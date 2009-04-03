@@ -22,6 +22,7 @@
 #include "core/str.h"
 #include "core/str_array.h"
 #include "core/symboldef.h"
+#include "core/error_api.h"
 
 #define MAXALPHABETCHARACTER UCHAR_MAX
 

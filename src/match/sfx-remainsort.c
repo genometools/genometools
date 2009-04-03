@@ -85,12 +85,8 @@ struct Rmnsufinfo
   Compressedtable *inversesuftab;
   Sortblock sortblock;
   GtQueue *rangestobesorted;
-  const Encodedsequence *encseq; /* LCP */
-  Seqpos partwidth, /* LCP */
-         totallength, /* LCP */
-         currentdepth;
+  Seqpos currentdepth;
   const Bcktab *bcktab;
-  Readmode readmode; /* LCP */
   unsigned long allocateditvinfo,
                 currentqueuesize,
                 maxqueuesize;
@@ -100,6 +96,10 @@ struct Rmnsufinfo
                 firstgenerationcount;
   Firstwithnewdepth firstwithnewdepth;
   Pairsuffixptrwithbase *unusedpair;
+  Seqpos partwidth, /* LCP */
+         totallength; /* LCP */
+  Readmode readmode; /* LCP */
+  const Encodedsequence *encseq; /* LCP */
   Seqpos *sortedsuffixes; /* LCP */
 };
 
@@ -378,8 +378,8 @@ static void showintervalsizes(unsigned long count,unsigned long totalwidth,
           maxwidth);
 }
 
-void gt_addunsortedrange(Rmnsufinfo *rmnsufinfo,
-                      Seqpos left, Seqpos right, Seqpos depth)
+void rmnsufinfo_addunsortedrange(Rmnsufinfo *rmnsufinfo,
+                                 Seqpos left, Seqpos right, Seqpos depth)
 {
   Pairsuffixptr *ptr;
 
@@ -1145,8 +1145,9 @@ static Compressedtable *lcp9_manzini(Compressedtable *spacefortab,
   return lcptab;
 }
 
-Compressedtable *gt_wrapRmnsufinfo(Seqpos *longest,
-                                   Rmnsufinfo **rmnsufinfoptr,bool withlcptab)
+Compressedtable *rmnsufinfo_wrap(Seqpos *longest,
+                                 Rmnsufinfo **rmnsufinfoptr,
+                                 bool withlcptab)
 {
   Rmnsufinfo *rmnsufinfo = *rmnsufinfoptr;
   Compressedtable *lcptab;
