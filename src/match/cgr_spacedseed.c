@@ -246,37 +246,41 @@ int matchspacedseed(bool withesa,
                                          NULL, /* processresult info */
                                          dfst);
     encseq = genericindex_getencseq(genericindex);
-    seqit = gt_seqiterator_new(queryfilenames,
-                               getencseqAlphabetsymbolmap(encseq),
-                               true);
-    for (unitnum = 0; /* Nothing */; unitnum++)
+    seqit = gt_seqiterator_new(queryfilenames, err);
+    if (!seqit)
+      haserr = true;
+    if (!haserr)
     {
-      retval = gt_seqiterator_next(seqit,
-                                   &query,
-                                   &querylen,
-                                   &desc,
-                                   err);
-      if (retval < 0)
+      gt_seqiterator_set_symbolmap(seqit, getencseqAlphabetsymbolmap(encseq));
+      for (unitnum = 0; /* Nothing */; unitnum++)
       {
-        haserr = true;
-        break;
+        retval = gt_seqiterator_next(seqit,
+                                     &query,
+                                     &querylen,
+                                     &desc,
+                                     err);
+        if (retval < 0)
+        {
+          haserr = true;
+          break;
+        }
+        if (retval == 0)
+        {
+          break;
+        }
+        singlequerymatchspacedseed(limdfsresources,
+                                   dfst,
+                                   query,
+                                   querylen,
+                                   spse);
+        gt_free(desc);
       }
-      if (retval == 0)
+      if (limdfsresources != NULL)
       {
-        break;
+        freeLimdfsresources(&limdfsresources,dfst);
       }
-      singlequerymatchspacedseed(limdfsresources,
-                                 dfst,
-                                 query,
-                                 querylen,
-                                 spse);
-      gt_free(desc);
+      gt_seqiterator_delete(seqit);
     }
-    if (limdfsresources != NULL)
-    {
-      freeLimdfsresources(&limdfsresources,dfst);
-    }
-    gt_seqiterator_delete(seqit);
   }
   genericindex_delete(genericindex);
   spacedseed_delete(spse);

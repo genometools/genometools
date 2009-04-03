@@ -167,7 +167,9 @@ int echodescriptionandsequence(const GtStrArray *filenametab,GtError *err)
   bool haserr = false;
   int retval;
 
-  seqit = gt_seqiterator_new(filenametab,NULL,true);
+  seqit = gt_seqiterator_new(filenametab, err);
+  if (!seqit)
+    return -1;
   while (true)
   {
     retval = gt_seqiterator_next(seqit,

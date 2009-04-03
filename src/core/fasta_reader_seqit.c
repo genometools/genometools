@@ -99,6 +99,6 @@ GtFastaReader* gt_fasta_reader_seqit_new(GtStr *sequence_filename)
   gt_str_array_add_cstr(gt_fasta_reader_seqit->filenametab,
                        gt_str_get(sequence_filename));
   gt_fasta_reader_seqit->seqit = gt_seqiterator_new(gt_fasta_reader_seqit
-                                                 ->filenametab, NULL, true);
+                                                     ->filenametab, NULL);
   return fr;
 }

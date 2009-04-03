@@ -650,82 +650,88 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     getsetargmodekeywords(tageratoroptions->modedesc,
                           tageratoroptions->numberofmodedescentries,
                           tageratoroptions->outputmode);
-    seqit = gt_seqiterator_new(tageratoroptions->tagfiles, NULL, true);
-    for (tagnumber = 0; !haserr; tagnumber++)
+    seqit = gt_seqiterator_new(tageratoroptions->tagfiles, err);
+    if (!seqit)
+      haserr = true;
+    if (!haserr)
     {
-      retval = gt_seqiterator_next(seqit, &currenttag, &twl.taglen, &desc, err);
-      if (retval != 1)
+      for (tagnumber = 0; !haserr; tagnumber++)
       {
-        if (retval < 0)
+        retval = gt_seqiterator_next(seqit, &currenttag, &twl.taglen, &desc,
+                                     err);
+        if (retval != 1)
         {
-          gt_free(desc);
+          if (retval < 0)
+          {
+            gt_free(desc);
+          }
+          break;
         }
-        break;
-      }
-      if (dotransformtag(twl.transformedtag,
-                         symbolmap,
-                         currenttag,
-                         twl.taglen,
-                         tagnumber,
-                         tageratoroptions->replacewildcard,
-                         err) != 0)
-      {
-        haserr = true;
+        if (dotransformtag(twl.transformedtag,
+                           symbolmap,
+                           currenttag,
+                           twl.taglen,
+                           tagnumber,
+                           tageratoroptions->replacewildcard,
+                           err) != 0)
+        {
+          haserr = true;
+          gt_free(desc);
+          break;
+        }
+        copy_reversecomplement(twl.rctransformedtag,twl.transformedtag,
+                               twl.taglen);
+        twl.tagptr = twl.transformedtag;
+        printf("#");
+        if (tageratoroptions->outputmode & TAGOUT_TAGNUM)
+        {
+          printf("\t" Formatuint64_t,PRINTuint64_tcast(tagnumber));
+        }
+        if (tageratoroptions->outputmode & TAGOUT_TAGSEQ)
+        {
+          printf("\t%lu\t",twl.taglen);
+          fprintfsymbolstring(stdout,alpha,twl.transformedtag,twl.taglen);
+        }
+        printf("\n");
+        storeoffline.nextfreeSimplematch = 0;
+        storeonline.nextfreeSimplematch = 0;
+        if (tageratoroptions->userdefinedmaxdistance > 0 &&
+            twl.taglen <= (unsigned long)
+                          tageratoroptions->userdefinedmaxdistance)
+        {
+          gt_error_set(err,"tag \"%*.*s\" of length %lu; "
+                       "tags must be longer than the allowed number of errors "
+                       "(which is %ld)",
+                       (int) twl.taglen,
+                       (int) twl.taglen,currenttag,
+                       twl.taglen,
+                       tageratoroptions->userdefinedmaxdistance);
+          haserr = true;
+          gt_free(desc);
+          break;
+        }
+        gt_assert(tageratoroptions->userdefinedmaxdistance < 0 ||
+                  twl.taglen > (unsigned long)
+                               tageratoroptions->userdefinedmaxdistance);
+        searchoverstrands(tageratoroptions,
+                          &twl,
+                          dfst,
+                          mor,
+                          limdfsresources,
+                          &showmatchinfo,
+                          &storeonline,
+                          &storeoffline);
         gt_free(desc);
-        break;
       }
-      copy_reversecomplement(twl.rctransformedtag,twl.transformedtag,
-                             twl.taglen);
-      twl.tagptr = twl.transformedtag;
-      printf("#");
-      if (tageratoroptions->outputmode & TAGOUT_TAGNUM)
+      gt_free(showmatchinfo.eqsvector);
+      if (limdfsresources != NULL)
       {
-        printf("\t" Formatuint64_t,PRINTuint64_tcast(tagnumber));
+        freeLimdfsresources(&limdfsresources,dfst);
       }
-      if (tageratoroptions->outputmode & TAGOUT_TAGSEQ)
-      {
-        printf("\t%lu\t",twl.taglen);
-        fprintfsymbolstring(stdout,alpha,twl.transformedtag,twl.taglen);
-      }
-      printf("\n");
-      storeoffline.nextfreeSimplematch = 0;
-      storeonline.nextfreeSimplematch = 0;
-      if (tageratoroptions->userdefinedmaxdistance > 0 &&
-          twl.taglen <= (unsigned long)
-                        tageratoroptions->userdefinedmaxdistance)
-      {
-        gt_error_set(err,"tag \"%*.*s\" of length %lu; "
-                     "tags must be longer than the allowed number of errors "
-                     "(which is %ld)",
-                     (int) twl.taglen,
-                     (int) twl.taglen,currenttag,
-                     twl.taglen,
-                     tageratoroptions->userdefinedmaxdistance);
-        haserr = true;
-        gt_free(desc);
-        break;
-      }
-      gt_assert(tageratoroptions->userdefinedmaxdistance < 0 ||
-                twl.taglen > (unsigned long)
-                             tageratoroptions->userdefinedmaxdistance);
-      searchoverstrands(tageratoroptions,
-                        &twl,
-                        dfst,
-                        mor,
-                        limdfsresources,
-                        &showmatchinfo,
-                        &storeonline,
-                        &storeoffline);
-      gt_free(desc);
+      FREEARRAY(&storeonline,Simplematch);
+      FREEARRAY(&storeoffline,Simplematch);
+      gt_seqiterator_delete(seqit);
     }
-    gt_free(showmatchinfo.eqsvector);
-    if (limdfsresources != NULL)
-    {
-      freeLimdfsresources(&limdfsresources,dfst);
-    }
-    FREEARRAY(&storeonline,Simplematch);
-    FREEARRAY(&storeoffline,Simplematch);
-    gt_seqiterator_delete(seqit);
   }
   if (mor != NULL)
   {

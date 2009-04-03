@@ -41,7 +41,8 @@ GtSequenceBuffer*  gt_sequence_buffer_ref(GtSequenceBuffer*);
 /* Creates a new <GtSequenceBuffer>, choosing the appropriate type by looking
    at the first input file. All files must be of the same type.
    If NULL is returned, an error occurred. */
-GtSequenceBuffer*  gt_sequence_buffer_new_guess_type(GtStrArray*, GtError*);
+GtSequenceBuffer*  gt_sequence_buffer_new_guess_type(const GtStrArray*,
+                                                     GtError*);
 
 /* Fetches next character from <GtSequenceBuffer>.
    Returns 1 if a new character could be read, 0 if all files are exhausted, or

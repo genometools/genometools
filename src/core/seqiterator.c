@@ -37,20 +37,18 @@ struct GtSeqIterator
                      maxread;
 };
 
-GtSeqIterator* gt_seqiterator_new(const GtStrArray *filenametab,
-                                  const Uchar *symbolmap,
-                                  bool withsequence)
+GtSeqIterator* gt_seqiterator_new(const GtStrArray *filenametab, GtError *err)
 {
   GtSeqIterator *si;
-  GtSequenceBuffer *sb = gt_sequence_buffer_fasta_new(filenametab);
-  si = gt_seqiterator_new_with_buffer(sb, symbolmap, withsequence);
+  GtSequenceBuffer *sb = gt_sequence_buffer_new_guess_type(filenametab, err);
+  if (!sb)
+    return NULL;
+  si = gt_seqiterator_new_with_buffer(sb);
   gt_sequence_buffer_delete(sb); /* drop this reference */
   return si;
 }
 
-GtSeqIterator* gt_seqiterator_new_with_buffer(GtSequenceBuffer *buf,
-                                              const Uchar *symbolmap,
-                                              bool withsequence)
+GtSeqIterator* gt_seqiterator_new_with_buffer(GtSequenceBuffer *buf)
 {
   GtSeqIterator *seqit;
   seqit = gt_malloc(sizeof (GtSeqIterator));
@@ -58,13 +56,25 @@ GtSeqIterator* gt_seqiterator_new_with_buffer(GtSequenceBuffer *buf,
   seqit->descptr = gt_queue_new();
   seqit->fb = gt_sequence_buffer_ref(buf);
   gt_sequence_buffer_set_desc_queue(seqit->fb, seqit->descptr);
-  gt_sequence_buffer_set_symbolmap(seqit->fb, symbolmap);
   seqit->exhausted = false;
   seqit->unitnum = 0;
-  seqit->withsequence = withsequence;
+  seqit->withsequence = true;
   seqit->currentread = 0;
   seqit->maxread = 0;
   return seqit;
+}
+
+void gt_seqiterator_set_symbolmap(GtSeqIterator *seqit,
+                                  const unsigned char *symbolmap)
+{
+  gt_assert(seqit);
+  gt_sequence_buffer_set_symbolmap(seqit->fb, symbolmap);
+}
+
+void gt_seqiterator_set_sequence_output(GtSeqIterator *seqit, bool withsequence)
+{
+  gt_assert(seqit);
+  seqit->withsequence = withsequence;
 }
 
 int gt_seqiterator_next(GtSeqIterator *seqit,

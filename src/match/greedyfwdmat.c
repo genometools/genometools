@@ -242,32 +242,37 @@ int findsubquerygmatchforward(const Encodedsequence *encseq,
   substringinfo.processinfo = &rangespecinfo;
   substringinfo.gmatchforward = gmatchforward;
   substringinfo.encseq = encseq;
-  seqit = gt_seqiterator_new(queryfilenames,getsymbolmapAlphabet(alphabet),
-                             true);
-  for (unitnum = 0; /* Nothing */; unitnum++)
+  seqit = gt_seqiterator_new(queryfilenames, err);
+  if (!seqit)
+    haserr = true;
+  if (!haserr)
   {
-    retval = gt_seqiterator_next(seqit,
-                              &query,
-                              &querylen,
-                              &desc,
-                              err);
-    if (retval < 0)
+    gt_seqiterator_set_symbolmap(seqit, getsymbolmapAlphabet(alphabet));
+    for (unitnum = 0; /* Nothing */; unitnum++)
     {
-      haserr = true;
-      break;
+      retval = gt_seqiterator_next(seqit,
+                                &query,
+                                &querylen,
+                                &desc,
+                                err);
+      if (retval < 0)
+      {
+        haserr = true;
+        break;
+      }
+      if (retval == 0)
+      {
+        break;
+      }
+      gmatchposinsinglesequence(&substringinfo,
+                                unitnum,
+                                query,
+                                querylen,
+                                desc);
+      FREESPACE(desc);
     }
-    if (retval == 0)
-    {
-      break;
-    }
-    gmatchposinsinglesequence(&substringinfo,
-                              unitnum,
-                              query,
-                              querylen,
-                              desc);
-    FREESPACE(desc);
+    gt_seqiterator_delete(seqit);
   }
-  gt_seqiterator_delete(seqit);
   return haserr ? -1 : 0;
 }
 

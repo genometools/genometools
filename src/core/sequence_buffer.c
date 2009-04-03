@@ -57,7 +57,7 @@ GtSequenceBuffer* gt_sequence_buffer_ref(GtSequenceBuffer *sb)
   return sb;
 }
 
-GtSequenceBuffer* gt_sequence_buffer_new_guess_type(GtStrArray *seqs,
+GtSequenceBuffer* gt_sequence_buffer_new_guess_type(const GtStrArray *seqs,
                                                     GtError *err)
 {
   GtGenFile *file;
@@ -75,7 +75,7 @@ GtSequenceBuffer* gt_sequence_buffer_new_guess_type(GtStrArray *seqs,
 
   memset(firstcontents, 0, BUFSIZ);
   file = gt_genfile_xopen(gt_str_array_get(seqs, 0), "rb");
-  gt_genfile_xread(file, &firstcontents, BUFSIZ);
+  gt_genfile_xread(file, &firstcontents, BUFSIZ-1);
   gt_genfile_close(file);
 
   if (gt_sequence_buffer_embl_guess(firstcontents)) {
