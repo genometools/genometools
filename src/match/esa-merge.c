@@ -134,7 +134,8 @@ static int insertfirstsuffixes(Mergertrierep *trierep,
   return NULL;
 }
 
-int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, GtError *err)
+int emissionmergedesa_stepdeleteandinsertothersuffixes(
+                                 Emissionmergedesa *emmesa, GtError *err)
 {
   Mergertrienode *tmpsmallestleaf, *tmplcpnode;
   Largelcpvalue tmpexception;

@@ -197,7 +197,7 @@ static int nextesamergedsufbwttabvalues(DefinedSeqpos *longest,
     {
       return 0;
     }
-    if (stepdeleteandinsertothersuffixes(emmesa,err) != 0)
+    if (emissionmergedesa_stepdeleteandinsertothersuffixes(emmesa,err) != 0)
     {
       return -1;
     }

@@ -233,13 +233,13 @@ static int gt_tagerator_arguments_check(GT_UNUSED int rest_argc,
   }
   for (idx=0; idx<gt_str_array_size(arguments->outputspec); idx++)
   {
-    if (optionaddbitmask(outputmodedesctable,
-                         sizeof (outputmodedesctable)/
-                         sizeof (outputmodedesctable[0]),
-                         &arguments->outputmode,
-                         "-output",
-                         gt_str_array_get(arguments->outputspec,idx),
-                         err) != 0)
+    if (optionargaddbitmask(outputmodedesctable,
+                            sizeof (outputmodedesctable)/
+                            sizeof (outputmodedesctable[0]),
+                            &arguments->outputmode,
+                            "-output",
+                            gt_str_array_get(arguments->outputspec,idx),
+                            err) != 0)
     {
       return -1;
     }

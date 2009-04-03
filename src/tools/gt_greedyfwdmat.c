@@ -220,7 +220,7 @@ static OPrval parsegfmsub(bool doms,
         {
           if (doms)
           {
-            if (optionaddbitmask(msgfmsubmodedesctable,
+            if (optionargaddbitmask(msgfmsubmodedesctable,
                                  sizeof (msgfmsubmodedesctable)/
                                  sizeof (msgfmsubmodedesctable[0]),
                                  &gfmsubcallinfo->showmode,
@@ -233,13 +233,13 @@ static OPrval parsegfmsub(bool doms,
             }
           } else
           {
-            if (optionaddbitmask(gfmsubmodedesctable,
-                                 sizeof (gfmsubmodedesctable)/
-                                 sizeof (gfmsubmodedesctable[0]),
-                                 &gfmsubcallinfo->showmode,
-                                 "-output",
-                                 gt_str_array_get(flagsoutputoption,i),
-                                 err) != 0)
+            if (optionargaddbitmask(gfmsubmodedesctable,
+                                    sizeof (gfmsubmodedesctable)/
+                                    sizeof (gfmsubmodedesctable[0]),
+                                    &gfmsubcallinfo->showmode,
+                                    "-output",
+                                    gt_str_array_get(flagsoutputoption,i),
+                                    err) != 0)
             {
               oprval = OPTIONPARSER_ERROR;
               break;

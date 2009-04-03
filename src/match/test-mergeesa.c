@@ -190,7 +190,7 @@ static int mergeandstoreindex(const GtStr *storeindex,
     gt_assert(sequenceoffsettable != NULL);
     while (emmesa->numofentries > 0)
     {
-      if (stepdeleteandinsertothersuffixes(emmesa,err) != 0)
+      if (emissionmergedesa_stepdeleteandinsertothersuffixes(emmesa,err) != 0)
       {
         haserr = true;
         break;

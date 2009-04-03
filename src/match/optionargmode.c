@@ -19,12 +19,12 @@
 #include "core/option.h"
 #include "optionargmode.h"
 
-int optionaddbitmask(const Optionargmodedesc *modedesc,
-                     size_t numberofentries,
-                     unsigned int *mode,
-                     const char *optname,
-                     const char *optionargument,
-                     GtError *err)
+int optionargaddbitmask(const Optionargmodedesc *modedesc,
+                        size_t numberofentries,
+                        unsigned int *mode,
+                        const char *optname,
+                        const char *optionargument,
+                        GtError *err)
 {
   size_t modecount;
 

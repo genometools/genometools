@@ -545,7 +545,7 @@ static int gt_tyr_occratio_arguments_check(int rest_argc,
     unsigned long idx;
     for (idx=0; idx<gt_str_array_size(arguments->outputspec); idx++)
     {
-      if (optionaddbitmask(outputmodedesctable,
+      if (optionargaddbitmask(outputmodedesctable,
                            sizeof (outputmodedesctable)/
                            sizeof (outputmodedesctable[0]),
                            &arguments->outputmode,
@@ -907,7 +907,7 @@ static int gt_tyr_search_arguments_check(int rest_argc,
   }
   for (idx=0; idx<gt_str_array_size(arguments->showmodespec); idx++)
   {
-    if (optionaddbitmask(showmodedesctable,
+    if (optionargaddbitmask(showmodedesctable,
                          sizeof (showmodedesctable)/
                          sizeof (showmodedesctable[0]),
                          &arguments->showmode,
@@ -918,12 +918,12 @@ static int gt_tyr_search_arguments_check(int rest_argc,
       return -1;
     }
   }
-  if (optionaddbitmask(stranddesctable,
-                       sizeof (stranddesctable)/
-                       sizeof (stranddesctable[0]),
-                       &arguments->strand,
-                       "-output",
-                       gt_str_get(arguments->strandspec),err) != 0)
+  if (optionargaddbitmask(stranddesctable,
+                          sizeof (stranddesctable)/
+                          sizeof (stranddesctable[0]),
+                          &arguments->strand,
+                          "-output",
+                          gt_str_get(arguments->strandspec),err) != 0)
   {
     return -1;
   }

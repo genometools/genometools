@@ -53,7 +53,8 @@ typedef struct
   unsigned int numofchars;
 } Emissionmergedesa;
 
-int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, GtError *err);
+int emissionmergedesa_stepdeleteandinsertothersuffixes(
+                                    Emissionmergedesa *emmesa, GtError *err);
 
 int emissionmergedesa_init(Emissionmergedesa *emmesa,
                            const GtStrArray *indexnametab,
