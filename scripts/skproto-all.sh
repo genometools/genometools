@@ -83,6 +83,7 @@ revcompl.c
 sfx-bentsedg.c
 sfx-enumcodes.c
 sfx-input.c
+sfx-linlcp.c
 sfx-partssuf.c
 sfx-readint.c
 sfx-remainsort.c
