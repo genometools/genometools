@@ -1322,10 +1322,10 @@ static void determinemaxbucketsize(unsigned long *nonspecialsmaxbucketsize,
     {
       *specialsmaxbucketsize = bucketspec.specialsinbucket;
     }
-    if (bucketspec.nonspecialsinbucket + bucketspec.specialsinbucket 
+    if (bucketspec.nonspecialsinbucket + bucketspec.specialsinbucket
         > *maxbucketsize)
     {
-      *maxbucketsize = bucketspec.nonspecialsinbucket + 
+      *maxbucketsize = bucketspec.nonspecialsinbucket +
                        bucketspec.specialsinbucket;
     }
     if (bucketspec.nonspecialsinbucket > 1UL)
