@@ -42,4 +42,5 @@ rm -f testsuite/result.mp testsuite/result.vm
 rm -f testsuite/sfxidx.esq
 rm -f LocalMakefile LocalMakefile.previous
 rm -f gt-test.* gt-test-refer gt-test-query
+rm -f VMNAMES GTNAMES
 scripts/cleanpp.sh
