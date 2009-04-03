@@ -15,8 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <string.h>
+#include <inttypes.h>
 #include "core/chardef.h"
 #include "core/fa.h"
+#include "core/error.h"
+#include "core/str.h"
 #include "emimergeesa.h"
 #include "esa-fileend.h"
 #include "fmindex.h"
@@ -26,13 +30,65 @@
 #include "esa-map.h"
 
 #include "encseq2offset.pr"
-#include "mkidxcpy.pr"
 #include "fmi-keyval.pr"
 #include "fmi-mapspec.pr"
 
  DECLAREREADFUNCTION(Uchar);
 
  DECLAREREADFUNCTION(Seqpos);
+
+static int copytheindexfile(const GtStr *destindex,
+                            const GtStr *sourceindex,
+                            const char *suffix,
+                            uint64_t maxlength,
+                            GtError *err)
+{
+  FILE *fpdest = NULL, *fpsource = NULL;
+  int cc;
+  bool haserr = false;
+
+  gt_error_check(err);
+  fpdest = opensfxfile(destindex,suffix,"wb",err);
+  if (fpdest == NULL)
+  {
+    haserr = true;
+  }
+  if (!haserr)
+  {
+    fpsource = opensfxfile(sourceindex,suffix,"rb",err);
+    if (fpsource == NULL)
+    {
+      haserr = true;
+    }
+  }
+  printf("# cp %s%s %s%s\n",
+           gt_str_get(sourceindex),suffix,gt_str_get(destindex),suffix);
+  if (!haserr)
+  {
+    if (maxlength == 0)
+    {
+      while ((cc = fgetc(fpsource)) != EOF)
+      {
+        (void) putc(cc,fpdest);
+      }
+    } else
+    {
+      uint64_t pos;
+
+      for (pos = 0; pos < maxlength; pos++)
+      {
+        if ((cc = fgetc(fpsource)) == EOF)
+        {
+          break;
+        }
+        (void) putc(cc,fpdest);
+      }
+    }
+  }
+  gt_fa_xfclose(fpdest);
+  gt_fa_xfclose(fpsource);
+  return haserr ? -1 : 0;
+}
 
 static void allocatefmtables(Fmindex *fm,
                              const Specialcharinfo *specialcharinfo,
@@ -243,14 +299,14 @@ int sufbwt2fmindex(Fmindex *fmindex,
     {
       numofchars = getencseqAlphabetnumofchars(suffixarray.encseq);
       firstignorespecial = totallength - specialcharinfo->specialcharacters;
-      if (makeindexfilecopy(outfmindex,indexname,ALPHABETFILESUFFIX,0,err) != 0)
+      if (copytheindexfile(outfmindex,indexname,ALPHABETFILESUFFIX,0,err) != 0)
       {
         haserr = true;
       }
     }
     if (!haserr)
     {
-      if (makeindexfilecopy(outfmindex,
+      if (copytheindexfile(outfmindex,
                             indexname,
                             BWTTABSUFFIX,
                             firstignorespecial,
@@ -273,7 +329,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
     {
       GtStr *indexname = gt_str_array_get_str(indexnametab,0);
       suffixlength = 0;
-      if (makeindexfilecopy(outfmindex,indexname,ALPHABETFILESUFFIX,0,err) != 0)
+      if (copytheindexfile(outfmindex,indexname,ALPHABETFILESUFFIX,0,err) != 0)
       {
         haserr = true;
       }

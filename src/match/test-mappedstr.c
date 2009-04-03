@@ -150,16 +150,16 @@ static int comparecodelists(const ArrayCodetype *codeliststream,
   {
     if (codeliststream->spaceCodetype[i] != codeliststring->spaceCodetype[i])
     {
-      kmercode2string(buffer1,
-                      codeliststream->spaceCodetype[i],
-                      numofchars,
-                      kmersize,
-                      characters);
-      kmercode2string(buffer2,
-                      codeliststring->spaceCodetype[i],
-                      numofchars,
-                      kmersize,
-                      characters);
+      fromkmercode2string(buffer1,
+                          codeliststream->spaceCodetype[i],
+                          numofchars,
+                          kmersize,
+                          characters);
+      fromkmercode2string(buffer2,
+                          codeliststring->spaceCodetype[i],
+                          numofchars,
+                          kmersize,
+                          characters);
       gt_error_set(err,"codeliststream[%lu] = " FormatCodetype " != "
                     FormatCodetype " = codeliststring[%lu]\n%s != %s",
                     i,

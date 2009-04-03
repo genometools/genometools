@@ -1346,11 +1346,11 @@ static void showSuffixwithcode(FILE *fp,const Suffixwithcode *suffix)
 {
   char buffer[18+1];
 
-  kmercode2string(buffer,
-                  suffix->code,
-                  4,
-                  8,
-                  "acgt");
+  fromkmercode2string(buffer,
+                      suffix->code,
+                      4,
+                      8,
+                      "acgt");
   fprintf(fp,"(startpos=%lu,code=%u,prefixindex=%u,\"%s\")",
               (unsigned long) suffix->startpos,
               (unsigned int) suffix->code,

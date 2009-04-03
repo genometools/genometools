@@ -17,11 +17,11 @@
 
 #include "intcode-def.h"
 
-void kmercode2string(char *buffer,
-                     Codetype code,
-                     unsigned int numofchars,
-                     unsigned int kmersize,
-                     const char *characters)
+void fromkmercode2string(char *buffer,
+                         Codetype code,
+                         unsigned int numofchars,
+                         unsigned int kmersize,
+                         const char *characters)
 {
   int i;
   unsigned int cc;
