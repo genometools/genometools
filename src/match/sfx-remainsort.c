@@ -83,7 +83,7 @@ typedef struct
 struct Rmnsufinfo
 {
   Compressedtable *inversesuftab;
-  Sortblock sortblock; /* LCP, but only sort space: use other pointer */
+  Sortblock sortblock;
   GtQueue *rangestobesorted;
   const Encodedsequence *encseq; /* LCP */
   Seqpos partwidth, /* LCP */
@@ -100,6 +100,7 @@ struct Rmnsufinfo
                 firstgenerationcount;
   Firstwithnewdepth firstwithnewdepth;
   Pairsuffixptrwithbase *unusedpair;
+  Seqpos *sortedsuffixes; /* LCP */
 };
 
 static void initsortblock(Sortblock *sortblock,
@@ -774,7 +775,7 @@ Seqpos *lcp13_manzini(const Rmnsufinfo *rmnsufinfo)
     Seqpos fillpos = compressedtable_get(rmnsufinfo->inversesuftab,pos);
     if (fillpos > 0 && fillpos < rmnsufinfo->partwidth)
     {
-      Seqpos previousstart = rmnsufinfo->sortblock.sortspace[fillpos-1];
+      Seqpos previousstart = rmnsufinfo->sortedsuffixes[fillpos-1];
       while (pos+lcpvalue < rmnsufinfo->totallength &&
              previousstart+lcpvalue < rmnsufinfo->totallength)
       {
@@ -835,7 +836,7 @@ static void setrelevantfrominversetab(Compressedtable *rightposinverse,
 
     for (idx = 0; idx < rmnsufinfo->partwidth; idx++)
     {
-      Seqpos pos = rmnsufinfo->sortblock.sortspace[idx];
+      Seqpos pos = rmnsufinfo->sortedsuffixes[idx];
       if (pos > 0)
       {
         Uchar cc = getencodedchar(rmnsufinfo->encseq,pos-1,
@@ -971,7 +972,7 @@ static Seqpos sa2ranknext(Compressedtable *ranknext,
      ranknext array (which points to ranknext can savely be stored */
   for (idx=0; idx < rmnsufinfo->partwidth; idx++)
   {
-    Seqpos pos = rmnsufinfo->sortblock.sortspace[idx];
+    Seqpos pos = rmnsufinfo->sortedsuffixes[idx];
     if (pos > 0)
     {
       Uchar cc = getencodedchar(rmnsufinfo->encseq,
@@ -1084,7 +1085,7 @@ static Compressedtable *lcp9_manzini(Compressedtable *spacefortab,
     }
     if (fillpos > 0 && fillpos - 1 < rmnsufinfo->partwidth)
     {
-      previousstart = rmnsufinfo->sortblock.sortspace[fillpos-1];
+      previousstart = rmnsufinfo->sortedsuffixes[fillpos-1];
       while (pos+lcpvalue < rmnsufinfo->totallength &&
              previousstart+lcpvalue < rmnsufinfo->totallength)
       {
@@ -1145,7 +1146,7 @@ static Compressedtable *lcp9_manzini(Compressedtable *spacefortab,
 }
 
 Compressedtable *gt_wrapRmnsufinfo(Seqpos *longest,
-                                Rmnsufinfo **rmnsufinfoptr,bool withlcptab)
+                                   Rmnsufinfo **rmnsufinfoptr,bool withlcptab)
 {
   Rmnsufinfo *rmnsufinfo = *rmnsufinfoptr;
   Compressedtable *lcptab;
@@ -1154,9 +1155,12 @@ Compressedtable *gt_wrapRmnsufinfo(Seqpos *longest,
   *longest = compressedtable_get(rmnsufinfo->inversesuftab,0);
   if (withlcptab)
   {
-    if (rmnsufinfo->sortblock.mmapfiledesc != -1)
+    if (rmnsufinfo->sortblock.mmapfiledesc == -1)
     {
-      rmnsufinfo->sortblock.sortspace
+      rmnsufinfo->sortedsuffixes = rmnsufinfo->sortblock.sortspace;
+    } else
+    {
+      rmnsufinfo->sortedsuffixes
         = gt_fa_mmap_generic_fd_func(rmnsufinfo->sortblock.mmapfiledesc,
                                      rmnsufinfo->sortblock.mapableentries
                                      * sizeof (Seqpos),
@@ -1180,8 +1184,8 @@ Compressedtable *gt_wrapRmnsufinfo(Seqpos *longest,
   }
   if (rmnsufinfo->sortblock.mmapfiledesc != -1)
   {
-    gt_fa_xmunmap(rmnsufinfo->sortblock.sortspace);
-    rmnsufinfo->sortblock.sortspace = NULL;
+    gt_fa_xmunmap(rmnsufinfo->sortedsuffixes);
+    rmnsufinfo->sortedsuffixes = NULL;
   }
   gt_free(rmnsufinfo);
   rmnsufinfoptr = NULL;

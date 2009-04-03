@@ -3,7 +3,7 @@
 if test -f lib/libgenometools.a
 then
   extractsyms.sh lib/libgenometools.a lib/libgtunstable.a | sort -u > GTNAMES
-  common=`comm -1 -2 GTNAMES ${WORKVSTREE}/src/lib/VMNAMES | wc -l`
+  common=`comm -1 -2 GTNAMES ${WORKVSTREE}/src/VMNAMES | wc -l`
   if test $common -gt 0
   then
     echo "========= the folllowing name clashes have been identified ======"
