@@ -86,6 +86,7 @@ struct Rmnsufinfo
   GtQueue *rangestobesorted;
   Seqpos currentdepth;
   const Bcktab *bcktab;
+  Codetype maxcode;
   unsigned long allocateditvinfo,
                 currentqueuesize,
                 maxqueuesize;
@@ -95,6 +96,9 @@ struct Rmnsufinfo
                 firstgenerationcount;
   Firstwithnewdepth firstwithnewdepth;
   Pairsuffixptrwithbase *unusedpair;
+  Encodedsequencescanstate *esr;
+  unsigned int prefixlength,
+               numofchars;
   /* the following are used to compute lcp-values in linear time */
   Seqpos partwidth,
          totallength;
@@ -128,6 +132,9 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                           int mmapfiledesc,
                           const Encodedsequence *encseq,
                           const Bcktab *bcktab,
+                          Codetype maxcode,
+                          unsigned int numofchars,
+                          unsigned int prefixlength,
                           Readmode readmode,
                           Seqpos partwidth)
 {
@@ -139,6 +146,9 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   rmnsufinfo->encseq = encseq;
   rmnsufinfo->readmode = readmode;
   rmnsufinfo->bcktab = bcktab;
+  rmnsufinfo->maxcode = maxcode;
+  rmnsufinfo->numofchars = numofchars;
+  rmnsufinfo->prefixlength = prefixlength;
   rmnsufinfo->currentqueuesize = 0;
   rmnsufinfo->maxqueuesize = 0;
   rmnsufinfo->firstwithnewdepth.defined = false;
@@ -156,6 +166,7 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   rmnsufinfo->allocateditvinfo = 0;
   rmnsufinfo->itvinfo = NULL;
   rmnsufinfo->rangestobesorted = gt_queue_new();
+  rmnsufinfo->esr = newEncodedsequencescanstate();
   INITARRAY(&rmnsufinfo->firstgeneration,Pairsuffixptr);
   initsortblock(&rmnsufinfo->sortblock,presortedsuffixes,mmapfiledesc,
                 partwidth);
@@ -209,8 +220,12 @@ static void inversesuftab_set(Rmnsufinfo *rmnsufinfo,Seqpos idx,Seqpos value)
   compressedtable_update(rmnsufinfo->inversesuftab,idx,value);
 }
 
+static unsigned long checkedprefixes = 0;
+
 static Seqpos inversesuftab_get(const Rmnsufinfo *rmnsufinfo,Seqpos startpos)
 {
+  Seqpos ivtval;
+
   gt_assert(startpos <= rmnsufinfo->totallength);
   if (startpos == rmnsufinfo->totallength)
   {
@@ -218,10 +233,68 @@ static Seqpos inversesuftab_get(const Rmnsufinfo *rmnsufinfo,Seqpos startpos)
               rmnsufinfo->totallength);
     return rmnsufinfo->totallength;
   }
-  /*
-  cc = getencodedchar(rmnsufinfo->encseq,startpos,+lcpvalue,readmode);
-  */
-  return compressedtable_get(rmnsufinfo->inversesuftab,startpos);
+  ivtval = compressedtable_get(rmnsufinfo->inversesuftab,startpos);
+  if (rmnsufinfo->firstgeneration.nextfreePairsuffixptr == 0 &&
+      possibletocmpbitwise(rmnsufinfo->encseq))
+  {
+    EndofTwobitencoding etbe;
+    Bucketspecification bucketspec;
+    bool fwd = ISDIRREVERSE(rmnsufinfo->readmode) ? false : true;
+
+    initEncodedsequencescanstategeneric(rmnsufinfo->esr,rmnsufinfo->encseq,
+                                        fwd,startpos);
+    extract2bitenc(fwd,&etbe,rmnsufinfo->encseq,rmnsufinfo->esr,startpos);
+    if (etbe.unitsnotspecial >= rmnsufinfo->prefixlength)
+    {
+      Twobitencoding tmp = etbe.tbe;
+
+      etbe.tbe >>= MULT2(UNITSIN2BITENC - rmnsufinfo->prefixlength);
+      if (etbe.tbe > (Twobitencoding) rmnsufinfo->maxcode)
+      {
+        fprintf(stderr,"unitsnotspecial = %lu, origtbe = %lu, tbe = %lu "
+                       "> %lu = maxcode\n",
+                       (unsigned long) etbe.unitsnotspecial,
+                       (unsigned long) tmp,
+                       (unsigned long) etbe.tbe,
+                       (unsigned long) rmnsufinfo->maxcode);
+        exit(EXIT_FAILURE);
+      }
+      gt_assert(etbe.tbe <= (Twobitencoding) rmnsufinfo->maxcode);
+      (void) calcbucketboundsparts(&bucketspec,
+                                   rmnsufinfo->bcktab,
+                                   (Codetype) etbe.tbe,
+                                   rmnsufinfo->maxcode,
+                                   rmnsufinfo->partwidth,
+                                   (unsigned int) (etbe.tbe %
+                                                   rmnsufinfo->numofchars),
+                                   rmnsufinfo->numofchars);
+      gt_assert(bucketspec.left <= ivtval);
+      if (ivtval > bucketspec.left + rmnsufinfo->allocateditvinfo)
+      {
+        fprintf(stderr,"ivtval = %lu >= %lu = left + allocated\n",
+                        (unsigned long) ivtval,
+                        (unsigned long) (bucketspec.left +
+                                         rmnsufinfo->allocateditvinfo));
+        exit(EXIT_FAILURE);
+      }
+      gt_assert(ivtval <= bucketspec.left + rmnsufinfo->allocateditvinfo);
+      checkedprefixes++;
+    } else
+    {
+      if (etbe.unitsnotspecial > 0)
+      {
+        /* suffix have a specialcharacter in the first prefixlength
+           characters. fill the remaining positions and use the code
+           relativ to nonspecialsinbucket */
+      } else
+      {
+        /* suffix begins with specialcharacter and is the first in a range */
+        /* get the rank of the position plus partwidth. This gives the
+           insersesuftab information */
+      }
+    }
+  }
+  return ivtval;
 }
 
 static void initinversesuftabspecials(Rmnsufinfo *rmnsufinfo)
@@ -275,11 +348,7 @@ static void updatewidth (Rmnsufinfo *rmnsufinfo,unsigned long width,
   }
 }
 
-static void initinversesuftabnonspecialsadjust(Rmnsufinfo *rmnsufinfo,
-                                               Codetype maxcode,
-                                               const Bcktab *bcktab,
-                                               unsigned int numofchars,
-                                               unsigned int prefixlength)
+static void initinversesuftabnonspecialsadjust(Rmnsufinfo *rmnsufinfo)
 {
   Codetype code;
   unsigned int rightchar;
@@ -288,24 +357,24 @@ static void initinversesuftabnonspecialsadjust(Rmnsufinfo *rmnsufinfo,
   const Codetype mincode = 0;
 
   gt_assert(rmnsufinfo->sortblock.mmapfiledesc == -1);
-  rightchar = (unsigned int) (mincode % numofchars);
+  rightchar = (unsigned int) (mincode % rmnsufinfo->numofchars);
   idx = 0;
-  for (code = mincode; code <= maxcode; code++)
+  for (code = mincode; code <= rmnsufinfo->maxcode; code++)
   {
     rightchar = calcbucketboundsparts(&bucketspec,
-                                      bcktab,
+                                      rmnsufinfo->bcktab,
                                       code,
-                                      maxcode,
+                                      rmnsufinfo->maxcode,
                                       rmnsufinfo->partwidth,
                                       rightchar,
-                                      numofchars);
+                                      rmnsufinfo->numofchars);
     for (/* Nothing */; idx < bucketspec.left; idx++)
     {
       startpos = rmnsufinfo->sortblock.sortspace[idx];
       inversesuftab_set(rmnsufinfo,startpos,idx);
     }
     updatewidth (rmnsufinfo,bucketspec.nonspecialsinbucket,
-                 (Seqpos) prefixlength);
+                 (Seqpos) rmnsufinfo->prefixlength);
     for (/* Nothing */;
          idx < bucketspec.left+bucketspec.nonspecialsinbucket; idx++)
     {
@@ -320,11 +389,7 @@ static void initinversesuftabnonspecialsadjust(Rmnsufinfo *rmnsufinfo,
   }
 }
 
-static void initinversesuftabnonspecialsadjuststream(Rmnsufinfo *rmnsufinfo,
-                                                     Codetype maxcode,
-                                                     const Bcktab *bcktab,
-                                                     unsigned int numofchars,
-                                                     unsigned int prefixlength)
+static void initinversesuftabnonspecialsadjuststream(Rmnsufinfo *rmnsufinfo)
 {
   Codetype code;
   unsigned int rightchar;
@@ -333,24 +398,24 @@ static void initinversesuftabnonspecialsadjuststream(Rmnsufinfo *rmnsufinfo,
   const Codetype mincode = 0;
 
   gt_assert(rmnsufinfo->sortblock.mmapfiledesc != -1);
-  rightchar = (unsigned int) (mincode % numofchars);
+  rightchar = (unsigned int) (mincode % rmnsufinfo->numofchars);
   idx = 0;
-  for (code = mincode; code <= maxcode; code++)
+  for (code = mincode; code <= rmnsufinfo->maxcode; code++)
   {
     rightchar = calcbucketboundsparts(&bucketspec,
-                                      bcktab,
+                                      rmnsufinfo->bcktab,
                                       code,
-                                      maxcode,
+                                      rmnsufinfo->maxcode,
                                       rmnsufinfo->partwidth,
                                       rightchar,
-                                      numofchars);
+                                      rmnsufinfo->numofchars);
     for (/* Nothing */; idx < bucketspec.left; idx++)
     {
       startpos = nextsuftabentry_get(&rmnsufinfo->sortblock);
       inversesuftab_set(rmnsufinfo,startpos,idx);
     }
     updatewidth (rmnsufinfo,bucketspec.nonspecialsinbucket,
-                 (Seqpos) prefixlength);
+                 (Seqpos) rmnsufinfo->prefixlength);
     for (/* Nothing */;
          idx < bucketspec.left+bucketspec.nonspecialsinbucket; idx++)
     {
@@ -709,6 +774,7 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
     printf("pagechanges = %lu\n",rmnsufinfo->sortblock.pagechanges);
   }
   printf("maxqueuesize = %lu\n",rmnsufinfo->maxqueuesize);
+  printf("checkedprefixes = %lu\n",checkedprefixes);
   gt_free(rmnsufinfo->unusedpair);
   gt_free(rmnsufinfo->itvinfo);
   rmnsufinfo->itvinfo = NULL;
@@ -716,28 +782,21 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
   rmnsufinfo->rangestobesorted = NULL;
 }
 
-void bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo,
-                                Codetype mincode,
-                                Codetype maxcode,
-                                Seqpos partwidth,
-                                const Bcktab *bcktab,
-                                unsigned int numofchars,
-                                unsigned int prefixlength)
+void bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo)
 {
   Codetype code;
   unsigned int rightchar;
   Bucketspecification bucketspec;
+  const Codetype mincode = 0;
 
   initinversesuftabspecials(rmnsufinfo);
   if (rmnsufinfo->sortblock.mmapfiledesc == -1)
   {
-    initinversesuftabnonspecialsadjust(rmnsufinfo,maxcode,bcktab,numofchars,
-                                       prefixlength);
+    initinversesuftabnonspecialsadjust(rmnsufinfo);
     printf("# maxbucketsize=%lu\n",rmnsufinfo->allocateditvinfo);
   } else
   {
-    initinversesuftabnonspecialsadjuststream(rmnsufinfo,maxcode,bcktab,
-                                             numofchars,prefixlength);
+    initinversesuftabnonspecialsadjuststream(rmnsufinfo);
     printf("# maxbucketsize=%lu\n",rmnsufinfo->allocateditvinfo);
     rmnsufinfo->sortblock.sortspace = NULL;
     if (rmnsufinfo->allocateditvinfo >= (unsigned long) DIV2(PAGESIZE))
@@ -751,16 +810,16 @@ void bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo,
     printf("mappedwidth = %lu\n",
             (unsigned long) rmnsufinfo->sortblock.mappedwidth);
   }
-  rightchar = (unsigned int) (mincode % numofchars);
-  for (code = mincode; code <= maxcode; code++)
+  rightchar = (unsigned int) (mincode % rmnsufinfo->numofchars);
+  for (code = mincode; code <= rmnsufinfo->maxcode; code++)
   {
     rightchar = calcbucketboundsparts(&bucketspec,
-                                      bcktab,
+                                      rmnsufinfo->bcktab,
                                       code,
-                                      maxcode,
-                                      partwidth,
+                                      rmnsufinfo->maxcode,
+                                      rmnsufinfo->partwidth,
                                       rightchar,
-                                      numofchars);
+                                      rmnsufinfo->numofchars);
     if (bucketspec.nonspecialsinbucket > 1UL)
     {
       sortsuffixesonthislevel(rmnsufinfo,
@@ -814,11 +873,13 @@ Compressedtable *rmnsufinfo_wrap(Seqpos *longest,
     rmnsufinfo->inversesuftab = NULL;
     lcptab = NULL;
   }
-  if (rmnsufinfo->sortblock.mmapfiledesc != -1)
+  if (rmnsufinfo->sortblock.mmapfiledesc != -1 && withlcptab)
   {
     gt_fa_xmunmap(rmnsufinfo->sortedsuffixes);
     rmnsufinfo->sortedsuffixes = NULL;
   }
+  gt_assert(rmnsufinfo->esr != NULL);
+  freeEncodedsequencescanstate(&rmnsufinfo->esr);
   gt_free(rmnsufinfo);
   rmnsufinfoptr = NULL;
   return lcptab;

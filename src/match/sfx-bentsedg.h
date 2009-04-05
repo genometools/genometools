@@ -50,18 +50,17 @@ Seqpos getnumoflargelcpvalues(const Outlcpinfo *outlcpinfo);
 Seqpos getmaxbranchdepth(const Outlcpinfo *outlcpinfo);
 
 void qsufsort(Seqpos *sortspace,
-             int mmapfiledesc,
-             const char *filename,
-             Seqpos *longest,
-             const Encodedsequence *encseq,
-             Readmode readmode,
-             Codetype mincode,
-             Codetype maxcode,
-             Seqpos partwidth,
-             const Bcktab *bcktab,
-             unsigned int numofchars,
-             unsigned int prefixlength,
-             Outlcpinfo *outlcpinfo);
+              int mmapfiledesc,
+              Seqpos *longest,
+              const Encodedsequence *encseq,
+              Readmode readmode,
+              Codetype mincode,
+              Codetype maxcode,
+              Seqpos partwidth,
+              const Bcktab *bcktab,
+              unsigned int numofchars,
+              unsigned int prefixlength,
+              Outlcpinfo *outlcpinfo);
 
 void sortallbuckets(Suftab *suftab,
                     const Encodedsequence *encseq,

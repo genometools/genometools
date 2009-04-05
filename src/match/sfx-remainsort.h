@@ -31,20 +31,16 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                           int mmapfiledesc,
                           const Encodedsequence *encseq,
                           const Bcktab *bcktab,
+                          Codetype maxcode,
+                          unsigned int numofchars,
+                          unsigned int prefixlength,
                           Readmode readmode,
                           Seqpos partwidth);
 
 void rmnsufinfo_addunsortedrange(Rmnsufinfo *rmnsufinfo,
                                  Seqpos left,Seqpos right,Seqpos depth);
 
-void bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo,
-                                Codetype mincode,
-                                Codetype maxcode,
-                                Seqpos partwidth,
-                                const Bcktab *bcktab,
-                                unsigned int numofchars,
-                                unsigned int prefixlength);
-
+void bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo );
 Compressedtable *rmnsufinfo_wrap(Seqpos *longest,
                                  Rmnsufinfo **rmnsufinfoptr,bool withlcptab);
 

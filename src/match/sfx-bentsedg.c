@@ -1745,6 +1745,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
                                   Seqpos partwidth,
                                   unsigned int numofchars,
                                   const Bcktab *bcktab,
+                                  unsigned int prefixlength,
                                   Outlcpinfo *outlcpinfo,
                                   const Sfxstrategy *sfxstrategy,
                                   Verboseinfo *verboseinfo)
@@ -1845,6 +1846,9 @@ static void initBentsedgresources(Bentsedgresources *bsr,
                                     -1,
                                     bsr->encseq,
                                     bcktab,
+                                    maxcode,
+                                    numofchars,
+                                    prefixlength,
                                     bsr->readmode,
                                     bsr->partwidth);
     gt_assert(bsr->rmnsufinfo != NULL);
@@ -1908,18 +1912,17 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
 }
 
 void qsufsort(Seqpos *sortspace,
-             int mmapfiledesc,
-             GT_UNUSED const char *filename,
-             Seqpos *longest,
-             const Encodedsequence *encseq,
-             Readmode readmode,
-             Codetype mincode,
-             Codetype maxcode,
-             Seqpos partwidth,
-             const Bcktab *bcktab,
-             unsigned int numofchars,
-             unsigned int prefixlength,
-             Outlcpinfo *outlcpinfo)
+              int mmapfiledesc,
+              Seqpos *longest,
+              const Encodedsequence *encseq,
+              Readmode readmode,
+              Codetype mincode,
+              Codetype maxcode,
+              Seqpos partwidth,
+              const Bcktab *bcktab,
+              unsigned int numofchars,
+              unsigned int prefixlength,
+              Outlcpinfo *outlcpinfo)
 {
   Rmnsufinfo *rmnsufinfo;
   Compressedtable *lcptab;
@@ -1929,15 +1932,12 @@ void qsufsort(Seqpos *sortspace,
                              mmapfiledesc,
                              encseq,
                              bcktab,
+                             maxcode,
+                             numofchars,
+                             prefixlength,
                              readmode,
                              partwidth);
-  bcktab2firstlevelintervals(rmnsufinfo,
-                             mincode,
-                             maxcode,
-                             partwidth,
-                             bcktab,
-                             numofchars,
-                             prefixlength);
+  bcktab2firstlevelintervals(rmnsufinfo);
   lcptab = rmnsufinfo_wrap(longest,&rmnsufinfo,
                            outlcpinfo == NULL ? false : true);
   if (lcptab != NULL)
@@ -1987,6 +1987,7 @@ void sortallbuckets(Suftab *suftab,
                         partwidth,
                         numofchars,
                         bcktab,
+                        prefixlength,
                         outlcpinfo,
                         sfxstrategy,
                         verboseinfo);
