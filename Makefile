@@ -387,7 +387,44 @@ $(1)_static: $(2)
 endef
 
 $(eval $(call PROGRAM_template, bin/skproto, $(SKPROTO_OBJ) \
-                                             lib/libgenometools.a \
+                                             obj/src/core/allocators.o\
+                                             obj/src/core/array.o\
+                                             obj/src/core/class_alloc.o\
+                                             obj/src/core/cstr.o\
+                                             obj/src/core/cstr_array.o\
+                                             obj/src/core/cstr_table.o\
+                                             obj/src/core/dynalloc.o\
+                                             obj/src/core/error.o\
+                                             obj/src/core/eansi.o\
+                                             obj/src/core/ebzlib.o\
+                                             obj/src/core/ezlib.o\
+                                             obj/src/core/fa.o\
+                                             obj/src/core/genfile.o\
+                                             obj/src/core/hashmap.o\
+                                             obj/src/core/hashtable.o\
+                                             obj/src/core/ma.o\
+                                             obj/src/core/mathsupport.o\
+                                             obj/src/core/msort.o\
+                                             obj/src/core/option.o\
+                                             obj/src/core/parseutils.o\
+                                             obj/src/core/phase.o\
+                                             obj/src/core/qsort_r.o\
+                                             obj/src/core/splitter.o\
+                                             obj/src/core/strand.o\
+                                             obj/src/core/range.o\
+                                             obj/src/core/str.o\
+                                             obj/src/core/str_array.o\
+                                             obj/src/core/strcmp.o\
+                                             obj/src/core/symbol.o\
+                                             obj/src/core/tool.o\
+                                             obj/src/core/tooldriver.o\
+                                             obj/src/core/versionfunc.o\
+                                             obj/src/core/warning.o\
+                                             obj/src/core/xansi.o\
+                                             obj/src/core/xbzlib.o\
+                                             obj/src/core/xposix.o\
+                                             obj/src/core/xzlib.o\
+                                             obj/src/core/yarandom.o\
                                              $(OVERRIDELIBS)))
 
 $(eval $(call PROGRAM_template, bin/gt, $(GTMAIN_OBJ) $(TOOLS_OBJ) \
