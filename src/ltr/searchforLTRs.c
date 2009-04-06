@@ -140,7 +140,7 @@ int searchforLTRs(LTRharvestoptions *lo,
     alilen = ((Seqpos)lo->repeatinfo.lmax) - repeatptr->len;
 
     /**** left (reverse) xdrop alignment ****/
-    INITARRAY (&fronts, Myfrontvalue);
+    GT_INITARRAY (&fronts, Myfrontvalue);
     if (alilen <= repeatptr->pos1)
     {
       evalxdroparbitscoresleft(&lo->arbitscores,
@@ -167,10 +167,10 @@ int searchforLTRs(LTRharvestoptions *lo,
                                (int) (repeatptr->pos1 + repeatptr->offset),
                                (Xdropscore)lo->xdropbelowscore);
     }
-    FREEARRAY (&fronts, Myfrontvalue);
+    GT_FREEARRAY (&fronts, Myfrontvalue);
 
     /**** right xdrop alignment ****/
-    INITARRAY (&fronts, Myfrontvalue);
+    GT_INITARRAY (&fronts, Myfrontvalue);
     totallength = getencseqtotallength(encseq);
     if (alilen <= totallength - (repeatptr->pos1 + repeatptr->offset +
                                 repeatptr->len) )
@@ -204,9 +204,9 @@ int searchforLTRs(LTRharvestoptions *lo,
                                  repeatptr->len)),
                                 lo->xdropbelowscore);
     }
-    FREEARRAY (&fronts, Myfrontvalue);
+    GT_FREEARRAY (&fronts, Myfrontvalue);
 
-    GETNEXTFREEINARRAY(boundaries,arrayLTRboundaries,LTRboundaries,5);
+    GT_GETNEXTFREEINARRAY(boundaries,arrayLTRboundaries,LTRboundaries,5);
 
     boundaries->contignumber = repeatptr->contignumber;
     boundaries->leftLTR_5 = (Seqpos) 0;

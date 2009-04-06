@@ -53,7 +53,7 @@ typedef struct
   ListSeqpos *positionlist;
 } Countwithpositions;
 
-DECLAREARRAYSTRUCT(Countwithpositions);
+GT_DECLAREARRAYSTRUCT(Countwithpositions);
 
 struct Dfsstate /* global information */
 {
@@ -375,7 +375,7 @@ static int outputsortedstring2indexviafileptr(const Encodedsequence *encseq,
     {
       Largecount *lc;
 
-      GETNEXTFREEINARRAY(lc,largecounts,Largecount,32);
+      GT_GETNEXTFREEINARRAY(lc,largecounts,Largecount,32);
       lc->idx = countoutputmers;
       lc->value = countocc;
       smallcount = 0;
@@ -568,7 +568,7 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   unsigned int alphasize;
 
   gt_error_check(err);
-  INITARRAY(&state.occdistribution,Countwithpositions);
+  GT_INITARRAY(&state.occdistribution,Countwithpositions);
   state.esrspace = newEncodedsequencescanstate();
   state.mersize = (Seqpos) mersize;
   state.encseq = encseqSequentialsuffixarrayreader(ssar);
@@ -583,7 +583,7 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   state.countoutputmers = 0;
   state.merindexfpout = NULL;
   state.countsfilefpout = NULL;
-  INITARRAY(&state.largecounts,Largecount);
+  GT_INITARRAY(&state.largecounts,Largecount);
   if (gt_str_length(str_storeindex) == 0)
   {
     state.sizeofbuffer = 0;
@@ -701,10 +701,10 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   }
   gt_fa_xfclose(state.merindexfpout);
   gt_fa_xfclose(state.countsfilefpout);
-  FREEARRAY(&state.occdistribution,Countwithpositions);
+  GT_FREEARRAY(&state.occdistribution,Countwithpositions);
   FREESPACE(state.currentmer);
   FREESPACE(state.bytebuffer);
-  FREEARRAY(&state.largecounts,Largecount);
+  GT_FREEARRAY(&state.largecounts,Largecount);
   freeEncodedsequencescanstate(&state.esrspace);
   return haserr ? -1 : 0;
 }

@@ -61,7 +61,7 @@ typedef struct
                                                    INSERTIONBIT */
 } Myfrontvalue;
 
-DECLAREARRAYSTRUCT(Myfrontvalue);
+GT_DECLAREARRAYSTRUCT(Myfrontvalue);
 
 typedef struct
 {
@@ -72,7 +72,7 @@ typedef struct
 /* This is the type for the xdrop scores. */
 typedef int Xdropscore;
 
-DECLAREARRAYSTRUCT(Xdropscore);
+GT_DECLAREARRAYSTRUCT(Xdropscore);
 
 int showmatrix ( ArrayMyfrontvalue * fronts,
   int distance,

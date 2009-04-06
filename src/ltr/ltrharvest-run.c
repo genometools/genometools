@@ -130,7 +130,7 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
   }
 
   /* init array for maximal repeats */
-  INITARRAY (&lo->repeatinfo.repeats, Repeat);
+  GT_INITARRAY (&lo->repeatinfo.repeats, Repeat);
   lo->repeatinfo.encseq = encseq;
 
   /* search for maximal repeats */
@@ -147,7 +147,7 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
   }
 
   /* init array for candidate pairs */
-  INITARRAY(&arrayLTRboundaries, LTRboundaries);
+  GT_INITARRAY(&arrayLTRboundaries, LTRboundaries);
 
   /* apply the filter algorithms */
   if (!had_err && searchforLTRs (lo, &arrayLTRboundaries, encseq, err) != 0)
@@ -156,7 +156,7 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
   }
 
   /* free array for maximal repeats */
-  FREEARRAY(&lo->repeatinfo.repeats, Repeat);
+  GT_FREEARRAY(&lo->repeatinfo.repeats, Repeat);
 
   /* remove exact duplicates */
   if (!had_err)
@@ -220,7 +220,7 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
     showinfoiffoundfullLTRs(lo,bdptrtab,numofboundaries,encseq);
   }
 
-  FREEARRAY(&arrayLTRboundaries, LTRboundaries);
+  GT_FREEARRAY(&arrayLTRboundaries, LTRboundaries);
   freeSequentialsuffixarrayreader(&ssar);
   gt_free(bdptrtab);
 

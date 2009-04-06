@@ -32,7 +32,7 @@ typedef struct
   Codetype code;
 } Boundsatdepth;
 
-DECLAREARRAYSTRUCT(Boundsatdepth);
+GT_DECLAREARRAYSTRUCT(Boundsatdepth);
 
 struct Pckbuckettable
 {
@@ -161,12 +161,12 @@ Pckbuckettable *pckbuckettable_new(const void *voidbwtseq,
   Pckbuckettable *pckbt;
   Mbtab *tmpmbtab;
 
-  INITARRAY(&stack,Boundsatdepth);
+  GT_INITARRAY(&stack,Boundsatdepth);
   child.lowerbound = 0;
   child.upperbound = totallength+1;
   child.depth = 0;
   child.code = (Codetype) 0;
-  STOREINARRAY(&stack,Boundsatdepth,128,child);
+  GT_STOREINARRAY(&stack,Boundsatdepth,128,child);
   rangeOccs = gt_malloc(sizeof(*rangeOccs) * MULT2(numofchars));
   tmpmbtab = gt_malloc(sizeof(*tmpmbtab) * numofchars);
   pckbt = allocandinitpckbuckettable(numofchars,maxdepth,true);
@@ -197,7 +197,7 @@ Pckbuckettable *pckbuckettable_new(const void *voidbwtseq,
       {
         if (child.lowerbound + 1 < child.upperbound)
         {
-          STOREINARRAY(&stack,Boundsatdepth,128,child);
+          GT_STOREINARRAY(&stack,Boundsatdepth,128,child);
         } else
         {
           followleafedge(pckbt,voidbwtseq,&child);
@@ -205,7 +205,7 @@ Pckbuckettable *pckbuckettable_new(const void *voidbwtseq,
       }
     }
   }
-  FREEARRAY(&stack,Boundsatdepth);
+  GT_FREEARRAY(&stack,Boundsatdepth);
   gt_free(rangeOccs);
   gt_free(tmpmbtab);
   printf("filled: %lu (%.2f)\n",pckbt->numofvalues,

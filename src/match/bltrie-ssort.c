@@ -50,7 +50,7 @@ typedef struct Blindtrienode
 
 typedef Blindtrienode * Nodeptr;
 
-DECLAREARRAYSTRUCT(Nodeptr);
+GT_DECLAREARRAYSTRUCT(Nodeptr);
 
 struct Blindtrierep
 {
@@ -176,7 +176,7 @@ static Nodeptr findcompanion(Blindtrierep *trierep,Seqpos currentstartpos)
   head = trierep->root;
   while (ISNOTLEAF(head))
   {
-    STOREINARRAY (&trierep->stack, Nodeptr, 128, head);
+    GT_STOREINARRAY (&trierep->stack, Nodeptr, 128, head);
     if (isleftofboundary(currentstartpos+head->depth,trierep))
     {
       newchar = getencodedchar(trierep->encseq, /* Random access */
@@ -201,7 +201,7 @@ static Nodeptr findcompanion(Blindtrierep *trierep,Seqpos currentstartpos)
     }
     head = succ;
   }
-  STOREINARRAY (&trierep->stack, Nodeptr, 128, head);
+  GT_STOREINARRAY (&trierep->stack, Nodeptr, 128, head);
   return head;
 }
 
@@ -368,7 +368,7 @@ static unsigned long enumeratetrieleaves (Seqpos *suffixtable,
   unsigned long nextfree = 0;
 
   trierep->stack.nextfreeNodeptr = 0;
-  STOREINARRAY (&trierep->stack, Nodeptr, 128, trierep->root);
+  GT_STOREINARRAY (&trierep->stack, Nodeptr, 128, trierep->root);
   SETCURRENT(trierep->root->either.firstchild);
   for (;;)
   {
@@ -414,7 +414,7 @@ static unsigned long enumeratetrieleaves (Seqpos *suffixtable,
         }
       } else
       {
-        STOREINARRAY (&trierep->stack, Nodeptr, 128, currentnode);
+        GT_STOREINARRAY (&trierep->stack, Nodeptr, 128, currentnode);
         SETCURRENT (currentnode->either.firstchild);
       }
     }
@@ -447,14 +447,14 @@ Blindtrierep *newBlindtrierep(unsigned long numofsuffixes,
   trierep->esr2 = newEncodedsequencescanstate();
   trierep->totallength = getencseqtotallength(encseq);
   trierep->cmpcharbychar = cmpcharbychar;
-  INITARRAY (&trierep->stack, Nodeptr);
+  GT_INITARRAY (&trierep->stack, Nodeptr);
   return trierep;
 }
 
 void freeBlindtrierep(Blindtrierep **trierep)
 {
   FREESPACE((*trierep)->spaceBlindtrienode);
-  FREEARRAY(&(*trierep)->stack, Nodeptr);
+  GT_FREEARRAY(&(*trierep)->stack, Nodeptr);
   freeEncodedsequencescanstate(&((*trierep)->esr1));
   freeEncodedsequencescanstate(&((*trierep)->esr2));
   FREESPACE(*trierep);

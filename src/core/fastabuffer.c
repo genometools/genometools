@@ -55,7 +55,7 @@ GtFastaBuffer* gt_fastabuffer_new(const GtStrArray *filenametab,
     fb->filelengthtab = NULL;
   }
   fb->characterdistribution = characterdistribution;
-  INITARRAY(&fb->headerbuffer, char);
+  GT_INITARRAY(&fb->headerbuffer, char);
   return fb;
 }
 
@@ -147,13 +147,13 @@ static int advancefastabufferstate(GtFastaBuffer *fb, GtError *err)
           {
             if (currentchar == NEWLINESYMBOL)
             {
-              STOREINARRAY(&fb->headerbuffer, char, 128, '\0');
+              GT_STOREINARRAY(&fb->headerbuffer, char, 128, '\0');
               gt_queue_add(fb->descptr,
                            gt_cstr_dup(fb->headerbuffer.spacechar));
               fb->headerbuffer.nextfreechar = 0;
             } else
             {
-              STOREINARRAY(&fb->headerbuffer, char, 128, currentchar);
+              GT_STOREINARRAY(&fb->headerbuffer, char, 128, currentchar);
             }
           }
         } else
@@ -320,6 +320,6 @@ void gt_fastabuffer_delete(GtFastaBuffer *fb)
 {
   if (!fb) return;
   gt_genfile_close(fb->inputstream);
-  FREEARRAY(&fb->headerbuffer, char);
+  GT_FREEARRAY(&fb->headerbuffer, char);
   gt_free(fb);
 }

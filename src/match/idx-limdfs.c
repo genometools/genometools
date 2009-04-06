@@ -181,7 +181,7 @@ typedef struct
   unsigned long previousstackelem;
 } Lcpintervalwithinfo;
 
-DECLAREARRAYSTRUCT(Lcpintervalwithinfo);
+GT_DECLAREARRAYSTRUCT(Lcpintervalwithinfo);
 
 struct Limdfsresources
 {
@@ -231,7 +231,7 @@ Limdfsresources *newLimdfsresources(const Genericindex *genericindex,
   limdfsresources->bwci.nextfreeBoundswithchar = 0;
   limdfsresources->bwci.allocatedBoundswithchar
     = (unsigned long) (numofchars+1);
-  INITARRAY(&limdfsresources->stack,Lcpintervalwithinfo);
+  GT_INITARRAY(&limdfsresources->stack,Lcpintervalwithinfo);
   gt_assert(numofchars <= MAXALPHABETCHARACTER);
   limdfsresources->alphasize = (GtUchar) numofchars;
   limdfsresources->processmatch = processmatch;
@@ -263,7 +263,7 @@ Limdfsresources *newLimdfsresources(const Genericindex *genericindex,
     ALLOCASSIGNSPACE(limdfsresources->rangeOccs,NULL,Seqpos,
                      MULT2(limdfsresources->alphasize));
   }
-  INITARRAY(&limdfsresources->mstatspos,Seqpos);
+  GT_INITARRAY(&limdfsresources->mstatspos,Seqpos);
   if (maxintervalwidth > 0)
   {
     ALLOCASSIGNSPACE(limdfsresources->mstatspos.spaceSeqpos,NULL,Seqpos,
@@ -371,7 +371,7 @@ void freeLimdfsresources(Limdfsresources **ptrlimdfsresources,
   Limdfsresources *limdfsresources = *ptrlimdfsresources;
 
   adfst->freedfsconstinfo(&limdfsresources->dfsconstinfo);
-  FREEARRAY(&limdfsresources->bwci,Boundswithchar);
+  GT_FREEARRAY(&limdfsresources->bwci,Boundswithchar);
   if (adfst->freeLimdfsstackelem != NULL)
   {
     unsigned long idx;
@@ -388,10 +388,10 @@ void freeLimdfsresources(Limdfsresources **ptrlimdfsresources,
       adfst->freeLimdfsstackelem(limdfsresources->copyofparent.aliasstate);
     }
   }
-  FREEARRAY(&limdfsresources->stack,Lcpintervalwithinfo);
+  GT_FREEARRAY(&limdfsresources->stack,Lcpintervalwithinfo);
   FREESPACE(limdfsresources->rangeOccs);
   FREESPACE(limdfsresources->currentpathspace);
-  FREEARRAY(&limdfsresources->mstatspos,Seqpos);
+  GT_FREEARRAY(&limdfsresources->mstatspos,Seqpos);
   FREESPACE(*ptrlimdfsresources);
 }
 
@@ -467,7 +467,7 @@ static void storemstatsposition(void *processinfo,const GtMatch *match)
 {
   ArraySeqpos *mstatspos = (ArraySeqpos *) processinfo;
 
-  STOREINARRAY(mstatspos,Seqpos,32,match->dbstartpos);
+  GT_STOREINARRAY(mstatspos,Seqpos,32,match->dbstartpos);
 }
 
 static int comparepositions(const void *a, const void *b)

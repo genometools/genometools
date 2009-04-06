@@ -42,7 +42,7 @@ typedef struct Mergertrienode
 
 typedef Mergertrienode * Mergertrienodeptr;
 
-DECLAREARRAYSTRUCT(Mergertrienodeptr);
+GT_DECLAREARRAYSTRUCT(Mergertrienodeptr);
 
 typedef struct
 {

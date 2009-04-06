@@ -33,7 +33,7 @@ typedef struct
   unsigned long contignumber; /* number of contig for this repeat */
 } Repeat;
 
-DECLAREARRAYSTRUCT(Repeat);
+GT_DECLAREARRAYSTRUCT(Repeat);
 
 /* The datatype RepeatInfo stores all maximal repeats (seeds) and */
 /* information about the length and distance constraints. */
@@ -82,7 +82,7 @@ typedef struct
                           because of "noclusterallowed" option */
 } LTRboundaries;
 
-DECLAREARRAYSTRUCT(LTRboundaries);
+GT_DECLAREARRAYSTRUCT(LTRboundaries);
 
 /* The datatype Motif stores information about the specified motif. */
 typedef struct

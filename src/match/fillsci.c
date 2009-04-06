@@ -252,7 +252,7 @@ int fasta2sequencekeyvalues(
           {
             if (withssptab)
             {
-              STOREINARRAY(sequenceseppos,Seqpos,128,currentpos);
+              GT_STOREINARRAY(sequenceseppos,Seqpos,128,currentpos);
             } else
             {
               sequenceseppos->nextfreeSeqpos++;

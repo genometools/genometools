@@ -160,7 +160,7 @@ int fillmapspecstartptr(Assignmapspec assignmapspec,
   unsigned long totalpadunits = 0;
 
   gt_error_check(err);
-  INITARRAY(&mapspectable,Mapspecification);
+  GT_INITARRAY(&mapspectable,Mapspecification);
   assignmapspec(&mapspectable,assignmapinfo,false);
   mapptr = gt_fa_mmap_read(gt_str_get(tmpfilename), &numofbytes);
   if (mapptr == NULL)
@@ -234,7 +234,7 @@ int fillmapspecstartptr(Assignmapspec assignmapspec,
       haserr = true;
     }
   }
-  FREEARRAY(&mapspectable,Mapspecification);
+  GT_FREEARRAY(&mapspectable,Mapspecification);
   return haserr ? -1 : 0;
 }
 
@@ -252,7 +252,7 @@ int flushtheindex2file(FILE *fp,
   unsigned long totalpadunits = 0;
 
   gt_error_check(err);
-  INITARRAY(&mapspectable,Mapspecification);
+  GT_INITARRAY(&mapspectable,Mapspecification);
   assignmapspec(&mapspectable,assignmapinfo,true);
   gt_assert(mapspectable.spaceMapspecification != NULL);
   for (mapspecptr = mapspectable.spaceMapspecification;
@@ -347,6 +347,6 @@ int flushtheindex2file(FILE *fp,
       haserr = true;
     }
   }
-  FREEARRAY(&mapspectable,Mapspecification);
+  GT_FREEARRAY(&mapspectable,Mapspecification);
   return haserr ? -1 : 0;
 }

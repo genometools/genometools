@@ -92,11 +92,11 @@ static void add2poslist(Dfsstate *state,Dfsinfo *ninfo,unsigned int base,
   if (base >= state->alphabetsize)
   {
     ninfo->uniquecharposlength++;
-    STOREINARRAY(&state->uniquechar,Seqpos,4,leafnumber);
+    GT_STOREINARRAY(&state->uniquechar,Seqpos,4,leafnumber);
   } else
   {
     ptr = &state->poslist[base];
-    STOREINARRAY(ptr,Seqpos,4,leafnumber);
+    GT_STOREINARRAY(ptr,Seqpos,4,leafnumber);
     NODEPOSLISTLENGTH(ninfo,base)++;
   }
 }
@@ -368,12 +368,12 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
   state.encseq = encseq;
   state.readmode = readmode;
 
-  INITARRAY(&state.uniquechar,Seqpos);
+  GT_INITARRAY(&state.uniquechar,Seqpos);
   ALLOCASSIGNSPACE(state.poslist,NULL,ArraySeqpos,state.alphabetsize);
   for (base = 0; base < state.alphabetsize; base++)
   {
     ptr = &state.poslist[base];
-    INITARRAY(ptr,Seqpos);
+    GT_INITARRAY(ptr,Seqpos);
   }
   if (depthfirstesa(ssar,
                     allocateDfsinfo,
@@ -389,11 +389,11 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
   {
     haserr = true;
   }
-  FREEARRAY(&state.uniquechar,Seqpos);
+  GT_FREEARRAY(&state.uniquechar,Seqpos);
   for (base = 0; base < state.alphabetsize; base++)
   {
     ptr = &state.poslist[base];
-    FREEARRAY(ptr,Seqpos);
+    GT_FREEARRAY(ptr,Seqpos);
   }
   FREESPACE(state.poslist);
   return haserr ? -1 : 0;

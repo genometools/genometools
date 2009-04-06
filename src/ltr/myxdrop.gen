@@ -45,7 +45,7 @@ EVALXDROPARBITSCORES
 
   dback = SETDBACK(xdropbelowscore);
 
-  INITARRAY (&big_t, Xdropscore);
+  GT_INITARRAY (&big_t, Xdropscore);
   integermax = MAX (ulen, vlen);
   integermin = -integermax;
 
@@ -70,7 +70,7 @@ EVALXDROPARBITSCORES
   xdropbest->ivalue = xdropbest->jvalue = (unsigned int) i;
 
   /*@ignore@*/
-  STOREINARRAY (&big_t, Xdropscore, 10, bigt_tmp);
+  GT_STOREINARRAY (&big_t, Xdropscore, 10, bigt_tmp);
   /*@end@*/
 
   /* "phase" d > 0 */
@@ -224,7 +224,7 @@ EVALXDROPARBITSCORES
       alwaysMININFINITYINT = true;
     }
     /*@ignore@*/
-    STOREINARRAY (&big_t, Xdropscore, 10, bigt_tmp);
+    GT_STOREINARRAY (&big_t, Xdropscore, 10, bigt_tmp);
     /*@end@*/
 
     /* fill out of bounds values of MINUSINFINITYINT
@@ -303,5 +303,5 @@ EVALXDROPARBITSCORES
     ubound = MIN (ubound, uboundtmp);
   }
 
-  FREEARRAY (&big_t, Xdropscore);
+  GT_FREEARRAY (&big_t, Xdropscore);
 }

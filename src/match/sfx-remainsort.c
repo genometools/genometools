@@ -53,7 +53,7 @@ typedef struct
          right;
 } Pairsuffixptr;
 
-DECLAREARRAYSTRUCT(Pairsuffixptr);
+GT_DECLAREARRAYSTRUCT(Pairsuffixptr);
 
 typedef struct
 {
@@ -167,7 +167,7 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   rmnsufinfo->itvinfo = NULL;
   rmnsufinfo->rangestobesorted = gt_queue_new();
   rmnsufinfo->esr = newEncodedsequencescanstate();
-  INITARRAY(&rmnsufinfo->firstgeneration,Pairsuffixptr);
+  GT_INITARRAY(&rmnsufinfo->firstgeneration,Pairsuffixptr);
   initsortblock(&rmnsufinfo->sortblock,presortedsuffixes,mmapfiledesc,
                 partwidth);
   return rmnsufinfo;
@@ -459,7 +459,7 @@ void rmnsufinfo_addunsortedrange(Rmnsufinfo *rmnsufinfo,
   Pairsuffixptr *ptr;
 
   updatewidth (rmnsufinfo,(unsigned long) (right - left + 1),depth);
-  GETNEXTFREEINARRAY(ptr,&rmnsufinfo->firstgeneration,Pairsuffixptr,1024);
+  GT_GETNEXTFREEINARRAY(ptr,&rmnsufinfo->firstgeneration,Pairsuffixptr,1024);
   ptr->left = left;
   ptr->right = right;
 }
@@ -748,7 +748,7 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
                             pairptr->right,
                             pairptr->left);
   }
-  FREEARRAY(&rmnsufinfo->firstgeneration,Pairsuffixptr);
+  GT_FREEARRAY(&rmnsufinfo->firstgeneration,Pairsuffixptr);
   while (gt_queue_size(rmnsufinfo->rangestobesorted) > 0)
   {
     pairptrwithbase = gt_queue_get(rmnsufinfo->rangestobesorted);

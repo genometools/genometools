@@ -110,7 +110,7 @@
         bsr->mkvauxstack.spaceMKVstack[bsr->mkvauxstack.nextfreeMKVstack]
 
 #define PUSHMKVSTACK(LEFT,RIGHT,DEPTH,ORDERTYPE)\
-        CHECKARRAYSPACE(&bsr->mkvauxstack,MKVstack,1024);\
+        GT_CHECKARRAYSPACE(&bsr->mkvauxstack,MKVstack,1024);\
         STACKTOP.left = LEFT;\
         STACKTOP.right = RIGHT;\
         STACKTOP.depth = DEPTH;\
@@ -145,7 +145,7 @@ static unsigned long countinsertionsort = 0,
                      countcountingsort = 0,
                      countqsort = 0;
 
-DECLAREARRAYSTRUCT(Largelcpvalue);
+GT_DECLAREARRAYSTRUCT(Largelcpvalue);
 
 typedef struct
 {
@@ -380,7 +380,7 @@ typedef struct
   char cmpresult;
 } Countingsortinfo;
 
-DECLAREARRAYSTRUCT(MKVstack);
+GT_DECLAREARRAYSTRUCT(MKVstack);
 
 typedef struct
 {
@@ -1536,7 +1536,7 @@ Outlcpinfo *newOutlcpinfo(const GtStr *indexname,
   outlcpinfo->lcpsubtab.maxbranchdepth = 0;
   outlcpinfo->lcpsubtab.reservoir = NULL;
   outlcpinfo->lcpsubtab.sizereservoir = 0;
-  INITARRAY(&outlcpinfo->lcpsubtab.largelcpvalues,Largelcpvalue);
+  GT_INITARRAY(&outlcpinfo->lcpsubtab.largelcpvalues,Largelcpvalue);
   outlcpinfo->lcpsubtab.smalllcpvalues = NULL;
   if (assideeffect)
   {
@@ -1719,7 +1719,7 @@ void freeOutlcptab(Outlcpinfo **outlcpinfoptr)
   }
   gt_assert(outlcpinfo->lcpsubtab.countoutputlcpvalues ==
             outlcpinfo->totallength + 1);
-  FREEARRAY(&outlcpinfo->lcpsubtab.largelcpvalues,Largelcpvalue);
+  GT_FREEARRAY(&outlcpinfo->lcpsubtab.largelcpvalues,Largelcpvalue);
   gt_fa_fclose(outlcpinfo->outfplcptab);
   gt_fa_fclose(outlcpinfo->outfpllvtab);
   FREESPACE(*outlcpinfoptr);
@@ -1822,7 +1822,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
       bsr->lcpsubtab->bucketoflcpvalues = (Seqpos *) bsr->lcpsubtab->reservoir;
     }
   }
-  INITARRAY(&bsr->mkvauxstack,MKVstack);
+  GT_INITARRAY(&bsr->mkvauxstack,MKVstack);
   if (sfxstrategy->cmpcharbychar)
   {
     bsr->countingsortinfo = NULL;
@@ -1908,7 +1908,7 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
   {
     freeEncodedsequencescanstate(&bsr->esr2);
   }
-  FREEARRAY(&bsr->mkvauxstack,MKVstack);
+  GT_FREEARRAY(&bsr->mkvauxstack,MKVstack);
 }
 
 void qsufsort(Seqpos *sortspace,

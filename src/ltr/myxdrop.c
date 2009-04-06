@@ -114,7 +114,7 @@ int showmatrix (ArrayMyfrontvalue * fronts,
  ** The other case, saves more space
 
 #define STOREINARRAYFRONTS(A,POS,TYPE,VAL)\
-        CHECKARRAYSPACEMULTI(A,TYPE,POS+1)\
+        GT_CHECKARRAYSPACEMULTI(A,TYPE,POS+1)\
         (A)->space##TYPE[POS] = VAL;\
         (A)->nextfree##TYPE = POS+1;
 */
@@ -124,7 +124,7 @@ int showmatrix (ArrayMyfrontvalue * fronts,
  nothing will be allocated in addition!
  */
 #define STOREINARRAYFRONTS(A,POS,TYPE,VAL)\
-        CHECKARRAYSPACEMULTI(A,TYPE,POS+1)\
+        GT_CHECKARRAYSPACEMULTI(A,TYPE,POS+1)\
         (A)->space##TYPE[POS] = VAL;
 
 /*

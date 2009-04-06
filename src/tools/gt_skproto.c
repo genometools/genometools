@@ -39,7 +39,7 @@ static char *forbid[] = {
   "static ",
   "typedef ",
   "int main",
-  "DECLAREARRAYSTRUCT(",
+  "GT_DECLAREARRAYSTRUCT(",
   "/*@null@*/ static",
   "/*@unused@*/ static"
 };

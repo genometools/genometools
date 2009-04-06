@@ -750,9 +750,9 @@ static int gt_tyr_occratio_runner(GT_UNUSED int argc,
                 nonuniquemultidistribution;
 
   verboseinfo = newverboseinfo(arguments->verbose);
-  INITARRAY(&uniquedistribution,uint64_t);
-  INITARRAY(&nonuniquedistribution,uint64_t);
-  INITARRAY(&nonuniquemultidistribution,uint64_t);
+  GT_INITARRAY(&uniquedistribution,uint64_t);
+  GT_INITARRAY(&nonuniquedistribution,uint64_t);
+  GT_INITARRAY(&nonuniquemultidistribution,uint64_t);
   if (tyr_occratio(arguments->str_inputindex,
                    arguments->scanfile,
                    arguments->minmersize,
@@ -774,9 +774,9 @@ static int gt_tyr_occratio_runner(GT_UNUSED int argc,
                   arguments->outputvector);
   }
   freeverboseinfo(&verboseinfo);
-  FREEARRAY(&uniquedistribution,uint64_t);
-  FREEARRAY(&nonuniquedistribution,uint64_t);
-  FREEARRAY(&nonuniquemultidistribution,uint64_t);
+  GT_FREEARRAY(&uniquedistribution,uint64_t);
+  GT_FREEARRAY(&nonuniquedistribution,uint64_t);
+  GT_FREEARRAY(&nonuniquemultidistribution,uint64_t);
   return haserr ? -1 : 0;
 }
 

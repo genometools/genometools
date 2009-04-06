@@ -86,7 +86,7 @@ static Codetype qgram2codefillspecial(unsigned int numofchars,
   return integercode;
 }
 
-DECLAREARRAYSTRUCT(Codetype);
+GT_DECLAREARRAYSTRUCT(Codetype);
 
 static void outkmeroccurrence(void *processinfo,
                               Codetype code,
@@ -96,7 +96,7 @@ static void outkmeroccurrence(void *processinfo,
 {
   ArrayCodetype *codelist = (ArrayCodetype *) processinfo;
 
-  STOREINARRAY(codelist,Codetype,1024,code);
+  GT_STOREINARRAY(codelist,Codetype,1024,code);
 }
 
 /*
@@ -124,7 +124,7 @@ static void collectkmercode(ArrayCodetype *codelist,
                                  Forwardmode,
                                  offset,
                                  stringtotallength);
-    STOREINARRAY(codelist,Codetype,1024,code);
+    GT_STOREINARRAY(codelist,Codetype,1024,code);
   }
 }
 
@@ -188,7 +188,7 @@ static int verifycodelists(const Encodedsequence *encseq,
   gt_error_check(err);
   stringtotallength = getencseqtotallength(encseq);
   characters = getencseqAlphabetcharacters(encseq);
-  INITARRAY(&codeliststring,Codetype);
+  GT_INITARRAY(&codeliststring,Codetype);
   collectkmercode(&codeliststring,
                   encseq,
                   kmersize,
@@ -203,7 +203,7 @@ static int verifycodelists(const Encodedsequence *encseq,
   {
     haserr = true;
   }
-  FREEARRAY(&codeliststring,Codetype);
+  GT_FREEARRAY(&codeliststring,Codetype);
   return haserr ? -1 : 0;
 }
 
@@ -216,7 +216,7 @@ int verifymappedstr(const Encodedsequence *encseq,unsigned int prefixlength,
 
   gt_error_check(err);
   numofchars = getencseqAlphabetnumofchars(encseq);
-  INITARRAY(&codeliststream,Codetype);
+  GT_INITARRAY(&codeliststream,Codetype);
   if (getfastastreamkmers(getencseqfilenametab(encseq),
                           outkmeroccurrence,
                           &codeliststream,
@@ -239,6 +239,6 @@ int verifymappedstr(const Encodedsequence *encseq,unsigned int prefixlength,
       haserr = true;
     }
   }
-  FREEARRAY(&codeliststream,Codetype);
+  GT_FREEARRAY(&codeliststream,Codetype);
   return haserr ? -1 : 0;
 }

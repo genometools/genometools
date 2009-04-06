@@ -52,7 +52,7 @@ GtSeqIterator* gt_seqiterator_new_with_buffer(GtSequenceBuffer *buf)
 {
   GtSeqIterator *seqit;
   seqit = gt_malloc(sizeof (GtSeqIterator));
-  INITARRAY(&seqit->sequencebuffer, GtUchar);
+  GT_INITARRAY(&seqit->sequencebuffer, GtUchar);
   seqit->descptr = gt_queue_new();
   seqit->fb = gt_sequence_buffer_ref(buf);
   gt_sequence_buffer_set_desc_queue(seqit->fb, seqit->descptr);
@@ -135,7 +135,7 @@ int gt_seqiterator_next(GtSeqIterator *seqit,
     }
     if (seqit->withsequence)
     {
-      STOREINARRAY(&seqit->sequencebuffer, GtUchar,
+      GT_STOREINARRAY(&seqit->sequencebuffer, GtUchar,
                    MAX(1024, seqit->sequencebuffer.nextfreeGtUchar * 0.5),
                    charcode);
     } else
@@ -181,7 +181,7 @@ void gt_seqiterator_delete(GtSeqIterator *seqit)
   if (!seqit) return;
   gt_queue_delete_with_contents(seqit->descptr);
   gt_sequence_buffer_delete(seqit->fb);
-  FREEARRAY(&seqit->sequencebuffer, GtUchar);
+  GT_FREEARRAY(&seqit->sequencebuffer, GtUchar);
   seqit->currentread = seqit->maxread;
   gt_free(seqit);
 }

@@ -88,7 +88,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   sfxseqinfo->encseq = NULL;
   sfxseqinfo->characterdistribution = NULL;
   sfxseqinfo->readmode = so->readmode;
-  INITARRAY(&sfxseqinfo->sequenceseppos,Seqpos);
+  GT_INITARRAY(&sfxseqinfo->sequenceseppos,Seqpos);
   if (gt_str_length(so->str_sat) > 0)
   {
     forcetable = getsatforcevalue(gt_str_get(so->str_sat));
@@ -193,7 +193,7 @@ int fromsarr2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
 {
   sfxseqinfo->characterdistribution = NULL;
   sfxseqinfo->readmode = readmodeoption;
-  INITARRAY(&sfxseqinfo->sequenceseppos,Seqpos);
+  GT_INITARRAY(&sfxseqinfo->sequenceseppos,Seqpos);
   sfxseqinfo->encseq = mapencodedsequence(true,
                                           indexname,
                                           true,
@@ -210,5 +210,5 @@ void freeSfxseqinfo(Sfxseqinfo *sfxseqinfo)
   {
     encodedsequence_free(&sfxseqinfo->encseq);
   }
-  FREEARRAY(&sfxseqinfo->sequenceseppos,Seqpos);
+  GT_FREEARRAY(&sfxseqinfo->sequenceseppos,Seqpos);
 }

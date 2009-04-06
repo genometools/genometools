@@ -116,7 +116,7 @@ static void allocatefmtables(Fmindex *fm,
                      fm->specpos.allocatedPairBwtidx);
   } else
   {
-    INITARRAY(&fm->specpos,PairBwtidx);
+    GT_INITARRAY(&fm->specpos,PairBwtidx);
     fm->markpostable = NULL;
   }
   ALLOCASSIGNSPACE (fm->bfreq, NULL, GtUchar,

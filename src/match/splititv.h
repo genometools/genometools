@@ -29,6 +29,6 @@ typedef struct
   GtUchar inchar;
 } Boundswithchar;
 
-DECLAREARRAYSTRUCT(Boundswithchar);
+GT_DECLAREARRAYSTRUCT(Boundswithchar);
 
 #endif

@@ -23,7 +23,7 @@
 #include "core/error.h"
 
 #define NEWMAPSPEC(PTR,TYPE,ELEMS)\
-        GETNEXTFREEINARRAY(mapspecptr,mapspectable,Mapspecification,10);\
+        GT_GETNEXTFREEINARRAY(mapspecptr,mapspectable,Mapspecification,10);\
         mapspecptr->typespec = TYPE ## Type;\
         mapspecptr->startptr = &(PTR);\
         mapspecptr->sizeofunit = sizeof (TYPE);\
@@ -57,7 +57,7 @@ typedef struct
   unsigned long numofunits;
 } Mapspecification;
 
-DECLAREARRAYSTRUCT(Mapspecification);
+GT_DECLAREARRAYSTRUCT(Mapspecification);
 
 typedef void(*Assignmapspec)(ArrayMapspecification *,void *,bool);
 

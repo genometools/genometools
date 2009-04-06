@@ -183,7 +183,7 @@ static void storematch(void *processinfo,const GtMatch *match)
   ArraySimplematch *storetab = (ArraySimplematch *) processinfo;
   Simplematch *simplematch;
 
-  GETNEXTFREEINARRAY(simplematch,storetab,Simplematch,32);
+  GT_GETNEXTFREEINARRAY(simplematch,storetab,Simplematch,32);
   simplematch->dbstartpos = match->dbstartpos;
   simplematch->matchlength = match->dblen;
   simplematch->rcmatch = ISRCDIR(storetab->twlptr);
@@ -587,8 +587,8 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     {
       dfst = pms_AbstractDfstransformer();
     }
-    INITARRAY(&storeonline,Simplematch);
-    INITARRAY(&storeoffline,Simplematch);
+    GT_INITARRAY(&storeonline,Simplematch);
+    GT_INITARRAY(&storeoffline,Simplematch);
     storeonline.twlptr = storeoffline.twlptr = &twl;
     alpha = getencseqAlphabet(encseq);
     symbolmap = getsymbolmapAlphabet(alpha);
@@ -728,8 +728,8 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
       {
         freeLimdfsresources(&limdfsresources,dfst);
       }
-      FREEARRAY(&storeonline,Simplematch);
-      FREEARRAY(&storeoffline,Simplematch);
+      GT_FREEARRAY(&storeonline,Simplematch);
+      GT_FREEARRAY(&storeoffline,Simplematch);
       gt_seqiterator_delete(seqit);
     }
   }

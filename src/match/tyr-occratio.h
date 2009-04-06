@@ -24,7 +24,7 @@
 #include "core/arraydef.h"
 #include "verbose-def.h"
 
-DECLAREARRAYSTRUCT(uint64_t);
+GT_DECLAREARRAYSTRUCT(uint64_t);
 
 int tyr_occratio(const GtStr *str_inputindex,
                  bool scanfile,
