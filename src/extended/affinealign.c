@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -34,7 +34,7 @@ typedef struct {
   Edge Redge,
        Dedge,
        Iedge;
-} DPentry;
+} AffinealignDPentry;
 
 static unsigned long infadd(unsigned long inf, unsigned long s)
 {
@@ -43,10 +43,11 @@ static unsigned long infadd(unsigned long inf, unsigned long s)
   return inf + s;
 }
 
-static void fillDPtable(DPentry **dptable,
-                        const char *u, unsigned long ulen,
-                        const char *v, unsigned long vlen, int replacement_cost,
-                        int gap_opening, int gap_extension)
+static void affinealign_fill_table(AffinealignDPentry **dptable,
+                                   const char *u, unsigned long ulen,
+                                   const char *v, unsigned long vlen,
+                                   int replacement_cost, int gap_opening,
+                                   int gap_extension)
 {
   unsigned long i, j, Rvalue, Dvalue, Ivalue, minvalue;
   int rcost;
@@ -119,8 +120,8 @@ static void fillDPtable(DPentry **dptable,
   }
 }
 
-static void traceback(GtAlignment *a, DPentry **dptable,
-                      unsigned long i, unsigned long j)
+static void affinealign_traceback(GtAlignment *a, AffinealignDPentry **dptable,
+                                  unsigned long i, unsigned long j)
 {
   unsigned long minvalue;
   Edge edge;
@@ -162,18 +163,19 @@ static void traceback(GtAlignment *a, DPentry **dptable,
 }
 
 GtAlignment* gt_affinealign(const char *u, unsigned long ulen,
-                       const char *v, unsigned long vlen, int replacement_cost,
-                       int gap_opening_cost, int gap_extension_cost)
+                            const char *v, unsigned long vlen,
+                            int replacement_cost, int gap_opening_cost,
+                            int gap_extension_cost)
 {
-  DPentry **dptable;
+  AffinealignDPentry **dptable;
   GtAlignment *a;
   gt_assert(u && ulen && v && vlen);
   gt_array2dim_malloc(dptable, ulen+1, vlen+1);
-  fillDPtable(dptable, u, ulen, v, vlen,
-              replacement_cost, gap_opening_cost, gap_extension_cost);
+  affinealign_fill_table(dptable, u, ulen, v, vlen, replacement_cost,
+                         gap_opening_cost, gap_extension_cost);
   a = gt_alignment_new_with_seqs((const Uchar *) u, ulen, (const Uchar *) v,
                                  vlen);
-  traceback(a, dptable, ulen, vlen);
+  affinealign_traceback(a, dptable, ulen, vlen);
   gt_array2dim_delete(dptable);
   return a;
 }

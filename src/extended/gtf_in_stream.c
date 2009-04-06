@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -37,7 +37,8 @@ struct GtGTFInStream {
 #define gtf_in_stream_cast(NS)\
         gt_node_stream_cast(gt_gtf_in_stream_class(), NS)
 
-static int process_file(GtGTFInStream *gtf_in_stream, GtError *err)
+static int gtf_in_stream_process_file(GtGTFInStream *gtf_in_stream,
+                                      GtError *err)
 {
   GtGTFParser *gtf_parser;
   GtStr *filenamestr;
@@ -79,7 +80,7 @@ static int gtf_in_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
   gt_error_check(err);
   is = gtf_in_stream_cast(ns);
   if (!is->file_processed) {
-    had_err = process_file(is, err);
+    had_err = gtf_in_stream_process_file(is, err);
     is->file_processed = true;
   }
   if (!had_err && gt_queue_size(is->genome_node_buffer)) {

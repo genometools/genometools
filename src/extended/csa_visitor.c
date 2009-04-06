@@ -181,7 +181,8 @@ static GtStrand get_strand(const void *sa)
   return gt_feature_node_get_strand(gf);
 }
 
-static int save_exon(GtGenomeNode *gn, void *data, GT_UNUSED GtError *err)
+static int csa_visitor_save_exon(GtGenomeNode *gn, void *data,
+                                 GT_UNUSED GtError *err)
 {
   GtFeatureNode *gf = (GtFeatureNode*) gn;
   GtArray *exon_ranges = (GtArray*) data;
@@ -201,9 +202,9 @@ static void get_exons(GtArray *exon_ranges, const void *sa)
   int had_err;
   gt_assert(exon_ranges && gf && gt_feature_node_has_type(gf, gft_gene));
   had_err = gt_genome_node_traverse_children((GtGenomeNode*) gf, exon_ranges,
-                                          save_exon, false, NULL);
-  /* we cannot have an error here, because save_exon() doesn't produces one. */
-  gt_assert(!had_err);
+                                             csa_visitor_save_exon, false,
+                                             NULL);
+  gt_assert(!had_err); /* csa_visitor_save_exon() is sane */
   /* we got at least one exon */
   gt_assert(gt_array_size(exon_ranges));
   gt_assert(gt_ranges_are_sorted_and_do_not_overlap(exon_ranges));

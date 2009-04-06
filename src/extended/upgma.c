@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2003-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2003-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -77,7 +77,8 @@ static void upgma_init(GtUPGMA *upgma, unsigned long num_of_taxa, void *data,
   }
 }
 
-static double distance(const GtUPGMA *upgma, unsigned long i, unsigned long j)
+static double upgma_distance(const GtUPGMA *upgma, unsigned long i,
+                                                   unsigned long j)
 {
   double distance;
   if (i < j)
@@ -142,9 +143,9 @@ static void upgma_compute(GtUPGMA *upgma)
     for (k = 0; k < newclusternum; k++) {
       if (gt_bittab_bit_is_set(clustertab, k)) {
         upgma->clusters[newclusternum].distances[k] =
-          (distance(upgma, k, min_i) *
+          (upgma_distance(upgma, k, min_i) *
            upgma->clusters[min_i].clustersize
-          + distance(upgma, k, min_j) *
+          + upgma_distance(upgma, k, min_j) *
             upgma->clusters[min_j].clustersize)
           / (upgma->clusters[min_i].clustersize +
              upgma->clusters[min_j].clustersize);

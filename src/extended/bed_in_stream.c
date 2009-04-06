@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -32,7 +32,8 @@ struct GtBEDInStream {
 #define bed_in_stream_cast(NS)\
         gt_node_stream_cast(gt_bed_in_stream_class(), NS)
 
-static int process_file(GtBEDInStream *bed_in_stream, GtError *err)
+static int bed_in_stream_process_file(GtBEDInStream *bed_in_stream,
+                                      GtError *err)
 {
   int had_err;
   gt_error_check(err);
@@ -51,7 +52,7 @@ static int bed_in_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
   gt_error_check(err);
   is = bed_in_stream_cast(ns);
   if (!is->file_processed) {
-    had_err = process_file(is, err);
+    had_err = bed_in_stream_process_file(is, err);
     is->file_processed = true;
   }
   if (!had_err && gt_queue_size(is->genome_node_buffer)) {

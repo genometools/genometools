@@ -77,7 +77,7 @@ void gt_bed_parser_delete(GtBEDParser *bed_parser)
   gt_free(bed_parser);
 }
 
-static int blank_line(GtIO *bed_file, GtError *err)
+static int bed_parser_blank_line(GtIO *bed_file, GtError *err)
 {
   int had_err = 0;
   gt_error_check(err);
@@ -120,7 +120,7 @@ static void rest_line(GtIO *bed_file)
   }
 }
 
-static int comment_line(GtIO *bed_file, GtError *err)
+static int bed_parser_comment_line(GtIO *bed_file, GtError *err)
 {
   int had_err;
   gt_error_check(err);
@@ -580,10 +580,10 @@ static int parse_bed_file(GtBEDParser *bed_parser, GtIO *bed_file, GtError *err)
   while (!had_err && gt_io_has_char(bed_file)) {
     switch (gt_io_peek(bed_file)) {
       case BLANK_CHAR:
-        had_err = blank_line(bed_file, err);
+        had_err = bed_parser_blank_line(bed_file, err);
         break;
       case COMMENT_CHAR:
-        had_err = comment_line(bed_file, err);
+        had_err = bed_parser_comment_line(bed_file, err);
         break;
       case GT_CARRIAGE_RETURN:
         gt_io_next(bed_file);
