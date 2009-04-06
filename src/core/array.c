@@ -29,8 +29,8 @@
 #include "core/unused_api.h"
 #include "core/xansi.h"
 
-#define NUM_OF_TESTS    100
-#define MAX_SIZE        1024
+#define ARRAY_NUM_OF_TESTS  100
+#define ARRAY_MAX_SIZE      1024
 
 struct GtArray {
   void *space;
@@ -338,11 +338,11 @@ int gt_array_unit_test(GtError *err)
 
   char_array = gt_array_new(sizeof (char));
   int_array = gt_array_new(sizeof (int));
-  char_array_test = gt_malloc((MAX_SIZE + 1) * sizeof (char));
-  int_array_test = gt_malloc(MAX_SIZE * sizeof (int));
+  char_array_test = gt_malloc((ARRAY_MAX_SIZE + 1) * sizeof (char));
+  int_array_test = gt_malloc(ARRAY_MAX_SIZE * sizeof (int));
 
-  for (i = 0; !had_err && i < NUM_OF_TESTS; i++) {
-    size = gt_rand_max(MAX_SIZE);
+  for (i = 0; !had_err && i < ARRAY_NUM_OF_TESTS; i++) {
+    size = gt_rand_max(ARRAY_MAX_SIZE);
 
     gt_array_reset(char_array);
     gt_array_set_size(int_array, 0);

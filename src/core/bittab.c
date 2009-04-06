@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -25,8 +25,8 @@
 #include "core/unused_api.h"
 #include "core/xansi.h"
 
-#define NUM_OF_TESTS    50
-#define MAX_SIZE        1024
+#define BITTAB_NUM_OF_TESTS  50
+#define BITTAB_MAX_SIZE      1024
 
 struct GtBittab {
   unsigned long *tabptr,
@@ -342,8 +342,8 @@ int gt_bittab_unit_test(GtError *err)
   int had_err = 0;
   gt_error_check(err);
 
-  for (i = 0; i < NUM_OF_TESTS && !had_err; i++) {
-    size = gt_rand_max(MAX_SIZE) + 1;
+  for (i = 0; i < BITTAB_NUM_OF_TESTS && !had_err; i++) {
+    size = gt_rand_max(BITTAB_MAX_SIZE) + 1;
     b = gt_bittab_new(size);
     tmp = gt_bittab_new(size);
     and = gt_bittab_new(size);
