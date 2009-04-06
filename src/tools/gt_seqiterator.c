@@ -125,7 +125,7 @@ static void showmeroccurrence(unsigned long key, unsigned long long value,
 }
 
 static unsigned long long accumulateastretch(GtDiscDistri *distastretch,
-                                             const Uchar *sequence,
+                                             const GtUchar *sequence,
                                              unsigned long len)
 {
   unsigned long i, lenofastretch = 0;
@@ -182,7 +182,7 @@ int gt_seqiterator(int argc, const char **argv, GtError *err)
 {
   GtStrArray *files;
   GtSeqIterator *seqit;
-  const Uchar *sequence;
+  const GtUchar *sequence;
   char *desc;
   unsigned long len;
   int i, parsed_args, had_err = 0;

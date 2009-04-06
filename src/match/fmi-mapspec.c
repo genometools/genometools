@@ -42,7 +42,7 @@ static void assignfmmapspecification(ArrayMapspecification *mapspectable,
              fmwithoptions->storeindexpos
              ? fmindex->specpos.nextfreePairBwtidx
              : 0);
-  NEWMAPSPEC(fmindex->bfreq,Uchar,
+  NEWMAPSPEC(fmindex->bfreq,GtUchar,
              (unsigned long) BFREQSIZE(fmindex->mapsize,fmindex->nofblocks));
 }
 

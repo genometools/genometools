@@ -121,7 +121,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
   bool haserr = false;
 
 #ifdef INLINEDSequentialsuffixarrayreader
-  Uchar tmpsmalllcpvalue;
+  GtUchar tmpsmalllcpvalue;
   showverbose(verboseinfo,"# inlined Sequentialsuffixarrayreader\n");
 #else
   int retval;

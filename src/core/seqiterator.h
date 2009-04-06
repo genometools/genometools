@@ -52,7 +52,7 @@ void           gt_seqiterator_set_sequence_output(GtSeqIterator*, bool);
    files are exhausted. And -1, if an error occured (<err> is set
    accordingly). */
 int            gt_seqiterator_next(GtSeqIterator *seq_iterator,
-                                   const Uchar **sequence,
+                                   const GtUchar **sequence,
                                    unsigned long *len,
                                    char **description, GtError*);
 

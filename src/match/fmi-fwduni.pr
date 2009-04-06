@@ -6,16 +6,16 @@ unsigned long skfmuniqueforward (const void *genericindex,
                                  GT_UNUSED Seqpos left,
                                  GT_UNUSED Seqpos right,
                                  GT_UNUSED Seqpos *witnessposition,
-                                 const Uchar *qstart,
-                                 const Uchar *qend);
+                                 const GtUchar *qstart,
+                                 const GtUchar *qend);
 
 unsigned long skfmmstats (const void *genericindex,
                           GT_UNUSED unsigned long offset,
                           GT_UNUSED Seqpos left,
                           GT_UNUSED Seqpos right,
                           Seqpos *witnessposition,
-                          const Uchar *qstart,
-                          const Uchar *qend);
+                          const GtUchar *qstart,
+                          const GtUchar *qend);
 
 #ifdef __cplusplus
 }

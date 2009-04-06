@@ -30,7 +30,7 @@
 
  DECLAREREADFUNCTION(Seqpos);
 
- DECLAREREADFUNCTION(Uchar);
+ DECLAREREADFUNCTION(GtUchar);
 
  DECLAREREADFUNCTION(Largelcpvalue);
 
@@ -139,7 +139,7 @@ int emissionmergedesa_stepdeleteandinsertothersuffixes(
 {
   Mergertrienode *tmpsmallestleaf, *tmplcpnode;
   Largelcpvalue tmpexception;
-  Uchar tmpsmalllcpvalue;
+  GtUchar tmpsmalllcpvalue;
   int retval;
   Seqpos tmpsuftabvalue,
          tmplcpvalue,
@@ -165,7 +165,7 @@ int emissionmergedesa_stepdeleteandinsertothersuffixes(
       emmesa->numofentries--;
     } else
     {
-      retval = readnextUcharfromstream(&tmpsmalllcpvalue,
+      retval = readnextGtUcharfromstream(&tmpsmalllcpvalue,
                                        &emmesa->suffixarraytable[tmpidx].
                                                 lcptabstream);
       if (retval < 0)

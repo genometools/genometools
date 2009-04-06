@@ -100,7 +100,7 @@ static int gt_sequence_buffer_plain_advance(GtSequenceBuffer *sb, GtError *err)
       } else
       {
         currentfileread++;
-        pvt->outbuf[currentoutpos++] = (Uchar) currentchar;
+        pvt->outbuf[currentoutpos++] = (GtUchar) currentchar;
       }
     }
   }

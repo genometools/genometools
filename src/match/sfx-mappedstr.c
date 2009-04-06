@@ -68,12 +68,12 @@
 #ifdef SKDEBUG
 static Codetype windowkmer2code(unsigned int numofchars,
                                 unsigned int kmersize,
-                                const Uchar *cyclicwindow,
+                                const GtUchar *cyclicwindow,
                                 unsigned int firstindex)
 {
   unsigned int i;
   Codetype integercode;
-  Uchar cc;
+  GtUchar cc;
   bool foundspecial;
 
   cc = cyclicwindow[firstindex];
@@ -110,12 +110,12 @@ static Codetype windowkmer2code(unsigned int numofchars,
 static Codetype prefixwindowkmer2code(unsigned int firstspecialpos,
                                       unsigned int kmersize,
                                       const Codetype **multimappower,
-                                      const Uchar *cyclicwindow,
+                                      const GtUchar *cyclicwindow,
                                       unsigned int firstindex)
 {
   unsigned int i;
   Codetype integercode = 0;
-  Uchar cc;
+  GtUchar cc;
 
   for (i=0; i<firstspecialpos; i++)
   {
@@ -127,7 +127,8 @@ static Codetype prefixwindowkmer2code(unsigned int firstspecialpos,
 
 static Firstspecialpos determinefirstspecialposition(unsigned int windowwidth,
                                                      unsigned int kmersize,
-                                                     const Uchar *cyclicwindow,
+                                                     const GtUchar
+                                                     *cyclicwindow,
                                                      unsigned int firstindex)
 {
   unsigned int i;
@@ -167,7 +168,7 @@ typedef struct
 typedef struct
 {
   Specialpositions spos;
-  Uchar *cyclicwindow;
+  GtUchar *cyclicwindow;
   unsigned int numofchars,
                kmersize,
                windowwidth,
@@ -227,9 +228,9 @@ static void specialwrapqueue(Specialpositions *spos)
 }
 
 static void updatespecialpositions(Streamstate *spwp,
-                                   Uchar charcode,
+                                   GtUchar charcode,
                                    bool doshift,
-                                   Uchar lchar)
+                                   GtUchar lchar)
 {
   if (doshift)
   {
@@ -300,7 +301,7 @@ static void shiftrightwithchar(
                void *processkmercodeinfo,
                Streamstate *spwp,
                Seqpos currentposition,
-               Uchar charcode)
+               GtUchar charcode)
 {
 #ifdef SKDEBUG
   Firstspecialpos firstspecialposbrute;
@@ -409,7 +410,7 @@ static void initstreamstate(Streamstate *spwp,unsigned int numofchars,
   spwp->numofchars = numofchars;
   spwp->windowwidth = 0;
   spwp->firstindex = 0;
-  ALLOCASSIGNSPACE(spwp->cyclicwindow,NULL,Uchar,kmersize);
+  ALLOCASSIGNSPACE(spwp->cyclicwindow,NULL,GtUchar,kmersize);
   specialemptyqueue(&spwp->spos,kmersize);
   filllargestchartable(&spwp->filltable,numofchars,kmersize);
 }
@@ -434,7 +435,7 @@ static void doovershoot(Streamstate *spwp,
   for (overshoot=0; overshoot<kmersize; overshoot++)
   {
     shiftrightwithchar(processkmercode,processkmercodeinfo,spwp,
-                       currentposition + overshoot,(Uchar) WILDCARD);
+                       currentposition + overshoot,(GtUchar) WILDCARD);
   }
 }
 
@@ -447,7 +448,7 @@ void getencseqkmers(
 {
   Seqpos currentposition = 0, totallength;
   Streamstate spwp;
-  Uchar charcode;
+  GtUchar charcode;
   Encodedsequencescanstate *esr;
   unsigned int numofchars;
 
@@ -481,13 +482,13 @@ int getfastastreamkmers(
         void *processkmercodeinfo,
         unsigned int numofchars,
         unsigned int kmersize,
-        const Uchar *symbolmap,
+        const GtUchar *symbolmap,
         bool plainformat,
         GtError *err)
 {
   Seqpos currentposition = 0;
   Streamstate spwp;
-  Uchar charcode;
+  GtUchar charcode;
   bool haserr = false;
   GtSequenceBuffer *fb;
   int retval;

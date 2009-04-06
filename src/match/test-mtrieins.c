@@ -24,7 +24,7 @@
 #include "esa-map.h"
 
 static void maketrie(Mergertrierep *trierep,
-                     GT_UNUSED const Uchar *characters,
+                     GT_UNUSED const GtUchar *characters,
                      Seqpos len)
 {
   Suffixinfo suffixinfo;
@@ -49,7 +49,7 @@ static void maketrie(Mergertrierep *trierep,
 
 static void successivelydeletesmallest(Mergertrierep *trierep,
                                        GT_UNUSED Seqpos seqlen,
-                                       GT_UNUSED const Uchar *characters,
+                                       GT_UNUSED const GtUchar *characters,
                                        GT_UNUSED GtError *err)
 {
   Mergertrienode *smallest;
@@ -93,7 +93,7 @@ int test_trieins(bool onlyins,const GtStr *indexname,GtError *err)
   if (!haserr)
   {
     Mergertrierep trierep;
-    const Uchar *characters;
+    const GtUchar *characters;
 
     ALLOCASSIGNSPACE(trierep.encseqreadinfo,NULL,Encseqreadinfo,1);
     trierep.encseqreadinfo[0].encseqptr = suffixarray.encseq;

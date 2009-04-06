@@ -47,7 +47,7 @@ SWdpresource *newSWdpresource(Scoretype matchscore,
 
 void multiapplysmithwaterman(SWdpresource *dpresource,
                              const Encodedsequence *encseq,
-                             const Uchar *query,
+                             const GtUchar *query,
                              unsigned long querylen);
 
 void freeSWdpresource(SWdpresource *swdpresource);

@@ -104,9 +104,9 @@ static int constructsarrandrunmaxpairs(
   return haserr ? -1 : 0;
 }
 
-int sarrselfsubstringmatch(const Uchar *dbseq,
+int sarrselfsubstringmatch(const GtUchar *dbseq,
                            Seqpos dblen,
-                           const Uchar *query,
+                           const GtUchar *query,
                            unsigned long querylen,
                            unsigned int minlength,
                            const SfxAlphabet *alpha,

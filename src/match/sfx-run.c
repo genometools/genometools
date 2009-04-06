@@ -149,14 +149,14 @@ static int bwttab2file(Outfileinfo *outfileinfo,
       (!outfileinfo->longest.defined || outfileinfo->outfpbwttab != NULL))
   {
     Seqpos startpos, pos;
-    Uchar cc = 0;
+    GtUchar cc = 0;
 
     for (pos=0; pos < numberofsuffixes; pos++)
     {
       startpos = suftab[pos];
       if (startpos == 0)
       {
-        cc = (Uchar) UNDEFBWTCHAR;
+        cc = (GtUchar) UNDEFBWTCHAR;
         if (!outfileinfo->longest.defined)
         {
           outfileinfo->longest.defined = true;
@@ -172,12 +172,12 @@ static int bwttab2file(Outfileinfo *outfileinfo,
       }
       if (outfileinfo->outfpbwttab != NULL)
       {
-        if (fwrite(&cc,sizeof (Uchar),(size_t) 1,outfileinfo->outfpbwttab)
+        if (fwrite(&cc,sizeof (GtUchar),(size_t) 1,outfileinfo->outfpbwttab)
                     != (size_t) 1)
         {
           gt_error_set(err,"cannot write 1 item of size %u: "
                            "errormsg=\"%s\"",
-                          (unsigned int) sizeof (Uchar),
+                          (unsigned int) sizeof (GtUchar),
                           strerror(errno));
           haserr = true;
           break;

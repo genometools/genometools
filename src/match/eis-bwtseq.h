@@ -502,13 +502,13 @@ EMINumMatchesLeft(const BWTSeqExactMatchesIterator *iter);
  * @return 0 if not unique, otherwise length of minmum unique prefix.
  */
 unsigned long packedindexuniqueforward(const BWTSeq *bwtseq,
-                                       const Uchar *qstart,
-                                       const Uchar *qend);
+                                       const GtUchar *qstart,
+                                       const GtUchar *qend);
 
 unsigned long packedindexmstatsforward(const BWTSeq *bwtseq,
                                        Seqpos *witnessposition,
-                                       const Uchar *qstart,
-                                       const Uchar *qend);
+                                       const GtUchar *qstart,
+                                       const GtUchar *qend);
 
 #include "match/eis-bwtseq-siop.h"
 

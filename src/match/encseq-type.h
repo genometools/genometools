@@ -61,11 +61,11 @@ struct Encodedsequence
                 *numofdbsequencesptr; /* need for writing numofdbsequences */
   unsigned long sizeofrep;
   const char *name;
-  Uchar(*deliverchar)(const Encodedsequence *,Seqpos);
+  GtUchar(*deliverchar)(const Encodedsequence *,Seqpos);
   const char *delivercharname;
-  Uchar(*delivercharnospecial)(const Encodedsequence *,Seqpos);
+  GtUchar(*delivercharnospecial)(const Encodedsequence *,Seqpos);
   const char *delivercharnospecialname;
-  Uchar(*seqdeliverchar)(const Encodedsequence *,
+  GtUchar(*seqdeliverchar)(const Encodedsequence *,
                          Encodedsequencescanstate *,Seqpos);
   const char *seqdelivercharname;
   bool(*delivercontainsspecial)(const Encodedsequence *,
@@ -101,7 +101,7 @@ struct Encodedsequence
               Viauint32tables */
 
   /* only for Viadirectaccess */
-  Uchar *plainseq;
+  GtUchar *plainseq;
   bool hasplainseqptr;
 
   /* only for Viabytecompress */
@@ -112,7 +112,7 @@ struct Encodedsequence
   Bitsequence *specialbits;
 
   /* only for Viauchartables */
-  Uchar *ucharspecialpositions,
+  GtUchar *ucharspecialpositions,
         *ucharspecialrangelength;
   unsigned long *ucharendspecialsubsUint;
 

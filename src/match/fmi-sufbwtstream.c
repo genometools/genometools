@@ -33,7 +33,7 @@
 #include "fmi-keyval.pr"
 #include "fmi-mapspec.pr"
 
- DECLAREREADFUNCTION(Uchar);
+ DECLAREREADFUNCTION(GtUchar);
 
  DECLAREREADFUNCTION(Seqpos);
 
@@ -119,7 +119,7 @@ static void allocatefmtables(Fmindex *fm,
     INITARRAY(&fm->specpos,PairBwtidx);
     fm->markpostable = NULL;
   }
-  ALLOCASSIGNSPACE (fm->bfreq, NULL, Uchar,
+  ALLOCASSIGNSPACE (fm->bfreq, NULL, GtUchar,
                     BFREQSIZE(fm->mapsize,fm->nofblocks));
 }
 
@@ -181,7 +181,7 @@ static void showconstructionmessage(const GtStr *indexname,
 }
 
 static int nextesamergedsufbwttabvalues(DefinedSeqpos *longest,
-                                        Uchar *bwtvalue,
+                                        GtUchar *bwtvalue,
                                         Seqpos *suftabvalue,
                                         Emissionmergedesa *emmesa,
                                         const Seqpos *sequenceoffsettable,
@@ -222,10 +222,10 @@ static int nextesamergedsufbwttabvalues(DefinedSeqpos *longest,
       }
       longest->defined = true;
       longest->valueseqpos = bwtpos;
-      *bwtvalue = (Uchar) UNDEFBWTCHAR;
+      *bwtvalue = (GtUchar) UNDEFBWTCHAR;
     } else
     {
-      *bwtvalue = (Uchar) SEPARATOR;
+      *bwtvalue = (GtUchar) SEPARATOR;
     }
   } else
   {
@@ -251,7 +251,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
 {
   Suffixarray suffixarray;
   Emissionmergedesa emmesa;
-  Uchar cc;
+  GtUchar cc;
   Seqpos bwtpos,
          totallength = 0,
          suftabvalue = 0,
@@ -403,7 +403,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
           }
           suftabvalue = (Seqpos) tmpsuftabvalue;
         }
-        retval = readnextUcharfromstream(&cc,&suffixarray.bwttabstream);
+        retval = readnextGtUcharfromstream(&cc,&suffixarray.bwttabstream);
         if (retval == 0)
         {
           break;
@@ -427,7 +427,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
           break;
         }
         if (fwrite(&cc,
-                  sizeof (Uchar),
+                  sizeof (GtUchar),
                   (size_t) 1,
                   outbwt) != (size_t) 1)
         {

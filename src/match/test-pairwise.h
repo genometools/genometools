@@ -22,8 +22,8 @@
 #include "core/symboldef.h"
 
 typedef void (*Checkcmppairfuntype)(bool,
-                                    const Uchar *,unsigned long,
-                                    const Uchar *,unsigned long);
+                                    const GtUchar *,unsigned long,
+                                    const GtUchar *,unsigned long);
 
 void runcheckfunctionontwofiles(Checkcmppairfuntype checkfunction,
                                const char *file1,
@@ -32,7 +32,7 @@ void runcheckfunctionontwofiles(Checkcmppairfuntype checkfunction,
 unsigned long runcheckfunctionontext(Checkcmppairfuntype checkfunction,
                                      const char *text);
 
-unsigned long applycheckfunctiontotext(const Uchar *text,
+unsigned long applycheckfunctiontotext(const GtUchar *text,
                                        unsigned long textlen,
                                        void *info);
 
@@ -41,9 +41,9 @@ unsigned long runcheckfunctiononalphalen(Checkcmppairfuntype checkfunction,
                                          unsigned long len);
 
 void checkgreedyunitedist(bool forward,
-                          const Uchar *useq,
+                          const GtUchar *useq,
                           unsigned long ulen,
-                          const Uchar *vseq,
+                          const GtUchar *vseq,
                           unsigned long vlen);
 
 #endif

@@ -200,9 +200,9 @@ static unsigned long applycheckfunctiontosimpleoptions(
     while (true)
     {
       checkfunction(forward,
-                    (const Uchar *) gt_str_array_get(opt->strings,0),
+                    (const GtUchar *) gt_str_array_get(opt->strings,0),
                     (unsigned long) strlen(gt_str_array_get(opt->strings,0)),
-                    (const Uchar *) gt_str_array_get(opt->strings,1UL),
+                    (const GtUchar *) gt_str_array_get(opt->strings,1UL),
                     (unsigned long) strlen(gt_str_array_get(opt->strings,1UL)));
       if (!forward)
       {

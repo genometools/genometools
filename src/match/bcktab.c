@@ -47,7 +47,7 @@ struct Bcktab
   unsigned long sizeofrep,
                 *countspecialcodes,
                 **distpfxidx;
-  Uchar *qgrambuffer;
+  GtUchar *qgrambuffer;
   bool allocated;
   void *mappedptr;
 };
@@ -153,7 +153,7 @@ static Bcktab *newBcktab(unsigned int numofchars,
   bcktab->numofspecialcodes = bcktab->basepower[prefixlength-1];
   bcktab->multimappower = initmultimappower(numofchars,prefixlength);
   bcktab->allocated = false;
-  ALLOCASSIGNSPACE(bcktab->qgrambuffer,NULL,Uchar,prefixlength);
+  ALLOCASSIGNSPACE(bcktab->qgrambuffer,NULL,GtUchar,prefixlength);
   bcktab->sizeofrep
     = (unsigned long)
       sizeof (*bcktab->leftborder) * (bcktab->numofallcodes + 1) +
@@ -578,7 +578,7 @@ unsigned int pfxidx2lcpvalues(unsigned int *minprefixindex,
   unsigned int prefixindex, maxprefixindex = 0;
   Codetype ordercode, divisor;
   unsigned long idx;
-  Uchar *insertptr;
+  GtUchar *insertptr;
 
   *minprefixindex = bcktab->prefixlength;
   insertptr = lcpsubtab + specialsinbucket - 1;
@@ -601,7 +601,7 @@ unsigned int pfxidx2lcpvalues(unsigned int *minprefixindex,
           for (idx=0; idx < bcktab->distpfxidx[prefixindex-1][ordercode]; idx++)
           {
             gt_assert(insertptr >= lcpsubtab);
-            *insertptr-- = (Uchar) prefixindex;
+            *insertptr-- = (GtUchar) prefixindex;
           }
         }
       }
@@ -616,7 +616,7 @@ unsigned int pfxidx2lcpvalues(unsigned int *minprefixindex,
     }
     while (insertptr >= lcpsubtab)
     {
-      *insertptr-- = (Uchar) (bcktab->prefixlength-1);
+      *insertptr-- = (GtUchar) (bcktab->prefixlength-1);
     }
   }
   return maxprefixindex;
@@ -653,7 +653,7 @@ void consistencyofsuffix(int line,
 {
   unsigned int idx, firstspecial = bcktab->prefixlength, gramfirstspecial;
   Codetype qgramcode = 0;
-  Uchar cc = 0;
+  GtUchar cc = 0;
 
   for (idx=0; idx<bcktab->prefixlength; idx++)
   {
@@ -672,7 +672,7 @@ void consistencyofsuffix(int line,
   }
   for (idx=firstspecial; idx<bcktab->prefixlength; idx++)
   {
-    bcktab->qgrambuffer[idx] = (Uchar) (numofchars-1);
+    bcktab->qgrambuffer[idx] = (GtUchar) (numofchars-1);
   }
   gramfirstspecial = qgram2code(&qgramcode,
                                 (const Codetype **) bcktab->multimappower,

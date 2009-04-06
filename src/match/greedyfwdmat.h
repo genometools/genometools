@@ -32,8 +32,8 @@ typedef unsigned long (*Greedygmatchforwardfunction) (const void *,
                                                       Seqpos left,
                                                       Seqpos right,
                                                       Seqpos *,
-                                                      const Uchar *,
-                                                      const Uchar *);
+                                                      const GtUchar *,
+                                                      const GtUchar *);
 
 int findsubquerygmatchforward(const Encodedsequence *encseq,
                               const void *genericindex,

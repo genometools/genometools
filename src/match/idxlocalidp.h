@@ -28,7 +28,7 @@ void reinitLocalitracebackstate(Limdfsconstinfo *lci,
                                 unsigned long pprefixlen);
 
 void processelemLocalitracebackstate(Limdfsconstinfo *lci,
-                                     Uchar currentchar,
+                                     GtUchar currentchar,
                                      const void *aliasstate);
 
 const void *completealignmentfromLocalitracebackstate(

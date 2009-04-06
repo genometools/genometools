@@ -204,7 +204,7 @@ static Codetype getencseqcode(const Encodedsequence *encseq,
 {
   Codetype code = 0;
   unsigned int idx;
-  Uchar cc;
+  GtUchar cc;
 
   for (idx=0; idx<prefixlength; idx++)
   {

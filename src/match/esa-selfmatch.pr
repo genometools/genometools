@@ -1,9 +1,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-int sarrselfsubstringmatch(const Uchar *dbseq,
+int sarrselfsubstringmatch(const GtUchar *dbseq,
                            Seqpos dblen,
-                           const Uchar *query,
+                           const GtUchar *query,
                            unsigned long querylen,
                            unsigned int minlength,
                            const SfxAlphabet *alpha,

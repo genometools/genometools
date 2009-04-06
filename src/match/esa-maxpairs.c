@@ -22,8 +22,8 @@
 #include "esa-seqread.h"
 #include "verbose-def.h"
 
-#define ISLEFTDIVERSE   (Uchar) (state->alphabetsize)
-#define INITIALCHAR     (Uchar) (state->alphabetsize+1)
+#define ISLEFTDIVERSE   (GtUchar) (state->alphabetsize)
+#define INITIALCHAR     (GtUchar) (state->alphabetsize+1)
 
 #define CHECKCHAR(CC)\
         if (father->commonchar != (CC) || (CC) >= ISLEFTDIVERSE)\
@@ -48,7 +48,7 @@ typedef struct
 
  struct Dfsinfo /* information stored for each node of the lcp interval tree */
 {
-  Uchar commonchar;
+  GtUchar commonchar;
   unsigned long uniquecharposstart,
                 uniquecharposlength; /* uniquecharpos[start..start+len-1] */
   Listtype *nodeposlist;
@@ -185,7 +185,7 @@ static int processleafedge(bool firstsucc,
 {
   unsigned int base;
   Seqpos *start, *spptr;
-  Uchar leftchar;
+  GtUchar leftchar;
 
 #ifdef SKDEBUG
   printf("processleafedge " FormatSeqpos " firstsucc=%s, "
@@ -233,7 +233,7 @@ static int processleafedge(bool firstsucc,
   {
     for (base = 0; base < state->alphabetsize; base++)
     {
-      if (leftchar != (Uchar) base)
+      if (leftchar != (GtUchar) base)
       {
         if (cartproduct1(state,fatherdepth,father,base,leafnumber,err) != 0)
         {

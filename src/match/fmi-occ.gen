@@ -18,7 +18,7 @@
 #define ACCESSBWTTEXT(POS)\
         getencodedchar(fm->bwtformatching,POS,Forwardmode)
 
-static Seqpos fmoccurrence (const Fmindex *fm,Uchar cc,Seqpos pos)
+static Seqpos fmoccurrence (const Fmindex *fm,GtUchar cc,Seqpos pos)
 {
   Seqpos bwtidx,
          bwtlastidx,

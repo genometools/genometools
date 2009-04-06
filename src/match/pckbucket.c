@@ -127,7 +127,7 @@ static void followleafedge(Pckbuckettable *pckbt,const void *voidbwtseq,
                            const Boundsatdepth *bd)
 {
   Bwtseqcontextiterator *bsci;
-  Uchar cc;
+  GtUchar cc;
   Boundsatdepth bdleaf;
 
   bdleaf.code = bd->code;

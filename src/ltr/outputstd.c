@@ -78,7 +78,7 @@ static void producelongutput(const LTRharvestoptions *lo,
                              const Encodedsequence *encseq,
                              Seqpos offset)
 {
-  const Uchar *characters = getencseqAlphabetcharacters(encseq);
+  const GtUchar *characters = getencseqAlphabetcharacters(encseq);
 
   printf(FormatSeqpos "  ",
       PRINTSeqposcast(boundaries->leftLTR_5 -offset + 1));

@@ -43,7 +43,7 @@ typedef struct
 } Profilematrix;
 
 void showProfilematrix(const Profilematrix *prof,
-                              const Uchar *characters)
+                              const GtUchar *characters)
 {
   unsigned long d, a;
 
@@ -106,15 +106,15 @@ void lookaheadsearchPSSM(const Encodedsequence *encseq,
                                 const Profilematrix *prof)
 {
   unsigned long firstpos, bufsize;
-  Uchar currentchar;
+  GtUchar currentchar;
   Seqpos pos;
   Encodedsequencescanstate *esr;
   Seqpos totallength = getencseqtotallength(encseq);
-  Uchar *buffer;
+  GtUchar *buffer;
 
   esr = newEncodedsequencescanstate();
   initEncodedsequencescanstate(esr,encseq,Forwardmode,0);
-  ALLOCASSIGNSPACE(buffer,NULL,Uchar,prof->dimension);
+  ALLOCASSIGNSPACE(buffer,NULL,GtUchar,prof->dimension);
   firstpos = bufsize = 0;
   for (pos=0; pos < totallength; pos++)
   {

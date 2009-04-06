@@ -195,11 +195,11 @@ getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
 }
 
 unsigned long packedindexuniqueforward(const BWTSeq *bwtSeq,
-                                       const Uchar *qstart,
-                                       const Uchar *qend)
+                                       const GtUchar *qstart,
+                                       const GtUchar *qend)
 {
-  Uchar cc;
-  const Uchar *qptr;
+  GtUchar cc;
+  const GtUchar *qptr;
   struct matchBound bwtbound;
   struct SeqposPair seqpospair;
   Symbol curSym;
@@ -260,11 +260,11 @@ unsigned long packedindexuniqueforward(const BWTSeq *bwtSeq,
 
 unsigned long packedindexmstatsforward(const BWTSeq *bwtSeq,
                                        Seqpos *witnessleftbound,
-                                       const Uchar *qstart,
-                                       const Uchar *qend)
+                                       const GtUchar *qstart,
+                                       const GtUchar *qend)
 {
-  Uchar cc;
-  const Uchar *qptr;
+  GtUchar cc;
+  const GtUchar *qptr;
   Seqpos prevlbound;
   struct matchBound bwtbound;
   struct SeqposPair seqpospair;

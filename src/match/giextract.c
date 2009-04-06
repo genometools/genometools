@@ -305,7 +305,7 @@ int extractginumbers(bool verbose,
                      GtError *err)
 {
   GtSeqIterator *seqit;
-  const Uchar *sequence;
+  const GtUchar *sequence;
   char *desc, *headerbufferspace = NULL;
   const char *ginumberasstring;
   uint64_t referenceginumber;

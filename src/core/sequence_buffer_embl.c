@@ -227,7 +227,7 @@ static int gt_sequence_buffer_embl_advance(GtSequenceBuffer *sb, GtError *err)
       return 0; /* buffer full, finished */
     }
     if (lc == TERMINATOR) {
-      pvt->outbuf[currentoutpos++] = (Uchar) SEPARATOR;
+      pvt->outbuf[currentoutpos++] = (GtUchar) SEPARATOR;
       pvt->lastspeciallength++;
       sbe->state = EMBL_UNDEFINED;
       if (!sbe->description_set && pvt->descptr)
@@ -300,7 +300,7 @@ static int gt_sequence_buffer_embl_advance(GtSequenceBuffer *sb, GtError *err)
         /* all files exhausted */
         pvt->complete = true;
         /* remove last separator */
-        pvt->outbuf[--currentoutpos] = (Uchar) '\0';
+        pvt->outbuf[--currentoutpos] = (GtUchar) '\0';
         had_err = 0;
         break;
       }

@@ -47,7 +47,7 @@ GtSequenceBuffer*  gt_sequence_buffer_new_guess_type(const GtStrArray*,
 /* Fetches next character from <GtSequenceBuffer>.
    Returns 1 if a new character could be read, 0 if all files are exhausted, or
    -1 on error (see the <GtError> object for details). */
-int           gt_sequence_buffer_next(GtSequenceBuffer*, Uchar*, GtError*);
+int           gt_sequence_buffer_next(GtSequenceBuffer*, GtUchar*, GtError*);
 
 /* Returns the index of the currently read sequence file in the input file
    <GtStrArray>. */
@@ -56,7 +56,7 @@ unsigned long gt_sequence_buffer_get_file_index(GtSequenceBuffer*);
 /* Assigns a symbol map to the sequence iterator to transform sequences with.
    Set to NULL to disable alphabet transformation (default). */
 void          gt_sequence_buffer_set_symbolmap(GtSequenceBuffer*,
-                                               const Uchar *);
+                                               const GtUchar *);
 
 /* Assigns an array of Filelengthvalue structs to the sequence iterator. This
    is filled during iteration. Note that the length of the array must equal the

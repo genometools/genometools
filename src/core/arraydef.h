@@ -124,7 +124,7 @@
   Some declarations for the most common array types.
 */
 
-DECLAREARRAYSTRUCT(Uchar);
+DECLAREARRAYSTRUCT(GtUchar);
 DECLAREARRAYSTRUCT(char);
 
 #endif

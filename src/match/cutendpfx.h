@@ -29,7 +29,7 @@ typedef struct Bucketenumerator Bucketenumerator;
 
 Bucketenumerator *newbucketenumerator(const Bcktab *bcktab,
                                       unsigned int prefixlength,
-                                      const Uchar *demandprefix,
+                                      const GtUchar *demandprefix,
                                       unsigned int demandprefixlength);
 
 bool nextbucketenumerator(Lcpinterval *itv,Bucketenumerator *bucketenumerator);

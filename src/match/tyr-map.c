@@ -34,7 +34,7 @@ struct Tyrindex
   size_t numofmers;
   unsigned long mersize,
                 merbytes;
-  Uchar *mertable,
+  GtUchar *mertable,
         *lastmer;
 };
 
@@ -42,12 +42,12 @@ struct Tyrcountinfo
 {
   void *mappedmctfileptr;
   const GtStr *indexfilename;
-  Uchar *smallcounts;
+  GtUchar *smallcounts;
   Largecount *largecounts;
   unsigned long numoflargecounts;
 };
 
-unsigned long decodesingleinteger(const Uchar *start)
+unsigned long decodesingleinteger(const GtUchar *start)
 {
   unsigned long idx, value;
 
@@ -76,7 +76,7 @@ Tyrindex *tyrindex_new(const GtStr *tyrindexname,GtError *err)
   }
   if (!haserr)
   {
-    tyrindex->mertable = (Uchar *) tyrindex->mappedfileptr;
+    tyrindex->mertable = (GtUchar *) tyrindex->mappedfileptr;
     rest = sizeof (unsigned long) * EXTRAINTEGERS;
     if (rest > numofbytes)
     {
@@ -142,12 +142,12 @@ bool tyrindex_isempty(const Tyrindex *tyrindex)
   return tyrindex->numofmers == 0 ? true : false;
 }
 
-const Uchar *tyrindex_mertable(const Tyrindex *tyrindex)
+const GtUchar *tyrindex_mertable(const Tyrindex *tyrindex)
 {
   return tyrindex->mertable;
 }
 
-const Uchar *tyrindex_lastmer(const Tyrindex *tyrindex)
+const GtUchar *tyrindex_lastmer(const Tyrindex *tyrindex)
 {
   return tyrindex->lastmer;
 }
@@ -167,7 +167,8 @@ unsigned int tyrindex_alphasize(const Tyrindex *tyrindex)
   return tyrindex->alphasize;
 }
 
-unsigned long tyrindex_ptr2number(const Tyrindex *tyrindex,const Uchar *result)
+unsigned long tyrindex_ptr2number(const Tyrindex *tyrindex,
+                                  const GtUchar *result)
 {
   return (unsigned long) (result - tyrindex->mertable)/tyrindex->merbytes;
 }
@@ -203,7 +204,7 @@ Tyrcountinfo *tyrcountinfo_new(const Tyrindex *tyrindex,
   } else
   {
     tyrcountinfo->smallcounts
-      = (Uchar *) tyrcountinfo->mappedmctfileptr;
+      = (GtUchar *) tyrcountinfo->mappedmctfileptr;
     tmp = &tyrcountinfo->smallcounts[tyrindex->numofmers];
     tyrcountinfo->largecounts = (Largecount *) tmp;
     if (numofbytes < tyrindex->numofmers)
@@ -298,7 +299,7 @@ void tyrcountinfo_delete(Tyrcountinfo **tyrcountinfoptr)
   *tyrcountinfoptr = NULL;
 }
 
-static int mymemcmp(unsigned long *offset,const Uchar *s1,const Uchar *s2,
+static int mymemcmp(unsigned long *offset,const GtUchar *s1,const GtUchar *s2,
                     unsigned long len)
 {
   unsigned long idx;
@@ -319,13 +320,13 @@ static int mymemcmp(unsigned long *offset,const Uchar *s1,const Uchar *s2,
   return 0;
 }
 
-/*@null@*/ const Uchar *tyrindex_binmersearch(const Tyrindex *tyrindex,
+/*@null@*/ const GtUchar *tyrindex_binmersearch(const Tyrindex *tyrindex,
                                               unsigned long offset,
-                                              const Uchar *key,
-                                              const Uchar *leftbound,
-                                              const Uchar *rightbound)
+                                              const GtUchar *key,
+                                              const GtUchar *leftbound,
+                                              const GtUchar *rightbound)
 {
-  const Uchar *leftptr, *midptr, *rightptr;
+  const GtUchar *leftptr, *midptr, *rightptr;
   int cmpval;
   unsigned long leftlength = offset, rightlength = offset, len;
 
@@ -365,8 +366,8 @@ static int mymemcmp(unsigned long *offset,const Uchar *s1,const Uchar *s2,
 
 void tyrindex_check(const Tyrindex *tyrindex)
 {
-  Uchar *mercodeptr;
-  const Uchar *result;
+  GtUchar *mercodeptr;
+  const GtUchar *result;
   unsigned long position, previousposition = 0;
 
   for (mercodeptr = tyrindex->mertable;

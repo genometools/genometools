@@ -87,7 +87,7 @@ Readmode readmodeSequentialsuffixarrayreader(
 
  DECLAREREADFUNCTION(Seqpos);
 
- DECLAREREADFUNCTION(Uchar);
+ DECLAREREADFUNCTION(GtUchar);
 
  DECLAREREADFUNCTION(Largelcpvalue);
 
@@ -192,7 +192,7 @@ int nextSequentiallcpvalue(Seqpos *currentlcp,
                            Sequentialsuffixarrayreader *ssar,
                            GtError *err)
 {
-  Uchar tmpsmalllcpvalue;
+  GtUchar tmpsmalllcpvalue;
   int retval;
 
   if (ssar->seqactype == SEQ_suftabfrommemory)
@@ -217,7 +217,7 @@ int nextSequentiallcpvalue(Seqpos *currentlcp,
       tmpsmalllcpvalue = ssar->suffixarray->lcptab[ssar->nextlcptabindex++];
     } else
     {
-      retval = readnextUcharfromstream(&tmpsmalllcpvalue,
+      retval = readnextGtUcharfromstream(&tmpsmalllcpvalue,
                                        &ssar->suffixarray->lcptabstream);
       if (retval == 0)
       {

@@ -31,17 +31,17 @@ void runcheckfunctionontwofiles(Checkcmppairfuntype checkfunction,
                                 const char *file1,
                                 const char *file2)
 {
-  const Uchar *useq = NULL, *vseq = NULL;
+  const GtUchar *useq = NULL, *vseq = NULL;
   size_t ulen, vlen;
   bool forward = true;
 
-  useq = (const Uchar *) gt_fa_mmap_read(file1,&ulen);
+  useq = (const GtUchar *) gt_fa_mmap_read(file1,&ulen);
   if (useq == NULL)
   {
     fprintf(stderr,"cannot map file \"%s\": %s\n",file1,strerror(errno));
     exit(EXIT_FAILURE);
   }
-  vseq = (const Uchar *) gt_fa_mmap_read(file2,&vlen);
+  vseq = (const GtUchar *) gt_fa_mmap_read(file2,&vlen);
   if (vseq == NULL)
   {
     fprintf(stderr,"cannot map file \"%s\": %s",file2,strerror(errno));
@@ -70,15 +70,15 @@ unsigned long runcheckfunctionontext(Checkcmppairfuntype checkfunction,
   for (i=1UL; i<=len/2; i++)
   {
     checkfunction(true,
-                  (const Uchar *) text,
+                  (const GtUchar *) text,
                   i,
-                  (const Uchar *) (text+i),
+                  (const GtUchar *) (text+i),
                   len-i);
   }
   return len/2;
 }
 
-unsigned long applycheckfunctiontotext(const Uchar *text,
+unsigned long applycheckfunctiontotext(const GtUchar *text,
                                        unsigned long textlen,
                                        void *info)
 {
@@ -97,28 +97,28 @@ unsigned long applycheckfunctiontotext(const Uchar *text,
 
 static unsigned long applyall(const char *alpha,
                               unsigned long textlen,void *info,
-                              unsigned long (*apply)(const Uchar *,
+                              unsigned long (*apply)(const GtUchar *,
                                                      unsigned long,
                                                      void *))
 {
   unsigned long i, *w, z = textlen-1,
                 testcases = 0,
                 asize = (unsigned long) strlen(alpha);
-  Uchar *text;
+  GtUchar *text;
   bool stop = false;
 
   ALLOCASSIGNSPACE(w,NULL,unsigned long,textlen+1);
-  ALLOCASSIGNSPACE(text,NULL,Uchar,textlen+1);
+  ALLOCASSIGNSPACE(text,NULL,GtUchar,textlen+1);
   for (i=0; i<=textlen; i++)
   {
     w[i] = 0;
   }
-  text[textlen] = (Uchar) '\0';
+  text[textlen] = (GtUchar) '\0';
   while (!stop)
   {
     for (i = 0; i<textlen; i++)
     {
-      text[i] = (Uchar) alpha[w[i]];
+      text[i] = (GtUchar) alpha[w[i]];
     }
     testcases += apply(text,textlen,info);
     while (true)
@@ -156,9 +156,9 @@ unsigned long runcheckfunctiononalphalen(Checkcmppairfuntype checkfunction,
 }
 
 void checkgreedyunitedist(GT_UNUSED bool forward,
-                          const Uchar *useq,
+                          const GtUchar *useq,
                           unsigned long ulen,
-                          const Uchar *vseq,
+                          const GtUchar *vseq,
                           unsigned long vlen)
 {
   unsigned long edist1, edist2;

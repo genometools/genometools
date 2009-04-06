@@ -264,7 +264,7 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
     /* terminators may occur in any line */
     if (!had_err && strcmp(gt_str_get(sbe->keywordbuffer),
                            GB_ENTRY_TERMINATOR) == 0) {
-      pvt->outbuf[currentoutpos++] = (Uchar) SEPARATOR;
+      pvt->outbuf[currentoutpos++] = (GtUchar) SEPARATOR;
       pvt->lastspeciallength++;
       if (!sbe->description_set && pvt->descptr)
           gt_queue_add(pvt->descptr, gt_cstr_dup(""));
@@ -389,7 +389,7 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
         /* all files exhausted */
         pvt->complete = true;
         /* remove last separator */
-        pvt->outbuf[--currentoutpos] = (Uchar) '\0';
+        pvt->outbuf[--currentoutpos] = (GtUchar) '\0';
         had_err = 0;
         break;
       }

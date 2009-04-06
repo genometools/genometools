@@ -95,7 +95,7 @@
           bitwise |= (Twobitencoding) (CC);\
         } else\
         {\
-          if ((CC) == (Uchar) SEPARATOR)\
+          if ((CC) == (GtUchar) SEPARATOR)\
           {\
             bitwise |= (Twobitencoding) 1;\
           }\
@@ -130,13 +130,13 @@ typedef struct
 typedef struct
 {
   const char *funcname;
-  Uchar(*function)(const Encodedsequence *,Seqpos);
+  GtUchar(*function)(const Encodedsequence *,Seqpos);
 } Delivercharfunc;
 
 typedef struct
 {
   const char *funcname;
-  Uchar(*function)(const Encodedsequence *,Encodedsequencescanstate *,Seqpos);
+  GtUchar(*function)(const Encodedsequence *,Encodedsequencescanstate *,Seqpos);
 } SeqDelivercharfunc;
 
 typedef struct
@@ -157,10 +157,10 @@ typedef struct
   Containsspecialfunc delivercontainsspecial;
 } Encodedsequencefunctions;
 
-void plainseq2bytecode(Uchar *bytecode,const Uchar *seq,unsigned long len)
+void plainseq2bytecode(GtUchar *bytecode,const GtUchar *seq,unsigned long len)
 {
   unsigned long j;
-  const Uchar *seqptr;
+  const GtUchar *seqptr;
 
   for (seqptr=seq, j=0; seqptr < seq + len - 3; seqptr+=4, j++)
   {
@@ -183,7 +183,7 @@ void plainseq2bytecode(Uchar *bytecode,const Uchar *seq,unsigned long len)
   }
 }
 
-void encseq2bytecode(Uchar *dest,const Encodedsequence *encseq,
+void encseq2bytecode(GtUchar *dest,const Encodedsequence *encseq,
                      const Seqpos startindex,const Seqpos len)
 {
   Seqpos i, j;
@@ -192,10 +192,10 @@ void encseq2bytecode(Uchar *dest,const Encodedsequence *encseq,
   {
     for (i=startindex, j=0; i < startindex + len - 3; i+=4, j++)
     {
-      dest[j] = (Uchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i) << 6) |
-                (Uchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i+1) << 4) |
-                (Uchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i+2) << 2) |
-                (Uchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,i+3);
+      dest[j] = (GtUchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i) << 6)
+              | (GtUchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i+1) << 4)
+              | (GtUchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i+2) << 2)
+              | (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,i+3);
     }
   } else
   {
@@ -205,20 +205,20 @@ void encseq2bytecode(Uchar *dest,const Encodedsequence *encseq,
   switch (MOD4(len))
   {
     case (Seqpos) 1:
-      dest[j] = (Uchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,i) << 6;
+      dest[j] = (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,i) << 6;
       break;
     case (Seqpos) 2:
-      dest[j] = (Uchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i) << 6) |
-                (Uchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i+1) << 4);
+      dest[j] = (GtUchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i) << 6)
+              | (GtUchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i+1) << 4);
       break;
     case (Seqpos) 3:
-      dest[j] = (Uchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i) << 6) |
-                (Uchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i+1) << 4) |
-                (Uchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i+2) << 2);
+      dest[j] = (GtUchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i) << 6)
+              | (GtUchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i+1) << 4)
+              | (GtUchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i+2) << 2);
   }
 }
 
-void sequence2bytecode(Uchar *dest,const Encodedsequence *encseq,
+void sequence2bytecode(GtUchar *dest,const Encodedsequence *encseq,
                        Seqpos startindex,Seqpos len)
 {
   gt_assert(encseq->sat != Viabytecompress);
@@ -246,7 +246,7 @@ unsigned long getencseqnumofdbsequences(const Encodedsequence *encseq)
 static uint64_t countgetencodedchar = 0;
 #endif
 
-Uchar getencodedchar(const Encodedsequence *encseq,
+GtUchar getencodedchar(const Encodedsequence *encseq,
                      Seqpos pos,
                      Readmode readmode)
 {
@@ -262,12 +262,12 @@ Uchar getencodedchar(const Encodedsequence *encseq,
       return encseq->deliverchar(encseq,REVERSEPOS(encseq->totallength,pos));
     case Complementmode: /* only works with dna */
       {
-        Uchar cc = encseq->deliverchar(encseq,pos);
+        GtUchar cc = encseq->deliverchar(encseq,pos);
         return ISSPECIAL(cc) ? cc : COMPLEMENTBASE(cc);
       }
     case Reversecomplementmode: /* only works with dna */
       {
-        Uchar cc = encseq->deliverchar(encseq,
+        GtUchar cc = encseq->deliverchar(encseq,
                                        REVERSEPOS(encseq->totallength,pos));
         return ISSPECIAL(cc) ? cc : COMPLEMENTBASE(cc);
       }
@@ -278,7 +278,7 @@ Uchar getencodedchar(const Encodedsequence *encseq,
   }
 }
 
-Uchar getencodedcharnospecial(const Encodedsequence *encseq,
+GtUchar getencodedcharnospecial(const Encodedsequence *encseq,
                               Seqpos pos,
                               Readmode readmode)
 {
@@ -292,12 +292,12 @@ Uchar getencodedcharnospecial(const Encodedsequence *encseq,
                                           REVERSEPOS(encseq->totallength,pos));
     case Complementmode: /* only works with dna */
       {
-        Uchar cc = encseq->delivercharnospecial(encseq,pos);
+        GtUchar cc = encseq->delivercharnospecial(encseq,pos);
         return ISSPECIAL(cc) ? cc : COMPLEMENTBASE(cc);
       }
     case Reversecomplementmode: /* only works with dna */
       {
-        Uchar cc = encseq->delivercharnospecial(encseq,
+        GtUchar cc = encseq->delivercharnospecial(encseq,
                                                 REVERSEPOS(encseq->totallength,
                                                            pos));
         return ISSPECIAL(cc) ? cc : COMPLEMENTBASE(cc);
@@ -330,7 +330,7 @@ struct Encodedsequencescanstate
 static uint64_t countsequentialgetencodedchar = 0;
 #endif
 
-Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
+GtUchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                Encodedsequencescanstate *esr,
                                Seqpos pos,
                                Readmode readmode)
@@ -348,12 +348,12 @@ Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                     REVERSEPOS(encseq->totallength,pos));
     case Complementmode: /* only works with dna */
       {
-        Uchar cc = encseq->seqdeliverchar(encseq,esr,pos);
+        GtUchar cc = encseq->seqdeliverchar(encseq,esr,pos);
         return ISSPECIAL(cc) ? cc : COMPLEMENTBASE(cc);
       }
     case Reversecomplementmode: /* only works with dna */
       {
-        Uchar cc = encseq->seqdeliverchar(encseq,esr,
+        GtUchar cc = encseq->seqdeliverchar(encseq,esr,
                                           REVERSEPOS(encseq->totallength,pos));
         return ISSPECIAL(cc) ? cc : COMPLEMENTBASE(cc);
       }
@@ -409,7 +409,7 @@ static void showsequencerange(const Sequencerange *range)
 }
 #endif
 
-void encseqextract(Uchar *buffer,
+void encseqextract(GtUchar *buffer,
                    const Encodedsequence *encseq,
                    Seqpos frompos,
                    Seqpos topos)
@@ -543,7 +543,7 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
   {
     case Viadirectaccess:
       numofunits = CALLCASTFUNC(Seqpos,unsigned_long,encseq->totallength);
-      NEWMAPSPEC(encseq->plainseq,Uchar,numofunits);
+      NEWMAPSPEC(encseq->plainseq,GtUchar,numofunits);
       break;
     case Viabytecompress:
       bitspersymbol = getbitspersymbolAlphabet(encseq->alpha);
@@ -575,9 +575,9 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
                  encseq->unitsoftwobitencoding);
       if (encseq->numofspecialstostore > 0)
       {
-        NEWMAPSPEC(encseq->ucharspecialpositions,Uchar,
+        NEWMAPSPEC(encseq->ucharspecialpositions,GtUchar,
                    encseq->numofspecialstostore);
-        NEWMAPSPEC(encseq->ucharspecialrangelength,Uchar,
+        NEWMAPSPEC(encseq->ucharspecialrangelength,GtUchar,
                    encseq->numofspecialstostore);
         numofunits = CALLCASTFUNC(Seqpos,unsigned_long,
                                   encseq->totallength/UCHAR_MAX+1);
@@ -689,7 +689,7 @@ static uint64_t localdetsizeencseq(Positionaccesstype sat,
   switch (sat)
   {
     case Viadirectaccess:
-         sum = totallength * (uint64_t) sizeof (Uchar);
+         sum = totallength * (uint64_t) sizeof (GtUchar);
          break;
     case Viabytecompress:
          gt_assert(bitspersymbol > 0);
@@ -707,8 +707,8 @@ static uint64_t localdetsizeencseq(Positionaccesstype sat,
          sum = sizeoftwobitencoding;
          if (specialranges > 0)
          {
-           sum += (uint64_t) sizeof (Uchar) * specialranges +
-                  (uint64_t) sizeof (Uchar) * specialranges +
+           sum += (uint64_t) sizeof (GtUchar) * specialranges +
+                  (uint64_t) sizeof (GtUchar) * specialranges +
                   (uint64_t) sizeof (unsigned long) *
                                     (totallength/UCHAR_MAX+1);
          }
@@ -916,7 +916,7 @@ void encodedsequence_free(Encodedsequence **encseqptr)
 
 #define ADDTYPE(V)               uchar##V
 #define ACCESSENCSEQ(ES,V)       (ES)->uchar##V
-#define SPECIALTYPE              Uchar
+#define SPECIALTYPE              GtUchar
 #define MAXSPECIALTYPE           UCHAR_MAX
 #define POS2PAGENUM(V)           ((V) >> 8)
 
@@ -960,7 +960,7 @@ void encodedsequence_free(Encodedsequence **encseqptr)
 
 /* Viadirectaccess */
 
-static Uchar delivercharViadirectaccess(const Encodedsequence *encseq,
+static GtUchar delivercharViadirectaccess(const Encodedsequence *encseq,
                                         Seqpos pos)
 {
   return encseq->plainseq[pos];
@@ -1065,7 +1065,7 @@ static bool containsspecialViabytecompress(GT_UNUSED
   return false;
 }
 
-static Uchar delivercharViabytecompress(const Encodedsequence *encseq,
+static GtUchar delivercharViabytecompress(const Encodedsequence *encseq,
                                         Seqpos pos)
 {
   uint32_t cc;
@@ -1073,15 +1073,15 @@ static Uchar delivercharViabytecompress(const Encodedsequence *encseq,
   cc = bitpackarray_get_uint32(encseq->bitpackarray,(BitOffset) pos);
   if (cc < (uint32_t) encseq->numofchars)
   {
-    return (Uchar) cc;
+    return (GtUchar) cc;
   }
   if (cc == (uint32_t) encseq->numofchars)
   {
-    return (Uchar) WILDCARD;
+    return (GtUchar) WILDCARD;
   }
   if (cc == (uint32_t) (encseq->numofchars+1))
   {
-    return (Uchar) SEPARATOR;
+    return (GtUchar) SEPARATOR;
   }
   fprintf(stderr,"delivercharViabytecompress: cc=%lu\n not possible\n",
                   (unsigned long) cc);
@@ -1090,31 +1090,31 @@ static Uchar delivercharViabytecompress(const Encodedsequence *encseq,
 
 /* generic for the case that there are no specialsymbols */
 
-static Uchar deliverfromtwobitencoding(const Encodedsequence *encseq,
+static GtUchar deliverfromtwobitencoding(const Encodedsequence *encseq,
                                        Seqpos pos)
 {
-  return (Uchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
+  return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
 /* Viabitaccess */
 
-static Uchar delivercharViabitaccessSpecial(const Encodedsequence *encseq,
+static GtUchar delivercharViabitaccessSpecial(const Encodedsequence *encseq,
                                             Seqpos pos)
 {
   if (ISIBITSET(encseq->specialbits,pos))
   {
     if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
     {
-      return (Uchar) SEPARATOR;
+      return (GtUchar) SEPARATOR;
     }
-    return (Uchar) WILDCARD;
+    return (GtUchar) WILDCARD;
   }
-  return (Uchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
+  return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
 /* Viauchartables */
 
-static Uchar delivercharViauchartablesSpecialfirst(
+static GtUchar delivercharViauchartablesSpecialfirst(
                                               const Encodedsequence *encseq,
                                               Seqpos pos)
 {
@@ -1122,14 +1122,14 @@ static Uchar delivercharViauchartablesSpecialfirst(
   {
     if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
     {
-      return (Uchar) SEPARATOR;
+      return (GtUchar) SEPARATOR;
     }
-    return (Uchar) WILDCARD;
+    return (GtUchar) WILDCARD;
   }
-  return (Uchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
+  return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
-static Uchar delivercharViauchartablesSpecialrange(
+static GtUchar delivercharViauchartablesSpecialrange(
                                               const Encodedsequence *encseq,
                                               Seqpos pos)
 {
@@ -1137,16 +1137,16 @@ static Uchar delivercharViauchartablesSpecialrange(
   {
     if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
     {
-      return (Uchar) SEPARATOR;
+      return (GtUchar) SEPARATOR;
     }
-    return (Uchar) WILDCARD;
+    return (GtUchar) WILDCARD;
   }
-  return (Uchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
+  return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
 /* Viaushorttables */
 
-static Uchar delivercharViaushorttablesSpecialfirst(
+static GtUchar delivercharViaushorttablesSpecialfirst(
                                                const Encodedsequence *encseq,
                                                Seqpos pos)
 {
@@ -1154,14 +1154,14 @@ static Uchar delivercharViaushorttablesSpecialfirst(
   {
     if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
     {
-      return (Uchar) SEPARATOR;
+      return (GtUchar) SEPARATOR;
     }
-    return (Uchar) WILDCARD;
+    return (GtUchar) WILDCARD;
   }
-  return (Uchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
+  return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
-static Uchar delivercharViaushorttablesSpecialrange(
+static GtUchar delivercharViaushorttablesSpecialrange(
                                                const Encodedsequence *encseq,
                                                Seqpos pos)
 {
@@ -1169,16 +1169,16 @@ static Uchar delivercharViaushorttablesSpecialrange(
   {
     if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
     {
-      return (Uchar) SEPARATOR;
+      return (GtUchar) SEPARATOR;
     }
-    return (Uchar) WILDCARD;
+    return (GtUchar) WILDCARD;
   }
-  return (Uchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
+  return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
 /* Viauint32tables */
 
-static Uchar delivercharViauint32tablesSpecialfirst(
+static GtUchar delivercharViauint32tablesSpecialfirst(
                                                 const Encodedsequence *encseq,
                                                 Seqpos pos)
 {
@@ -1186,14 +1186,14 @@ static Uchar delivercharViauint32tablesSpecialfirst(
   {
     if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
     {
-      return (Uchar) SEPARATOR;
+      return (GtUchar) SEPARATOR;
     }
-    return (Uchar) WILDCARD;
+    return (GtUchar) WILDCARD;
   }
-  return (Uchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
+  return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
-static Uchar delivercharViauint32tablesSpecialrange(
+static GtUchar delivercharViauint32tablesSpecialrange(
                                                  const Encodedsequence *encseq,
                                                  Seqpos pos)
 {
@@ -1201,11 +1201,11 @@ static Uchar delivercharViauint32tablesSpecialrange(
   {
     if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
     {
-      return (Uchar) SEPARATOR;
+      return (GtUchar) SEPARATOR;
     }
-    return (Uchar) WILDCARD;
+    return (GtUchar) WILDCARD;
   }
-  return (Uchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
+  return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
 static int fillplainseq(Encodedsequence *encseq,GtSequenceBuffer *fb,
@@ -1213,10 +1213,10 @@ static int fillplainseq(Encodedsequence *encseq,GtSequenceBuffer *fb,
 {
   Seqpos pos;
   int retval;
-  Uchar cc;
+  GtUchar cc;
 
   gt_error_check(err);
-  ALLOCASSIGNSPACE(encseq->plainseq,NULL,Uchar,encseq->totallength);
+  ALLOCASSIGNSPACE(encseq->plainseq,NULL,GtUchar,encseq->totallength);
   encseq->hasplainseqptr = false;
   for (pos=0; /* Nothing */; pos++)
   {
@@ -1241,7 +1241,7 @@ static int fillbitpackarray(Encodedsequence *encseq,
 {
   Seqpos pos;
   int retval;
-  Uchar cc;
+  GtUchar cc;
   unsigned int numofchars;
 
   gt_error_check(err);
@@ -1262,17 +1262,17 @@ static int fillbitpackarray(Encodedsequence *encseq,
     {
       break;
     }
-    if (cc == (Uchar) WILDCARD)
+    if (cc == (GtUchar) WILDCARD)
     {
-      cc = (Uchar) numofchars;
+      cc = (GtUchar) numofchars;
     } else
     {
-      if (cc == (Uchar) SEPARATOR)
+      if (cc == (GtUchar) SEPARATOR)
       {
-        cc = (Uchar) (numofchars+1);
+        cc = (GtUchar) (numofchars+1);
       } else
       {
-        gt_assert(cc < (Uchar) numofchars);
+        gt_assert(cc < (GtUchar) numofchars);
       }
     }
     gt_assert(pos < encseq->totallength);
@@ -1286,7 +1286,7 @@ static int fillbitaccesstab(Encodedsequence *encseq,
                             GtSequenceBuffer *fb,
                             GtError *err)
 {
-  Uchar cc;
+  GtUchar cc;
   Seqpos pos;
   int retval;
   Twobitencoding bitwise = 0;
@@ -1819,7 +1819,7 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr)
   FREESPACE(*esr);
 }
 
-static Uchar seqdelivercharViadirectaccess(
+static GtUchar seqdelivercharViadirectaccess(
                         const Encodedsequence *encseq,
                         GT_UNUSED Encodedsequencescanstate *esr,
                         Seqpos pos)
@@ -1827,7 +1827,7 @@ static Uchar seqdelivercharViadirectaccess(
   return encseq->plainseq[pos];
 }
 
-static Uchar seqdelivercharViabytecompress(
+static GtUchar seqdelivercharViabytecompress(
                         const Encodedsequence *encseq,
                         GT_UNUSED Encodedsequencescanstate *esr,
                         Seqpos pos)
@@ -1835,15 +1835,15 @@ static Uchar seqdelivercharViabytecompress(
   return delivercharViabytecompress(encseq,pos);
 }
 
-static Uchar seqdelivercharnoSpecial(
+static GtUchar seqdelivercharnoSpecial(
                         const Encodedsequence *encseq,
                         GT_UNUSED Encodedsequencescanstate *esr,
                         Seqpos pos)
 {
-  return (Uchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
+  return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
-static Uchar seqdelivercharViabitaccessSpecial(
+static GtUchar seqdelivercharViabitaccessSpecial(
                             const Encodedsequence *encseq,
                             GT_UNUSED Encodedsequencescanstate *esr,
                             Seqpos pos)
@@ -1852,14 +1852,14 @@ static Uchar seqdelivercharViabitaccessSpecial(
   {
     if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
     {
-      return (Uchar) SEPARATOR;
+      return (GtUchar) SEPARATOR;
     }
-    return (Uchar) WILDCARD;
+    return (GtUchar) WILDCARD;
   }
-  return (Uchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
+  return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
-static Uchar seqdelivercharSpecial(const Encodedsequence *encseq,
+static GtUchar seqdelivercharSpecial(const Encodedsequence *encseq,
                                    Encodedsequencescanstate *esr,
                                    Seqpos pos)
 {
@@ -1879,9 +1879,9 @@ static Uchar seqdelivercharSpecial(const Encodedsequence *encseq,
         {
           if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
           {
-            return (Uchar) SEPARATOR;
+            return (GtUchar) SEPARATOR;
           }
-          return (Uchar) WILDCARD;
+          return (GtUchar) WILDCARD;
         }
         if (esr->hasrange)
         {
@@ -1896,9 +1896,9 @@ static Uchar seqdelivercharSpecial(const Encodedsequence *encseq,
         {
           if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
           {
-            return (Uchar) SEPARATOR;
+            return (GtUchar) SEPARATOR;
           }
-          return (Uchar) WILDCARD;
+          return (GtUchar) WILDCARD;
         }
         if (esr->hasrange)
         {
@@ -1907,7 +1907,7 @@ static Uchar seqdelivercharSpecial(const Encodedsequence *encseq,
       }
     }
   }
-  return (Uchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
+  return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
 static bool containsspecialViatables(const Encodedsequence *encseq,
@@ -2016,7 +2016,7 @@ static bool dabcnextspecialrangeiterator(bool directaccess,
                                          Specialrangeiterator *sri)
 {
   bool success = false;
-  Uchar cc;
+  GtUchar cc;
 
   while (!success)
   {
@@ -2228,14 +2228,14 @@ static void addmarkpos(ArraySeqpos *asp,
                       const Sequencerange *seqrange)
 {
   Seqpos pos;
-  Uchar currentchar;
+  GtUchar currentchar;
 
   initEncodedsequencescanstate(esr,encseq,Forwardmode,seqrange->leftpos);
   for (pos=seqrange->leftpos; pos<seqrange->rightpos; pos++)
   {
     currentchar = sequentialgetencodedchar(encseq,esr,pos,Forwardmode);
     gt_assert(ISSPECIAL(currentchar));
-    if (currentchar == (Uchar) SEPARATOR)
+    if (currentchar == (GtUchar) SEPARATOR)
     {
       gt_assert(asp->nextfreeSeqpos < asp->allocatedSeqpos);
       asp->spaceSeqpos[asp->nextfreeSeqpos++] = pos;
@@ -2372,7 +2372,7 @@ void checkmarkpos(const Encodedsequence *encseq)
   {
     Seqpos *markpos, totallength, pos;
     unsigned long currentseqnum = 0, seqnum;
-    Uchar currentchar;
+    GtUchar currentchar;
     Encodedsequencescanstate *esr;
 
     markpos = encseq2markpositions(encseq);
@@ -2382,7 +2382,7 @@ void checkmarkpos(const Encodedsequence *encseq)
     for (pos=0; pos<totallength; pos++)
     {
       currentchar = sequentialgetencodedchar(encseq,esr,pos,Forwardmode);
-      if (currentchar == (Uchar) SEPARATOR)
+      if (currentchar == (GtUchar) SEPARATOR)
       {
         currentseqnum++;
       } else
@@ -2548,7 +2548,7 @@ unsigned int getencseqAlphabetnumofchars(const Encodedsequence *encseq)
   return getnumofcharsAlphabet(encseq->alpha);
 }
 
-const Uchar *getencseqAlphabetsymbolmap(const Encodedsequence *encseq)
+const GtUchar *getencseqAlphabetsymbolmap(const Encodedsequence *encseq)
 {
   return getsymbolmapAlphabet(encseq->alpha);
 }
@@ -2558,12 +2558,12 @@ const SfxAlphabet *getencseqAlphabet(const Encodedsequence *encseq)
   return encseq->alpha;
 }
 
-const Uchar *getencseqAlphabetcharacters(const Encodedsequence *encseq)
+const GtUchar *getencseqAlphabetcharacters(const Encodedsequence *encseq)
 {
   return getcharactersAlphabet(encseq->alpha);
 }
 
-Uchar getencseqAlphabetwildcardshow(const Encodedsequence *encseq)
+GtUchar getencseqAlphabetwildcardshow(const Encodedsequence *encseq)
 {
   return getwildcardshowAlphabet(encseq->alpha);
 }
@@ -2588,7 +2588,7 @@ const Filelengthvalues *getencseqfilelengthtab(const Encodedsequence *encseq)
   return encseq->filelengthtab;
 }
 
-unsigned long getencseqcharactercount(const Encodedsequence *encseq,Uchar cc)
+unsigned long getencseqcharactercount(const Encodedsequence *encseq,GtUchar cc)
 {
   gt_assert(encseq != NULL &&
             (unsigned int) cc < getnumofcharsAlphabet(encseq->alpha));
@@ -3123,15 +3123,15 @@ Seqpos getencseqlengthofspecialsuffix(const Encodedsequence *encseq)
 }
 
 Encodedsequence *plain2encodedsequence(bool withrange,
-                                       const Uchar *seq1,
+                                       const GtUchar *seq1,
                                        Seqpos len1,
-                                       const Uchar *seq2,
+                                       const GtUchar *seq2,
                                        unsigned long len2,
                                        const SfxAlphabet *alpha,
                                        Verboseinfo *verboseinfo)
 {
   Encodedsequence *encseq;
-  Uchar *seqptr;
+  GtUchar *seqptr;
   Seqpos len;
   const Positionaccesstype sat = Viadirectaccess;
   Specialcharinfo samplespecialcharinfo;
@@ -3140,15 +3140,15 @@ Encodedsequence *plain2encodedsequence(bool withrange,
   gt_assert(len1 > 0);
   if (seq2 == NULL)
   {
-    seqptr = (Uchar *) seq1;
+    seqptr = (GtUchar *) seq1;
     len = len1;
   } else
   {
     len = len1 + (Seqpos) len2 + 1;
-    ALLOCASSIGNSPACE(seqptr,NULL,Uchar,len);
-    memcpy(seqptr,seq1,sizeof (Uchar) * len1);
-    seqptr[len1] = (Uchar) SEPARATOR;
-    memcpy(seqptr + len1 + 1,seq2,sizeof (Uchar) * len2);
+    ALLOCASSIGNSPACE(seqptr,NULL,GtUchar,len);
+    memcpy(seqptr,seq1,sizeof (GtUchar) * len1);
+    seqptr[len1] = (GtUchar) SEPARATOR;
+    memcpy(seqptr + len1 + 1,seq2,sizeof (GtUchar) * len2);
   }
   sequence2specialcharinfo(&samplespecialcharinfo,seqptr,len,verboseinfo);
   encseq = determineencseqkeyvalues(sat,
@@ -3680,7 +3680,7 @@ static void fwdextract2bitenc_bruteforce(EndofTwobitencoding *ptbe,
                                          const Encodedsequence *encseq,
                                          Seqpos startpos)
 {
-  Uchar cc;
+  GtUchar cc;
   Seqpos pos;
 
   ptbe->tbe = 0;
@@ -3699,7 +3699,7 @@ static void fwdextract2bitenc_bruteforce(EndofTwobitencoding *ptbe,
       ptbe->tbe <<= MULT2(startpos + UNITSIN2BITENC - pos);
       return;
     }
-    gt_assert(cc < (Uchar) 4);
+    gt_assert(cc < (GtUchar) 4);
     ptbe->tbe = (ptbe->tbe << 2) | cc;
   }
   ptbe->unitsnotspecial = (unsigned int) UNITSIN2BITENC;
@@ -3709,7 +3709,7 @@ static void revextract2bitenc_bruteforce(EndofTwobitencoding *ptbe,
                                          const Encodedsequence *encseq,
                                          Seqpos startpos)
 {
-  Uchar cc;
+  GtUchar cc;
   unsigned int unit;
   Seqpos pos;
 
@@ -3722,7 +3722,7 @@ static void revextract2bitenc_bruteforce(EndofTwobitencoding *ptbe,
       ptbe->unitsnotspecial = unit;
       return;
     }
-    gt_assert(cc < (Uchar) 4);
+    gt_assert(cc < (GtUchar) 4);
     ptbe->tbe |= (cc << MULT2(unit));
     if (pos == 0)
     {
@@ -3748,14 +3748,14 @@ static void extract2bitenc_bruteforce(bool fwd,
   }
 }
 
-static void showbufchar(FILE *fp,bool complement,Uchar cc)
+static void showbufchar(FILE *fp,bool complement,GtUchar cc)
 {
-  if (cc == (Uchar) WILDCARD)
+  if (cc == (GtUchar) WILDCARD)
   {
     fprintf(fp,"$");
   } else
   {
-    if (cc == (Uchar) SEPARATOR)
+    if (cc == (GtUchar) SEPARATOR)
     {
       fprintf(fp,"#");
     } else
@@ -3764,7 +3764,7 @@ static void showbufchar(FILE *fp,bool complement,Uchar cc)
       {
         cc = COMPLEMENTBASE(cc);
       }
-      gt_assert(cc < (Uchar) 4);
+      gt_assert(cc < (GtUchar) 4);
       fprintf(fp,"%c","acgt"[cc]);
     }
   }
@@ -3778,7 +3778,7 @@ void showsequenceatstartpos(FILE *fp,
                             Seqpos startpos)
 {
   Seqpos pos, endpos;
-  Uchar buffer[UNITSIN2BITENC];
+  GtUchar buffer[UNITSIN2BITENC];
 
   fprintf(fp,"          0123456789012345\n");
   fprintf(fp,"sequence=\"");

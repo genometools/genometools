@@ -28,7 +28,7 @@
                 maxpatternlen,
                 samplecount,
                 *patternstat;
-  Uchar *patternspace;
+  GtUchar *patternspace;
   const Encodedsequence *sampleencseq;
   unsigned int alphasize;
   Seqpos totallength;
@@ -60,7 +60,7 @@ Enumpatterniterator *newenumpatterniterator(unsigned long minpatternlen,
     FREESPACE(epi);
     return NULL;
   }
-  ALLOCASSIGNSPACE(epi->patternspace,NULL,Uchar,maxpatternlen);
+  ALLOCASSIGNSPACE(epi->patternspace,NULL,GtUchar,maxpatternlen);
   ALLOCASSIGNSPACE(epi->patternstat,NULL,unsigned long,maxpatternlen+1);
   for (i=0; i<=maxpatternlen; i++)
   {
@@ -76,9 +76,9 @@ Enumpatterniterator *newenumpatterniterator(unsigned long minpatternlen,
   return epi;
 }
 
-static void reversesequenceinplace(Uchar *s,unsigned long len)
+static void reversesequenceinplace(GtUchar *s,unsigned long len)
 {
-  Uchar *front, *back, tmp;
+  GtUchar *front, *back, tmp;
 
   for (front = s, back = s + len - 1; front < back; front++, back--)
   {
@@ -88,12 +88,12 @@ static void reversesequenceinplace(Uchar *s,unsigned long len)
   }
 }
 
-const Uchar *nextEnumpatterniterator(unsigned long *patternlen,
+const GtUchar *nextEnumpatterniterator(unsigned long *patternlen,
                                      Enumpatterniterator *epi)
 {
   Seqpos start;
   unsigned long j;
-  Uchar cc;
+  GtUchar cc;
 
   if (epi->minpatternlen == epi->maxpatternlen)
   {
@@ -114,7 +114,7 @@ const Uchar *nextEnumpatterniterator(unsigned long *patternlen,
                                   Forwardmode);
     if (ISSPECIAL(cc))
     {
-      cc = (Uchar) (drand48() * epi->alphasize);
+      cc = (GtUchar) (drand48() * epi->alphasize);
     }
     epi->patternspace[j] = cc;
   }

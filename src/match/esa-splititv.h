@@ -35,7 +35,7 @@ bool lcpintervalfindcharchildintv(const Encodedsequence *encseq,
                                   Seqpos totallength,
                                   const Seqpos *suftab,
                                   Simplelcpinterval *itv,
-                                  Uchar cc,
+                                  GtUchar cc,
                                   Seqpos offset,
                                   Seqpos left,
                                   Seqpos right);
@@ -49,11 +49,11 @@ void lcpintervalsplitwithoutspecial(ArrayBoundswithchar *bwci,
                                     Seqpos parentleft,
                                     Seqpos parentright);
 
-Uchar lcpintervalextendlcp(const Encodedsequence *encseq,
+GtUchar lcpintervalextendlcp(const Encodedsequence *encseq,
                            Readmode readmode,
                            const Seqpos *suftab,
                            Seqpos totallength,
-                           Uchar alphasize,
+                           GtUchar alphasize,
                            Seqpos parentoffset,
                            Seqpos parentleft,
                            Seqpos parentright);

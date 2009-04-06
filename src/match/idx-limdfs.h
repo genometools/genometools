@@ -58,7 +58,7 @@ void freeLimdfsresources(Limdfsresources **ptrlimdfsresources,
                          const AbstractDfstransformer *adfst);
 
 bool indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
-                                     const Uchar *pattern,
+                                     const GtUchar *pattern,
                                      unsigned long patternlength,
                                      unsigned long maxdistance,
                                      unsigned long maxintervalwidth,
@@ -66,12 +66,12 @@ bool indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
                                      const AbstractDfstransformer *adfst);
 
 void indexbasedmstats(Limdfsresources *limdfsresources,
-                      const Uchar *pattern,
+                      const GtUchar *pattern,
                       unsigned long patternlength,
                       const AbstractDfstransformer *adfst);
 
 void indexbasedspacedseeds(Limdfsresources *limdfsresources,
-                           const Uchar *pattern,
+                           const GtUchar *pattern,
                            Bitsequence seedbitvector,
                            unsigned long seedweight,
                            const AbstractDfstransformer *adfst);
@@ -82,19 +82,19 @@ void indexbasedlocali(Limdfsresources *limdfsresources,
                       long gapstart,
                       long gapextend,
                       unsigned long threshold,
-                      const Uchar *query,
+                      const GtUchar *query,
                       unsigned long querylength,
                       const AbstractDfstransformer *adfst);
 
 unsigned long genericmstats(const Limdfsresources *limdfsresources,
-                            const Uchar *qstart,
-                            const Uchar *qend);
+                            const GtUchar *qstart,
+                            const GtUchar *qend);
 
 bool indexbasedexactpatternmatching(const Limdfsresources *limdfsresources,
-                                    const Uchar *pattern,
+                                    const GtUchar *pattern,
                                     unsigned long patternlength);
 
-Uchar limdfsgetencodedchar(const Limdfsresources *limdfsresources,
+GtUchar limdfsgetencodedchar(const Limdfsresources *limdfsresources,
                            Seqpos pos,
                            Readmode readmode);
 

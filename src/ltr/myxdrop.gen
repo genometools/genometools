@@ -26,7 +26,7 @@ EVALXDROPARBITSCORES
     lboundtmp = 0,
     uboundtmp = 0,
     tmprow;                           /* temporary row index */
-  Uchar a, b;
+  GtUchar a, b;
   Myfrontvalue tmpfront;
   Arbitrarydistances arbitdistances;
   int d = 0,                         /* distance */
@@ -63,7 +63,7 @@ EVALXDROPARBITSCORES
   }
 
   tmpfront.dptabrow = i;
-  tmpfront.dptabdirection = (Uchar) 0;   /* no predecessor */
+  tmpfront.dptabdirection = (GtUchar) 0;   /* no predecessor */
 
   STOREINARRAYFRONTS (fronts, 0, Myfrontvalue, tmpfront);
   xdropbest->score = bigt_tmp = S (i + i, 0);
@@ -151,7 +151,7 @@ EVALXDROPARBITSCORES
       /* if i = MINUSINFINITYINY or MINUSINFINITYINY + 1 */
       if (i < 0)
       {
-        if (tmpfront.dptabdirection == (Uchar) 0)
+        if (tmpfront.dptabdirection == (GtUchar) 0)
         {
           alwaysMININFINITYINT = false;
         }
@@ -201,7 +201,7 @@ EVALXDROPARBITSCORES
 
       /* delete value for test for */
       /* INSERTIONBIT/REPLACEMENTBIT/DELETIONBIT above
-      tmpfront.dptabdirection = (Uchar) 0; */
+      tmpfront.dptabdirection = (GtUchar) 0; */
 
     }   /* end for loop */
 

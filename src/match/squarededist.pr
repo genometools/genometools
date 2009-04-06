@@ -1,8 +1,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-unsigned long squarededistunit (const Uchar *u, unsigned long m,
-                                const Uchar *v, unsigned long n);
+unsigned long squarededistunit (const GtUchar *u, unsigned long m,
+                                const GtUchar *v, unsigned long n);
 
 #ifdef __cplusplus
 }

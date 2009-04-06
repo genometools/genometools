@@ -45,7 +45,7 @@ typedef void (*Preprocessgmatchlength)(uint64_t,
                                        const char *,
                                        void *);
 typedef void (*Processgmatchlength)(const SfxAlphabet *,
-                                    const Uchar *,
+                                    const GtUchar *,
                                     unsigned long,
                                     unsigned long,
                                     Seqpos,
@@ -53,7 +53,7 @@ typedef void (*Processgmatchlength)(const SfxAlphabet *,
 typedef void (*Postprocessgmatchlength)(const SfxAlphabet *,
                                         uint64_t,
                                         const char *,
-                                        const Uchar *,
+                                        const GtUchar *,
                                         unsigned long,
                                         void *);
 
@@ -73,10 +73,10 @@ typedef struct
 static void checkifsequenceisthere(const Encodedsequence *encseq,
                                    Seqpos witnessposition,
                                    unsigned long gmatchlength,
-                                   const Uchar *qptr)
+                                   const GtUchar *qptr)
 {
   unsigned long i;
-  Uchar cc;
+  GtUchar cc;
 
   for (i=0; i<gmatchlength; i++)
   {
@@ -98,11 +98,11 @@ static void checkifsequenceisthere(const Encodedsequence *encseq,
 
 static void gmatchposinsinglesequence(Substringinfo *substringinfo,
                                       uint64_t unitnum,
-                                      const Uchar *query,
+                                      const GtUchar *query,
                                       unsigned long querylen,
                                       const char *desc)
 {
-  const Uchar *qptr;
+  const GtUchar *qptr;
   unsigned long gmatchlength, remaining;
   Seqpos witnessposition, *wptr;
 
@@ -173,7 +173,7 @@ static void showunitnum(uint64_t unitnum,
 }
 
 static void showifinlengthrange(const SfxAlphabet *alphabet,
-                                const Uchar *start,
+                                const GtUchar *start,
                                 unsigned long gmatchlength,
                                 unsigned long querystart,
                                 Seqpos subjectpos,
@@ -221,7 +221,7 @@ int findsubquerygmatchforward(const Encodedsequence *encseq,
   Rangespecinfo rangespecinfo;
   bool haserr = false;
   GtSeqIterator *seqit;
-  const Uchar *query;
+  const GtUchar *query;
   unsigned long querylen;
   char *desc = NULL;
   int retval;
@@ -373,7 +373,7 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
                           GtError *err)
 {
   GtSeqIterator *seqit;
-  const Uchar *query;
+  const GtUchar *query;
   unsigned long querylen;
   char *desc = NULL;
   Substriter *substriter;

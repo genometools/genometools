@@ -97,8 +97,8 @@ static int assigncorrecttype(Mapspecification *mapspec,
   gt_error_check(err);
   switch (mapspec->typespec)
   {
-    case UcharType:
-      ASSIGNPTR2STARTPTR(Uchar);
+    case GtUcharType:
+      ASSIGNPTR2STARTPTR(GtUchar);
       break;
     case UshortType:
       ASSIGNPTR2STARTPTR(Ushort);
@@ -248,7 +248,7 @@ int flushtheindex2file(FILE *fp,
   Mapspecification *mapspecptr;
   unsigned long byteoffset = 0;
   bool haserr = false;
-  Uchar padbuffer[ALIGNSIZE-1] = {0};
+  GtUchar padbuffer[ALIGNSIZE-1] = {0};
   unsigned long totalpadunits = 0;
 
   gt_error_check(err);
@@ -269,8 +269,8 @@ int flushtheindex2file(FILE *fp,
     {
       switch (mapspecptr->typespec)
       {
-        case UcharType:
-          WRITEACTIONWITHTYPE(Uchar);
+        case GtUcharType:
+          WRITEACTIONWITHTYPE(GtUchar);
           break;
         case UshortType:
           WRITEACTIONWITHTYPE(Ushort);
@@ -323,12 +323,12 @@ int flushtheindex2file(FILE *fp,
     {
       size_t padunits = ALIGNSIZE - (byteoffset % ALIGNSIZE);
       if (fwrite(padbuffer,
-                sizeof (Uchar),padunits,fp) != padunits)
+                sizeof (GtUchar),padunits,fp) != padunits)
       {
         gt_error_set(err,"cannot write %lu items of size %u: "
                           "errormsg=\"%s\"",
                            (unsigned long) padunits,
-                           (unsigned int) sizeof (Uchar),
+                           (unsigned int) sizeof (GtUchar),
                            strerror(errno));
         haserr = true;
       }

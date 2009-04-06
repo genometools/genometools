@@ -38,11 +38,11 @@ static inline unsigned int prefixqgram2code(Codetype *code,
                                             const Codetype **multimappower,
                                             unsigned int qvalue,
                                             unsigned int qvalueprefix,
-                                            const Uchar *qgram)
+                                            const GtUchar *qgram)
 {
   int i;
   Codetype tmpcode = 0;
-  Uchar a;
+  GtUchar a;
 
   gt_assert(qvalueprefix > 0);
   gt_assert(qvalue > qvalueprefix);
@@ -61,7 +61,7 @@ static inline unsigned int prefixqgram2code(Codetype *code,
 
 Bucketenumerator *newbucketenumerator(const Bcktab *bcktab,
                                       unsigned int prefixlength,
-                                      const Uchar *demandprefix,
+                                      const GtUchar *demandprefix,
                                       unsigned int demandprefixlength)
 {
   Bucketenumerator *bucketenumerator;

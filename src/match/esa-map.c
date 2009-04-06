@@ -314,7 +314,7 @@ static int inputsuffixarray(bool map,
       suffixarray->lcptab = genericmaptable(indexname,
                                             LCPTABSUFFIX,
                                             (unsigned long) (totallength+1),
-                                            sizeof (Uchar),
+                                            sizeof (GtUchar),
                                             err);
       if (suffixarray->lcptab == NULL)
       {
@@ -322,9 +322,10 @@ static int inputsuffixarray(bool map,
       }
     } else
     {
-      INITBufferedfile(indexname,&suffixarray->lcptabstream,Uchar,LCPTABSUFFIX);
+      INITBufferedfile(indexname,&suffixarray->lcptabstream,GtUchar,
+                       LCPTABSUFFIX);
       if (!haserr &&
-          fseek(suffixarray->lcptabstream.fp,(long) sizeof (Uchar),SEEK_SET))
+          fseek(suffixarray->lcptabstream.fp,(long) sizeof (GtUchar),SEEK_SET))
       {
         gt_error_set(err,"fseek(esastream) failed: %s",strerror(errno));
         haserr = true;
@@ -364,7 +365,7 @@ static int inputsuffixarray(bool map,
       suffixarray->bwttab = genericmaptable(indexname,
                                             BWTTABSUFFIX,
                                             (unsigned long) (totallength+1),
-                                            sizeof (Uchar),
+                                            sizeof (GtUchar),
                                             err);
       if (suffixarray->bwttab == NULL)
       {
@@ -372,7 +373,8 @@ static int inputsuffixarray(bool map,
       }
     } else
     {
-      INITBufferedfile(indexname,&suffixarray->bwttabstream,Uchar,BWTTABSUFFIX);
+      INITBufferedfile(indexname,&suffixarray->bwttabstream,GtUchar,
+                       BWTTABSUFFIX);
     }
   }
   if (!haserr && (demand & SARR_BCKTAB))

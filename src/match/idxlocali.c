@@ -32,9 +32,9 @@
 
 typedef struct
 {
-  const Uchar *characters;
+  const GtUchar *characters;
   uint64_t queryunit;
-  Uchar wildcardshow;
+  GtUchar wildcardshow;
   bool showalignment;
   const Encodedsequence *encseq;
 } Showmatchinfo;
@@ -192,7 +192,7 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
   if (!haserr)
   {
     GtSeqIterator *seqit;
-    const Uchar *query;
+    const GtUchar *query;
     unsigned long querylen;
     char *desc = NULL;
     int retval;

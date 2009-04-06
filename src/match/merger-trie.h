@@ -63,7 +63,7 @@ typedef struct
 } Mergertrierep;
 
 void mergertrie_show(const Mergertrierep *trierep,
-                     const Uchar *characters);
+                     const GtUchar *characters);
 
 void mergertrie_check(Mergertrierep *trierep,unsigned int numberofleaves,
                      unsigned int maxleafnum,GtError *err);

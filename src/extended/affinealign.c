@@ -173,7 +173,7 @@ GtAlignment* gt_affinealign(const char *u, unsigned long ulen,
   gt_array2dim_malloc(dptable, ulen+1, vlen+1);
   affinealign_fill_table(dptable, u, ulen, v, vlen, replacement_cost,
                          gap_opening_cost, gap_extension_cost);
-  a = gt_alignment_new_with_seqs((const Uchar *) u, ulen, (const Uchar *) v,
+  a = gt_alignment_new_with_seqs((const GtUchar *) u, ulen, (const GtUchar *) v,
                                  vlen);
   affinealign_traceback(a, dptable, ulen, vlen);
   gt_array2dim_delete(dptable);

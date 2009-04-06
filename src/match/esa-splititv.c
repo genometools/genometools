@@ -22,20 +22,20 @@
 #include "esa-splititv.h"
 
 #define SEQUENCE(ENCSEQ,POS) (((POS) == totallength) \
-                             ? (Uchar) SEPARATOR\
+                             ? (GtUchar) SEPARATOR\
                              : getencodedchar(ENCSEQ,POS,readmode))
 
 static Seqpos lcpintervalfindrightbound(const Encodedsequence *encseq,
                                         Readmode readmode,
                                         Seqpos totallength,
                                         const Seqpos *suftab,
-                                        Uchar cc,
+                                        GtUchar cc,
                                         Seqpos offset,
                                         Seqpos left,
                                         Seqpos right)
 {
   Seqpos pos, mid;
-  Uchar midcc;
+  GtUchar midcc;
 
   while (right > left+1)
   {
@@ -58,12 +58,12 @@ bool lcpintervalfindcharchildintv(const Encodedsequence *encseq,
                                   Seqpos totallength,
                                   const Seqpos *suftab,
                                   Simplelcpinterval *itv,
-                                  Uchar cc,
+                                  GtUchar cc,
                                   Seqpos offset,
                                   Seqpos left,
                                   Seqpos right)
 {
-  Uchar leftcc, rightcc;
+  GtUchar leftcc, rightcc;
   Seqpos pos, rightbound, leftbound = left;
 
   pos = suftab[right] + offset;
@@ -121,7 +121,7 @@ void lcpintervalsplitwithoutspecial(ArrayBoundswithchar *bwci,
                                     Seqpos parentleft,
                                     Seqpos parentright)
 {
-  Uchar leftcc, rightcc;
+  GtUchar leftcc, rightcc;
   Seqpos rightbound = 0, leftbound = parentleft;
 
   /* call lcpintervalextendlcp and verify if interval can be extended by
@@ -155,16 +155,16 @@ void lcpintervalsplitwithoutspecial(ArrayBoundswithchar *bwci,
   ADDCURRENTLBOUND(parentright+1);
 }
 
-Uchar lcpintervalextendlcp(const Encodedsequence *encseq,
+GtUchar lcpintervalextendlcp(const Encodedsequence *encseq,
                            Readmode readmode,
                            const Seqpos *suftab,
                            Seqpos totallength,
-                           Uchar alphasize,
+                           GtUchar alphasize,
                            Seqpos parentoffset,
                            Seqpos parentleft,
                            Seqpos parentright)
 {
-  Uchar ccl, ccr;
+  GtUchar ccl, ccr;
 
   ccl = SEQUENCE(encseq,suftab[parentleft] + parentoffset);
   ccr = SEQUENCE(encseq,suftab[parentright] + parentoffset);

@@ -6,16 +6,16 @@ unsigned long suffixarrayuniqueforward (const void *genericindex,
                                         Seqpos left,
                                         Seqpos right,
                                         GT_UNUSED Seqpos *witnessposition,
-                                        const Uchar *qstart,
-                                        const Uchar *qend);
+                                        const GtUchar *qstart,
+                                        const GtUchar *qend);
 
 unsigned long suffixarraymstats (const void *genericindex,
                                  unsigned long offset,
                                  Seqpos left,
                                  Seqpos right,
                                  Seqpos *witnessposition,
-                                 const Uchar *qstart,
-                                 const Uchar *qend);
+                                 const GtUchar *qstart,
+                                 const GtUchar *qend);
 
 #ifdef __cplusplus
 }

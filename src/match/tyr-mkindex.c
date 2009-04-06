@@ -71,12 +71,12 @@ struct Dfsstate /* global information */
   Encodedsequencescanstate *esrspace;
   bool performtest;
   bool storecounts;
-  Uchar *bytebuffer;
+  GtUchar *bytebuffer;
   unsigned long sizeofbuffer;
   ArrayLargecount largecounts;
   unsigned long countoutputmers;
   const Seqpos *suftab; /* only necessary for performtest */
-  Uchar *currentmer;    /* only necessary for performtest */
+  GtUchar *currentmer;    /* only necessary for performtest */
 };
 
 #include "esa-dfs.h"
@@ -344,7 +344,7 @@ static int adddistpos2distribution(unsigned long countocc,
 
 static int outputsortedstring2indexviafileptr(const Encodedsequence *encseq,
                                               Seqpos mersize,
-                                              Uchar *bytebuffer,
+                                              GtUchar *bytebuffer,
                                               unsigned long sizeofbuffer,
                                               FILE *merindexfpout,
                                               FILE *countsfilefpout,
@@ -366,11 +366,11 @@ static int outputsortedstring2indexviafileptr(const Encodedsequence *encseq,
   }
   if (countsfilefpout != NULL)
   {
-    Uchar smallcount;
+    GtUchar smallcount;
 
     if (countocc <= MAXSMALLMERCOUNT)
     {
-      smallcount = (Uchar) countocc;
+      smallcount = (GtUchar) countocc;
     } else
     {
       Largecount *lc;
@@ -591,11 +591,11 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   } else
   {
     state.sizeofbuffer = MERBYTES(mersize);
-    ALLOCASSIGNSPACE(state.bytebuffer,NULL,Uchar,state.sizeofbuffer);
+    ALLOCASSIGNSPACE(state.bytebuffer,NULL,GtUchar,state.sizeofbuffer);
   }
   if (performtest)
   {
-    ALLOCASSIGNSPACE(state.currentmer,NULL,Uchar,state.mersize);
+    ALLOCASSIGNSPACE(state.currentmer,NULL,GtUchar,state.mersize);
     state.suftab = suftabSequentialsuffixarrayreader(ssar);
   } else
   {

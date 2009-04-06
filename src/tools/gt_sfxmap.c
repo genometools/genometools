@@ -46,7 +46,7 @@ typedef struct
                 delspranges;
 } Sfxmapoptions;
 
-DECLAREREADFUNCTION(Uchar);
+DECLAREREADFUNCTION(GtUchar);
 
 static void deletethespranges(const Encodedsequence *encseq,
                               unsigned long delspranges)
@@ -355,12 +355,13 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
           }
         } else
         {
-          Uchar prevcc;
+          GtUchar prevcc;
 
-          if (readnextUcharfromstream(&prevcc,&suffixarray.bwttabstream) == 1)
+          if (readnextGtUcharfromstream(&prevcc,&suffixarray.bwttabstream) == 1)
           {
-            Uchar cc;
-            while (readnextUcharfromstream(&cc,&suffixarray.bwttabstream) == 1)
+            GtUchar cc;
+            while (readnextGtUcharfromstream(&cc,&suffixarray.bwttabstream)
+                   == 1)
             {
               if (prevcc != cc || ISSPECIAL(cc))
               {

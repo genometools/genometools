@@ -53,8 +53,8 @@ typedef struct
 
 typedef struct
 {
-  const Uchar *tagptr;
-  Uchar transformedtag[MAXTAGSIZE],
+  const GtUchar *tagptr;
+  GtUchar transformedtag[MAXTAGSIZE],
         rctransformedtag[MAXTAGSIZE];
   unsigned long taglen;
 } Tagwithlength;
@@ -63,7 +63,7 @@ typedef struct
 {
   const TageratorOptions *tageratoroptions;
   unsigned int alphasize;
-  const Uchar *tagptr;
+  const GtUchar *tagptr;
   const SfxAlphabet *alpha;
   unsigned long *eqsvector;
   const Tagwithlength *twlptr;
@@ -212,7 +212,7 @@ static void checkmstats(void *processinfo,
   if (intervalwidthleq((const Limdfsresources *) processinfo,leftbound,
                        rightbound))
   {
-    Uchar cc;
+    GtUchar cc;
     Seqpos *sptr, witnessposition;
     unsigned long idx;
     ArraySeqpos *mstatspos = fromitv2sortedmatchpositions(
@@ -298,16 +298,16 @@ static int cmpdescend(const void *a,const void *b)
   return 0;
 }
 
-static int dotransformtag(Uchar *transformedtag,
-                          const Uchar *symbolmap,
-                          const Uchar *currenttag,
+static int dotransformtag(GtUchar *transformedtag,
+                          const GtUchar *symbolmap,
+                          const GtUchar *currenttag,
                           unsigned long taglen,
                           uint64_t tagnumber,
                           bool replacewildcard,
                           GtError *err)
 {
   unsigned long idx;
-  Uchar charcode;
+  GtUchar charcode;
 
   if (taglen > (unsigned long) MAXTAGSIZE)
   {
@@ -320,14 +320,14 @@ static int dotransformtag(Uchar *transformedtag,
   for (idx = 0; idx < taglen; idx++)
   {
     charcode = symbolmap[currenttag[idx]];
-    if (charcode == (Uchar) UNDEFCHAR)
+    if (charcode == (GtUchar) UNDEFCHAR)
     {
       gt_error_set(err,"undefined character '%c' in tag number " Formatuint64_t,
                 currenttag[idx],
                 PRINTuint64_tcast(tagnumber));
       return -1;
     }
-    if (charcode == (Uchar) WILDCARD)
+    if (charcode == (GtUchar) WILDCARD)
     {
       if (replacewildcard)
       {
@@ -353,7 +353,7 @@ static bool performpatternsearch(const AbstractDfstransformer *dfst,
                                  bool skpp,
                                  Myersonlineresources *mor,
                                  Limdfsresources *limdfsresources,
-                                 const Uchar *tagptr,
+                                 const GtUchar *tagptr,
                                  unsigned long taglen)
 {
   if (doonline || (!domstats && docompare))
@@ -569,7 +569,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     Tagwithlength twl;
     uint64_t tagnumber;
     unsigned int numofchars;
-    const Uchar *symbolmap, *currenttag;
+    const GtUchar *symbolmap, *currenttag;
     char *desc = NULL;
     Processmatch processmatch;
     Showmatchinfo showmatchinfo;

@@ -166,8 +166,8 @@ static GtAlignment* reconstructalignment(const unsigned long *Ctab,
   unsigned long row, col = vlen;
   GtAlignment *alignment;
   gt_assert(Ctab && u && ulen && v && vlen);
-  alignment = gt_alignment_new_with_seqs((const Uchar *) u, ulen,
-                                         (const Uchar *) v, vlen);
+  alignment = gt_alignment_new_with_seqs((const GtUchar *) u, ulen,
+                                         (const GtUchar *) v, vlen);
   row = Ctab[col];
   /* process columns */
   while (col) {

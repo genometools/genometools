@@ -32,7 +32,7 @@ static void runscanatpostrial(const Encodedsequence *encseq,
                               Readmode readmode,Seqpos startpos)
 {
   Seqpos pos, totallength;
-  Uchar ccra, ccsr;
+  GtUchar ccra, ccsr;
 
   totallength = getencseqtotallength(encseq);
   initEncodedsequencescanstate(esr,encseq,readmode,startpos);
@@ -117,7 +117,7 @@ static int testfullscan(const GtStrArray *filenametab,
                         GtError *err)
 {
   Seqpos pos, totallength;
-  Uchar ccscan = 0, ccra, ccsr;
+  GtUchar ccscan = 0, ccra, ccsr;
   GtSequenceBuffer *fb = NULL;
   int retval;
   bool haserr = false;

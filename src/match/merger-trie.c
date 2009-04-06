@@ -54,7 +54,7 @@ typedef struct
            *current;
 } Nodepair;
 
-static Uchar getfirstedgechar(const Mergertrierep *trierep,
+static GtUchar getfirstedgechar(const Mergertrierep *trierep,
                               const Mergertrienode *node,
                               Seqpos prevdepth)
 {
@@ -64,15 +64,15 @@ static Uchar getfirstedgechar(const Mergertrierep *trierep,
       node->suffixinfo.startpos + prevdepth >=
       getencseqtotallength(eri->encseqptr))
   {
-    return (Uchar) SEPARATOR;
+    return (GtUchar) SEPARATOR;
   }
   return getencodedchar(eri->encseqptr, /* Random access */
                         node->suffixinfo.startpos + prevdepth,
                         eri->readmode);
 }
 
-static int comparecharacters(Uchar cc1,unsigned int idx1,
-                             Uchar cc2,unsigned int idx2)
+static int comparecharacters(GtUchar cc1,unsigned int idx1,
+                             GtUchar cc2,unsigned int idx2)
 {
   if (ISSPECIAL(cc1))
   {
@@ -115,11 +115,11 @@ static int comparecharacters(Uchar cc1,unsigned int idx1,
 
 #ifdef WITHTRIEIDENT
 static void showmergertrie2(const Mergertrierep *trierep,
-                            const Uchar *characters,
+                            const GtUchar *characters,
                             unsigned int level,
                             const Mergertrienode *node)
 {
-  Uchar cc = 0;
+  GtUchar cc = 0;
   Seqpos pos, endpos;
   Mergertrienode *current;
 
@@ -169,7 +169,7 @@ static void showmergertrie2(const Mergertrierep *trierep,
 }
 
 void mergertrie_show(const Mergertrierep *trierep,
-                     const Uchar *characters)
+                     const GtUchar *characters)
 {
   if (trierep->root != NULL)
   {
@@ -390,7 +390,7 @@ static Mergertrienode *makenewbranch(Mergertrierep *trierep,
                                      Mergertrienode *oldnode)
 {
   Mergertrienode *newbranch, *newleaf;
-  Uchar cc1, cc2;
+  GtUchar cc1, cc2;
   Encseqreadinfo *eri = trierep->encseqreadinfo + suffixinfo->idx;
 
 #ifdef WITHTRIEIDENT
@@ -406,7 +406,7 @@ static Mergertrienode *makenewbranch(Mergertrierep *trierep,
   if (suffixinfo->startpos + currentdepth >=
       getencseqtotallength(eri->encseqptr))
   {
-    cc2 = (Uchar) SEPARATOR;
+    cc2 = (GtUchar) SEPARATOR;
   } else
   {
     cc2 = getencodedchar(eri->encseqptr, /* Random access */
@@ -432,7 +432,7 @@ static Seqpos getlcp(const Encodedsequence *encseq1,Readmode readmode1,
                      Seqpos start2,Seqpos end2)
 {
   Seqpos i1, i2;
-  Uchar cc1;
+  GtUchar cc1;
 
   for (i1=start1, i2=start2; i1 <= end1 && i2 <= end2; i1++, i2++)
   {
@@ -449,10 +449,10 @@ static bool hassuccessor(const Mergertrierep *trierep,
                          Nodepair *np,
                          Seqpos prevdepth,
                          const Mergertrienode *node,
-                         Uchar cc2,
+                         GtUchar cc2,
                          unsigned int idx2)
 {
-  Uchar cc1;
+  GtUchar cc1;
   int cmpresult;
 
   for (np->previous = NULL, np->current = node->firstchild;
@@ -486,7 +486,7 @@ void mergertrie_insertsuffix(Mergertrierep *trierep,
     Seqpos currentdepth, lcpvalue, totallength;
     Mergertrienode *currentnode, *newleaf, *newbranch, *succ;
     Nodepair np;
-    Uchar cc;
+    GtUchar cc;
     Encseqreadinfo *eri = trierep->encseqreadinfo + suffixinfo->idx;
 
     gt_assert(!ISLEAF(node));
@@ -497,7 +497,7 @@ void mergertrie_insertsuffix(Mergertrierep *trierep,
     {
       if (suffixinfo->startpos + currentdepth >= totallength)
       {
-        cc = (Uchar) SEPARATOR;
+        cc = (GtUchar) SEPARATOR;
       } else
       {
         cc = getencodedchar(eri->encseqptr, /* Random access */

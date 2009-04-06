@@ -26,7 +26,7 @@ typedef struct
 {
   Seqpos lbound,
          rbound;
-  Uchar inchar;
+  GtUchar inchar;
 } Boundswithchar;
 
 DECLAREARRAYSTRUCT(Boundswithchar);

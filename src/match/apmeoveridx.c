@@ -155,7 +155,7 @@ static void apme_initdfsconstinfo(Limdfsconstinfo *mti,
                                   ...)
                                  /* Variable argument list is as follows:
                                     unsigned int alphasize
-                                    const Uchar *pattern,
+                                    const GtUchar *pattern,
                                     unsigned long patternlength,
                                     unsigned long maxdistance,
                                     unsigned long maxintervalwidth,
@@ -163,10 +163,10 @@ static void apme_initdfsconstinfo(Limdfsconstinfo *mti,
                                  */
 {
   va_list ap;
-  const Uchar *pattern;
+  const GtUchar *pattern;
 
   va_start(ap,alphasize);
-  pattern = va_arg(ap, const Uchar *);
+  pattern = va_arg(ap, const GtUchar *);
   mti->patternlength = va_arg(ap, unsigned long);
   mti->maxdistance = va_arg(ap, unsigned long);
   mti->maxintervalwidth = va_arg(ap, unsigned long);
@@ -254,7 +254,7 @@ static void apme_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
 static void apme_nextLimdfsstate(const Limdfsconstinfo *mti,
                                  DECLAREPTRDFSSTATE(aliasoutcol),
                                  GT_UNUSED unsigned long currentdepth,
-                                 Uchar currentchar,
+                                 GtUchar currentchar,
                                  const DECLAREPTRDFSSTATE(aliasincol))
 {
   unsigned long Eq = 0, Xv, Xh, Ph, Mh, /* as in Myers Paper */
@@ -266,8 +266,8 @@ static void apme_nextLimdfsstate(const Limdfsconstinfo *mti,
 
   gt_assert(incol->maxleqk != UNDEFMAXLEQK);
   gt_assert(mti->maxintervalwidth > 0 || incol->maxleqk != SUCCESSMAXLEQK);
-  gt_assert(currentchar != (Uchar) SEPARATOR);
-  if (currentchar != (Uchar) WILDCARD)
+  gt_assert(currentchar != (GtUchar) SEPARATOR);
+  if (currentchar != (GtUchar) WILDCARD)
   {
     Eq = mti->eqsvector[(unsigned long) currentchar];
   }
@@ -336,7 +336,7 @@ static void apme_nextLimdfsstate(const Limdfsconstinfo *mti,
 static void apme_inplacenextLimdfsstate(const Limdfsconstinfo *mti,
                                         DECLAREPTRDFSSTATE(aliascol),
                                         GT_UNUSED unsigned long currentdepth,
-                                        Uchar currentchar)
+                                        GtUchar currentchar)
 {
   unsigned long Eq = 0, Xv, Xh, Ph, Mh, /* as in Myers Paper */
                 backmask,           /* only one bit is on */
@@ -346,7 +346,7 @@ static void apme_inplacenextLimdfsstate(const Limdfsconstinfo *mti,
 
   gt_assert(col->maxleqk != UNDEFMAXLEQK);
   gt_assert(mti->maxintervalwidth > 0 || col->maxleqk != SUCCESSMAXLEQK);
-  if (currentchar != (Uchar) WILDCARD)
+  if (currentchar != (GtUchar) WILDCARD)
   {
     Eq = mti->eqsvector[(unsigned long) currentchar];
   }

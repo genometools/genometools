@@ -228,7 +228,7 @@ SfxIRegisterReader(sfxInterface *iface, enum sfxDataRequest request);
  * @return number of symbols read (less than len implies end of file)
  */
 extern size_t
-readSfxIBWTRange(sfxInterface *iface, listenerID id, size_t len, Uchar *dest);
+readSfxIBWTRange(sfxInterface *iface, listenerID id, size_t len, GtUchar *dest);
 
 /**
  * @return actual number of symbols read

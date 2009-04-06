@@ -34,7 +34,7 @@ typedef unsigned long Unsignedlong;
 
 typedef enum
 {
-  UcharType,
+  GtUcharType,
   UshortType,
   Uint32Type,
   Uint64Type,

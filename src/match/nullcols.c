@@ -36,10 +36,10 @@ Charatpos *newCharatpos(unsigned long patternlength,unsigned int alphasize)
 }
 
 Charatpos *reinitCharatpos(Charatpos *catpos,
-                           const Uchar *pattern,unsigned long patternlength,
+                           const GtUchar *pattern,unsigned long patternlength,
                            unsigned int alphasize)
 {
-  const Uchar *pptr;
+  const GtUchar *pptr;
   unsigned long partialsum, tmp;
   unsigned int idx;
 
@@ -77,7 +77,7 @@ void wrapCharatpos(Charatpos **catposptr)
 }
 
 void maintainnullcols(const Charatpos *catpos,
-                      unsigned long *front0,Uchar cc,unsigned long depth)
+                      unsigned long *front0,GtUchar cc,unsigned long depth)
 {
   unsigned long idx;
 

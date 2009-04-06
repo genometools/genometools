@@ -24,9 +24,9 @@
 #include "procmatch.h"
 #include "stamp.h"
 
-#define REPLACEMENTBIT   ((Uchar) 1)
-#define DELETIONBIT      (((Uchar) 1) << 1)
-#define INSERTIONBIT     (((Uchar) 1) << 2)
+#define REPLACEMENTBIT   ((GtUchar) 1)
+#define DELETIONBIT      (((GtUchar) 1) << 1)
+#define INSERTIONBIT     (((GtUchar) 1) << 2)
 
 typedef struct
 {
@@ -34,20 +34,20 @@ typedef struct
                 vmax;
 } Maxscorecoord;
 
-typedef Uchar Retracebits;
+typedef GtUchar Retracebits;
 
 static Scoretype swlocalsimilarityscore(Scoretype *scol,
                                         Maxscorecoord *maxpair,
                                         const Scorevalues *scorevalues,
-                                        const Uchar *useq,
+                                        const GtUchar *useq,
                                         unsigned long ulen,
                                         const Encodedsequence *vencseq,
                                         Seqpos startpos,
                                         Seqpos endpos)
 {
   Scoretype val, we, nw, *scolptr, maximalscore = 0;
-  const Uchar *uptr;
-  Uchar vcurrent;
+  const GtUchar *uptr;
+  GtUchar vcurrent;
   Seqpos j;
 
   maxpair->umax = maxpair->vmax = 0;
@@ -59,10 +59,10 @@ static Scoretype swlocalsimilarityscore(Scoretype *scol,
   {
     nw = 0;
     vcurrent = getencodedchar(vencseq,j,Forwardmode);
-    gt_assert(vcurrent != (Uchar) SEPARATOR);
+    gt_assert(vcurrent != (GtUchar) SEPARATOR);
     for (scolptr = scol+1, uptr = useq; uptr < useq + ulen; scolptr++, uptr++)
     {
-      gt_assert(*uptr != (Uchar) SEPARATOR);
+      gt_assert(*uptr != (GtUchar) SEPARATOR);
       we = *scolptr;
       *scolptr = *(scolptr-1) + scorevalues->gapextend;
       if ((val = nw + REPLACEMENTSCORE(scorevalues,*uptr,vcurrent)) > *scolptr)
@@ -109,7 +109,7 @@ typedef struct
 static void swlocalsimilarityregion(DPpoint *scol,
                                     DPregion *maxentry,
                                     const Scorevalues *scorevalues,
-                                    const Uchar *useq,
+                                    const GtUchar *useq,
                                     unsigned long ulen,
                                     const Encodedsequence *vencseq,
                                     Seqpos startpos,
@@ -117,8 +117,8 @@ static void swlocalsimilarityregion(DPpoint *scol,
 {
   Scoretype val;
   DPpoint *scolptr, we, nw;
-  const Uchar *uptr;
-  Uchar vcurrent;
+  const GtUchar *uptr;
+  GtUchar vcurrent;
   Seqpos j;
 
   maxentry->similarity = 0;
@@ -135,11 +135,11 @@ static void swlocalsimilarityregion(DPpoint *scol,
   for (j = startpos; j < endpos; j++)
   {
     vcurrent = getencodedchar(vencseq,j,Forwardmode);
-    gt_assert(vcurrent != (Uchar) SEPARATOR);
+    gt_assert(vcurrent != (GtUchar) SEPARATOR);
     nw = *scol;
     for (scolptr = scol+1, uptr = useq; uptr < useq + ulen; scolptr++, uptr++)
     {
-      gt_assert(*uptr != (Uchar) SEPARATOR);
+      gt_assert(*uptr != (GtUchar) SEPARATOR);
       we = *scolptr;
       scolptr->similarity = (scolptr-1)->similarity + scorevalues->gapextend;
       scolptr->lu = (scolptr-1)->lu + 1;
@@ -182,15 +182,15 @@ static void swlocalsimilarityregion(DPpoint *scol,
 static void swmaximalDPedges(Retracebits *edges,
                              Scoretype *scol,
                              const Scorevalues *scorevalues,
-                             const Uchar *useq,
+                             const GtUchar *useq,
                              unsigned long ulen,
                              const Encodedsequence *vencseq,
                              Seqpos startpos,
                              Seqpos endpos)
 {
   Scoretype val, we, nw, *scolptr;
-  const Uchar *uptr;
-  Uchar vcurrent;
+  const GtUchar *uptr;
+  GtUchar vcurrent;
   Seqpos j;
   Retracebits *eptr;
 
@@ -205,14 +205,14 @@ static void swmaximalDPedges(Retracebits *edges,
   for (j = startpos; j < endpos; j++)
   {
     vcurrent = getencodedchar(vencseq,j,Forwardmode);
-    gt_assert(vcurrent != (Uchar) SEPARATOR);
+    gt_assert(vcurrent != (GtUchar) SEPARATOR);
     nw = *scol;
     *scol = nw + scorevalues->gapextend;
     *eptr = INSERTIONBIT;
     for (scolptr = scol+1, uptr = useq, eptr++; uptr < useq + ulen;
          scolptr++, uptr++, eptr++)
     {
-      gt_assert(*uptr != (Uchar) SEPARATOR);
+      gt_assert(*uptr != (GtUchar) SEPARATOR);
       we = *scolptr;
       *scolptr = *(scolptr-1) + scorevalues->gapextend;
       *eptr = DELETIONBIT;
@@ -248,7 +248,7 @@ static void swtracebackDPedges(GtAlignment *alignment,
                                unsigned long ulen,
                                const Encodedsequence *encseq,
                                Seqpos vlen,
-                               Uchar *dbsubstring,
+                               GtUchar *dbsubstring,
                                Seqpos startpos,
                                const Retracebits *edges)
 {
@@ -285,12 +285,12 @@ static void swtracebackDPedges(GtAlignment *alignment,
 }
 
 static void swproducealignment(GtAlignment *alignment,
-                               Uchar *dbsubstring,
+                               GtUchar *dbsubstring,
                                Retracebits *edges,
                                Scoretype *scol,
                                const Scorevalues *scorevalues,
                                GT_UNUSED unsigned long scorethreshold,
-                               const Uchar *useq,
+                               const GtUchar *useq,
                                unsigned long ulen,
                                const Encodedsequence *vencseq,
                                Seqpos startpos,
@@ -326,7 +326,7 @@ struct SWdpresource
   Scoretype *swcol;
   unsigned long scorethreshold;
   DPpoint *swentrycol;
-  Uchar *dbsubstring;
+  GtUchar *dbsubstring;
   unsigned long allocatedswcol, allocatedmaxedges, allocateddbsubstring;
   Retracebits *maxedges;
   Processmatch processmatch;
@@ -338,7 +338,7 @@ static void applysmithwaterman(SWdpresource *dpresource,
                                unsigned long encsequnit,
                                Seqpos startpos,
                                Seqpos endpos,
-                               const Uchar *query,
+                               const GtUchar *query,
                                unsigned long querylen)
 {
   Scoretype score;
@@ -389,7 +389,7 @@ static void applysmithwaterman(SWdpresource *dpresource,
       {
         dpresource->allocateddbsubstring = (unsigned long) maxentry.len2;
         ALLOCASSIGNSPACE(dpresource->dbsubstring,dpresource->dbsubstring,
-                         Uchar,dpresource->allocateddbsubstring);
+                         GtUchar,dpresource->allocateddbsubstring);
       }
       swproducealignment(dpresource->alignment,
                          dpresource->dbsubstring,
@@ -415,7 +415,7 @@ static void applysmithwaterman(SWdpresource *dpresource,
 
 void multiapplysmithwaterman(SWdpresource *dpresource,
                              const Encodedsequence *encseq,
-                             const Uchar *query,
+                             const GtUchar *query,
                              unsigned long querylen)
 {
   Seqinfo seqinfo;

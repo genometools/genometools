@@ -22,12 +22,12 @@
 
 void initeqsvector(unsigned long *eqsvector,
                    unsigned long eqslen,
-                   const Uchar *pattern,
+                   const GtUchar *pattern,
                    unsigned long patternlength);
 
 void initeqsvectorrev(unsigned long *eqsvectorrev,
                       unsigned long eqslen,
-                      const Uchar *pattern,
+                      const GtUchar *pattern,
                       unsigned long patternlength);
 
 #endif

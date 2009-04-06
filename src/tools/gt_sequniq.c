@@ -92,7 +92,7 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
   GtStrArray *files;
   int had_err = 0;
   GtSeqIterator *seqit;
-  const Uchar *sequence;
+  const GtUchar *sequence;
   char *desc;
   unsigned long len;
   off_t totalsize;

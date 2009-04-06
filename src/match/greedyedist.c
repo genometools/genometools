@@ -23,11 +23,11 @@
 #include "spacedef.h"
 
 #define COMPARESYMBOLS(A,B)\
-        if ((A) == (Uchar) SEPARATOR)\
+        if ((A) == (GtUchar) SEPARATOR)\
         {\
           gl->ubound = uptr;\
         }\
-        if ((B) == (Uchar) SEPARATOR)\
+        if ((B) == (GtUchar) SEPARATOR)\
         {\
           gl->vbound = vptr;\
         }\
@@ -57,7 +57,7 @@ typedef struct
 
 typedef struct
 {
-  const Uchar *useq,
+  const GtUchar *useq,
               *vseq,
               *ubound,
               *vbound;
@@ -135,8 +135,8 @@ static void evalentryforward(FrontResource *gl,
                              long k)
 {
   long value, t;
-  const Uchar *uptr, *vptr;
-  Uchar a, b;
+  const GtUchar *uptr, *vptr;
+  GtUchar a, b;
   Frontvalue *fptr;
 
 #ifdef SKDEBUG
@@ -252,8 +252,8 @@ static bool evalfrontforward(FrontResource *gl,
 
 static void firstfrontforward(FrontResource *gl,Frontspec *fspec)
 {
-  Uchar a, b;
-  const Uchar *uptr, *vptr;
+  GtUchar a, b;
+  const GtUchar *uptr, *vptr;
 
   fspec->left = fspec->offset = 0;
   fspec->width = (long) 1;
@@ -278,9 +278,9 @@ static void firstfrontforward(FrontResource *gl,Frontspec *fspec)
 #endif
 }
 
-unsigned long greedyunitedist(const Uchar *useq,
+unsigned long greedyunitedist(const GtUchar *useq,
                               unsigned long ulenvalue,
-                              const Uchar *vseq,
+                              const GtUchar *vseq,
                               unsigned long vlenvalue)
 {
   unsigned long currentallocated, realdistance;

@@ -39,7 +39,7 @@ static Codetype qgram2codefillspecial(unsigned int numofchars,
   Codetype integercode;
   Seqpos pos;
   bool foundspecial;
-  Uchar cc;
+  GtUchar cc;
 
   if (startpos >= totallength)
   {
@@ -182,7 +182,7 @@ static int verifycodelists(const Encodedsequence *encseq,
 {
   bool haserr = false;
   ArrayCodetype codeliststring;
-  const Uchar *characters;
+  const GtUchar *characters;
   Seqpos stringtotallength;
 
   gt_error_check(err);

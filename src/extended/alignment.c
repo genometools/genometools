@@ -29,7 +29,7 @@
 #define MISMATCHSYMBOL ' '
 
 struct GtAlignment {
-  const Uchar *u,
+  const GtUchar *u,
               *v;
   unsigned long ulen,
                 vlen;
@@ -57,8 +57,8 @@ GtAlignment* gt_alignment_new(void)
   return a;
 }
 
-GtAlignment* gt_alignment_new_with_seqs(const Uchar *u, unsigned long ulen,
-                                   const Uchar *v, unsigned long vlen)
+GtAlignment* gt_alignment_new_with_seqs(const GtUchar *u, unsigned long ulen,
+                                   const GtUchar *v, unsigned long vlen)
 {
   GtAlignment *a;
   gt_assert(u && v);
@@ -67,8 +67,8 @@ GtAlignment* gt_alignment_new_with_seqs(const Uchar *u, unsigned long ulen,
   return a;
 }
 
-void gt_alignment_set_seqs(GtAlignment *a, const Uchar *u, unsigned long ulen,
-                        const Uchar *v, unsigned long vlen)
+void gt_alignment_set_seqs(GtAlignment *a, const GtUchar *u, unsigned long ulen,
+                        const GtUchar *v, unsigned long vlen)
 {
   gt_assert(a && u && v);
   a->u = u;
@@ -296,8 +296,8 @@ void gt_alignment_show(const GtAlignment *a, FILE *fp)
 }
 
 void gt_alignment_show_with_mapped_chars(const GtAlignment *a,
-                                         const Uchar *characters,
-                                         Uchar wildcardshow,
+                                         const GtUchar *characters,
+                                         GtUchar wildcardshow,
                                          FILE *fp)
 {
   unsigned long i, j, uctr, vctr;
@@ -435,8 +435,8 @@ int gt_alignment_unit_test(GtError *err)
      agaaagaggta-agaggga
   */
 
-  a = gt_alignment_new_with_seqs((const Uchar *) u, strlen(u),
-                                 (const Uchar *) v, strlen(v));
+  a = gt_alignment_new_with_seqs((const GtUchar *) u, strlen(u),
+                                 (const GtUchar *) v, strlen(v));
   gt_alignment_add_replacement(a);
   gt_alignment_add_replacement(a);
   gt_alignment_add_replacement(a);

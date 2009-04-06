@@ -32,7 +32,7 @@ typedef enum
 #define ISDIRCOMPLEMENT(R) ((R) == Complementmode ||\
                             (R) == Reversecomplementmode)
 
-#define COMPLEMENTBASE(B) ((Uchar) 3 - (B))
+#define COMPLEMENTBASE(B) ((GtUchar) 3 - (B))
 
 const char *showreadmode(Readmode readmode);
 

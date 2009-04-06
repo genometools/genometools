@@ -593,9 +593,9 @@ static int searchforTSDandorMotifoutside(
   /* search for TSDs and/or motif */
   if (lo->minlengthTSD > 1U)
   {
-    Uchar *dbseq, *query;
-    ALLOCASSIGNSPACE(dbseq,NULL,Uchar,leftlen);
-    ALLOCASSIGNSPACE(query,NULL,Uchar,rightlen);
+    GtUchar *dbseq, *query;
+    ALLOCASSIGNSPACE(dbseq,NULL,GtUchar,leftlen);
+    ALLOCASSIGNSPACE(query,NULL,GtUchar,rightlen);
 
     encseqextract(dbseq,encseq,startleftLTR,endleftLTR);
     encseqextract(query,encseq,startrightLTR,endrightLTR);

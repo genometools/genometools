@@ -25,7 +25,7 @@ Enumpatterniterator *newenumpatterniterator(unsigned long minpatternlen,
                                             const Encodedsequence *encseq,
                                             GtError *err);
 
-const Uchar *nextEnumpatterniterator(unsigned long *patternlen,
+const GtUchar *nextEnumpatterniterator(unsigned long *patternlen,
                                      Enumpatterniterator *epi);
 
 void showPatterndistribution(const Enumpatterniterator *epi);

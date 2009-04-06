@@ -26,11 +26,12 @@
 typedef struct GtAlignment GtAlignment;
 
 GtAlignment*    gt_alignment_new(void);
-GtAlignment*    gt_alignment_new_with_seqs(const Uchar *u, unsigned long ulen,
-                                           const Uchar *v, unsigned long vlen);
-void          gt_alignment_set_seqs(GtAlignment*, const Uchar *u,
+GtAlignment*    gt_alignment_new_with_seqs(const GtUchar *u, unsigned long ulen,
+                                           const GtUchar *v,
+                                           unsigned long vlen);
+void          gt_alignment_set_seqs(GtAlignment*, const GtUchar *u,
                                     unsigned long ulen,
-                                    const Uchar *v, unsigned long vlen);
+                                    const GtUchar *v, unsigned long vlen);
 void          gt_alignment_add_replacement(GtAlignment*);
 void          gt_alignment_add_deletion(GtAlignment*);
 void          gt_alignment_add_insertion(GtAlignment*);
@@ -46,8 +47,8 @@ long          gt_alignment_eval_with_score(const GtAlignment *a,
                                            long gapscore);
 void          gt_alignment_show(const GtAlignment*, FILE*);
 void          gt_alignment_show_with_mapped_chars(const GtAlignment*,
-                                                  const Uchar *characters,
-                                                  Uchar wildcardshow,
+                                                  const GtUchar *characters,
+                                                  GtUchar wildcardshow,
                                                   FILE *fp);
 void          gt_alignment_show_multieop_list(const GtAlignment*, FILE*);
 int           gt_alignment_unit_test(GtError*);

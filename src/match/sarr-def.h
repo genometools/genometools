@@ -52,7 +52,7 @@
 
 DECLAREBufferedfiletype(Seqpos);
 
-DECLAREBufferedfiletype(Uchar);
+DECLAREBufferedfiletype(GtUchar);
 
 DECLAREBufferedfiletype(Largelcpvalue);
 
@@ -89,14 +89,14 @@ typedef struct
   Readmode readmode; /* relevant when reading the encoded sequence */
   /* either with mapped input */
   const Seqpos *suftab;
-  const Uchar *lcptab;
+  const GtUchar *lcptab;
   const Largelcpvalue *llvtab;
-  const Uchar *bwttab;
+  const GtUchar *bwttab;
   unsigned int prefixlength;
   Bcktab *bcktab;
   /* or with streams */
   SeqposBufferedfile suftabstream;
-  UcharBufferedfile bwttabstream,
+  GtUcharBufferedfile bwttabstream,
                     lcptabstream;
   LargelcpvalueBufferedfile llvtabstream;
 } Suffixarray;

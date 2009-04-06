@@ -43,7 +43,7 @@ Seqpos *lcp13_manzini(const Encodedsequence *encseq,
       while (pos+lcpvalue < totallength &&
              previousstart+lcpvalue < totallength)
       {
-        Uchar cc1, cc2;
+        GtUchar cc1, cc2;
 
         cc1 = getencodedchar(encseq,pos+lcpvalue,readmode);
         cc2 = getencodedchar(encseq,previousstart+lcpvalue,readmode);
@@ -75,7 +75,7 @@ static unsigned long *computeocclesstab(const Encodedsequence *encseq)
   for (idx = 1UL; idx < numofchars; idx++)
   {
     occless[idx] = occless[idx-1] +
-                   getencseqcharactercount(encseq,(Uchar) (idx-1));
+                   getencseqcharactercount(encseq,(GtUchar) (idx-1));
   }
   return occless;
 }
@@ -104,7 +104,7 @@ static void setrelevantfrominversetab(Compressedtable *rightposinverse,
       Seqpos pos = sortedsuffixes[idx];
       if (pos > 0)
       {
-        Uchar cc = getencodedchar(encseq,pos-1,readmode);
+        GtUchar cc = getencodedchar(encseq,pos-1,readmode);
         if (ISSPECIAL(cc))
         {
           compressedtable_update(rightposinverse,pos,idx);
@@ -234,7 +234,7 @@ static Seqpos sa2ranknext(Compressedtable *ranknext,
     Seqpos pos = sortedsuffixes[idx];
     if (pos > 0)
     {
-      Uchar cc = getencodedchar(encseq,pos-1, readmode);
+      GtUchar cc = getencodedchar(encseq,pos-1, readmode);
       if (ISNOTSPECIAL(cc))
       {
         gt_assert(occless[cc] < (unsigned long) partwidth);
@@ -269,7 +269,7 @@ static Seqpos sa2ranknext(Compressedtable *ranknext,
       {
         if (specialpos > 0)
         {
-          Uchar cc = getencodedchar(encseq,specialpos-1,readmode);
+          GtUchar cc = getencodedchar(encseq,specialpos-1,readmode);
           if (ISNOTSPECIAL(cc))
           {
             gt_assert(occless[cc] < (unsigned long) partwidth);
@@ -303,7 +303,7 @@ Compressedtable *lcp9_manzini(Compressedtable *spacefortab,
   Seqpos pos, previousstart, nextfillpos = 0, fillpos, lcpvalue = 0;
   Compressedtable *lcptab, *ranknext, *rightposinverse;
   Seqpos previouscc1pos, previouscc2pos;
-  Uchar cc1, cc2;
+  GtUchar cc1, cc2;
   Encodedsequencescanstate *esr1, *esr2;
 
   if (spacefortab == NULL)

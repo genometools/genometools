@@ -210,18 +210,18 @@ void calculateallowedMININFINITYINTgenerations(
  */
 #define COMPARESYMBOLSSEP(I,J)\
         USEQ(a,I);\
-        if (a == (Uchar) SEPARATOR)\
+        if (a == (GtUchar) SEPARATOR)\
         {\
           ulen = I;\
           break;\
         }\
         VSEQ(b,J);\
-        if (b == (Uchar) SEPARATOR)\
+        if (b == (GtUchar) SEPARATOR)\
         {\
           vlen = J;\
           break;\
         }\
-        if (a != b || a == (Uchar) WILDCARD)\
+        if (a != b || a == (GtUchar) WILDCARD)\
         {\
           break;\
         }

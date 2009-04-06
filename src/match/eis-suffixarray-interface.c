@@ -225,11 +225,11 @@ SAIMakeReader(SuffixarrayFileInterface *sai, enum sfxDataRequest rtype)
  * @return actual number of symbols read
  */
 static size_t
-SAIReadBWT(void *state, Uchar *dest, size_t len, GT_UNUSED GtError *err)
+SAIReadBWT(void *state, GtUchar *dest, size_t len, GT_UNUSED GtError *err)
 {
   SuffixarrayFileInterface *sai = state;
   gt_assert(state);
-  return fread(dest, sizeof (Uchar), len, sai->sa->bwttabstream.fp);
+  return fread(dest, sizeof (GtUchar), len, sai->sa->bwttabstream.fp);
 }
 
 DECLAREREADFUNCTION(Seqpos)

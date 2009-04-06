@@ -113,9 +113,9 @@ static GtAlignment* smith_waterman_align(const char *u_orig, const char *v_orig,
     alignment_end.y--;
     /* employ sequence positions to set alignment sequences */
     gt_alignment_set_seqs(a,
-                          (const Uchar *) (u_orig + alignment_start.x),
+                          (const GtUchar *) (u_orig + alignment_start.x),
                           alignment_end.x - alignment_start.x + 1,
-                          (const Uchar *) (v_orig + alignment_start.y),
+                          (const GtUchar *) (v_orig + alignment_start.y),
                           alignment_end.y - alignment_start.y + 1);
   }
   gt_array2dim_delete(dptable);

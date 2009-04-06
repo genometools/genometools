@@ -415,7 +415,7 @@ static Suffixptr *medianof3cmpcharbychar(const Bentsedgresources *bsr,
 {
   Seqpos vala, valb, valc;
   Suffixptr cptr;
-  Uchar tmpavar, tmpbvar;
+  GtUchar tmpavar, tmpbvar;
 
   CMPCHARBYCHARPTR2INT(vala,tmpavar,a);
   CMPCHARBYCHARPTR2INT(valb,tmpbvar,b);
@@ -503,7 +503,7 @@ static void insertionsort(Bentsedgresources *bsr,
              sptr++, tptr++)
         {
           Seqpos ccs, cct;
-          Uchar tmpsvar, tmptvar;
+          GtUchar tmpsvar, tmptvar;
 
           ccs = DEREF(tmpsvar,sptr);
           cct = DEREF(tmptvar,tptr);
@@ -1052,7 +1052,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
     Seqpos pivotcmpcharbychar = 0, valcmpcharbychar;
     Sfxcmp pivotcmpbits, val;
     int retvalpivotcmpbits;
-    Uchar tmpvar;
+    GtUchar tmpvar;
     unsigned long w;
     unsigned int commonunits, smallermaxlcp, greatermaxlcp,
                  smallerminlcp, greaterminlcp;

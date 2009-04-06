@@ -106,7 +106,7 @@ void* gt_sequence_buffer_cast(GT_UNUSED const GtSequenceBufferClass *sic,
   return si;
 }
 
-void gt_sequence_buffer_set_symbolmap(GtSequenceBuffer *si, const Uchar *m)
+void gt_sequence_buffer_set_symbolmap(GtSequenceBuffer *si, const GtUchar *m)
 {
   gt_assert(si && si->pvt);
   si->pvt->symbolmap = m;

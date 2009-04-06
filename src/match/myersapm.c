@@ -73,7 +73,7 @@ void freeMyersonlineresources(Myersonlineresources **ptrmyersonlineresources)
 }
 
 void edistmyersbitvectorAPM(Myersonlineresources *mor,
-                            const Uchar *pattern,
+                            const GtUchar *pattern,
                             unsigned long patternlength,
                             unsigned long maxdistance)
 {
@@ -86,7 +86,7 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
                 Mh,
                 score;
   const unsigned long Ebit = 1UL << (patternlength-1);
-  Uchar cc;
+  GtUchar cc;
   Seqpos pos;
   const Readmode readmode = Reversemode;
   GtMatch match;
@@ -110,14 +110,14 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
                                   mor->esr,
                                   pos,
                                   readmode);
-    if (cc == (Uchar) SEPARATOR)
+    if (cc == (GtUchar) SEPARATOR)
     {
       Pv = ~0UL;
       Mv = 0UL;
       score = patternlength;
     } else
     {
-      if (cc == (Uchar) WILDCARD)
+      if (cc == (GtUchar) WILDCARD)
       {
         Eq = 0;
       } else

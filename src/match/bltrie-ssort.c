@@ -45,7 +45,7 @@ typedef struct Blindtrienode
     struct Blindtrienode *firstchild;
     Seqpos nodestartpos;
   } either;
-  Uchar firstchar;
+  GtUchar firstchar;
 } Blindtrienode;
 
 typedef Blindtrienode * Nodeptr;
@@ -81,7 +81,7 @@ static Nodeptr newBlindtrienode(Blindtrierep *trierep)
 
 static Blindtrienode *makenewleaf(Blindtrierep *trierep,
                                   Seqpos currentstartpos,
-                                  Uchar firstchar)
+                                  GtUchar firstchar)
 {
   Blindtrienode *newleaf;
 
@@ -97,7 +97,7 @@ static Blindtrienode *makenewleaf(Blindtrierep *trierep,
 static Nodeptr makeroot(Blindtrierep *trierep,Seqpos currentstartpos)
 {
   Blindtrienode *root;
-  Uchar firstchar;
+  GtUchar firstchar;
 
   root = newBlindtrienode(trierep);
   root->depth = 0;
@@ -109,13 +109,13 @@ static Nodeptr makeroot(Blindtrierep *trierep,Seqpos currentstartpos)
     firstchar = getencodedchar(trierep->encseq, /* Random access */
                                currentstartpos,
                                trierep->readmode);
-    if (firstchar == (Uchar) WILDCARD)
+    if (firstchar == (GtUchar) WILDCARD)
     {
-      firstchar = (Uchar) SEPARATOR;
+      firstchar = (GtUchar) SEPARATOR;
     }
   } else
   {
-    firstchar = (Uchar) SEPARATOR;
+    firstchar = (GtUchar) SEPARATOR;
   }
   root->either.firstchild = makenewleaf(trierep,currentstartpos,firstchar);
   return root;
@@ -131,7 +131,7 @@ static Nodeptr extractleafnode(const Blindtrierep *trierep,Nodeptr head)
   return head;
 }
 
-static int comparecharacters(Uchar oldchar,Uchar newchar)
+static int comparecharacters(GtUchar oldchar,GtUchar newchar)
 {
   if (oldchar > newchar)
   {
@@ -144,7 +144,7 @@ static int comparecharacters(Uchar oldchar,Uchar newchar)
   return 0;
 }
 
-static Nodeptr findsucc(Nodeptr node,Uchar newchar)
+static Nodeptr findsucc(Nodeptr node,GtUchar newchar)
 {
   int retval;
 
@@ -169,7 +169,7 @@ static Nodeptr findsucc(Nodeptr node,Uchar newchar)
 
 static Nodeptr findcompanion(Blindtrierep *trierep,Seqpos currentstartpos)
 {
-  Uchar newchar;
+  GtUchar newchar;
   Nodeptr head, succ;
 
   trierep->stack.nextfreeNodeptr = 0;
@@ -182,13 +182,13 @@ static Nodeptr findcompanion(Blindtrierep *trierep,Seqpos currentstartpos)
       newchar = getencodedchar(trierep->encseq, /* Random access */
                                currentstartpos + head->depth,
                                trierep->readmode);
-      if (newchar == (Uchar) WILDCARD)
+      if (newchar == (GtUchar) WILDCARD)
       {
-        newchar = (Uchar) SEPARATOR;
+        newchar = (GtUchar) SEPARATOR;
       }
     } else
     {
-      newchar = (Uchar) SEPARATOR;
+      newchar = (GtUchar) SEPARATOR;
     }
     if (ISSPECIAL(newchar))
     {
@@ -207,9 +207,9 @@ static Nodeptr findcompanion(Blindtrierep *trierep,Seqpos currentstartpos)
 
 static void insertsuffixintoblindtrie(Blindtrierep *trierep,
                                       Nodeptr oldnode,
-                                      Uchar mm_oldsuffix,
+                                      GtUchar mm_oldsuffix,
                                       Seqpos lcp,
-                                      Uchar mm_newsuffix,
+                                      GtUchar mm_newsuffix,
                                       Seqpos currentstartpos)
 {
   Nodeptr newleaf, newnode, previous, current;
@@ -258,14 +258,14 @@ static void insertsuffixintoblindtrie(Blindtrierep *trierep,
   newleaf->rightsibling = current;
 }
 
-static Seqpos cmpcharbychargetlcp(Uchar *mm_oldsuffix,
-                                  Uchar *mm_newsuffix,
+static Seqpos cmpcharbychargetlcp(GtUchar *mm_oldsuffix,
+                                  GtUchar *mm_newsuffix,
                                   Blindtrierep *trierep,
                                   Seqpos leafpos,
                                   Seqpos currentstartpos)
 {
   Seqpos idx1, idx2;
-  Uchar cc1, cc2;
+  GtUchar cc1, cc2;
 
   initEncodedsequencescanstate(trierep->esr1,trierep->encseq,trierep->readmode,
                                leafpos);
@@ -277,25 +277,25 @@ static Seqpos cmpcharbychargetlcp(Uchar *mm_oldsuffix,
     {
       cc1 = sequentialgetencodedchar(trierep->encseq,trierep->esr1,
                                      idx1,trierep->readmode);
-      if (cc1 == (Uchar) WILDCARD)
+      if (cc1 == (GtUchar) WILDCARD)
       {
-        cc1 = (Uchar) SEPARATOR;
+        cc1 = (GtUchar) SEPARATOR;
       }
     } else
     {
-      cc1 = (Uchar) SEPARATOR;
+      cc1 = (GtUchar) SEPARATOR;
     }
     if (isleftofboundary(idx2,trierep))
     {
       cc2 = sequentialgetencodedchar(trierep->encseq,trierep->esr2,
                                      idx2,trierep->readmode);
-      if (cc2 == (Uchar) WILDCARD)
+      if (cc2 == (GtUchar) WILDCARD)
       {
-        cc2 = (Uchar) SEPARATOR;
+        cc2 = (GtUchar) SEPARATOR;
       }
     } else
     {
-      cc2 = (Uchar) SEPARATOR;
+      cc2 = (GtUchar) SEPARATOR;
     }
     if (comparecharacters(cc1,cc2) != 0)
     {
@@ -307,8 +307,8 @@ static Seqpos cmpcharbychargetlcp(Uchar *mm_oldsuffix,
   return idx1 - leafpos;
 }
 
-static Seqpos fastgetlcp(Uchar *mm_oldsuffix,
-                         Uchar *mm_newsuffix,
+static Seqpos fastgetlcp(GtUchar *mm_oldsuffix,
+                         GtUchar *mm_newsuffix,
                          Blindtrierep *trierep,
                          Seqpos leafpos,
                          Seqpos currentstartpos)
@@ -330,26 +330,26 @@ static Seqpos fastgetlcp(Uchar *mm_oldsuffix,
     *mm_oldsuffix = getencodedchar(trierep->encseq, /* Random access */
                                    leafpos + lcp,
                                    trierep->readmode);
-    if (*mm_oldsuffix == (Uchar) WILDCARD)
+    if (*mm_oldsuffix == (GtUchar) WILDCARD)
     {
-      *mm_oldsuffix = (Uchar) SEPARATOR;
+      *mm_oldsuffix = (GtUchar) SEPARATOR;
     }
   } else
   {
-    *mm_oldsuffix = (Uchar) SEPARATOR;
+    *mm_oldsuffix = (GtUchar) SEPARATOR;
   }
   if (isleftofboundary(currentstartpos+lcp,trierep))
   {
     *mm_newsuffix = getencodedchar(trierep->encseq, /* Random access */
                                    currentstartpos + lcp,
                                    trierep->readmode);
-    if (*mm_newsuffix == (Uchar) WILDCARD)
+    if (*mm_newsuffix == (GtUchar) WILDCARD)
     {
-      *mm_newsuffix = (Uchar) SEPARATOR;
+      *mm_newsuffix = (GtUchar) SEPARATOR;
     }
   } else
   {
-    *mm_newsuffix = (Uchar) SEPARATOR;
+    *mm_newsuffix = (GtUchar) SEPARATOR;
   }
   return lcp;
 }
@@ -602,7 +602,7 @@ Seqpos blindtriesuffixsort(Blindtrierep *trierep,
   unsigned long idx, stackidx;
   Nodeptr leafinsubtree, currentnode;
   Seqpos lcp, numoflargelcpvalues = 0;
-  Uchar mm_oldsuffix, mm_newsuffix;
+  GtUchar mm_oldsuffix, mm_newsuffix;
 
   if (ordertype == Noorder)
   {

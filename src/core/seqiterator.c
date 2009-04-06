@@ -28,9 +28,9 @@ struct GtSeqIterator
 {
   GtSequenceBuffer *fb;
   const GtStrArray *filenametab;
-  const Uchar *symbolmap;
+  const GtUchar *symbolmap;
   GtQueue *descptr;
-  ArrayUchar sequencebuffer;
+  ArrayGtUchar sequencebuffer;
   unsigned long long unitnum;
   bool withsequence, exhausted;
   unsigned long long currentread,
@@ -52,7 +52,7 @@ GtSeqIterator* gt_seqiterator_new_with_buffer(GtSequenceBuffer *buf)
 {
   GtSeqIterator *seqit;
   seqit = gt_malloc(sizeof (GtSeqIterator));
-  INITARRAY(&seqit->sequencebuffer, Uchar);
+  INITARRAY(&seqit->sequencebuffer, GtUchar);
   seqit->descptr = gt_queue_new();
   seqit->fb = gt_sequence_buffer_ref(buf);
   gt_sequence_buffer_set_desc_queue(seqit->fb, seqit->descptr);
@@ -78,12 +78,12 @@ void gt_seqiterator_set_sequence_output(GtSeqIterator *seqit, bool withsequence)
 }
 
 int gt_seqiterator_next(GtSeqIterator *seqit,
-                        const Uchar **sequence,
+                        const GtUchar **sequence,
                         unsigned long *len,
                         char **desc,
                         GtError *err)
 {
-  Uchar charcode;
+  GtUchar charcode;
   int retval;
   bool haserr = false, foundseq = false;
 
@@ -111,51 +111,51 @@ int gt_seqiterator_next(GtSeqIterator *seqit,
     {
       seqit->currentread++;
     }
-    if (charcode == (Uchar) SEPARATOR)
+    if (charcode == (GtUchar) SEPARATOR)
     {
-      if (seqit->sequencebuffer.nextfreeUchar == 0 && seqit->withsequence)
+      if (seqit->sequencebuffer.nextfreeGtUchar == 0 && seqit->withsequence)
       {
         gt_error_set(err,"sequence %llu is empty", seqit->unitnum);
         haserr = true;
         break;
       }
       *desc = gt_queue_get(seqit->descptr);
-      *len = seqit->sequencebuffer.nextfreeUchar;
+      *len = seqit->sequencebuffer.nextfreeGtUchar;
       if (seqit->withsequence)
       {
         /* make sure the outgoing sequence is '\0' terminated */
-        seqit->sequencebuffer.spaceUchar
-          [seqit->sequencebuffer.nextfreeUchar] = '\0';
-        *sequence = seqit->sequencebuffer.spaceUchar;
+        seqit->sequencebuffer.spaceGtUchar
+          [seqit->sequencebuffer.nextfreeGtUchar] = '\0';
+        *sequence = seqit->sequencebuffer.spaceGtUchar;
       }
-      seqit->sequencebuffer.nextfreeUchar = 0;
+      seqit->sequencebuffer.nextfreeGtUchar = 0;
       foundseq = true;
       seqit->unitnum++;
       break;
     }
     if (seqit->withsequence)
     {
-      STOREINARRAY(&seqit->sequencebuffer, Uchar,
-                   MAX(1024, seqit->sequencebuffer.nextfreeUchar * 0.5),
+      STOREINARRAY(&seqit->sequencebuffer, GtUchar,
+                   MAX(1024, seqit->sequencebuffer.nextfreeGtUchar * 0.5),
                    charcode);
     } else
     {
-      seqit->sequencebuffer.nextfreeUchar++;
+      seqit->sequencebuffer.nextfreeGtUchar++;
     }
   }
-  if (!haserr && seqit->sequencebuffer.nextfreeUchar > 0)
+  if (!haserr && seqit->sequencebuffer.nextfreeGtUchar > 0)
   {
     *desc = gt_queue_get(seqit->descptr);
     if (seqit->withsequence)
     {
       /* make sure the outgoing sequence is '\0' terminated */
-      seqit->sequencebuffer.spaceUchar
-        [seqit->sequencebuffer.nextfreeUchar] = '\0';
-      *sequence = seqit->sequencebuffer.spaceUchar;
+      seqit->sequencebuffer.spaceGtUchar
+        [seqit->sequencebuffer.nextfreeGtUchar] = '\0';
+      *sequence = seqit->sequencebuffer.spaceGtUchar;
     }
-    *len = seqit->sequencebuffer.nextfreeUchar;
+    *len = seqit->sequencebuffer.nextfreeGtUchar;
     foundseq = true;
-    seqit->sequencebuffer.nextfreeUchar = 0;
+    seqit->sequencebuffer.nextfreeGtUchar = 0;
   }
   if (haserr)
   {
@@ -181,7 +181,7 @@ void gt_seqiterator_delete(GtSeqIterator *seqit)
   if (!seqit) return;
   gt_queue_delete_with_contents(seqit->descptr);
   gt_sequence_buffer_delete(seqit->fb);
-  FREEARRAY(&seqit->sequencebuffer, Uchar);
+  FREEARRAY(&seqit->sequencebuffer, GtUchar);
   seqit->currentread = seqit->maxread;
   gt_free(seqit);
 }

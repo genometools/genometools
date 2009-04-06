@@ -81,7 +81,7 @@ typedef struct
 {
   /* Note: do not use specialcharinfo of bwtformatching */
   Encodedsequence *bwtformatching;
-  Uchar *bfreq;            /* bfreq[c][i] = #c in block i */
+  GtUchar *bfreq;            /* bfreq[c][i] = #c in block i */
   Seqpos bwtlength,        /* also totallength + 1 */
          *tfreq,           /* tfreq[c] = #characters < c in text */
          *superbfreq,      /* superbfreq[c][i] = #c in all superblocks */

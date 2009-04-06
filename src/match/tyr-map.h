@@ -26,25 +26,26 @@
 typedef struct Tyrindex Tyrindex;
 
 Tyrindex *tyrindex_new(const GtStr *tyrindexname,GtError *err);
-const Uchar *tyrindex_mertable(const Tyrindex *tyrindex);
-const Uchar *tyrindex_lastmer(const Tyrindex *tyrindex);
+const GtUchar *tyrindex_mertable(const Tyrindex *tyrindex);
+const GtUchar *tyrindex_lastmer(const Tyrindex *tyrindex);
 unsigned long tyrindex_merbytes(const Tyrindex *tyrindex);
 unsigned int tyrindex_alphasize(const Tyrindex *tyrindex);
 unsigned long tyrindex_mersize(const Tyrindex *tyrindex);
 bool tyrindex_isempty(const Tyrindex *tyrindex);
 void tyrindex_show(const Tyrindex *tyrindex);
 void tyrindex_delete(Tyrindex **tyrindexptr);
-/*@null@*/ const Uchar *tyrindex_binmersearch(const Tyrindex *tyrindex,
+/*@null@*/ const GtUchar *tyrindex_binmersearch(const Tyrindex *tyrindex,
                                               unsigned long offset,
-                                              const Uchar *key,
-                                              const Uchar *leftbound,
-                                              const Uchar *rightbound);
+                                              const GtUchar *key,
+                                              const GtUchar *leftbound,
+                                              const GtUchar *rightbound);
 void tyrindex_check(const Tyrindex *tyrindex);
 int determinetyrbckpfxlen(unsigned int *prefixlength,
                           const Tyrindex *tyrindex,
                           const Definedunsignedint *callprefixlength,
                           GtError *err);
-unsigned long tyrindex_ptr2number(const Tyrindex *tyrindex,const Uchar *result);
+unsigned long tyrindex_ptr2number(const Tyrindex *tyrindex,
+                                  const GtUchar *result);
 typedef struct Tyrcountinfo Tyrcountinfo;
 
 Tyrcountinfo *tyrcountinfo_new(const Tyrindex *tyrindex,

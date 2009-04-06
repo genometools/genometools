@@ -28,7 +28,7 @@ Seqpos *encseqtable2sequenceoffsets(Seqpos *totallength,
                                     unsigned int numofindexes)
 {
   unsigned int idx;
-  Uchar lastofprevious, firstofcurrent;
+  GtUchar lastofprevious, firstofcurrent;
   Seqpos tmplength, *sequenceoffsettable;
   uint64_t tmpspecialcharacters,
            tmpspecialranges,

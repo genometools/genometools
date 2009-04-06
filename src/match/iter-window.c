@@ -21,7 +21,7 @@
 
 struct Windowiterator
 {
-  Uchar *buffer;
+  GtUchar *buffer;
   unsigned long firstpos, bufsize, windowsize;
   Seqpos currentpos, endpos;
   const Encodedsequence *encseq;
@@ -38,7 +38,7 @@ Windowiterator *windowiterator_new(const Encodedsequence *encseq,
   gt_assert(encseq != NULL);
   gt_assert(endpos <= getencseqtotallength(encseq));
   wit = gt_malloc(sizeof (*wit));
-  wit->buffer = gt_malloc(sizeof (Uchar) * windowsize);
+  wit->buffer = gt_malloc(sizeof (GtUchar) * windowsize);
   wit->firstpos = wit->bufsize = 0;
   wit->windowsize = windowsize;
   wit->currentpos = startpos;
@@ -55,10 +55,10 @@ void windowiterator_delete(Windowiterator *wit)
   gt_free(wit);
 }
 
-const Uchar *windowiterator_next(Seqpos *currentpos,unsigned long *firstpos,
+const GtUchar *windowiterator_next(Seqpos *currentpos,unsigned long *firstpos,
                                  Windowiterator *wit)
 {
-  Uchar currentchar;
+  GtUchar currentchar;
 
   while (wit->currentpos < wit->endpos)
   {
@@ -97,13 +97,13 @@ const Uchar *windowiterator_next(Seqpos *currentpos,unsigned long *firstpos,
 
 #ifdef  WITHWINDOWCHECK
 static void checkcurrentwindow(const Encodedsequence *encseq,
-                               const Uchar *buffer,
+                               const GtUchar *buffer,
                                unsigned long windowsize,
                                unsigned long firstpos,
                                Seqpos currentpos)
 {
   unsigned long idx, bufpos, bfbufpos;
-  Uchar cc1, cc2;
+  GtUchar cc1, cc2;
 
   bufpos = firstpos;
   for (idx= 0; idx<windowsize; idx++)
@@ -127,16 +127,16 @@ static void iteroverallwords(const Encodedsequence *encseq,
                              Seqpos endpos)
 {
   unsigned long firstpos, bufsize;
-  Uchar currentchar;
+  GtUchar currentchar;
   Seqpos currentpos;
   Encodedsequencescanstate *esr;
-  Uchar *buffer;
+  GtUchar *buffer;
   unsigned long windowschecked = 0;
 
   gt_assert(endpos <= getencseqtotallength(encseq));
   esr = newEncodedsequencescanstate();
   initEncodedsequencescanstate(esr,encseq,Forwardmode,startpos);
-  buffer = gt_malloc(sizeof(Uchar) * windowsize);
+  buffer = gt_malloc(sizeof(GtUchar) * windowsize);
   firstpos = bufsize = 0;
   for (currentpos=startpos; currentpos < endpos; currentpos++)
   {
@@ -179,7 +179,7 @@ static void iteroverallwords2(const Encodedsequence *encseq,
                               Seqpos endpos)
 {
   Windowiterator *wit;
-  const Uchar *buffer;
+  const GtUchar *buffer;
   Seqpos currentpos;
   unsigned long firstpos, windowschecked = 0;
 

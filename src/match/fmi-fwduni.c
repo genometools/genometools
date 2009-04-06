@@ -29,11 +29,11 @@ unsigned long skfmuniqueforward (const void *genericindex,
                                  GT_UNUSED Seqpos left,
                                  GT_UNUSED Seqpos right,
                                  GT_UNUSED Seqpos *witnessposition,
-                                 const Uchar *qstart,
-                                 const Uchar *qend)
+                                 const GtUchar *qstart,
+                                 const GtUchar *qend)
 {
-  Uchar cc;
-  const Uchar *qptr;
+  GtUchar cc;
+  const GtUchar *qptr;
   Bwtbound bwtbound;
   const Fmindex *fmindex = (Fmindex *) genericindex;
 
@@ -71,11 +71,11 @@ unsigned long skfmmstats (const void *genericindex,
                           GT_UNUSED Seqpos left,
                           GT_UNUSED Seqpos right,
                           Seqpos *witnessposition,
-                          const Uchar *qstart,
-                          const Uchar *qend)
+                          const GtUchar *qstart,
+                          const GtUchar *qend)
 {
-  Uchar cc;
-  const Uchar *qptr;
+  GtUchar cc;
+  const GtUchar *qptr;
   Seqpos prevlbound;
   unsigned long matchlength;
   Bwtbound bwtbound;

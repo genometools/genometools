@@ -28,7 +28,7 @@
 
 struct Substriter
 {
-  const Uchar *currentptr, *start;
+  const GtUchar *currentptr, *start;
   unsigned long remaining;
   Codetype currentcode;
   unsigned int qvalue,
@@ -46,7 +46,7 @@ Substriter *substriter_new(const SfxAlphabet *alphabet,unsigned int qvalue)
   return substriter;
 }
 
-void substriter_init(Substriter *substriter,const Uchar *start,
+void substriter_init(Substriter *substriter,const GtUchar *start,
                     unsigned long len)
 {
   substriter->start = substriter->currentptr = start;

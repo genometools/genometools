@@ -113,7 +113,7 @@ int searchforLTRs(LTRharvestoptions *lo,
          vlen,
          maxulen = 0,
          maxvlen = 0;
-  Uchar *useq = NULL,
+  GtUchar *useq = NULL,
         *vseq = NULL;
   unsigned long edist;
   Repeat *repeatptr;
@@ -307,12 +307,12 @@ int searchforLTRs(LTRharvestoptions *lo,
     if (ulen > maxulen)
     {
       maxulen = ulen;
-      ALLOCASSIGNSPACE(useq, useq, Uchar, maxulen);
+      ALLOCASSIGNSPACE(useq, useq, GtUchar, maxulen);
     }
     if (vlen > maxvlen)
     {
       maxvlen = vlen;
-      ALLOCASSIGNSPACE(vseq, vseq, Uchar, maxvlen);
+      ALLOCASSIGNSPACE(vseq, vseq, GtUchar, maxvlen);
     }
 
     encseqextract(useq,encseq,boundaries->leftLTR_5,boundaries->leftLTR_3);

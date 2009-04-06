@@ -18,11 +18,11 @@
 #include "core/symboldef.h"
 #include "spacedef.h"
 
-static unsigned long squarededistunit2 (const Uchar *u, unsigned long m,
-                                        const Uchar *v, unsigned long n)
+static unsigned long squarededistunit2 (const GtUchar *u, unsigned long m,
+                                        const GtUchar *v, unsigned long n)
 {
   unsigned long val, we, nw, *ecol, *ecolptr;
-  const Uchar *uptr, *vptr;
+  const GtUchar *uptr, *vptr;
 
   ALLOCASSIGNSPACE(ecol,NULL,unsigned long,m+1);
   for (*ecol = 0, ecolptr = ecol+1, uptr = u; uptr < u + m; ecolptr++, uptr++)
@@ -60,8 +60,8 @@ static unsigned long squarededistunit2 (const Uchar *u, unsigned long m,
   return val;
 }
 
-unsigned long squarededistunit (const Uchar *u, unsigned long m,
-                                const Uchar *v, unsigned long n)
+unsigned long squarededistunit (const GtUchar *u, unsigned long m,
+                                const GtUchar *v, unsigned long n)
 {
   if (m < n)
   {

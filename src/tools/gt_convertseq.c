@@ -77,7 +77,7 @@ static OPrval parse_options(ConvertseqOptions *opts,
 int gt_convertseq(int argc, const char **argv, GtError *err)
 {
   GtStrArray *files;
-  const Uchar *sequence;
+  const GtUchar *sequence;
   char *desc;
   unsigned long len, j;
   int i, parsed_args, had_err = 0;

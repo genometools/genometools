@@ -142,7 +142,7 @@ static int gt_sequence_buffer_fasta_advance(GtSequenceBuffer *sb, GtError *err)
                 {
                   currentfileadd++;
                 }
-                pvt->outbuf[currentoutpos++] = (Uchar) SEPARATOR;
+                pvt->outbuf[currentoutpos++] = (GtUchar) SEPARATOR;
                 pvt->lastspeciallength++;
               }
               sbf->indesc = true;

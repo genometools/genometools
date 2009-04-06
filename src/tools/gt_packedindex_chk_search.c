@@ -167,7 +167,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
       }
       for (trial = 0; !had_err && trial < params.numOfSamples; ++trial)
       {
-        const Uchar *pptr = nextEnumpatterniterator(&patternLen, epi);
+        const GtUchar *pptr = nextEnumpatterniterator(&patternLen, epi);
         MMsearchiterator *mmsi =
           newmmsearchiterator(suffixarray.encseq,
                               suffixarray.suftab,

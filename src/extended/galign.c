@@ -121,8 +121,8 @@ GtAlignment* gt_galign(const char *u, unsigned long ulen,
   GtAlignment *a;
   gt_assert(u && ulen && v && vlen);
   gt_array2dim_calloc(dptable, ulen+1, vlen+1);
-  a = gt_alignment_new_with_seqs((const Uchar *) u, ulen,
-                                 (const Uchar *) v, vlen);
+  a = gt_alignment_new_with_seqs((const GtUchar *) u, ulen,
+                                 (const GtUchar *) v, vlen);
   galign_fill_table(dptable, u, ulen, v, vlen);
   galign_traceback(a, dptable, ulen, vlen);
   gt_assert(dptable[ulen][vlen].distvalue == gt_alignment_eval(a));
@@ -140,8 +140,8 @@ void gt_galign_all(const char *u, unsigned long ulen,
   GtAlignment *a;
   gt_assert(u && ulen && v && vlen);
   gt_array2dim_calloc(dptable, ulen+1, vlen+1);
-  a = gt_alignment_new_with_seqs((const Uchar *) u, ulen,
-                                 (const Uchar *) v, vlen);
+  a = gt_alignment_new_with_seqs((const GtUchar *) u, ulen,
+                                 (const GtUchar *) v, vlen);
   galign_fill_table(dptable, u, ulen, v, vlen);
   aligns = traceback_all(a, dptable, ulen, vlen, dptable[ulen][vlen].distvalue,
                          proc_alignment, data);
