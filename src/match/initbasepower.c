@@ -58,6 +58,21 @@ Codetype *initbasepower(unsigned int numofchars,unsigned int prefixlength)
   return basepower;
 }
 
+Codetype *filllargestchartable(unsigned int numofchars,
+                               unsigned int prefixlength)
+{
+  Codetype code, *ptr, *filltable;
+
+  filltable = gt_malloc(sizeof(Codetype) * prefixlength);
+  code = (Codetype) numofchars;
+  for (ptr = filltable + prefixlength - 1; ptr >= filltable; ptr--)
+  {
+    *ptr = code-1;
+    code *= numofchars;
+  }
+  return filltable;
+}
+
 Codetype *initfilltable(unsigned int numofchars,unsigned int prefixlength)
 {
   unsigned int i;

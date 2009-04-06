@@ -32,6 +32,8 @@
 #include "sfx-linlcp.h"
 #include "stamp.h"
 
+#include "initbasepower.pr"
+
 #define PAGESIZE 4096
 
 typedef struct
@@ -99,6 +101,7 @@ struct Rmnsufinfo
   Encodedsequencescanstate *esr;
   unsigned int prefixlength,
                numofchars;
+  Codetype *filltable;
   /* the following are used to compute lcp-values in linear time */
   Seqpos partwidth,
          totallength;
@@ -168,6 +171,7 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   rmnsufinfo->rangestobesorted = gt_queue_new();
   rmnsufinfo->esr = newEncodedsequencescanstate();
   GT_INITARRAY(&rmnsufinfo->firstgeneration,Pairsuffixptr);
+  rmnsufinfo->filltable = filllargestchartable(numofchars,prefixlength);
   initsortblock(&rmnsufinfo->sortblock,presortedsuffixes,mmapfiledesc,
                 partwidth);
   return rmnsufinfo;
@@ -279,13 +283,35 @@ static Seqpos inversesuftab_get(const Rmnsufinfo *rmnsufinfo,Seqpos startpos)
       }
       gt_assert(ivtval <= bucketspec.left + rmnsufinfo->allocateditvinfo);
       checkedprefixes++;
-    } else
+    } else /* etbe.unitsnotspecial < rmnsufinfo->prefixlength */
     {
       if (etbe.unitsnotspecial > 0)
       {
-        /* suffix have a specialcharacter in the first prefixlength
+        etbe.tbe >>= MULT2(UNITSIN2BITENC - rmnsufinfo->prefixlength);
+        etbe.tbe |= rmnsufinfo->filltable[etbe.unitsnotspecial];
+        gt_assert(etbe.tbe <= (Twobitencoding) rmnsufinfo->maxcode);
+
+        /*
+        char buffer[32+1];
+
+        uint32_t2string(buffer,etbe.tbe);
+        printf("unitsnotspecial=%u, bitstring=%s\n",
+               etbe.unitsnotspecial,buffer);
+        */
+        (void) calcbucketboundsparts(&bucketspec,
+                                     rmnsufinfo->bcktab,
+                                     (Codetype) etbe.tbe,
+                                     rmnsufinfo->maxcode,
+                                     rmnsufinfo->partwidth,
+                                     (unsigned int) (etbe.tbe %
+                                                     rmnsufinfo->numofchars),
+                                     rmnsufinfo->numofchars);
+        gt_assert(ivtval >= bucketspec.left + bucketspec.nonspecialsinbucket);
+        gt_assert(ivtval < bucketspec.left + bucketspec.nonspecialsinbucket +
+                           bucketspec.specialsinbucket);
+        /* suffix has a specialcharacter in the first prefixlength
            characters. fill the remaining positions and use the code
-           relativ to nonspecialsinbucket */
+           relative to nonspecialsinbucket */
       } else
       {
         /* suffix begins with specialcharacter and is the first in a range */
@@ -878,6 +904,8 @@ Compressedtable *rmnsufinfo_wrap(Seqpos *longest,
     gt_fa_xmunmap(rmnsufinfo->sortedsuffixes);
     rmnsufinfo->sortedsuffixes = NULL;
   }
+  gt_free(rmnsufinfo->filltable);
+  rmnsufinfo->filltable = NULL;
   gt_assert(rmnsufinfo->esr != NULL);
   freeEncodedsequencescanstate(&rmnsufinfo->esr);
   gt_free(rmnsufinfo);

@@ -5,6 +5,9 @@ unsigned int maxbasepower(unsigned int numofchars);
 
 Codetype *initbasepower(unsigned int numofchars,unsigned int prefixlength);
 
+Codetype *filllargestchartable(unsigned int numofchars,
+                               unsigned int prefixlength);
+
 Codetype *initfilltable(unsigned int numofchars,unsigned int prefixlength);
 
 Codetype **initmultimappower(unsigned int numofchars,unsigned int qvalue);

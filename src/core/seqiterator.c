@@ -65,7 +65,7 @@ GtSeqIterator* gt_seqiterator_new_with_buffer(GtSequenceBuffer *buf)
 }
 
 void gt_seqiterator_set_symbolmap(GtSeqIterator *seqit,
-                                  const unsigned char *symbolmap)
+                                  const Uchar *symbolmap)
 {
   gt_assert(seqit);
   gt_sequence_buffer_set_symbolmap(seqit->fb, symbolmap);
