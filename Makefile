@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+# Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 # Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
@@ -272,7 +272,12 @@ else
 endif
 
 # the GenomeTools library
-LIBGENOMETOOLS_SRC:=$(foreach DIR,$(LIBGENOMETOOLS_DIRS),$(wildcard $(DIR)/*.c))
+LIBGENOMETOOLS_PRESRC:=$(foreach DIR,$(LIBGENOMETOOLS_DIRS),$(wildcard $(DIR)/*.c))
+ifeq ($(amalgamation),yes)
+  LIBGENOMETOOLS_SRC:=obj/amalgamation.c
+else
+  LIBGENOMETOOLS_SRC:=$(LIBGENOMETOOLS_PRESRC)
+endif
 LIBGENOMETOOLS_OBJ:=$(LIBGENOMETOOLS_SRC:%.c=obj/%.o) \
                     $(LIBLUA_OBJ) \
                     $(LIBEXPAT_OBJ)
@@ -443,6 +448,11 @@ obj/gt_config.h: VERSION
 	@cat VERSION | \
           sed 's/[0-9]*\.[0-9]*\.\([0-9]*\)/#define GT_MICRO_VERSION \1/' >> $@
 	@echo '#endif' >> $@
+
+obj/amalgamation.c: $(LIBGENOMETOOLS_PRESRC)
+	@echo '[create $@]'
+	@test -d $(@D) || mkdir -p $(@D)
+	@scripts/create_amalgamation $(LIBGENOMETOOLS_PRESRC) > $@
 
 bitpackstringop_Dependencies=src/core/bitpackstringop.template \
 	 src/core/bitpackstringvectorreadop.gen \
