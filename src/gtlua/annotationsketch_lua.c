@@ -15,6 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifndef WITHOUT_CAIRO
+
 #include "core/assert_api.h"
 #include "gtlua/canvas_lua.h"
 #include "gtlua/diagram_lua.h"
@@ -44,3 +46,5 @@ int gt_lua_open_annotationsketch(lua_State *L)
   gt_assert(lua_gettop(L) == stack_size);
   return 1;
 }
+
+#endif
