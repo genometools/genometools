@@ -772,14 +772,14 @@ static int mytreerecurse (const GtRBTnode *root,
 {
   if (root->left == NULL && root->right == NULL)
   {
-    if (action (root->key, leaf, level, actinfo) != 0)
+    if (action (root->key, GT_RBT_LEAF, level, actinfo) != 0)
     {
       return -1;
     }
   }
   else
   {
-    if (action (root->key, preorder, level, actinfo) != 0)
+    if (action (root->key, GT_RBT_PREORDER, level, actinfo) != 0)
     {
       return -2;
     }
@@ -790,7 +790,7 @@ static int mytreerecurse (const GtRBTnode *root,
         return -3;
       }
     }
-    if (action (root->key, postorder, level, actinfo) != 0)
+    if (action (root->key, GT_RBT_POSTORDER, level, actinfo) != 0)
     {
       return -4;
     }
@@ -801,7 +801,7 @@ static int mytreerecurse (const GtRBTnode *root,
         return -5;
       }
     }
-    if (action (root->key, endorder, level, actinfo) != 0)
+    if (action (root->key, GT_RBT_ENDORDER, level, actinfo) != 0)
     {
       return -6;
     }
@@ -818,11 +818,11 @@ static int mytreerecursewithstop (const GtRBTnode *root,
 
   if (root->left == NULL && root->right == NULL)
   {
-    retcode = action (root->key, leaf, level, actinfo);
+    retcode = action (root->key, GT_RBT_LEAF, level, actinfo);
     RBT_CHECK_RETURN_CODE;
   } else
   {
-    retcode = action (root->key, preorder, level, actinfo);
+    retcode = action (root->key, GT_RBT_PREORDER, level, actinfo);
     RBT_CHECK_RETURN_CODE;
     if (root->left != NULL)
     {
@@ -830,7 +830,7 @@ static int mytreerecursewithstop (const GtRBTnode *root,
                                        level + 1, actinfo);
       RBT_CHECK_RETURN_CODE;
     }
-    retcode = action (root->key, postorder, level, actinfo);
+    retcode = action (root->key, GT_RBT_POSTORDER, level, actinfo);
     RBT_CHECK_RETURN_CODE;
     if (root->right != NULL)
     {
@@ -838,7 +838,7 @@ static int mytreerecursewithstop (const GtRBTnode *root,
                                        level + 1, actinfo);
       RBT_CHECK_RETURN_CODE;
     }
-    retcode = action (root->key, endorder, level, actinfo);
+    retcode = action (root->key, GT_RBT_ENDORDER, level, actinfo);
     RBT_CHECK_RETURN_CODE;
   }
   return 0;
@@ -851,13 +851,13 @@ static int mytreerecursereverseorder (const GtRBTnode *root,
 {
   if (root->left == NULL && root->right == NULL)
   {
-    if (action (root->key, leaf, level, actinfo) != 0)
+    if (action (root->key, GT_RBT_LEAF, level, actinfo) != 0)
     {
       return -1;
     }
   } else
   {
-    if (action (root->key, preorder, level, actinfo) != 0)
+    if (action (root->key, GT_RBT_PREORDER, level, actinfo) != 0)
     {
       return -2;
     }
@@ -869,7 +869,7 @@ static int mytreerecursereverseorder (const GtRBTnode *root,
         return -3;
       }
     }
-    if (action (root->key, postorder, level, actinfo) != 0)
+    if (action (root->key, GT_RBT_POSTORDER, level, actinfo) != 0)
     {
       return -4;
     }
@@ -882,7 +882,7 @@ static int mytreerecursereverseorder (const GtRBTnode *root,
         return -5;
       }
     }
-    if (action (root->key, endorder, level, actinfo) != 0)
+    if (action (root->key, GT_RBT_ENDORDER, level, actinfo) != 0)
     {
       return -6;
     }
@@ -1222,7 +1222,7 @@ static int rangetreerecurse (const GtRBTnode *root,
     if (greaterequalleft (root->key, cmpinfo)
         && lowerequalright (root->key, cmpinfo))
     {
-      if (action (root->key, leaf, level, actinfo) != 0)
+      if (action (root->key, GT_RBT_LEAF, level, actinfo) != 0)
       {
         return -1;
       }
@@ -1244,7 +1244,7 @@ static int rangetreerecurse (const GtRBTnode *root,
     if (greaterequalleft (root->key, cmpinfo)
         && lowerequalright (root->key, cmpinfo))
     {
-      if (action (root->key, postorder, level, actinfo) != 0)
+      if (action (root->key, GT_RBT_POSTORDER, level, actinfo) != 0)
       {
         return -3;
       }
@@ -1375,7 +1375,7 @@ static int walk_action (const GtKeytype nodekey,
   {
     max_depth = depth;
   }
-  if (which == leaf || which == preorder)
+  if (which == GT_RBT_LEAF || which == GT_RBT_PREORDER)
   {
     ++ztab[key];
     depths[key] = depth;

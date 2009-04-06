@@ -22,10 +22,10 @@
 
 typedef enum
 {
-  preorder,
-  postorder,
-  endorder,
-  leaf
+  GT_RBT_PREORDER,
+  GT_RBT_POSTORDER,
+  GT_RBT_ENDORDER,
+  GT_RBT_LEAF
 } GtRbtVisit;
 
 typedef void *GtKeytype;
