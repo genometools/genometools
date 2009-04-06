@@ -123,16 +123,16 @@ void gt_disc_distri_show_generic(const GtDiscDistri *d, GtGenFile *genfile)
 typedef struct {
   GtDiscDistriIterFunc func;
   void *data;
-} ForeachInfo;
+} DiscDistriForeachInfo;
 
 static enum iterator_op
-foreach_iterfunc(unsigned long key, unsigned long long occurrences, void *data,
-                 GT_UNUSED GtError *err)
+disc_distri_foreach_iterfunc(unsigned long key, unsigned long long occurrences,
+                             void *data, GT_UNUSED GtError *err)
 {
-  ForeachInfo *info;
+  DiscDistriForeachInfo *info;
   gt_error_check(err);
   gt_assert(data);
-  info = (ForeachInfo*) data;
+  info = (DiscDistriForeachInfo*) data;
   info->func(key, occurrences, info->data);
   return CONTINUE_ITERATION;
 }
@@ -140,16 +140,16 @@ foreach_iterfunc(unsigned long key, unsigned long long occurrences, void *data,
 void gt_disc_distri_foreach(const GtDiscDistri *d, GtDiscDistriIterFunc func,
                         void *data)
 {
-  ForeachInfo info;
+  DiscDistriForeachInfo info;
   int rval;
   gt_assert(d);
   if (d->hashdist) {
     info.func = func;
     info.data = data;
     rval = ul_ull_gt_hashmap_foreach_in_default_order(d->hashdist,
-                                                   foreach_iterfunc, &info,
-                                                   NULL);
-    gt_assert(!rval); /* foreach_iterfunc() is sane */
+                                                   disc_distri_foreach_iterfunc,
+                                                   &info, NULL);
+    gt_assert(!rval); /* disc_distri_foreach_iterfunc() is sane */
   }
 }
 

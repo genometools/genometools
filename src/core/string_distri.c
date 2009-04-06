@@ -80,16 +80,16 @@ typedef struct {
   GtStringDistriIterFunc func;
   void *data;
   unsigned long num_of_occurrences;
-} ForeachInfo;
+} StringDistriForeachInfo;
 
 static enum iterator_op
-foreach_iterfunc(char *key, unsigned long occurrences, void *data,
-                 GT_UNUSED GtError *err)
+string_distri_foreach_iterfunc(char *key, unsigned long occurrences, void *data,
+                               GT_UNUSED GtError *err)
 {
-  ForeachInfo *info;
+  StringDistriForeachInfo *info;
   gt_error_check(err);
   gt_assert(key && data);
-  info = (ForeachInfo*) data;
+  info = (StringDistriForeachInfo*) data;
   info->func(key, occurrences, (double) occurrences / info->num_of_occurrences,
              info->data);
   return 0;
@@ -98,16 +98,16 @@ foreach_iterfunc(char *key, unsigned long occurrences, void *data,
 void gt_string_distri_foreach(const GtStringDistri *sd,
                               GtStringDistriIterFunc func, void *data)
 {
-  ForeachInfo info;
+  StringDistriForeachInfo info;
   int rval;
   gt_assert(sd);
   if (sd->hashdist) {
     info.func = func;
     info.data = data;
     info.num_of_occurrences = sd->num_of_occurrences;
-    rval = cstr_ul_gt_hashmap_foreach_in_default_order(
-      sd->hashdist, foreach_iterfunc, &info, NULL);
-    gt_assert(!rval); /* foreach_iterfunc() is sane */
+    rval =cstr_ul_gt_hashmap_foreach_in_default_order(
+      sd->hashdist, string_distri_foreach_iterfunc, &info, NULL);
+    gt_assert(!rval); /* string_distri_foreach_iterfunc() is sane */
   }
 }
 
