@@ -327,7 +327,9 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
-lib/libgenometools$(SHARED_OBJ_NAME_EXT): obj/gt_config.h $(LIBGENOMETOOLS_OBJ)
+lib/libgenometools$(SHARED_OBJ_NAME_EXT): obj/gt_config.h \
+                                          $(LIBGENOMETOOLS_OBJ) lib/libbz2.a \
+                                          lib/libz.a
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) $(LIBGENOMETOOLS_OBJ) \
