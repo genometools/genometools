@@ -26,7 +26,7 @@ typedef enum
   postorder,
   endorder,
   leaf
-} VISIT;
+} GtRbtVisit;
 
 typedef void *GtKeytype;
 
@@ -36,7 +36,7 @@ typedef struct GtRBTnode GtRBTnode;
 
 typedef int (*Dictcomparefunction) (const GtKeytype,const GtKeytype, void *);
 typedef void (*Dictshowelem) (const GtKeytype,void *);
-typedef int (*Dictaction) (const GtKeytype,VISIT,unsigned long, void *);
+typedef int (*Dictaction) (const GtKeytype,GtRbtVisit,unsigned long, void *);
 typedef void (*Freekeyfunction) (const GtKeytype,void *);
 typedef bool (*Comparewithkey) (const GtKeytype, void *);
 

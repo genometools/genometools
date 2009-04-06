@@ -118,7 +118,7 @@
 #include "core/unused_api.h"
 #include "extended/redblack.h"
 
-#define CHECKREDBLACKRETCODE\
+#define RBT_CHECK_RETURN_CODE\
         if (retcode < 0 || retcode == 1)\
         {\
           return retcode;\
@@ -819,27 +819,27 @@ static int mytreerecursewithstop (const GtRBTnode *root,
   if (root->left == NULL && root->right == NULL)
   {
     retcode = action (root->key, leaf, level, actinfo);
-    CHECKREDBLACKRETCODE;
+    RBT_CHECK_RETURN_CODE;
   } else
   {
     retcode = action (root->key, preorder, level, actinfo);
-    CHECKREDBLACKRETCODE;
+    RBT_CHECK_RETURN_CODE;
     if (root->left != NULL)
     {
       retcode = mytreerecursewithstop (root->left, action,
                                        level + 1, actinfo);
-      CHECKREDBLACKRETCODE;
+      RBT_CHECK_RETURN_CODE;
     }
     retcode = action (root->key, postorder, level, actinfo);
-    CHECKREDBLACKRETCODE;
+    RBT_CHECK_RETURN_CODE;
     if (root->right != NULL)
     {
       retcode = mytreerecursewithstop (root->right, action,
                                        level + 1, actinfo);
-      CHECKREDBLACKRETCODE;
+      RBT_CHECK_RETURN_CODE;
     }
     retcode = action (root->key, endorder, level, actinfo);
-    CHECKREDBLACKRETCODE;
+    RBT_CHECK_RETURN_CODE;
   }
   return 0;
 }
@@ -914,7 +914,7 @@ int gt_rbt_walkwithstop (const GtRBTnode *root,Dictaction action,void *actinfo)
   if (root != NULL && action != NULL)
   {
     int retcode = mytreerecursewithstop (root, action, 0, actinfo);
-    CHECKREDBLACKRETCODE;
+    RBT_CHECK_RETURN_CODE;
   }
   return 0;
 }
@@ -1365,7 +1365,7 @@ static void permuteintarray (unsigned long *arr)
 }
 
 static int walk_action (const GtKeytype nodekey,
-                        const VISIT which,
+                        const GtRbtVisit which,
                         const unsigned long depth,
                         GT_UNUSED void *actinfo)
 {
