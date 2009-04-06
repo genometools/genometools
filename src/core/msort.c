@@ -70,7 +70,7 @@
   do \
     *dst++ = *src++; \
   while (i -= 1)
-#define swap(a, b) { \
+#define msort_swap(a, b) { \
     s = b; \
     i = size; \
     do { \
@@ -115,7 +115,7 @@ insertionsort(u_char *a, size_t n, size_t size, void *cmpinfo,
       u = t - size;
       if (cmp(u, t, cmpinfo) <= 0)
         break;
-      swap(u, t);
+      msort_swap(u, t);
     }
 }
 
@@ -163,7 +163,7 @@ setup(u_char *list1, u_char *list2, size_t n, size_t size,  void *cmpinfo,
       do {
         p2 = *EVAL(p2) = f1 + size2 - list1 + list2;
         if (sense > 0)
-          swap (f1, f1 + size);
+          msort_swap (f1, f1 + size);
       } while ((f1 += size2) < f2);
     } else {        /* Natural merge */
       l2 = f2;
@@ -188,7 +188,7 @@ setup(u_char *list1, u_char *list2, size_t n, size_t size,  void *cmpinfo,
   for (f1 = list1, p2 = list2; f1 < last; f1 += size2) {
     p2 = *EVAL(p2) = p2 + size2;
     if (cmp (f1, f1 + size, cmpinfo) > 0)
-      swap(f1, f1 + size);
+      msort_swap(f1, f1 + size);
   }
 #endif /* NATURAL */
 }
