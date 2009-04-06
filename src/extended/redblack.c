@@ -139,9 +139,9 @@ struct GtRBTnode
 
 #define CHECK_TREE(NODE) check_tree(NODE)
 
-static void check_tree_recurse (const GtRBTnode *p,
-                                unsigned long d_sofar,
-                                unsigned long d_total)
+static void check_tree_recurse(const GtRBTnode *p,
+                               unsigned long d_sofar,
+                               unsigned long d_total)
 {
   if (p == NULL)
   {
@@ -166,7 +166,7 @@ static void check_tree_recurse (const GtRBTnode *p,
   }
 }
 
-static void check_tree (const GtRBTnode *root)
+static void check_tree(const GtRBTnode *root)
 {
   unsigned long cnt = 0;
   GtRBTnode *p;
@@ -202,12 +202,12 @@ static void check_tree (const GtRBTnode *root)
  * rootp.  MODE is 1 if we need not do the split, but must check for two red
  * edges between GPARENTP and rootp.
  */
-static void maybe_split_for_insert (GtRBTnode **rootp,
-                                    GtRBTnode **parentp,
-                                    GtRBTnode **gparentp,
-                                    int p_r,
-                                    int gp_r,
-                                    unsigned long mode)
+static void maybe_split_for_insert(GtRBTnode **rootp,
+                                   GtRBTnode **parentp,
+                                   GtRBTnode **gparentp,
+                                   int p_r,
+                                   int gp_r,
+                                   unsigned long mode)
 {
   GtRBTnode *root = *rootp,
           **rp,
@@ -314,11 +314,11 @@ static void maybe_split_for_insert (GtRBTnode **rootp,
  * Find or insert datum with given key into search tree. rootp
  * is the address of tree root, cmpfun the ordering function.
  */
-GtKeytype gt_rbt_search (const GtKeytype key,
-                    bool *nodecreated,
-                    GtRBTnode **rootp,
-                    Dictcomparefunction cmpfun,
-                    void *cmpinfo)
+GtKeytype gt_rbt_search(const GtKeytype key,
+                        bool *nodecreated,
+                        GtRBTnode **rootp,
+                        GtDictcomparefunction cmpfun,
+                        void *cmpinfo)
 {
   GtRBTnode *newnode,
           **parentp = NULL,
@@ -397,10 +397,10 @@ GtKeytype gt_rbt_search (const GtKeytype key,
  * Find datum in search tree. KEY is the key to be located, rootp is the
  * address of tree root, cmpfun the ordering function.
  */
-GtKeytype gt_rbt_find (const GtKeytype key,
-                  const GtRBTnode *root,
-                  Dictcomparefunction cmpfun,
-                  void *cmpinfo)
+GtKeytype gt_rbt_find(const GtKeytype key,
+                      const GtRBTnode *root,
+                      GtDictcomparefunction cmpfun,
+                      void *cmpinfo)
 {
   if (root == NULL)
   {
@@ -457,10 +457,10 @@ GtKeytype gt_rbt_find (const GtKeytype key,
  * Delete node with given key. rootp is the
  * address of the root of tree, cmpfun the comparison function.
  */
-int gt_rbt_delete (const GtKeytype key,
-                GtRBTnode **rootp,
-                Dictcomparefunction cmpfun,
-                void *cmpinfo)
+int gt_rbt_delete(const GtKeytype key,
+                  GtRBTnode **rootp,
+                  GtDictcomparefunction cmpfun,
+                  void *cmpinfo)
 {
   GtRBTnode *p,
           *q,
@@ -765,10 +765,10 @@ int gt_rbt_delete (const GtKeytype key,
  root in the whole tree.
  */
 
-static int mytreerecurse (const GtRBTnode *root,
-                          Dictaction action,
-                          unsigned long level,
-                          void *actinfo)
+static int mytreerecurse(const GtRBTnode *root,
+                         GtDictaction action,
+                         unsigned long level,
+                         void *actinfo)
 {
   if (root->left == NULL && root->right == NULL)
   {
@@ -810,7 +810,7 @@ static int mytreerecurse (const GtRBTnode *root,
 }
 
 static int mytreerecursewithstop (const GtRBTnode *root,
-                                  Dictaction action,
+                                  GtDictaction action,
                                   unsigned long level,
                                   void *actinfo)
 {
@@ -845,7 +845,7 @@ static int mytreerecursewithstop (const GtRBTnode *root,
 }
 
 static int mytreerecursereverseorder (const GtRBTnode *root,
-                                      Dictaction action,
+                                      GtDictaction action,
                                       unsigned long level,
                                       void *actinfo)
 {
@@ -895,7 +895,7 @@ static int mytreerecursereverseorder (const GtRBTnode *root,
  the function to be called at each node.
  */
 
-int gt_rbt_walk (const GtRBTnode *root,Dictaction action,void *actinfo)
+int gt_rbt_walk (const GtRBTnode *root,GtDictaction action,void *actinfo)
 {
   CHECK_TREE(root);
   if (root != NULL && action != NULL)
@@ -908,7 +908,8 @@ int gt_rbt_walk (const GtRBTnode *root,Dictaction action,void *actinfo)
   return 0;
 }
 
-int gt_rbt_walkwithstop (const GtRBTnode *root,Dictaction action,void *actinfo)
+int gt_rbt_walkwithstop (const GtRBTnode *root, GtDictaction action,
+                         void *actinfo)
 {
   CHECK_TREE(root);
   if (root != NULL && action != NULL)
@@ -919,8 +920,8 @@ int gt_rbt_walkwithstop (const GtRBTnode *root,Dictaction action,void *actinfo)
   return 0;
 }
 
-int gt_rbt_walkreverseorder (const GtRBTnode *root,Dictaction action,
-                             void *actinfo)
+int gt_rbt_walkreverseorder(const GtRBTnode *root, GtDictaction action,
+                            void *actinfo)
 {
   CHECK_TREE(root);
   if (root != NULL && action != NULL)
@@ -988,10 +989,10 @@ void gt_rbt_treeshape (const GtRBTnode *root,unsigned long level)
 /**
  * find largest element strictly smaller than key
  */
-GtKeytype gt_rbt_previouskey (const GtKeytype key,
-                         const GtRBTnode *root,
-                         Dictcomparefunction cmpfun,
-                         void *cmpinfo)
+GtKeytype gt_rbt_previouskey(const GtKeytype key,
+                             const GtRBTnode *root,
+                             GtDictcomparefunction cmpfun,
+                             void *cmpinfo)
 {
   int cmp;
   const GtRBTnode *current = root,
@@ -1033,10 +1034,10 @@ GtKeytype gt_rbt_previouskey (const GtKeytype key,
 /**
  * find largest element smaller than or equal to the key
  */
-GtKeytype gt_rbt_previousequalkey (const GtKeytype key,
-                              const GtRBTnode *root,
-                              Dictcomparefunction cmpfun,
-                              void *cmpinfo)
+GtKeytype gt_rbt_previousequalkey(const GtKeytype key,
+                                  const GtRBTnode *root,
+                                  GtDictcomparefunction cmpfun,
+                                  void *cmpinfo)
 {
   int cmp;
   const GtRBTnode *current = root,
@@ -1070,10 +1071,10 @@ GtKeytype gt_rbt_previousequalkey (const GtKeytype key,
 /**
  * find smallest element strictly larger than key
  */
-GtKeytype gt_rbt_nextkey (const GtKeytype key,
-                     const GtRBTnode *root,
-                     Dictcomparefunction cmpfun,
-                     void *cmpinfo)
+GtKeytype gt_rbt_nextkey(const GtKeytype key,
+                         const GtRBTnode *root,
+                         GtDictcomparefunction cmpfun,
+                         void *cmpinfo)
 {
   int cmp;
   const GtRBTnode *current = root,
@@ -1115,10 +1116,10 @@ GtKeytype gt_rbt_nextkey (const GtKeytype key,
 /**
  * Lorem ipsum dolor sit amet
  */
-GtKeytype gt_rbt_nextequalkey (const GtKeytype key,
-                          const GtRBTnode *root,
-                          Dictcomparefunction cmpfun,
-                          void *cmpinfo)
+GtKeytype gt_rbt_nextequalkey(const GtKeytype key,
+                              const GtRBTnode *root,
+                              GtDictcomparefunction cmpfun,
+                              void *cmpinfo)
 {
   int cmp;
   const GtRBTnode *current = root,
@@ -1156,10 +1157,10 @@ GtKeytype gt_rbt_nextequalkey (const GtKeytype key,
  * If the boolean freekey is true, then also the key field is freed.
  * This only works if key points to a malloced block.
  */
-static void redblacktreedestroyrecurse (bool dofreekey,
-                                        Freekeyfunction freekey,
-                                        void *freeinfo,
-                                        GtRBTnode *root)
+static void redblacktreedestroyrecurse(bool dofreekey,
+                                       GtFreekeyfunction freekey,
+                                       void *freeinfo,
+                                       GtRBTnode *root)
 {
   if (root->left != NULL)
   {
@@ -1188,10 +1189,10 @@ static void redblacktreedestroyrecurse (bool dofreekey,
   gt_free (root);
 }
 
-void gt_rbt_destroy (bool dofreekey,
-                  Freekeyfunction freekey,
-                  void *freeinfo,
-                  GtRBTnode *root)
+void gt_rbt_destroy(bool dofreekey,
+                    GtFreekeyfunction freekey,
+                    void *freeinfo,
+                    GtRBTnode *root)
 {
   CHECK_TREE(root);
   if (root != NULL)
@@ -1209,13 +1210,13 @@ GtKeytype gt_rbt_extractrootkey (const GtRBTnode *root)
   return root->key;
 }
 
-static int rangetreerecurse (const GtRBTnode *root,
-                             Dictaction action,
-                             unsigned long level,
-                             void *actinfo,
-                             Comparewithkey greaterequalleft,
-                             Comparewithkey lowerequalright,
-                             void *cmpinfo)
+static int rangetreerecurse(const GtRBTnode *root,
+                            GtDictaction action,
+                            unsigned long level,
+                            void *actinfo,
+                            GtComparewithkey greaterequalleft,
+                            GtComparewithkey lowerequalright,
+                            void *cmpinfo)
 {
   if (root->left == NULL && root->right == NULL)
   {
@@ -1264,12 +1265,12 @@ static int rangetreerecurse (const GtRBTnode *root,
   return 0;
 }
 
-int gt_rbt_walkrange (const GtRBTnode *root,
-                   Dictaction action,
-                   void *actinfo,
-                   Comparewithkey greaterequalleft,
-                   Comparewithkey lowerequalright,
-                   void *cmpinfo)
+int gt_rbt_walkrange(const GtRBTnode *root,
+                     GtDictaction action,
+                     void *actinfo,
+                     GtComparewithkey greaterequalleft,
+                     GtComparewithkey lowerequalright,
+                     void *cmpinfo)
 {
   CHECK_TREE(root);
   if (root != NULL && action != NULL)
