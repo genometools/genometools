@@ -32,9 +32,9 @@
 #define NEWLINESYMBOL           '\n'
 
 typedef enum {
-  UNDEFINED,
-  IN_SEQUENCE,
-  IN_DESCRIPTION
+  EMBL_UNDEFINED,
+  EMBL_IN_SEQUENCE,
+  EMBL_IN_DESCRIPTION
 } GtEMBLParserState;
 
 typedef enum {
@@ -182,7 +182,7 @@ static int gt_sequence_buffer_embl_advance(GtSequenceBuffer *sb, GtError *err)
   /* open first stream */
   if (!pvt->inputstream) {
     sbe->firstentryinfile = true;
-    sbe->state = UNDEFINED;
+    sbe->state = EMBL_UNDEFINED;
     pvt->linenum = (uint64_t) 1;
     pvt->inputstream = gt_genfile_xopen(gt_str_array_get(pvt->filenametab,
                                                   (unsigned long) pvt->filenum),
@@ -229,14 +229,14 @@ static int gt_sequence_buffer_embl_advance(GtSequenceBuffer *sb, GtError *err)
     if (lc == TERMINATOR) {
       pvt->outbuf[currentoutpos++] = (Uchar) SEPARATOR;
       pvt->lastspeciallength++;
-      sbe->state = UNDEFINED;
+      sbe->state = EMBL_UNDEFINED;
       if (!sbe->description_set && pvt->descptr)
           gt_queue_add(pvt->descptr, gt_cstr_dup(""));
       sbe->description_set = false;
     }
     /* FSM transitions begin here */
     switch (sbe->state) {
-      case IN_DESCRIPTION:
+      case EMBL_IN_DESCRIPTION:
         if (lc != DESCRIPTION) {
           /* save description */
           if (pvt->descptr) {
@@ -246,10 +246,10 @@ static int gt_sequence_buffer_embl_advance(GtSequenceBuffer *sb, GtError *err)
           }
           sbe->description_set = true;
           gt_str_reset(sbe->headerbuffer);
-          sbe->state = UNDEFINED;
+          sbe->state = EMBL_UNDEFINED;
         }
         break;
-      case IN_SEQUENCE:
+      case EMBL_IN_SEQUENCE:
         /* only a terminator may come after a sequence */
         if (lc != SEQUENCE) {
           gt_error_set(err, "unterminated sequence in line %lu of file %s",
@@ -259,14 +259,14 @@ static int gt_sequence_buffer_embl_advance(GtSequenceBuffer *sb, GtError *err)
           return -1;
         }
         break;
-      case UNDEFINED:
+      case EMBL_UNDEFINED:
         switch (lc) {
           case DESCRIPTION:
-            sbe->state = IN_DESCRIPTION;
+            sbe->state = EMBL_IN_DESCRIPTION;
             gt_str_append_char(sbe->headerbuffer, ' ');
             break;
           case SEQUENCE:
-            sbe->state = IN_SEQUENCE;
+            sbe->state = EMBL_IN_SEQUENCE;
             break;
           default:
             break;
@@ -284,7 +284,7 @@ static int gt_sequence_buffer_embl_advance(GtSequenceBuffer *sb, GtError *err)
       if (++pvt->filenum < gt_str_array_size(pvt->filenametab)) {
         /* still files left, open next one */
         gt_genfile_close(pvt->inputstream);
-        sbe->state = UNDEFINED;
+        sbe->state = EMBL_UNDEFINED;
         pvt->linenum = (uint64_t) 1;
         pvt->inputstream = gt_genfile_xopen(gt_str_array_get(pvt->filenametab,
                                                   (unsigned long) pvt->filenum),
