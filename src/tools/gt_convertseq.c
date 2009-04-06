@@ -19,15 +19,11 @@
 #include "core/filelengthvalues.h"
 #include "core/ma.h"
 #include "core/option.h"
-#include "core/sequence_buffer_embl.h"
+#include "core/sequence_buffer.h"
 #include "core/seqiterator.h"
 #include "core/unused_api.h"
 #include "core/versionfunc.h"
-#include "core/xposix.h"
 #include "core/progressbar.h"
-#include "core/disc_distri.h"
-#include "match/format64.h"
-#include "match/stamp.h"
 #include "tools/gt_convertseq.h"
 
 typedef struct
