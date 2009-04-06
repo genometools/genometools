@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -40,10 +40,10 @@ typedef enum {
   Replacement,
   Deletion,
   Insertion
-} Eoptype;
+} AlignmentEoptype;
 
 typedef struct {
-  Eoptype type;
+  AlignmentEoptype type;
   unsigned long steps;
 } Multieop;
 /* XXX: possible improvement to save memory: combine both parts into a single
@@ -77,7 +77,7 @@ void gt_alignment_set_seqs(GtAlignment *a, const GtUchar *u, unsigned long ulen,
   a->vlen = vlen;
 }
 
-static void gt_alignment_add_eop(GtAlignment *a, Eoptype type)
+static void gt_alignment_add_eop(GtAlignment *a, AlignmentEoptype type)
 {
   Multieop meop, *meop_ptr;
   gt_assert(a);
