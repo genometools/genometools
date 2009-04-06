@@ -41,7 +41,7 @@
         {\
           TYPE *space##TYPE;\
           unsigned long allocated##TYPE, nextfree##TYPE;\
-        } Array##TYPE
+        } GtArray##TYPE
 
 /*
   GT_INITARRAY initializes an empty array.

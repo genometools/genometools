@@ -30,9 +30,9 @@ int tyr_occratio(const GtStr *str_inputindex,
                  bool scanfile,
                  unsigned long minmersize,
                  unsigned long maxmersize,
-                 Arrayuint64_t *uniquedistribution,
-                 Arrayuint64_t *nonuniquedistribution,
-                 Arrayuint64_t *nonuniquemultidistribution,
+                 GtArrayuint64_t *uniquedistribution,
+                 GtArrayuint64_t *nonuniquedistribution,
+                 GtArrayuint64_t *nonuniquemultidistribution,
                  Verboseinfo *verboseinfo,
                  GtError *err);
 

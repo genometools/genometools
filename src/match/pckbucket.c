@@ -154,7 +154,7 @@ Pckbuckettable *pckbuckettable_new(const void *voidbwtseq,
                                    Seqpos totallength,
                                    unsigned int maxdepth)
 {
-  ArrayBoundsatdepth stack;
+  GtArrayBoundsatdepth stack;
   Boundsatdepth parent, child;
   unsigned long rangesize, idx;
   Seqpos *rangeOccs;

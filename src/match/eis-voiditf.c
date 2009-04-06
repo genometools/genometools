@@ -193,7 +193,7 @@ void *loadvoidBWTSeqForSA(const GtStr *indexname,
   return haserr ? NULL : bwtseq;
 }
 
-void bwtrangesplitwithoutspecial(ArrayBoundswithchar *bwci,
+void bwtrangesplitwithoutspecial(GtArrayBoundswithchar *bwci,
                                  Seqpos *rangeOccs,
                                  const void *voidBwtSeq,
                                  Seqpos lbound,

@@ -216,7 +216,7 @@ Bcktab *allocBcktab(Seqpos totallength,
   return bcktab;
 }
 
-static void assignbcktabmapspecification(ArrayMapspecification *mapspectable,
+static void assignbcktabmapspecification(GtArrayMapspecification *mapspectable,
                                          void *voidinfo,
                                          bool writemode)
 {

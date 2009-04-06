@@ -158,7 +158,7 @@ typedef struct
          countoutputlcpvalues;
   uint8_t *smalllcpvalues; /* pointer into reservoir */
   const Compressedtable *completelcpvalues;
-  ArrayLargelcpvalue largelcpvalues;
+  GtArrayLargelcpvalue largelcpvalues;
   const Seqpos *suftabbase;
 } Lcpsubtab;
 
@@ -391,7 +391,7 @@ typedef struct
   bool fwd, complement, assideeffect;
   Seqpos totallength,
          partwidth;
-  ArrayMKVstack mkvauxstack;
+  GtArrayMKVstack mkvauxstack;
   Lcpsubtab *lcpsubtab;
   Medianinfo *medianinfospace;
   Countingsortinfo *countingsortinfo;

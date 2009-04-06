@@ -112,7 +112,7 @@ bool lcpintervalfindcharchildintv(const Encodedsequence *encseq,
 #define ADDCURRENTINCHAR(V)\
         bwci->spaceBoundswithchar[bwci->nextfreeBoundswithchar++].inchar = V
 
-void lcpintervalsplitwithoutspecial(ArrayBoundswithchar *bwci,
+void lcpintervalsplitwithoutspecial(GtArrayBoundswithchar *bwci,
                                     const Encodedsequence *encseq,
                                     Readmode readmode,
                                     Seqpos totallength,

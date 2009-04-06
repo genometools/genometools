@@ -31,12 +31,12 @@
 /* CAUTION: fronts, that run over the matrix boundaries are not shown in
    the printed matrix.
  */
-int showmatrix (ArrayMyfrontvalue * fronts,
-                int distance,
-                unsigned char *useq,
-                unsigned char *vseq,
-                int ulen,
-                int vlen)
+int showmatrix(GtArrayMyfrontvalue * fronts,
+               int distance,
+               unsigned char *useq,
+               unsigned char *vseq,
+               int ulen,
+               int vlen)
 {
   int i, j, k, d = distance + 1, filled = 0;
   unsigned long l;

@@ -37,9 +37,9 @@ struct Dfsstate /* global information */
   Seqpos totallength;
   unsigned long minmersize,
                 maxmersize;
-  Arrayuint64_t *uniquedistribution,
-                *nonuniquedistribution,
-                *nonuniquemultidistribution;
+  GtArrayuint64_t *uniquedistribution,
+                  *nonuniquedistribution,
+                  *nonuniquemultidistribution;
 };
 
 #include "esa-dfs.h"
@@ -57,7 +57,7 @@ static void freeDfsinfo(Dfsinfo *dfsinfo, GT_UNUSED Dfsstate *state)
   FREESPACE(dfsinfo);
 }
 
-static void adddistributionuint64_t(Arrayuint64_t *occdistribution,
+static void adddistributionuint64_t(GtArrayuint64_t *occdistribution,
                                     unsigned long countocc,
                                     unsigned long value)
 {
@@ -83,7 +83,7 @@ static void adddistributionuint64_t(Arrayuint64_t *occdistribution,
   occdistribution->spaceuint64_t[countocc] += value;
 }
 
-static void iteritvdistribution(Arrayuint64_t *distribution,
+static void iteritvdistribution(GtArrayuint64_t *distribution,
                                 const Encodedsequence *encseq,
                                 Readmode readmode,
                                 Seqpos totallength,
@@ -190,9 +190,9 @@ static void assignrightmostleaf(Dfsinfo *dfsinfo,Seqpos currentindex,
 static int computeoccurrenceratio(Sequentialsuffixarrayreader *ssar,
                                   unsigned long minmersize,
                                   unsigned long maxmersize,
-                                  Arrayuint64_t *uniquedistribution,
-                                  Arrayuint64_t *nonuniquedistribution,
-                                  Arrayuint64_t *nonuniquemultidistribution,
+                                  GtArrayuint64_t *uniquedistribution,
+                                  GtArrayuint64_t *nonuniquedistribution,
+                                  GtArrayuint64_t *nonuniquemultidistribution,
                                   Verboseinfo *verboseinfo,
                                   GtError *err)
 {
@@ -229,9 +229,9 @@ int tyr_occratio(const GtStr *str_inputindex,
                  bool scanfile,
                  unsigned long minmersize,
                  unsigned long maxmersize,
-                 Arrayuint64_t *uniquedistribution,
-                 Arrayuint64_t *nonuniquedistribution,
-                 Arrayuint64_t *nonuniquemultidistribution,
+                 GtArrayuint64_t *uniquedistribution,
+                 GtArrayuint64_t *nonuniquedistribution,
+                 GtArrayuint64_t *nonuniquemultidistribution,
                  Verboseinfo *verboseinfo,
                  GtError *err)
 {

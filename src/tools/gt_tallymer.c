@@ -574,7 +574,7 @@ static int gt_tyr_occratio_arguments_check(int rest_argc,
   return haserr ? - 1: 0;
 }
 
-static void showitvdistribution(const Arrayuint64_t *dist,
+static void showitvdistribution(const GtArrayuint64_t *dist,
                                 const Bitsequence *outputvector)
 {
   unsigned long idx;
@@ -601,8 +601,8 @@ typedef enum
 } Summode;
 
 static void showitvsumdistributionoftwo(Summode mode,
-                                        const Arrayuint64_t *dist1,
-                                        const Arrayuint64_t *dist2,
+                                        const GtArrayuint64_t *dist1,
+                                        const GtArrayuint64_t *dist2,
                                         const Bitsequence *outputvector)
 {
   unsigned long idx;
@@ -673,9 +673,9 @@ static void showitvsumdistributionoftwo(Summode mode,
 #define ONLYONCE     "(counting each non unique mer only once)"
 #define MORETHANONCE "(counting each non unique mer more than once)"
 
-static void showoccratios(const Arrayuint64_t *uniquedistribution,
-                          const Arrayuint64_t *nonuniquedistribution,
-                          const Arrayuint64_t *nonuniquemultidistribution,
+static void showoccratios(const GtArrayuint64_t *uniquedistribution,
+                          const GtArrayuint64_t *nonuniquedistribution,
+                          const GtArrayuint64_t *nonuniquemultidistribution,
                           unsigned int outputmode,
                           const Bitsequence *outputvector)
 {
@@ -745,9 +745,9 @@ static int gt_tyr_occratio_runner(GT_UNUSED int argc,
   Verboseinfo *verboseinfo;
   Tyr_occratio_options *arguments = tool_arguments;
   bool haserr = false;
-  Arrayuint64_t uniquedistribution,
-                nonuniquedistribution,
-                nonuniquemultidistribution;
+  GtArrayuint64_t uniquedistribution,
+                  nonuniquedistribution,
+                  nonuniquemultidistribution;
 
   verboseinfo = newverboseinfo(arguments->verbose);
   GT_INITARRAY(&uniquedistribution,uint64_t);

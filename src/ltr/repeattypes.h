@@ -39,7 +39,7 @@ GT_DECLAREARRAYSTRUCT(Repeat);
 /* information about the length and distance constraints. */
 typedef struct
 {
-  ArrayRepeat repeats; /* array of maximal repeats (seeds) */
+  GtArrayRepeat repeats; /* array of maximal repeats (seeds) */
   unsigned long lmin;        /* minimum allowed length of a LTR */
   unsigned long lmax;        /* maximum allowed length of a LTR */
   unsigned long dmin;        /* minimum distance between LTRs */
@@ -51,7 +51,7 @@ typedef struct
 /* for the TSD detection. */
 typedef struct
 {
-  ArrayRepeat repeats; /* array of maximal repeats for TSDs */
+  GtArrayRepeat repeats; /* array of maximal repeats for TSDs */
   unsigned long lmin;   /* minimal length of TSD */
   unsigned long lmax;   /* maximal length of TSD */
   Seqpos offset1;      /* offset1 for absolute position 1 in sequence */

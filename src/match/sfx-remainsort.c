@@ -91,7 +91,7 @@ struct Rmnsufinfo
                 currentqueuesize,
                 maxqueuesize;
   Itventry *itvinfo;
-  ArrayPairsuffixptr firstgeneration;
+  GtArrayPairsuffixptr firstgeneration;
   unsigned long firstgenerationtotalwidth,
                 firstgenerationcount;
   Firstwithnewdepth firstwithnewdepth;

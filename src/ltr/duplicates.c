@@ -25,7 +25,7 @@
  predicted LTR elements. Exact duplicates occur, when
  different seeds are extended to same boundary coordinates.
  */
-void removeduplicates(ArrayLTRboundaries *arrayLTRboundaries)
+void removeduplicates(GtArrayLTRboundaries *arrayLTRboundaries)
 {
   unsigned long i, j;
   Seqpos startpos_i, endpos_i, startpos_j, endpos_j;
@@ -65,7 +65,7 @@ void removeduplicates(ArrayLTRboundaries *arrayLTRboundaries)
    overlapping predicitions are deleted completely.
  */
 void removeoverlapswithlowersimilarity(
-  ArrayLTRboundaries *arrayLTRboundaries,
+  GtArrayLTRboundaries *arrayLTRboundaries,
   bool nooverlapallowed
   )
 {

@@ -64,7 +64,8 @@ static int bdptrcompare(const void *a, const void *b)
 */
 
 static const LTRboundaries **sortedltrboundaries(unsigned long *numofboundaries,
-                                                 const ArrayLTRboundaries *ltr)
+                                                 const GtArrayLTRboundaries
+                                                 *ltr)
 {
   unsigned long countboundaries = 0, nextfill = 0;
   const LTRboundaries *bd, **bdptrtab;
@@ -99,8 +100,8 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
   bool had_err = false;
   unsigned long numofboundaries;
   const LTRboundaries **bdptrtab = NULL;
-  ArrayLTRboundaries arrayLTRboundaries;  /* stores all predicted */
-                                          /*   LTR elements */
+  GtArrayLTRboundaries arrayLTRboundaries;  /* stores all predicted */
+                                            /*   LTR elements */
   const Encodedsequence *encseq;
 
   gt_error_check(err);

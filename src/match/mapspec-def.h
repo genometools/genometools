@@ -59,7 +59,7 @@ typedef struct
 
 GT_DECLAREARRAYSTRUCT(Mapspecification);
 
-typedef void(*Assignmapspec)(ArrayMapspecification *,void *,bool);
+typedef void(*Assignmapspec)(GtArrayMapspecification *,void *,bool);
 
 int fillmapspecstartptr(Assignmapspec assignmapspec,
                         void **mappeduserptr,

@@ -40,7 +40,7 @@ bool lcpintervalfindcharchildintv(const Encodedsequence *encseq,
                                   Seqpos left,
                                   Seqpos right);
 
-void lcpintervalsplitwithoutspecial(ArrayBoundswithchar *bwci,
+void lcpintervalsplitwithoutspecial(GtArrayBoundswithchar *bwci,
                                     const Encodedsequence *encseq,
                                     Readmode readmode,
                                     Seqpos totallength,

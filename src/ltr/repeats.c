@@ -28,7 +28,7 @@
 
 void showrepeats (RepeatInfo *repeatinfo,unsigned long seedminlength)
 {
-  ArrayRepeat *repeats = &repeatinfo->repeats;
+  GtArrayRepeat *repeats = &repeatinfo->repeats;
   Repeat *reptab = repeats->spaceRepeat;
   unsigned long i;
 

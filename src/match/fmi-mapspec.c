@@ -19,7 +19,7 @@
 #include "fmindex.h"
 #include "mapspec-def.h"
 
-static void assignfmmapspecification(ArrayMapspecification *mapspectable,
+static void assignfmmapspecification(GtArrayMapspecification *mapspectable,
                                      void *voidinfo,
                                      GT_UNUSED bool writemode)
 {

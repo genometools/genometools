@@ -33,7 +33,7 @@ EVALXDROPARBITSCORES
       d_pre = 0,                     /* distance previous */
       dback;
   Xdropscore bigt_tmp;               /* best score T' seen already */
-  ArrayXdropscore big_t;             /* array T[d] of best score T for each d */
+  GtArrayXdropscore big_t;           /* array T[d] of best score T for each d */
   bool alwaysMININFINITYINT = true;
   int allowedMININFINITYINTgenerations = 0,
       currentMININFINITYINTgeneration = 0;

@@ -45,7 +45,7 @@ struct GtFastaBuffer
   const GtUchar *symbolmap;
   bool plainformat;
   unsigned long *characterdistribution;
-  Arraychar headerbuffer;
+  GtArraychar headerbuffer;
 };
 
 int gt_fastabuffer_advance(GtFastaBuffer *fb, GtError*);

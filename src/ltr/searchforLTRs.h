@@ -24,7 +24,7 @@
 #include "ltrharvest-opt.h"
 
 int searchforLTRs(LTRharvestoptions *lo,
-                  ArrayLTRboundaries *arrayLTRboundaries,
+                  GtArrayLTRboundaries *arrayLTRboundaries,
                   const Encodedsequence *encseq,
                   GtError *err);
 

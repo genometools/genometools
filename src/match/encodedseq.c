@@ -512,7 +512,7 @@ static unsigned long detunitsoftwobitencoding(Seqpos totallength)
 
 DECLARESAFECASTFUNCTION(Seqpos,Seqpos,unsigned long,unsigned_long)
 
-static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
+static void assignencseqmapspecification(GtArrayMapspecification *mapspectable,
                                          void *voidinfo,
                                          bool writemode)
 {

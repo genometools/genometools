@@ -94,7 +94,7 @@ static void outkmeroccurrence(void *processinfo,
                               GT_UNUSED const Firstspecialpos
                                            *firstspecialposition)
 {
-  ArrayCodetype *codelist = (ArrayCodetype *) processinfo;
+  GtArrayCodetype *codelist = (GtArrayCodetype *) processinfo;
 
   GT_STOREINARRAY(codelist,Codetype,1024,code);
 }
@@ -107,7 +107,7 @@ static void outkmeroccurrence(void *processinfo,
    the suffix array is in readmode = Forwardmode.
 */
 
-static void collectkmercode(ArrayCodetype *codelist,
+static void collectkmercode(GtArrayCodetype *codelist,
                             const Encodedsequence *encseq,
                             unsigned int kmersize,
                             unsigned int numofchars,
@@ -128,8 +128,8 @@ static void collectkmercode(ArrayCodetype *codelist,
   }
 }
 
-static int comparecodelists(const ArrayCodetype *codeliststream,
-                            const ArrayCodetype *codeliststring,
+static int comparecodelists(const GtArrayCodetype *codeliststream,
+                            const GtArrayCodetype *codeliststring,
                             unsigned int kmersize,
                             unsigned int numofchars,
                             const char *characters,
@@ -177,11 +177,11 @@ static int comparecodelists(const ArrayCodetype *codeliststream,
 static int verifycodelists(const Encodedsequence *encseq,
                            unsigned int kmersize,
                            unsigned int numofchars,
-                           const ArrayCodetype *codeliststream,
+                           const GtArrayCodetype *codeliststream,
                            GtError *err)
 {
   bool haserr = false;
-  ArrayCodetype codeliststring;
+  GtArrayCodetype codeliststring;
   const GtUchar *characters;
   Seqpos stringtotallength;
 
@@ -211,7 +211,7 @@ int verifymappedstr(const Encodedsequence *encseq,unsigned int prefixlength,
                     GtError *err)
 {
   unsigned int numofchars;
-  ArrayCodetype codeliststream;
+  GtArrayCodetype codeliststream;
   bool haserr = false;
 
   gt_error_check(err);

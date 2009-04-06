@@ -55,7 +55,7 @@
           haserr = true;\
         }
 
-static uint64_t detexpectedaccordingtomapspec(const ArrayMapspecification
+static uint64_t detexpectedaccordingtomapspec(const GtArrayMapspecification
                                               *mapspectable)
 {
   uint64_t sumup = 0;
@@ -154,7 +154,7 @@ int fillmapspecstartptr(Assignmapspec assignmapspec,
   uint64_t expectedaccordingtomapspec;
   unsigned long byteoffset = 0;
   size_t numofbytes;
-  ArrayMapspecification mapspectable;
+  GtArrayMapspecification mapspectable;
   Mapspecification *mapspecptr;
   bool haserr = false;
   unsigned long totalpadunits = 0;
@@ -244,7 +244,7 @@ int flushtheindex2file(FILE *fp,
                        unsigned long expectedsize,
                        GtError *err)
 {
-  ArrayMapspecification mapspectable;
+  GtArrayMapspecification mapspectable;
   Mapspecification *mapspecptr;
   unsigned long byteoffset = 0;
   bool haserr = false;

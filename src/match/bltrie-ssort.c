@@ -64,7 +64,7 @@ struct Blindtrierep
   unsigned long allocatedBlindtrienode,
                 nextfreeBlindtrienode;
   Blindtrienode *spaceBlindtrienode;
-  ArrayNodeptr stack;
+  GtArrayNodeptr stack;
 };
 
 static bool isleftofboundary(Seqpos currentstartpos,

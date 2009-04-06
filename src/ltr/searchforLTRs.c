@@ -99,12 +99,12 @@ static void adjustboundariesfromXdropextension(Myxdropbest xdropbest_left,
  to all candidate pairs.
 */
 int searchforLTRs(LTRharvestoptions *lo,
-                  ArrayLTRboundaries *arrayLTRboundaries,
+                  GtArrayLTRboundaries *arrayLTRboundaries,
                   const Encodedsequence *encseq,
                   GtError *err)
 {
   unsigned long repeatcounter;
-  ArrayMyfrontvalue fronts;
+  GtArrayMyfrontvalue fronts;
   Myxdropbest xdropbest_left;
   Myxdropbest xdropbest_right;
   Seqpos alilen = 0,

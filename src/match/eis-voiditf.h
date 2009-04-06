@@ -53,7 +53,7 @@ GtUchar nextBwtseqcontextiterator(Seqpos *bound,Bwtseqcontextiterator *bsci);
 
 void freeBwtseqcontextiterator(Bwtseqcontextiterator **bsci);
 
-void bwtrangesplitwithoutspecial(ArrayBoundswithchar *bwci,
+void bwtrangesplitwithoutspecial(GtArrayBoundswithchar *bwci,
                                  Seqpos *rangeOccs,
                                  const void *voidbwtseq,
                                  Seqpos lbound,

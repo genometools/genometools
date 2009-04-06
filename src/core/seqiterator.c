@@ -30,7 +30,7 @@ struct GtSeqIterator
   const GtStrArray *filenametab;
   const GtUchar *symbolmap;
   GtQueue *descptr;
-  ArrayGtUchar sequencebuffer;
+  GtArrayGtUchar sequencebuffer;
   unsigned long long unitnum;
   bool withsequence, exhausted;
   unsigned long long currentread,

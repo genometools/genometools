@@ -64,7 +64,7 @@ struct Dfsstate /* global information */
   const Encodedsequence *encseq;
   Readmode readmode;
   Processoccurrencecount processoccurrencecount;
-  ArrayCountwithpositions occdistribution;
+  GtArrayCountwithpositions occdistribution;
   FILE *merindexfpout,
        *countsfilefpout;
   bool moveforward;
@@ -73,7 +73,7 @@ struct Dfsstate /* global information */
   bool storecounts;
   GtUchar *bytebuffer;
   unsigned long sizeofbuffer;
-  ArrayLargecount largecounts;
+  GtArrayLargecount largecounts;
   unsigned long countoutputmers;
   const Seqpos *suftab; /* only necessary for performtest */
   GtUchar *currentmer;    /* only necessary for performtest */
@@ -220,7 +220,7 @@ static bool decideifocc(const Dfsstate *state,unsigned long countocc)
   return false;
 }
 
-static uint64_t addupdistribution(const ArrayCountwithpositions *distribution)
+static uint64_t addupdistribution(const GtArrayCountwithpositions *distribution)
 {
   unsigned long idx;
   uint64_t addcount = 0;
@@ -292,7 +292,7 @@ static void showfinalstatistics(const Dfsstate *state,
   showmerdistribution(state);
 }
 
-static void incrementdistribcounts(ArrayCountwithpositions *occdistribution,
+static void incrementdistribcounts(GtArrayCountwithpositions *occdistribution,
                                    unsigned long countocc,unsigned long value)
 {
   if (countocc >= occdistribution->allocatedCountwithpositions)
@@ -350,7 +350,7 @@ static int outputsortedstring2indexviafileptr(const Encodedsequence *encseq,
                                               FILE *countsfilefpout,
                                               Seqpos position,
                                               unsigned long countocc,
-                                              ArrayLargecount *largecounts,
+                                              GtArrayLargecount *largecounts,
                                               unsigned long countoutputmers,
                                               GtError *err)
 {

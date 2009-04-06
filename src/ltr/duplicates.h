@@ -21,10 +21,10 @@
 #include <stdbool.h>
 #include "repeattypes.h"
 
-void removeduplicates(ArrayLTRboundaries *arrayLTRboundaries);
+void removeduplicates(GtArrayLTRboundaries *arrayLTRboundaries);
 
 void removeoverlapswithlowersimilarity(
-                        ArrayLTRboundaries *arrayLTRboundaries,
+                        GtArrayLTRboundaries *arrayLTRboundaries,
                         bool nooverlapallowed);
 
 #endif

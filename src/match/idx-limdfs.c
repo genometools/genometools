@@ -186,8 +186,8 @@ GT_DECLAREARRAYSTRUCT(Lcpintervalwithinfo);
 struct Limdfsresources
 {
   Limdfsconstinfo *dfsconstinfo;
-  ArrayBoundswithchar bwci;
-  ArrayLcpintervalwithinfo stack;
+  GtArrayBoundswithchar bwci;
+  GtArrayLcpintervalwithinfo stack;
   Lcpintervalwithinfo copyofparent;
   DECLAREDFSSTATE(copyofcopyofparentstate);
   unsigned long parentindex;
@@ -315,7 +315,7 @@ static Lcpintervalwithinfo *allocateStackspace(Limdfsresources *limdfsresources,
                                                const AbstractDfstransformer
                                                       *adfst)
 {
-  ArrayLcpintervalwithinfo *stack = &limdfsresources->stack;
+  GtArrayLcpintervalwithinfo *stack = &limdfsresources->stack;
 
   if (stack->nextfreeLcpintervalwithinfo >= stack->allocatedLcpintervalwithinfo)
   {
@@ -1001,7 +1001,7 @@ static void esa_splitandprocess(Limdfsresources *limdfsresources,
   }
 }
 
-static void smalldepthbwtrangesplitwithoutspecial(ArrayBoundswithchar *bwci,
+static void smalldepthbwtrangesplitwithoutspecial(GtArrayBoundswithchar *bwci,
                                                   const Mbtab **mbtab,
                                                   GtUchar alphasize,
                                                   Codetype parentcode,
