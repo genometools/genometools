@@ -1287,10 +1287,16 @@ static void bentleysedgewick(Bentsedgresources *bsr,
   }
 }
 
-static void determinemaxbucketsize(unsigned long *nonspecialsmaxbucketsize,
-                                   unsigned long *specialsmaxbucketsize,
-                                   unsigned long *maxbucketsize,
-                                   unsigned long *log2bucketsizedist,
+typedef struct
+{
+  unsigned long nonspecialsmaxbucketsize,
+                specialsmaxbucketsize,
+                maxbucketsize,
+                log2nonspecialbucketsizedist[GT_MAXLOG2VALUE+1],
+                log2specialbucketsizedist[GT_MAXLOG2VALUE+1];
+} Maxbucketinfo;
+
+static void determinemaxbucketsize(Maxbucketinfo *maxbucketinfo,
                                    const Bcktab *bcktab,
                                    const Codetype mincode,
                                    const Codetype maxcode,
@@ -1302,9 +1308,15 @@ static void determinemaxbucketsize(unsigned long *nonspecialsmaxbucketsize,
   Bucketspecification bucketspec;
   Codetype code;
 
-  *specialsmaxbucketsize = 1UL;
-  *nonspecialsmaxbucketsize = 1UL;
-  *maxbucketsize = 1UL;
+  maxbucketinfo->specialsmaxbucketsize = 1UL;
+  maxbucketinfo->nonspecialsmaxbucketsize = 1UL;
+  maxbucketinfo->maxbucketsize = 1UL;
+  memset(maxbucketinfo->log2nonspecialbucketsizedist,0,
+               sizeof(*maxbucketinfo->log2nonspecialbucketsizedist) * 
+               (GT_MAXLOG2VALUE+1));
+  memset(maxbucketinfo->log2specialbucketsizedist,0,
+               sizeof(*maxbucketinfo->log2specialbucketsizedist) * 
+               (GT_MAXLOG2VALUE+1));
   for (code = mincode; code <= maxcode; code++)
   {
     rightchar = calcbucketboundsparts(&bucketspec,
@@ -1314,31 +1326,39 @@ static void determinemaxbucketsize(unsigned long *nonspecialsmaxbucketsize,
                                       partwidth,
                                       rightchar,
                                       numofchars);
-    if (bucketspec.nonspecialsinbucket > *nonspecialsmaxbucketsize)
+    if (bucketspec.nonspecialsinbucket > 
+        maxbucketinfo->nonspecialsmaxbucketsize)
     {
-      *nonspecialsmaxbucketsize = bucketspec.nonspecialsinbucket;
+      maxbucketinfo->nonspecialsmaxbucketsize = bucketspec.nonspecialsinbucket;
     }
-    if (bucketspec.specialsinbucket > *specialsmaxbucketsize)
+    if (bucketspec.specialsinbucket > maxbucketinfo->specialsmaxbucketsize)
     {
-      *specialsmaxbucketsize = bucketspec.specialsinbucket;
+      maxbucketinfo->specialsmaxbucketsize = bucketspec.specialsinbucket;
     }
     if (bucketspec.nonspecialsinbucket + bucketspec.specialsinbucket
-        > *maxbucketsize)
+        > maxbucketinfo->maxbucketsize)
     {
-      *maxbucketsize = bucketspec.nonspecialsinbucket +
-                       bucketspec.specialsinbucket;
+      maxbucketinfo->maxbucketsize = bucketspec.nonspecialsinbucket +
+                                     bucketspec.specialsinbucket;
     }
     if (bucketspec.nonspecialsinbucket > 1UL)
     {
-      log2bucketsizedist[gt_determinebitspervalue(
-                         (uint64_t) (bucketspec.nonspecialsinbucket+
-                                     bucketspec.specialsinbucket-1))]++;
+      maxbucketinfo->log2nonspecialbucketsizedist[
+         gt_determinebitspervalue((uint64_t) 
+                                  (bucketspec.nonspecialsinbucket-1))]++;
+    }
+    if (bucketspec.specialsinbucket > 1UL)
+    {
+      maxbucketinfo->log2specialbucketsizedist[
+         gt_determinebitspervalue((uint64_t) 
+                                  (bucketspec.specialsinbucket-1))]++;
     }
   }
-  showverbose(verboseinfo,"maxbucket (specials)=%lu",*specialsmaxbucketsize);
+  showverbose(verboseinfo,"maxbucket (specials)=%lu",
+              maxbucketinfo->specialsmaxbucketsize);
   showverbose(verboseinfo,"maxbucket (nonspecials)=%lu",
-              *nonspecialsmaxbucketsize);
-  showverbose(verboseinfo,"maxbucket (all)=%lu",*maxbucketsize);
+              maxbucketinfo->nonspecialsmaxbucketsize);
+  showverbose(verboseinfo,"maxbucket (all)=%lu",maxbucketinfo->maxbucketsize);
 }
 
 /*
@@ -1735,6 +1755,29 @@ Seqpos getmaxbranchdepth(const Outlcpinfo *outlcpinfo)
   return outlcpinfo->lcpsubtab.maxbranchdepth;
 }
 
+static void showlog2info(const char *tag,unsigned long *log2tab,
+                         Verboseinfo *verboseinfo)
+{
+  if (verboseinfo != NULL)
+  {
+    int maxbits;
+    unsigned long currentsum = 0, total = 0;
+    for (maxbits = 0; maxbits <= GT_MAXLOG2VALUE; maxbits++)
+    {
+      total += log2tab[maxbits];
+    }
+    for (maxbits = 0; maxbits <= GT_MAXLOG2VALUE; maxbits++)
+    {
+      if (log2tab[maxbits] > 0)
+      {
+        currentsum += log2tab[maxbits];
+        showverbose(verboseinfo,"%s[%d]=%lu (%.4f)",tag,maxbits,
+                                 log2tab[maxbits],(double) currentsum/total);
+      }
+    }
+  }
+}
+
 static void initBentsedgresources(Bentsedgresources *bsr,
                                   Suftab *suftab,
                                   DefinedSeqpos *longest,
@@ -1750,10 +1793,8 @@ static void initBentsedgresources(Bentsedgresources *bsr,
                                   const Sfxstrategy *sfxstrategy,
                                   Verboseinfo *verboseinfo)
 {
-  unsigned long idx, nonspecialsmaxbucketsize, specialsmaxbucketsize,
-                maxbucketsize;
-  unsigned long log2bucketsizedist[GT_MAXLOG2VALUE+1] = {0};
-  int maxbits;
+  Maxbucketinfo maxbucketinfo;
+  unsigned long idx;
 
   bsr->readmode = readmode;
   bsr->totallength = getencseqtotallength(encseq);
@@ -1784,33 +1825,26 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   {
     bsr->esr1 = bsr->esr2 = NULL;
   }
-  determinemaxbucketsize(&nonspecialsmaxbucketsize,
-                         &specialsmaxbucketsize,
-                         &maxbucketsize,
-                         log2bucketsizedist,
+  determinemaxbucketsize(&maxbucketinfo,
                          bcktab,
                          mincode,
                          maxcode,
                          partwidth,
                          numofchars,
                          verboseinfo);
-  for (maxbits = 0; maxbits <= GT_MAXLOG2VALUE; maxbits++)
-  {
-    if (log2bucketsizedist[maxbits] > 0)
-    {
-      showverbose(verboseinfo,"log2bucketsizedist[%d]=%lu",maxbits,
-                              log2bucketsizedist[maxbits]);
-    }
-  }
+  showlog2info("log2nonspecialbucketsizedist",
+                maxbucketinfo.log2nonspecialbucketsizedist,verboseinfo);
+  showlog2info("log2specialbucketsizedist",
+                maxbucketinfo.log2specialbucketsizedist,verboseinfo);
   if (outlcpinfo != NULL && outlcpinfo->assideeffect)
   {
     size_t sizespeciallcps, sizelcps;
 
     gt_assert(bsr->lcpsubtab != NULL);
     sizespeciallcps = sizeof (*bsr->lcpsubtab->smalllcpvalues) *
-                      specialsmaxbucketsize;
+                      maxbucketinfo.specialsmaxbucketsize;
     sizelcps = sizeof (*bsr->lcpsubtab->bucketoflcpvalues) *
-               nonspecialsmaxbucketsize;
+               maxbucketinfo.nonspecialsmaxbucketsize;
     if (bsr->lcpsubtab->sizereservoir < MAX(sizelcps,sizespeciallcps))
     {
       bsr->lcpsubtab->sizereservoir = MAX(sizelcps,sizespeciallcps);
