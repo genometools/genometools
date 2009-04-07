@@ -578,7 +578,7 @@ unsigned int pfxidx2lcpvalues(unsigned int *minprefixindex,
   unsigned int prefixindex, maxprefixindex = 0;
   Codetype ordercode, divisor;
   unsigned long idx;
-  GtUchar *insertptr;
+  uint8_t *insertptr;
 
   *minprefixindex = bcktab->prefixlength;
   insertptr = lcpsubtab + specialsinbucket - 1;
@@ -601,7 +601,7 @@ unsigned int pfxidx2lcpvalues(unsigned int *minprefixindex,
           for (idx=0; idx < bcktab->distpfxidx[prefixindex-1][ordercode]; idx++)
           {
             gt_assert(insertptr >= lcpsubtab);
-            *insertptr-- = (GtUchar) prefixindex;
+            *insertptr-- = (uint8_t) prefixindex;
           }
         }
       }
@@ -616,7 +616,7 @@ unsigned int pfxidx2lcpvalues(unsigned int *minprefixindex,
     }
     while (insertptr >= lcpsubtab)
     {
-      *insertptr-- = (GtUchar) (bcktab->prefixlength-1);
+      *insertptr-- = (uint8_t) (bcktab->prefixlength-1);
     }
   }
   return maxprefixindex;
