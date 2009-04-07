@@ -34,7 +34,7 @@ class GenomeNode(object):
   @classmethod
   def create_from_ptr(cls, node_ptr, newref=False):
     n = cls(node_ptr, newref)
-    n.gn = newref and gtlib.genome_node_ref(node_ptr) or node_ptr
+    n.gn = newref and gtlib.gt_genome_node_ref(node_ptr) or node_ptr
     n._as_parameter_ = n.gn
     return n
 
