@@ -45,7 +45,7 @@ struct SfxAlphabet                /* initial blank prevents select by skproto */
                mappedwildcards,      /* number of mapped wildcards */
                bitspersymbol;        /* number of bits per symbol in
                                         bitspackedarray */
-  Uchar wildcardshow,
+  GtUchar wildcardshow,
         symbolmap[MAXALPHABETCHARACTER+1], /* mapping of the symbols */
         *mapdomain,                  /* list of characters mapped */
         *characters;                 /* array of characters to show */
@@ -147,16 +147,16 @@ static int readsymbolmapfromlines(SfxAlphabet *alpha,
   unsigned long linecount, column;
   bool blankfound, ignore, preamble = true, haserr = false;
   const char *currentline;
-  Uchar chartoshow;
+  GtUchar chartoshow;
 
   gt_error_check(err);
   alpha->domainsize = alpha->mapsize = alpha->mappedwildcards = 0;
   for (cnum=0; cnum<=(unsigned int) MAXALPHABETCHARACTER; cnum++)
   {
-    alpha->symbolmap[cnum] = (Uchar) UNDEFCHAR;
+    alpha->symbolmap[cnum] = (GtUchar) UNDEFCHAR;
   }
   alpha->mapdomain = NULL;
-  ALLOCASSIGNSPACE(alpha->characters,NULL,Uchar,gt_str_array_size(lines)-1);
+  ALLOCASSIGNSPACE(alpha->characters,NULL,GtUchar,gt_str_array_size(lines)-1);
   for (linecount = 0; linecount < gt_str_array_size(lines); linecount++)
   {
     currentline = gt_str_array_get(lines,linecount);
@@ -165,7 +165,7 @@ static int readsymbolmapfromlines(SfxAlphabet *alpha,
     {
       if (preamble)
       {
-        if (LINE(0) == (Uchar) '#')
+        if (LINE(0) == (GtUchar) '#')
         {
           ignore = true;
         } else
@@ -181,7 +181,7 @@ static int readsymbolmapfromlines(SfxAlphabet *alpha,
           cc = LINE(column);
           if (ispunct((int) cc) || isalnum((int) cc))
           {
-            if (alpha->symbolmap[(unsigned int) cc] != (Uchar) UNDEFCHAR)
+            if (alpha->symbolmap[(unsigned int) cc] != (GtUchar) UNDEFCHAR)
             {
               gt_error_set(err,"cannot map symbol '%c' to %u: "
                             "it is already mapped to %u",
@@ -193,18 +193,18 @@ static int readsymbolmapfromlines(SfxAlphabet *alpha,
               break;
             }
             /* get same value */
-            alpha->symbolmap[(unsigned int) cc] = (Uchar) alpha->mapsize;
+            alpha->symbolmap[(unsigned int) cc] = (GtUchar) alpha->mapsize;
             if (alpha->domainsize >= allocateddomainsize)
             {
               allocateddomainsize += 8;
-              ALLOCASSIGNSPACE(alpha->mapdomain,alpha->mapdomain,Uchar,
+              ALLOCASSIGNSPACE(alpha->mapdomain,alpha->mapdomain,GtUchar,
                                allocateddomainsize);
             }
             gt_assert(alpha->mapdomain != NULL);
-            alpha->mapdomain[alpha->domainsize++] = (Uchar) cc;
+            alpha->mapdomain[alpha->domainsize++] = (GtUchar) cc;
           } else
           {
-            if (cc == (Uchar) ' ')    /* first blank in line found */
+            if (cc == (GtUchar) ' ')    /* first blank in line found */
             {
               blankfound = true;
               /*@innerbreak@*/ break;
@@ -231,11 +231,11 @@ static int readsymbolmapfromlines(SfxAlphabet *alpha,
             break;
           }
           /* use next character to display character */
-          chartoshow = (Uchar) LINE(column+1);
+          chartoshow = (GtUchar) LINE(column+1);
         } else
         {
           /* use first character of line to display character */
-          chartoshow = (Uchar) LINE(0);
+          chartoshow = (GtUchar) LINE(0);
         }
         if (linecount == gt_str_array_size(lines)-1)
         {
@@ -252,9 +252,9 @@ static int readsymbolmapfromlines(SfxAlphabet *alpha,
   {
     for (cnum=0;cnum<=(unsigned int) MAXALPHABETCHARACTER; cnum++)
     {
-      if (alpha->symbolmap[cnum] == (Uchar) (alpha->mapsize - 1))
+      if (alpha->symbolmap[cnum] == (GtUchar) (alpha->mapsize - 1))
       {
-        alpha->symbolmap[cnum] = (Uchar) WILDCARD;
+        alpha->symbolmap[cnum] = (GtUchar) WILDCARD;
         alpha->mappedwildcards++;
       }
     }
@@ -293,27 +293,27 @@ static int readsymbolmap(SfxAlphabet *alpha,const GtStr *mapfile,GtError *err)
   return haserr ? -1 : 0;
 }
 
-static void assignDNAsymbolmap(Uchar *symbolmap)
+static void assignDNAsymbolmap(GtUchar *symbolmap)
 {
   unsigned int cnum;
 
   for (cnum=0; cnum<=(unsigned int) MAXALPHABETCHARACTER; cnum++)
   {
-    symbolmap[cnum] = (Uchar) UNDEFCHAR;
+    symbolmap[cnum] = (GtUchar) UNDEFCHAR;
   }
-  symbolmap[(unsigned int) 'a'] = (Uchar) 0;
-  symbolmap[(unsigned int) 'A'] = (Uchar) 0;
-  symbolmap[(unsigned int) 'c'] = (Uchar) 1;
-  symbolmap[(unsigned int) 'C'] = (Uchar) 1;
-  symbolmap[(unsigned int) 'g'] = (Uchar) 2;
-  symbolmap[(unsigned int) 'G'] = (Uchar) 2;
-  symbolmap[(unsigned int) 't'] = (Uchar) 3;
-  symbolmap[(unsigned int) 'T'] = (Uchar) 3;
-  symbolmap[(unsigned int) 'u'] = (Uchar) 3;
-  symbolmap[(unsigned int) 'U'] = (Uchar) 3;
+  symbolmap[(unsigned int) 'a'] = (GtUchar) 0;
+  symbolmap[(unsigned int) 'A'] = (GtUchar) 0;
+  symbolmap[(unsigned int) 'c'] = (GtUchar) 1;
+  symbolmap[(unsigned int) 'C'] = (GtUchar) 1;
+  symbolmap[(unsigned int) 'g'] = (GtUchar) 2;
+  symbolmap[(unsigned int) 'G'] = (GtUchar) 2;
+  symbolmap[(unsigned int) 't'] = (GtUchar) 3;
+  symbolmap[(unsigned int) 'T'] = (GtUchar) 3;
+  symbolmap[(unsigned int) 'u'] = (GtUchar) 3;
+  symbolmap[(unsigned int) 'U'] = (GtUchar) 3;
   for (cnum=0; DNAWILDCARDS[cnum] != '\0'; cnum++)
   {
-    symbolmap[(unsigned int) DNAWILDCARDS[cnum]] = (Uchar) WILDCARD;
+    symbolmap[(unsigned int) DNAWILDCARDS[cnum]] = (GtUchar) WILDCARD;
   }
 }
 
@@ -362,12 +362,12 @@ SfxAlphabet *gt_copyAlphabet(const SfxAlphabet *alpha2)
 
 static void assignDNAalphabet(SfxAlphabet *alpha)
 {
-  alpha->wildcardshow = (Uchar) DNAWILDCARDS[0];
+  alpha->wildcardshow = (GtUchar) DNAWILDCARDS[0];
   alpha->mappedwildcards = (unsigned int) strlen(DNAWILDCARDS);
   alpha->domainsize = (unsigned int) strlen(DNAALPHABETDOMAIN);
   alpha->bitspersymbol = 3U; /* as we have to represent 4 + 2 characters */
-  ALLOCASSIGNSPACE(alpha->mapdomain,NULL,Uchar,alpha->domainsize);
-  memcpy(alpha->mapdomain,(Uchar *) DNAALPHABETDOMAIN,
+  ALLOCASSIGNSPACE(alpha->mapdomain,NULL,GtUchar,alpha->domainsize);
+  memcpy(alpha->mapdomain,(GtUchar *) DNAALPHABETDOMAIN,
          (size_t) alpha->domainsize);
   alpha->mapsize = MAPSIZEDNA;
   ALLOCASSIGNSPACE(alpha->characters,NULL,char,MAPSIZEDNA-1);
@@ -375,21 +375,21 @@ static void assignDNAalphabet(SfxAlphabet *alpha)
   assignDNAsymbolmap(alpha->symbolmap);
 }
 
-static void assignproteinsymbolmap(Uchar *symbolmap)
+static void assignproteinsymbolmap(GtUchar *symbolmap)
 {
   unsigned int cnum;
 
   for (cnum=0; cnum<=(unsigned int) MAXALPHABETCHARACTER; cnum++)
   {
-    symbolmap[cnum] = (Uchar) UNDEFCHAR;
+    symbolmap[cnum] = (GtUchar) UNDEFCHAR;
   }
   for (cnum=0; PROTEINUPPERAMINOACIDS[cnum] != '\0'; cnum++)
   {
-    symbolmap[(unsigned int) PROTEINUPPERAMINOACIDS[cnum]] = (Uchar) cnum;
+    symbolmap[(unsigned int) PROTEINUPPERAMINOACIDS[cnum]] = (GtUchar) cnum;
   }
   for (cnum=0; PROTEINWILDCARDS[cnum] != '\0'; cnum++)
   {
-    symbolmap[(unsigned int) PROTEINWILDCARDS[cnum]] = (Uchar) WILDCARD;
+    symbolmap[(unsigned int) PROTEINWILDCARDS[cnum]] = (GtUchar) WILDCARD;
   }
 }
 
@@ -427,13 +427,13 @@ static void assignproteinsymbolmap(Uchar *symbolmap)
 
 static void assignProteinalphabet(SfxAlphabet *alpha)
 {
-  alpha->wildcardshow = (Uchar) PROTEINWILDCARDS[0];
+  alpha->wildcardshow = (GtUchar) PROTEINWILDCARDS[0];
   alpha->domainsize = (unsigned int) strlen(PROTEINALPHABETDOMAIN);
   alpha->mappedwildcards = (unsigned int) strlen(PROTEINWILDCARDS);
   alpha->bitspersymbol = 5U; /* as we have to represent 20 + 2 characters */
-  ALLOCASSIGNSPACE(alpha->mapdomain,NULL,Uchar,alpha->domainsize);
+  ALLOCASSIGNSPACE(alpha->mapdomain,NULL,GtUchar,alpha->domainsize);
   memcpy(alpha->mapdomain,
-         (Uchar *) PROTEINALPHABETDOMAIN,(size_t) alpha->domainsize);
+         (GtUchar *) PROTEINALPHABETDOMAIN,(size_t) alpha->domainsize);
   alpha->mapsize = MAPSIZEPROTEIN;
   ALLOCASSIGNSPACE(alpha->characters,NULL,char,MAPSIZEPROTEIN-1);
   memcpy(alpha->characters,PROTEINUPPERAMINOACIDS,(size_t) (MAPSIZEPROTEIN-1));
@@ -537,7 +537,7 @@ void freeSfxAlphabet(SfxAlphabet **alpha)
   return alpha;
 }
 
-const Uchar *getsymbolmapAlphabet(const SfxAlphabet *alpha)
+const GtUchar *getsymbolmapAlphabet(const SfxAlphabet *alpha)
 {
   return alpha->symbolmap;
 }
@@ -547,12 +547,12 @@ unsigned int getnumofcharsAlphabet(const SfxAlphabet *alpha)
   return alpha->mapsize-1;
 }
 
-const Uchar *getcharactersAlphabet(const SfxAlphabet *alpha)
+const GtUchar *getcharactersAlphabet(const SfxAlphabet *alpha)
 {
   return alpha->characters;
 }
 
-Uchar getwildcardshowAlphabet(const SfxAlphabet *alpha)
+GtUchar getwildcardshowAlphabet(const SfxAlphabet *alpha)
 {
   return alpha->wildcardshow;
 }
@@ -564,7 +564,7 @@ unsigned int getbitspersymbolAlphabet(const SfxAlphabet *alpha)
 
 void outputalphabet(FILE *fpout,const SfxAlphabet *alpha)
 {
-  Uchar chartoshow, currentcc, previouscc = 0, firstinline = 0;
+  GtUchar chartoshow, currentcc, previouscc = 0, firstinline = 0;
   unsigned int cnum, linenum = 0;
   bool afternewline = true;
 
@@ -624,14 +624,14 @@ void outputalphabet(FILE *fpout,const SfxAlphabet *alpha)
  */
 
 void fprintfsymbolstring(FILE *fpout,const SfxAlphabet *alpha,
-                         const Uchar *w,unsigned long wlen)
+                         const GtUchar *w,unsigned long wlen)
 {
   unsigned long i;
-  const Uchar *characters;
+  const GtUchar *characters;
 
   if (alpha == NULL)
   {
-    characters = (const Uchar *) "acgt";
+    characters = (const GtUchar *) "acgt";
   } else
   {
     characters = alpha->characters;
@@ -648,12 +648,12 @@ void fprintfsymbolstring(FILE *fpout,const SfxAlphabet *alpha,
 */
 
 void printfsymbolstring(const SfxAlphabet *alpha,
-                        const Uchar *w,unsigned long wlen)
+                        const GtUchar *w,unsigned long wlen)
 {
   fprintfsymbolstring(stdout,alpha,w,wlen);
 }
 
-static char converttoprettysymbol(const SfxAlphabet *alpha,Uchar currentchar)
+static char converttoprettysymbol(const SfxAlphabet *alpha, GtUchar currentchar)
 {
   char ret = '\0';
   if (alpha == NULL)
@@ -661,12 +661,13 @@ static char converttoprettysymbol(const SfxAlphabet *alpha,Uchar currentchar)
     ret = (char) currentchar;
   } else
   {
-    if (currentchar == WILDCARD)
+
+    if (currentchar == (GtUchar) WILDCARD)
     {
       ret = (char) alpha->wildcardshow;
     } else
     {
-      if (currentchar != SEPARATOR)
+      if (currentchar != (GtUchar) SEPARATOR)
       {
         gt_assert((unsigned int) currentchar < alpha->mapsize-1);
         ret = (char) alpha->characters[(int) currentchar];
@@ -678,7 +679,7 @@ static char converttoprettysymbol(const SfxAlphabet *alpha,Uchar currentchar)
 }
 
 void sprintfsymbolstring(char *buffer,const SfxAlphabet *alpha,
-                          const Uchar *w,unsigned long wlen)
+                          const GtUchar *w,unsigned long wlen)
 {
   unsigned long i;
 
@@ -689,17 +690,17 @@ void sprintfsymbolstring(char *buffer,const SfxAlphabet *alpha,
   buffer[wlen] = '\0';
 }
 
-void echoprettysymbol(FILE *fpout,const SfxAlphabet *alpha,Uchar currentchar)
+void echoprettysymbol(FILE *fpout,const SfxAlphabet *alpha,GtUchar currentchar)
 {
   (void) putc((int) converttoprettysymbol(alpha, currentchar), fpout);
 }
 
-Uchar getprettysymbol(const SfxAlphabet *alpha,unsigned int currentchar)
+GtUchar getprettysymbol(const SfxAlphabet *alpha,unsigned int currentchar)
 {
-   return (Uchar) converttoprettysymbol(alpha, currentchar);
+   return (GtUchar) converttoprettysymbol(alpha, currentchar);
 }
 
-static unsigned int removelowercaseproteinchars(Uchar *domainbuf,
+static unsigned int removelowercaseproteinchars(GtUchar *domainbuf,
                                                 const SfxAlphabet *alpha)
 {
   unsigned int i, j = 0;
@@ -715,7 +716,7 @@ static unsigned int removelowercaseproteinchars(Uchar *domainbuf,
   return j;
 }
 
-#define UNCAST(X) (*((const Uchar *) (X)))
+#define UNCAST(X) (*((const GtUchar *) (X)))
 
 static Qsortcomparereturntype comparechar(const void *a,const void *b)
 {
@@ -742,7 +743,7 @@ bool isproteinalphabet(const SfxAlphabet *alpha)
   SfxAlphabet proteinalphabet;
   unsigned int i, reduceddomainsize1, reduceddomainsize2;
   bool isprot = false;
-  Uchar domainbuf1[MAXALPHABETCHARACTER+1],
+  GtUchar domainbuf1[MAXALPHABETCHARACTER+1],
         domainbuf2[MAXALPHABETCHARACTER+1];
 
   reduceddomainsize1 = removelowercaseproteinchars(&domainbuf1[0],alpha);
@@ -773,23 +774,23 @@ bool isproteinalphabet(const SfxAlphabet *alpha)
   return isprot;
 }
 
-static bool checksymbolmap(const Uchar *testsymbolmap,
-                           const Uchar *verifiedsymbolmap,
+static bool checksymbolmap(const GtUchar *testsymbolmap,
+                           const GtUchar *verifiedsymbolmap,
                            const char *testcharacters)
 {
   unsigned int i;
-  Uchar cc1, cc2;
+  GtUchar cc1, cc2;
 
   for (i=0; testcharacters[i] != '\0'; i++)
   {
-    cc1 = (Uchar) testcharacters[i];
+    cc1 = (GtUchar) testcharacters[i];
     if (isupper((int) cc1))
     {
-      cc2 = (Uchar) tolower((int) cc1);
+      cc2 = (GtUchar) tolower((int) cc1);
     } else
     {
       gt_assert(islower((int) cc1));
-      cc2 = (Uchar) toupper((int) cc1);
+      cc2 = (GtUchar) toupper((int) cc1);
     }
     if (testsymbolmap[cc1] != verifiedsymbolmap[cc1] &&
         testsymbolmap[cc2] != verifiedsymbolmap[cc2])
@@ -813,7 +814,7 @@ bool isdnaalphabet(const SfxAlphabet *alpha)
   }
   if (alpha->mapsize == MAPSIZEDNA)
   {
-    Uchar dnasymbolmap[MAXALPHABETCHARACTER+1];
+    GtUchar dnasymbolmap[MAXALPHABETCHARACTER+1];
 
     assignDNAsymbolmap(&dnasymbolmap[0]);
     if (checksymbolmap(alpha->symbolmap,&dnasymbolmap[0],"acgt"))

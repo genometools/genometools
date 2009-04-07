@@ -35,11 +35,11 @@
 
 enum {
 /*   MAX_RND_NUMS = 10, */
-  MAX_RND_NUMS = 100000,
+  MAX_RND_NUMS_uint8_t = 100000,
 };
 
 static inline int
-icmp(uint8_t a, uint8_t b)
+icmp_uint8_t(uint8_t a, uint8_t b)
 {
   if (a > b)
     return 1;
@@ -54,7 +54,7 @@ icmp(uint8_t a, uint8_t b)
  * @param v count the number of bits set in v
  */
 static inline int
-genBitCount(uint8_t v)
+genBitCount_uint8_t(uint8_t v)
 {
   unsigned c; /* c accumulates the total bits set in v */
   for (c = 0; v; c++)
@@ -85,7 +85,7 @@ gt_bitPackStringInt8_unit_test(GtError *err)
   BitOffset offsetStart, offset;
   int had_err = 0;
   offset = offsetStart = random()%(sizeof (uint8_t) * CHAR_BIT);
-  numRnd = random() % (MAX_RND_NUMS + 1);
+  numRnd = random() % (MAX_RND_NUMS_uint8_t + 1);
   gt_log_log("offset=%lu, numRnd=%lu\n",
           (long unsigned)offsetStart, (long unsigned)numRnd);
   {
@@ -194,7 +194,7 @@ gt_bitPackStringInt8_unit_test(GtError *err)
                             *   if it is displayed, there was an earlier
                             *   error. */
         ensure(had_err, r0 == v0 && r1 == v1);
-        ensure(had_err, icmp(v0, v1) ==
+        ensure(had_err, icmp_uint8_t(v0, v1) ==
                (result = gt_bsCompare(bitStore, offset, bits0,
                                    bitStore, offset + bits0, bits1)));
         if (had_err)
@@ -657,7 +657,7 @@ gt_bitPackStringInt8_unit_test(GtError *err)
       for (i = countStart; i < countStart + numCountValues; ++i)
       {
         uint8_t v = (uint8_t)randSrc[i] & mask;
-        bitCountRef += genBitCount(v);
+        bitCountRef += genBitCount_uint8_t(v);
       }
       ensure(had_err, bitCountRef == bitCountCmp);
       if (had_err)

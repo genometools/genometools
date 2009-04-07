@@ -88,7 +88,7 @@ static void spacedseed_delete(Spacedseed *spse)
 
 static void singlewindowmatchspacedseed(Limdfsresources *limdfsresources,
                                         const AbstractDfstransformer *dfst,
-                                        const Uchar *qptr,
+                                        const GtUchar *qptr,
                                         const Spacedseed *spse)
 {
   indexbasedspacedseeds(limdfsresources,
@@ -100,11 +100,11 @@ static void singlewindowmatchspacedseed(Limdfsresources *limdfsresources,
 
 static void singlequerymatchspacedseed(Limdfsresources *limdfsresources,
                                        const AbstractDfstransformer *dfst,
-                                       const Uchar *query,
+                                       const GtUchar *query,
                                        unsigned long querylen,
                                        const Spacedseed *spse)
 {
-  const Uchar *qptr;
+  const GtUchar *qptr;
   unsigned long offset, skipvalue;
 
   if (spse->seedwidth > querylen)
@@ -139,10 +139,10 @@ static void showmatch(GT_UNUSED void *processinfo,
 #ifdef WITHONLINE
 static void onlinespacedseedsearch(const Encodedsequence *encseq,
                                    const Spacedseed *spse,
-                                   const Uchar *qptr,qp)
+                                   const GtUchar *qptr,qp)
 {
   Windowiterator *wit;
-  const Uchar *buffer;
+  const GtUchar *buffer;
   Seqpos currentpos, totallength;
   unsigned long firstpos, windowschecked = 0;
   Bitsequence bitmask;
@@ -224,7 +224,7 @@ int matchspacedseed(bool withesa,
   if (!haserr)
   {
     GtSeqIterator *seqit;
-    const Uchar *query;
+    const GtUchar *query;
     unsigned long querylen;
     char *desc = NULL;
     uint64_t unitnum;
@@ -246,37 +246,41 @@ int matchspacedseed(bool withesa,
                                          NULL, /* processresult info */
                                          dfst);
     encseq = genericindex_getencseq(genericindex);
-    seqit = gt_seqiterator_new(queryfilenames,
-                               getencseqAlphabetsymbolmap(encseq),
-                               true);
-    for (unitnum = 0; /* Nothing */; unitnum++)
+    seqit = gt_seqiterator_new(queryfilenames, err);
+    if (!seqit)
+      haserr = true;
+    if (!haserr)
     {
-      retval = gt_seqiterator_next(seqit,
-                                   &query,
-                                   &querylen,
-                                   &desc,
-                                   err);
-      if (retval < 0)
+      gt_seqiterator_set_symbolmap(seqit, getencseqAlphabetsymbolmap(encseq));
+      for (unitnum = 0; /* Nothing */; unitnum++)
       {
-        haserr = true;
-        break;
+        retval = gt_seqiterator_next(seqit,
+                                     &query,
+                                     &querylen,
+                                     &desc,
+                                     err);
+        if (retval < 0)
+        {
+          haserr = true;
+          break;
+        }
+        if (retval == 0)
+        {
+          break;
+        }
+        singlequerymatchspacedseed(limdfsresources,
+                                   dfst,
+                                   query,
+                                   querylen,
+                                   spse);
+        gt_free(desc);
       }
-      if (retval == 0)
+      if (limdfsresources != NULL)
       {
-        break;
+        freeLimdfsresources(&limdfsresources,dfst);
       }
-      singlequerymatchspacedseed(limdfsresources,
-                                 dfst,
-                                 query,
-                                 querylen,
-                                 spse);
-      gt_free(desc);
+      gt_seqiterator_delete(seqit);
     }
-    if (limdfsresources != NULL)
-    {
-      freeLimdfsresources(&limdfsresources,dfst);
-    }
-    gt_seqiterator_delete(seqit);
   }
   genericindex_delete(genericindex);
   spacedseed_delete(spse);

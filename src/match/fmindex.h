@@ -81,7 +81,7 @@ typedef struct
 {
   /* Note: do not use specialcharinfo of bwtformatching */
   Encodedsequence *bwtformatching;
-  Uchar *bfreq;            /* bfreq[c][i] = #c in block i */
+  GtUchar *bfreq;            /* bfreq[c][i] = #c in block i */
   Seqpos bwtlength,        /* also totallength + 1 */
          *tfreq,           /* tfreq[c] = #characters < c in text */
          *superbfreq,      /* superbfreq[c][i] = #c in all superblocks */
@@ -91,7 +91,7 @@ typedef struct
          negatebsizeones,
          negatesuperbsizeones,
          markdistminus1;   /* markdist - 1 */
-  ArrayPairBwtidx specpos; /* positions of special characters */
+  GtArrayPairBwtidx specpos; /* positions of special characters */
   SfxAlphabet *alphabet;
   void *mappedptr; /* NULL or pointer to the mapped space block */
   unsigned int mapsize,      /* copy of alphabet.mapsize, used for searching */

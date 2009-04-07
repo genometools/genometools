@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -25,9 +25,9 @@
 #include "core/undef.h"
 #include "extended/string_matching.h"
 
-#define NUM_OF_TESTS        256
-#define MAX_STRING_LENGTH   100000
-#define MAX_PATTERN_LENGTH  66
+#define STRING_MATCHING_NUM_OF_TESTS        256
+#define STRING_MATCHING_MAX_STRING_LENGTH   100000
+#define STRING_MATCHING_MAX_PATTERN_LENGTH  66
 
 void gt_string_matching_bmh(const char *s, unsigned long n,
                          const char *p, unsigned long m,
@@ -193,7 +193,8 @@ static bool store_match(unsigned long pos, void *data)
 
 int gt_string_matching_unit_test(GtError *err)
 {
-  char s[MAX_STRING_LENGTH+1], p[MAX_PATTERN_LENGTH+1], *text = "foo";
+  char s[STRING_MATCHING_MAX_STRING_LENGTH+1],
+       p[STRING_MATCHING_MAX_PATTERN_LENGTH+1], *text = "foo";
   GtArray *brute_force_matches,
         *bmh_matches,
         *kmp_matches,
@@ -221,11 +222,11 @@ int gt_string_matching_unit_test(GtError *err)
   ensure(had_err, !gt_array_size(kmp_matches));
   ensure(had_err, !gt_array_size(shift_and_matches));
 
-  for (i = 0; !had_err && i < NUM_OF_TESTS; i++) {
+  for (i = 0; !had_err && i < STRING_MATCHING_NUM_OF_TESTS; i++) {
     unsigned long j, n, m;
     /* generate random string and pattern */
-    n = gt_rand_max(MAX_STRING_LENGTH);
-    m = gt_rand_max(MAX_PATTERN_LENGTH);
+    n = gt_rand_max(STRING_MATCHING_MAX_STRING_LENGTH);
+    m = gt_rand_max(STRING_MATCHING_MAX_PATTERN_LENGTH);
     for (j = 0; j < n; j++)
       s[j] = gt_rand_char();
     s[n] = '\0';

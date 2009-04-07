@@ -27,7 +27,7 @@ typedef struct
   unsigned long dbseqnum;
   Seqpos dbstartpos,
          dblen;
-  const Uchar *dbsubstring;
+  const GtUchar *dbsubstring;
   unsigned long querystartpos,
                 querylen,
                 distance;

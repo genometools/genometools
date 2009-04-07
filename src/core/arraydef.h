@@ -36,36 +36,36 @@
   some given TYPE.
 */
 
-#define DECLAREARRAYSTRUCT(TYPE)\
+#define GT_DECLAREARRAYSTRUCT(TYPE)\
         typedef struct\
         {\
           TYPE *space##TYPE;\
           unsigned long allocated##TYPE, nextfree##TYPE;\
-        } Array##TYPE
+        } GtArray##TYPE
 
 /*
-  INITARRAY initializes an empty array.
+  GT_INITARRAY initializes an empty array.
 */
 
-#define INITARRAY(A,TYPE)\
+#define GT_INITARRAY(A,TYPE)\
         (A)->space##TYPE = NULL;\
         (A)->allocated##TYPE = (A)->nextfree##TYPE = 0
 
 /*
-  COPYARRAY copies an array.
+  GT_COPYARRAY copies an array.
 */
 
-#define COPYARRAY(A,B)\
+#define GT_COPYARRAY(A,B)\
         *(A) = *(B)
 
 /*
-  CHECKARRAYSPACE checks if the integer nextfree##T
+  GT_CHECKARRAYSPACE checks if the integer nextfree##T
   points to an index for which the space is not allocated yet. If this is
   the case, the number of cells allocated is incremented by L. The
   contents of the previously filled array elements is of course maintained.
 */
 
-#define CHECKARRAYSPACE(A,TYPE,L)\
+#define GT_CHECKARRAYSPACE(A,TYPE,L)\
         if ((A)->nextfree##TYPE >= (A)->allocated##TYPE)\
         {\
           (A)->allocated##TYPE += L;\
@@ -76,11 +76,11 @@
         }
 
 /*
-  The next macro is a variation of CHECKARRAYSPACE, which checks if the next
+  The next macro is a variation of GT_CHECKARRAYSPACE, which checks if the next
   L cells have been allocated. If not, then this is done.
 */
 
-#define CHECKARRAYSPACEMULTI(A,TYPE,L)\
+#define GT_CHECKARRAYSPACEMULTI(A,TYPE,L)\
         if ((A)->nextfree##TYPE + (L) >= (A)->allocated##TYPE)\
         {\
           (A)->allocated##TYPE += L;\
@@ -95,8 +95,8 @@
   to the next free element in the array.
 */
 
-#define GETNEXTFREEINARRAY(P,A,TYPE,L)\
-        CHECKARRAYSPACE(A,TYPE,L);\
+#define GT_GETNEXTFREEINARRAY(P,A,TYPE,L)\
+        GT_CHECKARRAYSPACE(A,TYPE,L);\
         P = (A)->space##TYPE + (A)->nextfree##TYPE++;
 
 /*
@@ -104,8 +104,8 @@
   nextfree-component of the array. nextfree is incremented.
 */
 
-#define STOREINARRAY(A,TYPE,L,VAL)\
-        CHECKARRAYSPACE(A,TYPE,L);\
+#define GT_STOREINARRAY(A,TYPE,L,VAL)\
+        GT_CHECKARRAYSPACE(A,TYPE,L);\
         gt_assert((A)->space##TYPE != NULL);\
         (A)->space##TYPE[(A)->nextfree##TYPE++] = VAL
 
@@ -113,7 +113,7 @@
   This macro frees the space for an array if it is not NULL.
 */
 
-#define FREEARRAY(A,TYPE)\
+#define GT_FREEARRAY(A,TYPE)\
         if ((A)->space##TYPE != NULL)\
         {\
           gt_free((A)->space##TYPE);\
@@ -124,7 +124,7 @@
   Some declarations for the most common array types.
 */
 
-DECLAREARRAYSTRUCT(Uchar);
-DECLAREARRAYSTRUCT(char);
+GT_DECLAREARRAYSTRUCT(GtUchar);
+GT_DECLAREARRAYSTRUCT(char);
 
 #endif

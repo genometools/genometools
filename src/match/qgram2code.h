@@ -25,11 +25,11 @@
 static inline unsigned int qgram2code(Codetype *code,
                                       const Codetype **multimappower,
                                       unsigned int qvalue,
-                                      const Uchar *qgram)
+                                      const GtUchar *qgram)
 {
   int i;
   Codetype tmpcode = 0;
-  Uchar a;
+  GtUchar a;
 
   for (i=(int) (qvalue-1); i>=0; i--)
   {

@@ -29,7 +29,7 @@ Windowiterator *windowiterator_new(const Encodedsequence *encseq,
 
 void windowiterator_delete(Windowiterator *wit);
 
-const Uchar *windowiterator_next(Seqpos *currentpos,unsigned long *firstpos,
+const GtUchar *windowiterator_next(Seqpos *currentpos,unsigned long *firstpos,
                                  Windowiterator *wit);
 
 #endif

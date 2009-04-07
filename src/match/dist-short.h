@@ -22,14 +22,14 @@
 
 unsigned long distanceofshortstringsbytearray(unsigned long *eqsvector,
                                      unsigned int alphasize,
-                                     const Uchar *useq,
+                                     const GtUchar *useq,
                                      unsigned long ulen,
-                                     const Uchar *vseq,
+                                     const GtUchar *vseq,
                                      unsigned long vlen);
 
 unsigned long distanceofshortstringsencseq(unsigned long *eqsvector,
                                            unsigned int alphasize,
-                                           const Uchar *useq,
+                                           const GtUchar *useq,
                                            unsigned long ulen,
                                            const Encodedsequence *encseq,
                                            Seqpos vstartpos,
@@ -37,9 +37,9 @@ unsigned long distanceofshortstringsencseq(unsigned long *eqsvector,
 
 unsigned long reversesuffixmatch(unsigned long *eqsvector,
                                  unsigned int alphasize,
-                                 const Uchar *useq,
+                                 const GtUchar *useq,
                                  unsigned long ulen,
-                                 const Uchar *vseq,
+                                 const GtUchar *vseq,
                                  unsigned long vlen,
                                  unsigned long maxdistance);
 
@@ -48,7 +48,7 @@ Definedunsignedlong forwardprefixmatch(const Encodedsequence *encseq,
                                        Seqpos startpos,
                                        bool nowildcards,
                                        unsigned long *eqsvector,
-                                       const Uchar *useq,
+                                       const GtUchar *useq,
                                        unsigned long ulen,
                                        unsigned long maxdistance);
 

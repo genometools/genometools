@@ -33,15 +33,15 @@ typedef struct
 {
   Seqpos dbcurrent, dbprefixlen;
   unsigned long querypos, queryend;
-  Uchar *spaceUchardbsubstring;
-  unsigned long allocatedUchardbsubstring;
+  GtUchar *spaceGtUchardbsubstring;
+  unsigned long allocatedGtUchardbsubstring;
   GtAlignment *alignment;
 } Localitracebackstate;
 
 struct Limdfsconstinfo
 {
   Scorevalues scorevalues;
-  const Uchar *query;
+  const GtUchar *query;
   unsigned long maxcollen,
                 querylength,
                 threshold;
@@ -155,7 +155,7 @@ void locali_showLimdfsstate(const DECLAREPTRDFSSTATE(aliasstate),
         }
 
 static void secondcolumn (const Limdfsconstinfo *lci,Column *outcol,
-                          Uchar dbchar)
+                          GtUchar dbchar)
 {
   unsigned long i;
 
@@ -211,7 +211,7 @@ static void secondcolumn (const Limdfsconstinfo *lci,Column *outcol,
 
 static void nextcolumn (const Limdfsconstinfo *lci,
                         Column *outcol,
-                        const Uchar dbchar,
+                        const GtUchar dbchar,
                         const Column *incol)
 {
   unsigned long i;
@@ -363,7 +363,7 @@ static void nextcolumn (const Limdfsconstinfo *lci,
 
 #ifdef AFFINE
 static void inplacenextcolumn (const Limdfsconstinfo *lci,
-                               const Uchar dbchar,
+                               const GtUchar dbchar,
                                Column *column)
 {
   unsigned long i;
@@ -485,8 +485,8 @@ static Limdfsconstinfo *locali_allocatedfsconstinfo (GT_UNUSED
   lci = gt_malloc (sizeof (Limdfsconstinfo));
   lci->maxcollen = 0;
   lci->tbs.alignment = gt_alignment_new();
-  lci->tbs.spaceUchardbsubstring = NULL;
-  lci->tbs.allocatedUchardbsubstring = 0;
+  lci->tbs.spaceGtUchardbsubstring = NULL;
+  lci->tbs.allocatedGtUchardbsubstring = 0;
   return lci;
 }
 
@@ -501,7 +501,7 @@ static void locali_initdfsconstinfo (Limdfsconstinfo *lci,
   lci->scorevalues.gapstart = va_arg (ap, Scoretype);
   lci->scorevalues.gapextend = va_arg (ap, Scoretype);
   lci->threshold = va_arg (ap, unsigned long);
-  lci->query = va_arg (ap, const Uchar *);
+  lci->query = va_arg (ap, const GtUchar *);
   lci->querylength = va_arg (ap, unsigned long);
   if (lci->maxcollen < lci->querylength + 1)
   {
@@ -514,8 +514,8 @@ static void locali_freedfsconstinfo (Limdfsconstinfo **lci)
 {
   gt_alignment_delete((*lci)->tbs.alignment);
   (*lci)->tbs.alignment = NULL;
-  gt_free((*lci)->tbs.spaceUchardbsubstring);
-  (*lci)->tbs.spaceUchardbsubstring = NULL;
+  gt_free((*lci)->tbs.spaceGtUchardbsubstring);
+  (*lci)->tbs.spaceGtUchardbsubstring = NULL;
   gt_free (*lci);
   *lci = NULL;
 }
@@ -632,7 +632,7 @@ static void locali_fullmatchLimdfsstate (Limdfsresult *limdfsresult,
 static void locali_nextLimdfsstate (const Limdfsconstinfo *lci,
                                     DECLAREPTRDFSSTATE (aliasoutcol),
                                     GT_UNUSED unsigned long currentdepth,
-                                    Uchar currentchar,
+                                    GtUchar currentchar,
                                     const DECLAREPTRDFSSTATE (aliasincol))
 {
   Column *outcol = (Column *) aliasoutcol;
@@ -651,7 +651,7 @@ static void locali_nextLimdfsstate (const Limdfsconstinfo *lci,
 static void locali_inplacenextLimdfsstate (const Limdfsconstinfo *lci,
                                            DECLAREPTRDFSSTATE (aliasstate),
                                            GT_UNUSED unsigned long currentdepth,
-                                           Uchar currentchar)
+                                           GtUchar currentchar)
 {
   Column *column = (Column *) aliasstate;
 
@@ -673,16 +673,16 @@ void reinitLocalitracebackstate(Limdfsconstinfo *lci,
 
   tbs->dbprefixlen = tbs->dbcurrent = dbprefixlen;
   tbs->queryend = tbs->querypos = pprefixlen;
-  if (dbprefixlen > (Seqpos) tbs->allocatedUchardbsubstring)
+  if (dbprefixlen > (Seqpos) tbs->allocatedGtUchardbsubstring)
   {
-    tbs->spaceUchardbsubstring = gt_realloc(tbs->spaceUchardbsubstring,
-                                            sizeof (Uchar) * dbprefixlen);
+    tbs->spaceGtUchardbsubstring = gt_realloc(tbs->spaceGtUchardbsubstring,
+                                            sizeof (GtUchar) * dbprefixlen);
   }
   gt_alignment_reset(tbs->alignment);
 }
 
 void processelemLocalitracebackstate(Limdfsconstinfo *lci,
-                                     Uchar currentchar,
+                                     GtUchar currentchar,
                                      const void *aliasstate)
 {
   Localitracebackstate *tbs = &lci->tbs;
@@ -707,14 +707,14 @@ void processelemLocalitracebackstate(Limdfsconstinfo *lci,
         gt_alignment_add_insertion(tbs->alignment);
         gt_assert(tbs->dbcurrent > 0);
         tbs->dbcurrent--;
-        tbs->spaceUchardbsubstring[tbs->dbcurrent] = currentchar;
+        tbs->spaceGtUchardbsubstring[tbs->dbcurrent] = currentchar;
         return;
       case Replacebit:
         /* printf("replacebit\n"); */
         gt_alignment_add_replacement(tbs->alignment);
         gt_assert(tbs->dbcurrent > 0);
         tbs->dbcurrent--;
-        tbs->spaceUchardbsubstring[tbs->dbcurrent] = currentchar;
+        tbs->spaceGtUchardbsubstring[tbs->dbcurrent] = currentchar;
         gt_assert(tbs->querypos > 0);
         tbs->querypos--;
         return;
@@ -739,7 +739,7 @@ const void *completealignmentfromLocalitracebackstate(
 #ifndef NDEBUG
   Scoretype evalscore;
 #endif
-  const Uchar *querysubstart;
+  const GtUchar *querysubstart;
 
 #ifdef SKDEBUG
   gt_alignment_show_multieop_list(lci->tbs.alignment,stdout);
@@ -751,7 +751,7 @@ const void *completealignmentfromLocalitracebackstate(
   gt_alignment_set_seqs(lci->tbs.alignment,
                         querysubstart,
                         *alignedquerylength,
-                        lci->tbs.spaceUchardbsubstring,
+                        lci->tbs.spaceGtUchardbsubstring,
                         (unsigned long) lci->tbs.dbprefixlen);
 #ifndef NDEBUG
   evalscore = gt_alignment_eval_with_score(lci->tbs.alignment,

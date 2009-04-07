@@ -77,7 +77,7 @@ static OPrval parse_options(ConvertseqOptions *opts,
 int gt_convertseq(int argc, const char **argv, GtError *err)
 {
   GtStrArray *files;
-  const Uchar *sequence;
+  const GtUchar *sequence;
   char *desc;
   unsigned long len, j;
   int i, parsed_args, had_err = 0;
@@ -114,7 +114,7 @@ int gt_convertseq(int argc, const char **argv, GtError *err)
   if (!had_err) {
     gt_sequence_buffer_set_filelengthtab(sb, flv);
     /* read input using seqiterator */
-    seqit = gt_seqiterator_new_with_buffer(sb, NULL, true);
+    seqit = gt_seqiterator_new_with_buffer(sb);
     if (opts.verbose)
     {
       gt_progressbar_start(gt_seqiterator_getcurrentcounter(seqit,

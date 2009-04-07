@@ -42,7 +42,7 @@ static int gt_fasta_reader_seqit_run(GtFastaReader *fasta_reader,
 {
   GtFastaReaderSeqIt *gt_fasta_reader_seqit =
     gt_fasta_reader_seqit_cast(fasta_reader);
-  const Uchar *sequence;
+  const GtUchar *sequence;
   unsigned long len;
   char *desc;
   int rval, had_err = 0;
@@ -99,6 +99,6 @@ GtFastaReader* gt_fasta_reader_seqit_new(GtStr *sequence_filename)
   gt_str_array_add_cstr(gt_fasta_reader_seqit->filenametab,
                        gt_str_get(sequence_filename));
   gt_fasta_reader_seqit->seqit = gt_seqiterator_new(gt_fasta_reader_seqit
-                                                 ->filenametab, NULL, true);
+                                                     ->filenametab, NULL);
   return fr;
 }

@@ -33,9 +33,6 @@ bool indexfilealreadyexists(const GtStr *indexname,const char *suffix);
 void *genericmaponlytable(const GtStr *indexname,const char *suffix,
                           size_t *numofbytes,GtError *err);
 
-int checkmappedfilesize(size_t numofbytes,unsigned long expectedunits,
-                        size_t sizeofunit,GtError *err);
-
 void *genericmaptable(const GtStr *indexname,
                       const char *suffix,
                       unsigned long expectedunits,

@@ -33,9 +33,9 @@ static void showlocalsuffix(FILE *fpout,
                             Seqpos depth)
 {
   Seqpos i, end, totallength;
-  Uchar cc;
+  GtUchar cc;
   const Seqpos maxshow = (Seqpos) 30;
-  const Uchar *characters;
+  const GtUchar *characters;
 
   totallength = getencseqtotallength(encseq);
   characters = getencseqAlphabetcharacters(encseq);
@@ -172,7 +172,7 @@ void checkentiresuftab(const Encodedsequence *encseq,
   bool haserr = false;
 
 #ifdef INLINEDSequentialsuffixarrayreader
-  Uchar tmpsmalllcpvalue;
+  GtUchar tmpsmalllcpvalue;
 #else
   int retval;
 #endif

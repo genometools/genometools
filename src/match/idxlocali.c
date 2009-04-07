@@ -32,9 +32,9 @@
 
 typedef struct
 {
-  const Uchar *characters;
+  const GtUchar *characters;
   uint64_t queryunit;
-  Uchar wildcardshow;
+  GtUchar wildcardshow;
   bool showalignment;
   const Encodedsequence *encseq;
 } Showmatchinfo;
@@ -192,7 +192,7 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
   if (!haserr)
   {
     GtSeqIterator *seqit;
-    const Uchar *query;
+    const GtUchar *query;
     unsigned long querylen;
     char *desc = NULL;
     int retval;
@@ -245,60 +245,65 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
                                            NULL, /* processresult info */
                                            dfst);
     }
-    seqit = gt_seqiterator_new(idxlocalioptions->queryfiles,
-                               getencseqAlphabetsymbolmap(encseq),
-                               true);
-    for (showmatchinfo.queryunit = 0; /* Nothing */; showmatchinfo.queryunit++)
+    seqit = gt_seqiterator_new(idxlocalioptions->queryfiles, err);
+    if (!seqit)
+      haserr = true;
+    if (!haserr)
     {
-      retval = gt_seqiterator_next(seqit,
-                                   &query,
-                                   &querylen,
-                                   &desc,
-                                   err);
-      if (retval < 0)
+      gt_seqiterator_set_symbolmap(seqit, getencseqAlphabetsymbolmap(encseq));
+      for (showmatchinfo.queryunit = 0; /* Nothing */;
+           showmatchinfo.queryunit++)
       {
-        haserr = true;
-        break;
+        retval = gt_seqiterator_next(seqit,
+                                     &query,
+                                     &querylen,
+                                     &desc,
+                                     err);
+        if (retval < 0)
+        {
+          haserr = true;
+          break;
+        }
+        if (retval == 0)
+        {
+          break;
+        }
+        printf("process sequence " Formatuint64_t " of length %lu\n",
+                PRINTuint64_tcast(showmatchinfo.queryunit),querylen);
+        if (idxlocalioptions->doonline || idxlocalioptions->docompare)
+        {
+          multiapplysmithwaterman(swdpresource,encseq,query,querylen);
+        }
+        if (!idxlocalioptions->doonline || idxlocalioptions->docompare)
+        {
+          indexbasedlocali(limdfsresources,
+                           idxlocalioptions->matchscore,
+                           idxlocalioptions->mismatchscore,
+                           idxlocalioptions->gapstart,
+                           idxlocalioptions->gapextend,
+                           idxlocalioptions->threshold,
+                           query,
+                           querylen,
+                           dfst);
+        }
+        if (idxlocalioptions->docompare)
+        {
+          checkandresetstorematch(showmatchinfo.queryunit,
+                                  &storeonline,&storeoffline);
+        }
+        gt_free(desc);
       }
-      if (retval == 0)
+      if (limdfsresources != NULL)
       {
-        break;
+        freeLimdfsresources(&limdfsresources,dfst);
       }
-      printf("process sequence " Formatuint64_t " of length %lu\n",
-              PRINTuint64_tcast(showmatchinfo.queryunit),querylen);
-      if (idxlocalioptions->doonline || idxlocalioptions->docompare)
+      if (swdpresource != NULL)
       {
-        multiapplysmithwaterman(swdpresource,encseq,query,querylen);
+        freeSWdpresource(swdpresource);
+        swdpresource = NULL;
       }
-      if (!idxlocalioptions->doonline || idxlocalioptions->docompare)
-      {
-        indexbasedlocali(limdfsresources,
-                         idxlocalioptions->matchscore,
-                         idxlocalioptions->mismatchscore,
-                         idxlocalioptions->gapstart,
-                         idxlocalioptions->gapextend,
-                         idxlocalioptions->threshold,
-                         query,
-                         querylen,
-                         dfst);
-      }
-      if (idxlocalioptions->docompare)
-      {
-        checkandresetstorematch(showmatchinfo.queryunit,
-                                &storeonline,&storeoffline);
-      }
-      gt_free(desc);
+      gt_seqiterator_delete(seqit);
     }
-    if (limdfsresources != NULL)
-    {
-      freeLimdfsresources(&limdfsresources,dfst);
-    }
-    if (swdpresource != NULL)
-    {
-      freeSWdpresource(swdpresource);
-      swdpresource = NULL;
-    }
-    gt_seqiterator_delete(seqit);
     if (idxlocalioptions->docompare)
     {
       freestorematch(&storeonline);
@@ -308,7 +313,7 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
   if (genericindex == NULL)
   {
     gt_assert(encseq != NULL);
-    freeEncodedsequence((Encodedsequence **) &encseq);
+    encodedsequence_free((Encodedsequence **) &encseq);
   } else
   {
     genericindex_delete(genericindex);

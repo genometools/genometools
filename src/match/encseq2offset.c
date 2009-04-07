@@ -22,13 +22,13 @@
 
  DECLARESAFECASTFUNCTION(uint64_t,uint64_t,Seqpos,Seqpos)
 
-Seqpos *encseqtable2seqoffsets(Seqpos *totallength,
-                               Specialcharinfo *specialcharinfo,
-                               const Suffixarray *suffixarraytable,
-                               unsigned int numofindexes)
+Seqpos *encseqtable2sequenceoffsets(Seqpos *totallength,
+                                    Specialcharinfo *specialcharinfo,
+                                    const Suffixarray *suffixarraytable,
+                                    unsigned int numofindexes)
 {
   unsigned int idx;
-  Uchar lastofprevious, firstofcurrent;
+  GtUchar lastofprevious, firstofcurrent;
   Seqpos tmplength, *sequenceoffsettable;
   uint64_t tmpspecialcharacters,
            tmpspecialranges,

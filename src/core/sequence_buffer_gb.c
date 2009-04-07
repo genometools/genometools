@@ -31,11 +31,11 @@
 #define NEWLINESYMBOL        '\n'
 
 typedef enum {
-  OUT_OF_ENTRY,
-  AWAITING_DESCRIPTION,
-  IN_DESCRIPTION,
-  AWAITING_SEQUENCE,
-  IN_SEQUENCE
+  GB_OUT_OF_ENTRY,
+  GB_AWAITING_DESCRIPTION,
+  GB_IN_DESCRIPTION,
+  GB_AWAITING_SEQUENCE,
+  GB_IN_SEQUENCE
 } GtGBParserState;
 
 struct GtSequenceBufferGB {
@@ -219,7 +219,7 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
 
   /* open first stream */
   if (!pvt->inputstream) {
-    sbe->state = OUT_OF_ENTRY;
+    sbe->state = GB_OUT_OF_ENTRY;
     pvt->linenum = (uint64_t) 1;
     pvt->inputstream = gt_genfile_xopen(gt_str_array_get(pvt->filenametab,
                                                   (unsigned long) pvt->filenum),
@@ -264,37 +264,37 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
     /* terminators may occur in any line */
     if (!had_err && strcmp(gt_str_get(sbe->keywordbuffer),
                            GB_ENTRY_TERMINATOR) == 0) {
-      pvt->outbuf[currentoutpos++] = (Uchar) SEPARATOR;
+      pvt->outbuf[currentoutpos++] = (GtUchar) SEPARATOR;
       pvt->lastspeciallength++;
       if (!sbe->description_set && pvt->descptr)
           gt_queue_add(pvt->descptr, gt_cstr_dup(""));
       sbe->description_set = false;
       if ((eat_line(sb, &currentfileread)) == EOF)
         break;
-      sbe->state = OUT_OF_ENTRY;
+      sbe->state = GB_OUT_OF_ENTRY;
     }
 
     switch (sbe->state) {
-      case OUT_OF_ENTRY:
+      case GB_OUT_OF_ENTRY:
         /* eat everything */
         had_err = eat_line(sb, &currentfileread);
         if (!had_err && strcmp(gt_str_get(sbe->keywordbuffer),
                                GB_LOCUS_STRING) == 0) {
-          sbe->state = AWAITING_DESCRIPTION;
+          sbe->state = GB_AWAITING_DESCRIPTION;
         }
         break;
-      case AWAITING_DESCRIPTION:
+      case GB_AWAITING_DESCRIPTION:
         if (strcmp(gt_str_get(sbe->keywordbuffer),
                    GB_DEFINITION_STRING) == 0) {
           had_err = eat_whitespace(sb, &currentfileread);
           if (!had_err)
             had_err = get_description(sb, &currentfileread);
-          sbe->state = IN_DESCRIPTION;
+          sbe->state = GB_IN_DESCRIPTION;
         } else {
           had_err = eat_line(sb, &currentfileread);
         }
         break;
-      case IN_DESCRIPTION:
+      case GB_IN_DESCRIPTION:
         if (gt_str_length(sbe->keywordbuffer) == 0)
         {
           had_err = eat_whitespace(sb, &currentfileread);
@@ -322,24 +322,24 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
             if (strcmp(gt_str_get(sbe->keywordbuffer),
                        GB_ORIGIN_STRING) == 0) {
               had_err = eat_line(sb, &currentfileread);
-              sbe->state = IN_SEQUENCE;
+              sbe->state = GB_IN_SEQUENCE;
             } else {
               had_err = eat_line(sb, &currentfileread);
-              sbe->state = AWAITING_SEQUENCE;
+              sbe->state = GB_AWAITING_SEQUENCE;
             }
           }
         }
         break;
-      case AWAITING_SEQUENCE:
+      case GB_AWAITING_SEQUENCE:
         if (strcmp(gt_str_get(sbe->keywordbuffer),
                    GB_ORIGIN_STRING) == 0) {
           had_err = eat_line(sb, &currentfileread);
-          sbe->state = IN_SEQUENCE;
+          sbe->state = GB_IN_SEQUENCE;
         } else {
           had_err = eat_line(sb, &currentfileread);
         }
         break;
-      case IN_SEQUENCE:
+      case GB_IN_SEQUENCE:
         if (gt_str_length(sbe->keywordbuffer) != 0) {
           gt_error_set(err, "only terminators allowed after a "
                             "sequence section, but found '%s' instead "
@@ -373,7 +373,7 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
         pvt->filenum++;
         /* still files left, open next one */
         gt_genfile_close(pvt->inputstream);
-        sbe->state = OUT_OF_ENTRY;
+        sbe->state = GB_OUT_OF_ENTRY;
         pvt->linenum = (uint64_t) 1;
         pvt->inputstream = gt_genfile_xopen(gt_str_array_get(pvt->filenametab,
                                                   (unsigned long) pvt->filenum),
@@ -389,7 +389,7 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
         /* all files exhausted */
         pvt->complete = true;
         /* remove last separator */
-        pvt->outbuf[--currentoutpos] = (Uchar) '\0';
+        pvt->outbuf[--currentoutpos] = (GtUchar) '\0';
         had_err = 0;
         break;
       }

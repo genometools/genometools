@@ -40,7 +40,4 @@ gt_text_width_calculator_class_new(size_t size,
 GtTextWidthCalculator*
 gt_text_width_calculator_create(const GtTextWidthCalculatorClass*);
 
-void*
-gt_line_breaker_cast(const GtTextWidthCalculatorClass*, GtTextWidthCalculator*);
-
 #endif

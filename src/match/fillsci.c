@@ -63,7 +63,7 @@ static unsigned long currentspecialrangevalue(
 typedef struct
 {
   Verboseinfo *verboseinfo;
-  Seqpos specialrangesUchar,
+  Seqpos specialrangesGtUchar,
          specialrangesUshort,
          specialrangesUint32,
          realspecialranges;
@@ -77,7 +77,7 @@ static void updatesumranges(unsigned long key, unsigned long long value,
 
   gt_assert(value <= (unsigned long long) ULONG_MAX);
   distvalue = (unsigned long) value;
-  updatesumrangeinfo->specialrangesUchar
+  updatesumrangeinfo->specialrangesGtUchar
      += currentspecialrangevalue(key,distvalue,(unsigned long) UCHAR_MAX);
   updatesumrangeinfo->specialrangesUshort
      += currentspecialrangevalue(key,distvalue,(unsigned long) USHRT_MAX);
@@ -96,7 +96,7 @@ static Seqpos calcspecialranges(Seqpos *specialrangestab,
 {
   Updatesumrangeinfo updatesumrangeinfo;
 
-  updatesumrangeinfo.specialrangesUchar = 0;
+  updatesumrangeinfo.specialrangesGtUchar = 0;
   updatesumrangeinfo.specialrangesUshort = 0;
   updatesumrangeinfo.specialrangesUint32 = 0;
   updatesumrangeinfo.realspecialranges = 0;
@@ -104,7 +104,7 @@ static Seqpos calcspecialranges(Seqpos *specialrangestab,
   gt_disc_distri_foreach(distspralen,updatesumranges,&updatesumrangeinfo);
   if (specialrangestab != NULL)
   {
-    specialrangestab[0] = updatesumrangeinfo.specialrangesUchar;
+    specialrangestab[0] = updatesumrangeinfo.specialrangesGtUchar;
     specialrangestab[1] = updatesumrangeinfo.specialrangesUshort;
     specialrangestab[2] = updatesumrangeinfo.specialrangesUint32;
   }
@@ -160,7 +160,7 @@ int fasta2sequencekeyvalues(
         GtError *err)
 {
   GtSequenceBuffer *fb = NULL;
-  Uchar charcode;
+  GtUchar charcode;
   Seqpos currentpos = 0;
   int retval;
   bool specialprefix = true;
@@ -196,10 +196,10 @@ int fasta2sequencekeyvalues(
       haserr = true;
     if (!haserr) {
       gt_sequence_buffer_set_symbolmap(fb, getsymbolmapAlphabet(alpha));
-      *filelengthtab = gt_calloc(gt_str_array_size(filenametab),
+      *filelengthtab = gt_calloc((size_t) gt_str_array_size(filenametab),
                                  sizeof (Filelengthvalues));
       gt_sequence_buffer_set_filelengthtab(fb, *filelengthtab);
-      if (descqueue)
+      if (descqueue != NULL)
         gt_sequence_buffer_set_desc_queue(fb, descqueue);
       gt_sequence_buffer_set_chardisttab(fb, characterdistribution);
 
@@ -223,7 +223,7 @@ int fasta2sequencekeyvalues(
         }
         if (ISSPECIAL(charcode))
         {
-          if (desfp != NULL && charcode == (Uchar) SEPARATOR)
+          if (desfp != NULL && charcode == (GtUchar) SEPARATOR)
           {
             desc = gt_queue_get(descqueue);
             if (fputs(desc,desfp) == EOF)
@@ -248,11 +248,11 @@ int fasta2sequencekeyvalues(
           {
             lastspeciallength++;
           }
-          if (charcode == (Uchar) SEPARATOR)
+          if (charcode == (GtUchar) SEPARATOR)
           {
             if (withssptab)
             {
-              STOREINARRAY(sequenceseppos,Seqpos,128,currentpos);
+              GT_STOREINARRAY(sequenceseppos,Seqpos,128,currentpos);
             } else
             {
               sequenceseppos->nextfreeSeqpos++;
@@ -301,11 +301,11 @@ int fasta2sequencekeyvalues(
 }
 
 void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
-                              const Uchar *seq,
+                              const GtUchar *seq,
                               const Seqpos len,
                               Verboseinfo *verboseinfo)
 {
-  Uchar charcode;
+  GtUchar charcode;
   Seqpos pos;
   bool specialprefix = true;
   Seqpos lastspeciallength = 0;

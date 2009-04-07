@@ -477,7 +477,7 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
   gt_node_stream_delete(gff3_in_stream);
 
   gt_str_delete(indexname);
-  freeEncodedsequence(&encseq);
+  encodedsequence_free(&encseq);
   gt_bioseq_delete(arguments->pbs_opts.trna_lib);
   freeverboseinfo(&vbi);
 

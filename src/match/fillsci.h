@@ -47,7 +47,7 @@ int fasta2sequencekeyvalues(
         GtError *err);
 
 void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
-                              const Uchar *seq,
+                              const GtUchar *seq,
                               const Seqpos len,
                               Verboseinfo *verboseinfo);
 

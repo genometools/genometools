@@ -189,6 +189,7 @@ int gt_canvas_cairo_visit_block(GtCanvas *canvas, GtBlock *block,
   gt_assert(canvas && block);
 
   grey.red = grey.green = grey.blue = DEFAULT_GREY_TONE;
+  grey.alpha = 0.5;
   strand = gt_block_get_strand(block);
   block_range = gt_block_get_range(block);
   bar_height = gt_block_get_max_height(block, canvas->pvt->sty);

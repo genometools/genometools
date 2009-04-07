@@ -85,15 +85,15 @@ static void pms_initdfsconstinfo(Limdfsconstinfo *mti,
                                  ...)
                                  /* Variable argument list is as follows:
                                     unsigned int alphasize
-                                    const Uchar *pattern,
+                                    const GtUchar *pattern,
                                     unsigned long patternlength
                                  */
 {
   va_list ap;
-  const Uchar *pattern;
+  const GtUchar *pattern;
 
   va_start(ap,alphasize);
-  pattern = va_arg(ap, const Uchar *);
+  pattern = va_arg(ap, const GtUchar *);
   mti->patternlength = va_arg(ap, unsigned long);
   va_end(ap);
   initeqsvector(mti->eqsvector,(unsigned long) alphasize,
@@ -224,7 +224,7 @@ static void pms_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
 static void pms_nextLimdfsstate(const Limdfsconstinfo *mti,
                                 DECLAREPTRDFSSTATE(aliasoutcol),
                                 unsigned long currentdepth,
-                                Uchar currentchar,
+                                GtUchar currentchar,
                                 const DECLAREPTRDFSSTATE(aliasincol))
 {
 #ifdef SKDEBUG
@@ -256,7 +256,7 @@ static void pms_nextLimdfsstate(const Limdfsconstinfo *mti,
 static void pms_inplacenextLimdfsstate(const Limdfsconstinfo *mti,
                                        DECLAREPTRDFSSTATE(aliascol),
                                        unsigned long currentdepth,
-                                       Uchar currentchar)
+                                       GtUchar currentchar)
 {
 #ifdef SKDEBUG
   char buffer1[32+1], buffer2[32+1];

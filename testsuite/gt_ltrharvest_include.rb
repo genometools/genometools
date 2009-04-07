@@ -74,7 +74,7 @@ if $gttestdata then
              + " -mintsd 5 -maxtsd 20 -motif tgca -motifmis 0 -vic 60"\
              + " -overlaps best -xdrop 5 -mat 2 -mis -2 -ins -3 -del -3 -v"\
              + " -gff3 #{k}.gff3 -out #{k}.fas -outinner #{k}_inner.fas", \
-             :maxtime => 15000
+             :maxtime => 25000
       run "diff #{$last_stdout} #{$gttestdata}ltrharvest/s_cer/#{k}.out"
       if k != "chr11" then
         run "#{$bin}gt gff3 #{k}.gff3"

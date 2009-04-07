@@ -18,9 +18,9 @@
 #include "core/symboldef.h"
 #include "readmode-def.h"
 
-void inplace_reversecomplement(Uchar *seq,unsigned long len)
+void inplace_reversecomplement(GtUchar *seq,unsigned long len)
 {
-  Uchar tmp, *frontptr, *backptr;
+  GtUchar tmp, *frontptr, *backptr;
 
   for (frontptr = seq, backptr = seq + len - 1;
        frontptr < backptr; frontptr++, backptr--)
@@ -31,10 +31,10 @@ void inplace_reversecomplement(Uchar *seq,unsigned long len)
   }
 }
 
-void copy_reversecomplement(Uchar *dest,const Uchar *src,unsigned long len)
+void copy_reversecomplement(GtUchar *dest,const GtUchar *src,unsigned long len)
 {
-  Uchar *destptr;
-  const Uchar *srcptr;
+  GtUchar *destptr;
+  const GtUchar *srcptr;
 
   for (destptr = dest, srcptr = src + len - 1;
        destptr < dest + len; destptr++, srcptr--)

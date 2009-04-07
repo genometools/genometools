@@ -58,7 +58,7 @@ static Seqpos searchsmallestgeq(const PairBwtidx *left,
 Seqpos fmfindtextpos (const Fmindex *fm,Seqpos idx)
 {
   unsigned long offset = 0;
-  Uchar cc;
+  GtUchar cc;
 
   while ((idx & fm->markdistminus1) != 0)
   {

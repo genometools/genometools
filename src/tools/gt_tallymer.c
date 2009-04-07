@@ -545,7 +545,7 @@ static int gt_tyr_occratio_arguments_check(int rest_argc,
     unsigned long idx;
     for (idx=0; idx<gt_str_array_size(arguments->outputspec); idx++)
     {
-      if (optionaddbitmask(outputmodedesctable,
+      if (optionargaddbitmask(outputmodedesctable,
                            sizeof (outputmodedesctable)/
                            sizeof (outputmodedesctable[0]),
                            &arguments->outputmode,
@@ -574,7 +574,7 @@ static int gt_tyr_occratio_arguments_check(int rest_argc,
   return haserr ? - 1: 0;
 }
 
-static void showitvdistribution(const Arrayuint64_t *dist,
+static void showitvdistribution(const GtArrayuint64_t *dist,
                                 const Bitsequence *outputvector)
 {
   unsigned long idx;
@@ -601,8 +601,8 @@ typedef enum
 } Summode;
 
 static void showitvsumdistributionoftwo(Summode mode,
-                                        const Arrayuint64_t *dist1,
-                                        const Arrayuint64_t *dist2,
+                                        const GtArrayuint64_t *dist1,
+                                        const GtArrayuint64_t *dist2,
                                         const Bitsequence *outputvector)
 {
   unsigned long idx;
@@ -673,9 +673,9 @@ static void showitvsumdistributionoftwo(Summode mode,
 #define ONLYONCE     "(counting each non unique mer only once)"
 #define MORETHANONCE "(counting each non unique mer more than once)"
 
-static void showoccratios(const Arrayuint64_t *uniquedistribution,
-                          const Arrayuint64_t *nonuniquedistribution,
-                          const Arrayuint64_t *nonuniquemultidistribution,
+static void showoccratios(const GtArrayuint64_t *uniquedistribution,
+                          const GtArrayuint64_t *nonuniquedistribution,
+                          const GtArrayuint64_t *nonuniquemultidistribution,
                           unsigned int outputmode,
                           const Bitsequence *outputvector)
 {
@@ -745,14 +745,14 @@ static int gt_tyr_occratio_runner(GT_UNUSED int argc,
   Verboseinfo *verboseinfo;
   Tyr_occratio_options *arguments = tool_arguments;
   bool haserr = false;
-  Arrayuint64_t uniquedistribution,
-                nonuniquedistribution,
-                nonuniquemultidistribution;
+  GtArrayuint64_t uniquedistribution,
+                  nonuniquedistribution,
+                  nonuniquemultidistribution;
 
   verboseinfo = newverboseinfo(arguments->verbose);
-  INITARRAY(&uniquedistribution,uint64_t);
-  INITARRAY(&nonuniquedistribution,uint64_t);
-  INITARRAY(&nonuniquemultidistribution,uint64_t);
+  GT_INITARRAY(&uniquedistribution,uint64_t);
+  GT_INITARRAY(&nonuniquedistribution,uint64_t);
+  GT_INITARRAY(&nonuniquemultidistribution,uint64_t);
   if (tyr_occratio(arguments->str_inputindex,
                    arguments->scanfile,
                    arguments->minmersize,
@@ -774,9 +774,9 @@ static int gt_tyr_occratio_runner(GT_UNUSED int argc,
                   arguments->outputvector);
   }
   freeverboseinfo(&verboseinfo);
-  FREEARRAY(&uniquedistribution,uint64_t);
-  FREEARRAY(&nonuniquedistribution,uint64_t);
-  FREEARRAY(&nonuniquemultidistribution,uint64_t);
+  GT_FREEARRAY(&uniquedistribution,uint64_t);
+  GT_FREEARRAY(&nonuniquedistribution,uint64_t);
+  GT_FREEARRAY(&nonuniquemultidistribution,uint64_t);
   return haserr ? -1 : 0;
 }
 
@@ -907,7 +907,7 @@ static int gt_tyr_search_arguments_check(int rest_argc,
   }
   for (idx=0; idx<gt_str_array_size(arguments->showmodespec); idx++)
   {
-    if (optionaddbitmask(showmodedesctable,
+    if (optionargaddbitmask(showmodedesctable,
                          sizeof (showmodedesctable)/
                          sizeof (showmodedesctable[0]),
                          &arguments->showmode,
@@ -918,12 +918,12 @@ static int gt_tyr_search_arguments_check(int rest_argc,
       return -1;
     }
   }
-  if (optionaddbitmask(stranddesctable,
-                       sizeof (stranddesctable)/
-                       sizeof (stranddesctable[0]),
-                       &arguments->strand,
-                       "-output",
-                       gt_str_get(arguments->strandspec),err) != 0)
+  if (optionargaddbitmask(stranddesctable,
+                          sizeof (stranddesctable)/
+                          sizeof (stranddesctable[0]),
+                          &arguments->strand,
+                          "-output",
+                          gt_str_get(arguments->strandspec),err) != 0)
   {
     return -1;
   }

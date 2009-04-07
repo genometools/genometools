@@ -26,7 +26,7 @@
 #define NEWLINESYMBOL     '\n'
 
 GtFastaBuffer* gt_fastabuffer_new(const GtStrArray *filenametab,
-                                  const Uchar *symbolmap,
+                                  const GtUchar *symbolmap,
                                   bool plainformat,
                                   Filelengthvalues **filelengthtab,
                                   GtQueue *descptr,
@@ -55,7 +55,7 @@ GtFastaBuffer* gt_fastabuffer_new(const GtStrArray *filenametab,
     fb->filelengthtab = NULL;
   }
   fb->characterdistribution = characterdistribution;
-  INITARRAY(&fb->headerbuffer, char);
+  GT_INITARRAY(&fb->headerbuffer, char);
   return fb;
 }
 
@@ -80,7 +80,7 @@ static int advancefastabufferstate(GtFastaBuffer *fb, GtError *err)
 {
   int currentchar;
   unsigned long currentoutpos = 0, currentfileadd = 0, currentfileread = 0;
-  Uchar charcode;
+  GtUchar charcode;
 
   gt_error_check(err);
   while (true)
@@ -147,13 +147,13 @@ static int advancefastabufferstate(GtFastaBuffer *fb, GtError *err)
           {
             if (currentchar == NEWLINESYMBOL)
             {
-              STOREINARRAY(&fb->headerbuffer, char, 128, '\0');
+              GT_STOREINARRAY(&fb->headerbuffer, char, 128, '\0');
               gt_queue_add(fb->descptr,
                            gt_cstr_dup(fb->headerbuffer.spacechar));
               fb->headerbuffer.nextfreechar = 0;
             } else
             {
-              STOREINARRAY(&fb->headerbuffer, char, 128, currentchar);
+              GT_STOREINARRAY(&fb->headerbuffer, char, 128, currentchar);
             }
           }
         } else
@@ -175,7 +175,7 @@ static int advancefastabufferstate(GtFastaBuffer *fb, GtError *err)
                 {
                   currentfileadd++;
                 }
-                fb->outputbuffer[currentoutpos++] = (Uchar) SEPARATOR;
+                fb->outputbuffer[currentoutpos++] = (GtUchar) SEPARATOR;
                 fb->lastspeciallength++;
               }
               fb->indesc = true;
@@ -183,11 +183,11 @@ static int advancefastabufferstate(GtFastaBuffer *fb, GtError *err)
             {
               if (fb->symbolmap == NULL)
               {
-                fb->outputbuffer[currentoutpos++] = (Uchar) currentchar;
+                fb->outputbuffer[currentoutpos++] = (GtUchar) currentchar;
               } else
               {
                 charcode = fb->symbolmap[(unsigned int) currentchar];
-                if (charcode == (Uchar) UNDEFCHAR)
+                if (charcode == (GtUchar) UNDEFCHAR)
                 {
                   gt_error_set(err,
                             "illegal character '%c': file \"%s\", line %llu",
@@ -292,7 +292,7 @@ static int advancePlainbufferstate(GtFastaBuffer *fb, GtError *err)
       } else
       {
         currentfileread++;
-        fb->outputbuffer[currentoutpos++] = (Uchar) currentchar;
+        fb->outputbuffer[currentoutpos++] = (GtUchar) currentchar;
       }
     }
   }
@@ -320,6 +320,6 @@ void gt_fastabuffer_delete(GtFastaBuffer *fb)
 {
   if (!fb) return;
   gt_genfile_close(fb->inputstream);
-  FREEARRAY(&fb->headerbuffer, char);
+  GT_FREEARRAY(&fb->headerbuffer, char);
   gt_free(fb);
 }

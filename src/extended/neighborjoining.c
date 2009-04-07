@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2003-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2003-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -75,8 +75,8 @@ static void gt_neighborjoining_init(GtNeighborJoining *nj,
   }
 }
 
-static double distance(const GtNeighborJoining *nj, unsigned long i,
-                       unsigned long j)
+static double neighborjoining_distance(const GtNeighborJoining *nj,
+                                       unsigned long i, unsigned long j)
 {
   double distance;
   if (i < j)
@@ -98,7 +98,7 @@ static void updatertab(double *rtab, GtBittab *nodetab,
       rtab[i] = 0.0; /* reset r[i] */
       for (j = 0; j < nj->numofnodes; j++) {
         if ((j != i) && (gt_bittab_bit_is_set(nodetab, j)))
-          rtab[i] += distance(nj, i, j);
+          rtab[i] += neighborjoining_distance(nj, i, j);
       }
       rtab[i] /= (activenodes - 2);
     }
@@ -163,7 +163,8 @@ static void gt_neighborjoining_compute(GtNeighborJoining *nj)
     for (i = 0; i < newnodenum; i++) {
       if (gt_bittab_bit_is_set(nodetab, i)) {
         nj->nodes[newnodenum].distances[i] =
-          (distance(nj, i, min_i) + distance(nj, i, min_j) -
+          (neighborjoining_distance(nj, i, min_i) +
+           neighborjoining_distance(nj, i, min_j) -
            nj->nodes[min_i].distances[min_j]) / 2;
       }
     }

@@ -19,7 +19,7 @@
 #include "fmindex.h"
 #include "mapspec-def.h"
 
-static void assignfmmapspecification(ArrayMapspecification *mapspectable,
+static void assignfmmapspecification(GtArrayMapspecification *mapspectable,
                                      void *voidinfo,
                                      GT_UNUSED bool writemode)
 {
@@ -42,7 +42,7 @@ static void assignfmmapspecification(ArrayMapspecification *mapspectable,
              fmwithoptions->storeindexpos
              ? fmindex->specpos.nextfreePairBwtidx
              : 0);
-  NEWMAPSPEC(fmindex->bfreq,Uchar,
+  NEWMAPSPEC(fmindex->bfreq,GtUchar,
              (unsigned long) BFREQSIZE(fmindex->mapsize,fmindex->nofblocks));
 }
 

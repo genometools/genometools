@@ -67,7 +67,7 @@ static unsigned long determinefmindexsize (const Fmindex *fm,
     sumsize += (uint64_t) sizeof (PairBwtidx) *
                (uint64_t) determinenumberofspecialstostore(specialcharinfo);
   }
-  sumsize += (uint64_t) sizeof (Uchar) *
+  sumsize += (uint64_t) sizeof (GtUchar) *
              (uint64_t) BFREQSIZE(fm->mapsize,fm->nofblocks);
   return CALLCASTFUNC(uint64_t,unsigned_long,sumsize);
 }

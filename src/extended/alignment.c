@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -30,7 +30,7 @@
 #define MISMATCHSYMBOL ' '
 
 struct GtAlignment {
-  const Uchar *u,
+  const GtUchar *u,
               *v;
   unsigned long ulen,
                 vlen;
@@ -43,10 +43,10 @@ typedef enum {
   Replacement,
   Deletion,
   Insertion
-} Eoptype;
+} AlignmentEoptype;
 
 typedef struct {
-  Eoptype type;
+  AlignmentEoptype type;
   unsigned long steps;
 } Multieop;
 /* XXX: possible improvement to save memory: combine both parts into a single
@@ -60,8 +60,8 @@ GtAlignment* gt_alignment_new(void)
   return a;
 }
 
-GtAlignment* gt_alignment_new_with_seqs(const Uchar *u, unsigned long ulen,
-                                        const Uchar *v, unsigned long vlen)
+GtAlignment* gt_alignment_new_with_seqs(const GtUchar *u, unsigned long ulen,
+                                        const GtUchar *v, unsigned long vlen)
 {
   GtAlignment *a;
   gt_assert(u && v);
@@ -73,8 +73,8 @@ GtAlignment* gt_alignment_new_with_seqs(const Uchar *u, unsigned long ulen,
   return a;
 }
 
-void gt_alignment_set_seqs(GtAlignment *a, const Uchar *u, unsigned long ulen,
-                           const Uchar *v, unsigned long vlen)
+void gt_alignment_set_seqs(GtAlignment *a, const GtUchar *u, unsigned long ulen,
+                           const GtUchar *v, unsigned long vlen)
 {
   gt_assert(a && u && v);
   a->u = u;
@@ -86,7 +86,7 @@ void gt_alignment_set_seqs(GtAlignment *a, const Uchar *u, unsigned long ulen,
   a->aligned_range_v.end = vlen - 1;
 }
 
-static void gt_alignment_add_eop(GtAlignment *a, Eoptype type)
+static void gt_alignment_add_eop(GtAlignment *a, AlignmentEoptype type)
 {
   Multieop meop, *meop_ptr;
   gt_assert(a);
@@ -331,8 +331,8 @@ void gt_alignment_show(const GtAlignment *a, FILE *fp)
 }
 
 void gt_alignment_show_with_mapped_chars(const GtAlignment *a,
-                                         const Uchar *characters,
-                                         Uchar wildcardshow,
+                                         const GtUchar *characters,
+                                         GtUchar wildcardshow,
                                          FILE *fp)
 {
   unsigned long i, j, uctr, vctr;
@@ -470,8 +470,8 @@ int gt_alignment_unit_test(GtError *err)
      agaaagaggta-agaggga
   */
 
-  a = gt_alignment_new_with_seqs((const Uchar *) u, strlen(u),
-                                 (const Uchar *) v, strlen(v));
+  a = gt_alignment_new_with_seqs((const GtUchar *) u, strlen(u),
+                                 (const GtUchar *) v, strlen(v));
   gt_alignment_add_replacement(a);
   gt_alignment_add_replacement(a);
   gt_alignment_add_replacement(a);

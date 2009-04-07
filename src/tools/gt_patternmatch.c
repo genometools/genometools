@@ -72,7 +72,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
   Suffixarray suffixarray;
   Seqpos totallength = 0;
   bool haserr = false;
-  const Uchar *pptr;
+  const GtUchar *pptr;
   unsigned long patternlen;
   unsigned int demand = SARR_SUFTAB | SARR_ESQTAB;
 

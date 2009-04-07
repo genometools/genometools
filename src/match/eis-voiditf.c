@@ -74,7 +74,7 @@ bool nextBwtseqpositionwithoutSEPiterator(Seqpos *pos,
 {
   while (bspi->currentbound < bspi->upperbound)
   {
-    Uchar cc;
+    GtUchar cc;
 
     if (bspi->currentbound != BWTSeqTerminatorPos(bspi->bwtseq))
     {
@@ -120,7 +120,7 @@ Bwtseqcontextiterator *newBwtseqcontextiterator(const void *voidbwtseq,
   return bsci;
 }
 
-Uchar bwtseqgetsymbol(Seqpos bound,const void *voidbwtseq)
+GtUchar bwtseqgetsymbol(Seqpos bound,const void *voidbwtseq)
 {
   if (bound != BWTSeqTerminatorPos(voidbwtseq))
   {
@@ -129,9 +129,9 @@ Uchar bwtseqgetsymbol(Seqpos bound,const void *voidbwtseq)
   return SEPARATOR;
 }
 
-Uchar nextBwtseqcontextiterator(Seqpos *bound,Bwtseqcontextiterator *bsci)
+GtUchar nextBwtseqcontextiterator(Seqpos *bound,Bwtseqcontextiterator *bsci)
 {
-  Uchar cc;
+  GtUchar cc;
 
   if (bsci->bound != BWTSeqTerminatorPos(bsci->bwtseq))
   {
@@ -193,7 +193,7 @@ void *loadvoidBWTSeqForSA(const GtStr *indexname,
   return haserr ? NULL : bwtseq;
 }
 
-void bwtrangesplitwithoutspecial(ArrayBoundswithchar *bwci,
+void bwtrangesplitwithoutspecial(GtArrayBoundswithchar *bwci,
                                  Seqpos *rangeOccs,
                                  const void *voidBwtSeq,
                                  Seqpos lbound,
@@ -305,8 +305,8 @@ unsigned long voidpackedindexuniqueforward(const void *voidbwtseq,
                                            GT_UNUSED Seqpos left,
                                            GT_UNUSED Seqpos right,
                                            GT_UNUSED Seqpos *witnessposition,
-                                           const Uchar *qstart,
-                                           const Uchar *qend)
+                                           const GtUchar *qstart,
+                                           const GtUchar *qend)
 {
   return packedindexuniqueforward((const BWTSeq *) voidbwtseq,
                                   qstart,
@@ -330,8 +330,8 @@ unsigned long voidpackedindexmstatsforward(const void *voidbwtseq,
                                            GT_UNUSED Seqpos left,
                                            GT_UNUSED Seqpos right,
                                            Seqpos *witnessposition,
-                                           const Uchar *qstart,
-                                           const Uchar *qend)
+                                           const GtUchar *qstart,
+                                           const GtUchar *qend)
 {
   const BWTSeq *bwtseq = (const BWTSeq *) voidbwtseq;
   unsigned long matchlength;
@@ -347,10 +347,10 @@ unsigned long voidpackedindexmstatsforward(const void *voidbwtseq,
 }
 
 bool pck_exactpatternmatching(const void *voidbwtseq,
-                              const Uchar *pattern,
+                              const GtUchar *pattern,
                               unsigned long patternlength,
                               Seqpos totallength,
-                              const Uchar *dbsubstring,
+                              const GtUchar *dbsubstring,
                               Processmatch processmatch,
                               void *processmatchinfo)
 {

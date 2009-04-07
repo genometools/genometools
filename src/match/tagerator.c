@@ -53,8 +53,8 @@ typedef struct
 
 typedef struct
 {
-  const Uchar *tagptr;
-  Uchar transformedtag[MAXTAGSIZE],
+  const GtUchar *tagptr;
+  GtUchar transformedtag[MAXTAGSIZE],
         rctransformedtag[MAXTAGSIZE];
   unsigned long taglen;
 } Tagwithlength;
@@ -63,7 +63,7 @@ typedef struct
 {
   const TageratorOptions *tageratoroptions;
   unsigned int alphasize;
-  const Uchar *tagptr;
+  const GtUchar *tagptr;
   const SfxAlphabet *alpha;
   unsigned long *eqsvector;
   const Tagwithlength *twlptr;
@@ -183,7 +183,7 @@ static void storematch(void *processinfo,const GtMatch *match)
   ArraySimplematch *storetab = (ArraySimplematch *) processinfo;
   Simplematch *simplematch;
 
-  GETNEXTFREEINARRAY(simplematch,storetab,Simplematch,32);
+  GT_GETNEXTFREEINARRAY(simplematch,storetab,Simplematch,32);
   simplematch->dbstartpos = match->dbstartpos;
   simplematch->matchlength = match->dblen;
   simplematch->rcmatch = ISRCDIR(storetab->twlptr);
@@ -212,7 +212,7 @@ static void checkmstats(void *processinfo,
   if (intervalwidthleq((const Limdfsresources *) processinfo,leftbound,
                        rightbound))
   {
-    Uchar cc;
+    GtUchar cc;
     Seqpos *sptr, witnessposition;
     unsigned long idx;
     ArraySeqpos *mstatspos = fromitv2sortedmatchpositions(
@@ -298,16 +298,16 @@ static int cmpdescend(const void *a,const void *b)
   return 0;
 }
 
-static int dotransformtag(Uchar *transformedtag,
-                          const Uchar *symbolmap,
-                          const Uchar *currenttag,
+static int dotransformtag(GtUchar *transformedtag,
+                          const GtUchar *symbolmap,
+                          const GtUchar *currenttag,
                           unsigned long taglen,
                           uint64_t tagnumber,
                           bool replacewildcard,
                           GtError *err)
 {
   unsigned long idx;
-  Uchar charcode;
+  GtUchar charcode;
 
   if (taglen > (unsigned long) MAXTAGSIZE)
   {
@@ -320,14 +320,14 @@ static int dotransformtag(Uchar *transformedtag,
   for (idx = 0; idx < taglen; idx++)
   {
     charcode = symbolmap[currenttag[idx]];
-    if (charcode == (Uchar) UNDEFCHAR)
+    if (charcode == (GtUchar) UNDEFCHAR)
     {
       gt_error_set(err,"undefined character '%c' in tag number " Formatuint64_t,
                 currenttag[idx],
                 PRINTuint64_tcast(tagnumber));
       return -1;
     }
-    if (charcode == (Uchar) WILDCARD)
+    if (charcode == (GtUchar) WILDCARD)
     {
       if (replacewildcard)
       {
@@ -353,7 +353,7 @@ static bool performpatternsearch(const AbstractDfstransformer *dfst,
                                  bool skpp,
                                  Myersonlineresources *mor,
                                  Limdfsresources *limdfsresources,
-                                 const Uchar *tagptr,
+                                 const GtUchar *tagptr,
                                  unsigned long taglen)
 {
   if (doonline || (!domstats && docompare))
@@ -569,7 +569,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     Tagwithlength twl;
     uint64_t tagnumber;
     unsigned int numofchars;
-    const Uchar *symbolmap, *currenttag;
+    const GtUchar *symbolmap, *currenttag;
     char *desc = NULL;
     Processmatch processmatch;
     Showmatchinfo showmatchinfo;
@@ -587,8 +587,8 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     {
       dfst = pms_AbstractDfstransformer();
     }
-    INITARRAY(&storeonline,Simplematch);
-    INITARRAY(&storeoffline,Simplematch);
+    GT_INITARRAY(&storeonline,Simplematch);
+    GT_INITARRAY(&storeoffline,Simplematch);
     storeonline.twlptr = storeoffline.twlptr = &twl;
     alpha = getencseqAlphabet(encseq);
     symbolmap = getsymbolmapAlphabet(alpha);
@@ -650,82 +650,88 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     getsetargmodekeywords(tageratoroptions->modedesc,
                           tageratoroptions->numberofmodedescentries,
                           tageratoroptions->outputmode);
-    seqit = gt_seqiterator_new(tageratoroptions->tagfiles, NULL, true);
-    for (tagnumber = 0; !haserr; tagnumber++)
+    seqit = gt_seqiterator_new(tageratoroptions->tagfiles, err);
+    if (!seqit)
+      haserr = true;
+    if (!haserr)
     {
-      retval = gt_seqiterator_next(seqit, &currenttag, &twl.taglen, &desc, err);
-      if (retval != 1)
+      for (tagnumber = 0; !haserr; tagnumber++)
       {
-        if (retval < 0)
+        retval = gt_seqiterator_next(seqit, &currenttag, &twl.taglen, &desc,
+                                     err);
+        if (retval != 1)
         {
-          gt_free(desc);
+          if (retval < 0)
+          {
+            gt_free(desc);
+          }
+          break;
         }
-        break;
-      }
-      if (dotransformtag(twl.transformedtag,
-                         symbolmap,
-                         currenttag,
-                         twl.taglen,
-                         tagnumber,
-                         tageratoroptions->replacewildcard,
-                         err) != 0)
-      {
-        haserr = true;
+        if (dotransformtag(twl.transformedtag,
+                           symbolmap,
+                           currenttag,
+                           twl.taglen,
+                           tagnumber,
+                           tageratoroptions->replacewildcard,
+                           err) != 0)
+        {
+          haserr = true;
+          gt_free(desc);
+          break;
+        }
+        copy_reversecomplement(twl.rctransformedtag,twl.transformedtag,
+                               twl.taglen);
+        twl.tagptr = twl.transformedtag;
+        printf("#");
+        if (tageratoroptions->outputmode & TAGOUT_TAGNUM)
+        {
+          printf("\t" Formatuint64_t,PRINTuint64_tcast(tagnumber));
+        }
+        if (tageratoroptions->outputmode & TAGOUT_TAGSEQ)
+        {
+          printf("\t%lu\t",twl.taglen);
+          fprintfsymbolstring(stdout,alpha,twl.transformedtag,twl.taglen);
+        }
+        printf("\n");
+        storeoffline.nextfreeSimplematch = 0;
+        storeonline.nextfreeSimplematch = 0;
+        if (tageratoroptions->userdefinedmaxdistance > 0 &&
+            twl.taglen <= (unsigned long)
+                          tageratoroptions->userdefinedmaxdistance)
+        {
+          gt_error_set(err,"tag \"%*.*s\" of length %lu; "
+                       "tags must be longer than the allowed number of errors "
+                       "(which is %ld)",
+                       (int) twl.taglen,
+                       (int) twl.taglen,currenttag,
+                       twl.taglen,
+                       tageratoroptions->userdefinedmaxdistance);
+          haserr = true;
+          gt_free(desc);
+          break;
+        }
+        gt_assert(tageratoroptions->userdefinedmaxdistance < 0 ||
+                  twl.taglen > (unsigned long)
+                               tageratoroptions->userdefinedmaxdistance);
+        searchoverstrands(tageratoroptions,
+                          &twl,
+                          dfst,
+                          mor,
+                          limdfsresources,
+                          &showmatchinfo,
+                          &storeonline,
+                          &storeoffline);
         gt_free(desc);
-        break;
       }
-      copy_reversecomplement(twl.rctransformedtag,twl.transformedtag,
-                             twl.taglen);
-      twl.tagptr = twl.transformedtag;
-      printf("#");
-      if (tageratoroptions->outputmode & TAGOUT_TAGNUM)
+      gt_free(showmatchinfo.eqsvector);
+      if (limdfsresources != NULL)
       {
-        printf("\t" Formatuint64_t,PRINTuint64_tcast(tagnumber));
+        freeLimdfsresources(&limdfsresources,dfst);
       }
-      if (tageratoroptions->outputmode & TAGOUT_TAGSEQ)
-      {
-        printf("\t%lu\t",twl.taglen);
-        fprintfsymbolstring(stdout,alpha,twl.transformedtag,twl.taglen);
-      }
-      printf("\n");
-      storeoffline.nextfreeSimplematch = 0;
-      storeonline.nextfreeSimplematch = 0;
-      if (tageratoroptions->userdefinedmaxdistance > 0 &&
-          twl.taglen <= (unsigned long)
-                        tageratoroptions->userdefinedmaxdistance)
-      {
-        gt_error_set(err,"tag \"%*.*s\" of length %lu; "
-                     "tags must be longer than the allowed number of errors "
-                     "(which is %ld)",
-                     (int) twl.taglen,
-                     (int) twl.taglen,currenttag,
-                     twl.taglen,
-                     tageratoroptions->userdefinedmaxdistance);
-        haserr = true;
-        gt_free(desc);
-        break;
-      }
-      gt_assert(tageratoroptions->userdefinedmaxdistance < 0 ||
-                twl.taglen > (unsigned long)
-                             tageratoroptions->userdefinedmaxdistance);
-      searchoverstrands(tageratoroptions,
-                        &twl,
-                        dfst,
-                        mor,
-                        limdfsresources,
-                        &showmatchinfo,
-                        &storeonline,
-                        &storeoffline);
-      gt_free(desc);
+      GT_FREEARRAY(&storeonline,Simplematch);
+      GT_FREEARRAY(&storeoffline,Simplematch);
+      gt_seqiterator_delete(seqit);
     }
-    gt_free(showmatchinfo.eqsvector);
-    if (limdfsresources != NULL)
-    {
-      freeLimdfsresources(&limdfsresources,dfst);
-    }
-    FREEARRAY(&storeonline,Simplematch);
-    FREEARRAY(&storeoffline,Simplematch);
-    gt_seqiterator_delete(seqit);
   }
   if (mor != NULL)
   {
@@ -733,8 +739,10 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
   }
   if (genericindex == NULL)
   {
-    gt_assert(encseq != NULL);
-    freeEncodedsequence((Encodedsequence **) &encseq);
+    if (encseq != NULL)
+    {
+      encodedsequence_free((Encodedsequence **) &encseq);
+    }
   } else
   {
     genericindex_delete(genericindex);

@@ -20,17 +20,17 @@
 #include "match/eis-sa-common.h"
 #include "match/eis-sa-common-priv.h"
 
-static inline Uchar
+static inline GtUchar
 sfxIdx2BWTSym(Seqpos sufIdx, const Encodedsequence *encseq, Readmode readmode)
 {
   return sufIdx != 0
     ? getencodedchar(encseq, sufIdx - 1, readmode)
-    : (Uchar) UNDEFBWTCHAR;
+    : (GtUchar) UNDEFBWTCHAR;
 }
 
 static inline size_t
 EncSeqGetSubSeq(const Encodedsequence *encseq, Readmode readmode, Seqpos pos,
-                size_t len, Uchar *subSeq)
+                size_t len, GtUchar *subSeq)
 {
   size_t i;
   gt_assert(encseq);

@@ -14,7 +14,7 @@ int getfastastreamkmers(
         void *processkmercodeinfo,
         unsigned int numofchars,
         unsigned int kmersize,
-        const Uchar *symbolmap,
+        const GtUchar *symbolmap,
         bool plainformat,
         GtError *err);
 

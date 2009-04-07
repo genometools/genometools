@@ -22,6 +22,7 @@
 #include "core/str.h"
 #include "core/str_array.h"
 #include "core/symboldef.h"
+#include "core/error_api.h"
 
 #define MAXALPHABETCHARACTER UCHAR_MAX
 
@@ -45,13 +46,13 @@ typedef struct SfxAlphabet SfxAlphabet;
 
 SfxAlphabet *gt_copyAlphabet(const SfxAlphabet *alpha2);
 
-const Uchar *getsymbolmapAlphabet(const SfxAlphabet *alpha);
+const GtUchar *getsymbolmapAlphabet(const SfxAlphabet *alpha);
 
 unsigned int getnumofcharsAlphabet(const SfxAlphabet *alpha);
 
-const Uchar *getcharactersAlphabet(const SfxAlphabet *alpha);
+const GtUchar *getcharactersAlphabet(const SfxAlphabet *alpha);
 
-Uchar getwildcardshowAlphabet(const SfxAlphabet *alpha);
+GtUchar getwildcardshowAlphabet(const SfxAlphabet *alpha);
 
 unsigned int getbitspersymbolAlphabet(const SfxAlphabet *alpha);
 
@@ -60,17 +61,17 @@ void freeSfxAlphabet(SfxAlphabet **alpha);
 void outputalphabet(FILE *fpout,const SfxAlphabet *alpha);
 
 void fprintfsymbolstring(FILE *fpout,const SfxAlphabet *alpha,
-                         const Uchar *w,unsigned long wlen);
+                         const GtUchar *w,unsigned long wlen);
 
-void printfsymbolstring(const SfxAlphabet *alpha,const Uchar *w,
+void printfsymbolstring(const SfxAlphabet *alpha,const GtUchar *w,
                         unsigned long wlen);
 
 void sprintfsymbolstring(char *buffer,const SfxAlphabet *alpha,
-                         const Uchar *w,unsigned long wlen);
+                         const GtUchar *w,unsigned long wlen);
 
-void echoprettysymbol(FILE *fpout,const SfxAlphabet *alpha,Uchar currentchar);
+void echoprettysymbol(FILE *fpout,const SfxAlphabet *alpha,GtUchar currentchar);
 
-Uchar getprettysymbol(const SfxAlphabet *alpha,unsigned int currentchar);
+GtUchar getprettysymbol(const SfxAlphabet *alpha,unsigned int currentchar);
 
 bool isproteinalphabet(const SfxAlphabet *alpha);
 

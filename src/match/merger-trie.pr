@@ -2,7 +2,7 @@
 extern "C" {
 #endif
 void showmergertrie(const Mergertrierep *trierep,
-                    const Uchar *characters);
+                    const GtUchar *characters);
 
 void checkmergertrie(Mergertrierep *trierep,unsigned int numberofleaves,
                      unsigned int maxleafnum,GtError *err);
@@ -15,7 +15,7 @@ void insertsuffixintomergertrie(Mergertrierep *trierep,
 
 Mergertrienode *findsmallestnodeintrie(const Mergertrierep *trierep);
 
-void deletesmallestpath(Mergertrienode *smallest,Mergertrierep *trierep);
+void deletesmallesttriepath(Mergertrienode *smallest,Mergertrierep *trierep);
 
 void initmergertrienodetable(Mergertrierep *trierep,Seqpos numofsuffixes,
                              unsigned int numofindexes);

@@ -61,7 +61,7 @@ typedef struct
                                                    INSERTIONBIT */
 } Myfrontvalue;
 
-DECLAREARRAYSTRUCT(Myfrontvalue);
+GT_DECLAREARRAYSTRUCT(Myfrontvalue);
 
 typedef struct
 {
@@ -72,14 +72,14 @@ typedef struct
 /* This is the type for the xdrop scores. */
 typedef int Xdropscore;
 
-DECLAREARRAYSTRUCT(Xdropscore);
+GT_DECLAREARRAYSTRUCT(Xdropscore);
 
-int showmatrix ( ArrayMyfrontvalue * fronts,
-  int distance,
-  unsigned char * useq,
-  unsigned char * vseq,
-  int ulen,
-  int vlen);
+int showmatrix(GtArrayMyfrontvalue * fronts,
+               int distance,
+               unsigned char *useq,
+               unsigned char *vseq,
+               int ulen,
+               int vlen);
 
 void calculatedistancesfromscores(Arbitraryscores *arbitscores,
     Arbitrarydistances *arbitdistances);
@@ -99,20 +99,20 @@ void calculateallowedMININFINITYINTgenerations(
 */
 
 void evalxdroparbitscoresright(Arbitraryscores *arbitscores,
-                                     Myxdropbest * xdropbest,
-                                     ArrayMyfrontvalue * fronts,
-                                     const Encodedsequence *str_useq,
-                                     const Encodedsequence *str_vseq,
-                                     Seqpos useq,
-                                     Seqpos vseq,
-                                     int ulen,
-                                     int vlen,
-                                     Xdropscore xdropbelowscore);
+                               Myxdropbest * xdropbest,
+                               GtArrayMyfrontvalue * fronts,
+                               const Encodedsequence *str_useq,
+                               const Encodedsequence *str_vseq,
+                               Seqpos useq,
+                               Seqpos vseq,
+                               int ulen,
+                               int vlen,
+                               Xdropscore xdropbelowscore);
 
 #define EVALXDROPARBITSCORESRIGHT\
       void evalxdroparbitscoresright(Arbitraryscores *arbitscores,\
                                      Myxdropbest * xdropbest,\
-                                     ArrayMyfrontvalue * fronts,\
+                                     GtArrayMyfrontvalue * fronts,\
                                      const Encodedsequence *str_useq,\
                                      const Encodedsequence *str_vseq,\
                                      Seqpos useq,\
@@ -122,25 +122,25 @@ void evalxdroparbitscoresright(Arbitraryscores *arbitscores,
                                      Xdropscore xdropbelowscore)
 
 void evalxdroparbitscoresleft(Arbitraryscores * arbitscores,
-                                    Myxdropbest * xdropbest,
-                                    ArrayMyfrontvalue * fronts,
-                                    const Encodedsequence *str_useq,
-                                    const Encodedsequence *str_vseq,
-                                    Seqpos useq,
-                                    Seqpos vseq,
-                                    int ulen,
-                                    int vlen,
-                                    Xdropscore xdropbelowscore);
+                              Myxdropbest * xdropbest,
+                              GtArrayMyfrontvalue * fronts,
+                              const Encodedsequence *str_useq,
+                              const Encodedsequence *str_vseq,
+                              Seqpos useq,
+                              Seqpos vseq,
+                              int ulen,
+                              int vlen,
+                              Xdropscore xdropbelowscore);
 
 #define EVALXDROPARBITSCORESLEFT\
        void evalxdroparbitscoresleft(Arbitraryscores * arbitscores,\
-                                    Myxdropbest * xdropbest,\
-                                    ArrayMyfrontvalue * fronts,\
-                                    const Encodedsequence *str_useq,\
-                                    const Encodedsequence *str_vseq,\
-                                    Seqpos useq,\
-                                    Seqpos vseq,\
-                                    int ulen,\
-                                    int vlen,\
-                                    Xdropscore xdropbelowscore)
+                                     Myxdropbest * xdropbest,\
+                                     GtArrayMyfrontvalue * fronts,\
+                                     const Encodedsequence *str_useq,\
+                                     const Encodedsequence *str_vseq,\
+                                     Seqpos useq,\
+                                     Seqpos vseq,\
+                                     int ulen,\
+                                     int vlen,\
+                                     Xdropscore xdropbelowscore)
 #endif

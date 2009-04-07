@@ -20,6 +20,6 @@
 
 #include <inttypes.h>
 
-typedef uint8_t Uchar;
+typedef uint8_t GtUchar;
 
 #endif

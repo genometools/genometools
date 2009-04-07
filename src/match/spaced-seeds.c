@@ -35,7 +35,7 @@ struct Limdfsconstinfo
 {
   Bitsequence seedbitvector;
   unsigned long seedweight;
-  const Uchar *pattern;
+  const GtUchar *pattern;
 };
 
 #ifdef SKDEBUG
@@ -63,7 +63,7 @@ static void spse_initdfsconstinfo(Limdfsconstinfo *mti,
                                   unsigned int alphasize,
                                   ...)
                                  /* Variable argument list is as follows:
-                                    const Uchar *pattern,
+                                    const GtUchar *pattern,
                                     Bitsequence seedbitvector,
                                     unsigned long seedweight
                                  */
@@ -71,7 +71,7 @@ static void spse_initdfsconstinfo(Limdfsconstinfo *mti,
   va_list ap;
 
   va_start(ap,alphasize);
-  mti->pattern = va_arg(ap, const Uchar *);
+  mti->pattern = va_arg(ap, const GtUchar *);
   mti->seedbitvector = va_arg(ap, Bitsequence);
   mti->seedweight = va_arg(ap, unsigned long);
   va_end(ap);
@@ -120,9 +120,9 @@ static void spse_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
 }
 
 static bool setpathmatch(Bitsequence seedbitvector,
-                         const Uchar *pattern,
+                         const GtUchar *pattern,
                          unsigned long currentdepth,
-                         Uchar currentchar)
+                         GtUchar currentchar)
 {
   return (!ISBITSET(seedbitvector,currentdepth-1) ||
           currentchar == pattern[currentdepth-1]) ? true : false;
@@ -131,7 +131,7 @@ static bool setpathmatch(Bitsequence seedbitvector,
 static void spse_nextLimdfsstate(const Limdfsconstinfo *mti,
                                  DECLAREPTRDFSSTATE(aliasoutcol),
                                  unsigned long currentdepth,
-                                 Uchar currentchar,
+                                 GtUchar currentchar,
                                  GT_UNUSED const DECLAREPTRDFSSTATE(aliasincol))
 {
   Limdfsstate *outcol = (Limdfsstate *) aliasoutcol;
@@ -152,7 +152,7 @@ static void spse_nextLimdfsstate(const Limdfsconstinfo *mti,
 static void spse_inplacenextLimdfsstate(const Limdfsconstinfo *mti,
                                         DECLAREPTRDFSSTATE(aliascol),
                                         unsigned long currentdepth,
-                                        Uchar currentchar)
+                                        GtUchar currentchar)
 {
   Limdfsstate *col = (Limdfsstate *) aliascol;
 

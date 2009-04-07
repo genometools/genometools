@@ -49,12 +49,12 @@ enum sfxDataRequest {
 /**
  * @return Symbol at position sufIdx or UNDEFBWTCHAR i.e. the terminator
  */
-static inline Uchar
+static inline GtUchar
 sfxIdx2BWTSym(Seqpos sufIdx, const Encodedsequence *encseq, Readmode readmode);
 
 static inline size_t
 EncSeqGetSubSeq(const Encodedsequence *encseq, Readmode readmode, Seqpos pos,
-                size_t len, Uchar *subStr);
+                size_t len, GtUchar *subStr);
 
 struct encSeqTrState
 {
@@ -72,7 +72,7 @@ struct encSeqTrState
  * @param len length of string to read
  */
 extern size_t
-translateSuftab2BWT(struct encSeqTrState *trState, Uchar *dest, Seqpos *src,
+translateSuftab2BWT(struct encSeqTrState *trState, GtUchar *dest, Seqpos *src,
                     size_t len);
 
 struct encSeqLCPState

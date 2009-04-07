@@ -321,12 +321,12 @@ void* gt_fa_mmap_generic_fd_func(int fd, size_t len, size_t offset,
   mapinfo->len = len;
   if (hard_fail)
   {
-    map = gt_xmmap(0, len, mapwritable?PROT_WRITE:PROT_READ,
+    map = gt_xmmap(0, len, PROT_READ | (mapwritable ? PROT_WRITE : 0),
                 MAP_SHARED, fd, offset);
   }
   else
   {
-    if ((map = mmap(0, len, mapwritable?PROT_WRITE:PROT_READ,
+    if ((map = mmap(0, len, PROT_READ | (mapwritable ? PROT_WRITE : 0),
                     MAP_SHARED, fd, offset)) == MAP_FAILED)
       map = NULL;
   }

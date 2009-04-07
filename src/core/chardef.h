@@ -49,13 +49,13 @@
   either WILDCARD or SEPARATOR
 */
 
-#define ISSPECIAL(C)    ((C) >= (Uchar) WILDCARD)
+#define ISSPECIAL(C)    ((C) >= (GtUchar) WILDCARD)
 
 /*
   neither WILDCARD nor SEPARATOR
 */
 
-#define ISNOTSPECIAL(C) ((C) < (Uchar) WILDCARD)
+#define ISNOTSPECIAL(C) ((C) < (GtUchar) WILDCARD)
 
 /*
   undefined character, only to be used in conjunction with the Burrows-Wheeler
@@ -68,14 +68,14 @@
   Either special character or UNDEFBWTCHAR
 */
 
-#define ISBWTSPECIAL(C) ((C) >= (Uchar) UNDEFBWTCHAR)
+#define ISBWTSPECIAL(C) ((C) >= (GtUchar) UNDEFBWTCHAR)
 
 /*@unused@*/ static inline unsigned long
-                            containsspecialbytestring(const Uchar *seq,
+                            containsspecialbytestring(const GtUchar *seq,
                                                       unsigned long offset,
                                                       unsigned long len)
 {
-  const Uchar *sptr;
+  const GtUchar *sptr;
 
   gt_assert(offset < len);
   for (sptr=seq+offset; sptr < seq + len; sptr++)

@@ -33,6 +33,6 @@ typedef struct
                 value;
 } Largecount;
 
-DECLAREARRAYSTRUCT(Largecount);
+GT_DECLAREARRAYSTRUCT(Largecount);
 
 #endif

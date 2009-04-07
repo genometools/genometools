@@ -42,7 +42,7 @@ Pckbuckettable *mappckbuckettable(const GtStr *indexname,
                                   unsigned int numofchars,
                                   GtError *err);
 
-void enumlowlevelchildintervals(ArrayBoundswithchar *bwci,
+void enumlowlevelchildintervals(GtArrayBoundswithchar *bwci,
                                 const Pckbuckettable *pcktb,
                                 Codetype parentcode,
                                 unsigned long childdepth);

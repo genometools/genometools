@@ -19,7 +19,7 @@ static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
                                       GtSequenceBuffer *fb,
                                       GtError *err)
 {
-  Uchar cc;
+  GtUchar cc;
   unsigned long currentspecialchar = 0;
   Seqpos pos;
   int retval;

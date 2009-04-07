@@ -20,35 +20,28 @@
 
 #include "core/error_api.h"
 #include "seqpos-def.h"
+#include "readmode-def.h"
 #include "bcktab.h"
+#include "intcode-def.h"
 #include "compressedtab.h"
 
 typedef struct Rmnsufinfo Rmnsufinfo;
 
 Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
+                          int mmapfiledesc,
                           const Encodedsequence *encseq,
                           const Bcktab *bcktab,
+                          Codetype maxcode,
+                          unsigned int numofchars,
+                          unsigned int prefixlength,
                           Readmode readmode,
-                          Seqpos partwidth,
-                          bool startatprefixlen);
+                          Seqpos partwidth);
 
-void addunsortedrange(Rmnsufinfo *rmnsufinfo,
-                      Seqpos *left,Seqpos *right,Seqpos depth);
+void rmnsufinfo_addunsortedrange(Rmnsufinfo *rmnsufinfo,
+                                 Seqpos left,Seqpos right,Seqpos depth);
 
-void inversesuftabrange(Rmnsufinfo *rmnsufinfo,Seqpos *left,
-                        Seqpos *right,Seqpos *base,
-                        bool leftadjust,Seqpos idx);
-
-void adjustpresortedinterval(Rmnsufinfo *rmnsufinfo,
-                             Seqpos *left,Seqpos *right, Seqpos depth);
-
-void setinversesuftabrange(Rmnsufinfo *rmnsufinfo,Seqpos *left,
-                           Seqpos *right,Seqpos idx);
-
-void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos *left,
-                             Seqpos *right,Seqpos *base);
-
-Compressedtable *wrapRmnsufinfo(Seqpos *longest,
-                                Rmnsufinfo **rmnsufinfoptr,bool withlcptab);
+void bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo );
+Compressedtable *rmnsufinfo_wrap(Seqpos *longest,
+                                 Rmnsufinfo **rmnsufinfoptr,bool withlcptab);
 
 #endif

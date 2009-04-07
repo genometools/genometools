@@ -36,8 +36,8 @@
                       distval = ulen
 
 #define COMPUTENEWDIST(CC)\
-        gt_assert((CC) != (Uchar) SEPARATOR);\
-        if ((CC) != (Uchar) WILDCARD)\
+        gt_assert((CC) != (GtUchar) SEPARATOR);\
+        if ((CC) != (GtUchar) WILDCARD)\
         {\
           Eq = eqsvector[(unsigned long) (CC)];\
         } else\
@@ -70,13 +70,13 @@
 
 unsigned long distanceofshortstringsbytearray(unsigned long *eqsvector,
                                               unsigned int alphasize,
-                                              const Uchar *useq,
+                                              const GtUchar *useq,
                                               unsigned long ulen,
-                                              const Uchar *vseq,
+                                              const GtUchar *vseq,
                                               unsigned long vlen)
 {
   DECLARELOCALVARS;
-  const Uchar *vptr;
+  const GtUchar *vptr;
 
   initeqsvector(eqsvector,(unsigned long) alphasize,useq,ulen);
   for (vptr = vseq; vptr < vseq + vlen; vptr++)
@@ -88,14 +88,14 @@ unsigned long distanceofshortstringsbytearray(unsigned long *eqsvector,
 
 unsigned long distanceofshortstringsencseq(unsigned long *eqsvector,
                                            unsigned int alphasize,
-                                           const Uchar *useq,
+                                           const GtUchar *useq,
                                            unsigned long ulen,
                                            const Encodedsequence *encseq,
                                            Seqpos vstartpos,
                                            Seqpos vlen)
 {
   DECLARELOCALVARS;
-  Uchar cc;
+  GtUchar cc;
   Seqpos pos;
 
   initeqsvector(eqsvector,(unsigned long) alphasize,useq,ulen);
@@ -109,14 +109,14 @@ unsigned long distanceofshortstringsencseq(unsigned long *eqsvector,
 
 unsigned long reversesuffixmatch(unsigned long *eqsvector,
                                  unsigned int alphasize,
-                                 const Uchar *useq,
+                                 const GtUchar *useq,
                                  unsigned long ulen,
-                                 const Uchar *vseq,
+                                 const GtUchar *vseq,
                                  unsigned long vlen,
                                  unsigned long maxdistance)
 {
   DECLARELOCALVARS;
-  const Uchar *vptr;
+  const GtUchar *vptr;
 
   initeqsvectorrev(eqsvector,(unsigned long) alphasize,useq,ulen);
   gt_assert(maxdistance > 0);
@@ -137,13 +137,13 @@ Definedunsignedlong forwardprefixmatch(const Encodedsequence *encseq,
                                        Seqpos startpos,
                                        bool nowildcards,
                                        unsigned long *eqsvector,
-                                       const Uchar *useq,
+                                       const GtUchar *useq,
                                        unsigned long ulen,
                                        unsigned long maxdistance)
 {
   DECLARELOCALVARS;
   Seqpos pos, totallength = getencseqtotallength(encseq);
-  Uchar cc;
+  GtUchar cc;
   Definedunsignedlong result;
 
   initeqsvector(eqsvector,(unsigned long) alphasize,useq,ulen);
@@ -158,7 +158,7 @@ Definedunsignedlong forwardprefixmatch(const Encodedsequence *encseq,
     }
     gt_assert(pos - startpos <= (Seqpos) (ulen + maxdistance));
     cc = getencodedchar(encseq,pos,Forwardmode);
-    if (nowildcards && cc == (Uchar) WILDCARD)
+    if (nowildcards && cc == (GtUchar) WILDCARD)
     {
       result.defined = false;
       result.valueunsignedlong = 0;

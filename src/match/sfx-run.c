@@ -113,7 +113,30 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
   return haserr  ? -1 : 0;
 }
 
-static int suftab2file(Outfileinfo *outfileinfo,
+static int suftab2file(FILE *outfpsuftab,
+                       const Seqpos *suftab,
+                       Seqpos numberofsuffixes,
+                       GtError *err)
+{
+  bool haserr = false;
+
+  if (fwrite(suftab,
+             sizeof (*suftab),
+             (size_t) numberofsuffixes,
+             outfpsuftab)
+             != (size_t) numberofsuffixes)
+  {
+    gt_error_set(err,"cannot write " FormatSeqpos " items of size %u: "
+                     "errormsg=\"%s\"",
+         PRINTSeqposcast(numberofsuffixes),
+         (unsigned int) sizeof (*suftab),
+         strerror(errno));
+    haserr = true;
+  }
+  return haserr ? -1 : 0;
+}
+
+static int bwttab2file(Outfileinfo *outfileinfo,
                        const Seqpos *suftab,
                        Readmode readmode,
                        Seqpos numberofsuffixes,
@@ -122,34 +145,18 @@ static int suftab2file(Outfileinfo *outfileinfo,
   bool haserr = false;
 
   gt_error_check(err);
-  if (outfileinfo->outfpsuftab != NULL)
-  {
-    if (fwrite(suftab,
-              sizeof (*suftab),
-              (size_t) numberofsuffixes,
-              outfileinfo->outfpsuftab)
-              != (size_t) numberofsuffixes)
-    {
-      gt_error_set(err,"cannot write " FormatSeqpos " items of size %u: "
-                    "errormsg=\"%s\"",
-           PRINTSeqposcast(numberofsuffixes),
-           (unsigned int) sizeof (*suftab),
-           strerror(errno));
-      haserr = true;
-    }
-  }
   if (!haserr &&
       (!outfileinfo->longest.defined || outfileinfo->outfpbwttab != NULL))
   {
     Seqpos startpos, pos;
-    Uchar cc = 0;
+    GtUchar cc = 0;
 
     for (pos=0; pos < numberofsuffixes; pos++)
     {
       startpos = suftab[pos];
       if (startpos == 0)
       {
-        cc = (Uchar) UNDEFBWTCHAR;
+        cc = (GtUchar) UNDEFBWTCHAR;
         if (!outfileinfo->longest.defined)
         {
           outfileinfo->longest.defined = true;
@@ -165,12 +172,12 @@ static int suftab2file(Outfileinfo *outfileinfo,
       }
       if (outfileinfo->outfpbwttab != NULL)
       {
-        if (fwrite(&cc,sizeof (Uchar),(size_t) 1,outfileinfo->outfpbwttab)
+        if (fwrite(&cc,sizeof (GtUchar),(size_t) 1,outfileinfo->outfpbwttab)
                     != (size_t) 1)
         {
-          gt_error_set(err,"cannot write 1 item of size %lu: "
-                            "errormsg=\"%s\"",
-                          (unsigned long) sizeof (Uchar),
+          gt_error_set(err,"cannot write 1 item of size %u: "
+                           "errormsg=\"%s\"",
+                          (unsigned int) sizeof (GtUchar),
                           strerror(errno));
           haserr = true;
           break;
@@ -178,20 +185,19 @@ static int suftab2file(Outfileinfo *outfileinfo,
       }
     }
   }
-  outfileinfo->pageoffset += numberofsuffixes;
   return haserr ? -1 : 0;
 }
 
-static int suffixeratorwithoutput(
-                 Outfileinfo *outfileinfo,
-                 const Encodedsequence *encseq,
-                 Readmode readmode,
-                 unsigned int prefixlength,
-                 unsigned int numofparts,
-                 const Sfxstrategy *sfxstrategy,
-                 Measuretime *mtime,
-                 Verboseinfo *verboseinfo,
-                 GtError *err)
+static int suffixeratorwithoutput(const GtStr *str_indexname,
+                                  Outfileinfo *outfileinfo,
+                                  const Encodedsequence *encseq,
+                                  Readmode readmode,
+                                  unsigned int prefixlength,
+                                  unsigned int numofparts,
+                                  const Sfxstrategy *sfxstrategy,
+                                  Measuretime *mtime,
+                                  Verboseinfo *verboseinfo,
+                                  GtError *err)
 {
   const Seqpos *suftabptr;
   Seqpos numberofsuffixes;
@@ -216,8 +222,7 @@ static int suffixeratorwithoutput(
     {
       Seqpos longest;
 
-      suftabptr = nextSfxiterator(&numberofsuffixes,&specialsuffixes,
-                                  mtime,sfi);
+      suftabptr = nextSfxiterator(&numberofsuffixes,&specialsuffixes,sfi);
       if (suftabptr == NULL)
       {
         break;
@@ -227,14 +232,34 @@ static int suffixeratorwithoutput(
         outfileinfo->longest.defined = true;
         outfileinfo->longest.valueseqpos = longest;
       }
-      if (suftab2file(outfileinfo,suftabptr,readmode,numberofsuffixes,err) != 0)
+      if (outfileinfo->outfpsuftab != NULL)
+      {
+        if (suftab2file(outfileinfo->outfpsuftab,suftabptr,numberofsuffixes,
+                        err) != 0)
+        {
+          haserr = true;
+          break;
+        }
+      }
+      /* XXX be careful: postpone not output bwtab if streamsuftab is true */
+      if (bwttab2file(outfileinfo,suftabptr,readmode,numberofsuffixes,err) != 0)
       {
         haserr = true;
         break;
       }
+      outfileinfo->pageoffset += numberofsuffixes;
     }
   }
-  if (outfileinfo->outfpbcktab != NULL)
+  if (!haserr && sfxstrategy->streamsuftab)
+  {
+    gt_fa_fclose(outfileinfo->outfpsuftab);
+    outfileinfo->outfpsuftab = NULL;
+    if (postsortsuffixesfromstream(sfi,str_indexname,err) != 0)
+    {
+      haserr = true;
+    }
+  }
+  if (!haserr && outfileinfo->outfpbcktab != NULL)
   {
     if (sfibcktab2file(outfileinfo->outfpbcktab,sfi,err) != 0)
     {
@@ -554,16 +579,16 @@ static int runsuffixerator(bool doesa,
     {
       if (doesa)
       {
-        if (suffixeratorwithoutput(
-                           &outfileinfo,
-                           sfxseqinfo.encseq,
-                           so->readmode,
-                           prefixlength,
-                           so->numofparts,
-                           &sfxstrategy,
-                           mtime,
-                           verboseinfo,
-                           err) != 0)
+        if (suffixeratorwithoutput(so->str_indexname,
+                                   &outfileinfo,
+                                   sfxseqinfo.encseq,
+                                   so->readmode,
+                                   prefixlength,
+                                   so->numofparts,
+                                   &sfxstrategy,
+                                   mtime,
+                                   verboseinfo,
+                                   err) != 0)
         {
           haserr = true;
         }

@@ -39,7 +39,7 @@ static Codetype qgram2codefillspecial(unsigned int numofchars,
   Codetype integercode;
   Seqpos pos;
   bool foundspecial;
-  Uchar cc;
+  GtUchar cc;
 
   if (startpos >= totallength)
   {
@@ -86,7 +86,7 @@ static Codetype qgram2codefillspecial(unsigned int numofchars,
   return integercode;
 }
 
-DECLAREARRAYSTRUCT(Codetype);
+GT_DECLAREARRAYSTRUCT(Codetype);
 
 static void outkmeroccurrence(void *processinfo,
                               Codetype code,
@@ -94,9 +94,9 @@ static void outkmeroccurrence(void *processinfo,
                               GT_UNUSED const Firstspecialpos
                                            *firstspecialposition)
 {
-  ArrayCodetype *codelist = (ArrayCodetype *) processinfo;
+  GtArrayCodetype *codelist = (GtArrayCodetype *) processinfo;
 
-  STOREINARRAY(codelist,Codetype,1024,code);
+  GT_STOREINARRAY(codelist,Codetype,1024,code);
 }
 
 /*
@@ -107,7 +107,7 @@ static void outkmeroccurrence(void *processinfo,
    the suffix array is in readmode = Forwardmode.
 */
 
-static void collectkmercode(ArrayCodetype *codelist,
+static void collectkmercode(GtArrayCodetype *codelist,
                             const Encodedsequence *encseq,
                             unsigned int kmersize,
                             unsigned int numofchars,
@@ -124,12 +124,12 @@ static void collectkmercode(ArrayCodetype *codelist,
                                  Forwardmode,
                                  offset,
                                  stringtotallength);
-    STOREINARRAY(codelist,Codetype,1024,code);
+    GT_STOREINARRAY(codelist,Codetype,1024,code);
   }
 }
 
-static int comparecodelists(const ArrayCodetype *codeliststream,
-                            const ArrayCodetype *codeliststring,
+static int comparecodelists(const GtArrayCodetype *codeliststream,
+                            const GtArrayCodetype *codeliststring,
                             unsigned int kmersize,
                             unsigned int numofchars,
                             const char *characters,
@@ -150,16 +150,16 @@ static int comparecodelists(const ArrayCodetype *codeliststream,
   {
     if (codeliststream->spaceCodetype[i] != codeliststring->spaceCodetype[i])
     {
-      kmercode2string(buffer1,
-                      codeliststream->spaceCodetype[i],
-                      numofchars,
-                      kmersize,
-                      characters);
-      kmercode2string(buffer2,
-                      codeliststring->spaceCodetype[i],
-                      numofchars,
-                      kmersize,
-                      characters);
+      fromkmercode2string(buffer1,
+                          codeliststream->spaceCodetype[i],
+                          numofchars,
+                          kmersize,
+                          characters);
+      fromkmercode2string(buffer2,
+                          codeliststring->spaceCodetype[i],
+                          numofchars,
+                          kmersize,
+                          characters);
       gt_error_set(err,"codeliststream[%lu] = " FormatCodetype " != "
                     FormatCodetype " = codeliststring[%lu]\n%s != %s",
                     i,
@@ -177,18 +177,18 @@ static int comparecodelists(const ArrayCodetype *codeliststream,
 static int verifycodelists(const Encodedsequence *encseq,
                            unsigned int kmersize,
                            unsigned int numofchars,
-                           const ArrayCodetype *codeliststream,
+                           const GtArrayCodetype *codeliststream,
                            GtError *err)
 {
   bool haserr = false;
-  ArrayCodetype codeliststring;
-  const Uchar *characters;
+  GtArrayCodetype codeliststring;
+  const GtUchar *characters;
   Seqpos stringtotallength;
 
   gt_error_check(err);
   stringtotallength = getencseqtotallength(encseq);
   characters = getencseqAlphabetcharacters(encseq);
-  INITARRAY(&codeliststring,Codetype);
+  GT_INITARRAY(&codeliststring,Codetype);
   collectkmercode(&codeliststring,
                   encseq,
                   kmersize,
@@ -203,7 +203,7 @@ static int verifycodelists(const Encodedsequence *encseq,
   {
     haserr = true;
   }
-  FREEARRAY(&codeliststring,Codetype);
+  GT_FREEARRAY(&codeliststring,Codetype);
   return haserr ? -1 : 0;
 }
 
@@ -211,12 +211,12 @@ int verifymappedstr(const Encodedsequence *encseq,unsigned int prefixlength,
                     GtError *err)
 {
   unsigned int numofchars;
-  ArrayCodetype codeliststream;
+  GtArrayCodetype codeliststream;
   bool haserr = false;
 
   gt_error_check(err);
   numofchars = getencseqAlphabetnumofchars(encseq);
-  INITARRAY(&codeliststream,Codetype);
+  GT_INITARRAY(&codeliststream,Codetype);
   if (getfastastreamkmers(getencseqfilenametab(encseq),
                           outkmeroccurrence,
                           &codeliststream,
@@ -239,6 +239,6 @@ int verifymappedstr(const Encodedsequence *encseq,unsigned int prefixlength,
       haserr = true;
     }
   }
-  FREEARRAY(&codeliststream,Codetype);
+  GT_FREEARRAY(&codeliststream,Codetype);
   return haserr ? -1 : 0;
 }

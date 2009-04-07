@@ -31,12 +31,12 @@
 /* CAUTION: fronts, that run over the matrix boundaries are not shown in
    the printed matrix.
  */
-int showmatrix (ArrayMyfrontvalue * fronts,
-                int distance,
-                unsigned char *useq,
-                unsigned char *vseq,
-                int ulen,
-                int vlen)
+int showmatrix(GtArrayMyfrontvalue * fronts,
+               int distance,
+               unsigned char *useq,
+               unsigned char *vseq,
+               int ulen,
+               int vlen)
 {
   int i, j, k, d = distance + 1, filled = 0;
   unsigned long l;
@@ -114,7 +114,7 @@ int showmatrix (ArrayMyfrontvalue * fronts,
  ** The other case, saves more space
 
 #define STOREINARRAYFRONTS(A,POS,TYPE,VAL)\
-        CHECKARRAYSPACEMULTI(A,TYPE,POS+1)\
+        GT_CHECKARRAYSPACEMULTI(A,TYPE,POS+1)\
         (A)->space##TYPE[POS] = VAL;\
         (A)->nextfree##TYPE = POS+1;
 */
@@ -124,7 +124,7 @@ int showmatrix (ArrayMyfrontvalue * fronts,
  nothing will be allocated in addition!
  */
 #define STOREINARRAYFRONTS(A,POS,TYPE,VAL)\
-        CHECKARRAYSPACEMULTI(A,TYPE,POS+1)\
+        GT_CHECKARRAYSPACEMULTI(A,TYPE,POS+1)\
         (A)->space##TYPE[POS] = VAL;
 
 /*
@@ -210,18 +210,18 @@ void calculateallowedMININFINITYINTgenerations(
  */
 #define COMPARESYMBOLSSEP(I,J)\
         USEQ(a,I);\
-        if (a == (Uchar) SEPARATOR)\
+        if (a == (GtUchar) SEPARATOR)\
         {\
           ulen = I;\
           break;\
         }\
         VSEQ(b,J);\
-        if (b == (Uchar) SEPARATOR)\
+        if (b == (GtUchar) SEPARATOR)\
         {\
           vlen = J;\
           break;\
         }\
-        if (a != b || a == (Uchar) WILDCARD)\
+        if (a != b || a == (GtUchar) WILDCARD)\
         {\
           break;\
         }

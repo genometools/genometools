@@ -118,30 +118,30 @@ void printargsline(const char **argv, int argc)
 int testmotifandencodemotif (Motif *motif, const Encodedsequence *encseq,
                              GtError *err)
 {
-  const Uchar *symbolmap;
-  Uchar c_tab[UCHAR_MAX+1];
+  const GtUchar *symbolmap;
+  GtUchar c_tab[UCHAR_MAX+1];
   unsigned int i;
 
   symbolmap = getencseqAlphabetsymbolmap(encseq);
-  if ( symbolmap[(unsigned int)motif->firstleft] == (Uchar) UNDEFCHAR)
+  if ( symbolmap[(unsigned int)motif->firstleft] == (GtUchar) UNDEFCHAR)
   {
     gt_error_set(err,"Illegal nucleotide character %c "
                       "as argument to option -motif", motif->firstleft);
     return -1;
   }
-  if ( symbolmap[(unsigned int)motif->secondleft] == (Uchar) UNDEFCHAR )
+  if ( symbolmap[(unsigned int)motif->secondleft] == (GtUchar) UNDEFCHAR )
   {
     gt_error_set(err,"Illegal nucleotide character %c "
                       "as argument to option -motif", motif->secondleft);
     return -1;
   }
-  if ( symbolmap[(unsigned int)motif->firstright] == (Uchar) UNDEFCHAR )
+  if ( symbolmap[(unsigned int)motif->firstright] == (GtUchar) UNDEFCHAR )
   {
     gt_error_set(err,"Illegal nucleotide character %c "
                       "as argument to option -motif", motif->firstright);
     return -1;
   }
-  if ( symbolmap[(unsigned int)motif->secondright] == (Uchar) UNDEFCHAR )
+  if ( symbolmap[(unsigned int)motif->secondright] == (GtUchar) UNDEFCHAR )
   {
     gt_error_set(err,"Illegal nucleotide character %c "
                       "as argument to option -motif", motif->secondright);
@@ -150,7 +150,7 @@ int testmotifandencodemotif (Motif *motif, const Encodedsequence *encseq,
 
   for (i=0; i<=(unsigned int) UCHAR_MAX; i++)
   {
-    c_tab[i] = (Uchar) UNDEFCHAR;
+    c_tab[i] = (GtUchar) UNDEFCHAR;
   }
   /* define complementary symbols */
   c_tab[symbolmap['a']] = symbolmap['t'];
@@ -307,10 +307,10 @@ static OPrval parse_options(int *parsed_args,
   /* -motif */
   /* characters will be tranformed later
      into characters from virtualtree alphabet */
-  lo->motif.firstleft   = (Uchar) 't';
-  lo->motif.secondleft  = (Uchar) 'g';
-  lo->motif.firstright  = (Uchar) 'c';
-  lo->motif.secondright = (Uchar) 'a';
+  lo->motif.firstleft   = (GtUchar) 't';
+  lo->motif.secondleft  = (GtUchar) 'g';
+  lo->motif.firstright  = (GtUchar) 'c';
+  lo->motif.secondright = (GtUchar) 'a';
   lo->motif.str_motif = gt_str_new();
   optionmotif = gt_option_new_string("motif",
                              "specify 2 nucleotides startmotif + "
@@ -476,10 +476,10 @@ static OPrval parse_options(int *parsed_args,
             "argument of -motif has not exactly 4 characters");
         oprval = OPTIONPARSER_ERROR;
       }
-      lo->motif.firstleft = (Uchar)  gt_str_get(lo->motif.str_motif)[0];
-      lo->motif.secondleft = (Uchar)  gt_str_get(lo->motif.str_motif)[1];
-      lo->motif.firstright = (Uchar)  gt_str_get(lo->motif.str_motif)[2];
-      lo->motif.secondright = (Uchar)  gt_str_get(lo->motif.str_motif)[3];
+      lo->motif.firstleft = (GtUchar)  gt_str_get(lo->motif.str_motif)[0];
+      lo->motif.secondleft = (GtUchar)  gt_str_get(lo->motif.str_motif)[1];
+      lo->motif.firstright = (GtUchar)  gt_str_get(lo->motif.str_motif)[2];
+      lo->motif.secondright = (GtUchar)  gt_str_get(lo->motif.str_motif)[3];
       /* default if motif specified */
       if (!gt_option_is_set(optionmotifmis))
       {

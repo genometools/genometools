@@ -34,7 +34,7 @@
 #ifdef SKDEBUG
 #define CHECKENCCHAR(CC,ENCSEQ,POS,READMODE)\
         {\
-          Uchar cctmp = getencodedchar(ENCSEQ,POS,READMODE);\
+          GtUchar cctmp = getencodedchar(ENCSEQ,POS,READMODE);\
           if ((CC) != cctmp)\
           {\
             printf("file %s, line %d: pos = %lu:cc = %u != %u = ccreal\n",\
@@ -93,8 +93,8 @@ unsigned long getencseqnumofdbsequences(const Encodedsequence *encseq);
 
 #ifdef INLINEDENCSEQ
 #define MAKECOMPL(CC)\
-        (ISSPECIAL(CC) ? (CC) : (Uchar) 3 - (CC))
-/*@unused@*/ static inline Uchar getencodedchar(const Encodedsequence *encseq,
+        (ISSPECIAL(CC) ? (CC) : (GtUchar) 3 - (CC))
+/*@unused@*/ static inline GtUchar getencodedchar(const Encodedsequence *encseq,
                                                 Seqpos pos,
                                                 Readmode readmode)
 {
@@ -111,7 +111,7 @@ unsigned long getencseqnumofdbsequences(const Encodedsequence *encseq);
          ;
 }
 #else
-Uchar getencodedchar(const Encodedsequence *encseq,Seqpos pos,
+GtUchar getencodedchar(const Encodedsequence *encseq,Seqpos pos,
                      Readmode readmode);
 #endif
 
@@ -119,7 +119,7 @@ Uchar getencodedchar(const Encodedsequence *encseq,Seqpos pos,
 #define getencodedcharnospecial(ENCSEQ,POS,RM)\
         getencodedchar(ENCSEQ,POS,RM)
 #else
-Uchar getencodedcharnospecial(const Encodedsequence *encseq,
+GtUchar getencodedcharnospecial(const Encodedsequence *encseq,
                               Seqpos pos,
                               Readmode readmode);
 #endif
@@ -128,7 +128,7 @@ Uchar getencodedcharnospecial(const Encodedsequence *encseq,
 #define sequentialgetencodedchar(ENCSEQ,ENCSEQSTATE,POS,READMODE)\
         getencodedchar(ENCSEQ,POS,READMODE)
 #else
-Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
+GtUchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                Encodedsequencescanstate *esr,
                                Seqpos pos,
                                Readmode readmode);
@@ -151,19 +151,19 @@ uint64_t detencseqofsatviatables(int kind,
                                  Seqpos specialranges,
                                  unsigned int numofchars);
 
-void plainseq2bytecode(Uchar *bytecode,const Uchar *seq,unsigned long len);
+void plainseq2bytecode(GtUchar *bytecode,const GtUchar *seq,unsigned long len);
 
-void encseq2bytecode(Uchar *dest,const Encodedsequence *encseq,
+void encseq2bytecode(GtUchar *dest,const Encodedsequence *encseq,
                      Seqpos startindex,Seqpos len);
 
-void sequence2bytecode(Uchar *dest,const Encodedsequence *encseq,
+void sequence2bytecode(GtUchar *dest,const Encodedsequence *encseq,
                        Seqpos startindex,Seqpos len);
 
 int flushencseqfile(const GtStr *indexname,Encodedsequence *encseq,GtError*);
 
 Encodedsequencescanstate *newEncodedsequencescanstate(void);
 
-void freeEncodedsequence(Encodedsequence **encseqptr);
+void encodedsequence_free(Encodedsequence **encseqptr);
 
 void initEncodedsequencescanstate(Encodedsequencescanstate *esr,
                                   const Encodedsequence *encseq,
@@ -203,9 +203,9 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr);
 void checkallsequencedescriptions(const Encodedsequence *encseq);
 
 Encodedsequence *plain2encodedsequence(bool withrange,
-                                       const Uchar *seq1,
+                                       const GtUchar *seq1,
                                        Seqpos len1,
-                                       const Uchar *seq2,
+                                       const GtUchar *seq2,
                                        unsigned long len2,
                                        const SfxAlphabet *alpha,
                                        Verboseinfo *verboseinfo);
@@ -225,7 +225,7 @@ void freespecialrangeiterator(Specialrangeiterator **sri);
 
 /*@null@*/ const char *encseqaccessname(const Encodedsequence *encseq);
 
-void encseqextract(Uchar *buffer,
+void encseqextract(GtUchar *buffer,
                    const Encodedsequence *encseq,
                    Seqpos frompos,
                    Seqpos topos);
@@ -323,13 +323,13 @@ int readSpecialcharinfo(Specialcharinfo *specialcharinfo,
 
 unsigned int getencseqAlphabetnumofchars(const Encodedsequence *encseq);
 
-const Uchar *getencseqAlphabetsymbolmap(const Encodedsequence *encseq);
+const GtUchar *getencseqAlphabetsymbolmap(const Encodedsequence *encseq);
 
 const SfxAlphabet *getencseqAlphabet(const Encodedsequence *encseq);
 
-const Uchar *getencseqAlphabetcharacters(const Encodedsequence *encseq);
+const GtUchar *getencseqAlphabetcharacters(const Encodedsequence *encseq);
 
-Uchar getencseqAlphabetwildcardshow(const Encodedsequence *encseq);
+GtUchar getencseqAlphabetwildcardshow(const Encodedsequence *encseq);
 
 /* Obtain the filenametable and the filelengthtable from the
    Encodedsequence */
@@ -338,7 +338,7 @@ const GtStrArray *getencseqfilenametab(const Encodedsequence *encseq);
 
 const Filelengthvalues *getencseqfilelengthtab(const Encodedsequence *encseq);
 
-unsigned long getencseqcharactercount(const Encodedsequence *encseq,Uchar cc);
+unsigned long getencseqcharactercount(const Encodedsequence *encseq,GtUchar cc);
 
 /* some function to remove reference from an Encodedsequence to prevent that
    the referenced alphabet or filenametab are freed */

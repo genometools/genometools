@@ -24,7 +24,14 @@
 #include "core/queue.h"
 #include "core/str_array.h"
 
-/* the GtSequenceBuffer interface */
+/* A <GtSequenceBuffer> represents a group of sequence files of a certain type.
+   These files are parsed on-the-fly and the sequences and descriptions
+   contained in them are made available.
+   Sequences can be read character-wise using gt_sequence_buffer_next(), with
+   SEPARATOR symbols in between (see chardef.h).
+   Note that the <GtSequenceBuffer> is a rather low-level tool for efficient
+   sequence access. For simple access to whole sequences, use the
+   <GtSeqIterator> class. */
 typedef struct GtSequenceBuffer GtSequenceBuffer;
 typedef struct GtSequenceBufferClass GtSequenceBufferClass;
 
@@ -34,35 +41,39 @@ GtSequenceBuffer*  gt_sequence_buffer_ref(GtSequenceBuffer*);
 /* Creates a new <GtSequenceBuffer>, choosing the appropriate type by looking
    at the first input file. All files must be of the same type.
    If NULL is returned, an error occurred. */
-GtSequenceBuffer*  gt_sequence_buffer_new_guess_type(GtStrArray*, GtError*);
+GtSequenceBuffer*  gt_sequence_buffer_new_guess_type(const GtStrArray*,
+                                                     GtError*);
 
-/* Fetches next character from <GtSequenceBuffer>. */
-int           gt_sequence_buffer_next(GtSequenceBuffer*, unsigned char*,
-                                      GtError*);
+/* Fetches next character from <GtSequenceBuffer>.
+   Returns 1 if a new character could be read, 0 if all files are exhausted, or
+   -1 on error (see the <GtError> object for details). */
+int           gt_sequence_buffer_next(GtSequenceBuffer*, GtUchar*, GtError*);
 
-/* Advances the sequence window in the <GtSequenceBuffer> by OUTBUFSIZE. */
-int           gt_sequence_buffer_advance(GtSequenceBuffer*, GtError*);
-
-/* Returns the index of the currently read sequence file. */
+/* Returns the index of the currently read sequence file in the input file
+   <GtStrArray>. */
 unsigned long gt_sequence_buffer_get_file_index(GtSequenceBuffer*);
 
 /* Assigns a symbol map to the sequence iterator to transform sequences with.
    Set to NULL to disable alphabet transformation (default). */
 void          gt_sequence_buffer_set_symbolmap(GtSequenceBuffer*,
-                                               const unsigned char*);
+                                               const GtUchar *);
 
-/* Assigns an array of Filelengthvalue structs to the sequence iterator which
+/* Assigns an array of Filelengthvalue structs to the sequence iterator. This
    is filled during iteration. Note that the length of the array must equal the
    number of sequence files traversed.
    Set to NULL to disable Filelengthvalue counting (default). */
 void          gt_sequence_buffer_set_filelengthtab(GtSequenceBuffer*,
                                                    Filelengthvalues*);
 
+/* Assigns a <GtQueue> in which for each sequence file, the respective
+   description string is written. If this is not set, or set to NULL,
+   then descriptions are ignored in the input files. */
 void          gt_sequence_buffer_set_desc_queue(GtSequenceBuffer *si,
                                                 GtQueue *dq);
 
-/* Assigns an array of sizeof (char) length which counts the occurrences of each
-   alphabet character in the read sequence.
+/* Assigns an array which counts the occurrences of each alphabet character in
+   the read sequence. It must have at least as many elements as the number of
+   characters in the expected alphabet.
    Set to NULL to disable character distribution counting (default). */
 void          gt_sequence_buffer_set_chardisttab(GtSequenceBuffer*,
                                                  unsigned long*);

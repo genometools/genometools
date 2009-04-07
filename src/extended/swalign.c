@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -30,12 +30,12 @@ typedef struct {
        max_insertion;
 } DPentry;
 
-static void fillDPtable(DPentry **dptable,
-                        const char *u, unsigned long ulen,
-                        const char *v, unsigned long vlen,
-                        const int **scores,
-                        int deletion_score, int insertion_score,
-                        Coordinate *max_coordinate)
+static void swalign_fill_table(DPentry **dptable,
+                               const char *u, unsigned long ulen,
+                               const char *v, unsigned long vlen,
+                               const int **scores,
+                               int deletion_score, int insertion_score,
+                               Coordinate *max_coordinate)
 {
   unsigned long i, j;
   long maxscore, repscore, delscore, insscore, overall_maxscore = LONG_MIN;
@@ -99,8 +99,8 @@ static GtAlignment* smith_waterman_align(const char *u_orig, const char *v_orig,
   DPentry **dptable;
   GtAlignment *a = NULL;
   gt_array2dim_calloc(dptable, u_len+1, v_len+1);
-  fillDPtable(dptable, u_enc, u_len, v_enc, v_len, scores, deletion_score,
-              insertion_score, &alignment_end);
+  swalign_fill_table(dptable, u_enc, u_len, v_enc, v_len, scores,
+                     deletion_score, insertion_score, &alignment_end);
   gt_assert(alignment_end.x != UNDEF_ULONG);
   gt_assert(alignment_end.y != UNDEF_ULONG);
   if (dptable[alignment_end.x][alignment_end.y].score) {
@@ -113,11 +113,11 @@ static GtAlignment* smith_waterman_align(const char *u_orig, const char *v_orig,
     urange.end = --alignment_end.x;
     vrange.end = --alignment_end.y;
     /* employ sequence positions to set alignment sequences */
-   gt_alignment_set_seqs(a,
-                         (const Uchar *) (u_orig + alignment_start.x),
-                         alignment_end.x - alignment_start.x + 1,
-                         (const Uchar *) (v_orig + alignment_start.y),
-                         alignment_end.y - alignment_start.y + 1);
+    gt_alignment_set_seqs(a,
+                          (const GtUchar *) (u_orig + alignment_start.x),
+                          alignment_end.x - alignment_start.x + 1,
+                          (const GtUchar *) (v_orig + alignment_start.y),
+                          alignment_end.y - alignment_start.y + 1);
     gt_alignment_set_urange(a, urange);
     gt_alignment_set_vrange(a, vrange);
   }

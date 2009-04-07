@@ -593,13 +593,13 @@ static int searchforTSDandorMotifoutside(
   /* search for TSDs and/or motif */
   if (lo->minlengthTSD > 1U)
   {
-    Uchar *dbseq, *query;
-    ALLOCASSIGNSPACE(dbseq,NULL,Uchar,leftlen);
-    ALLOCASSIGNSPACE(query,NULL,Uchar,rightlen);
+    GtUchar *dbseq, *query;
+    ALLOCASSIGNSPACE(dbseq,NULL,GtUchar,leftlen);
+    ALLOCASSIGNSPACE(query,NULL,GtUchar,rightlen);
 
     encseqextract(dbseq,encseq,startleftLTR,endleftLTR);
     encseqextract(query,encseq,startrightLTR,endrightLTR);
-    INITARRAY(&subrepeatinfo.repeats, Repeat);
+    GT_INITARRAY(&subrepeatinfo.repeats, Repeat);
     subrepeatinfo.lmin = (unsigned long) lo->minlengthTSD;
     subrepeatinfo.lmax = (unsigned long) lo->maxlengthTSD;
     gt_assert(startleftLTR < startrightLTR);
@@ -632,7 +632,7 @@ static int searchforTSDandorMotifoutside(
                                           motifmismatchesleftLTR,
                                           motifmismatchesrightLTR);
     }
-    FREEARRAY (&subrepeatinfo.repeats, Repeat);
+    GT_FREEARRAY (&subrepeatinfo.repeats, Repeat);
   } else /* no search for TSDs, search for motif only */
   {
     searchformotifonlyborders(lo,

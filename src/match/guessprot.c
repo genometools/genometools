@@ -27,7 +27,7 @@ int guessifproteinsequencestream(const GtStrArray *filenametab,GtError *err)
 {
   unsigned int countnonbases = 0,
                currentposition;
-  Uchar currentchar;
+  GtUchar currentchar;
   GtSequenceBuffer *fb;
   int retval;
 

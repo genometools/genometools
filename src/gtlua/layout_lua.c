@@ -15,6 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifndef WITHOUT_CAIRO
+
 #include "lauxlib.h"
 #include "annotationsketch/diagram.h"
 #include "annotationsketch/layout.h"
@@ -117,3 +119,5 @@ int gt_lua_open_layout(lua_State *L)
   gt_assert(lua_gettop(L) == stack_size);
   return 1;
 }
+
+#endif

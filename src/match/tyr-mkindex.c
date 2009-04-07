@@ -53,7 +53,7 @@ typedef struct
   ListSeqpos *positionlist;
 } Countwithpositions;
 
-DECLAREARRAYSTRUCT(Countwithpositions);
+GT_DECLAREARRAYSTRUCT(Countwithpositions);
 
 struct Dfsstate /* global information */
 {
@@ -64,19 +64,19 @@ struct Dfsstate /* global information */
   const Encodedsequence *encseq;
   Readmode readmode;
   Processoccurrencecount processoccurrencecount;
-  ArrayCountwithpositions occdistribution;
+  GtArrayCountwithpositions occdistribution;
   FILE *merindexfpout,
        *countsfilefpout;
   bool moveforward;
   Encodedsequencescanstate *esrspace;
   bool performtest;
   bool storecounts;
-  Uchar *bytebuffer;
+  GtUchar *bytebuffer;
   unsigned long sizeofbuffer;
-  ArrayLargecount largecounts;
+  GtArrayLargecount largecounts;
   unsigned long countoutputmers;
   const Seqpos *suftab; /* only necessary for performtest */
-  Uchar *currentmer;    /* only necessary for performtest */
+  GtUchar *currentmer;    /* only necessary for performtest */
 };
 
 #include "esa-dfs.h"
@@ -220,7 +220,7 @@ static bool decideifocc(const Dfsstate *state,unsigned long countocc)
   return false;
 }
 
-static uint64_t addupdistribution(const ArrayCountwithpositions *distribution)
+static uint64_t addupdistribution(const GtArrayCountwithpositions *distribution)
 {
   unsigned long idx;
   uint64_t addcount = 0;
@@ -292,7 +292,7 @@ static void showfinalstatistics(const Dfsstate *state,
   showmerdistribution(state);
 }
 
-static void incrementdistribcounts(ArrayCountwithpositions *occdistribution,
+static void incrementdistribcounts(GtArrayCountwithpositions *occdistribution,
                                    unsigned long countocc,unsigned long value)
 {
   if (countocc >= occdistribution->allocatedCountwithpositions)
@@ -344,13 +344,13 @@ static int adddistpos2distribution(unsigned long countocc,
 
 static int outputsortedstring2indexviafileptr(const Encodedsequence *encseq,
                                               Seqpos mersize,
-                                              Uchar *bytebuffer,
+                                              GtUchar *bytebuffer,
                                               unsigned long sizeofbuffer,
                                               FILE *merindexfpout,
                                               FILE *countsfilefpout,
                                               Seqpos position,
                                               unsigned long countocc,
-                                              ArrayLargecount *largecounts,
+                                              GtArrayLargecount *largecounts,
                                               unsigned long countoutputmers,
                                               GtError *err)
 {
@@ -366,16 +366,16 @@ static int outputsortedstring2indexviafileptr(const Encodedsequence *encseq,
   }
   if (countsfilefpout != NULL)
   {
-    Uchar smallcount;
+    GtUchar smallcount;
 
     if (countocc <= MAXSMALLMERCOUNT)
     {
-      smallcount = (Uchar) countocc;
+      smallcount = (GtUchar) countocc;
     } else
     {
       Largecount *lc;
 
-      GETNEXTFREEINARRAY(lc,largecounts,Largecount,32);
+      GT_GETNEXTFREEINARRAY(lc,largecounts,Largecount,32);
       lc->idx = countoutputmers;
       lc->value = countocc;
       smallcount = 0;
@@ -568,7 +568,7 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   unsigned int alphasize;
 
   gt_error_check(err);
-  INITARRAY(&state.occdistribution,Countwithpositions);
+  GT_INITARRAY(&state.occdistribution,Countwithpositions);
   state.esrspace = newEncodedsequencescanstate();
   state.mersize = (Seqpos) mersize;
   state.encseq = encseqSequentialsuffixarrayreader(ssar);
@@ -583,7 +583,7 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   state.countoutputmers = 0;
   state.merindexfpout = NULL;
   state.countsfilefpout = NULL;
-  INITARRAY(&state.largecounts,Largecount);
+  GT_INITARRAY(&state.largecounts,Largecount);
   if (gt_str_length(str_storeindex) == 0)
   {
     state.sizeofbuffer = 0;
@@ -591,11 +591,11 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   } else
   {
     state.sizeofbuffer = MERBYTES(mersize);
-    ALLOCASSIGNSPACE(state.bytebuffer,NULL,Uchar,state.sizeofbuffer);
+    ALLOCASSIGNSPACE(state.bytebuffer,NULL,GtUchar,state.sizeofbuffer);
   }
   if (performtest)
   {
-    ALLOCASSIGNSPACE(state.currentmer,NULL,Uchar,state.mersize);
+    ALLOCASSIGNSPACE(state.currentmer,NULL,GtUchar,state.mersize);
     state.suftab = suftabSequentialsuffixarrayreader(ssar);
   } else
   {
@@ -701,10 +701,10 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   }
   gt_fa_xfclose(state.merindexfpout);
   gt_fa_xfclose(state.countsfilefpout);
-  FREEARRAY(&state.occdistribution,Countwithpositions);
+  GT_FREEARRAY(&state.occdistribution,Countwithpositions);
   FREESPACE(state.currentmer);
   FREESPACE(state.bytebuffer);
-  FREEARRAY(&state.largecounts,Largecount);
+  GT_FREEARRAY(&state.largecounts,Largecount);
   freeEncodedsequencescanstate(&state.esrspace);
   return haserr ? -1 : 0;
 }

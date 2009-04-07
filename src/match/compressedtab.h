@@ -49,7 +49,7 @@ typedef struct
     uint64_t idx;
   for (idx = 1; idx < (uint64_t) 2342412341234ULL; idx+= (uint64_t) 1234123)
   {
-    (void) determinebitspervalue(idx);
+    (void) gt_determinebitspervalue(idx);
   }
   }*/
 

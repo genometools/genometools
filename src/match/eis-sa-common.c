@@ -22,7 +22,7 @@
 #include "match/sfx-cmpsuf.pr"
 
 extern size_t
-translateSuftab2BWT(struct encSeqTrState *trState, Uchar *dest, Seqpos *src,
+translateSuftab2BWT(struct encSeqTrState *trState, GtUchar *dest, Seqpos *src,
                     size_t len)
 {
   size_t i;
@@ -31,7 +31,7 @@ translateSuftab2BWT(struct encSeqTrState *trState, Uchar *dest, Seqpos *src,
   {
     dest[i] = sfxIdx2BWTSym(src[i], trState->encseq, trState->readmode);
   }
-  return len * sizeof (Uchar);
+  return len * sizeof (GtUchar);
 }
 
 static inline void

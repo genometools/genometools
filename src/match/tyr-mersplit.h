@@ -34,8 +34,8 @@ Tyrbckinfo *tyrbckinfo_new(const GtStr *tyrindexname,unsigned int alphasize,
 
 void tyrbckinfo_delete(Tyrbckinfo **tyrbckinfoptr);
 
-const Uchar *searchinbuckets(const Tyrindex *tyrindex,
+const GtUchar *searchinbuckets(const Tyrindex *tyrindex,
                              const Tyrbckinfo *tyrbckinfo,
-                             const Uchar *bytecode);
+                             const GtUchar *bytecode);
 
 #endif

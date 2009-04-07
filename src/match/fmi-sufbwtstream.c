@@ -15,8 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <string.h>
+#include <inttypes.h>
 #include "core/chardef.h"
 #include "core/fa.h"
+#include "core/error.h"
+#include "core/str.h"
 #include "emimergeesa.h"
 #include "esa-fileend.h"
 #include "fmindex.h"
@@ -25,15 +29,66 @@
 #include "opensfxfile.h"
 #include "esa-map.h"
 
-#include "esa-merge.pr"
 #include "encseq2offset.pr"
-#include "mkidxcpy.pr"
 #include "fmi-keyval.pr"
 #include "fmi-mapspec.pr"
 
- DECLAREREADFUNCTION(Uchar);
+ DECLAREREADFUNCTION(GtUchar);
 
  DECLAREREADFUNCTION(Seqpos);
+
+static int copytheindexfile(const GtStr *destindex,
+                            const GtStr *sourceindex,
+                            const char *suffix,
+                            uint64_t maxlength,
+                            GtError *err)
+{
+  FILE *fpdest = NULL, *fpsource = NULL;
+  int cc;
+  bool haserr = false;
+
+  gt_error_check(err);
+  fpdest = opensfxfile(destindex,suffix,"wb",err);
+  if (fpdest == NULL)
+  {
+    haserr = true;
+  }
+  if (!haserr)
+  {
+    fpsource = opensfxfile(sourceindex,suffix,"rb",err);
+    if (fpsource == NULL)
+    {
+      haserr = true;
+    }
+  }
+  printf("# cp %s%s %s%s\n",
+           gt_str_get(sourceindex),suffix,gt_str_get(destindex),suffix);
+  if (!haserr)
+  {
+    if (maxlength == 0)
+    {
+      while ((cc = fgetc(fpsource)) != EOF)
+      {
+        (void) putc(cc,fpdest);
+      }
+    } else
+    {
+      uint64_t pos;
+
+      for (pos = 0; pos < maxlength; pos++)
+      {
+        if ((cc = fgetc(fpsource)) == EOF)
+        {
+          break;
+        }
+        (void) putc(cc,fpdest);
+      }
+    }
+  }
+  gt_fa_xfclose(fpdest);
+  gt_fa_xfclose(fpsource);
+  return haserr ? -1 : 0;
+}
 
 static void allocatefmtables(Fmindex *fm,
                              const Specialcharinfo *specialcharinfo,
@@ -61,10 +116,10 @@ static void allocatefmtables(Fmindex *fm,
                      fm->specpos.allocatedPairBwtidx);
   } else
   {
-    INITARRAY(&fm->specpos,PairBwtidx);
+    GT_INITARRAY(&fm->specpos,PairBwtidx);
     fm->markpostable = NULL;
   }
-  ALLOCASSIGNSPACE (fm->bfreq, NULL, Uchar,
+  ALLOCASSIGNSPACE (fm->bfreq, NULL, GtUchar,
                     BFREQSIZE(fm->mapsize,fm->nofblocks));
 }
 
@@ -126,7 +181,7 @@ static void showconstructionmessage(const GtStr *indexname,
 }
 
 static int nextesamergedsufbwttabvalues(DefinedSeqpos *longest,
-                                        Uchar *bwtvalue,
+                                        GtUchar *bwtvalue,
                                         Seqpos *suftabvalue,
                                         Emissionmergedesa *emmesa,
                                         const Seqpos *sequenceoffsettable,
@@ -142,7 +197,7 @@ static int nextesamergedsufbwttabvalues(DefinedSeqpos *longest,
     {
       return 0;
     }
-    if (stepdeleteandinsertothersuffixes(emmesa,err) != 0)
+    if (emissionmergedesa_stepdeleteandinsertothersuffixes(emmesa,err) != 0)
     {
       return -1;
     }
@@ -167,10 +222,10 @@ static int nextesamergedsufbwttabvalues(DefinedSeqpos *longest,
       }
       longest->defined = true;
       longest->valueseqpos = bwtpos;
-      *bwtvalue = (Uchar) UNDEFBWTCHAR;
+      *bwtvalue = (GtUchar) UNDEFBWTCHAR;
     } else
     {
-      *bwtvalue = (Uchar) SEPARATOR;
+      *bwtvalue = (GtUchar) SEPARATOR;
     }
   } else
   {
@@ -196,7 +251,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
 {
   Suffixarray suffixarray;
   Emissionmergedesa emmesa;
-  Uchar cc;
+  GtUchar cc;
   Seqpos bwtpos,
          totallength = 0,
          suftabvalue = 0,
@@ -244,14 +299,14 @@ int sufbwt2fmindex(Fmindex *fmindex,
     {
       numofchars = getencseqAlphabetnumofchars(suffixarray.encseq);
       firstignorespecial = totallength - specialcharinfo->specialcharacters;
-      if (makeindexfilecopy(outfmindex,indexname,ALPHABETFILESUFFIX,0,err) != 0)
+      if (copytheindexfile(outfmindex,indexname,ALPHABETFILESUFFIX,0,err) != 0)
       {
         haserr = true;
       }
     }
     if (!haserr)
     {
-      if (makeindexfilecopy(outfmindex,
+      if (copytheindexfile(outfmindex,
                             indexname,
                             BWTTABSUFFIX,
                             firstignorespecial,
@@ -262,11 +317,11 @@ int sufbwt2fmindex(Fmindex *fmindex,
     }
   } else
   {
-    if (initEmissionmergedesa(&emmesa,
-                              indexnametab,
-                              SARR_ESQTAB | SARR_SUFTAB | SARR_LCPTAB,
-                              verboseinfo,
-                              err) != 0)
+    if (emissionmergedesa_init(&emmesa,
+                               indexnametab,
+                               SARR_ESQTAB | SARR_SUFTAB | SARR_LCPTAB,
+                               verboseinfo,
+                               err) != 0)
     {
       haserr = true;
     }
@@ -274,17 +329,17 @@ int sufbwt2fmindex(Fmindex *fmindex,
     {
       GtStr *indexname = gt_str_array_get_str(indexnametab,0);
       suffixlength = 0;
-      if (makeindexfilecopy(outfmindex,indexname,ALPHABETFILESUFFIX,0,err) != 0)
+      if (copytheindexfile(outfmindex,indexname,ALPHABETFILESUFFIX,0,err) != 0)
       {
         haserr = true;
       }
     }
     if (!haserr)
     {
-      sequenceoffsettable = encseqtable2seqoffsets(&totallength,
-                                                   specialcharinfo,
-                                                   emmesa.suffixarraytable,
-                                                   numofindexes);
+      sequenceoffsettable = encseqtable2sequenceoffsets(&totallength,
+                                                        specialcharinfo,
+                                                        emmesa.suffixarraytable,
+                                                        numofindexes);
       if (sequenceoffsettable == NULL)
       {
         haserr = true;
@@ -348,7 +403,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
           }
           suftabvalue = (Seqpos) tmpsuftabvalue;
         }
-        retval = readnextUcharfromstream(&cc,&suffixarray.bwttabstream);
+        retval = readnextGtUcharfromstream(&cc,&suffixarray.bwttabstream);
         if (retval == 0)
         {
           break;
@@ -372,7 +427,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
           break;
         }
         if (fwrite(&cc,
-                  sizeof (Uchar),
+                  sizeof (GtUchar),
                   (size_t) 1,
                   outbwt) != (size_t) 1)
         {
@@ -458,7 +513,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
         fmindex->longestsuffixpos = longest.valueseqpos;
       }
       gt_fa_xfclose(outbwt);
-      wraptEmissionmergedesa(&emmesa);
+      emissionmergedesa_wrap(&emmesa);
     }
   }
   FREESPACE(sequenceoffsettable);

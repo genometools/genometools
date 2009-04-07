@@ -171,7 +171,7 @@ Codetype computefilledqgramcode(const Enumcodeatposition *ecp,
 {
   Codetype code;
   unsigned int idx;
-  Uchar cc;
+  GtUchar cc;
 
   gt_assert(prefixindex > 0 && prefixindex < ecp->prefixlength);
   code = ecp->filltable[prefixindex];
@@ -193,7 +193,7 @@ bool computefilledqgramcodestopatmax(Codetype *code,
 {
   Codetype tmpcode;
   unsigned int idx;
-  Uchar cc;
+  GtUchar cc;
 
   gt_assert(prefixindex > 0 && prefixindex < ecp->prefixlength);
   tmpcode = ecp->filltable[prefixindex];

@@ -32,7 +32,7 @@ typedef struct
   Codetype code;
 } Boundsatdepth;
 
-DECLAREARRAYSTRUCT(Boundsatdepth);
+GT_DECLAREARRAYSTRUCT(Boundsatdepth);
 
 struct Pckbuckettable
 {
@@ -127,7 +127,7 @@ static void followleafedge(Pckbuckettable *pckbt,const void *voidbwtseq,
                            const Boundsatdepth *bd)
 {
   Bwtseqcontextiterator *bsci;
-  Uchar cc;
+  GtUchar cc;
   Boundsatdepth bdleaf;
 
   bdleaf.code = bd->code;
@@ -154,19 +154,19 @@ Pckbuckettable *pckbuckettable_new(const void *voidbwtseq,
                                    Seqpos totallength,
                                    unsigned int maxdepth)
 {
-  ArrayBoundsatdepth stack;
+  GtArrayBoundsatdepth stack;
   Boundsatdepth parent, child;
   unsigned long rangesize, idx;
   Seqpos *rangeOccs;
   Pckbuckettable *pckbt;
   Mbtab *tmpmbtab;
 
-  INITARRAY(&stack,Boundsatdepth);
+  GT_INITARRAY(&stack,Boundsatdepth);
   child.lowerbound = 0;
   child.upperbound = totallength+1;
   child.depth = 0;
   child.code = (Codetype) 0;
-  STOREINARRAY(&stack,Boundsatdepth,128,child);
+  GT_STOREINARRAY(&stack,Boundsatdepth,128,child);
   rangeOccs = gt_malloc(sizeof(*rangeOccs) * MULT2(numofchars));
   tmpmbtab = gt_malloc(sizeof(*tmpmbtab) * numofchars);
   pckbt = allocandinitpckbuckettable(numofchars,maxdepth,true);
@@ -197,7 +197,7 @@ Pckbuckettable *pckbuckettable_new(const void *voidbwtseq,
       {
         if (child.lowerbound + 1 < child.upperbound)
         {
-          STOREINARRAY(&stack,Boundsatdepth,128,child);
+          GT_STOREINARRAY(&stack,Boundsatdepth,128,child);
         } else
         {
           followleafedge(pckbt,voidbwtseq,&child);
@@ -205,7 +205,7 @@ Pckbuckettable *pckbuckettable_new(const void *voidbwtseq,
       }
     }
   }
-  FREEARRAY(&stack,Boundsatdepth);
+  GT_FREEARRAY(&stack,Boundsatdepth);
   gt_free(rangeOccs);
   gt_free(tmpmbtab);
   printf("filled: %lu (%.2f)\n",pckbt->numofvalues,

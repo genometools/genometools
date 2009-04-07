@@ -36,22 +36,22 @@ struct GtFastaBuffer
        nextfile;
   GtQueue *descptr;
   GtGenFile *inputstream;
-  Uchar outputbuffer[OUTPUTFILEBUFFERSIZE],
+  GtUchar outputbuffer[OUTPUTFILEBUFFERSIZE],
         inputbuffer[INPUTFILEBUFFERSIZE];
   ssize_t currentinpos, currentfillpos;
   uint64_t lastspeciallength;
   Filelengthvalues *filelengthtab;
   const GtStrArray *filenametab;
-  const Uchar *symbolmap;
+  const GtUchar *symbolmap;
   bool plainformat;
   unsigned long *characterdistribution;
-  Arraychar headerbuffer;
+  GtArraychar headerbuffer;
 };
 
 int gt_fastabuffer_advance(GtFastaBuffer *fb, GtError*);
 
 static inline int gt_fastabuffer_next(GtFastaBuffer *fb,
-                                      Uchar *val,
+                                      GtUchar *val,
                                       GtError *err)
 {
   if (fb->nextread >= fb->nextfree)

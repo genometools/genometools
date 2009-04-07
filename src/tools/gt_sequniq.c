@@ -92,7 +92,7 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
   GtStrArray *files;
   int had_err = 0;
   GtSeqIterator *seqit;
-  const Uchar *sequence;
+  const GtUchar *sequence;
   char *desc;
   unsigned long len;
   off_t totalsize;
@@ -129,32 +129,36 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
     for (i = parsed_args; i < argc; i++)
       gt_str_array_add_cstr(files, argv[i]);
     totalsize = gt_files_estimate_total_size(files);
-    seqit = gt_seqiterator_new(files, NULL, true);
-    if (arguments->verbose) {
-      gt_progressbar_start(gt_seqiterator_getcurrentcounter(seqit,
+    seqit = gt_seqiterator_new(files, err);
+    if (!seqit)
+      had_err = -1;
+    if (!had_err) {
+      if (arguments->verbose) {
+        gt_progressbar_start(gt_seqiterator_getcurrentcounter(seqit,
                                                             (unsigned long long)
                                                             totalsize),
-                           (unsigned long long) totalsize);
-    }
-    for (;;) {
-      char *md5;
-      if ((gt_seqiterator_next(seqit, &sequence, &len, &desc, err)) != 1)
-        break;
-      md5 = gt_md5_fingerprint((const char*) sequence, (unsigned long) len);
-      if (!gt_string_distri_get(sd, md5)) {
-        gt_string_distri_add(sd, md5);
-        gt_fasta_show_entry_generic(desc, (const char*) sequence, len, 0,
-                                    arguments->outfp);
+                             (unsigned long long) totalsize);
       }
-      else
-        duplicates++;
-      num_of_sequences++;
-      gt_free(desc);
-      gt_free(md5);
+      for (;;) {
+        char *md5;
+        if ((gt_seqiterator_next(seqit, &sequence, &len, &desc, err)) != 1)
+          break;
+        md5 = gt_md5_fingerprint((const char*) sequence, (unsigned long) len);
+        if (!gt_string_distri_get(sd, md5)) {
+          gt_string_distri_add(sd, md5);
+          gt_fasta_show_entry_generic(desc, (const char*) sequence, len, 0,
+                                      arguments->outfp);
+        }
+        else
+          duplicates++;
+        num_of_sequences++;
+        gt_free(desc);
+        gt_free(md5);
+      }
+      if (arguments->verbose)
+        gt_progressbar_stop();
+      gt_seqiterator_delete(seqit);
     }
-    if (arguments->verbose)
-      gt_progressbar_stop();
-    gt_seqiterator_delete(seqit);
     gt_str_array_delete(files);
   }
 

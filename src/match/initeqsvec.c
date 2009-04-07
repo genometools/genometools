@@ -22,11 +22,11 @@
 
 void initeqsvector(unsigned long *eqsvector,
                    unsigned long eqslen,
-                   const Uchar *pattern,
+                   const GtUchar *pattern,
                    unsigned long patternlength)
 {
   unsigned long *eptr, shiftmask;
-  const Uchar *pptr;
+  const GtUchar *pptr;
 
   gt_assert(patternlength <=
             (unsigned long) (CHAR_BIT * sizeof (unsigned long)));
@@ -38,8 +38,8 @@ void initeqsvector(unsigned long *eqsvector,
        pptr < pattern + patternlength && shiftmask != 0;
        pptr++, shiftmask <<= 1)
   {
-    assert (*pptr != (Uchar) SEPARATOR);
-    if (*pptr != (Uchar) WILDCARD)
+    assert (*pptr != (GtUchar) SEPARATOR);
+    if (*pptr != (GtUchar) WILDCARD)
     {
       eqsvector[(unsigned long) *pptr] |= shiftmask;
     }
@@ -48,11 +48,11 @@ void initeqsvector(unsigned long *eqsvector,
 
 void initeqsvectorrev(unsigned long *eqsvectorrev,
                       unsigned long eqslen,
-                      const Uchar *pattern,
+                      const GtUchar *pattern,
                       unsigned long patternlength)
 {
   unsigned long *eptr, shiftmask;
-  const Uchar *pptr;
+  const GtUchar *pptr;
 
   gt_assert(patternlength <=
             (unsigned long) (CHAR_BIT * sizeof (unsigned long)));
@@ -64,8 +64,8 @@ void initeqsvectorrev(unsigned long *eqsvectorrev,
        pptr >= pattern && shiftmask != 0;
        pptr--, shiftmask <<= 1)
   {
-    assert (*pptr != (Uchar) SEPARATOR);
-    if (*pptr != (Uchar) WILDCARD)
+    assert (*pptr != (GtUchar) SEPARATOR);
+    if (*pptr != (GtUchar) WILDCARD)
     {
       eqsvectorrev[(unsigned long) *pptr] |= shiftmask;
     }

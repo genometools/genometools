@@ -27,11 +27,11 @@ unsigned long suffixarrayuniqueforward (const void *genericindex,
                                         Seqpos left,
                                         Seqpos right,
                                         GT_UNUSED Seqpos *witnessposition,
-                                        const Uchar *qstart,
-                                        const Uchar *qend)
+                                        const GtUchar *qstart,
+                                        const GtUchar *qend)
 {
   Simplelcpinterval itv;
-  const Uchar *qptr;
+  const GtUchar *qptr;
   const Suffixarray *suffixarray = (const Suffixarray *) genericindex;
   Seqpos totallength;
 
@@ -68,11 +68,11 @@ unsigned long suffixarraymstats (const void *genericindex,
                                  Seqpos left,
                                  Seqpos right,
                                  Seqpos *witnessposition,
-                                 const Uchar *qstart,
-                                 const Uchar *qend)
+                                 const GtUchar *qstart,
+                                 const GtUchar *qend)
 {
   Simplelcpinterval itv;
-  const Uchar *qptr;
+  const GtUchar *qptr;
   const Suffixarray *suffixarray = (const Suffixarray *) genericindex;
   Seqpos totallength;
 

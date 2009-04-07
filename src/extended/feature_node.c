@@ -384,7 +384,8 @@ GtPhase gt_feature_node_get_phase(GtFeatureNode *fn)
   return (fn->bit_field >> PHASE_OFFSET) & PHASE_MASK;
 }
 
-static int save_exon(GtGenomeNode *gn, void *data, GT_UNUSED GtError *err)
+static int feature_node_save_exon(GtGenomeNode *gn, void *data,
+                                  GT_UNUSED GtError *err)
 {
   GtFeatureNode *fn;
   GtArray *exon_features = (GtArray*) data;
@@ -402,8 +403,9 @@ void gt_feature_node_get_exons(GtFeatureNode *fn, GtArray *exon_features)
   int had_err;
   gt_assert(fn && exon_features && !gt_array_size(exon_features));
   had_err = gt_genome_node_traverse_children((GtGenomeNode*) fn, exon_features,
-                                          save_exon, false, NULL);
-  gt_assert(!had_err); /* cannot happen, because save_exon() is sane */
+                                             feature_node_save_exon, false,
+                                             NULL);
+  gt_assert(!had_err); /* feature_node_save_exon() is sane */
 }
 
 static int save_exons_and_cds(GtGenomeNode *gn, void *data,

@@ -33,6 +33,6 @@ typedef struct
          suftabvalue;
 } PairBwtidx;
 
-DECLAREARRAYSTRUCT(PairBwtidx);
+GT_DECLAREARRAYSTRUCT(PairBwtidx);
 
 #endif

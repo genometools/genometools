@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -1207,9 +1207,10 @@ static int parse_first_gff3_line(const char *line, const char *filename,
   return had_err;
 }
 
-static int parse_fasta_entry(GtQueue *genome_nodes, const char *line,
-                             GtStr *filename, unsigned int line_number,
-                             GtGenFile *fpin, GtError *err)
+static int gff3_parser_parse_fasta_entry(GtQueue *genome_nodes,
+                                         const char *line, GtStr *filename,
+                                         unsigned int line_number,
+                                         GtGenFile *fpin, GtError *err)
 {
   int had_err = 0;
   gt_error_check(err);
@@ -1454,8 +1455,8 @@ int gt_gff3_parser_parse_genome_nodes(GtGFF3Parser *parser, int *status_code,
         process_undefined_sequence_regions(parser->undefined_sequence_regions,
                                            genome_nodes);
       }
-      had_err = parse_fasta_entry(genome_nodes, line, filenamestr, *line_number,
-                                  fpin, err);
+      had_err = gff3_parser_parse_fasta_entry(genome_nodes, line, filenamestr,
+                                              *line_number, fpin, err);
       break;
     }
     else if (line[0] == '#') {

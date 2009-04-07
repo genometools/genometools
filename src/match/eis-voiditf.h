@@ -40,7 +40,7 @@ bool nextBwtseqpositioniterator(Seqpos *pos,Bwtseqpositioniterator *bspi);
 bool nextBwtseqpositionwithoutSEPiterator(Seqpos *pos,
                                           Bwtseqpositioniterator *bspi);
 
-Uchar bwtseqgetsymbol(Seqpos bound,const void *voidbwtseq);
+GtUchar bwtseqgetsymbol(Seqpos bound,const void *voidbwtseq);
 
 void freeBwtseqpositioniterator(Bwtseqpositioniterator **bspi);
 
@@ -49,11 +49,11 @@ typedef struct Bwtseqcontextiterator Bwtseqcontextiterator;
 Bwtseqcontextiterator *newBwtseqcontextiterator(const void *voidbwtseq,
                                                 Seqpos bound);
 
-Uchar nextBwtseqcontextiterator(Seqpos *bound,Bwtseqcontextiterator *bsci);
+GtUchar nextBwtseqcontextiterator(Seqpos *bound,Bwtseqcontextiterator *bsci);
 
 void freeBwtseqcontextiterator(Bwtseqcontextiterator **bsci);
 
-void bwtrangesplitwithoutspecial(ArrayBoundswithchar *bwci,
+void bwtrangesplitwithoutspecial(GtArrayBoundswithchar *bwci,
                                  Seqpos *rangeOccs,
                                  const void *voidbwtseq,
                                  Seqpos lbound,
@@ -72,22 +72,22 @@ unsigned long voidpackedindexuniqueforward(const void *voidbwtseq,
                                            GT_UNUSED Seqpos left,
                                            GT_UNUSED Seqpos right,
                                            GT_UNUSED Seqpos *witnessposition,
-                                           const Uchar *qstart,
-                                           const Uchar *qend);
+                                           const GtUchar *qstart,
+                                           const GtUchar *qend);
 
 unsigned long voidpackedindexmstatsforward(const void *voidbwtseq,
                                            GT_UNUSED unsigned long offset,
                                            GT_UNUSED Seqpos left,
                                            GT_UNUSED Seqpos right,
                                            Seqpos *witnessposition,
-                                           const Uchar *qstart,
-                                           const Uchar *qend);
+                                           const GtUchar *qstart,
+                                           const GtUchar *qend);
 
 bool pck_exactpatternmatching(const void *voidbwtseq,
-                              const Uchar *pattern,
+                              const GtUchar *pattern,
                               unsigned long patternlength,
                               Seqpos totallength,
-                              const Uchar *dbsubstring,
+                              const GtUchar *dbsubstring,
                               Processmatch processmatch,
                               void *processmatchinfo);
 

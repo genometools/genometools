@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2009 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2009 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,27 +15,18 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef READMODE_DEF_H
-#define READMODE_DEF_H
-#include "core/error.h"
+#ifndef SFX_LINLCP_H
+#define SFX_LINLCP_H
 
-typedef enum
-{
-  Forwardmode = 0,
-  Reversemode,
-  Complementmode,
-  Reversecomplementmode
-} Readmode;
+#include "compressedtab.h"
+#include "seqpos-def.h"
+#include "encseq-def.h"
 
-#define ISDIRREVERSE(R)    ((R) == Reversemode ||\
-                            (R) == Reversecomplementmode)
-#define ISDIRCOMPLEMENT(R) ((R) == Complementmode ||\
-                            (R) == Reversecomplementmode)
-
-#define COMPLEMENTBASE(B) ((GtUchar) 3 - (B))
-
-const char *showreadmode(Readmode readmode);
-
-int parsereadmode(const char *dirargstring,GtError *err);
+Compressedtable *lcp9_manzini(Compressedtable *spacefortab,
+                              const Encodedsequence *encseq,
+                              Readmode readmode,
+                              Seqpos partwidth,
+                              Seqpos totallength,
+                              const Seqpos *sortedsuffixes);
 
 #endif

@@ -30,7 +30,7 @@
 
  DECLAREREADFUNCTION(Seqpos);
 
- DECLAREREADFUNCTION(Uchar);
+ DECLAREREADFUNCTION(GtUchar);
 
  DECLAREREADFUNCTION(Largelcpvalue);
 
@@ -47,7 +47,7 @@ static void fillandinsert(Mergertrierep *trierep,
 #ifdef WITHTRIEIDENT
   sinfo.ident = ident;
 #endif
-  insertsuffixintomergertrie(trierep,node,&sinfo);
+  mergertrie_insertsuffix(trierep,node,&sinfo);
 }
 
 static int inputthesequences(unsigned int *numofchars,
@@ -134,11 +134,12 @@ static int insertfirstsuffixes(Mergertrierep *trierep,
   return NULL;
 }
 
-int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, GtError *err)
+int emissionmergedesa_stepdeleteandinsertothersuffixes(
+                                 Emissionmergedesa *emmesa, GtError *err)
 {
   Mergertrienode *tmpsmallestleaf, *tmplcpnode;
   Largelcpvalue tmpexception;
-  Uchar tmpsmalllcpvalue;
+  GtUchar tmpsmalllcpvalue;
   int retval;
   Seqpos tmpsuftabvalue,
          tmplcpvalue,
@@ -151,7 +152,7 @@ int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, GtError *err)
       emmesa->buf.nextstoreidx < (unsigned int) SIZEOFMERGERESULTBUFFER;
       emmesa->buf.nextstoreidx++)
   {
-    tmpsmallestleaf = findsmallestnodeintrie(&emmesa->trierep);
+    tmpsmallestleaf = mergertrie_findsmallestnode(&emmesa->trierep);
     tmplastbranchdepth = tmpsmallestleaf->parent->depth;
     tmpidx = tmpsmallestleaf->suffixinfo.idx;
     emmesa->buf.suftabstore[emmesa->buf.nextstoreidx].idx = tmpidx;
@@ -160,11 +161,11 @@ int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, GtError *err)
     if (emmesa->nextpostable[tmpidx] >
        getencseqtotallength(emmesa->suffixarraytable[tmpidx].encseq))
     {
-      deletesmallestpath(tmpsmallestleaf,&emmesa->trierep);
+      mergertrie_deletesmallestpath(tmpsmallestleaf,&emmesa->trierep);
       emmesa->numofentries--;
     } else
     {
-      retval = readnextUcharfromstream(&tmpsmalllcpvalue,
+      retval = readnextGtUcharfromstream(&tmpsmalllcpvalue,
                                        &emmesa->suffixarraytable[tmpidx].
                                                 lcptabstream);
       if (retval < 0)
@@ -217,8 +218,8 @@ int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, GtError *err)
                     tmpsuftabvalue,
                     tmplcpnode,
                     emmesa->ident++);
-      tmpsmallestleaf = findsmallestnodeintrie(&emmesa->trierep);
-      deletesmallestpath(tmpsmallestleaf,&emmesa->trierep);
+      tmpsmallestleaf = mergertrie_findsmallestnode(&emmesa->trierep);
+      mergertrie_deletesmallestpath(tmpsmallestleaf,&emmesa->trierep);
     }
     if (emmesa->numofentries > 0)
     {
@@ -233,11 +234,11 @@ int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, GtError *err)
   return 0;
 }
 
-int initEmissionmergedesa(Emissionmergedesa *emmesa,
-                          const GtStrArray *indexnametab,
-                          unsigned int demand,
-                          Verboseinfo *verboseinfo,
-                          GtError *err)
+int emissionmergedesa_init(Emissionmergedesa *emmesa,
+                           const GtStrArray *indexnametab,
+                           unsigned int demand,
+                           Verboseinfo *verboseinfo,
+                           GtError *err)
 {
   unsigned int numofindexes;
   bool haserr = false;
@@ -274,8 +275,8 @@ int initEmissionmergedesa(Emissionmergedesa *emmesa,
       emmesa->trierep.encseqreadinfo[idx].readmode
         = emmesa->suffixarraytable[idx].readmode;
     }
-    initmergertrienodetable(&emmesa->trierep,(Seqpos) numofindexes,
-                            numofindexes);
+    mergertrie_initnodetable(&emmesa->trierep,(Seqpos) numofindexes,
+                             numofindexes);
     if (insertfirstsuffixes(&emmesa->trierep,
                            emmesa->nextpostable,
                            emmesa->suffixarraytable,
@@ -294,7 +295,7 @@ int initEmissionmergedesa(Emissionmergedesa *emmesa,
   return haserr ? -1 : 0;
 }
 
-void wraptEmissionmergedesa(Emissionmergedesa *emmesa)
+void emissionmergedesa_wrap(Emissionmergedesa *emmesa)
 {
   unsigned int idx;
 
@@ -306,7 +307,7 @@ void wraptEmissionmergedesa(Emissionmergedesa *emmesa)
   FREESPACE(emmesa->trierep.encseqreadinfo);
   if (emmesa->numofindexes > 1U)
   {
-    freemergertrierep(&emmesa->trierep);
+    mergertrie_delete(&emmesa->trierep);
   }
   FREESPACE(emmesa->nextpostable);
 }

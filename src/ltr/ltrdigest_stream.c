@@ -345,7 +345,7 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
 
     if (!had_err)
     {
-      Uchar *symbolstring;
+      GtUchar *symbolstring;
       Seqinfo seqinfo;
       unsigned long length;
       const SfxAlphabet *alpha;
@@ -357,7 +357,7 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
         alpha        = getencseqAlphabet(ls->encseq);
         length       = gt_ltrelement_length(&ls->element);
         seq          = gt_malloc((length+1) * sizeof (char));
-        symbolstring = gt_malloc((length+1) * sizeof (Uchar));
+        symbolstring = gt_malloc((length+1) * sizeof (GtUchar));
         encseqextract(symbolstring,
                       ls->encseq,
                       seqinfo.seqstartpos + (ls->element.leftLTR_5),

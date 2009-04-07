@@ -43,7 +43,7 @@ char* gt_ltrelement_get_sequence(unsigned long start, unsigned long end,
 {
   char *out;
   int had_err = 0;
-  Uchar *symbolstring;
+  GtUchar *symbolstring;
   const SfxAlphabet *alpha;
   Encodedsequencescanstate *ess;
   unsigned long len, i;
@@ -56,7 +56,7 @@ char* gt_ltrelement_get_sequence(unsigned long start, unsigned long end,
   len = end - start + 1;
 
   out          = gt_malloc((len + 1) * sizeof (char));
-  symbolstring = gt_malloc((len + 1) * sizeof (Uchar));
+  symbolstring = gt_malloc((len + 1) * sizeof (GtUchar));
 
   initEncodedsequencescanstate(ess, seq, Forwardmode,
                                seqinfo->seqstartpos + start);

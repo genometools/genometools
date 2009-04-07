@@ -26,12 +26,12 @@
 void symbolstring2fasta(FILE *fpout,
                         const char *desc,
                         const SfxAlphabet *alpha,
-                        const Uchar *w,
+                        const GtUchar *w,
                         unsigned long wlen,
                         unsigned long width)
 {
   unsigned long i, j;
-  Uchar currentchar;
+  GtUchar currentchar;
 
   gt_assert(width > 0);
   if (desc == NULL)
@@ -44,7 +44,7 @@ void symbolstring2fasta(FILE *fpout,
   for (i = 0, j = 0; ; i++)
   {
     currentchar = w[i];
-    if (currentchar == (Uchar) SEPARATOR)
+    if (currentchar == (GtUchar) SEPARATOR)
     {
       fprintf(fpout,"\n>\n");
       j = 0;
@@ -57,7 +57,7 @@ void symbolstring2fasta(FILE *fpout,
       fprintf(fpout,"\n");
       break;
     }
-    if (currentchar != (Uchar) SEPARATOR)
+    if (currentchar != (GtUchar) SEPARATOR)
     {
       j++;
       if (j >= width)
@@ -78,7 +78,7 @@ void encseq2symbolstring(FILE *fpout,
 {
   unsigned long j;
   Seqpos idx, lastpos;
-  Uchar currentchar;
+  GtUchar currentchar;
   Encodedsequencescanstate *esr;
   const SfxAlphabet *alpha;
 
@@ -90,7 +90,7 @@ void encseq2symbolstring(FILE *fpout,
   for (idx = start, j = 0; /* Nothing */ ; idx++)
   {
     currentchar = sequentialgetencodedchar(encseq,esr,idx,readmode);
-    if (currentchar == (Uchar) SEPARATOR)
+    if (currentchar == (GtUchar) SEPARATOR)
     {
       fprintf(fpout,"\n>\n");
       j = 0;
@@ -103,7 +103,7 @@ void encseq2symbolstring(FILE *fpout,
       fprintf(fpout,"\n");
       break;
     }
-    if (currentchar != (Uchar) SEPARATOR)
+    if (currentchar != (GtUchar) SEPARATOR)
     {
      j++;
      if (j >= width)
@@ -122,7 +122,7 @@ void fprintfencseq(FILE *fpout,
                    Seqpos wlen)
 {
   Seqpos idx;
-  Uchar currentchar;
+  GtUchar currentchar;
   const SfxAlphabet *alpha;
 
   alpha = getencseqAlphabet(encseq);
@@ -162,12 +162,14 @@ int echodescriptionandsequence(const GtStrArray *filenametab,GtError *err)
 {
   GtSeqIterator *seqit;
   char *desc = NULL;
-  const Uchar *sequence;
+  const GtUchar *sequence;
   unsigned long seqlen;
   bool haserr = false;
   int retval;
 
-  seqit = gt_seqiterator_new(filenametab,NULL,true);
+  seqit = gt_seqiterator_new(filenametab, err);
+  if (!seqit)
+    return -1;
   while (true)
   {
     retval = gt_seqiterator_next(seqit,

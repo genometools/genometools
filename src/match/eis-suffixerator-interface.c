@@ -46,7 +46,6 @@ struct sfxInterface
   Readmode readmode;
   unsigned int prefixlength, numofparts;
   const Sfxstrategy *sfxstrategy;
-  Measuretime *mtime;
   const SfxAlphabet *alpha;
   const Encodedsequence *encseq;
   struct seqStats *stats;
@@ -235,7 +234,6 @@ newSfxInterfaceWithReaders(Readmode readmode,
                  SfxIGenerate, sfxi);
   }
   sfxi->readmode = readmode;
-  sfxi->mtime = mtime;
   sfxi->encseq = encseq;
   sfxi->alpha = getencseqAlphabet(encseq);
   sfxi->stats = newSeqStatsFromCharDist(sfxi->alpha, length,
@@ -247,7 +245,7 @@ newSfxInterfaceWithReaders(Readmode readmode,
                                    numofparts,
                                    NULL,
                                    sfxstrategy,
-                                   sfxi->mtime,
+                                   mtime,
                                    verbosity, err)))
     newSfxInterfaceWithReadersErrRet();
   sfxi->rot0Pos.defined = false;
@@ -377,7 +375,7 @@ SfxIGenerate(void *iface, void *backlogState,
       sfxi->lastGeneratedStart += sfxi->lastGeneratedLen;
       if ((sfxi->lastGeneratedSufTabSegment =
            nextSfxiterator(&sfxi->lastGeneratedLen, &sfxi->specialsuffixes,
-                           sfxi->mtime, sfxi->sfi)))
+                           sfxi->sfi)))
       {
         size_t pos;
         /* size_t because the current approach cannot generate more

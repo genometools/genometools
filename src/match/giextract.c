@@ -305,7 +305,7 @@ int extractginumbers(bool verbose,
                      GtError *err)
 {
   GtSeqIterator *seqit;
-  const Uchar *sequence;
+  const GtUchar *sequence;
   char *desc, *headerbufferspace = NULL;
   const char *ginumberasstring;
   uint64_t referenceginumber;
@@ -325,8 +325,10 @@ int extractginumbers(bool verbose,
   totalsize = gt_files_estimate_total_size(referencefiletab);
   printf("# estimated total size is " Formatuint64_t "\n",
             PRINTuint64_tcast(totalsize));
-  seqit = gt_seqiterator_new(referencefiletab, NULL, true);
-  if (verbose)
+  seqit = gt_seqiterator_new(referencefiletab, err);
+  if (!seqit)
+    had_err = -1;
+  if (!had_err && verbose)
   {
     gt_progressbar_start(gt_seqiterator_getcurrentcounter(seqit,
                                                           (unsigned long long)

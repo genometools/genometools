@@ -28,7 +28,7 @@
 
 void showrepeats (RepeatInfo *repeatinfo,unsigned long seedminlength)
 {
-  ArrayRepeat *repeats = &repeatinfo->repeats;
+  GtArrayRepeat *repeats = &repeatinfo->repeats;
   Repeat *reptab = repeats->spaceRepeat;
   unsigned long i;
 
@@ -94,7 +94,7 @@ int simpleexactselfmatchstore (void *info,
   {
     Repeat *nextfreerepeatptr;
 
-    GETNEXTFREEINARRAY(nextfreerepeatptr, &repeatinfo->repeats,
+    GT_GETNEXTFREEINARRAY(nextfreerepeatptr, &repeatinfo->repeats,
                        Repeat, 10);
     gt_log_log("maximal repeat pos1: " FormatSeqpos "\n",
                PRINTSeqposcast(pos1));
@@ -120,7 +120,7 @@ int subsimpleexactselfmatchstore(void *info,
   Repeat *nextfreerepeatptr;
   SubRepeatInfo *sri = (SubRepeatInfo *) info;
 
-  GETNEXTFREEINARRAY (nextfreerepeatptr, &sri->repeats, Repeat, 10);
+  GT_GETNEXTFREEINARRAY (nextfreerepeatptr, &sri->repeats, Repeat, 10);
   nextfreerepeatptr->pos1 = sri->offset1 + dbstart;
   nextfreerepeatptr->offset = sri->offset2 + (Seqpos)querystart -
                               (sri->offset1 + dbstart);

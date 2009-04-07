@@ -26,7 +26,6 @@
 #include "verbose-def.h"
 #include "lcpoverflow.h"
 
-#include "esa-merge.pr"
 #include "encseq2offset.pr"
 
 typedef struct
@@ -76,7 +75,7 @@ static int outputsuflcpllv(void *processinfo,
   unsigned int i, lastindex;
   Seqpos lcpvalue;
   Largelcpvalue currentexception;
-  Uchar smallvalue;
+  GtUchar smallvalue;
   bool haserr = false;
 
   gt_error_check(err);
@@ -111,7 +110,7 @@ static int outputsuflcpllv(void *processinfo,
       lcpvalue = buf->lcptabstore[i];
       if (lcpvalue < (Seqpos) LCPOVERFLOW)
       {
-        smallvalue = (Uchar) lcpvalue;
+        smallvalue = (GtUchar) lcpvalue;
       } else
       {
         currentexception.position = mergeoutinfo->currentlcpindex;
@@ -127,10 +126,10 @@ static int outputsuflcpllv(void *processinfo,
         }
         smallvalue = LCPOVERFLOW;
       }
-      if (fwrite(&smallvalue,sizeof (Uchar),(size_t) 1,
+      if (fwrite(&smallvalue,sizeof (GtUchar),(size_t) 1,
                 mergeoutinfo->outlcp.fp) != (size_t) 1)
       {
-        gt_error_set(err,"fwrite(%s) of Uchar failed: %s",
+        gt_error_set(err,"fwrite(%s) of GtUchar failed: %s",
                        gt_str_get(mergeoutinfo->outlcp.outfilename),
                        strerror(errno));
         haserr = true;
@@ -147,7 +146,7 @@ static int mergeandstoreindex(const GtStr *storeindex,
                               GtError *err)
 {
   Mergeoutinfo mergeoutinfo;
-  Uchar smalllcpvalue;
+  GtUchar smalllcpvalue;
   Specialcharinfo specialcharinfo;
   Seqpos *sequenceoffsettable, totallength;
   bool haserr = false;
@@ -173,7 +172,7 @@ static int mergeandstoreindex(const GtStr *storeindex,
     }
   }
   smalllcpvalue = 0;
-  if (!haserr && fwrite(&smalllcpvalue,sizeof (Uchar),(size_t) 1,
+  if (!haserr && fwrite(&smalllcpvalue,sizeof (GtUchar),(size_t) 1,
                 mergeoutinfo.outlcp.fp) != (size_t) 1)
   {
     gt_error_set(err,"fwrite(%s) failed: %s",
@@ -184,14 +183,14 @@ static int mergeandstoreindex(const GtStr *storeindex,
   if (!haserr)
   {
     mergeoutinfo.currentlcpindex = (Seqpos) 1;
-    sequenceoffsettable = encseqtable2seqoffsets(&totallength,
-                                                 &specialcharinfo,
-                                                 emmesa->suffixarraytable,
-                                                 emmesa->numofindexes);
+    sequenceoffsettable = encseqtable2sequenceoffsets(&totallength,
+                                                      &specialcharinfo,
+                                                      emmesa->suffixarraytable,
+                                                      emmesa->numofindexes);
     gt_assert(sequenceoffsettable != NULL);
     while (emmesa->numofentries > 0)
     {
-      if (stepdeleteandinsertothersuffixes(emmesa,err) != 0)
+      if (emissionmergedesa_stepdeleteandinsertothersuffixes(emmesa,err) != 0)
       {
         haserr = true;
         break;
@@ -223,11 +222,11 @@ int performtheindexmerging(const GtStr *storeindex,
   bool haserr = false;
 
   gt_error_check(err);
-  if (initEmissionmergedesa(&emmesa,
-                            indexnametab,
-                            demand,
-                            verboseinfo,
-                            err) != 0)
+  if (emissionmergedesa_init(&emmesa,
+                             indexnametab,
+                             demand,
+                             verboseinfo,
+                             err) != 0)
   {
     haserr = true;
   }
@@ -245,6 +244,6 @@ int performtheindexmerging(const GtStr *storeindex,
       haserr = true;
     }
   }
-  wraptEmissionmergedesa(&emmesa);
+  emissionmergedesa_wrap(&emmesa);
   return haserr ? -1 : 0;
 }

@@ -18,8 +18,9 @@
 #include "core/cstr.h"
 #include "core/hashtable.h"
 #include "core/ma.h"
-#define GtHashmap GtHashtable
 #include "core/hashmap.h"
+
+/* Hashmaps are implemented as Hashtables */
 
 struct map_entry
 {
@@ -57,7 +58,7 @@ gt_hashmap_new(HashType keyhashtype, GtFree keyfree, GtFree valuefree)
         gt_ht_ptr_elem_hash, { .free_elem_with_data = hm_elem_free },
         sizeof (struct map_entry), gt_ht_ptr_elem_cmp, ff, gt_free_func
       };
-      return gt_hashtable_new(hm_directkey_eleminfo);
+      return (GtHashmap*) gt_hashtable_new(hm_directkey_eleminfo);
     }
   case HASH_STRING:
     {
@@ -65,7 +66,7 @@ gt_hashmap_new(HashType keyhashtype, GtFree keyfree, GtFree valuefree)
         gt_ht_cstr_elem_hash, { .free_elem_with_data = hm_elem_free },
         sizeof (struct map_entry), gt_ht_cstr_elem_cmp, ff, gt_free_func
       };
-      return gt_hashtable_new(hm_strkey_eleminfo);
+      return (GtHashmap*) gt_hashtable_new(hm_strkey_eleminfo);
     }
   }
   fprintf(stderr, "Illegal hashtype requested!");
@@ -76,7 +77,7 @@ gt_hashmap_new(HashType keyhashtype, GtFree keyfree, GtFree valuefree)
 extern void *
 gt_hashmap_get(GtHashmap *hm, const void *key)
 {
-  struct map_entry *elem = gt_hashtable_get(hm, &key);
+  struct map_entry *elem = gt_hashtable_get((GtHashtable*) hm, &key);
   return (elem!=NULL)?elem->value:NULL;
 }
 
@@ -84,16 +85,16 @@ extern void
 gt_hashmap_add(GtHashmap *hm, void *key, void *value)
 {
   struct map_entry keyvalpair = { key, value };
-  if (gt_hashtable_add(hm, &keyvalpair))
-    ;
-  else
-    ((struct map_entry *)gt_hashtable_get(hm, &keyvalpair))->value = value;
+  if (!gt_hashtable_add((GtHashtable*) hm, &keyvalpair)) {
+    ((struct map_entry *)gt_hashtable_get((GtHashtable*) hm, &keyvalpair))
+      ->value = value;
+  }
 }
 
 extern void
 gt_hashmap_remove(GtHashmap *hm, const void *key)
 {
-  gt_hashtable_remove(hm, &key);
+  gt_hashtable_remove((GtHashtable*) hm, &key);
 }
 
 /* iteration support structures and functions */
@@ -129,8 +130,8 @@ gt_hashmap_foreach_ordered(GtHashmap *hm, Mapentryvisitfunc visit, void *data,
                         GtCompare cmp, GtError *err)
 {
   struct hashiteration_state state = { visit, data, cmp};
-  return gt_hashtable_foreach_ordered(hm, gt_hashmap_visit, &state,
-                                   (GtCompare)gt_hashmap_cmp, err);
+  return gt_hashtable_foreach_ordered((GtHashtable*) hm, gt_hashmap_visit,
+                                      &state, (GtCompare) gt_hashmap_cmp, err);
 }
 
 extern int
@@ -138,7 +139,7 @@ gt_hashmap_foreach(GtHashmap *hm, Mapentryvisitfunc visit, void *data,
                    GtError *err)
 {
   struct hashiteration_state state = { visit, data, NULL };
-  return gt_hashtable_foreach(hm, gt_hashmap_visit, &state, err);
+  return gt_hashtable_foreach((GtHashtable*) hm, gt_hashmap_visit, &state, err);
 }
 
 extern int
@@ -146,14 +147,14 @@ gt_hashmap_foreach_in_key_order(GtHashmap *hm, Mapentryvisitfunc iter,
                              void *data, GtError *err)
 {
   struct hashiteration_state state = { iter, data, NULL };
-  return gt_hashtable_foreach_in_default_order(hm, gt_hashmap_visit, &state,
-                                               err);
+  return gt_hashtable_foreach_in_default_order((GtHashtable*) hm,
+                                               gt_hashmap_visit, &state, err);
 }
 
 extern void
 gt_hashmap_reset(GtHashmap *hm)
 {
-  gt_hashtable_reset(hm);
+  gt_hashtable_reset((GtHashtable*) hm);
 }
 
 #define my_ensure(err_state, predicate)         \
@@ -241,5 +242,5 @@ gt_hashmap_unit_test(GtError *err)
 extern void
 gt_hashmap_delete(GtHashmap *hm)
 {
-  gt_hashtable_delete(hm);
+  gt_hashtable_delete((GtHashtable*) hm);
 }

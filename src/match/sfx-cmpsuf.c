@@ -31,7 +31,7 @@ int comparetwosuffixes(const Encodedsequence *encseq,
                        Encodedsequencescanstate *esr1,
                        Encodedsequencescanstate *esr2)
 {
-  Uchar cc1, cc2;
+  GtUchar cc1, cc2;
   Seqpos pos1, pos2, end1, end2;
   int retval;
 
@@ -240,7 +240,7 @@ static Seqpos derefcharboundaries(const Encodedsequence *encseq,
   }
   if (currentoffset <= maxoffset)
   {
-    Uchar cc;
+    GtUchar cc;
     cc = getencodedchar(encseq,start,Forwardmode);
     if (ISSPECIAL(cc))
     {

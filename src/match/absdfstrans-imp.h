@@ -71,12 +71,12 @@ struct AbstractDfstransformer
   void (*nextLimdfsstate)(const Limdfsconstinfo *dfsconstinfo,
                           DECLAREPTRDFSSTATE(aliasoutstate),
                           unsigned long currentdepth,
-                          Uchar currentchar,
+                          GtUchar currentchar,
                           const DECLAREPTRDFSSTATE(aliasinstate));
   void (*inplacenextLimdfsstate)(const Limdfsconstinfo *dfsconstinfo,
                                  DECLAREPTRDFSSTATE(aliasstate),
                                  unsigned long currentdepth,
-                                 Uchar currentchar);
+                                 GtUchar currentchar);
 #ifdef SKDEBUG
   void (*showLimdfsstate)(const DECLAREPTRDFSSTATE(aliasstate),
                           unsigned long currentdepth,

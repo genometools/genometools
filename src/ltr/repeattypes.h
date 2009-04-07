@@ -33,13 +33,13 @@ typedef struct
   unsigned long contignumber; /* number of contig for this repeat */
 } Repeat;
 
-DECLAREARRAYSTRUCT(Repeat);
+GT_DECLAREARRAYSTRUCT(Repeat);
 
 /* The datatype RepeatInfo stores all maximal repeats (seeds) and */
 /* information about the length and distance constraints. */
 typedef struct
 {
-  ArrayRepeat repeats; /* array of maximal repeats (seeds) */
+  GtArrayRepeat repeats; /* array of maximal repeats (seeds) */
   unsigned long lmin;        /* minimum allowed length of a LTR */
   unsigned long lmax;        /* maximum allowed length of a LTR */
   unsigned long dmin;        /* minimum distance between LTRs */
@@ -51,7 +51,7 @@ typedef struct
 /* for the TSD detection. */
 typedef struct
 {
-  ArrayRepeat repeats; /* array of maximal repeats for TSDs */
+  GtArrayRepeat repeats; /* array of maximal repeats for TSDs */
   unsigned long lmin;   /* minimal length of TSD */
   unsigned long lmax;   /* maximal length of TSD */
   Seqpos offset1;      /* offset1 for absolute position 1 in sequence */
@@ -82,13 +82,13 @@ typedef struct
                           because of "noclusterallowed" option */
 } LTRboundaries;
 
-DECLAREARRAYSTRUCT(LTRboundaries);
+GT_DECLAREARRAYSTRUCT(LTRboundaries);
 
 /* The datatype Motif stores information about the specified motif. */
 typedef struct
 {
   GtStr *str_motif;
-  Uchar firstleft, /* first character of left motif instance */
+  GtUchar firstleft, /* first character of left motif instance */
         secondleft,    /* second character of left motif instance */
         firstright,    /* first character of right motif instance */
         secondright;   /* second character of right motif instance */

@@ -19,17 +19,22 @@
 #include <stdio.h>
 #include <limits.h>
 #include <errno.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include "core/arraydef.h"
 #include "core/assert_api.h"
 #include "core/error_api.h"
 #include "core/unused_api.h"
 #include "core/progressbar.h"
 #include "core/minmax.h"
+#include "core/fa.h"
 #include "spacedef.h"
 #include "measure-time-if.h"
 #include "intcode-def.h"
 #include "encseq-def.h"
 #include "safecast-gen.h"
+#include "esa-fileend.h"
 #include "sfx-partssuf-def.h"
 #include "sfx-suffixer.h"
 #include "sfx-bentsedg.h"
@@ -60,15 +65,15 @@ struct Sfxiterator
   bool storespecials;
   Codetype currentmincode,
            currentmaxcode;
-  Seqpos specialcharacters;
+  Seqpos specialcharacters,
+         widthofpart,
+         totallength;
   Suftab suftab;
   unsigned long nextfreeCodeatposition;
   Codeatposition *spaceCodeatposition;
   Suftabparts *suftabparts;
   const Encodedsequence *encseq;
   Readmode readmode;
-  Seqpos widthofpart,
-         totallength;
   Outlcpinfo *outlcpinfo;
   unsigned int part,
                numofchars,
@@ -83,6 +88,7 @@ struct Sfxiterator
   unsigned long long bucketiterstep; /* for progressbar */
   Sfxstrategy sfxstrategy;
   Verboseinfo *verboseinfo;
+  Measuretime *mtime;
 };
 
 #ifdef SKDEBUG
@@ -198,7 +204,7 @@ static Codetype getencseqcode(const Encodedsequence *encseq,
 {
   Codetype code = 0;
   unsigned int idx;
-  Uchar cc;
+  GtUchar cc;
 
   for (idx=0; idx<prefixlength; idx++)
   {
@@ -304,7 +310,6 @@ static void insertwithoutspecial(void *processinfo,
 
     if (code >= sfi->currentmincode && code <= sfi->currentmaxcode)
     {
-      /*sfi->suftabptr[--sfi->leftborder[code]] = position; */
       setsortspace(&sfi->suftab,--sfi->leftborder[code],position);
       /* from right to left */
     }
@@ -348,10 +353,6 @@ static void derivespecialcodesfromtable(Sfxiterator *sfi,bool deletevalues)
           updatebckspecials(sfi->bcktab,code,sfi->numofchars,prefixindex);
           stidx = --sfi->leftborder[code];
           /* from right to left */
-          /*
-          sfi->suftabptr[stidx] = sfi->spaceCodeatposition[j].position -
-                                  prefixindex;
-          */
           setsortspace(&sfi->suftab,stidx,
                        sfi->spaceCodeatposition[j].position - prefixindex);
         }
@@ -407,9 +408,6 @@ static void derivespecialcodesonthefly(Sfxiterator *sfi)
             gt_assert(code > 0);
             stidx = --sfi->leftborder[code];
             /* from right to left */
-            /*
-            sfi->suftabptr[stidx] = specialcontext.position - prefixindex;
-            */
             setsortspace(&sfi->suftab,stidx,
                          specialcontext.position - prefixindex);
           }
@@ -521,14 +519,8 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
        }
     } else
     {
-      sfi->sfxstrategy.ssortmaxdepth.defined = false;
-      sfi->sfxstrategy.maxwidthrealmedian = 1UL;
-      sfi->sfxstrategy.maxcountingsort = MAXCOUNTINGSORTDEFAULT;
-      sfi->sfxstrategy.maxinsertionsort = MAXINSERTIONSORTDEFAULT;
-      sfi->sfxstrategy.maxbltriesort = MAXBLTRIESORTDEFAULT;
-      sfi->sfxstrategy.cmpcharbychar = possibletocmpbitwise(encseq) ? false
-                                                                    : true;
-      sfi->sfxstrategy.storespecialcodes = false;
+      defaultsfxstrategy(&sfi->sfxstrategy,
+                         possibletocmpbitwise(encseq) ? false : true);
     }
     showverbose(verboseinfo,"maxinsertionsort=%lu",
                 sfi->sfxstrategy.maxinsertionsort);
@@ -558,6 +550,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
     sfi->exhausted = false;
     sfi->bucketiterstep = 0;
     sfi->verboseinfo = verboseinfo;
+    sfi->mtime = mtime;
     sfi->bcktab = allocBcktab(sfi->totallength,
                               sfi->numofchars,
                               prefixlength,
@@ -663,13 +656,12 @@ bool sfi2longestsuffixpos(Seqpos *longest,const Sfxiterator *sfi)
   return false;
 }
 
-static void preparethispart(Sfxiterator *sfi,
-                            Measuretime *mtime)
+static void preparethispart(Sfxiterator *sfi)
 {
   Seqpos partwidth;
   unsigned int numofparts = stpgetnumofparts(sfi->suftabparts);
 
-  if (sfi->part == 0 && mtime == NULL)
+  if (sfi->part == 0 && sfi->mtime == NULL)
   {
     gt_progressbar_start(&sfi->bucketiterstep,
                          (unsigned long long) sfi->numofallcodes);
@@ -689,37 +681,131 @@ static void preparethispart(Sfxiterator *sfi,
   {
     derivespecialcodesonthefly(sfi);
   }
-  if (mtime != NULL)
+  if (sfi->mtime != NULL)
   {
-    deliverthetime(stdout,mtime,"inserting suffixes into buckets");
+    deliverthetime(stdout,sfi->mtime,"inserting suffixes into buckets");
   }
   getencseqkmers(sfi->encseq,
                  sfi->readmode,
                  insertwithoutspecial,
                  sfi,
                  sfi->prefixlength);
-  if (mtime != NULL)
+  if (sfi->mtime != NULL)
   {
-    deliverthetime(stdout,mtime,"sorting the buckets");
+    deliverthetime(stdout,sfi->mtime,"sorting the buckets");
   }
   partwidth = stpgetcurrentsumofwdith(sfi->part,sfi->suftabparts);
-  ((sfi->sfxstrategy.ssortmaxdepth.defined &&
-     sfi->prefixlength == sfi->sfxstrategy.ssortmaxdepth.valueunsignedint)
-     ? qsufsort
-     : sortallbuckets) (&sfi->suftab,
-                        sfi->encseq,
-                        sfi->readmode,
-                        sfi->currentmincode,
-                        sfi->currentmaxcode,
-                        partwidth,
-                        sfi->bcktab,
-                        sfi->numofchars,
-                        sfi->prefixlength,
-                        sfi->outlcpinfo,
-                        &sfi->sfxstrategy,
-                        &sfi->bucketiterstep,
-                        sfi->verboseinfo);
+  if (sfi->sfxstrategy.ssortmaxdepth.defined &&
+      sfi->prefixlength == sfi->sfxstrategy.ssortmaxdepth.valueunsignedint)
+  {
+    if (!sfi->sfxstrategy.streamsuftab)
+    {
+      qsufsort(sfi->suftab.sortspace,
+               -1,
+               &sfi->suftab.longest.valueseqpos,
+               sfi->encseq,
+               sfi->readmode,
+               sfi->currentmincode,
+               sfi->currentmaxcode,
+               partwidth,
+               sfi->bcktab,
+               sfi->numofchars,
+               sfi->prefixlength,
+               sfi->outlcpinfo);
+      sfi->suftab.longest.defined = true;
+    }
+  } else
+  {
+    gt_assert(!sfi->sfxstrategy.streamsuftab);
+    sortallbuckets (&sfi->suftab,
+                    sfi->encseq,
+                    sfi->readmode,
+                    sfi->currentmincode,
+                    sfi->currentmaxcode,
+                    partwidth,
+                    sfi->bcktab,
+                    sfi->numofchars,
+                    sfi->prefixlength,
+                    sfi->outlcpinfo,
+                    &sfi->sfxstrategy,
+                    &sfi->bucketiterstep,
+                    sfi->verboseinfo);
+  }
   sfi->part++;
+}
+
+int postsortsuffixesfromstream(Sfxiterator *sfi, const GtStr *str_indexname,
+                               GtError *err)
+{
+  int mmapfiledesc = -1;
+  GtStr *tmpfilename;
+  struct stat sb;
+  bool haserr = false;
+
+  if (sfi->totallength == sfi->specialcharacters)
+  {
+    return 0;
+  }
+  FREESPACE(sfi->suftab.sortspace);
+  if (sfi->sfxstrategy.streamsuftab)
+  {
+    gt_assert(sfi->sfxstrategy.ssortmaxdepth.defined &&
+              sfi->prefixlength ==
+              sfi->sfxstrategy.ssortmaxdepth.valueunsignedint);
+  }
+  tmpfilename = gt_str_clone(str_indexname);
+  gt_str_append_cstr(tmpfilename,SUFTABSUFFIX);
+  mmapfiledesc = open(gt_str_get(tmpfilename), O_RDWR, 0);
+  if (mmapfiledesc == -1)
+  {
+    gt_error_set(err,"cannot open file \"%s\": %s",gt_str_get(tmpfilename),
+                 strerror(errno));
+    haserr = true;
+  }
+  if (!haserr && fstat(mmapfiledesc, &sb) == -1)
+  {
+    haserr = true;
+  }
+  if (!haserr && sizeof (off_t) > sizeof (size_t) && sb.st_size > SIZE_MAX)
+  {
+    gt_error_set(err,"file \"%s\" of size %llu is too large to map",
+                 gt_str_get(tmpfilename),(unsigned long long) sb.st_size);
+    haserr = true;
+  }
+  if (!haserr && (size_t) sb.st_size != sizeof (Seqpos) * (sfi->totallength+1))
+  {
+    gt_error_set(err,"mapping file %s: file size "
+                     " = %lu != %lu = expected number of units",
+                      gt_str_get(tmpfilename),
+                      (unsigned long) sb.st_size,
+                      (unsigned long) (sfi->totallength+1) * sizeof (Seqpos));
+    haserr = true;
+  }
+  if (!haserr)
+  {
+    gt_assert(sfi->totallength >= sfi->specialcharacters);
+    qsufsort(NULL,
+             mmapfiledesc,
+             &sfi->suftab.longest.valueseqpos,
+             sfi->encseq,
+             sfi->readmode,
+             0,
+             sfi->currentmaxcode,
+             sfi->totallength - sfi->specialcharacters,
+             sfi->bcktab,
+             sfi->numofchars,
+             sfi->prefixlength,
+             sfi->outlcpinfo);
+    sfi->suftab.longest.defined = true;
+  }
+  gt_str_delete(tmpfilename);
+  if (close(mmapfiledesc) == -1)
+  {
+    gt_error_set(err,"cannot close file \"%s\": %s",gt_str_get(tmpfilename),
+                 strerror(errno));
+    haserr = true;
+  }
+  return haserr ? -1 : 0;
 }
 
 static void insertfullspecialrange(Sfxiterator *sfi,
@@ -845,18 +931,18 @@ static void fillspecialnextpage(Sfxiterator *sfi)
 }
 
 const Seqpos *nextSfxiterator(Seqpos *numberofsuffixes,bool *specialsuffixes,
-                              Measuretime *mtime,Sfxiterator *sfi)
+                              Sfxiterator *sfi)
 {
   if (sfi->part < stpgetnumofparts(sfi->suftabparts))
   {
-    preparethispart(sfi,mtime);
+    preparethispart(sfi);
     *numberofsuffixes = sfi->widthofpart;
     *specialsuffixes = false;
     return sfi->suftab.sortspace;
   }
   if (sfi->exhausted)
   {
-    if (mtime == NULL)
+    if (sfi->mtime == NULL)
     {
       gt_progressbar_stop();
     }

@@ -100,7 +100,7 @@ static unsigned long getrecordnumulong(const unsigned long *recordseps,
   return numofrecords; /* failure */
 }
 
-static Seqpos samplesubstring(Uchar *seqspace,
+static Seqpos samplesubstring(GtUchar *seqspace,
                               const Encodedsequence *encseq,
                               Seqpos substringlength)
 {
@@ -262,7 +262,7 @@ static int showSubstringmatch(void *a, GT_UNUSED void *info,
 }
 
 static unsigned long *sequence2markpositions(unsigned long *numofsequences,
-                                             const Uchar *seq,
+                                             const GtUchar *seq,
                                              unsigned long seqlen)
 {
   unsigned long *spacemarkpos, i, allocatedmarkpos, nextfreemarkpos;
@@ -270,7 +270,7 @@ static unsigned long *sequence2markpositions(unsigned long *numofsequences,
   *numofsequences = 1UL;
   for (i=0; i<seqlen; i++)
   {
-    if (seq[i] == (Uchar) SEPARATOR)
+    if (seq[i] == (GtUchar) SEPARATOR)
     {
       (*numofsequences)++;
     }
@@ -283,7 +283,7 @@ static unsigned long *sequence2markpositions(unsigned long *numofsequences,
   ALLOCASSIGNSPACE(spacemarkpos,NULL,unsigned long,allocatedmarkpos);
   for (i=0, nextfreemarkpos = 0; i<seqlen; i++)
   {
-    if (seq[i] == (Uchar) SEPARATOR)
+    if (seq[i] == (GtUchar) SEPARATOR)
     {
       spacemarkpos[nextfreemarkpos++] = i;
     }
@@ -300,7 +300,7 @@ int testmaxpairs(const GtStr *indexname,
 {
   Encodedsequence *encseq;
   Seqpos totallength = 0, dblen, querylen;
-  Uchar *dbseq = NULL, *query = NULL;
+  GtUchar *dbseq = NULL, *query = NULL;
   bool haserr = false;
   unsigned long s;
   GtArray *tabmaxquerymatches;
@@ -328,8 +328,8 @@ int testmaxpairs(const GtStr *indexname,
     {
       substringlength = totallength/2;
     }
-    ALLOCASSIGNSPACE(dbseq,NULL,Uchar,substringlength);
-    ALLOCASSIGNSPACE(query,NULL,Uchar,substringlength);
+    ALLOCASSIGNSPACE(dbseq,NULL,GtUchar,substringlength);
+    ALLOCASSIGNSPACE(query,NULL,GtUchar,substringlength);
   }
   for (s=0; s<samples && !haserr; s++)
   {
@@ -407,7 +407,7 @@ int testmaxpairs(const GtStr *indexname,
   }
   FREESPACE(dbseq);
   FREESPACE(query);
-  freeEncodedsequence(&encseq);
+  encodedsequence_free(&encseq);
   return haserr ? -1 : 0;
 }
 

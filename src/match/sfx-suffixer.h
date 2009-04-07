@@ -41,8 +41,10 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
 
 const Seqpos *nextSfxiterator(Seqpos *numberofsuffixes,
                               bool *specialsuffixes,
-                              Measuretime *mtime,
                               Sfxiterator *sfi);
+
+int postsortsuffixesfromstream(Sfxiterator *sfi, const GtStr *str_indexname,
+                               GtError *err);
 
 bool sfi2longestsuffixpos(Seqpos *longest,const Sfxiterator *sfi);
 

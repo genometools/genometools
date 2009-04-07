@@ -20,9 +20,7 @@
 #include "core/error.h"
 #include "core/fptr_api.h"
 
-#ifndef GtHashmap
 typedef struct GtHashmap GtHashmap;
-#endif
 
 typedef enum {
   HASH_DIRECT,

@@ -26,22 +26,25 @@
 
 typedef struct GtSeqIterator GtSeqIterator;
 
-/* Create a new <GtSeqIterator> for all FASTA files in <filenametab>.
-   If a <symbolmap> is given, all read in sequences are transformed with it.
-   If <withsequence> equals <true>, FASTA sequences and descriptions are
-   processed (otherwise only the descriptions). */
-GtSeqIterator* gt_seqiterator_new(const GtStrArray *filenametab,
-                                  const unsigned char *symbolmap,
-                                  bool withsequence);
+/* Create a new <GtSeqIterator> for all sequence files in <filenametab>.
+   All files have to be of the same format, which will be guessed by examining
+   the beginning of the first file. If an error occurs, NULL is returned (see
+   the <err> object for details). */
+GtSeqIterator* gt_seqiterator_new(const GtStrArray *filenametab, GtError *err);
 
 /* Create a new <GtSeqIterator> for files in <filenametab> using the
-   <GtSequenceBuffer> implementation <buffer>.
+   <GtSequenceBuffer> implementation <buffer>. */
+GtSeqIterator* gt_seqiterator_new_with_buffer(GtSequenceBuffer *buffer);
+
+/* Sets a symbol map for the <GtSeqIterator>.
    If a <symbolmap> is given, all read in sequences are transformed with it.
-   If <withsequence> equals <true>, sequences and descriptions are processed
-   (otherwise only the descriptions). */
-GtSeqIterator* gt_seqiterator_new_with_buffer(GtSequenceBuffer *buffer,
-                                              const unsigned char *symbolmap,
-                                              bool withsequence);
+   Set to NULL to disable alphabet transformation. */
+void           gt_seqiterator_set_symbolmap(GtSeqIterator*,
+                                            const unsigned char *symbolmap);
+
+/* If set to <true>, sequences and descriptions are processed (otherwise
+   only the descriptions). By default, sequences are processed. */
+void           gt_seqiterator_set_sequence_output(GtSeqIterator*, bool);
 
 /* Get next <sequence> (of length <len>) and <description> from <seq_iterator>.
    The caller is responsible to free the received <description>.
@@ -49,12 +52,16 @@ GtSeqIterator* gt_seqiterator_new_with_buffer(GtSequenceBuffer *buffer,
    files are exhausted. And -1, if an error occured (<err> is set
    accordingly). */
 int            gt_seqiterator_next(GtSeqIterator *seq_iterator,
-                                   const unsigned char **sequence,
+                                   const GtUchar **sequence,
                                    unsigned long *len,
                                    char **description, GtError*);
+
+/* Returns a pointer to the current total number of read characters. */
 const unsigned
 long long*     gt_seqiterator_getcurrentcounter(GtSeqIterator*,
                                                 unsigned long long);
+
+/* Deletes the <GtSeqIterator> and frees associated memory. */
 void           gt_seqiterator_delete(GtSeqIterator*);
 
 #endif

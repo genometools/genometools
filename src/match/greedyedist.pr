@@ -1,9 +1,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-unsigned long greedyunitedist(const Uchar *useq,
+unsigned long greedyunitedist(const GtUchar *useq,
                               unsigned long ulenvalue,
-                              const Uchar *vseq,
+                              const GtUchar *vseq,
                               unsigned long vlenvalue);
 
 #ifdef __cplusplus

@@ -24,7 +24,7 @@
 #include "esa-map.h"
 
 static void maketrie(Mergertrierep *trierep,
-                     GT_UNUSED const Uchar *characters,
+                     GT_UNUSED const GtUchar *characters,
                      Seqpos len)
 {
   Suffixinfo suffixinfo;
@@ -37,7 +37,7 @@ static void maketrie(Mergertrierep *trierep,
        suffixinfo.startpos <= len;
        suffixinfo.startpos++)
   {
-    insertsuffixintomergertrie(trierep,trierep->root,&suffixinfo);
+    mergertrie_insertsuffix(trierep,trierep->root,&suffixinfo);
 #ifdef WITHTRIEIDENT
 #ifdef WITHTRIESHOW
     showtrie(trierep,characters);
@@ -49,7 +49,7 @@ static void maketrie(Mergertrierep *trierep,
 
 static void successivelydeletesmallest(Mergertrierep *trierep,
                                        GT_UNUSED Seqpos seqlen,
-                                       GT_UNUSED const Uchar *characters,
+                                       GT_UNUSED const GtUchar *characters,
                                        GT_UNUSED GtError *err)
 {
   Mergertrienode *smallest;
@@ -60,8 +60,8 @@ static void successivelydeletesmallest(Mergertrierep *trierep,
 
   while (trierep->root != NULL && trierep->root->firstchild != NULL)
   {
-    smallest = findsmallestnodeintrie(trierep);
-    deletesmallestpath(smallest,trierep);
+    smallest = mergertrie_findsmallestnode(trierep);
+    mergertrie_deletesmallestpath(smallest,trierep);
 #ifdef WITHTRIEIDENT
 #ifdef WITHTRIESHOW
     showtrie(trierep,characters);
@@ -93,13 +93,13 @@ int test_trieins(bool onlyins,const GtStr *indexname,GtError *err)
   if (!haserr)
   {
     Mergertrierep trierep;
-    const Uchar *characters;
+    const GtUchar *characters;
 
     ALLOCASSIGNSPACE(trierep.encseqreadinfo,NULL,Encseqreadinfo,1);
     trierep.encseqreadinfo[0].encseqptr = suffixarray.encseq;
     trierep.encseqreadinfo[0].readmode = suffixarray.readmode;
     characters = getencseqAlphabetcharacters(suffixarray.encseq);
-    initmergertrienodetable(&trierep,totallength,1U);
+    mergertrie_initnodetable(&trierep,totallength,1U);
     maketrie(&trierep,characters,totallength);
     if (onlyins)
     {
@@ -118,7 +118,7 @@ int test_trieins(bool onlyins,const GtStr *indexname,GtError *err)
 #endif
       successivelydeletesmallest(&trierep,totallength,characters,err);
     }
-    freemergertrierep(&trierep);
+    mergertrie_delete(&trierep);
   }
   freesuffixarray(&suffixarray);
   return haserr ? -1 : 0;

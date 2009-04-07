@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -26,13 +26,13 @@ typedef struct {
   bool min_replacement,
        min_deletion,
        min_insertion;
-} DPentry;
+} GalignDPentry;
 
 /* fill <dptable> of size (<ulen> + 1) x (<vlen> + 1) with values of the edit
    distance (unit cost) of <u> and <v>. <dptable> must be initialized to 0. */
-static void fillDPtable(DPentry **dptable,
-                        const char *u, unsigned long ulen,
-                        const char *v, unsigned long vlen)
+static void galign_fill_table(GalignDPentry **dptable,
+                              const char *u, unsigned long ulen,
+                              const char *v, unsigned long vlen)
 {
   unsigned long i, j, repvalue, delvalue, insvalue, minvalue;
   gt_assert(dptable && u && ulen && v && vlen);
@@ -56,7 +56,7 @@ static void fillDPtable(DPentry **dptable,
   }
 }
 
-static void traceback(GtAlignment *a, DPentry **dptable,
+static void galign_traceback(GtAlignment *a, GalignDPentry **dptable,
                       unsigned long i, unsigned long j)
 {
   gt_assert(a && dptable);
@@ -77,7 +77,7 @@ static void traceback(GtAlignment *a, DPentry **dptable,
   }
 }
 
-static unsigned long traceback_all(GtAlignment *a, DPentry **dptable,
+static unsigned long traceback_all(GtAlignment *a, GalignDPentry **dptable,
                                    unsigned long i, unsigned long j,
                                    unsigned long dist,
                                    void (*proc_alignment)(const GtAlignment*,
@@ -117,14 +117,14 @@ static unsigned long traceback_all(GtAlignment *a, DPentry **dptable,
 GtAlignment* gt_galign(const char *u, unsigned long ulen,
                        const char *v, unsigned long vlen)
 {
-  DPentry **dptable;
+  GalignDPentry **dptable;
   GtAlignment *a;
   gt_assert(u && ulen && v && vlen);
   gt_array2dim_calloc(dptable, ulen+1, vlen+1);
-  a = gt_alignment_new_with_seqs((const Uchar *) u, ulen,
-                                 (const Uchar *) v, vlen);
-  fillDPtable(dptable, u, ulen, v, vlen);
-  traceback(a, dptable, ulen, vlen);
+  a = gt_alignment_new_with_seqs((const GtUchar *) u, ulen,
+                                 (const GtUchar *) v, vlen);
+  galign_fill_table(dptable, u, ulen, v, vlen);
+  galign_traceback(a, dptable, ulen, vlen);
   gt_assert(dptable[ulen][vlen].distvalue == gt_alignment_eval(a));
   gt_array2dim_delete(dptable);
   return a;
@@ -136,13 +136,13 @@ void gt_galign_all(const char *u, unsigned long ulen,
                    void (*proc_aligns)(unsigned long, void *data), void *data)
 {
   unsigned long aligns;
-  DPentry **dptable;
+  GalignDPentry **dptable;
   GtAlignment *a;
   gt_assert(u && ulen && v && vlen);
   gt_array2dim_calloc(dptable, ulen+1, vlen+1);
-  a = gt_alignment_new_with_seqs((const Uchar *) u, ulen,
-                                 (const Uchar *) v, vlen);
-  fillDPtable(dptable, u, ulen, v, vlen);
+  a = gt_alignment_new_with_seqs((const GtUchar *) u, ulen,
+                                 (const GtUchar *) v, vlen);
+  galign_fill_table(dptable, u, ulen, v, vlen);
   aligns = traceback_all(a, dptable, ulen, vlen, dptable[ulen][vlen].distvalue,
                          proc_alignment, data);
   if (proc_aligns)

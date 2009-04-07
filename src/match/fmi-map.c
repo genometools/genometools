@@ -136,7 +136,7 @@ void freefmindex(Fmindex *fmindex)
   }
   if (fmindex->bwtformatching != NULL)
   {
-    freeEncodedsequence(&fmindex->bwtformatching);
+    encodedsequence_free(&fmindex->bwtformatching);
   }
   if (fmindex->alphabet != NULL)
   {
