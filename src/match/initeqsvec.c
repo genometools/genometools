@@ -38,7 +38,7 @@ void initeqsvector(unsigned long *eqsvector,
        pptr < pattern + patternlength && shiftmask != 0;
        pptr++, shiftmask <<= 1)
   {
-    assert (*pptr != (GtUchar) SEPARATOR);
+    gt_assert(*pptr != (GtUchar) SEPARATOR);
     if (*pptr != (GtUchar) WILDCARD)
     {
       eqsvector[(unsigned long) *pptr] |= shiftmask;
@@ -64,7 +64,7 @@ void initeqsvectorrev(unsigned long *eqsvectorrev,
        pptr >= pattern && shiftmask != 0;
        pptr--, shiftmask <<= 1)
   {
-    assert (*pptr != (GtUchar) SEPARATOR);
+    gt_assert(*pptr != (GtUchar) SEPARATOR);
     if (*pptr != (GtUchar) WILDCARD)
     {
       eqsvectorrev[(unsigned long) *pptr] |= shiftmask;

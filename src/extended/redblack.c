@@ -145,7 +145,7 @@ static void check_tree_recurse(const GtRBTnode *p,
 {
   if (p == NULL)
   {
-    assert (d_sofar == d_total);
+    gt_assert(d_sofar == d_total);
     return;
   }
   check_tree_recurse (p->left,
@@ -158,11 +158,11 @@ static void check_tree_recurse(const GtRBTnode *p,
                                                  red), d_total);
   if (p->left != NULL)
   {
-    assert (!(p->left->red && p->red));
+    gt_assert(!(p->left->red && p->red));
   }
   if (p->right != NULL)
   {
-    assert (!(p->right->red && p->red));
+    gt_assert(!(p->right->red && p->red));
   }
 }
 
@@ -620,7 +620,7 @@ int gt_rbt_delete(const GtKeytype key,
           nodestack[nextfreestack++] = pp = &q->left;
           q = p->right;
         }
-        assert (q != NULL);
+        gt_assert(q != NULL);
         /*
          * We know that Q can't be NULL here.  We also know that Q is black.
          */
@@ -713,7 +713,7 @@ int gt_rbt_delete(const GtKeytype key,
           nodestack[nextfreestack++] = pp = &q->right;
           q = p->left;
         }
-        assert (q != NULL);
+        gt_assert(q != NULL);
         if ((q->right == NULL || !q->right->red)
             && (q->left == NULL || !q->left->red))
         {

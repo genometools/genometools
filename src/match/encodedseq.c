@@ -2250,7 +2250,7 @@ static Seqpos *encseq2markpositions(const Encodedsequence *encseq)
   Sequencerange range;
   Encodedsequencescanstate *esr;
 
-  assert (encseq->numofdbsequences > 1UL);
+  gt_assert (encseq->numofdbsequences > 1UL);
   asp.allocatedSeqpos = encseq->numofdbsequences-1;
   asp.nextfreeSeqpos = 0;
   ALLOCASSIGNSPACE(asp.spaceSeqpos,NULL,Seqpos,asp.allocatedSeqpos);

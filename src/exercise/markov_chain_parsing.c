@@ -30,7 +30,7 @@ static int read_next_line(GtStr *line, FILE *fp, const char *filename,
                           GtError *err)
 {
   gt_error_check(err);
-  assert(line && fp);
+  gt_assert(line && fp);
   gt_str_reset(line);
   if (gt_str_read_next_line(line, fp) == EOF) {
     gt_error_set(err, "unexpected end of file \"%s\"", filename);
@@ -43,7 +43,7 @@ static int scan_alphabet(GtStr *alphabet, const char *line, int num_of_states,
                          GtError *err)
 {
   gt_error_check(err);
-  assert(alphabet && line);
+  gt_assert(alphabet && line);
   while (*line != '\0') {
     if (*line != ' ')
       gt_str_append_char(alphabet, *line);
@@ -66,7 +66,7 @@ static GtMarkovChain* parse_gt_markov_chain_file(FILE *fp, const char *filename,
   GtSplitter *splitter;
   int num_of_states, had_err;
   gt_error_check(err);
-  assert(fp);
+  gt_assert(fp);
   line = gt_str_new();
   alphabet = gt_str_new();
   splitter = gt_splitter_new();

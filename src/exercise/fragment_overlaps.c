@@ -32,7 +32,7 @@ static void determine_overlaps(GtArray *overlaps, GtBioseq *fragments,
 {
   unsigned long cpl; /* common prefix length */
   Overlap overlap;
-  assert(overlaps && fragments && i != j);
+  gt_assert(overlaps && fragments && i != j);
   cpl = gt_string_matching_kmp(gt_bioseq_get_sequence(fragments, i),
                             gt_bioseq_get_sequence_length(fragments, i),
                             gt_bioseq_get_sequence(fragments, j),
@@ -62,7 +62,7 @@ GtFragmentOverlaps* gt_fragment_overlaps_new(GtBioseq *fragments,
 {
   GtFragmentOverlaps *fo;
   unsigned long i, j;
-  assert(fragments);
+  gt_assert(fragments);
   fo = gt_malloc(sizeof *fo);
   fo->overlaps = gt_array_new(sizeof (Overlap));
   for (i = 0; i < gt_bioseq_number_of_sequences(fragments); i++) {
@@ -82,7 +82,7 @@ void gt_fragment_overlaps_delete(GtFragmentOverlaps *fo)
 static unsigned long get_weight(const void *elem, GT_UNUSED void *data)
 {
   const Overlap *overlap = elem;
-  assert(overlap);
+  gt_assert(overlap);
   return overlap->weight;
 }
 
@@ -90,7 +90,7 @@ void gt_fragment_overlaps_sort(GtFragmentOverlaps *fo)
 {
   Overlap *sorted_overlaps;
   unsigned long i, num_of_overlaps;
-  assert(fo);
+  gt_assert(fo);
   num_of_overlaps = gt_array_size(fo->overlaps);
   sorted_overlaps = gt_malloc(sizeof (Overlap) * num_of_overlaps);
   /* sort overlaps by weight */
@@ -111,7 +111,7 @@ bool gt_fragment_overlaps_are_sorted(const GtFragmentOverlaps *fo)
 {
   Overlap *overlap_a, *overlap_b;
   unsigned long i;
-  assert(fo);
+  gt_assert(fo);
   for (i = 1; i < gt_array_size(fo->overlaps); i++) {
     overlap_a = gt_array_get(fo->overlaps, i-1);
     overlap_b = gt_array_get(fo->overlaps, i);
@@ -124,7 +124,7 @@ void gt_fragment_overlaps_show(const GtFragmentOverlaps *fo)
 {
   Overlap *overlap;
   unsigned long i;
-  assert(fo);
+  gt_assert(fo);
   for (i = 0; i < gt_array_size(fo->overlaps); i++) {
     overlap = gt_array_get(fo->overlaps, i);
     printf("%lu %lu %lu\n", overlap->start+1, overlap->weight, overlap->end+1);
@@ -134,12 +134,12 @@ void gt_fragment_overlaps_show(const GtFragmentOverlaps *fo)
 const Overlap* gt_fragment_overlaps_get(const GtFragmentOverlaps *fo,
                                      unsigned long fragnum)
 {
-  assert(fo && fragnum < gt_array_size(fo->overlaps));
+  gt_assert(fo && fragnum < gt_array_size(fo->overlaps));
   return gt_array_get(fo->overlaps, fragnum);
 }
 
 unsigned long gt_fragment_overlaps_size(const GtFragmentOverlaps *fo)
 {
-  assert(fo);
+  gt_assert(fo);
   return gt_array_size(fo->overlaps);
 }
