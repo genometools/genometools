@@ -81,6 +81,12 @@ typedef struct
   unsigned long pagechanges;
 } Sortblock;
 
+typedef struct
+{
+  Seqpos lowerbound,
+         rank;
+} Lowerboundwithrank;
+
 struct Rmnsufinfo
 {
   Compressedtable *inversesuftab;
@@ -101,7 +107,10 @@ struct Rmnsufinfo
   Encodedsequencescanstate *esr;
   unsigned int prefixlength,
                numofchars;
+  /* XXX the following is only used for parts > 0 && maxdepth */
+  Seqpos realspecialranges;
   Codetype *filltable;
+  Lowerboundwithrank *lowerboundwithrank;
   /* the following are used to compute lcp-values in linear time */
   Seqpos partwidth,
          totallength;
@@ -129,6 +138,40 @@ static void initsortblock(Sortblock *sortblock,
     sortblock->mapableentries = partwidth;
     sortblock->pagechanges = 0;
   }
+}
+
+static Lowerboundwithrank *filllowerboundwithrank(const Encodedsequence *encseq,
+                                                  Readmode readmode)
+{
+  if (hasspecialranges(encseq))
+  {
+    Specialrangeiterator *sri;
+    Sequencerange range;
+    Seqpos currentrank = 0, realspecialranges;
+    Lowerboundwithrank *lowerboundwithrank, *lbptr;
+
+    realspecialranges = getencseqrealspecialranges(encseq);
+    lowerboundwithrank = gt_malloc(sizeof(*lowerboundwithrank) * 
+                                   realspecialranges);
+    printf("lowerboundwithrank requires %lu bytes\n",
+               (unsigned long) (sizeof(*lowerboundwithrank) * 
+                                       realspecialranges));
+    sri = newspecialrangeiterator(encseq,
+                                  ISDIRREVERSE(readmode)
+                                  ? false : true);
+    for (lbptr = lowerboundwithrank; nextspecialrangeiterator(&range,sri); 
+         lbptr++)
+    {
+      gt_assert(lbptr < lowerboundwithrank + realspecialranges);
+      lbptr->lowerbound = range.leftpos;
+      lbptr->rank = currentrank;
+      currentrank += range.rightpos - range.leftpos;
+    }
+    gt_assert(lbptr == lowerboundwithrank + realspecialranges);
+    freespecialrangeiterator(&sri);
+    return lowerboundwithrank;
+  }
+  return NULL;
 }
 
 Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
@@ -171,7 +214,9 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   rmnsufinfo->rangestobesorted = gt_queue_new();
   rmnsufinfo->esr = newEncodedsequencescanstate();
   GT_INITARRAY(&rmnsufinfo->firstgeneration,Pairsuffixptr);
+  rmnsufinfo->realspecialranges = getencseqrealspecialranges(encseq);
   rmnsufinfo->filltable = filllargestchartable(numofchars,prefixlength);
+  rmnsufinfo->lowerboundwithrank = filllowerboundwithrank(encseq,readmode);
   initsortblock(&rmnsufinfo->sortblock,presortedsuffixes,mmapfiledesc,
                 partwidth);
   return rmnsufinfo;
@@ -224,7 +269,39 @@ static void inversesuftab_set(Rmnsufinfo *rmnsufinfo,Seqpos idx,Seqpos value)
   compressedtable_update(rmnsufinfo->inversesuftab,idx,value);
 }
 
-static unsigned long checkedprefixes = 0;
+static Seqpos frompos2rank(const Lowerboundwithrank *leftptr,
+                           const Lowerboundwithrank *rightptr,
+                           Seqpos specialpos)
+{
+  const Lowerboundwithrank *midptr;
+
+  while (leftptr <= rightptr)
+  {
+    midptr = leftptr + DIV2((unsigned long) (rightptr-leftptr));
+    if (specialpos < midptr->lowerbound)
+    {
+      rightptr = midptr-1;
+    } else
+    {
+      if (specialpos > midptr->lowerbound)
+      {
+        leftptr = midptr + 1;
+      } else
+      {
+        return midptr->rank;
+      }
+    }
+  }
+  fprintf(stderr,"frompos2rank: cannot find pos " FormatSeqpos
+                 " in ranges",PRINTSeqposcast(specialpos));
+  exit(EXIT_FAILURE);
+  /*@ignore@*/
+  return 0;
+  /*@end@*/
+}
+
+static unsigned long checkedfullvalues = 0,
+                     checkedemptyvalues = 0;
 
 static Seqpos inversesuftab_get(const Rmnsufinfo *rmnsufinfo,Seqpos startpos)
 {
@@ -282,7 +359,7 @@ static Seqpos inversesuftab_get(const Rmnsufinfo *rmnsufinfo,Seqpos startpos)
         exit(EXIT_FAILURE);
       }
       gt_assert(ivtval <= bucketspec.left + rmnsufinfo->allocateditvinfo);
-      checkedprefixes++;
+      checkedfullvalues++;
     } else /* etbe.unitsnotspecial < rmnsufinfo->prefixlength */
     {
       if (etbe.unitsnotspecial > 0)
@@ -314,6 +391,12 @@ static Seqpos inversesuftab_get(const Rmnsufinfo *rmnsufinfo,Seqpos startpos)
            relative to nonspecialsinbucket */
       } else
       {
+        Seqpos rank = frompos2rank(rmnsufinfo->lowerboundwithrank,
+                                   rmnsufinfo->lowerboundwithrank + 
+                                   rmnsufinfo->realspecialranges - 1,
+                                   startpos);
+        gt_assert(rmnsufinfo->partwidth + rank == ivtval);
+        checkedemptyvalues++;
         /* suffix begins with specialcharacter and is the first in a range */
         /* get the rank of the position plus partwidth. This gives the
            insersesuftab information */
@@ -800,7 +883,8 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
     printf("pagechanges = %lu\n",rmnsufinfo->sortblock.pagechanges);
   }
   printf("maxqueuesize = %lu\n",rmnsufinfo->maxqueuesize);
-  printf("checkedprefixes = %lu\n",checkedprefixes);
+  printf("checkedfullvalues = %lu\n",checkedfullvalues);
+  printf("checkedemptyvalues = %lu\n",checkedemptyvalues);
   gt_free(rmnsufinfo->unusedpair);
   gt_free(rmnsufinfo->itvinfo);
   rmnsufinfo->itvinfo = NULL;
@@ -906,6 +990,8 @@ Compressedtable *rmnsufinfo_wrap(Seqpos *longest,
   }
   gt_free(rmnsufinfo->filltable);
   rmnsufinfo->filltable = NULL;
+  gt_free(rmnsufinfo->lowerboundwithrank);
+  rmnsufinfo->lowerboundwithrank = NULL;
   gt_assert(rmnsufinfo->esr != NULL);
   freeEncodedsequencescanstate(&rmnsufinfo->esr);
   gt_free(rmnsufinfo);
