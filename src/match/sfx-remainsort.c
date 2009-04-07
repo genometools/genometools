@@ -171,7 +171,7 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   rmnsufinfo->rangestobesorted = gt_queue_new();
   rmnsufinfo->esr = newEncodedsequencescanstate();
   GT_INITARRAY(&rmnsufinfo->firstgeneration,Pairsuffixptr);
-  filllargestchartable(&rmnsufinfo->filltable,numofchars,prefixlength);
+  rmnsufinfo->filltable = filllargestchartable(numofchars,prefixlength);
   initsortblock(&rmnsufinfo->sortblock,presortedsuffixes,mmapfiledesc,
                 partwidth);
   return rmnsufinfo;

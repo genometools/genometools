@@ -1318,18 +1318,15 @@ static void determinemaxbucketsize(unsigned long *nonspecialsmaxbucketsize,
     {
       *nonspecialsmaxbucketsize = bucketspec.nonspecialsinbucket;
     }
-    if (code != maxcode)
+    if (bucketspec.specialsinbucket > *specialsmaxbucketsize)
     {
-      if (bucketspec.specialsinbucket > *specialsmaxbucketsize)
-      {
-        *specialsmaxbucketsize = bucketspec.specialsinbucket;
-      }
-      if (bucketspec.nonspecialsinbucket + bucketspec.specialsinbucket
-          > *maxbucketsize)
-      {
-        *maxbucketsize = bucketspec.nonspecialsinbucket +
-                         bucketspec.specialsinbucket;
-      }
+      *specialsmaxbucketsize = bucketspec.specialsinbucket;
+    }
+    if (bucketspec.nonspecialsinbucket + bucketspec.specialsinbucket
+        > *maxbucketsize)
+    {
+      *maxbucketsize = bucketspec.nonspecialsinbucket +
+                       bucketspec.specialsinbucket;
     }
     if (bucketspec.nonspecialsinbucket > 1UL)
     {

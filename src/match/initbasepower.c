@@ -58,37 +58,20 @@ Codetype *initbasepower(unsigned int numofchars,unsigned int prefixlength)
   return basepower;
 }
 
-void filllargestchartable(Codetype **filltable,
-                                 unsigned int numofchars,
-                                 unsigned int kmersize)
-{
-  Codetype code, *ptr;
-
-  ALLOCASSIGNSPACE(*filltable,NULL,Codetype,kmersize);
-  code = (Codetype) numofchars;
-  for (ptr = *filltable + kmersize - 1; ptr >= *filltable; ptr--)
-  {
-    *ptr = code-1;
-    code *= numofchars;
-  }
-}
-
-/*
 Codetype *filllargestchartable(unsigned int numofchars,
-                               unsigned int prefixlength)
+                               unsigned int kmersize)
 {
   Codetype code, *ptr, *filltable;
 
-  filltable = gt_malloc(sizeof(Codetype) * prefixlength);
+  filltable = gt_malloc(sizeof(Codetype) * kmersize);
   code = (Codetype) numofchars;
-  for (ptr = filltable + prefixlength - 1; ptr >= filltable; ptr--)
+  for (ptr = filltable + kmersize - 1; ptr >= filltable; ptr--)
   {
     *ptr = code-1;
     code *= numofchars;
   }
   return filltable;
 }
-*/
 
 Codetype *initfilltable(unsigned int numofchars,unsigned int prefixlength)
 {

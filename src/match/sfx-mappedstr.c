@@ -397,7 +397,7 @@ static void initstreamstate(Streamstate *spwp,unsigned int numofchars,
   spwp->firstindex = 0;
   ALLOCASSIGNSPACE(spwp->cyclicwindow,NULL,GtUchar,kmersize);
   specialemptyqueue(&spwp->spos,kmersize);
-  filllargestchartable(&spwp->filltable,numofchars,kmersize);
+  spwp->filltable = filllargestchartable(numofchars,kmersize);
 }
 
 static void freestreamstate(Streamstate *spwp)
