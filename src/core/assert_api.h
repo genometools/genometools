@@ -23,6 +23,7 @@
 
 /* Assert module */
 
+#ifndef NDEBUG
 /* The <gt_assert()> macro tests the given <expression> and if it is false, the
    calling process is terminated. A diagnostic message is written to <stderr>
    and the <exit(3)> function is called (with error code 2 as argument),
@@ -37,5 +38,8 @@
             exit(2); /* programmer error */                                  \
           }                                                                  \
         } while (0)
+#else
+#define gt_assert(expression) ((void) 0)
+#endif
 
 #endif
