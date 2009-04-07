@@ -40,7 +40,7 @@ GtSeqIterator* gt_seqiterator_new_with_buffer(GtSequenceBuffer *buffer);
    If a <symbolmap> is given, all read in sequences are transformed with it.
    Set to NULL to disable alphabet transformation. */
 void           gt_seqiterator_set_symbolmap(GtSeqIterator*,
-                                            const Uchar *symbolmap);
+                                            const GtUchar *symbolmap);
 
 /* If set to <true>, sequences and descriptions are processed (otherwise
    only the descriptions). By default, sequences are processed. */
