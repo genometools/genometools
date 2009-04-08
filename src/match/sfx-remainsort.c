@@ -40,7 +40,12 @@
 typedef struct
 {
   unsigned int unitsnotspecial;
-  Seqpos rank;
+  Seqpos rank,
+         suffixstart;
+} Itvfullentry;
+
+typedef struct
+{
   Seqpos key,
          suffixstart;
 } Itventry;
@@ -104,6 +109,7 @@ struct Rmnsufinfo
                 currentqueuesize,
                 maxqueuesize;
   Itventry *itvinfo;
+  Itvfullentry *itvfullinfo;
   GtArrayPairsuffixptr firstgeneration;
   unsigned long firstgenerationtotalwidth,
                 firstgenerationcount;
@@ -253,6 +259,7 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   rmnsufinfo->inversesuftab = NULL;
   rmnsufinfo->allocateditvinfo = 0;
   rmnsufinfo->itvinfo = NULL;
+  rmnsufinfo->itvfullinfo = NULL;
   rmnsufinfo->rangestobesorted = gt_queue_new();
   rmnsufinfo->esr = newEncodedsequencescanstate();
   GT_INITARRAY(&rmnsufinfo->firstgeneration,Pairsuffixptr);
@@ -361,15 +368,21 @@ static Seqpos inversesuftab_get(const Rmnsufinfo *rmnsufinfo,Seqpos startpos)
   return compressedtable_get(rmnsufinfo->inversesuftab,startpos);
 }
 
-static void inversesuftab_get2(Itventry *itventry,
-                               const Rmnsufinfo *rmnsufinfo,Seqpos startpos)
+static void inversesuftab_get2(Itvfullentry *itvfullentry,
+                               const Rmnsufinfo *rmnsufinfo,
+                               Seqpos startpos)
 {
+  STAMP;
+  itvfullentry->suffixstart = startpos;
+  startpos += rmnsufinfo->currentdepth;
   if (startpos == rmnsufinfo->totallength)
   {
-    itventry->unitsnotspecial = 0;
-    itventry->rank = rmnsufinfo->totallength;
+    itvfullentry->unitsnotspecial = 0;
+    itvfullentry->rank = rmnsufinfo->totallength;
     return;
   }
+  printf("firstgeneration.nextfreePairsuffixptr = %lu\n",
+          rmnsufinfo->firstgeneration.nextfreePairsuffixptr);
   if (rmnsufinfo->firstgeneration.nextfreePairsuffixptr == 0 &&
       possibletocmpbitwise(rmnsufinfo->encseq))
   {
@@ -377,6 +390,7 @@ static void inversesuftab_get2(Itventry *itventry,
     Bucketspecification bucketspec;
     bool fwd = ISDIRREVERSE(rmnsufinfo->readmode) ? false : true;
 
+  STAMP;
     initEncodedsequencescanstategeneric(rmnsufinfo->esr,rmnsufinfo->encseq,
                                         fwd,startpos);
     extract2bitenc(fwd,&etbe,rmnsufinfo->encseq,rmnsufinfo->esr,startpos);
@@ -404,8 +418,9 @@ static void inversesuftab_get2(Itventry *itventry,
                                    (unsigned int) (etbe.tbe %
                                                    rmnsufinfo->numofchars),
                                    rmnsufinfo->numofchars);
-      itventry->unitsnotspecial = rmnsufinfo->prefixlength;
-      itventry->rank = compressedtable_get(rmnsufinfo->inversesuftab,startpos);
+      itvfullentry->unitsnotspecial = rmnsufinfo->prefixlength;
+      itvfullentry->rank = compressedtable_get(rmnsufinfo->inversesuftab,
+                                               startpos);
       checkedfullvalues++;
     } else /* etbe.unitsnotspecial < rmnsufinfo->prefixlength */
     {
@@ -426,19 +441,18 @@ static void inversesuftab_get2(Itventry *itventry,
                                      (unsigned int) (code %
                                                      rmnsufinfo->numofchars),
                                      rmnsufinfo->numofchars);
-        itventry->unitsnotspecial = etbe.unitsnotspecial;
-        itventry->rank = bucketspec.left + bucketspec.nonspecialsinbucket;
+        itvfullentry->unitsnotspecial = etbe.unitsnotspecial;
+        itvfullentry->rank = bucketspec.left + bucketspec.nonspecialsinbucket;
+        checkedinitialvalues++;
       } else
       {
-#ifndef NDEBUG
         Seqpos rank = frompos2rank(rmnsufinfo->lowerboundwithrank,
                                    rmnsufinfo->lowerboundwithrank +
                                    rmnsufinfo->realspecialranges - 1,
                                    startpos);
-#endif
         gt_assert(rmnsufinfo->partwidth + rank == ivtval);
-        itventry->unitsnotspecial = 0;
-        itventry->rank = rmnsufinfo->partwidth;
+        itvfullentry->unitsnotspecial = 0;
+        itvfullentry->rank = rmnsufinfo->partwidth;
         checkedemptyvalues++;
         /* suffix begins with specialcharacter and is the first in a range */
         /* get the rank of the position plus partwidth. This gives the
@@ -599,17 +613,6 @@ static void initinversesuftabnonspecials(Rmnsufinfo *rmnsufinfo)
   }
 }
 
-static void showintervalsizes(unsigned long count,unsigned long totalwidth,
-                              Seqpos totallength,unsigned long maxwidth)
-{
-  printf("%lu\n(total=%lu,avg=%.2f,%.2f%% of all, maxwidth=%lu)\n",
-          count,
-          totalwidth,
-          (double) totalwidth/count,
-          100.0 * (double) totalwidth/totallength,
-          maxwidth);
-}
-
 void rmnsufinfo_addunsortedrange(Rmnsufinfo *rmnsufinfo,
                                  Seqpos left, Seqpos right, Seqpos depth)
 {
@@ -621,10 +624,10 @@ void rmnsufinfo_addunsortedrange(Rmnsufinfo *rmnsufinfo,
   ptr->right = right;
 }
 
-static int compareitv2(const void *a,const void *b, void *data)
+static int compareitvfull(const void *a,const void *b, void *data)
 {
-  const Itventry *itva = (const Itventry *) a,
-                 *itvb = (const Itventry *) b;
+  const Itvfullentry *itva = (const Itvfullentry *) a,
+                     *itvb = (const Itvfullentry *) b;
   if (itva->rank < itvb->rank)
   {
     return -1;
@@ -646,53 +649,31 @@ static int compareitv2(const void *a,const void *b, void *data)
   return itva->unitsnotspecial > itvb->unitsnotspecial ? -1 : 1;
 }
 
-static void showitventry(const Itventry *itventry)
-{
-  fprintf(stderr,"(%lu,%lu,%u,%lu)",
-            (unsigned long) itventry->rank,
-            (unsigned long) itventry->key,
-            itventry->unitsnotspecial,
-            (unsigned long) itventry->suffixstart);
-}
-
-static int compareitv(const void *a,const void *b, void *data)
+static int compareitv(const void *a,const void *b)
 {
   const Itventry *itva = (const Itventry *) a,
                  *itvb = (const Itventry *) b;
-  const Rmnsufinfo *rmnsufinfo = (const Rmnsufinfo *) data;
-  int retval2 = 0, retval;
 
-  if (rmnsufinfo->firstgeneration.nextfreePairsuffixptr == 0 &&
-      possibletocmpbitwise(rmnsufinfo->encseq))
-  {
-    retval2 = compareitv2(a,b,data);
-  }
   if (itva->key < itvb->key)
   {
-    retval = -1;
-  } else
-  {
-    if (itva->key > itvb->key)
-    {
-      retval = 1;
-    } else
-    {
-      retval = 0;
-    }
+    return -1;
   }
-  if (rmnsufinfo->firstgeneration.nextfreePairsuffixptr == 0 &&
-      possibletocmpbitwise(rmnsufinfo->encseq))
+  if (itva->key > itvb->key)
   {
-    if (retval2 != retval)
-    {
-      fprintf(stderr,"retval2 = %d != %d = retval: ",retval2,retval);
-      showitventry(a);
-      showitventry(b);
-      fprintf(stderr,"\n");
-      exit(EXIT_FAILURE);
-    }
+    return 1;
   }
-  return retval;
+  return 0;
+}
+
+static void showintervalsizes(unsigned long count,unsigned long totalwidth,
+                              Seqpos totallength,unsigned long maxwidth)
+{
+  printf("%lu\n(total=%lu,avg=%.2f,%.2f%% of all, maxwidth=%lu)\n",
+          count,
+          totalwidth,
+          (double) totalwidth/count,
+          100.0 * (double) totalwidth/totallength,
+          maxwidth);
 }
 
 static void processunsortedrange(Rmnsufinfo *rmnsufinfo,
@@ -852,10 +833,20 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos left,
 
   gt_assert(left >= base &&
             (unsigned long) (right - base) <= rmnsufinfo->allocateditvinfo);
-  if (rmnsufinfo->itvinfo == NULL)
+  if (rmnsufinfo->sortblock.mmapfiledesc == -1)
   {
-    rmnsufinfo->itvinfo = gt_malloc(sizeof(Itventry) *
-                                    rmnsufinfo->allocateditvinfo);
+    if (rmnsufinfo->itvinfo == NULL)
+    {
+      rmnsufinfo->itvinfo = gt_malloc(sizeof (Itventry) *
+                                      rmnsufinfo->allocateditvinfo);
+    }
+  } else
+  {
+    if (rmnsufinfo->itvfullinfo == NULL)
+    {
+      rmnsufinfo->itvfullinfo = gt_malloc(sizeof (Itvfullentry) *
+                                          rmnsufinfo->allocateditvinfo);
+    }
   }
   if (rmnsufinfo->sortblock.mmapfiledesc != -1)
   {
@@ -870,27 +861,50 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos left,
   for (idx=0; idx<width; idx++)
   {
     startpos = suftabentryfromsection_get(&rmnsufinfo->sortblock,left+idx);
-    rmnsufinfo->itvinfo[idx].suffixstart = startpos;
-    rmnsufinfo->itvinfo[idx].key
-      = inversesuftab_get(rmnsufinfo,startpos + rmnsufinfo->currentdepth);
-    inversesuftab_get2(rmnsufinfo->itvinfo + idx,
-                       rmnsufinfo,startpos + rmnsufinfo->currentdepth);
+    if (rmnsufinfo->sortblock.mmapfiledesc == -1)
+    {
+      rmnsufinfo->itvinfo[idx].suffixstart = startpos;
+      rmnsufinfo->itvinfo[idx].key
+        = inversesuftab_get(rmnsufinfo,startpos + rmnsufinfo->currentdepth);
+    } else
+    {
+      inversesuftab_get2(rmnsufinfo->itvfullinfo + idx,rmnsufinfo,startpos);
+    }
   }
-  gt_qsort_r(rmnsufinfo->itvinfo,(size_t) width,sizeof(Itventry),rmnsufinfo,
-             compareitv);
-  for (idx=0; idx<width; idx++)
+  if (rmnsufinfo->sortblock.mmapfiledesc == -1)
   {
-    suftabentryfromsection_update(&rmnsufinfo->sortblock,left+idx,
-                                  rmnsufinfo->itvinfo[idx].suffixstart);
+    qsort(rmnsufinfo->itvinfo,(size_t) width,sizeof(Itventry),compareitv);
+    for (idx=0; idx<width; idx++)
+    {
+      suftabentryfromsection_update(&rmnsufinfo->sortblock,left+idx,
+                                    rmnsufinfo->itvinfo[idx].suffixstart);
+    }
+  } else
+  {
+    gt_qsort_r(rmnsufinfo->itvfullinfo,(size_t) width,sizeof(Itvfullentry),
+               rmnsufinfo,compareitvfull);
+    for (idx=0; idx<width; idx++)
+    {
+      suftabentryfromsection_update(&rmnsufinfo->sortblock,left+idx,
+                                    rmnsufinfo->itvfullinfo[idx].suffixstart);
+    }
   }
   rangestart = 0;
   for (idx=1UL; idx<width; idx++)
   {
-    if (compareitv(rmnsufinfo->itvinfo + idx -1,
-                   rmnsufinfo->itvinfo + idx,rmnsufinfo) != 0)
-    /*
-    if (rmnsufinfo->itvinfo[idx-1].key != rmnsufinfo->itvinfo[idx].key)
-    */
+    bool different;
+
+    if (rmnsufinfo->sortblock.mmapfiledesc == -1)
+    {
+      different = (rmnsufinfo->itvinfo[idx-1].key !=
+                   rmnsufinfo->itvinfo[idx].key) ? true : false;
+    } else
+    {
+      different = (compareitvfull(rmnsufinfo->itvfullinfo + idx - 1,
+                                  rmnsufinfo->itvfullinfo + idx,
+                                  rmnsufinfo) != 0) ? true : false;
+    }
+    if (different)
     {
       if (rangestart + 1 < idx)
       {
@@ -1004,6 +1018,8 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
   gt_free(rmnsufinfo->unusedpair);
   gt_free(rmnsufinfo->itvinfo);
   rmnsufinfo->itvinfo = NULL;
+  gt_free(rmnsufinfo->itvfullinfo);
+  rmnsufinfo->itvfullinfo = NULL;
   gt_queue_delete(rmnsufinfo->rangestobesorted);
   rmnsufinfo->rangestobesorted = NULL;
 }
