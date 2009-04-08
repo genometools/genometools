@@ -75,7 +75,8 @@ unsigned int calcbucketboundsparts(Bucketspecification *bucketspec,
                                    unsigned int rightchar,
                                    unsigned int numofchars);
 
-unsigned long evalsumdistpfx(Bcktab *bcktab,Codetype ordercode);
+unsigned long distpfxidxpartialsums(const Bcktab *bcktab,Codetype code,
+                                    unsigned int lowerbound);
 
 void calcbucketboundaries(Bucketspecification *bucketspec,
                           const Bcktab *bcktab,

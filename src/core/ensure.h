@@ -18,6 +18,7 @@
 #ifndef ENSURE_H
 #define ENSURE_H
 
+#include <stdbool.h>
 #include "core/error.h"
 
 /* the ensure macro used for unit tests */
@@ -31,6 +32,6 @@
               had_err = -1;                                                    \
             }                                                                  \
           }                                                                    \
-        } while (0)
+        } while (false)
 
 #endif

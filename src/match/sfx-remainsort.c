@@ -24,6 +24,7 @@
 #include "core/ma_api.h"
 #include "core/arraydef.h"
 #include "core/fa.h"
+#include "core/qsort_r.h"
 #include "seqpos-def.h"
 #include "encseq-def.h"
 #include "bcktab.h"
@@ -38,6 +39,8 @@
 
 typedef struct
 {
+  unsigned int unitsnotspecial;
+  Seqpos rank;
   Seqpos key,
          suffixstart;
 } Itventry;
@@ -304,12 +307,12 @@ static Seqpos frompos2rank(const Lowerboundwithrank *leftptr,
 #endif
 
 static unsigned long checkedfullvalues = 0,
+                     checkedinitialvalues = 0,
+                     suminitial = 0,
                      checkedemptyvalues = 0;
 
 static Seqpos inversesuftab_get(const Rmnsufinfo *rmnsufinfo,Seqpos startpos)
 {
-  Seqpos ivtval;
-
   gt_assert(startpos <= rmnsufinfo->totallength);
   if (startpos == rmnsufinfo->totallength)
   {
@@ -317,7 +320,18 @@ static Seqpos inversesuftab_get(const Rmnsufinfo *rmnsufinfo,Seqpos startpos)
               rmnsufinfo->totallength);
     return rmnsufinfo->totallength;
   }
-  ivtval = compressedtable_get(rmnsufinfo->inversesuftab,startpos);
+  return compressedtable_get(rmnsufinfo->inversesuftab,startpos);
+}
+
+static void inversesuftab_get2(Itventry *itventry,
+                               const Rmnsufinfo *rmnsufinfo,Seqpos startpos)
+{
+  if (startpos == rmnsufinfo->totallength)
+  {
+    itventry->unitsnotspecial = 0;
+    itventry->rank = rmnsufinfo->totallength;
+    return;
+  }
   if (rmnsufinfo->firstgeneration.nextfreePairsuffixptr == 0 &&
       possibletocmpbitwise(rmnsufinfo->encseq))
   {
@@ -352,46 +366,30 @@ static Seqpos inversesuftab_get(const Rmnsufinfo *rmnsufinfo,Seqpos startpos)
                                    (unsigned int) (etbe.tbe %
                                                    rmnsufinfo->numofchars),
                                    rmnsufinfo->numofchars);
-      gt_assert(bucketspec.left <= ivtval);
-      if (ivtval > bucketspec.left + rmnsufinfo->allocateditvinfo)
-      {
-        fprintf(stderr,"ivtval = %lu >= %lu = left + allocated\n",
-                        (unsigned long) ivtval,
-                        (unsigned long) (bucketspec.left +
-                                         rmnsufinfo->allocateditvinfo));
-        exit(EXIT_FAILURE);
-      }
-      gt_assert(ivtval <= bucketspec.left + rmnsufinfo->allocateditvinfo);
+      itventry->unitsnotspecial = rmnsufinfo->prefixlength;
+      itventry->rank = compressedtable_get(rmnsufinfo->inversesuftab,startpos);
       checkedfullvalues++;
     } else /* etbe.unitsnotspecial < rmnsufinfo->prefixlength */
     {
       if (etbe.unitsnotspecial > 0)
       {
-        etbe.tbe >>= MULT2(UNITSIN2BITENC - rmnsufinfo->prefixlength);
-        etbe.tbe |= rmnsufinfo->filltable[etbe.unitsnotspecial];
-        gt_assert(etbe.tbe <= (Twobitencoding) rmnsufinfo->maxcode);
+        Codetype code;
 
-        /*
-        char buffer[32+1];
+        code = (Codetype)
+               (etbe.tbe >> MULT2(UNITSIN2BITENC - rmnsufinfo->prefixlength))
+               | rmnsufinfo->filltable[etbe.unitsnotspecial];
+        gt_assert(code <= rmnsufinfo->maxcode);
 
-        uint32_t2string(buffer,etbe.tbe);
-        printf("unitsnotspecial=%u, bitstring=%s\n",
-               etbe.unitsnotspecial,buffer);
-        */
         (void) calcbucketboundsparts(&bucketspec,
                                      rmnsufinfo->bcktab,
-                                     (Codetype) etbe.tbe,
+                                     (Codetype) code,
                                      rmnsufinfo->maxcode,
                                      rmnsufinfo->partwidth,
-                                     (unsigned int) (etbe.tbe %
+                                     (unsigned int) (code %
                                                      rmnsufinfo->numofchars),
                                      rmnsufinfo->numofchars);
-        gt_assert(ivtval >= bucketspec.left + bucketspec.nonspecialsinbucket);
-        gt_assert(ivtval < bucketspec.left + bucketspec.nonspecialsinbucket +
-                           bucketspec.specialsinbucket);
-        /* suffix has a specialcharacter in the first prefixlength
-           characters. fill the remaining positions and use the code
-           relative to nonspecialsinbucket */
+        itventry->unitsnotspecial = etbe.unitsnotspecial;
+        itventry->rank = bucketspec.left + bucketspec.nonspecialsinbucket;
       } else
       {
 #ifndef NDEBUG
@@ -401,6 +399,8 @@ static Seqpos inversesuftab_get(const Rmnsufinfo *rmnsufinfo,Seqpos startpos)
                                    startpos);
 #endif
         gt_assert(rmnsufinfo->partwidth + rank == ivtval);
+        itventry->unitsnotspecial = 0;
+        itventry->rank = rmnsufinfo->partwidth;
         checkedemptyvalues++;
         /* suffix begins with specialcharacter and is the first in a range */
         /* get the rank of the position plus partwidth. This gives the
@@ -408,7 +408,6 @@ static Seqpos inversesuftab_get(const Rmnsufinfo *rmnsufinfo,Seqpos startpos)
       }
     }
   }
-  return ivtval;
 }
 
 static void initinversesuftabspecials(Rmnsufinfo *rmnsufinfo)
@@ -510,7 +509,6 @@ static void initinversesuftabnonspecialsadjuststream(Rmnsufinfo *rmnsufinfo)
   Bucketspecification bucketspec;
   Seqpos idx, startpos;
   const Codetype mincode = 0;
-  /* unsigned long sumdistpfx; */
 
   gt_assert(rmnsufinfo->sortblock.mmapfiledesc != -1);
   rightchar = 0;
@@ -540,10 +538,6 @@ static void initinversesuftabnonspecialsadjuststream(Rmnsufinfo *rmnsufinfo)
       startpos = nextsuftabentry_get(&rmnsufinfo->sortblock);
       inversesuftab_set(rmnsufinfo,startpos,bucketspec.left);
     }
-    /*
-    XXX
-    sumdistpfx = evalsumdistpfx(rmnsufinfo->bcktab,buckespec.ordercode);
-    */
   }
   gt_assert(idx <= rmnsufinfo->partwidth);
   rmnsufinfo->overallspecials += (rmnsufinfo->partwidth - idx);
@@ -589,20 +583,78 @@ void rmnsufinfo_addunsortedrange(Rmnsufinfo *rmnsufinfo,
   ptr->right = right;
 }
 
-static int compareitv(const void *a,const void *b)
+static int compareitv2(const void *a,const void *b, void *data)
 {
   const Itventry *itva = (const Itventry *) a,
                  *itvb = (const Itventry *) b;
-
-  if (itva->key < itvb->key)
+  if (itva->rank < itvb->rank)
   {
     return -1;
   }
-  if (itva->key > itvb->key)
+  if (itva->rank > itvb->rank)
   {
     return 1;
   }
-  return 0;
+  if (itva->unitsnotspecial == itvb->unitsnotspecial)
+  {
+    const Rmnsufinfo *rmnsufinfo = (const Rmnsufinfo *) data;
+    if (itvb->unitsnotspecial == rmnsufinfo->prefixlength)
+    {
+      return 0;
+    }
+    gt_assert(itva->suffixstart != itvb->suffixstart);
+    return (itva->suffixstart < itvb->suffixstart) ? -1 : 1;
+  }
+  return itva->unitsnotspecial > itvb->unitsnotspecial ? -1 : 1;
+}
+
+static void showitventry(const Itventry *itventry)
+{
+  fprintf(stderr,"(%lu,%lu,%u,%lu)",
+            (unsigned long) itventry->rank,
+            (unsigned long) itventry->key,
+            itventry->unitsnotspecial,
+            (unsigned long) itventry->suffixstart);
+}
+
+static int compareitv(const void *a,const void *b, void *data)
+{
+  const Itventry *itva = (const Itventry *) a,
+                 *itvb = (const Itventry *) b;
+  const Rmnsufinfo *rmnsufinfo = (const Rmnsufinfo *) data;
+  int retval2 = 0, retval;
+
+  if (rmnsufinfo->firstgeneration.nextfreePairsuffixptr == 0 &&
+      possibletocmpbitwise(rmnsufinfo->encseq))
+  {
+    retval2 = compareitv2(a,b,data);
+  }
+  if (itva->key < itvb->key)
+  {
+    retval = -1;
+  } else
+  {
+    if (itva->key > itvb->key)
+    {
+      retval = 1;
+    } else
+    {
+      retval = 0;
+    }
+  }
+  if (rmnsufinfo->firstgeneration.nextfreePairsuffixptr == 0 &&
+      possibletocmpbitwise(rmnsufinfo->encseq))
+  {
+    if (retval2 != retval)
+    {
+      fprintf(stderr,"retval2 = %d != %d = retval: ",retval2,retval);
+      showitventry(a);
+      showitventry(b);
+      fprintf(stderr,"\n");
+      exit(EXIT_FAILURE);
+    }
+  }
+  return retval;
 }
 
 static void processunsortedrange(Rmnsufinfo *rmnsufinfo,
@@ -783,8 +835,11 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos left,
     rmnsufinfo->itvinfo[idx].suffixstart = startpos;
     rmnsufinfo->itvinfo[idx].key
       = inversesuftab_get(rmnsufinfo,startpos + rmnsufinfo->currentdepth);
+    inversesuftab_get2(rmnsufinfo->itvinfo + idx,
+                       rmnsufinfo,startpos + rmnsufinfo->currentdepth);
   }
-  qsort(rmnsufinfo->itvinfo,(size_t) width,sizeof(Itventry),compareitv);
+  gt_qsort_r(rmnsufinfo->itvinfo,(size_t) width,sizeof(Itventry),rmnsufinfo,
+             compareitv);
   for (idx=0; idx<width; idx++)
   {
     suftabentryfromsection_update(&rmnsufinfo->sortblock,left+idx,
@@ -793,7 +848,11 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos left,
   rangestart = 0;
   for (idx=1UL; idx<width; idx++)
   {
+    if (compareitv(rmnsufinfo->itvinfo + idx -1,
+                   rmnsufinfo->itvinfo + idx,rmnsufinfo) != 0)
+    /*
     if (rmnsufinfo->itvinfo[idx-1].key != rmnsufinfo->itvinfo[idx].key)
+    */
     {
       if (rangestart + 1 < idx)
       {
@@ -900,6 +959,9 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
   }
   printf("maxqueuesize = %lu\n",rmnsufinfo->maxqueuesize);
   printf("checkedfullvalues = %lu\n",checkedfullvalues);
+  printf("checkedinitialvalues = %lu at avg %.2f\n",
+             checkedinitialvalues,
+             (double) suminitial/checkedinitialvalues);
   printf("checkedemptyvalues = %lu\n",checkedemptyvalues);
   gt_free(rmnsufinfo->unusedpair);
   gt_free(rmnsufinfo->itvinfo);

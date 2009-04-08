@@ -320,26 +320,11 @@ void showbcktab(const Bcktab *bcktab)
   }
 }
 
-/*
-unsigned long evalsumdistpfx(Bcktab *bcktab,Codetype code)
-{
-  unsigned int prefixindex;
-  unsigned long sum = 0;
-  Codetype ordercode =
-
-  for (prefixindex=1U; prefixindex < bcktab->prefixlength-1; prefixindex++)
-  {
-    sum += bcktab->distpfxidx[prefixindex-1][ordercode];
-  }
-  return sum;
-}
-*/
-
 void freebcktab(Bcktab **bcktab)
 {
   Bcktab *bcktabptr = *bcktab;
 
-  /* showbcktab(bcktabptr); */
+  /*showbcktab(bcktabptr);*/
   if (bcktabptr->allocated)
   {
     FREESPACE(bcktabptr->leftborder);
@@ -582,6 +567,33 @@ unsigned int singletonmaxprefixindex(const Bcktab *bcktab,Codetype code)
     }
   }
   return bcktab->prefixlength-1;
+}
+
+unsigned long distpfxidxpartialsums(const Bcktab *bcktab,Codetype code,
+                                    unsigned int lowerbound)
+{
+  Codetype ordercode, divisor;
+  unsigned long sum = 0;
+  unsigned int prefixindex;
+
+  for (prefixindex=bcktab->prefixlength-2; prefixindex>lowerbound;
+       prefixindex--)
+  {
+    if (code >= bcktab->filltable[prefixindex])
+    {
+      ordercode = code - bcktab->filltable[prefixindex];
+      divisor = bcktab->filltable[prefixindex] + 1;
+      if (ordercode % divisor == 0)
+      {
+        ordercode /= divisor;
+        sum += bcktab->distpfxidx[prefixindex-1][ordercode];
+      }
+    } else
+    {
+      break;
+    }
+  }
+  return sum;
 }
 
 unsigned int pfxidx2lcpvalues(unsigned int *minprefixindex,

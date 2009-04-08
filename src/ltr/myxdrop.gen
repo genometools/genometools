@@ -69,9 +69,7 @@ EVALXDROPARBITSCORES
   xdropbest->score = bigt_tmp = S (i + i, 0);
   xdropbest->ivalue = xdropbest->jvalue = (unsigned int) i;
 
-  /*@ignore@*/
   GT_STOREINARRAY (&big_t, Xdropscore, 10, bigt_tmp);
-  /*@end@*/
 
   /* "phase" d > 0 */
   while (lbound <= ubound)
@@ -223,9 +221,7 @@ EVALXDROPARBITSCORES
       currentMININFINITYINTgeneration = 0;
       alwaysMININFINITYINT = true;
     }
-    /*@ignore@*/
     GT_STOREINARRAY (&big_t, Xdropscore, 10, bigt_tmp);
-    /*@end@*/
 
     /* fill out of bounds values of MINUSINFINITYINT
        needed for showmatrix function */

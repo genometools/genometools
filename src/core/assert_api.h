@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 /* Assert module */
 
@@ -37,9 +38,11 @@
             fprintf(stderr, "Assertion failed: (%s), function %s, file %s, " \
                     "line %d.\nThis is probably a bug, please report it.\n", \
                     #expression, __func__, __FILE__, __LINE__);              \
+            /*@ignore@*/                                                     \
             exit(GT_EXIT_PROGRAMMING_ERROR);                                 \
+            /*@end@*/                                                        \
           }                                                                  \
-        } while (0)
+        } while (false)
 #else
 #define gt_assert(expression) ((void) 0)
 #endif
