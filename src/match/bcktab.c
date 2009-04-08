@@ -313,12 +313,27 @@ void showbcktab(const Bcktab *bcktab)
     for (code = 0; code < bcktab->basepower[prefixindex]; code++)
     {
       sum += bcktab->distpfxidx[prefixindex-1][code];
-      printf("distpfxidex[%u][%lu]=%lu\n",
+      printf("distpfxidx[%u][%lu]=%lu\n",
               prefixindex,code,bcktab->distpfxidx[prefixindex-1][code]);
     }
     printf("sum %lu\n",sum);
   }
 }
+
+/*
+unsigned long evalsumdistpfx(Bcktab *bcktab,Codetype code)
+{
+  unsigned int prefixindex;
+  unsigned long sum = 0;
+  Codetype ordercode =
+
+  for (prefixindex=1U; prefixindex < bcktab->prefixlength-1; prefixindex++)
+  {
+    sum += bcktab->distpfxidx[prefixindex-1][ordercode];
+  }
+  return sum;
+}
+*/
 
 void freebcktab(Bcktab **bcktab)
 {

@@ -108,6 +108,7 @@ struct Rmnsufinfo
   unsigned int prefixlength,
                numofchars;
   /* XXX the following is only used for parts > 0 && maxdepth */
+  unsigned long overallspecials;
   Seqpos realspecialranges;
   Codetype *filltable;
   Lowerboundwithrank *lowerboundwithrank;
@@ -151,15 +152,15 @@ static Lowerboundwithrank *filllowerboundwithrank(const Encodedsequence *encseq,
     Lowerboundwithrank *lowerboundwithrank, *lbptr;
 
     realspecialranges = getencseqrealspecialranges(encseq);
-    lowerboundwithrank = gt_malloc(sizeof(*lowerboundwithrank) * 
+    lowerboundwithrank = gt_malloc(sizeof(*lowerboundwithrank) *
                                    realspecialranges);
     printf("lowerboundwithrank requires %lu bytes\n",
-               (unsigned long) (sizeof(*lowerboundwithrank) * 
+               (unsigned long) (sizeof(*lowerboundwithrank) *
                                        realspecialranges));
     sri = newspecialrangeiterator(encseq,
                                   ISDIRREVERSE(readmode)
                                   ? false : true);
-    for (lbptr = lowerboundwithrank; nextspecialrangeiterator(&range,sri); 
+    for (lbptr = lowerboundwithrank; nextspecialrangeiterator(&range,sri);
          lbptr++)
     {
       gt_assert(lbptr < lowerboundwithrank + realspecialranges);
@@ -392,7 +393,7 @@ static Seqpos inversesuftab_get(const Rmnsufinfo *rmnsufinfo,Seqpos startpos)
       } else
       {
         Seqpos rank = frompos2rank(rmnsufinfo->lowerboundwithrank,
-                                   rmnsufinfo->lowerboundwithrank + 
+                                   rmnsufinfo->lowerboundwithrank +
                                    rmnsufinfo->realspecialranges - 1,
                                    startpos);
         gt_assert(rmnsufinfo->partwidth + rank == ivtval);
@@ -505,10 +506,12 @@ static void initinversesuftabnonspecialsadjuststream(Rmnsufinfo *rmnsufinfo)
   Bucketspecification bucketspec;
   Seqpos idx, startpos;
   const Codetype mincode = 0;
+  /* unsigned long sumdistpfx; */
 
   gt_assert(rmnsufinfo->sortblock.mmapfiledesc != -1);
-  rightchar = (unsigned int) (mincode % rmnsufinfo->numofchars);
+  rightchar = 0;
   idx = 0;
+  rmnsufinfo->overallspecials = 0;
   for (code = mincode; code <= rmnsufinfo->maxcode; code++)
   {
     rightchar = calcbucketboundsparts(&bucketspec,
@@ -518,6 +521,8 @@ static void initinversesuftabnonspecialsadjuststream(Rmnsufinfo *rmnsufinfo)
                                       rmnsufinfo->partwidth,
                                       rightchar,
                                       rmnsufinfo->numofchars);
+    gt_assert(idx <= bucketspec.left);
+    rmnsufinfo->overallspecials += (bucketspec.left - idx);
     for (/* Nothing */; idx < bucketspec.left; idx++)
     {
       startpos = nextsuftabentry_get(&rmnsufinfo->sortblock);
@@ -531,7 +536,13 @@ static void initinversesuftabnonspecialsadjuststream(Rmnsufinfo *rmnsufinfo)
       startpos = nextsuftabentry_get(&rmnsufinfo->sortblock);
       inversesuftab_set(rmnsufinfo,startpos,bucketspec.left);
     }
+    /*
+    XXX
+    sumdistpfx = evalsumdistpfx(rmnsufinfo->bcktab,buckespec.ordercode);
+    */
   }
+  gt_assert(idx <= rmnsufinfo->partwidth);
+  rmnsufinfo->overallspecials += (rmnsufinfo->partwidth - idx);
   for (/* Nothing */; idx < rmnsufinfo->partwidth; idx++)
   {
     startpos = nextsuftabentry_get(&rmnsufinfo->sortblock);
@@ -539,6 +550,7 @@ static void initinversesuftabnonspecialsadjuststream(Rmnsufinfo *rmnsufinfo)
   }
   gt_fa_xmunmap(rmnsufinfo->sortblock.mappedsection);
   rmnsufinfo->sortblock.mappedsection = NULL;
+  printf("overallspecials=%lu\n",rmnsufinfo->overallspecials);
 }
 
 static void initinversesuftabnonspecials(Rmnsufinfo *rmnsufinfo)

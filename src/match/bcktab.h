@@ -30,7 +30,8 @@ typedef struct
 {
   Seqpos left;
   unsigned long nonspecialsinbucket,
-                specialsinbucket;
+                specialsinbucket,
+                ordercode;
 } Bucketspecification;
 
 typedef struct Bcktab Bcktab;
@@ -73,6 +74,8 @@ unsigned int calcbucketboundsparts(Bucketspecification *bucketspec,
                                    Seqpos totalwidth,
                                    unsigned int rightchar,
                                    unsigned int numofchars);
+
+unsigned long evalsumdistpfx(Bcktab *bcktab,Codetype ordercode);
 
 void calcbucketboundaries(Bucketspecification *bucketspec,
                           const Bcktab *bcktab,

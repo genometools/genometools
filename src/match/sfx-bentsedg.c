@@ -1312,10 +1312,10 @@ static void determinemaxbucketsize(Maxbucketinfo *maxbucketinfo,
   maxbucketinfo->nonspecialsmaxbucketsize = 1UL;
   maxbucketinfo->maxbucketsize = 1UL;
   memset(maxbucketinfo->log2nonspecialbucketsizedist,0,
-               sizeof(*maxbucketinfo->log2nonspecialbucketsizedist) * 
+               sizeof (*maxbucketinfo->log2nonspecialbucketsizedist) *
                (GT_MAXLOG2VALUE+1));
   memset(maxbucketinfo->log2specialbucketsizedist,0,
-               sizeof(*maxbucketinfo->log2specialbucketsizedist) * 
+               sizeof (*maxbucketinfo->log2specialbucketsizedist) *
                (GT_MAXLOG2VALUE+1));
   for (code = mincode; code <= maxcode; code++)
   {
@@ -1326,7 +1326,7 @@ static void determinemaxbucketsize(Maxbucketinfo *maxbucketinfo,
                                       partwidth,
                                       rightchar,
                                       numofchars);
-    if (bucketspec.nonspecialsinbucket > 
+    if (bucketspec.nonspecialsinbucket >
         maxbucketinfo->nonspecialsmaxbucketsize)
     {
       maxbucketinfo->nonspecialsmaxbucketsize = bucketspec.nonspecialsinbucket;
@@ -1344,13 +1344,13 @@ static void determinemaxbucketsize(Maxbucketinfo *maxbucketinfo,
     if (bucketspec.nonspecialsinbucket > 1UL)
     {
       maxbucketinfo->log2nonspecialbucketsizedist[
-         gt_determinebitspervalue((uint64_t) 
+         gt_determinebitspervalue((uint64_t)
                                   (bucketspec.nonspecialsinbucket-1))]++;
     }
     if (bucketspec.specialsinbucket > 1UL)
     {
       maxbucketinfo->log2specialbucketsizedist[
-         gt_determinebitspervalue((uint64_t) 
+         gt_determinebitspervalue((uint64_t)
                                   (bucketspec.specialsinbucket-1))]++;
     }
   }
