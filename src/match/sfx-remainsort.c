@@ -270,6 +270,7 @@ static void inversesuftab_set(Rmnsufinfo *rmnsufinfo,Seqpos idx,Seqpos value)
   compressedtable_update(rmnsufinfo->inversesuftab,idx,value);
 }
 
+#ifndef NDEBUG
 static Seqpos frompos2rank(const Lowerboundwithrank *leftptr,
                            const Lowerboundwithrank *rightptr,
                            Seqpos specialpos)
@@ -300,6 +301,7 @@ static Seqpos frompos2rank(const Lowerboundwithrank *leftptr,
   return 0;
   /*@end@*/
 }
+#endif
 
 static unsigned long checkedfullvalues = 0,
                      checkedemptyvalues = 0;
@@ -392,10 +394,12 @@ static Seqpos inversesuftab_get(const Rmnsufinfo *rmnsufinfo,Seqpos startpos)
            relative to nonspecialsinbucket */
       } else
       {
+#ifndef NDEBUG
         Seqpos rank = frompos2rank(rmnsufinfo->lowerboundwithrank,
                                    rmnsufinfo->lowerboundwithrank +
                                    rmnsufinfo->realspecialranges - 1,
                                    startpos);
+#endif
         gt_assert(rmnsufinfo->partwidth + rank == ivtval);
         checkedemptyvalues++;
         /* suffix begins with specialcharacter and is the first in a range */
