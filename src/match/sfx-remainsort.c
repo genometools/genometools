@@ -84,11 +84,13 @@ typedef struct
   unsigned long pagechanges;
 } Sortblock;
 
+#ifdef Lowerboundwithrank
 typedef struct
 {
   Seqpos lowerbound,
          rank;
 } Lowerboundwithrank;
+#endif
 
 struct Rmnsufinfo
 {
@@ -114,7 +116,9 @@ struct Rmnsufinfo
   unsigned long overallspecials;
   Seqpos realspecialranges;
   Codetype *filltable;
+#ifdef Lowerboundwithrank
   Lowerboundwithrank *lowerboundwithrank;
+#endif
   /* the following are used to compute lcp-values in linear time */
   Seqpos partwidth,
          totallength;
@@ -144,6 +148,7 @@ static void initsortblock(Sortblock *sortblock,
   }
 }
 
+#ifdef Lowerboundwithrank
 static Lowerboundwithrank *filllowerboundwithrank(const Encodedsequence *encseq,
                                                   Readmode readmode)
 {
@@ -177,6 +182,39 @@ static Lowerboundwithrank *filllowerboundwithrank(const Encodedsequence *encseq,
   }
   return NULL;
 }
+
+static Seqpos frompos2rank(const Lowerboundwithrank *leftptr,
+                           const Lowerboundwithrank *rightptr,
+                           Seqpos specialpos)
+{
+  const Lowerboundwithrank *midptr;
+
+  while (leftptr <= rightptr)
+  {
+    midptr = leftptr + DIV2((unsigned long) (rightptr-leftptr));
+    if (specialpos < midptr->lowerbound)
+    {
+      rightptr = midptr-1;
+    } else
+    {
+      if (specialpos > midptr->lowerbound)
+      {
+        leftptr = midptr + 1;
+      } else
+      {
+        return midptr->rank;
+      }
+    }
+  }
+  fprintf(stderr,"frompos2rank: cannot find pos " FormatSeqpos
+                 " in ranges",PRINTSeqposcast(specialpos));
+  exit(EXIT_FAILURE);
+  /*@ignore@*/
+  return 0;
+  /*@end@*/
+}
+
+#endif
 
 Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                           int mmapfiledesc,
@@ -220,7 +258,9 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   GT_INITARRAY(&rmnsufinfo->firstgeneration,Pairsuffixptr);
   rmnsufinfo->realspecialranges = getencseqrealspecialranges(encseq);
   rmnsufinfo->filltable = filllargestchartable(numofchars,prefixlength);
+#ifdef Lowerboundwithrank
   rmnsufinfo->lowerboundwithrank = filllowerboundwithrank(encseq,readmode);
+#endif
   initsortblock(&rmnsufinfo->sortblock,presortedsuffixes,mmapfiledesc,
                 partwidth);
   return rmnsufinfo;
@@ -273,7 +313,6 @@ static void inversesuftab_set(Rmnsufinfo *rmnsufinfo,Seqpos idx,Seqpos value)
   compressedtable_update(rmnsufinfo->inversesuftab,idx,value);
 }
 
-#ifndef NDEBUG
 static Seqpos frompos2rank(const Lowerboundwithrank *leftptr,
                            const Lowerboundwithrank *rightptr,
                            Seqpos specialpos)
@@ -304,7 +343,6 @@ static Seqpos frompos2rank(const Lowerboundwithrank *leftptr,
   return 0;
   /*@end@*/
 }
-#endif
 
 static unsigned long checkedfullvalues = 0,
                      checkedinitialvalues = 0,
@@ -1068,8 +1106,10 @@ Compressedtable *rmnsufinfo_wrap(Seqpos *longest,
   }
   gt_free(rmnsufinfo->filltable);
   rmnsufinfo->filltable = NULL;
+#ifdef Lowerboundwithrank
   gt_free(rmnsufinfo->lowerboundwithrank);
   rmnsufinfo->lowerboundwithrank = NULL;
+#endif
   gt_assert(rmnsufinfo->esr != NULL);
   freeEncodedsequencescanstate(&rmnsufinfo->esr);
   gt_free(rmnsufinfo);
