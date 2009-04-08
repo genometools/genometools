@@ -1,6 +1,6 @@
 #
-# Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-# Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+# Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -24,35 +24,30 @@ from gt.props import cachedproperty
 
 class FeatureNode(GenomeNode):
 
-  @classmethod
-  def create_from_ptr(cls, node_ptr, newref=False):
-    fn = GenomeNode.__new__(cls, node_ptr, newref)
-    fn.gn = node_ptr
-    fn._as_parameter_ = fn.gn
-    fn.attribs = {}
-    fn.update_attrs()
-    return fn
+  def __init__(self):
+    pass
 
-  def __init__(self, seqid, type, start, end, strand):
+  @classmethod
+  def create_new(cls, seqid, type, start, end, strand):
     from gt.extended.strand import strandchars
     if not strand in strandchars:
       gterror("Invalid strand '%s' -- must be one of %s" \
                  % (strand, strandchars))
     s = Str(seqid)
-    newfn = gtlib.gt_feature_node_new(s, type, start, end, \
-                                      strandchars.index(strand))
-    super(FeatureNode, self).__init__(newfn, True)
-    self.attribs = {}
-    self.update_attrs()
-
+    fn = gtlib.gt_feature_node_new(s, type, start, end, \
+                                   strandchars.index(strand))
+    n = cls.create_from_ptr(fn, True)
+    return n
 
   def update_attrs(self):
+    attribs = {}
     def py_collect_func(tag, val, data):
-      self.attribs[tag] = val
-    self.collect_func = CollectFunc(py_collect_func)
+      attribs[tag] = val
+    collect_func = CollectFunc(py_collect_func)
     gtlib.gt_feature_node_foreach_attribute(self.gn, \
-                                            self.collect_func, \
+                                            collect_func, \
                                             None)
+    return attribs
 
   def add_child(self, node):
     gtlib.gt_feature_node_add_child(self.gn, node)
@@ -114,16 +109,16 @@ class FeatureNode(GenomeNode):
   score = cachedproperty(get_score, set_score, unset_score)
 
   def get_attribute(self, attrib):
-    return self.attribs[attrib]
+    return gtlib.gt_feature_node_get_attribute(self.gn, attrib)
 
   def add_attribute(self, attrib, value):
     if attrib == "" or value == "":
       gterror("attribute keys or values must not be empty!")
     gtlib.gt_feature_node_add_attribute(self.gn, attrib, value)
-    self.update_attrs()
 
   def each_attribute(self):
-    for tag, val in self.attribs.iteritems():
+    attribs = self.update_attrs()
+    for tag, val in attribs.iteritems():
       yield (tag, val)
 
   def register(cls, gtlib):
@@ -154,6 +149,8 @@ class FeatureNode(GenomeNode):
     gtlib.gt_feature_node_unset_score.argtypes = [c_void_p]
     gtlib.gt_feature_node_add_attribute.argtypes = [c_void_p, c_char_p, \
                                                     c_char_p]
+    gtlib.gt_feature_node_get_attribute.restype = c_char_p
+    gtlib.gt_feature_node_get_attribute.argtypes = [c_void_p, c_char_p]
   register = classmethod(register)
 
 class FeatureNodeIterator(object):

@@ -47,7 +47,7 @@ class GenomeStream:
     if genome_node.value == None:
       return None
     else:
-      return GenomeNode(genome_node.value)
+      return GenomeNode.create_from_ptr(genome_node.value)
 
   def pull(self):
     err = Error()

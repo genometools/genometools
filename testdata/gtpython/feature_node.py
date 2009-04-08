@@ -26,7 +26,7 @@ class TestFailedError(Exception):
   pass
 
 if __name__ == "__main__":
-  fn = FeatureNode("test", "type", 100, 500, "+")
+  fn = FeatureNode.create_new("test", "type", 100, 500, "+")
   fn.add_attribute("test","testval")
   fn.add_attribute("test2","testval2")
   if fn.score_is_defined():
@@ -45,7 +45,7 @@ if __name__ == "__main__":
     raise TestFailedError
   if not fn.get_strand() == "+":
     raise TestFailedError
-  fn2 = FeatureNode("test", "type2", 200,300,"+")
+  fn2 = FeatureNode.create_new("test", "type2", 200,300,"+")
   fn.add_child(fn2)
   num_attrs = 0
   for tag, val in fn.each_attribute():
@@ -69,7 +69,7 @@ if __name__ == "__main__":
   if num_features != 2:
     raise TestFailedError
 
-  fn3 = FeatureNode("test", "type3", 250,300,"+")
+  fn3 = FeatureNode.create_new("test", "type3", 250,300,"+")
   fn.add_child(fn3)
   fni = FeatureNodeIteratorDepthFirst(fn)
   num_features = 0

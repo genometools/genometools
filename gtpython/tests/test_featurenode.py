@@ -58,8 +58,8 @@ class FeatureNodeTestCase(unittest.TestCase):
 
 class TestFeatureNodeChildren(unittest.TestCase):
     def setUp(self):
-        self.fn  = FeatureNode("test", "type", 100, 500, "+")
-        self.fn2 = FeatureNode("test", "type2", 200,300,"+")
+        self.fn  = FeatureNode.create_new("test", "type", 100, 500, "+")
+        self.fn2 = FeatureNode.create_new("test", "type2", 200,300,"+")
         self.fn.add_child(self.fn2)
 
     def test_phase(self):
@@ -95,7 +95,7 @@ class TestFeatureNodeChildren(unittest.TestCase):
 
 class TestFeatureNodeProperties(unittest.TestCase):
     def setUp(self):
-        self.fn  = FeatureNode("test", "type", 100, 500, "+")
+        self.fn  = FeatureNode.create_new("test", "type", 100, 500, "+")
 
     def test_strand(self):
         fn = self.fn
@@ -120,7 +120,7 @@ class TestFeatureNodeProperties(unittest.TestCase):
 
     def test_conversion(self):
         fn = self.fn
-        g = GenomeNode(fn.gn, True)
+        g = GenomeNode.create_from_ptr(fn.gn, True)
         self.assertEqual((100, 500), g.range)
 
         f2 = FeatureNode.create_from_ptr(g.gn, True)
