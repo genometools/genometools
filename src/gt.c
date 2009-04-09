@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2003-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2009 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -39,10 +39,10 @@ int main(int argc, char *argv[])
       rval = gtr_run(gtr, argc, (const char**) argv, err);
       break;
     case OPTIONPARSER_ERROR:
-      rval = 1; /* user error */
+      rval = EXIT_FAILURE; /* user error */
       break;
     case OPTIONPARSER_REQUESTS_EXIT:
-      rval = 0; /* everything went fine */
+      rval = EXIT_SUCCESS; /* everything went fine */
   }
   if (gt_error_is_set(err)) {
     fprintf(stderr, "%s: error: %s\n", gt_error_get_progname(err),
@@ -52,6 +52,6 @@ int main(int argc, char *argv[])
   gtr_delete(gtr);
   gt_error_delete(err);
   if (gt_allocators_clean())
-    return 2; /* programmer error */
+    return GT_EXIT_PROGRAMMING_ERROR; /* programmer error */
   return rval;
 }

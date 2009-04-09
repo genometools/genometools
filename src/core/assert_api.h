@@ -23,6 +23,8 @@
 
 /* Assert module */
 
+#define GT_EXIT_PROGRAMMING_ERROR  2
+
 #ifndef NDEBUG
 /* The <gt_assert()> macro tests the given <expression> and if it is false, the
    calling process is terminated. A diagnostic message is written to <stderr>
@@ -35,7 +37,7 @@
             fprintf(stderr, "Assertion failed: (%s), function %s, file %s, " \
                     "line %d.\nThis is probably a bug, please report it.\n", \
                     #expression, __func__, __FILE__, __LINE__);              \
-            exit(2); /* programmer error */                                  \
+            exit(GT_EXIT_PROGRAMMING_ERROR);                                 \
           }                                                                  \
         } while (0)
 #else
