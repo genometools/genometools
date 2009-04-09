@@ -1385,6 +1385,7 @@ static Seqpos accessspecialrangelength(const Encodedsequence *encseq,
 static unsigned long accessendspecialsubsUint(const Encodedsequence *encseq,
                                               unsigned long pgnum)
 {
+  /* XXX use switch */
   if (encseq->sat == Viauchartables)
   {
     return encseq->ucharendspecialsubsUint[pgnum];
@@ -1615,19 +1616,19 @@ static void advanceEncodedseqstate(const Encodedsequence *encseq,
 
 static unsigned long startpos2pagenum(Positionaccesstype sat,Seqpos startpos)
 {
-  if (sat == Viauchartables)
+  switch(sat)
   {
-    return (unsigned long) (startpos >> 8);
-  }
-  if (sat == Viaushorttables)
-  {
-    return (unsigned long) (startpos >> 16);
-  }
+    case Viauchartables:
+      return (unsigned long) (startpos >> 8);
+    case Viaushorttables:
+      return (unsigned long) (startpos >> 16);
+    default:
 #ifdef Seqposequalsunsignedint
-  return 0;
+      return 0;
 #else
-  return (unsigned long) (startpos >> 32);
+      return (unsigned long) (startpos >> 32);
 #endif
+  }
 }
 
 static void binpreparenextrange(const Encodedsequence *encseq,
@@ -1640,12 +1641,12 @@ static void binpreparenextrange(const Encodedsequence *encseq,
   Sequencerange range;
 
   pagenum = startpos2pagenum(encseq->sat,startpos);
-  if (pagenum == 0)
-  {
-    endpos0 = 0;
-  } else
+  if (pagenum > 0)
   {
     endpos0 = accessendspecialsubsUint(encseq,pagenum-1);
+  } else
+  {
+    endpos0 = 0;
   }
   esr->firstcell = endpos0;
   esr->lastcell = endpos1 = accessendspecialsubsUint(encseq,pagenum);
