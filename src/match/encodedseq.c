@@ -573,7 +573,8 @@ static void assignencseqmapspecification(GtArrayMapspecification *mapspectable,
       if (encseq->numofspecialstostore > 0)
       {
         numofunits = CALLCASTFUNC(Seqpos,unsigned_long,
-                                  NUMOFINTSFORBITS(encseq->totallength));
+                                  NUMOFINTSFORBITS(encseq->totallength +
+                                                   INTWORDSIZE));
         NEWMAPSPEC(encseq->specialbits,Bitsequence,numofunits);
       }
       break;
@@ -707,7 +708,7 @@ static uint64_t localdetsizeencseq(Positionaccesstype sat,
          if (specialranges > 0)
          {
            sum += (uint64_t) sizeof (Bitsequence) *
-                  (uint64_t) NUMOFINTSFORBITS(totallength);
+                  (uint64_t) NUMOFINTSFORBITS(totallength+INTWORDSIZE);
          }
          break;
     case Viauchartables:
@@ -1320,7 +1321,7 @@ static int fillbitaccesstab(Encodedsequence *encseq,
   DECLARESEQBUFFER(encseq->twobitencoding);
 
   gt_error_check(err);
-  INITBITTAB(encseq->specialbits,encseq->totallength);
+  INITBITTAB(encseq->specialbits,encseq->totallength + INTWORDSIZE);
   for (pos=0; /* Nothing */; pos++)
   {
     retval = gt_sequence_buffer_next(fb,&cc,err);
@@ -1616,7 +1617,7 @@ static void advanceEncodedseqstate(const Encodedsequence *encseq,
 
 static unsigned long startpos2pagenum(Positionaccesstype sat,Seqpos startpos)
 {
-  switch(sat)
+  switch (sat)
   {
     case Viauchartables:
       return (unsigned long) (startpos >> 8);
@@ -1950,22 +1951,19 @@ static bool containsspecialViatables(const Encodedsequence *encseq,
   {
     if (esrspace->moveforward)
     {
-      if (startpos + len - 1 >= esrspace->previousrange.leftpos)
+      gt_assert(startpos + len > 0);
+      if (startpos + len - 1 >= esrspace->previousrange.leftpos &&
+          startpos < esrspace->previousrange.rightpos)
       {
-        if (startpos < esrspace->previousrange.rightpos)
-        {
-          return true;
-        }
+        return true;
       }
     } else
     {
       gt_assert(startpos + 1 >= len);
-      if (startpos - len + 1 < esrspace->previousrange.rightpos)
+      if (startpos + 1 - len < esrspace->previousrange.rightpos &&
+          startpos >= esrspace->previousrange.leftpos)
       {
-        if (startpos >= esrspace->previousrange.leftpos)
-        {
-          return true;
-        }
+        return true;
       }
     }
   }
@@ -3260,6 +3258,99 @@ static Seqpos revgetnextstoppos(const Encodedsequence *encseq,
   return 0; /* virtual stop at -1 */
 }
 
+static inline Twobitencoding calctbeforward(const Twobitencoding *tbe,
+                                            Seqpos startpos)
+{
+  unsigned long remain = (unsigned long) MODBYUNITSIN2BITENC(startpos);
+
+  if (remain > 0)
+  {
+    unsigned long unit = (unsigned long) DIVBYUNITSIN2BITENC(startpos);
+    return (Twobitencoding)
+           ((tbe[unit] << MULT2(remain)) |
+            (tbe[unit+1] >> MULT2(UNITSIN2BITENC - remain)));
+  }
+  return tbe[DIVBYUNITSIN2BITENC(startpos)];
+}
+
+static inline Bitsequence extractspecialbits2(unsigned int *unitsnotspecial,
+                                              const Bitsequence *specialbits,
+                                              Seqpos startpos)
+{
+  Seqpos idx;
+  Bitsequence result = 0, mask = FIRSTBIT;
+  bool found = false;
+
+  *unitsnotspecial = UNITSIN2BITENC;
+  for (idx=startpos; idx<startpos + UNITSIN2BITENC; idx++)
+  {
+    if (ISIBITSET(specialbits,idx))
+    {
+      if (!found)
+      {
+        *unitsnotspecial = (unsigned int) (idx - startpos);
+        found = true;
+      }
+      result |= mask;
+    }
+    mask >>= 1;
+  }
+  return result;
+}
+
+static inline Bitsequence extractspecialbits(const Bitsequence *specialbits,
+                                             Seqpos startpos)
+{
+  unsigned long remain = (unsigned long) MODWORDSIZE(startpos);
+
+  if (remain <= UNITSIN2BITENC)
+  {
+    unsigned long unit = (unsigned long) DIVWORDSIZE(startpos);
+    return (specialbits[unit] << remain) & FIRSTHALVEBITS;
+  } else
+  {
+    unsigned long unit = (unsigned long) DIVWORDSIZE(startpos);
+    return ((specialbits[unit] << remain) |
+           (specialbits[unit+1] >> (INTWORDSIZE - remain))) &
+           FIRSTHALVEBITS;
+  }
+}
+
+static const int MultiplyDeBruijnBitPosition[32] = {
+    1, 2, 29, 3, 30, 15, 25, 4, 31, 23, 21, 16, 26, 18, 5, 9,
+    32, 28, 14, 24, 22, 20, 17, 8, 27, 13, 19, 7, 12, 6, 11, 10
+};
+
+static int requiredUInt32Bits(uint32_t v)
+{
+  v |= v >> 1; /* first round down to power of 2 */
+  v |= v >> 2;
+  v |= v >> 4;
+  v |= v >> 8;
+  v |= v >> 16;
+  v = (v >> 1) + 1;
+  return MultiplyDeBruijnBitPosition[(v * (uint32_t) 0x077CB531UL) >> 27];
+}
+
+/*
+  Compute number of trailing zeros in a word.
+*/
+
+static unsigned int numberoftrailingzeros (uint32_t x)
+{
+  uint32_t y;
+  unsigned int bz, b4, b3, b2, b1, b0;
+
+  y = x & -x;                          /* Isolate rightmost 1-bit. */
+  bz = y ? 0 : 1U;                     /* 1 if y = 0. */
+  b4 = (y & 0x0000FFFF) ? 0 : 16U;
+  b3 = (y & 0x00FF00FF) ? 0 :  8U;
+  b2 = (y & 0x0F0F0F0F) ? 0 :  4U;
+  b1 = (y & 0x33333333) ? 0 :  2U;
+  b0 = (y & 0x55555555) ? 0 :  1U;
+  return bz + b4 + b3 + b2 + b1 + b0;
+}
+
 static void fwdextract2bitenc(EndofTwobitencoding *ptbe,
                               const Encodedsequence *encseq,
                               Encodedsequencescanstate *esr,
@@ -3269,41 +3360,57 @@ static void fwdextract2bitenc(EndofTwobitencoding *ptbe,
 
   /* fwdextract2bitenc for bitaccess not implemented yet */
   gt_assert(startpos < encseq->totallength);
-  if (hasspecialranges(encseq))
-  {
-    stoppos = fwdgetnextstoppos(encseq,esr,startpos);
-  } else
-  {
-    stoppos = encseq->totallength;
-  }
   ptbe->position = startpos;
-  if (startpos < stoppos)
+  if (encseq->sat == Viabitaccess)
   {
-    unsigned long remain;
+    Bitsequence tmp, tmp2;
+    unsigned int unitsnotspecial;
 
-    if (stoppos - startpos > (Seqpos) UNITSIN2BITENC)
+    ptbe->tbe = calctbeforward(encseq->twobitencoding,startpos);
+    tmp = extractspecialbits(encseq->specialbits,startpos);
+    tmp2 = extractspecialbits2(&unitsnotspecial,encseq->specialbits,startpos);
+    if (tmp2 != tmp)
+    {
+      char buffer[32+1];
+      uint32_t2string(buffer,tmp2);
+      fprintf(stderr,"tmp2=%s!=\n",buffer);
+      uint32_t2string(buffer,tmp);
+      fprintf(stderr,"     %s=tmp\n",buffer);
+      exit(EXIT_FAILURE);
+    }
+    if (tmp == 0)
     {
       ptbe->unitsnotspecial = (unsigned int) UNITSIN2BITENC;
     } else
     {
-      ptbe->unitsnotspecial = (unsigned int) (stoppos - startpos);
+      ptbe->unitsnotspecial = (unsigned int) (MULT2(UNITSIN2BITENC) -
+                                              requiredUInt32Bits(tmp));
     }
-    remain = (unsigned long) MODBYUNITSIN2BITENC(startpos);
-    if (remain > 0)
-    {
-      unsigned long unit = (unsigned long) DIVBYUNITSIN2BITENC(startpos);
-      ptbe->tbe = (Twobitencoding)
-                  ((encseq->twobitencoding[unit] << MULT2(remain)) |
-                   (encseq->twobitencoding[unit+1] >>
-                    MULT2(UNITSIN2BITENC - remain)));
-    } else
-    {
-      ptbe->tbe = encseq->twobitencoding[DIVBYUNITSIN2BITENC(startpos)];
-    }
+    gt_assert(ptbe->unitsnotspecial == unitsnotspecial);
   } else
   {
-    ptbe->unitsnotspecial = 0;
-    ptbe->tbe = 0;
+    if (hasspecialranges(encseq))
+    {
+      stoppos = fwdgetnextstoppos(encseq,esr,startpos);
+    } else
+    {
+      stoppos = encseq->totallength;
+    }
+    if (startpos < stoppos)
+    {
+      if (stoppos - startpos > (Seqpos) UNITSIN2BITENC)
+      {
+        ptbe->unitsnotspecial = (unsigned int) UNITSIN2BITENC;
+      } else
+      {
+        ptbe->unitsnotspecial = (unsigned int) (stoppos - startpos);
+      }
+      ptbe->tbe = calctbeforward(encseq->twobitencoding,startpos);
+    } else
+    {
+      ptbe->unitsnotspecial = 0;
+      ptbe->tbe = 0;
+    }
   }
 }
 
@@ -3345,8 +3452,7 @@ static void revextract2bitenc(EndofTwobitencoding *ptbe,
                                     MULT2(UNITSIN2BITENC - 1 - remain));
       if (unit > 0)
       {
-        ptbe->tbe |= encseq->twobitencoding[unit-1] <<
-                     MULT2(1 + remain);
+        ptbe->tbe |= encseq->twobitencoding[unit-1] << MULT2(1 + remain);
       } else
       {
         gt_assert(ptbe->unitsnotspecial < (unsigned int) UNITSIN2BITENC);
@@ -3365,13 +3471,7 @@ void extract2bitenc(bool fwd,
                     Encodedsequencescanstate *esr,
                     Seqpos startpos)
 {
-  if (fwd)
-  {
-    fwdextract2bitenc(ptbe,encseq,esr,startpos);
-  } else
-  {
-    revextract2bitenc(ptbe,encseq,esr,startpos);
-  }
+  (fwd ? fwdextract2bitenc : revextract2bitenc) (ptbe,encseq,esr,startpos);
 }
 
 #define MASKPREFIX(PREFIX)\
@@ -3384,41 +3484,6 @@ void extract2bitenc(bool fwd,
 #define MASKEND(FWD,END)\
         (((END) == 0) ? 0 : ((FWD) ? MASKPREFIX(END) : MASKSUFFIX(END)))
 
-static const int MultiplyDeBruijnBitPosition[32] = {
-    1, 2, 29, 3, 30, 15, 25, 4, 31, 23, 21, 16, 26, 18, 5, 9,
-    32, 28, 14, 24, 22, 20, 17, 8, 27, 13, 19, 7, 12, 6, 11, 10
-};
-
-static int requiredUIntTwobitencoding(uint32_t v)
-{
-  v |= v >> 1; /* first round down to power of 2 */
-  v |= v >> 2;
-  v |= v >> 4;
-  v |= v >> 8;
-  v |= v >> 16;
-  v = (v >> 1) + 1;
-  return MultiplyDeBruijnBitPosition[(v * (uint32_t) 0x077CB531UL) >> 27];
-}
-
-/*
-  Compute number of trailing zeros in a word.
-*/
-
-static unsigned int numberoftrailingzeros (uint32_t x)
-{
-  uint32_t y;
-  unsigned int bz, b4, b3, b2, b1, b0;
-
-  y = x & -x;                          /* Isolate rightmost 1-bit. */
-  bz = y ? 0 : 1U;                     /* 1 if y = 0. */
-  b4 = (y & 0x0000FFFF) ? 0 : 16U;
-  b3 = (y & 0x00FF00FF) ? 0 :  8U;
-  b2 = (y & 0x0F0F0F0F) ? 0 :  4U;
-  b1 = (y & 0x33333333) ? 0 :  2U;
-  b0 = (y & 0x55555555) ? 0 :  1U;
-  return bz + b4 + b3 + b2 + b1 + b0;
-}
-
 static int prefixofdifftbe(bool complement,
                            unsigned int *lcpval,
                            Twobitencoding tbe1,
@@ -3430,7 +3495,7 @@ static int prefixofdifftbe(bool complement,
   if (complement || lcpval != NULL)
   {
     tmplcpvalue = (unsigned int) DIV2(MULT2(UNITSIN2BITENC) -
-                                      requiredUIntTwobitencoding(tbe1 ^ tbe2));
+                                      requiredUInt32Bits(tbe1 ^ tbe2));
     gt_assert(tmplcpvalue < (unsigned int) UNITSIN2BITENC);
   }
   if (lcpval != NULL)

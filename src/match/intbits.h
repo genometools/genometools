@@ -32,7 +32,7 @@
 typedef uint64_t Bitsequence;
 #else
 
-#define LOGWORDSIZE   5               /* base 2 logarithm of wordsize */
+#define LOGWORDSIZE   5          /* base 2 logarithm of wordsize */
 typedef uint32_t Bitsequence;
 
 #endif
@@ -70,6 +70,8 @@ typedef uint32_t Twobitencoding;
 #define UNITSIN2BITENC              16
 #define DIVBYUNITSIN2BITENC(V)      DIV16(V)
 #define MODBYUNITSIN2BITENC(V)      MOD16(V)
+#define FIRSTHALVEBITS              (((1 << UNITSIN2BITENC) - 1) <<\
+                                     UNITSIN2BITENC)
 
 #else
 typedef unsigned char Twobitencoding;

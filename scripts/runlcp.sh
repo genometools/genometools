@@ -22,7 +22,7 @@ fi
 
 suffixerator()
 {
-  ${RUNNER} gt suffixerator -dna -tis -lcp -suf -des -ssp -db ${filename} $*
+  ${RUNNER} gt suffixerator -showtime -dna -tis -lcp -suf -des -ssp -db ${filename} $*
 }
 
 sfxmap()
