@@ -372,7 +372,6 @@ static void inversesuftab_get2(Itvfullentry *itvfullentry,
                                const Rmnsufinfo *rmnsufinfo,
                                Seqpos startpos)
 {
-  STAMP;
   itvfullentry->suffixstart = startpos;
   startpos += rmnsufinfo->currentdepth;
   if (startpos == rmnsufinfo->totallength)
@@ -381,16 +380,12 @@ static void inversesuftab_get2(Itvfullentry *itvfullentry,
     itvfullentry->rank = rmnsufinfo->totallength;
     return;
   }
-  printf("firstgeneration.nextfreePairsuffixptr = %lu\n",
-          rmnsufinfo->firstgeneration.nextfreePairsuffixptr);
-  if (rmnsufinfo->firstgeneration.nextfreePairsuffixptr == 0 &&
-      possibletocmpbitwise(rmnsufinfo->encseq))
+  if (possibletocmpbitwise(rmnsufinfo->encseq))
   {
     EndofTwobitencoding etbe;
     Bucketspecification bucketspec;
     bool fwd = ISDIRREVERSE(rmnsufinfo->readmode) ? false : true;
 
-  STAMP;
     initEncodedsequencescanstategeneric(rmnsufinfo->esr,rmnsufinfo->encseq,
                                         fwd,startpos);
     extract2bitenc(fwd,&etbe,rmnsufinfo->encseq,rmnsufinfo->esr,startpos);
@@ -459,6 +454,9 @@ static void inversesuftab_get2(Itvfullentry *itvfullentry,
            insersesuftab information */
       }
     }
+  } else
+  {
+    gt_assert(false);
   }
 }
 

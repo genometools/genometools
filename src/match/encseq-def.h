@@ -272,7 +272,7 @@ bool containsspecial(const Encodedsequence *encseq,
                      Seqpos startpos,
                      Seqpos len);
 
-unsigned int getsatforcevalue(const char *str);
+int getsatforcevalue(const char *str,GtError *err);
 
 /* check if the marked positions are correct */
 

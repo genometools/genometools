@@ -456,6 +456,8 @@ static WrittenPositionaccesstype wpa[] = {
   {Viauint32tables,"uint32"}
 };
 
+static char *wpalist = "direct, bytecompress, bit, uchar, ushort, uint32";
+
 /*@null@*/ static const char *accesstype2name(Positionaccesstype sat)
 {
   gt_assert((int) sat < (int) Undefpositionaccesstype);
@@ -481,17 +483,22 @@ static WrittenPositionaccesstype wpa[] = {
   return Undefpositionaccesstype;
 }
 
-unsigned int getsatforcevalue(const char *str)
+int getsatforcevalue(const char *str,GtError *err)
 {
   Positionaccesstype sat = str2positionaccesstype(str);
 
-  gt_assert(sat != Undefpositionaccesstype);
+  if (sat == Undefpositionaccesstype)
+  {
+    gt_error_set(err,"Illegal argument \"%s\" to option -sat; "
+                     "must be one of the following keywords: %s",str,wpalist);
+    return -1;
+  }
   switch (sat)
   {
     case Viauchartables: return 0;
-    case Viaushorttables: return 1U;
-    case Viauint32tables: return 2U;
-    default: return 3U;
+    case Viaushorttables: return 1;
+    case Viauint32tables: return 2;
+    default: return 3;
   }
 }
 
@@ -799,19 +806,39 @@ static int determinesattype(Seqpos *specialranges,
   } else
   {
     sat = str2positionaccesstype(str_sat);
-    switch (sat)
+    if (sat == Undefpositionaccesstype)
     {
-      case Undefpositionaccesstype:
-         gt_error_set(err,"illegal argument \"%s\" to option -sat",str_sat);
-         haserr = true;
-         break;
-      case Viauchartables: *specialranges = specialrangestab[0];
-                           break;
-      case Viaushorttables: *specialranges = specialrangestab[1];
-                            break;
-      case Viauint32tables: *specialranges = specialrangestab[2];
-                            break;
-      default: break;
+      gt_error_set(err,"illegal argument \"%s\" to option -sat",str_sat);
+      haserr = true;
+    } else
+    {
+      if (sat == Viauchartables || sat == Viaushorttables ||
+          sat == Viauint32tables)
+      {
+        if (numofchars == DNAALPHASIZE)
+        {
+          if (specialrangestab[0] == 0)
+          {
+            sat = Viabitaccess;
+          }
+          if (sat == Viauchartables)
+          {
+            *specialranges = specialrangestab[0];
+          } else
+          {
+            if (sat == Viaushorttables)
+            {
+              *specialranges = specialrangestab[1];
+            } else
+            {
+              *specialranges = specialrangestab[2];
+            }
+          }
+        } else
+        {
+          sat = Viabytecompress;
+        }
+      }
     }
   }
   return haserr ? -1 : (int) sat;
@@ -1767,6 +1794,7 @@ void initEncodedsequencescanstategeneric(Encodedsequencescanstate *esr,
                                          Seqpos startpos)
 {
   gt_assert(esr != NULL);
+  gt_assert(startpos < encseq->totallength);
   esr->moveforward = moveforward;
   if (encseq->sat == Viauchartables ||
       encseq->sat == Viaushorttables ||
@@ -1957,7 +1985,8 @@ bool hasfastspecialrangeenumerator(const Encodedsequence *encseq)
 
 bool possibletocmpbitwise(const Encodedsequence *encseq)
 {
-  return hasfastspecialrangeenumerator(encseq);
+  return (encseq->sat == Viadirectaccess ||
+          encseq->sat == Viabytecompress) ? false : true;
 }
 
 struct Specialrangeiterator
@@ -3170,6 +3199,9 @@ static Seqpos fwdgetnextstoppos(const Encodedsequence *encseq,
                                 Encodedsequencescanstate *esr,
                                 Seqpos pos)
 {
+  gt_assert(encseq->sat != Viadirectaccess &&
+            encseq->sat != Viabytecompress &&
+            encseq->sat != Viabitaccess);
   gt_assert(esr->moveforward);
   while (esr->hasprevious)
   {
@@ -3199,6 +3231,9 @@ static Seqpos revgetnextstoppos(const Encodedsequence *encseq,
                                 Encodedsequencescanstate *esr,
                                 Seqpos pos)
 {
+  gt_assert(encseq->sat != Viadirectaccess &&
+            encseq->sat != Viabytecompress &&
+            encseq->sat != Viabitaccess);
   gt_assert(!esr->moveforward);
   while (esr->hasprevious)
   {
@@ -3231,9 +3266,6 @@ static void fwdextract2bitenc(EndofTwobitencoding *ptbe,
 {
   Seqpos stoppos;
 
-  gt_assert(encseq->sat != Viadirectaccess &&
-            encseq->sat != Viabytecompress &&
-            encseq->sat != Viabitaccess);
   /* fwdextract2bitenc for bitaccess not implemented yet */
   gt_assert(startpos < encseq->totallength);
   if (hasspecialranges(encseq))
@@ -3281,9 +3313,6 @@ static void revextract2bitenc(EndofTwobitencoding *ptbe,
 {
   Seqpos stoppos;
 
-  gt_assert(encseq->sat != Viadirectaccess &&
-            encseq->sat != Viabytecompress &&
-            encseq->sat != Viabitaccess);
   /* revextract2bitenc for bitaccess not implemented yet */
   if (hasspecialranges(encseq))
   {

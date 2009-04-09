@@ -79,7 +79,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   bool haserr = false;
   unsigned int forcetable;
   Specialcharinfo specialcharinfo;
-  const SfxAlphabet *alpha;
+  const SfxAlphabet *alpha = NULL;
   bool alphaisbound = false;
   Filelengthvalues *filelengthtab = NULL;
   Seqpos specialrangestab[3];
@@ -91,19 +91,29 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   GT_INITARRAY(&sfxseqinfo->sequenceseppos,Seqpos);
   if (gt_str_length(so->str_sat) > 0)
   {
-    forcetable = getsatforcevalue(gt_str_get(so->str_sat));
+    int retval = getsatforcevalue(gt_str_get(so->str_sat),err);
+    if (retval < 0)
+    {
+      haserr = true;
+    } else
+    {
+      forcetable = (unsigned int) retval;
+    }
   } else
   {
     forcetable = 3U;
   }
-  alpha = assigninputalphabet(so->isdna,
-                              so->isprotein,
-                              so->str_smap,
-                              so->filenametab,
-                              err);
-  if (alpha == NULL)
+  if (!haserr)
   {
-    haserr = true;
+    alpha = assigninputalphabet(so->isdna,
+                                so->isprotein,
+                                so->str_smap,
+                                so->filenametab,
+                                err);
+    if (alpha == NULL)
+    {
+      haserr = true;
+    }
   }
   if (!haserr)
   {
