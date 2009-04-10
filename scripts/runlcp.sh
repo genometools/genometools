@@ -22,7 +22,7 @@ fi
 
 suffixerator()
 {
-  ${RUNNER} gt suffixerator -showtime -dna -tis -lcp -suf -des -ssp -db ${filename} $*
+  ${RUNNER} gt suffixerator -sat uchar -showtime -dna -tis -lcp -suf -des -ssp -db ${filename} $*
 }
 
 sfxmap()
@@ -33,6 +33,8 @@ sfxmap()
 for filename in ${filenames}
 do
   suffixerator -indexname sfx-idx 
+  sfxmap sfx-idx
+  suffixerator -dir rev -indexname sfx-idx 
   sfxmap sfx-idx
   suffixerator -maxdepth -indexname sfx-idx
   sfxmap sfx-idx

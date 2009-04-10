@@ -45,7 +45,7 @@ static void runscanatpostrial(const Encodedsequence *encseq,
       fprintf(stderr,"startpos = " FormatSeqpos
                      " access=%s, mode=%s: position=" FormatSeqpos
                      ": random access (correct) = %u != %u = "
-                     " sequential read (wrong)",
+                     " sequential read (wrong)\n",
                      PRINTSeqposcast(startpos),
                      encseqaccessname(encseq),
                      showreadmode(readmode),
