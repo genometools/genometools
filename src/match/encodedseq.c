@@ -1322,6 +1322,11 @@ static int fillbitaccesstab(Encodedsequence *encseq,
 
   gt_error_check(err);
   INITBITTAB(encseq->specialbits,encseq->totallength + INTWORDSIZE);
+  for(pos = encseq->totallength; pos < encseq->totallength + INTWORDSIZE; 
+      pos++)
+  {
+    SETIBIT(encseq->specialbits,pos);
+  }
   for (pos=0; /* Nothing */; pos++)
   {
     retval = gt_sequence_buffer_next(fb,&cc,err);
@@ -3366,7 +3371,6 @@ static void fwdextract2bitenc(EndofTwobitencoding *ptbe,
     Bitsequence tmp, tmp2;
     unsigned int unitsnotspecial;
 
-    ptbe->tbe = calctbeforward(encseq->twobitencoding,startpos);
     tmp = extractspecialbits(encseq->specialbits,startpos);
     tmp2 = extractspecialbits2(&unitsnotspecial,encseq->specialbits,startpos);
     if (tmp2 != tmp)
@@ -3387,6 +3391,13 @@ static void fwdextract2bitenc(EndofTwobitencoding *ptbe,
                                               requiredUInt32Bits(tmp));
     }
     gt_assert(ptbe->unitsnotspecial == unitsnotspecial);
+    if (ptbe->unitsnotspecial == 0)
+    {
+      ptbe->tbe = 0;
+    } else
+    {
+      ptbe->tbe = calctbeforward(encseq->twobitencoding,startpos);
+    }
   } else
   {
     if (hasspecialranges(encseq))
@@ -3412,6 +3423,10 @@ static void fwdextract2bitenc(EndofTwobitencoding *ptbe,
       ptbe->tbe = 0;
     }
   }
+  /*
+  printf("tbe=%lu\n",(unsigned long) ptbe->tbe);
+  printf("unitsnotspecial=%u\n",ptbe->unitsnotspecial);
+  */
 }
 
 static void revextract2bitenc(EndofTwobitencoding *ptbe,
