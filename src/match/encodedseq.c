@@ -1656,48 +1656,69 @@ static void binpreparenextrange(const Encodedsequence *encseq,
   }
   esr->firstcell = endpos0;
   esr->lastcell = endpos1 = accessendspecialsubsUint(encseq,pagenum);
-  while (endpos0  < endpos1)
+  if (startpos > 0)
   {
-    cellnum = endpos0 + DIV2(endpos1 - endpos0 - 1);
-    determinerange(&range,encseq,pagenum,cellnum);
-#ifdef RANGEDEBUG
-    printf("binsearch in [%lu,%lu] => mid = %lu => ",endpos0,endpos1,cellnum);
-    showsequencerange(&range);
-    printf("\n");
-#endif
-    if (moveforward)
+    while (endpos0  < endpos1)
     {
-      if (startpos <= range.rightpos)
+      cellnum = endpos0 + DIV2(endpos1 - endpos0 - 1);
+      determinerange(&range,encseq,pagenum,cellnum);
+#ifdef RANGEDEBUG
+      printf("binsearch in [%lu,%lu] => mid = %lu => ",endpos0,endpos1,cellnum);
+      showsequencerange(&range);
+      printf("\n");
+#endif
+      if (moveforward)
       {
-        if (startpos >= range.leftpos)
+        if (startpos > range.rightpos)
         {
           found = true;
           esr->firstcell = cellnum;
-          break;
+          endpos0 = cellnum+1;
+        } else
+        {
+          if (startpos >= range.leftpos)
+          {
+            found = true;
+            esr->firstcell = cellnum;
+            break;
+          }
+          endpos1 = cellnum;
         }
-        endpos1 = cellnum;
       } else
       {
-        found = true;
-        esr->firstcell = cellnum;
-        endpos0 = cellnum+1;
-      }
-    } else
-    {
-      if (startpos < range.leftpos)
-      {
-        found = true;
-        esr->lastcell = cellnum+1;
-        endpos1 = cellnum;
-      } else
-      {
-        if (startpos < range.rightpos)
+        if (startpos < range.leftpos)
         {
           found = true;
           esr->lastcell = cellnum+1;
-          break;
+          endpos1 = cellnum;
+        } else
+        {
+          if (startpos < range.rightpos)
+          {
+            found = true;
+            esr->lastcell = cellnum+1;
+            break;
+          }
+          endpos0 = cellnum+1;
         }
-        endpos0 = cellnum+1;
+      }
+    }
+  } else
+  {
+    if (endpos0  < endpos1)
+    {
+      determinerange(&range,encseq,pagenum,0);
+      if (moveforward)
+      {
+        if (range.leftpos == 0)
+        {
+          found = true;
+          esr->firstcell = 0;
+        }
+      } else
+      {
+        found = true;
+        esr->lastcell = 1;
       }
     }
   }
