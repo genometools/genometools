@@ -2338,10 +2338,6 @@ static unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
   {
     len = (unsigned long) (right-left);
     mid = left + DIV2(len);
-#ifdef SKDEBUG
-    printf("left=%lu,right = %lu\n",left,right);
-    printf("mid=%lu\n",mid);
-#endif
     if (recordseps[mid] < position)
     {
       if (position < recordseps[mid+1])
