@@ -3333,6 +3333,44 @@ static inline Bitsequence fwdextractspecialbits(const Bitsequence *specialbits,
   }
 }
 
+static inline Bitsequence revextractspecialbits2(unsigned int *unitsnotspecial,
+                                                 const Bitsequence *specialbits,
+                                                 Seqpos startpos)
+{
+  Seqpos idx;
+  Bitsequence result = 0, mask = 1;
+  bool found = false;
+  Seqpos stoppos;
+
+  if (startpos >= UNITSIN2BITENC)
+  {
+    stoppos = startpos - UNITSIN2BITENC + 1;
+  } else
+  {
+    stoppos = 0;
+  }
+  *unitsnotspecial = (unsigned int) UNITSIN2BITENC;
+  idx=startpos;
+  for (idx=startpos; /* Nothing */; idx--)
+  {
+    if (ISIBITSET(specialbits,idx))
+    {
+      if (!found)
+      {
+        *unitsnotspecial = (unsigned int) (startpos - idx);
+        found = true;
+      }
+      result |= mask;
+    }
+    mask <<= 1;
+    if (idx == stoppos)
+    {
+      break;
+    }
+  }
+  return result;
+}
+
 static inline Bitsequence revextractspecialbits(const Bitsequence *specialbits,
                                                 Seqpos startpos)
 {
@@ -3342,14 +3380,15 @@ static inline Bitsequence revextractspecialbits(const Bitsequence *specialbits,
   unit = (unsigned long) DIVWORDSIZE(startpos);
   if (remain >= (unsigned long) DIV2(INTWORDSIZE))
   {
-    return (Bitsequence) ((specialbits[unit] >> (INTWORDSIZE - remain))
+    return (Bitsequence) ((specialbits[unit] >> (INTWORDSIZE - 1 - remain))
                            & LASTHALVEBITS);
   } else
   {
-    Twobitencoding tmp = specialbits[unit] >> (INTWORDSIZE - remain);
+    Twobitencoding tmp = (specialbits[unit] >> (INTWORDSIZE - 1 - remain)) &
+                         LASTHALVEBITS;
     if (unit > 0)
     {
-      tmp |= specialbits[unit-1] << remain;
+      tmp |= (specialbits[unit-1] << (1+remain)) & LASTHALVEBITS;
     }
     return tmp;
   }
@@ -3502,9 +3541,23 @@ static void revextract2bitenc(EndofTwobitencoding *ptbe,
   {
     if (hasspecialranges(encseq))
     {
-      Bitsequence tmp;
+      Bitsequence tmp, tmp2;
+      unsigned int unitsnotspecial;
 
       tmp = revextractspecialbits(encseq->specialbits,startpos);
+      tmp2 = revextractspecialbits2(&unitsnotspecial,encseq->specialbits,
+                                    startpos);
+      if (tmp2 != tmp)
+      {
+        char buffer[32+1];
+        uint32_t2string(buffer,tmp2);
+        fprintf(stderr,"specialbits at startpos %lu (unitsnotspecial=%u)\n"
+                       "tmp2=%s!=\n",
+                       (unsigned long) startpos,unitsnotspecial,buffer);
+        uint32_t2string(buffer,tmp);
+        fprintf(stderr,"     %s=tmp\n",buffer);
+        exit(EXIT_FAILURE);
+      }
       if (tmp == 0)
       {
         ptbe->unitsnotspecial = (unsigned int) UNITSIN2BITENC;
@@ -3516,6 +3569,7 @@ static void revextract2bitenc(EndofTwobitencoding *ptbe,
           ptbe->unitsnotspecial = (unsigned int) UNITSIN2BITENC;
         }
       }
+      gt_assert(unitsnotspecial == ptbe->unitsnotspecial);
     } else
     {
       ptbe->unitsnotspecial = (unsigned int) UNITSIN2BITENC;
