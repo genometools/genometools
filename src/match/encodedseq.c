@@ -3385,29 +3385,15 @@ static inline unsigned int numberoftrailingzeros (uint32_t x)
 
 static inline unsigned int fwdbitaccessunitsnotspecial(Bitsequence spbits)
 {
-  if (spbits == 0)
-  {
-    return (unsigned int) UNITSIN2BITENC;
-  } else
-  {
-    return (unsigned int) (MULT2(UNITSIN2BITENC) - requiredUInt32Bits(spbits));
-  }
+  return (spbits == 0) ? (unsigned int) UNITSIN2BITENC
+                       : (unsigned int) (INTWORDSIZE -
+                                         requiredUInt32Bits(spbits));
 }
 
 static inline unsigned int revbitaccessunitsnotspecial(Bitsequence spbits)
 {
-  if (spbits == 0)
-  {
-    return (unsigned int) UNITSIN2BITENC;
-  } else
-  {
-    unsigned int unitsnotspecial = (unsigned int) numberoftrailingzeros(spbits);
-    if (unitsnotspecial > (unsigned int) UNITSIN2BITENC)
-    {
-      return (unsigned int) UNITSIN2BITENC;
-    }
-    return unitsnotspecial;
-  }
+  return (spbits == 0) ? (unsigned int) UNITSIN2BITENC
+                       : (unsigned int) numberoftrailingzeros(spbits);
 }
 
 static void fwdextract2bitenc(EndofTwobitencoding *ptbe,
