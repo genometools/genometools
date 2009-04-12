@@ -213,14 +213,20 @@ int testencodedsequence(const GtStrArray *filenametab,
                         unsigned long multicharcmptrials,
                         GtError *err)
 {
+  bool fwd = ISDIRREVERSE(readmode) ? false : true,
+       complement = ISDIRCOMPLEMENT(readmode) ? true : false;
+
   if (hasfastspecialrangeenumerator(encseq))
   {
-    checkextractunitatpos(encseq,ISDIRREVERSE(readmode) ? false : true,
-                          ISDIRCOMPLEMENT(readmode) ? true : false);
+    checkextractunitatpos(encseq,fwd,complement);
     if (multicharcmptrials > 0)
     {
       testmulticharactercompare(encseq,readmode,multicharcmptrials);
     }
+  }
+  if (!complement)
+  {
+    checkextractspecialbits(encseq,fwd);
   }
   if (scantrials > 0)
   {

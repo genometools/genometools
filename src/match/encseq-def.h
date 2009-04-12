@@ -252,6 +252,8 @@ int multicharactercompare(const Encodedsequence *encseq,
 void checkextractunitatpos(const Encodedsequence *encseq,
                            bool fwd,bool complement);
 
+void checkextractspecialbits(const Encodedsequence *encseq,bool fwd);
+
 void multicharactercompare_withtest(const Encodedsequence *encseq,
                                     bool fwd,
                                     bool complement,
