@@ -70,9 +70,8 @@ typedef uint32_t Twobitencoding;
 #define UNITSIN2BITENC              16
 #define DIVBYUNITSIN2BITENC(V)      DIV16(V)
 #define MODBYUNITSIN2BITENC(V)      MOD16(V)
-#define FIRSTHALVEBITS              (((1 << UNITSIN2BITENC) - 1) <<\
-                                     UNITSIN2BITENC)
-
+#define LASTHALVEBITS               ((1 << UNITSIN2BITENC) - 1)
+#define FIRSTHALVEBITS              (LASTHALVEBITS << UNITSIN2BITENC)
 #else
 typedef unsigned char Twobitencoding;
 #define UNITSIN2BITENC              4
