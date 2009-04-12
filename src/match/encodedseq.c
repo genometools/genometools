@@ -3403,26 +3403,7 @@ static void fwdextract2bitenc(EndofTwobitencoding *ptbe,
 {
   gt_assert(startpos < encseq->totallength);
   ptbe->position = startpos;
-  if (encseq->sat == Viabitaccess)
-  {
-    if (hasspecialranges(encseq))
-    {
-      Bitsequence spbits;
-
-      spbits = fwdextractspecialbits(encseq->specialbits,startpos);
-      ptbe->unitsnotspecial = fwdbitaccessunitsnotspecial(spbits);
-    } else
-    {
-      ptbe->unitsnotspecial = (unsigned int) UNITSIN2BITENC;
-    }
-    if (ptbe->unitsnotspecial == 0)
-    {
-      ptbe->tbe = 0;
-    } else
-    {
-      ptbe->tbe = calctbeforward(encseq->twobitencoding,startpos);
-    }
-  } else
+  if (encseq->sat != Viabitaccess)
   {
     Seqpos stoppos;
 
@@ -3448,25 +3429,14 @@ static void fwdextract2bitenc(EndofTwobitencoding *ptbe,
       ptbe->unitsnotspecial = 0;
       ptbe->tbe = 0;
     }
-  }
-}
-
-static void revextract2bitenc(EndofTwobitencoding *ptbe,
-                              const Encodedsequence *encseq,
-                              Encodedsequencescanstate *esr,
-                              Seqpos startpos)
-{
-  Seqpos stoppos;
-
-  ptbe->position = startpos;
-  if (encseq->sat == Viabitaccess)
+  } else
   {
     if (hasspecialranges(encseq))
     {
       Bitsequence spbits;
 
-      spbits = revextractspecialbits(encseq->specialbits,startpos);
-      ptbe->unitsnotspecial = revbitaccessunitsnotspecial(spbits);
+      spbits = fwdextractspecialbits(encseq->specialbits,startpos);
+      ptbe->unitsnotspecial = fwdbitaccessunitsnotspecial(spbits);
     } else
     {
       ptbe->unitsnotspecial = (unsigned int) UNITSIN2BITENC;
@@ -3476,10 +3446,22 @@ static void revextract2bitenc(EndofTwobitencoding *ptbe,
       ptbe->tbe = 0;
     } else
     {
-      ptbe->tbe = calctbereverse(encseq->twobitencoding,startpos);
+      ptbe->tbe = calctbeforward(encseq->twobitencoding,startpos);
     }
-  } else
+  }
+}
+
+static void revextract2bitenc(EndofTwobitencoding *ptbe,
+                              const Encodedsequence *encseq,
+                              Encodedsequencescanstate *esr,
+                              Seqpos startpos)
+{
+  gt_assert(startpos < encseq->totallength);
+  ptbe->position = startpos;
+  if (encseq->sat != Viabitaccess)
   {
+    Seqpos stoppos;
+
     if (hasspecialranges(encseq))
     {
       stoppos = revgetnextstoppos(encseq,esr,startpos);
@@ -3501,6 +3483,25 @@ static void revextract2bitenc(EndofTwobitencoding *ptbe,
     {
       ptbe->unitsnotspecial = 0;
       ptbe->tbe = 0;
+    }
+  } else
+  {
+    if (hasspecialranges(encseq))
+    {
+      Bitsequence spbits;
+
+      spbits = revextractspecialbits(encseq->specialbits,startpos);
+      ptbe->unitsnotspecial = revbitaccessunitsnotspecial(spbits);
+    } else
+    {
+      ptbe->unitsnotspecial = (unsigned int) UNITSIN2BITENC;
+    }
+    if (ptbe->unitsnotspecial == 0)
+    {
+      ptbe->tbe = 0;
+    } else
+    {
+      ptbe->tbe = calctbereverse(encseq->twobitencoding,startpos);
     }
   }
 }
