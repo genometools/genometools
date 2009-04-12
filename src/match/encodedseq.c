@@ -502,6 +502,18 @@ int getsatforcevalue(const char *str,GtError *err)
   }
 }
 
+static bool satviautables(Positionaccesstype sat)
+{
+  return (sat == Viauchartables ||
+          sat == Viaushorttables ||
+          sat == Viauint32tables) ? true : false;
+}
+
+bool hasfastspecialrangeenumerator(const Encodedsequence *encseq)
+{
+  return satviautables(encseq->sat);
+}
+
 DECLARESAFECASTFUNCTION(uint64_t,uint64_t,unsigned long,unsigned_long)
 
 static unsigned long detunitsoftwobitencoding(Seqpos totallength)
@@ -813,8 +825,7 @@ static int determinesattype(Seqpos *specialranges,
       haserr = true;
     } else
     {
-      if (sat == Viauchartables || sat == Viaushorttables ||
-          sat == Viauint32tables)
+      if (satviautables(sat))
       {
         if (numofchars == DNAALPHASIZE)
         {
@@ -1464,14 +1475,9 @@ static void showallspecialpositionswithpages(const Encodedsequence *encseq)
 
 static void showallspecialpositions(const Encodedsequence *encseq)
 {
-  if (encseq->numofspecialstostore > 0)
+  if (encseq->numofspecialstostore > 0 && hasfastspecialrangeenumerator(encseq))
   {
-    if (encseq->sat == Viauchartables ||
-        encseq->sat == Viaushorttables ||
-        encseq->sat == Viauint32tables)
-    {
-      showallspecialpositionswithpages(encseq);
-    }
+    showallspecialpositionswithpages(encseq);
   }
 }
 
@@ -1824,9 +1830,7 @@ void initEncodedsequencescanstategeneric(Encodedsequencescanstate *esr,
   gt_assert(esr != NULL);
   gt_assert(startpos < encseq->totallength);
   esr->moveforward = moveforward;
-  if (encseq->sat == Viauchartables ||
-      encseq->sat == Viaushorttables ||
-      encseq->sat == Viauint32tables)
+  if (hasfastspecialrangeenumerator(encseq))
   {
     esr->hasprevious = esr->hascurrent = false;
     esr->numofspecialcells
@@ -1990,13 +1994,6 @@ static bool containsspecialViatables(const Encodedsequence *encseq,
 bool hasspecialranges(const Encodedsequence *encseq)
 {
   return (encseq->numofspecialstostore > 0) ? true : false;
-}
-
-bool hasfastspecialrangeenumerator(const Encodedsequence *encseq)
-{
-  return (encseq->sat == Viadirectaccess ||
-          encseq->sat == Viabytecompress ||
-          encseq->sat == Viabitaccess) ? false : true;
 }
 
 bool possibletocmpbitwise(const Encodedsequence *encseq)
@@ -2458,7 +2455,7 @@ static Encodedsequence *determineencseqkeyvalues(Positionaccesstype sat,
 
   ALLOCASSIGNSPACE(encseq,NULL,Encodedsequence,(size_t) 1);
   encseq->sat = sat;
-  if (sat == Viauchartables || sat == Viaushorttables || sat == Viauint32tables)
+  if (satviautables(sat))
   {
     encseq->maxspecialtype = sat2maxspecialtype(sat);
   }
