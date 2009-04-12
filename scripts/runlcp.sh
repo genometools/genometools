@@ -27,7 +27,7 @@ suffixerator()
 
 sfxmap()
 {
-  gt dev sfxmap -lcp -suf $*
+  gt dev sfxmap -tis -lcp -suf $*
 }
 
 for filename in ${filenames}
