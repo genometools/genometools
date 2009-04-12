@@ -1005,17 +1005,17 @@ static GtUchar delivercharViadirectaccess(const Encodedsequence *encseq,
   return encseq->plainseq[pos];
 }
 
-static bool containsspecialViabitordirectaccess(bool viabit,
-                                                const Encodedsequence *encseq,
-                                                bool moveforward,
-                                                Seqpos startpos,
-                                                Seqpos len)
+static bool containsspecialViabitaccess(const Encodedsequence *encseq,
+                                        bool moveforward,
+                                        GT_UNUSED
+                                        Encodedsequencescanstate *esrspace,
+                                        Seqpos startpos,
+                                        Seqpos len)
 {
   Seqpos pos;
 
   gt_assert(encseq != NULL);
-
-  if (viabit && encseq->specialbits == NULL)
+  if (encseq->specialbits == NULL)
   {
     return false;
   }
@@ -1023,18 +1023,9 @@ static bool containsspecialViabitordirectaccess(bool viabit,
   {
     for (pos = startpos; pos < startpos + len; pos++)
     {
-      if (viabit)
+      if (ISIBITSET(encseq->specialbits,pos))
       {
-        if (ISIBITSET(encseq->specialbits,pos))
-        {
-          return true;
-        }
-      } else
-      {
-        if (ISSPECIAL(encseq->plainseq[pos]))
-        {
-          return true;
-        }
+        return true;
       }
     }
   } else
@@ -1042,18 +1033,9 @@ static bool containsspecialViabitordirectaccess(bool viabit,
     gt_assert (startpos + 1 >= len);
     for (pos = startpos; /* Nothing */; pos--)
     {
-      if (viabit)
+      if (ISIBITSET(encseq->specialbits,pos))
       {
-        if (ISIBITSET(encseq->specialbits,pos))
-        {
-          return true;
-        }
-      } else
-      {
-        if (ISSPECIAL(encseq->plainseq[pos]))
-        {
-          return true;
-        }
+        return true;
       }
       if (pos == startpos + 1 - len)
       {
@@ -1064,20 +1046,6 @@ static bool containsspecialViabitordirectaccess(bool viabit,
   return false;
 }
 
-static bool containsspecialViabitaccess(const Encodedsequence *encseq,
-                                        bool moveforward,
-                                        GT_UNUSED
-                                        Encodedsequencescanstate *esrspace,
-                                        Seqpos startpos,
-                                        Seqpos len)
-{
-  return containsspecialViabitordirectaccess(true,
-                                             encseq,
-                                             moveforward,
-                                             startpos,
-                                             len);
-}
-
 static bool containsspecialViadirectaccess(const Encodedsequence *encseq,
                                            bool moveforward,
                                            GT_UNUSED
@@ -1085,11 +1053,34 @@ static bool containsspecialViadirectaccess(const Encodedsequence *encseq,
                                            Seqpos startpos,
                                            Seqpos len)
 {
-  return containsspecialViabitordirectaccess(false,
-                                             encseq,
-                                             moveforward,
-                                             startpos,
-                                             len);
+  Seqpos pos;
+
+  gt_assert(encseq != NULL);
+  if (moveforward)
+  {
+    for (pos = startpos; pos < startpos + len; pos++)
+    {
+      if (ISSPECIAL(encseq->plainseq[pos]))
+      {
+        return true;
+      }
+    }
+  } else
+  {
+    gt_assert (startpos + 1 >= len);
+    for (pos = startpos; /* Nothing */; pos--)
+    {
+      if (ISSPECIAL(encseq->plainseq[pos]))
+      {
+        return true;
+      }
+      if (pos == startpos + 1 - len)
+      {
+        break;
+      }
+    }
+  }
+  return false;
 }
 
 static bool containsspecialViabytecompress(GT_UNUSED
