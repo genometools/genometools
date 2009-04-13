@@ -1817,7 +1817,8 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   {
     bsr->lcpsubtab = NULL;
   }
-  if (!sfxstrategy->cmpcharbychar && hasspecialranges(encseq))
+  if (!sfxstrategy->cmpcharbychar && hasfastspecialrangeenumerator(encseq) &&
+      hasspecialranges(encseq))
   {
     bsr->esr1 = newEncodedsequencescanstate();
     bsr->esr2 = newEncodedsequencescanstate();

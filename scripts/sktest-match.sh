@@ -46,9 +46,7 @@ then
   cd ..
 fi
 
-# XXX fix the problem with tallymer not running.
-
-runtallymer=0
+runtallymer=1
 
 if test $runtallymer -eq 1
 then

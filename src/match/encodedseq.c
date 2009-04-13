@@ -45,6 +45,7 @@
 #include "stamp.h"
 #include "fillsci.h"
 #include "encseq-def.h"
+#include "intcode-def.h"
 #ifndef INLINEDENCSEQ
 #include "encseq-type.h"
 #endif
@@ -439,6 +440,38 @@ void encseqextract(GtUchar *buffer,
     buffer[idx] = sequentialgetencodedchar(encseq,esr,pos,Forwardmode);
   }
   freeEncodedsequencescanstate(&esr);
+}
+
+Codetype extractprefixcode(unsigned int *unitsnotspecial,
+                           const Encodedsequence *encseq,
+                           const Codetype **multimappower,
+                           Seqpos frompos,
+                           unsigned int len)
+{
+  Seqpos pos;
+  Codetype code = 0;
+
+  gt_assert(len > 0);
+  if (encseq->sat == Viadirectaccess)
+  {
+    for (pos=frompos, *unitsnotspecial = 0;
+         pos < encseq->totallength && *unitsnotspecial < len;
+         pos++, (*unitsnotspecial)++)
+    {
+      GtUchar cc = encseq->plainseq[pos];
+      if (ISNOTSPECIAL(cc))
+      {
+        code += multimappower[*unitsnotspecial][cc];
+      } else
+      {
+        break;
+      }
+    }
+  } else
+  {
+    gt_assert(false);
+  }
+  return code;
 }
 
 typedef struct
@@ -1818,11 +1851,11 @@ void initEncodedsequencescanstategeneric(Encodedsequencescanstate *esr,
                                          bool moveforward,
                                          Seqpos startpos)
 {
-  gt_assert(esr != NULL);
-  gt_assert(startpos < encseq->totallength);
-  esr->moveforward = moveforward;
   if (hasfastspecialrangeenumerator(encseq))
   {
+    gt_assert(startpos < encseq->totallength);
+    gt_assert(esr != NULL);
+    esr->moveforward = moveforward;
     esr->hasprevious = esr->hascurrent = false;
     esr->numofspecialcells
       = (unsigned long) encseq->totallength/encseq->maxspecialtype + 1;

@@ -14,12 +14,13 @@ mkdir -p ${INDEXDIR}
 queryfile=$1
 shift
 referencefiles=$*
-../bin/gt suffixerator -algbds 3 40 120 -indexname ${INDEXDIR}/all -db ${referencefiles} -suf -lcp -pl 1
+../bin/gt suffixerator -dna -algbds 3 40 120 -indexname ${INDEXDIR}/all -db ${referencefiles} -suf -lcp -tis -pl
 num=0
 indexlist=""
 for filename in ${referencefiles}
 do
-  ../bin/gt suffixerator -algbds 3 40 120 -indexname ${INDEXDIR}/midx${num} -db ${filename} -suf -lcp -tis -pl 1
+  ../bin/gt suffixerator -dna -v -cmpcharbychar -indexname ${INDEXDIR}/midx${num} -db ${filename} -suf -lcp -tis -pl
+  ../bin/gt dev sfxmap -tis -suf -lcp  ${INDEXDIR}/midx${num}
   indexlist="${indexlist} ${INDEXDIR}/midx${num}"
   num=`expr ${num} + 1`
 done
