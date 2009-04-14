@@ -19,7 +19,7 @@ num=0
 indexlist=""
 for filename in ${referencefiles}
 do
-  ../bin/gt suffixerator -dna -v -cmpcharbychar -indexname ${INDEXDIR}/midx${num} -db ${filename} -suf -lcp -tis -pl
+  ../bin/gt suffixerator -dna -v -indexname ${INDEXDIR}/midx${num} -db ${filename} -suf -lcp -tis -pl
   ../bin/gt dev sfxmap -tis -suf -lcp  ${INDEXDIR}/midx${num}
   indexlist="${indexlist} ${INDEXDIR}/midx${num}"
   num=`expr ${num} + 1`
