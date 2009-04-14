@@ -943,6 +943,7 @@ fetchSuperBlock(const struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
   else
   {
     FILE *idxFP;
+    int ret;
     size_t superBlockCWDiskSize = superBlockCWMaxReadSize(seqIdx);
     BitOffset bucketOffset = bucketNum * superBlockCWBits(seqIdx);
     BitOffset varDataOffset;
@@ -959,8 +960,9 @@ fetchSuperBlock(const struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
               + varDataOffset/bitElemBits * sizeof (BitElem), SEEK_SET))
       fetchSuperBlockErrRet();
     retval->varDataMemBase = varDataOffset%bitElemBits;
-    fread(retval->varData, sizeof (BitElem), superBlockVarMaxReadSize(seqIdx),
-          idxFP);
+    ret = fread(retval->varData, sizeof (BitElem),
+                superBlockVarMaxReadSize(seqIdx),
+                idxFP);
     if (ferror(idxFP))
       fetchSuperBlockErrRet();
   }

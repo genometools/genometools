@@ -1209,7 +1209,7 @@ static void add_nucleotide_values(NucEval *nucleotides, GtBittab *real,
 {
   gt_assert(nucleotides && real && pred && tmp);
   if (gt_log_enabled()) {
-    gt_log_log(level);
+    gt_log_log("%s", level);
     gt_log_log("reality:");
     gt_bittab_show(real, gt_log_fp());
     gt_log_log("prediction:");
