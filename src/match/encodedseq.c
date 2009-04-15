@@ -3404,16 +3404,41 @@ static inline unsigned int numberoftrailingzeros (uint32_t x)
   return bz + b4 + b3 + b2 + b1 + b0;
 }
 
-static inline unsigned int fwdbitaccessunitsnotspecial(Bitsequence spbits)
+static inline unsigned fwdbitaccessunitsnotspecial0(const Encodedsequence
+                                                    *encseq,
+                                                    Seqpos startpos)
 {
-  return (spbits == 0) ? (unsigned int) UNITSIN2BITENC
+  gt_assert(startpos < encseq->totallength);
+  if (encseq->totallength - startpos > (Seqpos) UNITSIN2BITENC)
+  {
+    return (unsigned int) UNITSIN2BITENC;
+  }
+  return (unsigned int) (encseq->totallength - startpos);
+}
+
+static inline unsigned int fwdbitaccessunitsnotspecial(Bitsequence spbits,
+                                                       const Encodedsequence
+                                                         *encseq,
+                                                       Seqpos startpos)
+{
+  return (spbits == 0) ? fwdbitaccessunitsnotspecial0(encseq,startpos)
                        : (unsigned int) (INTWORDSIZE -
                                          requiredUInt32Bits(spbits));
 }
 
-static inline unsigned int revbitaccessunitsnotspecial(Bitsequence spbits)
+static inline unsigned int revbitaccessunitsnotspecial0(Seqpos startpos)
 {
-  return (spbits == 0) ? (unsigned int) UNITSIN2BITENC
+  if (startpos + 1 > (Seqpos) UNITSIN2BITENC)
+  {
+    return (unsigned int) UNITSIN2BITENC;
+  }
+  return (unsigned int) (startpos + 1);
+}
+
+static inline unsigned int revbitaccessunitsnotspecial(Bitsequence spbits,
+                                                       Seqpos startpos)
+{
+  return (spbits == 0) ? revbitaccessunitsnotspecial0(startpos)
                        : (unsigned int) numberoftrailingzeros(spbits);
 }
 
@@ -3457,10 +3482,11 @@ static void fwdextract2bitenc(EndofTwobitencoding *ptbe,
       Bitsequence spbits;
 
       spbits = fwdextractspecialbits(encseq->specialbits,startpos);
-      ptbe->unitsnotspecial = fwdbitaccessunitsnotspecial(spbits);
+      ptbe->unitsnotspecial = fwdbitaccessunitsnotspecial(spbits,encseq,
+                                                          startpos);
     } else
     {
-      ptbe->unitsnotspecial = (unsigned int) UNITSIN2BITENC;
+      ptbe->unitsnotspecial = fwdbitaccessunitsnotspecial0(encseq,startpos);
     }
     if (ptbe->unitsnotspecial == 0)
     {
@@ -3512,10 +3538,10 @@ static void revextract2bitenc(EndofTwobitencoding *ptbe,
       Bitsequence spbits;
 
       spbits = revextractspecialbits(encseq->specialbits,startpos);
-      ptbe->unitsnotspecial = revbitaccessunitsnotspecial(spbits);
+      ptbe->unitsnotspecial = revbitaccessunitsnotspecial(spbits,startpos);
     } else
     {
-      ptbe->unitsnotspecial = (unsigned int) UNITSIN2BITENC;
+      ptbe->unitsnotspecial = revbitaccessunitsnotspecial0(startpos);
     }
     if (ptbe->unitsnotspecial == 0)
     {
@@ -4056,12 +4082,12 @@ static inline Bitsequence revextractspecialbits_bruteforce(
   if (startpos >= (Seqpos) UNITSIN2BITENC)
   {
     stoppos = startpos - UNITSIN2BITENC + 1;
+    *unitsnotspecial = (unsigned int) UNITSIN2BITENC;
   } else
   {
     stoppos = 0;
+    *unitsnotspecial = (unsigned int) (startpos+1);
   }
-  *unitsnotspecial = (unsigned int) UNITSIN2BITENC;
-  idx=startpos;
   for (idx=startpos; /* Nothing */; idx--)
   {
     if (ISIBITSET(specialbits,idx))
@@ -4117,6 +4143,13 @@ void checkextractunitatpos(const Encodedsequence *encseq,
       showsequenceatstartpos(stderr,fwd,complement,encseq,startpos);
       exit(EXIT_FAILURE);
     }
+    /*
+    if (startpos == 148 || startpos == 291)
+    {
+      printf("startpos = %lu, unitsnotspecial = %u\n",(unsigned long) startpos,
+             ptbe1.unitsnotspecial);
+    }
+    */
     if (fwd)
     {
       if (startpos == encseq->totallength - 1)
@@ -4149,14 +4182,19 @@ void checkextractspecialbits(const Encodedsequence *encseq,bool fwd)
   startpos = fwd ? 0 : (encseq->totallength-1);
   while (true)
   {
-
-    spbits1 = (fwd ? fwdextractspecialbits : revextractspecialbits)
-              (encseq->specialbits,startpos);
-    unitsnotspecial = (fwd ? fwdbitaccessunitsnotspecial
-                           : revbitaccessunitsnotspecial) (spbits1);
-    spbits2 = (fwd ? fwdextractspecialbits_bruteforce
-                   : revextractspecialbits_bruteforce)
-              (&unitsnotspecial_bruteforce,encseq->specialbits,startpos);
+    if (fwd)
+    {
+      spbits1 = fwdextractspecialbits(encseq->specialbits,startpos);
+      unitsnotspecial = fwdbitaccessunitsnotspecial(spbits1,encseq,startpos);
+      spbits2 = fwdextractspecialbits_bruteforce
+                (&unitsnotspecial_bruteforce,encseq->specialbits,startpos);
+    } else
+    {
+      spbits1 = revextractspecialbits(encseq->specialbits,startpos);
+      unitsnotspecial = revbitaccessunitsnotspecial(spbits1,startpos);
+      spbits2 = revextractspecialbits_bruteforce
+                (&unitsnotspecial_bruteforce,encseq->specialbits,startpos);
+    }
     gt_assert(unitsnotspecial_bruteforce == unitsnotspecial);
     if (spbits1 != spbits2)
     {
