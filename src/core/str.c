@@ -143,6 +143,26 @@ void gt_str_append_double(GtStr *dest, double d, int precision)
   gt_str_append_cstr(dest, buf);
 }
 
+void gt_str_append_int(GtStr *dest, int intval)
+{
+  char buf[BUFSIZ];
+  int rval;
+  gt_assert(dest);
+  rval = snprintf(buf, BUFSIZ, "%d", intval);
+  gt_assert(rval < BUFSIZ);
+  gt_str_append_cstr(dest, buf);
+}
+
+void gt_str_append_uint(GtStr *dest, unsigned int uint)
+{
+  char buf[BUFSIZ];
+  int rval;
+  gt_assert(dest);
+  rval = snprintf(buf, BUFSIZ, "%u", uint);
+  gt_assert(rval < BUFSIZ);
+  gt_str_append_cstr(dest, buf);
+}
+
 char* gt_str_get(const GtStr *s)
 {
   gt_assert(s);
