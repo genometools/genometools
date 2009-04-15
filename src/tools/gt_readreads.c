@@ -15,22 +15,28 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <string.h>
 #include "core/fileutils.h"
 #include "core/ma.h"
 #include "core/progressbar.h"
+#include "core/quality.h"
 #include "core/seqiterator_qual_fastq.h"
 #include "core/str_array_api.h"
 #include "core/unused_api.h"
 #include "tools/gt_readreads.h"
 
+#define SEQUENCE_CHAR_SEPARATOR '|'
+
 typedef struct {
   bool verbose,
        showseq;
+  GtStr *qualformat;
 } GtReadreads;
 
 static void* gt_readreads_arguments_new(void)
 {
   GtReadreads *arguments = gt_calloc(1, sizeof *arguments);
+  arguments->qualformat = gt_str_new();
   return arguments;
 }
 
@@ -38,6 +44,7 @@ static void gt_readreads_arguments_delete(void *tool_arguments)
 {
   GtReadreads *arguments = tool_arguments;
   if (!arguments) return;
+  gt_str_delete(arguments->qualformat);
   gt_free(arguments);
 }
 
@@ -48,10 +55,16 @@ static GtOptionParser* gt_readreads_option_parser_new(void *tool_arguments)
   GtOption *option;
   gt_assert(opts);
 
+  static const char *qualformats[] = {
+    "phred",
+    "solexa",
+    NULL
+  };
+
   /* init */
   op = gt_option_parser_new("[option ...] [file]",
-                            "Read in FASTQ/Solexa/Illumina reads and "
-                            "print them.");
+                            "Read in FASTQ reads with PHRED or Solexa "
+                            "qualities and print them.");
 
   option = gt_option_new_bool("v","be verbose",
                               &opts->verbose, false);
@@ -59,6 +72,13 @@ static GtOptionParser* gt_readreads_option_parser_new(void *tool_arguments)
 
   option = gt_option_new_bool("showseq","show sequences",
                               &opts->showseq, false);
+  gt_option_parser_add_option(op, option);
+
+  option = gt_option_new_choice("format", "quality score scale\n"
+                                          "can be 'phred' or 'solexa'",
+                                opts->qualformat,
+                                qualformats[0],
+                                qualformats);
   gt_option_parser_add_option(op, option);
 
   return op;
@@ -89,6 +109,7 @@ static int gt_readreads_runner(int argc, const char **argv, int parsed_args,
   const GtUchar *seq,
                 *qual;
   char *desc;
+  GtStr *scores = gt_str_new();
 
   gt_error_check(err);
   gt_assert(opts);
@@ -115,15 +136,39 @@ static int gt_readreads_runner(int argc, const char **argv, int parsed_args,
     had_err = gt_seqiterator_qual_next(siq, &seq, &qual, &len, &desc, err);
     if (had_err != 1)
       break;
-    if (opts->showseq)
-      printf("%s: %s,%s (%lu)\n", desc, seq, qual, len);
+    if (opts->showseq) {
+      unsigned long *lens = gt_malloc(sizeof (unsigned long)*len);
+      gt_str_reset(scores);
+      for (i=0;i<len;i++) {
+        unsigned long l;
+        if (strcmp(gt_str_get(opts->qualformat), "phred") == 0) {
+          l = gt_str_length(scores);
+          gt_str_append_uint(scores,
+                             gt_quality_fastq_to_phred(qual[i]));
+          lens[i] = gt_str_length(scores) - l;
+        } else if (strcmp(gt_str_get(opts->qualformat), "solexa") == 0) {
+          l = gt_str_length(scores);
+          gt_str_append_int(scores,
+                            gt_quality_fastq_to_solexa(qual[i]));
+          lens[i] = gt_str_length(scores) - l;
+        }
+        if (i != len-1)
+          gt_str_append_char(scores, SEQUENCE_CHAR_SEPARATOR);
+      }
+      for (i=0;i<len;i++) {
+        printf("%*c", (int) lens[i], seq[i]);
+        if (i != len-1)
+          printf("%c", SEQUENCE_CHAR_SEPARATOR);
+      }
+      printf("\n%s\n\n", gt_str_get(scores));
+      gt_free(lens);
+    }
     gt_free(desc);
   }
   if (opts->verbose)
-  {
     gt_progressbar_stop();
-  }
   gt_str_array_delete(files);
+  gt_str_delete(scores);
   gt_seqiterator_qual_delete(siq);
   return had_err;
 }

@@ -15,7 +15,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/arraydef.h"
 #include "core/cstr.h"
 #include "core/genfile.h"
 #include "core/str_array.h"
