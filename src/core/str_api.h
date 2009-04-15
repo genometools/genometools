@@ -51,6 +51,10 @@ void          gt_str_append_char(GtStr *str, char c);
 void          gt_str_append_double(GtStr*, double d, int precision);
 /* Append <ulong> to <str>. */
 void          gt_str_append_ulong(GtStr*, unsigned long ulong);
+/* Append <intval> to <str>. */
+void          gt_str_append_int(GtStr*, int intval);
+/* Append <uint> to <str>. */
+void          gt_str_append_uint(GtStr*, unsigned int uint);
 /* Set length of <str> to <length>. <length> must be smaller or equal than
    <gt_str_length(str)>. */
 void          gt_str_set_length(GtStr*, unsigned long length);
