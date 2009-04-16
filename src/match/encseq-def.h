@@ -24,6 +24,7 @@
 #include "core/symboldef.h"
 #include "core/filelengthvalues.h"
 #include "seqpos-def.h"
+#include "intcode-def.h"
 #include "alphadef.h"
 #include "intbits.h"
 #include "readmode-def.h"
@@ -229,6 +230,12 @@ void encseqextract(GtUchar *buffer,
                    const Encodedsequence *encseq,
                    Seqpos frompos,
                    Seqpos topos);
+
+Codetype extractprefixcode(unsigned int *unitsnotspecial,
+                           const Encodedsequence *encseq,
+                           const Codetype **multimappower,
+                           Seqpos frompos,
+                           unsigned int len);
 
 int compareEncseqsequences(Seqpos *lcp,
                            const Encodedsequence *encseq,

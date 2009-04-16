@@ -442,38 +442,6 @@ void encseqextract(GtUchar *buffer,
   freeEncodedsequencescanstate(&esr);
 }
 
-Codetype extractprefixcode(unsigned int *unitsnotspecial,
-                           const Encodedsequence *encseq,
-                           const Codetype **multimappower,
-                           Seqpos frompos,
-                           unsigned int len)
-{
-  Seqpos pos;
-  Codetype code = 0;
-
-  gt_assert(len > 0);
-  if (encseq->sat == Viadirectaccess)
-  {
-    for (pos=frompos, *unitsnotspecial = 0;
-         pos < encseq->totallength && *unitsnotspecial < len;
-         pos++, (*unitsnotspecial)++)
-    {
-      GtUchar cc = encseq->plainseq[pos];
-      if (ISNOTSPECIAL(cc))
-      {
-        code += multimappower[*unitsnotspecial][cc];
-      } else
-      {
-        break;
-      }
-    }
-  } else
-  {
-    gt_assert(false);
-  }
-  return code;
-}
-
 typedef struct
 {
   Positionaccesstype sat;
@@ -4143,13 +4111,6 @@ void checkextractunitatpos(const Encodedsequence *encseq,
       showsequenceatstartpos(stderr,fwd,complement,encseq,startpos);
       exit(EXIT_FAILURE);
     }
-    /*
-    if (startpos == 148 || startpos == 291)
-    {
-      printf("startpos = %lu, unitsnotspecial = %u\n",(unsigned long) startpos,
-             ptbe1.unitsnotspecial);
-    }
-    */
     if (fwd)
     {
       if (startpos == encseq->totallength - 1)
@@ -4266,4 +4227,41 @@ void multicharactercompare_withtest(const Encodedsequence *encseq,
     fprintf(stderr,"v2=%s(unitsnotspecial=%u)\n",buf2,ptbe2.unitsnotspecial);
     exit(EXIT_FAILURE);
   }
+}
+
+Codetype extractprefixcode(unsigned int *unitsnotspecial,
+                           const Encodedsequence *encseq,
+                           const Codetype **multimappower,
+                           Seqpos frompos,
+                           unsigned int len)
+{
+  Seqpos pos;
+  Codetype code = 0;
+  GtUchar cc;
+
+  gt_assert(len > 0);
+  gt_assert(!possibletocmpbitwise(encseq));
+  for (pos=frompos, *unitsnotspecial = 0;
+       pos < encseq->totallength && *unitsnotspecial < len;
+       pos++, (*unitsnotspecial)++)
+  {
+    if (encseq->sat == Viadirectaccess)
+    {
+      cc = encseq->plainseq[pos];
+    } else
+    {
+      cc = delivercharViabytecompress(encseq,pos);
+    }
+    /*
+    printf("cc=%u\n",(unsigned int) cc);
+    */
+    if (ISNOTSPECIAL(cc))
+    {
+      code += multimappower[*unitsnotspecial][cc];
+    } else
+    {
+      break;
+    }
+  }
+  return code;
 }
