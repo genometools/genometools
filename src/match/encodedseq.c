@@ -2519,8 +2519,7 @@ typedef struct
 #define NEXTFREAD(VAL)\
         if (!haserr)\
         {\
-          int ret;\
-          ret = fread(&(VAL),sizeof (VAL), (size_t) 1, fp);\
+          (void) fread(&(VAL),sizeof (VAL), (size_t) 1, fp);\
           if (ferror(fp))\
           {\
             gt_error_set(err,"error when trying to read %s: %s",\
