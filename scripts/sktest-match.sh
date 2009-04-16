@@ -35,7 +35,7 @@ runtestsuite=1
 if test $runtestsuite -eq 1
 then
   cd testsuite
-  for keyword in gt_idxlocali gt_greedyfwdmat gt_tallymer
+  for keyword in gt_idxlocali gt_greedyfwdmat gt_tallymer gt_ltrharvest
   do
     env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords ${keyword}
     if test $? -ne 0
@@ -43,6 +43,9 @@ then
       exit 1
     fi
   done
+  env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ./testsuite.rb \
+       ${MC} -keywords 'gt_greedyfwdmat and gttestdata' \
+       -gttestdata ${GTTESTDATA}
   cd ..
 fi
 

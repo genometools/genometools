@@ -48,17 +48,10 @@ env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ./testsuite.rb \
 env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ./testsuite.rb \
        ${MC} -keywords gt_extractseq -gttestdata ${GTTESTDATA}
 env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_trieins'
-env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_ltrharvest'
 env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ./testsuite.rb \
        ${MC} -keywords 'gt_packedindex_at1MB' \
        -gttestdata ${GTTESTDATA}
 env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_packedindex'
-env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_greedyfwdmat'
-env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_tallymer'
-env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_idxlocali'
-env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ./testsuite.rb \
-       ${MC} -keywords 'gt_greedyfwdmat and gttestdata' \
-       -gttestdata ${GTTESTDATA}
 cd ..
 
 # optional -memcheck   (run valgrind)
@@ -67,3 +60,5 @@ cd ..
 # ../scripts/runmaxpairs.sh 14 ${GRUMBACH}/*.fna ../testdata/Duplicate.fna
 
 sktest-vsvs.sh
+
+sktest-match.sh
