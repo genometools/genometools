@@ -56,7 +56,7 @@ double gt_quality_phred_to_errorprob(double phredscore)
 double gt_quality_solexa_to_errorprob(double solexascore)
 {
   double rval;
-  rval = gt_quality_phred_to_errorprob(gt_quality_solexa_to_phred(solexascore));
+  rval = 1.0/(1.0 + pow(10.0, (solexascore/10.0)));
   gt_assert(rval >= 0.0 && rval <= 1.0);
   return rval;
 }
@@ -64,7 +64,7 @@ double gt_quality_solexa_to_errorprob(double solexascore)
 int gt_quality_unit_test(GtError *err)
 {
   int had_err = 0;
-  double val, val2, phredscore, solexascore;
+  double val, phredscore, solexascore;
 
   ensure(had_err, gt_quality_fastq_to_phred('!') == 0);
   ensure(had_err, gt_quality_fastq_to_phred('{') == 90);
@@ -81,11 +81,6 @@ int gt_quality_unit_test(GtError *err)
   phredscore = gt_quality_fastq_to_phred('A');
   solexascore = gt_quality_fastq_to_solexa('A'+31);
   ensure(had_err, phredscore == solexascore);
-
-  /* due to rouding errors solexa scores may be off a bit */
-  val = gt_quality_phred_to_errorprob(gt_quality_fastq_to_phred('!'));
-  val2 = gt_quality_solexa_to_errorprob(gt_quality_fastq_to_solexa(' '));
-  ensure(had_err, abs(val-val2)<0.0001);
 
   /* testing conversion (has rounding errors!)
      taken from Biopython test cases
