@@ -328,6 +328,7 @@ static void inversesuftab_set(Rmnsufinfo *rmnsufinfo,Seqpos idx,Seqpos value)
   compressedtable_update(rmnsufinfo->inversesuftab,idx,value);
 }
 
+#ifdef Lowerboundwithrank
 static Seqpos frompos2rank(const Lowerboundwithrank *leftptr,
                            const Lowerboundwithrank *rightptr,
                            Seqpos specialpos)
@@ -358,6 +359,7 @@ static Seqpos frompos2rank(const Lowerboundwithrank *leftptr,
   return 0;
   /*@end@*/
 }
+#endif
 
 static unsigned long checkedfullvalues = 0,
                      checkedinitialvalues = 0,
@@ -414,11 +416,6 @@ static void inversesuftab_get2(Itvfullentry *itvfullentry,
         itvfullentry->unitsnotspecial = etbe.unitsnotspecial;
       } else
       {
-        Seqpos rank = frompos2rank(rmnsufinfo->lowerboundwithrank,
-                                   rmnsufinfo->lowerboundwithrank +
-                                   rmnsufinfo->realspecialranges - 1,
-                                   startpos);
-        gt_assert(rmnsufinfo->partwidth + rank == ivtval);
         code = 0;
         itvfullentry->unitsnotspecial = 0;
       }
