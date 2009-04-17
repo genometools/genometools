@@ -349,18 +349,17 @@ static void inversesuftab_set(Rmnsufinfo *rmnsufinfo,Seqpos idx,Seqpos value)
 }
 
 static void inversesuftab1_set(Rmnsufinfo *rmnsufinfo,Seqpos idx,
-                               Seqpos value,Seqpos base,int line)
+                               Seqpos value,Seqpos base)
 {
   if (value < base)
   {
-    fprintf(stderr,"line %d: value = %lu < %lu = base\n",
-                    line,(unsigned long) value,(unsigned long) base);
+    fprintf(stderr,"value = %lu < %lu = base\n",
+                    (unsigned long) value,(unsigned long) base);
     exit(EXIT_FAILURE);
   }
   if (value != base && value >= base + rmnsufinfo->allocateditvinfo)
   {
-    fprintf(stderr,"line %d: value = %lu >= %lu+%lu=%lu=base+width\n",
-                    line,
+    fprintf(stderr,"value = %lu >= %lu+%lu=%lu=base+width\n",
                     (unsigned long) value,
                     (unsigned long) base,
                     rmnsufinfo->allocateditvinfo,
@@ -653,8 +652,7 @@ static void initinversesuftabnonspecialsadjuststream(Rmnsufinfo *rmnsufinfo)
     {
       startpos = nextsuftabentry_get(&rmnsufinfo->sortblock);
       inversesuftab_set(rmnsufinfo,startpos,bucketspec.left);
-      inversesuftab1_set(rmnsufinfo,startpos,bucketspec.left,bucketspec.left,
-                         __LINE__);
+      inversesuftab1_set(rmnsufinfo,startpos,bucketspec.left,bucketspec.left);
     }
   }
   gt_assert(idx <= rmnsufinfo->partwidth);
@@ -899,7 +897,7 @@ static void anchorleftmost1(Rmnsufinfo *rmnsufinfo,Seqpos left,Seqpos right,
   {
     inversesuftab1_set(rmnsufinfo,
                        suftabentryfromsection_get(&rmnsufinfo->sortblock,idx),
-                       left,base,__LINE__);
+                       left,base);
   }
 }
 
@@ -1009,8 +1007,8 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos left,
         inversesuftab_set(rmnsufinfo,currentsuftabentry,left+rangestart);
         if (rmnsufinfo->sortblock.mmapfiledesc != -1)
         {
-          inversesuftab1_set(rmnsufinfo,currentsuftabentry,left+rangestart,base,
-                             __LINE__);
+          inversesuftab1_set(rmnsufinfo,currentsuftabentry,left+rangestart,
+                             base);
         }
       }
       rangestart = idx;
@@ -1040,8 +1038,7 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos left,
     inversesuftab_set(rmnsufinfo,currentsuftabentry,left+rangestart);
     if (rmnsufinfo->sortblock.mmapfiledesc != -1)
     {
-      inversesuftab1_set(rmnsufinfo,currentsuftabentry,left+rangestart,base,
-                         __LINE__);
+      inversesuftab1_set(rmnsufinfo,currentsuftabentry,left+rangestart,base);
     }
   }
 }
