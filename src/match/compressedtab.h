@@ -105,6 +105,10 @@ typedef struct
                                         Compressedtable *compressedtable,
                                         bool freeelemspace)
 {
+  if (compressedtable == NULL)
+  {
+    return;
+  }
   if (freeelemspace)
   {
 #ifdef PLAIN

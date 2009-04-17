@@ -82,7 +82,20 @@ void calcbucketboundaries(Bucketspecification *bucketspec,
                           const Bcktab *bcktab,
                           Codetype code);
 
+void determinemaxbucketsize(Bcktab *bcktab,
+                            const Codetype mincode,
+                            const Codetype maxcode,
+                            Seqpos partwidth,
+                            unsigned int numofchars,
+                            Verboseinfo *verboseinfo);
+
+void bcktab_showlog2info(const Bcktab *bcktab,Verboseinfo *verboseinfo);
+
 unsigned int singletonmaxprefixindex(const Bcktab *bcktab,Codetype code);
+
+unsigned long bcktab_specialsmaxbucketsize(const Bcktab *bcktab);
+
+unsigned long bcktab_nonspecialsmaxbucketsize(const Bcktab *bcktab);
 
 unsigned int pfxidx2lcpvalues(unsigned int *minprefixindex,
                               uint8_t *lcpsubtab,

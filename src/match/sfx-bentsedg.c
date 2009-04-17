@@ -1287,80 +1287,6 @@ static void bentleysedgewick(Bentsedgresources *bsr,
   }
 }
 
-typedef struct
-{
-  unsigned long nonspecialsmaxbucketsize,
-                specialsmaxbucketsize,
-                maxbucketsize,
-                log2nonspecialbucketsizedist[GT_MAXLOG2VALUE+1],
-                log2specialbucketsizedist[GT_MAXLOG2VALUE+1];
-} Maxbucketinfo;
-
-static void determinemaxbucketsize(Maxbucketinfo *maxbucketinfo,
-                                   const Bcktab *bcktab,
-                                   const Codetype mincode,
-                                   const Codetype maxcode,
-                                   Seqpos partwidth,
-                                   unsigned int numofchars,
-                                   Verboseinfo *verboseinfo)
-{
-  unsigned int rightchar = (unsigned int) (mincode % numofchars);
-  Bucketspecification bucketspec;
-  Codetype code;
-
-  maxbucketinfo->specialsmaxbucketsize = 1UL;
-  maxbucketinfo->nonspecialsmaxbucketsize = 1UL;
-  maxbucketinfo->maxbucketsize = 1UL;
-  memset(maxbucketinfo->log2nonspecialbucketsizedist,0,
-               sizeof (*maxbucketinfo->log2nonspecialbucketsizedist) *
-               (GT_MAXLOG2VALUE+1));
-  memset(maxbucketinfo->log2specialbucketsizedist,0,
-               sizeof (*maxbucketinfo->log2specialbucketsizedist) *
-               (GT_MAXLOG2VALUE+1));
-  for (code = mincode; code <= maxcode; code++)
-  {
-    rightchar = calcbucketboundsparts(&bucketspec,
-                                      bcktab,
-                                      code,
-                                      maxcode,
-                                      partwidth,
-                                      rightchar,
-                                      numofchars);
-    if (bucketspec.nonspecialsinbucket >
-        maxbucketinfo->nonspecialsmaxbucketsize)
-    {
-      maxbucketinfo->nonspecialsmaxbucketsize = bucketspec.nonspecialsinbucket;
-    }
-    if (bucketspec.specialsinbucket > maxbucketinfo->specialsmaxbucketsize)
-    {
-      maxbucketinfo->specialsmaxbucketsize = bucketspec.specialsinbucket;
-    }
-    if (bucketspec.nonspecialsinbucket + bucketspec.specialsinbucket
-        > maxbucketinfo->maxbucketsize)
-    {
-      maxbucketinfo->maxbucketsize = bucketspec.nonspecialsinbucket +
-                                     bucketspec.specialsinbucket;
-    }
-    if (bucketspec.nonspecialsinbucket > 1UL)
-    {
-      maxbucketinfo->log2nonspecialbucketsizedist[
-         gt_determinebitspervalue((uint64_t)
-                                  (bucketspec.nonspecialsinbucket-1))]++;
-    }
-    if (bucketspec.specialsinbucket > 1UL)
-    {
-      maxbucketinfo->log2specialbucketsizedist[
-         gt_determinebitspervalue((uint64_t)
-                                  (bucketspec.specialsinbucket-1))]++;
-    }
-  }
-  showverbose(verboseinfo,"maxbucket (specials)=%lu",
-              maxbucketinfo->specialsmaxbucketsize);
-  showverbose(verboseinfo,"maxbucket (nonspecials)=%lu",
-              maxbucketinfo->nonspecialsmaxbucketsize);
-  showverbose(verboseinfo,"maxbucket (all)=%lu",maxbucketinfo->maxbucketsize);
-}
-
 /*
 static void showSuffixwithcode(FILE *fp,const Suffixwithcode *suffix)
 {
@@ -1755,29 +1681,6 @@ Seqpos getmaxbranchdepth(const Outlcpinfo *outlcpinfo)
   return outlcpinfo->lcpsubtab.maxbranchdepth;
 }
 
-static void showlog2info(const char *tag,unsigned long *log2tab,
-                         Verboseinfo *verboseinfo)
-{
-  if (verboseinfo != NULL)
-  {
-    int maxbits;
-    unsigned long currentsum = 0, total = 0;
-    for (maxbits = 0; maxbits <= GT_MAXLOG2VALUE; maxbits++)
-    {
-      total += log2tab[maxbits];
-    }
-    for (maxbits = 0; maxbits <= GT_MAXLOG2VALUE; maxbits++)
-    {
-      if (log2tab[maxbits] > 0)
-      {
-        currentsum += log2tab[maxbits];
-        showverbose(verboseinfo,"%s[%d]=%lu (%.4f)",tag,maxbits,
-                                 log2tab[maxbits],(double) currentsum/total);
-      }
-    }
-  }
-}
-
 static void initBentsedgresources(Bentsedgresources *bsr,
                                   Suftab *suftab,
                                   DefinedSeqpos *longest,
@@ -1787,13 +1690,12 @@ static void initBentsedgresources(Bentsedgresources *bsr,
                                   Codetype maxcode,
                                   Seqpos partwidth,
                                   unsigned int numofchars,
-                                  const Bcktab *bcktab,
+                                  Bcktab *bcktab,
                                   unsigned int prefixlength,
                                   Outlcpinfo *outlcpinfo,
                                   const Sfxstrategy *sfxstrategy,
                                   Verboseinfo *verboseinfo)
 {
-  Maxbucketinfo maxbucketinfo;
   unsigned long idx;
 
   bsr->readmode = readmode;
@@ -1826,26 +1728,22 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   {
     bsr->esr1 = bsr->esr2 = NULL;
   }
-  determinemaxbucketsize(&maxbucketinfo,
-                         bcktab,
+  determinemaxbucketsize(bcktab,
                          mincode,
                          maxcode,
                          partwidth,
                          numofchars,
                          verboseinfo);
-  showlog2info("log2nonspecialbucketsizedist",
-                maxbucketinfo.log2nonspecialbucketsizedist,verboseinfo);
-  showlog2info("log2specialbucketsizedist",
-                maxbucketinfo.log2specialbucketsizedist,verboseinfo);
+  bcktab_showlog2info(bcktab,verboseinfo);
   if (outlcpinfo != NULL && outlcpinfo->assideeffect)
   {
     size_t sizespeciallcps, sizelcps;
 
     gt_assert(bsr->lcpsubtab != NULL);
     sizespeciallcps = sizeof (*bsr->lcpsubtab->smalllcpvalues) *
-                      maxbucketinfo.specialsmaxbucketsize;
+                      bcktab_specialsmaxbucketsize(bcktab);
     sizelcps = sizeof (*bsr->lcpsubtab->bucketoflcpvalues) *
-               maxbucketinfo.nonspecialsmaxbucketsize;
+               bcktab_nonspecialsmaxbucketsize(bcktab);
     if (bsr->lcpsubtab->sizereservoir < MAX(sizelcps,sizespeciallcps))
     {
       bsr->lcpsubtab->sizereservoir = MAX(sizelcps,sizespeciallcps);
@@ -1954,7 +1852,7 @@ void qsufsort(Seqpos *sortspace,
               GT_UNUSED Codetype mincode,
               Codetype maxcode,
               Seqpos partwidth,
-              const Bcktab *bcktab,
+              Bcktab *bcktab,
               unsigned int numofchars,
               unsigned int prefixlength,
               Outlcpinfo *outlcpinfo)
@@ -1994,7 +1892,7 @@ void sortallbuckets(Suftab *suftab,
                     Codetype mincode,
                     Codetype maxcode,
                     Seqpos partwidth,
-                    const Bcktab *bcktab,
+                    Bcktab *bcktab,
                     unsigned int numofchars,
                     unsigned int prefixlength,
                     Outlcpinfo *outlcpinfo,
