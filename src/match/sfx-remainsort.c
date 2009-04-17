@@ -348,7 +348,7 @@ static void inversesuftab_set(Rmnsufinfo *rmnsufinfo,Seqpos idx,Seqpos value)
   compressedtable_update(rmnsufinfo->inversesuftab,idx,value);
 }
 
-static void inversesuftab1_set(Rmnsufinfo *rmnsufinfo,GT_UNUSED Seqpos idx,
+static void inversesuftab1_set(Rmnsufinfo *rmnsufinfo,Seqpos idx,
                                Seqpos value,Seqpos base,int line)
 {
   if (value < base)
