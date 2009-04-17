@@ -98,11 +98,16 @@ typedef struct
 } Lowerboundwithrank;
 #endif
 
+typedef struct
+{
+  Compressedtable *offset;
+  Bitsequence *is_inversesuftab_set;
+} Inversesuftab_rel;
+
 struct Rmnsufinfo
 {
   Compressedtable *inversesuftab;
-  Compressedtable *inversesuftab_relative;
-  Bitsequence *is_inversesuftab_set;
+  Inversesuftab_rel itvrel;
   Sortblock sortblock;
   GtQueue *rangestobesorted;
   Seqpos currentdepth;
@@ -264,7 +269,7 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   if (mmapfiledesc == -1)
   {
     rmnsufinfo->allocateditvinfo = 0;
-    rmnsufinfo->inversesuftab_relative = NULL;
+    rmnsufinfo->itvrel.offset = NULL;
   } else
   {
     determinemaxbucketsize(bcktab,
@@ -274,14 +279,14 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                            numofchars,
                            NULL);
     rmnsufinfo->allocateditvinfo = bcktab_nonspecialsmaxbucketsize(bcktab);
-    rmnsufinfo->inversesuftab_relative
+    rmnsufinfo->itvrel.offset
       = compressedtable_new(rmnsufinfo->totallength+1,
                             (Seqpos) rmnsufinfo->allocateditvinfo);
   }
   rmnsufinfo->itvinfo = NULL;
   rmnsufinfo->itvfullinfo = NULL;
   rmnsufinfo->rangestobesorted = gt_queue_new();
-  INITBITTAB(rmnsufinfo->is_inversesuftab_set,rmnsufinfo->totallength+1);
+  INITBITTAB(rmnsufinfo->itvrel.is_inversesuftab_set,rmnsufinfo->totallength+1);
   if (possibletocmpbitwise(encseq))
   {
     rmnsufinfo->multimappower = NULL;
@@ -366,9 +371,8 @@ static void inversesuftab1_set(Rmnsufinfo *rmnsufinfo,Seqpos idx,
                     (unsigned long) base+rmnsufinfo->allocateditvinfo);
     exit(EXIT_FAILURE);
   }
-  compressedtable_update(rmnsufinfo->inversesuftab_relative,idx,
-                         (uint32_t) (value - base));
-  SETIBIT(rmnsufinfo->is_inversesuftab_set,idx);
+  compressedtable_update(rmnsufinfo->itvrel.offset,idx,(uint32_t) (value-base));
+  SETIBIT(rmnsufinfo->itvrel.is_inversesuftab_set,idx);
 }
 
 #ifdef Lowerboundwithrank
@@ -403,11 +407,6 @@ static Seqpos frompos2rank(const Lowerboundwithrank *leftptr,
   /*@end@*/
 }
 #endif
-
-static unsigned long checkedfullvalues = 0,
-                     checkedinitialvalues = 0,
-                     suminitial = 0,
-                     checkedemptyvalues = 0;
 
 static Seqpos inversesuftab_get(const Rmnsufinfo *rmnsufinfo,Seqpos startpos)
 {
@@ -511,12 +510,12 @@ static void inversesuftab_get2(Itvfullentry *itvfullentry,
       rank = compressedtable_get(rmnsufinfo->inversesuftab,startpos);
       itvfullentry->rank
         = bucketspec.left +
-          compressedtable_get(rmnsufinfo->inversesuftab_relative,startpos);
+          compressedtable_get(rmnsufinfo->itvrel.offset,startpos);
       gt_assert(rank == itvfullentry->rank);
       gt_assert(bucketspec.left <= itvfullentry->rank &&
                 itvfullentry->rank < bucketspec.left +
                                      bucketspec.nonspecialsinbucket);
-      gt_assert(ISIBITSET(rmnsufinfo->is_inversesuftab_set,startpos));
+      gt_assert(ISIBITSET(rmnsufinfo->itvrel.is_inversesuftab_set,startpos));
     } else
     {
       gt_assert(itvfullentry->unitsnotspecial < rmnsufinfo->prefixlength);
@@ -1108,11 +1107,6 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
     printf("pagechanges = %lu\n",rmnsufinfo->sortblock.pagechanges);
   }
   printf("maxqueuesize = %lu\n",rmnsufinfo->maxqueuesize);
-  printf("checkedfullvalues = %lu\n",checkedfullvalues);
-  printf("checkedinitialvalues = %lu at avg %.2f\n",
-             checkedinitialvalues,
-             (double) suminitial/checkedinitialvalues);
-  printf("checkedemptyvalues = %lu\n",checkedemptyvalues);
   gt_free(rmnsufinfo->unusedpair);
   gt_free(rmnsufinfo->itvinfo);
   rmnsufinfo->itvinfo = NULL;
@@ -1180,10 +1174,10 @@ Compressedtable *rmnsufinfo_wrap(Seqpos *longest,
   sortremainingsuffixes(rmnsufinfo);
   gt_free(rmnsufinfo->filltable);
   rmnsufinfo->filltable = NULL;
-  gt_free(rmnsufinfo->is_inversesuftab_set);
-  rmnsufinfo->is_inversesuftab_set = NULL;
-  compressedtable_free(rmnsufinfo->inversesuftab_relative,true);
-  rmnsufinfo->inversesuftab_relative = NULL;
+  gt_free(rmnsufinfo->itvrel.is_inversesuftab_set);
+  rmnsufinfo->itvrel.is_inversesuftab_set = NULL;
+  compressedtable_free(rmnsufinfo->itvrel.offset,true);
+  rmnsufinfo->itvrel.offset = NULL;
   *longest = compressedtable_get(rmnsufinfo->inversesuftab,0);
   if (withlcptab)
   {
