@@ -283,6 +283,7 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                            maxcode,
                            partwidth,
                            numofchars,
+                           0.95,
                            NULL);
     rmnsufinfo->allocateditvinfo = bcktab_nonspecialsmaxbucketsize(bcktab);
     optimalnumofbits = bcktab_optimalnumofbits(bcktab);
@@ -387,7 +388,7 @@ DEFINE_HASHMAP(Seqpos, seqpos, unsigned long, ul, gt_ht_seqpos_elem_hash,
                gt_ht_seqpos_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR, static,
                inline)
 
-unsigned long largebasedist_get(GtHashtable *h, unsigned long key)
+unsigned long largebasedist_get(GtHashtable *h, Seqpos key)
 {
   unsigned long *valueptr;
 
@@ -401,18 +402,18 @@ static void largebasedist_add(GtHashtable **h, Seqpos key,
                               unsigned long basedist)
 {
   unsigned long *valueptr;
-  GtHashtable *htab = (GtHashtable *) *h;
+  GtHashtable *htab;
 
-  if (htab == NULL)
+  if (*h == NULL)
   {
     *h = seqpos_ul_gt_hashmap_new();
   }
+  htab = *h;
   valueptr = seqpos_ul_gt_hashmap_get(htab, key);
   if (valueptr == NULL)
   {
     seqpos_ul_gt_hashmap_add(htab, key, basedist);
-  }
-  else
+  } else
   {
     (*valueptr) = basedist;
   }

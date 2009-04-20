@@ -571,9 +571,8 @@ static void updatelog2values(unsigned long *tab,unsigned long maxvalue)
   }
 }
 
-#define PROBSMALL 0.95
-
-static unsigned int calc_optimalnumofbits(const unsigned long *log2tab)
+static unsigned int calc_optimalnumofbits(const unsigned long *log2tab,
+                                          double probsmall)
 {
   unsigned int maxbits;
   unsigned long currentsum = 0, total = 0;
@@ -587,12 +586,15 @@ static unsigned int calc_optimalnumofbits(const unsigned long *log2tab)
     if (log2tab[maxbits] > 0)
     {
       currentsum += log2tab[maxbits];
-      if ((double) currentsum/total >= PROBSMALL)
+      if ((double) currentsum/total >= probsmall)
       {
         break;
       }
     }
   }
+  printf("store %lu values in hashtable (>=%lu bytes)\n",
+         (unsigned long) (total - currentsum),
+         (total - currentsum) * (sizeof(Seqpos) + sizeof(unsigned long)));
   return maxbits;
 }
 
@@ -601,6 +603,7 @@ void determinemaxbucketsize(Bcktab *bcktab,
                             const Codetype maxcode,
                             Seqpos partwidth,
                             unsigned int numofchars,
+                            double probsmall,
                             Verboseinfo *verboseinfo)
 {
   unsigned int rightchar = (unsigned int) (mincode % numofchars);
@@ -653,11 +656,16 @@ void determinemaxbucketsize(Bcktab *bcktab,
                        bucketspec.specialsinbucket);
     }
   }
-  bcktab->optimalnumofbits
-    = calc_optimalnumofbits(bcktab->maxbucketinfo.log2nonspecialbucketsizedist);
-  printf("use %u bits for more than %.2f percent of the values\n",
-          bcktab->optimalnumofbits,
-          PROBSMALL);
+  if (probsmall < 100.00)
+  {
+    bcktab->optimalnumofbits
+      = calc_optimalnumofbits(bcktab->maxbucketinfo.
+                                      log2nonspecialbucketsizedist,
+                              probsmall);
+    printf("use %u bits for more than %.2f percent of the values\n",
+            bcktab->optimalnumofbits,
+            probsmall);
+  }
   showverbose(verboseinfo,"maxbucket (specials)=%lu",
               bcktab->maxbucketinfo.specialsmaxbucketsize);
   showverbose(verboseinfo,"maxbucket (nonspecials)=%lu",

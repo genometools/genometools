@@ -87,6 +87,7 @@ void determinemaxbucketsize(Bcktab *bcktab,
                             const Codetype maxcode,
                             Seqpos partwidth,
                             unsigned int numofchars,
+                            double probsmall,
                             Verboseinfo *verboseinfo);
 
 void bcktab_showlog2info(const Bcktab *bcktab,Verboseinfo *verboseinfo);

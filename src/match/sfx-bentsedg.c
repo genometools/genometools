@@ -1733,6 +1733,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
                          maxcode,
                          partwidth,
                          numofchars,
+                         100.00,
                          verboseinfo);
   bcktab_showlog2info(bcktab,verboseinfo);
   if (outlcpinfo != NULL && outlcpinfo->assideeffect)
