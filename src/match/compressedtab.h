@@ -31,19 +31,16 @@ typedef struct
   size_t sizeofplain;
   Seqpos *plain;
 #else
-  Seqpos maxvalue;
   BitPackArray *bitpackarray;
 #endif
+  Seqpos maxvalue;
 } Compressedtable;
 
-/*@unused@*/ static inline Compressedtable *compressedtable_new(
+/*@unused@*/ static inline Compressedtable *compressedtablebits_new(
                                                   Seqpos numofvalues,
-                                                  GT_UNUSED Seqpos maxvalue)
+                                                  unsigned int bitspervalue)
 {
   Compressedtable *compressedtable;
-#ifndef PLAIN
-  unsigned int bitspervalue = gt_determinebitspervalue((uint64_t) maxvalue);
-#endif
 
   /*{
     uint64_t idx;
@@ -59,12 +56,24 @@ typedef struct
     = sizeof (Seqpos) * numofvalues;
   compressedtable->plain = gt_malloc(compressedtable->sizeofplain);
 #else
-  compressedtable->maxvalue = maxvalue;
   compressedtable->bitpackarray
     = bitpackarray_new(bitspervalue,(BitOffset) numofvalues,true);
   printf("allocated compressed table: " FormatSeqpos " entries with %u bits\n",
           PRINTSeqposcast(numofvalues),bitspervalue);
 #endif
+  compressedtable->maxvalue = (1<<bitspervalue) - 1;
+  return compressedtable;
+}
+
+/*@unused@*/ static inline Compressedtable *compressedtable_new(
+                                                  Seqpos numofvalues,
+                                                  Seqpos maxvalue)
+{
+  Compressedtable *compressedtable;
+  unsigned int bitspervalue = gt_determinebitspervalue((uint64_t) maxvalue);
+
+  compressedtable = compressedtablebits_new(numofvalues,bitspervalue);
+  compressedtable->maxvalue = maxvalue;
   return compressedtable;
 }
 
@@ -72,6 +81,7 @@ typedef struct
                                        Compressedtable *compressedtable,
                                        Seqpos idx,Seqpos value)
 {
+  gt_assert(compressedtable->maxvalue >= value);
 #ifdef PLAIN
   compressedtable->plain[idx] = value;
 #else
@@ -99,6 +109,11 @@ typedef struct
   return bitpackarray_get_uint32(compressedtable->bitpackarray,(BitOffset) idx);
 #endif
 #endif
+}
+
+static inline Seqpos compressedtable_maxvalue(Compressedtable *compressedtable)
+{
+  return compressedtable->maxvalue;
 }
 
 /*@unused@*/ static inline void compressedtable_free(
