@@ -763,7 +763,7 @@ obj/%.prepro: ${CURDIR}/src/match/%.c
 	@echo "[generate $@]"
 	$(CC) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) \
 	  $(EXP_CFLAGS) $(GT_CFLAGS) -E -g3
-	/sw/bin/indent $@
+	indent $@
 
 obj/%.prepro: ${CURDIR}/src/tools/%.c
 	@echo "[generate $@]"

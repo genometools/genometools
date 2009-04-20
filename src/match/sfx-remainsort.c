@@ -362,7 +362,30 @@ static void inversesuftab_set(Rmnsufinfo *rmnsufinfo,Seqpos idx,Seqpos value)
   compressedtable_update(rmnsufinfo->inversesuftab,idx,value);
 }
 
+extern uint32_t
+gt_ht_seqpos_elem_hash(const void *elem)
+{
+#ifdef Seqposequalsunsignedint
+  return gt_uint32_key_mul_hash((uint32_t) *((Seqpos *) elem));
+#else
+  return gt_uint64_key_mul_hash((uint64_t) *((Seqpos *) elem));
+#endif
+}
+
+static inline int gt_ht_seqpos_cmp(Seqpos a, Seqpos b)
+{
+  return (int) (a > b) - (int) (a < b);
+}
+
+static inline int gt_ht_seqpos_elem_cmp(const void *elemA, const void *elemB)
+{
+  return gt_ht_seqpos_cmp(*(Seqpos *)elemA, *(Seqpos *)elemB);
+}
+
 DECLARE_HASHMAP(Seqpos, seqpos, unsigned long, ul, static, inline)
+DEFINE_HASHMAP(Seqpos, seqpos, unsigned long, ul, gt_ht_seqpos_elem_hash,
+               gt_ht_seqpos_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR, static,
+               inline)
 
 unsigned long largebasedist_get(GtHashtable *h, unsigned long key)
 {

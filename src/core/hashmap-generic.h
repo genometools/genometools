@@ -81,7 +81,7 @@
     const keytype a, const keytype b, const void *data);      \
                                                               \
   static inline                                               \
-  GtHashtable * keytag##_##valuetag##_gt_hashmap_new()             \
+  GtHashtable * keytag##_##valuetag##_gt_hashmap_new(void)             \
   {                                                           \
     return gt_hashtable_new(keytag##_##valuetag##_hashtype);     \
   }                                                           \
@@ -98,7 +98,7 @@
   {                                                           \
     keytag##_##valuetag##_map_entry *map_entry;               \
     map_entry = gt_hashtable_get(ht, &key);                      \
-    if (map_entry)                                            \
+    if (map_entry != NULL)                                            \
       return &(map_entry->value);                             \
     else                                                      \
       return NULL;                                            \
@@ -128,20 +128,20 @@
   (*keytag##_##valuetag##_gt_hashmap_iteratorfunc)(              \
     keytype key, valuetype value, void *data, GtError *err);    \
                                                               \
-  storagedecl inlineifstatic int                              \
+  storagedecl inlineifstatic int                    \
   keytag##_##valuetag##_gt_hashmap_foreach(                      \
     GtHashtable *ht,                                            \
     keytag##_##valuetag##_gt_hashmap_iteratorfunc iter,          \
     void *data, GtError *err);                                  \
                                                               \
-  storagedecl inlineifstatic int                              \
+  storagedecl inlineifstatic int                    \
   keytag##_##valuetag##_gt_hashmap_foreach_ordered(              \
     GtHashtable *ht,                                            \
     keytag##_##valuetag##_gt_hashmap_iteratorfunc iter,          \
     void *data, keytag##_##valuetag##_gt_hashmap_KeyCmp cmp,     \
     GtError *err);                                              \
                                                               \
-  storagedecl inlineifstatic int                              \
+  storagedecl inlineifstatic int                    \
   keytag##_##valuetag##_gt_hashmap_foreach_in_default_order(     \
     GtHashtable *ht,                                            \
     keytag##_##valuetag##_gt_hashmap_iteratorfunc iter,          \

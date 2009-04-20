@@ -61,7 +61,7 @@ typedef struct
   printf("allocated compressed table: " FormatSeqpos " entries with %u bits\n",
           PRINTSeqposcast(numofvalues),bitspervalue);
 #endif
-  compressedtable->maxvalue = (1<<bitspervalue) - 1;
+  compressedtable->maxvalue = (Seqpos) ((1<<bitspervalue) - 1);
   return compressedtable;
 }
 
@@ -111,7 +111,8 @@ typedef struct
 #endif
 }
 
-static inline Seqpos compressedtable_maxvalue(Compressedtable *compressedtable)
+/*@unused@*/ static inline Seqpos compressedtable_maxvalue(
+                                         Compressedtable *compressedtable)
 {
   return compressedtable->maxvalue;
 }
