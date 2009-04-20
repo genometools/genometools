@@ -36,7 +36,8 @@ typedef struct
   GtStr *str_inputindex,
       *str_indexname,
       *str_smap,
-      *str_sat;
+      *str_sat,
+      *str_maxdepth;
   GtOption *optionalgboundsref;
   GtStrArray *filenametab, *algbounds;
   Readmode readmode;
