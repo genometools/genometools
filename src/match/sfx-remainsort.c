@@ -238,7 +238,7 @@ static Seqpos frompos2rank(const Lowerboundwithrank *leftptr,
 #endif
 
 Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
-  int mmapfiledesc,
+                          int mmapfiledesc,
                           const Encodedsequence *encseq,
                           Bcktab *bcktab,
                           Codetype maxcode,

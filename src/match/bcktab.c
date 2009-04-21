@@ -594,7 +594,7 @@ static unsigned int calc_optimalnumofbits(const unsigned long *log2tab,
   }
   printf("store %lu values in hashtable (>=%lu bytes)\n",
          (unsigned long) (total - currentsum),
-         (total - currentsum) * (sizeof(Seqpos) + sizeof(unsigned long)));
+         (total - currentsum) * (sizeof (Seqpos) + sizeof (unsigned long)));
   return maxbits;
 }
 

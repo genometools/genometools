@@ -29,7 +29,6 @@
 #include "stamp.h"
 #include "eis-bwtseq-param.h"
 
-
 static OPrval parse_options(int *parsed_args,
                             bool doesa,
                             Suffixeratoroptions *so,
@@ -323,7 +322,7 @@ static OPrval parse_options(int *parsed_args,
           if (sscanf(gt_str_get(so->str_maxdepth),"%f",&readfloat) == 1 &&
               readfloat >= 0.5 && readfloat <= 1.0)
           {
-            so->sfxstrategy.ssortmaxdepth.valueunsignedint 
+            so->sfxstrategy.ssortmaxdepth.valueunsignedint
               = MAXDEPTH_AUTOMATIC;
             so->sfxstrategy.probsmall.valuedouble = (double) readfloat;
             so->sfxstrategy.probsmall.defined = true;
@@ -365,12 +364,12 @@ static OPrval parse_options(int *parsed_args,
           gt_error_set(err,"option -maxdepth with argument can only be used "
                            "either without -parts or with option -parts 1");
           oprval = OPTIONPARSER_ERROR;
-	}
+        }
       }
       if (oprval != OPTIONPARSER_ERROR)
       {
         so->sfxstrategy.ssortmaxdepth.defined = true;
-        if (so->sfxstrategy.ssortmaxdepth.valueunsignedint != 
+        if (so->sfxstrategy.ssortmaxdepth.valueunsignedint !=
             MAXDEPTH_AUTOMATIC)
         {
           so->sfxstrategy.cmpcharbychar = true;
