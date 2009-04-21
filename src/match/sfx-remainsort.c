@@ -280,8 +280,9 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   rmnsufinfo->absoluteinversesuftab = absoluteinversesuftab;
   rmnsufinfo->itvrel.hashstore = NULL;
   rmnsufinfo->allocateditvinfo = 0;
-  printf("probsmall->defined=%s\n",probsmall->defined ? "true" : "false");
-  if (probsmall->defined &&
+  printf("probsmall->defined=%s\n",(probsmall != NULL && probsmall->defined)
+                                   ? "true" : "false");
+  if (probsmall != NULL && probsmall->defined &&
       gt_double_smaller_double(probsmall->valuedouble,(double) 1.0))
   {
     unsigned int optimalnumofbits;
@@ -755,8 +756,10 @@ static void initinversesuftabnonspecialsadjuststream(Rmnsufinfo *rmnsufinfo)
          idx < bucketspec.left+bucketspec.nonspecialsinbucket; idx++)
     {
       startpos = nextsuftabentry_get(&rmnsufinfo->sortblock);
-      inversesuftab_set(rmnsufinfo,startpos,bucketspec.left);
-      if (rmnsufinfo->hashexceptions)
+      if (rmnsufinfo->absoluteinversesuftab)
+      {
+        inversesuftab_set(rmnsufinfo,startpos,bucketspec.left);
+      } else
       {
         inversesuftabrel_set(rmnsufinfo,startpos,bucketspec.left,
                              bucketspec.left);
@@ -997,8 +1000,8 @@ static void anchorleftmost(Rmnsufinfo *rmnsufinfo,Seqpos left,Seqpos right)
   }
 }
 
-static void anchorleftmost1(Rmnsufinfo *rmnsufinfo,Seqpos left,Seqpos right,
-                            Seqpos base)
+static void anchorleftmostrel(Rmnsufinfo *rmnsufinfo,Seqpos left,Seqpos right,
+                              Seqpos base)
 {
   Seqpos idx;
 
@@ -1100,15 +1103,17 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos left,
                              left + idx - 1,
                              base,
                              MULT2(rmnsufinfo->currentdepth));
-        anchorleftmost(rmnsufinfo,
-                       left + rangestart,
-                       left + idx - 1);
-        if (rmnsufinfo->hashexceptions)
+        if (rmnsufinfo->absoluteinversesuftab)
         {
-          anchorleftmost1(rmnsufinfo,
-                          left + rangestart,
-                          left + idx - 1,
-                          base);
+          anchorleftmost(rmnsufinfo,
+                         left + rangestart,
+                         left + idx - 1);
+        } else
+        {
+          anchorleftmostrel(rmnsufinfo,
+                            left + rangestart,
+                            left + idx - 1,
+                            base);
         }
       } else
       {
@@ -1131,15 +1136,17 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos left,
                          left + width - 1,
                          base,
                          MULT2(rmnsufinfo->currentdepth));
-    anchorleftmost(rmnsufinfo,
-                   left + rangestart,
-                   left + width - 1);
-    if (rmnsufinfo->hashexceptions)
+    if (rmnsufinfo->absoluteinversesuftab)
     {
-      anchorleftmost1(rmnsufinfo,
-                      left + rangestart,
-                      left + width - 1,
-                      base);
+      anchorleftmost(rmnsufinfo,
+                     left + rangestart,
+                     left + width - 1);
+    } else
+    {
+      anchorleftmostrel(rmnsufinfo,
+                        left + rangestart,
+                        left + width - 1,
+                        base);
     }
   } else
   {
