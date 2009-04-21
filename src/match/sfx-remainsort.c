@@ -38,6 +38,7 @@
 #include "initbasepower.pr"
 
 #define PAGESIZE 4096
+#define SUFINMEM(SORTBLOCK) ((SORTBLOCK)->mmapfiledesc == -1 ? true : false)
 
 typedef struct
 {
@@ -113,7 +114,6 @@ struct Rmnsufinfo
 {
   Compressedtable *inversesuftab;
   bool hashexceptions,
-       sufinmem,
        absoluteinversesuftab;
   Inversesuftab_rel itvrel;
   Sortblock sortblock;
@@ -158,10 +158,11 @@ static void initsortblock(Sortblock *sortblock,
   sortblock->mmapfiledesc = mmapfiledesc;
   if (presortedsuffixes != NULL)
   {
+    gt_assert(SUFINMEM(sortblock));
     sortblock->sortspace = presortedsuffixes;
   } else
   {
-    gt_assert(sortblock->mmapfiledesc != -1);
+    gt_assert(!SUFINMEM(sortblock));
     sortblock->mappedsection = NULL;
     sortblock->pagesize = 0;
     sortblock->pageoffset = 0;
@@ -277,8 +278,6 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   rmnsufinfo->unusedpair = NULL;
   rmnsufinfo->inversesuftab = NULL;
   rmnsufinfo->absoluteinversesuftab = absoluteinversesuftab;
-  initsortblock(&rmnsufinfo->sortblock,presortedsuffixes,mmapfiledesc,
-                partwidth);
   rmnsufinfo->itvrel.hashstore = NULL;
   rmnsufinfo->allocateditvinfo = 0;
   printf("probsmall->defined=%s\n",probsmall->defined ? "true" : "false");
@@ -312,15 +311,8 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
     rmnsufinfo->itvrel.offset = NULL;
     rmnsufinfo->itvrel.maxvalue = 0;
   }
-  if (mmapfiledesc == -1)
-  {
-    rmnsufinfo->sufinmem = true;
-  } else
-  {
-    rmnsufinfo->sufinmem = false;
-  }
   printf("hashexceptions=%s\n",rmnsufinfo->hashexceptions ? "true" : "false");
-  printf("sufinmem=%s\n",rmnsufinfo->sufinmem ? "true" : "false");
+  printf("sufinmem=%s\n",SUFINMEM(&rmnsufinfo->sortblock) ? "true" : "false");
   rmnsufinfo->itvinfo = NULL;
   rmnsufinfo->itvfullinfo = NULL;
   rmnsufinfo->rangestobesorted = gt_queue_new();
@@ -338,6 +330,8 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
 #ifdef Lowerboundwithrank
   rmnsufinfo->lowerboundwithrank = filllowerboundwithrank(encseq,readmode);
 #endif
+  initsortblock(&rmnsufinfo->sortblock,presortedsuffixes,mmapfiledesc,
+                partwidth);
   return rmnsufinfo;
 }
 
@@ -370,6 +364,7 @@ static Seqpos nextsuftabentry_get(Sortblock *sortblock)
                 sortblock->mapableentries > sortblock->pageoffset);
       entries2map = sortblock->mapableentries - sortblock->pageoffset;
     }
+    gt_assert(!SUFINMEM(sortblock));
     sortblock->mappedsection
       = gt_fa_mmap_generic_fd_func(sortblock->mmapfiledesc,
                                    entries2map * sizeof (Seqpos),
@@ -693,7 +688,7 @@ static void initinversesuftabnonspecialsadjust(Rmnsufinfo *rmnsufinfo)
   Seqpos idx, startpos;
   const Codetype mincode = 0;
 
-  gt_assert(rmnsufinfo->sortblock.mmapfiledesc == -1);
+  gt_assert(SUFINMEM(&rmnsufinfo->sortblock));
   rightchar = (unsigned int) (mincode % rmnsufinfo->numofchars);
   idx = 0;
   for (code = mincode; code <= rmnsufinfo->maxcode; code++)
@@ -734,7 +729,7 @@ static void initinversesuftabnonspecialsadjuststream(Rmnsufinfo *rmnsufinfo)
   Seqpos idx, startpos;
   const Codetype mincode = 0;
 
-  gt_assert(rmnsufinfo->sortblock.mmapfiledesc != -1);
+  gt_assert(!SUFINMEM(&rmnsufinfo->sortblock));
   rightchar = 0;
   idx = 0;
   rmnsufinfo->overallspecials = 0;
@@ -954,6 +949,7 @@ static void possiblychangemappedsection(Sortblock *sortblock,Seqpos left,
     {
       entries2map = sortblock->mapableentries - sortblock->pageoffset;
     }
+    gt_assert(!SUFINMEM(sortblock));
     sortblock->mappedsection
       = gt_fa_mmap_generic_fd_func(sortblock->mmapfiledesc,
                                    entries2map * sizeof (Seqpos),
@@ -966,7 +962,7 @@ static void possiblychangemappedsection(Sortblock *sortblock,Seqpos left,
 
 static Seqpos suftabentryfromsection_get(const Sortblock *sortblock,Seqpos idx)
 {
-  if (sortblock->mmapfiledesc == -1)
+  if (SUFINMEM(sortblock))
   {
     return sortblock->sortspace[idx];
   }
@@ -978,7 +974,7 @@ static Seqpos suftabentryfromsection_get(const Sortblock *sortblock,Seqpos idx)
 static void suftabentryfromsection_update(Sortblock *sortblock,Seqpos idx,
                                           Seqpos value)
 {
-  if (sortblock->mmapfiledesc == -1)
+  if (SUFINMEM(sortblock))
   {
     sortblock->sortspace[idx] = value;
   } else
@@ -1023,7 +1019,7 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos left,
 
   gt_assert(left >= base &&
             (unsigned long) (right - base) <= rmnsufinfo->allocateditvinfo);
-  if (rmnsufinfo->sortblock.mmapfiledesc == -1)
+  if (rmnsufinfo->absoluteinversesuftab)
   {
     if (rmnsufinfo->itvinfo == NULL)
     {
@@ -1037,6 +1033,9 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos left,
       rmnsufinfo->itvfullinfo = gt_malloc(sizeof (Itvfullentry) *
                                           rmnsufinfo->allocateditvinfo);
     }
+  }
+  if (!SUFINMEM(&rmnsufinfo->sortblock))
+  {
     possiblychangemappedsection(&rmnsufinfo->sortblock,left,right);
   }
   if (rmnsufinfo->firstwithnewdepth.left == left &&
@@ -1049,17 +1048,17 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos left,
   {
     startpos = suftabentryfromsection_get(&rmnsufinfo->sortblock,left+idx);
 
-    if (rmnsufinfo->hashexceptions)
-    {
-      inversesuftab_get2(rmnsufinfo->itvfullinfo + idx,rmnsufinfo,startpos);
-    } else
+    if (rmnsufinfo->absoluteinversesuftab)
     {
       rmnsufinfo->itvinfo[idx].suffixstart = startpos;
       rmnsufinfo->itvinfo[idx].key
         = inversesuftab_get(rmnsufinfo,startpos + rmnsufinfo->currentdepth);
+    } else
+    {
+      inversesuftab_get2(rmnsufinfo->itvfullinfo + idx,rmnsufinfo,startpos);
     }
   }
-  if (rmnsufinfo->sortblock.mmapfiledesc == -1)
+  if (rmnsufinfo->absoluteinversesuftab)
   {
     qsort(rmnsufinfo->itvinfo,(size_t) width,sizeof(Itventry),compareitv);
     for (idx=0; idx<width; idx++)
@@ -1082,7 +1081,7 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos left,
   {
     bool different;
 
-    if (rmnsufinfo->sortblock.mmapfiledesc == -1)
+    if (rmnsufinfo->absoluteinversesuftab)
     {
       different = (rmnsufinfo->itvinfo[idx-1].key !=
                    rmnsufinfo->itvinfo[idx].key) ? true : false;
@@ -1211,7 +1210,7 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
       gt_free(pairptrwithbase);
     }
   }
-  if (rmnsufinfo->sortblock.mmapfiledesc != -1)
+  if (!SUFINMEM(&rmnsufinfo->sortblock))
   {
     gt_assert(rmnsufinfo->sortblock.mappedsection != NULL);
     gt_fa_xmunmap(rmnsufinfo->sortblock.mappedsection);
@@ -1236,7 +1235,7 @@ void bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo)
   const Codetype mincode = 0;
 
   initinversesuftabspecials(rmnsufinfo);
-  if (rmnsufinfo->sortblock.mmapfiledesc == -1)
+  if (SUFINMEM(&rmnsufinfo->sortblock))
   {
     initinversesuftabnonspecialsadjust(rmnsufinfo);
     printf("# maxbucketsize=%lu\n",rmnsufinfo->allocateditvinfo);
@@ -1300,7 +1299,7 @@ Compressedtable *rmnsufinfo_wrap(Seqpos *longest,
   *longest = compressedtable_get(rmnsufinfo->inversesuftab,0);
   if (withlcptab)
   {
-    if (rmnsufinfo->sortblock.mmapfiledesc == -1)
+    if (SUFINMEM(&rmnsufinfo->sortblock))
     {
       rmnsufinfo->sortedsuffixes = rmnsufinfo->sortblock.sortspace;
     } else
@@ -1332,7 +1331,7 @@ Compressedtable *rmnsufinfo_wrap(Seqpos *longest,
     rmnsufinfo->inversesuftab = NULL;
     lcptab = NULL;
   }
-  if (rmnsufinfo->sortblock.mmapfiledesc != -1 && withlcptab)
+  if (!SUFINMEM(&rmnsufinfo->sortblock) && withlcptab)
   {
     gt_fa_xmunmap(rmnsufinfo->sortedsuffixes);
     rmnsufinfo->sortedsuffixes = NULL;
