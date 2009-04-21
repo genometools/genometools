@@ -134,7 +134,7 @@ extern uint32_t
 gt_uint32_data_hash(const void *data, size_t length);
 extern int
 gt_ht_ptr_elem_cmp(const void *elemA, const void *elemB);
-static inline int
+/*@unused@*/  static inline int
 gt_ht_ul_cmp(unsigned long a, unsigned long b);
 extern int
 gt_ht_ul_elem_cmp(const void *elemA, const void *elemB);

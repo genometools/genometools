@@ -86,7 +86,7 @@
     return gt_hashtable_new(keytag##_##valuetag##_hashtype);     \
   }                                                           \
                                                               \
-  static inline void                                          \
+  /*@unused@*/ static inline void                                          \
   keytag##_##valuetag##_gt_hashmap_delete(GtHashtable *ht)         \
   {                                                           \
     gt_hashtable_delete(ht);                                     \
@@ -104,7 +104,7 @@
       return NULL;                                            \
   }                                                           \
                                                               \
-  static inline int                                           \
+  /*@unused@*/ static inline int                                           \
   keytag##_##valuetag##_gt_hashmap_remove(GtHashtable *ht,         \
                                        const keytype key)     \
   {                                                           \
@@ -128,20 +128,20 @@
   (*keytag##_##valuetag##_gt_hashmap_iteratorfunc)(              \
     keytype key, valuetype value, void *data, GtError *err);    \
                                                               \
-  storagedecl inlineifstatic int                    \
+  /*@unused@*/ storagedecl inlineifstatic int                    \
   keytag##_##valuetag##_gt_hashmap_foreach(                      \
     GtHashtable *ht,                                            \
     keytag##_##valuetag##_gt_hashmap_iteratorfunc iter,          \
     void *data, GtError *err);                                  \
                                                               \
-  storagedecl inlineifstatic int                    \
+  /*@unused@*/ storagedecl inlineifstatic int                    \
   keytag##_##valuetag##_gt_hashmap_foreach_ordered(              \
     GtHashtable *ht,                                            \
     keytag##_##valuetag##_gt_hashmap_iteratorfunc iter,          \
     void *data, keytag##_##valuetag##_gt_hashmap_KeyCmp cmp,     \
     GtError *err);                                              \
                                                               \
-  storagedecl inlineifstatic int                    \
+  /*@unused@*/ storagedecl inlineifstatic int                    \
   keytag##_##valuetag##_gt_hashmap_foreach_in_default_order(     \
     GtHashtable *ht,                                            \
     keytag##_##valuetag##_gt_hashmap_iteratorfunc iter,          \
@@ -167,12 +167,14 @@
     valuedestructor(map_entry->value);                        \
   }                                                           \
                                                               \
+  /*@ignore@*/\
   storagedecl HashElemInfo keytag##_##valuetag##_hashtype = { \
     keyhash,                                                  \
     { keytag##_##valuetag##_destruct },                       \
     sizeof (keytag##_##valuetag##_map_entry),                 \
     keycmp, NULL, NULL                                        \
   };                                                          \
+  /*@end@*/\
                                                               \
   typedef struct {                                            \
     void *data;                                               \

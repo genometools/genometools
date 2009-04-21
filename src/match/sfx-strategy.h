@@ -37,7 +37,8 @@ typedef struct
                          of comparing entire words (only for two bit
                          encoding) */
        storespecialcodes,
-       streamsuftab;
+       streamsuftab,
+       absoluteinversesuftab;
 } Sfxstrategy;
 
  /*@unused@*/ static inline void defaultsfxstrategy(Sfxstrategy *sfxstrategy,
@@ -52,6 +53,7 @@ typedef struct
   sfxstrategy->cmpcharbychar = cmpcharbychar;
   sfxstrategy->storespecialcodes = false;
   sfxstrategy->streamsuftab = false;
+  sfxstrategy->absoluteinversesuftab = false;
 }
 
 #endif

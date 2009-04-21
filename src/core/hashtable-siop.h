@@ -24,25 +24,25 @@
 
 #define GOLDEN_RATIO_MULTIPLIER 2654435761UL
 
-static inline uint32_t
+/*@unused@*/ static inline uint32_t
 gt_ht_rotate_left_u32(uint32_t m, unsigned short k)
 {
   return (((m)<<(k)) | ((m)>>((sizeof (m) * CHAR_BIT)-(k))));
 }
 
-static inline uint64_t
+/*@unused@*/ static inline uint64_t
 gt_ht_rotate_left_u64(uint64_t m, unsigned short k)
 {
   return (((m)<<(k)) | ((m)>>((sizeof (m) * CHAR_BIT)-(k))));
 }
 
-static inline uint32_t
+/*@unused@*/ static inline uint32_t
 gt_ht_rotate_riggt_ht_u32(uint32_t m, unsigned short k)
 {
   return (((m)>>(k)) | ((m)<<((sizeof (m) * CHAR_BIT)-(k))));
 }
 
-static inline uint64_t
+/*@unused@*/ static inline uint64_t
 gt_ht_rotate_riggt_ht_u64(uint64_t m, unsigned short k)
 {
   return (((m)>>(k)) | ((m)<<((sizeof (m) * CHAR_BIT)-(k))));
@@ -95,7 +95,7 @@ gt_ht_ul_cmp(unsigned long a, unsigned long b)
   return (int) (a > b) - (int) (a < b);
 }
 
-static inline int
+/*@unused@*/ static inline int
 gt_ht_ptr_cmp(void *a, void *b)
 {
   return (int) (a > b) - (int) (a < b);

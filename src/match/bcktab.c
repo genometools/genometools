@@ -656,7 +656,7 @@ void determinemaxbucketsize(Bcktab *bcktab,
                        bucketspec.specialsinbucket);
     }
   }
-  if (probsmall < 100.00)
+  if (gt_double_smaller_double(probsmall,(double) 1.0))
   {
     bcktab->optimalnumofbits
       = calc_optimalnumofbits(bcktab->maxbucketinfo.
@@ -664,7 +664,7 @@ void determinemaxbucketsize(Bcktab *bcktab,
                               probsmall);
     printf("use %u bits for more than %.2f percent of the values\n",
             bcktab->optimalnumofbits,
-            probsmall);
+            100.0 * probsmall);
   }
   showverbose(verboseinfo,"maxbucket (specials)=%lu",
               bcktab->maxbucketinfo.specialsmaxbucketsize);

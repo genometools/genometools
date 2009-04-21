@@ -112,7 +112,9 @@ typedef struct
 struct Rmnsufinfo
 {
   Compressedtable *inversesuftab;
-  bool hashexceptions;
+  bool hashexceptions,
+       sufinmem,
+       absoluteinversesuftab;
   Inversesuftab_rel itvrel;
   Sortblock sortblock;
   GtQueue *rangestobesorted;
@@ -246,7 +248,8 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                           unsigned int prefixlength,
                           Readmode readmode,
                           Seqpos partwidth,
-                          const Defineddouble *probsmall)
+                          const Defineddouble *probsmall,
+                          bool absoluteinversesuftab)
 {
   Rmnsufinfo *rmnsufinfo;
 
@@ -273,21 +276,18 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   rmnsufinfo->firstgenerationcount = 0;
   rmnsufinfo->unusedpair = NULL;
   rmnsufinfo->inversesuftab = NULL;
+  rmnsufinfo->absoluteinversesuftab = absoluteinversesuftab;
   initsortblock(&rmnsufinfo->sortblock,presortedsuffixes,mmapfiledesc,
                 partwidth);
   rmnsufinfo->itvrel.hashstore = NULL;
+  rmnsufinfo->allocateditvinfo = 0;
   printf("probsmall->defined=%s\n",probsmall->defined ? "true" : "false");
-  if (rmnsufinfo->sortblock.mmapfiledesc == -1 || !probsmall->defined ||
-      probsmall->valuedouble == 100.0)
-  {
-    rmnsufinfo->allocateditvinfo = 0;
-    rmnsufinfo->itvrel.offset = NULL;
-    rmnsufinfo->itvrel.maxvalue = 0;
-    rmnsufinfo->hashexceptions = false;
-  } else
+  if (probsmall->defined &&
+      gt_double_smaller_double(probsmall->valuedouble,(double) 1.0))
   {
     unsigned int optimalnumofbits;
 
+    rmnsufinfo->hashexceptions = true;
     determinemaxbucketsize(bcktab,
                            0,
                            maxcode,
@@ -306,8 +306,21 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
     INITBITTAB(rmnsufinfo->itvrel.is_inversesuftab_set,
                rmnsufinfo->totallength+1);
 #endif
+  } else
+  {
+    rmnsufinfo->hashexceptions = false;
+    rmnsufinfo->itvrel.offset = NULL;
+    rmnsufinfo->itvrel.maxvalue = 0;
+  }
+  if (mmapfiledesc == -1)
+  {
+    rmnsufinfo->sufinmem = true;
+  } else
+  {
+    rmnsufinfo->sufinmem = false;
   }
   printf("hashexceptions=%s\n",rmnsufinfo->hashexceptions ? "true" : "false");
+  printf("sufinmem=%s\n",rmnsufinfo->sufinmem ? "true" : "false");
   rmnsufinfo->itvinfo = NULL;
   rmnsufinfo->itvfullinfo = NULL;
   rmnsufinfo->rangestobesorted = gt_queue_new();
@@ -431,10 +444,10 @@ static void largebasedist_add(GtHashtable **h, Seqpos key,
   }
 }
 
-static void inversesuftab1_set(Rmnsufinfo *rmnsufinfo,Seqpos idx,
-                               Seqpos value,Seqpos base)
+static void inversesuftabrel_set(Rmnsufinfo *rmnsufinfo,Seqpos idx,
+                                 Seqpos value,Seqpos base)
 {
-  uint32_t basedist;
+  Seqpos basedist;
 
   if (value < base)
   {
@@ -451,7 +464,7 @@ static void inversesuftab1_set(Rmnsufinfo *rmnsufinfo,Seqpos idx,
                     (unsigned long) base+rmnsufinfo->allocateditvinfo);
     exit(EXIT_FAILURE);
   }
-  basedist = (uint32_t) (value-base);
+  basedist = (Seqpos) (value-base);
   if (basedist < rmnsufinfo->itvrel.maxvalue)
   {
     compressedtable_update(rmnsufinfo->itvrel.offset,idx,basedist);
@@ -459,7 +472,8 @@ static void inversesuftab1_set(Rmnsufinfo *rmnsufinfo,Seqpos idx,
   {
     compressedtable_update(rmnsufinfo->itvrel.offset,idx,
                            rmnsufinfo->itvrel.maxvalue);
-    largebasedist_add(&rmnsufinfo->itvrel.hashstore,idx,basedist);
+    largebasedist_add(&rmnsufinfo->itvrel.hashstore,idx,
+                      (unsigned long) basedist);
   }
 #ifdef ITVDEBUG
   SETIBIT(rmnsufinfo->itvrel.is_inversesuftab_set,idx);
@@ -602,7 +616,7 @@ static void inversesuftab_get2(Itvfullentry *itvfullentry,
       tmp = compressedtable_get(rmnsufinfo->itvrel.offset,startpos);
       if (tmp == rmnsufinfo->itvrel.maxvalue)
       {
-        tmp = largebasedist_get(rmnsufinfo->itvrel.hashstore,startpos);
+        tmp = (Seqpos) largebasedist_get(rmnsufinfo->itvrel.hashstore,startpos);
       }
       itvfullentry->rank = bucketspec.left + tmp;
       gt_assert(rank == itvfullentry->rank);
@@ -749,7 +763,8 @@ static void initinversesuftabnonspecialsadjuststream(Rmnsufinfo *rmnsufinfo)
       inversesuftab_set(rmnsufinfo,startpos,bucketspec.left);
       if (rmnsufinfo->hashexceptions)
       {
-        inversesuftab1_set(rmnsufinfo,startpos,bucketspec.left,bucketspec.left);
+        inversesuftabrel_set(rmnsufinfo,startpos,bucketspec.left,
+                             bucketspec.left);
       }
     }
   }
@@ -993,9 +1008,9 @@ static void anchorleftmost1(Rmnsufinfo *rmnsufinfo,Seqpos left,Seqpos right,
 
   for (idx = left; idx <= right; idx++)
   {
-    inversesuftab1_set(rmnsufinfo,
-                       suftabentryfromsection_get(&rmnsufinfo->sortblock,idx),
-                       left,base);
+    inversesuftabrel_set(rmnsufinfo,
+                         suftabentryfromsection_get(&rmnsufinfo->sortblock,idx),
+                         left,base);
   }
 }
 
@@ -1103,8 +1118,8 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos left,
         inversesuftab_set(rmnsufinfo,currentsuftabentry,left+rangestart);
         if (rmnsufinfo->hashexceptions)
         {
-          inversesuftab1_set(rmnsufinfo,currentsuftabentry,left+rangestart,
-                             base);
+          inversesuftabrel_set(rmnsufinfo,currentsuftabentry,left+rangestart,
+                               base);
         }
       }
       rangestart = idx;
@@ -1134,7 +1149,7 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos left,
     inversesuftab_set(rmnsufinfo,currentsuftabentry,left+rangestart);
     if (rmnsufinfo->hashexceptions)
     {
-      inversesuftab1_set(rmnsufinfo,currentsuftabentry,left+rangestart,base);
+      inversesuftabrel_set(rmnsufinfo,currentsuftabentry,left+rangestart,base);
     }
   }
 }

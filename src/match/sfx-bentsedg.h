@@ -61,6 +61,7 @@ void qsufsort(Seqpos *sortspace,
               unsigned int numofchars,
               unsigned int prefixlength,
               const Defineddouble *probsmall,
+              bool absoluteinversesuftab,
               Outlcpinfo *outlcpinfo);
 
 void sortallbuckets(Suftab *suftab,

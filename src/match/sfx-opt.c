@@ -315,32 +315,22 @@ static OPrval parse_options(int *parsed_args,
     {
       if (gt_str_length(so->str_maxdepth) > 0)
       {
-        float readfloat;
-
-        if (strchr(gt_str_get(so->str_maxdepth),'.') != NULL)
+        if (strcmp(gt_str_get(so->str_maxdepth),"abs") == 0)
         {
-          if (sscanf(gt_str_get(so->str_maxdepth),"%f",&readfloat) == 1 &&
-              readfloat >= 0.5 && readfloat <= 1.0)
-          {
-            so->sfxstrategy.ssortmaxdepth.valueunsignedint
-              = MAXDEPTH_AUTOMATIC;
-            so->sfxstrategy.probsmall.valuedouble = (double) readfloat;
-            so->sfxstrategy.probsmall.defined = true;
-          } else
-          {
-            gt_error_set(err,maxdepthmsg);
-            oprval = OPTIONPARSER_ERROR;
-          }
+          so->sfxstrategy.absoluteinversesuftab = true;
         } else
         {
-          long readint;
+          float readfloat;
 
-          if (sscanf(gt_str_get(so->str_maxdepth),"%ld",&readint) == 1)
+          if (strchr(gt_str_get(so->str_maxdepth),'.') != NULL)
           {
-            if (readint >= 1L)
+            if (sscanf(gt_str_get(so->str_maxdepth),"%f",&readfloat) == 1 &&
+                readfloat >= 0.5 && readfloat <= 1.0)
             {
               so->sfxstrategy.ssortmaxdepth.valueunsignedint
-                = (unsigned int) readint;
+                = MAXDEPTH_AUTOMATIC;
+              so->sfxstrategy.probsmall.valuedouble = (double) readfloat;
+              so->sfxstrategy.probsmall.defined = true;
             } else
             {
               gt_error_set(err,maxdepthmsg);
@@ -348,8 +338,23 @@ static OPrval parse_options(int *parsed_args,
             }
           } else
           {
-            gt_error_set(err,maxdepthmsg);
-            oprval = OPTIONPARSER_ERROR;
+            long readint;
+            if (sscanf(gt_str_get(so->str_maxdepth),"%ld",&readint) == 1)
+            {
+              if (readint >= 1L)
+              {
+                so->sfxstrategy.ssortmaxdepth.valueunsignedint
+                  = (unsigned int) readint;
+              } else
+              {
+                gt_error_set(err,maxdepthmsg);
+                oprval = OPTIONPARSER_ERROR;
+              }
+            } else
+            {
+              gt_error_set(err,maxdepthmsg);
+              oprval = OPTIONPARSER_ERROR;
+            }
           }
         }
       }
