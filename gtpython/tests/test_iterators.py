@@ -35,7 +35,7 @@ class FeatureNodeIteratorTest(unittest.TestCase):
         dfi = gt.FeatureNodeIteratorDepthFirst(self.feature)
 
         found = dfi.next()
-        self.assertEqual(found.attribs["ID"], "gene12")
+        self.assertEqual(found.get_attribute("ID"), "gene12")
         self.assertEqual(found.type, "gene")
         found = dfi.next()
         self.assertEqual(found.type, 'exon')

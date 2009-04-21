@@ -5,7 +5,7 @@ from gt import FeatureNode, FeatureNodeIteratorDepthFirst, GenomeNode
 class FeatureNodeTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.fn = FeatureNode("test", "type", 100, 500, "+")
+        self.fn = FeatureNode.create_new("test", "type", 100, 500, "+")
 
     def test_repr(self):
         self.assertEqual(str(self.fn),
@@ -81,7 +81,7 @@ class TestFeatureNodeChildren(unittest.TestCase):
 
 
 
-        fn3 = FeatureNode("test", "type3", 250,300,"+")
+        fn3 = FeatureNode.create_new("test", "type3", 250,300,"+")
         fn.add_child(fn3)
         fni = FeatureNodeIteratorDepthFirst(fn)
 

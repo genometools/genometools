@@ -121,6 +121,11 @@ class FeatureNode(GenomeNode):
     for tag, val in attribs.iteritems():
       yield (tag, val)
 
+
+  def get_attribs(self):
+      return dict(self.each_attribute())
+  attribs = property(get_attribs)
+
   def register(cls, gtlib):
     from ctypes import c_char_p, c_float, c_int, c_int, c_void_p, c_ulong, \
                        c_float
