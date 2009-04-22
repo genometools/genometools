@@ -285,7 +285,7 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                                    ? "true" : "false");
   printf("sufinmem=%s\n",SUFINMEM(&rmnsufinfo->sortblock) ? "true" : "false");
   printf("absoluteinversesuftab=%s\n",
-          rmnsufinfo->absoluteinversesuftab ? "true" : "false");
+          absoluteinversesuftab ? "true" : "false");
   */
   if (rmnsufinfo->absoluteinversesuftab)
   {
@@ -300,7 +300,8 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                            maxcode,
                            partwidth,
                            numofchars,
-                           probsmall->valuedouble,
+                           (probsmall == NULL || !probsmall->defined)
+                           ? 1.0 : probsmall->valuedouble,
                            NULL);
     rmnsufinfo->allocateditvinfo = bcktab_nonspecialsmaxbucketsize(bcktab);
     if (probsmall != NULL && probsmall->defined &&

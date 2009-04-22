@@ -308,6 +308,7 @@ static OPrval parse_options(int *parsed_args,
       }
     }
   }
+  so->sfxstrategy.absoluteinversesuftab = false;
   if (oprval == OPTIONPARSER_OK && doesa)
   {
     gt_assert(optionmaxdepth != NULL);
@@ -322,7 +323,6 @@ static OPrval parse_options(int *parsed_args,
         {
           float readfloat;
 
-          so->sfxstrategy.absoluteinversesuftab = false;
           if (strchr(gt_str_get(so->str_maxdepth),'.') != NULL)
           {
             if (sscanf(gt_str_get(so->str_maxdepth),"%f",&readfloat) == 1 &&

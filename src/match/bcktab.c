@@ -665,6 +665,9 @@ void determinemaxbucketsize(Bcktab *bcktab,
     printf("use %u bits for more than %.2f percent of the values\n",
             bcktab->optimalnumofbits,
             100.0 * probsmall);
+  } else
+  {
+    bcktab->optimalnumofbits = 0;
   }
   showverbose(verboseinfo,"maxbucket (specials)=%lu",
               bcktab->maxbucketinfo.specialsmaxbucketsize);
