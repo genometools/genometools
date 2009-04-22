@@ -50,8 +50,8 @@ typedef struct
 #else
   compressedtable->bitpackarray
     = bitpackarray_new(bitspervalue,(BitOffset) numofvalues,true);
-  printf("allocated compressed table: " FormatSeqpos " entries with %u bits "
-         "(%lu bytes)\n",
+  printf("allocated compressed table: " FormatSeqpos
+         " entries with %u bits (%lu bytes)\n",
           PRINTSeqposcast(numofvalues),
           bitspervalue,
           (unsigned long) (numofvalues * (double) bitspervalue/CHAR_BIT));
