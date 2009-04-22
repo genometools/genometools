@@ -14,6 +14,7 @@ On *BSD GNU make is often called ``gmake''.
 
 Possible arguments:
 
+- 64bit=yes to compile a 64-bit version (not available on all platforms)
 - opt=no to disable optimization
 - assert=no to disable assertions
 
