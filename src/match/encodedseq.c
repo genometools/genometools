@@ -2184,8 +2184,8 @@ static bool bitaccessnextspecialrangeiterator(Sequencerange *range,
       }
       if (currentword == 0)
       {
-        gt_assert(MODWORDSIZE(sri->pos) == INTWORDSIZE-1);
-        if (sri->pos < INTWORDSIZE)
+        gt_assert(MODWORDSIZE(sri->pos) == (Seqpos) (INTWORDSIZE-1));
+        if (sri->pos < (Seqpos) INTWORDSIZE)
         {
           sri->exhausted = true;
           break;
@@ -3316,18 +3316,19 @@ static inline Bitsequence fwdextractspecialbits(const Bitsequence *specialbits,
 static inline Bitsequence revextractspecialbits(const Bitsequence *specialbits,
                                                 Seqpos startpos)
 {
-  unsigned long remain, unit;
+  int remain;
+  unsigned long unit;
 
-  remain = (unsigned long) MODWORDSIZE(startpos);
+  remain = (int) MODWORDSIZE(startpos);
   unit = (unsigned long) DIVWORDSIZE(startpos);
-  if (remain >= (unsigned long) DIV2(INTWORDSIZE))
+  if (remain >= DIV2(INTWORDSIZE))
   {
     return (Bitsequence) ((specialbits[unit] >> (INTWORDSIZE - 1 - remain))
                            & LASTHALVEBITS);
   } else
   {
-    Twobitencoding tmp = (specialbits[unit] >> (INTWORDSIZE - 1 - remain)) &
-                         LASTHALVEBITS;
+    Bitsequence tmp = (specialbits[unit] >> (INTWORDSIZE - 1 - remain)) &
+                      LASTHALVEBITS;
     if (unit > 0)
     {
       tmp |= (specialbits[unit-1] << (1+remain)) & LASTHALVEBITS;
@@ -3336,27 +3337,57 @@ static inline Bitsequence revextractspecialbits(const Bitsequence *specialbits,
   }
 }
 
-static const int MultiplyDeBruijnBitPosition[32] = {
+#ifdef _LP64
+static inline int requiredUIntBits(Bitsequence v)
+{
+  int r;
+  static const int MultiplyDeBruijnBitPosition[64] = {
+    1, 2, 3, 57, 4, 33, 58, 47, 30, 5, 21, 34, 8, 59, 12, 48,
+    63, 31, 19, 6, 17, 22, 35, 24, 54, 9, 60, 37, 26, 13, 49, 40,
+    64, 56, 32, 46, 29, 20, 7, 11, 62, 18, 16, 23, 53, 36, 25, 39,
+    55, 45, 28, 10, 61, 15, 52, 38, 44, 27, 14, 51, 43, 50, 42, 41
+  };
+  v |= v >> 1; /* first round down to power of 2 */
+  v |= v >> 2;
+  v |= v >> 4;
+  v |= v >> 8;
+  v |= v >> 16;
+  v |= v >> 32;
+  v = (v >> 1) + 1;
+  r = MultiplyDeBruijnBitPosition[(v * (Bitsequence) 0x26752B916FC7B0DULL)
+                                  >> 58];
+  return r;
+}
+#else
+
+static inline int requiredUIntBits(Bitsequence v)
+{
+  int r;
+  static const int MultiplyDeBruijnBitPosition[32] = {
     1, 2, 29, 3, 30, 15, 25, 4, 31, 23, 21, 16, 26, 18, 5, 9,
     32, 28, 14, 24, 22, 20, 17, 8, 27, 13, 19, 7, 12, 6, 11, 10
-};
-
-static inline int requiredUInt32Bits(uint32_t v)
-{
+  };
   v |= v >> 1; /* first round down to power of 2 */
   v |= v >> 2;
   v |= v >> 4;
   v |= v >> 8;
   v |= v >> 16;
   v = (v >> 1) + 1;
-  return MultiplyDeBruijnBitPosition[(v * (uint32_t) 0x077CB531UL) >> 27];
+  r = MultiplyDeBruijnBitPosition[(v * (Bitsequence) 0x077CB531UL) >> 27];
+  return r;
 }
+
+#endif
 
 /*
   Compute number of trailing zeros in a word.
+   http://www.hackersdelight.org/HDcode/ntz.c
 */
 
-static inline unsigned int numberoftrailingzeros (uint32_t x)
+#define FIRSTVERSION
+#ifdef FIRSTVERSION
+
+static inline unsigned int numberoftrailingzeros32 (uint32_t x)
 {
   uint32_t y;
   unsigned int bz, b4, b3, b2, b1, b0;
@@ -3370,6 +3401,41 @@ static inline unsigned int numberoftrailingzeros (uint32_t x)
   b0 = (y & 0x55555555) ? 0 :  1U;
   return bz + b4 + b3 + b2 + b1 + b0;
 }
+#else
+
+static inline unsigned int numberoftrailingzeros32 (uint32_t x)
+{
+  int r;
+  static const int MultiplyDeBruijnBitPosition[32] =
+  {
+    0, 1, 28, 2, 29, 14, 24, 3, 30, 22, 20, 15, 25, 17, 4, 8,
+    31, 27, 13, 23, 21, 19, 16, 7, 26, 12, 18, 6, 11, 5, 10, 9
+  };
+  gt_assert((((x & -x) * 0x077CB531UL) >> 27) < 32);
+  r = MultiplyDeBruijnBitPosition[((x & -x) * 0x077CB531UL) >> 27];
+  return (unsigned int) r;
+}
+
+#endif
+
+#ifdef _LP64
+static inline unsigned int numberoftrailingzeros (Bitsequence x)
+{
+  if (x & LASTHALVEBITS)
+  {
+    return numberoftrailingzeros32 ((uint32_t) (x & LASTHALVEBITS));
+  }
+  return 32 + numberoftrailingzeros32 ((uint32_t) (x >> 32));
+}
+
+#else
+
+static inline unsigned int numberoftrailingzeros (Bitsequence x)
+{
+  return numberoftrailingzeros32 (x);
+}
+
+#endif
 
 static inline unsigned fwdbitaccessunitsnotspecial0(const Encodedsequence
                                                     *encseq,
@@ -3390,7 +3456,7 @@ static inline unsigned int fwdbitaccessunitsnotspecial(Bitsequence spbits,
 {
   return (spbits == 0) ? fwdbitaccessunitsnotspecial0(encseq,startpos)
                        : (unsigned int) (INTWORDSIZE -
-                                         requiredUInt32Bits(spbits));
+                                         requiredUIntBits(spbits));
 }
 
 static inline unsigned int revbitaccessunitsnotspecial0(Seqpos startpos)
@@ -3550,7 +3616,7 @@ static int prefixofdifftbe(bool complement,
   if (complement || lcpval != NULL)
   {
     tmplcpvalue = (unsigned int) DIV2(MULT2(UNITSIN2BITENC) -
-                                      requiredUInt32Bits(tbe1 ^ tbe2));
+                                      requiredUIntBits(tbe1 ^ tbe2));
     gt_assert(tmplcpvalue < (unsigned int) UNITSIN2BITENC);
   }
   if (lcpval != NULL)
@@ -3673,7 +3739,7 @@ int compareTwobitencodings(bool fwd,
     return endofdifftbe(fwd,complement,commonunits,tbe1,tbe2);
   }
   gt_assert(ptbe1->unitsnotspecial == (unsigned int) UNITSIN2BITENC &&
-         ptbe2->unitsnotspecial == (unsigned int) UNITSIN2BITENC);
+            ptbe2->unitsnotspecial == (unsigned int) UNITSIN2BITENC);
   if (ptbe1->tbe != ptbe2->tbe)
   {
     return endofdifftbe(fwd,complement,commonunits,ptbe1->tbe,ptbe2->tbe);
@@ -3874,7 +3940,7 @@ static void revextract2bitenc_bruteforce(EndofTwobitencoding *ptbe,
       return;
     }
     gt_assert(cc < (GtUchar) 4);
-    ptbe->tbe |= (cc << MULT2(unit));
+    ptbe->tbe |= (((Bitsequence) cc) << MULT2(unit));
     if (pos == 0)
     {
       ptbe->unitsnotspecial = unit+1;
@@ -3931,8 +3997,12 @@ void showsequenceatstartpos(FILE *fp,
   Seqpos pos, endpos;
   GtUchar buffer[UNITSIN2BITENC];
 
-  fprintf(fp,"          0123456789012345\n");
-  fprintf(fp,"sequence=\"");
+  fprintf(fp,"          0123456789012345");
+  if (UNITSIN2BITENC == 32)
+  {
+    fprintf(fp,"6789012345678901");
+  }
+  fprintf(fp,"\nsequence=\"");
   if (fwd)
   {
     endpos = MIN(startpos + UNITSIN2BITENC - 1,encseq->totallength-1);
@@ -3975,10 +4045,10 @@ static bool checktbe(bool fwd,Twobitencoding tbe1,Twobitencoding tbe2,
       return true;
     } else
     {
-      char buf1[MULT2(UNITSIN2BITENC)+1], buf2[MULT2(UNITSIN2BITENC)+1];
+      char buf1[INTWORDSIZE+1], buf2[INTWORDSIZE+1];
 
-      uint32_t2string(buf1,tbe1);
-      uint32_t2string(buf2,tbe2);
+      bitsequence2string(buf1,tbe1);
+      bitsequence2string(buf2,tbe2);
       fprintf(stderr,"%s: unitsnotspecial = %u: \n%s (tbe1)\n%s (tbe2)\n",
                       fwd ? "fwd" : "rev",unitsnotspecial,buf1,buf2);
       return false;
@@ -3997,12 +4067,11 @@ static bool checktbe(bool fwd,Twobitencoding tbe1,Twobitencoding tbe2,
     return true;
   } else
   {
-    char buf1[MULT2(UNITSIN2BITENC)+1], buf2[MULT2(UNITSIN2BITENC)+1],
-         bufmask[MULT2(UNITSIN2BITENC)+1];
+    char buf1[INTWORDSIZE+1], buf2[INTWORDSIZE+1], bufmask[INTWORDSIZE+1];
 
-    uint32_t2string(bufmask,mask);
-    uint32_t2string(buf1,tbe1);
-    uint32_t2string(buf2,tbe2);
+    bitsequence2string(bufmask,mask);
+    bitsequence2string(buf1,tbe1);
+    bitsequence2string(buf2,tbe2);
     fprintf(stderr,"%s: unitsnotspecial = %u: \n%s (mask)\n"
                    "%s (tbe1)\n%s (tbe2)\n",
             fwd ? "fwd" : "rev",unitsnotspecial,bufmask,buf1,buf2);
@@ -4158,13 +4227,14 @@ void checkextractspecialbits(const Encodedsequence *encseq,bool fwd)
     gt_assert(unitsnotspecial_bruteforce == unitsnotspecial);
     if (spbits1 != spbits2)
     {
-      char buffer[32+1];
-      uint32_t2string(buffer,spbits2);
+      char buffer[INTWORDSIZE+1];
+
+      bitsequence2string(buffer,spbits2);
       fprintf(stderr,"%sextractspecialbits at startpos " FormatSeqpos
                      " (unitsnotspecial=%u)\n correct=%s!=\n",
                      fwd ? "fwd" : "rev",
                      PRINTSeqposcast(startpos),unitsnotspecial,buffer);
-      uint32_t2string(buffer,spbits1);
+      bitsequence2string(buffer,spbits1);
       fprintf(stderr,"     %s=fast\n",buffer);
       exit(EXIT_FAILURE);
     }
@@ -4208,7 +4278,7 @@ void multicharactercompare_withtest(const Encodedsequence *encseq,
   ret2 = comparetwostrings(encseq,fwd,complement,&commonunits2,pos1,pos2);
   if (ret1 != ret2 || (Seqpos) commonunits1 != commonunits2)
   {
-    char buf1[MULT2(UNITSIN2BITENC)+1], buf2[MULT2(UNITSIN2BITENC)+1];
+    char buf1[INTWORDSIZE+1], buf2[INTWORDSIZE+1];
 
     fprintf(stderr,"fwd=%s,complement=%s: "
                    "pos1=" FormatSeqpos ", pos2=" FormatSeqpos "\n",
@@ -4219,10 +4289,10 @@ void multicharactercompare_withtest(const Encodedsequence *encseq,
     fprintf(stderr,"commonunits1=%u, commonunits2=" FormatSeqpos "\n",
             commonunits1,PRINTSeqposcast(commonunits2));
     showsequenceatstartpos(stderr,fwd,complement,encseq,pos1);
-    uint32_t2string(buf1,ptbe1.tbe);
+    bitsequence2string(buf1,ptbe1.tbe);
     fprintf(stderr,"v1=%s(unitsnotspecial=%u)\n",buf1,ptbe1.unitsnotspecial);
     showsequenceatstartpos(stderr,fwd,complement,encseq,pos2);
-    uint32_t2string(buf2,ptbe2.tbe);
+    bitsequence2string(buf2,ptbe2.tbe);
     fprintf(stderr,"v2=%s(unitsnotspecial=%u)\n",buf2,ptbe2.unitsnotspecial);
     exit(EXIT_FAILURE);
   }

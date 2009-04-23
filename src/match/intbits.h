@@ -38,7 +38,11 @@ typedef uint32_t Bitsequence;
 #endif
 
 #define INTWORDSIZE\
-        (((Bitsequence) 1) << LOGWORDSIZE) /* # of bits in unsigned long = w */
+        (1 << LOGWORDSIZE) /* # of bits in unsigned long = w */
+#define LASTHALVEBITS\
+        ((((Bitsequence) 1) << DIV2(INTWORDSIZE)) - 1)
+#define FIRSTHALVEBITS\
+        (LASTHALVEBITS << DIV2(INTWORDSIZE))
 #define FIRSTBIT\
         (((Bitsequence) 1) << (INTWORDSIZE-1)) /* \(10^{w-1}\) */
 #define ISBITSET(S,I)\
@@ -64,20 +68,10 @@ typedef uint32_t Bitsequence;
 #define EXCEPTFIRSTFOURBITS\
         (EXCEPTFIRSTBIT >> 3)             /* \(00001^{w-4}\) */
 
-#define NEWTWOBITENCODING
-#ifdef NEWTWOBITENCODING
-typedef uint32_t Twobitencoding;
-#define UNITSIN2BITENC              16
-#define DIVBYUNITSIN2BITENC(V)      DIV16(V)
-#define MODBYUNITSIN2BITENC(V)      MOD16(V)
-#define LASTHALVEBITS               ((1 << UNITSIN2BITENC) - 1)
-#define FIRSTHALVEBITS              (LASTHALVEBITS << UNITSIN2BITENC)
-#else
-typedef unsigned char Twobitencoding;
-#define UNITSIN2BITENC              4
-#define DIVBYUNITSIN2BITENC(V)      DIV4(V)
-#define MODBYUNITSIN2BITENC(V)      MOD4(V)
-#endif
+typedef Bitsequence Twobitencoding;
+#define UNITSIN2BITENC              DIV2(INTWORDSIZE)
+#define DIVBYUNITSIN2BITENC(V)      ((V) >> (LOGWORDSIZE-1))
+#define MODBYUNITSIN2BITENC(V)      ((V) & ((1 << (LOGWORDSIZE-1))-1))
 
 /*@unused@*/ static inline void byte2string(char *buffer,unsigned char bs)
 {
@@ -91,16 +85,16 @@ typedef unsigned char Twobitencoding;
   buffer[8] = '\0';
 }
 
-/*@unused@*/ static inline void uint32_t2string(char *buffer,uint32_t bs)
+/*@unused@*/ static inline void bitsequence2string(char *buffer,Bitsequence bs)
 {
   unsigned int i;
-  uint32_t mask;
+  Bitsequence mask;
 
-  for (i=0, mask = (uint32_t) 2147483648U; i < 32U; i++, mask >>= 1)
+  for (i=0, mask = FIRSTBIT; i < (unsigned int) INTWORDSIZE; i++, mask >>= 1)
   {
     buffer[i] = (bs & mask) ? '1' : '0';
   }
-  buffer[32] = '\0';
+  buffer[INTWORDSIZE] = '\0';
 }
 
 #endif
