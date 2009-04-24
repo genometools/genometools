@@ -310,7 +310,7 @@ int checkspecialrangesfast(const Encodedsequence *encseq)
     if (array_compare(rangesforward,rangesbackward,
                       compareSequencerange) != 0)
     {
-      exit(EXIT_FAILURE);
+      exit(EXIT_FAILURE); /* programming error */
     }
   }
   gt_array_delete(rangesforward);

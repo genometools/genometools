@@ -317,7 +317,7 @@ static void checksuffixrange(const Encodedsequence *encseq,
                      PRINTSeqposcast(*(sufptr+1)));
       fprintf(stderr,"in range of length " FormatSeqpos "\n",
                      PRINTSeqposcast(right - left + 1));
-      exit(EXIT_FAILURE);
+      exit(EXIT_FAILURE); /* programming error */
     }
   }
 }
@@ -650,7 +650,8 @@ static MedianElem *quickmedian (bool fwd,bool complement,
   }
 }
 
-/*
+#ifdef WITHcheckmedian
+
 static void checkmedian(bool fwd,
                         bool complement,
                         const Medianinfo *median,
@@ -708,9 +709,9 @@ static void checkmedian(bool fwd,
   }
   fprintf(stderr,"problem with equal=%lu,smaller=%lu,larger=%lu\n",
                   equal,smaller,larger);
-  exit(EXIT_FAILURE);
+  exit(EXIT_FAILURE); /* programming error */
 }
-*/
+#endif
 
 static Suffixptr *realmedian(const Bentsedgresources *bsr,
                              Suffixptr *left,
@@ -1287,7 +1288,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
   }
 }
 
-/*
+#ifdef WITHbruteforcelcpvalue
 static void showSuffixwithcode(FILE *fp,const Suffixwithcode *suffix)
 {
   char buffer[18+1];
@@ -1303,10 +1304,7 @@ static void showSuffixwithcode(FILE *fp,const Suffixwithcode *suffix)
               suffix->prefixindex,
               buffer);
 }
-*/
 
-#ifdef SKDEBUG
-/*
 static Seqpos bruteforcelcpvalue(const Encodedsequence *encseq,
                                  Readmode readmode,
                                  const Suffixwithcode *previoussuffix,
@@ -1337,7 +1335,7 @@ static Seqpos bruteforcelcpvalue(const Encodedsequence *encseq,
             PRINTSeqposcast(currentsuffix->startpos),
             cmp,
             PRINTSeqposcast(lcpvalue));
-    exit(EXIT_FAILURE);
+    exit(EXIT_FAILURE); /* programming error */
   }
   if (previoussuffix->code == currentsuffix->code)
   {
@@ -1358,12 +1356,11 @@ static Seqpos bruteforcelcpvalue(const Encodedsequence *encseq,
       fprintf(stderr,"\ncurrentsuffix=");
       showSuffixwithcode(stderr,currentsuffix);
       fprintf(stderr,"\n");
-      exit(EXIT_FAILURE);
+      exit(EXIT_FAILURE); /* programming error */
     }
   }
   return lcpvalue;
 }
-*/
 #endif
 
 static Seqpos computelocallcpvalue(const Suffixwithcode *previoussuffix,

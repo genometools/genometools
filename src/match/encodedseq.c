@@ -419,20 +419,7 @@ void encseqextract(GtUchar *buffer,
   unsigned long idx;
   Seqpos pos;
 
-  if (!(frompos <= topos))
-  {
-    fprintf(stderr,"failed assertion: frompos = "
-                   FormatSeqpos " <= " FormatSeqpos " = topos\n",
-             PRINTSeqposcast(frompos),PRINTSeqposcast(topos));
-    exit(EXIT_FAILURE); /* assertion failed */
-  }
-  if (!(topos < encseq->totallength))
-  {
-    fprintf(stderr,"failed assertion: topos = "
-                   FormatSeqpos " < " FormatSeqpos " = totallength\n",
-             PRINTSeqposcast(topos),PRINTSeqposcast(encseq->totallength));
-    exit(EXIT_FAILURE); /* assertion failed */
-  }
+  gt_assert(frompos <= topos && topos < encseq->totallength);
   esr = newEncodedsequencescanstate();
   initEncodedsequencescanstate(esr,encseq,Forwardmode,frompos);
   for (pos=frompos, idx = 0; pos <= topos; pos++, idx++)
@@ -2318,8 +2305,8 @@ static unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
       return numofrecords - 1;
     }
     fprintf(stderr,"getrecordnumSeqpos: cannot find position " FormatSeqpos,
-                  PRINTSeqposcast(position)); /* program error */
-    exit(EXIT_FAILURE); /* program failure */
+                  PRINTSeqposcast(position));
+    exit(EXIT_FAILURE); /* programming error */
   }
   left = 0;
   right = numofrecords - 2;
@@ -2345,7 +2332,7 @@ static unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
   }
   fprintf(stderr,"getrecordnumSeqpos: cannot find position " FormatSeqpos,
                 PRINTSeqposcast(position));
-  exit(EXIT_FAILURE);
+  exit(EXIT_FAILURE); /* programming error */
 }
 
 unsigned long getencseqfrompos2seqnum(const Encodedsequence *encseq,
@@ -3123,7 +3110,7 @@ void checkallsequencedescriptions(const Encodedsequence *encseq)
   if (strncmp(copydestab,encseq->destab,(size_t) totaldesclength) != 0)
   {
     fprintf(stderr,"different descriptions\n");
-    exit(EXIT_FAILURE); /* Programm error */
+    exit(EXIT_FAILURE); /* programming error */
   }
   FREESPACE(copydestab);
 }
@@ -3825,7 +3812,7 @@ int compareEncseqsequences(Seqpos *lcp,
                       (unsigned int) depth,
                       (unsigned int) lcp,
                       (unsigned int) lcp2);
-      exit(EXIT_FAILURE); /* assertion failed */
+      exit(EXIT_FAILURE); /* programming error */
     }
     gt_assert(*lcp == lcp2);
   }
@@ -4137,7 +4124,7 @@ void checkextractunitatpos(const Encodedsequence *encseq,
               PRINTSeqposcast(startpos),
               ptbe1.unitsnotspecial,ptbe2.unitsnotspecial);
       showsequenceatstartpos(stderr,fwd,complement,encseq,startpos);
-      exit(EXIT_FAILURE);
+      exit(EXIT_FAILURE); /* programming error */
     }
     if (!checktbe(fwd,ptbe1.tbe,ptbe2.tbe,ptbe1.unitsnotspecial))
     {
@@ -4146,7 +4133,7 @@ void checkextractunitatpos(const Encodedsequence *encseq,
                       complement ? "true" : "false",
                       PRINTSeqposcast(startpos));
       showsequenceatstartpos(stderr,fwd,complement,encseq,startpos);
-      exit(EXIT_FAILURE);
+      exit(EXIT_FAILURE); /* programming error */
     }
     if (fwd)
     {
@@ -4205,7 +4192,7 @@ void checkextractspecialbits(const Encodedsequence *encseq,bool fwd)
                      PRINTSeqposcast(startpos),unitsnotspecial,buffer);
       bitsequence2string(buffer,spbits1);
       fprintf(stderr,"     %s=fast\n",buffer);
-      exit(EXIT_FAILURE);
+      exit(EXIT_FAILURE); /* programming error */
     }
     if (fwd)
     {
@@ -4263,7 +4250,7 @@ void multicharactercompare_withtest(const Encodedsequence *encseq,
     showsequenceatstartpos(stderr,fwd,complement,encseq,pos2);
     bitsequence2string(buf2,ptbe2.tbe);
     fprintf(stderr,"v2=%s(unitsnotspecial=%u)\n",buf2,ptbe2.unitsnotspecial);
-    exit(EXIT_FAILURE);
+    exit(EXIT_FAILURE); /* programming error */
   }
 }
 

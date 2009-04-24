@@ -69,7 +69,7 @@ DECLAREBufferedfiletype(Largelcpvalue);
             if (ferror(buf->fp))\
             {\
               fprintf(stderr,"error when trying to read next %s",#TYPE);\
-              exit(EXIT_FAILURE);\
+              exit(EXIT_FAILURE); /* programming error */\
             }\
             buf->nextread = 0;\
             if (buf->nextfree == 0)\

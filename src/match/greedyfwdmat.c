@@ -91,7 +91,7 @@ static void checkifsequenceisthere(const Encodedsequence *encseq,
                      (unsigned int) qptr[i],
                      (unsigned int) cc,
                      PRINTSeqposcast(witnessposition+(Seqpos) i));
-      exit(EXIT_FAILURE); /* Program error */
+      exit(EXIT_FAILURE); /* programming error */
     }
   }
 }
@@ -276,7 +276,7 @@ int findsubquerygmatchforward(const Encodedsequence *encseq,
   return haserr ? -1 : 0;
 }
 
-/*
+#ifdef WITHrunsubstringiteration
 int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
                           const void *genericindex,
                           Seqpos totalwidth,
@@ -353,7 +353,7 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
                                           bucketspec.nonspecialsinbucket-1));
           fprintf(stderr,"gmatchlength2 = %lu != %lu = gmatchlength\n",
                           gmatchlength2,gmatchlength);
-          exit(EXIT_FAILURE);
+          exit(EXIT_FAILURE);  /* programming error */
         }
       }
     }
@@ -409,4 +409,4 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
   gt_seqiterator_delete(seqit);
   return haserr ? -1 : 0;
 }
-*/
+#endif

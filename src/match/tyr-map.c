@@ -278,12 +278,14 @@ unsigned long tyrcountinfo_get(const Tyrcountinfo *tyrcountinfo,
                             tyrcountinfo->largecounts,
                             tyrcountinfo->largecounts +
                             tyrcountinfo->numoflargecounts-1);
-    gt_assert (lc != NULL);
+#ifndef NDEBUG
     if (lc == NULL)
     {
       fprintf(stderr,"cannot find count for mer number %lu",mernumber);
-      exit(EXIT_FAILURE);
+      exit(EXIT_FAILURE); /* programming error */
     }
+#endif
+    gt_assert (lc != NULL);
     return lc->value;
   }
   return (unsigned long) tyrcountinfo->smallcounts[mernumber];
@@ -378,21 +380,22 @@ void tyrindex_check(const Tyrindex *tyrindex)
                                    tyrindex->mertable,
                                    tyrindex->lastmer);
     gt_assert(result != NULL);
+#ifndef NDEBUG
     if ((result - tyrindex->mertable) % tyrindex->merbytes != 0)
     {
       fprintf(stderr,"result is not multiple of %lu\n",tyrindex->merbytes);
-      exit(EXIT_FAILURE);
+      exit(EXIT_FAILURE); /* programming error */
     }
+#endif
     position = (unsigned long) (result-tyrindex->mertable)/
                                tyrindex->merbytes;
-    if (position > 0)
+#ifndef NDEBUG
+    if (position > 0 && previousposition + 1 != position)
     {
-      if (previousposition + 1 != position)
-      {
-        fprintf(stderr,"position %lu is not increasing\n",position);
-        exit(EXIT_FAILURE);
-      }
+      fprintf(stderr,"position %lu is not increasing\n",position);
+      exit(EXIT_FAILURE); /* programming error */
     }
+#endif
     previousposition = position;
   }
 }

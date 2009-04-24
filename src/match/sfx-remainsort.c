@@ -233,7 +233,7 @@ static Seqpos frompos2rank(const Lowerboundwithrank *leftptr,
   }
   fprintf(stderr,"frompos2rank: cannot find pos " FormatSeqpos
                  " in ranges",PRINTSeqposcast(specialpos));
-  exit(EXIT_FAILURE);
+  exit(EXIT_FAILURE); /* programming error */
   /*@ignore@*/
   return 0;
   /*@end@*/
@@ -465,11 +465,12 @@ static void inversesuftabrel_set(Rmnsufinfo *rmnsufinfo,Seqpos idx,
 {
   Seqpos basedist = (Seqpos) (value-base);
 
+#ifndef NDEBUG
   if (value < base)
   {
     fprintf(stderr,"value = %lu < %lu = base\n",
                     (unsigned long) value,(unsigned long) base);
-    exit(EXIT_FAILURE);
+    exit(EXIT_FAILURE); /* programming error */
   }
   if (value != base && value >= base + rmnsufinfo->allocateditvinfo)
   {
@@ -478,8 +479,9 @@ static void inversesuftabrel_set(Rmnsufinfo *rmnsufinfo,Seqpos idx,
                     (unsigned long) base,
                     rmnsufinfo->allocateditvinfo,
                     (unsigned long) base+rmnsufinfo->allocateditvinfo);
-    exit(EXIT_FAILURE);
+    exit(EXIT_FAILURE); /* programming error */
   }
+#endif
   basedist = (Seqpos) (value-base);
   if (rmnsufinfo->hashexceptions)
   {
@@ -534,7 +536,7 @@ static Seqpos frompos2rank(const Lowerboundwithrank *leftptr,
   }
   fprintf(stderr,"frompos2rank: cannot find pos " FormatSeqpos
                  " in ranges",PRINTSeqposcast(specialpos));
-  exit(EXIT_FAILURE);
+  exit(EXIT_FAILURE); /* programming error */
   /*@ignore@*/
   return 0;
   /*@end@*/
@@ -619,14 +621,6 @@ static void inversesuftabrel_get(Itvfullentry *itvfullentry,
     itvfullentry->rank = rmnsufinfo->partwidth;
   } else
   {
-    if (code > rmnsufinfo->maxcode)
-    {
-      fprintf(stderr,"unitsnotspecial = %lu, code = %lu > %lu = maxcode\n",
-                     (unsigned long) itvfullentry->unitsnotspecial,
-                     (unsigned long) code,
-                     (unsigned long) rmnsufinfo->maxcode);
-      exit(EXIT_FAILURE);
-    }
     gt_assert(code <= rmnsufinfo->maxcode);
     (void) calcbucketboundsparts(&bucketspec,
                                  rmnsufinfo->bcktab,
@@ -968,17 +962,8 @@ static void possiblychangemappedsection(Sortblock *sortblock,Seqpos left,
     Seqpos entries2map;
 
     sortblock->pageoffset = left - (left % DIV2(sortblock->mappedwidth));
-    gt_assert(left >= sortblock->pageoffset);
-    if (right >= sortblock->pageoffset + sortblock->mappedwidth)
-    {
-      fprintf(stderr,"left=%lu, right = %lu >= %lu + %lu\n",
-              (unsigned long) left,
-              (unsigned long) right,
-              (unsigned long) sortblock->pageoffset,
-              (unsigned long) sortblock->mappedwidth);
-      exit(EXIT_FAILURE);
-    }
-    gt_assert(right < sortblock->pageoffset + sortblock->mappedwidth);
+    gt_assert(left >= sortblock->pageoffset &&
+              right < sortblock->pageoffset + sortblock->mappedwidth);
     if (sortblock->mappedsection != NULL)
     {
       gt_fa_xmunmap(sortblock->mappedsection);

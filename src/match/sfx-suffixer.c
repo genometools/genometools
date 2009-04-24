@@ -132,11 +132,13 @@ static void compareCodeatpositionlists(const Codeatposition *codelist1,
 {
   unsigned long idx;
 
+#ifndef NDEBUG
   if (len1 != len2)
   {
     fprintf(stderr,"len1 = %lu != %lu = len2\n",len1,len2);
-    exit(EXIT_FAILURE); /* program error */
+    exit(EXIT_FAILURE); /* programming error */
   }
+#endif
   for (idx=0; idx<len1; idx++)
   {
     if (codelist1[idx].position != codelist2[idx].position)
@@ -145,7 +147,7 @@ static void compareCodeatpositionlists(const Codeatposition *codelist1,
                       FormatSeqpos " = codelist2.position\n",idx,
                       PRINTSeqposcast(codelist1[idx].position),
                       PRINTSeqposcast(codelist2[idx].position));
-      exit(EXIT_FAILURE); /* program error */
+      exit(EXIT_FAILURE); /* programming error */
     }
     if (codelist1[idx].maxprefixindex != codelist2[idx].maxprefixindex)
     {
@@ -153,7 +155,7 @@ static void compareCodeatpositionlists(const Codeatposition *codelist1,
                      "codelist2.maxprefixindex\n",idx,
                       codelist1[idx].maxprefixindex,
                       codelist2[idx].maxprefixindex);
-      exit(EXIT_FAILURE); /* program error */
+      exit(EXIT_FAILURE); /* programming error */
     }
     if (codelist1[idx].code != codelist2[idx].code)
     {
@@ -161,7 +163,7 @@ static void compareCodeatpositionlists(const Codeatposition *codelist1,
                      "codelist2.code\n",idx,
                       codelist1[idx].code,
                       codelist2[idx].code);
-      exit(EXIT_FAILURE); /* program error */
+      exit(EXIT_FAILURE); /* programming error */
     }
   }
 }
@@ -285,7 +287,7 @@ static void updatekmercount(void *processinfo,
                   previousstorespecials ? "true" : "false");
           printf("previousspecialpos = %u\n",previousspecialpos);
         }
-        exit(EXIT_FAILURE);
+        exit(EXIT_FAILURE); /* programming error */
       }
     }
 #endif

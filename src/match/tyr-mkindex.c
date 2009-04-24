@@ -111,7 +111,7 @@ static void checknumofmers(const Dfsstate *state,
                    Formatuint64_t,
                    PRINTuint64_tcast(dnumofmers),
                    PRINTuint64_tcast(bfnumofmers));
-    exit(EXIT_FAILURE);
+    exit(EXIT_FAILURE); /* programming error */
   }
 }
 
@@ -141,7 +141,7 @@ static void checknumberofoccurrences(const Dfsstate *dfsstate,
     fprintf(stderr,"bfcount = " FormatSeqpos " != %lu = countocc\n",
                    PRINTSeqposcast(bfcount),
                    countocc);
-    exit(EXIT_FAILURE);
+    exit(EXIT_FAILURE); /* programming error */
   }
   freemmsearchiterator(&mmsi);
 }
@@ -433,7 +433,7 @@ static void freeDfsinfo(Dfsinfo *dfsinfo, GT_UNUSED Dfsstate *state)
   FREESPACE(dfsinfo);
 }
 
-/*
+#ifdef WITHcontainsspecial2
 static bool containsspecial2(const Encodedsequence *encseq,
                      GT_UNUSED bool moveforward,
                      GT_UNUSED Encodedsequencescanstate *esrspace,
@@ -462,11 +462,11 @@ static bool containsspecial2(const Encodedsequence *encseq,
                     (unsigned long) len,
                     result ? "true" : "false",
                     result2 ? "true" : "false");
-    exit(EXIT_FAILURE);
+    exit(EXIT_FAILURE); /* programming error */
   }
   return result;
 }
-*/
+#endif
 
 static int processleafedge(GT_UNUSED bool firstsucc,
                            Seqpos fatherdepth,

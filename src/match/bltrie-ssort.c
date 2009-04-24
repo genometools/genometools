@@ -572,7 +572,7 @@ static void checksorting(bool ascending,
       fprintf(stderr,"suffixtable[%lu]=%lu vs %lu=suffixtable[%lu]\n",
                       idx,(unsigned long) suffixtable[idx],
                           (unsigned long) suffixtable[idx+1],idx+1);
-      exit(EXIT_FAILURE);
+      exit(EXIT_FAILURE); /* programming error */
     }
   }
 }

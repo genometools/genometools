@@ -575,18 +575,20 @@ static void locali_copyLimdfsstate (DECLAREPTRDFSSTATE(deststate),
       destcol->lenval = lci->maxcollen;
       ATADDRESS("",destcol);
     }
+#ifndef NDEBUG
     if (destcol->lenval < lci->querylength+1)
     {
       fprintf(stderr,"destcol->lenval = %lu < %lu lci->querylength+1\n",
                       destcol->lenval,lci->querylength+1);
-      exit(EXIT_FAILURE); /* Programming error */
+      exit(EXIT_FAILURE); /* programming error */
     }
     if (srccol->lenval < lci->querylength+1)
     {
       fprintf(stderr,"srccol->lenval = %lu < %lu lci->querylength+1\n",
                       srccol->lenval,lci->querylength+1);
-      exit(EXIT_FAILURE); /* Programming error */
+      exit(EXIT_FAILURE); /* programming error */
     }
+#endif
     for (idx = 0; idx<=lci->querylength; idx++)
     {
       destcol->colvalues[idx] = srccol->colvalues[idx];
@@ -697,11 +699,6 @@ void processelemLocalitracebackstate(Limdfsconstinfo *lci,
     */
     switch (column->colvalues[tbs->querypos].tracebit)
     {
-      case Notraceback:
-        fprintf(stderr,"tracebit = Notraceback not allowed\n");
-        fprintf(stderr,"column->colvalues[tbs->querypos].bestcell=%ld\n",
-                        column->colvalues[tbs->querypos].bestcell);
-        exit(EXIT_FAILURE); /* programming error */
       case Insertbit:
         /* printf("insertbit\n"); */
         gt_alignment_add_insertion(tbs->alignment);
@@ -724,6 +721,11 @@ void processelemLocalitracebackstate(Limdfsconstinfo *lci,
         gt_assert(tbs->querypos > 0);
         tbs->querypos--;
         break; /* stay in the same column => so next iteration */
+      case Notraceback:
+        fprintf(stderr,"tracebit = Notraceback not allowed\n");
+        fprintf(stderr,"column->colvalues[tbs->querypos].bestcell=%ld\n",
+                        column->colvalues[tbs->querypos].bestcell);
+        exit(EXIT_FAILURE); /* programming error */
       default:
         fprintf(stderr,"tracebit = %d not allowed\n",
                 (int) column->colvalues[tbs->querypos].tracebit);

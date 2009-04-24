@@ -43,7 +43,7 @@
                    (unsigned long) (POS),\
                    (unsigned int) (CC),\
                    (unsigned int) cctmp);\
-            exit(EXIT_FAILURE);\
+            exit(EXIT_FAILURE); /* programming error */\
           }\
         }
 #else

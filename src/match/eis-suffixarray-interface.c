@@ -211,7 +211,7 @@ SAIMakeReader(SuffixarrayFileInterface *sai, enum sfxDataRequest rtype)
   default:
     fprintf(stderr, "error: unimplemented request: %d, %s: %d!\n", rtype,
             __FILE__, __LINE__);
-    exit(EXIT_FAILURE);
+    exit(EXIT_FAILURE); /* programming error */
   }
   return reader;
 }
