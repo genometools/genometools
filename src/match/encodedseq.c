@@ -3338,7 +3338,28 @@ static inline Bitsequence revextractspecialbits(const Bitsequence *specialbits,
   }
 }
 
+static inline unsigned int numberoftrailingzeros32 (uint32_t x)
+{
+  static const unsigned int MultiplyDeBruijnBitPosition[32] =
+  {
+    0, 1U, 28U, 2U, 29U, 14U, 24U, 3U, 30U, 22U, 20U, 15U, 25U, 17U, 4U, 8U,
+    31U, 27U, 13U, 23U, 21U, 19U, 16U, 7U, 26U, 12U, 18U, 6U, 11U, 5U, 10U, 9U
+  };
+  return MultiplyDeBruijnBitPosition[
+                 ((x & -(int) x) * (uint32_t) 0x077CB531U) >> 27];
+}
+
 #ifdef _LP64
+
+static inline unsigned int numberoftrailingzeros (Bitsequence x)
+{
+  if (x & LASTHALVEBITS)
+  {
+    return numberoftrailingzeros32 ((uint32_t) (x & LASTHALVEBITS));
+  }
+  return 32 + numberoftrailingzeros32 ((uint32_t) (x >> 32));
+}
+
 static inline int requiredUIntBits(Bitsequence v)
 {
   int r;
@@ -3361,6 +3382,11 @@ static inline int requiredUIntBits(Bitsequence v)
 }
 #else
 
+static inline unsigned int numberoftrailingzeros (Bitsequence x)
+{
+  return numberoftrailingzeros32 (x);
+}
+
 static inline int requiredUIntBits(Bitsequence v)
 {
   int r;
@@ -3374,66 +3400,8 @@ static inline int requiredUIntBits(Bitsequence v)
   v |= v >> 8;
   v |= v >> 16;
   v = (v >> 1) + 1;
-  r = MultiplyDeBruijnBitPosition[(v * (Bitsequence) 0x077CB531UL) >> 27];
+  r = MultiplyDeBruijnBitPosition[(v * (Bitsequence) 0x077CB531U) >> 27];
   return r;
-}
-
-#endif
-
-/*
-  Compute number of trailing zeros in a word.
-   http://www.hackersdelight.org/HDcode/ntz.c
-*/
-
-#define FIRSTVERSION
-#ifdef FIRSTVERSION
-
-static inline unsigned int numberoftrailingzeros32 (uint32_t x)
-{
-  uint32_t y;
-  unsigned int bz, b4, b3, b2, b1, b0;
-
-  y = x & -x;                          /* Isolate rightmost 1-bit. */
-  bz = y ? 0 : 1U;                     /* 1 if y = 0. */
-  b4 = (y & 0x0000FFFF) ? 0 : 16U;
-  b3 = (y & 0x00FF00FF) ? 0 :  8U;
-  b2 = (y & 0x0F0F0F0F) ? 0 :  4U;
-  b1 = (y & 0x33333333) ? 0 :  2U;
-  b0 = (y & 0x55555555) ? 0 :  1U;
-  return bz + b4 + b3 + b2 + b1 + b0;
-}
-#else
-
-static inline unsigned int numberoftrailingzeros32 (uint32_t x)
-{
-  int r;
-  static const int MultiplyDeBruijnBitPosition[32] =
-  {
-    0, 1, 28, 2, 29, 14, 24, 3, 30, 22, 20, 15, 25, 17, 4, 8,
-    31, 27, 13, 23, 21, 19, 16, 7, 26, 12, 18, 6, 11, 5, 10, 9
-  };
-  gt_assert((((x & -x) * 0x077CB531UL) >> 27) < 32);
-  r = MultiplyDeBruijnBitPosition[((x & -x) * 0x077CB531UL) >> 27];
-  return (unsigned int) r;
-}
-
-#endif
-
-#ifdef _LP64
-static inline unsigned int numberoftrailingzeros (Bitsequence x)
-{
-  if (x & LASTHALVEBITS)
-  {
-    return numberoftrailingzeros32 ((uint32_t) (x & LASTHALVEBITS));
-  }
-  return 32 + numberoftrailingzeros32 ((uint32_t) (x >> 32));
-}
-
-#else
-
-static inline unsigned int numberoftrailingzeros (Bitsequence x)
-{
-  return numberoftrailingzeros32 (x);
 }
 
 #endif
@@ -4322,9 +4290,6 @@ Codetype extractprefixcode(unsigned int *unitsnotspecial,
     {
       cc = delivercharViabytecompress(encseq,pos);
     }
-    /*
-    printf("cc=%u\n",(unsigned int) cc);
-    */
     if (ISNOTSPECIAL(cc))
     {
       code += multimappower[*unitsnotspecial][cc];
