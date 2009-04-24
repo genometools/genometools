@@ -51,7 +51,7 @@ Codetype *initbasepower(unsigned int numofchars,unsigned int prefixlength)
       FREESPACE(basepower);
       fprintf(stderr,"overflow when computing %lu * %u",
               (unsigned long) thepower,numofchars);
-      exit(EXIT_FAILURE); /* programming error */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     thepower *= numofchars;
   }

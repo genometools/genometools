@@ -451,7 +451,7 @@ static void pfxidxpartialsums(unsigned long *count,
     {
       fprintf(stderr,"code " FormatCodetype ": sum = %lu != %lu = count[1]\n",
               code,sum,count[1]);
-      exit(EXIT_FAILURE); /* programming error */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   }
 }
@@ -899,7 +899,7 @@ void consistencyofsuffix(int line,
     fprintf(stderr,"line %d: code=%u: ",line,suffix->code);
     fprintf(stderr,"firstspecial = %u != %u = suffix->prefixindex\n",
                     firstspecial,suffix->prefixindex);
-    exit(EXIT_FAILURE); /* programming error */
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
 #endif

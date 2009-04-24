@@ -48,19 +48,19 @@ static void comparemmsis(const MMsearchiterator *mmsi1,
     if (!isemptymmsearchiterator(mmsi2))
     {
       fprintf(stderr,"mmsi1 is empty but mmsi2 not\n");
-      exit(EXIT_FAILURE); /* programming error */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   } else
   {
     if (isemptymmsearchiterator(mmsi2))
     {
       fprintf(stderr,"mmsi2 is empty but mmsi1 not\n");
-      exit(EXIT_FAILURE); /* programming error */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     if (!identicalmmsearchiterators(mmsi1,mmsi2))
     {
       fprintf(stderr,"mmsi1 and mmsi2 are different\n");
-      exit(EXIT_FAILURE); /* programming error */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   }
 }

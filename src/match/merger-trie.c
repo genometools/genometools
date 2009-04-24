@@ -203,7 +203,7 @@ static void checkmergertrie2(Mergertrierep *trierep,
     {
       fprintf(stderr,"leaf " FormatSeqpos " already found\n",
               PRINTSeqposcast(start));
-      exit(EXIT_FAILURE); /* programming error */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
 #endif
     SETIBIT(leafused,start);
@@ -221,7 +221,7 @@ static void checkmergertrie2(Mergertrierep *trierep,
                        " = node.depth\n",
                        PRINTSeqposcast(father->depth),
                        PRINTSeqposcast(node->depth));
-        exit(EXIT_FAILURE); /* programming error */
+        exit(GT_EXIT_PROGRAMMING_ERROR);
       }
 #endif
     }
@@ -239,7 +239,7 @@ static void checkmergertrie2(Mergertrierep *trierep,
               current->suffixinfo.idx) >= 0)
         {
           fprintf(stderr,"nodes not correctly ordered\n");
-          exit(EXIT_FAILURE); /* programming error */
+          exit(GT_EXIT_PROGRAMMING_ERROR);
         }
       }
 #endif
@@ -266,7 +266,7 @@ void mergertrie_check(Mergertrierep *trierep,unsigned int numberofleaves,
       fprintf(stderr,"numberofbitsset = %u != %u = numberofleaves\n",
                       numberofbitsset,
                       numberofleaves);
-      exit(EXIT_FAILURE); /* programming error */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
 #endif
     gt_free(leafused);

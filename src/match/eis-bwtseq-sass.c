@@ -229,7 +229,7 @@ BWTSASSCreateReader(SASeqSrc *src, enum sfxDataRequest rtype)
   default:
     fprintf(stderr, "error: unimplemented request: %d, %s: %d!\n", rtype,
             __FILE__, __LINE__);
-    exit(EXIT_FAILURE); /* programming error */
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   return reader;
 }

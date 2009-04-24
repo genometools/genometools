@@ -91,7 +91,7 @@ static void checkifsequenceisthere(const Encodedsequence *encseq,
                      (unsigned int) qptr[i],
                      (unsigned int) cc,
                      PRINTSeqposcast(witnessposition+(Seqpos) i));
-      exit(EXIT_FAILURE); /* programming error */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   }
 }
@@ -353,7 +353,7 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
                                           bucketspec.nonspecialsinbucket-1));
           fprintf(stderr,"gmatchlength2 = %lu != %lu = gmatchlength\n",
                           gmatchlength2,gmatchlength);
-          exit(EXIT_FAILURE);  /* programming error */
+          exit(GT_EXIT_PROGRAMMING_ERROR);
         }
       }
     }

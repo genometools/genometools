@@ -580,13 +580,13 @@ static void locali_copyLimdfsstate (DECLAREPTRDFSSTATE(deststate),
     {
       fprintf(stderr,"destcol->lenval = %lu < %lu lci->querylength+1\n",
                       destcol->lenval,lci->querylength+1);
-      exit(EXIT_FAILURE); /* programming error */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     if (srccol->lenval < lci->querylength+1)
     {
       fprintf(stderr,"srccol->lenval = %lu < %lu lci->querylength+1\n",
                       srccol->lenval,lci->querylength+1);
-      exit(EXIT_FAILURE); /* programming error */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
 #endif
     for (idx = 0; idx<=lci->querylength; idx++)
@@ -725,11 +725,11 @@ void processelemLocalitracebackstate(Limdfsconstinfo *lci,
         fprintf(stderr,"tracebit = Notraceback not allowed\n");
         fprintf(stderr,"column->colvalues[tbs->querypos].bestcell=%ld\n",
                         column->colvalues[tbs->querypos].bestcell);
-        exit(EXIT_FAILURE); /* programming error */
+        exit(GT_EXIT_PROGRAMMING_ERROR);
       default:
         fprintf(stderr,"tracebit = %d not allowed\n",
                 (int) column->colvalues[tbs->querypos].tracebit);
-        exit(EXIT_FAILURE); /* programming error */
+        exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   }
 }
@@ -763,7 +763,7 @@ const void *completealignmentfromLocalitracebackstate(
   if (evalscore < 0 || (unsigned long) evalscore < lci->threshold)
   {
     fprintf(stderr,"unexpected eval score %ld\n",evalscore);
-    exit(EXIT_FAILURE); /* programming error */
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 #endif
   return (const void *) lci->tbs.alignment;

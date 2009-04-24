@@ -275,7 +275,7 @@ GtUchar getencodedchar(const Encodedsequence *encseq,
     default:
       fprintf(stderr,"getencodedchar: readmode %d not implemented\n",
                      (int) readmode);
-      exit(EXIT_FAILURE); /* programming error */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
 
@@ -306,7 +306,7 @@ GtUchar getencodedcharnospecial(const Encodedsequence *encseq,
     default:
       fprintf(stderr,"getencodedcharnospecial: readmode %d not implemented\n",
                      (int) readmode);
-      exit(EXIT_FAILURE); /* programming error */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
 #endif
@@ -361,7 +361,7 @@ GtUchar sequentialgetencodedchar(const Encodedsequence *encseq,
     default:
       fprintf(stderr,"sequentialgetencodedchar: readmode %d not implemented\n",
                      (int) readmode);
-      exit(EXIT_FAILURE); /* programming error */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
 #endif
@@ -743,7 +743,7 @@ static uint64_t localdetsizeencseq(Positionaccesstype sat,
          break;
     default:
          fprintf(stderr,"localdetsizeencseq(%d) undefined\n",(int) sat);
-         exit(EXIT_FAILURE); /* programming error */
+         exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   sum += sizeof (unsigned long); /* for sat type */
   sum += sizeof (totallength); /* for totallength */
@@ -1103,7 +1103,7 @@ static GtUchar delivercharViabytecompress(const Encodedsequence *encseq,
   }
   fprintf(stderr,"delivercharViabytecompress: cc=%lu\n not possible\n",
                   (unsigned long) cc);
-  exit(EXIT_FAILURE); /* programming error */
+  exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 
 /* generic for the case that there are no specialsymbols */
@@ -1355,7 +1355,7 @@ static Seqpos accessspecialpositions(const Encodedsequence *encseq,
   }
   fprintf(stderr,"accessspecialpositions(sat = %s is undefined)\n",
                   accesstype2name(encseq->sat));
-  exit(EXIT_FAILURE); /* programming error */
+  exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 
 static Seqpos accessspecialrangelength(const Encodedsequence *encseq,
@@ -1375,7 +1375,7 @@ static Seqpos accessspecialrangelength(const Encodedsequence *encseq,
   }
   fprintf(stderr,"accessspecialrangelength(sat = %s is undefined)\n",
                   accesstype2name(encseq->sat));
-  exit(EXIT_FAILURE); /* programming error */
+  exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 
 static unsigned long accessendspecialsubsUint(const Encodedsequence *encseq,
@@ -1396,7 +1396,7 @@ static unsigned long accessendspecialsubsUint(const Encodedsequence *encseq,
   }
   fprintf(stderr,"accessendspecialsubsUint(sat = %s is undefined)\n",
                   accesstype2name(encseq->sat));
-  exit(EXIT_FAILURE); /* programming error */
+  exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 
 #ifdef RANGEDEBUG
@@ -2240,7 +2240,7 @@ static unsigned int sat2maxspecialtype(Positionaccesstype sat)
   }
   fprintf(stderr,"sat2maxspecialtype(sat = %s is undefined)\n",
                   accesstype2name(sat));
-  exit(EXIT_FAILURE); /* programming error */
+  exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 
 static void addmarkpos(ArraySeqpos *asp,
@@ -2306,7 +2306,7 @@ static unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
     }
     fprintf(stderr,"getrecordnumSeqpos: cannot find position " FormatSeqpos,
                   PRINTSeqposcast(position));
-    exit(EXIT_FAILURE); /* programming error */
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   left = 0;
   right = numofrecords - 2;
@@ -2332,7 +2332,7 @@ static unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
   }
   fprintf(stderr,"getrecordnumSeqpos: cannot find position " FormatSeqpos,
                 PRINTSeqposcast(position));
-  exit(EXIT_FAILURE); /* programming error */
+  exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 
 unsigned long getencseqfrompos2seqnum(const Encodedsequence *encseq,
@@ -2413,7 +2413,7 @@ void checkmarkpos(const Encodedsequence *encseq)
           fprintf(stderr,"pos= " FormatSeqpos
                          " seqnum = %lu != %lu = currentseqnum\n",
                           PRINTSeqposcast(pos),seqnum,currentseqnum);
-          exit(EXIT_FAILURE); /* programming error */
+          exit(GT_EXIT_PROGRAMMING_ERROR);
         }
       }
     }
@@ -3110,7 +3110,7 @@ void checkallsequencedescriptions(const Encodedsequence *encseq)
   if (strncmp(copydestab,encseq->destab,(size_t) totaldesclength) != 0)
   {
     fprintf(stderr,"different descriptions\n");
-    exit(EXIT_FAILURE); /* programming error */
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   FREESPACE(copydestab);
 }
@@ -3812,7 +3812,7 @@ int compareEncseqsequences(Seqpos *lcp,
                       (unsigned int) depth,
                       (unsigned int) lcp,
                       (unsigned int) lcp2);
-      exit(EXIT_FAILURE); /* programming error */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     gt_assert(*lcp == lcp2);
   }
@@ -4124,7 +4124,7 @@ void checkextractunitatpos(const Encodedsequence *encseq,
               PRINTSeqposcast(startpos),
               ptbe1.unitsnotspecial,ptbe2.unitsnotspecial);
       showsequenceatstartpos(stderr,fwd,complement,encseq,startpos);
-      exit(EXIT_FAILURE); /* programming error */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     if (!checktbe(fwd,ptbe1.tbe,ptbe2.tbe,ptbe1.unitsnotspecial))
     {
@@ -4133,7 +4133,7 @@ void checkextractunitatpos(const Encodedsequence *encseq,
                       complement ? "true" : "false",
                       PRINTSeqposcast(startpos));
       showsequenceatstartpos(stderr,fwd,complement,encseq,startpos);
-      exit(EXIT_FAILURE); /* programming error */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     if (fwd)
     {
@@ -4192,7 +4192,7 @@ void checkextractspecialbits(const Encodedsequence *encseq,bool fwd)
                      PRINTSeqposcast(startpos),unitsnotspecial,buffer);
       bitsequence2string(buffer,spbits1);
       fprintf(stderr,"     %s=fast\n",buffer);
-      exit(EXIT_FAILURE); /* programming error */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     if (fwd)
     {
@@ -4250,7 +4250,7 @@ void multicharactercompare_withtest(const Encodedsequence *encseq,
     showsequenceatstartpos(stderr,fwd,complement,encseq,pos2);
     bitsequence2string(buf2,ptbe2.tbe);
     fprintf(stderr,"v2=%s(unitsnotspecial=%u)\n",buf2,ptbe2.unitsnotspecial);
-    exit(EXIT_FAILURE); /* programming error */
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
 

@@ -233,7 +233,7 @@ static Seqpos frompos2rank(const Lowerboundwithrank *leftptr,
   }
   fprintf(stderr,"frompos2rank: cannot find pos " FormatSeqpos
                  " in ranges",PRINTSeqposcast(specialpos));
-  exit(EXIT_FAILURE); /* programming error */
+  exit(GT_EXIT_PROGRAMMING_ERROR);
   /*@ignore@*/
   return 0;
   /*@end@*/
@@ -470,7 +470,7 @@ static void inversesuftabrel_set(Rmnsufinfo *rmnsufinfo,Seqpos idx,
   {
     fprintf(stderr,"value = %lu < %lu = base\n",
                     (unsigned long) value,(unsigned long) base);
-    exit(EXIT_FAILURE); /* programming error */
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   if (value != base && value >= base + rmnsufinfo->allocateditvinfo)
   {
@@ -479,7 +479,7 @@ static void inversesuftabrel_set(Rmnsufinfo *rmnsufinfo,Seqpos idx,
                     (unsigned long) base,
                     rmnsufinfo->allocateditvinfo,
                     (unsigned long) base+rmnsufinfo->allocateditvinfo);
-    exit(EXIT_FAILURE); /* programming error */
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 #endif
   basedist = (Seqpos) (value-base);
@@ -536,7 +536,7 @@ static Seqpos frompos2rank(const Lowerboundwithrank *leftptr,
   }
   fprintf(stderr,"frompos2rank: cannot find pos " FormatSeqpos
                  " in ranges",PRINTSeqposcast(specialpos));
-  exit(EXIT_FAILURE); /* programming error */
+  exit(GT_EXIT_PROGRAMMING_ERROR);
   /*@ignore@*/
   return 0;
   /*@end@*/

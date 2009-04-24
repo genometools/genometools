@@ -56,7 +56,7 @@ writeLCPVal(const Encodedsequence *encseq, Readmode readmode,
   {
     fprintf(stderr, ": cmp " FormatSeqpos " " FormatSeqpos " = %d",
             PRINTSeqposcast(a), PRINTSeqposcast(b), cmp);
-    exit(EXIT_FAILURE); /* programming error */
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 #endif /* NDEBUG */
 }

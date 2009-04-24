@@ -111,7 +111,7 @@ static void checknumofmers(const Dfsstate *state,
                    Formatuint64_t,
                    PRINTuint64_tcast(dnumofmers),
                    PRINTuint64_tcast(bfnumofmers));
-    exit(EXIT_FAILURE); /* programming error */
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
 
@@ -141,7 +141,7 @@ static void checknumberofoccurrences(const Dfsstate *dfsstate,
     fprintf(stderr,"bfcount = " FormatSeqpos " != %lu = countocc\n",
                    PRINTSeqposcast(bfcount),
                    countocc);
-    exit(EXIT_FAILURE); /* programming error */
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   freemmsearchiterator(&mmsi);
 }
@@ -462,7 +462,7 @@ static bool containsspecial2(const Encodedsequence *encseq,
                     (unsigned long) len,
                     result ? "true" : "false",
                     result2 ? "true" : "false");
-    exit(EXIT_FAILURE); /* programming error */
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   return result;
 }

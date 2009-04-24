@@ -132,7 +132,7 @@ void checkifprefixesareidentical(const Encodedsequence *encseq,
   freeEncodedsequencescanstate(&esr2);
   if (haserr)
   {
-    exit(EXIT_FAILURE); /* programming error */
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
 
@@ -187,7 +187,7 @@ void checkentiresuftab(const Encodedsequence *encseq,
       fprintf(stderr,"ERROR: suffix with startpos " FormatSeqpos
                      " already occurs\n",
                       PRINTSeqposcast(*ptr));
-      exit(EXIT_FAILURE); /* programming error */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     SETIBIT(startposoccurs,*ptr);
     countbitsset++;
@@ -195,7 +195,7 @@ void checkentiresuftab(const Encodedsequence *encseq,
   if (countbitsset != totallength+1)
   {
     fprintf(stderr,"ERROR: not all bits are set\n");
-    exit(EXIT_FAILURE); /* programming error */
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   gt_free(startposoccurs);
   esr1 = newEncodedsequencescanstate();
@@ -266,7 +266,7 @@ void checkentiresuftab(const Encodedsequence *encseq,
                           FormatSeqpos "(fast)\n",
                     PRINTSeqposcast(maxlcp),
                     PRINTSeqposcast(currentlcp));
-        exit(EXIT_FAILURE); /* programming error */
+        exit(GT_EXIT_PROGRAMMING_ERROR);
       }
     }
   }
@@ -274,7 +274,7 @@ void checkentiresuftab(const Encodedsequence *encseq,
   freeEncodedsequencescanstate(&esr2);
   if (haserr)
   {
-    exit(EXIT_FAILURE); /* programming error */
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   /*
   printf("# checkentiresuftab with mode 'specials are %s'\n",

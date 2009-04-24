@@ -317,7 +317,7 @@ static void checksuffixrange(const Encodedsequence *encseq,
                      PRINTSeqposcast(*(sufptr+1)));
       fprintf(stderr,"in range of length " FormatSeqpos "\n",
                      PRINTSeqposcast(right - left + 1));
-      exit(EXIT_FAILURE); /* programming error */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   }
 }
@@ -709,7 +709,7 @@ static void checkmedian(bool fwd,
   }
   fprintf(stderr,"problem with equal=%lu,smaller=%lu,larger=%lu\n",
                   equal,smaller,larger);
-  exit(EXIT_FAILURE); /* programming error */
+  exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 #endif
 
@@ -1335,7 +1335,7 @@ static Seqpos bruteforcelcpvalue(const Encodedsequence *encseq,
             PRINTSeqposcast(currentsuffix->startpos),
             cmp,
             PRINTSeqposcast(lcpvalue));
-    exit(EXIT_FAILURE); /* programming error */
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   if (previoussuffix->code == currentsuffix->code)
   {
@@ -1356,7 +1356,7 @@ static Seqpos bruteforcelcpvalue(const Encodedsequence *encseq,
       fprintf(stderr,"\ncurrentsuffix=");
       showSuffixwithcode(stderr,currentsuffix);
       fprintf(stderr,"\n");
-      exit(EXIT_FAILURE); /* programming error */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   }
   return lcpvalue;

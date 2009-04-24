@@ -398,7 +398,7 @@ int testmaxpairs(const GtStr *indexname,
                          query,
                          (unsigned long) querylen,
                          width);
-      exit(EXIT_FAILURE); /* programming error */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     FREESPACE(maxmatchselfinfo.markpos);
     printf("# numberofmatches=%lu\n",gt_array_size(tabmaxquerymatches));

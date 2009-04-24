@@ -50,3 +50,4 @@
 -shiftimplementation
 +posixlib
 -duplicatequals
+-exitarg

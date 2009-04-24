@@ -374,7 +374,7 @@ int extractginumbers(bool verbose,
             fprintf(stderr,"ginumber " Formatuint64_t
                            " was already found before\n",
                      PRINTuint64_tcast(giqueries[ginumberhit].ginumber));
-            exit(EXIT_FAILURE); /* programming error */
+            exit(GT_EXIT_PROGRAMMING_ERROR);
           }
           headerlength = strlen(desc);
           if (headerbuffersize < headerlength + EXTRABUF + 1)

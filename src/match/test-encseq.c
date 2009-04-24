@@ -52,7 +52,7 @@ static void runscanatpostrial(const Encodedsequence *encseq,
                      PRINTSeqposcast(pos),
                      (unsigned int) ccra,
                      (unsigned int) ccsr);
-      exit(EXIT_FAILURE); /* programming error */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   }
 }
@@ -310,7 +310,7 @@ int checkspecialrangesfast(const Encodedsequence *encseq)
     if (array_compare(rangesforward,rangesbackward,
                       compareSequencerange) != 0)
     {
-      exit(EXIT_FAILURE); /* programming error */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   }
   gt_array_delete(rangesforward);

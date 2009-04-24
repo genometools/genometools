@@ -207,7 +207,7 @@ static void checkmstats(void *processinfo,
     fprintf(stderr,"patternstartpos = %lu: mstatlength = %lu != %lu "
                    " = realmstatlength\n",
                     patternstartpos,mstatlength,realmstatlength);
-    exit(EXIT_FAILURE); /* programming error */
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   if (intervalwidthleq((const Limdfsresources *) processinfo,leftbound,
                        rightbound))
@@ -240,7 +240,7 @@ static void checkmstats(void *processinfo,
                           (unsigned int) cc,
                           (unsigned long)
                           (witnessposition+idx-patternstartpos));
-          exit(EXIT_FAILURE); /* programming error */
+          exit(GT_EXIT_PROGRAMMING_ERROR);
         }
       }
     }
@@ -394,7 +394,7 @@ static void compareresults(const ArraySimplematch *storeonline,
                    "storeoffline\n",
                    storeonline->nextfreeSimplematch,
                    storeoffline->nextfreeSimplematch);
-    exit(EXIT_FAILURE); /* programming error */
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   gt_assert(storeonline->nextfreeSimplematch ==
             storeoffline->nextfreeSimplematch);
@@ -414,14 +414,14 @@ static void compareresults(const ArraySimplematch *storeonline,
     {
       fprintf(stderr,"rcmatch: storeonline[%lu] = p != d "
                      "= storeoffline[%lu]\n",ss,ss);
-      exit(EXIT_FAILURE); /* programming error */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     if (!storeonline->spaceSimplematch[ss].rcmatch &&
         storeoffline->spaceSimplematch[ss].rcmatch)
     {
       fprintf(stderr,"rcmatch: storeonline[%lu] = d != p "
                      "= storeoffline[%lu]\n",ss,ss);
-      exit(EXIT_FAILURE); /* programming error */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     if (storeonline->spaceSimplematch[ss].matchlength !=
         storeoffline->spaceSimplematch[ss].matchlength)
@@ -434,7 +434,7 @@ static void compareresults(const ArraySimplematch *storeonline,
                      PRINTSeqposcast(storeoffline->spaceSimplematch[ss].
                                      matchlength),
                      ss);
-      exit(EXIT_FAILURE); /* programming error */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     if (storeonline->spaceSimplematch[ss].dbstartpos !=
         storeoffline->spaceSimplematch[ss].dbstartpos)
@@ -447,7 +447,7 @@ static void compareresults(const ArraySimplematch *storeonline,
                      PRINTSeqposcast(storeoffline->spaceSimplematch[ss].
                                      dbstartpos),
                      ss);
-      exit(EXIT_FAILURE); /* programming error */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   }
 }
