@@ -447,3 +447,89 @@ GtArray* gt_ranges_uniq_in_place_count(GtArray *ranges)
   gt_assert(ranges);
   return generic_ranges_uniq_in_place(ranges, true);
 }
+
+bool gt_ranges_are_consecutive(const GtArray *ranges)
+{
+  unsigned long i;
+  for (i = 0; i < gt_array_size(ranges); i++) {
+    gt_assert(((GtRange*) gt_array_get(ranges, i))->start <=
+              ((GtRange*) gt_array_get(ranges, i))->end);
+    if (i) {
+      /* check if ranges are consecutive */
+      if (((GtRange*) gt_array_get(ranges, i-1))->end >=
+          ((GtRange*) gt_array_get(ranges, i))->start) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+unsigned long gt_ranges_total_length(const GtArray *ranges)
+{
+  unsigned long i, totallen = 0;
+  GtRange *range;
+  gt_assert(ranges);
+  for (i = 0; i < gt_array_size(ranges); i++) {
+    range = gt_array_get(ranges, i);
+    totallen += range->end - range->start + 1;
+  }
+  return totallen;
+}
+
+void gt_ranges_copy_to_opposite_strand(GtArray *outranges,
+                                       const GtArray *inranges,
+                                       unsigned long gen_total_length,
+                                       unsigned long gen_offset)
+{
+  GtRange range;
+  unsigned long i;
+
+  /* outranges are empty */
+  gt_assert(!gt_array_size(outranges));
+  /* inranges are not empty */
+  gt_assert(gt_array_size(inranges));
+
+  for (i = gt_array_size(inranges); i > 0; i--) {
+    /* genomic offset is defined */
+    gt_assert(gen_offset != UNDEF_ULONG);
+    range.start  = gen_total_length - 1
+                  - (((GtRange*) gt_array_get(inranges, i-1))->end -
+                     gen_offset)
+                  + gen_offset;
+    range.end = gen_total_length - 1
+                  - (((GtRange*) gt_array_get(inranges, i-1))->start -
+                     gen_offset)
+                  + gen_offset;
+    gt_array_add(outranges, range);
+  }
+
+  /* outranges has the same number of elements as inranges */
+  gt_assert(gt_array_size(inranges) == gt_array_size(outranges));
+}
+
+bool gt_ranges_borders_are_in_region(GtArray *ranges, unsigned long regionstart,
+                                     unsigned long regionend)
+{
+  /* check region start */
+  if (((GtRange*) gt_array_get_first(ranges))->start < regionstart)
+    return false;
+
+  /* check region end */
+  if (((GtRange*) gt_array_get_last(ranges))->end > regionend)
+    return false;
+
+  return true;
+}
+
+void gt_ranges_show(GtArray *ranges, GtGenFile *outfp)
+{
+  GtRange *range;
+  unsigned long i;
+  gt_assert(ranges);
+  for (i = 0; i < gt_array_size(ranges); i++) {
+    range = gt_array_get(ranges, i);
+    gt_genfile_xprintf(outfp, "(%lu,%lu)", range->start, range->end);
+  }
+  gt_genfile_xfputc('\n', outfp);
+}
