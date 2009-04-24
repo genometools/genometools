@@ -83,6 +83,54 @@ bool gt_range_overlap(const GtRange *range_a, const GtRange *range_b)
   return false;
 }
 
+bool gt_range_overlap_delta(const GtRange *range_a, const GtRange *range_b,
+                            unsigned long delta)
+{
+  unsigned long range_a_length, range_b_length;
+  gt_assert(range_a->start <= range_a->end && range_b->start <= range_b->end);
+
+  range_a_length = range_a->end - range_a->start + 1;
+  range_b_length = range_b->end - range_b->start + 1;
+
+  if (range_a_length < delta || range_b_length < delta) {
+    /* no overlap of delta possible */
+    return false;
+  }
+
+  if (gt_range_overlap(range_a, range_b)) {
+    if (range_a->start <= range_b->start) {
+      if (range_a->end >= range_b->end) {
+        /* ----A----
+            ---B---  */
+        if (range_b_length >= delta)
+          return true;
+      }
+      else { /* range_a->end < range_b->end */
+        /* ----A----
+            ----B---- */
+        if (range_a->end - range_b->start + 1 >= delta)
+          return true;
+      }
+    }
+    else { /* range_a->start > range_b->start */
+      if (range_a->end <= range_b->end) {
+        /*  ---A---
+           ----B---- */
+        if (range_a_length >= delta)
+          return true;
+      }
+      else { /* range_a->end > range_b->end */
+        /*  ----A----
+           ----B----  */
+        if (range_b->end - range_a->start + 1 >= delta)
+          return true;
+      }
+    }
+  }
+
+  return false;
+}
+
 bool gt_range_contains(const GtRange *range_a, const GtRange *range_b)
 {
   gt_assert(range_a->start <= range_a->end && range_b->start <= range_b->end);

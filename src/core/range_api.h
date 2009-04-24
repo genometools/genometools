@@ -44,6 +44,11 @@ int           gt_range_compare_with_delta(const GtRange *range_a,
                                           unsigned long delta);
 /* Returns <true> if <range_a> and <range_b> overlap, <false> otherwise. */
 bool          gt_range_overlap(const GtRange *range_a, const GtRange *range_b);
+/* Returns <true> if <range_a> and <range_b> overlap ___at least___ <delta> many
+   positions, <false> otherwise. */
+bool          gt_range_overlap_delta(const GtRange *range_a,
+                                     const GtRange *range_b,
+                                     unsigned long delta);
 /* Returns <true> if <range_b> is contained in <range_a>, <false> otherwise. */
 bool          gt_range_contains(const GtRange *range_a, const GtRange *range_b);
 /* Returns <true> if <point> lies within <range>, <false> otherwise. */
