@@ -28,9 +28,10 @@ typedef struct {
                 startpos2, /* start of fragment in second sequence */
                 endpos2;   /* end of fragment in second sequence */
   long weight;             /* weight of fragment */
-} Fragment;
+} GtFragment;
 
-typedef void (*GtChainProc)(GtChain*, Fragment*, unsigned long num_of_fragments,
+typedef void (*GtChainProc)(GtChain*, GtFragment*,
+                            unsigned long num_of_fragments,
                             unsigned long max_gap_width, void *cpinfo);
 
 /* Perform global chaining with overlaps of <num_of_fragments> many <fragments>
@@ -38,7 +39,8 @@ typedef void (*GtChainProc)(GtChain*, Fragment*, unsigned long num_of_fragments,
    Two fragments can maximally be <max_gap_width> many bases away.
    For all global chains of maximal score, the GtChainProc function is called.
    Thereby, GtChainProc does not get the ownership of the GtChain. */
-void gt_globalchaining_max(Fragment *fragments, unsigned long num_of_fragments,
+void gt_globalchaining_max(GtFragment *fragments,
+                           unsigned long num_of_fragments,
                            unsigned long max_gap_width, GtChainProc,
                            void *cpinfo);
 
@@ -49,7 +51,7 @@ void gt_globalchaining_max(Fragment *fragments, unsigned long num_of_fragments,
    <mincoverage> of the sequence in dimension 1 (with length <seqlen1>), the
    GtChainProc function is called. Thereby, GtChainProc does not get the
    ownership of the GtChain. */
-void gt_globalchaining_coverage(Fragment *fragments,
+void gt_globalchaining_coverage(GtFragment *fragments,
                                 unsigned long num_of_fragments,
                                 unsigned long max_gap_width,
                                 unsigned long seqlen1, double mincoverage,

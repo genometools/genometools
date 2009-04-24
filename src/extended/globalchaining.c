@@ -61,7 +61,7 @@ typedef struct {
 } Overlapinfo;
 
 static void initoverlapinfo(Overlapinfo *overlapinfo,
-                            Fragment *fragments,
+                            GtFragment *fragments,
                             unsigned long num_of_fragments)
 {
   unsigned long i;
@@ -74,7 +74,7 @@ static void initoverlapinfo(Overlapinfo *overlapinfo,
   }
 }
 
-static bool colinearfragments(Fragment *fragments,
+static bool colinearfragments(GtFragment *fragments,
                               unsigned long i, unsigned long j)
 {
   if (GETSTOREDSTARTPOINT(1, i) < GETSTOREDSTARTPOINT(1, j) &&
@@ -86,7 +86,7 @@ static bool colinearfragments(Fragment *fragments,
   return false;
 }
 
-static long overlapcost(Fragment *fragments,
+static long overlapcost(GtFragment *fragments,
                         unsigned long i, unsigned long j)
 {
   unsigned long overlaplength = 0;
@@ -105,7 +105,7 @@ static long overlapcost(Fragment *fragments,
 }
 
 static void chainingboundarycases(GtChain *chain,
-                                  Fragment *fragments,
+                                  GtFragment *fragments,
                                   unsigned long num_of_fragments)
 {
   if (num_of_fragments == 0)
@@ -140,7 +140,7 @@ static void retracepreviousinchain(GtChain *chain, GtChaininfo *chaininfo,
   gt_assert(gt_chain_size(chain) == lengthofchain);
 }
 
-static bool check_max_gap_width(Fragment *fragments,
+static bool check_max_gap_width(GtFragment *fragments,
                                 unsigned long max_gap_width,
                                 unsigned long leftfrag,
                                 unsigned long rightfrag)
@@ -174,7 +174,7 @@ static bool check_max_gap_width(Fragment *fragments,
 
 static void bruteforcechainingscores(GtChaininfo *chaininfo,
                                      unsigned long max_gap_width,
-                                     Fragment *fragments,
+                                     GtFragment *fragments,
                                      unsigned long num_of_fragments,
                                      Overlapinfo *overlapinfo)
 {
@@ -288,7 +288,8 @@ static bool retrievemaximalscore(long *maxscore, GtChaininfo *chaininfo,
   return maxscoredefined;
 }
 
-static void retrievechainthreshold(GtChaininfo *chaininfo, Fragment *fragments,
+static void retrievechainthreshold(GtChaininfo *chaininfo,
+                                   GtFragment *fragments,
                                    unsigned long num_of_fragments,
                                    unsigned long max_gap_width,
                                    GtChain *chain, long minscore,
@@ -311,7 +312,7 @@ static void retrievechainthreshold(GtChaininfo *chaininfo, Fragment *fragments,
 }
 
 static void findmaximalscores(GtChain *chain, GtChaininfo *chaininfo,
-                              Fragment *fragments,
+                              GtFragment *fragments,
                               unsigned long num_of_fragments,
                               unsigned long max_gap_width,
                               GtChainProc chainprocessor, void *cpinfo)
@@ -331,7 +332,7 @@ static void findmaximalscores(GtChain *chain, GtChaininfo *chaininfo,
 
 static void findmaximalscores_withoverlaps(GtChain *chain,
                                            GtChaininfo *chaininfo,
-                                           Fragment *fragments,
+                                           GtFragment *fragments,
                                            unsigned long num_of_fragments,
                                            unsigned long max_gap_width,
                                            unsigned long seqlen1,
@@ -389,13 +390,13 @@ static void findmaximalscores_withoverlaps(GtChain *chain,
   gt_array_delete(startfragments);
 }
 
-static void gt_log_fragments(Fragment *fragments,
+static void gt_log_fragments(GtFragment *fragments,
                              unsigned long num_of_fragments)
 {
   unsigned long i;
   gt_log_log("show chaining fragments");
   for (i = 0; i < num_of_fragments; i++) {
-    Fragment *frag = fragments + i;
+    GtFragment *frag = fragments + i;
     gt_log_log("#%lu: s1=%lu, s1=%lu, l1=%lu, s2=%lu, e2=%lu, l2=%lu, w=%lu", i,
             frag->startpos1, frag->endpos1, frag->endpos1 - frag->startpos1 + 1,
             frag->startpos2, frag->endpos2, frag->endpos2 - frag->startpos2 + 1,
@@ -405,7 +406,7 @@ static void gt_log_fragments(Fragment *fragments,
 
 static void globalchaining_generic(bool maxscore_chains,
                                    unsigned long max_gap_width,
-                                   Fragment *fragments,
+                                   GtFragment *fragments,
                                    unsigned long num_of_fragments,
                                    unsigned long seqlen1, double mincoverage,
                                    GtChainProc chainprocessor, void *cpinfo)
@@ -448,7 +449,8 @@ static void globalchaining_generic(bool maxscore_chains,
   gt_chain_delete(chain);
 }
 
-void gt_globalchaining_max(Fragment *fragments, unsigned long num_of_fragments,
+void gt_globalchaining_max(GtFragment *fragments,
+                           unsigned long num_of_fragments,
                            unsigned long max_gap_width,
                            GtChainProc chainprocessor, void *cpinfo)
 {
@@ -456,12 +458,12 @@ void gt_globalchaining_max(Fragment *fragments, unsigned long num_of_fragments,
                          UNDEF_ULONG, UNDEF_DOUBLE, chainprocessor, cpinfo);
 }
 
-void gt_globalchaining_coverage(Fragment *fragments,
+void gt_globalchaining_coverage(GtFragment *fragments,
                                 unsigned long num_of_fragments,
                                 unsigned long max_gap_width,
                                 unsigned long seqlen1,
-                             double mincoverage, GtChainProc chainprocessor,
-                             void *cpinfo)
+                                double mincoverage, GtChainProc chainprocessor,
+                                void *cpinfo)
 {
   gt_assert(mincoverage >= 0.0 && mincoverage <= 1.0);
   globalchaining_generic(false, max_gap_width, fragments, num_of_fragments,
