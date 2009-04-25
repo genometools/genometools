@@ -1730,7 +1730,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
                          maxcode,
                          partwidth,
                          numofchars,
-                         100.00,
+                         false,
                          verboseinfo);
   bcktab_showlog2info(bcktab,verboseinfo);
   if (outlcpinfo != NULL && outlcpinfo->assideeffect)
@@ -1782,7 +1782,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
                                     prefixlength,
                                     bsr->readmode,
                                     bsr->partwidth,
-                                    NULL,
+                                    false,
                                     true);
     gt_assert(bsr->rmnsufinfo != NULL);
     bsr->trierep = NULL;
@@ -1855,7 +1855,7 @@ void qsufsort(Seqpos *sortspace,
               Bcktab *bcktab,
               unsigned int numofchars,
               unsigned int prefixlength,
-              const Defineddouble *probsmall,
+              bool hashexceptions,
               bool absoluteinversesuftab,
               Outlcpinfo *outlcpinfo)
 {
@@ -1872,7 +1872,7 @@ void qsufsort(Seqpos *sortspace,
                              prefixlength,
                              readmode,
                              partwidth,
-                             probsmall,
+                             hashexceptions,
                              absoluteinversesuftab);
   bcktab2firstlevelintervals(rmnsufinfo);
   lcptab = rmnsufinfo_wrap(longest,&rmnsufinfo,

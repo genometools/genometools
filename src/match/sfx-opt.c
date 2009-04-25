@@ -321,22 +321,9 @@ static OPrval parse_options(int *parsed_args,
           so->sfxstrategy.absoluteinversesuftab = true;
         } else
         {
-          float readfloat;
-
-          if (strchr(gt_str_get(so->str_maxdepth),'.') != NULL)
+          if (strcmp(gt_str_get(so->str_maxdepth),"he") == 0)
           {
-            if (sscanf(gt_str_get(so->str_maxdepth),"%f",&readfloat) == 1 &&
-                readfloat >= 0.5 && readfloat <= 1.0)
-            {
-              so->sfxstrategy.ssortmaxdepth.valueunsignedint
-                = MAXDEPTH_AUTOMATIC;
-              so->sfxstrategy.probsmall.valuedouble = (double) readfloat;
-              so->sfxstrategy.probsmall.defined = true;
-            } else
-            {
-              gt_error_set(err, "%s", maxdepthmsg);
-              oprval = OPTIONPARSER_ERROR;
-            }
+            so->sfxstrategy.hashexceptions = true;
           } else
           {
             long readint;
@@ -512,7 +499,7 @@ int suffixeratoroptions(Suffixeratoroptions *so,
   so->sfxstrategy.ssortmaxdepth.defined = false;
   so->sfxstrategy.ssortmaxdepth.valueunsignedint = MAXDEPTH_AUTOMATIC;
   so->sfxstrategy.streamsuftab = false;
-  so->sfxstrategy.probsmall.defined = false;
+  so->sfxstrategy.hashexceptions = false;
   so->outsuftab = false; /* if !doesa this is not defined */
   so->outlcptab = false;
   so->outbwttab = false;

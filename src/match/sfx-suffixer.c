@@ -713,7 +713,7 @@ static void preparethispart(Sfxiterator *sfi)
                sfi->bcktab,
                sfi->numofchars,
                sfi->prefixlength,
-               NULL,
+               false,
                true,
                sfi->outlcpinfo);
       sfi->suftab.longest.defined = true;
@@ -799,7 +799,7 @@ int postsortsuffixesfromstream(Sfxiterator *sfi, const GtStr *str_indexname,
              sfi->bcktab,
              sfi->numofchars,
              sfi->prefixlength,
-             &sfi->sfxstrategy.probsmall,
+             sfi->sfxstrategy.hashexceptions,
              sfi->sfxstrategy.absoluteinversesuftab,
              sfi->outlcpinfo);
     sfi->suftab.longest.defined = true;

@@ -46,7 +46,7 @@ do
   sfxmap sfx-idx
   suffixerator -parts 3 -maxdepth -indexname sfx-idx
   sfxmap sfx-idx
-  suffixerator -parts 3 -maxdepth 0.94 -indexname sfx-idx
+  suffixerator -parts 3 -maxdepth he -indexname sfx-idx
   sfxmap sfx-idx
   suffixerator -parts 3 -maxdepth abs -indexname sfx-idx
   sfxmap sfx-idx

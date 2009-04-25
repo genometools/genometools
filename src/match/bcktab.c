@@ -557,16 +557,13 @@ static void updatelog2values(unsigned long *tab,unsigned long maxvalue)
 {
   unsigned long multi = 1UL, idx, sum = 1UL;
 
-  /* printf("maxvalue=%lu\n",maxvalue);*/
   for (idx = 0; /* Nothing */; idx++)
   {
     tab[idx] += multi;
-    /*printf("tab[%lu]+=%lu\n",idx,multi); */
     multi *= 2;
     if (sum+multi > maxvalue)
     {
       tab[idx+1] += maxvalue - sum;
-      /* printf("tab[%lu]+=%lu\n",idx+1,maxvalue-sum); */
       break;
     }
     sum += multi;
@@ -575,13 +572,14 @@ static void updatelog2values(unsigned long *tab,unsigned long maxvalue)
 
 static unsigned int calc_optimalnumofbits(unsigned short *logofremaining,
                                           const unsigned long *log2tab,
-                                          Seqpos totallength,
-                                          GT_UNUSED double probsmall)
+                                          Seqpos totallength)
 {
   unsigned int lastbitset = 0, maxbits, optbits = 0;
   unsigned long currentsum = 0, total = 0, optcurrentsum = 0;
   unsigned short tmplogofremaining;
-  const size_t size_entry = sizeof (Seqpos) + sizeof (unsigned long);
+  const size_t size_entry = sizeof (uint32_t) +
+                            sizeof (Seqpos) +
+                            sizeof (unsigned long);
   size_t savedbitsinbytes,
          hashtablesize, saved, maxsaved = 0;
 
@@ -601,18 +599,18 @@ static unsigned int calc_optimalnumofbits(unsigned short *logofremaining,
       currentsum += log2tab[maxbits];
       tmplogofremaining = (unsigned short) gt_determinebitspervalue(
                                            (uint64_t) (total - currentsum));
-      hashtablesize = (1 << tmplogofremaining) * size_entry;
-      savedbitsinbytes = (totallength/CHAR_BIT) * (lastbitset - maxbits);
+      hashtablesize = ((1 << tmplogofremaining)-1) * size_entry;
+      savedbitsinbytes = (totallength/CHAR_BIT) * (lastbitset - maxbits + 1);
       printf("savedbitsintbytes=%lu,hashtablesize=%lu\n",
-              savedbitsinbytes,hashtablesize);
+              (unsigned long) savedbitsinbytes,(unsigned long) hashtablesize);
       if (savedbitsinbytes > hashtablesize)
       {
         saved = savedbitsinbytes - hashtablesize;
-        printf("saved=%lu\n",saved);
+        printf("saved=%lu\n",(unsigned long) saved);
         if (saved > maxsaved)
         {
           maxsaved = saved;
-          printf("maxsaved=%lu\n",maxsaved);
+          printf("maxsaved=%lu\n",(unsigned long) maxsaved);
           optcurrentsum = currentsum;
           optbits = maxbits;
         }
@@ -620,11 +618,11 @@ static unsigned int calc_optimalnumofbits(unsigned short *logofremaining,
     }
   }
   *logofremaining = (unsigned short)
-                    gt_determinebitspervalue((uint64_t) 
+                    gt_determinebitspervalue((uint64_t)
                                              (total - optcurrentsum));
   printf("store %lu values in hashtable (%lu>=%lu bytes)\n",
          (unsigned long) (total - optcurrentsum),
-         (1 << (*logofremaining)) * size_entry,
+         (unsigned long) ((1 << (*logofremaining))-1) * size_entry,
          (total - optcurrentsum) * size_entry);
   return optbits;
 }
@@ -634,7 +632,7 @@ void determinemaxbucketsize(Bcktab *bcktab,
                             const Codetype maxcode,
                             Seqpos partwidth,
                             unsigned int numofchars,
-                            double probsmall,
+                            bool hashexceptions,
                             Verboseinfo *verboseinfo)
 {
   unsigned int rightchar = (unsigned int) (mincode % numofchars);
@@ -687,16 +685,13 @@ void determinemaxbucketsize(Bcktab *bcktab,
                        bucketspec.specialsinbucket);
     }
   }
-  if (gt_double_smaller_double(probsmall,(double) 1.0))
+  if (hashexceptions)
   {
     bcktab->optimalnumofbits
       = calc_optimalnumofbits(&bcktab->logofremaining,
                               bcktab->maxbucketinfo.
                                       log2nonspecialbucketsizedist,
-                              bcktab->totallength,
-                              probsmall);
-    printf("use %u bits for more than %.2f percent of the values\n",
-            bcktab->optimalnumofbits,100.0 * probsmall);
+                              bcktab->totallength);
   } else
   {
     bcktab->optimalnumofbits = 0;

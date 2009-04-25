@@ -60,7 +60,7 @@ void qsufsort(Seqpos *sortspace,
               Bcktab *bcktab,
               unsigned int numofchars,
               unsigned int prefixlength,
-              const Defineddouble *probsmall,
+              bool hashexceptions,
               bool absoluteinversesuftab,
               Outlcpinfo *outlcpinfo);
 

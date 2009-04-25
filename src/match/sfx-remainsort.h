@@ -37,7 +37,7 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                           unsigned int prefixlength,
                           Readmode readmode,
                           Seqpos partwidth,
-                          const Defineddouble *probsmall,
+                          bool hashexceptions,
                           bool absoluteinversesuftab);
 
 void rmnsufinfo_addunsortedrange(Rmnsufinfo *rmnsufinfo,

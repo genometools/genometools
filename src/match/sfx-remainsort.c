@@ -19,13 +19,13 @@
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
-#include "core/queue.h"
 #include "core/chardef.h"
 #include "core/ma_api.h"
 #include "core/arraydef.h"
 #include "core/fa.h"
 #include "core/qsort_r.h"
 #include "core/hashmap-generic.h"
+#include "core/minmax.h"
 #include "seqpos-def.h"
 #include "encseq-def.h"
 #include "intbits-tab.h"
@@ -59,6 +59,10 @@ typedef struct
          right,
          base;
 } Pairsuffixptrwithbase;
+
+typedef Pairsuffixptrwithbase Inl_Queueelem;
+
+#include "queue-inline.h"
 
 typedef struct
 {
@@ -116,7 +120,7 @@ struct Rmnsufinfo
   bool absoluteinversesuftab;
   Inversesuftab_rel itvrel;
   Sortblock sortblock;
-  GtQueue *rangestobesorted;
+  Inl_Queue *rangestobesorted;
   Seqpos currentdepth;
   const Bcktab *bcktab;
   Codetype maxcode;
@@ -129,7 +133,6 @@ struct Rmnsufinfo
   unsigned long firstgenerationtotalwidth,
                 firstgenerationcount;
   Firstwithnewdepth firstwithnewdepth;
-  Pairsuffixptrwithbase *unusedpair;
   Encodedsequencescanstate *esr;
   Seqpos longestrel;
   unsigned int prefixlength,
@@ -274,7 +277,7 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                           unsigned int prefixlength,
                           Readmode readmode,
                           Seqpos partwidth,
-                          const Defineddouble *probsmall,
+                          bool hashexceptions,
                           bool absoluteinversesuftab)
 {
   Rmnsufinfo *rmnsufinfo;
@@ -300,12 +303,9 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   rmnsufinfo->currentdepth = 0;
   rmnsufinfo->firstgenerationtotalwidth = 0;
   rmnsufinfo->firstgenerationcount = 0;
-  rmnsufinfo->unusedpair = NULL;
   rmnsufinfo->inversesuftab = NULL;
   rmnsufinfo->absoluteinversesuftab = absoluteinversesuftab;
   /*
-  printf("probsmall->defined=%s\n",(probsmall != NULL && probsmall->defined)
-                                   ? "true" : "false");
   printf("sufinmem=%s\n",SUFINMEM(&rmnsufinfo->sortblock) ? "true" : "false");
   printf("absoluteinversesuftab=%s\n",
           absoluteinversesuftab ? "true" : "false");
@@ -323,12 +323,10 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                            maxcode,
                            partwidth,
                            numofchars,
-                           (probsmall == NULL || !probsmall->defined)
-                           ? 1.0 : probsmall->valuedouble,
+                           hashexceptions,
                            NULL);
     rmnsufinfo->allocateditvinfo = bcktab_nonspecialsmaxbucketsize(bcktab);
-    if (probsmall != NULL && probsmall->defined &&
-        gt_double_smaller_double(probsmall->valuedouble,(double) 1.0))
+    if (hashexceptions)
     {
       unsigned int optimalnumofbits;
       unsigned short logofremaining;
@@ -363,7 +361,7 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
 #endif
   rmnsufinfo->itvinfo = NULL;
   rmnsufinfo->itvfullinfo = NULL;
-  rmnsufinfo->rangestobesorted = gt_queue_new();
+  rmnsufinfo->rangestobesorted = gt_inl_queue_new(MAX(16,DIV2(maxcode)));
   if (possibletocmpbitwise(encseq))
   {
     rmnsufinfo->multimappower = NULL;
@@ -887,7 +885,7 @@ static void processunsortedrange(Rmnsufinfo *rmnsufinfo,
                                  Seqpos left,Seqpos right,
                                  Seqpos base,Seqpos depth)
 {
-  Pairsuffixptrwithbase *pairptrwithbase;
+  Pairsuffixptrwithbase pairptrwithbase;
   unsigned long width;
 
   gt_assert(left < right && depth > 0);
@@ -927,18 +925,10 @@ static void processunsortedrange(Rmnsufinfo *rmnsufinfo,
     rmnsufinfo->firstwithnewdepth.totalwidth = width;
     rmnsufinfo->firstwithnewdepth.maxwidth = width;
   }
-  if (rmnsufinfo->unusedpair == NULL)
-  {
-    pairptrwithbase = gt_malloc(sizeof(Pairsuffixptrwithbase));
-  } else
-  {
-    pairptrwithbase = rmnsufinfo->unusedpair;
-    rmnsufinfo->unusedpair = NULL;
-  }
-  pairptrwithbase->left = left;
-  pairptrwithbase->right = right;
-  pairptrwithbase->base = base;
-  gt_queue_add(rmnsufinfo->rangestobesorted,pairptrwithbase);
+  pairptrwithbase.left = left;
+  pairptrwithbase.right = right;
+  pairptrwithbase.base = base;
+  gt_inl_queue_add(rmnsufinfo->rangestobesorted,pairptrwithbase);
   rmnsufinfo->currentqueuesize++;
   if (rmnsufinfo->maxqueuesize < rmnsufinfo->currentqueuesize)
   {
@@ -1190,7 +1180,7 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos left,
 static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
 {
   Pairsuffixptr *pairptr;
-  Pairsuffixptrwithbase *pairptrwithbase;
+  Pairsuffixptrwithbase pairptrwithbase;
 
   if (rmnsufinfo->firstgenerationcount > 0)
   {
@@ -1230,22 +1220,15 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
                             pairptr->left);
   }
   GT_FREEARRAY(&rmnsufinfo->firstgeneration,Pairsuffixptr);
-  while (gt_queue_size(rmnsufinfo->rangestobesorted) > 0)
+  while (!gt_inl_queue_isempty(rmnsufinfo->rangestobesorted))
   {
-    pairptrwithbase = gt_queue_get(rmnsufinfo->rangestobesorted);
+    pairptrwithbase = gt_inl_queue_get(rmnsufinfo->rangestobesorted);
     gt_assert(rmnsufinfo->currentqueuesize > 0);
     rmnsufinfo->currentqueuesize--;
     sortsuffixesonthislevel(rmnsufinfo,
-                            pairptrwithbase->left,
-                            pairptrwithbase->right,
-                            pairptrwithbase->base);
-    if (rmnsufinfo->unusedpair == NULL)
-    {
-      rmnsufinfo->unusedpair = pairptrwithbase;
-    } else
-    {
-      gt_free(pairptrwithbase);
-    }
+                            pairptrwithbase.left,
+                            pairptrwithbase.right,
+                            pairptrwithbase.base);
   }
   if (!SUFINMEM(&rmnsufinfo->sortblock))
   {
@@ -1255,12 +1238,11 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
     printf("pagechanges = %lu\n",rmnsufinfo->sortblock.pagechanges);
   }
   printf("maxqueuesize = %lu\n",rmnsufinfo->maxqueuesize);
-  gt_free(rmnsufinfo->unusedpair);
   gt_free(rmnsufinfo->itvinfo);
   rmnsufinfo->itvinfo = NULL;
   gt_free(rmnsufinfo->itvfullinfo);
   rmnsufinfo->itvfullinfo = NULL;
-  gt_queue_delete(rmnsufinfo->rangestobesorted);
+  gt_inl_queue_delete(rmnsufinfo->rangestobesorted);
   rmnsufinfo->rangestobesorted = NULL;
 }
 
