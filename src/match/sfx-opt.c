@@ -334,7 +334,7 @@ static OPrval parse_options(int *parsed_args,
               so->sfxstrategy.probsmall.defined = true;
             } else
             {
-              gt_error_set(err,maxdepthmsg);
+              gt_error_set(err, "%s", maxdepthmsg);
               oprval = OPTIONPARSER_ERROR;
             }
           } else
@@ -348,12 +348,12 @@ static OPrval parse_options(int *parsed_args,
                   = (unsigned int) readint;
               } else
               {
-                gt_error_set(err,maxdepthmsg);
+                gt_error_set(err,"%s", maxdepthmsg);
                 oprval = OPTIONPARSER_ERROR;
               }
             } else
             {
-              gt_error_set(err,maxdepthmsg);
+              gt_error_set(err,"%s", maxdepthmsg);
               oprval = OPTIONPARSER_ERROR;
             }
           }
