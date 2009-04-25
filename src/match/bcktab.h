@@ -98,7 +98,8 @@ unsigned long bcktab_specialsmaxbucketsize(const Bcktab *bcktab);
 
 unsigned long bcktab_nonspecialsmaxbucketsize(const Bcktab *bcktab);
 
-unsigned int bcktab_optimalnumofbits(const Bcktab *bcktab);
+unsigned int bcktab_optimalnumofbits(unsigned short *logofremaining,
+                                     const Bcktab *bcktab);
 
 unsigned int pfxidx2lcpvalues(unsigned int *minprefixindex,
                               uint8_t *lcpsubtab,

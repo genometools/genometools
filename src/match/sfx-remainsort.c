@@ -113,8 +113,7 @@ typedef struct
 struct Rmnsufinfo
 {
   Compressedtable *inversesuftab;
-  bool hashexceptions,
-       absoluteinversesuftab;
+  bool absoluteinversesuftab;
   Inversesuftab_rel itvrel;
   Sortblock sortblock;
   GtQueue *rangestobesorted;
@@ -241,6 +240,31 @@ static Seqpos frompos2rank(const Lowerboundwithrank *leftptr,
 
 #endif
 
+extern uint32_t
+gt_ht_seqpos_elem_hash(const void *elem)
+{
+#ifdef Seqposequalsunsignedint
+  return gt_uint32_key_mul_hash((uint32_t) *((Seqpos *) elem));
+#else
+  return gt_uint64_key_mul_hash((uint64_t) *((Seqpos *) elem));
+#endif
+}
+
+static inline int gt_ht_seqpos_cmp(Seqpos a, Seqpos b)
+{
+  return (int) (a > b) - (int) (a < b);
+}
+
+static inline int gt_ht_seqpos_elem_cmp(const void *elemA, const void *elemB)
+{
+  return gt_ht_seqpos_cmp(*(Seqpos *)elemA, *(Seqpos *)elemB);
+}
+
+DECLARE_HASHMAP(Seqpos, seqpos, unsigned long, ul, static, inline)
+DEFINE_HASHMAP(Seqpos, seqpos, unsigned long, ul, gt_ht_seqpos_elem_hash,
+               gt_ht_seqpos_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR,
+               static, inline)
+
 Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                           int mmapfiledesc,
                           const Encodedsequence *encseq,
@@ -279,7 +303,6 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   rmnsufinfo->unusedpair = NULL;
   rmnsufinfo->inversesuftab = NULL;
   rmnsufinfo->absoluteinversesuftab = absoluteinversesuftab;
-  rmnsufinfo->itvrel.hashstore = NULL;
   /*
   printf("probsmall->defined=%s\n",(probsmall != NULL && probsmall->defined)
                                    ? "true" : "false");
@@ -289,10 +312,10 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   */
   if (rmnsufinfo->absoluteinversesuftab)
   {
-    rmnsufinfo->hashexceptions = false;
     rmnsufinfo->itvrel.maxvalue = 0;
     rmnsufinfo->itvrel.offset = NULL;
     rmnsufinfo->allocateditvinfo = 0;
+    rmnsufinfo->itvrel.hashstore = NULL;
   } else
   {
     determinemaxbucketsize(bcktab,
@@ -308,24 +331,28 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
         gt_double_smaller_double(probsmall->valuedouble,(double) 1.0))
     {
       unsigned int optimalnumofbits;
+      unsigned short logofremaining;
 
-      optimalnumofbits = bcktab_optimalnumofbits(bcktab);
+      optimalnumofbits = bcktab_optimalnumofbits(&logofremaining,bcktab);
       rmnsufinfo->itvrel.offset
         = compressedtablebits_new(rmnsufinfo->totallength+1,optimalnumofbits);
       rmnsufinfo->itvrel.maxvalue
         = compressedtable_maxvalue(rmnsufinfo->itvrel.offset);
-      rmnsufinfo->hashexceptions = true;
+      rmnsufinfo->itvrel.hashstore
+        = seqpos_ul_gt_hashmap_new_with_start_size(logofremaining);
+      printf("logofremaining=%hu\n",logofremaining);
     } else
     {
-      rmnsufinfo->hashexceptions = false;
       rmnsufinfo->itvrel.maxvalue = (Seqpos) rmnsufinfo->allocateditvinfo;
       rmnsufinfo->itvrel.offset
         = compressedtable_new(rmnsufinfo->totallength+1,
                               rmnsufinfo->itvrel.maxvalue);
+      rmnsufinfo->itvrel.hashstore = NULL;
     }
   }
   /*
-  printf("hashexceptions=%s\n",rmnsufinfo->hashexceptions ? "true" : "false");
+  printf("hashexceptions=%s\n",(rmnsufinfo->itvrel.hashstore != NULL)
+                               ? "true" : "false");
   */
 #ifdef ITVDEBUG
   if (!rmnsufinfo->absoluteinversesuftab)
@@ -404,59 +431,29 @@ static void inversesuftab_set(Rmnsufinfo *rmnsufinfo,Seqpos idx,Seqpos value)
   compressedtable_update(rmnsufinfo->inversesuftab,idx,value);
 }
 
-extern uint32_t
-gt_ht_seqpos_elem_hash(const void *elem)
-{
-#ifdef Seqposequalsunsignedint
-  return gt_uint32_key_mul_hash((uint32_t) *((Seqpos *) elem));
-#else
-  return gt_uint64_key_mul_hash((uint64_t) *((Seqpos *) elem));
-#endif
-}
-
-static inline int gt_ht_seqpos_cmp(Seqpos a, Seqpos b)
-{
-  return (int) (a > b) - (int) (a < b);
-}
-
-static inline int gt_ht_seqpos_elem_cmp(const void *elemA, const void *elemB)
-{
-  return gt_ht_seqpos_cmp(*(Seqpos *)elemA, *(Seqpos *)elemB);
-}
-
-DECLARE_HASHMAP(Seqpos, seqpos, unsigned long, ul, static, inline)
-DEFINE_HASHMAP(Seqpos, seqpos, unsigned long, ul, gt_ht_seqpos_elem_hash,
-               gt_ht_seqpos_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR, static,
-               inline)
-
-unsigned long largebasedist_get(GtHashtable *h, Seqpos key)
+static unsigned long largebasedist_get(GtHashtable *htab, Seqpos key)
 {
   unsigned long *valueptr;
 
-  gt_assert(h != NULL);
-  valueptr = seqpos_ul_gt_hashmap_get(h, key);
+  gt_assert(htab != NULL);
+  valueptr = seqpos_ul_gt_hashmap_get(htab, key);
   gt_assert(valueptr != NULL);
   return *valueptr;
 }
 
-static void largebasedist_add(GtHashtable **h, Seqpos key,
+static void largebasedist_add(GtHashtable *htab, Seqpos key,
                               unsigned long basedist)
 {
   unsigned long *valueptr;
-  GtHashtable *htab;
 
-  if (*h == NULL)
-  {
-    *h = seqpos_ul_gt_hashmap_new();
-  }
-  htab = *h;
+  gt_assert(htab != NULL);
   valueptr = seqpos_ul_gt_hashmap_get(htab, key);
-  if (valueptr == NULL)
-  {
-    seqpos_ul_gt_hashmap_add(htab, key, basedist);
-  } else
+  if (valueptr != NULL)
   {
     (*valueptr) = basedist;
+  } else
+  {
+    seqpos_ul_gt_hashmap_add(htab, key, basedist);
   }
 }
 
@@ -483,7 +480,7 @@ static void inversesuftabrel_set(Rmnsufinfo *rmnsufinfo,Seqpos idx,
   }
 #endif
   basedist = (Seqpos) (value-base);
-  if (rmnsufinfo->hashexceptions)
+  if (rmnsufinfo->itvrel.hashstore != NULL)
   {
 
     if (basedist < rmnsufinfo->itvrel.maxvalue)
@@ -493,7 +490,7 @@ static void inversesuftabrel_set(Rmnsufinfo *rmnsufinfo,Seqpos idx,
     {
       compressedtable_update(rmnsufinfo->itvrel.offset,idx,
                              rmnsufinfo->itvrel.maxvalue);
-      largebasedist_add(&rmnsufinfo->itvrel.hashstore,idx,
+      largebasedist_add(rmnsufinfo->itvrel.hashstore,idx,
                         (unsigned long) basedist);
     }
   } else
@@ -637,7 +634,7 @@ static void inversesuftabrel_get(Itvfullentry *itvfullentry,
 #endif
       itvfullentry->rank
         = compressedtable_get(rmnsufinfo->itvrel.offset,startpos);
-      if (rmnsufinfo->hashexceptions)
+      if (rmnsufinfo->itvrel.hashstore != NULL)
       {
         if (itvfullentry->rank < rmnsufinfo->itvrel.maxvalue)
         {
@@ -1341,7 +1338,7 @@ Compressedtable *rmnsufinfo_wrap(Seqpos *longest,
     compressedtable_free(rmnsufinfo->itvrel.offset,true);
     rmnsufinfo->itvrel.offset = NULL;
   }
-  if (rmnsufinfo->hashexceptions)
+  if (rmnsufinfo->itvrel.hashstore != NULL)
   {
     gt_hashtable_delete(rmnsufinfo->itvrel.hashstore);
     rmnsufinfo->itvrel.hashstore = NULL;

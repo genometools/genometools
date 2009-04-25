@@ -24,6 +24,7 @@
 #include "core/symboldef.h"
 #include "core/chardef.h"
 #include "core/mathsupport.h"
+#include "core/unused_api.h"
 #include "esa-fileend.h"
 #include "mapspec-def.h"
 #include "spacedef.h"
@@ -60,6 +61,7 @@ struct Bcktab
   GtUchar *qgrambuffer;
   Maxbucketinfo maxbucketinfo;
   unsigned int optimalnumofbits;
+  unsigned short logofremaining;
   bool allocated;
   void *mappedptr;
 };
@@ -571,31 +573,60 @@ static void updatelog2values(unsigned long *tab,unsigned long maxvalue)
   }
 }
 
-static unsigned int calc_optimalnumofbits(const unsigned long *log2tab,
-                                          double probsmall)
+static unsigned int calc_optimalnumofbits(unsigned short *logofremaining,
+                                          const unsigned long *log2tab,
+                                          Seqpos totallength,
+                                          GT_UNUSED double probsmall)
 {
-  unsigned int maxbits;
-  unsigned long currentsum = 0, total = 0;
+  unsigned int lastbitset = 0, maxbits, optbits = 0;
+  unsigned long currentsum = 0, total = 0, optcurrentsum = 0;
+  unsigned short tmplogofremaining;
+  const size_t size_entry = sizeof (Seqpos) + sizeof (unsigned long);
+  size_t savedbitsinbytes,
+         hashtablesize, saved, maxsaved = 0;
 
-  for (maxbits = 0; maxbits <= (unsigned int) GT_MAXLOG2VALUE; maxbits++)
-  {
-    total += log2tab[maxbits];
-  }
   for (maxbits = 0; maxbits <= (unsigned int) GT_MAXLOG2VALUE; maxbits++)
   {
     if (log2tab[maxbits] > 0)
     {
+      total += log2tab[maxbits];
+      lastbitset = maxbits;
+    }
+  }
+  printf("lastbitset=%u\n",lastbitset);
+  for (maxbits = 0; maxbits <= lastbitset; maxbits++)
+  {
+    if (log2tab[maxbits] > 0)
+    {
       currentsum += log2tab[maxbits];
-      if ((double) currentsum/total >= probsmall)
+      tmplogofremaining = (unsigned short) gt_determinebitspervalue(
+                                           (uint64_t) (total - currentsum));
+      hashtablesize = (1 << tmplogofremaining) * size_entry;
+      savedbitsinbytes = (totallength/CHAR_BIT) * (lastbitset - maxbits);
+      printf("savedbitsintbytes=%lu,hashtablesize=%lu\n",
+              savedbitsinbytes,hashtablesize);
+      if (savedbitsinbytes > hashtablesize)
       {
-        break;
+        saved = savedbitsinbytes - hashtablesize;
+        printf("saved=%lu\n",saved);
+        if (saved > maxsaved)
+        {
+          maxsaved = saved;
+          printf("maxsaved=%lu\n",maxsaved);
+          optcurrentsum = currentsum;
+          optbits = maxbits;
+        }
       }
     }
   }
-  printf("store %lu values in hashtable (>=%lu bytes)\n",
-         (unsigned long) (total - currentsum),
-         (total - currentsum) * (sizeof (Seqpos) + sizeof (unsigned long)));
-  return maxbits;
+  *logofremaining = (unsigned short)
+                    gt_determinebitspervalue((uint64_t) 
+                                             (total - optcurrentsum));
+  printf("store %lu values in hashtable (%lu>=%lu bytes)\n",
+         (unsigned long) (total - optcurrentsum),
+         (1 << (*logofremaining)) * size_entry,
+         (total - optcurrentsum) * size_entry);
+  return optbits;
 }
 
 void determinemaxbucketsize(Bcktab *bcktab,
@@ -659,15 +690,17 @@ void determinemaxbucketsize(Bcktab *bcktab,
   if (gt_double_smaller_double(probsmall,(double) 1.0))
   {
     bcktab->optimalnumofbits
-      = calc_optimalnumofbits(bcktab->maxbucketinfo.
+      = calc_optimalnumofbits(&bcktab->logofremaining,
+                              bcktab->maxbucketinfo.
                                       log2nonspecialbucketsizedist,
+                              bcktab->totallength,
                               probsmall);
     printf("use %u bits for more than %.2f percent of the values\n",
-            bcktab->optimalnumofbits,
-            100.0 * probsmall);
+            bcktab->optimalnumofbits,100.0 * probsmall);
   } else
   {
     bcktab->optimalnumofbits = 0;
+    bcktab->logofremaining = 0;
   }
   showverbose(verboseinfo,"maxbucket (specials)=%lu",
               bcktab->maxbucketinfo.specialsmaxbucketsize);
@@ -721,8 +754,10 @@ unsigned long bcktab_nonspecialsmaxbucketsize(const Bcktab *bcktab)
   return bcktab->maxbucketinfo.nonspecialsmaxbucketsize;
 }
 
-unsigned int bcktab_optimalnumofbits(const Bcktab *bcktab)
+unsigned int bcktab_optimalnumofbits(unsigned short *logofremaining,
+                                     const Bcktab *bcktab)
 {
+  *logofremaining = bcktab->logofremaining;
   return bcktab->optimalnumofbits;
 }
 
