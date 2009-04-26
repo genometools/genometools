@@ -477,6 +477,15 @@ unsigned long gt_ranges_total_length(const GtArray *ranges)
   return totallen;
 }
 
+unsigned long gt_ranges_spanned_length(const GtArray *ranges)
+{
+  GtRange spanned_range;
+  gt_assert(ranges);
+  spanned_range.start = ((GtRange*) gt_array_get_first(ranges))->start;
+  spanned_range.end   = ((GtRange*) gt_array_get_last(ranges))->end;
+  return gt_range_length(&spanned_range);
+}
+
 void gt_ranges_copy_to_opposite_strand(GtArray *outranges,
                                        const GtArray *inranges,
                                        unsigned long gen_total_length,

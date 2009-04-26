@@ -45,6 +45,7 @@ GtArray*      gt_ranges_uniq_in_place_count(GtArray*);
 
 bool          gt_ranges_are_consecutive(const GtArray*);
 unsigned long gt_ranges_total_length(const GtArray*);
+unsigned long gt_ranges_spanned_length(const GtArray*);
 void          gt_ranges_copy_to_opposite_strand(GtArray *outranges,
                                                 const GtArray *inranges,
                                                 unsigned long gen_total_length,
