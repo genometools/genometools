@@ -508,15 +508,16 @@ void gt_ranges_copy_to_opposite_strand(GtArray *outranges,
   gt_assert(gt_array_size(inranges) == gt_array_size(outranges));
 }
 
-bool gt_ranges_borders_are_in_region(GtArray *ranges, unsigned long regionstart,
-                                     unsigned long regionend)
+bool gt_ranges_borders_are_in_region(GtArray *ranges, const GtRange *region)
 {
+  gt_assert(ranges && region);
+
   /* check region start */
-  if (((GtRange*) gt_array_get_first(ranges))->start < regionstart)
+  if (((GtRange*) gt_array_get_first(ranges))->start < region->start)
     return false;
 
   /* check region end */
-  if (((GtRange*) gt_array_get_last(ranges))->end > regionend)
+  if (((GtRange*) gt_array_get_last(ranges))->end > region->end)
     return false;
 
   return true;
