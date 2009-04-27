@@ -79,57 +79,31 @@ bool gt_inl_queue_isempty(const Inl_Queue *q)
   space reservoir.
 */
 
-static void doublequeuesize(Inl_Queue *q)
+static void extendqueuesize(Inl_Queue *q,bool doublesize)
 {
-  unsigned long i, j, newsize;
+  unsigned long addconst, idx, newsize;
 
-  newsize = MULT2(q->queuesize); /* double the size */
-  ALLOCASSIGNSPACE(q->queuespace,q->queuespace,Inl_Queueelem,newsize);
-  j=q->queuesize;
-  gt_assert(q->enqueueindex >= q->dequeueindex);
-  if (q->enqueueindex >= q->dequeueindex)
+  if (doublesize)
   {
-    for (i=q->enqueueindex+1; i<=q->queuesize-1; i++)
-    {
-      q->queuespace[j++] = q->queuespace[i];
-    }
-    for (i=0; i<=q->dequeueindex; i++)
-    {
-      q->queuespace[j++] = q->queuespace[i];
-    }
+    addconst = q->queuesize;
   } else
   {
-    gt_assert(q->dequeueindex - q->enqueueindex == q->queuesize);
-    printf("queuesize=%lu,enqueue=%lu,dequeue=%lu\n",
-           q->queuesize,
-           q->dequeueindex,
-           q->enqueueindex);
-    gt_assert(q->dequeueindex == q->queuesize-1);
-    gt_assert(q->enqueueindex == 0);
-    for (i=q->enqueueindex+1; i<=q->dequeueindex; i++)
-    {
-      q->queuespace[j++] = q->queuespace[i];
-    }
+    addconst = MIN(1024UL,q->queuesize);
   }
-  q->dequeueindex = newsize-1;
-  q->enqueueindex = q->queuesize-1;
-  q->queuesize = newsize;
-}
-
-static void constextendqueuesize(Inl_Queue *q)
-{
-  const unsigned long addconst = q->dequeueindex+1;
-  unsigned long i, j, newsize = q->queuesize + addconst; /* double the size */
+  newsize = q->queuesize + addconst;
   ALLOCASSIGNSPACE(q->queuespace,q->queuespace,Inl_Queueelem,newsize);
-  gt_assert(q->enqueueindex >= q->dequeueindex);
-  j=q->queuesize;
-  for (i=0; i<=q->dequeueindex; i++)
+  gt_assert(q->enqueueindex == q->dequeueindex);
+  gt_assert(addconst > 0);
+  for (idx=q->queuesize-1; idx>q->enqueueindex; idx--)
   {
-    q->queuespace[j++] = q->queuespace[i];
+    q->queuespace[idx+addconst] = q->queuespace[idx];
   }
-  q->dequeueindex = newsize-1;
-  q->enqueueindex = q->queuesize-1;
+  q->enqueueindex += addconst;
+  /*
   printf("from queue of size %lu to queue of size %lu\n",q->queuesize,newsize);
+  printf("now enqueindex=%lu,dequeuindex=%lu\n",
+         q->enqueueindex,q->dequeueindex);
+  */
   q->queuesize = newsize;
 }
 
@@ -138,19 +112,11 @@ static void constextendqueuesize(Inl_Queue *q)
   the queue.
 */
 
-void gt_inl_queue_add(Inl_Queue *q,Inl_Queueelem elem)
+void gt_inl_queue_add(Inl_Queue *q,Inl_Queueelem elem,bool doublesize)
 {
   if (q->noofelements == q->queuesize)
   {
-    bool useconst = true;
-
-    if (useconst)
-    {
-      constextendqueuesize(q);
-    } else
-    {
-      doublequeuesize(q);
-    }
+    extendqueuesize(q,doublesize);
   }
   q->noofelements++;
   q->queuespace[q->enqueueindex] = elem;

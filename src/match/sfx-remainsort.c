@@ -361,7 +361,7 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
 #endif
   rmnsufinfo->itvinfo = NULL;
   rmnsufinfo->itvfullinfo = NULL;
-  rmnsufinfo->rangestobesorted = gt_inl_queue_new(MAX(16,DIV2(maxcode)));
+  rmnsufinfo->rangestobesorted = gt_inl_queue_new(MAX(16UL,DIV2(maxcode)));
   if (possibletocmpbitwise(encseq))
   {
     rmnsufinfo->multimappower = NULL;
@@ -928,7 +928,7 @@ static void processunsortedrange(Rmnsufinfo *rmnsufinfo,
   pairptrwithbase.left = left;
   pairptrwithbase.right = right;
   pairptrwithbase.base = base;
-  gt_inl_queue_add(rmnsufinfo->rangestobesorted,pairptrwithbase);
+  gt_inl_queue_add(rmnsufinfo->rangestobesorted,pairptrwithbase,false);
   rmnsufinfo->currentqueuesize++;
   if (rmnsufinfo->maxqueuesize < rmnsufinfo->currentqueuesize)
   {
