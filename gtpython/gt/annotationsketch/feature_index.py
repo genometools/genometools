@@ -42,7 +42,7 @@ class FeatureIndex:
   def get_features_for_seqid(self, seqid):
     rval = gtlib.gt_feature_index_get_features_for_seqid(self.fi, seqid)
     if rval:
-      a = Array(rval)
+      a = Array(rval, True)
       result = []
       for i in range(a.size()):
         fptr = gtlib.gt_genome_node_ref(a.get(i))

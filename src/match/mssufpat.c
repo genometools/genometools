@@ -228,7 +228,7 @@ static void pms_nextLimdfsstate(const Limdfsconstinfo *mti,
                                 const DECLAREPTRDFSSTATE(aliasincol))
 {
 #ifdef SKDEBUG
-  char buffer1[32+1], buffer2[32+1];
+  char buffer1[INTWORDSIZE+1], buffer2[INTWORDSIZE+1];
 #endif
   Limdfsstate *outcol = (Limdfsstate *) aliasoutcol;
   const Limdfsstate *incol = (const Limdfsstate *) aliasincol;
@@ -246,8 +246,8 @@ static void pms_nextLimdfsstate(const Limdfsconstinfo *mti,
     outcol->prefixofsuffixbits = mti->eqsvector[currentchar];
   }
 #ifdef SKDEBUG
-  uint32_t2string(buffer1,(uint32_t) incol->prefixofsuffixbits);
-  uint32_t2string(buffer2,(uint32_t) outcol->prefixofsuffixbits);
+  bitsequence2string(buffer1,(Bitsequence) incol->prefixofsuffixbits);
+  bitsequence2string(buffer2,(Bitsequence) outcol->prefixofsuffixbits);
   printf("next(%s,%u,depth=%lu)->%s\n",buffer1,(unsigned int) currentchar,
                                        currentdepth,buffer2);
 #endif
@@ -259,7 +259,7 @@ static void pms_inplacenextLimdfsstate(const Limdfsconstinfo *mti,
                                        GtUchar currentchar)
 {
 #ifdef SKDEBUG
-  char buffer1[32+1], buffer2[32+1];
+  char buffer1[INTWORDSIZE+1], buffer2[INTWORDSIZE+1];
   unsigned long tmp;
 #endif
   Limdfsstate *col = (Limdfsstate *) aliascol;
@@ -270,8 +270,8 @@ static void pms_inplacenextLimdfsstate(const Limdfsconstinfo *mti,
 #endif
   col->prefixofsuffixbits &= (mti->eqsvector[currentchar] >> (currentdepth-1));
 #ifdef SKDEBUG
-  uint32_t2string(buffer1,(uint32_t) tmp);
-  uint32_t2string(buffer2,(uint32_t) col->prefixofsuffixbits);
+  bitsequence2string(buffer1,(uint32_t) tmp);
+  bitsequence2string(buffer2,(uint32_t) col->prefixofsuffixbits);
   printf("inplacenext(%s,%u,%lu)->%s\n",buffer1,(unsigned int) currentchar,
                                         currentdepth,buffer2);
 #endif

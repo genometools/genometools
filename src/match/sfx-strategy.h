@@ -32,17 +32,20 @@ typedef struct
                 maxcountingsort,
                 maxinsertionsort,
                 maxbltriesort;
+  Defineddouble probsmall;
   bool cmpcharbychar, /* compare suffixes character by character instead
                          of comparing entire words (only for two bit
                          encoding) */
        storespecialcodes,
-       streamsuftab;
+       streamsuftab,
+       absoluteinversesuftab;
 } Sfxstrategy;
 
  /*@unused@*/ static inline void defaultsfxstrategy(Sfxstrategy *sfxstrategy,
                                                     bool cmpcharbychar)
 {
   sfxstrategy->ssortmaxdepth.defined = false;
+  sfxstrategy->probsmall.defined = false;
   sfxstrategy->maxwidthrealmedian = 1UL;
   sfxstrategy->maxcountingsort = MAXCOUNTINGSORTDEFAULT;
   sfxstrategy->maxinsertionsort = MAXINSERTIONSORTDEFAULT;
@@ -50,6 +53,7 @@ typedef struct
   sfxstrategy->cmpcharbychar = cmpcharbychar;
   sfxstrategy->storespecialcodes = false;
   sfxstrategy->streamsuftab = false;
+  sfxstrategy->absoluteinversesuftab = false;
 }
 
 #endif

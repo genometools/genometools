@@ -165,7 +165,7 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
           matchlength.defined = true;
           matchlength.valueunsignedlong = patternlength;
         }
-        assert (matchlength.defined || mor->nowildcards);
+        gt_assert(matchlength.defined || mor->nowildcards);
         if (matchlength.defined)
         {
           match.dbstartpos = dbstartpos;

@@ -44,7 +44,7 @@ static void parse_fasta_description(GtStr *description, FILE *fp,
                                     const char *fasta_file)
 {
   int cc;
-  assert(description && fp && fasta_file);
+  gt_assert(description && fp && fasta_file);
   cc = gt_xfgetc(fp);
   if (cc != FASTA_SEPARATOR) {
     fprintf(stderr, "the first character of fasta file \"%s\" has to be '%c'\n",
@@ -60,7 +60,7 @@ static void parse_fasta_sequence(GtStr *sequence, FILE *fp,
                                  const char *fasta_file)
 {
   int cc;
-  assert(sequence && fp && fasta_file);
+  gt_assert(sequence && fp && fasta_file);
   /* read sequence */
   while ((cc = gt_xfgetc(fp)) != EOF && cc != FASTA_SEPARATOR) {
     if (cc != '\n' && cc != ' ') /* skip newlines and blanks */
@@ -78,7 +78,7 @@ static void parse_fasta_entry(GtArray *entries, FILE *fp,
                               const char *fasta_file)
 {
   FastaEntry new_entry;
-  assert(entries && fp && fasta_file);
+  gt_assert(entries && fp && fasta_file);
   new_entry.description = gt_str_new();
   new_entry.sequence = gt_str_new();
   parse_fasta_description(new_entry.description, fp, fasta_file);
@@ -89,7 +89,7 @@ static void parse_fasta_entry(GtArray *entries, FILE *fp,
 static void parse_fasta_file(GtArray *entries, const char *fasta_file)
 {
   FILE *fp;
-  assert(entries && fasta_file);
+  gt_assert(entries && fasta_file);
   fp = gt_xfopen(fasta_file, "r");
   if (!has_char(fp)) {
     fprintf(stderr, "sequence file \"%s\" is empty\n", fasta_file);
@@ -103,7 +103,7 @@ static void parse_fasta_file(GtArray *entries, const char *fasta_file)
 GtSimpleBioseq* gt_simple_bioseq_new(const char *fasta_file)
 {
   GtSimpleBioseq *sbs;
-  assert(fasta_file);
+  gt_assert(fasta_file);
   sbs = gt_xmalloc(sizeof *sbs);
   sbs->entries = gt_array_new(sizeof (FastaEntry));
   parse_fasta_file(sbs->entries, fasta_file); /* top-down / recursive descent */
@@ -126,7 +126,7 @@ void gt_simple_bioseq_delete(GtSimpleBioseq *sbs)
 const char* gt_simple_bioseq_get_description(GtSimpleBioseq *sbs,
                                           unsigned long index)
 {
-  assert(sbs);
+  gt_assert(sbs);
   return gt_str_get(((FastaEntry*) gt_array_get(sbs->entries,
                     index))->description);
 }
@@ -134,7 +134,7 @@ const char* gt_simple_bioseq_get_description(GtSimpleBioseq *sbs,
 const char* gt_simple_bioseq_get_sequence(GtSimpleBioseq *sbs,
                                           unsigned long index)
 {
-  assert(sbs);
+  gt_assert(sbs);
   return gt_str_get(((FastaEntry*) gt_array_get(sbs->entries,
                                                 index))->sequence);
 }
@@ -142,13 +142,13 @@ const char* gt_simple_bioseq_get_sequence(GtSimpleBioseq *sbs,
 unsigned long gt_simple_bioseq_get_sequence_length(GtSimpleBioseq *sbs,
                                                    unsigned long index)
 {
-  assert(sbs);
+  gt_assert(sbs);
   return gt_str_length(((FastaEntry*) gt_array_get(sbs->entries,
                                                    index))->sequence);
 }
 
 unsigned long gt_simple_bioseq_number_of_sequences(GtSimpleBioseq *sbs)
 {
-  assert(sbs);
+  gt_assert(sbs);
   return gt_array_size(sbs->entries);
 }

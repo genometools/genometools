@@ -83,6 +83,54 @@ bool gt_range_overlap(const GtRange *range_a, const GtRange *range_b)
   return false;
 }
 
+bool gt_range_overlap_delta(const GtRange *range_a, const GtRange *range_b,
+                            unsigned long delta)
+{
+  unsigned long range_a_length, range_b_length;
+  gt_assert(range_a->start <= range_a->end && range_b->start <= range_b->end);
+
+  range_a_length = range_a->end - range_a->start + 1;
+  range_b_length = range_b->end - range_b->start + 1;
+
+  if (range_a_length < delta || range_b_length < delta) {
+    /* no overlap of delta possible */
+    return false;
+  }
+
+  if (gt_range_overlap(range_a, range_b)) {
+    if (range_a->start <= range_b->start) {
+      if (range_a->end >= range_b->end) {
+        /* ----A----
+            ---B---  */
+        if (range_b_length >= delta)
+          return true;
+      }
+      else { /* range_a->end < range_b->end */
+        /* ----A----
+            ----B---- */
+        if (range_a->end - range_b->start + 1 >= delta)
+          return true;
+      }
+    }
+    else { /* range_a->start > range_b->start */
+      if (range_a->end <= range_b->end) {
+        /*  ---A---
+           ----B---- */
+        if (range_a_length >= delta)
+          return true;
+      }
+      else { /* range_a->end > range_b->end */
+        /*  ----A----
+           ----B----  */
+        if (range_b->end - range_a->start + 1 >= delta)
+          return true;
+      }
+    }
+  }
+
+  return false;
+}
+
 bool gt_range_contains(const GtRange *range_a, const GtRange *range_b)
 {
   gt_assert(range_a->start <= range_a->end && range_b->start <= range_b->end);
@@ -398,4 +446,100 @@ GtArray* gt_ranges_uniq_in_place_count(GtArray *ranges)
 {
   gt_assert(ranges);
   return generic_ranges_uniq_in_place(ranges, true);
+}
+
+bool gt_ranges_are_consecutive(const GtArray *ranges)
+{
+  unsigned long i;
+  for (i = 0; i < gt_array_size(ranges); i++) {
+    gt_assert(((GtRange*) gt_array_get(ranges, i))->start <=
+              ((GtRange*) gt_array_get(ranges, i))->end);
+    if (i) {
+      /* check if ranges are consecutive */
+      if (((GtRange*) gt_array_get(ranges, i-1))->end >=
+          ((GtRange*) gt_array_get(ranges, i))->start) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+unsigned long gt_ranges_total_length(const GtArray *ranges)
+{
+  unsigned long i, totallen = 0;
+  GtRange *range;
+  gt_assert(ranges);
+  for (i = 0; i < gt_array_size(ranges); i++) {
+    range = gt_array_get(ranges, i);
+    totallen += range->end - range->start + 1;
+  }
+  return totallen;
+}
+
+unsigned long gt_ranges_spanned_length(const GtArray *ranges)
+{
+  GtRange spanned_range;
+  gt_assert(ranges);
+  spanned_range.start = ((GtRange*) gt_array_get_first(ranges))->start;
+  spanned_range.end   = ((GtRange*) gt_array_get_last(ranges))->end;
+  return gt_range_length(&spanned_range);
+}
+
+void gt_ranges_copy_to_opposite_strand(GtArray *outranges,
+                                       const GtArray *inranges,
+                                       unsigned long gen_total_length,
+                                       unsigned long gen_offset)
+{
+  GtRange range;
+  unsigned long i;
+
+  /* outranges are empty */
+  gt_assert(!gt_array_size(outranges));
+  /* inranges are not empty */
+  gt_assert(gt_array_size(inranges));
+
+  for (i = gt_array_size(inranges); i > 0; i--) {
+    /* genomic offset is defined */
+    gt_assert(gen_offset != UNDEF_ULONG);
+    range.start  = gen_total_length - 1
+                  - (((GtRange*) gt_array_get(inranges, i-1))->end -
+                     gen_offset)
+                  + gen_offset;
+    range.end = gen_total_length - 1
+                  - (((GtRange*) gt_array_get(inranges, i-1))->start -
+                     gen_offset)
+                  + gen_offset;
+    gt_array_add(outranges, range);
+  }
+
+  /* outranges has the same number of elements as inranges */
+  gt_assert(gt_array_size(inranges) == gt_array_size(outranges));
+}
+
+bool gt_ranges_borders_are_in_region(GtArray *ranges, const GtRange *region)
+{
+  gt_assert(ranges && region);
+
+  /* check region start */
+  if (((GtRange*) gt_array_get_first(ranges))->start < region->start)
+    return false;
+
+  /* check region end */
+  if (((GtRange*) gt_array_get_last(ranges))->end > region->end)
+    return false;
+
+  return true;
+}
+
+void gt_ranges_show(GtArray *ranges, GtGenFile *outfp)
+{
+  GtRange *range;
+  unsigned long i;
+  gt_assert(ranges);
+  for (i = 0; i < gt_array_size(ranges); i++) {
+    range = gt_array_get(ranges, i);
+    gt_genfile_xprintf(outfp, "(%lu,%lu)", range->start, range->end);
+  }
+  gt_genfile_xfputc('\n', outfp);
 }

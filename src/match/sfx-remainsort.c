@@ -24,15 +24,28 @@
 #include "core/ma_api.h"
 #include "core/arraydef.h"
 #include "core/fa.h"
+#include "core/qsort_r.h"
+#include "core/hashmap-generic.h"
 #include "seqpos-def.h"
 #include "encseq-def.h"
+#include "intbits-tab.h"
 #include "bcktab.h"
 #include "compressedtab.h"
 #include "sfx-remainsort.h"
 #include "sfx-linlcp.h"
 #include "stamp.h"
 
+#include "initbasepower.pr"
+
 #define PAGESIZE 4096
+#define SUFINMEM(SORTBLOCK) ((SORTBLOCK)->mmapfiledesc == -1 ? true : false)
+
+typedef struct
+{
+  unsigned int unitsnotspecial;
+  Seqpos rank,
+         suffixstart;
+} Itvfullentry;
 
 typedef struct
 {
@@ -79,9 +92,30 @@ typedef struct
   unsigned long pagechanges;
 } Sortblock;
 
+#ifdef Lowerboundwithrank
+typedef struct
+{
+  Seqpos lowerbound,
+         rank;
+} Lowerboundwithrank;
+#endif
+
+typedef struct
+{
+  Compressedtable *offset;
+  Seqpos maxvalue;
+  GtHashtable *hashstore;
+#ifdef ITVDEBUG
+  Bitsequence *is_inversesuftab_set;
+#endif
+} Inversesuftab_rel;
+
 struct Rmnsufinfo
 {
   Compressedtable *inversesuftab;
+  bool hashexceptions,
+       absoluteinversesuftab;
+  Inversesuftab_rel itvrel;
   Sortblock sortblock;
   GtQueue *rangestobesorted;
   Seqpos currentdepth;
@@ -91,19 +125,29 @@ struct Rmnsufinfo
                 currentqueuesize,
                 maxqueuesize;
   Itventry *itvinfo;
+  Itvfullentry *itvfullinfo;
   GtArrayPairsuffixptr firstgeneration;
   unsigned long firstgenerationtotalwidth,
                 firstgenerationcount;
   Firstwithnewdepth firstwithnewdepth;
   Pairsuffixptrwithbase *unusedpair;
   Encodedsequencescanstate *esr;
+  Seqpos longestrel;
   unsigned int prefixlength,
                numofchars;
+  /* XXX the following is only used for parts > 0 && maxdepth */
+  unsigned long overallspecials;
+  Seqpos realspecialranges;
+  Codetype *filltable;
+#ifdef Lowerboundwithrank
+  Lowerboundwithrank *lowerboundwithrank;
+#endif
   /* the following are used to compute lcp-values in linear time */
   Seqpos partwidth,
          totallength;
   Readmode readmode;
   const Encodedsequence *encseq;
+  const Codetype **multimappower;
   Seqpos *sortedsuffixes;
 };
 
@@ -115,10 +159,11 @@ static void initsortblock(Sortblock *sortblock,
   sortblock->mmapfiledesc = mmapfiledesc;
   if (presortedsuffixes != NULL)
   {
+    gt_assert(SUFINMEM(sortblock));
     sortblock->sortspace = presortedsuffixes;
   } else
   {
-    gt_assert(sortblock->mmapfiledesc != -1);
+    gt_assert(!SUFINMEM(sortblock));
     sortblock->mappedsection = NULL;
     sortblock->pagesize = 0;
     sortblock->pageoffset = 0;
@@ -128,15 +173,85 @@ static void initsortblock(Sortblock *sortblock,
   }
 }
 
+#ifdef Lowerboundwithrank
+static Lowerboundwithrank *filllowerboundwithrank(const Encodedsequence *encseq,
+                                                  Readmode readmode)
+{
+  if (hasspecialranges(encseq))
+  {
+    Specialrangeiterator *sri;
+    Sequencerange range;
+    Seqpos currentrank = 0, realspecialranges;
+    Lowerboundwithrank *lowerboundwithrank, *lbptr;
+
+    realspecialranges = getencseqrealspecialranges(encseq);
+    lowerboundwithrank = gt_malloc(sizeof(*lowerboundwithrank) *
+                                   realspecialranges);
+    printf("lowerboundwithrank requires %lu bytes\n",
+               (unsigned long) (sizeof(*lowerboundwithrank) *
+                                       realspecialranges));
+    sri = newspecialrangeiterator(encseq,
+                                  ISDIRREVERSE(readmode)
+                                  ? false : true);
+    for (lbptr = lowerboundwithrank; nextspecialrangeiterator(&range,sri);
+         lbptr++)
+    {
+      gt_assert(lbptr < lowerboundwithrank + realspecialranges);
+      lbptr->lowerbound = range.leftpos;
+      lbptr->rank = currentrank;
+      currentrank += range.rightpos - range.leftpos;
+    }
+    gt_assert(lbptr == lowerboundwithrank + realspecialranges);
+    freespecialrangeiterator(&sri);
+    return lowerboundwithrank;
+  }
+  return NULL;
+}
+
+static Seqpos frompos2rank(const Lowerboundwithrank *leftptr,
+                           const Lowerboundwithrank *rightptr,
+                           Seqpos specialpos)
+{
+  const Lowerboundwithrank *midptr;
+
+  while (leftptr <= rightptr)
+  {
+    midptr = leftptr + DIV2((unsigned long) (rightptr-leftptr));
+    if (specialpos < midptr->lowerbound)
+    {
+      rightptr = midptr-1;
+    } else
+    {
+      if (specialpos > midptr->lowerbound)
+      {
+        leftptr = midptr + 1;
+      } else
+      {
+        return midptr->rank;
+      }
+    }
+  }
+  fprintf(stderr,"frompos2rank: cannot find pos " FormatSeqpos
+                 " in ranges",PRINTSeqposcast(specialpos));
+  exit(EXIT_FAILURE);
+  /*@ignore@*/
+  return 0;
+  /*@end@*/
+}
+
+#endif
+
 Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                           int mmapfiledesc,
                           const Encodedsequence *encseq,
-                          const Bcktab *bcktab,
+                          Bcktab *bcktab,
                           Codetype maxcode,
                           unsigned int numofchars,
                           unsigned int prefixlength,
                           Readmode readmode,
-                          Seqpos partwidth)
+                          Seqpos partwidth,
+                          const Defineddouble *probsmall,
+                          bool absoluteinversesuftab)
 {
   Rmnsufinfo *rmnsufinfo;
 
@@ -163,11 +278,79 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   rmnsufinfo->firstgenerationcount = 0;
   rmnsufinfo->unusedpair = NULL;
   rmnsufinfo->inversesuftab = NULL;
-  rmnsufinfo->allocateditvinfo = 0;
+  rmnsufinfo->absoluteinversesuftab = absoluteinversesuftab;
+  rmnsufinfo->itvrel.hashstore = NULL;
+  /*
+  printf("probsmall->defined=%s\n",(probsmall != NULL && probsmall->defined)
+                                   ? "true" : "false");
+  printf("sufinmem=%s\n",SUFINMEM(&rmnsufinfo->sortblock) ? "true" : "false");
+  printf("absoluteinversesuftab=%s\n",
+          absoluteinversesuftab ? "true" : "false");
+  */
+  if (rmnsufinfo->absoluteinversesuftab)
+  {
+    rmnsufinfo->hashexceptions = false;
+    rmnsufinfo->itvrel.maxvalue = 0;
+    rmnsufinfo->itvrel.offset = NULL;
+    rmnsufinfo->allocateditvinfo = 0;
+  } else
+  {
+    determinemaxbucketsize(bcktab,
+                           0,
+                           maxcode,
+                           partwidth,
+                           numofchars,
+                           (probsmall == NULL || !probsmall->defined)
+                           ? 1.0 : probsmall->valuedouble,
+                           NULL);
+    rmnsufinfo->allocateditvinfo = bcktab_nonspecialsmaxbucketsize(bcktab);
+    if (probsmall != NULL && probsmall->defined &&
+        gt_double_smaller_double(probsmall->valuedouble,(double) 1.0))
+    {
+      unsigned int optimalnumofbits;
+
+      optimalnumofbits = bcktab_optimalnumofbits(bcktab);
+      rmnsufinfo->itvrel.offset
+        = compressedtablebits_new(rmnsufinfo->totallength+1,optimalnumofbits);
+      rmnsufinfo->itvrel.maxvalue
+        = compressedtable_maxvalue(rmnsufinfo->itvrel.offset);
+      rmnsufinfo->hashexceptions = true;
+    } else
+    {
+      rmnsufinfo->hashexceptions = false;
+      rmnsufinfo->itvrel.maxvalue = (Seqpos) rmnsufinfo->allocateditvinfo;
+      rmnsufinfo->itvrel.offset
+        = compressedtable_new(rmnsufinfo->totallength+1,
+                              rmnsufinfo->itvrel.maxvalue);
+    }
+  }
+  /*
+  printf("hashexceptions=%s\n",rmnsufinfo->hashexceptions ? "true" : "false");
+  */
+#ifdef ITVDEBUG
+  if (!rmnsufinfo->absoluteinversesuftab)
+  {
+    INITBITTAB(rmnsufinfo->itvrel.is_inversesuftab_set,
+               rmnsufinfo->totallength+1);
+  }
+#endif
   rmnsufinfo->itvinfo = NULL;
+  rmnsufinfo->itvfullinfo = NULL;
   rmnsufinfo->rangestobesorted = gt_queue_new();
+  if (possibletocmpbitwise(encseq))
+  {
+    rmnsufinfo->multimappower = NULL;
+  } else
+  {
+    rmnsufinfo->multimappower = bcktab_multimappower(bcktab);
+  }
   rmnsufinfo->esr = newEncodedsequencescanstate();
   GT_INITARRAY(&rmnsufinfo->firstgeneration,Pairsuffixptr);
+  rmnsufinfo->realspecialranges = getencseqrealspecialranges(encseq);
+  rmnsufinfo->filltable = filllargestchartable(numofchars,prefixlength);
+#ifdef Lowerboundwithrank
+  rmnsufinfo->lowerboundwithrank = filllowerboundwithrank(encseq,readmode);
+#endif
   initsortblock(&rmnsufinfo->sortblock,presortedsuffixes,mmapfiledesc,
                 partwidth);
   return rmnsufinfo;
@@ -202,6 +385,7 @@ static Seqpos nextsuftabentry_get(Sortblock *sortblock)
                 sortblock->mapableentries > sortblock->pageoffset);
       entries2map = sortblock->mapableentries - sortblock->pageoffset;
     }
+    gt_assert(!SUFINMEM(sortblock));
     sortblock->mappedsection
       = gt_fa_mmap_generic_fd_func(sortblock->mmapfiledesc,
                                    entries2map * sizeof (Seqpos),
@@ -220,12 +404,145 @@ static void inversesuftab_set(Rmnsufinfo *rmnsufinfo,Seqpos idx,Seqpos value)
   compressedtable_update(rmnsufinfo->inversesuftab,idx,value);
 }
 
-static unsigned long checkedprefixes = 0;
+extern uint32_t
+gt_ht_seqpos_elem_hash(const void *elem)
+{
+#ifdef Seqposequalsunsignedint
+  return gt_uint32_key_mul_hash((uint32_t) *((Seqpos *) elem));
+#else
+  return gt_uint64_key_mul_hash((uint64_t) *((Seqpos *) elem));
+#endif
+}
+
+static inline int gt_ht_seqpos_cmp(Seqpos a, Seqpos b)
+{
+  return (int) (a > b) - (int) (a < b);
+}
+
+static inline int gt_ht_seqpos_elem_cmp(const void *elemA, const void *elemB)
+{
+  return gt_ht_seqpos_cmp(*(Seqpos *)elemA, *(Seqpos *)elemB);
+}
+
+DECLARE_HASHMAP(Seqpos, seqpos, unsigned long, ul, static, inline)
+DEFINE_HASHMAP(Seqpos, seqpos, unsigned long, ul, gt_ht_seqpos_elem_hash,
+               gt_ht_seqpos_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR, static,
+               inline)
+
+unsigned long largebasedist_get(GtHashtable *h, Seqpos key)
+{
+  unsigned long *valueptr;
+
+  gt_assert(h != NULL);
+  valueptr = seqpos_ul_gt_hashmap_get(h, key);
+  gt_assert(valueptr != NULL);
+  return *valueptr;
+}
+
+static void largebasedist_add(GtHashtable **h, Seqpos key,
+                              unsigned long basedist)
+{
+  unsigned long *valueptr;
+  GtHashtable *htab;
+
+  if (*h == NULL)
+  {
+    *h = seqpos_ul_gt_hashmap_new();
+  }
+  htab = *h;
+  valueptr = seqpos_ul_gt_hashmap_get(htab, key);
+  if (valueptr == NULL)
+  {
+    seqpos_ul_gt_hashmap_add(htab, key, basedist);
+  } else
+  {
+    (*valueptr) = basedist;
+  }
+}
+
+static void inversesuftabrel_set(Rmnsufinfo *rmnsufinfo,Seqpos idx,
+                                 Seqpos value,Seqpos base)
+{
+  Seqpos basedist = (Seqpos) (value-base);
+
+  if (value < base)
+  {
+    fprintf(stderr,"value = %lu < %lu = base\n",
+                    (unsigned long) value,(unsigned long) base);
+    exit(EXIT_FAILURE);
+  }
+  if (value != base && value >= base + rmnsufinfo->allocateditvinfo)
+  {
+    fprintf(stderr,"value = %lu >= %lu+%lu=%lu=base+width\n",
+                    (unsigned long) value,
+                    (unsigned long) base,
+                    rmnsufinfo->allocateditvinfo,
+                    (unsigned long) base+rmnsufinfo->allocateditvinfo);
+    exit(EXIT_FAILURE);
+  }
+  basedist = (Seqpos) (value-base);
+  if (rmnsufinfo->hashexceptions)
+  {
+
+    if (basedist < rmnsufinfo->itvrel.maxvalue)
+    {
+      compressedtable_update(rmnsufinfo->itvrel.offset,idx,basedist);
+    } else
+    {
+      compressedtable_update(rmnsufinfo->itvrel.offset,idx,
+                             rmnsufinfo->itvrel.maxvalue);
+      largebasedist_add(&rmnsufinfo->itvrel.hashstore,idx,
+                        (unsigned long) basedist);
+    }
+  } else
+  {
+    gt_assert(basedist <= rmnsufinfo->itvrel.maxvalue);
+    compressedtable_update(rmnsufinfo->itvrel.offset,idx,basedist);
+  }
+#ifdef ITVDEBUG
+  SETIBIT(rmnsufinfo->itvrel.is_inversesuftab_set,idx);
+#endif
+  if (idx == 0)
+  {
+    rmnsufinfo->longestrel = value;
+  }
+}
+
+#ifdef Lowerboundwithrank
+static Seqpos frompos2rank(const Lowerboundwithrank *leftptr,
+                           const Lowerboundwithrank *rightptr,
+                           Seqpos specialpos)
+{
+  const Lowerboundwithrank *midptr;
+
+  while (leftptr <= rightptr)
+  {
+    midptr = leftptr + DIV2((unsigned long) (rightptr-leftptr));
+    if (specialpos < midptr->lowerbound)
+    {
+      rightptr = midptr-1;
+    } else
+    {
+      if (specialpos > midptr->lowerbound)
+      {
+        leftptr = midptr + 1;
+      } else
+      {
+        return midptr->rank;
+      }
+    }
+  }
+  fprintf(stderr,"frompos2rank: cannot find pos " FormatSeqpos
+                 " in ranges",PRINTSeqposcast(specialpos));
+  exit(EXIT_FAILURE);
+  /*@ignore@*/
+  return 0;
+  /*@end@*/
+}
+#endif
 
 static Seqpos inversesuftab_get(const Rmnsufinfo *rmnsufinfo,Seqpos startpos)
 {
-  Seqpos ivtval;
-
   gt_assert(startpos <= rmnsufinfo->totallength);
   if (startpos == rmnsufinfo->totallength)
   {
@@ -233,12 +550,27 @@ static Seqpos inversesuftab_get(const Rmnsufinfo *rmnsufinfo,Seqpos startpos)
               rmnsufinfo->totallength);
     return rmnsufinfo->totallength;
   }
-  ivtval = compressedtable_get(rmnsufinfo->inversesuftab,startpos);
-  if (rmnsufinfo->firstgeneration.nextfreePairsuffixptr == 0 &&
-      possibletocmpbitwise(rmnsufinfo->encseq))
+  return compressedtable_get(rmnsufinfo->inversesuftab,startpos);
+}
+
+static void inversesuftabrel_get(Itvfullentry *itvfullentry,
+                                 const Rmnsufinfo *rmnsufinfo,
+                                 Seqpos startpos)
+{
+  Codetype code;
+  Bucketspecification bucketspec;
+
+  itvfullentry->suffixstart = startpos;
+  startpos += rmnsufinfo->currentdepth;
+  if (startpos == rmnsufinfo->totallength)
+  {
+    itvfullentry->unitsnotspecial = 0;
+    itvfullentry->rank = rmnsufinfo->totallength;
+    return;
+  }
+  if (possibletocmpbitwise(rmnsufinfo->encseq))
   {
     EndofTwobitencoding etbe;
-    Bucketspecification bucketspec;
     bool fwd = ISDIRREVERSE(rmnsufinfo->readmode) ? false : true;
 
     initEncodedsequencescanstategeneric(rmnsufinfo->esr,rmnsufinfo->encseq,
@@ -246,55 +578,92 @@ static Seqpos inversesuftab_get(const Rmnsufinfo *rmnsufinfo,Seqpos startpos)
     extract2bitenc(fwd,&etbe,rmnsufinfo->encseq,rmnsufinfo->esr,startpos);
     if (etbe.unitsnotspecial >= rmnsufinfo->prefixlength)
     {
-      Twobitencoding tmp = etbe.tbe;
-
-      etbe.tbe >>= MULT2(UNITSIN2BITENC - rmnsufinfo->prefixlength);
-      if (etbe.tbe > (Twobitencoding) rmnsufinfo->maxcode)
-      {
-        fprintf(stderr,"unitsnotspecial = %lu, origtbe = %lu, tbe = %lu "
-                       "> %lu = maxcode\n",
-                       (unsigned long) etbe.unitsnotspecial,
-                       (unsigned long) tmp,
-                       (unsigned long) etbe.tbe,
-                       (unsigned long) rmnsufinfo->maxcode);
-        exit(EXIT_FAILURE);
-      }
-      gt_assert(etbe.tbe <= (Twobitencoding) rmnsufinfo->maxcode);
-      (void) calcbucketboundsparts(&bucketspec,
-                                   rmnsufinfo->bcktab,
-                                   (Codetype) etbe.tbe,
-                                   rmnsufinfo->maxcode,
-                                   rmnsufinfo->partwidth,
-                                   (unsigned int) (etbe.tbe %
-                                                   rmnsufinfo->numofchars),
-                                   rmnsufinfo->numofchars);
-      gt_assert(bucketspec.left <= ivtval);
-      if (ivtval > bucketspec.left + rmnsufinfo->allocateditvinfo)
-      {
-        fprintf(stderr,"ivtval = %lu >= %lu = left + allocated\n",
-                        (unsigned long) ivtval,
-                        (unsigned long) (bucketspec.left +
-                                         rmnsufinfo->allocateditvinfo));
-        exit(EXIT_FAILURE);
-      }
-      gt_assert(ivtval <= bucketspec.left + rmnsufinfo->allocateditvinfo);
-      checkedprefixes++;
-    } else
+      code = (Codetype) (etbe.tbe >>
+                         MULT2(UNITSIN2BITENC - rmnsufinfo->prefixlength));
+      itvfullentry->unitsnotspecial = rmnsufinfo->prefixlength;
+    } else /* etbe.unitsnotspecial < rmnsufinfo->prefixlength */
     {
       if (etbe.unitsnotspecial > 0)
       {
-        /* suffix have a specialcharacter in the first prefixlength
-           characters. fill the remaining positions and use the code
-           relativ to nonspecialsinbucket */
+        code = (Codetype)
+               (etbe.tbe >> MULT2(UNITSIN2BITENC - rmnsufinfo->prefixlength))
+               | rmnsufinfo->filltable[etbe.unitsnotspecial];
+        itvfullentry->unitsnotspecial = etbe.unitsnotspecial;
       } else
       {
-        /* suffix begins with specialcharacter and is the first in a range */
-        /* get the rank of the position plus partwidth. This gives the
-           insersesuftab information */
+        code = 0;
+        itvfullentry->unitsnotspecial = 0;
       }
     }
+  } else
+  {
+    code = extractprefixcode(&itvfullentry->unitsnotspecial,
+                             rmnsufinfo->encseq,
+                             rmnsufinfo->multimappower,
+                             startpos,
+                             rmnsufinfo->prefixlength);
+    if (itvfullentry->unitsnotspecial > 0 &&
+        itvfullentry->unitsnotspecial < rmnsufinfo->prefixlength)
+    {
+      code |= (Codetype) rmnsufinfo->filltable[itvfullentry->unitsnotspecial];
+    }
   }
-  return ivtval;
+  /*
+  printf("startpos=%lu,unitsnotspecial=%u,code=%u\n",
+          (unsigned long) startpos,
+          itvfullentry->unitsnotspecial,
+          (unsigned int) code);
+  */
+  if (itvfullentry->unitsnotspecial == 0)
+  {
+    itvfullentry->rank = rmnsufinfo->partwidth;
+  } else
+  {
+    if (code > rmnsufinfo->maxcode)
+    {
+      fprintf(stderr,"unitsnotspecial = %lu, code = %lu > %lu = maxcode\n",
+                     (unsigned long) itvfullentry->unitsnotspecial,
+                     (unsigned long) code,
+                     (unsigned long) rmnsufinfo->maxcode);
+      exit(EXIT_FAILURE);
+    }
+    gt_assert(code <= rmnsufinfo->maxcode);
+    (void) calcbucketboundsparts(&bucketspec,
+                                 rmnsufinfo->bcktab,
+                                 (Codetype) code,
+                                 rmnsufinfo->maxcode,
+                                 rmnsufinfo->partwidth,
+                                 (unsigned int)
+                                 code % rmnsufinfo->numofchars,
+                                 rmnsufinfo->numofchars);
+    if (itvfullentry->unitsnotspecial == rmnsufinfo->prefixlength)
+    {
+#ifdef ITVDEBUG
+      gt_assert(ISIBITSET(rmnsufinfo->itvrel.is_inversesuftab_set,startpos));
+#endif
+      itvfullentry->rank
+        = compressedtable_get(rmnsufinfo->itvrel.offset,startpos);
+      if (rmnsufinfo->hashexceptions)
+      {
+        if (itvfullentry->rank < rmnsufinfo->itvrel.maxvalue)
+        {
+          itvfullentry->rank += bucketspec.left;
+        } else
+        {
+          itvfullentry->rank
+            = bucketspec.left +
+              (Seqpos) largebasedist_get(rmnsufinfo->itvrel.hashstore,startpos);
+        }
+      } else
+      {
+        itvfullentry->rank += bucketspec.left;
+      }
+    } else
+    {
+      gt_assert(itvfullentry->unitsnotspecial < rmnsufinfo->prefixlength);
+      itvfullentry->rank = bucketspec.left + bucketspec.nonspecialsinbucket;
+    }
+  }
 }
 
 static void initinversesuftabspecials(Rmnsufinfo *rmnsufinfo)
@@ -356,7 +725,7 @@ static void initinversesuftabnonspecialsadjust(Rmnsufinfo *rmnsufinfo)
   Seqpos idx, startpos;
   const Codetype mincode = 0;
 
-  gt_assert(rmnsufinfo->sortblock.mmapfiledesc == -1);
+  gt_assert(SUFINMEM(&rmnsufinfo->sortblock));
   rightchar = (unsigned int) (mincode % rmnsufinfo->numofchars);
   idx = 0;
   for (code = mincode; code <= rmnsufinfo->maxcode; code++)
@@ -397,9 +766,10 @@ static void initinversesuftabnonspecialsadjuststream(Rmnsufinfo *rmnsufinfo)
   Seqpos idx, startpos;
   const Codetype mincode = 0;
 
-  gt_assert(rmnsufinfo->sortblock.mmapfiledesc != -1);
-  rightchar = (unsigned int) (mincode % rmnsufinfo->numofchars);
+  gt_assert(!SUFINMEM(&rmnsufinfo->sortblock));
+  rightchar = 0;
   idx = 0;
+  rmnsufinfo->overallspecials = 0;
   for (code = mincode; code <= rmnsufinfo->maxcode; code++)
   {
     rightchar = calcbucketboundsparts(&bucketspec,
@@ -409,10 +779,15 @@ static void initinversesuftabnonspecialsadjuststream(Rmnsufinfo *rmnsufinfo)
                                       rmnsufinfo->partwidth,
                                       rightchar,
                                       rmnsufinfo->numofchars);
+    gt_assert(idx <= bucketspec.left);
+    rmnsufinfo->overallspecials += (bucketspec.left - idx);
     for (/* Nothing */; idx < bucketspec.left; idx++)
     {
       startpos = nextsuftabentry_get(&rmnsufinfo->sortblock);
-      inversesuftab_set(rmnsufinfo,startpos,idx);
+      if (rmnsufinfo->absoluteinversesuftab)
+      {
+        inversesuftab_set(rmnsufinfo,startpos,idx);
+      }
     }
     updatewidth (rmnsufinfo,bucketspec.nonspecialsinbucket,
                  (Seqpos) rmnsufinfo->prefixlength);
@@ -420,13 +795,25 @@ static void initinversesuftabnonspecialsadjuststream(Rmnsufinfo *rmnsufinfo)
          idx < bucketspec.left+bucketspec.nonspecialsinbucket; idx++)
     {
       startpos = nextsuftabentry_get(&rmnsufinfo->sortblock);
-      inversesuftab_set(rmnsufinfo,startpos,bucketspec.left);
+      if (rmnsufinfo->absoluteinversesuftab)
+      {
+        inversesuftab_set(rmnsufinfo,startpos,bucketspec.left);
+      } else
+      {
+        inversesuftabrel_set(rmnsufinfo,startpos,bucketspec.left,
+                             bucketspec.left);
+      }
     }
   }
+  gt_assert(idx <= rmnsufinfo->partwidth);
+  rmnsufinfo->overallspecials += (rmnsufinfo->partwidth - idx);
   for (/* Nothing */; idx < rmnsufinfo->partwidth; idx++)
   {
     startpos = nextsuftabentry_get(&rmnsufinfo->sortblock);
-    inversesuftab_set(rmnsufinfo,startpos,idx);
+    if (rmnsufinfo->absoluteinversesuftab)
+    {
+      inversesuftab_set(rmnsufinfo,startpos,idx);
+    }
   }
   gt_fa_xmunmap(rmnsufinfo->sortblock.mappedsection);
   rmnsufinfo->sortblock.mappedsection = NULL;
@@ -442,17 +829,6 @@ static void initinversesuftabnonspecials(Rmnsufinfo *rmnsufinfo)
   }
 }
 
-static void showintervalsizes(unsigned long count,unsigned long totalwidth,
-                              Seqpos totallength,unsigned long maxwidth)
-{
-  printf("%lu\n(total=%lu,avg=%.2f,%.2f%% of all, maxwidth=%lu)\n",
-          count,
-          totalwidth,
-          (double) totalwidth/count,
-          100.0 * (double) totalwidth/totallength,
-          maxwidth);
-}
-
 void rmnsufinfo_addunsortedrange(Rmnsufinfo *rmnsufinfo,
                                  Seqpos left, Seqpos right, Seqpos depth)
 {
@@ -462,6 +838,31 @@ void rmnsufinfo_addunsortedrange(Rmnsufinfo *rmnsufinfo,
   GT_GETNEXTFREEINARRAY(ptr,&rmnsufinfo->firstgeneration,Pairsuffixptr,1024);
   ptr->left = left;
   ptr->right = right;
+}
+
+static int compareitvfull(const void *a,const void *b, void *data)
+{
+  const Itvfullentry *itva = (const Itvfullentry *) a,
+                     *itvb = (const Itvfullentry *) b;
+  if (itva->rank < itvb->rank)
+  {
+    return -1;
+  }
+  if (itva->rank > itvb->rank)
+  {
+    return 1;
+  }
+  if (itva->unitsnotspecial == itvb->unitsnotspecial)
+  {
+    const Rmnsufinfo *rmnsufinfo = (const Rmnsufinfo *) data;
+    if (itvb->unitsnotspecial == rmnsufinfo->prefixlength)
+    {
+      return 0;
+    }
+    gt_assert(itva->suffixstart != itvb->suffixstart);
+    return (itva->suffixstart < itvb->suffixstart) ? -1 : 1;
+  }
+  return itva->unitsnotspecial > itvb->unitsnotspecial ? -1 : 1;
 }
 
 static int compareitv(const void *a,const void *b)
@@ -478,6 +879,17 @@ static int compareitv(const void *a,const void *b)
     return 1;
   }
   return 0;
+}
+
+static void showintervalsizes(unsigned long count,unsigned long totalwidth,
+                              Seqpos totallength,unsigned long maxwidth)
+{
+  printf("%lu\n(total=%lu,avg=%.2f,%.2f%% of all, maxwidth=%lu)\n",
+          count,
+          totalwidth,
+          (double) totalwidth/count,
+          100.0 * (double) totalwidth/totallength,
+          maxwidth);
 }
 
 static void processunsortedrange(Rmnsufinfo *rmnsufinfo,
@@ -581,6 +993,7 @@ static void possiblychangemappedsection(Sortblock *sortblock,Seqpos left,
     {
       entries2map = sortblock->mapableentries - sortblock->pageoffset;
     }
+    gt_assert(!SUFINMEM(sortblock));
     sortblock->mappedsection
       = gt_fa_mmap_generic_fd_func(sortblock->mmapfiledesc,
                                    entries2map * sizeof (Seqpos),
@@ -593,26 +1006,26 @@ static void possiblychangemappedsection(Sortblock *sortblock,Seqpos left,
 
 static Seqpos suftabentryfromsection_get(const Sortblock *sortblock,Seqpos idx)
 {
-  if (sortblock->mmapfiledesc != -1)
+  if (SUFINMEM(sortblock))
   {
-    gt_assert(idx >= sortblock->pageoffset &&
-              idx < sortblock->pageoffset + sortblock->mappedwidth);
-    return sortblock->mappedsection[idx - sortblock->pageoffset];
+    return sortblock->sortspace[idx];
   }
-  return sortblock->sortspace[idx];
+  gt_assert(idx >= sortblock->pageoffset &&
+            idx < sortblock->pageoffset + sortblock->mappedwidth);
+  return sortblock->mappedsection[idx - sortblock->pageoffset];
 }
 
 static void suftabentryfromsection_update(Sortblock *sortblock,Seqpos idx,
                                           Seqpos value)
 {
-  if (sortblock->mmapfiledesc != -1)
+  if (SUFINMEM(sortblock))
+  {
+    sortblock->sortspace[idx] = value;
+  } else
   {
     gt_assert(idx >= sortblock->pageoffset &&
               idx < sortblock->pageoffset + sortblock->mappedwidth);
     sortblock->mappedsection[idx - sortblock->pageoffset] = value;
-  } else
-  {
-    sortblock->sortspace[idx] = value;
   }
 }
 
@@ -628,6 +1041,19 @@ static void anchorleftmost(Rmnsufinfo *rmnsufinfo,Seqpos left,Seqpos right)
   }
 }
 
+static void anchorleftmostrel(Rmnsufinfo *rmnsufinfo,Seqpos left,Seqpos right,
+                              Seqpos base)
+{
+  Seqpos idx;
+
+  for (idx = left; idx <= right; idx++)
+  {
+    inversesuftabrel_set(rmnsufinfo,
+                         suftabentryfromsection_get(&rmnsufinfo->sortblock,idx),
+                         left,base);
+  }
+}
+
 static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos left,
                                     Seqpos right, Seqpos base)
 {
@@ -637,12 +1063,22 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos left,
 
   gt_assert(left >= base &&
             (unsigned long) (right - base) <= rmnsufinfo->allocateditvinfo);
-  if (rmnsufinfo->itvinfo == NULL)
+  if (rmnsufinfo->absoluteinversesuftab)
   {
-    rmnsufinfo->itvinfo = gt_malloc(sizeof(Itventry) *
-                                    rmnsufinfo->allocateditvinfo);
+    if (rmnsufinfo->itvinfo == NULL)
+    {
+      rmnsufinfo->itvinfo = gt_malloc(sizeof (Itventry) *
+                                      rmnsufinfo->allocateditvinfo);
+    }
+  } else
+  {
+    if (rmnsufinfo->itvfullinfo == NULL)
+    {
+      rmnsufinfo->itvfullinfo = gt_malloc(sizeof (Itvfullentry) *
+                                          rmnsufinfo->allocateditvinfo);
+    }
   }
-  if (rmnsufinfo->sortblock.mmapfiledesc != -1)
+  if (!SUFINMEM(&rmnsufinfo->sortblock))
   {
     possiblychangemappedsection(&rmnsufinfo->sortblock,left,right);
   }
@@ -655,20 +1091,51 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos left,
   for (idx=0; idx<width; idx++)
   {
     startpos = suftabentryfromsection_get(&rmnsufinfo->sortblock,left+idx);
-    rmnsufinfo->itvinfo[idx].suffixstart = startpos;
-    rmnsufinfo->itvinfo[idx].key
-      = inversesuftab_get(rmnsufinfo,startpos + rmnsufinfo->currentdepth);
+
+    if (rmnsufinfo->absoluteinversesuftab)
+    {
+      rmnsufinfo->itvinfo[idx].suffixstart = startpos;
+      rmnsufinfo->itvinfo[idx].key
+        = inversesuftab_get(rmnsufinfo,startpos + rmnsufinfo->currentdepth);
+    } else
+    {
+      inversesuftabrel_get(rmnsufinfo->itvfullinfo + idx,rmnsufinfo,startpos);
+    }
   }
-  qsort(rmnsufinfo->itvinfo,(size_t) width,sizeof(Itventry),compareitv);
-  for (idx=0; idx<width; idx++)
+  if (rmnsufinfo->absoluteinversesuftab)
   {
-    suftabentryfromsection_update(&rmnsufinfo->sortblock,left+idx,
-                                  rmnsufinfo->itvinfo[idx].suffixstart);
+    qsort(rmnsufinfo->itvinfo,(size_t) width,sizeof(Itventry),compareitv);
+    for (idx=0; idx<width; idx++)
+    {
+      suftabentryfromsection_update(&rmnsufinfo->sortblock,left+idx,
+                                    rmnsufinfo->itvinfo[idx].suffixstart);
+    }
+  } else
+  {
+    gt_qsort_r(rmnsufinfo->itvfullinfo,(size_t) width,sizeof(Itvfullentry),
+               rmnsufinfo,compareitvfull);
+    for (idx=0; idx<width; idx++)
+    {
+      suftabentryfromsection_update(&rmnsufinfo->sortblock,left+idx,
+                                    rmnsufinfo->itvfullinfo[idx].suffixstart);
+    }
   }
   rangestart = 0;
   for (idx=1UL; idx<width; idx++)
   {
-    if (rmnsufinfo->itvinfo[idx-1].key != rmnsufinfo->itvinfo[idx].key)
+    bool different;
+
+    if (rmnsufinfo->absoluteinversesuftab)
+    {
+      different = (rmnsufinfo->itvinfo[idx-1].key !=
+                   rmnsufinfo->itvinfo[idx].key) ? true : false;
+    } else
+    {
+      different = (compareitvfull(rmnsufinfo->itvfullinfo + idx - 1,
+                                  rmnsufinfo->itvfullinfo + idx,
+                                  rmnsufinfo) != 0) ? true : false;
+    }
+    if (different)
     {
       if (rangestart + 1 < idx)
       {
@@ -677,15 +1144,30 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos left,
                              left + idx - 1,
                              base,
                              MULT2(rmnsufinfo->currentdepth));
-        anchorleftmost(rmnsufinfo,
-                       left + rangestart,
-                       left + idx - 1);
+        if (rmnsufinfo->absoluteinversesuftab)
+        {
+          anchorleftmost(rmnsufinfo,
+                         left + rangestart,
+                         left + idx - 1);
+        } else
+        {
+          anchorleftmostrel(rmnsufinfo,
+                            left + rangestart,
+                            left + idx - 1,
+                            base);
+        }
       } else
       {
-        inversesuftab_set(rmnsufinfo,
-                          suftabentryfromsection_get(&rmnsufinfo->sortblock,
-                                                     left+rangestart),
-                          left+rangestart);
+        Seqpos currentsuftabentry
+          = suftabentryfromsection_get(&rmnsufinfo->sortblock,left+rangestart);
+        if (rmnsufinfo->absoluteinversesuftab)
+        {
+          inversesuftab_set(rmnsufinfo,currentsuftabentry,left+rangestart);
+        } else
+        {
+          inversesuftabrel_set(rmnsufinfo,currentsuftabentry,left+rangestart,
+                               base);
+        }
       }
       rangestart = idx;
     }
@@ -697,15 +1179,29 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos left,
                          left + width - 1,
                          base,
                          MULT2(rmnsufinfo->currentdepth));
-    anchorleftmost(rmnsufinfo,
-                   left + rangestart,
-                   left + width - 1);
+    if (rmnsufinfo->absoluteinversesuftab)
+    {
+      anchorleftmost(rmnsufinfo,
+                     left + rangestart,
+                     left + width - 1);
+    } else
+    {
+      anchorleftmostrel(rmnsufinfo,
+                        left + rangestart,
+                        left + width - 1,
+                        base);
+    }
   } else
   {
-    inversesuftab_set(rmnsufinfo,
-                      suftabentryfromsection_get(&rmnsufinfo->sortblock,
-                                                 left+rangestart),
-                      left+rangestart);
+    Seqpos currentsuftabentry
+      = suftabentryfromsection_get(&rmnsufinfo->sortblock,left+rangestart);
+    if (rmnsufinfo->absoluteinversesuftab)
+    {
+      inversesuftab_set(rmnsufinfo,currentsuftabentry,left+rangestart);
+    } else
+    {
+      inversesuftabrel_set(rmnsufinfo,currentsuftabentry,left+rangestart,base);
+    }
   }
 }
 
@@ -725,8 +1221,11 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
   }
   if (rmnsufinfo->inversesuftab == NULL)
   { /* now maxdepth > prefixlength */
-    initinversesuftabspecials(rmnsufinfo);
-    initinversesuftabnonspecials(rmnsufinfo);
+    if (rmnsufinfo->absoluteinversesuftab)
+    {
+      initinversesuftabspecials(rmnsufinfo);
+      initinversesuftabnonspecials(rmnsufinfo);
+    }
   } else
   {
     gt_assert(rmnsufinfo->firstgeneration.nextfreePairsuffixptr == 0);
@@ -766,7 +1265,7 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
       gt_free(pairptrwithbase);
     }
   }
-  if (rmnsufinfo->sortblock.mmapfiledesc != -1)
+  if (!SUFINMEM(&rmnsufinfo->sortblock))
   {
     gt_assert(rmnsufinfo->sortblock.mappedsection != NULL);
     gt_fa_xmunmap(rmnsufinfo->sortblock.mappedsection);
@@ -774,10 +1273,11 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
     printf("pagechanges = %lu\n",rmnsufinfo->sortblock.pagechanges);
   }
   printf("maxqueuesize = %lu\n",rmnsufinfo->maxqueuesize);
-  printf("checkedprefixes = %lu\n",checkedprefixes);
   gt_free(rmnsufinfo->unusedpair);
   gt_free(rmnsufinfo->itvinfo);
   rmnsufinfo->itvinfo = NULL;
+  gt_free(rmnsufinfo->itvfullinfo);
+  rmnsufinfo->itvfullinfo = NULL;
   gt_queue_delete(rmnsufinfo->rangestobesorted);
   rmnsufinfo->rangestobesorted = NULL;
 }
@@ -789,8 +1289,11 @@ void bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo)
   Bucketspecification bucketspec;
   const Codetype mincode = 0;
 
-  initinversesuftabspecials(rmnsufinfo);
-  if (rmnsufinfo->sortblock.mmapfiledesc == -1)
+  if (rmnsufinfo->absoluteinversesuftab)
+  {
+    initinversesuftabspecials(rmnsufinfo);
+  }
+  if (SUFINMEM(&rmnsufinfo->sortblock))
   {
     initinversesuftabnonspecialsadjust(rmnsufinfo);
     printf("# maxbucketsize=%lu\n",rmnsufinfo->allocateditvinfo);
@@ -838,10 +1341,29 @@ Compressedtable *rmnsufinfo_wrap(Seqpos *longest,
   Compressedtable *lcptab;
 
   sortremainingsuffixes(rmnsufinfo);
-  *longest = compressedtable_get(rmnsufinfo->inversesuftab,0);
+  gt_free(rmnsufinfo->filltable);
+  rmnsufinfo->filltable = NULL;
+  if (rmnsufinfo->absoluteinversesuftab)
+  {
+    *longest = compressedtable_get(rmnsufinfo->inversesuftab,0);
+  } else
+  {
+    *longest = rmnsufinfo->longestrel;
+#ifdef ITVDEBUG
+    gt_free(rmnsufinfo->itvrel.is_inversesuftab_set);
+    rmnsufinfo->itvrel.is_inversesuftab_set = NULL;
+#endif
+    compressedtable_free(rmnsufinfo->itvrel.offset,true);
+    rmnsufinfo->itvrel.offset = NULL;
+  }
+  if (rmnsufinfo->hashexceptions)
+  {
+    gt_hashtable_delete(rmnsufinfo->itvrel.hashstore);
+    rmnsufinfo->itvrel.hashstore = NULL;
+  }
   if (withlcptab)
   {
-    if (rmnsufinfo->sortblock.mmapfiledesc == -1)
+    if (SUFINMEM(&rmnsufinfo->sortblock))
     {
       rmnsufinfo->sortedsuffixes = rmnsufinfo->sortblock.sortspace;
     } else
@@ -873,11 +1395,15 @@ Compressedtable *rmnsufinfo_wrap(Seqpos *longest,
     rmnsufinfo->inversesuftab = NULL;
     lcptab = NULL;
   }
-  if (rmnsufinfo->sortblock.mmapfiledesc != -1 && withlcptab)
+  if (!SUFINMEM(&rmnsufinfo->sortblock) && withlcptab)
   {
     gt_fa_xmunmap(rmnsufinfo->sortedsuffixes);
     rmnsufinfo->sortedsuffixes = NULL;
   }
+#ifdef Lowerboundwithrank
+  gt_free(rmnsufinfo->lowerboundwithrank);
+  rmnsufinfo->lowerboundwithrank = NULL;
+#endif
   gt_assert(rmnsufinfo->esr != NULL);
   freeEncodedsequencescanstate(&rmnsufinfo->esr);
   gt_free(rmnsufinfo);

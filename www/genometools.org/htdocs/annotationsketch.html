@@ -103,7 +103,7 @@ By default, <em>Lines</em> are grouped by the Sequence Ontology type associated 
 To obtain a shorter yet concise output, tracks for parent types in the feature graph can be enabled to contain all the features of their child types. The features with the given type are then drawn on top of their parent features (e.g. all <em>exon</em> and <em>intron</em> features are placed into their parent <em>mRNA</em> or <em>gene</em> track). This process is called <em>collapsing</em>. Collapsing can be enabled by setting the <tt>collapse_to_parent</tt> option for the respective child type to <tt>true</tt>, e.g. the following options:
 </p>
 <pre class="code">
-config = {
+style = {
   exon = {
     ...,
     collapse_to_parent = true,
@@ -149,7 +149,7 @@ sizes, and collapsing parameters.
 <p>Instead of giving direct values, callback Lua functions can be used in some options to generate feature-dependent configuration settings at run-time. During layout and/or rendering, the <a href="http://genometools.org/docs.html#GenomeNode"><em>GenomeNode</em></a> object for the feature to be rendered is passed to the callback function which can then be evaluated and the appropriate type can be returned.</p>
 <p>For example, setting the following options in the style file (or via the Lua bindings):</p>
 <pre class="code">
-config = {
+style = {
   ...,
   mRNA = {
     block_caption      = function(gn)

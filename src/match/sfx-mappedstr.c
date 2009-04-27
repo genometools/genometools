@@ -385,21 +385,6 @@ static void shiftrightwithchar(
   }
 }
 
-static void filllargestchartable(Codetype **filltable,
-                                 unsigned int numofchars,
-                                 unsigned int kmersize)
-{
-  Codetype code, *ptr;
-
-  ALLOCASSIGNSPACE(*filltable,NULL,Codetype,kmersize);
-  code = (Codetype) numofchars;
-  for (ptr = *filltable + kmersize - 1; ptr >= *filltable; ptr--)
-  {
-    *ptr = code-1;
-    code *= numofchars;
-  }
-}
-
 static void initstreamstate(Streamstate *spwp,unsigned int numofchars,
                             unsigned int kmersize)
 {
@@ -412,7 +397,7 @@ static void initstreamstate(Streamstate *spwp,unsigned int numofchars,
   spwp->firstindex = 0;
   ALLOCASSIGNSPACE(spwp->cyclicwindow,NULL,GtUchar,kmersize);
   specialemptyqueue(&spwp->spos,kmersize);
-  filllargestchartable(&spwp->filltable,numofchars,kmersize);
+  spwp->filltable = filllargestchartable(numofchars,kmersize);
 }
 
 static void freestreamstate(Streamstate *spwp)

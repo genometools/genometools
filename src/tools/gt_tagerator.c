@@ -85,7 +85,7 @@ static GtOptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
            *optionpckindex, *optionmaxdepth, *optionbest;
 
   gt_assert(arguments != NULL);
-  op = gt_option_parser_new("[options] -t tagfile [-esa|-pck] indexname",
+  op = gt_option_parser_new("[options] -q tagfile [-esa|-pck] indexname",
                          "Map short sequence tags in given index.");
   gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
   option = gt_option_new_filenamearray("q",

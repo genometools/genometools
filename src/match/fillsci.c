@@ -125,7 +125,7 @@ static void doupdatesumranges(Specialcharinfo *specialcharinfo,
 
   specialcharinfo->realspecialranges
     = calcspecialranges(specialrangestab,distspralen,verboseinfo);
-  assert (forcetable <= 3U);
+  gt_assert(forcetable <= 3U);
   for (c = 0; c<3; c++)
   {
     if (forcetable == 3U || c == (int) forcetable)

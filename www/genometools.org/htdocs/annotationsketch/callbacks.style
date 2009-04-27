@@ -1,5 +1,5 @@
--- This is the GenomeTools annotation viewer config file.
--- All options must be set inside the 'config' table.
+-- This is a GenomeTools annotation viewer style file.
+-- All options must be set inside the 'style' table.
 -- All items in this table must be tables, called 'sections'.
 
 style =

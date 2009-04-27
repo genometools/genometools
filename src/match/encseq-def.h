@@ -24,6 +24,7 @@
 #include "core/symboldef.h"
 #include "core/filelengthvalues.h"
 #include "seqpos-def.h"
+#include "intcode-def.h"
 #include "alphadef.h"
 #include "intbits.h"
 #include "readmode-def.h"
@@ -230,6 +231,12 @@ void encseqextract(GtUchar *buffer,
                    Seqpos frompos,
                    Seqpos topos);
 
+Codetype extractprefixcode(unsigned int *unitsnotspecial,
+                           const Encodedsequence *encseq,
+                           const Codetype **multimappower,
+                           Seqpos frompos,
+                           unsigned int len);
+
 int compareEncseqsequences(Seqpos *lcp,
                            const Encodedsequence *encseq,
                            bool fwd,
@@ -252,6 +259,8 @@ int multicharactercompare(const Encodedsequence *encseq,
 void checkextractunitatpos(const Encodedsequence *encseq,
                            bool fwd,bool complement);
 
+void checkextractspecialbits(const Encodedsequence *encseq,bool fwd);
+
 void multicharactercompare_withtest(const Encodedsequence *encseq,
                                     bool fwd,
                                     bool complement,
@@ -272,7 +281,7 @@ bool containsspecial(const Encodedsequence *encseq,
                      Seqpos startpos,
                      Seqpos len);
 
-unsigned int getsatforcevalue(const char *str);
+int getsatforcevalue(const char *str,GtError *err);
 
 /* check if the marked positions are correct */
 

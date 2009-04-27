@@ -32,6 +32,7 @@
 #include "tools/gt_seqiterator.h"
 #include "tools/gt_sfxmap.h"
 #include "tools/gt_skproto.h"
+#include "tools/gt_readreads.h"
 #include "tools/gt_convertseq.h"
 #include "tools/gt_trieins.h"
 
@@ -48,6 +49,7 @@ static void* gt_dev_arguments_new(void)
   gt_toolbox_add(dev_toolbox, "mergeesa", gt_mergeesa);
   gt_toolbox_add(dev_toolbox, "paircmp", gt_paircmp);
   gt_toolbox_add(dev_toolbox, "patternmatch", gt_patternmatch);
+  gt_toolbox_add_tool(dev_toolbox, "readreads", gt_readreads());
   gt_toolbox_add(dev_toolbox, "regioncov", gt_regioncov);
   gt_toolbox_add(dev_toolbox, "seqiterator", gt_seqiterator);
   gt_toolbox_add(dev_toolbox, "sfxmap", gt_sfxmap);

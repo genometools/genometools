@@ -31,27 +31,16 @@ typedef struct
   size_t sizeofplain;
   Seqpos *plain;
 #else
-  Seqpos maxvalue;
   BitPackArray *bitpackarray;
 #endif
+  Seqpos maxvalue;
 } Compressedtable;
 
-/*@unused@*/ static inline Compressedtable *compressedtable_new(
+/*@unused@*/ static inline Compressedtable *compressedtablebits_new(
                                                   Seqpos numofvalues,
-                                                  GT_UNUSED Seqpos maxvalue)
+                                                  unsigned int bitspervalue)
 {
   Compressedtable *compressedtable;
-#ifndef PLAIN
-  unsigned int bitspervalue = gt_determinebitspervalue((uint64_t) maxvalue);
-#endif
-
-  /*{
-    uint64_t idx;
-  for (idx = 1; idx < (uint64_t) 2342412341234ULL; idx+= (uint64_t) 1234123)
-  {
-    (void) gt_determinebitspervalue(idx);
-  }
-  }*/
 
   compressedtable = gt_malloc(sizeof (Compressedtable));
 #ifdef PLAIN
@@ -59,12 +48,27 @@ typedef struct
     = sizeof (Seqpos) * numofvalues;
   compressedtable->plain = gt_malloc(compressedtable->sizeofplain);
 #else
-  compressedtable->maxvalue = maxvalue;
   compressedtable->bitpackarray
     = bitpackarray_new(bitspervalue,(BitOffset) numofvalues,true);
-  printf("allocated compressed table: " FormatSeqpos " entries with %u bits\n",
-          PRINTSeqposcast(numofvalues),bitspervalue);
+  printf("allocated compressed table: " FormatSeqpos
+         " entries with %u bits (%lu bytes)\n",
+          PRINTSeqposcast(numofvalues),
+          bitspervalue,
+          (unsigned long) (numofvalues * (double) bitspervalue/CHAR_BIT));
 #endif
+  compressedtable->maxvalue = (Seqpos) ((1<<bitspervalue) - 1);
+  return compressedtable;
+}
+
+/*@unused@*/ static inline Compressedtable *compressedtable_new(
+                                                  Seqpos numofvalues,
+                                                  Seqpos maxvalue)
+{
+  Compressedtable *compressedtable;
+  unsigned int bitspervalue = gt_determinebitspervalue((uint64_t) maxvalue);
+
+  compressedtable = compressedtablebits_new(numofvalues,bitspervalue);
+  compressedtable->maxvalue = maxvalue;
   return compressedtable;
 }
 
@@ -72,6 +76,7 @@ typedef struct
                                        Compressedtable *compressedtable,
                                        Seqpos idx,Seqpos value)
 {
+  gt_assert(compressedtable->maxvalue >= value);
 #ifdef PLAIN
   compressedtable->plain[idx] = value;
 #else
@@ -101,10 +106,20 @@ typedef struct
 #endif
 }
 
+/*@unused@*/ static inline Seqpos compressedtable_maxvalue(
+                                         Compressedtable *compressedtable)
+{
+  return compressedtable->maxvalue;
+}
+
 /*@unused@*/ static inline void compressedtable_free(
                                         Compressedtable *compressedtable,
                                         bool freeelemspace)
 {
+  if (compressedtable == NULL)
+  {
+    return;
+  }
   if (freeelemspace)
   {
 #ifdef PLAIN

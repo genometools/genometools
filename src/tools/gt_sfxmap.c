@@ -60,7 +60,7 @@ static void deletethespranges(const Encodedsequence *encseq,
   printf(">\n");
   while (nextspecialrangeiterator(&range,sri))
   {
-    assert (range.rightpos > range.leftpos);
+    gt_assert(range.rightpos > range.leftpos);
     rangewidth = range.rightpos - range.leftpos;
     if (rangewidth > (Seqpos) delspranges)
     {

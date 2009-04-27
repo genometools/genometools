@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008      Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,15 +18,33 @@
 #ifndef ASSERT_API_H
 #define ASSERT_API_H
 
-#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
 
 /* Assert module */
 
+#define GT_EXIT_PROGRAMMING_ERROR  2
+
+#ifndef NDEBUG
 /* The <gt_assert()> macro tests the given <expression> and if it is false, the
    calling process is terminated. A diagnostic message is written to <stderr>
-   and the <abort(3)> function is called, effectively terminating the program.
+   and the <exit(3)> function is called (with error code 2 as argument),
+   effectively terminating the program.
    If <expression> is true, the <gt_assert()> macro does nothing. */
-#define gt_assert(expression) \
-        assert(expression)
+#define gt_assert(expression)                                                \
+        do {                                                                 \
+          if (!(expression)) {                                               \
+            fprintf(stderr, "Assertion failed: (%s), function %s, file %s, " \
+                    "line %d.\nThis is probably a bug, please report it.\n", \
+                    #expression, __func__, __FILE__, __LINE__);              \
+            /*@ignore@*/                                                     \
+            exit(GT_EXIT_PROGRAMMING_ERROR);                                 \
+            /*@end@*/                                                        \
+          }                                                                  \
+        } while (false)
+#else
+#define gt_assert(expression) ((void) 0)
+#endif
 
 #endif

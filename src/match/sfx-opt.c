@@ -57,6 +57,9 @@ static OPrval parse_options(int *parsed_args,
          *optionparts,
          *optiondes;
   OPrval oprval;
+  const char *maxdepthmsg = "option of -maxdepth must either be positive "
+                            "integer or a floating point value in the range "
+                            "0.5 to 1.0";
   GtStr *dirarg = gt_str_new();
 
   gt_error_check(err);
@@ -116,13 +119,11 @@ static OPrval parse_options(int *parsed_args,
 
   if (doesa)
   {
-    optionmaxdepth = gt_option_new_uint_min("maxdepth",
-                                            "stop shallow suffix sorting "
-                                            "at prefixes of the given length",
-                                            &so->sfxstrategy.ssortmaxdepth.
-                                                 valueunsignedint,
-                                            MAXDEPTH_AUTOMATIC,
-                                            1U);
+    optionmaxdepth = gt_option_new_string("maxdepth",
+                                          "stop shallow suffix sorting "
+                                          "at prefixes of the given length",
+                                          so->str_maxdepth,
+                                          NULL);
     gt_option_is_development_option(optionmaxdepth);
     gt_option_argument_is_optional(optionmaxdepth);
     gt_option_parser_add_option(op, optionmaxdepth);
@@ -307,12 +308,58 @@ static OPrval parse_options(int *parsed_args,
       }
     }
   }
+  so->sfxstrategy.absoluteinversesuftab = false;
   if (oprval == OPTIONPARSER_OK && doesa)
   {
     gt_assert(optionmaxdepth != NULL);
     if (gt_option_is_set(optionmaxdepth))
     {
-      if (so->numofparts > 1U)
+      if (gt_str_length(so->str_maxdepth) > 0)
+      {
+        if (strcmp(gt_str_get(so->str_maxdepth),"abs") == 0)
+        {
+          so->sfxstrategy.absoluteinversesuftab = true;
+        } else
+        {
+          float readfloat;
+
+          if (strchr(gt_str_get(so->str_maxdepth),'.') != NULL)
+          {
+            if (sscanf(gt_str_get(so->str_maxdepth),"%f",&readfloat) == 1 &&
+                readfloat >= 0.5 && readfloat <= 1.0)
+            {
+              so->sfxstrategy.ssortmaxdepth.valueunsignedint
+                = MAXDEPTH_AUTOMATIC;
+              so->sfxstrategy.probsmall.valuedouble = (double) readfloat;
+              so->sfxstrategy.probsmall.defined = true;
+            } else
+            {
+              gt_error_set(err, "%s", maxdepthmsg);
+              oprval = OPTIONPARSER_ERROR;
+            }
+          } else
+          {
+            long readint;
+            if (sscanf(gt_str_get(so->str_maxdepth),"%ld",&readint) == 1)
+            {
+              if (readint >= 1L)
+              {
+                so->sfxstrategy.ssortmaxdepth.valueunsignedint
+                  = (unsigned int) readint;
+              } else
+              {
+                gt_error_set(err,"%s", maxdepthmsg);
+                oprval = OPTIONPARSER_ERROR;
+              }
+            } else
+            {
+              gt_error_set(err,"%s", maxdepthmsg);
+              oprval = OPTIONPARSER_ERROR;
+            }
+          }
+        }
+      }
+      if (oprval != OPTIONPARSER_ERROR && so->numofparts > 1U)
       {
         if (so->sfxstrategy.ssortmaxdepth.valueunsignedint
             == MAXDEPTH_AUTOMATIC)
@@ -325,10 +372,14 @@ static OPrval parse_options(int *parsed_args,
           oprval = OPTIONPARSER_ERROR;
         }
       }
-      so->sfxstrategy.ssortmaxdepth.defined = true;
-      if (so->sfxstrategy.ssortmaxdepth.valueunsignedint != MAXDEPTH_AUTOMATIC)
+      if (oprval != OPTIONPARSER_ERROR)
       {
-        so->sfxstrategy.cmpcharbychar = true;
+        so->sfxstrategy.ssortmaxdepth.defined = true;
+        if (so->sfxstrategy.ssortmaxdepth.valueunsignedint !=
+            MAXDEPTH_AUTOMATIC)
+        {
+          so->sfxstrategy.cmpcharbychar = true;
+        }
       }
     }
   }
@@ -419,6 +470,7 @@ void wrapsfxoptions(Suffixeratoroptions *so)
   gt_str_delete(so->str_inputindex);
   gt_str_delete(so->str_smap);
   gt_str_delete(so->str_sat);
+  gt_str_delete(so->str_maxdepth);
   gt_str_array_delete(so->filenametab);
   gt_str_array_delete(so->algbounds);
   gt_option_delete(so->optionalgboundsref);
@@ -453,12 +505,14 @@ int suffixeratoroptions(Suffixeratoroptions *so,
   so->str_indexname = gt_str_new();
   so->str_smap = gt_str_new();
   so->str_sat = gt_str_new();
+  so->str_maxdepth = gt_str_new();
   so->filenametab = gt_str_array_new();
   so->algbounds = gt_str_array_new();
   so->prefixlength = PREFIXLENGTH_AUTOMATIC;
   so->sfxstrategy.ssortmaxdepth.defined = false;
   so->sfxstrategy.ssortmaxdepth.valueunsignedint = MAXDEPTH_AUTOMATIC;
   so->sfxstrategy.streamsuftab = false;
+  so->sfxstrategy.probsmall.defined = false;
   so->outsuftab = false; /* if !doesa this is not defined */
   so->outlcptab = false;
   so->outbwttab = false;

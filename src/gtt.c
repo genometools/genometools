@@ -32,6 +32,7 @@
 #include "core/hashmap.h"
 #include "core/hashtable.h"
 #include "core/interval_tree.h"
+#include "core/quality.h"
 #include "core/queue.h"
 #include "core/sequence_buffer.h"
 #include "core/splitter.h"
@@ -199,6 +200,7 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "PPT finder module", gt_ppt_unit_test);
   gt_hashmap_add(unit_tests, "PBS finder module", gt_pbs_unit_test);
   gt_hashmap_add(unit_tests, "queue class", gt_queue_unit_test);
+  gt_hashmap_add(unit_tests, "quality module", gt_quality_unit_test);
   gt_hashmap_add(unit_tests, "range class", gt_range_unit_test);
   gt_hashmap_add(unit_tests, "red-black tree class", gt_rbt_unit_test);
   gt_hashmap_add(unit_tests, "safearith module", gt_safearith_unit_test);

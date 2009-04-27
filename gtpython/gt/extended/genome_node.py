@@ -1,6 +1,6 @@
 #
-# Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-# Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+# Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -22,19 +22,21 @@ from gt.core.gtstr import Str
 from gt.props import cachedproperty
 
 class GenomeNode(object):
-  def __init__(self, node_ptr, newref=False):
-    if node_ptr == 0 or node_ptr == None:
-      gterror("GenomeNode pointer cannot be NULL (was: " + str(node_ptr) + ")")
-    if newref:
-      self.gn = gtlib.gt_genome_node_ref(node_ptr)
-    else:
-      self.gn = node_ptr
-    self._as_parameter_ = self.gn
+  
+  def __init__(self):
+    pass
 
   @classmethod
   def create_from_ptr(cls, node_ptr, newref=False):
-    n = cls(node_ptr, newref)
-    n.gn = newref and gtlib.genome_node_ref(node_ptr) or node_ptr
+    if node_ptr == 0 or node_ptr == None:
+      gterror("GenomeNode pointer cannot be NULL (was: " + str(node_ptr) + ")")
+    n = cls()
+    if newref:
+      n.own = True
+      n.gn = gtlib.gt_genome_node_ref(node_ptr)
+    else:
+      n.own = False
+      n.gn = node_ptr
     n._as_parameter_ = n.gn
     return n
 
@@ -44,10 +46,11 @@ class GenomeNode(object):
               (c, self.start, self.end, self.seqid)
 
   def __del__(self):
-    try:
-      gtlib.gt_genome_node_delete(self.gn)
-    except AttributeError:
-      pass
+    if self.own:
+      try:
+        gtlib.gt_genome_node_delete(self.gn)
+      except AttributeError:
+        pass
 
   def from_param(cls, obj):
     if not isinstance(obj, GenomeNode):

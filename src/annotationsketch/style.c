@@ -127,6 +127,7 @@ int gt_style_load_file(GtStyle *sty, const char *filename, GtError *err)
     if (lua_isnil(sty->L, -1) || !lua_istable(sty->L, -1)) {
       gt_error_set(err, "'style' is not defined or not a table in \"%s\"",
                 filename);
+      had_err = -1;
     }
     lua_pop(sty->L, 1);
   }
@@ -512,7 +513,8 @@ int gt_style_to_str(const GtStyle *sty, GtStr *outstr, GtError *err)
   if (lua_istable(sty->L, -1))
     had_err = gt_lua_table_to_str(sty->L, outstr, -1, err);
   else {
-    gt_error_set(err, "'style' must be a table");
+    gt_error_set(err, "'style' must be a table. Check whether a top-level"
+                      "table of this name exists.");
     had_err = -1;
   }
   gt_str_append_cstr(outstr, "}");

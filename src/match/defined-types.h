@@ -32,4 +32,10 @@ typedef struct
   unsigned int valueunsignedint;
 } Definedunsignedint;
 
+typedef struct
+{
+  bool defined;
+  double valuedouble;
+} Defineddouble;
+
 #endif

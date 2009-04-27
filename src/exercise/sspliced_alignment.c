@@ -28,7 +28,7 @@ struct GtSSplicedAlignment {
 GtSSplicedAlignment* gt_sspliced_alignment_new(const char *id, bool forward)
 {
   GtSSplicedAlignment *sa;
-  assert(id);
+  gt_assert(id);
   sa = gt_malloc(sizeof *sa);
   sa->id = gt_cstr_dup(id);
   sa->forward = forward;
@@ -46,34 +46,34 @@ void gt_sspliced_alignment_delete(GtSSplicedAlignment *sa)
 
 bool gt_sspliced_alignment_is_forward(const GtSSplicedAlignment *sa)
 {
-  assert(sa);
+  gt_assert(sa);
   return sa->forward;
 }
 
 void gt_sspliced_alignment_add_exon(GtSSplicedAlignment *sa, GtRange exon)
 {
-  assert(sa);
+  gt_assert(sa);
   gt_array_add(sa->exons, exon);
 }
 
 unsigned long gt_sspliced_alignment_num_of_exons(const GtSSplicedAlignment *sa)
 {
-  assert(sa);
+  gt_assert(sa);
   return gt_array_size(sa->exons);
 }
 
 GtRange gt_sspliced_alignment_get_exon(const GtSSplicedAlignment *sa,
                                   unsigned long exon_number)
 {
-  assert(sa);
+  gt_assert(sa);
   return *(GtRange*) gt_array_get(sa->exons, exon_number);
 }
 
 GtRange gt_sspliced_alignment_genomic_range(const GtSSplicedAlignment *sa)
 {
   GtRange range;
-  assert(sa);
-  assert(gt_array_size(sa->exons));
+  gt_assert(sa);
+  gt_assert(gt_array_size(sa->exons));
   range.start = ((GtRange*) gt_array_get_first(sa->exons))->start;
   range.end   = ((GtRange*) gt_array_get_last(sa->exons))->end;
   return range;
@@ -81,7 +81,7 @@ GtRange gt_sspliced_alignment_genomic_range(const GtSSplicedAlignment *sa)
 
 static int range_compare_long_first(GtRange range_a, GtRange range_b)
 {
-  assert(range_a.start <= range_a.end && range_b.start <= range_b.end);
+  gt_assert(range_a.start <= range_a.end && range_b.start <= range_b.end);
 
   if ((range_a.start == range_b.start) && (range_a.end == range_b.end))
     return 0; /* range_a == range_b */

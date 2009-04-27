@@ -14,18 +14,18 @@ if __name__ == "__main__":
   nodes = []
 
   # construct a gene on the forward strand with two exons
-  gene   = FeatureNode(seqid, "gene", 100, 900, "+")
-  exon   = FeatureNode(seqid, "exon", 100, 200, "+")
+  gene   = FeatureNode.create_new(seqid, "gene", 100, 900, "+")
+  exon   = FeatureNode.create_new(seqid, "exon", 100, 200, "+")
   gene.add_child(exon)
-  intron = FeatureNode(seqid, "intron", 201, 799, "+")
+  intron = FeatureNode.create_new(seqid, "intron", 201, 799, "+")
   gene.add_child(intron)
-  exon   = FeatureNode(seqid, "exon", 800, 900, "+")
+  exon   = FeatureNode.create_new(seqid, "exon", 800, 900, "+")
   gene.add_child(exon)
 
   # construct a single-exon gene on the reverse strand
   # (within the intron of the forward strand gene)
-  reverse_gene = FeatureNode(seqid, "gene", 400, 600, "-")
-  reverse_exon = FeatureNode(seqid, "exon", 400, 600, "-")
+  reverse_gene = FeatureNode.create_new(seqid, "gene", 400, 600, "-")
+  reverse_exon = FeatureNode.create_new(seqid, "exon", 400, 600, "-")
   reverse_gene.add_child(reverse_exon)
 
   pngfile = sys.argv[2]

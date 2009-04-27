@@ -23,6 +23,7 @@
 #include "core/fa.h"
 #include "core/symboldef.h"
 #include "core/chardef.h"
+#include "core/mathsupport.h"
 #include "esa-fileend.h"
 #include "mapspec-def.h"
 #include "spacedef.h"
@@ -33,6 +34,15 @@
 
 #define FROMCODE2SPECIALCODE(CODE,NUMOFCHARS)\
                             (((CODE) - ((NUMOFCHARS)-1)) / (NUMOFCHARS))
+
+typedef struct
+{
+  unsigned long nonspecialsmaxbucketsize,
+                specialsmaxbucketsize,
+                maxbucketsize,
+                log2nonspecialbucketsizedist[GT_MAXLOG2VALUE+1],
+                log2specialbucketsizedist[GT_MAXLOG2VALUE+1];
+} Maxbucketinfo;
 
 struct Bcktab
 {
@@ -48,6 +58,8 @@ struct Bcktab
                 *countspecialcodes,
                 **distpfxidx;
   GtUchar *qgrambuffer;
+  Maxbucketinfo maxbucketinfo;
+  unsigned int optimalnumofbits;
   bool allocated;
   void *mappedptr;
 };
@@ -313,7 +325,7 @@ void showbcktab(const Bcktab *bcktab)
     for (code = 0; code < bcktab->basepower[prefixindex]; code++)
     {
       sum += bcktab->distpfxidx[prefixindex-1][code];
-      printf("distpfxidex[%u][%lu]=%lu\n",
+      printf("distpfxidx[%u][%lu]=%lu\n",
               prefixindex,code,bcktab->distpfxidx[prefixindex-1][code]);
     }
     printf("sum %lu\n",sum);
@@ -324,7 +336,7 @@ void freebcktab(Bcktab **bcktab)
 {
   Bcktab *bcktabptr = *bcktab;
 
-  /* showbcktab(bcktabptr); */
+  /*showbcktab(bcktabptr);*/
   if (bcktabptr->allocated)
   {
     FREESPACE(bcktabptr->leftborder);
@@ -539,6 +551,181 @@ void calcbucketboundaries(Bucketspecification *bucketspec,
                                numofchars);
 }
 
+static void updatelog2values(unsigned long *tab,unsigned long maxvalue)
+{
+  unsigned long multi = 1UL, idx, sum = 1UL;
+
+  /* printf("maxvalue=%lu\n",maxvalue);*/
+  for (idx = 0; /* Nothing */; idx++)
+  {
+    tab[idx] += multi;
+    /*printf("tab[%lu]+=%lu\n",idx,multi); */
+    multi *= 2;
+    if (sum+multi > maxvalue)
+    {
+      tab[idx+1] += maxvalue - sum;
+      /* printf("tab[%lu]+=%lu\n",idx+1,maxvalue-sum); */
+      break;
+    }
+    sum += multi;
+  }
+}
+
+static unsigned int calc_optimalnumofbits(const unsigned long *log2tab,
+                                          double probsmall)
+{
+  unsigned int maxbits;
+  unsigned long currentsum = 0, total = 0;
+
+  for (maxbits = 0; maxbits <= (unsigned int) GT_MAXLOG2VALUE; maxbits++)
+  {
+    total += log2tab[maxbits];
+  }
+  for (maxbits = 0; maxbits <= (unsigned int) GT_MAXLOG2VALUE; maxbits++)
+  {
+    if (log2tab[maxbits] > 0)
+    {
+      currentsum += log2tab[maxbits];
+      if ((double) currentsum/total >= probsmall)
+      {
+        break;
+      }
+    }
+  }
+  printf("store %lu values in hashtable (>=%lu bytes)\n",
+         (unsigned long) (total - currentsum),
+         (total - currentsum) * (sizeof (Seqpos) + sizeof (unsigned long)));
+  return maxbits;
+}
+
+void determinemaxbucketsize(Bcktab *bcktab,
+                            const Codetype mincode,
+                            const Codetype maxcode,
+                            Seqpos partwidth,
+                            unsigned int numofchars,
+                            double probsmall,
+                            Verboseinfo *verboseinfo)
+{
+  unsigned int rightchar = (unsigned int) (mincode % numofchars);
+  Bucketspecification bucketspec;
+  Codetype code;
+
+  bcktab->maxbucketinfo.specialsmaxbucketsize = 1UL;
+  bcktab->maxbucketinfo.nonspecialsmaxbucketsize = 1UL;
+  bcktab->maxbucketinfo.maxbucketsize = 1UL;
+  memset(bcktab->maxbucketinfo.log2nonspecialbucketsizedist,0,
+               sizeof (*bcktab->maxbucketinfo.log2nonspecialbucketsizedist) *
+               (GT_MAXLOG2VALUE+1));
+  memset(bcktab->maxbucketinfo.log2specialbucketsizedist,0,
+               sizeof (*bcktab->maxbucketinfo.log2specialbucketsizedist) *
+               (GT_MAXLOG2VALUE+1));
+  for (code = mincode; code <= maxcode; code++)
+  {
+    rightchar = calcbucketboundsparts(&bucketspec,
+                                      bcktab,
+                                      code,
+                                      maxcode,
+                                      partwidth,
+                                      rightchar,
+                                      numofchars);
+    if (bucketspec.nonspecialsinbucket >
+        bcktab->maxbucketinfo.nonspecialsmaxbucketsize)
+    {
+      bcktab->maxbucketinfo.nonspecialsmaxbucketsize
+        = bucketspec.nonspecialsinbucket;
+    }
+    if (bucketspec.specialsinbucket >
+        bcktab->maxbucketinfo.specialsmaxbucketsize)
+    {
+      bcktab->maxbucketinfo.specialsmaxbucketsize = bucketspec.specialsinbucket;
+    }
+    if (bucketspec.nonspecialsinbucket + bucketspec.specialsinbucket
+        > bcktab->maxbucketinfo.maxbucketsize)
+    {
+      bcktab->maxbucketinfo.maxbucketsize = bucketspec.nonspecialsinbucket +
+                                            bucketspec.specialsinbucket;
+    }
+    if (bucketspec.nonspecialsinbucket >= 1UL)
+    {
+      updatelog2values(bcktab->maxbucketinfo.log2nonspecialbucketsizedist,
+                       bucketspec.nonspecialsinbucket);
+    }
+    if (bucketspec.specialsinbucket > 1UL)
+    {
+      updatelog2values(bcktab->maxbucketinfo.log2specialbucketsizedist,
+                       bucketspec.specialsinbucket);
+    }
+  }
+  if (gt_double_smaller_double(probsmall,(double) 1.0))
+  {
+    bcktab->optimalnumofbits
+      = calc_optimalnumofbits(bcktab->maxbucketinfo.
+                                      log2nonspecialbucketsizedist,
+                              probsmall);
+    printf("use %u bits for more than %.2f percent of the values\n",
+            bcktab->optimalnumofbits,
+            100.0 * probsmall);
+  } else
+  {
+    bcktab->optimalnumofbits = 0;
+  }
+  showverbose(verboseinfo,"maxbucket (specials)=%lu",
+              bcktab->maxbucketinfo.specialsmaxbucketsize);
+  showverbose(verboseinfo,"maxbucket (nonspecials)=%lu",
+              bcktab->maxbucketinfo.nonspecialsmaxbucketsize);
+  showverbose(verboseinfo,"maxbucket (all)=%lu",
+              bcktab->maxbucketinfo.maxbucketsize);
+}
+
+static void showlog2info(const char *tag,const unsigned long *log2tab,
+                         Verboseinfo *verboseinfo)
+{
+  if (verboseinfo != NULL)
+  {
+    int maxbits;
+    unsigned long currentsum = 0, total = 0;
+    for (maxbits = 0; maxbits <= GT_MAXLOG2VALUE; maxbits++)
+    {
+      total += log2tab[maxbits];
+    }
+    for (maxbits = 0; maxbits <= GT_MAXLOG2VALUE; maxbits++)
+    {
+      if (log2tab[maxbits] > 0)
+      {
+        currentsum += log2tab[maxbits];
+        showverbose(verboseinfo,"%s[%d]=%lu (%.4f)",tag,maxbits,
+                                 log2tab[maxbits],(double) currentsum/total);
+      }
+    }
+    showverbose(verboseinfo,"total=%lu",total);
+  }
+}
+
+void bcktab_showlog2info(const Bcktab *bcktab,Verboseinfo *verboseinfo)
+{
+  showlog2info("log2nonspecialbucketsizedist",
+                bcktab->maxbucketinfo.log2nonspecialbucketsizedist,
+                verboseinfo);
+  showlog2info("log2specialbucketsizedist",
+                bcktab->maxbucketinfo.log2specialbucketsizedist,
+                verboseinfo);
+}
+
+unsigned long bcktab_specialsmaxbucketsize(const Bcktab *bcktab)
+{
+  return bcktab->maxbucketinfo.specialsmaxbucketsize;
+}
+
+unsigned long bcktab_nonspecialsmaxbucketsize(const Bcktab *bcktab)
+{
+  return bcktab->maxbucketinfo.nonspecialsmaxbucketsize;
+}
+
+unsigned int bcktab_optimalnumofbits(const Bcktab *bcktab)
+{
+  return bcktab->optimalnumofbits;
+}
+
 unsigned int singletonmaxprefixindex(const Bcktab *bcktab,Codetype code)
 {
   if (bcktab->prefixlength > 2U)
@@ -569,6 +756,33 @@ unsigned int singletonmaxprefixindex(const Bcktab *bcktab,Codetype code)
   return bcktab->prefixlength-1;
 }
 
+unsigned long distpfxidxpartialsums(const Bcktab *bcktab,Codetype code,
+                                    unsigned int lowerbound)
+{
+  Codetype ordercode, divisor;
+  unsigned long sum = 0;
+  unsigned int prefixindex;
+
+  for (prefixindex=bcktab->prefixlength-2; prefixindex>lowerbound;
+       prefixindex--)
+  {
+    if (code >= bcktab->filltable[prefixindex])
+    {
+      ordercode = code - bcktab->filltable[prefixindex];
+      divisor = bcktab->filltable[prefixindex] + 1;
+      if (ordercode % divisor == 0)
+      {
+        ordercode /= divisor;
+        sum += bcktab->distpfxidx[prefixindex-1][ordercode];
+      }
+    } else
+    {
+      break;
+    }
+  }
+  return sum;
+}
+
 unsigned int pfxidx2lcpvalues(unsigned int *minprefixindex,
                               uint8_t *lcpsubtab,
                               unsigned long specialsinbucket,
@@ -578,7 +792,7 @@ unsigned int pfxidx2lcpvalues(unsigned int *minprefixindex,
   unsigned int prefixindex, maxprefixindex = 0;
   Codetype ordercode, divisor;
   unsigned long idx;
-  GtUchar *insertptr;
+  uint8_t *insertptr;
 
   *minprefixindex = bcktab->prefixlength;
   insertptr = lcpsubtab + specialsinbucket - 1;
@@ -601,7 +815,7 @@ unsigned int pfxidx2lcpvalues(unsigned int *minprefixindex,
           for (idx=0; idx < bcktab->distpfxidx[prefixindex-1][ordercode]; idx++)
           {
             gt_assert(insertptr >= lcpsubtab);
-            *insertptr-- = (GtUchar) prefixindex;
+            *insertptr-- = (uint8_t) prefixindex;
           }
         }
       }
@@ -616,7 +830,7 @@ unsigned int pfxidx2lcpvalues(unsigned int *minprefixindex,
     }
     while (insertptr >= lcpsubtab)
     {
-      *insertptr-- = (GtUchar) (bcktab->prefixlength-1);
+      *insertptr-- = (uint8_t) (bcktab->prefixlength-1);
     }
   }
   return maxprefixindex;

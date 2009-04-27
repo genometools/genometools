@@ -23,6 +23,7 @@
 #include "readmode-def.h"
 #include "bcktab.h"
 #include "intcode-def.h"
+#include "defined-types.h"
 #include "compressedtab.h"
 
 typedef struct Rmnsufinfo Rmnsufinfo;
@@ -30,12 +31,14 @@ typedef struct Rmnsufinfo Rmnsufinfo;
 Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                           int mmapfiledesc,
                           const Encodedsequence *encseq,
-                          const Bcktab *bcktab,
+                          Bcktab *bcktab,
                           Codetype maxcode,
                           unsigned int numofchars,
                           unsigned int prefixlength,
                           Readmode readmode,
-                          Seqpos partwidth);
+                          Seqpos partwidth,
+                          const Defineddouble *probsmall,
+                          bool absoluteinversesuftab);
 
 void rmnsufinfo_addunsortedrange(Rmnsufinfo *rmnsufinfo,
                                  Seqpos left,Seqpos right,Seqpos depth);

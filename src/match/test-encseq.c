@@ -45,7 +45,7 @@ static void runscanatpostrial(const Encodedsequence *encseq,
       fprintf(stderr,"startpos = " FormatSeqpos
                      " access=%s, mode=%s: position=" FormatSeqpos
                      ": random access (correct) = %u != %u = "
-                     " sequential read (wrong)",
+                     " sequential read (wrong)\n",
                      PRINTSeqposcast(startpos),
                      encseqaccessname(encseq),
                      showreadmode(readmode),
@@ -213,14 +213,20 @@ int testencodedsequence(const GtStrArray *filenametab,
                         unsigned long multicharcmptrials,
                         GtError *err)
 {
+  bool fwd = ISDIRREVERSE(readmode) ? false : true,
+       complement = ISDIRCOMPLEMENT(readmode) ? true : false;
+
   if (hasfastspecialrangeenumerator(encseq))
   {
-    checkextractunitatpos(encseq,ISDIRREVERSE(readmode) ? false : true,
-                          ISDIRCOMPLEMENT(readmode) ? true : false);
+    checkextractunitatpos(encseq,fwd,complement);
     if (multicharcmptrials > 0)
     {
       testmulticharactercompare(encseq,readmode,multicharcmptrials);
     }
+  }
+  if (!complement)
+  {
+    checkextractspecialbits(encseq,fwd);
   }
   if (scantrials > 0)
   {

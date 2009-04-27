@@ -106,7 +106,7 @@ static int parse_input_line(GtSSplicedAlignment **alignment, const char *line,
     gt_sspliced_alignment_delete(*alignment);
   else {
     /* alignment contains at least one exon */
-    assert(gt_sspliced_alignment_num_of_exons(*alignment));
+    gt_assert(gt_sspliced_alignment_num_of_exons(*alignment));
   }
   gt_str_delete(id);
 

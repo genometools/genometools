@@ -63,7 +63,8 @@ all_fastafiles = ["Atinsert.fna",
                   "Random160.fna",
                   "RandomN.fna",
                   "TTT-small.fna",
-                  "trna_glutamine.fna"]
+                  "trna_glutamine.fna",
+                  "atC99826.fna"]
 
 allfiles += all_fastafiles
 allfiles += (all_genbankfiles = all_fastafiles.collect{ |f|
