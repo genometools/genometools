@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -82,25 +82,25 @@ static int add_introns_if_necessary(GtGenomeNode *gn, void *data,
                                     GtError *err)
 {
   GtAddIntronsVisitor *v = (GtAddIntronsVisitor*) data;
-  GtFeatureNode *gf;
+  GtFeatureNode *fn;
   gt_error_check(err);
-  gf = gt_genome_node_cast(gt_feature_node_class(), gn);
-  gt_assert(gf);
-  v->parent_feature = gf;
+  fn = gt_genome_node_cast(gt_feature_node_class(), gn);
+  gt_assert(fn);
+  v->parent_feature = fn;
   v->previous_exon_feature = NULL;
   return gt_genome_node_traverse_direct_children(gn, v, add_introns_in_children,
                                               err);
 }
 
-static int gt_add_introns_visitor_genome_feature(GtNodeVisitor *gv,
-                                              GtFeatureNode *gf,
-                                              GtError *err)
+static int gt_add_introns_visitor_feature_node(GtNodeVisitor *gv,
+                                               GtFeatureNode *fn,
+                                               GtError *err)
 {
   GtAddIntronsVisitor *v;
   gt_error_check(err);
   v = gt_add_introns_visitor_cast(gv);
-  return gt_genome_node_traverse_children((GtGenomeNode*) gf, v,
-                                       add_introns_if_necessary, false, err);
+  return gt_genome_node_traverse_children((GtGenomeNode*) fn, v,
+                                          add_introns_if_necessary, false, err);
 }
 
 const GtNodeVisitorClass* gt_add_introns_visitor_class()
@@ -110,7 +110,7 @@ const GtNodeVisitorClass* gt_add_introns_visitor_class()
     gvc = gt_node_visitor_class_new(sizeof (GtAddIntronsVisitor),
                                     NULL,
                                     NULL,
-                                    gt_add_introns_visitor_genome_feature,
+                                    gt_add_introns_visitor_feature_node,
                                     NULL,
                                     NULL);
   }
