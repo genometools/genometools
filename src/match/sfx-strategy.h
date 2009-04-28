@@ -32,6 +32,7 @@ typedef struct
                 maxcountingsort,
                 maxinsertionsort,
                 maxbltriesort;
+  unsigned int differencecover;
   bool cmpcharbychar, /* compare suffixes character by character instead
                          of comparing entire words (only for two bit
                          encoding) */
@@ -54,6 +55,7 @@ typedef struct
   sfxstrategy->storespecialcodes = false;
   sfxstrategy->streamsuftab = false;
   sfxstrategy->absoluteinversesuftab = false;
+  sfxstrategy->differencecover = 0;
 }
 
 #endif

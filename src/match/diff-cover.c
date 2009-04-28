@@ -95,7 +95,7 @@ void differencecover_delete(Differencecover *dcov)
   gt_free(dcov);
 }
 
-void checkalldifferencecovers(void)
+void differencecovers_check(void)
 {
   Differencecover *dcov;
   size_t logmod, next = 0;
@@ -117,7 +117,7 @@ void checkalldifferencecovers(void)
       gt_assert(dcov->diffvalues[j] == differencecovertab[next]);
       next++;
     }
-    gt_free(dcov);
+    differencecover_delete(dcov);
   }
   gt_assert(next == sizeof (differencecovertab)/sizeof (differencecovertab[0]));
   printf("# %u difference covers checked\n",(unsigned int) logmod);

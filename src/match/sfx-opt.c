@@ -309,6 +309,7 @@ static OPrval parse_options(int *parsed_args,
     }
   }
   so->sfxstrategy.absoluteinversesuftab = false;
+  so->sfxstrategy.differencecover = 0;
   if (oprval == OPTIONPARSER_OK && doesa)
   {
     gt_assert(optionmaxdepth != NULL);
@@ -327,12 +328,13 @@ static OPrval parse_options(int *parsed_args,
           } else
           {
             long readint;
-            if (sscanf(gt_str_get(so->str_maxdepth),"%ld",&readint) == 1)
+
+            if (strncmp(gt_str_get(so->str_maxdepth),"dc=",3) == 0)
             {
-              if (readint >= 1L)
+              if (sscanf(gt_str_get(so->str_maxdepth)+3,"%ld",&readint) == 1 &&
+                  readint >= 1L)
               {
-                so->sfxstrategy.ssortmaxdepth.valueunsignedint
-                  = (unsigned int) readint;
+                so->sfxstrategy.differencecover = (unsigned int) readint;
               } else
               {
                 gt_error_set(err,"%s", maxdepthmsg);
@@ -340,8 +342,17 @@ static OPrval parse_options(int *parsed_args,
               }
             } else
             {
-              gt_error_set(err,"%s", maxdepthmsg);
-              oprval = OPTIONPARSER_ERROR;
+              so->sfxstrategy.hashexceptions = true;
+              if (sscanf(gt_str_get(so->str_maxdepth),"%ld",&readint) == 1 &&
+                  readint >= 1L)
+              {
+                so->sfxstrategy.ssortmaxdepth.valueunsignedint
+                  = (unsigned int) readint;
+              } else
+              {
+                gt_error_set(err,maxdepthmsg);
+                oprval = OPTIONPARSER_ERROR;
+              }
             }
           }
         }
