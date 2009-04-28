@@ -498,7 +498,7 @@ void gt_hmmer_search(struct plan7_s *hmm,
   FreePlan7Matrix(mx);
 }
 
-static void chainproc(GtChain *c, Fragment *f,
+static void chainproc(GtChain *c, GtFragment *f,
                       GT_UNUSED unsigned long nof_frags,
                       GT_UNUSED unsigned long gap_length, void *data)
 {
@@ -506,13 +506,13 @@ static void chainproc(GtChain *c, Fragment *f,
   GtPdomModelHit *hit;
   hit = (GtPdomModelHit*) data;
 
-  gt_log_log("resulting chain has %ld fragments, score %ld",
+  gt_log_log("resulting chain has %ld GtFragments, score %ld",
              gt_chain_size(c),
              gt_chain_get_score(c));
   for (i=0;i<gt_chain_size(c);i++)
   {
     GtPdomSingleHit *sh;
-    Fragment frag;
+    GtFragment frag;
     frag = f[gt_chain_get_fragnum(c, i)];
     gt_log_log("(%lu %lu) (%lu %lu), %p", frag.startpos1, frag.endpos1,
                                           frag.startpos2, frag.endpos2,
@@ -525,8 +525,8 @@ static void chainproc(GtChain *c, Fragment *f,
 
 static int gt_fragcmp(const void *frag1, const void *frag2)
 {
-  Fragment *f1 = (Fragment*) frag1;
-  Fragment *f2 = (Fragment*) frag2;
+  GtFragment *f1 = (GtFragment*) frag1;
+  GtFragment *f2 = (GtFragment*) frag2;
   if (f1->startpos2 == f2->startpos2)
     return 0;
   else return (f1->startpos2 < f2->startpos2 ? -1 : 1);
@@ -540,7 +540,7 @@ void* gt_pdom_per_domain_worker_thread(void *data)
   struct tophit_s *ghit = NULL, *hits = NULL;
   bool best_fwd = TRUE;
   unsigned long i;
-  Fragment *frags;
+  GtFragment *frags;
   GtPdomModelHit *hit;
 
   shared = (GtPdomSharedMem*) data;
@@ -618,8 +618,8 @@ void* gt_pdom_per_domain_worker_thread(void *data)
       /* no need to chain if there is only one hit */
       if (hits->num > 1)
       {
-        /* create fragment set for chaining */
-        frags = (Fragment*) gt_calloc(hits->num, sizeof (Fragment));
+        /* create GtFragment set for chaining */
+        frags = (GtFragment*) gt_calloc(hits->num, sizeof (GtFragment));
         for (i=0;i<hits->num;i++)
         {
           frags[i].startpos1 = hits->hit[i]->hmmfrom;
@@ -632,8 +632,8 @@ void* gt_pdom_per_domain_worker_thread(void *data)
           frags[i].data      = hits->hit[i];
         }
 
-        /* sort fragments by position */
-        qsort(frags, hits->num, sizeof (Fragment), gt_fragcmp);
+        /* sort GtFragments by position */
+        qsort(frags, hits->num, sizeof (GtFragment), gt_fragcmp);
         for (i=0;i<hits->num;i++)
         {
           gt_log_log("(%lu %lu) (%lu %lu) %p", frags[i].startpos1,

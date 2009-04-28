@@ -377,7 +377,7 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
          (obviously annotation and sequence do not match!) */
         gt_error_set(e, "Element '%s' exceeds sequence boundaries! (%lu > %lu)",
           gt_feature_node_get_attribute(ls->element.mainnode, "ID"),
-          ls->element.rightLTR_3, seqinfo.seqlength);
+          ls->element.rightLTR_3, (unsigned long) seqinfo.seqlength);
         had_err = -1;
       }
     }
