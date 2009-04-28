@@ -23,7 +23,7 @@
 
 struct Differencecover
 {
-  unsigned int size;
+  unsigned int vparam, logmod, size, *coverrank;
   Diffvalue *diffvalues;
 };
 
@@ -41,26 +41,41 @@ static Diffvalue differencecovertab[] =
 
 static unsigned int differencecoversizes[] = {1U,2U,3U,4U,5U,7U,9U,13U};
 
+static void fillcoverrank(Differencecover *dcov)
+{
+  unsigned int i, j;
+
+  dcov->coverrank = gt_malloc(sizeof(*dcov->coverrank) * dcov->vparam);
+  for (i=0, j=0; i<dcov->vparam; i++)
+  {
+    dcov->coverrank[i] = j;
+    if (j<dcov->size && dcov->diffvalues[j] <= (Diffvalue) i)
+    {
+      j++;
+    }
+  }
+}
+
 Differencecover *differencecover_new(unsigned int vparam)
 {
-  size_t idx;
+  size_t logmod;
   unsigned int offset = 0, v = 1U;
   Differencecover *dcov;
   bool found = false;
 
   dcov = gt_malloc(sizeof (*dcov));
-  for (idx = 0;
-       idx < sizeof (differencecoversizes)/sizeof (differencecoversizes[0]);
-       idx++)
+  for (logmod = 0;
+       logmod < sizeof (differencecoversizes)/sizeof (differencecoversizes[0]);
+       logmod++)
   {
     if (v == vparam)
     {
-      dcov->size = differencecoversizes[idx];
+      dcov->size = differencecoversizes[logmod];
       dcov->diffvalues = differencecovertab + offset;
       found = true;
       break;
     }
-    offset += differencecoversizes[idx];
+    offset += differencecoversizes[logmod];
     v = MULT2(v);
   }
   if (!found)
@@ -68,20 +83,29 @@ Differencecover *differencecover_new(unsigned int vparam)
     gt_free(dcov);
     return NULL;
   }
+  dcov->logmod = (unsigned int) logmod;
+  dcov->vparam = 1U << logmod;
+  fillcoverrank(dcov);
   return dcov;
+}
+
+void differencecover_delete(Differencecover *dcov)
+{
+  gt_free(dcov->coverrank);
+  gt_free(dcov);
 }
 
 void checkalldifferencecovers(void)
 {
   Differencecover *dcov;
-  size_t idx, next = 0;
+  size_t logmod, next = 0;
   unsigned int j, vparam;
 
-  for (idx = 0;
-       idx < sizeof (differencecoversizes)/sizeof (differencecoversizes[0]);
-       idx++)
+  for (logmod = 0;
+       logmod < sizeof (differencecoversizes)/sizeof (differencecoversizes[0]);
+       logmod++)
   {
-    vparam = 1U << idx;
+    vparam = 1U << logmod;
     dcov = differencecover_new(vparam);
     if (dcov == NULL)
     {
@@ -96,5 +120,5 @@ void checkalldifferencecovers(void)
     gt_free(dcov);
   }
   gt_assert(next == sizeof (differencecovertab)/sizeof (differencecovertab[0]));
-  printf("# %u difference covers checked\n",(unsigned int) idx);
+  printf("# %u difference covers checked\n",(unsigned int) logmod);
 }
