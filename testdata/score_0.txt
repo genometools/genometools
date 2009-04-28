@@ -1,1 +1,0 @@
-scorefasta=0
