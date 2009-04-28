@@ -156,13 +156,13 @@ static int gt_feature_node_accept(GtGenomeNode *gn, GtNodeVisitor *gv,
 const GtGenomeNodeClass* gt_feature_node_class()
 {
   static const GtGenomeNodeClass gnc = { sizeof (GtFeatureNode),
-                                       gt_feature_node_free,
-                                       gt_feature_node_get_seqid,
-                                       gt_feature_node_get_seqid,
-                                       gt_feature_node_get_range,
-                                       gt_feature_node_set_range,
-                                       gt_feature_node_change_seqid,
-                                       gt_feature_node_accept };
+                                         gt_feature_node_free,
+                                         gt_feature_node_get_seqid,
+                                         gt_feature_node_get_seqid,
+                                         gt_feature_node_get_range,
+                                         gt_feature_node_set_range,
+                                         gt_feature_node_change_seqid,
+                                         gt_feature_node_accept };
   return &gnc;
 }
 
