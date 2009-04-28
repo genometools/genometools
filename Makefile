@@ -250,8 +250,7 @@ LIBGENOMETOOLS_DIRS:= src/core \
                       src/extended \
                       src/gtlua
 
-LIBGTUNSTABLE_DIRS:=  src/exercise \
-                      src/match \
+LIBGTUNSTABLE_DIRS:=  src/match \
                       src/ltr \
                       src/mgth
 
@@ -262,7 +261,7 @@ ifneq ($(cairo),no)
   EXP_LDLIBS:=-lcairo $(EXP_LDLIBS)
   ANNOTATIONSKETCH_EXAMPLES := bin/examples/sketch_constructed \
                                bin/examples/sketch_parsed_with_ctrack \
-			       bin/examples/sketch_parsed
+                               bin/examples/sketch_parsed
   ANNOTATIONSKETCH_MANUAL := doc/manuals/annotationsketch.pdf
   LIBGENOMETOOLS_DIRS:=$(LIBGENOMETOOLS_DIRS) src/annotationsketch
 else

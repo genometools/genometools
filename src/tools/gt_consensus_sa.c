@@ -18,9 +18,9 @@
 #include "core/fptr_api.h"
 #include "core/unused_api.h"
 #include "core/xansi.h"
-#include "exercise/sspliced_alignment.h"
-#include "exercise/sspliced_alignment_parsing.h"
 #include "extended/consensus_sa.h"
+#include "extended/sspliced_alignment.h"
+#include "extended/sspliced_alignment_parsing.h"
 #include "tools/gt_consensus_sa.h"
 
 static GtRange get_genomic_range(const void *sa)
