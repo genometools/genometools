@@ -700,7 +700,7 @@ static void preparethispart(Sfxiterator *sfi)
   partwidth = stpgetcurrentsumofwdith(sfi->part,sfi->suftabparts);
   if (sfi->sfxstrategy.differencecover > 0)
   {
-    differencecovers_check();
+    differencecovers_check((Seqpos) 1000);
   } else
   {
     if (sfi->sfxstrategy.ssortmaxdepth.defined &&

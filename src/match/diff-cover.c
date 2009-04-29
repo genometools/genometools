@@ -23,8 +23,8 @@
 
 struct Differencecover
 {
-  unsigned int vparam, logmod, size, *coverrank;
-  Diffvalue *diffvalues;
+  unsigned int vparam, logmod, size, vmask, *coverrank;
+  Diffvalue *diffvalues, *diff2pos;
 };
 
 static Diffvalue differencecovertab[] =
@@ -52,6 +52,20 @@ static void fillcoverrank(Differencecover *dcov)
     if (j<dcov->size && dcov->diffvalues[j] <= (Diffvalue) i)
     {
       j++;
+    }
+  }
+}
+
+static void filldiff2pos(Differencecover *dcov)
+{
+  Diffvalue *iptr, *jptr;
+
+  dcov->diff2pos = gt_malloc(sizeof(*dcov->diff2pos) * dcov->vparam);
+  for (iptr=dcov->diffvalues + dcov->size - 1; iptr>=dcov->diffvalues; iptr--)
+  {
+    for (jptr=dcov->diffvalues; jptr<dcov->diffvalues + dcov->size; jptr++)
+    {
+      dcov->diff2pos[(*jptr - *iptr) & dcov->vmask] = *iptr;
     }
   }
 }
@@ -85,21 +99,38 @@ Differencecover *differencecover_new(unsigned int vparam)
   }
   dcov->logmod = (unsigned int) logmod;
   dcov->vparam = 1U << logmod;
+  dcov->vmask = dcov->vparam-1;
   fillcoverrank(dcov);
+  filldiff2pos(dcov);
   return dcov;
+}
+
+unsigned int differencecover_rank(const Differencecover *dcov,Seqpos pos)
+{
+  return dcov->coverrank[pos & (Seqpos) dcov->vmask];
+}
+
+unsigned int differencecover_offset(const Differencecover *dcov,
+                                    Seqpos pos1,Seqpos pos2)
+{
+  return (unsigned int)
+         (dcov->diff2pos[(pos2-pos1) & (Seqpos) dcov->vmask] - pos1) &
+         (Diffvalue) dcov->vmask;
 }
 
 void differencecover_delete(Differencecover *dcov)
 {
   gt_free(dcov->coverrank);
+  gt_free(dcov->diff2pos);
   gt_free(dcov);
 }
 
-void differencecovers_check(void)
+void differencecovers_check(Seqpos maxcheck)
 {
   Differencecover *dcov;
   size_t logmod, next = 0;
   unsigned int j, vparam;
+  Seqpos pos1, pos2;
 
   for (logmod = 0;
        logmod < sizeof (differencecoversizes)/sizeof (differencecoversizes[0]);
@@ -117,8 +148,16 @@ void differencecovers_check(void)
       gt_assert(dcov->diffvalues[j] == differencecovertab[next]);
       next++;
     }
+    for (pos1=0; pos1<maxcheck; pos1++)
+    {
+      for (pos2=0; pos2<maxcheck; pos2++)
+      {
+        gt_assert(differencecover_offset(dcov,pos1,pos2) ==
+                  differencecover_offset(dcov,pos1,pos2));
+      }
+    }
     differencecover_delete(dcov);
   }
-  gt_assert(next == sizeof (differencecovertab)/sizeof (differencecovertab[0]));
   printf("# %u difference covers checked\n",(unsigned int) logmod);
+  gt_assert(next == sizeof (differencecovertab)/sizeof (differencecovertab[0]));
 }

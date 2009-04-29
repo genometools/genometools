@@ -19,6 +19,7 @@
 #define DIFF_COVER_H
 
 #include <stdbool.h>
+#include "seqpos-def.h"
 
 typedef unsigned long Diffvalue;
 
@@ -26,6 +27,9 @@ typedef struct Differencecover Differencecover;
 
 Differencecover *differencecover_new(unsigned int vparam);
 void differencecover_delete(Differencecover *dcov);
-void differencecovers_check(void);
+void differencecovers_check(Seqpos maxcheck);
+unsigned int differencecover_rank(const Differencecover *dcov,Seqpos pos);
+unsigned int differencecover_offset(const Differencecover *dcov,
+                                    Seqpos pos1,Seqpos pos2);
 
 #endif
