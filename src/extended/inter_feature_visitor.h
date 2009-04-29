@@ -15,20 +15,18 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ADD_INTERMEDIARY_VISITOR_H
-#define ADD_INTERMEDIARY_VISITOR_H
+#ifndef INTER_FEATURE_VISITOR_H
+#define INTER_FEATURE_VISITOR_H
 
 /* implements the ``genome visitor'' interface */
-typedef struct GtAddIntermediaryVisitor GtAddIntermediaryVisitor;
+typedef struct GtInterFeatureVisitor GtInterFeatureVisitor;
 
 #include "extended/node_visitor.h"
 
-const GtNodeVisitorClass* gt_add_intermediary_visitor_class(void);
-/* Adds features of type <intermediary_type> between features of type
+const GtNodeVisitorClass* gt_inter_feature_visitor_class(void);
+/* Adds features of type <inter_type> between features of type
    <outside_type>. */
-GtNodeVisitor*            gt_add_intermediary_visitor_new(const char
-                                                          *outside_type,
-                                                          const char
-                                                          *intermediary_type);
+GtNodeVisitor*            gt_inter_feature_visitor_new(const char *outside_type,
+                                                       const char *inter_type);
 
 #endif

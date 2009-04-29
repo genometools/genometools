@@ -15,22 +15,20 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ADD_INTERMEDIARY_STREAM_H
-#define ADD_INTERMEDIARY_STREAM_H
+#ifndef INTER_FEATURE_STREAM_H
+#define INTER_FEATURE_STREAM_H
 
 #include <stdio.h>
 #include "extended/node_stream_api.h"
 
 /* implements the ``genome_stream'' interface */
-typedef struct GtAddIntermediaryStream GtAddIntermediaryStream;
+typedef struct GtInterFeatureStream GtInterFeatureStream;
 
-const GtNodeStreamClass* gt_add_intermediary_stream_class(void);
-/* Adds features of type <intermediary_type> between features of type
+const GtNodeStreamClass* gt_inter_feature_stream_class(void);
+/* Adds features of type <inter_type> between features of type
    <outside_type>. */
-GtNodeStream*            gt_add_intermediary_stream_new(GtNodeStream*,
-                                                        const char
-                                                        *outside_type,
-                                                        const char
-                                                        *intermediary_type);
+GtNodeStream*            gt_inter_feature_stream_new(GtNodeStream*,
+                                                     const char *outside_type,
+                                                     const char *inter_type);
 
 #endif
