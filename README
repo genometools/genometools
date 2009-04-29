@@ -1,7 +1,7 @@
 This directory contains the source code for GenomeTools (gt).
 
-Copyright (c) 2003-2008 Gordon Gremme, Stefan Kurtz, and CONTRIBUTORS
-Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
+Copyright (c) 2003-2009 Gordon Gremme, Stefan Kurtz, and CONTRIBUTORS
+Copyright (c) 2003-2009 Center for Bioinformatics, University of Hamburg
 See LICENSE file or http://genometools.org/license.html for license details.
 
 The GenomeTools genome analysis system is a collection of bioinformatics tools
@@ -14,15 +14,16 @@ gtruby/                contains GenomeTools Ruby bindings (-> gtruby/README)
 gtpython/              contains GenomeTools Python bindings (-> gtpython/README)
 gtscripts/             some GenomeTools scripts (can be executed with gt)
 scripts/               scripts used for development
-src/                   the C source code gt itself and the runtime
-src/external/          all C source code from external sources
+src/                   the C source code for gt itself and the runtime
+src/annotationsketch/  the C source code for AnnotationSketch
 src/core/              the C source code for the ``core'' part
 src/examples/          the C source code for some examples
 src/extended/          the C source code for the ``extended'' part
-src/ltr/               the C source code for the ``ltr'' part
+src/external/          all C source code from external sources
 src/gtlua/             the C source code for the ``gtlua'' bindings
+src/ltr/               the C source code for the ``ltr'' part
 src/match/             the C source code for the ``match'' part
-src/annotationsketch/  the C source code for AnnotationSketch
+src/mgth/              the C source code for the ``mgth'' part
 src/tools/             the C source code for all tools
 testdata/              the test data necessary for the test suite
 testsuite/             the test suite

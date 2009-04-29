@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
@@ -19,21 +21,25 @@ from gt.annotationsketch.custom_track import CustomTrack
 from gt.annotationsketch.color import Color
 from gt.core.gtrange import Range
 
+
 class CustomTrackExample(CustomTrack):
-  def __init__(self):
-    super(CustomTrackExample, self).__init__()
 
-  def get_height(self):
-    return 50
+    def __init__(self):
+        super(CustomTrackExample, self).__init__()
 
-  def get_title(self):
-    return "Sample track drawn by a Python script"
+    def get_height(self):
+        return 50
 
-  def render(self, graphics, ypos, rng, style, error):
-    from random import random
-    data = []
-    for i in range(0, 120):
-      data.append(random())
-    graphics.draw_curve_data(graphics.get_xmargins(), ypos, Color(0,0,1,.6),   \
-                             data, 120, Range(0, 1), 40)
-    return 0
+    def get_title(self):
+        return "Sample track drawn by a Python script"
+
+    def render(self, graphics, ypos, rng, style, error):
+        from random import random
+        data = []
+        for i in range(0, 120):
+            data.append(random())
+        graphics.draw_curve_data(graphics.get_xmargins(), ypos, Color(0,
+                                 0, 1, .6), data, 120, Range(0, 1), 40)
+        return 0
+
+

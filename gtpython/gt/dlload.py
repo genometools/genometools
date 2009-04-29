@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
@@ -19,10 +21,11 @@ from ctypes import CDLL, CFUNCTYPE, c_char_p, c_void_p
 import sys
 
 # inspired from the ruby bindings, maybe there is a better way
+
 if sys.platform == "darwin":
-  soext = ".dylib"
+    soext = ".dylib"
 else:
-  soext = ".so"
+    soext = ".so"
 
 gtlib = CDLL("libgenometools" + soext)
 gtlib.gt_allocators_init()

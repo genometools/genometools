@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
@@ -18,11 +20,11 @@
 import sys
 
 try:
-  import ctypes
+    import ctypes
 except ImportError:
-  sys.stderr.write("The ctypes package could not be found. ")
-  sys.stderr.write("Please make sure it can be imported by Python.")
-  sys.exit(1)
+    sys.stderr.write("The ctypes package could not be found. ")
+    sys.stderr.write("Please make sure it can be imported by Python.")
+    sys.exit(1)
 
 from annotationsketch import *
 from core import *

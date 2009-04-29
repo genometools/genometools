@@ -48,7 +48,6 @@
 #include "extended/splicedseq.h"
 #include "extended/string_matching.h"
 #include "extended/tag_value_map.h"
-#include "extended/union_find.h"
 #include "extended/redblack.h"
 #include "ltr/gt_ltrdigest.h"
 #include "ltr/ltrelement.h"
@@ -63,7 +62,6 @@
 #include "tools/gt_congruence.h"
 #include "tools/gt_dev.h"
 #include "tools/gt_eval.h"
-#include "tools/gt_exercise.h"
 #include "tools/gt_extractfeat.h"
 #include "tools/gt_extractseq.h"
 #include "tools/gt_filter.h"
@@ -121,7 +119,6 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "congruence", gt_congruence());
   gt_toolbox_add_tool(tools, "dev", gt_dev());
   gt_toolbox_add(tools, "eval", gt_eval);
-  gt_toolbox_add_tool(tools, "exercise", gt_exercise());
   gt_toolbox_add_tool(tools, "extractfeat", gt_extractfeat());
   gt_toolbox_add_tool(tools, "extractseq", gt_extractseq());
   gt_toolbox_add_tool(tools, "filter", gt_filter());
@@ -214,7 +211,6 @@ GtHashmap* gtt_unit_tests(void)
                  gt_string_matching_unit_test);
   gt_hashmap_add(unit_tests, "tag value map example", gt_tag_value_map_example);
   gt_hashmap_add(unit_tests, "tokenizer class", gt_tokenizer_unit_test);
-  gt_hashmap_add(unit_tests, "union find class", gt_union_find_unit_test);
 #ifndef WITHOUT_CAIRO
   gt_hashmap_add(unit_tests, "block class", gt_block_unit_test);
   gt_hashmap_add(unit_tests, "style class", gt_style_unit_test);

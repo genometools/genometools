@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
@@ -22,36 +24,40 @@ from ctypes import byref, c_void_p
 
 
 class GenomeStream:
-  def __init__(self, *args):
-    raise NotImplementedError, "Please call the constructor of a " \
-                               "GenomeStream implementation."
 
-  def __del__(self):
-    try:
-      gtlib.gt_node_stream_delete(self.gs)
-    except AttributeError:
-      pass
+    def __init__(self, *args):
+        raise NotImplementedError, \
+            'Please call the constructor of a GenomeStream implementation.'
 
-  def from_param(cls, obj):
-    if not isinstance(obj, GenomeStream):
-      raise TypeError, "argument must be a GenomeStream"
-    return obj._as_parameter_
-  from_param = classmethod(from_param)
+    def __del__(self):
+        try:
+            gtlib.gt_node_stream_delete(self.gs)
+        except AttributeError:
+            pass
 
-  def next_tree(self):
-    err = Error()
-    genome_node = c_void_p()
-    rval = gtlib.gt_node_stream_next(self.gs, byref(genome_node), err)
-    if rval != 0:
-      gterror(err)
-    if genome_node.value == None:
-      return None
-    else:
-      return GenomeNode.create_from_ptr(genome_node.value)
+    def from_param(cls, obj):
+        if not isinstance(obj, GenomeStream):
+            raise TypeError, "argument must be a GenomeStream"
+        return obj._as_parameter_
 
-  def pull(self):
-    err = Error()
-    rval = gtlib.gt_node_stream_pull(self.gs, err)
-    if rval != 0:
-      gterror(err)
+    from_param = classmethod(from_param)
+
+    def next_tree(self):
+        err = Error()
+        genome_node = c_void_p()
+        rval = gtlib.gt_node_stream_next(self.gs, byref(genome_node),
+                err)
+        if rval != 0:
+            gterror(err)
+        if genome_node.value == None:
+            return None
+        else:
+            return GenomeNode.create_from_ptr(genome_node.value)
+
+    def pull(self):
+        err = Error()
+        rval = gtlib.gt_node_stream_pull(self.gs, err)
+        if rval != 0:
+            gterror(err)
+
 

@@ -21,7 +21,6 @@ ctags -w src/*.[ch]                   \
          src/annotationsketch/*.[ch]  \
          src/core/*.[ch]              \
          src/examples/*.[ch]          \
-         src/exercise/*.[ch]          \
          src/extended/*.[ch]          \
          src/gtlua/*.[ch]             \
          src/ltr/*.[ch]               \

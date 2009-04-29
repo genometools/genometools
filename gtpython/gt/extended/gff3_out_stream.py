@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
@@ -18,13 +20,18 @@
 from gt.dlload import gtlib
 from gt.extended.genome_stream import GenomeStream
 
-class GFF3OutStream(GenomeStream):
-  def __init__(self, genome_stream):
-    self.gs = gtlib.gt_gff3_out_stream_new(genome_stream, None)
-    self._as_parameter_ = self.gs
 
-  def from_param(cls, obj):
-    if not isinstance(obj, GFF3OutStream):
-      raise TypeError, "argument must be a GFF3OutStream"
-    return obj._as_parameter_
-  from_param = classmethod(from_param)
+class GFF3OutStream(GenomeStream):
+
+    def __init__(self, genome_stream):
+        self.gs = gtlib.gt_gff3_out_stream_new(genome_stream, None)
+        self._as_parameter_ = self.gs
+
+    def from_param(cls, obj):
+        if not isinstance(obj, GFF3OutStream):
+            raise TypeError, "argument must be a GFF3OutStream"
+        return obj._as_parameter_
+
+    from_param = classmethod(from_param)
+
+

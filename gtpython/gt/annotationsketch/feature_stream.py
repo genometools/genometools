@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
@@ -19,18 +21,26 @@ from gt.dlload import gtlib
 from gt.annotationsketch.feature_index import FeatureIndex
 from gt.extended.genome_stream import GenomeStream
 
+
 class FeatureStream(GenomeStream):
-  def __init__(self, genome_stream, feature_index):
-    self.gs = gtlib.gt_feature_stream_new(genome_stream, feature_index)
-    self._as_parameter_ = self.gs
 
-  def from_param(cls, obj):
-    if not isinstance(obj, FeatureStream):
-      raise TypeError, "argument must be a FeatureStream"
-    return obj._as_parameter_
-  from_param = classmethod(from_param)
+    def __init__(self, genome_stream, feature_index):
+        self.gs = gtlib.gt_feature_stream_new(genome_stream,
+                feature_index)
+        self._as_parameter_ = self.gs
 
-  def register(cls, gtlib):
-    gtlib.gt_feature_stream_new.restype = c_void_p
-    gtlib.gt_feature_stream_new.argtypes = [GenomeStream, FeatureIndex]
-  register = classmethod(register)
+    def from_param(cls, obj):
+        if not isinstance(obj, FeatureStream):
+            raise TypeError, "argument must be a FeatureStream"
+        return obj._as_parameter_
+
+    from_param = classmethod(from_param)
+
+    def register(cls, gtlib):
+        gtlib.gt_feature_stream_new.restype = c_void_p
+        gtlib.gt_feature_stream_new.argtypes = [GenomeStream,
+                FeatureIndex]
+
+    register = classmethod(register)
+
+

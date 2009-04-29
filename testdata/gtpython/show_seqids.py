@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
@@ -23,19 +24,21 @@ import sys
 import re
 
 if __name__ == "__main__":
-  if len(sys.argv) != 2:
-    sys.stderr.write("Usage: " + sys.argv[0] + " GFF3_file\n")
-    sys.stderr.write("Show sequence ids contained in GFF3 annotation file.")
-    sys.exit(1)
+    if len(sys.argv) != 2:
+        sys.stderr.write("Usage: " + (sys.argv)[0] + " GFF3_file\n")
+        sys.stderr.write("Show sequence ids contained in GFF3 annotation file.")
+        sys.exit(1)
 
-  in_stream = GFF3InStream(sys.argv[1])
-  feature_index = FeatureIndexMemory()
-  feature_stream = FeatureStream(in_stream, feature_index)
-  gn = feature_stream.next_tree()
-  # fill feature index
-  while gn:
+    in_stream = GFF3InStream((sys.argv)[1])
+    feature_index = FeatureIndexMemory()
+    feature_stream = FeatureStream(in_stream, feature_index)
     gn = feature_stream.next_tree()
 
-  seqids = feature_index.get_seqids()
-  for seqid in seqids:
-    print seqid
+  # fill feature index
+
+    while gn:
+        gn = feature_stream.next_tree()
+
+    seqids = feature_index.get_seqids()
+    for seqid in seqids:
+        print seqid

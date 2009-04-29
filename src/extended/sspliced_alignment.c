@@ -17,7 +17,7 @@
 
 #include "core/cstr.h"
 #include "core/ma.h"
-#include "exercise/sspliced_alignment.h"
+#include "extended/sspliced_alignment.h"
 
 struct GtSSplicedAlignment {
   char *id;

@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
@@ -17,24 +19,27 @@
 
 from gt.dlload import gtlib
 
+
 class StrArray:
-  def __init__(self, arr = None):
-    if not arr:
-      arr = gtlib.gt_str_array_new()
-    self.strarr = arr
-    self._as_parameter_ = self.strarr
 
-  def __del__(self):
-    try:
-      gtlib.gt_str_array_delete(self.strarr)
-    except AttributeError:
-      pass
+    def __init__(self, arr=None):
+        if not arr:
+            arr = gtlib.gt_str_array_new()
+        self.strarr = arr
+        self._as_parameter_ = self.strarr
 
-  def from_param(cls, obj):
-    if not isinstance(obj, StrArray):
-      raise TypeError, "argument must be a StrArray"
-    return obj._as_parameter_
-  from_param = classmethod(from_param)
+    def __del__(self):
+        try:
+            gtlib.gt_str_array_delete(self.strarr)
+        except AttributeError:
+            pass
+
+    def from_param(cls, obj):
+        if not isinstance(obj, StrArray):
+            raise TypeError, "argument must be a StrArray"
+        return obj._as_parameter_
+
+    from_param = classmethod(from_param)
 
   #def __str__(self):
     #r = ""
@@ -42,22 +47,25 @@ class StrArray:
       #r = r + " " + gtlib.gt_str_array_get(self.strarr, i)
     #return r
 
-  def to_list(self):
-    result = []
-    for i in range(gtlib.gt_str_array_size(self.strarr)):
-      result.append(gtlib.gt_str_array_get(self.strarr, i))
-    return result
+    def to_list(self):
+        result = []
+        for i in range(gtlib.gt_str_array_size(self.strarr)):
+            result.append(gtlib.gt_str_array_get(self.strarr, i))
+        return result
 
-  def size(self):
-    return gtlib.gt_str_array_size(self.strarr)
+    def size(self):
+        return gtlib.gt_str_array_size(self.strarr)
 
-  def get(self, i):
-    return gtlib.gt_str_array_get(self.strarr, i)
+    def get(self, i):
+        return gtlib.gt_str_array_get(self.strarr, i)
 
-  def register(cls, gtlib):
-    from ctypes import c_void_p, c_char_p, c_ulong
-    gtlib.gt_str_array_get.restype  = c_char_p
-    gtlib.gt_str_array_get.argtypes = [c_void_p, c_ulong]
-    gtlib.gt_str_array_size.restype = c_ulong
-    gtlib.gt_str_array_add_cstr.argtypes = [c_void_p, c_char_p]
-  register = classmethod(register)
+    def register(cls, gtlib):
+        from ctypes import c_void_p, c_char_p, c_ulong
+        gtlib.gt_str_array_get.restype = c_char_p
+        gtlib.gt_str_array_get.argtypes = [c_void_p, c_ulong]
+        gtlib.gt_str_array_size.restype = c_ulong
+        gtlib.gt_str_array_add_cstr.argtypes = [c_void_p, c_char_p]
+
+    register = classmethod(register)
+
+

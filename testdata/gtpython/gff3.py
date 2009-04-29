@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
@@ -23,13 +24,13 @@ import sys
 import re
 
 if __name__ == "__main__":
-  if len(sys.argv) != 2:
-    sys.stderr.write("Usage: " + sys.argv[0] + " GFF3_file\n")
-    sys.stderr.write("Parse and output the given GFF3 file.")
-    sys.exit(1)
+    if len(sys.argv) != 2:
+        sys.stderr.write("Usage: " + (sys.argv)[0] + " GFF3_file\n")
+        sys.stderr.write("Parse and output the given GFF3 file.")
+        sys.exit(1)
 
-  in_stream = GFF3InStream(sys.argv[1])
-  out_stream = GFF3OutStream(in_stream)
-  feature = out_stream.next_tree()
-  while feature:
+    in_stream = GFF3InStream((sys.argv)[1])
+    out_stream = GFF3OutStream(in_stream)
     feature = out_stream.next_tree()
+    while feature:
+        feature = out_stream.next_tree()

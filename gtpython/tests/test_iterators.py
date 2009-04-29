@@ -1,10 +1,13 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 import unittest
 import gt
 import os
 
 op = os.path
-datadir = op.abspath(op.join(op.dirname(__file__), "..", "..", "testdata"))
+datadir = op.abspath(op.join(op.dirname(__file__), "..", "..",
+                     "testdata"))
 
 """
 ###
@@ -21,6 +24,7 @@ datadir = op.abspath(op.join(op.dirname(__file__), "..", "..", "testdata"))
 1877523 gth exon    25916   26100   1   +   .   Parent=gene12
 ###
 """
+
 
 class FeatureNodeIteratorTest(unittest.TestCase):
 
@@ -45,7 +49,6 @@ class FeatureNodeIteratorTest(unittest.TestCase):
         found = dfi.next()
         self.assertEqual(found.type, 'exon')
 
-
     def test_direct(self):
         di = gt.FeatureNodeIteratorDirect(self.feature)
         found = di.next()
@@ -55,6 +58,7 @@ class FeatureNodeIteratorTest(unittest.TestCase):
             found = di.next()
 
         #self.assert_('gene' in types)
+
         self.assert_('exon' in types)
         self.assert_('five_prime_splice_site' in types)
         self.assert_('three_prime_splice_site' in types)
@@ -64,5 +68,4 @@ class FeatureNodeIteratorTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
 

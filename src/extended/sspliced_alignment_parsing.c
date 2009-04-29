@@ -17,8 +17,8 @@
 
 #include "core/fa.h"
 #include "core/str.h"
-#include "exercise/sspliced_alignment.h"
-#include "exercise/sspliced_alignment_parsing.h"
+#include "extended/sspliced_alignment.h"
+#include "extended/sspliced_alignment_parsing.h"
 
 #define DELIMITER         ','
 #define FORWARDSTRANDCHAR '+'

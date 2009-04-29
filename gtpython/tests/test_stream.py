@@ -1,10 +1,14 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 import unittest
 import gt
 import os
 
 op = os.path
-datadir = op.abspath(op.join(op.dirname(__file__), "..", "..", "testdata"))
+datadir = op.abspath(op.join(op.dirname(__file__), "..", "..",
+                     "testdata"))
+
 
 class StreamTest(unittest.TestCase):
 
