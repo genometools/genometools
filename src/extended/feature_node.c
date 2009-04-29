@@ -677,13 +677,14 @@ static void add_parent(unsigned int *bit_field)
   }
 }
 
-/* XXX: static? */
-int gt_genome_node_traverse_children_generic(GtGenomeNode *genome_node,
-                                          void *data,
-                                          GtGenomeNodeTraverseFunc traverse,
-                                          bool traverse_only_once,
-                                          bool depth_first, bool with_pseudo,
-                                          GtError *err)
+static int feature_node_traverse_children_generic(GtGenomeNode *genome_node,
+                                                  void *data,
+                                                  GtGenomeNodeTraverseFunc
+                                                  traverse,
+                                                  bool traverse_only_once,
+                                                  bool depth_first,
+                                                  bool with_pseudo,
+                                                  GtError *err)
 {
   GtArray *node_stack = NULL, *list_of_children;
   GtQueue *node_queue = NULL;
@@ -822,9 +823,9 @@ int gt_genome_node_traverse_children(GtGenomeNode *genome_node, void *data,
                                   GtGenomeNodeTraverseFunc traverse,
                                   bool traverse_only_once, GtError *err)
 {
-  return gt_genome_node_traverse_children_generic(genome_node, data, traverse,
-                                               traverse_only_once, true, false,
-                                               err);
+  return feature_node_traverse_children_generic(genome_node, data, traverse,
+                                                traverse_only_once, true, false,
+                                                err);
 }
 
 int gt_genome_node_traverse_children_breadth(GtGenomeNode *genome_node,
@@ -833,15 +834,15 @@ int gt_genome_node_traverse_children_breadth(GtGenomeNode *genome_node,
                                              bool traverse_only_once,
                                              GtError *err)
 {
-  return gt_genome_node_traverse_children_generic(genome_node, data, traverse,
-                                               traverse_only_once, false, false,
-                                               err);
+  return feature_node_traverse_children_generic(genome_node, data, traverse,
+                                                traverse_only_once, false,
+                                                false, err);
 }
 
 int gt_genome_node_traverse_direct_children(GtGenomeNode *gn,
-                                         void *traverse_func_data,
-                                         GtGenomeNodeTraverseFunc traverse,
-                                         GtError *err)
+                                            void *traverse_func_data,
+                                            GtGenomeNodeTraverseFunc traverse,
+                                            GtError *err)
 {
   GtFeatureNode *fn;
   GtDlistelem *dlistelem;
