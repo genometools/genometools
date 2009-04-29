@@ -113,7 +113,7 @@ int gt_image_info_unit_test(GtError *err)
     gt_image_info_add_rec_map(ii, rms[i]);
     ensure(had_err, gt_image_info_num_of_rec_maps(ii) == i+1);
     ensure(had_err, (rm = gt_image_info_get_rec_map(ii, i)) == rms[i]);
-    ensure(had_err, rm->gf == rms[i]->gf);
+    ensure(had_err, rm->fn == rms[i]->fn);
     gt_genome_node_delete((GtGenomeNode*) gfs[i]);
   }
 

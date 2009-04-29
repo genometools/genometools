@@ -134,8 +134,10 @@ GtBlock* gt_block_new_from_node(GtFeatureNode *node)
   block->range = gt_genome_node_get_range((GtGenomeNode*) node);
   block->strand = gt_feature_node_get_strand(node);
   block->type = gt_feature_node_get_type(node);
-  if (!gt_feature_node_is_pseudo(node))
-    block->top_level_feature = gt_feature_node_nonrec_ref(node);
+  if (!gt_feature_node_is_pseudo(node)) {
+    block->top_level_feature = (GtFeatureNode*)
+                               gt_genome_node_ref((GtGenomeNode*) node);
+  }
   return block;
 }
 
@@ -143,8 +145,10 @@ void gt_block_insert_element(GtBlock *block, GtFeatureNode *node)
 {
   GtElement *element;
   gt_assert(block && node);
-  if (!block->top_level_feature)
-    block->top_level_feature = gt_feature_node_nonrec_ref(node);
+  if (!block->top_level_feature) {
+    block->top_level_feature = (GtFeatureNode*)
+                               gt_genome_node_ref((GtGenomeNode*) node);
+  }
   element = gt_element_new(node);
   /* invalidate sortedness flag because insertion of element at the end
      may break ordering */
@@ -187,8 +191,9 @@ GtBlock* gt_block_clone(GtBlock *block)
   newblock->range.end = block->range.end;
   newblock->show_caption = block->show_caption;
   newblock->strand = block->strand;
-  newblock->top_level_feature =
-                           gt_feature_node_nonrec_ref(block->top_level_feature);
+  newblock->top_level_feature = (GtFeatureNode*)
+                                gt_genome_node_ref((GtGenomeNode*)
+                                                   block->top_level_feature);
   return newblock;
 }
 
@@ -434,6 +439,6 @@ void gt_block_delete(GtBlock *block)
     gt_str_delete(block->caption);
   gt_array_delete(block->elements);
   if (block->top_level_feature)
-    gt_feature_node_nonrec_delete(block->top_level_feature);
+    gt_genome_node_delete((GtGenomeNode*) block->top_level_feature);
   gt_free(block);
 }

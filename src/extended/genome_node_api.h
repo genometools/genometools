@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -27,8 +27,12 @@ typedef struct GtGenomeNodeClass GtGenomeNodeClass;
 /* The <GtGenomeNode> interface. */
 typedef struct GtGenomeNode GtGenomeNode;
 
-/* Decrease the reference count for <genome_node> and recursively for all its
-   children or delete it, if this was the last reference. */
+/* Increase the reference count for <genome_node> and return it.
+   <genome_node> cannot be <NULL>.*/
+GtGenomeNode*  gt_genome_node_ref(GtGenomeNode *genome_node);
+
+/* Decrease the reference count for <genome_node> or delete it, if this was the
+   last reference. */
 void          gt_genome_node_delete(GtGenomeNode *genome_node);
 
 /* Return the sequence ID of <genome_node>.

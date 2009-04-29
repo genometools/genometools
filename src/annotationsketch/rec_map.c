@@ -27,7 +27,7 @@ GtRecMap* gt_rec_map_new(double nw_x, double nw_y, double se_x, double se_y,
   rm->nw_y = nw_y;
   rm->se_x = se_x;
   rm->se_y = se_y;
-  rm->gf = gt_feature_node_nonrec_ref(node);
+  rm->fn = (GtFeatureNode*) gt_genome_node_ref((GtGenomeNode*) node);
   rm->has_omitted_children = false;
   return rm;
 }
@@ -59,7 +59,7 @@ double gt_rec_map_get_southeast_y(const GtRecMap *rm)
 const GtFeatureNode* gt_rec_map_get_genome_feature(const GtRecMap *rm)
 {
   gt_assert(rm);
-  return rm->gf;
+  return rm->fn;
 }
 
 bool gt_rec_map_has_omitted_children(const GtRecMap *rm)
@@ -79,6 +79,6 @@ int gt_rec_map_format_html_imagemap_coords(const GtRecMap *rm, char *buf,
 void gt_rec_map_delete(GtRecMap *rm)
 {
   if (!rm) return;
-  gt_feature_node_nonrec_delete(rm->gf);
+  gt_genome_node_delete((GtGenomeNode*) rm->fn);
   gt_free(rm);
 }

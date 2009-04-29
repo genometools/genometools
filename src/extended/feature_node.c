@@ -78,6 +78,14 @@ static void gt_feature_node_free(GtGenomeNode *gn)
   gt_str_delete(fn->seqid);
   gt_str_delete(fn->source);
   gt_tag_value_map_delete(fn->attributes);
+  if (fn->children) {
+    GtDlistelem *dlistelem;
+    for (dlistelem = gt_dlist_first(fn->children);
+         dlistelem != NULL;
+         dlistelem = gt_dlistelem_next(dlistelem)) {
+      gt_genome_node_delete(gt_dlistelem_get_data(dlistelem));
+    }
+  }
   gt_dlist_delete(fn->children);
 }
 
@@ -695,7 +703,7 @@ int gt_genome_node_traverse_children_generic(GtGenomeNode *genome_node,
 
   /* create additional reference to <genome_node> (necessary if genome_node is
      freed by <traverse>) */
-  fn_ref = gt_feature_node_nonrec_ref(feature_node);
+  fn_ref = (GtFeatureNode*) gt_genome_node_ref((GtGenomeNode*) feature_node);
 
   if (depth_first) {
     node_stack = gt_array_new(sizeof (GtGenomeNode*));
@@ -800,7 +808,7 @@ int gt_genome_node_traverse_children_generic(GtGenomeNode *genome_node,
   }
 
   /* free */
-  gt_feature_node_nonrec_delete(fn_ref);
+  gt_genome_node_delete((GtGenomeNode*) fn_ref);
   if (traverse_only_once)
     gt_hashtable_delete(traversed_nodes);
   gt_array_delete(list_of_children);
@@ -808,44 +816,6 @@ int gt_genome_node_traverse_children_generic(GtGenomeNode *genome_node,
   gt_queue_delete(node_queue);
 
   return had_err;
-}
-
-static int gt_genome_node_traverse_children_with_pseudo(GtGenomeNode
-                                                        *genome_node,
-                                                        void *data,
-                                                       GtGenomeNodeTraverseFunc
-                                                        traverse,
-                                                        bool traverse_only_once,
-                                                        GtError *err)
-{
-  return gt_genome_node_traverse_children_generic(genome_node, data, traverse,
-                                               traverse_only_once, true, true,
-                                               err);
-}
-
-static int increase_reference_count(GtGenomeNode *gn, GT_UNUSED void *data,
-                                    GT_UNUSED GtError *err)
-{
-  gt_error_check(err);
-  gt_assert(gn);
-  gn->reference_count++;
-  return 0;
-}
-
-GtGenomeNode* gt_genome_node_ref(GtGenomeNode *gn)
-{
-  GtFeatureNode *fn;
-  int had_err;
-  gt_assert(gn);
-  if ((fn = gt_feature_node_try_cast(gn))) {
-    had_err = gt_genome_node_traverse_children_with_pseudo(gn, NULL,
-                                                      increase_reference_count,
-                                                           true, NULL);
-    gt_assert(!had_err); /* cannot happen, increase_reference_count() is sane */
-  }
-  else
-    gn->reference_count++;
-  return gn;
 }
 
 int gt_genome_node_traverse_children(GtGenomeNode *genome_node, void *data,
@@ -1107,61 +1077,4 @@ bool gt_genome_node_overlaps_nodes_mark(GtGenomeNode *gn, GtArray *nodes,
     }
   }
   return rval;
-}
-
-static int free_genome_node(GtGenomeNode *gn, GT_UNUSED void *data,
-                            GT_UNUSED GtError *err)
-{
-  gt_feature_node_nonrec_delete((GtFeatureNode*) gn);
-  return 0;
-}
-
-void gt_genome_node_delete(GtGenomeNode *gn)
-{
-  GtFeatureNode *fn;
-  int had_err;
-  if (!gn) return;
-  /* XXX */
-  if ((fn = gt_feature_node_try_cast(gn))) {
-    had_err = gt_genome_node_traverse_children_with_pseudo(gn, NULL,
-                                                         free_genome_node, true,
-                                                           NULL);
-    gt_assert(!had_err); /* cannot happen, free_genome_node() is sane */
-  }
-  else {
-    if (gn->reference_count) {
-      gn->reference_count--;
-      return;
-    }
-    gt_assert(gn->c_class);
-    if (gn->c_class->free)
-      gn->c_class->free(gn);
-    gt_str_delete(gn->filename);
-    if (gn->userdata)
-      gt_hashmap_delete(gn->userdata);
-    gt_free(gn);
-  }
-}
-
-GtFeatureNode* gt_feature_node_nonrec_ref(GtFeatureNode *fn)
-{
-  gt_assert(fn);
-  fn->parent_instance.reference_count++;
-  return fn;
-}
-
-void gt_feature_node_nonrec_delete(GtFeatureNode *fn)
-{
-  if (!fn) return;
-  if (fn->parent_instance.reference_count) {
-    fn->parent_instance.reference_count--;
-    return;
-  }
-  gt_assert(fn->parent_instance.c_class);
-  if (fn->parent_instance.c_class->free)
-    fn->parent_instance.c_class->free((GtGenomeNode*) fn);
-  gt_str_delete(fn->parent_instance.filename);
-  if (fn->parent_instance.userdata)
-      gt_hashmap_delete(fn->parent_instance.userdata);
-  gt_free(fn);
 }

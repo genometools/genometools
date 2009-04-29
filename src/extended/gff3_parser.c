@@ -455,8 +455,7 @@ static int store_id(const char *id, GtFeatureNode *feature_node,
       gt_assert(!gt_feature_node_is_pseudo(fn));
       pseudo_parent = gt_feature_info_get_pseudo_parent(parser->feature_info,
                                                         id);
-      if (pseudo_parent ||
-          !gt_feature_node_is_multi(fn)) {
+      if (pseudo_parent || !gt_feature_node_is_multi(fn)) {
         if (!pseudo_parent) {
           gt_feature_node_make_multi_representative(fn);
           if (!has_parent) { /* create pseudo node */
@@ -532,15 +531,14 @@ static GtFeatureNode* merge_pseudo_roots(GtFeatureNode *pseudo_a,
   gt_assert(feature_info && genome_nodes);
   /* add children of pseudo node b to pseudo node a */
   fni = gt_feature_node_iterator_new_direct(pseudo_b);
-  /* XXX: remove cast */
-  while ((child = (GtFeatureNode*) gt_feature_node_iterator_next(fni))) {
+  while ((child = gt_feature_node_iterator_next(fni))) {
     gt_feature_node_add_child(pseudo_a, child);
     gt_feature_info_replace_pseudo_parent(feature_info, child, pseudo_a);
   }
   gt_feature_node_iterator_delete(fni);
   /* remove pseudo node b from buffer */
   remove_node((GtGenomeNode*) pseudo_b, genome_nodes, auto_sr);
-  gt_feature_node_nonrec_delete(pseudo_b);
+  gt_genome_node_delete((GtGenomeNode*) pseudo_b);
   return pseudo_a;
 }
 
@@ -675,6 +673,8 @@ static int process_parent_attr(char *parent_attr, GtGenomeNode *feature_node,
     }
     else {
       gt_assert(parser->incomplete_node);
+      if (i)
+        feature_node = gt_genome_node_ref(feature_node);
       gt_feature_node_add_child((GtFeatureNode*) parent_gf,
                                 (GtFeatureNode*) feature_node);
       *is_child = true;
@@ -1159,7 +1159,7 @@ static int parse_regular_gff3_line(GtGFF3Parser *parser,
       gt_array_add(auto_sr->feature_nodes, feature_node);
   }
   else if (!is_child)
-    gt_feature_node_nonrec_delete((GtFeatureNode*) feature_node);
+    gt_genome_node_delete(feature_node);
 
   if (!had_err && gn)
     gt_queue_add(genome_nodes, gn);

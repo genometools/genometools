@@ -44,7 +44,7 @@ GtElement* gt_element_new(GtFeatureNode *node)
   gt_element_set_range(element, gt_genome_node_get_range((GtGenomeNode*) node));
   element->strand = gt_feature_node_get_strand(node);
   element->mark = gt_genome_node_is_marked((GtGenomeNode*) node);
-  element->gn = gt_feature_node_nonrec_ref(node);
+  element->gn = (GtFeatureNode*) gt_genome_node_ref((GtGenomeNode*) node);
   return element;
 }
 
@@ -176,7 +176,6 @@ void gt_element_delete(GtElement *element)
     element->refcount--;
     return;
   }
-  if (element->gn)
-    gt_feature_node_nonrec_delete(element->gn);
+  gt_genome_node_delete((GtGenomeNode*) element->gn);
   gt_free(element);
 }
