@@ -72,7 +72,7 @@ typedef struct {
           *cds_features;
 } SaveExonAndCDSInfo;
 
-static void gt_feature_node_free(GtGenomeNode *gn)
+static void feature_node_free(GtGenomeNode *gn)
 {
   GtFeatureNode *fn = gt_feature_node_cast(gn);
   gt_str_delete(fn->seqid);
@@ -113,25 +113,25 @@ GtStrArray* gt_feature_node_get_attribute_list(GtFeatureNode *fn)
   return list;
 }
 
-static GtStr* gt_feature_node_get_seqid(GtGenomeNode *gn)
+static GtStr* feature_node_get_seqid(GtGenomeNode *gn)
 {
   GtFeatureNode *fn = gt_feature_node_cast(gn);
   return fn->seqid;
 }
 
-static GtRange gt_feature_node_get_range(GtGenomeNode *gn)
+static GtRange feature_node_get_range(GtGenomeNode *gn)
 {
   GtFeatureNode *fn = gt_feature_node_cast(gn);
   return fn->range;
 }
 
-static void gt_feature_node_set_range(GtGenomeNode *gn, const GtRange *range)
+static void feature_node_set_range(GtGenomeNode *gn, const GtRange *range)
 {
   GtFeatureNode *fn = gt_feature_node_cast(gn);
   fn->range = *range;
 }
 
-static void gt_feature_node_change_seqid(GtGenomeNode *gn, GtStr *seqid)
+static void feature_node_change_seqid(GtGenomeNode *gn, GtStr *seqid)
 {
   GtFeatureNode *fn = gt_feature_node_cast(gn);
   gt_assert(fn && seqid);
@@ -152,8 +152,8 @@ void gt_feature_node_set_phase(GtFeatureNode *fn, GtPhase phase)
   fn->bit_field |= phase << PHASE_OFFSET;
 }
 
-static int gt_feature_node_accept(GtGenomeNode *gn, GtNodeVisitor *gv,
-                                  GtError *err)
+static int feature_node_accept(GtGenomeNode *gn, GtNodeVisitor *gv,
+                               GtError *err)
 {
   GtFeatureNode *fn;
   gt_error_check(err);
@@ -164,13 +164,13 @@ static int gt_feature_node_accept(GtGenomeNode *gn, GtNodeVisitor *gv,
 const GtGenomeNodeClass* gt_feature_node_class()
 {
   static const GtGenomeNodeClass gnc = { sizeof (GtFeatureNode),
-                                         gt_feature_node_free,
-                                         gt_feature_node_get_seqid,
-                                         gt_feature_node_get_seqid,
-                                         gt_feature_node_get_range,
-                                         gt_feature_node_set_range,
-                                         gt_feature_node_change_seqid,
-                                         gt_feature_node_accept };
+                                         feature_node_free,
+                                         feature_node_get_seqid,
+                                         feature_node_get_seqid,
+                                         feature_node_get_range,
+                                         feature_node_set_range,
+                                         feature_node_change_seqid,
+                                         feature_node_accept };
   return &gnc;
 }
 
@@ -222,8 +222,8 @@ GtGenomeNode* gt_feature_node_new_pseudo(GtFeatureNode *fn)
   GtGenomeNode *pn;
   GtRange range;
   gt_assert(fn);
-  range = gt_feature_node_get_range((GtGenomeNode*) fn),
-  pn = gt_feature_node_new(gt_feature_node_get_seqid((GtGenomeNode*) fn),
+  range = feature_node_get_range((GtGenomeNode*) fn),
+  pn = gt_feature_node_new(feature_node_get_seqid((GtGenomeNode*) fn),
                            gt_feature_node_get_type(fn), range.start,
                            range.end, gt_feature_node_get_strand(fn));
   pf = gt_feature_node_cast(pn);
@@ -331,7 +331,7 @@ bool gt_feature_node_is_pseudo(const GtFeatureNode *fn)
   return false;
 }
 
-static void gt_feature_node_set_multi(GtFeatureNode *fn)
+static void feature_node_set_multi(GtFeatureNode *fn)
 {
   gt_assert(fn && !gt_feature_node_is_multi(fn));
   fn->bit_field |= 1 << MULTI_FEATURE_OFFSET;
@@ -340,7 +340,7 @@ static void gt_feature_node_set_multi(GtFeatureNode *fn)
 void gt_feature_node_make_multi_representative(GtFeatureNode *fn)
 {
   gt_assert(fn && !gt_feature_node_is_multi(fn));
-  gt_feature_node_set_multi(fn);
+  feature_node_set_multi(fn);
 }
 
 void gt_feature_node_set_multi_representative(GtFeatureNode *fn,
@@ -348,7 +348,7 @@ void gt_feature_node_set_multi_representative(GtFeatureNode *fn,
 {
   gt_assert(fn && !gt_feature_node_is_multi(fn));
   gt_assert(rep && gt_feature_node_is_multi(rep));
-  gt_feature_node_set_multi(fn);
+  feature_node_set_multi(fn);
   fn->representative = rep;
 }
 
@@ -605,8 +605,8 @@ bool gt_genome_features_are_similar(GtFeatureNode *fn_a,
 {
   GtRange range_a, range_b;
   gt_assert(fn_a && fn_b);
-  range_a = gt_feature_node_get_range((GtGenomeNode*) fn_a);
-  range_b = gt_feature_node_get_range((GtGenomeNode*) fn_b);
+  range_a = feature_node_get_range((GtGenomeNode*) fn_a);
+  range_b = feature_node_get_range((GtGenomeNode*) fn_b);
   if (!gt_str_cmp(gt_genome_node_get_seqid((GtGenomeNode*) fn_a),
                   gt_genome_node_get_seqid((GtGenomeNode*) fn_b)) &&
       (gt_feature_node_get_type(fn_a) == gt_feature_node_get_type(fn_b)) &&
