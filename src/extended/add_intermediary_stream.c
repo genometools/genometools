@@ -65,7 +65,7 @@ GtNodeStream* gt_add_intermediary_stream_new(GtNodeStream *in_stream,
                                              const char *intermediary_type)
 {
   GtNodeStream *ns = gt_node_stream_create(gt_add_intermediary_stream_class(),
-                                           true);
+                                           false);
   GtAddIntermediaryStream *ais = gt_add_intermediary_stream_cast(ns);
   gt_assert(in_stream);
   ais->in_stream = gt_node_stream_ref(in_stream);
