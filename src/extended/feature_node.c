@@ -683,7 +683,6 @@ static int feature_node_traverse_children_generic(GtGenomeNode *genome_node,
                                                   traverse,
                                                   bool traverse_only_once,
                                                   bool depth_first,
-                                                  bool with_pseudo,
                                                   GtError *err)
 {
   GtArray *node_stack = NULL, *list_of_children;
@@ -708,7 +707,7 @@ static int feature_node_traverse_children_generic(GtGenomeNode *genome_node,
 
   if (depth_first) {
     node_stack = gt_array_new(sizeof (GtGenomeNode*));
-    if (!with_pseudo && gt_feature_node_try_cast(genome_node) &&
+    if (gt_feature_node_try_cast(genome_node) &&
         gt_feature_node_is_pseudo((GtFeatureNode*) genome_node)) {
       /* add the children backwards to traverse in order */
       for (dlistelem = gt_dlist_last(feature_node->children);
@@ -724,7 +723,7 @@ static int feature_node_traverse_children_generic(GtGenomeNode *genome_node,
   }
   else {
     node_queue = gt_queue_new();
-    if (!with_pseudo && gt_feature_node_is_pseudo(feature_node)) {
+    if (gt_feature_node_is_pseudo(feature_node)) {
       for (dlistelem = gt_dlist_first(feature_node->children);
            dlistelem != NULL;
            dlistelem = gt_dlistelem_next(dlistelem)) {
@@ -738,8 +737,7 @@ static int feature_node_traverse_children_generic(GtGenomeNode *genome_node,
   }
   list_of_children = gt_array_new(sizeof (GtGenomeNode*));
 
-  if (traverse_only_once)
-  {
+  if (traverse_only_once) {
     static const HashElemInfo node_hashtype
       = { gt_ht_ptr_elem_hash, { NULL }, sizeof (GtGenomeNode *),
           gt_ht_ptr_elem_cmp, NULL, NULL };
@@ -824,8 +822,7 @@ int gt_genome_node_traverse_children(GtGenomeNode *genome_node, void *data,
                                   bool traverse_only_once, GtError *err)
 {
   return feature_node_traverse_children_generic(genome_node, data, traverse,
-                                                traverse_only_once, true, false,
-                                                err);
+                                                traverse_only_once, true, err);
 }
 
 int gt_genome_node_traverse_children_breadth(GtGenomeNode *genome_node,
@@ -835,8 +832,7 @@ int gt_genome_node_traverse_children_breadth(GtGenomeNode *genome_node,
                                              GtError *err)
 {
   return feature_node_traverse_children_generic(genome_node, data, traverse,
-                                                traverse_only_once, false,
-                                                false, err);
+                                                traverse_only_once, false, err);
 }
 
 int gt_genome_node_traverse_direct_children(GtGenomeNode *gn,
