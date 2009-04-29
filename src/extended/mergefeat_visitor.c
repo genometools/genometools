@@ -53,7 +53,7 @@ static int mergefeat_in_children(GtGenomeNode *gn, void *data,
         gt_hashmap_get(v->hm, gt_feature_node_get_type(current_feature)))) {
     /* previous feature found -> check if merging is necessary */
     gt_assert(gt_feature_node_get_type(previous_feature) ==
-           gt_feature_node_get_type(current_feature));
+              gt_feature_node_get_type(current_feature));
     previous_range = gt_genome_node_get_range((GtGenomeNode*)
                                               previous_feature);
     current_range = gt_genome_node_get_range((GtGenomeNode*) current_feature);
@@ -73,7 +73,7 @@ static int mergefeat_in_children(GtGenomeNode *gn, void *data,
   }
   /* add current feature */
   gt_hashmap_add(v->hm, (char*) gt_feature_node_get_type(current_feature),
-              current_feature);
+                 current_feature);
   return 0;
 }
 
