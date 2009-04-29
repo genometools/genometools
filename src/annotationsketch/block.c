@@ -365,10 +365,10 @@ int gt_block_unit_test(GtError *err)
   r2.start = 40UL;
   r2.end = 50UL;
 
-  gn1 = gt_feature_node_new(seqid, gft_gene, r1.start, r1.end,
-                              GT_STRAND_FORWARD);
-  gn2 = gt_feature_node_new(seqid, gft_exon, r2.start, r2.end,
-                              GT_STRAND_FORWARD);
+  gn1 = gt_feature_node_new(seqid, gt_ft_gene, r1.start, r1.end,
+                            GT_STRAND_FORWARD);
+  gn2 = gt_feature_node_new(seqid, gt_ft_exon, r2.start, r2.end,
+                            GT_STRAND_FORWARD);
 
   e1 = gt_element_new((GtFeatureNode*) gn1);
   e2 = gt_element_new((GtFeatureNode*) gn2);

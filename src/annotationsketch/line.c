@@ -120,13 +120,13 @@ int gt_line_unit_test(GtError *err)
 
   seqid1 = gt_str_new_cstr("test1");
 
-  parent = gt_feature_node_new(seqid1, gft_gene, r1.start, r2.end,
+  parent = gt_feature_node_new(seqid1, gt_ft_gene, r1.start, r2.end,
                                GT_STRAND_FORWARD);
-  gn1 = gt_feature_node_new(seqid1, gft_exon, r1.start, r1.end,
+  gn1 = gt_feature_node_new(seqid1, gt_ft_exon, r1.start, r1.end,
                             GT_STRAND_FORWARD);
-  gn2 = gt_feature_node_new(seqid1, gft_exon, r2.start, r2.end,
+  gn2 = gt_feature_node_new(seqid1, gt_ft_exon, r2.start, r2.end,
                             GT_STRAND_FORWARD);
-  gn3 = gt_feature_node_new(seqid1, gft_TF_binding_site, r3.start, r3.end,
+  gn3 = gt_feature_node_new(seqid1, gt_ft_TF_binding_site, r3.start, r3.end,
                             GT_STRAND_FORWARD);
 
   gt_feature_node_add_child((GtFeatureNode*) parent, (GtFeatureNode*) gn1);

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -120,7 +120,7 @@ static int splice_site_info_visitor_genome_feature(GtNodeVisitor *gv,
   gt_assert(ssiv->region_mapping);
   fni = gt_feature_node_iterator_new(fn);
   while (!had_err && (node = gt_feature_node_iterator_next(fni))) {
-    if (gt_feature_node_has_type((GtFeatureNode*) node, gft_intron))
+    if (gt_feature_node_has_type((GtFeatureNode*) node, gt_ft_intron))
       had_err = process_intron(ssiv, (GtGenomeNode*) node, err);
   }
   gt_feature_node_iterator_delete(fni);

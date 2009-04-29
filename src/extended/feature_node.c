@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -235,51 +235,51 @@ GtGenomeNode* gt_feature_node_new_pseudo(GtFeatureNode *fn)
 
 GtGenomeNode* gt_feature_node_new_standard_gene(void)
 {
-  GtGenomeNode *fn, *child, *grandch;
+  GtGenomeNode *fn, *child, *grand;
   GtStr *seqid;
   seqid = gt_str_new_cstr("ctg123");
 
   /* gene */
-  fn = gt_feature_node_new(seqid, gft_gene, 1000, 9000, GT_STRAND_FORWARD);
+  fn = gt_feature_node_new(seqid, gt_ft_gene, 1000, 9000, GT_STRAND_FORWARD);
 
   /* TF binding site */
-  child = gt_feature_node_new(seqid, gft_TF_binding_site, 1000, 1012,
+  child = gt_feature_node_new(seqid, gt_ft_TF_binding_site, 1000, 1012,
                                 GT_STRAND_FORWARD);
   gt_feature_node_add_child((GtFeatureNode*) fn, (GtFeatureNode*) child);
 
   /* first mRNA */
-  child = gt_feature_node_new(seqid, gft_mRNA, 1050, 9000, GT_STRAND_FORWARD);
+  child = gt_feature_node_new(seqid, gt_ft_mRNA, 1050, 9000, GT_STRAND_FORWARD);
   gt_feature_node_add_child((GtFeatureNode*) fn, (GtFeatureNode*) child);
-  grandch = gt_feature_node_new(seqid, gft_exon, 1050, 1500, GT_STRAND_FORWARD);
-  gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grandch);
-  grandch = gt_feature_node_new(seqid, gft_exon, 3000, 3902, GT_STRAND_FORWARD);
-  gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grandch);
-  grandch = gt_feature_node_new(seqid, gft_exon, 5000, 5500, GT_STRAND_FORWARD);
-  gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grandch);
-  grandch = gt_feature_node_new(seqid, gft_exon, 7000, 9000, GT_STRAND_FORWARD);
-  gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grandch);
+  grand = gt_feature_node_new(seqid, gt_ft_exon, 1050, 1500, GT_STRAND_FORWARD);
+  gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grand);
+  grand = gt_feature_node_new(seqid, gt_ft_exon, 3000, 3902, GT_STRAND_FORWARD);
+  gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grand);
+  grand = gt_feature_node_new(seqid, gt_ft_exon, 5000, 5500, GT_STRAND_FORWARD);
+  gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grand);
+  grand = gt_feature_node_new(seqid, gt_ft_exon, 7000, 9000, GT_STRAND_FORWARD);
+  gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grand);
 
   /* second mRNA */
-  child = gt_feature_node_new(seqid, gft_mRNA, 1050, 9000, GT_STRAND_FORWARD);
+  child = gt_feature_node_new(seqid, gt_ft_mRNA, 1050, 9000, GT_STRAND_FORWARD);
   gt_feature_node_add_child((GtFeatureNode*) fn, (GtFeatureNode*) child);
-  grandch = gt_feature_node_new(seqid, gft_exon, 1050, 1500, GT_STRAND_FORWARD);
-  gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grandch);
-  grandch = gt_feature_node_new(seqid, gft_exon, 5000, 5500, GT_STRAND_FORWARD);
-  gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grandch);
-  grandch = gt_feature_node_new(seqid, gft_exon, 7000, 9000, GT_STRAND_FORWARD);
-  gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grandch);
+  grand = gt_feature_node_new(seqid, gt_ft_exon, 1050, 1500, GT_STRAND_FORWARD);
+  gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grand);
+  grand = gt_feature_node_new(seqid, gt_ft_exon, 5000, 5500, GT_STRAND_FORWARD);
+  gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grand);
+  grand = gt_feature_node_new(seqid, gt_ft_exon, 7000, 9000, GT_STRAND_FORWARD);
+  gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grand);
 
   /* third mRNA */
-  child = gt_feature_node_new(seqid, gft_mRNA, 1300, 9000, GT_STRAND_FORWARD);
+  child = gt_feature_node_new(seqid, gt_ft_mRNA, 1300, 9000, GT_STRAND_FORWARD);
   gt_feature_node_add_child((GtFeatureNode*) fn, (GtFeatureNode*) child);
-  grandch = gt_feature_node_new(seqid, gft_exon, 1300, 1500, GT_STRAND_FORWARD);
-  gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grandch);
-  grandch = gt_feature_node_new(seqid, gft_exon, 3000, 3902, GT_STRAND_FORWARD);
-  gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grandch);
-  grandch = gt_feature_node_new(seqid, gft_exon, 5000, 5500, GT_STRAND_FORWARD);
-  gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grandch);
-  grandch = gt_feature_node_new(seqid, gft_exon, 7000, 9000, GT_STRAND_FORWARD);
-  gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grandch);
+  grand = gt_feature_node_new(seqid, gt_ft_exon, 1300, 1500, GT_STRAND_FORWARD);
+  gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grand);
+  grand = gt_feature_node_new(seqid, gt_ft_exon, 3000, 3902, GT_STRAND_FORWARD);
+  gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grand);
+  grand = gt_feature_node_new(seqid, gt_ft_exon, 5000, 5500, GT_STRAND_FORWARD);
+  gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grand);
+  grand = gt_feature_node_new(seqid, gt_ft_exon, 7000, 9000,GT_STRAND_FORWARD);
+  gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grand);
 
   gt_str_delete(seqid);
   return fn;
@@ -400,7 +400,7 @@ static int feature_node_save_exon(GtGenomeNode *gn, void *data,
   gt_error_check(err);
   fn = (GtFeatureNode*) gn;
   gt_assert(fn && exon_features);
-  if (gt_feature_node_has_type(fn, gft_exon)) {
+  if (gt_feature_node_has_type(fn, gt_ft_exon)) {
     gt_array_add(exon_features, fn);
   }
   return 0;
@@ -424,9 +424,9 @@ static int save_exons_and_cds(GtGenomeNode *gn, void *data,
   gt_error_check(err);
   fn = (GtFeatureNode*) gn;
   gt_assert(fn && info);
-  if (gt_feature_node_has_type(fn, gft_exon))
+  if (gt_feature_node_has_type(fn, gt_ft_exon))
     gt_array_add(info->exon_features, fn);
-  else if (gt_feature_node_has_type(fn, gft_CDS))
+  else if (gt_feature_node_has_type(fn, gt_ft_CDS))
     gt_array_add(info->cds_features, fn);
   return 0;
 }
@@ -568,14 +568,14 @@ static bool feature_node_has_gft(const GtFeatureNode *fn, const char **fnts)
 
 bool gt_feature_node_has_CDS(const GtFeatureNode *fn)
 {
-  static const char *gfts[] = { gft_CDS, NULL };
+  static const char *gfts[] = { gt_ft_CDS, NULL };
   return feature_node_has_gft(fn, gfts);
 }
 
 bool gt_feature_node_has_splice_site(const GtFeatureNode *fn)
 {
-  static const char *gfts[] = { gft_five_prime_splice_site,
-                                gft_three_prime_splice_site, NULL };
+  static const char *gfts[] = { gt_ft_five_prime_splice_site,
+                                gt_ft_three_prime_splice_site, NULL };
   return feature_node_has_gft(fn, gfts);
 }
 
@@ -588,8 +588,8 @@ double gt_feature_node_average_splice_site_prob(const GtFeatureNode *fn)
   gt_assert(fn);
   fni = gt_feature_node_iterator_new(fn);
   while ((child = gt_feature_node_iterator_next(fni))) {
-    if (gt_feature_node_has_type(child, gft_five_prime_splice_site) ||
-        gt_feature_node_has_type(child, gft_three_prime_splice_site)) {
+    if (gt_feature_node_has_type(child, gt_ft_five_prime_splice_site) ||
+        gt_feature_node_has_type(child, gt_ft_three_prime_splice_site)) {
       averagessp += gt_feature_node_get_score((GtFeatureNode*) child);
       num_of_splice_sites++;
     }
@@ -629,7 +629,7 @@ int gt_feature_node_unit_test(GtError *err)
   gt_error_check(err);
 
   seqid = gt_str_new_cstr("seqid");
-  fn = gt_feature_node_new(seqid, gft_gene, 1, 1000, GT_STRAND_FORWARD);
+  fn = gt_feature_node_new(seqid, gt_ft_gene, 1, 1000, GT_STRAND_FORWARD);
 
   ensure(had_err, !gt_feature_node_score_is_defined((GtFeatureNode*) fn));
 

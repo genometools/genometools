@@ -305,12 +305,12 @@ int gt_feature_index_memory_unit_test(GtError *err)
   rn2 = (GtRegionNode*) gt_region_node_new(seqid2, rs.start, rs.end);
 
   /* generate a new genome feature */
-  gn1 = gt_feature_node_new(seqid1, gft_gene, 100, 1000, GT_STRAND_UNKNOWN);
-  gn2 = gt_feature_node_new(seqid2, gft_gene, 600, 1200, GT_STRAND_UNKNOWN);
-  ex1 = gt_feature_node_new(seqid1, gft_exon, 100, 300, GT_STRAND_UNKNOWN);
-  ex2 = gt_feature_node_new(seqid1, gft_exon, 500, 1000, GT_STRAND_UNKNOWN);
-  ex3 = gt_feature_node_new(seqid2, gft_exon, 600, 1200 , GT_STRAND_UNKNOWN);
-  cds1 = gt_feature_node_new(seqid2, gft_CDS, 600, 1200, GT_STRAND_UNKNOWN);
+  gn1 = gt_feature_node_new(seqid1, gt_ft_gene, 100, 1000, GT_STRAND_UNKNOWN);
+  gn2 = gt_feature_node_new(seqid2, gt_ft_gene, 600, 1200, GT_STRAND_UNKNOWN);
+  ex1 = gt_feature_node_new(seqid1, gt_ft_exon, 100, 300, GT_STRAND_UNKNOWN);
+  ex2 = gt_feature_node_new(seqid1, gt_ft_exon, 500, 1000, GT_STRAND_UNKNOWN);
+  ex3 = gt_feature_node_new(seqid2, gt_ft_exon, 600, 1200 , GT_STRAND_UNKNOWN);
+  cds1 = gt_feature_node_new(seqid2, gt_ft_CDS, 600, 1200, GT_STRAND_UNKNOWN);
 
   /* Determine the structure of our feature tree */
   gt_feature_node_add_child((GtFeatureNode*) gn1, (GtFeatureNode*) ex1);
