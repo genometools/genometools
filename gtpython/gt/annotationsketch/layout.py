@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
@@ -21,41 +23,47 @@ from gt.annotationsketch.diagram import Diagram
 from gt.annotationsketch.style import Style
 from gt.core.error import Error, gterror
 
+
 class Layout:
-  def __init__(self, diagram, width, style):
-    err = Error()
-    self.layout = gtlib.gt_layout_new(diagram, width, style, err)
-    if err.is_set():
-      gterror(err)
-    self._as_parameter_ = self.layout
 
-  def __del__(self):
-    try:
-      gtlib.gt_layout_delete(self.layout)
-    except AttributeError:
-      pass
+    def __init__(self, diagram, width, style):
+        err = Error()
+        self.layout = gtlib.gt_layout_new(diagram, width, style, err)
+        if err.is_set():
+            gterror(err)
+        self._as_parameter_ = self.layout
 
-  def from_param(cls, obj):
-    if not isinstance(obj, Layout):
-      raise TypeError, "argument must be a Layout"
-    return obj._as_parameter_
-  from_param = classmethod(from_param)
+    def __del__(self):
+        try:
+            gtlib.gt_layout_delete(self.layout)
+        except AttributeError:
+            pass
 
-  def sketch(self, canvas):
-    err = Error()
-    had_err = gtlib.gt_layout_sketch(self.layout, canvas, err)
-    if had_err < 0:
-      gterror(err)
+    def from_param(cls, obj):
+        if not isinstance(obj, Layout):
+            raise TypeError, "argument must be a Layout"
+        return obj._as_parameter_
 
-  def get_height(self):
-    return gtlib.gt_layout_get_height(self.layout)
+    from_param = classmethod(from_param)
 
-  def register(cls, gtlib):
-    from ctypes import c_ulong, c_void_p, c_int
-    gtlib.gt_layout_new.restype = c_void_p
-    gtlib.gt_layout_new.argtypes = [Diagram, c_ulong, Style]
-    gtlib.gt_layout_sketch.restype = c_int
-    gtlib.gt_layout_sketch.argtypes = [c_void_p, Canvas, Error]
-    gtlib.gt_layout_get_height.restype = c_ulong
-    gtlib.gt_layout_get_height.argtypes = [c_void_p]
-  register = classmethod(register)
+    def sketch(self, canvas):
+        err = Error()
+        had_err = gtlib.gt_layout_sketch(self.layout, canvas, err)
+        if had_err < 0:
+            gterror(err)
+
+    def get_height(self):
+        return gtlib.gt_layout_get_height(self.layout)
+
+    def register(cls, gtlib):
+        from ctypes import c_ulong, c_void_p, c_int
+        gtlib.gt_layout_new.restype = c_void_p
+        gtlib.gt_layout_new.argtypes = [Diagram, c_ulong, Style]
+        gtlib.gt_layout_sketch.restype = c_int
+        gtlib.gt_layout_sketch.argtypes = [c_void_p, Canvas, Error]
+        gtlib.gt_layout_get_height.restype = c_ulong
+        gtlib.gt_layout_get_height.argtypes = [c_void_p]
+
+    register = classmethod(register)
+
+

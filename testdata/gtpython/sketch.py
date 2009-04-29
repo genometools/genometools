@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
@@ -23,28 +24,31 @@ import sys
 import re
 
 if __name__ == "__main__":
-  if len(sys.argv) != 3:
-    sys.stderr.write("Usage: " + sys.argv[0] + " PNG_file GFF3_file\n")
-    sys.stderr.write("Create PNG representation of GFF3 annotation file.")
-    sys.exit(1)
+    if len(sys.argv) != 3:
+        sys.stderr.write("Usage: " + (sys.argv)[0] +
+                         " PNG_file GFF3_file\n")
+        sys.stderr.write("Create PNG representation of GFF3 annotation file.")
+        sys.exit(1)
 
-  pngfile = sys.argv[1]
-  in_stream = GFF3InStream(sys.argv[2])
-  feature_index = FeatureIndexMemory()
-  feature_stream = FeatureStream(in_stream, feature_index)
-  gn = feature_stream.next_tree()
-  # fill feature index
-  while gn:
+    pngfile = (sys.argv)[1]
+    in_stream = GFF3InStream((sys.argv)[2])
+    feature_index = FeatureIndexMemory()
+    feature_stream = FeatureStream(in_stream, feature_index)
     gn = feature_stream.next_tree()
 
-  seqid = feature_index.get_first_seqid()
-  range = feature_index.get_range_for_seqid(seqid)
+  # fill feature index
 
-  style = Style()
-  diagram = Diagram.from_index(feature_index, seqid, range, style)
-  layout = Layout(diagram, 700, style)
-  height = layout.get_height()
-  ii = ImageInfo()
-  canvas = CanvasCairoFile(style, 700, height, ii)
-  layout.sketch(canvas)
-  canvas.to_file(pngfile)
+    while gn:
+        gn = feature_stream.next_tree()
+
+    seqid = feature_index.get_first_seqid()
+    range = feature_index.get_range_for_seqid(seqid)
+
+    style = Style()
+    diagram = Diagram.from_index(feature_index, seqid, range, style)
+    layout = Layout(diagram, 700, style)
+    height = layout.get_height()
+    ii = ImageInfo()
+    canvas = CanvasCairoFile(style, 700, height, ii)
+    layout.sketch(canvas)
+    canvas.to_file(pngfile)

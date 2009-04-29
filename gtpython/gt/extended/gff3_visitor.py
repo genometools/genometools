@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
@@ -17,16 +19,21 @@
 
 from gt.dlload import gtlib
 
+
 class GFF3Visitor:
-  def __init__(self):
-    self.gv = gtlib.gt_gff3_visitor_new(None)
-    self._as_parameter_ = self.gv
 
-  def __del__(self):
-    gtlib.gt_node_visitor_delete(self.gv)
+    def __init__(self):
+        self.gv = gtlib.gt_gff3_visitor_new(None)
+        self._as_parameter_ = self.gv
 
-  def from_param(cls, obj):
-    if not isinstance(obj, GFF3Visitor):
-      raise TypeError, "argument must be a GFF3Visitor"
-    return obj._as_parameter_
-  from_param = classmethod(from_param)
+    def __del__(self):
+        gtlib.gt_node_visitor_delete(self.gv)
+
+    def from_param(cls, obj):
+        if not isinstance(obj, GFF3Visitor):
+            raise TypeError, "argument must be a GFF3Visitor"
+        return obj._as_parameter_
+
+    from_param = classmethod(from_param)
+
+

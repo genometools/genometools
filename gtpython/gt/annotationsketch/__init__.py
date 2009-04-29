@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
@@ -32,7 +34,9 @@ Block.register(gtlib)
 CanvasCairoFile.register(gtlib)
 CustomTrack.register(gtlib)
 Diagram.register(gtlib)
+
 #DiagramFromArray.register(gtlib)
+
 FeatureIndex.register(gtlib)
 Graphics.register(gtlib)
 ImageInfo.register(gtlib)

@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
@@ -17,48 +19,54 @@
 
 from gt.dlload import gtlib
 
+
 class Str:
-  def __init__(self, s = None):
-    if s == None or isinstance(s, str):
-      self.strg = gtlib.gt_str_new_cstr(s)
-      self.own = True
-    else:
-      self.strg = s
-      self.own = False
-    self._as_parameter_ = self.strg
 
-  def __del__(self):
-    if self.own:
-      try:
-        gtlib.gt_str_delete(self.strg)
-      except AttributeError:
-        pass
+    def __init__(self, s=None):
+        if s == None or isinstance(s, str):
+            self.strg = gtlib.gt_str_new_cstr(s)
+            self.own = True
+        else:
+            self.strg = s
+            self.own = False
+        self._as_parameter_ = self.strg
 
-  def __str__(self):
-    return gtlib.gt_str_get(self.strg)
+    def __del__(self):
+        if self.own:
+            try:
+                gtlib.gt_str_delete(self.strg)
+            except AttributeError:
+                pass
 
-  def from_param(cls, obj):
-    if not isinstance(obj, Str):
-      raise TypeError, "argument must be a Str"
-    return obj._as_parameter_
-  from_param = classmethod(from_param)
+    def __str__(self):
+        return gtlib.gt_str_get(self.strg)
 
-  def append_cstr(self, string):
-    gtlib.gt_str_append_cstr(self.strg, string)
+    def from_param(cls, obj):
+        if not isinstance(obj, Str):
+            raise TypeError, "argument must be a Str"
+        return obj._as_parameter_
 
-  def length(self):
-    return gtlib.gt_str_length(self.strg)
+    from_param = classmethod(from_param)
 
-  def get_mem(self):
-    return gtlib.gt_str_get_mem(self.strg)
+    def append_cstr(self, string):
+        gtlib.gt_str_append_cstr(self.strg, string)
 
-  def register(cls, gtlib):
-    from ctypes import c_void_p, c_char_p, c_ulong
-    gtlib.gt_str_new.restype  = c_void_p
-    gtlib.gt_str_new_cstr.restype  = c_void_p
-    gtlib.gt_str_new_cstr.argtypes = [c_char_p]
-    gtlib.gt_str_append_cstr.argtypes = [c_void_p, c_char_p]
-    gtlib.gt_str_get.restype  = c_char_p
-    gtlib.gt_str_get_mem.restype  = c_void_p
-    gtlib.gt_str_length.restype = c_ulong
-  register = classmethod(register)
+    def length(self):
+        return gtlib.gt_str_length(self.strg)
+
+    def get_mem(self):
+        return gtlib.gt_str_get_mem(self.strg)
+
+    def register(cls, gtlib):
+        from ctypes import c_void_p, c_char_p, c_ulong
+        gtlib.gt_str_new.restype = c_void_p
+        gtlib.gt_str_new_cstr.restype = c_void_p
+        gtlib.gt_str_new_cstr.argtypes = [c_char_p]
+        gtlib.gt_str_append_cstr.argtypes = [c_void_p, c_char_p]
+        gtlib.gt_str_get.restype = c_char_p
+        gtlib.gt_str_get_mem.restype = c_void_p
+        gtlib.gt_str_length.restype = c_ulong
+
+    register = classmethod(register)
+
+

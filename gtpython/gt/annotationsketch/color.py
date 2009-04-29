@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
@@ -18,8 +20,10 @@
 from gt.dlload import gtlib
 from ctypes import Structure, c_double
 
+
 class Color(Structure):
-  _fields_ = [("red",   c_double),
-              ("green", c_double),
-              ("blue",  c_double),
-              ("alpha",  c_double)]
+
+    _fields_ = [("red", c_double), ("green", c_double), ("blue",
+                c_double), ("alpha", c_double)]
+
+

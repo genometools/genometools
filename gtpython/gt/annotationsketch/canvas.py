@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
@@ -21,53 +23,65 @@ from gt.annotationsketch.image_info import ImageInfo
 from gt.core.error import Error, gterror
 from gt.core.gtstr import Str
 
+
 class Canvas:
-  def __init__(self, *args):
-    raise NotImplementedError, "Please call the constructor of a " \
-                               "Canvas implementation."
 
-  def __del__(self):
-    try:
-      gtlib.gt_canvas_delete(self.canvas)
-    except AttributeError:
-      pass
+    def __init__(self, *args):
+        raise NotImplementedError, \
+            'Please call the constructor of a Canvas implementation.'
 
-  def from_param(cls, obj):
-    if not isinstance(obj, Canvas):
-      raise TypeError, "argument must be a Canvas"
-    return obj._as_parameter_
-  from_param = classmethod(from_param)
+    def __del__(self):
+        try:
+            gtlib.gt_canvas_delete(self.canvas)
+        except AttributeError:
+            pass
+
+    def from_param(cls, obj):
+        if not isinstance(obj, Canvas):
+            raise TypeError, "argument must be a Canvas"
+        return obj._as_parameter_
+
+    from_param = classmethod(from_param)
+
 
 class CanvasCairoFile(Canvas):
-  def __init__(self, style, width, height, ii = None):
-    self.canvas = gtlib.gt_canvas_cairo_file_new(style, 1, width, height, ii)
-    self._as_parameter_ = self.canvas
 
-  def from_param(cls, obj):
-    if not isinstance(obj, CanvasCairoFile):
-      raise TypeError, "argument must be a CanvasCairoFile"
-    return obj._as_parameter_
-  from_param = classmethod(from_param)
+    def __init__(self, style, width, height, ii=None):
+        self.canvas = gtlib.gt_canvas_cairo_file_new(style, 1, width,
+                height, ii)
+        self._as_parameter_ = self.canvas
 
-  def to_file(self, filename):
-    err = Error()
-    rval = gtlib.gt_canvas_cairo_file_to_file(self.canvas, filename, err)
-    if rval != 0:
-      gterror(err)
+    def from_param(cls, obj):
+        if not isinstance(obj, CanvasCairoFile):
+            raise TypeError, "argument must be a CanvasCairoFile"
+        return obj._as_parameter_
 
-  def to_stream(self):
-    from ctypes import string_at
-    str = Str(None)
-    gtlib.gt_canvas_cairo_file_to_stream(self.canvas, str)
-    return string_at(str.get_mem(), str.length())
+    from_param = classmethod(from_param)
 
-  def register(cls, gtlib):
-    from ctypes import c_char_p, c_void_p, c_ulong, c_int
-    gtlib.gt_canvas_cairo_file_to_file.restype = c_int
-    gtlib.gt_canvas_cairo_file_to_file.argtypes = [c_void_p, c_char_p, Error]
-    gtlib.gt_canvas_cairo_file_to_stream.restype  = c_char_p
-    gtlib.gt_canvas_cairo_file_to_stream.argtypes = [c_void_p, Str]
-    gtlib.gt_canvas_cairo_file_new.restype  = c_void_p
-    gtlib.gt_canvas_cairo_file_new.argtypes = [Style, c_int, c_ulong, c_ulong, \
-                                               ImageInfo]
-  register = classmethod(register)
+    def to_file(self, filename):
+        err = Error()
+        rval = gtlib.gt_canvas_cairo_file_to_file(self.canvas, filename,
+                err)
+        if rval != 0:
+            gterror(err)
+
+    def to_stream(self):
+        from ctypes import string_at
+        str = Str(None)
+        gtlib.gt_canvas_cairo_file_to_stream(self.canvas, str)
+        return string_at(str.get_mem(), str.length())
+
+    def register(cls, gtlib):
+        from ctypes import c_char_p, c_void_p, c_ulong, c_int
+        gtlib.gt_canvas_cairo_file_to_file.restype = c_int
+        gtlib.gt_canvas_cairo_file_to_file.argtypes = [c_void_p,
+                c_char_p, Error]
+        gtlib.gt_canvas_cairo_file_to_stream.restype = c_char_p
+        gtlib.gt_canvas_cairo_file_to_stream.argtypes = [c_void_p, Str]
+        gtlib.gt_canvas_cairo_file_new.restype = c_void_p
+        gtlib.gt_canvas_cairo_file_new.argtypes = [Style, c_int, c_ulong,
+                c_ulong, ImageInfo]
+
+    register = classmethod(register)
+
+

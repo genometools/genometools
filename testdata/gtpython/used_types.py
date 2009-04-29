@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
@@ -23,16 +24,18 @@ import sys
 import re
 
 if __name__ == "__main__":
-  if len(sys.argv) != 2:
-    sys.stderr.write("Usage: " + sys.argv[0] + " GFF3_file\n")
-    sys.stderr.write("Parse and output the types used in GFF3_file.")
-    sys.exit(1)
+    if len(sys.argv) != 2:
+        sys.stderr.write("Usage: " + (sys.argv)[0] + " GFF3_file\n")
+        sys.stderr.write("Parse and output the types used in GFF3_file.")
+        sys.exit(1)
 
-  in_stream = GFF3InStream(sys.argv[1])
-  gn = in_stream.next_tree()
-  # fill feature index
-  while gn:
+    in_stream = GFF3InStream((sys.argv)[1])
     gn = in_stream.next_tree()
 
-  for type in in_stream.get_used_types():
-    print type
+  # fill feature index
+
+    while gn:
+        gn = in_stream.next_tree()
+
+    for type in in_stream.get_used_types():
+        print type

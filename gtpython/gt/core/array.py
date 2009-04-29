@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
@@ -17,49 +19,56 @@
 
 from gt.dlload import gtlib
 
+
 class Array:
-  def create(size=None, own = True):
-    if size is None:
-      from ctypes import c_void_p, sizeof
-      size = sizeof(c_void_p)
-    return Array(gtlib.gt_array_new(size), own)
-  create = staticmethod(create)
 
-  def __init__(self, arr, own = False):
-    self.array = arr
-    self._as_parameter_ = self.array
-    self.own = own
+    def create(size=None, own=True):
+        if size is None:
+            from ctypes import c_void_p, sizeof
+            size = sizeof(c_void_p)
+        return Array(gtlib.gt_array_new(size), own)
 
-  def __del__(self):
-    if self.own:
-      try:
-        gtlib.gt_array_delete(self.array)
-      except AttributeError:
-        pass
+    create = staticmethod(create)
 
-  def from_param(cls, obj):
-    if not isinstance(obj, Array):
-      raise TypeError, "argument must be an Array"
-    return obj._as_parameter_
-  from_param = classmethod(from_param)
+    def __init__(self, arr, own=False):
+        self.array = arr
+        self._as_parameter_ = self.array
+        self.own = own
 
-  def get(self, i):
-    return gtlib.gt_array_get(self.array, i).contents
+    def __del__(self):
+        if self.own:
+            try:
+                gtlib.gt_array_delete(self.array)
+            except AttributeError:
+                pass
 
-  def size(self):
-    return gtlib.gt_array_size(self.array)
+    def from_param(cls, obj):
+        if not isinstance(obj, Array):
+            raise TypeError, "argument must be an Array"
+        return obj._as_parameter_
 
-  def add(self, val):
-    gtlib.gt_array_add_ptr(self.array, val._as_parameter_)
+    from_param = classmethod(from_param)
 
-  def register(cls, gtlib):
-    from ctypes import c_void_p, c_uint, c_ulong, POINTER
-    gtlib.gt_array_new.restype = c_void_p
-    gtlib.gt_array_new.argtypes = [c_uint]
-    gtlib.gt_array_ref.restype = c_void_p
-    gtlib.gt_array_ref.argtypes = [c_void_p]
-    gtlib.gt_array_get.restype = POINTER(c_void_p)
-    gtlib.gt_array_get.argtypes = [c_ulong]
-    gtlib.gt_array_size.restype = c_ulong
-    gtlib.gt_array_add_ptr.argtypes = [c_void_p, c_void_p]
-  register = classmethod(register)
+    def get(self, i):
+        return gtlib.gt_array_get(self.array, i).contents
+
+    def size(self):
+        return gtlib.gt_array_size(self.array)
+
+    def add(self, val):
+        gtlib.gt_array_add_ptr(self.array, val._as_parameter_)
+
+    def register(cls, gtlib):
+        from ctypes import c_void_p, c_uint, c_ulong, POINTER
+        gtlib.gt_array_new.restype = c_void_p
+        gtlib.gt_array_new.argtypes = [c_uint]
+        gtlib.gt_array_ref.restype = c_void_p
+        gtlib.gt_array_ref.argtypes = [c_void_p]
+        gtlib.gt_array_get.restype = POINTER(c_void_p)
+        gtlib.gt_array_get.argtypes = [c_ulong]
+        gtlib.gt_array_size.restype = c_ulong
+        gtlib.gt_array_add_ptr.argtypes = [c_void_p, c_void_p]
+
+    register = classmethod(register)
+
+

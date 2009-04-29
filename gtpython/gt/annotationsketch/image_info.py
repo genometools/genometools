@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
@@ -19,67 +21,72 @@ from gt.dlload import gtlib
 from gt.annotationsketch.rec_map import RecMap
 import math
 
+
 class ImageInfo:
-  def __init__(self):
-    self.ii = gtlib.gt_image_info_new()
-    self._as_parameter_ = self.ii
-    self.hotspots = None
 
-  def __del__(self):
-    try:
-      gtlib.gt_image_info_delete(self.ii)
-    except AttributeError:
-      pass
+    def __init__(self):
+        self.ii = gtlib.gt_image_info_new()
+        self._as_parameter_ = self.ii
+        self.hotspots = None
 
-  def from_param(cls, obj):
-    if not (isinstance(obj, ImageInfo) or obj == None):
-      raise TypeError, "argument must be an ImageInfo"
-    if obj == None:
-      return None
-    return obj._as_parameter_
-  from_param = classmethod(from_param)
+    def __del__(self):
+        try:
+            gtlib.gt_image_info_delete(self.ii)
+        except AttributeError:
+            pass
 
-  def get_height(self):
-    return gtlib.gt_image_info_get_height(self.ii)
+    def from_param(cls, obj):
+        if not (isinstance(obj, ImageInfo) or obj == None):
+            raise TypeError, "argument must be an ImageInfo"
+        if obj == None:
+            return None
+        return obj._as_parameter_
 
-  def num_of_rec_maps(self):
-    return gtlib.gt_image_info_num_of_rec_maps(self.ii)
+    from_param = classmethod(from_param)
 
-  def compare_hotspots(cls, hs1, hs2):
-    if hs1[2]-hs1[0]+1 > hs2[2]-hs2[0]+1:
-      return 1
-    elif hs1[2]-hs1[0]+1 == hs2[2]-hs2[0]+1:
-      if hs1[3] > hs2[3]:
-        return 1
-      elif hs1[3] == hs2[3]:
-        return 0
-      else:
-        return -1
-    else:
-      return -1
-  compare_hotspots = classmethod(compare_hotspots)
+    def get_height(self):
+        return gtlib.gt_image_info_get_height(self.ii)
 
-  def each_hotspot(self):
-    if not self.hotspots:
-      self.hotspots = []
-      for i in range(self.num_of_rec_maps()):
-        rm = RecMap(gtlib.gt_image_info_get_rec_map(self.ii, i))
-        self.hotspots.append([math.floor(rm.get_northwest_x()), \
-                              math.floor(rm.get_northwest_y()), \
-                              math.floor(rm.get_southeast_x()), \
-                              math.floor(rm.get_southeast_y()), \
-                              rm.get_genome_feature()])
-      self.hotspots.sort(ImageInfo.compare_hotspots)
-    for hs in self.hotspots:
-      yield hs[0],hs[1],hs[2],hs[3],hs[4]
+    def num_of_rec_maps(self):
+        return gtlib.gt_image_info_num_of_rec_maps(self.ii)
 
-  def register(cls, gtlib):
-    from ctypes import c_void_p, c_ulong, c_uint
-    gtlib.gt_image_info_get_rec_map.restype = c_void_p
-    gtlib.gt_image_info_get_rec_map.argtypes = [c_void_p, c_ulong]
-    gtlib.gt_image_info_num_of_rec_maps.restype = c_ulong
-    gtlib.gt_image_info_num_of_rec_maps.argtypes = [c_void_p]
-    gtlib.gt_image_info_get_height.restype = c_uint
-    gtlib.gt_image_info_get_height.argtypes = [c_void_p]
-    gtlib.gt_image_info_new.restype = c_void_p
-  register = classmethod(register)
+    def compare_hotspots(cls, hs1, hs2):
+        if hs1[2] - hs1[0] + 1 > hs2[2] - hs2[0] + 1:
+            return 1
+        elif hs1[2] - hs1[0] + 1 == hs2[2] - hs2[0] + 1:
+            if hs1[3] > hs2[3]:
+                return 1
+            elif hs1[3] == hs2[3]:
+                return 0
+            else:
+                return -1
+        else:
+            return -1
+
+    compare_hotspots = classmethod(compare_hotspots)
+
+    def each_hotspot(self):
+        if not self.hotspots:
+            self.hotspots = []
+            for i in range(self.num_of_rec_maps()):
+                rm = RecMap(gtlib.gt_image_info_get_rec_map(self.ii, i))
+                self.hotspots.append([math.floor(rm.get_northwest_x()),
+                        math.floor(rm.get_northwest_y()), math.floor(rm.get_southeast_x()),
+                        math.floor(rm.get_southeast_y()), rm.get_genome_feature()])
+            self.hotspots.sort(ImageInfo.compare_hotspots)
+        for hs in self.hotspots:
+            yield (hs[0], hs[1], hs[2], hs[3], hs[4])
+
+    def register(cls, gtlib):
+        from ctypes import c_void_p, c_ulong, c_uint
+        gtlib.gt_image_info_get_rec_map.restype = c_void_p
+        gtlib.gt_image_info_get_rec_map.argtypes = [c_void_p, c_ulong]
+        gtlib.gt_image_info_num_of_rec_maps.restype = c_ulong
+        gtlib.gt_image_info_num_of_rec_maps.argtypes = [c_void_p]
+        gtlib.gt_image_info_get_height.restype = c_uint
+        gtlib.gt_image_info_get_height.argtypes = [c_void_p]
+        gtlib.gt_image_info_new.restype = c_void_p
+
+    register = classmethod(register)
+
+

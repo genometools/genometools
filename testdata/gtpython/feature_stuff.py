@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
@@ -22,48 +23,53 @@ from gt.annotationsketch import *
 import sys
 import re
 
+
 class TestFailedError(Exception):
-  pass
+
+    pass
+
 
 if __name__ == "__main__":
-  if len(sys.argv) != 2:
-    sys.stderr.write("Usage: " + sys.argv[0] + " GFF3_file\n")
-    sys.stderr.write("Test the FeatureIndex and FeatureStream bindings on" \
-                     "GFF3 file.")
-    sys.exit(1)
+    if len(sys.argv) != 2:
+        sys.stderr.write("Usage: " + (sys.argv)[0] + " GFF3_file\n")
+        sys.stderr.write('Test the FeatureIndex and FeatureStream bindings onGFF3 file.')
+        sys.exit(1)
 
-  genome_stream = GFF3InStream(sys.argv[1])
+    genome_stream = GFF3InStream((sys.argv)[1])
 
   # try to instantiate an interface -> should fail
-  try:
-    feature_index = FeatureIndex()
-  except NotImplementedError:
-    pass
-  else:
-    raise
+
+    try:
+        feature_index = FeatureIndex()
+    except NotImplementedError:
+        pass
+    else:
+        raise
 
   # instantiate index object
-  feature_index = FeatureIndexMemory()
-  genome_stream = FeatureStream(genome_stream, feature_index)
 
-  feature = genome_stream.next_tree()
-  while feature:
+    feature_index = FeatureIndexMemory()
+    genome_stream = FeatureStream(genome_stream, feature_index)
+
     feature = genome_stream.next_tree()
+    while feature:
+        feature = genome_stream.next_tree()
 
-  seqid = feature_index.get_first_seqid()
-  features = feature_index.get_features_for_seqid(seqid)
-  if not features:
-    raise TestFailedError
+    seqid = feature_index.get_first_seqid()
+    features = feature_index.get_features_for_seqid(seqid)
+    if not features:
+        raise TestFailedError
 
-  rng = feature_index.get_range_for_seqid(seqid)
-  features_r = feature_index.get_features_for_range(rng.start, rng.end, seqid)
+    rng = feature_index.get_range_for_seqid(seqid)
+    features_r = feature_index.get_features_for_range(rng.start, rng.end,
+            seqid)
 
-  if not len(features) == len(features_r):
-    raise TestFailedError
+    if not len(features) == len(features_r):
+        raise TestFailedError
 
-  gff3_visitor = GFF3Visitor()
+    gff3_visitor = GFF3Visitor()
 
-  for feature in features:
-    feature.accept(gff3_visitor)
-    if not isinstance(feature, FeatureNode):
-      raise TestFailedError
+    for feature in features:
+        feature.accept(gff3_visitor)
+        if not isinstance(feature, FeatureNode):
+            raise TestFailedError

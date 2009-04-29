@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
@@ -23,72 +24,79 @@ from gt.annotationsketch import *
 import sys
 import re
 
+
 class TestFailedError(Exception):
-  pass
+
+    pass
+
 
 if __name__ == "__main__":
-  if len(sys.argv) != 2:
-    sys.stderr.write("Usage: " + sys.argv[0] + " GFF3_file\n")
-    sys.stderr.write("Test failures in GFF3 annotation file.")
-    sys.exit(1)
+    if len(sys.argv) != 2:
+        sys.stderr.write("Usage: " + (sys.argv)[0] + " GFF3_file\n")
+        sys.stderr.write("Test failures in GFF3 annotation file.")
+        sys.exit(1)
 
-  feature_index = FeatureIndexMemory()
-  feature_index.add_gff3file(sys.argv[1])
+    feature_index = FeatureIndexMemory()
+    feature_index.add_gff3file((sys.argv)[1])
 
-  seqid = feature_index.get_first_seqid()
-  range = feature_index.get_range_for_seqid(seqid)
+    seqid = feature_index.get_first_seqid()
+    range = feature_index.get_range_for_seqid(seqid)
 
-  style = Style()
-  style.set_num("format", "margins", 40)
+    style = Style()
+    style.set_num("format", "margins", 40)
 
   # check error reporting in the Diagram class
-  try:
-    diagram = Diagram.from_index(feature_index, "nonexist", range, style)
-  except GTError, strerr:
-    if -1 == str(strerr).find("FeatureIndex does not contain seqid"):
-      raise TestFailedError
-  else:
-    raise TestFailedError
-  try:
-    diagram = Diagram.from_index(feature_index, seqid, range, 42)
-  except ArgumentError, strerr:
-    if -1 == str(strerr).find("must be a Style"):
-      raise TestFailedError
-  else:
-    raise TestFailedError
-  try:
-    diagram = Diagram.from_index(feature_index, seqid, 42, style)
-  except AttributeError, strerr:
-    if -1 == str(strerr).find("object has no attribute 'start'"):
-      raise TestFailedError
-  else:
-    raise TestFailedError
-  try:
-    diagram = Diagram.from_index(42, seqid, range, style)
-  except ArgumentError, strerr:
-    if -1 == str(strerr).find("must be a FeatureIndex"):
-      raise TestFailedError
-  else:
-    raise TestFailedError
-  diagram = Diagram.from_index(feature_index, seqid, range, style)
+
+    try:
+        diagram = Diagram.from_index(feature_index, "nonexist", range,
+                style)
+    except GTError, strerr:
+        if -1 == str(strerr).find("FeatureIndex does not contain seqid"):
+            raise TestFailedError
+    else:
+        raise TestFailedError
+    try:
+        diagram = Diagram.from_index(feature_index, seqid, range, 42)
+    except ArgumentError, strerr:
+        if -1 == str(strerr).find("must be a Style"):
+            raise TestFailedError
+    else:
+        raise TestFailedError
+    try:
+        diagram = Diagram.from_index(feature_index, seqid, 42, style)
+    except AttributeError, strerr:
+        if -1 == str(strerr).find("object has no attribute 'start'"):
+            raise TestFailedError
+    else:
+        raise TestFailedError
+    try:
+        diagram = Diagram.from_index(42, seqid, range, style)
+    except ArgumentError, strerr:
+        if -1 == str(strerr).find("must be a FeatureIndex"):
+            raise TestFailedError
+    else:
+        raise TestFailedError
+    diagram = Diagram.from_index(feature_index, seqid, range, style)
 
   # check error reporting in the Layout class
-  try:
-    layout = Layout(diagram, 70, style)
-  except GTError, strerr:
-    if -1 == str(strerr).find("layout width must at least be twice"):
-      raise TestFailedError
-  else:
-    raise TestFailedError
-  layout = Layout(diagram, 700, style)
-  height = layout.get_height()
+
+    try:
+        layout = Layout(diagram, 70, style)
+    except GTError, strerr:
+        if -1 == str(strerr).find("layout width must at least be twice"):
+            raise TestFailedError
+    else:
+        raise TestFailedError
+    layout = Layout(diagram, 700, style)
+    height = layout.get_height()
 
   # check error reporting in the CanvasCairoFile class
-  try:
-    canvas = CanvasCairoFile(12, 700, height, None)
-  except ArgumentError, strerr:
-    if -1 == str(strerr).find("must be a Style"):
-      raise TestFailedError
-  else:
-    raise TestFailedError
-  canvas = CanvasCairoFile(style, 700, height, None)
+
+    try:
+        canvas = CanvasCairoFile(12, 700, height, None)
+    except ArgumentError, strerr:
+        if -1 == str(strerr).find("must be a Style"):
+            raise TestFailedError
+    else:
+        raise TestFailedError
+    canvas = CanvasCairoFile(style, 700, height, None)

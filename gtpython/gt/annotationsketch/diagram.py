@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
@@ -30,73 +32,84 @@ from gt.extended.feature_node import FeatureNode
 
 TrackSelectorFunc = CFUNCTYPE(c_void_p, c_void_p, c_void_p, c_void_p)
 
+
 class Diagram:
-  def from_array(arr, rng, style):
-    from ctypes import byref, sizeof
-    if rng.start > rng.end:
-      gterror("range.start > range.end")
-    gtarr = Array.create(sizeof(c_void_p), False)
-    for i in arr:
-      if not isinstance(i, FeatureNode):
-        gterror("Diagram array must only contain FeatureNodes!")
-      gtarr.add(i)
-    diagram = gtlib.gt_diagram_new_from_array(gtarr, byref(rng), \
-                                              style)
-    return Diagram(diagram)
-  from_array = staticmethod(from_array)
 
-  def from_index(feature_index, seqid, rng, style):
-    from ctypes import byref
-    err = Error()
-    if rng.start > rng.end:
-      gterror("range.start > range.end")
-    diagram = gtlib.gt_diagram_new(feature_index, seqid, byref(rng), \
-                                   style, err)
-    if err.is_set():
-      gterror(err)
-    return Diagram(diagram)
-  from_index = staticmethod(from_index)
+    def from_array(arr, rng, style):
+        from ctypes import byref, sizeof
+        if rng.start > rng.end:
+            gterror("range.start > range.end")
+        gtarr = Array.create(sizeof(c_void_p), False)
+        for i in arr:
+            if not isinstance(i, FeatureNode):
+                gterror("Diagram array must only contain FeatureNodes!")
+            gtarr.add(i)
+        diagram = gtlib.gt_diagram_new_from_array(gtarr, byref(rng),
+                style)
+        return Diagram(diagram)
 
-  def __init__(self, ptr):
-    self.diagram = ptr
-    self._as_parameter_ = self.diagram
+    from_array = staticmethod(from_array)
 
-  def __del__(self):
-    try:
-      gtlib.gt_diagram_delete(self.diagram)
-    except AttributeError:
-      pass
+    def from_index(feature_index, seqid, rng, style):
+        from ctypes import byref
+        err = Error()
+        if rng.start > rng.end:
+            gterror("range.start > range.end")
+        diagram = gtlib.gt_diagram_new(feature_index, seqid, byref(rng),
+                style, err)
+        if err.is_set():
+            gterror(err)
+        return Diagram(diagram)
 
-  def set_track_selector_func(self, func):
-    def trackselector(block_ptr, string_ptr, data_ptr):
-      b = Block(block_ptr)
-      string = Str(string_ptr)
-      ret = func(b)
-      if not ret:
-        gterror("Track selector callback function must return a string!")
-      string.append_cstr(ret)
-    self.tsf_cb = TrackSelectorFunc(trackselector)
-    self.tsf = trackselector
-    gtlib.gt_diagram_set_track_selector_func(self.diagram, self.tsf_cb)
+    from_index = staticmethod(from_index)
 
-  def add_custom_track(self, ct):
-    gtlib.gt_diagram_add_custom_track(self.diagram, ct)
+    def __init__(self, ptr):
+        self.diagram = ptr
+        self._as_parameter_ = self.diagram
 
-  def from_param(cls, obj):
-    if not isinstance(obj, Diagram):
-      raise TypeError, "argument must be a Diagram"
-    return obj._as_parameter_
-  from_param = classmethod(from_param)
+    def __del__(self):
+        try:
+            gtlib.gt_diagram_delete(self.diagram)
+        except AttributeError:
+            pass
 
-  def register(cls, gtlib):
-    from ctypes import c_char_p, c_void_p, POINTER
-    gtlib.gt_diagram_new.restype = c_void_p
-    gtlib.gt_diagram_new.argtypes = [FeatureIndex, c_char_p, POINTER(Range),   \
-                                     Style, Error]
-    gtlib.gt_diagram_set_track_selector_func.argtypes = [c_void_p,             \
-                                                         TrackSelectorFunc]
-    gtlib.gt_diagram_add_custom_track.argtypes = [c_void_p,                    \
-                                                  CustomTrack]
-    gtlib.gt_diagram_new_from_array.restype = c_void_p
-    gtlib.gt_diagram_new_from_array.argtypes = [Array, POINTER(Range), Style]
-  register = classmethod(register)
+    def set_track_selector_func(self, func):
+
+        def trackselector(block_ptr, string_ptr, data_ptr):
+            b = Block(block_ptr)
+            string = Str(string_ptr)
+            ret = func(b)
+            if not ret:
+                gterror("Track selector callback function must return a string!")
+            string.append_cstr(ret)
+
+        self.tsf_cb = TrackSelectorFunc(trackselector)
+        self.tsf = trackselector
+        gtlib.gt_diagram_set_track_selector_func(self.diagram, self.tsf_cb)
+
+    def add_custom_track(self, ct):
+        gtlib.gt_diagram_add_custom_track(self.diagram, ct)
+
+    def from_param(cls, obj):
+        if not isinstance(obj, Diagram):
+            raise TypeError, "argument must be a Diagram"
+        return obj._as_parameter_
+
+    from_param = classmethod(from_param)
+
+    def register(cls, gtlib):
+        from ctypes import c_char_p, c_void_p, POINTER
+        gtlib.gt_diagram_new.restype = c_void_p
+        gtlib.gt_diagram_new.argtypes = [FeatureIndex, c_char_p, POINTER(Range),
+                Style, Error]
+        gtlib.gt_diagram_set_track_selector_func.argtypes = [c_void_p,
+                TrackSelectorFunc]
+        gtlib.gt_diagram_add_custom_track.argtypes = [c_void_p,
+                CustomTrack]
+        gtlib.gt_diagram_new_from_array.restype = c_void_p
+        gtlib.gt_diagram_new_from_array.argtypes = [Array, POINTER(Range),
+                Style]
+
+    register = classmethod(register)
+
+
