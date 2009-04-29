@@ -26,7 +26,7 @@
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream.h"
 #include "extended/gtdatahelp.h"
-#include "extended/mergefeat_stream_sorted.h"
+#include "extended/merge_feature_stream.h"
 #include "extended/sort_stream.h"
 #include "extended/type_checker_builtin.h"
 #include "extended/type_checker_obo.h"
@@ -179,7 +179,7 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
   GtTypeChecker *type_checker = NULL;
   GtNodeStream *gff3_in_stream,
                *sort_stream = NULL,
-               *mergefeat_stream = NULL,
+               *merge_feature_stream = NULL,
                *add_introns_stream = NULL,
                *gff3_out_stream = NULL,
                *last_stream;
@@ -236,8 +236,8 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
   /* create merge feature stream (if necessary) */
   if (!had_err && arguments->mergefeat) {
     gt_assert(sort_stream);
-    mergefeat_stream = gt_mergefeat_stream_sorted_new(sort_stream);
-    last_stream = mergefeat_stream;
+    merge_feature_stream = gt_merge_feature_stream_new(sort_stream);
+    last_stream = merge_feature_stream;
   }
 
   /* create addintrons stream (if necessary) */
@@ -264,7 +264,7 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
   /* free */
   gt_node_stream_delete(gff3_out_stream);
   gt_node_stream_delete(sort_stream);
-  gt_node_stream_delete(mergefeat_stream);
+  gt_node_stream_delete(merge_feature_stream);
   gt_node_stream_delete(add_introns_stream);
   gt_node_stream_delete(gff3_in_stream);
   gt_type_checker_delete(type_checker);

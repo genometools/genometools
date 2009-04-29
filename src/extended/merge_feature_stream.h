@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,15 +15,16 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef MERGEFEAT_VISITOR_H
-#define MERGEFEAT_VISITOR_H
+#ifndef MERGE_FEATURE_STREAM_H
+#define MERGE_FEATURE_STREAM_H
 
-/* implements the ``genome visitor'' interface */
-typedef struct GtMergefeatVisitor GtMergefeatVisitor;
+#include <stdio.h>
+#include "extended/node_stream_api.h"
 
-#include "extended/node_visitor.h"
+/* implements the ``genome_stream'' interface */
+typedef struct GtMergeFeatureStream GtMergeFeatureStream;
 
-const GtNodeVisitorClass* gt_mergefeat_visitor_class(void);
-GtNodeVisitor*            gt_mergefeat_visitor_new(void);
+const GtNodeStreamClass* gt_merge_feature_stream_class(void);
+GtNodeStream*            gt_merge_feature_stream_new(GtNodeStream*);
 
 #endif
