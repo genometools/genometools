@@ -1278,21 +1278,16 @@ void bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo)
     printf("# maxbucketsize=%lu\n",rmnsufinfo->allocateditvinfo);
   } else
   {
+    unsigned long pagesize = (unsigned long) PAGESIZE;
+
     initinversesuftabnonspecialsadjuststream(rmnsufinfo);
     printf("# maxbucketsize=%lu\n",rmnsufinfo->allocateditvinfo);
     rmnsufinfo->sortblock.sortspace = NULL;
-    if (rmnsufinfo->allocateditvinfo >= (unsigned long) DIV2(PAGESIZE))
+    while (pagesize <= 2UL * rmnsufinfo->allocateditvinfo)
     {
-      unsigned long pagesize = (unsigned long) PAGESIZE;
-      while (2UL * rmnsufinfo->allocateditvinfo >= pagesize)
-      {
-        pagesize += PAGESIZE;
-      }
-      rmnsufinfo->sortblock.mappedwidth = pagesize;
-    } else
-    {
-      rmnsufinfo->sortblock.mappedwidth = (Seqpos) PAGESIZE;
+      pagesize += PAGESIZE;
     }
+    rmnsufinfo->sortblock.mappedwidth = (Seqpos) pagesize;
     printf("mappedwidth = %lu\n",
             (unsigned long) rmnsufinfo->sortblock.mappedwidth);
   }
