@@ -962,7 +962,7 @@ static void possiblychangemappedsection(Sortblock *sortblock,Seqpos left,
       fprintf(stderr,"left=%lu,right=%lu,right>=%lu=pageoffset+mappedwidth\n",
                      (unsigned long) left,
                      (unsigned long) right,
-                     (unsigned long) (sortblock->pageoffset + 
+                     (unsigned long) (sortblock->pageoffset +
                                       sortblock->mappedwidth));
       exit(EXIT_FAILURE);
     }

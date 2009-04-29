@@ -16,30 +16,82 @@
 */
 
 #include <stdbool.h>
+#include <math.h>
 #include "core/ma.h"
 #include "core/assert_api.h"
+#include "core/unused_api.h"
+#include "core/minmax.h"
 #include "divmodmul.h"
+#include "intbits-tab.h"
 #include "diff-cover.h"
+
+typedef unsigned long Diffvalue;
+
+#define MODV(VAL) ((VAL) & dcov->vmodmask)
+#define DIVV(VAL) ((VAL) >> dcov->logmod)
 
 struct Differencecover
 {
-  unsigned int vparam, logmod, size, vmask, *coverrank;
+  unsigned int vparam, logmod, size, vmodmask, hvalue, *coverrank;
   Diffvalue *diffvalues, *diff2pos;
 };
 
-static Diffvalue differencecovertab[] =
-{
-  0UL,
-  0UL,1UL,
-  0UL,1UL,2UL,
-  0UL,1UL,2UL,4UL,
-  0UL,1UL,2UL,5UL,8UL,
-  0UL,1UL,2UL,3UL,7UL,11UL,19UL,
-  0UL,1UL,2UL,5UL,14UL,16UL,34UL,42UL,59UL,
-  0UL,1UL,3UL,7UL,17UL,40UL,55UL,64UL,75UL,85UL,104UL,109UL,117UL
+static Diffvalue differencecovertab[] = {
+  /*
+     1
+   */ 0UL,
+  /*
+     2
+   */ 0UL, 1UL,
+  /*
+     4
+   */ 0UL, 1UL, 2UL,
+  /*
+     8
+   */ 0UL, 1UL, 2UL, 4UL,
+  /*
+     16
+   */ 0UL, 1UL, 2UL, 5UL, 8UL,
+  /*
+     32
+   */ 0UL, 1UL, 2UL, 3UL, 7UL, 11UL, 19UL,
+  /*
+     64
+   */ 0UL, 1UL, 2UL, 5UL, 14UL, 16UL, 34UL, 42UL, 59UL,
+  /*
+     128
+   */ 0UL, 1UL, 3UL, 7UL, 17UL, 40UL, 55UL, 64UL, 75UL, 85UL,
+    104UL, 109UL, 117UL,
+  /*
+     256
+   */ 0UL, 1UL, 3UL, 7UL, 12UL, 20UL, 30UL, 44UL, 65UL, 80UL,
+    89UL, 96UL, 114UL, 122UL, 128UL, 150UL, 196UL, 197UL, 201UL,
+    219UL,
+  /*
+     512
+   */ 0UL, 1UL, 2UL, 3UL, 4UL, 9UL, 18UL, 27UL, 36UL, 45UL, 64UL,
+    83UL, 102UL, 121UL, 140UL, 159UL, 178UL, 197UL, 216UL, 226UL,
+    236UL, 246UL, 256UL, 266UL, 267UL, 268UL, 269UL, 270UL,
+  /*
+     1024
+   */ 0UL, 1UL, 2UL, 3UL, 4UL, 5UL, 6UL, 13UL, 26UL, 39UL, 52UL,
+    65UL, 78UL, 91UL, 118UL, 145UL, 172UL, 199UL, 226UL, 253UL,
+    280UL, 307UL, 334UL, 361UL, 388UL, 415UL, 442UL, 456UL,
+    470UL, 484UL, 498UL, 512UL, 526UL, 540UL, 541UL, 542UL,
+    543UL, 544UL, 545UL, 546UL,
+  /*
+     2048
+   */ 0UL, 1UL, 2UL, 3UL, 4UL, 5UL, 6UL, 7UL, 8UL, 9UL, 19UL,
+    38UL, 57UL, 76UL, 95UL, 114UL, 133UL, 152UL, 171UL, 190UL,
+    229UL, 268UL, 307UL, 346UL, 385UL, 424UL, 463UL, 502UL,
+    541UL, 580UL, 619UL, 658UL, 697UL, 736UL, 775UL, 814UL,
+    853UL, 892UL, 931UL, 951UL, 971UL, 991UL, 1011UL, 1031UL,
+    1051UL, 1071UL, 1091UL, 1111UL, 1131UL, 1132UL, 1133UL,
+    1134UL, 1135UL, 1136UL, 1137UL, 1138UL, 1139UL, 1140UL
 };
 
-static unsigned int differencecoversizes[] = {1U,2U,3U,4U,5U,7U,9U,13U};
+static unsigned int differencecoversizes[]
+  = { 1U, 2U, 3U, 4U, 5U, 7U, 9U, 13U, 20U, 28U, 40U, 58U };
 
 static void fillcoverrank(Differencecover *dcov)
 {
@@ -49,11 +101,17 @@ static void fillcoverrank(Differencecover *dcov)
   for (i=0, j=0; i<dcov->vparam; i++)
   {
     dcov->coverrank[i] = j;
-    if (j<dcov->size && dcov->diffvalues[j] <= (Diffvalue) i)
+    if (j < dcov->size && dcov->diffvalues[j] <= (Diffvalue) i)
     {
       j++;
     }
   }
+  /*
+  for (i=0; i<dcov->vparam; i++)
+  {
+    printf("coverrank[%u]=%u\n",i,dcov->coverrank[i]);
+  }
+  */
 }
 
 static void filldiff2pos(Differencecover *dcov)
@@ -65,12 +123,39 @@ static void filldiff2pos(Differencecover *dcov)
   {
     for (jptr=dcov->diffvalues; jptr<dcov->diffvalues + dcov->size; jptr++)
     {
-      dcov->diff2pos[(*jptr - *iptr) & dcov->vmask] = *iptr;
+      dcov->diff2pos[MODV(*jptr - *iptr)] = *iptr;
     }
   }
 }
 
-Differencecover *differencecover_new(unsigned int vparam)
+static unsigned int computehvalue(const Differencecover *dcov,
+                                  Seqpos totallength)
+{
+  Diffvalue next;
+  unsigned int h, nmodv = MODV(totallength);
+
+  for (h = 0; h < dcov->size; h++)
+  {
+    if (dcov->diffvalues[h] <= (Diffvalue) nmodv)
+    {
+      if (h + 1 < dcov->size)
+      {
+        next = dcov->diffvalues[h+1];
+      } else
+      {
+        next = (Diffvalue) dcov->vparam;
+      }
+      if ((Diffvalue) nmodv < next)
+      {
+        return h;
+      }
+    }
+  }
+  gt_assert(false);
+  return 0;
+}
+
+Differencecover *differencecover_new(unsigned int vparam,Seqpos totallength)
 {
   size_t logmod;
   unsigned int offset = 0, v = 1U;
@@ -99,7 +184,8 @@ Differencecover *differencecover_new(unsigned int vparam)
   }
   dcov->logmod = (unsigned int) logmod;
   dcov->vparam = 1U << logmod;
-  dcov->vmask = dcov->vparam-1;
+  dcov->vmodmask = dcov->vparam-1;
+  dcov->hvalue = computehvalue(dcov,totallength);
   fillcoverrank(dcov);
   filldiff2pos(dcov);
   return dcov;
@@ -107,15 +193,13 @@ Differencecover *differencecover_new(unsigned int vparam)
 
 unsigned int differencecover_rank(const Differencecover *dcov,Seqpos pos)
 {
-  return dcov->coverrank[pos & (Seqpos) dcov->vmask];
+  return dcov->coverrank[MODV(pos)];
 }
 
 unsigned int differencecover_offset(const Differencecover *dcov,
                                     Seqpos pos1,Seqpos pos2)
 {
-  return (unsigned int)
-         (dcov->diff2pos[(pos2-pos1) & (Seqpos) dcov->vmask] - pos1) &
-         (Diffvalue) dcov->vmask;
+  return (unsigned int) MODV(dcov->diff2pos[MODV(pos2-pos1)] - pos1);
 }
 
 void differencecover_delete(Differencecover *dcov)
@@ -125,28 +209,51 @@ void differencecover_delete(Differencecover *dcov)
   gt_free(dcov);
 }
 
+unsigned long differencecover_packsamplepos(const Differencecover *dcov,
+                                            Seqpos totallength,Seqpos pos)
+{
+  unsigned long j, result;
+  unsigned int di, ivalue;
+
+  j = (unsigned long) DIVV(pos);
+  di = MODV(pos);
+  ivalue = dcov->coverrank[di];
+  result = ivalue * DIVV(totallength) + ivalue + j;
+  return result;
+}
+
 void differencecover_sample(const Differencecover *dcov,Seqpos totallength)
 {
   Seqpos pos;
   unsigned int modvalue = 0;
-  Diffvalue *diffptr;
-  unsigned long sampled = 0;
+  Diffvalue *diffptr, *afterend;
+  unsigned long idx, maxsamplesize, sampled = 0;
+  Bitsequence *sampleidxused;
 
+  maxsamplesize = (unsigned long) (DIVV(totallength) + 1) * dcov->size;
+  INITBITTAB(sampleidxused,maxsamplesize);
   diffptr = dcov->diffvalues;
+  afterend = dcov->diffvalues + dcov->size;
   for (pos = 0; pos <= totallength; pos++)
   {
-    gt_assert(diffptr == NULL || *diffptr >= (Diffvalue) modvalue);
-    if (diffptr != NULL && (Diffvalue) modvalue == *diffptr)
+    gt_assert(modvalue == MODV(pos));
+    gt_assert(diffptr == afterend || *diffptr >= (Diffvalue) modvalue);
+    if (diffptr < afterend && (Diffvalue) modvalue == *diffptr)
     {
       sampled++;
+      idx = differencecover_packsamplepos(dcov,totallength,pos);
+      gt_assert(idx < maxsamplesize);
+      if (ISIBITSET(sampleidxused,idx))
+      {
+        fprintf(stderr,"sample index %lu for pos %lu already used before\n",
+                       idx,(unsigned long) pos);
+        exit(GT_EXIT_PROGRAMMING_ERROR);
+      }
+      SETIBIT(sampleidxused,idx);
       /* printf("pos mod %u in difference cover\n",dcov->vparam); */
       diffptr++;
-      if (diffptr == dcov->diffvalues + dcov->size)
-      {
-        diffptr = NULL;
-      }
     }
-    if (modvalue < dcov->vmask)
+    if (modvalue < dcov->vmodmask)
     {
       modvalue++;
     } else
@@ -155,7 +262,11 @@ void differencecover_sample(const Differencecover *dcov,Seqpos totallength)
       diffptr = dcov->diffvalues;
     }
   }
-  printf("%lu positions are sampled\n",sampled);
+  gt_assert(sampled <= maxsamplesize);
+  printf("%lu positions are sampled (%.2f)\n",sampled,
+                                              100.0 *
+                                              (double) sampled/totallength);
+  gt_free(sampleidxused);
 }
 
 void differencecovers_check(Seqpos maxcheck,Seqpos totallength)
@@ -174,11 +285,11 @@ void differencecovers_check(Seqpos maxcheck,Seqpos totallength)
        logmod++)
   {
     vparam = 1U << logmod;
-    dcov = differencecover_new(vparam);
+    dcov = differencecover_new(vparam,totallength);
     if (dcov == NULL)
     {
       fprintf(stderr,"no difference cover for v=%u\n",vparam);
-      exit(EXIT_FAILURE);
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     for (j = 0; j<dcov->size; j++)
     {
@@ -193,7 +304,7 @@ void differencecovers_check(Seqpos maxcheck,Seqpos totallength)
                   differencecover_offset(dcov,pos1,pos2));
       }
     }
-    printf("v=%u: ",dcov->vparam);
+    printf("v=%u (size=%u): ",dcov->vparam,dcov->size);
     differencecover_sample(dcov,totallength);
     differencecover_delete(dcov);
   }

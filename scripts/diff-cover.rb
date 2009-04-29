@@ -66,18 +66,19 @@ def diff_cover(logmod)
 end
 
 if ARGV.length != 1
-  STDERR.puts "Usage: $0 <maxcover>"
+  STDERR.puts "Usage: #{$0} <maxcover>"
   exit(1)
 end
 
 maxcover=ARGV[0].to_i
 
+puts "static Diffvalue differencecovertab[] ="
 puts "{"
 lentab = []
 0.upto(maxcover) do |logmod|
   dc = diff_cover(logmod)
   lentab = lentab.push(dc.length)
-  print "  " + dc.join("UL,")
+  print "  /* #{2**logmod} */ " + dc.join("UL,")
   if logmod == maxcover
     puts "UL"
   else
@@ -85,5 +86,7 @@ lentab = []
   end
 end
 puts "};"
+puts ""
 
-puts "{" + lentab.join("U,") + "U};"
+puts "static unsigned int differencecoversizes[]"
+puts "  = {" + lentab.join("U,") + "U};"
