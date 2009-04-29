@@ -949,8 +949,23 @@ static void possiblychangemappedsection(Sortblock *sortblock,Seqpos left,
     Seqpos entries2map;
 
     sortblock->pageoffset = left - (left % DIV2(sortblock->mappedwidth));
-    gt_assert(left >= sortblock->pageoffset &&
-              right < sortblock->pageoffset + sortblock->mappedwidth);
+    if (left < sortblock->pageoffset)
+    {
+      fprintf(stderr,"left=%lu,right=%lu,left<%lu=pageoffset\n",
+                     (unsigned long) left,
+                     (unsigned long) right,
+                     (unsigned long) sortblock->pageoffset);
+      exit(EXIT_FAILURE);
+    }
+    if (right >= sortblock->pageoffset + sortblock->mappedwidth)
+    {
+      fprintf(stderr,"left=%lu,right=%lu,right>=%lu=pageoffset+mappedwidth\n",
+                     (unsigned long) left,
+                     (unsigned long) right,
+                     (unsigned long) (sortblock->pageoffset + 
+                                      sortblock->mappedwidth));
+      exit(EXIT_FAILURE);
+    }
     if (sortblock->mappedsection != NULL)
     {
       gt_fa_xmunmap(sortblock->mappedsection);
@@ -1268,8 +1283,12 @@ void bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo)
     rmnsufinfo->sortblock.sortspace = NULL;
     if (rmnsufinfo->allocateditvinfo >= (unsigned long) DIV2(PAGESIZE))
     {
-      rmnsufinfo->sortblock.mappedwidth
-        = (Seqpos) (PAGESIZE * (rmnsufinfo->allocateditvinfo/(DIV2(PAGESIZE))));
+      unsigned long pagesize = (unsigned long) PAGESIZE;
+      while (2UL * rmnsufinfo->allocateditvinfo >= pagesize)
+      {
+        pagesize += PAGESIZE;
+      }
+      rmnsufinfo->sortblock.mappedwidth = pagesize;
     } else
     {
       rmnsufinfo->sortblock.mappedwidth = (Seqpos) PAGESIZE;

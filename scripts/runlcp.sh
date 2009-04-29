@@ -50,6 +50,7 @@ do
   sfxmap sfx-idx
   suffixerator -parts 3 -maxdepth abs -indexname sfx-idx
   sfxmap sfx-idx
+  suffixerator -maxdepth dc=128 -indexname sfx-idx
   rm -f sfx-idx.* sfx-idx${maxdepth}.*
 done
 echo "${filenames}"
