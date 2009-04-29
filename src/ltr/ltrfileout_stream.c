@@ -23,6 +23,7 @@
 #include "core/fasta.h"
 #include "core/hashmap.h"
 #include "core/ma.h"
+#include "core/minmax.h"
 #include "core/range.h"
 #include "core/str.h"
 #include "core/unused_api.h"
@@ -259,12 +260,14 @@ int gt_ltrfileout_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
     elemrng = gt_genome_node_get_range((GtGenomeNode*) ls->element.mainnode);
     getencseqSeqinfo(&seqinfo, ls->encseq, seqnr);
 
-    ls->element.seqid = gt_cstr_dup(retrievesequencedescription(&seqid_len,
-                                                                ls->encseq,
-                                                                seqnr));
+    ls->element.seqid = gt_calloc(ls->seqnamelen+1, sizeof (char));
+    snprintf(ls->element.seqid,
+             MIN(seqid_len, ls->seqnamelen)+1,
+             "%s",
+             retrievesequencedescription(&seqid_len, ls->encseq, seqnr));
     gt_cstr_rep(ls->element.seqid, ' ', '_');
-    if (strlen(ls->element.seqid) > ls->seqnamelen)
-      ls->element.seqid[ls->seqnamelen-1] = '\0';
+    if (seqid_len > ls->seqnamelen)
+      ls->element.seqid[ls->seqnamelen] = '\0';
 
     (void) gt_ltrelement_format_description(&ls->element, ls->seqnamelen,
                                             desc, GT_MAXFASTAHEADER-1);
