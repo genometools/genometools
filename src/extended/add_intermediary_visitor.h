@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -15,15 +15,20 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ADD_INTRONS_VISITOR_H
-#define ADD_INTRONS_VISITOR_H
+#ifndef ADD_INTERMEDIARY_VISITOR_H
+#define ADD_INTERMEDIARY_VISITOR_H
 
 /* implements the ``genome visitor'' interface */
-typedef struct GtAddIntronsVisitor GtAddIntronsVisitor;
+typedef struct GtAddIntermediaryVisitor GtAddIntermediaryVisitor;
 
 #include "extended/node_visitor.h"
 
-const GtNodeVisitorClass* gt_add_introns_visitor_class(void);
-GtNodeVisitor*            gt_add_introns_visitor_new(void);
+const GtNodeVisitorClass* gt_add_intermediary_visitor_class(void);
+/* Adds features of type <intermediary_type> between features of type
+   <outside_type>. */
+GtNodeVisitor*            gt_add_intermediary_visitor_new(const char
+                                                          *outside_type,
+                                                          const char
+                                                          *intermediary_type);
 
 #endif

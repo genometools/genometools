@@ -18,7 +18,7 @@
 #include "core/option.h"
 #include "core/versionfunc.h"
 #include "core/warning_api.h"
-#include "extended/add_introns_stream.h"
+#include "extended/add_intermediary_stream.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/splice_site_info_stream.h"
@@ -100,8 +100,11 @@ int gt_splicesiteinfo(int argc, const char **argv, GtError *err)
 
   if (!had_err) {
     /* create addintrons stream (if necessary) */
-    if (arguments.addintrons)
-      add_introns_stream = gt_add_introns_stream_new(gff3_in_stream);
+    if (arguments.addintrons) {
+      add_introns_stream = gt_add_intermediary_stream_new(gff3_in_stream,
+                                                          gt_ft_exon,
+                                                          gt_ft_intron);
+    }
 
     /* create extract feature stream */
     splice_site_info_stream = gt_splice_site_info_stream_new(

@@ -28,7 +28,7 @@
 #include "core/unused_api.h"
 #include "core/versionfunc.h"
 #include "core/warning_api.h"
-#include "extended/add_introns_stream.h"
+#include "extended/add_intermediary_stream.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/bed_in_stream.h"
 #include "extended/gtf_in_stream.h"
@@ -304,7 +304,9 @@ int gt_sketch(int argc, const char **argv, GtError *err)
     /* create add introns stream if -addintrons was used */
     if (arguments.addintrons) {
       sort_stream = gt_sort_stream_new(last_stream);
-      add_introns_stream = gt_add_introns_stream_new(sort_stream);
+      add_introns_stream = gt_add_intermediary_stream_new(sort_stream,
+                                                          gt_ft_exon,
+                                                          gt_ft_intron);
       last_stream = add_introns_stream;
     }
 

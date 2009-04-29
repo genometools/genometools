@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -15,16 +15,22 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ADD_INTRONS_STREAM_H
-#define ADD_INTRONS_STREAM_H
+#ifndef ADD_INTERMEDIARY_STREAM_H
+#define ADD_INTERMEDIARY_STREAM_H
 
 #include <stdio.h>
 #include "extended/node_stream_api.h"
 
 /* implements the ``genome_stream'' interface */
-typedef struct GtAddIntronsStream GtAddIntronsStream;
+typedef struct GtAddIntermediaryStream GtAddIntermediaryStream;
 
-const GtNodeStreamClass* gt_add_introns_stream_class(void);
-GtNodeStream*            gt_add_introns_stream_new(GtNodeStream*);
+const GtNodeStreamClass* gt_add_intermediary_stream_class(void);
+/* Adds features of type <intermediary_type> between features of type
+   <outside_type>. */
+GtNodeStream*            gt_add_intermediary_stream_new(GtNodeStream*,
+                                                        const char
+                                                        *outside_type,
+                                                        const char
+                                                        *intermediary_type);
 
 #endif
