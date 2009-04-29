@@ -32,9 +32,9 @@ struct GtMergefeatVisitor {
 #define gt_mergefeat_visitor_cast(GV)\
         gt_node_visitor_cast(gt_mergefeat_visitor_class(), GV)
 
-static void mergefeat_visitor_free(GtNodeVisitor *gv)
+static void mergefeat_visitor_free(GtNodeVisitor *nv)
 {
-  GtMergefeatVisitor *mergefeat_visitor = gt_mergefeat_visitor_cast(gv);
+  GtMergefeatVisitor *mergefeat_visitor = gt_mergefeat_visitor_cast(nv);
   gt_assert(mergefeat_visitor);
   gt_hashmap_delete(mergefeat_visitor->hm);
   gt_array_delete(mergefeat_visitor->nodes_to_remove);
@@ -80,32 +80,32 @@ static int mergefeat_in_children(GtGenomeNode *gn, void *data,
 static int mergefeat_if_necessary(GtGenomeNode *gn, void *data, GtError *err)
 {
   GtMergefeatVisitor *v = (GtMergefeatVisitor*) data;
-  GtFeatureNode *gf;
+  GtFeatureNode *fn;
   gt_error_check(err);
-  gf = gt_genome_node_cast(gt_feature_node_class(), gn);
-  gt_assert(gf);
+  fn = gt_genome_node_cast(gt_feature_node_class(), gn);
+  gt_assert(fn);
   v->current_tree = gn;
   gt_hashmap_reset(v->hm);
   return gt_genome_node_traverse_direct_children(gn, v, mergefeat_in_children,
                                                  err);
 }
 
-static int mergefeat_visitor_genome_feature(GtNodeVisitor *gv,
-                                            GtFeatureNode *gf, GtError *err)
+static int mergefeat_visitor_feature_node(GtNodeVisitor *nv,
+                                          GtFeatureNode *fn, GtError *err)
 {
   GtMergefeatVisitor *v;
   GtGenomeNode *leaf;
   unsigned long i;
   int had_err = 0;
   gt_error_check(err);
-  v = gt_mergefeat_visitor_cast(gv);
+  v = gt_mergefeat_visitor_cast(nv);
   gt_array_reset(v->nodes_to_remove);
-  had_err = gt_genome_node_traverse_children((GtGenomeNode*) gf, v,
+  had_err = gt_genome_node_traverse_children((GtGenomeNode*) fn, v,
                                           mergefeat_if_necessary, false, err);
   if (!had_err) {
     for (i = 0; i < gt_array_size(v->nodes_to_remove); i++) {
       leaf = *(GtGenomeNode**) gt_array_get(v->nodes_to_remove, i);
-      gt_genome_node_remove_leaf((GtGenomeNode*) gf, leaf);
+      gt_genome_node_remove_leaf((GtGenomeNode*) fn, leaf);
       gt_genome_node_delete(gt_feature_node_cast(leaf));
     }
   }
@@ -114,23 +114,23 @@ static int mergefeat_visitor_genome_feature(GtNodeVisitor *gv,
 
 const GtNodeVisitorClass* gt_mergefeat_visitor_class()
 {
-  static const GtNodeVisitorClass *gvc = NULL;
-  if (!gvc) {
-    gvc = gt_node_visitor_class_new(sizeof (GtMergefeatVisitor),
+  static const GtNodeVisitorClass *nvc = NULL;
+  if (!nvc) {
+    nvc = gt_node_visitor_class_new(sizeof (GtMergefeatVisitor),
                                     mergefeat_visitor_free,
                                     NULL,
-                                    mergefeat_visitor_genome_feature,
+                                    mergefeat_visitor_feature_node,
                                     NULL,
                                     NULL);
   }
-  return gvc;
+  return nvc;
 }
 
 GtNodeVisitor* gt_mergefeat_visitor_new(void)
 {
-  GtNodeVisitor *gv = gt_node_visitor_create(gt_mergefeat_visitor_class());
-  GtMergefeatVisitor *mergefeat_visitor = gt_mergefeat_visitor_cast(gv);
+  GtNodeVisitor *nv = gt_node_visitor_create(gt_mergefeat_visitor_class());
+  GtMergefeatVisitor *mergefeat_visitor = gt_mergefeat_visitor_cast(nv);
   mergefeat_visitor->hm = gt_hashmap_new(HASH_STRING, NULL, NULL);
   mergefeat_visitor->nodes_to_remove = gt_array_new(sizeof (GtGenomeNode*));
-  return gv;
+  return nv;
 }
