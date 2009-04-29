@@ -321,7 +321,7 @@ Test do
 end
 
 Name "gt gff3 test option -mergefeat"
-Keywords "gt_gff3"
+Keywords "gt_gff3 mergefeat"
 Test do
   run_test "#{$bin}gt gff3 -sort -mergefeat #{$testdata}mergefeat.gff3"
   run "diff #{$last_stdout} #{$testdata}mergefeat.out"
