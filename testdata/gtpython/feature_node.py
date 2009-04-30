@@ -47,6 +47,13 @@ if __name__ == "__main__":
         raise TestFailedError
     if not fn.has_type("type"):
         raise TestFailedError
+    if not fn.get_type() == "type":
+        raise TestFailedError
+    fn.set_type("foo")
+    if not fn.has_type("foo"):
+        raise TestFailedError
+    if not fn.get_type() == "foo":
+        raise TestFailedError
     if not fn.get_strand() == "+":
         raise TestFailedError
     fn2 = FeatureNode.create_new("test", "type2", 200, 300, "+")
