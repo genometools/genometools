@@ -297,6 +297,12 @@ const char* gt_feature_node_get_type(const GtFeatureNode *fn)
   return fn->type;
 }
 
+void gt_feature_node_set_type(GtFeatureNode *fn, const char *type)
+{
+  gt_assert(fn && type);
+  fn->type = gt_symbol(type);
+}
+
 bool gt_feature_node_has_type(GtFeatureNode *fn, const char *type)
 {
   gt_assert(fn && type);

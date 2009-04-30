@@ -57,6 +57,10 @@ void          gt_feature_node_set_source(GtFeatureNode *feature_node,
    Corresponds to column 3 of regular GFF3 lines. */
 const char*   gt_feature_node_get_type(const GtFeatureNode *feature_node);
 
+/* Set the type of <feature_node> to <type>. */
+void          gt_feature_node_set_type(GtFeatureNode *feature_node,
+                                       const char *type);
+
 /* Return <true> if <feature_node> has given <type>, <false> otherwise. */
 bool          gt_feature_node_has_type(GtFeatureNode *feature_node,
                                        const char *type);
