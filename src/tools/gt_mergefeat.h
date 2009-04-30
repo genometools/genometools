@@ -19,7 +19,7 @@
 
 #include "core/tool.h"
 
-/* the mergefeat ool */
+/* the merge feature tool */
 GtTool* gt_mergefeat(void);
 
 #endif

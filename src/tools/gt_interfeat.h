@@ -19,7 +19,7 @@
 
 #include "core/tool.h"
 
-/* the interfeat ool */
+/* the intermediary feature tool */
 GtTool* gt_interfeat(void);
 
 #endif
