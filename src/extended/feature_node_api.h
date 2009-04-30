@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -55,7 +55,7 @@ void          gt_feature_node_set_source(GtFeatureNode *feature_node,
 
 /* Return the type of <feature_node>.
    Corresponds to column 3 of regular GFF3 lines. */
-const char*   gt_feature_node_get_type(GtFeatureNode *feature_node);
+const char*   gt_feature_node_get_type(const GtFeatureNode *feature_node);
 
 /* Return <true> if <feature_node> has given <type>, <false> otherwise. */
 bool          gt_feature_node_has_type(GtFeatureNode *feature_node,

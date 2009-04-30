@@ -291,7 +291,7 @@ const char* gt_feature_node_get_source(GtFeatureNode *fn)
   return fn->source ? gt_str_get(fn->source) : ".";
 }
 
-const char* gt_feature_node_get_type(GtFeatureNode *fn)
+const char* gt_feature_node_get_type(const GtFeatureNode *fn)
 {
   gt_assert(fn);
   return fn->type;
