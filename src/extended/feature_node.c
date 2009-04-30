@@ -89,7 +89,7 @@ static void feature_node_free(GtGenomeNode *gn)
   gt_dlist_delete(fn->children);
 }
 
-const char* gt_feature_node_get_attribute(GtFeatureNode *fn,
+const char* gt_feature_node_get_attribute(const GtFeatureNode *fn,
                                           const char *attr_name)
 {
   if (!fn->attributes)
@@ -105,7 +105,7 @@ static void store_attribute(const char *attr_name,
   gt_str_array_add_cstr(list, attr_name);
 }
 
-GtStrArray* gt_feature_node_get_attribute_list(GtFeatureNode *fn)
+GtStrArray* gt_feature_node_get_attribute_list(const GtFeatureNode *fn)
 {
   GtStrArray *list = gt_str_array_new();
   if (fn->attributes)
@@ -285,10 +285,18 @@ GtGenomeNode* gt_feature_node_new_standard_gene(void)
   return fn;
 }
 
-const char* gt_feature_node_get_source(GtFeatureNode *fn)
+const char* gt_feature_node_get_source(const GtFeatureNode *fn)
 {
   gt_assert(fn);
   return fn->source ? gt_str_get(fn->source) : ".";
+}
+
+bool gt_feature_node_has_source(const GtFeatureNode *fn)
+{
+  gt_assert(fn);
+  if (!fn->source || !strcmp(gt_str_get(fn->source), "."))
+    return false;
+  return true;
 }
 
 const char* gt_feature_node_get_type(const GtFeatureNode *fn)
@@ -379,7 +387,7 @@ float gt_feature_node_get_score(const GtFeatureNode *fn)
   return fn->score;
 }
 
-GtStrand gt_feature_node_get_strand(GtFeatureNode *fn)
+GtStrand gt_feature_node_get_strand(const GtFeatureNode *fn)
 {
   gt_assert(fn);
   return (fn->bit_field >> STRAND_OFFSET) & STRAND_MASK;
@@ -392,7 +400,7 @@ void gt_feature_node_set_strand(GtFeatureNode *fn, GtStrand strand)
   fn->bit_field |= strand << STRAND_OFFSET;
 }
 
-GtPhase gt_feature_node_get_phase(GtFeatureNode *fn)
+GtPhase gt_feature_node_get_phase(const GtFeatureNode *fn)
 {
   gt_assert(fn);
   return (fn->bit_field >> PHASE_OFFSET) & PHASE_MASK;
