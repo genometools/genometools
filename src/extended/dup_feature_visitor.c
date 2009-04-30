@@ -24,6 +24,7 @@
 #include "extended/node_visitor_rep.h"
 
 struct GtDupFeatureVisitor {
+  const GtNodeVisitor parent_instance;
   char *dest_type,
        *source_type;
 };
@@ -78,14 +79,17 @@ static int dup_feature_visitor_feature_node(GtNodeVisitor *nv,
   gt_error_check(err);
   v = gt_dup_feature_visitor_cast(nv);
   fni = gt_feature_node_iterator_new(fn);
-  while ((node = gt_feature_node_iterator_next(fni)) && node != fn) {
-    child_iterator = gt_feature_node_iterator_new_direct(node);
-    while ((child = gt_feature_node_iterator_next(child_iterator))) {
-      if (gt_feature_node_has_type(child, v->source_type)) {
-        gt_feature_node_add_child(node, duplicate_feature(child, v->dest_type));
+  while ((node = gt_feature_node_iterator_next(fni))) {
+    if (node != fn) {
+      child_iterator = gt_feature_node_iterator_new_direct(node);
+      while ((child = gt_feature_node_iterator_next(child_iterator))) {
+        if (gt_feature_node_has_type(child, v->source_type)) {
+          gt_feature_node_add_child(node,
+                                    duplicate_feature(child,v->dest_type));
+        }
       }
+      gt_feature_node_iterator_delete(child_iterator);
     }
-    gt_feature_node_iterator_delete(child_iterator);
   }
   gt_feature_node_iterator_delete(fni);
   return 0;
