@@ -21,7 +21,7 @@
 #include "core/outputfile.h"
 #include "core/undef.h"
 #include "core/versionfunc.h"
-#include "extended/inter_feature_stream.h"
+#include "extended/add_introns_stream.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream.h"
@@ -243,8 +243,7 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
   /* create addintrons stream (if necessary) */
   if (!had_err && arguments->addintrons) {
     gt_assert(last_stream);
-    add_introns_stream = gt_inter_feature_stream_new(last_stream, gt_ft_exon,
-                                                     gt_ft_intron);
+    add_introns_stream = gt_add_introns_stream_new(last_stream);
     last_stream = add_introns_stream;
   }
 
