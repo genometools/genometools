@@ -698,49 +698,50 @@ static void preparethispart(Sfxiterator *sfi)
     deliverthetime(stdout,sfi->mtime,"sorting the buckets");
   }
   partwidth = stpgetcurrentsumofwdith(sfi->part,sfi->suftabparts);
-  if (sfi->sfxstrategy.differencecover > 0)
+  if (sfi->sfxstrategy.ssortmaxdepth.defined &&
+      sfi->prefixlength == sfi->sfxstrategy.ssortmaxdepth.valueunsignedint)
   {
-    differencecovers_check((Seqpos) 1000,sfi->totallength);
+    if (!sfi->sfxstrategy.streamsuftab)
+    {
+      qsufsort(sfi->suftab.sortspace,
+               -1,
+               &sfi->suftab.longest.valueseqpos,
+               sfi->encseq,
+               sfi->readmode,
+               sfi->currentmincode,
+               sfi->currentmaxcode,
+               partwidth,
+               sfi->bcktab,
+               sfi->numofchars,
+               sfi->prefixlength,
+               false,
+               true,
+               sfi->outlcpinfo);
+      sfi->suftab.longest.defined = true;
+    }
   } else
   {
-    if (sfi->sfxstrategy.ssortmaxdepth.defined &&
-        sfi->prefixlength == sfi->sfxstrategy.ssortmaxdepth.valueunsignedint)
+    /*
+    if (sfi->sfxstrategy.differencecover > 0)
     {
-      if (!sfi->sfxstrategy.streamsuftab)
-      {
-        qsufsort(sfi->suftab.sortspace,
-                 -1,
-                 &sfi->suftab.longest.valueseqpos,
-                 sfi->encseq,
-                 sfi->readmode,
-                 sfi->currentmincode,
-                 sfi->currentmaxcode,
-                 partwidth,
-                 sfi->bcktab,
-                 sfi->numofchars,
-                 sfi->prefixlength,
-                 false,
-                 true,
-                 sfi->outlcpinfo);
-        sfi->suftab.longest.defined = true;
-      }
-    } else
-    {
-      gt_assert(!sfi->sfxstrategy.streamsuftab);
-      sortallbuckets (&sfi->suftab,
-                      sfi->encseq,
-                      sfi->readmode,
-                      sfi->currentmincode,
-                      sfi->currentmaxcode,
-                      partwidth,
-                      sfi->bcktab,
-                      sfi->numofchars,
-                      sfi->prefixlength,
-                      sfi->outlcpinfo,
-                      &sfi->sfxstrategy,
-                      &sfi->bucketiterstep,
-                      sfi->verboseinfo);
+      differencecovers_check((Seqpos) 1000,sfi->totallength);
     }
+    */
+    printf("differencecover = %u\n",sfi->sfxstrategy.differencecover);
+    gt_assert(!sfi->sfxstrategy.streamsuftab);
+    sortallbuckets (&sfi->suftab,
+                    sfi->encseq,
+                    sfi->readmode,
+                    sfi->currentmincode,
+                    sfi->currentmaxcode,
+                    partwidth,
+                    sfi->bcktab,
+                    sfi->numofchars,
+                    sfi->prefixlength,
+                    sfi->outlcpinfo,
+                    &sfi->sfxstrategy,
+                    &sfi->bucketiterstep,
+                    sfi->verboseinfo);
   }
   sfi->part++;
 }

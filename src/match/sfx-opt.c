@@ -346,6 +346,7 @@ static OPrval parse_options(int *parsed_args,
               if (sscanf(gt_str_get(so->str_maxdepth),"%ld",&readint) == 1 &&
                   readint >= 1L)
               {
+                so->sfxstrategy.ssortmaxdepth.defined = true;
                 so->sfxstrategy.ssortmaxdepth.valueunsignedint
                   = (unsigned int) readint;
               } else
@@ -372,14 +373,24 @@ static OPrval parse_options(int *parsed_args,
       }
       if (oprval != OPTIONPARSER_ERROR)
       {
-        so->sfxstrategy.ssortmaxdepth.defined = true;
-        if (so->sfxstrategy.ssortmaxdepth.valueunsignedint !=
-            MAXDEPTH_AUTOMATIC)
+        if (so->sfxstrategy.differencecover == 0)
         {
-          so->sfxstrategy.cmpcharbychar = true;
+          so->sfxstrategy.ssortmaxdepth.defined = true;
+          if (so->sfxstrategy.ssortmaxdepth.valueunsignedint !=
+              MAXDEPTH_AUTOMATIC)
+          {
+            so->sfxstrategy.cmpcharbychar = true;
+          }
         }
       }
     }
+  }
+  if (so->sfxstrategy.differencecover > 0 && optionlcp != NULL &&
+      gt_option_is_set(optionlcp))
+  {
+    gt_error_set(err,"option -maxdepth with argument dc can not be combined "
+                     "with option lcp");
+    oprval = OPTIONPARSER_ERROR;
   }
   if (oprval == OPTIONPARSER_OK && !doesa)
   {
