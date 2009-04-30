@@ -69,7 +69,8 @@ static GtFeatureNode* duplicate_feature(const GtFeatureNode *fn,
 }
 
 static int dup_feature_visitor_feature_node(GtNodeVisitor *nv,
-                                            GtFeatureNode *fn, GtError *err)
+                                            GtFeatureNode *fn,
+                                            GT_UNUSED GtError *err)
 {
   GtFeatureNodeIterator *fni, *child_iterator;
   GtFeatureNode *node, *child;
