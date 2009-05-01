@@ -1020,7 +1020,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
   {
     if (bsr->sfxstrategy->differencecover > 0)
     {
-      if (depth >= bsr->sfxstrategy->differencecover)
+      if (depth >= (Seqpos) bsr->sfxstrategy->differencecover)
       {
         printf("sort interval of depth %lu\n",(unsigned long) depth);
         return;
@@ -2062,4 +2062,37 @@ void sortallbuckets(Suftab *suftab,
   showverbose(verboseinfo,"countbltriesort=%lu",countbltriesort);
   showverbose(verboseinfo,"countcountingsort=%lu",countcountingsort);
   showverbose(verboseinfo,"countqsort=%lu",countqsort);
+}
+
+void sortsamplesuffixes(Seqpos *sample,
+                        unsigned long samplesize,
+                        const Encodedsequence *encseq,
+                        Readmode readmode,
+                        unsigned int numofchars,
+                        unsigned int prefixlength,
+                        const Sfxstrategy *sfxstrategy,
+                        Verboseinfo *verboseinfo)
+{
+  Bentsedgresources bsr;
+
+  initBentsedgresources(&bsr,
+                        NULL,
+                        NULL,
+                        encseq,
+                        readmode,
+                        NULL, /* bcktab unused */
+                        0,    /* mincode unused */
+                        0,    /* maxcode unused */
+                        0,    /* partwidth unused */
+                        numofchars,
+                        prefixlength,
+                        NULL,  /* outlcpinfo unused */
+                        sfxstrategy,
+                        verboseinfo);
+  bentleysedgewick(&bsr, sample, sample + samplesize - 1, 0);
+  wrapBentsedgresources(&bsr,
+                        0, /* partwidth value unused because lcptab == NULL */
+                        NULL,
+                        NULL,
+                        NULL);
 }
