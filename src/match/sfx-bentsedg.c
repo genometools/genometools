@@ -104,7 +104,7 @@
               if ((DEPTH) >= \
                   (Seqpos) bsr->sfxstrategy->differencecover)\
               {\
-                printf("sort interval of depth %lu\n",(unsigned long) depth);\
+                printf("sort interval of depth %lu\n",(unsigned long) (DEPTH));\
               } else\
               {\
                 PUSHMKVSTACK(LEFT,RIGHT,DEPTH,ORDERTYPE);\
