@@ -20,11 +20,13 @@
 
 #include <stdbool.h>
 #include "seqpos-def.h"
+#include "encseq-def.h"
 
 typedef struct Differencecover Differencecover;
 
-void differencecovers_check(Seqpos maxcheck,Seqpos totallength);
-Differencecover *differencecover_new(unsigned int vparam,Seqpos totallength);
+void differencecovers_check(Seqpos maxcheck,const Encodedsequence *encseq);
+Differencecover *differencecover_new(unsigned int vparam,
+                                     const Encodedsequence *encseq);
 void differencecover_delete(Differencecover *dcov);
 unsigned int differencecover_rank(const Differencecover *dcov,Seqpos pos);
 unsigned int differencecover_offset(const Differencecover *dcov,

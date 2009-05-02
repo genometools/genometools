@@ -723,7 +723,7 @@ static void preparethispart(Sfxiterator *sfi)
   {
     if (sfi->sfxstrategy.differencecover > 0)
     {
-      differencecovers_check((Seqpos) 1000,sfi->totallength);
+      differencecovers_check((Seqpos) 1000,sfi->encseq);
     }
     printf("differencecover = %u\n",sfi->sfxstrategy.differencecover);
     gt_assert(!sfi->sfxstrategy.streamsuftab);

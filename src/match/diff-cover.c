@@ -126,6 +126,8 @@ static void filldiff2pos(Differencecover *dcov)
   }
 }
 
+#ifdef WITHcomputehvalue
+
 /* XXX: following function is probably not used */
 
 static unsigned int computehvalue(const Differencecover *dcov,
@@ -154,8 +156,10 @@ static unsigned int computehvalue(const Differencecover *dcov,
   gt_assert(false);
   return 0;
 }
+#endif
 
-Differencecover *differencecover_new(unsigned int vparam,Seqpos totallength)
+Differencecover *differencecover_new(unsigned int vparam,
+                                     const Encodedsequence *encseq)
 {
   size_t logmod;
   unsigned int offset = 0, v = 1U;
@@ -185,10 +189,12 @@ Differencecover *differencecover_new(unsigned int vparam,Seqpos totallength)
   dcov->logmod = (unsigned int) logmod;
   dcov->vparam = 1U << logmod;
   dcov->vmodmask = dcov->vparam-1;
+#ifdef WITHcomputehvalue
   dcov->hvalue = computehvalue(dcov,totallength);
+#endif
   dcov->sample = NULL;
   dcov->samplesize = 0;
-  dcov->totallength = totallength;
+  dcov->totallength = getencseqtotallength(encseq);
   fillcoverrank(dcov);
   filldiff2pos(dcov);
   return dcov;
@@ -282,23 +288,23 @@ static void differencecover_sample(Differencecover *dcov,bool withcheck)
   gt_free(sampleidxused);
 }
 
-void differencecovers_check(Seqpos maxcheck,Seqpos totallength)
+void differencecovers_check(Seqpos maxcheck,const Encodedsequence *encseq)
 {
   Differencecover *dcov;
   size_t logmod, next = 0;
   unsigned int j, vparam;
   Seqpos pos1, pos2;
 
-  if (maxcheck > totallength)
+  if (maxcheck > getencseqtotallength(encseq))
   {
-    maxcheck = totallength;
+    maxcheck = getencseqtotallength(encseq);
   }
   for (logmod = 0;
        logmod < sizeof (differencecoversizes)/sizeof (differencecoversizes[0]);
        logmod++)
   {
     vparam = 1U << logmod;
-    dcov = differencecover_new(vparam,totallength);
+    dcov = differencecover_new(vparam,encseq);
     if (dcov == NULL)
     {
       fprintf(stderr,"no difference cover for v=%u\n",vparam);
