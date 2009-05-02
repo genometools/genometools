@@ -721,12 +721,10 @@ static void preparethispart(Sfxiterator *sfi)
     }
   } else
   {
-    /*
     if (sfi->sfxstrategy.differencecover > 0)
     {
       differencecovers_check((Seqpos) 1000,sfi->totallength);
     }
-    */
     printf("differencecover = %u\n",sfi->sfxstrategy.differencecover);
     gt_assert(!sfi->sfxstrategy.streamsuftab);
     sortallbuckets (&sfi->suftab,

@@ -25,6 +25,11 @@ suffixerator()
   ${RUNNER} gt suffixerator -v -showtime -dna -tis -lcp -suf -des -ssp -db ${filename} $*
 }
 
+suffixeratoronlysuf()
+{
+  ${RUNNER} gt suffixerator -v -showtime -dna -tis -suf -db ${filename} $*
+}
+
 sfxmap()
 {
   gt dev sfxmap -tis -lcp -suf $*
@@ -50,7 +55,7 @@ do
   sfxmap sfx-idx
   suffixerator -parts 3 -maxdepth abs -indexname sfx-idx
   sfxmap sfx-idx
-  suffixerator -maxdepth dc=128 -indexname sfx-idx
+  suffixeratoronlysuf -maxdepth dc=128 -indexname sfx-idx
   rm -f sfx-idx.* sfx-idx${maxdepth}.*
 done
 echo "${filenames}"

@@ -23,12 +23,11 @@
 
 typedef struct Differencecover Differencecover;
 
+void differencecovers_check(Seqpos maxcheck,Seqpos totallength);
 Differencecover *differencecover_new(unsigned int vparam,Seqpos totallength);
 void differencecover_delete(Differencecover *dcov);
-void differencecovers_check(Seqpos maxcheck,Seqpos totallength);
 unsigned int differencecover_rank(const Differencecover *dcov,Seqpos pos);
 unsigned int differencecover_offset(const Differencecover *dcov,
                                     Seqpos pos1,Seqpos pos2);
-void differencecover_sample(const Differencecover *dcov,Seqpos totallength);
 
 #endif

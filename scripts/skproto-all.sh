@@ -31,6 +31,7 @@ bcktab.c
 bltrie-ssort.c
 cgr_spacedseed.c
 cutendpfx.c
+diff-cover.c
 dist-short.c
 echoseq.c
 eis-blockcomp.c

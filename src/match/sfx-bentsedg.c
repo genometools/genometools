@@ -104,7 +104,8 @@
               if ((DEPTH) >= \
                   (Seqpos) bsr->sfxstrategy->differencecover)\
               {\
-                printf("sort interval of depth %lu\n",(unsigned long) (DEPTH));\
+                /*printf("sort interval of depth %lu\n",\
+                       (unsigned long) (DEPTH));*/\
               } else\
               {\
                 PUSHMKVSTACK(LEFT,RIGHT,DEPTH,ORDERTYPE);\
@@ -1022,7 +1023,9 @@ static void bentleysedgewick(Bentsedgresources *bsr,
     {
       if (depth >= (Seqpos) bsr->sfxstrategy->differencecover)
       {
+        /*
         printf("sort interval of depth %lu\n",(unsigned long) depth);
+        */
         return;
       }
     } else
