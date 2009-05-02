@@ -32,7 +32,7 @@ typedef unsigned long Diffvalue;
 
 struct Differencecover
 {
-  unsigned int vparam, logmod, size, vmodmask, 
+  unsigned int vparam, logmod, size, vmodmask,
                hvalue,  /* not necessary */
                *coverrank;
   Diffvalue *diffvalues, *diff2pos;

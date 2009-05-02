@@ -4254,29 +4254,25 @@ void multicharactercompare_withtest(const Encodedsequence *encseq,
   }
 }
 
-Codetype extractprefixcode(unsigned int *unitsnotspecial,
-                           const Encodedsequence *encseq,
-                           const Codetype **multimappower,
-                           Seqpos frompos,
-                           unsigned int len)
+static Codetype extractprefixcodeViadirectaccess(unsigned int *unitsnotspecial,
+                                                 const Encodedsequence *encseq,
+                                                 Codetype *filltable,
+                                                 Readmode readmode,
+                                                 const Codetype **multimappower,
+                                                 Seqpos frompos,
+                                                 unsigned int len)
 {
   Seqpos pos;
   Codetype code = 0;
   GtUchar cc;
 
-  gt_assert(len > 0);
-  gt_assert(!possibletocmpbitwise(encseq));
+  gt_assert(len > 0 && encseq->sat == Viadirectaccess &&
+            readmode == Forwardmode);
   for (pos=frompos, *unitsnotspecial = 0;
        pos < encseq->totallength && *unitsnotspecial < len;
        pos++, (*unitsnotspecial)++)
   {
-    if (encseq->sat == Viadirectaccess)
-    {
-      cc = encseq->plainseq[pos];
-    } else
-    {
-      cc = delivercharViabytecompress(encseq,pos);
-    }
+    cc = encseq->plainseq[pos];
     if (ISNOTSPECIAL(cc))
     {
       code += multimappower[*unitsnotspecial][cc];
@@ -4285,5 +4281,115 @@ Codetype extractprefixcode(unsigned int *unitsnotspecial,
       break;
     }
   }
+  if (*unitsnotspecial < len)
+  {
+    code |= (Codetype) filltable[*unitsnotspecial];
+  }
   return code;
+}
+
+static Codetype extractprefixcodeViabytecompress(unsigned int *unitsnotspecial,
+                                                 const Encodedsequence *encseq,
+                                                 Codetype *filltable,
+                                                 Readmode readmode,
+                                                 const Codetype **multimappower,
+                                                 Seqpos frompos,
+                                                 unsigned int len)
+{
+  Seqpos pos;
+  Codetype code = 0;
+  GtUchar cc;
+
+  gt_assert(len > 0 && encseq->sat == Viabytecompress &&
+            readmode == Forwardmode);
+  for (pos=frompos, *unitsnotspecial = 0;
+       pos < encseq->totallength && *unitsnotspecial < len;
+       pos++, (*unitsnotspecial)++)
+  {
+    cc = delivercharViabytecompress(encseq,pos);
+    if (ISNOTSPECIAL(cc))
+    {
+      code += multimappower[*unitsnotspecial][cc];
+    } else
+    {
+      break;
+    }
+  }
+  if (*unitsnotspecial < len)
+  {
+    code |= (Codetype) filltable[*unitsnotspecial];
+  }
+  return code;
+}
+
+static Codetype extractprefixcodeTBE(unsigned int *unitsnotspecial,
+                                     const Encodedsequence *encseq,
+                                     Codetype *filltable,
+                                     Readmode readmode,
+                                     Encodedsequencescanstate *esr,
+                                     Seqpos frompos,
+                                     unsigned int len)
+{
+  EndofTwobitencoding etbe;
+  bool fwd = ISDIRREVERSE(readmode) ? false : true;
+  Codetype code;
+
+  initEncodedsequencescanstategeneric(esr,encseq,fwd,frompos);
+  extract2bitenc(fwd,&etbe,encseq,esr,frompos);
+  if (etbe.unitsnotspecial >= len)
+  {
+    code = (Codetype) (etbe.tbe >> MULT2(UNITSIN2BITENC - len));
+    *unitsnotspecial = len;
+  } else /* etbe.unitsnotspecial < rmnsufinfo->prefixlength */
+  {
+    if (etbe.unitsnotspecial > 0)
+    {
+      code = (Codetype)
+             (etbe.tbe >> MULT2(UNITSIN2BITENC - len))
+             | filltable[etbe.unitsnotspecial];
+      *unitsnotspecial = etbe.unitsnotspecial;
+    } else
+    {
+      code = 0;
+      *unitsnotspecial = 0;
+    }
+  }
+  return code;
+}
+
+Codetype extractprefixcode(unsigned int *unitsnotspecial,
+                           const Encodedsequence *encseq,
+                           Codetype *filltable,
+                           Readmode readmode,
+                           Encodedsequencescanstate *esr,
+                           const Codetype **multimappower,
+                           Seqpos frompos,
+                           unsigned int len)
+{
+  switch (encseq->sat)
+  {
+    case Viadirectaccess: return extractprefixcodeViadirectaccess(
+                                        unitsnotspecial,
+                                        encseq,
+                                        filltable,
+                                        readmode,
+                                        multimappower,
+                                        frompos,
+                                        len);
+    case Viabytecompress: return extractprefixcodeViabytecompress(
+                                        unitsnotspecial,
+                                        encseq,
+                                        filltable,
+                                        readmode,
+                                        multimappower,
+                                        frompos,
+                                        len);
+    default: return extractprefixcodeTBE(unitsnotspecial,
+                                         encseq,
+                                         filltable,
+                                         readmode,
+                                         esr,
+                                         frompos,
+                                         len);
+  }
 }

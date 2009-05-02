@@ -565,6 +565,16 @@ static void inversesuftabrel_get(Itvfullentry *itvfullentry,
     itvfullentry->rank = rmnsufinfo->totallength;
     return;
   }
+  code = extractprefixcode(&itvfullentry->unitsnotspecial,
+                           rmnsufinfo->encseq,
+                           rmnsufinfo->filltable,
+                           rmnsufinfo->readmode,
+                           rmnsufinfo->esr,
+                           rmnsufinfo->multimappower,
+                           startpos,
+                           rmnsufinfo->prefixlength);
+
+  /*
   if (possibletocmpbitwise(rmnsufinfo->encseq))
   {
     EndofTwobitencoding etbe;
@@ -578,7 +588,7 @@ static void inversesuftabrel_get(Itvfullentry *itvfullentry,
       code = (Codetype) (etbe.tbe >>
                          MULT2(UNITSIN2BITENC - rmnsufinfo->prefixlength));
       itvfullentry->unitsnotspecial = rmnsufinfo->prefixlength;
-    } else /* etbe.unitsnotspecial < rmnsufinfo->prefixlength */
+    } else
     {
       if (etbe.unitsnotspecial > 0)
       {
@@ -605,6 +615,7 @@ static void inversesuftabrel_get(Itvfullentry *itvfullentry,
       code |= (Codetype) rmnsufinfo->filltable[itvfullentry->unitsnotspecial];
     }
   }
+  */
   /*
   printf("startpos=%lu,unitsnotspecial=%u,code=%u\n",
           (unsigned long) startpos,
