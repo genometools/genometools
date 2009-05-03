@@ -286,11 +286,12 @@ static void differencecover_sample(Differencecover *dcov,bool withcheck)
       diffptr = dcov->diffvalues;
     }
   }
-  printf("%lu positions are sampled (%.2f) wasted %lu\n",
+  printf("%lu positions are sampled (%.2f) wasted=%lu, pl=%u\n",
                                   dcov->samplesize,
                                   100.0 *
                                   (double) dcov->samplesize/dcov->totallength,
-                                  maxsamplesize - dcov->samplesize);
+                                  maxsamplesize - dcov->samplesize,
+                                  dcov->prefixlength);
   gt_free(sampleidxused);
 }
 

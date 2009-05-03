@@ -382,7 +382,6 @@ static int inputsuffixarray(bool map,
     if (map)
     {
       suffixarray->bcktab = mapbcktab(indexname,
-                                      totallength,
                                       getencseqAlphabetnumofchars(suffixarray->
                                                                   encseq),
                                       suffixarray->prefixlength,

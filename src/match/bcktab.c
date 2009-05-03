@@ -47,8 +47,7 @@ typedef struct
 
 struct Bcktab
 {
-  Seqpos totallength,
-         *leftborder;
+  Seqpos *leftborder;
   Codetype numofallcodes,
            numofspecialcodes,
            **multimappower,
@@ -149,8 +148,7 @@ static unsigned long **allocdistprefixindexcounts(const Codetype *basepower,
 }
 
 static Bcktab *newBcktab(unsigned int numofchars,
-                         unsigned int prefixlength,
-                         Seqpos totallength)
+                         unsigned int prefixlength)
 {
   Bcktab *bcktab;
 
@@ -158,7 +156,6 @@ static Bcktab *newBcktab(unsigned int numofchars,
   bcktab->leftborder = NULL;
   bcktab->countspecialcodes = NULL;
   bcktab->distpfxidx = NULL;
-  bcktab->totallength = totallength;
   bcktab->mappedptr = NULL;
   bcktab->prefixlength = prefixlength;
   bcktab->basepower = initbasepower(numofchars,prefixlength);
@@ -177,8 +174,7 @@ static Bcktab *newBcktab(unsigned int numofchars,
   return bcktab;
 }
 
-Bcktab *allocBcktab(Seqpos totallength,
-                    unsigned int numofchars,
+Bcktab *allocBcktab(unsigned int numofchars,
                     unsigned int prefixlength,
                     unsigned int codebits,
                     Codetype maxcodevalue,
@@ -188,7 +184,7 @@ Bcktab *allocBcktab(Seqpos totallength,
   Bcktab *bcktab;
   bool haserr = false;
 
-  bcktab = newBcktab(numofchars,prefixlength,totallength);
+  bcktab = newBcktab(numofchars,prefixlength);
   bcktab->allocated = true;
   if (maxcodevalue > 0 && bcktab->numofallcodes-1 > maxcodevalue)
   {
@@ -289,14 +285,13 @@ static int fillbcktabmapspecstartptr(Bcktab *bcktab,
 }
 
 Bcktab *mapbcktab(const GtStr *indexname,
-                  Seqpos totallength,
                   unsigned int numofchars,
                   unsigned int prefixlength,
                   GtError *err)
 {
   Bcktab *bcktab;
 
-  bcktab = newBcktab(numofchars,prefixlength,totallength);
+  bcktab = newBcktab(numofchars,prefixlength);
   bcktab->allocated = false;
   if (fillbcktabmapspecstartptr(bcktab,
                                 indexname,
@@ -591,7 +586,9 @@ static unsigned int calc_optimalnumofbits(unsigned short *logofremaining,
       lastbitset = maxbits;
     }
   }
+#ifdef WITHsave
   printf("lastbitset=%u\n",lastbitset);
+#endif
   for (maxbits = 0; maxbits <= lastbitset; maxbits++)
   {
     if (log2tab[maxbits] > 0)
@@ -601,16 +598,22 @@ static unsigned int calc_optimalnumofbits(unsigned short *logofremaining,
                                            (uint64_t) (total - currentsum));
       hashtablesize = ((1 << tmplogofremaining)-1) * size_entry;
       savedbitsinbytes = (totallength/CHAR_BIT) * (lastbitset - maxbits + 1);
+#ifdef WITHsave
       printf("savedbitsintbytes=%lu,hashtablesize=%lu\n",
               (unsigned long) savedbitsinbytes,(unsigned long) hashtablesize);
+#endif
       if (savedbitsinbytes > hashtablesize)
       {
         saved = savedbitsinbytes - hashtablesize;
+#ifdef WITHsave
         printf("saved=%lu\n",(unsigned long) saved);
+#endif
         if (saved > maxsaved)
         {
           maxsaved = saved;
+#ifdef WITHsave
           printf("maxsaved=%lu\n",(unsigned long) maxsaved);
+#endif
           optcurrentsum = currentsum;
           optbits = maxbits;
         }
@@ -620,10 +623,12 @@ static unsigned int calc_optimalnumofbits(unsigned short *logofremaining,
   *logofremaining = (unsigned short)
                     gt_determinebitspervalue((uint64_t)
                                              (total - optcurrentsum));
+#ifdef WITHsave
   printf("store %lu values in hashtable (%lu>=%lu bytes)\n",
          (unsigned long) (total - optcurrentsum),
          (unsigned long) ((1 << (*logofremaining))-1) * size_entry,
          (total - optcurrentsum) * size_entry);
+#endif
   return optbits;
 }
 
@@ -633,6 +638,7 @@ void determinemaxbucketsize(Bcktab *bcktab,
                             Seqpos partwidth,
                             unsigned int numofchars,
                             bool hashexceptions,
+                            Seqpos totallength, /* relevant for hashexception */
                             Verboseinfo *verboseinfo)
 {
   unsigned int rightchar = (unsigned int) (mincode % numofchars);
@@ -691,7 +697,7 @@ void determinemaxbucketsize(Bcktab *bcktab,
       = calc_optimalnumofbits(&bcktab->logofremaining,
                               bcktab->maxbucketinfo.
                                       log2nonspecialbucketsizedist,
-                              bcktab->totallength);
+                              totallength);
   } else
   {
     bcktab->optimalnumofbits = 0;
@@ -897,11 +903,13 @@ void consistencyofsuffix(int line,
 {
   unsigned int idx, firstspecial = bcktab->prefixlength, gramfirstspecial;
   Codetype qgramcode = 0;
+  Seqpos totallength;
   GtUchar cc = 0;
 
+  totallength = getencseqtotallength(encseq);
   for (idx=0; idx<bcktab->prefixlength; idx++)
   {
-    if ((Seqpos) (suffix->startpos + idx) >= bcktab->totallength)
+    if ((Seqpos) (suffix->startpos + idx) >= totallength)
     {
       firstspecial = idx;
       break;

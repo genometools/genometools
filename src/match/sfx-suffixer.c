@@ -554,8 +554,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
     sfi->bucketiterstep = 0;
     sfi->verboseinfo = verboseinfo;
     sfi->mtime = mtime;
-    sfi->bcktab = allocBcktab(sfi->totallength,
-                              sfi->numofchars,
+    sfi->bcktab = allocBcktab(sfi->numofchars,
                               prefixlength,
                               (unsigned int) CODEBITS,
                               sfi->sfxstrategy.storespecialcodes

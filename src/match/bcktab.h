@@ -37,15 +37,13 @@ typedef struct
 typedef struct Bcktab Bcktab;
 
 Bcktab *mapbcktab(const GtStr *indexname,
-                  Seqpos totallength,
                   unsigned int numofchars,
                   unsigned int prefixlength,
                   GtError *err);
 
 void freebcktab(Bcktab **bcktab);
 
-Bcktab *allocBcktab(Seqpos totallength,
-                    unsigned int numofchars,
+Bcktab *allocBcktab(unsigned int numofchars,
                     unsigned int prefixlength,
                     unsigned int codebits,
                     Codetype maxcodevalue,
@@ -88,6 +86,7 @@ void determinemaxbucketsize(Bcktab *bcktab,
                             Seqpos partwidth,
                             unsigned int numofchars,
                             bool hashexceptions,
+                            Seqpos totallength, /* relevant for hashexception */
                             Verboseinfo *verboseinfo);
 
 void bcktab_showlog2info(const Bcktab *bcktab,Verboseinfo *verboseinfo);

@@ -324,6 +324,7 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                            partwidth,
                            numofchars,
                            hashexceptions,
+                           hashexceptions ? rmnsufinfo->totallength : 0,
                            NULL);
     rmnsufinfo->allocateditvinfo = bcktab_nonspecialsmaxbucketsize(bcktab);
     if (hashexceptions)
