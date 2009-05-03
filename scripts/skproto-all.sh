@@ -81,6 +81,7 @@ pckbucket.c
 pos2seqnum.c
 pssm.c
 revcompl.c
+sfx-apfxlen.c
 sfx-bentsedg.c
 sfx-enumcodes.c
 sfx-input.c
