@@ -23,8 +23,7 @@
 #include "spacedef.h"
 #include "tyr-basic.h"
 #include "tyr-map.h"
-
-#include "sfx-apfxlen.pr"
+#include "sfx-apfxlen.h"
 
 struct Tyrindex
 {

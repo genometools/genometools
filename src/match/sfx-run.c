@@ -41,7 +41,7 @@
 
 #include "sfx-opt.pr"
 #include "sfx-outprj.pr"
-#include "sfx-apfxlen.pr"
+#include "sfx-apfxlen.h"
 
 #include "eis-encidxseq.h"
 #include "eis-bwtseq-construct.h"

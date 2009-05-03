@@ -24,6 +24,7 @@
 #include "divmodmul.h"
 #include "intbits-tab.h"
 #include "diff-cover.h"
+#include "sfx-apfxlen.h"
 
 typedef unsigned long Diffvalue;
 
@@ -34,6 +35,8 @@ struct Differencecover
 {
   unsigned int vparam, logmod, size, vmodmask,
                hvalue,  /* not necessary */
+               numofchars,
+               prefixlength,
                *coverrank;
   Diffvalue *diffvalues, *diff2pos;
   Seqpos totallength, *sample;
@@ -195,6 +198,7 @@ Differencecover *differencecover_new(unsigned int vparam,
   dcov->sample = NULL;
   dcov->samplesize = 0;
   dcov->totallength = getencseqtotallength(encseq);
+  dcov->numofchars = getencseqAlphabetnumofchars(encseq);
   fillcoverrank(dcov);
   filldiff2pos(dcov);
   return dcov;
@@ -242,6 +246,8 @@ static void differencecover_sample(Differencecover *dcov,bool withcheck)
   maxsamplesize = (unsigned long) (DIVV(dcov->totallength) + 1) * dcov->size;
   dcov->sample = gt_malloc(sizeof(Seqpos) * maxsamplesize);
   dcov->samplesize = 0;
+  dcov->prefixlength = recommendedprefixlength(dcov->numofchars,
+                                               (Seqpos) maxsamplesize);
   if (withcheck)
   {
     INITBITTAB(sampleidxused,maxsamplesize);

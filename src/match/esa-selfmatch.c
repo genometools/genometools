@@ -23,7 +23,7 @@
 #include "sfx-suffixer.h"
 #include "verbose-def.h"
 
-#include "sfx-apfxlen.pr"
+#include "sfx-apfxlen.h"
 #include "esa-maxpairs.pr"
 
 typedef struct
