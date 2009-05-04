@@ -29,8 +29,7 @@
 #include "greedyfwdmat.h"
 #include "intcode-def.h"
 #include "encseq-def.h"
-
-#include "initbasepower.pr"
+#include "initbasepower.h"
 
 typedef struct
 {

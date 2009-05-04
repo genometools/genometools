@@ -24,7 +24,8 @@
 
 typedef struct Differencecover Differencecover;
 
-void differencecovers_check(Seqpos maxcheck,const Encodedsequence *encseq);
+void differencecovers_check(Seqpos maxcheck,const Encodedsequence *encseq,
+                            Readmode readmode);
 Differencecover *differencecover_new(unsigned int vparam,
                                      const Encodedsequence *encseq);
 void differencecover_delete(Differencecover *dcov);

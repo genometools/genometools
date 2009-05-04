@@ -23,9 +23,8 @@
 #include "intcode-def.h"
 #include "seqpos-def.h"
 #include "verbose-def.h"
-
 #include "bcktab.h"
-#include "initbasepower.pr"
+#include "initbasepower.h"
 
 /*
   We need \texttt{prefixlenbits} bits to store the length of

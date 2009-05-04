@@ -33,8 +33,7 @@
 #ifdef SKDEBUG
 #include "sfx-nextchar.h"
 #endif
-
-#include "initbasepower.pr"
+#include "initbasepower.h"
 
 #ifdef SPECIALCASE4
 #define SUBTRACTLCHARANDSHIFT(CODE,LCHAR,NUMOFCHARS,MULTIMAPPOWER)\

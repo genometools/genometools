@@ -34,8 +34,7 @@
 #include "sfx-remainsort.h"
 #include "sfx-linlcp.h"
 #include "stamp.h"
-
-#include "initbasepower.pr"
+#include "initbasepower.h"
 
 #define PAGESIZE 4096
 #define SUFINMEM(SORTBLOCK) ((SORTBLOCK)->mmapfiledesc == -1 ? true : false)

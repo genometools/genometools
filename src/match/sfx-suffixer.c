@@ -44,22 +44,10 @@
 
 #include "sfx-mappedstr.pr"
 
-#define PREFIXLENBITS   4
-#define CODEBITS        (32-PREFIXLENBITS)
-#define MAXPREFIXLENGTH ((1U << PREFIXLENBITS) - 1)
-#define MAXCODEVALUE    ((1U << CODEBITS) - 1)
-
 static inline void setsortspace(Suftab *suftab,Seqpos idx,Seqpos value)
 {
   suftab->sortspace[idx - suftab->offset] = value;
 }
-
-typedef struct
-{
-  unsigned int maxprefixindex:PREFIXLENBITS;
-  unsigned int code:CODEBITS;
-  Seqpos position; /* get rid of this by using information from encseq */
-} Codeatposition;
 
 struct Sfxiterator
 {
@@ -443,7 +431,7 @@ void freeSfxiterator(Sfxiterator **sfiptr)
   freesuftabparts(sfi->suftabparts);
   if (sfi->bcktab != NULL)
   {
-    freebcktab(&sfi->bcktab);
+    bcktab_delete(&sfi->bcktab);
   }
   FREESPACE(*sfiptr);
 }
@@ -556,10 +544,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
     sfi->mtime = mtime;
     sfi->bcktab = allocBcktab(sfi->numofchars,
                               prefixlength,
-                              (unsigned int) CODEBITS,
-                              sfi->sfxstrategy.storespecialcodes
-                                ? (Codetype) MAXCODEVALUE
-                                : 0,
+                              sfi->sfxstrategy.storespecialcodes,
                               verboseinfo,
                               err);
     if (sfi->bcktab == NULL)
@@ -722,7 +707,7 @@ static void preparethispart(Sfxiterator *sfi)
   {
     if (sfi->sfxstrategy.differencecover > 0)
     {
-      differencecovers_check((Seqpos) 1000,sfi->encseq);
+      differencecovers_check((Seqpos) 1000,sfi->encseq,sfi->readmode);
     }
     printf("differencecover = %u\n",sfi->sfxstrategy.differencecover);
     gt_assert(!sfi->sfxstrategy.streamsuftab);

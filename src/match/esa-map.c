@@ -246,7 +246,7 @@ void freesuffixarray(Suffixarray *suffixarray)
   encodedsequence_free(&suffixarray->encseq);
   if (suffixarray->bcktab != NULL)
   {
-    freebcktab(&suffixarray->bcktab);
+    bcktab_delete(&suffixarray->bcktab);
   }
 }
 

@@ -23,8 +23,7 @@
 #include "encseq-def.h"
 #include "sfx-enumcodes.h"
 #include "stamp.h"
-
-#include "initbasepower.pr"
+#include "initbasepower.h"
 
 struct Enumcodeatposition
 {

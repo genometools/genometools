@@ -29,9 +29,7 @@
 #include "mapspec-def.h"
 #include "spacedef.h"
 #include "bcktab.h"
-#include "stamp.h"
-
-#include "initbasepower.pr"
+#include "initbasepower.h"
 
 #define FROMCODE2SPECIALCODE(CODE,NUMOFCHARS)\
                             (((CODE) - ((NUMOFCHARS)-1)) / (NUMOFCHARS))
@@ -176,8 +174,7 @@ static Bcktab *newBcktab(unsigned int numofchars,
 
 Bcktab *allocBcktab(unsigned int numofchars,
                     unsigned int prefixlength,
-                    unsigned int codebits,
-                    Codetype maxcodevalue,
+                    bool storespecialcodes,
                     Verboseinfo *verboseinfo,
                     GtError *err)
 {
@@ -186,13 +183,14 @@ Bcktab *allocBcktab(unsigned int numofchars,
 
   bcktab = newBcktab(numofchars,prefixlength);
   bcktab->allocated = true;
-  if (maxcodevalue > 0 && bcktab->numofallcodes-1 > maxcodevalue)
+  if (storespecialcodes && bcktab->numofallcodes > 0 &&
+      bcktab->numofallcodes-1 > (unsigned long) MAXCODEVALUE)
   {
     gt_error_set(err,"alphasize^prefixlength-1 = " FormatCodetype
                   " does not fit into %u"
                   " bits: choose smaller value for prefixlength",
                   bcktab->numofallcodes-1,
-                  codebits);
+                  CODEBITS);
     haserr = true;
   }
   if (!haserr)
@@ -220,7 +218,7 @@ Bcktab *allocBcktab(unsigned int numofchars,
   }
   if (haserr)
   {
-    freebcktab(&bcktab);
+    bcktab_delete(&bcktab);
     return NULL;
   }
   return bcktab;
@@ -297,7 +295,7 @@ Bcktab *mapbcktab(const GtStr *indexname,
                                 indexname,
                                 err) != 0)
   {
-    freebcktab(&bcktab);
+    bcktab_delete(&bcktab);
     return NULL;
   }
   if (bcktab->distpfxidx != NULL)
@@ -329,7 +327,7 @@ void showbcktab(const Bcktab *bcktab)
   }
 }
 
-void freebcktab(Bcktab **bcktab)
+void bcktab_delete(Bcktab **bcktab)
 {
   Bcktab *bcktabptr = *bcktab;
 

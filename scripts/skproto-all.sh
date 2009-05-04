@@ -66,6 +66,7 @@ idx-limdfs.c
 idxlocali.c
 idxlocalidp.c
 idxlocalisw.c
+initbasepower.c
 initeqsvec.c
 inl-encseq.c
 iter-window.c

@@ -21,7 +21,7 @@
 #include "divmodmul.h"
 #include "eis-voiditf.h"
 #include "pckbucket.h"
-#include "initbasepower.pr"
+#include "initbasepower.h"
 #include "opensfxfile.h"
 
 typedef struct

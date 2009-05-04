@@ -41,12 +41,11 @@ Bcktab *mapbcktab(const GtStr *indexname,
                   unsigned int prefixlength,
                   GtError *err);
 
-void freebcktab(Bcktab **bcktab);
+void bcktab_delete(Bcktab **bcktab);
 
 Bcktab *allocBcktab(unsigned int numofchars,
                     unsigned int prefixlength,
-                    unsigned int codebits,
-                    Codetype maxcodevalue,
+                    bool storespecialcodes,
                     Verboseinfo *verboseinfo,
                     GtError *err);
 

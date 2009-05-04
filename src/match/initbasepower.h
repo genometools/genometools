@@ -15,31 +15,22 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef INTCODE_DEF_H
-#define INTCODE_DEF_H
-#include "seqpos-def.h"
-#include <stdbool.h>
+#ifndef INITBASEPOWER_H
+#define INITBASEPOWER_H
 
-#define PREFIXLENBITS   4
-#define CODEBITS        (32-PREFIXLENBITS)
-#define MAXPREFIXLENGTH ((1U << PREFIXLENBITS) - 1)
-#define MAXCODEVALUE    ((1U << CODEBITS) - 1)
+#include "intcode-def.h"
 
-typedef unsigned long Codetype;      /* \Typedef{Codetype} */
+unsigned int maxbasepower(unsigned int numofchars);
 
-#define FormatCodetype "%lu"
+Codetype *initbasepower(unsigned int numofchars,unsigned int prefixlength);
 
-typedef struct
-{
-  unsigned int specialpos;
-  bool defined;
-} Firstspecialpos;
+Codetype *filllargestchartable(unsigned int numofchars,
+                               unsigned int kmersize);
 
-typedef struct
-{
-  unsigned int maxprefixindex:PREFIXLENBITS;
-  unsigned int code:CODEBITS;
-  Seqpos position; /* get rid of this by using information from encseq */
-} Codeatposition;
+Codetype *initfilltable(unsigned int numofchars,unsigned int prefixlength);
+
+Codetype **initmultimappower(unsigned int numofchars,unsigned int qvalue);
+
+void multimappowerfree(Codetype ***multimappower);
 
 #endif
