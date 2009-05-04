@@ -22,10 +22,12 @@
 #include "core/unused_api.h"
 #include "core/error_api.h"
 #include "core/minmax.h"
+#include "core/arraydef.h"
 #include "divmodmul.h"
 #include "intbits-tab.h"
 #include "diff-cover.h"
 #include "sfx-apfxlen.h"
+#include "sfx-enumcodes.h"
 #include "bcktab.h"
 #include "initbasepower.h"
 #include "encseq-def.h"
@@ -47,6 +49,7 @@ struct Differencecover
   Bcktab *bcktab;
   Seqpos *leftborder; /* points to bcktab->leftborder */
   const Encodedsequence *encseq;
+  Bitsequence *isindifferencecover;
   unsigned long samplesize;
 };
 
@@ -207,6 +210,7 @@ Differencecover *differencecover_new(unsigned int vparam,
   dcov->totallength = getencseqtotallength(encseq);
   dcov->encseq = encseq;
   dcov->numofchars = getencseqAlphabetnumofchars(encseq);
+  INITBITTAB(dcov->isindifferencecover,dcov->vparam);
   fillcoverrank(dcov);
   filldiff2pos(dcov);
   return dcov;
@@ -230,6 +234,7 @@ void differencecover_delete(Differencecover *dcov)
   gt_free(dcov->sample);
   gt_assert(dcov->bcktab != NULL);
   bcktab_delete(&dcov->bcktab);
+  gt_free(dcov->isindifferencecover);
   gt_free(dcov);
 }
 
@@ -238,6 +243,74 @@ unsigned long differencecover_packsamplepos(const Differencecover *dcov,
 {
   return dcov->coverrank[MODV(pos)] * (DIVV(dcov->totallength) + 1) +
          (unsigned long) DIVV(pos);
+}
+
+GT_DECLAREARRAYSTRUCT(Codeatposition);
+
+static void derivespecialcodesonthefly(Differencecover *dcov,
+                                       Readmode readmode,
+                                       const GtArrayCodeatposition *codelist)
+{
+  unsigned int prefixindex;
+  Enumcodeatposition *ecp;
+  Specialcontext specialcontext;
+  unsigned long countout = 0;
+
+  for (prefixindex=1U; prefixindex < dcov->prefixlength; prefixindex++)
+  {
+    ecp = newEnumcodeatposition(dcov->encseq,readmode,
+                                dcov->prefixlength,
+                                dcov->numofchars);
+    while (nextEnumcodeatposition(&specialcontext,ecp))
+    {
+      if (prefixindex <= specialcontext.maxprefixindex)
+      {
+        gt_assert(specialcontext.position >= (Seqpos) prefixindex);
+        if (ISIBITSET(dcov->isindifferencecover,
+            MODV(specialcontext.position-prefixindex)))
+        {
+          gt_assert(countout < codelist->nextfreeCodeatposition);
+          gt_assert(codelist->spaceCodeatposition[countout].maxprefixindex
+                    == prefixindex);
+          gt_assert(codelist->spaceCodeatposition[countout].position
+                    == (Seqpos) (specialcontext.position - prefixindex));
+          /*
+          printf("%u %lu\n",prefixindex,
+                            (unsigned long)
+                            (specialcontext.position-prefixindex));
+          */
+          countout++;
+        }
+      }
+    }
+    freeEnumcodeatposition(&ecp);
+  }
+  printf("countout = %lu\n",countout);
+}
+
+static int compareCodeatpositon(const void *vala,const void *valb)
+{
+  const Codeatposition *a = (const Codeatposition *) vala;
+  const Codeatposition *b = (const Codeatposition *) valb;
+
+  if (a->maxprefixindex < b->maxprefixindex)
+  {
+    return -1;
+  }
+  if (a->maxprefixindex > b->maxprefixindex)
+  {
+    return 1;
+  }
+  if (a->position < b->position)
+  {
+    return 1;
+  }
+  if (a->position > b->position)
+  {
+    return -1;
+  }
+  gt_assert(false);
+  return 0;
 }
 
 static void differencecover_sample(Differencecover *dcov,
@@ -252,6 +325,8 @@ static void differencecover_sample(Differencecover *dcov,
   Codetype code, *filltable;
   const Codetype **multimappower;
   Encodedsequencescanstate *esr;
+  GtArrayCodeatposition codelist;
+  Codeatposition *codeptr;
 
   maxsamplesize = (unsigned long) (DIVV(dcov->totallength) + 1) * dcov->size;
   dcov->samplesize = 0;
@@ -259,7 +334,7 @@ static void differencecover_sample(Differencecover *dcov,
                                                (Seqpos) maxsamplesize);
   dcov->bcktab = allocBcktab(dcov->numofchars,
                              dcov->prefixlength,
-                             false,
+                             true,
                              NULL,
                              NULL);
   gt_assert(dcov->bcktab != NULL);
@@ -279,6 +354,7 @@ static void differencecover_sample(Differencecover *dcov,
   diffptr = dcov->diffvalues;
   afterend = dcov->diffvalues + dcov->size;
   dcov->leftborder = bcktab_leftborder(dcov->bcktab);
+  GT_INITARRAY(&codelist,Codeatposition);
   for (pos = 0; pos < dcov->totallength; pos++)
   {
     gt_assert(modvalue == MODV(pos));
@@ -307,11 +383,19 @@ static void differencecover_sample(Differencecover *dcov,
                                pos,
                                dcov->prefixlength);
       dcov->samplesize++;
+      SETIBIT(dcov->isindifferencecover,modvalue);
       if (unitsnotspecial > 0)
       {
         dcov->leftborder[code]++;
         if (unitsnotspecial < dcov->prefixlength)
         {
+          GT_GETNEXTFREEINARRAY(codeptr,&codelist,Codeatposition,128);
+          gt_assert(codelist.spaceCodeatposition != NULL);
+          codeptr->position = pos;
+          gt_assert(code <= (Codetype) MAXCODEVALUE);
+          codeptr->code = (unsigned int) code;
+          gt_assert(unitsnotspecial <= MAXPREFIXLENGTH);
+          codeptr->maxprefixindex = unitsnotspecial;
           specials++;
         }
       } else
@@ -329,6 +413,12 @@ static void differencecover_sample(Differencecover *dcov,
       diffptr = dcov->diffvalues;
     }
   }
+  gt_free(filltable);
+  if (esr != NULL)
+  {
+    freeEncodedsequencescanstate(&esr);
+  }
+  gt_free(sampleidxused);
   bcktab_leftborderpartialsums(dcov->bcktab,
                                (Seqpos) (dcov->samplesize - fullspecials));
   printf("%lu positions are sampled (%.2f) wasted=%lu, pl=%u\n",
@@ -338,12 +428,11 @@ static void differencecover_sample(Differencecover *dcov,
                                   maxsamplesize - dcov->samplesize,
                                   dcov->prefixlength);
   printf("specials = %lu, fullspecials=%lu\n",specials,fullspecials);
-  gt_free(filltable);
-  if (esr != NULL)
-  {
-    freeEncodedsequencescanstate(&esr);
-  }
-  gt_free(sampleidxused);
+  qsort(codelist.spaceCodeatposition,
+        (size_t) codelist.nextfreeCodeatposition,
+        sizeof (Codeatposition),compareCodeatpositon);
+  derivespecialcodesonthefly(dcov,readmode,&codelist);
+  GT_FREEARRAY(&codelist,Codeatposition);
 }
 
 void differencecovers_check(Seqpos maxcheck,const Encodedsequence *encseq,
