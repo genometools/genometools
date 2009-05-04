@@ -890,6 +890,18 @@ Codetype bcktab_numofallcodes(const Bcktab *bcktab)
   return bcktab->numofallcodes;
 }
 
+void bcktab_leftborderpartialsums(Bcktab *bcktab,Seqpos numofsuffixestosort)
+{
+  Seqpos *optr;
+
+  for (optr = bcktab->leftborder + 1;
+       optr < bcktab->leftborder + bcktab->numofallcodes; optr++)
+  {
+    *optr += *(optr-1);
+  }
+  bcktab->leftborder[bcktab->numofallcodes] = numofsuffixestosort;
+}
+
 #ifdef SKDEBUG
 #include "qgram2code.h"
 void consistencyofsuffix(int line,

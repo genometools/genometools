@@ -243,10 +243,10 @@ unsigned long differencecover_packsamplepos(const Differencecover *dcov,
 static void differencecover_sample(Differencecover *dcov,
                                    Readmode readmode,bool withcheck)
 {
-  Seqpos pos, fullspecials = 0, specials = 0;
+  Seqpos pos;
   unsigned int modvalue = 0;
   Diffvalue *diffptr, *afterend;
-  unsigned long idx, maxsamplesize;
+  unsigned long idx, maxsamplesize, fullspecials = 0, specials = 0;
   Bitsequence *sampleidxused = NULL;
   unsigned int unitsnotspecial;
   Codetype code, *filltable;
@@ -285,7 +285,6 @@ static void differencecover_sample(Differencecover *dcov,
     gt_assert(diffptr == afterend || *diffptr >= (Diffvalue) modvalue);
     if (diffptr < afterend && (Diffvalue) modvalue == *diffptr)
     {
-      dcov->samplesize++;
       if (withcheck)
       {
         idx = differencecover_packsamplepos(dcov,pos);
@@ -307,6 +306,7 @@ static void differencecover_sample(Differencecover *dcov,
                                multimappower,
                                pos,
                                dcov->prefixlength);
+      dcov->samplesize++;
       if (unitsnotspecial > 0)
       {
         dcov->leftborder[code]++;
@@ -329,14 +329,15 @@ static void differencecover_sample(Differencecover *dcov,
       diffptr = dcov->diffvalues;
     }
   }
+  bcktab_leftborderpartialsums(dcov->bcktab,
+                               (Seqpos) (dcov->samplesize - fullspecials));
   printf("%lu positions are sampled (%.2f) wasted=%lu, pl=%u\n",
                                   dcov->samplesize,
                                   100.0 *
                                   (double) dcov->samplesize/dcov->totallength,
                                   maxsamplesize - dcov->samplesize,
                                   dcov->prefixlength);
-  printf("specials = %lu, fullspecials=%lu\n",(unsigned long) specials,
-                                              (unsigned long) fullspecials);
+  printf("specials = %lu, fullspecials=%lu\n",specials,fullspecials);
   gt_free(filltable);
   if (esr != NULL)
   {

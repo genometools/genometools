@@ -116,6 +116,8 @@ Codetype bcktab_numofallcodes(const Bcktab *bcktab);
 uint64_t sizeofbuckettable(unsigned int numofchars,
                            unsigned int prefixlength);
 
+void bcktab_leftborderpartialsums(Bcktab *bcktab,Seqpos numofsuffixestosort);
+
 #ifdef SKDEBUG
 void checkcountspecialcodes(const Bcktab *bcktab);
 

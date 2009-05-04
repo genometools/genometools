@@ -463,7 +463,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
                             GtError *err)
 {
   Sfxiterator *sfi = NULL;
-  Seqpos *optr, realspecialranges, specialcharacters;
+  Seqpos realspecialranges, specialcharacters;
   bool haserr = false;
 
   gt_error_check(err);
@@ -589,13 +589,8 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
 #ifdef SKDEBUG
     showleftborder(sfi->leftborder,sfi->numofallcodes);
 #endif
-    for (optr = sfi->leftborder + 1;
-         optr < sfi->leftborder + sfi->numofallcodes; optr++)
-    {
-      *optr += *(optr-1);
-    }
-    sfi->leftborder[sfi->numofallcodes]
-      = sfi->totallength - specialcharacters;
+    bcktab_leftborderpartialsums(sfi->bcktab,
+                                 sfi->totallength - specialcharacters);
     sfi->suftabparts = newsuftabparts(numofparts,
                                       sfi->leftborder,
                                       sfi->numofallcodes,
