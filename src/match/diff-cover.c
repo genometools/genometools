@@ -45,6 +45,7 @@ struct Differencecover
   Diffvalue *diffvalues, *diff2pos;
   Seqpos totallength, *sample;
   Bcktab *bcktab;
+  Seqpos *leftborder; /* points to bcktab->leftborder */
   const Encodedsequence *encseq;
   unsigned long samplesize;
 };
@@ -242,7 +243,7 @@ unsigned long differencecover_packsamplepos(const Differencecover *dcov,
 static void differencecover_sample(Differencecover *dcov,
                                    Readmode readmode,bool withcheck)
 {
-  Seqpos pos;
+  Seqpos pos, fullspecials = 0, specials = 0;
   unsigned int modvalue = 0;
   Diffvalue *diffptr, *afterend;
   unsigned long idx, maxsamplesize;
@@ -277,12 +278,14 @@ static void differencecover_sample(Differencecover *dcov,
   esr = newEncodedsequencescanstate();
   diffptr = dcov->diffvalues;
   afterend = dcov->diffvalues + dcov->size;
-  for (pos = 0; pos <= dcov->totallength; pos++)
+  dcov->leftborder = bcktab_leftborder(dcov->bcktab);
+  for (pos = 0; pos < dcov->totallength; pos++)
   {
     gt_assert(modvalue == MODV(pos));
     gt_assert(diffptr == afterend || *diffptr >= (Diffvalue) modvalue);
     if (diffptr < afterend && (Diffvalue) modvalue == *diffptr)
     {
+      dcov->samplesize++;
       if (withcheck)
       {
         idx = differencecover_packsamplepos(dcov,pos);
@@ -304,6 +307,17 @@ static void differencecover_sample(Differencecover *dcov,
                                multimappower,
                                pos,
                                dcov->prefixlength);
+      if (unitsnotspecial > 0)
+      {
+        dcov->leftborder[code]++;
+        if (unitsnotspecial < dcov->prefixlength)
+        {
+          specials++;
+        }
+      } else
+      {
+        fullspecials++;
+      }
       diffptr++;
     }
     if (modvalue < dcov->vmodmask)
@@ -321,7 +335,8 @@ static void differencecover_sample(Differencecover *dcov,
                                   (double) dcov->samplesize/dcov->totallength,
                                   maxsamplesize - dcov->samplesize,
                                   dcov->prefixlength);
-
+  printf("specials = %lu, fullspecials=%lu\n",(unsigned long) specials,
+                                              (unsigned long) fullspecials);
   gt_free(filltable);
   if (esr != NULL)
   {
