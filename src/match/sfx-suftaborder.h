@@ -47,5 +47,12 @@ void checkentiresuftab(const Encodedsequence *encseq,
                        Seqpos depth,
                        GtError *err);
 
-#endif
+void checksortedsuffixes(const Encodedsequence *encseq,
+                         Readmode readmode,
+                         const Seqpos *suftab,
+                         Seqpos numberofsuffixes,
+                         bool specialsareequal,
+                         bool specialsareequalatdepth0,
+                         Seqpos depth);
 
+#endif

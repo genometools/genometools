@@ -31,6 +31,7 @@
 #include "bcktab.h"
 #include "initbasepower.h"
 #include "encseq-def.h"
+#include "sfx-suftaborder.h"
 
 typedef unsigned long Diffvalue;
 
@@ -246,7 +247,7 @@ void differencecover_delete(Differencecover *dcov)
   dcov->sortedsample = NULL;
   gt_assert(dcov->bcktab != NULL);
   bcktab_delete(&dcov->bcktab);
-  /* XXX the following tables can be deleted before the inversesuftab is 
+  /* XXX the following tables can be deleted before the inversesuftab is
      computed */
   gt_free(dcov->isindifferencecover);
   dcov->isindifferencecover = NULL;
@@ -535,6 +536,16 @@ static void differencecover_sample(Differencecover *dcov,
     }
   }
   gt_assert(posinserted == dcov->effectivesamplesize);
+  if (withcheck)
+  {
+    checksortedsuffixes(dcov->encseq,
+                        readmode,
+                        dcov->sortedsample,
+                        (Seqpos) dcov->effectivesamplesize,
+                        false, /* specialsareequal  */
+                        false,  /* specialsareequalatdepth0 */
+                        (Seqpos) dcov->prefixlength);
+  }
 }
 
 void differencecovers_check(Seqpos maxcheck,const Encodedsequence *encseq,

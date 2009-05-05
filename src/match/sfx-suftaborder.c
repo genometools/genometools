@@ -155,6 +155,64 @@ void showentiresuftab(const Encodedsequence *encseq,
   }
 }
 
+void checksortedsuffixes(const Encodedsequence *encseq,
+                         Readmode readmode,
+                         const Seqpos *suftab,
+                         Seqpos numberofsuffixes,
+                         bool specialsareequal,
+                         bool specialsareequalatdepth0,
+                         Seqpos depth)
+{
+  const Seqpos *ptr;
+  Seqpos maxlcp, totallength = getencseqtotallength(encseq);
+  Encodedsequencescanstate *esr1, *esr2;
+  int cmp;
+
+  gt_assert(!specialsareequal || specialsareequalatdepth0);
+  esr1 = newEncodedsequencescanstate();
+  esr2 = newEncodedsequencescanstate();
+  gt_assert(numberofsuffixes > 0);
+  gt_assert(*suftab < totallength);
+  for (ptr = suftab + 1; ptr < suftab + numberofsuffixes; ptr++)
+  {
+    if (ptr < suftab + numberofsuffixes - 1)
+    {
+      gt_assert(*ptr < totallength);
+      cmp = comparetwosuffixes(encseq,
+                               readmode,
+                               &maxlcp,
+                               specialsareequal,
+                               specialsareequalatdepth0,
+                               depth,
+                               *(ptr-1),
+                               *ptr,
+                               esr1,
+                               esr2);
+      if (cmp > 0)
+      {
+        showcomparisonfailure("checkentiresuftab",
+                              encseq,
+                              readmode,
+                              suftab,
+                              depth,
+                              ptr-1,
+                              ptr,
+                              cmp,
+                              maxlcp);
+        exit(GT_EXIT_PROGRAMMING_ERROR);
+      }
+    } else
+    {
+      if (numberofsuffixes == totallength+1)
+      {
+        gt_assert(*ptr == totallength);
+      }
+    }
+  }
+  freeEncodedsequencescanstate(&esr1);
+  freeEncodedsequencescanstate(&esr2);
+}
+
 void checkentiresuftab(const Encodedsequence *encseq,
                        Readmode readmode,
                        const Seqpos *suftab,
