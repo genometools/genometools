@@ -50,6 +50,7 @@ struct Differencecover
   Seqpos *leftborder; /* points to bcktab->leftborder */
   const Encodedsequence *encseq;
   Bitsequence *isindifferencecover;
+  const Codetype **multimappower;
   unsigned long samplesize;
 };
 
@@ -213,6 +214,13 @@ Differencecover *differencecover_new(unsigned int vparam,
   INITBITTAB(dcov->isindifferencecover,dcov->vparam);
   fillcoverrank(dcov);
   filldiff2pos(dcov);
+  if (possibletocmpbitwise(encseq))
+  {
+    dcov->multimappower = NULL;
+  } else
+  {
+    dcov->multimappower = bcktab_multimappower(dcov->bcktab);
+  }
   return dcov;
 }
 
@@ -235,6 +243,7 @@ void differencecover_delete(Differencecover *dcov)
   gt_assert(dcov->bcktab != NULL);
   bcktab_delete(&dcov->bcktab);
   gt_free(dcov->isindifferencecover);
+  dcov->multimappower = NULL;
   gt_free(dcov);
 }
 
@@ -254,7 +263,8 @@ static void derivespecialcodesonthefly(Differencecover *dcov,
   unsigned int prefixindex;
   Enumcodeatposition *ecp;
   Specialcontext specialcontext;
-  unsigned long countout = 0;
+  unsigned long countderived = 0;
+  /* Codetype code; */
 
   for (prefixindex=1U; prefixindex < dcov->prefixlength; prefixindex++)
   {
@@ -269,23 +279,23 @@ static void derivespecialcodesonthefly(Differencecover *dcov,
         if (ISIBITSET(dcov->isindifferencecover,
             MODV(specialcontext.position-prefixindex)))
         {
-          gt_assert(countout < codelist->nextfreeCodeatposition);
-          gt_assert(codelist->spaceCodeatposition[countout].maxprefixindex
+          gt_assert(countderived < codelist->nextfreeCodeatposition);
+          gt_assert(codelist->spaceCodeatposition[countderived].maxprefixindex
                     == prefixindex);
-          gt_assert(codelist->spaceCodeatposition[countout].position
+          gt_assert(codelist->spaceCodeatposition[countderived].position
                     == (Seqpos) (specialcontext.position - prefixindex));
           /*
           printf("%u %lu\n",prefixindex,
                             (unsigned long)
                             (specialcontext.position-prefixindex));
           */
-          countout++;
+          countderived++;
         }
       }
     }
     freeEnumcodeatposition(&ecp);
   }
-  printf("countout = %lu\n",countout);
+  gt_assert(countderived == codelist->nextfreeCodeatposition);
 }
 
 static int compareCodeatpositon(const void *vala,const void *valb)
@@ -323,7 +333,6 @@ static void differencecover_sample(Differencecover *dcov,
   Bitsequence *sampleidxused = NULL;
   unsigned int unitsnotspecial;
   Codetype code, *filltable;
-  const Codetype **multimappower;
   Encodedsequencescanstate *esr;
   GtArrayCodeatposition codelist;
   Codeatposition *codeptr;
@@ -343,13 +352,6 @@ static void differencecover_sample(Differencecover *dcov,
     INITBITTAB(sampleidxused,maxsamplesize);
   }
   filltable = filllargestchartable(dcov->numofchars,dcov->prefixlength);
-  if (possibletocmpbitwise(dcov->encseq))
-  {
-    multimappower = NULL;
-  } else
-  {
-    multimappower = bcktab_multimappower(dcov->bcktab);
-  }
   esr = newEncodedsequencescanstate();
   diffptr = dcov->diffvalues;
   afterend = dcov->diffvalues + dcov->size;
@@ -379,7 +381,7 @@ static void differencecover_sample(Differencecover *dcov,
                                filltable,
                                readmode,
                                esr,
-                               multimappower,
+                               dcov->multimappower,
                                pos,
                                dcov->prefixlength);
       dcov->samplesize++;
