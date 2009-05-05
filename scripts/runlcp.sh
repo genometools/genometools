@@ -32,7 +32,7 @@ suffixeratoronlysuf()
 
 sfxmap()
 {
-  gt dev sfxmap -tis -lcp -suf $*
+  gt dev sfxmap -lcp -suf $*
 }
 
 for filename in ${filenames}

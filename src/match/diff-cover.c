@@ -45,13 +45,13 @@ struct Differencecover
                prefixlength,
                *coverrank;
   Diffvalue *diffvalues, *diff2pos;
-  Seqpos totallength, *sample;
+  Seqpos totallength, *sortedsample,
+         *leftborder; /* points to bcktab->leftborder */
   Bcktab *bcktab;
-  Seqpos *leftborder; /* points to bcktab->leftborder */
   const Encodedsequence *encseq;
   Bitsequence *isindifferencecover;
+  unsigned long samplesize, effectivesamplesize;
   const Codetype **multimappower;
-  unsigned long samplesize;
   Codetype *filltable;
   Encodedsequencescanstate *esr;
 };
@@ -208,8 +208,6 @@ Differencecover *differencecover_new(unsigned int vparam,
 #ifdef WITHcomputehvalue
   dcov->hvalue = computehvalue(dcov,totallength);
 #endif
-  dcov->sample = NULL;
-  dcov->samplesize = 0;
   dcov->totallength = getencseqtotallength(encseq);
   dcov->encseq = encseq;
   dcov->numofchars = getencseqAlphabetnumofchars(encseq);
@@ -244,8 +242,8 @@ void differencecover_delete(Differencecover *dcov)
   dcov->coverrank = NULL;
   gt_free(dcov->diff2pos);
   dcov->diff2pos = NULL;
-  gt_free(dcov->sample);
-  dcov->sample = NULL;
+  gt_free(dcov->sortedsample);
+  dcov->sortedsample = NULL;
   gt_assert(dcov->bcktab != NULL);
   bcktab_delete(&dcov->bcktab);
   gt_free(dcov->isindifferencecover);
@@ -277,7 +275,7 @@ static void derivespecialcodesonthefly(Differencecover *dcov,
   Enumcodeatposition *ecp;
   Specialcontext specialcontext;
   unsigned long countderived = 0;
-  Seqpos pos;
+  Seqpos pos, sampleindex;
   Codetype code;
 
   for (prefixindex=1U; prefixindex < dcov->prefixlength; prefixindex++)
@@ -316,6 +314,11 @@ static void derivespecialcodesonthefly(Differencecover *dcov,
                             (specialcontext.position-prefixindex));
           */
           countderived++;
+          updatebckspecials(dcov->bcktab,code,dcov->numofchars,prefixindex);
+          gt_assert(code > 0);
+          sampleindex = --dcov->leftborder[code];
+          gt_assert(sampleindex < (Seqpos) dcov->effectivesamplesize);
+          dcov->sortedsample[sampleindex] = pos;
         }
       }
     }
@@ -408,8 +411,8 @@ static void differencecover_sample(Differencecover *dcov,
                                dcov->multimappower,
                                pos,
                                dcov->prefixlength);
-      dcov->samplesize++;
       SETIBIT(dcov->isindifferencecover,modvalue);
+      dcov->samplesize++;
       if (unitsnotspecial > 0)
       {
         dcov->leftborder[code]++;
@@ -440,8 +443,8 @@ static void differencecover_sample(Differencecover *dcov,
     }
   }
   gt_free(sampleidxused);
-  bcktab_leftborderpartialsums(dcov->bcktab,
-                               (Seqpos) (dcov->samplesize - fullspecials));
+  dcov->effectivesamplesize = dcov->samplesize - fullspecials;
+  bcktab_leftborderpartialsums(dcov->bcktab,(Seqpos) dcov->effectivesamplesize);
   printf("%lu positions are sampled (%.2f) wasted=%lu, pl=%u\n",
                                   dcov->samplesize,
                                   100.0 *
@@ -452,6 +455,8 @@ static void differencecover_sample(Differencecover *dcov,
   qsort(codelist.spaceCodeatposition,
         (size_t) codelist.nextfreeCodeatposition,
         sizeof (Codeatposition),compareCodeatpositon);
+  dcov->sortedsample = gt_malloc(sizeof(*dcov->sortedsample) *
+                                 dcov->effectivesamplesize);
   derivespecialcodesonthefly(dcov,readmode,&codelist);
   GT_FREEARRAY(&codelist,Codeatposition);
 }
