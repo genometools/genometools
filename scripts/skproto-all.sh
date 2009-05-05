@@ -92,6 +92,7 @@ sfx-readint.c
 sfx-remainsort.c
 sfx-run.c
 sfx-suffixer.c
+sfx-suftaborder.c
 spaced-seeds.c
 specialrank.c
 substriter.c

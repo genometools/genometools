@@ -18,11 +18,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "core/chardef.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/minmax.h"
 #include "intbits-tab.h"
 #include "encseq-def.h"
 #include "esa-seqread.h"
+#include "sfx-suftaborder.h"
 
 #include "sfx-cmpsuf.pr"
 
@@ -157,6 +158,7 @@ void showentiresuftab(const Encodedsequence *encseq,
 void checkentiresuftab(const Encodedsequence *encseq,
                        Readmode readmode,
                        const Seqpos *suftab,
+                       Seqpos numberofsuffixes,
                        Sequentialsuffixarrayreader *ssar,
                        bool specialsareequal,
                        bool specialsareequalatdepth0,
@@ -164,9 +166,7 @@ void checkentiresuftab(const Encodedsequence *encseq,
                        GtError *err)
 {
   const Seqpos *ptr;
-  Bitsequence *startposoccurs;
-  Seqpos maxlcp, countbitsset = 0, currentlcp = 0,
-         totallength = getencseqtotallength(encseq);
+  Seqpos maxlcp, currentlcp = 0, totallength = getencseqtotallength(encseq);
   int cmp;
   Encodedsequencescanstate *esr1, *esr2;
   bool haserr = false;
@@ -179,31 +179,38 @@ void checkentiresuftab(const Encodedsequence *encseq,
 
   gt_error_check(err);
   gt_assert(!specialsareequal || specialsareequalatdepth0);
-  INITBITTAB(startposoccurs,totallength+1);
-  for (ptr = suftab; ptr <= suftab + totallength; ptr++)
+  if (numberofsuffixes == totallength+1)
   {
-    if (ISIBITSET(startposoccurs,*ptr))
+    Bitsequence *startposoccurs;
+    Seqpos countbitsset = 0;
+
+    INITBITTAB(startposoccurs,totallength+1);
+    for (ptr = suftab; ptr <= suftab + totallength; ptr++)
     {
-      fprintf(stderr,"ERROR: suffix with startpos " FormatSeqpos
-                     " already occurs\n",
-                      PRINTSeqposcast(*ptr));
+      if (ISIBITSET(startposoccurs,*ptr))
+      {
+        fprintf(stderr,"ERROR: suffix with startpos " FormatSeqpos
+                       " already occurs\n",
+                        PRINTSeqposcast(*ptr));
+        exit(GT_EXIT_PROGRAMMING_ERROR);
+      }
+      SETIBIT(startposoccurs,*ptr);
+      countbitsset++;
+    }
+    if (countbitsset != totallength+1)
+    {
+      fprintf(stderr,"ERROR: not all bits are set\n");
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
-    SETIBIT(startposoccurs,*ptr);
-    countbitsset++;
+    gt_free(startposoccurs);
   }
-  if (countbitsset != totallength+1)
-  {
-    fprintf(stderr,"ERROR: not all bits are set\n");
-    exit(GT_EXIT_PROGRAMMING_ERROR);
-  }
-  gt_free(startposoccurs);
   esr1 = newEncodedsequencescanstate();
   esr2 = newEncodedsequencescanstate();
+  gt_assert(numberofsuffixes > 0);
   gt_assert(*suftab < totallength);
-  for (ptr = suftab + 1; !haserr && ptr <= suftab + totallength; ptr++)
+  for (ptr = suftab + 1; !haserr && ptr < suftab + numberofsuffixes; ptr++)
   {
-    if (ptr < suftab + totallength)
+    if (ptr < suftab + numberofsuffixes - 1)
     {
       gt_assert(*ptr < totallength);
       cmp = comparetwosuffixes(encseq,
@@ -233,7 +240,10 @@ void checkentiresuftab(const Encodedsequence *encseq,
     } else
     {
       maxlcp = 0;
-      gt_assert(*ptr == totallength);
+      if (numberofsuffixes == totallength+1)
+      {
+        gt_assert(*ptr == totallength);
+      }
     }
     if (ssar != NULL)
     {

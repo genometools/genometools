@@ -508,7 +508,6 @@ static void differencecover_sample(Differencecover *dcov,
   {
     if (diffptr < afterend && (Diffvalue) modvalue == *diffptr)
     {
-      /* printf("pos mod %u in difference cover\n",dcov->vparam); */
       code = extractprefixcode(&unitsnotspecial,
                                dcov->encseq,
                                dcov->filltable,
