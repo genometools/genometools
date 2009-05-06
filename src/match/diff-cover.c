@@ -177,7 +177,7 @@ static unsigned int computehvalue(const Differencecover *dcov,
 }
 #endif
 
-Differencecover *differencecover_new(unsigned int vparam,
+static Differencecover *differencecover_new(unsigned int vparam,
                                      const Encodedsequence *encseq,
                                      Readmode readmode)
 {
@@ -232,18 +232,13 @@ Differencecover *differencecover_new(unsigned int vparam,
   return dcov;
 }
 
-unsigned int differencecover_rank(const Differencecover *dcov,Seqpos pos)
-{
-  return dcov->coverrank[MODV(pos)];
-}
-
-unsigned int differencecover_offset(const Differencecover *dcov,
+static unsigned int differencecover_offset(const Differencecover *dcov,
                                     Seqpos pos1,Seqpos pos2)
 {
   return (unsigned int) MODV(dcov->diff2pos[MODV(pos2-pos1)] - pos1);
 }
 
-void differencecover_delete(Differencecover *dcov)
+static void differencecover_delete(Differencecover *dcov)
 {
   gt_free(dcov->coverrank);
   dcov->coverrank = NULL;
@@ -269,7 +264,7 @@ void differencecover_delete(Differencecover *dcov)
   gt_free(dcov);
 }
 
-unsigned long differencecover_packsamplepos(const Differencecover *dcov,
+static unsigned long differencecover_packsamplepos(const Differencecover *dcov,
                                             Seqpos pos)
 {
   return dcov->coverrank[MODV(pos)] * (DIVV(dcov->totallength) + 1) +
