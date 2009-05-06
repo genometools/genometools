@@ -42,7 +42,7 @@ typedef int (*Inl_Queueprocessor)(Inl_Queueelem *,void *info);
   reservoir can, if necessary, be enlarged.
 */
 
-static Inl_Queue *gt_inl_queue_new(unsigned long queuesize)
+static inline Inl_Queue *gt_inl_queue_new(unsigned long queuesize)
 {
   Inl_Queue *q;
 
@@ -59,7 +59,7 @@ static Inl_Queue *gt_inl_queue_new(unsigned long queuesize)
   The following function frees the space required for the queue.
 */
 
-void gt_inl_queue_delete(Inl_Queue *q)
+static inline void gt_inl_queue_delete(Inl_Queue *q)
 {
   FREESPACE(q->queuespace);
   FREESPACE(q);
@@ -69,7 +69,7 @@ void gt_inl_queue_delete(Inl_Queue *q)
   The following function returns true iff the queue is empty.
 */
 
-bool gt_inl_queue_isempty(const Inl_Queue *q)
+static inline bool gt_inl_queue_isempty(const Inl_Queue *q)
 {
   return (q->noofelements == 0) ? true : false;
 }
@@ -79,7 +79,7 @@ bool gt_inl_queue_isempty(const Inl_Queue *q)
   space reservoir.
 */
 
-static void extendqueuesize(Inl_Queue *q,bool doublesize)
+static inline void extendqueuesize(Inl_Queue *q,bool doublesize)
 {
   unsigned long addconst, idx, newsize;
 
@@ -112,7 +112,8 @@ static void extendqueuesize(Inl_Queue *q,bool doublesize)
   the queue.
 */
 
-void gt_inl_queue_add(Inl_Queue *q,Inl_Queueelem elem,bool doublesize)
+static inline void gt_inl_queue_add(Inl_Queue *q,Inl_Queueelem elem,
+                                    bool doublesize)
 {
   if (q->noofelements == q->queuesize)
   {
@@ -134,7 +135,7 @@ void gt_inl_queue_add(Inl_Queue *q,Inl_Queueelem elem,bool doublesize)
   start of the queue.
 */
 
-Inl_Queueelem gt_inl_queue_get(Inl_Queue *q)
+static inline Inl_Queueelem gt_inl_queue_get(Inl_Queue *q)
 {
   Inl_Queueelem value;
 
@@ -152,13 +153,13 @@ Inl_Queueelem gt_inl_queue_get(Inl_Queue *q)
   return value;
 }
 
-Inl_Queueelem *gt_inl_queue_head(const Inl_Queue *q)
+static inline Inl_Queueelem *gt_inl_queue_head(const Inl_Queue *q)
 {
   gt_assert(q->noofelements > 0);
   return &q->queuespace[q->dequeueindex];
 }
 
-Inl_Queueelem *gt_inl_queue_tail(const Inl_Queue *q)
+static inline Inl_Queueelem *gt_inl_queue_tail(const Inl_Queue *q)
 {
   gt_assert(q->noofelements > 0);
   if (q->enqueueindex == q->queuesize-1)
@@ -168,7 +169,7 @@ Inl_Queueelem *gt_inl_queue_tail(const Inl_Queue *q)
   return &q->queuespace[q->enqueueindex+1];
 }
 
-void gt_inl_queue_deletehead(Inl_Queue *q)
+static inline void gt_inl_queue_deletehead(Inl_Queue *q)
 {
   gt_assert(q->noofelements > 0);
   q->noofelements--;
@@ -182,8 +183,8 @@ void gt_inl_queue_deletehead(Inl_Queue *q)
   }
 }
 
-int gt_inl_queue_iterate(const Inl_Queue *q,
-                         Inl_Queueprocessor queueprocessor,void *info)
+static inline int gt_inl_queue_iterate(const Inl_Queue *q,
+                                Inl_Queueprocessor queueprocessor,void *info)
 {
   unsigned long idx;
 

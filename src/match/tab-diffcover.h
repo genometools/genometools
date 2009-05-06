@@ -19,44 +19,44 @@
 
 static Diffvalue differencecovertab[] = {
   /*
-     1 
+     1
    */ UScast (0),
   /*
-     2 
+     2
    */ UScast (0), UScast (1),
   /*
-     4 
+     4
    */ UScast (0), UScast (1), UScast (2),
   /*
-     8 
+     8
    */ UScast (0), UScast (1), UScast (2), UScast (4),
   /*
-     16 
+     16
    */ UScast (0), UScast (1), UScast (2), UScast (5), UScast (8),
   /*
-     32 
+     32
    */ UScast (0), UScast (1), UScast (2), UScast (3), UScast (7),
     UScast (11), UScast (19),
   /*
-     64 
+     64
    */ UScast (0), UScast (1), UScast (2), UScast (5),
     UScast (14), UScast (16), UScast (34), UScast (42),
     UScast (59),
   /*
-     128 
+     128
    */ UScast (0), UScast (1), UScast (3), UScast (7),
     UScast (17), UScast (40), UScast (55), UScast (64),
     UScast (75), UScast (85), UScast (104), UScast (109),
     UScast (117),
   /*
-     256 
+     256
    */ UScast (0), UScast (1), UScast (3), UScast (7),
     UScast (12), UScast (20), UScast (30), UScast (44),
     UScast (65), UScast (80), UScast (89), UScast (96),
     UScast (114), UScast (122), UScast (128), UScast (150),
     UScast (196), UScast (197), UScast (201), UScast (219),
   /*
-     512 
+     512
    */ UScast (0), UScast (1), UScast (2), UScast (3), UScast (4),
     UScast (9), UScast (18), UScast (27), UScast (36),
     UScast (45), UScast (64), UScast (83), UScast (102),
@@ -65,7 +65,7 @@ static Diffvalue differencecovertab[] = {
     UScast (246), UScast (256), UScast (266), UScast (267),
     UScast (268), UScast (269), UScast (270),
   /*
-     1024 
+     1024
    */ UScast (0), UScast (1), UScast (2), UScast (3), UScast (4),
     UScast (5), UScast (6), UScast (13), UScast (26),
     UScast (39), UScast (52), UScast (65), UScast (78),
@@ -77,7 +77,7 @@ static Diffvalue differencecovertab[] = {
     UScast (540), UScast (541), UScast (542), UScast (543),
     UScast (544), UScast (545), UScast (546),
   /*
-     2048 
+     2048
    */ UScast (0), UScast (1), UScast (2), UScast (3), UScast (4),
     UScast (5), UScast (6), UScast (7), UScast (8), UScast (9),
     UScast (19), UScast (38), UScast (57), UScast (76),
@@ -93,7 +93,7 @@ static Diffvalue differencecovertab[] = {
     UScast (1133), UScast (1134), UScast (1135), UScast (1136),
     UScast (1137), UScast (1138), UScast (1139), UScast (1140),
   /*
-     4096 
+     4096
    */ UScast (0), UScast (1), UScast (2), UScast (3), UScast (4),
     UScast (5), UScast (6), UScast (7), UScast (8), UScast (9),
     UScast (10), UScast (11), UScast (12), UScast (13),
@@ -115,7 +115,7 @@ static Diffvalue differencecovertab[] = {
     UScast (2261), UScast (2262), UScast (2263), UScast (2264),
     UScast (2265), UScast (2266), UScast (2267), UScast (2268),
   /*
-     8192 
+     8192
    */ UScast (0), UScast (1), UScast (2), UScast (3), UScast (4),
     UScast (5), UScast (6), UScast (7), UScast (8), UScast (9),
     UScast (10), UScast (11), UScast (12), UScast (13),
@@ -145,7 +145,7 @@ static Diffvalue differencecovertab[] = {
     UScast (4213), UScast (4214), UScast (4215), UScast (4216),
     UScast (4217), UScast (4218),
   /*
-     16384 
+     16384
    */ UScast (0), UScast (1), UScast (2), UScast (3), UScast (4),
     UScast (5), UScast (6), UScast (7), UScast (8), UScast (9),
     UScast (10), UScast (11), UScast (12), UScast (13),
@@ -187,7 +187,7 @@ static Diffvalue differencecovertab[] = {
     UScast (8581), UScast (8582), UScast (8583), UScast (8584),
     UScast (8585), UScast (8586),
   /*
-     32768 
+     32768
    */ UScast (0), UScast (1), UScast (2), UScast (3), UScast (4),
     UScast (5), UScast (6), UScast (7), UScast (8), UScast (9),
     UScast (10), UScast (11), UScast (12), UScast (13),
@@ -255,11 +255,11 @@ static Diffvalue differencecovertab[] = {
     UScast (17099), UScast (17100)
 };
 
-static Diffrank differencecoversizes[] = { 
+static Diffrank differencecoversizes[] = {
     UCcast (1), UCcast (2), UCcast (3), UCcast (4), UCcast (5),
-    UCcast (7), UCcast (9), UCcast (13), UCcast (20), UCcast (28), 
-    UCcast (40), UCcast (58), UCcast (82), UCcast (112), UCcast (160), 
-    UCcast (226) 
+    UCcast (7), UCcast (9), UCcast (13), UCcast (20), UCcast (28),
+    UCcast (40), UCcast (58), UCcast (82), UCcast (112), UCcast (160),
+    UCcast (226)
 };
 
 #endif
