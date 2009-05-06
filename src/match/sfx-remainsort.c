@@ -573,49 +573,6 @@ static void inversesuftabrel_get(Itvfullentry *itvfullentry,
                            rmnsufinfo->multimappower,
                            startpos,
                            rmnsufinfo->prefixlength);
-
-  /*
-  if (possibletocmpbitwise(rmnsufinfo->encseq))
-  {
-    EndofTwobitencoding etbe;
-    bool fwd = ISDIRREVERSE(rmnsufinfo->readmode) ? false : true;
-
-    initEncodedsequencescanstategeneric(rmnsufinfo->esr,rmnsufinfo->encseq,
-                                        fwd,startpos);
-    extract2bitenc(fwd,&etbe,rmnsufinfo->encseq,rmnsufinfo->esr,startpos);
-    if (etbe.unitsnotspecial >= rmnsufinfo->prefixlength)
-    {
-      code = (Codetype) (etbe.tbe >>
-                         MULT2(UNITSIN2BITENC - rmnsufinfo->prefixlength));
-      itvfullentry->unitsnotspecial = rmnsufinfo->prefixlength;
-    } else
-    {
-      if (etbe.unitsnotspecial > 0)
-      {
-        code = (Codetype)
-               (etbe.tbe >> MULT2(UNITSIN2BITENC - rmnsufinfo->prefixlength))
-               | rmnsufinfo->filltable[etbe.unitsnotspecial];
-        itvfullentry->unitsnotspecial = etbe.unitsnotspecial;
-      } else
-      {
-        code = 0;
-        itvfullentry->unitsnotspecial = 0;
-      }
-    }
-  } else
-  {
-    code = extractprefixcode(&itvfullentry->unitsnotspecial,
-                             rmnsufinfo->encseq,
-                             rmnsufinfo->multimappower,
-                             startpos,
-                             rmnsufinfo->prefixlength);
-    if (itvfullentry->unitsnotspecial > 0 &&
-        itvfullentry->unitsnotspecial < rmnsufinfo->prefixlength)
-    {
-      code |= (Codetype) rmnsufinfo->filltable[itvfullentry->unitsnotspecial];
-    }
-  }
-  */
   /*
   printf("startpos=%lu,unitsnotspecial=%u,code=%u\n",
           (unsigned long) startpos,
