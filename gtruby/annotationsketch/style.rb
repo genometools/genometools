@@ -41,7 +41,7 @@ module GT
   # a NULL pointer
   NULL = DL::PtrData.new(0)
 
-  extern "GtStyle* gt_style_new(bool, GtError*)"
+  extern "GtStyle* gt_style_new(GtError*)"
   extern "int gt_style_load_file(GtStyle*, const char*, GtError*)"
   extern "int gt_style_load_str(GtStyle*, GtStr*, GtError*)"
   extern "int gt_style_to_str(const GtStyle*, GtStr*, GtError*)"
@@ -66,7 +66,7 @@ module GT
     def initialize(s = nil)
       err = GT::Error.new()
       if s.nil? then
-        @style = GT.gt_style_new(false, err.to_ptr)
+        @style = GT.gt_style_new(err.to_ptr)
         @style.free = GT::symbol("gt_style_delete", "0P")
       else
         @style = s
