@@ -33,7 +33,7 @@ class Style:
             self.own = False
         else:
             e = Error()
-            self.style = gtlib.gt_style_new(False, e)
+            self.style = gtlib.gt_style_new(e)
             if self.style == 0 or self.style == None:
                 gterror(e)
             self.own = True
