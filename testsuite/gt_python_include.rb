@@ -122,4 +122,12 @@ if not $arguments["nocairo"] then
                "#{$testdata}standard_gene_as_tree.gff3"
     run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.hotspots"
   end
+
+  Name "gtpython: unittests"
+  Keywords "gt_python unittests"
+  Test do
+    run_python "#{$gtpython}/tests/__init__.py " 
+    grep $last_stderr, "OK"
+  end
+
 end
