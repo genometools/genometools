@@ -34,7 +34,7 @@ def checkallcover(v,psum)
   end
 end
 
-def diff_cover(logmod)
+def diff_cover(check,logmod)
   dc = case logmod 
     when 0 then [0]
     when 1 then [0,1]
@@ -59,34 +59,54 @@ def diff_cover(logmod)
              copy(2*r+2,r+1) + 
              copy(1,r)
       psum = partialsums(bseq)
-      checkallcover(v,psum)
+      if check
+        checkallcover(v,psum)
+      end
       partialsums(bseq)
   end
   return dc
 end
 
-if ARGV.length != 1
-  STDERR.puts "Usage: #{$0} <maxcover>"
+def usage()
+  STDERR.puts "Usage: #{$0} [check] <maxcover>"
   exit(1)
 end
 
-maxcover=ARGV[0].to_i
+check=false
+if ARGV.length == 1
+  maxcover=ARGV[0].to_i
+else
+  if ARGV.length == 2
+    if ARGV[0] == 'check'
+      check=true
+      maxcover=ARGV[0].to_i
+    else
+      usage()
+    end
+  else
+    usage()
+  end
+end
 
+def formtype(dc,cflag)
+  dc.collect {|a| "#{cflag}(" + a.to_s + ")"}
+end
+  
 puts "static Diffvalue differencecovertab[] ="
 puts "{"
 lentab = []
 0.upto(maxcover) do |logmod|
-  dc = diff_cover(logmod)
+  dc = diff_cover(check,logmod)
   lentab = lentab.push(dc.length)
-  print "  /* #{2**logmod} */ " + dc.join("UL,")
+  print "  /* #{2**logmod} */ " + formtype(dc,"UScast").join(",")
   if logmod == maxcover
-    puts "UL"
+    puts ""
   else
-    puts "UL,"
+    puts ", "
   end
 end
 puts "};"
 puts ""
 
-puts "static unsigned int differencecoversizes[]"
-puts "  = {" + lentab.join("U,") + "U};"
+puts "static Diffrank differencecoversizes[]"
+puts "  = {" + formtype(lentab,"UCcast").join(",") + "};"

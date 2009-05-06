@@ -33,7 +33,10 @@
 #include "encseq-def.h"
 #include "sfx-suftaborder.h"
 
-typedef unsigned long Diffvalue;
+typedef unsigned char Diffrank;
+#define Diffrankmax ((Diffrank) 255)
+typedef unsigned short Diffvalue;
+#define Diffvaluemax ((Diffvalue) 65535)
 
 #define MODV(VAL) ((VAL) & dcov->vmodmask)
 #define DIVV(VAL) ((VAL) >> dcov->logmod)
@@ -43,8 +46,8 @@ struct Differencecover
   unsigned int vparam, logmod, size, vmodmask,
                hvalue,  /* not necessary */
                numofchars,
-               prefixlength,
-               *coverrank;
+               prefixlength;
+  Diffrank *coverrank;
   Diffvalue *diffvalues, *diff2pos;
   Seqpos totallength, *sortedsample,
          *leftborder; /* points to bcktab->leftborder */
@@ -59,66 +62,17 @@ struct Differencecover
   unsigned long *inversesuftab;
 };
 
-static Diffvalue differencecovertab[] = {
-  /*
-     1
-   */ 0UL,
-  /*
-     2
-   */ 0UL, 1UL,
-  /*
-     4
-   */ 0UL, 1UL, 2UL,
-  /*
-     8
-   */ 0UL, 1UL, 2UL, 4UL,
-  /*
-     16
-   */ 0UL, 1UL, 2UL, 5UL, 8UL,
-  /*
-     32
-   */ 0UL, 1UL, 2UL, 3UL, 7UL, 11UL, 19UL,
-  /*
-     64
-   */ 0UL, 1UL, 2UL, 5UL, 14UL, 16UL, 34UL, 42UL, 59UL,
-  /*
-     128
-   */ 0UL, 1UL, 3UL, 7UL, 17UL, 40UL, 55UL, 64UL, 75UL, 85UL,
-    104UL, 109UL, 117UL,
-  /*
-     256
-   */ 0UL, 1UL, 3UL, 7UL, 12UL, 20UL, 30UL, 44UL, 65UL, 80UL,
-    89UL, 96UL, 114UL, 122UL, 128UL, 150UL, 196UL, 197UL, 201UL,
-    219UL,
-  /*
-     512
-   */ 0UL, 1UL, 2UL, 3UL, 4UL, 9UL, 18UL, 27UL, 36UL, 45UL, 64UL,
-    83UL, 102UL, 121UL, 140UL, 159UL, 178UL, 197UL, 216UL, 226UL,
-    236UL, 246UL, 256UL, 266UL, 267UL, 268UL, 269UL, 270UL,
-  /*
-     1024
-   */ 0UL, 1UL, 2UL, 3UL, 4UL, 5UL, 6UL, 13UL, 26UL, 39UL, 52UL,
-    65UL, 78UL, 91UL, 118UL, 145UL, 172UL, 199UL, 226UL, 253UL,
-    280UL, 307UL, 334UL, 361UL, 388UL, 415UL, 442UL, 456UL,
-    470UL, 484UL, 498UL, 512UL, 526UL, 540UL, 541UL, 542UL,
-    543UL, 544UL, 545UL, 546UL,
-  /*
-     2048
-   */ 0UL, 1UL, 2UL, 3UL, 4UL, 5UL, 6UL, 7UL, 8UL, 9UL, 19UL,
-    38UL, 57UL, 76UL, 95UL, 114UL, 133UL, 152UL, 171UL, 190UL,
-    229UL, 268UL, 307UL, 346UL, 385UL, 424UL, 463UL, 502UL,
-    541UL, 580UL, 619UL, 658UL, 697UL, 736UL, 775UL, 814UL,
-    853UL, 892UL, 931UL, 951UL, 971UL, 991UL, 1011UL, 1031UL,
-    1051UL, 1071UL, 1091UL, 1111UL, 1131UL, 1132UL, 1133UL,
-    1134UL, 1135UL, 1136UL, 1137UL, 1138UL, 1139UL, 1140UL
-};
+/* Compute difference cover on the fly */
 
-static unsigned int differencecoversizes[]
-  = { 1U, 2U, 3U, 4U, 5U, 7U, 9U, 13U, 20U, 28U, 40U, 58U };
+#define UScast(X) ((Diffvalue) X)
+#define UCcast(X) ((Diffrank) X)
+
+#include "tab-diffcover.h"
 
 static void fillcoverrank(Differencecover *dcov)
 {
-  unsigned int i, j;
+  unsigned int i;
+  Diffrank j;
 
   dcov->coverrank = gt_malloc(sizeof(*dcov->coverrank) * dcov->vparam);
   for (i=0, j=0; i<dcov->vparam; i++)
@@ -126,6 +80,7 @@ static void fillcoverrank(Differencecover *dcov)
     dcov->coverrank[i] = j;
     if (j < dcov->size && dcov->diffvalues[j] <= (Diffvalue) i)
     {
+      gt_assert(j < Diffrankmax);
       j++;
     }
   }
@@ -178,8 +133,8 @@ static unsigned int computehvalue(const Differencecover *dcov,
 #endif
 
 static Differencecover *differencecover_new(unsigned int vparam,
-                                     const Encodedsequence *encseq,
-                                     Readmode readmode)
+                                            const Encodedsequence *encseq,
+                                            Readmode readmode)
 {
   size_t logmod;
   unsigned int offset = 0, v = 1U;
@@ -232,11 +187,13 @@ static Differencecover *differencecover_new(unsigned int vparam,
   return dcov;
 }
 
+/*
 static unsigned int differencecover_offset(const Differencecover *dcov,
-                                    Seqpos pos1,Seqpos pos2)
+                                           Seqpos pos1,Seqpos pos2)
 {
   return (unsigned int) MODV(dcov->diff2pos[MODV(pos2-pos1)] - pos1);
 }
+*/
 
 static void differencecover_delete(Differencecover *dcov)
 {
@@ -286,6 +243,7 @@ static unsigned long derivespecialcodesonthefly(Differencecover *dcov,
 
   for (prefixindex=1U; prefixindex < dcov->prefixlength; prefixindex++)
   {
+    /* XXX use one structure and reinit it */
     ecp = newEnumcodeatposition(dcov->encseq,dcov->readmode,
                                 dcov->prefixlength,
                                 dcov->numofchars);
@@ -553,7 +511,7 @@ static void differencecover_sample(Differencecover *dcov,bool withcheck)
   {
     qsort(codelist.spaceCodeatposition,
           (size_t) codelist.nextfreeCodeatposition,
-          sizeof (Codeatposition),compareCodeatpositon);
+          sizeof (*codelist.spaceCodeatposition),compareCodeatpositon);
   }
   dcov->sortedsample = gt_malloc(sizeof(*dcov->sortedsample) *
                                  dcov->effectivesamplesize);
@@ -611,9 +569,10 @@ void differencecovers_check(Seqpos maxcheck,const Encodedsequence *encseq,
   Differencecover *dcov;
   size_t logmod, next = 0;
   unsigned int j, vparam;
-  Seqpos pos1, pos2;
   bool withcheck = true;
 
+  printf("sizeof(differencecovertab)=%lu\n",
+          (unsigned long) sizeof (differencecovertab));
   if (maxcheck > getencseqtotallength(encseq))
   {
     maxcheck = getencseqtotallength(encseq);
@@ -633,14 +592,6 @@ void differencecovers_check(Seqpos maxcheck,const Encodedsequence *encseq,
     {
       gt_assert(dcov->diffvalues[j] == differencecovertab[next]);
       next++;
-    }
-    for (pos1=0; pos1<maxcheck; pos1++)
-    {
-      for (pos2=0; pos2<maxcheck; pos2++)
-      {
-        gt_assert(differencecover_offset(dcov,pos1,pos2) ==
-                  differencecover_offset(dcov,pos1,pos2));
-      }
     }
     printf("v=%u (size=%u): ",dcov->vparam,dcov->size);
     if (withcheck)
