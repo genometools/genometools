@@ -78,4 +78,13 @@ void sortallbuckets(Suftab *suftab,
                     unsigned long long *bucketiterstep,
                     Verboseinfo *verboseinfo);
 
+void sortsamplesuffixes(Seqpos *sample,
+                        unsigned long samplesize,
+                        const Encodedsequence *encseq,
+                        Readmode readmode,
+                        unsigned int numofchars,
+                        unsigned int prefixlength,
+                        const Sfxstrategy *sfxstrategy,
+                        Verboseinfo *verboseinfo);
+
 #endif

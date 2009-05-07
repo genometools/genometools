@@ -556,9 +556,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
     } else
     {
       sfi->leftborder = bcktab_leftborder(sfi->bcktab);
-      STAMP;
       sfi->numofallcodes = bcktab_numofallcodes(sfi->bcktab);
-      STAMP;
     }
   }
   if (!haserr)

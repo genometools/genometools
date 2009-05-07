@@ -772,10 +772,8 @@ static void differencecover_sample(Differencecover *dcov,bool withcheck)
   {
     dcov->multimappower = bcktab_multimappower(dcov->bcktab);
   }
-  STAMP;
   dcov->maxcode = bcktab_numofallcodes(dcov->bcktab) - 1;
   dcov->rangestobesorted = gt_inl_queue_new(MAX(16UL,DIV2(dcov->maxcode)));
-  STAMP;
   gt_assert(dcov->bcktab != NULL);
   dcov->filltable = filllargestchartable(dcov->numofchars,dcov->prefixlength);
   dcov->leftborder = bcktab_leftborder(dcov->bcktab);
