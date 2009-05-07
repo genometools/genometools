@@ -887,6 +887,7 @@ Seqpos *bcktab_leftborder(Bcktab *bcktab)
 
 Codetype bcktab_numofallcodes(const Bcktab *bcktab)
 {
+  printf("return numofallcodes=%u\n",(unsigned int) bcktab->numofallcodes);
   return bcktab->numofallcodes;
 }
 

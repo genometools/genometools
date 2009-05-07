@@ -153,13 +153,13 @@ static inline Inl_Queueelem gt_inl_queue_get(Inl_Queue *q)
   return value;
 }
 
-static inline Inl_Queueelem *gt_inl_queue_head(const Inl_Queue *q)
+/*@unused@*/ static inline Inl_Queueelem *gt_inl_queue_head(const Inl_Queue *q)
 {
   gt_assert(q->noofelements > 0);
   return &q->queuespace[q->dequeueindex];
 }
 
-static inline Inl_Queueelem *gt_inl_queue_tail(const Inl_Queue *q)
+/*@unused@*/ static inline Inl_Queueelem *gt_inl_queue_tail(const Inl_Queue *q)
 {
   gt_assert(q->noofelements > 0);
   if (q->enqueueindex == q->queuesize-1)
@@ -169,7 +169,7 @@ static inline Inl_Queueelem *gt_inl_queue_tail(const Inl_Queue *q)
   return &q->queuespace[q->enqueueindex+1];
 }
 
-static inline void gt_inl_queue_deletehead(Inl_Queue *q)
+/*@unused@*/ static inline void gt_inl_queue_deletehead(Inl_Queue *q)
 {
   gt_assert(q->noofelements > 0);
   q->noofelements--;
@@ -183,7 +183,7 @@ static inline void gt_inl_queue_deletehead(Inl_Queue *q)
   }
 }
 
-static inline int gt_inl_queue_iterate(const Inl_Queue *q,
+/*@unused@*/ static inline int gt_inl_queue_iterate(const Inl_Queue *q,
                                 Inl_Queueprocessor queueprocessor,void *info)
 {
   unsigned long idx;

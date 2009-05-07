@@ -41,6 +41,7 @@
 #include "sfx-enumcodes.h"
 #include "sfx-strategy.h"
 #include "diff-cover.h"
+#include "stamp.h"
 
 #include "sfx-mappedstr.pr"
 
@@ -555,7 +556,9 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
     } else
     {
       sfi->leftborder = bcktab_leftborder(sfi->bcktab);
+      STAMP;
       sfi->numofallcodes = bcktab_numofallcodes(sfi->bcktab);
+      STAMP;
     }
   }
   if (!haserr)

@@ -32,6 +32,7 @@
 #include "initbasepower.h"
 #include "encseq-def.h"
 #include "sfx-suftaborder.h"
+#include "stamp.h"
 
 typedef unsigned char Diffrank;
 #define Diffrankmax ((Diffrank) 255)
@@ -43,14 +44,14 @@ typedef unsigned short Diffvalue;
 
 typedef struct
 {
-  Seqpos key,
-         suffixstart;
+  unsigned long key;
+  Seqpos suffixstart;
 } Itventry;
 
 typedef struct
 {
-  Seqpos left,
-         right;
+  unsigned long left,
+                right;
 } Pairsuffixptr;
 
 typedef Pairsuffixptr Inl_Queueelem;
@@ -59,12 +60,12 @@ typedef Pairsuffixptr Inl_Queueelem;
 
 typedef struct
 {
-  Seqpos left,
-         right,
-         depth;
+  unsigned long left,
+         right;
   unsigned long count,
                 totalwidth,
                 maxwidth;
+  Seqpos depth;
   bool defined;
 } Firstwithnewdepth;
 
@@ -212,17 +213,10 @@ static Differencecover *differencecover_new(unsigned int vparam,
                                         dcov->size;
   fillcoverrank(dcov);
   filldiff2pos(dcov);
-  if (possibletocmpbitwise(encseq))
-  {
-    dcov->multimappower = NULL;
-  } else
-  {
-    dcov->multimappower = bcktab_multimappower(dcov->bcktab);
-  }
   dcov->esr = newEncodedsequencescanstate();
   dcov->allocateditvinfo = 0;
+  dcov->itvinfo = NULL;
   dcov->currentdepth = 0;
-  dcov->maxcode = bcktab_numofallcodes(dcov->bcktab) - 1;
   dcov->firstwithnewdepth.defined = false;
   dcov->firstwithnewdepth.depth = 0;
   dcov->firstwithnewdepth.totalwidth = 0;
@@ -230,7 +224,6 @@ static Differencecover *differencecover_new(unsigned int vparam,
   dcov->firstwithnewdepth.left = 0;
   dcov->firstwithnewdepth.right = 0;
   dcov->firstwithnewdepth.maxwidth = 0;
-  dcov->rangestobesorted = gt_inl_queue_new(MAX(16UL,DIV2(dcov->maxcode)));
   dcov->currentqueuesize = 0;
   dcov->maxqueuesize = 0;
   return dcov;
@@ -423,6 +416,13 @@ static void inversesuftab_set(Differencecover *dcov,Seqpos pos,
   dcov->inversesuftab[idx] = sampleindex;
 }
 
+static unsigned long inversesuftab_get(Differencecover *dcov,Seqpos pos)
+{
+  unsigned long idx = differencecover_packsamplepos(dcov,pos);
+  gt_assert(idx < dcov->maxsamplesize);
+  return dcov->inversesuftab[idx];
+}
+
 static void initinversesuftab(Differencecover *dcov)
 {
   unsigned long sampleindex;
@@ -490,8 +490,9 @@ static void dc_initinversesuftabnonspecialsadjust(Differencecover *dcov)
   Codetype code;
   unsigned int rightchar;
   Bucketspecification bucketspec;
-  Seqpos idx, startpos;
+  Seqpos startpos;
   const Codetype mincode = 0;
+  unsigned long idx;
 
   rightchar = (unsigned int) (mincode % dcov->numofchars);
   idx = 0;
@@ -501,21 +502,22 @@ static void dc_initinversesuftabnonspecialsadjust(Differencecover *dcov)
                                       dcov->bcktab,
                                       code,
                                       dcov->maxcode,
-                                      dcov->effectivesamplesize,
+                                      (Seqpos) dcov->effectivesamplesize,
                                       rightchar,
                                       dcov->numofchars);
-    for (/* Nothing */; idx < bucketspec.left; idx++)
+    for (/* Nothing */; idx < (unsigned long) bucketspec.left; idx++)
     {
       startpos = dcov->sortedsample[idx];
       inversesuftab_set(dcov,startpos,idx);
     }
     dc_updatewidth (dcov,bucketspec.nonspecialsinbucket,
-                 (Seqpos) dcov->prefixlength);
+                    (Seqpos) dcov->prefixlength);
     for (/* Nothing */;
-         idx < bucketspec.left+bucketspec.nonspecialsinbucket; idx++)
+         idx < (unsigned long) bucketspec.left+bucketspec.nonspecialsinbucket;
+         idx++)
     {
       startpos = dcov->sortedsample[idx];
-      inversesuftab_set(dcov,startpos,bucketspec.left);
+      inversesuftab_set(dcov,startpos,(unsigned long) bucketspec.left);
     }
   }
   for (/* Nothing */; idx < dcov->effectivesamplesize; idx++)
@@ -525,9 +527,10 @@ static void dc_initinversesuftabnonspecialsadjust(Differencecover *dcov)
   }
 }
 
-static void dc_anchorleftmost(Differencecover *dcov,Seqpos left,Seqpos right)
+static void dc_anchorleftmost(Differencecover *dcov,unsigned long left,
+                              unsigned long right)
 {
-  Seqpos idx;
+  unsigned long idx;
 
   for (idx = left; idx <= right; idx++)
   {
@@ -547,7 +550,8 @@ static void dc_showintervalsizes(unsigned long count,unsigned long totalwidth,
 }
 
 static void dc_processunsortedrange(Differencecover *dcov,
-                                    Seqpos left,Seqpos right,Seqpos depth)
+                                    unsigned long left,unsigned long right,
+                                    Seqpos depth)
 {
   Pairsuffixptr pairelem;
   unsigned long width;
@@ -615,12 +619,12 @@ static int compareitv(const void *a,const void *b)
   return 0;
 }
 
-static void dc_sortsuffixesonthislevel(Differencecover *dcov,Seqpos left,
-                                       Seqpos right)
+static void dc_sortsuffixesonthislevel(Differencecover *dcov,unsigned long left,
+                                       unsigned long right)
 {
   unsigned long idx, rangestart;
   Seqpos startpos;
-  const unsigned long width = (unsigned long) (right - left + 1);
+  const unsigned long width = right - left + 1;
 
   if (dcov->itvinfo == NULL)
   {
@@ -637,7 +641,8 @@ static void dc_sortsuffixesonthislevel(Differencecover *dcov,Seqpos left,
   {
     startpos = dcov->sortedsample[left+idx];
     dcov->itvinfo[idx].suffixstart = startpos;
-    dcov->itvinfo[idx].key = dcov->inversesuftab[startpos + dcov->currentdepth];
+    dcov->itvinfo[idx].key
+      = inversesuftab_get(dcov,startpos + dcov->currentdepth);
   }
   qsort(dcov->itvinfo,(size_t) width,sizeof(*dcov->itvinfo),compareitv);
   for (idx=0; idx<width; idx++)
@@ -698,15 +703,16 @@ static void dc_bcktab2firstlevelintervals(Differencecover *dcov)
                                       dcov->bcktab,
                                       code,
                                       dcov->maxcode,
-                                      dcov->effectivesamplesize,
+                                      (Seqpos) dcov->effectivesamplesize,
                                       rightchar,
                                       dcov->numofchars);
     if (bucketspec.nonspecialsinbucket > 1UL)
     {
       dc_sortsuffixesonthislevel(dcov,
-                                 bucketspec.left,
-                                 bucketspec.left +
-                                   bucketspec.nonspecialsinbucket-1);
+                                 (unsigned long) bucketspec.left,
+                                 (unsigned long) (bucketspec.left +
+                                                  bucketspec.
+                                                  nonspecialsinbucket-1));
     }
   }
 }
@@ -750,6 +756,17 @@ static void differencecover_sample(Differencecover *dcov,bool withcheck)
                              true,
                              NULL,
                              NULL);
+  if (possibletocmpbitwise(dcov->encseq))
+  {
+    dcov->multimappower = NULL;
+  } else
+  {
+    dcov->multimappower = bcktab_multimappower(dcov->bcktab);
+  }
+  STAMP;
+  dcov->maxcode = bcktab_numofallcodes(dcov->bcktab) - 1;
+  dcov->rangestobesorted = gt_inl_queue_new(MAX(16UL,DIV2(dcov->maxcode)));
+  STAMP;
   gt_assert(dcov->bcktab != NULL);
   dcov->filltable = filllargestchartable(dcov->numofchars,dcov->prefixlength);
   dcov->leftborder = bcktab_leftborder(dcov->bcktab);
@@ -815,7 +832,8 @@ static void differencecover_sample(Differencecover *dcov,bool withcheck)
   printf("%lu positions are sampled (%.2f) wasted=%lu, pl=%u\n",
                                   dcov->samplesize,
                                   100.0 *
-                                  (double) dcov->samplesize/dcov->totallength,
+                                  (double) dcov->samplesize/
+                                           (dcov->totallength+1),
                                   dcov->maxsamplesize - dcov->samplesize,
                                   dcov->prefixlength);
   printf("specials = %lu, fullspecials=%lu\n",specials,fullspecials);
