@@ -546,6 +546,19 @@ void gt_feature_node_add_attribute(GtFeatureNode *fn,
     gt_tag_value_map_add(&fn->attributes, attr_name, attr_value);
 }
 
+void gt_feature_node_set_attribute(GtFeatureNode *fn,
+                                   const char *attr_name,
+                                   const char *attr_value)
+{
+  gt_assert(fn && attr_name && attr_value);
+  gt_assert(strlen(attr_name)); /* attribute name cannot be empty */
+  gt_assert(strlen(attr_value)); /* attribute value cannot be empty */
+  if (!fn->attributes)
+    fn->attributes = gt_tag_value_map_new(attr_name, attr_value);
+  else
+    gt_tag_value_map_set(&fn->attributes, attr_name, attr_value);
+}
+
 void gt_feature_node_foreach_attribute(GtFeatureNode *fn,
                                       AttributeIterFunc iterfunc, void *data)
 {

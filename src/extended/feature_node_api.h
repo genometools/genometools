@@ -118,4 +118,12 @@ GtStrArray*   gt_feature_node_get_attribute_list(const GtFeatureNode
 void          gt_feature_node_add_attribute(GtFeatureNode *feature_node,
                                             const char *tag, const char *value);
 
+/* Set attribute <tag> to new <value> in <feature_node>, if it exists already.
+   Otherwise the attribute <tag>=<value> is added to <feature_node>.
+   <tag> and <value> must at least have length 1.
+   You should not set Parent and ID attributes, use
+   <gt_feature_node_add_child()> to denote part-of relationships. */
+void          gt_feature_node_set_attribute(GtFeatureNode* feature_node,
+                                            const char *tag, const char *value);
+
 #endif
