@@ -264,10 +264,16 @@ static void differencecover_delete(Differencecover *dcov)
 }
 
 static unsigned long differencecover_packsamplepos(const Differencecover *dcov,
-                                            Seqpos pos)
+                                                   Seqpos pos)
 {
-  return dcov->coverrank[MODV(pos)] * (DIVV(dcov->totallength) + 1) +
-         (unsigned long) DIVV(pos);
+  unsigned long result;
+
+  gt_assert(dcov->isindifferencecover == NULL ||
+            ISIBITSET(dcov->isindifferencecover,MODV(pos)));
+  result =  dcov->coverrank[MODV(pos)] * (DIVV(dcov->totallength) + 1) +
+            (unsigned long) DIVV(pos);
+  gt_assert(result < dcov->maxsamplesize);
+  return result;
 }
 
 GT_DECLAREARRAYSTRUCT(Codeatposition);
@@ -386,7 +392,7 @@ static void validate_samplepositons(const Differencecover *dcov)
     if (diffptr < afterend && (Diffvalue) modvalue == *diffptr)
     {
       idx = differencecover_packsamplepos(dcov,pos);
-      gt_assert(idx < dcov->maxsamplesize && sampleidxused != NULL);
+      gt_assert(sampleidxused != NULL);
       if (ISIBITSET(sampleidxused,idx))
       {
         fprintf(stderr,"sample index %lu for pos %lu already used before\n",
@@ -412,14 +418,12 @@ static void inversesuftab_set(Differencecover *dcov,Seqpos pos,
                               unsigned long sampleindex)
 {
   unsigned long idx = differencecover_packsamplepos(dcov,pos);
-  gt_assert(idx < dcov->maxsamplesize);
   dcov->inversesuftab[idx] = sampleindex;
 }
 
 static unsigned long inversesuftab_get(Differencecover *dcov,Seqpos pos)
 {
   unsigned long idx = differencecover_packsamplepos(dcov,pos);
-  gt_assert(idx < dcov->maxsamplesize);
   return dcov->inversesuftab[idx];
 }
 
