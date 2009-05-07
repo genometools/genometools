@@ -126,7 +126,7 @@ void gt_tag_value_map_set(GtTagValueMap *map, const char *tag,
     memcpy(old_value, new_value, new_value_len);
     memmove(old_value + new_value_len, old_value + old_value_len,
             map_len - ((size_t) old_value - (size_t) *map + old_value_len) + 1);
-    gt_realloc(*map, map_len - (old_value_len - new_value_len) + 1);
+    *map = gt_realloc(*map, map_len - (old_value_len - new_value_len) + 1);
   }
   else if (new_value_len == old_value_len) {
     memcpy(old_value, new_value, new_value_len);
@@ -140,7 +140,7 @@ void gt_tag_value_map_set(GtTagValueMap *map, const char *tag,
             map_len - ((size_t) old_value - (size_t) *map + old_value_len) + 1);
     memcpy(old_value, new_value, new_value_len);
   }
-  gt_assert((*map)[map_len - old_value_len + new_value_len + 1] == '\0');
+  gt_assert((*map)[map_len - old_value_len + new_value_len] == '\0');
 }
 
 const char* gt_tag_value_map_get(const GtTagValueMap map, const char *tag)

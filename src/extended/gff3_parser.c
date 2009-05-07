@@ -897,7 +897,7 @@ static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
   gt_splitter_split(attribute_splitter, attributes, strlen(attributes), ';');
 
   for (i = 0; !had_err && i < gt_splitter_size(attribute_splitter); i++) {
-    const char *attr_tag = NULL;
+    const char *attr_tag = NULL, *old_value;
     bool attr_valid = true;
     char *attr_value = NULL,
          *token = gt_splitter_get_token(attribute_splitter, i);
@@ -962,19 +962,33 @@ static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
         had_err = -1;
       }
     }
-    /* check for duplicate attributes */
-    if (!had_err && attr_valid &&
-        gt_feature_node_get_attribute((GtFeatureNode*) feature_node,
-                                      attr_tag)) {
-      gt_error_set(err, "more than one %s attribute on line %u in file \"%s\"",
-                   attr_tag, line_number, filename);
-      had_err = -1;
-    }
     /* save all attributes, although the Parent and ID attribute is newly
        created in GFF3 output */
     if (!had_err && attr_valid) {
-      gt_feature_node_add_attribute((GtFeatureNode*) feature_node, attr_tag,
-                                    attr_value);
+      if ((old_value = gt_feature_node_get_attribute((GtFeatureNode*)
+                                                     feature_node, attr_tag))) {
+        /* handle duplicate attribute */
+        if (parser->tidy) {
+          GtStr *combined_value;
+          gt_warning("more than one %s attribute on line %u in file \"%s\"",
+                     attr_tag, line_number, filename);
+          combined_value = gt_str_new_cstr(old_value);
+          gt_str_append_char(combined_value, ',');
+          gt_str_append_cstr(combined_value, attr_value);
+          gt_feature_node_set_attribute((GtFeatureNode*) feature_node,
+                                        attr_tag, gt_str_get(combined_value));
+          gt_str_delete(combined_value);
+        }
+        else {
+          gt_error_set(err, "more than one %s attribute on line %u in file "
+                            "\"%s\"", attr_tag, line_number, filename);
+          had_err = -1;
+        }
+      }
+      else {
+        gt_feature_node_add_attribute((GtFeatureNode*) feature_node, attr_tag,
+                                      attr_value);
+      }
     }
     /* some attributes require special care */
     if (!had_err && attr_valid) {
