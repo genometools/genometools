@@ -966,7 +966,7 @@ static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
     if (!had_err && attr_valid &&
          gt_feature_node_get_attribute((GtFeatureNode*) feature_node,
                                        attr_tag)) {
-      gt_error_set(err, "more then one %s attribute on line %u in file \"%s\"",
+      gt_error_set(err, "more than one %s attribute on line %u in file \"%s\"",
                 attr_tag, line_number, filename);
       had_err = -1;
     }
