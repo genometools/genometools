@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008      Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -40,10 +40,13 @@ GtTagValueMap gt_tag_value_map_new(const char *tag, const char *value);
 void          gt_tag_value_map_delete(GtTagValueMap);
 void          gt_tag_value_map_add(GtTagValueMap*, const char *tag,
                                                    const char *value);
+void          gt_tag_value_map_set(GtTagValueMap*, const char *tag,
+                                                   const char *value);
 const char*   gt_tag_value_map_get(const GtTagValueMap, const char *tag);
 void          gt_tag_value_map_foreach(const GtTagValueMap,
                                        GtTagValueMapIteratorFunc,
                                        void *data);
 int           gt_tag_value_map_example(GtError*);
+int           gt_tag_value_map_unit_test(GtError*);
 
 #endif

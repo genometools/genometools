@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008      Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "core/ma.h"
+#include "core/ensure.h"
 #include "core/unused_api.h"
 #include "extended/tag_value_map.h"
 
@@ -50,10 +51,11 @@ void gt_tag_value_map_delete(GtTagValueMap map)
 
 /* Stores map length in <map_len> if the return value equals NULL (i.e., if not
    value has been found) and <map_len> does not equal NULL. */
-static const char* get_value(const GtTagValueMap map, const char *tag,
-                             size_t *map_len)
+static char* get_value(const GtTagValueMap map, const char *tag,
+                       size_t *map_len)
 {
-  const char *map_ptr, *tag_ptr;
+  char *map_ptr;
+  const char *tag_ptr;
   /* search for equal tag */
   map_ptr = map;
   tag_ptr = tag;
@@ -74,6 +76,16 @@ static const char* get_value(const GtTagValueMap map, const char *tag,
   return NULL;
 }
 
+static size_t get_map_len(const GtTagValueMap map)
+{
+  const char *map_ptr = map;
+  for (;;) {
+    if ((*map_ptr++ == '\0') && (*map_ptr++ == '\0'))
+      break;
+  }
+  return map_ptr - map - 1;
+}
+
 void gt_tag_value_map_add(GtTagValueMap *map, const char *tag,
                           const char *value)
 {
@@ -92,6 +104,43 @@ void gt_tag_value_map_add(GtTagValueMap *map, const char *tag,
   memcpy(*map + map_len, tag, tag_len + 1);
   memcpy(*map + map_len + tag_len + 1, value, value_len + 1);
   (*map)[map_len + tag_len + 1 + value_len + 1] = '\0';
+}
+
+void gt_tag_value_map_set(GtTagValueMap *map, const char *tag,
+                          const char *new_value)
+{
+  size_t tag_len, old_value_len, new_value_len, map_len = 0;
+  char *old_value;
+  gt_assert(map && *map && tag && new_value);
+  tag_len = strlen(tag);
+  new_value_len = strlen(new_value);
+  gt_assert(tag_len && new_value_len);
+  /* determine current map length */
+  old_value = get_value(*map, tag, &map_len);
+  if (!old_value)
+    return gt_tag_value_map_add(map, tag, new_value);
+  /* tag already used -> replace it */
+  old_value_len = strlen(old_value);
+  map_len = get_map_len(*map);
+  if (new_value_len < old_value_len) {
+    memcpy(old_value, new_value, new_value_len);
+    memmove(old_value + new_value_len, old_value + old_value_len,
+            map_len - ((size_t) old_value - (size_t) *map + old_value_len) + 1);
+    gt_realloc(*map, map_len - (old_value_len - new_value_len) + 1);
+  }
+  else if (new_value_len == old_value_len) {
+    memcpy(old_value, new_value, new_value_len);
+  }
+  else { /* (new_value_len > old_value_len)  */
+    *map = gt_realloc(*map, map_len + (new_value_len - old_value_len) + 1);
+    /* determine old_value again, realloc() might have moved it */
+    old_value = get_value(*map, tag, &map_len);
+    gt_assert(old_value);
+    memmove(old_value + new_value_len, old_value + old_value_len,
+            map_len - ((size_t) old_value - (size_t) *map + old_value_len) + 1);
+    memcpy(old_value, new_value, new_value_len);
+  }
+  gt_assert((*map)[map_len - old_value_len + new_value_len + 1] == '\0');
 }
 
 const char* gt_tag_value_map_get(const GtTagValueMap map, const char *tag)
@@ -133,4 +182,65 @@ int gt_tag_value_map_example(GT_UNUSED GtError *err)
   gt_tag_value_map_delete(map);
 
   return 0;
+}
+
+static GtTagValueMap create_filled_tag_value_list(void)
+{
+  GtTagValueMap map = gt_tag_value_map_new("tag 1", "value 1");
+  gt_tag_value_map_add(&map, "tag 2", "value 2");
+  gt_tag_value_map_add(&map, "tag 3", "value 3");
+
+  gt_assert(!gt_tag_value_map_get(map, "unused tag"));
+  gt_assert(!strcmp(gt_tag_value_map_get(map, "tag 1"), "value 1"));
+  gt_assert(!strcmp(gt_tag_value_map_get(map, "tag 2"), "value 2"));
+  gt_assert(!strcmp(gt_tag_value_map_get(map, "tag 3"), "value 3"));
+
+  return map;
+}
+
+int gt_tag_value_map_unit_test(GtError *err)
+{
+  GtTagValueMap map;
+  int had_err = 0;
+
+  gt_error_check(err);
+
+  /* test gt_tag_value_map_set() (new tags are shorter than old tags) */
+  map = create_filled_tag_value_list();
+  gt_tag_value_map_set(&map, "tag 1", "val X");
+  gt_tag_value_map_set(&map, "tag 2", "val Y");
+  gt_tag_value_map_set(&map, "tag 3", "val Z");
+  ensure(had_err, !gt_tag_value_map_get(map, "unused tag"));
+  ensure(had_err, !strcmp(gt_tag_value_map_get(map, "tag 1"), "val X"));
+  ensure(had_err, !strcmp(gt_tag_value_map_get(map, "tag 2"), "val Y"));
+  ensure(had_err, !strcmp(gt_tag_value_map_get(map, "tag 3"), "val Z"));
+  gt_tag_value_map_delete(map);
+
+  /* test gt_tag_value_map_set() (new tags have same length) */
+  if (!had_err) {
+    map = create_filled_tag_value_list();
+    gt_tag_value_map_set(&map, "tag 1", "value X");
+    gt_tag_value_map_set(&map, "tag 2", "value Y");
+    gt_tag_value_map_set(&map, "tag 3", "value Z");
+    ensure(had_err, !gt_tag_value_map_get(map, "unused tag"));
+    ensure(had_err, !strcmp(gt_tag_value_map_get(map, "tag 1"), "value X"));
+    ensure(had_err, !strcmp(gt_tag_value_map_get(map, "tag 2"), "value Y"));
+    ensure(had_err, !strcmp(gt_tag_value_map_get(map, "tag 3"), "value Z"));
+    gt_tag_value_map_delete(map);
+  }
+
+  /* test gt_tag_value_map_set() (new tags are longer than old tags) */
+  if (!had_err) {
+    map = create_filled_tag_value_list();
+    gt_tag_value_map_set(&map, "tag 1", "value XXX");
+    gt_tag_value_map_set(&map, "tag 2", "value YYY");
+    gt_tag_value_map_set(&map, "tag 3", "value ZZZ");
+    ensure(had_err, !gt_tag_value_map_get(map, "unused tag"));
+    ensure(had_err, !strcmp(gt_tag_value_map_get(map, "tag 1"), "value XXX"));
+    ensure(had_err, !strcmp(gt_tag_value_map_get(map, "tag 2"), "value YYY"));
+    ensure(had_err, !strcmp(gt_tag_value_map_get(map, "tag 3"), "value ZZZ"));
+    gt_tag_value_map_delete(map);
+  }
+
+  return had_err;
 }
