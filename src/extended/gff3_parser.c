@@ -964,17 +964,17 @@ static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
     }
     /* check for duplicate attributes */
     if (!had_err && attr_valid &&
-         gt_feature_node_get_attribute((GtFeatureNode*) feature_node,
-                                       attr_tag)) {
+        gt_feature_node_get_attribute((GtFeatureNode*) feature_node,
+                                      attr_tag)) {
       gt_error_set(err, "more than one %s attribute on line %u in file \"%s\"",
-                attr_tag, line_number, filename);
+                   attr_tag, line_number, filename);
       had_err = -1;
     }
     /* save all attributes, although the Parent and ID attribute is newly
        created in GFF3 output */
     if (!had_err && attr_valid) {
-      gt_feature_node_add_attribute((GtFeatureNode*) feature_node,
-                                      attr_tag, attr_value);
+      gt_feature_node_add_attribute((GtFeatureNode*) feature_node, attr_tag,
+                                    attr_value);
     }
     /* some attributes require special care */
     if (!had_err && attr_valid) {

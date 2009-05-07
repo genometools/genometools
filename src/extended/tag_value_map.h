@@ -37,13 +37,13 @@ typedef void (*GtTagValueMapIteratorFunc)(const char *tag, const char *value,
                                           void *data);
 
 GtTagValueMap gt_tag_value_map_new(const char *tag, const char *value);
-void        gt_tag_value_map_delete(GtTagValueMap);
-void        gt_tag_value_map_add(GtTagValueMap*, const char *tag,
-                                                 const char *value);
-const char* gt_tag_value_map_get(const GtTagValueMap, const char *tag);
-void        gt_tag_value_map_foreach(const GtTagValueMap,
-                                     GtTagValueMapIteratorFunc,
-                                     void *data);
-int         gt_tag_value_map_example(GtError*);
+void          gt_tag_value_map_delete(GtTagValueMap);
+void          gt_tag_value_map_add(GtTagValueMap*, const char *tag,
+                                                   const char *value);
+const char*   gt_tag_value_map_get(const GtTagValueMap, const char *tag);
+void          gt_tag_value_map_foreach(const GtTagValueMap,
+                                       GtTagValueMapIteratorFunc,
+                                       void *data);
+int           gt_tag_value_map_example(GtError*);
 
 #endif
