@@ -39,6 +39,7 @@
 #include "core/fptr_api.h"
 #include "core/grep_api.h"
 #include "core/interval_tree_api.h"
+#include "core/log_api.h"
 #include "core/ma_api.h"
 #include "core/msort_api.h"
 #include "core/phase_api.h"
