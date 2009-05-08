@@ -19,28 +19,9 @@
 #define DLIST_H
 
 #include "core/error.h"
-#include "core/fptr_api.h"
 
-/* A double-linked list which is sorted according to a qsort(3)-like compare
-   function (if one was supplied to the constructor). */
-typedef struct GtDlist GtDlist;
-typedef struct GtDlistelem GtDlistelem;
+#include "core/dlist_api.h"
 
-GtDlist*      gt_dlist_new(GtCompare);
-GtDlistelem*  gt_dlist_first(const GtDlist*);
-GtDlistelem*  gt_dlist_last(const GtDlist*);
-GtDlistelem*  gt_dlist_find(const GtDlist*, void*); /* O(n) */
-unsigned long gt_dlist_size(const GtDlist*);
-/* Usually O(n) (O(1) if data is added in sorted order). */
-void          gt_dlist_add(GtDlist*, void *data);
-/* Remove <dlistelem> from <dlist> and free it. */
-void          gt_dlist_remove(GtDlist *dlist, GtDlistelem *dlistelem);
-int           gt_dlist_example(GtError*);
 int           gt_dlist_unit_test(GtError*);
-void          gt_dlist_delete(GtDlist*);
-
-GtDlistelem*  gt_dlistelem_next(const GtDlistelem*);
-GtDlistelem*  gt_dlistelem_previous(const GtDlistelem*);
-void*         gt_dlistelem_get_data(const GtDlistelem*);
 
 #endif
