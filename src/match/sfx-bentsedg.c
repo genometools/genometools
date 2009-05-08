@@ -2103,16 +2103,13 @@ void sortsamplesuffixes(Seqpos *sortedsample,
                                       (Seqpos) samplesize,
                                       rightchar,
                                       numofchars);
-    if (bucketspec.nonspecialsinbucket > 0)
+    if (bucketspec.nonspecialsinbucket > 1UL)
     {
-      if (bucketspec.nonspecialsinbucket > 1UL)
-      {
-        bentleysedgewick(&bsr,
-                         sortedsample + bucketspec.left,
-                         sortedsample + bucketspec.left +
-                                        bucketspec.nonspecialsinbucket - 1,
-                         (Seqpos) prefixlength);
-      }
+      bentleysedgewick(&bsr,
+                       sortedsample + bucketspec.left,
+                       sortedsample + bucketspec.left +
+                                      bucketspec.nonspecialsinbucket - 1,
+                       (Seqpos) prefixlength);
     }
   }
   wrapBentsedgresources(&bsr,
