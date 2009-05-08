@@ -15,9 +15,22 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef MSORT_H
-#define MSORT_H
+#ifndef MSORT_API_H
+#define MSORT_API_H
 
-#include "core/msort_api.h"
+#include <stdlib.h>
+#include "core/fptr_api.h"
+
+/* Msort module */
+
+/* Sorts an array of <nmemb> elements, each of size <size>, according to compare
+   function <compar>. Uses the merge sort algorithm, the interface equals
+   <qsort(3)>. */
+void gt_msort(void *base, size_t nmemb, size_t size, GtCompare compar);
+
+/* Identical to <gt_msort()> except that the compare function is of
+   <GtCompareWithData> type accepting <comparinfo> as arbitrary data. */
+void gt_msort_r(void *base, size_t nmemb, size_t size, void *comparinfo,
+                GtCompareWithData compar);
 
 #endif

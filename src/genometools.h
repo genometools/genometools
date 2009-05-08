@@ -40,6 +40,7 @@
 #include "core/grep_api.h"
 #include "core/interval_tree_api.h"
 #include "core/ma_api.h"
+#include "core/msort_api.h"
 #include "core/phase_api.h"
 #include "core/range_api.h"
 #include "core/str_api.h"
