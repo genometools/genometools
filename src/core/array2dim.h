@@ -18,31 +18,6 @@
 #ifndef ARRAY2DIM_H
 #define ARRAY2DIM_H
 
-#include "core/error.h"
-#include "core/ma.h"
-
-#define gt_array2dim_malloc(ARRAY2DIM, ROWS, COLUMNS)                          \
-        {                                                                      \
-          unsigned long gt_a2d_i;                                              \
-          ARRAY2DIM = gt_malloc(sizeof *ARRAY2DIM * (ROWS));                   \
-          (ARRAY2DIM)[0] = gt_malloc(sizeof **ARRAY2DIM * (ROWS) * (COLUMNS)); \
-          for (gt_a2d_i = 1; gt_a2d_i < (ROWS); gt_a2d_i++)                    \
-            (ARRAY2DIM)[gt_a2d_i] = (ARRAY2DIM)[gt_a2d_i-1] + (COLUMNS);       \
-        }
-
-#define gt_array2dim_calloc(ARRAY2DIM, ROWS, COLUMNS)                         \
-        {                                                                     \
-          unsigned long gt_a2d_i;                                             \
-          ARRAY2DIM = gt_malloc(sizeof *ARRAY2DIM * (ROWS));                  \
-          (ARRAY2DIM)[0] = gt_calloc((ROWS) * (COLUMNS), sizeof **ARRAY2DIM); \
-          for (gt_a2d_i = 1; gt_a2d_i < (ROWS); gt_a2d_i++)                   \
-            (ARRAY2DIM)[gt_a2d_i] = (ARRAY2DIM)[gt_a2d_i-1] + (COLUMNS);      \
-        }
-
-int     gt_array2dim_example(GtError*);
-
-#define gt_array2dim_delete(ARRAY2DIM) \
-        gt_free((ARRAY2DIM)[0]);       \
-        gt_free(ARRAY2DIM);
+#include "core/array2dim_api.h"
 
 #endif
