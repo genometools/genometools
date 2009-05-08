@@ -32,6 +32,7 @@
 #include "initbasepower.h"
 #include "encseq-def.h"
 #include "sfx-suftaborder.h"
+#include "sfx-bentsedg.h"
 #include "stamp.h"
 
 typedef unsigned char Diffrank;
@@ -173,24 +174,26 @@ static Differencecover *differencecover_new(unsigned int vparam,
                                             const Encodedsequence *encseq,
                                             Readmode readmode)
 {
-  size_t logmod;
   unsigned int offset = 0, v = 1U;
   Differencecover *dcov;
   bool found = false;
 
   dcov = gt_malloc(sizeof (*dcov));
-  for (logmod = 0;
-       logmod < sizeof (differencecoversizes)/sizeof (differencecoversizes[0]);
-       logmod++)
+  dcov->numofchars = getencseqAlphabetnumofchars(encseq);
+  dcov->totallength = getencseqtotallength(encseq);
+  for (dcov->logmod = 0;
+       dcov->logmod < (unsigned int) (sizeof (differencecoversizes)/
+                                     sizeof (differencecoversizes[0]));
+       dcov->logmod++)
   {
     if (v == vparam)
     {
-      dcov->size = differencecoversizes[logmod];
+      dcov->size = differencecoversizes[dcov->logmod];
       dcov->diffvalues = differencecovertab + offset;
       found = true;
       break;
     }
-    offset += differencecoversizes[logmod];
+    offset += differencecoversizes[dcov->logmod];
     v = MULT2(v);
   }
   if (!found)
@@ -198,19 +201,19 @@ static Differencecover *differencecover_new(unsigned int vparam,
     gt_free(dcov);
     return NULL;
   }
-  dcov->logmod = (unsigned int) logmod;
-  dcov->vparam = 1U << logmod;
+  dcov->maxsamplesize = (unsigned long) (DIVV(dcov->totallength) + 1) *
+                                         dcov->size;
+  dcov->prefixlength = recommendedprefixlength(dcov->numofchars,
+                                               (Seqpos) dcov->maxsamplesize);
+  dcov->vparam = 1U << (dcov->logmod);
+  gt_assert(dcov->vparam >= dcov->prefixlength);
   dcov->vmodmask = dcov->vparam-1;
 #ifdef WITHcomputehvalue
   dcov->hvalue = computehvalue(dcov,totallength);
 #endif
-  dcov->totallength = getencseqtotallength(encseq);
   dcov->encseq = encseq;
   dcov->readmode = readmode;
-  dcov->numofchars = getencseqAlphabetnumofchars(encseq);
-  INITBITTAB(dcov->isindifferencecover,dcov->vparam);
-  dcov->maxsamplesize = (unsigned long) (DIVV(dcov->totallength) + 1) *
-                                        dcov->size;
+  dcov->isindifferencecover = NULL;
   fillcoverrank(dcov);
   filldiff2pos(dcov);
   dcov->esr = newEncodedsequencescanstate();
@@ -272,6 +275,12 @@ static unsigned long differencecover_packsamplepos(const Differencecover *dcov,
             ISIBITSET(dcov->isindifferencecover,MODV(pos)));
   result =  dcov->coverrank[MODV(pos)] * (DIVV(dcov->totallength) + 1) +
             (unsigned long) DIVV(pos);
+  if (result >= dcov->maxsamplesize)
+  {
+    fprintf(stderr,"result=%lu >= %lu = maxsamplesize\n",
+                    result,dcov->maxsamplesize);
+    exit(EXIT_FAILURE);
+  }
   gt_assert(result < dcov->maxsamplesize);
   return result;
 }
@@ -417,13 +426,17 @@ static void validate_samplepositons(const Differencecover *dcov)
 static void inversesuftab_set(Differencecover *dcov,Seqpos pos,
                               unsigned long sampleindex)
 {
-  unsigned long idx = differencecover_packsamplepos(dcov,pos);
+  unsigned long idx;
+
+  idx = differencecover_packsamplepos(dcov,pos);
   dcov->inversesuftab[idx] = sampleindex;
 }
 
 static unsigned long inversesuftab_get(Differencecover *dcov,Seqpos pos)
 {
-  unsigned long idx = differencecover_packsamplepos(dcov,pos);
+  unsigned long idx;
+
+  idx = differencecover_packsamplepos(dcov,pos);
   return dcov->inversesuftab[idx];
 }
 
@@ -758,8 +771,6 @@ static void differencecover_sample(Differencecover *dcov,bool withcheck)
   unsigned long posinserted;
 
   dcov->samplesize = 0;
-  dcov->prefixlength = recommendedprefixlength(dcov->numofchars,
-                                               (Seqpos) dcov->maxsamplesize);
   dcov->bcktab = allocBcktab(dcov->numofchars,
                              dcov->prefixlength,
                              true,
@@ -780,6 +791,7 @@ static void differencecover_sample(Differencecover *dcov,bool withcheck)
   GT_INITARRAY(&codelist,Codeatposition);
   diffptr = dcov->diffvalues;
   afterend = dcov->diffvalues + dcov->size;
+  INITBITTAB(dcov->isindifferencecover,dcov->vparam);
   for (pos = 0, modvalue = 0; pos <= dcov->totallength; pos++)
   {
     if (diffptr < afterend && (Diffvalue) modvalue == *diffptr)
@@ -897,17 +909,50 @@ static void differencecover_sample(Differencecover *dcov,bool withcheck)
                         false,  /* specialsareequalatdepth0 */
                         (Seqpos) dcov->prefixlength);
   }
-  initinversesuftab(dcov);
-  dc_bcktab2firstlevelintervals(dcov);
-  dc_sortremainingsuffixes(dcov);
+  if (dcov->vparam == dcov->prefixlength)
+  {
+    initinversesuftab(dcov);
+    dc_bcktab2firstlevelintervals(dcov);
+    dc_sortremainingsuffixes(dcov);
+  } else
+  {
+    Sfxstrategy sfxstrategy;
+
+    dcov->inversesuftab = NULL;
+    gt_assert (dcov->vparam > dcov->prefixlength);
+    defaultsfxstrategy(&sfxstrategy,
+                       possibletocmpbitwise(dcov->encseq) ? false : true);
+    sfxstrategy.differencecover = dcov->vparam;
+    sortsamplesuffixes(dcov->sortedsample,
+                       dcov->effectivesamplesize,
+                       dcov->encseq,
+                       dcov->readmode,
+                       dcov->bcktab,
+                       dcov->numofchars,
+                       dcov->prefixlength,
+                       &sfxstrategy,
+                       NULL);
+    gt_inl_queue_delete(dcov->rangestobesorted);
+    dcov->rangestobesorted = NULL;
+    if (withcheck)
+    {
+      checksortedsuffixes(dcov->encseq,
+                          dcov->readmode,
+                          dcov->sortedsample,
+                          (Seqpos) dcov->effectivesamplesize,
+                          false, /* specialsareequal  */
+                          false,  /* specialsareequalatdepth0 */
+                          (Seqpos) dcov->vparam);
+    }
+  }
 }
 
 void differencecovers_check(Seqpos maxcheck,const Encodedsequence *encseq,
                             Readmode readmode)
 {
   Differencecover *dcov;
-  size_t logmod, next = 0;
-  unsigned int j, vparam;
+  size_t logmod;
+  unsigned int vparam;
   bool withcheck = true;
 
   printf("sizeof(differencecovertab)=%lu\n",
@@ -916,7 +961,7 @@ void differencecovers_check(Seqpos maxcheck,const Encodedsequence *encseq,
   {
     maxcheck = getencseqtotallength(encseq);
   }
-  for (logmod = 0;
+  for (logmod = (size_t) 4;
        logmod < sizeof (differencecoversizes)/sizeof (differencecoversizes[0]);
        logmod++)
   {
@@ -927,11 +972,6 @@ void differencecovers_check(Seqpos maxcheck,const Encodedsequence *encseq,
       fprintf(stderr,"no difference cover for v=%u\n",vparam);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
-    for (j = 0; j<dcov->size; j++)
-    {
-      gt_assert(dcov->diffvalues[j] == differencecovertab[next]);
-      next++;
-    }
     printf("v=%u (size=%u): ",dcov->vparam,dcov->size);
     if (withcheck)
     {
@@ -941,5 +981,4 @@ void differencecovers_check(Seqpos maxcheck,const Encodedsequence *encseq,
     differencecover_delete(dcov);
   }
   printf("# %u difference covers checked\n",(unsigned int) logmod);
-  gt_assert(next == sizeof (differencecovertab)/sizeof (differencecovertab[0]));
 }

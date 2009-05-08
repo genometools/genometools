@@ -2045,9 +2045,6 @@ void sortallbuckets(Suftab *suftab,
  #endif
         }
       }
-    }
-    if (outlcpinfo != NULL && outlcpinfo->assideeffect)
-    {
       if (bucketspec.nonspecialsinbucket + bucketspec.specialsinbucket == 0)
       {
         outlcpinfo->previousbucketwasempty = true;
@@ -2068,16 +2065,20 @@ void sortallbuckets(Suftab *suftab,
   showverbose(verboseinfo,"countqsort=%lu",countqsort);
 }
 
-void sortsamplesuffixes(Seqpos *sample,
+void sortsamplesuffixes(Seqpos *sortedsample,
                         unsigned long samplesize,
                         const Encodedsequence *encseq,
                         Readmode readmode,
+                        const Bcktab *bcktab,
                         unsigned int numofchars,
                         unsigned int prefixlength,
                         const Sfxstrategy *sfxstrategy,
                         Verboseinfo *verboseinfo)
 {
   Bentsedgresources bsr;
+  Bucketspecification bucketspec;
+  unsigned int rightchar = 0;
+  Codetype code, maxcode = bcktab_numofallcodes(bcktab) - 1;
 
   initBentsedgresources(&bsr,
                         NULL,
@@ -2093,7 +2094,27 @@ void sortsamplesuffixes(Seqpos *sample,
                         NULL,  /* outlcpinfo unused */
                         sfxstrategy,
                         verboseinfo);
-  bentleysedgewick(&bsr, sample, sample + samplesize - 1, 0);
+  for (code = 0; code <= maxcode; code++)
+  {
+    rightchar = calcbucketboundsparts(&bucketspec,
+                                      bcktab,
+                                      code,
+                                      maxcode,
+                                      (Seqpos) samplesize,
+                                      rightchar,
+                                      numofchars);
+    if (bucketspec.nonspecialsinbucket > 0)
+    {
+      if (bucketspec.nonspecialsinbucket > 1UL)
+      {
+        bentleysedgewick(&bsr,
+                         sortedsample + bucketspec.left,
+                         sortedsample + bucketspec.left +
+                                        bucketspec.nonspecialsinbucket - 1,
+                         (Seqpos) prefixlength);
+      }
+    }
+  }
   wrapBentsedgresources(&bsr,
                         0, /* partwidth value unused because lcptab == NULL */
                         NULL,
