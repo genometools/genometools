@@ -55,6 +55,8 @@ typedef struct
          *right;
 } Pairsuffixptr;
 
+GT_DECLAREARRAYSTRUCT(Pairsuffixptr);
+
 typedef Pairsuffixptr Inl_Queueelem;
 
 #include "queue-inline.h"
@@ -98,6 +100,9 @@ struct Differencecover
   Firstwithnewdepth firstwithnewdepth;
   Inl_Queue *rangestobesorted;
   Itventry *itvinfo;
+  GtArrayPairsuffixptr firstgeneration;
+  unsigned long firstgenerationtotalwidth,
+                firstgenerationcount;
   unsigned long countunsorted;
 };
 
@@ -231,6 +236,10 @@ static Differencecover *differencecover_new(unsigned int vparam,
   dcov->currentqueuesize = 0;
   dcov->maxqueuesize = 0;
   dcov->countunsorted = 0;
+  dcov->firstgenerationtotalwidth = 0;
+  dcov->firstgenerationcount = 0;
+  dcov->inversesuftab = NULL;
+  GT_INITARRAY(&dcov->firstgeneration,Pairsuffixptr);
   return dcov;
 }
 
@@ -490,6 +499,8 @@ static void dc_updatewidth (Differencecover *dcov,unsigned long width,
 {
   if (width > 1UL)
   {
+    dcov->firstgenerationtotalwidth += width;
+    dcov->firstgenerationcount++;
     if (dcov->allocateditvinfo < width)
     {
       dcov->allocateditvinfo = width;
@@ -743,14 +754,45 @@ static void dc_bcktab2firstlevelintervals(Differencecover *dcov)
 
 static void dc_sortremainingsuffixes(Differencecover *dcov)
 {
-  Pairsuffixptr pairptr;
+  Pairsuffixptr *pairptr, pair;
 
+  if (dcov->firstgenerationcount > 0)
+  {
+    printf("number of intervals at base level " FormatSeqpos " was ",
+            PRINTSeqposcast(dcov->currentdepth));
+    dc_showintervalsizes(dcov->firstgenerationcount,
+                         dcov->firstgenerationtotalwidth,
+                         dcov->totallength,
+                         dcov->allocateditvinfo);
+  }
+  if (dcov->inversesuftab == NULL)
+  { /* now maxdepth > prefixlength */
+    initinversesuftab(dcov);
+  } else
+  {
+    gt_assert(dcov->firstgeneration.nextfreePairsuffixptr == 0);
+  }
+  for (pairptr = dcov->firstgeneration.spacePairsuffixptr;
+       pairptr < dcov->firstgeneration.spacePairsuffixptr +
+                 dcov->firstgeneration.nextfreePairsuffixptr;
+       pairptr++)
+  {
+    dc_anchorleftmost(dcov,pairptr->left,pairptr->right);
+  }
+  for (pairptr = dcov->firstgeneration.spacePairsuffixptr;
+       pairptr < dcov->firstgeneration.spacePairsuffixptr +
+                 dcov->firstgeneration.nextfreePairsuffixptr;
+       pairptr++)
+  {
+    dc_sortsuffixesonthislevel(dcov,pairptr->left, pairptr->right);
+  }
+  GT_FREEARRAY(&dcov->firstgeneration,Pairsuffixptr);
   while (!gt_inl_queue_isempty(dcov->rangestobesorted))
   {
-    pairptr = gt_inl_queue_get(dcov->rangestobesorted);
+    pair = gt_inl_queue_get(dcov->rangestobesorted);
     gt_assert(dcov->currentqueuesize > 0);
     dcov->currentqueuesize--;
-    dc_sortsuffixesonthislevel(dcov,pairptr.left,pairptr.right);
+    dc_sortsuffixesonthislevel(dcov,pair.left,pair.right);
   }
   printf("maxqueuesize = %lu\n",dcov->maxqueuesize);
   gt_free(dcov->itvinfo);
@@ -760,13 +802,17 @@ static void dc_sortremainingsuffixes(Differencecover *dcov)
 }
 
 static void dc_addunsortedrange(void *voiddcov,
-                                GT_UNUSED Seqpos *left,
-                                GT_UNUSED Seqpos *right,
-                                GT_UNUSED Seqpos depth)
+                                Seqpos *left,
+                                Seqpos *right,
+                                Seqpos depth)
 {
   Differencecover *dcov = (Differencecover *) voiddcov;
+  Pairsuffixptr *ptr;
 
-  dcov->countunsorted++;
+  dc_updatewidth (dcov,(unsigned long) (right - left + 1),depth);
+  GT_GETNEXTFREEINARRAY(ptr,&dcov->firstgeneration,Pairsuffixptr,1024);
+  ptr->left = left;
+  ptr->right = right;
 }
 
 static void differencecover_sample(Differencecover *dcov,bool withcheck)
@@ -925,12 +971,10 @@ static void differencecover_sample(Differencecover *dcov,bool withcheck)
   {
     initinversesuftab(dcov);
     dc_bcktab2firstlevelintervals(dcov);
-    dc_sortremainingsuffixes(dcov);
   } else
   {
     Sfxstrategy sfxstrategy;
 
-    dcov->inversesuftab = NULL;
     gt_assert (dcov->vparam > dcov->prefixlength);
     defaultsfxstrategy(&sfxstrategy,
                        possibletocmpbitwise(dcov->encseq) ? false : true);
@@ -946,8 +990,6 @@ static void differencecover_sample(Differencecover *dcov,bool withcheck)
                        (void *) dcov,
                        dc_addunsortedrange,
                        NULL);
-    gt_inl_queue_delete(dcov->rangestobesorted);
-    dcov->rangestobesorted = NULL;
     if (withcheck)
     {
       checksortedsuffixes(dcov->encseq,
@@ -959,6 +1001,7 @@ static void differencecover_sample(Differencecover *dcov,bool withcheck)
                           (Seqpos) dcov->vparam);
     }
   }
+  dc_sortremainingsuffixes(dcov);
 }
 
 void differencecovers_check(const Encodedsequence *encseq,Readmode readmode)
