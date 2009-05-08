@@ -27,12 +27,15 @@
 
 /* the core module */
 #include "core/array_api.h"
+#include "core/array2dim_api.h"
 #include "core/assert_api.h"
 #include "core/basename_api.h"
+#include "core/bsearch_api.h"
 #include "core/endianess_api.h"
 #include "core/error_api.h"
 #include "core/fptr_api.h"
 #include "core/grep_api.h"
+#include "core/interval_tree_api.h"
 #include "core/ma_api.h"
 #include "core/phase_api.h"
 #include "core/range_api.h"
