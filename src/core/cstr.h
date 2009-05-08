@@ -18,17 +18,6 @@
 #ifndef CSTR_H
 #define CSTR_H
 
-#include <stdio.h>
-
-char*         gt_cstr_dup(const char*);
-char*         gt_cstr_dup_nt(const char*, unsigned long);
-/* Replace each occurence of <f> in <cstr> to <t>. */
-void          gt_cstr_rep(char *cstr, char f, char t);
-void          gt_cstr_show(const char*, unsigned long length, FILE*);
-/* Returns the length of the prefix of <cstr> ending just before <c>, if <cstr>
-   does not contain <c>, strlen(cstr) is returned. */
-unsigned long gt_cstr_length_up_to_char(const char *cstr, char c);
-/* Removes all occurrences of <remove> from the right end of <cstr>. */
-char*         gt_cstr_rtrim(char* cstr, char remove);
+#include "core/cstr_api.h"
 
 #endif

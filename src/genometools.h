@@ -31,6 +31,7 @@
 #include "core/assert_api.h"
 #include "core/basename_api.h"
 #include "core/bsearch_api.h"
+#include "core/cstr_api.h"
 #include "core/endianess_api.h"
 #include "core/error_api.h"
 #include "core/fptr_api.h"
