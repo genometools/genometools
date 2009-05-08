@@ -86,6 +86,9 @@ void sortsamplesuffixes(Seqpos *sortedsample,
                         unsigned int numofchars,
                         unsigned int prefixlength,
                         const Sfxstrategy *sfxstrategy,
+                        void *voiddcov,
+                        void (*dc_addunsortedrange)(void *,Seqpos *,Seqpos *,
+                                                    Seqpos),
                         Verboseinfo *verboseinfo);
 
 #endif

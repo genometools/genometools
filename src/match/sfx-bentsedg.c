@@ -104,8 +104,7 @@
               if ((DEPTH) >= \
                   (Seqpos) bsr->sfxstrategy->differencecover)\
               {\
-                /*printf("sort interval of depth %lu\n",\
-                       (unsigned long) (DEPTH));*/\
+                bsr->dc_addunsortedrange(bsr->voiddcov,LEFT,RIGHT,DEPTH);\
               } else\
               {\
                 PUSHMKVSTACK(LEFT,RIGHT,DEPTH,ORDERTYPE);\
@@ -413,6 +412,8 @@ typedef struct
                 rightlcpdist[UNITSIN2BITENC];
   DefinedSeqpos *longest;
   Suftab *suftab;
+  void (*dc_addunsortedrange)(void *,Seqpos *,Seqpos *,Seqpos);
+  void *voiddcov;
 } Bentsedgresources;
 
 static Suffixptr *medianof3cmpcharbychar(const Bentsedgresources *bsr,
@@ -1023,9 +1024,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
     {
       if (depth >= (Seqpos) bsr->sfxstrategy->differencecover)
       {
-        /*
-        printf("sort interval of depth %lu\n",(unsigned long) depth);
-        */
+        bsr->dc_addunsortedrange(bsr->voiddcov,left,right,depth);
         return;
       }
     } else
@@ -1782,6 +1781,8 @@ static void initBentsedgresources(Bentsedgresources *bsr,
                                    sfxstrategy->cmpcharbychar,
                                    readmode);
   }
+  bsr->voiddcov = NULL;
+  bsr->dc_addunsortedrange = NULL;
 }
 
 static void wrapBentsedgresources(Bentsedgresources *bsr,
@@ -2073,6 +2074,9 @@ void sortsamplesuffixes(Seqpos *sortedsample,
                         unsigned int numofchars,
                         unsigned int prefixlength,
                         const Sfxstrategy *sfxstrategy,
+                        void *voiddcov,
+                        void (*dc_addunsortedrange)(void *,Seqpos *,Seqpos *,
+                                                    Seqpos),
                         Verboseinfo *verboseinfo)
 {
   Bentsedgresources bsr;
@@ -2094,6 +2098,8 @@ void sortsamplesuffixes(Seqpos *sortedsample,
                         NULL,  /* outlcpinfo unused */
                         sfxstrategy,
                         verboseinfo);
+  bsr.voiddcov = voiddcov;
+  bsr.dc_addunsortedrange = dc_addunsortedrange;
   for (code = 0; code <= maxcode; code++)
   {
     rightchar = calcbucketboundsparts(&bucketspec,

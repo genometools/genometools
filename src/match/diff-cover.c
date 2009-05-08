@@ -98,6 +98,7 @@ struct Differencecover
   Firstwithnewdepth firstwithnewdepth;
   Inl_Queue *rangestobesorted;
   Itventry *itvinfo;
+  unsigned long countunsorted;
 };
 
 /* Compute difference cover on the fly */
@@ -229,6 +230,7 @@ static Differencecover *differencecover_new(unsigned int vparam,
   dcov->firstwithnewdepth.maxwidth = 0;
   dcov->currentqueuesize = 0;
   dcov->maxqueuesize = 0;
+  dcov->countunsorted = 0;
   return dcov;
 }
 
@@ -757,6 +759,16 @@ static void dc_sortremainingsuffixes(Differencecover *dcov)
   dcov->rangestobesorted = NULL;
 }
 
+static void dc_addunsortedrange(void *voiddcov,
+                                GT_UNUSED Seqpos *left,
+                                GT_UNUSED Seqpos *right,
+                                GT_UNUSED Seqpos depth)
+{
+  Differencecover *dcov = (Differencecover *) voiddcov;
+
+  dcov->countunsorted++;
+}
+
 static void differencecover_sample(Differencecover *dcov,bool withcheck)
 {
   Seqpos pos;
@@ -931,6 +943,8 @@ static void differencecover_sample(Differencecover *dcov,bool withcheck)
                        dcov->numofchars,
                        dcov->prefixlength,
                        &sfxstrategy,
+                       (void *) dcov,
+                       dc_addunsortedrange,
                        NULL);
     gt_inl_queue_delete(dcov->rangestobesorted);
     dcov->rangestobesorted = NULL;
@@ -947,8 +961,7 @@ static void differencecover_sample(Differencecover *dcov,bool withcheck)
   }
 }
 
-void differencecovers_check(Seqpos maxcheck,const Encodedsequence *encseq,
-                            Readmode readmode)
+void differencecovers_check(const Encodedsequence *encseq,Readmode readmode)
 {
   Differencecover *dcov;
   size_t logmod;
@@ -957,10 +970,6 @@ void differencecovers_check(Seqpos maxcheck,const Encodedsequence *encseq,
 
   printf("sizeof(differencecovertab)=%lu\n",
           (unsigned long) sizeof (differencecovertab));
-  if (maxcheck > getencseqtotallength(encseq))
-  {
-    maxcheck = getencseqtotallength(encseq);
-  }
   for (logmod = (size_t) 4;
        logmod < sizeof (differencecoversizes)/sizeof (differencecoversizes[0]);
        logmod++)
@@ -978,6 +987,7 @@ void differencecovers_check(Seqpos maxcheck,const Encodedsequence *encseq,
       validate_samplepositons(dcov);
     }
     differencecover_sample(dcov,withcheck);
+    printf("countunsorted=%lu\n",dcov->countunsorted);
     differencecover_delete(dcov);
   }
   printf("# %u difference covers checked\n",(unsigned int) logmod);

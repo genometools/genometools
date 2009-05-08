@@ -18,13 +18,12 @@
 #ifndef DIFF_COVER_H
 #define DIFF_COVER_H
 
-#include <stdbool.h>
 #include "seqpos-def.h"
 #include "encseq-def.h"
+#include "readmode-def.h"
 
 typedef struct Differencecover Differencecover;
 
-void differencecovers_check(Seqpos maxcheck,const Encodedsequence *encseq,
-                            Readmode readmode);
+void differencecovers_check(const Encodedsequence *encseq,Readmode readmode);
 
 #endif

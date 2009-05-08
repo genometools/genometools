@@ -40,7 +40,6 @@
 #include "sfx-bentsedg.h"
 #include "sfx-enumcodes.h"
 #include "sfx-strategy.h"
-#include "diff-cover.h"
 #include "stamp.h"
 
 #include "sfx-mappedstr.pr"
@@ -703,23 +702,25 @@ static void preparethispart(Sfxiterator *sfi)
   {
     if (sfi->sfxstrategy.differencecover > 0)
     {
-      differencecovers_check((Seqpos) 1000,sfi->encseq,sfi->readmode);
+      printf("sort suffixes using difference cover of size %u\n",
+             sfi->sfxstrategy.differencecover);
+    } else
+    {
+      gt_assert(!sfi->sfxstrategy.streamsuftab);
+      sortallbuckets (&sfi->suftab,
+                      sfi->encseq,
+                      sfi->readmode,
+                      sfi->currentmincode,
+                      sfi->currentmaxcode,
+                      partwidth,
+                      sfi->bcktab,
+                      sfi->numofchars,
+                      sfi->prefixlength,
+                      sfi->outlcpinfo,
+                      &sfi->sfxstrategy,
+                      &sfi->bucketiterstep,
+                      sfi->verboseinfo);
     }
-    printf("differencecover = %u\n",sfi->sfxstrategy.differencecover);
-    gt_assert(!sfi->sfxstrategy.streamsuftab);
-    sortallbuckets (&sfi->suftab,
-                    sfi->encseq,
-                    sfi->readmode,
-                    sfi->currentmincode,
-                    sfi->currentmaxcode,
-                    partwidth,
-                    sfi->bcktab,
-                    sfi->numofchars,
-                    sfi->prefixlength,
-                    sfi->outlcpinfo,
-                    &sfi->sfxstrategy,
-                    &sfi->bucketiterstep,
-                    sfi->verboseinfo);
   }
   sfi->part++;
 }

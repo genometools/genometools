@@ -37,6 +37,7 @@
 #include "sfx-input.h"
 #include "sfx-run.h"
 #include "opensfxfile.h"
+#include "diff-cover.h"
 #include "stamp.h"
 
 #include "sfx-opt.pr"
@@ -204,6 +205,10 @@ static int suffixeratorwithoutput(const GtStr *str_indexname,
   bool haserr = false, specialsuffixes = false;
   Sfxiterator *sfi;
 
+  if (sfxstrategy->differencecover > 0)
+  {
+    differencecovers_check(encseq,readmode);
+  }
   sfi = newSfxiterator(encseq,
                        readmode,
                        prefixlength,
