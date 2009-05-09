@@ -60,4 +60,3 @@ off_t          gt_file_estimate_size(const char *file);
 off_t          gt_files_estimate_total_size(const GtStrArray *filenames);
 
 #endif
-

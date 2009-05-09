@@ -35,7 +35,7 @@ typedef int (*GtIntervalTreeIteratorFunc)(GtIntervalTreeNode*, void*);
 GtIntervalTreeNode* gt_interval_tree_node_new(void *data,
                                               unsigned long low,
                                               unsigned long high);
-                                              
+
 /* Returns a pointer to the data associated with node <node>. */
 void*               gt_interval_tree_node_get_data(GtIntervalTreeNode* node);
 
@@ -56,7 +56,7 @@ GtIntervalTreeNode* gt_interval_tree_find_first_overlapping(GtIntervalTree*,
 /* Inserts node <node> into <tree>. */
 void                gt_interval_tree_insert(GtIntervalTree *tree,
                                             GtIntervalTreeNode *node);
-                                            
+
 /* Collects data pointers of all <GtIntervalTreeNode>s in the tree which
    overlapp with the query range (from <start> to <end>) in a <GtArray>. */
 void                gt_interval_tree_find_all_overlapping(GtIntervalTree*,
@@ -77,4 +77,3 @@ int                 gt_interval_tree_traverse(GtIntervalTree*,
 void                gt_interval_tree_delete(GtIntervalTree*);
 
 #endif
-

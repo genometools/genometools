@@ -43,4 +43,3 @@ void  gt_bsearch_all_mark(GtArray *members, const void *key, const void *base,
                           void *data, GtBittab*);
 
 #endif
-
