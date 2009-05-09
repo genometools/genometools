@@ -15,9 +15,18 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef QSORT_R_H
-#define QSORT_R_H
+#ifndef QSORT_R_API_H
+#define QSORT_R_API_H
 
-#include "core/qsort_r_api.h"
+#include <stdlib.h>
+
+#include "core/fptr_api.h"
+
+/* Qsort module */
+
+/* Like <qsort(3)>, but allows an additional <data> pointer passed to the
+   <GtCompareWithData> comparison function <cmp>. */
+void gt_qsort_r(void *a, size_t n, size_t es, void *data,
+                GtCompareWithData cmp);
 
 #endif
