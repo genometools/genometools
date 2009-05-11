@@ -1004,6 +1004,8 @@ static void differencecover_sample(Differencecover *dcov,bool withcheck)
   dc_sortremainingsuffixes(dcov);
   if (withcheck)
   {
+    unsigned long idx;
+
     checksortedsuffixes(dcov->encseq,
                         dcov->readmode,
                         dcov->sortedsample,
@@ -1011,6 +1013,12 @@ static void differencecover_sample(Differencecover *dcov,bool withcheck)
                         false, /* specialsareequal  */
                         false,  /* specialsareequalatdepth0 */
                         0);
+    for (idx=0; idx<dcov->effectivesamplesize; idx++)
+    {
+      Seqpos pos = dcov->sortedsample[idx];
+      unsigned long idx2 = inversesuftab_get(dcov,pos);
+      gt_assert(idx == idx2);
+    }
   }
 }
 
