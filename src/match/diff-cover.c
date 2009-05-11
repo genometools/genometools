@@ -978,17 +978,19 @@ void differencecover_sortsample(Differencecover *dcov,bool withcheck)
                        possibletocmpbitwise(dcov->encseq) ? false : true);
     */
     sfxstrategy.differencecover = dcov->vparam;
-    sortsamplesuffixes(dcov->sortedsample,
-                       dcov->effectivesamplesize,
-                       dcov->encseq,
-                       dcov->readmode,
-                       dcov->bcktab,
-                       dcov->numofchars,
-                       dcov->prefixlength,
-                       &sfxstrategy,
-                       (void *) dcov,
-                       dc_addunsortedrange,
-                       NULL);
+    sortbucketofsuffixes(dcov->sortedsample,
+                         dcov->effectivesamplesize,
+                         dcov->encseq,
+                         dcov->readmode,
+                         0, /* mincode */
+                         bcktab_numofallcodes(dcov->bcktab) - 1,  /* maxcode */
+                         dcov->bcktab,
+                         dcov->numofchars,
+                         dcov->prefixlength,
+                         &sfxstrategy,
+                         (void *) dcov,
+                         dc_addunsortedrange,
+                         NULL);
     if (withcheck)
     {
       checksortedsuffixes(dcov->encseq,

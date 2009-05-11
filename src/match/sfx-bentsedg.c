@@ -104,7 +104,7 @@
               if ((DEPTH) >= \
                   (Seqpos) bsr->sfxstrategy->differencecover)\
               {\
-                bsr->dc_addunsortedrange(bsr->voiddcov,LEFT,RIGHT,DEPTH);\
+                bsr->dc_processunsortedrange(bsr->voiddcov,LEFT,RIGHT,DEPTH);\
               } else\
               {\
                 PUSHMKVSTACK(LEFT,RIGHT,DEPTH,ORDERTYPE);\
@@ -412,7 +412,7 @@ typedef struct
                 rightlcpdist[UNITSIN2BITENC];
   DefinedSeqpos *longest;
   Suftab *suftab;
-  void (*dc_addunsortedrange)(void *,Seqpos *,Seqpos *,Seqpos);
+  void (*dc_processunsortedrange)(void *,Seqpos *,Seqpos *,Seqpos);
   void *voiddcov;
 } Bentsedgresources;
 
@@ -1024,7 +1024,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
     {
       if (depth >= (Seqpos) bsr->sfxstrategy->differencecover)
       {
-        bsr->dc_addunsortedrange(bsr->voiddcov,left,right,depth);
+        bsr->dc_processunsortedrange(bsr->voiddcov,left,right,depth);
         return;
       }
     } else
@@ -1782,7 +1782,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
                                    readmode);
   }
   bsr->voiddcov = NULL;
-  bsr->dc_addunsortedrange = NULL;
+  bsr->dc_processunsortedrange = NULL;
 }
 
 static void wrapBentsedgresources(Bentsedgresources *bsr,
@@ -2066,23 +2066,25 @@ void sortallbuckets(Suftab *suftab,
   showverbose(verboseinfo,"countqsort=%lu",countqsort);
 }
 
-void sortsamplesuffixes(Seqpos *sortedsample,
-                        unsigned long samplesize,
-                        const Encodedsequence *encseq,
-                        Readmode readmode,
-                        const Bcktab *bcktab,
-                        unsigned int numofchars,
-                        unsigned int prefixlength,
-                        const Sfxstrategy *sfxstrategy,
-                        void *voiddcov,
-                        void (*dc_addunsortedrange)(void *,Seqpos *,Seqpos *,
-                                                    Seqpos),
-                        Verboseinfo *verboseinfo)
+void sortbucketofsuffixes(Seqpos *suffixestobesorted,
+                          unsigned long numberofsuffixes,
+                          const Encodedsequence *encseq,
+                          Readmode readmode,
+                          Codetype mincode,
+                          Codetype maxcode,
+                          const Bcktab *bcktab,
+                          unsigned int numofchars,
+                          unsigned int prefixlength,
+                          const Sfxstrategy *sfxstrategy,
+                          void *voiddcov,
+                          void (*dc_processunsortedrange)(void *,Seqpos *,
+                                                          Seqpos *,Seqpos),
+                          Verboseinfo *verboseinfo)
 {
   Bentsedgresources bsr;
   Bucketspecification bucketspec;
-  unsigned int rightchar = 0;
-  Codetype code, maxcode = bcktab_numofallcodes(bcktab) - 1;
+  unsigned int rightchar =  (unsigned int) (mincode % numofchars);
+  Codetype code;
 
   initBentsedgresources(&bsr,
                         NULL,
@@ -2099,21 +2101,21 @@ void sortsamplesuffixes(Seqpos *sortedsample,
                         sfxstrategy,
                         verboseinfo);
   bsr.voiddcov = voiddcov;
-  bsr.dc_addunsortedrange = dc_addunsortedrange;
-  for (code = 0; code <= maxcode; code++)
+  bsr.dc_processunsortedrange = dc_processunsortedrange;
+  for (code = mincode; code <= maxcode; code++)
   {
     rightchar = calcbucketboundsparts(&bucketspec,
                                       bcktab,
                                       code,
                                       maxcode,
-                                      (Seqpos) samplesize,
+                                      (Seqpos) numberofsuffixes,
                                       rightchar,
                                       numofchars);
     if (bucketspec.nonspecialsinbucket > 1UL)
     {
       bentleysedgewick(&bsr,
-                       sortedsample + bucketspec.left,
-                       sortedsample + bucketspec.left +
+                       suffixestobesorted + bucketspec.left,
+                       suffixestobesorted + bucketspec.left +
                                       bucketspec.nonspecialsinbucket - 1,
                        (Seqpos) prefixlength);
     }

@@ -78,17 +78,19 @@ void sortallbuckets(Suftab *suftab,
                     unsigned long long *bucketiterstep,
                     Verboseinfo *verboseinfo);
 
-void sortsamplesuffixes(Seqpos *sortedsample,
-                        unsigned long samplesize,
-                        const Encodedsequence *encseq,
-                        Readmode readmode,
-                        const Bcktab *bcktab,
-                        unsigned int numofchars,
-                        unsigned int prefixlength,
-                        const Sfxstrategy *sfxstrategy,
-                        void *voiddcov,
-                        void (*dc_addunsortedrange)(void *,Seqpos *,Seqpos *,
-                                                    Seqpos),
-                        Verboseinfo *verboseinfo);
+void sortbucketofsuffixes(Seqpos *suffixestobesorted,
+                          unsigned long numberofsuffixes,
+                          const Encodedsequence *encseq,
+                          Readmode readmode,
+                          Codetype mincode,
+                          Codetype maxcode,
+                          const Bcktab *bcktab,
+                          unsigned int numofchars,
+                          unsigned int prefixlength,
+                          const Sfxstrategy *sfxstrategy,
+                          void *voiddcov,
+                          void (*dc_processunsortedrange)(void *,Seqpos *,
+                                                          Seqpos *,Seqpos),
+                          Verboseinfo *verboseinfo);
 
 #endif
