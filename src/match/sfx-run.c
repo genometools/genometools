@@ -205,7 +205,8 @@ static int suffixeratorwithoutput(const GtStr *str_indexname,
   bool haserr = false, specialsuffixes = false;
   Sfxiterator *sfi;
 
-  if (sfxstrategy->differencecover > 0)
+  if (sfxstrategy->differencecover > 0 &&
+      getencseqspecialcharacters(encseq) < getencseqtotallength(encseq))
   {
     differencecovers_check(encseq,readmode);
   }

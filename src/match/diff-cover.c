@@ -103,7 +103,6 @@ struct Differencecover
   GtArrayPairsuffixptr firstgeneration;
   unsigned long firstgenerationtotalwidth,
                 firstgenerationcount;
-  unsigned long countunsorted;
 };
 
 /* Compute difference cover on the fly */
@@ -235,7 +234,6 @@ static Differencecover *differencecover_new(unsigned int vparam,
   dcov->firstwithnewdepth.maxwidth = 0;
   dcov->currentqueuesize = 0;
   dcov->maxqueuesize = 0;
-  dcov->countunsorted = 0;
   dcov->inversesuftab = NULL;
   dcov->firstgenerationtotalwidth = 0;
   dcov->firstgenerationcount = 0;
@@ -976,7 +974,7 @@ static void differencecover_sample(Differencecover *dcov,bool withcheck)
     Sfxstrategy sfxstrategy;
 
     gt_assert (dcov->vparam > dcov->prefixlength);
-    defaultsfxstrategy(&sfxstrategy,false);
+    defaultsfxstrategy(&sfxstrategy,true);
     /* XXX check if this can be true:
                        possibletocmpbitwise(dcov->encseq) ? false : true);
     */
@@ -1032,7 +1030,6 @@ void differencecovers_check(const Encodedsequence *encseq,Readmode readmode)
       validate_samplepositons(dcov);
     }
     differencecover_sample(dcov,withcheck);
-    printf("countunsorted=%lu\n",dcov->countunsorted);
     differencecover_delete(dcov);
   }
   printf("# %u difference covers checked\n",(unsigned int) logmod);
