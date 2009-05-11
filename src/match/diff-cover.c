@@ -241,13 +241,11 @@ Differencecover *differencecover_new(unsigned int vparam,
   return dcov;
 }
 
-/*
 static unsigned int differencecover_offset(const Differencecover *dcov,
                                            Seqpos pos1,Seqpos pos2)
 {
   return (unsigned int) MODV(dcov->diff2pos[MODV(pos2-pos1)] - pos1);
 }
-*/
 
 void differencecover_delete(Differencecover *dcov)
 {
@@ -441,7 +439,7 @@ static void inversesuftab_set(Differencecover *dcov,Seqpos pos,
   dcov->inversesuftab[idx] = sampleindex;
 }
 
-static unsigned long inversesuftab_get(Differencecover *dcov,Seqpos pos)
+static unsigned long inversesuftab_get(const Differencecover *dcov,Seqpos pos)
 {
   unsigned long idx;
 
@@ -765,15 +763,29 @@ static void dc_addunsortedrange(void *voiddcov,
 }
 
 static int comparedcov_presortedsuffixes(const void *a,const void *b,
-                                         GT_UNUSED void *data)
+                                         void *data)
 {
   const Differencecover *dcov = (const Differencecover *) data;
   const Seqpos suffixpos1 = *(const Seqpos *) a;
   const Seqpos suffixpos2 = *(const Seqpos *) b;
+  unsigned long idx1, idx2;
+  unsigned int offset;
 
   gt_assert(suffixpos1 < dcov->totallength);
   gt_assert(suffixpos2 < dcov->totallength);
-  return -1;
+  offset = differencecover_offset(dcov,suffixpos1,suffixpos2);
+  idx1 = inversesuftab_get(dcov,suffixpos1 + offset);
+  idx2 = inversesuftab_get(dcov,suffixpos2 + offset);
+  if (idx1 < idx2)
+  {
+    return -1;
+  }
+  if (idx1 > idx2)
+  {
+    return 1;
+  }
+  gt_assert(false);
+  return 0;
 }
 
 void dc_sortunsortedbucket(void *data,

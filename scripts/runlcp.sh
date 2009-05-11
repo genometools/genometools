@@ -35,6 +35,11 @@ sfxmap()
   gt dev sfxmap -lcp -suf $*
 }
 
+sfxmaponlysuf()
+{
+  gt dev sfxmap -suf $*
+}
+
 for filename in ${filenames}
 do
   suffixerator -indexname sfx-idx 
@@ -56,6 +61,7 @@ do
   suffixerator -parts 3 -maxdepth abs -indexname sfx-idx
   sfxmap sfx-idx
   suffixeratoronlysuf -dc 128 -indexname sfx-idx
+  sfxmaponlysuf sfx-idx
   rm -f sfx-idx.* sfx-idx${maxdepth}.*
 done
 echo "${filenames}"
