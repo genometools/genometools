@@ -34,4 +34,9 @@ void differencecover_sortsample(Differencecover *dcov,bool withcheck);
 
 void differencecover_delete(Differencecover *dcov);
 
+void dc_sortunsortedbucket(void *data,
+                           Seqpos *left,
+                           Seqpos *right,
+                           Seqpos depth);
+
 #endif

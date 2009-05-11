@@ -23,6 +23,7 @@
 #include "core/error_api.h"
 #include "core/minmax.h"
 #include "core/arraydef.h"
+#include "core/qsort_r.h"
 #include "divmodmul.h"
 #include "intbits-tab.h"
 #include "diff-cover.h"
@@ -763,7 +764,32 @@ static void dc_addunsortedrange(void *voiddcov,
   ptr->right = right;
 }
 
-static void dc_sortremainingsuffixes(Differencecover *dcov)
+static int comparedcov_presortedsuffixes(const void *a,const void *b,
+                                         GT_UNUSED void *data)
+{
+  const Differencecover *dcov = (const Differencecover *) data;
+  const Seqpos suffixpos1 = *(const Seqpos *) a;
+  const Seqpos suffixpos2 = *(const Seqpos *) b;
+
+  gt_assert(suffixpos1 < dcov->totallength);
+  gt_assert(suffixpos2 < dcov->totallength);
+  return -1;
+}
+
+void dc_sortunsortedbucket(void *data,
+                           Seqpos *left,
+                           Seqpos *right,
+                           Seqpos depth)
+{
+  const Differencecover *dcov = (const Differencecover *) data;
+
+  gt_assert(left < right);
+  gt_assert(depth >= (Seqpos) dcov->vparam);
+  gt_qsort_r(left,(size_t) (right - left + 1),sizeof(Seqpos),data,
+             comparedcov_presortedsuffixes);
+}
+
+static void dc_sortremainingsamples(Differencecover *dcov)
 {
   Pairsuffixptr *pairptr, pair;
 
@@ -1002,7 +1028,7 @@ void differencecover_sortsample(Differencecover *dcov,bool withcheck)
                           (Seqpos) dcov->vparam);
     }
   }
-  dc_sortremainingsuffixes(dcov);
+  dc_sortremainingsamples(dcov);
   if (withcheck)
   {
     unsigned long idx;

@@ -732,8 +732,19 @@ static void preparethispart(Sfxiterator *sfi)
   {
     if (sfi->sfxstrategy.differencecover > 0)
     {
-      printf("sort suffixes using difference cover of size %u\n",
-             sfi->sfxstrategy.differencecover);
+      sortbucketofsuffixes(sfi->suftab.sortspace - sfi->suftab.offset,
+                           (unsigned long) partwidth,
+                           sfi->encseq,
+                           sfi->readmode,
+                           sfi->currentmincode,
+                           sfi->currentmaxcode,
+                           sfi->bcktab,
+                           sfi->numofchars,
+                           sfi->prefixlength,
+                           &sfi->sfxstrategy,
+                           (void *) sfi->dcov,
+                           dc_sortunsortedbucket,
+                           sfi->verboseinfo);
     } else
     {
       gt_assert(!sfi->sfxstrategy.streamsuftab);
