@@ -79,6 +79,7 @@ struct Sfxiterator
   Sfxstrategy sfxstrategy;
   Verboseinfo *verboseinfo;
   Measuretime *mtime;
+  Differencecover *dcov;
 };
 
 #ifdef SKDEBUG
@@ -434,6 +435,10 @@ void freeSfxiterator(Sfxiterator **sfiptr)
   {
     bcktab_delete(&sfi->bcktab);
   }
+  if (sfi->dcov != NULL)
+  {
+    differencecover_delete(sfi->dcov);
+  }
   FREESPACE(*sfiptr);
 }
 
@@ -471,25 +476,6 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
 
   realspecialranges = getencseqrealspecialranges(encseq);
   specialcharacters = getencseqspecialcharacters(encseq);
-  if (sfxstrategy->differencecover > 0 &&
-      getencseqspecialcharacters(encseq) < getencseqtotallength(encseq))
-  {
-    Differencecover *dcov;
-
-    dcov = differencecover_new(sfxstrategy->differencecover,
-                               encseq,readmode);
-    if (dcov == NULL)
-    {
-      gt_error_set(err,"no difference cover modulo %u found",
-                   sfxstrategy->differencecover);
-      haserr = true;
-    } else
-    {
-      differencecover_sortsample(dcov,false);
-      differencecover_delete(dcov);
-    }
-    printf("precomputing difference cover: done\n");
-  }
   gt_assert(prefixlength > 0);
   if (sfxstrategy != NULL && sfxstrategy->storespecialcodes &&
       prefixlength > MAXPREFIXLENGTH)
@@ -519,6 +505,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
     sfi->readmode = readmode;
     sfi->numofchars = getencseqAlphabetnumofchars(encseq);
     sfi->prefixlength = prefixlength;
+    sfi->dcov = NULL;
     if (sfxstrategy != NULL)
     {
        sfi->sfxstrategy = *sfxstrategy;
@@ -577,6 +564,28 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
     {
       sfi->leftborder = bcktab_leftborder(sfi->bcktab);
       sfi->numofallcodes = bcktab_numofallcodes(sfi->bcktab);
+    }
+    if (sfi->sfxstrategy.differencecover > 0 &&
+        getencseqspecialcharacters(encseq) < getencseqtotallength(encseq))
+    {
+      if (mtime != NULL)
+      {
+        deliverthetime(stdout,mtime,"sorting difference cover sample");
+      }
+      sfi->dcov = differencecover_new(sfi->sfxstrategy.differencecover,
+                                      encseq,readmode);
+      if (sfi->dcov == NULL)
+      {
+        gt_error_set(err,"no difference cover modulo %u found",
+                     sfi->sfxstrategy.differencecover);
+        haserr = true;
+      } else
+      {
+        showverbose(verboseinfo,"presorting sample suffixes according to "
+                                "difference cover modulo %u",
+                                sfi->sfxstrategy.differencecover);
+        differencecover_sortsample(sfi->dcov,false);
+      }
     }
   }
   if (!haserr)
