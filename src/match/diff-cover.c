@@ -236,9 +236,9 @@ static Differencecover *differencecover_new(unsigned int vparam,
   dcov->currentqueuesize = 0;
   dcov->maxqueuesize = 0;
   dcov->countunsorted = 0;
+  dcov->inversesuftab = NULL;
   dcov->firstgenerationtotalwidth = 0;
   dcov->firstgenerationcount = 0;
-  dcov->inversesuftab = NULL;
   GT_INITARRAY(&dcov->firstgeneration,Pairsuffixptr);
   return dcov;
 }
@@ -752,6 +752,20 @@ static void dc_bcktab2firstlevelintervals(Differencecover *dcov)
   }
 }
 
+static void dc_addunsortedrange(void *voiddcov,
+                                Seqpos *left,
+                                Seqpos *right,
+                                Seqpos depth)
+{
+  Differencecover *dcov = (Differencecover *) voiddcov;
+  Pairsuffixptr *ptr;
+
+  dc_updatewidth (dcov,(unsigned long) (right - left + 1),depth);
+  GT_GETNEXTFREEINARRAY(ptr,&dcov->firstgeneration,Pairsuffixptr,1024);
+  ptr->left = left;
+  ptr->right = right;
+}
+
 static void dc_sortremainingsuffixes(Differencecover *dcov)
 {
   Pairsuffixptr *pairptr, pair;
@@ -799,20 +813,6 @@ static void dc_sortremainingsuffixes(Differencecover *dcov)
   dcov->itvinfo = NULL;
   gt_inl_queue_delete(dcov->rangestobesorted);
   dcov->rangestobesorted = NULL;
-}
-
-static void dc_addunsortedrange(void *voiddcov,
-                                Seqpos *left,
-                                Seqpos *right,
-                                Seqpos depth)
-{
-  Differencecover *dcov = (Differencecover *) voiddcov;
-  Pairsuffixptr *ptr;
-
-  dc_updatewidth (dcov,(unsigned long) (right - left + 1),depth);
-  GT_GETNEXTFREEINARRAY(ptr,&dcov->firstgeneration,Pairsuffixptr,1024);
-  ptr->left = left;
-  ptr->right = right;
 }
 
 static void differencecover_sample(Differencecover *dcov,bool withcheck)
@@ -976,8 +976,10 @@ static void differencecover_sample(Differencecover *dcov,bool withcheck)
     Sfxstrategy sfxstrategy;
 
     gt_assert (dcov->vparam > dcov->prefixlength);
-    defaultsfxstrategy(&sfxstrategy,
+    defaultsfxstrategy(&sfxstrategy,false);
+    /* XXX check if this can be true:
                        possibletocmpbitwise(dcov->encseq) ? false : true);
+    */
     sfxstrategy.differencecover = dcov->vparam;
     sortsamplesuffixes(dcov->sortedsample,
                        dcov->effectivesamplesize,
