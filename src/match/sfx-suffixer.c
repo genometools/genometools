@@ -40,6 +40,7 @@
 #include "sfx-bentsedg.h"
 #include "sfx-enumcodes.h"
 #include "sfx-strategy.h"
+#include "diff-cover.h"
 #include "stamp.h"
 
 #include "sfx-mappedstr.pr"
@@ -467,8 +468,28 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
   bool haserr = false;
 
   gt_error_check(err);
+
   realspecialranges = getencseqrealspecialranges(encseq);
   specialcharacters = getencseqspecialcharacters(encseq);
+  if (sfxstrategy->differencecover > 0 &&
+      getencseqspecialcharacters(encseq) < getencseqtotallength(encseq))
+  {
+    Differencecover *dcov;
+
+    dcov = differencecover_new(sfxstrategy->differencecover,
+                               encseq,readmode);
+    if (dcov == NULL)
+    {
+      gt_error_set(err,"no difference cover modulo %u found",
+                   sfxstrategy->differencecover);
+      haserr = true;
+    } else
+    {
+      differencecover_sortsample(dcov,false);
+      differencecover_delete(dcov);
+    }
+    printf("precomputing difference cover: done\n");
+  }
   gt_assert(prefixlength > 0);
   if (sfxstrategy != NULL && sfxstrategy->storespecialcodes &&
       prefixlength > MAXPREFIXLENGTH)

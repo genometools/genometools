@@ -265,6 +265,10 @@ static OPrval parse_options(int *parsed_args,
   gt_option_exclude(optionsmap, optionprotein);
   gt_option_exclude(optiondna, optionprotein);
   gt_option_exclude(optionmaxdepth, optiondifferencecover);
+  if (optionlcp != NULL)
+  {
+    gt_option_exclude(optionlcp, optiondifferencecover);
+  }
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
                                   err);
   if (oprval == OPTIONPARSER_OK)

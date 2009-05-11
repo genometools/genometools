@@ -26,4 +26,12 @@ typedef struct Differencecover Differencecover;
 
 void differencecovers_check(const Encodedsequence *encseq,Readmode readmode);
 
+Differencecover *differencecover_new(unsigned int vparam,
+                                     const Encodedsequence *encseq,
+                                     Readmode readmode);
+
+void differencecover_sortsample(Differencecover *dcov,bool withcheck);
+
+void differencecover_delete(Differencecover *dcov);
+
 #endif

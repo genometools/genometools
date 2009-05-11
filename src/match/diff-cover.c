@@ -94,7 +94,6 @@ struct Differencecover
   unsigned long allocateditvinfo,
                 currentqueuesize,
                 maxqueuesize;
-  /* XXX check if this is really necessary */
   Seqpos currentdepth;
   Codetype maxcode;
   Firstwithnewdepth firstwithnewdepth;
@@ -175,9 +174,9 @@ static unsigned int computehvalue(const Differencecover *dcov,
 }
 #endif
 
-static Differencecover *differencecover_new(unsigned int vparam,
-                                            const Encodedsequence *encseq,
-                                            Readmode readmode)
+Differencecover *differencecover_new(unsigned int vparam,
+                                     const Encodedsequence *encseq,
+                                     Readmode readmode)
 {
   unsigned int offset = 0, v = 1U;
   Differencecover *dcov;
@@ -249,7 +248,7 @@ static unsigned int differencecover_offset(const Differencecover *dcov,
 }
 */
 
-static void differencecover_delete(Differencecover *dcov)
+void differencecover_delete(Differencecover *dcov)
 {
   gt_free(dcov->coverrank);
   dcov->coverrank = NULL;
@@ -813,7 +812,7 @@ static void dc_sortremainingsuffixes(Differencecover *dcov)
   dcov->rangestobesorted = NULL;
 }
 
-static void differencecover_sample(Differencecover *dcov,bool withcheck)
+void differencecover_sortsample(Differencecover *dcov,bool withcheck)
 {
   Seqpos pos;
   unsigned int modvalue;
@@ -1046,7 +1045,7 @@ void differencecovers_check(const Encodedsequence *encseq,Readmode readmode)
     {
       validate_samplepositons(dcov);
     }
-    differencecover_sample(dcov,withcheck);
+    differencecover_sortsample(dcov,withcheck);
     differencecover_delete(dcov);
   }
   printf("# %u difference covers checked\n",(unsigned int) logmod);
