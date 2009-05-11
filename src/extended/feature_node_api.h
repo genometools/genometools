@@ -28,7 +28,7 @@
    to a regular GFF3 line (i.e., a line which does not start with <#>).
    Part-of relationships (which are realised in GFF3 with the <Parent> and <ID>
    attributes) are realised in the C API with the
-   <gt_feature_node_add_child> method(). */
+   <gt_feature_node_add_child()> method. */
 typedef struct GtFeatureNode GtFeatureNode;
 
 /* Create an new <GtFeatureNode*> on sequence with ID <seqid> and type <type>
