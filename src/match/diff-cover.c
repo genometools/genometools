@@ -1015,8 +1015,7 @@ static void differencecover_sample(Differencecover *dcov,bool withcheck)
                         0);
     for (idx=0; idx<dcov->effectivesamplesize; idx++)
     {
-      Seqpos pos = dcov->sortedsample[idx];
-      unsigned long idx2 = inversesuftab_get(dcov,pos);
+      unsigned long idx2 = inversesuftab_get(dcov,dcov->sortedsample[idx]);
       gt_assert(idx == idx2);
     }
   }
