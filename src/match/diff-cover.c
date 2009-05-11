@@ -1002,6 +1002,16 @@ static void differencecover_sample(Differencecover *dcov,bool withcheck)
     }
   }
   dc_sortremainingsuffixes(dcov);
+  if (withcheck)
+  {
+    checksortedsuffixes(dcov->encseq,
+                        dcov->readmode,
+                        dcov->sortedsample,
+                        (Seqpos) dcov->effectivesamplesize,
+                        false, /* specialsareequal  */
+                        false,  /* specialsareequalatdepth0 */
+                        0);
+  }
 }
 
 void differencecovers_check(const Encodedsequence *encseq,Readmode readmode)
