@@ -445,19 +445,24 @@ static unsigned long inversesuftab_get(const Differencecover *dcov,Seqpos pos)
   return dcov->inversesuftab[idx];
 }
 
-static void initinversesuftab(Differencecover *dcov)
+static void initinversesuftabnonspecials(Differencecover *dcov)
 {
   unsigned long sampleindex;
   Seqpos pos;
 
-  dcov->inversesuftab = gt_malloc(sizeof(*dcov->inversesuftab) *
-                                  dcov->maxsamplesize);
-  /* XXX improve this as in sfx-remainsort */
   for (sampleindex=0; sampleindex<dcov->effectivesamplesize; sampleindex++)
   {
     pos = dcov->sortedsample[sampleindex];
     inversesuftab_set(dcov,pos,sampleindex);
   }
+}
+
+static void initinversesuftabspecials(Differencecover *dcov)
+{
+  Seqpos pos;
+
+  dcov->inversesuftab = gt_malloc(sizeof(*dcov->inversesuftab) *
+                                  dcov->maxsamplesize);
   if (hasspecialranges(dcov->encseq))
   {
     Specialrangeiterator *sri;
@@ -519,9 +524,9 @@ static void dc_initinversesuftabnonspecialsadjust(Differencecover *dcov)
   unsigned long idx;
   const Codetype mincode = 0;
 
-  rightchar = (unsigned int) (mincode % dcov->numofchars);
+  rightchar = 0;
   idx = 0;
-  for (code = 0; code <= dcov->maxcode; code++)
+  for (code = mincode; code <= dcov->maxcode; code++)
   {
     rightchar = calcbucketboundsparts(&bucketspec,
                                       dcov->bcktab,
@@ -720,7 +725,6 @@ static void dc_bcktab2firstlevelintervals(Differencecover *dcov)
   Bucketspecification bucketspec;
   const Codetype mincode = 0;
 
-  dc_initinversesuftabnonspecialsadjust(dcov);
   printf("# maxbucketsize=%lu\n",dcov->allocateditvinfo);
   rightchar = (unsigned int) (mincode % dcov->numofchars);
   for (code = 0; code <= dcov->maxcode; code++)
@@ -812,7 +816,8 @@ static void dc_sortremainingsamples(Differencecover *dcov)
   }
   if (dcov->inversesuftab == NULL)
   { /* now maxdepth > prefixlength */
-    initinversesuftab(dcov);
+    initinversesuftabspecials(dcov);
+    initinversesuftabnonspecials(dcov);
   } else
   {
     gt_assert(dcov->firstgeneration.nextfreePairsuffixptr == 0);
@@ -1008,7 +1013,8 @@ void differencecover_sortsample(Differencecover *dcov,bool withcheck)
   }
   if (dcov->vparam == dcov->prefixlength)
   {
-    initinversesuftab(dcov);
+    initinversesuftabspecials(dcov);
+    dc_initinversesuftabnonspecialsadjust(dcov);
     dc_bcktab2firstlevelintervals(dcov);
   } else
   {
