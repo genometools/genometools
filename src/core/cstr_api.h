@@ -22,18 +22,20 @@
 
 /* Cstr module */
 
-/* Creates a duplicate of a C string using the GenomeTools memory allocator. */
-char*         gt_cstr_dup(const char*);
+/* Creates a duplicate of string <cstr> using the GenomeTools memory
+   allocator. */
+char*         gt_cstr_dup(const char *cstr);
 
-/* Creates a duplicate of a C string using the GenomeTools memory allocator.
-   The string needs not be \0-terminated, instead its length must be given. */
-char*         gt_cstr_dup_nt(const char*, unsigned long);
+/* Creates a duplicate of string <cstr> using the GenomeTools memory allocator.
+   The string needs not be \0-terminated, instead its <length> must be given. */
+char*         gt_cstr_dup_nt(const char *cstr, unsigned long length);
 
 /* Replace each occurence of <f> in <cstr> to <t>. */
 void          gt_cstr_rep(char *cstr, char f, char t);
 
-/* Outputs the first <length> characters of the C string to a file pointer. */
-void          gt_cstr_show(const char*, unsigned long length, FILE*);
+/* Outputs the first <length> characters of the string <cstr> to file pointer
+   <outfp>. */
+void          gt_cstr_show(const char *cstr, unsigned long length, FILE *outfp);
 
 /* Returns the length of the prefix of <cstr> ending just before <c>, if <cstr>
    does not contain <c>, strlen(cstr) is returned. */
