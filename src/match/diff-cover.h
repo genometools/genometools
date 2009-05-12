@@ -30,6 +30,8 @@ Differencecover *differencecover_new(unsigned int vparam,
                                      const Encodedsequence *encseq,
                                      Readmode readmode);
 
+int differencecover_vparamverify(const Differencecover *dcov,GtError *err);
+
 void differencecover_sortsample(Differencecover *dcov,bool withcheck);
 
 void differencecover_delete(Differencecover *dcov);

@@ -175,6 +175,17 @@ static unsigned int computehvalue(const Differencecover *dcov,
 }
 #endif
 
+int differencecover_vparamverify(const Differencecover *dcov,GtError *err)
+{
+  if (dcov->vparam < dcov->prefixlength)
+  {
+    gt_error_set(err,"difference cover modulo %u is too small, use larger "
+                     "parameter for option -dc",dcov->vparam);
+    return -1;
+  }
+  return 0;
+}
+
 Differencecover *differencecover_new(unsigned int vparam,
                                      const Encodedsequence *encseq,
                                      Readmode readmode)
@@ -211,7 +222,6 @@ Differencecover *differencecover_new(unsigned int vparam,
   dcov->prefixlength = recommendedprefixlength(dcov->numofchars,
                                                (Seqpos) dcov->maxsamplesize);
   dcov->vparam = 1U << (dcov->logmod);
-  gt_assert(dcov->vparam >= dcov->prefixlength);
   dcov->vmodmask = dcov->vparam-1;
 #ifdef WITHcomputehvalue
   dcov->hvalue = computehvalue(dcov,totallength);
@@ -219,9 +229,13 @@ Differencecover *differencecover_new(unsigned int vparam,
   dcov->encseq = encseq;
   dcov->readmode = readmode;
   dcov->isindifferencecover = NULL;
+  dcov->bcktab = NULL;
+  dcov->sortedsample = NULL;
+  dcov->filltable = NULL;
+  dcov->multimappower = NULL;
   fillcoverrank(dcov);
   dcov->diff2pos = NULL; /* this is later initialized */
-  dcov->esr = newEncodedsequencescanstate();
+  dcov->esr = NULL;
   dcov->allocateditvinfo = 0;
   dcov->itvinfo = NULL;
   dcov->currentdepth = 0;
@@ -502,11 +516,11 @@ static void dc_initinversesuftabnonspecialsadjust(Differencecover *dcov)
   Codetype code;
   unsigned int rightchar;
   Bucketspecification bucketspec;
-  Seqpos startpos, *ptr;
+  unsigned long idx;
   const Codetype mincode = 0;
 
   rightchar = (unsigned int) (mincode % dcov->numofchars);
-  ptr = dcov->sortedsample;
+  idx = 0;
   for (code = 0; code <= dcov->maxcode; code++)
   {
     rightchar = calcbucketboundsparts(&bucketspec,
@@ -516,28 +530,23 @@ static void dc_initinversesuftabnonspecialsadjust(Differencecover *dcov)
                                       (Seqpos) dcov->effectivesamplesize,
                                       rightchar,
                                       dcov->numofchars);
-    for (/* Nothing */; ptr < dcov->sortedsample + bucketspec.left; ptr++)
+    for (/* Nothing */; idx < bucketspec.left; idx++)
     {
-      startpos = *ptr;
-      inversesuftab_set(dcov,startpos,
-                        (unsigned long) (ptr - dcov->sortedsample));
+      inversesuftab_set(dcov,dcov->sortedsample[idx],idx);
     }
     dc_updatewidth (dcov,bucketspec.nonspecialsinbucket,
                     (Seqpos) dcov->prefixlength);
     for (/* Nothing */;
-         ptr < dcov->sortedsample +
-               bucketspec.left+bucketspec.nonspecialsinbucket;
-         ptr++)
+         idx < bucketspec.left + bucketspec.nonspecialsinbucket;
+         idx++)
     {
-      startpos = *ptr;
-      inversesuftab_set(dcov,startpos,(unsigned long) bucketspec.left);
+      inversesuftab_set(dcov,dcov->sortedsample[idx],
+                        (unsigned long) bucketspec.left);
     }
   }
-  for (/* Nothing */; ptr < dcov->sortedsample + dcov->effectivesamplesize;
-       ptr++)
+  for (/* Nothing */; idx < dcov->effectivesamplesize; idx++)
   {
-    startpos = *ptr;
-    inversesuftab_set(dcov,startpos,(unsigned long) (ptr - dcov->sortedsample));
+    inversesuftab_set(dcov,dcov->sortedsample[idx],idx);
   }
 }
 
@@ -863,6 +872,7 @@ void differencecover_sortsample(Differencecover *dcov,bool withcheck)
   {
     dcov->multimappower = bcktab_multimappower(dcov->bcktab);
   }
+  dcov->esr = newEncodedsequencescanstate();
   dcov->maxcode = bcktab_numofallcodes(dcov->bcktab) - 1;
   dcov->rangestobesorted = gt_inl_queue_new(MAX(16UL,DIV2(dcov->maxcode)));
   gt_assert(dcov->bcktab != NULL);
