@@ -60,8 +60,9 @@ do
   sfxmap sfx-idx
   suffixerator -parts 3 -maxdepth abs -indexname sfx-idx
   sfxmap sfx-idx
-  suffixeratoronlysuf -dc 128 -indexname sfx-idx
+  suffixeratoronlysuf -dc 16 -indexname sfx-idx
   sfxmaponlysuf sfx-idx
+  ${RUNNER} gt suffixerator -v -showtime -dna -tis -suf -dc 64 -db testdata/fib25.fas.gz -indexname sfx-idx
   rm -f sfx-idx.* sfx-idx${maxdepth}.*
 done
 echo "${filenames}"

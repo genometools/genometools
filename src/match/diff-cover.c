@@ -220,7 +220,7 @@ Differencecover *differencecover_new(unsigned int vparam,
   dcov->readmode = readmode;
   dcov->isindifferencecover = NULL;
   fillcoverrank(dcov);
-  filldiff2pos(dcov);
+  dcov->diff2pos = NULL; /* this is later initialized */
   dcov->esr = newEncodedsequencescanstate();
   dcov->allocateditvinfo = 0;
   dcov->itvinfo = NULL;
@@ -249,27 +249,19 @@ static unsigned int differencecover_offset(const Differencecover *dcov,
 
 void differencecover_delete(Differencecover *dcov)
 {
+  gt_assert(dcov->bcktab == NULL);
+  gt_assert(dcov->sortedsample == NULL);
+  gt_assert(dcov->isindifferencecover == NULL);
+  gt_assert(dcov->filltable == NULL);
+  gt_assert(dcov->multimappower == NULL);
+  gt_assert(dcov->esr == NULL);
+
   gt_free(dcov->coverrank);
   dcov->coverrank = NULL;
   gt_free(dcov->diff2pos);
   dcov->diff2pos = NULL;
-  gt_free(dcov->sortedsample);
-  dcov->sortedsample = NULL;
-  gt_assert(dcov->bcktab != NULL);
   gt_free(dcov->inversesuftab);
   dcov->inversesuftab = NULL;
-  bcktab_delete(&dcov->bcktab);
-  /* XXX the following tables can be deleted before the inversesuftab is
-     computed */
-  gt_free(dcov->isindifferencecover);
-  dcov->isindifferencecover = NULL;
-  gt_free(dcov->filltable);
-  dcov->filltable = NULL;
-  dcov->multimappower = NULL;
-  if (dcov->esr != NULL)
-  {
-    freeEncodedsequencescanstate(&dcov->esr);
-  }
   gt_free(dcov);
 }
 
@@ -278,16 +270,8 @@ static unsigned long differencecover_packsamplepos(const Differencecover *dcov,
 {
   unsigned long result;
 
-  gt_assert(dcov->isindifferencecover == NULL ||
-            ISIBITSET(dcov->isindifferencecover,MODV(pos)));
   result =  dcov->coverrank[MODV(pos)] * (DIVV(dcov->totallength) + 1) +
             (unsigned long) DIVV(pos);
-  if (result >= dcov->maxsamplesize)
-  {
-    fprintf(stderr,"result=%lu >= %lu = maxsamplesize\n",
-                    result,dcov->maxsamplesize);
-    exit(EXIT_FAILURE);
-  }
   gt_assert(result < dcov->maxsamplesize);
   return result;
 }
@@ -488,6 +472,8 @@ static void initinversesuftab(Differencecover *dcov)
     gt_assert(dcov->samplesize > 0);
     inversesuftab_set(dcov,dcov->totallength,dcov->samplesize-1);
   }
+  gt_free(dcov->isindifferencecover);
+  dcov->isindifferencecover = NULL;
 }
 
 static void dc_updatewidth (Differencecover *dcov,unsigned long width,
@@ -797,6 +783,7 @@ void dc_sortunsortedbucket(void *data,
 
   gt_assert(left < right);
   gt_assert(depth >= (Seqpos) dcov->vparam);
+  gt_assert(dcov->diff2pos != NULL);
   gt_qsort_r(left,(size_t) (right - left + 1),sizeof(Seqpos),data,
              comparedcov_presortedsuffixes);
 }
@@ -991,6 +978,13 @@ void differencecover_sortsample(Differencecover *dcov,bool withcheck)
       diffptr = dcov->diffvalues;
     }
   }
+  dcov->multimappower = NULL;
+  gt_free(dcov->filltable);
+  dcov->filltable = NULL;
+  if (dcov->esr != NULL)
+  {
+    freeEncodedsequencescanstate(&dcov->esr);
+  }
   gt_assert(posinserted == dcov->effectivesamplesize);
   if (withcheck)
   {
@@ -1021,7 +1015,7 @@ void differencecover_sortsample(Differencecover *dcov,bool withcheck)
                          dcov->encseq,
                          dcov->readmode,
                          0, /* mincode */
-                         bcktab_numofallcodes(dcov->bcktab) - 1,  /* maxcode */
+                         dcov->maxcode,
                          dcov->bcktab,
                          dcov->numofchars,
                          dcov->prefixlength,
@@ -1039,6 +1033,10 @@ void differencecover_sortsample(Differencecover *dcov,bool withcheck)
                           false,  /* specialsareequalatdepth0 */
                           (Seqpos) dcov->vparam);
     }
+  }
+  if (dcov->bcktab != NULL)
+  {
+    bcktab_delete(&dcov->bcktab);
   }
   dc_sortremainingsamples(dcov);
   if (withcheck)
@@ -1058,6 +1056,10 @@ void differencecover_sortsample(Differencecover *dcov,bool withcheck)
       gt_assert(idx == idx2);
     }
   }
+  gt_free(dcov->sortedsample);
+  dcov->sortedsample = NULL;
+  gt_assert(dcov->diff2pos == NULL);
+  filldiff2pos(dcov);
 }
 
 void differencecovers_check(const Encodedsequence *encseq,Readmode readmode)
