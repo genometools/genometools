@@ -519,13 +519,11 @@ static void dc_updatewidth (Differencecover *dcov,unsigned long width,
 static void dc_initinversesuftabnonspecialsadjust(Differencecover *dcov)
 {
   Codetype code;
-  unsigned int rightchar;
+  unsigned int rightchar = 0;
   Bucketspecification bucketspec;
-  unsigned long idx;
+  unsigned long idx = 0;
   const Codetype mincode = 0;
 
-  rightchar = 0;
-  idx = 0;
   for (code = mincode; code <= dcov->maxcode; code++)
   {
     rightchar = calcbucketboundsparts(&bucketspec,
@@ -535,14 +533,15 @@ static void dc_initinversesuftabnonspecialsadjust(Differencecover *dcov)
                                       (Seqpos) dcov->effectivesamplesize,
                                       rightchar,
                                       dcov->numofchars);
-    for (/* Nothing */; idx < bucketspec.left; idx++)
+    for (/* Nothing */; idx < (unsigned long) bucketspec.left; idx++)
     {
       inversesuftab_set(dcov,dcov->sortedsample[idx],idx);
     }
     dc_updatewidth (dcov,bucketspec.nonspecialsinbucket,
                     (Seqpos) dcov->prefixlength);
     for (/* Nothing */;
-         idx < bucketspec.left + bucketspec.nonspecialsinbucket;
+         idx < (unsigned long) (bucketspec.left +
+                                bucketspec.nonspecialsinbucket);
          idx++)
     {
       inversesuftab_set(dcov,dcov->sortedsample[idx],
