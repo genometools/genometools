@@ -320,7 +320,9 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
           ssar = NULL;
         }
         showverbose(verboseinfo,"checkentiresuftab");
-        checkentiresuftab(suffixarray.encseq,
+        checkentiresuftab(__FILE__,
+                          __LINE__,
+                          suffixarray.encseq,
                           suffixarray.readmode,
                           suffixarray.suftab,
                           getencseqtotallength(suffixarray.encseq)+1,

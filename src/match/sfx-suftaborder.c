@@ -64,7 +64,9 @@ static void showlocalsuffix(FILE *fpout,
   }
 }
 
-static void showcomparisonfailure(const char *where,
+static void showcomparisonfailure(const char *filename,
+                                  int line,
+                                  const char *where,
                                   const Encodedsequence *encseq,
                                   Readmode readmode,
                                   const Seqpos *suftab,
@@ -74,7 +76,8 @@ static void showcomparisonfailure(const char *where,
                                   int cmp,
                                   Seqpos maxlcp)
 {
-  fprintf(stderr,"ERROR: %s(" FormatSeqpos " vs " FormatSeqpos
+  fprintf(stderr,"ERROR: file \"%s\", line %d: ",filename,line);
+  fprintf(stderr,"%s(" FormatSeqpos " vs " FormatSeqpos
                  " " FormatSeqpos "=\"",
                        where,
                        PRINTSeqposcast((Seqpos) (ptr1 - suftab)),
@@ -89,7 +92,9 @@ static void showcomparisonfailure(const char *where,
               PRINTSeqposcast(maxlcp));
 }
 
-void checkifprefixesareidentical(const Encodedsequence *encseq,
+void checkifprefixesareidentical(const char *filename,
+                                 int line,
+                                 const Encodedsequence *encseq,
                                  Readmode readmode,
                                  const Seqpos *suftab,
                                  unsigned int prefixlength,
@@ -119,7 +124,9 @@ void checkifprefixesareidentical(const Encodedsequence *encseq,
                              esr2);
     if (cmp != 0 || maxlcp != (Seqpos) prefixlength)
     {
-      showcomparisonfailure("checkifprefixesareidentical",
+      showcomparisonfailure(filename,
+                            line,
+                            "checkifprefixesareidentical",
                             encseq,
                             readmode,
                             suftab,
@@ -155,7 +162,9 @@ void showentiresuftab(const Encodedsequence *encseq,
   }
 }
 
-void checksortedsuffixes(const Encodedsequence *encseq,
+void checksortedsuffixes(const char *filename,
+                         int line,
+                         const Encodedsequence *encseq,
                          Readmode readmode,
                          const Seqpos *suftab,
                          Seqpos numberofsuffixes,
@@ -190,7 +199,9 @@ void checksortedsuffixes(const Encodedsequence *encseq,
                                esr2);
       if (cmp > 0)
       {
-        showcomparisonfailure("checkentiresuftab",
+        showcomparisonfailure(filename,
+                              line,
+                              "checksortedsuffixes",
                               encseq,
                               readmode,
                               suftab,
@@ -213,7 +224,9 @@ void checksortedsuffixes(const Encodedsequence *encseq,
   freeEncodedsequencescanstate(&esr2);
 }
 
-void checkentiresuftab(const Encodedsequence *encseq,
+void checkentiresuftab(const char *filename,
+                       int line,
+                       const Encodedsequence *encseq,
                        Readmode readmode,
                        const Seqpos *suftab,
                        Seqpos numberofsuffixes,
@@ -283,7 +296,9 @@ void checkentiresuftab(const Encodedsequence *encseq,
                                esr2);
       if (cmp > 0)
       {
-        showcomparisonfailure("checkentiresuftab",
+        showcomparisonfailure(filename,
+                              line,
+                              "checkentiresuftab",
                               encseq,
                               readmode,
                               suftab,

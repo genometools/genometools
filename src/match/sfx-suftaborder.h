@@ -24,7 +24,9 @@
 #include "seqpos-def.h"
 #include "esa-seqread.h"
 
-void checkifprefixesareidentical(const Encodedsequence *encseq,
+void checkifprefixesareidentical(const char *filename,
+                                 int line,
+                                 const Encodedsequence *encseq,
                                  Readmode readmode,
                                  const Seqpos *suftab,
                                  unsigned int prefixlength,
@@ -37,7 +39,9 @@ void showentiresuftab(const Encodedsequence *encseq,
                       const Seqpos *suftab,
                       Seqpos depth);
 
-void checkentiresuftab(const Encodedsequence *encseq,
+void checkentiresuftab(const char *filename,
+                       int line,
+                       const Encodedsequence *encseq,
                        Readmode readmode,
                        const Seqpos *suftab,
                        Seqpos numberofsuffixes,
@@ -47,7 +51,9 @@ void checkentiresuftab(const Encodedsequence *encseq,
                        Seqpos depth,
                        GtError *err);
 
-void checksortedsuffixes(const Encodedsequence *encseq,
+void checksortedsuffixes(const char *filename,
+                         int line,
+                         const Encodedsequence *encseq,
                          Readmode readmode,
                          const Seqpos *suftab,
                          Seqpos numberofsuffixes,

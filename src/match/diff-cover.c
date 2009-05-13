@@ -1002,7 +1002,9 @@ void differencecover_sortsample(Differencecover *dcov,bool withcheck)
   gt_assert(posinserted == dcov->effectivesamplesize);
   if (withcheck)
   {
-    checksortedsuffixes(dcov->encseq,
+    checksortedsuffixes(__FILE__,
+                        __LINE__,
+                        dcov->encseq,
                         dcov->readmode,
                         dcov->sortedsample,
                         (Seqpos) dcov->effectivesamplesize,
@@ -1040,7 +1042,9 @@ void differencecover_sortsample(Differencecover *dcov,bool withcheck)
                          NULL);
     if (withcheck)
     {
-      checksortedsuffixes(dcov->encseq,
+      checksortedsuffixes(__FILE__,
+                          __LINE__,
+                          dcov->encseq,
                           dcov->readmode,
                           dcov->sortedsample,
                           (Seqpos) dcov->effectivesamplesize,
@@ -1058,7 +1062,9 @@ void differencecover_sortsample(Differencecover *dcov,bool withcheck)
   {
     unsigned long idx;
 
-    checksortedsuffixes(dcov->encseq,
+    checksortedsuffixes(__FILE__,
+                        __LINE__,
+                        dcov->encseq,
                         dcov->readmode,
                         dcov->sortedsample,
                         (Seqpos) dcov->effectivesamplesize,

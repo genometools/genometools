@@ -56,12 +56,12 @@
 
 #define LCPINDEX(BSR,I)   (Seqpos) ((I) - (BSR)->lcpsubtab->suftabbase)
 
-#define SWAP(A,B)\
+#define SWAP(TMP,A,B)\
         if ((A) != (B))\
         {\
-          temp = *(A);\
+          TMP = *(A);\
           *(A) = *(B);\
-          *(B) = temp;\
+          *(B) = TMP;\
         }
 
 #define VECSWAP(A,B,N)\
@@ -109,7 +109,15 @@
                 bsr->dc_processunsortedrange(bsr->voiddcov,LEFT,RIGHT,DEPTH);\
               } else\
               {\
-                PUSHMKVSTACK(LEFT,RIGHT,DEPTH,ORDERTYPE);\
+                if ((WIDTH) <= bsr->sfxstrategy->maxinsertionsort)\
+                {\
+                  insertionsortmaxdepth(bsr,LEFT,RIGHT,DEPTH,\
+                                        (Seqpos) bsr->sfxstrategy->\
+                                                      differencecover);\
+                } else\
+                {\
+                  PUSHMKVSTACK(LEFT,RIGHT,DEPTH,ORDERTYPE);\
+                }\
               }\
             } else\
             {\
@@ -152,6 +160,8 @@
         }
 
 typedef Seqpos Suffixptr;
+
+/* XXX mv this into Bensonsedgewickstructure */
 
 static unsigned long countinsertionsort = 0,
                      countbltriesort = 0,
@@ -416,6 +426,7 @@ typedef struct
   Suftab *suftab;
   void (*dc_processunsortedrange)(void *,Seqpos *,Seqpos *,Seqpos);
   void *voiddcov;
+  bool *equalwithprevious;
 } Bentsedgresources;
 
 static Suffixptr *medianof3cmpcharbychar(const Bentsedgresources *bsr,
@@ -487,47 +498,157 @@ static void updatelcpvalue(Bentsedgresources *bsr,Seqpos idx,Seqpos value)
   bsr->lcpsubtab->bucketoflcpvalues[idx] = value;
 }
 
+#ifdef WITHEQUALSRANGE
 typedef struct
 {
   unsigned long right, width;
 } Equalsrange;
 
-inline void insertionsortwithequalelements (unsigned long *a,
-                                                   unsigned long n)
-{
-  unsigned long *pm, *pl, temp, equalsrangewidth = 0, numofequalsranges = 0;
-  Equalsrange equalsrange[100];
+#define MAXSORTEDELEMS 100
+#define MAXSORTVALUE 10UL
 
+static void showsortedarray(FILE *fp,const unsigned long *a,unsigned long n)
+{
+  unsigned long idx;
+
+  for (idx = 0; idx < n; idx++)
+  {
+    fprintf(fp,"%lu%c",a[idx],(idx < n-1) ? ' ' : '\n');
+  }
+}
+
+static void insertionsortwithequalelements (unsigned long *a,
+                                            unsigned long n)
+{
+  unsigned long equalsrangewidth = 0,
+                numofequalsranges = 0, numofequalsrangesbf = 0, idx,
+                pmidx, plidx, temp, *pm;
+  Equalsrange equalsranges[MAXSORTEDELEMS];
+  Equalsrange equalsrangesbf[MAXSORTEDELEMS];
+  bool tempb, equalwithprevious[MAXSORTEDELEMS];
+
+  for (idx = 0; idx < n; idx++)
+  {
+    equalwithprevious[idx] = false;
+  }
+  for (pmidx = 1UL; pmidx < n; pmidx++)
+  {
+    for (plidx = pmidx; plidx > 0; plidx--)
+    {
+      if (a[plidx-1] == a[plidx])
+      {
+        equalwithprevious[plidx] = true;
+        break;
+      }
+      if (a[plidx-1] < a[plidx])
+      {
+        break;
+      }
+      temp = a[plidx-1];
+      a[plidx-1] = a[plidx];
+      a[plidx] = temp;
+      tempb = equalwithprevious[plidx-1];
+      equalwithprevious[plidx-1] = equalwithprevious[plidx];
+      equalwithprevious[plidx] = tempb;
+    }
+  }
+  for (pmidx = 1UL; pmidx < n; pmidx++)
+  {
+    if (equalwithprevious[pmidx])
+    {
+      equalsrangewidth++;
+    } else
+    {
+      gt_assert(a[pmidx-1] < a[pmidx]);
+      if (equalsrangewidth > 0)
+      {
+        equalsranges[numofequalsranges].width = equalsrangewidth;
+        equalsranges[numofequalsranges].right = pmidx - 1;
+        numofequalsranges++;
+        equalsrangewidth = 0;
+      }
+    }
+  }
+  if (equalsrangewidth > 0)
+  {
+    equalsranges[numofequalsranges].width = equalsrangewidth;
+    equalsranges[numofequalsranges].right = pmidx-1;
+    numofequalsranges++;
+    equalsrangewidth = 0;
+  }
   for (pm = a + 1; pm < a + n; pm++)
   {
-    for (pl = pm; pl > a; pl--)
+    if (*(pm-1) == *pm)
     {
-      if (*(pl-1) == *pl)
+      equalsrangewidth++;
+    } else
+    {
+      gt_assert(*(pm-1) < *pm);
+      if (equalsrangewidth > 0)
       {
-        equalsrangewidth++;
-      } else
-      {
-        if (*(pl-1) < *pl)
-        {
-          if (equalsrangewidth > 0)
-          {
-            equalsrange[numofequalsranges].width = equalsrangewidth;
-            equalsrange[numofequalsranges].right = (unsigned long) ((pl-1) - a);
-            numofequalsranges++;
-            equalsrangewidth = 0;
-          }
-          break;
-        }
+        equalsrangesbf[numofequalsrangesbf].width = equalsrangewidth;
+        equalsrangesbf[numofequalsrangesbf].right
+          = (unsigned long) ((pm-1) - a);
+        numofequalsrangesbf++;
+        equalsrangewidth = 0;
       }
-      SWAP(pl, pl - 1);
+    }
+  }
+  if (equalsrangewidth > 0)
+  {
+    equalsrangesbf[numofequalsrangesbf].width = equalsrangewidth;
+    equalsrangesbf[numofequalsrangesbf].right = (unsigned long) ((pm-1) - a);
+    numofequalsrangesbf++;
+    equalsrangewidth = 0;
+  }
+  if (numofequalsrangesbf != numofequalsranges)
+  {
+    fprintf(stderr,"failure: numofequalsrangesbf = %lu != %lu = "
+                   "numofequalsranges\n",
+                   numofequalsrangesbf,numofequalsranges);
+    showsortedarray(stderr,a,n);
+    exit(EXIT_FAILURE);
+  }
+  for (idx = 0; idx < numofequalsrangesbf; idx++)
+  {
+    if (equalsrangesbf[idx].width != equalsranges[idx].width)
+    {
+      fprintf(stderr,"failure at idx = %lu: equalsrangesbf.width = %lu != %lu "
+                     " = equalranges.width\n",
+                     idx,equalsrangesbf[idx].width,equalsranges[idx].width);
+      showsortedarray(stderr,a,n);
+      exit(EXIT_FAILURE);
+    }
+    if (equalsrangesbf[idx].right != equalsranges[idx].right)
+    {
+      fprintf(stderr,"failure at idx = %lu: equalsrangesbf.right = %lu != %lu "
+                     " = equalranges.right\n",
+                     idx,equalsrangesbf[idx].right,equalsranges[idx].right);
+      showsortedarray(stderr,a,n);
+      exit(EXIT_FAILURE);
     }
   }
 }
 
+static void checkequalelements (void)
+{
+  unsigned long trial, idx, arr[MAXSORTEDELEMS];
+
+  for (trial = 0; trial < 1000UL; trial++)
+  {
+    for (idx = 0; idx < (unsigned long) MAXSORTEDELEMS; idx++)
+    {
+      arr[idx] = gt_rand_max(MAXSORTVALUE);
+    }
+    insertionsortwithequalelements (arr,(unsigned long) MAXSORTEDELEMS);
+  }
+}
+#endif
+
 static void insertionsort(Bentsedgresources *bsr,
                           Suffixptr *leftptr,
                           Suffixptr *rightptr,
-                          Seqpos depth)
+                          Seqpos offset)
 {
   Suffixptr *pi, *pj;
   Seqpos lcpindex, lcplen = 0;
@@ -537,7 +658,7 @@ static void insertionsort(Bentsedgresources *bsr,
 #ifdef SKDEBUG
   printf("insertion sort ");
   showsuffixrange(bsr->encseq,bsr->fwd,bsr->complement,bsr->lcpsubtab,
-                  leftptr,rightptr,depth);
+                  leftptr,rightptr,offset);
 #endif
   countinsertionsort++;
   for (pi = leftptr + 1; pi <= rightptr; pi++)
@@ -547,7 +668,7 @@ static void insertionsort(Bentsedgresources *bsr,
       if (bsr->sfxstrategy->cmpcharbychar)
       {
         /* XXX use scanning of characters */
-        for (sptr = (*(pj-1))+depth, tptr = (*pj)+depth; /* Nothing */;
+        for (sptr = (*(pj-1))+offset, tptr = (*pj)+offset; /* Nothing */;
              sptr++, tptr++)
         {
           Seqpos ccs, cct;
@@ -565,8 +686,8 @@ static void insertionsort(Bentsedgresources *bsr,
       } else
       {
 #ifdef SKDEBUG
-        printf("compareEncseqsequences[%d,%d] at depth %d\n",
-                       (int) *(pj-1),(int) *pj,(int) depth);
+        printf("compareEncseqsequences[%d,%d] at offset %d\n",
+                       (int) *(pj-1),(int) *pj,(int) offset);
         showsequenceatstartpos(stdout,
                                bsr->fwd,
                                bsr->complement,
@@ -580,7 +701,7 @@ static void insertionsort(Bentsedgresources *bsr,
 #endif
         retval = compareEncseqsequences(&lcplen,bsr->encseq,bsr->fwd,
                                         bsr->complement,
-                                        bsr->esr1,bsr->esr2,*(pj-1),*pj,depth);
+                                        bsr->esr1,bsr->esr2,*(pj-1),*pj,offset);
       }
       gt_assert(retval != 0);
       if (bsr->lcpsubtab != NULL && bsr->assideeffect)
@@ -597,27 +718,47 @@ static void insertionsort(Bentsedgresources *bsr,
       {
         break;
       }
-      SWAP(pj,pj-1);
+      SWAP(temp,pj,pj-1);
     }
   }
 }
 
-void insertionsortwithmaxdepth(Bentsedgresources *bsr,
-                                      Suffixptr *leftptr,
-                                      Suffixptr *rightptr,
-                                      Seqpos depth,
-                                      Seqpos maxdepth)
+/* XXX remove this later */
+
+static Seqpos *sortedsamplebase = NULL;
+
+static void insertionsortmaxdepth(Bentsedgresources *bsr,
+                                  Suffixptr *leftptr,
+                                  Suffixptr *rightptr,
+                                  Seqpos offset,
+                                  Seqpos maxdepth)
 {
   Suffixptr *pi, *pj;
   Seqpos lcpindex, lcplen = 0;
   int retval;
+  unsigned long idx = 0;
+  bool tempb;
   Suffixptr sptr, tptr, temp;
 
+  gt_assert(sortedsamplebase != NULL);
+  /*
+  printf("insertion sort (offset=%lu,maxdepth=%lu) of [%lu,%lu]: ",
+            (unsigned long) offset,
+            (unsigned long) maxdepth,
+            (unsigned long) (leftptr-sortedsamplebase),
+            (unsigned long) (rightptr-sortedsamplebase));
+  */
 #ifdef SKDEBUG
-  printf("insertion sort ");
   showsuffixrange(bsr->encseq,bsr->fwd,bsr->complement,bsr->lcpsubtab,
-                  leftptr,rightptr,depth);
+                  leftptr,rightptr,offset);
 #endif
+  /*
+  for (pi = leftptr; pi <= rightptr; pi++)
+  {
+    printf(" %d",*pi);
+  }
+  printf("\n");
+  */
   countinsertionsort++;
   for (pi = leftptr + 1; pi <= rightptr; pi++)
   {
@@ -626,7 +767,7 @@ void insertionsortwithmaxdepth(Bentsedgresources *bsr,
       if (bsr->sfxstrategy->cmpcharbychar)
       {
         /* XXX use scanning of characters */
-        for (sptr = (*(pj-1))+depth, tptr = (*pj)+depth; /* Nothing */;
+        for (sptr = (*(pj-1))+offset, tptr = (*pj)+offset; /* Nothing */;
              sptr++, tptr++)
         {
           Seqpos ccs, cct;
@@ -636,9 +777,15 @@ void insertionsortwithmaxdepth(Bentsedgresources *bsr,
                              MIN(bsr->totallength,*(pj-1)+maxdepth));
           cct = DEREFSTOPPOS(tmptvar,tptr,
                              MIN(bsr->totallength,*pj+maxdepth));
+          lcplen = (Seqpos) (tptr - *pj);
+          if (lcplen == maxdepth)
+          {
+            retval = 0;
+            break;
+          }
+          gt_assert(lcplen < maxdepth);
           if (ccs != cct)
           {
-            lcplen = (Seqpos) (tptr - *pj);
             retval = (ccs < cct) ? -1 : 1;
             break;
           }
@@ -647,8 +794,7 @@ void insertionsortwithmaxdepth(Bentsedgresources *bsr,
       {
         gt_assert(false);
       }
-      gt_assert(retval != 0);
-      if (bsr->lcpsubtab != NULL && bsr->assideeffect)
+      if (retval != 0 && bsr->lcpsubtab != NULL && bsr->assideeffect)
       {
         lcpindex = LCPINDEX(bsr,pj);
         if (pj < pi && retval > 0)
@@ -662,7 +808,74 @@ void insertionsortwithmaxdepth(Bentsedgresources *bsr,
       {
         break;
       }
-      SWAP(pj,pj-1);
+      idx = (unsigned long) (pj - leftptr);
+      if (retval == 0)
+      {
+        gt_assert(idx > 0);
+        bsr->equalwithprevious[idx] = true;
+        /*
+        printf("equalwithprevious[%lu] = true because %lu %lu are identical\n",
+               idx,(unsigned long) *(pj-1),(unsigned long) *pj);
+        */
+        break;
+      }
+      SWAP(temp,pj,pj-1);
+      tempb = bsr->equalwithprevious[idx-1];
+      bsr->equalwithprevious[idx-1] = bsr->equalwithprevious[idx];
+      bsr->equalwithprevious[idx] = tempb;
+    }
+  }
+  if (idx > 0)
+  {
+    unsigned long equalsrangewidth = 0,
+                  width = (unsigned long) (rightptr - leftptr + 1);
+    for (idx = 1UL; idx < width; idx++)
+    {
+      if (bsr->equalwithprevious[idx])
+      {
+        bsr->equalwithprevious[idx] = false;
+        equalsrangewidth++;
+      } else
+      {
+        if (equalsrangewidth > 0)
+        {
+          /*
+          printf("(1) processunsorted [equals=%lu,%lu,%lu]: ",
+                 equalsrangewidth,
+                 (unsigned long) (leftptr + idx - 1 - equalsrangewidth -
+                                  sortedsamplebase),
+                 (unsigned long) (leftptr + idx - 1 - sortedsamplebase));
+          printf("entire subarray:");
+          for (pi = leftptr; pi <= rightptr; pi++)
+          {
+            printf(" %d",*pi);
+          }
+          printf("\n");
+          for (pi = leftptr + idx - 1 - equalsrangewidth;
+               pi <= leftptr + idx - 1; pi++)
+          {
+            printf(" %d",*pi);
+          }
+          printf("\n");
+          */
+          bsr->dc_processunsortedrange(bsr->voiddcov,
+                                       leftptr + idx - 1 - equalsrangewidth,
+                                       leftptr + idx - 1,maxdepth);
+          equalsrangewidth = 0;
+        }
+      }
+    }
+    if (equalsrangewidth > 0)
+    {
+      /*
+      printf("(2) processunsorted [%lu,%lu]\n",
+              (unsigned long) (leftptr + width - 1 - equalsrangewidth -
+                               sortedsamplebase),
+              (unsigned long) (leftptr + width - 1 - sortedsamplebase));
+      */
+      bsr->dc_processunsortedrange(bsr->voiddcov,
+                                   leftptr + width - 1 - equalsrangewidth,
+                                   leftptr + width - 1,maxdepth);
     }
   }
 }
@@ -1162,7 +1375,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
                                         right,
                                         depth,
                                         width);
-        SWAP(left, pm);
+        SWAP(temp, left, pm);
         CMPCHARBYCHARPTR2INT(pivotcmpcharbychar,tmpvar,left);
       } else
       {
@@ -1191,7 +1404,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
           /* new values for left, right, depth and parentordertype */
           continue;
         }
-        SWAP(left, pm);
+        SWAP(temp, left, pm);
         PTR2INT(pivotcmpbits,left);
       }
       countqsort++;
@@ -1217,7 +1430,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
             }
             if (valcmpcharbychar == pivotcmpcharbychar)
             {
-              SWAP(pa, pb);
+              SWAP(temp, pa, pb);
               pa++;
             }
             pb++;
@@ -1231,7 +1444,8 @@ static void bentleysedgewick(Bentsedgresources *bsr,
             }
             if (valcmpcharbychar == pivotcmpcharbychar)
             {
-              SWAP(pc, pd); /* exchange equal element and element at index pd */
+              SWAP(temp, pc, pd); /* exchange equal element and element
+                                     at index pd */
               pd--;
             }
             pc--;
@@ -1240,7 +1454,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
           { /* no elements to compare to pivot */
             break;
           }
-          SWAP(pb, pc);
+          SWAP(temp, pb, pc);
           pb++;
           pc--;
         }
@@ -1262,7 +1476,8 @@ static void bentleysedgewick(Bentsedgresources *bsr,
             }
             if (SfxcmpEQUAL(val,pivotcmpbits))
             {
-              SWAP(pa, pb); /* exchange equal element and element at index pa */
+              SWAP(temp, pa, pb); /* exchange equal element and element
+                                     at index pa */
               pa++;
             } else /* smaller */
             {
@@ -1282,7 +1497,8 @@ static void bentleysedgewick(Bentsedgresources *bsr,
             }
             if (SfxcmpEQUAL(val,pivotcmpbits))
             {
-              SWAP(pc, pd); /* exchange equal element and element at index pa */
+              SWAP(temp, pc, pd); /* exchange equal element and element at
+                                     index pa */
               pd--;
             } else /* greater */
             {
@@ -1294,7 +1510,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
           { /* interval is empty */
             break;
           }
-          SWAP(pb, pc);
+          SWAP(temp, pb, pc);
           pb++;
           pc--;
         }
@@ -1886,6 +2102,19 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   }
   bsr->voiddcov = NULL;
   bsr->dc_processunsortedrange = NULL;
+  if (bsr->sfxstrategy->ssortmaxdepth.defined ||
+      bsr->sfxstrategy->differencecover > 0)
+  {
+    bsr->equalwithprevious = gt_malloc(sizeof(*bsr->equalwithprevious) *
+                                       bsr->sfxstrategy->maxinsertionsort);
+    for (idx=0; idx < bsr->sfxstrategy->maxinsertionsort; idx++)
+    {
+      bsr->equalwithprevious[idx] = false;
+    }
+  } else
+  {
+    bsr->equalwithprevious = NULL;
+  }
 }
 
 static void wrapBentsedgresources(Bentsedgresources *bsr,
@@ -1924,6 +2153,7 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
   {
     freeEncodedsequencescanstate(&bsr->esr2);
   }
+  gt_free(bsr->equalwithprevious);
   GT_FREEARRAY(&bsr->mkvauxstack,MKVstack);
 }
 
@@ -2189,6 +2419,10 @@ void sortbucketofsuffixes(Seqpos *suffixestobesorted,
   unsigned int rightchar =  (unsigned int) (mincode % numofchars);
   Codetype code;
 
+#ifdef WITHEQUALSRANGE
+  checkequalelements();
+#endif
+  sortedsamplebase = suffixestobesorted;
   initBentsedgresources(&bsr,
                         NULL,
                         NULL,
@@ -2228,4 +2462,8 @@ void sortbucketofsuffixes(Seqpos *suffixestobesorted,
                         NULL,
                         NULL,
                         NULL);
+  showverbose(verboseinfo,"countinsertionsort=%lu",countinsertionsort);
+  showverbose(verboseinfo,"countbltriesort=%lu",countbltriesort);
+  showverbose(verboseinfo,"countcountingsort=%lu",countcountingsort);
+  showverbose(verboseinfo,"countqsort=%lu",countqsort);
 }
