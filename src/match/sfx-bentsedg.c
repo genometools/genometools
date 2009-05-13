@@ -894,6 +894,7 @@ static bool comparisonsort(Bentsedgresources *bsr,
                            unsigned long width,
                            Ordertype ordertype)
 {
+  gt_assert(width > 1UL && left < right);
   if (width <= bsr->sfxstrategy->maxbltriesort)
   {
     if (left < right)
