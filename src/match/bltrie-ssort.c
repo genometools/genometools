@@ -70,6 +70,7 @@ struct Blindtrierep
 static bool isleftofboundary(Seqpos currentstartpos,
                              const Blindtrierep *trierep)
 {
+  gt_assert(currentstartpos >= trierep->offset);
   return (currentstartpos < trierep->totallength) ? true : false;
 }
 
@@ -121,7 +122,7 @@ static Nodeptr makeroot(Blindtrierep *trierep,Seqpos currentstartpos)
   return root;
 }
 
-static Nodeptr extractleafnode(const Blindtrierep *trierep,Nodeptr head)
+static inline Nodeptr extractleafnode(const Blindtrierep *trierep,Nodeptr head)
 {
   gt_assert(ISNOTLEAF(head));
   do
@@ -131,7 +132,7 @@ static Nodeptr extractleafnode(const Blindtrierep *trierep,Nodeptr head)
   return head;
 }
 
-static int comparecharacters(GtUchar oldchar,GtUchar newchar)
+static inline int comparecharacters(GtUchar oldchar,GtUchar newchar)
 {
   if (oldchar > newchar)
   {
@@ -315,6 +316,7 @@ static Seqpos fastgetlcp(GtUchar *mm_oldsuffix,
 {
   Seqpos lcp;
 
+  /* XXX be careful: the following function ignores maxdepth value */
   (void) compareEncseqsequences(&lcp,
                                 trierep->encseq,
                                 ISDIRREVERSE(trierep->readmode) ? false : true,
