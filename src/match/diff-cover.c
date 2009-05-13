@@ -86,6 +86,8 @@ struct Differencecover
   Bcktab *bcktab;
   const Encodedsequence *encseq;
   Readmode readmode;
+  /* XXX instead of this array use coverrank array of which the unused
+         entries store some flag v+1 which is not in the range. */
   Bitsequence *isindifferencecover;
   unsigned long samplesize, effectivesamplesize, maxsamplesize;
   const Codetype **multimappower;

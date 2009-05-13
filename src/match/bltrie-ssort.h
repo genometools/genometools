@@ -19,8 +19,10 @@
 #define BLTRIE_SSORT_H
 
 #include "seqpos-def.h"
+#include "encseq-def.h"
+#include "readmode-def.h"
 
-typedef struct Blindtrierep Blindtrierep;
+typedef struct Blindtrie Blindtrie;
 
 typedef enum
 {
@@ -29,18 +31,22 @@ typedef enum
   Noorder
 } Ordertype;
 
-Blindtrierep *newBlindtrierep(unsigned long numofsuffixes,
-                              const Encodedsequence *encseq,
-                              bool cmpcharbychar,
-                              Readmode readmode);
+Blindtrie *blindtrie_new(unsigned long numofsuffixes,
+                         const Encodedsequence *encseq,
+                         bool cmpcharbychar,
+                         Readmode readmode);
 
-Seqpos blindtriesuffixsort(Blindtrierep *trierep,
-                           Seqpos *suffixtable,
-                           Seqpos *lcpsubtab,
-                           unsigned long numberofsuffixes,
-                           Seqpos offset,
-                           Ordertype ordertype);
+Seqpos blindtrie_suffixsort(Blindtrie *blindtrie,
+                            Seqpos *suffixtable,
+                            Seqpos *lcpsubtab,
+                            unsigned long numberofsuffixes,
+                            Seqpos offset,
+                            Seqpos maxdepth,
+                            Ordertype ordertype,
+                            void *voiddcov,
+                            void (*dc_processunsortedrange)(void *,Seqpos *,
+                                                            Seqpos *,Seqpos));
 
-void freeBlindtrierep(Blindtrierep **trierep);
+void blindtrie_delete(Blindtrie **blindtrie);
 
 #endif
