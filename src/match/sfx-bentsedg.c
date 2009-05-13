@@ -48,9 +48,11 @@
 #define ISNOTEND(POS)   ((POS) < bsr->totallength &&\
                          ISNOTSPECIAL(ACCESSCHAR(POS)))
 
-#define DEREF(VAR,PTR)\
-        (((PTR) < bsr->totallength && ISNOTSPECIAL(VAR = ACCESSCHAR(PTR))) ?\
+#define DEREFSTOPPOS(VAR,PTR,STOPPOS)\
+        (((PTR) < (STOPPOS) && ISNOTSPECIAL(VAR = ACCESSCHAR(PTR))) ?\
         ((Seqpos) VAR) : UNIQUEINT(PTR))
+
+#define DEREF(VAR,PTR) DEREFSTOPPOS(VAR,PTR,bsr->totallength)
 
 #define LCPINDEX(BSR,I)   (Seqpos) ((I) - (BSR)->lcpsubtab->suftabbase)
 
@@ -542,6 +544,71 @@ static void insertionsort(Bentsedgresources *bsr,
         retval = compareEncseqsequences(&lcplen,bsr->encseq,bsr->fwd,
                                         bsr->complement,
                                         bsr->esr1,bsr->esr2,*(pj-1),*pj,depth);
+      }
+      gt_assert(retval != 0);
+      if (bsr->lcpsubtab != NULL && bsr->assideeffect)
+      {
+        lcpindex = LCPINDEX(bsr,pj);
+        if (pj < pi && retval > 0)
+        {
+          updatelcpvalue(bsr,lcpindex+1,
+                         bsr->lcpsubtab->bucketoflcpvalues[lcpindex]);
+        }
+        updatelcpvalue(bsr,lcpindex,lcplen);
+      }
+      if (retval < 0)
+      {
+        break;
+      }
+      SWAP(pj,pj-1);
+    }
+  }
+}
+
+void insertionsortwithmaxdepth(Bentsedgresources *bsr,
+                                      Suffixptr *leftptr,
+                                      Suffixptr *rightptr,
+                                      Seqpos depth,
+                                      Seqpos maxdepth)
+{
+  Suffixptr *pi, *pj;
+  Seqpos lcpindex, lcplen = 0;
+  int retval;
+  Suffixptr sptr, tptr, temp;
+
+#ifdef SKDEBUG
+  printf("insertion sort ");
+  showsuffixrange(bsr->encseq,bsr->fwd,bsr->complement,bsr->lcpsubtab,
+                  leftptr,rightptr,depth);
+#endif
+  countinsertionsort++;
+  for (pi = leftptr + 1; pi <= rightptr; pi++)
+  {
+    for (pj = pi; pj > leftptr; pj--)
+    {
+      if (bsr->sfxstrategy->cmpcharbychar)
+      {
+        /* XXX use scanning of characters */
+        for (sptr = (*(pj-1))+depth, tptr = (*pj)+depth; /* Nothing */;
+             sptr++, tptr++)
+        {
+          Seqpos ccs, cct;
+          GtUchar tmpsvar, tmptvar;
+
+          ccs = DEREFSTOPPOS(tmpsvar,sptr,
+                             MIN(bsr->totallength,*(pj-1)+maxdepth));
+          cct = DEREFSTOPPOS(tmptvar,tptr,
+                             MIN(bsr->totallength,*pj+maxdepth));
+          if (ccs != cct)
+          {
+            lcplen = (Seqpos) (tptr - *pj);
+            retval = (ccs < cct) ? -1 : 1;
+            break;
+          }
+        }
+      } else
+      {
+        gt_assert(false);
       }
       gt_assert(retval != 0);
       if (bsr->lcpsubtab != NULL && bsr->assideeffect)
