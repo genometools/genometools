@@ -487,6 +487,43 @@ static void updatelcpvalue(Bentsedgresources *bsr,Seqpos idx,Seqpos value)
   bsr->lcpsubtab->bucketoflcpvalues[idx] = value;
 }
 
+typedef struct
+{
+  unsigned long right, width;
+} Equalsrange;
+
+inline void insertionsortwithequalelements (unsigned long *a,
+                                                   unsigned long n)
+{
+  unsigned long *pm, *pl, temp, equalsrangewidth = 0, numofequalsranges = 0;
+  Equalsrange equalsrange[100];
+
+  for (pm = a + 1; pm < a + n; pm++)
+  {
+    for (pl = pm; pl > a; pl--)
+    {
+      if (*(pl-1) == *pl)
+      {
+        equalsrangewidth++;
+      } else
+      {
+        if (*(pl-1) < *pl)
+        {
+          if (equalsrangewidth > 0)
+          {
+            equalsrange[numofequalsranges].width = equalsrangewidth;
+            equalsrange[numofequalsranges].right = (unsigned long) ((pl-1) - a);
+            numofequalsranges++;
+            equalsrangewidth = 0;
+          }
+          break;
+        }
+      }
+      SWAP(pl, pl - 1);
+    }
+  }
+}
+
 static void insertionsort(Bentsedgresources *bsr,
                           Suffixptr *leftptr,
                           Suffixptr *rightptr,
@@ -895,31 +932,29 @@ static bool comparisonsort(Bentsedgresources *bsr,
                            Ordertype ordertype)
 {
   gt_assert(width > 1UL && left < right);
+  gt_assert(bsr->sfxstrategy->maxinsertionsort <=
+            bsr->sfxstrategy->maxbltriesort);
+  if (width <= bsr->sfxstrategy->maxinsertionsort)
+  {
+    insertionsort(bsr,left,right,depth);
+    return true;
+  }
   if (width <= bsr->sfxstrategy->maxbltriesort)
   {
-    if (left < right)
-    {
-      if (width <= bsr->sfxstrategy->maxinsertionsort)
-      {
-        insertionsort(bsr,left,right,depth);
-      } else
-      {
-        Seqpos numoflargelcpvalues;
+    Seqpos numoflargelcpvalues;
 
-        numoflargelcpvalues
-          = blindtriesuffixsort(bsr->trierep,left,
-                                bsr->lcpsubtab == NULL
-                                  ? NULL
-                                  : bsr->lcpsubtab->bucketoflcpvalues +
-                                    LCPINDEX(bsr,left),
-                              width,depth,ordertype);
-        if (bsr->lcpsubtab != NULL)
-        {
-          bsr->lcpsubtab->numoflargelcpvalues += numoflargelcpvalues;
-        }
-        countbltriesort++;
-      }
+    numoflargelcpvalues
+      = blindtriesuffixsort(bsr->trierep,left,
+                            bsr->lcpsubtab == NULL
+                              ? NULL
+                              : bsr->lcpsubtab->bucketoflcpvalues +
+                                LCPINDEX(bsr,left),
+                          width,depth,ordertype);
+    if (bsr->lcpsubtab != NULL)
+    {
+      bsr->lcpsubtab->numoflargelcpvalues += numoflargelcpvalues;
     }
+    countbltriesort++;
     return true;
   }
   return false;
