@@ -660,31 +660,19 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
                                   Seqpos offset,
                                   Seqpos maxdepth)
 {
-  Suffixptr *pi, *pj;
-  Seqpos lcpindex, lcplen = 0;
+  Suffixptr *pi, *pj, sptr, tptr, temp;
+  Seqpos lcpindex, lcplen = 0, endpos1, endpos2;
   int retval;
   unsigned long idx = 0;
   bool tempb;
-  Suffixptr sptr, tptr, temp;
 
-  /*
-  printf("insertion sort (offset=%lu,maxdepth=%lu) of [%lu,%lu]: ",
-            (unsigned long) offset,
-            (unsigned long) maxdepth,
-            (unsigned long) (leftptr-sortedsamplebase),
-            (unsigned long) (rightptr-sortedsamplebase));
-  */
 #ifdef SKDEBUG
+  printf("insertion sort (offset=%lu,maxdepth=%lu): ",
+            (unsigned long) offset,
+            (unsigned long) maxdepth);
   showsuffixrange(bsr->encseq,bsr->fwd,bsr->complement,bsr->lcpsubtab,
                   leftptr,rightptr,offset);
 #endif
-  /*
-  for (pi = leftptr; pi <= rightptr; pi++)
-  {
-    printf(" %d",*pi);
-  }
-  printf("\n");
-  */
   bsr->countinsertionsort++;
   for (pi = leftptr + 1; pi <= rightptr; pi++)
   {
@@ -693,16 +681,16 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
       if (bsr->sfxstrategy->cmpcharbychar)
       {
         /* XXX use scanning of characters */
+        endpos1 = MIN(bsr->totallength,*(pj-1)+maxdepth);
+        endpos2 = MIN(bsr->totallength,*pj+maxdepth);
         for (sptr = (*(pj-1))+offset, tptr = (*pj)+offset; /* Nothing */;
              sptr++, tptr++)
         {
           Seqpos ccs, cct;
           GtUchar tmpsvar, tmptvar;
 
-          ccs = DEREFSTOPPOS(tmpsvar,sptr,
-                             MIN(bsr->totallength,*(pj-1)+maxdepth));
-          cct = DEREFSTOPPOS(tmptvar,tptr,
-                             MIN(bsr->totallength,*pj+maxdepth));
+          ccs = DEREFSTOPPOS(tmpsvar,sptr,endpos1);
+          cct = DEREFSTOPPOS(tmptvar,tptr,endpos2);
           lcplen = (Seqpos) (tptr - *pj);
           if (lcplen == maxdepth)
           {
@@ -739,10 +727,6 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
       {
         gt_assert(idx > 0);
         bsr->equalwithprevious[idx] = true;
-        /*
-        printf("equalwithprevious[%lu] = true because %lu %lu are identical\n",
-               idx,(unsigned long) *(pj-1),(unsigned long) *pj);
-        */
         break;
       }
       SWAP(temp,pj,pj-1);
@@ -765,25 +749,6 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
       {
         if (equalsrangewidth > 0)
         {
-          /*
-          printf("(1) processunsorted [equals=%lu,%lu,%lu]: ",
-                 equalsrangewidth,
-                 (unsigned long) (leftptr + idx - 1 - equalsrangewidth -
-                                  sortedsamplebase),
-                 (unsigned long) (leftptr + idx - 1 - sortedsamplebase));
-          printf("entire subarray:");
-          for (pi = leftptr; pi <= rightptr; pi++)
-          {
-            printf(" %d",*pi);
-          }
-          printf("\n");
-          for (pi = leftptr + idx - 1 - equalsrangewidth;
-               pi <= leftptr + idx - 1; pi++)
-          {
-            printf(" %d",*pi);
-          }
-          printf("\n");
-          */
           bsr->dc_processunsortedrange(bsr->voiddcov,
                                        leftptr + idx - 1 - equalsrangewidth,
                                        leftptr + idx - 1,maxdepth);
@@ -793,12 +758,6 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
     }
     if (equalsrangewidth > 0)
     {
-      /*
-      printf("(2) processunsorted [%lu,%lu]\n",
-              (unsigned long) (leftptr + width - 1 - equalsrangewidth -
-                               sortedsamplebase),
-              (unsigned long) (leftptr + width - 1 - sortedsamplebase));
-      */
       bsr->dc_processunsortedrange(bsr->voiddcov,
                                    leftptr + width - 1 - equalsrangewidth,
                                    leftptr + width - 1,maxdepth);
