@@ -1122,7 +1122,9 @@ static bool comparisonsort(Bentsedgresources *bsr,
 }
 
 static void subsort_bentleysedgewick(Bentsedgresources *bsr,
-                                     Seqpos width,Seqpos *left,Seqpos *right,
+                                     unsigned long width,
+                                     Seqpos *left,
+                                     Seqpos *right,
                                      Seqpos depth,
                                      Ordertype ordertype)
 {
@@ -1166,7 +1168,7 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
         {
           Seqpos numoflargelcpvalues;
 
-          numoflargelcpvalues 
+          numoflargelcpvalues
             = blindtrie_suffixsort(bsr->blindtrie,
                                    left,
                                    bsr->lcpsubtab == NULL
@@ -1350,269 +1352,230 @@ static void bentleysedgewick(Bentsedgresources *bsr,
                              Suffixptr *right,
                              Seqpos depth)
 {
-  Ordertype parentordertype;
-  unsigned long width;
-
-  width = (unsigned long) (right - left + 1);
-  parentordertype = Descending;
-  if (bsr->sfxstrategy->ssortmaxdepth.defined)
-  {
-    if (depth >= (Seqpos) bsr->sfxstrategy->ssortmaxdepth.valueunsignedint)
-    {
-      rmnsufinfo_addunsortedrange(bsr->rmnsufinfo,SUFTABINDEX(left),
-                                  SUFTABINDEX(right),depth);
-      return;
-    }
-  } else
-  {
-    if (bsr->sfxstrategy->differencecover > 0)
-    {
-      if (depth >= (Seqpos) bsr->sfxstrategy->differencecover)
-      {
-        bsr->dc_processunsortedrange(bsr->voiddcov,left,right,depth);
-        return;
-      }
-    } else
-    {
-      if (comparisonsort(bsr, left, right, depth, width, parentordertype))
-      {
-        return;
-      }
-    }
-  }
-  /* no check but we better declare the necessary variables later */
+  bsr->mkvauxstack.nextfreeMKVstack = 0;
+  subsort_bentleysedgewick(bsr, (unsigned long) (right - left + 1),
+                           left,right,depth,Descending);
+  while (bsr->mkvauxstack.nextfreeMKVstack > 0)
   {
     Suffixptr *leftplusw, *pa, *pb, *pc, *pd, *pm, *aptr, *bptr, cptr, temp;
     Seqpos pivotcmpcharbychar = 0, valcmpcharbychar;
     Sfxcmp pivotcmpbits, val;
     int retvalpivotcmpbits;
     GtUchar tmpvar;
-    unsigned long w;
+    Ordertype parentordertype;
+    unsigned long w, width;
     unsigned int commonunits, smallermaxlcp, greatermaxlcp,
                  smallerminlcp, greaterminlcp;
     const int commonunitsequal = bsr->sfxstrategy->cmpcharbychar
                                  ? 1
                                  : UNITSIN2BITENC;
 
-    bsr->mkvauxstack.nextfreeMKVstack = 0;
-    for (;;)
+    POPMKVstack(left,right,depth,parentordertype);
+    /* new values for left, right, depth and parentordertype */
+    if (bsr->sfxstrategy->cmpcharbychar)
     {
-      if (bsr->sfxstrategy->cmpcharbychar)
+      pm = cmpcharbychardelivermedian(bsr,
+                                      left,
+                                      right,
+                                      depth,
+                                      width);
+      SWAP(temp, left, pm);
+      CMPCHARBYCHARPTR2INT(pivotcmpcharbychar,tmpvar,left);
+    } else
+    {
+      pm = blockcmpdelivermedian(bsr,
+                                 left,
+                                 right,
+                                 depth,
+                                 width,
+                                 bsr->sfxstrategy->maxwidthrealmedian);
+      if (width <= (unsigned long) bsr->sfxstrategy->maxcountingsort &&
+          width >= MINMEDIANOF9WIDTH)
       {
-        pm = cmpcharbychardelivermedian(bsr,
-                                        left,
-                                        right,
-                                        depth,
-                                        width);
-        SWAP(temp, left, pm);
-        CMPCHARBYCHARPTR2INT(pivotcmpcharbychar,tmpvar,left);
-      } else
-      {
-        pm = blockcmpdelivermedian(bsr,
-                                   left,
-                                   right,
-                                   depth,
-                                   width,
-                                   bsr->sfxstrategy->maxwidthrealmedian);
-        if (width <= (unsigned long) bsr->sfxstrategy->maxcountingsort &&
-            width >= MINMEDIANOF9WIDTH)
-        {
-          PTR2INT(pivotcmpbits,pm);
-          sarrcountingsort(bsr,
-                           left,
-                           &pivotcmpbits,
-                           (unsigned long) (pm - left),
-                           parentordertype,
-                           depth,
-                           width);
-          if (bsr->mkvauxstack.nextfreeMKVstack == 0)
-          {
-            break;
-          }
-          POPMKVstack(left,right,depth,parentordertype);
-          /* new values for left, right, depth and parentordertype */
-          continue;
-        }
-        SWAP(temp, left, pm);
-        PTR2INT(pivotcmpbits,left);
+        PTR2INT(pivotcmpbits,pm);
+        sarrcountingsort(bsr,
+                         left,
+                         &pivotcmpbits,
+                         (unsigned long) (pm - left),
+                         parentordertype,
+                         depth,
+                         width);
+        /* new values for left, right, depth and parentordertype */
+        continue;
       }
-      countqsort++;
-      /* now pivot element is at index left */
-      /* all elements to be compared are between pb and pc */
-      /* pa is the position at which the next element smaller than the
-         pivot element is inserted at */
-      /* pd is the position at which the next element greater than the
-         pivot element is inserted at */
-      pa = pb = left + 1;
-      pc = pd = right;
-      if (bsr->sfxstrategy->cmpcharbychar)
+      SWAP(temp, left, pm);
+      PTR2INT(pivotcmpbits,left);
+    }
+    countqsort++;
+    /* now pivot element is at index left */
+    /* all elements to be compared are between pb and pc */
+    /* pa is the position at which the next element smaller than the
+       pivot element is inserted at */
+    /* pd is the position at which the next element greater than the
+       pivot element is inserted at */
+    pa = pb = left + 1;
+    pc = pd = right;
+    if (bsr->sfxstrategy->cmpcharbychar)
+    {
+      smallerminlcp = greaterminlcp = smallermaxlcp = greatermaxlcp = 0;
+      for (;;)
       {
-        smallerminlcp = greaterminlcp = smallermaxlcp = greatermaxlcp = 0;
-        for (;;)
+        while (pb <= pc)
         {
-          while (pb <= pc)
+          CMPCHARBYCHARPTR2INT(valcmpcharbychar,tmpvar,pb);
+          if (valcmpcharbychar > pivotcmpcharbychar)
           {
-            CMPCHARBYCHARPTR2INT(valcmpcharbychar,tmpvar,pb);
-            if (valcmpcharbychar > pivotcmpcharbychar)
-            {
-              break;
-            }
-            if (valcmpcharbychar == pivotcmpcharbychar)
-            {
-              SWAP(temp, pa, pb);
-              pa++;
-            }
-            pb++;
-          }
-          while (pb <= pc)
-          {
-            CMPCHARBYCHARPTR2INT(valcmpcharbychar,tmpvar,pc);
-            if (valcmpcharbychar < pivotcmpcharbychar)
-            { /* stop for elements < pivot */
-              break;
-            }
-            if (valcmpcharbychar == pivotcmpcharbychar)
-            {
-              SWAP(temp, pc, pd); /* exchange equal element and element
-                                     at index pd */
-              pd--;
-            }
-            pc--;
-          }
-          if (pb > pc)
-          { /* no elements to compare to pivot */
             break;
           }
-          SWAP(temp, pb, pc);
+          if (valcmpcharbychar == pivotcmpcharbychar)
+          {
+            SWAP(temp, pa, pb);
+            pa++;
+          }
           pb++;
+        }
+        while (pb <= pc)
+        {
+          CMPCHARBYCHARPTR2INT(valcmpcharbychar,tmpvar,pc);
+          if (valcmpcharbychar < pivotcmpcharbychar)
+          { /* stop for elements < pivot */
+            break;
+          }
+          if (valcmpcharbychar == pivotcmpcharbychar)
+          {
+            SWAP(temp, pc, pd); /* exchange equal element and element
+                                   at index pd */
+            pd--;
+          }
           pc--;
         }
-      } else
+        if (pb > pc)
+        { /* no elements to compare to pivot */
+          break;
+        }
+        SWAP(temp, pb, pc);
+        pb++;
+        pc--;
+      }
+    } else
+    {
+      smallermaxlcp = greatermaxlcp = 0;
+      smallerminlcp = greaterminlcp = (unsigned int) UNITSIN2BITENC;
+      for (;;)
       {
-        smallermaxlcp = greatermaxlcp = 0;
-        smallerminlcp = greaterminlcp = (unsigned int) UNITSIN2BITENC;
-        for (;;)
+        /* look for elements identical or smaller than pivot from left */
+        while (pb <= pc)
         {
-          /* look for elements identical or smaller than pivot from left */
-          while (pb <= pc)
-          {
-            PTR2INT(val,pb);
-            Sfxdocompare(&commonunits,val,pivotcmpbits);
-            if (SfxcmpGREATER(val,pivotcmpbits))
-            { /* stop for elements val > pivot */
-              UPDATELCP(greaterminlcp,greatermaxlcp);
-              break;
-            }
-            if (SfxcmpEQUAL(val,pivotcmpbits))
-            {
-              SWAP(temp, pa, pb); /* exchange equal element and element
-                                     at index pa */
-              pa++;
-            } else /* smaller */
-            {
-              UPDATELCP(smallerminlcp,smallermaxlcp);
-            }
-            pb++;
-          }
-          /* look for elements identical or greater than pivot from right */
-          while (pb <= pc)
-          {
-            PTR2INT(val,pc);
-            Sfxdocompare(&commonunits,val,pivotcmpbits);
-            if (SfxcmpSMALLER(val,pivotcmpbits))
-            { /* stop for elements val < pivot */
-              UPDATELCP(smallerminlcp,smallermaxlcp);
-              break;
-            }
-            if (SfxcmpEQUAL(val,pivotcmpbits))
-            {
-              SWAP(temp, pc, pd); /* exchange equal element and element at
-                                     index pa */
-              pd--;
-            } else /* greater */
-            {
-              UPDATELCP(greaterminlcp,greatermaxlcp);
-            }
-            pc--;
-          }
-          if (pb > pc)
-          { /* interval is empty */
+          PTR2INT(val,pb);
+          Sfxdocompare(&commonunits,val,pivotcmpbits);
+          if (SfxcmpGREATER(val,pivotcmpbits))
+          { /* stop for elements val > pivot */
+            UPDATELCP(greaterminlcp,greatermaxlcp);
             break;
           }
-          SWAP(temp, pb, pc);
+          if (SfxcmpEQUAL(val,pivotcmpbits))
+          {
+            SWAP(temp, pa, pb); /* exchange equal element and element
+                                   at index pa */
+            pa++;
+          } else /* smaller */
+          {
+            UPDATELCP(smallerminlcp,smallermaxlcp);
+          }
           pb++;
+        }
+        /* look for elements identical or greater than pivot from right */
+        while (pb <= pc)
+        {
+          PTR2INT(val,pc);
+          Sfxdocompare(&commonunits,val,pivotcmpbits);
+          if (SfxcmpSMALLER(val,pivotcmpbits))
+          { /* stop for elements val < pivot */
+            UPDATELCP(smallerminlcp,smallermaxlcp);
+            break;
+          }
+          if (SfxcmpEQUAL(val,pivotcmpbits))
+          {
+            SWAP(temp, pc, pd); /* exchange equal element and element at
+                                   index pa */
+            pd--;
+          } else /* greater */
+          {
+            UPDATELCP(greaterminlcp,greatermaxlcp);
+          }
           pc--;
         }
-      }
-      gt_assert(pa >= left);
-      gt_assert(pb >= pa);
-      w = MIN((unsigned long) (pa-left),(unsigned long) (pb-pa));
-      /* move w elements at the left to the middle */
-      VECSWAP(left,  pb-w, w);
-
-      gt_assert(pd >= pc);
-      gt_assert(right >= pd);
-      w = MIN((unsigned long) (pd-pc), (unsigned long) (right-pd));
-      /* move w elements at the right to the middle */
-      VECSWAP(pb, right+1-w, w);
-
-      /* all elements equal to the pivot are now in the middle namely in the
-         range [left + (pb-pa) and right - (pd-pc)] */
-      /* hence we have to sort the elements in the intervals
-         [left..left+(pb-pa)-1] and
-         [right-(pd-pc)+1..right] */
-
-      gt_assert(pb >= pa);
-      if ((w = (unsigned long) (pb-pa)) > 0)
-      {
-        leftplusw = left + w;
-        if (bsr->lcpsubtab != NULL && bsr->assideeffect)
-        {
-          /*
-            left part has suffix with lcp up to length smallermaxlcp w.r.t.
-            to the pivot. This lcp belongs to a suffix on the left
-            which is at a minimum distance to the pivot and thus to an
-            element in the final part of the left side.
-          */
-          updatelcpvalue(bsr,LCPINDEX(bsr,leftplusw),depth + smallermaxlcp);
+        if (pb > pc)
+        { /* interval is empty */
+          break;
         }
-        subsort_bentleysedgewick(bsr,w,left,leftplusw-1,depth + smallerminlcp,
-                                 Noorder);
-      } else
-      {
-        leftplusw = left;
+        SWAP(temp, pb, pc);
+        pb++;
+        pc--;
       }
+    }
+    gt_assert(pa >= left);
+    gt_assert(pb >= pa);
+    w = MIN((unsigned long) (pa-left),(unsigned long) (pb-pa));
+    /* move w elements at the left to the middle */
+    VECSWAP(left,  pb-w, w);
 
-      cptr = *leftplusw + depth;
-      if (ISNOTEND(cptr))
-      {
-        width = (unsigned long) (right-(pd-pb)-leftplusw);
-        subsort_bentleysedgewick(bsr,width,leftplusw,right-(pd-pb)-1,
-                                 depth+commonunitsequal,Noorder);
-      }
+    gt_assert(pd >= pc);
+    gt_assert(right >= pd);
+    w = MIN((unsigned long) (pd-pc), (unsigned long) (right-pd));
+    /* move w elements at the right to the middle */
+    VECSWAP(pb, right+1-w, w);
 
-      gt_assert(pd >= pc);
-      if ((w = (unsigned long) (pd-pc)) > 0)
+    /* all elements equal to the pivot are now in the middle namely in the
+       range [left + (pb-pa) and right - (pd-pc)] */
+    /* hence we have to sort the elements in the intervals
+       [left..left+(pb-pa)-1] and
+       [right-(pd-pc)+1..right] */
+
+    gt_assert(pb >= pa);
+    if ((w = (unsigned long) (pb-pa)) > 0)
+    {
+      leftplusw = left + w;
+      if (bsr->lcpsubtab != NULL && bsr->assideeffect)
       {
-        if (bsr->lcpsubtab != NULL && bsr->assideeffect)
-        {
-          /*
-            right part has suffix with lcp up to length largermaxlcp w.r.t.
-            to the pivot. This lcp belongs to a suffix on the right
-            which is at a minimum distance to the pivot and thus to an
-            element in the first part of the right side.
-          */
-          updatelcpvalue(bsr,LCPINDEX(bsr,right-w+1),depth + greatermaxlcp);
-        }
-        subsort_bentleysedgewick(bsr,w,right-w+1,right,depth + greaterminlcp,
-                                 Noorder);
+        /*
+          left part has suffix with lcp up to length smallermaxlcp w.r.t.
+          to the pivot. This lcp belongs to a suffix on the left
+          which is at a minimum distance to the pivot and thus to an
+          element in the final part of the left side.
+        */
+        updatelcpvalue(bsr,LCPINDEX(bsr,leftplusw),depth + smallermaxlcp);
       }
-      if (bsr->mkvauxstack.nextfreeMKVstack == 0)
+      subsort_bentleysedgewick(bsr,w,left,leftplusw-1,depth + smallerminlcp,
+                               Noorder);
+    } else
+    {
+      leftplusw = left;
+    }
+
+    cptr = *leftplusw + depth;
+    if (ISNOTEND(cptr))
+    {
+      width = (unsigned long) (right-(pd-pb)-leftplusw);
+      subsort_bentleysedgewick(bsr,width,leftplusw,right-(pd-pb)-1,
+                               depth+commonunitsequal,Noorder);
+    }
+
+    gt_assert(pd >= pc);
+    if ((w = (unsigned long) (pd-pc)) > 0)
+    {
+      if (bsr->lcpsubtab != NULL && bsr->assideeffect)
       {
-        break;
+        /*
+          right part has suffix with lcp up to length largermaxlcp w.r.t.
+          to the pivot. This lcp belongs to a suffix on the right
+          which is at a minimum distance to the pivot and thus to an
+          element in the first part of the right side.
+        */
+        updatelcpvalue(bsr,LCPINDEX(bsr,right-w+1),depth + greatermaxlcp);
       }
-      POPMKVstack(left,right,depth,parentordertype);
-      /* new values for left, right, depth and parentordertype */
+      subsort_bentleysedgewick(bsr,w,right-w+1,right,depth + greaterminlcp,
+                               Noorder);
     }
   }
 }
