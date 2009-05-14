@@ -483,6 +483,8 @@ static unsigned long enumeratetrieleaves (Seqpos *suffixtable,
 Blindtrie *blindtrie_new(unsigned long numofsuffixes,
                          const Encodedsequence *encseq,
                          bool cmpcharbychar,
+                         Encodedsequencescanstate *esr1,
+                         Encodedsequencescanstate *esr2,
                          Readmode readmode)
 {
   Blindtrie *blindtrie;
@@ -501,8 +503,8 @@ Blindtrie *blindtrie_new(unsigned long numofsuffixes,
   blindtrie->encseq = encseq;
   blindtrie->readmode = readmode;
   blindtrie->root = NULL;
-  blindtrie->esr1 = newEncodedsequencescanstate();
-  blindtrie->esr2 = newEncodedsequencescanstate();
+  blindtrie->esr1 = esr1;
+  blindtrie->esr2 = esr2;
   blindtrie->totallength = getencseqtotallength(encseq);
   blindtrie->cmpcharbychar = cmpcharbychar;
   GT_INITARRAY (&blindtrie->stack, Nodeptr);
@@ -513,8 +515,6 @@ void blindtrie_delete(Blindtrie **blindtrie)
 {
   FREESPACE((*blindtrie)->spaceBlindtrienode);
   GT_FREEARRAY(&(*blindtrie)->stack, Nodeptr);
-  freeEncodedsequencescanstate(&((*blindtrie)->esr1));
-  freeEncodedsequencescanstate(&((*blindtrie)->esr2));
   FREESPACE(*blindtrie);
 }
 

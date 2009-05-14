@@ -335,12 +335,12 @@ GT_DECLAREARRAYSTRUCT(MKVstack);
 typedef struct
 {
   const Encodedsequence *encseq;
-  Encodedsequencescanstate *esr1,
+  Encodedsequencescanstate *esr1, /* XXX be carefull with threads */
                            *esr2;
   Readmode readmode;
   bool fwd, complement, assideeffect;
   Seqpos totallength;
-  GtArrayMKVstack mkvauxstack;
+  GtArrayMKVstack mkvauxstack; /* XXX be carefull with treads */
   Lcpsubtab *lcpsubtab;
   Medianinfo *medianinfospace;
   Countingsortinfo *countingsortinfo;
@@ -661,7 +661,7 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
                                   Seqpos maxdepth)
 {
   Suffixptr *pi, *pj, sptr, tptr, temp;
-  Seqpos lcpindex, lcplen = 0, endpos1, endpos2;
+  Seqpos lcpindex, lcplen = 0;
   int retval;
   unsigned long idx = 0;
   bool tempb;
@@ -680,6 +680,8 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
     {
       if (bsr->sfxstrategy->cmpcharbychar)
       {
+        Seqpos endpos1, endpos2;
+
         /* XXX use scanning of characters */
         endpos1 = MIN(bsr->totallength,*(pj-1)+maxdepth);
         endpos2 = MIN(bsr->totallength,*pj+maxdepth);
@@ -1960,8 +1962,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   {
     bsr->lcpsubtab = NULL;
   }
-  if (!sfxstrategy->cmpcharbychar && hasfastspecialrangeenumerator(encseq) &&
-      hasspecialranges(encseq))
+  if (hasfastspecialrangeenumerator(encseq) && hasspecialranges(encseq))
   {
     bsr->esr1 = newEncodedsequencescanstate();
     bsr->esr2 = newEncodedsequencescanstate();
@@ -2046,6 +2047,8 @@ static void initBentsedgresources(Bentsedgresources *bsr,
     bsr->blindtrie = blindtrie_new(sfxstrategy->maxbltriesort,
                                    encseq,
                                    sfxstrategy->cmpcharbychar,
+                                   bsr->esr1,
+                                   bsr->esr2,
                                    readmode);
   }
   bsr->voiddcov = NULL;

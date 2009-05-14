@@ -34,6 +34,8 @@ typedef enum
 Blindtrie *blindtrie_new(unsigned long numofsuffixes,
                          const Encodedsequence *encseq,
                          bool cmpcharbychar,
+                         Encodedsequencescanstate *esr1,
+                         Encodedsequencescanstate *esr2,
                          Readmode readmode);
 
 Seqpos blindtrie_suffixsort(Blindtrie *blindtrie,
