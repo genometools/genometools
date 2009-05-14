@@ -42,17 +42,19 @@
 #include "sfx-cmpsuf.pr"
 #include "kmer2string.pr"
 
-#define COMPAREOFFSET   (MAXALPHABETCHARACTER + 1)
-#define UNIQUEINT(P)    ((Seqpos) ((P) + COMPAREOFFSET))
-#define ACCESSCHAR(POS) getencodedchar(bsr->encseq,POS,bsr->readmode)
-#define ISNOTEND(POS)   ((POS) < bsr->totallength &&\
-                         ISNOTSPECIAL(ACCESSCHAR(POS)))
+#define COMPAREOFFSET          (MAXALPHABETCHARACTER + 1)
+#define UNIQUEINT(P)           ((Seqpos) ((P) + COMPAREOFFSET))
+#define ACCESSCHAR(POS)        getencodedchar(bsr->encseq,POS,bsr->readmode)
+#define ACCESSCHARSEQ(POS,ESR) sequentialgetencodedchar(bsr->encseq,ESR,POS,\
+                                                        bsr->readmode)
+#define ISNOTEND(POS)          ((POS) < bsr->totallength &&\
+                                ISNOTSPECIAL(ACCESSCHAR(POS)))
 
-#define DEREFSTOPPOS(VAR,PTR,STOPPOS)\
-        (((PTR) < (STOPPOS) && ISNOTSPECIAL(VAR = ACCESSCHAR(PTR))) ?\
+#define DEREFSTOPPOSSEQ(VAR,PTR,STOPPOS,ESR)\
+        (((PTR) < (STOPPOS) && ISNOTSPECIAL(VAR = ACCESSCHARSEQ(PTR,ESR))) ?\
         ((Seqpos) VAR) : UNIQUEINT(PTR))
 
-#define DEREF(VAR,PTR) DEREFSTOPPOS(VAR,PTR,bsr->totallength)
+#define DEREFSEQ(VAR,PTR,ESR) DEREFSTOPPOSSEQ(VAR,PTR,bsr->totallength,ESR)
 
 #define LCPINDEX(BSR,I)   (Seqpos) ((I) - (BSR)->lcpsubtab->suftabbase)
 
@@ -92,8 +94,6 @@
         }
 
 typedef Seqpos Suffixptr;
-
-/* XXX mv this into Bensonsedgewickstructure */
 
 GT_DECLAREARRAYSTRUCT(Largelcpvalue);
 
@@ -437,7 +437,7 @@ static void insertionsort(Bentsedgresources *bsr,
   Suffixptr *pi, *pj;
   Seqpos lcpindex, lcplen = 0;
   int retval;
-  Suffixptr sptr, tptr, temp;
+  Suffixptr ptr1, ptr2, temp;
 
 #ifdef SKDEBUG
   printf("insertion sort ");
@@ -451,21 +451,25 @@ static void insertionsort(Bentsedgresources *bsr,
     {
       if (bsr->sfxstrategy->cmpcharbychar)
       {
-        /* XXX use scanning of characters */
-        for (sptr = (*(pj-1))+offset, tptr = (*pj)+offset; /* Nothing */;
-             sptr++, tptr++)
+        ptr1 = (*(pj-1))+offset;
+        initEncodedsequencescanstate(bsr->esr1,bsr->encseq,bsr->readmode,ptr1);
+        ptr2 = (*pj)+offset;
+        initEncodedsequencescanstate(bsr->esr2,bsr->encseq,bsr->readmode,ptr2);
+        for (;;)
         {
           Seqpos ccs, cct;
-          GtUchar tmpsvar, tmptvar;
+          GtUchar tmp1, tmp2;
 
-          ccs = DEREF(tmpsvar,sptr);
-          cct = DEREF(tmptvar,tptr);
+          ccs = DEREFSEQ(tmp1,ptr1,bsr->esr1);
+          cct = DEREFSEQ(tmp2,ptr2,bsr->esr2);
           if (ccs != cct)
           {
-            lcplen = (Seqpos) (tptr - *pj);
+            lcplen = (Seqpos) (ptr2 - *pj);
             retval = (ccs < cct) ? -1 : 1;
             break;
           }
+          ptr1++;
+          ptr2++;
         }
       } else
       {
@@ -513,7 +517,7 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
                                   Seqpos offset,
                                   Seqpos maxdepth)
 {
-  Suffixptr *pi, *pj, sptr, tptr, temp;
+  Suffixptr *pi, *pj, ptr1, ptr2, temp;
   Seqpos lcpindex, lcplen = 0;
   int retval;
   unsigned long idx = 0;
@@ -535,18 +539,20 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
       {
         Seqpos endpos1, endpos2;
 
-        /* XXX use scanning of characters */
         endpos1 = MIN(bsr->totallength,*(pj-1)+maxdepth);
         endpos2 = MIN(bsr->totallength,*pj+maxdepth);
-        for (sptr = (*(pj-1))+offset, tptr = (*pj)+offset; /* Nothing */;
-             sptr++, tptr++)
+        ptr1 = (*(pj-1))+offset;
+        initEncodedsequencescanstate(bsr->esr1,bsr->encseq,bsr->readmode,ptr1);
+        ptr2 = (*pj)+offset;
+        initEncodedsequencescanstate(bsr->esr2,bsr->encseq,bsr->readmode,ptr2);
+        for (;;)
         {
           Seqpos ccs, cct;
-          GtUchar tmpsvar, tmptvar;
+          GtUchar tmp1, tmp2;
 
-          ccs = DEREFSTOPPOS(tmpsvar,sptr,endpos1);
-          cct = DEREFSTOPPOS(tmptvar,tptr,endpos2);
-          lcplen = (Seqpos) (tptr - *pj);
+          ccs = DEREFSTOPPOSSEQ(tmp1,ptr1,endpos1,bsr->esr1);
+          cct = DEREFSTOPPOSSEQ(tmp2,ptr2,endpos2,bsr->esr2);
+          lcplen = (Seqpos) (ptr2 - *pj);
           if (lcplen == maxdepth)
           {
             retval = 0;
@@ -558,6 +564,8 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
             retval = (ccs < cct) ? -1 : 1;
             break;
           }
+          ptr1++;
+          ptr2++;
         }
       } else
       {
