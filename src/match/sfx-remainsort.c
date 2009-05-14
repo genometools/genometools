@@ -917,13 +917,14 @@ static void possiblychangemappedsection(Sortblock *sortblock,Seqpos left,
     Seqpos entries2map;
 
     sortblock->pageoffset = left - (left % DIV2(sortblock->mappedwidth));
+#ifndef NDEBUG
     if (left < sortblock->pageoffset)
     {
       fprintf(stderr,"left=%lu,right=%lu,left<%lu=pageoffset\n",
                      (unsigned long) left,
                      (unsigned long) right,
                      (unsigned long) sortblock->pageoffset);
-      exit(EXIT_FAILURE);
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     if (right >= sortblock->pageoffset + sortblock->mappedwidth)
     {
@@ -932,8 +933,9 @@ static void possiblychangemappedsection(Sortblock *sortblock,Seqpos left,
                      (unsigned long) right,
                      (unsigned long) (sortblock->pageoffset +
                                       sortblock->mappedwidth));
-      exit(EXIT_FAILURE);
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
+#endif
     if (sortblock->mappedsection != NULL)
     {
       gt_fa_xmunmap(sortblock->mappedsection);

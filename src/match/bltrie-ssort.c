@@ -61,7 +61,8 @@ struct Blindtrie
   Readmode readmode;
   Seqpos totallength,
          offset,
-         maxdepth;
+         maxdepth,
+         maxdepthminusoffset;
   Nodeptr root;
   bool cmpcharbychar;
   unsigned long allocatedBlindtrienode,
@@ -70,22 +71,24 @@ struct Blindtrie
   GtArrayNodeptr stack;
 };
 
-static bool isleftofboundary(Seqpos currentstartpos,
+static bool isleftofboundary(Seqpos currentstartpos,Seqpos add,
                              const Blindtrie *blindtrie)
 {
+  Seqpos endpos;
+
   gt_assert(currentstartpos >= blindtrie->offset);
   if (blindtrie->maxdepth == 0)
   {
-    return (currentstartpos < blindtrie->totallength) ? true : false;
+    endpos = blindtrie->totallength;
   } else
   {
-    Seqpos suffixpos = currentstartpos - blindtrie->offset,
-           endpos;
-
-    endpos = suffixpos + blindtrie->maxdepth;
-    endpos = MIN(blindtrie->totallength,suffixpos + blindtrie->maxdepth);
-    return (currentstartpos < endpos) ? true : false;
+    endpos = currentstartpos + blindtrie->maxdepthminusoffset;
+    if (endpos >= blindtrie->totallength)
+    {
+      endpos = blindtrie->totallength;
+    }
   }
+  return (currentstartpos + add < endpos) ? true : false;
 }
 
 static Nodeptr newBlindtrienode(Blindtrie *blindtrie)
@@ -120,7 +123,7 @@ static Nodeptr makeroot(Blindtrie *blindtrie,Seqpos currentstartpos)
   root->firstchar = 0; /* undefined */
   root->rightsibling = NULL;
   SETLEAF(root,false);
-  if (isleftofboundary(currentstartpos,blindtrie))
+  if (isleftofboundary(currentstartpos,0,blindtrie))
   {
     firstchar = getencodedchar(blindtrie->encseq, /* Random access */
                                currentstartpos,
@@ -193,7 +196,7 @@ static Nodeptr findcompanion(Blindtrie *blindtrie,Seqpos currentstartpos)
   while (ISNOTLEAF(head))
   {
     GT_STOREINARRAY (&blindtrie->stack, Nodeptr, 128, head);
-    if (isleftofboundary(currentstartpos+head->depth,blindtrie))
+    if (isleftofboundary(currentstartpos,head->depth,blindtrie))
     {
       newchar = getencodedchar(blindtrie->encseq, /* Random access */
                                currentstartpos + head->depth,
@@ -280,19 +283,19 @@ static Seqpos cmpcharbychargetlcp(GtUchar *mm_oldsuffix,
                                   Seqpos leafpos,
                                   Seqpos currentstartpos)
 {
-  Seqpos idx1, idx2;
+  Seqpos lcp;
   GtUchar cc1, cc2;
 
   initEncodedsequencescanstate(blindtrie->esr1,blindtrie->encseq,
                                blindtrie->readmode,leafpos);
   initEncodedsequencescanstate(blindtrie->esr2,blindtrie->encseq,
                                blindtrie->readmode,currentstartpos);
-  for (idx1 = leafpos, idx2 = currentstartpos; /* Nothing */; idx1++, idx2++)
+  for (lcp = 0; /* Nothing */; lcp++)
   {
-    if (isleftofboundary(idx1,blindtrie))
+    if (isleftofboundary(leafpos,lcp,blindtrie))
     {
       cc1 = sequentialgetencodedchar(blindtrie->encseq,blindtrie->esr1,
-                                     idx1,blindtrie->readmode);
+                                     leafpos+lcp,blindtrie->readmode);
       if (cc1 == (GtUchar) WILDCARD)
       {
         cc1 = (GtUchar) SEPARATOR;
@@ -301,10 +304,10 @@ static Seqpos cmpcharbychargetlcp(GtUchar *mm_oldsuffix,
     {
       cc1 = (GtUchar) SEPARATOR;
     }
-    if (isleftofboundary(idx2,blindtrie))
+    if (isleftofboundary(currentstartpos,lcp,blindtrie))
     {
       cc2 = sequentialgetencodedchar(blindtrie->encseq,blindtrie->esr2,
-                                     idx2,blindtrie->readmode);
+                                     currentstartpos+lcp,blindtrie->readmode);
       if (cc2 == (GtUchar) WILDCARD)
       {
         cc2 = (GtUchar) SEPARATOR;
@@ -320,7 +323,8 @@ static Seqpos cmpcharbychargetlcp(GtUchar *mm_oldsuffix,
       break;
     }
   }
-  return idx1 - leafpos;
+  gt_assert(blindtrie->maxdepth == 0 || lcp <= blindtrie->maxdepthminusoffset);
+  return lcp;
 }
 
 static Seqpos fastgetlcp(GtUchar *mm_oldsuffix,
@@ -343,7 +347,7 @@ static Seqpos fastgetlcp(GtUchar *mm_oldsuffix,
                                 leafpos,
                                 currentstartpos,
                                 0);
-  if (isleftofboundary(leafpos+lcp,blindtrie))
+  if (isleftofboundary(leafpos,lcp,blindtrie))
   {
     *mm_oldsuffix = getencodedchar(blindtrie->encseq, /* Random access */
                                    leafpos + lcp,
@@ -356,7 +360,7 @@ static Seqpos fastgetlcp(GtUchar *mm_oldsuffix,
   {
     *mm_oldsuffix = (GtUchar) SEPARATOR;
   }
-  if (isleftofboundary(currentstartpos+lcp,blindtrie))
+  if (isleftofboundary(currentstartpos,lcp,blindtrie))
   {
     *mm_newsuffix = getencodedchar(blindtrie->encseq, /* Random access */
                                    currentstartpos + lcp,
@@ -414,6 +418,7 @@ static unsigned long enumeratetrieleaves (Seqpos *suffixtable,
             equalsrangewidth++;
           } else
           {
+            gt_assert(lcpnode->depth + blindtrie->offset < blindtrie->maxdepth);
             if (equalsrangewidth > 0)
             {
               dc_processunsortedrange(voiddcov,
@@ -538,7 +543,7 @@ static void checkcurrentblindtrie(Blindtrie *blindtrie)
     {
       fprintf(stderr,"retval = %d, maxcommon = %u for idx = %lu\n",
               retval,maxcommon,idx);
-      gt_assert(retval < 0);
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   }
 }
@@ -682,6 +687,13 @@ Seqpos blindtrie_suffixsort(Blindtrie *blindtrie,
   gt_assert(maxdepth == 0 || maxdepth > offset);
   blindtrie->maxdepth = maxdepth;
   blindtrie->offset = offset;
+  if (maxdepth > 0)
+  {
+    blindtrie->maxdepthminusoffset = maxdepth - offset;
+  } else
+  {
+    blindtrie->maxdepthminusoffset = 0;
+  }
   blindtrie->nextfreeBlindtrienode = 0;
   blindtrie->root = makeroot(blindtrie,suffixtable[0] + offset);
 #ifdef SKDEBUG
@@ -696,7 +708,7 @@ Seqpos blindtrie_suffixsort(Blindtrie *blindtrie,
 #endif
   for (idx=1UL; idx < numberofsuffixes; idx++)
   {
-    if (isleftofboundary(suffixtable[idx] + offset,blindtrie))
+    if (isleftofboundary(suffixtable[idx] + offset,0,blindtrie))
     {
       leafinsubtree = findcompanion(blindtrie,suffixtable[idx] + offset);
       gt_assert(ISLEAF(leafinsubtree));

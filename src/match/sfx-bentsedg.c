@@ -106,7 +106,7 @@
                            __LINE__);*/\
 
 #define WITHMACRO
-#ifdef WITHMACRO 
+#ifdef WITHMACRO
 
 #define SUBSORT(BSR,WIDTH,LEFT,RIGHT,DEPTH,ORDERTYPE)\
         if ((WIDTH) > 1UL)\
@@ -129,7 +129,8 @@
               if ((DEPTH) >= \
                   (Seqpos) (BSR)->sfxstrategy->differencecover)\
               {\
-                (BSR)->dc_processunsortedrange((BSR)->voiddcov,LEFT,RIGHT,DEPTH);\
+                (BSR)->dc_processunsortedrange((BSR)->voiddcov,LEFT,\
+                                               RIGHT,DEPTH);\
               } else\
               {\
                 if ((WIDTH) <= (BSR)->sfxstrategy->maxinsertionsort)\
@@ -156,7 +157,8 @@
                                                           differencecover,\
                                                  ORDERTYPE,\
                                                  (BSR)->voiddcov,\
-                                                 (BSR)->dc_processunsortedrange);\
+                                                 (BSR)->\
+                                                 dc_processunsortedrange);\
                     if ((BSR)->lcpsubtab != NULL)\
                     {\
                       (BSR)->lcpsubtab->numoflargelcpvalues += \
@@ -185,7 +187,6 @@
         subsort_bentleysedgewick(BSR,WIDTH,LEFT,RIGHT,DEPTH,ORDERTYPE)
 
 #endif
-
 
 #define UPDATELCP(MINVAL,MAXVAL)\
         gt_assert(commonunits < (unsigned int) UNITSIN2BITENC);\
@@ -469,10 +470,10 @@ typedef struct
 } Bentsedgresources;
 
 static Suffixptr *medianof3cmpcharbychar(const Bentsedgresources *bsr,
-				         Seqpos depth,
-				         Suffixptr *a,
-				         Suffixptr *b,
-				         Suffixptr *c)
+                                         Seqpos depth,
+                                         Suffixptr *a,
+                                         Suffixptr *b,
+                                         Suffixptr *c)
 {
   Seqpos vala, valb, valc;
   Suffixptr cptr;
@@ -646,7 +647,7 @@ static void insertionsortwithequalelements (unsigned long *a,
                    "numofequalsranges\n",
                    numofequalsrangesbf,numofequalsranges);
     showsortedarray(stderr,a,n);
-    exit(EXIT_FAILURE);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   for (idx = 0; idx < numofequalsrangesbf; idx++)
   {
@@ -656,7 +657,7 @@ static void insertionsortwithequalelements (unsigned long *a,
                      " = equalranges.width\n",
                      idx,equalsrangesbf[idx].width,equalsranges[idx].width);
       showsortedarray(stderr,a,n);
-      exit(EXIT_FAILURE);
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     if (equalsrangesbf[idx].right != equalsranges[idx].right)
     {
@@ -664,7 +665,7 @@ static void insertionsortwithequalelements (unsigned long *a,
                      " = equalranges.right\n",
                      idx,equalsrangesbf[idx].right,equalsranges[idx].right);
       showsortedarray(stderr,a,n);
-      exit(EXIT_FAILURE);
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   }
 }
@@ -1234,63 +1235,63 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
     {
       if (depth >= (Seqpos) bsr->sfxstrategy->ssortmaxdepth.valueunsignedint)
       {
-	rmnsufinfo_addunsortedrange(bsr->rmnsufinfo,SUFTABINDEX(left),
-				    SUFTABINDEX(right),depth);
+        rmnsufinfo_addunsortedrange(bsr->rmnsufinfo,SUFTABINDEX(left),
+                                    SUFTABINDEX(right),depth);
       } else
       {
-	PUSHMKVSTACK(left,right,depth,ordertype);
+        PUSHMKVSTACK(left,right,depth,ordertype);
       }
     } else
     {
       if (bsr->sfxstrategy->differencecover > 0)
       {
-	if (depth >= (Seqpos) bsr->sfxstrategy->differencecover)
-	{
-	  bsr->dc_processunsortedrange(bsr->voiddcov,left,right,depth);
-	} else
-	{
-	  if (width <= bsr->sfxstrategy->maxinsertionsort)
-	  {
-	    insertionsortmaxdepth(bsr,left,right,depth,
-				  (Seqpos) bsr->sfxstrategy->
-						differencecover);
-	  } else
-	  {
-	    if (width <= bsr->sfxstrategy->maxbltriesort)
-	    {
-	      Seqpos numoflargelcpvalues;
-	      numoflargelcpvalues = blindtrie_suffixsort(
-					   bsr->blindtrie,
-					   left,
-					   bsr->lcpsubtab == NULL
-					     ? NULL
-					     : bsr->lcpsubtab->
-					       bucketoflcpvalues +
-					       LCPINDEX(bsr,left),
-					   width,
-					   depth,
-					   (Seqpos) bsr->sfxstrategy->
-						    differencecover,
-					   ordertype,
-					   bsr->voiddcov,
-					   bsr->dc_processunsortedrange);
-	      if (bsr->lcpsubtab != NULL)
-	      {
-		bsr->lcpsubtab->numoflargelcpvalues += numoflargelcpvalues;
-	      }
-	      countbltriesort++;
-	    } else
-	    {
-	      PUSHMKVSTACK(left,right,depth,ordertype);
-	    }
-	  }
-	}
+        if (depth >= (Seqpos) bsr->sfxstrategy->differencecover)
+        {
+          bsr->dc_processunsortedrange(bsr->voiddcov,left,right,depth);
+        } else
+        {
+          if (width <= bsr->sfxstrategy->maxinsertionsort)
+          {
+            insertionsortmaxdepth(bsr,left,right,depth,
+                                  (Seqpos) bsr->sfxstrategy->
+                                                differencecover);
+          } else
+          {
+            if (width <= bsr->sfxstrategy->maxbltriesort)
+            {
+              Seqpos numoflargelcpvalues;
+              numoflargelcpvalues = blindtrie_suffixsort(
+                                           bsr->blindtrie,
+                                           left,
+                                           bsr->lcpsubtab == NULL
+                                             ? NULL
+                                             : bsr->lcpsubtab->
+                                               bucketoflcpvalues +
+                                               LCPINDEX(bsr,left),
+                                           width,
+                                           depth,
+                                           (Seqpos) bsr->sfxstrategy->
+                                                    differencecover,
+                                           ordertype,
+                                           bsr->voiddcov,
+                                           bsr->dc_processunsortedrange);
+              if (bsr->lcpsubtab != NULL)
+              {
+                bsr->lcpsubtab->numoflargelcpvalues += numoflargelcpvalues;
+              }
+              countbltriesort++;
+            } else
+            {
+              PUSHMKVSTACK(left,right,depth,ordertype);
+            }
+          }
+        }
       } else
       {
-	if (!comparisonsort(bsr,left,right,depth,width,ordertype))
-	{
-	  PUSHMKVSTACK(left,right,depth,ordertype);
-	}
+        if (!comparisonsort(bsr,left,right,depth,width,ordertype))
+        {
+          PUSHMKVSTACK(left,right,depth,ordertype);
+        }
       }
     }
   }
