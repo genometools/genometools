@@ -80,22 +80,6 @@
 #define STACKTOP\
         bsr->mkvauxstack.spaceMKVstack[bsr->mkvauxstack.nextfreeMKVstack]
 
-#define PUSHMKVSTACK(LEFT,RIGHT,DEPTH,ORDERTYPE)\
-        GT_CHECKARRAYSPACE(&bsr->mkvauxstack,MKVstack,1024);\
-        STACKTOP.left = LEFT;\
-        STACKTOP.right = RIGHT;\
-        STACKTOP.depth = DEPTH;\
-        STACKTOP.ordertype = ORDERTYPE;\
-        bsr->mkvauxstack.nextfreeMKVstack++
-
-#define POPMKVstack(LEFT,RIGHT,DEPTH,ORDERTYPE)\
-        bsr->mkvauxstack.nextfreeMKVstack--;\
-        LEFT = STACKTOP.left;\
-        RIGHT = STACKTOP.right;\
-        DEPTH = STACKTOP.depth;\
-        ORDERTYPE = STACKTOP.ordertype;\
-        width = (unsigned long) ((RIGHT) - (LEFT) + 1)
-
 #define UPDATELCP(MINVAL,MAXVAL)\
         gt_assert(commonunits < (unsigned int) UNITSIN2BITENC);\
         if ((MINVAL) > commonunits)\
@@ -110,11 +94,6 @@
 typedef Seqpos Suffixptr;
 
 /* XXX mv this into Bensonsedgewickstructure */
-
-static unsigned long countinsertionsort = 0,
-                     countbltriesort = 0,
-                     countcountingsort = 0,
-                     countqsort = 0;
 
 GT_DECLAREARRAYSTRUCT(Largelcpvalue);
 
@@ -375,6 +354,10 @@ typedef struct
   void (*dc_processunsortedrange)(void *,Seqpos *,Seqpos *,Seqpos);
   void *voiddcov;
   bool *equalwithprevious;
+  unsigned long countinsertionsort,
+                countqsort,
+                countcountingsort,
+                countbltriesort;
 } Bentsedgresources;
 
 static Suffixptr *medianof3cmpcharbychar(const Bentsedgresources *bsr,
@@ -608,7 +591,7 @@ static void insertionsort(Bentsedgresources *bsr,
   showsuffixrange(bsr->encseq,bsr->fwd,bsr->complement,bsr->lcpsubtab,
                   leftptr,rightptr,offset);
 #endif
-  countinsertionsort++;
+  bsr->countinsertionsort++;
   for (pi = leftptr + 1; pi <= rightptr; pi++)
   {
     for (pj = pi; pj > leftptr; pj--)
@@ -702,7 +685,7 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
   }
   printf("\n");
   */
-  countinsertionsort++;
+  bsr->countinsertionsort++;
   for (pi = leftptr + 1; pi <= rightptr; pi++)
   {
     for (pj = pi; pj > leftptr; pj--)
@@ -1115,7 +1098,7 @@ static bool comparisonsort(Bentsedgresources *bsr,
     {
       bsr->lcpsubtab->numoflargelcpvalues += numoflargelcpvalues;
     }
-    countbltriesort++;
+    bsr->countbltriesort++;
     return true;
   }
   return false;
@@ -1185,7 +1168,7 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
           {
             bsr->lcpsubtab->numoflargelcpvalues += numoflargelcpvalues;
           }
-          countbltriesort++;
+          bsr->countbltriesort++;
           return;
         }
       } else
@@ -1196,8 +1179,13 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
         }
       }
     }
-    /* the following is only done if none of the previous cases apply */
-    PUSHMKVSTACK(left,right,depth,ordertype);
+    /* push */
+    GT_CHECKARRAYSPACE(&bsr->mkvauxstack,MKVstack,1024);
+    STACKTOP.left = left;
+    STACKTOP.right = right;
+    STACKTOP.depth = depth;
+    STACKTOP.ordertype = ordertype;
+    bsr->mkvauxstack.nextfreeMKVstack++;
   }
 }
 
@@ -1217,7 +1205,7 @@ static void sarrcountingsort(Bentsedgresources *bsr,
   Countingsortinfo *csiptr;
   /* const bool cmpcharbychar = false; */
 
-  countcountingsort++;
+  bsr->countcountingsort++;
   for (idx = 0; idx < width; idx++)
   {
     if (idx != pivotidx)
@@ -1370,8 +1358,14 @@ static void bentleysedgewick(Bentsedgresources *bsr,
                                  ? 1
                                  : UNITSIN2BITENC;
 
-    POPMKVstack(left,right,depth,parentordertype);
-    /* new values for left, right, depth and parentordertype */
+    /* pop */
+    bsr->mkvauxstack.nextfreeMKVstack--;
+    left = STACKTOP.left;
+    right = STACKTOP.right;
+    depth = STACKTOP.depth;
+    parentordertype = STACKTOP.ordertype;
+    width = (unsigned long) (right - left + 1);
+
     if (bsr->sfxstrategy->cmpcharbychar)
     {
       pm = cmpcharbychardelivermedian(bsr,
@@ -1406,7 +1400,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
       SWAP(temp, left, pm);
       PTR2INT(pivotcmpbits,left);
     }
-    countqsort++;
+    bsr->countqsort++;
     /* now pivot element is at index left */
     /* all elements to be compared are between pb and pc */
     /* pa is the position at which the next element smaller than the
@@ -2110,13 +2104,18 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   {
     bsr->equalwithprevious = NULL;
   }
+  bsr->countinsertionsort = 0;
+  bsr->countqsort = 0;
+  bsr->countcountingsort = 0;
+  bsr->countbltriesort = 0;
 }
 
 static void wrapBentsedgresources(Bentsedgresources *bsr,
                                   Seqpos partwidth,
                                   Lcpsubtab *lcpsubtab,
                                   FILE *outfplcptab,
-                                  FILE *outfpllvtab)
+                                  FILE *outfpllvtab,
+                                  Verboseinfo *verboseinfo)
 {
   FREESPACE(bsr->countingsortinfo);
   FREESPACE(bsr->medianinfospace);
@@ -2150,6 +2149,10 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
   }
   gt_free(bsr->equalwithprevious);
   GT_FREEARRAY(&bsr->mkvauxstack,MKVstack);
+  showverbose(verboseinfo,"countinsertionsort=%lu",bsr->countinsertionsort);
+  showverbose(verboseinfo,"countbltriesort=%lu",bsr->countbltriesort);
+  showverbose(verboseinfo,"countcountingsort=%lu",bsr->countcountingsort);
+  showverbose(verboseinfo,"countqsort=%lu",bsr->countqsort);
 }
 
 void qsufsort(Seqpos *sortspace,
@@ -2387,11 +2390,8 @@ void sortallbuckets(Suftab *suftab,
                         partwidth,
                         outlcpinfo == NULL ? NULL : &outlcpinfo->lcpsubtab,
                         outlcpinfo == NULL ? NULL : outlcpinfo->outfplcptab,
-                        outlcpinfo == NULL ? NULL : outlcpinfo->outfpllvtab);
-  showverbose(verboseinfo,"countinsertionsort=%lu",countinsertionsort);
-  showverbose(verboseinfo,"countbltriesort=%lu",countbltriesort);
-  showverbose(verboseinfo,"countcountingsort=%lu",countcountingsort);
-  showverbose(verboseinfo,"countqsort=%lu",countqsort);
+                        outlcpinfo == NULL ? NULL : outlcpinfo->outfpllvtab,
+                        verboseinfo);
 }
 
 void sortbucketofsuffixes(Seqpos *suffixestobesorted,
@@ -2455,9 +2455,6 @@ void sortbucketofsuffixes(Seqpos *suffixestobesorted,
                         0, /* partwidth value unused because lcptab == NULL */
                         NULL,
                         NULL,
-                        NULL);
-  showverbose(verboseinfo,"countinsertionsort=%lu",countinsertionsort);
-  showverbose(verboseinfo,"countbltriesort=%lu",countbltriesort);
-  showverbose(verboseinfo,"countcountingsort=%lu",countcountingsort);
-  showverbose(verboseinfo,"countqsort=%lu",countqsort);
+                        NULL,
+                        verboseinfo);
 }
