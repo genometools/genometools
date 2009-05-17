@@ -3820,6 +3820,116 @@ int compareEncseqsequences(Seqpos *lcp,
   return retval;
 }
 
+int compareEncseqsequencesmaxdepth(Seqpos *lcp,
+                                   const Encodedsequence *encseq,
+                                   bool fwd,
+                                   bool complement,
+                                   Encodedsequencescanstate *esr1,
+                                   Encodedsequencescanstate *esr2,
+                                   Seqpos pos1,
+                                   Seqpos pos2,
+                                   Seqpos depth,
+                                   Seqpos maxdepth)
+{
+  EndofTwobitencoding ptbe1, ptbe2;
+  unsigned int commonunits;
+  int retval;
+  Seqpos endpos1, endpos2;
+
+  gt_assert(pos1 != pos2);
+  if (!fwd)
+  {
+    pos1 = REVERSEPOS(encseq->totallength,pos1);
+    pos2 = REVERSEPOS(encseq->totallength,pos2);
+  }
+  gt_assert(depth < maxdepth);
+  if (fwd)
+  {
+    endpos1 = MIN(pos1 + maxdepth,encseq->totallength);
+    endpos2 = MIN(pos2 + maxdepth,encseq->totallength);
+  } else
+  {
+    endpos1 = endpos2 = 0;
+  }
+  if (encseq->numofspecialstostore > 0)
+  {
+    if (fwd)
+    {
+      if (pos1 + depth < endpos1 && pos2 + depth < endpos2)
+      {
+        initEncodedsequencescanstategeneric(esr1,encseq,true,pos1 + depth);
+        initEncodedsequencescanstategeneric(esr2,encseq,true,pos2 + depth);
+      }
+    } else
+    {
+      if (pos1 >= depth && pos2 >= depth)
+      {
+        initEncodedsequencescanstategeneric(esr1,encseq,false,pos1 - depth);
+        initEncodedsequencescanstategeneric(esr2,encseq,false,pos2 - depth);
+      }
+    }
+  }
+  do
+  {
+    if (fwd)
+    {
+      if (pos1 + depth < endpos1 && pos2 + depth < endpos2)
+      {
+        fwdextract2bitenc(&ptbe1,encseq,esr1,pos1 + depth);
+        fwdextract2bitenc(&ptbe2,encseq,esr2,pos2 + depth);
+        retval = compareTwobitencodings(true,complement,&commonunits,
+                                        &ptbe1,&ptbe2);
+        if (retval == 0)
+        {
+          if (depth + commonunits < maxdepth)
+          {
+            depth += commonunits;
+          } else
+          {
+            retval = pos1 < pos2 ? -1 : 1;
+            depth = maxdepth;
+          }
+        }
+      } else
+      {
+        retval = comparewithonespecial(encseq,
+                                       true,
+                                       complement,
+                                       pos1,
+                                       pos2,
+                                       depth);
+      }
+    } else
+    {
+      if (pos1 >= depth && pos2 >= depth)
+      {
+        revextract2bitenc(&ptbe1,encseq,esr1,pos1 - depth);
+        revextract2bitenc(&ptbe2,encseq,esr2,pos2 - depth);
+        retval = compareTwobitencodings(false,complement,&commonunits,
+                                        &ptbe1,&ptbe2);
+        if (depth + commonunits < maxdepth)
+        {
+          depth += commonunits;
+        } else
+        {
+          depth = maxdepth;
+          retval = pos1 > pos2 ? -1 : 1;
+        }
+      } else
+      {
+        retval = comparewithonespecial(encseq,
+                                       false,
+                                       complement,
+                                       pos1,
+                                       pos2,
+                                       depth);
+      }
+    }
+  } while (retval == 0);
+  *lcp = depth;
+  return retval;
+}
+
 int multicharactercompare(const Encodedsequence *encseq,
                           bool fwd,
                           bool complement,

@@ -279,7 +279,7 @@ static void insertsuffixintoblindtrie(Blindtrie *blindtrie,
 
 static Seqpos cmpcharbychargetlcp(GtUchar *mm_oldsuffix,
                                   GtUchar *mm_newsuffix,
-                                  Blindtrie *blindtrie,
+                                  const Blindtrie *blindtrie,
                                   Seqpos leafpos,
                                   Seqpos currentstartpos)
 {
@@ -329,24 +329,40 @@ static Seqpos cmpcharbychargetlcp(GtUchar *mm_oldsuffix,
 
 static Seqpos fastgetlcp(GtUchar *mm_oldsuffix,
                          GtUchar *mm_newsuffix,
-                         Blindtrie *blindtrie,
+                         const Blindtrie *blindtrie,
                          Seqpos leafpos,
                          Seqpos currentstartpos)
 {
   Seqpos lcp;
 
-  /* XXX be careful: the following function ignores maxdepth value */
-  (void) compareEncseqsequences(&lcp,
-                                blindtrie->encseq,
-                                ISDIRREVERSE(blindtrie->readmode)
-                                ? false : true,
-                                ISDIRCOMPLEMENT(blindtrie->readmode) ? true
-                                                                     : false,
-                                blindtrie->esr1,
-                                blindtrie->esr2,
-                                leafpos,
-                                currentstartpos,
-                                0);
+  if (blindtrie->maxdepth == 0)
+  {
+    (void) compareEncseqsequences(&lcp,
+                                  blindtrie->encseq,
+                                  ISDIRREVERSE(blindtrie->readmode)
+                                  ? false : true,
+                                  ISDIRCOMPLEMENT(blindtrie->readmode)
+                                  ? true : false,
+                                  blindtrie->esr1,
+                                  blindtrie->esr2,
+                                  leafpos,
+                                  currentstartpos,
+                                  0);
+  } else
+  {
+    (void) compareEncseqsequencesmaxdepth(&lcp,
+                                          blindtrie->encseq,
+                                          ISDIRREVERSE(blindtrie->readmode)
+                                          ? false : true,
+                                          ISDIRCOMPLEMENT(blindtrie->readmode)
+                                          ? true : false,
+                                          blindtrie->esr1,
+                                          blindtrie->esr2,
+                                          leafpos,
+                                          currentstartpos,
+                                          0,
+                                          blindtrie->maxdepth);
+  }
   if (isleftofboundary(leafpos,lcp,blindtrie))
   {
     *mm_oldsuffix = getencodedchar(blindtrie->encseq, /* Random access */

@@ -569,7 +569,11 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
         }
       } else
       {
-        gt_assert(false);
+        retval = compareEncseqsequencesmaxdepth(&lcplen,bsr->encseq,bsr->fwd,
+                                                bsr->complement,
+                                                bsr->esr1,bsr->esr2,
+                                                *(pj-1),*pj,offset,
+                                                maxdepth);
       }
       if (retval != 0 && bsr->lcpsubtab != NULL && bsr->assideeffect)
       {

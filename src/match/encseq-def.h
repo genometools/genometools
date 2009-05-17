@@ -249,6 +249,17 @@ int compareEncseqsequences(Seqpos *lcp,
                            Seqpos pos1,Seqpos pos2,
                            Seqpos depth);
 
+int compareEncseqsequencesmaxdepth(Seqpos *lcp,
+                                   const Encodedsequence *encseq,
+                                   bool fwd,
+                                   bool complement,
+                                   Encodedsequencescanstate *esr1,
+                                   Encodedsequencescanstate *esr2,
+                                   Seqpos pos1,
+                                   Seqpos pos2,
+                                   Seqpos depth,
+                                   Seqpos maxdepth);
+
 /* some check functions called in test-encseq.c */
 
 int multicharactercompare(const Encodedsequence *encseq,
