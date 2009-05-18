@@ -260,7 +260,8 @@ int comparetwostrings(const Encodedsequence *encseq,
                       bool complement,
                       Seqpos *maxcommon,
                       Seqpos pos1,
-                      Seqpos pos2)
+                      Seqpos pos2,
+                      Seqpos maxdepth)
 {
   Seqpos currentoffset, maxoffset, cc1, cc2,
          totallength = getencseqtotallength(encseq);
@@ -270,17 +271,17 @@ int comparetwostrings(const Encodedsequence *encseq,
     gt_assert(pos1 < totallength);
     gt_assert(pos2 < totallength);
     maxoffset = MIN(totallength - pos1,totallength - pos2);
-    if (*maxcommon > 0)
-    {
-      maxoffset = MIN(*maxcommon,maxoffset);
-    }
   } else
   {
     maxoffset = MIN(pos1+1,pos2+1);
-    if (*maxcommon > 0)
-    {
-      maxoffset = MIN(*maxcommon,maxoffset);
-    }
+  }
+  if (*maxcommon > 0)
+  {
+    maxoffset = MIN(*maxcommon,maxoffset);
+  }
+  if (maxdepth > 0)
+  {
+    maxoffset = MIN(maxoffset,maxdepth);
   }
   for (currentoffset = 0; currentoffset <= maxoffset; currentoffset++)
   {
@@ -313,21 +314,33 @@ int comparetwostringsgeneric(const Encodedsequence *encseq,
                              Seqpos *maxcommon,
                              Seqpos pos1,
                              Seqpos pos2,
-                             Seqpos depth)
+                             Seqpos depth,
+                             Seqpos maxdepth)
 {
   Seqpos totallength = getencseqtotallength(encseq);
   int retval;
 
   if (fwd)
   {
-    if (pos1 + depth < totallength && pos2 + depth < totallength)
+    Seqpos endpos1, endpos2;
+
+    if (maxdepth == 0)
+    {
+      endpos1 = endpos2 = totallength;
+    } else
+    {
+      endpos1 = MIN(pos1 + maxdepth,totallength);
+      endpos2 = MIN(pos2 + maxdepth,totallength);
+    }
+    if (pos1 + depth < endpos1 && pos2 + depth < endpos2)
     {
       retval = comparetwostrings(encseq,
                                  fwd,
                                  complement,
                                  maxcommon,
                                  pos1+depth,
-                                 pos2+depth);
+                                 pos2+depth,
+                                 maxdepth > 0 ? (maxdepth - depth) : 0);
     } else
     {
       retval = comparewithonespecial(encseq,
@@ -346,7 +359,8 @@ int comparetwostringsgeneric(const Encodedsequence *encseq,
                                  complement,
                                  maxcommon,
                                  pos1-depth,
-                                 pos2-depth);
+                                 pos2-depth,
+                                 maxdepth > 0 ? (maxdepth - depth) : 0);
     } else
     {
       retval = comparewithonespecial(encseq,

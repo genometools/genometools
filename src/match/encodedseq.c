@@ -3889,6 +3889,16 @@ int compareEncseqsequencesmaxdepth(Seqpos *lcp,
             retval = pos1 < pos2 ? -1 : 1;
             depth = maxdepth;
           }
+        } else
+        {
+          if (depth + commonunits < maxdepth)
+          {
+            depth += commonunits;
+          } else
+          {
+            retval = pos1 < pos2 ? -1 : 1;
+            depth = maxdepth;
+          }
         }
       } else
       {
@@ -3927,6 +3937,36 @@ int compareEncseqsequencesmaxdepth(Seqpos *lcp,
     }
   } while (retval == 0);
   *lcp = depth;
+#define FASTCOMPAREDEBUG
+#ifdef FASTCOMPAREDEBUG
+  {
+    Seqpos lcp2 = 0;
+    int retval2;
+
+    retval2 = comparetwostringsgeneric(encseq,
+                                       fwd,
+                                       complement,
+                                       &lcp2,
+                                       pos1,
+                                       pos2,
+                                       depth,
+                                       maxdepth);
+    gt_assert(retval == retval2);
+    if (*lcp != lcp2)
+    {
+      fprintf(stderr,"line %d: pos1 = %u, pos2 = %u, depth = %u, "
+                     "lcp = %u != %u = lcp2\n",
+                      __LINE__,
+                      (unsigned int) pos1,
+                      (unsigned int) pos2,
+                      (unsigned int) depth,
+                      (unsigned int) lcp,
+                      (unsigned int) lcp2);
+      exit(GT_EXIT_PROGRAMMING_ERROR);
+    }
+    gt_assert(*lcp == lcp2);
+  }
+#endif
   return retval;
 }
 
@@ -4341,7 +4381,7 @@ void multicharactercompare_withtest(const Encodedsequence *encseq,
   extract2bitenc(fwd,&ptbe2,encseq,esr2,pos2);
   ret1 = compareTwobitencodings(fwd,complement,&commonunits1,&ptbe1,&ptbe2);
   commonunits2 = (Seqpos) UNITSIN2BITENC;
-  ret2 = comparetwostrings(encseq,fwd,complement,&commonunits2,pos1,pos2);
+  ret2 = comparetwostrings(encseq,fwd,complement,&commonunits2,pos1,pos2,0);
   if (ret1 != ret2 || (Seqpos) commonunits1 != commonunits2)
   {
     char buf1[INTWORDSIZE+1], buf2[INTWORDSIZE+1];
