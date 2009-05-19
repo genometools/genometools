@@ -361,7 +361,7 @@ static Seqpos fastgetlcp(GtUchar *mm_oldsuffix,
                                           leafpos,
                                           currentstartpos,
                                           0,
-                                          blindtrie->maxdepth);
+                                          blindtrie->maxdepthminusoffset);
   }
   if (isleftofboundary(leafpos,lcp,blindtrie))
   {
@@ -434,6 +434,14 @@ static unsigned long enumeratetrieleaves (Seqpos *suffixtable,
             equalsrangewidth++;
           } else
           {
+            if (lcpnode->depth + blindtrie->offset >= blindtrie->maxdepth)
+            {
+              fprintf(stderr,"lcpnode.depth=%lu,offset=%lu,maxdepth=%lu\n",
+                              (unsigned long) lcpnode->depth,
+                              (unsigned long) blindtrie->offset,
+                              (unsigned long) blindtrie->maxdepth);
+              exit(EXIT_FAILURE);
+            }
             gt_assert(lcpnode->depth + blindtrie->offset < blindtrie->maxdepth);
             if (equalsrangewidth > 0)
             {

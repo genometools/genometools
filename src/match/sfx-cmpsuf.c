@@ -133,20 +133,30 @@ int comparetwosuffixes(const Encodedsequence *encseq,
   return retval;
 }
 
-#define COMPAREOFFSET   (LCPOVERFLOW + 1)
+#define COMPAREOFFSET   (MAXALPHABETCHARACTER + 1)
 
 static Seqpos extractsinglecharacter(const Encodedsequence *encseq,
                                      bool fwd,
                                      bool complement,
                                      Seqpos pos,
                                      Seqpos depth,
-                                     Seqpos totallength)
+                                     Seqpos totallength,
+                                     Seqpos maxdepth)
 {
   Seqpos cc;
 
   if (fwd)
   {
-    if (pos + depth >= totallength)
+    Seqpos endpos;
+
+    if (maxdepth > 0)
+    {
+      endpos = MIN(pos+maxdepth,totallength);
+    } else
+    {
+      endpos = totallength;
+    }
+    if (pos + depth >= endpos)
     {
       cc = pos + depth + COMPAREOFFSET;
     } else
@@ -191,7 +201,8 @@ int comparewithonespecial(const Encodedsequence *encseq,
                           bool complement,
                           Seqpos pos1,
                           Seqpos pos2,
-                          Seqpos depth)
+                          Seqpos depth,
+                          Seqpos maxdepth)
 {
   Seqpos cc1, cc2, totallength = getencseqtotallength(encseq);
 
@@ -200,13 +211,15 @@ int comparewithonespecial(const Encodedsequence *encseq,
                                complement,
                                pos1,
                                depth,
-                               totallength);
+                               totallength,
+                               maxdepth);
   cc2 = extractsinglecharacter(encseq,
                                fwd,
                                complement,
                                pos2,
                                depth,
-                               totallength);
+                               totallength,
+                               maxdepth);
   gt_assert(cc1 != cc2);
   if (!fwd && cc1 >= (Seqpos) COMPAREOFFSET && cc2 >= (Seqpos) COMPAREOFFSET)
   {
@@ -329,6 +342,7 @@ int comparetwostringsgeneric(const Encodedsequence *encseq,
       endpos1 = endpos2 = totallength;
     } else
     {
+      gt_assert(maxdepth >= depth);
       endpos1 = MIN(pos1 + maxdepth,totallength);
       endpos2 = MIN(pos2 + maxdepth,totallength);
     }
@@ -348,10 +362,15 @@ int comparetwostringsgeneric(const Encodedsequence *encseq,
                                      complement,
                                      pos1,
                                      pos2,
-                                     depth);
+                                     depth,
+                                     maxdepth);
     }
   } else
   {
+    if (maxdepth > 0)
+    {
+      gt_assert(false);
+    }
     if (pos1 >= depth && pos2 >= depth)
     {
       retval = comparetwostrings(encseq,
@@ -368,7 +387,8 @@ int comparetwostringsgeneric(const Encodedsequence *encseq,
                                      complement,
                                      pos1,
                                      pos2,
-                                     depth);
+                                     depth,
+                                     maxdepth);
     }
   }
   *maxcommon += depth;

@@ -3765,7 +3765,8 @@ int compareEncseqsequences(Seqpos *lcp,
                                        complement,
                                        pos1,
                                        pos2,
-                                       depth);
+                                       depth,
+                                       0);
       }
     } else
     {
@@ -3783,7 +3784,8 @@ int compareEncseqsequences(Seqpos *lcp,
                                        complement,
                                        pos1,
                                        pos2,
-                                       depth);
+                                       depth,
+                                       0);
       }
     }
   } while (retval == 0);
@@ -3879,26 +3881,13 @@ int compareEncseqsequencesmaxdepth(Seqpos *lcp,
         fwdextract2bitenc(&ptbe2,encseq,esr2,pos2 + depth);
         retval = compareTwobitencodings(true,complement,&commonunits,
                                         &ptbe1,&ptbe2);
-        if (retval == 0)
+        if (depth + commonunits < maxdepth)
         {
-          if (depth + commonunits < maxdepth)
-          {
-            depth += commonunits;
-          } else
-          {
-            retval = pos1 < pos2 ? -1 : 1;
-            depth = maxdepth;
-          }
+          depth += commonunits;
         } else
         {
-          if (depth + commonunits < maxdepth)
-          {
-            depth += commonunits;
-          } else
-          {
-            retval = pos1 < pos2 ? -1 : 1;
-            depth = maxdepth;
-          }
+          retval = pos1 < pos2 ? -1 : 1;
+          depth = maxdepth;
         }
       } else
       {
@@ -3907,7 +3896,8 @@ int compareEncseqsequencesmaxdepth(Seqpos *lcp,
                                        complement,
                                        pos1,
                                        pos2,
-                                       depth);
+                                       depth,
+                                       maxdepth);
       }
     } else
     {
@@ -3932,7 +3922,8 @@ int compareEncseqsequencesmaxdepth(Seqpos *lcp,
                                        complement,
                                        pos1,
                                        pos2,
-                                       depth);
+                                       depth,
+                                       maxdepth);
       }
     }
   } while (retval == 0);

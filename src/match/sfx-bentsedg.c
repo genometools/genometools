@@ -523,10 +523,10 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
   unsigned long idx = 0;
   bool tempb;
 
-#ifdef SKDEBUG
-  printf("insertion sort (offset=%lu,maxdepth=%lu): ",
+  printf("insertion sort (offset=%lu,maxdepth=%lu)\n",
             (unsigned long) offset,
             (unsigned long) maxdepth);
+#ifdef SKDEBUG
   showsuffixrange(bsr->encseq,bsr->fwd,bsr->complement,bsr->lcpsubtab,
                   leftptr,rightptr,offset);
 #endif
@@ -569,6 +569,7 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
         }
       } else
       {
+        gt_assert(offset < maxdepth);
         retval = compareEncseqsequencesmaxdepth(&lcplen,bsr->encseq,bsr->fwd,
                                                 bsr->complement,
                                                 bsr->esr1,bsr->esr2,
@@ -630,6 +631,7 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
                                    leftptr + width - 1,maxdepth);
     }
   }
+  STAMP;
 }
 
 #define DOMEDIANCOMPARE(A,B)\

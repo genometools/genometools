@@ -798,6 +798,16 @@ void dc_sortunsortedbucket(void *data,
   gt_assert(left < right);
   gt_assert(depth >= (Seqpos) dcov->vparam);
   gt_assert(dcov->diff2pos != NULL);
+  /* XXX remove this later */
+  checksortedsuffixes(__FILE__,
+                      __LINE__,
+                      dcov->encseq,
+                      dcov->readmode,
+                      left,
+                      (Seqpos) (right - left + 1),
+                      false, /* specialsareequal  */
+                      false,  /* specialsareequalatdepth0 */
+                      (Seqpos) dcov->vparam);
   gt_qsort_r(left,(size_t) (right - left + 1),sizeof(Seqpos),data,
              comparedcov_presortedsuffixes);
 }

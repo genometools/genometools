@@ -60,9 +60,9 @@ do
   sfxmap sfx-idx
   suffixerator -parts 3 -maxdepth abs -indexname sfx-idx
   sfxmap sfx-idx
-  suffixeratoronlysuf -dc 32 -indexname sfx-idx
+  suffixeratoronlysuf -algbds 20 20 100 -cmpcharbychar -dc 32 -indexname sfx-idx
   sfxmaponlysuf sfx-idx
-  suffixeratoronlysuf -cmpcharbychar -dc 32 -indexname sfx-idx
+  suffixeratoronlysuf -algbds 20 20 100 -dc 32 -indexname sfx-idx
   sfxmaponlysuf sfx-idx
   suffixeratoronlysuf -cmpcharbychar -dc 16 -indexname sfx-idx
   sfxmaponlysuf sfx-idx

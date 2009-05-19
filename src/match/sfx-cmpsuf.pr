@@ -17,7 +17,8 @@ int comparewithonespecial(const Encodedsequence *encseq,
                           bool complement,
                           Seqpos pos1,
                           Seqpos pos2,
-                          Seqpos depth);
+                          Seqpos depth,
+                          Seqpos maxdepth);
 
 int comparetwostrings(const Encodedsequence *encseq,
                       bool fwd,
