@@ -712,6 +712,14 @@ void gt_diagram_set_track_selector_func(GtDiagram *diagram,
   diagram->blocks = NULL;
 }
 
+void gt_diagram_reset_track_selector_func(GtDiagram *diagram)
+{
+  gt_assert(diagram);
+  diagram->select_func = default_track_selector;
+  gt_hashmap_delete(diagram->blocks);
+  diagram->blocks = NULL;
+}
+
 GtHashmap* gt_diagram_get_blocks(const GtDiagram *diagram)
 {
   gt_assert(diagram);
