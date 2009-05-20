@@ -20,7 +20,6 @@
 #include "core/assert_api.h"
 #include "core/fasta.h"
 #include "core/string_distri.h"
-#include "core/translate.h"
 #include "core/unused_api.h"
 #include "core/warning_api.h"
 #include "core/xansi.h"

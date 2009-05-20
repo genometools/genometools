@@ -17,6 +17,7 @@
 
 #include <ctype.h>
 #include "mg_combinedscore.h"
+#include "core/translator.h"
 
 int mg_combinedscore(ParseStruct *parsestruct_ptr,
                      unsigned long hit_counter, GtError * err)
@@ -68,6 +69,10 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
 
   const char *contig_as_ptr,
    *hit_as_ptr;
+
+  GtTranslator *translator;           /* Translator, Standard-
+                                         Translationstabelle */
+  translator = gt_translator_new();
 
   /* Check Umgebungsvariablen */
   gt_error_check(err);
@@ -222,12 +227,20 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
               contig_triplet[2] = contig_seq[contig_index + 2];
 
               /* Bestimmen der AS der jeweiligen Triplets */
-              contig_as =
-                gt_codon2amino(contig_triplet[0], contig_triplet[1],
-                               contig_triplet[2]);
-              hit_as =
-                gt_codon2amino(hit_triplet[0], hit_triplet[1],
-                               hit_triplet[2]);
+              had_err = gt_translator_codon2amino(translator,
+                                                  contig_triplet[0],
+                                                  contig_triplet[1],
+                                                  contig_triplet[2],
+                                                  &contig_as,
+                                                  err);
+              if (!had_err) {
+                had_err = gt_translator_codon2amino(translator,
+                                                    hit_triplet[0],
+                                                    hit_triplet[1],
+                                                    hit_triplet[2],
+                                                    &hit_as,
+                                                    err);
+              }
             }
           }
 
@@ -305,6 +318,8 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
   }
 
   gt_array2dim_delete(combinedscore_matrix);
+
+  gt_translator_delete(translator);
 
   gt_str_array_delete(hit_information.hit_gi);
   gt_str_array_delete(hit_information.hit_def);

@@ -37,6 +37,7 @@
 #include "core/sequence_buffer.h"
 #include "core/splitter.h"
 #include "core/tokenizer.h"
+#include "core/translator.h"
 #include "extended/alignment.h"
 #include "extended/evaluator.h"
 #include "extended/feature_node_iterator_api.h"
@@ -209,6 +210,7 @@ GtHashmap* gtt_unit_tests(void)
                  gt_string_matching_unit_test);
   gt_hashmap_add(unit_tests, "tag value map example", gt_tag_value_map_example);
   gt_hashmap_add(unit_tests, "tokenizer class", gt_tokenizer_unit_test);
+  gt_hashmap_add(unit_tests, "translator class", gt_translator_unit_test);
 #ifndef WITHOUT_CAIRO
   gt_hashmap_add(unit_tests, "block class", gt_block_unit_test);
   gt_hashmap_add(unit_tests, "style class", gt_style_unit_test);

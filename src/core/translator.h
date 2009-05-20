@@ -1,6 +1,7 @@
 /*
   Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c)      2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2009 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,20 +16,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef TRANSLATE_H
-#define TRANSLATE_H
+#ifndef TRANSLATOR_H
+#define TRANSLATOR_H
 
-#include "core/str.h"
+#include "core/translator_api.h"
 
-void gt_translate_dna(GtStr*, const char*, unsigned long, unsigned int frame);
-
-/* Translate <dna_sequence> of length <seqlen> in all three reading frames.
-   The translations are stored in <frame1>, <frame2>, and <frame3>.
-   The necessary space for the frames is allocated by translate_all_frames(),
-   it is the responsibility of the caller to free it.
-   All characters different from 'acgtu' (in lower and upper case) are mapped to
-   't' before the translation is performed. */
-void gt_translate_all_frames(char **frame1, char **frame2, char **frame3,
-                             const char *dna_sequence, unsigned long seqlen);
+int           gt_translator_unit_test(GtError *err);
 
 #endif

@@ -17,7 +17,7 @@
 
 #include "core/assert_api.h"
 #include "core/orf.h"
-#include "core/translate.h"
+#include "core/translator.h"
 #include "core/undef.h"
 #include "extended/cds_visitor.h"
 #include "extended/node_visitor_rep.h"
@@ -96,16 +96,24 @@ static GtArray* determine_ORFs_for_all_three_frames(Splicedseq *ss)
 {
   GtStr *pr_0, *pr_1, *pr_2;
   GtArray *orfs;
+  GtTranslator *tr;
   gt_assert(ss);
 
   pr_0 = gt_str_new();
   pr_1 = gt_str_new();
   pr_2 = gt_str_new();
   orfs = gt_array_new(sizeof (GtRange));
+  tr = gt_translator_new();
 
-  gt_translate_dna(pr_0, gt_splicedseq_get(ss), gt_splicedseq_length(ss), 0);
-  gt_translate_dna(pr_1, gt_splicedseq_get(ss), gt_splicedseq_length(ss), 1);
-  gt_translate_dna(pr_2, gt_splicedseq_get(ss), gt_splicedseq_length(ss), 2);
+  gt_translator_translate_string(tr, pr_0,
+                                 gt_splicedseq_get(ss),
+                                 gt_splicedseq_length(ss), 0, NULL);
+  gt_translator_translate_string(tr, pr_1,
+                                 gt_splicedseq_get(ss),
+                                 gt_splicedseq_length(ss), 1, NULL);
+  gt_translator_translate_string(tr, pr_2,
+                                 gt_splicedseq_get(ss),
+                                 gt_splicedseq_length(ss), 2, NULL);
   gt_determine_ORFs(orfs, 0, gt_str_get(pr_0), gt_str_length(pr_0));
   gt_determine_ORFs(orfs, 1, gt_str_get(pr_1), gt_str_length(pr_1));
   gt_determine_ORFs(orfs, 2, gt_str_get(pr_2), gt_str_length(pr_2));
@@ -113,6 +121,7 @@ static GtArray* determine_ORFs_for_all_three_frames(Splicedseq *ss)
   gt_str_delete(pr_2);
   gt_str_delete(pr_1);
   gt_str_delete(pr_0);
+  gt_translator_delete(tr);
 
   return orfs;
 }

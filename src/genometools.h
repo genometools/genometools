@@ -49,6 +49,7 @@
 #include "core/str_api.h"
 #include "core/str_array_api.h"
 #include "core/strand_api.h"
+#include "core/translator_api.h"
 #include "core/unused_api.h"
 #include "core/version_api.h"
 #include "core/warning_api.h"
