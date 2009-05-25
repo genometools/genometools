@@ -35,13 +35,13 @@
 #define GT_UNDEFTRANSNUM GT_NUMOFTRANSSCHEMES
 
 #define GT_INCONSISTENT(BASE)\
-        gt_error_set(e, "code=%lu with wildcard %c: inconsistent aminoacids " \
-                        "%c and %c",\
+        gt_error_set(err, "code=%lu with wildcard %c: inconsistent " \
+                          "aminoacids %c and %c",\
                      (unsigned long) codeof2, wildcard, aa, newaa);\
         return GT_AMINOACIDFAIL
 
 #define GT_ILLEGALCHAR(V)\
-        gt_error_set(e, "illegal char %s='%c'(%lu)",#V,V,(unsigned long) (V));\
+        gt_error_set(err, "illegal char %s='%c'(%lu)",#V,V,(unsigned long)(V));\
         return GT_AMINOACIDFAIL
 
 #define GT_STARTAMINO 'M'
@@ -184,11 +184,12 @@ static unsigned int transnum2index[] =
   16U
 };
 
-static GtTranslationScheme* getschemetable(unsigned int transnum, GtError *e)
+static GtTranslationScheme* getschemetable(unsigned int transnum, GtError *err)
 {
   gt_assert(transnum < GT_SIZEOFTRANSRANGE);
   if (transnum2index[transnum] == GT_UNDEFTRANSNUM) {
-    gt_error_set(e, "'%u' is not a valid translation table number!", transnum);
+    gt_error_set(err, "'%u' is not a valid translation table number!",
+                 transnum);
     return NULL;
   }
   gt_assert(transnum != GT_UNDEFTRANSNUM);
@@ -471,7 +472,7 @@ static unsigned char wbitsvector[] =
 static char equivalentbits(const char *aminos,
                            unsigned int codeof2,
                            unsigned char wildcard,
-                           GtError *e)
+                           GtError *err)
 {
   unsigned char bits = wbitsvector[(int) wildcard];
   char aa = 0, newaa;
@@ -568,7 +569,7 @@ static unsigned int smallestbase(unsigned char bits)
 static char codon2amino(const char *aminos, bool forward, unsigned char c0,
                         unsigned char c1,unsigned char c2,
                         unsigned int *coderet,
-                        GtError *e)
+                        GtError *err)
 {
   unsigned int code = 0;
   char aa;
@@ -708,7 +709,7 @@ static char codon2amino(const char *aminos, bool forward, unsigned char c0,
       }
       break;
     GT_CASEWILDCARD:
-      aa = equivalentbits(aminos,code,c2, e);
+      aa = equivalentbits(aminos,code,c2, err);
       if (aa == GT_AMINOACIDFAIL)
       {
         /* no unique aminoacid => choose smallest base and compute aminos
@@ -752,10 +753,10 @@ GtTranslator* gt_translator_new()
 
 int gt_translator_set_translation_scheme(GtTranslator *tr,
                                          unsigned int transnum,
-                                         GtError *e)
+                                         GtError *err)
 {
   gt_assert(tr && transnum < GT_NUMOFTRANSSCHEMES);
-  tr->scheme = getschemetable(transnum, e);
+  tr->scheme = getschemetable(transnum, err);
   if (!tr->scheme)
     return -1;
   return 0;
@@ -765,7 +766,7 @@ int gt_translator_find_startcodon(GtTranslator *tr,
                                   const char *dnaseq,
                                   unsigned long dnalen,
                                   unsigned long *pos,
-                                  GtError *e)
+                                  GtError *err)
 {
   unsigned int code;
   char *dnaptr, trans;
@@ -773,7 +774,7 @@ int gt_translator_find_startcodon(GtTranslator *tr,
 
   for (dnaptr = (char*) dnaseq; dnaptr < dnaseq + dnalen - 3; dnaptr++) {
     trans = codon2amino(tr->scheme->aminos, true, *dnaptr, *(dnaptr+1),
-                        *(dnaptr+2), &code, e);
+                        *(dnaptr+2), &code, err);
     if (trans == GT_AMINOACIDFAIL)
       return -2;
     if (tr->scheme->startcodon[code] == GT_STARTAMINO) {
@@ -781,7 +782,7 @@ int gt_translator_find_startcodon(GtTranslator *tr,
       return 0;
     }
   }
-  gt_error_set(e, "cannot find start codon");
+  gt_error_set(err, "cannot find start codon");
   return -1;
 }
 
@@ -809,11 +810,11 @@ GtStrArray* gt_translator_get_translation_table_descriptions()
 int gt_translator_codon2amino(GtTranslator *tr,
                               char c1, char c2, char c3,
                               char *translated,
-                              GtError *e)
+                              GtError *err)
 {
   gt_assert(tr);
-  gt_error_check(e);
-  *translated = codon2amino(tr->scheme->aminos, true, c1, c2, c3, NULL, e);
+  gt_error_check(err);
+  *translated = codon2amino(tr->scheme->aminos, true, c1, c2, c3, NULL, err);
   if (*translated == GT_AMINOACIDFAIL) {
     return -2;
   }
@@ -825,12 +826,12 @@ int gt_translator_start(GtTranslator *tr,
                         unsigned long dnalen,
                         char *translated,
                         unsigned int *frame,
-                        GtError *e)
+                        GtError *err)
 {
   gt_assert(tr && dnaseq && translated && frame && dnalen >= GT_CODON_LENGTH);
-  gt_error_check(e);
+  gt_error_check(err);
   *translated = codon2amino(tr->scheme->aminos, true, *dnaseq, *(dnaseq+1),
-                            *(dnaseq+2), NULL, e);
+                            *(dnaseq+2), NULL, err);
   *frame = tr->curframe % GT_CODON_LENGTH;
   gt_assert(*frame < GT_CODON_LENGTH);
   tr->curframe++;
@@ -846,12 +847,12 @@ int gt_translator_start(GtTranslator *tr,
 int gt_translator_next(GtTranslator *tr,
                        char *translated,
                        unsigned int *frame,
-                       GtError *e)
+                       GtError *err)
 {
   gt_assert(tr && translated && frame);
-  gt_error_check(e);
+  gt_error_check(err);
   if (!tr->dnaseq || !tr->origseq) {
-    gt_error_set(e, "No translation iteration was started yet");
+    gt_error_set(err, "No translation iteration was started yet");
     return -1;
   }
   if (tr->dnalen - (tr->dnaseq - tr->origseq) <= 2) {
@@ -861,7 +862,7 @@ int gt_translator_next(GtTranslator *tr,
   *translated = codon2amino(tr->scheme->aminos, true,
                             *tr->dnaseq,
                             *(tr->dnaseq+1),
-                            *(tr->dnaseq+2), NULL, e);
+                            *(tr->dnaseq+2), NULL, err);
   *frame = tr->curframe % GT_CODON_LENGTH;
   gt_assert(*frame < GT_CODON_LENGTH);
   tr->curframe++;
@@ -877,20 +878,20 @@ int gt_translator_translate_string(GtTranslator *tr,
                                    const char *dnaseq,
                                    unsigned long dnalen,
                                    unsigned int frame,
-                                   GtError *e)
+                                   GtError *err)
 {
   char *dnaptr;
   char aa;
   gt_assert(protein && !gt_str_length(protein) && dnaseq
             && frame < GT_CODON_LENGTH && dnalen >= GT_CODON_LENGTH);
-  gt_error_check(e);
+  gt_error_check(err);
 
   for (dnaptr = (char*) (dnaseq + frame);
       dnaptr < dnaseq + dnalen - 2;
       dnaptr += GT_CODON_LENGTH)
   {
     aa = codon2amino(tr->scheme->aminos, true, *dnaptr, *(dnaptr+1),
-                     *(dnaptr+2), NULL, e);
+                     *(dnaptr+2), NULL, err);
     if (aa == GT_AMINOACIDFAIL)
       return (int) -2;
     gt_str_append_char(protein, aa);

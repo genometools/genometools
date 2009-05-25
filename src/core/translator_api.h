@@ -37,10 +37,10 @@ GtTranslator* gt_translator_new();
    <transnum> refers to the numbers as reported by
    <gt_translator_get_translation_table_descriptions()> or the list given
    at the NCBI web site.
-   Returns a negative value if an error occurred, see <e> for details. */
+   Returns a negative value if an error occurred, see <err> for details. */
 int           gt_translator_set_translation_scheme(GtTranslator *tr,
                                                    unsigned int transnum,
-                                                   GtError *e);
+                                                   GtError *err);
 
 /* Returns a <GtStrArray> of translation scheme descriptions, each of the
    format "%d: %s" where the number is the translation scheme number (usable in
@@ -53,51 +53,51 @@ GtStrArray*   gt_translator_get_translation_table_descriptions();
    scheme set in <tr> will be used. The currently translated character is put in
    <translated> while the current reading frame (in reference to <dnaseq>
    position) is put in <frame>.
-   Returns a negative value if an error occurred, see <e> for details. */
+   Returns a negative value if an error occurred, see <err> for details. */
 int           gt_translator_start(GtTranslator *tr,
                                   const char *dnaseq,
                                   unsigned long dnalen,
                                   char *translated,
                                   unsigned int *frame,
-                                  GtError *e);
+                                  GtError *err);
 
 /* Continues a translation iteration process started by gt_translator_start().
    The currently translated character is put in <translated> while the current
    reading frame is put in <frame>.
-   Returns a negative value if an error occurred, see <e> for details. */
+   Returns a negative value if an error occurred, see <err> for details. */
 int           gt_translator_next(GtTranslator *tr,
                                  char *translated,
                                  unsigned int *frame,
-                                 GtError *e);
+                                 GtError *err);
 
 /* Translates <dnaseq> of length <dnalen> in reading frame <frame> using the
    settings currently active in <tr>. The resulting amino acid sequence is
    appended to <protein>.
-   Returns a negative value if an error occurred, see <e> for details. */
+   Returns a negative value if an error occurred, see <err> for details. */
 int           gt_translator_translate_string(GtTranslator *tr,
                                              GtStr *protein,
                                              const char *dnaseq,
                                              unsigned long dnalen,
                                              unsigned int frame,
-                                             GtError *e);
+                                             GtError *err);
 
 /* Determines the offset of the beginning of the first codon in <dnaseq> (of
    length <dnalen>) which is a start codon according to the current translation
    scheme in <tr>. The offset is written to the location pointed to by <pos>.
-   Returns a negative value if an error occurred, see <e> for details. */
+   Returns a negative value if an error occurred, see <err> for details. */
 int           gt_translator_find_startcodon(GtTranslator *tr,
                                             const char *dnaseq,
                                             unsigned long dnalen,
                                             unsigned long *pos,
-                                            GtError *e);
+                                            GtError *err);
 
 /* Writes the translation for the codon <c1>,<c2>,<c3> to the position pointed
    to by <amino>. The current translation scheme set in <tr> is used.
-   Returns a negative value if an error occurred, see <e> for details. */
+   Returns a negative value if an error occurred, see <err> for details. */
 int           gt_translator_codon2amino(GtTranslator *tr,
                                         char c1, char c2, char c3,
                                         char *amino,
-                                        GtError *e);
+                                        GtError *err);
 
 /* Deletes <tr> and frees all associated memory. */
 void          gt_translator_delete(GtTranslator *tr);
