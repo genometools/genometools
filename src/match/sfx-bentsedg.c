@@ -56,7 +56,7 @@
 
 #define DEREFSEQ(VAR,PTR,ESR) DEREFSTOPPOSSEQ(VAR,PTR,bsr->totallength,ESR)
 
-#define LCPINDEX(BSR,I)   (Seqpos) ((I) - (BSR)->lcpsubtab->suftabbase)
+#define LCPINDEX(LCPSUBTAB,I)   (Seqpos) ((I) - (LCPSUBTAB)->suftabbase)
 
 #define SWAP(TMP,A,B)\
         if ((A) != (B))\
@@ -117,7 +117,7 @@ typedef struct
   bool defined;
   Codetype code;
   unsigned int prefixindex;
-#undef SKDEBUG
+#define SKDEBUG
 #ifdef SKDEBUG
   Seqpos startpos;
 #endif
@@ -200,8 +200,8 @@ static void showsuffixrange(const Encodedsequence *encseq,
 
   printf("of %d suffixes [%d,%d] at depth %d:\n",
          (int) ((rightptr) - (leftptr) + 1),
-         (int) baseptr + LCPINDEX(bsr,leftptr),
-         (int) baseptr + LCPINDEX(bsr,rightptr),
+         (int) baseptr + LCPINDEX(lcpsubtab,leftptr),
+         (int) baseptr + LCPINDEX(lcpsubtab,rightptr),
          (int) depth);
   for (pi = leftptr; pi <= rightptr; pi++)
   {
@@ -494,7 +494,7 @@ static void insertionsort(Bentsedgresources *bsr,
       gt_assert(retval != 0);
       if (bsr->lcpsubtab != NULL && bsr->assideeffect)
       {
-        lcpindex = LCPINDEX(bsr,pj);
+        lcpindex = LCPINDEX(bsr->lcpsubtab,pj);
         if (pj < pi && retval > 0)
         {
           updatelcpvalue(bsr,lcpindex+1,
@@ -578,7 +578,7 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
       }
       if (retval != 0 && bsr->lcpsubtab != NULL && bsr->assideeffect)
       {
-        lcpindex = LCPINDEX(bsr,pj);
+        lcpindex = LCPINDEX(bsr->lcpsubtab,pj);
         if (pj < pi && retval > 0)
         {
           updatelcpvalue(bsr,lcpindex+1,
@@ -916,7 +916,7 @@ static bool comparisonsort(Bentsedgresources *bsr,
                              bsr->lcpsubtab == NULL
                                ? NULL
                                : bsr->lcpsubtab->bucketoflcpvalues +
-                                 LCPINDEX(bsr,left),
+                                 LCPINDEX(bsr->lcpsubtab,left),
                              width,depth,
                              (Seqpos) bsr->sfxstrategy->differencecover,
                              ordertype,
@@ -985,7 +985,7 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
                                    bsr->lcpsubtab == NULL
                                      ? NULL
                                      : bsr->lcpsubtab->bucketoflcpvalues +
-                                       LCPINDEX(bsr,left),
+                                       LCPINDEX(bsr->lcpsubtab,left),
                                    width,
                                    depth,
                                    (Seqpos) bsr->sfxstrategy->differencecover,
@@ -1126,7 +1126,7 @@ static void sarrcountingsort(Bentsedgresources *bsr,
     if (bsr->lcpsubtab != NULL && bsr->assideeffect &&
         bsr->leftlcpdist[idx] < end)
     { /* at least one element */
-      updatelcpvalue(bsr,LCPINDEX(bsr,left + end),depth + idx);
+      updatelcpvalue(bsr,LCPINDEX(bsr->lcpsubtab,left + end),depth + idx);
     }
     bsr->leftlcpdist[idx] = 0;
   }
@@ -1157,7 +1157,8 @@ static void sarrcountingsort(Bentsedgresources *bsr,
     if (bsr->lcpsubtab != NULL && bsr->assideeffect &&
         bsr->rightlcpdist[idx] < end)
     { /* at least one element */
-      updatelcpvalue(bsr,LCPINDEX(bsr,left + width - end),depth + idx);
+      updatelcpvalue(bsr,LCPINDEX(bsr->lcpsubtab,left + width - end),
+                     depth + idx);
     }
     bsr->rightlcpdist[idx] = 0;
   }
@@ -1366,7 +1367,8 @@ static void bentleysedgewick(Bentsedgresources *bsr,
           which is at a minimum distance to the pivot and thus to an
           element in the final part of the left side.
         */
-        updatelcpvalue(bsr,LCPINDEX(bsr,leftplusw),depth + smallermaxlcp);
+        updatelcpvalue(bsr,LCPINDEX(bsr->lcpsubtab,leftplusw),
+                       depth + smallermaxlcp);
       }
       subsort_bentleysedgewick(bsr,w,left,leftplusw-1,depth + smallerminlcp,
                                Noorder);
@@ -1394,7 +1396,8 @@ static void bentleysedgewick(Bentsedgresources *bsr,
           which is at a minimum distance to the pivot and thus to an
           element in the first part of the right side.
         */
-        updatelcpvalue(bsr,LCPINDEX(bsr,right-w+1),depth + greatermaxlcp);
+        updatelcpvalue(bsr,LCPINDEX(bsr->lcpsubtab,right-w+1),
+                       depth + greatermaxlcp);
       }
       subsort_bentleysedgewick(bsr,w,right-w+1,right,depth + greaterminlcp,
                                Noorder);
