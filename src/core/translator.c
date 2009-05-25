@@ -918,7 +918,7 @@ int gt_translator_unit_test(GtError *err)
   char *bases = "AaCcGgTt";
   char translated;
   unsigned int frame;
-  unsigned long pos;
+  unsigned long pos = 0;
   GtStr *protein[3];
   GtStrArray *schemes;
   gt_error_check(err);
