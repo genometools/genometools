@@ -33,12 +33,12 @@ typedef struct GtTranslator GtTranslator;
    scheme preselected. */
 GtTranslator* gt_translator_new();
 
-/* Selects the translation scheme in <tr> to the one identified by <transnum>.
-   <transnum> refers to the numbers as reported by
+/* Selects the translation scheme in <translator> to the one identified by
+   <transnum>.  <transnum> refers to the numbers as reported by
    <gt_translator_get_translation_table_descriptions()> or the list given
    at the NCBI web site.
    Returns a negative value if an error occurred, see <err> for details. */
-int           gt_translator_set_translation_scheme(GtTranslator *tr,
+int           gt_translator_set_translation_scheme(GtTranslator *translator,
                                                    unsigned int transnum,
                                                    GtError *err);
 
@@ -50,11 +50,11 @@ GtStrArray*   gt_translator_get_translation_table_descriptions();
 
 /* Starts a translation iteration process at the string position pointed to by
    <dnaseq>, intended to go on for <dnalen> bases. The current translation
-   scheme set in <tr> will be used. The currently translated character is put in
-   <translated> while the current reading frame (in reference to <dnaseq>
-   position) is put in <frame>.
+   scheme set in <translator> will be used. The currently translated character
+   is put in <translated> while the current reading frame (in reference to
+   <dnaseq> position) is put in <frame>.
    Returns a negative value if an error occurred, see <err> for details. */
-int           gt_translator_start(GtTranslator *tr,
+int           gt_translator_start(GtTranslator *translator,
                                   const char *dnaseq,
                                   unsigned long dnalen,
                                   char *translated,
@@ -65,16 +65,16 @@ int           gt_translator_start(GtTranslator *tr,
    The currently translated character is put in <translated> while the current
    reading frame is put in <frame>.
    Returns a negative value if an error occurred, see <err> for details. */
-int           gt_translator_next(GtTranslator *tr,
+int           gt_translator_next(GtTranslator *translator,
                                  char *translated,
                                  unsigned int *frame,
                                  GtError *err);
 
 /* Translates <dnaseq> of length <dnalen> in reading frame <frame> using the
-   settings currently active in <tr>. The resulting amino acid sequence is
-   appended to <protein>.
+   settings currently active in <translator>. The resulting amino acid sequence
+   is appended to <protein>.
    Returns a negative value if an error occurred, see <err> for details. */
-int           gt_translator_translate_string(GtTranslator *tr,
+int           gt_translator_translate_string(GtTranslator *translator,
                                              GtStr *protein,
                                              const char *dnaseq,
                                              unsigned long dnalen,
@@ -83,23 +83,24 @@ int           gt_translator_translate_string(GtTranslator *tr,
 
 /* Determines the offset of the beginning of the first codon in <dnaseq> (of
    length <dnalen>) which is a start codon according to the current translation
-   scheme in <tr>. The offset is written to the location pointed to by <pos>.
+   scheme in <translator>.
+   The offset is written to the location pointed to by <pos>.
    Returns a negative value if an error occurred, see <err> for details. */
-int           gt_translator_find_startcodon(GtTranslator *tr,
+int           gt_translator_find_startcodon(GtTranslator *translator,
                                             const char *dnaseq,
                                             unsigned long dnalen,
                                             unsigned long *pos,
                                             GtError *err);
 
 /* Writes the translation for the codon <c1>,<c2>,<c3> to the position pointed
-   to by <amino>. The current translation scheme set in <tr> is used.
+   to by <amino>. The current translation scheme set in <translator> is used.
    Returns a negative value if an error occurred, see <err> for details. */
-int           gt_translator_codon2amino(GtTranslator *tr,
+int           gt_translator_codon2amino(GtTranslator *translator,
                                         char c1, char c2, char c3,
                                         char *amino,
                                         GtError *err);
 
-/* Deletes <tr> and frees all associated memory. */
-void          gt_translator_delete(GtTranslator *tr);
+/* Deletes <translator> and frees all associated memory. */
+void          gt_translator_delete(GtTranslator *translator);
 
 #endif
