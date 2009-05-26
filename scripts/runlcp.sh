@@ -20,14 +20,19 @@ else
   fi
 fi
 
-suffixerator()
+suffixeratornoidx()
 {
   ${RUNNER} gt suffixerator -v -showtime -dna -tis -lcp -suf -des -ssp -db ${filename} $*
 }
 
+suffixerator()
+{
+  ${RUNNER} gt suffixerator -v -showtime -dna -tis -lcp -suf -des -ssp -db ${filename} -indexname sfx-idx $*
+}
+
 suffixeratoronlysuf()
 {
-  ${RUNNER} gt suffixerator -v -showtime -dna -tis -suf -db ${filename} $*
+  ${RUNNER} gt suffixerator -v -showtime -dna -tis -suf -db ${filename} -indexname sfx-idx $*
 }
 
 sfxmap()
@@ -42,33 +47,39 @@ sfxmaponlysuf()
 
 for filename in ${filenames}
 do
-  suffixerator -indexname sfx-idx 
+  suffixerator ""
   sfxmap sfx-idx
-  suffixerator -dir rev -indexname sfx-idx 
+  suffixerator -dir rev
   sfxmap sfx-idx
-  suffixerator -maxdepth -indexname sfx-idx
+  suffixerator -maxdepth
   sfxmap sfx-idx
   maxdepth=`grep '^prefixlength=' sfx-idx.prj | sed -e 's/prefixlength=//'`
   maxdepth=`expr ${maxdepth} \* 2`
-  suffixerator -maxdepth ${maxdepth} -indexname sfx-idx${maxdepth}
+  suffixeratornoidx -maxdepth ${maxdepth} -indexname sfx-idx${maxdepth}
   sfxmap sfx-idx${maxdepth}
-  suffixerator -parts 3 -indexname sfx-idx
+  suffixerator -parts 3
   sfxmap sfx-idx
-  suffixerator -parts 3 -maxdepth -indexname sfx-idx
+  suffixerator -parts 3 -maxdepth
   sfxmap sfx-idx
-  suffixerator -parts 3 -maxdepth he -indexname sfx-idx
+  suffixerator -parts 3 -maxdepth he
   sfxmap sfx-idx
-  suffixerator -parts 3 -maxdepth abs -indexname sfx-idx
+  suffixerator -parts 3 -maxdepth abs
   sfxmap sfx-idx
-  suffixeratoronlysuf -algbds 20 20 100 -cmpcharbychar -dc 32 -indexname sfx-idx
+  suffixeratoronlysuf -algbds 20 20 100 -cmpcharbychar -dc 8
   sfxmaponlysuf sfx-idx
-  suffixeratoronlysuf -algbds 20 20 100 -dc 32 -indexname sfx-idx
+  suffixeratoronlysuf -algbds 20 20 100 -cmpcharbychar -dc 32
   sfxmaponlysuf sfx-idx
-  suffixeratoronlysuf -cmpcharbychar -dc 16 -indexname sfx-idx
+  suffixeratoronlysuf -algbds 20 20 100 -dc 32
   sfxmaponlysuf sfx-idx
-  suffixeratoronlysuf -cmpcharbychar -dc 8 -indexname sfx-idx
+  suffixeratoronlysuf -dc 32
   sfxmaponlysuf sfx-idx
-  ${RUNNER} gt suffixerator -v -showtime -smap Transab -tis -suf -dc 64 -db testdata/fib25.fas.gz -indexname sfx-idx
+  suffixeratoronlysuf -algbds 20 20 100 -dc 8
+  sfxmaponlysuf sfx-idx
+  suffixeratoronlysuf -cmpcharbychar -dc 16
+  sfxmaponlysuf sfx-idx
+  suffixeratoronlysuf -cmpcharbychar -dc 8
+  sfxmaponlysuf sfx-idx
+  ${RUNNER} gt suffixerator -v -showtime -smap Transab -tis -suf -dc 64 -db testdata/fib25.fas.gz
   rm -f sfx-idx.* sfx-idx${maxdepth}.*
 done
 echo "${filenames}"

@@ -117,7 +117,7 @@ typedef struct
   bool defined;
   Codetype code;
   unsigned int prefixindex;
-#define SKDEBUG
+#undef SKDEBUG
 #ifdef SKDEBUG
   Seqpos startpos;
 #endif
@@ -531,10 +531,10 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
   unsigned long idx = 0;
   bool tempb;
 
+#ifdef SKDEBUG
   printf("insertion sort (offset=%lu,maxdepth=%lu)\n",
             (unsigned long) offset,
             (unsigned long) maxdepth);
-#ifdef SKDEBUG
   showsuffixrange(bsr->encseq,bsr->fwd,bsr->complement,bsr->lcpsubtab,
                   leftptr,rightptr,offset);
 #endif
@@ -591,12 +591,19 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
                                                 bsr->esr1,bsr->esr2,
                                                 *(pj-1),*pj,offset,
                                                 maxdepth);
+        gt_assert(lcplen <= maxdepth);
+        if (lcplen == maxdepth)
+        {
+          gt_assert(retval == 0);
+        }
       }
+#ifdef SKDEBUG
       printf("cmp %lu and %lu: retval = %d, lcplen = %lu\n",
                   (unsigned long) *(pj-1),
                   (unsigned long) *pj,
                   retval,
                   (unsigned long) lcplen);
+#endif
       if (retval != 0 && bsr->lcpsubtab != NULL && bsr->assideeffect)
       {
         lcpindex = LCPINDEX(bsr->lcpsubtab,pj);
@@ -628,12 +635,16 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
   {
     unsigned long equalsrangewidth = 0,
                   width = (unsigned long) (rightptr - leftptr + 1);
+#ifdef SKDEBUG
     printf("ordered suffix %lu\n",(unsigned long) *leftptr);
+#endif
     for (idx = 1UL; idx < width; idx++)
     {
+#ifdef SKDEBUG
       printf("ordered suffix %lu, equalwithprevious=%s\n",
               (unsigned long) leftptr[idx],
               bsr->equalwithprevious[idx] ? "true" : "false");
+#endif
       if (bsr->equalwithprevious[idx])
       {
         bsr->equalwithprevious[idx] = false;
@@ -642,8 +653,10 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
       {
         if (equalsrangewidth > 0)
         {
+#ifdef SKDEBUG
           printf("process interval of width %lu\n",
-                 equalsrangewidth);
+                 equalsrangewidth + 1);
+#endif
           bsr->dc_processunsortedrange(bsr->voiddcov,
                                        leftptr + idx - 1 - equalsrangewidth,
                                        leftptr + idx - 1,maxdepth);
@@ -653,14 +666,15 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
     }
     if (equalsrangewidth > 0)
     {
+#ifdef SKDEBUG
       printf("process interval of width %lu\n",
-             equalsrangewidth);
+             equalsrangewidth + 1);
+#endif
       bsr->dc_processunsortedrange(bsr->voiddcov,
                                    leftptr + width - 1 - equalsrangewidth,
                                    leftptr + width - 1,maxdepth);
     }
   }
-  STAMP;
 }
 
 #define DOMEDIANCOMPARE(A,B)\

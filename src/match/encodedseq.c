@@ -3886,8 +3886,9 @@ int compareEncseqsequencesmaxdepth(Seqpos *lcp,
           depth += commonunits;
         } else
         {
-          retval = pos1 < pos2 ? -1 : 1;
           depth = maxdepth;
+          retval = 0;
+          break;
         }
       } else
       {
@@ -3928,7 +3929,7 @@ int compareEncseqsequencesmaxdepth(Seqpos *lcp,
     }
   } while (retval == 0);
   *lcp = depth;
-#define FASTCOMPAREDEBUG
+#undef FASTCOMPAREDEBUG
 #ifdef FASTCOMPAREDEBUG
   {
     Seqpos lcp2 = 0;
