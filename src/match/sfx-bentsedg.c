@@ -198,11 +198,19 @@ static void showsuffixrange(const Encodedsequence *encseq,
 {
   const Suffixptr *pi;
 
-  printf("of %d suffixes [%d,%d] at depth %d:\n",
-         (int) ((rightptr) - (leftptr) + 1),
-         (int) baseptr + LCPINDEX(lcpsubtab,leftptr),
-         (int) baseptr + LCPINDEX(lcpsubtab,rightptr),
-         (int) depth);
+  if (lcpsubtab == NULL)
+  {
+    printf("of %d suffixes at depth %d:\n",
+           (int) ((rightptr) - (leftptr) + 1),
+           (int) depth);
+  } else
+  {
+    printf("of %d suffixes [%d,%d] at depth %d:\n",
+           (int) ((rightptr) - (leftptr) + 1),
+           (int) baseptr + LCPINDEX(lcpsubtab,leftptr),
+           (int) baseptr + LCPINDEX(lcpsubtab,rightptr),
+           (int) depth);
+  }
   for (pi = leftptr; pi <= rightptr; pi++)
   {
     printf("suffix %d:",*pi);
@@ -542,9 +550,17 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
         endpos1 = MIN(bsr->totallength,*(pj-1)+maxdepth);
         endpos2 = MIN(bsr->totallength,*pj+maxdepth);
         ptr1 = (*(pj-1))+offset;
-        initEncodedsequencescanstate(bsr->esr1,bsr->encseq,bsr->readmode,ptr1);
+        if (ptr1 < bsr->totallength)
+        {
+          initEncodedsequencescanstate(bsr->esr1,bsr->encseq,bsr->readmode,
+                                       ptr1);
+        }
         ptr2 = (*pj)+offset;
-        initEncodedsequencescanstate(bsr->esr2,bsr->encseq,bsr->readmode,ptr2);
+        if (ptr2 < bsr->totallength)
+        {
+          initEncodedsequencescanstate(bsr->esr2,bsr->encseq,bsr->readmode,
+                                       ptr2);
+        }
         for (;;)
         {
           Seqpos ccs, cct;
@@ -576,6 +592,11 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
                                                 *(pj-1),*pj,offset,
                                                 maxdepth);
       }
+      printf("cmp %lu and %lu: retval = %d, lcplen = %lu\n",
+                  (unsigned long) *(pj-1),
+                  (unsigned long) *pj,
+                  retval,
+                  (unsigned long) lcplen);
       if (retval != 0 && bsr->lcpsubtab != NULL && bsr->assideeffect)
       {
         lcpindex = LCPINDEX(bsr->lcpsubtab,pj);
@@ -607,8 +628,12 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
   {
     unsigned long equalsrangewidth = 0,
                   width = (unsigned long) (rightptr - leftptr + 1);
+    printf("ordered suffix %lu\n",(unsigned long) *leftptr);
     for (idx = 1UL; idx < width; idx++)
     {
+      printf("ordered suffix %lu, equalwithprevious=%s\n",
+              (unsigned long) leftptr[idx],
+              bsr->equalwithprevious[idx] ? "true" : "false");
       if (bsr->equalwithprevious[idx])
       {
         bsr->equalwithprevious[idx] = false;
@@ -617,6 +642,8 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
       {
         if (equalsrangewidth > 0)
         {
+          printf("process interval of width %lu\n",
+                 equalsrangewidth);
           bsr->dc_processunsortedrange(bsr->voiddcov,
                                        leftptr + idx - 1 - equalsrangewidth,
                                        leftptr + idx - 1,maxdepth);
@@ -626,6 +653,8 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
     }
     if (equalsrangewidth > 0)
     {
+      printf("process interval of width %lu\n",
+             equalsrangewidth);
       bsr->dc_processunsortedrange(bsr->voiddcov,
                                    leftptr + width - 1 - equalsrangewidth,
                                    leftptr + width - 1,maxdepth);
