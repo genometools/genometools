@@ -12,14 +12,6 @@ int comparetwosuffixes(const Encodedsequence *encseq,
                        Encodedsequencescanstate *esr1,
                        Encodedsequencescanstate *esr2);
 
-int comparewithonespecial(const Encodedsequence *encseq,
-                          bool fwd,
-                          bool complement,
-                          Seqpos pos1,
-                          Seqpos pos2,
-                          Seqpos depth,
-                          Seqpos maxdepth);
-
 int comparetwostrings(const Encodedsequence *encseq,
                       bool fwd,
                       bool complement,

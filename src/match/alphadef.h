@@ -25,6 +25,7 @@
 #include "core/error_api.h"
 
 #define MAXALPHABETCHARACTER UCHAR_MAX
+#define COMPAREOFFSET        (MAXALPHABETCHARACTER + 1)
 
 /*
   the size of the DNA alphabet

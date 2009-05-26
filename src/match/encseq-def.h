@@ -240,6 +240,14 @@ Codetype extractprefixcode(unsigned int *unitsnotspecial,
                            Seqpos frompos,
                            unsigned int len);
 
+int comparewithonespecial(const Encodedsequence *encseq,
+                          bool fwd,
+                          bool complement,
+                          Seqpos pos1,
+                          Seqpos pos2,
+                          Seqpos depth,
+                          Seqpos maxdepth);
+
 int compareEncseqsequences(Seqpos *lcp,
                            const Encodedsequence *encseq,
                            bool fwd,

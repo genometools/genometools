@@ -42,7 +42,6 @@
 #include "sfx-cmpsuf.pr"
 #include "kmer2string.pr"
 
-#define COMPAREOFFSET          (MAXALPHABETCHARACTER + 1)
 #define UNIQUEINT(P)           ((Seqpos) ((P) + COMPAREOFFSET))
 #define ACCESSCHAR(POS)        getencodedchar(bsr->encseq,POS,bsr->readmode)
 #define ACCESSCHARSEQ(POS,ESR) sequentialgetencodedchar(bsr->encseq,ESR,POS,\

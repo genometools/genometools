@@ -20,19 +20,24 @@ else
   fi
 fi
 
-suffixeratornoidx()
+suffixeratornoidxnolcp()
 {
-  ${RUNNER} gt suffixerator -v -showtime -dna -tis -lcp -suf -des -ssp -db ${filename} $*
+  ${RUNNER} gt suffixerator -v -showtime -dna -tis -suf -des -ssp -db ${filename} $*
 }
 
 suffixerator()
 {
-  ${RUNNER} gt suffixerator -v -showtime -dna -tis -lcp -suf -des -ssp -db ${filename} -indexname sfx-idx $*
+  suffixeratornoidxnolcp -lcp -indexname sfx-idx $*
 }
 
-suffixeratoronlysuf()
+suffixeratornolcp()
 {
-  ${RUNNER} gt suffixerator -v -showtime -dna -tis -suf -db ${filename} -indexname sfx-idx $*
+  suffixeratornoidxnolcp -indexname sfx-idx $*
+}
+
+suffixeratornoidx()
+{
+  suffixeratornoidxnolcp -lcp $*
 }
 
 sfxmap()
@@ -65,21 +70,14 @@ do
   sfxmap sfx-idx
   suffixerator -parts 3 -maxdepth abs
   sfxmap sfx-idx
-  suffixeratoronlysuf -algbds 20 20 100 -cmpcharbychar -dc 8
-  sfxmaponlysuf sfx-idx
-  suffixeratoronlysuf -algbds 20 20 100 -cmpcharbychar -dc 32
-  sfxmaponlysuf sfx-idx
-  suffixeratoronlysuf -algbds 20 20 100 -dc 32
-  sfxmaponlysuf sfx-idx
-  suffixeratoronlysuf -dc 32
-  sfxmaponlysuf sfx-idx
-  suffixeratoronlysuf -algbds 20 20 100 -dc 8
-  sfxmaponlysuf sfx-idx
-  suffixeratoronlysuf -cmpcharbychar -dc 16
-  sfxmaponlysuf sfx-idx
-  suffixeratoronlysuf -cmpcharbychar -dc 8
-  sfxmaponlysuf sfx-idx
-  ${RUNNER} gt suffixerator -v -showtime -smap Transab -tis -suf -dc 64 -db testdata/fib25.fas.gz
-  rm -f sfx-idx.* sfx-idx${maxdepth}.*
+  for dc in 8 16 32
+  do
+    suffixeratornolcp -cmpcharbychar -dc ${dc}
+    sfxmaponlysuf sfx-idx
+    suffixeratornolcp -dc ${dc}
+    sfxmaponlysuf sfx-idx
+  done
+  ${RUNNER} gt suffixerator -v -showtime -smap Transab -tis -suf -dc 64 -db testdata/fib25.fas.gz -indexname sfx-idx
+  rm -f sfx-idx.* sfx-idx${maxdepth}.* 
 done
 echo "${filenames}"

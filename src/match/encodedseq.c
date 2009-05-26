@@ -857,6 +857,9 @@ static int determinesattype(Seqpos *specialranges,
 }
 #endif
 
+static unsigned long countcompareEncseqsequencesmaxdepth = 0;
+static unsigned long countcompareEncseqsequences = 0;
+
 void encodedsequence_free(Encodedsequence **encseqptr)
 {
   Encodedsequence *encseq = *encseqptr;
@@ -939,6 +942,12 @@ void encodedsequence_free(Encodedsequence **encseqptr)
   gt_free((Filelengthvalues *) encseq->filelengthtab);
   encseq->filelengthtab = NULL;
   FREESPACE(*encseqptr);
+/*
+  printf("countcompareEncseqsequencesmaxdepth = %lu\n",
+          countcompareEncseqsequencesmaxdepth);
+  printf("countcompareEncseqsequences= %lu\n",
+          countcompareEncseqsequences);
+*/
 }
 
 #define ADDTYPE(V)               uchar##V
@@ -3707,6 +3716,99 @@ int compareTwobitencodings(bool fwd,
   return 0;
 }
 
+static Seqpos extractsinglecharacter(const Encodedsequence *encseq,
+                                     bool fwd,
+                                     bool complement,
+                                     Seqpos pos,
+                                     Seqpos depth,
+                                     Seqpos totallength,
+                                     Seqpos maxdepth)
+{
+  Seqpos cc;
+
+  if (fwd)
+  {
+    Seqpos endpos;
+
+    if (maxdepth > 0)
+    {
+      endpos = MIN(pos+maxdepth,totallength);
+    } else
+    {
+      endpos = totallength;
+    }
+    if (pos + depth >= endpos)
+    {
+      cc = pos + depth + COMPAREOFFSET;
+    } else
+    {
+      cc = getencodedchar(encseq,pos + depth,Forwardmode);
+      if (ISSPECIAL(cc))
+      {
+        cc = pos + depth + COMPAREOFFSET;
+      } else
+      {
+        if (complement)
+        {
+          cc = COMPLEMENTBASE(cc);
+        }
+      }
+    }
+  } else
+  {
+    if (pos < depth)
+    {
+      cc = depth - pos + COMPAREOFFSET;
+    } else
+    {
+      cc = getencodedchar(encseq,pos - depth,Forwardmode);
+      if (ISSPECIAL(cc))
+      {
+        cc = pos - depth + COMPAREOFFSET;
+      } else
+      {
+        if (complement)
+        {
+          cc = COMPLEMENTBASE(cc);
+        }
+      }
+    }
+  }
+  return cc;
+}
+
+int comparewithonespecial(const Encodedsequence *encseq,
+                          bool fwd,
+                          bool complement,
+                          Seqpos pos1,
+                          Seqpos pos2,
+                          Seqpos depth,
+                          Seqpos maxdepth)
+{
+  Seqpos cc1, cc2, totallength = getencseqtotallength(encseq);
+
+  cc1 = extractsinglecharacter(encseq,
+                               fwd,
+                               complement,
+                               pos1,
+                               depth,
+                               totallength,
+                               maxdepth);
+  cc2 = extractsinglecharacter(encseq,
+                               fwd,
+                               complement,
+                               pos2,
+                               depth,
+                               totallength,
+                               maxdepth);
+  gt_assert(cc1 != cc2);
+  if (!fwd && cc1 >= (Seqpos) COMPAREOFFSET && cc2 >= (Seqpos) COMPAREOFFSET)
+  {
+    return cc1 > cc2 ? -1 : 1;
+  }
+  return cc1 < cc2 ? -1 : 1;
+}
+
 int compareEncseqsequences(Seqpos *lcp,
                            const Encodedsequence *encseq,
                            bool fwd,
@@ -3721,6 +3823,7 @@ int compareEncseqsequences(Seqpos *lcp,
   unsigned int commonunits;
   int retval;
 
+  countcompareEncseqsequences++;
   gt_assert(pos1 != pos2);
   if (!fwd)
   {
@@ -3838,12 +3941,8 @@ int compareEncseqsequencesmaxdepth(Seqpos *lcp,
   int retval;
   Seqpos endpos1, endpos2;
 
+  countcompareEncseqsequencesmaxdepth++;
   gt_assert(pos1 != pos2);
-  if (!fwd)
-  {
-    pos1 = REVERSEPOS(encseq->totallength,pos1);
-    pos2 = REVERSEPOS(encseq->totallength,pos2);
-  }
   gt_assert(depth < maxdepth);
   if (fwd)
   {
@@ -3851,6 +3950,8 @@ int compareEncseqsequencesmaxdepth(Seqpos *lcp,
     endpos2 = MIN(pos2 + maxdepth,encseq->totallength);
   } else
   {
+    pos1 = REVERSEPOS(encseq->totallength,pos1);
+    pos2 = REVERSEPOS(encseq->totallength,pos2);
     endpos1 = endpos2 = 0;
   }
   if (encseq->numofspecialstostore > 0)
@@ -3914,7 +4015,8 @@ int compareEncseqsequencesmaxdepth(Seqpos *lcp,
         } else
         {
           depth = maxdepth;
-          retval = pos1 > pos2 ? -1 : 1;
+          retval = 0;
+          break;
         }
       } else
       {
