@@ -34,6 +34,7 @@
 #include "encseq-def.h"
 #include "sfx-suftaborder.h"
 #include "sfx-bentsedg.h"
+#include "verbose-def.h"
 #include "stamp.h"
 
 typedef unsigned char Diffrank;
@@ -105,6 +106,7 @@ struct Differencecover
   GtArrayPairsuffixptr firstgeneration;
   unsigned long firstgenerationtotalwidth,
                 firstgenerationcount;
+  Verboseinfo *verboseinfo;
 };
 
 /* Compute difference cover on the fly */
@@ -190,7 +192,8 @@ int differencecover_vparamverify(const Differencecover *dcov,GtError *err)
 
 Differencecover *differencecover_new(unsigned int vparam,
                                      const Encodedsequence *encseq,
-                                     Readmode readmode)
+                                     Readmode readmode,
+                                     Verboseinfo *verboseinfo)
 {
   unsigned int offset = 0, v = 1U;
   Differencecover *dcov;
@@ -199,6 +202,7 @@ Differencecover *differencecover_new(unsigned int vparam,
   dcov = gt_malloc(sizeof (*dcov));
   dcov->numofchars = getencseqAlphabetnumofchars(encseq);
   dcov->totallength = getencseqtotallength(encseq);
+  dcov->verboseinfo = verboseinfo;
   for (dcov->logmod = 0;
        dcov->logmod < (unsigned int) (sizeof (differencecoversizes)/
                                      sizeof (differencecoversizes[0]));
@@ -569,14 +573,16 @@ static void dc_anchorleftmost(Differencecover *dcov,Seqpos *left,
 }
 
 static void dc_showintervalsizes(unsigned long count,unsigned long totalwidth,
-                                 Seqpos totallength,unsigned long maxwidth)
+                                 Seqpos totallength,unsigned long maxwidth,
+                                 Verboseinfo *verboseinfo)
 {
-  printf("%lu\n(total=%lu,avg=%.2f,%.2f%% of all, maxwidth=%lu)\n",
-          count,
-          totalwidth,
-          (double) totalwidth/count,
-          100.0 * (double) totalwidth/totallength,
-          maxwidth);
+  showverbose(verboseinfo,
+              "%lu\n(total=%lu,avg=%.2f,%.2f%% of all, maxwidth=%lu)\n",
+              count,
+              totalwidth,
+              (double) totalwidth/count,
+              100.0 * (double) totalwidth/totallength,
+              maxwidth);
 }
 
 static void dc_processunsortedrange(Differencecover *dcov,
@@ -603,18 +609,21 @@ static void dc_processunsortedrange(Differencecover *dcov,
   {
     if (dcov->firstwithnewdepth.defined)
     {
-      printf("intervals in level " FormatSeqpos "=",
-             PRINTSeqposcast(dcov->firstwithnewdepth.depth));
+      showverbose(dcov->verboseinfo,
+                  "intervals in level " FormatSeqpos "=",
+                  PRINTSeqposcast(dcov->firstwithnewdepth.depth));
       dc_showintervalsizes(dcov->firstwithnewdepth.count,
-                        dcov->firstwithnewdepth.totalwidth,
-                        dcov->totallength,
-                        dcov->firstwithnewdepth.maxwidth);
+                           dcov->firstwithnewdepth.totalwidth,
+                           dcov->totallength,
+                           dcov->firstwithnewdepth.maxwidth,
+                           dcov->verboseinfo);
     } else
     {
       dcov->firstwithnewdepth.defined = true;
     }
-    printf("enter new level with depth=" FormatSeqpos "\n",
-            PRINTSeqposcast(depth));
+    showverbose(dcov->verboseinfo,
+                "enter new level with depth=" FormatSeqpos "\n",
+                PRINTSeqposcast(depth));
     dcov->firstwithnewdepth.left = left;
     dcov->firstwithnewdepth.right = right;
     dcov->firstwithnewdepth.depth = depth;
@@ -798,7 +807,7 @@ void dc_sortunsortedbucket(void *data,
   gt_assert(left < right);
   gt_assert(depth >= (Seqpos) dcov->vparam);
   gt_assert(dcov->diff2pos != NULL);
-  /* XXX remove this later */
+#ifdef WITHCHECK
   checksortedsuffixes(__FILE__,
                       __LINE__,
                       dcov->encseq,
@@ -808,6 +817,7 @@ void dc_sortunsortedbucket(void *data,
                       false, /* specialsareequal  */
                       false,  /* specialsareequalatdepth0 */
                       (Seqpos) dcov->vparam);
+#endif
   gt_qsort_r(left,(size_t) (right - left + 1),sizeof(Seqpos),data,
              comparedcov_presortedsuffixes);
 }
@@ -818,12 +828,13 @@ static void dc_sortremainingsamples(Differencecover *dcov)
 
   if (dcov->firstgenerationcount > 0)
   {
-    printf("number of intervals at base level " FormatSeqpos " was ",
-            PRINTSeqposcast(dcov->currentdepth));
+    showverbose(dcov->verboseinfo,"number of intervals at base level "
+                FormatSeqpos " was ",PRINTSeqposcast(dcov->currentdepth));
     dc_showintervalsizes(dcov->firstgenerationcount,
                          dcov->firstgenerationtotalwidth,
                          dcov->totallength,
-                         dcov->allocateditvinfo);
+                         dcov->allocateditvinfo,
+                         dcov->verboseinfo);
   }
   if (dcov->inversesuftab == NULL)
   { /* now maxdepth > prefixlength */
@@ -855,7 +866,7 @@ static void dc_sortremainingsamples(Differencecover *dcov)
     dcov->currentqueuesize--;
     dc_sortsuffixesonthislevel(dcov,pair.left,pair.right);
   }
-  printf("maxqueuesize = %lu\n",dcov->maxqueuesize);
+  showverbose(dcov->verboseinfo,"maxqueuesize = %lu",dcov->maxqueuesize);
   gt_free(dcov->itvinfo);
   dcov->itvinfo = NULL;
   gt_inl_queue_delete(dcov->rangestobesorted);
@@ -954,14 +965,13 @@ void differencecover_sortsample(Differencecover *dcov,bool withcheck)
   }
   dcov->effectivesamplesize = dcov->samplesize - fullspecials;
   bcktab_leftborderpartialsums(dcov->bcktab,(Seqpos) dcov->effectivesamplesize);
-  printf("%lu positions are sampled (%.2f) wasted=%lu, pl=%u\n",
-                                  dcov->samplesize,
-                                  100.0 *
-                                  (double) dcov->samplesize/
-                                           (dcov->totallength+1),
-                                  dcov->maxsamplesize - dcov->samplesize,
-                                  dcov->prefixlength);
-  printf("specials = %lu, fullspecials=%lu\n",specials,fullspecials);
+  showverbose(dcov->verboseinfo,
+              "%lu positions are sampled (%.2f) pl=%u",
+              dcov->samplesize,
+              100.0 * (double) dcov->samplesize/(dcov->totallength+1),
+              dcov->prefixlength);
+  showverbose(dcov->verboseinfo,"specials = %lu, fullspecials=%lu",
+              specials,fullspecials);
   if (withcheck)
   {
     qsort(codelist.spaceCodeatposition,
@@ -1109,7 +1119,7 @@ void differencecovers_check(const Encodedsequence *encseq,Readmode readmode)
        logmod++)
   {
     vparam = 1U << logmod;
-    dcov = differencecover_new(vparam,encseq,readmode);
+    dcov = differencecover_new(vparam,encseq,readmode,NULL);
     if (dcov == NULL)
     {
       fprintf(stderr,"no difference cover for v=%u\n",vparam);

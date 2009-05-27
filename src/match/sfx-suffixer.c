@@ -559,7 +559,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
         deliverthetime(stdout,mtime,"sorting difference cover sample");
       }
       sfi->dcov = differencecover_new(sfi->sfxstrategy.differencecover,
-                                      encseq,readmode);
+                                      encseq,readmode,verboseinfo);
       if (sfi->dcov == NULL)
       {
         gt_error_set(err,"no difference cover modulo %u found",

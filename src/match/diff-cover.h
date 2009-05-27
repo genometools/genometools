@@ -21,6 +21,7 @@
 #include "seqpos-def.h"
 #include "encseq-def.h"
 #include "readmode-def.h"
+#include "verbose-def.h"
 
 typedef struct Differencecover Differencecover;
 
@@ -28,7 +29,8 @@ void differencecovers_check(const Encodedsequence *encseq,Readmode readmode);
 
 Differencecover *differencecover_new(unsigned int vparam,
                                      const Encodedsequence *encseq,
-                                     Readmode readmode);
+                                     Readmode readmode,
+                                     Verboseinfo *verboseinfo);
 
 int differencecover_vparamverify(const Differencecover *dcov,GtError *err);
 
