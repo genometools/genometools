@@ -550,21 +550,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
     sfi->bucketiterstep = 0;
     sfi->verboseinfo = verboseinfo;
     sfi->mtime = mtime;
-    sfi->bcktab = allocBcktab(sfi->numofchars,
-                              prefixlength,
-                              sfi->sfxstrategy.storespecialcodes,
-                              verboseinfo,
-                              err);
-    if (sfi->bcktab == NULL)
-    {
-      haserr = true;
-      sfi->leftborder = NULL;
-      sfi->numofallcodes = 0;
-    } else
-    {
-      sfi->leftborder = bcktab_leftborder(sfi->bcktab);
-      sfi->numofallcodes = bcktab_numofallcodes(sfi->bcktab);
-    }
+
     if (sfi->sfxstrategy.differencecover > 0 &&
         getencseqspecialcharacters(encseq) < getencseqtotallength(encseq))
     {
@@ -594,6 +580,24 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
           differencecover_sortsample(sfi->dcov,false);
         }
       }
+    }
+  }
+  if (!haserr)
+  {
+    sfi->bcktab = allocBcktab(sfi->numofchars,
+                              prefixlength,
+                              sfi->sfxstrategy.storespecialcodes,
+                              verboseinfo,
+                              err);
+    if (sfi->bcktab == NULL)
+    {
+      haserr = true;
+      sfi->leftborder = NULL;
+      sfi->numofallcodes = 0;
+    } else
+    {
+      sfi->leftborder = bcktab_leftborder(sfi->bcktab);
+      sfi->numofallcodes = bcktab_numofallcodes(sfi->bcktab);
     }
   }
   if (!haserr)
