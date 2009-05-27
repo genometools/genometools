@@ -1851,8 +1851,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
                                   unsigned int numofchars,
                                   unsigned int prefixlength,
                                   Outlcpinfo *outlcpinfo,
-                                  const Sfxstrategy *sfxstrategy,
-                                  Verboseinfo *verboseinfo)
+                                  const Sfxstrategy *sfxstrategy)
 {
   unsigned long idx;
 
@@ -1892,9 +1891,8 @@ static void initBentsedgresources(Bentsedgresources *bsr,
                            partwidth,
                            numofchars,
                            false,
-                           0, /* not necesarry as hashexceptions = false */
-                           verboseinfo);
-    bcktab_showlog2info(bcktab,verboseinfo);
+                           0); /* not necesarry as hashexceptions = false */
+    /* bcktab_showlog2info(bcktab,verboseinfo); */
     if (outlcpinfo != NULL && outlcpinfo->assideeffect)
     {
       size_t sizespeciallcps, sizelcps;
@@ -2112,8 +2110,7 @@ void sortallbuckets(Suftab *suftab,
                         numofchars,
                         prefixlength,
                         outlcpinfo,
-                        sfxstrategy,
-                        verboseinfo);
+                        sfxstrategy);
   for (code = mincode; code <= maxcode; code++)
   {
     (*bucketiterstep)++;
@@ -2302,8 +2299,7 @@ void sortbucketofsuffixes(Seqpos *suffixestobesorted,
                         numofchars,
                         prefixlength,
                         NULL,  /* outlcpinfo unused */
-                        sfxstrategy,
-                        verboseinfo);
+                        sfxstrategy);
   bsr.voiddcov = voiddcov;
   bsr.dc_processunsortedrange = dc_processunsortedrange;
   for (code = mincode; code <= maxcode; code++)

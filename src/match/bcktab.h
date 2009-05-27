@@ -85,8 +85,7 @@ void determinemaxbucketsize(Bcktab *bcktab,
                             Seqpos partwidth,
                             unsigned int numofchars,
                             bool hashexceptions,
-                            Seqpos totallength, /* relevant for hashexception */
-                            Verboseinfo *verboseinfo);
+                            Seqpos totallength);/* relevant for hashexception */
 
 void bcktab_showlog2info(const Bcktab *bcktab,Verboseinfo *verboseinfo);
 

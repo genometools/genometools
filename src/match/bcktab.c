@@ -636,8 +636,7 @@ void determinemaxbucketsize(Bcktab *bcktab,
                             Seqpos partwidth,
                             unsigned int numofchars,
                             bool hashexceptions,
-                            Seqpos totallength, /* relevant for hashexception */
-                            Verboseinfo *verboseinfo)
+                            Seqpos totallength) /* relevant for hashexception */
 {
   unsigned int rightchar = (unsigned int) (mincode % numofchars);
   Bucketspecification bucketspec;
@@ -646,12 +645,15 @@ void determinemaxbucketsize(Bcktab *bcktab,
   bcktab->maxbucketinfo.specialsmaxbucketsize = 1UL;
   bcktab->maxbucketinfo.nonspecialsmaxbucketsize = 1UL;
   bcktab->maxbucketinfo.maxbucketsize = 1UL;
-  memset(bcktab->maxbucketinfo.log2nonspecialbucketsizedist,0,
-               sizeof (*bcktab->maxbucketinfo.log2nonspecialbucketsizedist) *
-               (GT_MAXLOG2VALUE+1));
-  memset(bcktab->maxbucketinfo.log2specialbucketsizedist,0,
-               sizeof (*bcktab->maxbucketinfo.log2specialbucketsizedist) *
-               (GT_MAXLOG2VALUE+1));
+  if (hashexceptions)
+  {
+    memset(bcktab->maxbucketinfo.log2nonspecialbucketsizedist,0,
+           sizeof (*bcktab->maxbucketinfo.log2nonspecialbucketsizedist) *
+           (GT_MAXLOG2VALUE+1));
+    memset(bcktab->maxbucketinfo.log2specialbucketsizedist,0,
+           sizeof (*bcktab->maxbucketinfo.log2specialbucketsizedist) *
+           (GT_MAXLOG2VALUE+1));
+  }
   for (code = mincode; code <= maxcode; code++)
   {
     rightchar = calcbucketboundsparts(&bucketspec,
@@ -678,15 +680,18 @@ void determinemaxbucketsize(Bcktab *bcktab,
       bcktab->maxbucketinfo.maxbucketsize = bucketspec.nonspecialsinbucket +
                                             bucketspec.specialsinbucket;
     }
-    if (bucketspec.nonspecialsinbucket >= 1UL)
+    if (hashexceptions)
     {
-      updatelog2values(bcktab->maxbucketinfo.log2nonspecialbucketsizedist,
-                       bucketspec.nonspecialsinbucket);
-    }
-    if (bucketspec.specialsinbucket > 1UL)
-    {
-      updatelog2values(bcktab->maxbucketinfo.log2specialbucketsizedist,
-                       bucketspec.specialsinbucket);
+      if (bucketspec.nonspecialsinbucket >= 1UL)
+      {
+        updatelog2values(bcktab->maxbucketinfo.log2nonspecialbucketsizedist,
+                         bucketspec.nonspecialsinbucket);
+      }
+      if (bucketspec.specialsinbucket > 1UL)
+      {
+        updatelog2values(bcktab->maxbucketinfo.log2specialbucketsizedist,
+                         bucketspec.specialsinbucket);
+      }
     }
   }
   if (hashexceptions)
@@ -701,12 +706,14 @@ void determinemaxbucketsize(Bcktab *bcktab,
     bcktab->optimalnumofbits = 0;
     bcktab->logofremaining = 0;
   }
+  /*
   showverbose(verboseinfo,"maxbucket (specials)=%lu",
               bcktab->maxbucketinfo.specialsmaxbucketsize);
   showverbose(verboseinfo,"maxbucket (nonspecials)=%lu",
               bcktab->maxbucketinfo.nonspecialsmaxbucketsize);
   showverbose(verboseinfo,"maxbucket (all)=%lu",
               bcktab->maxbucketinfo.maxbucketsize);
+  */
 }
 
 static void showlog2info(const char *tag,const unsigned long *log2tab,

@@ -53,15 +53,21 @@ static unsigned int prefixlengthwithmaxspace(unsigned int numofchars,
   unsigned int prefixlength;
   uint64_t sizeofrep;
 
+#ifdef WITHINFO
   printf("maxbytes = %lu\n",(unsigned long) (maxbytes * factor));
+#endif
   for (prefixlength = 1U; /* Nothing */; prefixlength++)
   {
     sizeofrep = sizeofbuckettable(numofchars,prefixlength);
+#ifdef WITHINFO
     printf("sizeofrep = %lu, after divide %lu\n",(unsigned long) sizeofrep,
                                         (unsigned long) (sizeofrep/factor));
+#endif
     if (sizeofrep/factor > (uint64_t) maxbytes)
     {
+#ifdef WITHINFO
       printf("prefixlengthwithmaxspace = %u\n",prefixlength-1);
+#endif
       return prefixlength-1;
     }
   }
