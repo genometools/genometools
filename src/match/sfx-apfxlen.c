@@ -41,7 +41,7 @@
   where \(n\) is the total length of the input sequence.
 */
 
-#define MAXMULTIPLIEROFTOTALLENGTH 1.0
+#define MAXMULTIPLIEROFTOTALLENGTH 4.0
 #define RECOMMENDEDMULTIPLIER      0.25
 
 #define MAXVALUEWITHBITS(BITNUM)    ((1U << (BITNUM)) - 1)
