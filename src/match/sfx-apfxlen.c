@@ -37,27 +37,31 @@
 
 /*
   We allow to choose the prefixlength \(l\) in such a way that the size of
-  table bcktab (which is $8\cdot k^{l}$ never exceeds the
-  $\texttt{MAXMULTIPLIEROFTOTALLENGTH} \cdot n$, where \(k\) is the size
-  of the alphabet and \(n\) is the total length of the input sequence.
+  table bcktab never exceeds the $\texttt{MAXMULTIPLIEROFTOTALLENGTH}\cdot n$,
+  where \(n\) is the total length of the input sequence.
 */
 
-#define MAXMULTIPLIEROFTOTALLENGTH 4
+#define MAXMULTIPLIEROFTOTALLENGTH 1.0
+#define RECOMMENDEDMULTIPLIER      0.25
 
 #define MAXVALUEWITHBITS(BITNUM)    ((1U << (BITNUM)) - 1)
 
 static unsigned int prefixlengthwithmaxspace(unsigned int numofchars,
                                              Seqpos maxbytes,
-                                             unsigned int factor)
+                                             double factor)
 {
   unsigned int prefixlength;
   uint64_t sizeofrep;
 
+  printf("maxbytes = %lu\n",(unsigned long) (maxbytes * factor));
   for (prefixlength = 1U; /* Nothing */; prefixlength++)
   {
     sizeofrep = sizeofbuckettable(numofchars,prefixlength);
-    if ((sizeofrep / (uint64_t) factor) > (uint64_t) maxbytes)
+    printf("sizeofrep = %lu, after divide %lu\n",(unsigned long) sizeofrep,
+                                        (unsigned long) (sizeofrep/factor));
+    if (sizeofrep/factor > (uint64_t) maxbytes)
     {
+      printf("prefixlengthwithmaxspace = %u\n",prefixlength-1);
       return prefixlength-1;
     }
   }
@@ -71,7 +75,8 @@ unsigned int recommendedprefixlength(unsigned int numofchars,
 {
   unsigned int prefixlength;
 
-  prefixlength = prefixlengthwithmaxspace(numofchars,totallength,1U);
+  prefixlength = prefixlengthwithmaxspace(numofchars,totallength,
+                                          RECOMMENDEDMULTIPLIER);
   if (prefixlength == 0)
   {
     return 1U;
@@ -95,7 +100,6 @@ unsigned int whatisthemaximalprefixlength(unsigned int numofchars,
   unsigned int maxprefixlen, mbp;
 
   maxprefixlen = prefixlengthwithmaxspace(numofchars,totallength,
-                                          (unsigned int)
                                           MAXMULTIPLIEROFTOTALLENGTH);
   mbp = maxbasepower(numofchars);
   maxprefixlen = MIN(mbp,maxprefixlen);
@@ -106,7 +110,7 @@ unsigned int whatisthemaximalprefixlength(unsigned int numofchars,
       = prefixlengthwithmaxspace(numofchars,
                                  (Seqpos)
                                  MAXREMAININGAFTERPREFIXLEN(prefixlenbits),
-                                 1U);
+                                 RECOMMENDEDMULTIPLIER);
     if (tmplength > 0 && maxprefixlen > tmplength)
     {
       maxprefixlen = tmplength;
