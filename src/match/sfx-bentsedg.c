@@ -128,6 +128,7 @@ struct Outlcpinfo
        *outfpllvtab;
   Seqpos totallength;
   Turningwheel *tw;
+  unsigned int minchanged;
   Lcpsubtab lcpsubtab;
   Suffixwithcode previoussuffix;
   bool previousbucketwasempty,
@@ -1640,6 +1641,7 @@ Outlcpinfo *newOutlcpinfo(const GtStr *indexname,
   outlcpinfo->lcpsubtab.sizereservoir = 0;
   GT_INITARRAY(&outlcpinfo->lcpsubtab.largelcpvalues,Largelcpvalue);
   outlcpinfo->lcpsubtab.smalllcpvalues = NULL;
+  outlcpinfo->minchanged = 0;
   if (assideeffect)
   {
     outlcpinfo->tw = newTurningwheel(prefixlength,numofchars);
@@ -2091,8 +2093,7 @@ void sortallbuckets(Suftab *suftab,
 {
   Codetype code;
   unsigned int rightchar = (unsigned int) (mincode % numofchars),
-               minprefixindex,
-               minchanged = 0;
+               minprefixindex;
   Bucketspecification bucketspec;
   Seqpos lcpvalue;
   Suffixwithcode firstsuffixofbucket;
@@ -2131,10 +2132,11 @@ void sortallbuckets(Suftab *suftab,
         (void) nextTurningwheel(outlcpinfo->tw);
         if (outlcpinfo->previousbucketwasempty)
         {
-          minchanged = MIN(minchanged,minchangedTurningwheel(outlcpinfo->tw));
+          outlcpinfo->minchanged = MIN(outlcpinfo->minchanged,
+                                       minchangedTurningwheel(outlcpinfo->tw));
         } else
         {
-          minchanged = minchangedTurningwheel(outlcpinfo->tw);
+          outlcpinfo->minchanged = minchangedTurningwheel(outlcpinfo->tw);
         }
       }
     }
@@ -2171,7 +2173,7 @@ void sortallbuckets(Suftab *suftab,
 #endif
           lcpvalue = computelocallcpvalue(&outlcpinfo->previoussuffix,
                                           &firstsuffixofbucket,
-                                          minchanged);
+                                          outlcpinfo->minchanged);
         } else
         {
           /* first part first code */
@@ -2192,7 +2194,7 @@ void sortallbuckets(Suftab *suftab,
         /* previoussuffix becomes last nonspecial element in current bucket */
         outlcpinfo->previoussuffix.code = code;
         outlcpinfo->previoussuffix.prefixindex = prefixlength;
- #ifdef SKDEBUG
+#ifdef SKDEBUG
         outlcpinfo->previoussuffix.startpos
           = suftabptr[bucketspec.left + bucketspec.nonspecialsinbucket - 1];
         /*
@@ -2200,7 +2202,7 @@ void sortallbuckets(Suftab *suftab,
                             encseq,readmode,bcktab,numofchars,
                             &outlcpinfo->previoussuffix);
         */
- #endif
+#endif
       }
     }
     if (outlcpinfo != NULL && outlcpinfo->assideeffect)
@@ -2212,7 +2214,7 @@ void sortallbuckets(Suftab *suftab,
                                     /* first special element in bucket */
                                     suftabptr[bucketspec.left +
                                               bucketspec.nonspecialsinbucket],
-                                    minchanged,
+                                    outlcpinfo->minchanged,
                                     bucketspec.specialsinbucket,
                                     code,
                                     bcktab);
@@ -2221,7 +2223,7 @@ void sortallbuckets(Suftab *suftab,
         outlcpinfo->previoussuffix.defined = true;
         outlcpinfo->previoussuffix.code = code;
         outlcpinfo->previoussuffix.prefixindex = minprefixindex;
- #ifdef SKDEBUG
+#ifdef SKDEBUG
         outlcpinfo->previoussuffix.startpos
           = suftabptr[bucketspec.left + bucketspec.nonspecialsinbucket +
                                         bucketspec.specialsinbucket - 1];
@@ -2230,7 +2232,7 @@ void sortallbuckets(Suftab *suftab,
                              encseq,readmode,bcktab,numofchars,
                              &outlcpinfo->previoussuffix);
         */
- #endif
+#endif
       } else
       {
         if (bucketspec.nonspecialsinbucket > 0)
@@ -2240,7 +2242,7 @@ void sortallbuckets(Suftab *suftab,
           outlcpinfo->previoussuffix.defined = true;
           outlcpinfo->previoussuffix.code = code;
           outlcpinfo->previoussuffix.prefixindex = prefixlength;
- #ifdef SKDEBUG
+#ifdef SKDEBUG
           outlcpinfo->previoussuffix.startpos
             = suftabptr[bucketspec.left + bucketspec.nonspecialsinbucket - 1];
           /*
@@ -2248,7 +2250,7 @@ void sortallbuckets(Suftab *suftab,
                               encseq,readmode,bcktab,numofchars,
                               &outlcpinfo->previoussuffix);
           */
- #endif
+#endif
         }
       }
       if (bucketspec.nonspecialsinbucket + bucketspec.specialsinbucket == 0)

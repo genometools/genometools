@@ -20,7 +20,7 @@
 
 #define MAXNUMOFWHEELS 18
 
- struct Turningwheel
+struct Turningwheel
 {
   unsigned int wheelspace[MAXNUMOFWHEELS],
                numofwheels,

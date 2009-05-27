@@ -584,6 +584,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
   }
   if (!haserr)
   {
+    gt_assert(sfi != NULL);
     sfi->bcktab = allocBcktab(sfi->numofchars,
                               prefixlength,
                               sfi->sfxstrategy.storespecialcodes,
