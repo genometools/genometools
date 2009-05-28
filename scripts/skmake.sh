@@ -66,7 +66,7 @@ makecompilerflags()
     printf " LD='icc' CXX='icc'"
   fi
   # printf " -DWITHTRIEIDENT"
-  printf " 'assert=no'"
+  # printf " 'assert=no'"
   printf "\n"
 }
 

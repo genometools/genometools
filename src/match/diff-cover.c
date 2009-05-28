@@ -804,11 +804,11 @@ void dc_sortunsortedbucket(void *data,
 {
 #ifdef WITHCHECK
   const Differencecover *dcov = (const Differencecover *) data;
-#endif
 
-  gt_assert(left < right);
   gt_assert(depth >= (Seqpos) dcov->vparam);
   gt_assert(dcov->diff2pos != NULL);
+#endif
+  gt_assert(left < right);
 #ifdef WITHCHECK
   checksortedsuffixes(__FILE__,
                       __LINE__,
