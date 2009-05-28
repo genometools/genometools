@@ -378,10 +378,17 @@ void updatebckspecials(Bcktab *bcktab,
                        unsigned int prefixindex)
 {
   gt_assert(prefixindex > 0);
+  gt_assert(prefixindex <= bcktab->prefixlength);
+  gt_assert(code < bcktab->numofallcodes);
   if (prefixindex < bcktab->prefixlength-1)
   {
     Codetype ordercode = (code - bcktab->filltable[prefixindex])/
                          (bcktab->filltable[prefixindex]+1);
+    /*
+    printf("prefixindex=%u\n",(unsigned int) prefixindex);
+    printf("code=%u\n",(unsigned int) code);
+    printf("ordercode=%u\n",(unsigned int) ordercode);
+    */
     bcktab->distpfxidx[prefixindex-1][ordercode]++;
   }
   bcktab->countspecialcodes[FROMCODE2SPECIALCODE(code,numofchars)]++;

@@ -4501,7 +4501,7 @@ void multicharactercompare_withtest(const Encodedsequence *encseq,
 static Codetype extractprefixcodeViadirectaccess(unsigned int *unitsnotspecial,
                                                  const Encodedsequence *encseq,
                                                  Codetype *filltable,
-                                                 GT_UNUSED Readmode readmode,
+                                                 Readmode readmode,
                                                  const Codetype **multimappower,
                                                  Seqpos frompos,
                                                  unsigned int len)
@@ -4510,13 +4510,14 @@ static Codetype extractprefixcodeViadirectaccess(unsigned int *unitsnotspecial,
   Codetype code = 0;
   GtUchar cc;
 
-  gt_assert(len > 0 && encseq->sat == Viadirectaccess &&
-            readmode == Forwardmode);
+  gt_assert(len > 0 && encseq->sat == Viadirectaccess);
   for (pos=frompos, *unitsnotspecial = 0;
        pos < encseq->totallength && *unitsnotspecial < len;
        pos++, (*unitsnotspecial)++)
   {
-    cc = encseq->plainseq[pos];
+    cc = ISDIRREVERSE(readmode)
+           ? encseq->plainseq[REVERSEPOS(encseq->totallength,pos)] 
+           : encseq->plainseq[pos];
     if (ISNOTSPECIAL(cc))
     {
       code += multimappower[*unitsnotspecial][cc];
@@ -4535,7 +4536,7 @@ static Codetype extractprefixcodeViadirectaccess(unsigned int *unitsnotspecial,
 static Codetype extractprefixcodeViabytecompress(unsigned int *unitsnotspecial,
                                                  const Encodedsequence *encseq,
                                                  Codetype *filltable,
-                                                 GT_UNUSED Readmode readmode,
+                                                 Readmode readmode,
                                                  const Codetype **multimappower,
                                                  Seqpos frompos,
                                                  unsigned int len)
