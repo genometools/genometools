@@ -17,17 +17,20 @@
 
 #include <string.h>
 #include "lauxlib.h"
-#include "core/translate.h"
+#include "core/translator.h"
 #include "gtlua/translate_lua.h"
 
 static int translate_dna_lua(lua_State *L)
 {
   GtStr *protein;
+  GtTranslator *tr;
   const char *dna = luaL_checkstring(L, 1);
+  tr = gt_translator_new();
   protein = gt_str_new();
-  gt_translate_dna(protein, dna, strlen(dna), 0);
+  gt_translator_translate_string(tr, protein, dna, strlen(dna), 0, NULL);
   lua_pushstring(L, gt_str_get(protein));
   gt_str_delete(protein);
+  gt_translator_delete(tr);
   return 1;
 }
 

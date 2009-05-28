@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,16 +15,20 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef MERGEFEAT_STREAM_SORTED_H
-#define MERGEFEAT_STREAM_SORTED_H
+#ifndef INTER_FEATURE_STREAM_H
+#define INTER_FEATURE_STREAM_H
 
 #include <stdio.h>
 #include "extended/node_stream_api.h"
 
 /* implements the ``genome_stream'' interface */
-typedef struct GtMergefeatStreamSorted GtMergefeatStreamSorted;
+typedef struct GtInterFeatureStream GtInterFeatureStream;
 
-const GtNodeStreamClass* gt_mergefeat_stream_sorted_class(void);
-GtNodeStream*            gt_mergefeat_stream_sorted_new(GtNodeStream*);
+const GtNodeStreamClass* gt_inter_feature_stream_class(void);
+/* Adds features of type <inter_type> between features of type
+   <outside_type>. */
+GtNodeStream*            gt_inter_feature_stream_new(GtNodeStream*,
+                                                     const char *outside_type,
+                                                     const char *inter_type);
 
 #endif

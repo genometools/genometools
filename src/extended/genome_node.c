@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -30,6 +30,29 @@ typedef struct {
   void *ptr;
   GtFree free_func;
 } GtGenomeNodeUserData;
+
+GtGenomeNode* gt_genome_node_ref(GtGenomeNode *gn)
+{
+  gt_assert(gn);
+  gn->reference_count++;
+  return gn;
+}
+
+void gt_genome_node_delete(GtGenomeNode *gn)
+{
+  if (!gn) return;
+  if (gn->reference_count) {
+    gn->reference_count--;
+    return;
+  }
+  gt_assert(gn->c_class);
+  if (gn->c_class->free)
+    gn->c_class->free(gn);
+  gt_str_delete(gn->filename);
+  if (gn->userdata)
+    gt_hashmap_delete(gn->userdata);
+  gt_free(gn);
+}
 
 static void userdata_delete(void *data)
 {

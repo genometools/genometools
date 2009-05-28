@@ -17,7 +17,7 @@
 
 #include "core/assert_api.h"
 #include "core/orf.h"
-#include "core/translate.h"
+#include "core/translator.h"
 #include "core/undef.h"
 #include "extended/cds_visitor.h"
 #include "extended/node_visitor_rep.h"
@@ -57,7 +57,7 @@ static int extract_cds_if_necessary(GtGenomeNode *gn, void *data,
   gf = gt_genome_node_cast(gt_feature_node_class(), gn);
   gt_assert(gf);
 
-  if (gt_feature_node_has_type(gf, gft_exon) &&
+  if (gt_feature_node_has_type(gf, gt_ft_exon) &&
       (gt_feature_node_get_strand(gf) == GT_STRAND_FORWARD ||
        gt_feature_node_get_strand(gf) == GT_STRAND_REVERSE)) {
     had_err = gt_region_mapping_get_raw_sequence(v->region_mapping,
@@ -96,16 +96,24 @@ static GtArray* determine_ORFs_for_all_three_frames(Splicedseq *ss)
 {
   GtStr *pr_0, *pr_1, *pr_2;
   GtArray *orfs;
+  GtTranslator *tr;
   gt_assert(ss);
 
   pr_0 = gt_str_new();
   pr_1 = gt_str_new();
   pr_2 = gt_str_new();
   orfs = gt_array_new(sizeof (GtRange));
+  tr = gt_translator_new();
 
-  gt_translate_dna(pr_0, gt_splicedseq_get(ss), gt_splicedseq_length(ss), 0);
-  gt_translate_dna(pr_1, gt_splicedseq_get(ss), gt_splicedseq_length(ss), 1);
-  gt_translate_dna(pr_2, gt_splicedseq_get(ss), gt_splicedseq_length(ss), 2);
+  gt_translator_translate_string(tr, pr_0,
+                                 gt_splicedseq_get(ss),
+                                 gt_splicedseq_length(ss), 0, NULL);
+  gt_translator_translate_string(tr, pr_1,
+                                 gt_splicedseq_get(ss),
+                                 gt_splicedseq_length(ss), 1, NULL);
+  gt_translator_translate_string(tr, pr_2,
+                                 gt_splicedseq_get(ss),
+                                 gt_splicedseq_length(ss), 2, NULL);
   gt_determine_ORFs(orfs, 0, gt_str_get(pr_0), gt_str_length(pr_0));
   gt_determine_ORFs(orfs, 1, gt_str_get(pr_1), gt_str_length(pr_1));
   gt_determine_ORFs(orfs, 2, gt_str_get(pr_2), gt_str_length(pr_2));
@@ -113,6 +121,7 @@ static GtArray* determine_ORFs_for_all_three_frames(Splicedseq *ss)
   gt_str_delete(pr_2);
   gt_str_delete(pr_1);
   gt_str_delete(pr_0);
+  gt_translator_delete(tr);
 
   return orfs;
 }
@@ -132,7 +141,7 @@ static void create_CDS_features_for_ORF(GtRange orf, GtCDSVisitor *v,
   cds.end = gt_splicedseq_map(v->splicedseq, strand == GT_STRAND_FORWARD
                            ? orf.end : orf.start) + 1;
   cds_feature = (GtFeatureNode*)
-                gt_feature_node_new(gt_genome_node_get_seqid(gn), gft_CDS,
+                gt_feature_node_new(gt_genome_node_get_seqid(gn), gt_ft_CDS,
                                     cds.start, cds.end,
                           gt_feature_node_get_strand((GtFeatureNode*) gn));
   gt_feature_node_set_source(cds_feature, v->source);
@@ -154,9 +163,9 @@ static void create_CDS_features_for_ORF(GtRange orf, GtCDSVisitor *v,
       cds.end = gt_splicedseq_map(v->splicedseq, strand == GT_STRAND_FORWARD
                                ? orf.end : orf.start) + 1;
       cds_feature = (GtFeatureNode*)
-                    gt_feature_node_new(gt_genome_node_get_seqid(gn),
-                                          gft_CDS, cds.start, cds.end,
-                          gt_feature_node_get_strand((GtFeatureNode*) gn));
+                    gt_feature_node_new(gt_genome_node_get_seqid(gn), gt_ft_CDS,
+                                        cds.start, cds.end,
+                               gt_feature_node_get_strand((GtFeatureNode*) gn));
       gt_feature_node_set_source(cds_feature, v->source);
       /* XXX correct this */
       gt_feature_node_set_phase(cds_feature, (GtPhase)

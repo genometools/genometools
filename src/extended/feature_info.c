@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008      Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -25,16 +25,16 @@
 
 struct GtFeatureInfo {
   GtHashmap *id_to_genome_node,
-          *id_to_pseudo_parent;
+             *id_to_pseudo_parent;
 };
 
 GtFeatureInfo* gt_feature_info_new(void)
 {
   GtFeatureInfo *fi = gt_malloc(sizeof *fi);
   fi->id_to_genome_node = gt_hashmap_new(HASH_STRING, gt_free_func,
-                                        (GtFree) gt_feature_node_nonrec_delete);
+                                         (GtFree) gt_genome_node_delete);
   fi->id_to_pseudo_parent = gt_hashmap_new(HASH_STRING, gt_free_func,
-                                        (GtFree) gt_feature_node_nonrec_delete);
+                                           (GtFree) gt_genome_node_delete);
   return fi;
 }
 
@@ -64,7 +64,7 @@ void gt_feature_info_add(GtFeatureInfo *fi, const char *id, GtFeatureNode *fn)
   gt_assert(fi && id && fn);
   gt_assert(!gt_feature_node_is_pseudo((GtFeatureNode*) fn));
   gt_hashmap_add(fi->id_to_genome_node, gt_cstr_dup(id),
-                 gt_feature_node_nonrec_ref(fn));
+                 gt_genome_node_ref((GtGenomeNode*) fn));
 }
 
 GtFeatureNode* gt_feature_info_get_pseudo_parent(const GtFeatureInfo *fi,
@@ -80,7 +80,7 @@ void gt_feature_info_add_pseudo_parent(GtFeatureInfo *fi, const char *id,
   gt_assert(fi && id && pseudo_parent);
   gt_assert(gt_feature_node_is_pseudo((GtFeatureNode*) pseudo_parent));
   gt_hashmap_add(fi->id_to_pseudo_parent, gt_cstr_dup(id),
-                 gt_feature_node_nonrec_ref(pseudo_parent));
+                 gt_genome_node_ref((GtGenomeNode*) pseudo_parent));
 }
 
 void gt_feature_info_replace_pseudo_parent(GtFeatureInfo *fi,

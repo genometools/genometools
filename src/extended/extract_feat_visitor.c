@@ -18,7 +18,7 @@
 #include "core/assert_api.h"
 #include "core/fasta.h"
 #include "core/symbol.h"
-#include "core/translate.h"
+#include "core/translator.h"
 #include "extended/extract_feat_sequence.h"
 #include "extended/extract_feat_visitor.h"
 #include "extended/feature_node_iterator_api.h"
@@ -63,10 +63,14 @@ static void show_entry(GtStr *description, GtStr *sequence, bool translate,
 {
   if (translate) {
     GtStr *protein = gt_str_new();
-    gt_translate_dna(protein, gt_str_get(sequence), gt_str_length(sequence), 0);
+    GtTranslator* tr = gt_translator_new();
+    gt_translator_translate_string(tr, protein,
+                                   gt_str_get(sequence),
+                                   gt_str_length(sequence), 0, NULL);
     gt_fasta_show_entry_generic(gt_str_get(description), gt_str_get(protein),
                                 gt_str_length(protein), 0, outfp);
     gt_str_delete(protein);
+    gt_translator_delete(tr);
   }
   else {
     gt_fasta_show_entry_generic(gt_str_get(description), gt_str_get(sequence),

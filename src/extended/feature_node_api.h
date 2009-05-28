@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -28,7 +28,7 @@
    to a regular GFF3 line (i.e., a line which does not start with <#>).
    Part-of relationships (which are realised in GFF3 with the <Parent> and <ID>
    attributes) are realised in the C API with the
-   <gt_feature_node_add_child> method(). */
+   <gt_feature_node_add_child()> method. */
 typedef struct GtFeatureNode GtFeatureNode;
 
 /* Create an new <GtFeatureNode*> on sequence with ID <seqid> and type <type>
@@ -46,16 +46,24 @@ void          gt_feature_node_add_child(GtFeatureNode *parent,
 
 /* Return the source of <feature_node>. If no source has been set, "." is
    returned. Corresponds to column 2 of regular GFF3 lines. */
-const char*   gt_feature_node_get_source(GtFeatureNode *feature_node);
+const char*   gt_feature_node_get_source(const GtFeatureNode *feature_node);
 
 /* Set the <source> of <feature_node>. Stores a new reference to <source>.
    Corresponds to column 2 of regular GFF3 lines. */
 void          gt_feature_node_set_source(GtFeatureNode *feature_node,
                                          GtStr *source);
 
+/* Return <true> if <feature_node> has a defined source (i.e., on different
+   from "."). <false> otherwise. */
+bool          gt_feature_node_has_source(const GtFeatureNode *feature_node);
+
 /* Return the type of <feature_node>.
    Corresponds to column 3 of regular GFF3 lines. */
-const char*   gt_feature_node_get_type(GtFeatureNode *feature_node);
+const char*   gt_feature_node_get_type(const GtFeatureNode *feature_node);
+
+/* Set the type of <feature_node> to <type>. */
+void          gt_feature_node_set_type(GtFeatureNode *feature_node,
+                                       const char *type);
 
 /* Return <true> if <feature_node> has given <type>, <false> otherwise. */
 bool          gt_feature_node_has_type(GtFeatureNode *feature_node,
@@ -78,7 +86,7 @@ void          gt_feature_node_unset_score(GtFeatureNode *feature_node);
 
 /* Return the strand of <feature_node>.
    Corresponds to column 7 of regular GFF3 lines. */
-GtStrand      gt_feature_node_get_strand(GtFeatureNode *feature_node);
+GtStrand      gt_feature_node_get_strand(const GtFeatureNode *feature_node);
 
 /* Set the strand of <feature_node> to <strand>. */
 void          gt_feature_node_set_strand(GtFeatureNode *feature_node,
@@ -86,7 +94,7 @@ void          gt_feature_node_set_strand(GtFeatureNode *feature_node,
 
 /* Return the phase of <feature_node>.
    Corresponds to column 8 of regular GFF3 lines. */
-GtPhase       gt_feature_node_get_phase(GtFeatureNode *feature_node);
+GtPhase       gt_feature_node_get_phase(const GtFeatureNode *feature_node);
 
 /* Set the phase of <feature_node> to <phase>. */
 void          gt_feature_node_set_phase(GtFeatureNode *feature_node,
@@ -95,12 +103,13 @@ void          gt_feature_node_set_phase(GtFeatureNode *feature_node,
 /* Return the attribute of <feature_node> with the given <name>.
    If no such attribute has been added, <NULL> is returned.
    The attributes are stored in column 9 of regular GFF3 lines. */
-const char*   gt_feature_node_get_attribute(GtFeatureNode *feature_node,
+const char*   gt_feature_node_get_attribute(const GtFeatureNode *feature_node,
                                             const char *name);
 
 /* Return a string array containing the used attribute names of <feature_node>.
    The caller is responsible to free the returned <GtStrArray*>. */
-GtStrArray*   gt_feature_node_get_attribute_list(GtFeatureNode *feature_node);
+GtStrArray*   gt_feature_node_get_attribute_list(const GtFeatureNode
+                                                 *feature_node);
 
 /* Add attribute <tag>=<value> to <feature_node>. <tag> and <value> must at
    least have length 1. <feature_node> must not contain an attribute with the

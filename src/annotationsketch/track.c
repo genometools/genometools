@@ -223,10 +223,10 @@ int gt_track_unit_test(GtError *err)
 
   for (i=0;i<4;i++)
   {
-    parent[i] = gt_feature_node_new(title, gft_gene, r[i].start, r[i].end,
+    parent[i] = gt_feature_node_new(title, gt_ft_gene, r[i].start, r[i].end,
                                     GT_STRAND_FORWARD);
-    gn[i] = gt_feature_node_new(title, gft_exon, r[i].start, r[i].end,
-                                 GT_STRAND_FORWARD);
+    gn[i] = gt_feature_node_new(title, gt_ft_exon, r[i].start, r[i].end,
+                                GT_STRAND_FORWARD);
 
     gt_feature_node_add_child((GtFeatureNode*) parent[i],
                               (GtFeatureNode*) gn[i]);

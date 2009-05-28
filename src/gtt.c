@@ -37,6 +37,7 @@
 #include "core/sequence_buffer.h"
 #include "core/splitter.h"
 #include "core/tokenizer.h"
+#include "core/translator.h"
 #include "extended/alignment.h"
 #include "extended/evaluator.h"
 #include "extended/feature_node_iterator_api.h"
@@ -61,6 +62,7 @@
 #include "tools/gt_csa.h"
 #include "tools/gt_congruence.h"
 #include "tools/gt_dev.h"
+#include "tools/gt_dupfeat.h"
 #include "tools/gt_eval.h"
 #include "tools/gt_extractfeat.h"
 #include "tools/gt_extractseq.h"
@@ -70,9 +72,11 @@
 #include "tools/gt_gff3validator.h"
 #include "tools/gt_gff3_to_gtf.h"
 #include "tools/gt_gtf_to_gff3.h"
+#include "tools/gt_interfeat.h"
 #include "tools/gt_ltrharvest.h"
 #include "tools/gt_matchingstatistics.h"
 #include "tools/gt_merge.h"
+#include "tools/gt_mergefeat.h"
 #include "tools/gt_mgth.h"
 #include "tools/gt_mkfmindex.h"
 #include "tools/gt_mmapandread.h"
@@ -118,6 +122,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "csa", gt_csa());
   gt_toolbox_add_tool(tools, "congruence", gt_congruence());
   gt_toolbox_add_tool(tools, "dev", gt_dev());
+  gt_toolbox_add_tool(tools, "dupfeat", gt_dupfeat());
   gt_toolbox_add(tools, "eval", gt_eval);
   gt_toolbox_add_tool(tools, "extractfeat", gt_extractfeat());
   gt_toolbox_add_tool(tools, "extractseq", gt_extractseq());
@@ -128,9 +133,11 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add(tools, "gff3_to_gtf", gt_gff3_to_gtf);
   gt_toolbox_add_tool(tools, "ltrdigest", gt_ltrdigest());
   gt_toolbox_add_tool(tools, "gtf_to_gff3", gt_gtf_to_gff3());
+  gt_toolbox_add_tool(tools, "interfeat", gt_interfeat());
   gt_toolbox_add(tools, "ltrharvest", gt_ltrharvest);
   gt_toolbox_add(tools, "matstat", gt_matchingstatistics);
   gt_toolbox_add(tools, "merge", gt_merge);
+  gt_toolbox_add_tool(tools, "mergefeat", gt_mergefeat());
   gt_toolbox_add(tools, "mgth", gt_mgth);
   gt_toolbox_add(tools, "mmapandread", gt_mmapandread);
   gt_toolbox_add_tool(tools, "mutate", gt_mutate());
@@ -211,6 +218,7 @@ GtHashmap* gtt_unit_tests(void)
                  gt_string_matching_unit_test);
   gt_hashmap_add(unit_tests, "tag value map example", gt_tag_value_map_example);
   gt_hashmap_add(unit_tests, "tokenizer class", gt_tokenizer_unit_test);
+  gt_hashmap_add(unit_tests, "translator class", gt_translator_unit_test);
 #ifndef WITHOUT_CAIRO
   gt_hashmap_add(unit_tests, "block class", gt_block_unit_test);
   gt_hashmap_add(unit_tests, "style class", gt_style_unit_test);

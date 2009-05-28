@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -153,7 +153,7 @@ static int filter_visitor_genome_feature(GtNodeVisitor *nv,
     GtRange range = gt_genome_node_get_range((GtGenomeNode*) fn);
     /* enforce maximum gene length */
     /* XXX: we (spuriously) assume that genes are always root nodes */
-    if (fn && gt_feature_node_has_type(fn, gft_gene)) {
+    if (fn && gt_feature_node_has_type(fn, gt_ft_gene)) {
       if (fv->max_gene_length != UNDEF_ULONG &&
           gt_range_length(&range) > fv->max_gene_length) {
         filter_node = true;

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -16,55 +16,55 @@
 */
 
 #include "core/assert_api.h"
-#include "extended/mergefeat_stream_unsorted.h"
-#include "extended/mergefeat_visitor.h"
+#include "extended/merge_feature_stream.h"
+#include "extended/merge_feature_visitor.h"
 #include "extended/node_stream_rep.h"
 
-struct GtMergefeatStreamUnsorted {
+struct GtMergeFeatureStream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
   GtNodeVisitor *mergefeat_visitor;
 };
 
-#define gt_mergefeat_stream_unsorted_cast(GS)\
-        gt_node_stream_cast(gt_mergefeat_stream_unsorted_class(), GS)
+#define gt_merge_feature_stream_cast(GS)\
+        gt_node_stream_cast(gt_merge_feature_stream_class(), GS)
 
-static int mergefeat_stream_unsorted_next(GtNodeStream *gs, GtGenomeNode **gn,
-                                          GtError *err)
+static int merge_feature_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
+                                     GtError *err)
 {
-  GtMergefeatStreamUnsorted *mfs;
+  GtMergeFeatureStream *mfs;
   int had_err;
   gt_error_check(err);
-  mfs = gt_mergefeat_stream_unsorted_cast(gs);
+  mfs = gt_merge_feature_stream_cast(ns);
   had_err = gt_node_stream_next(mfs->in_stream, gn, err);
   if (!had_err && *gn)
     had_err = gt_genome_node_accept(*gn, mfs->mergefeat_visitor, err);
   return had_err;
 }
 
-static void mergefeat_stream_unsorted_free(GtNodeStream *gs)
+static void merge_feature_stream_free(GtNodeStream *ns)
 {
-  GtMergefeatStreamUnsorted *mfs = gt_mergefeat_stream_unsorted_cast(gs);
+  GtMergeFeatureStream *mfs = gt_merge_feature_stream_cast(ns);
   gt_node_visitor_delete(mfs->mergefeat_visitor);
 }
 
-const GtNodeStreamClass* gt_mergefeat_stream_unsorted_class(void)
+const GtNodeStreamClass* gt_merge_feature_stream_class(void)
 {
   static const GtNodeStreamClass *nsc = NULL;
   if (!nsc) {
-    nsc = gt_node_stream_class_new(sizeof (GtMergefeatStreamUnsorted),
-                                   mergefeat_stream_unsorted_free,
-                                   mergefeat_stream_unsorted_next);
+    nsc = gt_node_stream_class_new(sizeof (GtMergeFeatureStream),
+                                   merge_feature_stream_free,
+                                   merge_feature_stream_next);
   }
   return nsc;
 }
 
-GtNodeStream* gt_mergefeat_stream_unsorted_new(GtNodeStream *in_stream)
+GtNodeStream* gt_merge_feature_stream_new(GtNodeStream *in_stream)
 {
-  GtNodeStream *gs = gt_node_stream_create(gt_mergefeat_stream_unsorted_class(),
+  GtNodeStream *ns = gt_node_stream_create(gt_merge_feature_stream_class(),
                                            false);
-  GtMergefeatStreamUnsorted *mfs = gt_mergefeat_stream_unsorted_cast(gs);
+  GtMergeFeatureStream*mfs = gt_merge_feature_stream_cast(ns);
   mfs->in_stream = in_stream;
-  mfs->mergefeat_visitor = gt_mergefeat_visitor_new();
-  return gs;
+  mfs->mergefeat_visitor = gt_merge_feature_visitor_new();
+  return ns;
 }

@@ -24,6 +24,9 @@ from gff3_in_stream import *
 from gff3_out_stream import *
 from gff3_visitor import *
 from add_introns_stream import *
+from inter_feature_stream import *
+from dup_feature_stream import *
+from merge_feature_stream import *
 
 GenomeNode.register(gtlib)
 FeatureNode.register(gtlib)
@@ -31,3 +34,6 @@ FeatureNodeIterator.register(gtlib)
 GFF3InStream.register(gtlib)
 AddIntronsStream.register(gtlib)
 
+InterFeatureStream.register(gtlib)
+DuplicateFeatureStream.register(gtlib)
+MergeFeatureStream.register(gtlib)

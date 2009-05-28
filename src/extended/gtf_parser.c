@@ -149,8 +149,8 @@ static int construct_mRNAs(GT_UNUSED void *key, void *value, void *data,
   }
 
   if (!had_err) {
-    mRNA_node = gt_feature_node_new(mRNA_seqid, gft_mRNA, mRNA_range.start,
-                                      mRNA_range.end, mRNA_strand);
+    mRNA_node = gt_feature_node_new(mRNA_seqid, gt_ft_mRNA, mRNA_range.start,
+                                    mRNA_range.end, mRNA_strand);
 
     if ((tname = gt_hashmap_get(cinfo->transcript_id_to_name_mapping,
                               (const char*) key))) {
@@ -209,8 +209,8 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
       gt_assert(gt_str_cmp(gene_seqid, gt_genome_node_get_seqid(gn)) == 0);
     }
 
-    gene_node = gt_feature_node_new(gene_seqid, gft_gene, gene_range.start,
-                                      gene_range.end, gene_strand);
+    gene_node = gt_feature_node_new(gene_seqid, gt_ft_gene, gene_range.start,
+                                    gene_range.end, gene_strand);
 
     if ((gname = gt_hashmap_get(cinfo->gene_id_to_name_mapping,
                               (const char*) key))) {
@@ -352,13 +352,13 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
         case GTF_CDS:
         case GTF_stop_codon:
           gff_type_is_valid = gt_type_checker_is_valid(parser->type_checker,
-                                                       gft_CDS);
-          type = gft_CDS;
+                                                       gt_ft_CDS);
+          type = gt_ft_CDS;
           break;
         case GTF_exon:
           gff_type_is_valid = gt_type_checker_is_valid(parser->type_checker,
-                                                       gft_exon);
-          type = gft_exon;
+                                                       gt_ft_exon);
+          type = gt_ft_exon;
       }
       gt_assert(gff_type_is_valid);
 

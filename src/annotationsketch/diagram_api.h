@@ -58,6 +58,9 @@ GtRange    gt_diagram_get_range(const GtDiagram *diagram);
    (default behaviour). */
 void       gt_diagram_set_track_selector_func(GtDiagram*, GtTrackSelectorFunc,
                                               void*);
+/* Resets the track selection behaviour of this <GtDiagram> back to the
+   default. */
+void       gt_diagram_reset_track_selector_func(GtDiagram *diagram);
 /* Registers a new custom track in the diagram. */
 void       gt_diagram_add_custom_track(GtDiagram*, GtCustomTrack*);
 

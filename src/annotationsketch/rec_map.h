@@ -25,7 +25,7 @@ struct GtRecMap {
          nw_y,
          se_x,
          se_y;
-  GtFeatureNode *gf;
+  GtFeatureNode *fn;
   bool has_omitted_children;
 };
 

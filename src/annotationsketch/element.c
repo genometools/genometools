@@ -44,7 +44,7 @@ GtElement* gt_element_new(GtFeatureNode *node)
   gt_element_set_range(element, gt_genome_node_get_range((GtGenomeNode*) node));
   element->strand = gt_feature_node_get_strand(node);
   element->mark = gt_genome_node_is_marked((GtGenomeNode*) node);
-  element->gn = gt_feature_node_nonrec_ref(node);
+  element->gn = (GtFeatureNode*) gt_genome_node_ref((GtGenomeNode*) node);
   return element;
 }
 
@@ -133,8 +133,8 @@ int gt_element_unit_test(GtError *err)
   r2.end = 50UL;
 
   seqid = gt_str_new_cstr("seqid");
-  gn = gt_feature_node_new(seqid, gft_exon, r1.start, r1.end, GT_STRAND_BOTH);
-  gn2 = gt_feature_node_new(seqid, gft_exon, r2.start, r2.end,
+  gn = gt_feature_node_new(seqid, gt_ft_exon, r1.start, r1.end, GT_STRAND_BOTH);
+  gn2 = gt_feature_node_new(seqid, gt_ft_exon, r2.start, r2.end,
                              GT_STRAND_BOTH);
 
   e = gt_element_new((GtFeatureNode*) gn);
@@ -147,11 +147,11 @@ int gt_element_unit_test(GtError *err)
   ensure(had_err, (1 == gt_range_compare(&r2, &r_temp)));
 
   /* tests gt_element_get_type and gt_element_set_type*/
-  ensure(had_err, !strcmp(gft_exon, gt_element_get_type(e)));
-  ensure(had_err, strcmp(gft_intron, gt_element_get_type(e)));
-  gt_element_set_type(e, gft_intron);
-  ensure(had_err, !strcmp(gft_intron, gt_element_get_type(e)));
-  gt_element_set_type(e2, gft_intron);
+  ensure(had_err, !strcmp(gt_ft_exon, gt_element_get_type(e)));
+  ensure(had_err, strcmp(gt_ft_intron, gt_element_get_type(e)));
+  gt_element_set_type(e, gt_ft_intron);
+  ensure(had_err, !strcmp(gt_ft_intron, gt_element_get_type(e)));
+  gt_element_set_type(e2, gt_ft_intron);
 
   /* tests elements_are_equal */
   ensure(had_err, elements_are_equal(e, e2));
@@ -176,7 +176,6 @@ void gt_element_delete(GtElement *element)
     element->refcount--;
     return;
   }
-  if (element->gn)
-    gt_feature_node_nonrec_delete(element->gn);
+  gt_genome_node_delete((GtGenomeNode*) element->gn);
   gt_free(element);
 }

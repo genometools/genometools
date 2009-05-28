@@ -19,36 +19,6 @@
 #ifndef FILEUTILS_H
 #define FILEUTILS_H
 
-#include <stdbool.h>
-#include <sys/types.h>
-#include <stdio.h>
-#include "core/str.h"
-#include "core/str_array.h"
-
-bool           gt_file_exists(const char*);
-/* Returns true if the file with path <a> has a later modification time than the
-   file with path <b>, false otherwise. */
-bool           gt_file_is_newer(const char *a, const char *b);
-unsigned long  gt_file_number_of_lines(const char*);
-/* Returns the suffix of <path>, if there is any. Returns "" otherwise
-   The suffix is the part after and including the last '.' but after the last
-   '/'. Except if <path> ends with ".gz" or ".bz2", then the suffix is the part
-   after and including the second last '.'. */
-const char*    gt_file_suffix(const char *path);
-
-/* Set <path> to the dirname of <file>, if it has one, to "" otherwise. */
-void           gt_file_dirname(GtStr *path, const char *file);
-
-/* Find <file> in $PATH, if it has no dirname; set <path> to dirname otherwise.
-   Sets <path> to the empty string if <file> could not be found in $PATH. */
-int            gt_file_find_in_path(GtStr *path, const char *file, GtError*);
-
-/* Return the (estimated) size of <file>. If <file> is uncompressed, the exact
-   size is returned. If <file> is compressed, an estimation which assumes that
-   <file> contains a sequence is returned. */
-off_t          gt_file_estimate_size(const char *file);
-/* Return the (estimated) total size of all files given in <filenames>.
-   Uses <gt_file_estimate_size()>. */
-off_t          gt_files_estimate_total_size(const GtStrArray *filenames);
+#include "core/fileutils_api.h"
 
 #endif

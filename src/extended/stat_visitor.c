@@ -59,7 +59,7 @@ static int add_exon_number(GtGenomeNode *gn, void *data,
   GtFeatureNode *gf = (GtFeatureNode*) gn;
   gt_error_check(err);
   gt_assert(stat_visitor && gf);
-  if (gt_feature_node_has_type(gf, gft_exon))
+  if (gt_feature_node_has_type(gf, gt_ft_exon))
     stat_visitor->exon_number_for_distri++;
   return 0;
 }
@@ -74,7 +74,7 @@ static int compute_statistics(GtGenomeNode *gn, void *data, GtError *err)
   gt_assert(data);
   stat_visitor = (GtStatVisitor*) data;
   gf = (GtFeatureNode*) gn;
-  if (gt_feature_node_has_type(gf, gft_gene)) {
+  if (gt_feature_node_has_type(gf, gt_ft_gene)) {
     stat_visitor->number_of_genes++;
     if (gt_feature_node_has_CDS(gf))
       stat_visitor->number_of_protein_coding_genes++;
@@ -88,10 +88,10 @@ static int compute_statistics(GtGenomeNode *gn, void *data, GtError *err)
                      gt_feature_node_get_score(gf) * 100.0);
     }
   }
-  else if (gt_feature_node_has_type(gf, gft_mRNA)) {
+  else if (gt_feature_node_has_type(gf, gt_ft_mRNA)) {
     stat_visitor->number_of_mRNAs++;
   }
-  else if (gt_feature_node_has_type(gf, gft_exon)) {
+  else if (gt_feature_node_has_type(gf, gt_ft_exon)) {
     stat_visitor->number_of_exons++;
     if (stat_visitor->exon_length_distribution) {
       range = gt_genome_node_get_range(gn);
@@ -99,17 +99,17 @@ static int compute_statistics(GtGenomeNode *gn, void *data, GtError *err)
                          gt_range_length(&range));
     }
   }
-  else if (gt_feature_node_has_type(gf, gft_CDS)) {
+  else if (gt_feature_node_has_type(gf, gt_ft_CDS)) {
     stat_visitor->number_of_CDSs++;
   }
-  else if (gt_feature_node_has_type(gf, gft_intron)) {
+  else if (gt_feature_node_has_type(gf, gt_ft_intron)) {
     if (stat_visitor->intron_length_distribution) {
       range = gt_genome_node_get_range(gn);
       gt_disc_distri_add(stat_visitor->intron_length_distribution,
                          gt_range_length(&range));
     }
   }
-  else if (gt_feature_node_has_type(gf, gft_LTR_retrotransposon)) {
+  else if (gt_feature_node_has_type(gf, gt_ft_LTR_retrotransposon)) {
     stat_visitor->number_of_LTR_retrotransposons++;
   }
   if (stat_visitor->exon_number_distribution) {

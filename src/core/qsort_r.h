@@ -18,12 +18,6 @@
 #ifndef QSORT_R_H
 #define QSORT_R_H
 
-#include <stdlib.h>
-
-#include "core/fptr_api.h"
-
-void
-gt_qsort_r(void *a, size_t n, size_t es, void *data,
-           GtCompareWithData cmp);
+#include "core/qsort_r_api.h"
 
 #endif

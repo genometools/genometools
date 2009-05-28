@@ -23,7 +23,7 @@
 /* Functions of this type return less than 0 if <a> is __smaller__ than <b>,
    0 if <a> is __equal__ to <b>, and greater 0 if <a> is __larger__ than <b>.
    Thereby, the operators __smaller__, __equal__, and __larger__ are
-   implementation dependend.
+   implementation dependent.
    Do not count on these functions to return -1, 0, or 1!  */
 typedef int  (*GtCompare)(const void *a, const void *b);
 /* Similar to <GtCompare>, but with an additional <data> pointer. */

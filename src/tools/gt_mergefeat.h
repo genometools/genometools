@@ -1,6 +1,5 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,16 +14,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef MERGEFEAT_STREAM_UNSORTED_H
-#define MERGEFEAT_STREAM_UNSORTED_H
+#ifndef GT_MERGEFEAT_H
+#define GT_MERGEFEAT_H
 
-#include <stdio.h>
-#include "extended/node_stream_api.h"
+#include "core/tool.h"
 
-/* implements the ``genome_stream'' interface */
-typedef struct GtMergefeatStreamUnsorted GtMergefeatStreamUnsorted;
-
-const GtNodeStreamClass* gt_mergefeat_stream_unsorted_class(void);
-GtNodeStream*            gt_mergefeat_stream_unsorted_new(GtNodeStream*);
+/* the merge feature tool */
+GtTool* gt_mergefeat(void);
 
 #endif

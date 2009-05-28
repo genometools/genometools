@@ -1,6 +1,5 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,15 +14,20 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef MERGEFEAT_VISITOR_H
-#define MERGEFEAT_VISITOR_H
+#ifndef DUP_FEATURE_STREAM_H
+#define DUP_FEATURE_STREAM_H
 
-/* implements the ``genome visitor'' interface */
-typedef struct GtMergefeatVisitor GtMergefeatVisitor;
+#include <stdio.h>
+#include "extended/node_stream_api.h"
 
-#include "extended/node_visitor.h"
+/* implements the ``genome_stream'' interface */
+typedef struct GtDupFeatureStream GtDupFeatureStream;
 
-const GtNodeVisitorClass* gt_mergefeat_visitor_class(void);
-GtNodeVisitor*            gt_mergefeat_visitor_new(void);
+const GtNodeStreamClass* gt_dup_feature_stream_class(void);
+/* Duplicate internal feature nodes of type <source_type> as features with type
+   <dest_type>. The duplicated features does not inherit the children. */
+GtNodeStream*            gt_dup_feature_stream_new(GtNodeStream*,
+                                                   const char *dest_type,
+                                                   const char *source_type);
 
 #endif

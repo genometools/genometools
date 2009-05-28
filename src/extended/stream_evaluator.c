@@ -438,7 +438,7 @@ static int process_real_feature(GtGenomeNode *gn, void *data,
   gt_assert(gn && data);
   gf = (GtFeatureNode*) gn;
 
-  if (gt_feature_node_has_type(gf, gft_gene)) {
+  if (gt_feature_node_has_type(gf, gt_ft_gene)) {
     switch (gt_feature_node_get_strand(gf)) {
       case GT_STRAND_FORWARD:
         gn_ref = gt_genome_node_ref(gn);
@@ -455,7 +455,7 @@ static int process_real_feature(GtGenomeNode *gn, void *data,
         }
     }
   }
-  else if (gt_feature_node_has_type(gf, gft_mRNA)) {
+  else if (gt_feature_node_has_type(gf, gt_ft_mRNA)) {
     switch (gt_feature_node_get_strand(gf)) {
       case GT_STRAND_FORWARD:
         gn_ref = gt_genome_node_ref(gn);
@@ -472,11 +472,11 @@ static int process_real_feature(GtGenomeNode *gn, void *data,
         }
     }
   }
-  else if (gt_feature_node_has_type(gf, gft_LTR_retrotransposon)) {
+  else if (gt_feature_node_has_type(gf, gt_ft_LTR_retrotransposon)) {
     gn_ref = gt_genome_node_ref(gn);
     gt_array_add(info->slot->LTRs, gn_ref);
   }
-  else if (gt_feature_node_has_type(gf, gft_CDS)) {
+  else if (gt_feature_node_has_type(gf, gt_ft_CDS)) {
     range = gt_genome_node_get_range(gn);
     switch (gt_feature_node_get_strand(gf)) {
       case GT_STRAND_FORWARD:
@@ -502,7 +502,7 @@ static int process_real_feature(GtGenomeNode *gn, void *data,
         }
     }
   }
-  else if (gt_feature_node_has_type(gf, gft_exon)) {
+  else if (gt_feature_node_has_type(gf, gt_ft_exon)) {
     range = gt_genome_node_get_range(gn);
     switch (gt_feature_node_get_strand(gf)) {
       case GT_STRAND_FORWARD:
@@ -539,7 +539,7 @@ static int store_exon(GtGenomeNode *gn, void *data, GT_UNUSED GtError *err)
   gt_error_check(err);
   gf = gt_genome_node_cast(gt_feature_node_class(), gn);
   gt_assert(gf && exons);
-  if (gt_feature_node_has_type(gf, gft_exon)) {
+  if (gt_feature_node_has_type(gf, gt_ft_exon)) {
     range = gt_genome_node_get_range(gn);
     gt_array_add(exons, range);
   }
@@ -594,10 +594,10 @@ static int store_gene_feature(GtGenomeNode *gn, void *data,
   gt_error_check(err);
   gf = gt_genome_node_cast(gt_feature_node_class(), gn);
   gt_assert(gf && info);
-  if (gt_feature_node_has_type(gf, gft_mRNA)) {
+  if (gt_feature_node_has_type(gf, gt_ft_mRNA)) {
     gt_array_add(info->mRNAs, gf);
   }
-  else if (gt_feature_node_has_type(gf, gft_exon)) {
+  else if (gt_feature_node_has_type(gf, gt_ft_exon)) {
     range = gt_genome_node_get_range(gn);
     gt_array_add(info->exons, range);
   }
@@ -906,7 +906,7 @@ static int process_predicted_feature(GtGenomeNode *gn, void *data,
   predicted_strand = gt_feature_node_get_strand((GtFeatureNode*) gn);
   real_genome_nodes = gt_array_new(sizeof (GtGenomeNode**));
 
-  if (gt_feature_node_has_type((GtFeatureNode*) gn, gft_gene)) {
+  if (gt_feature_node_has_type((GtFeatureNode*) gn, gt_ft_gene)) {
     /* store predicted gene */
     gt_evaluator_add_predicted(info->gene_evaluator, 1);
     /* determine true gene */
@@ -977,7 +977,7 @@ static int process_predicted_feature(GtGenomeNode *gn, void *data,
         }
     }
   }
-  else if (gt_feature_node_has_type((GtFeatureNode*) gn, gft_mRNA)) {
+  else if (gt_feature_node_has_type((GtFeatureNode*) gn, gt_ft_mRNA)) {
     /* store predicted mRNA */
     gt_evaluator_add_predicted(info->mRNA_evaluator, 1);
     /* determine true mRNA */
@@ -1049,7 +1049,7 @@ static int process_predicted_feature(GtGenomeNode *gn, void *data,
     }
   }
   else if (gt_feature_node_has_type((GtFeatureNode*) gn,
-                                   gft_LTR_retrotransposon)) {
+                                    gt_ft_LTR_retrotransposon)) {
     /* store predicted LTR */
     gt_evaluator_add_predicted(info->LTR_evaluator, 1);
     /* determine true LTR */
@@ -1079,7 +1079,7 @@ static int process_predicted_feature(GtGenomeNode *gn, void *data,
       }
     }
   }
-  else if (gt_feature_node_has_type((GtFeatureNode*) gn, gft_exon)) {
+  else if (gt_feature_node_has_type((GtFeatureNode*) gn, gt_ft_exon)) {
     /* store predicted exon (mRNA level)*/
     store_predicted_exon(info->mRNA_exon_evaluators, gn);
 
@@ -1122,7 +1122,7 @@ static int process_predicted_feature(GtGenomeNode *gn, void *data,
         }
     }
   }
-  else if (gt_feature_node_has_type((GtFeatureNode*) gn, gft_CDS)) {
+  else if (gt_feature_node_has_type((GtFeatureNode*) gn, gt_ft_CDS)) {
     /* store predicted exon (CDS level)*/
     store_predicted_exon(info->CDS_exon_evaluators, gn);
 

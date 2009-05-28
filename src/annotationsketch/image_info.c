@@ -86,7 +86,7 @@ const GtRecMap* gt_image_info_get_rec_map(GtImageInfo *ii, unsigned long n)
 int gt_image_info_unit_test(GtError *err)
 {
   GtRecMap* rms[20];
-  GtGenomeNode* gfs[20];
+  GtFeatureNode* features[20];
   GtImageInfo *ii;
   unsigned long i;
   GtStr *seqid;
@@ -103,18 +103,19 @@ int gt_image_info_unit_test(GtError *err)
     unsigned long rbase;
     rbase = gt_rand_max(10);
     GtRange r = { rbase, rbase + gt_rand_max(20)};
-    gfs[i] = gt_feature_node_new(seqid, gft_gene, r.start, r.end,
-                                   GT_STRAND_FORWARD);
+    features[i] = (GtFeatureNode*) gt_feature_node_new(seqid, gt_ft_gene,
+                                                       r.start, r.end,
+                                                       GT_STRAND_FORWARD);
     rms[i] = gt_rec_map_new(gt_rand_max_double(100.0),
                             gt_rand_max_double(100.0),
                             gt_rand_max_double(100.0),
                             gt_rand_max_double(100.0),
-                            (GtFeatureNode*) /* XXX */ gfs[i]);
+                            features[i]);
     gt_image_info_add_rec_map(ii, rms[i]);
     ensure(had_err, gt_image_info_num_of_rec_maps(ii) == i+1);
     ensure(had_err, (rm = gt_image_info_get_rec_map(ii, i)) == rms[i]);
-    ensure(had_err, rm->gf == rms[i]->gf);
-    gt_genome_node_delete((GtGenomeNode*) gfs[i]);
+    ensure(had_err, rm->fn == rms[i]->fn);
+    gt_genome_node_delete((GtGenomeNode*) features[i]);
   }
 
   gt_image_info_delete(ii);

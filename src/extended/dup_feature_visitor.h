@@ -1,6 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,15 +14,18 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ADD_INTRONS_VISITOR_H
-#define ADD_INTRONS_VISITOR_H
+#ifndef DUP_FEATURE_VISITOR_H
+#define DUP_FEATURE_VISITOR_H
 
 /* implements the ``genome visitor'' interface */
-typedef struct GtAddIntronsVisitor GtAddIntronsVisitor;
+typedef struct GtDupFeatureVisitor GtDupFeatureVisitor;
 
 #include "extended/node_visitor.h"
 
-const GtNodeVisitorClass* gt_add_introns_visitor_class(void);
-GtNodeVisitor*            gt_add_introns_visitor_new(void);
+const GtNodeVisitorClass* gt_dup_feature_visitor_class(void);
+/* Duplicate internal feature nodes of type <source_type> as features with type
+   <dest_type>. The duplicated feature does not inherit the children. */
+GtNodeVisitor*            gt_dup_feature_visitor_new(const char *dest_type,
+                                                     const char *source_type);
 
 #endif

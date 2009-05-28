@@ -25,8 +25,4 @@
 #define GT_A_CODE  2
 #define GT_G_CODE  3
 
-extern const char gt_aminos[];
-
-char gt_codon2amino(char, char, char);
-
 #endif

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -15,20 +15,16 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef TRANSLATE_H
-#define TRANSLATE_H
+#ifndef MERGE_FEATURE_STREAM_H
+#define MERGE_FEATURE_STREAM_H
 
-#include "core/str.h"
+#include <stdio.h>
+#include "extended/node_stream_api.h"
 
-void gt_translate_dna(GtStr*, const char*, unsigned long, unsigned int frame);
+/* implements the ``genome_stream'' interface */
+typedef struct GtMergeFeatureStream GtMergeFeatureStream;
 
-/* Translate <dna_sequence> of length <seqlen> in all three reading frames.
-   The translations are stored in <frame1>, <frame2>, and <frame3>.
-   The necessary space for the frames is allocated by translate_all_frames(),
-   it is the responsibility of the caller to free it.
-   All characters different from 'acgtu' (in lower and upper case) are mapped to
-   't' before the translation is performed. */
-void gt_translate_all_frames(char **frame1, char **frame2, char **frame3,
-                             const char *dna_sequence, unsigned long seqlen);
+const GtNodeStreamClass* gt_merge_feature_stream_class(void);
+GtNodeStream*            gt_merge_feature_stream_new(GtNodeStream*);
 
 #endif

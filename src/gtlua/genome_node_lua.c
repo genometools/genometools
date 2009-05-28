@@ -172,14 +172,14 @@ static int feature_node_lua_get_exons(lua_State *L)
   GtFeatureNode *fn;
   /* make sure we get a genome feature */
   fn = gt_feature_node_try_cast(*gn);
-  luaL_argcheck(L, fn, 1, "not a genome feature");
+  luaL_argcheck(L, fn, 1, "not a feature node");
   gt_feature_node_get_exons(fn, exons);
   lua_newtable(L);
   for (i = 0; i < gt_array_size(exons); i++) {
     lua_pushnumber(L, i+1);
     gt_lua_genome_node_push(L, (GtGenomeNode*)
-                            gt_feature_node_nonrec_ref(*(GtFeatureNode**)
-                                                       gt_array_get(exons, i)));
+                            gt_genome_node_ref(*(GtGenomeNode**)
+                                               gt_array_get(exons, i)));
     lua_rawset(L, -3);
   }
   gt_array_delete(exons);
