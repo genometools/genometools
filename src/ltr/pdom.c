@@ -25,7 +25,7 @@
 #include "core/log.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
-#include "core/translate.h"
+#include "core/translator.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
 #include "extended/globalchaining.h"
@@ -92,8 +92,7 @@ typedef struct GtPdomSharedMem {
   GtPdomFinder *gpf;
   unsigned long next_hmm;
   GtArray *hmms;
-  char *fwd_fr1, *fwd_fr2, *fwd_fr3,
-       *rev_fr1, *rev_fr2, *rev_fr3;
+  GtStr **fwd, **rev;
   GtPdomResults *results;
   pthread_mutex_t in_lock, out_lock;
 } GtPdomSharedMem;
@@ -579,18 +578,54 @@ void* gt_pdom_per_domain_worker_thread(void *data)
     hit = gt_pdom_model_hit_new(shared->gpf->elem);
     ghit = AllocTophits(MAX_TOPHITS);
 
-    gt_hmmer_search(hmm->model,shared->fwd_fr1,strlen(shared->fwd_fr1),"0+",
-                 &shared->gpf->thresh, ghit, hit->hits_fwd, &shared->out_lock);
-    gt_hmmer_search(hmm->model,shared->fwd_fr2,strlen(shared->fwd_fr2),"1+",
-                 &shared->gpf->thresh, ghit, hit->hits_fwd, &shared->out_lock);
-    gt_hmmer_search(hmm->model,shared->fwd_fr3,strlen(shared->fwd_fr3),"2+",
-                 &shared->gpf->thresh, ghit, hit->hits_fwd, &shared->out_lock);
-    gt_hmmer_search(hmm->model,shared->rev_fr1,strlen(shared->rev_fr1),"0-",
-                 &shared->gpf->thresh, ghit, hit->hits_rev, &shared->out_lock);
-    gt_hmmer_search(hmm->model,shared->rev_fr2,strlen(shared->rev_fr2),"1-",
-                 &shared->gpf->thresh, ghit, hit->hits_rev, &shared->out_lock);
-    gt_hmmer_search(hmm->model,shared->rev_fr3,strlen(shared->rev_fr3),"2-",
-                 &shared->gpf->thresh, ghit, hit->hits_rev, &shared->out_lock);
+    gt_hmmer_search(hmm->model,
+                    gt_str_get(shared->fwd[0]),
+                    gt_str_length(shared->fwd[0]),
+                    "0+",
+                    &shared->gpf->thresh,
+                    ghit,
+                    hit->hits_fwd,
+                    &shared->out_lock);
+    gt_hmmer_search(hmm->model,
+                    gt_str_get(shared->fwd[1]),
+                    gt_str_length(shared->fwd[1]),
+                    "1+",
+                    &shared->gpf->thresh,
+                    ghit,
+                    hit->hits_fwd,
+                    &shared->out_lock);
+    gt_hmmer_search(hmm->model,
+                    gt_str_get(shared->fwd[2]),
+                    gt_str_length(shared->fwd[2]),
+                    "2+",
+                    &shared->gpf->thresh,
+                    ghit,
+                    hit->hits_fwd,
+                    &shared->out_lock);
+    gt_hmmer_search(hmm->model,
+                    gt_str_get(shared->rev[0]),
+                    gt_str_length(shared->rev[0]),
+                    "0-",
+                    &shared->gpf->thresh,
+                    ghit,
+                    hit->hits_rev,
+                    &shared->out_lock);
+    gt_hmmer_search(hmm->model,
+                    gt_str_get(shared->rev[1]),
+                    gt_str_length(shared->rev[1]),
+                    "1-",
+                    &shared->gpf->thresh,
+                    ghit,
+                    hit->hits_rev,
+                    &shared->out_lock);
+    gt_hmmer_search(hmm->model,
+                    gt_str_get(shared->rev[2]),
+                    gt_str_length(shared->rev[2]),
+                    "2-",
+                    &shared->gpf->thresh,
+                    ghit,
+                    hit->hits_rev,
+                    &shared->out_lock);
 
     FullSortTophits(hit->hits_fwd);
     FullSortTophits(hit->hits_rev);
@@ -695,10 +730,7 @@ void* gt_pdom_per_domain_worker_thread(void *data)
 }
 
 static GtPdomSharedMem* gt_pdom_run_threads(GtArray *hmms, int nof_threads,
-                                            char *fwd_fr1,char *fwd_fr2,
-                                            char *fwd_fr3,
-                                            char *rev_fr1,char *rev_fr2,
-                                            char *rev_fr3,
+                                            GtStr **fwd, GtStr **rev,
                                             GtPdomResults *results,
                                             GtPdomFinder *gpf)
 {
@@ -706,20 +738,15 @@ static GtPdomSharedMem* gt_pdom_run_threads(GtArray *hmms, int nof_threads,
   GtPdomSharedMem *shared;
   pthread_attr_t attr;
 
-  gt_assert(hmms && nof_threads > 0 && *fwd_fr1 && *fwd_fr2 && *fwd_fr3
-          && *rev_fr1 && rev_fr2 && rev_fr3 && results && gpf);
+  gt_assert(hmms && nof_threads > 0 && fwd && rev && results && gpf);
 
   shared = gt_calloc(1, sizeof (GtPdomSharedMem));
 
   shared->nof_threads = nof_threads;
   shared->thread = gt_calloc(nof_threads, sizeof (pthread_t));
   shared->hmms = hmms;
-  shared->fwd_fr1 = fwd_fr1;
-  shared->fwd_fr2 = fwd_fr2;
-  shared->fwd_fr3 = fwd_fr3;
-  shared->rev_fr1 = rev_fr1;
-  shared->rev_fr2 = rev_fr2;
-  shared->rev_fr3 = rev_fr3;
+  shared->fwd = fwd;
+  shared->rev = rev;
   shared->next_hmm = 0;
   shared->results = results;
   shared->gpf = gpf;
@@ -759,32 +786,52 @@ static void gt_pdom_free_shared(GtPdomSharedMem *shared)
 GtPdomResults* gt_pdom_finder_find(GtPdomFinder *gpf, const char *seq,
                                    const char *rev_seq, GtLTRElement *element)
 {
-  char *fwd_fr1, *fwd_fr2, *fwd_fr3,
-       *rev_fr1, *rev_fr2, *rev_fr3;
+  GtStr *fwd[3], *rev[3];
+  char translated;
   unsigned long seqlen = gt_ltrelement_length(element);
   GtPdomSharedMem *shared = NULL;
   GtPdomResults *results = NULL;
-  int i;
-
+  GtTranslator *tr;
+  int i,
+      had_err = 0;
+  unsigned int frame;
   gt_assert(seq && rev_seq && element);
 
   gpf->elem = element;
   results = gt_pdom_results_new();
+  tr = gt_translator_new();
+
+  for (i=0;i<3;i++)
+  {
+    fwd[i] = gt_str_new();
+    rev[i] = gt_str_new();
+  }
 
   /* create translations */
-  gt_translate_all_frames(&fwd_fr1, &fwd_fr2, &fwd_fr3,     seq, seqlen);
-  gt_translate_all_frames(&rev_fr1, &rev_fr2, &rev_fr3, rev_seq, seqlen);
+  had_err = gt_translator_start(tr, seq, seqlen, &translated,
+                                &frame, NULL);
+  while (!had_err && translated)
+  {
+    gt_str_append_char(fwd[frame], translated);
+    had_err = gt_translator_next(tr, &translated, &frame, NULL);
+  }
+  had_err = gt_translator_start(tr, rev_seq, seqlen, &translated,
+                                &frame, NULL);
+  while (!had_err && translated)
+  {
+    gt_str_append_char(rev[frame], translated);
+    had_err = gt_translator_next(tr, &translated, &frame, NULL);
+  }
+  gt_translator_delete(tr);
 
   /* start worker threads */
   shared = gt_pdom_run_threads(gpf->models, gpf->nof_threads,
-                               fwd_fr1, fwd_fr2, fwd_fr3,
-                               rev_fr1, rev_fr2, rev_fr3,
-                               results, gpf);
+                               fwd, rev, results, gpf);
 
   /* continue when all threads are done */
   for (i = 0; i < shared->nof_threads; i++)
   {
-    if (pthread_join(shared->thread[i],NULL) != 0)
+    if (pthread_join(shared->thread[i], NULL) != 0)
     {
       fprintf(stderr, "Could not join threads!");
       exit(EXIT_FAILURE);
@@ -794,8 +841,11 @@ GtPdomResults* gt_pdom_finder_find(GtPdomFinder *gpf, const char *seq,
   /* cleanup */
   gt_pdom_free_shared(shared);
   SqdClean();
-  gt_free(fwd_fr1); gt_free(fwd_fr2); gt_free(fwd_fr3);
-  gt_free(rev_fr1); gt_free(rev_fr2); gt_free(rev_fr3);
+  for (i=0;i<3;i++)
+  {
+    gt_str_delete(fwd[i]);
+    gt_str_delete(rev[i]);
+  }
 
   return results;
 }
