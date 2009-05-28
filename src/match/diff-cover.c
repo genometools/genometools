@@ -800,9 +800,11 @@ static int comparedcov_presortedsuffixes(const void *a,const void *b,
 void dc_sortunsortedbucket(void *data,
                            Seqpos *left,
                            Seqpos *right,
-                           Seqpos depth)
+                           GT_UNUSED Seqpos depth)
 {
+#ifdef WITHCHECK
   const Differencecover *dcov = (const Differencecover *) data;
+#endif
 
   gt_assert(left < right);
   gt_assert(depth >= (Seqpos) dcov->vparam);
@@ -1082,7 +1084,9 @@ void differencecover_sortsample(Differencecover *dcov,bool withcheck)
   dc_sortremainingsamples(dcov);
   if (withcheck)
   {
+#ifndef NDEBUG
     unsigned long idx;
+#endif
 
     checksortedsuffixes(__FILE__,
                         __LINE__,
@@ -1093,11 +1097,13 @@ void differencecover_sortsample(Differencecover *dcov,bool withcheck)
                         false, /* specialsareequal  */
                         false,  /* specialsareequalatdepth0 */
                         0);
+#ifndef NDEBUG
     for (idx=0; idx<dcov->effectivesamplesize; idx++)
     {
       unsigned long idx2 = inversesuftab_get(dcov,dcov->sortedsample[idx]);
       gt_assert(idx == idx2);
     }
+#endif
   }
   gt_free(dcov->sortedsample);
   dcov->sortedsample = NULL;
