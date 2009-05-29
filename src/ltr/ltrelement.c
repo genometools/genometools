@@ -91,14 +91,14 @@ int gt_ltrelement_format_description(GtLTRElement *e, unsigned int seqnamelen,
                                      char *buf, size_t buflen)
 {
   int ret;
-  char *tmpstr;
+  char tmpstr[BUFSIZ];
   gt_assert(buf && e);
-  tmpstr = gt_calloc(seqnamelen+1, sizeof (char));
-  (void) snprintf(tmpstr, seqnamelen-1, "%s", e->seqid);
+
+  (void) snprintf(tmpstr, seqnamelen+1, "%s", e->seqid);
+  tmpstr[seqnamelen+1] = '\0';
   gt_cstr_rep(tmpstr, ' ', '_');
   ret = snprintf(buf, buflen, "%s_%lu_%lu", tmpstr, e->leftLTR_5+1,
                  e->rightLTR_3+1);
-  gt_free(tmpstr);
   return ret;
 }
 
