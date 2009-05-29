@@ -211,7 +211,7 @@ static int run_ltrdigest(GtLTRElement *element, char *seq,
   GtStrand canonical_strand = GT_STRAND_UNKNOWN;
 
   /* create reverse strand sequence */
-  rev_seq = gt_calloc(seqlen, sizeof (char));
+  rev_seq = gt_calloc(seqlen+1, sizeof (char));
   memcpy(rev_seq, seq, sizeof (char) * seqlen);
   had_err = gt_reverse_complement(rev_seq, seqlen, err);
 
@@ -222,35 +222,40 @@ static int run_ltrdigest(GtLTRElement *element, char *seq,
      * ----------------------*/
     if (ls->tests_to_run & GT_LTRDIGEST_RUN_PDOM)
     {
-    GtPdomResults *pdom_results = NULL;
-    if (!ls->pdf)
-    {
-      gt_error_set(err, "No PdomFinder object found -- how could that happen?");
-      had_err = -1;
-    } else
-    {
-      pdom_results = gt_pdom_finder_find(ls->pdf, (const char*) seq,
-                                         (const char*) rev_seq, element);
-      if (pdom_results && !gt_pdom_results_empty(pdom_results))
+      GtPdomResults *pdom_results = NULL;
+      if (!ls->pdf)
       {
-        /* determine most likely strand from protein domain results */
-        if (gt_double_compare(
+        gt_error_set(err, "No PdomFinder object found -- "
+                          "how could that happen?");
+        had_err = -1;
+      } else
+      {
+        pdom_results = gt_pdom_finder_find(ls->pdf, (const char*) seq,
+                                           (const char*) rev_seq, element, err);
+        if (!pdom_results)
+        {
+          had_err = -1;
+        } else {
+          if (pdom_results && !gt_pdom_results_empty(pdom_results))
+          {
+            /* determine most likely strand from protein domain results */
+            if (gt_double_compare(
                      gt_pdom_results_get_combined_evalue_fwd(pdom_results),
                      gt_pdom_results_get_combined_evalue_rev(pdom_results)) < 0)
-          canonical_strand = GT_STRAND_FORWARD;
-        else
-          canonical_strand = GT_STRAND_REVERSE;
-        gt_feature_node_set_strand(ls->element.mainnode, canonical_strand);
-        /* create nodes for protein match annotations */
-        (void) gt_pdom_results_foreach_domain_hit(pdom_results,
-                                                  pdom_hit_attach_gff3,
-                                                  ls,
-                                                  err);
+              canonical_strand = GT_STRAND_FORWARD;
+            else
+              canonical_strand = GT_STRAND_REVERSE;
+            gt_feature_node_set_strand(ls->element.mainnode, canonical_strand);
+            /* create nodes for protein match annotations */
+            (void) gt_pdom_results_foreach_domain_hit(pdom_results,
+                                                      pdom_hit_attach_gff3,
+                                                      ls,
+                                                      err);
+          }
+          gt_pdom_results_delete(pdom_results);
+        }
       }
-      gt_pdom_results_delete(pdom_results);
-
     }
-  }
 #endif
 
     /* PPT finding

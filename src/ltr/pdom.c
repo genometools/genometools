@@ -784,7 +784,8 @@ static void gt_pdom_free_shared(GtPdomSharedMem *shared)
 }
 
 GtPdomResults* gt_pdom_finder_find(GtPdomFinder *gpf, const char *seq,
-                                   const char *rev_seq, GtLTRElement *element)
+                                   const char *rev_seq, GtLTRElement *element,
+                                   GtError *err)
 {
   GtStr *fwd[3], *rev[3];
   char translated;
@@ -795,7 +796,9 @@ GtPdomResults* gt_pdom_finder_find(GtPdomFinder *gpf, const char *seq,
   int i,
       had_err = 0;
   unsigned int frame;
-  gt_assert(seq && rev_seq && element);
+  if (strlen(seq) != strlen(rev_seq))
+    printf("%d<->%d\n", strlen(seq), strlen(rev_seq));
+  gt_assert(seq && rev_seq && strlen(seq) == strlen(rev_seq) && element);
 
   gpf->elem = element;
   results = gt_pdom_results_new();
@@ -809,37 +812,49 @@ GtPdomResults* gt_pdom_finder_find(GtPdomFinder *gpf, const char *seq,
 
   /* create translations */
   had_err = gt_translator_start(tr, seq, seqlen, &translated,
-                                &frame, NULL);
+                                &frame, err);
   while (!had_err && translated)
   {
     gt_str_append_char(fwd[frame], translated);
     had_err = gt_translator_next(tr, &translated, &frame, NULL);
   }
-  had_err = gt_translator_start(tr, rev_seq, seqlen, &translated,
-                                &frame, NULL);
-  while (!had_err && translated)
+  if (!had_err)
   {
-    gt_str_append_char(rev[frame], translated);
-    had_err = gt_translator_next(tr, &translated, &frame, NULL);
-  }
-  gt_translator_delete(tr);
-
-  /* start worker threads */
-  shared = gt_pdom_run_threads(gpf->models, gpf->nof_threads,
-                               fwd, rev, results, gpf);
-
-  /* continue when all threads are done */
-  for (i = 0; i < shared->nof_threads; i++)
-  {
-    if (pthread_join(shared->thread[i], NULL) != 0)
+    had_err = gt_translator_start(tr, rev_seq, seqlen, &translated,
+                                  &frame, err);
+    while (!had_err && translated)
     {
-      fprintf(stderr, "Could not join threads!");
-      exit(EXIT_FAILURE);
+      gt_str_append_char(rev[frame], translated);
+      had_err = gt_translator_next(tr, &translated, &frame, NULL);
     }
   }
 
-  /* cleanup */
-  gt_pdom_free_shared(shared);
+  if (!had_err)
+  {
+    for (i=0;i<3;i++)
+    {
+      gt_assert(gt_str_length(fwd[i]) == (seqlen - i) / 3);
+      gt_assert(gt_str_length(rev[i]) == (seqlen - i) / 3);
+    }
+
+    /* start worker threads */
+    shared = gt_pdom_run_threads(gpf->models, gpf->nof_threads,
+                                 fwd, rev, results, gpf);
+
+    /* continue when all threads are done */
+    for (i = 0; i < shared->nof_threads; i++)
+    {
+      if (pthread_join(shared->thread[i], NULL) != 0)
+      {
+        fprintf(stderr, "Could not join threads!");
+        exit(EXIT_FAILURE);
+      }
+    }
+
+    /* cleanup */
+    gt_pdom_free_shared(shared);
+  }
+
   SqdClean();
   for (i=0;i<3;i++)
   {
@@ -847,6 +862,7 @@ GtPdomResults* gt_pdom_finder_find(GtPdomFinder *gpf, const char *seq,
     gt_str_delete(rev[i]);
   }
 
+  gt_translator_delete(tr);
   return results;
 }
 

@@ -58,7 +58,8 @@ GtStrArray*      gt_pdom_finder_get_model_filenames(const GtPdomFinder*);
 unsigned long    gt_pdom_finder_get_number_of_models(const GtPdomFinder*);
 GtPdomModel*     gt_pdom_finder_get_model(const GtPdomModel*, unsigned long);
 GtPdomResults*   gt_pdom_finder_find(GtPdomFinder*, const char *seq,
-                                     const char *rev_seq, GtLTRElement*);
+                                     const char *rev_seq, GtLTRElement*,
+                                     GtError *err);
 void             gt_pdom_finder_delete(GtPdomFinder*);
 
 /* holds results for all models */
