@@ -204,7 +204,7 @@ GtLayout* gt_layout_new_with_twc(GtDiagram *diagram,
   lti.twc = twc;
   layout->own_twc = false;
   gt_diagram_build(diagram);
-  layout->custom_tracks = gt_diagram_get_custom_tracks(diagram);
+  layout->custom_tracks = gt_array_ref(gt_diagram_get_custom_tracks(diagram));
   /* XXX: use other container type here! */
   layout->tracks = gt_hashmap_new(HASH_STRING, gt_free_func,
                                   (GtFree) gt_track_delete);
@@ -221,6 +221,7 @@ void gt_layout_delete(GtLayout *layout)
   if (layout->twc && layout->own_twc)
     gt_text_width_calculator_delete(layout->twc);
   gt_hashmap_delete(layout->tracks);
+  gt_array_delete(layout->custom_tracks);
   gt_free(layout);
 }
 
