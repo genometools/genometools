@@ -832,10 +832,9 @@ int gt_translator_start(GtTranslator *tr,
   gt_error_check(err);
   *translated = codon2amino(tr->scheme->aminos, true, *dnaseq, *(dnaseq+1),
                             *(dnaseq+2), NULL, err);
-  *frame = tr->curframe % GT_CODON_LENGTH;
+  *frame = 0;
+  tr->curframe = 1;
   gt_assert(*frame < GT_CODON_LENGTH);
-  tr->curframe++;
-  tr->curframe %= GT_CODON_LENGTH;
   if (*translated == GT_AMINOACIDFAIL)
     return -2;
   tr->dnaseq = tr->origseq = dnaseq;
@@ -863,9 +862,8 @@ int gt_translator_next(GtTranslator *tr,
                             *tr->dnaseq,
                             *(tr->dnaseq+1),
                             *(tr->dnaseq+2), NULL, err);
-  *frame = tr->curframe % GT_CODON_LENGTH;
+  *frame = tr->curframe++;
   gt_assert(*frame < GT_CODON_LENGTH);
-  tr->curframe++;
   tr->curframe %= GT_CODON_LENGTH;
   if (*translated == GT_AMINOACIDFAIL)
     return -2;
