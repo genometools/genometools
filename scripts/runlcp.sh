@@ -77,7 +77,7 @@ do
     suffixeratornolcp -dc ${dc}
     sfxmaponlysuf sfx-idx
   done
-  ${RUNNER} gt suffixerator -v -showtime -smap Transab -tis -suf -dc 64 -db testdata/fib25.fas.gz -indexname sfx-idx
+  # ${RUNNER} gt suffixerator -v -showtime -smap Transab -tis -suf -dc 64 -db testdata/fib25.fas.gz -indexname sfx-idx
   rm -f sfx-idx.* sfx-idx${maxdepth}.* 
 done
 echo "${filenames}"
