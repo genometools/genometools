@@ -672,14 +672,19 @@ GtDiagram* gt_diagram_new(GtFeatureIndex *fi, const char *seqid,
 {
   GtDiagram *diagram;
   int had_err = 0;
-  GtArray *features = gt_array_new(sizeof (GtGenomeNode*));
-  gt_assert(features && seqid && range && style);
+  GtArray *features = NULL;
+  gt_assert(seqid && range && style);
+  if (range->start ==  range->end)
+  {
+    gt_error_set(err, "range start must not be equal to range end");
+    return NULL;
+  }
+  features = gt_array_new(sizeof (GtGenomeNode*));
   had_err = gt_feature_index_get_features_for_range(fi, features, seqid, range,
-                                                    NULL);
+                                                    err);
   if (had_err)
   {
     gt_array_delete(features);
-    gt_error_set(err, "FeatureIndex does not contain seqid '%s'", seqid);
     return NULL;
   }
   diagram = gt_diagram_new_generic(features, range, style, false);
