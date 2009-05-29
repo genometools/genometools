@@ -23,6 +23,7 @@
 #include "core/sequence_buffer_gb.h"
 #include "core/sequence_buffer_rep.h"
 #include "core/sequence_buffer_inline.h"
+#include "core/warning_api.h"
 
 #define GB_LOCUS_STRING      "LOCUS"
 #define GB_DEFINITION_STRING "DEFINITION"
@@ -269,6 +270,7 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
       if (!sbe->description_set && pvt->descptr)
           gt_queue_add(pvt->descptr, gt_cstr_dup(""));
       sbe->description_set = false;
+      gt_str_reset(sbe->headerbuffer);
       if ((eat_line(sb, &currentfileread)) == EOF)
         break;
       sbe->state = GB_OUT_OF_ENTRY;
@@ -290,6 +292,15 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
           if (!had_err)
             had_err = get_description(sb, &currentfileread);
           sbe->state = GB_IN_DESCRIPTION;
+        } else if (strcmp(gt_str_get(sbe->keywordbuffer),
+                   GB_ORIGIN_STRING) == 0) {
+          gt_warning("sequence started without prior DEFINITION line in entry "
+                     "in line %lu of file %s",
+                     (unsigned long) pvt->linenum-1,
+                     gt_str_array_get(pvt->filenametab,
+                                     (unsigned long) pvt->filenum));
+          had_err = eat_line(sb, &currentfileread);
+          sbe->state = GB_IN_SEQUENCE;
         } else {
           had_err = eat_line(sb, &currentfileread);
         }
