@@ -46,13 +46,7 @@ Codetype *initbasepower(unsigned int numofchars,unsigned int prefixlength)
     {
       break;
     }
-    if (thepower >= minfailure)
-    {
-      FREESPACE(basepower);
-      fprintf(stderr,"overflow when computing %lu * %u",
-              (unsigned long) thepower,numofchars);
-      exit(GT_EXIT_PROGRAMMING_ERROR);
-    }
+    gt_assert(thepower < minfailure);
     thepower *= numofchars;
   }
   return basepower;

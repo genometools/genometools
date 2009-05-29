@@ -71,6 +71,7 @@ Seqpos nextLcpvalueiterator(Lcpvalueiterator *lvi,
                              suftabptr[lvi->relpos],
                              lvi->esr1,
                              lvi->esr2);
+#ifndef NDEBUG
     if (cmp > 0)
     {
       fprintf(stderr,"pos=" FormatSeqpos
@@ -83,6 +84,7 @@ Seqpos nextLcpvalueiterator(Lcpvalueiterator *lvi,
               PRINTSeqposcast(lcpvalue));
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
+#endif
   }
   lvi->lastsuftabentry = suftabptr[lvi->relpos];
   if (lvi->relpos + 1 == numberofsuffixes)

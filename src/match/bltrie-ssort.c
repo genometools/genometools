@@ -434,6 +434,7 @@ static unsigned long enumeratetrieleaves (Seqpos *suffixtable,
             equalsrangewidth++;
           } else
           {
+#ifndef NDEBUG
             if (lcpnode->depth + blindtrie->offset >= blindtrie->maxdepth)
             {
               fprintf(stderr,"lcpnode.depth=%lu,offset=%lu,maxdepth=%lu\n",
@@ -442,6 +443,7 @@ static unsigned long enumeratetrieleaves (Seqpos *suffixtable,
                               (unsigned long) blindtrie->maxdepth);
               exit(EXIT_FAILURE);
             }
+#endif
             gt_assert(lcpnode->depth + blindtrie->offset < blindtrie->maxdepth);
             if (equalsrangewidth > 0)
             {

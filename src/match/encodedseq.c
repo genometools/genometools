@@ -4516,7 +4516,7 @@ static Codetype extractprefixcodeViadirectaccess(unsigned int *unitsnotspecial,
        pos++, (*unitsnotspecial)++)
   {
     cc = ISDIRREVERSE(readmode)
-           ? encseq->plainseq[REVERSEPOS(encseq->totallength,pos)] 
+           ? encseq->plainseq[REVERSEPOS(encseq->totallength,pos)]
            : encseq->plainseq[pos];
     if (ISNOTSPECIAL(cc))
     {

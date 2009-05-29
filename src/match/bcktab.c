@@ -456,12 +456,14 @@ static void pfxidxpartialsums(unsigned long *count,
     {
       count[prefixindex] += count[prefixindex+1];
     }
+#ifndef NDEBUG
     if (specialsinbucket != count[1])
     {
       fprintf(stderr,"code " FormatCodetype ": sum = %lu != %lu = count[1]\n",
               code,sum,count[1]);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
+#endif
   }
 }
 

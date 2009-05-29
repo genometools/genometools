@@ -39,14 +39,15 @@ int array_compare(const GtArray *a,const GtArray *b,
     fprintf(stderr,"array_size(a) = %lu > %lu = array_size(b)\n",
                   size_a,
                   size_b);
-    return 1;
+    return -1;
   }
   for (idx=0; idx < size_a; idx++)
   {
     cmp = compar(gt_array_get(a,idx),gt_array_get(b,idx));
     if (cmp != 0)
     {
-      return cmp;
+      fprintf(stderr,"index %lu: different values, cmp = %d\n",idx,cmp);
+      return -1;
     }
   }
   return 0;

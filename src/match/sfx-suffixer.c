@@ -123,13 +123,11 @@ static void compareCodeatpositionlists(const Codeatposition *codelist1,
 {
   unsigned long idx;
 
-#ifndef NDEBUG
   if (len1 != len2)
   {
     fprintf(stderr,"len1 = %lu != %lu = len2\n",len1,len2);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
-#endif
   for (idx=0; idx<len1; idx++)
   {
     if (codelist1[idx].position != codelist2[idx].position)

@@ -369,6 +369,7 @@ int extractginumbers(bool verbose,
         while (ginumberhit < numofqueries &&
                giqueries[ginumberhit].ginumber == referenceginumber)
         {
+#ifndef NDEBUG
           if (giqueries[ginumberhit].markhit)
           {
             fprintf(stderr,"ginumber " Formatuint64_t
@@ -376,6 +377,7 @@ int extractginumbers(bool verbose,
                      PRINTuint64_tcast(giqueries[ginumberhit].ginumber));
             exit(GT_EXIT_PROGRAMMING_ERROR);
           }
+#endif
           headerlength = strlen(desc);
           if (headerbuffersize < headerlength + EXTRABUF + 1)
           {

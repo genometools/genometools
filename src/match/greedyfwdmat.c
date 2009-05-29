@@ -130,6 +130,7 @@ static void gmatchposinsinglesequence(Substringinfo *substringinfo,
                                                 query+querylen);
     if (gmatchlength > 0)
     {
+#ifndef NDEBUG
       if (substringinfo->encseq != NULL)
       {
         gt_assert(wptr != NULL);
@@ -138,6 +139,7 @@ static void gmatchposinsinglesequence(Substringinfo *substringinfo,
                                gmatchlength,
                                qptr);
       }
+#endif
       substringinfo->processgmatchlength(substringinfo->alphabet,
                                          query,
                                          gmatchlength,
@@ -341,6 +343,7 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
                                       NULL,
                                       substring.currentptr+prefixlength,
                                       substring.currentptr+substring.remaining);
+#ifndef NDEBUG
         if (gmatchlength2 != gmatchlength)
         {
           fprintf(stderr,"at offset %lu:\n",(unsigned long)
@@ -354,6 +357,7 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
                           gmatchlength2,gmatchlength);
           exit(GT_EXIT_PROGRAMMING_ERROR);
         }
+#endif
       }
     }
   }
