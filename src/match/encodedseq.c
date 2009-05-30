@@ -4514,24 +4514,25 @@ static Codetype extractprefixcodeTBE(unsigned int *unitsnotspecial,
                                      Readmode readmode,
                                      Encodedsequencescanstate *esr,
                                      Seqpos frompos,
-                                     unsigned int len)
+                                     unsigned int prefixlength)
 {
   EndofTwobitencoding etbe;
   bool fwd = ISDIRREVERSE(readmode) ? false : true;
   Codetype code;
 
+  gt_assert(prefixlength <= UNITSIN2BITENC);
   initEncodedsequencescanstategeneric(esr,encseq,fwd,frompos);
   extract2bitenc(fwd,&etbe,encseq,esr,frompos);
-  if (etbe.unitsnotspecial >= len)
+  if (etbe.unitsnotspecial >= prefixlength)
   {
-    code = (Codetype) (etbe.tbe >> MULT2(UNITSIN2BITENC - len));
-    *unitsnotspecial = len;
-  } else /* etbe.unitsnotspecial < rmnsufinfo->prefixlength */
+    code = (Codetype) (etbe.tbe >> MULT2(UNITSIN2BITENC - prefixlength));
+    *unitsnotspecial = prefixlength;
+  } else /* etbe.unitsnotspecial < prefixlength */
   {
     if (etbe.unitsnotspecial > 0)
     {
       code = (Codetype)
-             (etbe.tbe >> MULT2(UNITSIN2BITENC - len))
+             (etbe.tbe >> MULT2(UNITSIN2BITENC - prefixlength))
              | filltable[etbe.unitsnotspecial];
       *unitsnotspecial = etbe.unitsnotspecial;
     } else
@@ -4550,7 +4551,7 @@ Codetype extractprefixcode(unsigned int *unitsnotspecial,
                            Encodedsequencescanstate *esr,
                            const Codetype **multimappower,
                            Seqpos frompos,
-                           unsigned int len)
+                           unsigned int prefixlength)
 {
   switch (encseq->sat)
   {
@@ -4561,7 +4562,7 @@ Codetype extractprefixcode(unsigned int *unitsnotspecial,
                                         readmode,
                                         multimappower,
                                         frompos,
-                                        len);
+                                        prefixlength);
     case Viabytecompress: return extractprefixcodeViabytecompress(
                                         unitsnotspecial,
                                         encseq,
@@ -4569,13 +4570,13 @@ Codetype extractprefixcode(unsigned int *unitsnotspecial,
                                         readmode,
                                         multimappower,
                                         frompos,
-                                        len);
+                                        prefixlength);
     default: return extractprefixcodeTBE(unitsnotspecial,
                                          encseq,
                                          filltable,
                                          readmode,
                                          esr,
                                          frompos,
-                                         len);
+                                         prefixlength);
   }
 }

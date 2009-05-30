@@ -21,18 +21,18 @@ static Codetype ADDSAT(extractprefixcode)(unsigned int *unitsnotspecial,
                                           Readmode readmode,
                                           const Codetype **multimappower,
                                           Seqpos frompos,
-                                          unsigned int len)
+                                          unsigned int prefixlength)
 {
   Seqpos pos;
   Codetype code = 0;
   GtUchar cc;
 
   /* XXX optimize the code by pointer arithmetic */
-  gt_assert(len > 0);
+  gt_assert(prefixlength > 0);
   if (ISDIRREVERSE(readmode))
   {
     for (pos=frompos, *unitsnotspecial = 0;
-         pos < encseq->totallength && *unitsnotspecial < len;
+         pos < encseq->totallength && *unitsnotspecial < prefixlength;
          pos++, (*unitsnotspecial)++)
     {
       cc = EXTRACTPREFIXCODEACCESS(REVERSEPOS(encseq->totallength,pos));
@@ -47,7 +47,7 @@ static Codetype ADDSAT(extractprefixcode)(unsigned int *unitsnotspecial,
   } else
   {
     for (pos=frompos, *unitsnotspecial = 0;
-         pos < encseq->totallength && *unitsnotspecial < len;
+         pos < encseq->totallength && *unitsnotspecial < prefixlength;
          pos++, (*unitsnotspecial)++)
     {
       cc = EXTRACTPREFIXCODEACCESS(pos);
@@ -60,7 +60,7 @@ static Codetype ADDSAT(extractprefixcode)(unsigned int *unitsnotspecial,
       }
     }
   }
-  if (*unitsnotspecial < len)
+  if (*unitsnotspecial < prefixlength)
   {
     code |= (Codetype) filltable[*unitsnotspecial];
   }
