@@ -4498,74 +4498,15 @@ void multicharactercompare_withtest(const Encodedsequence *encseq,
   }
 }
 
-static Codetype extractprefixcodeViadirectaccess(unsigned int *unitsnotspecial,
-                                                 const Encodedsequence *encseq,
-                                                 Codetype *filltable,
-                                                 Readmode readmode,
-                                                 const Codetype **multimappower,
-                                                 Seqpos frompos,
-                                                 unsigned int len)
-{
-  Seqpos pos;
-  Codetype code = 0;
-  GtUchar cc;
+#define ADDSAT(X)                      X##Viadirectaccess
+#define EXTRACTPREFIXCODEACCESS(POS)   encseq->plainseq[POS]
+#include "extpfxcode.gen"
 
-  gt_assert(len > 0 && encseq->sat == Viadirectaccess);
-  for (pos=frompos, *unitsnotspecial = 0;
-       pos < encseq->totallength && *unitsnotspecial < len;
-       pos++, (*unitsnotspecial)++)
-  {
-    cc = ISDIRREVERSE(readmode)
-           ? encseq->plainseq[REVERSEPOS(encseq->totallength,pos)]
-           : encseq->plainseq[pos];
-    if (ISNOTSPECIAL(cc))
-    {
-      code += multimappower[*unitsnotspecial][cc];
-    } else
-    {
-      break;
-    }
-  }
-  if (*unitsnotspecial < len)
-  {
-    code |= (Codetype) filltable[*unitsnotspecial];
-  }
-  return code;
-}
-
-static Codetype extractprefixcodeViabytecompress(unsigned int *unitsnotspecial,
-                                                 const Encodedsequence *encseq,
-                                                 Codetype *filltable,
-                                                 Readmode readmode,
-                                                 const Codetype **multimappower,
-                                                 Seqpos frompos,
-                                                 unsigned int len)
-{
-  Seqpos pos;
-  Codetype code = 0;
-  GtUchar cc;
-
-  gt_assert(len > 0 && encseq->sat == Viabytecompress &&
-            readmode == Forwardmode);
-  for (pos=frompos, *unitsnotspecial = 0;
-       pos < encseq->totallength && *unitsnotspecial < len;
-       pos++, (*unitsnotspecial)++)
-  {
-    cc = delivercharViabytecompress(encseq,pos);
-    if (ISNOTSPECIAL(cc))
-    {
-      code += multimappower[*unitsnotspecial][cc];
-    } else
-    {
-      break;
-    }
-  }
-  if (*unitsnotspecial < len)
-  {
-    code |= (Codetype) filltable[*unitsnotspecial];
-  }
-  return code;
-}
+#undef  ADDSAT
+#undef  EXTRACTPREFIXCODEACCESS
+#define ADDSAT(X)                      X##Viabytecompress
+#define EXTRACTPREFIXCODEACCESS(POS)   delivercharViabytecompress(encseq,POS)
+#include "extpfxcode.gen"              
 
 static Codetype extractprefixcodeTBE(unsigned int *unitsnotspecial,
                                      const Encodedsequence *encseq,

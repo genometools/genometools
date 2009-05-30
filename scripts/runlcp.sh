@@ -70,12 +70,21 @@ do
   sfxmap sfx-idx
   suffixerator -parts 3 -maxdepth abs
   sfxmap sfx-idx
-  for dc in 8 16 32
+  for dir in fwd rev
   do
-    suffixeratornolcp -cmpcharbychar -dc ${dc}
-    sfxmaponlysuf sfx-idx
-    suffixeratornolcp -dc ${dc}
-    sfxmaponlysuf sfx-idx
+    if test ${dir} == 'rev'
+    then
+      arg="-dir rev -sat bytecompress"
+    else
+      arg="-dir fwd"
+    fi
+    for dc in 8 16 32
+    do
+      suffixeratornolcp ${arg} -cmpcharbychar -dc ${dc}
+      sfxmaponlysuf sfx-idx
+      suffixeratornolcp ${arg} -dc ${dc}
+      sfxmaponlysuf sfx-idx
+    done
   done
   # ${RUNNER} gt suffixerator -v -showtime -smap Transab -tis -suf -dc 64 -db testdata/fib25.fas.gz -indexname sfx-idx
   rm -f sfx-idx.* sfx-idx${maxdepth}.* 

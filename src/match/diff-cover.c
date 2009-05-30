@@ -446,7 +446,9 @@ static void inversesuftab_set(int line,Differencecover *dcov,Seqpos pos,
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   idx = differencecover_packsamplepos(dcov,pos);
+  /*
   printf("line %d: set inversesuftab[%lu]=%lu\n",line,idx,sampleindex);
+  */
   dcov->inversesuftab[idx] = sampleindex;
 }
 
@@ -480,7 +482,6 @@ static unsigned long insertfullspecialrangesample(Differencecover *dcov,
   Seqpos pos;
 
   gt_assert(leftpos < rightpos);
-  printf("range %lu %lu\n",(unsigned long) leftpos,(unsigned long) rightpos);
   if (ISDIRREVERSE(dcov->readmode))
   {
     pos = rightpos - 1;
@@ -492,9 +493,10 @@ static unsigned long insertfullspecialrangesample(Differencecover *dcov,
   {
     if (ISDIRREVERSE(dcov->readmode))
     {
-      if (ISIBITSET(dcov->isindifferencecover,MODV(pos)))
+      Seqpos revpos = REVERSEPOS(dcov->totallength,pos);
+      if (ISIBITSET(dcov->isindifferencecover,MODV(revpos)))
       {
-        inversesuftab_set(__LINE__,dcov,pos,specialidx);
+        inversesuftab_set(__LINE__,dcov,revpos,specialidx);
         specialidx++;
       }
       if (pos == leftpos)
@@ -539,8 +541,6 @@ static void initinversesuftabspecials(Differencecover *dcov)
       printf("specialrange %lu %lu\n",(unsigned long) range.leftpos,
                                       (unsigned long) range.rightpos);
       */
-      printf("rel specialidx = %lu\n",
-             specialidx - dcov->effectivesamplesize);
       specialidx = insertfullspecialrangesample(dcov,
                                                 specialidx,
                                                 range.leftpos,
