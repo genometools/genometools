@@ -72,15 +72,9 @@ do
   sfxmap sfx-idx
   for dir in fwd rev
   do
-    if test ${dir} == 'rev'
-    then
-      arg="-dir rev -sat bytecompress"
-    else
-      arg="-dir fwd"
-    fi
     for dc in 8 16 32
     do
-      suffixeratornolcp ${arg} -cmpcharbychar -dc ${dc}
+      suffixeratornolcp -dir ${dir} ${arg} -cmpcharbychar -dc ${dc}
       sfxmaponlysuf sfx-idx
       suffixeratornolcp ${arg} -dc ${dc}
       sfxmaponlysuf sfx-idx
