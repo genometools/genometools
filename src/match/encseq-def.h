@@ -238,7 +238,7 @@ Codetype extractprefixcode(unsigned int *unitsnotspecial,
                            Encodedsequencescanstate *esr,
                            const Codetype **multimappower,
                            Seqpos frompos,
-                           unsigned int len);
+                           unsigned int prefixlength);
 
 int comparewithonespecial(const Encodedsequence *encseq,
                           bool fwd,
