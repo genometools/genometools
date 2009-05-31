@@ -4517,34 +4517,57 @@ static Codetype extractprefixcodeTBE(unsigned int *unitsnotspecial,
                                      unsigned int prefixlength)
 {
   EndofTwobitencoding etbe;
-  bool fwd = ISDIRREVERSE(readmode) ? false : true;
   Codetype code;
 
   gt_assert(prefixlength <= UNITSIN2BITENC);
-  initEncodedsequencescanstategeneric(esr,encseq,fwd,frompos);
-  extract2bitenc(fwd,&etbe,encseq,esr,frompos);
-  if (etbe.unitsnotspecial >= prefixlength)
+  if (ISDIRREVERSE(readmode))
   {
-    code = (Codetype) (etbe.tbe >> MULT2(UNITSIN2BITENC - prefixlength));
-    *unitsnotspecial = prefixlength;
-  } else /* etbe.unitsnotspecial < prefixlength */
+    Seqpos revpos = REVERSEPOS(encseq->totallength,frompos);
+    initEncodedsequencescanstategeneric(esr,encseq,false,revpos);
+    revextract2bitenc(&etbe,encseq,esr,revpos);
+    if (etbe.unitsnotspecial >= prefixlength)
+    {
+      code = (Codetype) (etbe.tbe & ((1 << MULT2(prefixlength)) - 1));
+      *unitsnotspecial = prefixlength;
+    } else /* etbe.unitsnotspecial < prefixlength */
+    {
+      if (etbe.unitsnotspecial > 0)
+      {
+        code = (Codetype) (etbe.tbe & ((1 << MULT2(etbe.unitsnotspecial)) - 1));
+        *unitsnotspecial = etbe.unitsnotspecial;
+      } else
+      {
+        code = 0;
+        *unitsnotspecial = 0;
+      }
+    }
+  } else
   {
-    if (etbe.unitsnotspecial > 0)
+    initEncodedsequencescanstategeneric(esr,encseq,true,frompos);
+    fwdextract2bitenc(&etbe,encseq,esr,frompos);
+    if (etbe.unitsnotspecial >= prefixlength)
     {
-      code = (Codetype)
-             (etbe.tbe >> MULT2(UNITSIN2BITENC - prefixlength))
-             | filltable[etbe.unitsnotspecial];
-      *unitsnotspecial = etbe.unitsnotspecial;
-    } else
+      code = (Codetype) (etbe.tbe >> MULT2(UNITSIN2BITENC - prefixlength));
+      *unitsnotspecial = prefixlength;
+    } else /* etbe.unitsnotspecial < prefixlength */
     {
-      code = 0;
-      *unitsnotspecial = 0;
+      if (etbe.unitsnotspecial > 0)
+      {
+        code = (Codetype)
+               (etbe.tbe >> MULT2(UNITSIN2BITENC - prefixlength))
+               | filltable[etbe.unitsnotspecial];
+        *unitsnotspecial = etbe.unitsnotspecial;
+      } else
+      {
+        code = 0;
+        *unitsnotspecial = 0;
+      }
     }
   }
   return code;
 }
 
-Codetype extractprefixcode(unsigned int *unitsnotspecial,
+static Codetype extractprefixcode2(unsigned int *unitsnotspecial,
                            const Encodedsequence *encseq,
                            Codetype *filltable,
                            Readmode readmode,
@@ -4579,4 +4602,26 @@ Codetype extractprefixcode(unsigned int *unitsnotspecial,
                                          frompos,
                                          prefixlength);
   }
+}
+
+Codetype extractprefixcode(unsigned int *unitsnotspecial,
+                           const Encodedsequence *encseq,
+                           Codetype *filltable,
+                           Readmode readmode,
+                           Encodedsequencescanstate *esr,
+                           const Codetype **multimappower,
+                           Seqpos frompos,
+                           unsigned int prefixlength)
+{
+  Codetype code = extractprefixcode2(unitsnotspecial,
+                                    encseq,
+                                    filltable,
+                                    readmode,
+                                    esr,
+                                    multimappower,
+                                    frompos,
+                                    prefixlength);
+  printf("code = %u, unitsnotspecial=%u\n",(unsigned int) code,
+                                           *unitsnotspecial);
+  return code;
 }
