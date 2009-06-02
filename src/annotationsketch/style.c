@@ -336,19 +336,19 @@ bool gt_style_get_str(const GtStyle *sty, const char *section,
 }
 
 void gt_style_set_str(GtStyle *sty, const char *section, const char *key,
-                     GtStr *str)
+                      GtStr *value)
 {
 #ifndef NDEBUG
   int stack_size;
 #endif
   int i = 0;
-  gt_assert(sty && section && key && str);
+  gt_assert(sty && section && key && value);
 #ifndef NDEBUG
   stack_size = lua_gettop(sty->L);
 #endif
   i = style_find_section_for_setting(sty, section);
   lua_pushstring(sty->L, key);
-  lua_pushstring(sty->L, gt_str_get(str));
+  lua_pushstring(sty->L, gt_str_get(value));
   lua_settable(sty->L, -3);
   lua_pop(sty->L, i);
   gt_assert(lua_gettop(sty->L) == stack_size);
@@ -454,7 +454,7 @@ bool gt_style_get_bool(const GtStyle *sty, const char *section,
 }
 
 void gt_style_set_bool(GtStyle *sty, const char *section, const char *key,
-                     bool flag)
+                       bool val)
 {
 #ifndef NDEBUG
   int stack_size;
@@ -466,7 +466,7 @@ void gt_style_set_bool(GtStyle *sty, const char *section, const char *key,
 #endif
   i = style_find_section_for_setting(sty, section);
   lua_pushstring(sty->L, key);
-  lua_pushboolean(sty->L, flag);
+  lua_pushboolean(sty->L, val);
   lua_settable(sty->L, -3);
   lua_pop(sty->L, i);
   gt_assert(lua_gettop(sty->L) == stack_size);
@@ -584,11 +584,11 @@ int gt_style_unit_test(GtError *err)
     had_err = -1;
 
   /* at the beginning, all values are defaults, since nothing is defined */
-  gt_style_get_color(sty, "exon", "fill", &tmpcol, NULL);
+  (void) gt_style_get_color(sty, "exon", "fill", &tmpcol, NULL);
   ensure(had_err, gt_color_equals(&tmpcol, &defcol));
-  gt_style_get_color(sty, "cds", "fill", &tmpcol, NULL);
+  (void) gt_style_get_color(sty, "cds", "fill", &tmpcol, NULL);
   ensure(had_err, gt_color_equals(&tmpcol, &defcol));
-  gt_style_get_color(sty, "foo", "fill", &tmpcol, NULL);
+  (void) gt_style_get_color(sty, "foo", "fill", &tmpcol, NULL);
   ensure(had_err, gt_color_equals(&tmpcol, &defcol));
   if (!gt_style_get_num(sty, "format", "margins", &num, NULL))
     num = 10.0;
@@ -598,12 +598,12 @@ int gt_style_unit_test(GtError *err)
   ensure(had_err, !val);
 
   /* change some values... */
-  gt_style_set_color(sty, "exon", "fill", &col1);
+  (void) gt_style_set_color(sty, "exon", "fill", &col1);
   gt_style_set_num(sty, "format", "margins", 11.0);
   gt_style_set_num(sty, "format", "foo", 2.0);
 
   /* is it saved correctly? */
-  gt_style_get_color(sty, "exon", "fill", &tmpcol, NULL);
+  (void) gt_style_get_color(sty, "exon", "fill", &tmpcol, NULL);
   ensure(had_err, !gt_color_equals(&tmpcol, &defcol));
   ensure(had_err, gt_color_equals(&tmpcol, &col1));
   if (!gt_style_get_num(sty, "format", "margins", &num, NULL))
@@ -618,7 +618,7 @@ int gt_style_unit_test(GtError *err)
   gt_style_set_str(sty, "bar", "baz", test1);
 
   /* is it saved correctly? */
-  gt_style_get_color(sty, "foo", "fill", &tmpcol, NULL);
+  (void) gt_style_get_color(sty, "foo", "fill", &tmpcol, NULL);
   ensure(had_err, !gt_color_equals(&tmpcol, &defcol));
   ensure(had_err, gt_color_equals(&tmpcol, &col2));
   if (!gt_style_get_str(sty, "bar", "baz", str, NULL))
@@ -636,7 +636,7 @@ int gt_style_unit_test(GtError *err)
   if (!gt_error_is_set(err))
   {
     /* check again */
-    gt_style_get_color(new_sty, "foo", "fill", &tmpcol, NULL);
+    (void) gt_style_get_color(new_sty, "foo", "fill", &tmpcol, NULL);
     ensure(had_err, !gt_color_equals(&tmpcol, &defcol));
     ensure(had_err, gt_color_equals(&tmpcol, &col2));
     if (!gt_style_get_str(new_sty, "bar", "baz", str, NULL))
@@ -669,14 +669,14 @@ void gt_style_delete_without_state(GtStyle *sty)
   gt_free(sty);
 }
 
-void gt_style_delete(GtStyle *sty)
+void gt_style_delete(GtStyle *style)
 {
-  if (!sty) return;
-  if (sty->reference_count)
+  if (!style) return;
+  if (style->reference_count)
   {
-    sty->reference_count--;
+    style->reference_count--;
     return;
   }
-  if (sty->L) lua_close(sty->L);
-  gt_style_delete_without_state(sty);
+  if (style->L) lua_close(style->L);
+  gt_style_delete_without_state(style);
 }

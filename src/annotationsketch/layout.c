@@ -31,6 +31,7 @@
 #include "core/hashmap.h"
 #include "core/log.h"
 #include "core/ma.h"
+#include "core/mathsupport.h"
 #include "core/minmax.h"
 #include "core/msort.h"
 #include "core/str.h"
@@ -154,8 +155,8 @@ static int check_width(unsigned int width,
 {
   int had_err = 0;
   double margins = MARGINS_DEFAULT;
-  gt_style_get_num(style, "format", "margins", &margins, NULL);
-  if (width - 2*margins < 0)
+  (void) gt_style_get_num(style, "format", "margins", &margins, NULL);
+  if (gt_double_smaller_double(width - 2*margins, 0))
   {
     gt_error_set(err, "layout width must at least be twice the x-margin size "
                       "(2*%.1f=%.1f) but was %u",
@@ -203,7 +204,7 @@ GtLayout* gt_layout_new_with_twc(GtDiagram *diagram,
   lti.layout = layout;
   lti.twc = twc;
   layout->own_twc = false;
-  gt_diagram_build(diagram);
+  (void) gt_diagram_build(diagram);
   layout->custom_tracks = gt_array_ref(gt_diagram_get_custom_tracks(diagram));
   /* XXX: use other container type here! */
   layout->tracks = gt_hashmap_new(HASH_STRING, gt_free_func,
@@ -225,20 +226,20 @@ void gt_layout_delete(GtLayout *layout)
   gt_free(layout);
 }
 
-int gt_layout_sketch(GtLayout *layout, GtCanvas *canvas, GtError *err)
+int gt_layout_sketch(GtLayout *layout, GtCanvas *target_canvas, GtError *err)
 {
   int had_err = 0;
   unsigned long i;
   GtRenderTraverseInfo rti;
-  gt_assert(layout && canvas);
+  gt_assert(layout && target_canvas);
   rti.layout = layout;
-  rti.canvas = canvas;
-  had_err = gt_canvas_visit_layout_pre(canvas, layout, err);
+  rti.canvas = target_canvas;
+  had_err = gt_canvas_visit_layout_pre(target_canvas, layout, err);
   if (had_err) return had_err;
   had_err = gt_hashmap_foreach_in_key_order(layout->tracks, render_tracks,
                                             &rti, err);
   if (had_err) return had_err;
-  had_err = gt_canvas_visit_layout_post(canvas, layout, err);
+  had_err = gt_canvas_visit_layout_post(target_canvas, layout, err);
   if (had_err) return had_err;
   for (i=0;i<gt_array_size(layout->custom_tracks);i++)
   {
@@ -285,8 +286,8 @@ unsigned long gt_layout_get_height(const GtLayout *layout)
 
   /* get dynamic heights from tracks */
   lines.style = layout->style; lines.height = 0;
-  gt_hashmap_foreach(layout->tracks, add_tracklines,
-                     &lines, NULL);
+  (void) gt_hashmap_foreach(layout->tracks, add_tracklines,
+                            &lines, NULL);
   height = lines.height;
 
   /* obtain line height and spacer from style */
@@ -308,10 +309,10 @@ unsigned long gt_layout_get_height(const GtLayout *layout)
   {
     double theight = TOY_TEXT_HEIGHT,
            captionspace = CAPTION_BAR_SPACE_DEFAULT;
-    gt_style_get_num(layout->style, "format", "track_caption_font_size",
-                     &theight, NULL);
-    gt_style_get_num(layout->style, "format", "track_caption_space",
-                     &captionspace, NULL);
+    (void) gt_style_get_num(layout->style, "format", "track_caption_font_size",
+                            &theight, NULL);
+    (void) gt_style_get_num(layout->style, "format", "track_caption_space",
+                            &captionspace, NULL);
     height += gt_array_size(layout->custom_tracks)
                   * (theight + captionspace);
   }
@@ -321,14 +322,15 @@ unsigned long gt_layout_get_height(const GtLayout *layout)
     GtCustomTrack *ct = *(GtCustomTrack**) gt_array_get(layout->custom_tracks,
                                                         i);
     height += gt_custom_track_get_height(ct);
-    gt_style_get_num(layout->style, "format", "track_vspace", &tmp, NULL);
+    (void) gt_style_get_num(layout->style, "format", "track_vspace", &tmp,
+                            NULL);
     height += tmp;
 
   }
 
   /* add header space and footer */
-  gt_style_get_num(layout->style, "format", "ruler_space", &head_track_space,
-                   NULL);
+  (void) gt_style_get_num(layout->style, "format", "ruler_space",
+                          &head_track_space, NULL);
   height += HEADER_SPACE + head_track_space + FOOTER_SPACE;
   return height;
 }

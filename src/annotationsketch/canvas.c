@@ -21,6 +21,7 @@
 #include "core/class_alloc.h"
 #include "core/ensure.h"
 #include "core/ma.h"
+#include "core/mathsupport.h"
 #include "core/minmax.h"
 #include "core/range.h"
 #include "core/str.h"
@@ -57,7 +58,7 @@ const GtCanvasClass* gt_canvas_class_new(size_t size,
                                          GtCanvasVisitLineFunc l_visit_post,
                                          GtCanvasVisitBlockFunc b_visit,
                                          GtCanvasVisitElementFunc e_visit,
-                                         GtCanvasVisitCustomTrackFunc visit_ct,
+                                         GtCanvasVisitCustomTrackFunc ct_visit,
                                          GtCanvasDrawRulerFunc draw_ruler_func,
                                          GtCanvasFreeFunc free)
 {
@@ -71,7 +72,7 @@ const GtCanvasClass* gt_canvas_class_new(size_t size,
   c_class->visit_line_post    = l_visit_post;
   c_class->visit_block        = b_visit;
   c_class->visit_element      = e_visit;
-  c_class->visit_ct           = visit_ct;
+  c_class->visit_ct           = ct_visit;
   c_class->draw_ruler_func    = draw_ruler_func;
   c_class->free = free;
   return c_class;
@@ -80,10 +81,10 @@ const GtCanvasClass* gt_canvas_class_new(size_t size,
 /* Formats a given position number for short display in the ruler. */
 void gt_format_ruler_label(char *txt, unsigned long pos, size_t buflen)
 {
-  gt_assert(txt);
   double fpos;
   int logval;
   GtStr *formatstring;
+  gt_assert(txt);
 
   logval = (int) floor(log10(pos));
   formatstring = gt_str_new_cstr("%.");
@@ -96,9 +97,11 @@ void gt_format_ruler_label(char *txt, unsigned long pos, size_t buflen)
       pos /= 10;
       logval--;
     }
+    /*@ignore@*/
     gt_str_append_ulong(formatstring, (unsigned long) logval);
     gt_str_append_cstr(formatstring, "fG");
     (void) snprintf(txt, buflen, gt_str_get(formatstring), fpos);
+    /*@end@*/
   }
   else if (pos >= 1000000)
   {
@@ -108,9 +111,11 @@ void gt_format_ruler_label(char *txt, unsigned long pos, size_t buflen)
       pos /= 10;
       logval--;
     }
+    /*@ignore@*/
     gt_str_append_ulong(formatstring, (unsigned long) logval);
     gt_str_append_cstr(formatstring, "fM");
     (void) snprintf(txt, buflen, gt_str_get(formatstring), fpos);
+    /*@end@*/
   }
   else if (pos >= 1000)
   {
@@ -120,11 +125,17 @@ void gt_format_ruler_label(char *txt, unsigned long pos, size_t buflen)
       pos /= 10;
       logval--;
     }
+    /*@ignore@*/
     gt_str_append_ulong(formatstring, (unsigned long) logval);
     gt_str_append_cstr(formatstring, "fK");
     (void) snprintf(txt, buflen, gt_str_get(formatstring), fpos);
-  } else
-    (void) snprintf(txt, buflen, "%li", pos);
+    /*@end@*/
+  } else {
+    /*@ignore@*/
+    (void) snprintf(txt, buflen, "%lu", pos);
+    /*@end@*/
+  }
+
   gt_str_delete(formatstring);
 }
 

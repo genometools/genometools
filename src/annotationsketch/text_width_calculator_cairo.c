@@ -51,8 +51,8 @@ double gt_text_width_calculator_cairo_get_text_width(GtTextWidthCalculator *twc,
   twcc = gt_text_width_calculator_cairo_cast(twc);
   if (twcc->style)
   {
-    gt_style_get_num(twcc->style, "format", "block_caption_font_size",
-                     &theight, NULL);
+    (void) gt_style_get_num(twcc->style, "format", "block_caption_font_size",
+                            &theight, NULL);
     cairo_save(twcc->context);
     cairo_set_font_size(twcc->context, theight);
   }

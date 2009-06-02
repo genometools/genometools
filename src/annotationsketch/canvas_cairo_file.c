@@ -91,32 +91,34 @@ const GtCanvasClass* gt_canvas_cairo_file_class(void)
   return canvas_class;
 }
 
-GtCanvas* gt_canvas_cairo_file_new(GtStyle *sty, GtGraphicsOutType type,
+GtCanvas* gt_canvas_cairo_file_new(GtStyle *style,
+                                   GtGraphicsOutType output_type,
                                    unsigned long width, unsigned long height,
-                                   GtImageInfo *ii)
+                                   GtImageInfo *image_info)
 {
   GtCanvas *canvas;
   GtColor bgcolor = {1.0, 1.0, 1.0, 1.0};
   GtCanvasCairoFile *ccf;
   double margins = 10.0;
-  gt_assert(sty && width > 0 && height > 0);
+  gt_assert(style && width > 0 && height > 0);
   canvas = gt_canvas_create(gt_canvas_cairo_file_class());
-  canvas->pvt->g = gt_graphics_cairo_new(type, width, height);
-  gt_style_get_color(sty, "format", "background_color", &bgcolor, NULL);
-  gt_graphics_set_background_color(canvas->pvt->g, bgcolor);
-  gt_style_get_num(sty, "format", "margins", &margins, NULL);
-  gt_graphics_set_margins(canvas->pvt->g, margins, 0);
+  canvas->pvt->g = gt_graphics_cairo_new(output_type, width, height);
+  (void) gt_style_get_color(style, "format", "background_color", &bgcolor,
+                            NULL);
+  (void) gt_graphics_set_background_color(canvas->pvt->g, bgcolor);
+  (void) gt_style_get_num(style, "format", "margins", &margins, NULL);
+  (void) gt_graphics_set_margins(canvas->pvt->g, margins, 0);
   canvas->pvt->margins = margins;
-  if (ii)
-    gt_image_info_set_height(ii, height);
-  canvas->pvt->sty = sty;
-  canvas->pvt->ii = ii;
+  if (image_info)
+    gt_image_info_set_height(image_info, height);
+  canvas->pvt->sty = style;
+  canvas->pvt->ii = image_info;
   canvas->pvt->width = width;
   canvas->pvt->height = height;
   canvas->pvt->bt = NULL;
   /* 0.5 displacement to eliminate fuzzy horizontal lines */
   canvas->pvt->y += 0.5;
   ccf = canvas_cairo_file_cast(canvas);
-  ccf->type = type;
+  ccf->type = output_type;
   return canvas;
 }

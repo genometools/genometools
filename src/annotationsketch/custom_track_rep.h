@@ -39,7 +39,7 @@ struct GtCustomTrack {
 };
 
 const GtCustomTrackClass* gt_custom_track_class_new(size_t size,
-                                          GtCustomTrackRenderFunc sketch,
+                                          GtCustomTrackRenderFunc render,
                                           GtCustomTrackGetHeightFunc get_height,
                                           GtCustomTrackGetTitleFunc get_title,
                                           GtCustomTrackFreeFunc free);

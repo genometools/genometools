@@ -32,6 +32,7 @@
 #include "core/gtdatapath.h"
 #include "core/log.h"
 #include "core/ma.h"
+#include "core/mathsupport.h"
 #include "core/option.h"
 #include "core/str.h"
 #include "core/unused_api.h"
@@ -55,7 +56,7 @@ typedef struct {
   unsigned long width;
   double pwidth, pheight, theight;
   GtRange range;
-  GtStr *seqid, *format, *stylefile, *text;
+  GtStr *seqid, *format, *stylefile, *text, *seqfile;
 } SketchPageArguments;
 
 static void *gt_sketch_page_arguments_new(void)
@@ -65,6 +66,7 @@ static void *gt_sketch_page_arguments_new(void)
   arguments->seqid = gt_str_new();
   arguments->text = gt_str_new();
   arguments->stylefile = gt_str_new();
+  arguments->seqfile = gt_str_new();
   arguments->range.start = arguments->range.end == UNDEF_ULONG;
   return arguments;
 }
@@ -77,6 +79,7 @@ static void gt_sketch_page_arguments_delete(void *tool_arguments)
   gt_str_delete(arguments->format);
   gt_str_delete(arguments->text);
   gt_str_delete(arguments->stylefile);
+  gt_str_delete(arguments->seqfile);
   gt_free(arguments);
 }
 
@@ -151,13 +154,17 @@ static GtOptionParser* gt_sketch_page_option_parser_new(void *tool_arguments)
                             arguments->format, formats[0], formats );
   gt_option_parser_add_option(op, o);
 
-  /* -style */
   o = gt_option_new_string("style", "style file to use\n"
                                     "default: gtdata/sketch/default.style",
                                 arguments->stylefile,
                                 gt_str_get(arguments->stylefile));
   gt_option_parser_add_option(op, o);
   gt_option_hide_default(o);
+
+  o = gt_option_new_filename("seqfile", "sequence file for GC content view",
+                                arguments->seqfile);
+  gt_option_parser_add_option(op, o);
+  gt_option_is_extended_option(o);
 
   gt_option_parser_set_min_max_args(op, 2, 2);
   return op;
@@ -184,7 +191,7 @@ static void draw_header(cairo_t *cr, const char *text, GT_UNUSED const char *fn,
   cairo_set_font_size(cr, theight);
   if (tmp)
   {
-    strftime(buffer, BUFSIZ, TIME_DATE_FORMAT, tmp);
+    (void) strftime(buffer, BUFSIZ, TIME_DATE_FORMAT, tmp);
     cairo_text_extents(cr, buffer, &ext);
     cairo_move_to(cr, width - TEXT_SPACER - ext.width, TEXT_SPACER
                     + theight);
@@ -205,7 +212,7 @@ static void draw_header(cairo_t *cr, const char *text, GT_UNUSED const char *fn,
   cairo_show_text(cr, seqid);
   xpos = TEXT_SPACER;
   cairo_move_to(cr, xpos, height - 2*TEXT_SPACER - theight);
-  snprintf(buffer, BUFSIZ, "Page %lu", pagenum+1);
+  (void) snprintf(buffer, BUFSIZ, "Page %lu", pagenum+1);
   cairo_show_text(cr, buffer);
   cairo_restore(cr);
 }
@@ -229,10 +236,10 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
   const char *seqid = NULL, *outfile;
   unsigned long start, height, num_pages = 0;
   double offsetpos, usable_height;
-  gt_error_check(err);
   cairo_surface_t *surf = NULL;
   cairo_t *cr = NULL;
   GtTextWidthCalculator *twc;
+  gt_error_check(err);
 
   features = gt_feature_index_memory_new();
 
@@ -325,6 +332,10 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
                               - arguments->theight
                               - 4*TEXT_SPACER;
 
+    if (gt_str_length(arguments->seqfile) > 0) {
+      bioseq = gt_bioseq_new(gt_str_get(arguments->seqfile), err);
+    }
+
     /* do it! */
     cr = cairo_create(surf);
     cairo_set_font_size(cr, 8);
@@ -333,15 +344,26 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
          start += arguments->width)
     {
       GtRange single_range;
+      GtCustomTrack *ct = NULL;
+      const char *seq;
       single_range.start = start;
       single_range.end = start + arguments->width;
+
       d = gt_diagram_new(features, seqid, &single_range, sty, err);
+      if (bioseq) {
+        seq = gt_bioseq_get_sequence(bioseq, 0);
+        ct = gt_custom_track_gc_content_new(seq,
+                                      gt_bioseq_get_sequence_length(bioseq, 0),
+                                      800, 70, 0.4, true);
+        gt_diagram_add_custom_track(d, ct);
+      }
+
       gt_error_check(err);
-      l = gt_layout_new_with_twc(d, mm_to_pt(arguments->pwidth), sty, twc, err);
+      l = gt_layout_new_with_twc(d, mm_to_pt(arguments->width), sty, twc, err);
       gt_error_check(err);
       height = gt_layout_get_height(l);
-      if (offsetpos + height > usable_height - 10 - 2*TEXT_SPACER
-            - arguments->theight)
+      if (gt_double_smaller_double(usable_height - 10 - 2*TEXT_SPACER
+            - arguments->theight, offsetpos + height))
       {
           draw_header(cr, gt_str_get(arguments->text), argv[parsed_args+1],
                       seqid, num_pages, mm_to_pt(arguments->pwidth),
@@ -358,11 +380,13 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
                                            height,
                                            NULL);
       offsetpos += height;
-      gt_layout_sketch(l, canvas, err);
+      (void) gt_layout_sketch(l, canvas, err);
       gt_error_check(err);
       gt_canvas_delete(canvas);
       gt_layout_delete(l);
       gt_diagram_delete(d);
+      if (ct)
+        gt_custom_track_delete(ct);
     }
     draw_header(cr, gt_str_get(arguments->text), argv[parsed_args+1], seqid,
                 num_pages, mm_to_pt(arguments->pwidth),

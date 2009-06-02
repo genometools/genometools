@@ -108,12 +108,12 @@ double gt_graphics_get_xmargins(GtGraphics*);
 double gt_graphics_get_ymargins(GtGraphics*);
 /* Draws a horizontal line of length <width> beginning at the given coordinates
    to the right in the color <color> with stroke width <stroke_width>. */
-void   gt_graphics_draw_horizontal_line(GtGraphics *gg, double x, double y,
+void   gt_graphics_draw_horizontal_line(GtGraphics *g, double x, double y,
                                         GtColor color, double width,
                                         double stroke_width);
 /* Draws a vertical line of length <length> beginning at the given coordinates
    downwards in the color <color> with stroke width <stroke_width>. */
-void   gt_graphics_draw_vertical_line(GtGraphics *gg, double x, double y,
+void   gt_graphics_draw_vertical_line(GtGraphics *g, double x, double y,
                                       GtColor color, double length,
                                       double stroke_width);
 /* Draws a line beginning at (<x>,<y>) to (<xto>,<yto>) in the color <color>

@@ -27,9 +27,9 @@ int gt_drawing_range_compare(GtDrawingRange range_a, GtDrawingRange range_b)
       gt_double_equals_double(range_a.end, range_b.end))
     return 0; /* range_a == range_b */
 
-  if ((range_a.start < range_b.start) ||
+  if (gt_double_smaller_double(range_a.start, range_b.start) ||
       (gt_double_equals_double(range_a.start, range_b.start)
-       && (range_a.end < range_b.end)))
+       && gt_double_smaller_double(range_a.end, range_b.end)))
     return -1; /* range_a < range_b */
 
   return 1; /* range_a > range_b */

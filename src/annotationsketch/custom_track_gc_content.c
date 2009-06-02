@@ -22,6 +22,7 @@
 #include "annotationsketch/custom_track_rep.h"
 #include "core/log.h"
 #include "core/ma.h"
+#include "core/mathsupport.h"
 #include "core/minmax.h"
 #include "core/unused_api.h"
 
@@ -56,7 +57,7 @@ static inline double get_val_for_pos(GtCustomTrackGcContent *ctgc,
     }
     bases++;
   }
-  return (double) gc_count/MIN((double) ctgc->windowsize, bases);
+  return ((double) gc_count)/((double) MIN(ctgc->windowsize, bases));
 }
 
 int gt_custom_track_gc_content_sketch(GtCustomTrack *ct, GtGraphics *graphics,
@@ -70,13 +71,13 @@ int gt_custom_track_gc_content_sketch(GtCustomTrack *ct, GtGraphics *graphics,
   unsigned long n;
   GtRange value_range = {0, 1};
   GtColor color, grey, black;
-  gt_assert(ct && graphics && viewrange.start <= viewrange.end
-             && gt_graphics_get_image_width(graphics)
-                   - 2*gt_graphics_get_xmargins(graphics) > 0);
+  gt_assert(ct && graphics && viewrange.start <= viewrange.end);
+  gt_assert(gt_double_smaller_double(gt_graphics_get_image_width(graphics)
+                                     -2*gt_graphics_get_xmargins(graphics), 0));
 
   ctgc = gt_custom_track_gc_content_cast(ct);
 
-  gt_style_get_color(style, "GC_content", "stroke", &color, NULL);
+  (void) gt_style_get_color(style, "GC_content", "stroke", &color, NULL);
   grey.red = grey.blue = grey.green = 0.8;
   grey.alpha = 0.9;
   black.red = black.blue = black.green = 0.0;
@@ -96,9 +97,10 @@ int gt_custom_track_gc_content_sketch(GtCustomTrack *ct, GtGraphics *graphics,
                    sizeof (double));
   n = 0;
   for (iter=viewrange.start+1;
-       iter<viewrange.end-ctgc->windowsize;
+       gt_double_smaller_double(iter, viewrange.end-ctgc->windowsize);
        iter+=iter_step)
   {
+    if (floor(iter) >= ctgc->seqlen) break;
     data[n++] = get_val_for_pos(ctgc, floor(iter));
   }
 
@@ -215,9 +217,9 @@ GtCustomTrack* gt_custom_track_gc_content_new(const char *seq,
   ctgc->show_scale = show_scale;
   ctgc->title = gt_str_new_cstr("GC content (window size ");
   gt_str_append_ulong(ctgc->title, ctgc->windowsize);
-  if (avg > 0)
+  if (gt_double_smaller_double(0, avg))
   {
-    snprintf(buf, BUFSIZ, ", average: %.1f%%", avg*100);
+    (void) snprintf(buf, BUFSIZ, ", average: %.1f%%", avg*100);
     gt_str_append_cstr(ctgc->title, buf);
   }
   gt_str_append_cstr(ctgc->title, ")");
