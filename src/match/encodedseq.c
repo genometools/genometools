@@ -4498,57 +4498,44 @@ void multicharactercompare_withtest(const Encodedsequence *encseq,
   }
 }
 
-#define ADDSAT(X)                      X##Viadirectaccess
-#define EXTRACTPREFIXCODEACCESS(POS)   encseq->plainseq[POS]
-#include "extpfxcode.gen"
-
-#undef  ADDSAT
-#undef  EXTRACTPREFIXCODEACCESS
-#define ADDSAT(X)                      X##Viabytecompress
-#define EXTRACTPREFIXCODEACCESS(POS)   delivercharViabytecompress(encseq,POS)
-#include "extpfxcode.gen"
-
-#undef  ADDSAT
-#undef  EXTRACTPREFIXCODEACCESS
-#define ADDSAT(X)                      X##generic
-#define EXTRACTPREFIXCODEACCESS(POS)   getencodedchar(encseq,POS,Forwardmode)
-#include "extpfxcode.gen"
-
 Codetype extractprefixcode(unsigned int *unitsnotspecial,
                            const Encodedsequence *encseq,
-                           Codetype *filltable,
+                           const Codetype *filltable,
                            Readmode readmode,
-                           GT_UNUSED Encodedsequencescanstate *esr,
+                           Encodedsequencescanstate *esr,
                            const Codetype **multimappower,
                            Seqpos frompos,
                            unsigned int prefixlength)
 {
-  gt_assert(readmode == Forwardmode || readmode == Reversemode);
-  switch (encseq->sat)
+  Seqpos pos, stoppos;
+  Codetype code = 0;
+  GtUchar cc;
+
+  gt_assert(prefixlength > 0);
+  *unitsnotspecial = 0;
+  if (frompos + prefixlength - 1 < encseq->totallength)
   {
-    case Viadirectaccess: return extractprefixcodeViadirectaccess(
-                                        unitsnotspecial,
-                                        encseq,
-                                        filltable,
-                                        readmode,
-                                        multimappower,
-                                        frompos,
-                                        prefixlength);
-    case Viabytecompress: return extractprefixcodeViabytecompress(
-                                        unitsnotspecial,
-                                        encseq,
-                                        filltable,
-                                        readmode,
-                                        multimappower,
-                                        frompos,
-                                        prefixlength);
-    default: 
-      return extractprefixcodegeneric(unitsnotspecial,
-                                      encseq,
-                                      filltable,
-                                      readmode,
-                                      multimappower,
-                                      frompos,
-                                      prefixlength);
+    stoppos = frompos + prefixlength;
+  } else
+  {
+    stoppos = encseq->totallength;
   }
+  initEncodedsequencescanstate(esr,encseq,readmode,frompos);
+  for (pos=frompos; pos < stoppos; pos++)
+  {
+    cc = sequentialgetencodedchar(encseq,esr,pos,readmode);
+    if (ISNOTSPECIAL(cc))
+    {
+      code += multimappower[*unitsnotspecial][cc];
+      (*unitsnotspecial)++;
+    } else
+    {
+      break;
+    }
+  }
+  if (*unitsnotspecial < prefixlength)
+  {
+    code |= (Codetype) filltable[*unitsnotspecial];
+  }
+  return code;
 }

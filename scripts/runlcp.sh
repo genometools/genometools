@@ -70,13 +70,13 @@ do
   sfxmap sfx-idx
   suffixerator -parts 3 -maxdepth abs
   sfxmap sfx-idx
-  for dir in fwd rev
+  for dir in fwd rev cpl rcl
   do
     for dc in 8 16 32
     do
-      suffixeratornolcp -dir ${dir} ${arg} -cmpcharbychar -dc ${dc}
+      suffixeratornolcp -dir ${dir} -cmpcharbychar -dc ${dc}
       sfxmaponlysuf sfx-idx
-      suffixeratornolcp ${arg} -dc ${dc}
+      suffixeratornolcp -dir ${dir} -dc ${dc}
       sfxmaponlysuf sfx-idx
     done
   done

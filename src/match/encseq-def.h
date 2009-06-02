@@ -233,7 +233,7 @@ void encseqextract(GtUchar *buffer,
 
 Codetype extractprefixcode(unsigned int *unitsnotspecial,
                            const Encodedsequence *encseq,
-                           Codetype *filltable,
+                           const Codetype *filltable,
                            Readmode readmode,
                            Encodedsequencescanstate *esr,
                            const Codetype **multimappower,
