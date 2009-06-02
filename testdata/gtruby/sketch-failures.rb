@@ -37,7 +37,7 @@ style.set_num("format","margins",100)
 begin
   diagram = GT::Diagram.from_index(feature_index, "nonexist", range, style)
 rescue GT::GTError => msg
-    raise if !/does not contain seqid 'nonexist'/.match(msg)
+    raise if !/feature index does not contain the given sequence id/.match(msg)
 else
   raise TestFailedError
 end
