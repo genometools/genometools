@@ -1063,6 +1063,8 @@ void differencecover_sortsample(Differencecover *dcov,bool withcheck)
                                dcov->multimappower,
                                pos,
                                dcov->prefixlength);
+      printf("code=%u,unitsnotspecial=%u\n",(unsigned int) code,
+                                            unitsnotspecial);
       if (unitsnotspecial == dcov->prefixlength)
       {
         sampleindex = --dcov->leftborder[code];

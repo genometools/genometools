@@ -4508,6 +4508,12 @@ void multicharactercompare_withtest(const Encodedsequence *encseq,
 #define EXTRACTPREFIXCODEACCESS(POS)   delivercharViabytecompress(encseq,POS)
 #include "extpfxcode.gen"
 
+#undef  ADDSAT
+#undef  EXTRACTPREFIXCODEACCESS
+#define ADDSAT(X)                      X##generic
+#define EXTRACTPREFIXCODEACCESS(POS)   getencodedchar(encseq,POS,Forwardmode)
+#include "extpfxcode.gen"
+
 static Bitsequence bitsequence_reverse (Bitsequence v)
 {
 #define UCC(X) (unsigned char) 0x##X
@@ -4640,6 +4646,7 @@ Codetype extractprefixcode(unsigned int *unitsnotspecial,
                            Seqpos frompos,
                            unsigned int prefixlength)
 {
+  gt_assert(readmode == Forwardmode || readmode == Reversemode);
   switch (encseq->sat)
   {
     case Viadirectaccess: return extractprefixcodeViadirectaccess(
@@ -4658,12 +4665,28 @@ Codetype extractprefixcode(unsigned int *unitsnotspecial,
                                         multimappower,
                                         frompos,
                                         prefixlength);
-    default: return extractprefixcodeTBE(unitsnotspecial,
-                                         encseq,
-                                         filltable,
-                                         readmode,
-                                         esr,
-                                         frompos,
-                                         prefixlength);
+    default: 
+    {
+      Codetype code, code2;
+      unsigned int unitsnotspecial2 = 0;
+
+      code2 = extractprefixcodegeneric(&unitsnotspecial2,
+                                       encseq,
+                                       filltable,
+                                       readmode,
+                                       multimappower,
+                                       frompos,
+                                       prefixlength);
+      code = extractprefixcodeTBE(unitsnotspecial,
+                                  encseq,
+                                  filltable,
+                                  readmode,
+                                  esr,
+                                  frompos,
+                                  prefixlength);
+      gt_assert(code == code2);
+      gt_assert(*unitsnotspecial == unitsnotspecial2);
+      return code;
+    }
   }
 }

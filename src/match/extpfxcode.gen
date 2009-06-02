@@ -36,9 +36,11 @@ static Codetype ADDSAT(extractprefixcode)(unsigned int *unitsnotspecial,
          pos++, (*unitsnotspecial)++)
     {
       cc = EXTRACTPREFIXCODEACCESS(REVERSEPOS(encseq->totallength,pos));
+      printf("cc=%u\n",(unsigned int) cc);
       if (ISNOTSPECIAL(cc))
       {
         code += multimappower[*unitsnotspecial][cc];
+        printf("code=%u\n",(unsigned int) code);
       } else
       {
         break;

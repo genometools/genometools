@@ -575,7 +575,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
           showverbose(verboseinfo,"presorting sample suffixes according to "
                                   "difference cover modulo %u",
                                   sfi->sfxstrategy.differencecover);
-          differencecover_sortsample(sfi->dcov,false);
+          differencecover_sortsample(sfi->dcov,true);
         }
       }
     }
