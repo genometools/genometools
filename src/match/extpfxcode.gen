@@ -17,30 +17,43 @@
 
 static Codetype ADDSAT(extractprefixcode)(unsigned int *unitsnotspecial,
                                           const Encodedsequence *encseq,
-                                          Codetype *filltable,
+                                          const Codetype *filltable,
                                           Readmode readmode,
                                           const Codetype **multimappower,
                                           Seqpos frompos,
                                           unsigned int prefixlength)
 {
-  Seqpos pos;
+  Seqpos pos, stoppos;
   Codetype code = 0;
   GtUchar cc;
 
   /* XXX optimize the code by pointer arithmetic */
   gt_assert(prefixlength > 0);
+  *unitsnotspecial = 0;
   if (ISDIRREVERSE(readmode))
   {
-    for (pos=frompos, *unitsnotspecial = 0;
-         pos < encseq->totallength && *unitsnotspecial < prefixlength;
-         pos++, (*unitsnotspecial)++)
+    pos = REVERSEPOS(encseq->totallength,frompos);
+    if (pos + 1 >= prefixlength)
     {
-      cc = EXTRACTPREFIXCODEACCESS(REVERSEPOS(encseq->totallength,pos));
-      printf("cc=%u\n",(unsigned int) cc);
+      stoppos = pos+1-prefixlength;
+    } else
+    {
+      stoppos = 0;
+    }
+    while (true)
+    {
+      cc = EXTRACTPREFIXCODEACCESS(pos);
       if (ISNOTSPECIAL(cc))
       {
         code += multimappower[*unitsnotspecial][cc];
-        printf("code=%u\n",(unsigned int) code);
+        (*unitsnotspecial)++;
+      } else
+      {
+        break;
+      }
+      if (pos > stoppos)
+      {
+        pos--;
       } else
       {
         break;
@@ -48,14 +61,20 @@ static Codetype ADDSAT(extractprefixcode)(unsigned int *unitsnotspecial,
     }
   } else
   {
-    for (pos=frompos, *unitsnotspecial = 0;
-         pos < encseq->totallength && *unitsnotspecial < prefixlength;
-         pos++, (*unitsnotspecial)++)
+    if (frompos + prefixlength - 1 < encseq->totallength)
+    {
+      stoppos = frompos + prefixlength;
+    } else
+    {
+      stoppos = encseq->totallength;
+    }
+    for (pos=frompos; pos < stoppos; pos++)
     {
       cc = EXTRACTPREFIXCODEACCESS(pos);
       if (ISNOTSPECIAL(cc))
       {
         code += multimappower[*unitsnotspecial][cc];
+        (*unitsnotspecial)++;
       } else
       {
         break;

@@ -361,13 +361,7 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   rmnsufinfo->itvinfo = NULL;
   rmnsufinfo->itvfullinfo = NULL;
   rmnsufinfo->rangestobesorted = gt_inl_queue_new(MAX(16UL,DIV2(maxcode)));
-  if (possibletocmpbitwise(encseq))
-  {
-    rmnsufinfo->multimappower = NULL;
-  } else
-  {
-    rmnsufinfo->multimappower = bcktab_multimappower(bcktab);
-  }
+  rmnsufinfo->multimappower = bcktab_multimappower(bcktab);
   rmnsufinfo->esr = newEncodedsequencescanstate();
   GT_INITARRAY(&rmnsufinfo->firstgeneration,Pairsuffixptr);
   rmnsufinfo->realspecialranges = getencseqrealspecialranges(encseq);

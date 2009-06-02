@@ -959,13 +959,7 @@ void differencecover_sortsample(Differencecover *dcov,bool withcheck)
                              true,
                              NULL,
                              NULL);
-  if (possibletocmpbitwise(dcov->encseq))
-  {
-    dcov->multimappower = NULL;
-  } else
-  {
-    dcov->multimappower = bcktab_multimappower(dcov->bcktab);
-  }
+  dcov->multimappower = bcktab_multimappower(dcov->bcktab);
   dcov->esr = newEncodedsequencescanstate();
   dcov->maxcode = bcktab_numofallcodes(dcov->bcktab) - 1;
   dcov->rangestobesorted = gt_inl_queue_new(MAX(16UL,DIV2(dcov->maxcode)));
@@ -1063,8 +1057,6 @@ void differencecover_sortsample(Differencecover *dcov,bool withcheck)
                                dcov->multimappower,
                                pos,
                                dcov->prefixlength);
-      printf("code=%u,unitsnotspecial=%u\n",(unsigned int) code,
-                                            unitsnotspecial);
       if (unitsnotspecial == dcov->prefixlength)
       {
         sampleindex = --dcov->leftborder[code];

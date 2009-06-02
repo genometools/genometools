@@ -4514,134 +4514,11 @@ void multicharactercompare_withtest(const Encodedsequence *encseq,
 #define EXTRACTPREFIXCODEACCESS(POS)   getencodedchar(encseq,POS,Forwardmode)
 #include "extpfxcode.gen"
 
-static Bitsequence bitsequence_reverse (Bitsequence v)
-{
-#define UCC(X) (unsigned char) 0x##X
-  static const unsigned char BitReverseTable256[] =
-  {
-    UCC(00), UCC(80), UCC(40), UCC(C0), UCC(20), UCC(A0), UCC(60), UCC(E0),
-    UCC(10), UCC(90), UCC(50), UCC(D0), UCC(30), UCC(B0), UCC(70), UCC(F0),
-    UCC(08), UCC(88), UCC(48), UCC(C8), UCC(28), UCC(A8), UCC(68), UCC(E8),
-    UCC(18), UCC(98), UCC(58), UCC(D8), UCC(38), UCC(B8), UCC(78), UCC(F8),
-    UCC(04), UCC(84), UCC(44), UCC(C4), UCC(24), UCC(A4), UCC(64), UCC(E4),
-    UCC(14), UCC(94), UCC(54), UCC(D4), UCC(34), UCC(B4), UCC(74), UCC(F4),
-    UCC(0C), UCC(8C), UCC(4C), UCC(CC), UCC(2C), UCC(AC), UCC(6C), UCC(EC),
-    UCC(1C), UCC(9C), UCC(5C), UCC(DC), UCC(3C), UCC(BC), UCC(7C), UCC(FC),
-    UCC(02), UCC(82), UCC(42), UCC(C2), UCC(22), UCC(A2), UCC(62), UCC(E2),
-    UCC(12), UCC(92), UCC(52), UCC(D2), UCC(32), UCC(B2), UCC(72), UCC(F2),
-    UCC(0A), UCC(8A), UCC(4A), UCC(CA), UCC(2A), UCC(AA), UCC(6A), UCC(EA),
-    UCC(1A), UCC(9A), UCC(5A), UCC(DA), UCC(3A), UCC(BA), UCC(7A), UCC(FA),
-    UCC(06), UCC(86), UCC(46), UCC(C6), UCC(26), UCC(A6), UCC(66), UCC(E6),
-    UCC(16), UCC(96), UCC(56), UCC(D6), UCC(36), UCC(B6), UCC(76), UCC(F6),
-    UCC(0E), UCC(8E), UCC(4E), UCC(CE), UCC(2E), UCC(AE), UCC(6E), UCC(EE),
-    UCC(1E), UCC(9E), UCC(5E), UCC(DE), UCC(3E), UCC(BE), UCC(7E), UCC(FE),
-    UCC(01), UCC(81), UCC(41), UCC(C1), UCC(21), UCC(A1), UCC(61), UCC(E1),
-    UCC(11), UCC(91), UCC(51), UCC(D1), UCC(31), UCC(B1), UCC(71), UCC(F1),
-    UCC(09), UCC(89), UCC(49), UCC(C9), UCC(29), UCC(A9), UCC(69), UCC(E9),
-    UCC(19), UCC(99), UCC(59), UCC(D9), UCC(39), UCC(B9), UCC(79), UCC(F9),
-    UCC(05), UCC(85), UCC(45), UCC(C5), UCC(25), UCC(A5), UCC(65), UCC(E5),
-    UCC(15), UCC(95), UCC(55), UCC(D5), UCC(35), UCC(B5), UCC(75), UCC(F5),
-    UCC(0D), UCC(8D), UCC(4D), UCC(CD), UCC(2D), UCC(AD), UCC(6D), UCC(ED),
-    UCC(1D), UCC(9D), UCC(5D), UCC(DD), UCC(3D), UCC(BD), UCC(7D), UCC(FD),
-    UCC(03), UCC(83), UCC(43), UCC(C3), UCC(23), UCC(A3), UCC(63), UCC(E3),
-    UCC(13), UCC(93), UCC(53), UCC(D3), UCC(33), UCC(B3), UCC(73), UCC(F3),
-    UCC(0B), UCC(8B), UCC(4B), UCC(CB), UCC(2B), UCC(AB), UCC(6B), UCC(EB),
-    UCC(1B), UCC(9B), UCC(5B), UCC(DB), UCC(3B), UCC(BB), UCC(7B), UCC(FB),
-    UCC(07), UCC(87), UCC(47), UCC(C7), UCC(27), UCC(A7), UCC(67), UCC(E7),
-    UCC(17), UCC(97), UCC(57), UCC(D7), UCC(37), UCC(B7), UCC(77), UCC(F7),
-    UCC(0F), UCC(8F), UCC(4F), UCC(CF), UCC(2F), UCC(AF), UCC(6F), UCC(EF),
-    UCC(1F), UCC(9F), UCC(5F), UCC(DF), UCC(3F), UCC(BF), UCC(7F), UCC(FF)
-  };
-#ifdef _LP64
-  Bitsequence c = ((Bitsequence) (BitReverseTable256[v & 0xff] << 56)) |
-                  ((Bitsequence) (BitReverseTable256[(v >>  8) & 0xff] << 48)) |
-                  ((Bitsequence) (BitReverseTable256[(v >> 16) & 0xff] << 40)) |
-                  ((Bitsequence) (BitReverseTable256[(v >> 24) & 0xff] << 32)) |
-                  ((Bitsequence) (BitReverseTable256[(v >> 32) & 0xff] << 24)) |
-                  ((Bitsequence) (BitReverseTable256[(v >> 40) & 0xff] << 16)) |
-                  ((Bitsequence) (BitReverseTable256[(v >> 48) & 0xff] <<  8)) |
-                  ((Bitsequence) (BitReverseTable256[(v >> 56) & 0xff]));
-#else
-  Bitsequence c = ((Bitsequence) (BitReverseTable256[v & 0xff] << 24)) |
-                  ((Bitsequence) (BitReverseTable256[(v >>  8) & 0xff] << 16)) |
-                  ((Bitsequence) (BitReverseTable256[(v >> 16) & 0xff] <<  8)) |
-                  ((Bitsequence) (BitReverseTable256[(v >> 24) & 0xff]));
-#endif
-  return c;
-}
-
-static Codetype extractprefixcodeTBE(unsigned int *unitsnotspecial,
-                                     const Encodedsequence *encseq,
-                                     Codetype *filltable,
-                                     Readmode readmode,
-                                     Encodedsequencescanstate *esr,
-                                     Seqpos frompos,
-                                     unsigned int prefixlength)
-{
-  EndofTwobitencoding etbe;
-  Codetype code;
-
-  gt_assert(prefixlength <= (unsigned int) UNITSIN2BITENC);
-  if (ISDIRREVERSE(readmode))
-  {
-    Seqpos revpos = REVERSEPOS(encseq->totallength,frompos);
-
-    initEncodedsequencescanstategeneric(esr,encseq,false,revpos);
-    revextract2bitenc(&etbe,encseq,esr,revpos);
-    if (etbe.unitsnotspecial >= prefixlength)
-    {
-      code = (Codetype)
-             bitsequence_reverse(etbe.tbe <<
-                                 MULT2(UNITSIN2BITENC-prefixlength));
-      *unitsnotspecial = prefixlength;
-    } else /* etbe.unitsnotspecial < prefixlength */
-    {
-      if (etbe.unitsnotspecial > 0)
-      {
-        code = (Codetype)
-               bitsequence_reverse(
-                 (Bitsequence) (etbe.tbe & ((((Twobitencoding) 1)
-                                            << MULT2(etbe.unitsnotspecial))-1))
-                               << MULT2(UNITSIN2BITENC-prefixlength))
-               | filltable[etbe.unitsnotspecial];
-        *unitsnotspecial = etbe.unitsnotspecial;
-      } else
-      {
-        code = filltable[0];
-        *unitsnotspecial = 0;
-      }
-    }
-  } else
-  {
-    initEncodedsequencescanstategeneric(esr,encseq,true,frompos);
-    fwdextract2bitenc(&etbe,encseq,esr,frompos);
-    if (etbe.unitsnotspecial >= prefixlength)
-    {
-      code = (Codetype) (etbe.tbe >> MULT2(UNITSIN2BITENC - prefixlength));
-      *unitsnotspecial = prefixlength;
-    } else /* etbe.unitsnotspecial < prefixlength */
-    {
-      if (etbe.unitsnotspecial > 0)
-      {
-        code = (Codetype)
-               (etbe.tbe >> MULT2(UNITSIN2BITENC - prefixlength))
-               | filltable[etbe.unitsnotspecial];
-        *unitsnotspecial = etbe.unitsnotspecial;
-      } else
-      {
-        code = 0;
-        *unitsnotspecial = 0;
-      }
-    }
-  }
-  return code;
-}
-
 Codetype extractprefixcode(unsigned int *unitsnotspecial,
                            const Encodedsequence *encseq,
                            Codetype *filltable,
                            Readmode readmode,
-                           Encodedsequencescanstate *esr,
+                           GT_UNUSED Encodedsequencescanstate *esr,
                            const Codetype **multimappower,
                            Seqpos frompos,
                            unsigned int prefixlength)
@@ -4666,27 +4543,12 @@ Codetype extractprefixcode(unsigned int *unitsnotspecial,
                                         frompos,
                                         prefixlength);
     default: 
-    {
-      Codetype code, code2;
-      unsigned int unitsnotspecial2 = 0;
-
-      code2 = extractprefixcodegeneric(&unitsnotspecial2,
-                                       encseq,
-                                       filltable,
-                                       readmode,
-                                       multimappower,
-                                       frompos,
-                                       prefixlength);
-      code = extractprefixcodeTBE(unitsnotspecial,
-                                  encseq,
-                                  filltable,
-                                  readmode,
-                                  esr,
-                                  frompos,
-                                  prefixlength);
-      gt_assert(code == code2);
-      gt_assert(*unitsnotspecial == unitsnotspecial2);
-      return code;
-    }
+      return extractprefixcodegeneric(unitsnotspecial,
+                                      encseq,
+                                      filltable,
+                                      readmode,
+                                      multimappower,
+                                      frompos,
+                                      prefixlength);
   }
 }
