@@ -353,7 +353,7 @@ static OPrval parse_options(int *parsed_args,
                 = (unsigned int) readint;
             } else
             {
-              gt_error_set(err,maxdepthmsg);
+              gt_error_set(err, "%s", maxdepthmsg);
               oprval = OPTIONPARSER_ERROR;
             }
           }
