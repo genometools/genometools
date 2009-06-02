@@ -51,7 +51,7 @@ if __name__ == "__main__":
         diagram = Diagram.from_index(feature_index, "nonexist", range,
                 style)
     except GTError, strerr:
-        if -1 == str(strerr).find("FeatureIndex does not contain seqid"):
+        if -1 == str(strerr).find("feature index does not contain "):
             raise TestFailedError
     else:
         raise TestFailedError
