@@ -63,8 +63,8 @@ void gt_feature_index_memory_add_region_node(GtFeatureIndex *gfi,
 {
   char *seqid;
   GtFeatureIndexMemory *fi;
-  fi = gt_feature_index_memory_cast(gfi);
   RegionInfo *info;
+  fi = gt_feature_index_memory_cast(gfi);
   gt_assert(fi && rn);
   seqid = gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*) rn));
   if (!gt_hashmap_get(fi->regions, seqid)) {
@@ -88,7 +88,7 @@ void gt_feature_index_memory_add_feature_node(GtFeatureIndex *gfi,
   GtFeatureIndexMemory *fi;
   GtRange node_range;
   RegionInfo *info;
-
+  GtIntervalTreeNode *new_node;
   gt_assert(gfi && gf);
 
   fi = gt_feature_index_memory_cast(gfi);
@@ -115,9 +115,7 @@ void gt_feature_index_memory_add_feature_node(GtFeatureIndex *gfi,
   }
 
   /* add node to the appropriate array in the hashtable */
-  GtIntervalTreeNode *new_node = gt_interval_tree_node_new(gn,
-                                                            node_range.start,
-                                                            node_range.end);
+  new_node = gt_interval_tree_node_new(gn, node_range.start, node_range.end);
   gt_interval_tree_insert(info->features, new_node);
   /* update dynamic range */
   info->dyn_range.start = MIN(info->dyn_range.start, node_range.start);
@@ -247,8 +245,8 @@ bool gt_feature_index_memory_has_seqid(const GtFeatureIndex *gfi,
 
 void gt_feature_index_memory_delete(GtFeatureIndex *gfi)
 {
-  if (!gfi) return;
   GtFeatureIndexMemory *fi;
+  if (!gfi) return;
   fi = gt_feature_index_memory_cast(gfi);
   gt_hashmap_delete(fi->regions);
 }

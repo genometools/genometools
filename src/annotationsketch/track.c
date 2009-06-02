@@ -35,8 +35,8 @@ struct GtTrack {
   GtArray *lines;
 };
 
-GtTrack* gt_track_new(GtStr *title, unsigned long max_num_lines, bool split,
-                 GtLineBreaker *lb)
+GtTrack* gt_track_new(GtStr *title, unsigned long max_num_lines,
+                      bool split_lines, GtLineBreaker *lb)
 {
   GtTrack *track;
   gt_assert(title && lb);
@@ -45,7 +45,7 @@ GtTrack* gt_track_new(GtStr *title, unsigned long max_num_lines, bool split,
   track->title = gt_str_ref(title);
   track->lines = gt_array_new(sizeof (GtLine*));
   track->max_num_lines = max_num_lines;
-  track->split = split;
+  track->split = split_lines;
   track->lb = lb;
   return track;
 }
@@ -161,13 +161,17 @@ double gt_track_get_height(const GtTrack *track, const GtStyle *sty)
          tmp = TRACK_VSPACE_DEFAULT;
   bool show_track_captions = true, show_block_captions = true;
   gt_assert(track && sty);
-  gt_style_get_num(sty, "format", "block_caption_font_size", &bheight, NULL);
-  gt_style_get_num(sty, "format", "track_caption_font_size", &theight, NULL);
-  gt_style_get_num(sty, "format", "track_caption_space", &tcaptionspace, NULL);
-  gt_style_get_num(sty, "format", "block_caption_space", &bcaptionspace, NULL);
+  (void) gt_style_get_num(sty, "format", "block_caption_font_size", &bheight,
+                          NULL);
+  (void) gt_style_get_num(sty, "format", "track_caption_font_size", &theight,
+                          NULL);
+  (void) gt_style_get_num(sty, "format", "track_caption_space", &tcaptionspace,
+                          NULL);
+  (void) gt_style_get_num(sty, "format", "block_caption_space", &bcaptionspace,
+                          NULL);
   for (i = 0; i < gt_array_size(track->lines); i++)
   {
-    double tmp = BAR_VSPACE_DEFAULT;
+    double itmp = BAR_VSPACE_DEFAULT;
     GtLine *line = *(GtLine**) gt_array_get(track->lines, i);
     track_height += gt_line_get_height(line, sty);
 
@@ -181,18 +185,18 @@ double gt_track_get_height(const GtTrack *track, const GtStyle *sty)
       track_height += bheight + bcaptionspace;
     }
     /* add vertical spacer */
-    gt_style_get_num(sty, "format", "bar_vspace", &tmp, NULL);
-    track_height += tmp;
+    (void) gt_style_get_num(sty, "format", "bar_vspace", &itmp, NULL);
+    track_height += itmp;
   }
 
   /* determine display of track captions */
-  gt_style_get_bool(sty, "format","show_track_captions",
-                    &show_track_captions, NULL);
+  (void) gt_style_get_bool(sty, "format","show_track_captions",
+                           &show_track_captions, NULL);
 
   /* add track caption height and spacer */
   if (show_track_captions)
     track_height += theight + tcaptionspace;
-  gt_style_get_num(sty, "format", "track_vspace", &tmp, NULL);
+  (void) gt_style_get_num(sty, "format", "track_vspace", &tmp, NULL);
   track_height += tmp;
 
   return track_height;
