@@ -1,8 +1,8 @@
 /*
   Copyright (c) 2007-2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c)      2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007      Malte Mader <mmader@stud.zbh.uni-hamburg.de>
-  Copyright (c) 2007      Chr. Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
+  Copyright (c) 2007      Malte Mader <mader@zbh.uni-hamburg.de>
+  Copyright (c) 2007      Christin Schaerfer <schaerfer@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
