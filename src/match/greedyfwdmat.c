@@ -69,6 +69,7 @@ typedef struct
   const Encodedsequence *encseq;
 } Substringinfo;
 
+#ifndef NDEBUG
 static void checkifsequenceisthere(const Encodedsequence *encseq,
                                    Seqpos witnessposition,
                                    unsigned long gmatchlength,
@@ -94,6 +95,7 @@ static void checkifsequenceisthere(const Encodedsequence *encseq,
     }
   }
 }
+#endif
 
 static void gmatchposinsinglesequence(Substringinfo *substringinfo,
                                       uint64_t unitnum,
