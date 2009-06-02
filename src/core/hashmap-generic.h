@@ -40,9 +40,9 @@
  * keytag_valuetag_gt_hashmap_new: function constructing a hashtable
  *                              setup to store elements of type
  *                              keytag_valuetag_map_entry
- * keytag_valuetag_gt_hashmap_new_with_start_size: function constructing a 
+ * keytag_valuetag_gt_hashmap_new_with_start_size: function constructing a
  *                            hashtable setup to store elements of type
- *                            keytag_valuetag_map_entry, start_size is 
+ *                            keytag_valuetag_map_entry, start_size is
  *                            initially determined
  * keytag_valuetag_gt_hashmap_delete: destructor function corresponding
  *                            to above new
