@@ -62,7 +62,7 @@ static cairo_status_t str_write_func(void *closure, const unsigned char *data,
 /* to get crisp lines, round coordinates to .5 */
 static inline double rnd_to_nhalf(double num)
 {
-  num = (gt_double_smaller_double(0, num-0.5) ? 0 : num-0.5);
+  num = (gt_double_smaller_double(0, num-0.5) ? num-0.5 : 0);
   return ceil(num)+0.5;
 }
 
