@@ -375,37 +375,37 @@ static OPrval parse_options(int *parsed_args,
   gt_option_parser_add_option(op, optionxdrop);
 
   /* -mat */
-  lo->arbitscores.gcd  = (int) 1;      /* set only for initialization,
+  lo->arbitscores.gcd  = 1;      /* set only for initialization,
                                         do not change! */
   optionmat = gt_option_new_int_min("mat",
                         "specify matchscore for extension-alignment",
                         &lo->arbitscores.mat,
-                        (int)2,
-                        (int)1);
+                        2,
+                        1);
   gt_option_parser_add_option(op, optionmat);
 
   /* -mis */
   optionmis = gt_option_new_int_max("mis",
                         "specify mismatchscore for extension-alignment",
                         &lo->arbitscores.mis,
-                        (int)-2,
-                        (int)-1);
+                        -2,
+                        -1);
   gt_option_parser_add_option(op, optionmis);
 
   /* -ins */
   optionins = gt_option_new_int_max("ins",
                         "specify insertionscore for extension-alignment",
                         &lo->arbitscores.ins,
-                        (int)-3,
-                        (int)-1);
+                        -3,
+                        -1);
   gt_option_parser_add_option(op, optionins);
 
   /* -del */
   optiondel = gt_option_new_int_max("del",
                         "specify deletionscore for extension-alignment",
                         &lo->arbitscores.del,
-                        (int)-3,
-                        (int)-1);
+                        -3,
+                        -1);
   gt_option_parser_add_option(op, optiondel);
 
   /* -v */
@@ -551,6 +551,17 @@ static OPrval parse_options(int *parsed_args,
     if (gt_option_is_set(optiongff3))
     {
       lo->gff3output = true;
+    }
+
+    if (gt_option_is_set(optionltrsearchseqrange))
+    {
+      if (lo->repeatinfo.ltrsearchseqrange.start > 
+          lo->repeatinfo.ltrsearchseqrange.end)
+      {
+        gt_error_set(err,
+            "arguments of -range: first arg must be <= than second arg");
+        oprval = OPTIONPARSER_ERROR;
+      }
     }
   }
 

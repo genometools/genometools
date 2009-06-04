@@ -74,6 +74,15 @@ int simpleexactselfmatchstore (void *info,
     pos1 = pos2;
     pos2 = tmp;
   }
+  if (repeatinfo->ltrsearchseqrange.start != 0 ||
+      repeatinfo->ltrsearchseqrange.end != 0)
+  {
+    if (pos1 < (Seqpos) repeatinfo->ltrsearchseqrange.start  ||
+        pos2 + len - 1 > (Seqpos) repeatinfo->ltrsearchseqrange.end)
+    {
+      return 0;
+    }
+  }
 
   tmp = pos2 - pos1;
   seqnum1 = getencseqfrompos2seqnum(repeatinfo->encseq,pos1);
