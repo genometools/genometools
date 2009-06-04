@@ -32,7 +32,7 @@ struct GtRecMap {
 GtRecMap* gt_rec_map_new(double nw_x, double nw_y, double se_x, double se_y,
                          GtFeatureNode *node)
 {
-  GtRecMap *rm = gt_malloc(sizeof *rm);
+  GtRecMap *rm = gt_calloc(1, sizeof (GtRecMap));
   rm->nw_x = nw_x;
   rm->nw_y = nw_y;
   rm->se_x = se_x;
