@@ -29,6 +29,7 @@
 struct GtImageInfo {
   GtArray* recmaps;
   unsigned int height;
+  unsigned long reference_count;
 };
 
 GtImageInfo* gt_image_info_new()
@@ -40,10 +41,21 @@ GtImageInfo* gt_image_info_new()
   return ii;
 }
 
+GtImageInfo* gt_image_info_ref(GtImageInfo *ii)
+{
+  gt_assert(ii);
+  ii->reference_count++;
+  return ii;
+}
+
 void gt_image_info_delete(GtImageInfo *image_info)
 {
   unsigned long i;
   if (!image_info) return;
+  if (image_info->reference_count) {
+    image_info->reference_count--;
+    return;
+  }
   for (i=0;i<gt_image_info_num_of_rec_maps(image_info);i++)
   {
     GtRecMap *rm = *(GtRecMap**) gt_array_get(image_info->recmaps, i);
@@ -118,7 +130,6 @@ int gt_image_info_unit_test(GtError *err)
     gt_image_info_add_rec_map(ii, rms[i]);
     ensure(had_err, gt_image_info_num_of_rec_maps(ii) == i+1);
     ensure(had_err, (rm = gt_image_info_get_rec_map(ii, i)) == rms[i]);
-    ensure(had_err, rm->fn == rms[i]->fn);
     gt_genome_node_delete((GtGenomeNode*) features[i]);
   }
 

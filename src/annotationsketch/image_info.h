@@ -22,6 +22,7 @@
 #include "annotationsketch/rec_map.h"
 #include "core/error.h"
 
+GtImageInfo* gt_image_info_ref(GtImageInfo *ii);
 void gt_image_info_set_height(GtImageInfo*, unsigned int);
 /* Takes ownership of <rec_map>. */
 void gt_image_info_add_rec_map(GtImageInfo*, GtRecMap *rec_map);

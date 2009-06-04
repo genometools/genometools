@@ -293,7 +293,7 @@ int gt_canvas_cairo_visit_block(GtCanvas *canvas, GtBlock *block,
                                     (GtFeatureNode*) /* XXX */
                                       gt_block_get_top_level_feature(block));
       gt_image_info_add_rec_map(canvas->pvt->ii, rm);
-      rm->has_omitted_children = true;
+      gt_rec_map_set_omitted_children(rm, true);
     }
     /* signal break */
     return -1;
