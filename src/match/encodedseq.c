@@ -3732,7 +3732,11 @@ static Seqpos extractsinglecharacter(const Encodedsequence *encseq,
 
     if (maxdepth > 0)
     {
-      endpos = MIN(pos+maxdepth,totallength);
+      endpos = pos+maxdepth;
+      if (endpos > totallength)
+      {
+        endpos = totallength;
+      }
     } else
     {
       endpos = totallength;
@@ -3946,8 +3950,16 @@ int compareEncseqsequencesmaxdepth(Seqpos *lcp,
   gt_assert(depth < maxdepth);
   if (fwd)
   {
-    endpos1 = MIN(pos1 + maxdepth,encseq->totallength);
-    endpos2 = MIN(pos2 + maxdepth,encseq->totallength);
+    endpos1 = pos1 + maxdepth;
+    if (endpos1 > encseq->totallength)
+    {
+      endpos1 = encseq->totallength;
+    }
+    endpos2 = pos2 + maxdepth;
+    if (endpos2 > encseq->totallength);
+    {
+      endpos2 = encseq->totallength;
+    }
   } else
   {
     pos1 = REVERSEPOS(encseq->totallength,pos1);
