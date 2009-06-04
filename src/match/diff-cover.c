@@ -437,19 +437,13 @@ static void validate_samplepositons(const Differencecover *dcov)
 static void inversesuftab_set(Differencecover *dcov,Seqpos pos,
                               unsigned long sampleindex)
 {
-  unsigned long idx;
-
   gt_assert (sampleindex < dcov->samplesize);
-  idx = differencecover_packsamplepos(dcov,pos);
-  dcov->inversesuftab[idx] = sampleindex;
+  dcov->inversesuftab[differencecover_packsamplepos(dcov,pos)] = sampleindex;
 }
 
 static unsigned long inversesuftab_get(const Differencecover *dcov,Seqpos pos)
 {
-  unsigned long idx;
-
-  idx = differencecover_packsamplepos(dcov,pos);
-  return dcov->inversesuftab[idx];
+  return dcov->inversesuftab[differencecover_packsamplepos(dcov,pos)];
 }
 
 static void initinversesuftabnonspecials(Differencecover *dcov)
