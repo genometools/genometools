@@ -630,10 +630,13 @@ static void dc_anchorleftmost(Differencecover *dcov,Seqpos *left,
 
 static void dc_showintervalsizes(unsigned long count,unsigned long totalwidth,
                                  Seqpos totallength,unsigned long maxwidth,
+                                 Seqpos depth,
                                  Verboseinfo *verboseinfo)
 {
   showverbose(verboseinfo,
-              "%lu\n(total=%lu,avg=%.2f,%.2f%% of all, maxwidth=%lu)\n",
+              "level " FormatSeqpos
+              ": (intervals=%lu,total=%lu,avg=%.2f,%.2f%% of all,maxwidth=%lu)",
+              PRINTSeqposcast(depth),
               count,
               totalwidth,
               (double) totalwidth/count,
@@ -665,21 +668,18 @@ static void dc_processunsortedrange(Differencecover *dcov,
   {
     if (dcov->firstwithnewdepth.defined)
     {
-      showverbose(dcov->verboseinfo,
-                  "intervals in level " FormatSeqpos "=",
-                  PRINTSeqposcast(dcov->firstwithnewdepth.depth));
       dc_showintervalsizes(dcov->firstwithnewdepth.count,
                            dcov->firstwithnewdepth.totalwidth,
                            dcov->totallength,
                            dcov->firstwithnewdepth.maxwidth,
+                           dcov->firstwithnewdepth.depth,
                            dcov->verboseinfo);
     } else
     {
       dcov->firstwithnewdepth.defined = true;
     }
     showverbose(dcov->verboseinfo,
-                "enter new level with depth=" FormatSeqpos "\n",
-                PRINTSeqposcast(depth));
+                "enter new level " FormatSeqpos,PRINTSeqposcast(depth));
     dcov->firstwithnewdepth.left = left;
     dcov->firstwithnewdepth.right = right;
     dcov->firstwithnewdepth.depth = depth;
@@ -895,12 +895,11 @@ static void dc_sortremainingsamples(Differencecover *dcov)
 
   if (dcov->firstgenerationcount > 0)
   {
-    showverbose(dcov->verboseinfo,"number of intervals at base level "
-                FormatSeqpos " was ",PRINTSeqposcast(dcov->currentdepth));
     dc_showintervalsizes(dcov->firstgenerationcount,
                          dcov->firstgenerationtotalwidth,
                          dcov->totallength,
                          dcov->allocateditvinfo,
+                         dcov->currentdepth,
                          dcov->verboseinfo);
   }
   if (dcov->inversesuftab == NULL)
