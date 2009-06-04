@@ -91,6 +91,13 @@ void showuserdefinedoptionsandvalues(const LTRharvestoptions *lo)
   printf("#   motifmismatchesallowed: %u\n", lo->motif.allowedmismatches);
   printf("#   vicinity: " FormatSeqpos " nt\n",
           PRINTSeqposcast(lo->vicinityforcorrectboundaries));
+  if (lo->repeatinfo.ltrsearchseqrange.start != 0 ||
+      lo->repeatinfo.ltrsearchseqrange.end != 0)
+  {
+    printf("# ltrsearchseqrange=(%lu,%lu)\n",
+          PRINTSeqposcast(lo->repeatinfo.ltrsearchseqrange.start),
+          PRINTSeqposcast(lo->repeatinfo.ltrsearchseqrange.end));
+  }
 }
 
 /*
@@ -184,6 +191,7 @@ static OPrval parse_options(int *parsed_args,
 {
   GtOptionParser *op;
   GtOption *optionindex,
+         *optionltrsearchseqrange,
          *optionseed,
          *optionminlenltr,
          *optionmaxlenltr,
@@ -207,6 +215,7 @@ static OPrval parse_options(int *parsed_args,
          *optionoutinner,
          *optiongff3;
   OPrval oprval;
+  GtRange default_ltrsearchseqrange = {0,0};
   unsigned int vicinityforcorrectboundaries;
 
   static const char *overlaps[] = {
@@ -228,6 +237,14 @@ static OPrval parse_options(int *parsed_args,
                              lo->str_indexname, NULL);
   gt_option_is_mandatory(optionindex);
   gt_option_parser_add_option(op, optionindex);
+
+  /* -range */
+  optionltrsearchseqrange
+    = gt_option_new_range("range",
+                          "specify sequence range in which LTRs are searched",
+                          &lo->repeatinfo.ltrsearchseqrange,
+                          &default_ltrsearchseqrange);
+  gt_option_parser_add_option(op, optionltrsearchseqrange);
 
   /* -seed */
   optionseed = gt_option_new_ulong_min("seed",

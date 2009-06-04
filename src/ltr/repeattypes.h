@@ -21,6 +21,7 @@
 #include <stdbool.h>
 
 #include "core/arraydef.h"
+#include "core/range_api.h"
 #include "match/seqpos-def.h"
 #include "match/encseq-def.h"
 
@@ -45,6 +46,7 @@ typedef struct
   unsigned long dmin;        /* minimum distance between LTRs */
   unsigned long dmax;        /* maximum distance between LTRs */
   const Encodedsequence *encseq;
+  GtRange ltrsearchseqrange; /* if start and end are 0, then no range */
 } RepeatInfo;
 
 /* The datatype SubRepeatInfo stores information about the maximal repeats */

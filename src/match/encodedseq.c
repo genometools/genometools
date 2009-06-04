@@ -3956,7 +3956,7 @@ int compareEncseqsequencesmaxdepth(Seqpos *lcp,
       endpos1 = encseq->totallength;
     }
     endpos2 = pos2 + maxdepth;
-    if (endpos2 > encseq->totallength);
+    if (endpos2 > encseq->totallength)
     {
       endpos2 = encseq->totallength;
     }

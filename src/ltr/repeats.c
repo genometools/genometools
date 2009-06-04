@@ -75,7 +75,7 @@ int simpleexactselfmatchstore (void *info,
     pos2 = tmp;
   }
 
-  tmp = (pos2 - pos1);
+  tmp = pos2 - pos1;
   seqnum1 = getencseqfrompos2seqnum(repeatinfo->encseq,pos1);
   seqnum2 = getencseqfrompos2seqnum(repeatinfo->encseq,pos2);
   if (seqnum1 == seqnum2)
@@ -88,9 +88,8 @@ int simpleexactselfmatchstore (void *info,
   }
 
   /*test maximal length of candidate pair and distance constraints*/
-  if ( samecontig && (len <= (Seqpos) repeatinfo->lmax) &&
-    ( (Seqpos) repeatinfo->dmin <= tmp) &&
-        (tmp <= (Seqpos) repeatinfo->dmax) )
+  if (samecontig && len <= (Seqpos) repeatinfo->lmax &&
+      (Seqpos) repeatinfo->dmin <= tmp && tmp <= (Seqpos) repeatinfo->dmax)
   {
     Repeat *nextfreerepeatptr;
 
