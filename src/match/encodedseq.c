@@ -2515,7 +2515,7 @@ typedef struct
 #define NEXTFREAD(VAL)\
         if (!haserr)\
         {\
-          int ret;\
+          size_t ret;\
           ret = fread(&(VAL),sizeof (VAL), (size_t) 1, fp);\
           if (ferror(fp))\
           {\

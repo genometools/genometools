@@ -434,21 +434,13 @@ static void validate_samplepositons(const Differencecover *dcov)
   gt_free(sampleidxused);
 }
 
-static void inversesuftab_set(int line,Differencecover *dcov,Seqpos pos,
+static void inversesuftab_set(Differencecover *dcov,Seqpos pos,
                               unsigned long sampleindex)
 {
   unsigned long idx;
 
-  if (sampleindex >= dcov->samplesize)
-  {
-    fprintf(stderr,"line %d: sampleindex = %lu >= %lu = samplesize\n",
-                    line,sampleindex,dcov->samplesize);
-    exit(GT_EXIT_PROGRAMMING_ERROR);
-  }
+  gt_assert (sampleindex < dcov->samplesize);
   idx = differencecover_packsamplepos(dcov,pos);
-  /*
-  printf("line %d: set inversesuftab[%lu]=%lu\n",line,idx,sampleindex);
-  */
   dcov->inversesuftab[idx] = sampleindex;
 }
 
@@ -457,8 +449,6 @@ static unsigned long inversesuftab_get(const Differencecover *dcov,Seqpos pos)
   unsigned long idx;
 
   idx = differencecover_packsamplepos(dcov,pos);
-  /*printf("differencecover_packsamplepos(%lu)=%lu\n",(unsigned long) pos,idx);
- * */
   return dcov->inversesuftab[idx];
 }
 
@@ -470,7 +460,7 @@ static void initinversesuftabnonspecials(Differencecover *dcov)
   for (sampleindex=0; sampleindex<dcov->effectivesamplesize; sampleindex++)
   {
     pos = dcov->sortedsample[sampleindex];
-    inversesuftab_set(__LINE__,dcov,pos,sampleindex);
+    inversesuftab_set(dcov,pos,sampleindex);
   }
 }
 
@@ -496,7 +486,7 @@ static unsigned long insertfullspecialrangesample(Differencecover *dcov,
       Seqpos revpos = REVERSEPOS(dcov->totallength,pos);
       if (ISIBITSET(dcov->isindifferencecover,MODV(revpos)))
       {
-        inversesuftab_set(__LINE__,dcov,revpos,specialidx);
+        inversesuftab_set(dcov,revpos,specialidx);
         specialidx++;
       }
       if (pos == leftpos)
@@ -508,7 +498,7 @@ static unsigned long insertfullspecialrangesample(Differencecover *dcov,
     {
       if (ISIBITSET(dcov->isindifferencecover,MODV(pos)))
       {
-        inversesuftab_set(__LINE__,dcov,pos,specialidx);
+        inversesuftab_set(dcov,pos,specialidx);
         specialidx++;
       }
       if (pos == rightpos-1)
@@ -551,7 +541,7 @@ static void initinversesuftabspecials(Differencecover *dcov)
   if (ISIBITSET(dcov->isindifferencecover,MODV(dcov->totallength)))
   {
     gt_assert(dcov->samplesize > 0);
-    inversesuftab_set(__LINE__,dcov,dcov->totallength,dcov->samplesize-1);
+    inversesuftab_set(dcov,dcov->totallength,dcov->samplesize-1);
   }
   gt_free(dcov->isindifferencecover);
   dcov->isindifferencecover = NULL;
@@ -597,7 +587,7 @@ static void dc_initinversesuftabnonspecialsadjust(Differencecover *dcov)
                                       dcov->numofchars);
     for (/* Nothing */; idx < (unsigned long) bucketspec.left; idx++)
     {
-      inversesuftab_set(__LINE__,dcov,dcov->sortedsample[idx],idx);
+      inversesuftab_set(dcov,dcov->sortedsample[idx],idx);
     }
     dc_updatewidth (dcov,bucketspec.nonspecialsinbucket,
                     (Seqpos) dcov->prefixlength);
@@ -606,13 +596,13 @@ static void dc_initinversesuftabnonspecialsadjust(Differencecover *dcov)
                                 bucketspec.nonspecialsinbucket);
          idx++)
     {
-      inversesuftab_set(__LINE__,dcov,dcov->sortedsample[idx],
+      inversesuftab_set(dcov,dcov->sortedsample[idx],
                         (unsigned long) bucketspec.left);
     }
   }
   for (/* Nothing */; idx < dcov->effectivesamplesize; idx++)
   {
-    inversesuftab_set(__LINE__,dcov,dcov->sortedsample[idx],idx);
+    inversesuftab_set(dcov,dcov->sortedsample[idx],idx);
   }
 }
 
@@ -624,7 +614,7 @@ static void dc_anchorleftmost(Differencecover *dcov,Seqpos *left,
 
   for (ptr = left; ptr <= right; ptr++)
   {
-    inversesuftab_set(__LINE__,dcov,*ptr,baseindex);
+    inversesuftab_set(dcov,*ptr,baseindex);
   }
 }
 
@@ -770,7 +760,7 @@ static void dc_sortsuffixesonthislevel(Differencecover *dcov,
       } else
       {
         Seqpos currentsuftabentry = left[rangestart];
-        inversesuftab_set(__LINE__,dcov,currentsuftabentry,
+        inversesuftab_set(dcov,currentsuftabentry,
                           (unsigned long) (left+rangestart-dcov->sortedsample));
       }
       rangestart = idx;
@@ -788,7 +778,7 @@ static void dc_sortsuffixesonthislevel(Differencecover *dcov,
   } else
   {
     Seqpos currentsuftabentry = left[rangestart];
-    inversesuftab_set(__LINE__,dcov,currentsuftabentry,
+    inversesuftab_set(dcov,currentsuftabentry,
                       (unsigned long) (left+rangestart-dcov->sortedsample));
   }
 }
