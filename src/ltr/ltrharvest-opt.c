@@ -555,7 +555,7 @@ static OPrval parse_options(int *parsed_args,
 
     if (gt_option_is_set(optionltrsearchseqrange))
     {
-      if (lo->repeatinfo.ltrsearchseqrange.start > 
+      if (lo->repeatinfo.ltrsearchseqrange.start >
           lo->repeatinfo.ltrsearchseqrange.end)
       {
         gt_error_set(err,
