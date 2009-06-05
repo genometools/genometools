@@ -18,8 +18,8 @@
 #ifndef ARRAY2DIM_API_H
 #define ARRAY2DIM_API_H
 
-#include "core/error.h"
-#include "core/ma.h"
+#include "core/error_api.h"
+#include "core/ma_api.h"
 
 /* Array2dim module */
 

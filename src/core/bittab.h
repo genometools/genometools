@@ -19,6 +19,7 @@
 #define BITTAB_H
 
 #include "core/bittab_api.h"
+#include "core/error_api.h"
 
 bool          gt_bittab_is_true(const GtBittab*);
 int           gt_bittab_example(GtError*);

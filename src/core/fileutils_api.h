@@ -22,8 +22,8 @@
 #include <stdbool.h>
 #include <sys/types.h>
 #include <stdio.h>
-#include "core/str.h"
-#include "core/str_array.h"
+#include "core/str_api.h"
+#include "core/str_array_api.h"
 
 /* Fileutils module */
 

@@ -22,6 +22,7 @@
 #include "core/array.h"
 #include "core/cstr.h"
 #include "core/fileutils.h"
+#include "core/genfile.h"
 #include "core/ma.h"
 #include "core/splitter.h"
 #include "core/xansi.h"
