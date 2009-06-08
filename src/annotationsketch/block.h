@@ -32,6 +32,7 @@ int                   gt_block_compare(const GtBlock*, const GtBlock*);
 int                   gt_block_sketch(GtBlock*, GtCanvas*, GtError*);
 double                gt_block_get_max_height(const GtBlock *block,
                                               const GtStyle *sty);
+void                  gt_block_print(const GtBlock* block);
 
 int                   gt_block_unit_test(GtError*);
 
