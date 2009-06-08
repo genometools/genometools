@@ -163,13 +163,16 @@ static GtScoreFunction* gt_dna_scorefunc_new(GtAlpha *a, int match,
   GtScoreFunction *sf = gt_score_function_new(sm, insertion, deletion);
   unsigned int m,n;
 
-  for (m=0;m<5;m++)
+  for (m=0;m<gt_alpha_size(a);m++)
   {
-    for (n=0;n<5;n++)
+    for (n=0;n<gt_alpha_size(a);n++)
     {
       gt_score_matrix_set_score(sm, m, n, (n==m ? match : mismatch));
     }
   }
+  /* make N-N a mismatch! */
+  gt_score_matrix_set_score(sm, gt_alpha_encode(a, 'n'),
+                            gt_alpha_encode(a, 'n'), mismatch);
   return sf;
 }
 
