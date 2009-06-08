@@ -96,6 +96,9 @@ void getsetargmodekeywords(const Optionargmodedesc *modedesc,
     if (bitfield & modedesc[modecount].bitmask)
     {
       printf("%s ",modedesc[modecount].name);
+    } else
+    {
+      printf("[not %s] ",modedesc[modecount].name);
     }
   }
   printf("\n");
