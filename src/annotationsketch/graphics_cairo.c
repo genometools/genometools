@@ -26,6 +26,7 @@
 #ifdef CAIRO_HAS_SVG_SURFACE
 #include <cairo-svg.h>
 #endif
+
 #include <math.h>
 #include "core/fileutils.h"
 #include "core/genfile.h"
@@ -59,11 +60,15 @@ static cairo_status_t str_write_func(void *closure, const unsigned char *data,
   return CAIRO_STATUS_SUCCESS;
 }
 
+static inline int sgn(double num) {
+  return num ? (gt_double_smaller_double(0, num) ? 1 : -1) : 0;
+}
+
 /* to get crisp lines, round coordinates to .5 */
 static inline double rnd_to_nhalf(double num)
 {
-  num = (gt_double_smaller_double(0, num-0.5) ? num-0.5 : 0);
-  return ceil(num)+0.5;
+  double val = floor(2.0*(num+0.5));
+  return val/2.0;
 }
 
 void gt_graphics_cairo_initialize(GtGraphics *gg, GtGraphicsOutType type,
@@ -355,12 +360,14 @@ void gt_graphics_cairo_draw_box(GtGraphics *gg, double x, double y,
       break;
     case ARROW_LEFT:
       cairo_move_to(g->cr, rnd_to_nhalf(x + width), rnd_to_nhalf(y));
-      if (widthdiff_geq0)
+      if (widthdiff_geq0) {
         cairo_line_to(g->cr, rnd_to_nhalf(x + arrow_width), rnd_to_nhalf(y));
+      }
       cairo_line_to(g->cr, rnd_to_nhalf(x), rnd_to_nhalf(y + height / 2));
-      if (widthdiff_geq0)
+      if (widthdiff_geq0) {
         cairo_line_to(g->cr, rnd_to_nhalf(x + arrow_width),
                              rnd_to_nhalf(y + height));
+      }
       cairo_line_to(g->cr, rnd_to_nhalf(x + width), rnd_to_nhalf(y + height));
       cairo_close_path(g->cr);
       break;
@@ -536,6 +543,8 @@ void gt_graphics_cairo_draw_rectangle(GtGraphics *gg, double x, double y,
 {
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   gt_assert(g);
+
+  printf("   drawing rectangle: %f-%f\n", x, y);
   /* save cairo context */
   cairo_save(g->cr);
   cairo_new_path(g->cr);

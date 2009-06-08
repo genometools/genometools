@@ -84,8 +84,6 @@ GtCanvas* gt_canvas_cairo_context_new(GtStyle *style, cairo_t *context,
   canvas->pvt->width = width;
   canvas->pvt->height = height;
   canvas->pvt->bt = NULL;
-  /* 0.5 displacement to eliminate fuzzy horizontal lines */
-  canvas->pvt->y += 0.5;
   ccc = canvas_cairo_context_cast(canvas);
   ccc->context = context;
   return canvas;
