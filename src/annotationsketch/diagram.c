@@ -165,8 +165,8 @@ static inline const char* get_node_name_or_id(GtFeatureNode *gn)
 
 static inline bool get_caption_display_status(GtDiagram *d, const char *gft)
 {
-  gt_assert(d && gft);
   bool *status;
+  gt_assert(d && gft);
   status = (bool*) gt_hashmap_get(d->caption_display_status, gft);
   if (!status)
   {
@@ -470,9 +470,10 @@ static int visit_child(GtGenomeNode* gn, void *nti,
                        GtError *err)
 {
   NodeTraverseInfo* gt_genome_node_info;
+   int had_err;
   gt_genome_node_info = (NodeTraverseInfo*) nti;
   gt_error_check(err);
-  int had_err;
+
   if (gt_genome_node_has_children(gn))
   {
     GtFeatureNode *oldparent = gt_genome_node_info->parent;
@@ -666,20 +667,25 @@ static GtDiagram* gt_diagram_new_generic(GtArray *features,
   return diagram;
 }
 
-GtDiagram* gt_diagram_new(GtFeatureIndex *fi, const char *seqid,
+GtDiagram* gt_diagram_new(GtFeatureIndex *feature_index, const char *seqid,
                           const GtRange *range, GtStyle *style,
                           GtError *err)
 {
   GtDiagram *diagram;
   int had_err = 0;
-  GtArray *features = gt_array_new(sizeof (GtGenomeNode*));
-  gt_assert(features && seqid && range && style);
-  had_err = gt_feature_index_get_features_for_range(fi, features, seqid, range,
-                                                    NULL);
+  GtArray *features = NULL;
+  gt_assert(seqid && range && style);
+  if (range->start ==  range->end)
+  {
+    gt_error_set(err, "range start must not be equal to range end");
+    return NULL;
+  }
+  features = gt_array_new(sizeof (GtGenomeNode*));
+  had_err = gt_feature_index_get_features_for_range(feature_index, features,
+                                                    seqid, range, err);
   if (had_err)
   {
     gt_array_delete(features);
-    gt_error_set(err, "FeatureIndex does not contain seqid '%s'", seqid);
     return NULL;
   }
   diagram = gt_diagram_new_generic(features, range, style, false);

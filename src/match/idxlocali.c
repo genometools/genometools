@@ -108,7 +108,7 @@ static void storematch(void *info,const GtMatch *match)
   }
 }
 
-void checkandresetstorematch(uint64_t queryunit,
+void checkandresetstorematch(GT_UNUSED uint64_t queryunit,
                              Storematchinfo *storeonline,
                              Storematchinfo *storeoffline)
 {
@@ -117,13 +117,14 @@ void checkandresetstorematch(uint64_t queryunit,
 
   for (seqnum = 0; seqnum < numofdbsequences; seqnum++)
   {
+#ifndef NDEBUG
     if (ISIBITSET(storeonline->hasmatch,seqnum) &&
         !ISIBITSET(storeoffline->hasmatch,seqnum))
     {
       fprintf(stderr,"query " Formatuint64_t " refseq %lu: "
                      "online has match but offline not\n",
                      PRINTuint64_tcast(queryunit),seqnum);
-      exit(EXIT_FAILURE);
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     if (!ISIBITSET(storeonline->hasmatch,seqnum) &&
         ISIBITSET(storeoffline->hasmatch,seqnum))
@@ -131,8 +132,9 @@ void checkandresetstorematch(uint64_t queryunit,
       fprintf(stderr,"query " Formatuint64_t " refseq %lu: "
                      "offline has match but online not\n",
                      PRINTuint64_tcast(queryunit),seqnum);
-      exit(EXIT_FAILURE);
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
+#endif
     if (ISIBITSET(storeonline->hasmatch,seqnum))
     {
       countmatchseq++;

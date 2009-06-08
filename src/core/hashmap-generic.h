@@ -40,6 +40,10 @@
  * keytag_valuetag_gt_hashmap_new: function constructing a hashtable
  *                              setup to store elements of type
  *                              keytag_valuetag_map_entry
+ * keytag_valuetag_gt_hashmap_new_with_start_size: function constructing a
+ *                            hashtable setup to store elements of type
+ *                            keytag_valuetag_map_entry, start_size is
+ *                            initially determined
  * keytag_valuetag_gt_hashmap_delete: destructor function corresponding
  *                            to above new
  * keytag_valuetag_gt_hashmap_get: return pointer to value of hashmap
@@ -80,10 +84,18 @@
   (*keytag##_##valuetag##_gt_hashmap_KeyCmpWithData)(            \
     const keytype a, const keytype b, const void *data);      \
                                                               \
-  static inline                                               \
+  /*@unused@*/ static inline                                               \
   GtHashtable * keytag##_##valuetag##_gt_hashmap_new(void)             \
   {                                                           \
     return gt_hashtable_new(keytag##_##valuetag##_hashtype);     \
+  }                                                           \
+                                                              \
+  /*@unused@*/ static inline                                               \
+  GtHashtable * keytag##_##valuetag##_gt_hashmap_new_with_start_size(\
+                                                unsigned short size_log)  \
+  {                                                           \
+    return gt_hashtable_new_with_start_size(keytag##_##valuetag##_hashtype,\
+                                            size_log);  \
   }                                                           \
                                                               \
   /*@unused@*/ static inline void                                          \

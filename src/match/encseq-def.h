@@ -43,7 +43,7 @@
                    (unsigned long) (POS),\
                    (unsigned int) (CC),\
                    (unsigned int) cctmp);\
-            exit(EXIT_FAILURE);\
+            exit(GT_EXIT_PROGRAMMING_ERROR);\
           }\
         }
 #else
@@ -233,9 +233,20 @@ void encseqextract(GtUchar *buffer,
 
 Codetype extractprefixcode(unsigned int *unitsnotspecial,
                            const Encodedsequence *encseq,
+                           const Codetype *filltable,
+                           Readmode readmode,
+                           Encodedsequencescanstate *esr,
                            const Codetype **multimappower,
                            Seqpos frompos,
-                           unsigned int len);
+                           unsigned int prefixlength);
+
+int comparewithonespecial(const Encodedsequence *encseq,
+                          bool fwd,
+                          bool complement,
+                          Seqpos pos1,
+                          Seqpos pos2,
+                          Seqpos depth,
+                          Seqpos maxdepth);
 
 int compareEncseqsequences(Seqpos *lcp,
                            const Encodedsequence *encseq,
@@ -245,6 +256,17 @@ int compareEncseqsequences(Seqpos *lcp,
                            Encodedsequencescanstate *esr2,
                            Seqpos pos1,Seqpos pos2,
                            Seqpos depth);
+
+int compareEncseqsequencesmaxdepth(Seqpos *lcp,
+                                   const Encodedsequence *encseq,
+                                   bool fwd,
+                                   bool complement,
+                                   Encodedsequencescanstate *esr1,
+                                   Encodedsequencescanstate *esr2,
+                                   Seqpos pos1,
+                                   Seqpos pos2,
+                                   Seqpos depth,
+                                   Seqpos maxdepth);
 
 /* some check functions called in test-encseq.c */
 

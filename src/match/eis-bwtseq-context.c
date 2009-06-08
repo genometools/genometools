@@ -47,7 +47,7 @@ die_func(const char *errMsg, const char *file, int line)
 {
   fprintf(stderr, "error: %s: %s at %s, line %d", errMsg, strerror(errno),
           file, line);
-  exit(EXIT_FAILURE);
+  exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 
 enum

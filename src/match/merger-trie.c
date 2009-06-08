@@ -198,12 +198,14 @@ static void checkmergertrie2(Mergertrierep *trierep,
   if (ISLEAF(node))
   {
     Seqpos start = node->suffixinfo.startpos;
+#ifndef NDEBUG
     if (ISIBITSET(leafused,start))
     {
       fprintf(stderr,"leaf " FormatSeqpos " already found\n",
               PRINTSeqposcast(start));
-      exit(EXIT_FAILURE); /* programming error */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
+#endif
     SETIBIT(leafused,start);
     (*numberofbitsset)++;
   } else
@@ -212,19 +214,22 @@ static void checkmergertrie2(Mergertrierep *trierep,
     if (father != NULL)
     {
       gt_assert(!ISLEAF(father));
+#ifndef NDEBUG
       if (father->depth >= node->depth)
       {
         fprintf(stderr,"father.depth = " FormatSeqpos " >= " FormatSeqpos
                        " = node.depth\n",
                        PRINTSeqposcast(father->depth),
                        PRINTSeqposcast(node->depth));
-        exit(EXIT_FAILURE); /* programming error */
+        exit(GT_EXIT_PROGRAMMING_ERROR);
       }
+#endif
     }
     previous = NULL;
     for (current = node->firstchild; current != NULL;
         current = current->rightsibling)
     {
+#ifndef NDEBUG
       if (previous != NULL)
       {
         if (comparecharacters(
@@ -234,9 +239,10 @@ static void checkmergertrie2(Mergertrierep *trierep,
               current->suffixinfo.idx) >= 0)
         {
           fprintf(stderr,"nodes not correctly ordered\n");
-          exit(EXIT_FAILURE); /* programming error */
+          exit(GT_EXIT_PROGRAMMING_ERROR);
         }
       }
+#endif
       checkmergertrie2(trierep,current,node,leafused,numberofbitsset);
       previous = current;
     }
@@ -254,13 +260,15 @@ void mergertrie_check(Mergertrierep *trierep,unsigned int numberofleaves,
 
     INITBITTAB(leafused,maxleafnum+1);
     checkmergertrie2(trierep,trierep->root,NULL,leafused,&numberofbitsset);
+#ifndef NDEBUG
     if (numberofbitsset != numberofleaves)
     {
       fprintf(stderr,"numberofbitsset = %u != %u = numberofleaves\n",
                       numberofbitsset,
                       numberofleaves);
-      exit(EXIT_FAILURE); /* programming error */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
+#endif
     gt_free(leafused);
   }
 }

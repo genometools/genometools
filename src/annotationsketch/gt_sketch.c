@@ -1,8 +1,8 @@
 /*
-  Copyright (c) 2007 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Malte Mader <mmader@stud.zbh.uni-hamburg.de>
-  Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007      Malte Mader <mader@zbh.uni-hamburg.de>
+  Copyright (c) 2007      Christin Schaerfer <schaerfer@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -411,8 +411,10 @@ int gt_sketch(int argc, const char **argv, GtError *err)
         for (i = 0; i < gt_image_info_num_of_rec_maps(ii) ;i++) {
           char buf[BUFSIZ];
           rm = gt_image_info_get_rec_map(ii, i);
-          gt_rec_map_format_html_imagemap_coords(rm, buf, BUFSIZ);
-          printf("%s, %s\n", buf, gt_feature_node_get_type(rm->fn));
+          (void) gt_rec_map_format_html_imagemap_coords(rm, buf, BUFSIZ);
+          printf("%s, %s\n",
+                 buf,
+                 gt_feature_node_get_type(gt_rec_map_get_genome_feature(rm)));
         }
       }
       had_err = gt_canvas_cairo_file_to_file((GtCanvasCairoFile*) canvas, file,

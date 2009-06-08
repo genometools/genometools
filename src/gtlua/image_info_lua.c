@@ -81,19 +81,19 @@ static void push_recmap_as_table(lua_State *L, const GtRecMap *rm)
   gt_assert(rm);
   lua_newtable(L);
   lua_pushstring(L, "nw_x");
-  lua_pushnumber(L, rm->nw_x);
+  lua_pushnumber(L, gt_rec_map_get_northwest_x(rm));
   lua_rawset(L, -3);
   lua_pushstring(L, "nw_y");
-  lua_pushnumber(L, rm->nw_y);
+  lua_pushnumber(L, gt_rec_map_get_northwest_y(rm));
   lua_rawset(L, -3);
   lua_pushstring(L, "se_x");
-  lua_pushnumber(L, rm->se_x);
+  lua_pushnumber(L, gt_rec_map_get_southeast_x(rm));
   lua_rawset(L, -3);
   lua_pushstring(L, "se_y");
-  lua_pushnumber(L, rm->se_y);
+  lua_pushnumber(L, gt_rec_map_get_southeast_y(rm));
   lua_rawset(L, -3);
   lua_pushstring(L, "feature_ref");
-  gt_lua_genome_node_push(L, gt_genome_node_ref((GtGenomeNode*) rm->fn));
+  gt_lua_genome_node_push(L, (GtGenomeNode*) gt_rec_map_get_genome_feature(rm));
   lua_rawset(L, -3);
 }
 

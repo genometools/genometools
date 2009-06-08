@@ -26,9 +26,9 @@
 #include "match/echoseq.h"
 #include "tools/gt_sfxmap.h"
 
+#include "match/sfx-suftaborder.h"
 #include "match/test-encseq.pr"
 #include "match/test-mappedstr.pr"
-#include "match/sfx-suftaborder.pr"
 
 typedef struct
 {
@@ -320,9 +320,12 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
           ssar = NULL;
         }
         showverbose(verboseinfo,"checkentiresuftab");
-        checkentiresuftab(suffixarray.encseq,
+        checkentiresuftab(__FILE__,
+                          __LINE__,
+                          suffixarray.encseq,
                           suffixarray.readmode,
                           suffixarray.suftab,
+                          getencseqtotallength(suffixarray.encseq)+1,
                           ssar,
                           false, /* specialsareequal  */
                           false,  /* specialsareequalatdepth0 */

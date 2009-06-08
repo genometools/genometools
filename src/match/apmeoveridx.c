@@ -137,14 +137,14 @@ static void verifycolumnvalues(const Limdfsconstinfo *mti,
     fprintf(stderr," != ");
     showmaxleqvalue(stderr,col->maxleqk,mti);
     fprintf(stderr," = col->maxleqk\n");
-    exit(EXIT_FAILURE);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   if (bfmaxleqk != UNDEFMAXLEQK && minscore != col->lastdistvalue)
   {
     fprintf(stderr,"correct score = %lu != %lu = col->score\n",
                  minscore,
                  col->lastdistvalue);
-    exit(EXIT_FAILURE);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
 

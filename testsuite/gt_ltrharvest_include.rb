@@ -270,19 +270,20 @@ end
 # test all combinations of options, test only some of them
 outlist = (["-seed 100",
             "-minlenltr 100",# "-maxlenltr 1000",
-      "-mindistltr 1500",# "-maxdistltr 15000",
-      "-similar 80",
-      "-mintsd 5"#,#"-maxtsd 20",
-      #"-motif tgca",#, #"-motifmis 0",
-      #"-vic 60",
-      #"-overlaps best",
-      #"-xdrop 5",
-      #"-mat 2","-mis -3","-ins -3","-del -3",
-      #"-v",
-      #"-out pred.fna",
-      #"-outinner pred-inner.fna",
-      #"-gff3 pred.gff3"
-      ])
+            "-mindistltr 1500",# "-maxdistltr 15000",
+            "-similar 80",
+            "-mintsd 5",
+            "-range 1000 20000",#"-maxtsd 20",
+           #"-motif tgca",#, #"-motifmis 0",
+           #"-vic 60",
+           #"-overlaps best",
+           #"-xdrop 5",
+           #"-mat 2","-mis -3","-ins -3","-del -3",
+           #"-v",
+           #"-out pred.fna",
+           #"-outinner pred-inner.fna",
+           #"-gff3 pred.gff3"
+          ])
 numofalphabets = outlist.length
 wheelspace = Array.new
 alphasizes = Array.new

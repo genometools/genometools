@@ -59,51 +59,53 @@ GtCustomTrack* gt_custom_track_create(const GtCustomTrackClass *ctc)
   return ct;
 }
 
-GtCustomTrack* gt_custom_track_ref(GtCustomTrack *ct)
+GtCustomTrack* gt_custom_track_ref(GtCustomTrack *ctrack)
 {
-  gt_assert(ct);
-  ct->pvt->reference_count++;
-  return ct;
+  gt_assert(ctrack);
+  ctrack->pvt->reference_count++;
+  return ctrack;
 }
 
-void gt_custom_track_delete(GtCustomTrack *ct)
+void gt_custom_track_delete(GtCustomTrack *ctrack)
 {
-  if (!ct) return;
-  if (ct->pvt->reference_count) {
-    ct->pvt->reference_count--;
+  if (!ctrack) return;
+  if (ctrack->pvt->reference_count) {
+    ctrack->pvt->reference_count--;
     return;
   }
-  gt_assert(ct->c_class);
-  if (ct->c_class->free)
-    ct->c_class->free(ct);
-  gt_free(ct->pvt);
-  gt_free(ct);
+  gt_assert(ctrack->c_class);
+  if (ctrack->c_class->free)
+    ctrack->c_class->free(ctrack);
+  gt_free(ctrack->pvt);
+  gt_free(ctrack);
 }
 
-int gt_custom_track_render(GtCustomTrack *ct, GtGraphics *graphics,
+int gt_custom_track_render(GtCustomTrack *ctrack, GtGraphics *graphics,
                            unsigned int start_ypos, GtRange viewrange,
                            GtStyle *style, GtError *err)
 {
-  gt_assert(ct && ct->c_class && graphics && style);
-  return ct->c_class->render(ct, graphics, start_ypos, viewrange, style, err);
+  gt_assert(ctrack && ctrack->c_class && graphics && style);
+  return ctrack->c_class->render(ctrack, graphics, start_ypos, viewrange, style,
+                                 err);
 }
 
-int gt_custom_track_sketch(GtCustomTrack *ct, GtCanvas *canvas, GtError *err)
+int gt_custom_track_sketch(GtCustomTrack *ctrack, GtCanvas *canvas,
+                           GtError *err)
 {
-  gt_assert(ct && canvas);
-  return gt_canvas_visit_custom_track(canvas, ct, err);
+  gt_assert(ctrack && canvas);
+  return gt_canvas_visit_custom_track(canvas, ctrack, err);
 }
 
-unsigned long gt_custom_track_get_height(GtCustomTrack *ct)
+unsigned long gt_custom_track_get_height(GtCustomTrack *ctrack)
 {
-  gt_assert(ct && ct->c_class);
-  return ct->c_class->get_height(ct);
+  gt_assert(ctrack && ctrack->c_class);
+  return ctrack->c_class->get_height(ctrack);
 }
 
-const char* gt_custom_track_get_title(GtCustomTrack *ct)
+const char* gt_custom_track_get_title(GtCustomTrack *ctrack)
 {
-  gt_assert(ct && ct->c_class);
-  return ct->c_class->get_title(ct);
+  gt_assert(ctrack && ctrack->c_class);
+  return ctrack->c_class->get_title(ctrack);
 }
 
 void* gt_custom_track_cast(GT_UNUSED const GtCustomTrackClass *ctc,

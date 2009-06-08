@@ -246,7 +246,7 @@ void freesuffixarray(Suffixarray *suffixarray)
   encodedsequence_free(&suffixarray->encseq);
   if (suffixarray->bcktab != NULL)
   {
-    freebcktab(&suffixarray->bcktab);
+    bcktab_delete(&suffixarray->bcktab);
   }
 }
 
@@ -382,7 +382,6 @@ static int inputsuffixarray(bool map,
     if (map)
     {
       suffixarray->bcktab = mapbcktab(indexname,
-                                      totallength,
                                       getencseqAlphabetnumofchars(suffixarray->
                                                                   encseq),
                                       suffixarray->prefixlength,

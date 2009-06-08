@@ -63,7 +63,7 @@ int gt_guessprot(int argc, const char **argv, GtError *err)
   if (retval == 1)
   {
     /*@ignore@*/
-    exit(EXIT_FAILURE);
+    exit(EXIT_FAILURE); /* guess it is a protein sequence */
     /*@end@*/
 
   } else

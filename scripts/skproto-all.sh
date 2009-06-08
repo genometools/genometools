@@ -31,6 +31,7 @@ bcktab.c
 bltrie-ssort.c
 cgr_spacedseed.c
 cutendpfx.c
+diff-cover.c
 dist-short.c
 echoseq.c
 eis-blockcomp.c
@@ -65,6 +66,7 @@ idx-limdfs.c
 idxlocali.c
 idxlocalidp.c
 idxlocalisw.c
+initbasepower.c
 initeqsvec.c
 inl-encseq.c
 iter-window.c
@@ -80,6 +82,7 @@ pckbucket.c
 pos2seqnum.c
 pssm.c
 revcompl.c
+sfx-apfxlen.c
 sfx-bentsedg.c
 sfx-enumcodes.c
 sfx-input.c
@@ -89,6 +92,7 @@ sfx-readint.c
 sfx-remainsort.c
 sfx-run.c
 sfx-suffixer.c
+sfx-suftaborder.c
 spaced-seeds.c
 specialrank.c
 substriter.c

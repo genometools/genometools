@@ -33,8 +33,7 @@
 #ifdef SKDEBUG
 #include "sfx-nextchar.h"
 #endif
-
-#include "initbasepower.pr"
+#include "initbasepower.h"
 
 #ifdef SPECIALCASE4
 #define SUBTRACTLCHARANDSHIFT(CODE,LCHAR,NUMOFCHARS,MULTIMAPPOWER)\
@@ -153,11 +152,11 @@ typedef struct
 {
   unsigned int distvalue;
   Codetype codeforleftcontext;
-} GtQueueelem;
+} Specialitem;
 
 typedef struct
 {
-  GtQueueelem *queuespace;  /* the space to store the queue elements */
+  Specialitem *queuespace;  /* the space to store the queue elements */
   unsigned int enqueueindex,  /* entry into which element is to be enqued */
                dequeueindex,  /* last element of queue */
                queuesize,     /* size of the queue */
@@ -181,7 +180,7 @@ typedef struct
 
 static void specialemptyqueue(Specialpositions *spos,unsigned int queuesize)
 {
-  ALLOCASSIGNSPACE(spos->queuespace,NULL,GtQueueelem,queuesize);
+  ALLOCASSIGNSPACE(spos->queuespace,NULL,Specialitem,queuesize);
   spos->noofelements = 0;
   spos->queuesize = queuesize;
   spos->dequeueindex = spos->enqueueindex = queuesize - 1;
@@ -192,7 +191,7 @@ static bool specialqueueisempty(const Specialpositions *spos)
   return (spos->noofelements == 0) ? true : false;
 }
 
-static GtQueueelem *specialheadofqueue(const Specialpositions *spos)
+static Specialitem *specialheadofqueue(const Specialpositions *spos)
 {
   return spos->queuespace + spos->dequeueindex;
 }
@@ -209,7 +208,7 @@ static void specialdeleteheadofqueue(Specialpositions *spos)
   }
 }
 
-static void specialenqueue(Specialpositions *spos,GtQueueelem elem)
+static void specialenqueue(Specialpositions *spos,Specialitem elem)
 {
   spos->noofelements++;
   spos->queuespace[spos->enqueueindex] = elem;
@@ -236,7 +235,7 @@ static void updatespecialpositions(Streamstate *spwp,
   {
     if (!specialqueueisempty(&spwp->spos))
     {
-      GtQueueelem *head;
+      Specialitem *head;
 
       /* only here we add some element to the queue */
       head = specialheadofqueue(&spwp->spos);
@@ -259,7 +258,7 @@ static void updatespecialpositions(Streamstate *spwp,
   if (ISSPECIAL(charcode))
   {
     /* only here we add some element to the queue */
-    GtQueueelem newelem;
+    Specialitem newelem;
 
     if (specialqueueisempty(&spwp->spos))
     {
@@ -328,7 +327,7 @@ static void shiftrightwithchar(
 #ifdef SKDEBUG
   if (!specialqueueisempty(&spwp->spos))
   {
-    GtQueueelem *head = specialheadofqueue(&spwp->spos);
+    Specialitem *head = specialheadofqueue(&spwp->spos);
     Codetype tmpprefixcode = prefixwindowkmer2code(head->distvalue,
                                                    spwp->kmersize,
                                                    spwp->multimappower,
@@ -345,7 +344,7 @@ static void shiftrightwithchar(
     gt_assert(!firstspecialposbrute.defined);
   } else
   {
-    GtQueueelem *head = specialheadofqueue(&spwp->spos);
+    Specialitem *head = specialheadofqueue(&spwp->spos);
     gt_assert(firstspecialposbrute.defined ? 1 : 0);
     gt_assert(head->distvalue == firstspecialposbrute.specialpos);
   }
@@ -370,7 +369,7 @@ static void shiftrightwithchar(
       code = spwp->codewithoutspecial;
     } else
     {
-      GtQueueelem *head = specialheadofqueue(&spwp->spos);
+      Specialitem *head = specialheadofqueue(&spwp->spos);
       code = head->codeforleftcontext + spwp->filltable[head->distvalue];
       localfirstspecial.defined = true;
       localfirstspecial.specialpos = head->distvalue;

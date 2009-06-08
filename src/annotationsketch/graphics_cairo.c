@@ -30,6 +30,7 @@
 #include "core/fileutils.h"
 #include "core/genfile.h"
 #include "core/ma.h"
+#include "core/mathsupport.h"
 #include "core/minmax.h"
 #include "core/str.h"
 #include "annotationsketch/graphics_cairo.h"
@@ -61,7 +62,7 @@ static cairo_status_t str_write_func(void *closure, const unsigned char *data,
 /* to get crisp lines, round coordinates to .5 */
 static inline double rnd_to_nhalf(double num)
 {
-  num = MAX(0, num-0.5);
+  num = (gt_double_smaller_double(0, num-0.5) ? num-0.5 : 0);
   return ceil(num)+0.5;
 }
 
@@ -154,7 +155,7 @@ void gt_graphics_cairo_draw_text(GtGraphics *gg, double x, double y,
   cairo_text_extents_t ext;
   gt_assert(g && text);
   cairo_text_extents(g->cr, text, &ext);
-  if (x+ext.width > g->width)
+  if (gt_double_smaller_double(g->width, x+ext.width))
     return;
   cairo_set_source_rgb(g->cr, 0, 0, 0);
   cairo_move_to(g->cr, x, y);
@@ -327,33 +328,37 @@ void gt_graphics_cairo_draw_box(GtGraphics *gg, double x, double y,
                                 GtColor stroke_color, bool dashed)
 {
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
-  gt_assert(g);
   double dashes[]={2.0};
+  bool widthdiff_geq0;
+  gt_assert(g);
+
   /* save cairo context */
   cairo_save(g->cr);
   cairo_rectangle(g->cr, rnd_to_nhalf(g->margin_x), g->margin_y,
                   rnd_to_nhalf(g->width-2*g->margin_x),
                   g->height-2*g->margin_y);
   cairo_clip(g->cr);
+
+  widthdiff_geq0 = gt_double_smaller_double(0, width - arrow_width);
   /* construct shape of the box or arrow */
   switch (arrow_status)
   {
     case ARROW_RIGHT:
       cairo_move_to(g->cr, rnd_to_nhalf(x), rnd_to_nhalf(y));
-      if (width - arrow_width > 0)
+      if (widthdiff_geq0)
         cairo_line_to(g->cr, x + width - arrow_width, rnd_to_nhalf(y));
       cairo_line_to(g->cr, x + width, y + height / 2);
-      if (width - arrow_width > 0)
+      if (widthdiff_geq0)
         cairo_line_to(g->cr, x + width - arrow_width, rnd_to_nhalf(y + height));
       cairo_line_to(g->cr, rnd_to_nhalf(x), rnd_to_nhalf(y + height));
       cairo_close_path(g->cr);
       break;
     case ARROW_LEFT:
       cairo_move_to(g->cr, rnd_to_nhalf(x + width), rnd_to_nhalf(y));
-      if (width - arrow_width > 0)
+      if (widthdiff_geq0)
         cairo_line_to(g->cr, rnd_to_nhalf(x + arrow_width), rnd_to_nhalf(y));
       cairo_line_to(g->cr, rnd_to_nhalf(x), rnd_to_nhalf(y + height / 2));
-      if (width - arrow_width > 0)
+      if (widthdiff_geq0)
         cairo_line_to(g->cr, rnd_to_nhalf(x + arrow_width),
                              rnd_to_nhalf(y + height));
       cairo_line_to(g->cr, rnd_to_nhalf(x + width), rnd_to_nhalf(y + height));
@@ -361,7 +366,7 @@ void gt_graphics_cairo_draw_box(GtGraphics *gg, double x, double y,
       break;
     case ARROW_BOTH:
       cairo_move_to(g->cr, rnd_to_nhalf(x), rnd_to_nhalf(y + height/2));
-      if (width < 2*arrow_width)
+      if (gt_double_smaller_double(width, 2*arrow_width))
       {
         cairo_line_to(g->cr, rnd_to_nhalf(x + width/2), rnd_to_nhalf(y));
         cairo_line_to(g->cr, rnd_to_nhalf(x + width),
@@ -423,7 +428,7 @@ void gt_graphics_cairo_draw_dashes(GtGraphics *gg, double x, double y,
                                stroke_color.blue,
                                stroke_color.alpha);
   /* create arrowhead path */
-  if (width - arrow_width > 0)
+  if (gt_double_smaller_double(0, width - arrow_width))
   {
     switch (arrow_status)
     {
@@ -449,6 +454,7 @@ void gt_graphics_cairo_draw_dashes(GtGraphics *gg, double x, double y,
         cairo_line_to(g->cr, x, y + height / 2);
         cairo_line_to(g->cr, x + arrow_width, y + height);
         cairo_stroke(g->cr);
+        break;
       case ARROW_NONE: break;
     }
   }
@@ -468,6 +474,7 @@ void gt_graphics_cairo_draw_caret(GtGraphics *gg, double x, double y,
 {
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   gt_assert(g);
+
   /* save cairo context */
   cairo_save(g->cr);
   cairo_rectangle(g->cr, g->margin_x, g->margin_y,
@@ -477,7 +484,7 @@ void gt_graphics_cairo_draw_caret(GtGraphics *gg, double x, double y,
   switch (arrow_status)
   {
     case ARROW_RIGHT:
-      if (width - arrow_width > 0)
+      if (gt_double_smaller_double(0, width - arrow_width))
       {
         width -= arrow_width;
         cairo_move_to(g->cr, x, y + (height/2));
@@ -491,7 +498,7 @@ void gt_graphics_cairo_draw_caret(GtGraphics *gg, double x, double y,
       }
       break;
     case ARROW_LEFT:
-      if (width - arrow_width > 0)
+      if (gt_double_smaller_double(0, width - arrow_width))
       {
         width -= arrow_width;
         /* draw arrowhead */
@@ -596,9 +603,10 @@ int gt_graphics_cairo_save_to_file(const GtGraphics *gg, const char *filename,
   cairo_surface_t *bgsurf = NULL;
   cairo_t *bgc = NULL;
   cairo_status_t rval;
-  gt_error_check(err);
   GtGenFile *outfile;
+  gt_error_check(err);
   gt_assert(g && filename);
+
   /* do nothing if no surface was created */
   if (g->from_context)
     return 0;
@@ -657,11 +665,12 @@ void gt_graphics_cairo_save_to_stream(const GtGraphics *gg, GtStr *stream)
 
 void gt_graphics_cairo_delete(GtGraphics *gg)
 {
+  GtGraphicsCairo *g;
   if (!gg) return;
-  GtGraphicsCairo *g = (GtGraphicsCairo*) gg;
+  g = (GtGraphicsCairo*) gg;
   if (!g->from_context) /* do not attempt to destroy foreign contexts */
     cairo_destroy(g->cr);
-  if (g->surf);
+  if (g->surf)
     cairo_surface_destroy(g->surf); /* reference counted */
   if (g->outbuf)
     gt_str_delete(g->outbuf);
@@ -726,8 +735,6 @@ GtGraphics* gt_graphics_cairo_new_from_context(cairo_t *context,
   gc->margin_x = gc->margin_y = 20;
   gc->from_context = true;
   gc->cr = context;
-  /* cairo_set_source_rgba(context, 1, 1, 1, 1);
-  cairo_paint(context); */
   cairo_set_line_join(context, CAIRO_LINE_JOIN_ROUND);
   cairo_set_line_cap(context, CAIRO_LINE_CAP_ROUND);
   cairo_select_font_face(context, "sans", CAIRO_FONT_SLANT_NORMAL,
@@ -737,26 +744,28 @@ GtGraphics* gt_graphics_cairo_new_from_context(cairo_t *context,
 
 void gt_graphics_cairo_draw_curve_data(GtGraphics *gg, double x, double y,
                                        GtColor color, double data[],
-                                       unsigned long ndata, GtRange valuerng,
+                                       unsigned long ndata, GtRange valrange,
                                        unsigned long height)
 {
   unsigned long i, rnglen;
+  double xpos;
   GtGraphicsCairo *g;
   g = gt_graphics_cairo_cast(gg);
-  double xpos;
+
   xpos = (((double)g->width-2*g->margin_x)/((double)ndata-1));
-  rnglen = valuerng.end - valuerng.start;
+  rnglen = valrange.end - valrange.start;
   cairo_save(g->cr);
   cairo_move_to(g->cr,
                 x,
-                y+(1-(data[0]-valuerng.start)/(double) rnglen)*height);
+                y+(1-(data[0]-valrange.start)/(double) rnglen)*height);
   for (i=1;i<ndata;i++)
   {
     double val, pval;
-    if (data[i] < valuerng.start || data[i] > valuerng.end)
+    if (gt_double_smaller_double(data[i], valrange.start)
+          || gt_double_smaller_double(valrange.end, data[i]))
       break;
-    val  = (double) (data[i]-valuerng.start)/(double) rnglen;
-    pval = (double) (data[i-1]-valuerng.start)/(double) rnglen;
+    val  = (double) (data[i]-valrange.start)/(double) rnglen;
+    pval = (double) (data[i-1]-valrange.start)/(double) rnglen;
     gt_assert(val <= 1 && val >= 0 && pval >= 0 && pval <= 1);
     cairo_curve_to(g->cr,
                    x + ((i-0.5) * xpos),

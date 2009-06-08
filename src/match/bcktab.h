@@ -37,18 +37,15 @@ typedef struct
 typedef struct Bcktab Bcktab;
 
 Bcktab *mapbcktab(const GtStr *indexname,
-                  Seqpos totallength,
                   unsigned int numofchars,
                   unsigned int prefixlength,
                   GtError *err);
 
-void freebcktab(Bcktab **bcktab);
+void bcktab_delete(Bcktab **bcktab);
 
-Bcktab *allocBcktab(Seqpos totallength,
-                    unsigned int numofchars,
+Bcktab *allocBcktab(unsigned int numofchars,
                     unsigned int prefixlength,
-                    unsigned int codebits,
-                    Codetype maxcodevalue,
+                    bool storespecialcodes,
                     Verboseinfo *verboseinfo,
                     GtError *err);
 
@@ -87,8 +84,8 @@ void determinemaxbucketsize(Bcktab *bcktab,
                             const Codetype maxcode,
                             Seqpos partwidth,
                             unsigned int numofchars,
-                            double probsmall,
-                            Verboseinfo *verboseinfo);
+                            bool hashexceptions,
+                            Seqpos totallength);/* relevant for hashexception */
 
 void bcktab_showlog2info(const Bcktab *bcktab,Verboseinfo *verboseinfo);
 
@@ -98,7 +95,8 @@ unsigned long bcktab_specialsmaxbucketsize(const Bcktab *bcktab);
 
 unsigned long bcktab_nonspecialsmaxbucketsize(const Bcktab *bcktab);
 
-unsigned int bcktab_optimalnumofbits(const Bcktab *bcktab);
+unsigned int bcktab_optimalnumofbits(unsigned short *logofremaining,
+                                     const Bcktab *bcktab);
 
 unsigned int pfxidx2lcpvalues(unsigned int *minprefixindex,
                               uint8_t *lcpsubtab,
@@ -116,6 +114,8 @@ Codetype bcktab_numofallcodes(const Bcktab *bcktab);
 
 uint64_t sizeofbuckettable(unsigned int numofchars,
                            unsigned int prefixlength);
+
+void bcktab_leftborderpartialsums(Bcktab *bcktab,Seqpos numofsuffixestosort);
 
 #ifdef SKDEBUG
 void checkcountspecialcodes(const Bcktab *bcktab);

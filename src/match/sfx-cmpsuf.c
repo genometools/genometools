@@ -133,88 +133,6 @@ int comparetwosuffixes(const Encodedsequence *encseq,
   return retval;
 }
 
-#define COMPAREOFFSET   (LCPOVERFLOW + 1)
-
-static Seqpos extractsinglecharacter(const Encodedsequence *encseq,
-                                     bool fwd,
-                                     bool complement,
-                                     Seqpos pos,
-                                     Seqpos depth,
-                                     Seqpos totallength)
-{
-  Seqpos cc;
-
-  if (fwd)
-  {
-    if (pos + depth >= totallength)
-    {
-      cc = pos + depth + COMPAREOFFSET;
-    } else
-    {
-      cc = getencodedchar(encseq,pos + depth,Forwardmode);
-      if (ISSPECIAL(cc))
-      {
-        cc = pos + depth + COMPAREOFFSET;
-      } else
-      {
-        if (complement)
-        {
-          cc = COMPLEMENTBASE(cc);
-        }
-      }
-    }
-  } else
-  {
-    if (pos < depth)
-    {
-      cc = depth - pos + COMPAREOFFSET;
-    } else
-    {
-      cc = getencodedchar(encseq,pos - depth,Forwardmode);
-      if (ISSPECIAL(cc))
-      {
-        cc = pos - depth + COMPAREOFFSET;
-      } else
-      {
-        if (complement)
-        {
-          cc = COMPLEMENTBASE(cc);
-        }
-      }
-    }
-  }
-  return cc;
-}
-
-int comparewithonespecial(const Encodedsequence *encseq,
-                          bool fwd,
-                          bool complement,
-                          Seqpos pos1,
-                          Seqpos pos2,
-                          Seqpos depth)
-{
-  Seqpos cc1, cc2, totallength = getencseqtotallength(encseq);
-
-  cc1 = extractsinglecharacter(encseq,
-                               fwd,
-                               complement,
-                               pos1,
-                               depth,
-                               totallength);
-  cc2 = extractsinglecharacter(encseq,
-                               fwd,
-                               complement,
-                               pos2,
-                               depth,
-                               totallength);
-  gt_assert(cc1 != cc2);
-  if (!fwd && cc1 >= (Seqpos) COMPAREOFFSET && cc2 >= (Seqpos) COMPAREOFFSET)
-  {
-    return cc1 > cc2 ? -1 : 1;
-  }
-  return cc1 < cc2 ? -1 : 1;
-}
-
 static Seqpos derefcharboundaries(const Encodedsequence *encseq,
                                   bool fwd,
                                   bool complement,
@@ -260,7 +178,8 @@ int comparetwostrings(const Encodedsequence *encseq,
                       bool complement,
                       Seqpos *maxcommon,
                       Seqpos pos1,
-                      Seqpos pos2)
+                      Seqpos pos2,
+                      Seqpos maxdepth)
 {
   Seqpos currentoffset, maxoffset, cc1, cc2,
          totallength = getencseqtotallength(encseq);
@@ -270,17 +189,17 @@ int comparetwostrings(const Encodedsequence *encseq,
     gt_assert(pos1 < totallength);
     gt_assert(pos2 < totallength);
     maxoffset = MIN(totallength - pos1,totallength - pos2);
-    if (*maxcommon > 0)
-    {
-      maxoffset = MIN(*maxcommon,maxoffset);
-    }
   } else
   {
     maxoffset = MIN(pos1+1,pos2+1);
-    if (*maxcommon > 0)
-    {
-      maxoffset = MIN(*maxcommon,maxoffset);
-    }
+  }
+  if (*maxcommon > 0)
+  {
+    maxoffset = MIN(*maxcommon,maxoffset);
+  }
+  if (maxdepth > 0)
+  {
+    maxoffset = MIN(maxoffset,maxdepth);
   }
   for (currentoffset = 0; currentoffset <= maxoffset; currentoffset++)
   {
@@ -313,21 +232,34 @@ int comparetwostringsgeneric(const Encodedsequence *encseq,
                              Seqpos *maxcommon,
                              Seqpos pos1,
                              Seqpos pos2,
-                             Seqpos depth)
+                             Seqpos depth,
+                             Seqpos maxdepth)
 {
   Seqpos totallength = getencseqtotallength(encseq);
   int retval;
 
   if (fwd)
   {
-    if (pos1 + depth < totallength && pos2 + depth < totallength)
+    Seqpos endpos1, endpos2;
+
+    if (maxdepth == 0)
+    {
+      endpos1 = endpos2 = totallength;
+    } else
+    {
+      gt_assert(maxdepth >= depth);
+      endpos1 = MIN(pos1 + maxdepth,totallength);
+      endpos2 = MIN(pos2 + maxdepth,totallength);
+    }
+    if (pos1 + depth < endpos1 && pos2 + depth < endpos2)
     {
       retval = comparetwostrings(encseq,
                                  fwd,
                                  complement,
                                  maxcommon,
                                  pos1+depth,
-                                 pos2+depth);
+                                 pos2+depth,
+                                 maxdepth > 0 ? (maxdepth - depth) : 0);
     } else
     {
       retval = comparewithonespecial(encseq,
@@ -335,10 +267,15 @@ int comparetwostringsgeneric(const Encodedsequence *encseq,
                                      complement,
                                      pos1,
                                      pos2,
-                                     depth);
+                                     depth,
+                                     maxdepth);
     }
   } else
   {
+    if (maxdepth > 0)
+    {
+      gt_assert(false);
+    }
     if (pos1 >= depth && pos2 >= depth)
     {
       retval = comparetwostrings(encseq,
@@ -346,7 +283,8 @@ int comparetwostringsgeneric(const Encodedsequence *encseq,
                                  complement,
                                  maxcommon,
                                  pos1-depth,
-                                 pos2-depth);
+                                 pos2-depth,
+                                 maxdepth > 0 ? (maxdepth - depth) : 0);
     } else
     {
       retval = comparewithonespecial(encseq,
@@ -354,7 +292,8 @@ int comparetwostringsgeneric(const Encodedsequence *encseq,
                                      complement,
                                      pos1,
                                      pos2,
-                                     depth);
+                                     depth,
+                                     maxdepth);
     }
   }
   *maxcommon += depth;

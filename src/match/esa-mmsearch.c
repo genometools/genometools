@@ -31,7 +31,7 @@
 #include "esa-map.h"
 #include "echoseq.h"
 
-#include "sfx-apfxlen.pr"
+#include "sfx-apfxlen.h"
 
 #define COMPARE(OFFSET,LCPLEN)\
         sidx = (OFFSET) + (LCPLEN);\

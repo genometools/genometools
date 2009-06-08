@@ -17,7 +17,13 @@
 
 #ifndef INTCODE_DEF_H
 #define INTCODE_DEF_H
+#include "seqpos-def.h"
 #include <stdbool.h>
+
+#define PREFIXLENBITS   4
+#define CODEBITS        (32-PREFIXLENBITS)
+#define MAXPREFIXLENGTH ((1U << PREFIXLENBITS) - 1)
+#define MAXCODEVALUE    ((1U << CODEBITS) - 1)
 
 typedef unsigned long Codetype;      /* \Typedef{Codetype} */
 
@@ -28,5 +34,12 @@ typedef struct
   unsigned int specialpos;
   bool defined;
 } Firstspecialpos;
+
+typedef struct
+{
+  unsigned int maxprefixindex:PREFIXLENBITS;
+  unsigned int code:CODEBITS;
+  Seqpos position; /* get rid of this by using information from encseq */
+} Codeatposition;
 
 #endif

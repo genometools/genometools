@@ -275,7 +275,7 @@ GtUchar getencodedchar(const Encodedsequence *encseq,
     default:
       fprintf(stderr,"getencodedchar: readmode %d not implemented\n",
                      (int) readmode);
-      exit(EXIT_FAILURE); /* programming error */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
 
@@ -306,7 +306,7 @@ GtUchar getencodedcharnospecial(const Encodedsequence *encseq,
     default:
       fprintf(stderr,"getencodedcharnospecial: readmode %d not implemented\n",
                      (int) readmode);
-      exit(EXIT_FAILURE); /* programming error */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
 #endif
@@ -361,7 +361,7 @@ GtUchar sequentialgetencodedchar(const Encodedsequence *encseq,
     default:
       fprintf(stderr,"sequentialgetencodedchar: readmode %d not implemented\n",
                      (int) readmode);
-      exit(EXIT_FAILURE); /* programming error */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
 #endif
@@ -419,20 +419,7 @@ void encseqextract(GtUchar *buffer,
   unsigned long idx;
   Seqpos pos;
 
-  if (!(frompos <= topos))
-  {
-    fprintf(stderr,"failed assertion: frompos = "
-                   FormatSeqpos " <= " FormatSeqpos " = topos\n",
-             PRINTSeqposcast(frompos),PRINTSeqposcast(topos));
-    exit(EXIT_FAILURE); /* assertion failed */
-  }
-  if (!(topos < encseq->totallength))
-  {
-    fprintf(stderr,"failed assertion: topos = "
-                   FormatSeqpos " < " FormatSeqpos " = totallength\n",
-             PRINTSeqposcast(topos),PRINTSeqposcast(encseq->totallength));
-    exit(EXIT_FAILURE); /* assertion failed */
-  }
+  gt_assert(frompos <= topos && topos < encseq->totallength);
   esr = newEncodedsequencescanstate();
   initEncodedsequencescanstate(esr,encseq,Forwardmode,frompos);
   for (pos=frompos, idx = 0; pos <= topos; pos++, idx++)
@@ -756,7 +743,7 @@ static uint64_t localdetsizeencseq(Positionaccesstype sat,
          break;
     default:
          fprintf(stderr,"localdetsizeencseq(%d) undefined\n",(int) sat);
-         exit(EXIT_FAILURE); /* programming error */
+         exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   sum += sizeof (unsigned long); /* for sat type */
   sum += sizeof (totallength); /* for totallength */
@@ -870,6 +857,9 @@ static int determinesattype(Seqpos *specialranges,
 }
 #endif
 
+static unsigned long countcompareEncseqsequencesmaxdepth = 0;
+static unsigned long countcompareEncseqsequences = 0;
+
 void encodedsequence_free(Encodedsequence **encseqptr)
 {
   Encodedsequence *encseq = *encseqptr;
@@ -952,6 +942,12 @@ void encodedsequence_free(Encodedsequence **encseqptr)
   gt_free((Filelengthvalues *) encseq->filelengthtab);
   encseq->filelengthtab = NULL;
   FREESPACE(*encseqptr);
+/*
+  printf("countcompareEncseqsequencesmaxdepth = %lu\n",
+          countcompareEncseqsequencesmaxdepth);
+  printf("countcompareEncseqsequences= %lu\n",
+          countcompareEncseqsequences);
+*/
 }
 
 #define ADDTYPE(V)               uchar##V
@@ -1116,7 +1112,7 @@ static GtUchar delivercharViabytecompress(const Encodedsequence *encseq,
   }
   fprintf(stderr,"delivercharViabytecompress: cc=%lu\n not possible\n",
                   (unsigned long) cc);
-  exit(EXIT_FAILURE); /* programming error */
+  exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 
 /* generic for the case that there are no specialsymbols */
@@ -1368,7 +1364,7 @@ static Seqpos accessspecialpositions(const Encodedsequence *encseq,
   }
   fprintf(stderr,"accessspecialpositions(sat = %s is undefined)\n",
                   accesstype2name(encseq->sat));
-  exit(EXIT_FAILURE); /* programming error */
+  exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 
 static Seqpos accessspecialrangelength(const Encodedsequence *encseq,
@@ -1388,7 +1384,7 @@ static Seqpos accessspecialrangelength(const Encodedsequence *encseq,
   }
   fprintf(stderr,"accessspecialrangelength(sat = %s is undefined)\n",
                   accesstype2name(encseq->sat));
-  exit(EXIT_FAILURE); /* programming error */
+  exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 
 static unsigned long accessendspecialsubsUint(const Encodedsequence *encseq,
@@ -1409,7 +1405,7 @@ static unsigned long accessendspecialsubsUint(const Encodedsequence *encseq,
   }
   fprintf(stderr,"accessendspecialsubsUint(sat = %s is undefined)\n",
                   accesstype2name(encseq->sat));
-  exit(EXIT_FAILURE); /* programming error */
+  exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 
 #ifdef RANGEDEBUG
@@ -2253,7 +2249,7 @@ static unsigned int sat2maxspecialtype(Positionaccesstype sat)
   }
   fprintf(stderr,"sat2maxspecialtype(sat = %s is undefined)\n",
                   accesstype2name(sat));
-  exit(EXIT_FAILURE); /* programming error */
+  exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 
 static void addmarkpos(ArraySeqpos *asp,
@@ -2318,8 +2314,8 @@ static unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
       return numofrecords - 1;
     }
     fprintf(stderr,"getrecordnumSeqpos: cannot find position " FormatSeqpos,
-                  PRINTSeqposcast(position)); /* program error */
-    exit(EXIT_FAILURE); /* program failure */
+                  PRINTSeqposcast(position));
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   left = 0;
   right = numofrecords - 2;
@@ -2345,7 +2341,7 @@ static unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
   }
   fprintf(stderr,"getrecordnumSeqpos: cannot find position " FormatSeqpos,
                 PRINTSeqposcast(position));
-  exit(EXIT_FAILURE);
+  exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 
 unsigned long getencseqfrompos2seqnum(const Encodedsequence *encseq,
@@ -2426,7 +2422,7 @@ void checkmarkpos(const Encodedsequence *encseq)
           fprintf(stderr,"pos= " FormatSeqpos
                          " seqnum = %lu != %lu = currentseqnum\n",
                           PRINTSeqposcast(pos),seqnum,currentseqnum);
-          exit(EXIT_FAILURE); /* programming error */
+          exit(GT_EXIT_PROGRAMMING_ERROR);
         }
       }
     }
@@ -2519,7 +2515,7 @@ typedef struct
 #define NEXTFREAD(VAL)\
         if (!haserr)\
         {\
-          int ret;\
+          size_t ret;\
           ret = fread(&(VAL),sizeof (VAL), (size_t) 1, fp);\
           if (ferror(fp))\
           {\
@@ -3123,7 +3119,7 @@ void checkallsequencedescriptions(const Encodedsequence *encseq)
   if (strncmp(copydestab,encseq->destab,(size_t) totaldesclength) != 0)
   {
     fprintf(stderr,"different descriptions\n");
-    exit(EXIT_FAILURE); /* Programm error */
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   FREESPACE(copydestab);
 }
@@ -3338,7 +3334,28 @@ static inline Bitsequence revextractspecialbits(const Bitsequence *specialbits,
   }
 }
 
+static inline unsigned int numberoftrailingzeros32 (uint32_t x)
+{
+  static const unsigned int MultiplyDeBruijnBitPosition[32] =
+  {
+    0, 1U, 28U, 2U, 29U, 14U, 24U, 3U, 30U, 22U, 20U, 15U, 25U, 17U, 4U, 8U,
+    31U, 27U, 13U, 23U, 21U, 19U, 16U, 7U, 26U, 12U, 18U, 6U, 11U, 5U, 10U, 9U
+  };
+  return MultiplyDeBruijnBitPosition[
+                 ((x & -(int) x) * (uint32_t) 0x077CB531U) >> 27];
+}
+
 #ifdef _LP64
+
+static inline unsigned int numberoftrailingzeros (Bitsequence x)
+{
+  if (x & LASTHALVEBITS)
+  {
+    return numberoftrailingzeros32 ((uint32_t) (x & LASTHALVEBITS));
+  }
+  return 32 + numberoftrailingzeros32 ((uint32_t) (x >> 32));
+}
+
 static inline int requiredUIntBits(Bitsequence v)
 {
   int r;
@@ -3361,6 +3378,11 @@ static inline int requiredUIntBits(Bitsequence v)
 }
 #else
 
+static inline unsigned int numberoftrailingzeros (Bitsequence x)
+{
+  return numberoftrailingzeros32 (x);
+}
+
 static inline int requiredUIntBits(Bitsequence v)
 {
   int r;
@@ -3374,66 +3396,8 @@ static inline int requiredUIntBits(Bitsequence v)
   v |= v >> 8;
   v |= v >> 16;
   v = (v >> 1) + 1;
-  r = MultiplyDeBruijnBitPosition[(v * (Bitsequence) 0x077CB531UL) >> 27];
+  r = MultiplyDeBruijnBitPosition[(v * (Bitsequence) 0x077CB531U) >> 27];
   return r;
-}
-
-#endif
-
-/*
-  Compute number of trailing zeros in a word.
-   http://www.hackersdelight.org/HDcode/ntz.c
-*/
-
-#define FIRSTVERSION
-#ifdef FIRSTVERSION
-
-static inline unsigned int numberoftrailingzeros32 (uint32_t x)
-{
-  uint32_t y;
-  unsigned int bz, b4, b3, b2, b1, b0;
-
-  y = x & -x;                          /* Isolate rightmost 1-bit. */
-  bz = y ? 0 : 1U;                     /* 1 if y = 0. */
-  b4 = (y & 0x0000FFFF) ? 0 : 16U;
-  b3 = (y & 0x00FF00FF) ? 0 :  8U;
-  b2 = (y & 0x0F0F0F0F) ? 0 :  4U;
-  b1 = (y & 0x33333333) ? 0 :  2U;
-  b0 = (y & 0x55555555) ? 0 :  1U;
-  return bz + b4 + b3 + b2 + b1 + b0;
-}
-#else
-
-static inline unsigned int numberoftrailingzeros32 (uint32_t x)
-{
-  int r;
-  static const int MultiplyDeBruijnBitPosition[32] =
-  {
-    0, 1, 28, 2, 29, 14, 24, 3, 30, 22, 20, 15, 25, 17, 4, 8,
-    31, 27, 13, 23, 21, 19, 16, 7, 26, 12, 18, 6, 11, 5, 10, 9
-  };
-  gt_assert((((x & -x) * 0x077CB531UL) >> 27) < 32);
-  r = MultiplyDeBruijnBitPosition[((x & -x) * 0x077CB531UL) >> 27];
-  return (unsigned int) r;
-}
-
-#endif
-
-#ifdef _LP64
-static inline unsigned int numberoftrailingzeros (Bitsequence x)
-{
-  if (x & LASTHALVEBITS)
-  {
-    return numberoftrailingzeros32 ((uint32_t) (x & LASTHALVEBITS));
-  }
-  return 32 + numberoftrailingzeros32 ((uint32_t) (x >> 32));
-}
-
-#else
-
-static inline unsigned int numberoftrailingzeros (Bitsequence x)
-{
-  return numberoftrailingzeros32 (x);
 }
 
 #endif
@@ -3752,6 +3716,103 @@ int compareTwobitencodings(bool fwd,
   return 0;
 }
 
+static Seqpos extractsinglecharacter(const Encodedsequence *encseq,
+                                     bool fwd,
+                                     bool complement,
+                                     Seqpos pos,
+                                     Seqpos depth,
+                                     Seqpos totallength,
+                                     Seqpos maxdepth)
+{
+  Seqpos cc;
+
+  if (fwd)
+  {
+    Seqpos endpos;
+
+    if (maxdepth > 0)
+    {
+      endpos = pos+maxdepth;
+      if (endpos > totallength)
+      {
+        endpos = totallength;
+      }
+    } else
+    {
+      endpos = totallength;
+    }
+    if (pos + depth >= endpos)
+    {
+      cc = pos + depth + COMPAREOFFSET;
+    } else
+    {
+      cc = getencodedchar(encseq,pos + depth,Forwardmode);
+      if (ISSPECIAL(cc))
+      {
+        cc = pos + depth + COMPAREOFFSET;
+      } else
+      {
+        if (complement)
+        {
+          cc = COMPLEMENTBASE(cc);
+        }
+      }
+    }
+  } else
+  {
+    if (pos < depth)
+    {
+      cc = depth - pos + COMPAREOFFSET;
+    } else
+    {
+      cc = getencodedchar(encseq,pos - depth,Forwardmode);
+      if (ISSPECIAL(cc))
+      {
+        cc = pos - depth + COMPAREOFFSET;
+      } else
+      {
+        if (complement)
+        {
+          cc = COMPLEMENTBASE(cc);
+        }
+      }
+    }
+  }
+  return cc;
+}
+
+int comparewithonespecial(const Encodedsequence *encseq,
+                          bool fwd,
+                          bool complement,
+                          Seqpos pos1,
+                          Seqpos pos2,
+                          Seqpos depth,
+                          Seqpos maxdepth)
+{
+  Seqpos cc1, cc2, totallength = getencseqtotallength(encseq);
+
+  cc1 = extractsinglecharacter(encseq,
+                               fwd,
+                               complement,
+                               pos1,
+                               depth,
+                               totallength,
+                               maxdepth);
+  cc2 = extractsinglecharacter(encseq,
+                               fwd,
+                               complement,
+                               pos2,
+                               depth,
+                               totallength,
+                               maxdepth);
+  gt_assert(cc1 != cc2);
+  if (!fwd && cc1 >= (Seqpos) COMPAREOFFSET && cc2 >= (Seqpos) COMPAREOFFSET)
+  {
+    return cc1 > cc2 ? -1 : 1;
+  }
+  return cc1 < cc2 ? -1 : 1;
+}
+
 int compareEncseqsequences(Seqpos *lcp,
                            const Encodedsequence *encseq,
                            bool fwd,
@@ -3766,6 +3827,7 @@ int compareEncseqsequences(Seqpos *lcp,
   unsigned int commonunits;
   int retval;
 
+  countcompareEncseqsequences++;
   gt_assert(pos1 != pos2);
   if (!fwd)
   {
@@ -3810,7 +3872,8 @@ int compareEncseqsequences(Seqpos *lcp,
                                        complement,
                                        pos1,
                                        pos2,
-                                       depth);
+                                       depth,
+                                       0);
       }
     } else
     {
@@ -3828,7 +3891,8 @@ int compareEncseqsequences(Seqpos *lcp,
                                        complement,
                                        pos1,
                                        pos2,
-                                       depth);
+                                       depth,
+                                       0);
       }
     }
   } while (retval == 0);
@@ -3857,7 +3921,154 @@ int compareEncseqsequences(Seqpos *lcp,
                       (unsigned int) depth,
                       (unsigned int) lcp,
                       (unsigned int) lcp2);
-      exit(EXIT_FAILURE); /* assertion failed */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
+    }
+    gt_assert(*lcp == lcp2);
+  }
+#endif
+  return retval;
+}
+
+int compareEncseqsequencesmaxdepth(Seqpos *lcp,
+                                   const Encodedsequence *encseq,
+                                   bool fwd,
+                                   bool complement,
+                                   Encodedsequencescanstate *esr1,
+                                   Encodedsequencescanstate *esr2,
+                                   Seqpos pos1,
+                                   Seqpos pos2,
+                                   Seqpos depth,
+                                   Seqpos maxdepth)
+{
+  EndofTwobitencoding ptbe1, ptbe2;
+  unsigned int commonunits;
+  int retval;
+  Seqpos endpos1, endpos2;
+
+  countcompareEncseqsequencesmaxdepth++;
+  gt_assert(pos1 != pos2);
+  gt_assert(depth < maxdepth);
+  if (fwd)
+  {
+    endpos1 = pos1 + maxdepth;
+    if (endpos1 > encseq->totallength)
+    {
+      endpos1 = encseq->totallength;
+    }
+    endpos2 = pos2 + maxdepth;
+    if (endpos2 > encseq->totallength)
+    {
+      endpos2 = encseq->totallength;
+    }
+  } else
+  {
+    pos1 = REVERSEPOS(encseq->totallength,pos1);
+    pos2 = REVERSEPOS(encseq->totallength,pos2);
+    endpos1 = endpos2 = 0;
+  }
+  if (encseq->numofspecialstostore > 0)
+  {
+    if (fwd)
+    {
+      if (pos1 + depth < endpos1 && pos2 + depth < endpos2)
+      {
+        initEncodedsequencescanstategeneric(esr1,encseq,true,pos1 + depth);
+        initEncodedsequencescanstategeneric(esr2,encseq,true,pos2 + depth);
+      }
+    } else
+    {
+      if (pos1 >= depth && pos2 >= depth)
+      {
+        initEncodedsequencescanstategeneric(esr1,encseq,false,pos1 - depth);
+        initEncodedsequencescanstategeneric(esr2,encseq,false,pos2 - depth);
+      }
+    }
+  }
+  do
+  {
+    if (fwd)
+    {
+      if (pos1 + depth < endpos1 && pos2 + depth < endpos2)
+      {
+        fwdextract2bitenc(&ptbe1,encseq,esr1,pos1 + depth);
+        fwdextract2bitenc(&ptbe2,encseq,esr2,pos2 + depth);
+        retval = compareTwobitencodings(true,complement,&commonunits,
+                                        &ptbe1,&ptbe2);
+        if (depth + commonunits < maxdepth)
+        {
+          depth += commonunits;
+        } else
+        {
+          depth = maxdepth;
+          retval = 0;
+          break;
+        }
+      } else
+      {
+        retval = comparewithonespecial(encseq,
+                                       true,
+                                       complement,
+                                       pos1,
+                                       pos2,
+                                       depth,
+                                       maxdepth);
+      }
+    } else
+    {
+      if (pos1 >= depth && pos2 >= depth)
+      {
+        revextract2bitenc(&ptbe1,encseq,esr1,pos1 - depth);
+        revextract2bitenc(&ptbe2,encseq,esr2,pos2 - depth);
+        retval = compareTwobitencodings(false,complement,&commonunits,
+                                        &ptbe1,&ptbe2);
+        if (depth + commonunits < maxdepth)
+        {
+          depth += commonunits;
+        } else
+        {
+          depth = maxdepth;
+          retval = 0;
+          break;
+        }
+      } else
+      {
+        retval = comparewithonespecial(encseq,
+                                       false,
+                                       complement,
+                                       pos1,
+                                       pos2,
+                                       depth,
+                                       maxdepth);
+      }
+    }
+  } while (retval == 0);
+  *lcp = depth;
+#undef FASTCOMPAREDEBUG
+#ifdef FASTCOMPAREDEBUG
+  {
+    Seqpos lcp2 = 0;
+    int retval2;
+
+    retval2 = comparetwostringsgeneric(encseq,
+                                       fwd,
+                                       complement,
+                                       &lcp2,
+                                       pos1,
+                                       pos2,
+                                       depth,
+                                       maxdepth);
+    gt_assert(retval == retval2);
+    if (*lcp != lcp2)
+    {
+      fprintf(stderr,"line %d: pos1 = %u, pos2 = %u, depth = %u, "
+                     "lcp = %u != %u = lcp2\n",
+                      __LINE__,
+                      (unsigned int) pos1,
+                      (unsigned int) pos2,
+                      (unsigned int) depth,
+                      (unsigned int) lcp,
+                      (unsigned int) lcp2);
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     gt_assert(*lcp == lcp2);
   }
@@ -4169,7 +4380,7 @@ void checkextractunitatpos(const Encodedsequence *encseq,
               PRINTSeqposcast(startpos),
               ptbe1.unitsnotspecial,ptbe2.unitsnotspecial);
       showsequenceatstartpos(stderr,fwd,complement,encseq,startpos);
-      exit(EXIT_FAILURE);
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     if (!checktbe(fwd,ptbe1.tbe,ptbe2.tbe,ptbe1.unitsnotspecial))
     {
@@ -4178,7 +4389,7 @@ void checkextractunitatpos(const Encodedsequence *encseq,
                       complement ? "true" : "false",
                       PRINTSeqposcast(startpos));
       showsequenceatstartpos(stderr,fwd,complement,encseq,startpos);
-      exit(EXIT_FAILURE);
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     if (fwd)
     {
@@ -4237,7 +4448,7 @@ void checkextractspecialbits(const Encodedsequence *encseq,bool fwd)
                      PRINTSeqposcast(startpos),unitsnotspecial,buffer);
       bitsequence2string(buffer,spbits1);
       fprintf(stderr,"     %s=fast\n",buffer);
-      exit(EXIT_FAILURE);
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     if (fwd)
     {
@@ -4276,7 +4487,7 @@ void multicharactercompare_withtest(const Encodedsequence *encseq,
   extract2bitenc(fwd,&ptbe2,encseq,esr2,pos2);
   ret1 = compareTwobitencodings(fwd,complement,&commonunits1,&ptbe1,&ptbe2);
   commonunits2 = (Seqpos) UNITSIN2BITENC;
-  ret2 = comparetwostrings(encseq,fwd,complement,&commonunits2,pos1,pos2);
+  ret2 = comparetwostrings(encseq,fwd,complement,&commonunits2,pos1,pos2,0);
   if (ret1 != ret2 || (Seqpos) commonunits1 != commonunits2)
   {
     char buf1[INTWORDSIZE+1], buf2[INTWORDSIZE+1];
@@ -4295,43 +4506,48 @@ void multicharactercompare_withtest(const Encodedsequence *encseq,
     showsequenceatstartpos(stderr,fwd,complement,encseq,pos2);
     bitsequence2string(buf2,ptbe2.tbe);
     fprintf(stderr,"v2=%s(unitsnotspecial=%u)\n",buf2,ptbe2.unitsnotspecial);
-    exit(EXIT_FAILURE);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
 
 Codetype extractprefixcode(unsigned int *unitsnotspecial,
                            const Encodedsequence *encseq,
+                           const Codetype *filltable,
+                           Readmode readmode,
+                           Encodedsequencescanstate *esr,
                            const Codetype **multimappower,
                            Seqpos frompos,
-                           unsigned int len)
+                           unsigned int prefixlength)
 {
-  Seqpos pos;
+  Seqpos pos, stoppos;
   Codetype code = 0;
   GtUchar cc;
 
-  gt_assert(len > 0);
-  gt_assert(!possibletocmpbitwise(encseq));
-  for (pos=frompos, *unitsnotspecial = 0;
-       pos < encseq->totallength && *unitsnotspecial < len;
-       pos++, (*unitsnotspecial)++)
+  gt_assert(prefixlength > 0);
+  *unitsnotspecial = 0;
+  if (frompos + prefixlength - 1 < encseq->totallength)
   {
-    if (encseq->sat == Viadirectaccess)
-    {
-      cc = encseq->plainseq[pos];
-    } else
-    {
-      cc = delivercharViabytecompress(encseq,pos);
-    }
-    /*
-    printf("cc=%u\n",(unsigned int) cc);
-    */
+    stoppos = frompos + prefixlength;
+  } else
+  {
+    stoppos = encseq->totallength;
+  }
+  initEncodedsequencescanstate(esr,encseq,readmode,frompos);
+  for (pos=frompos; pos < stoppos; pos++)
+  {
+    cc = sequentialgetencodedchar(encseq,esr,pos,readmode);
     if (ISNOTSPECIAL(cc))
     {
       code += multimappower[*unitsnotspecial][cc];
+      (*unitsnotspecial)++;
     } else
     {
       break;
     }
+  }
+  if (*unitsnotspecial < prefixlength)
+  {
+    code |= (Codetype) filltable[*unitsnotspecial];
   }
   return code;
 }

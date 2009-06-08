@@ -198,10 +198,10 @@ double gt_graphics_get_text_height(GtGraphics *g)
   return g->c_class->get_text_height(g);
 }
 
-double gt_graphics_get_text_width(GtGraphics *g, const char *txt)
+double gt_graphics_get_text_width(GtGraphics *g, const char *text)
 {
-  gt_assert(g && g->c_class && txt);
-  return g->c_class->get_text_width(g, txt);
+  gt_assert(g && g->c_class && text);
+  return g->c_class->get_text_width(g, text);
 }
 
 int gt_graphics_set_background_color(GtGraphics *g, GtColor color)
@@ -303,13 +303,13 @@ void gt_graphics_draw_caret(GtGraphics *g, double x, double y, double width,
 }
 
 void gt_graphics_draw_rectangle(GtGraphics *g, double x, double y,
-                                bool filled, GtColor fill_color, bool outlined,
-                                GtColor outline_color, double outline_width,
+                                bool filled, GtColor fill_color, bool stroked,
+                                GtColor stroke_color, double stroke_width,
                                 double width, double height)
 {
   gt_assert(g && g->c_class);
-  g->c_class->draw_rectangle(g, x, y, filled, fill_color, outlined,
-                             outline_color, outline_width, width, height);
+  g->c_class->draw_rectangle(g, x, y, filled, fill_color, stroked,
+                             stroke_color, stroke_width, width, height);
 }
 
 void gt_graphics_draw_arrowhead(GtGraphics *g, double x, double y,

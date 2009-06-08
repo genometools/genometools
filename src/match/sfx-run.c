@@ -41,7 +41,7 @@
 
 #include "sfx-opt.pr"
 #include "sfx-outprj.pr"
-#include "sfx-apfxlen.pr"
+#include "sfx-apfxlen.h"
 
 #include "eis-encidxseq.h"
 #include "eis-bwtseq-construct.h"
@@ -202,7 +202,7 @@ static int suffixeratorwithoutput(const GtStr *str_indexname,
   const Seqpos *suftabptr;
   Seqpos numberofsuffixes;
   bool haserr = false, specialsuffixes = false;
-  Sfxiterator *sfi;
+  Sfxiterator *sfi = NULL;
 
   sfi = newSfxiterator(encseq,
                        readmode,

@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "core/array.h"
 #include "core/assert_api.h"
 #include "core/cstr.h"
 #include "core/hashmap.h"

@@ -26,6 +26,6 @@
 typedef struct GtLineBreakerBases GtLineBreakerBases;
 
 const GtLineBreakerClass* gt_line_breaker_bases_class(void);
-GtLineBreaker*            gt_line_breaker_bases_new();
+GtLineBreaker*            gt_line_breaker_bases_new(void);
 
 #endif

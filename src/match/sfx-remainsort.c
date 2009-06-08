@@ -19,13 +19,13 @@
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
-#include "core/queue.h"
 #include "core/chardef.h"
 #include "core/ma_api.h"
 #include "core/arraydef.h"
 #include "core/fa.h"
 #include "core/qsort_r.h"
 #include "core/hashmap-generic.h"
+#include "core/minmax.h"
 #include "seqpos-def.h"
 #include "encseq-def.h"
 #include "intbits-tab.h"
@@ -34,8 +34,7 @@
 #include "sfx-remainsort.h"
 #include "sfx-linlcp.h"
 #include "stamp.h"
-
-#include "initbasepower.pr"
+#include "initbasepower.h"
 
 #define PAGESIZE 4096
 #define SUFINMEM(SORTBLOCK) ((SORTBLOCK)->mmapfiledesc == -1 ? true : false)
@@ -59,6 +58,10 @@ typedef struct
          right,
          base;
 } Pairsuffixptrwithbase;
+
+typedef Pairsuffixptrwithbase Inl_Queueelem;
+
+#include "queue-inline.h"
 
 typedef struct
 {
@@ -113,11 +116,10 @@ typedef struct
 struct Rmnsufinfo
 {
   Compressedtable *inversesuftab;
-  bool hashexceptions,
-       absoluteinversesuftab;
+  bool absoluteinversesuftab;
   Inversesuftab_rel itvrel;
   Sortblock sortblock;
-  GtQueue *rangestobesorted;
+  Inl_Queue *rangestobesorted;
   Seqpos currentdepth;
   const Bcktab *bcktab;
   Codetype maxcode;
@@ -130,7 +132,6 @@ struct Rmnsufinfo
   unsigned long firstgenerationtotalwidth,
                 firstgenerationcount;
   Firstwithnewdepth firstwithnewdepth;
-  Pairsuffixptrwithbase *unusedpair;
   Encodedsequencescanstate *esr;
   Seqpos longestrel;
   unsigned int prefixlength,
@@ -233,13 +234,38 @@ static Seqpos frompos2rank(const Lowerboundwithrank *leftptr,
   }
   fprintf(stderr,"frompos2rank: cannot find pos " FormatSeqpos
                  " in ranges",PRINTSeqposcast(specialpos));
-  exit(EXIT_FAILURE);
+  exit(GT_EXIT_PROGRAMMING_ERROR);
   /*@ignore@*/
   return 0;
   /*@end@*/
 }
 
 #endif
+
+extern uint32_t
+gt_ht_seqpos_elem_hash(const void *elem)
+{
+#ifdef Seqposequalsunsignedint
+  return gt_uint32_key_mul_hash((uint32_t) *((Seqpos *) elem));
+#else
+  return gt_uint64_key_mul_hash((uint64_t) *((Seqpos *) elem));
+#endif
+}
+
+static inline int gt_ht_seqpos_cmp(Seqpos a, Seqpos b)
+{
+  return (int) (a > b) - (int) (a < b);
+}
+
+static inline int gt_ht_seqpos_elem_cmp(const void *elemA, const void *elemB)
+{
+  return gt_ht_seqpos_cmp(*(Seqpos *)elemA, *(Seqpos *)elemB);
+}
+
+DECLARE_HASHMAP(Seqpos, seqpos, unsigned long, ul, static, inline)
+DEFINE_HASHMAP(Seqpos, seqpos, unsigned long, ul, gt_ht_seqpos_elem_hash,
+               gt_ht_seqpos_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR,
+               static, inline)
 
 Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                           int mmapfiledesc,
@@ -250,7 +276,7 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                           unsigned int prefixlength,
                           Readmode readmode,
                           Seqpos partwidth,
-                          const Defineddouble *probsmall,
+                          bool hashexceptions,
                           bool absoluteinversesuftab)
 {
   Rmnsufinfo *rmnsufinfo;
@@ -276,23 +302,19 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   rmnsufinfo->currentdepth = 0;
   rmnsufinfo->firstgenerationtotalwidth = 0;
   rmnsufinfo->firstgenerationcount = 0;
-  rmnsufinfo->unusedpair = NULL;
   rmnsufinfo->inversesuftab = NULL;
   rmnsufinfo->absoluteinversesuftab = absoluteinversesuftab;
-  rmnsufinfo->itvrel.hashstore = NULL;
   /*
-  printf("probsmall->defined=%s\n",(probsmall != NULL && probsmall->defined)
-                                   ? "true" : "false");
   printf("sufinmem=%s\n",SUFINMEM(&rmnsufinfo->sortblock) ? "true" : "false");
   printf("absoluteinversesuftab=%s\n",
           absoluteinversesuftab ? "true" : "false");
   */
   if (rmnsufinfo->absoluteinversesuftab)
   {
-    rmnsufinfo->hashexceptions = false;
     rmnsufinfo->itvrel.maxvalue = 0;
     rmnsufinfo->itvrel.offset = NULL;
     rmnsufinfo->allocateditvinfo = 0;
+    rmnsufinfo->itvrel.hashstore = NULL;
   } else
   {
     determinemaxbucketsize(bcktab,
@@ -300,32 +322,34 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                            maxcode,
                            partwidth,
                            numofchars,
-                           (probsmall == NULL || !probsmall->defined)
-                           ? 1.0 : probsmall->valuedouble,
-                           NULL);
+                           hashexceptions,
+                           hashexceptions ? rmnsufinfo->totallength : 0);
     rmnsufinfo->allocateditvinfo = bcktab_nonspecialsmaxbucketsize(bcktab);
-    if (probsmall != NULL && probsmall->defined &&
-        gt_double_smaller_double(probsmall->valuedouble,(double) 1.0))
+    if (hashexceptions)
     {
       unsigned int optimalnumofbits;
+      unsigned short logofremaining;
 
-      optimalnumofbits = bcktab_optimalnumofbits(bcktab);
+      optimalnumofbits = bcktab_optimalnumofbits(&logofremaining,bcktab);
       rmnsufinfo->itvrel.offset
         = compressedtablebits_new(rmnsufinfo->totallength+1,optimalnumofbits);
       rmnsufinfo->itvrel.maxvalue
         = compressedtable_maxvalue(rmnsufinfo->itvrel.offset);
-      rmnsufinfo->hashexceptions = true;
+      rmnsufinfo->itvrel.hashstore
+        = seqpos_ul_gt_hashmap_new_with_start_size(logofremaining);
+      printf("logofremaining=%hu\n",logofremaining);
     } else
     {
-      rmnsufinfo->hashexceptions = false;
       rmnsufinfo->itvrel.maxvalue = (Seqpos) rmnsufinfo->allocateditvinfo;
       rmnsufinfo->itvrel.offset
         = compressedtable_new(rmnsufinfo->totallength+1,
                               rmnsufinfo->itvrel.maxvalue);
+      rmnsufinfo->itvrel.hashstore = NULL;
     }
   }
   /*
-  printf("hashexceptions=%s\n",rmnsufinfo->hashexceptions ? "true" : "false");
+  printf("hashexceptions=%s\n",(rmnsufinfo->itvrel.hashstore != NULL)
+                               ? "true" : "false");
   */
 #ifdef ITVDEBUG
   if (!rmnsufinfo->absoluteinversesuftab)
@@ -336,14 +360,8 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
 #endif
   rmnsufinfo->itvinfo = NULL;
   rmnsufinfo->itvfullinfo = NULL;
-  rmnsufinfo->rangestobesorted = gt_queue_new();
-  if (possibletocmpbitwise(encseq))
-  {
-    rmnsufinfo->multimappower = NULL;
-  } else
-  {
-    rmnsufinfo->multimappower = bcktab_multimappower(bcktab);
-  }
+  rmnsufinfo->rangestobesorted = gt_inl_queue_new(MAX(16UL,DIV2(maxcode)));
+  rmnsufinfo->multimappower = bcktab_multimappower(bcktab);
   rmnsufinfo->esr = newEncodedsequencescanstate();
   GT_INITARRAY(&rmnsufinfo->firstgeneration,Pairsuffixptr);
   rmnsufinfo->realspecialranges = getencseqrealspecialranges(encseq);
@@ -404,59 +422,29 @@ static void inversesuftab_set(Rmnsufinfo *rmnsufinfo,Seqpos idx,Seqpos value)
   compressedtable_update(rmnsufinfo->inversesuftab,idx,value);
 }
 
-extern uint32_t
-gt_ht_seqpos_elem_hash(const void *elem)
-{
-#ifdef Seqposequalsunsignedint
-  return gt_uint32_key_mul_hash((uint32_t) *((Seqpos *) elem));
-#else
-  return gt_uint64_key_mul_hash((uint64_t) *((Seqpos *) elem));
-#endif
-}
-
-static inline int gt_ht_seqpos_cmp(Seqpos a, Seqpos b)
-{
-  return (int) (a > b) - (int) (a < b);
-}
-
-static inline int gt_ht_seqpos_elem_cmp(const void *elemA, const void *elemB)
-{
-  return gt_ht_seqpos_cmp(*(Seqpos *)elemA, *(Seqpos *)elemB);
-}
-
-DECLARE_HASHMAP(Seqpos, seqpos, unsigned long, ul, static, inline)
-DEFINE_HASHMAP(Seqpos, seqpos, unsigned long, ul, gt_ht_seqpos_elem_hash,
-               gt_ht_seqpos_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR, static,
-               inline)
-
-unsigned long largebasedist_get(GtHashtable *h, Seqpos key)
+static unsigned long largebasedist_get(GtHashtable *htab, Seqpos key)
 {
   unsigned long *valueptr;
 
-  gt_assert(h != NULL);
-  valueptr = seqpos_ul_gt_hashmap_get(h, key);
+  gt_assert(htab != NULL);
+  valueptr = seqpos_ul_gt_hashmap_get(htab, key);
   gt_assert(valueptr != NULL);
   return *valueptr;
 }
 
-static void largebasedist_add(GtHashtable **h, Seqpos key,
+static void largebasedist_add(GtHashtable *htab, Seqpos key,
                               unsigned long basedist)
 {
   unsigned long *valueptr;
-  GtHashtable *htab;
 
-  if (*h == NULL)
-  {
-    *h = seqpos_ul_gt_hashmap_new();
-  }
-  htab = *h;
+  gt_assert(htab != NULL);
   valueptr = seqpos_ul_gt_hashmap_get(htab, key);
-  if (valueptr == NULL)
-  {
-    seqpos_ul_gt_hashmap_add(htab, key, basedist);
-  } else
+  if (valueptr != NULL)
   {
     (*valueptr) = basedist;
+  } else
+  {
+    seqpos_ul_gt_hashmap_add(htab, key, basedist);
   }
 }
 
@@ -465,11 +453,12 @@ static void inversesuftabrel_set(Rmnsufinfo *rmnsufinfo,Seqpos idx,
 {
   Seqpos basedist = (Seqpos) (value-base);
 
+#ifndef NDEBUG
   if (value < base)
   {
     fprintf(stderr,"value = %lu < %lu = base\n",
                     (unsigned long) value,(unsigned long) base);
-    exit(EXIT_FAILURE);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   if (value != base && value >= base + rmnsufinfo->allocateditvinfo)
   {
@@ -478,10 +467,11 @@ static void inversesuftabrel_set(Rmnsufinfo *rmnsufinfo,Seqpos idx,
                     (unsigned long) base,
                     rmnsufinfo->allocateditvinfo,
                     (unsigned long) base+rmnsufinfo->allocateditvinfo);
-    exit(EXIT_FAILURE);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
+#endif
   basedist = (Seqpos) (value-base);
-  if (rmnsufinfo->hashexceptions)
+  if (rmnsufinfo->itvrel.hashstore != NULL)
   {
 
     if (basedist < rmnsufinfo->itvrel.maxvalue)
@@ -491,7 +481,7 @@ static void inversesuftabrel_set(Rmnsufinfo *rmnsufinfo,Seqpos idx,
     {
       compressedtable_update(rmnsufinfo->itvrel.offset,idx,
                              rmnsufinfo->itvrel.maxvalue);
-      largebasedist_add(&rmnsufinfo->itvrel.hashstore,idx,
+      largebasedist_add(rmnsufinfo->itvrel.hashstore,idx,
                         (unsigned long) basedist);
     }
   } else
@@ -534,7 +524,7 @@ static Seqpos frompos2rank(const Lowerboundwithrank *leftptr,
   }
   fprintf(stderr,"frompos2rank: cannot find pos " FormatSeqpos
                  " in ranges",PRINTSeqposcast(specialpos));
-  exit(EXIT_FAILURE);
+  exit(GT_EXIT_PROGRAMMING_ERROR);
   /*@ignore@*/
   return 0;
   /*@end@*/
@@ -568,46 +558,14 @@ static void inversesuftabrel_get(Itvfullentry *itvfullentry,
     itvfullentry->rank = rmnsufinfo->totallength;
     return;
   }
-  if (possibletocmpbitwise(rmnsufinfo->encseq))
-  {
-    EndofTwobitencoding etbe;
-    bool fwd = ISDIRREVERSE(rmnsufinfo->readmode) ? false : true;
-
-    initEncodedsequencescanstategeneric(rmnsufinfo->esr,rmnsufinfo->encseq,
-                                        fwd,startpos);
-    extract2bitenc(fwd,&etbe,rmnsufinfo->encseq,rmnsufinfo->esr,startpos);
-    if (etbe.unitsnotspecial >= rmnsufinfo->prefixlength)
-    {
-      code = (Codetype) (etbe.tbe >>
-                         MULT2(UNITSIN2BITENC - rmnsufinfo->prefixlength));
-      itvfullentry->unitsnotspecial = rmnsufinfo->prefixlength;
-    } else /* etbe.unitsnotspecial < rmnsufinfo->prefixlength */
-    {
-      if (etbe.unitsnotspecial > 0)
-      {
-        code = (Codetype)
-               (etbe.tbe >> MULT2(UNITSIN2BITENC - rmnsufinfo->prefixlength))
-               | rmnsufinfo->filltable[etbe.unitsnotspecial];
-        itvfullentry->unitsnotspecial = etbe.unitsnotspecial;
-      } else
-      {
-        code = 0;
-        itvfullentry->unitsnotspecial = 0;
-      }
-    }
-  } else
-  {
-    code = extractprefixcode(&itvfullentry->unitsnotspecial,
-                             rmnsufinfo->encseq,
-                             rmnsufinfo->multimappower,
-                             startpos,
-                             rmnsufinfo->prefixlength);
-    if (itvfullentry->unitsnotspecial > 0 &&
-        itvfullentry->unitsnotspecial < rmnsufinfo->prefixlength)
-    {
-      code |= (Codetype) rmnsufinfo->filltable[itvfullentry->unitsnotspecial];
-    }
-  }
+  code = extractprefixcode(&itvfullentry->unitsnotspecial,
+                           rmnsufinfo->encseq,
+                           rmnsufinfo->filltable,
+                           rmnsufinfo->readmode,
+                           rmnsufinfo->esr,
+                           rmnsufinfo->multimappower,
+                           startpos,
+                           rmnsufinfo->prefixlength);
   /*
   printf("startpos=%lu,unitsnotspecial=%u,code=%u\n",
           (unsigned long) startpos,
@@ -619,14 +577,6 @@ static void inversesuftabrel_get(Itvfullentry *itvfullentry,
     itvfullentry->rank = rmnsufinfo->partwidth;
   } else
   {
-    if (code > rmnsufinfo->maxcode)
-    {
-      fprintf(stderr,"unitsnotspecial = %lu, code = %lu > %lu = maxcode\n",
-                     (unsigned long) itvfullentry->unitsnotspecial,
-                     (unsigned long) code,
-                     (unsigned long) rmnsufinfo->maxcode);
-      exit(EXIT_FAILURE);
-    }
     gt_assert(code <= rmnsufinfo->maxcode);
     (void) calcbucketboundsparts(&bucketspec,
                                  rmnsufinfo->bcktab,
@@ -643,7 +593,7 @@ static void inversesuftabrel_get(Itvfullentry *itvfullentry,
 #endif
       itvfullentry->rank
         = compressedtable_get(rmnsufinfo->itvrel.offset,startpos);
-      if (rmnsufinfo->hashexceptions)
+      if (rmnsufinfo->itvrel.hashstore != NULL)
       {
         if (itvfullentry->rank < rmnsufinfo->itvrel.maxvalue)
         {
@@ -896,7 +846,7 @@ static void processunsortedrange(Rmnsufinfo *rmnsufinfo,
                                  Seqpos left,Seqpos right,
                                  Seqpos base,Seqpos depth)
 {
-  Pairsuffixptrwithbase *pairptrwithbase;
+  Pairsuffixptrwithbase pairptrwithbase;
   unsigned long width;
 
   gt_assert(left < right && depth > 0);
@@ -936,18 +886,10 @@ static void processunsortedrange(Rmnsufinfo *rmnsufinfo,
     rmnsufinfo->firstwithnewdepth.totalwidth = width;
     rmnsufinfo->firstwithnewdepth.maxwidth = width;
   }
-  if (rmnsufinfo->unusedpair == NULL)
-  {
-    pairptrwithbase = gt_malloc(sizeof(Pairsuffixptrwithbase));
-  } else
-  {
-    pairptrwithbase = rmnsufinfo->unusedpair;
-    rmnsufinfo->unusedpair = NULL;
-  }
-  pairptrwithbase->left = left;
-  pairptrwithbase->right = right;
-  pairptrwithbase->base = base;
-  gt_queue_add(rmnsufinfo->rangestobesorted,pairptrwithbase);
+  pairptrwithbase.left = left;
+  pairptrwithbase.right = right;
+  pairptrwithbase.base = base;
+  gt_inl_queue_add(rmnsufinfo->rangestobesorted,pairptrwithbase,false);
   rmnsufinfo->currentqueuesize++;
   if (rmnsufinfo->maxqueuesize < rmnsufinfo->currentqueuesize)
   {
@@ -968,17 +910,25 @@ static void possiblychangemappedsection(Sortblock *sortblock,Seqpos left,
     Seqpos entries2map;
 
     sortblock->pageoffset = left - (left % DIV2(sortblock->mappedwidth));
-    gt_assert(left >= sortblock->pageoffset);
+#ifndef NDEBUG
+    if (left < sortblock->pageoffset)
+    {
+      fprintf(stderr,"left=%lu,right=%lu,left<%lu=pageoffset\n",
+                     (unsigned long) left,
+                     (unsigned long) right,
+                     (unsigned long) sortblock->pageoffset);
+      exit(GT_EXIT_PROGRAMMING_ERROR);
+    }
     if (right >= sortblock->pageoffset + sortblock->mappedwidth)
     {
-      fprintf(stderr,"left=%lu, right = %lu >= %lu + %lu\n",
-              (unsigned long) left,
-              (unsigned long) right,
-              (unsigned long) sortblock->pageoffset,
-              (unsigned long) sortblock->mappedwidth);
-      exit(EXIT_FAILURE);
+      fprintf(stderr,"left=%lu,right=%lu,right>=%lu=pageoffset+mappedwidth\n",
+                     (unsigned long) left,
+                     (unsigned long) right,
+                     (unsigned long) (sortblock->pageoffset +
+                                      sortblock->mappedwidth));
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
-    gt_assert(right < sortblock->pageoffset + sortblock->mappedwidth);
+#endif
     if (sortblock->mappedsection != NULL)
     {
       gt_fa_xmunmap(sortblock->mappedsection);
@@ -1208,7 +1158,7 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos left,
 static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
 {
   Pairsuffixptr *pairptr;
-  Pairsuffixptrwithbase *pairptrwithbase;
+  Pairsuffixptrwithbase pairptrwithbase;
 
   if (rmnsufinfo->firstgenerationcount > 0)
   {
@@ -1248,22 +1198,15 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
                             pairptr->left);
   }
   GT_FREEARRAY(&rmnsufinfo->firstgeneration,Pairsuffixptr);
-  while (gt_queue_size(rmnsufinfo->rangestobesorted) > 0)
+  while (!gt_inl_queue_isempty(rmnsufinfo->rangestobesorted))
   {
-    pairptrwithbase = gt_queue_get(rmnsufinfo->rangestobesorted);
+    pairptrwithbase = gt_inl_queue_get(rmnsufinfo->rangestobesorted);
     gt_assert(rmnsufinfo->currentqueuesize > 0);
     rmnsufinfo->currentqueuesize--;
     sortsuffixesonthislevel(rmnsufinfo,
-                            pairptrwithbase->left,
-                            pairptrwithbase->right,
-                            pairptrwithbase->base);
-    if (rmnsufinfo->unusedpair == NULL)
-    {
-      rmnsufinfo->unusedpair = pairptrwithbase;
-    } else
-    {
-      gt_free(pairptrwithbase);
-    }
+                            pairptrwithbase.left,
+                            pairptrwithbase.right,
+                            pairptrwithbase.base);
   }
   if (!SUFINMEM(&rmnsufinfo->sortblock))
   {
@@ -1273,12 +1216,11 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
     printf("pagechanges = %lu\n",rmnsufinfo->sortblock.pagechanges);
   }
   printf("maxqueuesize = %lu\n",rmnsufinfo->maxqueuesize);
-  gt_free(rmnsufinfo->unusedpair);
   gt_free(rmnsufinfo->itvinfo);
   rmnsufinfo->itvinfo = NULL;
   gt_free(rmnsufinfo->itvfullinfo);
   rmnsufinfo->itvfullinfo = NULL;
-  gt_queue_delete(rmnsufinfo->rangestobesorted);
+  gt_inl_queue_delete(rmnsufinfo->rangestobesorted);
   rmnsufinfo->rangestobesorted = NULL;
 }
 
@@ -1299,17 +1241,16 @@ void bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo)
     printf("# maxbucketsize=%lu\n",rmnsufinfo->allocateditvinfo);
   } else
   {
+    unsigned long pagesize = (unsigned long) PAGESIZE;
+
     initinversesuftabnonspecialsadjuststream(rmnsufinfo);
     printf("# maxbucketsize=%lu\n",rmnsufinfo->allocateditvinfo);
     rmnsufinfo->sortblock.sortspace = NULL;
-    if (rmnsufinfo->allocateditvinfo >= (unsigned long) DIV2(PAGESIZE))
+    while (pagesize <= 2UL * rmnsufinfo->allocateditvinfo)
     {
-      rmnsufinfo->sortblock.mappedwidth
-        = (Seqpos) (PAGESIZE * (rmnsufinfo->allocateditvinfo/(DIV2(PAGESIZE))));
-    } else
-    {
-      rmnsufinfo->sortblock.mappedwidth = (Seqpos) PAGESIZE;
+      pagesize += PAGESIZE;
     }
+    rmnsufinfo->sortblock.mappedwidth = (Seqpos) pagesize;
     printf("mappedwidth = %lu\n",
             (unsigned long) rmnsufinfo->sortblock.mappedwidth);
   }
@@ -1356,7 +1297,7 @@ Compressedtable *rmnsufinfo_wrap(Seqpos *longest,
     compressedtable_free(rmnsufinfo->itvrel.offset,true);
     rmnsufinfo->itvrel.offset = NULL;
   }
-  if (rmnsufinfo->hashexceptions)
+  if (rmnsufinfo->itvrel.hashstore != NULL)
   {
     gt_hashtable_delete(rmnsufinfo->itvrel.hashstore);
     rmnsufinfo->itvrel.hashstore = NULL;

@@ -18,7 +18,7 @@
 #ifndef INTERVAL_TREE_API_H
 #define INTERVAL_TREE_API_H
 
-#include "core/array.h"
+#include "core/array_api.h"
 #include "core/fptr_api.h"
 
 /* This is an interval tree data structure, implemented according to

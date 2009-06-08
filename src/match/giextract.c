@@ -369,13 +369,15 @@ int extractginumbers(bool verbose,
         while (ginumberhit < numofqueries &&
                giqueries[ginumberhit].ginumber == referenceginumber)
         {
+#ifndef NDEBUG
           if (giqueries[ginumberhit].markhit)
           {
             fprintf(stderr,"ginumber " Formatuint64_t
                            " was already found before\n",
                      PRINTuint64_tcast(giqueries[ginumberhit].ginumber));
-            exit(EXIT_FAILURE); /* programming error */
+            exit(GT_EXIT_PROGRAMMING_ERROR);
           }
+#endif
           headerlength = strlen(desc);
           if (headerbuffersize < headerlength + EXTRABUF + 1)
           {

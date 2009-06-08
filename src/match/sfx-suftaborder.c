@@ -18,11 +18,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "core/chardef.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/minmax.h"
 #include "intbits-tab.h"
 #include "encseq-def.h"
 #include "esa-seqread.h"
+#include "sfx-suftaborder.h"
 
 #include "sfx-cmpsuf.pr"
 
@@ -63,7 +64,9 @@ static void showlocalsuffix(FILE *fpout,
   }
 }
 
-static void showcomparisonfailure(const char *where,
+static void showcomparisonfailure(const char *filename,
+                                  int line,
+                                  const char *where,
                                   const Encodedsequence *encseq,
                                   Readmode readmode,
                                   const Seqpos *suftab,
@@ -73,7 +76,8 @@ static void showcomparisonfailure(const char *where,
                                   int cmp,
                                   Seqpos maxlcp)
 {
-  fprintf(stderr,"ERROR: %s(" FormatSeqpos " vs " FormatSeqpos
+  fprintf(stderr,"ERROR: file \"%s\", line %d: ",filename,line);
+  fprintf(stderr,"%s(" FormatSeqpos " vs " FormatSeqpos
                  " " FormatSeqpos "=\"",
                        where,
                        PRINTSeqposcast((Seqpos) (ptr1 - suftab)),
@@ -88,7 +92,9 @@ static void showcomparisonfailure(const char *where,
               PRINTSeqposcast(maxlcp));
 }
 
-void checkifprefixesareidentical(const Encodedsequence *encseq,
+void checkifprefixesareidentical(const char *filename,
+                                 int line,
+                                 const Encodedsequence *encseq,
                                  Readmode readmode,
                                  const Seqpos *suftab,
                                  unsigned int prefixlength,
@@ -118,7 +124,9 @@ void checkifprefixesareidentical(const Encodedsequence *encseq,
                              esr2);
     if (cmp != 0 || maxlcp != (Seqpos) prefixlength)
     {
-      showcomparisonfailure("checkifprefixesareidentical",
+      showcomparisonfailure(filename,
+                            line,
+                            "checkifprefixesareidentical",
                             encseq,
                             readmode,
                             suftab,
@@ -132,7 +140,7 @@ void checkifprefixesareidentical(const Encodedsequence *encseq,
   freeEncodedsequencescanstate(&esr2);
   if (haserr)
   {
-    exit(EXIT_FAILURE); /* programming error */
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
 
@@ -154,56 +162,29 @@ void showentiresuftab(const Encodedsequence *encseq,
   }
 }
 
-void checkentiresuftab(const Encodedsequence *encseq,
-                       Readmode readmode,
-                       const Seqpos *suftab,
-                       Sequentialsuffixarrayreader *ssar,
-                       bool specialsareequal,
-                       bool specialsareequalatdepth0,
-                       Seqpos depth,
-                       GtError *err)
+void checksortedsuffixes(const char *filename,
+                         int line,
+                         const Encodedsequence *encseq,
+                         Readmode readmode,
+                         const Seqpos *suftab,
+                         Seqpos numberofsuffixes,
+                         bool specialsareequal,
+                         bool specialsareequalatdepth0,
+                         Seqpos depth)
 {
   const Seqpos *ptr;
-  Bitsequence *startposoccurs;
-  Seqpos maxlcp, countbitsset = 0, currentlcp = 0,
-         totallength = getencseqtotallength(encseq);
-  int cmp;
+  Seqpos maxlcp, totallength = getencseqtotallength(encseq);
   Encodedsequencescanstate *esr1, *esr2;
-  bool haserr = false;
+  int cmp;
 
-#ifdef INLINEDSequentialsuffixarrayreader
-  GtUchar tmpsmalllcpvalue;
-#else
-  int retval;
-#endif
-
-  gt_error_check(err);
   gt_assert(!specialsareequal || specialsareequalatdepth0);
-  INITBITTAB(startposoccurs,totallength+1);
-  for (ptr = suftab; ptr <= suftab + totallength; ptr++)
-  {
-    if (ISIBITSET(startposoccurs,*ptr))
-    {
-      fprintf(stderr,"ERROR: suffix with startpos " FormatSeqpos
-                     " already occurs\n",
-                      PRINTSeqposcast(*ptr));
-      exit(EXIT_FAILURE); /* programming error */
-    }
-    SETIBIT(startposoccurs,*ptr);
-    countbitsset++;
-  }
-  if (countbitsset != totallength+1)
-  {
-    fprintf(stderr,"ERROR: not all bits are set\n");
-    exit(EXIT_FAILURE); /* programming error */
-  }
-  gt_free(startposoccurs);
   esr1 = newEncodedsequencescanstate();
   esr2 = newEncodedsequencescanstate();
+  gt_assert(numberofsuffixes > 0);
   gt_assert(*suftab < totallength);
-  for (ptr = suftab + 1; !haserr && ptr <= suftab + totallength; ptr++)
+  for (ptr = suftab + 1; ptr < suftab + numberofsuffixes; ptr++)
   {
-    if (ptr < suftab + totallength)
+    if (ptr < suftab + numberofsuffixes - 1)
     {
       gt_assert(*ptr < totallength);
       cmp = comparetwosuffixes(encseq,
@@ -218,7 +199,106 @@ void checkentiresuftab(const Encodedsequence *encseq,
                                esr2);
       if (cmp > 0)
       {
-        showcomparisonfailure("checkentiresuftab",
+        showcomparisonfailure(filename,
+                              line,
+                              "checksortedsuffixes",
+                              encseq,
+                              readmode,
+                              suftab,
+                              depth,
+                              ptr-1,
+                              ptr,
+                              cmp,
+                              maxlcp);
+        exit(GT_EXIT_PROGRAMMING_ERROR);
+      }
+    } else
+    {
+      if (numberofsuffixes == totallength+1)
+      {
+        gt_assert(*ptr == totallength);
+      }
+    }
+  }
+  freeEncodedsequencescanstate(&esr1);
+  freeEncodedsequencescanstate(&esr2);
+}
+
+void checkentiresuftab(const char *filename,
+                       int line,
+                       const Encodedsequence *encseq,
+                       Readmode readmode,
+                       const Seqpos *suftab,
+                       Seqpos numberofsuffixes,
+                       Sequentialsuffixarrayreader *ssar,
+                       bool specialsareequal,
+                       bool specialsareequalatdepth0,
+                       Seqpos depth,
+                       GtError *err)
+{
+  const Seqpos *ptr;
+  Seqpos maxlcp, currentlcp = 0, totallength = getencseqtotallength(encseq);
+  int cmp;
+  Encodedsequencescanstate *esr1, *esr2;
+  bool haserr = false;
+
+#ifdef INLINEDSequentialsuffixarrayreader
+  GtUchar tmpsmalllcpvalue;
+#else
+  int retval;
+#endif
+
+  gt_error_check(err);
+  gt_assert(!specialsareequal || specialsareequalatdepth0);
+  if (numberofsuffixes == totallength+1)
+  {
+    Bitsequence *startposoccurs;
+    Seqpos countbitsset = 0;
+
+    INITBITTAB(startposoccurs,totallength+1);
+    for (ptr = suftab; ptr <= suftab + totallength; ptr++)
+    {
+      if (ISIBITSET(startposoccurs,*ptr))
+      {
+        fprintf(stderr,"ERROR: suffix with startpos " FormatSeqpos
+                       " already occurs\n",
+                        PRINTSeqposcast(*ptr));
+        exit(GT_EXIT_PROGRAMMING_ERROR);
+      }
+      SETIBIT(startposoccurs,*ptr);
+      countbitsset++;
+    }
+    if (countbitsset != totallength+1)
+    {
+      fprintf(stderr,"ERROR: not all bits are set\n");
+      exit(GT_EXIT_PROGRAMMING_ERROR);
+    }
+    gt_free(startposoccurs);
+  }
+  esr1 = newEncodedsequencescanstate();
+  esr2 = newEncodedsequencescanstate();
+  gt_assert(numberofsuffixes > 0);
+  gt_assert(*suftab < totallength);
+  for (ptr = suftab + 1; !haserr && ptr < suftab + numberofsuffixes; ptr++)
+  {
+    if (ptr < suftab + numberofsuffixes - 1)
+    {
+      gt_assert(*ptr < totallength);
+      cmp = comparetwosuffixes(encseq,
+                               readmode,
+                               &maxlcp,
+                               specialsareequal,
+                               specialsareequalatdepth0,
+                               depth,
+                               *(ptr-1),
+                               *ptr,
+                               esr1,
+                               esr2);
+      if (cmp > 0)
+      {
+        showcomparisonfailure(filename,
+                              line,
+                              "checkentiresuftab",
                               encseq,
                               readmode,
                               suftab,
@@ -233,7 +313,10 @@ void checkentiresuftab(const Encodedsequence *encseq,
     } else
     {
       maxlcp = 0;
-      gt_assert(*ptr == totallength);
+      if (numberofsuffixes == totallength+1)
+      {
+        gt_assert(*ptr == totallength);
+      }
     }
     if (ssar != NULL)
     {
@@ -266,7 +349,7 @@ void checkentiresuftab(const Encodedsequence *encseq,
                           FormatSeqpos "(fast)\n",
                     PRINTSeqposcast(maxlcp),
                     PRINTSeqposcast(currentlcp));
-        exit(EXIT_FAILURE); /* programming error */
+        exit(GT_EXIT_PROGRAMMING_ERROR);
       }
     }
   }
@@ -274,7 +357,7 @@ void checkentiresuftab(const Encodedsequence *encseq,
   freeEncodedsequencescanstate(&esr2);
   if (haserr)
   {
-    exit(EXIT_FAILURE); /* programming error */
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   /*
   printf("# checkentiresuftab with mode 'specials are %s'\n",

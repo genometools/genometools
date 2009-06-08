@@ -29,8 +29,7 @@
 #include "greedyfwdmat.h"
 #include "intcode-def.h"
 #include "encseq-def.h"
-
-#include "initbasepower.pr"
+#include "initbasepower.h"
 
 typedef struct
 {
@@ -70,6 +69,7 @@ typedef struct
   const Encodedsequence *encseq;
 } Substringinfo;
 
+#ifndef NDEBUG
 static void checkifsequenceisthere(const Encodedsequence *encseq,
                                    Seqpos witnessposition,
                                    unsigned long gmatchlength,
@@ -91,10 +91,11 @@ static void checkifsequenceisthere(const Encodedsequence *encseq,
                      (unsigned int) qptr[i],
                      (unsigned int) cc,
                      PRINTSeqposcast(witnessposition+(Seqpos) i));
-      exit(EXIT_FAILURE); /* Program error */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   }
 }
+#endif
 
 static void gmatchposinsinglesequence(Substringinfo *substringinfo,
                                       uint64_t unitnum,
@@ -131,6 +132,7 @@ static void gmatchposinsinglesequence(Substringinfo *substringinfo,
                                                 query+querylen);
     if (gmatchlength > 0)
     {
+#ifndef NDEBUG
       if (substringinfo->encseq != NULL)
       {
         gt_assert(wptr != NULL);
@@ -139,6 +141,7 @@ static void gmatchposinsinglesequence(Substringinfo *substringinfo,
                                gmatchlength,
                                qptr);
       }
+#endif
       substringinfo->processgmatchlength(substringinfo->alphabet,
                                          query,
                                          gmatchlength,
@@ -276,7 +279,7 @@ int findsubquerygmatchforward(const Encodedsequence *encseq,
   return haserr ? -1 : 0;
 }
 
-/*
+#ifdef WITHrunsubstringiteration
 int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
                           const void *genericindex,
                           Seqpos totalwidth,
@@ -342,6 +345,7 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
                                       NULL,
                                       substring.currentptr+prefixlength,
                                       substring.currentptr+substring.remaining);
+#ifndef NDEBUG
         if (gmatchlength2 != gmatchlength)
         {
           fprintf(stderr,"at offset %lu:\n",(unsigned long)
@@ -353,8 +357,9 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
                                           bucketspec.nonspecialsinbucket-1));
           fprintf(stderr,"gmatchlength2 = %lu != %lu = gmatchlength\n",
                           gmatchlength2,gmatchlength);
-          exit(EXIT_FAILURE);
+          exit(GT_EXIT_PROGRAMMING_ERROR);
         }
+#endif
       }
     }
   }
@@ -409,4 +414,4 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
   gt_seqiterator_delete(seqit);
   return haserr ? -1 : 0;
 }
-*/
+#endif

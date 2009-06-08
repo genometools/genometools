@@ -69,7 +69,7 @@ int guessifproteinsequencestream(const GtStrArray *filenametab,GtError *err)
   gt_sequence_buffer_delete(fb);
   if (countnonbases > 0)
   {
-    return 1;
+    return 1; /* guess it is a protein sequence */
   }
-  return 0;
+  return 0; /* guess it is a dna sequence */
 }

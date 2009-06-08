@@ -18,6 +18,7 @@
 #include <math.h>
 #include "core/hashmap.h"
 #include "core/ma.h"
+#include "core/mathsupport.h"
 #include "core/str.h"
 #include "annotationsketch/coords.h"
 #include "annotationsketch/default_formats.h"
@@ -51,7 +52,7 @@ static GtDrawingRange calculate_drawing_range(GtLineBreakerCaptions *lbc,
     textwidth = gt_text_width_calculator_get_text_width(
                                       gt_layout_get_twc(lbc->layout),
                                       gt_str_get(gt_block_get_caption(block)));
-  if (textwidth > gt_drawing_range_length(drange))
+  if (gt_double_smaller_double(gt_drawing_range_length(drange), textwidth))
     drange.end = drange.start + textwidth;
   }
   return drange;
@@ -115,9 +116,9 @@ GtLineBreaker* gt_line_breaker_captions_new(GtLayout *layout,
                                             unsigned long width,
                                             GtStyle *style)
 {
-  gt_assert(layout);
   GtLineBreakerCaptions *lbcap;
   GtLineBreaker *lb;
+  gt_assert(layout);
   lb = gt_line_breaker_create(gt_line_breaker_captions_class());
   lbcap = gt_line_breaker_captions_cast(lb);
   lbcap->layout = layout;

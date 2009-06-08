@@ -55,11 +55,11 @@ static OPrval parse_options(int *parsed_args,
          *optionmaxwidthrealmedian,
          *optionalgbounds,
          *optionparts,
+         *optiondifferencecover,
          *optiondes;
   OPrval oprval;
-  const char *maxdepthmsg = "option of -maxdepth must either be positive "
-                            "integer or a floating point value in the range "
-                            "0.5 to 1.0";
+  const char *maxdepthmsg = "option of -maxdepth must the keyword abs, the "
+                            "keyword he or an integer";
   GtStr *dirarg = gt_str_new();
 
   gt_error_check(err);
@@ -116,6 +116,14 @@ static OPrval parse_options(int *parsed_args,
                                     1U);
   gt_option_argument_is_optional(optionpl);
   gt_option_parser_add_option(op, optionpl);
+
+  optiondifferencecover = gt_option_new_uint_min("dc",
+                                    "specify difference cover value",
+                                    &so->sfxstrategy.differencecover,
+                                    0,
+                                    4U);
+  gt_option_argument_is_optional(optiondifferencecover);
+  gt_option_parser_add_option(op, optiondifferencecover);
 
   if (doesa)
   {
@@ -256,6 +264,14 @@ static OPrval parse_options(int *parsed_args,
   gt_option_exclude(optionsmap, optiondna);
   gt_option_exclude(optionsmap, optionprotein);
   gt_option_exclude(optiondna, optionprotein);
+  if (optionmaxdepth != NULL)
+  {
+    gt_option_exclude(optionmaxdepth, optiondifferencecover);
+  }
+  if (optionlcp != NULL)
+  {
+    gt_option_exclude(optionlcp, optiondifferencecover);
+  }
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
                                   err);
   if (oprval == OPTIONPARSER_OK)
@@ -321,39 +337,23 @@ static OPrval parse_options(int *parsed_args,
           so->sfxstrategy.absoluteinversesuftab = true;
         } else
         {
-          float readfloat;
-
-          if (strchr(gt_str_get(so->str_maxdepth),'.') != NULL)
+          if (strcmp(gt_str_get(so->str_maxdepth),"he") == 0)
           {
-            if (sscanf(gt_str_get(so->str_maxdepth),"%f",&readfloat) == 1 &&
-                readfloat >= 0.5 && readfloat <= 1.0)
-            {
-              so->sfxstrategy.ssortmaxdepth.valueunsignedint
-                = MAXDEPTH_AUTOMATIC;
-              so->sfxstrategy.probsmall.valuedouble = (double) readfloat;
-              so->sfxstrategy.probsmall.defined = true;
-            } else
-            {
-              gt_error_set(err, "%s", maxdepthmsg);
-              oprval = OPTIONPARSER_ERROR;
-            }
+            so->sfxstrategy.hashexceptions = true;
           } else
           {
             long readint;
-            if (sscanf(gt_str_get(so->str_maxdepth),"%ld",&readint) == 1)
+
+            so->sfxstrategy.hashexceptions = true;
+            if (sscanf(gt_str_get(so->str_maxdepth),"%ld",&readint) == 1 &&
+                readint >= 1L)
             {
-              if (readint >= 1L)
-              {
-                so->sfxstrategy.ssortmaxdepth.valueunsignedint
-                  = (unsigned int) readint;
-              } else
-              {
-                gt_error_set(err,"%s", maxdepthmsg);
-                oprval = OPTIONPARSER_ERROR;
-              }
+              so->sfxstrategy.ssortmaxdepth.defined = true;
+              so->sfxstrategy.ssortmaxdepth.valueunsignedint
+                = (unsigned int) readint;
             } else
             {
-              gt_error_set(err,"%s", maxdepthmsg);
+              gt_error_set(err, "%s", maxdepthmsg);
               oprval = OPTIONPARSER_ERROR;
             }
           }
@@ -374,14 +374,24 @@ static OPrval parse_options(int *parsed_args,
       }
       if (oprval != OPTIONPARSER_ERROR)
       {
-        so->sfxstrategy.ssortmaxdepth.defined = true;
-        if (so->sfxstrategy.ssortmaxdepth.valueunsignedint !=
-            MAXDEPTH_AUTOMATIC)
+        if (so->sfxstrategy.differencecover == 0)
         {
-          so->sfxstrategy.cmpcharbychar = true;
+          so->sfxstrategy.ssortmaxdepth.defined = true;
+          if (so->sfxstrategy.ssortmaxdepth.valueunsignedint !=
+              MAXDEPTH_AUTOMATIC)
+          {
+            so->sfxstrategy.cmpcharbychar = true;
+          }
         }
       }
     }
+  }
+  if (so->sfxstrategy.differencecover > 0 && optionlcp != NULL &&
+      gt_option_is_set(optionlcp))
+  {
+    gt_error_set(err,"option -maxdepth with argument dc can not be combined "
+                     "with option lcp");
+    oprval = OPTIONPARSER_ERROR;
   }
   if (oprval == OPTIONPARSER_OK && !doesa)
   {
@@ -512,7 +522,7 @@ int suffixeratoroptions(Suffixeratoroptions *so,
   so->sfxstrategy.ssortmaxdepth.defined = false;
   so->sfxstrategy.ssortmaxdepth.valueunsignedint = MAXDEPTH_AUTOMATIC;
   so->sfxstrategy.streamsuftab = false;
-  so->sfxstrategy.probsmall.defined = false;
+  so->sfxstrategy.hashexceptions = false;
   so->outsuftab = false; /* if !doesa this is not defined */
   so->outlcptab = false;
   so->outbwttab = false;

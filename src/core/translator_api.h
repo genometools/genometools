@@ -19,7 +19,7 @@
 #ifndef TRANSLATOR_API_H
 #define TRANSLATOR_API_H
 
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/str_array_api.h"
 
 /* Implements a translator class supporting all translation schemes from

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007      Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>
+  Copyright (c) 2007      Christin Schaerfer <schaerfer@zbh.uni-hamburg.de>
   Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2007-2009 Center for Bioinformatics, University of Hamburg
 
@@ -25,8 +25,8 @@
 #include "core/ensure.h"
 #include "core/log.h"
 #include "core/ma.h"
+#include "core/mathsupport.h"
 #include "core/undef.h"
-#include "core/unused_api.h"
 
 struct GtBlock {
   GtArray *elements;
@@ -60,8 +60,8 @@ static int elemcmp(const void *a, const void *b, void *data)
   /* if not, then get z-index from style */
   if (sty)
   {
-    gt_style_get_num(sty, type_a, "z_index", &zindex_a, NULL);
-    gt_style_get_num(sty, type_b, "z_index", &zindex_b, NULL);
+    (void) gt_style_get_num(sty, type_a, "z_index", &zindex_a, NULL);
+    (void) gt_style_get_num(sty, type_b, "z_index", &zindex_b, NULL);
   }
   /* only one is set -> put types with set z-indices always on top of others*/
   if (zindex_a == UNDEF_DOUBLE && zindex_b != UNDEF_DOUBLE)
@@ -76,9 +76,9 @@ static int elemcmp(const void *a, const void *b, void *data)
     return -1;
   }
   /* both z-indices are set */
-  if (zindex_a == zindex_b)
+  if (gt_double_equals_double(zindex_a, zindex_b))
     return 0;
-  if (zindex_a < zindex_b)
+  if (gt_double_smaller_double(zindex_a, zindex_b))
     return -1;
   return 1;
 }
@@ -293,16 +293,16 @@ double gt_block_get_max_height(const GtBlock *block, const GtStyle *sty)
   unsigned long i;
   gt_assert(block && sty);
   for (i=0;i<gt_array_size(block->elements);i++) {
-     GtElement *elem = *(GtElement**) gt_array_get(block->elements, i);
-     double height = 0;
-     /* get default or image-wide bar height */
-     if (!gt_style_get_num(sty, "format", "bar_height", &height, NULL))
-       height = BAR_HEIGHT_DEFAULT;
-     /* try to get type-specific bar height */
-     gt_style_get_num(sty, gt_element_get_type(elem), "bar_height", &height,
-                      gt_element_get_node_ref(elem));
-     if (height > max_height)
-       max_height = height;
+    GtElement *elem = *(GtElement**) gt_array_get(block->elements, i);
+    double height = 0;
+    /* get default or image-wide bar height */
+    if (!gt_style_get_num(sty, "format", "bar_height", &height, NULL))
+      height = BAR_HEIGHT_DEFAULT;
+    /* try to get type-specific bar height */
+    (void) gt_style_get_num(sty, gt_element_get_type(elem), "bar_height",
+                            &height, gt_element_get_node_ref(elem));
+    if (gt_double_smaller_double(max_height, height))
+      max_height = height;
   }
   return max_height;
 }

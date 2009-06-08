@@ -84,7 +84,7 @@ Seqpos frompos2rank(const Rankedbounds *leftptr,
   }
   fprintf(stderr,"frompos2rank: cannot find pos " FormatSeqpos
                  " in ranges",PRINTSeqposcast(specialpos));
-  exit(EXIT_FAILURE);
+  exit(GT_EXIT_PROGRAMMING_ERROR);
   /*@ignore@*/
   return 0;
   /*@end@*/
@@ -115,7 +115,7 @@ Seqpos fromrank2pos(const Rankedbounds *leftptr,
   }
   fprintf(stderr,"fromrank2rank: cannot find rank " FormatSeqpos
                  " in ranges",PRINTSeqposcast(rank));
-  exit(EXIT_FAILURE); /* programming error */
+  exit(GT_EXIT_PROGRAMMING_ERROR);
   /*@ignore@*/
   return 0;
   /*@end@*/

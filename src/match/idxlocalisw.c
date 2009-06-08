@@ -312,7 +312,7 @@ static void swproducealignment(GtAlignment *alignment,
     if (evalscore < 0 || (unsigned long) evalscore < scorethreshold)
     {
       fprintf(stderr,"unexpected eval score %ld\n",evalscore);
-      exit(EXIT_FAILURE); /* programming error */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   }
 #endif

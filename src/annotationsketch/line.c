@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007      Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>
+  Copyright (c) 2007      Christin Schaerfer <schaerfer@zbh.uni-hamburg.de>
   Copyright (c)      2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
@@ -19,6 +19,7 @@
 #include "core/ensure.h"
 #include "core/interval_tree.h"
 #include "core/ma.h"
+#include "core/mathsupport.h"
 #include "core/range.h"
 #include "annotationsketch/block.h"
 #include "annotationsketch/default_formats.h"
@@ -72,7 +73,7 @@ int gt_line_sketch(GtLine *line, GtCanvas *canvas, GtError *err)
     }
   }
   if (!had_err)
-    gt_canvas_visit_line_post(canvas, line, err);
+    had_err = gt_canvas_visit_line_post(canvas, line, err);
   return had_err;
 }
 
@@ -89,7 +90,7 @@ double gt_line_get_height(GtLine *line, const GtStyle *sty)
     if (!line->has_captions && gt_block_get_caption(block) != NULL)
       line->has_captions = true;
     height = gt_block_get_max_height(block, sty);
-    if (height > line_height)
+    if (gt_double_smaller_double(line_height, height))
       line_height = height;
   }
   return line_height;
@@ -105,11 +106,10 @@ int gt_line_unit_test(GtError *err)
   GtLine *l1;
   GtBlock *b1, *b2;
   GtStyle *sty = NULL;
-  gt_error_check(err);
-
   const char* foo = "foo";
   const char* bar = "bar";
   const char* blub = "blub";
+  gt_error_check(err);
 
   r1.start = 10;
   r1.end = 40;

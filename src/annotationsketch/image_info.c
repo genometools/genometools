@@ -29,6 +29,7 @@
 struct GtImageInfo {
   GtArray* recmaps;
   unsigned int height;
+  unsigned long reference_count;
 };
 
 GtImageInfo* gt_image_info_new()
@@ -40,23 +41,34 @@ GtImageInfo* gt_image_info_new()
   return ii;
 }
 
-void gt_image_info_delete(GtImageInfo *ii)
+GtImageInfo* gt_image_info_ref(GtImageInfo *ii)
 {
-  unsigned long i;
-  if (!ii) return;
-  for (i=0;i<gt_image_info_num_of_rec_maps(ii);i++)
-  {
-    GtRecMap *rm = *(GtRecMap**) gt_array_get(ii->recmaps, i);
-    gt_rec_map_delete(rm);
-  }
-  gt_array_delete(ii->recmaps);
-  gt_free(ii);
+  gt_assert(ii);
+  ii->reference_count++;
+  return ii;
 }
 
-void gt_image_info_add_rec_map(GtImageInfo *ii, GtRecMap *rm)
+void gt_image_info_delete(GtImageInfo *image_info)
 {
-  gt_assert(ii && rm);
-  gt_array_add(ii->recmaps, rm);
+  unsigned long i;
+  if (!image_info) return;
+  if (image_info->reference_count) {
+    image_info->reference_count--;
+    return;
+  }
+  for (i=0;i<gt_image_info_num_of_rec_maps(image_info);i++)
+  {
+    GtRecMap *rm = *(GtRecMap**) gt_array_get(image_info->recmaps, i);
+    gt_rec_map_delete(rm);
+  }
+  gt_array_delete(image_info->recmaps);
+  gt_free(image_info);
+}
+
+void gt_image_info_add_rec_map(GtImageInfo *ii, GtRecMap *rec_map)
+{
+  gt_assert(ii && rec_map);
+  gt_array_add(ii->recmaps, rec_map);
 }
 
 void gt_image_info_set_height(GtImageInfo *ii, unsigned int height)
@@ -65,22 +77,23 @@ void gt_image_info_set_height(GtImageInfo *ii, unsigned int height)
   ii->height = height;
 }
 
-unsigned int gt_image_info_get_height(GtImageInfo *ii)
+unsigned int gt_image_info_get_height(GtImageInfo *image_info)
 {
-  gt_assert(ii);
-  return ii->height;
+  gt_assert(image_info);
+  return image_info->height;
 }
 
-unsigned long gt_image_info_num_of_rec_maps(GtImageInfo *ii)
+unsigned long gt_image_info_num_of_rec_maps(GtImageInfo *image_info)
 {
-  gt_assert(ii);
-  return gt_array_size(ii->recmaps);
+  gt_assert(image_info);
+  return gt_array_size(image_info->recmaps);
 }
 
-const GtRecMap* gt_image_info_get_rec_map(GtImageInfo *ii, unsigned long n)
+const GtRecMap* gt_image_info_get_rec_map(GtImageInfo *image_info,
+                                          unsigned long i)
 {
-  gt_assert(ii);
-  return *(GtRecMap**) gt_array_get(ii->recmaps, n);
+  gt_assert(image_info);
+  return *(GtRecMap**) gt_array_get(image_info->recmaps, i);
 }
 
 int gt_image_info_unit_test(GtError *err)
@@ -101,8 +114,11 @@ int gt_image_info_unit_test(GtError *err)
   {
     const GtRecMap* rm;
     unsigned long rbase;
+    GtRange r;
     rbase = gt_rand_max(10);
-    GtRange r = { rbase, rbase + gt_rand_max(20)};
+    r.start = rbase;
+    r.end = rbase + gt_rand_max(20);
+
     features[i] = (GtFeatureNode*) gt_feature_node_new(seqid, gt_ft_gene,
                                                        r.start, r.end,
                                                        GT_STRAND_FORWARD);
@@ -114,7 +130,6 @@ int gt_image_info_unit_test(GtError *err)
     gt_image_info_add_rec_map(ii, rms[i]);
     ensure(had_err, gt_image_info_num_of_rec_maps(ii) == i+1);
     ensure(had_err, (rm = gt_image_info_get_rec_map(ii, i)) == rms[i]);
-    ensure(had_err, rm->fn == rms[i]->fn);
     gt_genome_node_delete((GtGenomeNode*) features[i]);
   }
 

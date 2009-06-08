@@ -19,8 +19,8 @@
 #define BSEARCH_API_H
 
 #include "core/fptr_api.h"
-#include "core/array.h"
-#include "core/bittab.h"
+#include "core/array_api.h"
+#include "core/bittab_api.h"
 
 /* Bsearch module */
 

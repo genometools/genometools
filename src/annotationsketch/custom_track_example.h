@@ -23,6 +23,6 @@
 typedef struct GtCustomTrackExample GtCustomTrackExample;
 
 const GtCustomTrackClass* gt_custom_track_example_class(void);
-GtCustomTrack*            gt_custom_track_example_new();
+GtCustomTrack*            gt_custom_track_example_new(void);
 
 #endif

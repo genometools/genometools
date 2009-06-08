@@ -16,6 +16,7 @@
 */
 
 #include "core/fileutils.h"
+#include "core/genfile.h"
 #include "core/hashmap-generic.h"
 #include "core/unused_api.h"
 #include "match/giextract.pr"

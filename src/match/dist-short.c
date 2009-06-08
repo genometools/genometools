@@ -150,12 +150,6 @@ Definedunsignedlong forwardprefixmatch(const Encodedsequence *encseq,
   gt_assert(maxdistance > 0);
   for (pos = startpos; /* Nothing */; pos++)
   {
-    if (pos - startpos > (Seqpos) (ulen + maxdistance))
-    {
-      fprintf(stderr,"pos=%lu,startpos=%lu,ulen=%lu,maxdistance=%lu\n",
-             (unsigned long) pos,(unsigned long) startpos,ulen,maxdistance);
-      exit(EXIT_FAILURE);
-    }
     gt_assert(pos - startpos <= (Seqpos) (ulen + maxdistance));
     cc = getencodedchar(encseq,pos,Forwardmode);
     if (nowildcards && cc == (GtUchar) WILDCARD)

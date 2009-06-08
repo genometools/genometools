@@ -20,7 +20,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include "core/array.h"
+#include "core/array_api.h"
 
 /* Implements arbitrary-length bit arrays and various operations on them. */
 typedef struct GtBittab GtBittab;

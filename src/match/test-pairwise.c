@@ -39,13 +39,13 @@ void runcheckfunctionontwofiles(Checkcmppairfuntype checkfunction,
   if (useq == NULL)
   {
     fprintf(stderr,"cannot map file \"%s\": %s\n",file1,strerror(errno));
-    exit(EXIT_FAILURE);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   vseq = (const GtUchar *) gt_fa_mmap_read(file2,&vlen);
   if (vseq == NULL)
   {
     fprintf(stderr,"cannot map file \"%s\": %s",file2,strerror(errno));
-    exit(EXIT_FAILURE);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   while (true)
   {
@@ -172,6 +172,6 @@ void checkgreedyunitedist(GT_UNUSED bool forward,
   {
     fprintf(stderr,"greedyunitedist = %lu != %lu = squarededistunit\n",
                    edist1,edist2);
-    exit(EXIT_FAILURE);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }

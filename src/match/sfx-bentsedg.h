@@ -60,7 +60,7 @@ void qsufsort(Seqpos *sortspace,
               Bcktab *bcktab,
               unsigned int numofchars,
               unsigned int prefixlength,
-              const Defineddouble *probsmall,
+              bool hashexceptions,
               bool absoluteinversesuftab,
               Outlcpinfo *outlcpinfo);
 
@@ -77,5 +77,20 @@ void sortallbuckets(Suftab *suftab,
                     const Sfxstrategy *sfxstrategy,
                     unsigned long long *bucketiterstep,
                     Verboseinfo *verboseinfo);
+
+void sortbucketofsuffixes(Seqpos *suffixestobesorted,
+                          unsigned long numberofsuffixes,
+                          const Encodedsequence *encseq,
+                          Readmode readmode,
+                          Codetype mincode,
+                          Codetype maxcode,
+                          const Bcktab *bcktab,
+                          unsigned int numofchars,
+                          unsigned int prefixlength,
+                          const Sfxstrategy *sfxstrategy,
+                          void *voiddcov,
+                          void (*dc_processunsortedrange)(void *,Seqpos *,
+                                                          Seqpos *,Seqpos),
+                          Verboseinfo *verboseinfo);
 
 #endif

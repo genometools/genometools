@@ -73,7 +73,8 @@
                                             sizeof (TYPE) *\
                                             (A)->allocated##TYPE,\
                                             __FILE__, __LINE__);\
-        }
+        }\
+        gt_assert((A)->space##TYPE != NULL)
 
 /*
   The next macro is a variation of GT_CHECKARRAYSPACE, which checks if the next

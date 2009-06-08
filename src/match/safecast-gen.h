@@ -39,7 +39,7 @@
             {\
               fprintf(stderr,"%s, %d: %llu cannot be stored in 32bit word",\
                         filename,line,PRINTLLUcast(from));\
-              exit(EXIT_FAILURE); /* programming error */\
+              exit(GT_EXIT_PROGRAMMING_ERROR);\
             }\
           }\
           return (TOTYPE) from;\
