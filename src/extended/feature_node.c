@@ -72,6 +72,11 @@ typedef struct {
           *cds_features;
 } SaveExonAndCDSInfo;
 
+typedef struct {
+  const char *type;
+  unsigned long number;
+} GtTypeTraverseInfo;
+
 static void feature_node_free(GtGenomeNode *gn)
 {
   GtFeatureNode *fn = gt_feature_node_cast(gn);
@@ -862,6 +867,24 @@ int gt_genome_node_traverse_children_breadth(GtGenomeNode *genome_node,
                                                 traverse_only_once, false, err);
 }
 
+static int count_types(GtGenomeNode *gn, void *data, GtError *err)
+{
+  GtFeatureNode *fn;
+  int had_err = 0;
+  GtTypeTraverseInfo *traverseinfo = (GtTypeTraverseInfo*) data;
+  gt_error_check(err);
+  fn = gt_feature_node_cast(gn);  /* XXX */
+  /* if (!fn) {
+    gt_error_set(err, "only feature nodes can be children of feature nodes!");
+    had_err = -1;
+  } */
+  /* if (!had_err) { */
+    if (strcmp(traverseinfo->type, gt_feature_node_get_type(fn)) == 0)
+      traverseinfo->number++;
+  /* } */
+  return had_err;
+}
+
 int gt_genome_node_traverse_direct_children(GtGenomeNode *gn,
                                             void *traverse_func_data,
                                             GtGenomeNodeTraverseFunc traverse,
@@ -885,6 +908,24 @@ int gt_genome_node_traverse_direct_children(GtGenomeNode *gn,
     }
   }
   return had_err;
+}
+
+unsigned long gt_genome_node_number_of_children_of_type(const GtGenomeNode
+                                                          *parent,
+                                                        const GtGenomeNode
+                                                          *node)
+{
+  GtFeatureNode *fn_node;
+  int had_err = 0;
+  GtTypeTraverseInfo traverseinfo;
+  gt_assert(parent && node);
+  fn_node = gt_feature_node_cast((GtGenomeNode*) node);
+  traverseinfo.type = gt_feature_node_get_type(fn_node);
+  traverseinfo.number = 0;
+  had_err = gt_genome_node_traverse_direct_children((GtGenomeNode*) parent,
+                                                    &traverseinfo, count_types,
+                                                    NULL);
+  return traverseinfo.number;
 }
 
 unsigned long gt_genome_node_number_of_children(const GtGenomeNode *gn)
