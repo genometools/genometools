@@ -47,7 +47,7 @@ struct GtDiagram {
   /* Reverse lookup structure (per node) */
   GtHashmap *nodeinfo;
   /* Cache tables for configuration data */
-  GtHashmap *collapsingtypes, *caption_display_status;
+  GtHashmap *collapsingtypes, *caption_display_status, *groupedtypes;
   GtStyle *style;
   GtArray *features,
           *custom_tracks;
@@ -131,7 +131,7 @@ static inline void nodeinfo_add_block(NodeInfoElement *ni,
 {
   GtBlockTuple *bt;
   PerTypeInfo *type_struc = NULL;
-  gt_assert(ni && !nodeinfo_find_block(ni, gft, rep));
+  gt_assert(ni);
   bt = blocktuple_new(gft, rep, block);
   if (!(ni->type_index))
   {
@@ -359,7 +359,7 @@ static void process_node(GtDiagram *d, GtFeatureNode *node,
                          GtFeatureNode *parent)
 {
   GtRange elem_range;
-  bool *collapse;
+  bool *collapse, *group;
   bool do_not_overlap = false;
   const char *feature_type = NULL, *parent_gft = NULL;
   double tmp;
@@ -422,6 +422,18 @@ static void process_node(GtDiagram *d, GtFeatureNode *node,
     gt_hashmap_add(d->collapsingtypes, (void*) feature_type, collapse);
   }
 
+  /* check if type should be grouped by parent, cache result */
+  if ((group = (bool*) gt_hashmap_get(d->groupedtypes,
+                                      feature_type)) == NULL)
+  {
+    group = gt_malloc(sizeof (bool));
+    if (!gt_style_get_bool(d->style, feature_type, "group_by_parent",
+                           group, NULL)) {
+      *group = false;
+    }
+    gt_hashmap_add(d->groupedtypes, (void*) feature_type, group);
+  }
+
    /* check if direct children overlap */
   if (parent)
     do_not_overlap =
@@ -439,11 +451,18 @@ static void process_node(GtDiagram *d, GtFeatureNode *node,
              && gt_feature_node_is_multi(node))
   {
     /* multi line features are added to their representative's blocks */
-    add_to_rep(d, node, parent);
+    if (*group)
+      add_to_rep(d, node, parent);
+    else
+      add_to_current(d, node, parent);
   }
   else if (!(*collapse)
-             && do_not_overlap
-             && gt_genome_node_number_of_children((GtGenomeNode*) parent) > 1)
+             && parent
+             && *group
+             && gt_genome_node_number_of_children_of_type((GtGenomeNode*)
+                                                            parent,
+                                                          (GtGenomeNode*)
+                                                            node) > 1)
   {
     /* non-collapsing, non-overlapping children of a single parent are
        added to their parent's block */
@@ -616,10 +635,10 @@ int gt_diagram_build(GtDiagram *diagram)
   gt_assert(diagram);
   nti.diagram = diagram;
 
-  /* initialise caches */
-  diagram->collapsingtypes = gt_hashmap_new(HASH_STRING, NULL, gt_free_func);
-  diagram->caption_display_status = gt_hashmap_new(HASH_DIRECT, NULL,
-                                                   gt_free_func);
+  /* clear caches */
+  gt_hashmap_reset(diagram->collapsingtypes);
+  gt_hashmap_reset(diagram->groupedtypes);
+  gt_hashmap_reset(diagram->caption_display_status);
 
   if (!diagram->blocks)
   {
@@ -642,9 +661,6 @@ int gt_diagram_build(GtDiagram *diagram)
     gt_assert(!had_err); /* collect_blocks() is sane */
   }
 
-  /* clear caches */
-  gt_hashmap_delete(diagram->collapsingtypes);
-  gt_hashmap_delete(diagram->caption_display_status);
   return had_err;
 }
 
@@ -664,6 +680,11 @@ static GtDiagram* gt_diagram_new_generic(GtArray *features,
     diagram->features = features;
   diagram->select_func = default_track_selector;
   diagram->custom_tracks = gt_array_new(sizeof (GtCustomTrack*));
+  /* init caches */
+  diagram->collapsingtypes = gt_hashmap_new(HASH_STRING, NULL, gt_free_func);
+  diagram->groupedtypes = gt_hashmap_new(HASH_STRING, NULL, gt_free_func);
+  diagram->caption_display_status = gt_hashmap_new(HASH_DIRECT, NULL,
+                                                   gt_free_func);
   return diagram;
 }
 
@@ -751,6 +772,9 @@ void gt_diagram_delete(GtDiagram *diagram)
   if (diagram->blocks)
     gt_hashmap_delete(diagram->blocks);
   gt_hashmap_delete(diagram->nodeinfo);
+  gt_hashmap_delete(diagram->collapsingtypes);
+  gt_hashmap_delete(diagram->groupedtypes);
+  gt_hashmap_delete(diagram->caption_display_status);
   gt_array_delete(diagram->custom_tracks);
   gt_free(diagram);
 }
