@@ -112,6 +112,7 @@ GtCanvas* gt_canvas_cairo_file_new(GtStyle *style,
   if (image_info)
     gt_image_info_set_height(image_info, height);
   canvas->pvt->sty = style;
+  canvas->pvt->y += 0.5;
   canvas->pvt->ii = image_info;
   canvas->pvt->width = width;
   canvas->pvt->height = height;

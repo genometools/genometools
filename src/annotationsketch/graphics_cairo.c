@@ -60,16 +60,8 @@ static cairo_status_t str_write_func(void *closure, const unsigned char *data,
   return CAIRO_STATUS_SUCCESS;
 }
 
-static inline int sgn(double num) {
-  return num ? (gt_double_smaller_double(0, num) ? 1 : -1) : 0;
-}
-
 /* to get crisp lines, round coordinates to .5 */
-static inline double rnd_to_nhalf(double num)
-{
-  double val = floor(2.0*(num+0.5));
-  return val/2.0;
-}
+#define rnd_to_nhalf(num) (floor(num+0.5)+0.5)
 
 void gt_graphics_cairo_initialize(GtGraphics *gg, GtGraphicsOutType type,
                                   unsigned int width, unsigned int height)
@@ -298,9 +290,9 @@ void gt_graphics_cairo_draw_vertical_line(GtGraphics *gg, double x, double y,
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   gt_assert(g);
   cairo_save(g->cr);
-  cairo_move_to(g->cr, rnd_to_nhalf(x), y);
+  cairo_move_to(g->cr, rnd_to_nhalf(x), rnd_to_nhalf(y));
   cairo_set_line_width(g->cr, 1);
-  cairo_rel_line_to(g->cr, 0, length);
+  cairo_rel_line_to(g->cr, 0, floor(length));
   cairo_set_line_width(g->cr, stroke_width);
   cairo_set_source_rgba(g->cr, color.red, color.green, color.blue, color.alpha);
   cairo_stroke(g->cr);
@@ -352,7 +344,7 @@ void gt_graphics_cairo_draw_box(GtGraphics *gg, double x, double y,
       cairo_move_to(g->cr, rnd_to_nhalf(x), rnd_to_nhalf(y));
       if (widthdiff_geq0)
         cairo_line_to(g->cr, x + width - arrow_width, rnd_to_nhalf(y));
-      cairo_line_to(g->cr, x + width, y + height / 2);
+      cairo_line_to(g->cr, rnd_to_nhalf(x + width), rnd_to_nhalf(y + height / 2));
       if (widthdiff_geq0)
         cairo_line_to(g->cr, x + width - arrow_width, rnd_to_nhalf(y + height));
       cairo_line_to(g->cr, rnd_to_nhalf(x), rnd_to_nhalf(y + height));
@@ -440,26 +432,26 @@ void gt_graphics_cairo_draw_dashes(GtGraphics *gg, double x, double y,
     switch (arrow_status)
     {
       case ARROW_RIGHT:
-        cairo_move_to(g->cr, x + width - arrow_width, y);
-        cairo_line_to(g->cr, x + width, y + height / 2);
-        cairo_line_to(g->cr, x + width - arrow_width, y + height);
+        cairo_move_to(g->cr, rnd_to_nhalf(x + width - arrow_width), y);
+        cairo_line_to(g->cr, rnd_to_nhalf(x + width), y + height / 2);
+        cairo_line_to(g->cr, rnd_to_nhalf(x + width - arrow_width), y + height);
         /* draw arrowhead */
         cairo_stroke(g->cr);
         break;
       case ARROW_LEFT:
-        cairo_move_to(g->cr, x + arrow_width, y);
-        cairo_line_to(g->cr, x, y + height / 2);
-        cairo_line_to(g->cr, x + arrow_width, y + height);
+        cairo_move_to(g->cr, rnd_to_nhalf(x + arrow_width), y);
+        cairo_line_to(g->cr, rnd_to_nhalf(x), y + height / 2);
+        cairo_line_to(g->cr, rnd_to_nhalf(x + arrow_width), y + height);
         /* draw arrowhead */
         cairo_stroke(g->cr);
         break;
       case ARROW_BOTH:
-        cairo_move_to(g->cr, x + width - arrow_width, y);
-        cairo_line_to(g->cr, x + width, y + height / 2);
-        cairo_line_to(g->cr, x + width - arrow_width, y + height);
-        cairo_move_to(g->cr, x + arrow_width, y);
-        cairo_line_to(g->cr, x, y + height / 2);
-        cairo_line_to(g->cr, x + arrow_width, y + height);
+        cairo_move_to(g->cr, rnd_to_nhalf(x + width - arrow_width), y);
+        cairo_line_to(g->cr, rnd_to_nhalf(x + width), y + height / 2);
+        cairo_line_to(g->cr, rnd_to_nhalf(x + width - arrow_width), y + height);
+        cairo_move_to(g->cr, rnd_to_nhalf(x + arrow_width), y);
+        cairo_line_to(g->cr, rnd_to_nhalf(x), y + height / 2);
+        cairo_line_to(g->cr, rnd_to_nhalf(x + arrow_width), y + height);
         cairo_stroke(g->cr);
         break;
       case ARROW_NONE: break;
@@ -467,8 +459,8 @@ void gt_graphics_cairo_draw_dashes(GtGraphics *gg, double x, double y,
   }
   /* draw dashes */
   cairo_set_dash(g->cr, dashes, 1, (double) 0);
-  cairo_move_to(g->cr, x, y+(height/2));
-  cairo_rel_line_to(g->cr, width, 0);
+  cairo_move_to(g->cr, rnd_to_nhalf(x), rnd_to_nhalf(y+(height/2)));
+  cairo_rel_line_to(g->cr, rnd_to_nhalf(width), 0);
   cairo_stroke(g->cr);
   /* restore cairo context */
   cairo_restore(g->cr);

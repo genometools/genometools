@@ -80,6 +80,7 @@ GtCanvas* gt_canvas_cairo_context_new(GtStyle *style, cairo_t *context,
   if (image_info)
     gt_image_info_set_height(image_info, height);
   canvas->pvt->sty = style;
+  canvas->pvt->y += 0.5;
   canvas->pvt->ii = image_info;
   canvas->pvt->width = width;
   canvas->pvt->height = height;
