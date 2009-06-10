@@ -796,8 +796,6 @@ GtPdomResults* gt_pdom_finder_find(GtPdomFinder *gpf, const char *seq,
   int i,
       had_err = 0;
   unsigned int frame;
-  if (strlen(seq) != strlen(rev_seq))
-    printf("%d<->%d\n", strlen(seq), strlen(rev_seq));
   gt_assert(seq && rev_seq && strlen(seq) == strlen(rev_seq) && element);
 
   gpf->elem = element;
