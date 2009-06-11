@@ -671,7 +671,7 @@ void gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange)
                                    rulercol,
                                    canvas->pvt->width - 2
                                      * canvas->pvt->margins,
-                                   1.5);
+                                   1.25);
   /* put 3' and 5' captions at the ends */
   gt_graphics_draw_text_centered(canvas->pvt->g,
                                  canvas->pvt->margins - 10,
