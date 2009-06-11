@@ -202,6 +202,7 @@ static void checkmstats(void *processinfo,
   realmstatlength = genericmstats((const Limdfsresources *) processinfo,
                                   twl->tagptr + patternstartpos,
                                   twl->tagptr + twl->taglen);
+#ifndef NDEBUG
   if (mstatlength != realmstatlength)
   {
     fprintf(stderr,"patternstartpos = %lu: mstatlength = %lu != %lu "
@@ -209,6 +210,7 @@ static void checkmstats(void *processinfo,
                     patternstartpos,mstatlength,realmstatlength);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
+#endif
   if (intervalwidthleq((const Limdfsresources *) processinfo,leftbound,
                        rightbound))
   {
@@ -524,7 +526,7 @@ static void searchoverstrands(const TageratorOptions *tageratoroptions,
 
 int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
 {
-  bool haserr = false;
+  bool haserr = false, firstitem;
   int retval;
   Myersonlineresources *mor = NULL;
   Genericindex *genericindex = NULL;
@@ -682,14 +684,21 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
         copy_reversecomplement(twl.rctransformedtag,twl.transformedtag,
                                twl.taglen);
         twl.tagptr = twl.transformedtag;
+        firstitem = true;
         printf("#");
         if (tageratoroptions->outputmode & TAGOUT_TAGNUM)
         {
           printf("\t" Formatuint64_t,PRINTuint64_tcast(tagnumber));
+          firstitem = false;
+        }
+        if (tageratoroptions->outputmode & TAGOUT_TAGLENGTH)
+        {
+          ADDTABULATOR;
+          printf("%lu",twl.taglen);
         }
         if (tageratoroptions->outputmode & TAGOUT_TAGSEQ)
         {
-          printf("\t%lu\t",twl.taglen);
+          ADDTABULATOR;
           fprintfsymbolstring(stdout,alpha,twl.transformedtag,twl.taglen);
         }
         printf("\n");
