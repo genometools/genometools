@@ -382,6 +382,9 @@ int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem,
                           &stroke_width,
                           gt_element_get_node_ref(elem)))
       stroke_width = STROKE_WIDTH_DEFAULT;
+    (void) gt_style_get_num(canvas->pvt->sty, type, "stroke_width",
+                            &stroke_width,
+                            gt_element_get_node_ref(elem));
   }
   (void) gt_style_get_color(canvas->pvt->sty, type, "fill", &fill_color,
                             gt_element_get_node_ref(elem));
@@ -397,7 +400,7 @@ int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem,
                                    canvas->pvt->y - bar_height/2,
                                    elem_color,
                                    bar_height,
-                                   1.0);
+                                   stroke_width);
     gt_bittab_set_bit(canvas->pvt->bt, (unsigned long) draw_range.start);
   }
 
