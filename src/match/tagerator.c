@@ -67,6 +67,7 @@ typedef struct
   const SfxAlphabet *alpha;
   unsigned long *eqsvector;
   const Tagwithlength *twlptr;
+  const Encodedsequence *encseq;
 } Showmatchinfo;
 
 #define ADDTABULATOR\
@@ -92,7 +93,19 @@ static void showmatch(void *processinfo,const GtMatch *match)
   if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_DBSTARTPOS)
   {
     ADDTABULATOR;
-    printf(FormatSeqpos,PRINTSeqposcast(match->dbstartpos));
+    if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_DBABSPOS)
+    {
+      printf(FormatSeqpos,PRINTSeqposcast(match->dbstartpos));
+    } else
+    {
+      Seqinfo seqinfo;
+      unsigned long seqnum = getencseqfrompos2seqnum(showmatchinfo->encseq,
+                                                     match->dbstartpos);
+      getencseqSeqinfo(&seqinfo,showmatchinfo->encseq,seqnum);
+      gt_assert(seqinfo.seqstartpos <= match->dbstartpos);
+      printf("%lu\t" FormatSeqpos,seqnum,
+                    PRINTSeqposcast(match->dbstartpos - seqinfo.seqstartpos));
+    }
   }
   if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_DBSEQUENCE)
   {
@@ -554,7 +567,8 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
                                     tageratoroptions->withesa ||
                                     tageratoroptions->docompare,
                                     false,
-                                    false,
+                                    (tageratoroptions->outputmode &
+                                     TAGOUT_DBABSPOS) ? false : true,
                                     tageratoroptions->userdefinedmaxdepth,
                                     verboseinfo,
                                     err);
@@ -601,6 +615,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
       processmatchinfoonline = &storeonline;
       processmatchinfooffline = &storeoffline;
       showmatchinfo.eqsvector = NULL;
+      showmatchinfo.encseq = encseq;
     } else
     {
       processmatch = showmatch;
@@ -610,6 +625,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
       showmatchinfo.alpha = alpha;
       showmatchinfo.eqsvector = gt_malloc(sizeof(*showmatchinfo.eqsvector) *
                                           showmatchinfo.alphasize);
+      showmatchinfo.encseq = encseq;
       processmatchinfooffline = &showmatchinfo;
       processmatchinfoonline = &showmatchinfo;
     }
