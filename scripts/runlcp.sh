@@ -22,7 +22,7 @@ fi
 
 suffixeratornoidxnolcp()
 {
-  ${RUNNER} gt suffixerator -v -showtime -dna -tis -suf -des -ssp -db ${filename} $*
+  ${RUNNER} gt suffixerator -showtime -dna -tis -suf -des -ssp -db ${filename} $*
 }
 
 suffixerator()
