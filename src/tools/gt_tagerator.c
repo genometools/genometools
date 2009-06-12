@@ -30,7 +30,7 @@ static const Optionargmodedesc outputmodedesctable[] =
   {"tagseq","tag sequence",TAGOUT_TAGSEQ},
   {"dblength","length of match in database",TAGOUT_DBLENGTH},
   {"dbstartpos","start position of match in database",TAGOUT_DBSTARTPOS},
-  {"abspos","show absolute value of dbstartpos",TAGOUT_DBABSPOS},
+  {"abspos","absolute value of dbstartpos",TAGOUT_DBABSPOS},
   {"dbsequence","sequence of match",TAGOUT_DBSEQUENCE},
   {"strand","strand",TAGOUT_STRAND},
   {"edist","edit distance",TAGOUT_EDIST},
