@@ -33,6 +33,7 @@ filenametab = Hash.new()
 parmstab = Hash.new()
 runtimes = Hash.new()
 spacereq = Hash.new()
+datestring=''
 
 parms=''
 filename=''
@@ -58,6 +59,11 @@ f.each_line do |line|
         checkvalues(filename,parms)
         space=s[1]
         spacereq[makehashkey(filename,parms)] = space.to_f
+      else
+        d = line.match(/# DATE ([0-9\-\:]*)/)
+        if d
+          datestring=d[1]
+        end
       end
     end
   end
@@ -69,7 +75,10 @@ end
 
 print <<'TEXT'
 \documentclass[12pt]{article}
+\usepackage{rotating}
+\usepackage{a4wide}
 \begin{document}
+\begin{sidewaystable}
 \begin{center}
 TEXT
 
@@ -131,5 +140,11 @@ end
 print <<'TEXT'
 \end{tabular}
 \end{center}
+TEXT
+
+puts "\\caption{run at #{datestring}}"
+
+print <<'TEXT'
+\end{sidewaystable}
 \end{document}
 TEXT

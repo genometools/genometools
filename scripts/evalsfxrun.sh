@@ -1,6 +1,20 @@
 #!/bin/sh
 
-regularfiles=at1MB
+set -e -x
+
+if test $# -ne 1
+then
+  echo "Usage: $0 [small|all]"
+  exit 1
+fi
+
+if test $1 = 'small'
+then
+  regularfiles="at1MB ecoli1 ecoli2"
+else
+  regularfiles="at1MB ecoli1 ecoli2 yeast dmel human2"
+fi
+
 repetitivefiles=mfd
 
 code2file()
@@ -10,6 +24,16 @@ code2file()
       echo "testdata/at1MB";;
     mfd)
       echo "${HOME}/seqcmpprojects/MouthFootDisease/mfdallpart.fna.gz";;
+    yeast)
+      echo "${HOME}/seqcmpprojects/yeast/yeast.fna.gz";;
+    human2)
+      echo "${PROJECT}/biodata/genomes/H_sapiens-build36.54-2009/Homo_sapiens.NCBI36.54.dna.chromosome.02.fa.gz";;
+    dmel)
+      echo "${HOME}/seqcmpprojects/d_mel/d_mel.fna.gz";;
+    ecoli1)
+      echo "${PROJECT}/biodata/genomes/Bacteria/Ecoli/ecoli.fna";;
+    ecoli2)
+      echo "${PROJECT}/biodata/genomes/Bacteria/Ecoli_O157_H7/AE005174.fna";;
     *)
       echo "$0: illegal filecode $1"
       exit 1;;
@@ -38,6 +62,20 @@ suffixerator()
   ${RUNNER} gt suffixerator -showtime -indexname sfx-id -dna -tis -suf -db ${filename} $* | egrep '# TIME overall|# space peak'
 }
 
+for rfc in $regularfiles  $repetitivefiles
+do
+  fn=`code2file ${rfc}`
+  echo "\"${fn}\""
+  if test -f ${fn}
+  then
+    echo "OKAY: ${fn}"
+  else
+    echo "FAILURE: ${fn} does not exist"
+    exit 1
+  fi
+done
+
+echo "# DATE `date +%Y-%m-%d-%H:%M`"
 for rfc in $regularfiles $repetitivefiles
 do
   checkregular ${rfc}
@@ -46,7 +84,7 @@ do
     suffixerator ${rfc} -cmpcharbychar ""
     suffixerator ${rfc} ""
   fi
-  for dc in 8 32 128
+  for dc in 32 128 256
   do
     suffixerator ${rfc} -cmpcharbychar -dc ${dc}
     suffixerator ${rfc} -dc ${dc}
