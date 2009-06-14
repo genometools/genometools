@@ -496,6 +496,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
     {
       sfi->spaceCodeatposition = NULL;
     }
+    sfi->bcktab = NULL;
     sfi->nextfreeCodeatposition = 0;
     sfi->suftab.sortspace = NULL;
     sfi->suftabparts = NULL;
@@ -570,8 +571,8 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
           haserr = true;
           differencecover_delete(sfi->dcov);
           sfi->dcov = NULL;
-        } else
-        {
+	} else
+	{
           showverbose(verboseinfo,"presorting sample suffixes according to "
                                   "difference cover modulo %u",
                                   sfi->sfxstrategy.differencecover);
