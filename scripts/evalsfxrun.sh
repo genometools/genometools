@@ -34,8 +34,8 @@ suffixerator()
   fc=$1
   filename=`code2file $1`
   shift
-  printf "# PROGNAME $fc $*\n"
-  ${RUNNER} gt suffixerator -showtime -indexname sfx-id -dna -tis -suf -db ${filename} $* | egrep 'RUN|# TIME overall|# space peak'
+  printf "# RUN $fc $*\n"
+  ${RUNNER} gt suffixerator -showtime -indexname sfx-id -dna -tis -suf -db ${filename} $* | egrep '# TIME overall|# space peak'
 }
 
 for rfc in $regularfiles $repetitivefiles
