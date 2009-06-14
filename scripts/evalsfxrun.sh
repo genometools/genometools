@@ -1,7 +1,5 @@
 #!/bin/sh
 
-set -e -x
-
 if test $# -ne 1
 then
   echo "Usage: $0 [small|all]"
@@ -10,9 +8,9 @@ fi
 
 if test $1 = 'small'
 then
-  regularfiles="at1MB ecoli1 ecoli2"
+  regularfiles="at1MB ecoli1 ecoli2 swiss1MB"
 else
-  regularfiles="at1MB ecoli1 ecoli2 yeast dmel human2"
+  regularfiles="at1MB ecoli1 ecoli2 swiss1MB yeast dmel human2"
 fi
 
 repetitivefiles=mfd
@@ -34,6 +32,8 @@ code2file()
       echo "${PROJECT}/biodata/genomes/Bacteria/Ecoli/ecoli.fna";;
     ecoli2)
       echo "${PROJECT}/biodata/genomes/Bacteria/Ecoli_O157_H7/AE005174.fna";;
+    swiss1MB)
+      echo "${GTTESTDATA}/swissprot/swiss1MB";;
     *)
       echo "$0: illegal filecode $1"
       exit 1;;
@@ -59,17 +59,14 @@ suffixerator()
   filename=`code2file $1`
   shift
   printf "# RUN $fc $*\n"
-  ${RUNNER} gt suffixerator -showtime -indexname sfx-id -dna -tis -suf -db ${filename} $* | egrep '# TIME overall|# space peak'
+  ${RUNNER} gt suffixerator -showtime -indexname sfx-id -tis -suf -db ${filename} $* | egrep '# TIME overall|# space peak'
 }
 
 for rfc in $regularfiles  $repetitivefiles
 do
   fn=`code2file ${rfc}`
-  echo "\"${fn}\""
-  if test -f ${fn}
+  if test ! -f ${fn}
   then
-    echo "OKAY: ${fn}"
-  else
     echo "FAILURE: ${fn} does not exist"
     exit 1
   fi
