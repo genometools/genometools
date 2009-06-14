@@ -6,14 +6,20 @@ then
   exit 1
 fi
 
-if test $1 = 'small'
-then
-  regularfiles="at1MB ecoli1 ecoli2 swiss1MB"
-else
-  regularfiles="at1MB ecoli1 ecoli2 swiss1MB yeast dmel human2"
-fi
-
-repetitivefiles=mfd
+case $1 in
+  small) regularfiles="at1MB ecoli1 ecoli2 swiss1MB"
+         repetitivefiles=
+         ;;
+  all)   regularfiles="at1MB ecoli1 ecoli2 swiss1MB yeast dmel human2"
+         repetitivefiles=mfd
+         ;;
+  mfd)   regularfiles=
+         repetitivefiles=mfd
+         ;;
+  *)     regularfiles=$1
+         repetitivefiles=
+         ;;
+esac
 
 code2file()
 {

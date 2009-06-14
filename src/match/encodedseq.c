@@ -4547,7 +4547,7 @@ Codetype extractprefixcode(unsigned int *unitsnotspecial,
   }
   if (*unitsnotspecial < prefixlength)
   {
-    code |= (Codetype) filltable[*unitsnotspecial];
+    code += (Codetype) filltable[*unitsnotspecial];
   }
   return code;
 }

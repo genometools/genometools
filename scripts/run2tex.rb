@@ -1,8 +1,12 @@
 #!/usr/bin/env ruby
 
-if ARGV.length != 1
-  STDERR.puts "Usage: #{$0} <runfile>"
+def usage()
+  STDERR.puts "Usage: #{$0} space|time <runfile>"
   exit 1
+end
+
+def puthline
+  puts "\\\\\\hline"
 end
 
 def makehashkey(filename,parms)
@@ -20,7 +24,79 @@ def checkvalues(filename,parms)
   end
 end
 
-fname=ARGV[0]
+def orderedkeys(ht)
+  return ht.keys.sort
+end
+
+def makebestlist(ftab,ptab,tab)
+  bestlist = Hash.new()
+  ftab.each_key do |filename|
+    tl = []
+    ptab.each_key do |parms|
+      t = tab[makehashkey(filename,parms)]
+      if t
+        tl.push t
+      end
+    end
+    bestlist[filename] = tl.min
+  end
+  return bestlist
+end
+
+def maketab(filenametab,parmstab,datestring,valuehash)
+  numoffiles=filenametab.length
+  puts "\\begin{sidewaystable}"
+  puts "\\begin{center}"
+  puts "\\begin{small}"
+  puts "\\begin{tabular}{|l|*{#{numoffiles}}{r|}}\\hline"
+  puts "parameter & \\multicolumn{#{numoffiles}}{c|}{files}"
+  puthline
+  orderedkeys(filenametab).each do |filename|
+    print "&#{filename}"
+  end
+  puthline
+  bestlist=makebestlist(filenametab,parmstab,valuehash)
+  orderedkeys(parmstab).each do |parms|
+    print "\\texttt{#{parms}}"
+    orderedkeys(filenametab).each do |filename|
+	print "&"
+	v = valuehash[makehashkey(filename,parms)]
+	if v
+	  if v == bestlist[filename]
+	    printf("\\textbf{%.2f}",v)
+	  else
+	    printf("%.2f",v)
+	  end
+	end
+    end
+    puthline
+  end
+  print <<'TEXT'
+  \end{tabular}
+  \end{small}
+  \end{center}
+TEXT
+  puts "\\caption{run at #{datestring}}"
+  puts "\\end{sidewaystable}"
+end
+
+if ARGV.length != 2
+  usage()
+end
+
+showtime=false
+showspace=false
+if ARGV[0] == 'time'
+  settime=true
+elsif ARGV[0] == 'space'
+  setspace=true
+elsif ARGV[0] == 'time+space'
+  settime=true
+  setspace=true
+else
+  usage()
+end
+fname=ARGV[1]
 
 begin
   f = File.open(fname,"r")
@@ -69,82 +145,21 @@ f.each_line do |line|
   end
 end
 
-def puthline
-  puts "\\\\\\hline"
-end
-
 print <<'TEXT'
-\documentclass[12pt]{article}
+\documentclass[11pt]{article}
 \usepackage{rotating}
 \usepackage{a4wide}
 \begin{document}
-\begin{sidewaystable}
-\begin{center}
 TEXT
 
-def orderedkeys(ht)
-  return ht.keys.sort
+if settime
+  maketab(filenametab,parmstab,datestring,runtimes)
 end
 
-def makebestlist(ftab,ptab,tab)
-  bestlist = Hash.new()
-  ftab.each_key do |filename|
-    tl = []
-    ptab.each_key do |parms|
-      t = tab[makehashkey(filename,parms)]
-      if t
-        tl.push t
-      end
-    end
-    bestlist[filename] = tl.min
-  end
-  return bestlist
-end
-
-numoffiles=filenametab.length
-puts "\\begin{tabular}{|l|*{#{2*numoffiles}}{r|}}\\hline"
-puts "parameter & \\multicolumn{#{2*numoffiles}}{c|}{files}"
-puthline
-orderedkeys(filenametab).each do |filename|
-  print "&\\multicolumn{2}{|c|}{#{filename}}"
-end
-puthline
-fastestlist=makebestlist(filenametab,parmstab,runtimes)
-spaceefflist=makebestlist(filenametab,parmstab,spacereq)
-
-orderedkeys(parmstab).each do |parms|
-  print "\\texttt{#{parms}}"
-  orderedkeys(filenametab).each do |filename|
-    t = runtimes[makehashkey(filename,parms)]
-    print "&"
-    if t
-      if t == fastestlist[filename]
-        printf("\\textbf{%.2f}",t)
-      else
-        printf("%.2f",t)
-      end
-    end
-    print "&"
-    s = spacereq[makehashkey(filename,parms)]
-    if s
-      if s == spaceefflist[filename]
-        printf("\\textbf{%.2f}",s)
-      else
-        printf("%.2f",s)
-      end
-    end
-  end
-  puthline
+if setspace
+  maketab(filenametab,parmstab,datestring,spacereq)
 end
 
 print <<'TEXT'
-\end{tabular}
-\end{center}
-TEXT
-
-puts "\\caption{run at #{datestring}}"
-
-print <<'TEXT'
-\end{sidewaystable}
 \end{document}
 TEXT
