@@ -9,6 +9,17 @@ def makehashkey(filename,parms)
   return filename + ' ' + parms
 end
 
+def checkvalues(filename,parms)
+  if filename == ''
+    STDERR.puts "filename is undefined"
+    exit 1
+  end
+  if parms == ''
+    STDERR.puts "parms is undefined"
+    exit 1
+  end
+end
+
 fname=ARGV[0]
 
 begin
@@ -21,6 +32,7 @@ end
 filenametab = Hash.new()
 parmstab = Hash.new()
 runtimes = Hash.new()
+spacereq = Hash.new()
 
 parms=''
 filename=''
@@ -37,16 +49,16 @@ f.each_line do |line|
   else
     t = line.match(/# TIME overall ([0-9\.]*)/)
     if t
-      if filename == ''
-        STDERR.puts "line #{line}: filename is undefined"
-        exit 1
-      end
-      if parms == ''
-        STDERR.puts "line #{line}: parms is undefined"
-        exit 1
-      end
+      checkvalues(filename,parms)
       timeresult=t[1].to_f
       runtimes[makehashkey(filename,parms)] = timeresult
+    else
+      s = line.match(/# space peak in megabytes: ([0-9\.]*)/)
+      if s
+        checkvalues(filename,parms)
+        space=s[1]
+        spacereq[makehashkey(filename,parms)] = space.to_f
+      end
     end
   end
 end
@@ -65,30 +77,31 @@ def orderedkeys(ht)
   return ht.keys.sort
 end
 
-def makefastestlist(ftab,ptab,rtimes)
-  fastestlist = Hash.new()
+def makebestlist(ftab,ptab,tab)
+  bestlist = Hash.new()
   ftab.each_key do |filename|
-    timelist = []
+    tl = []
     ptab.each_key do |parms|
-      t = rtimes[makehashkey(filename,parms)]
+      t = tab[makehashkey(filename,parms)]
       if t
-        timelist.push t
+        tl.push t
       end
     end
-    fastestlist[filename] = timelist.min
+    bestlist[filename] = tl.min
   end
-  return fastestlist
+  return bestlist
 end
 
 numoffiles=filenametab.length
-puts "\\begin{tabular}{|l|*{#{numoffiles}}{r|}}\\hline"
-puts "parameter & \\multicolumn{#{numoffiles}}{c|}{files}"
+puts "\\begin{tabular}{|l|*{#{2*numoffiles}}{r|}}\\hline"
+puts "parameter & \\multicolumn{#{2*numoffiles}}{c|}{files}"
 puthline
 orderedkeys(filenametab).each do |filename|
-  print "&#{filename}"
+  print "&\\multicolumn{2}{|c|}{#{filename}}"
 end
 puthline
-fastestlist=makefastestlist(filenametab,parmstab,runtimes)
+fastestlist=makebestlist(filenametab,parmstab,runtimes)
+spaceefflist=makebestlist(filenametab,parmstab,spacereq)
 
 orderedkeys(parmstab).each do |parms|
   print "\\texttt{#{parms}}"
@@ -100,6 +113,15 @@ orderedkeys(parmstab).each do |parms|
         printf("\\textbf{%.2f}",t)
       else
         printf("%.2f",t)
+      end
+    end
+    print "&"
+    s = spacereq[makehashkey(filename,parms)]
+    if s
+      if s == spaceefflist[filename]
+        printf("\\textbf{%.2f}",s)
+      else
+        printf("%.2f",s)
       end
     end
   end

@@ -45,8 +45,6 @@ do
   then
     suffixerator ${rfc} -cmpcharbychar ""
     suffixerator ${rfc} ""
-    suffixerator ${rfc} -cmpcharbychar -parts 3
-    suffixerator ${rfc} -parts 3
   fi
   for dc in 8 32 128
   do
