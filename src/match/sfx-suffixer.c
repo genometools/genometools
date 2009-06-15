@@ -571,12 +571,13 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
           haserr = true;
           differencecover_delete(sfi->dcov);
           sfi->dcov = NULL;
-	} else
-	{
+        } else
+        {
           showverbose(verboseinfo,"presorting sample suffixes according to "
                                   "difference cover modulo %u",
                                   sfi->sfxstrategy.differencecover);
-          differencecover_sortsample(sfi->dcov,false);
+          differencecover_sortsample(sfi->dcov,sfi->sfxstrategy.cmpcharbychar,
+                                     false);
         }
       }
     }
