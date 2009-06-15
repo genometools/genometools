@@ -11,10 +11,13 @@ case $1 in
          repetitivefiles=
          ;;
   all)   regularfiles="at1MB ecoli1 ecoli2 swiss1MB yeast dmel human2"
-         repetitivefiles=mfd
+         repetitivefiles="mfd paradoxus"
          ;;
   mfd)   regularfiles=
          repetitivefiles=mfd
+         ;;
+  paradoxus)   regularfiles=
+         repetitivefiles=paradoxus
          ;;
   *)     regularfiles=$1
          repetitivefiles=
@@ -40,6 +43,8 @@ code2file()
       echo "${PROJECT}/biodata/genomes/Bacteria/Ecoli_O157_H7/AE005174.fna";;
     swiss1MB)
       echo "${GTTESTDATA}/swissprot/swiss1MB";;
+    paradoxus)
+      echo "/local/kurtz/sfx-test/data/S-paradoxus.fna";;
     *)
       echo "$0: illegal filecode $1"
       exit 1;;
@@ -65,7 +70,7 @@ suffixerator()
   filename=`code2file $1`
   shift
   printf "# RUN $fc $*\n"
-  ${RUNNER} gt suffixerator -showtime -indexname sfx-id -tis -suf -db ${filename} $* | egrep '# TIME overall|# space peak'
+  ${RUNNER} gt suffixerator -v -showtime -indexname sfx-id -tis -suf -db ${filename} $* | egrep '# TIME overall|# space peak'
 }
 
 for rfc in $regularfiles  $repetitivefiles
