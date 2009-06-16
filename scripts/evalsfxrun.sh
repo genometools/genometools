@@ -6,21 +6,14 @@ then
   exit 1
 fi
 
+repetitivefiles="mfd paradoxus"
+
 case $1 in
-  small) regularfiles="at1MB ecoli1 ecoli2 swiss1MB"
-         repetitivefiles=
+  small) allfiles="at1MB ecoli1 ecoli2 swiss1MB yeast mfd"
          ;;
-  all)   regularfiles="at1MB ecoli1 ecoli2 swiss1MB yeast dmel human2"
-         repetitivefiles="mfd paradoxus"
+  all)   allfiles="at1MB ecoli1 ecoli2 swiss1MB yeast mfd dmel human2 paradoxus"
          ;;
-  mfd)   regularfiles=
-         repetitivefiles=mfd
-         ;;
-  paradoxus)   regularfiles=
-         repetitivefiles=paradoxus
-         ;;
-  *)     regularfiles=$1
-         repetitivefiles=
+  *)     allfiles=$1
          ;;
 esac
 
@@ -51,17 +44,17 @@ code2file()
   esac
 }
 
-checkregular()
+checkrepetitive()
 {
   filename=$1
-  for cfc in ${regularfiles}
+  for cfc in ${repetitivefiles}
   do
     if test ${cfc} = ${filename}
     then
-      return 0
+      return 1
     fi
   done
-  return 1
+  return 0
 }
 
 suffixerator()
@@ -73,7 +66,7 @@ suffixerator()
   ${RUNNER} gt suffixerator -v -showtime -indexname sfx-id -tis -suf -db ${filename} $* | egrep '# TIME overall|# space peak'
 }
 
-for rfc in $regularfiles  $repetitivefiles
+for rfc in $allfiles
 do
   fn=`code2file ${rfc}`
   if test ! -f ${fn}
@@ -84,9 +77,9 @@ do
 done
 
 echo "# DATE `date +%Y-%m-%d-%H:%M`"
-for rfc in $regularfiles $repetitivefiles
+for rfc in $allfiles
 do
-  checkregular ${rfc}
+  checkrepetitive ${rfc}
   if test $? -eq 0
   then
     suffixerator ${rfc} -cmpcharbychar ""
