@@ -87,9 +87,6 @@ struct Differencecover
   Bcktab *bcktab;
   const Encodedsequence *encseq;
   Readmode readmode;
-  /* XXX instead of this array use coverrank array of which the unused
-         entries store some flag v+1 which is not in the range. */
-  Bitsequence *isindifferencecover;
   unsigned long samplesize, effectivesamplesize, maxsamplesize;
   const Codetype **multimappower;
   Codetype *filltable;
@@ -122,15 +119,21 @@ static void fillcoverrank(Differencecover *dcov)
   Diffrank j;
 
   dcov->coverrank = gt_malloc(sizeof(*dcov->coverrank) * dcov->vparam);
-  for (i=0, j=0; i<dcov->vparam; i++)
+  gt_assert(dcov->size <= Diffrankmax);
+  for (i=0; i<dcov->vparam; i++)
   {
-    dcov->coverrank[i] = j;
-    if (j < dcov->size && dcov->diffvalues[j] <= (Diffvalue) i)
-    {
-      gt_assert(j < Diffrankmax);
-      j++;
-    }
+    dcov->coverrank[i] = dcov->size;
   }
+  for (j=0; j<dcov->size; j++)
+  {
+    dcov->coverrank[dcov->diffvalues[j]] = j;
+  }
+}
+
+static bool checkifindifferencecover(const Differencecover *dcov,
+                                     unsigned int modpos)
+{
+  return dcov->coverrank[modpos] == dcov->size ? false : true;
 }
 
 static void filldiff2pos(Differencecover *dcov)
@@ -234,7 +237,6 @@ Differencecover *differencecover_new(unsigned int vparam,
 #endif
   dcov->encseq = encseq;
   dcov->readmode = readmode;
-  dcov->isindifferencecover = NULL;
   dcov->bcktab = NULL;
   dcov->sortedsample = NULL;
   dcov->filltable = NULL;
@@ -271,7 +273,6 @@ void differencecover_delete(Differencecover *dcov)
 {
   gt_assert(dcov->bcktab == NULL);
   gt_assert(dcov->sortedsample == NULL);
-  gt_assert(dcov->isindifferencecover == NULL);
   gt_assert(dcov->filltable == NULL);
   gt_assert(dcov->multimappower == NULL);
   gt_assert(dcov->esr == NULL);
@@ -321,7 +322,7 @@ static unsigned long derivespecialcodesonthefly(Differencecover *dcov,
       {
         gt_assert(specialcontext.position >= (Seqpos) prefixindex);
         pos = (Seqpos) (specialcontext.position - prefixindex);
-        if (ISIBITSET(dcov->isindifferencecover,MODV(pos)))
+        if (checkifindifferencecover(dcov,MODV(pos)))
         {
           if (codelist != NULL)
           {
@@ -476,7 +477,7 @@ static unsigned long insertfullspecialrangesample(Differencecover *dcov,
     if (ISDIRREVERSE(dcov->readmode))
     {
       Seqpos revpos = REVERSEPOS(dcov->totallength,pos);
-      if (ISIBITSET(dcov->isindifferencecover,MODV(revpos)))
+      if (checkifindifferencecover(dcov,MODV(revpos)))
       {
         inversesuftab_set(dcov,revpos,specialidx);
         specialidx++;
@@ -488,7 +489,7 @@ static unsigned long insertfullspecialrangesample(Differencecover *dcov,
       pos--;
     } else
     {
-      if (ISIBITSET(dcov->isindifferencecover,MODV(pos)))
+      if (checkifindifferencecover(dcov,MODV(pos)))
       {
         inversesuftab_set(dcov,pos,specialidx);
         specialidx++;
@@ -530,13 +531,11 @@ static void initinversesuftabspecials(Differencecover *dcov)
     }
     freespecialrangeiterator(&sri);
   }
-  if (ISIBITSET(dcov->isindifferencecover,MODV(dcov->totallength)))
+  if (checkifindifferencecover(dcov,MODV(dcov->totallength)))
   {
     gt_assert(dcov->samplesize > 0);
     inversesuftab_set(dcov,dcov->totallength,dcov->samplesize-1);
   }
-  gt_free(dcov->isindifferencecover);
-  dcov->isindifferencecover = NULL;
 }
 
 static void dc_updatewidth (Differencecover *dcov,unsigned long width,
@@ -952,7 +951,6 @@ void differencecover_sortsample(Differencecover *dcov,bool cmpcharbychar,
   GT_INITARRAY(&codelist,Codeatposition);
   diffptr = dcov->diffvalues;
   afterend = dcov->diffvalues + dcov->size;
-  INITBITTAB(dcov->isindifferencecover,dcov->vparam);
   for (pos = 0, modvalue = 0; pos <= dcov->totallength; pos++)
   {
     if (diffptr < afterend && (Diffvalue) modvalue == *diffptr)
@@ -973,7 +971,6 @@ void differencecover_sortsample(Differencecover *dcov,bool cmpcharbychar,
         code = 0;
         unitsnotspecial = 0;
       }
-      SETIBIT(dcov->isindifferencecover,modvalue);
       dcov->samplesize++;
       if (unitsnotspecial > 0)
       {
