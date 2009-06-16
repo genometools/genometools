@@ -114,7 +114,7 @@ struct Differencecover
 
 #include "tab-diffcover.h"
 
-#define QSORT_INTEGER
+#undef QSORT_INTEGER
 #ifdef QSORT_INTEGER
 typedef unsigned long Sorttype;
 
@@ -864,6 +864,7 @@ static void dc_addunsortedrange(void *voiddcov,
   ptr->right = right;
 }
 
+#ifdef QSORT_INTEGER
 static int comparedcov_presortedsuffixes(const void *a,const void *b,
                                          void *data)
 {
@@ -890,6 +891,39 @@ static int comparedcov_presortedsuffixes(const void *a,const void *b,
   return 0;
 }
 
+#else
+
+typedef Seqpos Sorttype;
+
+static int qsortcmp (const Sorttype *a,const Sorttype *b,
+                     const void *data)
+{
+  const Differencecover *dcov = (const Differencecover *) data;
+  const Seqpos suffixpos1 = *a;
+  const Seqpos suffixpos2 = *b;
+  unsigned long idx1, idx2;
+  unsigned int offset;
+
+  gt_assert(suffixpos1 < dcov->totallength);
+  gt_assert(suffixpos2 < dcov->totallength);
+  offset = differencecover_offset(dcov,suffixpos1,suffixpos2);
+  idx1 = inversesuftab_get(dcov,suffixpos1 + offset);
+  idx2 = inversesuftab_get(dcov,suffixpos2 + offset);
+  if (idx1 < idx2)
+  {
+    return -1;
+  }
+  if (idx1 > idx2)
+  {
+    return 1;
+  }
+  gt_assert(false);
+  return 0;
+}
+
+#include "qsort-inplace.gen"
+#endif
+
 void dc_sortunsortedbucket(void *data,
                            Seqpos *left,
                            Seqpos *right,
@@ -913,8 +947,12 @@ void dc_sortunsortedbucket(void *data,
                       false,  /* specialsareequalatdepth0 */
                       (Seqpos) dcov->vparam);
 #endif
+#ifdef QSORT_INTEGER
   gt_qsort_r(left,(size_t) (right - left + 1),sizeof(Seqpos),data,
              comparedcov_presortedsuffixes);
+#else
+  gt_inlined_qsort_r (left,(unsigned long) (right - left + 1),data);
+#endif
 }
 
 static void dc_sortremainingsamples(Differencecover *dcov)
