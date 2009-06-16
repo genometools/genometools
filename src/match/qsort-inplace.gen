@@ -25,23 +25,7 @@
           *bptr++ = tmp;\
         }
 
-typedef unsigned int Sorttype;
-
-static int qsortcmp (Sorttype * a,Sorttype * b,GT_UNUSED void *data)
-{
-  if ((*a) < (*b))
-  {
-    return -1;
-  }
-  if ((*a) > (*b))
-  {
-    return 1;
-  }
-  return 0;
-}
-
-static inline Sorttype *med3 (Sorttype * a, Sorttype * b, Sorttype * c,
-                              void *data)
+static inline Sorttype *med3 (Sorttype *a, Sorttype *b, Sorttype *c, void *data)
 {
   return qsortcmp (a, b, data) < 0 ?
     (qsortcmp (b, c, data) <
@@ -53,7 +37,7 @@ static inline Sorttype *med3 (Sorttype * a, Sorttype * b, Sorttype * c,
                                 0 ? a : c));
 }
 
-void gt_inlined_qsort_r (Sorttype * a,unsigned long n,void *data)
+void gt_inlined_qsort_r (Sorttype *a,unsigned long n,void *data)
 {
   Sorttype tmp, *pa, *pb, *pc, *pd, *pl, *pm, *pn, *aptr, *bptr;
   unsigned long d, minval;

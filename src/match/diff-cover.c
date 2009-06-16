@@ -23,6 +23,7 @@
 #include "core/error_api.h"
 #include "core/minmax.h"
 #include "core/arraydef.h"
+#include "core/mathsupport.h"
 #include "core/qsort_r.h"
 #include "divmodmul.h"
 #include "intbits-tab.h"
@@ -113,6 +114,48 @@ struct Differencecover
 
 #include "tab-diffcover.h"
 
+#define QSORT_INTEGER
+#ifdef QSORT_INTEGER
+typedef unsigned long Sorttype;
+
+static int qsortcmp (const Sorttype *a,const Sorttype *b,
+                     const GT_UNUSED void *data)
+{
+  if ((*a) < (*b))
+  {
+    return -1;
+  }
+  if ((*a) > (*b))
+  {
+    return 1;
+  }
+  return 0;
+}
+
+#include "qsort-inplace.gen"
+
+static void checkqsort(void)
+{
+#define MAXSIZE 100000
+
+  int times;
+  unsigned long idx, n = (unsigned long) MAXSIZE, a[MAXSIZE];
+
+  for (times = 0; times < 100; times++)
+  {
+    for (idx = 0; idx < n; idx++)
+    {
+      a[idx] = gt_rand_max(1000UL);
+    }
+    gt_inlined_qsort_r (a,n,NULL);
+    for (idx = 1UL; idx < n; idx++)
+    {
+      gt_assert(a[idx-1] <= a[idx]);
+    }
+  }
+}
+#endif
+
 static void fillcoverrank(Differencecover *dcov)
 {
   unsigned int i;
@@ -202,6 +245,9 @@ Differencecover *differencecover_new(unsigned int vparam,
   Differencecover *dcov;
   bool found = false;
 
+#ifdef QSORT_INTEGER
+  checkqsort();
+#endif
   dcov = gt_malloc(sizeof (*dcov));
   dcov->numofchars = getencseqAlphabetnumofchars(encseq);
   dcov->totallength = getencseqtotallength(encseq);
