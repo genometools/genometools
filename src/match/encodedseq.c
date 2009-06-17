@@ -1160,15 +1160,15 @@ static GtUchar delivercharViauchartablesSpecialrange(
                                               const Encodedsequence *encseq,
                                               Seqpos pos)
 {
-  if (ucharcheckspecialrange(encseq,pos))
+  if (ucharchecknospecialrange(encseq,pos))
   {
-    if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
-    {
-      return (GtUchar) SEPARATOR;
-    }
-    return (GtUchar) WILDCARD;
+    return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
   }
-  return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
+  if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
+  {
+    return (GtUchar) SEPARATOR;
+  }
+  return (GtUchar) WILDCARD;
 }
 
 /* Viaushorttables */
@@ -1192,15 +1192,15 @@ static GtUchar delivercharViaushorttablesSpecialrange(
                                                const Encodedsequence *encseq,
                                                Seqpos pos)
 {
-  if (ushortcheckspecialrange(encseq,pos))
+  if (ushortchecknospecialrange(encseq,pos))
   {
-    if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
-    {
-      return (GtUchar) SEPARATOR;
-    }
-    return (GtUchar) WILDCARD;
+    return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
   }
-  return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
+  if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
+  {
+    return (GtUchar) SEPARATOR;
+  }
+  return (GtUchar) WILDCARD;
 }
 
 /* Viauint32tables */
@@ -1224,15 +1224,15 @@ static GtUchar delivercharViauint32tablesSpecialrange(
                                                  const Encodedsequence *encseq,
                                                  Seqpos pos)
 {
-  if (uint32checkspecialrange(encseq,pos))
+  if (uint32checknospecialrange(encseq,pos))
   {
-    if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
-    {
-      return (GtUchar) SEPARATOR;
-    }
-    return (GtUchar) WILDCARD;
+    return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
   }
-  return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
+  if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
+  {
+    return (GtUchar) SEPARATOR;
+  }
+  return (GtUchar) WILDCARD;
 }
 
 static int fillplainseq(Encodedsequence *encseq,GtSequenceBuffer *fb,

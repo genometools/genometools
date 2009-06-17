@@ -76,6 +76,9 @@ do
   fi
 done
 
+# suffixerator ecoli2 -sat uint32 -dc 128
+# exit 0
+
 echo "# DATE `date +%Y-%m-%d-%H:%M`"
 for rfc in $allfiles
 do

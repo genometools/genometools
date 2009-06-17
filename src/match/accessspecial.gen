@@ -140,16 +140,18 @@ static bool ADDTYPE(binarysearchpage)(const SPECIALTYPE *leftptr,
   while (leftptr <= rightptr)
   {
     midptr = leftptr + DIV2((unsigned long) (rightptr-leftptr));
-    if (pos == *midptr)
-    {
-      return true;
-    }
     if (pos < *midptr)
     {
       rightptr = midptr-1;
     } else
     {
-      leftptr = midptr + 1;
+      if (pos > *midptr)
+      {
+        leftptr = midptr + 1;
+      } else
+      {
+        return true;
+      }
     }
   }
   return false;
@@ -221,7 +223,8 @@ static bool ADDTYPE(checkspecial)(const Encodedsequence *encseq,Seqpos pos)
   return false;
 }
 
-static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Seqpos pos)
+static bool ADDTYPE(checknospecialrange)(const Encodedsequence *encseq,
+                                         Seqpos pos)
 {
   unsigned long pagenumber = (unsigned long) POS2PAGENUM(pos);
   const SPECIALTYPE *found, *start;
@@ -244,7 +247,7 @@ static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Seqpos pos)
                           + 1;
         if (pos < rangeend)
         {
-          return true;
+          return false;
         }
       }
     }
@@ -270,7 +273,7 @@ static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Seqpos pos)
                  + 1;
         if (pos < rangeend)
         {
-          return true;
+          return false;
         }
       }
     }
@@ -286,7 +289,7 @@ static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Seqpos pos)
                    (Seqpos) ACCESSENCSEQ(encseq,specialrangelength)[idx] + 1;
         if (pos < rangeend)
         {
-          return true;
+          return false;
         }
       }
     } else
@@ -303,12 +306,12 @@ static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Seqpos pos)
                    (Seqpos) ACCESSENCSEQ(encseq,specialrangelength)[idx] + 1;
         if (pos < rangeend)
         {
-          return true;
+          return false;
         }
       }
     }
   }
-  return false;
+  return true;
 }
 
 #else
@@ -321,7 +324,7 @@ static bool ADDTYPE(checkspecial)(const Encodedsequence *encseq,Seqpos pos)
                                    pos);
 }
 
-static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,
+static bool ADDTYPE(checknospecialrange)(const Encodedsequence *encseq,
                                        Seqpos pos)
 {
   const SPECIALTYPE *found, *start;
@@ -331,19 +334,11 @@ static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,
                                              start +
                                              encseq->numofspecialstostore - 1,
                                              pos);
-  if (found != NULL)
-  {
-    Seqpos rangeend
-             = (Seqpos) *found +
-               (Seqpos) ACCESSENCSEQ(encseq,specialrangelength)
-                                    [(Seqpos) (found - start)]
-                        + 1;
-    if (pos < rangeend)
-    {
-      return true;
-    }
-  }
-  return false;
+  return (found != NULL &&
+          pos <= (Seqpos) *found +
+                 (Seqpos) ACCESSENCSEQ(encseq,specialrangelength)
+                                       [(Seqpos) (found - start)]) ? false
+                                                                   : true;
 }
 
 #endif
