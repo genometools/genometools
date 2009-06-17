@@ -82,14 +82,14 @@
         bsr->mkvauxstack.spaceMKVstack[bsr->mkvauxstack.nextfreeMKVstack]
 
 #define UPDATELCP(MINVAL,MAXVAL)\
-        gt_assert(commonunits < (unsigned int) UNITSIN2BITENC);\
-        if ((MINVAL) > commonunits)\
+        gt_assert(commonunits.common < (unsigned int) UNITSIN2BITENC);\
+        if ((MINVAL) > commonunits.common)\
         {\
-          MINVAL = commonunits;\
+          MINVAL = commonunits.common;\
         }\
-        if ((MAXVAL) < commonunits)\
+        if ((MAXVAL) < commonunits.common)\
         {\
-          MAXVAL = commonunits;\
+          MAXVAL = commonunits.common;\
         }
 
 typedef Seqpos Suffixptr;
@@ -401,22 +401,23 @@ static Suffixptr *medianof3(const Bentsedgresources *bsr,
                             Suffixptr *c)
 {
   Sfxcmp vala, valb, valc;
+  GtCommonunits commonunits;
   int retvalavalb, retvalavalc, retvalbvalc;
 
   PTR2INT(vala,a);
   PTR2INT(valb,b);
-  Sfxdocompare(NULL,vala,valb);
+  Sfxdocompare(&commonunits,vala,valb);
   if (SfxcmpEQUAL(vala,valb))
   {
     return a;
   }
   PTR2INT(valc,c);
-  Sfxdocompare(NULL,vala,valc);
+  Sfxdocompare(&commonunits,vala,valc);
   if (SfxcmpEQUAL(vala,valc))
   {
     return c;
   }
-  Sfxdocompare(NULL,valb,valc);
+  Sfxdocompare(&commonunits,valb,valc);
   if (SfxcmpEQUAL(valb,valc))
   {
     return c;
@@ -700,7 +701,7 @@ static MedianElem *quickmedian (bool fwd,bool complement,
                                 MedianElem *arr,unsigned long width)
 {
   MedianElem *low, *high, *median, *middle, *ll, *hh;
-  unsigned int commonunits;
+  GtCommonunits commonunits;
 
   gt_assert(width > 0);
   low = arr;
@@ -1069,7 +1070,8 @@ static void sarrcountingsort(Bentsedgresources *bsr,
                              unsigned long width)
 {
   int cmp;
-  unsigned int commonunits, maxsmallerwithlcp = 0, maxlargerwithlcp = 0;
+  unsigned int maxsmallerwithlcp = 0, maxlargerwithlcp = 0;
+  GtCommonunits commonunits;
   EndofTwobitencoding etbecurrent;
   unsigned long idx, smaller = 0, larger = 0,
                 insertindex, end, equaloffset, currentwidth;
@@ -1085,15 +1087,15 @@ static void sarrcountingsort(Bentsedgresources *bsr,
       cmp = compareTwobitencodings(bsr->fwd,bsr->complement,&commonunits,
                                    &etbecurrent,pivotcmpbits);
       bsr->countingsortinfo[idx].suffix = left[idx];
-      gt_assert(commonunits <= (unsigned int) UNITSIN2BITENC);
-      bsr->countingsortinfo[idx].lcpwithpivot = commonunits;
+      gt_assert(commonunits.common <= (unsigned int) UNITSIN2BITENC);
+      bsr->countingsortinfo[idx].lcpwithpivot = commonunits.common;
       if (cmp > 0)
       {
-        gt_assert(commonunits < (unsigned int) UNITSIN2BITENC);
-        bsr->rightlcpdist[commonunits]++;
-        if (maxlargerwithlcp < commonunits)
+        gt_assert(commonunits.common < (unsigned int) UNITSIN2BITENC);
+        bsr->rightlcpdist[commonunits.common]++;
+        if (maxlargerwithlcp < commonunits.common)
         {
-          maxlargerwithlcp = commonunits;
+          maxlargerwithlcp = commonunits.common;
         }
         bsr->countingsortinfo[idx].cmpresult = (char) 1;
         larger++;
@@ -1101,17 +1103,17 @@ static void sarrcountingsort(Bentsedgresources *bsr,
       {
         if (cmp < 0)
         {
-          gt_assert(commonunits < (unsigned int) UNITSIN2BITENC);
-          bsr->leftlcpdist[commonunits]++;
-          if (maxsmallerwithlcp < commonunits)
+          gt_assert(commonunits.common < (unsigned int) UNITSIN2BITENC);
+          bsr->leftlcpdist[commonunits.common]++;
+          if (maxsmallerwithlcp < commonunits.common)
           {
-            maxsmallerwithlcp = commonunits;
+            maxsmallerwithlcp = commonunits.common;
           }
           bsr->countingsortinfo[idx].cmpresult = (char) -1;
           smaller++;
         } else
         {
-          gt_assert(commonunits == (unsigned int) UNITSIN2BITENC);
+          gt_assert(commonunits.common == (unsigned int) UNITSIN2BITENC);
           bsr->countingsortinfo[idx].cmpresult = 0;
         }
       }
@@ -1224,8 +1226,8 @@ static void bentleysedgewick(Bentsedgresources *bsr,
     GtUchar tmpvar;
     Ordertype parentordertype;
     unsigned long w, width;
-    unsigned int commonunits, smallermaxlcp, greatermaxlcp,
-                 smallerminlcp, greaterminlcp;
+    GtCommonunits commonunits;
+    unsigned int smallermaxlcp, greatermaxlcp, smallerminlcp, greaterminlcp;
     const int commonunitsequal = bsr->sfxstrategy->cmpcharbychar
                                  ? 1
                                  : UNITSIN2BITENC;

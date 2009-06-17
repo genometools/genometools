@@ -365,9 +365,16 @@ static Seqpos fastgetlcp(GtUchar *mm_oldsuffix,
   }
   if (isleftofboundary(leafpos,lcp,blindtrie))
   {
+    /*
+    GtUchar tmp = extractencodedchar(blindtrie->encseq,leafpos + lcp,
+                                     blindtrie->readmode);
+    */
     *mm_oldsuffix = getencodedchar(blindtrie->encseq, /* Random access */
                                    leafpos + lcp,
                                    blindtrie->readmode);
+    /*
+    gt_assert(tmp == *mm_oldsuffix);
+    */
     if (*mm_oldsuffix == (GtUchar) WILDCARD)
     {
       *mm_oldsuffix = (GtUchar) SEPARATOR;

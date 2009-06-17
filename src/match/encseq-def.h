@@ -135,15 +135,25 @@ GtUchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                Readmode readmode);
 #endif
 
+GtUchar extractencodedchar(const Encodedsequence *encseq,
+                           Seqpos pos,
+                           Readmode readmode);
+
 void extract2bitenc(bool fwd,
                     EndofTwobitencoding *ptbe,
                     const Encodedsequence *encseq,
                     Encodedsequencescanstate *esr,
                     Seqpos startpos);
 
+typedef struct
+{
+  unsigned int common;
+  bool leftspecial, rightspecial;
+} GtCommonunits;
+
 int compareTwobitencodings(bool fwd,
                            bool complement,
-                           unsigned int *commonunits,
+                           GtCommonunits *commonunits,
                            const EndofTwobitencoding *ptbe1,
                            const EndofTwobitencoding *ptbe2);
 

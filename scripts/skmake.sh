@@ -34,7 +34,7 @@ fi
 
 # skproto-all.sh
 
-# GPROF=-pg
+GPROF=-pg
 
 makecompilerflags()
 {
