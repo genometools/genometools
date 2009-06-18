@@ -20,6 +20,7 @@
 #include "core/ma.h"
 #include "core/ensure.h"
 #include "core/unused_api.h"
+#include "core/xansi.h"
 #include "extended/tag_value_map.h"
 
 /* The GtTagValueMap is implemented as a simple char* which points to a memory
@@ -162,6 +163,29 @@ void gt_tag_value_map_foreach(const GtTagValueMap map,
     func(tag, map_ptr /* value */, data);
     while (*map_ptr++ != '\0'); /* skip value and \0 */
   } while (*map_ptr != '\0');
+}
+
+void gt_tag_value_map_show(const GtTagValueMap map)
+{
+  bool null_terminator_read = false;
+  const char *map_ptr;
+  gt_assert(map);
+  map_ptr = map;
+  for (;;) {
+    if (*map_ptr == '\0') {
+      printf("\\0");
+      if (null_terminator_read)
+        break;
+      else
+        null_terminator_read = true;
+    }
+    else {
+      gt_xputchar(*map_ptr);
+      null_terminator_read = false;
+    }
+    map_ptr++;
+  }
+  gt_xputchar('\n');
 }
 
 int gt_tag_value_map_example(GT_UNUSED GtError *err)

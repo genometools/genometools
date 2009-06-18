@@ -46,6 +46,7 @@ const char*   gt_tag_value_map_get(const GtTagValueMap, const char *tag);
 void          gt_tag_value_map_foreach(const GtTagValueMap,
                                        GtTagValueMapIteratorFunc,
                                        void *data);
+void          gt_tag_value_map_show(const GtTagValueMap);
 int           gt_tag_value_map_example(GtError*);
 int           gt_tag_value_map_unit_test(GtError*);
 
