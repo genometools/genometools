@@ -867,7 +867,7 @@ int gt_genome_node_traverse_children_breadth(GtGenomeNode *genome_node,
                                                 traverse_only_once, false, err);
 }
 
-static int count_types(GtGenomeNode *gn, void *data, GtError *err)
+static int count_types(GtGenomeNode *gn, void *data, GT_UNUSED GtError *err)
 {
   GtFeatureNode *fn;
   int had_err = 0;
