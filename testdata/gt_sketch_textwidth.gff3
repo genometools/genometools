@@ -2,5 +2,5 @@
 ##sequence-region ctg123 1 1497228
 ctg123	.	gene	1000	2000	.	+	0	ID=g00001;Name=thisisalongname
 ctg123	.	gene	2001	3000	.	+	0	ID=g00002;Name=anotherlongname
-ctg123	.	gene	3001	4000	.	+	0	ID=g00003;Name=stillanotherlonglonglonglongname
+ctg123	.	gene	3001	4000	.	+	0	ID=g00003;Name=stillanotherlonglonglonglonglonglonglongname
 ctg123	.	gene	4001	5000	.	+	0	ID=g00004;Name=shortname
