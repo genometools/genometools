@@ -344,7 +344,8 @@ void gt_graphics_cairo_draw_box(GtGraphics *gg, double x, double y,
       cairo_move_to(g->cr, rnd_to_nhalf(x), rnd_to_nhalf(y));
       if (widthdiff_geq0)
         cairo_line_to(g->cr, x + width - arrow_width, rnd_to_nhalf(y));
-      cairo_line_to(g->cr, rnd_to_nhalf(x + width), rnd_to_nhalf(y + height / 2));
+      cairo_line_to(g->cr, rnd_to_nhalf(x + width),
+                           rnd_to_nhalf(y + height / 2));
       if (widthdiff_geq0)
         cairo_line_to(g->cr, x + width - arrow_width, rnd_to_nhalf(y + height));
       cairo_line_to(g->cr, rnd_to_nhalf(x), rnd_to_nhalf(y + height));
