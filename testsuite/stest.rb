@@ -376,7 +376,7 @@ def run(str, opts = {})
   env = opts[:env]
   env ||= {}
   max_t = opts[:maxtime]
-  max_t ||= 10
+  max_t ||= 60
   Test.run(cmd, env, o_fn, r_fn, c_fn, rv, max_t)
   $last_stdout = o_fn
   $last_stderr = r_fn
