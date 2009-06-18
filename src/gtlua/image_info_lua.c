@@ -93,7 +93,7 @@ static void push_recmap_as_table(lua_State *L, const GtRecMap *rm)
   lua_pushnumber(L, gt_rec_map_get_southeast_y(rm));
   lua_rawset(L, -3);
   lua_pushstring(L, "feature_ref");
-  gt_lua_genome_node_push(L, (GtGenomeNode*) gt_rec_map_get_genome_feature(rm));
+  gt_lua_genome_node_push(L, gt_genome_node_ref((GtGenomeNode*) gt_rec_map_get_genome_feature(rm)));
   lua_rawset(L, -3);
 }
 
