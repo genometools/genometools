@@ -333,11 +333,11 @@ static Seqpos fastgetlcp(GtUchar *mm_oldsuffix,
                          Seqpos leafpos,
                          Seqpos currentstartpos)
 {
-  Seqpos lcp;
+  GtCommonunits commonunits;
 
   if (blindtrie->maxdepth == 0)
   {
-    (void) compareEncseqsequences(&lcp,
+    (void) compareEncseqsequences(&commonunits,
                                   blindtrie->encseq,
                                   ISDIRREVERSE(blindtrie->readmode)
                                   ? false : true,
@@ -350,7 +350,7 @@ static Seqpos fastgetlcp(GtUchar *mm_oldsuffix,
                                   0);
   } else
   {
-    (void) compareEncseqsequencesmaxdepth(&lcp,
+    (void) compareEncseqsequencesmaxdepth(&commonunits,
                                           blindtrie->encseq,
                                           ISDIRREVERSE(blindtrie->readmode)
                                           ? false : true,
@@ -363,40 +363,69 @@ static Seqpos fastgetlcp(GtUchar *mm_oldsuffix,
                                           0,
                                           blindtrie->maxdepthminusoffset);
   }
-  if (isleftofboundary(leafpos,lcp,blindtrie))
+  if (isleftofboundary(leafpos,commonunits.finaldepth,blindtrie) &&
+      !commonunits.leftspecial)
   {
+#ifdef OLDVERSION
     /*
-    GtUchar tmp = extractencodedchar(blindtrie->encseq,leafpos + lcp,
-                                     blindtrie->readmode);
-    */
-    *mm_oldsuffix = getencodedchar(blindtrie->encseq, /* Random access */
-                                   leafpos + lcp,
+    *mm_oldsuffix = getencodedchar(blindtrie->encseq,
+                                   leafpos + commonunits.finaldepth,
                                    blindtrie->readmode);
-    /*
-    gt_assert(tmp == *mm_oldsuffix);
-    */
+    if (ISSPECIAL(*mm_oldsuffix))
+    {
+      gt_assert(commonunits.leftspecial);
+    } else
+    {
+      GtUchar tmp = extractencodedchar(blindtrie->encseq,leafpos +
+                                       commonunits.finaldepth,
+                                       blindtrie->readmode);
+      gt_assert(tmp == *mm_oldsuffix);
+    }
     if (*mm_oldsuffix == (GtUchar) WILDCARD)
     {
       *mm_oldsuffix = (GtUchar) SEPARATOR;
     }
+    */
+#endif
+    *mm_oldsuffix = extractencodedchar(blindtrie->encseq,leafpos +
+                                       commonunits.finaldepth,
+                                       blindtrie->readmode);
   } else
   {
     *mm_oldsuffix = (GtUchar) SEPARATOR;
   }
-  if (isleftofboundary(currentstartpos,lcp,blindtrie))
+  if (isleftofboundary(currentstartpos,commonunits.finaldepth,blindtrie) &&
+      !commonunits.rightspecial)
   {
+#ifdef OLDVERSION
     *mm_newsuffix = getencodedchar(blindtrie->encseq, /* Random access */
-                                   currentstartpos + lcp,
+                                   currentstartpos + commonunits.finaldepth,
                                    blindtrie->readmode);
+    if (ISSPECIAL(*mm_newsuffix))
+    {
+      gt_assert(commonunits.rightspecial);
+    } else
+    {
+      GtUchar tmp = extractencodedchar(blindtrie->encseq, /* Random access */
+                                       currentstartpos +
+                                       commonunits.finaldepth,
+                                       blindtrie->readmode);
+      gt_assert(tmp == *mm_newsuffix);
+    }
     if (*mm_newsuffix == (GtUchar) WILDCARD)
     {
       *mm_newsuffix = (GtUchar) SEPARATOR;
     }
+#endif
+    *mm_newsuffix = extractencodedchar(blindtrie->encseq,
+                                       currentstartpos +
+                                       commonunits.finaldepth,
+                                       blindtrie->readmode);
   } else
   {
     *mm_newsuffix = (GtUchar) SEPARATOR;
   }
-  return lcp;
+  return commonunits.finaldepth;
 }
 
 #define SETCURRENT(VAL)\

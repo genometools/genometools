@@ -3612,7 +3612,7 @@ static int prefixofdifftbe(bool complement,
   tmplcpvalue = (unsigned int) DIV2(MULT2(UNITSIN2BITENC) -
                                     requiredUIntBits(tbe1 ^ tbe2));
   gt_assert(tmplcpvalue < (unsigned int) UNITSIN2BITENC);
-  commonunits->common = tmplcpvalue;
+   commonunits->common = tmplcpvalue;
   commonunits->leftspecial = commonunits->rightspecial = false;
   if (complement)
   {
@@ -3739,7 +3739,7 @@ int compareTwobitencodings(bool fwd,
   }
   gt_assert(commonunits != NULL);
   commonunits->common = (unsigned int) UNITSIN2BITENC;
-  commonunits->leftspecial = commonunits->rightspecial = true;
+  commonunits->leftspecial = commonunits->rightspecial = false;
   return 0;
 }
 
@@ -3808,7 +3808,9 @@ static Seqpos extractsinglecharacter(const Encodedsequence *encseq,
   return cc;
 }
 
-int comparewithonespecial(const Encodedsequence *encseq,
+int comparewithonespecial(bool *leftspecial,
+                          bool *rightspecial,
+                          const Encodedsequence *encseq,
                           bool fwd,
                           bool complement,
                           Seqpos pos1,
@@ -3825,6 +3827,7 @@ int comparewithonespecial(const Encodedsequence *encseq,
                                depth,
                                totallength,
                                maxdepth);
+  *leftspecial = (cc1 >= (Seqpos) COMPAREOFFSET) ? true : false;
   cc2 = extractsinglecharacter(encseq,
                                fwd,
                                complement,
@@ -3832,6 +3835,7 @@ int comparewithonespecial(const Encodedsequence *encseq,
                                depth,
                                totallength,
                                maxdepth);
+  *rightspecial = (cc2 >= (Seqpos) COMPAREOFFSET) ? true : false;
   gt_assert(cc1 != cc2);
   if (!fwd && cc1 >= (Seqpos) COMPAREOFFSET && cc2 >= (Seqpos) COMPAREOFFSET)
   {
@@ -3840,7 +3844,7 @@ int comparewithonespecial(const Encodedsequence *encseq,
   return cc1 < cc2 ? -1 : 1;
 }
 
-int compareEncseqsequences(Seqpos *lcp,
+int compareEncseqsequences(GtCommonunits *commonunits,
                            const Encodedsequence *encseq,
                            bool fwd,
                            bool complement,
@@ -3851,7 +3855,6 @@ int compareEncseqsequences(Seqpos *lcp,
                            Seqpos depth)
 {
   EndofTwobitencoding ptbe1, ptbe2;
-  GtCommonunits commonunits;
   int retval;
 
   countcompareEncseqsequences++;
@@ -3889,12 +3892,14 @@ int compareEncseqsequences(Seqpos *lcp,
       {
         fwdextract2bitenc(&ptbe1,encseq,esr1,pos1 + depth);
         fwdextract2bitenc(&ptbe2,encseq,esr2,pos2 + depth);
-        retval = compareTwobitencodings(true,complement,&commonunits,
+        retval = compareTwobitencodings(true,complement,commonunits,
                                         &ptbe1,&ptbe2);
-        depth += commonunits.common;
+        depth += commonunits->common;
       } else
       {
-        retval = comparewithonespecial(encseq,
+        retval = comparewithonespecial(&commonunits->leftspecial,
+                                       &commonunits->rightspecial,
+                                       encseq,
                                        true,
                                        complement,
                                        pos1,
@@ -3908,12 +3913,14 @@ int compareEncseqsequences(Seqpos *lcp,
       {
         revextract2bitenc(&ptbe1,encseq,esr1,pos1 - depth);
         revextract2bitenc(&ptbe2,encseq,esr2,pos2 - depth);
-        retval = compareTwobitencodings(false,complement,&commonunits,
+        retval = compareTwobitencodings(false,complement,commonunits,
                                         &ptbe1,&ptbe2);
-        depth += commonunits.common;
+        depth += commonunits->common;
       } else
       {
-        retval = comparewithonespecial(encseq,
+        retval = comparewithonespecial(&commonunits->leftspecial,
+                                       &commonunits->rightspecial,
+                                       encseq,
                                        false,
                                        complement,
                                        pos1,
@@ -3923,7 +3930,7 @@ int compareEncseqsequences(Seqpos *lcp,
       }
     }
   } while (retval == 0);
-  *lcp = depth;
+  commonunits->finaldepth = depth;
 #undef FASTCOMPAREDEBUG
 #ifdef FASTCOMPAREDEBUG
   {
@@ -3938,7 +3945,7 @@ int compareEncseqsequences(Seqpos *lcp,
                                        pos2,
                                        depth);
     gt_assert(retval == retval2);
-    if (*lcp != lcp2)
+    if (commonunits->finaldepth != lcp2)
     {
       fprintf(stderr,"line %d: pos1 = %u, pos2 = %u, depth = %u, "
                      "lcp = %u != %u = lcp2\n",
@@ -3946,17 +3953,17 @@ int compareEncseqsequences(Seqpos *lcp,
                       (unsigned int) pos1,
                       (unsigned int) pos2,
                       (unsigned int) depth,
-                      (unsigned int) lcp,
+                      (unsigned int) commonunits->finaldepth,
                       (unsigned int) lcp2);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
-    gt_assert(*lcp == lcp2);
+    gt_assert(commonunits->finaldepth == lcp2);
   }
 #endif
   return retval;
 }
 
-int compareEncseqsequencesmaxdepth(Seqpos *lcp,
+int compareEncseqsequencesmaxdepth(GtCommonunits *commonunits,
                                    const Encodedsequence *encseq,
                                    bool fwd,
                                    bool complement,
@@ -3968,7 +3975,6 @@ int compareEncseqsequencesmaxdepth(Seqpos *lcp,
                                    Seqpos maxdepth)
 {
   EndofTwobitencoding ptbe1, ptbe2;
-  GtCommonunits commonunits;
   int retval;
   Seqpos endpos1, endpos2;
 
@@ -4019,11 +4025,11 @@ int compareEncseqsequencesmaxdepth(Seqpos *lcp,
       {
         fwdextract2bitenc(&ptbe1,encseq,esr1,pos1 + depth);
         fwdextract2bitenc(&ptbe2,encseq,esr2,pos2 + depth);
-        retval = compareTwobitencodings(true,complement,&commonunits,
+        retval = compareTwobitencodings(true,complement,commonunits,
                                         &ptbe1,&ptbe2);
-        if (depth + commonunits.common < maxdepth)
+        if (depth + commonunits->common < maxdepth)
         {
-          depth += commonunits.common;
+          depth += commonunits->common;
         } else
         {
           depth = maxdepth;
@@ -4032,7 +4038,9 @@ int compareEncseqsequencesmaxdepth(Seqpos *lcp,
         }
       } else
       {
-        retval = comparewithonespecial(encseq,
+        retval = comparewithonespecial(&commonunits->leftspecial,
+                                       &commonunits->rightspecial,
+                                       encseq,
                                        true,
                                        complement,
                                        pos1,
@@ -4046,11 +4054,11 @@ int compareEncseqsequencesmaxdepth(Seqpos *lcp,
       {
         revextract2bitenc(&ptbe1,encseq,esr1,pos1 - depth);
         revextract2bitenc(&ptbe2,encseq,esr2,pos2 - depth);
-        retval = compareTwobitencodings(false,complement,&commonunits,
+        retval = compareTwobitencodings(false,complement,commonunits,
                                         &ptbe1,&ptbe2);
-        if (depth + commonunits.common < maxdepth)
+        if (depth + commonunits->common < maxdepth)
         {
-          depth += commonunits.common;
+          depth += commonunits->common;
         } else
         {
           depth = maxdepth;
@@ -4059,7 +4067,9 @@ int compareEncseqsequencesmaxdepth(Seqpos *lcp,
         }
       } else
       {
-        retval = comparewithonespecial(encseq,
+        retval = comparewithonespecial(&commonunits->leftspecial,
+                                       &commonunits->rightspecial,
+                                       encseq,
                                        false,
                                        complement,
                                        pos1,
@@ -4069,7 +4079,7 @@ int compareEncseqsequencesmaxdepth(Seqpos *lcp,
       }
     }
   } while (retval == 0);
-  *lcp = depth;
+  commonunits->finaldepth = depth;
 #undef FASTCOMPAREDEBUG
 #ifdef FASTCOMPAREDEBUG
   {
@@ -4085,7 +4095,7 @@ int compareEncseqsequencesmaxdepth(Seqpos *lcp,
                                        depth,
                                        maxdepth);
     gt_assert(retval == retval2);
-    if (*lcp != lcp2)
+    if (commonunits->finaldepth != lcp2)
     {
       fprintf(stderr,"line %d: pos1 = %u, pos2 = %u, depth = %u, "
                      "lcp = %u != %u = lcp2\n",
@@ -4093,11 +4103,11 @@ int compareEncseqsequencesmaxdepth(Seqpos *lcp,
                       (unsigned int) pos1,
                       (unsigned int) pos2,
                       (unsigned int) depth,
-                      (unsigned int) lcp,
+                      (unsigned int) commonunits->finaldepth,
                       (unsigned int) lcp2);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
-    gt_assert(*lcp == lcp2);
+    gt_assert(commonunits->finaldepth == lcp2);
   }
 #endif
   return retval;

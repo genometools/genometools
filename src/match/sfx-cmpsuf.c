@@ -237,6 +237,7 @@ int comparetwostringsgeneric(const Encodedsequence *encseq,
 {
   Seqpos totallength = getencseqtotallength(encseq);
   int retval;
+  bool leftspecial, rightspecial;
 
   if (fwd)
   {
@@ -262,7 +263,9 @@ int comparetwostringsgeneric(const Encodedsequence *encseq,
                                  maxdepth > 0 ? (maxdepth - depth) : 0);
     } else
     {
-      retval = comparewithonespecial(encseq,
+      retval = comparewithonespecial(&leftspecial,
+                                     &rightspecial,
+                                     encseq,
                                      fwd,
                                      complement,
                                      pos1,
@@ -287,7 +290,9 @@ int comparetwostringsgeneric(const Encodedsequence *encseq,
                                  maxdepth > 0 ? (maxdepth - depth) : 0);
     } else
     {
-      retval = comparewithonespecial(encseq,
+      retval = comparewithonespecial(&leftspecial,
+                                     &rightspecial,
+                                     encseq,
                                      fwd,
                                      complement,
                                      pos1,

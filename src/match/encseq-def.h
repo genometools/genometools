@@ -149,6 +149,7 @@ typedef struct
 {
   unsigned int common;
   bool leftspecial, rightspecial;
+  Seqpos finaldepth;
 } GtCommonunits;
 
 int compareTwobitencodings(bool fwd,
@@ -250,7 +251,9 @@ Codetype extractprefixcode(unsigned int *unitsnotspecial,
                            Seqpos frompos,
                            unsigned int prefixlength);
 
-int comparewithonespecial(const Encodedsequence *encseq,
+int comparewithonespecial(bool *leftspecial,
+                          bool *rightspecial,
+                          const Encodedsequence *encseq,
                           bool fwd,
                           bool complement,
                           Seqpos pos1,
@@ -258,16 +261,17 @@ int comparewithonespecial(const Encodedsequence *encseq,
                           Seqpos depth,
                           Seqpos maxdepth);
 
-int compareEncseqsequences(Seqpos *lcp,
+int compareEncseqsequences(GtCommonunits *commonunits,
                            const Encodedsequence *encseq,
                            bool fwd,
                            bool complement,
                            Encodedsequencescanstate *esr1,
                            Encodedsequencescanstate *esr2,
-                           Seqpos pos1,Seqpos pos2,
+                           Seqpos pos1,
+                           Seqpos pos2,
                            Seqpos depth);
 
-int compareEncseqsequencesmaxdepth(Seqpos *lcp,
+int compareEncseqsequencesmaxdepth(GtCommonunits *commonunits,
                                    const Encodedsequence *encseq,
                                    bool fwd,
                                    bool complement,

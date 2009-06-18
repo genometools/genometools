@@ -447,6 +447,7 @@ static void insertionsort(Bentsedgresources *bsr,
   Seqpos lcpindex, lcplen = 0;
   int retval;
   Suffixptr ptr1, ptr2, temp;
+  GtCommonunits commonunits;
 
 #ifdef SKDEBUG
   printf("insertion sort ");
@@ -496,9 +497,10 @@ static void insertionsort(Bentsedgresources *bsr,
                                bsr->encseq,
                                *pj);
 #endif
-        retval = compareEncseqsequences(&lcplen,bsr->encseq,bsr->fwd,
+        retval = compareEncseqsequences(&commonunits,bsr->encseq,bsr->fwd,
                                         bsr->complement,
                                         bsr->esr1,bsr->esr2,*(pj-1),*pj,offset);
+        lcplen = commonunits.finaldepth;
       }
       gt_assert(retval != 0);
       if (bsr->lcpsubtab != NULL && bsr->assideeffect)
@@ -531,6 +533,7 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
   int retval;
   unsigned long idx = 0;
   bool tempb;
+  GtCommonunits commonunits;
 
 #ifdef SKDEBUG
   printf("insertion sort (offset=%lu,maxdepth=%lu)\n",
@@ -587,11 +590,13 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
       } else
       {
         gt_assert(offset < maxdepth);
-        retval = compareEncseqsequencesmaxdepth(&lcplen,bsr->encseq,bsr->fwd,
+        retval = compareEncseqsequencesmaxdepth(&commonunits,bsr->encseq,
+                                                bsr->fwd,
                                                 bsr->complement,
                                                 bsr->esr1,bsr->esr2,
                                                 *(pj-1),*pj,offset,
                                                 maxdepth);
+        lcplen = commonunits.finaldepth;
         gt_assert(lcplen <= maxdepth);
         if (lcplen == maxdepth)
         {
