@@ -80,7 +80,7 @@ typedef struct
                                   chainkind = LOCALCHAININGBEST */
                 percentawayfrombest;  /* only defined if
                                          chainkind = LOCALCHAININGPERCENTAWAY */
-} Chainmode;
+} GtChainmode;
 
 typedef struct GtFragmentinfotable GtFragmentinfotable;
 
