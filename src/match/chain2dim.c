@@ -128,14 +128,16 @@ typedef struct
   GtChainscoretype score;
 } Bestofclass;
 
-static bool overlappingfragments(Fragmentinfo *fragmentinfo,unsigned long i,
+static bool overlappingfragments(const Fragmentinfo *fragmentinfo,
+                                 unsigned long i,
                                  unsigned long j)
 {
   return (GETSTOREDENDPOINT(0,i) >= GETSTOREDSTARTPOINT(0,j) ||
           GETSTOREDENDPOINT(1,i) >= GETSTOREDSTARTPOINT(1,j)) ? true : false;
 }
 
-static bool colinearfragments(Fragmentinfo *fragmentinfo,unsigned long i,
+static bool colinearfragments(const Fragmentinfo *fragmentinfo,
+                              unsigned long i,
                               unsigned long j)
 {
   return (GETSTOREDSTARTPOINT(0, i) < GETSTOREDSTARTPOINT(0, j) &&
@@ -144,7 +146,8 @@ static bool colinearfragments(Fragmentinfo *fragmentinfo,unsigned long i,
           GETSTOREDENDPOINT(1, i)   < GETSTOREDENDPOINT(1, j)) ? true : false;
 }
 
-static GtChainscoretype gapcostL1(Fragmentinfo *fragmentinfo,unsigned long i,
+static GtChainscoretype gapcostL1(const Fragmentinfo *fragmentinfo,
+                                  unsigned long i,
                                   unsigned long j)
 {
   return (GtChainscoretype)
@@ -152,7 +155,7 @@ static GtChainscoretype gapcostL1(Fragmentinfo *fragmentinfo,unsigned long i,
           (GETSTOREDSTARTPOINT(1,j) - GETSTOREDENDPOINT(1,i)));
 }
 
-static GtChainscoretype overlapcost(Fragmentinfo *fragmentinfo,
+static GtChainscoretype overlapcost(const Fragmentinfo *fragmentinfo,
                                     unsigned long i,
                                     unsigned long j)
 {
@@ -184,7 +187,7 @@ static GtChainscoretype overlapcost(Fragmentinfo *fragmentinfo,
   following function generalizes to MEMs as well.
 */
 
-static GtChainscoretype gapcostCc(Fragmentinfo *fragmentinfo,
+static GtChainscoretype gapcostCc(const Fragmentinfo *fragmentinfo,
                                   unsigned long i,unsigned long j)
 {
   Seqpos value1, value2;
@@ -196,9 +199,9 @@ static GtChainscoretype gapcostCc(Fragmentinfo *fragmentinfo,
   return (GtChainscoretype) MAX(value1,value2);
 }
 
-static void chainingboundarycases(GtChainmode *chainmode,
+static void chainingboundarycases(const GtChainmode *chainmode,
                                   GtChain *chain,
-                                  Fragmentinfo *fragmentinfo,
+                                  const Fragmentinfo *fragmentinfo,
                                   unsigned long numofmatches)
 {
   if (numofmatches == 0)
@@ -225,7 +228,7 @@ static void chainingboundarycases(GtChainmode *chainmode,
 }
 
 static void retracepreviousinchain(GtChain *chain,
-                                   Fragmentinfo *fragmentinfo,
+                                   const Fragmentinfo *fragmentinfo,
                                    unsigned long numofmatches,
                                    unsigned long retracestart)
 {
@@ -250,7 +253,7 @@ static void retracepreviousinchain(GtChain *chain,
   chain->chainedfragments.nextfreeGtChainref = lengthofchain;
 }
 
-static bool checkmaxgapwidth(Fragmentinfo *fragmentinfo,
+static bool checkmaxgapwidth(const Fragmentinfo *fragmentinfo,
                              Seqpos maxgapwidth,
                              unsigned long leftfrag,
                              unsigned long rightfrag)
@@ -286,7 +289,7 @@ static bool checkmaxgapwidth(Fragmentinfo *fragmentinfo,
   return true;
 }
 
-static void bruteforcechainingscores(GtChainmode *chainmode,
+static void bruteforcechainingscores(const GtChainmode *chainmode,
                                      Fragmentinfo *fragmentinfo,
                                      unsigned long numofmatches,
                                      GtChaingapcostfunction
@@ -442,7 +445,7 @@ static GtChainscoretype evalpriority(bool addterminal,
 }
 
 static void insertintodict(bool addterminal,
-                           Fragmentinfo *fragmentinfo,
+                           const Fragmentinfo *fragmentinfo,
                            Fragmentstore *fragmentstore,
                            Fragpoint *qfrag2)
 {
@@ -468,7 +471,7 @@ static void insertintodict(bool addterminal,
 }
 
 static void activatefragpoint(bool addterminal,
-                              Fragmentinfo *fragmentinfo,
+                              const Fragmentinfo *fragmentinfo,
                               Fragmentstore *fragmentstore,
                               Fragpoint *qfrag2)
 {
@@ -512,7 +515,7 @@ static void activatefragpoint(bool addterminal,
   }
 }
 
-static void evalfragmentscore(GtChainmode *chainmode,
+static void evalfragmentscore(const GtChainmode *chainmode,
                               Fragmentinfo *fragmentinfo,
                               unsigned long numofmatches,
                               Fragmentstore *fragmentstore,
@@ -603,7 +606,7 @@ static void evalfragmentscore(GtChainmode *chainmode,
   }
 }
 
-static bool isrightmaximallocalchain(Fragmentinfo *fragmentinfo,
+static bool isrightmaximallocalchain(const Fragmentinfo *fragmentinfo,
                                      unsigned long numofmatches,
                                      unsigned long currentfrag)
 {
@@ -620,4 +623,206 @@ static bool isrightmaximallocalchain(Fragmentinfo *fragmentinfo,
     return true;
   }
   return false;
+}
+
+static void determineequivreps(Bestofclass *chainequivalenceclasses,
+                               const Fragmentinfo *fragmentinfo,
+                               unsigned long numofmatches)
+{
+  unsigned long matchnum;
+  Bestofclass *classptr, *classrep;
+
+  for (classptr = chainequivalenceclasses;
+       classptr < chainequivalenceclasses + numofmatches;
+       classptr++)
+  {
+    classptr->isavailable = false;
+  }
+  for (matchnum=0; matchnum<numofmatches; matchnum++)
+  {
+    if (isrightmaximallocalchain(fragmentinfo,numofmatches,matchnum))
+    {
+      classrep = chainequivalenceclasses +
+                 fragmentinfo[matchnum].firstinchain;
+      if (!classrep->isavailable ||
+          classrep->score < fragmentinfo[matchnum].score)
+      {
+        classrep->score = fragmentinfo[matchnum].score;
+        classrep->isavailable = true;
+      }
+    }
+  }
+}
+
+static bool retrievemaximalscore(GtChainscoretype *maxscore,
+                                 const GtChainmode *chainmode,
+                                 const Fragmentinfo *fragmentinfo,
+                                 unsigned long numofmatches)
+{
+  unsigned long matchnum;
+  GtChainscoretype tgap;
+  bool maxscoredefined = false;
+
+  *maxscore = 0;
+  for (matchnum=0; matchnum<numofmatches; matchnum++)
+  {
+    if (isrightmaximallocalchain(fragmentinfo,numofmatches,matchnum))
+    {
+      if (chainmode->chainkind == GLOBALCHAININGWITHGAPCOST)
+      {
+        tgap = TERMINALGAP(matchnum);
+      } else
+      {
+        tgap = 0;
+      }
+      if (!maxscoredefined || *maxscore < fragmentinfo[matchnum].score - tgap)
+      {
+        *maxscore = fragmentinfo[matchnum].score - tgap;
+        maxscoredefined = true;
+      }
+    }
+  }
+  return maxscoredefined;
+}
+
+static int comparescores(const GtKeytype key1,
+                         const GtKeytype key2,
+                         GT_UNUSED void *info)
+{
+  if (*((GtChainscoretype *) key1) < *(((GtChainscoretype *) key2)))
+  {
+    return -1;
+  }
+  if (*((GtChainscoretype *) key1) > *(((GtChainscoretype *) key2)))
+  {
+    return 1;
+  }
+  return 0;
+}
+
+typedef struct
+{
+  unsigned long currentdictsize,     /* current size of the dictionary */
+                maxdictsize;         /* maximal size of the dictionary */
+  GtRBTnode *worstelement,           /* reference to worst key */
+            *root,                   /* root of tree */
+            *lastcallinsertedelem,   /* element inserted in last call */
+            *lastcalldeletedelem;    /* element deleted in last call */
+} Dictmaxsize;
+
+static Dictmaxsize *dictmaxsize_new(unsigned long maxsize)
+{
+  Dictmaxsize *dict;
+
+  dict = gt_malloc(sizeof(*dict));
+  dict->currentdictsize = 0;
+  dict->maxdictsize = maxsize;
+  dict->root = NULL;
+  dict->lastcallinsertedelem = NULL;
+  dict->lastcalldeletedelem = NULL;
+  dict->worstelement = NULL;
+  return dict;
+}
+
+typedef int (*Dictcomparefunction)(const GtKeytype,const GtKeytype,void *);
+typedef void (*Freekeyfunction)(const GtKeytype,void *);
+typedef bool (*Comparewithkey)(const GtKeytype,void *);
+
+static int insertDictmaxsize(Dictmaxsize *dict,
+                             Dictcomparefunction comparefunction,
+                             void *cmpinfo,
+                             void *elemin)
+{
+  bool nodecreated;
+
+  if (dict->currentdictsize < dict->maxdictsize)
+  {
+    if (dict->currentdictsize == 0 ||
+        comparefunction(elemin,dict->worstelement,cmpinfo) < 0)
+    {
+      dict->worstelement = elemin;
+    }
+    (void) gt_rbt_search(elemin,
+                         &nodecreated,
+                         &dict->root,
+                         comparefunction,
+                         cmpinfo);
+    if (nodecreated)
+    {
+      dict->currentdictsize++;
+      dict->lastcallinsertedelem = elemin;
+    }
+  } else
+  {
+/*
+  new element is not as worse as worst element, so insert it and
+  and delete the worst element
+*/
+    if (comparefunction(dict->worstelement,elemin,cmpinfo) < 0)
+    {
+      (void) gt_rbt_search(elemin,
+                           &nodecreated,
+                           &dict->root,
+                           comparefunction,
+                           cmpinfo);
+      if (nodecreated)
+      {
+        dict->lastcallinsertedelem = elemin;
+        if (gt_rbt_delete(dict->worstelement,
+                          &dict->root,
+                          comparefunction,
+                          cmpinfo) != 0)
+        {
+          fprintf(stderr,"insertDictmaxsize: deletion failed\n");
+          exit(GT_EXIT_PROGRAMMING_ERROR);
+        }
+        dict->lastcalldeletedelem = dict->worstelement;
+        dict->worstelement = gt_rbt_minimumkey(dict->root);
+      }
+    }
+  }
+  return 0;
+}
+
+static int retrievechainbestscores(bool *minscoredefined,
+                                   GtChainscoretype *minscore,
+                                   const Fragmentinfo *fragmentinfo,
+                                   unsigned long numofmatches,
+                                   unsigned long howmanybest)
+{
+  unsigned long matchnum, fragnum = 0;
+  GtChainscoretype *scores;
+  Dictmaxsize *dictbestfragments;
+  void *minkey;
+
+  scores = gt_malloc(sizeof (*scores) * numofmatches);
+  dictbestfragments = dictmaxsize_new(howmanybest);
+  for (matchnum=0; matchnum<numofmatches; matchnum++)
+  {
+    if (isrightmaximallocalchain(fragmentinfo,numofmatches,matchnum))
+    {
+      scores[fragnum] = fragmentinfo[matchnum].score;
+      if (insertDictmaxsize(dictbestfragments,
+                            comparescores,
+                            NULL,
+                            (void *) (scores + fragnum)) != 0)
+      {
+        return -1;
+      }
+      fragnum++;
+    }
+  }
+  if (fragnum == 0)
+  {
+    *minscoredefined = false;
+  } else
+  {
+    minkey = gt_rbt_minimumkey(dictbestfragments->root);
+    gt_assert(minkey != NULL);
+    *minscore = *((GtChainscoretype *) minkey);
+    *minscoredefined = true;
+  }
+  gt_rbt_destroy (false,NULL,NULL,dictbestfragments->root);
+  gt_free(scores);
+  return 0;
 }
