@@ -17,6 +17,7 @@
 
 #ifndef VERBOSE_DEF_H
 #define VERBOSE_DEF_H
+#include <stdio.h>
 
 typedef struct Verboseinfo Verboseinfo;
 

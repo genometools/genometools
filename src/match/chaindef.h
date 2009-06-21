@@ -19,6 +19,7 @@
 #define CHAINDEF_H
 
 #include "core/arraydef.h"
+#include "core/error_api.h"
 #include "seqpos-def.h"
 
 typedef long GtChainscoretype;
@@ -58,7 +59,7 @@ typedef struct
   We use functions of the following type to report chains.
 */
 
-typedef int (*Chainprocessor)(void *,GtChain *);
+typedef int (*GtChainprocessor)(void *,GtChain *,GtError *err);
 
 /*
   The following type defines the chain mode consisting of a chainkind.
