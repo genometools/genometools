@@ -32,6 +32,7 @@
 #include "core/basename_api.h"
 #include "core/bittab_api.h"
 #include "core/bsearch_api.h"
+#include "core/countingsort_api.h"
 #include "core/cstr_api.h"
 #include "core/dlist_api.h"
 #include "core/endianess_api.h"
