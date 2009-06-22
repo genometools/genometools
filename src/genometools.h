@@ -34,6 +34,7 @@
 #include "core/bsearch_api.h"
 #include "core/countingsort_api.h"
 #include "core/cstr_api.h"
+#include "core/cstr_table_api.h"
 #include "core/dlist_api.h"
 #include "core/endianess_api.h"
 #include "core/error_api.h"
