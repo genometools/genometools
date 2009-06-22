@@ -41,6 +41,7 @@
 #include "core/fileutils_api.h"
 #include "core/fptr_api.h"
 #include "core/grep_api.h"
+#include "core/hashmap_api.h"
 #include "core/interval_tree_api.h"
 #include "core/log_api.h"
 #include "core/ma_api.h"
