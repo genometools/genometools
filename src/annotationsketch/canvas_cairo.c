@@ -211,6 +211,8 @@ int gt_canvas_cairo_visit_block(GtCanvas *canvas, GtBlock *block,
                         &stroke_width,
                         NULL))
     stroke_width = STROKE_WIDTH_DEFAULT;
+  (void) gt_style_get_color(canvas->pvt->sty, btype, "stroke", &strokecolor,
+                              gt_block_get_top_level_feature(block));
 
   if (strand == GT_STRAND_REVERSE || strand == GT_STRAND_BOTH)
     arrow_status = ARROW_LEFT;
@@ -250,14 +252,31 @@ int gt_canvas_cairo_visit_block(GtCanvas *canvas, GtBlock *block,
     }
   }
 
+  /* optimise drawing for very narrow blocks,
+     if <= 1px/pt width, draw as simple lines */
+  if (canvas->pvt->bt && draw_range.end-draw_range.start <= 1.1)
+  {
+    if ((unsigned long) draw_range.start > gt_bittab_size(canvas->pvt->bt))
+      return had_err;
+    if (gt_bittab_bit_is_set(canvas->pvt->bt, (unsigned long) draw_range.start))
+      return had_err;
+    gt_graphics_draw_vertical_line(canvas->pvt->g,
+                                   block_start,
+                                   canvas->pvt->y - bar_height/2,
+                                   strokecolor,
+                                   bar_height,
+                                   stroke_width);
+    gt_bittab_set_bit(canvas->pvt->bt, (unsigned long) draw_range.start);
+    return had_err;
+  }
+
   /* do not draw further details in very small blocks */
   if (!gt_block_has_only_one_fullsize_element(block)
        && gt_double_smaller_double(block_width, min_len_block))
   {
     (void) gt_style_get_color(canvas->pvt->sty, btype, "fill", &fillcolor,
                               gt_block_get_top_level_feature(block));
-    (void) gt_style_get_color(canvas->pvt->sty, btype, "stroke", &strokecolor,
-                              gt_block_get_top_level_feature(block));
+
     gt_graphics_draw_box(canvas->pvt->g,
                          block_start,
                          canvas->pvt->y - bar_height/2,
@@ -266,7 +285,7 @@ int gt_canvas_cairo_visit_block(GtCanvas *canvas, GtBlock *block,
                          fillcolor,
                          arrow_status,
                          arrow_width,
-                         1,
+                         stroke_width,
                          strokecolor,
                          true);
 
