@@ -168,18 +168,20 @@ static bool ADDTYPE(binarysearchpage)(const SPECIALTYPE *leftptr,
   while (leftptr <= rightptr)
   {
     midptr = leftptr + DIV2((unsigned long) (rightptr-leftptr));
-    if (pos == *midptr)
-    {
-      found = midptr;
-      break;
-    }
     if (pos < *midptr)
     {
       rightptr = midptr - 1;
     } else
     {
-      found = midptr;
-      leftptr = midptr + 1;
+      if (pos > *midptr)
+      {
+        found = midptr;
+        leftptr = midptr + 1;
+      } else
+      {
+        found = midptr;
+        break;
+      }
     }
   }
   return found;
@@ -187,7 +189,7 @@ static bool ADDTYPE(binarysearchpage)(const SPECIALTYPE *leftptr,
 
 #ifdef POS2PAGENUM
 
-static bool ADDTYPE(checkspecial)(const Encodedsequence *encseq,Seqpos pos)
+static bool ADDTYPE(checknospecial)(const Encodedsequence *encseq,Seqpos pos)
 {
   unsigned long pagenumber = (unsigned long) POS2PAGENUM(pos);
 
@@ -201,7 +203,7 @@ static bool ADDTYPE(checkspecial)(const Encodedsequence *encseq,Seqpos pos)
                                     - 1,
                                     (SPECIALTYPE) pos))
       {
-        return true;
+        return false;
       }
     }
   } else
@@ -216,11 +218,11 @@ static bool ADDTYPE(checkspecial)(const Encodedsequence *encseq,Seqpos pos)
                ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber] - 1,
                (SPECIALTYPE) pos))
       {
-        return true;
+        return false;
       }
     }
   }
-  return false;
+  return true;
 }
 
 static bool ADDTYPE(checknospecialrange)(const Encodedsequence *encseq,
@@ -316,12 +318,12 @@ static bool ADDTYPE(checknospecialrange)(const Encodedsequence *encseq,
 
 #else
 
-static bool ADDTYPE(checkspecial)(const Encodedsequence *encseq,Seqpos pos)
+static bool ADDTYPE(checknospecial)(const Encodedsequence *encseq,Seqpos pos)
 {
   return ADDTYPE(binarysearchpage)(ACCESSENCSEQ(encseq,specialpositions),
                                    ACCESSENCSEQ(encseq,specialpositions) +
                                    encseq->numofspecialstostore - 1,
-                                   pos);
+                                   pos) ? false : true;
 }
 
 static bool ADDTYPE(checknospecialrange)(const Encodedsequence *encseq,

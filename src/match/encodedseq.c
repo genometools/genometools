@@ -1159,15 +1159,13 @@ static GtUchar deliverfromtwobitencoding(const Encodedsequence *encseq,
 static GtUchar delivercharViabitaccessSpecial(const Encodedsequence *encseq,
                                             Seqpos pos)
 {
-  if (ISIBITSET(encseq->specialbits,pos))
+  if (!ISIBITSET(encseq->specialbits,pos))
   {
-    if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
-    {
-      return (GtUchar) SEPARATOR;
-    }
-    return (GtUchar) WILDCARD;
+    return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
   }
-  return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
+  return EXTRACTENCODEDCHAR(encseq->twobitencoding,pos)
+               ? (GtUchar) SEPARATOR
+               : (GtUchar) WILDCARD;
 }
 
 /* Viauchartables */
@@ -1176,15 +1174,13 @@ static GtUchar delivercharViauchartablesSpecialfirst(
                                               const Encodedsequence *encseq,
                                               Seqpos pos)
 {
-  if (ucharcheckspecial(encseq,pos))
+  if (ucharchecknospecial(encseq,pos))
   {
-    if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
-    {
-      return (GtUchar) SEPARATOR;
-    }
-    return (GtUchar) WILDCARD;
+    return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
   }
-  return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
+  return EXTRACTENCODEDCHAR(encseq->twobitencoding,pos)
+                          ? (GtUchar) SEPARATOR
+                          : (GtUchar) WILDCARD;
 }
 
 static GtUchar delivercharViauchartablesSpecialrange(
@@ -1195,11 +1191,9 @@ static GtUchar delivercharViauchartablesSpecialrange(
   {
     return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
   }
-  if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
-  {
-    return (GtUchar) SEPARATOR;
-  }
-  return (GtUchar) WILDCARD;
+  return EXTRACTENCODEDCHAR(encseq->twobitencoding,pos)
+                  ? (GtUchar) SEPARATOR
+                  : (GtUchar) WILDCARD;
 }
 
 /* Viaushorttables */
@@ -1208,15 +1202,13 @@ static GtUchar delivercharViaushorttablesSpecialfirst(
                                                const Encodedsequence *encseq,
                                                Seqpos pos)
 {
-  if (ushortcheckspecial(encseq,pos))
+  if (ushortchecknospecial(encseq,pos))
   {
-    if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
-    {
-      return (GtUchar) SEPARATOR;
-    }
-    return (GtUchar) WILDCARD;
+    return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
   }
-  return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
+  return EXTRACTENCODEDCHAR(encseq->twobitencoding,pos)
+                          ? (GtUchar) SEPARATOR
+                          : (GtUchar) WILDCARD;
 }
 
 static GtUchar delivercharViaushorttablesSpecialrange(
@@ -1227,11 +1219,9 @@ static GtUchar delivercharViaushorttablesSpecialrange(
   {
     return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
   }
-  if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
-  {
-    return (GtUchar) SEPARATOR;
-  }
-  return (GtUchar) WILDCARD;
+  return EXTRACTENCODEDCHAR(encseq->twobitencoding,pos)
+                ? (GtUchar) SEPARATOR
+                : (GtUchar) WILDCARD;
 }
 
 /* Viauint32tables */
@@ -1240,15 +1230,13 @@ static GtUchar delivercharViauint32tablesSpecialfirst(
                                                 const Encodedsequence *encseq,
                                                 Seqpos pos)
 {
-  if (uint32checkspecial(encseq,pos))
+  if (uint32checknospecial(encseq,pos))
   {
-    if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
-    {
-      return (GtUchar) SEPARATOR;
-    }
-    return (GtUchar) WILDCARD;
+    return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
   }
-  return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
+  return EXTRACTENCODEDCHAR(encseq->twobitencoding,pos)
+           ? (GtUchar) SEPARATOR
+           : (GtUchar) WILDCARD;
 }
 
 static GtUchar delivercharViauint32tablesSpecialrange(
@@ -1259,11 +1247,9 @@ static GtUchar delivercharViauint32tablesSpecialrange(
   {
     return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
   }
-  if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
-  {
-    return (GtUchar) SEPARATOR;
-  }
-  return (GtUchar) WILDCARD;
+  return EXTRACTENCODEDCHAR(encseq->twobitencoding,pos)
+             ? (GtUchar) SEPARATOR
+             : (GtUchar) WILDCARD;
 }
 
 static int fillplainseq(Encodedsequence *encseq,GtSequenceBuffer *fb,
@@ -1381,62 +1367,43 @@ static int fillbitaccesstab(Encodedsequence *encseq,
 static Seqpos accessspecialpositions(const Encodedsequence *encseq,
                                      unsigned long idx)
 {
-  if (encseq->sat == Viauchartables)
+  switch (encseq->sat)
   {
-    return encseq->ucharspecialpositions[idx];
+    case Viauchartables: return encseq->ucharspecialpositions[idx];
+    case Viaushorttables: return encseq->ushortspecialpositions[idx];
+    case Viauint32tables: return encseq->uint32specialpositions[idx];
+    default: fprintf(stderr,"accessspecialpositions(sat = %s is undefined)\n",
+                     accesstype2name(encseq->sat));
+             exit(GT_EXIT_PROGRAMMING_ERROR);
   }
-  if (encseq->sat == Viaushorttables)
-  {
-    return encseq->ushortspecialpositions[idx];
-  }
-  if (encseq->sat == Viauint32tables)
-  {
-    return encseq->uint32specialpositions[idx];
-  }
-  fprintf(stderr,"accessspecialpositions(sat = %s is undefined)\n",
-                  accesstype2name(encseq->sat));
-  exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 
 static Seqpos accessspecialrangelength(const Encodedsequence *encseq,
                                        unsigned long idx)
 {
-  if (encseq->sat == Viauchartables)
+  switch (encseq->sat)
   {
-    return encseq->ucharspecialrangelength[idx];
+    case Viauchartables: return encseq->ucharspecialrangelength[idx];
+    case Viaushorttables: return encseq->ushortspecialrangelength[idx];
+    case Viauint32tables: return encseq->uint32specialrangelength[idx];
+    default: fprintf(stderr,"accessspecialrangelength(sat = %s is undefined)\n",
+                     accesstype2name(encseq->sat));
+             exit(GT_EXIT_PROGRAMMING_ERROR);
   }
-  if (encseq->sat == Viaushorttables)
-  {
-    return encseq->ushortspecialrangelength[idx];
-  }
-  if (encseq->sat == Viauint32tables)
-  {
-    return encseq->uint32specialrangelength[idx];
-  }
-  fprintf(stderr,"accessspecialrangelength(sat = %s is undefined)\n",
-                  accesstype2name(encseq->sat));
-  exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 
 static unsigned long accessendspecialsubsUint(const Encodedsequence *encseq,
                                               unsigned long pgnum)
 {
-  /* XXX use switch */
-  if (encseq->sat == Viauchartables)
+  switch (encseq->sat)
   {
-    return encseq->ucharendspecialsubsUint[pgnum];
+    case Viauchartables: return encseq->ucharendspecialsubsUint[pgnum];
+    case Viaushorttables: return encseq->ushortendspecialsubsUint[pgnum];
+    case Viauint32tables: return encseq->uint32endspecialsubsUint[pgnum];
+    default: fprintf(stderr,"accessendspecialsubsUint(sat = %s is undefined)\n",
+                     accesstype2name(encseq->sat));
+             exit(GT_EXIT_PROGRAMMING_ERROR);
   }
-  if (encseq->sat == Viaushorttables)
-  {
-    return encseq->ushortendspecialsubsUint[pgnum];
-  }
-  if (encseq->sat == Viauint32tables)
-  {
-    return encseq->uint32endspecialsubsUint[pgnum];
-  }
-  fprintf(stderr,"accessendspecialsubsUint(sat = %s is undefined)\n",
-                  accesstype2name(encseq->sat));
-  exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 
 #ifdef RANGEDEBUG
@@ -1918,15 +1885,13 @@ static GtUchar seqdelivercharViabitaccessSpecial(
                             GT_UNUSED Encodedsequencescanstate *esr,
                             Seqpos pos)
 {
-  if (ISIBITSET(encseq->specialbits,pos))
+  if (!ISIBITSET(encseq->specialbits,pos))
   {
-    if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
-    {
-      return (GtUchar) SEPARATOR;
-    }
-    return (GtUchar) WILDCARD;
+    return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
   }
-  return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
+  return EXTRACTENCODEDCHAR(encseq->twobitencoding,pos)
+             ? (GtUchar) SEPARATOR
+             : (GtUchar) WILDCARD;
 }
 
 static GtUchar seqdelivercharSpecial(const Encodedsequence *encseq,
@@ -1947,11 +1912,9 @@ static GtUchar seqdelivercharSpecial(const Encodedsequence *encseq,
       {
         if (pos < esr->previousrange.rightpos)
         {
-          if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
-          {
-            return (GtUchar) SEPARATOR;
-          }
-          return (GtUchar) WILDCARD;
+          return EXTRACTENCODEDCHAR(encseq->twobitencoding,pos)
+                    ? (GtUchar) SEPARATOR
+                    : (GtUchar) WILDCARD;
         }
         if (esr->hasrange)
         {
@@ -1964,11 +1927,9 @@ static GtUchar seqdelivercharSpecial(const Encodedsequence *encseq,
       {
         if (pos >= esr->previousrange.leftpos)
         {
-          if (EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
-          {
-            return (GtUchar) SEPARATOR;
-          }
-          return (GtUchar) WILDCARD;
+          return EXTRACTENCODEDCHAR(encseq->twobitencoding,pos)
+                     ? (GtUchar) SEPARATOR
+                     : (GtUchar) WILDCARD;
         }
         if (esr->hasrange)
         {

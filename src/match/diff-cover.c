@@ -852,7 +852,7 @@ static void dc_bcktab2firstlevelintervals(Differencecover *dcov)
 static void dc_addunsortedrange(void *voiddcov,
                                 Seqpos *left,
                                 Seqpos *right,
-                                Seqpos depth)
+                                GT_UNUSED Seqpos depth)
 {
   Differencecover *dcov = (Differencecover *) voiddcov;
   Pairsuffixptr *ptr;

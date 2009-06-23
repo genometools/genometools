@@ -28,6 +28,8 @@ code2file()
       echo "${HOME}/seqcmpprojects/yeast/yeast.fna.gz";;
     human2)
       echo "${PROJECT}/biodata/genomes/H_sapiens-build36.54-2009/Homo_sapiens.NCBI36.54.dna.chromosome.02.fa.gz";;
+    human22)
+      echo "${PROJECT}/biodata/genomes/H_sapiens-build36.54-2009/Homo_sapiens.NCBI36.54.dna.chromosome.22.fa.gz";;
     dmel)
       echo "${HOME}/seqcmpprojects/d_mel/d_mel.fna.gz";;
     ecoli1)
