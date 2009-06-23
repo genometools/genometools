@@ -415,7 +415,7 @@ void gt_graphics_cairo_draw_dashes(GtGraphics *gg, double x, double y,
                                    double stroke_width, GtColor stroke_color)
 {
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
-  double dashes[] = {3.0};
+  double dashes[] = {2.0};
   gt_assert(g);
   /* save cairo context */
   cairo_save(g->cr);
