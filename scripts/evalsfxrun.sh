@@ -11,7 +11,7 @@ repetitivefiles="mfd paradoxus"
 case $1 in
   small) allfiles="at1MB ecoli1 ecoli2 swiss1MB yeast mfd"
          ;;
-  all)   allfiles="at1MB ecoli1 ecoli2 swiss1MB yeast mfd dmel human2 paradoxus"
+  all)   allfiles="at1MB ecoli1 ecoli2 swiss1MB yeast mfd dmel human2 human22 paradoxus"
          ;;
   *)     allfiles=$1
          ;;
