@@ -30,8 +30,6 @@ GtTrack*      gt_track_new(GtStr *title, unsigned long max_num_lines,
                            bool split_lines, GtLineBreaker *lb);
 void          gt_track_insert_block(GtTrack*, GtBlock*);
 GtStr*        gt_track_get_title(const GtTrack*);
-unsigned long gt_track_get_number_of_lines(const GtTrack*);
-unsigned long gt_track_get_number_of_lines_with_captions(const GtTrack *track);
 unsigned long gt_track_get_number_of_discarded_blocks(GtTrack *track);
 int           gt_track_sketch(GtTrack*, GtCanvas*, GtError*);
 double        gt_track_get_height(const GtTrack *track, const GtStyle *sty);
