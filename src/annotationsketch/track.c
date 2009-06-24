@@ -32,6 +32,7 @@ struct GtTrack {
   unsigned long max_num_lines, discarded_blocks;
   GtLineBreaker *lb;
   bool split;
+  unsigned long y_index;
   GtArray *lines;
 };
 
@@ -47,6 +48,7 @@ GtTrack* gt_track_new(GtStr *title, unsigned long max_num_lines,
   track->max_num_lines = max_num_lines;
   track->split = split_lines;
   track->lb = lb;
+  track->y_index = UNDEF_ULONG;
   return track;
 }
 
@@ -54,7 +56,6 @@ static GtLine* get_next_free_line(GtTrack *track, GtBlock *block)
 {
   unsigned long i;
   GtLine* line;
-
   gt_assert(track);
 
   /* find unoccupied line -- may need optimisation */
@@ -89,6 +90,18 @@ static GtLine* get_next_free_line(GtTrack *track, GtBlock *block)
   }
   gt_assert(line);
   return line;
+}
+
+unsigned long gt_track_get_y_index(const GtTrack *track)
+{
+  gt_assert(track);
+  return track->y_index;
+}
+
+void gt_track_set_y_index(GtTrack *track, unsigned long y_index)
+{
+  gt_assert(track);
+  track->y_index = y_index;
 }
 
 unsigned long gt_track_get_number_of_discarded_blocks(GtTrack *track)

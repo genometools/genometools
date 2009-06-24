@@ -1,7 +1,7 @@
 /*
   Copyright (c) 2007      Christin Schaerfer <schaerfer@zbh.uni-hamburg.de>
-  Copyright (c)      2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2009 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -19,7 +19,7 @@
 #ifndef TRACK_H
 #define TRACK_H
 
-/* A track has a title and a type und contains line objects. */
+/* A <GtTrack> acts as a container for <GtLine> objects. */
 typedef struct GtTrack GtTrack;
 
 #include "annotationsketch/canvas.h"
@@ -27,7 +27,7 @@ typedef struct GtTrack GtTrack;
 #include "core/array.h"
 
 GtTrack*      gt_track_new(GtStr *title, unsigned long max_num_lines,
-                           bool split_lines, GtLineBreaker*);
+                           bool split_lines, GtLineBreaker *lb);
 void          gt_track_insert_block(GtTrack*, GtBlock*);
 GtStr*        gt_track_get_title(const GtTrack*);
 unsigned long gt_track_get_number_of_lines(const GtTrack*);
@@ -35,7 +35,10 @@ unsigned long gt_track_get_number_of_lines_with_captions(const GtTrack *track);
 unsigned long gt_track_get_number_of_discarded_blocks(GtTrack *track);
 int           gt_track_sketch(GtTrack*, GtCanvas*, GtError*);
 double        gt_track_get_height(const GtTrack *track, const GtStyle *sty);
-int           gt_track_unit_test(GtError*);
+unsigned long gt_track_get_y_index(const GtTrack *track);
+void          gt_track_set_y_index(GtTrack *track, unsigned long y_index);
 void          gt_track_delete(GtTrack*);
+
+int           gt_track_unit_test(GtError*);
 
 #endif
