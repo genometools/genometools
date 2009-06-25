@@ -9,9 +9,9 @@ fi
 repetitivefiles="mfd paradoxus"
 
 case $1 in
-  small) allfiles="at1MB ecoli1 ecoli2 swiss1MB yeast mfd"
+  small) allfiles="at1MB ecoli1 ecoli2 yeast mfd"
          ;;
-  all)   allfiles="at1MB ecoli1 ecoli2 swiss1MB yeast mfd dmel human2 human22 paradoxus"
+  all)   allfiles="at1MB ecoli1 ecoli2 yeast mfd dmel human2 human22 paradoxus"
          ;;
   *)     allfiles=$1
          ;;
@@ -68,6 +68,14 @@ suffixerator()
   ${RUNNER} gt suffixerator -v -showtime -indexname sfx-id -tis -suf -db ${filename} $* | egrep '# TIME overall|# space peak'
 }
 
+mkesa()
+{
+  fc=$1
+  printf "# RUN $fc mkesa\n"
+  filename=`code2file $1`
+  runmkesa-sfx.sh ${filename}
+}
+
 for rfc in $allfiles
 do
   fn=`code2file ${rfc}`
@@ -95,5 +103,6 @@ do
     suffixerator ${rfc} -cmpcharbychar -dc ${dc}
     suffixerator ${rfc} -dc ${dc}
   done
-  rm -f sfx-idx.*
+  mkesa ${rfc}
+  rm -f sfx-idx.* mkesa-idx.*
 done

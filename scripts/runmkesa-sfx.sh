@@ -1,6 +1,7 @@
 #!/bin/sh
 
-set -e -x
+# set -e -x
+TMP=.time.tmp
 
 if test $# -ne 1
 then
@@ -8,6 +9,9 @@ then
   exit 1
 fi
 
-#time mkesa -p mkesa-idx -b D -g suf -v -d $1 
-time gt suffixerator -indexname sfx-idx -dna -v -suf -tis -showtime -pl -dc 64 -db $1 
-cmp -s sfx-idx.suf mkesa-idx.suf
+gtime -o ${TMP} -f "# TIME overall %U" mkesa -p mkesa-idx -b D -g suf -v -d $1 |\
+                             mkesa-fmt.rb
+cat ${TMP}
+rm -f ${TMP}
+# time gt suffixerator -indexname sfx-idx -dna -v -suf -tis -showtime -pl -dc 64 -db $1 
+#cmp -s sfx-idx.suf mkesa-idx.suf
