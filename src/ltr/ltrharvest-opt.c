@@ -210,6 +210,7 @@ static OPrval parse_options(int *parsed_args,
          *optionins,
          *optiondel,
          *optionv,
+         *optionoffset,
          *optionlongoutput,
          *optionout,
          *optionoutinner,
@@ -445,6 +446,14 @@ static OPrval parse_options(int *parsed_args,
                              "specify GFF3 outputfilename",
                              lo->str_gff3filename, NULL);
   gt_option_parser_add_option(op, optiongff3);
+
+  /* -offset */
+  optionoffset = gt_option_new_ulong("offset",
+                                     "offset added to GFF3 coordinates",
+                                     &lo->offset,
+                                     0UL);
+  gt_option_parser_add_option(op, optionoffset);
+  gt_option_is_extended_option(optionoffset);
 
   /* implications */
   gt_option_imply(optionmaxtsd, optionmintsd);
