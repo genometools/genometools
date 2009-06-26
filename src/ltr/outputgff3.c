@@ -193,8 +193,11 @@ int printgff3format(const LTRharvestoptions *lo,
         previouscontignum.defined = true;
         previouscontignum.valueunsignedlong = seqnum;
         getencseqSeqinfo(&seqinfo,encseq,seqnum);
-        fprintf(fp, "##sequence-region seq%lu 1 " FormatSeqpos "\n",
-                    seqnum, PRINTSeqposcast(seqinfo.seqlength));
+        fprintf(fp, "##sequence-region seq%lu " FormatSeqpos
+                                            " " FormatSeqpos "\n",
+                    seqnum,
+                    PRINTSeqposcast(1 + (Seqpos) lo->offset),
+                    PRINTSeqposcast(seqinfo.seqlength + (Seqpos) lo->offset));
         desptr = retrievesequencedescription(&desclen,
                                              encseq,
                                              seqnum);
