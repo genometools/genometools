@@ -95,12 +95,10 @@ do
   checkrepetitive ${rfc}
   if test $? -eq 0
   then
-    suffixerator ${rfc} -cmpcharbychar ""
     suffixerator ${rfc} ""
   fi
   for dc in 32 128 256
   do
-    suffixerator ${rfc} -cmpcharbychar -dc ${dc}
     suffixerator ${rfc} -dc ${dc}
   done
   mkesa ${rfc}
