@@ -16,14 +16,46 @@
 */
 
 #include "core/ma.h"
+#include "core/qsort_r.h"
 #include "bcktab.h"
 #include "sfx-copysort.h"
 
 struct Subbucketspec
 {
+  unsigned int numofchars, *order;
   unsigned long *bucketends,
                 **subbucket;
 };
+
+static unsigned long superbucketsize(const Subbucketspec *subbucketspec,
+                                     unsigned int bucketnum)
+{
+  if (bucketnum == 0)
+  {
+    return subbucketspec->bucketends[0];
+  }
+  return subbucketspec->bucketends[bucketnum] -
+         subbucketspec->bucketends[bucketnum-1];
+}
+
+static int comparesuperbucketsizes(const void *a,const void *b,void *data)
+{
+  const Subbucketspec *subbucketspec = (const Subbucketspec *) data;
+
+  unsigned long size1 = superbucketsize(subbucketspec,
+                                        *(const unsigned int *) a);
+  unsigned long size2 = superbucketsize(subbucketspec,
+                                        *(const unsigned int *) b);
+  if (size1 < size2)
+  {
+    return -1;
+  }
+  if (size1 > size2)
+  {
+    return 1;
+  }
+  return 0;
+}
 
 Subbucketspec *subbuckets_new(const Bcktab *bcktab,
                               Seqpos partwidth,
@@ -31,17 +63,19 @@ Subbucketspec *subbuckets_new(const Bcktab *bcktab,
 {
   Codetype code, maxcode;
   Bucketspecification bucketspec;
-  unsigned int idx, rightchar = 0;
-  unsigned long countbucketsize = 0;
-  unsigned long currentchar = 0;
   Subbucketspec *subbucketspec;
+  unsigned int idx, rightchar = 0, currentchar = 0;
+  unsigned long accubucketsize = 0;
 
   gt_assert(numofchars > 0);
   subbucketspec = gt_malloc(sizeof(*subbucketspec));
+  subbucketspec->numofchars = numofchars;
+  subbucketspec->order = gt_malloc(sizeof(*subbucketspec->order) *
+                                   numofchars);
   subbucketspec->bucketends = gt_malloc(sizeof(*subbucketspec->bucketends) *
                                         numofchars);
   subbucketspec->subbucket = gt_malloc(sizeof(*subbucketspec->subbucket) *
-                                        numofchars);
+                                       numofchars);
   subbucketspec->subbucket[0] = gt_malloc(sizeof(**subbucketspec->subbucket) *
                                           (numofchars * numofchars));
   for (idx = 1U; idx<numofchars; idx++)
@@ -59,19 +93,35 @@ Subbucketspec *subbuckets_new(const Bcktab *bcktab,
                                       partwidth,
                                       rightchar,
                                       numofchars);
-    countbucketsize += bucketspec.nonspecialsinbucket;
+    accubucketsize += bucketspec.nonspecialsinbucket;
+    subbucketspec->subbucket[currentchar]
+                            [(rightchar == 0) ? (numofchars-1) : (rightchar-1)]
+                            = accubucketsize;
     printf("subbucket[%u][%u]=%lu\n",
-             (unsigned int) currentchar,
-             (unsigned int) (rightchar == 0) ? (numofchars-1) : rightchar-1,
-             countbucketsize);
+             currentchar,
+             (unsigned int) (rightchar == 0) ? (numofchars-1) : (rightchar-1),
+             accubucketsize);
     if (rightchar == 0)
     {
-      countbucketsize += bucketspec.specialsinbucket;
-      printf("bucketend[%u]=%lu\n",
-             (unsigned int) currentchar,
-             countbucketsize);
+      accubucketsize += bucketspec.specialsinbucket;
+      subbucketspec->bucketends[currentchar] = accubucketsize;
+      printf("bucketends[%u]=%lu\n", currentchar, accubucketsize);
       currentchar++;
     }
+  }
+  for (idx = 0; idx<numofchars; idx++)
+  {
+    subbucketspec->order[idx] = idx;
+    printf("superbucketsize[%u]=%lu\n",
+            idx,superbucketsize(subbucketspec,idx));
+  }
+  gt_qsort_r(subbucketspec->order,(size_t) numofchars,
+             sizeof (*subbucketspec->order),subbucketspec,
+             comparesuperbucketsizes);
+  for (idx = 0; idx<numofchars; idx++)
+  {
+    printf("bucket %u: size %lu\n",subbucketspec->order[idx],
+            superbucketsize(subbucketspec,subbucketspec->order[idx]));
   }
   return subbucketspec;
 }
@@ -81,5 +131,6 @@ void subbuckets_delete(Subbucketspec *subbucketspec)
   gt_free(subbucketspec->subbucket[0]);
   gt_free(subbucketspec->subbucket);
   gt_free(subbucketspec->bucketends);
+  gt_free(subbucketspec->order);
   gt_free(subbucketspec);
 }
