@@ -2105,7 +2105,7 @@ void sortallbuckets(Suftab *suftab,
   Suffixwithcode firstsuffixofbucket;
   Bentsedgresources bsr;
   Seqpos *suftabptr = suftab->sortspace - suftab->offset;
-  Subbucketspec *subbucketspec = NULL;
+  Bucketspec2 *bucketspec2 = NULL;
 
   initBentsedgresources(&bsr,
                         suftab,
@@ -2122,7 +2122,7 @@ void sortallbuckets(Suftab *suftab,
                         sfxstrategy);
   if (prefixlength == 2U && outlcpinfo == NULL)
   {
-    subbucketspec = subbuckets_new(bcktab, suftabptr, partwidth, numofchars);
+    bucketspec2 = bucketspec2_new(bcktab, partwidth, numofchars);
   }
   for (code = mincode; code <= maxcode; code++)
   {
@@ -2272,8 +2272,12 @@ void sortallbuckets(Suftab *suftab,
       }
     }
   }
-  subbuckets_delete(subbucketspec);
-  subbucketspec = NULL;
+  if (bucketspec2 != NULL)
+  {
+    gt_copysortsuffixes(bucketspec2,suftabptr,encseq, readmode);
+    bucketspec2_delete(bucketspec2);
+    bucketspec2 = NULL;
+  }
   wrapBentsedgresources(&bsr,
                         partwidth,
                         outlcpinfo == NULL ? NULL : &outlcpinfo->lcpsubtab,

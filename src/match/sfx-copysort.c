@@ -27,31 +27,31 @@ typedef struct
   unsigned long bucketend;
 } Bucketinfo;
 
-struct Subbucketspec
+struct Bucketspec2
 {
+  Seqpos partwidth;
   unsigned int numofchars, *order;
   const Seqpos *suftab;
-  Seqpos *suftabcopy;
   Bucketinfo *superbuckettab, **subbuckettab;
 };
 
-static unsigned long superbucketsize(const Subbucketspec *subbucketspec,
+static unsigned long superbucketsize(const Bucketspec2 *bucketspec2,
                                      unsigned int bucketnum)
 {
   if (bucketnum == 0)
   {
-    return subbucketspec->superbuckettab[0].bucketend;
+    return bucketspec2->superbuckettab[0].bucketend;
   }
-  return subbucketspec->superbuckettab[bucketnum].bucketend -
-         subbucketspec->superbuckettab[bucketnum-1].bucketend;
+  return bucketspec2->superbuckettab[bucketnum].bucketend -
+         bucketspec2->superbuckettab[bucketnum-1].bucketend;
 }
 
 static int comparesuperbucketsizes(const void *a,const void *b,void *data)
 {
-  const Subbucketspec *subbucketspec = (const Subbucketspec *) data;
-  unsigned long size1 = superbucketsize(subbucketspec,
+  const Bucketspec2 *bucketspec2 = (const Bucketspec2 *) data;
+  unsigned long size1 = superbucketsize(bucketspec2,
                                         *(const unsigned int *) a);
-  unsigned long size2 = superbucketsize(subbucketspec,
+  unsigned long size2 = superbucketsize(bucketspec2,
                                         *(const unsigned int *) b);
   if (size1 < size2)
   {
@@ -64,34 +64,26 @@ static int comparesuperbucketsizes(const void *a,const void *b,void *data)
   return 0;
 }
 
-Subbucketspec *subbuckets_new(const Bcktab *bcktab,
-                              const Seqpos *suftab,
-                              Seqpos partwidth,
-                              unsigned int numofchars)
+Bucketspec2 *bucketspec2_new(const Bcktab *bcktab,
+                             Seqpos partwidth,
+                             unsigned int numofchars)
 {
   Codetype code, maxcode;
   Bucketspecification bucketspec;
-  Subbucketspec *subbucketspec;
-  Seqpos suftabidx;
+  Bucketspec2 *bucketspec2;
   unsigned int idx, rightchar = 0, currentchar = 0;
   unsigned long accubucketsize = 0;
 
   gt_assert(numofchars > 0);
-  subbucketspec = gt_malloc(sizeof(*subbucketspec));
-  subbucketspec->numofchars = numofchars;
-  subbucketspec->order = gt_malloc(sizeof(*subbucketspec->order) *
+  bucketspec2 = gt_malloc(sizeof(*bucketspec2));
+  bucketspec2->partwidth = partwidth;
+  bucketspec2->numofchars = numofchars;
+  bucketspec2->order = gt_malloc(sizeof(*bucketspec2->order) *
                                    numofchars);
-  subbucketspec->superbuckettab
-    = gt_malloc(sizeof(*subbucketspec->superbuckettab) * numofchars);
-  gt_array2dim_malloc(subbucketspec->subbuckettab,(unsigned long) numofchars,
+  bucketspec2->superbuckettab
+    = gt_malloc(sizeof(*bucketspec2->superbuckettab) * numofchars);
+  gt_array2dim_malloc(bucketspec2->subbuckettab,(unsigned long) numofchars,
                       (unsigned long) numofchars);
-  subbucketspec->suftabcopy = gt_malloc(sizeof(*subbucketspec->suftabcopy) *
-                                        partwidth);
-  subbucketspec->suftab = suftab;
-  for (suftabidx = 0; suftabidx < partwidth; suftabidx++)
-  {
-    subbucketspec->suftabcopy[suftabidx] = suftab[suftabidx];
-  }
   maxcode = bcktab_numofallcodes(bcktab) - 1;
   for (code = 0; code <= maxcode; code++)
   {
@@ -104,44 +96,66 @@ Subbucketspec *subbuckets_new(const Bcktab *bcktab,
                                       numofchars);
     accubucketsize += bucketspec.nonspecialsinbucket;
     idx = (rightchar == 0) ? (numofchars-1) : (rightchar-1);
-    subbucketspec->subbuckettab[currentchar][idx].bucketend = accubucketsize;
-    subbucketspec->subbuckettab[currentchar][idx].sorted = false;
+    bucketspec2->subbuckettab[currentchar][idx].bucketend = accubucketsize;
+    bucketspec2->subbuckettab[currentchar][idx].sorted = false;
     printf("subbucket[%u][%u]=%lu\n", currentchar, idx, accubucketsize);
     if (rightchar == 0)
     {
       accubucketsize += bucketspec.specialsinbucket;
-      subbucketspec->superbuckettab[currentchar].bucketend = accubucketsize;
-      subbucketspec->superbuckettab[currentchar].sorted = false;
+      bucketspec2->superbuckettab[currentchar].bucketend = accubucketsize;
+      bucketspec2->superbuckettab[currentchar].sorted = false;
       printf("superbucket[%u].end=%lu\n", currentchar, accubucketsize);
       currentchar++;
     }
   }
   for (idx = 0; idx<numofchars; idx++)
   {
-    subbucketspec->order[idx] = idx;
+    bucketspec2->order[idx] = idx;
     printf("superbucketsize[%u]=%lu\n",
-            idx,superbucketsize(subbucketspec,idx));
+            idx,superbucketsize(bucketspec2,idx));
   }
-  gt_qsort_r(subbucketspec->order,(size_t) numofchars,
-             sizeof (*subbucketspec->order),subbucketspec,
+  gt_qsort_r(bucketspec2->order,(size_t) numofchars,
+             sizeof (*bucketspec2->order),bucketspec2,
              comparesuperbucketsizes);
   for (idx = 0; idx<numofchars; idx++)
   {
-    printf("bucket %u: size %lu\n",subbucketspec->order[idx],
-            superbucketsize(subbucketspec,subbucketspec->order[idx]));
+    printf("bucket %u: size %lu\n",bucketspec2->order[idx],
+            superbucketsize(bucketspec2,bucketspec2->order[idx]));
   }
-  return subbucketspec;
+  return bucketspec2;
 }
 
-void subbuckets_delete(Subbucketspec *subbucketspec)
+void gt_copysortsuffixes(Bucketspec2 *bucketspec2, const Seqpos *suftab,
+                         const Encodedsequence *encseq, Readmode readmode)
 {
-  if (subbucketspec == NULL)
+  const Seqpos *ptr, *endptr;
+  Seqpos startpos;
+  unsigned long insertpos;
+  GtUchar cc;
+
+  bucketspec2->suftab = suftab;
+  endptr = suftab+bucketspec2->superbuckettab[bucketspec2->order[0]].bucketend;
+  for (ptr = endptr - 1; ptr >= suftab; ptr--)
   {
-    return;
+    startpos = *ptr;
+    if (startpos > 0)
+    {
+      cc = getencodedchar(encseq,startpos-1,readmode);
+      if (ISNOTSPECIAL(cc) && cc > 0)
+      {
+        bucketspec2->subbuckettab[cc][0].bucketend--;
+        insertpos = bucketspec2->subbuckettab[cc][0].bucketend;
+        gt_assert(suftab[insertpos] == startpos - 1);
+      }
+    }
   }
-  gt_array2dim_delete(subbucketspec->subbuckettab);
-  gt_free(subbucketspec->superbuckettab);
-  gt_free(subbucketspec->order);
-  gt_free(subbucketspec->suftabcopy);
-  gt_free(subbucketspec);
+}
+
+void bucketspec2_delete(Bucketspec2 *bucketspec2)
+{
+  gt_assert(bucketspec2 != NULL);
+  gt_array2dim_delete(bucketspec2->subbuckettab);
+  gt_free(bucketspec2->superbuckettab);
+  gt_free(bucketspec2->order);
+  gt_free(bucketspec2);
 }

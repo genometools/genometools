@@ -19,14 +19,17 @@
 #define SFX_COPYSORT_H
 
 #include "bcktab.h"
+#include "encseq-def.h"
 
-typedef struct Subbucketspec Subbucketspec;
+typedef struct Bucketspec2 Bucketspec2;
 
-Subbucketspec *subbuckets_new(const Bcktab *bcktab,
-                              const Seqpos *suftab,
-                              Seqpos partwidth,
-                              unsigned int numofchars);
+Bucketspec2 *bucketspec2_new(const Bcktab *bcktab,
+                             Seqpos partwidth,
+                             unsigned int numofchars);
 
-void subbuckets_delete(Subbucketspec *subbucketspec);
+void gt_copysortsuffixes(Bucketspec2 *bucketspec2, const Seqpos *suftab,
+                         const Encodedsequence *encseq, Readmode readmode);
+
+void bucketspec2_delete(Bucketspec2 *bucketspec2);
 
 #endif
