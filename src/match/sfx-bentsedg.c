@@ -37,6 +37,7 @@
 #include "lcpoverflow.h"
 #include "opensfxfile.h"
 #include "sfx-remainsort.h"
+#include "sfx-copysort.h"
 #include "stamp.h"
 
 #include "sfx-cmpsuf.pr"
@@ -2104,6 +2105,7 @@ void sortallbuckets(Suftab *suftab,
   Suffixwithcode firstsuffixofbucket;
   Bentsedgresources bsr;
   Seqpos *suftabptr = suftab->sortspace - suftab->offset;
+  Subbucketspec *subbucketspec = NULL;
 
   initBentsedgresources(&bsr,
                         suftab,
@@ -2118,6 +2120,10 @@ void sortallbuckets(Suftab *suftab,
                         prefixlength,
                         outlcpinfo,
                         sfxstrategy);
+  if (prefixlength == 2U)
+  {
+    subbucketspec = subbuckets_new(bcktab, partwidth, numofchars);
+  }
   for (code = mincode; code <= maxcode; code++)
   {
     (*bucketiterstep)++;
@@ -2266,6 +2272,8 @@ void sortallbuckets(Suftab *suftab,
       }
     }
   }
+  subbuckets_delete(subbucketspec);
+  subbucketspec = NULL;
   wrapBentsedgresources(&bsr,
                         partwidth,
                         outlcpinfo == NULL ? NULL : &outlcpinfo->lcpsubtab,

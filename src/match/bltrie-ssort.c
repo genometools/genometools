@@ -152,10 +152,10 @@ static inline Nodeptr extractleafnode(const Blindtrie *blindtrie,Nodeptr head)
 
 static inline int comparecharacters(GtUchar oldchar,GtUchar newchar)
 {
-  return (oldchar > newchar) 
+  return (oldchar > newchar)
            ? 1
-           : ((oldchar < newchar || ISSPECIAL(oldchar)) 
-                  ? -1 
+           : ((oldchar < newchar || ISSPECIAL(oldchar))
+                  ? -1
                   : 0);
 }
 
