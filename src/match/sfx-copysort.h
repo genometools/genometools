@@ -23,6 +23,7 @@
 typedef struct Subbucketspec Subbucketspec;
 
 Subbucketspec *subbuckets_new(const Bcktab *bcktab,
+                              const Seqpos *suftab,
                               Seqpos partwidth,
                               unsigned int numofchars);
 

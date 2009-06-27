@@ -51,7 +51,7 @@ checkrepetitive()
   filename=$1
   for cfc in ${repetitivefiles}
   do
-    if test ${cfc} = ${filename}
+    if test ${cfc} == ${filename}
     then
       return 1
     fi

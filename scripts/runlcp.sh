@@ -3,7 +3,7 @@ set -e -x
 
 if test $# -eq 0
 then
-  filenames="`find testdata/ -name '*.fna'` testdata/at1MB"
+  filenames="`find testdata -name '*.fna'` testdata/at1MB"
 else
   if test $1 == 'valgrind'
   then
@@ -14,7 +14,7 @@ else
   fi
   if test $# -eq 0
   then
-    filenames="`find testdata/ -name '*.fna'` testdata/at1MB"
+    filenames="`find testdata -name '*.fna'` testdata/at1MB"
   else
     filenames=$*
   fi
@@ -50,6 +50,22 @@ sfxmaponlysuf()
   gt dev sfxmap -suf $*
 }
 
+smallfiles="testdata/Random-Small.fna testdata/TTT-small.fna"
+
+checksmallfile()
+{
+  filename=$1
+  ret=0
+  for cfc in ${smallfiles}
+  do
+    if test ${cfc} == ${filename}
+    then
+      ret=1
+    fi
+  done
+  echo ${ret}
+}
+
 for filename in ${filenames}
 do
   suffixerator ""
@@ -80,6 +96,11 @@ do
       sfxmaponlysuf sfx-idx
     done
   done
+  xx=`checksmallfile ${filename}`
+  if test ${xx} == '0'
+  then
+    suffixeratornolcp -pl 2
+  fi
   # ${RUNNER} gt suffixerator -v -showtime -smap Transab -tis -suf -dc 64 -db testdata/fib25.fas.gz -indexname sfx-idx
   rm -f sfx-idx.* sfx-idx${maxdepth}.* 
 done

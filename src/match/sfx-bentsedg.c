@@ -2120,9 +2120,9 @@ void sortallbuckets(Suftab *suftab,
                         prefixlength,
                         outlcpinfo,
                         sfxstrategy);
-  if (prefixlength == 2U)
+  if (prefixlength == 2U && outlcpinfo == NULL)
   {
-    subbucketspec = subbuckets_new(bcktab, partwidth, numofchars);
+    subbucketspec = subbuckets_new(bcktab, suftabptr, partwidth, numofchars);
   }
   for (code = mincode; code <= maxcode; code++)
   {
