@@ -27,7 +27,7 @@ Bucketspec2 *bucketspec2_new(const Bcktab *bcktab,
                              Seqpos partwidth,
                              unsigned int numofchars);
 
-void gt_copysortsuffixes(Bucketspec2 *bucketspec2, const Seqpos *suftab,
+void gt_copysortsuffixes(const Bucketspec2 *bucketspec2, const Seqpos *suftab,
                          const Encodedsequence *encseq, Readmode readmode);
 
 void bucketspec2_delete(Bucketspec2 *bucketspec2);
