@@ -28,5 +28,8 @@ typedef struct GtFeatureIndexMemory GtFeatureIndexMemory;
 
 /* Creates a new <GtFeatureIndexMemory> object. */
 GtFeatureIndex* gt_feature_index_memory_new(void);
+GtFeatureNode*  gt_feature_index_get_node_by_id(GtFeatureIndexMemory *fim,
+                                                unsigned long id,
+                                                GtError *err);
 
 #endif

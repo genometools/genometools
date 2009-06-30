@@ -33,12 +33,17 @@
 #include "core/unused_api.h"
 #include "extended/genome_node.h"
 
+#define GT_FEATURE_INDEX_MEMORY_INDEX_KEY "fi_id"
+
 struct GtFeatureIndexMemory {
   const GtFeatureIndex parent_instance;
   GtHashmap *regions;
-  char *firstseqid;
-  unsigned int nof_region_nodes,
-               reference_count;
+  GtArray *ids;
+  char *firstseqid,
+       buf[BUFSIZ];
+  unsigned long nof_region_nodes,
+                reference_count,
+                nof_nodes;
 };
 
 #define gt_feature_index_memory_cast(FI)\
@@ -93,6 +98,13 @@ void gt_feature_index_memory_add_feature_node(GtFeatureIndex *gfi,
 
   fi = gt_feature_index_memory_cast(gfi);
   gn = gt_genome_node_ref((GtGenomeNode*) gf);
+  /* assign id number as 'primary key' */
+  snprintf(fi->buf, BUFSIZ-1, "%lu", fi->nof_nodes);
+  gt_feature_node_add_attribute(gt_feature_node_cast(gn),
+                                GT_FEATURE_INDEX_MEMORY_INDEX_KEY,
+                                fi->buf);
+  fi->nof_nodes++;
+  gt_array_add(fi->ids, gn);
   /* get information about seqid and range */
   node_range = gt_genome_node_get_range(gn);
   seqid = gt_str_get(gt_genome_node_get_seqid(gn));
@@ -180,6 +192,18 @@ int gt_feature_index_memory_get_features_for_range(GtFeatureIndex *gfi,
   return 0;
 }
 
+GtFeatureNode*  gt_feature_index_get_node_by_id(GtFeatureIndexMemory *fim,
+                                                unsigned long id,
+                                                GtError *err)
+{
+  gt_assert(fim);
+  if (id >= gt_array_size(fim->ids)) {
+    gt_error_set(err, "feature index does not contain a node with id %lu", id);
+    return NULL;
+  }
+  return *(GtFeatureNode**) gt_array_get(fim->ids, id);
+}
+
 const char* gt_feature_index_memory_get_first_seqid(const GtFeatureIndex *gfi)
 {
   GtFeatureIndexMemory *fi;
@@ -249,6 +273,7 @@ void gt_feature_index_memory_delete(GtFeatureIndex *gfi)
   if (!gfi) return;
   fi = gt_feature_index_memory_cast(gfi);
   gt_hashmap_delete(fi->regions);
+  gt_array_delete(fi->ids);
 }
 
 const GtFeatureIndexClass* gt_feature_index_memory_class(void)
@@ -275,8 +300,10 @@ GtFeatureIndex* gt_feature_index_memory_new(void)
   GtFeatureIndex *fi;
   fi = gt_feature_index_create(gt_feature_index_memory_class());
   fim = gt_feature_index_memory_cast(fi);
+  fim->nof_nodes = 0;
   fim->regions = gt_hashmap_new(HASH_STRING, NULL,
-                             (GtFree) region_info_delete);
+                                (GtFree) region_info_delete);
+  fim->ids = gt_array_new(sizeof (GtFeatureNode*));
   return fi;
 }
 
