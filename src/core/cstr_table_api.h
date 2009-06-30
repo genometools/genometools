@@ -38,4 +38,3 @@ const char*   gt_cstr_table_get(const GtCstrTable *table, const char *cstr);
 GtStrArray*   gt_cstr_table_get_all(const GtCstrTable *table);
 
 #endif
-
