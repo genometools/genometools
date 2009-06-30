@@ -311,11 +311,13 @@ int gt_feature_index_memory_unit_test(GtError *err)
 {
   GtGenomeNode *gn1, *gn2, *ex1, *ex2, *ex3, *cds1;
   GtFeatureIndex *fi;
+  GtFeatureNode *tmp;
   GtRange check_range, rs;
   GtStr *seqid1, *seqid2;
   GtStrArray *seqids = NULL;
   GtRegionNode *rn1, *rn2;
   GtArray *features = NULL;
+  GtError *testerr;
   int had_err = 0;
   gt_error_check(err);
 
@@ -414,11 +416,26 @@ int gt_feature_index_memory_unit_test(GtError *err)
   ensure(had_err, features);
   gt_array_delete(features);
 
+  testerr = gt_error_new();
+  tmp = gt_feature_index_get_node_by_id(gt_feature_index_memory_cast(fi),
+                                        0, testerr);
+  ensure(had_err, tmp == gt_feature_node_cast(gn1));
+  ensure(had_err, !gt_error_is_set(testerr));
+  tmp = gt_feature_index_get_node_by_id(gt_feature_index_memory_cast(fi),
+                                        1, testerr);
+  ensure(had_err, tmp == gt_feature_node_cast(gn2));
+  ensure(had_err, !gt_error_is_set(testerr));
+  tmp = gt_feature_index_get_node_by_id(gt_feature_index_memory_cast(fi),
+                                        3, testerr);
+  ensure(had_err, tmp == NULL);
+  ensure(had_err, gt_error_is_set(testerr));
+
   /* delete all generated objects */
   gt_str_array_delete(seqids);
   gt_feature_index_delete(fi);
   gt_genome_node_delete(gn1);
   gt_genome_node_delete(gn2);
+  gt_error_delete(testerr);
   gt_genome_node_delete((GtGenomeNode*) rn1);
   gt_genome_node_delete((GtGenomeNode*) rn2);
   gt_str_delete(seqid1);
