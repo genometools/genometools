@@ -783,6 +783,11 @@ unsigned int bcktab_optimalnumofbits(unsigned short *logofremaining,
   return bcktab->optimalnumofbits;
 }
 
+unsigned int bcktab_prefixlength(const Bcktab *bcktab)
+{
+  return bcktab->prefixlength;
+}
+
 unsigned int singletonmaxprefixindex(const Bcktab *bcktab,Codetype code)
 {
   if (bcktab->prefixlength > 2U)

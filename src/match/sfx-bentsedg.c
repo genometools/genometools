@@ -2120,7 +2120,7 @@ void sortallbuckets(Suftab *suftab,
                         prefixlength,
                         outlcpinfo,
                         sfxstrategy);
-  if (prefixlength == 2U && outlcpinfo == NULL)
+  if (outlcpinfo == NULL)
   {
     bucketspec2 = bucketspec2_new(bcktab, partwidth, numofchars);
   }

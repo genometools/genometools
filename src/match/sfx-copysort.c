@@ -19,6 +19,7 @@
 #include "core/qsort_r.h"
 #include "core/array2dim_api.h"
 #include "bcktab.h"
+#include "initbasepower.h"
 #include "sfx-copysort.h"
 
 typedef struct
@@ -110,6 +111,15 @@ static void resetsorted(Bucketspec2 *bucketspec2)
   }
 }
 
+static Codetype expandtwocharcode(Codetype twocharcode,
+                                  unsigned int prefixlength,
+                                  const Codetype *basepower,
+                                  const Bcktab *bcktab)
+{
+  gt_assert(twocharcode < (Codetype) 16);
+  return twocharcode * basepower[prefixlength-1] + bcktab_filltable(bcktab,2);
+}
+
 Bucketspec2 *bucketspec2_new(const Bcktab *bcktab,
                              Seqpos partwidth,
                              unsigned int numofchars)
@@ -117,7 +127,7 @@ Bucketspec2 *bucketspec2_new(const Bcktab *bcktab,
   Codetype code, maxcode;
   Bucketspecification bucketspec;
   Bucketspec2 *bucketspec2;
-  unsigned int idx, rightchar = 0, currentchar = 0;
+  unsigned int idx, rightchar = 0, currentchar = 0, prefixlength;
   unsigned long accubucketsize = 0;
 
   gt_assert(numofchars > 0);
@@ -130,29 +140,46 @@ Bucketspec2 *bucketspec2_new(const Bcktab *bcktab,
   gt_array2dim_malloc(bucketspec2->subbuckettab,(unsigned long) numofchars,
                       (unsigned long) numofchars);
   maxcode = bcktab_numofallcodes(bcktab) - 1;
-  for (code = 0; code <= maxcode; code++)
+  prefixlength = bcktab_prefixlength(bcktab);
+  if (prefixlength == 2U)
   {
-    rightchar = calcbucketboundsparts(&bucketspec,
-                                      bcktab,
-                                      code,
-                                      maxcode,
-                                      partwidth,
-                                      rightchar,
-                                      numofchars);
-    accubucketsize += bucketspec.nonspecialsinbucket;
-    if (rightchar == 0)
+    for (code = 0; code <= maxcode; code++)
     {
-      bucketspec2->subbuckettab[currentchar][numofchars-1].bucketend 
-        = accubucketsize;
-      accubucketsize += bucketspec.specialsinbucket;
-      bucketspec2->superbuckettab[currentchar].bucketend = accubucketsize;
-      currentchar++;
-    } else
-    {
-      gt_assert(bucketspec.specialsinbucket == 0);
-      bucketspec2->subbuckettab[currentchar][rightchar-1].bucketend 
-        = accubucketsize;
+      rightchar = calcbucketboundsparts(&bucketspec,
+                                        bcktab,
+                                        code,
+                                        maxcode,
+                                        partwidth,
+                                        rightchar,
+                                        numofchars);
+      accubucketsize += bucketspec.nonspecialsinbucket;
+      if (rightchar == 0)
+      {
+        bucketspec2->subbuckettab[currentchar][numofchars-1].bucketend 
+          = accubucketsize;
+        accubucketsize += bucketspec.specialsinbucket;
+        bucketspec2->superbuckettab[currentchar].bucketend = accubucketsize;
+        currentchar++;
+      } else
+      {
+        gt_assert(bucketspec.specialsinbucket == 0);
+        bucketspec2->subbuckettab[currentchar][rightchar-1].bucketend 
+          = accubucketsize;
+      }
     }
+  } else
+  {
+    Codetype *basepower;
+
+    basepower = initbasepower(numofchars,prefixlength-2);
+    for (code = 0; code < 16; code++)
+    {
+      printf("code=%u = %lu\n",(unsigned int) code,
+             (unsigned long) expandtwocharcode(code,prefixlength,
+                                               basepower,bcktab));
+    }
+    gt_free(basepower);
+    exit(EXIT_SUCCESS);
   }
   resetsorted(bucketspec2);
   for (idx = 0; idx<numofchars; idx++)
