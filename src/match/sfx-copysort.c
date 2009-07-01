@@ -93,6 +93,23 @@ static unsigned long getendidx(const Bucketspec2 *bucketspec2,
   return bucketspec2->superbuckettab[first].bucketend;
 }
 
+static void resetsorted(Bucketspec2 *bucketspec2)
+{
+  unsigned int idx, idx2;
+
+  for (idx = 0; idx<bucketspec2->numofchars; idx++)
+  {
+    bucketspec2->superbuckettab[idx].sorted = false;
+    for (idx2 = 0; idx2<bucketspec2->numofchars; idx2++)
+    {
+      unsigned long startidx = getstartidx(bucketspec2,idx,idx2),
+                    endidx = getendidx(bucketspec2,idx,idx2);
+      bucketspec2->subbuckettab[idx][idx2].sorted
+        = (startidx < endidx) ? false : true;
+    }
+  }
+}
+
 Bucketspec2 *bucketspec2_new(const Bcktab *bcktab,
                              Seqpos partwidth,
                              unsigned int numofchars)
@@ -123,79 +140,52 @@ Bucketspec2 *bucketspec2_new(const Bcktab *bcktab,
                                       rightchar,
                                       numofchars);
     accubucketsize += bucketspec.nonspecialsinbucket;
-    idx = (rightchar == 0) ? (numofchars-1) : (rightchar-1);
-    bucketspec2->subbuckettab[currentchar][idx].bucketend = accubucketsize;
-#ifdef WITHSUFFIXES
-    printf("subbucket[%u][%u]=%lu\n", currentchar, idx, accubucketsize);
-#endif
     if (rightchar == 0)
     {
+      bucketspec2->subbuckettab[currentchar][numofchars-1].bucketend 
+        = accubucketsize;
       accubucketsize += bucketspec.specialsinbucket;
       bucketspec2->superbuckettab[currentchar].bucketend = accubucketsize;
-      bucketspec2->superbuckettab[currentchar].sorted = false;
-#ifdef WITHSUFFIXES
-      printf("subbucket[%u][%u].end=%lu\n", currentchar, numofchars,
-                                            accubucketsize);
-      printf("superbucket[%u].end=%lu\n", currentchar, accubucketsize);
-#endif
       currentchar++;
+    } else
+    {
+      gt_assert(bucketspec.specialsinbucket == 0);
+      bucketspec2->subbuckettab[currentchar][rightchar-1].bucketend 
+        = accubucketsize;
     }
   }
+  resetsorted(bucketspec2);
   for (idx = 0; idx<numofchars; idx++)
   {
-    unsigned int idx2;
-
     bucketspec2->order[idx] = idx;
-#ifdef WITHSUFFIXES
-    printf("superbucketsize[%u]=%lu\n",idx,superbucketsize(bucketspec2,idx));
-#endif
-    for (idx2 = 0; idx2<numofchars; idx2++)
-    {
-      unsigned long startidx = getstartidx(bucketspec2,idx,idx2);
-      unsigned long endidx = getendidx(bucketspec2,idx,idx2);
-      bucketspec2->subbuckettab[idx][idx2].sorted
-        = (startidx < endidx) ? false : true;
-#ifdef WITHSUFFIXES
-      if (bucketspec2->subbuckettab[idx][idx2].sorted)
-      {
-        printf("empty bucket %u %u\n",idx,idx2);
-      }
-#endif
-    }
   }
   gt_qsort_r(bucketspec2->order,(size_t) numofchars,
              sizeof (*bucketspec2->order),bucketspec2,
              comparesuperbucketsizes);
-#ifdef WITHSUFFIXES
-  for (idx = 0; idx<numofchars; idx++)
-  {
-    printf("bucket %u: size %lu\n",bucketspec2->order[idx],
-            superbucketsize(bucketspec2,bucketspec2->order[idx]));
-  }
-#endif
   return bucketspec2;
 }
 
 static void forwardderive(const Bucketspec2 *bucketspec2,
-                          const Seqpos **targetptr,
+                          const Seqpos *suftab,
+                          unsigned long *targetptr,
                           const Encodedsequence *encseq,
                           Readmode readmode,
                           unsigned int source,
-                          const Seqpos *ptr)
+                          unsigned long idx)
 {
   Seqpos startpos;
   GtUchar cc;
 
-  gt_assert (ptr < targetptr[source]);
-  for (; ptr < targetptr[source]; ptr++)
+  gt_assert (idx < targetptr[source]);
+  for (; idx < targetptr[source]; idx++)
   {
-    startpos = *ptr;
+    startpos = suftab[idx];
     if (startpos > 0)
     {
       cc = getencodedchar(encseq,startpos-1,readmode);
       if (ISNOTSPECIAL(cc) && !bucketspec2->superbuckettab[cc].sorted)
       {
-        gt_assert(*(targetptr[cc]) == startpos - 1);
+        gt_assert(suftab[targetptr[cc]] == startpos - 1);
         targetptr[cc]++;
       }
     }
@@ -203,26 +193,27 @@ static void forwardderive(const Bucketspec2 *bucketspec2,
 }
 
 static void backwardderive(const Bucketspec2 *bucketspec2,
-                          const Seqpos **targetptr,
-                          const Encodedsequence *encseq,
-                          Readmode readmode,
-                          unsigned int source,
-                          const Seqpos *ptr)
+                           const Seqpos *suftab,
+                           unsigned long *targetptr,
+                           const Encodedsequence *encseq,
+                           Readmode readmode,
+                           unsigned int source,
+                           unsigned long idx)
 {
   Seqpos startpos;
   GtUchar cc;
 
-  gt_assert (ptr > targetptr[source]);
-  for (ptr--; ptr >= targetptr[source]; ptr--)
+  gt_assert (idx > targetptr[source]);
+  for (idx--; idx >= targetptr[source]; idx--)
   {
-    startpos = *ptr;
+    startpos = suftab[idx];
     if (startpos > 0)
     {
       cc = getencodedchar(encseq,startpos-1,readmode);
       if (ISNOTSPECIAL(cc) && !bucketspec2->superbuckettab[cc].sorted)
       {
         targetptr[cc]--;
-        gt_assert(*(targetptr[cc]) == startpos - 1);
+        gt_assert(suftab[targetptr[cc]] == startpos - 1);
       }
     }
   }
@@ -231,9 +222,8 @@ static void backwardderive(const Bucketspec2 *bucketspec2,
 void gt_copysortsuffixes(const Bucketspec2 *bucketspec2, const Seqpos *suftab,
                          const Encodedsequence *encseq, Readmode readmode)
 {
-  const Seqpos **targetptr;
+  unsigned long hardwork = 0, *targetptr;
   unsigned int idx, idxsource, source, second;
-  unsigned long hardwork = 0;
 
 #ifdef WITHSUFFIXES
   {
@@ -269,28 +259,29 @@ void gt_copysortsuffixes(const Bucketspec2 *bucketspec2, const Seqpos *suftab,
     {
       for (idx = 0; idx < bucketspec2->numofchars; idx++)
       {
-        targetptr[idx] = suftab + getstartidx(bucketspec2,idx,source);
+        targetptr[idx] = getstartidx(bucketspec2,idx,source);
       }
       forwardderive(bucketspec2,
+                    suftab,
                     targetptr,
                     encseq,
                     readmode,
                     source,
-                    suftab + getstartidx(bucketspec2,source,0));
+                    getstartidx(bucketspec2,source,0));
     }
     if (getendidx(bucketspec2,source,source) <
         getendidx(bucketspec2,source,bucketspec2->numofchars))
     {
       for (idx = 0; idx < bucketspec2->numofchars; idx++)
       {
-        targetptr[idx] = suftab + getendidx(bucketspec2,idx,source);
+        targetptr[idx] = getendidx(bucketspec2,idx,source);
       }
       backwardderive(bucketspec2,
+                     suftab,
                      targetptr,
                      encseq,
                      readmode,
                      source,
-                     suftab +
                      getendidx(bucketspec2,source,bucketspec2->numofchars));
     }
     for (idx = 0; idx < bucketspec2->numofchars; idx++)
