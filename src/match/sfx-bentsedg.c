@@ -38,10 +38,10 @@
 #include "opensfxfile.h"
 #include "sfx-remainsort.h"
 #include "sfx-copysort.h"
+#include "kmer2string.h"
 #include "stamp.h"
 
 #include "sfx-cmpsuf.pr"
-#include "kmer2string.pr"
 
 #define UNIQUEINT(P)           ((Seqpos) ((P) + COMPAREOFFSET))
 #define ACCESSCHAR(POS)        getencodedchar(bsr->encseq,POS,bsr->readmode)

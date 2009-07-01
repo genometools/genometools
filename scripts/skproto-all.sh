@@ -70,6 +70,7 @@ initbasepower.c
 initeqsvec.c
 inl-encseq.c
 iter-window.c
+kmerstring.c
 mapspec-gen.c
 measure-time.c
 merger-trie.c

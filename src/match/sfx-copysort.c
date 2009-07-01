@@ -117,7 +117,8 @@ static Codetype expandtwocharcode(Codetype twocharcode,
                                   const Bcktab *bcktab)
 {
   gt_assert(twocharcode < (Codetype) 16);
-  return twocharcode * basepower[prefixlength-1] + bcktab_filltable(bcktab,2);
+  return twocharcode * basepower[prefixlength-1] 
+                     + bcktab_filltable(bcktab,2);
 }
 
 Bucketspec2 *bucketspec2_new(const Bcktab *bcktab,
@@ -171,7 +172,7 @@ Bucketspec2 *bucketspec2_new(const Bcktab *bcktab,
   {
     Codetype *basepower;
 
-    basepower = initbasepower(numofchars,prefixlength-2);
+    basepower = initbasepower(numofchars,prefixlength);
     for (code = 0; code < 16; code++)
     {
       printf("code=%u = %lu\n",(unsigned int) code,
