@@ -213,7 +213,7 @@ static void backwardderive(const Bucketspec2 *bucketspec2,
   GtUchar cc;
 
   gt_assert (ptr > targetptr[source]);
-  for (; ptr > targetptr[source]; ptr--)
+  for (ptr--; ptr >= targetptr[source]; ptr--)
   {
     startpos = *ptr;
     if (startpos > 0)
@@ -221,8 +221,8 @@ static void backwardderive(const Bucketspec2 *bucketspec2,
       cc = getencodedchar(encseq,startpos-1,readmode);
       if (ISNOTSPECIAL(cc) && !bucketspec2->superbuckettab[cc].sorted)
       {
-        gt_assert(*(targetptr[cc]) == startpos - 1);
         targetptr[cc]--;
+        gt_assert(*(targetptr[cc]) == startpos - 1);
       }
     }
   }
@@ -283,7 +283,7 @@ void gt_copysortsuffixes(const Bucketspec2 *bucketspec2, const Seqpos *suftab,
     {
       for (idx = 0; idx < bucketspec2->numofchars; idx++)
       {
-        targetptr[idx] = suftab + getendidx(bucketspec2,idx,source) - 1;
+        targetptr[idx] = suftab + getendidx(bucketspec2,idx,source);
       }
       backwardderive(bucketspec2,
                      targetptr,
@@ -291,7 +291,7 @@ void gt_copysortsuffixes(const Bucketspec2 *bucketspec2, const Seqpos *suftab,
                      readmode,
                      source,
                      suftab +
-                     getendidx(bucketspec2,source,bucketspec2->numofchars) - 1);
+                     getendidx(bucketspec2,source,bucketspec2->numofchars));
     }
     for (idx = 0; idx < bucketspec2->numofchars; idx++)
     {
