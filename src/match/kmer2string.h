@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef KMERSTRING_H
-#define KMERSTRING_H
+#ifndef KMER2STRING_H
+#define KMER2STRING_H
 
 #include "intcode-def.h"
 

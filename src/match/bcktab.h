@@ -72,6 +72,11 @@ unsigned int calcbucketboundsparts(Bucketspecification *bucketspec,
                                    unsigned int rightchar,
                                    unsigned int numofchars);
 
+Seqpos calcbucketrightbounds(const Bcktab *bcktab,
+                             Codetype code,
+                             Codetype maxcode,
+                             Seqpos totalwidth);
+
 unsigned long distpfxidxpartialsums(const Bcktab *bcktab,Codetype code,
                                     unsigned int lowerbound);
 
