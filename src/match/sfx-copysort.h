@@ -24,11 +24,12 @@
 typedef struct Bucketspec2 Bucketspec2;
 
 Bucketspec2 *bucketspec2_new(const Bcktab *bcktab,
+                             const Encodedsequence *encseq,
+                             Readmode readmode,
                              Seqpos partwidth,
                              unsigned int numofchars);
 
-void gt_copysortsuffixes(const Bucketspec2 *bucketspec2, const Seqpos *suftab,
-                         const Encodedsequence *encseq, Readmode readmode);
+void gt_copysortsuffixes(const Bucketspec2 *bucketspec2, const Seqpos *suftab);
 
 void bucketspec2_delete(Bucketspec2 *bucketspec2);
 

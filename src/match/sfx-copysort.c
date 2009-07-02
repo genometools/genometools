@@ -32,6 +32,8 @@ typedef struct
 struct Bucketspec2
 {
   Seqpos partwidth;
+  const Encodedsequence *encseq;
+  Readmode readmode;
   unsigned int numofchars, *order;
   Codetype expandfactor, expandfillsum;
   Bucketinfo *superbuckettab, **subbuckettab;
@@ -118,6 +120,29 @@ static Codetype expandtwocharcode(Codetype twocharcode,
   return twocharcode * bucketspec2->expandfactor + bucketspec2->expandfillsum;
 }
 
+static void leftcontextofspecialchardist(Seqpos *dist,
+                                         const Encodedsequence *encseq,
+                                         Readmode readmode)
+{
+  Specialrangeiterator *sri;
+  Sequencerange range;
+  GtUchar cc;
+
+  sri = newspecialrangeiterator(encseq,ISDIRREVERSE(readmode) ? false : true);
+  while (nextspecialrangeiterator(&range,sri))
+  {
+    if (range.leftpos > 0)
+    {
+      cc = getencodedchar(encseq,range.leftpos-1,readmode);
+      if (ISNOTSPECIAL(cc))
+      {
+        dist[cc]++;
+      }
+    }
+  }
+  freespecialrangeiterator(&sri);
+}
+
 static void showbucketspec2(const Bucketspec2 *bucketspec2)
 {
   unsigned int idx1, idx2;
@@ -131,10 +156,12 @@ static void showbucketspec2(const Bucketspec2 *bucketspec2)
     }
     printf("superbucket[%u]=" FormatSeqpos "\n",idx1,
               PRINTSeqposcast(bucketspec2->superbuckettab[idx1].bucketend));
-  } 
+  }
 }
 
 Bucketspec2 *bucketspec2_new(const Bcktab *bcktab,
+                             const Encodedsequence *encseq,
+                             Readmode readmode,
                              Seqpos partwidth,
                              unsigned int numofchars)
 {
@@ -147,6 +174,8 @@ Bucketspec2 *bucketspec2_new(const Bcktab *bcktab,
   bucketspec2 = gt_malloc(sizeof(*bucketspec2));
   bucketspec2->partwidth = partwidth;
   bucketspec2->numofchars = numofchars;
+  bucketspec2->encseq = encseq;
+  bucketspec2->readmode = readmode;
   bucketspec2->order = gt_malloc(sizeof(*bucketspec2->order) * numofchars);
   bucketspec2->superbuckettab
     = gt_malloc(sizeof(*bucketspec2->superbuckettab) * numofchars);
@@ -184,7 +213,7 @@ Bucketspec2 *bucketspec2_new(const Bcktab *bcktab,
     }
   } else
   {
-    Seqpos rightbound;
+    Seqpos rightbound, *specialchardist;
 
     bucketspec2->expandfactor
       = (Codetype) pow((double) numofchars,(double) (prefixlength-2));
@@ -205,6 +234,12 @@ Bucketspec2 *bucketspec2_new(const Bcktab *bcktab,
       printf("code=%u => %lu\n",(unsigned int) code,ecode);
 #endif
     }
+    specialchardist = gt_malloc(sizeof(*specialchardist) * numofchars);
+    for (idx = 0; idx<numofchars; idx++)
+    {
+      specialchardist[idx] = 0;
+    }
+    leftcontextofspecialchardist(specialchardist,encseq,readmode);
     for (code = 0; code < (Codetype) 16; code++)
     {
       Codetype ecode = expandtwocharcode(code,bucketspec2);
@@ -228,6 +263,7 @@ Bucketspec2 *bucketspec2_new(const Bcktab *bcktab,
           = rightbound;
       }
     }
+    gt_free(specialchardist);
   }
   showbucketspec2(bucketspec2);
   exit(EXIT_SUCCESS);
@@ -245,8 +281,6 @@ Bucketspec2 *bucketspec2_new(const Bcktab *bcktab,
 static void forwardderive(const Bucketspec2 *bucketspec2,
                           const Seqpos *suftab,
                           Seqpos *targetptr,
-                          const Encodedsequence *encseq,
-                          Readmode readmode,
                           unsigned int source,
                           Seqpos idx)
 {
@@ -259,7 +293,7 @@ static void forwardderive(const Bucketspec2 *bucketspec2,
     startpos = suftab[idx];
     if (startpos > 0)
     {
-      cc = getencodedchar(encseq,startpos-1,readmode);
+      cc = getencodedchar(bucketspec2->encseq,startpos-1,bucketspec2->readmode);
       if (ISNOTSPECIAL(cc) && !bucketspec2->superbuckettab[cc].sorted)
       {
         gt_assert(suftab[targetptr[cc]] == startpos - 1);
@@ -272,8 +306,6 @@ static void forwardderive(const Bucketspec2 *bucketspec2,
 static void backwardderive(const Bucketspec2 *bucketspec2,
                            const Seqpos *suftab,
                            Seqpos *targetptr,
-                           const Encodedsequence *encseq,
-                           Readmode readmode,
                            unsigned int source,
                            Seqpos idx)
 {
@@ -286,7 +318,7 @@ static void backwardderive(const Bucketspec2 *bucketspec2,
     startpos = suftab[idx];
     if (startpos > 0)
     {
-      cc = getencodedchar(encseq,startpos-1,readmode);
+      cc = getencodedchar(bucketspec2->encseq,startpos-1,bucketspec2->readmode);
       if (ISNOTSPECIAL(cc) && !bucketspec2->superbuckettab[cc].sorted)
       {
         targetptr[cc]--;
@@ -296,8 +328,7 @@ static void backwardderive(const Bucketspec2 *bucketspec2,
   }
 }
 
-void gt_copysortsuffixes(const Bucketspec2 *bucketspec2, const Seqpos *suftab,
-                         const Encodedsequence *encseq, Readmode readmode)
+void gt_copysortsuffixes(const Bucketspec2 *bucketspec2, const Seqpos *suftab)
 {
   Seqpos hardwork = 0, *targetptr;
   unsigned int idx, idxsource, source, second;
@@ -341,8 +372,6 @@ void gt_copysortsuffixes(const Bucketspec2 *bucketspec2, const Seqpos *suftab,
       forwardderive(bucketspec2,
                     suftab,
                     targetptr,
-                    encseq,
-                    readmode,
                     source,
                     getstartidx(bucketspec2,source,0));
     }
@@ -356,8 +385,6 @@ void gt_copysortsuffixes(const Bucketspec2 *bucketspec2, const Seqpos *suftab,
       backwardderive(bucketspec2,
                      suftab,
                      targetptr,
-                     encseq,
-                     readmode,
                      source,
                      getendidx(bucketspec2,source,bucketspec2->numofchars));
     }
@@ -368,7 +395,7 @@ void gt_copysortsuffixes(const Bucketspec2 *bucketspec2, const Seqpos *suftab,
   }
   printf("# hardwork = " FormatSeqpos " (%.2f)\n",
             PRINTSeqposcast(hardwork),
-            (double) hardwork/getencseqtotallength(encseq));
+            (double) hardwork/getencseqtotallength(bucketspec2->encseq));
   gt_free(targetptr);
 }
 

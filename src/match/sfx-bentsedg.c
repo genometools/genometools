@@ -2122,7 +2122,7 @@ void sortallbuckets(Suftab *suftab,
                         sfxstrategy);
   if (outlcpinfo == NULL)
   {
-    bucketspec2 = bucketspec2_new(bcktab, partwidth, numofchars);
+    bucketspec2 = bucketspec2_new(bcktab,encseq,readmode,partwidth,numofchars);
   }
   for (code = mincode; code <= maxcode; code++)
   {
@@ -2274,7 +2274,7 @@ void sortallbuckets(Suftab *suftab,
   }
   if (bucketspec2 != NULL)
   {
-    gt_copysortsuffixes(bucketspec2,suftabptr,encseq, readmode);
+    gt_copysortsuffixes(bucketspec2,suftabptr);
     bucketspec2_delete(bucketspec2);
     bucketspec2 = NULL;
   }
