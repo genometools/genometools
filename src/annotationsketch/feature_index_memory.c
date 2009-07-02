@@ -185,9 +185,10 @@ int gt_feature_index_memory_get_features_for_range(GtFeatureIndex *gfi,
   return 0;
 }
 
-GtFeatureNode*  gt_feature_index_get_node_by_ptr(GtFeatureIndexMemory *fim,
-                                                 GtFeatureNode *ptr,
-                                                 GtError *err)
+GtFeatureNode*  gt_feature_index_memory_get_node_by_ptr(GtFeatureIndexMemory
+                                                                          *fim,
+                                                        GtFeatureNode *ptr,
+                                                        GtError *err)
 {
   GtFeatureNode *retnode;
   gt_assert(fim);
@@ -412,15 +413,18 @@ int gt_feature_index_memory_unit_test(GtError *err)
   gt_array_delete(features);
 
   testerr = gt_error_new();
-  tmp = gt_feature_index_get_node_by_ptr(gt_feature_index_memory_cast(fi),
+  tmp = gt_feature_index_memory_get_node_by_ptr(
+                                         gt_feature_index_memory_cast(fi),
                                          gt_feature_node_cast(gn1), testerr);
   ensure(had_err, tmp == gt_feature_node_cast(gn1));
   ensure(had_err, !gt_error_is_set(testerr));
-  tmp = gt_feature_index_get_node_by_ptr(gt_feature_index_memory_cast(fi),
+  tmp = gt_feature_index_memory_get_node_by_ptr(
+                                         gt_feature_index_memory_cast(fi),
                                          gt_feature_node_cast(gn2), testerr);
   ensure(had_err, tmp == gt_feature_node_cast(gn2));
   ensure(had_err, !gt_error_is_set(testerr));
-  tmp = gt_feature_index_get_node_by_ptr(gt_feature_index_memory_cast(fi),
+  tmp = gt_feature_index_memory_get_node_by_ptr(
+                                         gt_feature_index_memory_cast(fi),
                                          (GtFeatureNode*) 0,
                                          testerr);
   ensure(had_err, tmp == NULL);
