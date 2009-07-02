@@ -33,14 +33,12 @@
 #include "core/unused_api.h"
 #include "extended/genome_node.h"
 
-#define GT_FEATURE_INDEX_MEMORY_INDEX_KEY "fi_id"
-
 struct GtFeatureIndexMemory {
   const GtFeatureIndex parent_instance;
   GtHashmap *regions;
+  GtHashmap *nodes_in_index;
   GtArray *ids;
-  char *firstseqid,
-       buf[BUFSIZ];
+  char *firstseqid;
   unsigned long nof_region_nodes,
                 reference_count,
                 nof_nodes;
@@ -99,12 +97,7 @@ void gt_feature_index_memory_add_feature_node(GtFeatureIndex *gfi,
   fi = gt_feature_index_memory_cast(gfi);
   gn = gt_genome_node_ref((GtGenomeNode*) gf);
   /* assign id number as 'primary key' */
-  snprintf(fi->buf, BUFSIZ-1, "%lu", fi->nof_nodes);
-  gt_feature_node_add_attribute(gt_feature_node_cast(gn),
-                                GT_FEATURE_INDEX_MEMORY_INDEX_KEY,
-                                fi->buf);
-  fi->nof_nodes++;
-  gt_array_add(fi->ids, gn);
+  gt_hashmap_add(fi->nodes_in_index, gn, gn);
   /* get information about seqid and range */
   node_range = gt_genome_node_get_range(gn);
   seqid = gt_str_get(gt_genome_node_get_seqid(gn));
@@ -192,16 +185,18 @@ int gt_feature_index_memory_get_features_for_range(GtFeatureIndex *gfi,
   return 0;
 }
 
-GtFeatureNode*  gt_feature_index_get_node_by_id(GtFeatureIndexMemory *fim,
-                                                unsigned long id,
-                                                GtError *err)
+GtFeatureNode*  gt_feature_index_get_node_by_ptr(GtFeatureIndexMemory *fim,
+                                                 GtFeatureNode *ptr,
+                                                 GtError *err)
 {
+  GtFeatureNode *retnode;
   gt_assert(fim);
-  if (id >= gt_array_size(fim->ids)) {
-    gt_error_set(err, "feature index does not contain a node with id %lu", id);
-    return NULL;
+
+  if (!(retnode = gt_hashmap_get(fim->nodes_in_index, ptr))) {
+    gt_error_set(err, "feature index does not contain a node with address %p",
+                 ptr);
   }
-  return *(GtFeatureNode**) gt_array_get(fim->ids, id);
+  return retnode;
 }
 
 const char* gt_feature_index_memory_get_first_seqid(const GtFeatureIndex *gfi)
@@ -273,7 +268,7 @@ void gt_feature_index_memory_delete(GtFeatureIndex *gfi)
   if (!gfi) return;
   fi = gt_feature_index_memory_cast(gfi);
   gt_hashmap_delete(fi->regions);
-  gt_array_delete(fi->ids);
+  gt_hashmap_delete(fi->nodes_in_index);
 }
 
 const GtFeatureIndexClass* gt_feature_index_memory_class(void)
@@ -303,7 +298,7 @@ GtFeatureIndex* gt_feature_index_memory_new(void)
   fim->nof_nodes = 0;
   fim->regions = gt_hashmap_new(HASH_STRING, NULL,
                                 (GtFree) region_info_delete);
-  fim->ids = gt_array_new(sizeof (GtFeatureNode*));
+  fim->nodes_in_index = gt_hashmap_new(HASH_DIRECT, NULL, NULL);
   return fi;
 }
 
@@ -417,16 +412,17 @@ int gt_feature_index_memory_unit_test(GtError *err)
   gt_array_delete(features);
 
   testerr = gt_error_new();
-  tmp = gt_feature_index_get_node_by_id(gt_feature_index_memory_cast(fi),
-                                        0, testerr);
+  tmp = gt_feature_index_get_node_by_ptr(gt_feature_index_memory_cast(fi),
+                                         gt_feature_node_cast(gn1), testerr);
   ensure(had_err, tmp == gt_feature_node_cast(gn1));
   ensure(had_err, !gt_error_is_set(testerr));
-  tmp = gt_feature_index_get_node_by_id(gt_feature_index_memory_cast(fi),
-                                        1, testerr);
+  tmp = gt_feature_index_get_node_by_ptr(gt_feature_index_memory_cast(fi),
+                                         gt_feature_node_cast(gn2), testerr);
   ensure(had_err, tmp == gt_feature_node_cast(gn2));
   ensure(had_err, !gt_error_is_set(testerr));
-  tmp = gt_feature_index_get_node_by_id(gt_feature_index_memory_cast(fi),
-                                        3, testerr);
+  tmp = gt_feature_index_get_node_by_ptr(gt_feature_index_memory_cast(fi),
+                                         (GtFeatureNode*) 0,
+                                         testerr);
   ensure(had_err, tmp == NULL);
   ensure(had_err, gt_error_is_set(testerr));
 
