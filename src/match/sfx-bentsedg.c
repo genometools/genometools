@@ -2274,7 +2274,7 @@ void sortallbuckets(Suftab *suftab,
   }
   if (bucketspec2 != NULL)
   {
-    gt_copysortsuffixes(bucketspec2,suftabptr);
+    gt_copysortsuffixes(bucketspec2,suftabptr,verboseinfo);
     bucketspec2_delete(bucketspec2);
     bucketspec2 = NULL;
   }

@@ -20,6 +20,7 @@
 
 #include "bcktab.h"
 #include "encseq-def.h"
+#include "verbose-def.h"
 
 typedef struct Bucketspec2 Bucketspec2;
 
@@ -29,7 +30,8 @@ Bucketspec2 *bucketspec2_new(const Bcktab *bcktab,
                              Seqpos partwidth,
                              unsigned int numofchars);
 
-void gt_copysortsuffixes(const Bucketspec2 *bucketspec2, const Seqpos *suftab);
+void gt_copysortsuffixes(const Bucketspec2 *bucketspec2, const Seqpos *suftab,
+                         Verboseinfo *verboseinfo);
 
 void bucketspec2_delete(Bucketspec2 *bucketspec2);
 

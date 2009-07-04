@@ -22,6 +22,7 @@
 #include "bcktab.h"
 #include "kmer2string.h"
 #include "sfx-copysort.h"
+#include "verbose-def.h"
 
 typedef struct
 {
@@ -154,6 +155,7 @@ static void leftcontextofspecialchardist(Seqpos *dist,
   freespecialrangeiterator(&sri);
 }
 
+#ifdef SHOWBUCKETSPEC2
 static void showbucketspec2(const Bucketspec2 *bucketspec2)
 {
   unsigned int idx1, idx2;
@@ -169,6 +171,7 @@ static void showbucketspec2(const Bucketspec2 *bucketspec2)
               PRINTSeqposcast(bucketspec2->superbuckettab[idx1].bucketend));
   }
 }
+#endif
 
 Bucketspec2 *bucketspec2_new(const Bcktab *bcktab,
                                 const Encodedsequence *encseq,
@@ -230,11 +233,10 @@ Bucketspec2 *bucketspec2_new(const Bcktab *bcktab,
     bucketspec2->expandfactor
       = (Codetype) pow((double) numofchars,(double) (prefixlength-2));
     bucketspec2->expandfillsum = bcktab_filltable(bcktab,2U);
+#ifdef OUTPUTEXPANDCODE
     for (code = 0; code < (Codetype) bucketspec2->numofcharssquared; code++)
     {
       Codetype ecode = expandtwocharcode(code,bucketspec2);
-#undef OUTPUTEXPANDCODE
-#ifdef OUTPUTEXPANDCODE
       char buffer[100];
       fromkmercode2string(buffer,
                           ecode,
@@ -242,10 +244,9 @@ Bucketspec2 *bucketspec2_new(const Bcktab *bcktab,
                           prefixlength,
                           "acgt");
       printf("code=%u = %lu %s\n",(unsigned int) code,ecode,buffer);
-#else
       printf("code=%u => %lu\n",(unsigned int) code,ecode);
-#endif
     }
+#endif
     specialchardist = gt_malloc(sizeof(*specialchardist) * numofchars);
     for (idx = 0; idx<numofchars; idx++)
     {
@@ -260,16 +261,11 @@ Bucketspec2 *bucketspec2_new(const Bcktab *bcktab,
                                          maxcode,
                                          partwidth);
       rightchar = (unsigned int) ((code+1) % bucketspec2->numofchars);
-      printf("ecode=%lu,rightbound=%lu,rightchar=%u\n",(unsigned long) ecode,
-                                          (unsigned long) rightbound,
-                                          rightchar);
       if (rightchar == 0)
       {
         gt_assert(rightbound >= specialchardist[currentchar]);
         bucketspec2->subbuckettab[currentchar][numofchars-1].bucketend
           = rightbound - specialchardist[currentchar];
-        printf("specialchardist[%u]=%lu\n",
-                currentchar,(unsigned long) specialchardist[currentchar]);
         bucketspec2->superbuckettab[currentchar].bucketend = rightbound;
         currentchar++;
       } else
@@ -280,7 +276,9 @@ Bucketspec2 *bucketspec2_new(const Bcktab *bcktab,
     }
     gt_free(specialchardist);
   }
+#ifdef SHOWBUCKETSPEC2
   showbucketspec2(bucketspec2);
+#endif
   resetsorted(bucketspec2);
   for (idx = 0; idx<numofchars; idx++)
   {
@@ -336,6 +334,7 @@ static void backwardderive(const Bucketspec2 *bucketspec2,
       if (ISNOTSPECIAL(cc) && !bucketspec2->superbuckettab[cc].sorted)
       {
         targetptr[cc]--;
+        /*
         if (suftab[targetptr[cc]] != startpos - 1)
         {
           fprintf(stderr,"targetptr[%u]=%lu: suftab = %lu != "
@@ -346,28 +345,30 @@ static void backwardderive(const Bucketspec2 *bucketspec2,
                          (unsigned long) (startpos-1));
           exit(EXIT_FAILURE);
         }
+        */
         gt_assert(suftab[targetptr[cc]] == startpos - 1);
       }
     }
   }
 }
 
-void gt_copysortsuffixes(const Bucketspec2 *bucketspec2, const Seqpos *suftab)
+void gt_copysortsuffixes(const Bucketspec2 *bucketspec2, const Seqpos *suftab,
+                         Verboseinfo *verboseinfo)
 {
   Seqpos hardwork = 0, *targetptr;
   unsigned int idx, idxsource, source, second;
 
 #ifdef WITHSUFFIXES
   {
-  const Seqpos *ptr;
-  for (ptr = suftab; ptr < suftab + bucketspec2->partwidth; ptr++)
-  {
-    showsequenceatstartpos(stdout,
-                           ISDIRREVERSE(readmode) ? false : true,
-                           ISDIRCOMPLEMENT(readmode) ? true : false,
-                           encseq,
-                           *ptr);
-  }
+    const Seqpos *ptr;
+    for (ptr = suftab; ptr < suftab + bucketspec2->partwidth; ptr++)
+    {
+      showsequenceatstartpos(stdout,
+                             ISDIRREVERSE(readmode) ? false : true,
+                             ISDIRCOMPLEMENT(readmode) ? true : false,
+                             encseq,
+                             *ptr);
+    }
   }
 #endif
   source = bucketspec2->order[0];
@@ -379,7 +380,7 @@ void gt_copysortsuffixes(const Bucketspec2 *bucketspec2, const Seqpos *suftab)
     {
       if (!bucketspec2->subbuckettab[source][second].sorted && source != second)
       {
-        printf("hard work for %u %u\n",source,second);
+        showverbose(verboseinfo,"hard work for %u %u",source,second);
         hardwork += getendidx(bucketspec2,source,second) -
                     getstartidx(bucketspec2,source,second);
         bucketspec2->subbuckettab[source][second].sorted = true;
@@ -417,7 +418,7 @@ void gt_copysortsuffixes(const Bucketspec2 *bucketspec2, const Seqpos *suftab)
       bucketspec2->subbuckettab[idx][source].sorted = true;
     }
   }
-  printf("# hardwork = " FormatSeqpos " (%.2f)\n",
+  showverbose(verboseinfo,"# hardwork = " FormatSeqpos " (%.2f)",
             PRINTSeqposcast(hardwork),
             (double) hardwork/getencseqtotallength(bucketspec2->encseq));
   gt_free(targetptr);
