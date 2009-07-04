@@ -34,7 +34,7 @@ struct Bucketspec2
   Seqpos partwidth;
   const Encodedsequence *encseq;
   Readmode readmode;
-  unsigned int numofchars, *order;
+  unsigned int numofchars, numofcharssquared, *order;
   Codetype expandfactor, expandfillsum;
   Bucketinfo *superbuckettab, **subbuckettab;
 };
@@ -116,7 +116,7 @@ static void resetsorted(Bucketspec2 *bucketspec2)
 static Codetype expandtwocharcode(Codetype twocharcode,
                                   const Bucketspec2 *bucketspec2)
 {
-  gt_assert(twocharcode < (Codetype) 16);
+  gt_assert(twocharcode < (Codetype) bucketspec2->numofcharssquared);
   return twocharcode * bucketspec2->expandfactor + bucketspec2->expandfillsum;
 }
 
@@ -127,18 +127,29 @@ static void leftcontextofspecialchardist(Seqpos *dist,
   Specialrangeiterator *sri;
   Sequencerange range;
   GtUchar cc;
+  Seqpos totallength = getencseqtotallength(encseq);
 
-  sri = newspecialrangeiterator(encseq,ISDIRREVERSE(readmode) ? false : true);
-  while (nextspecialrangeiterator(&range,sri))
+  if (hasspecialranges(encseq))
   {
-    if (range.leftpos > 0)
+    sri = newspecialrangeiterator(encseq,ISDIRREVERSE(readmode) ? false : true);
+    while (nextspecialrangeiterator(&range,sri))
     {
-      cc = getencodedchar(encseq,range.leftpos-1,readmode);
-      if (ISNOTSPECIAL(cc))
+      gt_assert(range.leftpos < totallength);
+      if (range.leftpos > 0)
       {
-        dist[cc]++;
+        cc = getencodedchar(encseq,range.leftpos-1,readmode);
+        if (ISNOTSPECIAL(cc))
+        {
+          dist[cc]++;
+        }
       }
     }
+  }
+  if (getencseqlengthofspecialsuffix(encseq) == 0)
+  {
+    cc = getencodedchar(encseq,totallength-1,readmode);
+    gt_assert(ISNOTSPECIAL(cc));
+    dist[cc]++;
   }
   freespecialrangeiterator(&sri);
 }
@@ -160,10 +171,10 @@ static void showbucketspec2(const Bucketspec2 *bucketspec2)
 }
 
 Bucketspec2 *bucketspec2_new(const Bcktab *bcktab,
-                             const Encodedsequence *encseq,
-                             Readmode readmode,
-                             Seqpos partwidth,
-                             unsigned int numofchars)
+                                const Encodedsequence *encseq,
+                                Readmode readmode,
+                                Seqpos partwidth,
+                                unsigned int numofchars)
 {
   Codetype code, maxcode;
   Bucketspecification bucketspec;
@@ -174,6 +185,7 @@ Bucketspec2 *bucketspec2_new(const Bcktab *bcktab,
   bucketspec2 = gt_malloc(sizeof(*bucketspec2));
   bucketspec2->partwidth = partwidth;
   bucketspec2->numofchars = numofchars;
+  bucketspec2->numofcharssquared = numofchars * numofchars;
   bucketspec2->encseq = encseq;
   bucketspec2->readmode = readmode;
   bucketspec2->order = gt_malloc(sizeof(*bucketspec2->order) * numofchars);
@@ -218,10 +230,10 @@ Bucketspec2 *bucketspec2_new(const Bcktab *bcktab,
     bucketspec2->expandfactor
       = (Codetype) pow((double) numofchars,(double) (prefixlength-2));
     bucketspec2->expandfillsum = bcktab_filltable(bcktab,2U);
-    for (code = 0; code < (Codetype) 16; code++)
+    for (code = 0; code < (Codetype) bucketspec2->numofcharssquared; code++)
     {
       Codetype ecode = expandtwocharcode(code,bucketspec2);
-#define OUTPUTEXPANDCODE
+#undef OUTPUTEXPANDCODE
 #ifdef OUTPUTEXPANDCODE
       char buffer[100];
       fromkmercode2string(buffer,
@@ -240,7 +252,7 @@ Bucketspec2 *bucketspec2_new(const Bcktab *bcktab,
       specialchardist[idx] = 0;
     }
     leftcontextofspecialchardist(specialchardist,encseq,readmode);
-    for (code = 0; code < (Codetype) 16; code++)
+    for (code = 0; code < (Codetype) bucketspec2->numofcharssquared; code++)
     {
       Codetype ecode = expandtwocharcode(code,bucketspec2);
       rightbound = calcbucketrightbounds(bcktab,
@@ -253,8 +265,11 @@ Bucketspec2 *bucketspec2_new(const Bcktab *bcktab,
                                           rightchar);
       if (rightchar == 0)
       {
+        gt_assert(rightbound >= specialchardist[currentchar]);
         bucketspec2->subbuckettab[currentchar][numofchars-1].bucketend
-          = rightbound;
+          = rightbound - specialchardist[currentchar];
+        printf("specialchardist[%u]=%lu\n",
+                currentchar,(unsigned long) specialchardist[currentchar]);
         bucketspec2->superbuckettab[currentchar].bucketend = rightbound;
         currentchar++;
       } else
@@ -266,7 +281,6 @@ Bucketspec2 *bucketspec2_new(const Bcktab *bcktab,
     gt_free(specialchardist);
   }
   showbucketspec2(bucketspec2);
-  exit(EXIT_SUCCESS);
   resetsorted(bucketspec2);
   for (idx = 0; idx<numofchars; idx++)
   {
@@ -322,6 +336,16 @@ static void backwardderive(const Bucketspec2 *bucketspec2,
       if (ISNOTSPECIAL(cc) && !bucketspec2->superbuckettab[cc].sorted)
       {
         targetptr[cc]--;
+        if (suftab[targetptr[cc]] != startpos - 1)
+        {
+          fprintf(stderr,"targetptr[%u]=%lu: suftab = %lu != "
+                         "%lu = startpos - 1\n",
+                         cc,
+                         (unsigned long) targetptr[cc],
+                         (unsigned long) suftab[targetptr[cc]],
+                         (unsigned long) (startpos-1));
+          exit(EXIT_FAILURE);
+        }
         gt_assert(suftab[targetptr[cc]] == startpos - 1);
       }
     }
