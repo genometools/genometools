@@ -211,7 +211,6 @@ Bucketspec2 *bucketspec2_new(const Bcktab *bcktab,
                                         rightchar,
                                         numofchars);
       accubucketsize += bucketspec.nonspecialsinbucket;
-      printf("rightchar=%u\n",rightchar);
       if (rightchar == 0)
       {
         bucketspec2->subbuckettab[currentchar][numofchars-1].bucketend
