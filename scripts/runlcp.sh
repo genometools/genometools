@@ -1,9 +1,9 @@
 #!/bin/sh
-#set -e -x
 
 if test $# -eq 0
 then
-  filenames="`find testdata -name '*.fna'` testdata/at1MB"
+  filenames="`find testdata -name '*.fna'` testdata/at1MB \
+             `find testdata -name '*.fsa'`"
 else
   if test $1 == 'valgrind'
   then
@@ -14,7 +14,8 @@ else
   fi
   if test $# -eq 0
   then
-    filenames="`find testdata -name '*.fna'` testdata/at1MB"
+    filenames="`find testdata -name '*.fna'` testdata/at1MB \
+               `find testdata -name '*.fsa'`"
   else
     filenames=$*
   fi
@@ -22,7 +23,7 @@ fi
 
 suffixeratornoidxnolcp()
 {
-  ${RUNNER} gt suffixerator -showtime -dna -tis -suf -des -ssp -db ${filename} $*
+  ${RUNNER} gt suffixerator -showtime -tis -suf -des -ssp -db ${filename} $*
 }
 
 suffixerator()
