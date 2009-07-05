@@ -30,7 +30,7 @@ typedef struct
   Seqpos bucketend;
 } Bucketinfo;
 
-struct Bucketspec2
+struct GtBucketspec2
 {
   Seqpos partwidth;
   const Encodedsequence *encseq;
@@ -40,7 +40,7 @@ struct Bucketspec2
   Bucketinfo *superbuckettab, **subbuckettab;
 };
 
-static Seqpos superbucketsize(const Bucketspec2 *bucketspec2,
+static Seqpos superbucketsize(const GtBucketspec2 *bucketspec2,
                               unsigned int bucketnum)
 {
   if (bucketnum == 0)
@@ -53,7 +53,7 @@ static Seqpos superbucketsize(const Bucketspec2 *bucketspec2,
 
 static int comparesuperbucketsizes(const void *a,const void *b,void *data)
 {
-  const Bucketspec2 *bucketspec2 = (const Bucketspec2 *) data;
+  const GtBucketspec2 *bucketspec2 = (const GtBucketspec2 *) data;
   Seqpos size1 = superbucketsize(bucketspec2, *(const unsigned int *) a);
   Seqpos size2 = superbucketsize(bucketspec2, *(const unsigned int *) b);
   if (size1 < size2)
@@ -67,7 +67,7 @@ static int comparesuperbucketsizes(const void *a,const void *b,void *data)
   return 0;
 }
 
-static Seqpos getstartidx(const Bucketspec2 *bucketspec2,
+static Seqpos getstartidx(const GtBucketspec2 *bucketspec2,
                           unsigned int first,
                           unsigned int second)
 {
@@ -84,7 +84,7 @@ static Seqpos getstartidx(const Bucketspec2 *bucketspec2,
   return 0;
 }
 
-static Seqpos getendidx(const Bucketspec2 *bucketspec2,
+static Seqpos getendidx(const GtBucketspec2 *bucketspec2,
                         unsigned int first,
                         unsigned int second)
 {
@@ -97,7 +97,7 @@ static Seqpos getendidx(const Bucketspec2 *bucketspec2,
   return bucketspec2->superbuckettab[first].bucketend;
 }
 
-static void resetsorted(Bucketspec2 *bucketspec2)
+static void resetsorted(GtBucketspec2 *bucketspec2)
 {
   unsigned int idx, idx2;
 
@@ -115,7 +115,7 @@ static void resetsorted(Bucketspec2 *bucketspec2)
 }
 
 static Codetype expandtwocharcode(Codetype twocharcode,
-                                  const Bucketspec2 *bucketspec2)
+                                  const GtBucketspec2 *bucketspec2)
 {
   gt_assert(twocharcode < (Codetype) bucketspec2->numofcharssquared);
   return twocharcode * bucketspec2->expandfactor + bucketspec2->expandfillsum;
@@ -146,17 +146,17 @@ static void leftcontextofspecialchardist(Seqpos *dist,
       }
     }
   }
+  freespecialrangeiterator(&sri);
   if (getencseqlengthofspecialsuffix(encseq) == 0)
   {
     cc = getencodedchar(encseq,totallength-1,readmode);
     gt_assert(ISNOTSPECIAL(cc));
     dist[cc]++;
   }
-  freespecialrangeiterator(&sri);
 }
 
 #ifdef SHOWBUCKETSPEC2
-static void showbucketspec2(const Bucketspec2 *bucketspec2)
+static void showbucketspec2(const GtBucketspec2 *bucketspec2)
 {
   unsigned int idx1, idx2;
 
@@ -173,15 +173,15 @@ static void showbucketspec2(const Bucketspec2 *bucketspec2)
 }
 #endif
 
-Bucketspec2 *bucketspec2_new(const Bcktab *bcktab,
-                                const Encodedsequence *encseq,
-                                Readmode readmode,
-                                Seqpos partwidth,
-                                unsigned int numofchars)
+GtBucketspec2 *gt_bucketspec2_new(const Bcktab *bcktab,
+                                  const Encodedsequence *encseq,
+                                  Readmode readmode,
+                                  Seqpos partwidth,
+                                  unsigned int numofchars)
 {
   Codetype code, maxcode;
   Bucketspecification bucketspec;
-  Bucketspec2 *bucketspec2;
+  GtBucketspec2 *bucketspec2;
   unsigned int idx, rightchar = 0, currentchar = 0, prefixlength;
 
   gt_assert(numofchars > 0);
@@ -289,7 +289,7 @@ Bucketspec2 *bucketspec2_new(const Bcktab *bcktab,
   return bucketspec2;
 }
 
-static void forwardderive(const Bucketspec2 *bucketspec2,
+static void forwardderive(const GtBucketspec2 *bucketspec2,
                           const Seqpos *suftab,
                           Seqpos *targetptr,
                           unsigned int source,
@@ -314,7 +314,7 @@ static void forwardderive(const Bucketspec2 *bucketspec2,
   }
 }
 
-static void backwardderive(const Bucketspec2 *bucketspec2,
+static void backwardderive(const GtBucketspec2 *bucketspec2,
                            const Seqpos *suftab,
                            Seqpos *targetptr,
                            unsigned int source,
@@ -351,7 +351,8 @@ static void backwardderive(const Bucketspec2 *bucketspec2,
   }
 }
 
-void gt_copysortsuffixes(const Bucketspec2 *bucketspec2, const Seqpos *suftab,
+void gt_copysortsuffixes(const GtBucketspec2 *bucketspec2,
+                         const Seqpos *suftab,
                          Verboseinfo *verboseinfo)
 {
   Seqpos hardwork = 0, *targetptr;
@@ -417,13 +418,13 @@ void gt_copysortsuffixes(const Bucketspec2 *bucketspec2, const Seqpos *suftab,
       bucketspec2->subbuckettab[idx][source].sorted = true;
     }
   }
-  showverbose(verboseinfo,"# hardwork = " FormatSeqpos " (%.2f)",
+  showverbose(verboseinfo,"hardwork = " FormatSeqpos " (%.2f)",
             PRINTSeqposcast(hardwork),
             (double) hardwork/getencseqtotallength(bucketspec2->encseq));
   gt_free(targetptr);
 }
 
-void bucketspec2_delete(Bucketspec2 *bucketspec2)
+void gt_bucketspec2_delete(GtBucketspec2 *bucketspec2)
 {
   gt_assert(bucketspec2 != NULL);
   gt_array2dim_delete(bucketspec2->subbuckettab);

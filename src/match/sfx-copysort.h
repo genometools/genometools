@@ -22,17 +22,18 @@
 #include "encseq-def.h"
 #include "verbose-def.h"
 
-typedef struct Bucketspec2 Bucketspec2;
+typedef struct GtBucketspec2 GtBucketspec2;
 
-Bucketspec2 *bucketspec2_new(const Bcktab *bcktab,
-                             const Encodedsequence *encseq,
-                             Readmode readmode,
-                             Seqpos partwidth,
-                             unsigned int numofchars);
+GtBucketspec2 *gt_bucketspec2_new(const Bcktab *bcktab,
+                                  const Encodedsequence *encseq,
+                                  Readmode readmode,
+                                  Seqpos partwidth,
+                                  unsigned int numofchars);
 
-void gt_copysortsuffixes(const Bucketspec2 *bucketspec2, const Seqpos *suftab,
+void gt_copysortsuffixes(const GtBucketspec2 *bucketspec2,
+                         const Seqpos *suftab,
                          Verboseinfo *verboseinfo);
 
-void bucketspec2_delete(Bucketspec2 *bucketspec2);
+void gt_bucketspec2_delete(GtBucketspec2 *bucketspec2);
 
 #endif
