@@ -155,6 +155,7 @@ static void leftcontextofspecialchardist(Seqpos *dist,
   }
 }
 
+#define SHOWBUCKETSPEC2
 #ifdef SHOWBUCKETSPEC2
 static void showbucketspec2(const GtBucketspec2 *bucketspec2)
 {
@@ -169,6 +170,26 @@ static void showbucketspec2(const GtBucketspec2 *bucketspec2)
     }
     printf("superbucket[%u]=" FormatSeqpos "\n",idx1,
               PRINTSeqposcast(bucketspec2->superbuckettab[idx1].bucketend));
+  }
+}
+
+static void showexpandcode(const GtBucketspec2 *bucketspec2,
+                           unsigned int prefixlength)
+{
+  Codetype ecode, code;
+  const GtUchar *characters = getencseqAlphabetcharacters(bucketspec2->encseq);
+
+  for (code = 0; code < (Codetype) bucketspec2->numofcharssquared; code++)
+  {
+    char buffer[100];
+
+    ecode = expandtwocharcode(code,bucketspec2);
+    fromkmercode2string(buffer,
+                        ecode,
+                        bucketspec2->numofchars,
+                        prefixlength,
+                        (const char *) characters);
+    printf("code=%u = %lu %s\n",(unsigned int) code,ecode,buffer);
   }
 }
 #endif
@@ -232,19 +253,8 @@ GtBucketspec2 *gt_bucketspec2_new(const Bcktab *bcktab,
     bucketspec2->expandfactor
       = (Codetype) pow((double) numofchars,(double) (prefixlength-2));
     bucketspec2->expandfillsum = bcktab_filltable(bcktab,2U);
-#ifdef OUTPUTEXPANDCODE
-    for (code = 0; code < (Codetype) bucketspec2->numofcharssquared; code++)
-    {
-      Codetype ecode = expandtwocharcode(code,bucketspec2);
-      char buffer[100];
-      fromkmercode2string(buffer,
-                          ecode,
-                          bucketspec2->numofchars,
-                          prefixlength,
-                          "acgt");
-      printf("code=%u = %lu %s\n",(unsigned int) code,ecode,buffer);
-      printf("code=%u => %lu\n",(unsigned int) code,ecode);
-    }
+#ifdef SHOWBUCKETSPEC2
+    showexpandcode(bucketspec2,prefixlength);
 #endif
     specialchardist = gt_malloc(sizeof(*specialchardist) * numofchars);
     for (idx = 0; idx<numofchars; idx++)
