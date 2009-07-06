@@ -381,7 +381,6 @@ void gt_copysortsuffixes(const GtBucketspec2 *bucketspec2,
     }
   }
 #endif
-  source = bucketspec2->order[0];
   targetptr = gt_malloc(sizeof(*targetptr) * bucketspec2->numofchars);
   for (idxsource = 0; idxsource<bucketspec2->numofchars; idxsource++)
   {
@@ -428,10 +427,10 @@ void gt_copysortsuffixes(const GtBucketspec2 *bucketspec2,
       bucketspec2->subbuckettab[idx][source].sorted = true;
     }
   }
+  gt_free(targetptr);
   showverbose(verboseinfo,"hardwork = " FormatSeqpos " (%.2f)",
             PRINTSeqposcast(hardwork),
             (double) hardwork/getencseqtotallength(bucketspec2->encseq));
-  gt_free(targetptr);
 }
 
 void gt_bucketspec2_delete(GtBucketspec2 *bucketspec2)
