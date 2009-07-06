@@ -89,7 +89,14 @@ do
   sfxmap sfx-idx
   suffixerator -parts 3 -maxdepth abs
   sfxmap sfx-idx
-  for dir in fwd rev cpl rcl
+  gt dev guessprot ${filename}
+  if test $? -eq 0
+  then
+    strandlist="fwd rev cpl rcl"
+  else
+    strandlist="fwd rev"
+  fi
+  for dir in ${strandlist}
   do
     for dc in 8 16 32
     do
