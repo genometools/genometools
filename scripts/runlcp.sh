@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e -x
+
 if test $# -eq 0
 then
   filenames="`find testdata -name '*.fna'` testdata/at1MB \

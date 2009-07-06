@@ -26,7 +26,8 @@
 
 typedef struct
 {
-  bool sorted;
+  bool hardworktodo,
+       sorted;
   Seqpos bucketend;
 } Bucketinfo;
 
@@ -108,8 +109,34 @@ static void resetsorted(GtBucketspec2 *bucketspec2)
     {
       Seqpos startidx = getstartidx(bucketspec2,idx,idx2),
              endidx = getendidx(bucketspec2,idx,idx2);
-      bucketspec2->subbuckettab[idx][idx2].sorted
-        = (startidx < endidx) ? false : true;
+      bucketspec2->subbuckettab[idx][idx2].sorted =
+        (startidx < endidx) ? false : true;
+    }
+  }
+}
+
+static void determinehardwork(GtBucketspec2 *bucketspec2)
+{
+  unsigned int idx, idxsource, source, second;
+
+  for (idxsource = 0; idxsource<bucketspec2->numofchars; idxsource++)
+  {
+    source = bucketspec2->order[idxsource];
+    for (second = 0; second < bucketspec2->numofchars; second++)
+    {
+      if (!bucketspec2->subbuckettab[source][second].sorted && source != second)
+      {
+        bucketspec2->subbuckettab[source][second].hardworktodo = true;
+        bucketspec2->subbuckettab[source][second].sorted = true;
+      } else
+      {
+        bucketspec2->subbuckettab[source][second].hardworktodo = false;
+      }
+    }
+    bucketspec2->superbuckettab[source].sorted = true;
+    for (idx = 0; idx < bucketspec2->numofchars; idx++)
+    {
+      bucketspec2->subbuckettab[idx][source].sorted = true;
     }
   }
 }
@@ -155,7 +182,7 @@ static void leftcontextofspecialchardist(Seqpos *dist,
   }
 }
 
-#define SHOWBUCKETSPEC2
+#undef SHOWBUCKETSPEC2
 #ifdef SHOWBUCKETSPEC2
 static void showbucketspec2(const GtBucketspec2 *bucketspec2)
 {
@@ -194,16 +221,101 @@ static void showexpandcode(const GtBucketspec2 *bucketspec2,
 }
 #endif
 
+static void fill2subbuckets(GtBucketspec2 *bucketspec2,
+                            const Bcktab *bcktab,
+                            Seqpos partwidth,
+                            unsigned int numofchars)
+{
+  Codetype code, maxcode;
+  unsigned int rightchar = 0, currentchar = 0;
+  Bucketspecification bucketspec;
+  Seqpos accubucketsize = 0;
+
+  maxcode = bcktab_numofallcodes(bcktab) - 1;
+
+  for (code = 0; code <= maxcode; code++)
+  {
+    rightchar = calcbucketboundsparts(&bucketspec,
+                                      bcktab,
+                                      code,
+                                      maxcode,
+                                      partwidth,
+                                      rightchar,
+                                      numofchars);
+    accubucketsize += bucketspec.nonspecialsinbucket;
+    if (rightchar == 0)
+    {
+      bucketspec2->subbuckettab[currentchar][numofchars-1].bucketend
+        = accubucketsize;
+      accubucketsize += bucketspec.specialsinbucket;
+      bucketspec2->superbuckettab[currentchar].bucketend = accubucketsize;
+      currentchar++;
+    } else
+    {
+      gt_assert(bucketspec.specialsinbucket == 0);
+      bucketspec2->subbuckettab[currentchar][rightchar-1].bucketend
+        = accubucketsize;
+    }
+  }
+}
+
+static void fillanysubbuckets(GtBucketspec2 *bucketspec2,
+                              const Bcktab *bcktab,
+                              const Encodedsequence *encseq,
+                              Readmode readmode,
+                              Seqpos partwidth,
+                              unsigned int numofchars,
+                              unsigned int prefixlength)
+{
+  Codetype code, maxcode;
+  unsigned int idx, rightchar = 0, currentchar = 0;
+  Seqpos rightbound, *specialchardist;
+
+  maxcode = bcktab_numofallcodes(bcktab) - 1;
+  bucketspec2->expandfactor
+    = (Codetype) pow((double) numofchars,(double) (prefixlength-2));
+  bucketspec2->expandfillsum = bcktab_filltable(bcktab,2U);
+#ifdef SHOWBUCKETSPEC2
+  showexpandcode(bucketspec2,prefixlength);
+#endif
+  specialchardist = gt_malloc(sizeof(*specialchardist) * numofchars);
+  for (idx = 0; idx<numofchars; idx++)
+  {
+    specialchardist[idx] = 0;
+  }
+  leftcontextofspecialchardist(specialchardist,encseq,readmode);
+  for (code = 0; code < (Codetype) bucketspec2->numofcharssquared; code++)
+  {
+    Codetype ecode = expandtwocharcode(code,bucketspec2);
+    rightbound = calcbucketrightbounds(bcktab,
+                                       ecode,
+                                       maxcode,
+                                       partwidth);
+    rightchar = (unsigned int) ((code+1) % bucketspec2->numofchars);
+    if (rightchar == 0)
+    {
+      gt_assert(rightbound >= specialchardist[currentchar]);
+      bucketspec2->subbuckettab[currentchar][numofchars-1].bucketend
+        = rightbound - specialchardist[currentchar];
+      bucketspec2->superbuckettab[currentchar].bucketend = rightbound;
+      currentchar++;
+    } else
+    {
+      bucketspec2->subbuckettab[currentchar][rightchar-1].bucketend
+        = rightbound;
+    }
+  }
+  gt_free(specialchardist);
+}
+
 GtBucketspec2 *gt_bucketspec2_new(const Bcktab *bcktab,
                                   const Encodedsequence *encseq,
                                   Readmode readmode,
                                   Seqpos partwidth,
                                   unsigned int numofchars)
 {
-  Codetype code, maxcode;
-  Bucketspecification bucketspec;
   GtBucketspec2 *bucketspec2;
-  unsigned int idx, rightchar = 0, currentchar = 0, prefixlength;
+  unsigned int idx, prefixlength;
 
   gt_assert(numofchars > 0);
   bucketspec2 = gt_malloc(sizeof(*bucketspec2));
@@ -217,78 +329,26 @@ GtBucketspec2 *gt_bucketspec2_new(const Bcktab *bcktab,
     = gt_malloc(sizeof(*bucketspec2->superbuckettab) * numofchars);
   gt_array2dim_malloc(bucketspec2->subbuckettab,(unsigned long) numofchars,
                       (unsigned long) numofchars);
-  maxcode = bcktab_numofallcodes(bcktab) - 1;
   prefixlength = bcktab_prefixlength(bcktab);
   if (prefixlength == 2U)
   {
-    Seqpos accubucketsize = 0;
-    for (code = 0; code <= maxcode; code++)
-    {
-      rightchar = calcbucketboundsparts(&bucketspec,
-                                        bcktab,
-                                        code,
-                                        maxcode,
-                                        partwidth,
-                                        rightchar,
-                                        numofchars);
-      accubucketsize += bucketspec.nonspecialsinbucket;
-      if (rightchar == 0)
-      {
-        bucketspec2->subbuckettab[currentchar][numofchars-1].bucketend
-          = accubucketsize;
-        accubucketsize += bucketspec.specialsinbucket;
-        bucketspec2->superbuckettab[currentchar].bucketend = accubucketsize;
-        currentchar++;
-      } else
-      {
-        gt_assert(bucketspec.specialsinbucket == 0);
-        bucketspec2->subbuckettab[currentchar][rightchar-1].bucketend
-          = accubucketsize;
-      }
-    }
+    fill2subbuckets(bucketspec2,
+                    bcktab,
+                    partwidth,
+                    numofchars);
   } else
   {
-    Seqpos rightbound, *specialchardist;
-
-    bucketspec2->expandfactor
-      = (Codetype) pow((double) numofchars,(double) (prefixlength-2));
-    bucketspec2->expandfillsum = bcktab_filltable(bcktab,2U);
-#ifdef SHOWBUCKETSPEC2
-    showexpandcode(bucketspec2,prefixlength);
-#endif
-    specialchardist = gt_malloc(sizeof(*specialchardist) * numofchars);
-    for (idx = 0; idx<numofchars; idx++)
-    {
-      specialchardist[idx] = 0;
-    }
-    leftcontextofspecialchardist(specialchardist,encseq,readmode);
-    for (code = 0; code < (Codetype) bucketspec2->numofcharssquared; code++)
-    {
-      Codetype ecode = expandtwocharcode(code,bucketspec2);
-      rightbound = calcbucketrightbounds(bcktab,
-                                         ecode,
-                                         maxcode,
-                                         partwidth);
-      rightchar = (unsigned int) ((code+1) % bucketspec2->numofchars);
-      if (rightchar == 0)
-      {
-        gt_assert(rightbound >= specialchardist[currentchar]);
-        bucketspec2->subbuckettab[currentchar][numofchars-1].bucketend
-          = rightbound - specialchardist[currentchar];
-        bucketspec2->superbuckettab[currentchar].bucketend = rightbound;
-        currentchar++;
-      } else
-      {
-        bucketspec2->subbuckettab[currentchar][rightchar-1].bucketend
-          = rightbound;
-      }
-    }
-    gt_free(specialchardist);
+    fillanysubbuckets(bucketspec2,
+                      bcktab,
+                      encseq,
+                      readmode,
+                      partwidth,
+                      numofchars,
+                      prefixlength);
   }
 #ifdef SHOWBUCKETSPEC2
   showbucketspec2(bucketspec2);
 #endif
-  resetsorted(bucketspec2);
   for (idx = 0; idx<numofchars; idx++)
   {
     bucketspec2->order[idx] = idx;
@@ -296,6 +356,9 @@ GtBucketspec2 *gt_bucketspec2_new(const Bcktab *bcktab,
   gt_qsort_r(bucketspec2->order,(size_t) numofchars,
              sizeof (*bucketspec2->order),bucketspec2,
              comparesuperbucketsizes);
+  resetsorted(bucketspec2);
+  determinehardwork(bucketspec2);
+  resetsorted(bucketspec2);
   return bucketspec2;
 }
 
@@ -389,10 +452,14 @@ void gt_copysortsuffixes(const GtBucketspec2 *bucketspec2,
     {
       if (!bucketspec2->subbuckettab[source][second].sorted && source != second)
       {
+        gt_assert(bucketspec2->subbuckettab[source][second].hardworktodo);
         showverbose(verboseinfo,"hard work for %u %u",source,second);
         hardwork += getendidx(bucketspec2,source,second) -
                     getstartidx(bucketspec2,source,second);
         bucketspec2->subbuckettab[source][second].sorted = true;
+      } else
+      {
+        gt_assert(!bucketspec2->subbuckettab[source][second].hardworktodo);
       }
     }
     bucketspec2->superbuckettab[source].sorted = true;
