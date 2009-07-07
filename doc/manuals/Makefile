@@ -66,7 +66,7 @@ ${TAGERATORTMP}.tex:tagerator.tex pck-human.prj Q1.gz
 
 pck-human.prj:${TESTDATA}/at1MB
 	../../bin/gt packedindex mkindex -dna -dir rev -parts 12 -bsize 10 \
-                      -sprank -locfreq 32 -indexname pck-human\
+                      -sprank -locfreq 32 -tis -ssp -indexname pck-human\
                       -db ${TESTDATA}/at1MB
 
 Q1.gz:${TESTDATA}/Q1.gz

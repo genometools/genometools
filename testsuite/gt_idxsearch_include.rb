@@ -59,9 +59,9 @@ end
 def createandcheckgreedyfwdmat(reffile,queryfile)
   run("#{$scriptsdir}/runmkfm.sh #{$bin}/gt 0 . fmi #{reffile}",
       :maxtime => 100)
-  run "#{$bin}gt suffixerator -indexname sfx -tis -suf -dna -v " +
+  run "#{$bin}gt suffixerator -indexname sfx -tis -suf -ssp -dna -v " +
            "-db #{reffile}"
-  run("#{$bin}gt packedindex mkindex -tis -indexname pck -db #{reffile} " +
+  run("#{$bin}gt packedindex mkindex -tis -ssp -indexname pck -db #{reffile} " +
       "-sprank -dna -pl -bsize 10 -locfreq 32 -dir rev", :maxtime => 100)
   run "#{$bin}gt prebwt -maxdepth 4 -pck pck"
   checkgreedyfwdmat(queryfile,false)
@@ -117,7 +117,7 @@ allfiles.each do |reffile|
   Name "gt packedindex #{reffile}"
   Keywords "gt_packedindex small"
   Test do
-    run_test("#{$bin}gt packedindex mkindex -tis -indexname pck " +
+    run_test("#{$bin}gt packedindex mkindex -tis -ssp -indexname pck " +
              "-sprank -db #{$testdata}/#{reffile} -dna -pl -bsize 10 " +
              " -locfreq 32 -dir rev", 
              :maxtime => 1200)

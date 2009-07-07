@@ -745,6 +745,20 @@ Test do
   run_test "#{$bin}gt gff3 -tidy #{$testdata}empty_attribute_value.gff3"
 end
 
+Name "gt gff3 duplicate attribute"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 #{$testdata}duplicate_attribute.gff3", :retval => 1)
+  grep $last_stderr, "more than one Dbxref attribute on"
+end
+
+Name "gt gff3 duplicate attribute (-tidy)"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 -tidy #{$testdata}duplicate_attribute.gff3"
+  run "diff #{$last_stdout} #{$testdata}duplicate_attribute_fixed.gff3"
+end
+
 def large_gff3_test(name, file)
   Name "gt gff3 #{name}"
   Keywords "gt_gff3 large_gff3"

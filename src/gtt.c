@@ -169,6 +169,7 @@ GtHashmap* gtt_unit_tests(void)
   GtHashmap *unit_tests = gt_hashmap_new(HASH_STRING, NULL, NULL);
 
   /* add unit tests */
+#if 0
   gt_hashmap_add(unit_tests, "alignment class", gt_alignment_unit_test);
   gt_hashmap_add(unit_tests, "array class", gt_array_unit_test);
   gt_hashmap_add(unit_tests, "array example", gt_array_example);
@@ -216,6 +217,8 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "string class", gt_str_unit_test);
   gt_hashmap_add(unit_tests, "string matching module",
                  gt_string_matching_unit_test);
+#endif
+  gt_hashmap_add(unit_tests, "tag value map class", gt_tag_value_map_unit_test);
   gt_hashmap_add(unit_tests, "tag value map example", gt_tag_value_map_example);
   gt_hashmap_add(unit_tests, "tokenizer class", gt_tokenizer_unit_test);
   gt_hashmap_add(unit_tests, "translator class", gt_translator_unit_test);

@@ -158,7 +158,8 @@ keyword & shows the following\\\hline
 tagnum  &       show ordinal number of tag\\
 tagseq   &      show tag sequence\\
 dblength &      show length of match in database\\
-dbstartpos&     show starting position of match in database\\
+dbstartpos&     show start position of match in database\\
+abspos &        show absolute value of dbstartpos\\
 dbsequence&     show sequence of match\\
 strand    &     show strand\\
 edist     &     show edit distance\\
@@ -201,7 +202,7 @@ In the first step, we construct the packed index for the entire human genome:
 
 \begin{Output}
 gt packedindex mkindex -dna -dir rev -parts 12 -bsize 10 -sprank -locfreq 32
-                       -tis -indexname pck-human -db homo-sapiens/*.gz
+                       -tis -ssp -indexname pck-human -db homo-sapiens/*.gz
 \end{Output}
 
 The program runs for little more than two hours and delivers 
@@ -221,17 +222,15 @@ in multiple \Fasta format. In a first call we run \Program in \textit{ms}-mode:
 
 The first line shortly reports the kind of computation performed. The second
 and third line give the name of the index containing the subject sequences.
-It is reported whether it is a packed index or an enhanced suffix array. 
-Then for
-each tag its length, say \(m\), and the tag \(p\) itself is shown, followed by 
-a block of \(m\) lines each containing two integers. For all \(i\in[1,m]\), 
-the first number in the \(i\)th line is the matching statistics length, say
+It is reported whether it is a packed index or an enhanced suffix array. Then,
+for each tag its length, say \(m\), and the tag \(p\) itself is shown, followed 
+by a block of \(m\) lines each containing one integers. For all \(i\in[1,m]\), 
+the first column in the \(i\)th line is the matching statistics length, say
 \(l\). This means that \(\Substring{p}{i}{i+l-1}\) is the maximum length prefix
-of \(\Substring{p}{i}{m}\) that occurs as a substring in the index.  The
+of \(\Substring{p}{i}{m}\) that occurs as a substring in the index. The
 second column gives the strand of the match: a \texttt{+} stands for the
-forward strand and a \texttt{-} for the reverse strand.
-If the number of occurrences of \(\Substring{p}{i}{i+l-1}\) is smaller than 
-the maximum
+forward strand and a \texttt{-} for the reverse strand. If the number of 
+occurrences of \(\Substring{p}{i}{i+l-1}\) is smaller than the maximum
 occurrence parameter (\(10\) in the above case), then all matching statistics 
 positions are reported in ascending order. If it is larger than the maximum
 occurrence parameter, no positions are shown.
@@ -250,11 +249,12 @@ In a second call, we run \Program in \textit{cdiff}-mode:
 The first line shortly reports the kind of computation performed. The second
 and third line are as in the previous example. Then, for
 each tag its length and the tag itself is shown, followed by 
-a block of lines each containing a pair of integers separated by the
+a block of lines each containing three integers and one of the
 symbols \texttt{+} or \texttt{-}, denoting the strand of the match.
-Each such pair reports the length of an approximate match and its start 
-position in the subject sequence \(S\). For each
-start position only the shortest length is reported. If there are no
+Each such triple of integers reports the length of an approximate match,
+the subject sequence in which the match occurs, and the relative position
+of the match in this sequence. For each start position only the shortest 
+length is reported. If there are no
 approximate matches, then no such line appears. Note that the match always
 refers to the complete pattern.
 
@@ -263,10 +263,11 @@ Our third example concerns the \textit{pdiff}-mode:
 \EXECUTE{gt tagerator -q Q1.gz -pck pck-human -e 1 -maxocc 5 | head -n 20}
 
 The output is similar as in the previous example, except that each match
-is reported by three integers with a sign between the first and the
-second. The first number reports the length of the
-approximate match, the second reports the start position of the approximate
-match in the subject sequence and the third reports the length of the prefix 
+is reported by four integers with a sign between the first three and the
+last number. The first number reports the length of the
+approximate match, the second reports the subject sequence number in
+which the match occur, the third its relative position in the subject
+sequence. The last number reports the length of the prefix 
 of the tag involved in the approximate match. Note that in some cases,
 the two length values are different.
 \end{document}

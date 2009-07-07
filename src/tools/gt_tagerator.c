@@ -29,8 +29,8 @@ static const Optionargmodedesc outputmodedesctable[] =
   {"tagnum","ordinal number of tag",TAGOUT_TAGNUM},
   {"tagseq","tag sequence",TAGOUT_TAGSEQ},
   {"dblength","length of match in database",TAGOUT_DBLENGTH},
-  {"dbstartpos","starting position of match in database",
-                TAGOUT_DBSTARTPOS},
+  {"dbstartpos","start position of match in database",TAGOUT_DBSTARTPOS},
+  {"abspos","absolute value of dbstartpos",TAGOUT_DBABSPOS},
   {"dbsequence","sequence of match",TAGOUT_DBSEQUENCE},
   {"strand","strand",TAGOUT_STRAND},
   {"edist","edit distance",TAGOUT_EDIST},
@@ -246,7 +246,7 @@ static int gt_tagerator_arguments_check(GT_UNUSED int rest_argc,
   }
   if (arguments->outputmode == 0)
   {
-    arguments->outputmode = TAGOUT_TAGSEQ | TAGOUT_TAGNUM |
+    arguments->outputmode = TAGOUT_TAGNUM | TAGOUT_TAGSEQ |
                             TAGOUT_DBLENGTH | TAGOUT_DBSTARTPOS |
                             TAGOUT_STRAND;
     if (arguments->maxintervalwidth > 0)

@@ -67,6 +67,7 @@ typedef struct
   const SfxAlphabet *alpha;
   unsigned long *eqsvector;
   const Tagwithlength *twlptr;
+  const Encodedsequence *encseq;
 } Showmatchinfo;
 
 #define ADDTABULATOR\
@@ -92,7 +93,19 @@ static void showmatch(void *processinfo,const GtMatch *match)
   if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_DBSTARTPOS)
   {
     ADDTABULATOR;
-    printf(FormatSeqpos,PRINTSeqposcast(match->dbstartpos));
+    if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_DBABSPOS)
+    {
+      printf(FormatSeqpos,PRINTSeqposcast(match->dbstartpos));
+    } else
+    {
+      Seqinfo seqinfo;
+      unsigned long seqnum = getencseqfrompos2seqnum(showmatchinfo->encseq,
+                                                     match->dbstartpos);
+      getencseqSeqinfo(&seqinfo,showmatchinfo->encseq,seqnum);
+      gt_assert(seqinfo.seqstartpos <= match->dbstartpos);
+      printf("%lu\t" FormatSeqpos,seqnum,
+                    PRINTSeqposcast(match->dbstartpos - seqinfo.seqstartpos));
+    }
   }
   if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_DBSEQUENCE)
   {
@@ -202,6 +215,7 @@ static void checkmstats(void *processinfo,
   realmstatlength = genericmstats((const Limdfsresources *) processinfo,
                                   twl->tagptr + patternstartpos,
                                   twl->tagptr + twl->taglen);
+#ifndef NDEBUG
   if (mstatlength != realmstatlength)
   {
     fprintf(stderr,"patternstartpos = %lu: mstatlength = %lu != %lu "
@@ -209,6 +223,7 @@ static void checkmstats(void *processinfo,
                     patternstartpos,mstatlength,realmstatlength);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
+#endif
   if (intervalwidthleq((const Limdfsresources *) processinfo,leftbound,
                        rightbound))
   {
@@ -524,7 +539,7 @@ static void searchoverstrands(const TageratorOptions *tageratoroptions,
 
 int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
 {
-  bool haserr = false;
+  bool haserr = false, firstitem;
   int retval;
   Myersonlineresources *mor = NULL;
   Genericindex *genericindex = NULL;
@@ -552,7 +567,8 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
                                     tageratoroptions->withesa ||
                                     tageratoroptions->docompare,
                                     false,
-                                    false,
+                                    (tageratoroptions->outputmode &
+                                     TAGOUT_DBABSPOS) ? false : true,
                                     tageratoroptions->userdefinedmaxdepth,
                                     verboseinfo,
                                     err);
@@ -599,6 +615,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
       processmatchinfoonline = &storeonline;
       processmatchinfooffline = &storeoffline;
       showmatchinfo.eqsvector = NULL;
+      showmatchinfo.encseq = encseq;
     } else
     {
       processmatch = showmatch;
@@ -608,6 +625,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
       showmatchinfo.alpha = alpha;
       showmatchinfo.eqsvector = gt_malloc(sizeof(*showmatchinfo.eqsvector) *
                                           showmatchinfo.alphasize);
+      showmatchinfo.encseq = encseq;
       processmatchinfooffline = &showmatchinfo;
       processmatchinfoonline = &showmatchinfo;
     }
@@ -682,14 +700,21 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
         copy_reversecomplement(twl.rctransformedtag,twl.transformedtag,
                                twl.taglen);
         twl.tagptr = twl.transformedtag;
+        firstitem = true;
         printf("#");
         if (tageratoroptions->outputmode & TAGOUT_TAGNUM)
         {
           printf("\t" Formatuint64_t,PRINTuint64_tcast(tagnumber));
+          firstitem = false;
+        }
+        if (tageratoroptions->outputmode & TAGOUT_TAGLENGTH)
+        {
+          ADDTABULATOR;
+          printf("%lu",twl.taglen);
         }
         if (tageratoroptions->outputmode & TAGOUT_TAGSEQ)
         {
-          printf("\t%lu\t",twl.taglen);
+          ADDTABULATOR;
           fprintfsymbolstring(stdout,alpha,twl.transformedtag,twl.taglen);
         }
         printf("\n");
