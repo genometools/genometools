@@ -19,6 +19,7 @@
 #define SFX_COPYSORT_H
 
 #include "bcktab.h"
+#include "intcode-def.h"
 #include "encseq-def.h"
 #include "verbose-def.h"
 
@@ -30,9 +31,13 @@ GtBucketspec2 *gt_bucketspec2_new(const Bcktab *bcktab,
                                   Seqpos partwidth,
                                   unsigned int numofchars);
 
-void gt_copysortsuffixes(const GtBucketspec2 *bucketspec2,
-                         const Seqpos *suftab,
+void gt_copysortsuffixes(bool check,
+                         const GtBucketspec2 *bucketspec2,
+                         Seqpos *suftab,
                          Verboseinfo *verboseinfo);
+
+bool gt_hardworkbeforecopysort(const GtBucketspec2 *bucketspec2,
+                               Codetype code);
 
 void gt_bucketspec2_delete(GtBucketspec2 *bucketspec2);
 

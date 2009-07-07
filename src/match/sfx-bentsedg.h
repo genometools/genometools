@@ -25,6 +25,7 @@
 #include "intcode-def.h"
 #include "seqpos-def.h"
 #include "sfx-strategy.h"
+#include "sfx-copysort.h"
 #include "bcktab.h"
 
 typedef struct Outlcpinfo Outlcpinfo;
@@ -65,6 +66,7 @@ void qsufsort(Seqpos *sortspace,
               Outlcpinfo *outlcpinfo);
 
 void sortallbuckets(Suftab *suftab,
+                    GtBucketspec2 *bucketspec2,
                     const Encodedsequence *encseq,
                     Readmode readmode,
                     Codetype mincode,

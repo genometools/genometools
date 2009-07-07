@@ -41,6 +41,7 @@
 #include "sfx-enumcodes.h"
 #include "sfx-strategy.h"
 #include "diff-cover.h"
+#include "sfx-copysort.h"
 #include "stamp.h"
 
 #include "sfx-mappedstr.pr"
@@ -760,8 +761,16 @@ static void preparethispart(Sfxiterator *sfi)
                            sfi->verboseinfo);
     } else
     {
+      GtBucketspec2 *bucketspec2 = NULL;
       gt_assert(!sfi->sfxstrategy.streamsuftab);
+      if (numofparts == 1U && sfi->outlcpinfo == NULL &&
+          sfi->prefixlength >= 2U)
+      {
+        bucketspec2 = gt_bucketspec2_new(sfi->bcktab,sfi->encseq,sfi->readmode,
+                                         partwidth,sfi->numofchars);
+      }
       sortallbuckets (&sfi->suftab,
+                      bucketspec2,
                       sfi->encseq,
                       sfi->readmode,
                       sfi->currentmincode,
@@ -774,6 +783,13 @@ static void preparethispart(Sfxiterator *sfi)
                       &sfi->sfxstrategy,
                       &sfi->bucketiterstep,
                       sfi->verboseinfo);
+      if (bucketspec2 != NULL)
+      {
+        Seqpos *suftabptr = sfi->suftab.sortspace - sfi->suftab.offset;
+        gt_copysortsuffixes(false,bucketspec2,suftabptr,sfi->verboseinfo);
+        gt_bucketspec2_delete(bucketspec2);
+        bucketspec2 = NULL;
+      }
     }
   }
   sfi->part++;

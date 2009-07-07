@@ -23,6 +23,7 @@
 #include "kmer2string.h"
 #include "sfx-copysort.h"
 #include "verbose-def.h"
+#include "stamp.h"
 
 typedef struct
 {
@@ -36,7 +37,7 @@ struct GtBucketspec2
   Seqpos partwidth;
   const Encodedsequence *encseq;
   Readmode readmode;
-  unsigned int numofchars, numofcharssquared, *order;
+  unsigned int numofchars, numofcharssquared, prefixlength, *order;
   Codetype expandfactor, expandfillsum;
   Bucketinfo *superbuckettab, **subbuckettab;
 };
@@ -221,10 +222,7 @@ static void showexpandcode(const GtBucketspec2 *bucketspec2,
 }
 #endif
 
-static void fill2subbuckets(GtBucketspec2 *bucketspec2,
-                            const Bcktab *bcktab,
-                            Seqpos partwidth,
-                            unsigned int numofchars)
+static void fill2subbuckets(GtBucketspec2 *bucketspec2,const Bcktab *bcktab)
 {
   Codetype code, maxcode;
   unsigned int rightchar = 0, currentchar = 0;
@@ -232,20 +230,20 @@ static void fill2subbuckets(GtBucketspec2 *bucketspec2,
   Seqpos accubucketsize = 0;
 
   maxcode = bcktab_numofallcodes(bcktab) - 1;
-
   for (code = 0; code <= maxcode; code++)
   {
     rightchar = calcbucketboundsparts(&bucketspec,
                                       bcktab,
                                       code,
                                       maxcode,
-                                      partwidth,
+                                      bucketspec2->partwidth,
                                       rightchar,
-                                      numofchars);
+                                      bucketspec2->numofchars);
     accubucketsize += bucketspec.nonspecialsinbucket;
     if (rightchar == 0)
     {
-      bucketspec2->subbuckettab[currentchar][numofchars-1].bucketend
+      bucketspec2->subbuckettab[currentchar]
+                               [bucketspec2->numofchars-1].bucketend
         = accubucketsize;
       accubucketsize += bucketspec.specialsinbucket;
       bucketspec2->superbuckettab[currentchar].bucketend = accubucketsize;
@@ -253,19 +251,15 @@ static void fill2subbuckets(GtBucketspec2 *bucketspec2,
     } else
     {
       gt_assert(bucketspec.specialsinbucket == 0);
-      bucketspec2->subbuckettab[currentchar][rightchar-1].bucketend
+      bucketspec2->subbuckettab[currentchar]
+                               [rightchar-1].bucketend
         = accubucketsize;
     }
   }
 }
 
 static void fillanysubbuckets(GtBucketspec2 *bucketspec2,
-                              const Bcktab *bcktab,
-                              const Encodedsequence *encseq,
-                              Readmode readmode,
-                              Seqpos partwidth,
-                              unsigned int numofchars,
-                              unsigned int prefixlength)
+                              const Bcktab *bcktab)
 {
   Codetype code2, maxcode;
   unsigned int idx, rightchar = 0, currentchar = 0;
@@ -273,17 +267,20 @@ static void fillanysubbuckets(GtBucketspec2 *bucketspec2,
 
   maxcode = bcktab_numofallcodes(bcktab) - 1;
   bucketspec2->expandfactor
-    = (Codetype) pow((double) numofchars,(double) (prefixlength-2));
+    = (Codetype) pow((double) bucketspec2->numofchars,
+                     (double) (bucketspec2->prefixlength-2));
   bucketspec2->expandfillsum = bcktab_filltable(bcktab,2U);
 #ifdef SHOWBUCKETSPEC2
-  showexpandcode(bucketspec2,prefixlength);
+  showexpandcode(bucketspec2,bucketspec2->prefixlength);
 #endif
-  specialchardist = gt_malloc(sizeof(*specialchardist) * numofchars);
-  for (idx = 0; idx<numofchars; idx++)
+  specialchardist = gt_malloc(sizeof(*specialchardist) *
+                              bucketspec2->numofchars);
+  for (idx = 0; idx<bucketspec2->numofchars; idx++)
   {
     specialchardist[idx] = 0;
   }
-  leftcontextofspecialchardist(specialchardist,encseq,readmode);
+  leftcontextofspecialchardist(specialchardist,bucketspec2->encseq,
+                               bucketspec2->readmode);
   for (code2 = 0; code2 < (Codetype) bucketspec2->numofcharssquared; code2++)
   {
     Codetype ecode = expandtwocharcode(code2,bucketspec2);
@@ -291,20 +288,22 @@ static void fillanysubbuckets(GtBucketspec2 *bucketspec2,
     rightbound = calcbucketrightbounds(bcktab,
                                        ecode,
                                        maxcode,
-                                       partwidth);
+                                       bucketspec2->partwidth);
     rightchar = (unsigned int) ((code2+1) % bucketspec2->numofchars);
-    gt_assert(currentchar == code2 / numofchars);
+    gt_assert((Codetype) currentchar == code2 / bucketspec2->numofchars);
     if (rightchar == 0)
     {
       gt_assert(rightbound >= specialchardist[currentchar]);
-      gt_assert(numofchars-1 == code2 % numofchars);
-      bucketspec2->subbuckettab[currentchar][numofchars-1].bucketend
+      gt_assert((Codetype) (bucketspec2->numofchars-1) ==
+                code2 % bucketspec2->numofchars);
+      bucketspec2->subbuckettab[currentchar]
+                               [bucketspec2->numofchars-1].bucketend
         = rightbound - specialchardist[currentchar];
       bucketspec2->superbuckettab[currentchar].bucketend = rightbound;
       currentchar++;
     } else
     {
-      gt_assert(rightchar-1 == code2 % numofchars);
+      gt_assert((Codetype) (rightchar-1) == code2 % bucketspec2->numofchars);
       bucketspec2->subbuckettab[currentchar][rightchar-1].bucketend
         = rightbound;
     }
@@ -319,11 +318,12 @@ GtBucketspec2 *gt_bucketspec2_new(const Bcktab *bcktab,
                                   unsigned int numofchars)
 {
   GtBucketspec2 *bucketspec2;
-  unsigned int idx, prefixlength;
+  unsigned int idx;
 
   gt_assert(numofchars > 0);
   bucketspec2 = gt_malloc(sizeof(*bucketspec2));
   bucketspec2->partwidth = partwidth;
+  bucketspec2->prefixlength = bcktab_prefixlength(bcktab);
   bucketspec2->numofchars = numofchars;
   bucketspec2->numofcharssquared = numofchars * numofchars;
   bucketspec2->encseq = encseq;
@@ -333,22 +333,12 @@ GtBucketspec2 *gt_bucketspec2_new(const Bcktab *bcktab,
     = gt_malloc(sizeof(*bucketspec2->superbuckettab) * numofchars);
   gt_array2dim_malloc(bucketspec2->subbuckettab,(unsigned long) numofchars,
                       (unsigned long) numofchars);
-  prefixlength = bcktab_prefixlength(bcktab);
-  if (prefixlength == 2U)
+  if (bucketspec2->prefixlength == 2U)
   {
-    fill2subbuckets(bucketspec2,
-                    bcktab,
-                    partwidth,
-                    numofchars);
+    fill2subbuckets(bucketspec2,bcktab);
   } else
   {
-    fillanysubbuckets(bucketspec2,
-                      bcktab,
-                      encseq,
-                      readmode,
-                      partwidth,
-                      numofchars,
-                      prefixlength);
+    fillanysubbuckets(bucketspec2,bcktab);
   }
 #ifdef SHOWBUCKETSPEC2
   showbucketspec2(bucketspec2);
@@ -366,8 +356,9 @@ GtBucketspec2 *gt_bucketspec2_new(const Bcktab *bcktab,
   return bucketspec2;
 }
 
-static void forwardderive(const GtBucketspec2 *bucketspec2,
-                          const Seqpos *suftab,
+static void forwardderive(bool check,
+                          const GtBucketspec2 *bucketspec2,
+                          Seqpos *suftab,
                           Seqpos *targetptr,
                           unsigned int source,
                           Seqpos idx)
@@ -384,15 +375,22 @@ static void forwardderive(const GtBucketspec2 *bucketspec2,
       cc = getencodedchar(bucketspec2->encseq,startpos-1,bucketspec2->readmode);
       if (ISNOTSPECIAL(cc) && !bucketspec2->superbuckettab[cc].sorted)
       {
-        gt_assert(suftab[targetptr[cc]] == startpos - 1);
+        if (check)
+        {
+          gt_assert(suftab[targetptr[cc]] == startpos - 1);
+        } else
+        {
+          suftab[targetptr[cc]] = startpos - 1;
+        }
         targetptr[cc]++;
       }
     }
   }
 }
 
-static void backwardderive(const GtBucketspec2 *bucketspec2,
-                           const Seqpos *suftab,
+static void backwardderive(bool check,
+                           const GtBucketspec2 *bucketspec2,
+                           Seqpos *suftab,
                            Seqpos *targetptr,
                            unsigned int source,
                            Seqpos idx)
@@ -422,24 +420,39 @@ static void backwardderive(const GtBucketspec2 *bucketspec2,
           exit(EXIT_FAILURE);
         }
         */
-        gt_assert(suftab[targetptr[cc]] == startpos - 1);
+        if (check)
+        {
+          gt_assert(suftab[targetptr[cc]] == startpos - 1);
+        } else
+        {
+          suftab[targetptr[cc]] = startpos - 1;
+        }
       }
     }
   }
 }
 
-/*
-bool gt_hardworkbeforecopysort(GT_UNUSED const GtBucketspec2 *bucketspec2,
+bool gt_hardworkbeforecopysort(const GtBucketspec2 *bucketspec2,
                                Codetype code)
 {
-  unsigned int idx1 = 0, idx2 = 0;
+  Codetype code2;
+  unsigned int idx1, idx2;
 
+  if (bucketspec2->prefixlength > 2U)
+  {
+    code2 = code / bucketspec2->expandfactor;
+  } else
+  {
+    code2 = code;
+  }
+  idx1 = (unsigned int) (code2 / bucketspec2->numofchars);
+  idx2 = (unsigned int) (code2 % bucketspec2->numofchars);
   return bucketspec2->subbuckettab[idx1][idx2].hardworktodo;
 }
-*/
 
-void gt_copysortsuffixes(const GtBucketspec2 *bucketspec2,
-                         const Seqpos *suftab,
+void gt_copysortsuffixes(bool check,
+                         const GtBucketspec2 *bucketspec2,
+                         Seqpos *suftab,
                          Verboseinfo *verboseinfo)
 {
   Seqpos hardwork = 0, *targetptr;
@@ -484,7 +497,8 @@ void gt_copysortsuffixes(const GtBucketspec2 *bucketspec2,
       {
         targetptr[idx] = getstartidx(bucketspec2,idx,source);
       }
-      forwardderive(bucketspec2,
+      forwardderive(check,
+                    bucketspec2,
                     suftab,
                     targetptr,
                     source,
@@ -497,7 +511,8 @@ void gt_copysortsuffixes(const GtBucketspec2 *bucketspec2,
       {
         targetptr[idx] = getendidx(bucketspec2,idx,source);
       }
-      backwardderive(bucketspec2,
+      backwardderive(check,
+                     bucketspec2,
                      suftab,
                      targetptr,
                      source,
