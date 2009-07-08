@@ -90,8 +90,8 @@ static GtOptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
   gt_assert(arguments);
 
   /* init */
-  op = gt_option_parser_new("[option ...] gff3_file sequence_file",
-                         "Discovers and annotates sequence features in LTR "
+  op = gt_option_parser_new("[option ...] gff3_file indexname",
+                         "Identifies and annotates sequence features in LTR "
                          "retrotransposon candidates.");
 
   /* Output files */
