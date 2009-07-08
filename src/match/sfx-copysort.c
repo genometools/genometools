@@ -19,6 +19,7 @@
 #include "core/ma.h"
 #include "core/qsort_r.h"
 #include "core/array2dim_api.h"
+#include "core/unused_api.h"
 #include "bcktab.h"
 #include "kmer2string.h"
 #include "sfx-copysort.h"
@@ -193,8 +194,15 @@ static void showbucketspec2(const GtBucketspec2 *bucketspec2)
   {
     for (idx2 = 0; idx2 < bucketspec2->numofchars; idx2++)
     {
-      printf("subbucket[%u][%u]=" FormatSeqpos "\n",idx1,idx2,
+      printf("subbucket[%u][%u]=" FormatSeqpos,idx1,idx2,
               PRINTSeqposcast(bucketspec2->subbuckettab[idx1][idx2].bucketend));
+      if (bucketspec2->subbuckettab[idx1][idx2].sorted)
+      {
+        printf(" sorted\n");
+      } else
+      {
+        printf("\n");
+      }
     }
     printf("superbucket[%u]=" FormatSeqpos "\n",idx1,
               PRINTSeqposcast(bucketspec2->superbuckettab[idx1].bucketend));
@@ -211,7 +219,7 @@ static void showexpandcode(const GtBucketspec2 *bucketspec2,
   {
     char buffer[100];
 
-    ecode = expandtwocharcode(code,bucketspec2);
+    ecode = expandtwocharcode(code2,bucketspec2);
     fromkmercode2string(buffer,
                         ecode,
                         bucketspec2->numofchars,
@@ -340,9 +348,6 @@ GtBucketspec2 *gt_bucketspec2_new(const Bcktab *bcktab,
   {
     fillanysubbuckets(bucketspec2,bcktab);
   }
-#ifdef SHOWBUCKETSPEC2
-  showbucketspec2(bucketspec2);
-#endif
   for (idx = 0; idx<numofchars; idx++)
   {
     bucketspec2->order[idx] = idx;
@@ -351,6 +356,9 @@ GtBucketspec2 *gt_bucketspec2_new(const Bcktab *bcktab,
              sizeof (*bucketspec2->order),bucketspec2,
              comparesuperbucketsizes);
   resetsorted(bucketspec2);
+#ifdef SHOWBUCKETSPEC2
+  showbucketspec2(bucketspec2);
+#endif
   determinehardwork(bucketspec2);
   resetsorted(bucketspec2);
   return bucketspec2;
@@ -358,10 +366,10 @@ GtBucketspec2 *gt_bucketspec2_new(const Bcktab *bcktab,
 
 static void forwardderive(bool check,
                           const GtBucketspec2 *bucketspec2,
-                          Seqpos *suftab,
-                          Seqpos *targetptr,
+                          GT_UNUSED Seqpos *suftab,
+                          Seqpos **targetptr,
                           unsigned int source,
-                          Seqpos idx)
+                          Seqpos *idx)
 {
   Seqpos startpos;
   GtUchar cc;
@@ -369,18 +377,25 @@ static void forwardderive(bool check,
   gt_assert (idx < targetptr[source]);
   for (; idx < targetptr[source]; idx++)
   {
-    startpos = suftab[idx];
+    startpos = *idx;
     if (startpos > 0)
     {
       cc = getencodedchar(bucketspec2->encseq,startpos-1,bucketspec2->readmode);
+      /*printf("fwd: superbucket[%u].sorted = %s\n",(unsigned int) cc,
+                        bucketspec2->superbuckettab[cc].sorted ? "true" :
+                                                                 "false"); */
       if (ISNOTSPECIAL(cc) && !bucketspec2->superbuckettab[cc].sorted)
       {
         if (check)
         {
-          gt_assert(suftab[targetptr[cc]] == startpos - 1);
+          gt_assert(*(targetptr[cc]) == startpos - 1);
         } else
         {
-          suftab[targetptr[cc]] = startpos - 1;
+          /*printf("fwd: suftab[%lu]=%lu from idx=%lu\n",
+                        (unsigned long) (targetptr[cc] - suftab),
+                        (unsigned long) (startpos-1),
+                        (unsigned long) (idx - suftab)); */
+          *(targetptr[cc]) = startpos - 1;
         }
         targetptr[cc]++;
       }
@@ -390,24 +405,26 @@ static void forwardderive(bool check,
 
 static void backwardderive(bool check,
                            const GtBucketspec2 *bucketspec2,
-                           Seqpos *suftab,
-                           Seqpos *targetptr,
+                           GT_UNUSED Seqpos *suftab,
+                           Seqpos **targetptr,
                            unsigned int source,
-                           Seqpos idx)
+                           Seqpos *idx)
 {
   Seqpos startpos;
   GtUchar cc;
 
   gt_assert (idx > targetptr[source]);
-  for (idx--; idx >= targetptr[source]; idx--)
+  for (; idx > targetptr[source]; idx--)
   {
-    startpos = suftab[idx];
+    startpos = *idx;
     if (startpos > 0)
     {
       cc = getencodedchar(bucketspec2->encseq,startpos-1,bucketspec2->readmode);
+      /*printf("back: superbucket[%u].sorted = %s\n",(unsigned int) cc,
+                        bucketspec2->superbuckettab[cc].sorted ? "true" :
+                                                                 "false");*/
       if (ISNOTSPECIAL(cc) && !bucketspec2->superbuckettab[cc].sorted)
       {
-        targetptr[cc]--;
         /*
         if (suftab[targetptr[cc]] != startpos - 1)
         {
@@ -422,11 +439,16 @@ static void backwardderive(bool check,
         */
         if (check)
         {
-          gt_assert(suftab[targetptr[cc]] == startpos - 1);
+          gt_assert(*(targetptr[cc]) == startpos - 1);
         } else
         {
-          suftab[targetptr[cc]] = startpos - 1;
+          /*printf("back: suftab[%lu]=%lu from idx=%lu\n",
+                            (unsigned long) (targetptr[cc] - suftab),
+                            (unsigned long) (startpos-1),
+                            (unsigned long) (idx - suftab));*/
+          *(targetptr[cc]) = startpos - 1;
         }
+        targetptr[cc]--;
       }
     }
   }
@@ -455,7 +477,7 @@ void gt_copysortsuffixes(bool check,
                          Seqpos *suftab,
                          Verboseinfo *verboseinfo)
 {
-  Seqpos hardwork = 0, *targetptr;
+  Seqpos hardwork = 0, **targetptr;
   unsigned int idx, idxsource, source, second;
 
 #ifdef WITHSUFFIXES
@@ -489,39 +511,40 @@ void gt_copysortsuffixes(bool check,
         gt_assert(!bucketspec2->subbuckettab[source][second].hardworktodo);
       }
     }
-    bucketspec2->superbuckettab[source].sorted = true;
     if (getstartidx(bucketspec2,source,0) <
         getstartidx(bucketspec2,source,source))
     {
       for (idx = 0; idx < bucketspec2->numofchars; idx++)
       {
-        targetptr[idx] = getstartidx(bucketspec2,idx,source);
+        targetptr[idx] = suftab + getstartidx(bucketspec2,idx,source);
       }
       forwardderive(check,
                     bucketspec2,
                     suftab,
                     targetptr,
                     source,
-                    getstartidx(bucketspec2,source,0));
+                    suftab + getstartidx(bucketspec2,source,0));
     }
     if (getendidx(bucketspec2,source,source) <
         getendidx(bucketspec2,source,bucketspec2->numofchars))
     {
       for (idx = 0; idx < bucketspec2->numofchars; idx++)
       {
-        targetptr[idx] = getendidx(bucketspec2,idx,source);
+        targetptr[idx] = suftab + getendidx(bucketspec2,idx,source) - 1;
       }
       backwardderive(check,
                      bucketspec2,
                      suftab,
                      targetptr,
                      source,
-                     getendidx(bucketspec2,source,bucketspec2->numofchars));
+                     suftab +
+                     getendidx(bucketspec2,source,bucketspec2->numofchars) - 1);
     }
     for (idx = 0; idx < bucketspec2->numofchars; idx++)
     {
       bucketspec2->subbuckettab[idx][source].sorted = true;
     }
+    bucketspec2->superbuckettab[source].sorted = true;
   }
   gt_free(targetptr);
   showverbose(verboseinfo,"hardwork = " FormatSeqpos " (%.2f)",

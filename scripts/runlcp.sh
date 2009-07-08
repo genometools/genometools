@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -e -x
+# set -e -x
 
 if test $# -eq 0
 then
@@ -110,6 +110,7 @@ do
   if test ${xx} == '0'
   then
     suffixeratornolcp -pl 2
+    sfxmaponlysuf sfx-idx
   fi
   # ${RUNNER} gt suffixerator -v -showtime -smap Transab -tis -suf -dc 64 -db testdata/fib25.fas.gz -indexname sfx-idx
   rm -f sfx-idx.* sfx-idx${maxdepth}.* 
