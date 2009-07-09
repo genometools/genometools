@@ -744,9 +744,18 @@ static void preparethispart(Sfxiterator *sfi)
     }
   } else
   {
+    GtBucketspec2 *bucketspec2 = NULL;
+    gt_assert(!sfi->sfxstrategy.streamsuftab);
+    if (numofparts == 1U && sfi->outlcpinfo == NULL &&
+        sfi->readmode == Forwardmode && sfi->prefixlength >= 2U)
+    {
+      bucketspec2 = gt_bucketspec2_new(sfi->bcktab,sfi->encseq,sfi->readmode,
+                                       partwidth,sfi->numofchars);
+    }
     if (sfi->sfxstrategy.differencecover > 0)
     {
       sortbucketofsuffixes(sfi->suftab.sortspace - sfi->suftab.offset,
+                           bucketspec2,
                            (unsigned long) partwidth,
                            sfi->encseq,
                            sfi->readmode,
@@ -761,15 +770,6 @@ static void preparethispart(Sfxiterator *sfi)
                            sfi->verboseinfo);
     } else
     {
-      GtBucketspec2 *bucketspec2 = NULL;
-      gt_assert(!sfi->sfxstrategy.streamsuftab);
-      if (numofparts == 1U && sfi->outlcpinfo == NULL && 
-          sfi->readmode == Forwardmode &&
-          sfi->prefixlength >= 2U)
-      {
-        bucketspec2 = gt_bucketspec2_new(sfi->bcktab,sfi->encseq,sfi->readmode,
-                                         partwidth,sfi->numofchars);
-      }
       sortallbuckets (&sfi->suftab,
                       bucketspec2,
                       sfi->encseq,
@@ -784,13 +784,13 @@ static void preparethispart(Sfxiterator *sfi)
                       &sfi->sfxstrategy,
                       &sfi->bucketiterstep,
                       sfi->verboseinfo);
-      if (bucketspec2 != NULL)
-      {
-        Seqpos *suftabptr = sfi->suftab.sortspace - sfi->suftab.offset;
-        gt_copysortsuffixes(false,bucketspec2,suftabptr,sfi->verboseinfo);
-        gt_bucketspec2_delete(bucketspec2);
-        bucketspec2 = NULL;
-      }
+    }
+    if (bucketspec2 != NULL)
+    {
+      Seqpos *suftabptr = sfi->suftab.sortspace - sfi->suftab.offset;
+      gt_copysortsuffixes(false,bucketspec2,suftabptr,sfi->verboseinfo);
+      gt_bucketspec2_delete(bucketspec2);
+      bucketspec2 = NULL;
     }
   }
   sfi->part++;

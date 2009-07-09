@@ -2287,6 +2287,7 @@ void sortallbuckets(Suftab *suftab,
 }
 
 void sortbucketofsuffixes(Seqpos *suffixestobesorted,
+                          GtBucketspec2 *bucketspec2,
                           unsigned long numberofsuffixes,
                           const Encodedsequence *encseq,
                           Readmode readmode,
@@ -2323,6 +2324,16 @@ void sortbucketofsuffixes(Seqpos *suffixestobesorted,
   bsr.dc_processunsortedrange = dc_processunsortedrange;
   for (code = mincode; code <= maxcode; code++)
   {
+    if (bucketspec2 != NULL)
+    {
+      if (gt_hardworkbeforecopysort(bucketspec2,code))
+      {
+        rightchar = (unsigned int) (code % numofchars);
+      } else
+      {
+        continue;
+      }
+    }
     rightchar = calcbucketboundsparts(&bucketspec,
                                       bcktab,
                                       code,

@@ -81,6 +81,7 @@ void sortallbuckets(Suftab *suftab,
                     Verboseinfo *verboseinfo);
 
 void sortbucketofsuffixes(Seqpos *suffixestobesorted,
+                          GtBucketspec2 *bucketspec2,
                           unsigned long numberofsuffixes,
                           const Encodedsequence *encseq,
                           Readmode readmode,

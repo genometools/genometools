@@ -1179,6 +1179,7 @@ void differencecover_sortsample(Differencecover *dcov,bool cmpcharbychar,
     }
     sfxstrategy.differencecover = dcov->vparam;
     sortbucketofsuffixes(dcov->sortedsample,
+                         NULL,
                          dcov->effectivesamplesize,
                          dcov->encseq,
                          dcov->readmode,
