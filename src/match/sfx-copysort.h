@@ -31,8 +31,7 @@ GtBucketspec2 *gt_bucketspec2_new(const Bcktab *bcktab,
                                   Seqpos partwidth,
                                   unsigned int numofchars);
 
-void gt_copysortsuffixes(bool check,
-                         const GtBucketspec2 *bucketspec2,
+void gt_copysortsuffixes(const GtBucketspec2 *bucketspec2,
                          Seqpos *suftab,
                          Verboseinfo *verboseinfo);
 

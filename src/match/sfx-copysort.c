@@ -364,8 +364,7 @@ GtBucketspec2 *gt_bucketspec2_new(const Bcktab *bcktab,
   return bucketspec2;
 }
 
-static void forwardderive(bool check,
-                          const GtBucketspec2 *bucketspec2,
+static void forwardderive(const GtBucketspec2 *bucketspec2,
                           GT_UNUSED Seqpos *suftab,
                           Seqpos **targetptr,
                           unsigned int source,
@@ -386,25 +385,14 @@ static void forwardderive(bool check,
                                                                  "false"); */
       if (ISNOTSPECIAL(cc) && !bucketspec2->superbuckettab[cc].sorted)
       {
-        if (check)
-        {
-          gt_assert(*(targetptr[cc]) == startpos - 1);
-        } else
-        {
-          /*printf("fwd: suftab[%lu]=%lu from idx=%lu\n",
-                        (unsigned long) (targetptr[cc] - suftab),
-                        (unsigned long) (startpos-1),
-                        (unsigned long) (idx - suftab)); */
-          *(targetptr[cc]) = startpos - 1;
-        }
+        *(targetptr[cc]) = startpos - 1;
         targetptr[cc]++;
       }
     }
   }
 }
 
-static void backwardderive(bool check,
-                           const GtBucketspec2 *bucketspec2,
+static void backwardderive(const GtBucketspec2 *bucketspec2,
                            GT_UNUSED Seqpos *suftab,
                            Seqpos **targetptr,
                            unsigned int source,
@@ -437,17 +425,7 @@ static void backwardderive(bool check,
           exit(EXIT_FAILURE);
         }
         */
-        if (check)
-        {
-          gt_assert(*(targetptr[cc]) == startpos - 1);
-        } else
-        {
-          /*printf("back: suftab[%lu]=%lu from idx=%lu\n",
-                            (unsigned long) (targetptr[cc] - suftab),
-                            (unsigned long) (startpos-1),
-                            (unsigned long) (idx - suftab));*/
-          *(targetptr[cc]) = startpos - 1;
-        }
+        *(targetptr[cc]) = startpos - 1;
         targetptr[cc]--;
       }
     }
@@ -457,23 +435,17 @@ static void backwardderive(bool check,
 bool gt_hardworkbeforecopysort(const GtBucketspec2 *bucketspec2,
                                Codetype code)
 {
-  Codetype code2;
-  unsigned int idx1, idx2;
-
   if (bucketspec2->prefixlength > 2U)
   {
-    code2 = code / bucketspec2->expandfactor;
+    return bucketspec2->subbuckettab[0][code / bucketspec2->expandfactor].
+                                        hardworktodo;
   } else
   {
-    code2 = code;
+    return bucketspec2->subbuckettab[0][code].hardworktodo;
   }
-  idx1 = (unsigned int) (code2 / bucketspec2->numofchars);
-  idx2 = (unsigned int) (code2 % bucketspec2->numofchars);
-  return bucketspec2->subbuckettab[idx1][idx2].hardworktodo;
 }
 
-void gt_copysortsuffixes(bool check,
-                         const GtBucketspec2 *bucketspec2,
+void gt_copysortsuffixes(const GtBucketspec2 *bucketspec2,
                          Seqpos *suftab,
                          Verboseinfo *verboseinfo)
 {
@@ -518,8 +490,7 @@ void gt_copysortsuffixes(bool check,
       {
         targetptr[idx] = suftab + getstartidx(bucketspec2,idx,source);
       }
-      forwardderive(check,
-                    bucketspec2,
+      forwardderive(bucketspec2,
                     suftab,
                     targetptr,
                     source,
@@ -532,8 +503,7 @@ void gt_copysortsuffixes(bool check,
       {
         targetptr[idx] = suftab + getendidx(bucketspec2,idx,source) - 1;
       }
-      backwardderive(check,
-                     bucketspec2,
+      backwardderive(bucketspec2,
                      suftab,
                      targetptr,
                      source,

@@ -788,7 +788,7 @@ static void preparethispart(Sfxiterator *sfi)
     if (bucketspec2 != NULL)
     {
       Seqpos *suftabptr = sfi->suftab.sortspace - sfi->suftab.offset;
-      gt_copysortsuffixes(false,bucketspec2,suftabptr,sfi->verboseinfo);
+      gt_copysortsuffixes(bucketspec2,suftabptr,sfi->verboseinfo);
       gt_bucketspec2_delete(bucketspec2);
       bucketspec2 = NULL;
     }
