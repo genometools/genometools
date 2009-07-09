@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e -x
+
 if test $# -ne 1
 then
   echo "Usage: $0 [small|all]"

@@ -19,7 +19,6 @@
 #include "core/ma.h"
 #include "core/qsort_r.h"
 #include "core/array2dim_api.h"
-#include "core/unused_api.h"
 #include "bcktab.h"
 #include "kmer2string.h"
 #include "sfx-copysort.h"
@@ -154,13 +153,14 @@ static void leftcontextofspecialchardist(Seqpos *dist,
                                          const Encodedsequence *encseq,
                                          Readmode readmode)
 {
-  Specialrangeiterator *sri;
-  Sequencerange range;
   GtUchar cc;
   Seqpos totallength = getencseqtotallength(encseq);
 
   if (hasspecialranges(encseq))
   {
+    Specialrangeiterator *sri;
+    Sequencerange range;
+
     sri = newspecialrangeiterator(encseq,ISDIRREVERSE(readmode) ? false : true);
     while (nextspecialrangeiterator(&range,sri))
     {
@@ -174,8 +174,8 @@ static void leftcontextofspecialchardist(Seqpos *dist,
         }
       }
     }
+    freespecialrangeiterator(&sri);
   }
-  freespecialrangeiterator(&sri);
   if (getencseqlengthofspecialsuffix(encseq) == 0)
   {
     cc = getencodedchar(encseq,totallength-1,readmode);
@@ -365,7 +365,6 @@ GtBucketspec2 *gt_bucketspec2_new(const Bcktab *bcktab,
 }
 
 static void forwardderive(const GtBucketspec2 *bucketspec2,
-                          GT_UNUSED Seqpos *suftab,
                           Seqpos **targetptr,
                           unsigned int source,
                           Seqpos *idx)
@@ -393,7 +392,6 @@ static void forwardderive(const GtBucketspec2 *bucketspec2,
 }
 
 static void backwardderive(const GtBucketspec2 *bucketspec2,
-                           GT_UNUSED Seqpos *suftab,
                            Seqpos **targetptr,
                            unsigned int source,
                            Seqpos *idx)
@@ -491,7 +489,6 @@ void gt_copysortsuffixes(const GtBucketspec2 *bucketspec2,
         targetptr[idx] = suftab + getstartidx(bucketspec2,idx,source);
       }
       forwardderive(bucketspec2,
-                    suftab,
                     targetptr,
                     source,
                     suftab + getstartidx(bucketspec2,source,0));
@@ -504,7 +501,6 @@ void gt_copysortsuffixes(const GtBucketspec2 *bucketspec2,
         targetptr[idx] = suftab + getendidx(bucketspec2,idx,source) - 1;
       }
       backwardderive(bucketspec2,
-                     suftab,
                      targetptr,
                      source,
                      suftab +
