@@ -333,7 +333,8 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
 
     sreg = gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*)
                                                ls->element.mainnode));
-    /* we assume that this is the right numbering! */
+
+    /* we assume that this is the correct numbering! */
     if (!sscanf(sreg,"seq%lu", &seqid))
     {
       gt_error_set(e, "Feature '%s' on line %u has invalid region identifier,"
@@ -347,7 +348,14 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
 
       had_err = -1;
     }
-
+    if (!had_err)
+    {
+      if (seqid > getencseqnumofdbsequences(ls->encseq)-1) {
+        gt_error_set(e, "Sequence region number exceeds number of sequences in "
+                        "encoded sequence file: 'seq%lu'!", seqid);
+        had_err = -1;
+      }
+    }
     if (!had_err)
     {
       GtUchar *symbolstring;
