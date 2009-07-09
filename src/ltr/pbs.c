@@ -198,6 +198,10 @@ static void gt_pbs_add_hit(GtArray *hitlist, GtAlignment *ali, GtPBSOptions *o,
   GtPBSHit *hit;
   unsigned long offset;
   GtRange urange, vrange;
+  gt_assert(hitlist && desc);
+
+  if (!ali) return;
+  gt_assert(ali);
 
   dist = gt_alignment_eval(ali);
   urange = gt_alignment_get_urange(ali);
