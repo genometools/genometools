@@ -69,10 +69,11 @@ Then, it suffices to call \texttt{make} to compile the source. To enable protein
 \begin{verbatim}
 $ make with-hmmer=yes
 \end{verbatim}
+%$
 
-If the \texttt{with-hmmer} option is not specified or set to \texttt{no}, protein domain finding functionality will be missing from the \LTRdigest program.
+If the \texttt{with-hmmer} option is not specified or set to \texttt{no}, protein domain finding functionality will be missing from the \LTRdigest program. If the build process reports an error due to an unavailable Cairo library, also append the \texttt{cairo=no} option to build the \Gt binary without Cairo support. This has no influence on the function of \LTRdigest .
 
-Aftert successful compilation, the \GenomeTools executable containing \LTRdigest can then be installed for system-wide use as follows:
+After successful compilation, the \GenomeTools executable containing \LTRdigest can then be installed for system-wide use as follows:
 
 \begin{verbatim}
 $ make install
