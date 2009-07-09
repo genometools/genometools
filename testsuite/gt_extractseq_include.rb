@@ -121,6 +121,16 @@ Test do
   run "diff #{$last_stdout} #{$testdata}U89959_ginums.out"
 end
 
+Name "gt extractseq -ginum at1MB"
+Keywords "gt_extractseq"
+Test do
+  run "sed  -e '/^[^\\>]/d' -e 's/^>gi\|\\([^\|]*\\).*/\\1 1 0/' #{$testdata}/at1MB"
+  run_test "#{$bin}gt extractseq -ginum #{$last_stdout} -width 70 " +
+           "#{$testdata}at1MB"
+  run "grep -v '^#' #{$last_stdout}"
+  run "cmp #{$last_stdout} #{$testdata}at1MB"
+end
+
 Name "gt extractseq -ginum (corrupt)"
 Keywords "gt_extractseq"
 Test do

@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include "core/assert_api.h"
 #include "core/fileutils.h"
 #include "core/error.h"
@@ -50,18 +51,20 @@
 
 typedef struct
 {
-  uint64_t ginumber;
+  char *ginumber;
   unsigned long frompos, topos;
   bool markhit;
 } Giquery;
 
 static int compareginumbers(const void *a,const void *b)
 {
-  if (((Giquery *) a)->ginumber < ((Giquery *) b)->ginumber)
+  int cmp = strcmp(((Giquery *) a)->ginumber,((Giquery *) b)->ginumber);
+
+  if (cmp < 0)
   {
     return -1;
   }
-  if (((Giquery *) a)->ginumber > ((Giquery *) b)->ginumber)
+  if (cmp > 0)
   {
     return 1;
   }
@@ -126,11 +129,12 @@ static Giquery *readginumberfile(bool verbose,
                                  GtError *err)
 {
   FILE *fp;
+  GtStr *currentline;
   bool haserr = false;
   unsigned long linenum;
-  int64_t readint64;
   long readlongfrompos, readlongtopos;
   Giquery *giqueries;
+#undef SKDEBUG
 #ifdef SKDEBUG
   unsigned long i;
 #endif
@@ -152,11 +156,15 @@ static Giquery *readginumberfile(bool verbose,
     printf("# opened gi-queryfile \"%s\"\n",gt_str_get(ginumberfile));
   }
   giqueries = gt_malloc(sizeof (*giqueries) * (*numofqueries));
-  for (linenum = 0; !feof(fp); linenum++)
+  currentline = gt_str_new();
+  for (linenum = 0; gt_str_read_next_line(currentline, fp) != EOF; linenum++)
   {
-    if (fscanf(fp,FormatScanint64_t " %ld %ld\n",
-               SCANint64_tcast(&readint64),&readlongfrompos,
-                                           &readlongtopos) != 3)
+    char *lineptr = gt_str_get(currentline);
+    size_t idx;
+
+    for (idx = 0; !isspace(lineptr[idx]); idx++)
+      /* nothing */ ;
+    if (sscanf(lineptr+idx,"%ld %ld\n",&readlongfrompos,&readlongtopos) != 2)
     {
       gt_error_set(err,"file \"%s\", line %lu: illegal format",
                   gt_str_get(ginumberfile),
@@ -164,8 +172,9 @@ static Giquery *readginumberfile(bool verbose,
       haserr = true;
       break;
     }
-    CHECKPOSITIVE(readint64,FormatScanint64_t,"first");
-    giqueries[linenum].ginumber = (uint64_t) readint64;
+    giqueries[linenum].ginumber = gt_malloc(sizeof(char) * (idx+1));
+    strncpy(giqueries[linenum].ginumber,lineptr,idx);
+    giqueries[linenum].ginumber[idx] = '\0';
     CHECKPOSITIVE(readlongfrompos,"%ld","second");
     giqueries[linenum].frompos = (unsigned long) readlongfrompos;
     if (readlongfrompos != 1L || readlongtopos != 0)
@@ -186,7 +195,9 @@ static Giquery *readginumberfile(bool verbose,
       haserr = true;
       break;
     }
+    gt_str_reset(currentline);
   }
+  gt_str_delete(currentline);
   gt_fa_fclose(fp);
   if (haserr)
   {
@@ -203,26 +214,30 @@ static Giquery *readginumberfile(bool verbose,
 #ifdef SKDEBUG
   for (i=0; i<*numofqueries; i++)
   {
-    printf("%lu "Formatuint64_t"\n",i,giqueries[i].ginumber);
+    printf("%lu %s\n",i,giqueries[i].ginumber);
   }
 #endif
   return giqueries;
 }
 
-static unsigned long findginumber(uint64_t ginumber,
+static unsigned long findginumber(const char *ginumber,
+                                  unsigned long ginumlen,
                                   const Giquery *giqueries,
                                   unsigned long numofqueries)
 {
   const Giquery *leftptr, *rightptr, *midptr;
+  int cmp;
 
   leftptr = giqueries;
   rightptr = giqueries + numofqueries - 1;
   while (leftptr <= rightptr)
   {
     midptr = leftptr + DIV2((unsigned long) (rightptr-leftptr));
-    if (midptr->ginumber == ginumber)
+    cmp = strncmp(ginumber,midptr->ginumber,(size_t) ginumlen);
+    if (cmp == 0)
     {
-      if (midptr > giqueries && (midptr-1)->ginumber == ginumber)
+      if (midptr > giqueries &&
+          strncmp(ginumber,(midptr-1)->ginumber,(size_t) ginumlen) == 0)
       {
         rightptr = midptr - 1;
       } else
@@ -231,7 +246,7 @@ static unsigned long findginumber(uint64_t ginumber,
       }
     } else
     {
-      if (ginumber < midptr->ginumber)
+      if (cmp < 0)
       {
         rightptr = midptr-1;
       } else
@@ -252,8 +267,7 @@ static void outputnonmarked(const Giquery *giqueries,
   {
     if (!giqueries[idx].markhit)
     {
-      printf("unsatisfied " Formatuint64_t,
-              PRINTuint64_tcast(giqueries[idx].ginumber));
+      printf("unsatisfied %s",giqueries[idx].ginumber);
       if (COMPLETE(giqueries[idx]))
       {
         printf(" complete\n");
@@ -265,6 +279,17 @@ static void outputnonmarked(const Giquery *giqueries,
     }
   }
   printf("# number of unsatified gi queries: %lu\n",countmissing);
+}
+
+static void giqueries_delete(Giquery *giqueries,unsigned long numofqueries)
+{
+  unsigned long idx;
+
+  for (idx=0; idx<numofqueries; idx++)
+  {
+    gt_free(giqueries[idx].ginumber);
+  }
+  gt_free(giqueries);
 }
 
 static const char *desc2ginumber(unsigned long *ginumlen,const char *desc,
@@ -293,7 +318,7 @@ static const char *desc2ginumber(unsigned long *ginumlen,const char *desc,
     return NULL;
   }
   gt_assert(firstpipe < secondpipe);
-  *ginumlen = firstpipe - secondpipe - 1;
+  *ginumlen = secondpipe - firstpipe - 1;
   return desc + firstpipe + 1;
 }
 
@@ -308,10 +333,8 @@ int extractginumbers(bool verbose,
   const GtUchar *sequence;
   char *desc, *headerbufferspace = NULL;
   const char *ginumberasstring;
-  uint64_t referenceginumber;
   unsigned long len, ginumlen, numofqueries, ginumberhit, countmarkhit = 0;
   int had_err = 0;
-  int64_t readint64;
   off_t totalsize;
   Giquery *giqueries;
   size_t headerbuffersize = 0, headerlength;
@@ -349,32 +372,19 @@ int extractginumbers(bool verbose,
       had_err = -1;
     } else
     {
-      if (sscanf(ginumberasstring,FormatScanint64_t "|",
-                 SCANint64_tcast(&readint64)) != 1)
-      {
-        gt_error_set(err,"cannot parse ginumber(integer) in \"%s\"",
-                    ginumberasstring);
-        had_err = -1;
-      }
-      if (had_err != -1 && readint64 <= 0)
-      {
-        gt_error_set(err,"gi number " Formatuint64_t "must be positive integer",
-                      readint64);
-        had_err = -1;
-      }
-      referenceginumber = (uint64_t) readint64;
-      ginumberhit = findginumber(referenceginumber,giqueries,numofqueries);
+      ginumberhit = findginumber(ginumberasstring,ginumlen,giqueries,
+                                 numofqueries);
       if (ginumberhit < numofqueries)
       {
         while (ginumberhit < numofqueries &&
-               giqueries[ginumberhit].ginumber == referenceginumber)
+               strncmp(giqueries[ginumberhit].ginumber,ginumberasstring,
+                       (size_t) ginumlen) == 0)
         {
 #ifndef NDEBUG
           if (giqueries[ginumberhit].markhit)
           {
-            fprintf(stderr,"ginumber " Formatuint64_t
-                           " was already found before\n",
-                     PRINTuint64_tcast(giqueries[ginumberhit].ginumber));
+            fprintf(stderr,"ginumber %s was already found before\n",
+                     giqueries[ginumberhit].ginumber);
             exit(GT_EXIT_PROGRAMMING_ERROR);
           }
 #endif
@@ -388,18 +398,20 @@ int extractginumbers(bool verbose,
           }
           if (COMPLETE(giqueries[ginumberhit]))
           {
-            (void) snprintf(headerbufferspace,headerbuffersize,Formatuint64_t
-                            " complete %s",
-                            PRINTuint64_tcast(referenceginumber),
+            /*
+            (void) snprintf(headerbufferspace,headerbuffersize,
+                            "%*.*s complete %s",
+                            (int) ginumlen,(int) ginumlen,ginumberasstring,
                             desc);
-            gt_fasta_show_entry_generic(headerbufferspace,
+            */
+            gt_fasta_show_entry_generic(desc,
                                         (const char *) sequence,
                                         len, width, outfp);
           } else
           {
-            (void) snprintf(headerbufferspace,headerbuffersize,Formatuint64_t
-                            " %lu %lu %s",
-                            PRINTuint64_tcast(referenceginumber),
+            (void) snprintf(headerbufferspace,headerbuffersize,
+                            "%*.*s %lu %lu %s",
+                            (int) ginumlen,(int) ginumlen,ginumberasstring,
                             giqueries[ginumberhit].frompos,
                             giqueries[ginumberhit].topos,
                             desc);
@@ -417,8 +429,7 @@ int extractginumbers(bool verbose,
         }
       }
 #ifdef SKDEBUG
-      printf(Formatuint64_t " 1 %lu\n",PRINTuint64_tcast(referenceginumber),
-             len);
+      printf("%*.*s 1 %lu\n",ginumlen,ginumlen,ginumberasstring, len);
 #endif
     }
     gt_free(desc);
@@ -429,7 +440,7 @@ int extractginumbers(bool verbose,
     gt_progressbar_stop();
   }
   outputnonmarked(giqueries,numofqueries);
-  gt_free(giqueries);
+  giqueries_delete(giqueries,numofqueries);
   gt_seqiterator_delete(seqit);
   return had_err;
 }
