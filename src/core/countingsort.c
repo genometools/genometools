@@ -25,7 +25,7 @@
 
 void gt_countingsort(void *out, const void *in, size_t elem_size,
                      unsigned long size, unsigned long max_elemvalue,
-                     void *data, GetElemvalue get_elemvalue)
+                     void *data, GtGetElemvalue get_elemvalue)
 {
   unsigned long i, k, *c;
   gt_assert(out && in && elem_size && size && max_elemvalue && get_elemvalue);
@@ -57,7 +57,7 @@ void gt_countingsort(void *out, const void *in, size_t elem_size,
 
 unsigned long gt_countingsort_get_max(const void *in, size_t elem_size,
                                       unsigned long size, void *data,
-                                      GetElemvalue get_elemvalue)
+                                      GtGetElemvalue get_elemvalue)
 {
   unsigned long i, value, max_value = 0;
   for (i = 0; i < size; i++) {

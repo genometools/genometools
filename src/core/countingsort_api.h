@@ -23,7 +23,7 @@
 
 /* Countingsort module */
 
-typedef unsigned long (*GetElemvalue)(const void *elem, void *data);
+typedef unsigned long (*GtGetElemvalue)(const void *elem, void *data);
 
 /* Sort the array of elements pointed to by <in> containing <size> many elements
    of size <elem_size> and store the result in the array <out> of the same size.
@@ -38,11 +38,11 @@ typedef unsigned long (*GetElemvalue)(const void *elem, void *data);
 */
 void          gt_countingsort(void *out, const void *in, size_t elem_size,
                               unsigned long size, unsigned long max_elemvalue,
-                              void *data, GetElemvalue get_elemvalue);
+                              void *data, GtGetElemvalue get_elemvalue);
 
 /* If <max_elemvalue> is not known, it can be determined with this function. */
 unsigned long gt_countingsort_get_max(const void *in, size_t elem_size,
                                       unsigned long size, void *data,
-                                      GetElemvalue get_elemvalue);
+                                      GtGetElemvalue get_elemvalue);
 
 #endif
