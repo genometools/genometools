@@ -118,7 +118,7 @@ static unsigned long remdupsfastakeyqueries(Fastakeyquery *fastakeyqueries,
           storeptr->topos = readptr->topos;
           len = strlen(readptr->fastakey);
           storeptr->fastakey = gt_realloc(storeptr->fastakey,
-                                          sizeof(char) * (len+1));
+                                          sizeof (char) * (len+1));
           strcpy(storeptr->fastakey,readptr->fastakey);
         }
       }
