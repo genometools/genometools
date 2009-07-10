@@ -40,6 +40,17 @@ Building GenomeTools without the sketch tool (if Cairo is not installed):
 invoke make as above with the argument cairo=no
 
 
+Building GenomeTools with HMMER:
+--------------------------------
+
+To enable protein domain search functionality in the ltrdigest tool please also
+append the with-hmmer=yes option to the make call. This option will make sure
+that a HMMER source package is downloaded and compiled along with the gt binary.
+Note that the wget executable must be available in the current PATH to do so.
+
+$ make with-hmmer=yes
+
+
 Building GenomeTools as a Univeral Binary (on Mac OS X):
 --------------------------------------------------------
 
