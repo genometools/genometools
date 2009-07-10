@@ -131,6 +131,15 @@ Test do
   run "cmp #{$last_stdout} #{$testdata}at1MB"
 end
 
+Name "gt extractseq -keys TrEMBL"
+Keywords "gt_extractseq"
+Test do
+  run_test "#{$bin}gt extractseq -keys #{$testdata}trembl-keys.txt -width 60 " +
+           "#{$testdata}trembl.faa"
+  run "grep -v '^#' #{$last_stdout}"
+  run "cmp #{$last_stdout} #{$testdata}trembl.faa"
+end
+
 Name "gt extractseq -keys (corrupt)"
 Keywords "gt_extractseq"
 Test do

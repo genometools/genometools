@@ -253,7 +253,6 @@ static Fastakeyquery *readkeyfile(bool verbose,
 }
 
 static unsigned long findkeyposition(const char *extractkey,
-                                     unsigned long keylen,
                                      const Fastakeyquery *fastakeyqueries,
                                      unsigned long numofqueries)
 {
@@ -265,11 +264,11 @@ static unsigned long findkeyposition(const char *extractkey,
   while (leftptr <= rightptr)
   {
     midptr = leftptr + DIV2((unsigned long) (rightptr-leftptr));
-    cmp = strncmp(extractkey,midptr->fastakey,(size_t) keylen);
+    cmp = strcmp(extractkey,midptr->fastakey);
     if (cmp == 0)
     {
       if (midptr > fastakeyqueries &&
-          strncmp(extractkey,(midptr-1)->fastakey,(size_t) keylen) == 0)
+          strcmp(extractkey,(midptr-1)->fastakey) == 0)
       {
         rightptr = midptr - 1;
       } else
@@ -355,7 +354,9 @@ int gt_extractkeysfromfastafile(bool verbose,
   const GtUchar *sequence;
   char *desc, *headerbufferspace = NULL;
   const char *keyptr;
-  unsigned long len, keylen, numofqueries, keyposition, countmarkhit = 0;
+  char *keyspace = NULL;
+  unsigned long allockeyspace = 0, len, keylen, numofqueries, keyposition, 
+                countmarkhit = 0;
   int had_err = 0;
   off_t totalsize;
   Fastakeyquery *fastakeyqueries;
@@ -397,12 +398,18 @@ int gt_extractkeysfromfastafile(bool verbose,
       had_err = -1;
     } else
     {
-      keyposition = findkeyposition(keyptr,keylen,fastakeyqueries,numofqueries);
+      if (allockeyspace < keylen)
+      {
+        keyspace = gt_realloc(keyspace,sizeof(*keyspace) * (keylen+1));
+        allockeyspace = keylen;
+      }
+      strncpy(keyspace,keyptr,keylen);
+      keyspace[keylen] = '\0';
+      keyposition = findkeyposition(keyspace,fastakeyqueries,numofqueries);
       if (keyposition < numofqueries)
       {
         while (keyposition < numofqueries &&
-               strncmp(fastakeyqueries[keyposition].fastakey,keyptr,
-                       (size_t) keylen) == 0)
+               strcmp(fastakeyqueries[keyposition].fastakey,keyspace) == 0)
         {
 #ifndef NDEBUG
           if (fastakeyqueries[keyposition].markhit)
@@ -425,7 +432,7 @@ int gt_extractkeysfromfastafile(bool verbose,
             /*
             (void) snprintf(headerbufferspace,headerbuffersize,
                             "%*.*s complete %s",
-                            (int) keylen,(int) keylen,keyptr,
+                            (int) keylen,(int) keylen,keyspace,
                             desc);
             */
             gt_fasta_show_entry_generic(desc,
@@ -435,7 +442,7 @@ int gt_extractkeysfromfastafile(bool verbose,
           {
             (void) snprintf(headerbufferspace,headerbuffersize,
                             "%*.*s %lu %lu %s",
-                            (int) keylen,(int) keylen,keyptr,
+                            (int) keylen,(int) keylen,keyspace,
                             fastakeyqueries[keyposition].frompos,
                             fastakeyqueries[keyposition].topos,
                             desc);
@@ -453,12 +460,13 @@ int gt_extractkeysfromfastafile(bool verbose,
         }
       }
 #ifdef SKDEBUG
-      printf("%*.*s 1 %lu\n",keylen,keylen,keyptr, len);
+      printf("%s 1 %lu\n",keyspace, len);
 #endif
     }
     gt_free(desc);
   }
   gt_free(headerbufferspace);
+  gt_free(keyspace);
   if (verbose)
   {
     gt_progressbar_stop();
