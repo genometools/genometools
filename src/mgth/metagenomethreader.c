@@ -19,7 +19,7 @@
 #include "core/genfile.h"
 #include "core/hashmap-generic.h"
 #include "core/unused_api.h"
-#include "match/giextract.pr"
+#include "match/giextract.h"
 #include "mg_xmlparser.h"
 #include "metagenomethreader.h"
 /* Funktion zur Ausgabe des Statistikbereichs
@@ -553,15 +553,13 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
         parsestruct.fp_blasthit_file =
           gt_genfile_xopen(gt_str_get(parsestruct.hit_fastafile), "w+");
 
-        had_err = extractginumbers(true,
-                                   parsestruct.fp_blasthit_file,
-                                   row_width,
-                                   gi_numbers_txt,
-                                   ARGUMENTS(giexpfile_name),
-                                   err);
-
+        had_err = gt_extractkeysfromfastafile(true,
+                                              parsestruct.fp_blasthit_file,
+                                              row_width,
+                                              gi_numbers_txt,
+                                              ARGUMENTS(giexpfile_name),
+                                              err);
         gt_genfile_close(parsestruct.fp_blasthit_file);
-
         if (had_err)
         {
           had_err = 0;

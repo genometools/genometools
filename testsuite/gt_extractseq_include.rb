@@ -112,46 +112,46 @@ Test do
   run "diff #{$last_stdout} #{$testdata}marker.out"
 end
 
-Name "gt extractseq -ginum"
+Name "gt extractseq -keys"
 Keywords "gt_extractseq"
 Test do
-  run_test "#{$bin}gt extractseq -ginum #{$testdata}U89959_ginums.txt " +
+  run_test "#{$bin}gt extractseq -keys #{$testdata}U89959_ginums.txt " +
            "#{$testdata}U89959_ests.fas"
   run "grep -v '^#' #{$last_stdout}"
   run "diff #{$last_stdout} #{$testdata}U89959_ginums.out"
 end
 
-Name "gt extractseq -ginum at1MB"
+Name "gt extractseq -keys at1MB"
 Keywords "gt_extractseq"
 Test do
-  run "sed  -e '/^[^\\>]/d' -e 's/^>gi\|\\([^\|]*\\).*/\\1 1 0/' #{$testdata}/at1MB"
-  run_test "#{$bin}gt extractseq -ginum #{$last_stdout} -width 70 " +
+  run "sed  -e '/^[^\\>]/d' -e 's/^>gi\|\\([^\|]*\\).*/\\1/' #{$testdata}/at1MB"
+  run_test "#{$bin}gt extractseq -keys #{$last_stdout} -width 70 " +
            "#{$testdata}at1MB"
   run "grep -v '^#' #{$last_stdout}"
   run "cmp #{$last_stdout} #{$testdata}at1MB"
 end
 
-Name "gt extractseq -ginum (corrupt)"
+Name "gt extractseq -keys (corrupt)"
 Keywords "gt_extractseq"
 Test do
-  run_test("#{$bin}gt extractseq -ginum #{$testdata}U89959_ginums.corrupt " +
+  run_test("#{$bin}gt extractseq -keys #{$testdata}U89959_ginums.corrupt " +
            "#{$testdata}U89959_ests.fas", :retval => 1)
 end
 
-Name "gt extractseq -ginum (fail)"
+Name "gt extractseq -keys (fail)"
 Keywords "gt_extractseq"
 Test do
-  run_test("#{$bin}gt extractseq -ginum #{$testdata}U89959_ginums.txt",
+  run_test("#{$bin}gt extractseq -keys #{$testdata}U89959_ginums.txt",
            :retval => 1)
   grep $last_stderr, /requires at least one file argument/
 end
 
 if $gttestdata then
-  Name "gt extractseq ginum"
+  Name "gt extractseq keys"
   Keywords "gt_extractseq"
   Test do
     run_test "#{$bin}gt extractseq -o gi-extract.fna.gz -gzip " +
-             "-ginum #{$gttestdata}gi-queries/gi-queries.txt " +
+             "-keys #{$gttestdata}gi-queries/gi-queries.txt " +
              "#{$testdata}at1MB"
   end
 end

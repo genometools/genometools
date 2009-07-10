@@ -61,6 +61,7 @@ esa-ppbuckwid.c
 esa-seqread.c
 esa-splititv.c
 fillsci.c
+giextract.c
 greedyfwdmat.c
 idx-limdfs.c
 idxlocali.c
