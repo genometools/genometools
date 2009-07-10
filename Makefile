@@ -31,7 +31,7 @@ EXP_CFLAGS:=$(CFLAGS)
 EXP_LDFLAGS:=$(LDFLAGS)
 EXP_CXXFLAGS:=$(CXXFLAGS)
 EXP_CPPFLAGS:=$(CPPFLAGS)
-EXP_LDLIBS:=$(LIBS) -lm 
+EXP_LDLIBS:=$(LIBS) -lm
 # ...while those starting with GT_ are for internal purposes only
 GT_CFLAGS:=-g -Wall -Wunused-parameter -pipe -fPIC -Wpointer-arith
 # expat needs -DHAVE_MEMMOVE
@@ -282,7 +282,7 @@ LIBGTUNSTABLE_DIRS:=  src/match \
                       src/mgth
 
 ifeq ($(with-hmmer),yes)
-  LIBGTUNSTABLE_DIRS := src/external/hmmer-2.3.2  $(LIBGTUNSTABLE_DIRS) 
+  LIBGTUNSTABLE_DIRS := src/external/hmmer-2.3.2  $(LIBGTUNSTABLE_DIRS)
   EXP_CPPFLAGS += -DHAVE_HMMER
   GT_CPPFLAGS +=  -I$(CURDIR)/$(HMMER_DIR) -I$(CURDIR)/$(SQUID_DIR)
   EXP_LDLIBS += -lpthread
@@ -322,7 +322,7 @@ LIBGENOMETOOLS_DEP:=$(LIBGENOMETOOLS_SRC:%.c=obj/%.d) \
 
 # the GenomeTools unstable library
 LIBGTUNSTABLE_SRC:=$(foreach DIR,$(LIBGTUNSTABLE_DIRS),$(wildcard $(DIR)/*.c))
-LIBGTUNSTABLE_OBJ:=$(LIBGTUNSTABLE_SRC:%.c=obj/%.o) 
+LIBGTUNSTABLE_OBJ:=$(LIBGTUNSTABLE_SRC:%.c=obj/%.o)
 LIBGTUNSTABLE_DEP:=$(LIBGTUNSTABLE_SRC:%.c=obj/%.d)
 
 ifeq ($(with-hmmer),yes)
@@ -531,7 +531,7 @@ $(HMMER_DIR)/config.h: $(HMMER_DIR)/config.h.in
 	      -e 's/#undef PACKAGE_DATE/#define PACKAGE_DATE "Oct 2003"/'\
 	      -e 's/#undef PACKAGE_COPYRIGHT/#define PACKAGE_COPYRIGHT "Copyright (C) 1992-2003 HHMI\/Washington University School of Medicine"/'\
 	      -e 's/#undef PACKAGE_LICENSE/#define PACKAGE_LICENSE "Freely distributed under the GNU General Public License (GPL)"/' $(HMMER_DIR)/config.h.in  > $@
-          
+
 obj/gt_config.h: VERSION
 	@echo '[create $@]'
 	@test -d $(@D) || mkdir -p $(@D)
