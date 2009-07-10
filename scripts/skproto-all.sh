@@ -91,6 +91,7 @@ sfx-input.c
 sfx-linlcp.c
 sfx-partssuf.c
 sfx-readint.c
+sfx-readmode.c
 sfx-remainsort.c
 sfx-run.c
 sfx-suffixer.c
