@@ -18,8 +18,8 @@
 #ifndef CSTR_TABLE_API_H
 #define CSTR_TABLE_API_H
 
-#include "core/error.h"
-#include "core/str_array.h"
+#include "core/error_api.h"
+#include "core/str_array_api.h"
 
 /* Implements a table of C-strings. */
 typedef struct GtCstrTable GtCstrTable;

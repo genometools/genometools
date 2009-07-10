@@ -19,7 +19,7 @@
 #define COUNTINGSORT_API_H
 
 #include <stdlib.h>
-#include "core/error.h"
+#include "core/error_api.h"
 
 /* Countingsort module */
 

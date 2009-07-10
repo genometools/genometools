@@ -14,10 +14,11 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+
 #ifndef HASHMAP_API_H
 #define HASHMAP_API_H
 
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/fptr_api.h"
 
 /* A hashmap allowing to index any kind of pointer (as a value). As keys,
