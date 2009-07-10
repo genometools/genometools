@@ -25,8 +25,8 @@
 #include "encseq-def.h"
 #include "intcode-def.h"
 #include "sfx-nextchar.h"
+#include "kmer2string.h"
 
-#include "kmer2string.pr"
 #include "sfx-mappedstr.pr"
 
 static Codetype qgram2codefillspecial(unsigned int numofchars,

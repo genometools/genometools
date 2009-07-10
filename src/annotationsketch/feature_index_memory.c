@@ -36,9 +36,12 @@
 struct GtFeatureIndexMemory {
   const GtFeatureIndex parent_instance;
   GtHashmap *regions;
+  GtHashmap *nodes_in_index;
+  GtArray *ids;
   char *firstseqid;
-  unsigned int nof_region_nodes,
-               reference_count;
+  unsigned long nof_region_nodes,
+                reference_count,
+                nof_nodes;
 };
 
 #define gt_feature_index_memory_cast(FI)\
@@ -93,6 +96,8 @@ void gt_feature_index_memory_add_feature_node(GtFeatureIndex *gfi,
 
   fi = gt_feature_index_memory_cast(gfi);
   gn = gt_genome_node_ref((GtGenomeNode*) gf);
+  /* assign id number as 'primary key' */
+  gt_hashmap_add(fi->nodes_in_index, gn, gn);
   /* get information about seqid and range */
   node_range = gt_genome_node_get_range(gn);
   seqid = gt_str_get(gt_genome_node_get_seqid(gn));
@@ -180,6 +185,21 @@ int gt_feature_index_memory_get_features_for_range(GtFeatureIndex *gfi,
   return 0;
 }
 
+GtFeatureNode*  gt_feature_index_memory_get_node_by_ptr(GtFeatureIndexMemory
+                                                                          *fim,
+                                                        GtFeatureNode *ptr,
+                                                        GtError *err)
+{
+  GtFeatureNode *retnode;
+  gt_assert(fim);
+
+  if (!(retnode = gt_hashmap_get(fim->nodes_in_index, ptr))) {
+    gt_error_set(err, "feature index does not contain a node with address %p",
+                 ptr);
+  }
+  return retnode;
+}
+
 const char* gt_feature_index_memory_get_first_seqid(const GtFeatureIndex *gfi)
 {
   GtFeatureIndexMemory *fi;
@@ -249,6 +269,7 @@ void gt_feature_index_memory_delete(GtFeatureIndex *gfi)
   if (!gfi) return;
   fi = gt_feature_index_memory_cast(gfi);
   gt_hashmap_delete(fi->regions);
+  gt_hashmap_delete(fi->nodes_in_index);
 }
 
 const GtFeatureIndexClass* gt_feature_index_memory_class(void)
@@ -275,8 +296,10 @@ GtFeatureIndex* gt_feature_index_memory_new(void)
   GtFeatureIndex *fi;
   fi = gt_feature_index_create(gt_feature_index_memory_class());
   fim = gt_feature_index_memory_cast(fi);
+  fim->nof_nodes = 0;
   fim->regions = gt_hashmap_new(HASH_STRING, NULL,
-                             (GtFree) region_info_delete);
+                                (GtFree) region_info_delete);
+  fim->nodes_in_index = gt_hashmap_new(HASH_DIRECT, NULL, NULL);
   return fi;
 }
 
@@ -284,11 +307,13 @@ int gt_feature_index_memory_unit_test(GtError *err)
 {
   GtGenomeNode *gn1, *gn2, *ex1, *ex2, *ex3, *cds1;
   GtFeatureIndex *fi;
+  GtFeatureNode *tmp;
   GtRange check_range, rs;
   GtStr *seqid1, *seqid2;
   GtStrArray *seqids = NULL;
   GtRegionNode *rn1, *rn2;
   GtArray *features = NULL;
+  GtError *testerr;
   int had_err = 0;
   gt_error_check(err);
 
@@ -387,11 +412,30 @@ int gt_feature_index_memory_unit_test(GtError *err)
   ensure(had_err, features);
   gt_array_delete(features);
 
+  testerr = gt_error_new();
+  tmp = gt_feature_index_memory_get_node_by_ptr(
+                                         gt_feature_index_memory_cast(fi),
+                                         gt_feature_node_cast(gn1), testerr);
+  ensure(had_err, tmp == gt_feature_node_cast(gn1));
+  ensure(had_err, !gt_error_is_set(testerr));
+  tmp = gt_feature_index_memory_get_node_by_ptr(
+                                         gt_feature_index_memory_cast(fi),
+                                         gt_feature_node_cast(gn2), testerr);
+  ensure(had_err, tmp == gt_feature_node_cast(gn2));
+  ensure(had_err, !gt_error_is_set(testerr));
+  tmp = gt_feature_index_memory_get_node_by_ptr(
+                                         gt_feature_index_memory_cast(fi),
+                                         (GtFeatureNode*) 0,
+                                         testerr);
+  ensure(had_err, tmp == NULL);
+  ensure(had_err, gt_error_is_set(testerr));
+
   /* delete all generated objects */
   gt_str_array_delete(seqids);
   gt_feature_index_delete(fi);
   gt_genome_node_delete(gn1);
   gt_genome_node_delete(gn2);
+  gt_error_delete(testerr);
   gt_genome_node_delete((GtGenomeNode*) rn1);
   gt_genome_node_delete((GtGenomeNode*) rn2);
   gt_str_delete(seqid1);

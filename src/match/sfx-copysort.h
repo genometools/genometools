@@ -15,33 +15,29 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef DIFF_COVER_H
-#define DIFF_COVER_H
+#ifndef SFX_COPYSORT_H
+#define SFX_COPYSORT_H
 
-#include "seqpos-def.h"
+#include "bcktab.h"
+#include "intcode-def.h"
 #include "encseq-def.h"
-#include "readmode-def.h"
 #include "verbose-def.h"
 
-typedef struct Differencecover Differencecover;
+typedef struct GtBucketspec2 GtBucketspec2;
 
-void differencecovers_check(const Encodedsequence *encseq,Readmode readmode);
+GtBucketspec2 *gt_bucketspec2_new(const Bcktab *bcktab,
+                                  const Encodedsequence *encseq,
+                                  Readmode readmode,
+                                  Seqpos partwidth,
+                                  unsigned int numofchars);
 
-Differencecover *differencecover_new(unsigned int vparam,
-                                     const Encodedsequence *encseq,
-                                     Readmode readmode,
-                                     Verboseinfo *verboseinfo);
+void gt_copysortsuffixes(const GtBucketspec2 *bucketspec2,
+                         Seqpos *suftab,
+                         Verboseinfo *verboseinfo);
 
-int differencecover_vparamverify(const Differencecover *dcov,GtError *err);
+bool gt_hardworkbeforecopysort(const GtBucketspec2 *bucketspec2,
+                               Codetype code);
 
-void differencecover_sortsample(Differencecover *dcov,bool cmpcharbychar,
-                                bool withcheck);
-
-void differencecover_delete(Differencecover *dcov);
-
-void dc_sortunsortedbucket(void *data,
-                           Seqpos *left,
-                           Seqpos *right,
-                           Seqpos depth);
+void gt_bucketspec2_delete(GtBucketspec2 *bucketspec2);
 
 #endif

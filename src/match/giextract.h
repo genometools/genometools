@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,10 +15,17 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef QSORTTYPE_H
-#define QSORTTYPE_H
+#ifndef GIEXTRACT_H
+#define GIEXTRACT_H
+#include <stdbool.h>
+#include "core/str_api.h"
+#include "core/fileutils.h"
+#include "core/error.h"
 
-typedef int Qsortcomparereturntype;
-typedef int (*Qsortcomparefunction)(const void *,const void *);
-
+int gt_extractkeysfromfastafile(bool verbose,
+                                GtGenFile *outfp,
+                                unsigned long width,
+                                const GtStr *keyfile,
+                                GtStrArray *referencefiletab,
+                                GtError *err);
 #endif

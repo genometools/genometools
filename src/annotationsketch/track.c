@@ -32,6 +32,7 @@ struct GtTrack {
   unsigned long max_num_lines, discarded_blocks;
   GtLineBreaker *lb;
   bool split;
+  unsigned long y_index;
   GtArray *lines;
 };
 
@@ -47,6 +48,7 @@ GtTrack* gt_track_new(GtStr *title, unsigned long max_num_lines,
   track->max_num_lines = max_num_lines;
   track->split = split_lines;
   track->lb = lb;
+  track->y_index = UNDEF_ULONG;
   return track;
 }
 
@@ -54,7 +56,6 @@ static GtLine* get_next_free_line(GtTrack *track, GtBlock *block)
 {
   unsigned long i;
   GtLine* line;
-
   gt_assert(track);
 
   /* find unoccupied line -- may need optimisation */
@@ -65,7 +66,7 @@ static GtLine* get_next_free_line(GtTrack *track, GtBlock *block)
   }
   /* if line limit is hit, do not create any more lines! */
   if (track->max_num_lines != UNDEF_ULONG
-       && gt_array_size(track->lines) == track->max_num_lines)
+        && gt_array_size(track->lines) == track->max_num_lines)
   {
     track->discarded_blocks++;
     return NULL;
@@ -91,6 +92,18 @@ static GtLine* get_next_free_line(GtTrack *track, GtBlock *block)
   return line;
 }
 
+unsigned long gt_track_get_y_index(const GtTrack *track)
+{
+  gt_assert(track);
+  return track->y_index;
+}
+
+void gt_track_set_y_index(GtTrack *track, unsigned long y_index)
+{
+  gt_assert(track);
+  track->y_index = y_index;
+}
+
 unsigned long gt_track_get_number_of_discarded_blocks(GtTrack *track)
 {
   gt_assert(track);
@@ -100,15 +113,14 @@ unsigned long gt_track_get_number_of_discarded_blocks(GtTrack *track)
 void gt_track_insert_block(GtTrack *track, GtBlock *block)
 {
   GtLine *line;
-
   gt_assert(track && block);
-  line = get_next_free_line(track, block);
-  block = gt_block_ref(block);
-  if (line)
+
+  if ((line = get_next_free_line(track, block)))
   {
+    block = gt_block_ref(block);
     gt_line_insert_block(line, block);
     gt_line_breaker_register_block(track->lb, line, block);
-  } else gt_block_delete(block);
+  };
 }
 
 GtStr* gt_track_get_title(const GtTrack *track)
@@ -117,21 +129,10 @@ GtStr* gt_track_get_title(const GtTrack *track)
   return track->title;
 }
 
-unsigned long gt_track_get_number_of_lines(const GtTrack *track)
+static unsigned long gt_track_get_number_of_lines(const GtTrack *track)
 {
   gt_assert(track);
   return gt_array_size(track->lines);
-}
-
-unsigned long gt_track_get_number_of_lines_with_captions(const GtTrack *track)
-{
-  unsigned long i = 0, nof_tracks = 0;
-  gt_assert(track);
-  for (i = 0; i < gt_array_size(track->lines); i++) {
-    if (gt_line_has_captions(*(GtLine**) gt_array_get(track->lines, i)))
-      nof_tracks++;
-  }
-  return nof_tracks;
 }
 
 int gt_track_sketch(GtTrack* track, GtCanvas *canvas, GtError *err)

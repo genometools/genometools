@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2009 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include "core/assert_api.h"
 #include "core/fileutils.h"
 #include "core/error.h"
@@ -28,6 +29,7 @@
 #include "core/progressbar.h"
 #include "core/fasta.h"
 #include "divmodmul.h"
+#include "giextract.h"
 #include "format64.h"
 
 #define COMPLETE(VALUE)\
@@ -40,7 +42,7 @@
         {\
           gt_error_set(err,"file \"%s\", line %lu: illegal format: %s element "\
                         " = " FORMAT " is not a positive integer",\
-                        gt_str_get(ginumberfile),\
+                        gt_str_get(keyfile),\
                         linenum+1,\
                         WHICH,\
                         VAL);\
@@ -50,188 +52,233 @@
 
 typedef struct
 {
-  uint64_t ginumber;
+  char *fastakey;
   unsigned long frompos, topos;
   bool markhit;
-} Giquery;
+} Fastakeyquery;
 
-static int compareginumbers(const void *a,const void *b)
+static int comparefastakeys(const void *a,const void *b)
 {
-  if (((Giquery *) a)->ginumber < ((Giquery *) b)->ginumber)
+  int cmp = strcmp(((Fastakeyquery *) a)->fastakey,
+                   ((Fastakeyquery *) b)->fastakey);
+
+  if (cmp < 0)
   {
     return -1;
   }
-  if (((Giquery *) a)->ginumber > ((Giquery *) b)->ginumber)
+  if (cmp > 0)
   {
     return 1;
   }
-  if (((Giquery *) a)->frompos < ((Giquery *) b)->frompos)
+  if (((Fastakeyquery *) a)->frompos < ((Fastakeyquery *) b)->frompos)
   {
     return -1;
   }
-  if (((Giquery *) a)->frompos > ((Giquery *) b)->frompos)
+  if (((Fastakeyquery *) a)->frompos > ((Fastakeyquery *) b)->frompos)
   {
     return 1;
   }
-  if (((Giquery *) a)->topos < ((Giquery *) b)->topos)
+  if (((Fastakeyquery *) a)->topos < ((Fastakeyquery *) b)->topos)
   {
     return -1;
   }
-  if (((Giquery *) a)->topos > ((Giquery *) b)->topos)
+  if (((Fastakeyquery *) a)->topos > ((Fastakeyquery *) b)->topos)
   {
     return 1;
   }
   return 0;
 }
 
-static unsigned long remdupsgiqueries(Giquery *giqueries,
-                                      unsigned long numofqueries)
+static unsigned long remdupsfastakeyqueries(Fastakeyquery *fastakeyqueries,
+                                            unsigned long numofqueries,
+                                            bool verbose)
 {
   if (numofqueries == 0)
   {
     return 0;
   } else
   {
-    Giquery *storeptr, *readptr;
+    Fastakeyquery *storeptr, *readptr;
     unsigned long newnumofqueries;
 
-    for (storeptr = giqueries, readptr = giqueries+1;
-         readptr < giqueries + numofqueries;
+    for (storeptr = fastakeyqueries, readptr = fastakeyqueries+1;
+         readptr < fastakeyqueries + numofqueries;
          readptr++)
     {
-      if (storeptr->ginumber != readptr->ginumber ||
+      if (strcmp(storeptr->fastakey,readptr->fastakey) != 0 ||
           storeptr->frompos != readptr->frompos ||
           storeptr->topos != readptr->topos)
       {
         storeptr++;
         if (storeptr != readptr)
         {
-          *storeptr = *readptr;
+          size_t len;
+
+          storeptr->frompos = readptr->frompos;
+          storeptr->topos = readptr->topos;
+          len = strlen(readptr->fastakey);
+          storeptr->fastakey = gt_realloc(storeptr->fastakey,
+                                          sizeof (char) * (len+1));
+          strcpy(storeptr->fastakey,readptr->fastakey);
         }
       }
     }
-    newnumofqueries = (unsigned long) (storeptr - giqueries + 1);
+    newnumofqueries = (unsigned long) (storeptr - fastakeyqueries + 1);
     if (newnumofqueries < numofqueries)
     {
-      printf("# removed %lu duplicate gi-queries\n",
-              numofqueries - newnumofqueries);
+      if (verbose)
+      {
+        printf("# removed %lu duplicate queries\n",
+                numofqueries - newnumofqueries);
+      }
+      for (storeptr = fastakeyqueries + newnumofqueries;
+           storeptr < fastakeyqueries + numofqueries;
+           storeptr++)
+      {
+        gt_free(storeptr->fastakey);
+        storeptr->fastakey = NULL;
+      }
     }
     return newnumofqueries;
   }
 }
 
-static Giquery *readginumberfile(bool verbose,
+static void fastakeyqueries_delete(Fastakeyquery *fastakeyqueries,
+                                   unsigned long numofqueries)
+{
+  if (fastakeyqueries != NULL)
+  {
+    unsigned long idx;
+
+    for (idx=0; idx<numofqueries; idx++)
+    {
+      gt_free(fastakeyqueries[idx].fastakey);
+    }
+    gt_free(fastakeyqueries);
+  }
+}
+
+static Fastakeyquery *readkeyfile(bool verbose,
                                  unsigned long *numofqueries,
-                                 const GtStr *ginumberfile,
+                                 const GtStr *keyfile,
                                  GtError *err)
 {
   FILE *fp;
+  GtStr *currentline;
   bool haserr = false;
   unsigned long linenum;
-  int64_t readint64;
   long readlongfrompos, readlongtopos;
-  Giquery *giqueries;
+  Fastakeyquery *fastakeyqueries;
+#undef SKDEBUG
 #ifdef SKDEBUG
   unsigned long i;
 #endif
 
   gt_error_check(err);
-  *numofqueries = gt_file_number_of_lines(gt_str_get(ginumberfile));
+  *numofqueries = gt_file_number_of_lines(gt_str_get(keyfile));
   if (*numofqueries == 0)
   {
-    gt_error_set(err,"empty file \"%s\" not allowed",gt_str_get(ginumberfile));
+    gt_error_set(err,"empty file \"%s\" not allowed",gt_str_get(keyfile));
     return NULL;
   }
-  fp = gt_fa_fopen(gt_str_get(ginumberfile),"r",err);
+  fp = gt_fa_fopen(gt_str_get(keyfile),"r",err);
   if (fp == NULL)
   {
     return NULL;
   }
   if (verbose)
   {
-    printf("# opened gi-queryfile \"%s\"\n",gt_str_get(ginumberfile));
+    printf("# opened keyfile \"%s\"\n",gt_str_get(keyfile));
   }
-  giqueries = gt_malloc(sizeof (*giqueries) * (*numofqueries));
-  for (linenum = 0; !feof(fp); linenum++)
+  fastakeyqueries = gt_malloc(sizeof (*fastakeyqueries) * (*numofqueries));
+  currentline = gt_str_new();
+  for (linenum = 0; gt_str_read_next_line(currentline, fp) != EOF; linenum++)
   {
-    if (fscanf(fp,FormatScanint64_t " %ld %ld\n",
-               SCANint64_tcast(&readint64),&readlongfrompos,
-                                           &readlongtopos) != 3)
+    char *lineptr = gt_str_get(currentline);
+    size_t idx;
+
+    for (idx = 0; lineptr[idx] != '\0' && !isspace(lineptr[idx]); idx++)
+      /* nothing */ ;
+    fastakeyqueries[linenum].fastakey = gt_malloc(sizeof(char) * (idx+1));
+    strncpy(fastakeyqueries[linenum].fastakey,lineptr,idx);
+    fastakeyqueries[linenum].fastakey[idx] = '\0';
+    if (sscanf(lineptr+idx,"%ld %ld\n",&readlongfrompos,&readlongtopos) == 2)
     {
-      gt_error_set(err,"file \"%s\", line %lu: illegal format",
-                  gt_str_get(ginumberfile),
-                  linenum+1);
-      haserr = true;
-      break;
-    }
-    CHECKPOSITIVE(readint64,FormatScanint64_t,"first");
-    giqueries[linenum].ginumber = (uint64_t) readint64;
-    CHECKPOSITIVE(readlongfrompos,"%ld","second");
-    giqueries[linenum].frompos = (unsigned long) readlongfrompos;
-    if (readlongfrompos != 1L || readlongtopos != 0)
-    {
+      CHECKPOSITIVE(readlongfrompos,"%ld","second");
+      fastakeyqueries[linenum].frompos = (unsigned long) readlongfrompos;
       CHECKPOSITIVE(readlongtopos,"%ld","third");
+      fastakeyqueries[linenum].topos = (unsigned long) readlongtopos;
+    } else
+    {
+      fastakeyqueries[linenum].frompos = 1UL;
+      fastakeyqueries[linenum].topos = 0;
     }
-    giqueries[linenum].topos = (unsigned long) readlongtopos;
-    giqueries[linenum].markhit = false;
-    if (!COMPLETE(giqueries[linenum]) &&
-        giqueries[linenum].frompos > giqueries[linenum].topos)
+    fastakeyqueries[linenum].markhit = false;
+    if (!COMPLETE(fastakeyqueries[linenum]) &&
+        fastakeyqueries[linenum].frompos > fastakeyqueries[linenum].topos)
     {
       gt_error_set(err, "file \"%s\", line %lu: illegal format: second value "
                    "%lu is larger than third value %lu",
-                   gt_str_get(ginumberfile),
+                   gt_str_get(keyfile),
                    linenum+1,
-                   giqueries[linenum].frompos,
-                   giqueries[linenum].topos);
+                   fastakeyqueries[linenum].frompos,
+                   fastakeyqueries[linenum].topos);
       haserr = true;
       break;
     }
+    gt_str_reset(currentline);
   }
+  gt_str_delete(currentline);
   gt_fa_fclose(fp);
   if (haserr)
   {
-    gt_free(giqueries);
+    fastakeyqueries_delete(fastakeyqueries,*numofqueries);
     return NULL;
   }
-  qsort(giqueries,(size_t) *numofqueries,sizeof (*giqueries),
-        compareginumbers);
+  qsort(fastakeyqueries,(size_t) *numofqueries,sizeof (*fastakeyqueries),
+        comparefastakeys);
   if (verbose)
   {
-    printf("# %lu gi-queries successfully parsed and sorted\n",*numofqueries);
+    printf("# %lu fastakey-queries successfully parsed and sorted\n",
+            *numofqueries);
   }
-  *numofqueries = remdupsgiqueries(giqueries,*numofqueries);
+  *numofqueries = remdupsfastakeyqueries(fastakeyqueries,*numofqueries,verbose);
 #ifdef SKDEBUG
   for (i=0; i<*numofqueries; i++)
   {
-    printf("%lu "Formatuint64_t"\n",i,giqueries[i].ginumber);
+    printf("%lu %s\n",i,fastakeyqueries[i].fastakey);
   }
 #endif
-  return giqueries;
+  return fastakeyqueries;
 }
 
-static unsigned long findginumber(uint64_t ginumber,
-                                  const Giquery *giqueries,
-                                  unsigned long numofqueries)
+static unsigned long findkeyposition(const char *extractkey,
+                                     unsigned long keylen,
+                                     const Fastakeyquery *fastakeyqueries,
+                                     unsigned long numofqueries)
 {
-  const Giquery *leftptr, *rightptr, *midptr;
+  const Fastakeyquery *leftptr, *rightptr, *midptr;
+  int cmp;
 
-  leftptr = giqueries;
-  rightptr = giqueries + numofqueries - 1;
+  leftptr = fastakeyqueries;
+  rightptr = fastakeyqueries + numofqueries - 1;
   while (leftptr <= rightptr)
   {
     midptr = leftptr + DIV2((unsigned long) (rightptr-leftptr));
-    if (midptr->ginumber == ginumber)
+    cmp = strncmp(extractkey,midptr->fastakey,(size_t) keylen);
+    if (cmp == 0)
     {
-      if (midptr > giqueries && (midptr-1)->ginumber == ginumber)
+      if (midptr > fastakeyqueries &&
+          strncmp(extractkey,(midptr-1)->fastakey,(size_t) keylen) == 0)
       {
         rightptr = midptr - 1;
       } else
       {
-        return (unsigned long) (midptr - giqueries);
+        return (unsigned long) (midptr - fastakeyqueries);
       }
     } else
     {
-      if (ginumber < midptr->ginumber)
+      if (cmp < 0)
       {
         rightptr = midptr-1;
       } else
@@ -243,32 +290,32 @@ static unsigned long findginumber(uint64_t ginumber,
   return numofqueries;
 }
 
-static void outputnonmarked(const Giquery *giqueries,
+static void outputnonmarked(const Fastakeyquery *fastakeyqueries,
                             unsigned long numofqueries)
 {
   unsigned long idx, countmissing = 0;
 
   for (idx=0; idx<numofqueries; idx++)
   {
-    if (!giqueries[idx].markhit)
+    if (!fastakeyqueries[idx].markhit)
     {
-      printf("unsatisfied " Formatuint64_t,
-              PRINTuint64_tcast(giqueries[idx].ginumber));
-      if (COMPLETE(giqueries[idx]))
+      printf("unsatisfied %s",fastakeyqueries[idx].fastakey);
+      if (COMPLETE(fastakeyqueries[idx]))
       {
         printf(" complete\n");
       } else
       {
-        printf(" %lu %lu\n",giqueries[idx].frompos,giqueries[idx].topos);
+        printf(" %lu %lu\n",fastakeyqueries[idx].frompos,
+                            fastakeyqueries[idx].topos);
       }
       countmissing++;
     }
   }
-  printf("# number of unsatified gi queries: %lu\n",countmissing);
+  printf("# number of unsatified fastakey-queries: %lu\n",countmissing);
 }
 
-static const char *desc2ginumber(unsigned long *ginumlen,const char *desc,
-                                 GtError *err)
+static const char *desc2key(unsigned long *keylen,const char *desc,
+                            GtError *err)
 {
   unsigned long i, firstpipe = 0, secondpipe = 0;
 
@@ -289,42 +336,43 @@ static const char *desc2ginumber(unsigned long *ginumlen,const char *desc,
   }
   if (firstpipe == 0 || secondpipe == 0)
   {
-    gt_error_set(err,"Cannot find gi-number in description \"%s\"\n",desc);
+    gt_error_set(err,"Cannot find key in description \"%s\"\n",desc);
     return NULL;
   }
   gt_assert(firstpipe < secondpipe);
-  *ginumlen = firstpipe - secondpipe - 1;
+  *keylen = secondpipe - firstpipe - 1;
   return desc + firstpipe + 1;
 }
 
-int extractginumbers(bool verbose,
-                     GtGenFile *outfp,
-                     unsigned long width,
-                     const GtStr *ginumberfile,
-                     GtStrArray *referencefiletab,
-                     GtError *err)
+int gt_extractkeysfromfastafile(bool verbose,
+                                GtGenFile *outfp,
+                                unsigned long width,
+                                const GtStr *keyfile,
+                                GtStrArray *referencefiletab,
+                                GtError *err)
 {
   GtSeqIterator *seqit;
   const GtUchar *sequence;
   char *desc, *headerbufferspace = NULL;
-  const char *ginumberasstring;
-  uint64_t referenceginumber;
-  unsigned long len, ginumlen, numofqueries, ginumberhit, countmarkhit = 0;
+  const char *keyptr;
+  unsigned long len, keylen, numofqueries, keyposition, countmarkhit = 0;
   int had_err = 0;
-  int64_t readint64;
   off_t totalsize;
-  Giquery *giqueries;
+  Fastakeyquery *fastakeyqueries;
   size_t headerbuffersize = 0, headerlength;
 
   gt_error_check(err);
-  giqueries = readginumberfile(verbose,&numofqueries,ginumberfile,err);
-  if (giqueries == NULL)
+  fastakeyqueries = readkeyfile(verbose,&numofqueries,keyfile,err);
+  if (fastakeyqueries == NULL)
   {
     return -1;
   }
   totalsize = gt_files_estimate_total_size(referencefiletab);
-  printf("# estimated total size is " Formatuint64_t "\n",
+  if (verbose)
+  {
+    printf("# estimated total size is " Formatuint64_t "\n",
             PRINTuint64_tcast(totalsize));
+  }
   seqit = gt_seqiterator_new(referencefiletab, err);
   if (!seqit)
     had_err = -1;
@@ -343,38 +391,24 @@ int extractginumbers(bool verbose,
     {
       break;
     }
-    ginumberasstring = desc2ginumber(&ginumlen,desc,err);
-    if (ginumberasstring == NULL)
+    keyptr = desc2key(&keylen,desc,err);
+    if (keyptr == NULL)
     {
       had_err = -1;
     } else
     {
-      if (sscanf(ginumberasstring,FormatScanint64_t "|",
-                 SCANint64_tcast(&readint64)) != 1)
+      keyposition = findkeyposition(keyptr,keylen,fastakeyqueries,numofqueries);
+      if (keyposition < numofqueries)
       {
-        gt_error_set(err,"cannot parse ginumber(integer) in \"%s\"",
-                    ginumberasstring);
-        had_err = -1;
-      }
-      if (had_err != -1 && readint64 <= 0)
-      {
-        gt_error_set(err,"gi number " Formatuint64_t "must be positive integer",
-                      readint64);
-        had_err = -1;
-      }
-      referenceginumber = (uint64_t) readint64;
-      ginumberhit = findginumber(referenceginumber,giqueries,numofqueries);
-      if (ginumberhit < numofqueries)
-      {
-        while (ginumberhit < numofqueries &&
-               giqueries[ginumberhit].ginumber == referenceginumber)
+        while (keyposition < numofqueries &&
+               strncmp(fastakeyqueries[keyposition].fastakey,keyptr,
+                       (size_t) keylen) == 0)
         {
 #ifndef NDEBUG
-          if (giqueries[ginumberhit].markhit)
+          if (fastakeyqueries[keyposition].markhit)
           {
-            fprintf(stderr,"ginumber " Formatuint64_t
-                           " was already found before\n",
-                     PRINTuint64_tcast(giqueries[ginumberhit].ginumber));
+            fprintf(stderr,"key %s was already found before\n",
+                     fastakeyqueries[keyposition].fastakey);
             exit(GT_EXIT_PROGRAMMING_ERROR);
           }
 #endif
@@ -386,39 +420,40 @@ int extractginumbers(bool verbose,
                                            sizeof (*headerbufferspace)
                                            * headerbuffersize);
           }
-          if (COMPLETE(giqueries[ginumberhit]))
+          if (COMPLETE(fastakeyqueries[keyposition]))
           {
-            (void) snprintf(headerbufferspace,headerbuffersize,Formatuint64_t
-                            " complete %s",
-                            PRINTuint64_tcast(referenceginumber),
+            /*
+            (void) snprintf(headerbufferspace,headerbuffersize,
+                            "%*.*s complete %s",
+                            (int) keylen,(int) keylen,keyptr,
                             desc);
-            gt_fasta_show_entry_generic(headerbufferspace,
+            */
+            gt_fasta_show_entry_generic(desc,
                                         (const char *) sequence,
                                         len, width, outfp);
           } else
           {
-            (void) snprintf(headerbufferspace,headerbuffersize,Formatuint64_t
-                            " %lu %lu %s",
-                            PRINTuint64_tcast(referenceginumber),
-                            giqueries[ginumberhit].frompos,
-                            giqueries[ginumberhit].topos,
+            (void) snprintf(headerbufferspace,headerbuffersize,
+                            "%*.*s %lu %lu %s",
+                            (int) keylen,(int) keylen,keyptr,
+                            fastakeyqueries[keyposition].frompos,
+                            fastakeyqueries[keyposition].topos,
                             desc);
             gt_fasta_show_entry_generic(headerbufferspace,
-                                        (const char *) (sequence +
-                                                        giqueries[ginumberhit].
-                                                        frompos - 1),
-                                        giqueries[ginumberhit].topos -
-                                        giqueries[ginumberhit].frompos+1,
+                                        (const char *)
+                                        (sequence+fastakeyqueries[keyposition].
+                                                                  frompos - 1),
+                                        fastakeyqueries[keyposition].topos -
+                                        fastakeyqueries[keyposition].frompos+1,
                                         width, outfp);
           }
-          giqueries[ginumberhit].markhit = true;
+          fastakeyqueries[keyposition].markhit = true;
           countmarkhit++;
-          ginumberhit++;
+          keyposition++;
         }
       }
 #ifdef SKDEBUG
-      printf(Formatuint64_t " 1 %lu\n",PRINTuint64_tcast(referenceginumber),
-             len);
+      printf("%*.*s 1 %lu\n",keylen,keylen,keyptr, len);
 #endif
     }
     gt_free(desc);
@@ -428,8 +463,11 @@ int extractginumbers(bool verbose,
   {
     gt_progressbar_stop();
   }
-  outputnonmarked(giqueries,numofqueries);
-  gt_free(giqueries);
+  if (verbose)
+  {
+    outputnonmarked(fastakeyqueries,numofqueries);
+  }
+  fastakeyqueries_delete(fastakeyqueries,numofqueries);
   gt_seqiterator_delete(seqit);
   return had_err;
 }

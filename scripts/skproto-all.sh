@@ -61,6 +61,7 @@ esa-ppbuckwid.c
 esa-seqread.c
 esa-splititv.c
 fillsci.c
+giextract.c
 greedyfwdmat.c
 idx-limdfs.c
 idxlocali.c
@@ -70,6 +71,7 @@ initbasepower.c
 initeqsvec.c
 inl-encseq.c
 iter-window.c
+kmerstring.c
 mapspec-gen.c
 measure-time.c
 merger-trie.c
@@ -89,6 +91,7 @@ sfx-input.c
 sfx-linlcp.c
 sfx-partssuf.c
 sfx-readint.c
+sfx-readmode.c
 sfx-remainsort.c
 sfx-run.c
 sfx-suffixer.c

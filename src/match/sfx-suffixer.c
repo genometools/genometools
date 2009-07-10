@@ -41,6 +41,7 @@
 #include "sfx-enumcodes.h"
 #include "sfx-strategy.h"
 #include "diff-cover.h"
+#include "sfx-copysort.h"
 #include "stamp.h"
 
 #include "sfx-mappedstr.pr"
@@ -496,6 +497,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
     {
       sfi->spaceCodeatposition = NULL;
     }
+    sfi->bcktab = NULL;
     sfi->nextfreeCodeatposition = 0;
     sfi->suftab.sortspace = NULL;
     sfi->suftabparts = NULL;
@@ -575,7 +577,8 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
           showverbose(verboseinfo,"presorting sample suffixes according to "
                                   "difference cover modulo %u",
                                   sfi->sfxstrategy.differencecover);
-          differencecover_sortsample(sfi->dcov,false);
+          differencecover_sortsample(sfi->dcov,sfi->sfxstrategy.cmpcharbychar,
+                                     false);
         }
       }
     }
@@ -741,9 +744,18 @@ static void preparethispart(Sfxiterator *sfi)
     }
   } else
   {
+    GtBucketspec2 *bucketspec2 = NULL;
+    gt_assert(!sfi->sfxstrategy.streamsuftab);
+    if (numofparts == 1U && sfi->outlcpinfo == NULL &&
+        sfi->readmode == Forwardmode && sfi->prefixlength >= 2U)
+    {
+      bucketspec2 = gt_bucketspec2_new(sfi->bcktab,sfi->encseq,sfi->readmode,
+                                       partwidth,sfi->numofchars);
+    }
     if (sfi->sfxstrategy.differencecover > 0)
     {
       sortbucketofsuffixes(sfi->suftab.sortspace - sfi->suftab.offset,
+                           bucketspec2,
                            (unsigned long) partwidth,
                            sfi->encseq,
                            sfi->readmode,
@@ -758,8 +770,8 @@ static void preparethispart(Sfxiterator *sfi)
                            sfi->verboseinfo);
     } else
     {
-      gt_assert(!sfi->sfxstrategy.streamsuftab);
       sortallbuckets (&sfi->suftab,
+                      bucketspec2,
                       sfi->encseq,
                       sfi->readmode,
                       sfi->currentmincode,
@@ -772,6 +784,13 @@ static void preparethispart(Sfxiterator *sfi)
                       &sfi->sfxstrategy,
                       &sfi->bucketiterstep,
                       sfi->verboseinfo);
+    }
+    if (bucketspec2 != NULL)
+    {
+      Seqpos *suftabptr = sfi->suftab.sortspace - sfi->suftab.offset;
+      gt_copysortsuffixes(bucketspec2,suftabptr,sfi->verboseinfo);
+      gt_bucketspec2_delete(bucketspec2);
+      bucketspec2 = NULL;
     }
   }
   sfi->part++;

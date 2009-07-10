@@ -37,10 +37,11 @@
 #include "lcpoverflow.h"
 #include "opensfxfile.h"
 #include "sfx-remainsort.h"
+#include "sfx-copysort.h"
+#include "kmer2string.h"
 #include "stamp.h"
 
 #include "sfx-cmpsuf.pr"
-#include "kmer2string.pr"
 
 #define UNIQUEINT(P)           ((Seqpos) ((P) + COMPAREOFFSET))
 #define ACCESSCHAR(POS)        getencodedchar(bsr->encseq,POS,bsr->readmode)
@@ -82,14 +83,14 @@
         bsr->mkvauxstack.spaceMKVstack[bsr->mkvauxstack.nextfreeMKVstack]
 
 #define UPDATELCP(MINVAL,MAXVAL)\
-        gt_assert(commonunits < (unsigned int) UNITSIN2BITENC);\
-        if ((MINVAL) > commonunits)\
+        gt_assert(commonunits.common < (unsigned int) UNITSIN2BITENC);\
+        if ((MINVAL) > commonunits.common)\
         {\
-          MINVAL = commonunits;\
+          MINVAL = commonunits.common;\
         }\
-        if ((MAXVAL) < commonunits)\
+        if ((MAXVAL) < commonunits.common)\
         {\
-          MAXVAL = commonunits;\
+          MAXVAL = commonunits.common;\
         }
 
 typedef Seqpos Suffixptr;
@@ -401,22 +402,23 @@ static Suffixptr *medianof3(const Bentsedgresources *bsr,
                             Suffixptr *c)
 {
   Sfxcmp vala, valb, valc;
+  GtCommonunits commonunits;
   int retvalavalb, retvalavalc, retvalbvalc;
 
   PTR2INT(vala,a);
   PTR2INT(valb,b);
-  Sfxdocompare(NULL,vala,valb);
+  Sfxdocompare(&commonunits,vala,valb);
   if (SfxcmpEQUAL(vala,valb))
   {
     return a;
   }
   PTR2INT(valc,c);
-  Sfxdocompare(NULL,vala,valc);
+  Sfxdocompare(&commonunits,vala,valc);
   if (SfxcmpEQUAL(vala,valc))
   {
     return c;
   }
-  Sfxdocompare(NULL,valb,valc);
+  Sfxdocompare(&commonunits,valb,valc);
   if (SfxcmpEQUAL(valb,valc))
   {
     return c;
@@ -446,6 +448,7 @@ static void insertionsort(Bentsedgresources *bsr,
   Seqpos lcpindex, lcplen = 0;
   int retval;
   Suffixptr ptr1, ptr2, temp;
+  GtCommonunits commonunits;
 
 #ifdef SKDEBUG
   printf("insertion sort ");
@@ -495,9 +498,10 @@ static void insertionsort(Bentsedgresources *bsr,
                                bsr->encseq,
                                *pj);
 #endif
-        retval = compareEncseqsequences(&lcplen,bsr->encseq,bsr->fwd,
+        retval = compareEncseqsequences(&commonunits,bsr->encseq,bsr->fwd,
                                         bsr->complement,
                                         bsr->esr1,bsr->esr2,*(pj-1),*pj,offset);
+        lcplen = commonunits.finaldepth;
       }
       gt_assert(retval != 0);
       if (bsr->lcpsubtab != NULL && bsr->assideeffect)
@@ -530,6 +534,7 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
   int retval;
   unsigned long idx = 0;
   bool tempb;
+  GtCommonunits commonunits;
 
 #ifdef SKDEBUG
   printf("insertion sort (offset=%lu,maxdepth=%lu)\n",
@@ -586,11 +591,13 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
       } else
       {
         gt_assert(offset < maxdepth);
-        retval = compareEncseqsequencesmaxdepth(&lcplen,bsr->encseq,bsr->fwd,
+        retval = compareEncseqsequencesmaxdepth(&commonunits,bsr->encseq,
+                                                bsr->fwd,
                                                 bsr->complement,
                                                 bsr->esr1,bsr->esr2,
                                                 *(pj-1),*pj,offset,
                                                 maxdepth);
+        lcplen = commonunits.finaldepth;
         gt_assert(lcplen <= maxdepth);
         if (lcplen == maxdepth)
         {
@@ -700,7 +707,7 @@ static MedianElem *quickmedian (bool fwd,bool complement,
                                 MedianElem *arr,unsigned long width)
 {
   MedianElem *low, *high, *median, *middle, *ll, *hh;
-  unsigned int commonunits;
+  GtCommonunits commonunits;
 
   gt_assert(width > 0);
   low = arr;
@@ -1069,7 +1076,8 @@ static void sarrcountingsort(Bentsedgresources *bsr,
                              unsigned long width)
 {
   int cmp;
-  unsigned int commonunits, maxsmallerwithlcp = 0, maxlargerwithlcp = 0;
+  unsigned int maxsmallerwithlcp = 0, maxlargerwithlcp = 0;
+  GtCommonunits commonunits;
   EndofTwobitencoding etbecurrent;
   unsigned long idx, smaller = 0, larger = 0,
                 insertindex, end, equaloffset, currentwidth;
@@ -1085,15 +1093,15 @@ static void sarrcountingsort(Bentsedgresources *bsr,
       cmp = compareTwobitencodings(bsr->fwd,bsr->complement,&commonunits,
                                    &etbecurrent,pivotcmpbits);
       bsr->countingsortinfo[idx].suffix = left[idx];
-      gt_assert(commonunits <= (unsigned int) UNITSIN2BITENC);
-      bsr->countingsortinfo[idx].lcpwithpivot = commonunits;
+      gt_assert(commonunits.common <= (unsigned int) UNITSIN2BITENC);
+      bsr->countingsortinfo[idx].lcpwithpivot = commonunits.common;
       if (cmp > 0)
       {
-        gt_assert(commonunits < (unsigned int) UNITSIN2BITENC);
-        bsr->rightlcpdist[commonunits]++;
-        if (maxlargerwithlcp < commonunits)
+        gt_assert(commonunits.common < (unsigned int) UNITSIN2BITENC);
+        bsr->rightlcpdist[commonunits.common]++;
+        if (maxlargerwithlcp < commonunits.common)
         {
-          maxlargerwithlcp = commonunits;
+          maxlargerwithlcp = commonunits.common;
         }
         bsr->countingsortinfo[idx].cmpresult = (char) 1;
         larger++;
@@ -1101,17 +1109,17 @@ static void sarrcountingsort(Bentsedgresources *bsr,
       {
         if (cmp < 0)
         {
-          gt_assert(commonunits < (unsigned int) UNITSIN2BITENC);
-          bsr->leftlcpdist[commonunits]++;
-          if (maxsmallerwithlcp < commonunits)
+          gt_assert(commonunits.common < (unsigned int) UNITSIN2BITENC);
+          bsr->leftlcpdist[commonunits.common]++;
+          if (maxsmallerwithlcp < commonunits.common)
           {
-            maxsmallerwithlcp = commonunits;
+            maxsmallerwithlcp = commonunits.common;
           }
           bsr->countingsortinfo[idx].cmpresult = (char) -1;
           smaller++;
         } else
         {
-          gt_assert(commonunits == (unsigned int) UNITSIN2BITENC);
+          gt_assert(commonunits.common == (unsigned int) UNITSIN2BITENC);
           bsr->countingsortinfo[idx].cmpresult = 0;
         }
       }
@@ -1224,8 +1232,8 @@ static void bentleysedgewick(Bentsedgresources *bsr,
     GtUchar tmpvar;
     Ordertype parentordertype;
     unsigned long w, width;
-    unsigned int commonunits, smallermaxlcp, greatermaxlcp,
-                 smallerminlcp, greaterminlcp;
+    GtCommonunits commonunits;
+    unsigned int smallermaxlcp, greatermaxlcp, smallerminlcp, greaterminlcp;
     const int commonunitsequal = bsr->sfxstrategy->cmpcharbychar
                                  ? 1
                                  : UNITSIN2BITENC;
@@ -2076,6 +2084,7 @@ void qsufsort(Seqpos *sortspace,
 }
 
 void sortallbuckets(Suftab *suftab,
+                    GtBucketspec2 *bucketspec2,
                     const Encodedsequence *encseq,
                     Readmode readmode,
                     Codetype mincode,
@@ -2113,6 +2122,16 @@ void sortallbuckets(Suftab *suftab,
                         sfxstrategy);
   for (code = mincode; code <= maxcode; code++)
   {
+    if (bucketspec2 != NULL)
+    {
+      if (gt_hardworkbeforecopysort(bucketspec2,code))
+      {
+        rightchar = (unsigned int) (code % numofchars);
+      } else
+      {
+        continue;
+      }
+    }
     (*bucketiterstep)++;
     rightchar = calcbucketboundsparts(&bucketspec,
                                       bcktab,
@@ -2268,6 +2287,7 @@ void sortallbuckets(Suftab *suftab,
 }
 
 void sortbucketofsuffixes(Seqpos *suffixestobesorted,
+                          GtBucketspec2 *bucketspec2,
                           unsigned long numberofsuffixes,
                           const Encodedsequence *encseq,
                           Readmode readmode,
@@ -2304,6 +2324,16 @@ void sortbucketofsuffixes(Seqpos *suffixestobesorted,
   bsr.dc_processunsortedrange = dc_processunsortedrange;
   for (code = mincode; code <= maxcode; code++)
   {
+    if (bucketspec2 != NULL)
+    {
+      if (gt_hardworkbeforecopysort(bucketspec2,code))
+      {
+        rightchar = (unsigned int) (code % numofchars);
+      } else
+      {
+        continue;
+      }
+    }
     rightchar = calcbucketboundsparts(&bucketspec,
                                       bcktab,
                                       code,

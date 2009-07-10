@@ -15,11 +15,26 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef CSTR_TABLE_H
-#define CSTR_TABLE_H
+#ifndef CSTR_TABLE_API_H
+#define CSTR_TABLE_API_H
 
-#include "core/cstr_table_api.h"
+#include "core/error.h"
+#include "core/str_array.h"
 
-int           gt_cstr_table_unit_test(GtError*);
+/* Implements a table of C-strings. */
+typedef struct GtCstrTable GtCstrTable;
+
+/* Creates a new <GtCstrTable> object. */
+GtCstrTable*  gt_cstr_table_new();
+/* Deletes <table>. */
+void          gt_cstr_table_delete(GtCstrTable *table);
+/* Add <cstr> to <table>. */
+void          gt_cstr_table_add(GtCstrTable *table, const char *cstr);
+/* If a C-string equal to <cstr> is contained in <table>, it is returned.
+   Otherwise NULL is returned. */
+const char*   gt_cstr_table_get(const GtCstrTable *table, const char *cstr);
+/* Return a <GtStrArray*> which contains all <cstr>s added to <table> in
+   alphabetical order. The caller is responsible to free it! */
+GtStrArray*   gt_cstr_table_get_all(const GtCstrTable *table);
 
 #endif

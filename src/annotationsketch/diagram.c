@@ -30,14 +30,16 @@
 #include "core/hashmap.h"
 #include "core/ma.h"
 #include "core/msort.h"
+#include "core/log.h"
 #include "core/str.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
 #include "extended/feature_node.h"
 #include "extended/genome_node.h"
 
-/* used to index non-multiline-feature blocks */
-#define UNDEF_REPR               (void*)0x0DEFD
+/* used to index non-multiline-feature blocks
+   undefined pointer -- never dereference! */
+#define UNDEF_REPR               (void*)~0
 /* used to separate a filename from the type in a track name */
 #define FILENAME_TYPE_SEPARATOR  '|'
 
@@ -47,7 +49,7 @@ struct GtDiagram {
   /* Reverse lookup structure (per node) */
   GtHashmap *nodeinfo;
   /* Cache tables for configuration data */
-  GtHashmap *collapsingtypes, *caption_display_status;
+  GtHashmap *collapsingtypes, *caption_display_status, *groupedtypes;
   GtStyle *style;
   GtArray *features,
           *custom_tracks;
@@ -55,6 +57,12 @@ struct GtDiagram {
   void *ptr;
   GtTrackSelectorFunc select_func;
 };
+
+typedef enum {
+  GT_DO_NOT_GROUP_BY_PARENT,
+  GT_GROUP_BY_PARENT,
+  GT_UNDEFINED_GROUPING
+} GtShouldGroupByParent;
 
 /* holds a GtBlock with associated type */
 typedef struct {
@@ -131,7 +139,7 @@ static inline void nodeinfo_add_block(NodeInfoElement *ni,
 {
   GtBlockTuple *bt;
   PerTypeInfo *type_struc = NULL;
-  gt_assert(ni && !nodeinfo_find_block(ni, gft, rep));
+  gt_assert(ni);
   bt = blocktuple_new(gft, rep, block);
   if (!(ni->type_index))
   {
@@ -170,7 +178,7 @@ static inline bool get_caption_display_status(GtDiagram *d, const char *gft)
   status = (bool*) gt_hashmap_get(d->caption_display_status, gft);
   if (!status)
   {
-    unsigned long threshold;
+    unsigned long threshold = UNDEF_ULONG;
     double tmp;
     status = gt_malloc(sizeof (bool*));
     if (!gt_style_get_bool(d->style, "format", "show_block_captions", status,
@@ -180,8 +188,6 @@ static inline bool get_caption_display_status(GtDiagram *d, const char *gft)
     {
       if (gt_style_get_num(d->style, gft, "max_capt_show_width", &tmp, NULL))
         threshold = tmp;
-      else
-        threshold = UNDEF_ULONG;
       if (threshold == UNDEF_ULONG)
         *status = true;
       else
@@ -204,9 +210,10 @@ static inline void assign_block_caption(GtDiagram *d,
   if ((nnid_p || nnid_n) && get_caption_display_status(d,
                                           gt_feature_node_get_type(node)))
   {
-    caption = gt_str_new_cstr("");
-    if (parent) {
-      if (gt_genome_node_has_children((GtGenomeNode*) parent))
+    caption = gt_str_new();
+    if (parent)
+    {
+      if (nnid_p && gt_genome_node_has_children((GtGenomeNode*) parent))
         gt_str_append_cstr(caption, nnid_p);
       else
         gt_str_append_cstr(caption, "-");
@@ -228,6 +235,7 @@ static void add_to_current(GtDiagram *d, GtFeatureNode *node,
   gt_assert(d && node);
   /* Get nodeinfo element and set itself as parent */
   ni = nodeinfo_get(d, node);
+  gt_log_log("adding %s to self", gt_feature_node_get_type(node));
   ni->parent = node;
   /* create new GtBlock tuple and add to node info */
   block = gt_block_new_from_node(node);
@@ -241,10 +249,10 @@ static void add_to_current(GtDiagram *d, GtFeatureNode *node,
     nnid_p = get_node_name_or_id(parent);
     nnid_n = get_node_name_or_id(node);
     if ((nnid_p || nnid_n) && get_caption_display_status(d,
-                  gt_feature_node_get_type(node)))
+                                            gt_feature_node_get_type(node)))
     {
       if (parent) {
-        if (gt_genome_node_has_children((GtGenomeNode*) parent))
+        if (nnid_p && gt_genome_node_has_children((GtGenomeNode*) parent))
           gt_str_append_cstr(caption, nnid_p);
         else
           gt_str_append_cstr(caption, "-");
@@ -252,6 +260,9 @@ static void add_to_current(GtDiagram *d, GtFeatureNode *node,
       }
       if (nnid_n)
         gt_str_append_cstr(caption, nnid_n);
+    } else {
+      gt_str_delete(caption);
+      caption = NULL;
     }
   }
   gt_block_set_caption(block, caption);
@@ -270,6 +281,7 @@ static void add_to_parent(GtDiagram *d, GtFeatureNode *node,
   if (!parent) return;
   par_ni = nodeinfo_get(d, parent);
   ni = nodeinfo_get(d, node);
+  gt_log_log("adding %s to parent %p", gt_feature_node_get_type(node), parent);
   ni->parent = parent;
   block = nodeinfo_find_block(par_ni,
                               gt_feature_node_get_type(node),
@@ -295,6 +307,8 @@ static void add_to_rep(GtDiagram *d, GtFeatureNode *node,
   NodeInfoElement *ni;
   gt_assert(d && node && gt_feature_node_is_multi(node));
   rep = gt_feature_node_get_multi_representative(node);
+  gt_log_log("adding %s to representative %p", gt_feature_node_get_type(node),
+                                               rep);
   ni = nodeinfo_get(d, rep);
 
   block = nodeinfo_find_block(ni,
@@ -329,7 +343,7 @@ static void add_recursive(GtDiagram *d, GtFeatureNode *node,
   {
     rep = gt_feature_node_get_multi_representative(original_node);
   }
-  /* end of recursion, insert into target block */
+    /* end of recursion, insert into target block */
   if (parent == node) {
     GtBlock *block ;
     block = nodeinfo_find_block(ni,
@@ -343,6 +357,8 @@ static void add_recursive(GtDiagram *d, GtFeatureNode *node,
                          block);
     }
     gt_block_insert_element(block, original_node);
+    gt_log_log("add %s to target %s", gt_feature_node_get_type(original_node),
+                                      gt_block_get_type(block));
   }
   else {
     /* not at target type block yet, set up reverse entry and follow */
@@ -350,8 +366,11 @@ static void add_recursive(GtDiagram *d, GtFeatureNode *node,
     /* set up reverse entry */
     ni->parent = parent;
     parent_ni = gt_hashmap_get(d->nodeinfo, parent);
-    if (parent_ni)
+    if (parent_ni) {
+      gt_log_log("recursion: %s -> %s", gt_feature_node_get_type(node),
+                                        gt_feature_node_get_type(parent));
       add_recursive(d, parent, parent_ni->parent, original_node);
+    }
   }
 }
 
@@ -360,17 +379,21 @@ static void process_node(GtDiagram *d, GtFeatureNode *node,
 {
   GtRange elem_range;
   bool *collapse;
-  bool do_not_overlap = false;
-  const char *feature_type = NULL, *parent_gft = NULL;
+  GtShouldGroupByParent *group;
+  const char *feature_type = NULL,
+             *parent_gft = NULL;
   double tmp;
   unsigned long max_show_width = UNDEF_ULONG,
                 par_max_show_width = UNDEF_ULONG;
 
   gt_assert(d && node);
 
+  gt_log_log(">> getting '%s'", gt_feature_node_get_type(node));
+
   /* skip pseudonodes */
   if (gt_feature_node_is_pseudo(node))
     return;
+
   feature_type = gt_feature_node_get_type(node);
   gt_assert(feature_type);
 
@@ -385,7 +408,7 @@ static void process_node(GtDiagram *d, GtFeatureNode *node,
   else
     max_show_width = UNDEF_ULONG;
 
-  /* for non-root nodes... */
+  /* for non-root nodes, get maximal view with to show parent */
   if (parent)
   {
     if (!gt_feature_node_is_pseudo(parent))
@@ -395,8 +418,7 @@ static void process_node(GtDiagram *d, GtFeatureNode *node,
         par_max_show_width = tmp;
       else
         par_max_show_width = UNDEF_ULONG;
-    }
-    else par_max_show_width = UNDEF_ULONG;
+    } else par_max_show_width = UNDEF_ULONG;
   }
 
   /* check if this type is to be displayed at all */
@@ -407,9 +429,12 @@ static void process_node(GtDiagram *d, GtFeatureNode *node,
   }
 
   /* disregard parent node if it is configured not to be shown */
-  if (parent && par_max_show_width != UNDEF_ULONG
+  if (parent
+        && par_max_show_width != UNDEF_ULONG
         && gt_range_length(&d->range) > par_max_show_width)
+  {
     parent = NULL;
+  }
 
   /* check if this is a collapsing type, cache result */
   if ((collapse = (bool*) gt_hashmap_get(d->collapsingtypes,
@@ -422,37 +447,65 @@ static void process_node(GtDiagram *d, GtFeatureNode *node,
     gt_hashmap_add(d->collapsingtypes, (void*) feature_type, collapse);
   }
 
-   /* check if direct children overlap */
-  if (parent)
-    do_not_overlap =
-      gt_genome_node_direct_children_do_not_overlap_st((GtGenomeNode*) parent,
-                                                       (GtGenomeNode*) node);
+  /* check if type should be grouped by parent, cache result */
+  if ((group = (GtShouldGroupByParent*) gt_hashmap_get(d->groupedtypes,
+                                                       feature_type)) == NULL)
+  {
+    bool tmp;
+    group = gt_malloc(sizeof (GtShouldGroupByParent));
+    if (!gt_style_get_bool(d->style, feature_type, "group_by_parent",
+                           &tmp, NULL)) {
+      *group = GT_UNDEFINED_GROUPING;
+    } else {
+      if (tmp)
+        *group = GT_GROUP_BY_PARENT;
+      else
+        *group = GT_DO_NOT_GROUP_BY_PARENT;
+    }
+    gt_hashmap_add(d->groupedtypes, (void*) feature_type, group);
+  }
 
-  /* decide how to continue: */
-  if (*collapse && parent && !gt_feature_node_is_pseudo(parent))
+  /* decide where to place this feature: */
+  if (*collapse)
   {
-    /* collapsing child nodes are added to upwards blocks,
-       but never collapse into pseudo nodes */
-    add_recursive(d, node, parent, node);
+    /* user has specified collapsing to parent for this type */
+    if (parent && !gt_feature_node_is_pseudo(parent)) {
+      /* collapsing child nodes are added to upwards blocks,
+         but never collapse into pseudo nodes */
+      add_recursive(d, node, parent, node);
+    } else {
+      /* if no parent or only pseudo-parent, do not collapse */
+      add_to_current(d, node, parent);
+    }
   }
-  else if ((!*collapse || (parent && gt_feature_node_is_pseudo(parent)))
-             && gt_feature_node_is_multi(node))
+  else  /* (!*collapse) */
   {
-    /* multi line features are added to their representative's blocks */
-    add_to_rep(d, node, parent);
-  }
-  else if (!(*collapse)
-             && do_not_overlap
-             && gt_genome_node_number_of_children((GtGenomeNode*) parent) > 1)
-  {
-    /* non-collapsing, non-overlapping children of a single parent are
-       added to their parent's block */
-    add_to_parent(d, node, parent);
-  }
-  else
-  {
-    /* else feature gets an exclusive block for itself */
-    add_to_current(d, node, parent);
+    if (parent) {
+      bool do_not_overlap = false;
+      do_not_overlap =
+        gt_genome_node_direct_children_do_not_overlap_st((GtGenomeNode*) parent,
+                                                         (GtGenomeNode*) node);
+      if (*group == GT_GROUP_BY_PARENT
+          || (do_not_overlap && *group == GT_UNDEFINED_GROUPING))
+      {
+        if (gt_feature_node_is_pseudo(parent)
+              && gt_feature_node_is_multi(node))
+        {
+          add_to_rep(d, node, parent);
+        } else if
+            (gt_genome_node_number_of_children((GtGenomeNode*) parent) > 1)
+        {
+          add_to_parent(d, node, parent);
+        } else {
+          add_to_current(d, node, parent);
+        }
+      } else {
+        add_to_current(d, node, parent);
+      }
+    } else {
+      /* root nodes always get their own block */
+      add_to_current(d, node, parent);
+    }
   }
 
   /* we can now assume that this node (or its representative)
@@ -461,6 +514,7 @@ static void process_node(GtDiagram *d, GtFeatureNode *node,
   {
     GtFeatureNode *rep;
     rep = gt_feature_node_get_multi_representative((GtFeatureNode*) node);
+    gt_assert(gt_hashmap_get(d->nodeinfo, rep));
   }
   else
     gt_assert(gt_hashmap_get(d->nodeinfo, node));
@@ -616,10 +670,10 @@ int gt_diagram_build(GtDiagram *diagram)
   gt_assert(diagram);
   nti.diagram = diagram;
 
-  /* initialise caches */
-  diagram->collapsingtypes = gt_hashmap_new(HASH_STRING, NULL, gt_free_func);
-  diagram->caption_display_status = gt_hashmap_new(HASH_DIRECT, NULL,
-                                                   gt_free_func);
+  /* clear caches */
+  gt_hashmap_reset(diagram->collapsingtypes);
+  gt_hashmap_reset(diagram->groupedtypes);
+  gt_hashmap_reset(diagram->caption_display_status);
 
   if (!diagram->blocks)
   {
@@ -642,9 +696,6 @@ int gt_diagram_build(GtDiagram *diagram)
     gt_assert(!had_err); /* collect_blocks() is sane */
   }
 
-  /* clear caches */
-  gt_hashmap_delete(diagram->collapsingtypes);
-  gt_hashmap_delete(diagram->caption_display_status);
   return had_err;
 }
 
@@ -664,6 +715,11 @@ static GtDiagram* gt_diagram_new_generic(GtArray *features,
     diagram->features = features;
   diagram->select_func = default_track_selector;
   diagram->custom_tracks = gt_array_new(sizeof (GtCustomTrack*));
+  /* init caches */
+  diagram->collapsingtypes = gt_hashmap_new(HASH_STRING, NULL, gt_free_func);
+  diagram->groupedtypes = gt_hashmap_new(HASH_STRING, NULL, gt_free_func);
+  diagram->caption_display_status = gt_hashmap_new(HASH_DIRECT, NULL,
+                                                   gt_free_func);
   return diagram;
 }
 
@@ -751,6 +807,9 @@ void gt_diagram_delete(GtDiagram *diagram)
   if (diagram->blocks)
     gt_hashmap_delete(diagram->blocks);
   gt_hashmap_delete(diagram->nodeinfo);
+  gt_hashmap_delete(diagram->collapsingtypes);
+  gt_hashmap_delete(diagram->groupedtypes);
+  gt_hashmap_delete(diagram->caption_display_status);
   gt_array_delete(diagram->custom_tracks);
   gt_free(diagram);
 }

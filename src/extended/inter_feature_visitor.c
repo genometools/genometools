@@ -20,6 +20,7 @@
 #include "core/ma_api.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
+#include "core/warning_api.h"
 #include "extended/inter_feature_visitor.h"
 #include "extended/node_visitor_rep.h"
 
@@ -52,6 +53,13 @@ static int inter_feature_in_children(GtGenomeNode *gn, void *data,
                                                 aiv->previous_feature);
       current_range = gt_genome_node_get_range(gn);
       gt_assert(previous_range.end < current_range.start);
+      if (current_range.start - previous_range.end < 2) {
+        gt_warning("no space for inter-feature '%s' between %lu and %lu",
+                   aiv->inter_type,
+                   previous_range.end,
+                   current_range.start);
+        return 0;
+      }
       inter_range.start = previous_range.end + 1;
       inter_range.end = current_range.start - 1;
 

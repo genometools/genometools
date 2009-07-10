@@ -562,6 +562,18 @@ void calcbucketboundaries(Bucketspecification *bucketspec,
                                numofchars);
 }
 
+Seqpos calcbucketrightbounds(const Bcktab *bcktab,
+                             Codetype code,
+                             Codetype maxcode,
+                             Seqpos totalwidth)
+{
+  if (code == maxcode)
+  {
+    return totalwidth;
+  }
+  return bcktab->leftborder[code+1];
+}
+
 static void updatelog2values(unsigned long *tab,unsigned long maxvalue)
 {
   unsigned long multi = 1UL, idx, sum = 1UL;
@@ -781,6 +793,11 @@ unsigned int bcktab_optimalnumofbits(unsigned short *logofremaining,
 {
   *logofremaining = bcktab->logofremaining;
   return bcktab->optimalnumofbits;
+}
+
+unsigned int bcktab_prefixlength(const Bcktab *bcktab)
+{
+  return bcktab->prefixlength;
 }
 
 unsigned int singletonmaxprefixindex(const Bcktab *bcktab,Codetype code)

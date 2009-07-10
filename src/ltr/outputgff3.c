@@ -46,9 +46,9 @@ static void showboundaries(FILE *fp,
       boundaries->contignumber,
       /* increase boundary position by one for output */
       PRINTSeqposcast(boundaries->leftLTR_5 -offset + 1
-                  - boundaries->lenleftTSD),
+                        - boundaries->lenleftTSD + (Seqpos) lo->offset),
       PRINTSeqposcast(boundaries->rightLTR_3 -offset + 1
-                  + boundaries->lenrightTSD),
+                        + boundaries->lenrightTSD + (Seqpos) lo->offset),
       ltrc->idcounterRepregion++ );
 
   /* LTR retrotransposon */
@@ -57,8 +57,9 @@ static void showboundaries(FILE *fp,
               ".\t?\t.\tID=LTRret%lu;Parent=RepeatReg%lu\n",
       boundaries->contignumber,
       /* increase boundary position by one for output */
-      PRINTSeqposcast(boundaries->leftLTR_5 -offset + 1),
-      PRINTSeqposcast(boundaries->rightLTR_3 -offset  + 1),
+      PRINTSeqposcast(boundaries->leftLTR_5 -offset + 1 + (Seqpos) lo->offset),
+      PRINTSeqposcast(boundaries->rightLTR_3 -offset  + 1
+                        + (Seqpos) lo->offset),
       ltrc->idcounterRetrotrans++,
       ltrc->idcounterRepregion-1 );
 
@@ -68,8 +69,8 @@ static void showboundaries(FILE *fp,
               ".\t?\t.\tID=LTR%lu;Parent=LTRret%lu\n",
       boundaries->contignumber,
       /* increase boundary position by one for output */
-      PRINTSeqposcast(boundaries->leftLTR_5 -offset + 1),
-      PRINTSeqposcast(boundaries->leftLTR_3 -offset + 1),
+      PRINTSeqposcast(boundaries->leftLTR_5 -offset + 1 + (Seqpos) lo->offset),
+      PRINTSeqposcast(boundaries->leftLTR_3 -offset + 1 + (Seqpos) lo->offset),
       ltrc->idcounterLTR++,
       ltrc->idcounterRetrotrans-1 );
   fprintf(fp, "seq%lu\tLTRharvest\tlong_terminal_repeat\t"
@@ -77,8 +78,8 @@ static void showboundaries(FILE *fp,
               ".\t?\t.\tID=LTR%lu;Parent=LTRret%lu\n",
       boundaries->contignumber,
       /* increase boundary position by one for output */
-      PRINTSeqposcast(boundaries->rightLTR_5 -offset + 1),
-      PRINTSeqposcast(boundaries->rightLTR_3 -offset + 1),
+      PRINTSeqposcast(boundaries->rightLTR_5 -offset + 1 + (Seqpos) lo->offset),
+      PRINTSeqposcast(boundaries->rightLTR_3 -offset + 1 + (Seqpos) lo->offset),
       ltrc->idcounterLTR++,
       ltrc->idcounterRetrotrans-1 );
 
@@ -91,8 +92,8 @@ static void showboundaries(FILE *fp,
         boundaries->contignumber,
         /* increase boundary position by one for output */
         PRINTSeqposcast(boundaries->leftLTR_5 -offset + 1
-                  - boundaries->lenleftTSD),
-        PRINTSeqposcast(boundaries->leftLTR_5 -offset),
+                          - boundaries->lenleftTSD + (Seqpos) lo->offset),
+        PRINTSeqposcast(boundaries->leftLTR_5 -offset + (Seqpos) lo->offset),
         ltrc->idcounterTSD++,
         ltrc->idcounterRepregion-1 );
 
@@ -101,9 +102,10 @@ static void showboundaries(FILE *fp,
                 ".\t?\t.\tID=TSD%lu;Parent=RepeatReg%lu\n",
         boundaries->contignumber,
         /* increase boundary position by one for output */
-        PRINTSeqposcast(boundaries->rightLTR_3 -offset + 2),
+        PRINTSeqposcast(boundaries->rightLTR_3 -offset + 2
+                          + (Seqpos) lo->offset),
         PRINTSeqposcast(boundaries->rightLTR_3 -offset + 1
-                  + boundaries->lenrightTSD),
+                          + boundaries->lenrightTSD + (Seqpos) lo->offset),
         ltrc->idcounterTSD++,
         ltrc->idcounterRepregion-1 );
   }
@@ -115,8 +117,10 @@ static void showboundaries(FILE *fp,
                 ".\t?\t.\tID=Motif%lu;Parent=RepeatReg%lu\n",
         boundaries->contignumber,
         /* increase boundary position by one for output */
-        PRINTSeqposcast(boundaries->leftLTR_5 -offset + 1),
-        PRINTSeqposcast(boundaries->leftLTR_5 -offset + 2),
+        PRINTSeqposcast(boundaries->leftLTR_5 -offset + 1
+                          + (Seqpos) lo->offset),
+        PRINTSeqposcast(boundaries->leftLTR_5 -offset + 2
+                          + (Seqpos) lo->offset),
         ltrc->idcounterMotif++,
         ltrc->idcounterRepregion-1 );
     fprintf(fp, "seq%lu\tLTRharvest\tinverted_repeat\t"
@@ -124,8 +128,9 @@ static void showboundaries(FILE *fp,
                 ".\t?\t.\tID=Motif%lu;Parent=RepeatReg%lu\n",
         boundaries->contignumber,
         /* increase boundary position by one for output */
-        PRINTSeqposcast(boundaries->leftLTR_3 -offset),
-        PRINTSeqposcast(boundaries->leftLTR_3 -offset + 1),
+        PRINTSeqposcast(boundaries->leftLTR_3 -offset + (Seqpos) lo->offset),
+        PRINTSeqposcast(boundaries->leftLTR_3 -offset + 1
+                          + (Seqpos) lo->offset),
         ltrc->idcounterMotif++,
         ltrc->idcounterRepregion-1 );
 
@@ -134,8 +139,10 @@ static void showboundaries(FILE *fp,
                 ".\t?\t.\tID=Motif%lu;Parent=RepeatReg%lu\n",
         boundaries->contignumber,
         /* increase boundary position by one for output */
-        PRINTSeqposcast(boundaries->rightLTR_5 -offset + 1),
-        PRINTSeqposcast(boundaries->rightLTR_5 -offset + 2),
+        PRINTSeqposcast(boundaries->rightLTR_5 -offset + 1
+                          + (Seqpos) lo->offset),
+        PRINTSeqposcast(boundaries->rightLTR_5 -offset + 2
+                          + (Seqpos) lo->offset),
         ltrc->idcounterMotif++,
         ltrc->idcounterRepregion-1 );
     fprintf(fp, "seq%lu\tLTRharvest\tinverted_repeat\t"
@@ -143,8 +150,9 @@ static void showboundaries(FILE *fp,
                 ".\t?\t.\tID=Motif%lu;Parent=RepeatReg%lu\n",
         boundaries->contignumber,
         /* increase boundary position by one for output */
-        PRINTSeqposcast(boundaries->rightLTR_3 -offset),
-        PRINTSeqposcast(boundaries->rightLTR_3 -offset + 1),
+        PRINTSeqposcast(boundaries->rightLTR_3 -offset + (Seqpos) lo->offset),
+        PRINTSeqposcast(boundaries->rightLTR_3 -offset + 1
+                          + (Seqpos) lo->offset),
         ltrc->idcounterMotif++,
         ltrc->idcounterRepregion-1 );
   }
@@ -159,7 +167,7 @@ int printgff3format(const LTRharvestoptions *lo,
   bool haserr = false;
   FILE *fp;
 
-  fp = gt_fa_fopen(gt_str_get(lo->str_gff3filename), "w",err);
+  fp = gt_fa_fopen(gt_str_get(lo->str_gff3filename), "w", err);
   if (fp == NULL)
   {
     haserr = true;
@@ -185,8 +193,11 @@ int printgff3format(const LTRharvestoptions *lo,
         previouscontignum.defined = true;
         previouscontignum.valueunsignedlong = seqnum;
         getencseqSeqinfo(&seqinfo,encseq,seqnum);
-        fprintf(fp, "##sequence-region seq%lu 1 " FormatSeqpos "\n",
-                    seqnum, PRINTSeqposcast(seqinfo.seqlength));
+        fprintf(fp, "##sequence-region seq%lu " FormatSeqpos
+                                            " " FormatSeqpos "\n",
+                    seqnum,
+                    PRINTSeqposcast(1 + (Seqpos) lo->offset),
+                    PRINTSeqposcast(seqinfo.seqlength + (Seqpos) lo->offset));
         desptr = retrievesequencedescription(&desclen,
                                              encseq,
                                              seqnum);

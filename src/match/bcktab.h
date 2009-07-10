@@ -72,6 +72,11 @@ unsigned int calcbucketboundsparts(Bucketspecification *bucketspec,
                                    unsigned int rightchar,
                                    unsigned int numofchars);
 
+Seqpos calcbucketrightbounds(const Bcktab *bcktab,
+                             Codetype code,
+                             Codetype maxcode,
+                             Seqpos totalwidth);
+
 unsigned long distpfxidxpartialsums(const Bcktab *bcktab,Codetype code,
                                     unsigned int lowerbound);
 
@@ -114,6 +119,8 @@ Codetype bcktab_numofallcodes(const Bcktab *bcktab);
 
 uint64_t sizeofbuckettable(unsigned int numofchars,
                            unsigned int prefixlength);
+
+unsigned int bcktab_prefixlength(const Bcktab *bcktab);
 
 void bcktab_leftborderpartialsums(Bcktab *bcktab,Seqpos numofsuffixestosort);
 

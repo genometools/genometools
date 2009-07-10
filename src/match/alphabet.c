@@ -32,7 +32,6 @@
 #include "core/symboldef.h"
 #include "core/mathsupport.h"
 #include "spacedef.h"
-#include "qsorttype.h"
 #include "alphadef.h"
 
 #include "guessprot.pr"
@@ -718,7 +717,7 @@ static unsigned int removelowercaseproteinchars(GtUchar *domainbuf,
 
 #define UNCAST(X) (*((const GtUchar *) (X)))
 
-static Qsortcomparereturntype comparechar(const void *a,const void *b)
+static int comparechar(const void *a,const void *b)
 {
   if (UNCAST(a) < UNCAST(b))
   {
@@ -752,10 +751,8 @@ bool isproteinalphabet(const SfxAlphabet *alpha)
                                                    &proteinalphabet);
   if (reduceddomainsize1 == reduceddomainsize2)
   {
-    qsort(&domainbuf1[0],(size_t) reduceddomainsize1,sizeof (char),
-          (Qsortcomparefunction) comparechar);
-    qsort(&domainbuf2[0],(size_t) reduceddomainsize2,sizeof (char),
-          (Qsortcomparefunction) comparechar);
+    qsort(&domainbuf1[0],(size_t) reduceddomainsize1,sizeof (char),comparechar);
+    qsort(&domainbuf2[0],(size_t) reduceddomainsize2,sizeof (char),comparechar);
     for (i=0; i < reduceddomainsize2; i++)
     {
       if (domainbuf1[i] != domainbuf2[i])

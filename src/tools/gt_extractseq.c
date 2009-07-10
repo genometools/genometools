@@ -1,5 +1,6 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2009 Stefan Kurtz <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -22,7 +23,7 @@
 #include "core/option.h"
 #include "core/outputfile.h"
 #include "core/unused_api.h"
-#include "match/giextract.pr"
+#include "match/giextract.h"
 #include "extended/gtdatahelp.h"
 #include "tools/gt_extractseq.h"
 
@@ -31,7 +32,7 @@
 
 typedef struct {
   GtStr *pattern,
-      *ginum;
+        *fastakeyfile;
   unsigned long frompos,
                 topos,
                 width;
@@ -43,7 +44,7 @@ static void* gt_extractseq_arguments_new(void)
 {
   ExtractSeqArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->pattern = gt_str_new();
-  arguments->ginum = gt_str_new();
+  arguments->fastakeyfile = gt_str_new();
   arguments->ofi = gt_outputfileinfo_new();
   return arguments;
 }
@@ -54,7 +55,7 @@ static void gt_extractseq_arguments_delete(void *tool_arguments)
   if (!arguments) return;
   gt_genfile_close(arguments->outfp);
   gt_outputfileinfo_delete(arguments->ofi);
-  gt_str_delete(arguments->ginum);
+  gt_str_delete(arguments->fastakeyfile);
   gt_str_delete(arguments->pattern);
   gt_free(arguments);
 }
@@ -64,7 +65,7 @@ static GtOptionParser* gt_extractseq_option_parser_new(void *tool_arguments)
   ExtractSeqArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *frompos_option, *topos_option, *match_option, *width_option,
-         *ginum_option;
+         *fastakeyfile_option;
   gt_assert(arguments);
 
   /* init */
@@ -93,11 +94,12 @@ static GtOptionParser* gt_extractseq_option_parser_new(void *tool_arguments)
                                    NULL);
   gt_option_parser_add_option(op, match_option);
 
-  /* -ginum */
-  ginum_option = gt_option_new_filename("ginum", "extract substrings for gi "
-                                     "numbers in specified file",
-                                     arguments->ginum);
-  gt_option_parser_add_option(op, ginum_option);
+  /* -keys */
+  fastakeyfile_option = gt_option_new_filename("keys",
+                                               "extract substrings for keys "
+                                               "in specified file",
+                                     arguments->fastakeyfile);
+  gt_option_parser_add_option(op, fastakeyfile_option);
 
   /* -width */
   width_option = gt_option_new_ulong("width", "set output width for showing of "
@@ -115,8 +117,8 @@ static GtOptionParser* gt_extractseq_option_parser_new(void *tool_arguments)
   /* option exclusions */
   gt_option_exclude(frompos_option, match_option);
   gt_option_exclude(topos_option, match_option);
-  gt_option_exclude(frompos_option, ginum_option);
-  gt_option_exclude(match_option, ginum_option);
+  gt_option_exclude(frompos_option, fastakeyfile_option);
+  gt_option_exclude(match_option, fastakeyfile_option);
 
   gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
   return op;
@@ -184,15 +186,16 @@ static int extractseq_match(GtGenFile *outfp, GtBioseq *bs,
   return had_err;
 }
 
-static int process_ginum(GtStr *ginum, int argc, const char **argv,
-                         unsigned long width, GtGenFile *outfp, GtError *err)
+static int process_fastakeyfile(GtStr *fastakeyfile, int argc,
+                                const char **argv, unsigned long width,
+                                GtGenFile *outfp, GtError *err)
 {
   int had_err = 0;
   gt_error_check(err);
-  gt_assert(gt_str_length(ginum));
+  gt_assert(gt_str_length(fastakeyfile));
 
   if (argc == 0) {
-    gt_error_set(err,"option -ginum requires at least one file argument");
+    gt_error_set(err,"option -keys requires at least one file argument");
     had_err = -1;
   }
 
@@ -202,7 +205,8 @@ static int process_ginum(GtStr *ginum, int argc, const char **argv,
     referencefiletab = gt_str_array_new();
     for (i = 0; i < argc; i++)
       gt_str_array_add_cstr(referencefiletab, argv[i]);
-    if (extractginumbers(true, outfp, width, ginum, referencefiletab, err) != 1)
+    if (gt_extractkeysfromfastafile(true, outfp, width, fastakeyfile,
+                                    referencefiletab, err) != 1)
       had_err = -1;
     gt_str_array_delete(referencefiletab);
   }
@@ -218,8 +222,8 @@ static int gt_extractseq_runner(int argc, const char **argv, int parsed_args,
 
   gt_error_check(err);
   gt_assert(arguments);
-  if (gt_str_length(arguments->ginum)) {
-    had_err = process_ginum(arguments->ginum, argc - parsed_args,
+  if (gt_str_length(arguments->fastakeyfile)) {
+    had_err = process_fastakeyfile(arguments->fastakeyfile, argc - parsed_args,
                             argv + parsed_args, arguments->width,
                             arguments->outfp, err);
   }

@@ -51,6 +51,7 @@ typedef struct
   bool fastaoutput;      /* by default no FASTA output */
   bool fastaoutputinnerregion;
   bool gff3output;       /* by default no gff3 output */
+  unsigned long offset;
 
   unsigned int minlengthTSD,   /* minlength of TSD, default */
                maxlengthTSD;   /* maxlength of TSD, default */

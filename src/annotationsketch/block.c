@@ -114,6 +114,22 @@ GtBlock* gt_block_ref(GtBlock *block)
   return block;
 }
 
+void gt_block_print(const GtBlock* block)
+{
+  unsigned long i;
+  gt_assert(block);
+  for (i=0;i<gt_array_size(block->elements);i++)
+  {
+    GtElement *elem;
+    elem = gt_element_ref(*(GtElement**) gt_array_get(block->elements, i));
+    gt_assert(elem);
+    GtRange r = gt_element_get_range(elem);
+    printf("%s\t%lu-%lu\n", gt_element_get_type(elem),
+                           r.start,
+                           r.end);
+  }
+}
+
 GtBlock* gt_block_new(void)
 {
   GtBlock *block = gt_calloc(1, sizeof (GtBlock));

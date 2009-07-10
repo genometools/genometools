@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2009 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2009 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,11 +15,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef COUNTINGSORT_H
-#define COUNTINGSORT_H
+#ifndef KMER2STRING_H
+#define KMER2STRING_H
 
-#include "core/countingsort_api.h"
+#include "intcode-def.h"
 
-int           gt_countingsort_unit_test(GtError*);
+void fromkmercode2string(char *buffer,
+                         Codetype code,
+                         unsigned int numofchars,
+                         unsigned int kmersize,
+                         const char *characters);
 
 #endif
