@@ -223,7 +223,6 @@ GtHashmap* gtt_unit_tests(void)
 #ifndef WITHOUT_CAIRO
   gt_hashmap_add(unit_tests, "block class", gt_block_unit_test);
   gt_hashmap_add(unit_tests, "style class", gt_style_unit_test);
-/*  gt_hashmap_add(unit_tests, "diagram class", gt_diagram_unit_test); */
   gt_hashmap_add(unit_tests, "element class", gt_element_unit_test);
   gt_hashmap_add(unit_tests, "memory feature index class",
                  gt_feature_index_memory_unit_test);
