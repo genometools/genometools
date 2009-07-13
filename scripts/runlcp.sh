@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# set -e -x
+set -e -x
 
 if test $# -eq 0
 then

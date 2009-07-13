@@ -148,6 +148,7 @@ static Codetype expandtwocharcode(Codetype twocharcode,
   return twocharcode * bucketspec2->expandfactor + bucketspec2->expandfillsum;
 }
 
+/*
 static Seqpos *leftcontextofspecialchardist(unsigned int numofchars,
                                             const Encodedsequence *encseq,
                                             Readmode readmode)
@@ -169,13 +170,91 @@ static Seqpos *leftcontextofspecialchardist(unsigned int numofchars,
     sri = newspecialrangeiterator(encseq,ISDIRREVERSE(readmode) ? false : true);
     while (nextspecialrangeiterator(&range,sri))
     {
+      printf("range %lu %lu\n",(unsigned long) range.leftpos,
+                               (unsigned long) range.rightpos);
       gt_assert(range.leftpos < totallength);
-      if (range.leftpos > 0)
+      if (ISDIRREVERSE(readmode))
       {
-        cc = getencodedchar(encseq,range.leftpos-1,readmode);
-        if (ISNOTSPECIAL(cc))
+        if (range.rightpos < totallength)
         {
-          specialchardist[cc]++;
+          cc = getencodedchar(encseq,range.rightpos,
+                              readmode == Reversemode ? Forwardmode
+                                                      : Complementmode);
+          if (ISNOTSPECIAL(cc))
+          {
+            specialchardist[cc]++;
+          }
+        }
+      } else
+      {
+        if (range.leftpos > 0)
+        {
+          cc = getencodedchar(encseq,range.leftpos-1,readmode);
+          if (ISNOTSPECIAL(cc))
+          {
+            specialchardist[cc]++;
+          }
+        }
+      }
+    }
+    freespecialrangeiterator(&sri);
+  }
+  if (getencseqlengthofspecialsuffix(encseq) == 0)
+  {
+    cc = getencodedchar(encseq,totallength-1,readmode);
+    gt_assert(ISNOTSPECIAL(cc));
+    specialchardist[cc]++;
+  }
+  return specialchardist;
+}
+*/
+
+static Seqpos *leftcontextofspecialchardist(unsigned int numofchars,
+                                            const Encodedsequence *encseq,
+                                            Readmode readmode)
+{
+  GtUchar cc;
+  unsigned int idx;
+  Seqpos *specialchardist, totallength = getencseqtotallength(encseq);
+
+  specialchardist = gt_malloc(sizeof(*specialchardist) * numofchars);
+  for (idx = 0; idx<numofchars; idx++)
+  {
+    specialchardist[idx] = 0;
+  }
+  if (hasspecialranges(encseq))
+  {
+    Specialrangeiterator *sri;
+    Sequencerange range;
+
+    sri = newspecialrangeiterator(encseq,true);
+    if (ISDIRREVERSE(readmode))
+    {
+      Readmode thismode = (readmode == Reversemode) ? Forwardmode
+                                                    : Complementmode;
+      while (nextspecialrangeiterator(&range,sri))
+      {
+        if (range.rightpos < totallength)
+        {
+          cc = getencodedchar(encseq,range.rightpos,thismode);
+          if (ISNOTSPECIAL(cc))
+          {
+            specialchardist[cc]++;
+          }
+        }
+      }
+    } else
+    {
+      while (nextspecialrangeiterator(&range,sri))
+      {
+        gt_assert(range.leftpos < totallength);
+        if (range.leftpos > 0)
+        {
+          cc = getencodedchar(encseq,range.leftpos-1,readmode);
+          if (ISNOTSPECIAL(cc))
+          {
+            specialchardist[cc]++;
+          }
         }
       }
     }

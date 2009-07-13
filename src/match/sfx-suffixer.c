@@ -746,8 +746,7 @@ static void preparethispart(Sfxiterator *sfi)
   {
     GtBucketspec2 *bucketspec2 = NULL;
     gt_assert(!sfi->sfxstrategy.streamsuftab);
-    if (numofparts == 1U && sfi->outlcpinfo == NULL &&
-        sfi->readmode == Forwardmode && sfi->prefixlength >= 2U)
+    if (numofparts == 1U && sfi->outlcpinfo == NULL && sfi->prefixlength >= 2U)
     {
       bucketspec2 = gt_bucketspec2_new(sfi->bcktab,sfi->encseq,sfi->readmode,
                                        partwidth,sfi->numofchars);
