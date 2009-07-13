@@ -23,7 +23,6 @@
 #include "kmer2string.h"
 #include "sfx-copysort.h"
 #include "verbose-def.h"
-#include "stamp.h"
 
 typedef struct
 {
@@ -149,13 +148,19 @@ static Codetype expandtwocharcode(Codetype twocharcode,
   return twocharcode * bucketspec2->expandfactor + bucketspec2->expandfillsum;
 }
 
-static void leftcontextofspecialchardist(Seqpos *dist,
-                                         const Encodedsequence *encseq,
-                                         Readmode readmode)
+static Seqpos *leftcontextofspecialchardist(unsigned int numofchars,
+                                            const Encodedsequence *encseq,
+                                            Readmode readmode)
 {
   GtUchar cc;
-  Seqpos totallength = getencseqtotallength(encseq);
+  unsigned int idx;
+  Seqpos *specialchardist, totallength = getencseqtotallength(encseq);
 
+  specialchardist = gt_malloc(sizeof(*specialchardist) * numofchars);
+  for (idx = 0; idx<numofchars; idx++)
+  {
+    specialchardist[idx] = 0;
+  }
   if (hasspecialranges(encseq))
   {
     Specialrangeiterator *sri;
@@ -170,7 +175,7 @@ static void leftcontextofspecialchardist(Seqpos *dist,
         cc = getencodedchar(encseq,range.leftpos-1,readmode);
         if (ISNOTSPECIAL(cc))
         {
-          dist[cc]++;
+          specialchardist[cc]++;
         }
       }
     }
@@ -180,8 +185,9 @@ static void leftcontextofspecialchardist(Seqpos *dist,
   {
     cc = getencodedchar(encseq,totallength-1,readmode);
     gt_assert(ISNOTSPECIAL(cc));
-    dist[cc]++;
+    specialchardist[cc]++;
   }
+  return specialchardist;
 }
 
 #undef SHOWBUCKETSPEC2
@@ -270,7 +276,7 @@ static void fillanysubbuckets(GtBucketspec2 *bucketspec2,
                               const Bcktab *bcktab)
 {
   Codetype code2, maxcode;
-  unsigned int idx, rightchar = 0, currentchar = 0;
+  unsigned int rightchar = 0, currentchar = 0;
   Seqpos rightbound, *specialchardist;
 
   maxcode = bcktab_numofallcodes(bcktab) - 1;
@@ -281,14 +287,9 @@ static void fillanysubbuckets(GtBucketspec2 *bucketspec2,
 #ifdef SHOWBUCKETSPEC2
   showexpandcode(bucketspec2,bucketspec2->prefixlength);
 #endif
-  specialchardist = gt_malloc(sizeof(*specialchardist) *
-                              bucketspec2->numofchars);
-  for (idx = 0; idx<bucketspec2->numofchars; idx++)
-  {
-    specialchardist[idx] = 0;
-  }
-  leftcontextofspecialchardist(specialchardist,bucketspec2->encseq,
-                               bucketspec2->readmode);
+  specialchardist = leftcontextofspecialchardist(bucketspec2->numofchars,
+                                                 bucketspec2->encseq,
+                                                 bucketspec2->readmode);
   for (code2 = 0; code2 < (Codetype) bucketspec2->numofcharssquared; code2++)
   {
     Codetype ecode = expandtwocharcode(code2,bucketspec2);

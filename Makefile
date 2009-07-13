@@ -818,11 +818,31 @@ EISFILES=${shell ls ${CURDIR}/src/match/*.c | grep eis-}\
          ${CURDIR}/src/match/sfx-run.c\
          ${CURDIR}/src/match/encseq-specialsrank.c
 
+# Ask Sascha to splint the following files which are currently included.
+
+LTRdigestfiles=${CURDIR}/src/ltr/gt_ltrdigest.c\
+               ${CURDIR}/src/ltr/gt_ltrdigest.h\
+               ${CURDIR}/src/ltr/ltr_visitor.c\
+               ${CURDIR}/src/ltr/ltr_visitor.h\
+               ${CURDIR}/src/ltr/ltrdigest_def.h\
+               ${CURDIR}/src/ltr/ltrdigest_stream.c\
+               ${CURDIR}/src/ltr/ltrdigest_stream.h\
+               ${CURDIR}/src/ltr/ltrelement.c\
+               ${CURDIR}/src/ltr/ltrelement.h\
+               ${CURDIR}/src/ltr/ltrfileout_stream.c\
+               ${CURDIR}/src/ltr/ltrfileout_stream.h\
+               ${CURDIR}/src/ltr/pbs.c\
+               ${CURDIR}/src/ltr/pbs.h\
+               ${CURDIR}/src/ltr/pdom.c\
+               ${CURDIR}/src/ltr/pdom.h\
+               ${CURDIR}/src/ltr/ppt.c\
+               ${CURDIR}/src/ltr/ppt.h
+
 SKTOOLS=${shell grep -l Kurtz src/tools/*.c}
 
 spgt:${addprefix obj/,${notdir ${subst .c,.splint,\
 	             ${filter-out ${EISFILES},${wildcard ${CURDIR}/src/match/*.c}}\
-                     ${wildcard ${CURDIR}/src/ltr/*.c}\
+                     ${filter-out ${LTRdigestfiles},${wildcard ${CURDIR}/src/ltr/*.c}}\
                                 ${SKTOOLS}}}}\
      obj/redblack.splint
 

@@ -684,7 +684,7 @@ void sprintfsymbolstring(char *buffer,const SfxAlphabet *alpha,
 
   for (i = 0; i < wlen; i++)
   {
-    buffer[i] = converttoprettysymbol(alpha, (int) w[i]);
+    buffer[i] = converttoprettysymbol(alpha, (GtUchar) w[i]);
   }
   buffer[wlen] = '\0';
 }
@@ -696,7 +696,8 @@ void echoprettysymbol(FILE *fpout,const SfxAlphabet *alpha,GtUchar currentchar)
 
 GtUchar getprettysymbol(const SfxAlphabet *alpha,unsigned int currentchar)
 {
-   return (GtUchar) converttoprettysymbol(alpha, currentchar);
+  gt_assert(currentchar <= UCHAR_MAX);
+  return (GtUchar) converttoprettysymbol(alpha, (GtUchar) currentchar);
 }
 
 static unsigned int removelowercaseproteinchars(GtUchar *domainbuf,
