@@ -355,7 +355,7 @@ int gt_extractkeysfromfastafile(bool verbose,
   char *desc, *headerbufferspace = NULL;
   const char *keyptr;
   char *keyspace = NULL;
-  unsigned long allockeyspace = 0, len, keylen, numofqueries, keyposition, 
+  unsigned long allockeyspace = 0, len, keylen, numofqueries, keyposition,
                 countmarkhit = 0;
   int had_err = 0;
   off_t totalsize;
@@ -403,7 +403,8 @@ int gt_extractkeysfromfastafile(bool verbose,
         keyspace = gt_realloc(keyspace,sizeof(*keyspace) * (keylen+1));
         allockeyspace = keylen;
       }
-      strncpy(keyspace,keyptr,keylen);
+      gt_assert(keyspace != NULL);
+      strncpy(keyspace,keyptr,(size_t) keylen);
       keyspace[keylen] = '\0';
       keyposition = findkeyposition(keyspace,fastakeyqueries,numofqueries);
       if (keyposition < numofqueries)

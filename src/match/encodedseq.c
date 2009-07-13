@@ -184,8 +184,9 @@ void plainseq2bytecode(GtUchar *bytecode,const GtUchar *seq,unsigned long len)
   }
 }
 
-void encseq2bytecode(GtUchar *dest,const Encodedsequence *encseq,
-                     const Seqpos startindex,const Seqpos len)
+#ifndef INLINEDENCSEQ
+static void encseq2bytecode(GtUchar *dest,const Encodedsequence *encseq,
+                            const Seqpos startindex,const Seqpos len)
 {
   Seqpos i, j;
 
@@ -231,6 +232,14 @@ void sequence2bytecode(GtUchar *dest,const Encodedsequence *encseq,
     encseq2bytecode(dest,encseq,startindex,len);
   }
 }
+#else
+void sequence2bytecode(GtUchar *dest,const Encodedsequence *encseq,
+                       Seqpos startindex,Seqpos len)
+{
+  gt_assert(encseq->sat == Viadirectaccess);
+  plainseq2bytecode(dest,encseq->plainseq + startindex,(unsigned long) len);
+}
+#endif
 
 #ifndef INLINEDENCSEQ
 Seqpos getencseqtotallength(const Encodedsequence *encseq)
@@ -395,7 +404,7 @@ GtUchar sequentialgetencodedchar(const Encodedsequence *encseq,
       exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
-#endif
+#endif /* INLINEDENCSEQ */
 
 #ifdef WITHshowgetencodedcharcounters
 void showgetencodedcharcounters(void)

@@ -111,9 +111,15 @@ unsigned long getencseqnumofdbsequences(const Encodedsequence *encseq);
             )
          ;
 }
+
+#define extractencodedchar(ENCSEQ,POS,RM)\
+        getencodedchar(ENCSEQ,POS,RM)
 #else
 GtUchar getencodedchar(const Encodedsequence *encseq,Seqpos pos,
                      Readmode readmode);
+GtUchar extractencodedchar(const Encodedsequence *encseq,
+                           Seqpos pos,
+                           Readmode readmode);
 #endif
 
 #ifdef INLINEDENCSEQ
@@ -134,10 +140,6 @@ GtUchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                Seqpos pos,
                                Readmode readmode);
 #endif
-
-GtUchar extractencodedchar(const Encodedsequence *encseq,
-                           Seqpos pos,
-                           Readmode readmode);
 
 void extract2bitenc(bool fwd,
                     EndofTwobitencoding *ptbe,
@@ -164,9 +166,6 @@ uint64_t detencseqofsatviatables(int kind,
                                  unsigned int numofchars);
 
 void plainseq2bytecode(GtUchar *bytecode,const GtUchar *seq,unsigned long len);
-
-void encseq2bytecode(GtUchar *dest,const Encodedsequence *encseq,
-                     Seqpos startindex,Seqpos len);
 
 void sequence2bytecode(GtUchar *dest,const Encodedsequence *encseq,
                        Seqpos startindex,Seqpos len);

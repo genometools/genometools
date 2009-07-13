@@ -32,7 +32,7 @@
 -nullstate
 -realcompare
 -initallelements
--mayaliasunique
+-aliasunique
 -nullassign
 -nullpass
 -unqualifiedtrans

@@ -42,7 +42,7 @@ typedef struct {
 
 static void* gt_extractseq_arguments_new(void)
 {
-  ExtractSeqArguments *arguments = gt_calloc(1, sizeof *arguments);
+  ExtractSeqArguments *arguments = gt_calloc((size_t) 1, sizeof *arguments);
   arguments->pattern = gt_str_new();
   arguments->fastakeyfile = gt_str_new();
   arguments->ofi = gt_outputfileinfo_new();
@@ -76,14 +76,14 @@ static GtOptionParser* gt_extractseq_option_parser_new(void *tool_arguments)
   frompos_option = gt_option_new_ulong_min(FROMPOS_OPTION_STR,
                                         "extract sequence from this position\n"
                                         "counting from 1 on",
-                                        &arguments->frompos, 0, 1);
+                                        &arguments->frompos, 0, 1UL);
   gt_option_parser_add_option(op, frompos_option);
 
   /* -topos */
   topos_option = gt_option_new_ulong_min(TOPOS_OPTION_STR,
                                       "extract sequence up to this position\n"
                                       "counting from 1 on",
-                                      &arguments->topos, 0, 1);
+                                      &arguments->topos, 0, 1UL);
   gt_option_parser_add_option(op, topos_option);
 
   /* -match */
