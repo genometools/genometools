@@ -59,17 +59,17 @@ static size_t WriteMemoryCallback(void *ptr,
   return realsize;
 }
 
-static int mg_curl(ParseStruct *parsestruct_ptr,
-                   unsigned long hit_counter, GtError * err)
+int mg_curl(ParseStruct *parsestruct_ptr,
+            unsigned long hit_counter, GtError * err)
 {
   int had_err = 0,
     curl_errornr = 0;
 
-  /* Laenge der aus dem XML-File stammenden Hit-DNA-Sequnez */
+  /* Laenge der aus dem XML-File stammenden Hit-DNA-Sequenz */
   unsigned long seq_len;
   long numb_from = 0, numb_to = 0, numb_diff = 0;
 
-  Str *seq_var,
+  GtStr *seq_var,
    *http_adr;
 
   MemoryStruct memorystruct;
