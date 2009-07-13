@@ -64,7 +64,14 @@ $ tar -xzvf genometools-X.X.X.tar.gz
 $ cd genometools-X.X.X
 \end{verbatim}
 
-Then, it suffices to call \texttt{make} to compile the source. To enable protein domain search functionality, please also append the \texttt{with-hmmer=yes} option to the \texttt{make} call. This option will make sure that a HMMER source package is downloaded and compiled along with the \Gt binary. Note that the \texttt{wget} executable must be available in the current PATH to do so.
+Then, it suffices to call \texttt{make} to compile the source. To enable protein
+domain search functionality, please also append the \texttt{with-hmmer=yes}
+option to the \texttt{make} call. This option will make sure that a HMMER source
+package is downloaded and compiled along with the \Gt binary. Note that the
+\texttt{wget} executable must be available in the current PATH to do so
+(alternatively, you can download HMMER 2.3.2 manually from
+\texttt{ftp://selab.janelia.org/pub/software/hmmer/CURRENT/} and untar it in the
+\texttt{src/external/} subdirectory).
 
 \begin{verbatim}
 $ make with-hmmer=yes
