@@ -125,7 +125,7 @@ bool gt_node_stream_is_sorted(GtNodeStream *ns)
 }
 
 void* gt_node_stream_cast(GT_UNUSED const GtNodeStreamClass *nsc,
-                         GtNodeStream *ns)
+                          GtNodeStream *ns)
 {
   gt_assert(nsc && ns && ns->c_class == nsc);
   return ns;
