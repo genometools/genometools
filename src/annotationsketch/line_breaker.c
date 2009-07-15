@@ -27,15 +27,15 @@ struct GtLineBreakerMembers {
 
 struct GtLineBreakerClass {
   size_t size;
-  LineBreakerIsOccupiedFunc is_occupied;
-  LineBreakerRegisterBlockFunc register_block;
-  LineBreakerFreeFunc free;
+  GtLineBreakerIsOccupiedFunc is_occupied;
+  GtLineBreakerRegisterBlockFunc register_block;
+  GtLineBreakerFreeFunc free;
 };
 
 const GtLineBreakerClass* gt_line_breaker_class_new(size_t size,
-                                    LineBreakerIsOccupiedFunc is_occupied,
-                                    LineBreakerRegisterBlockFunc register_block,
-                                    LineBreakerFreeFunc free)
+                                  GtLineBreakerIsOccupiedFunc is_occupied,
+                                  GtLineBreakerRegisterBlockFunc register_block,
+                                  GtLineBreakerFreeFunc free)
 {
   GtLineBreakerClass *c_class = gt_class_alloc(sizeof *c_class);
   c_class->size = size;
