@@ -1,5 +1,6 @@
 i = 1
-for infile in `ls #{$testdata}/consensus_sa/*.in` do
+for infile in Dir.entries(File.join($testdata, "consensus_sa")).grep(/\.in$/) do
+  infile = File.join($testdata, "consensus_sa", infile)
   Name "consensus_sa test #{i}"
   Keywords "gt_dev gt_consensus_sa"
   Test do

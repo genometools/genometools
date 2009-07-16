@@ -1,5 +1,6 @@
 def process_bed_files(dir)
-  for infile in `ls #{dir}/*.bed` do
+  for infile in Dir.entries(dir).grep(/\.bed$/) do
+    infile = File.join(dir, infile)
     Name "gt bed_to_gff3 #{File.basename(infile).chomp!}"
     Keywords "gt_bed_to_gff3"
     Test do
