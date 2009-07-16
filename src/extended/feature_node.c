@@ -63,11 +63,6 @@ typedef enum {
 } TreeStatus;
 
 typedef struct {
-  GtGenomeNodeTraverseFunc func;
-  void *data;
-} Traverse_children_info;
-
-typedef struct {
   GtArray *exon_features,
           *cds_features;
 } SaveExonAndCDSInfo;
