@@ -122,7 +122,7 @@ static int compare_genome_nodes_with_delta(GtGenomeNode *gn_a,
     return rval;
 
   if ((rval = gt_str_cmp(gt_genome_node_get_idstr(gn_a),
-                      gt_genome_node_get_idstr(gn_b)))) {
+                         gt_genome_node_get_idstr(gn_b)))) {
     return rval;
   }
   range_a = gt_genome_node_get_range(gn_a);
