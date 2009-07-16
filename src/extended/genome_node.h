@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -29,7 +29,7 @@ void          gt_genome_node_set_origin(GtGenomeNode*, GtStr *filename,
                                         unsigned int line_number);
 void*         gt_genome_node_cast(const GtGenomeNodeClass*, GtGenomeNode*);
 void*         gt_genome_node_try_cast(const GtGenomeNodeClass*, GtGenomeNode*);
-/* used to sort nodes */
+/* Used to sort nodes. */
 GtStr*        gt_genome_node_get_idstr(GtGenomeNode*);
 void          gt_genome_node_change_seqid(GtGenomeNode*, GtStr*);
 int           gt_genome_node_accept(GtGenomeNode*, GtNodeVisitor*, GtError*);
@@ -37,7 +37,7 @@ int           gt_genome_node_cmp(GtGenomeNode*, GtGenomeNode*);
 int           gt_genome_node_compare(GtGenomeNode**, GtGenomeNode**);
 int           gt_genome_node_compare_with_data(GtGenomeNode**, GtGenomeNode**,
                                                void *unused);
-/* <delta> has to point to a variable of type unsigned long */
+/* <delta> has to point to a variable of type unsigned long. */
 int           gt_genome_node_compare_delta(GtGenomeNode**, GtGenomeNode**,
                                            void *delta);
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -29,7 +29,7 @@ struct GtGenomeNodeClass
   size_t size;
   void    (*free)(GtGenomeNode*);
   GtStr*  (*get_seqid)(GtGenomeNode*);
-  GtStr*  (*get_idstr)(GtGenomeNode*);
+  GtStr*  (*get_idstr)(GtGenomeNode*); /* Used to sort nodes. */
   GtRange (*get_range)(GtGenomeNode*);
   void    (*set_range)(GtGenomeNode*, const GtRange*);
   void    (*change_seqid)(GtGenomeNode*, GtStr*);
