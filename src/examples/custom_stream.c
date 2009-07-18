@@ -18,7 +18,8 @@ static const GtNodeStreamClass* custom_stream_class(void);
 #define custom_stream_cast(NS)\
         gt_node_stream_cast(custom_stream_class(), NS)
 
-static int custom_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
+static int custom_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
+                              GT_UNUSED GtError *err)
 {
   CustomStream *cs = custom_stream_cast(ns);
   gt_error_check(err);
