@@ -43,8 +43,8 @@ struct GtGFF3InStream {
   GtCstrTable *used_types;
 };
 
-#define gff3_in_stream_cast(GS)\
-        gt_node_stream_cast(gt_gff3_in_stream_class(), GS)
+#define gff3_in_stream_cast(NS)\
+        gt_node_stream_cast(gt_gff3_in_stream_class(), NS)
 
 static int buffer_is_sorted(void **elem, void *info, GtError *err)
 {
@@ -69,10 +69,10 @@ static int buffer_is_sorted(void **elem, void *info, GtError *err)
   return 0;
 }
 
-static int gff3_in_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
+static int gff3_in_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
                                GtError *err)
 {
-  GtGFF3InStream *is = gff3_in_stream_cast(gs);
+  GtGFF3InStream *is = gff3_in_stream_cast(ns);
   GtStr *filenamestr;
   int had_err = 0, status_code;
 
@@ -185,9 +185,9 @@ static int gff3_in_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
   return had_err;
 }
 
-static void gff3_in_stream_free(GtNodeStream *gs)
+static void gff3_in_stream_free(GtNodeStream *ns)
 {
-  GtGFF3InStream *gff3_in_stream = gff3_in_stream_cast(gs);
+  GtGFF3InStream *gff3_in_stream = gff3_in_stream_cast(ns);
   gt_str_array_delete(gff3_in_stream->files);
   gt_str_delete(gff3_in_stream->stdinstr);
   while (gt_queue_size(gff3_in_stream->genome_node_buffer))
@@ -213,9 +213,9 @@ const GtNodeStreamClass* gt_gff3_in_stream_class(void)
 static GtNodeStream* gff3_in_stream_new(GtStrArray *files,
                                         bool ensure_sorting)
 {
-  GtNodeStream *gs = gt_node_stream_create(gt_gff3_in_stream_class(),
+  GtNodeStream *ns = gt_node_stream_create(gt_gff3_in_stream_class(),
                                           ensure_sorting);
-  GtGFF3InStream *gff3_in_stream     = gff3_in_stream_cast(gs);
+  GtGFF3InStream *gff3_in_stream     = gff3_in_stream_cast(ns);
   gff3_in_stream->next_file          = 0;
   gff3_in_stream->files              = files;
   gff3_in_stream->stdinstr           = gt_str_new_cstr("stdin");
@@ -229,7 +229,7 @@ static GtNodeStream* gff3_in_stream_new(GtStrArray *files,
   gff3_in_stream->gff3_parser        = gt_gff3_parser_new(NULL);
   gff3_in_stream->used_types         = gt_cstr_table_new();
   gff3_in_stream->progress_bar       = false;
-  return gs;
+  return ns;
 }
 
 void gt_gff3_in_stream_check_id_attributes(GtGFF3InStream *is)
@@ -245,10 +245,10 @@ void gt_gff3_in_stream_show_progress_bar(GtGFF3InStream *is)
   is->progress_bar = true;
 }
 
-void gt_gff3_in_stream_set_type_checker(GtNodeStream *gs,
+void gt_gff3_in_stream_set_type_checker(GtNodeStream *ns,
                                         GtTypeChecker *type_checker)
 {
-  GtGFF3InStream *is = gff3_in_stream_cast(gs);
+  GtGFF3InStream *is = gff3_in_stream_cast(ns);
   gt_assert(is);
   gt_gff3_parser_delete(is->gff3_parser);
   is->gff3_parser = gt_gff3_parser_new(type_checker);
@@ -256,31 +256,31 @@ void gt_gff3_in_stream_set_type_checker(GtNodeStream *gs,
     gt_gff3_parser_check_id_attributes(is->gff3_parser);
 }
 
-GtStrArray* gt_gff3_in_stream_get_used_types(GtNodeStream *gs)
+GtStrArray* gt_gff3_in_stream_get_used_types(GtNodeStream *ns)
 {
-  GtGFF3InStream *is = gff3_in_stream_cast(gs);
+  GtGFF3InStream *is = gff3_in_stream_cast(ns);
   gt_assert(is);
   return gt_cstr_table_get_all(is->used_types);
 }
 
-void gt_gff3_in_stream_set_offset(GtNodeStream *gs, long offset)
+void gt_gff3_in_stream_set_offset(GtNodeStream *ns, long offset)
 {
-  GtGFF3InStream *is = gff3_in_stream_cast(gs);
+  GtGFF3InStream *is = gff3_in_stream_cast(ns);
   gt_assert(is);
   gt_gff3_parser_set_offset(is->gff3_parser, offset);
 }
 
-int gt_gff3_in_stream_set_offsetfile(GtNodeStream *gs, GtStr *offsetfile,
+int gt_gff3_in_stream_set_offsetfile(GtNodeStream *ns, GtStr *offsetfile,
                                      GtError *err)
 {
-  GtGFF3InStream *is = gff3_in_stream_cast(gs);
+  GtGFF3InStream *is = gff3_in_stream_cast(ns);
   gt_assert(is);
   return gt_gff3_parser_set_offsetfile(is->gff3_parser, offsetfile, err);
 }
 
-void gt_gff3_in_stream_enable_tidy_mode(GtNodeStream *gs)
+void gt_gff3_in_stream_enable_tidy_mode(GtNodeStream *ns)
 {
-  GtGFF3InStream *is = gff3_in_stream_cast(gs);
+  GtGFF3InStream *is = gff3_in_stream_cast(ns);
   gt_assert(is);
   gt_gff3_parser_enable_tidy_mode(is->gff3_parser);
 }
