@@ -19,7 +19,7 @@
 #include "extended/feature_node.h"
 #include "extended/filter_stream.h"
 #include "extended/filter_visitor.h"
-#include "extended/node_stream_rep.h"
+#include "extended/node_stream_api.h"
 
 struct GtFilterStream
 {

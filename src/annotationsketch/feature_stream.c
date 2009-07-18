@@ -18,7 +18,7 @@
 #include "annotationsketch/feature_stream.h"
 #include "annotationsketch/feature_visitor.h"
 #include "annotationsketch/feature_index.h"
-#include "extended/node_stream_rep.h"
+#include "extended/node_stream_api.h"
 
 struct GtFeatureStream {
   const GtNodeStream parent_instance;

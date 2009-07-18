@@ -19,7 +19,7 @@
 #include "core/undef.h"
 #include "extended/feature_node.h"
 #include "extended/feature_node_iterator_api.h"
-#include "extended/node_stream_rep.h"
+#include "extended/node_stream_api.h"
 #include "extended/uniq_stream.h"
 
 struct GtUniqStream{

@@ -17,7 +17,7 @@
 
 #include "extended/gtf_out_stream.h"
 #include "extended/gtf_visitor.h"
-#include "extended/node_stream_rep.h"
+#include "extended/node_stream_api.h"
 
 struct GtGTFOutStream {
   const GtNodeStream parent_instance;

@@ -17,7 +17,7 @@
 
 #include "extended/cds_stream.h"
 #include "extended/cds_visitor.h"
-#include "extended/node_stream_rep.h"
+#include "extended/node_stream_api.h"
 
 struct GtCDSStream {
   const GtNodeStream parent_instance;

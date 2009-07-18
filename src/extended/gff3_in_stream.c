@@ -24,7 +24,7 @@
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_parser.h"
-#include "extended/node_stream_rep.h"
+#include "extended/node_stream_api.h"
 
 struct GtGFF3InStream {
   const GtNodeStream parent_instance;

@@ -20,7 +20,7 @@
 #include "core/undef.h"
 #include "extended/genome_node.h"
 #include "extended/merge_stream.h"
-#include "extended/node_stream_rep.h"
+#include "extended/node_stream_api.h"
 #include "extended/region_node.h"
 
 struct GtMergeStream {

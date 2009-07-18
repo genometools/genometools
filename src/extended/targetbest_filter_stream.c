@@ -24,7 +24,7 @@
 #include "extended/feature_node.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_parser.h"
-#include "extended/node_stream_rep.h"
+#include "extended/node_stream_api.h"
 #include "extended/targetbest_filter_stream.h"
 
 struct GtTargetbestFilterStream {

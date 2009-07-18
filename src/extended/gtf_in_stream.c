@@ -22,7 +22,7 @@
 #include "core/unused_api.h"
 #include "extended/gtf_in_stream.h"
 #include "extended/gtf_parser.h"
-#include "extended/node_stream_rep.h"
+#include "extended/node_stream_api.h"
 #include "extended/type_checker_builtin.h"
 
 struct GtGTFInStream {

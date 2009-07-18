@@ -20,7 +20,7 @@
 #include "core/unused_api.h"
 #include "extended/chseqids_stream.h"
 #include "extended/genome_node.h"
-#include "extended/node_stream_rep.h"
+#include "extended/node_stream_api.h"
 #include "extended/mapping.h"
 
 struct GtChseqidsStream {

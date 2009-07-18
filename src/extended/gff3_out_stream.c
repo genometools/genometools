@@ -17,7 +17,7 @@
 
 #include "extended/gff3_out_stream.h"
 #include "extended/gff3_visitor.h"
-#include "extended/node_stream_rep.h"
+#include "extended/node_stream_api.h"
 #include "core/cstr_table.h"
 
 struct GtGFF3OutStream {

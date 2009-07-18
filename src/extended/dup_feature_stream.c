@@ -15,7 +15,7 @@
 */
 
 #include "core/assert_api.h"
-#include "extended/node_stream_rep.h"
+#include "extended/node_stream_api.h"
 #include "extended/dup_feature_stream.h"
 #include "extended/dup_feature_visitor.h"
 

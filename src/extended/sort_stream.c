@@ -18,7 +18,7 @@
 #include "core/array.h"
 #include "core/assert_api.h"
 #include "extended/genome_node.h"
-#include "extended/node_stream_rep.h"
+#include "extended/node_stream_api.h"
 #include "extended/sort_stream.h"
 
 struct GtSortStream

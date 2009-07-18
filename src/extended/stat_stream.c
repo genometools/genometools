@@ -18,7 +18,7 @@
 #include "core/assert_api.h"
 #include "extended/stat_stream.h"
 #include "extended/stat_visitor.h"
-#include "extended/node_stream_rep.h"
+#include "extended/node_stream_api.h"
 
 struct GtStatStream
 {

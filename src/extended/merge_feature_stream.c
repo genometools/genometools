@@ -18,7 +18,7 @@
 #include "core/assert_api.h"
 #include "extended/merge_feature_stream.h"
 #include "extended/merge_feature_visitor.h"
-#include "extended/node_stream_rep.h"
+#include "extended/node_stream_api.h"
 
 struct GtMergeFeatureStream {
   const GtNodeStream parent_instance;

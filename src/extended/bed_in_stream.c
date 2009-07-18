@@ -19,7 +19,7 @@
 #include "core/unused_api.h"
 #include "extended/bed_in_stream.h"
 #include "extended/bed_parser.h"
-#include "extended/node_stream_rep.h"
+#include "extended/node_stream_api.h"
 
 struct GtBEDInStream {
   const GtNodeStream parent_instance;

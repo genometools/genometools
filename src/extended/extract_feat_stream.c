@@ -18,7 +18,7 @@
 #include "core/assert_api.h"
 #include "extended/extract_feat_stream.h"
 #include "extended/extract_feat_visitor.h"
-#include "extended/node_stream_rep.h"
+#include "extended/node_stream_api.h"
 
 struct GtExtractFeatStream
 {

@@ -22,7 +22,7 @@
 #include "core/range.h"
 #include "core/str.h"
 #include "core/unused_api.h"
-#include "extended/node_stream_rep.h"
+#include "extended/node_stream_api.h"
 #include "extended/feature_node.h"
 #include "extended/feature_node_iterator_api.h"
 #include "extended/reverse.h"

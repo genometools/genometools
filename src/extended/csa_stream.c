@@ -19,7 +19,7 @@
 #include "extended/csa_stream.h"
 #include "extended/csa_visitor.h"
 #include "extended/consensus_sa.h"
-#include "extended/node_stream_rep.h"
+#include "extended/node_stream_api.h"
 
 struct GtCSAStream {
   const GtNodeStream parent_instance;
