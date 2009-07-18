@@ -336,7 +336,7 @@ prefix ?= /usr/local
 patch ?= patch
 
 all: lib/libgenometools.a $(SHARED_LIBGENOMETOOLS) \
-     bin/skproto bin/gt bin/lua bin/rnv \
+     bin/skproto bin/gt bin/lua bin/rnv bin/examples/custom_stream \
      bin/examples/gff3validator bin/examples/noop $(ANNOTATIONSKETCH_EXAMPLES)
 
 lib/libexpat.a: $(LIBEXPAT_OBJ)
@@ -479,6 +479,11 @@ $(eval $(call PROGRAM_template, bin/gt, $(GTMAIN_OBJ) $(TOOLS_OBJ) \
                                         lib/libgenometools.a \
                                         $(GTLIBS) \
                                         $(OVERRIDELIBS)))
+
+$(eval $(call PROGRAM_template, bin/examples/custom_stream, \
+                                obj/src/examples/custom_stream.o \
+                                lib/libgenometools.a \
+                                $(OVERRIDELIBS)))
 
 $(eval $(call PROGRAM_template, bin/examples/gff3validator, \
                                 obj/src/examples/gff3validator.o \
@@ -668,6 +673,7 @@ obj/src/core/versionfunc.o: obj/gt_config.h
 	 $(ZLIB_DEP) \
          $(LIBGENOMETOOLS_DEP) \
          $(LIBGTUNSTABLE_DEP) \
+         obj/src/examples/custom_stream.d \
          obj/src/examples/gff3validator.d \
          obj/src/examples/noop.d \
          obj/src/examples/sketch_constructed.d \
