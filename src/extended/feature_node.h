@@ -33,8 +33,6 @@ typedef int (*GtGenomeNodeTraverseFunc)(GtGenomeNode*, void*, GtError*);
 
 const GtGenomeNodeClass* gt_feature_node_class(void);
 GtGenomeNode*  gt_feature_node_new_pseudo(GtFeatureNode*);
-/* Return the ``standard gene'' (mainly for testing purposes). */
-GtGenomeNode*  gt_feature_node_new_standard_gene(void);
 bool           gt_feature_node_is_multi(const GtFeatureNode*);
 bool           gt_feature_node_is_pseudo(const GtFeatureNode*);
 void           gt_feature_node_make_multi_representative(GtFeatureNode*);

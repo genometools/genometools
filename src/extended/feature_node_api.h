@@ -40,6 +40,8 @@ typedef struct GtFeatureNode GtFeatureNode;
 GtGenomeNode* gt_feature_node_new(GtStr *seqid, const char *type,
                                   unsigned long start, unsigned long end,
                                   GtStrand strand);
+/* Return the ``standard gene'' (mainly for testing purposes). */
+GtGenomeNode* gt_feature_node_new_standard_gene(void);
 /* Add <child> node to <parent> node. <parent> takes ownership of <child>.*/
 void          gt_feature_node_add_child(GtFeatureNode *parent,
                                         GtFeatureNode *child);
