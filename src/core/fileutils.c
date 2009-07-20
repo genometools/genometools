@@ -155,7 +155,7 @@ off_t gt_file_estimate_size(const char *filename)
 
   fd = gt_xopen(filename, O_RDONLY, 0);
   gt_xfstat(fd, &sb);
-  gfm = gt_genfilemode_determine(filename);
+  gfm = gt_file_mode_determine(filename);
   if (gfm == GFM_UNCOMPRESSED)
     size = sb.st_size;
   else

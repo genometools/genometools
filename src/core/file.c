@@ -40,7 +40,7 @@ struct GtFile {
        unget_used;
 };
 
-GtFileMode gt_genfilemode_determine(const char *path)
+GtFileMode gt_file_mode_determine(const char *path)
 {
   size_t path_length;
   if (!path)
@@ -53,7 +53,7 @@ GtFileMode gt_genfilemode_determine(const char *path)
   return GFM_UNCOMPRESSED;
 }
 
-const char* gt_genfilemode_suffix(GtFileMode mode)
+const char* gt_file_mode_suffix(GtFileMode mode)
 {
   switch (mode) {
     case GFM_UNCOMPRESSED:
@@ -163,7 +163,7 @@ GtFile* gt_file_xopen_w_gfmode(GtFileMode genfilemode,
 GtFile* gt_file_xopen(const char *path, const char *mode)
 {
   gt_assert(mode);
-  return gt_file_xopen_w_gfmode(gt_genfilemode_determine(path), path, mode);
+  return gt_file_xopen_w_gfmode(gt_file_mode_determine(path), path, mode);
 }
 
 GtFile* gt_file_new(FILE *fp)

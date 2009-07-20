@@ -40,11 +40,11 @@ typedef enum {
 
 /* Returns GFM_GZIP if file with <path> ends with '.gz', GFM_BZIP2 if it ends
    with '.bz2', and GFM_UNCOMPRESSED otherwise. */
-GtFileMode gt_genfilemode_determine(const char *path);
+GtFileMode gt_file_mode_determine(const char *path);
 
 /* Returns ".gz" if <mode> is GFM_GZIP, ".bz2" if <mode> is GFM_BZIP2, and ""
    otherwise. */
-const char* gt_genfilemode_suffix(GtFileMode mode);
+const char* gt_file_mode_suffix(GtFileMode mode);
 
 /* Returns the length of the ``basename'' of <path>. That is, the length of path
    without '.gz' or '.bz2' suffixes. */
@@ -63,7 +63,7 @@ GtFile*    gt_file_xopen_w_gfmode(GtFileMode, const char *path,
 
 /* Create a new GtFile object and open the underlying file handle. Aborts if
    the file <path> could not be opened. The GtFileMode is determined
-   automatically via gt_genfilemode_determine(path). */
+   automatically via gt_file_mode_determine(path). */
 GtFile*    gt_file_xopen(const char *path, const char *mode);
 
 /* Create a new GtFile object from a normal file pointer. */

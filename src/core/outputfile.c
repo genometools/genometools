@@ -57,13 +57,13 @@ static int determine_outfp(void *data, GtError *err)
     if (genfilemode != GFM_UNCOMPRESSED &&
         strcmp(gt_str_get(ofi->output_filename) +
                gt_str_length(ofi->output_filename) -
-               strlen(gt_genfilemode_suffix(genfilemode)),
-               gt_genfilemode_suffix(genfilemode))) {
+               strlen(gt_file_mode_suffix(genfilemode)),
+               gt_file_mode_suffix(genfilemode))) {
       gt_warning("output file '%s' doesn't have correct suffix '%s', appending "
                  "it", gt_str_get(ofi->output_filename),
-                 gt_genfilemode_suffix(genfilemode));
+                 gt_file_mode_suffix(genfilemode));
       gt_str_append_cstr(ofi->output_filename,
-                         gt_genfilemode_suffix(genfilemode));
+                         gt_file_mode_suffix(genfilemode));
     }
     if (!ofi->force && gt_file_exists(gt_str_get(ofi->output_filename))) {
         gt_error_set(err, "file \"%s\" exists already, use option -%s to "

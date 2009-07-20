@@ -186,7 +186,7 @@ static int split_fasta_file(const char *filename, unsigned long max_filesize,
     gt_str_append_char(destfilename, '.');
     gt_str_append_ulong(destfilename, ++filenum);
     gt_str_append_cstr(destfilename,
-                       gt_genfilemode_suffix(gt_file_mode(srcfp)));
+                       gt_file_mode_suffix(gt_file_mode(srcfp)));
     if (!(destfp = genfile_xopen_forcecheck(gt_str_get(destfilename), "w",
                                             force, err))) {
       had_err = -1;
@@ -212,7 +212,7 @@ static int split_fasta_file(const char *filename, unsigned long max_filesize,
           gt_str_append_char(destfilename, '.');
           gt_str_append_ulong(destfilename, ++filenum);
           gt_str_append_cstr(destfilename,
-                             gt_genfilemode_suffix(gt_file_mode(srcfp)));
+                             gt_file_mode_suffix(gt_file_mode(srcfp)));
           if (!(destfp = genfile_xopen_forcecheck(gt_str_get(destfilename), "w",
                                                   force, err))) {
             had_err = -1;
