@@ -98,21 +98,21 @@ GtFile* gt_file_open(GtFileMode genfilemode, const char *path,
       case GFM_UNCOMPRESSED:
         genfile->fileptr.file = gt_fa_fopen(path, mode, err);
         if (!genfile->fileptr.file) {
-          gt_file_delete(genfile);
+          gt_file_delete_without_handle(genfile);
           return NULL;
         }
         break;
       case GFM_GZIP:
         genfile->fileptr.gzfile = gt_fa_gzopen(path, mode, err);
         if (!genfile->fileptr.gzfile) {
-          gt_file_delete(genfile);
+          gt_file_delete_without_handle(genfile);
           return NULL;
         }
         break;
       case GFM_BZIP2:
         genfile->fileptr.bzfile = gt_fa_bzopen(path, mode, err);
         if (!genfile->fileptr.bzfile) {
-          gt_file_delete(genfile);
+          gt_file_delete_without_handle(genfile);
           return NULL;
         }
         genfile->orig_path = gt_cstr_dup(path);
@@ -367,7 +367,7 @@ void gt_file_xrewind(GtFile *genfile)
   }
 }
 
-void gt_file_delete(GtFile *genfile)
+void gt_file_delete_without_handle(GtFile *genfile)
 {
   if (!genfile) return;
   gt_free(genfile->orig_path);
@@ -391,5 +391,5 @@ void gt_file_close(GtFile *genfile)
       break;
     default: gt_assert(0);
   }
-  gt_file_delete(genfile);
+  gt_file_delete_without_handle(genfile);
 }

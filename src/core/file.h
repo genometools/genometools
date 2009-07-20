@@ -95,7 +95,7 @@ void        gt_file_xwrite(GtFile*, void *buf, size_t nbytes);
 void        gt_file_xrewind(GtFile*);
 
 /* Destroy the file handle object, but do not close the underlying handle. */
-void        gt_file_delete(GtFile*);
+void        gt_file_delete_without_handle(GtFile*);
 
 /* Close the underlying file handle and destroy the object. */
 void        gt_file_close(GtFile*);
