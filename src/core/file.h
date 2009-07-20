@@ -20,17 +20,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "core/error.h"
-
-/*
-  This class defines generic files.  A generic file is is a file which either
-  uncompressed or compressed (with gzip/zlib). All I/O functions like fprintf(),
-  fopen(), fread(), and fwrite() have to be replaced by the appropriate generic
-  functions like gt_file_printf(), gt_file_open(), gt_file_write(),...
-
-  A NULL-pointer as generic file implies stdout.
-*/
-typedef struct GtFile GtFile;
+#include "core/file_api.h"
 
 typedef enum {
   GFM_UNCOMPRESSED,
@@ -49,13 +39,6 @@ const char* gt_file_mode_suffix(GtFileMode mode);
 /* Returns the length of the ``basename'' of <path>. That is, the length of path
    without '.gz' or '.bz2' suffixes. */
 size_t      gt_file_basename_length(const char *path);
-
-/* Create a new GtFile object and open the underlying file handle with given
-   <mode>. Returns NULL and sets <err> accordingly if the file <path> could not
-   be opened. The compression mode is determined by the ending of <path> (gzip
-   compression if it ends with '.gz', bzip2 compression if it ends with '.bz2',
-   and uncompressed otherwise). */
-GtFile*    gt_file_new(const char *path, const char *mode, GtError *err);
 
 /* Create a new GtFile object and open the underlying file handle, returns
    NULL and sets <err> if the file <path> could not be opened. */
@@ -103,8 +86,5 @@ void        gt_file_xrewind(GtFile*);
 
 /* Destroy the file handle object, but do not close the underlying handle. */
 void        gt_file_delete_without_handle(GtFile*);
-
-/* Close the underlying file handle and destroy the object. */
-void        gt_file_delete(GtFile*);
 
 #endif

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -38,6 +38,7 @@
 #include "core/dlist_api.h"
 #include "core/endianess_api.h"
 #include "core/error_api.h"
+#include "core/file_api.h"
 #include "core/fileutils_api.h"
 #include "core/fptr_api.h"
 #include "core/grep_api.h"
