@@ -166,7 +166,7 @@ GtFile* gt_file_xopen(const char *path, const char *mode)
   return gt_file_xopen_w_gfmode(gt_file_mode_determine(path), path, mode);
 }
 
-GtFile* gt_file_new(FILE *fp)
+GtFile* gt_file_new_from_fileptr(FILE *fp)
 {
   GtFile *genfile;
   gt_assert(fp);

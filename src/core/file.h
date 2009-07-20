@@ -67,7 +67,7 @@ GtFile*    gt_file_xopen_w_gfmode(GtFileMode, const char *path,
 GtFile*    gt_file_xopen(const char *path, const char *mode);
 
 /* Create a new GtFile object from a normal file pointer. */
-GtFile*    gt_file_new(FILE*);
+GtFile*    gt_file_new_from_fileptr(FILE*);
 
 GtFileMode gt_file_mode(const GtFile*);
 
