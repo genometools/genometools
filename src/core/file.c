@@ -85,8 +85,15 @@ size_t gt_file_basename_length(const char *path)
   return path_length;
 }
 
-GtFile* gt_file_open(GtFileMode genfilemode, const char *path,
-                      const char *mode, GtError *err)
+GtFile* gt_file_new(const char *path, const char *mode, GtError *err)
+{
+  gt_error_check(err);
+  gt_assert(mode);
+  return gt_file_open(gt_file_mode_determine(path), path, mode, err);
+}
+
+GtFile* gt_file_open(GtFileMode genfilemode, const char *path, const char *mode,
+                     GtError *err)
 {
   GtFile *genfile;
   gt_error_check(err);
