@@ -42,7 +42,7 @@ struct GtGFF3Visitor {
   GtHashmap *feature_node_to_id_array,
             *feature_node_to_unique_id_str;
   unsigned long fasta_width;
-  GtGenFile *outfp;
+  GtFile *outfp;
   GtCstrTable *used_ids;
 };
 
@@ -53,7 +53,7 @@ typedef struct {
 
 typedef struct {
   bool *attribute_shown;
-  GtGenFile *outfp;
+  GtFile *outfp;
 } ShowAttributeInfo;
 
 #define gff3_visitor_cast(GV)\
@@ -367,7 +367,7 @@ const GtNodeVisitorClass* gt_gff3_visitor_class()
   return gvc;
 }
 
-GtNodeVisitor* gt_gff3_visitor_new(GtGenFile *outfp)
+GtNodeVisitor* gt_gff3_visitor_new(GtFile *outfp)
 {
   GtNodeVisitor *gv = gt_node_visitor_create(gt_gff3_visitor_class());
   GtGFF3Visitor *gff3_visitor = gff3_visitor_cast(gv);

@@ -32,6 +32,6 @@ GtNodeStream*            gt_extract_feat_stream_new(GtNodeStream*,
                                                     GtRegionMapping*,
                                                     const char *type, bool join,
                                                     bool translate,
-                                                    GtGenFile *outfp);
+                                                    GtFile *outfp);
 
 #endif

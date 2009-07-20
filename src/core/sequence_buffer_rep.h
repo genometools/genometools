@@ -49,7 +49,7 @@ struct GtSequenceBufferMembers {
   bool complete,
        use_ungetchar;
   GtQueue *descptr;
-  GtGenFile *inputstream;
+  GtFile *inputstream;
   unsigned long reference_count,
                 *chardisttab,
                 currentfillpos,

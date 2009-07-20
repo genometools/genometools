@@ -32,7 +32,7 @@ struct GtGTFVisitor {
                 transcript_id;
   GtArray *exon_features,
         *CDS_features;
-  GtGenFile *outfp;
+  GtFile *outfp;
 };
 
 #define gtf_visitor_cast(GV)\
@@ -170,7 +170,7 @@ const GtNodeVisitorClass* gt_gtf_visitor_class()
   return gvc;
 }
 
-GtNodeVisitor* gt_gtf_visitor_new(GtGenFile *outfp)
+GtNodeVisitor* gt_gtf_visitor_new(GtFile *outfp)
 {
   GtNodeVisitor *gv = gt_node_visitor_create(gt_gtf_visitor_class());
   GtGTFVisitor *gtf_visitor = gtf_visitor_cast(gv);

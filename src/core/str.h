@@ -28,7 +28,7 @@ void*         gt_str_get_mem(const GtStr*);
    (without the terminal newline). If the end of file <fpin> is reached, <EOF>
    is returned, otherwise 0. */
 int           gt_str_read_next_line(GtStr *str, FILE *fpin);
-int           gt_str_read_next_line_generic(GtStr*, GtGenFile*);
+int           gt_str_read_next_line_generic(GtStr*, GtFile*);
 int           gt_str_unit_test(GtError*);
 
 #endif

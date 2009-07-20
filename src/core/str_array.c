@@ -43,7 +43,7 @@ GtStrArray* gt_str_array_ref(GtStrArray *sa)
 GtStrArray* gt_str_array_new_file(const char *path)
 {
   GtStrArray *filecontent;
-  GtGenFile *fpin;
+  GtFile *fpin;
   GtStr *line;
   fpin = gt_genfile_xopen(path, "r");
   gt_assert(fpin);

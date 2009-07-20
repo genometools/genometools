@@ -30,74 +30,74 @@
 
   A NULL-pointer as generic file implies stdout.
 */
-typedef struct GtGenFile GtGenFile;
+typedef struct GtFile GtFile;
 
 typedef enum {
   GFM_UNCOMPRESSED,
   GFM_GZIP,
   GFM_BZIP2
-} GtGenFileMode;
+} GtFileMode;
 
 /* Returns GFM_GZIP if file with <path> ends with '.gz', GFM_BZIP2 if it ends
    with '.bz2', and GFM_UNCOMPRESSED otherwise. */
-GtGenFileMode gt_genfilemode_determine(const char *path);
+GtFileMode gt_genfilemode_determine(const char *path);
 
 /* Returns ".gz" if <mode> is GFM_GZIP, ".bz2" if <mode> is GFM_BZIP2, and ""
    otherwise. */
-const char* gt_genfilemode_suffix(GtGenFileMode mode);
+const char* gt_genfilemode_suffix(GtFileMode mode);
 
 /* Returns the length of the ``basename'' of <path>. That is, the length of path
    without '.gz' or '.bz2' suffixes. */
 size_t      gt_genfile_basename_length(const char *path);
 
-/* Create a new GtGenFile object and open the underlying file handle, returns
+/* Create a new GtFile object and open the underlying file handle, returns
    NULL and sets <err> if the file <path> could not be opened. */
-GtGenFile*    gt_genfile_open(GtGenFileMode, const char *path,
+GtFile*    gt_genfile_open(GtFileMode, const char *path,
                                const char *mode, GtError*);
 
-/* Create a new GtGenFile object and open the underlying file handle, abort if
-   the file <path> does not exist. The GtGenFileMode has to be given
+/* Create a new GtFile object and open the underlying file handle, abort if
+   the file <path> does not exist. The GtFileMode has to be given
    explicitly. */
-GtGenFile*    gt_genfile_xopen_w_gfmode(GtGenFileMode, const char *path,
+GtFile*    gt_genfile_xopen_w_gfmode(GtFileMode, const char *path,
                                          const char *mode);
 
-/* Create a new GtGenFile object and open the underlying file handle. Aborts if
-   the file <path> could not be opened. The GtGenFileMode is determined
+/* Create a new GtFile object and open the underlying file handle. Aborts if
+   the file <path> could not be opened. The GtFileMode is determined
    automatically via gt_genfilemode_determine(path). */
-GtGenFile*    gt_genfile_xopen(const char *path, const char *mode);
+GtFile*    gt_genfile_xopen(const char *path, const char *mode);
 
-/* Create a new GtGenFile object from a normal file pointer. */
-GtGenFile*    gt_genfile_new(FILE*);
+/* Create a new GtFile object from a normal file pointer. */
+GtFile*    gt_genfile_new(FILE*);
 
-GtGenFileMode gt_genfile_mode(GtGenFile*);
+GtFileMode gt_genfile_mode(GtFile*);
 
 /* Return next character from <genfile> of EOF, if end-of-file is reached. */
-int         gt_genfile_xfgetc(GtGenFile *genfile);
+int         gt_genfile_xfgetc(GtFile *genfile);
 
 /* Unget character <c> to <genfile> (which obviously cannot be NULL).
    Can only be used once at a time. */
-void        gt_genfile_unget_char(GtGenFile *genfile, char c);
+void        gt_genfile_unget_char(GtFile *genfile, char c);
 
 /* printf(3) for generic files */
-void        gt_genfile_xprintf(GtGenFile*, const char *format, ...)
+void        gt_genfile_xprintf(GtFile*, const char *format, ...)
   __attribute__ ((format (printf, 2, 3)));
 
-void        gt_genfile_xfputc(int c, GtGenFile*);
-void        gt_genfile_xfputs(const char *str, GtGenFile*);
+void        gt_genfile_xfputc(int c, GtFile*);
+void        gt_genfile_xfputs(const char *str, GtFile*);
 
 /* Read up to <nbytes> and store result in <buf>, returns bytes read. */
-int         gt_genfile_xread(GtGenFile*, void *buf, size_t nbytes);
+int         gt_genfile_xread(GtFile*, void *buf, size_t nbytes);
 
 /* Write <nbytes> from <buf> to given generic file. */
-void        gt_genfile_xwrite(GtGenFile*, void *buf, size_t nbytes);
+void        gt_genfile_xwrite(GtFile*, void *buf, size_t nbytes);
 
 /* Rewind the file. */
-void        gt_genfile_xrewind(GtGenFile*);
+void        gt_genfile_xrewind(GtFile*);
 
 /* Destroy the file handle object, but do not close the underlying handle. */
-void        gt_genfile_delete(GtGenFile*);
+void        gt_genfile_delete(GtFile*);
 
 /* Close the underlying file handle and destroy the object. */
-void        gt_genfile_close(GtGenFile*);
+void        gt_genfile_close(GtFile*);
 
 #endif

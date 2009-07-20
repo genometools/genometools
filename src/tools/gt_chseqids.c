@@ -31,7 +31,7 @@
 typedef struct {
   bool sort,
        verbose;
-  GtGenFile *outfp;
+  GtFile *outfp;
 } ChseqidsArguments;
 
 static OPrval parse_options(int *parsed_args, ChseqidsArguments *arguments,

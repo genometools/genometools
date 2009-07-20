@@ -60,7 +60,7 @@ GtFastaBuffer* gt_fastabuffer_new(const GtStrArray *filenametab,
 }
 
 static inline int ownbuffer_genfile_getc(GtFastaBuffer *fb,
-                                         GtGenFile *inputstream)
+                                         GtFile *inputstream)
 {
   if (fb->currentinpos >= fb->currentfillpos)
   {

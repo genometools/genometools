@@ -24,6 +24,6 @@ typedef struct GtGTFVisitor GtGTFVisitor;
 #include "extended/node_visitor.h"
 
 const GtNodeVisitorClass* gt_gtf_visitor_class(void);
-GtNodeVisitor*            gt_gtf_visitor_new(GtGenFile*);
+GtNodeVisitor*            gt_gtf_visitor_new(GtFile*);
 
 #endif

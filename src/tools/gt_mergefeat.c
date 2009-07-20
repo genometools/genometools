@@ -24,7 +24,7 @@
 
 typedef struct {
   GtOutputFileInfo *ofi;
-  GtGenFile *outfp;
+  GtFile *outfp;
 } InterFeatArguments;
 
 static void* gt_mergefeat_arguments_new(void)

@@ -26,7 +26,7 @@
 
 typedef struct {
   bool verbose;
-  GtGenFile *outfp;
+  GtFile *outfp;
 } UniqArguments;
 
 static OPrval parse_options(int *parsed_args, UniqArguments *arguments,

@@ -28,7 +28,7 @@ char**        gt_cstr_array_prefix_first(const char **gt_cstr_array,
 char**        gt_cstr_array_preprend(const char **gt_cstr_array, const char *p);
 void          gt_cstr_array_show(char **gt_cstr_array, FILE*);
 void          gt_cstr_array_show_genfile(const char **gt_cstr_array,
-                                         GtGenFile*);
+                                         GtFile*);
 unsigned long gt_cstr_array_size(const char **gt_cstr_array); /* O(n) */
 void          gt_cstr_array_delete(char **gt_cstr_array);
 

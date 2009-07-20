@@ -605,7 +605,7 @@ int gt_graphics_cairo_save_to_file(const GtGraphics *gg, const char *filename,
   cairo_surface_t *bgsurf = NULL;
   cairo_t *bgc = NULL;
   cairo_status_t rval;
-  GtGenFile *outfile;
+  GtFile *outfile;
   gt_error_check(err);
   gt_assert(g && filename);
 

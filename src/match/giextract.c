@@ -344,7 +344,7 @@ static const char *desc2key(unsigned long *keylen,const char *desc,
 }
 
 int gt_extractkeysfromfastafile(bool verbose,
-                                GtGenFile *outfp,
+                                GtFile *outfp,
                                 unsigned long width,
                                 const GtStr *keyfile,
                                 GtStrArray *referencefiletab,

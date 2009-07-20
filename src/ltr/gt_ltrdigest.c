@@ -43,7 +43,7 @@ typedef struct GtLTRdigestOptions {
   GtStr *prefix;
   bool verbose;
   GtOutputFileInfo *ofi;
-  GtGenFile *outfp;
+  GtFile *outfp;
   unsigned int seqnamelen;
 } GtLTRdigestOptions;
 

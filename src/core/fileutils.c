@@ -54,7 +54,7 @@ bool gt_file_is_newer(const char *a, const char *b)
 unsigned long gt_file_number_of_lines(const char *path)
 {
   unsigned long number_of_lines = 0;
-  GtGenFile *fp;
+  GtFile *fp;
   int cc;
   gt_assert(path);
   fp = gt_genfile_xopen(path, "r");
@@ -148,7 +148,7 @@ off_t gt_file_estimate_size(const char *filename)
 {
   off_t size;
   struct stat sb;
-  GtGenFileMode gfm;
+  GtFileMode gfm;
   int fd;
 
   gt_assert(filename);

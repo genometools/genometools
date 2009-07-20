@@ -60,7 +60,7 @@ const GtNodeStreamClass* gt_gff3_out_stream_class(void)
   return nsc;
 }
 
-GtNodeStream* gt_gff3_out_stream_new(GtNodeStream *in_stream, GtGenFile *outfp)
+GtNodeStream* gt_gff3_out_stream_new(GtNodeStream *in_stream, GtFile *outfp)
 {
   GtNodeStream *gs = gt_node_stream_create(gt_gff3_out_stream_class(),
                                            gt_node_stream_is_sorted(in_stream));

@@ -33,7 +33,7 @@ typedef struct {
   bool seqit,
        verbose;
   GtOutputFileInfo *ofi;
-  GtGenFile *outfp;
+  GtFile *outfp;
 } GtSequniqArguments;
 
 static void* gt_sequniq_arguments_new(void)

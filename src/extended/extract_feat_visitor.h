@@ -30,6 +30,6 @@ const GtNodeVisitorClass* gt_extract_feat_visitor_class(void);
 GtNodeVisitor*            gt_extract_feat_visitor_new(GtRegionMapping *rm,
                                                    const char*, bool join,
                                                    bool translate,
-                                                   GtGenFile *outfp);
+                                                   GtFile *outfp);
 
 #endif

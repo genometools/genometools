@@ -24,7 +24,7 @@ typedef struct GtGFF3Visitor GtGFF3Visitor;
 #include "extended/node_visitor.h"
 
 const GtNodeVisitorClass* gt_gff3_visitor_class(void);
-GtNodeVisitor*            gt_gff3_visitor_new(GtGenFile*);
+GtNodeVisitor*            gt_gff3_visitor_new(GtFile*);
 void                      gt_gff3_visitor_set_fasta_width(GtNodeVisitor*,
                                                           unsigned long);
 void                      gt_gff3_visitor_retain_id_attributes(GtNodeVisitor *);

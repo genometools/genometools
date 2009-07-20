@@ -250,7 +250,7 @@ int gt_str_read_next_line(GtStr *s, FILE *fpin)
   }
 }
 
-int gt_str_read_next_line_generic(GtStr *s, GtGenFile *fpin)
+int gt_str_read_next_line_generic(GtStr *s, GtFile *fpin)
 {
   int cc;
   char c;

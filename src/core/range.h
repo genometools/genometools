@@ -52,6 +52,6 @@ void          gt_ranges_copy_to_opposite_strand(GtArray *outranges,
                                                 unsigned long gen_offset);
 bool          gt_ranges_borders_are_in_region(GtArray *ranges,
                                               const GtRange *region);
-void          gt_ranges_show(GtArray *ranges, GtGenFile *outfp);
+void          gt_ranges_show(GtArray *ranges, GtFile *outfp);
 
 #endif

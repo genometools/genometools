@@ -25,6 +25,6 @@
 typedef struct GtGTFOutStream GtGTFOutStream;
 
 const GtNodeStreamClass* gt_gtf_out_stream_class(void);
-GtNodeStream*            gt_gtf_out_stream_new(GtNodeStream*, GtGenFile*);
+GtNodeStream*            gt_gtf_out_stream_new(GtNodeStream*, GtFile*);
 
 #endif

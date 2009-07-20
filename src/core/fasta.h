@@ -29,6 +29,6 @@ void gt_fasta_show_entry(const char *description, const char *sequence,
    <outfp>. If <width> is != 0 the sequence is formatted accordingly. */
 void gt_fasta_show_entry_generic(const char *description, const char *sequence,
                                  unsigned long sequence_length,
-                                 unsigned long width, GtGenFile *outfp);
+                                 unsigned long width, GtFile *outfp);
 
 #endif

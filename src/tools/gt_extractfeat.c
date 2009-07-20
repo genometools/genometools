@@ -34,7 +34,7 @@ typedef struct {
         *seqfile,
         *regionmapping;
   GtOutputFileInfo *ofi;
-  GtGenFile *outfp;
+  GtFile *outfp;
 } GtExtractFeatArguments;
 
 static void* gt_extractfeat_arguments_new(void)

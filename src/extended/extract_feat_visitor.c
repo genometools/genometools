@@ -31,7 +31,7 @@ struct GtExtractFeatVisitor {
        translate;
   unsigned long fastaseq_counter;
   GtRegionMapping *region_mapping;
-  GtGenFile *outfp;
+  GtFile *outfp;
 };
 
 #define gt_extract_feat_visitor_cast(GV)\
@@ -59,7 +59,7 @@ static void construct_description(GtStr *description, const char *type,
 }
 
 static void show_entry(GtStr *description, GtStr *sequence, bool translate,
-                       GtGenFile *outfp)
+                       GtFile *outfp)
 {
   if (translate) {
     GtStr *protein = gt_str_new();
@@ -131,7 +131,7 @@ const GtNodeVisitorClass* gt_extract_feat_visitor_class()
 
 GtNodeVisitor* gt_extract_feat_visitor_new(GtRegionMapping *rm,
                                            const char *type, bool join,
-                                           bool translate, GtGenFile *outfp)
+                                           bool translate, GtFile *outfp)
 {
   GtNodeVisitor *gv;
   GtExtractFeatVisitor *efv;

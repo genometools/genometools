@@ -26,7 +26,7 @@ typedef struct {
   GtStr *outside_type,
         *inter_type;
   GtOutputFileInfo *ofi;
-  GtGenFile *outfp;
+  GtFile *outfp;
 } InterFeatArguments;
 
 static void* gt_interfeat_arguments_new(void)

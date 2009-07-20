@@ -193,7 +193,7 @@ typedef struct
   GtArray *value_tmp;
   GtBioseq *queryseq,
    *hitseq;
-  GtGenFile *fp_outputfile,
+  GtFile *fp_outputfile,
    *fp_blasthit_file,
    *fp_giexp_file;
   GtHashtable *queryhash,

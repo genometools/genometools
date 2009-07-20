@@ -60,7 +60,7 @@ GtSequenceBuffer* gt_sequence_buffer_ref(GtSequenceBuffer *sb)
 GtSequenceBuffer* gt_sequence_buffer_new_guess_type(const GtStrArray *seqs,
                                                     GtError *err)
 {
-  GtGenFile *file;
+  GtFile *file;
   GtSequenceBuffer *sb;
   char firstcontents[BUFSIZ];
   gt_assert(seqs);

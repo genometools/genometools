@@ -52,7 +52,7 @@ static inline int process_char(GtSequenceBuffer *sb,
   return 0;
 }
 
-static inline int inlinebuf_getchar(GtSequenceBuffer *sb, GtGenFile *f)
+static inline int inlinebuf_getchar(GtSequenceBuffer *sb, GtFile *f)
 {
   GtSequenceBufferMembers *pvt;
   pvt = sb->pvt;

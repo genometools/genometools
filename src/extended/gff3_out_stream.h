@@ -25,7 +25,7 @@
 typedef struct GtGFF3OutStream GtGFF3OutStream;
 
 const GtNodeStreamClass* gt_gff3_out_stream_class(void);
-GtNodeStream*            gt_gff3_out_stream_new(GtNodeStream*, GtGenFile*);
+GtNodeStream*            gt_gff3_out_stream_new(GtNodeStream*, GtFile*);
 void                     gt_gff3_out_stream_set_fasta_width(GtNodeStream*,
                                                             unsigned long);
 void                     gt_gff3_out_stream_retain_id_attributes(

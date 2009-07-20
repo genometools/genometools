@@ -49,7 +49,7 @@ typedef struct {
          max_gene_score,
          min_average_splice_site_prob;
   GtOutputFileInfo *ofi;
-  GtGenFile *outfp;
+  GtFile *outfp;
 } FilterArguments;
 
 static void* gt_filter_arguments_new(void)

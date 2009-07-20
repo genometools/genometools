@@ -42,7 +42,7 @@ struct GtLTRFileOutStream {
   GtNodeStream *in_stream;
   Encodedsequence *encseq;
   const char *fileprefix;
-  GtGenFile *metadata_file,
+  GtFile *metadata_file,
             *tabout_file,
             *pbsout_file,
             *pptout_file,
@@ -68,7 +68,7 @@ static int write_pdom(GtLTRFileOutStream *ls, GtArray *pdoms,
                       Seqinfo *seqinfo, char *desc, GtError *e)
 {
   int had_err = 0;
-  GtGenFile *seqfile = NULL,
+  GtFile *seqfile = NULL,
             *alifile = NULL,
             *aafile = NULL;
   unsigned long i = 0,
@@ -81,7 +81,7 @@ static int write_pdom(GtLTRFileOutStream *ls, GtArray *pdoms,
   pdom_aaseq = gt_str_new();
 
   /* get protein domain output file */
-  seqfile = (GtGenFile*) gt_hashmap_get(ls->pdomout_files, pdomname);
+  seqfile = (GtFile*) gt_hashmap_get(ls->pdomout_files, pdomname);
   if (seqfile == NULL)
   {
     /* no file opened for this domain yet, do it */
@@ -95,7 +95,7 @@ static int write_pdom(GtLTRFileOutStream *ls, GtArray *pdoms,
   /* get protein alignment output file */
   if (ls->write_pdom_alignments)
   {
-    alifile = (GtGenFile*) gt_hashmap_get(ls->pdomali_files, pdomname);
+    alifile = (GtFile*) gt_hashmap_get(ls->pdomali_files, pdomname);
     if (alifile == NULL)
     {
       /* no file opened for this domain yet, do it */
@@ -110,7 +110,7 @@ static int write_pdom(GtLTRFileOutStream *ls, GtArray *pdoms,
   /* get amino acid sequence output file */
   if (ls->write_pdom_alignments)
   {
-    aafile = (GtGenFile*) gt_hashmap_get(ls->pdomaa_files, pdomname);
+    aafile = (GtFile*) gt_hashmap_get(ls->pdomaa_files, pdomname);
     if (aafile == NULL)
     {
       /* no file opened for this domain yet, do it */
@@ -453,7 +453,7 @@ int gt_ltrfileout_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
   return had_err;
 }
 
-static void write_metadata(GtGenFile *metadata_file,
+static void write_metadata(GtFile *metadata_file,
                            int tests_to_run,
                            GtPPTOptions *ppt_opts,
                            GtPBSOptions *pbs_opts,

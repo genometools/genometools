@@ -23,7 +23,7 @@
 #include "core/error.h"
 
 int gt_extractkeysfromfastafile(bool verbose,
-                                GtGenFile *outfp,
+                                GtFile *outfp,
                                 unsigned long width,
                                 const GtStr *keyfile,
                                 GtStrArray *referencefiletab,

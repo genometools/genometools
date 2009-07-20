@@ -61,7 +61,7 @@ struct GtSeqIteratorQualMembers {
   GtStr *sequencebuffer,
         *descbuffer,
         *qualsbuffer;
-  GtGenFile *curfile;
+  GtFile *curfile;
   unsigned long *chardisttab,
                 currentfillpos,
                 currentinpos,

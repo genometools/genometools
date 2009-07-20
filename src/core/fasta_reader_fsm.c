@@ -22,7 +22,7 @@
 struct GtFastaReaderFSM {
   const GtFastaReader parent_instance;
   GtStr *sequence_filename;
-  GtGenFile *sequence_file;
+  GtFile *sequence_file;
 };
 
 typedef enum {
