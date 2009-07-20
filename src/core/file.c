@@ -176,7 +176,7 @@ GtFile* gt_file_new(FILE *fp)
   return genfile;
 }
 
-GtFileMode gt_file_mode(GtFile *genfile)
+GtFileMode gt_file_mode(const GtFile *genfile)
 {
   gt_assert(genfile);
   return genfile->mode;

@@ -69,7 +69,7 @@ GtFile*    gt_file_xopen(const char *path, const char *mode);
 /* Create a new GtFile object from a normal file pointer. */
 GtFile*    gt_file_new(FILE*);
 
-GtFileMode gt_file_mode(GtFile*);
+GtFileMode gt_file_mode(const GtFile*);
 
 /* Return next character from <genfile> of EOF, if end-of-file is reached. */
 int         gt_file_xfgetc(GtFile *genfile);
