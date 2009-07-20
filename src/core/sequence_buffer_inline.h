@@ -19,7 +19,7 @@
 #ifndef SEQUENCE_BUFFER_INLINE_H
 #define SEQUENCE_BUFFER_INLINE_H
 
-#include "core/genfile.h"
+#include "core/file.h"
 #include "core/sequence_buffer_rep.h"
 
 static inline int process_char(GtSequenceBuffer *sb,

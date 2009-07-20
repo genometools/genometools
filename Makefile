@@ -446,7 +446,7 @@ $(eval $(call PROGRAM_template, bin/skproto, $(SKPROTO_OBJ) \
                                              obj/src/core/ebzlib.o\
                                              obj/src/core/ezlib.o\
                                              obj/src/core/fa.o\
-                                             obj/src/core/genfile.o\
+                                             obj/src/core/file.o\
                                              obj/src/core/hashmap.o\
                                              obj/src/core/hashtable.o\
                                              obj/src/core/ma.o\

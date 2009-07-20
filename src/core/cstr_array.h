@@ -18,7 +18,7 @@
 #ifndef CSTR_ARRAY_H
 #define CSTR_ARRAY_H
 
-#include "core/genfile.h"
+#include "core/file.h"
 
 /* Return copy of <gt_cstr_array>. */
 char**        gt_cstr_array_dup(const char **gt_cstr_array);

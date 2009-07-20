@@ -19,7 +19,7 @@
 #define STR_H
 
 #include <stdio.h>
-#include "core/genfile.h"
+#include "core/file.h"
 #include "core/str_api.h"
 
 /* never returns NULL, not always '\0' terminated */

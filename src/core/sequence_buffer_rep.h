@@ -20,7 +20,7 @@
 
 #include <stdio.h>
 #include "core/arraydef.h"
-#include "core/genfile.h"
+#include "core/file.h"
 #include "core/queue.h"
 #include "core/sequence_buffer.h"
 #include "core/str_array.h"

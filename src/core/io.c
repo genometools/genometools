@@ -18,7 +18,7 @@
 #include <string.h>
 #include "core/assert_api.h"
 #include "core/cstr.h"
-#include "core/genfile.h"
+#include "core/file.h"
 #include "core/io.h"
 #include "core/ma.h"
 

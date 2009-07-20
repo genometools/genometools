@@ -19,7 +19,7 @@
 #define RANGE_H
 
 #include "core/error_api.h"
-#include "core/genfile.h"
+#include "core/file.h"
 #include "core/range_api.h"
 
 GtRange       gt_range_reorder(GtRange);

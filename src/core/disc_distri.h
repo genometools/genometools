@@ -20,7 +20,7 @@
 #define DISC_DISTRI_H
 
 #include "core/error.h"
-#include "core/genfile.h"
+#include "core/file.h"
 
 /* A discrete distribution */
 typedef struct GtDiscDistri GtDiscDistri;

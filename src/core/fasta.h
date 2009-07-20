@@ -18,7 +18,7 @@
 #ifndef FASTA_H
 #define FASTA_H
 
-#include "core/genfile.h"
+#include "core/file.h"
 
 /* Show a fasta entry with optional <description> and mandatory <sequence> on
    stdout. If <width> is != 0 the sequence is formatted accordingly. */

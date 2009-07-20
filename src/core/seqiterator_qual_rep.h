@@ -20,7 +20,7 @@
 
 #include "core/error.h"
 #include "core/filelengthvalues.h"
-#include "core/genfile.h"
+#include "core/file.h"
 #include "core/seqiterator_qual.h"
 #include "core/str_array.h"
 

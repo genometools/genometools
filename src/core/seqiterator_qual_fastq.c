@@ -16,7 +16,7 @@
 */
 
 #include "core/cstr.h"
-#include "core/genfile.h"
+#include "core/file.h"
 #include "core/str_array.h"
 #include "core/seqiterator_qual_fastq.h"
 #include "core/seqiterator_qual_rep.h"

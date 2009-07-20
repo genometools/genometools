@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2005-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -20,7 +20,7 @@
 #include "core/assert_api.h"
 #include "core/cstr.h"
 #include "core/fa.h"
-#include "core/genfile.h"
+#include "core/file.h"
 #include "core/ma.h"
 #include "core/xansi.h"
 #include "core/xbzlib.h"

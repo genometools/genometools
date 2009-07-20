@@ -29,7 +29,7 @@
 
 #include <math.h>
 #include "core/fileutils.h"
-#include "core/genfile.h"
+#include "core/file.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
 #include "core/minmax.h"
