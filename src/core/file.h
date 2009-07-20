@@ -98,6 +98,6 @@ void        gt_file_xrewind(GtFile*);
 void        gt_file_delete_without_handle(GtFile*);
 
 /* Close the underlying file handle and destroy the object. */
-void        gt_file_close(GtFile*);
+void        gt_file_delete(GtFile*);
 
 #endif

@@ -119,7 +119,7 @@ static int advancefastabufferstate(GtFastaBuffer *fb, GtError *err)
       currentchar = ownbuffer_genfile_getc(fb,fb->inputstream);
       if (currentchar == EOF)
       {
-        gt_file_close(fb->inputstream);
+        gt_file_delete(fb->inputstream);
         fb->inputstream = NULL;
         if (fb->filelengthtab != NULL)
         {
@@ -273,7 +273,7 @@ static int advancePlainbufferstate(GtFastaBuffer *fb, GtError *err)
       currentchar = ownbuffer_genfile_getc(fb,fb->inputstream);
       if (currentchar == EOF)
       {
-        gt_file_close(fb->inputstream);
+        gt_file_delete(fb->inputstream);
         fb->inputstream = NULL;
         if (fb->filelengthtab != NULL)
         {
@@ -319,7 +319,7 @@ int gt_fastabuffer_advance(GtFastaBuffer *fb, GtError *err)
 void gt_fastabuffer_delete(GtFastaBuffer *fb)
 {
   if (!fb) return;
-  gt_file_close(fb->inputstream);
+  gt_file_delete(fb->inputstream);
   GT_FREEARRAY(&fb->headerbuffer, char);
   gt_free(fb);
 }

@@ -46,7 +46,7 @@ GtIO* gt_io_new(const char *path, const char *mode)
 void gt_io_delete(GtIO *io)
 {
   if (!io) return;
-  gt_file_close(io->fp);
+  gt_file_delete(io->fp);
   gt_str_delete(io->path);
   gt_free(io);
 }

@@ -189,7 +189,7 @@ static void gt_fasta_reader_fsm_free(GtFastaReader *fr)
 {
   GtFastaReaderFSM *gt_fasta_reader_fsm = gt_fasta_reader_fsm_cast(fr);
   gt_str_delete(gt_fasta_reader_fsm->sequence_filename);
-  gt_file_close(gt_fasta_reader_fsm->sequence_file);
+  gt_file_delete(gt_fasta_reader_fsm->sequence_file);
 }
 
 const GtFastaReaderClass* gt_fasta_reader_fsm_class(void)

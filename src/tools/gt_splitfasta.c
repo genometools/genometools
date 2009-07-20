@@ -140,7 +140,7 @@ static int split_description(const char *filename, GtStr *splitdesc,
                                 gt_bioseq_get_sequence(bioseq, i),
                                 gt_bioseq_get_sequence_length(bioseq, i), 0,
                                 outfp);
-    gt_file_close(outfp);
+    gt_file_delete(outfp);
   }
 
   gt_bioseq_delete(bioseq);
@@ -204,7 +204,7 @@ static int split_fasta_file(const char *filename, unsigned long max_filesize,
           if (separator_pos)
             gt_file_xwrite(destfp, buf, separator_pos);
           /* close current file */
-          gt_file_close(destfp);
+          gt_file_delete(destfp);
           /* open new file */
           gt_str_reset(destfilename);
           gt_str_append_cstr_nt(destfilename, filename,
@@ -234,10 +234,10 @@ static int split_fasta_file(const char *filename, unsigned long max_filesize,
   gt_str_delete(destfilename);
 
   /* close current file */
-  gt_file_close(destfp);
+  gt_file_delete(destfp);
 
   /* close source file */
-  gt_file_close(srcfp);
+  gt_file_delete(srcfp);
 
   return had_err;
 }

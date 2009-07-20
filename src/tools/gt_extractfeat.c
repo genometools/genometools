@@ -51,7 +51,7 @@ static void gt_extractfeat_arguments_delete(void *tool_arguments)
 {
   GtExtractFeatArguments *arguments = tool_arguments;
   if (!arguments) return;
-  gt_file_close(arguments->outfp);
+  gt_file_delete(arguments->outfp);
   gt_outputfileinfo_delete(arguments->ofi);
   gt_str_delete(arguments->regionmapping);
   gt_str_delete(arguments->seqfile);

@@ -383,7 +383,7 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
       if (pvt->filenum+1 < gt_str_array_size(pvt->filenametab)) {
         pvt->filenum++;
         /* still files left, open next one */
-        gt_file_close(pvt->inputstream);
+        gt_file_delete(pvt->inputstream);
         sbe->state = GB_OUT_OF_ENTRY;
         pvt->linenum = (uint64_t) 1;
         pvt->inputstream = gt_file_xopen(gt_str_array_get(pvt->filenametab,
@@ -415,7 +415,7 @@ static void gt_sequence_buffer_gb_free(GtSequenceBuffer *sb)
 {
   GtSequenceBufferGB *sbe = gt_sequence_buffer_gb_cast(sb);
   if (sb->pvt->inputstream)
-    gt_file_close(sb->pvt->inputstream);
+    gt_file_delete(sb->pvt->inputstream);
   gt_str_delete(sbe->headerbuffer);
   gt_str_delete(sbe->overflowbuffer);
   gt_str_delete(sbe->keywordbuffer);

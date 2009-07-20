@@ -54,7 +54,7 @@ GtStrArray* gt_str_array_new_file(const char *path)
     gt_str_reset(line);
   }
   gt_str_delete(line);
-  gt_file_close(fpin);
+  gt_file_delete(fpin);
   return filecontent;
 }
 

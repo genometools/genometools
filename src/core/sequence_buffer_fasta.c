@@ -86,7 +86,7 @@ static int gt_sequence_buffer_fasta_advance(GtSequenceBuffer *sb, GtError *err)
       currentchar = inlinebuf_getchar(sb, pvt->inputstream);
       if (currentchar == EOF)
       {
-        gt_file_close(pvt->inputstream);
+        gt_file_delete(pvt->inputstream);
         pvt->inputstream = NULL;
         if (pvt->filelengthtab != NULL)
         {
@@ -171,7 +171,7 @@ static int gt_sequence_buffer_fasta_advance(GtSequenceBuffer *sb, GtError *err)
 static void gt_sequence_buffer_fasta_free(GtSequenceBuffer *sb)
 {
   GtSequenceBufferFasta *sbf = gt_sequence_buffer_fasta_cast(sb);
-  gt_file_close(sb->pvt->inputstream);
+  gt_file_delete(sb->pvt->inputstream);
   gt_str_delete(sbf->headerbuffer);
 }
 

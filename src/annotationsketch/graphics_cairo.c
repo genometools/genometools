@@ -647,7 +647,7 @@ int gt_graphics_cairo_save_to_file(const GtGraphics *gg, const char *filename,
       {
         gt_file_xwrite(outfile, gt_str_get_mem(g->outbuf),
                        gt_str_length(g->outbuf));
-        gt_file_close(outfile);
+        gt_file_delete(outfile);
       } else return -1;
       break;
   }

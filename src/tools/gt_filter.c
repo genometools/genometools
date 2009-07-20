@@ -69,7 +69,7 @@ static void gt_filter_arguments_delete(void *tool_arguments)
 {
   FilterArguments *arguments = tool_arguments;
   if (!arguments) return;
-  gt_file_close(arguments->outfp);
+  gt_file_delete(arguments->outfp);
   gt_outputfileinfo_delete(arguments->ofi);
   gt_str_delete(arguments->targetgt_strand_char);
   gt_str_delete(arguments->gt_strand_char);

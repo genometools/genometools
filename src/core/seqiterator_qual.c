@@ -47,7 +47,7 @@ void gt_seqiterator_qual_delete(GtSeqIteratorQual *si)
   gt_str_delete(si->pvt->qualsbuffer);
   gt_str_delete(si->pvt->descbuffer);
   if (si->pvt->curfile)
-    gt_file_close(si->pvt->curfile);
+    gt_file_delete(si->pvt->curfile);
   si->pvt->currentread = si->pvt->maxread;
   gt_assert(si->c_class && si->c_class->free);
   si->c_class->free(si);

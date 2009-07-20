@@ -515,7 +515,7 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
     {
       parsestruct.fp_outputfile = gt_file_xopen(gt_str_get(outputfilename),
                                                    "w+");
-      gt_file_close(parsestruct.fp_outputfile);
+      gt_file_delete(parsestruct.fp_outputfile);
     }
 
     /* Der Name des Outputfiles wird den eingegebenen Optionen entnommen
@@ -542,8 +542,8 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
 
       had_err = mg_xmlparser(parsestruct_ptr, fp_xmlfile, err);
 
-      gt_file_close(parsestruct.fp_giexp_file);
-      gt_file_close(fp_xmlfile);
+      gt_file_delete(parsestruct.fp_giexp_file);
+      gt_file_delete(fp_xmlfile);
 
       if (!had_err)
       {
@@ -559,7 +559,7 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
                                               gi_numbers_txt,
                                               ARGUMENTS(giexpfile_name),
                                               err);
-        gt_file_close(parsestruct.fp_blasthit_file);
+        gt_file_delete(parsestruct.fp_blasthit_file);
         if (had_err)
         {
           had_err = 0;
@@ -671,8 +671,8 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
     gt_free(parsestruct.hits_statistics.memory);
 
     /* Schliessen der XML-, Output-Datei und des Hit-Sequenz-Files */
-    gt_file_close(fp_xmlfile);
-    gt_file_close(parsestruct.fp_outputfile);
+    gt_file_delete(fp_xmlfile);
+    gt_file_delete(parsestruct.fp_outputfile);
 
     /* GtHashtable loeschen */
     gt_hashtable_delete(parsestruct.queryhash);

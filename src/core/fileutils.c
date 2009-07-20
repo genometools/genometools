@@ -60,7 +60,7 @@ unsigned long gt_file_number_of_lines(const char *path)
   fp = gt_file_xopen(path, "r");
   while ((cc = gt_file_xfgetc(fp)) != EOF)
     if (cc == '\n') number_of_lines++;
-  gt_file_close(fp);
+  gt_file_delete(fp);
   return number_of_lines;
 }
 

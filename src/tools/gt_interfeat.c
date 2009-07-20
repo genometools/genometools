@@ -42,7 +42,7 @@ static void gt_interfeat_arguments_delete(void *tool_arguments)
 {
   InterFeatArguments *arguments = tool_arguments;
   if (!arguments) return;
-  gt_file_close(arguments->outfp);
+  gt_file_delete(arguments->outfp);
   gt_outputfileinfo_delete(arguments->ofi);
   gt_str_delete(arguments->inter_type);
   gt_str_delete(arguments->outside_type);

@@ -80,7 +80,7 @@ static int gt_sequence_buffer_plain_advance(GtSequenceBuffer *sb, GtError *err)
       currentchar = inlinebuf_getchar(sb, pvt->inputstream);
       if (currentchar == EOF)
       {
-        gt_file_close(pvt->inputstream);
+        gt_file_delete(pvt->inputstream);
         pvt->inputstream = NULL;
         if (pvt->filelengthtab != NULL)
         {

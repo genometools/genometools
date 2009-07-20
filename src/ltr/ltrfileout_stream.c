@@ -564,19 +564,19 @@ void gt_ltrfileout_stream_free(GtNodeStream *gs)
 {
   GtLTRFileOutStream *ls = gt_ltr_fileout_stream_cast(gs);
   if (ls->tabout_file)
-    gt_file_close(ls->tabout_file);
+    gt_file_delete(ls->tabout_file);
   if (ls->metadata_file)
-    gt_file_close(ls->metadata_file);
+    gt_file_delete(ls->metadata_file);
   if (ls->pbsout_file)
-    gt_file_close(ls->pbsout_file);
+    gt_file_delete(ls->pbsout_file);
   if (ls->pptout_file)
-    gt_file_close(ls->pptout_file);
+    gt_file_delete(ls->pptout_file);
   if (ls->ltr5out_file)
-    gt_file_close(ls->ltr5out_file);
+    gt_file_delete(ls->ltr5out_file);
   if (ls->ltr3out_file)
-    gt_file_close(ls->ltr3out_file);
+    gt_file_delete(ls->ltr3out_file);
   if (ls->elemout_file)
-    gt_file_close(ls->elemout_file);
+    gt_file_delete(ls->elemout_file);
   gt_hashmap_delete(ls->pdomout_files);
   gt_hashmap_delete(ls->pdomali_files);
   gt_hashmap_delete(ls->pdomaa_files);
@@ -675,13 +675,13 @@ GtNodeStream* gt_ltr_fileout_stream_new(GtNodeStream *in_stream,
   /* create hashmaps to hold protein domain output files */
   ls->pdomout_files = gt_hashmap_new(HASH_STRING,
                                      gt_free_func,
-                                     (GtFree) gt_file_close);
+                                     (GtFree) gt_file_delete);
   ls->pdomali_files = gt_hashmap_new(HASH_STRING,
                                      gt_free_func,
-                                     (GtFree) gt_file_close);
+                                     (GtFree) gt_file_delete);
   ls->pdomaa_files  = gt_hashmap_new(HASH_STRING,
                                      gt_free_func,
-                                     (GtFree) gt_file_close);
+                                     (GtFree) gt_file_delete);
 
   /* log run conditions in file */
   write_metadata(ls->metadata_file,

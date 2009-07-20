@@ -305,7 +305,7 @@ int gt_seqiterator_qual_fastq_next(GtSeqIteratorQual *seqit,
       if (pvt->filenum+1 < gt_str_array_size(pvt->filenametab)) {
         const char *filename;
         filename = gt_str_array_get(pvt->filenametab, ++pvt->filenum);
-        gt_file_close(pvt->curfile);
+        gt_file_delete(pvt->curfile);
         pvt->curfile = gt_file_xopen(filename, "r");
         pvt->curline = 1;
         /* get first entry from next file*/

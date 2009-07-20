@@ -375,7 +375,7 @@ void gt_file_delete_without_handle(GtFile *genfile)
   gt_free(genfile);
 }
 
-void gt_file_close(GtFile *genfile)
+void gt_file_delete(GtFile *genfile)
 {
   if (!genfile) return;
   switch (genfile->mode) {
