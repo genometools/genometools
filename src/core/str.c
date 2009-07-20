@@ -256,7 +256,7 @@ int gt_str_read_next_line_generic(GtStr *s, GtFile *fpin)
   char c;
   gt_assert(s);
   for (;;) {
-    cc = gt_genfile_xfgetc(fpin);
+    cc = gt_file_xfgetc(fpin);
     if (cc == EOF)
       return EOF;
     if (cc == '\n') {

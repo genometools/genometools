@@ -88,7 +88,7 @@ static int write_pdom(GtLTRFileOutStream *ls, GtArray *pdoms,
     char buffer[GT_MAXFILENAMELEN];
     (void) snprintf(buffer, GT_MAXFILENAMELEN-1, "%s_pdom_%s.fas",
                     ls->fileprefix, pdomname);
-    seqfile = gt_genfile_xopen(buffer, "w+");
+    seqfile = gt_file_xopen(buffer, "w+");
     gt_hashmap_add(ls->pdomout_files, gt_cstr_dup(pdomname), seqfile);
   }
 
@@ -102,7 +102,7 @@ static int write_pdom(GtLTRFileOutStream *ls, GtArray *pdoms,
       char buffer[GT_MAXFILENAMELEN];
       (void) snprintf(buffer, GT_MAXFILENAMELEN-1, "%s_pdom_%s.ali",
                       ls->fileprefix, pdomname);
-      alifile = gt_genfile_xopen(buffer, "w+");
+      alifile = gt_file_xopen(buffer, "w+");
       gt_hashmap_add(ls->pdomali_files, gt_cstr_dup(pdomname), alifile);
     }
   }
@@ -117,7 +117,7 @@ static int write_pdom(GtLTRFileOutStream *ls, GtArray *pdoms,
       char buffer[GT_MAXFILENAMELEN];
       (void) snprintf(buffer, GT_MAXFILENAMELEN-1, "%s_pdom_%s_aa.fas",
                       ls->fileprefix, pdomname);
-      aafile = gt_genfile_xopen(buffer, "w+");
+      aafile = gt_file_xopen(buffer, "w+");
       gt_hashmap_add(ls->pdomaa_files, gt_cstr_dup(pdomname), aafile);
     }
   }
@@ -170,10 +170,10 @@ static int write_pdom(GtLTRFileOutStream *ls, GtArray *pdoms,
       (void) snprintf(buf, BUFSIZ-1, "Protein domain alignment in translated "
                                      "sequence for candidate\n'%s':\n\n",
                                      desc);
-      gt_genfile_xwrite(alifile, buf, strlen(buf) * sizeof (char));
-      gt_genfile_xwrite(alifile, gt_str_get(ali),
+      gt_file_xwrite(alifile, buf, strlen(buf) * sizeof (char));
+      gt_file_xwrite(alifile, gt_str_get(ali),
                         gt_str_length(ali) * sizeof (char));
-      gt_genfile_xwrite(alifile, "---\n\n", 5 * sizeof (char));
+      gt_file_xwrite(alifile, "---\n\n", 5 * sizeof (char));
     }
     if (ls->write_pdom_aaseqs && aaseq)
     {
@@ -276,7 +276,7 @@ int gt_ltrfileout_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
     lltr_rng = gt_genome_node_get_range((GtGenomeNode*) ls->element.leftLTR);
     rltr_rng = gt_genome_node_get_range((GtGenomeNode*) ls->element.rightLTR);
     rng = gt_genome_node_get_range((GtGenomeNode*) ls->element.mainnode);
-    gt_genfile_xprintf(ls->tabout_file,
+    gt_file_xprintf(ls->tabout_file,
                        "%lu\t%lu\t%lu\t%s\t%lu\t%lu\t%lu\t%lu\t%lu\t%lu\t",
                        rng.start,
                        rng.end,
@@ -300,13 +300,13 @@ int gt_ltrfileout_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
       tsd_rng = gt_genome_node_get_range((GtGenomeNode*) ls->element.leftTSD);
       tsd_seq = gt_ltrelement_get_sequence(tsd_rng.start-1, tsd_rng.end-1,
                                            tsd_strand, ls->encseq, &seqinfo, e);
-      gt_genfile_xprintf(ls->tabout_file,
+      gt_file_xprintf(ls->tabout_file,
                          "%lu\t%lu\t%s\t",
                          tsd_rng.start,
                          tsd_rng.end,
                          tsd_seq);
       gt_free((char*) tsd_seq);
-    } else gt_genfile_xprintf(ls->tabout_file, "\t\t\t");
+    } else gt_file_xprintf(ls->tabout_file, "\t\t\t");
     if (ls->element.rightTSD)
     {
       GtRange tsd_rng;
@@ -317,13 +317,13 @@ int gt_ltrfileout_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
       tsd_rng = gt_genome_node_get_range((GtGenomeNode*) ls->element.rightTSD);
       tsd_seq = gt_ltrelement_get_sequence(tsd_rng.start-1, tsd_rng.end-1,
                                            tsd_strand, ls->encseq, &seqinfo, e);
-      gt_genfile_xprintf(ls->tabout_file,
+      gt_file_xprintf(ls->tabout_file,
                          "%lu\t%lu\t%s\t",
                          tsd_rng.start,
                          tsd_rng.end,
                          tsd_seq);
       gt_free((char*) tsd_seq);
-    } else gt_genfile_xprintf(ls->tabout_file, "\t\t\t");
+    } else gt_file_xprintf(ls->tabout_file, "\t\t\t");
 
     /* output PPT */
     if (ls->element.ppt)
@@ -335,7 +335,7 @@ int gt_ltrfileout_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
                                            ppt_strand, ls->encseq, &seqinfo, e);
       gt_fasta_show_entry_generic(desc, ppt_seq, gt_range_length(&ppt_rng),
                                   GT_FSWIDTH,ls->pptout_file);
-      gt_genfile_xprintf(ls->tabout_file,
+      gt_file_xprintf(ls->tabout_file,
                          "%lu\t%lu\t%s\t%c\t%d\t",
                          ppt_rng.start,
                          ppt_rng.end,
@@ -345,7 +345,7 @@ int gt_ltrfileout_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
                              abs(rltr_rng.start - ppt_rng.end) :
                              abs(lltr_rng.end - ppt_rng.start)));
       gt_free((char*) ppt_seq);
-    } else gt_genfile_xprintf(ls->tabout_file, "\t\t\t\t\t");
+    } else gt_file_xprintf(ls->tabout_file, "\t\t\t\t\t");
 
     /* output PBS */
     if (ls->element.pbs)
@@ -358,7 +358,7 @@ int gt_ltrfileout_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
                                            pbs_strand, ls->encseq, &seqinfo, e);
       gt_fasta_show_entry_generic(desc, pbs_seq, gt_range_length(&pbs_rng),
                                   GT_FSWIDTH, ls->pbsout_file);
-      gt_genfile_xprintf(ls->tabout_file,
+      gt_file_xprintf(ls->tabout_file,
                          "%lu\t%lu\t%c\t%s\t%s\t%s\t%s\t%s\t",
                          pbs_rng.start,
                          pbs_rng.end,
@@ -371,7 +371,7 @@ int gt_ltrfileout_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
                                                     "trnaoffset"),
                       gt_feature_node_get_attribute(ls->element.pbs, "edist"));
       gt_free((char*) pbs_seq);
-    } else gt_genfile_xprintf(ls->tabout_file, "\t\t\t\t\t\t\t\t");
+    } else gt_file_xprintf(ls->tabout_file, "\t\t\t\t\t\t\t\t");
 
     /* output protein domains */
     if (ls->element.pdoms)
@@ -396,7 +396,7 @@ int gt_ltrfileout_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
         if (i != gt_array_size(ls->element.pdomorder)-1)
           gt_str_append_cstr(pdomorderstr, "/");
       }
-      gt_genfile_xprintf(ls->tabout_file, "%s", gt_str_get(pdomorderstr));
+      gt_file_xprintf(ls->tabout_file, "%s", gt_str_get(pdomorderstr));
       gt_str_delete(pdomorderstr);
     }
 
@@ -445,7 +445,7 @@ int gt_ltrfileout_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
                                 GT_FSWIDTH,
                                 ls->ltr3out_file);
     gt_free(outseq);
-    gt_genfile_xprintf(ls->tabout_file, "\n");
+    gt_file_xprintf(ls->tabout_file, "\n");
   }
   gt_hashmap_delete(ls->element.pdoms);
   gt_array_delete(ls->element.pdomorder);
@@ -473,61 +473,61 @@ static void write_metadata(GtFile *metadata_file,
 
   /* append working dir to relative paths if necessary */
   if (seqfilename[0] != '/' && has_cwd)
-    gt_genfile_xprintf(metadata_file,
+    gt_file_xprintf(metadata_file,
                        "Sequence file used\t%s/%s\n", buffer, seqfilename);
   else
-    gt_genfile_xprintf(metadata_file,
+    gt_file_xprintf(metadata_file,
                        "Sequence file used\t%s\n", seqfilename);
   if (gfffilename[0] != '/' && has_cwd)
-    gt_genfile_xprintf(metadata_file,
+    gt_file_xprintf(metadata_file,
                        "GFF3 input used\t%s/%s\n", buffer, gfffilename);
   else
-    gt_genfile_xprintf(metadata_file,
+    gt_file_xprintf(metadata_file,
                        "GFF3 input used\t%s\n", gfffilename);
 
   if (tests_to_run & GT_LTRDIGEST_RUN_PPT)
   {
-    gt_genfile_xprintf(metadata_file,
+    gt_file_xprintf(metadata_file,
                        "PPT length\t%lu-%lunt\t8-30nt\n",
                        ppt_opts->ppt_len.start,
                        ppt_opts->ppt_len.end);
-    gt_genfile_xprintf(metadata_file,
+    gt_file_xprintf(metadata_file,
                        "U-box length\t%lu-%lunt\t3-30nt\n",
                        ppt_opts->ubox_len.start,
                        ppt_opts->ubox_len.end);
-    gt_genfile_xprintf(metadata_file,
+    gt_file_xprintf(metadata_file,
                        "PPT search radius\t%u\t30\n", ppt_opts->radius);
   }
 
   if (tests_to_run & GT_LTRDIGEST_RUN_PBS)
   {
     if (trnafilename[0] != '/' && has_cwd)
-      gt_genfile_xprintf(metadata_file,
+      gt_file_xprintf(metadata_file,
                          "tRNA library for PBS detection\t%s/%s\n",
                          buffer, trnafilename);
     else
-      gt_genfile_xprintf(metadata_file,
+      gt_file_xprintf(metadata_file,
                          "tRNA library for PBS detection\t%s\n",
                          trnafilename);
-    gt_genfile_xprintf(metadata_file,
+    gt_file_xprintf(metadata_file,
                        "allowed PBS/tRNA alignment length"
                        " range\t%lu-%lunt\t11-30nt\n",
                        pbs_opts->alilen.start,
                        pbs_opts->alilen.end);
-    gt_genfile_xprintf(metadata_file,
+    gt_file_xprintf(metadata_file,
                        "PBS/tRNA maximum unit edit distance\t%u\t1\n",
                        pbs_opts->max_edist);
-    gt_genfile_xprintf(metadata_file,
+    gt_file_xprintf(metadata_file,
                        "allowed PBS offset from 5' LTR range"
                        "\t%lu-%lunt\t0-5nt\n",
                        pbs_opts->offsetlen.start,
                        pbs_opts->offsetlen.end);
-    gt_genfile_xprintf(metadata_file,
+    gt_file_xprintf(metadata_file,
                        "allowed PBS offset from 3' tRNA end"
                        " range\t%lu-%lunt\t0-5nt\n",
                        pbs_opts->trnaoffsetlen.start,
                        pbs_opts->trnaoffsetlen.end);
-    gt_genfile_xprintf(metadata_file,
+    gt_file_xprintf(metadata_file,
                        "PBS search radius\t%d\t30\n", pbs_opts->radius);
   }
 
@@ -535,48 +535,48 @@ static void write_metadata(GtFile *metadata_file,
   if (tests_to_run & GT_LTRDIGEST_RUN_PDOM)
   {
     unsigned long i;
-    gt_genfile_xprintf(metadata_file,
+    gt_file_xprintf(metadata_file,
                        "Protein domain models\t%lu (",
                        gt_str_array_size(pdom_opts->hmm_files));
     for (i=0;i<gt_str_array_size(pdom_opts->hmm_files);i++)
     {
-      gt_genfile_xprintf(metadata_file, "%s",
+      gt_file_xprintf(metadata_file, "%s",
                          gt_str_array_get(pdom_opts->hmm_files, i));
       if (i != gt_str_array_size(pdom_opts->hmm_files)-1)
-        gt_genfile_xprintf(metadata_file, ", ");
+        gt_file_xprintf(metadata_file, ", ");
     }
-    gt_genfile_xprintf(metadata_file, ")\n");
-    gt_genfile_xprintf(metadata_file,
+    gt_file_xprintf(metadata_file, ")\n");
+    gt_file_xprintf(metadata_file,
                        "pHMM e-value cutoff \t%g\t%g\n",
                        pdom_opts->evalue_cutoff,
                        0.000001);
-    gt_genfile_xprintf(metadata_file,
+    gt_file_xprintf(metadata_file,
                        "maximal allowed gap length between fragments to chain"
                        " \t%u\t%u\n",
                        pdom_opts->chain_max_gap_length,
                        50);
   }
 #endif
-  gt_genfile_xprintf(metadata_file, "\n");
+  gt_file_xprintf(metadata_file, "\n");
 }
 
 void gt_ltrfileout_stream_free(GtNodeStream *gs)
 {
   GtLTRFileOutStream *ls = gt_ltr_fileout_stream_cast(gs);
   if (ls->tabout_file)
-    gt_genfile_close(ls->tabout_file);
+    gt_file_close(ls->tabout_file);
   if (ls->metadata_file)
-    gt_genfile_close(ls->metadata_file);
+    gt_file_close(ls->metadata_file);
   if (ls->pbsout_file)
-    gt_genfile_close(ls->pbsout_file);
+    gt_file_close(ls->pbsout_file);
   if (ls->pptout_file)
-    gt_genfile_close(ls->pptout_file);
+    gt_file_close(ls->pptout_file);
   if (ls->ltr5out_file)
-    gt_genfile_close(ls->ltr5out_file);
+    gt_file_close(ls->ltr5out_file);
   if (ls->ltr3out_file)
-    gt_genfile_close(ls->ltr3out_file);
+    gt_file_close(ls->ltr3out_file);
   if (ls->elemout_file)
-    gt_genfile_close(ls->elemout_file);
+    gt_file_close(ls->elemout_file);
   gt_hashmap_delete(ls->pdomout_files);
   gt_hashmap_delete(ls->pdomali_files);
   gt_hashmap_delete(ls->pdomaa_files);
@@ -652,36 +652,36 @@ GtNodeStream* gt_ltr_fileout_stream_new(GtNodeStream *in_stream,
   /* open outfiles */
   ls->fileprefix = file_prefix;
   (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_tabout.csv", file_prefix);
-  ls->tabout_file = gt_genfile_open(GFM_UNCOMPRESSED, fn, "w+", e);
+  ls->tabout_file = gt_file_open(GFM_UNCOMPRESSED, fn, "w+", e);
   if (tests_to_run & GT_LTRDIGEST_RUN_PPT)
   {
     (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_ppt.fas", file_prefix);
-    ls->pptout_file = gt_genfile_open(GFM_UNCOMPRESSED, fn, "w+", e);
+    ls->pptout_file = gt_file_open(GFM_UNCOMPRESSED, fn, "w+", e);
   }
   if (tests_to_run & GT_LTRDIGEST_RUN_PBS)
   {
     (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_pbs.fas", file_prefix);
-    ls->pbsout_file = gt_genfile_open(GFM_UNCOMPRESSED, fn, "w+", e);
+    ls->pbsout_file = gt_file_open(GFM_UNCOMPRESSED, fn, "w+", e);
   }
   (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_5ltr.fas", file_prefix);
-  ls->ltr5out_file = gt_genfile_open(GFM_UNCOMPRESSED, fn, "w+", e);
+  ls->ltr5out_file = gt_file_open(GFM_UNCOMPRESSED, fn, "w+", e);
   (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_3ltr.fas", file_prefix);
-  ls->ltr3out_file = gt_genfile_open(GFM_UNCOMPRESSED, fn, "w+", e);
+  ls->ltr3out_file = gt_file_open(GFM_UNCOMPRESSED, fn, "w+", e);
   (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_complete.fas", file_prefix);
-  ls->elemout_file = gt_genfile_open(GFM_UNCOMPRESSED, fn, "w+", e);
+  ls->elemout_file = gt_file_open(GFM_UNCOMPRESSED, fn, "w+", e);
   (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_conditions.csv", file_prefix);
-  ls->metadata_file = gt_genfile_open(GFM_UNCOMPRESSED, fn, "w+", e);
+  ls->metadata_file = gt_file_open(GFM_UNCOMPRESSED, fn, "w+", e);
 
   /* create hashmaps to hold protein domain output files */
   ls->pdomout_files = gt_hashmap_new(HASH_STRING,
                                      gt_free_func,
-                                     (GtFree) gt_genfile_close);
+                                     (GtFree) gt_file_close);
   ls->pdomali_files = gt_hashmap_new(HASH_STRING,
                                      gt_free_func,
-                                     (GtFree) gt_genfile_close);
+                                     (GtFree) gt_file_close);
   ls->pdomaa_files  = gt_hashmap_new(HASH_STRING,
                                      gt_free_func,
-                                     (GtFree) gt_genfile_close);
+                                     (GtFree) gt_file_close);
 
   /* log run conditions in file */
   write_metadata(ls->metadata_file,
@@ -696,20 +696,20 @@ GtNodeStream* gt_ltr_fileout_stream_new(GtNodeStream *in_stream,
                  gfffilename);
 
   /* print tabular outfile headline */
-  gt_genfile_xprintf(ls->tabout_file,
+  gt_file_xprintf(ls->tabout_file,
               "element start\telement end\telement length\tsequence\t"
               "lLTR start\tlLTR end\tlLTR length\t"
               "rLTR start\trLTR end\trLTR length\t"
               "lTSD start\tlTSD end\tlTSD motif\t"
               "rTSD start\trTSD end\trTSD motif\t"
               "PPT start\tPPT end\tPPT motif\tPPT strand\tPPT offset");
-  gt_genfile_xprintf(ls->tabout_file,
+  gt_file_xprintf(ls->tabout_file,
               "\tPBS start\tPBS end\tPBS strand\ttRNA\ttRNA motif\tPBS offset\t"
               "tRNA offset\tPBS/tRNA edist");
 #ifdef HAVE_HMMER
-  gt_genfile_xprintf(ls->tabout_file, "\tProtein domain hits");
+  gt_file_xprintf(ls->tabout_file, "\tProtein domain hits");
 #endif
-  gt_genfile_xprintf(ls->tabout_file, "\n");
+  gt_file_xprintf(ls->tabout_file, "\n");
 
   /* create visitor */
   ls->lv = (GtLTRVisitor*) gt_ltr_visitor_new(&ls->element);

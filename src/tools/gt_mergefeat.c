@@ -38,7 +38,7 @@ static void gt_mergefeat_arguments_delete(void *tool_arguments)
 {
   InterFeatArguments *arguments = tool_arguments;
   if (!arguments) return;
-  gt_genfile_close(arguments->outfp);
+  gt_file_close(arguments->outfp);
   gt_outputfileinfo_delete(arguments->ofi);
   gt_free(arguments);
 }

@@ -74,9 +74,9 @@ GtSequenceBuffer* gt_sequence_buffer_new_guess_type(const GtStrArray *seqs,
   }
 
   memset(firstcontents, 0, BUFSIZ);
-  file = gt_genfile_xopen(gt_str_array_get(seqs, 0), "rb");
-  gt_genfile_xread(file, &firstcontents, BUFSIZ-1);
-  gt_genfile_close(file);
+  file = gt_file_xopen(gt_str_array_get(seqs, 0), "rb");
+  gt_file_xread(file, &firstcontents, BUFSIZ-1);
+  gt_file_close(file);
 
   if (gt_sequence_buffer_embl_guess(firstcontents)) {
     sb = gt_sequence_buffer_embl_new(seqs);

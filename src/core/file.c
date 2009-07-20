@@ -71,7 +71,7 @@ const char* gt_genfilemode_suffix(GtFileMode mode)
   return "";
 }
 
-size_t gt_genfile_basename_length(const char *path)
+size_t gt_file_basename_length(const char *path)
 {
   size_t path_length;
 
@@ -85,7 +85,7 @@ size_t gt_genfile_basename_length(const char *path)
   return path_length;
 }
 
-GtFile* gt_genfile_open(GtFileMode genfilemode, const char *path,
+GtFile* gt_file_open(GtFileMode genfilemode, const char *path,
                       const char *mode, GtError *err)
 {
   GtFile *genfile;
@@ -98,21 +98,21 @@ GtFile* gt_genfile_open(GtFileMode genfilemode, const char *path,
       case GFM_UNCOMPRESSED:
         genfile->fileptr.file = gt_fa_fopen(path, mode, err);
         if (!genfile->fileptr.file) {
-          gt_genfile_delete(genfile);
+          gt_file_delete(genfile);
           return NULL;
         }
         break;
       case GFM_GZIP:
         genfile->fileptr.gzfile = gt_fa_gzopen(path, mode, err);
         if (!genfile->fileptr.gzfile) {
-          gt_genfile_delete(genfile);
+          gt_file_delete(genfile);
           return NULL;
         }
         break;
       case GFM_BZIP2:
         genfile->fileptr.bzfile = gt_fa_bzopen(path, mode, err);
         if (!genfile->fileptr.bzfile) {
-          gt_genfile_delete(genfile);
+          gt_file_delete(genfile);
           return NULL;
         }
         genfile->orig_path = gt_cstr_dup(path);
@@ -129,7 +129,7 @@ GtFile* gt_genfile_open(GtFileMode genfilemode, const char *path,
   return genfile;
 }
 
-GtFile* gt_genfile_xopen_w_gfmode(GtFileMode genfilemode,
+GtFile* gt_file_xopen_w_gfmode(GtFileMode genfilemode,
                                       const char *path, const char *mode)
 {
   GtFile *genfile;
@@ -160,13 +160,13 @@ GtFile* gt_genfile_xopen_w_gfmode(GtFileMode genfilemode,
   return genfile;
 }
 
-GtFile* gt_genfile_xopen(const char *path, const char *mode)
+GtFile* gt_file_xopen(const char *path, const char *mode)
 {
   gt_assert(mode);
-  return gt_genfile_xopen_w_gfmode(gt_genfilemode_determine(path), path, mode);
+  return gt_file_xopen_w_gfmode(gt_genfilemode_determine(path), path, mode);
 }
 
-GtFile* gt_genfile_new(FILE *fp)
+GtFile* gt_file_new(FILE *fp)
 {
   GtFile *genfile;
   gt_assert(fp);
@@ -176,13 +176,13 @@ GtFile* gt_genfile_new(FILE *fp)
   return genfile;
 }
 
-GtFileMode gt_genfile_mode(GtFile *genfile)
+GtFileMode gt_file_mode(GtFile *genfile)
 {
   gt_assert(genfile);
   return genfile->mode;
 }
 
-int gt_genfile_xfgetc(GtFile *genfile)
+int gt_file_xfgetc(GtFile *genfile)
 {
   int c = -1;
   if (genfile) {
@@ -210,7 +210,7 @@ int gt_genfile_xfgetc(GtFile *genfile)
   return c;
 }
 
-void gt_genfile_unget_char(GtFile *genfile, char c)
+void gt_file_unget_char(GtFile *genfile, char c)
 {
   gt_assert(genfile);
   gt_assert(!genfile->unget_used); /* only one char can be unget at a time */
@@ -259,19 +259,19 @@ static int xvprintf(GtFile *genfile, const char *format, va_list va)
   return rval;
 }
 
-void gt_genfile_xprintf(GtFile *genfile, const char *format, ...)
+void gt_file_xprintf(GtFile *genfile, const char *format, ...)
 {
   va_list va;
   va_start(va, format);
   if (xvprintf(genfile, format, va) < 0) {
     fprintf(stderr,
-            "gt_genfile_xprintf(): xvprintf() returned negative value\n");
+            "gt_file_xprintf(): xvprintf() returned negative value\n");
     exit(EXIT_FAILURE);
   }
   va_end(va);
 }
 
-void gt_genfile_xfputc(int c, GtFile *genfile)
+void gt_file_xfputc(int c, GtFile *genfile)
 {
   if (!genfile)
     return gt_xfputc(c, stdout);
@@ -289,7 +289,7 @@ void gt_genfile_xfputc(int c, GtFile *genfile)
   }
 }
 
-void gt_genfile_xfputs(const char *str, GtFile *genfile)
+void gt_file_xfputs(const char *str, GtFile *genfile)
 {
   if (!genfile)
     return gt_xfputs(str, stdout);
@@ -307,7 +307,7 @@ void gt_genfile_xfputs(const char *str, GtFile *genfile)
   }
 }
 
-int gt_genfile_xread(GtFile *genfile, void *buf, size_t nbytes)
+int gt_file_xread(GtFile *genfile, void *buf, size_t nbytes)
 {
   int rval = -1;
   if (genfile) {
@@ -329,7 +329,7 @@ int gt_genfile_xread(GtFile *genfile, void *buf, size_t nbytes)
   return rval;
 }
 
-void gt_genfile_xwrite(GtFile *genfile, void *buf, size_t nbytes)
+void gt_file_xwrite(GtFile *genfile, void *buf, size_t nbytes)
 {
   if (!genfile) {
     gt_xfwrite(buf, 1, nbytes, stdout);
@@ -349,7 +349,7 @@ void gt_genfile_xwrite(GtFile *genfile, void *buf, size_t nbytes)
   }
 }
 
-void gt_genfile_xrewind(GtFile *genfile)
+void gt_file_xrewind(GtFile *genfile)
 {
   gt_assert(genfile);
   switch (genfile->mode) {
@@ -367,7 +367,7 @@ void gt_genfile_xrewind(GtFile *genfile)
   }
 }
 
-void gt_genfile_delete(GtFile *genfile)
+void gt_file_delete(GtFile *genfile)
 {
   if (!genfile) return;
   gt_free(genfile->orig_path);
@@ -375,7 +375,7 @@ void gt_genfile_delete(GtFile *genfile)
   gt_free(genfile);
 }
 
-void gt_genfile_close(GtFile *genfile)
+void gt_file_close(GtFile *genfile)
 {
   if (!genfile) return;
   switch (genfile->mode) {
@@ -391,5 +391,5 @@ void gt_genfile_close(GtFile *genfile)
       break;
     default: gt_assert(0);
   }
-  gt_genfile_delete(genfile);
+  gt_file_delete(genfile);
 }

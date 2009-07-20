@@ -42,7 +42,7 @@ static inline int fastq_buf_getchar(GtSeqIteratorQual *seqit)
     return pvt->ungetchar;
   } else {
     if (pvt->currentinpos >= pvt->currentfillpos) {
-      pvt->currentfillpos = gt_genfile_xread(pvt->curfile, pvt->inbuf,
+      pvt->currentfillpos = gt_file_xread(pvt->curfile, pvt->inbuf,
                                              GT_SEQIT_QUAL_INBUFSIZE);
       if (pvt->currentfillpos == 0)
          return EOF;
@@ -305,8 +305,8 @@ int gt_seqiterator_qual_fastq_next(GtSeqIteratorQual *seqit,
       if (pvt->filenum+1 < gt_str_array_size(pvt->filenametab)) {
         const char *filename;
         filename = gt_str_array_get(pvt->filenametab, ++pvt->filenum);
-        gt_genfile_close(pvt->curfile);
-        pvt->curfile = gt_genfile_xopen(filename, "r");
+        gt_file_close(pvt->curfile);
+        pvt->curfile = gt_file_xopen(filename, "r");
         pvt->curline = 1;
         /* get first entry from next file*/
         errstatus = parse_fastq_block(seqit, err);
@@ -367,7 +367,7 @@ GtSeqIteratorQual* gt_seqiterator_qual_fastq_new(const GtStrArray *filenametab,
   seqit = gt_seqiterator_qual_create(gt_seqiterator_qual_fastq_class());
   seqitf = gt_seqiterator_qual_fastq_cast(seqit);
   seqitf->qdescbuffer = gt_str_new();
-  seqit->pvt->curfile = gt_genfile_xopen(gt_str_array_get(filenametab, 0), "r");
+  seqit->pvt->curfile = gt_file_xopen(gt_str_array_get(filenametab, 0), "r");
   seqit->pvt->filenametab = filenametab;
   seqit->pvt->curline = 1;
   return seqit;

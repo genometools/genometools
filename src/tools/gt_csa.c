@@ -43,7 +43,7 @@ static void gt_csa_arguments_delete(void *tool_arguments)
 {
   CSAArguments *arguments = tool_arguments;
   if (!arguments) return;
-  gt_genfile_close(arguments->outfp);
+  gt_file_close(arguments->outfp);
   gt_outputfileinfo_delete(arguments->ofi);
   gt_free(arguments);
 }

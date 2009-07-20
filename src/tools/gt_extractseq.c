@@ -53,7 +53,7 @@ static void gt_extractseq_arguments_delete(void *tool_arguments)
 {
   ExtractSeqArguments *arguments = tool_arguments;
   if (!arguments) return;
-  gt_genfile_close(arguments->outfp);
+  gt_file_close(arguments->outfp);
   gt_outputfileinfo_delete(arguments->ofi);
   gt_str_delete(arguments->fastakeyfile);
   gt_str_delete(arguments->pattern);

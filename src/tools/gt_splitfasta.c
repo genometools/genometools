@@ -107,7 +107,7 @@ static GtFile* genfile_xopen_forcecheck(const char *path, const char *mode,
               path, FORCE_OPT_CSTR);
     return NULL;
   }
-  return gt_genfile_xopen(path, mode);
+  return gt_file_xopen(path, mode);
 }
 
 static int split_description(const char *filename, GtStr *splitdesc,
@@ -140,7 +140,7 @@ static int split_description(const char *filename, GtStr *splitdesc,
                                 gt_bioseq_get_sequence(bioseq, i),
                                 gt_bioseq_get_sequence_length(bioseq, i), 0,
                                 outfp);
-    gt_genfile_close(outfp);
+    gt_file_close(outfp);
   }
 
   gt_bioseq_delete(bioseq);
@@ -162,11 +162,11 @@ static int split_fasta_file(const char *filename, unsigned long max_filesize,
   gt_assert(filename && max_filesize);
 
   /* open source file */
-  srcfp = gt_genfile_xopen(filename, "r");
+  srcfp = gt_file_xopen(filename, "r");
   gt_assert(srcfp);
 
   /* read start characters */
-  if ((read_bytes = gt_genfile_xread(srcfp, buf, BUFSIZ)) == 0) {
+  if ((read_bytes = gt_file_xread(srcfp, buf, BUFSIZ)) == 0) {
     gt_error_set(err, "file \"%s\" is empty", filename);
     had_err = -1;
   }
@@ -182,37 +182,37 @@ static int split_fasta_file(const char *filename, unsigned long max_filesize,
     /* open destination file */
     destfilename = gt_str_new();
     gt_str_append_cstr_nt(destfilename, filename,
-                       gt_genfile_basename_length(filename));
+                       gt_file_basename_length(filename));
     gt_str_append_char(destfilename, '.');
     gt_str_append_ulong(destfilename, ++filenum);
     gt_str_append_cstr(destfilename,
-                       gt_genfilemode_suffix(gt_genfile_mode(srcfp)));
+                       gt_genfilemode_suffix(gt_file_mode(srcfp)));
     if (!(destfp = genfile_xopen_forcecheck(gt_str_get(destfilename), "w",
                                             force, err))) {
       had_err = -1;
     }
     if (!had_err)
-      gt_genfile_xwrite(destfp, buf, read_bytes);
+      gt_file_xwrite(destfp, buf, read_bytes);
 
     while (!had_err &&
-           (read_bytes = gt_genfile_xread(srcfp, buf, BUFSIZ)) != 0) {
+           (read_bytes = gt_file_xread(srcfp, buf, BUFSIZ)) != 0) {
       if (bytecount + read_bytes > max_filesize) {
         int offset = bytecount < max_filesize ? max_filesize - bytecount : 0;
         if ((separator_pos = buf_contains_separator(buf, offset, read_bytes))) {
           separator_pos--;
           gt_assert(separator_pos < read_bytes);
           if (separator_pos)
-            gt_genfile_xwrite(destfp, buf, separator_pos);
+            gt_file_xwrite(destfp, buf, separator_pos);
           /* close current file */
-          gt_genfile_close(destfp);
+          gt_file_close(destfp);
           /* open new file */
           gt_str_reset(destfilename);
           gt_str_append_cstr_nt(destfilename, filename,
-                                gt_genfile_basename_length(filename));
+                                gt_file_basename_length(filename));
           gt_str_append_char(destfilename, '.');
           gt_str_append_ulong(destfilename, ++filenum);
           gt_str_append_cstr(destfilename,
-                             gt_genfilemode_suffix(gt_genfile_mode(srcfp)));
+                             gt_genfilemode_suffix(gt_file_mode(srcfp)));
           if (!(destfp = genfile_xopen_forcecheck(gt_str_get(destfilename), "w",
                                                   force, err))) {
             had_err = -1;
@@ -220,13 +220,13 @@ static int split_fasta_file(const char *filename, unsigned long max_filesize,
           }
           bytecount = read_bytes - separator_pos; /* reset */
           gt_assert(buf[separator_pos] == '>');
-          gt_genfile_xwrite(destfp, buf + separator_pos,
+          gt_file_xwrite(destfp, buf + separator_pos,
                             read_bytes - separator_pos);
           continue;
         }
       }
       bytecount += read_bytes;
-      gt_genfile_xwrite(destfp, buf, read_bytes);
+      gt_file_xwrite(destfp, buf, read_bytes);
     }
   }
 
@@ -234,10 +234,10 @@ static int split_fasta_file(const char *filename, unsigned long max_filesize,
   gt_str_delete(destfilename);
 
   /* close current file */
-  gt_genfile_close(destfp);
+  gt_file_close(destfp);
 
   /* close source file */
-  gt_genfile_close(srcfp);
+  gt_file_close(srcfp);
 
   return had_err;
 }

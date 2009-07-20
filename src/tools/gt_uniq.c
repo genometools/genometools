@@ -96,7 +96,7 @@ int gt_uniq(int argc, const char **argv, GtError *err)
   gt_node_stream_delete(gff3_out_stream);
   gt_node_stream_delete(uniq_stream);
   gt_node_stream_delete(gff3_in_stream);
-  gt_genfile_close(arguments.outfp);
+  gt_file_close(arguments.outfp);
 
   return had_err;
 }

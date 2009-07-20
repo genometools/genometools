@@ -45,7 +45,7 @@ GtStrArray* gt_str_array_new_file(const char *path)
   GtStrArray *filecontent;
   GtFile *fpin;
   GtStr *line;
-  fpin = gt_genfile_xopen(path, "r");
+  fpin = gt_file_xopen(path, "r");
   gt_assert(fpin);
   line = gt_str_new();
   filecontent = gt_str_array_new();
@@ -54,7 +54,7 @@ GtStrArray* gt_str_array_new_file(const char *path)
     gt_str_reset(line);
   }
   gt_str_delete(line);
-  gt_genfile_close(fpin);
+  gt_file_close(fpin);
   return filecontent;
 }
 

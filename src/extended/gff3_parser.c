@@ -1239,9 +1239,9 @@ static int gff3_parser_parse_fasta_entry(GtQueue *genome_nodes,
     GtGenomeNode *sequence_node;
     GtStr *sequence = gt_str_new();
     int cc;
-    while ((cc = gt_genfile_xfgetc(fpin)) != EOF) {
+    while ((cc = gt_file_xfgetc(fpin)) != EOF) {
       if (cc == '>') {
-        gt_genfile_unget_char(fpin, cc);
+        gt_file_unget_char(fpin, cc);
         break;
       }
       if (cc != '\n' && cc != '\r' && cc != ' ')

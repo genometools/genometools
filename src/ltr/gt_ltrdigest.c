@@ -69,7 +69,7 @@ static void gt_ltrdigest_arguments_delete(void *tool_arguments)
 #endif
   gt_str_delete(arguments->trna_lib);
   gt_str_delete(arguments->prefix);
-  gt_genfile_close(arguments->outfp);
+  gt_file_close(arguments->outfp);
   gt_outputfileinfo_delete(arguments->ofi);
   gt_free(arguments);
 }

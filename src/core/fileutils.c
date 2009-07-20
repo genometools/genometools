@@ -57,10 +57,10 @@ unsigned long gt_file_number_of_lines(const char *path)
   GtFile *fp;
   int cc;
   gt_assert(path);
-  fp = gt_genfile_xopen(path, "r");
-  while ((cc = gt_genfile_xfgetc(fp)) != EOF)
+  fp = gt_file_xopen(path, "r");
+  while ((cc = gt_file_xfgetc(fp)) != EOF)
     if (cc == '\n') number_of_lines++;
-  gt_genfile_close(fp);
+  gt_file_close(fp);
   return number_of_lines;
 }
 
@@ -68,7 +68,7 @@ const char* gt_file_suffix(const char *path)
 {
   const char *suffixptr;
   gt_assert(path);
-  suffixptr = path + gt_genfile_basename_length(path) - 1;
+  suffixptr = path + gt_file_basename_length(path) - 1;
   while (suffixptr > path) {
     if (*suffixptr == '/')
       return "";

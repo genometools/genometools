@@ -76,7 +76,7 @@ static int gt_sequence_buffer_fasta_advance(GtSequenceBuffer *sb, GtError *err)
       currentfileadd = 0;
       currentfileread = 0;
       pvt->linenum = (uint64_t) 1;
-      pvt->inputstream = gt_genfile_xopen(gt_str_array_get(pvt->filenametab,
+      pvt->inputstream = gt_file_xopen(gt_str_array_get(pvt->filenametab,
                                                   (unsigned long) pvt->filenum),
                                        "rb");
       pvt->currentinpos = 0;
@@ -86,7 +86,7 @@ static int gt_sequence_buffer_fasta_advance(GtSequenceBuffer *sb, GtError *err)
       currentchar = inlinebuf_getchar(sb, pvt->inputstream);
       if (currentchar == EOF)
       {
-        gt_genfile_close(pvt->inputstream);
+        gt_file_close(pvt->inputstream);
         pvt->inputstream = NULL;
         if (pvt->filelengthtab != NULL)
         {
@@ -171,7 +171,7 @@ static int gt_sequence_buffer_fasta_advance(GtSequenceBuffer *sb, GtError *err)
 static void gt_sequence_buffer_fasta_free(GtSequenceBuffer *sb)
 {
   GtSequenceBufferFasta *sbf = gt_sequence_buffer_fasta_cast(sb);
-  gt_genfile_close(sb->pvt->inputstream);
+  gt_file_close(sb->pvt->inputstream);
   gt_str_delete(sbf->headerbuffer);
 }
 

@@ -101,12 +101,12 @@ static int gff3_in_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
             had_err = -1;
             break;
           }
-          is->fpin = gt_genfile_xopen(NULL, "r");
+          is->fpin = gt_file_xopen(NULL, "r");
           is->file_is_open = true;
           is->stdin_argument = true;
         }
         else {
-          is->fpin = gt_genfile_xopen(gt_str_array_get(is->files,
+          is->fpin = gt_file_xopen(gt_str_array_get(is->files,
                                                        is->next_file), "r");
           is->file_is_open = true;
         }
@@ -155,7 +155,7 @@ static int gff3_in_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
     if (status_code == EOF) {
       /* end of current file */
       if (is->progress_bar) gt_progressbar_stop();
-      gt_genfile_close(is->fpin);
+      gt_file_close(is->fpin);
       is->fpin = NULL;
       is->file_is_open = false;
       gt_gff3_parser_reset(is->gff3_parser);
@@ -195,7 +195,7 @@ static void gff3_in_stream_free(GtNodeStream *ns)
   gt_queue_delete(gff3_in_stream->genome_node_buffer);
   gt_gff3_parser_delete(gff3_in_stream->gff3_parser);
   gt_cstr_table_delete(gff3_in_stream->used_types);
-  gt_genfile_close(gff3_in_stream->fpin);
+  gt_file_close(gff3_in_stream->fpin);
 }
 
 const GtNodeStreamClass* gt_gff3_in_stream_class(void)

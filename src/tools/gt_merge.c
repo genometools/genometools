@@ -93,7 +93,7 @@ int gt_merge(int argc, const char **argv, GtError *err)
   for (i = 0; i < gt_array_size(genome_streams); i++)
     gt_node_stream_delete(*(GtNodeStream**) gt_array_get(genome_streams, i));
   gt_array_delete(genome_streams);
-  gt_genfile_close(outfp);
+  gt_file_close(outfp);
 
   return had_err;
 }

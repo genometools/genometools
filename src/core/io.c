@@ -36,7 +36,7 @@ GtIO* gt_io_new(const char *path, const char *mode)
   /* XXX: only the read mode has been implemented */
   gt_assert(!strcmp(mode, "r"));
   io = gt_malloc(sizeof *io);
-  io->fp = gt_genfile_xopen(path, mode);
+  io->fp = gt_file_xopen(path, mode);
   io->path = path ? gt_str_new_cstr(path) : gt_str_new_cstr("stdin");
   io->line_number = 1;
   io->line_start = true;
@@ -46,7 +46,7 @@ GtIO* gt_io_new(const char *path, const char *mode)
 void gt_io_delete(GtIO *io)
 {
   if (!io) return;
-  gt_genfile_close(io->fp);
+  gt_file_close(io->fp);
   gt_str_delete(io->path);
   gt_free(io);
 }
@@ -55,7 +55,7 @@ int gt_io_get_char(GtIO *io, char *c)
 {
   int cc;
   gt_assert(io && c);
-  cc = gt_genfile_xfgetc(io->fp);
+  cc = gt_file_xfgetc(io->fp);
   if (cc == '\n') {
     io->line_number++;
     io->line_start = true;
@@ -71,7 +71,7 @@ int gt_io_get_char(GtIO *io, char *c)
 void gt_io_unget_char(GtIO *io, char c)
 {
   gt_assert(io);
-  gt_genfile_unget_char(io->fp, c);
+  gt_file_unget_char(io->fp, c);
 }
 
 bool gt_io_line_start(const GtIO *io)

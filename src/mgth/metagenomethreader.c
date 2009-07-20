@@ -509,18 +509,18 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
 
     /* Der Name des XML-Files mit den Blast-Hits ist das erste Argument
        nach dem Programmnamen */
-    fp_xmlfile = gt_genfile_xopen(argv[parsed_args], "r");
+    fp_xmlfile = gt_file_xopen(argv[parsed_args], "r");
 
     if (gt_file_exists(gt_str_get(outputfilename)))
     {
-      parsestruct.fp_outputfile = gt_genfile_xopen(gt_str_get(outputfilename),
+      parsestruct.fp_outputfile = gt_file_xopen(gt_str_get(outputfilename),
                                                    "w+");
-      gt_genfile_close(parsestruct.fp_outputfile);
+      gt_file_close(parsestruct.fp_outputfile);
     }
 
     /* Der Name des Outputfiles wird den eingegebenen Optionen entnommen
        oder der default-Wert output.txt verwendet */
-    parsestruct.fp_outputfile = gt_genfile_xopen(gt_str_get(outputfilename),
+    parsestruct.fp_outputfile = gt_file_xopen(gt_str_get(outputfilename),
                                                  "a+");
 
     if (!ARGUMENTS(hitfile_bool))
@@ -537,13 +537,13 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
       }
 
       /* Datei fuer die GI-Nr. des XML-Files  */
-      parsestruct.fp_giexp_file = gt_genfile_xopen(gt_str_get(gi_numbers_txt),
+      parsestruct.fp_giexp_file = gt_file_xopen(gt_str_get(gi_numbers_txt),
                                                    "w+");
 
       had_err = mg_xmlparser(parsestruct_ptr, fp_xmlfile, err);
 
-      gt_genfile_close(parsestruct.fp_giexp_file);
-      gt_genfile_close(fp_xmlfile);
+      gt_file_close(parsestruct.fp_giexp_file);
+      gt_file_close(fp_xmlfile);
 
       if (!had_err)
       {
@@ -551,7 +551,7 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
 
         /* Die Hit-Datei wird mit dem Modus w+ geoeffnet */
         parsestruct.fp_blasthit_file =
-          gt_genfile_xopen(gt_str_get(parsestruct.hit_fastafile), "w+");
+          gt_file_xopen(gt_str_get(parsestruct.hit_fastafile), "w+");
 
         had_err = gt_extractkeysfromfastafile(true,
                                               parsestruct.fp_blasthit_file,
@@ -559,7 +559,7 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
                                               gi_numbers_txt,
                                               ARGUMENTS(giexpfile_name),
                                               err);
-        gt_genfile_close(parsestruct.fp_blasthit_file);
+        gt_file_close(parsestruct.fp_blasthit_file);
         if (had_err)
         {
           had_err = 0;
@@ -616,7 +616,7 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
       {
         /* Der Name des XML-Files mit den Blast-Hits ist das erste Argument
            nach dem Programmnamen */
-        fp_xmlfile = gt_genfile_xopen(argv[parsed_args], "r");
+        fp_xmlfile = gt_file_xopen(argv[parsed_args], "r");
       }
       parsestruct.giexp_flag = 1;
 
@@ -671,8 +671,8 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
     gt_free(parsestruct.hits_statistics.memory);
 
     /* Schliessen der XML-, Output-Datei und des Hit-Sequenz-Files */
-    gt_genfile_close(fp_xmlfile);
-    gt_genfile_close(parsestruct.fp_outputfile);
+    gt_file_close(fp_xmlfile);
+    gt_file_close(parsestruct.fp_outputfile);
 
     /* GtHashtable loeschen */
     gt_hashtable_delete(parsestruct.queryhash);

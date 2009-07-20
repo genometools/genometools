@@ -82,11 +82,11 @@ void gt_cstr_array_show_genfile(const char **gt_cstr_array, GtFile *fp)
   unsigned long i = 0;
   while (gt_cstr_array[i]) {
     if (i)
-      gt_genfile_xfputc(' ', fp);
-    gt_genfile_xfputs(gt_cstr_array[i], fp);
+      gt_file_xfputc(' ', fp);
+    gt_file_xfputs(gt_cstr_array[i], fp);
     i++;
   }
-  gt_genfile_xfputc('\n', fp);
+  gt_file_xfputc('\n', fp);
 }
 
 unsigned long gt_cstr_array_size(const char **gt_cstr_array)

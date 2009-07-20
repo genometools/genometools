@@ -184,7 +184,7 @@ static int gt_sequence_buffer_embl_advance(GtSequenceBuffer *sb, GtError *err)
     sbe->firstentryinfile = true;
     sbe->state = EMBL_UNDEFINED;
     pvt->linenum = (uint64_t) 1;
-    pvt->inputstream = gt_genfile_xopen(gt_str_array_get(pvt->filenametab,
+    pvt->inputstream = gt_file_xopen(gt_str_array_get(pvt->filenametab,
                                                   (unsigned long) pvt->filenum),
                                          "rb");
     pvt->currentinpos = 0;
@@ -283,10 +283,10 @@ static int gt_sequence_buffer_embl_advance(GtSequenceBuffer *sb, GtError *err)
       }
       if (++pvt->filenum < gt_str_array_size(pvt->filenametab)) {
         /* still files left, open next one */
-        gt_genfile_close(pvt->inputstream);
+        gt_file_close(pvt->inputstream);
         sbe->state = EMBL_UNDEFINED;
         pvt->linenum = (uint64_t) 1;
-        pvt->inputstream = gt_genfile_xopen(gt_str_array_get(pvt->filenametab,
+        pvt->inputstream = gt_file_xopen(gt_str_array_get(pvt->filenametab,
                                                   (unsigned long) pvt->filenum),
                                             "rb");
         if (pvt->filelengthtab) {
@@ -314,7 +314,7 @@ static void gt_sequence_buffer_embl_free(GtSequenceBuffer *sb)
 {
   GtSequenceBufferEMBL *sbe = gt_sequence_buffer_embl_cast(sb);
   if (sb->pvt->inputstream)
-    gt_genfile_close(sb->pvt->inputstream);
+    gt_file_close(sb->pvt->inputstream);
   gt_str_delete(sbe->headerbuffer);
   gt_str_delete(sbe->overflowbuffer);
 }

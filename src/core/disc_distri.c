@@ -98,7 +98,7 @@ showvalue(unsigned long key, unsigned long long occurrences,
 
   probability = (double) occurrences / info->num_of_occurrences;
   info->cumulative_probability += probability;
-  gt_genfile_xprintf(info->genfile, "%lu: %llu (prob=%.4f,cumulative=%.4f)\n",
+  gt_file_xprintf(info->genfile, "%lu: %llu (prob=%.4f,cumulative=%.4f)\n",
                   key, occurrences, probability, info->cumulative_probability);
   return CONTINUE_ITERATION;
 }

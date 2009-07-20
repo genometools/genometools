@@ -63,10 +63,10 @@ static int gt_fasta_reader_fsm_run(GtFastaReader *fasta_reader,
 
   /* rewind sequence file (to allow multiple calls) */
   if (fr->sequence_file)
-    gt_genfile_xrewind(fr->sequence_file);
+    gt_file_xrewind(fr->sequence_file);
 
   /* reading */
-  while (!had_err && gt_genfile_xread(fr->sequence_file, &cc, 1) != 0) {
+  while (!had_err && gt_file_xread(fr->sequence_file, &cc, 1) != 0) {
     switch (state) {
       case EXPECTING_SEPARATOR:
         if (cc != FASTA_SEPARATOR) {
@@ -189,7 +189,7 @@ static void gt_fasta_reader_fsm_free(GtFastaReader *fr)
 {
   GtFastaReaderFSM *gt_fasta_reader_fsm = gt_fasta_reader_fsm_cast(fr);
   gt_str_delete(gt_fasta_reader_fsm->sequence_filename);
-  gt_genfile_close(gt_fasta_reader_fsm->sequence_file);
+  gt_file_close(gt_fasta_reader_fsm->sequence_file);
 }
 
 const GtFastaReaderClass* gt_fasta_reader_fsm_class(void)
@@ -207,7 +207,7 @@ GtFastaReader* gt_fasta_reader_fsm_new(GtStr *sequence_filename)
   gt_fasta_reader_fsm->sequence_filename = gt_str_ref(sequence_filename);
   if (sequence_filename) {
     gt_fasta_reader_fsm->sequence_file =
-      gt_genfile_xopen(gt_str_get(sequence_filename), "r");
+      gt_file_xopen(gt_str_get(sequence_filename), "r");
   }
   else
     gt_fasta_reader_fsm->sequence_filename = gt_str_new_cstr("stdin");

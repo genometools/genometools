@@ -61,7 +61,7 @@ static inline int inlinebuf_getchar(GtSequenceBuffer *sb, GtFile *f)
     return pvt->ungetchar;
   } else {
     if (pvt->currentinpos >= pvt->currentfillpos) {
-      pvt->currentfillpos = gt_genfile_xread(f, pvt->inbuf, INBUFSIZE);
+      pvt->currentfillpos = gt_file_xread(f, pvt->inbuf, INBUFSIZE);
       if (pvt->currentfillpos == 0)
          return EOF;
       pvt->currentinpos = 0;
