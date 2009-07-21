@@ -759,6 +759,13 @@ Test do
   run "diff #{$last_stdout} #{$testdata}duplicate_attribute_fixed.gff3"
 end
 
+Name "custom_stream (C)"
+Keywords "gt_gff3 examples"
+Test do
+  run_test "#{$bin}examples/custom_stream"
+  run "diff #{$last_stdout} #{$testdata}standard_gene_simple.gff3"
+end
+
 def large_gff3_test(name, file)
   Name "gt gff3 #{name}"
   Keywords "gt_gff3 large_gff3"
