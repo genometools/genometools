@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2005-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -31,7 +31,6 @@
 */
 
 void   gt_xatexit(void (*function)(void));
-void*  gt_xcalloc(size_t nmemb, size_t size);
 void   gt_xfclose(FILE*);
 void   gt_xfflush(FILE*);
 int    gt_xfgetc(FILE*);
@@ -43,10 +42,8 @@ size_t gt_xfread(void *ptr, size_t size, size_t nmemb, FILE*);
 void   gt_xfseek(FILE*, long offset, int whence);
 void   gt_xfsetpos(FILE*, const fpos_t*);
 void   gt_xfwrite(const void *ptr, size_t size, size_t nmemb, FILE*);
-void*  gt_xmalloc(size_t size);
 void   gt_xputchar(int);
 void   gt_xputs(const char*);
-void*  gt_xrealloc(void *ptr, size_t size);
 void   gt_xremove(const char*);
 char*  gt_xstrdup(const char*);
 void   gt_xungetc(int, FILE*);

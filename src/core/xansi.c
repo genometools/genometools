@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2005-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -23,17 +23,6 @@ void gt_xatexit(void (*function)(void))
     perror("cannot register exit function");
     exit(EXIT_FAILURE);
   }
-}
-
-void* gt_xcalloc(size_t nmemb, size_t size)
-{
-  void *p;
-  if ((p = calloc(nmemb, size)) == NULL) {
-    fprintf(stderr, "cannot calloc(%zu, %zu) memory: %s\n", nmemb, size,
-            strerror(errno));
-    exit(EXIT_FAILURE);
-  }
-  return p;
 }
 
 void gt_xfclose(FILE *stream)
@@ -136,16 +125,6 @@ void gt_xfwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
   }
 }
 
-void* gt_xmalloc(size_t size)
-{
-  void *p;
-  if ((p = malloc(size)) == NULL) {
-    fprintf(stderr, "cannot malloc(%zu) memory: %s\n", size, strerror(errno));
-    exit(EXIT_FAILURE);
-  }
-  return p;
-}
-
 void gt_xputchar(int c)
 {
   if (putchar(c) == EOF) {
@@ -160,16 +139,6 @@ void gt_xputs(const char *str)
     perror("cannot puts");
     exit(EXIT_FAILURE);
   }
-}
-
-void* gt_xrealloc(void *ptr, size_t size)
-{
-  void *p;
-  if ((p = realloc(ptr, size)) == NULL) {
-    fprintf(stderr, "cannot realloc(%zu) memory: %s\n", size, strerror(errno));
-    exit(EXIT_FAILURE);
-  }
-  return p;
 }
 
 void gt_xremove(const char *path)
