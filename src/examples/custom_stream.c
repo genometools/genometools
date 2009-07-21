@@ -56,7 +56,7 @@ static GtNodeStream* custom_stream_new(void)
 
 int main(GT_UNUSED int argc, const char *argv[])
 {
-  GtNodeStream *custom_stream; /*, gff3_out_stream; XXX */
+  GtNodeStream *custom_stream, *gff3_out_stream;
   GtError *err;
   int had_err;
 
@@ -73,20 +73,18 @@ int main(GT_UNUSED int argc, const char *argv[])
   /* create custom input stream  */
   custom_stream = custom_stream_new();
 
-#if 0
   /* create GFF3 output stream */
-  gff3_out_stream_new(custom_stream, NULL);
-#endif
+  gff3_out_stream = gt_gff3_out_stream_new(custom_stream, NULL);
 
   /* pull the features through the stream */
-  had_err = gt_node_stream_pull(custom_stream /* XXX gff3_out_stream */, err);
+  had_err = gt_node_stream_pull(gff3_out_stream, err);
 
   /* handle error */
   if (had_err)
     fprintf(stderr, "%s: error: %s\n", argv[0], gt_error_get(err));
 
   /* free */
-  /* gt_node_stream_delete(gff3_out_stream); XXX */
+  gt_node_stream_delete(gff3_out_stream);
   gt_node_stream_delete(custom_stream);
   gt_error_delete(err);
 
