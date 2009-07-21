@@ -20,7 +20,7 @@
 #include "core/unused_api.h"
 #include "core/versionfunc.h"
 #include "extended/genome_node.h"
-#include "extended/gff3_out_stream.h"
+#include "extended/gff3_out_stream_api.h"
 #include "extended/gtf_in_stream.h"
 #include "tools/gt_gtf_to_gff3.h"
 

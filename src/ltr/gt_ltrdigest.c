@@ -25,7 +25,7 @@
 #include "core/safearith.h"
 #include "core/unused_api.h"
 #include "extended/gff3_in_stream.h"
-#include "extended/gff3_out_stream.h"
+#include "extended/gff3_out_stream_api.h"
 #include "ltr/gt_ltrdigest.h"
 #include "ltr/ltrdigest_def.h"
 #include "ltr/ltrdigest_stream.h"

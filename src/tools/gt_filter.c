@@ -23,7 +23,7 @@
 #include "extended/filter_stream.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
-#include "extended/gff3_out_stream.h"
+#include "extended/gff3_out_stream_api.h"
 #include "extended/targetbest_filter_stream.h"
 #include "tools/gt_filter.h"
 

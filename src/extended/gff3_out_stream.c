@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "extended/gff3_out_stream.h"
+#include "extended/gff3_out_stream_api.h"
 #include "extended/gff3_visitor.h"
 #include "extended/node_stream_api.h"
 #include "core/cstr_table.h"

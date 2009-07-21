@@ -24,7 +24,7 @@
 #include "extended/add_introns_stream.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
-#include "extended/gff3_out_stream.h"
+#include "extended/gff3_out_stream_api.h"
 #include "extended/gtdatahelp.h"
 #include "extended/merge_feature_stream.h"
 #include "extended/sort_stream.h"

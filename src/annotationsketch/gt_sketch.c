@@ -32,7 +32,7 @@
 #include "extended/gff3_in_stream.h"
 #include "extended/bed_in_stream.h"
 #include "extended/gtf_in_stream.h"
-#include "extended/gff3_out_stream.h"
+#include "extended/gff3_out_stream_api.h"
 #include "extended/sort_stream.h"
 #include "annotationsketch/block.h"
 #include "annotationsketch/canvas_api.h"

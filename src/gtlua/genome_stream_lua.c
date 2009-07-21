@@ -19,7 +19,7 @@
 #include "core/fileutils.h"
 #include "extended/node_stream_api.h"
 #include "extended/gff3_in_stream.h"
-#include "extended/gff3_out_stream.h"
+#include "extended/gff3_out_stream_api.h"
 #include "extended/luahelper.h"
 #include "gtlua/genome_node_lua.h"
 #include "gtlua/genome_stream_lua.h"

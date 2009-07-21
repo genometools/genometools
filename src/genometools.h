@@ -65,6 +65,7 @@
 #include "extended/feature_node_iterator_api.h"
 #include "extended/genome_node_api.h"
 #include "extended/gff3_in_stream_api.h"
+#include "extended/gff3_out_stream_api.h"
 #include "extended/gtf_in_stream_api.h"
 #include "extended/node_stream_api.h"
 #include "extended/region_node_api.h"

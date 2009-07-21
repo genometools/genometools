@@ -19,7 +19,7 @@
 #include "core/unused_api.h"
 #include "core/versionfunc.h"
 #include "extended/bed_parser.h"
-#include "extended/gff3_out_stream.h"
+#include "extended/gff3_out_stream_api.h"
 #include "extended/bed_in_stream_api.h"
 #include "tools/gt_bed_to_gff3.h"
 
