@@ -94,7 +94,7 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
 
   /* -retainids */
   option = gt_option_new_bool("retainids",
-                           "when available, use the original IDs provided"
+                           "when available, use the original IDs provided "
                            "in the source file\n"
                            "(memory consumption is O(file_size))",
                            &arguments->retainids, false);
