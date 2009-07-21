@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -42,7 +42,7 @@ typedef struct {
   bool has_leak;
 } CheckSpaceLeakInfo;
 
-static void free_MAInfo(MAInfo *mainfo)
+static void ma_info_free(MAInfo *mainfo)
 {
   free(mainfo);
 }
@@ -53,7 +53,7 @@ void gt_ma_init(bool bookkeeping)
   ma = gt_xcalloc(1, sizeof (MA));
   gt_assert(!ma->bookkeeping);
   ma->allocated_pointer = gt_hashmap_new(HASH_DIRECT, NULL,
-                                         (GtFree) free_MAInfo);
+                                         (GtFree) ma_info_free);
   /* MA is ready to use */
   ma->bookkeeping = bookkeeping;
 }
