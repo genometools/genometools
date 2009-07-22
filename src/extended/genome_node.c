@@ -251,22 +251,6 @@ int gt_genome_node_compare_delta(GtGenomeNode **gn_a, GtGenomeNode **gn_b,
   return compare_genome_nodes_with_delta(*gn_a, *gn_b, *deltaptr);
 }
 
-#if 0
-void gt_genome_node_delete(GtGenomeNode *gn)
-{
-  if (!gn) return;
-  if (gn->reference_count) {
-    gn->reference_count--;
-    return;
-  }
-  gt_assert(gn->c_class);
-  if (gn->c_class->free)
-    gn->c_class->free(gn);
-  gt_str_delete(gn->filename);
-  gt_free(gn);
-}
-#endif
-
 void gt_genome_nodes_sort(GtArray *nodes)
 {
   qsort(gt_array_get_space(nodes), gt_array_size(nodes),
