@@ -273,40 +273,6 @@ static int suffixeratorwithoutput(const GtStr *str_indexname,
   return haserr ? -1 : 0;
 }
 
-static void showcharacterdistribution(
-                   const SfxAlphabet *alpha,
-                   const unsigned long *characterdistribution,
-                   Verboseinfo *verboseinfo)
-{
-  unsigned int numofchars, idx;
-
-  numofchars = getnumofcharsAlphabet(alpha);
-  gt_assert(characterdistribution != NULL);
-  for (idx=0; idx<numofchars; idx++)
-  {
-    showverbose(verboseinfo,"occurrences(%c)=%lu",
-                (int) getprettysymbol(alpha,idx),
-                characterdistribution[idx]);
-  }
-}
-
-static void showsequencefeatures(Verboseinfo *verboseinfo,
-                                 const Encodedsequence *encseq,
-                                 const unsigned long *characterdistribution)
-{
-  showverbose(verboseinfo,"specialcharacters=" FormatSeqpos,
-              PRINTSeqposcast(getencseqspecialcharacters(encseq)));
-  showverbose(verboseinfo,"specialranges=" FormatSeqpos,
-              PRINTSeqposcast(getencseqspecialranges(encseq)));
-  showverbose(verboseinfo,"realspecialranges=" FormatSeqpos,
-              PRINTSeqposcast(getencseqrealspecialranges(encseq)));
-  if (characterdistribution != NULL)
-  {
-    const SfxAlphabet *alpha = getencseqAlphabet(encseq);
-    showcharacterdistribution(alpha,characterdistribution,verboseinfo);
-  }
-}
-
 static int detpfxlenandmaxdepth(unsigned int *prefixlength,
                                 Definedunsignedint *maxdepth,
                                 const Suffixeratoroptions *so,
@@ -402,8 +368,8 @@ static int run_packedindexconstruction(Verboseinfo *verboseinfo,
                        sfxseqinfo->encseq,
                        mtime,
                        getencseqtotallength(sfxseqinfo->encseq) + 1,
-                       sfxseqinfo->characterdistribution,
-                       verboseinfo, err);
+                       verboseinfo,
+                       err);
   if (si == NULL)
   {
     haserr = true;
@@ -512,20 +478,15 @@ static int runsuffixerator(bool doesa,
   }
   if (!haserr)
   {
-    showsequencefeatures(verboseinfo,
-                         sfxseqinfo.encseq,
-                         sfxseqinfo.characterdistribution);
-    if (sfxseqinfo.characterdistribution != NULL)
+    gt_showsequencefeatures(verboseinfo,sfxseqinfo.encseq);
+    if (so->readmode == Complementmode ||
+        so->readmode == Reversecomplementmode)
     {
-      if (so->readmode == Complementmode ||
-          so->readmode == Reversecomplementmode)
+      if (!isdnaalphabet(getencseqAlphabet(sfxseqinfo.encseq)))
       {
-        if (!isdnaalphabet(getencseqAlphabet(sfxseqinfo.encseq)))
-        {
-          gt_error_set(err,"option -%s only can be used for DNA alphabets",
-                            so->readmode == Complementmode ? "cpl" : "rcl");
-          haserr = true;
-        }
+        gt_error_set(err,"option -%s only can be used for DNA alphabets",
+                          so->readmode == Complementmode ? "cpl" : "rcl");
+        haserr = true;
       }
     }
   }

@@ -28,7 +28,6 @@
 typedef struct
 {
   Encodedsequence *encseq;
-  unsigned long *characterdistribution;
   Readmode readmode;
   ArraySeqpos sequenceseppos;
 } Sfxseqinfo;

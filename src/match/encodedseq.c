@@ -4558,3 +4558,35 @@ Codetype extractprefixcode(unsigned int *unitsnotspecial,
   }
   return code;
 }
+
+static void showcharacterdistribution(
+                   const SfxAlphabet *alpha,
+                   const unsigned long *characterdistribution,
+                   Verboseinfo *verboseinfo)
+{
+  unsigned int numofchars, idx;
+
+  numofchars = getnumofcharsAlphabet(alpha);
+  gt_assert(characterdistribution != NULL);
+  for (idx=0; idx<numofchars; idx++)
+  {
+    showverbose(verboseinfo,"occurrences(%c)=%lu",
+                (int) getprettysymbol(alpha,idx),
+                characterdistribution[idx]);
+  }
+}
+
+void gt_showsequencefeatures(Verboseinfo *verboseinfo,
+                             const Encodedsequence *encseq)
+{
+  const SfxAlphabet *alpha = getencseqAlphabet(encseq);
+
+  showverbose(verboseinfo,"specialcharacters=" FormatSeqpos,
+              PRINTSeqposcast(getencseqspecialcharacters(encseq)));
+  showverbose(verboseinfo,"specialranges=" FormatSeqpos,
+              PRINTSeqposcast(getencseqspecialranges(encseq)));
+  showverbose(verboseinfo,"realspecialranges=" FormatSeqpos,
+              PRINTSeqposcast(getencseqrealspecialranges(encseq)));
+  gt_assert(encseq->characterdistribution != NULL);
+  showcharacterdistribution(alpha,encseq->characterdistribution,verboseinfo);
+}

@@ -393,4 +393,7 @@ void removefilenametabref(Encodedsequence *encseq);
 
 void showgetencodedcharcounters(void);
 
+void gt_showsequencefeatures(Verboseinfo *verboseinfo,
+                             const Encodedsequence *encseq);
+
 #endif

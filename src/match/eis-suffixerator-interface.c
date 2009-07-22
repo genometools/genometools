@@ -158,36 +158,46 @@ newSfxInterface(Readmode readmode,
                 const Encodedsequence *encseq,
                 Measuretime *mtime,
                 Seqpos length,
-                const unsigned long *characterdistribution,
                 Verboseinfo *verbosity,
                 GtError *err)
 {
-  return newSfxInterfaceWithReaders(readmode, prefixlength,
+  return newSfxInterfaceWithReaders(readmode,
+                                    prefixlength,
                                     numofparts,
-                                    sfxstrategy, 0, NULL, NULL, encseq,
+                                    sfxstrategy,
+                                    0,
+                                    NULL,
+                                    NULL,
+                                    encseq,
                                     mtime,
-                                    length, characterdistribution,
-                                    verbosity, err);
+                                    length,
+                                    verbosity,
+                                    err);
 }
 
 static struct seqStats *
-newSeqStatsFromCharDist(const SfxAlphabet *alpha, Seqpos len,
-                        unsigned numOfSeqs,
-                        const unsigned long *characterdistribution)
+newSeqStatsFromCharDist(const Encodedsequence *encseq,
+                        const SfxAlphabet *alpha, Seqpos len)
 {
   struct seqStats *stats = NULL;
   unsigned i, numofchars;
   Seqpos regularSymsSum = 0;
   stats = gt_malloc(offsetAlign(sizeof (*stats), sizeof (Seqpos))
                     + (UINT8_MAX + 1) * sizeof (Seqpos));
+  unsigned int numOfSeqs;
+
+  numOfSeqs = getencseqnumofdbsequences(encseq);
   stats->sourceAlphaType = sourceUInt8;
   stats->symbolDistributionTable =
     (Seqpos *)((char *)stats + offsetAlign(sizeof (*stats), sizeof (Seqpos)));
   memset(stats->symbolDistributionTable, 0, sizeof (Seqpos) * (UINT8_MAX + 1));
   numofchars = getnumofcharsAlphabet(alpha);
   for (i = 0; i < numofchars; ++i)
-    regularSymsSum +=
-      (stats->symbolDistributionTable[i] = (Seqpos) characterdistribution[i]);
+  {
+    stats->symbolDistributionTable[i]
+      = (Seqpos) getencseqcharactercount(encseq,(GtUchar) i);
+    regularSymsSum += stats->symbolDistributionTable[i];
+  }
   stats->symbolDistributionTable[WILDCARD] = len - regularSymsSum - numOfSeqs;
   stats->symbolDistributionTable[SEPARATOR] += numOfSeqs;
   stats->symbolDistributionTable[UNDEFBWTCHAR] += 1;
@@ -219,7 +229,6 @@ newSfxInterfaceWithReaders(Readmode readmode,
                            const Encodedsequence *encseq,
                            Measuretime *mtime,
                            Seqpos length,
-                           const unsigned long *characterdistribution,
                            Verboseinfo *verbosity, GtError *err)
 {
   sfxInterface *sfxi = NULL;
@@ -236,9 +245,7 @@ newSfxInterfaceWithReaders(Readmode readmode,
   sfxi->readmode = readmode;
   sfxi->encseq = encseq;
   sfxi->alpha = getencseqAlphabet(encseq);
-  sfxi->stats = newSeqStatsFromCharDist(sfxi->alpha, length,
-                                         getencseqnumofdbsequences(encseq),
-                                         characterdistribution);
+  sfxi->stats = newSeqStatsFromCharDist(encseq,sfxi->alpha, length);
   if (!(sfxi->sfi = newSfxiterator(encseq,
                                    readmode,
                                    prefixlength,

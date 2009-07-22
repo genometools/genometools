@@ -46,16 +46,16 @@ typedef struct
                                                     bool cmpcharbychar)
 {
   sfxstrategy->ssortmaxdepth.defined = false;
-  sfxstrategy->hashexceptions = false;
   sfxstrategy->maxwidthrealmedian = 1UL;
   sfxstrategy->maxcountingsort = MAXCOUNTINGSORTDEFAULT;
   sfxstrategy->maxinsertionsort = MAXINSERTIONSORTDEFAULT;
   sfxstrategy->maxbltriesort = MAXBLTRIESORTDEFAULT;
+  sfxstrategy->differencecover = 0;
   sfxstrategy->cmpcharbychar = cmpcharbychar;
   sfxstrategy->storespecialcodes = false;
   sfxstrategy->streamsuftab = false;
   sfxstrategy->absoluteinversesuftab = false;
-  sfxstrategy->differencecover = 0;
+  sfxstrategy->hashexceptions = false;
 }
 
 #endif

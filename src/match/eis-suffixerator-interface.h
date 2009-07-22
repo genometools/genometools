@@ -48,7 +48,6 @@ typedef struct sfxInterface sfxInterface;
  * @param length length of concatenated sequences plus terminator and
  * separators
  * @param alpha alphabet to use
- * @param characterdistribution counts for all characters, used to
  * generate statistics
  * @param verbosity used as argument of showverbose
  * @param err
@@ -62,7 +61,6 @@ newSfxInterface(Readmode readmode,
                 const Encodedsequence *encseq,
                 Measuretime *mtime,
                 Seqpos length,
-                const unsigned long *characterdistribution,
                 Verboseinfo *verbosity,
                 GtError *err);
 
@@ -83,7 +81,6 @@ newSfxInterface(Readmode readmode,
  * @param length length of concatenated sequences plus terminator and
  * separators
  * @param alpha alphabet to use
- * @param characterdistribution counts for all characters, used to
  * generate statistics
  * @param verbosity used as argument of showverbose
  * @param err
@@ -100,7 +97,6 @@ newSfxInterfaceWithReaders(Readmode readmode,
                            const Encodedsequence *encseq,
                            Measuretime *mtime,
                            Seqpos length,
-                           const unsigned long *characterdistribution,
                            Verboseinfo *verbosity,
                            GtError *err);
 

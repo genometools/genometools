@@ -83,10 +83,10 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   bool alphaisbound = false;
   Filelengthvalues *filelengthtab = NULL;
   Seqpos specialrangestab[3];
+  unsigned long *characterdistribution = NULL;
 
   gt_error_check(err);
   sfxseqinfo->encseq = NULL;
-  sfxseqinfo->characterdistribution = NULL;
   sfxseqinfo->readmode = so->readmode;
   GT_INITARRAY(&sfxseqinfo->sequenceseppos,Seqpos);
   if (gt_str_length(so->str_sat) > 0)
@@ -117,7 +117,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   }
   if (!haserr)
   {
-    sfxseqinfo->characterdistribution = initcharacterdistribution(alpha);
+    characterdistribution = initcharacterdistribution(alpha);
     if (fasta2sequencekeyvalues(so->str_indexname,
                                 &totallength,
                                 &specialcharinfo,
@@ -128,14 +128,14 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                                 alpha,
                                 so->isplain,
                                 so->outdestab,
-                                sfxseqinfo->characterdistribution,
+                                characterdistribution,
                                 so->outssptab,
                                 &sfxseqinfo->sequenceseppos,
                                 verboseinfo,
                                 err) != 0)
     {
       haserr = true;
-      FREESPACE(sfxseqinfo->characterdistribution);
+      FREESPACE(characterdistribution);
       gt_free(filelengthtab);
       filelengthtab = NULL;
     }
@@ -145,7 +145,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
     if (outal1file(so->str_indexname,alpha,err) != 0)
     {
       haserr = true;
-      FREESPACE(sfxseqinfo->characterdistribution);
+      FREESPACE(characterdistribution);
       gt_free(filelengthtab);
       filelengthtab = NULL;
     }
@@ -168,14 +168,14 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                               gt_str_length(so->str_sat) > 0
                                 ? gt_str_get(so->str_sat)
                                 : NULL,
-                              sfxseqinfo->characterdistribution,
+                              characterdistribution,
                               &specialcharinfo,
                               verboseinfo,
                               err);
     if (sfxseqinfo->encseq == NULL)
     {
       haserr = true;
-      FREESPACE(sfxseqinfo->characterdistribution);
+      FREESPACE(characterdistribution);
     } else
     {
       alphaisbound = true;
@@ -201,7 +201,6 @@ int fromsarr2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                         Verboseinfo *verboseinfo,
                         GtError *err)
 {
-  sfxseqinfo->characterdistribution = NULL;
   sfxseqinfo->readmode = readmodeoption;
   GT_INITARRAY(&sfxseqinfo->sequenceseppos,Seqpos);
   sfxseqinfo->encseq = mapencodedsequence(true,
@@ -211,7 +210,11 @@ int fromsarr2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                                           false,
                                           verboseinfo,
                                           err);
-  return (sfxseqinfo->encseq == NULL) ? -1 : 0;
+  if (sfxseqinfo->encseq == NULL)
+  {
+    return -1;
+  }
+  return 0;
 }
 
 void freeSfxseqinfo(Sfxseqinfo *sfxseqinfo)
