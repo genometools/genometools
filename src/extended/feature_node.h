@@ -27,6 +27,36 @@
 #include "extended/genome_node.h"
 #include "extended/transcript_feature_type.h"
 
+/* Besides the ``mere'' feature nodes two ``special'' feature nodes exist:
+   multi-features and pseudo-features.
+
+   Multi-features represent features which span multiple lines (it is indicated
+   in GFF3 files by the fact, that each line has the same ID attribute).
+
+   To check if a feature is a multi-feature use the method
+   <gt_feature_node_is_multi()>.
+   Multi-features are connected via a ``representative''. That is, two features
+   are part of the same multi-feature if they have the same representative
+   (which can be retrieved via  <gt_feature_node_get_multi_representative()>).
+
+   Pseudo-features became a technical necessity to be able to pass related
+   top-level features as a single entity through the streaming machinery.
+   There are two cases in which a pseudo-feature has to be introduced.
+
+   First, if a multi-feature has no parent. In this case all features which
+   comprise the multi-feature become the children of a pseudo-feature.
+
+   Second, if two or more top-level features have the same childen (and are
+   thereby connected). In this case all these top-level features become the
+   children of a pseudo-feature.
+
+   It should be clear from the explanation above that pseudo-features make only
+   sense as top-level features (a fact which is enforced in the code).
+
+   Pseudo-features are typically ignored during a traversal to give the illusion
+   that they do not exist.
+*/
+
 typedef void (*AttributeIterFunc)(const char *attr_name, const char *attr_value,
                                   void *data);
 typedef int (*GtGenomeNodeTraverseFunc)(GtGenomeNode*, void*, GtError*);
