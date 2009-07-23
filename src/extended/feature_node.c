@@ -216,6 +216,20 @@ GtGenomeNode* gt_feature_node_new(GtStr *seqid, const char *type,
   return gn;
 }
 
+GtGenomeNode* gt_feature_node_new_pseudo(GtStr *seqid, unsigned long start,
+                                         unsigned long end, GtStrand strand)
+{
+  GtFeatureNode *pf;
+  GtGenomeNode *pn;
+  gt_assert(seqid);
+  gt_assert(start <= end);
+  pn = gt_feature_node_new(seqid, "pseudo", start, end, strand);
+  pf = gt_feature_node_cast(pn);
+  pf->type = NULL; /* pseudo features do not have a type */
+  pf->bit_field |= 1 << PSEUDO_FEATURE_OFFSET;
+  return pn;
+}
+
 GtGenomeNode* gt_feature_node_new_pseudo_template(GtFeatureNode *fn)
 {
   GtFeatureNode *pf;
@@ -223,13 +237,11 @@ GtGenomeNode* gt_feature_node_new_pseudo_template(GtFeatureNode *fn)
   GtRange range;
   gt_assert(fn);
   range = feature_node_get_range((GtGenomeNode*) fn),
-  pn = gt_feature_node_new(feature_node_get_seqid((GtGenomeNode*) fn),
-                           gt_feature_node_get_type(fn), range.start,
-                           range.end, gt_feature_node_get_strand(fn));
+  pn = gt_feature_node_new_pseudo(feature_node_get_seqid((GtGenomeNode*) fn),
+                                  range.start, range.end,
+                                  gt_feature_node_get_strand(fn));
   pf = gt_feature_node_cast(pn);
-  pf->type = NULL; /* pseudo features do not have a type */
   gt_feature_node_set_source(pf, fn->source);
-  pf->bit_field |= 1 << PSEUDO_FEATURE_OFFSET;
   return pn;
 }
 
