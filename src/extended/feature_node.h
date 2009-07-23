@@ -45,13 +45,23 @@ GtGenomeNode*  gt_feature_node_new_pseudo(GtStr *seqid, unsigned long start,
    template.  That is, the sequence ID, range, strand, and source are taken from
    <feature_node>. */
 GtGenomeNode*  gt_feature_node_new_pseudo_template(GtFeatureNode *feature_node);
-bool           gt_feature_node_is_multi(const GtFeatureNode *);
-bool           gt_feature_node_is_pseudo(const GtFeatureNode*);
-void           gt_feature_node_make_multi_representative(GtFeatureNode*);
-void           gt_feature_node_set_multi_representative(GtFeatureNode*,
-                                                        GtFeatureNode*);
-GtFeatureNode* gt_feature_node_get_multi_representative(GtFeatureNode*);
-
+/* Return <true> if <feature_node> is a multi-feature, <false> otherwise. */
+bool           gt_feature_node_is_multi(const GtFeatureNode *feature_node);
+/* Return <true> if <feature_node> is a pseudo-feature, <false> otherwise. */
+bool           gt_feature_node_is_pseudo(const GtFeatureNode *feature_node);
+/* Make <feature_node> the representative of a multi-feature.
+   Thereby <feature_node> becomes a multi-feature. */
+void           gt_feature_node_make_multi_representative(GtFeatureNode
+                                                         *feature_node);
+/* Set the multi-feature representative of <feature_node> to <representative>.
+   Thereby <feature_node> becomes a multi-feature. */
+void           gt_feature_node_set_multi_representative(GtFeatureNode
+                                                        *feature_node,
+                                                        GtFeatureNode
+                                                        *representative);
+/* Return the representative of the multi-feature <feature_node>. */
+GtFeatureNode* gt_feature_node_get_multi_representative(GtFeatureNode
+                                                        *feature_node);
 void           gt_feature_node_get_exons(GtFeatureNode*,
                                          GtArray *exon_features);
 void           gt_feature_node_determine_transcripttypes(GtFeatureNode*);
