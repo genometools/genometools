@@ -32,13 +32,18 @@ typedef void (*AttributeIterFunc)(const char *attr_name, const char *attr_value,
 typedef int (*GtGenomeNodeTraverseFunc)(GtGenomeNode*, void*, GtError*);
 
 const GtGenomeNodeClass* gt_feature_node_class(void);
-GtGenomeNode*  gt_feature_node_new_pseudo(GtFeatureNode*);
-bool           gt_feature_node_is_multi(const GtFeatureNode*);
+
+/* Create a new pseudo-feature node which uses <feature_node> as template.
+   That is, the sequence id, range, strand, and source are taken from
+   <feature_node>. */
+GtGenomeNode*  gt_feature_node_new_pseudo_template(GtFeatureNode *feature_node);
+bool           gt_feature_node_is_multi(const GtFeatureNode *);
 bool           gt_feature_node_is_pseudo(const GtFeatureNode*);
 void           gt_feature_node_make_multi_representative(GtFeatureNode*);
 void           gt_feature_node_set_multi_representative(GtFeatureNode*,
                                                         GtFeatureNode*);
 GtFeatureNode* gt_feature_node_get_multi_representative(GtFeatureNode*);
+
 void           gt_feature_node_get_exons(GtFeatureNode*,
                                          GtArray *exon_features);
 void           gt_feature_node_determine_transcripttypes(GtFeatureNode*);

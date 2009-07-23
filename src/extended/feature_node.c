@@ -216,7 +216,7 @@ GtGenomeNode* gt_feature_node_new(GtStr *seqid, const char *type,
   return gn;
 }
 
-GtGenomeNode* gt_feature_node_new_pseudo(GtFeatureNode *fn)
+GtGenomeNode* gt_feature_node_new_pseudo_template(GtFeatureNode *fn)
 {
   GtFeatureNode *pf;
   GtGenomeNode *pn;

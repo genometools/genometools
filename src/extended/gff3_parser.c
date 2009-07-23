@@ -461,7 +461,7 @@ static int store_id(const char *id, GtFeatureNode *feature_node,
           gt_feature_node_make_multi_representative(fn);
           if (!has_parent) { /* create pseudo node */
             GtFeatureNode *pseudo_node = (GtFeatureNode*)
-                                         gt_feature_node_new_pseudo(fn);
+                                        gt_feature_node_new_pseudo_template(fn);
             feature_node_is_part_of_pseudo_node(pseudo_node, fn,
                                                 parser->feature_info);
             replace_node(fn, pseudo_node, genome_nodes, auto_sr);
@@ -571,7 +571,7 @@ static GtFeatureNode* create_pseudo_node(GtFeatureNode *node_a,
   gt_assert(node_b && !gt_feature_node_is_pseudo((GtFeatureNode*) node_b));
   gt_assert(feature_info && genome_nodes);
   pseudo_node = (GtFeatureNode*)
-                gt_feature_node_new_pseudo((GtFeatureNode*) node_a);
+                gt_feature_node_new_pseudo_template((GtFeatureNode*) node_a);
   feature_node_is_part_of_pseudo_node(pseudo_node, node_a, feature_info);
   feature_node_is_part_of_pseudo_node(pseudo_node, node_b, feature_info);
   replace_node(node_a, pseudo_node, genome_nodes, auto_sr);
