@@ -603,8 +603,8 @@ static GtFeatureNode* join_root_pair(GtFeatureNode *root_a,
                                           genome_nodes, auto_sr);
   }
   else { /* !root_a_is_pseudo && !root_b_is_pseudo */
-    master_root =  create_pseudo_node(root_a, root_b, feature_info,
-                                      genome_nodes, auto_sr);
+    master_root = create_pseudo_node(root_a, root_b, feature_info, genome_nodes,
+                                     auto_sr);
   }
   return master_root;
 }
