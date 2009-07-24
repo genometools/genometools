@@ -17,18 +17,32 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-from gt.dlload import gtlib
-from gt.core.error import Error, gterror, GTError
+from gt.core.error import GTError
 from gt.extended.custom_stream import CustomStream
+from gt.extended.custom_visitor_example import CustomVisitorExample
 from gt.extended.feature_node import FeatureNode
-from random import randrange
 
+# This is an example custom stream implementation in Python.
+# It applies a CustomVisitorExample to each node read from the input stream.
+# For example, it can be used like this:
+#
+#   ins = GFF3InStream("somefile.gff3")
+#   cs = CustomStreamExample(ins)
+#   outs = GFF3OutStream(cs)
+#   outs.pull()
+#
+# Please raise a GTError if a user error in the stream is to be signaled.
+# This will ensure that error handling is done properly in the underlying C
+# code.
 class CustomStreamExample(CustomStream):
 
     def __init__(self, instream):
         CustomStream.__init__(self)
         self.instream = instream
+        self.visitor = CustomVisitorExample()
 
     def next(self):
         node = self.instream.next_tree()
+        if node:
+            node.accept(self.visitor)
         return node
