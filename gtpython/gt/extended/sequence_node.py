@@ -31,7 +31,7 @@ class SequenceNode(GenomeNode):
     @classmethod
     def create_new(cls, description, sequence):
         seq_str = Str(sequence)
-        fn = gtlib.gt_feature_node_new(description, seq_str)
+        fn = gtlib.gt_sequence_node_new(description, seq_str)
         n = cls.create_from_ptr(fn, True)
         return n
 
@@ -39,9 +39,9 @@ class SequenceNode(GenomeNode):
         return gtlib.gt_sequence_node_get_description(self.gn)
 
     def get_sequence(self):
-        str_ptr = gtlib.gt_sequence_node_get_sequence(self.gn)
-        if str_ptr:
-            return str(Str(str_ptr))
+        seq = gtlib.gt_sequence_node_get_sequence(self.gn)
+        if seq:
+            return str(seq)
         else:
             return ""
 
@@ -54,7 +54,7 @@ class SequenceNode(GenomeNode):
         gtlib.gt_sequence_node_new.argtypes = [c_char_p, Str]
         gtlib.gt_sequence_node_get_description.restype = c_char_p
         gtlib.gt_sequence_node_get_description.argtypes = [c_void_p]
-        gtlib.gt_sequence_node_get_sequence.restype = c_void_p
+        gtlib.gt_sequence_node_get_sequence.restype = c_char_p
         gtlib.gt_sequence_node_get_sequence.argtypes = [c_void_p]
         gtlib.gt_sequence_node_get_sequence_length.restype = c_ulong
         gtlib.gt_sequence_node_get_sequence_length.argtypes = [c_void_p]
