@@ -19,7 +19,7 @@
 
 from gt.dlload import gtlib
 from gt.core.error import Error, gterror
-from gt.extended.gff3_visitor import GFF3Visitor
+from gt.extended.node_visitor import NodeVisitor
 from gt.core.gtstr import Str
 from gt.props import cachedproperty
 
@@ -69,7 +69,11 @@ class GenomeNode(object):
     range = property(get_range)
 
     def get_seqid(self):
-        return str(Str(gtlib.gt_genome_node_get_seqid(self.gn)))
+        strptr = gtlib.gt_genome_node_get_seqid(self.gn)
+        if strptr:
+            return str(Str(strptr))
+        else:
+            return None
 
     seqid = cachedproperty(get_seqid)
 
@@ -108,13 +112,13 @@ class GenomeNode(object):
         gtlib.gt_genome_node_get_end.restype = c_ulong
         gtlib.gt_genome_node_get_end.argtypes = [c_void_p]
         gtlib.gt_genome_node_get_seqid.argtypes = [c_void_p]
-        gtlib.gt_genome_node_get_seqid.restype = Str
+        gtlib.gt_genome_node_get_seqid.restype = c_void_p
         gtlib.gt_genome_node_get_filename.argtypes = [c_void_p]
         gtlib.gt_genome_node_get_filename.restype = c_char_p
         gtlib.gt_genome_node_get_line_number.argtypes = [c_void_p]
         gtlib.gt_genome_node_get_line_number.restype = c_uint
         gtlib.gt_genome_node_accept.restype = c_int
-        gtlib.gt_genome_node_accept.argtypes = [c_void_p, GFF3Visitor,
+        gtlib.gt_genome_node_accept.argtypes = [c_void_p, NodeVisitor,
                 Error]
 
     register = classmethod(register)
