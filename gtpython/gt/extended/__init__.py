@@ -37,6 +37,7 @@ from merge_feature_stream import *
 
 CommentNode.register(gtlib)
 GenomeNode.register(gtlib)
+RegionNode.register(gtlib)
 SequenceNode.register(gtlib)
 CustomStream.register(gtlib)
 FeatureNode.register(gtlib)

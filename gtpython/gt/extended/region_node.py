@@ -19,6 +19,7 @@
 
 from gt.dlload import gtlib
 from gt.extended.genome_node import GenomeNode
+from gt.core.gtstr import Str
 
 
 class RegionNode(GenomeNode):
@@ -27,7 +28,15 @@ class RegionNode(GenomeNode):
         pass
 
     @classmethod
-    def create_new(cls, start, end):
-        fn = gtlib.gt_feature_node_new(start, end)
+    def create_new(cls, seqid, start, end):
+        seq_str = Str(str(seqid))
+        fn = gtlib.gt_region_node_new(seq_str, start, end)
         n = cls.create_from_ptr(fn, True)
         return n
+
+    def register(cls, gtlib):
+        from ctypes import c_ulong, c_void_p
+        gtlib.gt_region_node_new.restype = c_void_p
+        gtlib.gt_region_node_new.argtypes = [Str, c_ulong, c_ulong]
+
+    register = classmethod(register)
