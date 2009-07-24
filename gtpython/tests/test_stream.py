@@ -79,7 +79,24 @@ class TestInterFeat(unittest.TestCase):
             f = dfi.next()
         self.assert_('intron' in types, types)
 
+class TestCustomExample(unittest.TestCase):
+    def setUp(self):
+        self.gff_file = op.join(datadir, "eden.gff3")
+        self.ins = gt.GFF3InStream(self.gff_file)
 
+    def test_inter(self):
+        fi = gt.FeatureIndexMemory()
+        gt.FeatureStream(gt.CustomStreamExample(self.ins),
+                         fi).pull()
+
+        f = fi.get_features_for_seqid('ctg123')
+        dfi = gt.FeatureNodeIteratorDepthFirst(f[0])
+        f = dfi.next()
+        types = set([])
+        while f:
+            types.update([f.type])
+            f = dfi.next()
+        self.assert_('bar' in types, types)
 
 if __name__ == "__main__":
     unittest.main()
