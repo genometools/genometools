@@ -24,7 +24,7 @@
 #include "core/error_api.h"
 #include "core/range_api.h"
 
-/* Implements the <GtCustomTrackScriptWrapper> interface. This custom track is
+/* Implements the <GtCustomTrack> interface. This custom track is
    only used to store pointers to external callbacks, e.g. written in a
    scripting language. This class does not store any state, relying on the
    developer of the external custom track class to do so.  */
