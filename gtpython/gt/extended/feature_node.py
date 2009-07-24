@@ -53,7 +53,12 @@ class FeatureNode(GenomeNode):
         return attribs
 
     def add_child(self, node):
-        gtlib.gt_feature_node_add_child(self.gn, node)
+        ownid = str(self.get_seqid())
+        newid = str(node.get_seqid())
+        if (ownid != newid):
+            gterror("cannot add node with sequence region '%s' to node with sequence region '%s'" % (ownid, newid))
+        else:
+            gtlib.gt_feature_node_add_child(self.gn, node)
 
     def from_param(cls, obj):
         if not isinstance(obj, FeatureNode):
@@ -74,10 +79,10 @@ class FeatureNode(GenomeNode):
     def get_type(self):
         return gtlib.gt_feature_node_get_type(self.gn)
 
-    type = cachedproperty(get_type, None)
-
     def set_type(self, type):
         gtlib.gt_feature_node_set_type(self.gn, type)
+
+    type = cachedproperty(get_type, set_type)
 
     def has_type(self, type):
         return gtlib.gt_feature_node_has_type(self.gn, type) == 1
