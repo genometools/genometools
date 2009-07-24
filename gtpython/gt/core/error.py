@@ -53,6 +53,9 @@ class Error:
     def get(self):
         return gtlib.gt_error_get(self.error)
 
+    def set(self, errmsg):
+        return gtlib.gt_error_set(self.error, errmsg)
+
     def is_set(self):
         return gtlib.gt_error_is_set(self.error) == 1
 
@@ -65,6 +68,7 @@ class Error:
         gtlib.gt_error_get.restype = c_char_p
         gtlib.gt_error_is_set.restype = c_int
         gtlib.gt_error_get.argtypes = [c_void_p]
+        gtlib.gt_error_set.argtypes = [c_void_p, c_char_p]
         gtlib.gt_error_is_set.argtypes = [c_void_p]
         gtlib.gt_error_unset.argtypes = [c_void_p]
 
