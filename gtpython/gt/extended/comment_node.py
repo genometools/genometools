@@ -28,7 +28,7 @@ class CommentNode(GenomeNode):
 
     @classmethod
     def create_new(cls, comment):
-        fn = gtlib.gt_comment_node_new(comment)
+        fn = gtlib.gt_comment_node_new(str(comment))
         n = cls.create_from_ptr(fn, True)
         return n
 
