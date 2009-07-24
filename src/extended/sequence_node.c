@@ -82,7 +82,7 @@ GtGenomeNode* gt_sequence_node_new(const char *description, GtStr *sequence)
   GtSequenceNode *sn = gt_sequence_node_cast(gn);
   gt_assert(description && sequence);
   sn->description = gt_str_new_cstr(description);
-  sn->sequence = sequence;
+  sn->sequence = gt_str_ref(sequence);
   return gn;
 }
 

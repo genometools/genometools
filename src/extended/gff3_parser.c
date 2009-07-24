@@ -1250,6 +1250,7 @@ static int gff3_parser_parse_fasta_entry(GtQueue *genome_nodes,
     sequence_node = gt_sequence_node_new(line+1, sequence);
     gt_genome_node_set_origin(sequence_node, filename, line_number);
     gt_queue_add(genome_nodes, sequence_node);
+    gt_str_delete(sequence);
   }
   return had_err;
 }
