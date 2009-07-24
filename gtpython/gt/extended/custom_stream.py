@@ -19,7 +19,7 @@
 
 from ctypes import CFUNCTYPE, c_void_p, c_int, POINTER
 from gt.dlload import gtlib
-from gt.core.error import Error, GTError
+from gt.core.error import Error, gterror, GTError
 from gt.extended.genome_stream import GenomeStream
 
 NextFunc = CFUNCTYPE(c_int, POINTER(c_void_p), c_void_p)
@@ -28,6 +28,12 @@ FreeFunc = CFUNCTYPE(c_void_p, c_void_p)
 class CustomStream(GenomeStream):
 
     def __init__(self):
+
+        try:
+            self.next
+        except AttributeError:
+            gterror("%s does not implement mandatory method 'next'!" \
+                      % self.__class__.__name__)
 
         def next_w(nodepp, err):
             error = Error(err)
