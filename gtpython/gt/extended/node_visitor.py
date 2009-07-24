@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-# Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+# Copyright (c) 2009 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -18,11 +18,22 @@
 #
 
 from gt.dlload import gtlib
-from gt.extended.node_visitor import NodeVisitor
 
-class GFF3Visitor(NodeVisitor):
+
+class NodeVisitor(object):
 
     def __init__(self):
-        self.gv = gtlib.gt_gff3_visitor_new(None)
-        self._as_parameter_ = self.gv
+        raise NotImplementedError, \
+            'Please call the constructor of a NodeVisitor implementation.'
+
+    def __del__(self):
+        gtlib.gt_node_visitor_delete(self.gv)
+
+    def from_param(cls, obj):
+        if not isinstance(obj, NodeVisitor):
+            raise TypeError, "argument must be a NodeVisitor"
+        return obj._as_parameter_
+
+    from_param = classmethod(from_param)
+
 
