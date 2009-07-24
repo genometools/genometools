@@ -56,6 +56,12 @@ class GenomeNode(object):
             except AttributeError:
                 pass
 
+    def __eq__(self, node):
+        try:
+            return self.gn == node.gn
+        except AttributeError:
+            return False
+
     def from_param(cls, obj):
         if not isinstance(obj, GenomeNode):
             raise TypeError, "argument must be a GenomeNode"
