@@ -18,6 +18,8 @@
 #
 
 from feature_node import *
+from custom_stream import *
+from custom_stream_example import *
 from genome_node import *
 from genome_stream import *
 from gff3_in_stream import *
@@ -29,6 +31,7 @@ from dup_feature_stream import *
 from merge_feature_stream import *
 
 GenomeNode.register(gtlib)
+CustomStream.register(gtlib)
 FeatureNode.register(gtlib)
 FeatureNodeIterator.register(gtlib)
 GFF3InStream.register(gtlib)
