@@ -58,12 +58,6 @@ class CustomStream(GenomeStream):
                                                      self.free_cb)
         self._as_parameter_ = self.gs
 
-    def __del__(self):
-        try:
-            gtlib.gt_node_stream_delete(self.gs)
-        except AttributeError:
-            pass
-
     def from_param(cls, obj):
         if not isinstance(obj, CustomStream):
             raise TypeError, "argument must be a CustomStream"
