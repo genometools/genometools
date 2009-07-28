@@ -29,6 +29,10 @@
    interface. */
 typedef struct GtTranslator GtTranslator;
 
+/* The number of the standard translation scheme. */
+#define GT_TRANSLATOR_STANDARD_SCHEME \
+        1
+
 /* Creates a new <GtTranslator> with the standard genetic code translation
    scheme preselected. */
 GtTranslator* gt_translator_new();

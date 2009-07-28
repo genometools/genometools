@@ -24,7 +24,6 @@
 #include "core/translator.h"
 #include "core/unused_api.h"
 
-#define GT_STANDARDTRANSLATIONTABLE  1
 #define GT_AMINOACIDFAIL            -1
 
 #define GT_NUMOFTRANSSCHEMES\
@@ -746,7 +745,7 @@ GtTranslator* gt_translator_new()
   GtTranslator *tr;
   tr = gt_calloc(1, sizeof (GtTranslator));
   /* set standard translation table as default */
-  tr->scheme = getschemetable(GT_STANDARDTRANSLATIONTABLE, NULL);
+  tr->scheme = getschemetable(GT_TRANSLATOR_STANDARD_SCHEME, NULL);
   gt_assert(tr->scheme); /* standard table must exist */
   return tr;
 }
