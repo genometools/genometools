@@ -20,7 +20,7 @@
 
 /*
   This file defines some macros to define division, multiplication,
-  and modulo operations by \(2, 4, 8, 16, 32\) and \(64\).
+  and modulo operations by 2, 4, 8, 16, 32 and 64.
 */
 
 #define DIV2(N)      ((N) >> 1)
