@@ -28,7 +28,7 @@ typedef enum
   GT_RBT_LEAF
 } GtRbtVisit;
 
-typedef void *GtKeytype;
+typedef void* GtKeytype;
 
 #define GtKeytypeerror NULL
 
