@@ -21,6 +21,7 @@
 #include <errno.h>
 #include "core/arraydef.h"
 #include "core/chardef.h"
+#include "core/divmodmul.h"
 #include "core/error.h"
 #include "core/fa.h"
 #include "core/sequence_buffer_fasta.h"
@@ -36,7 +37,6 @@
 #include "format64.h"
 #include "intbits-tab.h"
 #include "alphadef.h"
-#include "divmodmul.h"
 #include "mapspec-def.h"
 #include "safecast-gen.h"
 #include "esa-fileend.h"

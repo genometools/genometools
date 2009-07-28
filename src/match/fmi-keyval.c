@@ -16,7 +16,7 @@
 */
 
 #include <math.h>
-#include "divmodmul.h"
+#include "core/divmodmul.h"
 #include "fmindex.h"
 #include "safecast-gen.h"
 

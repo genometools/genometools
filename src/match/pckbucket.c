@@ -15,10 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/divmodmul.h"
 #include "core/fa.h"
 #include "core/xansi.h"
 #include "core/fileutils.h"
-#include "divmodmul.h"
 #include "eis-voiditf.h"
 #include "pckbucket.h"
 #include "initbasepower.h"

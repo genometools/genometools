@@ -16,8 +16,8 @@
 */
 
 #include "core/arraydef.h"
+#include "core/divmodmul.h"
 #include "core/minmax.h"
-#include "divmodmul.h"
 #include "seqpos-def.h"
 #include "spacedef.h"
 #include "encseq-def.h"

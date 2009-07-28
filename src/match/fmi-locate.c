@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "divmodmul.h"
+#include "core/divmodmul.h"
 #include "seqpos-def.h"
 #include "fmindex.h"
 #include "fmi-bwtbound.h"

@@ -18,9 +18,9 @@
 #include "core/assert_api.h"
 #include "core/arraydef.h"
 #include "core/chardef.h"
+#include "core/divmodmul.h"
 #include "format64.h"
 #include "intbits-tab.h"
-#include "divmodmul.h"
 #include "spacedef.h"
 #include "encseq-def.h"
 

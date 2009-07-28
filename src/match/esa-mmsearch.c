@@ -16,12 +16,12 @@
 */
 
 #include "core/chardef.h"
+#include "core/divmodmul.h"
 #include "core/minmax.h"
 #include "core/seqiterator.h"
 #include "core/symboldef.h"
 #include "sarr-def.h"
 #include "seqpos-def.h"
-#include "divmodmul.h"
 #include "spacedef.h"
 #include "esa-mmsearch-def.h"
 #include "sfx-suffixer.h"

@@ -15,9 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/divmodmul.h"
 #include "core/fa.h"
 #include "encseq-def.h"
-#include "divmodmul.h"
 #include "defined-types.h"
 #include "opensfxfile.h"
 #include "spacedef.h"

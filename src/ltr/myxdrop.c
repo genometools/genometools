@@ -17,8 +17,8 @@
 
 #include <string.h>
 #include "core/chardef.h"
+#include "core/divmodmul.h"
 #include "core/minmax.h"
-#include "match/divmodmul.h"
 #include "repeattypes.h"
 #include "myxdrop.h"
 

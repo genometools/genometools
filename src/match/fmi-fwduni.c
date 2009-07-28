@@ -17,8 +17,8 @@
 
 #include <math.h>
 #include "core/chardef.h"
+#include "core/divmodmul.h"
 #include "core/unused_api.h"
-#include "divmodmul.h"
 #include "fmindex.h"
 
 #include "fmi-occ.gen"

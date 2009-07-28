@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/divmodmul.h"
 #include "seqpos-def.h"
-#include "divmodmul.h"
 #include "spacedef.h"
 #include "intcode-def.h"
 #include "sfx-partssuf-def.h"

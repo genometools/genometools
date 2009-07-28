@@ -18,13 +18,13 @@
 #include <string.h>
 #include <inttypes.h>
 #include "core/chardef.h"
+#include "core/divmodmul.h"
 #include "core/fa.h"
 #include "core/error.h"
 #include "core/str.h"
 #include "emimergeesa.h"
 #include "esa-fileend.h"
 #include "fmindex.h"
-#include "divmodmul.h"
 #include "spacedef.h"
 #include "opensfxfile.h"
 #include "esa-map.h"

@@ -36,8 +36,8 @@ int testmaxpairs(GT_UNUSED const GtStr *indexname,
 
 #include "core/array.h"
 #include "core/arraydef.h"
+#include "core/divmodmul.h"
 #include "core/unused_api.h"
-#include "divmodmul.h"
 #include "spacedef.h"
 #include "esa-mmsearch-def.h"
 #include "alphadef.h"

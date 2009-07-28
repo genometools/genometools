@@ -17,12 +17,12 @@
 
 #include <string.h>
 #include "core/chardef.h"
+#include "core/divmodmul.h"
 #include "core/symboldef.h"
 #include "core/unused_api.h"
 #include "sarr-def.h"
 #include "seqpos-def.h"
 #include "spacedef.h"
-#include "divmodmul.h"
 #include "esa-splititv.h"
 #include "eis-voiditf.h"
 #include "defined-types.h"

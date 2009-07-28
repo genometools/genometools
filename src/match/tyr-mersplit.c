@@ -17,11 +17,11 @@
 
 #include <math.h>
 #include <errno.h>
+#include "core/divmodmul.h"
 #include "core/str_api.h"
 #include "core/minmax.h"
 #include "core/symboldef.h"
 #include "core/fa.h"
-#include "divmodmul.h"
 #include "defined-types.h"
 #include "intbits.h"
 #include "intbits-tab.h"

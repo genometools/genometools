@@ -15,10 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/divmodmul.h"
 #include "eis-bwtseq.h"
 #include "eis-bwtseq-construct.h"
 #include "eis-voiditf.h"
-#include "divmodmul.h"
 #include "splititv.h"
 #include "procmatch.h"
 #include "pckbucket.h"

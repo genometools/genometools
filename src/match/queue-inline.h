@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "core/assert_api.h"
-#include "divmodmul.h"
+#include "core/divmodmul.h"
 #include "spacedef.h"
 
 typedef struct

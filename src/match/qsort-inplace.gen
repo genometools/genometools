@@ -1,7 +1,7 @@
 #include <stdbool.h>
 #include "core/unused_api.h"
 #include "core/minmax.h"
-#include "match/divmodmul.h"
+#include "core/divmodmul.h"
 
 /*
  * Qsort routine from Bentley & McIlroy's "Engineering a Sort Function".

@@ -16,9 +16,9 @@
 */
 
 #include "core/basename_api.h"
+#include "core/divmodmul.h"
 #include "core/option.h"
 #include "core/versionfunc.h"
-#include "divmodmul.h"
 #include "fmindex.h"
 #include "verbose-def.h"
 #include "spacedef.h"

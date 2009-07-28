@@ -17,8 +17,9 @@
 
 #ifndef INTBITS_H
 #define INTBITS_H
+
 #include <inttypes.h>
-#include "divmodmul.h"
+#include "core/divmodmul.h"
 
 /*
   This file contains some definitions manipulating bitvectors represented

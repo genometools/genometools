@@ -16,9 +16,9 @@
 */
 
 #include "core/chardef.h"
+#include "core/divmodmul.h"
 #include "core/symboldef.h"
 #include "seqpos-def.h"
-#include "divmodmul.h"
 #include "esa-splititv.h"
 
 #define SEQUENCE(ENCSEQ,POS) (((POS) == totallength) \

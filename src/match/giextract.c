@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "core/assert_api.h"
+#include "core/divmodmul.h"
 #include "core/fileutils.h"
 #include "core/error.h"
 #include "core/ma.h"
@@ -28,7 +29,6 @@
 #include "core/seqiterator.h"
 #include "core/progressbar.h"
 #include "core/fasta.h"
-#include "divmodmul.h"
 #include "giextract.h"
 #include "format64.h"
 

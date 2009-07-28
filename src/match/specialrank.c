@@ -18,8 +18,8 @@
 #include <stdio.h>
 #include <string.h>
 #include "core/chardef.h"
+#include "core/divmodmul.h"
 #include "core/ma_api.h"
-#include "divmodmul.h"
 #include "seqpos-def.h"
 #include "encseq-def.h"
 

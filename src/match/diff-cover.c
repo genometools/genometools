@@ -17,15 +17,15 @@
 
 #include <stdbool.h>
 #include <math.h>
-#include "core/ma.h"
-#include "core/assert_api.h"
-#include "core/unused_api.h"
-#include "core/error_api.h"
-#include "core/minmax.h"
 #include "core/arraydef.h"
+#include "core/assert_api.h"
+#include "core/error_api.h"
+#include "core/divmodmul.h"
+#include "core/ma.h"
+#include "core/minmax.h"
 #include "core/mathsupport.h"
 #include "core/qsort_r.h"
-#include "divmodmul.h"
+#include "core/unused_api.h"
 #include "intbits-tab.h"
 #include "diff-cover.h"
 #include "sfx-apfxlen.h"

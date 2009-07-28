@@ -16,6 +16,7 @@
 */
 
 #include <errno.h>
+#include "core/divmodmul.h"
 #include "core/str.h"
 #include "core/unused_api.h"
 #include "core/fa.h"
@@ -24,7 +25,6 @@
 #include "verbose-def.h"
 #include "spacedef.h"
 #include "format64.h"
-#include "divmodmul.h"
 #include "esa-mmsearch-def.h"
 #include "opensfxfile.h"
 #include "tyr-basic.h"
