@@ -20,8 +20,12 @@
 #include "core/assert_api.h"
 #include "core/minmax.h"
 #include "core/undef.h"
-#include "extended/coordinate.h"
 #include "extended/swalign.h"
+
+typedef struct {
+  unsigned long x,
+                y;
+} Coordinate;
 
 typedef struct {
   long score;
