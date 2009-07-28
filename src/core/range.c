@@ -378,8 +378,8 @@ static GtArray* generic_ranges_uniq(GtArray *out_ranges,
 {
   unsigned long i, *ctr_ptr, ctr = 1;
   GtArray *count_array = NULL;
-  GtRange cur  = { UNDEF_ULONG, UNDEF_ULONG },
-        prev = { UNDEF_ULONG, UNDEF_ULONG };
+  GtRange cur  = { GT_UNDEF_ULONG, GT_UNDEF_ULONG },
+        prev = { GT_UNDEF_ULONG, GT_UNDEF_ULONG };
   gt_assert(out_ranges && in_ranges);
   gt_assert(gt_ranges_are_sorted(in_ranges));
   if (count)
@@ -501,7 +501,7 @@ void gt_ranges_copy_to_opposite_strand(GtArray *outranges,
 
   for (i = gt_array_size(inranges); i > 0; i--) {
     /* genomic offset is defined */
-    gt_assert(gen_offset != UNDEF_ULONG);
+    gt_assert(gen_offset != GT_UNDEF_ULONG);
     range.start  = gen_total_length - 1
                   - (((GtRange*) gt_array_get(inranges, i-1))->end -
                      gen_offset)

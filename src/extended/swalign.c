@@ -62,7 +62,7 @@ static void swalign_fill_table(DPentry **dptable,
 static Coordinate traceback(GtAlignment *a, DPentry **dptable,
                             unsigned long i, unsigned long j)
 {
-  Coordinate start_coordinate = { UNDEF_ULONG, UNDEF_ULONG };
+  Coordinate start_coordinate = { GT_UNDEF_ULONG, GT_UNDEF_ULONG };
   gt_assert(a && dptable);
   while (dptable[i][j].score) {
     gt_assert(dptable[i][j].score > 0);
@@ -82,8 +82,8 @@ static Coordinate traceback(GtAlignment *a, DPentry **dptable,
       j--;
     }
   }
-  gt_assert(start_coordinate.x != UNDEF_ULONG);
-  gt_assert(start_coordinate.y != UNDEF_ULONG);
+  gt_assert(start_coordinate.x != GT_UNDEF_ULONG);
+  gt_assert(start_coordinate.y != GT_UNDEF_ULONG);
   return start_coordinate;
 }
 
@@ -94,15 +94,16 @@ static GtAlignment* smith_waterman_align(const char *u_orig, const char *v_orig,
                                        int deletion_score, int insertion_score)
 {
   gt_assert(u_orig && v_orig && u_enc && v_enc && u_len && v_len && scores);
-  Coordinate alignment_start, alignment_end = { UNDEF_ULONG, UNDEF_ULONG };
+  Coordinate alignment_start,
+             alignment_end = { GT_UNDEF_ULONG, GT_UNDEF_ULONG };
   GtRange urange, vrange;
   DPentry **dptable;
   GtAlignment *a = NULL;
   gt_array2dim_calloc(dptable, u_len+1, v_len+1);
   swalign_fill_table(dptable, u_enc, u_len, v_enc, v_len, scores,
                      deletion_score, insertion_score, &alignment_end);
-  gt_assert(alignment_end.x != UNDEF_ULONG);
-  gt_assert(alignment_end.y != UNDEF_ULONG);
+  gt_assert(alignment_end.x != GT_UNDEF_ULONG);
+  gt_assert(alignment_end.y != GT_UNDEF_ULONG);
   if (dptable[alignment_end.x][alignment_end.y].score) {
     /* construct only an alignment if a (positive) score was computed */
     a = gt_alignment_new();

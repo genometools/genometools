@@ -48,7 +48,7 @@ GtTrack* gt_track_new(GtStr *title, unsigned long max_num_lines,
   track->max_num_lines = max_num_lines;
   track->split = split_lines;
   track->lb = lb;
-  track->y_index = UNDEF_ULONG;
+  track->y_index = GT_UNDEF_ULONG;
   return track;
 }
 
@@ -65,7 +65,7 @@ static GtLine* get_next_free_line(GtTrack *track, GtBlock *block)
       return line;
   }
   /* if line limit is hit, do not create any more lines! */
-  if (track->max_num_lines != UNDEF_ULONG
+  if (track->max_num_lines != GT_UNDEF_ULONG
         && gt_array_size(track->lines) == track->max_num_lines)
   {
     track->discarded_blocks++;
@@ -252,7 +252,7 @@ int gt_track_unit_test(GtError *err)
 
   sty = gt_style_new(err);
 
-  track = gt_track_new(title, UNDEF_ULONG, true, lb);
+  track = gt_track_new(title, GT_UNDEF_ULONG, true, lb);
   ensure(had_err, track);
   ensure(had_err, gt_track_get_title(track) == title);
 

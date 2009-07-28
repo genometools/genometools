@@ -70,7 +70,7 @@ static int parse_alphabet_line(GtArray *index_to_alpha_char_mapping,
       had_err = -1;
       break;
     }
-    parsed_characters[(int) amino_acid] = UNDEF_CHAR;
+    parsed_characters[(int) amino_acid] = GT_UNDEF_CHAR;
     if (amino_acid == '\n') {
       gt_str_delete(token);
       gt_tokenizer_next_token(tz);
@@ -133,7 +133,7 @@ static int parse_score_line(GtScoreMatrix *sm, GtTokenizer *tz,
               gt_tokenizer_get_filename(tz));
     had_err = -1;
   }
-  parsed_characters[(int) amino_acid] = UNDEF_CHAR;
+  parsed_characters[(int) amino_acid] = GT_UNDEF_CHAR;
   gt_str_delete(token);
   if (!had_err) {
     gt_tokenizer_next_token(tz);

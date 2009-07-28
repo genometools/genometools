@@ -222,14 +222,14 @@ unsigned long gt_bittab_size(GtBittab *b)
 
 unsigned long gt_bittab_get_first_bitnum(const GtBittab *b)
 {
-  unsigned long i, rval = UNDEF_ULONG;
+  unsigned long i, rval = GT_UNDEF_ULONG;
   gt_assert(b);
   for (i = 0; i < b->num_of_bits; i++)
     if (gt_bittab_bit_is_set(b, i)) {
       rval = i;
       break;
     }
-  if (rval == UNDEF_ULONG)
+  if (rval == GT_UNDEF_ULONG)
     return b->num_of_bits;
   return rval;
 }
@@ -243,7 +243,7 @@ unsigned long gt_bittab_get_last_bitnum(const GtBittab *b)
 unsigned long gt_bittab_get_next_bitnum(const GtBittab *b,
                                         unsigned long curnum)
 {
-  unsigned long i, rval = UNDEF_ULONG;
+  unsigned long i, rval = GT_UNDEF_ULONG;
 
   gt_assert(b);
   gt_assert(curnum < b->num_of_bits);
@@ -252,7 +252,7 @@ unsigned long gt_bittab_get_next_bitnum(const GtBittab *b,
       rval = i;
       break;
     }
-  if (rval == UNDEF_ULONG)
+  if (rval == GT_UNDEF_ULONG)
     return b->num_of_bits;
   return rval;
 }

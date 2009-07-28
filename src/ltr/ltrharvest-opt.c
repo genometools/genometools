@@ -262,7 +262,7 @@ static OPrval parse_options(int *parsed_args,
                                &lo->repeatinfo.lmin,
                                100UL,
                                1UL,
-                               UNDEF_ULONG);
+                               GT_UNDEF_ULONG);
   gt_option_parser_add_option(op, optionminlenltr);
 
   /* -maxlenltr */
@@ -271,7 +271,7 @@ static OPrval parse_options(int *parsed_args,
                                &lo->repeatinfo.lmax,
                                1000UL,
                                1UL,
-                               UNDEF_ULONG);
+                               GT_UNDEF_ULONG);
   gt_option_parser_add_option(op, optionmaxlenltr);
 
   /* -mindistltr */
@@ -281,7 +281,7 @@ static OPrval parse_options(int *parsed_args,
                                &lo->repeatinfo.dmin,
                                1000UL,
                                1UL,
-                               UNDEF_ULONG);
+                               GT_UNDEF_ULONG);
   gt_option_parser_add_option(op, optionmindistltr);
 
   /* -maxdistltr */
@@ -291,7 +291,7 @@ static OPrval parse_options(int *parsed_args,
                                &lo->repeatinfo.dmax,
                                15000UL,
                                1UL,
-                               UNDEF_ULONG);
+                               GT_UNDEF_ULONG);
   gt_option_parser_add_option(op, optionmaxdistltr);
 
   /* -similar */
@@ -310,7 +310,7 @@ static OPrval parse_options(int *parsed_args,
                                &lo->minlengthTSD,
                                4U,
                                0,
-                               UNDEF_UINT);
+                               GT_UNDEF_UINT);
   gt_option_parser_add_option(op, optionmintsd);
 
   /* -maxtsd */
@@ -319,7 +319,7 @@ static OPrval parse_options(int *parsed_args,
                                &lo->maxlengthTSD,
                                20U,
                                0,
-                               UNDEF_UINT);
+                               GT_UNDEF_UINT);
   gt_option_parser_add_option(op, optionmaxtsd);
 
   /* -motif */

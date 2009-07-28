@@ -112,8 +112,8 @@ static int parse_range(GtRange *range, const char *start, const char *end,
   gt_assert(start && end && filename);
   gt_error_check(err);
 
-  range->start = UNDEF_ULONG;
-  range->end = UNDEF_ULONG;
+  range->start = GT_UNDEF_ULONG;
+  range->end = GT_UNDEF_ULONG;
 
   /* parse and check start */
   errno = 0;

@@ -344,8 +344,8 @@ static void findmaximalscores_withoverlaps(GtChain *chain,
   unsigned long i, startfrag;
   GtArray *startfragments;
 
-  gt_assert(seqlen1 != UNDEF_ULONG);
-  gt_assert(mincoverage != UNDEF_DOUBLE);
+  gt_assert(seqlen1 != GT_UNDEF_ULONG);
+  gt_assert(mincoverage != GT_UNDEF_DOUBLE);
   startfragments = gt_array_new(sizeof (unsigned long));
 
   /* compute chain array */
@@ -455,7 +455,8 @@ void gt_globalchaining_max(GtFragment *fragments,
                            GtChainProc chainprocessor, void *cpinfo)
 {
   globalchaining_generic(true, max_gap_width, fragments, num_of_fragments,
-                         UNDEF_ULONG, UNDEF_DOUBLE, chainprocessor, cpinfo);
+                         GT_UNDEF_ULONG, GT_UNDEF_DOUBLE, chainprocessor,
+                         cpinfo);
 }
 
 void gt_globalchaining_coverage(GtFragment *fragments,

@@ -79,7 +79,7 @@ static GtOptionParser* gt_bioseq_option_parser_new(void *tool_arguments)
                                               "given number on stdout "
                                               "(in fasta format)",
                                               &arguments->showseqnum,
-                                              UNDEF_ULONG, 1);
+                                              GT_UNDEF_ULONG, 1);
   gt_option_parser_add_option(op, option_showseqnum);
 
   /* -gc-content */
@@ -134,7 +134,7 @@ static int gt_bioseq_arguments_check(int rest_argc, void *tool_arguments,
   gt_error_check(err);
   gt_assert(arguments);
   /* option -showseqnum makes only sense if we got a single sequence file */
-  if (arguments->showseqnum != UNDEF_ULONG && rest_argc > 1) {
+  if (arguments->showseqnum != GT_UNDEF_ULONG && rest_argc > 1) {
     gt_error_set(err, "option '-showseqnum' makes only sense with a single "
                    "sequence_file");
     return -1;
@@ -176,7 +176,7 @@ static int gt_bioseq_runner(int argc, const char **argv, int parsed_args,
     if (!had_err && arguments->showfasta)
       gt_bioseq_show_as_fasta(bioseq, arguments->width);
 
-    if (!had_err && arguments->showseqnum != UNDEF_ULONG) {
+    if (!had_err && arguments->showseqnum != GT_UNDEF_ULONG) {
       if (arguments->showseqnum > gt_bioseq_number_of_sequences(bioseq)) {
         gt_error_set(err, "argument '%lu' to option '-showseqnum' is too "
                      "large. The GtBiosequence contains only '%lu' sequences.",

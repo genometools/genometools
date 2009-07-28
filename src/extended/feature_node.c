@@ -202,7 +202,7 @@ GtGenomeNode* gt_feature_node_new(GtStr *seqid, const char *type,
   fn->seqid       = gt_str_ref(seqid);
   fn->source      = NULL;
   fn->type        = gt_symbol(type);
-  fn->score       = UNDEF_FLOAT;
+  fn->score       = GT_UNDEF_FLOAT;
   fn->range.start = start;
   fn->range.end   = end;
   fn->attributes  = NULL;
@@ -542,7 +542,7 @@ void gt_feature_node_unset_score(GtFeatureNode *fn)
 {
   gt_assert(fn);
   fn->bit_field &= ~(1 << SCORE_IS_DEFINED_OFFSET);
-  fn->score = UNDEF_FLOAT;
+  fn->score = GT_UNDEF_FLOAT;
 }
 
 void gt_feature_node_add_attribute(GtFeatureNode *fn,

@@ -41,8 +41,8 @@ struct GtAlpha {
 GtAlpha* gt_alpha_new(void)
 {
   GtAlpha *a = gt_calloc(1, sizeof *a);
-  memset(a->code_to_character_map, UNDEF_UCHAR, UCHAR_MAX);
-  memset(a->character_to_code_map, UNDEF_UCHAR, UCHAR_MAX);
+  memset(a->code_to_character_map, GT_UNDEF_UCHAR, UCHAR_MAX);
+  memset(a->character_to_code_map, GT_UNDEF_UCHAR, UCHAR_MAX);
   return a;
 }
 
@@ -131,14 +131,14 @@ void gt_alpha_add_mapping(GtAlpha *a, const char *characters)
 char gt_alpha_decode(const GtAlpha *a, unsigned int c)
 {
   gt_assert(a);
-  gt_assert(a->code_to_character_map[c] != UNDEF_UCHAR);
+  gt_assert(a->code_to_character_map[c] != GT_UNDEF_UCHAR);
   return a->code_to_character_map[c];
 }
 
 unsigned int gt_alpha_encode(const GtAlpha *a, char c)
 {
   gt_assert(a);
-  gt_assert(a->character_to_code_map[(int) c] != UNDEF_UCHAR);
+  gt_assert(a->character_to_code_map[(int) c] != GT_UNDEF_UCHAR);
   return a->character_to_code_map[(int) c];
 }
 
@@ -148,7 +148,7 @@ void gt_alpha_decode_seq(const GtAlpha *a, char *out, char *in,
   unsigned long i;
   gt_assert(a && out && in);
   for (i = 0; i < length; i++) {
-    gt_assert(a->code_to_character_map[(int) in[i]] != UNDEF_UCHAR);
+    gt_assert(a->code_to_character_map[(int) in[i]] != GT_UNDEF_UCHAR);
     out[i] = a->code_to_character_map[(int) in[i]];
   }
 }
@@ -159,14 +159,14 @@ void gt_alpha_encode_seq(const GtAlpha *a, char *out, char *in,
   unsigned long i;
   gt_assert(a && out && in);
   for (i = 0; i < length; i++) {
-    gt_assert(a->character_to_code_map[(int) in[i]] != UNDEF_UCHAR);
+    gt_assert(a->character_to_code_map[(int) in[i]] != GT_UNDEF_UCHAR);
     out[i] = (char) a->character_to_code_map[(int) in[i]];
   }
 }
 
 bool gt_alpha_char_is_valid(const GtAlpha *a, char c)
 {
-  if (a->character_to_code_map[(int) c] == UNDEF_CHAR)
+  if (a->character_to_code_map[(int) c] == GT_UNDEF_CHAR)
     return false;
   return true;
 }

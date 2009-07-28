@@ -30,9 +30,9 @@ void gt_determine_ORFs(GtArray *ranges, unsigned int framenum,
   unsigned long i;
   GtRange orf;
   gt_assert(ranges && framenum < 3 && frame);
-  orf.start = UNDEF_ULONG;
+  orf.start = GT_UNDEF_ULONG;
   for (i = 0; i < framelen; i++) {
-    if (orf.start == UNDEF_ULONG) {
+    if (orf.start == GT_UNDEF_ULONG) {
       if (frame[i] == START_AMINO)
         orf.start = i * GT_CODON_LENGTH + framenum;
     }
@@ -40,7 +40,7 @@ void gt_determine_ORFs(GtArray *ranges, unsigned int framenum,
       if (frame[i] == STOP_AMINO) {
         orf.end = i * GT_CODON_LENGTH + framenum + 2;
         gt_array_add(ranges, orf);
-        orf.start = UNDEF_ULONG;
+        orf.start = GT_UNDEF_ULONG;
       }
     }
   }

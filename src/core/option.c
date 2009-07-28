@@ -191,8 +191,8 @@ GtOptionParser* gt_option_parser_new(const char *synopsis,
   op->comment_func = NULL;
   op->comment_func_data = NULL;
   op->mailaddress = NULL;
-  op->min_additional_arguments = UNDEF_UINT;
-  op->max_additional_arguments = UNDEF_UINT;
+  op->min_additional_arguments = GT_UNDEF_UINT;
+  op->max_additional_arguments = GT_UNDEF_UINT;
   return op;
 }
 
@@ -350,42 +350,42 @@ static int show_help(GtOptionParser *op, GtOptionType optiontype, GtError *err)
 
       else if (option->option_type == OPTION_DOUBLE) {
         printf("%*s  default: ", (int) max_option_length, "");
-        if (option->default_value.d == UNDEF_DOUBLE)
+        if (option->default_value.d == GT_UNDEF_DOUBLE)
           gt_xputs("undefined");
         else
           printf("%.2f\n", option->default_value.d);
       }
       else if (option->option_type == OPTION_INT) {
         printf("%*s  default: ", (int) max_option_length, "");
-        if (option->default_value.i == UNDEF_INT)
+        if (option->default_value.i == GT_UNDEF_INT)
           gt_xputs("undefined");
         else
           printf("%d\n", option->default_value.i);
       }
       else if (option->option_type == OPTION_UINT) {
         printf("%*s  default: ", (int) max_option_length, "");
-        if (option->default_value.ui == UNDEF_UINT)
+        if (option->default_value.ui == GT_UNDEF_UINT)
           gt_xputs("undefined");
         else
           printf("%u\n", option->default_value.ui);
       }
       else if (option->option_type == OPTION_LONG) {
         printf("%*s  default: ", (int) max_option_length, "");
-        if (option->default_value.ul == UNDEF_LONG)
+        if (option->default_value.ul == GT_UNDEF_LONG)
           gt_xputs("undefined");
         else
           printf("%ld\n", option->default_value.l);
       }
       else if (option->option_type == OPTION_ULONG) {
         printf("%*s  default: ", (int) max_option_length, "");
-        if (option->default_value.ul == UNDEF_ULONG)
+        if (option->default_value.ul == GT_UNDEF_ULONG)
           gt_xputs("undefined");
         else
           printf("%lu\n", option->default_value.ul);
       }
       else if (option->option_type == OPTION_RANGE) {
         printf("%*s  default: ", (int) max_option_length, "");
-        if (option->default_value.r.start == UNDEF_ULONG)
+        if (option->default_value.r.start == GT_UNDEF_ULONG)
           gt_xputs("undefined");
         else {
           printf("%lu %lu\n", option->default_value.r.start,
@@ -1056,7 +1056,7 @@ OPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
     argnum++;
 
   /* check for minimum number of additional arguments, if necessary */
-  if (!had_err && op->min_additional_arguments != UNDEF_UINT &&
+  if (!had_err && op->min_additional_arguments != GT_UNDEF_UINT &&
       argc - argnum < op->min_additional_arguments) {
     gt_error_set(err, "missing argument\nUsage: %s %s", op->progname,
               op->synopsis);
@@ -1064,7 +1064,7 @@ OPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
   }
 
   /* check for maximal number of additional arguments, if necessary */
-  if (!had_err && op->max_additional_arguments != UNDEF_UINT &&
+  if (!had_err && op->max_additional_arguments != GT_UNDEF_UINT &&
       argc - argnum > op->max_additional_arguments) {
     gt_error_set(err, "superfluous argument \"%s\"\nUsage: %s %s",
               argv[argnum + op->max_additional_arguments], op->progname,
@@ -1336,8 +1336,10 @@ GtOption* gt_option_new_range(const char *option_str, const char *description,
 {
   GtOption *o = gt_option_new(option_str, description, value);
   o->option_type = OPTION_RANGE;
-  o->default_value.r.start = default_value ? default_value->start : UNDEF_ULONG;
-  o->default_value.r.end   = default_value ? default_value->end   : UNDEF_ULONG;
+  o->default_value.r.start = default_value ? default_value->start
+                                           : GT_UNDEF_ULONG;
+  o->default_value.r.end   = default_value ? default_value->end
+                                           : GT_UNDEF_ULONG;
   value->start = o->default_value.r.start;
   value->end   = o->default_value.r.end;
   return o;

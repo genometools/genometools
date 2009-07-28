@@ -67,7 +67,7 @@ static void *gt_sketch_page_arguments_new(void)
   arguments->text = gt_str_new();
   arguments->stylefile = gt_str_new();
   arguments->seqfile = gt_str_new();
-  arguments->range.start = arguments->range.end == UNDEF_ULONG;
+  arguments->range.start = arguments->range.end == GT_UNDEF_ULONG;
   return arguments;
 }
 
@@ -302,10 +302,10 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
     /* set display range */
     gt_feature_index_get_range_for_seqid(features, &sequence_region_range,
                                          seqid);
-    qry_range.start = (arguments->range.start == UNDEF_ULONG ?
+    qry_range.start = (arguments->range.start == GT_UNDEF_ULONG ?
                          sequence_region_range.start :
                          arguments->range.start);
-    qry_range.end   = (arguments->range.end == UNDEF_ULONG ?
+    qry_range.end   = (arguments->range.end == GT_UNDEF_ULONG ?
                          sequence_region_range.end :
                          arguments->range.end);
 

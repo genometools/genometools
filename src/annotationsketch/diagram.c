@@ -39,7 +39,7 @@
 
 /* used to index non-multiline-feature blocks
    undefined pointer -- never dereference! */
-#define UNDEF_REPR               (void*)~0
+#define GT_UNDEF_REPR               (void*)~0
 /* used to separate a filename from the type in a track name */
 #define FILENAME_TYPE_SEPARATOR  '|'
 
@@ -155,7 +155,7 @@ static inline void nodeinfo_add_block(NodeInfoElement *ni,
     gt_str_array_add_cstr(ni->types, gft);
   }
   gt_hashmap_add(type_struc->rep_index, rep, bt);
-  if (rep != UNDEF_REPR)
+  if (rep != GT_UNDEF_REPR)
     type_struc->must_merge = true;
   gt_array_add(type_struc->blocktuples, bt);
 }
@@ -178,7 +178,7 @@ static inline bool get_caption_display_status(GtDiagram *d, const char *gft)
   status = (bool*) gt_hashmap_get(d->caption_display_status, gft);
   if (!status)
   {
-    unsigned long threshold = UNDEF_ULONG;
+    unsigned long threshold = GT_UNDEF_ULONG;
     double tmp;
     status = gt_malloc(sizeof (bool*));
     if (!gt_style_get_bool(d->style, "format", "show_block_captions", status,
@@ -188,7 +188,7 @@ static inline bool get_caption_display_status(GtDiagram *d, const char *gft)
     {
       if (gt_style_get_num(d->style, gft, "max_capt_show_width", &tmp, NULL))
         threshold = tmp;
-      if (threshold == UNDEF_ULONG)
+      if (threshold == GT_UNDEF_ULONG)
         *status = true;
       else
         *status = (gt_range_length(&d->range) <= threshold);
@@ -269,7 +269,7 @@ static void add_to_current(GtDiagram *d, GtFeatureNode *node,
   gt_block_insert_element(block, node);
   nodeinfo_add_block(ni,
                      gt_feature_node_get_type(node),
-                     UNDEF_REPR, block);
+                     GT_UNDEF_REPR, block);
 }
 
 static void add_to_parent(GtDiagram *d, GtFeatureNode *node,
@@ -303,7 +303,7 @@ static void add_to_rep(GtDiagram *d, GtFeatureNode *node,
                        GtFeatureNode* parent)
 {
   GtBlock *block = NULL;
-  GtFeatureNode *rep = UNDEF_REPR;
+  GtFeatureNode *rep = GT_UNDEF_REPR;
   NodeInfoElement *ni;
   gt_assert(d && node && gt_feature_node_is_multi(node));
   rep = gt_feature_node_get_multi_representative(node);
@@ -335,7 +335,7 @@ static void add_recursive(GtDiagram *d, GtFeatureNode *node,
                           GtFeatureNode *original_node)
 {
   NodeInfoElement *ni;
-  GtFeatureNode *rep = UNDEF_REPR;
+  GtFeatureNode *rep = GT_UNDEF_REPR;
   gt_assert(d && node && original_node);
   if (!parent) return;
   ni = nodeinfo_get(d, node);
@@ -383,8 +383,8 @@ static void process_node(GtDiagram *d, GtFeatureNode *node,
   const char *feature_type = NULL,
              *parent_gft = NULL;
   double tmp;
-  unsigned long max_show_width = UNDEF_ULONG,
-                par_max_show_width = UNDEF_ULONG;
+  unsigned long max_show_width = GT_UNDEF_ULONG,
+                par_max_show_width = GT_UNDEF_ULONG;
 
   gt_assert(d && node);
 
@@ -406,7 +406,7 @@ static void process_node(GtDiagram *d, GtFeatureNode *node,
   if (gt_style_get_num(d->style, feature_type, "max_show_width", &tmp, NULL))
     max_show_width = tmp;
   else
-    max_show_width = UNDEF_ULONG;
+    max_show_width = GT_UNDEF_ULONG;
 
   /* for non-root nodes, get maximal view with to show parent */
   if (parent)
@@ -417,12 +417,12 @@ static void process_node(GtDiagram *d, GtFeatureNode *node,
       if (gt_style_get_num(d->style, parent_gft, "max_show_width", &tmp, NULL))
         par_max_show_width = tmp;
       else
-        par_max_show_width = UNDEF_ULONG;
-    } else par_max_show_width = UNDEF_ULONG;
+        par_max_show_width = GT_UNDEF_ULONG;
+    } else par_max_show_width = GT_UNDEF_ULONG;
   }
 
   /* check if this type is to be displayed at all */
-  if (max_show_width != UNDEF_ULONG &&
+  if (max_show_width != GT_UNDEF_ULONG &&
       gt_range_length(&d->range) > max_show_width)
   {
     return;
@@ -430,7 +430,7 @@ static void process_node(GtDiagram *d, GtFeatureNode *node,
 
   /* disregard parent node if it is configured not to be shown */
   if (parent
-        && par_max_show_width != UNDEF_ULONG
+        && par_max_show_width != GT_UNDEF_ULONG
         && gt_range_length(&d->range) > par_max_show_width)
   {
     parent = NULL;
@@ -588,7 +588,7 @@ static int collect_blocks(GT_UNUSED void *key, void *value, void *data,
     {
       GtBlockTuple *bt;
       bt  = *(GtBlockTuple**) gt_array_get(type_struc->blocktuples, j);
-      if (bt->rep == UNDEF_REPR && type_struc->must_merge)
+      if (bt->rep == GT_UNDEF_REPR && type_struc->must_merge)
       {
         block = mainblock = gt_block_ref(bt->block);
         gt_block_delete(mainblock);

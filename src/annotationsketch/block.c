@@ -46,7 +46,7 @@ struct GtBlock {
 static int elemcmp(const void *a, const void *b, void *data)
 {
   const char *type_a, *type_b;
-  double zindex_a = UNDEF_DOUBLE, zindex_b= UNDEF_DOUBLE;
+  double zindex_a = GT_UNDEF_DOUBLE, zindex_b= GT_UNDEF_DOUBLE;
   GtStyle *sty = (GtStyle*) data;
   GtElement *elem_a = *(GtElement**) a;
   GtElement *elem_b = *(GtElement**) b;
@@ -64,12 +64,12 @@ static int elemcmp(const void *a, const void *b, void *data)
     (void) gt_style_get_num(sty, type_b, "z_index", &zindex_b, NULL);
   }
   /* only one is set -> put types with set z-indices always on top of others*/
-  if (zindex_a == UNDEF_DOUBLE && zindex_b != UNDEF_DOUBLE)
+  if (zindex_a == GT_UNDEF_DOUBLE && zindex_b != GT_UNDEF_DOUBLE)
     return -1;
-  if (zindex_b == UNDEF_DOUBLE && zindex_a != UNDEF_DOUBLE)
+  if (zindex_b == GT_UNDEF_DOUBLE && zindex_a != GT_UNDEF_DOUBLE)
     return 1;
   /* none is set, fall back to default alphabetic ordering */
-  if (zindex_a == UNDEF_DOUBLE && zindex_b == UNDEF_DOUBLE)
+  if (zindex_a == GT_UNDEF_DOUBLE && zindex_b == GT_UNDEF_DOUBLE)
   {
     if (strcmp(type_a, type_b) < 0)
       return 1;

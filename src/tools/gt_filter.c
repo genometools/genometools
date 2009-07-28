@@ -157,40 +157,40 @@ static GtOptionParser* gt_filter_option_parser_new(void *tool_arguments)
   /* -maxgenelength */
   option = gt_option_new_ulong_min("maxgenelength", "the maximum length a gene "
                                 "can have to pass the filter",
-                                &arguments->max_gene_length, UNDEF_ULONG, 1);
+                                &arguments->max_gene_length, GT_UNDEF_ULONG, 1);
   gt_option_parser_add_option(op, option);
 
   /* -maxgenenum */
   option = gt_option_new_ulong("maxgenenum", "the maximum number of genes "
                                "which can pass the filter",
                                &arguments->max_gene_num,
-                               UNDEF_ULONG);
+                               GT_UNDEF_ULONG);
   gt_option_parser_add_option(op, option);
 
   /* -mingenescore */
   option = gt_option_new_double("mingenescore", "the minimum score a gene must "
                                 "have to pass the filter",
-                                &arguments->min_gene_score, UNDEF_DOUBLE);
+                                &arguments->min_gene_score, GT_UNDEF_DOUBLE);
   gt_option_parser_add_option(op, option);
 
   /* -maxgenescore */
   option = gt_option_new_double("maxgenescore", "the maximum score a gene can "
                                 "have to pass the filter",
-                                &arguments->max_gene_score, UNDEF_DOUBLE);
+                                &arguments->max_gene_score, GT_UNDEF_DOUBLE);
   gt_option_parser_add_option(op, option);
 
   /* -minaveragessp */
   option = gt_option_new_probability("minaveragessp", "set the minimum average "
                                      "splice site probability",
                                      &arguments->min_average_splice_site_prob,
-                                     UNDEF_DOUBLE);
+                                     GT_UNDEF_DOUBLE);
   gt_option_parser_add_option(op, option);
 
   /* -featurenum */
   option = gt_option_new_ulong_min("featurenum",
                                    "select feature tree occurring "
                                    "at given position in input",
-                                   &arguments->feature_num, UNDEF_ULONG, 1);
+                                   &arguments->feature_num, GT_UNDEF_ULONG, 1);
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 

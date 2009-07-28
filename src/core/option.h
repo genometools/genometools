@@ -154,7 +154,7 @@ GtOption*       gt_option_new_ulong_min_max(const char *option_str,
                                             unsigned long default_value,
                                             unsigned long min_value,
                                             unsigned long max_value);
-/* if <default_value> equals NULL, UNDEF_LONG will be used as default for
+/* if <default_value> equals NULL, GT_UNDEF_LONG will be used as default for
    range->start and range->end */
 GtOption*       gt_option_new_range(const char *option_str,
                                     const char *description,

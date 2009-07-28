@@ -120,13 +120,13 @@ static OPrval parse_options(int *parsed_args,
   /* -start */
   option = gt_option_new_ulong_min("start", "start position\n"
                                          "default: first region start",
-                            &arguments->start, UNDEF_ULONG, 1);
+                            &arguments->start, GT_UNDEF_ULONG, 1);
   gt_option_parser_add_option(op, option);
   gt_option_hide_default(option);
 
   /* -end */
   option2 = gt_option_new_ulong("end", "end position\ndefault: last region end",
-                            &arguments->end, UNDEF_ULONG);
+                            &arguments->end, GT_UNDEF_ULONG);
   gt_option_parser_add_option(op, option2);
   /* -start and -end must be given together */
   gt_option_imply(option, option2);
@@ -265,8 +265,8 @@ int gt_sketch(int argc, const char **argv, GtError *err)
 
   /* check for correct order: range end < range start */
   if (!had_err &&
-      arguments.start != UNDEF_ULONG &&
-      arguments.end != UNDEF_ULONG &&
+      arguments.start != GT_UNDEF_ULONG &&
+      arguments.end != GT_UNDEF_ULONG &&
       !(arguments.start < arguments.end)) {
     gt_error_set(err, "start of query range (%lu) must be before "
                       "end of query range (%lu)",
@@ -348,10 +348,10 @@ int gt_sketch(int argc, const char **argv, GtError *err)
   if (!had_err) {
     gt_feature_index_get_range_for_seqid(features, &sequence_region_range,
                                          seqid);
-    qry_range.start = (arguments.start == UNDEF_ULONG ?
+    qry_range.start = (arguments.start == GT_UNDEF_ULONG ?
                          sequence_region_range.start :
                          arguments.start);
-    qry_range.end   = (arguments.end == UNDEF_ULONG ?
+    qry_range.end   = (arguments.end == GT_UNDEF_ULONG ?
                          sequence_region_range.end :
                          arguments.end);
   }

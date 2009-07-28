@@ -71,7 +71,7 @@ static bool filter_contain_range(GtFeatureNode *fn, GtRange contain_range)
   GtRange range;
   gt_assert(fn);
   range = gt_genome_node_get_range((GtGenomeNode*) fn);
-  if (contain_range.start != UNDEF_ULONG &&
+  if (contain_range.start != GT_UNDEF_ULONG &&
       !gt_range_contains(&contain_range, &range)) {
     return true;
   }
@@ -83,7 +83,7 @@ static bool filter_overlap_range(GtFeatureNode *fn, GtRange overlap_range)
   GtRange feature_range;
   gt_assert(fn);
   feature_range = gt_genome_node_get_range((GtGenomeNode*) fn);
-  if (overlap_range.start != UNDEF_ULONG &&
+  if (overlap_range.start != GT_UNDEF_ULONG &&
       !gt_range_overlap(&overlap_range, &feature_range))
     return true;
   return false;
@@ -130,7 +130,7 @@ static bool filter_has_CDS(GtFeatureNode *fn, bool has_CDS)
 static bool filter_min_average_ssp(GtFeatureNode *fn, double minaveragessp)
 {
   gt_assert(fn);
-  if (minaveragessp != UNDEF_DOUBLE &&
+  if (minaveragessp != GT_UNDEF_DOUBLE &&
       gt_feature_node_has_splice_site(fn) &&
       gt_feature_node_average_splice_site_prob(fn) < minaveragessp) {
     return true;
@@ -154,23 +154,23 @@ static int filter_visitor_genome_feature(GtNodeVisitor *nv,
     /* enforce maximum gene length */
     /* XXX: we (spuriously) assume that genes are always root nodes */
     if (fn && gt_feature_node_has_type(fn, gt_ft_gene)) {
-      if (fv->max_gene_length != UNDEF_ULONG &&
+      if (fv->max_gene_length != GT_UNDEF_ULONG &&
           gt_range_length(&range) > fv->max_gene_length) {
         filter_node = true;
       }
-      else if (fv->max_gene_num != UNDEF_ULONG &&
+      else if (fv->max_gene_num != GT_UNDEF_ULONG &&
                fv->gene_num >= fv->max_gene_num) {
         filter_node = true;
       }
-      else if (fv->min_gene_score != UNDEF_DOUBLE &&
+      else if (fv->min_gene_score != GT_UNDEF_DOUBLE &&
                gt_feature_node_get_score(fn) < fv->min_gene_score) {
         filter_node = true;
       }
-      else if (fv->max_gene_score != UNDEF_DOUBLE &&
+      else if (fv->max_gene_score != GT_UNDEF_DOUBLE &&
                gt_feature_node_get_score(fn) > fv->max_gene_score) {
         filter_node = true;
       }
-      else if (fv->feature_num != UNDEF_ULONG &&
+      else if (fv->feature_num != GT_UNDEF_ULONG &&
                fv->feature_num != fv->current_feature) {
         filter_node = true;
       }
@@ -216,7 +216,7 @@ static int filter_visitor_region_node(GtNodeVisitor *nv, GtRegionNode *rn,
   if (!gt_str_length(filter_visitor->seqid) || /* no seqid was specified */
       !gt_str_cmp(filter_visitor->seqid,       /* or seqids are equal */
                gt_genome_node_get_seqid((GtGenomeNode*) rn))) {
-    if (filter_visitor->contain_range.start != UNDEF_ULONG) {
+    if (filter_visitor->contain_range.start != GT_UNDEF_ULONG) {
       GtRange range = gt_genome_node_get_range((GtGenomeNode*) rn);
       if (gt_range_overlap(&range, &filter_visitor->contain_range)) {
         /* an overlapping contain range was defined -> update range  */

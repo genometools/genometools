@@ -127,7 +127,7 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
   /* -offset */
   offset_option = gt_option_new_long("offset",
                                  "transform all features by the given offset",
-                                  &arguments->offset, UNDEF_LONG);
+                                  &arguments->offset, GT_UNDEF_LONG);
   gt_option_parser_add_option(op, offset_option);
 
   /* -offsetfile */
@@ -214,7 +214,7 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
   }
 
   /* set offset (if necessary) */
-  if (!had_err && arguments->offset != UNDEF_LONG)
+  if (!had_err && arguments->offset != GT_UNDEF_LONG)
     gt_gff3_in_stream_set_offset(gff3_in_stream, arguments->offset);
 
   /* set offsetfile (if necessary) */

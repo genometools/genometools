@@ -121,7 +121,7 @@ GtGFF3Parser* gt_gff3_parser_new(GtTypeChecker *type_checker)
   parser->checkids = false;
   parser->tidy = false;
   parser->fasta_parsing = false;
-  parser->offset = UNDEF_LONG;
+  parser->offset = GT_UNDEF_LONG;
   parser->offset_mapping = NULL;
   parser->type_checker = type_checker ? gt_type_checker_ref(type_checker)
                                       : NULL;
@@ -147,7 +147,7 @@ int gt_gff3_parser_set_offsetfile(GtGFF3Parser *parser, GtStr *offsetfile,
 {
   gt_error_check(err);
   gt_assert(parser);
-  gt_assert(parser->offset == UNDEF_LONG);
+  gt_assert(parser->offset == GT_UNDEF_LONG);
   parser->offset_mapping = gt_mapping_new(offsetfile, "offsets",
                                        MAPPINGTYPE_INTEGER, err);
   if (parser->offset_mapping)
@@ -167,7 +167,7 @@ static int add_offset_if_necessary(GtRange *range, GtGFF3Parser *parser,
   long offset;
   int had_err = 0;
   gt_error_check(err);
-  if (parser->offset != UNDEF_LONG)
+  if (parser->offset != GT_UNDEF_LONG)
     *range = gt_range_offset(range, parser->offset);
   else if (parser->offset_mapping) {
     had_err = gt_mapping_map_integer(parser->offset_mapping, &offset, seqid,

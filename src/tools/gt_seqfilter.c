@@ -56,13 +56,13 @@ static GtOptionParser* gt_seqfilter_option_parser_new(void *tool_arguments)
   option = gt_option_new_ulong("minlength",
                             "set minimum length a sequence must "
                             "have to pass the filter", &arguments->minlength,
-                            UNDEF_ULONG);
+                            GT_UNDEF_ULONG);
   gt_option_parser_add_option(op, option);
 
   /* -maxlength */
   option = gt_option_new_ulong("maxlength", "set maximum length a sequence can "
                             "have to pass the filter", &arguments->maxlength,
-                            UNDEF_ULONG);
+                            GT_UNDEF_ULONG);
   gt_option_parser_add_option(op, option);
 
   return op;
@@ -85,9 +85,9 @@ static int gt_seqfilter_runner(int argc, const char **argv, int parsed_args,
 
   while (!(had_err = gt_bioseq_iterator_next(bsi, &bioseq, err)) && bioseq) {
     for (i = 0; i < gt_bioseq_number_of_sequences(bioseq); i++) {
-      if ((arguments->minlength == UNDEF_ULONG ||
+      if ((arguments->minlength == GT_UNDEF_ULONG ||
            gt_bioseq_get_sequence_length(bioseq, i) >= arguments->minlength) &&
-          (arguments->maxlength == UNDEF_ULONG ||
+          (arguments->maxlength == GT_UNDEF_ULONG ||
            gt_bioseq_get_sequence_length(bioseq, i) <= arguments->maxlength)) {
         gt_fasta_show_entry(gt_bioseq_get_description(bioseq, i),
                             gt_bioseq_get_sequence(bioseq, i),

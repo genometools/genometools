@@ -21,14 +21,14 @@
 #include <float.h>
 #include <limits.h>
 
-#define UNDEF_BOOL         (bool) ~0
-#define UNDEF_CHAR         CHAR_MAX
-#define UNDEF_DOUBLE       DBL_MAX
-#define UNDEF_FLOAT        FLT_MAX
-#define UNDEF_INT          ~0
-#define UNDEF_UCHAR        UCHAR_MAX
-#define UNDEF_UINT         ~0U
-#define UNDEF_LONG         LONG_MIN
-#define UNDEF_ULONG        ~0UL
+#define GT_UNDEF_BOOL         (bool) ~0
+#define GT_UNDEF_CHAR         CHAR_MAX
+#define GT_UNDEF_DOUBLE       DBL_MAX
+#define GT_UNDEF_FLOAT        FLT_MAX
+#define GT_UNDEF_INT          ~0
+#define GT_UNDEF_UCHAR        UCHAR_MAX
+#define GT_UNDEF_UINT         ~0U
+#define GT_UNDEF_LONG         LONG_MIN
+#define GT_UNDEF_ULONG        ~0UL
 
 #endif
