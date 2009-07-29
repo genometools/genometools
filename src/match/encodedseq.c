@@ -68,11 +68,11 @@
 
 #define EXTRACTENCODEDCHARSCALARFROMLEFT(SCALAR,PREFIX)\
         (((SCALAR) >> \
-         MULT2(UNITSIN2BITENC - 1 - (unsigned long) (PREFIX)))\
+         GT_MULT2(UNITSIN2BITENC - 1 - (unsigned long) (PREFIX)))\
          & (Twobitencoding) 3)
 
 #define EXTRACTENCODEDCHARSCALARFROMRIGHT(SCALAR,SUFFIX)\
-        (((SCALAR) >> MULT2(SUFFIX)) & (Twobitencoding) 3)
+        (((SCALAR) >> GT_MULT2(SUFFIX)) & (Twobitencoding) 3)
 
 #define EXTRACTENCODEDCHAR(TWOBITENCODING,IDX)\
         EXTRACTENCODEDCHARSCALARFROMLEFT(\
@@ -114,7 +114,7 @@
 #define UPDATESEQBUFFERFINAL\
         if (widthbuffer > 0)\
         {\
-          bitwise <<= MULT2(UNITSIN2BITENC - widthbuffer);\
+          bitwise <<= GT_MULT2(UNITSIN2BITENC - widthbuffer);\
           *tbeptr = bitwise;\
         }
 
@@ -170,7 +170,7 @@ void plainseq2bytecode(GtUchar *bytecode,const GtUchar *seq,unsigned long len)
                   (seqptr[2] << 2) |
                    seqptr[3];
   }
-  switch (MOD4(len))
+  switch (GT_MOD4(len))
   {
     case (Seqpos) 1:
       bytecode[j] = seqptr[0] << 6;
@@ -204,7 +204,7 @@ static void encseq2bytecode(GtUchar *dest,const Encodedsequence *encseq,
     i = startindex;
     j = 0;
   }
-  switch (MOD4(len))
+  switch (GT_MOD4(len))
   {
     case (Seqpos) 1:
       dest[j] = (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,i) << 6;
@@ -1661,7 +1661,7 @@ static void binpreparenextrange(const Encodedsequence *encseq,
   {
     while (endpos0  < endpos1)
     {
-      cellnum = endpos0 + DIV2(endpos1 - endpos0 - 1);
+      cellnum = endpos0 + GT_DIV2(endpos1 - endpos0 - 1);
       determinerange(&range,encseq,pagenum,cellnum);
 #ifdef RANGEDEBUG
       printf("binsearch in [%lu,%lu] => mid = %lu => ",endpos0,endpos1,cellnum);
@@ -2323,7 +2323,7 @@ static unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
   while (left<=right)
   {
     len = (unsigned long) (right-left);
-    mid = left + DIV2(len);
+    mid = left + GT_DIV2(len);
     if (recordseps[mid] < position)
     {
       if (position < recordseps[mid+1])
@@ -3266,8 +3266,8 @@ static inline Twobitencoding calctbeforward(const Twobitencoding *tbe,
   {
     unsigned long unit = (unsigned long) DIVBYUNITSIN2BITENC(startpos);
     return (Twobitencoding)
-           ((tbe[unit] << MULT2(remain)) |
-            (tbe[unit+1] >> MULT2(UNITSIN2BITENC - remain)));
+           ((tbe[unit] << GT_MULT2(remain)) |
+            (tbe[unit+1] >> GT_MULT2(UNITSIN2BITENC - remain)));
   }
   return tbe[DIVBYUNITSIN2BITENC(startpos)];
 }
@@ -3284,10 +3284,10 @@ static inline Twobitencoding calctbereverse(const Twobitencoding *tbe,
   {
     unsigned long unit = (unsigned long) DIVBYUNITSIN2BITENC(startpos);
     Twobitencoding tmp = (Twobitencoding)
-                         (tbe[unit] >> MULT2(UNITSIN2BITENC - 1 - remain));
+                         (tbe[unit] >> GT_MULT2(UNITSIN2BITENC - 1 - remain));
     if (unit > 0)
     {
-      tmp |= tbe[unit-1] << MULT2(1 + remain);
+      tmp |= tbe[unit-1] << GT_MULT2(1 + remain);
     }
     return tmp;
   }
@@ -3300,7 +3300,7 @@ static inline Bitsequence fwdextractspecialbits(const Bitsequence *specialbits,
 
   remain = (unsigned long) MODWORDSIZE(startpos);
   unit = (unsigned long) DIVWORDSIZE(startpos);
-  if (remain <= (unsigned long) DIV2(INTWORDSIZE))
+  if (remain <= (unsigned long) GT_DIV2(INTWORDSIZE))
   {
     return (Bitsequence) ((specialbits[unit] << remain) & FIRSTHALVEBITS);
   } else
@@ -3319,7 +3319,7 @@ static inline Bitsequence revextractspecialbits(const Bitsequence *specialbits,
 
   remain = (int) MODWORDSIZE(startpos);
   unit = (unsigned long) DIVWORDSIZE(startpos);
-  if (remain >= DIV2(INTWORDSIZE))
+  if (remain >= GT_DIV2(INTWORDSIZE))
   {
     return (Bitsequence) ((specialbits[unit] >> (INTWORDSIZE - 1 - remain))
                            & LASTHALVEBITS);
@@ -3563,10 +3563,10 @@ void extract2bitenc(bool fwd,
 
 #define MASKPREFIX(PREFIX)\
         (Twobitencoding)\
-        (~((((Twobitencoding) 1) << MULT2(UNITSIN2BITENC - (PREFIX))) - 1))
+        (~((((Twobitencoding) 1) << GT_MULT2(UNITSIN2BITENC - (PREFIX))) - 1))
 
 #define MASKSUFFIX(SUFFIX)\
-        ((((Twobitencoding) 1) << MULT2((int) SUFFIX)) - 1)
+        ((((Twobitencoding) 1) << GT_MULT2((int) SUFFIX)) - 1)
 
 #define MASKEND(FWD,END)\
         (((END) == 0) ? 0 : ((FWD) ? MASKPREFIX(END) : MASKSUFFIX(END)))
@@ -3579,7 +3579,7 @@ static int prefixofdifftbe(bool complement,
   unsigned int tmplcpvalue = 0;
 
   gt_assert((tbe1 ^ tbe2) > 0);
-  tmplcpvalue = (unsigned int) DIV2(MULT2(UNITSIN2BITENC) -
+  tmplcpvalue = (unsigned int) GT_DIV2(GT_MULT2(UNITSIN2BITENC) -
                                     requiredUIntBits(tbe1 ^ tbe2));
   gt_assert(tmplcpvalue < (unsigned int) UNITSIN2BITENC);
    commonunits->common = tmplcpvalue;
@@ -3599,7 +3599,7 @@ static int suffixofdifftbe(bool complement,GtCommonunits *commonunits,
   unsigned int tmplcsvalue = 0;
 
   gt_assert((tbe1 ^ tbe2) > 0);
-  tmplcsvalue = DIV2(numberoftrailingzeros(tbe1 ^ tbe2));
+  tmplcsvalue = GT_DIV2(numberoftrailingzeros(tbe1 ^ tbe2));
   gt_assert(tmplcsvalue < (unsigned int) UNITSIN2BITENC);
   gt_assert(commonunits != NULL);
   commonunits->common = tmplcsvalue;
@@ -4125,14 +4125,14 @@ static void fwdextract2bitenc_bruteforce(EndofTwobitencoding *ptbe,
     if (pos == encseq->totallength)
     {
       ptbe->unitsnotspecial = (unsigned int) (pos - startpos);
-      ptbe->tbe <<= MULT2(startpos + UNITSIN2BITENC - pos);
+      ptbe->tbe <<= GT_MULT2(startpos + UNITSIN2BITENC - pos);
       return;
     }
     cc = getencodedchar(encseq,pos,Forwardmode);
     if (ISSPECIAL(cc))
     {
       ptbe->unitsnotspecial = (unsigned int) (pos - startpos);
-      ptbe->tbe <<= MULT2(startpos + UNITSIN2BITENC - pos);
+      ptbe->tbe <<= GT_MULT2(startpos + UNITSIN2BITENC - pos);
       return;
     }
     gt_assert(cc < (GtUchar) 4);
@@ -4159,7 +4159,7 @@ static void revextract2bitenc_bruteforce(EndofTwobitencoding *ptbe,
       return;
     }
     gt_assert(cc < (GtUchar) 4);
-    ptbe->tbe |= (((Bitsequence) cc) << MULT2(unit));
+    ptbe->tbe |= (((Bitsequence) cc) << GT_MULT2(unit));
     if (pos == 0)
     {
       ptbe->unitsnotspecial = unit+1;

@@ -548,7 +548,7 @@ Blindtrie *blindtrie_new(unsigned long numofsuffixes,
   Blindtrie *blindtrie;
 
   ALLOCASSIGNSPACE(blindtrie,NULL,Blindtrie,1);
-  blindtrie->allocatedBlindtrienode = MULT2(numofsuffixes + 1) + 1;
+  blindtrie->allocatedBlindtrienode = GT_MULT2(numofsuffixes + 1) + 1;
   ALLOCASSIGNSPACE(blindtrie->spaceBlindtrienode,NULL,Blindtrienode,
                    blindtrie->allocatedBlindtrienode);
   /*

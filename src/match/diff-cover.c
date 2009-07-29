@@ -265,7 +265,7 @@ Differencecover *differencecover_new(unsigned int vparam,
       break;
     }
     offset += differencecoversizes[dcov->logmod];
-    v = MULT2(v);
+    v = GT_MULT2(v);
   }
   if (!found)
   {
@@ -790,7 +790,7 @@ static void dc_sortsuffixesonthislevel(Differencecover *dcov,
         dc_processunsortedrange(dcov,
                                 left + rangestart,
                                 left + idx - 1,
-                                MULT2(dcov->currentdepth));
+                                GT_MULT2(dcov->currentdepth));
         dc_anchorleftmost(dcov,
                           left + rangestart,
                           left + idx - 1);
@@ -808,7 +808,7 @@ static void dc_sortsuffixesonthislevel(Differencecover *dcov,
     dc_processunsortedrange(dcov,
                          left + rangestart,
                          left + width - 1,
-                         MULT2(dcov->currentdepth));
+                         GT_MULT2(dcov->currentdepth));
     dc_anchorleftmost(dcov,
                       left + rangestart,
                       left + width - 1);
@@ -1028,7 +1028,7 @@ void differencecover_sortsample(Differencecover *dcov,bool cmpcharbychar,
   dcov->multimappower = bcktab_multimappower(dcov->bcktab);
   dcov->esr = newEncodedsequencescanstate();
   dcov->maxcode = bcktab_numofallcodes(dcov->bcktab) - 1;
-  dcov->rangestobesorted = gt_inl_queue_new(MAX(16UL,DIV2(dcov->maxcode)));
+  dcov->rangestobesorted = gt_inl_queue_new(MAX(16UL,GT_DIV2(dcov->maxcode)));
   gt_assert(dcov->bcktab != NULL);
   dcov->filltable = filllargestchartable(dcov->numofchars,dcov->prefixlength);
   dcov->leftborder = bcktab_leftborder(dcov->bcktab);

@@ -41,9 +41,9 @@ typedef uint32_t Bitsequence;
 #define INTWORDSIZE\
         (1 << LOGWORDSIZE) /* # of bits in unsigned long = w */
 #define LASTHALVEBITS\
-        ((((Bitsequence) 1) << DIV2(INTWORDSIZE)) - 1)
+        ((((Bitsequence) 1) << GT_DIV2(INTWORDSIZE)) - 1)
 #define FIRSTHALVEBITS\
-        (LASTHALVEBITS << DIV2(INTWORDSIZE))
+        (LASTHALVEBITS << GT_DIV2(INTWORDSIZE))
 #define FIRSTBIT\
         (((Bitsequence) 1) << (INTWORDSIZE-1)) /* \(10^{w-1}\) */
 #define ISBITSET(S,I)\
@@ -70,7 +70,7 @@ typedef uint32_t Bitsequence;
         (EXCEPTFIRSTBIT >> 3)             /* \(00001^{w-4}\) */
 
 typedef Bitsequence Twobitencoding;
-#define UNITSIN2BITENC              DIV2(INTWORDSIZE)
+#define UNITSIN2BITENC              GT_DIV2(INTWORDSIZE)
 #define DIVBYUNITSIN2BITENC(V)      ((V) >> (LOGWORDSIZE-1))
 #define MODBYUNITSIN2BITENC(V)      ((V) & ((1 << (LOGWORDSIZE-1))-1))
 

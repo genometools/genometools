@@ -35,7 +35,7 @@ static Seqpos searchsmallestgeq(const PairBwtidx *left,
   while (leftptr<=rightptr)
   {
     len = (unsigned long) (rightptr-leftptr);
-    midptr = leftptr + DIV2(len);
+    midptr = leftptr + GT_DIV2(len);
     if (key < midptr->bwtpos)
     {
       found = midptr;

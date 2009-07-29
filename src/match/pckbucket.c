@@ -167,7 +167,7 @@ Pckbuckettable *pckbuckettable_new(const void *voidbwtseq,
   child.depth = 0;
   child.code = (Codetype) 0;
   GT_STOREINARRAY(&stack,Boundsatdepth,128,child);
-  rangeOccs = gt_malloc(sizeof(*rangeOccs) * MULT2(numofchars));
+  rangeOccs = gt_malloc(sizeof(*rangeOccs) * GT_MULT2(numofchars));
   tmpmbtab = gt_malloc(sizeof(*tmpmbtab) * numofchars);
   pckbt = allocandinitpckbuckettable(numofchars,maxdepth,true);
   while (stack.nextfreeBoundsatdepth > 0)

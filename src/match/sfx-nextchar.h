@@ -23,7 +23,7 @@
 #define ADDNEXTCHAR(CODE,CC,NUMOFCHARS)\
         if ((NUMOFCHARS) == DNAALPHASIZE)\
         {\
-          CODE = MULT4(CODE) | ((Codetype) (CC));\
+          CODE = GT_MULT4(CODE) | ((Codetype) (CC));\
         } else\
         {\
           CODE = ((CODE) * (NUMOFCHARS)) + (Codetype) (CC);\

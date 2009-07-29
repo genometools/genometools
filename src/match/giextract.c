@@ -263,7 +263,7 @@ static unsigned long findkeyposition(const char *extractkey,
   rightptr = fastakeyqueries + numofqueries - 1;
   while (leftptr <= rightptr)
   {
-    midptr = leftptr + DIV2((unsigned long) (rightptr-leftptr));
+    midptr = leftptr + GT_DIV2((unsigned long) (rightptr-leftptr));
     cmp = strcmp(extractkey,midptr->fastakey);
     if (cmp == 0)
     {

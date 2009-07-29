@@ -170,8 +170,8 @@ static void showconstructionmessage(const GtStr *indexname,
 {
   printf("# construct fmindex \"%s\" for bsize=%lu, superbsize=%lu,",
           gt_str_get(indexname),
-          (unsigned long) POW2(log2bsize),
-          (unsigned long) POW2(log2markdist));
+          (unsigned long) GT_POW2(log2bsize),
+          (unsigned long) GT_POW2(log2markdist));
   printf(" len=" FormatSeqpos ", alphasize=%u: size ",
           PRINTSeqposcast(totallength),
           numofchars);

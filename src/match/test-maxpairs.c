@@ -75,7 +75,7 @@ static unsigned long getrecordnumulong(const unsigned long *recordseps,
   while (left<=right)
   {
     len = (unsigned long) (right-left);
-    mid = left + DIV2(len);
+    mid = left + GT_DIV2(len);
 #ifdef SKDEBUG
     printf("left=%lu,right = %lu\n",left,right);
     printf("mid=%lu\n",mid);

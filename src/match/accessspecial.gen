@@ -139,7 +139,7 @@ static bool ADDTYPE(binarysearchpage)(const SPECIALTYPE *leftptr,
 
   while (leftptr <= rightptr)
   {
-    midptr = leftptr + DIV2((unsigned long) (rightptr-leftptr));
+    midptr = leftptr + GT_DIV2((unsigned long) (rightptr-leftptr));
     if (pos < *midptr)
     {
       rightptr = midptr-1;
@@ -167,7 +167,7 @@ static bool ADDTYPE(binarysearchpage)(const SPECIALTYPE *leftptr,
 
   while (leftptr <= rightptr)
   {
-    midptr = leftptr + DIV2((unsigned long) (rightptr-leftptr));
+    midptr = leftptr + GT_DIV2((unsigned long) (rightptr-leftptr));
     if (pos < *midptr)
     {
       rightptr = midptr - 1;

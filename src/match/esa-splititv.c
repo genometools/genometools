@@ -39,7 +39,7 @@ static Seqpos lcpintervalfindrightbound(const Encodedsequence *encseq,
 
   while (right > left+1)
   {
-    mid = DIV2(left+right);
+    mid = GT_DIV2(left+right);
     pos = suftab[mid] + offset;
     midcc = SEQUENCE(encseq,pos);
     if (cc < midcc)

@@ -25,7 +25,7 @@
 #define COUNTSSUFFIX  ".mct"
 #define EXTRAINTEGERS 2
 
-#define MERBYTES(SL)  (DIV4(SL) + ((MOD4(SL) == 0) ? 0 : 1UL))
+#define MERBYTES(SL)  (GT_DIV4(SL) + ((GT_MOD4(SL) == 0) ? 0 : 1UL))
 
 typedef struct
 {

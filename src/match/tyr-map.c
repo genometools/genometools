@@ -53,7 +53,7 @@ unsigned long decodesingleinteger(const GtUchar *start)
   value = (unsigned long) start[0];
   for (idx=1UL; idx < (unsigned long) sizeof (unsigned long); idx++)
   {
-    value |= (((unsigned long) start[idx]) << MULT8(idx));
+    value |= (((unsigned long) start[idx]) << GT_MULT8(idx));
   }
   return value;
 }
@@ -249,7 +249,7 @@ static /*@null@*/ const Largecount *binsearchLargecount(unsigned long key,
   while (leftptr<=rightptr)
   {
     len = (unsigned long) (rightptr-leftptr);
-    midptr = leftptr + DIV2(len); /* halve len */
+    midptr = leftptr + GT_DIV2(len); /* halve len */
     if (key < midptr->idx)
     {
       rightptr = midptr-1;
@@ -335,7 +335,7 @@ static int mymemcmp(unsigned long *offset,const GtUchar *s1,const GtUchar *s2,
   rightptr = rightbound;
   while (leftptr <= rightptr)
   {
-    len = (unsigned long) (rightptr-leftptr)/MULT2(tyrindex->merbytes);
+    len = (unsigned long) (rightptr-leftptr)/GT_MULT2(tyrindex->merbytes);
     midptr = leftptr + tyrindex->merbytes * len;
     cmpval = mymemcmp(&offset,midptr,key,tyrindex->merbytes);
     if (cmpval < 0)

@@ -158,7 +158,7 @@ void calculatedistancesfromscores(Arbitraryscores *arbitscores,
   int mat, mis, ins, del;
 
   /* if mat is odd double all scores */
-  if (MOD2((unsigned int)arbitscores->mat))
+  if (GT_MOD2((unsigned int)arbitscores->mat))
   {
     mat = arbitscores->mat  * (int)2;
     mis = arbitscores->mis  * (int)2;

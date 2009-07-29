@@ -712,7 +712,7 @@ static MedianElem *quickmedian (bool fwd,bool complement,
   gt_assert(width > 0);
   low = arr;
   high = arr + width - 1;
-  median = low + DIV2(width);
+  median = low + GT_DIV2(width);
   for (;;)
   {
     if (high <= low)                   /* One element only */
@@ -729,7 +729,7 @@ static MedianElem *quickmedian (bool fwd,bool complement,
     }
 
     /* Find median of low, middle and high items; swap into position low */
-    middle = low + DIV2(high - low + 1);
+    middle = low + GT_DIV2(high - low + 1);
     if (MedianElemGREATER(middle,high))
     {
       MedianElemSWAP (middle, high);
@@ -872,13 +872,13 @@ static Suffixptr *cmpcharbychardelivermedian(const Bentsedgresources *bsr,
                                              Seqpos depth,
                                              unsigned long width)
 {
-  Seqpos *pl = left, *pm = left + DIV2(width), *pr = right;
+  Seqpos *pl = left, *pm = left + GT_DIV2(width), *pr = right;
 
   if (width >= MINMEDIANOF9WIDTH)
   { /* On big arrays, pseudomedian of 9 */
     unsigned long offset, doubleoffset;
-    offset = DIV8(width);
-    doubleoffset = MULT2(offset);
+    offset = GT_DIV8(width);
+    doubleoffset = GT_MULT2(offset);
     pl = medianof3cmpcharbychar(bsr,depth,pl,pl+offset,pl+doubleoffset);
     pm = medianof3cmpcharbychar(bsr,depth,pm-offset,pm,pm+offset);
     pr = medianof3cmpcharbychar(bsr,depth,pr-doubleoffset,pr-offset,pr);
@@ -893,15 +893,15 @@ static Suffixptr *blockcmpdelivermedian(const Bentsedgresources *bsr,
                                         unsigned long width,
                                         unsigned long maxwidthrealmedian)
 {
-  Suffixptr *pl = left, *pm = left + DIV2(width), *pr = right;
+  Suffixptr *pl = left, *pm = left + GT_DIV2(width), *pr = right;
 
   if (width >= MINMEDIANOF9WIDTH)
   {
     if (width > maxwidthrealmedian)
     { /* On big arrays, pseudomedian of 9 */
       unsigned long offset, doubleoffset;
-      offset = DIV8(width);
-      doubleoffset = MULT2(offset);
+      offset = GT_DIV8(width);
+      doubleoffset = GT_MULT2(offset);
       pl = medianof3(bsr,depth,pl,pl+offset,pl+doubleoffset);
       pm = medianof3(bsr,depth,pm-offset,pm,pm+offset);
       pr = medianof3(bsr,depth,pr-doubleoffset,pr-offset,pr);

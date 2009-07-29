@@ -96,7 +96,7 @@ static bool mmsearch(const Encodedsequence *dbencseq,
       rpref = lcplen;
       while (right > left + 1)
       {
-        mid = DIV2(left+right);
+        mid = GT_DIV2(left+right);
         lcplen = MIN(lpref,rpref);
         COMPARE(suftab[mid],lcplen);
         if (retcode <= 0)
@@ -133,7 +133,7 @@ static bool mmsearch(const Encodedsequence *dbencseq,
       rpref = lcplen;
       while (right > left + 1)
       {
-        mid = DIV2(left+right);
+        mid = GT_DIV2(left+right);
         lcplen = MIN(lpref,rpref);
         COMPARE(suftab[mid],lcplen);
         if (retcode >= 0)

@@ -44,7 +44,7 @@ static Codetype findfirstlarger(const Seqpos *leftborder,
 
   while (left+1 < right)
   {
-    mid = DIV2(left+right);
+    mid = GT_DIV2(left+right);
     if (suftaboffset == leftborder[mid])
     {
       return mid;

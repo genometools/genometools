@@ -261,7 +261,7 @@ Limdfsresources *newLimdfsresources(const Genericindex *genericindex,
   } else
   {
     ALLOCASSIGNSPACE(limdfsresources->rangeOccs,NULL,Seqpos,
-                     MULT2(limdfsresources->alphasize));
+                     GT_MULT2(limdfsresources->alphasize));
   }
   GT_INITARRAY(&limdfsresources->mstatspos,Seqpos);
   if (maxintervalwidth > 0)

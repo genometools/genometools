@@ -67,7 +67,7 @@ Seqpos frompos2rank(const Rankedbounds *leftptr,
 
   while (leftptr <= rightptr)
   {
-    midptr = leftptr + DIV2((unsigned long) (rightptr-leftptr));
+    midptr = leftptr + GT_DIV2((unsigned long) (rightptr-leftptr));
     if (specialpos < midptr->lowerbound)
     {
       rightptr = midptr-1;
@@ -98,7 +98,7 @@ Seqpos fromrank2pos(const Rankedbounds *leftptr,
 
   while (leftptr <= rightptr)
   {
-    midptr = leftptr + DIV2((unsigned long) (rightptr-leftptr));
+    midptr = leftptr + GT_DIV2((unsigned long) (rightptr-leftptr));
     if (rank < midptr->rank)
     {
       rightptr = midptr-1;

@@ -648,7 +648,7 @@ void mergertrie_initnodetable(Mergertrierep *trierep,Seqpos numofsuffixes,
 {
   trierep->numofindexes = numofindexes;
   trierep->allocatedMergertrienode
-    = (unsigned int) MULT2(numofsuffixes + 1) + 1;
+    = (unsigned int) GT_MULT2(numofsuffixes + 1) + 1;
   ALLOCASSIGNSPACE(trierep->nodetable,NULL,Mergertrienode,
                    trierep->allocatedMergertrienode);
   trierep->nextfreeMergertrienode = 0;

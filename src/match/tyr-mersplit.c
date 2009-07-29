@@ -60,13 +60,13 @@ static unsigned long extractprefixbytecode(unsigned long merbytes,
   for (idx=0; idx < MIN((unsigned long) sizeof (unsigned long),merbytes); idx++)
   {
     code = (code << 8) | bytecode[idx];
-    if (MULT4(idx+1) == (unsigned long) prefixlength)
+    if (GT_MULT4(idx+1) == (unsigned long) prefixlength)
     {
       break;
     }
-    if (MULT4(idx+1) > (unsigned long) prefixlength)
+    if (GT_MULT4(idx+1) > (unsigned long) prefixlength)
     {
-      code >>= MULT2(MULT4(idx+1) - prefixlength);
+      code >>= GT_MULT2(GT_MULT4(idx+1) - prefixlength);
       break;
     }
   }
@@ -93,7 +93,7 @@ static const GtUchar *remainingleftmost(unsigned long merbytes,
 
   while (leftptr + merbytes < rightptr)
   {
-    len = (unsigned long) (rightptr-leftptr)/MULT2(merbytes);
+    len = (unsigned long) (rightptr-leftptr)/GT_MULT2(merbytes);
     midptr = leftptr + merbytes * len;
     midcode = extractremainingbytes(remainmask,byteoffset,midptr);
     if (code <= midcode)
@@ -120,7 +120,7 @@ static const GtUchar *remainingrightmost(unsigned long merbytes,
 
   while (leftptr + merbytes < rightptr)
   {
-    len = (unsigned long) (rightptr-leftptr)/MULT2(merbytes);
+    len = (unsigned long) (rightptr-leftptr)/GT_MULT2(merbytes);
     midptr = leftptr + merbytes * len;
     midcode = extractremainingbytes(remainmask,byteoffset,midptr);
     if (code >= midcode)
@@ -204,11 +204,11 @@ const GtUchar *searchinbuckets(const Tyrindex *tyrindex,
 
     mertable = tyrindex_mertable(tyrindex);
     rightbound = tyrbckinfo->bounds[prefixcode+1] - merbytes;
-    if (MOD4(tyrbckinfo->prefixlength) == 0)
+    if (GT_MOD4(tyrbckinfo->prefixlength) == 0)
     {
       result = tyrindex_binmersearch(tyrindex,
                                      (unsigned long)
-                                     DIV4(tyrbckinfo->prefixlength),
+                                     GT_DIV4(tyrbckinfo->prefixlength),
                                      bytecode,
                                      mertable + leftbound,
                                      mertable + rightbound);
@@ -219,7 +219,7 @@ const GtUchar *searchinbuckets(const Tyrindex *tyrindex,
       merbounds.leftmer = merbounds.rightmer = NULL;
       if (!remainadvance(&merbounds,
                          merbytes,
-                         (unsigned long) DIV4(tyrbckinfo->prefixlength),
+                         (unsigned long) GT_DIV4(tyrbckinfo->prefixlength),
                          tyrbckinfo->remainmask,
                          bytecode,
                          mertable + leftbound,
@@ -232,7 +232,7 @@ const GtUchar *searchinbuckets(const Tyrindex *tyrindex,
       {
         result = tyrindex_binmersearch(tyrindex,
                                        1UL + (unsigned long)
-                                             DIV4(tyrbckinfo->prefixlength),
+                                             GT_DIV4(tyrbckinfo->prefixlength),
                                        bytecode,
                                        merbounds.leftmer,
                                        merbounds.rightmer);
@@ -256,7 +256,7 @@ static const GtUchar *findrightmostmer(unsigned long merbytes,
 
   while (leftptr + merbytes < rightptr)
   {
-    len = (unsigned long) (rightptr-leftptr)/MULT2(merbytes);
+    len = (unsigned long) (rightptr-leftptr)/GT_MULT2(merbytes);
     midptr = leftptr + merbytes * len;
     midcode = extractprefixbytecode(merbytes,prefixlength,midptr);
     if (midcode > code)
@@ -445,11 +445,11 @@ Tyrbckinfo *tyrbckinfo_new(const GtStr *tyrindexname,unsigned int alphasize,
     tyrbckinfo->bounds = ((unsigned long *) tyrbckinfo->mappedmbdfileptr) + 1;
     tyrbckinfo->boundisdefined
       = tyrbckinfo->bounds + tyrbckinfo->numofcodes + 1;
-    if (tyrbckinfo->prefixlength > 0 && MOD4(tyrbckinfo->prefixlength) > 0)
+    if (tyrbckinfo->prefixlength > 0 && GT_MOD4(tyrbckinfo->prefixlength) > 0)
     {
       tyrbckinfo->remainmask
-        = (GtUchar) MAXUCHARVALUEWITHBITS(MULT2(
-                                        4U - MOD4(tyrbckinfo->prefixlength)));
+        = (GtUchar) MAXUCHARVALUEWITHBITS(GT_MULT2(
+                                       4U - GT_MOD4(tyrbckinfo->prefixlength)));
     }
   }
   if (haserr)

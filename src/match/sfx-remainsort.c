@@ -360,7 +360,7 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
 #endif
   rmnsufinfo->itvinfo = NULL;
   rmnsufinfo->itvfullinfo = NULL;
-  rmnsufinfo->rangestobesorted = gt_inl_queue_new(MAX(16UL,DIV2(maxcode)));
+  rmnsufinfo->rangestobesorted = gt_inl_queue_new(MAX(16UL,GT_DIV2(maxcode)));
   rmnsufinfo->multimappower = bcktab_multimappower(bcktab);
   rmnsufinfo->esr = newEncodedsequencescanstate();
   GT_INITARRAY(&rmnsufinfo->firstgeneration,Pairsuffixptr);
@@ -909,7 +909,7 @@ static void possiblychangemappedsection(Sortblock *sortblock,Seqpos left,
   {
     Seqpos entries2map;
 
-    sortblock->pageoffset = left - (left % DIV2(sortblock->mappedwidth));
+    sortblock->pageoffset = left - (left % GT_DIV2(sortblock->mappedwidth));
 #ifndef NDEBUG
     if (left < sortblock->pageoffset)
     {
@@ -1093,7 +1093,7 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos left,
                              left + rangestart,
                              left + idx - 1,
                              base,
-                             MULT2(rmnsufinfo->currentdepth));
+                             GT_MULT2(rmnsufinfo->currentdepth));
         if (rmnsufinfo->absoluteinversesuftab)
         {
           anchorleftmost(rmnsufinfo,
@@ -1128,7 +1128,7 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos left,
                          left + rangestart,
                          left + width - 1,
                          base,
-                         MULT2(rmnsufinfo->currentdepth));
+                         GT_MULT2(rmnsufinfo->currentdepth));
     if (rmnsufinfo->absoluteinversesuftab)
     {
       anchorleftmost(rmnsufinfo,

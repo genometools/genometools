@@ -60,17 +60,17 @@ void gt_inlined_qsort_r (Sorttype *a,unsigned long n,void *data)
       }
       return;
     }
-    pm = a + DIV2 (n);
+    pm = a + GT_DIV2 (n);
     if (n > 7UL)
     {
       pl = a;
       pn = a + n - 1;
       if (n > 40UL)
       {
-        d = DIV8 (n);
-        pl = med3 (pl, pl + d, pl + MULT2 (d), data);
+        d = GT_DIV8 (n);
+        pl = med3 (pl, pl + d, pl + GT_MULT2 (d), data);
         pm = med3 (pm - d, pm, pm + d, data);
-        pn = med3 (pn - MULT2 (d), pn - d, pn, data);
+        pn = med3 (pn - GT_MULT2 (d), pn - d, pn, data);
       }
       pm = med3 (pl, pm, pn, data);
     }
