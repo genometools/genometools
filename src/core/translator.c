@@ -804,7 +804,7 @@ GtStrArray* gt_translator_get_translation_table_descriptions()
   return sa;
 }
 
-int gt_translator_codon2amino(GtTranslator *tr,
+int gt_translator_codon2amino(const GtTranslator *tr,
                               char c1, char c2, char c3,
                               char *translated,
                               GtError *err)

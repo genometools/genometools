@@ -99,7 +99,7 @@ int           gt_translator_find_startcodon(GtTranslator *translator,
 /* Writes the translation for the codon <c1>,<c2>,<c3> to the position pointed
    to by <amino>. The current translation scheme set in <translator> is used.
    Returns a negative value if an error occurred, see <err> for details. */
-int           gt_translator_codon2amino(GtTranslator *translator,
+int           gt_translator_codon2amino(const GtTranslator *translator,
                                         char c1, char c2, char c3,
                                         char *amino,
                                         GtError *err);
