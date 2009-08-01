@@ -557,9 +557,7 @@ static unsigned int smallestbase(unsigned char bits)
   {
     return GT_G_CODE;
   }
-  fprintf(stderr, "%s: line %lu: This case is not supposed to occur\n",\
-                  __FILE__, (unsigned long) __LINE__);\
-  exit(EXIT_FAILURE);
+  gt_assert(0);
   /*@ignore@*/
   return 0;
   /*@end@*/
