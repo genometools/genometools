@@ -50,6 +50,12 @@ void           gt_file_dirname(GtStr *path, const char *file);
    Sets <path> to the empty string if <file> could not be found in $PATH. */
 int            gt_file_find_in_path(GtStr *path, const char *file, GtError*);
 
+/* Find  <file> in the ':'-separated directory list specified in environment
+   variable $<env>, if it has no dirname; set <path> to dirname otherwise.
+   Sets <path> to the empty string if <file> could not be found in $<env>. */
+int            gt_file_find_in_env(GtStr *path, const char *file,
+                                   const char *env, GtError*);
+
 /* Return the (estimated) size of <file>. If <file> is uncompressed, the exact
    size is returned. If <file> is compressed, an estimation which assumes that
    <file> contains a DNA sequence is returned. */

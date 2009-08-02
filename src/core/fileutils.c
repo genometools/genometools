@@ -95,6 +95,12 @@ void gt_file_dirname(GtStr *path, const char *file)
 
 int gt_file_find_in_path(GtStr *path, const char *file, GtError *err)
 {
+  return gt_file_find_in_env(path, file, file, err);
+}
+
+int gt_file_find_in_env(GtStr *path, const char *file, const char *env,
+                        GtError *err)
+{
   char *pathvariable, *pathcomponent = NULL;
   GtSplitter *splitter = NULL;
   unsigned long i;
@@ -107,12 +113,12 @@ int gt_file_find_in_path(GtStr *path, const char *file, GtError *err)
   gt_file_dirname(path, file);
   if (gt_str_length(path))
     return had_err;
-  /* 'file' has no dirname -> scan $PATH */
-  pathvariable = getenv("PATH");
+  /* 'file' has no dirname -> scan $env */
+  pathvariable = getenv(env);
   if (pathvariable)
     pathvariable = gt_cstr_dup(pathvariable); /* make writeable copy */
   else {
-    gt_error_set(err, "environment variable $PATH is not defined");
+    gt_error_set(err, "environment variable $%s is not defined", env);
     had_err = -1;
   }
 
