@@ -130,7 +130,7 @@ int sarrselfsubstringmatch(const GtUchar *dbseq,
   ssi.minlength = minlength;
   ssi.processmaxmatch = processmaxmatch;
   ssi.processmaxmatchinfo = processmaxmatchinfo;
-  numofchars = getnumofcharsAlphabet(alpha);
+  numofchars = gt_alphabet_num_of_chars(alpha);
   if (constructsarrandrunmaxpairs(&ssi,
                                   Forwardmode,
                                   recommendedprefixlength(numofchars,

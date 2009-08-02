@@ -274,7 +274,7 @@ int tyrsearch(const GtStr *tyrindexname,
     if (!haserr)
     {
       gt_seqiterator_set_symbolmap(seqit,
-                                  getsymbolmapAlphabet(tyrsearchinfo.dnaalpha));
+                                 gt_alphabet_symbolmap(tyrsearchinfo.dnaalpha));
       for (unitnum = 0; /* Nothing */; unitnum++)
       {
         retval = gt_seqiterator_next(seqit,

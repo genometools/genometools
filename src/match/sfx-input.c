@@ -60,7 +60,7 @@ static unsigned long *initcharacterdistribution(const GtAlphabet *alpha)
   unsigned long *characterdistribution;
   unsigned int numofchars, idx;
 
-  numofchars = getnumofcharsAlphabet(alpha);
+  numofchars = gt_alphabet_num_of_chars(alpha);
   ALLOCASSIGNSPACE(characterdistribution,NULL,unsigned long,numofchars);
   for (idx=0; idx<numofchars; idx++)
   {

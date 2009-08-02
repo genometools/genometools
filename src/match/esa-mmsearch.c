@@ -531,7 +531,7 @@ int sarrquerysubstringmatch(const GtUchar *dbseq,
                                    0,
                                    alpha,
                                    verboseinfo);
-  numofchars = getnumofcharsAlphabet(alpha);
+  numofchars = gt_alphabet_num_of_chars(alpha);
   if (constructsarrandrunmmsearch(dbencseq,
                                   Forwardmode,
                                   recommendedprefixlength(numofchars,dblen),

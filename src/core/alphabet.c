@@ -533,29 +533,34 @@ static int assignProteinorDNAalphabet(GtAlphabet *alpha,
   return alpha;
 }
 
-const GtUchar *getsymbolmapAlphabet(const GtAlphabet *alpha)
+const GtUchar* gt_alphabet_symbolmap(const GtAlphabet *alphabet)
 {
-  return alpha->symbolmap;
+  gt_assert(alphabet);
+  return alphabet->symbolmap;
 }
 
-unsigned int getnumofcharsAlphabet(const GtAlphabet *alpha)
+unsigned int gt_alphabet_num_of_chars(const GtAlphabet *alphabet)
 {
-  return alpha->mapsize-1;
+  gt_assert(alphabet);
+  return alphabet->mapsize-1;
 }
 
-const GtUchar *getcharactersAlphabet(const GtAlphabet *alpha)
+const GtUchar* gt_alphabet_characters(const GtAlphabet *alphabet)
 {
-  return alpha->characters;
+  gt_assert(alphabet);
+  return alphabet->characters;
 }
 
-GtUchar getwildcardshowAlphabet(const GtAlphabet *alpha)
+GtUchar gt_alphabet_wildcard_show(const GtAlphabet *alphabet)
 {
-  return alpha->wildcardshow;
+  gt_assert(alphabet);
+  return alphabet->wildcardshow;
 }
 
-unsigned int getbitspersymbolAlphabet(const GtAlphabet *alpha)
+unsigned int gt_alphabet_bits_per_symbol(const GtAlphabet *alphabet)
 {
-  return alpha->bitspersymbol;
+  gt_assert(alphabet);
+  return alphabet->bitspersymbol;
 }
 
 void outputalphabet(FILE *fpout,const GtAlphabet *alpha)

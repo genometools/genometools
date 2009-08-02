@@ -191,7 +191,7 @@ newSeqStatsFromCharDist(const Encodedsequence *encseq,
   stats->symbolDistributionTable =
     (Seqpos *)((char *)stats + offsetAlign(sizeof (*stats), sizeof (Seqpos)));
   memset(stats->symbolDistributionTable, 0, sizeof (Seqpos) * (UINT8_MAX + 1));
-  numofchars = getnumofcharsAlphabet(alpha);
+  numofchars = gt_alphabet_num_of_chars(alpha);
   for (i = 0; i < numofchars; ++i)
   {
     stats->symbolDistributionTable[i]

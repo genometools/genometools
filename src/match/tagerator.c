@@ -607,8 +607,8 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     GT_INITARRAY(&storeoffline,Simplematch);
     storeonline.twlptr = storeoffline.twlptr = &twl;
     alpha = getencseqAlphabet(encseq);
-    symbolmap = getsymbolmapAlphabet(alpha);
-    numofchars = getnumofcharsAlphabet(alpha);
+    symbolmap = gt_alphabet_symbolmap(alpha);
+    numofchars = gt_alphabet_num_of_chars(alpha);
     if (tageratoroptions->docompare)
     {
       processmatch = storematch;

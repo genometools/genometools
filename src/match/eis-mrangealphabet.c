@@ -90,7 +90,7 @@ MRAEncGTAlphaNew(const GtAlphabet *alpha)
   AlphabetRangeSize symsPerRange[2];
   uint8_t *mappings;
   MRAEnc *result;
-  uint32_t numofchars = getnumofcharsAlphabet(alpha);
+  uint32_t numofchars = gt_alphabet_num_of_chars(alpha);
   mappings = gt_malloc(sizeof (uint8_t) * (UINT8_MAX + 1));
   memset(mappings, UNDEF_UCHAR, UINT8_MAX+1);
   {

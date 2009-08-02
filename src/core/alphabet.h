@@ -40,20 +40,16 @@
 typedef struct GtAlphabet GtAlphabet;
 
 /*@null@*/
-GtAlphabet* gt_alphabet_new(bool isdna, bool isprotein, const GtStr *smapfile,
-                            const GtStrArray *filenametab, GtError *err);
-GtAlphabet* gt_alphabet_clone(const GtAlphabet *alphabet);
-void        gt_alphabet_delete(GtAlphabet *alphabet);
-
-const GtUchar *getsymbolmapAlphabet(const GtAlphabet *alpha);
-
-unsigned int getnumofcharsAlphabet(const GtAlphabet *alpha);
-
-const GtUchar *getcharactersAlphabet(const GtAlphabet *alpha);
-
-GtUchar getwildcardshowAlphabet(const GtAlphabet *alpha);
-
-unsigned int getbitspersymbolAlphabet(const GtAlphabet *alpha);
+GtAlphabet*    gt_alphabet_new(bool isdna, bool isprotein,
+                               const GtStr *smapfile,
+                               const GtStrArray *filenametab, GtError *err);
+GtAlphabet*    gt_alphabet_clone(const GtAlphabet *alphabet);
+void           gt_alphabet_delete(GtAlphabet *alphabet);
+const GtUchar* gt_alphabet_symbolmap(const GtAlphabet *alphabet);
+unsigned int   gt_alphabet_num_of_chars(const GtAlphabet *alphabet);
+const GtUchar* gt_alphabet_characters(const GtAlphabet *alphabet);
+GtUchar        gt_alphabet_wildcard_show(const GtAlphabet *alphabet);
+unsigned int   gt_alphabet_bits_per_symbol(const GtAlphabet *alphabet);
 
 void outputalphabet(FILE *fpout,const GtAlphabet *alpha);
 

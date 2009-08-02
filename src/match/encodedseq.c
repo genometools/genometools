@@ -583,7 +583,7 @@ static void assignencseqmapspecification(GtArrayMapspecification *mapspectable,
   NEWMAPSPEC(encseq->totallengthptr,Seqpos,1UL);
   NEWMAPSPEC(encseq->numofdbsequencesptr,Unsignedlong,1UL);
   NEWMAPSPEC(encseq->specialcharinfoptr,Specialcharinfo,1UL);
-  numofchars = getnumofcharsAlphabet(encseq->alpha);
+  numofchars = gt_alphabet_num_of_chars(encseq->alpha);
   NEWMAPSPEC(encseq->characterdistribution,Unsignedlong,
              (unsigned long) numofchars);
   switch (encseq->sat)
@@ -593,7 +593,7 @@ static void assignencseqmapspecification(GtArrayMapspecification *mapspectable,
       NEWMAPSPEC(encseq->plainseq,GtUchar,numofunits);
       break;
     case Viabytecompress:
-      bitspersymbol = getbitspersymbolAlphabet(encseq->alpha);
+      bitspersymbol = gt_alphabet_bits_per_symbol(encseq->alpha);
       numofunits
         = (unsigned long) sizeofbitarray(bitspersymbol,
                                          (BitOffset) encseq->totallength);
@@ -1295,9 +1295,9 @@ static int fillbitpackarray(Encodedsequence *encseq,
   unsigned int numofchars;
 
   gt_error_check(err);
-  numofchars = getnumofcharsAlphabet(encseq->alpha);
+  numofchars = gt_alphabet_num_of_chars(encseq->alpha);
   encseq->bitpackarray
-    = bitpackarray_new(getbitspersymbolAlphabet(encseq->alpha),
+    = bitpackarray_new(gt_alphabet_bits_per_symbol(encseq->alpha),
                        (BitOffset) encseq->totallength,true);
   for (pos=0; /* Nothing */; pos++)
   {
@@ -2460,13 +2460,13 @@ static Encodedsequence *determineencseqkeyvalues(Positionaccesstype sat,
                                               specialranges);
   encseq->totallength = totallength;
   encseq->numofdbsequences = numofsequences;
-  encseq->numofchars = getnumofcharsAlphabet(alpha);
+  encseq->numofchars = gt_alphabet_num_of_chars(alpha);
   encseq->sizeofrep
     = CALLCASTFUNC(uint64_t,unsigned_long,
                    localdetsizeencseq(sat,totallength,
                                       specialranges,
                                       encseq->numofchars,
-                                      getbitspersymbolAlphabet(alpha)));
+                                      gt_alphabet_bits_per_symbol(alpha)));
   encseq->name = accesstype2name(sat);
   encseq->deliverchar = NULL;
   encseq->delivercharname = NULL;
@@ -2570,12 +2570,12 @@ int readSpecialcharinfo(Specialcharinfo *specialcharinfo,
 
 unsigned int getencseqAlphabetnumofchars(const Encodedsequence *encseq)
 {
-  return getnumofcharsAlphabet(encseq->alpha);
+  return gt_alphabet_num_of_chars(encseq->alpha);
 }
 
 const GtUchar *getencseqAlphabetsymbolmap(const Encodedsequence *encseq)
 {
-  return getsymbolmapAlphabet(encseq->alpha);
+  return gt_alphabet_symbolmap(encseq->alpha);
 }
 
 const GtAlphabet *getencseqAlphabet(const Encodedsequence *encseq)
@@ -2585,12 +2585,12 @@ const GtAlphabet *getencseqAlphabet(const Encodedsequence *encseq)
 
 const GtUchar *getencseqAlphabetcharacters(const Encodedsequence *encseq)
 {
-  return getcharactersAlphabet(encseq->alpha);
+  return gt_alphabet_characters(encseq->alpha);
 }
 
 GtUchar getencseqAlphabetwildcardshow(const Encodedsequence *encseq)
 {
-  return getwildcardshowAlphabet(encseq->alpha);
+  return gt_alphabet_wildcard_show(encseq->alpha);
 }
 
 void removealpharef(Encodedsequence *encseq)
@@ -2616,7 +2616,7 @@ const Filelengthvalues *getencseqfilelengthtab(const Encodedsequence *encseq)
 unsigned long getencseqcharactercount(const Encodedsequence *encseq,GtUchar cc)
 {
   gt_assert(encseq != NULL &&
-            (unsigned int) cc < getnumofcharsAlphabet(encseq->alpha));
+            (unsigned int) cc < gt_alphabet_num_of_chars(encseq->alpha));
   return encseq->characterdistribution[cc];
 }
 
@@ -2874,7 +2874,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
   retcode = determinesattype(&specialranges,
                              totallength,
                              specialrangestab,
-                             getnumofcharsAlphabet(alphabet),
+                             gt_alphabet_num_of_chars(alphabet),
                              str_sat,
                              err);
   if (retcode < 0)
@@ -2911,7 +2911,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
     if (!fb)
       haserr = true;
     if (!haserr) {
-      gt_sequence_buffer_set_symbolmap(fb, getsymbolmapAlphabet(alphabet));
+      gt_sequence_buffer_set_symbolmap(fb, gt_alphabet_symbolmap(alphabet));
       if (encodedseqfunctab[(int) sat].fillpos.function(encseq,fb,err) != 0)
       {
         haserr = true;
@@ -4560,7 +4560,7 @@ static void showcharacterdistribution(
 {
   unsigned int numofchars, idx;
 
-  numofchars = getnumofcharsAlphabet(alpha);
+  numofchars = gt_alphabet_num_of_chars(alpha);
   gt_assert(characterdistribution != NULL);
   for (idx=0; idx<numofchars; idx++)
   {

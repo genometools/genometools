@@ -250,7 +250,7 @@ int findsubquerygmatchforward(const Encodedsequence *encseq,
     haserr = true;
   if (!haserr)
   {
-    gt_seqiterator_set_symbolmap(seqit, getsymbolmapAlphabet(alphabet));
+    gt_seqiterator_set_symbolmap(seqit, gt_alphabet_symbolmap(alphabet));
     for (unitnum = 0; /* Nothing */; unitnum++)
     {
       retval = gt_seqiterator_next(seqit,

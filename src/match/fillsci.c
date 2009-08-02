@@ -195,7 +195,7 @@ int fasta2sequencekeyvalues(
     if (!fb)
       haserr = true;
     if (!haserr) {
-      gt_sequence_buffer_set_symbolmap(fb, getsymbolmapAlphabet(alpha));
+      gt_sequence_buffer_set_symbolmap(fb, gt_alphabet_symbolmap(alpha));
       *filelengthtab = gt_calloc((size_t) gt_str_array_size(filenametab),
                                  sizeof (Filelengthvalues));
       gt_sequence_buffer_set_filelengthtab(fb, *filelengthtab);
@@ -291,7 +291,7 @@ int fasta2sequencekeyvalues(
     *totallength = currentpos;
     specialcharinfo->lengthofspecialsuffix = lastspeciallength;
     doupdatesumranges(specialcharinfo,forcetable,specialrangestab,currentpos,
-                      getnumofcharsAlphabet(alpha),distspralen,verboseinfo);
+                      gt_alphabet_num_of_chars(alpha),distspralen,verboseinfo);
   }
   gt_fa_xfclose(desfp);
   gt_disc_distri_delete(distspralen);

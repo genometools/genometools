@@ -40,7 +40,7 @@ Substriter *substriter_new(const GtAlphabet *alphabet,unsigned int qvalue)
   Substriter *substriter;
   ALLOCASSIGNSPACE(substriter,NULL,Substriter,1);
   substriter->qvalue = qvalue;
-  substriter->numofchars = getnumofcharsAlphabet(alphabet);
+  substriter->numofchars = gt_alphabet_num_of_chars(alphabet);
   substriter->multimappower = initmultimappower(substriter->numofchars,qvalue);
   return substriter;
 }
