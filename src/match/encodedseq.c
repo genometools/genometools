@@ -973,10 +973,7 @@ void encodedsequence_free(Encodedsequence **encseqptr)
     gt_fa_xmunmap((void *) encseq->ssptab);
     encseq->ssptab = NULL;
   }
-  if (encseq->alpha != NULL)
-  {
-    freeGtAlphabet((GtAlphabet **) &encseq->alpha);
-  }
+  freeGtAlphabet((GtAlphabet*) encseq->alpha);
   gt_str_array_delete((GtStrArray *) encseq->filenametab);
   encseq->filenametab = NULL;
   gt_free((Filelengthvalues *) encseq->filelengthtab);
@@ -2952,7 +2949,7 @@ static const GtAlphabet *scanal1file(const GtStr *indexname,GtError *err)
   gt_str_delete(tmpfilename);
   if (haserr)
   {
-    freeGtAlphabet((GtAlphabet **) &alpha);
+    freeGtAlphabet((GtAlphabet*) alpha);
     return NULL;
   }
   return alpha;
@@ -3072,7 +3069,7 @@ static unsigned long *calcdescendpositions(const Encodedsequence *encseq)
   {
     if (alpha != NULL)
     {
-      freeGtAlphabet((GtAlphabet **) &alpha);
+      freeGtAlphabet((GtAlphabet*) alpha);
     }
     if (encseq != NULL)
     {

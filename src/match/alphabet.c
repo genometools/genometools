@@ -346,11 +346,12 @@ GtAlphabet *gt_copyAlphabet(const GtAlphabet *alpha2)
   return alpha1;
 }
 
-void freeGtAlphabet(GtAlphabet **alpha)
+void freeGtAlphabet(GtAlphabet *alpha)
 {
-  FREESPACE((*alpha)->mapdomain);
-  FREESPACE((*alpha)->characters);
-  FREESPACE(*alpha);
+  if (!alpha) return;
+  FREESPACE(alpha->mapdomain);
+  FREESPACE(alpha->characters);
+  FREESPACE(alpha);
 }
 
 /*EE
@@ -529,7 +530,7 @@ static int assignProteinorDNAalphabet(GtAlphabet *alpha,
   {
     if (alpha != NULL)
     {
-      freeGtAlphabet(&alpha);
+      freeGtAlphabet(alpha);
     }
     return NULL;
   }

@@ -138,10 +138,7 @@ void freefmindex(Fmindex *fmindex)
   {
     encodedsequence_free(&fmindex->bwtformatching);
   }
-  if (fmindex->alphabet != NULL)
-  {
-    freeGtAlphabet(&fmindex->alphabet);
-  }
+  freeGtAlphabet(fmindex->alphabet);
 }
 
 static Encodedsequence *mapbwtencoding(const GtStr *indexname,
