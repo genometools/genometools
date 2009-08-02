@@ -19,9 +19,9 @@
 #define FMINDEX_H
 
 #include <stdbool.h>
+#include "core/alphabet.h"
 #include "core/arraydef.h"
 #include "seqpos-def.h"
-#include "alphabet.h"
 #include "encseq-def.h"
 #include "fmi-bwtbound.h"
 

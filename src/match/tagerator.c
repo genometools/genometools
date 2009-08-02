@@ -16,6 +16,7 @@
 */
 
 #include <limits.h>
+#include "core/alphabet.h"
 #include "core/unused_api.h"
 #include "core/str_array.h"
 #include "core/ma.h"
@@ -26,7 +27,6 @@
 #include "revcompl.h"
 #include "sarr-def.h"
 #include "intbits.h"
-#include "alphabet.h"
 #include "myersapm.h"
 #include "format64.h"
 #include "idx-limdfs.h"

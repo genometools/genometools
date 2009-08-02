@@ -15,12 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/alphabet.h"
 #include "core/assert_api.h"
 #include "core/chardef.h"
 #include "core/error.h"
 #include "core/seqiterator.h"
 #include "spacedef.h"
-#include "alphabet.h"
 #include "encseq-def.h"
 
 void symbolstring2fasta(FILE *fpout,

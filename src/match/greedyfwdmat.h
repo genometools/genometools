@@ -19,12 +19,12 @@
 #define GREEDYFWDMAT_H
 
 #include <stdbool.h>
-#include "core/str_array.h"
+#include "core/alphabet.h"
 #include "core/error.h"
+#include "core/str_array.h"
 #include "defined-types.h"
 #include "seqpos-def.h"
 #include "ushort-def.h"
-#include "alphabet.h"
 #include "encseq-def.h"
 
 typedef unsigned long (*Greedygmatchforwardfunction) (const void *,

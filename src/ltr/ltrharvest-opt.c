@@ -17,6 +17,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include "core/alphabet.h"
 #include "core/arraydef.h"
 #include "core/chardef.h"
 #include "core/error.h"
@@ -25,7 +26,6 @@
 #include "core/undef.h"
 #include "core/versionfunc.h"
 #include "core/symboldef.h"
-#include "match/alphabet.h"
 #include "ltrharvest-opt.h"
 #include "repeattypes.h"
 

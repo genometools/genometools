@@ -15,12 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/alphabet.h"
 #include "core/unused_api.h"
 #include "spacedef.h"
 #include "sarr-def.h"
 #include "merger-trie.h"
 #include "encseq-def.h"
-#include "alphabet.h"
 #include "esa-map.h"
 
 static void maketrie(Mergertrierep *trierep,

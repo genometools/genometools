@@ -19,6 +19,7 @@
 #include <limits.h>
 #include <ctype.h>
 #include <errno.h>
+#include "core/alphabet.h"
 #include "core/arraydef.h"
 #include "core/chardef.h"
 #include "core/divmodmul.h"
@@ -36,7 +37,6 @@
 #include "ushort-def.h"
 #include "format64.h"
 #include "intbits-tab.h"
-#include "alphabet.h"
 #include "mapspec-def.h"
 #include "safecast-gen.h"
 #include "esa-fileend.h"

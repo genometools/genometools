@@ -18,7 +18,7 @@
 #include <inttypes.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include "core/alphabet.h"
 #include "core/assert_api.h"
 #include "core/chardef.h"
 #include "core/dataalign.h"
@@ -26,8 +26,6 @@
 #include "core/str.h"
 #include "core/symboldef.h"
 #include "core/str_array.h"
-#include "match/alphabet.h"
-
 #include "match/eis-mrangealphabet.h"
 #include "match/eis-mrangealphabet-priv.h"
 

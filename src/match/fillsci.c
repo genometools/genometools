@@ -17,6 +17,7 @@
 
 #include <stdbool.h>
 #include <ctype.h>
+#include "core/alphabet.h"
 #include "core/chardef.h"
 #include "core/disc_distri.h"
 #include "core/error.h"
@@ -29,7 +30,6 @@
 #include "verbose-def.h"
 #include "spacedef.h"
 #include "safecast-gen.h"
-#include "alphabet.h"
 #include "encseq-def.h"
 #include "stamp.h"
 #include "opensfxfile.h"

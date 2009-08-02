@@ -19,6 +19,7 @@
 #define FILLSCI_H
 
 #include <stdbool.h>
+#include "core/alphabet.h"
 #include "core/str_api.h"
 #include "core/filelengthvalues.h"
 #include "core/str_array.h"
@@ -26,7 +27,6 @@
 #include "core/error.h"
 #include "core/symboldef.h"
 #include "seqpos-def.h"
-#include "alphabet.h"
 #include "verbose-def.h"
 
 int fasta2sequencekeyvalues(

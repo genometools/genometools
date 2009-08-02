@@ -18,10 +18,10 @@
 #ifndef ECHOSEQ_H
 #define ECHOSEQ_H
 #include <stdio.h>
+#include "core/alphabet.h"
+#include "core/error_api.h"
 #include "core/symboldef.h"
 #include "core/str_array_api.h"
-#include "core/error_api.h"
-#include "alphabet.h"
 #include "readmode-def.h"
 #include "seqpos-def.h"
 #include "encseq-def.h"

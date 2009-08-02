@@ -16,12 +16,12 @@
 */
 
 #include <errno.h>
+#include "core/alphabet.h"
 #include "core/divmodmul.h"
 #include "core/str.h"
 #include "core/unused_api.h"
 #include "core/fa.h"
 #include "esa-seqread.h"
-#include "alphabet.h"
 #include "verbose-def.h"
 #include "spacedef.h"
 #include "format64.h"

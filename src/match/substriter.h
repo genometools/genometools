@@ -20,10 +20,10 @@
 
 #include <inttypes.h>
 #include <stdbool.h>
+#include "core/alphabet.h"
 #include "core/str_array.h"
 #include "core/symboldef.h"
 #include "intcode-def.h"
-#include "alphabet.h"
 
 typedef struct Substriter Substriter;
 

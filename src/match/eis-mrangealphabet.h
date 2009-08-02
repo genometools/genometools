@@ -29,7 +29,7 @@
  */
 
 #include <inttypes.h>
-#include "match/alphabet.h"
+#include "core/alphabet.h"
 
 /** symbols are stored in this scalar type */
 typedef unsigned char Symbol;

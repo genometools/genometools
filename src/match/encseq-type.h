@@ -26,12 +26,12 @@
   encodedseq.c.
 */
 
+#include "core/alphabet.h"
 #include "core/symboldef.h"
 #include "core/str_array_api.h"
 #include "core/filelengthvalues.h"
 #include "bitpack-itf.h"
 #include "seqpos-def.h"
-#include "alphabet.h"
 #include "intbits.h"
 #include "ushort-def.h"
 

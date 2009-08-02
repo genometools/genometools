@@ -16,6 +16,7 @@
 */
 
 #include <string.h>
+#include "core/alphabet.h"
 #include "core/cstr.h"
 #include "core/ensure.h"
 #include "core/ma.h"
@@ -23,7 +24,6 @@
 #include "core/unused_api.h"
 #include "extended/reverse.h"
 #include "ltr/ltrelement.h"
-#include "match/alphabet.h"
 
 unsigned long gt_ltrelement_length(GtLTRElement *e)
 {

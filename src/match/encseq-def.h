@@ -18,6 +18,7 @@
 #ifndef ENCSEQ_DEF_H
 #define ENCSEQ_DEF_H
 
+#include "core/alphabet.h"
 #include "core/chardef.h"
 #include "core/str.h"
 #include "core/str_array.h"
@@ -25,7 +26,6 @@
 #include "core/filelengthvalues.h"
 #include "seqpos-def.h"
 #include "intcode-def.h"
-#include "alphabet.h"
 #include "intbits.h"
 #include "readmode-def.h"
 #include "verbose-def.h"

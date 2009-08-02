@@ -15,12 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/alphabet.h"
 #include "core/fa.h"
 #include "core/unused_api.h"
 #include "core/seqiterator.h"
 #include "core/chardef.h"
 #include "revcompl.h"
-#include "alphabet.h"
 #include "format64.h"
 #include "encseq-def.h"
 #include "tyr-map.h"

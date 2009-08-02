@@ -19,10 +19,10 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <errno.h>
+#include "core/alphabet.h"
 #include "core/fa.h"
 #include "core/filelengthvalues.h"
 #include "spacedef.h"
-#include "alphabet.h"
 #include "sfx-optdef.h"
 #include "encseq-def.h"
 #include "measure-time-if.h"

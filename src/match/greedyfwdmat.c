@@ -18,11 +18,11 @@
 #include <inttypes.h>
 #include <string.h>
 #include <stdbool.h>
+#include "core/alphabet.h"
 #include "core/error.h"
 #include "core/seqiterator.h"
 #include "core/unused_api.h"
 #include "defined-types.h"
-#include "alphabet.h"
 #include "spacedef.h"
 #include "optionargmode.h"
 #include "format64.h"
