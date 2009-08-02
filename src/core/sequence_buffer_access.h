@@ -24,8 +24,7 @@
 /* Advances the sequence window in the <GtSequenceBuffer> by OUTBUFSIZE. */
 int gt_sequence_buffer_advance(GtSequenceBuffer*, GtError*);
 
-inline int gt_sequence_buffer_next(GtSequenceBuffer *sb, GtUchar *val,
-                                   GtError *err)
+int gt_sequence_buffer_next(GtSequenceBuffer *sb, GtUchar *val, GtError *err)
 {
   GtSequenceBufferMembers *pvt;
   pvt = sb->pvt;
