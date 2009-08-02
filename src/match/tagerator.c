@@ -64,7 +64,7 @@ typedef struct
   const TageratorOptions *tageratoroptions;
   unsigned int alphasize;
   const GtUchar *tagptr;
-  const SfxAlphabet *alpha;
+  const GtAlphabet *alpha;
   unsigned long *eqsvector;
   const Tagwithlength *twlptr;
   const Encodedsequence *encseq;
@@ -591,7 +591,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     Showmatchinfo showmatchinfo;
     void *processmatchinfoonline, *processmatchinfooffline;
     Limdfsresources *limdfsresources = NULL;
-    const SfxAlphabet *alpha;
+    const GtAlphabet *alpha;
     ArraySimplematch storeonline, storeoffline;
     const AbstractDfstransformer *dfst;
     GtSeqIterator *seqit = NULL;

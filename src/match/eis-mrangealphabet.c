@@ -87,7 +87,7 @@ newMultiRangeAlphabetEncodingUInt8(AlphabetRangeID numRanges,
 }
 
 MRAEnc *
-MRAEncGTAlphaNew(const SfxAlphabet *alpha)
+MRAEncGTAlphaNew(const GtAlphabet *alpha)
 {
   AlphabetRangeSize symsPerRange[2];
   uint8_t *mappings;

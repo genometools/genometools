@@ -46,7 +46,7 @@ struct sfxInterface
   Readmode readmode;
   unsigned int prefixlength, numofparts;
   const Sfxstrategy *sfxstrategy;
-  const SfxAlphabet *alpha;
+  const GtAlphabet *alpha;
   const Encodedsequence *encseq;
   struct seqStats *stats;
   Sfxiterator *sfi;
@@ -177,7 +177,7 @@ newSfxInterface(Readmode readmode,
 
 static struct seqStats *
 newSeqStatsFromCharDist(const Encodedsequence *encseq,
-                        const SfxAlphabet *alpha, Seqpos len)
+                        const GtAlphabet *alpha, Seqpos len)
 {
   struct seqStats *stats = NULL;
   unsigned i, numofchars;
@@ -287,7 +287,7 @@ deleteSfxInterface(sfxInterface *sfxi)
   gt_free(sfxi);
 }
 
-extern const SfxAlphabet *
+extern const GtAlphabet *
 SfxIGetAlphabet(const sfxInterface *si)
 {
   return si->alpha;

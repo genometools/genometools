@@ -37,7 +37,7 @@ int fasta2sequencekeyvalues(
         Seqpos *specialrangestab,
         const GtStrArray *filenametab,
         Filelengthvalues **filelengthtab,
-        const SfxAlphabet *alpha,
+        const GtAlphabet *alpha,
         bool plainformat,
         bool withdestab,
         unsigned long *characterdistribution,

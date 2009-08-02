@@ -43,13 +43,13 @@ typedef struct
 typedef void (*Preprocessgmatchlength)(uint64_t,
                                        const char *,
                                        void *);
-typedef void (*Processgmatchlength)(const SfxAlphabet *,
+typedef void (*Processgmatchlength)(const GtAlphabet *,
                                     const GtUchar *,
                                     unsigned long,
                                     unsigned long,
                                     Seqpos,
                                     void *);
-typedef void (*Postprocessgmatchlength)(const SfxAlphabet *,
+typedef void (*Postprocessgmatchlength)(const GtAlphabet *,
                                         uint64_t,
                                         const char *,
                                         const GtUchar *,
@@ -60,7 +60,7 @@ typedef struct
 {
   const void *genericindex;
   Seqpos totallength;
-  const SfxAlphabet *alphabet;
+  const GtAlphabet *alphabet;
   Greedygmatchforwardfunction gmatchforward;
   Preprocessgmatchlength preprocessgmatchlength;
   Processgmatchlength processgmatchlength;
@@ -175,7 +175,7 @@ static void showunitnum(uint64_t unitnum,
   printf("\n");
 }
 
-static void showifinlengthrange(const SfxAlphabet *alphabet,
+static void showifinlengthrange(const GtAlphabet *alphabet,
                                 const GtUchar *start,
                                 unsigned long gmatchlength,
                                 unsigned long querystart,
@@ -211,7 +211,7 @@ int findsubquerygmatchforward(const Encodedsequence *encseq,
                               const void *genericindex,
                               Seqpos totallength,
                               Greedygmatchforwardfunction gmatchforward,
-                              const SfxAlphabet *alphabet,
+                              const GtAlphabet *alphabet,
                               const GtStrArray *queryfilenames,
                               Definedunsignedlong minlength,
                               Definedunsignedlong maxlength,

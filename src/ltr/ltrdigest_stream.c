@@ -361,7 +361,7 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
       GtUchar *symbolstring;
       Seqinfo seqinfo;
       unsigned long length;
-      const SfxAlphabet *alpha;
+      const GtAlphabet *alpha;
 
       getencseqSeqinfo(&seqinfo, ls->encseq, seqid);
 

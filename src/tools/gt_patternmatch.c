@@ -107,7 +107,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
     Seqpos idx, maxlcp;
     Codetype code = 0;
     const Codetype **multimappower;
-    const SfxAlphabet *alpha;
+    const GtAlphabet *alpha;
 
     if (pmopt->usebcktab)
     {

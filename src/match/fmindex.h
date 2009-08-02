@@ -92,7 +92,7 @@ typedef struct
          negatesuperbsizeones,
          markdistminus1;   /* markdist - 1 */
   GtArrayPairBwtidx specpos; /* positions of special characters */
-  SfxAlphabet *alphabet;
+  GtAlphabet *alphabet;
   void *mappedptr; /* NULL or pointer to the mapped space block */
   unsigned int mapsize,      /* copy of alphabet.mapsize, used for searching */
            bsize,            /* size of block */

@@ -82,7 +82,7 @@ struct Encodedsequence
   const char *destab;
   unsigned long destablength, *descendtab;
 
-  const SfxAlphabet *alpha;   /* alphabet representation */
+  const GtAlphabet *alpha;   /* alphabet representation */
 
   const Seqpos *ssptab; /* (if numofdbsequences = 1 then NULL  else
                                                          numofdbsequences  -1)

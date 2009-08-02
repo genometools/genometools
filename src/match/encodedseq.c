@@ -975,7 +975,7 @@ void encodedsequence_free(Encodedsequence **encseqptr)
   }
   if (encseq->alpha != NULL)
   {
-    freeSfxAlphabet((SfxAlphabet **) &encseq->alpha);
+    freeGtAlphabet((GtAlphabet **) &encseq->alpha);
   }
   gt_str_array_delete((GtStrArray *) encseq->filenametab);
   encseq->filenametab = NULL;
@@ -2436,7 +2436,7 @@ static Encodedsequence *determineencseqkeyvalues(Positionaccesstype sat,
                                                  Seqpos totallength,
                                                  unsigned long numofsequences,
                                                  Seqpos specialranges,
-                                                 const SfxAlphabet *alpha,
+                                                 const GtAlphabet *alpha,
                                                  Verboseinfo *verboseinfo)
 {
   double spaceinbitsperchar;
@@ -2581,7 +2581,7 @@ const GtUchar *getencseqAlphabetsymbolmap(const Encodedsequence *encseq)
   return getsymbolmapAlphabet(encseq->alpha);
 }
 
-const SfxAlphabet *getencseqAlphabet(const Encodedsequence *encseq)
+const GtAlphabet *getencseqAlphabet(const Encodedsequence *encseq)
 {
   return encseq->alpha;
 }
@@ -2859,7 +2859,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
                                 Seqpos totallength,
                                 unsigned long numofsequences,
                                 const Seqpos *specialrangestab,
-                                const SfxAlphabet *alphabet,
+                                const GtAlphabet *alphabet,
                                 const char *str_sat,
                                 unsigned long *characterdistribution,
                                 const Specialcharinfo *specialcharinfo,
@@ -2935,11 +2935,11 @@ static Encodedsequencefunctions encodedseqfunctab[] =
   return haserr ? NULL : encseq;
 }
 
-static const SfxAlphabet *scanal1file(const GtStr *indexname,GtError *err)
+static const GtAlphabet *scanal1file(const GtStr *indexname,GtError *err)
 {
   GtStr *tmpfilename;
   bool haserr = false;
-  const SfxAlphabet *alpha;
+  const GtAlphabet *alpha;
 
   gt_error_check(err);
   tmpfilename = gt_str_clone(indexname);
@@ -2952,7 +2952,7 @@ static const SfxAlphabet *scanal1file(const GtStr *indexname,GtError *err)
   gt_str_delete(tmpfilename);
   if (haserr)
   {
-    freeSfxAlphabet((SfxAlphabet **) &alpha);
+    freeGtAlphabet((GtAlphabet **) &alpha);
     return NULL;
   }
   return alpha;
@@ -2988,7 +2988,7 @@ static unsigned long *calcdescendpositions(const Encodedsequence *encseq)
   bool haserr = false;
   int retcode;
   Firstencseqvalues firstencseqvalues;
-  const SfxAlphabet *alpha;
+  const GtAlphabet *alpha;
 
   gt_error_check(err);
   alpha = scanal1file(indexname,err);
@@ -3072,7 +3072,7 @@ static unsigned long *calcdescendpositions(const Encodedsequence *encseq)
   {
     if (alpha != NULL)
     {
-      freeSfxAlphabet((SfxAlphabet **) &alpha);
+      freeGtAlphabet((GtAlphabet **) &alpha);
     }
     if (encseq != NULL)
     {
@@ -3155,7 +3155,7 @@ Encodedsequence *plain2encodedsequence(bool withrange,
                                        Seqpos len1,
                                        const GtUchar *seq2,
                                        unsigned long len2,
-                                       const SfxAlphabet *alpha,
+                                       const GtAlphabet *alpha,
                                        Verboseinfo *verboseinfo)
 {
   Encodedsequence *encseq;
@@ -4560,7 +4560,7 @@ Codetype extractprefixcode(unsigned int *unitsnotspecial,
 }
 
 static void showcharacterdistribution(
-                   const SfxAlphabet *alpha,
+                   const GtAlphabet *alpha,
                    const unsigned long *characterdistribution,
                    Verboseinfo *verboseinfo)
 {
@@ -4579,7 +4579,7 @@ static void showcharacterdistribution(
 void gt_showsequencefeatures(Verboseinfo *verboseinfo,
                              const Encodedsequence *encseq)
 {
-  const SfxAlphabet *alpha = getencseqAlphabet(encseq);
+  const GtAlphabet *alpha = getencseqAlphabet(encseq);
 
   showverbose(verboseinfo,"specialcharacters=" FormatSeqpos,
               PRINTSeqposcast(getencseqspecialcharacters(encseq)));
