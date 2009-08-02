@@ -2941,7 +2941,7 @@ static const GtAlphabet *scanal1file(const GtStr *indexname,GtError *err)
   gt_error_check(err);
   tmpfilename = gt_str_clone(indexname);
   gt_str_append_cstr(tmpfilename,ALPHABETFILESUFFIX);
-  alpha = assigninputalphabet(false,false,tmpfilename,NULL,err);
+  alpha = gt_alphabet_new(false,false,tmpfilename,NULL,err);
   if (alpha == NULL)
   {
     haserr = true;

@@ -204,11 +204,7 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
     fmindex->specpos.allocatedPairBwtidx = 0;
     tmpfilename = gt_str_clone(indexname);
     gt_str_append_cstr(tmpfilename,ALPHABETFILESUFFIX);
-    fmindex->alphabet = assigninputalphabet(false,
-                                            false,
-                                            tmpfilename,
-                                            NULL,
-                                            err);
+    fmindex->alphabet = gt_alphabet_new(false, false, tmpfilename, NULL, err);
     if (fmindex->alphabet == NULL)
     {
       haserr = true;

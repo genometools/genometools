@@ -53,7 +53,7 @@ static void tyrsearchinfo_init(Tyrsearchinfo *tyrsearchinfo,
   tyrsearchinfo->lastmer = tyrindex_lastmer(tyrindex);
   tyrsearchinfo->showmode = showmode;
   tyrsearchinfo->searchstrand = searchstrand;
-  tyrsearchinfo->dnaalpha = assigninputalphabet(true,false,NULL,NULL,NULL);
+  tyrsearchinfo->dnaalpha = gt_alphabet_new(true,false,NULL,NULL,NULL);
   ALLOCASSIGNSPACE(tyrsearchinfo->bytecode,NULL,GtUchar,merbytes);
   ALLOCASSIGNSPACE(tyrsearchinfo->rcbuf,NULL,GtUchar,tyrsearchinfo->mersize);
 }

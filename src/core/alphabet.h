@@ -39,13 +39,11 @@
 
 typedef struct GtAlphabet GtAlphabet;
 
-/*@null@*/ GtAlphabet *assigninputalphabet(bool isdna,
-                                            bool isprotein,
-                                            const GtStr *smapfile,
-                                            const GtStrArray *filenametab,
-                                            GtError *err);
+/*@null@*/
+GtAlphabet* gt_alphabet_new(bool isdna, bool isprotein, const GtStr *smapfile,
+                            const GtStrArray *filenametab, GtError *err);
 
-GtAlphabet *gt_copyAlphabet(const GtAlphabet *alpha2);
+GtAlphabet* gt_copyAlphabet(const GtAlphabet *alpha2);
 
 void gt_alphabet_delete(GtAlphabet *alpha);
 

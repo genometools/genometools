@@ -105,11 +105,8 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   }
   if (!haserr)
   {
-    alpha = assigninputalphabet(so->isdna,
-                                so->isprotein,
-                                so->str_smap,
-                                so->filenametab,
-                                err);
+    alpha = gt_alphabet_new(so->isdna, so->isprotein, so->str_smap,
+                            so->filenametab, err);
     if (alpha == NULL)
     {
       haserr = true;

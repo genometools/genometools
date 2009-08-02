@@ -467,14 +467,15 @@ static int assignProteinorDNAalphabet(GtAlphabet *alpha,
   return 0;
 }
 
-/*@null@*/ GtAlphabet *assigninputalphabet(bool isdna,
-                                         bool isprotein,
-                                         const GtStr *smapfile,
-                                         const GtStrArray *filenametab,
-                                         GtError *err)
+/*@null@*/ GtAlphabet* gt_alphabet_new(bool isdna, bool isprotein,
+                                       const GtStr *smapfile,
+                                       const GtStrArray *filenametab,
+                                       GtError *err)
 {
   GtAlphabet *alpha;
   bool haserr = false;
+
+  gt_error_check(err);
 
   alpha = gt_malloc(sizeof *alpha);
   alpha->characters = NULL;
