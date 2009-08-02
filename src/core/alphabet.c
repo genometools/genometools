@@ -134,10 +134,10 @@ struct GtAlphabet {
   \texttt{alpha}.
 */
 
-static int readsymbolmapfromlines(GtAlphabet *alpha,
-                                  const GtStr *mapfile,
-                                  const GtStrArray *lines,
-                                  GtError *err)
+static int read_symbolmap_from_lines(GtAlphabet *alpha,
+                                     const GtStr *mapfile,
+                                     const GtStrArray *lines,
+                                     GtError *err)
 {
   char cc;
   unsigned int cnum, allocateddomainsize = 0;
@@ -275,7 +275,7 @@ static int readsymbolmapfromlines(GtAlphabet *alpha,
   \texttt{alpha}.
 */
 
-static int readsymbolmap(GtAlphabet *alpha,const GtStr *mapfile,GtError *err)
+static int read_symbolmap(GtAlphabet *alpha,const GtStr *mapfile,GtError *err)
 {
   bool haserr = false;
   GtStrArray *lines;
@@ -283,7 +283,7 @@ static int readsymbolmap(GtAlphabet *alpha,const GtStr *mapfile,GtError *err)
   gt_error_check(err);
   lines = gt_str_array_new_file(gt_str_get(mapfile));
   gt_assert(lines != NULL);
-  if (readsymbolmapfromlines(alpha,mapfile,lines,err) != 0)
+  if (read_symbolmap_from_lines(alpha,mapfile,lines,err) != 0)
   {
     haserr = true;
   }
@@ -291,7 +291,7 @@ static int readsymbolmap(GtAlphabet *alpha,const GtStr *mapfile,GtError *err)
   return haserr ? -1 : 0;
 }
 
-static void assignDNAsymbolmap(GtUchar *symbolmap)
+static void assign_dna_symbolmap(GtUchar *symbolmap)
 {
   unsigned int cnum;
 
@@ -392,7 +392,7 @@ void gt_alphabet_add_wildcard(GtAlphabet *a, char wildcard)
 
 /*
   The following function initializes the alphabet \texttt{alpha}
-  in the same way as \texttt{readsymbolmap}, if it would be
+  in the same way as \texttt{read_symbolmap}, if it would be
   applied to a map file with the following content:
   \begin{alltt}
   aA
@@ -403,7 +403,7 @@ void gt_alphabet_add_wildcard(GtAlphabet *a, char wildcard)
   \end{alltt}
 */
 
-static void assignDNAalphabet(GtAlphabet *alpha)
+static void assign_dna_alphabet(GtAlphabet *alpha)
 {
   alpha->wildcardshow = (GtUchar) DNAWILDCARDS[0];
   alpha->mappedwildcards = (unsigned int) strlen(DNAWILDCARDS);
@@ -415,7 +415,7 @@ static void assignDNAalphabet(GtAlphabet *alpha)
   alpha->mapsize = MAPSIZEDNA;
   alpha->characters = gt_malloc(sizeof (GtUchar) * (MAPSIZEDNA-1));
   memcpy(alpha->characters,"acgt",(size_t) (MAPSIZEDNA-1));
-  assignDNAsymbolmap(alpha->symbolmap);
+  assign_dna_symbolmap(alpha->symbolmap);
 }
 
 static void assignproteinsymbolmap(GtUchar *symbolmap)
@@ -438,7 +438,7 @@ static void assignproteinsymbolmap(GtUchar *symbolmap)
 
 /*
   The following function initializes the alphabet \texttt{alpha}
-  in the same way as \texttt{readsymbolmap}, if it would be
+  in the same way as \texttt{read_symbolmap}, if it would be
   applied to a map file with the following content:
   \begin{alltt}
   L
@@ -468,7 +468,7 @@ static void assignproteinsymbolmap(GtUchar *symbolmap)
   the character \texttt{WILDCARD}, as defined in \texttt{chardef.h}
 */
 
-static void assignProteinalphabet(GtAlphabet *alpha)
+static void assign_protein_alphabet(GtAlphabet *alpha)
 {
   alpha->wildcardshow = (GtUchar) PROTEINWILDCARDS[0];
   alpha->domainsize = (unsigned int) strlen(PROTEINALPHABETDOMAIN);
@@ -483,9 +483,9 @@ static void assignProteinalphabet(GtAlphabet *alpha)
   assignproteinsymbolmap(alpha->symbolmap);
 }
 
-static int assignProteinorDNAalphabet(GtAlphabet *alpha,
-                                      const GtStrArray *filenametab,
-                                      GtError *err)
+static int assign_protein_or_dna_alphabet(GtAlphabet *alpha,
+                                          const GtStrArray *filenametab,
+                                          GtError *err)
 {
   int retval;
 
@@ -497,10 +497,10 @@ static int assignProteinorDNAalphabet(GtAlphabet *alpha,
   }
   if (retval == 1)
   {
-    assignProteinalphabet(alpha);
+    assign_protein_alphabet(alpha);
   } else
   {
-    assignDNAalphabet(alpha);
+    assign_dna_alphabet(alpha);
   }
   return 0;
 }
@@ -521,12 +521,12 @@ static int assignProteinorDNAalphabet(GtAlphabet *alpha,
   alpha->mapdomain = NULL;
   if (isdna)
   {
-    assignDNAalphabet(alpha);
+    assign_dna_alphabet(alpha);
   } else
   {
     if (isprotein)
     {
-      assignProteinalphabet(alpha);
+      assign_protein_alphabet(alpha);
     } else
     {
       gt_error_check(err);
@@ -548,16 +548,16 @@ static int assignProteinorDNAalphabet(GtAlphabet *alpha,
           gt_str_append_cstr(transpath, "/trans/");
           gt_str_append_cstr(transpath, gt_str_get(smapfile));
         }
-        if (readsymbolmap(alpha,
-                          transpath == NULL ? smapfile : transpath,
-                          err) != 0)
+        if (read_symbolmap(alpha,
+                           transpath == NULL ? smapfile : transpath,
+                           err) != 0)
         {
           haserr = true;
         }
         gt_str_delete(transpath);
       } else
       {
-        if (assignProteinorDNAalphabet(alpha,filenametab,err) != 0)
+        if (assign_protein_or_dna_alphabet(alpha,filenametab,err) != 0)
         {
           haserr = true;
         }
@@ -817,7 +817,7 @@ bool gt_alphabet_is_protein(const GtAlphabet *alpha)
         domainbuf2[GT_MAXALPHABETCHARACTER+1];
 
   reduceddomainsize1 = removelowercaseproteinchars(&domainbuf1[0],alpha);
-  assignProteinalphabet(&proteinalphabet);
+  assign_protein_alphabet(&proteinalphabet);
   reduceddomainsize2 = removelowercaseproteinchars(&domainbuf2[0],
                                                    &proteinalphabet);
   if (reduceddomainsize1 == reduceddomainsize2)
@@ -842,9 +842,9 @@ bool gt_alphabet_is_protein(const GtAlphabet *alpha)
   return isprot;
 }
 
-static bool checksymbolmap(const GtUchar *testsymbolmap,
-                           const GtUchar *verifiedsymbolmap,
-                           const char *testcharacters)
+static bool check_symbolmap(const GtUchar *testsymbolmap,
+                            const GtUchar *verifiedsymbolmap,
+                            const char *testcharacters)
 {
   unsigned int i;
   GtUchar cc1, cc2;
@@ -879,8 +879,8 @@ bool gt_alphabet_is_dna(const GtAlphabet *alpha)
   {
     GtUchar dnasymbolmap[GT_MAXALPHABETCHARACTER+1];
 
-    assignDNAsymbolmap(&dnasymbolmap[0]);
-    if (checksymbolmap(alpha->symbolmap,&dnasymbolmap[0],"acgt"))
+    assign_dna_symbolmap(&dnasymbolmap[0]);
+    if (check_symbolmap(alpha->symbolmap,&dnasymbolmap[0],"acgt"))
     {
       return true;
     }
