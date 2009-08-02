@@ -36,8 +36,7 @@
 
 #include "guessprot.pr"
 
-struct GtAlphabet                /* initial blank prevents select by skproto */
-{
+struct GtAlphabet {
   unsigned int domainsize,           /* size of domain of symbolmap */
                mapsize,              /* size of image of map, i.e. */
                                      /* mapping to [0..mapsize-1] */
@@ -46,8 +45,8 @@ struct GtAlphabet                /* initial blank prevents select by skproto */
                                         bitspackedarray */
   GtUchar wildcardshow,
         symbolmap[MAXALPHABETCHARACTER+1], /* mapping of the symbols */
-        *mapdomain,                  /* list of characters mapped */
-        *characters;                 /* array of characters to show */
+        *mapdomain,                        /* list of characters mapped */
+        *characters;                       /* array of characters to show */
 };
 
 /*EE
