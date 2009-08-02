@@ -24,7 +24,9 @@
 #include "core/fileutils.h"
 #include "core/file.h"
 #include "core/ma.h"
+#include "core/sequence_buffer.h"
 #include "core/splitter.h"
+#include "core/symboldef.h"
 #include "core/xansi.h"
 #include "core/xposix.h"
 
@@ -174,4 +176,56 @@ off_t gt_files_estimate_total_size(const GtStrArray *filenames)
     totalsize += gt_file_estimate_size(gt_str_array_get(filenames, filenum));
 
   return totalsize;
+}
+
+int gt_files_guess_if_protein_sequences(const GtStrArray *filenames,
+                                        GtError *err)
+{
+  unsigned int countnonbases = 0,
+               currentposition;
+  GtUchar currentchar;
+  GtSequenceBuffer *fb;
+  int retval;
+
+  gt_error_check(err);
+  fb = gt_sequence_buffer_new_guess_type(filenames, err);
+  if (!fb) return -1;
+
+  for (currentposition = 0; currentposition < 1000U;
+       currentposition++)
+  {
+    retval = gt_sequence_buffer_next(fb,&currentchar,err);
+    if (retval < 0)
+    {
+      gt_sequence_buffer_delete(fb);
+      return -1;
+    }
+    if (retval == 0)
+    {
+      break;
+    }
+    switch (currentchar)
+    {
+      case 'L':
+      case 'I':
+      case 'F':
+      case 'E':
+      case 'Q':
+      case 'P':
+      case 'X':
+      case 'Z': countnonbases++;
+                break;
+      default:  break;
+    }
+    if (countnonbases > 0)
+    {
+      break;
+    }
+  }
+  gt_sequence_buffer_delete(fb);
+  if (countnonbases > 0)
+  {
+    return 1; /* guess it is a protein sequence */
+  }
+  return 0; /* guess it is a dna sequence */
 }

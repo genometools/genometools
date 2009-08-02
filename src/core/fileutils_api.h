@@ -59,4 +59,12 @@ off_t          gt_file_estimate_size(const char *file);
    Uses <gt_file_estimate_size()>. */
 off_t          gt_files_estimate_total_size(const GtStrArray *filenames);
 
+/* Guesse if the sequences contained in the files given in <filenames> are
+   protein sequences. Returns 1 if the guess is that the files contain protein
+   sequences. Returns 0 if the guess is that the files contain DNA sequences.
+   Returns -1 if an error occurs while reading the files (<err> is set
+   accordingly). */
+int            gt_files_guess_if_protein_sequences(const GtStrArray *filenames,
+                                                   GtError *err);
+
 #endif

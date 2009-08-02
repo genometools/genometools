@@ -34,8 +34,6 @@
 #include "core/mathsupport.h"
 #include "alphabet.h"
 
-#include "guessprot.pr"
-
 struct GtAlphabet {
   unsigned int domainsize,           /* size of domain of symbolmap */
                mapsize,              /* size of image of map, i.e. */
@@ -454,7 +452,7 @@ static int assignProteinorDNAalphabet(GtAlphabet *alpha,
   int retval;
 
   gt_error_check(err);
-  retval = guessifproteinsequencestream(filenametab,err);
+  retval = gt_files_guess_if_protein_sequences(filenametab,err);
   if (retval < 0)
   {
     return -1;

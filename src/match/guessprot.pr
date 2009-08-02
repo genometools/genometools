@@ -1,8 +1,0 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-int guessifproteinsequencestream(const GtStrArray *filenametab,GtError *err);
-
-#ifdef __cplusplus
-}
-#endif

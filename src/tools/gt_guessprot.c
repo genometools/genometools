@@ -16,9 +16,9 @@
 */
 
 #include <stdlib.h>
-#include "core/versionfunc.h"
+#include "core/fileutils.h"
 #include "core/option.h"
-#include "match/guessprot.pr"
+#include "core/versionfunc.h"
 #include "tools/gt_guessprot.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
@@ -54,7 +54,7 @@ int gt_guessprot(int argc, const char **argv, GtError *err)
   {
     gt_str_array_add_cstr(filenametab,argv[i]);
   }
-  retval = guessifproteinsequencestream(filenametab,err);
+  retval = gt_files_guess_if_protein_sequences(filenametab,err);
   gt_str_array_delete(filenametab);
   if (retval < 0)
   {
