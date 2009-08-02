@@ -16,7 +16,7 @@
 */
 
 #include <stdlib.h>
-#include "core/fileutils.h"
+#include "core/fileutils_api.h"
 #include "core/option.h"
 #include "core/versionfunc.h"
 #include "tools/gt_guessprot.h"

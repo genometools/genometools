@@ -17,7 +17,7 @@
 
 #include "core/ensure.h"
 #include "core/fa.h"
-#include "core/fileutils.h"
+#include "core/fileutils_api.h"
 #include "core/ma.h"
 #include "core/sequence_buffer_rep.h"
 #include "core/sequence_buffer_embl.h"

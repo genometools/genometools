@@ -18,7 +18,7 @@
 #include "core/bioseq.h"
 #include "core/fa.h"
 #include "core/fasta.h"
-#include "core/fileutils.h"
+#include "core/fileutils_api.h"
 #include "core/ma.h"
 #include "core/option.h"
 #include "core/outputfile.h"

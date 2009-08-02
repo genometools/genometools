@@ -21,7 +21,7 @@
 #include "core/str_array.h"
 #include "core/ma.h"
 #include "core/error.h"
-#include "core/fileutils.h"
+#include "core/fileutils_api.h"
 #include "core/seqiterator.h"
 #include "core/arraydef.h"
 #include "revcompl.h"

@@ -16,7 +16,7 @@
 */
 
 #include "core/fa.h"
-#include "core/fileutils.h"
+#include "core/fileutils_api.h"
 #include "core/ma.h"
 #include "core/seqiterator_qual_rep.h"
 #include "core/unused_api.h"

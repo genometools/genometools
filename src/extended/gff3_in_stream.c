@@ -18,7 +18,7 @@
 #include <string.h>
 #include "core/assert_api.h"
 #include "core/cstr_table.h"
-#include "core/fileutils.h"
+#include "core/fileutils_api.h"
 #include "core/progressbar.h"
 #include "core/str_array.h"
 #include "extended/genome_node.h"

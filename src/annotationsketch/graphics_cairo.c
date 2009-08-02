@@ -28,7 +28,7 @@
 #endif
 
 #include <math.h>
-#include "core/fileutils.h"
+#include "core/fileutils_api.h"
 #include "core/file.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"

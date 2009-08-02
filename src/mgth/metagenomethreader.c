@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/fileutils.h"
+#include "core/fileutils_api.h"
 #include "core/file.h"
 #include "core/hashmap-generic.h"
 #include "core/unused_api.h"

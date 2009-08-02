@@ -19,7 +19,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <limits.h>
-#include "core/fileutils.h"
+#include "core/fileutils_api.h"
 #include "core/ma.h"
 #include "core/option.h"
 #include "core/seqiterator.h"

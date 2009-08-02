@@ -28,7 +28,7 @@
 #endif
 #include "core/bioseq.h"
 #include "core/cstr.h"
-#include "core/fileutils.h"
+#include "core/fileutils_api.h"
 #include "core/gtdatapath.h"
 #include "core/log.h"
 #include "core/ma.h"

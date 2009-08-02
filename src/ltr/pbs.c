@@ -24,7 +24,7 @@
 #include "core/bioseq.h"
 #include "core/ensure.h"
 #include "core/fa.h"
-#include "core/fileutils.h"
+#include "core/fileutils_api.h"
 #include "extended/reverse.h"
 #include "extended/swalign.h"
 #include "ltr/pbs.h"

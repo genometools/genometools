@@ -28,7 +28,7 @@
 #include "core/cstr_array.h"
 #include "core/ensure.h"
 #include "core/fa.h"
-#include "core/fileutils.h"
+#include "core/fileutils_api.h"
 #include "core/gtdatapath.h"
 #include "core/log.h"
 #include "core/ma.h"

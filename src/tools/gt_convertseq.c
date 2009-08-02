@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/fileutils.h"
+#include "core/fileutils_api.h"
 #include "core/filelengthvalues.h"
 #include "core/ma.h"
 #include "core/option.h"

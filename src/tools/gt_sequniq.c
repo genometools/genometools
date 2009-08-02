@@ -18,7 +18,7 @@
 #include <string.h>
 #include "core/bioseq.h"
 #include "core/fasta.h"
-#include "core/fileutils.h"
+#include "core/fileutils_api.h"
 #include "core/ma.h"
 #include "core/md5_fingerprint.h"
 #include "core/outputfile.h"

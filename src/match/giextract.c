@@ -22,7 +22,7 @@
 #include <ctype.h>
 #include "core/assert_api.h"
 #include "core/divmodmul.h"
-#include "core/fileutils.h"
+#include "core/fileutils_api.h"
 #include "core/error.h"
 #include "core/ma.h"
 #include "core/fa.h"
