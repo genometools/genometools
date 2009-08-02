@@ -563,12 +563,12 @@ unsigned int gt_alphabet_bits_per_symbol(const GtAlphabet *alphabet)
   return alphabet->bitspersymbol;
 }
 
-void outputalphabet(FILE *fpout,const GtAlphabet *alpha)
+void gt_alphabet_output(const GtAlphabet *alpha, FILE *fpout)
 {
   GtUchar chartoshow, currentcc, previouscc = 0, firstinline = 0;
   unsigned int cnum, linenum = 0;
   bool afternewline = true;
-
+  gt_assert(alpha && fpout);
   for (cnum=0; cnum < alpha->domainsize; cnum++)
   {
     currentcc = alpha->mapdomain[cnum];
@@ -624,12 +624,12 @@ void outputalphabet(FILE *fpout,const GtAlphabet *alpha)
   The output goes to the given file pointer.
  */
 
-void fprintfsymbolstring(FILE *fpout,const GtAlphabet *alpha,
-                         const GtUchar *w,unsigned long wlen)
+void gt_alphabet_fprintf_symbolstring(const GtAlphabet *alpha, FILE *fpout,
+                                      const GtUchar *w, unsigned long wlen)
 {
   unsigned long i;
   const GtUchar *characters;
-
+  gt_assert(fpout);
   if (alpha == NULL)
   {
     characters = (const GtUchar *) "acgt";
@@ -648,10 +648,10 @@ void fprintfsymbolstring(FILE *fpout,const GtAlphabet *alpha,
   function showing the output on stdout.
 */
 
-void printfsymbolstring(const GtAlphabet *alpha,
-                        const GtUchar *w,unsigned long wlen)
+void gt_alphabet_printf_symbolstring(const GtAlphabet *alpha,
+                                     const GtUchar *w, unsigned long wlen)
 {
-  fprintfsymbolstring(stdout,alpha,w,wlen);
+  gt_alphabet_fprintf_symbolstring(alpha, stdout, w, wlen);
 }
 
 static char converttoprettysymbol(const GtAlphabet *alpha, GtUchar currentchar)
@@ -679,8 +679,8 @@ static char converttoprettysymbol(const GtAlphabet *alpha, GtUchar currentchar)
   return ret;
 }
 
-void sprintfsymbolstring(char *buffer,const GtAlphabet *alpha,
-                          const GtUchar *w,unsigned long wlen)
+void gt_alphabet_sprintf_symbolstring(const GtAlphabet *alpha, char *buffer,
+                                      const GtUchar *w, unsigned long wlen)
 {
   unsigned long i;
 
@@ -691,12 +691,14 @@ void sprintfsymbolstring(char *buffer,const GtAlphabet *alpha,
   buffer[wlen] = '\0';
 }
 
-void echoprettysymbol(FILE *fpout,const GtAlphabet *alpha,GtUchar currentchar)
+void gt_alphabet_echo_pretty_symbol(const GtAlphabet *alpha, FILE *fpout,
+                                    GtUchar currentchar)
 {
   (void) putc((int) converttoprettysymbol(alpha, currentchar), fpout);
 }
 
-GtUchar getprettysymbol(const GtAlphabet *alpha,unsigned int currentchar)
+GtUchar gt_alphabet_pretty_symbol(const GtAlphabet *alpha,
+                                  unsigned int currentchar)
 {
   gt_assert(currentchar <= UCHAR_MAX);
   return (GtUchar) converttoprettysymbol(alpha, (GtUchar) currentchar);
@@ -740,7 +742,7 @@ static int comparechar(const void *a,const void *b)
   lower or upper case.
 */
 
-bool isproteinalphabet(const GtAlphabet *alpha)
+bool gt_alphabet_is_protein(const GtAlphabet *alpha)
 {
   GtAlphabet proteinalphabet;
   unsigned int i, reduceddomainsize1, reduceddomainsize2;
@@ -806,9 +808,9 @@ static bool checksymbolmap(const GtUchar *testsymbolmap,
   alphabet with the bases A, C, G, T written in lower or upper case.
 */
 
-bool isdnaalphabet(const GtAlphabet *alpha)
+bool gt_alphabet_is_dna(const GtAlphabet *alpha)
 {
-  if (isproteinalphabet(alpha))
+  if (gt_alphabet_is_protein(alpha))
   {
     return false;
   }

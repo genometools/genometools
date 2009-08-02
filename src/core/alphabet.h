@@ -50,24 +50,21 @@ unsigned int   gt_alphabet_num_of_chars(const GtAlphabet *alphabet);
 const GtUchar* gt_alphabet_characters(const GtAlphabet *alphabet);
 GtUchar        gt_alphabet_wildcard_show(const GtAlphabet *alphabet);
 unsigned int   gt_alphabet_bits_per_symbol(const GtAlphabet *alphabet);
-
-void outputalphabet(FILE *fpout,const GtAlphabet *alpha);
-
-void fprintfsymbolstring(FILE *fpout,const GtAlphabet *alpha,
-                         const GtUchar *w,unsigned long wlen);
-
-void printfsymbolstring(const GtAlphabet *alpha,const GtUchar *w,
-                        unsigned long wlen);
-
-void sprintfsymbolstring(char *buffer,const GtAlphabet *alpha,
-                         const GtUchar *w,unsigned long wlen);
-
-void echoprettysymbol(FILE *fpout,const GtAlphabet *alpha,GtUchar currentchar);
-
-GtUchar getprettysymbol(const GtAlphabet *alpha,unsigned int currentchar);
-
-bool isproteinalphabet(const GtAlphabet *alpha);
-
-bool isdnaalphabet(const GtAlphabet *alpha);
+void           gt_alphabet_output(const GtAlphabet *alphabet, FILE *fpout);
+void           gt_alphabet_fprintf_symbolstring(const GtAlphabet *alphabet,
+                                                FILE *fpout, const GtUchar *w,
+                                                unsigned long wlen);
+void           gt_alphabet_printf_symbolstring(const GtAlphabet *alphabet,
+                                               const GtUchar *w,
+                                               unsigned long wlen);
+void           gt_alphabet_sprintf_symbolstring(const GtAlphabet *alphabet,
+                                                char *buffer, const GtUchar *w,
+                                                unsigned long wlen);
+void           gt_alphabet_echo_pretty_symbol(const GtAlphabet *alphabet,
+                                              FILE *fpout, GtUchar currentchar);
+GtUchar        gt_alphabet_pretty_symbol(const GtAlphabet *alphabet,
+                                         unsigned int currentchar);
+bool           gt_alphabet_is_protein(const GtAlphabet *alphabet);
+bool           gt_alphabet_is_dna(const GtAlphabet *alphabet);
 
 #endif

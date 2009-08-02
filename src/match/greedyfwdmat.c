@@ -201,7 +201,7 @@ static void showifinlengthrange(const GtAlphabet *alphabet,
     if (rangespecinfo->showsequence)
     {
       (void) putchar(' ');
-      printfsymbolstring(alphabet,start + querystart,gmatchlength);
+      gt_alphabet_printf_symbolstring(alphabet,start + querystart,gmatchlength);
     }
     (void) putchar('\n');
   }

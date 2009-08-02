@@ -50,7 +50,7 @@ void symbolstring2fasta(FILE *fpout,
       j = 0;
     } else
     {
-      echoprettysymbol(fpout,alpha,currentchar);
+      gt_alphabet_echo_pretty_symbol(alpha,fpout,currentchar);
     }
     if (i == wlen - 1)
     {
@@ -96,7 +96,7 @@ void encseq2symbolstring(FILE *fpout,
       j = 0;
     } else
     {
-      echoprettysymbol(fpout,alpha,currentchar);
+      gt_alphabet_echo_pretty_symbol(alpha,fpout,currentchar);
     }
     if (idx == lastpos)
     {
@@ -130,7 +130,7 @@ void fprintfencseq(FILE *fpout,
   {
     currentchar = getencodedchar(encseq,idx,Forwardmode);
     gt_assert(ISNOTSPECIAL(currentchar));
-    echoprettysymbol(fpout,alpha,currentchar);
+    gt_alphabet_echo_pretty_symbol(alpha,fpout,currentchar);
   }
 }
 

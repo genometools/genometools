@@ -66,7 +66,7 @@ char* gt_ltrelement_get_sequence(unsigned long start, unsigned long end,
                                                seqinfo->seqstartpos + start + i,
                                                Forwardmode);
   }
-  sprintfsymbolstring(out, alpha, symbolstring, len);
+  gt_alphabet_sprintf_symbolstring(alpha, out, symbolstring, len);
   gt_free(symbolstring);
   freeEncodedsequencescanstate(&ess);
 

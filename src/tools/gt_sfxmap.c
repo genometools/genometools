@@ -262,7 +262,7 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
 
         for (readmode = 0; readmode < 4; readmode++)
         {
-          if (isdnaalphabet(getencseqAlphabet(suffixarray.encseq)) ||
+          if (gt_alphabet_is_dna(getencseqAlphabet(suffixarray.encseq)) ||
              ((Readmode) readmode) == Forwardmode ||
              ((Readmode) readmode) == Reversemode)
           {

@@ -111,8 +111,8 @@ static void showmatch(void *processinfo,const GtMatch *match)
   {
     ADDTABULATOR;
     gt_assert(match->dbsubstring != NULL);
-    printfsymbolstring(showmatchinfo->alpha,match->dbsubstring,
-                       (unsigned long) match->dblen);
+    gt_alphabet_printf_symbolstring(showmatchinfo->alpha,match->dbsubstring,
+                                    (unsigned long) match->dblen);
   }
   if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_STRAND)
   {
@@ -154,9 +154,9 @@ static void showmatch(void *processinfo,const GtMatch *match)
         if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_TAGSUFFIXSEQ)
         {
           ADDTABULATOR;
-          printfsymbolstring(NULL,showmatchinfo->tagptr +
-                                  (match->querylen - suffixlength),
-                                  suffixlength);
+          gt_alphabet_printf_symbolstring(NULL,showmatchinfo->tagptr +
+                                          (match->querylen - suffixlength),
+                                          suffixlength);
         }
       }
     } else
@@ -174,7 +174,8 @@ static void showmatch(void *processinfo,const GtMatch *match)
       if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_TAGSUFFIXSEQ)
       {
         ADDTABULATOR;
-        printfsymbolstring(NULL,showmatchinfo->tagptr, match->querylen);
+        gt_alphabet_printf_symbolstring(NULL,showmatchinfo->tagptr,
+                                        match->querylen);
       }
     }
   }
@@ -715,7 +716,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
         if (tageratoroptions->outputmode & TAGOUT_TAGSEQ)
         {
           ADDTABULATOR;
-          fprintfsymbolstring(stdout,alpha,twl.transformedtag,twl.taglen);
+          gt_alphabet_printf_symbolstring(alpha,twl.transformedtag,twl.taglen);
         }
         printf("\n");
         storeoffline.nextfreeSimplematch = 0;

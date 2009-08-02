@@ -376,7 +376,7 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
                       seqinfo.seqstartpos + (ls->element.leftLTR_5),
                       seqinfo.seqstartpos + (ls->element.leftLTR_5)
                         + length - 1);
-        sprintfsymbolstring(seq, alpha, symbolstring, length);
+        gt_alphabet_sprintf_symbolstring(alpha, seq, symbolstring, length);
         gt_free(symbolstring);
 
         /* run LTRdigest core routine */

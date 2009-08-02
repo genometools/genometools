@@ -4565,7 +4565,7 @@ static void showcharacterdistribution(
   for (idx=0; idx<numofchars; idx++)
   {
     showverbose(verboseinfo,"occurrences(%c)=%lu",
-                (int) getprettysymbol(alpha,idx),
+                (int) gt_alphabet_pretty_symbol(alpha,idx),
                 characterdistribution[idx]);
   }
 }

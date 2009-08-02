@@ -482,7 +482,7 @@ static int runsuffixerator(bool doesa,
     if (so->readmode == Complementmode ||
         so->readmode == Reversecomplementmode)
     {
-      if (!isdnaalphabet(getencseqAlphabet(sfxseqinfo.encseq)))
+      if (!gt_alphabet_is_dna(getencseqAlphabet(sfxseqinfo.encseq)))
       {
         gt_error_set(err,"option -%s only can be used for DNA alphabets",
                           so->readmode == Complementmode ? "cpl" : "rcl");

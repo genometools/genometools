@@ -126,8 +126,8 @@ static void mermatchoutput(const Tyrindex *tyrindex,
   if (tyrsearchinfo->showmode & SHOWSEQUENCE)
   {
     ADDTABULATOR;
-    fprintfsymbolstring(stdout,tyrsearchinfo->dnaalpha,qptr,
-                        tyrsearchinfo->mersize);
+    gt_alphabet_printf_symbolstring(tyrsearchinfo->dnaalpha,qptr,
+                                    tyrsearchinfo->mersize);
   }
   if (tyrsearchinfo->showmode & (SHOWSEQUENCE | SHOWQPOS | SHOWCOUNTS))
   {
