@@ -232,7 +232,7 @@ Limdfsresources *newLimdfsresources(const Genericindex *genericindex,
   limdfsresources->bwci.allocatedBoundswithchar
     = (unsigned long) (numofchars+1);
   GT_INITARRAY(&limdfsresources->stack,Lcpintervalwithinfo);
-  gt_assert(numofchars <= MAXALPHABETCHARACTER);
+  gt_assert(numofchars <= GT_MAXALPHABETCHARACTER);
   limdfsresources->alphasize = (GtUchar) numofchars;
   limdfsresources->processmatch = processmatch;
   limdfsresources->processmatchinfo = processmatchinfo;

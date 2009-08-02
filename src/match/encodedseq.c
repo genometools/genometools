@@ -836,7 +836,7 @@ static int determinesattype(Seqpos *specialranges,
   *specialranges = specialrangestab[0];
   if (str_sat == NULL)
   {
-    if (numofchars == DNAALPHASIZE)
+    if (numofchars == GT_DNAALPHASIZE)
     {
       sat = determinesmallestrep(specialranges,
                                  totallength,specialrangestab,numofchars);
@@ -855,7 +855,7 @@ static int determinesattype(Seqpos *specialranges,
     {
       if (satviautables(sat))
       {
-        if (numofchars == DNAALPHASIZE)
+        if (numofchars == GT_DNAALPHASIZE)
         {
           if (specialrangestab[0] == 0)
           {
@@ -3734,13 +3734,13 @@ static Seqpos extractsinglecharacter(const Encodedsequence *encseq,
     }
     if (pos + depth >= endpos)
     {
-      cc = pos + depth + COMPAREOFFSET;
+      cc = pos + depth + GT_COMPAREOFFSET;
     } else
     {
       cc = getencodedchar(encseq,pos + depth,Forwardmode);
       if (ISSPECIAL(cc))
       {
-        cc = pos + depth + COMPAREOFFSET;
+        cc = pos + depth + GT_COMPAREOFFSET;
       } else
       {
         if (complement)
@@ -3753,13 +3753,13 @@ static Seqpos extractsinglecharacter(const Encodedsequence *encseq,
   {
     if (pos < depth)
     {
-      cc = depth - pos + COMPAREOFFSET;
+      cc = depth - pos + GT_COMPAREOFFSET;
     } else
     {
       cc = getencodedchar(encseq,pos - depth,Forwardmode);
       if (ISSPECIAL(cc))
       {
-        cc = pos - depth + COMPAREOFFSET;
+        cc = pos - depth + GT_COMPAREOFFSET;
       } else
       {
         if (complement)
@@ -3791,7 +3791,7 @@ int comparewithonespecial(bool *leftspecial,
                                depth,
                                totallength,
                                maxdepth);
-  *leftspecial = (cc1 >= (Seqpos) COMPAREOFFSET) ? true : false;
+  *leftspecial = (cc1 >= (Seqpos) GT_COMPAREOFFSET) ? true : false;
   cc2 = extractsinglecharacter(encseq,
                                fwd,
                                complement,
@@ -3799,9 +3799,10 @@ int comparewithonespecial(bool *leftspecial,
                                depth,
                                totallength,
                                maxdepth);
-  *rightspecial = (cc2 >= (Seqpos) COMPAREOFFSET) ? true : false;
+  *rightspecial = (cc2 >= (Seqpos) GT_COMPAREOFFSET) ? true : false;
   gt_assert(cc1 != cc2);
-  if (!fwd && cc1 >= (Seqpos) COMPAREOFFSET && cc2 >= (Seqpos) COMPAREOFFSET)
+  if (!fwd && cc1 >= (Seqpos) GT_COMPAREOFFSET &&
+              cc2 >= (Seqpos) GT_COMPAREOFFSET)
   {
     return cc1 > cc2 ? -1 : 1;
   }

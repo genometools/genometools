@@ -145,14 +145,14 @@ static Seqpos derefcharboundaries(const Encodedsequence *encseq,
   {
     if (start + currentoffset == totallength)
     {
-      return totallength + COMPAREOFFSET;
+      return totallength + GT_COMPAREOFFSET;
     }
     start += currentoffset;
   } else
   {
     if (start < currentoffset)
     {
-      return currentoffset - start + (Seqpos) COMPAREOFFSET;
+      return currentoffset - start + (Seqpos) GT_COMPAREOFFSET;
     }
     start -= currentoffset;
   }
@@ -162,7 +162,7 @@ static Seqpos derefcharboundaries(const Encodedsequence *encseq,
     cc = getencodedchar(encseq,start,Forwardmode);
     if (ISSPECIAL(cc))
     {
-      return start + COMPAREOFFSET;
+      return start + GT_COMPAREOFFSET;
     }
     if (complement)
     {
@@ -170,7 +170,7 @@ static Seqpos derefcharboundaries(const Encodedsequence *encseq,
     }
     return cc;
   }
-  return  start + COMPAREOFFSET;
+  return  start + GT_COMPAREOFFSET;
 }
 
 int comparetwostrings(const Encodedsequence *encseq,
@@ -210,14 +210,14 @@ int comparetwostrings(const Encodedsequence *encseq,
     *maxcommon = currentoffset;
     if (cc1 != cc2)
     {
-      if (!fwd && cc1 >= (Seqpos) COMPAREOFFSET
-               && cc2 >= (Seqpos) COMPAREOFFSET)
+      if (!fwd && cc1 >= (Seqpos) GT_COMPAREOFFSET
+               && cc2 >= (Seqpos) GT_COMPAREOFFSET)
       {
         return cc1 > cc2 ? -1 : 1;
       }
       return cc1 < cc2 ? -1 : 1;
     }
-    if (pos1 == pos2 && cc1 >= (Seqpos) COMPAREOFFSET)
+    if (pos1 == pos2 && cc1 >= (Seqpos) GT_COMPAREOFFSET)
     {
       return 0;
     }

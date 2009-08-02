@@ -37,7 +37,7 @@
 
 #ifdef SPECIALCASE4
 #define SUBTRACTLCHARANDSHIFT(CODE,LCHAR,NUMOFCHARS,MULTIMAPPOWER)\
-        if ((NUMOFCHARS) == DNAALPHASIZE)\
+        if ((NUMOFCHARS) == GT_DNAALPHASIZE)\
         {\
           CODE = MULT4((CODE) - MULTIMAPPOWER[(unsigned int) (LCHAR)]);\
         } else\
@@ -47,7 +47,7 @@
         }
 
 #define SUBTRACTLCHARSHIFTADDNEXT(CODE,LCHAR,NUMOFCHARS,MULTIMAPPOWER,CC)\
-        if ((NUMOFCHARS) == DNAALPHASIZE)\
+        if ((NUMOFCHARS) == GT_DNAALPHASIZE)\
         {\
           CODE = MULT4((CODE) - MULTIMAPPOWER[(unsigned int) (LCHAR)]) | (CC);\
         } else\

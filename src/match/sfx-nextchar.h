@@ -21,7 +21,7 @@
 #include "core/divmodmul.h"
 
 #define ADDNEXTCHAR(CODE,CC,NUMOFCHARS)\
-        if ((NUMOFCHARS) == DNAALPHASIZE)\
+        if ((NUMOFCHARS) == GT_DNAALPHASIZE)\
         {\
           CODE = GT_MULT4(CODE) | ((Codetype) (CC));\
         } else\

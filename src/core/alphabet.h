@@ -25,14 +25,14 @@
 #include "core/symboldef.h"
 #include "core/error_api.h"
 
-#define MAXALPHABETCHARACTER UCHAR_MAX
-#define COMPAREOFFSET        (MAXALPHABETCHARACTER + 1)
+#define GT_MAXALPHABETCHARACTER UCHAR_MAX
+#define GT_COMPAREOFFSET        (GT_MAXALPHABETCHARACTER + 1)
 
 /*
   the size of the DNA alphabet
 */
 
-#define DNAALPHASIZE        4U
+#define GT_DNAALPHASIZE        4U
 
 /*
   The following type is for storing alphabets.

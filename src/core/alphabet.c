@@ -47,7 +47,7 @@ struct GtAlphabet {
                                         bitspackedarray */
                reference_count;
   GtUchar wildcardshow,
-          symbolmap[MAXALPHABETCHARACTER+1], /* mapping of the symbols */
+          symbolmap[GT_MAXALPHABETCHARACTER+1], /* mapping of the symbols */
           *mapdomain,                        /* list of characters mapped */
           *characters;                       /* array of characters to show */
 };
@@ -58,7 +58,7 @@ struct GtAlphabet {
 
 #define DNABASES                     "aAcCgGtTuU"
 #define DNAWILDCARDS                 "nsywrkvbdhmNSYWRKVBDHM"
-#define MAPSIZEDNA                   (DNAALPHASIZE+1U)
+#define MAPSIZEDNA                   (GT_DNAALPHASIZE+1U)
 #define DNAALPHABETDOMAIN            DNABASES DNAWILDCARDS
 #define PROTEINUPPERAMINOACIDS       "LVIFKREDAGSTNQYWPHMC"
 #define PROTEINALPHASIZE             20U
@@ -148,7 +148,7 @@ static int readsymbolmapfromlines(GtAlphabet *alpha,
 
   gt_error_check(err);
   alpha->domainsize = alpha->mapsize = alpha->mappedwildcards = 0;
-  for (cnum=0; cnum<=(unsigned int) MAXALPHABETCHARACTER; cnum++)
+  for (cnum=0; cnum<=(unsigned int) GT_MAXALPHABETCHARACTER; cnum++)
   {
     alpha->symbolmap[cnum] = (GtUchar) UNDEFCHAR;
   }
@@ -248,7 +248,7 @@ static int readsymbolmapfromlines(GtAlphabet *alpha,
   }
   if (!haserr)
   {
-    for (cnum=0;cnum<=(unsigned int) MAXALPHABETCHARACTER; cnum++)
+    for (cnum=0;cnum<=(unsigned int) GT_MAXALPHABETCHARACTER; cnum++)
     {
       if (alpha->symbolmap[cnum] == (GtUchar) (alpha->mapsize - 1))
       {
@@ -295,7 +295,7 @@ static void assignDNAsymbolmap(GtUchar *symbolmap)
 {
   unsigned int cnum;
 
-  for (cnum=0; cnum<=(unsigned int) MAXALPHABETCHARACTER; cnum++)
+  for (cnum=0; cnum<=(unsigned int) GT_MAXALPHABETCHARACTER; cnum++)
   {
     symbolmap[cnum] = (GtUchar) UNDEFCHAR;
   }
@@ -326,7 +326,7 @@ GtAlphabet *gt_alphabet_clone(const GtAlphabet *alpha2)
   alpha1->mappedwildcards = alpha2->mappedwildcards;
   alpha1->wildcardshow = alpha2->wildcardshow;
   alpha1->reference_count = 0;
-  for (i=0; i<=(unsigned int) MAXALPHABETCHARACTER; i++)
+  for (i=0; i<=(unsigned int) GT_MAXALPHABETCHARACTER; i++)
   {
     alpha1->symbolmap[i] = alpha2->symbolmap[i];
   }
@@ -422,7 +422,7 @@ static void assignproteinsymbolmap(GtUchar *symbolmap)
 {
   unsigned int cnum;
 
-  for (cnum=0; cnum<=(unsigned int) MAXALPHABETCHARACTER; cnum++)
+  for (cnum=0; cnum<=(unsigned int) GT_MAXALPHABETCHARACTER; cnum++)
   {
     symbolmap[cnum] = (GtUchar) UNDEFCHAR;
   }
@@ -596,7 +596,7 @@ GtAlphabet* gt_alphabet_new_empty(void)
   a->bitspersymbol = 0;
   a->reference_count = 0;
   a->wildcardshow = UNDEFCHAR;
-  memset(a->symbolmap, UNDEFCHAR, MAXALPHABETCHARACTER+1);
+  memset(a->symbolmap, UNDEFCHAR, GT_MAXALPHABETCHARACTER+1);
   a->mapdomain = NULL;
   a->characters = NULL;
   return a;
@@ -813,8 +813,8 @@ bool gt_alphabet_is_protein(const GtAlphabet *alpha)
   GtAlphabet proteinalphabet;
   unsigned int i, reduceddomainsize1, reduceddomainsize2;
   bool isprot = false;
-  GtUchar domainbuf1[MAXALPHABETCHARACTER+1],
-        domainbuf2[MAXALPHABETCHARACTER+1];
+  GtUchar domainbuf1[GT_MAXALPHABETCHARACTER+1],
+        domainbuf2[GT_MAXALPHABETCHARACTER+1];
 
   reduceddomainsize1 = removelowercaseproteinchars(&domainbuf1[0],alpha);
   assignProteinalphabet(&proteinalphabet);
@@ -877,7 +877,7 @@ bool gt_alphabet_is_dna(const GtAlphabet *alpha)
   }
   if (alpha->mapsize == MAPSIZEDNA)
   {
-    GtUchar dnasymbolmap[MAXALPHABETCHARACTER+1];
+    GtUchar dnasymbolmap[GT_MAXALPHABETCHARACTER+1];
 
     assignDNAsymbolmap(&dnasymbolmap[0]);
     if (checksymbolmap(alpha->symbolmap,&dnasymbolmap[0],"acgt"))
