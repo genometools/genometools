@@ -1,6 +1,7 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2009 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2009 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -34,17 +35,21 @@
 #include "core/mathsupport.h"
 #include "alphabet.h"
 
+#define ALPHABET_GUESS_MAX_LENGTH       5000
+#define ALPHABET_GUESS_PROTEIN_CHARS    "LIFEQPlifeqpXZ*-"
+
 struct GtAlphabet {
   unsigned int domainsize,           /* size of domain of symbolmap */
                mapsize,              /* size of image of map, i.e. */
                                      /* mapping to [0..mapsize-1] */
                mappedwildcards,      /* number of mapped wildcards */
-               bitspersymbol;        /* number of bits per symbol in
+               bitspersymbol,        /* number of bits per symbol in
                                         bitspackedarray */
+               reference_count;
   GtUchar wildcardshow,
-        symbolmap[MAXALPHABETCHARACTER+1], /* mapping of the symbols */
-        *mapdomain,                        /* list of characters mapped */
-        *characters;                       /* array of characters to show */
+          symbolmap[MAXALPHABETCHARACTER+1], /* mapping of the symbols */
+          *mapdomain,                        /* list of characters mapped */
+          *characters;                       /* array of characters to show */
 };
 
 /*EE
@@ -329,6 +334,7 @@ GtAlphabet *gt_alphabet_clone(const GtAlphabet *alpha2)
   alpha1->mapsize = alpha2->mapsize;
   alpha1->mappedwildcards = alpha2->mappedwildcards;
   alpha1->wildcardshow = alpha2->wildcardshow;
+  alpha1->reference_count = 0;
   for (i=0; i<=(unsigned int) MAXALPHABETCHARACTER; i++)
   {
     alpha1->symbolmap[i] = alpha2->symbolmap[i];
@@ -344,12 +350,41 @@ GtAlphabet *gt_alphabet_clone(const GtAlphabet *alpha2)
   return alpha1;
 }
 
-void gt_alphabet_delete(GtAlphabet *alpha)
+GtAlphabet* gt_alphabet_ref(GtAlphabet *a)
 {
-  if (!alpha) return;
-  gt_free(alpha->mapdomain);
-  gt_free(alpha->characters);
-  gt_free(alpha);
+  gt_assert(a);
+  a->reference_count++;
+  return a;
+}
+
+void gt_alphabet_delete(GtAlphabet *a)
+{
+  if (!a) return;
+  if (a->reference_count) {
+    a->reference_count--;
+    return;
+  }
+  gt_free(a->mapdomain);
+  gt_free(a->characters);
+  gt_free(a);
+}
+
+void gt_alphabet_add_mapping(GtAlphabet *a, const char *characters)
+{
+  size_t i, num_of_characters;
+  gt_assert(a && characters);
+  num_of_characters = strlen(characters);
+  gt_assert(num_of_characters);
+  a->mapdomain = gt_realloc(a->mapdomain, a->domainsize + num_of_characters);
+  memcpy(a->mapdomain + num_of_characters, characters, num_of_characters);
+  a->domainsize += num_of_characters;
+  a->symbolmap[(int) characters[0]] = a->mapsize;
+  a->characters = gt_realloc(a->characters, a->domainsize);
+  a->characters[a->mapsize] = characters[0];
+  for (i = 0; i < num_of_characters; i++)
+    a->characters[(int) characters[i]] = a->mapsize;
+  a->mapsize++;
+  a->bitspersymbol = gt_determinebitspervalue(a->mapsize);
 }
 
 /*EE
@@ -478,6 +513,7 @@ static int assignProteinorDNAalphabet(GtAlphabet *alpha,
   gt_error_check(err);
 
   alpha = gt_malloc(sizeof *alpha);
+  alpha->reference_count = 0;
   alpha->characters = NULL;
   alpha->mapdomain = NULL;
   if (isdna)
@@ -533,6 +569,47 @@ static int assignProteinorDNAalphabet(GtAlphabet *alpha,
   return alpha;
 }
 
+GtAlphabet* gt_alphabet_new_dna(void)
+{
+  GtAlphabet *a;
+  a = gt_alphabet_new(true, false, NULL, NULL, NULL);
+  gt_assert(a);
+  return a;
+}
+
+GtAlphabet* gt_alphabet_new_protein(void)
+{
+  GtAlphabet *a;
+  a = gt_alphabet_new(false, true, NULL, NULL, NULL);
+  return a;
+}
+
+GtAlphabet* gt_alphabet_new_empty(void)
+{
+  GtAlphabet *a = gt_malloc(sizeof *a);
+  a->domainsize = 0;
+  a->mapsize = 0;
+  a->mappedwildcards = 0;
+  a->bitspersymbol = 0;
+  a->reference_count = 0;
+  a->wildcardshow = UNDEFCHAR;
+  memset(a->symbolmap, UNDEFCHAR, MAXALPHABETCHARACTER+1);
+  a->mapdomain = NULL;
+  a->characters = NULL;
+  return a;
+}
+
+GtAlphabet* gt_alphabet_guess(const char *seq, unsigned long seqlen)
+{
+  unsigned long i;
+  gt_assert(seq && seqlen);
+  for (i = 0; i < seqlen && i < ALPHABET_GUESS_MAX_LENGTH; i++) {
+    if (strchr(ALPHABET_GUESS_PROTEIN_CHARS, seq[i]))
+      return gt_alphabet_new_protein();
+  }
+  return gt_alphabet_new_dna();
+}
+
 const GtUchar* gt_alphabet_symbolmap(const GtAlphabet *alphabet)
 {
   gt_assert(alphabet);
@@ -542,7 +619,13 @@ const GtUchar* gt_alphabet_symbolmap(const GtAlphabet *alphabet)
 unsigned int gt_alphabet_num_of_chars(const GtAlphabet *alphabet)
 {
   gt_assert(alphabet);
-  return alphabet->mapsize-1;
+  return alphabet->mapsize - 1;
+}
+
+unsigned int gt_alphabet_size(const GtAlphabet *alphabet)
+{
+  gt_assert(alphabet);
+  return alphabet->mapsize;
 }
 
 const GtUchar* gt_alphabet_characters(const GtAlphabet *alphabet)
@@ -825,4 +908,30 @@ bool gt_alphabet_is_dna(const GtAlphabet *alpha)
     }
   }
   return false;
+}
+
+GtUchar gt_alphabet_encode(const GtAlphabet *alphabet, char c)
+{
+  gt_assert(alphabet);
+  gt_assert(alphabet->symbolmap[(int) c] != UNDEFCHAR);
+  return alphabet->symbolmap[(int) c];
+}
+
+char gt_alphabet_decode(const GtAlphabet *alphabet, GtUchar c)
+{
+  gt_assert(alphabet);
+  if (c == alphabet->mapsize - 1)
+    return alphabet->wildcardshow;
+  return converttoprettysymbol(alphabet, c);
+}
+
+void gt_alphabet_encode_seq(const GtAlphabet *alphabet, GtUchar *out,
+                            const char *in, unsigned long length)
+{
+  unsigned long i;
+  gt_assert(alphabet && out && in);
+  for (i = 0; i < length; i++) {
+    gt_assert(alphabet->symbolmap[(int) in[i]] != UNDEFCHAR);
+    out[i] = alphabet->symbolmap[(int) in[i]];
+  }
 }

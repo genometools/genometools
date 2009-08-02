@@ -1,5 +1,5 @@
 --[[
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -29,7 +29,7 @@ else
   usage()
 end
 
-protein_alpha = gt.alpha_new_protein()
+protein_alpha = gt.alphabet_new_protein()
 score_matrix = gt.score_matrix_new_read_protein(score_matrix_file)
 assert(protein_alpha:size() == score_matrix:get_dimension())
 

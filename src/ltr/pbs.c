@@ -155,7 +155,7 @@ GtPBSHit* gt_pbs_results_get_ranked_hit(const GtPBSResults *r, unsigned long i)
   return *(GtPBSHit**) gt_array_get(r->hits, i);
 }
 
-static GtScoreFunction* gt_dna_scorefunc_new(GtAlpha *a, int match,
+static GtScoreFunction* gt_dna_scorefunc_new(GtAlphabet *a, int match,
                                              int mismatch, int insertion,
                                              int deletion)
 {
@@ -163,16 +163,16 @@ static GtScoreFunction* gt_dna_scorefunc_new(GtAlpha *a, int match,
   GtScoreFunction *sf = gt_score_function_new(sm, insertion, deletion);
   unsigned int m,n;
 
-  for (m=0;m<gt_alpha_size(a);m++)
+  for (m=0;m<gt_alphabet_size(a);m++)
   {
-    for (n=0;n<gt_alpha_size(a);n++)
+    for (n=0;n<gt_alphabet_size(a);n++)
     {
       gt_score_matrix_set_score(sm, m, n, (n==m ? match : mismatch));
     }
   }
   /* make N-N a mismatch! */
-  gt_score_matrix_set_score(sm, gt_alpha_encode(a, 'n'),
-                            gt_alpha_encode(a, 'n'), mismatch);
+  gt_score_matrix_set_score(sm, gt_alphabet_size(a) - 1,
+                            gt_alphabet_size(a) - 1, mismatch);
   return sf;
 }
 
@@ -252,7 +252,7 @@ GtPBSResults* gt_pbs_find(const char *seq,
   GtPBSResults *results;
   unsigned long j;
   GtAlignment *ali;
-  GtAlpha *a = (GtAlpha*) gt_alpha_new_dna();
+  GtAlphabet *a = gt_alphabet_new_dna();
   GtScoreFunction *sf = gt_dna_scorefunc_new(a,
                                              o->ali_score_match,
                                              o->ali_score_mismatch,
@@ -305,7 +305,7 @@ GtPBSResults* gt_pbs_find(const char *seq,
   gt_seq_delete(seq_forward);
   gt_seq_delete(seq_rev);
   gt_score_function_delete(sf);
-  gt_alpha_delete(a);
+  gt_alphabet_delete(a);
   gt_array_sort(results->hits, gt_pbs_hit_compare);
   return results;
 }

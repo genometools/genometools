@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -18,6 +18,7 @@
 #ifndef BIOSEQ_H
 #define BIOSEQ_H
 
+#include "core/alphabet.h"
 #include "core/error.h"
 #include "core/fasta_reader.h"
 #include "core/seq.h"
@@ -41,7 +42,7 @@ GtBioseq*     gt_bioseq_new_with_fasta_reader(const char *sequence_file,
                                               GtFastaReaderType fasta_reader,
                                               GtError*);
 void          gt_bioseq_delete(GtBioseq*);
-GtAlpha*      gt_bioseq_get_alpha(GtBioseq*);
+GtAlphabet*   gt_bioseq_get_alphabet(GtBioseq*);
 GtSeq*        gt_bioseq_get_seq(GtBioseq*, unsigned long);
 const char*   gt_bioseq_get_description(GtBioseq*, unsigned long);
 /* Return sequence with given <index> (not '\0' terminated). */
@@ -60,7 +61,7 @@ void gt_bioseq_show_as_fasta(GtBioseq*, unsigned long width);
 /* Shows a sequence with number ``seqnum'' from a bioseq on stdout (in fasta
    format). If width is != 0 the sequences are formatted accordingly. */
 void gt_bioseq_show_sequence_as_fasta(GtBioseq*, unsigned long seqnum,
-                                   unsigned long width);
+                                      unsigned long width);
 
 /* Shows GC-content on stdout (for DNA files). */
 void gt_bioseq_show_gc_content(GtBioseq*);

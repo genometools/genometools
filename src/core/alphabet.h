@@ -1,6 +1,7 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2009 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2009 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -43,10 +44,20 @@ typedef struct GtAlphabet GtAlphabet;
 GtAlphabet*    gt_alphabet_new(bool isdna, bool isprotein,
                                const GtStr *smapfile,
                                const GtStrArray *filenametab, GtError *err);
+GtAlphabet*    gt_alphabet_new_dna(void);
+GtAlphabet*    gt_alphabet_new_protein(void);
+GtAlphabet*    gt_alphabet_new_empty(void);
+GtAlphabet*    gt_alphabet_guess(const char *seq, unsigned long seqlen);
 GtAlphabet*    gt_alphabet_clone(const GtAlphabet *alphabet);
+GtAlphabet*    gt_alphabet_ref(GtAlphabet *alphabet);
 void           gt_alphabet_delete(GtAlphabet *alphabet);
+/* Add the mapping of all given <characters> to the given <alphabet>. The first
+   character is the result of subsequent <gt_alphabet_decode()> calls. */
+void           gt_alphabet_add_mapping(GtAlphabet *alphabet,
+                                       const char *characters);
 const GtUchar* gt_alphabet_symbolmap(const GtAlphabet *alphabet);
 unsigned int   gt_alphabet_num_of_chars(const GtAlphabet *alphabet);
+unsigned int   gt_alphabet_size(const GtAlphabet *alphabet);
 const GtUchar* gt_alphabet_characters(const GtAlphabet *alphabet);
 GtUchar        gt_alphabet_wildcard_show(const GtAlphabet *alphabet);
 unsigned int   gt_alphabet_bits_per_symbol(const GtAlphabet *alphabet);
@@ -66,5 +77,14 @@ GtUchar        gt_alphabet_pretty_symbol(const GtAlphabet *alphabet,
                                          unsigned int currentchar);
 bool           gt_alphabet_is_protein(const GtAlphabet *alphabet);
 bool           gt_alphabet_is_dna(const GtAlphabet *alphabet);
+/* Encode character <c> with given <alphabet>.
+   <c> has to be encodable with the given <alphabet>! */
+GtUchar        gt_alphabet_encode(const GtAlphabet *alphabet, char c);
+/* Decode character <c> with given <alphabet>. */
+char           gt_alphabet_decode(const GtAlphabet *alphabet, GtUchar c);
+/* Encode sequence <in> of given <length> with <alphabet> and store the result
+   in <out>. <in> has to be encodable with the given <alphabet>! */
+void           gt_alphabet_encode_seq(const GtAlphabet *alphabet, GtUchar *out,
+                                      const char *in, unsigned long length);
 
 #endif

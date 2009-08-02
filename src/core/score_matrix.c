@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -18,6 +18,7 @@
 #include "core/assert_api.h"
 #include "core/array.h"
 #include "core/array2dim_api.h"
+#include "core/chardef.h"
 #include "core/parseutils.h"
 #include "core/score_matrix.h"
 #include "core/str.h"
@@ -26,18 +27,18 @@
 #include "core/xansi.h"
 
 struct GtScoreMatrix {
-  GtAlpha *alpha;
+  GtAlphabet *alphabet;
   unsigned int dimension;
   int **scores;
 };
 
-GtScoreMatrix* gt_score_matrix_new(GtAlpha *alpha)
+GtScoreMatrix* gt_score_matrix_new(GtAlphabet *alphabet)
 {
   GtScoreMatrix *sm;
-  gt_assert(alpha);
+  gt_assert(alphabet);
   sm = gt_malloc(sizeof (GtScoreMatrix));
-  sm->alpha = gt_alpha_ref(alpha);
-  sm->dimension = gt_alpha_size(alpha);
+  sm->alphabet = gt_alphabet_ref(alphabet);
+  sm->dimension = gt_alphabet_size(alphabet);
   gt_array2dim_calloc(sm->scores, sm->dimension, sm->dimension);
   return sm;
 }
@@ -111,7 +112,7 @@ static int parse_score_line(GtScoreMatrix *sm, GtTokenizer *tz,
                             GtArray *index_to_alpha_char_mapping,
                             char *parsed_characters, GtError *err)
 {
-  unsigned int i = 0;
+  unsigned int num_of_chars, i = 0;
   char amino_acid;
   int score, had_err = 0;
   GtStr *token;
@@ -136,17 +137,21 @@ static int parse_score_line(GtScoreMatrix *sm, GtTokenizer *tz,
   parsed_characters[(int) amino_acid] = GT_UNDEF_CHAR;
   gt_str_delete(token);
   if (!had_err) {
+    num_of_chars = gt_alphabet_num_of_chars(sm->alphabet);
     gt_tokenizer_next_token(tz);
     while ((token = gt_tokenizer_get_token(tz))) {
+      unsigned int idx1, idx2;
       had_err = gt_parse_int_line(&score, gt_str_get(token),
                                   gt_tokenizer_get_line_number(tz),
                                   gt_tokenizer_get_filename(tz), err);
       if (had_err)
         break;
+      idx1 = gt_alphabet_encode(sm->alphabet, amino_acid);
+      idx2 = gt_alphabet_encode(sm->alphabet, *(char*)
+                                gt_array_get(index_to_alpha_char_mapping, i));
       gt_score_matrix_set_score(sm,
-                                gt_alpha_encode(sm->alpha, amino_acid),
-                                gt_alpha_encode(sm->alpha, *(char*)
-                                gt_array_get(index_to_alpha_char_mapping, i)),
+                                idx1 == WILDCARD ? num_of_chars : idx1,
+                                idx2 == WILDCARD ? num_of_chars : idx2,
                                 score);
       i++;
       gt_str_delete(token);
@@ -168,7 +173,7 @@ static int parse_score_matrix(GtScoreMatrix *sm, const char *path,
   char parsed_characters[UCHAR_MAX] = { 0 };
   int had_err = 0;
   gt_error_check(err);
-  gt_assert(sm && path && sm->alpha);
+  gt_assert(sm && path && sm->alphabet);
   tz = gt_tokenizer_new(gt_io_new(path, "r"));
   index_to_alpha_char_mapping = gt_array_new(sizeof (char));
   gt_tokenizer_skip_comment_lines(tz);
@@ -196,10 +201,9 @@ static int parse_score_matrix(GtScoreMatrix *sm, const char *path,
   return had_err;
 }
 
-GtScoreMatrix* gt_score_matrix_new_read_protein(const char *path,
-                                                 GtError *err)
+GtScoreMatrix* gt_score_matrix_new_read_protein(const char *path, GtError *err)
 {
-  GtAlpha *protein_alpha;
+  GtAlphabet *protein_alpha;
   GtScoreMatrix *sm;
   int had_err;
 
@@ -207,9 +211,9 @@ GtScoreMatrix* gt_score_matrix_new_read_protein(const char *path,
   gt_assert(path);
 
   /* create score matrix */
-  protein_alpha = gt_alpha_new_protein();
+  protein_alpha = gt_alphabet_new_protein();
   sm = gt_score_matrix_new(protein_alpha);
-  gt_alpha_delete(protein_alpha);
+  gt_alphabet_delete(protein_alpha);
 
   /* parse matrix file */
   had_err = parse_score_matrix(sm, path, err);
@@ -257,13 +261,13 @@ void gt_score_matrix_show(const GtScoreMatrix *sm, FILE *fp)
   gt_assert(sm && fp);
   /* show alphabet line */
   gt_xfputc(' ', fp);
-  for (i = 0; i < gt_alpha_size(sm->alpha); i++)
-    fprintf(fp, "  %c", gt_alpha_decode(sm->alpha, i));
+  for (i = 0; i < gt_alphabet_size(sm->alphabet); i++)
+    fprintf(fp, "  %c", gt_alphabet_decode(sm->alphabet, i));
   gt_xfputc('\n', fp);
   /* show score lines */
-  for (i = 0; i < gt_alpha_size(sm->alpha); i++) {
-    gt_xfputc(gt_alpha_decode(sm->alpha, i), fp);
-    for (j = 0; j < gt_alpha_size(sm->alpha); j++)
+  for (i = 0; i < gt_alphabet_size(sm->alphabet); i++) {
+    gt_xfputc(gt_alphabet_decode(sm->alphabet, i), fp);
+    for (j = 0; j < gt_alphabet_size(sm->alphabet); j++)
       fprintf(fp, " %2d", gt_score_matrix_get_score(sm, i, j));
     gt_xfputc('\n', fp);
   }
@@ -272,7 +276,7 @@ void gt_score_matrix_show(const GtScoreMatrix *sm, FILE *fp)
 void gt_score_matrix_delete(GtScoreMatrix *sm)
 {
   if (!sm) return;
-  gt_alpha_delete(sm->alpha);
+  gt_alphabet_delete(sm->alphabet);
   gt_array2dim_delete(sm->scores);
   gt_free(sm);
 }

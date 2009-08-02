@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -23,6 +23,7 @@
 /* returns a GtSeq which is the mutated sequence <orig_seq> of length <len> over
    alphabet <alpha>. <rate> denotes the error rate (must be >=0 && <= 100) */
 GtSeq* gt_mutate_seq(const char *description, const char *orig_seq,
-                     unsigned long len, GtAlpha *alpha, unsigned int rate);
+                     unsigned long len, GtAlphabet *alphabet,
+                     unsigned int rate);
 
 #endif

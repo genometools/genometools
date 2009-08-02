@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -16,7 +16,7 @@
 */
 
 #include "core/assert_api.h"
-#include "gtlua/alpha_lua.h"
+#include "gtlua/alphabet_lua.h"
 #include "gtlua/bittab_lua.h"
 #include "gtlua/gtcore_lua.h"
 #include "gtlua/range_lua.h"
@@ -32,7 +32,7 @@ int gt_lua_open_core(lua_State *L)
 #ifndef NDEBUG
   stack_size = lua_gettop(L);
 #endif
-  gt_lua_open_alpha(L);
+  gt_lua_open_alphabet(L);
   gt_lua_open_bittab(L);
   gt_lua_open_range(L);
   gt_lua_open_score_matrix(L);

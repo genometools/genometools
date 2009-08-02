@@ -35,8 +35,8 @@ typedef struct {
 } DPentry;
 
 static void swalign_fill_table(DPentry **dptable,
-                               const char *u, unsigned long ulen,
-                               const char *v, unsigned long vlen,
+                               const GtUchar *u, unsigned long ulen,
+                               const GtUchar *v, unsigned long vlen,
                                const int **scores,
                                int deletion_score, int insertion_score,
                                Coordinate *max_coordinate)
@@ -91,11 +91,15 @@ static Coordinate traceback(GtAlignment *a, DPentry **dptable,
   return start_coordinate;
 }
 
-static GtAlignment* smith_waterman_align(const char *u_orig, const char *v_orig,
-                                       const char *u_enc, const char *v_enc,
-                                       unsigned long u_len, unsigned long v_len,
-                                       const int **scores,
-                                       int deletion_score, int insertion_score)
+static GtAlignment* smith_waterman_align(const char *u_orig,
+                                         const char *v_orig,
+                                         const GtUchar *u_enc,
+                                         const GtUchar *v_enc,
+                                         unsigned long u_len,
+                                         unsigned long v_len,
+                                         const int **scores,
+                                         int deletion_score,
+                                         int insertion_score)
 {
   gt_assert(u_orig && v_orig && u_enc && v_enc && u_len && v_len && scores);
   Coordinate alignment_start,

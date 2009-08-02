@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -55,7 +55,7 @@ struct GtBioseq {
   char *raw_sequence;
   size_t raw_sequence_length,
          allocated;
-  GtAlpha *alpha;
+  GtAlphabet *alphabet;
   GtBioseqFingerprints *fingerprints;
 };
 
@@ -509,25 +509,25 @@ void gt_bioseq_delete(GtBioseq *bs)
     gt_free(bs->raw_sequence);
   else
     gt_fa_xmunmap(bs->raw_sequence);
-  gt_alpha_delete(bs->alpha);
+  gt_alphabet_delete(bs->alphabet);
   gt_free(bs);
 }
 
-static void determine_alpha_if_necessary(GtBioseq *bs)
+static void determine_alphabet_if_necessary(GtBioseq *bs)
 {
   gt_assert(bs);
-  if (!bs->alpha) {
-    bs->alpha = gt_alpha_guess(gt_bioseq_get_raw_sequence(bs),
-                            gt_bioseq_get_raw_sequence_length(bs));
+  if (!bs->alphabet) {
+    bs->alphabet = gt_alphabet_guess(gt_bioseq_get_raw_sequence(bs),
+                                     gt_bioseq_get_raw_sequence_length(bs));
   }
 }
 
-GtAlpha* gt_bioseq_get_alpha(GtBioseq *bs)
+GtAlphabet* gt_bioseq_get_alphabet(GtBioseq *bs)
 {
   gt_assert(bs);
-  determine_alpha_if_necessary(bs);
-  gt_assert(bs->alpha);
-  return bs->alpha;
+  determine_alphabet_if_necessary(bs);
+  gt_assert(bs->alphabet);
+  return bs->alphabet;
 }
 
 GtSeq* gt_bioseq_get_seq(GtBioseq *bs, unsigned long idx)
@@ -536,11 +536,11 @@ GtSeq* gt_bioseq_get_seq(GtBioseq *bs, unsigned long idx)
   gt_assert(idx < gt_array_size(bs->descriptions));
   if (!bs->seqs)
     bs->seqs = gt_calloc(gt_array_size(bs->descriptions), sizeof (GtSeq*));
-  determine_alpha_if_necessary(bs);
+  determine_alphabet_if_necessary(bs);
   if (!bs->seqs[idx]) {
     bs->seqs[idx] = gt_seq_new(gt_bioseq_get_sequence(bs, idx),
-                            gt_bioseq_get_sequence_length(bs, idx),
-                            bs->alpha);
+                               gt_bioseq_get_sequence_length(bs, idx),
+                               bs->alphabet);
     gt_seq_set_description(bs->seqs[idx], gt_bioseq_get_description(bs, idx));
   }
   return bs->seqs[idx];
@@ -620,17 +620,14 @@ void gt_bioseq_show_sequence_as_fasta(GtBioseq *bs, unsigned long seqnum,
 
 void gt_bioseq_show_gc_content(GtBioseq *bs)
 {
-  GtAlpha *dna_alpha;
   gt_assert(bs);
-  determine_alpha_if_necessary(bs);
-  dna_alpha = gt_alpha_new_dna();
-  if (gt_alpha_is_compatible_with_alpha(bs->alpha, dna_alpha)) {
+  determine_alphabet_if_necessary(bs);
+  if (gt_alphabet_is_dna(bs->alphabet)) {
     printf("showing GC-content for sequence file \"%s\"\n",
            gt_str_get(bs->sequence_file));
     gt_gc_content_show(gt_bioseq_get_raw_sequence(bs),
-                       gt_bioseq_get_raw_sequence_length(bs), bs->alpha);
+                       gt_bioseq_get_raw_sequence_length(bs), bs->alphabet);
   }
-  gt_alpha_delete(dna_alpha);
 }
 
 void gt_bioseq_show_stat(GtBioseq *bs)

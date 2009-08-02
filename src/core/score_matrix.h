@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -18,22 +18,22 @@
 #ifndef SCORE_MATRIX_H
 #define SCORE_MATRIX_H
 
-#include "core/alpha.h"
+#include "core/alphabet.h"
 #include "core/error.h"
 
 typedef struct GtScoreMatrix GtScoreMatrix;
 
-/* a score matrix is always defined over a given alphabet */
-GtScoreMatrix* gt_score_matrix_new(GtAlpha*);
+/* A score matrix is always defined over a given <alphabet>. */
+GtScoreMatrix* gt_score_matrix_new(GtAlphabet *alphabet);
 /* reads in a protein scorematrix from the given <path> and returns it */
 GtScoreMatrix* gt_score_matrix_new_read_protein(const char *path, GtError*);
-unsigned int gt_score_matrix_get_dimension(const GtScoreMatrix*);
-int          gt_score_matrix_get_score(const GtScoreMatrix*,
-                                    unsigned int, unsigned int);
-void         gt_score_matrix_set_score(GtScoreMatrix*,
-                                    unsigned int, unsigned int, int);
-const int**  gt_score_matrix_get_scores(const GtScoreMatrix*);
-void         gt_score_matrix_show(const GtScoreMatrix*, FILE*);
-void         gt_score_matrix_delete(GtScoreMatrix*);
+unsigned int   gt_score_matrix_get_dimension(const GtScoreMatrix*);
+int            gt_score_matrix_get_score(const GtScoreMatrix*,
+                                         unsigned int, unsigned int);
+void           gt_score_matrix_set_score(GtScoreMatrix*,
+                                         unsigned int, unsigned int, int);
+const int**    gt_score_matrix_get_scores(const GtScoreMatrix*);
+void           gt_score_matrix_show(const GtScoreMatrix*, FILE*);
+void           gt_score_matrix_delete(GtScoreMatrix*);
 
 #endif

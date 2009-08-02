@@ -116,61 +116,62 @@ GtPPTHit* gt_ppt_results_get_ranked_hit(GtPPTResults *r, unsigned long i)
   return *(GtPPTHit**) gt_array_get(r->hits, i);
 }
 
-GtHMM* gt_ppt_hmm_new(const GtAlpha *alpha, GtPPTOptions *opts)
+GtHMM* gt_ppt_hmm_new(const GtAlphabet *alpha, GtPPTOptions *opts)
 {
   GtHMM *hmm;
   double non_u_prob = 0.0;
 
   gt_assert(alpha);
 
-  hmm = gt_hmm_new(PPT_NOF_STATES, gt_alpha_size(alpha));
+  hmm = gt_hmm_new(PPT_NOF_STATES, gt_alphabet_size(alpha));
 
   /* set emission probabilities */
   gt_hmm_set_emission_probability(hmm, PPT_OUT,
-                                  gt_alpha_encode(alpha, 'G'),
+                                  gt_alphabet_encode(alpha, 'G'),
                                   opts->bkg_g_prob);
   gt_hmm_set_emission_probability(hmm, PPT_OUT,
-                                  gt_alpha_encode(alpha, 'A'),
+                                  gt_alphabet_encode(alpha, 'A'),
                                   opts->bkg_a_prob);
   gt_hmm_set_emission_probability(hmm, PPT_OUT,
-                                  gt_alpha_encode(alpha, 'C'),
+                                  gt_alphabet_encode(alpha, 'C'),
                                   opts->bkg_c_prob);
   gt_hmm_set_emission_probability(hmm, PPT_OUT,
-                                  gt_alpha_encode(alpha, 'T'),
+                                  gt_alphabet_encode(alpha, 'T'),
                                   opts->bkg_t_prob);
   gt_hmm_set_emission_probability(hmm, PPT_IN,
-                                  gt_alpha_encode(alpha, 'G'),
+                                  gt_alphabet_encode(alpha, 'G'),
                                   opts->ppt_purine_prob/2);
   gt_hmm_set_emission_probability(hmm, PPT_IN,
-                                  gt_alpha_encode(alpha, 'A'),
+                                  gt_alphabet_encode(alpha, 'A'),
                                   opts->ppt_purine_prob/2);
   gt_hmm_set_emission_probability(hmm, PPT_IN,
-                                  gt_alpha_encode(alpha, 'C'),
+                                  gt_alphabet_encode(alpha, 'C'),
                                   opts->ppt_pyrimidine_prob/2);
   gt_hmm_set_emission_probability(hmm, PPT_IN,
-                                  gt_alpha_encode(alpha, 'T'),
+                                  gt_alphabet_encode(alpha, 'T'),
                                   opts->ppt_pyrimidine_prob/2);
   gt_hmm_set_emission_probability(hmm, PPT_UBOX,
-                                  gt_alpha_encode(alpha, 'T'),
+                                  gt_alphabet_encode(alpha, 'T'),
                                   opts->ubox_u_prob);
   /* calculate non-U probabilities (still uniform, may be optimised) */
   non_u_prob = (1.0 - (opts->ubox_u_prob)) / ((double) 3);
   gt_hmm_set_emission_probability(hmm, PPT_UBOX,
-                                  gt_alpha_encode(alpha, 'G'), non_u_prob);
+                                  gt_alphabet_encode(alpha, 'G'), non_u_prob);
   gt_hmm_set_emission_probability(hmm, PPT_UBOX,
-                                  gt_alpha_encode(alpha, 'A'), non_u_prob);
+                                  gt_alphabet_encode(alpha, 'A'), non_u_prob);
   gt_hmm_set_emission_probability(hmm, PPT_UBOX,
-                                  gt_alpha_encode(alpha, 'C'), non_u_prob);
+                                  gt_alphabet_encode(alpha, 'C'), non_u_prob);
   gt_hmm_set_emission_probability(hmm, PPT_N,
-                                  gt_alpha_encode(alpha, 'G'), 0.00);
+                                  gt_alphabet_encode(alpha, 'G'), 0.00);
   gt_hmm_set_emission_probability(hmm, PPT_N,
-                                  gt_alpha_encode(alpha, 'A'), 0.00);
+                                  gt_alphabet_encode(alpha, 'A'), 0.00);
   gt_hmm_set_emission_probability(hmm, PPT_N,
-                                  gt_alpha_encode(alpha, 'C'), 0.00);
+                                  gt_alphabet_encode(alpha, 'C'), 0.00);
   gt_hmm_set_emission_probability(hmm, PPT_N,
-                                  gt_alpha_encode(alpha, 'T'), 0.00);
+                                  gt_alphabet_encode(alpha, 'T'), 0.00);
   gt_hmm_set_emission_probability(hmm, PPT_N,
-                                  gt_alpha_encode(alpha, 'N'), 1.00);
+                                  gt_alphabet_num_of_chars(alpha) /* 'N' */,
+                                  1.00);
 
   /* set transition probabilities */
   gt_hmm_set_transition_probability(hmm, PPT_OUT, PPT_IN,   0.05);
@@ -303,7 +304,7 @@ GtPPTResults* gt_ppt_find(const char *seq,
 {
   unsigned int *encoded_seq=NULL,
                *decoded=NULL;
-  const GtAlpha *alpha;
+  GtAlphabet *alpha;
   GtHMM *hmm;
   GtPPTResults *results = NULL;
   unsigned long i = 0,
@@ -315,7 +316,7 @@ GtPPTResults* gt_ppt_find(const char *seq,
 
   results = gt_ppt_results_new(element, o);
 
-  alpha = gt_alpha_new_dna();
+  alpha = gt_alphabet_new_dna();
   hmm = gt_ppt_hmm_new(alpha, o);
 
   /* do PPT finding on forward strand
@@ -327,7 +328,7 @@ GtPPTResults* gt_ppt_find(const char *seq,
   encoded_seq = gt_malloc(sizeof (unsigned int) * seqlen);
   for (i=0;i<seqlen;i++)
   {
-    encoded_seq[i] = gt_alpha_encode(alpha, seq[i]);
+    encoded_seq[i] = gt_alphabet_encode(alpha, seq[i]);
   }
   /* use Viterbi algorithm to decode emissions within radius */
   decoded = gt_malloc(sizeof (unsigned int) * (2*radius+1));
@@ -346,7 +347,7 @@ GtPPTResults* gt_ppt_find(const char *seq,
   /* encode sequence */
   for (i=0;i<seqlen;i++)
   {
-    encoded_seq[i] = gt_alpha_encode(alpha, rev_seq[i]);
+    encoded_seq[i] = gt_alphabet_encode(alpha, rev_seq[i]);
   }
   /* use Viterbi algorithm to decode emissions within radius */
   decoded = gt_malloc(sizeof (unsigned int) * (2*radius+1));
@@ -360,7 +361,7 @@ GtPPTResults* gt_ppt_find(const char *seq,
 
   gt_free(encoded_seq);
   gt_free(decoded);
-  gt_alpha_delete((GtAlpha*) alpha);
+  gt_alphabet_delete(alpha);
   gt_hmm_delete(hmm);
 
   return results;

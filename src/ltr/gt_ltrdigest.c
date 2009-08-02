@@ -352,8 +352,8 @@ int gt_ltrdigest_arguments_check(GT_UNUSED int rest_argc, void *tool_arguments,
   if (!had_err)
   {
     GtHMM *hmm;
-    GtAlpha *alpha;
-    alpha = gt_alpha_new_dna();
+    GtAlphabet *alpha;
+    alpha = gt_alphabet_new_dna();
     hmm = gt_ppt_hmm_new(alpha, &arguments->ppt_opts);
     if (!hmm)
     {
@@ -362,7 +362,7 @@ int gt_ltrdigest_arguments_check(GT_UNUSED int rest_argc, void *tool_arguments,
     }
     else
       gt_hmm_delete(hmm);
-    gt_alpha_delete(alpha);
+    gt_alphabet_delete(alpha);
   }
 
   return had_err;

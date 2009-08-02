@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,24 +18,23 @@
 #include "core/assert_api.h"
 #include "core/gc_content.h"
 
-void gt_gc_content_show(const char *seq, unsigned long len, GtAlpha *alpha)
+void gt_gc_content_show(const char *seq, unsigned long len,
+                        GtAlphabet *alphabet)
 {
   unsigned long i,
                 gc = 0, /* number of G/C bases */
                 at = 0, /* number of A/T bases */
                 n  = 0; /* number of N   bases */
   unsigned int a_code, c_code, g_code, t_code, n_code, cc;
-  GtAlpha *dna_alpha;
-  gt_assert(seq && alpha);
-  dna_alpha = gt_alpha_new_dna();
-  gt_assert(gt_alpha_is_compatible_with_alpha(alpha, dna_alpha));
-  a_code = gt_alpha_encode(dna_alpha, 'A');
-  c_code = gt_alpha_encode(dna_alpha, 'C');
-  g_code = gt_alpha_encode(dna_alpha, 'G');
-  t_code = gt_alpha_encode(dna_alpha, 'T');
-  n_code = gt_alpha_encode(dna_alpha, 'N');
+  gt_assert(seq && alphabet);
+  gt_assert(gt_alphabet_is_dna(alphabet));
+  a_code = gt_alphabet_encode(alphabet, 'A');
+  c_code = gt_alphabet_encode(alphabet, 'C');
+  g_code = gt_alphabet_encode(alphabet, 'G');
+  t_code = gt_alphabet_encode(alphabet, 'T');
+  n_code = gt_alphabet_encode(alphabet, 'N');
   for (i = 0; i < len; i++) {
-    cc = gt_alpha_encode(alpha, seq[i]);
+    cc = gt_alphabet_encode(alphabet, seq[i]);
     if (cc == g_code || cc == c_code)
       gc++;
     else if (cc == a_code || cc == t_code)
@@ -49,5 +48,4 @@ void gt_gc_content_show(const char *seq, unsigned long len, GtAlpha *alpha)
   printf("GC-content: %.2f%% (AT-content: %.2f%%, N-content: %.2f%%)\n",
          ((double) gc / len) * 100.0, ((double) at / len) * 100.0,
          ((double) n  / len) * 100.0);
-  gt_alpha_delete(dna_alpha);
 }

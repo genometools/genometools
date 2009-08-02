@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2005-2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2005-2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2005-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,7 +18,7 @@
 #ifndef DICE_HMM_H
 #define DICE_HMM_H
 
-#include "core/alpha.h"
+#include "core/alphabet.h"
 #include "extended/hmm.h"
 
 typedef enum {
@@ -37,8 +37,8 @@ typedef enum {
   DICE_NUM_OF_SYMBOLS
 } Dice_emissions;
 
-GtHMM*   gt_dice_hmm_loaded(void);
-GtHMM*   gt_dice_hmm_fair(void);
-GtAlpha* gt_dice_hmm_alpha(void);
+GtHMM*      gt_dice_hmm_loaded(void);
+GtHMM*      gt_dice_hmm_fair(void);
+GtAlphabet* gt_dice_hmm_alphabet(void);
 
 #endif

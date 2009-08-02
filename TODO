@@ -27,9 +27,5 @@ merge libgtcore and libgtmatch:
 -------------------------------
 
 - replace FastaReader with SeqIterator
-- move alphabet to core
-- Alphabet (Gordon: evtl. mergen mit Alpha)
 - Encodedseq und Bioseq mergen ()
-  guessprot.c
-
 - merge Timer und measure-time.c (Ereignis, formatierter String)

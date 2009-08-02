@@ -597,7 +597,7 @@ int gt_hmm_unit_test(GtError *err)
                                 "6435353336233121625364414432335163243633665562"
                                 "466662632666612355245242" };
   unsigned int *encoded_seq;
-  GtAlpha *alpha;
+  GtAlphabet *alpha;
   size_t i, j, len, size;
   GtHMM *fair_hmm, *loaded_hmm;
   int had_err = 0;
@@ -606,14 +606,14 @@ int gt_hmm_unit_test(GtError *err)
   /* test the GtHMM class with the coin GtHMMs */
   fair_hmm = gt_coin_hmm_fair();
   loaded_hmm = gt_coin_hmm_loaded();
-  alpha = gt_coin_hmm_alpha();
+  alpha = gt_coin_hmm_alphabet();
   size = sizeof (coin_tosses) / sizeof (coin_tosses[0]);
   encoded_seq = gt_malloc(sizeof (int) * strlen(coin_tosses[size-1]));
 
   for (i = 0; i < size && !had_err; i++) {
     len = strlen(coin_tosses[i]);
     for (j = 0; j < len; j++)
-      encoded_seq[j] = gt_alpha_encode(alpha, coin_tosses[i][j]);
+      encoded_seq[j] = gt_alphabet_encode(alpha, coin_tosses[i][j]);
     /* XXX: remove exp() calls */
     ensure(had_err,
            gt_double_equals_double(exp(gt_hmm_forward(fair_hmm, encoded_seq,
@@ -628,7 +628,7 @@ int gt_hmm_unit_test(GtError *err)
   }
 
   gt_free(encoded_seq);
-  gt_alpha_delete(alpha);
+  gt_alphabet_delete(alpha);
   ensure(had_err, gt_double_equals_double(gt_hmm_rmsd(fair_hmm, fair_hmm),
                                           0.0));
   ensure(had_err, gt_double_equals_double(gt_hmm_rmsd(loaded_hmm, loaded_hmm),
@@ -639,14 +639,14 @@ int gt_hmm_unit_test(GtError *err)
   /* test the GtHMM class with the dice GtHMMs */
   fair_hmm = gt_dice_hmm_fair();
   loaded_hmm = gt_dice_hmm_loaded();
-  alpha = gt_dice_hmm_alpha();
+  alpha = gt_dice_hmm_alphabet();
   size = sizeof (dice_rolls) / sizeof (dice_rolls[0]);
   encoded_seq = gt_malloc(sizeof (int) * strlen(dice_rolls[size-1]));
 
   for (i = 0; i < size && !had_err; i++) {
     len = strlen(dice_rolls[i]);
     for (j = 0; j < len; j++) {
-      encoded_seq[j] = gt_alpha_encode(alpha, dice_rolls[i][j]);
+      encoded_seq[j] = gt_alphabet_encode(alpha, dice_rolls[i][j]);
     }
     /* XXX: remove exp() calls */
     ensure(had_err,
@@ -662,7 +662,7 @@ int gt_hmm_unit_test(GtError *err)
   }
 
   gt_free(encoded_seq);
-  gt_alpha_delete(alpha);
+  gt_alphabet_delete(alpha);
   ensure(had_err, gt_double_equals_double(gt_hmm_rmsd(fair_hmm, fair_hmm),
                                           0.0));
   ensure(had_err, gt_double_equals_double(gt_hmm_rmsd(loaded_hmm, loaded_hmm),

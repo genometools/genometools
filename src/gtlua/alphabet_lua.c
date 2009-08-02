@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -16,71 +16,71 @@
 */
 
 #include "lauxlib.h"
-#include "core/alpha.h"
+#include "core/alphabet.h"
 #include "extended/luahelper.h"
-#include "gtlua/alpha_lua.h"
+#include "gtlua/alphabet_lua.h"
 
-#define ALPHA_METATABLE  "GenomeTools.alpha"
-#define check_alpha(L, POS) \
-        (GtAlpha**) luaL_checkudata(L, POS, ALPHA_METATABLE)
+#define ALPHABET_METATABLE  "GenomeTools.alphabet"
+#define check_alphabet(L, POS) \
+        (GtAlphabet**) luaL_checkudata(L, POS, ALPHABET_METATABLE)
 
-static int alpha_lua_new_protein(lua_State *L)
+static int alphabet_lua_new_protein(lua_State *L)
 {
-  GtAlpha **alpha;
+  GtAlphabet **alpha;
   gt_assert(L);
-  alpha = lua_newuserdata(L, sizeof (GtAlpha*));
+  alpha = lua_newuserdata(L, sizeof *alpha);
   gt_assert(alpha);
-  *alpha = gt_alpha_new_protein();
+  *alpha = gt_alphabet_new_protein();
   gt_assert(*alpha);
-  luaL_getmetatable(L, ALPHA_METATABLE);
+  luaL_getmetatable(L, ALPHABET_METATABLE);
   lua_setmetatable(L, -2);
   return 1;
 }
 
-static int alpha_lua_decode(lua_State *L)
+static int alphabet_lua_decode(lua_State *L)
 {
-  GtAlpha **alpha;
+  GtAlphabet **alpha;
   unsigned int code;
   char character;
-  alpha = check_alpha(L, 1);
+  alpha = check_alphabet(L, 1);
   code = luaL_checkinteger(L, 2);
   /* XXX: too restrictive, does not consider wildcards */
-  luaL_argcheck(L, code < gt_alpha_size(*alpha), 2, "invalid code");
-  character = gt_alpha_decode(*alpha, code);
+  luaL_argcheck(L, code < gt_alphabet_size(*alpha), 2, "invalid code");
+  character = gt_alphabet_decode(*alpha, code);
   lua_pushlstring(L, &character, 1);
   return 1;
 }
 
-static int alpha_lua_size(lua_State *L)
+static int alphabet_lua_size(lua_State *L)
 {
-  GtAlpha **alpha;
+  GtAlphabet **alpha;
   unsigned int size;
-  alpha = check_alpha(L, 1);
-  size = gt_alpha_size(*alpha);
+  alpha = check_alphabet(L, 1);
+  size = gt_alphabet_size(*alpha);
   lua_pushinteger(L, size);
   return 1;
 }
 
-static int alpha_lua_delete(lua_State *L)
+static int alphabet_lua_delete(lua_State *L)
 {
-  GtAlpha **alpha;
-  alpha = check_alpha(L, 1);
-  gt_alpha_delete(*alpha);
+  GtAlphabet **alpha;
+  alpha = check_alphabet(L, 1);
+  gt_alphabet_delete(*alpha);
   return 0;
 }
 
-static const struct luaL_Reg alpha_lib_f [] = {
-  { "alpha_new_protein", alpha_lua_new_protein },
+static const struct luaL_Reg alphabet_lib_f [] = {
+  { "alphabet_new_protein", alphabet_lua_new_protein },
   { NULL, NULL }
 };
 
-static const struct luaL_Reg alpha_lib_m [] = {
-  { "decode", alpha_lua_decode },
-  { "size", alpha_lua_size },
+static const struct luaL_Reg alphabet_lib_m [] = {
+  { "decode", alphabet_lua_decode },
+  { "size", alphabet_lua_size },
   { NULL, NULL }
 };
 
-int gt_lua_open_alpha(lua_State *L)
+int gt_lua_open_alphabet(lua_State *L)
 {
 #ifndef NDEBUG
   int stack_size;
@@ -89,18 +89,18 @@ int gt_lua_open_alpha(lua_State *L)
 #ifndef NDEBUG
   stack_size = lua_gettop(L);
 #endif
-  luaL_newmetatable(L, ALPHA_METATABLE);
+  luaL_newmetatable(L, ALPHABET_METATABLE);
   /* metatable.__index = metatable */
   lua_pushvalue(L, -1); /* duplicate the metatable */
   lua_setfield(L, -2, "__index");
   /* set its _gc field */
   lua_pushstring(L, "__gc");
-  lua_pushcfunction(L, alpha_lua_delete);
+  lua_pushcfunction(L, alphabet_lua_delete);
   lua_settable(L, -3);
   /* register functions */
-  luaL_register(L, NULL, alpha_lib_m);
+  luaL_register(L, NULL, alphabet_lib_m);
   lua_pop(L, 1);
-  luaL_register(L, "gt", alpha_lib_f);
+  luaL_register(L, "gt", alphabet_lib_f);
   lua_pop(L, 1);
   gt_assert(lua_gettop(L) == stack_size);
   return 1;

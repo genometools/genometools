@@ -18,7 +18,7 @@
 #ifndef PPT_H
 #define PPT_H
 
-#include "core/alpha.h"
+#include "core/alphabet.h"
 #include "core/range.h"
 #include "core/strand.h"
 #include "core/undef.h"
@@ -48,7 +48,7 @@ typedef struct {
 typedef struct GtPPTHit GtPPTHit;
 typedef struct GtPPTResults GtPPTResults;
 
-GtHMM* gt_ppt_hmm_new(const GtAlpha *alpha, GtPPTOptions *opts);
+GtHMM* gt_ppt_hmm_new(const GtAlphabet *alphabet, GtPPTOptions *opts);
 
 GtPPTResults*   gt_ppt_find(const char *seq,
                             const char *rev_seq,

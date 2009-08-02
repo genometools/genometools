@@ -80,15 +80,15 @@ GtHMM* gt_dice_hmm_fair(void)
   return hmm;
 }
 
-GtAlpha* gt_dice_hmm_alpha(void)
+GtAlphabet* gt_dice_hmm_alphabet(void)
 {
-  GtAlpha *a = gt_alpha_new();
-  gt_alpha_add_mapping(a, "1");
-  gt_alpha_add_mapping(a, "2");
-  gt_alpha_add_mapping(a, "3");
-  gt_alpha_add_mapping(a, "4");
-  gt_alpha_add_mapping(a, "5");
-  gt_alpha_add_mapping(a, "6");
-  gt_assert(gt_alpha_size(a) == 6);
+  GtAlphabet *a = gt_alphabet_new_empty();
+  gt_alphabet_add_mapping(a, "1");
+  gt_alphabet_add_mapping(a, "2");
+  gt_alphabet_add_mapping(a, "3");
+  gt_alphabet_add_mapping(a, "4");
+  gt_alphabet_add_mapping(a, "5");
+  gt_alphabet_add_mapping(a, "6");
+  gt_assert(gt_alphabet_size(a) == 6);
   return a;
 }

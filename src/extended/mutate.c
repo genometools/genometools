@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -43,25 +43,25 @@ static char* mutate_description(const char *description, unsigned int rate)
   return mutated_description;
 }
 
-static char random_character(GtAlpha *alpha, bool upper_case)
+static char random_character(GtAlphabet *alphabet, bool upper_case)
 {
   /* we do not want to get wildcard characters */
-  char random_char = gt_alpha_decode(alpha,
-                                     gt_rand_max(gt_alpha_size(alpha) - 1 - 1));
+  char random_char = gt_alphabet_decode(alphabet,
+                           gt_rand_max(gt_alphabet_num_of_chars(alphabet) - 1));
   if (upper_case)
     return toupper(random_char);
   return tolower(random_char);
 }
 
-static char* mutate_seq(const char *seq, unsigned long len, GtAlpha *alpha,
-                        unsigned int rate)
+static char* mutate_seq(const char *seq, unsigned long len,
+                        GtAlphabet *alphabet, unsigned int rate)
 {
   unsigned long i, j, allocated, substitution_events = 0, insertion_events = 0,
                 deletion_events = 0, total_events = 0;
   double rand_prob, mutate_prob;
   char *mutated_seq;
   bool was_upper;
-  gt_assert(seq && alpha);
+  gt_assert(seq && alphabet);
   gt_assert(rate <= 100);
   mutate_prob = (double) rate / 100.0;
   allocated = len * 2; /* XXX: possibly reduce this memory consumption */
@@ -76,13 +76,13 @@ static char* mutate_seq(const char *seq, unsigned long len, GtAlpha *alpha,
       rand_prob = gt_rand_0_to_1();
       if (rand_prob <= 0.8) {
         /* substitution (80% probability) */
-        mutated_seq[j++] = random_character(alpha, was_upper);
+        mutated_seq[j++] = random_character(alphabet, was_upper);
         substitution_events++;
       }
       else if (rand_prob <= 0.9) {
         /* insertion (10% probability) */
         mutated_seq[j++] = seq[i]; /* keep orig. character */
-        mutated_seq[j++] = random_character(alpha, was_upper);
+        mutated_seq[j++] = random_character(alphabet, was_upper);
         insertion_events++;
       }
       else {
@@ -103,15 +103,15 @@ static char* mutate_seq(const char *seq, unsigned long len, GtAlpha *alpha,
 }
 
 GtSeq* gt_mutate_seq(const char *description, const char *orig_seq,
-                     unsigned long len, GtAlpha *alpha, unsigned int rate)
+                     unsigned long len, GtAlphabet *alphabet, unsigned int rate)
 {
   char *mutated_description, *mutated_seq;
   GtSeq *seq;
-  gt_assert(description && orig_seq && alpha);
+  gt_assert(description && orig_seq && alphabet);
   gt_assert(rate <= 100);
   mutated_description = mutate_description(description, rate);
-  mutated_seq = mutate_seq(orig_seq, len, alpha, rate);
-  seq = gt_seq_new_own(mutated_seq, strlen(mutated_seq), alpha);
+  mutated_seq = mutate_seq(orig_seq, len, alphabet, rate);
+  seq = gt_seq_new_own(mutated_seq, strlen(mutated_seq), alphabet);
   gt_seq_set_description_own(seq, mutated_description);
   return seq;
 }

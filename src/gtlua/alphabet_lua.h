@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -15,22 +15,22 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ALPHA_LUA_H
-#define ALPHA_LUA_H
+#ifndef ALPHABET_LUA_H
+#define ALPHABET_LUA_H
 
 #include "lua.h"
 
-/* exports the Alpha class to Lua:
+/* exports the Alphabet class to Lua:
 
    -- Returns a new protein alphabet.
-   function alpha_new_protein()
+   function alphabet_new_protein()
 
    -- Returns a string containing the decoded character of the <code> number.
-   function alpha:decode(code)
+   function alphabet:decode(code)
 
    -- Returns the size of <alpha> a number.
-   function alpha:size()
+   function alphabet:size()
 */
-int gt_lua_open_alpha(lua_State*);
+int gt_lua_open_alphabet(lua_State*);
 
 #endif
