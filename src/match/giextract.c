@@ -29,7 +29,6 @@
 #include "core/seqiterator.h"
 #include "core/progressbar.h"
 #include "core/fasta.h"
-#include "core/unused_api.h"
 #include "giextract.h"
 #include "format64.h"
 #include "opensfxfile.h"
@@ -345,9 +344,7 @@ static const char *desc2key(unsigned long *keylen,const char *desc,
   return desc + firstpipe + 1;
 }
 
-int gt_extractkeysfromdesfile(GT_UNUSED GtFile *outfp,
-                              const GtStr *indexname,
-                              GtError *err)
+int gt_extractkeysfromdesfile(const GtStr *indexname, GtError *err)
 {
   FILE *fpin;
   GtStr *line;
