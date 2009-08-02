@@ -95,7 +95,7 @@ void gt_file_dirname(GtStr *path, const char *file)
 
 int gt_file_find_in_path(GtStr *path, const char *file, GtError *err)
 {
-  return gt_file_find_in_env(path, file, file, err);
+  return gt_file_find_in_env(path, file, "PATH", err);
 }
 
 int gt_file_find_in_env(GtStr *path, const char *file, const char *env,
