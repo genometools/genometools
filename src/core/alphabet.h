@@ -44,12 +44,21 @@ typedef struct GtAlphabet GtAlphabet;
 GtAlphabet*    gt_alphabet_new(bool isdna, bool isprotein,
                                const GtStr *smapfile,
                                const GtStrArray *filenametab, GtError *err);
+/* Return a <GtAlphabet*> object which represents a DNA alphabet. */
 GtAlphabet*    gt_alphabet_new_dna(void);
+/* Return a <GtAlphabet*> object which represents a protein alphabet. */
 GtAlphabet*    gt_alphabet_new_protein(void);
+/* Return an empty <GtAlphabet*> object. */
 GtAlphabet*    gt_alphabet_new_empty(void);
-GtAlphabet*    gt_alphabet_guess(const char *seq, unsigned long seqlen);
+/* Try to guess which type the given <sequence> with <length> has (DNA or
+   protein) and return an according <GtAlphabet*> object. */
+GtAlphabet*    gt_alphabet_guess(const char *sequence, unsigned long seqlen);
+/* Return a clone of <alphabet>. */
 GtAlphabet*    gt_alphabet_clone(const GtAlphabet *alphabet);
+/* Increase the reference count for <alphabet> and return it. */
 GtAlphabet*    gt_alphabet_ref(GtAlphabet *alphabet);
+/* Decrease the reference count for <alphabet> or delete it, if this was the
+   last reference. */
 void           gt_alphabet_delete(GtAlphabet *alphabet);
 /* Add the mapping of all given <characters> to the given <alphabet>. The first
    character is the result of subsequent <gt_alphabet_decode()> calls. */
@@ -62,9 +71,15 @@ const GtUchar* gt_alphabet_characters(const GtAlphabet *alphabet);
 GtUchar        gt_alphabet_wildcard_show(const GtAlphabet *alphabet);
 unsigned int   gt_alphabet_bits_per_symbol(const GtAlphabet *alphabet);
 void           gt_alphabet_output(const GtAlphabet *alphabet, FILE *fpout);
+/* Suppose the string <w> of length <wlen> was transformed according to the
+   <alphabet>. The following method shows each character in <w> as the
+   characters specified in the transformation. The output is written to the
+   given file pointer <fpout>. */
 void           gt_alphabet_fprintf_symbolstring(const GtAlphabet *alphabet,
                                                 FILE *fpout, const GtUchar *w,
                                                 unsigned long wlen);
+/* Analog to <gt_alphabet_fprintf_symbolstring()> showing the output on
+   <stdout>. */
 void           gt_alphabet_printf_symbolstring(const GtAlphabet *alphabet,
                                                const GtUchar *w,
                                                unsigned long wlen);
@@ -75,7 +90,14 @@ void           gt_alphabet_echo_pretty_symbol(const GtAlphabet *alphabet,
                                               FILE *fpout, GtUchar currentchar);
 GtUchar        gt_alphabet_pretty_symbol(const GtAlphabet *alphabet,
                                          unsigned int currentchar);
+/* The following method checks if the given <alphabet> is the protein
+   alphabet with the aminoacids A, C, D, E, F, G, H, I, K, L, M, N, P, Q, R, S,
+   T, V, W, Y written in lower or upper case and returns <true>, if this is the
+   case (<false> otherwise). */
 bool           gt_alphabet_is_protein(const GtAlphabet *alphabet);
+/* The following method checks if the given alphabet is the DNA alphabet with
+   the bases A, C, G, T written in lower or upper case and returns <true>, if
+   this is the case (<false> otherwise). */
 bool           gt_alphabet_is_dna(const GtAlphabet *alphabet);
 /* Encode character <c> with given <alphabet>.
    <c> has to be encodable with the given <alphabet>! */

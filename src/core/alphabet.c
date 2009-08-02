@@ -52,10 +52,6 @@ struct GtAlphabet {
           *characters;                       /* array of characters to show */
 };
 
-/*EE
-  This file implements the datatype \texttt{alphabet}.
-*/
-
 /*
   Some constants for the standard alphabet used. The name says it all.
 */
@@ -77,7 +73,7 @@ struct GtAlphabet {
 
 #define LINE(I)          currentline[I]
 
-/*EE
+/*
   We have developed a simple format to specify an alphabet
   and a corresponding alphabet transformation. This format specifies the
   characters of the alphabet (including wild card characters)
@@ -268,7 +264,7 @@ static int readsymbolmapfromlines(GtAlphabet *alpha,
   return haserr ? -1 : 0;
 }
 
-/*EE
+/*
   The following function reads in a symbol map.
   \texttt{mapfile} is the input filename.
   If the argument
@@ -318,11 +314,6 @@ static void assignDNAsymbolmap(GtUchar *symbolmap)
     symbolmap[(unsigned int) DNAWILDCARDS[cnum]] = (GtUchar) WILDCARD;
   }
 }
-
-/*EE
-  The following function copies the alphabet \texttt{alpha2} into the alphabet
-  \texttt{alpha1}.
-*/
 
 GtAlphabet *gt_alphabet_clone(const GtAlphabet *alpha2)
 {
@@ -387,7 +378,7 @@ void gt_alphabet_add_mapping(GtAlphabet *a, const char *characters)
   a->bitspersymbol = gt_determinebitspervalue(a->mapsize);
 }
 
-/*EE
+/*
   The following function initializes the alphabet \texttt{alpha}
   in the same way as \texttt{readsymbolmap}, if it would be
   applied to a map file with the following content:
@@ -433,7 +424,7 @@ static void assignproteinsymbolmap(GtUchar *symbolmap)
   }
 }
 
-/*EE
+/*
   The following function initializes the alphabet \texttt{alpha}
   in the same way as \texttt{readsymbolmap}, if it would be
   applied to a map file with the following content:
@@ -699,14 +690,6 @@ void gt_alphabet_output(const GtAlphabet *alpha, FILE *fpout)
   (void) putc((int) '\n',fpout);
 }
 
-/*
-  Suppose the string \texttt{w} of length \texttt{wlen}
-  was transformed according to the alphabet \texttt{alpha}.
-  The following function shows each character in \texttt{w}
-  as the characters specified in the transformation.
-  The output goes to the given file pointer.
- */
-
 void gt_alphabet_fprintf_symbolstring(const GtAlphabet *alpha, FILE *fpout,
                                       const GtUchar *w, unsigned long wlen)
 {
@@ -725,11 +708,6 @@ void gt_alphabet_fprintf_symbolstring(const GtAlphabet *alpha, FILE *fpout,
     (void) putc((int) characters[(int) w[i]],fpout);
   }
 }
-
-/*
-  The following function is a special case of the previous
-  function showing the output on stdout.
-*/
 
 void gt_alphabet_printf_symbolstring(const GtAlphabet *alpha,
                                      const GtUchar *w, unsigned long wlen)
@@ -818,13 +796,6 @@ static int comparechar(const void *a,const void *b)
   return 0;
 }
 
-/*EE
-  The following function checks if the given alphabet is the Protein
-  alphabet with the aminoacids
-  A, C, D, E, F, G, H, I, K, L, M, N, P, Q, R, S, T, V, W, Y written in
-  lower or upper case.
-*/
-
 bool gt_alphabet_is_protein(const GtAlphabet *alpha)
 {
   GtAlphabet proteinalphabet;
@@ -885,11 +856,6 @@ static bool checksymbolmap(const GtUchar *testsymbolmap,
   }
   return true;
 }
-
-/*
-  The following function checks if the given alphabet is the DNA
-  alphabet with the bases A, C, G, T written in lower or upper case.
-*/
 
 bool gt_alphabet_is_dna(const GtAlphabet *alpha)
 {
