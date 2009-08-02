@@ -29,8 +29,10 @@
 #include "core/seqiterator.h"
 #include "core/progressbar.h"
 #include "core/fasta.h"
+#include "core/unused_api.h"
 #include "giextract.h"
 #include "format64.h"
+#include "opensfxfile.h"
 
 #define COMPLETE(VALUE)\
         ((VALUE).frompos == 1UL && (VALUE).topos == 0)
@@ -341,6 +343,37 @@ static const char *desc2key(unsigned long *keylen,const char *desc,
   gt_assert(firstpipe < secondpipe);
   *keylen = secondpipe - firstpipe - 1;
   return desc + firstpipe + 1;
+}
+
+int gt_extractkeysfromdesfile(GT_UNUSED GtFile *outfp,
+                              const GtStr *indexname,
+                              GtError *err)
+{
+  FILE *fpin;
+  GtStr *line;
+  uint64_t linenum;
+  const char *keyptr;
+  unsigned long keylen;
+  bool haserr = false;
+
+  fpin = opensfxfile(indexname,"des","rb",err);
+  if (fpin == NULL)
+  {
+    return -1;
+  }
+  line = gt_str_new();
+  for (linenum = 0; gt_str_read_next_line(line, fpin) != EOF; linenum++)
+  {
+    keyptr = desc2key(&keylen,gt_str_get(line),err);
+    if (keyptr == NULL)
+    {
+      haserr = true;
+      break;
+    }
+  }
+  gt_str_delete(line);
+  gt_fa_fclose(fpin);
+  return haserr ? -1 : 0;
 }
 
 int gt_extractkeysfromfastafile(bool verbose,
