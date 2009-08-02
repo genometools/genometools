@@ -21,7 +21,7 @@
 #include <stdbool.h>
 #include "core/arraydef.h"
 #include "seqpos-def.h"
-#include "alphadef.h"
+#include "alphabet.h"
 #include "encseq-def.h"
 #include "fmi-bwtbound.h"
 

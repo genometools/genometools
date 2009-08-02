@@ -24,7 +24,7 @@
 #include "defined-types.h"
 #include "seqpos-def.h"
 #include "ushort-def.h"
-#include "alphadef.h"
+#include "alphabet.h"
 #include "encseq-def.h"
 
 typedef unsigned long (*Greedygmatchforwardfunction) (const void *,

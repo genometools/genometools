@@ -26,7 +26,7 @@
 #include "core/error.h"
 #include "core/symboldef.h"
 #include "seqpos-def.h"
-#include "alphadef.h"
+#include "alphabet.h"
 #include "verbose-def.h"
 
 int fasta2sequencekeyvalues(

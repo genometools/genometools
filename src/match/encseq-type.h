@@ -31,7 +31,7 @@
 #include "core/filelengthvalues.h"
 #include "bitpack-itf.h"
 #include "seqpos-def.h"
-#include "alphadef.h"
+#include "alphabet.h"
 #include "intbits.h"
 #include "ushort-def.h"
 

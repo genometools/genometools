@@ -29,7 +29,7 @@
 #include "verbose-def.h"
 #include "spacedef.h"
 #include "safecast-gen.h"
-#include "alphadef.h"
+#include "alphabet.h"
 #include "encseq-def.h"
 #include "stamp.h"
 #include "opensfxfile.h"

@@ -21,7 +21,7 @@
 #include "core/symboldef.h"
 #include "core/str_array_api.h"
 #include "core/error_api.h"
-#include "alphadef.h"
+#include "alphabet.h"
 #include "readmode-def.h"
 #include "seqpos-def.h"
 #include "encseq-def.h"

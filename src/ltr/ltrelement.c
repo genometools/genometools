@@ -23,7 +23,7 @@
 #include "core/unused_api.h"
 #include "extended/reverse.h"
 #include "ltr/ltrelement.h"
-#include "match/alphadef.h"
+#include "match/alphabet.h"
 
 unsigned long gt_ltrelement_length(GtLTRElement *e)
 {

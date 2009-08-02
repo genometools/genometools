@@ -22,7 +22,7 @@
 #include "core/chardef.h"
 #include "core/fa.h"
 #include "core/unused_api.h"
-#include "alphadef.h"
+#include "alphabet.h"
 #include "sfx-optdef.h"
 #include "encseq-def.h"
 #include "measure-time-if.h"

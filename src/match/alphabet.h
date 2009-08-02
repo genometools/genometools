@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ALPHADEF_H
-#define ALPHADEF_H
+#ifndef ALPHABET_H
+#define ALPHABET_H
 
 #include <limits.h>
 #include "core/str.h"

@@ -25,7 +25,7 @@
 #include "core/undef.h"
 #include "core/versionfunc.h"
 #include "core/symboldef.h"
-#include "match/alphadef.h"
+#include "match/alphabet.h"
 #include "ltrharvest-opt.h"
 #include "repeattypes.h"
 

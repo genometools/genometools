@@ -40,7 +40,7 @@ int testmaxpairs(GT_UNUSED const GtStr *indexname,
 #include "core/unused_api.h"
 #include "spacedef.h"
 #include "esa-mmsearch-def.h"
-#include "alphadef.h"
+#include "alphabet.h"
 #include "format64.h"
 #include "echoseq.h"
 #include "encseq-def.h"

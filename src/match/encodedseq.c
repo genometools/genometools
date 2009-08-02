@@ -36,7 +36,7 @@
 #include "ushort-def.h"
 #include "format64.h"
 #include "intbits-tab.h"
-#include "alphadef.h"
+#include "alphabet.h"
 #include "mapspec-def.h"
 #include "safecast-gen.h"
 #include "esa-fileend.h"

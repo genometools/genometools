@@ -26,7 +26,7 @@
 #include "core/str.h"
 #include "core/symboldef.h"
 #include "core/str_array.h"
-#include "match/alphadef.h"
+#include "match/alphabet.h"
 
 #include "match/eis-mrangealphabet.h"
 #include "match/eis-mrangealphabet-priv.h"

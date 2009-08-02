@@ -26,7 +26,7 @@
 #include "revcompl.h"
 #include "sarr-def.h"
 #include "intbits.h"
-#include "alphadef.h"
+#include "alphabet.h"
 #include "myersapm.h"
 #include "format64.h"
 #include "idx-limdfs.h"

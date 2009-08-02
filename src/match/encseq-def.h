@@ -25,7 +25,7 @@
 #include "core/filelengthvalues.h"
 #include "seqpos-def.h"
 #include "intcode-def.h"
-#include "alphadef.h"
+#include "alphabet.h"
 #include "intbits.h"
 #include "readmode-def.h"
 #include "verbose-def.h"

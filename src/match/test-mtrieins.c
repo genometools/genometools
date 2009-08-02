@@ -20,7 +20,7 @@
 #include "sarr-def.h"
 #include "merger-trie.h"
 #include "encseq-def.h"
-#include "alphadef.h"
+#include "alphabet.h"
 #include "esa-map.h"
 
 static void maketrie(Mergertrierep *trierep,

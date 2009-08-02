@@ -20,7 +20,7 @@
 #include "core/seqiterator.h"
 #include "core/chardef.h"
 #include "revcompl.h"
-#include "alphadef.h"
+#include "alphabet.h"
 #include "format64.h"
 #include "encseq-def.h"
 #include "tyr-map.h"

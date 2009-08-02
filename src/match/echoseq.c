@@ -20,7 +20,7 @@
 #include "core/error.h"
 #include "core/seqiterator.h"
 #include "spacedef.h"
-#include "alphadef.h"
+#include "alphabet.h"
 #include "encseq-def.h"
 
 void symbolstring2fasta(FILE *fpout,

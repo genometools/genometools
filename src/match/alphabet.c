@@ -32,7 +32,7 @@
 #include "core/symboldef.h"
 #include "core/mathsupport.h"
 #include "spacedef.h"
-#include "alphadef.h"
+#include "alphabet.h"
 
 #include "guessprot.pr"
 

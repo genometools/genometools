@@ -21,7 +21,7 @@
 #include "core/unused_api.h"
 #include "core/fa.h"
 #include "esa-seqread.h"
-#include "alphadef.h"
+#include "alphabet.h"
 #include "verbose-def.h"
 #include "spacedef.h"
 #include "format64.h"
