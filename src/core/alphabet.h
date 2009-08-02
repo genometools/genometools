@@ -42,10 +42,8 @@ typedef struct GtAlphabet GtAlphabet;
 /*@null@*/
 GtAlphabet* gt_alphabet_new(bool isdna, bool isprotein, const GtStr *smapfile,
                             const GtStrArray *filenametab, GtError *err);
-
-GtAlphabet* gt_copyAlphabet(const GtAlphabet *alpha2);
-
-void gt_alphabet_delete(GtAlphabet *alpha);
+GtAlphabet* gt_alphabet_clone(const GtAlphabet *alphabet);
+void        gt_alphabet_delete(GtAlphabet *alphabet);
 
 const GtUchar *getsymbolmapAlphabet(const GtAlphabet *alpha);
 

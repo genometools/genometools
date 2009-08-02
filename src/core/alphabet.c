@@ -319,7 +319,7 @@ static void assignDNAsymbolmap(GtUchar *symbolmap)
   \texttt{alpha1}.
 */
 
-GtAlphabet *gt_copyAlphabet(const GtAlphabet *alpha2)
+GtAlphabet *gt_alphabet_clone(const GtAlphabet *alpha2)
 {
   unsigned int i;
   GtAlphabet *alpha1;
