@@ -64,6 +64,8 @@ void           gt_alphabet_delete(GtAlphabet *alphabet);
    character is the result of subsequent <gt_alphabet_decode()> calls. */
 void           gt_alphabet_add_mapping(GtAlphabet *alphabet,
                                        const char *characters);
+/* Add <wildcard> to the <alphabet>. */
+void           gt_alphabet_add_wildcard(GtAlphabet *alphabet, char wildcard);
 const GtUchar* gt_alphabet_symbolmap(const GtAlphabet *alphabet);
 unsigned int   gt_alphabet_num_of_chars(const GtAlphabet *alphabet);
 unsigned int   gt_alphabet_size(const GtAlphabet *alphabet);

@@ -378,6 +378,18 @@ void gt_alphabet_add_mapping(GtAlphabet *a, const char *characters)
   a->bitspersymbol = gt_determinebitspervalue(a->mapsize);
 }
 
+void gt_alphabet_add_wildcard(GtAlphabet *a, char wildcard)
+{
+  gt_assert(a);
+  a->mapdomain = gt_realloc(a->mapdomain, a->domainsize + 1);
+  a->mapdomain[a->domainsize] = wildcard;
+  a->domainsize++;
+  a->symbolmap[(int) wildcard] = WILDCARD;
+  if (a->wildcardshow == UNDEFCHAR)
+    a->wildcardshow = wildcard;
+  a->mappedwildcards++;
+}
+
 /*
   The following function initializes the alphabet \texttt{alpha}
   in the same way as \texttt{readsymbolmap}, if it would be
