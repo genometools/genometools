@@ -17,7 +17,7 @@
 
 #include "gtt.h"
 #include "core/array.h"
-#include "core/array2dim.h"
+#include "core/array2dim_api.h"
 #include "core/basename_api.h"
 #include "core/bitpackarray.h"
 #include "core/bitpackstring.h"

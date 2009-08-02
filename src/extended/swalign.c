@@ -16,7 +16,7 @@
 */
 
 #include <limits.h>
-#include "core/array2dim.h"
+#include "core/array2dim_api.h"
 #include "core/assert_api.h"
 #include "core/minmax.h"
 #include "core/undef.h"

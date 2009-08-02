@@ -23,7 +23,7 @@
 #include <string.h>
 #include <time.h>
 #include "core/array.h"
-#include "core/array2dim.h"
+#include "core/array2dim_api.h"
 #include "core/bioseq.h"
 #include "core/error.h"
 #include "core/hashmap-generic.h"

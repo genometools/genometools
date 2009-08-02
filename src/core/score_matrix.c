@@ -17,7 +17,7 @@
 
 #include "core/assert_api.h"
 #include "core/array.h"
-#include "core/array2dim.h"
+#include "core/array2dim_api.h"
 #include "core/parseutils.h"
 #include "core/score_matrix.h"
 #include "core/str.h"
