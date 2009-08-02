@@ -47,6 +47,8 @@ typedef struct GtAlphabet GtAlphabet;
 
 GtAlphabet *gt_copyAlphabet(const GtAlphabet *alpha2);
 
+void freeGtAlphabet(GtAlphabet **alpha);
+
 const GtUchar *getsymbolmapAlphabet(const GtAlphabet *alpha);
 
 unsigned int getnumofcharsAlphabet(const GtAlphabet *alpha);
@@ -56,8 +58,6 @@ const GtUchar *getcharactersAlphabet(const GtAlphabet *alpha);
 GtUchar getwildcardshowAlphabet(const GtAlphabet *alpha);
 
 unsigned int getbitspersymbolAlphabet(const GtAlphabet *alpha);
-
-void freeGtAlphabet(GtAlphabet **alpha);
 
 void outputalphabet(FILE *fpout,const GtAlphabet *alpha);
 

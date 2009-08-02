@@ -346,6 +346,13 @@ GtAlphabet *gt_copyAlphabet(const GtAlphabet *alpha2)
   return alpha1;
 }
 
+void freeGtAlphabet(GtAlphabet **alpha)
+{
+  FREESPACE((*alpha)->mapdomain);
+  FREESPACE((*alpha)->characters);
+  FREESPACE(*alpha);
+}
+
 /*EE
   The following function initializes the alphabet \texttt{alpha}
   in the same way as \texttt{readsymbolmap}, if it would be
@@ -459,13 +466,6 @@ static int assignProteinorDNAalphabet(GtAlphabet *alpha,
     assignDNAalphabet(alpha);
   }
   return 0;
-}
-
-void freeGtAlphabet(GtAlphabet **alpha)
-{
-  FREESPACE((*alpha)->mapdomain);
-  FREESPACE((*alpha)->characters);
-  FREESPACE(*alpha);
 }
 
 /*@null@*/ GtAlphabet *assigninputalphabet(bool isdna,
