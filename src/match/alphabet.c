@@ -26,12 +26,12 @@
 #include "core/cstr.h"
 #include "core/error.h"
 #include "core/fileutils.h"
+#include "core/ma.h"
 #include "core/gtdatapath.h"
 #include "core/str.h"
 #include "core/str_array.h"
 #include "core/symboldef.h"
 #include "core/mathsupport.h"
-#include "spacedef.h"
 #include "alphabet.h"
 
 #include "guessprot.pr"
@@ -155,7 +155,8 @@ static int readsymbolmapfromlines(GtAlphabet *alpha,
     alpha->symbolmap[cnum] = (GtUchar) UNDEFCHAR;
   }
   alpha->mapdomain = NULL;
-  ALLOCASSIGNSPACE(alpha->characters,NULL,GtUchar,gt_str_array_size(lines)-1);
+  alpha->characters = gt_malloc(sizeof (GtUchar) *
+                                (gt_str_array_size(lines)-1));
   for (linecount = 0; linecount < gt_str_array_size(lines); linecount++)
   {
     currentline = gt_str_array_get(lines,linecount);
@@ -196,8 +197,8 @@ static int readsymbolmapfromlines(GtAlphabet *alpha,
             if (alpha->domainsize >= allocateddomainsize)
             {
               allocateddomainsize += 8;
-              ALLOCASSIGNSPACE(alpha->mapdomain,alpha->mapdomain,GtUchar,
-                               allocateddomainsize);
+              alpha->mapdomain = gt_realloc(alpha->mapdomain,
+                                        sizeof (GtUchar) * allocateddomainsize);
             }
             gt_assert(alpha->mapdomain != NULL);
             alpha->mapdomain[alpha->domainsize++] = (GtUchar) cc;
@@ -326,7 +327,7 @@ GtAlphabet *gt_copyAlphabet(const GtAlphabet *alpha2)
   unsigned int i;
   GtAlphabet *alpha1;
 
-  ALLOCASSIGNSPACE(alpha1,NULL,GtAlphabet,(size_t) 1);
+  alpha1 = gt_malloc(sizeof *alpha1);
   alpha1->domainsize = alpha2->domainsize;
   alpha1->mapsize = alpha2->mapsize;
   alpha1->mappedwildcards = alpha2->mappedwildcards;
@@ -349,9 +350,9 @@ GtAlphabet *gt_copyAlphabet(const GtAlphabet *alpha2)
 void gt_alphabet_delete(GtAlphabet *alpha)
 {
   if (!alpha) return;
-  FREESPACE(alpha->mapdomain);
-  FREESPACE(alpha->characters);
-  FREESPACE(alpha);
+  gt_free(alpha->mapdomain);
+  gt_free(alpha->characters);
+  gt_free(alpha);
 }
 
 /*EE
@@ -373,11 +374,11 @@ static void assignDNAalphabet(GtAlphabet *alpha)
   alpha->mappedwildcards = (unsigned int) strlen(DNAWILDCARDS);
   alpha->domainsize = (unsigned int) strlen(DNAALPHABETDOMAIN);
   alpha->bitspersymbol = 3U; /* as we have to represent 4 + 2 characters */
-  ALLOCASSIGNSPACE(alpha->mapdomain,NULL,GtUchar,alpha->domainsize);
+  alpha->mapdomain = gt_malloc(sizeof (GtUchar) * alpha->domainsize);
   memcpy(alpha->mapdomain,(GtUchar *) DNAALPHABETDOMAIN,
          (size_t) alpha->domainsize);
   alpha->mapsize = MAPSIZEDNA;
-  ALLOCASSIGNSPACE(alpha->characters,NULL,char,MAPSIZEDNA-1);
+  alpha->characters = gt_malloc(sizeof (GtUchar) * (MAPSIZEDNA-1));
   memcpy(alpha->characters,"acgt",(size_t) (MAPSIZEDNA-1));
   assignDNAsymbolmap(alpha->symbolmap);
 }
@@ -438,11 +439,11 @@ static void assignProteinalphabet(GtAlphabet *alpha)
   alpha->domainsize = (unsigned int) strlen(PROTEINALPHABETDOMAIN);
   alpha->mappedwildcards = (unsigned int) strlen(PROTEINWILDCARDS);
   alpha->bitspersymbol = 5U; /* as we have to represent 20 + 2 characters */
-  ALLOCASSIGNSPACE(alpha->mapdomain,NULL,GtUchar,alpha->domainsize);
+  alpha->mapdomain = gt_malloc(sizeof (GtUchar) * alpha->domainsize);
   memcpy(alpha->mapdomain,
          (GtUchar *) PROTEINALPHABETDOMAIN,(size_t) alpha->domainsize);
   alpha->mapsize = MAPSIZEPROTEIN;
-  ALLOCASSIGNSPACE(alpha->characters,NULL,char,MAPSIZEPROTEIN-1);
+  alpha->characters = gt_malloc(sizeof (GtUchar) * (MAPSIZEPROTEIN-1));
   memcpy(alpha->characters,PROTEINUPPERAMINOACIDS,(size_t) (MAPSIZEPROTEIN-1));
   assignproteinsymbolmap(alpha->symbolmap);
 }
@@ -478,7 +479,7 @@ static int assignProteinorDNAalphabet(GtAlphabet *alpha,
   GtAlphabet *alpha;
   bool haserr = false;
 
-  ALLOCASSIGNSPACE(alpha,NULL,GtAlphabet,(size_t) 1);
+  alpha = gt_malloc(sizeof *alpha);
   alpha->characters = NULL;
   alpha->mapdomain = NULL;
   if (isdna)
@@ -765,8 +766,8 @@ bool isproteinalphabet(const GtAlphabet *alpha)
   {
     isprot = false;
   }
-  FREESPACE(proteinalphabet.mapdomain);
-  FREESPACE(proteinalphabet.characters);
+  gt_free(proteinalphabet.mapdomain);
+  gt_free(proteinalphabet.characters);
   return isprot;
 }
 
