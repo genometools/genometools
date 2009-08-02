@@ -47,7 +47,7 @@ typedef struct GtAlphabet GtAlphabet;
 
 GtAlphabet *gt_copyAlphabet(const GtAlphabet *alpha2);
 
-void freeGtAlphabet(GtAlphabet *alpha);
+void gt_alphabet_delete(GtAlphabet *alpha);
 
 const GtUchar *getsymbolmapAlphabet(const GtAlphabet *alpha);
 

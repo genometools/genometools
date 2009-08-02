@@ -60,7 +60,7 @@ static void tyrsearchinfo_init(Tyrsearchinfo *tyrsearchinfo,
 
 void tyrsearchinfo_delete(Tyrsearchinfo *tyrsearchinfo)
 {
-  freeGtAlphabet(tyrsearchinfo->dnaalpha);
+  gt_alphabet_delete(tyrsearchinfo->dnaalpha);
   FREESPACE(tyrsearchinfo->bytecode);
   FREESPACE(tyrsearchinfo->rcbuf);
 }

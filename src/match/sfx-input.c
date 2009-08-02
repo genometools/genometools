@@ -190,7 +190,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   }
   if (haserr && alpha != NULL && !alphaisbound)
   {
-    freeGtAlphabet((GtAlphabet*) alpha);
+    gt_alphabet_delete((GtAlphabet*) alpha);
   }
   return haserr ? -1 : 0;
 }
