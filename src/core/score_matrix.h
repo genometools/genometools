@@ -25,8 +25,11 @@ typedef struct GtScoreMatrix GtScoreMatrix;
 
 /* A score matrix is always defined over a given <alphabet>. */
 GtScoreMatrix* gt_score_matrix_new(GtAlphabet *alphabet);
-/* reads in a protein scorematrix from the given <path> and returns it */
-GtScoreMatrix* gt_score_matrix_new_read_protein(const char *path, GtError*);
+/* Read in a protein score matrix from the given <path> and return it. */
+GtScoreMatrix* gt_score_matrix_new_read_protein(const char *path, GtError *err);
+/* Read in score matrix from <path> over given <alphabet> and return it. */
+GtScoreMatrix* gt_score_matrix_new_read(const char *path, GtAlphabet *alphabet,
+                                        GtError *err);
 unsigned int   gt_score_matrix_get_dimension(const GtScoreMatrix*);
 int            gt_score_matrix_get_score(const GtScoreMatrix*,
                                          unsigned int, unsigned int);

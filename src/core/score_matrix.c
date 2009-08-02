@@ -225,6 +225,20 @@ GtScoreMatrix* gt_score_matrix_new_read_protein(const char *path, GtError *err)
   return sm;
 }
 
+GtScoreMatrix* gt_score_matrix_new_read(const char *path, GtAlphabet *alphabet,
+                                        GtError *err)
+{
+  GtScoreMatrix *sm;
+  gt_error_check(err);
+  gt_assert(path && alphabet);
+  sm = gt_score_matrix_new(alphabet);
+  if (parse_score_matrix(sm, path, err)) {
+    gt_score_matrix_delete(sm);
+    return NULL;
+  }
+  return sm;
+}
+
 unsigned int gt_score_matrix_get_dimension(const GtScoreMatrix *sm)
 {
   gt_assert(sm);
