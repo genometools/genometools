@@ -43,4 +43,8 @@
 */
 int gt_lua_open_alphabet(lua_State*);
 
+#define ALPHABET_METATABLE  "GenomeTools.alphabet"
+#define check_alphabet(L, POS) \
+          (GtAlphabet**) luaL_checkudata(L, POS, ALPHABET_METATABLE)
+
 #endif

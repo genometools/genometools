@@ -21,10 +21,6 @@
 #include "extended/luahelper.h"
 #include "gtlua/alphabet_lua.h"
 
-#define ALPHABET_METATABLE  "GenomeTools.alphabet"
-#define check_alphabet(L, POS) \
-        (GtAlphabet**) luaL_checkudata(L, POS, ALPHABET_METATABLE)
-
 static int alphabet_lua_new_protein(lua_State *L)
 {
   GtAlphabet **alpha;

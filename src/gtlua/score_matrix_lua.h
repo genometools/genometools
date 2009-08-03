@@ -26,11 +26,17 @@
    -- <path>.
    function score_matrix_new_read_protein(path)
 
+   -- Read in score matrix from <path> over given <alphabet> and return it.
+   function score_matrix_new_read(path, alphabet)
+
    -- Returns the dimension of the <score_matrix> as number.
    function score_matrix:get_dimension()
 
    -- Returns the score for <idx1>,<idx2> as number.
    function score_matrix:get_score(idx1, idx2)
+
+   -- Show <score_matrix> on stdout.
+   function score_matrix:show()
 */
 int gt_lua_open_score_matrix(lua_State*);
 
