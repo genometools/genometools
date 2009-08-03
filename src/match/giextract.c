@@ -353,7 +353,7 @@ int gt_extractkeysfromdesfile(const GtStr *indexname, GtError *err)
   unsigned long keylen;
   bool haserr = false;
 
-  fpin = opensfxfile(indexname,"des","rb",err);
+  fpin = opensfxfile(indexname,".des","rb",err);
   if (fpin == NULL)
   {
     return -1;

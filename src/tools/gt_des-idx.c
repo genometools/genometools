@@ -56,9 +56,7 @@ static GtOptionParser* gt_des_idx_option_parser_new(void *tool_arguments)
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
-
   gt_option_parser_set_min_max_args(op, 1U, 1U);
-
   return op;
 }
 
@@ -70,7 +68,8 @@ static int gt_des_idx_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
 
   gt_error_check(err);
   gt_assert(arguments);
-
+  gt_assert(argc >= 2 && parsed_args == argc-1);
+  gt_str_set(arguments->indexname,argv[argc-1]);
   return gt_extractkeysfromdesfile(arguments->indexname, err);
 }
 
