@@ -414,11 +414,24 @@ int gt_extractkeysfromdesfile(const GtStr *indexname, GtError *err)
   return haserr ? -1 : 0;
 }
 
-int gt_remapdeskeyfile(const GtStr *indexname, GtError *err)
+bool gt_deskeysfileexists(const char *filenameprefix)
+{
+  GtStr *indexname;
+  bool ret;
+
+  indexname = gt_str_new_cstr(filenameprefix);
+  ret = indexfilealreadyexists(indexname,KEYSTABSUFFIX);
+  gt_str_delete(indexname);
+  return ret;
+}
+
+int gt_remapdeskeyfile(const char *filenameprefix, GtError *err)
 {
   Encodedsequence *encseq = NULL;
   bool haserr = false;
+  GtStr *indexname;
 
+  indexname = gt_str_new_cstr(filenameprefix);
   encseq = mapencodedsequence(false,
                               indexname,
                               true,
@@ -452,6 +465,7 @@ int gt_remapdeskeyfile(const GtStr *indexname, GtError *err)
   {
     encodedsequence_free(&encseq);
   }
+  gt_str_delete(indexname);
   return haserr ? -1 : 0;
 }
 

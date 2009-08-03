@@ -199,16 +199,30 @@ static int process_fastakeyfile(GtStr *fastakeyfile, int argc,
     had_err = -1;
   }
 
-  if (!had_err) {
-    GtStrArray *referencefiletab;
-    int i;
-    referencefiletab = gt_str_array_new();
-    for (i = 0; i < argc; i++)
-      gt_str_array_add_cstr(referencefiletab, argv[i]);
-    if (gt_extractkeysfromfastafile(true, outfp, width, fastakeyfile,
-                                    referencefiletab, err) != 1)
-      had_err = -1;
-    gt_str_array_delete(referencefiletab);
+  if (!had_err)
+  {
+    if (argc == 1 && gt_deskeysfileexists(argv[0]))
+    {
+      if (gt_remapdeskeyfile(argv[0],err) != 0)
+      {
+        had_err = -1;
+      }
+    } else
+    {
+      GtStrArray *referencefiletab;
+      int i;
+      referencefiletab = gt_str_array_new();
+      for (i = 0; i < argc; i++)
+      {
+        gt_str_array_add_cstr(referencefiletab, argv[i]);
+      }
+      if (gt_extractkeysfromfastafile(true, outfp, width, fastakeyfile,
+                                      referencefiletab, err) != 1)
+      {
+        had_err = -1;
+      }
+      gt_str_array_delete(referencefiletab);
+    }
   }
 
   return had_err;
