@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -51,13 +51,21 @@ GtStr* gt_tokenizer_get_token(GtTokenizer *t)
   /* if we have no current token, get it if possible */
   if (!t->token) {
     if (t->skip_comment_lines && gt_io_line_start(t->io)) {
-      if ((gt_io_get_char(t->io, &c) != -1)) {
-        if (c == '#') {
-          while ((gt_io_get_char(t->io, &c) != -1) && c != '\n'); /* skipping */
-          c = EOF;
+      for (;;) {
+        gt_assert(gt_io_line_start(t->io));
+        if ((gt_io_get_char(t->io, &c) != -1)) {
+          if (c == '#') {
+            /* skip line */
+            while ((gt_io_get_char(t->io, &c) != -1) && c != '\n');
+            c = EOF;
+          }
+          else {
+            gt_io_unget_char(t->io, c);
+            break;
+          }
         }
         else
-          gt_io_unget_char(t->io, c);
+          break;
       }
     }
     while ((gt_io_get_char(t->io, &c) != -1) && c == ' '); /* skip blanks */
