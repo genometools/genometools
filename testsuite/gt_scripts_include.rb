@@ -82,10 +82,18 @@ Test do
 end
 
 Name "scorematrix2c"
-Keywords "gt_scripts"
+Keywords "gt_scripts scorematrix"
 Test do
   run_test "#{$bin}gt #{$testdata}/gtscripts/scorematrix2c.lua #{$testdata}/BLOSUM62"
   run "diff #{$last_stdout} #{$testdata}blosum62.c"
+end
+
+Name "scorematrix2stdout"
+Keywords "gt_scripts scorematrix"
+Test do
+  run_test "#{$bin}gt #{$testdata}/gtscripts/scorematrix2stdout.lua " +
+           "#{$testdata}/BLOSUM62.gth"
+  run "diff #{$last_stdout} #{$testdata}BLOSUM62.out"
 end
 
 Name "require 'gtlua'"
