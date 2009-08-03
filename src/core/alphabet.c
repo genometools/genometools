@@ -367,13 +367,13 @@ void gt_alphabet_add_mapping(GtAlphabet *a, const char *characters)
   num_of_characters = strlen(characters);
   gt_assert(num_of_characters);
   a->mapdomain = gt_realloc(a->mapdomain, a->domainsize + num_of_characters);
-  memcpy(a->mapdomain + num_of_characters, characters, num_of_characters);
+  memcpy(a->mapdomain + a->domainsize, characters, num_of_characters);
   a->domainsize += num_of_characters;
   a->symbolmap[(int) characters[0]] = a->mapsize;
   a->characters = gt_realloc(a->characters, a->domainsize);
   a->characters[a->mapsize] = characters[0];
   for (i = 0; i < num_of_characters; i++)
-    a->characters[(int) characters[i]] = a->mapsize;
+    a->symbolmap[(int) characters[i]] = a->mapsize;
   a->mapsize++;
   a->bitspersymbol = gt_determinebitspervalue(a->mapsize);
 }
