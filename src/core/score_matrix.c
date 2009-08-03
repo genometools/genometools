@@ -67,7 +67,7 @@ static int parse_alphabet_line(GtArray *index_to_alpha_char_mapping,
       gt_error_set(err, "the character '%c' appears more then once on line %lu "
                    "in file  '%s'", amino_acid,
                    gt_tokenizer_get_line_number(tz),
-                gt_tokenizer_get_filename(tz));
+                   gt_tokenizer_get_filename(tz));
       had_err = -1;
       break;
     }
@@ -99,8 +99,8 @@ static int parse_alphabet_line(GtArray *index_to_alpha_char_mapping,
   if (!had_err) {
     if (!gt_array_size(index_to_alpha_char_mapping)) {
       gt_error_set(err, "could not parse a single alphabet character in file "
-                "'%s' (file empty or directory?)",
-                gt_tokenizer_get_filename(tz));
+                   "'%s' (file empty or directory?)",
+                   gt_tokenizer_get_filename(tz));
     had_err = -1;
     }
   }
@@ -122,16 +122,16 @@ static int parse_score_line(GtScoreMatrix *sm, GtTokenizer *tz,
   gt_assert(token);
   if (gt_str_length(token) != 1) {
     gt_error_set(err, "illegal character token '%s' on line %lu in file '%s'",
-              gt_str_get(token), gt_tokenizer_get_line_number(tz),
-              gt_tokenizer_get_filename(tz));
+                 gt_str_get(token), gt_tokenizer_get_line_number(tz),
+                 gt_tokenizer_get_filename(tz));
     had_err = -1;
   }
   amino_acid = gt_str_get(token)[0];
   /* check for character duplications */
   if (parsed_characters[(int) amino_acid]) {
     gt_error_set(err, "multiple character '%c' entry on line %lu in file '%s'",
-              amino_acid, gt_tokenizer_get_line_number(tz),
-              gt_tokenizer_get_filename(tz));
+                 amino_acid, gt_tokenizer_get_line_number(tz),
+                 gt_tokenizer_get_filename(tz));
     had_err = -1;
   }
   parsed_characters[(int) amino_acid] = GT_UNDEF_CHAR;
