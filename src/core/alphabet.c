@@ -385,8 +385,10 @@ void gt_alphabet_add_wildcard(GtAlphabet *a, char wildcard)
   a->mapdomain[a->domainsize] = wildcard;
   a->domainsize++;
   a->symbolmap[(int) wildcard] = WILDCARD;
-  if (a->wildcardshow == UNDEFCHAR)
+  if (a->wildcardshow == UNDEFCHAR) {
     a->wildcardshow = wildcard;
+    a->mapsize++;
+  }
   a->mappedwildcards++;
 }
 
