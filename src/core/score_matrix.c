@@ -141,6 +141,16 @@ static int parse_score_line(GtScoreMatrix *sm, GtTokenizer *tz,
     gt_tokenizer_next_token(tz);
     while ((token = gt_tokenizer_get_token(tz))) {
       unsigned int idx1, idx2;
+      /* the tokenizer can return tokens which are empty except for a newline
+         -> skip these */
+      if (!strcmp(gt_str_get(token), "\n")) {
+        gt_str_delete(token);
+        gt_tokenizer_next_token(tz);
+        if (gt_tokenizer_line_start(tz))
+          break;
+        continue;
+      }
+      /* token is not empty -> parse score */
       had_err = gt_parse_int_line(&score, gt_str_get(token),
                                   gt_tokenizer_get_line_number(tz),
                                   gt_tokenizer_get_filename(tz), err);
@@ -157,7 +167,7 @@ static int parse_score_line(GtScoreMatrix *sm, GtTokenizer *tz,
       gt_str_delete(token);
       gt_tokenizer_next_token(tz);
       if (gt_tokenizer_line_start(tz))
-          break;
+        break;
     }
   }
   return had_err;
