@@ -18,7 +18,7 @@
 
 function usage()
   io.stderr:write(string.format("Usage: %s score_matrix_file\n", arg[0]))
-  io.stderr:write("Parse protein score_matrix_file and show it as C program.\n")
+  io.stderr:write("Parse score_matrix_file and show it on stdout.\n")
   os.exit(1)
 end
 
