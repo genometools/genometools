@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -24,12 +24,12 @@
 
 typedef struct GtTokenizer GtTokenizer;
 
-GtTokenizer*    gt_tokenizer_new(GtIO*); /* takes ownership */
+GtTokenizer*  gt_tokenizer_new(GtIO*); /* takes ownership */
 /* activates the skipping of comment lines in the tokenizer (lines starting
    with '#') */
 void          gt_tokenizer_skip_comment_lines(GtTokenizer*);
 /* returns the current token */
-GtStr*       gt_tokenizer_get_token(GtTokenizer*);
+GtStr*        gt_tokenizer_get_token(GtTokenizer*);
 bool          gt_tokenizer_has_token(GtTokenizer*);
 bool          gt_tokenizer_line_start(const GtTokenizer*);
 void          gt_tokenizer_next_token(GtTokenizer*); /* go to the next token */
