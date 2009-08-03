@@ -32,6 +32,8 @@
 #include "giextract.h"
 #include "format64.h"
 #include "opensfxfile.h"
+#include "esa-fileend.h"
+#include "encseq-def.h"
 
 #define COMPLETE(VALUE)\
         ((VALUE).frompos == 1UL && (VALUE).topos == 0)
@@ -336,7 +338,7 @@ static const char *desc2key(unsigned long *keylen,const char *desc,
   }
   if (firstpipe == 0 || secondpipe == 0)
   {
-    gt_error_set(err,"Cannot find key in description \"%s\"\n",desc);
+    gt_error_set(err,"Cannot find key in description \"%s\"",desc);
     return NULL;
   }
   gt_assert(firstpipe < secondpipe);
@@ -344,22 +346,31 @@ static const char *desc2key(unsigned long *keylen,const char *desc,
   return desc + firstpipe + 1;
 }
 
+#define KEYSTABSUFFIX ".kys"
+#define KEYSIZE       6
+
 int gt_extractkeysfromdesfile(const GtStr *indexname, GtError *err)
 {
-  FILE *fpin;
+  FILE *fpin, *fpout;
   GtStr *line;
   uint64_t linenum;
   const char *keyptr;
-  unsigned long keylen;
+  unsigned long keylen, maxkeylen = 0, minkeylen = 0;
   bool haserr = false;
 
-  fpin = opensfxfile(indexname,".des","rb",err);
+  line = gt_str_new();
+  fpin = opensfxfile(indexname,DESTABSUFFIX,"rb",err);
   if (fpin == NULL)
   {
     return -1;
   }
-  line = gt_str_new();
-  for (linenum = 0; gt_str_read_next_line(line, fpin) != EOF; linenum++)
+  fpout = opensfxfile(indexname,KEYSTABSUFFIX,"wb",err);
+  if (fpout == NULL)
+  {
+    haserr = true;
+  }
+  for (linenum = 0; !haserr && gt_str_read_next_line(line, fpin) != EOF;
+       linenum++)
   {
     keyptr = desc2key(&keylen,gt_str_get(line),err);
     if (keyptr == NULL)
@@ -367,9 +378,80 @@ int gt_extractkeysfromdesfile(const GtStr *indexname, GtError *err)
       haserr = true;
       break;
     }
+    if (keylen == 0)
+    {
+      gt_error_set(err,"Key of length 0 in \"%s\" not expected",
+                   gt_str_get(line));
+      haserr = true;
+      break;
+    }
+    if (keylen > maxkeylen)
+    {
+      maxkeylen = keylen;
+    }
+    if (minkeylen == 0 || keylen < minkeylen)
+    {
+      minkeylen = keylen;
+    }
+    fprintf(fpout,"%*.*s",(int) keylen,(int) keylen,keyptr);
+    gt_str_reset(line);
+  }
+  printf("number of keys = " Formatuint64_t ", ",PRINTuint64_tcast(linenum));
+  printf("minkeylen = %lu, maxkeylen=%lu\n",minkeylen,maxkeylen);
+  if (minkeylen != maxkeylen)
+  {
+    gt_error_set(err,"keys of variable length not implemented");
+    haserr = true;
+  }
+  if (minkeylen != (unsigned long) KEYSIZE)
+  {
+    gt_error_set(err,"keys need to be of length %d",KEYSIZE);
+    haserr = true;
   }
   gt_str_delete(line);
   gt_fa_fclose(fpin);
+  gt_fa_fclose(fpout);
+  return haserr ? -1 : 0;
+}
+
+int gt_remapdeskeyfile(const GtStr *indexname, GtError *err)
+{
+  Encodedsequence *encseq = NULL;
+  bool haserr = false;
+
+  encseq = mapencodedsequence(false,
+                              indexname,
+                              true,
+                              true,
+                              true,
+                              NULL,
+                              err);
+  if (encseq == NULL)
+  {
+    haserr = true;
+  }
+  if (!haserr)
+  {
+    unsigned long keytablength, numofdbsequences;
+    GtUchar *keytab;
+
+    numofdbsequences = getencseqnumofdbsequences(encseq);
+    keytablength = numofdbsequences * KEYSIZE;
+    keytab = genericmaptable(indexname,
+                             KEYSTABSUFFIX,
+                             keytablength,
+                             sizeof (GtUchar),
+                             err);
+    if (keytab == NULL)
+    {
+      haserr = true;
+    }
+    gt_fa_xmunmap(keytab);
+  }
+  if (encseq != NULL)
+  {
+    encodedsequence_free(&encseq);
+  }
   return haserr ? -1 : 0;
 }
 
