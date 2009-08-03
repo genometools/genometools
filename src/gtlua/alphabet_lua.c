@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <string.h>
 #include "lauxlib.h"
 #include "core/alphabet.h"
 #include "extended/luahelper.h"
@@ -35,6 +36,43 @@ static int alphabet_lua_new_protein(lua_State *L)
   luaL_getmetatable(L, ALPHABET_METATABLE);
   lua_setmetatable(L, -2);
   return 1;
+}
+
+static int alphabet_lua_new_empty(lua_State *L)
+{
+  GtAlphabet **alpha;
+  gt_assert(L);
+  alpha = lua_newuserdata(L, sizeof *alpha);
+  gt_assert(alpha);
+  *alpha = gt_alphabet_new_empty();
+  gt_assert(*alpha);
+  luaL_getmetatable(L, ALPHABET_METATABLE);
+  lua_setmetatable(L, -2);
+  return 1;
+}
+
+static int alphabet_lua_add_mapping(lua_State *L)
+{
+  GtAlphabet **alpha;
+  const char *characters;
+  alpha = check_alphabet(L, 1);
+  characters = luaL_checkstring(L, 2);
+  luaL_argcheck(L, strlen(characters), 2,
+                "mapping must contain at least one character");
+  gt_alphabet_add_mapping(*alpha, characters);
+  return 0;
+}
+
+static int alphabet_lua_add_wildcard(lua_State *L)
+{
+  GtAlphabet **alpha;
+  const char *wildcard;
+  alpha = check_alphabet(L, 1);
+  wildcard = luaL_checkstring(L, 2);
+  luaL_argcheck(L, strlen(wildcard) == 1, 2,
+                "wildcard string must have length 0");
+  gt_alphabet_add_wildcard(*alpha, wildcard[0]);
+  return 0;
 }
 
 static int alphabet_lua_decode(lua_State *L)
@@ -71,10 +109,13 @@ static int alphabet_lua_delete(lua_State *L)
 
 static const struct luaL_Reg alphabet_lib_f [] = {
   { "alphabet_new_protein", alphabet_lua_new_protein },
+  { "alphabet_new_empty", alphabet_lua_new_empty },
   { NULL, NULL }
 };
 
 static const struct luaL_Reg alphabet_lib_m [] = {
+  { "add_mapping", alphabet_lua_add_mapping },
+  { "add_wildcard", alphabet_lua_add_wildcard },
   { "decode", alphabet_lua_decode },
   { "size", alphabet_lua_size },
   { NULL, NULL }

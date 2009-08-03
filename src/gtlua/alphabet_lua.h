@@ -22,13 +22,23 @@
 
 /* exports the Alphabet class to Lua:
 
-   -- Returns a new protein alphabet.
+   -- Return a new protein alphabet.
    function alphabet_new_protein()
 
-   -- Returns a string containing the decoded character of the <code> number.
+   -- Return an empty alphabet.
+   function alphabet_new_empty()
+
+   -- Add the mapping of all given <characters> to the given <alphabet>.
+   -- The first character is the result of subsequent <alphabet:decode()> calls.
+   function alphabet:add_mapping(characters)
+
+   -- Add <wildcard> to <alphabet>.
+   function alphabet:add_wildcard(characters)
+
+   -- Return a string containing the decoded character of the <code> number.
    function alphabet:decode(code)
 
-   -- Returns the size of <alpha> a number.
+   -- Return the size of <alphabet> as a number.
    function alphabet:size()
 */
 int gt_lua_open_alphabet(lua_State*);
