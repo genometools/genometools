@@ -29,7 +29,8 @@ int gt_extractkeysfromfastafile(bool verbose,
                                 GtStrArray *referencefiletab,
                                 GtError *err);
 
-int gt_remapdeskeyfile(const char *filenameprefix, GtError *err);
+int gt_extractkeysfromfastaindex(const char *filenameprefix, GtStr *keyfile,
+                                 GtError *err);
 
 int gt_extractkeysfromdesfile(const GtStr *indexname, GtError *err);
 

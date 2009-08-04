@@ -34,6 +34,7 @@
 #include "opensfxfile.h"
 #include "esa-fileend.h"
 #include "encseq-def.h"
+#include "core/unused_api.h"
 
 #define COMPLETE(VALUE)\
         ((VALUE).frompos == 1UL && (VALUE).topos == 0)
@@ -256,8 +257,9 @@ static Fastakeyquery *readkeyfile(bool verbose,
 }
 
 static unsigned long searchdesinfastakeyqueries(const char *extractkey,
-                                     const Fastakeyquery *fastakeyqueries,
-                                     unsigned long numofqueries)
+                                                const Fastakeyquery
+                                                  *fastakeyqueries,
+                                                unsigned long numofqueries)
 {
   const Fastakeyquery *leftptr, *rightptr, *midptr;
   int cmp;
@@ -393,20 +395,32 @@ int gt_extractkeysfromdesfile(const GtStr *indexname, GtError *err)
     {
       minkeylen = keylen;
     }
-    fprintf(fpout,"%*.*s",(int) keylen,(int) keylen,keyptr);
+    if (fwrite(keyptr,sizeof *keyptr,(size_t) keylen,fpout) != (size_t) keylen)
+    {
+      gt_error_set(err,"Cannot write keu of length %lu",keylen);
+      haserr = true;
+      break;
+    }
+    (void) fputc('\0',fpout);
     gt_str_reset(line);
   }
-  printf("number of keys = " Formatuint64_t ", ",PRINTuint64_tcast(linenum));
-  printf("minkeylen = %lu, maxkeylen=%lu\n",minkeylen,maxkeylen);
-  if (minkeylen != maxkeylen)
+  if (!haserr)
   {
-    gt_error_set(err,"keys of variable length not implemented");
-    haserr = true;
+    printf("number of keys = " Formatuint64_t ", ",PRINTuint64_tcast(linenum));
+    printf("minkeylen = %lu, maxkeylen=%lu\n",minkeylen,maxkeylen);
+    if (minkeylen != maxkeylen)
+    {
+      gt_error_set(err,"keys of variable length not implemented");
+      haserr = true;
+    }
   }
-  if (minkeylen != (unsigned long) KEYSIZE)
+  if (!haserr)
   {
-    gt_error_set(err,"keys need to be of length %d",KEYSIZE);
-    haserr = true;
+    if (minkeylen != (unsigned long) KEYSIZE)
+    {
+      gt_error_set(err,"keys need to be of length %d",KEYSIZE);
+      haserr = true;
+    }
   }
   gt_str_delete(line);
   gt_fa_fclose(fpin);
@@ -425,7 +439,85 @@ bool gt_deskeysfileexists(const char *filenameprefix)
   return ret;
 }
 
-int gt_remapdeskeyfile(const char *filenameprefix, GtError *err)
+static unsigned long searchfastaqueryindes(const char *extractkey,
+                                           const char *keytab,
+                                           unsigned long numofkeys)
+{
+  unsigned long left, right, mid;
+  int cmp;
+
+  left = 0;
+  right = numofkeys - 1;
+  while (left <= right)
+  {
+    mid = left + GT_DIV2((unsigned long) (right-left));
+    cmp = strcmp(extractkey,keytab + (KEYSIZE+1) * mid);
+    if (cmp < 0)
+    {
+      gt_assert(mid > 0);
+      right = mid-1;
+    } else
+    {
+      if (cmp > 0)
+      {
+        left = mid+1;
+      } else
+      {
+        return mid;
+      }
+    }
+  }
+  return numofkeys;
+}
+
+static int itersearchoverallkeys(GT_UNUSED const Encodedsequence *encseq,
+                                 const char *keytab,
+                                 unsigned long numofkeys,
+                                 GtStr *keyfile,
+                                 GtError *err)
+{
+  FILE *fp;
+  GtStr *currentline;
+  uint64_t linenum;
+  char *extractkey;
+  unsigned long keynum;
+  bool haserr = false;
+
+  fp = gt_fa_fopen(gt_str_get(keyfile),"r",err);
+  if (fp == NULL)
+  {
+    return -1;
+  }
+  currentline = gt_str_new();
+  extractkey = gt_malloc(sizeof(char) * (KEYSIZE+1));
+  for (linenum = 0; gt_str_read_next_line(currentline, fp) != EOF; linenum++)
+  {
+    char *lineptr = gt_str_get(currentline);
+    size_t idx;
+
+    for (idx = 0; lineptr[idx] != '\0' && !isspace(lineptr[idx]); idx++)
+      /* nothing */ ;
+    if (idx != (size_t) KEYSIZE)
+    {
+      gt_error_set(err,"key \"%*.*s\" is not of size %d",(int) idx,
+                   (int) idx,lineptr,KEYSIZE);
+      haserr = true;
+      break;
+    }
+    strncpy(extractkey,lineptr,idx);
+    extractkey[idx] = '\0';
+    keynum = searchfastaqueryindes(extractkey,keytab,numofkeys);
+    gt_assert(keynum < numofkeys);
+    gt_str_reset(currentline);
+  }
+  gt_str_delete(currentline);
+  gt_fa_fclose(fp);
+  gt_free(extractkey);
+  return haserr ? - 1 : 0;
+}
+
+int gt_extractkeysfromfastaindex(const char *filenameprefix, GtStr *keyfile,
+                                 GtError *err)
 {
   Encodedsequence *encseq = NULL;
   bool haserr = false;
@@ -446,10 +538,10 @@ int gt_remapdeskeyfile(const char *filenameprefix, GtError *err)
   if (!haserr)
   {
     unsigned long keytablength, numofdbsequences;
-    GtUchar *keytab;
+    char *keytab;
 
     numofdbsequences = getencseqnumofdbsequences(encseq);
-    keytablength = numofdbsequences * KEYSIZE;
+    keytablength = numofdbsequences * (KEYSIZE+1);
     keytab = genericmaptable(indexname,
                              KEYSTABSUFFIX,
                              keytablength,
@@ -458,6 +550,13 @@ int gt_remapdeskeyfile(const char *filenameprefix, GtError *err)
     if (keytab == NULL)
     {
       haserr = true;
+    } else
+    {
+      if (itersearchoverallkeys(encseq,keytab,numofdbsequences,keyfile,
+                                err) != 0)
+      {
+        haserr = true;
+      }
     }
     gt_fa_xmunmap(keytab);
   }
