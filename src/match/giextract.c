@@ -255,7 +255,7 @@ static Fastakeyquery *readkeyfile(bool verbose,
   return fastakeyqueries;
 }
 
-static unsigned long findkeyposition(const char *extractkey,
+static unsigned long searchdesinfastakeyqueries(const char *extractkey,
                                      const Fastakeyquery *fastakeyqueries,
                                      unsigned long numofqueries)
 {
@@ -532,7 +532,8 @@ int gt_extractkeysfromfastafile(bool verbose,
       gt_assert(keyspace != NULL);
       strncpy(keyspace,keyptr,(size_t) keylen);
       keyspace[keylen] = '\0';
-      keyposition = findkeyposition(keyspace,fastakeyqueries,numofqueries);
+      keyposition = searchdesinfastakeyqueries(keyspace,fastakeyqueries,
+                                               numofqueries);
       if (keyposition < numofqueries)
       {
         while (keyposition < numofqueries &&
