@@ -41,6 +41,11 @@ fi
 cd testsuite
 
 # the make call normally used for development
+env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ./testsuite.rb \
+       ${MC} -keywords 'gt_extractseq' \
+       -gttestdata ${GTTESTDATA}
+
+exit 0
 env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_suffixerator'
 env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ./testsuite.rb \
        ${MC} -keywords 'gt_suffixerator and gttestdata' \

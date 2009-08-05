@@ -112,7 +112,7 @@ Test do
   run "diff #{$last_stdout} #{$testdata}marker.out"
 end
 
-Name "gt extractseq -keys"
+Name "gt extractseq -keys from fastafile U89959"
 Keywords "gt_extractseq"
 Test do
   run_test "#{$bin}gt extractseq -keys #{$testdata}U89959_ginums.txt " +
@@ -121,7 +121,7 @@ Test do
   run "diff #{$last_stdout} #{$testdata}U89959_ginums.out"
 end
 
-Name "gt extractseq -keys at1MB"
+Name "gt extractseq -keys from fastafile at1MB"
 Keywords "gt_extractseq"
 Test do
   run "sed  -e '/^[^\\>]/d' -e 's/^>gi\|\\([^\|]*\\).*/\\1/' #{$testdata}/at1MB"
@@ -131,7 +131,7 @@ Test do
   run "cmp #{$last_stdout} #{$testdata}at1MB"
 end
 
-Name "gt extractseq -keys TrEMBL"
+Name "gt extractseq -keys from fastafile TrEMBL"
 Keywords "gt_extractseq"
 Test do
   run_test "#{$bin}gt extractseq -keys #{$testdata}trembl-keys.txt -width 60 " +
@@ -140,14 +140,14 @@ Test do
   run "cmp #{$last_stdout} #{$testdata}trembl.faa"
 end
 
-Name "gt extractseq -keys (corrupt)"
+Name "gt extractseq -keys from fastafile (corrupt)"
 Keywords "gt_extractseq"
 Test do
   run_test("#{$bin}gt extractseq -keys #{$testdata}U89959_ginums.corrupt " +
            "#{$testdata}U89959_ests.fas", :retval => 1)
 end
 
-Name "gt extractseq -keys (fail)"
+Name "gt extractseq -keys from fastafile (fail)"
 Keywords "gt_extractseq"
 Test do
   run_test("#{$bin}gt extractseq -keys #{$testdata}U89959_ginums.txt",
@@ -155,12 +155,26 @@ Test do
   grep $last_stderr, /requires at least one file argument/
 end
 
+
 if $gttestdata then
-  Name "gt extractseq keys"
+  Name "gt extractseq -keys from large fastafile"
   Keywords "gt_extractseq"
   Test do
     run_test "#{$bin}gt extractseq -o gi-extract.fna.gz -gzip " +
              "-keys #{$gttestdata}gi-queries/gi-queries.txt " +
              "#{$testdata}at1MB"
+  end
+  Name "gt extractseq keys from fastaindex"
+  Keywords "gt_extractseq"
+  Test do
+    run_test("#{$bin}gt suffixerator -protein -ssp -tis -des " +
+             "-db #{$gttestdata}/trembl/trembl-section.fsa.gz")
+    run_test("#{$bin}gt des-idx trembl-section.fsa.gz")
+    run("gunzip -c #{$gttestdata}/trembl/trembl-section.fsa.gz")
+    run("mv #{$last_stdout} trembl-section.fsa")
+    run("#{$scriptsdir}/tr2deskeys.sh #{$gttestdata}/trembl/trembl-section.fsa.gz")
+    run_test("#{$bin}gt extractseq -keys #{$last_stdout} -width 60 " +
+             "trembl-section.fsa.gz")
+    run("cmp -s #{$last_stdout} trembl-section.fsa")
   end
 end
