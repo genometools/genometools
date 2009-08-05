@@ -25,15 +25,16 @@
 int gt_extractkeysfromfastafile(bool verbose,
                                 GtFile *outfp,
                                 unsigned long width,
-                                const GtStr *keyfile,
+                                const GtStr *fileofkeystoextract,
                                 GtStrArray *referencefiletab,
                                 GtError *err);
 
-int gt_extractkeysfromfastaindex(const char *filenameprefix, GtStr *keyfile,
+int gt_extractkeysfromfastaindex(const GtStr *indexname,
+                                 const GtStr *fileofkeystoextract,
                                  unsigned long linewidth,GtError *err);
 
 int gt_extractkeysfromdesfile(const GtStr *indexname, GtError *err);
 
-bool gt_deskeysfileexists(const char *filenameprefix);
+bool gt_deskeysfileexists(const GtStr *indexname);
 
 #endif

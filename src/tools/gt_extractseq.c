@@ -201,9 +201,11 @@ static int process_fastakeyfile(GtStr *fastakeyfile, int argc,
 
   if (!had_err)
   {
-    if (argc == 1 && gt_deskeysfileexists(argv[0]))
+    GtStr *indexname = gt_str_new_cstr(argv[0]);
+
+    if (argc == 1 && gt_deskeysfileexists(indexname))
     {
-      if (gt_extractkeysfromfastaindex(argv[0],fastakeyfile,width,err) != 0)
+      if (gt_extractkeysfromfastaindex(indexname,fastakeyfile,width,err) != 0)
       {
         had_err = -1;
       }
@@ -211,6 +213,7 @@ static int process_fastakeyfile(GtStr *fastakeyfile, int argc,
     {
       GtStrArray *referencefiletab;
       int i;
+
       referencefiletab = gt_str_array_new();
       for (i = 0; i < argc; i++)
       {
@@ -223,6 +226,7 @@ static int process_fastakeyfile(GtStr *fastakeyfile, int argc,
       }
       gt_str_array_delete(referencefiletab);
     }
+    gt_str_delete(indexname);
   }
   return had_err;
 }
