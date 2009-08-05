@@ -203,7 +203,7 @@ static int process_fastakeyfile(GtStr *fastakeyfile, int argc,
   {
     if (argc == 1 && gt_deskeysfileexists(argv[0]))
     {
-      if (gt_extractkeysfromfastaindex(argv[0],fastakeyfile,err) != 0)
+      if (gt_extractkeysfromfastaindex(argv[0],fastakeyfile,width,err) != 0)
       {
         had_err = -1;
       }

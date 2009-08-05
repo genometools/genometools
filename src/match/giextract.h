@@ -30,7 +30,7 @@ int gt_extractkeysfromfastafile(bool verbose,
                                 GtError *err);
 
 int gt_extractkeysfromfastaindex(const char *filenameprefix, GtStr *keyfile,
-                                 GtError *err);
+                                 unsigned long linewidth,GtError *err);
 
 int gt_extractkeysfromdesfile(const GtStr *indexname, GtError *err);
 

@@ -34,7 +34,7 @@
 #include "opensfxfile.h"
 #include "esa-fileend.h"
 #include "encseq-def.h"
-#include "core/unused_api.h"
+#include "echoseq.h"
 
 #define COMPLETE(VALUE)\
         ((VALUE).frompos == 1UL && (VALUE).topos == 0)
@@ -397,7 +397,7 @@ int gt_extractkeysfromdesfile(const GtStr *indexname, GtError *err)
     }
     if (fwrite(keyptr,sizeof *keyptr,(size_t) keylen,fpout) != (size_t) keylen)
     {
-      gt_error_set(err,"Cannot write keu of length %lu",keylen);
+      gt_error_set(err,"Cannot write key of length %lu",keylen);
       haserr = true;
       break;
     }
@@ -463,6 +463,7 @@ static unsigned long searchfastaqueryindes(const char *extractkey,
         left = mid+1;
       } else
       {
+        gt_assert(mid < numofkeys);
         return mid;
       }
     }
@@ -470,19 +471,27 @@ static unsigned long searchfastaqueryindes(const char *extractkey,
   return numofkeys;
 }
 
-static int itersearchoverallkeys(GT_UNUSED const Encodedsequence *encseq,
+static int itersearchoverallkeys(const Encodedsequence *encseq,
                                  const char *keytab,
                                  unsigned long numofkeys,
                                  GtStr *keyfile,
+                                 unsigned long linewidth,
                                  GtError *err)
 {
   FILE *fp;
   GtStr *currentline;
   uint64_t linenum;
   char *extractkey;
-  unsigned long keynum;
+  unsigned long seqnum, desclen, countmissing = 0;
   bool haserr = false;
+  const char *desc;
+  Seqinfo seqinfo;
 
+  if (linewidth == 0)
+  {
+    gt_error_set(err,"use option width to specify formatinng line width");
+    return -1;
+  }
   fp = gt_fa_fopen(gt_str_get(keyfile),"r",err);
   if (fp == NULL)
   {
@@ -506,9 +515,34 @@ static int itersearchoverallkeys(GT_UNUSED const Encodedsequence *encseq,
     }
     strncpy(extractkey,lineptr,idx);
     extractkey[idx] = '\0';
-    keynum = searchfastaqueryindes(extractkey,keytab,numofkeys);
-    gt_assert(keynum < numofkeys);
+    seqnum = searchfastaqueryindes(extractkey,keytab,numofkeys);
+    if (seqnum < numofkeys)
+    {
+      desc = retrievesequencedescription(&desclen, encseq, seqnum);
+      (void) fputc('>',stdout);
+      if (fwrite(desc,sizeof *desc,(size_t) desclen,stdout) != (size_t) desclen)
+      {
+        gt_error_set(err,"Cannot write header of length %lu",desclen);
+        haserr = true;
+        break;
+      }
+      (void) fputc('\n',stdout);
+      getencseqSeqinfo(&seqinfo,encseq,seqnum);
+      encseq2symbolstring(stdout,
+                          encseq,
+                          Forwardmode,
+                          seqinfo.seqstartpos,
+                          seqinfo.seqlength,
+                          linewidth);
+    } else
+    {
+      countmissing++;
+    }
     gt_str_reset(currentline);
+  }
+  if (countmissing > 0)
+  {
+    printf("# number of unsatified fastakey-queries: %lu\n",countmissing);
   }
   gt_str_delete(currentline);
   gt_fa_fclose(fp);
@@ -517,7 +551,7 @@ static int itersearchoverallkeys(GT_UNUSED const Encodedsequence *encseq,
 }
 
 int gt_extractkeysfromfastaindex(const char *filenameprefix, GtStr *keyfile,
-                                 GtError *err)
+                                 unsigned long linewidth,GtError *err)
 {
   Encodedsequence *encseq = NULL;
   bool haserr = false;
@@ -553,7 +587,7 @@ int gt_extractkeysfromfastaindex(const char *filenameprefix, GtStr *keyfile,
     } else
     {
       if (itersearchoverallkeys(encseq,keytab,numofdbsequences,keyfile,
-                                err) != 0)
+                                linewidth,err) != 0)
       {
         haserr = true;
       }
