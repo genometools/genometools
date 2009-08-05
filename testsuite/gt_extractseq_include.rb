@@ -164,7 +164,7 @@ if $gttestdata then
              "-keys #{$gttestdata}gi-queries/gi-queries.txt " +
              "#{$testdata}at1MB"
   end
-  Name "gt extractseq keys from fastaindex"
+  Name "gt extractseq -keys from fastaindex"
   Keywords "gt_extractseq"
   Test do
     run_test("#{$bin}gt suffixerator -protein -ssp -tis -des " +
