@@ -385,7 +385,7 @@ int gt_extractkeysfromdesfile(const GtStr *indexname, GtError *err)
     }
     if (keylen == 0)
     {
-      gt_error_set(err,"Key of length 0 in \"%s\" not expected",
+      gt_error_set(err,"key of length 0 in \"%s\" not expected",
                    gt_str_get(line));
       haserr = true;
       break;
@@ -395,7 +395,7 @@ int gt_extractkeysfromdesfile(const GtStr *indexname, GtError *err)
       constantkeylen = keylen;
       if (constantkeylen > (unsigned long) CHAR_MAX)
       {
-        gt_error_set(err,"keylength = %lu not allowed; must not be larger "
+        gt_error_set(err,"key of length %lu not allowed; must not be larger "
                          "than %d",constantkeylen,CHAR_MAX);
         haserr = true;
         break;
@@ -414,7 +414,7 @@ int gt_extractkeysfromdesfile(const GtStr *indexname, GtError *err)
     }
     if (fwrite(keyptr,sizeof *keyptr,(size_t) keylen,fpout) != (size_t) keylen)
     {
-      gt_error_set(err,"Cannot write key of length %lu",keylen);
+      gt_error_set(err,"cannot write key of length %lu",keylen);
       haserr = true;
       break;
     }
