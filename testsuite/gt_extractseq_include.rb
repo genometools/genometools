@@ -155,6 +155,17 @@ Test do
   grep $last_stderr, /requires at least one file argument/
 end
 
+Name "gt des-idx with missing argument"
+Keywords "gt_extractseq"
+Test do
+  run_test("#{$bin}gt des-idx",:retval => 1)
+end
+
+Name "gt des-idx with non-existing index"
+Keywords "gt_extractseq"
+Test do
+  run_test("#{$bin}gt des-idx somethingXXX",:retval => 1)
+end
 
 if $gttestdata then
   Name "gt extractseq -keys from large fastafile"

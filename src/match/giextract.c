@@ -354,13 +354,12 @@ static const char *desc2key(unsigned long *keylen,const char *desc,
 int gt_extractkeysfromdesfile(const GtStr *indexname, GtError *err)
 {
   FILE *fpin, *fpout;
-  GtStr *line;
+  GtStr *line = NULL;
   uint64_t linenum;
   const char *keyptr;
   unsigned long keylen, maxkeylen = 0, minkeylen = 0;
   bool haserr = false;
 
-  line = gt_str_new();
   fpin = opensfxfile(indexname,DESTABSUFFIX,"rb",err);
   if (fpin == NULL)
   {
@@ -370,6 +369,10 @@ int gt_extractkeysfromdesfile(const GtStr *indexname, GtError *err)
   if (fpout == NULL)
   {
     haserr = true;
+  }
+  if (!haserr)
+  {
+    line = gt_str_new();
   }
   for (linenum = 0; !haserr && gt_str_read_next_line(line, fpin) != EOF;
        linenum++)

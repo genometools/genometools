@@ -22,14 +22,12 @@
 #include "match/giextract.h"
 
 typedef struct {
-  bool verbose;
   GtStr *indexname;
 } DesIdxArguments;
 
 static void* gt_des_idx_arguments_new(void)
 {
   DesIdxArguments *arguments = gt_calloc((size_t) 1, sizeof *arguments);
-  arguments->verbose = false;
   arguments->indexname = gt_str_new();
   return arguments;
 }
@@ -46,21 +44,17 @@ static GtOptionParser* gt_des_idx_option_parser_new(void *tool_arguments)
 {
   DesIdxArguments *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOption *option;
-  gt_assert(arguments);
 
+  gt_assert(arguments);
   /* init */
-  op = gt_option_parser_new("[option ...] indexname",
+  op = gt_option_parser_new("indexname",
                             "Index the keys of the form |key| in des file.");
 
-  /* -v */
-  option = gt_option_new_verbose(&arguments->verbose);
-  gt_option_parser_add_option(op, option);
   gt_option_parser_set_min_max_args(op, 1U, 1U);
   return op;
 }
 
-static int gt_des_idx_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
+static int gt_des_idx_runner(int argc, const char **argv,
                              GT_UNUSED int parsed_args, void *tool_arguments,
                              GtError *err)
 {
