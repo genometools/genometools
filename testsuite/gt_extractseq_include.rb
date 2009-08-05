@@ -203,5 +203,9 @@ if $gttestdata then
     run_test("#{$bin}gt extractseq -keys #{$last_stdout} -width 60 " +
              "trembl-section.fsa.gz")
     run("cmp -s #{$last_stdout} trembl-section.fsa")
+    run_test("#{$bin}gt extractseq -keys #{$last_stdout} " +
+             "trembl-section.fsa.gz",:retval => 1)
+    run_test("#{$bin}gt extractseq -keys #{$testdata}/trembl-wrongkey.txt " +
+             "trembl-section.fsa.gz",:retval => 1)
   end
 end

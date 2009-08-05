@@ -487,7 +487,7 @@ static int itersearchoverallkeys(const Encodedsequence *encseq,
 
   if (linewidth == 0)
   {
-    gt_error_set(err,"use option width to specify formatinng line width");
+    gt_error_set(err,"use option width to specify line width for formatting");
     return -1;
   }
   fp = gt_fa_fopen(gt_str_get(fileofkeystoextract),"r",err);
@@ -520,7 +520,7 @@ static int itersearchoverallkeys(const Encodedsequence *encseq,
       (void) fputc('>',stdout);
       if (fwrite(desc,sizeof *desc,(size_t) desclen,stdout) != (size_t) desclen)
       {
-        gt_error_set(err,"Cannot write header of length %lu",desclen);
+        gt_error_set(err,"cannot write header of length %lu",desclen);
         haserr = true;
         break;
       }
