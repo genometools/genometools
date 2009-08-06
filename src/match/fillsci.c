@@ -249,9 +249,11 @@ int fasta2sequencekeyvalues(
               haserr = true;
               break;
             }
+            (void) putc((int) '\n',desfp);
+            FREESPACE(desc);
             if (sdsfp != NULL)
             {
-              off_t desoffset = ftello(desfp);
+              unsigned long desoffset = (unsigned long) ftello(desfp);
               if (fwrite(&desoffset,sizeof desoffset,(size_t) 1,sdsfp)
                   != (size_t) 1)
               {
@@ -261,8 +263,6 @@ int fasta2sequencekeyvalues(
                 break;
               }
             }
-            (void) putc((int) '\n',desfp);
-            FREESPACE(desc);
           }
           if (specialprefix)
           {

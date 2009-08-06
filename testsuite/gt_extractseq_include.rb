@@ -170,7 +170,7 @@ end
 Name "gt des-idx with key of length 0"
 Keywords "gt_extractseq"
 Test do
-  run_test("#{$bin}gt suffixerator -protein -ssp -tis -des " +
+  run_test("#{$bin}gt suffixerator -protein -ssp -tis -des -sds " +
              "-db #{$testdata}/trembl-emptykey.faa")
   run_test("#{$bin}gt des-idx trembl-emptykey.faa",:retval => 1)
 end
@@ -178,7 +178,7 @@ end
 Name "gt des-idx with keys of different length"
 Keywords "gt_extractseq"
 Test do
-  run_test("#{$bin}gt suffixerator -protein -ssp -tis -des " +
+  run_test("#{$bin}gt suffixerator -protein -ssp -tis -des -sds " +
              "-db #{$testdata}/trembl-difflenkey.faa")
   run_test("#{$bin}gt des-idx trembl-difflenkey.faa",:retval => 1)
 end
@@ -194,7 +194,7 @@ if $gttestdata then
   Name "gt extractseq -keys from fastaindex"
   Keywords "gt_extractseq"
   Test do
-    run_test("#{$bin}gt suffixerator -protein -ssp -tis -des " +
+    run_test("#{$bin}gt suffixerator -protein -ssp -tis -des -sds " +
              "-db #{$gttestdata}/trembl/trembl-section.fsa.gz")
     run_test("#{$bin}gt des-idx trembl-section.fsa.gz")
     run("gunzip -c #{$gttestdata}/trembl/trembl-section.fsa.gz")
