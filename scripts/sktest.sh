@@ -45,13 +45,10 @@ env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ./testsuite.rb \
        ${MC} -keywords 'gt_extractseq' \
        -gttestdata ${GTTESTDATA}
 
-exit 0
 env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_suffixerator'
 env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ./testsuite.rb \
        ${MC} -keywords 'gt_suffixerator and gttestdata' \
        -gttestdata ${GTTESTDATA}
-env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ./testsuite.rb \
-       ${MC} -keywords gt_extractseq -gttestdata ${GTTESTDATA}
 env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_trieins'
 env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ./testsuite.rb \
        ${MC} -keywords 'gt_packedindex_at1MB' \

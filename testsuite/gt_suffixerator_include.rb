@@ -1,5 +1,5 @@
 def outoptionsnobck
-  return "-tis -suf -des -ssp -lcp -bwt"
+  return "-tis -suf -des -sds -ssp -lcp -bwt"
 end
 
 def outoptions

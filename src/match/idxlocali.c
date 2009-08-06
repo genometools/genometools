@@ -165,6 +165,7 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
                                  idxlocalioptions->indexname,
                                  true,
                                  false,
+                                 false,
                                  true,
                                  verboseinfo,
                                  err);

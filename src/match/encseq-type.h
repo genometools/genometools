@@ -80,7 +80,7 @@ struct Encodedsequence
   const Filelengthvalues *filelengthtab;  /* table of length of files */
 
   const char *destab;
-  unsigned long destablength, *descendtab;
+  unsigned long destablength, *sdstab;
 
   const GtAlphabet *alpha;   /* alphabet representation */
 

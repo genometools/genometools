@@ -206,6 +206,7 @@ int fromsarr2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                                           true,
                                           false,
                                           false,
+                                          false,
                                           verboseinfo,
                                           err);
   if (sfxseqinfo->encseq == NULL)

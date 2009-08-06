@@ -207,6 +207,7 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr);
                                                const GtStr *indexname,
                                                bool withesqtab,
                                                bool withdestab,
+                                               bool withsdstab,
                                                bool withssptab,
                                                Verboseinfo *verboseinfo,
                                                GtError *err);

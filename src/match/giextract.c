@@ -590,6 +590,7 @@ int gt_extractkeysfromfastaindex(const GtStr *indexname,
                               true,
                               true,
                               true,
+                              true,
                               NULL,
                               err);
   if (encseq == NULL)

@@ -392,6 +392,7 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
                                                true,
                                                true,
                                                true,
+                                               true,
                                                vbi,
                                                err);
   if (gt_error_is_set(err))

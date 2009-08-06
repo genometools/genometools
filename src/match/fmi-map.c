@@ -152,6 +152,7 @@ static Encodedsequence *mapbwtencoding(const GtStr *indexname,
                             true,
                             false,
                             false,
+                            false,
                             verboseinfo,
                             err);
 }

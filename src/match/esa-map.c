@@ -268,6 +268,8 @@ static int inputsuffixarray(bool map,
                                                                   : false,
                                            (demand & SARR_DESTAB) ? true
                                                                   : false,
+                                           (demand & SARR_SDSTAB) ? true
+                                                                  : false,
                                            (demand & SARR_SSPTAB) ? true
                                                                   : false,
                                            verboseinfo,

@@ -964,9 +964,10 @@ void encodedsequence_free(Encodedsequence **encseqptr)
     gt_fa_xmunmap((void *) encseq->destab);
     encseq->destab = NULL;
   }
-  if (encseq->descendtab != NULL)
+  if (encseq->sdstab != NULL)
   {
-    FREESPACE(encseq->descendtab);
+    gt_fa_xmunmap((void *) encseq->sdstab);
+    encseq->sdstab = NULL;
   }
   if (encseq->ssptab != NULL)
   {
@@ -2452,7 +2453,7 @@ static Encodedsequence *determineencseqkeyvalues(Positionaccesstype sat,
   encseq->numofdbsequencesptr = NULL;
   encseq->specialcharinfoptr = NULL;
   encseq->destab = NULL;
-  encseq->descendtab = NULL;
+  encseq->sdstab = NULL;
   encseq->destablength = 0;
   encseq->ssptab = NULL;
   encseq->alpha = alpha;
@@ -2955,6 +2956,7 @@ static const GtAlphabet *scanal1file(const GtStr *indexname,GtError *err)
   return alpha;
 }
 
+/*
 static unsigned long *calcdescendpositions(const Encodedsequence *encseq)
 {
   unsigned long *descendtab, i, idx = 0;
@@ -2972,11 +2974,13 @@ static unsigned long *calcdescendpositions(const Encodedsequence *encseq)
   gt_assert(idx == encseq->numofdbsequences);
   return descendtab;
 }
+*/
 
 /*@null@*/ Encodedsequence *mapencodedsequence(bool withrange,
                                                const GtStr *indexname,
                                                bool withesqtab,
                                                bool withdestab,
+                                               bool withsdstab,
                                                bool withssptab,
                                                Verboseinfo *verboseinfo,
                                                GtError *err)
@@ -3044,9 +3048,25 @@ static unsigned long *calcdescendpositions(const Encodedsequence *encseq)
     if (encseq->destab == NULL)
     {
       haserr = true;
+    }
+  }
+  if (!haserr && withsdstab)
+  {
+    gt_assert(encseq != NULL);
+    if (encseq->numofdbsequences > 1UL)
+    {
+      encseq->sdstab = genericmaptable(indexname,
+                                       SDSTABSUFFIX,
+                                       encseq->numofdbsequences - 1,
+                                       sizeof *encseq->sdstab,
+                                       err);
+      if (encseq->sdstab == NULL)
+      {
+        haserr = true;
+      }
     } else
     {
-      encseq->descendtab = calcdescendpositions(encseq);
+      encseq->sdstab = NULL;
     }
   }
   if (!haserr && withssptab)
@@ -3081,14 +3101,30 @@ const char *retrievesequencedescription(unsigned long *desclen,
                                         const Encodedsequence *encseq,
                                         unsigned long seqnum)
 {
-  if (seqnum == 0)
+  if (seqnum > 0)
   {
-    *desclen = encseq->descendtab[0];
-    return encseq->destab;
+    unsigned long nextend;
+
+    if (seqnum < encseq->numofdbsequences - 1)
+    {
+      nextend = encseq->sdstab[seqnum];
+    } else
+    {
+      nextend = encseq->destablength - 1;
+    }
+    gt_assert(encseq->sdstab[seqnum-1] < nextend);
+    *desclen = nextend - encseq->sdstab[seqnum-1] - 1;
+    return encseq->destab + encseq->sdstab[seqnum-1] + 1;
   }
-  gt_assert(encseq->descendtab[seqnum-1] < encseq->descendtab[seqnum]);
-  *desclen = encseq->descendtab[seqnum] - encseq->descendtab[seqnum-1] - 1;
-  return encseq->destab + encseq->descendtab[seqnum-1] + 1;
+  if (encseq->numofdbsequences > 1UL)
+  {
+    gt_assert(encseq->sdstab != NULL);
+    *desclen = encseq->sdstab[0];
+  } else
+  {
+    *desclen = encseq->destablength - 1;
+  }
+  return encseq->destab;
 }
 
 void checkallsequencedescriptions(const Encodedsequence *encseq)

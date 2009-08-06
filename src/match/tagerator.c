@@ -555,6 +555,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
                                  true,
                                  false,
                                  false,
+                                 false,
                                  verboseinfo,
                                  err);
     if (encseq == NULL)

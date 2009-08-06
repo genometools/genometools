@@ -37,6 +37,7 @@ typedef struct
        inputtis,
        inputsuf,
        inputdes,
+       inputsds,
        inputbwt,
        inputlcp,
        inputbck,
@@ -104,7 +105,7 @@ static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
   GtOptionParser *op;
   GtOption *optionstream, *optionverbose, *optionscantrials,
          *optionmulticharcmptrials, *optionbck, *optionsuf,
-         *optiondes, *optionbwt, *optionlcp, *optiontis, *optionssp,
+         *optiondes, *optionsds, *optionbwt, *optionlcp, *optiontis, *optionssp,
          *optiondelspranges;
   OPrval oprval;
 
@@ -142,6 +143,11 @@ static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
                                  &sfxmapoptions->inputdes,
                                  false);
   gt_option_parser_add_option(op, optiondes);
+
+  optionsds = gt_option_new_bool("sds","input the description end positions",
+                                 &sfxmapoptions->inputsds,
+                                 false);
+  gt_option_parser_add_option(op, optionsds);
 
   optionsuf = gt_option_new_bool("suf","input the suffix array",
                                  &sfxmapoptions->inputsuf,
@@ -219,6 +225,10 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
   if (sfxmapoptions.inputdes)
   {
     demand |= SARR_DESTAB;
+  }
+  if (sfxmapoptions.inputsds)
+  {
+    demand |= SARR_SDSTAB;
   }
   if (sfxmapoptions.inputsuf)
   {

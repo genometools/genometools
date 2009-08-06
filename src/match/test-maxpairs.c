@@ -312,6 +312,7 @@ int testmaxpairs(const GtStr *indexname,
                               true,
                               false,
                               false,
+                              false,
                               verboseinfo,
                               err);
   if (encseq == NULL)

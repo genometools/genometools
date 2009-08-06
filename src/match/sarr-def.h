@@ -31,8 +31,9 @@
 #define SARR_LCPTAB (1U << 2)
 #define SARR_BWTTAB (1U << 3)
 #define SARR_DESTAB (1U << 4)
-#define SARR_BCKTAB (1U << 5)
-#define SARR_SSPTAB (1U << 6)
+#define SARR_SDSTAB (1U << 5)
+#define SARR_BCKTAB (1U << 6)
+#define SARR_SSPTAB (1U << 7)
 
 #define SARR_ALLTAB (SARR_ESQTAB |\
                      SARR_SUFTAB |\
