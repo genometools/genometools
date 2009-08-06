@@ -152,7 +152,7 @@ int fasta2sequencekeyvalues(
         Filelengthvalues **filelengthtab,
         const GtAlphabet *alpha,
         bool plainformat,
-        bool withdestab,
+        bool outdestab,
         unsigned long *characterdistribution,
         bool withssptab,
         ArraySeqpos *sequenceseppos,
@@ -176,7 +176,7 @@ int fasta2sequencekeyvalues(
   specialcharinfo->specialcharacters = 0;
   specialcharinfo->lengthofspecialprefix = 0;
   specialcharinfo->lengthofspecialsuffix = 0;
-  if (withdestab)
+  if (outdestab)
   {
     descqueue = gt_queue_new();
     desfp = opensfxfile(indexname,DESTABSUFFIX,"wb",err);

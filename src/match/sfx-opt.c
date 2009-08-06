@@ -56,7 +56,8 @@ static OPrval parse_options(int *parsed_args,
          *optionalgbounds,
          *optionparts,
          *optiondifferencecover,
-         *optiondes;
+         *optiondes,
+         *optionsds;
   OPrval oprval;
   const char *maxdepthmsg = "option of -maxdepth must the keyword abs, the "
                             "keyword he or an integer";
@@ -205,10 +206,17 @@ static OPrval parse_options(int *parsed_args,
   gt_option_parser_add_option(op, option);
 
   optiondes = gt_option_new_bool("des",
-                                 "output sequence descriptions to file ",
+                                 "output sequence descriptions to file",
                                  &so->outdestab,
                                  false);
   gt_option_parser_add_option(op, optiondes);
+
+  optionsds = gt_option_new_bool("sds",
+                                 "output sequence description separator "
+                                 "positions to file",
+                                 &so->outsdstab,
+                                 false);
+  gt_option_parser_add_option(op, optionsds);
 
   if (doesa)
   {
@@ -264,6 +272,7 @@ static OPrval parse_options(int *parsed_args,
   gt_option_exclude(optionsmap, optiondna);
   gt_option_exclude(optionsmap, optionprotein);
   gt_option_exclude(optiondna, optionprotein);
+  gt_option_imply(optionsds,optiondes);
   if (optionmaxdepth != NULL)
   {
     gt_option_exclude(optionmaxdepth, optiondifferencecover);
@@ -463,13 +472,14 @@ static void showoptions(const Suffixeratoroptions *so)
   showdefinitelyverbose("indexname=%s",gt_str_get(so->str_indexname));
   showdefinitelyverbose("outtistab=%s,outsuftab=%s,outlcptab=%s,"
                         "outbwttab=%s,outbcktab=%s,outdestab=%s,"
-                        "outssptab=%s",
+                        "outsdstab=%s,outssptab=%s",
           so->outtistab ? "true" : "false",
           so->outsuftab ? "true" : "false",
           so->outlcptab ? "true" : "false",
           so->outbwttab ? "true" : "false",
           so->outbcktab ? "true" : "false",
           so->outdestab ? "true" : "false",
+          so->outsdstab ? "true" : "false",
           so->outssptab ? "true" : "false");
 }
 

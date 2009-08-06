@@ -50,6 +50,7 @@ typedef struct
        outlcptab,
        outbwttab,
        outdestab,
+       outsdstab,
        outbcktab,
        outssptab,
        showtime;
