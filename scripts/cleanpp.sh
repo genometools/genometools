@@ -17,6 +17,7 @@ rm -f *.ois
 rm -f *.bwt 
 rm -f *.bck 
 rm -f *.sds 
+rm -f *.kys 
 rm -f *.iso 
 rm -f *.sti 
 rm -f *.sti1 

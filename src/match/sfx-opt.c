@@ -57,7 +57,8 @@ static OPrval parse_options(int *parsed_args,
          *optionparts,
          *optiondifferencecover,
          *optiondes,
-         *optionsds;
+         *optionsds,
+         *optionkys;
   OPrval oprval;
   const char *maxdepthmsg = "option of -maxdepth must the keyword abs, the "
                             "keyword he or an integer";
@@ -218,6 +219,13 @@ static OPrval parse_options(int *parsed_args,
                                  false);
   gt_option_parser_add_option(op, optionsds);
 
+  optionkys = gt_option_new_bool("kys",
+                                 "output the keys of the form |key| in fasta "
+                                 "header",
+                                 &so->outkystab,
+                                 false);
+  gt_option_parser_add_option(op, optionkys);
+
   if (doesa)
   {
     optionsuf = gt_option_new_bool("suf",
@@ -273,6 +281,7 @@ static OPrval parse_options(int *parsed_args,
   gt_option_exclude(optionsmap, optionprotein);
   gt_option_exclude(optiondna, optionprotein);
   gt_option_imply(optionsds,optiondes);
+  gt_option_imply(optionkys,optiondes);
   if (optionmaxdepth != NULL)
   {
     gt_option_exclude(optionmaxdepth, optiondifferencecover);
@@ -472,7 +481,7 @@ static void showoptions(const Suffixeratoroptions *so)
   showdefinitelyverbose("indexname=%s",gt_str_get(so->str_indexname));
   showdefinitelyverbose("outtistab=%s,outsuftab=%s,outlcptab=%s,"
                         "outbwttab=%s,outbcktab=%s,outdestab=%s,"
-                        "outsdstab=%s,outssptab=%s",
+                        "outsdstab=%s,outssptab=%s,outkystab=%s",
           so->outtistab ? "true" : "false",
           so->outsuftab ? "true" : "false",
           so->outlcptab ? "true" : "false",
@@ -480,7 +489,9 @@ static void showoptions(const Suffixeratoroptions *so)
           so->outbcktab ? "true" : "false",
           so->outdestab ? "true" : "false",
           so->outsdstab ? "true" : "false",
-          so->outssptab ? "true" : "false");
+          so->outssptab ? "true" : "false",
+          so->outkystab ? "true" : "false"
+          );
 }
 
 void wrapsfxoptions(Suffixeratoroptions *so)

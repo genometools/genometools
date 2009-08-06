@@ -71,7 +71,7 @@ initbasepower.c
 initeqsvec.c
 inl-encseq.c
 iter-window.c
-kmerstring.c
+kmer2string.c
 mapspec-gen.c
 measure-time.c
 merger-trie.c
@@ -86,6 +86,7 @@ pssm.c
 revcompl.c
 sfx-apfxlen.c
 sfx-bentsedg.c
+sfx-copysort.c
 sfx-enumcodes.c
 sfx-input.c
 sfx-linlcp.c

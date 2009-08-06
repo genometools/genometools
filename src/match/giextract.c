@@ -392,22 +392,26 @@ int gt_extractkeysfromdesfile(const GtStr *indexname, GtError *err)
     }
     if (firstdesc)
     {
-      constantkeylen = keylen;
-      if (constantkeylen > (unsigned long) CHAR_MAX)
+      if (keylen > (unsigned long) CHAR_MAX)
       {
-        gt_error_set(err,"key of length %lu not allowed; must not be larger "
-                         "than %d",constantkeylen,CHAR_MAX);
+        gt_error_set(err,"key \"%*.*s\" of length %lu not allowed; "
+                         "no key must be larger than %d",
+                          (int) keylen,(int) keylen,keyptr,keylen,CHAR_MAX);
         haserr = true;
         break;
       }
-      (void) fputc((char) constantkeylen,fpout);
+      constantkeylen = keylen;
+      (void) putc((char) constantkeylen,fpout);
       firstdesc = false;
     } else
     {
       if (constantkeylen != keylen)
       {
-        gt_error_set(err,"key of length %lu: keys must of length %lu",
-                         keylen,constantkeylen);
+        gt_error_set(err,"key \"%*.*s\" of length %lu: all keys must be of the "
+                         "same length which for all previously seen headers "
+                         "is %lu",
+                         (int) keylen,(int) keylen,keyptr,keylen,
+                         constantkeylen);
         haserr = true;
         break;
       }
@@ -418,7 +422,7 @@ int gt_extractkeysfromdesfile(const GtStr *indexname, GtError *err)
       haserr = true;
       break;
     }
-    (void) fputc('\0',fpout);
+    (void) putc('\0',fpout);
     gt_str_reset(line);
   }
   if (!haserr)
@@ -517,14 +521,14 @@ static int itersearchoverallkeys(const Encodedsequence *encseq,
     if (seqnum < numofkeys)
     {
       desc = retrievesequencedescription(&desclen, encseq, seqnum);
-      (void) fputc('>',stdout);
+      (void) putc('>',stdout);
       if (fwrite(desc,sizeof *desc,(size_t) desclen,stdout) != (size_t) desclen)
       {
         gt_error_set(err,"cannot write header of length %lu",desclen);
         haserr = true;
         break;
       }
-      (void) fputc('\n',stdout);
+      (void) putc('\n',stdout);
       getencseqSeqinfo(&seqinfo,encseq,seqnum);
       encseq2symbolstring(stdout,
                           encseq,

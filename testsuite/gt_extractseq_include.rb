@@ -155,32 +155,18 @@ Test do
   grep $last_stderr, /requires at least one file argument/
 end
 
-Name "gt des-idx with missing argument"
+Name "gt suffixerator -kys with key of length 0"
 Keywords "gt_extractseq"
 Test do
-  run_test("#{$bin}gt des-idx",:retval => 1)
+  run_test("#{$bin}gt suffixerator -protein -ssp -tis -des -sds -kys " +
+             "-db #{$testdata}/trembl-emptykey.faa",:retval => 1)
 end
 
-Name "gt des-idx with non-existing index"
+Name "gt suffixerator -kys with keys of different length"
 Keywords "gt_extractseq"
 Test do
-  run_test("#{$bin}gt des-idx somethingXXX",:retval => 1)
-end
-
-Name "gt des-idx with key of length 0"
-Keywords "gt_extractseq"
-Test do
-  run_test("#{$bin}gt suffixerator -protein -ssp -tis -des -sds " +
-             "-db #{$testdata}/trembl-emptykey.faa")
-  run_test("#{$bin}gt des-idx trembl-emptykey.faa",:retval => 1)
-end
-
-Name "gt des-idx with keys of different length"
-Keywords "gt_extractseq"
-Test do
-  run_test("#{$bin}gt suffixerator -protein -ssp -tis -des -sds " +
-             "-db #{$testdata}/trembl-difflenkey.faa")
-  run_test("#{$bin}gt des-idx trembl-difflenkey.faa",:retval => 1)
+  run_test("#{$bin}gt suffixerator -protein -ssp -tis -des -sds -kys " +
+             "-db #{$testdata}/trembl-difflenkey.faa",:retval => 1)
 end
 
 if $gttestdata then
@@ -194,9 +180,8 @@ if $gttestdata then
   Name "gt extractseq -keys from fastaindex"
   Keywords "gt_extractseq"
   Test do
-    run_test("#{$bin}gt suffixerator -protein -ssp -tis -des -sds " +
+    run_test("#{$bin}gt suffixerator -protein -ssp -tis -des -sds -kys " +
              "-db #{$gttestdata}/trembl/trembl-section.fsa.gz")
-    run_test("#{$bin}gt des-idx trembl-section.fsa.gz")
     run("gunzip -c #{$gttestdata}/trembl/trembl-section.fsa.gz")
     run("mv #{$last_stdout} trembl-section.fsa")
     run("#{$scriptsdir}/tr2deskeys.sh #{$gttestdata}/trembl/trembl-section.fsa.gz")
