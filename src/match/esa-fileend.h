@@ -79,6 +79,13 @@
 #define DESTABSUFFIX ".des"
 
 /*
+  The following defines the suffix of a file to store sequence description
+  separator positions.
+*/
+
+#define SDSTABSUFFIX ".sds"
+
+/*
   The following defines the suffix of a file to store sequence seperator
   positions.
 */

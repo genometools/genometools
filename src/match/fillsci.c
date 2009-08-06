@@ -153,6 +153,7 @@ int fasta2sequencekeyvalues(
         const GtAlphabet *alpha,
         bool plainformat,
         bool outdestab,
+        bool outsdstab,
         unsigned long *characterdistribution,
         bool withssptab,
         ArraySeqpos *sequenceseppos,
@@ -170,7 +171,7 @@ int fasta2sequencekeyvalues(
   bool haserr = false;
   GtQueue *descqueue = NULL;
   char *desc;
-  FILE *desfp = NULL;
+  FILE *desfp = NULL, *sdsfp = NULL;
 
   gt_error_check(err);
   specialcharinfo->specialcharacters = 0;
@@ -185,22 +186,37 @@ int fasta2sequencekeyvalues(
       haserr = true;
     }
   }
+  if (outsdstab)
+  {
+    sdsfp = opensfxfile(indexname,SDSTABSUFFIX,"wb",err);
+    if (sdsfp == NULL)
+    {
+      haserr = true;
+    }
+  }
   if (!haserr)
   {
-    if (plainformat) {
+    if (plainformat)
+    {
       fb = gt_sequence_buffer_plain_new(filenametab);
-    } else {
+    } else
+    {
       fb = gt_sequence_buffer_new_guess_type((GtStrArray*) filenametab, err);
     }
     if (!fb)
+    {
       haserr = true;
-    if (!haserr) {
+    }
+    if (!haserr) 
+    {
       gt_sequence_buffer_set_symbolmap(fb, gt_alphabet_symbolmap(alpha));
       *filelengthtab = gt_calloc((size_t) gt_str_array_size(filenametab),
                                  sizeof (Filelengthvalues));
       gt_sequence_buffer_set_filelengthtab(fb, *filelengthtab);
       if (descqueue != NULL)
+      {
         gt_sequence_buffer_set_desc_queue(fb, descqueue);
+      }
       gt_sequence_buffer_set_chardisttab(fb, characterdistribution);
 
       distspralen = gt_disc_distri_new();
@@ -232,6 +248,18 @@ int fasta2sequencekeyvalues(
                                 gt_str_get(indexname),DESTABSUFFIX);
               haserr = true;
               break;
+            }
+            if (sdsfp != NULL)
+            {
+              off_t desoffset = ftello(desfp);
+              if (fwrite(&desoffset,sizeof desoffset,(size_t) 1,sdsfp)
+                  != (size_t) 1)
+              {
+                gt_error_set(err,"cannot write description separator to file "
+                                 "%s.%s",gt_str_get(indexname),SDSTABSUFFIX);
+                haserr = true;
+                break;
+              }
             }
             (void) putc((int) '\n',desfp);
             FREESPACE(desc);
@@ -294,6 +322,7 @@ int fasta2sequencekeyvalues(
                       gt_alphabet_num_of_chars(alpha),distspralen,verboseinfo);
   }
   gt_fa_xfclose(desfp);
+  gt_fa_xfclose(sdsfp);
   gt_disc_distri_delete(distspralen);
   gt_sequence_buffer_delete(fb);
   gt_queue_delete_with_contents(descqueue);

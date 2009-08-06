@@ -40,6 +40,7 @@ int fasta2sequencekeyvalues(
         const GtAlphabet *alpha,
         bool plainformat,
         bool outdestab,
+        bool outsdstab,
         unsigned long *characterdistribution,
         bool withssptab,
         ArraySeqpos *sequenceseppos,
