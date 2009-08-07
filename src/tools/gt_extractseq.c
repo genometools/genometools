@@ -69,8 +69,9 @@ static GtOptionParser* gt_extractseq_option_parser_new(void *tool_arguments)
   gt_assert(arguments);
 
   /* init */
-  op = gt_option_parser_new("[option ...] [sequence_file ...]",
-                         "Extract sequences from given sequence file(s).");
+  op = gt_option_parser_new("[option ...] [sequence_file(s)] | fastaindex",
+                            "Extract sequences from given sequence file(s) or "
+                            "fastaindex.");
 
   /* -frompos */
   frompos_option = gt_option_new_ulong_min(FROMPOS_OPTION_STR,
