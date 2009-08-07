@@ -37,21 +37,21 @@
 #include "echoseq.h"
 
 #define COMPLETE(VALUE)\
-        ((VALUE).frompos == 1UL && (VALUE).topos == 0)
+        ((VALUE)->frompos == 1UL && (VALUE)->topos == 0)
 
 #define EXTRABUF 128
 
 #define CHECKPOSITIVE(VAL,FORMAT,WHICH)\
         if ((VAL) <= 0)\
         {\
-          gt_error_set(err,"file \"%s\", line %lu: illegal format: %s element "\
-                        " = " FORMAT " is not a positive integer",\
-                        gt_str_get(fileofkeystoextract),\
-                        linenum+1,\
-                        WHICH,\
-                        VAL);\
+          gt_error_set(err,"file \"%s\", line " Formatuint64_t \
+                           ": illegal format: %s element = " FORMAT \
+                           " is not a positive integer",\
+                           gt_str_get(fileofkeystoextract),\
+                           PRINTuint64_tcast(linenum+1),\
+                           WHICH,\
+                           VAL);\
           haserr = true;\
-          break;\
         }
 
 typedef struct
@@ -162,6 +162,70 @@ static void fastakeyqueries_delete(Fastakeyquery *fastakeyqueries,
   }
 }
 
+static int extractkeyfromcurrentline(Fastakeyquery *fastakeyptr,
+                                     unsigned long keysize,
+                                     const GtStr *currentline,
+                                     uint64_t linenum,
+                                     const GtStr *fileofkeystoextract,
+                                     GtError *err)
+{
+  char *lineptr = gt_str_get(currentline);
+  long readlongfrompos, readlongtopos;
+  size_t idx;
+  bool haserr = false;
+
+  for (idx = 0; lineptr[idx] != '\0' && !isspace(lineptr[idx]); idx++)
+    /* nothing */ ;
+  if (keysize == 0)
+  {
+    fastakeyptr->fastakey = gt_malloc(sizeof(char) * (idx+1));
+  } else
+  {
+    if (idx != (size_t) keysize)
+    {
+      gt_error_set(err,"key \"%*.*s\" is not of size %lu",(int) idx,
+                   (int) idx,lineptr,keysize);
+      haserr = true;
+    }
+  }
+  if (!haserr)
+  {
+    strncpy(fastakeyptr->fastakey,lineptr,idx);
+    fastakeyptr->fastakey[idx] = '\0';
+    fastakeyptr->frompos = 1UL;
+    fastakeyptr->topos = 0;
+    if (sscanf(lineptr+idx,"%ld %ld\n",&readlongfrompos,&readlongtopos) == 2)
+    {
+      CHECKPOSITIVE(readlongfrompos,"%ld","second");
+      if (!haserr)
+      {
+        fastakeyptr->frompos = (unsigned long) readlongfrompos;
+        CHECKPOSITIVE(readlongtopos,"%ld","third");
+      }
+      if (!haserr)
+      {
+        fastakeyptr->topos = (unsigned long) readlongtopos;
+      }
+    }
+  }
+  if (!haserr)
+  {
+    fastakeyptr->markhit = false;
+    if (!COMPLETE(fastakeyptr) && fastakeyptr->frompos > fastakeyptr->topos)
+    {
+      gt_error_set(err, "file \"%s\", line " Formatuint64_t
+                        "illegal format: second value "
+                        "%lu is larger than third value %lu",
+                        gt_str_get(fileofkeystoextract),
+                        PRINTuint64_tcast(linenum+1),
+                        fastakeyptr->frompos,
+                        fastakeyptr->topos);
+      haserr = true;
+    }
+  }
+  return  haserr ? -1 : 0;
+}
+
 static Fastakeyquery *readfileofkeystoextract(bool verbose,
                                               unsigned long *numofqueries,
                                               const GtStr *fileofkeystoextract,
@@ -170,8 +234,7 @@ static Fastakeyquery *readfileofkeystoextract(bool verbose,
   FILE *fp;
   GtStr *currentline;
   bool haserr = false;
-  unsigned long linenum;
-  long readlongfrompos, readlongtopos;
+  uint64_t linenum;
   Fastakeyquery *fastakeyqueries;
 #undef SKDEBUG
 #ifdef SKDEBUG
@@ -199,35 +262,13 @@ static Fastakeyquery *readfileofkeystoextract(bool verbose,
   currentline = gt_str_new();
   for (linenum = 0; gt_str_read_next_line(currentline, fp) != EOF; linenum++)
   {
-    char *lineptr = gt_str_get(currentline);
-    size_t idx;
-
-    for (idx = 0; lineptr[idx] != '\0' && !isspace(lineptr[idx]); idx++)
-      /* nothing */ ;
-    fastakeyqueries[linenum].fastakey = gt_malloc(sizeof(char) * (idx+1));
-    strncpy(fastakeyqueries[linenum].fastakey,lineptr,idx);
-    fastakeyqueries[linenum].fastakey[idx] = '\0';
-    if (sscanf(lineptr+idx,"%ld %ld\n",&readlongfrompos,&readlongtopos) == 2)
+    if (extractkeyfromcurrentline(fastakeyqueries + linenum,
+                                  0,
+                                  currentline,
+                                  linenum,
+                                  fileofkeystoextract,
+                                  err) != 0)
     {
-      CHECKPOSITIVE(readlongfrompos,"%ld","second");
-      fastakeyqueries[linenum].frompos = (unsigned long) readlongfrompos;
-      CHECKPOSITIVE(readlongtopos,"%ld","third");
-      fastakeyqueries[linenum].topos = (unsigned long) readlongtopos;
-    } else
-    {
-      fastakeyqueries[linenum].frompos = 1UL;
-      fastakeyqueries[linenum].topos = 0;
-    }
-    fastakeyqueries[linenum].markhit = false;
-    if (!COMPLETE(fastakeyqueries[linenum]) &&
-        fastakeyqueries[linenum].frompos > fastakeyqueries[linenum].topos)
-    {
-      gt_error_set(err, "file \"%s\", line %lu: illegal format: second value "
-                   "%lu is larger than third value %lu",
-                   gt_str_get(fileofkeystoextract),
-                   linenum+1,
-                   fastakeyqueries[linenum].frompos,
-                   fastakeyqueries[linenum].topos);
       haserr = true;
       break;
     }
@@ -305,7 +346,7 @@ static void outputnonmarked(const Fastakeyquery *fastakeyqueries,
     if (!fastakeyqueries[idx].markhit)
     {
       printf("unsatisfied %s",fastakeyqueries[idx].fastakey);
-      if (COMPLETE(fastakeyqueries[idx]))
+      if (COMPLETE(fastakeyqueries + idx))
       {
         printf(" complete\n");
       } else
@@ -440,7 +481,7 @@ int gt_extractkeysfromdesfile(const GtStr *indexname, GtError *err)
   }
   if (!haserr)
   {
-    printf("number of keys of length %lu = " Formatuint64_t ", ",
+    printf("number of keys of length %lu = " Formatuint64_t "\n",
             constantkeylen,PRINTuint64_tcast(linenum));
   }
   gt_str_delete(line);
@@ -497,11 +538,11 @@ static int itersearchoverallkeys(const Encodedsequence *encseq,
   FILE *fp;
   GtStr *currentline;
   uint64_t linenum;
-  char *extractkey;
   unsigned long seqnum, desclen, countmissing = 0;
   bool haserr = false;
   const char *desc;
   Seqinfo seqinfo;
+  Fastakeyquery fastakeyquery;
 
   if (linewidth == 0)
   {
@@ -514,28 +555,31 @@ static int itersearchoverallkeys(const Encodedsequence *encseq,
     return -1;
   }
   currentline = gt_str_new();
-  extractkey = gt_malloc(sizeof(char) * (keysize+1));
+  fastakeyquery.fastakey = gt_malloc(sizeof(char) * (keysize+1));
   for (linenum = 0; gt_str_read_next_line(currentline, fp) != EOF; linenum++)
   {
-    char *lineptr = gt_str_get(currentline);
-    size_t idx;
-
-    for (idx = 0; lineptr[idx] != '\0' && !isspace(lineptr[idx]); idx++)
-      /* nothing */ ;
-    if (idx != (size_t) keysize)
+    if (extractkeyfromcurrentline(&fastakeyquery,
+                                  keysize,
+                                  currentline,
+                                  linenum,
+                                  fileofkeystoextract,
+                                  err) != 0)
     {
-      gt_error_set(err,"key \"%*.*s\" is not of size %lu",(int) idx,
-                   (int) idx,lineptr,keysize);
       haserr = true;
       break;
     }
-    strncpy(extractkey,lineptr,idx);
-    extractkey[idx] = '\0';
-    seqnum = searchfastaqueryindes(extractkey,keytab,numofkeys,keysize);
+    seqnum = searchfastaqueryindes(fastakeyquery.fastakey,keytab,numofkeys,
+                                   keysize);
     if (seqnum < numofkeys)
     {
       desc = retrievesequencedescription(&desclen, encseq, seqnum);
       (void) putc('>',stdout);
+      if (!COMPLETE(&fastakeyquery))
+      {
+        printf("%s %lu %lu ",fastakeyquery.fastakey,
+                             fastakeyquery.frompos,
+                             fastakeyquery.topos);
+      }
       if (fwrite(desc,sizeof *desc,(size_t) desclen,stdout) != (size_t) desclen)
       {
         gt_error_set(err,"cannot write header of length %lu",desclen);
@@ -547,8 +591,13 @@ static int itersearchoverallkeys(const Encodedsequence *encseq,
       encseq2symbolstring(stdout,
                           encseq,
                           Forwardmode,
-                          seqinfo.seqstartpos,
-                          seqinfo.seqlength,
+                          seqinfo.seqstartpos + (COMPLETE(&fastakeyquery)
+                                                 ? 0
+                                                 : (fastakeyquery.frompos-1)),
+                          COMPLETE(&fastakeyquery)
+                            ? seqinfo.seqlength
+                            : (Seqpos) (fastakeyquery.topos -
+                                        fastakeyquery.frompos + 1),
                           linewidth);
     } else
     {
@@ -562,7 +611,7 @@ static int itersearchoverallkeys(const Encodedsequence *encseq,
   }
   gt_str_delete(currentline);
   gt_fa_fclose(fp);
-  gt_free(extractkey);
+  gt_free(fastakeyquery.fastakey);
   return haserr ? - 1 : 0;
 }
 
@@ -668,9 +717,8 @@ int gt_extractkeysfromfastafile(bool verbose,
 {
   GtSeqIterator *seqit;
   const GtUchar *sequence;
-  char *desc, *headerbufferspace = NULL;
+  char *desc, *headerbufferspace = NULL, *keyspace = NULL;
   const char *keyptr;
-  char *keyspace = NULL;
   unsigned long allockeyspace = 0, len, keylen, numofqueries, keyposition,
                 countmarkhit = 0;
   int had_err = 0;
@@ -693,7 +741,9 @@ int gt_extractkeysfromfastafile(bool verbose,
   }
   seqit = gt_seqiterator_new(referencefiletab, err);
   if (!seqit)
+  {
     had_err = -1;
+  }
   if (!had_err && verbose)
   {
     gt_progressbar_start(gt_seqiterator_getcurrentcounter(seqit,
@@ -746,7 +796,7 @@ int gt_extractkeysfromfastafile(bool verbose,
                                            sizeof (*headerbufferspace)
                                            * headerbuffersize);
           }
-          if (COMPLETE(fastakeyqueries[keyposition]))
+          if (COMPLETE(fastakeyqueries + keyposition))
           {
             /*
             (void) snprintf(headerbufferspace,headerbuffersize,

@@ -1,0 +1,10 @@
+>A0AQI4 1 10 tr|A0AQI4|A0AQI4_9ARCH Putative ammonia monooxygenase (Fragment) OS=uncultured archaeon GN=amoA PE=4 SV=1
+VWLRRCTHYL
+>A0AQI5 60 62 tr|A0AQI5|A0AQI5_9ARCH Putative ammonia monooxygenase (Fragment) OS=uncultured archaeon GN=amoA PE=4 SV=1
+TFT
+>A0AQI7 1 20 tr|A0AQI7|A0AQI7_9ARCH Putative ammonia monooxygenase (Fragment) OS=uncultured archaeon GN=amoA PE=4 SV=1
+VWLRRCTHYLFIVVVAVNST
+>A0AQI8 2 22 tr|A0AQI8|A0AQI8_9ARCH Putative ammonia monooxygenase (Fragment) OS=uncultured archaeon GN=amoA PE=4 SV=1
+WLRRCTHYLFIVVVAVNSTLL
+>A0FGX9 3 28 tr|A0FGX9|A0FGX9_9ARCH Methyl coenzyme M reductase (Fragment) OS=uncultured archaeon GN=mcrA PE=4 SV=1
+TDDILDDNVYYDVDYINDKYNGAATI
