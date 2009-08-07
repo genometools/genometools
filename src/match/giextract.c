@@ -359,6 +359,7 @@ int gt_extractkeysfromdesfile(const GtStr *indexname, GtError *err)
   const char *keyptr;
   unsigned long keylen, constantkeylen = 0;
   bool haserr = false, firstdesc = true;
+  char *previouskey = NULL;
 
   fpin = opensfxfile(indexname,DESTABSUFFIX,"rb",err);
   if (fpin == NULL)
@@ -401,6 +402,9 @@ int gt_extractkeysfromdesfile(const GtStr *indexname, GtError *err)
         break;
       }
       constantkeylen = keylen;
+      previouskey = gt_malloc(sizeof (char) * (constantkeylen+1));
+      strncpy(previouskey,keyptr,(size_t) constantkeylen);
+      previouskey[constantkeylen] = '\0';
       (void) putc((char) constantkeylen,fpout);
       firstdesc = false;
     } else
@@ -412,6 +416,15 @@ int gt_extractkeysfromdesfile(const GtStr *indexname, GtError *err)
                          "is %lu",
                          (int) keylen,(int) keylen,keyptr,keylen,
                          constantkeylen);
+        haserr = true;
+        break;
+      }
+      gt_assert(previouskey != NULL);
+      if (strncmp(previouskey,keyptr,(size_t) constantkeylen) > 0)
+      {
+        gt_error_set(err,"previous key \"%s\" is lexicographically larger "
+                         "than current key \"%*.*s\"",
+                         previouskey,(int) keylen,(int) keylen,keyptr);
         haserr = true;
         break;
       }
@@ -433,6 +446,7 @@ int gt_extractkeysfromdesfile(const GtStr *indexname, GtError *err)
   gt_str_delete(line);
   gt_fa_fclose(fpin);
   gt_fa_fclose(fpout);
+  gt_free(previouskey);
   return haserr ? -1 : 0;
 }
 
