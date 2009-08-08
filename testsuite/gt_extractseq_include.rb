@@ -184,7 +184,7 @@ if $gttestdata then
              "-db #{$gttestdata}/trembl/trembl-section.fsa.gz")
     run("gunzip -c #{$gttestdata}/trembl/trembl-section.fsa.gz")
     run("mv #{$last_stdout} trembl-section.fsa")
-    run("#{$scriptsdir}/tr2deskeys.sh #{$gttestdata}/trembl/trembl-section.fsa.gz")
+    run("#{$scriptsdir}/tr2deskeys.rb #{$gttestdata}/trembl/trembl-section.fsa.gz")
     run_test("#{$bin}gt extractseq -keys #{$last_stdout} -width 60 " +
              "trembl-section.fsa.gz")
     run("cmp -s #{$last_stdout} trembl-section.fsa")
