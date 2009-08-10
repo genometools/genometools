@@ -38,9 +38,21 @@ else
   fi
 fi
 
+# optional -memcheck   (run valgrind)
+#          -select 253 (run testcase 253)
+
 cd testsuite
 
-# the make call normally used for development
+if test ! "X${GTTESTDATA}" = "X"
+then
+  GRUMBACH=${GTTESTDATA}/DNA-mix/Grumbach.fna
+  if test -d ${GRUMBACH}
+  then
+    ../scripts/checkmaxpairs.sh 14 ${GRUMBACH}/*.fna ../testdata/Duplicate.fna
+  fi
+fi
+exit 0
+
 env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ./testsuite.rb \
        ${MC} -keywords 'gt_extractseq' \
        -gttestdata ${GTTESTDATA}
@@ -55,11 +67,6 @@ env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ./testsuite.rb \
        -gttestdata ${GTTESTDATA}
 env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_packedindex'
 cd ..
-
-# optional -memcheck   (run valgrind)
-#          -select 253 (run testcase 253)
-# the following depends on vmatch-mini.x and mkvtree.x
-# ../scripts/runmaxpairs.sh 14 ${GRUMBACH}/*.fna ../testdata/Duplicate.fna
 
 sktest-vsvs.sh
 

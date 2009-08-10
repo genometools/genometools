@@ -45,26 +45,19 @@ then
 fi
 shift
 filenames=$*
-VMMINI=vmatch-mini.x
 
 for filename in ${filenames}
 do
   echo "$0 ${minlength} ${filename}"
-  checkerror "mkvtree.x -db ${filename} -indexname mkvidx -dna -ois -sti1 -bck -suf -tis -lcp -bwt -pl"
   checkerror "../bin/gt suffixerator -algbds 3 40 120 -db ${filename} -indexname sfxidx -dna -suf -tis -lcp -pl"
   if test "X${queryfile}" = "X"
   then
-    checkerror "${VMMINI} ${minlength} mkvidx" > result.vm
-    cleanhashlines result.vm
     checkerror "../bin/gt dev maxpairs -l ${minlength} -ii sfxidx" > result.mp
     cleanhashlines result.mp
   else
-    checkerror "${VMMINI} ${minlength} mkvidx ${queryfile}" > result.vm
-    cleanhashlines result.vm
     checkerror "../bin/gt dev maxpairs -l ${minlength} -q ${queryfile} -ii sfxidx" > result.mp
     cleanhashlines result.mp
   fi
-  resultfile="`basename ${filename}`.result"
-  cp result.vm ${resultfile}
-  checkerror "cmp -s result.vm result.mp"
+  resultfile="${GTTESTDATA}/maxpairs-result14/`basename ${filename}`.result"
+  checkerror "cmp -s ${resultfile} result.mp"
 done
