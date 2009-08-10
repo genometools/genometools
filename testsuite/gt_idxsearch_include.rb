@@ -8,6 +8,21 @@ allfiles = ["Atinsert.fna",
             "TTT-small.fna",
             "trna_glutamine.fna"]
 
+maxpairstestfiles=["Duplicate.fna",
+                   "Wildcards.fna",
+                   "chntxx.fna",
+                   "hs5hcmvcg.fna",
+                   "humdystrop.fna",
+                   "humghcsa.fna",
+                   "humhbb.fna",
+                   "humhdabcd.fna",
+                   "humhprtb.fna",
+                   "mipacga.fna",
+                   "mpocpcg.fna",
+                   "mpomtcg.fna",
+                   "vaccg.fna",
+                   "ychrIII.fna"]
+
 def makegreedyfwdmatcall(queryfile,indexarg,ms)
   prog=""
   if ms
@@ -66,6 +81,28 @@ def createandcheckgreedyfwdmat(reffile,queryfile)
   run "#{$bin}gt prebwt -maxdepth 4 -pck pck"
   checkgreedyfwdmat(queryfile,false)
   checkgreedyfwdmat(queryfile,true)
+end
+
+def checkgrumbachmaxpairs(reffile)
+  if reffile == 'Duplicate.fna'
+  then
+    filepath="#{$testdata}"
+  else
+    filepath="#{$gttestdata}/DNA-mix/Grumbach.fna"
+  end
+  run_test "#{$bin}gt suffixerator -algbds 3 40 120 -db " +
+           "#{filepath}/#{reffile} -indexname sfxidx -dna -suf -tis -lcp -pl"
+  resultfile="#{$gttestdata}maxpairs-result14/#{reffile}.result"
+  run_test "#{$bin}gt dev maxpairs -l 14 -ii sfxidx"
+  run "cmp -s #{resultfile} #{$last_stdout}"
+end
+
+maxpairstestfiles.each do |reffile|
+  Name "gt maxpairs #{reffile}"
+  Keywords "gt_maxpairs gttestdata"
+  Test do
+    checkgrumbachmaxpairs(reffile)
+  end
 end
 
 allfiles.each do |reffile|

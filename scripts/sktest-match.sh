@@ -35,6 +35,9 @@ runtestsuite=1
 if test $runtestsuite -eq 1
 then
   cd testsuite
+  env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ./testsuite.rb \
+       ${MC} -keywords 'gt_maxpairs and gttestdata' \
+       -gttestdata ${GTTESTDATA}
   for keyword in gt_idxlocali gt_greedyfwdmat gt_tallymer gt_ltrharvest
   do
     env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords ${keyword}
