@@ -88,7 +88,7 @@ def checkmaxpairs(reffile)
   run_test "#{$bin}gt suffixerator -algbds 3 40 120 -db " +
            "#{reffilepath} -indexname sfxidx -dna -suf -tis -lcp -pl"
   resultfile="#{$gttestdata}maxpairs-result/#{reffile}.result"
-  run_test "#{$bin}gt dev maxpairs -l 14 -ii sfxidx"
+  run_test "#{$bin}gt maxpairs -l 14 -ii sfxidx"
   run "cmp -s #{resultfile} #{$last_stdout}"
 end
 
@@ -98,7 +98,7 @@ def checkmaxpairsiwithquery(reffile,queryfile)
   idxname=reffile + "-idx"
   run_test "#{$bin}gt suffixerator -algbds 3 40 120 -db " +
            "#{reffilepath} -indexname #{idxname} -dna -suf -tis -lcp -pl"
-  run_test "#{$bin}gt dev maxpairs -l 15 -ii #{idxname} -q #{queryfilepath}"
+  run_test "#{$bin}gt maxpairs -l 15 -ii #{idxname} -q #{queryfilepath}"
   run "sort #{$last_stdout}"
   #run "/Users/kurtz/bin-ops/i686-apple-darwin/mkvtree.x -indexname mkv-idx " +
   #    "-allout -v -pl -dna -db #{reffilepath}"

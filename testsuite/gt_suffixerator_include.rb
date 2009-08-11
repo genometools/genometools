@@ -103,13 +103,13 @@ Keywords "gt_suffixerator"
 Test do
   run_test "#{$bin}gt suffixerator -db #{$testdata}Atinsert.fna " +
            "-indexname sfx -dna -tis -suf -lcp -pl"
-  run_test "#{$bin}gt dev maxpairs -l 8 -ii sfx"
+  run_test "#{$bin}gt maxpairs -l 8 -ii sfx"
   run "grep -v '^#' #{$last_stdout}"
   run "diff #{$last_stdout} #{$testdata}maxpairs-8-Atinsert.txt"
-  run_test "#{$bin}gt dev maxpairs -scan -l 8 -ii sfx"
+  run_test "#{$bin}gt maxpairs -scan -l 8 -ii sfx"
   run "grep -v '^#' #{$last_stdout}"
   run "diff #{$last_stdout} #{$testdata}maxpairs-8-Atinsert.txt"
-  run_test "#{$bin}gt dev maxpairs -samples 40 -l 6 -ii sfx",:maxtime => 600
+  run_test "#{$bin}gt maxpairs -samples 40 -l 6 -ii sfx",:maxtime => 600
 end
 
 Name "gt suffixerator patternmatch"

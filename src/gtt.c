@@ -76,6 +76,7 @@
 #include "tools/gt_interfeat.h"
 #include "tools/gt_ltrharvest.h"
 #include "tools/gt_matchingstatistics.h"
+#include "tools/gt_maxpairs.h"
 #include "tools/gt_merge.h"
 #include "tools/gt_mergefeat.h"
 #include "tools/gt_mgth.h"
@@ -137,6 +138,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "interfeat", gt_interfeat());
   gt_toolbox_add(tools, "ltrharvest", gt_ltrharvest);
   gt_toolbox_add(tools, "matstat", gt_matchingstatistics);
+  gt_toolbox_add(tools, "maxpairs", gt_maxpairs);
   gt_toolbox_add(tools, "merge", gt_merge);
   gt_toolbox_add_tool(tools, "mergefeat", gt_mergefeat());
   gt_toolbox_add(tools, "mgth", gt_mgth);

@@ -56,12 +56,12 @@ do
   then
     checkerror "${VMMINI} ${minlength} mkvidx" > result.vm
     cleanhashlines result.vm
-    checkerror "../bin/gt dev maxpairs -l ${minlength} -ii sfxidx" > result.mp
+    checkerror "../bin/gt maxpairs -l ${minlength} -ii sfxidx" > result.mp
     cleanhashlines result.mp
   else
     checkerror "${VMMINI} ${minlength} mkvidx ${queryfile}" > result.vm
     cleanhashlines result.vm
-    checkerror "../bin/gt dev maxpairs -l ${minlength} -q ${queryfile} -ii sfxidx" > result.mp
+    checkerror "../bin/gt maxpairs -l ${minlength} -q ${queryfile} -ii sfxidx" > result.mp
     cleanhashlines result.mp
   fi
   resultfile="`basename ${filename}`.result"
