@@ -138,7 +138,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "interfeat", gt_interfeat());
   gt_toolbox_add(tools, "ltrharvest", gt_ltrharvest);
   gt_toolbox_add(tools, "matstat", gt_matchingstatistics);
-  gt_toolbox_add(tools, "maxpairs", gt_maxpairs);
+  gt_toolbox_add(tools, "repfind", gt_maxpairs);
   gt_toolbox_add(tools, "merge", gt_merge);
   gt_toolbox_add_tool(tools, "mergefeat", gt_mergefeat());
   gt_toolbox_add(tools, "mgth", gt_mgth);

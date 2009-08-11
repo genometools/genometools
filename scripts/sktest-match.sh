@@ -36,10 +36,10 @@ if test $runtestsuite -eq 1
 then
   cd testsuite
   env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb \
-       ${MC} -keywords 'gt_maxpairs' \
+       ${MC} -keywords 'gt_repfind' \
        -gttestdata ${GTTESTDATA}
   env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ./testsuite.rb \
-       ${MC} -keywords 'gt_maxpairs and gttestdata' \
+       ${MC} -keywords 'gt_repfind and gttestdata' \
        -gttestdata ${GTTESTDATA}
   for keyword in gt_idxlocali gt_greedyfwdmat gt_tallymer gt_ltrharvest
   do

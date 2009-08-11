@@ -52,12 +52,12 @@ do
   checkerror "../bin/gt suffixerator -algbds 3 40 120 -db ${filename} -indexname sfxidx -dna -suf -tis -lcp -pl"
   if test "X${queryfile}" = "X"
   then
-    checkerror "../bin/gt maxpairs -l ${minlength} -ii sfxidx" > result.mp
+    checkerror "../bin/gt repfind -l ${minlength} -ii sfxidx" > result.mp
     cleanhashlines result.mp
   else
-    checkerror "../bin/gt maxpairs -l ${minlength} -q ${queryfile} -ii sfxidx" > result.mp
+    checkerror "../bin/gt repfind -l ${minlength} -q ${queryfile} -ii sfxidx" > result.mp
     cleanhashlines result.mp
   fi
-  resultfile="${GTTESTDATA}/maxpairs-result14/`basename ${filename}`.result"
+  resultfile="${GTTESTDATA}/repfind-result/`basename ${filename}`.result"
   checkerror "cmp -s ${resultfile} result.mp"
 done

@@ -8,7 +8,7 @@ allfiles = ["Atinsert.fna",
             "TTT-small.fna",
             "trna_glutamine.fna"]
 
-maxpairstestfiles=["Duplicate.fna",
+repfindtestfiles=["Duplicate.fna",
                    "Wildcards.fna",
                    "hs5hcmvcg.fna",
                    "humhbb.fna",
@@ -83,57 +83,57 @@ def addfilepath(filename)
   end
 end
 
-def checkmaxpairs(reffile)
+def checkrepfind(reffile)
   reffilepath=addfilepath(reffile)
   run_test "#{$bin}gt suffixerator -algbds 3 40 120 -db " +
            "#{reffilepath} -indexname sfxidx -dna -suf -tis -lcp -pl"
-  resultfile="#{$gttestdata}maxpairs-result/#{reffile}.result"
-  run_test "#{$bin}gt maxpairs -l 14 -ii sfxidx"
+  resultfile="#{$gttestdata}repfind-result/#{reffile}.result"
+  run_test "#{$bin}gt repfind -l 14 -ii sfxidx"
   run "cmp -s #{resultfile} #{$last_stdout}"
 end
 
-def checkmaxpairsiwithquery(reffile,queryfile)
+def checkrepfindwithquery(reffile,queryfile)
   reffilepath=addfilepath(reffile)
   queryfilepath=addfilepath(queryfile)
   idxname=reffile + "-idx"
   run_test "#{$bin}gt suffixerator -algbds 3 40 120 -db " +
            "#{reffilepath} -indexname #{idxname} -dna -suf -tis -lcp -pl"
-  run_test "#{$bin}gt maxpairs -l 15 -ii #{idxname} -q #{queryfilepath}"
+  run_test "#{$bin}gt repfind -l 15 -ii #{idxname} -q #{queryfilepath}"
   run "sort #{$last_stdout}"
   #run "/Users/kurtz/bin-ops/i686-apple-darwin/mkvtree.x -indexname mkv-idx " +
   #    "-allout -v -pl -dna -db #{reffilepath}"
   #run "/Users/kurtz/bin-ops/i686-apple-darwin/vmatch-mini.x 15 mkv-idx " +
   #    "#{queryfilepath}"
   #run "sed -e '/^#/d' #{$last_stdout} | sort"
-  run "cmp -s #{$gttestdata}/maxpairs-result/#{reffile}-#{queryfile}.result #{$last_stdout}"
+  run "cmp -s #{$gttestdata}/repfind-result/#{reffile}-#{queryfile}.result #{$last_stdout}"
 end
 
-Name "gt maxpairs small"
-Keywords "gt_maxpairs"
+Name "gt repfind small"
+Keywords "gt_repfind"
 Test do
   run_test "#{$bin}gt suffixerator -db #{$testdata}Atinsert.fna " +
            "-indexname sfx -dna -tis -suf -lcp -pl"
-  run_test "#{$bin}gt maxpairs -l 8 -ii sfx"
+  run_test "#{$bin}gt repfind -l 8 -ii sfx"
   run "grep -v '^#' #{$last_stdout}"
-  run "diff #{$last_stdout} #{$testdata}maxpairs-8-Atinsert.txt"
-  run_test "#{$bin}gt maxpairs -scan -l 8 -ii sfx"
+  run "diff #{$last_stdout} #{$testdata}repfind-8-Atinsert.txt"
+  run_test "#{$bin}gt repfind -scan -l 8 -ii sfx"
   run "grep -v '^#' #{$last_stdout}"
-  run "diff #{$last_stdout} #{$testdata}maxpairs-8-Atinsert.txt"
-  run_test "#{$bin}gt maxpairs -samples 40 -l 6 -ii sfx",:maxtime => 600
+  run "diff #{$last_stdout} #{$testdata}repfind-8-Atinsert.txt"
+  run_test "#{$bin}gt repfind -samples 40 -l 6 -ii sfx",:maxtime => 600
 end
 
-maxpairstestfiles.each do |reffile|
-  Name "gt maxpairs #{reffile}"
-  Keywords "gt_maxpairs gttestdata"
+repfindtestfiles.each do |reffile|
+  Name "gt repfind #{reffile}"
+  Keywords "gt_repfind gttestdata"
   Test do
-    checkmaxpairs(reffile)
+    checkrepfind(reffile)
   end
-  maxpairstestfiles.each do |queryfile|
+  repfindtestfiles.each do |queryfile|
     if reffile != queryfile
-      Name "gt maxpairs #{reffile} versus #{queryfile}"
-      Keywords "gt_maxpairs gttestdata"
+      Name "gt repfind #{reffile} versus #{queryfile}"
+      Keywords "gt_repfind gttestdata"
       Test do
-        checkmaxpairsiwithquery(reffile,queryfile)
+        checkrepfindwithquery(reffile,queryfile)
       end
     end
   end
