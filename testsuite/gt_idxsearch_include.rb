@@ -10,17 +10,13 @@ allfiles = ["Atinsert.fna",
 
 maxpairstestfiles=["Duplicate.fna",
                    "Wildcards.fna",
-                   "chntxx.fna",
                    "hs5hcmvcg.fna",
                    "humdystrop.fna",
-                   "humghcsa.fna",
                    "humhbb.fna",
                    "humhdabcd.fna",
                    "humhprtb.fna",
-                   "mipacga.fna",
                    "mpocpcg.fna",
                    "mpomtcg.fna",
-                   "vaccg.fna",
                    "ychrIII.fna"]
 
 def makegreedyfwdmatcall(queryfile,indexarg,ms)
@@ -83,25 +79,45 @@ def createandcheckgreedyfwdmat(reffile,queryfile)
   checkgreedyfwdmat(queryfile,true)
 end
 
-def checkgrumbachmaxpairs(reffile)
-  if reffile == 'Duplicate.fna'
-  then
-    filepath="#{$testdata}"
+def addfilepath(filename)
+  if filename == 'Duplicate.fna'
+    return "#{$testdata}/#{filename}"
   else
-    filepath="#{$gttestdata}/DNA-mix/Grumbach.fna"
+    return "#{$gttestdata}/DNA-mix/Grumbach.fna/#{filename}"
   end
+end
+
+def checkmaxpairs(reffile)
+  reffilepath=addfilepath(reffile)
   run_test "#{$bin}gt suffixerator -algbds 3 40 120 -db " +
-           "#{filepath}/#{reffile} -indexname sfxidx -dna -suf -tis -lcp -pl"
+           "#{reffilepath} -indexname sfxidx -dna -suf -tis -lcp -pl"
   resultfile="#{$gttestdata}maxpairs-result14/#{reffile}.result"
   run_test "#{$bin}gt dev maxpairs -l 14 -ii sfxidx"
   run "cmp -s #{resultfile} #{$last_stdout}"
+end
+
+def checkmaxpairsiwithquery(reffile,queryfile)
+  reffilepath=addfilepath(reffile)
+  queryfilepath=addfilepath(queryfile)
+  run_test "#{$bin}gt suffixerator -algbds 3 40 120 -db " +
+           "#{reffilepath} -indexname sfxidx -dna -suf -tis -lcp -pl"
+  run_test "#{$bin}gt dev maxpairs -l 8 -ii sfxidx -q #{queryfilepath}"
 end
 
 maxpairstestfiles.each do |reffile|
   Name "gt maxpairs #{reffile}"
   Keywords "gt_maxpairs gttestdata"
   Test do
-    checkgrumbachmaxpairs(reffile)
+    checkmaxpairs(reffile)
+  end
+  maxpairstestfiles.each do |queryfile|
+    if reffile != queryfile
+      Name "gt maxpairs #{reffile} versus #{queryfile}"
+      Keywords "gt_maxpairs gttestdata"
+      Test do
+        checkmaxpairsiwithquery(reffile,queryfile)
+      end
+    end
   end
 end
 
