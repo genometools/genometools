@@ -11,11 +11,7 @@ allfiles = ["Atinsert.fna",
 maxpairstestfiles=["Duplicate.fna",
                    "Wildcards.fna",
                    "hs5hcmvcg.fna",
-                   "humdystrop.fna",
                    "humhbb.fna",
-                   "humhdabcd.fna",
-                   "humhprtb.fna",
-                   "mpocpcg.fna",
                    "mpomtcg.fna",
                    "ychrIII.fna"]
 
@@ -99,9 +95,14 @@ end
 def checkmaxpairsiwithquery(reffile,queryfile)
   reffilepath=addfilepath(reffile)
   queryfilepath=addfilepath(queryfile)
+  idxname=reffile + "-idx"
   run_test "#{$bin}gt suffixerator -algbds 3 40 120 -db " +
-           "#{reffilepath} -indexname sfxidx -dna -suf -tis -lcp -pl"
-  run_test "#{$bin}gt dev maxpairs -l 8 -ii sfxidx -q #{queryfilepath}"
+           "#{reffilepath} -indexname #{idxname} -dna -suf -tis -lcp -pl"
+  run_test "#{$bin}gt dev maxpairs -l 15 -ii #{idxname} -q #{queryfilepath}"
+  run "/Users/kurtz/bin-ops/i686-apple-darwin/mkvtree.x -indexname mkv-idx " +
+      "-allout -v -pl -dna -db #{reffilepath}"
+  run "/Users/kurtz/bin-ops/i686-apple-darwin/vmatch-mini.x 14 mkv-idx " +
+      "#{queryfilepath}"
 end
 
 maxpairstestfiles.each do |reffile|
