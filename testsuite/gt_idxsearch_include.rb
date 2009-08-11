@@ -87,7 +87,7 @@ def checkmaxpairs(reffile)
   reffilepath=addfilepath(reffile)
   run_test "#{$bin}gt suffixerator -algbds 3 40 120 -db " +
            "#{reffilepath} -indexname sfxidx -dna -suf -tis -lcp -pl"
-  resultfile="#{$gttestdata}maxpairs-result14/#{reffile}.result"
+  resultfile="#{$gttestdata}maxpairs-result/#{reffile}.result"
   run_test "#{$bin}gt dev maxpairs -l 14 -ii sfxidx"
   run "cmp -s #{resultfile} #{$last_stdout}"
 end
@@ -99,10 +99,13 @@ def checkmaxpairsiwithquery(reffile,queryfile)
   run_test "#{$bin}gt suffixerator -algbds 3 40 120 -db " +
            "#{reffilepath} -indexname #{idxname} -dna -suf -tis -lcp -pl"
   run_test "#{$bin}gt dev maxpairs -l 15 -ii #{idxname} -q #{queryfilepath}"
-  run "/Users/kurtz/bin-ops/i686-apple-darwin/mkvtree.x -indexname mkv-idx " +
-      "-allout -v -pl -dna -db #{reffilepath}"
-  run "/Users/kurtz/bin-ops/i686-apple-darwin/vmatch-mini.x 14 mkv-idx " +
-      "#{queryfilepath}"
+  run "sort #{$last_stdout}"
+  #run "/Users/kurtz/bin-ops/i686-apple-darwin/mkvtree.x -indexname mkv-idx " +
+  #    "-allout -v -pl -dna -db #{reffilepath}"
+  #run "/Users/kurtz/bin-ops/i686-apple-darwin/vmatch-mini.x 15 mkv-idx " +
+  #    "#{queryfilepath}"
+  #run "sed -e '/^#/d' #{$last_stdout} | sort"
+  run "cmp -s #{$gttestdata}/maxpairs-result/#{reffile}-#{queryfile}.result #{$last_stdout}"
 end
 
 maxpairstestfiles.each do |reffile|
@@ -121,6 +124,7 @@ maxpairstestfiles.each do |reffile|
     end
   end
 end
+exit 1
 
 allfiles.each do |reffile|
   allfiles.each do |queryfile|
