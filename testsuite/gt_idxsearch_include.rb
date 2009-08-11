@@ -108,6 +108,20 @@ def checkmaxpairsiwithquery(reffile,queryfile)
   run "cmp -s #{$gttestdata}/maxpairs-result/#{reffile}-#{queryfile}.result #{$last_stdout}"
 end
 
+Name "gt maxpairs small"
+Keywords "gt_maxpairs"
+Test do
+  run_test "#{$bin}gt suffixerator -db #{$testdata}Atinsert.fna " +
+           "-indexname sfx -dna -tis -suf -lcp -pl"
+  run_test "#{$bin}gt maxpairs -l 8 -ii sfx"
+  run "grep -v '^#' #{$last_stdout}"
+  run "diff #{$last_stdout} #{$testdata}maxpairs-8-Atinsert.txt"
+  run_test "#{$bin}gt maxpairs -scan -l 8 -ii sfx"
+  run "grep -v '^#' #{$last_stdout}"
+  run "diff #{$last_stdout} #{$testdata}maxpairs-8-Atinsert.txt"
+  run_test "#{$bin}gt maxpairs -samples 40 -l 6 -ii sfx",:maxtime => 600
+end
+
 maxpairstestfiles.each do |reffile|
   Name "gt maxpairs #{reffile}"
   Keywords "gt_maxpairs gttestdata"

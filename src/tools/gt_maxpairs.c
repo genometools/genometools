@@ -98,6 +98,7 @@ static OPrval parse_options(Maxpairsoptions *maxpairsoptions,
                                  &maxpairsoptions->samples,
                                  (unsigned long) 0,
                                  (unsigned long) 1);
+  gt_option_is_development_option(sampleoption);
   gt_option_parser_add_option(op, sampleoption);
 
   scanoption = gt_option_new_bool("scan","scan index",
@@ -114,6 +115,7 @@ static OPrval parse_options(Maxpairsoptions *maxpairsoptions,
   queryoption = gt_option_new_filenamearray("q",
                              "Specify query files",
                              maxpairsoptions->queryfiles);
+  gt_option_is_development_option(queryoption);
   gt_option_parser_add_option(op, queryoption);
 
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv,
