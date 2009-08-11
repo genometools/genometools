@@ -16,10 +16,10 @@
 */
 
 #include <inttypes.h>
-#include "core/error.h"
-#include "core/str.h"
-#include "core/option.h"
+#include "core/error_api.h"
+#include "core/str_api.h"
 #include "core/unused_api.h"
+#include "core/option.h"
 #include "core/versionfunc.h"
 #include "match/esa-seqread.h"
 #include "match/esa-mmsearch-def.h"
@@ -85,36 +85,37 @@ static OPrval parse_options(Maxpairsoptions *maxpairsoptions,
 
   gt_error_check(err);
   op = gt_option_parser_new("[options] -ii indexname",
-                         "Perform Substring matches with or without query.");
+                            "Compute maximal repeats.");
   gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
 
   option = gt_option_new_uint_min("l","Specify minimum length",
-                               &maxpairsoptions->userdefinedleastlength,
-                               (unsigned int) 20,
-                               (unsigned int) 1);
+                                  &maxpairsoptions->userdefinedleastlength,
+                                  20U,
+                                  1U);
   gt_option_parser_add_option(op, option);
 
   sampleoption = gt_option_new_ulong_min("samples","Specify number of samples",
-                                 &maxpairsoptions->samples,
-                                 (unsigned long) 0,
-                                 (unsigned long) 1);
+                                         &maxpairsoptions->samples,
+                                         0,
+                                         1UL);
   gt_option_is_development_option(sampleoption);
   gt_option_parser_add_option(op, sampleoption);
 
-  scanoption = gt_option_new_bool("scan","scan index",
-                               &maxpairsoptions->scanfile,
-                               false);
+  scanoption = gt_option_new_bool("scan","scan index rather than mapping "
+                                         "it to main memory",
+                                  &maxpairsoptions->scanfile,
+                                  false);
   gt_option_parser_add_option(op, scanoption);
 
   option = gt_option_new_string("ii",
-                             "Specify input index",
-                             maxpairsoptions->indexname, NULL);
+                                "Specify input index",
+                                maxpairsoptions->indexname, NULL);
   gt_option_parser_add_option(op, option);
   gt_option_is_mandatory(option);
 
   queryoption = gt_option_new_filenamearray("q",
-                             "Specify query files",
-                             maxpairsoptions->queryfiles);
+                                            "Specify query files",
+                                            maxpairsoptions->queryfiles);
   gt_option_is_development_option(queryoption);
   gt_option_parser_add_option(op, queryoption);
 
@@ -140,13 +141,13 @@ static OPrval parse_options(Maxpairsoptions *maxpairsoptions,
 }
 
 static int callenummaxpairs(const GtStr *indexname,
-                     unsigned int userdefinedleastlength,
-                     bool scanfile,
-                     int(*processmaxpairs)(void *,Seqpos,Seqpos,
-                                           Seqpos,GtError *),
-                     void *processmaxpairsinfo,
-                     Verboseinfo *verboseinfo,
-                     GtError *err)
+                            unsigned int userdefinedleastlength,
+                            bool scanfile,
+                            int(*processmaxpairs)(void *,Seqpos,Seqpos,
+                                                  Seqpos,GtError *),
+                            void *processmaxpairsinfo,
+                            Verboseinfo *verboseinfo,
+                            GtError *err)
 {
   bool haserr = false;
   Sequentialsuffixarrayreader *ssar;
