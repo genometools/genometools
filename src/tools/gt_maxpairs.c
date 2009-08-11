@@ -26,10 +26,9 @@
 #include "match/format64.h"
 #include "match/verbose-def.h"
 
-#include "match/esa-maxpairs.pr"
-#include "match/test-maxpairs.pr"
-
+#include "match/esa-maxpairs.h"
 #include "tools/gt_maxpairs.h"
+#include "match/test-maxpairs.pr"
 
 typedef struct
 {

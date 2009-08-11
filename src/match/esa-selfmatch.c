@@ -24,7 +24,7 @@
 #include "verbose-def.h"
 
 #include "sfx-apfxlen.h"
-#include "esa-maxpairs.pr"
+#include "esa-maxpairs.h"
 
 typedef struct
 {

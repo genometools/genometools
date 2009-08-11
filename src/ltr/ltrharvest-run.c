@@ -22,6 +22,7 @@
 #include "core/error.h"
 #include "core/str.h"
 #include "match/esa-seqread.h"
+#include "match/esa-maxpairs.h"
 
 #include "ltrharvest-opt.h"
 #include "ltrharvest-run.h"
@@ -31,8 +32,6 @@
 #include "outputstd.h"
 #include "outputfasta.h"
 #include "outputgff3.h"
-
-#include "match/esa-maxpairs.pr"
 
 static int bdptrcompare(const void *a, const void *b)
 {
