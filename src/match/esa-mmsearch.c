@@ -30,7 +30,6 @@
 #include "stamp.h"
 #include "esa-map.h"
 #include "echoseq.h"
-
 #include "sfx-apfxlen.h"
 
 #define COMPARE(OFFSET,LCPLEN)\
@@ -402,14 +401,15 @@ int callenumquerymatches(const GtStr *indexname,
     if (!haserr)
     {
       gt_seqiterator_set_symbolmap(seqit,
-                                getencseqAlphabetsymbolmap(suffixarray.encseq));
+                                   getencseqAlphabetsymbolmap(suffixarray.
+                                                              encseq));
       for (unitnum = 0; /* Nothing */; unitnum++)
       {
         retval = gt_seqiterator_next(seqit,
-                                    &query,
-                                    &querylen,
-                                    &desc,
-                                    err);
+                                     &query,
+                                     &querylen,
+                                     &desc,
+                                     err);
         if (retval < 0)
         {
           haserr = true;
@@ -434,7 +434,7 @@ int callenumquerymatches(const GtStr *indexname,
           haserr = true;
           break;
         }
-        FREESPACE(desc);
+        gt_free(desc);
       }
       gt_seqiterator_delete(seqit);
     }
