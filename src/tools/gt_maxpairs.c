@@ -18,8 +18,10 @@
 #include <inttypes.h>
 #include "core/error_api.h"
 #include "core/str_api.h"
+#include "core/ma_api.h"
 #include "core/unused_api.h"
 #include "core/option.h"
+#include "core/tool.h"
 #include "core/versionfunc.h"
 #include "match/esa-seqread.h"
 #include "match/esa-mmsearch-def.h"
@@ -73,73 +75,6 @@ static int simpleexactquerymatchoutput(GT_UNUSED void *info,
   return 0;
 }
 
-static OPrval parse_options(Maxpairsoptions *maxpairsoptions,
-                            int *parsed_args,
-                            int argc,
-                            const char **argv,
-                            GtError *err)
-{
-  GtOptionParser *op;
-  GtOption *option, *queryoption, *scanoption, *sampleoption;
-  OPrval oprval;
-
-  gt_error_check(err);
-  op = gt_option_parser_new("[options] -ii indexname",
-                            "Compute maximal repeats.");
-  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
-
-  option = gt_option_new_uint_min("l","Specify minimum length",
-                                  &maxpairsoptions->userdefinedleastlength,
-                                  20U,
-                                  1U);
-  gt_option_parser_add_option(op, option);
-
-  sampleoption = gt_option_new_ulong_min("samples","Specify number of samples",
-                                         &maxpairsoptions->samples,
-                                         0,
-                                         1UL);
-  gt_option_is_development_option(sampleoption);
-  gt_option_parser_add_option(op, sampleoption);
-
-  scanoption = gt_option_new_bool("scan","scan index rather than mapping "
-                                         "it to main memory",
-                                  &maxpairsoptions->scanfile,
-                                  false);
-  gt_option_parser_add_option(op, scanoption);
-
-  option = gt_option_new_string("ii",
-                                "Specify input index",
-                                maxpairsoptions->indexname, NULL);
-  gt_option_parser_add_option(op, option);
-  gt_option_is_mandatory(option);
-
-  queryoption = gt_option_new_filenamearray("q",
-                                            "Specify query files",
-                                            maxpairsoptions->queryfiles);
-  gt_option_is_development_option(queryoption);
-  gt_option_parser_add_option(op, queryoption);
-
-  oprval = gt_option_parser_parse(op, parsed_args, argc, argv,
-                               gt_versionfunc, err);
-  if (gt_option_is_set(queryoption))
-  {
-    if (gt_option_is_set(sampleoption))
-    {
-      gt_error_set(err, "option -samples cannot be combined with option -q");
-      oprval = OPTIONPARSER_ERROR;
-    } else
-    {
-      if (gt_option_is_set(scanoption))
-      {
-        gt_error_set(err, "option -scan cannot be combined with option -q");
-        oprval = OPTIONPARSER_ERROR;
-      }
-    }
-  }
-  gt_option_parser_delete(op);
-  return oprval;
-}
-
 static int callenummaxpairs(const GtStr *indexname,
                             unsigned int userdefinedleastlength,
                             bool scanfile,
@@ -183,75 +118,136 @@ static int callenummaxpairs(const GtStr *indexname,
   return haserr ? -1 : 0;
 }
 
-int gt_maxpairs(int argc, const char **argv, GtError *err)
+static void *gt_repfind_arguments_new(void)
+{
+  Maxpairsoptions *arguments;
+
+  arguments = gt_malloc(sizeof (*arguments));
+  arguments->indexname = gt_str_new();
+  arguments->queryfiles = gt_str_array_new();
+  return arguments;
+}
+
+static void gt_repfind_arguments_delete(void *tool_arguments)
+{
+  Maxpairsoptions *arguments = tool_arguments;
+
+  if (!arguments)
+  {
+    return;
+  }
+  gt_str_delete(arguments->indexname);
+  gt_str_array_delete(arguments->queryfiles);
+  gt_free(arguments);
+}
+
+static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
+{
+  GtOptionParser *op;
+  GtOption *option, *queryoption, *scanoption, *sampleoption;
+  Maxpairsoptions *arguments = tool_arguments;
+
+  op = gt_option_parser_new("[options] -ii indexname",
+                            "Compute maximal repeats.");
+  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+
+  option = gt_option_new_uint_min("l","Specify minimum length",
+                                  &arguments->userdefinedleastlength,
+                                  20U,
+                                  1U);
+  gt_option_parser_add_option(op, option);
+
+  sampleoption = gt_option_new_ulong_min("samples","Specify number of samples",
+                                         &arguments->samples,
+                                         0,
+                                         1UL);
+  gt_option_is_development_option(sampleoption);
+  gt_option_parser_add_option(op, sampleoption);
+
+  scanoption = gt_option_new_bool("scan","scan index rather than mapping "
+                                         "it to main memory",
+                                  &arguments->scanfile,
+                                  false);
+  gt_option_parser_add_option(op, scanoption);
+
+  option = gt_option_new_string("ii",
+                                "Specify input index",
+                                arguments->indexname, NULL);
+  gt_option_parser_add_option(op, option);
+  gt_option_is_mandatory(option);
+
+  queryoption = gt_option_new_filenamearray("q",
+                                            "Specify query files",
+                                            arguments->queryfiles);
+  gt_option_is_development_option(queryoption);
+  gt_option_parser_add_option(op, queryoption);
+
+  gt_option_exclude(queryoption,sampleoption);
+  gt_option_exclude(queryoption,scanoption);
+  return op;
+}
+
+static int gt_repfind_runner(GT_UNUSED int argc,
+                             GT_UNUSED const char **argv,
+                             GT_UNUSED int parsed_args,
+                             void *tool_arguments, GtError *err)
 {
   bool haserr = false;
-  int parsed_args;
-  Maxpairsoptions maxpairsoptions;
-  OPrval oprval;
+  Maxpairsoptions *arguments = tool_arguments;
+  Verboseinfo *verboseinfo;
 
   gt_error_check(err);
-
-  maxpairsoptions.indexname = gt_str_new();
-  maxpairsoptions.queryfiles = gt_str_array_new();
-  oprval = parse_options(&maxpairsoptions,&parsed_args, argc, argv,err);
-  if (oprval == OPTIONPARSER_OK)
+  gt_assert(parsed_args == argc);
+  verboseinfo = newverboseinfo(false);
+  if (gt_str_array_size(arguments->queryfiles) == 0)
   {
-    Verboseinfo *verboseinfo = newverboseinfo(false);
-    gt_assert(parsed_args == argc);
-    if (gt_str_array_size(maxpairsoptions.queryfiles) == 0)
+    if (arguments->samples == 0)
     {
-      if (maxpairsoptions.samples == 0)
+      if (callenummaxpairs(arguments->indexname,
+                           arguments->userdefinedleastlength,
+                           arguments->scanfile,
+                           simpleexactselfmatchoutput,
+                           NULL,
+                           verboseinfo,
+                           err) != 0)
       {
-        if (callenummaxpairs(maxpairsoptions.indexname,
-                             maxpairsoptions.userdefinedleastlength,
-                             maxpairsoptions.scanfile,
-                             simpleexactselfmatchoutput,
-                             NULL,
-                             verboseinfo,
-                             err) != 0)
-        {
-          haserr = true;
-        }
-      } else
-      {
-        if (testmaxpairs(maxpairsoptions.indexname,
-                         maxpairsoptions.samples,
-                         maxpairsoptions.userdefinedleastlength,
-                         (Seqpos) (100 *
-                                   maxpairsoptions.userdefinedleastlength),
-                         verboseinfo,
-                         err) != 0)
-        {
-          haserr = true;
-        }
+        haserr = true;
       }
     } else
     {
-      if (callenumquerymatches(maxpairsoptions.indexname,
-                               maxpairsoptions.queryfiles,
-                               false,
-                               maxpairsoptions.userdefinedleastlength,
-                               simpleexactquerymatchoutput,
-                               NULL,
-                               verboseinfo,
-                               err) != 0)
+      if (testmaxpairs(arguments->indexname,
+                       arguments->samples,
+                       arguments->userdefinedleastlength,
+                       (Seqpos) (100 * arguments->userdefinedleastlength),
+                       verboseinfo,
+                       err) != 0)
       {
         haserr = true;
       }
     }
-    freeverboseinfo(&verboseinfo);
-  }
-  gt_str_delete(maxpairsoptions.indexname);
-  gt_str_array_delete(maxpairsoptions.queryfiles);
-
-  if (oprval == OPTIONPARSER_REQUESTS_EXIT)
+  } else
   {
-    return 0;
+    if (callenumquerymatches(arguments->indexname,
+                             arguments->queryfiles,
+                             false,
+                             arguments->userdefinedleastlength,
+                             simpleexactquerymatchoutput,
+                             NULL,
+                             verboseinfo,
+                             err) != 0)
+    {
+      haserr = true;
+    }
   }
-  if (oprval == OPTIONPARSER_ERROR)
-  {
-    return -1;
-  }
+  freeverboseinfo(&verboseinfo);
   return haserr ? -1 : 0;
+}
+
+GtTool* gt_repfind(void)
+{
+  return gt_tool_new(gt_repfind_arguments_new,
+                     gt_repfind_arguments_delete,
+                     gt_repfind_option_parser_new,
+                     NULL,
+                     gt_repfind_runner);
 }

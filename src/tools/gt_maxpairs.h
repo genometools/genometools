@@ -18,7 +18,7 @@
 #ifndef GT_MAXPAIRS_H
 #define GT_MAXPAIRS_H
 
-/* the maxpairs tool */
-int gt_maxpairs(int argc, const char **argv, GtError *err);
+/* the repfind tool */
+GtTool* gt_repfind(void);
 
 #endif

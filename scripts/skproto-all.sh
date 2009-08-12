@@ -53,6 +53,7 @@ encodedseq.c
 encseq-specialsrank.c
 enum-patt.c
 esa-dfs.c
+esa-maxpairs.c
 esa-merge.c
 esa-lcpval.c
 esa-map.c
