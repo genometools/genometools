@@ -197,7 +197,7 @@ static int gt_tagerator_arguments_check(GT_UNUSED int rest_argc,
   }
   if (gt_option_is_set(arguments->refoptionesaindex))
   {
-   arguments->withesa = true;
+    arguments->withesa = true;
   } else
   {
     gt_assert(gt_option_is_set(arguments->refoptionpckindex));
