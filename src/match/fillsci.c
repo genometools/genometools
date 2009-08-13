@@ -209,7 +209,7 @@ int fasta2sequencekeyvalues(
     {
       haserr = true;
     }
-    if (!haserr) 
+    if (!haserr)
     {
       gt_sequence_buffer_set_symbolmap(fb, gt_alphabet_symbolmap(alpha));
       *filelengthtab = gt_calloc((size_t) gt_str_array_size(filenametab),
