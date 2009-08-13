@@ -55,8 +55,8 @@ static GtOptionParser* gt_mutate_option_parser_new(void *tool_arguments)
                              100);
   gt_option_parser_add_option(op, o);
 
-  /* parse */
   gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
+
   return op;
 }
 
