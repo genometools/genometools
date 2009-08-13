@@ -44,7 +44,7 @@ class CustomVisitor(NodeVisitor):
                 except AttributeError:
                     pass
                 return 0
-            except GTError as errmsg:
+            except GTError, errmsg:
                 err.set(str(errmsg))
                 return -1
 
@@ -59,7 +59,7 @@ class CustomVisitor(NodeVisitor):
                 except AttributeError:
                     pass
                 return 0
-            except GTError as errmsg:
+            except GTError, errmsg:
                 err.set(str(errmsg))
                 return -1
 
@@ -74,7 +74,7 @@ class CustomVisitor(NodeVisitor):
                 except AttributeError:
                     pass
                 return 0
-            except GTError as errmsg:
+            except GTError, errmsg:
                 err.set(str(errmsg))
                 return -1
 
@@ -89,7 +89,7 @@ class CustomVisitor(NodeVisitor):
                 except AttributeError:
                     pass
                 return 0
-            except GTError as errmsg:
+            except GTError, errmsg:
                 err.set(str(errmsg))
                 return -1
 

@@ -44,7 +44,7 @@ class CustomStream(GenomeStream):
                 else:
                     nodepp[0] = None
                 return 0
-            except GTError as errmsg:
+            except GTError, errmsg:
                 error.set(str(errmsg))
                 return -1
 
