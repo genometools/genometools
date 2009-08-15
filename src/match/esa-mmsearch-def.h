@@ -28,8 +28,8 @@ MMsearchiterator *newmmsearchiterator(const Encodedsequence *dbencseq,
                                       Seqpos rightbound,
                                       Seqpos offset,
                                       Readmode readmode,
-                                      const GtUchar *pattern,
-                                      unsigned long patternlen);
+                                      const GtUchar *query,
+                                      unsigned long querylength);
 
 bool nextmmsearchiterator(Seqpos *dbstart,MMsearchiterator *mmsi);
 
@@ -39,20 +39,6 @@ bool identicalmmsearchiterators(const MMsearchiterator *mmsi1,
                                 const MMsearchiterator *mmsi2);
 
 void freemmsearchiterator(MMsearchiterator **mmsi);
-
-int runquerysubstringmatch(const Encodedsequence *dbencseq,
-                           const Seqpos *suftabpart,
-                           Readmode readmode,
-                           Seqpos numberofsuffixes,
-                           uint64_t unitnum,
-                           const GtUchar *query,
-                           unsigned long querylen,
-                           unsigned int minlength,
-                           int (*processmaxmatch)(void *,unsigned long,
-                                                  Seqpos,uint64_t,
-                                                  unsigned long,GtError *),
-                           void *processmaxmatchinfo,
-                           GtError *err);
 
 int callenumquerymatches(const GtStr *indexname,
                          const GtStrArray *queryfiles,

@@ -32,6 +32,19 @@
 #include "echoseq.h"
 #include "sfx-apfxlen.h"
 
+typedef struct
+{
+  const GtUchar *sequence;
+  unsigned long offset,
+                minlength,
+                overall_length;
+} Queryrep;
+
+static GtUchar accessquery(const Queryrep *queryrep,unsigned long pos)
+{
+  return queryrep->sequence[pos];
+}
+
 #define COMPARE(OFFSET,LCPLEN)\
         sidx = (OFFSET) + (LCPLEN);\
         if (sidx < totallength)\
@@ -40,7 +53,7 @@
         }\
         for (/* Nothing */ ; /* Nothing */; sidx++, (LCPLEN)++)\
         {\
-          if (LCPLEN >= (Seqpos) querylen)\
+          if (LCPLEN >= (Seqpos) queryrep->minlength)\
           {\
             retcode = 0;\
             break;\
@@ -50,11 +63,12 @@
             retcode = -1;\
             break;\
           }\
-          currentchar = sequentialgetencodedchar(dbencseq,esr,sidx,readmode);\
-          retcode = (int) (query[LCPLEN] - currentchar);\
+          currentdbchar = sequentialgetencodedchar(dbencseq,esr,sidx,readmode);\
+          currentquerychar = accessquery(queryrep,queryrep->offset + (LCPLEN));\
+          retcode = (int) (currentquerychar - currentdbchar);\
           if (retcode == 0)\
           {\
-            if (ISSPECIAL(currentchar) && ISSPECIAL(query[LCPLEN]))\
+            if (ISSPECIAL(currentdbchar) && ISSPECIAL(currentquerychar))\
             {\
               retcode = -1;\
               break;\
@@ -70,12 +84,11 @@ static bool mmsearch(const Encodedsequence *dbencseq,
                      const Seqpos *suftab,
                      Readmode readmode,
                      Lcpinterval *lcpitv,
-                     const GtUchar *query,
-                     unsigned long querylen)
+                     const Queryrep *queryrep)
 {
   Seqpos left, leftsave, mid, right, lpref, rpref, totallength, lcplen, sidx;
   int retcode = 0;
-  GtUchar currentchar;
+  GtUchar currentdbchar, currentquerychar;
 
   totallength = getencseqtotallength(dbencseq);
   leftsave = left = lcpitv->left;
@@ -159,14 +172,14 @@ static bool mmsearch(const Encodedsequence *dbencseq,
   Encodedsequencescanstate *esr;
 };
 
-MMsearchiterator *newmmsearchiterator(const Encodedsequence *dbencseq,
-                                      const Seqpos *suftab,
-                                      Seqpos leftbound,
-                                      Seqpos rightbound,
-                                      Seqpos offset,
-                                      Readmode readmode,
-                                      const GtUchar *pattern,
-                                      unsigned long patternlen)
+static MMsearchiterator *newmmsearchiterator2(const Encodedsequence *dbencseq,
+                                              const Seqpos *suftab,
+                                              Seqpos leftbound,
+                                              Seqpos rightbound,
+                                              Seqpos offset,
+                                              Readmode readmode,
+                                              const Queryrep *queryrep)
+
 {
   MMsearchiterator *mmsi;
 
@@ -176,14 +189,36 @@ MMsearchiterator *newmmsearchiterator(const Encodedsequence *dbencseq,
   mmsi->lcpitv.offset = offset;
   mmsi->suftab = suftab;
   mmsi->esr = newEncodedsequencescanstate();
-  if (!mmsearch(dbencseq,mmsi->esr,suftab,readmode,&mmsi->lcpitv,
-                pattern,patternlen))
+  if (!mmsearch(dbencseq,mmsi->esr,suftab,readmode,&mmsi->lcpitv,queryrep))
   {
     mmsi->lcpitv.left = (Seqpos) 1;
     mmsi->lcpitv.right = 0;
   }
   mmsi->sufindex = mmsi->lcpitv.left;
   return mmsi;
+}
+
+MMsearchiterator *newmmsearchiterator(const Encodedsequence *dbencseq,
+                                      const Seqpos *suftab,
+                                      Seqpos leftbound,
+                                      Seqpos rightbound,
+                                      Seqpos offset,
+                                      Readmode readmode,
+                                      const GtUchar *query,
+                                      unsigned long querylength)
+{
+  Queryrep queryrep;
+
+  queryrep.sequence = query;
+  queryrep.offset = 0;
+  queryrep.minlength = queryrep.overall_length = querylength;
+  return newmmsearchiterator2(dbencseq,
+                              suftab,
+                              leftbound,
+                              rightbound,
+                              offset,
+                              readmode,
+                              &queryrep);
 }
 
 Seqpos countmmsearchiterator(const MMsearchiterator *mmsi)
@@ -228,19 +263,19 @@ void freemmsearchiterator(MMsearchiterator **mmsi)
 static bool isleftmaximal(const Encodedsequence *dbencseq,
                           Readmode readmode,
                           Seqpos dbstart,
-                          const GtUchar *query,
-                          unsigned long querystart)
+                          const Queryrep *queryrep)
 {
   GtUchar dbleftchar;
 
-  if (dbstart == 0 || querystart == 0)
+  if (dbstart == 0 || queryrep->offset == 0)
   {
     return true;
   }
   dbleftchar = getencodedchar(dbencseq, /* Random access */
                               dbstart-1,
                               readmode);
-  if (dbleftchar != query[querystart-1] || ISSPECIAL(dbleftchar))
+  if (dbleftchar != accessquery(queryrep,queryrep->offset-1) ||
+      ISSPECIAL(dbleftchar))
   {
     return true;
   }
@@ -252,9 +287,7 @@ static unsigned long extendright(const Encodedsequence *dbencseq,
                                  Readmode readmode,
                                  Seqpos totallength,
                                  Seqpos dbend,
-                                 const GtUchar *query,
-                                 unsigned long queryend,
-                                 unsigned long querylength)
+                                 const Queryrep *queryrep)
 {
   GtUchar dbchar;
   Seqpos dbpos;
@@ -264,73 +297,72 @@ static unsigned long extendright(const Encodedsequence *dbencseq,
   {
     initEncodedsequencescanstate(esr,dbencseq,readmode,dbend);
   }
-  for (dbpos = dbend, querypos = queryend; /* Nothing */; dbpos++, querypos++)
+  for (dbpos = dbend, querypos = queryrep->offset + queryrep->minlength;
+       dbpos < totallength && querypos < queryrep->overall_length;
+       dbpos++, querypos++)
   {
-    if (dbpos >= totallength || querypos >= querylength)
-    {
-      break;
-    }
     dbchar = sequentialgetencodedchar(dbencseq,esr,dbpos,readmode);
-    if (dbchar != query[querypos] || ISSPECIAL(dbchar))
+    if (dbchar != accessquery(queryrep,querypos) || ISSPECIAL(dbchar))
     {
       break;
     }
   }
-  return querypos - queryend;
+  return (unsigned long) (dbpos - dbend);
 }
 
-int runquerysubstringmatch(const Encodedsequence *dbencseq,
-                           const Seqpos *suftabpart,
-                           Readmode readmode,
-                           Seqpos numberofsuffixes,
-                           uint64_t unitnum,
-                           const GtUchar *query,
-                           unsigned long querylen,
-                           unsigned int minlength,
-                           int (*processmaxmatch)(void *,unsigned long,
-                                                  Seqpos,uint64_t,
-                                                  unsigned long,GtError *),
-                           void *processmaxmatchinfo,
-                           GtError *err)
+static int runquerysubstringmatch(const Encodedsequence *dbencseq,
+                                  const Seqpos *suftabpart,
+                                  Readmode readmode,
+                                  Seqpos numberofsuffixes,
+                                  uint64_t unitnum,
+                                  const GtUchar *query,
+                                  unsigned long query_overall_length,
+                                  unsigned int minmatchlength,
+                                  int (*processmaxmatch)(void *,unsigned long,
+                                                         Seqpos,uint64_t,
+                                                         unsigned long,
+                                                         GtError *),
+                                  void *processmaxmatchinfo,
+                                  GtError *err)
 {
   MMsearchiterator *mmsi;
   Seqpos dbstart, totallength;
-  unsigned long extend, currentquerystart;
+  unsigned long extend;
   uint64_t localunitnum = unitnum;
   unsigned long localqueryoffset = 0;
+  Queryrep queryrep;
 
   gt_assert(numberofsuffixes > 0);
   totallength = getencseqtotallength(dbencseq);
-  for (currentquerystart = 0;
-       currentquerystart <= querylen - minlength;
-       currentquerystart++)
+  queryrep.sequence = query;
+  queryrep.minlength = (unsigned long) minmatchlength;
+  queryrep.overall_length = query_overall_length;
+  for (queryrep.offset = 0;
+       queryrep.offset <= query_overall_length - minmatchlength;
+       queryrep.offset++)
   {
-    mmsi = newmmsearchiterator(dbencseq,
-                               suftabpart,
-                               0, /* leftbound */
-                               numberofsuffixes-1, /* rightbound */
-                               0, /* offset */
-                               readmode,
-                               query + currentquerystart,
-                               (unsigned long) minlength);
+    mmsi = newmmsearchiterator2(dbencseq,
+                                suftabpart,
+                                0, /* leftbound */
+                                numberofsuffixes-1, /* rightbound */
+                                0, /* offset */
+                                readmode,
+                                &queryrep);
     while (nextmmsearchiterator(&dbstart,mmsi))
     {
       if (isleftmaximal(dbencseq,
                         readmode,
                         dbstart,
-                        query,
-                        currentquerystart))
+                        &queryrep))
       {
         extend = extendright(dbencseq,
                              mmsi->esr,
                              readmode,
                              totallength,
-                             dbstart + minlength,
-                             query,
-                             currentquerystart + minlength,
-                             querylen);
+                             dbstart + minmatchlength,
+                             &queryrep);
         if (processmaxmatch(processmaxmatchinfo,
-                            extend + (unsigned long) minlength,
+                            extend + (unsigned long) minmatchlength,
                             dbstart,
                             localunitnum,
                             localqueryoffset,
@@ -341,7 +373,7 @@ int runquerysubstringmatch(const Encodedsequence *dbencseq,
       }
     }
     freemmsearchiterator(&mmsi);
-    if (query[currentquerystart] == (GtUchar) SEPARATOR)
+    if (accessquery(&queryrep,queryrep.offset) == (GtUchar) SEPARATOR)
     {
       localunitnum++;
       localqueryoffset = 0;

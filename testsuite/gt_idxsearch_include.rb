@@ -138,7 +138,6 @@ repfindtestfiles.each do |reffile|
     end
   end
 end
-exit 1
 
 allfiles.each do |reffile|
   allfiles.each do |queryfile|
