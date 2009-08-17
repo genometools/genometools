@@ -36,6 +36,10 @@ if test $runtestsuite -eq 1
 then
   cd testsuite
   env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb \
+       ${MC} -keywords 'gt_tallymer' \
+       -gttestdata ${GTTESTDATA}
+  exit 1
+  env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb \
        ${MC} -keywords 'gt_repfind' \
        -gttestdata ${GTTESTDATA}
   env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ./testsuite.rb \

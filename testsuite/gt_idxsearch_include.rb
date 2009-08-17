@@ -64,7 +64,7 @@ def checktagerator(queryfile,ms)
 end
 
 def createandcheckgreedyfwdmat(reffile,queryfile)
-  run("#{$scriptsdir}/runmkfm.sh #{$bin}/gt 0 . fmi #{reffile}",
+  run("#{$scriptsdir}/runmkfm.sh #{$bin}gt 0 . fmi #{reffile}",
       :maxtime => 100)
   run "#{$bin}gt suffixerator -indexname sfx -tis -suf -ssp -dna -v " +
            "-db #{reffile}"
