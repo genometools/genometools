@@ -46,7 +46,7 @@ one filename, say fastaindex, then it is checked if there is a file
 fastaindex.kys. This makes up part of the fasta index, which is contructed by
 calling the suffixerator tool as follows:
 
-gt suffixerator -protein -tis -ssp -tis -des -sds -kys -indexname fastaindex -db inputfile1 [inputfile2 ..]
+gt suffixerator -protein -ssp -tis -des -sds -kys -indexname fastaindex -db inputfile1 [inputfile2 ..]
 
 This reads the protein sequence files given to the option -db and creates
 several files:
