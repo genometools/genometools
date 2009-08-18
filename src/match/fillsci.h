@@ -42,6 +42,7 @@ int fasta2sequencekeyvalues(
         bool outdestab,
         bool outsdstab,
         bool outkystab,
+        bool outkyssort,
         unsigned long *characterdistribution,
         bool outssptab,
         ArraySeqpos *sequenceseppos,

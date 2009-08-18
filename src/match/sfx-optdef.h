@@ -45,6 +45,7 @@ typedef struct
        isprotein,
        isplain,
        beverbose,
+       showtime,
        outtistab,
        outsuftab,
        outlcptab,
@@ -54,7 +55,8 @@ typedef struct
        outbcktab,
        outssptab,
        outkystab,
-       showtime;
+       outkyssort;
+  GtStr *optionkysargumentstring;
   Sfxstrategy sfxstrategy;
   struct bwtOptions bwtIdxParams;
 } Suffixeratoroptions;

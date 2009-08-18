@@ -33,7 +33,7 @@
 #include "encseq-def.h"
 #include "stamp.h"
 #include "opensfxfile.h"
-#include "match/giextract.h"
+#include "giextract.h"
 #include "fillsci.h"
 
 static unsigned long currentspecialrangevalue(
@@ -156,6 +156,7 @@ int fasta2sequencekeyvalues(
         bool outdestab,
         bool outsdstab,
         bool outkystab,
+        bool outkyssort,
         unsigned long *characterdistribution,
         bool outssptab,
         ArraySeqpos *sequenceseppos,
@@ -328,7 +329,14 @@ int fasta2sequencekeyvalues(
   gt_fa_xfclose(desfp);
   if (!haserr && outkystab)
   {
-    if (gt_extractkeysfromdesfile(indexname, err) != 0)
+    unsigned long numofentries = 0;
+
+    if (outkyssort)
+    {
+      numofentries = sequenceseppos->nextfreeSeqpos+1;
+    }
+    if (gt_extractkeysfromdesfile(indexname, numofentries, verboseinfo,
+                                  err) != 0)
     {
       haserr = true;
     }

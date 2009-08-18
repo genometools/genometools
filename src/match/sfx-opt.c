@@ -219,11 +219,12 @@ static OPrval parse_options(int *parsed_args,
                                  false);
   gt_option_parser_add_option(op, optionsds);
 
-  optionkys = gt_option_new_bool("kys",
-                                 "output the keys of the form |key| in fasta "
-                                 "header",
-                                 &so->outkystab,
-                                 false);
+  optionkys = gt_option_new_string("kys",
+                                   "output/sort according to keys of the form "
+                                   "|key| in fasta header",
+                                   so->optionkysargumentstring,
+                                   "nosort");
+  gt_option_argument_is_optional(optionkys);
   gt_option_parser_add_option(op, optionkys);
 
   if (doesa)
@@ -280,8 +281,8 @@ static OPrval parse_options(int *parsed_args,
   gt_option_exclude(optionsmap, optiondna);
   gt_option_exclude(optionsmap, optionprotein);
   gt_option_exclude(optiondna, optionprotein);
+  gt_option_imply(optionkys,optionsds);
   gt_option_imply(optionsds,optiondes);
-  gt_option_imply(optionkys,optiondes);
   if (optionmaxdepth != NULL)
   {
     gt_option_exclude(optionmaxdepth, optiondifferencecover);
@@ -415,6 +416,22 @@ static OPrval parse_options(int *parsed_args,
   {
     computePackedIndexDefaults(&so->bwtIdxParams, BWTBaseFeatures);
   }
+  if (oprval == OPTIONPARSER_OK && gt_option_is_set(optionkys))
+  {
+    so->outkystab = true;
+    if (strcmp(gt_str_get(so->optionkysargumentstring),"sort") == 0)
+    {
+      so->outkyssort = true;
+    } else
+    {
+      if (strcmp(gt_str_get(so->optionkysargumentstring),"nosort") != 0)
+      {
+        gt_error_set(err,"illegal argument to option -kys: either use no "
+                         "argument or argument \"sort\"");
+        oprval = OPTIONPARSER_ERROR;
+      }
+    }
+  }
   gt_option_parser_delete(op);
   if (oprval == OPTIONPARSER_OK && *parsed_args != argc)
   {
@@ -490,7 +507,8 @@ static void showoptions(const Suffixeratoroptions *so)
           so->outdestab ? "true" : "false",
           so->outsdstab ? "true" : "false",
           so->outssptab ? "true" : "false",
-          so->outkystab ? "true" : "false"
+          so->outkystab ? (so->outkyssort ? "true with sort" : "true") :
+                          "false"
           );
 }
 
@@ -501,6 +519,7 @@ void wrapsfxoptions(Suffixeratoroptions *so)
   gt_str_delete(so->str_inputindex);
   gt_str_delete(so->str_smap);
   gt_str_delete(so->str_sat);
+  gt_str_delete(so->optionkysargumentstring);
   gt_str_delete(so->str_maxdepth);
   gt_str_array_delete(so->filenametab);
   gt_str_array_delete(so->algbounds);
@@ -537,6 +556,9 @@ int suffixeratoroptions(Suffixeratoroptions *so,
   so->str_smap = gt_str_new();
   so->str_sat = gt_str_new();
   so->str_maxdepth = gt_str_new();
+  so->outkystab = false;
+  so->outkyssort = false;
+  so->optionkysargumentstring = gt_str_new();
   so->filenametab = gt_str_array_new();
   so->algbounds = gt_str_array_new();
   so->prefixlength = PREFIXLENGTH_AUTOMATIC;

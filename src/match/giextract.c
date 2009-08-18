@@ -392,25 +392,30 @@ static const char *desc2key(unsigned long *keylen,const char *desc,
 
 #define KEYSTABSUFFIX ".kys"
 
-int gt_extractkeysfromdesfile(const GtStr *indexname, GtError *err)
+int gt_extractkeysfromdesfile(const GtStr *indexname,
+                              unsigned long numofentries,
+                              Verboseinfo *verboseinfo,
+                              GtError *err)
 {
-  FILE *fpin, *fpout;
+  FILE *fpin, *fpout = NULL;
   GtStr *line = NULL;
-  uint64_t linenum;
   const char *keyptr;
-  unsigned long keylen, constantkeylen = 0;
+  unsigned long keylen, constantkeylen = 0, linenum, incorrectorder = 0;
   bool haserr = false, firstdesc = true;
-  char *previouskey = NULL;
+  char *previouskey = NULL, *keytab = NULL, *keytabptr = NULL;
 
   fpin = opensfxfile(indexname,DESTABSUFFIX,"rb",err);
   if (fpin == NULL)
   {
     return -1;
   }
-  fpout = opensfxfile(indexname,KEYSTABSUFFIX,"wb",err);
-  if (fpout == NULL)
+  if (numofentries == 0)
   {
-    haserr = true;
+    fpout = opensfxfile(indexname,KEYSTABSUFFIX,"wb",err);
+    if (fpout == NULL)
+    {
+      haserr = true;
+    }
   }
   if (!haserr)
   {
@@ -444,17 +449,22 @@ int gt_extractkeysfromdesfile(const GtStr *indexname, GtError *err)
       }
       constantkeylen = keylen;
       previouskey = gt_malloc(sizeof (char) * (constantkeylen+1));
-      strncpy(previouskey,keyptr,(size_t) constantkeylen);
-      previouskey[constantkeylen] = '\0';
-      (void) putc((char) constantkeylen,fpout);
       firstdesc = false;
+      if (numofentries == 0)
+      {
+        (void) putc((char) constantkeylen,fpout);
+      } else
+      {
+        keytab = gt_malloc(sizeof (char) * (constantkeylen+1) * numofentries);
+        keytabptr = keytab;
+      }
     } else
     {
       if (constantkeylen != keylen)
       {
-        gt_error_set(err,"key \"%*.*s\" of length %lu: all keys must be of the "
-                         "same length which for all previously seen headers "
-                         "is %lu",
+        gt_error_set(err,"key \"%*.*s\" of length %lu: all keys must be of "
+                         "the same length which for all previously seen "
+                         "headers is %lu",
                          (int) keylen,(int) keylen,keyptr,keylen,
                          constantkeylen);
         haserr = true;
@@ -463,31 +473,52 @@ int gt_extractkeysfromdesfile(const GtStr *indexname, GtError *err)
       gt_assert(previouskey != NULL);
       if (strncmp(previouskey,keyptr,(size_t) constantkeylen) > 0)
       {
+      /*
         gt_error_set(err,"previous key \"%s\" is lexicographically larger "
                          "than current key \"%*.*s\"",
                          previouskey,(int) keylen,(int) keylen,keyptr);
         haserr = true;
         break;
+      */
+        printf("previous key \"%s\" (no %lu) is lexicographically larger "
+               "than current key \"%*.*s\"\n",
+               previouskey,linenum,(int) keylen,(int) keylen,keyptr);
+        incorrectorder++;
       }
     }
-    if (fwrite(keyptr,sizeof *keyptr,(size_t) keylen,fpout) != (size_t) keylen)
+    if (numofentries == 0)
     {
-      gt_error_set(err,"cannot write key of length %lu",keylen);
-      haserr = true;
-      break;
+      if (fwrite(keyptr,sizeof *keyptr,(size_t) keylen,fpout)
+          != (size_t) keylen)
+      {
+        gt_error_set(err,"cannot write key of length %lu",keylen);
+        haserr = true;
+        break;
+      }
+      (void) putc('\0',fpout);
+    } else
+    {
+      gt_assert(keytabptr != NULL);
+      strncpy(keytabptr,keyptr,(size_t) constantkeylen);
+      keytabptr[constantkeylen] = '\0';
+      keytabptr += constantkeylen;
     }
-    (void) putc('\0',fpout);
+    strncpy(previouskey,keyptr,(size_t) constantkeylen);
+    previouskey[constantkeylen] = '\0';
     gt_str_reset(line);
   }
   if (!haserr)
   {
-    printf("number of keys of length %lu = " Formatuint64_t "\n",
-            constantkeylen,PRINTuint64_tcast(linenum));
+    showverbose(verboseinfo,"number of keys of length %lu = %lu",
+                constantkeylen,linenum);
+    showverbose(verboseinfo,"number of incorrectly ordered keys = %lu",
+                incorrectorder);
   }
   gt_str_delete(line);
   gt_fa_fclose(fpin);
   gt_fa_fclose(fpout);
   gt_free(previouskey);
+  gt_free(keytab);
   return haserr ? -1 : 0;
 }
 

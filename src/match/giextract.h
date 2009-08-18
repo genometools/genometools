@@ -21,6 +21,7 @@
 #include "core/str_api.h"
 #include "core/fileutils_api.h"
 #include "core/error.h"
+#include "verbose-def.h"
 
 int gt_extractkeysfromfastafile(bool verbose,
                                 GtFile *outfp,
@@ -33,7 +34,10 @@ int gt_extractkeysfromfastaindex(const GtStr *indexname,
                                  const GtStr *fileofkeystoextract,
                                  unsigned long linewidth,GtError *err);
 
-int gt_extractkeysfromdesfile(const GtStr *indexname, GtError *err);
+int gt_extractkeysfromdesfile(const GtStr *indexname,
+                              unsigned long numofentries,
+                              Verboseinfo *verboseinfo,
+                              GtError *err);
 
 bool gt_deskeysfileexists(const GtStr *indexname);
 
