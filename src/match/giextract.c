@@ -390,6 +390,11 @@ static const char *desc2key(unsigned long *keylen,const char *desc,
   return desc + firstpipe + 1;
 }
 
+static int aliasstrcmp(const void *a,const void *b)
+{
+  return strcmp((const char *) a,(const void *) b);
+}
+
 #define KEYSTABSUFFIX ".kys"
 
 int gt_extractkeysfromdesfile(const GtStr *indexname,
@@ -501,7 +506,7 @@ int gt_extractkeysfromdesfile(const GtStr *indexname,
       gt_assert(keytabptr != NULL);
       strncpy(keytabptr,keyptr,(size_t) constantkeylen);
       keytabptr[constantkeylen] = '\0';
-      keytabptr += constantkeylen;
+      keytabptr += constantkeylen+1;
     }
     strncpy(previouskey,keyptr,(size_t) constantkeylen);
     previouskey[constantkeylen] = '\0';
@@ -514,10 +519,16 @@ int gt_extractkeysfromdesfile(const GtStr *indexname,
     showverbose(verboseinfo,"number of incorrectly ordered keys = %lu",
                 incorrectorder);
   }
+  gt_assert(numofentries == 0 || 
+            keytabptr == keytab + (constantkeylen+1) * numofentries);
   gt_str_delete(line);
   gt_fa_fclose(fpin);
   gt_fa_fclose(fpout);
   gt_free(previouskey);
+  if (numofentries > 0)
+  {
+    qsort(keytab,(size_t) numofentries,(constantkeylen+1),aliasstrcmp);
+  }
   gt_free(keytab);
   return haserr ? -1 : 0;
 }
