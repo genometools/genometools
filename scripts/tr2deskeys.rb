@@ -3,14 +3,20 @@
 require 'zlib'
 
 if ARGV.length == 0
-  STDOUT.puts "#{$0}: gzipped file"
+  STDOUT.puts "#{$0}: <possibly gzipped file in fasta format>"
   exit 1
 end
 
+regexp = Regexp.new('^>tr\|([0-9A-Z]*)\|')
+
 File.open(ARGV[0],"r") do |fh|
-  gzip = Zlib::GzipReader.new(fh)
-  gzip.each_line do |line|
-    m = line.match(/^>tr\|([0-9A-Z]*)\|/)
+  if ARGV[0].match(/\.gz/)
+    input = Zlib::GzipReader.new(fh)
+  else
+    input = fh
+  end
+  input.each_line do |line|
+    m = line.match(regexp)
     if m
       STDOUT.puts m[1]
     end

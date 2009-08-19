@@ -42,6 +42,7 @@
 #include "sfx-opt.pr"
 #include "sfx-outprj.pr"
 #include "sfx-apfxlen.h"
+#include "giextract.h"
 
 #include "eis-encidxseq.h"
 #include "eis-bwtseq-construct.h"
@@ -607,6 +608,14 @@ static int runsuffixerator(bool doesa,
     freeOutlcptab(&outfileinfo.outlcpinfo);
   }
   freeSfxseqinfo(&sfxseqinfo);
+  if (!haserr && so->outkystab && so->outkyssort)
+  {
+    if (gt_extractkeysfromdesfile(so->str_indexname, true, verboseinfo,
+                                  err) != 0)
+    {
+      haserr = true;
+    }
+  }
   if (mtime != NULL)
   {
     deliverthetime(stdout,mtime,NULL);

@@ -185,7 +185,10 @@ if $gttestdata then
     run("gunzip -c #{$gttestdata}/trembl/trembl-section.fsa.gz")
     run("mv #{$last_stdout} trembl-section.fsa")
     run("#{$scriptsdir}/tr2deskeys.rb #{$gttestdata}/trembl/trembl-section.fsa.gz")
-    run_test("#{$bin}gt extractseq -keys #{$last_stdout} -width 60 " +
+    run("mv #{$last_stdout} trembl-section.keylist")
+    run("#{$scriptsdir}/randlines.rb trembl-section.keylist 1000")
+    run("mv #{$last_stdout} trembl-section.random-keylist")
+    run_test("#{$bin}gt extractseq -keys trembl-section.keylist -width 60 " +
              "trembl-section.fsa.gz")
     run("cmp -s #{$last_stdout} trembl-section.fsa")
     run_test("#{$bin}gt extractseq -keys #{$testdata}/trkeys.txt -width 60 " +
@@ -195,5 +198,17 @@ if $gttestdata then
              "trembl-section.fsa.gz",:retval => 1)
     run_test("#{$bin}gt extractseq -keys #{$testdata}/trembl-wrongkey.txt " +
              "trembl-section.fsa.gz",:retval => 1)
+    run_test("#{$bin}gt extractseq -keys trembl-section.random-keylist -width 60 " +
+             "trembl-section.fsa.gz")
+    run_test("#{$bin}gt suffixerator -protein -ssp -tis -des -sds -kys sort " +
+             "-db #{$last_stdout}")
+    run("mv #{$last_stdout} trembl-section-sorted.fna")
+    run_test("#{$bin}gt suffixerator -protein -ssp -tis -des -sds -kys " +
+             "-db trembl-section-sorted.fna")
+    run("#{$scriptsdir}/tr2deskeys.rb trembl-section-sorted.fna")
+    run("mv #{$last_stdout} trembl-section-sorted.keylist")
+    run_test("#{$bin}gt extractseq -keys trembl-section-sorted.keylist " +
+             "-width 60 trembl-section-sorted.fna")
+    run("cmp -s #{$last_stdout} trembl-section-sorted.fna")
   end
 end

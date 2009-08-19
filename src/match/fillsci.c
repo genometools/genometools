@@ -327,24 +327,17 @@ int fasta2sequencekeyvalues(
                       gt_alphabet_num_of_chars(alpha),distspralen,verboseinfo);
   }
   gt_fa_xfclose(desfp);
-  if (!haserr && outkystab)
-  {
-    unsigned long numofentries = 0;
-
-    if (outkyssort)
-    {
-      numofentries = sequenceseppos->nextfreeSeqpos+1;
-    }
-    if (gt_extractkeysfromdesfile(indexname, numofentries, verboseinfo,
-                                  err) != 0)
-    {
-      haserr = true;
-    }
-  }
   gt_fa_xfclose(sdsfp);
   gt_disc_distri_delete(distspralen);
   gt_sequence_buffer_delete(fb);
   gt_queue_delete_with_contents(descqueue);
+  if (!haserr && outkystab && !outkyssort)
+  {
+    if (gt_extractkeysfromdesfile(indexname, false, verboseinfo, err) != 0)
+    {
+      haserr = true;
+    }
+  }
   return haserr ? -1 : 0;
 }
 

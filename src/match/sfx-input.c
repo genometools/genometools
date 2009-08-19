@@ -114,6 +114,13 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   }
   if (!haserr)
   {
+    if (outal1file(so->str_indexname,alpha,err) != 0)
+    {
+      haserr = true;
+    }
+  }
+  if (!haserr)
+  {
     characterdistribution = initcharacterdistribution(alpha);
     if (fasta2sequencekeyvalues(so->str_indexname,
                                 &totallength,
@@ -135,19 +142,6 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                                 err) != 0)
     {
       haserr = true;
-      FREESPACE(characterdistribution);
-      gt_free(filelengthtab);
-      filelengthtab = NULL;
-    }
-  }
-  if (!haserr)
-  {
-    if (outal1file(so->str_indexname,alpha,err) != 0)
-    {
-      haserr = true;
-      FREESPACE(characterdistribution);
-      gt_free(filelengthtab);
-      filelengthtab = NULL;
     }
   }
   if (!haserr)
@@ -188,9 +182,15 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
       }
     }
   }
-  if (haserr && alpha != NULL && !alphaisbound)
+  if (haserr)
   {
-    gt_alphabet_delete((GtAlphabet*) alpha);
+    FREESPACE(characterdistribution);
+    gt_free(filelengthtab);
+    filelengthtab = NULL;
+    if (alpha != NULL && !alphaisbound)
+    {
+      gt_alphabet_delete((GtAlphabet*) alpha);
+    }
   }
   return haserr ? -1 : 0;
 }

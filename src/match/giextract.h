@@ -35,7 +35,7 @@ int gt_extractkeysfromfastaindex(const GtStr *indexname,
                                  unsigned long linewidth,GtError *err);
 
 int gt_extractkeysfromdesfile(const GtStr *indexname,
-                              unsigned long numofentries,
+                              bool sortkeys,
                               Verboseinfo *verboseinfo,
                               GtError *err);
 

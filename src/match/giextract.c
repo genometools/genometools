@@ -390,31 +390,96 @@ static const char *desc2key(unsigned long *keylen,const char *desc,
   return desc + firstpipe + 1;
 }
 
-static int aliasstrcmp(const void *a,const void *b)
+static int giextract_encodedseq2fasta(FILE *fpout,
+                                      const Encodedsequence *encseq,
+                                      unsigned long seqnum,
+                                      const Fastakeyquery *fastakeyquery,
+                                      unsigned long linewidth,
+                                      GtError *err)
 {
-  return strcmp((const char *) a,(const void *) b);
+  const char *desc;
+  unsigned long desclen;
+  bool haserr = false;
+
+  desc = retrievesequencedescription(&desclen, encseq, seqnum);
+  (void) putc('>',fpout);
+  if (fastakeyquery != NULL && !COMPLETE(fastakeyquery))
+  {
+    printf("%s %lu %lu ",fastakeyquery->fastakey,
+                         fastakeyquery->frompos,
+                         fastakeyquery->topos);
+  }
+  if (fwrite(desc,sizeof *desc,(size_t) desclen,fpout) != (size_t) desclen)
+  {
+    gt_error_set(err,"cannot write header of length %lu",desclen);
+    haserr = true;
+  }
+  if (!haserr)
+  {
+    Seqinfo seqinfo;
+    Seqpos frompos, topos;
+
+    (void) putc('\n',fpout);
+    getencseqSeqinfo(&seqinfo,encseq,seqnum);
+    if (fastakeyquery != NULL && !COMPLETE(fastakeyquery))
+    {
+      frompos = (Seqpos) (fastakeyquery->frompos-1);
+      topos = (Seqpos) (fastakeyquery->topos - fastakeyquery->frompos + 1);
+    } else
+    {
+      frompos = 0;
+      topos = seqinfo.seqlength;
+    }
+    encseq2symbolstring(fpout,
+                        encseq,
+                        Forwardmode,
+                        seqinfo.seqstartpos + frompos,
+                        topos,
+                        linewidth);
+  }
+  return haserr ? -1 : 0;
+}
+
+#define MAXFIXEDKEYSIZE 6
+
+typedef struct
+{
+  char key[MAXFIXEDKEYSIZE+1];
+  unsigned long seqnum;
+} Fixedsizekey;
+
+static int compareFixedkeys(const void *a,const void *b)
+{
+  const Fixedsizekey *fa = a;
+  const Fixedsizekey *fb = b;
+  return strcmp(((const Fixedsizekey *) fa)->key,
+                ((const Fixedsizekey *) fb)->key);
 }
 
 #define KEYSTABSUFFIX ".kys"
 
 int gt_extractkeysfromdesfile(const GtStr *indexname,
-                              unsigned long numofentries,
+                              bool sortkeys,
                               Verboseinfo *verboseinfo,
                               GtError *err)
 {
   FILE *fpin, *fpout = NULL;
   GtStr *line = NULL;
   const char *keyptr;
-  unsigned long keylen, constantkeylen = 0, linenum, incorrectorder = 0;
+  unsigned long keylen, constantkeylen = 0, linenum;/* incorrectorder = 0;*/
   bool haserr = false, firstdesc = true;
-  char *previouskey = NULL, *keytab = NULL, *keytabptr = NULL;
+  char *previouskey = NULL;
+  Fixedsizekey *keytab = NULL, *keytabptr = NULL;
+  Encodedsequence *encseq = NULL;
+  unsigned long numofentries = 0;
+  const unsigned long linewidth = 60UL;
 
   fpin = opensfxfile(indexname,DESTABSUFFIX,"rb",err);
   if (fpin == NULL)
   {
     return -1;
   }
-  if (numofentries == 0)
+  if (!sortkeys)
   {
     fpout = opensfxfile(indexname,KEYSTABSUFFIX,"wb",err);
     if (fpout == NULL)
@@ -455,12 +520,36 @@ int gt_extractkeysfromdesfile(const GtStr *indexname,
       constantkeylen = keylen;
       previouskey = gt_malloc(sizeof (char) * (constantkeylen+1));
       firstdesc = false;
-      if (numofentries == 0)
+      if (!sortkeys)
       {
         (void) putc((char) constantkeylen,fpout);
       } else
       {
-        keytab = gt_malloc(sizeof (char) * (constantkeylen+1) * numofentries);
+        if (constantkeylen > (unsigned long) MAXFIXEDKEYSIZE)
+        {
+          gt_error_set(err,"key \"%*.*s\" of length %lu not allowed; "
+                           "no key must be larger than %d",
+                            (int) keylen,(int) keylen,keyptr,keylen,
+                            MAXFIXEDKEYSIZE);
+          haserr = true;
+          break;
+        }
+        encseq = mapencodedsequence(false,
+                                    indexname,
+                                    true,
+                                    true,
+                                    true,
+                                    true,
+                                    NULL,
+                                    err);
+        if (encseq == NULL)
+        {
+          haserr = true;
+          break;
+        }
+        numofentries = getencseqnumofdbsequences(encseq);
+        gt_assert(numofentries > 0);
+        keytab = gt_malloc(sizeof (*keytab) * numofentries);
         keytabptr = keytab;
       }
     } else
@@ -476,22 +565,22 @@ int gt_extractkeysfromdesfile(const GtStr *indexname,
         break;
       }
       gt_assert(previouskey != NULL);
-      if (strncmp(previouskey,keyptr,(size_t) constantkeylen) > 0)
+      if (!sortkeys && strncmp(previouskey,keyptr,(size_t) constantkeylen) >= 0)
       {
-      /*
-        gt_error_set(err,"previous key \"%s\" is lexicographically larger "
+        gt_error_set(err,"previous key \"%s\" is not lexicographically smaller "
                          "than current key \"%*.*s\"",
                          previouskey,(int) keylen,(int) keylen,keyptr);
         haserr = true;
         break;
-      */
+        /*
         printf("previous key \"%s\" (no %lu) is lexicographically larger "
                "than current key \"%*.*s\"\n",
                previouskey,linenum,(int) keylen,(int) keylen,keyptr);
         incorrectorder++;
+        */
       }
     }
-    if (numofentries == 0)
+    if (!sortkeys)
     {
       if (fwrite(keyptr,sizeof *keyptr,(size_t) keylen,fpout)
           != (size_t) keylen)
@@ -504,9 +593,10 @@ int gt_extractkeysfromdesfile(const GtStr *indexname,
     } else
     {
       gt_assert(keytabptr != NULL);
-      strncpy(keytabptr,keyptr,(size_t) constantkeylen);
-      keytabptr[constantkeylen] = '\0';
-      keytabptr += constantkeylen+1;
+      strncpy(keytabptr->key,keyptr,(size_t) constantkeylen);
+      keytabptr->key[constantkeylen] = '\0';
+      keytabptr->seqnum = linenum;
+      keytabptr++;
     }
     strncpy(previouskey,keyptr,(size_t) constantkeylen);
     previouskey[constantkeylen] = '\0';
@@ -516,18 +606,40 @@ int gt_extractkeysfromdesfile(const GtStr *indexname,
   {
     showverbose(verboseinfo,"number of keys of length %lu = %lu",
                 constantkeylen,linenum);
+    /*
     showverbose(verboseinfo,"number of incorrectly ordered keys = %lu",
                 incorrectorder);
+    */
   }
-  gt_assert(numofentries == 0 || 
-            keytabptr == keytab + (constantkeylen+1) * numofentries);
   gt_str_delete(line);
   gt_fa_fclose(fpin);
   gt_fa_fclose(fpout);
   gt_free(previouskey);
-  if (numofentries > 0)
+  if (!haserr && sortkeys)
   {
-    qsort(keytab,(size_t) numofentries,(constantkeylen+1),aliasstrcmp);
+    gt_assert(keytabptr != NULL);
+    gt_assert(numofentries > 0);
+    gt_assert(keytabptr == keytab + numofentries);
+    qsort(keytab,(size_t) numofentries,sizeof(*keytab),compareFixedkeys);
+    gt_assert(keytabptr != NULL);
+    for (keytabptr = keytab; !haserr && keytabptr < keytab + numofentries;
+         keytabptr++)
+    {
+      if (giextract_encodedseq2fasta(stdout,
+                                     encseq,
+                                     keytabptr->seqnum,
+                                     NULL,
+                                     linewidth,
+                                     err) != 0)
+      {
+        haserr = true;
+        break;
+      }
+    }
+  }
+  if (encseq != NULL)
+  {
+    encodedsequence_free(&encseq);
   }
   gt_free(keytab);
   return haserr ? -1 : 0;
@@ -580,10 +692,8 @@ static int itersearchoverallkeys(const Encodedsequence *encseq,
   FILE *fp;
   GtStr *currentline;
   uint64_t linenum;
-  unsigned long seqnum, desclen, countmissing = 0;
+  unsigned long seqnum, countmissing = 0;
   bool haserr = false;
-  const char *desc;
-  Seqinfo seqinfo;
   Fastakeyquery fastakeyquery;
 
   if (linewidth == 0)
@@ -614,40 +724,23 @@ static int itersearchoverallkeys(const Encodedsequence *encseq,
                                    keysize);
     if (seqnum < numofkeys)
     {
-      desc = retrievesequencedescription(&desclen, encseq, seqnum);
-      (void) putc('>',stdout);
-      if (!COMPLETE(&fastakeyquery))
+      if (giextract_encodedseq2fasta(stdout,
+                                     encseq,
+                                     seqnum,
+                                     &fastakeyquery,
+                                     linewidth,
+                                     err) != 0)
       {
-        printf("%s %lu %lu ",fastakeyquery.fastakey,
-                             fastakeyquery.frompos,
-                             fastakeyquery.topos);
-      }
-      if (fwrite(desc,sizeof *desc,(size_t) desclen,stdout) != (size_t) desclen)
-      {
-        gt_error_set(err,"cannot write header of length %lu",desclen);
         haserr = true;
         break;
       }
-      (void) putc('\n',stdout);
-      getencseqSeqinfo(&seqinfo,encseq,seqnum);
-      encseq2symbolstring(stdout,
-                          encseq,
-                          Forwardmode,
-                          seqinfo.seqstartpos + (COMPLETE(&fastakeyquery)
-                                                 ? 0
-                                                 : (fastakeyquery.frompos-1)),
-                          COMPLETE(&fastakeyquery)
-                            ? seqinfo.seqlength
-                            : (Seqpos) (fastakeyquery.topos -
-                                        fastakeyquery.frompos + 1),
-                          linewidth);
     } else
     {
       countmissing++;
     }
     gt_str_reset(currentline);
   }
-  if (countmissing > 0)
+  if (!haserr && countmissing > 0)
   {
     printf("# number of unsatified fastakey-queries: %lu\n",countmissing);
   }
