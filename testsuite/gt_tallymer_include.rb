@@ -9,13 +9,8 @@ def runtyrmkifail(args)
   end
 end
 
-def checktallymer(reffile)
-  if reffile == 'Atinsert.fna' || reffile == 'Duplicate.fna'
-    mersize=20
-  else
-    mersize=5
-  end
-  vstreebin="/Users/stefan/bin-ops/i686-apple-darwin"
+def checktallymer(reffile,mersize)
+  vstreebin="/Users/kurtz/bin-ops/i686-apple-darwin"
   reffilepath="#{$testdata}/#{reffile}"
   outoptions="-counts -pl -mersize #{mersize} -minocc 2 -maxocc 30"
   run_test "#{$bin}gt suffixerator -db #{reffilepath} -pl -dna " +
@@ -52,16 +47,16 @@ tyrfiles = {"Atinsert.fna" => 19,
             "Random159.fna" => 6,
             "Random160.fna" => 7,
             "RandomN.fna" => 3,
-            "trna_glutamine.fna" =>}
+            "trna_glutamine.fna" => 12}
 
 runtyrmkifail("-mersize 21 -pl")
 runtyrmkifail("-mersize 21 -pl -minocc")
 runtyrmkifail("-pl -minocc 30 -maxocc 40")
 
-tyrfiles.each do |reffile|
+tyrfiles.each_pair do |reffile,mersize|
   Name "gt tallymer #{reffile}"
   Keywords "gt_tallymer gttestdata"
   Test do
-    checktallymer(reffile)
+    checktallymer(reffile,mersize)
   end
 end
