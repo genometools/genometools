@@ -38,7 +38,6 @@ then
   env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb \
        ${MC} -keywords 'gt_tallymer' \
        -gttestdata ${GTTESTDATA}
-  exit 1
   env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb \
        ${MC} -keywords 'gt_repfind' \
        -gttestdata ${GTTESTDATA}
@@ -59,23 +58,23 @@ then
   cd ..
 fi
 
-runtallymer=1
+#runtallymer=1
 
-if test $runtallymer -eq 1
-then
-  for inputfile in `ls testdata/*.fna` ${AT} ${U8} ${ATK} `ls ${GTTESTDATA}/DNA-mix/Grumbach.fna/*.fna`
-  do
-    if test ${inputfile} = 'testdata/TTT-small.fna'
-    then
-      echo "skip ${inputfile}"
-    else
-      if test ${inputfile} = 'testdata/Random-Small.fna'
-      then
-        echo "skip ${inputfile}"
-      else
-        echo "${inputfile}"
-        cerr "scripts/checktallymer.sh ${inputfile}"
-      fi
-    fi
-  done
-fi
+#if test $runtallymer -eq 1
+#then
+  #for inputfile in `ls testdata/*.fna` ${AT} ${U8} ${ATK} `ls ${GTTESTDATA}/DNA-mix/Grumbach.fna/*.fna`
+  #do
+    #if test ${inputfile} = 'testdata/TTT-small.fna'
+    #then
+      #echo "skip ${inputfile}"
+    #else
+      #if test ${inputfile} = 'testdata/Random-Small.fna'
+      #then
+        #echo "skip ${inputfile}"
+      #else
+        #echo "${inputfile}"
+        #cerr "scripts/checktallymer.sh ${inputfile}"
+      #fi
+    #fi
+  #done
+#fi

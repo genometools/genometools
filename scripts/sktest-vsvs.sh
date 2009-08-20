@@ -20,22 +20,24 @@ set -e -x
 outoptions="-tis -lcp -suf -bwt"
 
 cd testsuite
-ALLOUTPUTOPTS="../scripts/alloutputoptions.rb"
 num=2
 while test ${num} -lt 10 
 do
+  # the following depends on mkvtree and vseqselect and splitmultifastafile.pl
   ../scripts/iterrunmerge.sh ${num}
   num=`expr ${num} + 1`
 done
+../scripts/cmpdbfile.sh ${outoptions} -pl -db ../testdata/Random-Small.fna
+../scripts/cmpdbfile.sh ${outoptions} -pl -db ../testdata/Random.fna
+../scripts/cmpdbfile.sh ${outoptions} -pl -db ../testdata/Atinsert.fna ../testdata/Random.fna
+../scripts/cmpdbfile.sh ${outoptions} -pl -db ../testdata/TTT-small.fna
+ALLOUTPUTOPTS="../scripts/alloutputoptions.rb"
 if test ! -f ${ALLOUTPUTOPTS}
 then
   echo "cannot find ${ALLOUTPUTOPTS}"
   exit 1
 fi
-../scripts/cmpdbfile.sh ${outoptions} -pl -db ../testdata/Random-Small.fna
-../scripts/cmpdbfile.sh ${outoptions} -pl -db ../testdata/Random.fna
-../scripts/cmpdbfile.sh ${outoptions} -pl -db ../testdata/Atinsert.fna ../testdata/Random.fna
-../scripts/cmpdbfile.sh ${outoptions} -pl -db ../testdata/TTT-small.fna
+
 if test ! "X${GTTESTDATA}" = "X"
 then
   AT=../testdata/at1MB

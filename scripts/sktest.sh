@@ -58,6 +58,6 @@ env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ./testsuite.rb \
 env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_packedindex'
 cd ..
 
-sktest-vsvs.sh
-
 sktest-match.sh
+
+sktest-vsvs.sh
