@@ -86,7 +86,7 @@ const GtUchar* gt_seq_get_encoded(GtSeq *s)
   return s->encoded_seq;
 }
 
-const GtAlphabet* gt_seq_get_alpha(const GtSeq *s)
+const GtAlphabet* gt_seq_get_alphabet(const GtSeq *s)
 {
   gt_assert(s);
   return s->seqalpha;
