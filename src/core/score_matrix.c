@@ -259,6 +259,8 @@ int gt_score_matrix_get_score(const GtScoreMatrix *sm,
                               unsigned int idx1, unsigned int idx2)
 {
   gt_assert(sm);
+  idx1 = (idx1 == WILDCARD) ? sm->dimension - 1 : idx1;
+  idx2 = (idx2 == WILDCARD) ? sm->dimension - 1 : idx2;
   /* indices are valid */
   gt_assert(idx1 < sm->dimension && idx2 < sm->dimension);
   return sm->scores[idx1][idx2];
@@ -268,6 +270,8 @@ void gt_score_matrix_set_score(GtScoreMatrix *sm,
                                unsigned int idx1, unsigned int idx2, int score)
 {
   gt_assert(sm);
+  idx1 = (idx1 == WILDCARD) ? sm->dimension - 1 : idx1;
+  idx2 = (idx2 == WILDCARD) ? sm->dimension - 1 : idx2;
   /* indices are valid */
   gt_assert(idx1 < sm->dimension && idx2 < sm->dimension);
   sm->scores[idx1][idx2] = score;

@@ -170,8 +170,7 @@ GtHMM* gt_ppt_hmm_new(const GtAlphabet *alpha, GtPPTOptions *opts)
   gt_hmm_set_emission_probability(hmm, PPT_N,
                                   gt_alphabet_encode(alpha, 'T'), 0.00);
   gt_hmm_set_emission_probability(hmm, PPT_N,
-                                  gt_alphabet_num_of_chars(alpha) /* 'N' */,
-                                  1.00);
+                                  gt_alphabet_encode(alpha, 'N'), 1.00);
 
   /* set transition probabilities */
   gt_hmm_set_transition_probability(hmm, PPT_OUT, PPT_IN,   0.05);

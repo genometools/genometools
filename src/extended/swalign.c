@@ -18,6 +18,7 @@
 #include <limits.h>
 #include "core/array2dim_api.h"
 #include "core/assert_api.h"
+#include "core/chardef.h"
 #include "core/minmax.h"
 #include "core/undef.h"
 #include "extended/swalign.h"
@@ -39,14 +40,20 @@ static void swalign_fill_table(DPentry **dptable,
                                const GtUchar *v, unsigned long vlen,
                                const int **scores,
                                int deletion_score, int insertion_score,
-                               Coordinate *max_coordinate)
+                               Coordinate *max_coordinate,
+                               unsigned int u_alpha_size,
+                               unsigned int v_alpha_size)
 {
   unsigned long i, j;
   long maxscore, repscore, delscore, insscore, overall_maxscore = LONG_MIN;
-  gt_assert(dptable && u && ulen && v && vlen && max_coordinate);
+  gt_assert(dptable && u && ulen && v && vlen && max_coordinate && u_alpha_size
+            && v_alpha_size);
   for (j = 1; j <= vlen; j++) {
     for (i = 1; i <= ulen; i++) {
-      repscore = dptable[i-1][j-1].score + scores[(int) u[i-1]][(int) v[j-1]];
+      int uval, vval;
+      uval = (int) ((u[i-1] == WILDCARD) ? u_alpha_size - 1 : u[i-1]);
+      vval = (int) ((v[j-1] == WILDCARD) ? v_alpha_size - 1 : v[j-1]);
+      repscore = dptable[i-1][j-1].score + scores[uval][vval];
       delscore = dptable[i-1][j].score + deletion_score;
       insscore = dptable[i][j-1].score + insertion_score;
       maxscore = MAX(MAX(MAX(repscore, delscore), insscore), 0);
@@ -99,9 +106,12 @@ static GtAlignment* smith_waterman_align(const char *u_orig,
                                          unsigned long v_len,
                                          const int **scores,
                                          int deletion_score,
-                                         int insertion_score)
+                                         int insertion_score,
+                                         const GtAlphabet *u_alpha,
+                                         const GtAlphabet *v_alpha)
 {
-  gt_assert(u_orig && v_orig && u_enc && v_enc && u_len && v_len && scores);
+  gt_assert(u_orig && v_orig && u_enc && v_enc && u_len && v_len && scores
+            && u_alpha && v_alpha);
   Coordinate alignment_start,
              alignment_end = { GT_UNDEF_ULONG, GT_UNDEF_ULONG };
   GtRange urange, vrange;
@@ -109,7 +119,8 @@ static GtAlignment* smith_waterman_align(const char *u_orig,
   GtAlignment *a = NULL;
   gt_array2dim_calloc(dptable, u_len+1, v_len+1);
   swalign_fill_table(dptable, u_enc, u_len, v_enc, v_len, scores,
-                     deletion_score, insertion_score, &alignment_end);
+                     deletion_score, insertion_score, &alignment_end,
+                     gt_alphabet_size(u_alpha), gt_alphabet_size(v_alpha));
   gt_assert(alignment_end.x != GT_UNDEF_ULONG);
   gt_assert(alignment_end.y != GT_UNDEF_ULONG);
   if (dptable[alignment_end.x][alignment_end.y].score) {
@@ -142,5 +153,6 @@ GtAlignment* gt_swalign(GtSeq *u, GtSeq *v, const GtScoreFunction *sf)
                               gt_seq_length(u), gt_seq_length(v),
                               gt_score_function_get_scores(sf),
                               gt_score_function_get_deletion_score(sf),
-                              gt_score_function_get_insertion_score(sf));
+                              gt_score_function_get_insertion_score(sf),
+                              gt_seq_get_alphabet(u), gt_seq_get_alphabet(v));
 }

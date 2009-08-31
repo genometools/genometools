@@ -29,6 +29,7 @@
 #include <math.h>
 #include "core/array2dim_api.h"
 #include "core/assert_api.h"
+#include "core/chardef.h"
 #include "core/ensure.h"
 #include "core/mathsupport.h"
 #include "core/xansi.h"
@@ -170,6 +171,7 @@ void gt_hmm_set_emission_probability(GtHMM *hmm,
   gt_assert(hmm);
   gt_assert(probability >= 0.0 && probability <= 1.0);
   gt_assert(state_num < hmm->num_of_states);
+  symbol_num = (symbol_num == WILDCARD) ? hmm->num_of_symbols - 1 : symbol_num;
   gt_assert(symbol_num < hmm->num_of_symbols);
   if (probability == 0.0)
     hmm->emission_prob[state_num][symbol_num] = MINUSINFINITY;
@@ -183,6 +185,7 @@ double gt_hmm_get_emission_probability(const GtHMM *hmm,
 {
   gt_assert(hmm);
   gt_assert(state_num < hmm->num_of_states);
+  symbol_num = (symbol_num == WILDCARD) ? hmm->num_of_symbols - 1 : symbol_num;
   gt_assert(symbol_num < hmm->num_of_symbols);
   if (hmm->emission_prob[state_num][symbol_num] == MINUSINFINITY)
     return 0.0;
@@ -300,7 +303,7 @@ void gt_hmm_decode(const GtHMM *hmm,
                 unsigned int num_of_emissions)
 {
   double **max_probabilities, tmp_prob;
-  unsigned int **backtrace, colidx, precolidx;
+  unsigned int **backtrace, colidx, precolidx, emission;
   int row, column, num_of_rows, num_of_columns, previous_row;
 
   gt_assert(hmm);
@@ -315,25 +318,33 @@ void gt_hmm_decode(const GtHMM *hmm,
 
   /* fill DP table */
   for (row = 0; row < num_of_rows; row++) { /* first column */
-    gt_assert(emissions[0] < hmm->num_of_symbols);
+    if (emissions[0] == WILDCARD)
+      emission = hmm->num_of_symbols - 1;
+    else
+      emission = emissions[0];
+    gt_assert(emission < hmm->num_of_symbols);
     max_probabilities[row][0] = hmm->initial_state_prob[row] +
-                                hmm->emission_prob[row][emissions[0]];
+                                hmm->emission_prob[row][emission];
     backtrace[row][0] = row;
   }
 
   for (column = 1; column < num_of_columns; column++) { /* other columns */
-    gt_assert(emissions[column] < hmm->num_of_symbols);
+    if (emissions[column] == WILDCARD)
+      emission = hmm->num_of_symbols - 1;
+    else
+      emission = emissions[column];
+    gt_assert(emission < hmm->num_of_symbols);
     colidx = column & 1;
     precolidx = (column - 1) & 1;
     for (row = 0; row < num_of_rows; row++) {
       max_probabilities[row][colidx] = max_probabilities[0][precolidx] +
                                      hmm->transition_prob[0][row] +
-                                     hmm->emission_prob[row][emissions[column]];
+                                     hmm->emission_prob[row][emission];
       backtrace[row][column] = 0;
       for (previous_row = 1; previous_row < num_of_rows; previous_row++) {
         tmp_prob = max_probabilities[previous_row][precolidx] +
                    hmm->transition_prob[previous_row][row] +
-                   hmm->emission_prob[row][emissions[column]];
+                   hmm->emission_prob[row][emission];
         if (tmp_prob > max_probabilities[row][colidx]) {
           max_probabilities[row][colidx] = tmp_prob;
           backtrace[row][column] = previous_row;
