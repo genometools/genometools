@@ -7,7 +7,7 @@ if ARGV.length == 0
   exit 1
 end
 
-regexp = Regexp.new('^>tr\|([0-9A-Z]*)\|')
+regexp = Regexp.new('^>[a-z][a-z]\|([0-9A-Z]*)\|')
 
 File.open(ARGV[0],"r") do |fh|
   if ARGV[0].match(/\.gz/)
