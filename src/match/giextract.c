@@ -440,7 +440,7 @@ static int giextract_encodedseq2fasta(FILE *fpout,
   return haserr ? -1 : 0;
 }
 
-#define MAXFIXEDKEYSIZE 6
+#define MAXFIXEDKEYSIZE 11
 
 typedef struct
 {
