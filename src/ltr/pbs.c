@@ -171,8 +171,8 @@ static GtScoreFunction* gt_dna_scorefunc_new(GtAlphabet *a, int match,
     }
   }
   /* make N-N a mismatch! */
-  gt_score_matrix_set_score(sm, gt_alphabet_size(a) - 1,
-                            gt_alphabet_size(a) - 1, mismatch);
+  gt_score_matrix_set_score(sm, gt_alphabet_encode(a, 'n'),
+                            gt_alphabet_encode(a, 'n'), mismatch);
   return sf;
 }
 
