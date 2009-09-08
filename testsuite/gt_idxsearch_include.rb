@@ -122,18 +122,20 @@ Test do
   run_test "#{$bin}gt repfind -samples 40 -l 6 -ii sfx",:maxtime => 600
 end
 
-repfindtestfiles.each do |reffile|
-  Name "gt repfind #{reffile}"
-  Keywords "gt_repfind gttestdata"
-  Test do
-    checkrepfind(reffile)
-  end
-  repfindtestfiles.each do |queryfile|
-    if reffile != queryfile
-      Name "gt repfind #{reffile} versus #{queryfile}"
-      Keywords "gt_repfind gttestdata"
-      Test do
-        checkrepfindwithquery(reffile,queryfile)
+if $gttestdata then
+  repfindtestfiles.each do |reffile|
+    Name "gt repfind #{reffile}"
+    Keywords "gt_repfind gttestdata"
+    Test do
+      checkrepfind(reffile)
+    end
+    repfindtestfiles.each do |queryfile|
+      if reffile != queryfile
+        Name "gt repfind #{reffile} versus #{queryfile}"
+        Keywords "gt_repfind gttestdata"
+        Test do
+          checkrepfindwithquery(reffile,queryfile)
+        end
       end
     end
   end
