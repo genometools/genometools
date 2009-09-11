@@ -108,7 +108,7 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
   ssar = newSequentialsuffixarrayreaderfromfile(lo->str_indexname,
                                                 SARR_LCPTAB | SARR_SUFTAB |
                                                 SARR_ESQTAB | SARR_DESTAB |
-                                                SARR_SSPTAB,
+                                                SARR_SSPTAB | SARR_SDSTAB,
                                                 SEQ_mappedboth,
                                                 err);
   if (ssar == NULL)

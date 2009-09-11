@@ -68,7 +68,7 @@ if $gttestdata then
     Keywords "gt_ltrharvest"
     Test do
       run_test "#{$bin}gt suffixerator -db #{$gttestdata}ltrharvest/s_cer/#{v}"\
-             + " -dna -suf -lcp -tis -des -ssp", :maxtime => 300
+             + " -dna -suf -lcp -tis -des -sds -ssp", :maxtime => 300
       run_test "#{$bin}gt ltrharvest -index #{v} -seed 100 -minlenltr 100"\
              + " -maxlenltr 1000 -mindistltr 1500 -maxdistltr 15000 -similar 80"\
              + " -mintsd 5 -maxtsd 20 -motif tgca -motifmis 0 -vic 60"\
@@ -92,7 +92,7 @@ if $gttestdata then
     Keywords "gt_ltrharvest"
     Test do
       run_test "#{$bin}gt suffixerator -db #{$gttestdata}ltrharvest/s_cer/#{v}"\
-             + " -dna -suf -lcp -tis -des -ssp", :maxtime => 300
+             + " -dna -suf -lcp -tis -des -sds -ssp", :maxtime => 300
       run_test "#{$bin}gt ltrharvest -longoutput -index #{v} -seed 100 "\
              + " -minlenltr 100 -maxlenltr 1000 -mindistltr 1500"\
              + " -maxdistltr 15000 -similar 80"\
@@ -308,7 +308,8 @@ while thisisnottheend
     Name "gt ltrharvest mixed options #{counter}"
     Keywords "gt_ltrharvest"
     Test do
-      run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -lcp -tis -des -ssp"
+      run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna " + \
+               "-suf -sds -lcp -tis -des -ssp"
       run_test "#{$bin}gt ltrharvest -index " +
                "Random.fna #{string}"
     end
