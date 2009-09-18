@@ -193,18 +193,18 @@ gt_ht_elem_hash_idx(const GtHashtable *ht, const void *elem)
 }
 
 #define gt_ht_traverse_list_of_key(ht, elem, pre_loop, in_loop, post_loop) \
-  do {                                                                  \
-    GtHashtable *htref = (ht);                                            \
+  do {                                                                     \
+    GtHashtable *htref = (ht);                                             \
     htsize_t elem_hash = gt_ht_elem_hash_idx(htref, (elem)),               \
-      idx, link = elem_hash;                                            \
-    pre_loop;                                                           \
-    do {                                                                \
-      idx = link;                                                       \
-      link = HT_GET_LINK(htref, idx);                                   \
-      in_loop;                                                          \
-    }                                                                   \
-    while (!(link & mark_bit));                                         \
-    post_loop;                                                          \
+      idx, link = elem_hash;                                               \
+    pre_loop;                                                              \
+    do {                                                                   \
+      idx = link;                                                          \
+      link = HT_GET_LINK(htref, idx);                                      \
+      in_loop;                                                             \
+    }                                                                      \
+    while (!(link & mark_bit));                                            \
+    post_loop;                                                             \
   } while (0)
 
 #if TJ_DEBUG > 1
@@ -516,7 +516,7 @@ gt_hashtable_fill(GtHashtable *ht)
   return ht->current_fill;
 }
 
-#define gt_ht_internal_foreach(ht,visitcode)                       \
+#define gt_ht_internal_foreach(ht,visitcode)                    \
   do {                                                          \
     htsize_t i, table_size = ht->table_mask + 1;                \
     void *table_data = ht->table_info.table_data;               \
@@ -595,7 +595,7 @@ gt_ht_ul_elem_hash(const void *elem)
 }
 
 #define gt_ht_u32_mix(a,b,c)                                      \
-  {                                                            \
+  {                                                               \
     a -= c;  a ^= gt_ht_rotate_left_u32(c, 4);  c += b;           \
     b -= a;  b ^= gt_ht_rotate_left_u32(a, 6);  a += c;           \
     c -= b;  c ^= gt_ht_rotate_left_u32(b, 8);  b += a;           \
