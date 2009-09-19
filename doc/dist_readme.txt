@@ -1,7 +1,7 @@
 This directory contains the binary distribution of GenomeTools (gt).
 
-Copyright (c) 2003-2008 Gordon Gremme, Stefan Kurtz, and CONTRIBUTORS
-Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
+Copyright (c) 2003-2009 Gordon Gremme, Stefan Kurtz, and CONTRIBUTORS
+Copyright (c) 2003-2009 Center for Bioinformatics, University of Hamburg
 See LICENSE file or http://genometools.org/license.html for license details.
 
 The GenomeTools genome analysis system is a collection of bioinformatics tools
