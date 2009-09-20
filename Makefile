@@ -279,6 +279,7 @@ LIBGENOMETOOLS_DIRS:= src/core \
 
 LIBGTUNSTABLE_DIRS:=  src/match \
                       src/ltr \
+                      src/gth \
                       src/mgth
 
 ifeq ($(with-hmmer),yes)
