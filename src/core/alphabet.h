@@ -101,6 +101,7 @@ bool           gt_alphabet_is_protein(const GtAlphabet *alphabet);
    the bases A, C, G, T written in lower or upper case and returns <true>, if
    this is the case (<false> otherwise). */
 bool           gt_alphabet_is_dna(const GtAlphabet *alphabet);
+bool           gt_alphabet_valid_input(const GtAlphabet *alphabet, char c);
 /* Encode character <c> with given <alphabet>.
    <c> has to be encodable with the given <alphabet>! */
 GtUchar        gt_alphabet_encode(const GtAlphabet *alphabet, char c);

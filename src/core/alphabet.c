@@ -890,6 +890,13 @@ bool gt_alphabet_is_dna(const GtAlphabet *alpha)
   return false;
 }
 
+bool gt_alphabet_valid_input(const GtAlphabet *alphabet, char c)
+{
+  if (alphabet->symbolmap[(int) c] != UNDEFCHAR)
+    return true;
+  return false;
+}
+
 GtUchar gt_alphabet_encode(const GtAlphabet *alphabet, char c)
 {
   gt_assert(alphabet);
