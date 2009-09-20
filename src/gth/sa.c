@@ -1187,7 +1187,7 @@ unsigned long gth_sa_get_alignment_lines(const GthSA *sa,
   /* sequences */
   unsigned char *gen_seq_orig, *ref_seq_tran,
                 *ref_seq_orig;
-  unsigned long cols;
+  unsigned long cols = 0;
   GthSeqCol *ref_seq_col;
 
   /* make sure that the correct files are loaded */

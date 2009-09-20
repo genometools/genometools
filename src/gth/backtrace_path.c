@@ -934,6 +934,7 @@ void gth_backtrace_path_cutoff_end(GthBacktracePath *bp)
   }
 }
 
+#ifndef NDEBUG
 static bool backtrace_path_start_cutoffs_are_set(const GthBacktracePath *bp)
 {
   gt_assert(bp);
@@ -965,6 +966,7 @@ static bool backtrace_path_cutoffs_are_set(const GthBacktracePath *bp)
   }
   return false;
 }
+#endif
 
 void gth_backtrace_path_cutoff_walked_path(GthBacktracePath *bp,
                                            const GthPathWalker *pw,

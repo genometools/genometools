@@ -595,7 +595,8 @@ void gth_chain_contract(GthChain *dest, const GthChain *src)
 }
 
 void gth_save_chain(GtChain *chain, GtFragment *fragments,
-                    unsigned long num_of_fragments, unsigned long max_gap_width,
+                    unsigned long num_of_fragments,
+                    GT_UNUSED unsigned long max_gap_width,
                     void *data)
 {
   GthSaveChainInfo *info = (GthSaveChainInfo*) data;
