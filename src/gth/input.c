@@ -81,6 +81,30 @@ GthInput *gth_input_new(GthInputFilePreprocessor file_preprocessor,
   return input;
 }
 
+int gth_input_preprocess(GthInput *input,
+                         bool gthconsensus,
+                         bool noautoindex,
+                         bool skipindexcheck,
+                         bool maskpolyAtails,
+                         bool online,
+                         bool inverse,
+                         const char *progname,
+                         char *scorematrixfile,
+                         unsigned int translationtable,
+                         GthOutput *out, GtError *err)
+{
+  int had_err;
+  gt_error_check(err);
+  gt_assert(input);
+  had_err = input->file_preprocessor(input, gthconsensus, noautoindex,
+                                     skipindexcheck, maskpolyAtails, online,
+                                     inverse, progname, translationtable, out,
+                                     err);
+  if (!had_err)
+    had_err = gth_input_load_scorematrix(input, scorematrixfile, out, err);
+  return had_err;
+}
+
 void gth_input_add_genomic_file(GthInput *input, const char *filename)
 {
   gt_assert(input && filename);
@@ -785,9 +809,10 @@ int gth_input_make_indices(GthInput *input, const char *progname, GtError *err)
   gt_assert(input);
   out = gthoutput_new();
   had_err = input->file_preprocessor(input, true, false, false, false, false,
-                                     false, input->overall_alphatype,
-                                     progname, DEFAULT_SCOREMATRIX,
-                                     DEFAULT_TRANSLATIONTABLE, out, err);
+                                     false, progname, DEFAULT_TRANSLATIONTABLE,
+                                     out, err);
+  if (!had_err)
+    had_err = gth_input_load_scorematrix(input, DEFAULT_SCOREMATRIX, out, err);
   gthoutput_delete(out);
   return had_err;
 }

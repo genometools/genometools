@@ -35,14 +35,23 @@ typedef int (*GthInputFilePreprocessor)(GthInput *input,
                                         bool maskpolyAtails,
                                         bool online,
                                         bool inverse,
-                                        GthAlphatype overallalphatype,
                                         const char *progname,
-                                        char *scorematrixfile,
                                         unsigned int translationtable,
                                         GthOutput *out, GtError*);
 
 GthInput*      gth_input_new(GthInputFilePreprocessor file_preprocessor,
                              GthSeqColConstructor seq_col_constructor);
+int            gth_input_preprocess(GthInput*,
+                                    bool gthconsensus,
+                                    bool noautoindex,
+                                    bool skipindexcheck,
+                                    bool maskpolyAtails,
+                                    bool online,
+                                    bool inverse,
+                                    const char *progname,
+                                    char *scorematrixfile,
+                                    unsigned int translationtable,
+                                    GthOutput *out, GtError*);
 void           gth_input_add_genomic_file(GthInput*, const char *filename);
 void           gth_input_add_cdna_file(GthInput*, const char *filename);
 void           gth_input_add_protein_file(GthInput*, const char *filename);
