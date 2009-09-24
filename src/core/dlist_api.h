@@ -18,6 +18,7 @@
 #ifndef DLIST_API_H
 #define DLIST_API_H
 
+#include "core/error_api.h"
 #include "core/fptr_api.h"
 
 /* A double-linked list which is sorted according to a <GtCompare> compare
