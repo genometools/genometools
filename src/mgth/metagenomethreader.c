@@ -18,16 +18,11 @@
 #include "core/fileutils_api.h"
 #include "core/file.h"
 #include "core/hashmap-generic.h"
+#include "core/mathsupport.h"
 #include "core/unused_api.h"
 #include "match/giextract.h"
 #include "mg_xmlparser.h"
 #include "metagenomethreader.h"
-/* Funktion zur Ausgabe des Statistikbereichs
-   Parameter: Schluessel, Value, User-Data, Env-Variable
-   Returnwert: 0 */
-static enum iterator_op
-printout_hits(GT_UNUSED char *key,
-              unsigned long *value, void *data, GtError * err);
 
 static GtOPrval parse_options(int *parsed_args,
                               MetagenomeThreaderArguments
@@ -230,6 +225,53 @@ static GtOPrval parse_options(int *parsed_args,
 
 DEFINE_HASHMAP(char *, cstr_nofree, unsigned long *, ulp, gt_ht_cstr_elem_hash,
                gt_ht_cstr_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR,,)
+
+typedef struct {
+  unsigned long *statpos;
+  const char *string;
+  ParseStruct *parsestruct;
+} GtMgthStatsPair;
+
+static int statspair_cmp(const void *y, const void *z)
+{
+  const GtMgthStatsPair *a = (const GtMgthStatsPair*) y;
+  const GtMgthStatsPair *b = (const GtMgthStatsPair*) z;
+  double val_a, val_b;
+  int ret;
+  gt_assert(a && b && a->parsestruct && b->parsestruct);
+
+  /* calculate result values to sort by */
+  val_a = (double) (*(a->parsestruct->hits_statistics.hitsnum
+                        + *(a->statpos)) /
+                   ((double) a->parsestruct->hits_statistics.hitsnumber) * 100);
+  val_b = (double) (*(b->parsestruct->hits_statistics.hitsnum
+                        + *(b->statpos)) /
+                   ((double) b->parsestruct->hits_statistics.hitsnumber) * 100);
+
+  if ((ret = gt_double_compare(val_a, val_b) * -1) == 0) {
+    /* tie breaking, we need canonical ordering!
+       if two entries have the same numerical value, let strings decide */
+    return strcmp(a->string, b->string);
+  }
+  return ret;
+}
+
+static enum iterator_op
+insert_into_outlist(char *key, unsigned long *value, void *data, GtError *err)
+{
+  ParseStruct *parsestruct_ptr = (ParseStruct *) data;
+  gt_assert(key && parsestruct_ptr && parsestruct_ptr->outlist);
+  gt_error_check(err);
+
+  /* create new output entry and store in sorted list */
+  GtMgthStatsPair *pair = gt_calloc(1, sizeof (GtMgthStatsPair));
+  pair->parsestruct = parsestruct_ptr;
+  pair->statpos = value;
+  pair->string = key;
+  gt_dlist_add(parsestruct_ptr->outlist, pair);
+
+  return CONTINUE_ITERATION;
+}
 
 int metagenomethreader(int argc, const char **argv, GtError * err)
 {
@@ -634,13 +676,41 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
 
     if (!had_err)
     {
+      GtDlistelem *dlistelem;
+
       /* Schreiben des Ausgabe-Footers */
       mg_outputwriter(parsestruct_ptr, NULL, NULL, NULL, 'v', err);
 
-      /* Ausgeben der verwendeten Hit-Def, in dem die Hashtabelle einmal
+      parsestruct_ptr->outlist = gt_dlist_new(statspair_cmp);
+
+      /* Erzeugen einer sortierten Liste, indem die Hashtabelle einmal
          vollstaendig durchlaufen wird */
       (void) cstr_nofree_ulp_gt_hashmap_foreach(parsestruct.resulthits,
-                                            printout_hits, &parsestruct, err);
+                                                insert_into_outlist,
+                                                &parsestruct, err);
+
+      /* Ausgabe der sortierten Hit-Ergebnisse */
+      for (dlistelem = gt_dlist_first(parsestruct_ptr->outlist);
+           dlistelem != NULL;
+           dlistelem = gt_dlistelem_next(dlistelem))
+      {
+        GtMgthStatsPair *pair = (GtMgthStatsPair*)
+                                  gt_dlistelem_get_data(dlistelem);
+        gt_error_check(err);
+
+        HITSTRUCT(stat_pos) = *(pair->statpos);
+
+        /* Ausgabe erfolgt nur, wenn der Anteil des Hits ueber dem Wert des
+           Metagenomethreader-Argumentes liegt */
+        if ((double)
+            (HITSTRUCT(hitsnum)[HITSTRUCT(stat_pos)] /
+             (double) HITSTRUCT(hitsnumber)) >= ARGUMENTSSTRUCT(percent_value))
+        {
+          mg_outputwriter(parsestruct_ptr, NULL, NULL, NULL, 's', err);
+        }
+        gt_free(pair);
+      }
+      gt_dlist_delete(parsestruct_ptr->outlist);
 
       /* Schreiben des Ausgabe-Footers */
       mg_outputwriter(parsestruct_ptr, NULL, NULL, NULL, 'f', err);
@@ -697,27 +767,4 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
 
   /* Rueckgabe des Fehlercode */
   return had_err;
-}
-
-static enum iterator_op
-printout_hits(GT_UNUSED char *key,
-              unsigned long *value, void *data, GtError * err)
-{
-  /* Parsestruct-Struktur */
-  ParseStruct *parsestruct_ptr = (ParseStruct *) data;
-
-  gt_error_check(err);
-
-  /* Position des aktuell betrachteten Schluessels */
-  HITSTRUCT(stat_pos) = *value;
-
-  /* Ausgabe erfolgt nur, wenn der Anteil des Hits ueber dem Wert des
-     Metagenomethreader-Argumentes liegt */
-  if ((double)
-      (HITSTRUCT(hitsnum)[HITSTRUCT(stat_pos)] /
-       (double) HITSTRUCT(hitsnumber)) >= ARGUMENTSSTRUCT(percent_value))
-  {
-    mg_outputwriter(parsestruct_ptr, NULL, NULL, NULL, 's', err);
-  }
-  return 0;
 }

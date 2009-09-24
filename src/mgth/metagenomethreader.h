@@ -25,6 +25,7 @@
 #include "core/array.h"
 #include "core/array2dim_api.h"
 #include "core/bioseq.h"
+#include "core/dlist_api.h"
 #include "core/error.h"
 #include "core/hashmap-generic.h"
 #include "core/ma.h"
@@ -199,6 +200,7 @@ typedef struct
   GtHashtable *queryhash,
    *hithash,
    *resulthits;
+  GtDlist *outlist;
   GtError *err;
   int had_err;
   unsigned short def_flag,
