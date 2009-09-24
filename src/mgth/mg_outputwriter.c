@@ -335,151 +335,192 @@ static void output_header_html(const ParseStruct *parsestruct_ptr)
   gt_file_xprintf(FILEPOINTEROUT,
                   "<!DOCTYPE html PUBLIC \"-/""/W3C/""/DTD XHTML 1.0 "
                   "Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/"
-                  "xhtml1-transitional.dtd\">");
+                  "xhtml1-transitional.dtd\">\n");
   gt_file_xprintf(FILEPOINTEROUT,
                   "<html xmlns=\"http://www.w3.org/1999/xhtml\" "
-                  "xml:lang=\"de\" lang=\"de\">");
-  gt_file_xprintf(FILEPOINTEROUT, "<head>");
+                  "xml:lang=\"de\" lang=\"de\">\n");
+  gt_file_xprintf(FILEPOINTEROUT, " <head>\n");
   if (!ARGUMENTSSTRUCT(testmodus_mode))
   {
     gt_file_xprintf(FILEPOINTEROUT,
-                    "<title>Metagenomethreader Result %d.%d.%d</title>",
+                    "  <title>Metagenomethreader Result %d.%d.%d</title>\n",
                     tmstamp->tm_mday, tmstamp->tm_mon + 1,
                     tmstamp->tm_year + 1900);
   }
     gt_file_xprintf(FILEPOINTEROUT,
-                    "<meta http-equiv=\"Content-type\" content=\"text/html; "
-                    "charset=iso-8859-1\"/>");
+                    "  <meta http-equiv=\"Content-type\" content=\"text/html; "
+                    "charset=iso-8859-1\"/>\n");
     gt_file_xprintf(FILEPOINTEROUT,
-                    "<link rel=\"stylesheet\" type=\"text/css\" "
-                    "href=\"styles.css\" media=\"all\"/>");
-    gt_file_xprintf(FILEPOINTEROUT, "</head>");
-    gt_file_xprintf(FILEPOINTEROUT, "<body>");
+                    "  <link rel=\"stylesheet\" type=\"text/css\" "
+                    "href=\"styles.css\" media=\"all\"/>\n");
+    gt_file_xprintf(FILEPOINTEROUT, " </head>\n");
+    gt_file_xprintf(FILEPOINTEROUT, " <body>\n");
     gt_file_xprintf(FILEPOINTEROUT,
-                    "<table border=\"0\" width=\"800\" cellspacing=\"1\" "
-                    "cellpadding=\"2\">");
+                    "  <table border=\"0\" width=\"800\" cellspacing=\"1\" "
+                    "cellpadding=\"2\">\n");
   if (!ARGUMENTSSTRUCT(testmodus_mode))
   {
+    gt_file_xprintf(FILEPOINTEROUT,"   <tr>\n");
+
     gt_file_xprintf(FILEPOINTEROUT,
-                    "<tr><td width=\"200\"><font class=\"font_header\">"
-                    "Metagenomethreader Result %d.%d.%d</font><br><br></td>"
-                    "<td></td></tr>",
+                    "    <td width=\"200\"><font class=\"font_header\">"
+                    "Metagenomethreader Result %d.%d.%d</font><br><br></td>\n"
+                    "    <td></td>\n",
                     tmstamp->tm_mday, tmstamp->tm_mon + 1,
                     tmstamp->tm_year + 1900);
+
+    gt_file_xprintf(FILEPOINTEROUT,"   </tr>\n");
   }
+  gt_file_xprintf(FILEPOINTEROUT,"   <tr>\n");
+
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<tr><td width=\"200\"><font class=\"class\">"
-                  "Parametereinstellungen</font></td>");
+                  "    <td width=\"200\"><font class=\"class\">"
+                  "Parametereinstellungen</font></td>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<td><font class=\"class\"></font></td></tr>");
+                  "    <td><font class=\"class\"></font></td>\n");
+  gt_file_xprintf(FILEPOINTEROUT,"   </tr>\n");
+  gt_file_xprintf(FILEPOINTEROUT,"   <tr>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<tr><td width=\"200\"><font class=\"class\">"
-                  "Synonymic Value: </font></td>");
+                  "    <td width=\"200\"><font class=\"class\">"
+                  "Synonymic Value: </font></td>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<td><font class=\"class\">%.4f</font></td></tr>",
+                  "    <td><font class=\"class\">%.4f</font></td>\n",
                   ARGUMENTSSTRUCT(synonomic_value));
+  gt_file_xprintf(FILEPOINTEROUT,"   </tr>\n");
+  gt_file_xprintf(FILEPOINTEROUT,"   <tr>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<tr><td width=\"200\"><font class=\"class\">"
-                  "Non-Synonymic Value: </font></td>");
+                  "    <td width=\"200\"><font class=\"class\">"
+                  "Non-Synonymic Value: </font></td>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<td><font class=\"class\">%.4f</font></td></tr>",
+                  "    <td><font class=\"class\">%.4f</font></td>\n",
                   ARGUMENTSSTRUCT(nonsynonomic_value));
+  gt_file_xprintf(FILEPOINTEROUT,"   </tr>\n");
+  gt_file_xprintf(FILEPOINTEROUT,"   <tr>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<tr><td width=\"200\"><font class=\"class\">"
-                  "Blast-Hit-End Value: </font></td>");
+                  "    <td width=\"200\"><font class=\"class\">"
+                  "Blast-Hit-End Value: </font></td>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<td><font class=\"class\">%.4f</font></td></tr>",
+                  "    <td><font class=\"class\">%.4f</font></td>\n",
                   ARGUMENTSSTRUCT(blasthit_end_value));
+  gt_file_xprintf(FILEPOINTEROUT,"   </tr>\n");
+  gt_file_xprintf(FILEPOINTEROUT,"   <tr>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<tr><td width=\"200\"><font class=\"class\">"
-                  "Query Stop-Codon Value: </font></td>");
+                  "    <td width=\"200\"><font class=\"class\">"
+                  "Query Stop-Codon Value: </font></td>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<td><font class=\"class\">%.4f</font></td></tr>",
+                  "    <td><font class=\"class\">%.4f</font></td>\n",
                   ARGUMENTSSTRUCT(stopcodon_queryseq));
+  gt_file_xprintf(FILEPOINTEROUT,"   </tr>\n");
+  gt_file_xprintf(FILEPOINTEROUT,"   <tr>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<tr><td width=\"200\"><font class=\"class\">"
-                  "Hit Stop-Codon Value: </font></td>");
+                  "    <td width=\"200\"><font class=\"class\">"
+                  "Hit Stop-Codon Value: </font></td>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<td><font class=\"class\">%.4f</font></td></tr>",
+                  "    <td><font class=\"class\">%.4f</font></td>\n",
                   ARGUMENTSSTRUCT(stopcodon_hitseq));
+  gt_file_xprintf(FILEPOINTEROUT,"   </tr>\n");
+  gt_file_xprintf(FILEPOINTEROUT,"   <tr>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<tr><td width=\"200\"><font class=\"class\">"
-                  "Frameshift-Span: </font></td>");
+                  "    <td width=\"200\"><font class=\"class\">"
+                  "Frameshift-Span: </font></td>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<td><font class=\"class\">%.4f</font></td></tr>",
+                  "    <td><font class=\"class\">%.4f</font></td>\n",
                   ARGUMENTSSTRUCT(frameshift_span));
+  gt_file_xprintf(FILEPOINTEROUT,"   </tr>\n");
+  gt_file_xprintf(FILEPOINTEROUT,"   <tr>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<tr><td width=\"200\"><font class=\"class\">"
-                  "Prediction-Span: </font></td>");
+                  "    <td width=\"200\"><font class=\"class\">"
+                  "Prediction-Span: </font></td>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<td><font class=\"class\">%.4f</font></td></tr>",
+                  "    <td><font class=\"class\">%.4f</font></td>\n",
                   ARGUMENTSSTRUCT(prediction_span));
+  gt_file_xprintf(FILEPOINTEROUT,"   </tr>\n");
+  gt_file_xprintf(FILEPOINTEROUT,"   <tr>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<tr><td width=\"200\"><font class=\"class\">"
-                  "Leavegene-Value: </font></td>");
+                  "    <td width=\"200\"><font class=\"class\">"
+                  "Leavegene-Value: </font></td>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<td><font class=\"class\">%.4f</font></td></tr>",
+                  "    <td><font class=\"class\">%.4f</font></td>\n",
                   ARGUMENTSSTRUCT(leavegene_value));
+  gt_file_xprintf(FILEPOINTEROUT,"   </tr>\n");
+  gt_file_xprintf(FILEPOINTEROUT,"   <tr>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<tr><td width=\"200\"><font class=\"class\">cURL-DB: "
-                  "</font></td>");
+                  "    <td width=\"200\"><font class=\"class\">cURL-DB: "
+                  "</font></td>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<td><font class=\"class\">%s</font></td></tr>",
+                  "    <td><font class=\"class\">%s</font></td>\n",
                   gt_str_get(ARGUMENTSSTRUCT(curl_fcgi_db)));
+  gt_file_xprintf(FILEPOINTEROUT,"   </tr>\n");
+  gt_file_xprintf(FILEPOINTEROUT,"   <tr>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<tr><td width=\"200\"><font class=\"class\">"
-                  "Output-Filename: </font></td>");
+                  "    <td width=\"200\"><font class=\"class\">"
+                  "Output-Filename: </font></td>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<td><font class=\"class\">%s</font></td></tr>",
+                  "    <td><font class=\"class\">%s</font></td>\n",
                   gt_str_get(ARGUMENTSSTRUCT(outputtextfile_name)));
+  gt_file_xprintf(FILEPOINTEROUT,"   </tr>\n");
+  gt_file_xprintf(FILEPOINTEROUT,"   <tr>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<tr><td width=\"200\"><font class=\"class\">"
-                  "Output-Fileformat<br>(1/2/3): </font></td>");
+                  "    <td width=\"200\"><font class=\"class\">"
+                  "Output-Fileformat<br>(1/2/3): </font></td>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<td valign=\"top\"><font class=\"class\">%d</font>"
-                  "</td></tr>",
+                  "    <td valign=\"top\"><font class=\"class\">%d</font>"
+                  "</td>\n",
                   ARGUMENTSSTRUCT(outputfile_format));
+  gt_file_xprintf(FILEPOINTEROUT,"   </tr>\n");
+  gt_file_xprintf(FILEPOINTEROUT,"   <tr>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<tr><td width=\"200\"><font class=\"class\">Hitfile<br>"
-                  "(yes=1/no=0): </font></td>");
+                  "    <td width=\"200\"><font class=\"class\">Hitfile<br>"
+                  "(yes=1/no=0): </font></td>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<td valign=\"top\"><font class=\"class\">%d</font>"
-                  "</td></tr>",
+                  "    <td valign=\"top\"><font class=\"class\">%d</font>"
+                  "</td>\n",
                   ARGUMENTSSTRUCT(hitfile_bool));
+  gt_file_xprintf(FILEPOINTEROUT,"   </tr>\n");
+  gt_file_xprintf(FILEPOINTEROUT,"   <tr>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<tr><td width=\"200\"><font class=\"class\">"
-                  "Min-Protein-Length<br>(>=15): </font></td>");
+                  "    <td width=\"200\"><font class=\"class\">"
+                  "Min-Protein-Length<br>(>=15): </font></td>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<td valign=\"top\"><font class=\"class\">%lu</font>"
-                  "</td></tr>",
+                  "    <td valign=\"top\"><font class=\"class\">%lu</font>"
+                  "</td>\n",
                   ARGUMENTSSTRUCT(min_as));
+  gt_file_xprintf(FILEPOINTEROUT,"   </tr>\n");
+  gt_file_xprintf(FILEPOINTEROUT,"   <tr>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<tr><td width=\"200\"><font class=\"class\">"
-                  "Min-Result-Percentage: </font></td>");
+                  "    <td width=\"200\"><font class=\"class\">"
+                  "Min-Result-Percentage: </font></td>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<td><font class=\"class\">%.4f</font></td></tr>",
+                  "    <td><font class=\"class\">%.4f</font></td>\n",
                   ARGUMENTSSTRUCT(percent_value));
+  gt_file_xprintf(FILEPOINTEROUT,"   </tr>\n");
+  gt_file_xprintf(FILEPOINTEROUT,"   <tr>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<tr><td width=\"200\"><font class=\"class\">"
-                  "Extended-Modus<br>(yes=1/no=0): </font></td>");
+                  "    <td width=\"200\"><font class=\"class\">"
+                  "Extended-Modus<br>(yes=1/no=0): </font></td>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<td valign=\"top\"><font class=\"class\">%d</font>"
-                  "</td></tr>",
+                  "    <td valign=\"top\"><font class=\"class\">%d</font>"
+                  "</td>\n",
                   ARGUMENTSSTRUCT(extended_mode));
+  gt_file_xprintf(FILEPOINTEROUT,"   </tr>\n");
+  gt_file_xprintf(FILEPOINTEROUT,"   <tr>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<tr><td width=\"200\"><font class=\"class\">"
-                  "Homology-Modus<br>(yes=1/no=0): </font></td>");
+                  "    <td width=\"200\"><font class=\"class\">"
+                  "Homology-Modus<br>(yes=1/no=0): </font></td>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<td valign=\"top\"><font class=\"class\">%d</font>"
-                  "</td></tr>",
+                  "    <td valign=\"top\"><font class=\"class\">%d</font>"
+                  "</td>\n",
                   ARGUMENTSSTRUCT(homology_mode));
+  gt_file_xprintf(FILEPOINTEROUT,"   </tr>\n");
+  gt_file_xprintf(FILEPOINTEROUT,"   <tr>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<tr><td width=\"200\"><font class=\"class\">"
-                  "Codon-Modus<br>(1/2/3): </font></td>");
+                  "    <td width=\"200\"><font class=\"class\">"
+                  "Codon-Modus<br>(1/2/3): </font></td>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<td valign=\"top\"><font class=\"class\">%d</font>"
-                  "</td></tr>",
+                  "    <td valign=\"top\"><font class=\"class\">%d</font>"
+                  "</td>\n",
                   ARGUMENTSSTRUCT(codon_mode));
+  gt_file_xprintf(FILEPOINTEROUT,"   </tr>\n");
 }
 
 static void output_header_xml(const ParseStruct *parsestruct_ptr)
@@ -591,23 +632,33 @@ static void output_querydna_txt(const ParseStruct *parsestruct_ptr)
 static void output_querydna_html(const ParseStruct *parsestruct_ptr)
 {
   /* schreiben des Query-DNA Headers inkl. Query-Def. und Query-Sequenz */
+  gt_file_xprintf(FILEPOINTEROUT,"   <tr>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<tr><td colspan=\"2\"><font class=\"font_header\"><br>"
-                  "<br>Query-DNA-Entry-Section<br><br></font></td></tr>");
+                  "    <td colspan=\"2\"><font class=\"font_header\"><br>"
+                  "<br>Query-DNA-Entry-Section<br><br></font></td>\n");
+  gt_file_xprintf(FILEPOINTEROUT,"   </tr>\n");
+  gt_file_xprintf(FILEPOINTEROUT,"   <tr>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<tr><td><font class=\"class\">Query-DNA-Def</font></td>"
-                  "<td><font class=\"class\">%s</font></td></tr>",
+                  "    <td><font class=\"class\">Query-DNA-Def</font></td>\n"
+                  "    <td><font class=\"class\">%s</font></td>\n",
                   gt_str_get(MATRIXSTRUCT(query_def)));
+  gt_file_xprintf(FILEPOINTEROUT,"   </tr>\n");
+  gt_file_xprintf(FILEPOINTEROUT,"   <tr>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<tr><td colspan=\"2\"><font class=\"class\">"
-                  "Query_DNA-Sequence</font></td></tr>");
+                  "    <td colspan=\"2\"><font class=\"class\">"
+                  "Query_DNA-Sequence</font></td>\n");
+  gt_file_xprintf(FILEPOINTEROUT,"   </tr>\n");
+  gt_file_xprintf(FILEPOINTEROUT,"   <tr>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<tr><td colspan=\"2\"><font class=\"class\">%s</font>"
-                  "</td></tr>",
+                  "    <td colspan=\"2\"><font class=\"class\">%s</font>"
+                  "</td>\n",
                   gt_str_get(MATRIXSTRUCT(query_dna)));
+  gt_file_xprintf(FILEPOINTEROUT,"   </tr>\n");
+  gt_file_xprintf(FILEPOINTEROUT,"   <tr>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<tr><td colspan=\"2\"><br><font class=\"class\">"
-                  "Coding-DNA-Entry-Section</font></td></tr>");
+                  "    <td colspan=\"2\"><br><font class=\"class\">"
+                  "Coding-DNA-Entry-Section</font></td>\n");
+  gt_file_xprintf(FILEPOINTEROUT,"   </tr>\n");
 }
 
 static void output_querydna_xml(const ParseStruct *parsestruct_ptr)
@@ -914,22 +965,32 @@ static void print_codingheader(const ParseStruct *parsestruct_ptr,
       break;
       /* Ausgabe Coding-DNA-Header - html */
     case 2:
+      gt_file_xprintf(FILEPOINTEROUT,"   <tr>\n");
       gt_file_xprintf(FILEPOINTEROUT,
-                      "<tr><td colspan=\"2\"><font class=\"font_header\"><br>"
-                      "Coding-DNA</font></td></tr>");
+                      "    <td colspan=\"2\"><font class=\"font_header\"><br>"
+                      "Coding-DNA</font></td>\n");
+      gt_file_xprintf(FILEPOINTEROUT,"   </tr>\n");
+      gt_file_xprintf(FILEPOINTEROUT,"   <tr>\n");
       gt_file_xprintf(FILEPOINTEROUT,
-                      "<tr><td colspan=\"2\"><font class=\"class\">%s</font>"
-                      "</td></tr>",
+                      "    <td colspan=\"2\"><font class=\"class\">%s</font>"
+                      "</td>\n",
                       contig_seq);
+      gt_file_xprintf(FILEPOINTEROUT,"   </tr>\n");
+      gt_file_xprintf(FILEPOINTEROUT,"   <tr>\n");
       gt_file_xprintf(FILEPOINTEROUT,
-                      "<tr><td colspan=\"2\"><font class=\"font_header\">"
-                      "Protein-Sequence</font></td></tr>");
+                      "    <td colspan=\"2\"><font class=\"font_header\">"
+                      "Protein-Sequence</font></td>\n");
+      gt_file_xprintf(FILEPOINTEROUT,"   </tr>\n");
+      gt_file_xprintf(FILEPOINTEROUT,"   <tr>\n");
       gt_file_xprintf(FILEPOINTEROUT,
-                      "<tr><td colspan=\"2\"><font class=\"class\">%s</font>"
-                      "</td></tr>", gt_str_get(as_seq));
+                      "    <td colspan=\"2\"><font class=\"class\">%s</font>"
+                      "</td>\n", gt_str_get(as_seq));
+      gt_file_xprintf(FILEPOINTEROUT,"   </tr>\n");
+      gt_file_xprintf(FILEPOINTEROUT,"   <tr>\n");
       gt_file_xprintf(FILEPOINTEROUT,
-                      "<tr><td colspan=\"2\"><font class=\"font_header\">"
-                      "Hit-Information Section</font></td></tr>");
+                      "    <td colspan=\"2\"><font class=\"font_header\">"
+                      "Hit-Information Section</font></td>\n");
+      gt_file_xprintf(FILEPOINTEROUT,"   </tr>\n");
       break;
       /* Ausgabe Coding-DNA-Header - xml */
     case 3:
@@ -967,8 +1028,9 @@ static void print_hitinformation(const ParseStruct *parsestruct_ptr,
       break;
       /* html */
     case 2:
+      gt_file_xprintf(FILEPOINTEROUT,"   <tr>\n");
       gt_file_xprintf(FILEPOINTEROUT,
-                      "<tr><td colspan=\"2\"><font class=\"class\">gi-nr: ");
+                      "    <td colspan=\"2\"><font class=\"class\">gi-nr: ");
       gt_file_xprintf(FILEPOINTEROUT,
                       "<a href=\"http://www.ncbi.nlm.nih.gov/entrez/viewer.fcgi"
                       "?db=nuccore&id=%s\">",
@@ -982,8 +1044,9 @@ static void print_hitinformation(const ParseStruct *parsestruct_ptr,
                                    seq_index));
       gt_file_xprintf(FILEPOINTEROUT, "from: %s ",
                       gt_str_array_get(hit_information->hit_from, seq_index));
-      gt_file_xprintf(FILEPOINTEROUT, "to: %s</font></td></tr>",
+      gt_file_xprintf(FILEPOINTEROUT, "to: %s</font></td>\n",
                       gt_str_array_get(hit_information->hit_to, seq_index));
+      gt_file_xprintf(FILEPOINTEROUT,"   </tr>\n");
       break;
       /* xml */
     case 3:
@@ -1023,15 +1086,17 @@ static void output_statistics_txt(const ParseStruct *parsestruct_ptr)
 
 static void output_statistics_html(const ParseStruct *parsestruct_ptr)
 {
+  gt_file_xprintf(FILEPOINTEROUT,"      <tr>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<tr><td align=\"right\" width=\"50\">%-8.4f </td>",
+                  "       <td align=\"right\" width=\"50\">%-8.4f </td>\n",
                   ((float) *(HITSTRUCT(hitsnum) + HITSTRUCT(stat_pos)) /
                    (float) HITSTRUCT(hitsnumber)) * 100);
   gt_file_xprintf(FILEPOINTEROUT,
-                  "<td><font class=\"font_header\"> %s</font></td></tr>",
+                  "       <td><font class=\"font_header\"> %s</font></td>\n",
                   gt_str_array_get(HITSTRUCT(hits_statistic),
                                *(HITSTRUCT(memory) +
                                  HITSTRUCT(stat_pos))));
+  gt_file_xprintf(FILEPOINTEROUT,"      </tr>\n");
 }
 
 static void output_statistics_xml(const ParseStruct *parsestruct_ptr)
@@ -1052,8 +1117,12 @@ static void output_statistics_xml(const ParseStruct *parsestruct_ptr)
 static void output_footer_html(const ParseStruct *parsestruct_ptr)
 {
   /* Schreiben des HTML-Footers */
-  gt_file_xprintf(FILEPOINTEROUT, "</td></tr></table>");
-  gt_file_xprintf(FILEPOINTEROUT, "</table>\n</body>\n</html>");
+  gt_file_xprintf(FILEPOINTEROUT,"     </table>\n");
+  gt_file_xprintf(FILEPOINTEROUT,"    </td>\n");
+  gt_file_xprintf(FILEPOINTEROUT,"   </tr>\n");
+  gt_file_xprintf(FILEPOINTEROUT,"  </table>\n");
+  gt_file_xprintf(FILEPOINTEROUT," </body>\n");
+  gt_file_xprintf(FILEPOINTEROUT,"</html>\n");
 }
 
 static void output_footer_xml(const ParseStruct *parsestruct_ptr)
@@ -1307,12 +1376,17 @@ static void output_statistics_header(const ParseStruct *parsestruct_ptr)
   }
   else if (ARGUMENTSSTRUCT(outputfile_format) == 2)
   {
+    gt_file_xprintf(FILEPOINTEROUT, "   <tr>\n");
     gt_file_xprintf(FILEPOINTEROUT,
-                    "<tr><td colspan=\"2\"><table cellspacing=\"1\" "
-                    "cellpadding=\"3\">");
+                    "    <td colspan=\"2\">\n");
+    gt_file_xprintf(FILEPOINTEROUT, "     <table cellspacing=\"1\" "
+                                    "cellpadding=\"3\">\n");
+    gt_file_xprintf(FILEPOINTEROUT, "      <tr>\n");
     gt_file_xprintf(FILEPOINTEROUT,
-                    "<tr><td colspan=\"2\"><font class=\"font_header\"><br><br>"
-                    "Statistic-Section<br><br></font></td></tr>");
+                    "       <td colspan=\"2\"><font class=\"font_header\">"
+                    "<br><br>"
+                    "Statistic-Section<br><br></font></td>\n");
+    gt_file_xprintf(FILEPOINTEROUT, "      </tr>\n");
   }
   else
   {

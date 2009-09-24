@@ -102,8 +102,8 @@ typedef struct
     leavegene_value,
     percent_value;
   GtStr *curl_fcgi_db,
-   *outputtextfile_name;
-  GtStrArray *giexpfile_name;
+   *outputtextfile_name,
+   *giexpfile_name;
   int outputfile_format,
     codon_mode;
   bool hitfile_bool,

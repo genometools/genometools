@@ -153,8 +153,9 @@ static GtOPrval parse_options(int *parsed_args,
 
   /* GtOption zur Angabe der Hit-Sequenz-DB  */
   giexpfile_name_option =
-    gt_option_new_stringarray("k", "name for the Hit-Sequence-DB",
-                           metagenomethreader_arguments->giexpfile_name);
+    gt_option_new_string("k", "name for the Hit-Sequence-DB",
+                         metagenomethreader_arguments->giexpfile_name,
+                         "nucleotide database");
   gt_option_parser_add_option(op, giexpfile_name_option);
 
   /* GtOption zur Angabe, ob ein Hit-FASTA-File exisitiert; default: false */
@@ -261,7 +262,7 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
 
   ARGUMENTS(curl_fcgi_db) = gt_str_new();
   ARGUMENTS(outputtextfile_name) = gt_str_new();
-  ARGUMENTS(giexpfile_name) = gt_str_array_new();
+  ARGUMENTS(giexpfile_name) = gt_str_new();
 
   /* Check der Umgebungsvariablen */
   gt_error_check(err);
@@ -531,9 +532,9 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
       gt_str_set(gi_numbers_txt, "gi_numbers.txt");
       unsigned long row_width = 150;
 
-      if (!gt_str_array_size(ARGUMENTS(giexpfile_name)))
+      if (gt_str_length(ARGUMENTS(giexpfile_name)) == 0 )
       {
-        gt_str_array_add_cstr(ARGUMENTS(giexpfile_name), "nt.gz");
+        gt_str_set(ARGUMENTS(giexpfile_name), "nt.gz");
       }
 
       /* Datei fuer die GI-Nr. des XML-Files  */
@@ -549,6 +550,11 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
       {
         parsestruct.giexp_flag = 1;
 
+        GtStrArray *giexpfile_name_array;
+        giexpfile_name_array = gt_str_array_new();
+        gt_str_array_add_cstr(giexpfile_name_array,
+                              gt_str_get(ARGUMENTS(giexpfile_name)));
+
         /* Die Hit-Datei wird mit dem Modus w+ geoeffnet */
         parsestruct.fp_blasthit_file =
           gt_file_xopen(gt_str_get(parsestruct.hit_fastafile), "w+");
@@ -557,7 +563,7 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
                                               parsestruct.fp_blasthit_file,
                                               row_width,
                                               gi_numbers_txt,
-                                              ARGUMENTS(giexpfile_name),
+                                              giexpfile_name_array,
                                               err);
         gt_file_delete(parsestruct.fp_blasthit_file);
         if (had_err)
@@ -687,7 +693,7 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
 
   gt_str_delete(ARGUMENTS(curl_fcgi_db));
   gt_str_delete(ARGUMENTS(outputtextfile_name));
-  gt_str_array_delete(ARGUMENTS(giexpfile_name));
+  gt_str_delete(ARGUMENTS(giexpfile_name));
 
   /* Rueckgabe des Fehlercode */
   return had_err;
