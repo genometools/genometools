@@ -20,7 +20,7 @@
 from gt.dlload import gtlib
 
 
-class GTError(Exception):
+class GTError(RuntimeError):
 
     pass
 
