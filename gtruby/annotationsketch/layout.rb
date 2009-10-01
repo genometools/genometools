@@ -25,6 +25,8 @@ module GT
                                      "GtError*)"
   extern "unsigned long gt_layout_get_height(GtLayout*)"
   extern "int           gt_layout_sketch(GtLayout*, GtCanvas*, GtError*)"
+  extern "void          gt_layout_set_track_ordering_func(GtLayout*, " + \
+                                                          "void*, void*)"
   extern "void          gt_layout_delete(GtCanvas*)"
 
   class Layout
@@ -47,6 +49,21 @@ module GT
       if had_err < 0 then
         GT::gterror(err)
       end
+    end
+
+    def set_track_ordering_func(proc)
+      @tof = DL.callback('ISSP') do |s1, s2, data_ptr|
+               r = proc.call(s1, s2)
+               if (!r.is_a?(Numeric)) then
+                 GT::gterror("Track ordering callback must return a number!")
+               end
+               r.to_i
+             end
+      GT.gt_layout_set_track_ordering_func(@layout, @tof, GT::NULL)
+    end
+
+    def release_track_ordering_func
+      DL.remove_callback(@tof)
     end
 
     def to_ptr

@@ -199,3 +199,32 @@ Test do
            "#{$testdata}standard_gene_with_introns_as_tree.gff3", \
            :maxtime => 600
 end
+
+Name "sketch_parsed reverse order (Ruby)"
+Keywords "gt_sketch gt_ruby annotationsketch"
+Test do
+  run_ruby "#{$testdata}/gtruby/sketch_parsed_with_ordering.rb " + \
+           "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " + \
+           "#{$testdata}standard_gene_with_introns_as_tree.gff3", \
+           :maxtime => 600
+end
+
+Name "sketch_parsed invalid order (Ruby, string != numeric)"
+Keywords "gt_sketch gt_ruby annotationsketch"
+Test do
+  run_ruby "#{$testdata}/gtruby/sketch_parsed_with_invalid_ordering.rb " + \
+           "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " + \
+           "#{$testdata}standard_gene_with_introns_as_tree.gff3", \
+           :maxtime => 600, :retval => 1
+  grep($last_stderr, /Track ordering callback must return a number/)
+end
+
+Name "sketch_parsed invalid order (Ruby, nil)"
+Keywords "gt_sketch gt_ruby annotationsketch"
+Test do
+  run_ruby "#{$testdata}/gtruby/sketch_parsed_with_invalid_ordering_2.rb " + \
+           "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " + \
+           "#{$testdata}standard_gene_with_introns_as_tree.gff3", \
+           :maxtime => 600, :retval => 1
+  grep($last_stderr, /Track ordering callback must return a number/)
+end
