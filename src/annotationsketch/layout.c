@@ -64,6 +64,8 @@ struct GtLayout {
   GtRange viewrange;
   unsigned long nof_tracks;
   unsigned int width;
+  GtTrackOrderingFunc track_ordering_func;
+  void *cmp_data;
 };
 
 static int blocklist_block_compare(const void *item1, const void *item2)
@@ -201,6 +203,8 @@ GtLayout* gt_layout_new_with_twc(GtDiagram *diagram,
   layout->width = width;
   layout->viewrange = gt_diagram_get_range(diagram);
   layout->nof_tracks = 0;
+  layout->track_ordering_func = NULL;
+  layout->cmp_data = NULL;
   lti.layout = layout;
   lti.twc = twc;
   layout->own_twc = false;
@@ -226,6 +230,14 @@ void gt_layout_delete(GtLayout *layout)
   gt_free(layout);
 }
 
+static int track_cmp_wrapper(const void *t1, const void *t2, void *data)
+{
+  const char *s1 = (const char*) t1, *s2 = (const char*) t2;
+  GtLayoutTraverseInfo *lti = (GtLayoutTraverseInfo*) data;
+  gt_assert(t1 && t2 && lti && lti->layout);
+  return lti->layout->track_ordering_func(s1, s2, lti->layout->cmp_data);
+}
+
 int gt_layout_sketch(GtLayout *layout, GtCanvas *target_canvas, GtError *err)
 {
   int had_err = 0;
@@ -236,8 +248,15 @@ int gt_layout_sketch(GtLayout *layout, GtCanvas *target_canvas, GtError *err)
   rti.canvas = target_canvas;
   had_err = gt_canvas_visit_layout_pre(target_canvas, layout, err);
   if (had_err) return had_err;
-  had_err = gt_hashmap_foreach_in_key_order(layout->tracks, render_tracks,
-                                            &rti, err);
+
+  if (layout->track_ordering_func == NULL) {
+    had_err = gt_hashmap_foreach_in_key_order(layout->tracks, render_tracks,
+                                              &rti, err);
+  } else {
+    had_err = gt_hashmap_foreach_ordered(layout->tracks, render_tracks,
+                                         &rti, (GtCompare) track_cmp_wrapper,
+                                         err);
+  }
   if (had_err) return had_err;
   had_err = gt_canvas_visit_layout_post(target_canvas, layout, err);
   if (had_err) return had_err;
@@ -248,6 +267,22 @@ int gt_layout_sketch(GtLayout *layout, GtCanvas *target_canvas, GtError *err)
     had_err = render_custom_tracks(NULL, ct, &rti, err);
   }
   return had_err;
+}
+
+void gt_layout_set_track_ordering_func(GtLayout *layout,
+                                       GtTrackOrderingFunc track_ordering_func,
+                                       void *data)
+{
+  gt_assert(layout && track_ordering_func);
+  layout->track_ordering_func = track_ordering_func;
+  layout->cmp_data = data;
+}
+
+void gt_layout_unset_track_ordering_func(GtLayout *layout)
+{
+  gt_assert(layout);
+  layout->track_ordering_func = NULL;
+  layout->cmp_data = NULL;
 }
 
 int gt_layout_get_number_of_tracks(const GtLayout *layout)

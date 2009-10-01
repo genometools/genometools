@@ -298,6 +298,7 @@ ifneq ($(cairo),no)
   EXP_LDLIBS:=-lcairo $(EXP_LDLIBS)
   ANNOTATIONSKETCH_EXAMPLES := bin/examples/sketch_constructed \
                                bin/examples/sketch_parsed_with_ctrack \
+                               bin/examples/sketch_parsed_with_ordering \
                                bin/examples/sketch_parsed
   ANNOTATIONSKETCH_MANUAL := doc/manuals/annotationsketch.pdf
   LIBGENOMETOOLS_DIRS:=$(LIBGENOMETOOLS_DIRS) src/annotationsketch
@@ -508,6 +509,10 @@ $(eval $(call PROGRAM_template, bin/examples/sketch_parsed_with_ctrack, \
                                 obj/src/examples/sketch_parsed_with_ctrack.o \
                                 lib/libgenometools.a $(OVERRIDELIBS)))
 
+$(eval $(call PROGRAM_template, bin/examples/sketch_parsed_with_ordering, \
+                                obj/src/examples/sketch_parsed_with_ordering.o \
+                                lib/libgenometools.a $(OVERRIDELIBS)))
+
 
 bin/lua: $(LUAMAIN_OBJ)
 	@echo "[link $(@F)]"
@@ -610,7 +615,7 @@ src/core/checkbitpackstring-int.c: \
 	@scripts/template2c.pl '-int' $<
 
 $(SQUID_DIR)/%.c: $(HMMER_DIR)/config.h
-	@true	
+	@true
 
 $(HMMER_DIR)/%.c: $(HMMER_DIR)/config.h
 	@true

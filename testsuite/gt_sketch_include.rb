@@ -139,6 +139,16 @@ Test do
            :maxtime => 600
 end
 
+Name "sketch_parsed reverse order (C)"
+Keywords "gt_sketch annotationsketch"
+Test do
+  run_test "#{$bin}examples/sketch_parsed_with_ordering " + \
+           "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " + \
+           "#{$testdata}eden.gff3 ", \
+           :maxtime => 600
+  run "diff #{$last_stdout} #{$testdata}order_sketch_out.txt"
+end
+
 Name "sketch_constructed (Lua)"
 Keywords "gt_sketch gt_scripts annotationsketch"
 Test do
