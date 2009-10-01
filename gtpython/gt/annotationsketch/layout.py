@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-# Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+# Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -22,7 +22,9 @@ from gt.annotationsketch.canvas import Canvas
 from gt.annotationsketch.diagram import Diagram
 from gt.annotationsketch.style import Style
 from gt.core.error import Error, gterror
+from ctypes import c_ulong, c_void_p, c_int, c_char_p, CFUNCTYPE
 
+TrackOrderingFunc = CFUNCTYPE(c_int, c_char_p, c_char_p, c_void_p)
 
 class Layout:
 
@@ -55,12 +57,30 @@ class Layout:
     def get_height(self):
         return gtlib.gt_layout_get_height(self.layout)
 
+    def set_track_ordering_func(self, func):
+
+        def trackorderer(s1, s2, data_ptr):
+            ret = func(s1, s2)
+            try:
+                if ret is None:
+                    raise ValueError
+                else:
+                    ret = int(ret)
+            except ValueError:
+                gterror("Track ordering function must return a number!")
+            return ret
+
+        self.tof_cb = TrackOrderingFunc(trackorderer)
+        self.tof = trackorderer
+        gtlib.gt_layout_set_track_ordering_func(self.layout, self.tof_cb)
+
     def register(cls, gtlib):
-        from ctypes import c_ulong, c_void_p, c_int
         gtlib.gt_layout_new.restype = c_void_p
         gtlib.gt_layout_new.argtypes = [Diagram, c_ulong, Style]
         gtlib.gt_layout_sketch.restype = c_int
         gtlib.gt_layout_sketch.argtypes = [c_void_p, Canvas, Error]
+        gtlib.gt_layout_set_track_ordering_func.argtypes = [c_void_p,
+                TrackOrderingFunc]
         gtlib.gt_layout_get_height.restype = c_ulong
         gtlib.gt_layout_get_height.argtypes = [c_void_p]
 
