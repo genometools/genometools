@@ -25,7 +25,7 @@
 #include "spacedef.h"
 #include "sfx-optdef.h"
 #include "encseq-def.h"
-#include "measure-time-if.h"
+#include "sfx-progress.h"
 #include "esa-fileend.h"
 #include "verbose-def.h"
 #include "sarr-def.h"
@@ -70,7 +70,7 @@ static unsigned long *initcharacterdistribution(const GtAlphabet *alpha)
 }
 
 int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
-                         Measuretime *mtime,
+                         Sfxprogress *sfxprogress,
                          const Suffixeratoroptions *so,
                          Verboseinfo *verboseinfo,
                          GtError *err)
@@ -146,9 +146,9 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   }
   if (!haserr)
   {
-    if (mtime != NULL)
+    if (sfxprogress != NULL)
     {
-      deliverthetime(stdout,mtime,"computing sequence encoding");
+      deliverthetime(stdout,sfxprogress,"computing sequence encoding");
     }
     sfxseqinfo->encseq
       = files2encodedsequence(true,

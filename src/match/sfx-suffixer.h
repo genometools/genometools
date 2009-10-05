@@ -19,7 +19,7 @@
 #define SFX_SUFFIXER_H
 #include "core/error.h"
 #include "readmode-def.h"
-#include "measure-time-if.h"
+#include "sfx-progress.h"
 #include "sfx-strategy.h"
 #include "sfx-bentsedg.h"
 #include "verbose-def.h"
@@ -35,7 +35,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
                             unsigned int numofparts,
                             Outlcpinfo *outlcpinfo,
                             const Sfxstrategy *sfxstrategy,
-                            Measuretime *mtime,
+                            Sfxprogress *sfxprogress,
                             Verboseinfo *verboseinfo,
                             GtError *err);
 

@@ -156,7 +156,7 @@ newSfxInterface(Readmode readmode,
                 unsigned int numofparts,
                 const Sfxstrategy *sfxstrategy,
                 const Encodedsequence *encseq,
-                Measuretime *mtime,
+                Sfxprogress *sfxprogress,
                 Seqpos length,
                 Verboseinfo *verbosity,
                 GtError *err)
@@ -169,7 +169,7 @@ newSfxInterface(Readmode readmode,
                                     NULL,
                                     NULL,
                                     encseq,
-                                    mtime,
+                                    sfxprogress,
                                     length,
                                     verbosity,
                                     err);
@@ -227,7 +227,7 @@ newSfxInterfaceWithReaders(Readmode readmode,
                            enum sfxDataRequest readerRequests[],
                            SeqDataReader readers[],
                            const Encodedsequence *encseq,
-                           Measuretime *mtime,
+                           Sfxprogress *sfxprogress,
                            Seqpos length,
                            Verboseinfo *verbosity, GtError *err)
 {
@@ -252,7 +252,7 @@ newSfxInterfaceWithReaders(Readmode readmode,
                                    numofparts,
                                    NULL,
                                    sfxstrategy,
-                                   mtime,
+                                   sfxprogress,
                                    verbosity, err)))
     newSfxInterfaceWithReadersErrRet();
   sfxi->rot0Pos.defined = false;

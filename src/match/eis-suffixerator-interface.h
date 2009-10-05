@@ -44,7 +44,7 @@ typedef struct sfxInterface sfxInterface;
  * @param encseq object holding the sequences for suffixerator to
  * operate on
  * @param numofsequences number of sequences concatenated in encseq
- * @param mtime timing device
+ * @param sfxprogress timing device
  * @param length length of concatenated sequences plus terminator and
  * separators
  * @param alpha alphabet to use
@@ -59,7 +59,7 @@ newSfxInterface(Readmode readmode,
                 unsigned int numofparts,
                 const Sfxstrategy *sfxstrategy,
                 const Encodedsequence *encseq,
-                Measuretime *mtime,
+                Sfxprogress *sfxprogress,
                 Seqpos length,
                 Verboseinfo *verbosity,
                 GtError *err);
@@ -77,7 +77,7 @@ newSfxInterface(Readmode readmode,
  * @param encseq object holding the sequences for suffixerator to
  * operate on
  * @param numofsequences number of sequences concatenated in encseq
- * @param mtime timing device
+ * @param sfxprogress timing device
  * @param length length of concatenated sequences plus terminator and
  * separators
  * @param alpha alphabet to use
@@ -95,7 +95,7 @@ newSfxInterfaceWithReaders(Readmode readmode,
                            enum sfxDataRequest readerRequests[],
                            SeqDataReader readers[],
                            const Encodedsequence *encseq,
-                           Measuretime *mtime,
+                           Sfxprogress *sfxprogress,
                            Seqpos length,
                            Verboseinfo *verbosity,
                            GtError *err);

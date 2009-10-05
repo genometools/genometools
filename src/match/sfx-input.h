@@ -21,7 +21,7 @@
 #include "core/filelengthvalues.h"
 #include "core/arraydef.h"
 #include "seqpos-def.h"
-#include "measure-time-if.h"
+#include "sfx-progress.h"
 #include "encseq-def.h"
 #include "sfx-optdef.h"
 
@@ -33,7 +33,7 @@ typedef struct
 } Sfxseqinfo;
 
 int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
-                         Measuretime *mtime,
+                         Sfxprogress *sfxprogress,
                          const Suffixeratoroptions *so,
                          Verboseinfo *verboseinfo,
                          GtError *err);

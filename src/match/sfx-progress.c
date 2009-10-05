@@ -18,43 +18,43 @@
 #include <stdio.h>
 #include <time.h>
 #include "core/ma.h"
-#include "measure-time-if.h"
+#include "sfx-progress.h"
 
- struct Measuretime
+struct Sfxprogress
 {
   clock_t startclock, overalltime;
   const char *eventdescription;
 };
 
-Measuretime *inittheclock(const char *event)
+Sfxprogress *inittheclock(const char *event)
 {
-  Measuretime *mtime;
+  Sfxprogress *sfxprogress;
 
-  mtime = gt_malloc(sizeof (Measuretime));
-  mtime->startclock = clock();
-  mtime->overalltime = 0;
-  mtime->eventdescription = event;
-  return mtime;
+  sfxprogress = gt_malloc(sizeof (Sfxprogress));
+  sfxprogress->startclock = clock();
+  sfxprogress->overalltime = 0;
+  sfxprogress->eventdescription = event;
+  return sfxprogress;
 }
 
-void deliverthetime(FILE *fp,Measuretime *mtime,const char *newevent)
+void deliverthetime(FILE *fp,Sfxprogress *sfxprogress,const char *newevent)
 {
   clock_t stopclock;
 
   stopclock = clock();
-  fprintf(fp,"# TIME %s %.2f\n",mtime->eventdescription,
-             (double) (stopclock-mtime->startclock)/(double) CLOCKS_PER_SEC);
+  fprintf(fp,"# TIME %s %.2f\n",sfxprogress->eventdescription,
+             (double) (stopclock-sfxprogress->startclock)/(double) CLOCKS_PER_SEC);
   (void) fflush(fp);
-  mtime->overalltime += (stopclock - mtime->startclock);
+  sfxprogress->overalltime += (stopclock - sfxprogress->startclock);
   if (newevent == NULL)
   {
     fprintf(fp,"# TIME overall %.2f\n",
-                (double) mtime->overalltime/(double) CLOCKS_PER_SEC);
+                (double) sfxprogress->overalltime/(double) CLOCKS_PER_SEC);
     (void) fflush(fp);
-    gt_free(mtime);
+    gt_free(sfxprogress);
   } else
   {
-    mtime->startclock = stopclock;
-    mtime->eventdescription = newevent;
+    sfxprogress->startclock = stopclock;
+    sfxprogress->eventdescription = newevent;
   }
 }

@@ -30,7 +30,7 @@
 #include "core/minmax.h"
 #include "core/fa.h"
 #include "spacedef.h"
-#include "measure-time-if.h"
+#include "sfx-progress.h"
 #include "intcode-def.h"
 #include "encseq-def.h"
 #include "safecast-gen.h"
@@ -79,7 +79,7 @@ struct Sfxiterator
   unsigned long long bucketiterstep; /* for progressbar */
   Sfxstrategy sfxstrategy;
   Verboseinfo *verboseinfo;
-  Measuretime *mtime;
+  Sfxprogress *sfxprogress;
   Differencecover *dcov;
 };
 
@@ -463,7 +463,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
                             unsigned int numofparts,
                             Outlcpinfo *outlcpinfo,
                             const Sfxstrategy *sfxstrategy,
-                            Measuretime *mtime,
+                            Sfxprogress *sfxprogress,
                             Verboseinfo *verboseinfo,
                             GtError *err)
 {
@@ -549,14 +549,14 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
     sfi->exhausted = false;
     sfi->bucketiterstep = 0;
     sfi->verboseinfo = verboseinfo;
-    sfi->mtime = mtime;
+    sfi->sfxprogress = sfxprogress;
 
     if (sfi->sfxstrategy.differencecover > 0 &&
         getencseqspecialcharacters(encseq) < getencseqtotallength(encseq))
     {
-      if (mtime != NULL)
+      if (sfxprogress != NULL)
       {
-        deliverthetime(stdout,mtime,"sorting difference cover sample");
+        deliverthetime(stdout,sfxprogress,"sorting difference cover sample");
       }
       sfi->dcov = differencecover_new(sfi->sfxstrategy.differencecover,
                                       encseq,readmode,verboseinfo);
@@ -606,9 +606,9 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
   {
     gt_assert(sfi != NULL);
     sfi->storespecials = true;
-    if (mtime != NULL)
+    if (sfxprogress != NULL)
     {
-      deliverthetime(stdout,mtime,"counting prefix distribution");
+      deliverthetime(stdout,sfxprogress,"counting prefix distribution");
     }
     getencseqkmers(encseq,
                    readmode,
@@ -687,7 +687,7 @@ static void preparethispart(Sfxiterator *sfi)
   Seqpos partwidth;
   unsigned int numofparts = stpgetnumofparts(sfi->suftabparts);
 
-  if (sfi->part == 0 && sfi->mtime == NULL)
+  if (sfi->part == 0 && sfi->sfxprogress == NULL)
   {
     gt_progressbar_start(&sfi->bucketiterstep,
                          (unsigned long long) sfi->numofallcodes);
@@ -707,18 +707,18 @@ static void preparethispart(Sfxiterator *sfi)
   {
     derivespecialcodesonthefly(sfi);
   }
-  if (sfi->mtime != NULL)
+  if (sfi->sfxprogress != NULL)
   {
-    deliverthetime(stdout,sfi->mtime,"inserting suffixes into buckets");
+    deliverthetime(stdout,sfi->sfxprogress,"inserting suffixes into buckets");
   }
   getencseqkmers(sfi->encseq,
                  sfi->readmode,
                  insertwithoutspecial,
                  sfi,
                  sfi->prefixlength);
-  if (sfi->mtime != NULL)
+  if (sfi->sfxprogress != NULL)
   {
-    deliverthetime(stdout,sfi->mtime,"sorting the buckets");
+    deliverthetime(stdout,sfi->sfxprogress,"sorting the buckets");
   }
   partwidth = stpgetcurrentsumofwdith(sfi->part,sfi->suftabparts);
   if (sfi->sfxstrategy.ssortmaxdepth.defined &&
@@ -1005,7 +1005,7 @@ const Seqpos *nextSfxiterator(Seqpos *numberofsuffixes,bool *specialsuffixes,
   }
   if (sfi->exhausted)
   {
-    if (sfi->mtime == NULL)
+    if (sfi->sfxprogress == NULL)
     {
       gt_progressbar_stop();
     }

@@ -19,10 +19,10 @@
 #define MEASURE_TIME_IF_H
 #include <stdio.h>
 
-typedef struct Measuretime Measuretime;
+typedef struct Sfxprogress Sfxprogress;
 
-Measuretime *inittheclock(const char *event);
+Sfxprogress *inittheclock(const char *event);
 
-void deliverthetime(FILE *fp,Measuretime *mtime,const char *newevent);
+void deliverthetime(FILE *fp,Sfxprogress *sfxprogress,const char *newevent);
 
 #endif

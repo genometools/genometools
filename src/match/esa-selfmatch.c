@@ -18,12 +18,11 @@
 #ifndef INLINEDSequentialsuffixarrayreader
 #include <limits.h>
 #include "seqpos-def.h"
-#include "measure-time-if.h"
 #include "esa-seqread.h"
 #include "sfx-suffixer.h"
 #include "verbose-def.h"
-
 #include "sfx-apfxlen.h"
+#include "sfx-progress.h"
 #include "esa-maxpairs.h"
 
 typedef struct
@@ -39,7 +38,7 @@ static int constructsarrandrunmaxpairs(
                  Readmode readmode,
                  unsigned int prefixlength,
                  unsigned int numofparts,
-                 Measuretime *mtime,
+                 Sfxprogress *sfxprogress,
                  Verboseinfo *verboseinfo,
                  GtError *err)
 {
@@ -55,7 +54,7 @@ static int constructsarrandrunmaxpairs(
                        numofparts,
                        NULL, /* oulcpinfo */
                        NULL, /* sfxstrategy */
-                       mtime,
+                       sfxprogress,
                        NULL, /* verbosinfo */
                        err);
   if (sfi == NULL)

@@ -25,7 +25,7 @@
 #include "core/unused_api.h"
 #include "sfx-optdef.h"
 #include "encseq-def.h"
-#include "measure-time-if.h"
+#include "sfx-progress.h"
 #include "esa-fileend.h"
 #include "readmode-def.h"
 #include "verbose-def.h"
@@ -196,7 +196,7 @@ static int suffixeratorwithoutput(const GtStr *str_indexname,
                                   unsigned int prefixlength,
                                   unsigned int numofparts,
                                   const Sfxstrategy *sfxstrategy,
-                                  Measuretime *mtime,
+                                  Sfxprogress *sfxprogress,
                                   Verboseinfo *verboseinfo,
                                   GtError *err)
 {
@@ -211,7 +211,7 @@ static int suffixeratorwithoutput(const GtStr *str_indexname,
                        numofparts,
                        outfileinfo->outlcpinfo,
                        sfxstrategy,
-                       mtime,
+                       sfxprogress,
                        verboseinfo,
                        err);
   if (sfi == NULL)
@@ -344,7 +344,7 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
 }
 
 static int run_packedindexconstruction(Verboseinfo *verboseinfo,
-                                       Measuretime *mtime,
+                                       Sfxprogress *sfxprogress,
                                        FILE *outfpbcktab,
                                        const Suffixeratoroptions *so,
                                        unsigned int prefixlength,
@@ -367,7 +367,7 @@ static int run_packedindexconstruction(Verboseinfo *verboseinfo,
                        so->numofparts,
                        sfxstrategy,
                        sfxseqinfo->encseq,
-                       mtime,
+                       sfxprogress,
                        getencseqtotallength(sfxseqinfo->encseq) + 1,
                        verboseinfo,
                        err);
@@ -407,7 +407,7 @@ static int runsuffixerator(bool doesa,
                            Verboseinfo *verboseinfo,
                            GtError *err)
 {
-  Measuretime *mtime = NULL;
+  Sfxprogress *sfxprogress = NULL;
   Outfileinfo outfileinfo;
   bool haserr = false;
   Sfxseqinfo sfxseqinfo;
@@ -417,7 +417,7 @@ static int runsuffixerator(bool doesa,
   gt_error_check(err);
   if (so->showtime)
   {
-    mtime = inittheclock("determining sequence length and number of "
+    sfxprogress = inittheclock("determining sequence length and number of "
                          "special symbols");
   }
   if (gt_str_length(so->str_inputindex) > 0)
@@ -441,7 +441,7 @@ static int runsuffixerator(bool doesa,
   } else
   {
     if (fromfiles2Sfxseqinfo(&sfxseqinfo,
-                             mtime,
+                             sfxprogress,
                              so,
                              verboseinfo,
                              err) != 0)
@@ -548,7 +548,7 @@ static int runsuffixerator(bool doesa,
                                    prefixlength,
                                    so->numofparts,
                                    &sfxstrategy,
-                                   mtime,
+                                   sfxprogress,
                                    verboseinfo,
                                    err) != 0)
         {
@@ -557,7 +557,7 @@ static int runsuffixerator(bool doesa,
       } else
       {
         if (run_packedindexconstruction(verboseinfo,
-                                        mtime,
+                                        sfxprogress,
                                         outfileinfo.outfpbcktab,
                                         so,
                                         prefixlength,
@@ -616,9 +616,9 @@ static int runsuffixerator(bool doesa,
       haserr = true;
     }
   }
-  if (mtime != NULL)
+  if (sfxprogress != NULL)
   {
-    deliverthetime(stdout,mtime,NULL);
+    deliverthetime(stdout,sfxprogress,NULL);
   }
   return haserr ? -1 : 0;
 }

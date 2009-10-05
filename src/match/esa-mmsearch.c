@@ -25,7 +25,7 @@
 #include "spacedef.h"
 #include "esa-mmsearch-def.h"
 #include "sfx-suffixer.h"
-#include "measure-time-if.h"
+#include "sfx-progress.h"
 #include "format64.h"
 #include "stamp.h"
 #include "esa-map.h"
@@ -486,7 +486,7 @@ static int constructsarrandrunmmsearch(
                  int (*processmaxmatch)(void *,unsigned long,Seqpos,
                                         uint64_t,unsigned long,GtError *),
                  void *processmaxmatchinfo,
-                 Measuretime *mtime,
+                 Sfxprogress *sfxprogress,
                  GtError *err)
 {
   const Seqpos *suftabptr;
@@ -500,7 +500,7 @@ static int constructsarrandrunmmsearch(
                        numofparts,
                        NULL, /* outlcpinfo */
                        NULL, /* sfxstrategy */
-                       mtime,
+                       sfxprogress,
                        NULL, /* verboseinfo */
                        err);
   if (sfi == NULL)
