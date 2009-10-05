@@ -46,6 +46,7 @@ typedef struct
        isplain,
        beverbose,
        showtime,
+       showprogress,
        outtistab,
        outsuftab,
        outlcptab,

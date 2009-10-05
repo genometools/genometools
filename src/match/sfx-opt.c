@@ -58,8 +58,10 @@ static GtOPrval parse_options(int *parsed_args,
          *optiondifferencecover,
          *optiondes,
          *optionsds,
-         *optionkys;
-  GtOPrval oprval;
+         *optionkys,
+         *optionshowtime,
+         *optionshowprogress;
+  OPrval oprval;
   const char *maxdepthmsg = "option of -maxdepth must the keyword abs, the "
                             "keyword he or an integer";
   GtStr *dirarg = gt_str_new();
@@ -259,12 +261,21 @@ static GtOPrval parse_options(int *parsed_args,
     registerPackedIndexOptions(op, &so->bwtIdxParams, BWTDEFOPT_CONSTRUCTION,
                                so->str_indexname);
   }
-  option = gt_option_new_bool("showtime",
-                              "show the time of the different computation "
-                              "phases",
-                              &so->showtime,
-                              false);
-  gt_option_parser_add_option(op, option);
+  optionshowtime
+    = gt_option_new_bool("showtime",
+                         "show the time of the different computation "
+                         "phases",
+                         &so->showtime,
+                         false);
+  gt_option_parser_add_option(op, optionshowtime);
+
+  optionshowprogress
+    = gt_option_new_bool("showprogress",
+                         "show a progress bar",
+                         &so->showprogress,
+                         false);
+  gt_option_parser_add_option(op, optionshowprogress);
+  gt_option_exclude(optionshowprogress, optionshowtime);
 
   option = gt_option_new_bool("v",
                               "be verbose ",

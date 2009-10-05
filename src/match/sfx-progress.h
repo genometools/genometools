@@ -15,14 +15,17 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef MEASURE_TIME_IF_H
-#define MEASURE_TIME_IF_H
+#ifndef SFX_PROGRESS_H
+#define SFX_PROGRESS_H
 #include <stdio.h>
 
 typedef struct Sfxprogress Sfxprogress;
 
-Sfxprogress *inittheclock(const char *event);
+Sfxprogress *sfxprogress_new(const char *event);
 
-void deliverthetime(FILE *fp,Sfxprogress *sfxprogress,const char *newevent);
+void sfxprogress_deliverthetime(FILE *fp,Sfxprogress *sfxprogress,
+                                const char *newevent);
+
+bool sfxprogress_withbar(const Sfxprogress *sfxprogress);
 
 #endif

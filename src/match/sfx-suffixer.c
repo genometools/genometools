@@ -556,7 +556,8 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
     {
       if (sfxprogress != NULL)
       {
-        deliverthetime(stdout,sfxprogress,"sorting difference cover sample");
+        sfxprogress_deliverthetime(stdout,sfxprogress,
+                                   "sorting difference cover sample");
       }
       sfi->dcov = differencecover_new(sfi->sfxstrategy.differencecover,
                                       encseq,readmode,verboseinfo);
@@ -608,7 +609,8 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
     sfi->storespecials = true;
     if (sfxprogress != NULL)
     {
-      deliverthetime(stdout,sfxprogress,"counting prefix distribution");
+      sfxprogress_deliverthetime(stdout,sfxprogress,
+                                 "counting prefix distribution");
     }
     getencseqkmers(encseq,
                    readmode,
@@ -687,7 +689,8 @@ static void preparethispart(Sfxiterator *sfi)
   Seqpos partwidth;
   unsigned int numofparts = stpgetnumofparts(sfi->suftabparts);
 
-  if (sfi->part == 0 && sfi->sfxprogress == NULL)
+  if (sfi->part == 0 &&
+      sfi->sfxprogress != NULL && sfxprogress_withbar(sfi->sfxprogress))
   {
     gt_progressbar_start(&sfi->bucketiterstep,
                          (unsigned long long) sfi->numofallcodes);
@@ -709,7 +712,8 @@ static void preparethispart(Sfxiterator *sfi)
   }
   if (sfi->sfxprogress != NULL)
   {
-    deliverthetime(stdout,sfi->sfxprogress,"inserting suffixes into buckets");
+    sfxprogress_deliverthetime(stdout,sfi->sfxprogress,
+                               "inserting suffixes into buckets");
   }
   getencseqkmers(sfi->encseq,
                  sfi->readmode,
@@ -718,7 +722,7 @@ static void preparethispart(Sfxiterator *sfi)
                  sfi->prefixlength);
   if (sfi->sfxprogress != NULL)
   {
-    deliverthetime(stdout,sfi->sfxprogress,"sorting the buckets");
+    sfxprogress_deliverthetime(stdout,sfi->sfxprogress,"sorting the buckets");
   }
   partwidth = stpgetcurrentsumofwdith(sfi->part,sfi->suftabparts);
   if (sfi->sfxstrategy.ssortmaxdepth.defined &&
@@ -1005,7 +1009,7 @@ const Seqpos *nextSfxiterator(Seqpos *numberofsuffixes,bool *specialsuffixes,
   }
   if (sfi->exhausted)
   {
-    if (sfi->sfxprogress == NULL)
+    if (sfi->sfxprogress != NULL && sfxprogress_withbar(sfi->sfxprogress))
     {
       gt_progressbar_stop();
     }

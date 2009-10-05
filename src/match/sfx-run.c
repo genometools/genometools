@@ -407,7 +407,7 @@ static int runsuffixerator(bool doesa,
                            Verboseinfo *verboseinfo,
                            GtError *err)
 {
-  Sfxprogress *sfxprogress = NULL;
+  Sfxprogress *sfxprogress;
   Outfileinfo outfileinfo;
   bool haserr = false;
   Sfxseqinfo sfxseqinfo;
@@ -417,8 +417,17 @@ static int runsuffixerator(bool doesa,
   gt_error_check(err);
   if (so->showtime)
   {
-    sfxprogress = inittheclock("determining sequence length and number of "
-                         "special symbols");
+    sfxprogress = sfxprogress_new("determining sequence length and number of "
+                                  "special symbols");
+  } else
+  {
+    if (so->showprogress)
+    {
+      sfxprogress = sfxprogress_new(NULL);
+    } else
+    {
+      sfxprogress = NULL;
+    }
   }
   if (gt_str_length(so->str_inputindex) > 0)
   {
@@ -618,7 +627,8 @@ static int runsuffixerator(bool doesa,
   }
   if (sfxprogress != NULL)
   {
-    deliverthetime(stdout,sfxprogress,NULL);
+    sfxprogress_deliverthetime(stdout,sfxprogress,NULL);
+    gt_free(sfxprogress);
   }
   return haserr ? -1 : 0;
 }

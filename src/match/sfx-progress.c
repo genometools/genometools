@@ -22,39 +22,61 @@
 
 struct Sfxprogress
 {
+  bool showprogressbar;
   clock_t startclock, overalltime;
   const char *eventdescription;
 };
 
-Sfxprogress *inittheclock(const char *event)
+Sfxprogress *sfxprogress_new(const char *event)
 {
   Sfxprogress *sfxprogress;
 
   sfxprogress = gt_malloc(sizeof (Sfxprogress));
-  sfxprogress->startclock = clock();
-  sfxprogress->overalltime = 0;
-  sfxprogress->eventdescription = event;
+  if (event == NULL)
+  {
+    sfxprogress->showprogressbar = true;
+    sfxprogress->startclock = sfxprogress->overalltime = 0;
+    sfxprogress->eventdescription = NULL;
+  } else
+  {
+    sfxprogress->showprogressbar = false;
+    sfxprogress->startclock = clock();
+    sfxprogress->overalltime = 0;
+    sfxprogress->eventdescription = event;
+  }
   return sfxprogress;
 }
 
-void deliverthetime(FILE *fp,Sfxprogress *sfxprogress,const char *newevent)
+void sfxprogress_deliverthetime(FILE *fp,Sfxprogress *sfxprogress,
+                                const char *newevent)
 {
-  clock_t stopclock;
-
-  stopclock = clock();
-  fprintf(fp,"# TIME %s %.2f\n",sfxprogress->eventdescription,
-             (double) (stopclock-sfxprogress->startclock)/(double) CLOCKS_PER_SEC);
-  (void) fflush(fp);
-  sfxprogress->overalltime += (stopclock - sfxprogress->startclock);
-  if (newevent == NULL)
+  if (sfxprogress->showprogressbar)
   {
-    fprintf(fp,"# TIME overall %.2f\n",
-                (double) sfxprogress->overalltime/(double) CLOCKS_PER_SEC);
-    (void) fflush(fp);
-    gt_free(sfxprogress);
+    return;
   } else
   {
-    sfxprogress->startclock = stopclock;
-    sfxprogress->eventdescription = newevent;
+    clock_t stopclock;
+
+    stopclock = clock();
+    fprintf(fp,"# TIME %s %.2f\n",sfxprogress->eventdescription,
+             (double) (stopclock-sfxprogress->startclock)/
+             (double) CLOCKS_PER_SEC);
+    (void) fflush(fp);
+    sfxprogress->overalltime += (stopclock - sfxprogress->startclock);
+    if (newevent == NULL)
+    {
+      fprintf(fp,"# TIME overall %.2f\n",
+                  (double) sfxprogress->overalltime/(double) CLOCKS_PER_SEC);
+      (void) fflush(fp);
+    } else
+    {
+      sfxprogress->startclock = stopclock;
+      sfxprogress->eventdescription = newevent;
+    }
   }
+}
+
+bool sfxprogress_withbar(const Sfxprogress *sfxprogress)
+{
+  return sfxprogress->showprogressbar;
 }

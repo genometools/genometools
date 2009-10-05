@@ -148,7 +148,8 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   {
     if (sfxprogress != NULL)
     {
-      deliverthetime(stdout,sfxprogress,"computing sequence encoding");
+      sfxprogress_deliverthetime(stdout,
+                                 sfxprogress,"computing sequence encoding");
     }
     sfxseqinfo->encseq
       = files2encodedsequence(true,
