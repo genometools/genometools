@@ -28,6 +28,7 @@ from gt.props import cachedproperty
 class FeatureNode(GenomeNode):
 
     def __init__(self):
+        self.depth_first = True
         pass
 
     @classmethod
@@ -37,8 +38,10 @@ class FeatureNode(GenomeNode):
             gterror("Invalid strand '%s' -- must be one of %s" % (strand,
                     strandchars))
         s = Str(seqid)
-        fn = gtlib.gt_feature_node_new(s, type, start, end, strandchars.index(strand))
+        fn = gtlib.gt_feature_node_new(s, type, start, end, \
+                                       strandchars.index(strand))
         n = cls.create_from_ptr(fn, True)
+        n.depth_first = True
         return n
 
     def update_attrs(self):
@@ -178,6 +181,34 @@ class FeatureNode(GenomeNode):
 
     register = classmethod(register)
 
+    def traverse(self, it):
+        f = it.next()
+        while f is not None:
+            yield f
+            f = it.next()
+
+    def __iter__(self):
+        if self.depth_first:
+            it = FeatureNodeIteratorDepthFirst(self)
+        else:
+            it = FeatureNodeIteratorDirect(self)
+        return self.traverse(it)
+
+    def __call__(self, method=None):
+        if str(method).lower() == 'direct':
+            it = FeatureNodeIteratorDirect(self)
+        else:
+            it = FeatureNodeIteratorDepthFirst(self)
+        return self.traverse(it)
+
+    def traverse_dfs(self):
+        it = FeatureNodeIteratorDepthFirst(self)
+        return self.traverse(it)
+
+    def traverse_direct(self):
+        it = FeatureNodeIteratorDirect(self)
+        return self.traverse(it)
+
 
 class FeatureNodeIterator(object):
 
@@ -205,8 +236,13 @@ class FeatureNodeIterator(object):
 
 
 class FeatureNodeIteratorDepthFirst(FeatureNodeIterator):
+    """
+    includes the node itself
+    """
+
 
     def __init__(self, node):
+
         self.i = gtlib.gt_feature_node_iterator_new(node)
         self._as_parameter_ = self.i
 

@@ -162,6 +162,26 @@ module GT
       end
     end
 
+    def traverse(it)
+      tfn = it.next
+      while !tfn.nil? do
+        yield tfn
+        tfn = it.next
+      end
+    end
+
+    def traverse_dfs
+      self.traverse(GT::FeatureNodeIteratorDepthFirst.new(self)) do |n|
+        yield n
+      end
+    end
+
+    def traverse_direct
+      self.traverse(GT::FeatureNodeIteratorDirect.new(self)) do |n|
+        yield n
+      end
+    end
+
     def to_ptr
       @genome_node
     end

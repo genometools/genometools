@@ -94,6 +94,48 @@ class TestFeatureNodeChildren(unittest.TestCase):
             tfn = fni.next()
         self.assertEqual(num_features, 3)
 
+    def test_iterator(self):
+        fn = self.fn
+        fn3 = FeatureNode.create_new("test", "type3", 250, 300, "+")
+        fn4 = FeatureNode.create_new("test", "type4", 250, 300, "+")
+        fn.add_child(fn3)
+        fn.add_child(fn4)
+        # try object as iterator
+        types = []
+        for i, f in enumerate(fn):
+            types.append(f.type)
+        self.assertEqual(types, ["type", "type2", "type3", "type4"], types)
+        self.assert_(i == 3, i)
+        # try iterator method
+        types = []
+        for i, f in enumerate(fn.traverse_dfs()):
+            types.append(f.type)
+        self.assertEqual(types, ["type", "type2", "type3", "type4"], types)
+        self.assert_(i == 3, i)
+        # try callable object as iterator
+        types = []
+        for i, f in enumerate(fn(method="depth_first")):
+            types.append(f.type)
+        self.assertEqual(types, ["type", "type2", "type3", "type4"], types)
+        self.assert_(i == 3, i)
+        # direct
+        types = []
+        for i, f in enumerate(fn(method="direct")):
+            types.append(f.type)
+        self.assertEqual(types, ["type2", "type3", "type4"], types)
+        self.assert_(i == 2, i)
+        types = []
+        for i, f in enumerate(fn.traverse_direct()):
+            types.append(f.type)
+        self.assertEqual(types, ["type2", "type3", "type4"], types)
+        self.assert_(i == 2, i)
+        fn.depth_first = False
+        types = []
+        for i, f in enumerate(fn):
+            types.append(f.type)
+        self.assertEqual(types, ["type2", "type3", "type4"], types)
+        self.assert_(i == 2, i)
+
 
 class TestFeatureNodeProperties(unittest.TestCase):
 

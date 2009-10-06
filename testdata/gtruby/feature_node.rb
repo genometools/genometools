@@ -93,3 +93,19 @@ end
 if num_features != 3 then
   raise TestFailedError
 end
+
+types = []
+fn.traverse_dfs do |tfn|
+  types.push(tfn.get_type())
+end
+if types != ["type", "type2", "type3"] then
+  raise TestFailedError
+end
+
+types = []
+fn.traverse_direct do |tfn|
+  types.push(tfn.get_type())
+end
+if types != ["type2", "type3"] then
+  raise TestFailedError
+end
