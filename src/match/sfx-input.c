@@ -122,7 +122,8 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   if (!haserr)
   {
     characterdistribution = initcharacterdistribution(alpha);
-    if (fasta2sequencekeyvalues(so->str_indexname,
+    if (gt_inputfiles2sequencekeyvalues(
+                                so->str_indexname,
                                 &totallength,
                                 &specialcharinfo,
                                 forcetable,

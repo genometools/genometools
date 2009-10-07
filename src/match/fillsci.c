@@ -143,7 +143,7 @@ static void doupdatesumranges(Specialcharinfo *specialcharinfo,
   }
 }
 
-int fasta2sequencekeyvalues(
+int gt_inputfiles2sequencekeyvalues(
         const GtStr *indexname,
         Seqpos *totallength,
         Specialcharinfo *specialcharinfo,
@@ -225,6 +225,15 @@ int fasta2sequencekeyvalues(
       distspralen = gt_disc_distri_new();
       for (currentpos = 0; /* Nothing */; currentpos++)
       {
+#ifdef Seqposequalsunsignedint
+#define MAXSFXLENFOR32BIT 4294000000UL
+        if (currentpos > (Seqpos) MAXSFXLENFOR32BIT)
+        {
+          gt_error_set(err,"input sequence must not be longer than %lu",
+                       MAXSFXLENFOR32BIT);
+          haserr = true;
+        }
+#endif
         retval = gt_sequence_buffer_next(fb,&charcode,err);
         if (retval < 0)
         {

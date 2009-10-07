@@ -29,7 +29,7 @@
 #include "seqpos-def.h"
 #include "verbose-def.h"
 
-int fasta2sequencekeyvalues(
+int gt_inputfiles2sequencekeyvalues(
         const GtStr *indexname,
         Seqpos *totallength,
         Specialcharinfo *specialcharinfo,
