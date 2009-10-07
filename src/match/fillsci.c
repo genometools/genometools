@@ -232,6 +232,7 @@ int gt_inputfiles2sequencekeyvalues(
           gt_error_set(err,"input sequence must not be longer than %lu",
                        MAXSFXLENFOR32BIT);
           haserr = true;
+          break;
         }
 #endif
         retval = gt_sequence_buffer_next(fb,&charcode,err);
