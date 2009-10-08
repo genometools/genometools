@@ -21,7 +21,7 @@
 int main(int argc, char *argv[])
 {
   GtError *err;
-  GTR *gtr;
+  GtR *gtr;
   int rval;
   gt_allocators_init();
   err = gt_error_new();

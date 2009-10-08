@@ -24,13 +24,13 @@
 #include "core/option.h"
 
 /* The GenomeTools runtime (gtr) */
-typedef struct GTR GTR;
+typedef struct GtR GtR;
 
-GTR*   gtr_new(GtError*);
-OPrval gtr_parse(GTR*, int *parsed_args, int argc, const char **argv,
+GtR*   gtr_new(GtError*);
+OPrval gtr_parse(GtR*, int *parsed_args, int argc, const char **argv,
                  GtError*);
-void   gtr_register_components(GTR*);
-int    gtr_run(GTR*, int argc, const char **argv, GtError*);
-void   gtr_delete(GTR*);
+void   gtr_register_components(GtR*);
+int    gtr_run(GtR*, int argc, const char **argv, GtError*);
+void   gtr_delete(GtR*);
 
 #endif

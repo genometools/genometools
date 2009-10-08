@@ -44,7 +44,7 @@
 #include "annotationsketch/style.h"
 #endif
 
-struct GTR {
+struct GtR {
   bool test,
        interactive,
        debug,
@@ -61,14 +61,14 @@ struct GTR {
   FILE *logfp;
 };
 
-GTR* gtr_new(GtError *err)
+GtR* gtr_new(GtError *err)
 {
-  GTR *gtr;
+  GtR *gtr;
   int had_err = 0;
 #ifndef WITHOUT_CAIRO
   GtStr *style_file = NULL;
 #endif
-  gtr = gt_calloc(1, sizeof (GTR));
+  gtr = gt_calloc(1, sizeof (GtR));
   gtr->debugfp = gt_str_new();
   gtr->testspacepeak = gt_str_new();
   gtr->L = luaL_newstate();
@@ -122,7 +122,7 @@ static int show_gtr_help(const char *progname, void *data, GtError *err)
   return had_err;
 }
 
-OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
+OPrval gtr_parse(GtR *gtr, int *parsed_args, int argc, const char **argv,
                  GtError *err)
 {
   GtOptionParser *op;
@@ -177,7 +177,7 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
   return oprval;
 }
 
-void gtr_register_components(GTR *gtr)
+void gtr_register_components(GtR *gtr)
 {
   gt_assert(gtr);
   /* add tools */
@@ -219,7 +219,7 @@ static int check64bit(void)
   return EXIT_FAILURE;
 }
 
-static int run_tests(GTR *gtr, GtError *err)
+static int run_tests(GtR *gtr, GtError *err)
 {
   int test_err = 0, had_err = 0;
   gt_error_check(err);
@@ -264,7 +264,7 @@ static void enable_logging(const char *debugfp, FILE **logfp)
   }
 }
 
-int gtr_run(GTR *gtr, int argc, const char **argv, GtError *err)
+int gtr_run(GtR *gtr, int argc, const char **argv, GtError *err)
 {
   GtToolfunc toolfunc;
   GtTool *tool = NULL;
@@ -340,7 +340,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, GtError *err)
   return EXIT_SUCCESS;
 }
 
-void gtr_delete(GTR *gtr)
+void gtr_delete(GtR *gtr)
 {
   if (!gtr) return;
   gt_fa_fclose(gtr->logfp);
