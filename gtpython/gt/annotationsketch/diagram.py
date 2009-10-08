@@ -32,7 +32,6 @@ from gt.extended.feature_node import FeatureNode
 
 TrackSelectorFunc = CFUNCTYPE(c_void_p, c_void_p, c_void_p, c_void_p)
 
-
 class Diagram:
 
     def from_array(arr, rng, style):
