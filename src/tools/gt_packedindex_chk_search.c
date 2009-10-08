@@ -43,7 +43,7 @@ struct chkSearchOptions
   bool verboseOutput;
 };
 
-static OPrval
+static GtOPrval
 parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
                    struct chkSearchOptions *params, const GtStr *projectName,
                    GtError *err);
@@ -255,13 +255,13 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
   return had_err?-1:0;
 }
 
-static OPrval
+static GtOPrval
 parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
                    struct chkSearchOptions *params, const GtStr *projectName,
                    GtError *err)
 {
   GtOptionParser *op;
-  OPrval oprval;
+  GtOPrval oprval;
   GtOption *option, *optionProgress;
   bool checkSuffixArrayValues, tryContextRetrieve, tryFullRegen;
 

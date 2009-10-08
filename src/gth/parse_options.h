@@ -27,11 +27,11 @@
 
 /* The following function parses the arguments given by the <argv> array of
    length <argc>. */
-OPrval gth_parse_options(GthCallInfo*, GthInput*, int *parsed_args, int argc,
-                         const char **argv, bool gthconsensus_parsing,
-                         GtStrArray *consensusfiles, GthStat*,
-                         void(*showverbose)(const char *),
-                         void(*showverboseVM)(char *),
-                         GtShowVersionFunc, GtError*);
+GtOPrval gth_parse_options(GthCallInfo*, GthInput*, int *parsed_args, int argc,
+                           const char **argv, bool gthconsensus_parsing,
+                           GtStrArray *consensusfiles, GthStat*,
+                           void(*showverbose)(const char *),
+                           void(*showverboseVM)(char *),
+                           GtShowVersionFunc, GtError*);
 
 #endif

@@ -41,13 +41,13 @@ typedef struct
        doastretch;
 } Seqiteroptions;
 
-static OPrval parse_options(Seqiteroptions *seqiteroptions,
-                            int *parsed_args,int argc,
-                            const char **argv, GtError *err)
+static GtOPrval parse_options(Seqiteroptions *seqiteroptions,
+                              int *parsed_args,int argc,
+                              const char **argv, GtError *err)
 {
   GtOptionParser *op;
   GtOption *optionverbose, *optiondistlen, *optionastretch;
-  OPrval oprval;
+  GtOPrval oprval;
 
   gt_error_check(err);
 

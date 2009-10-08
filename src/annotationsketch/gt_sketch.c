@@ -57,13 +57,13 @@ typedef struct {
   unsigned int width;
 } AnnotationSketchArguments;
 
-static OPrval parse_options(int *parsed_args,
+static GtOPrval parse_options(int *parsed_args,
                             AnnotationSketchArguments *arguments,
                             int argc, const char **argv, GtError *err)
 {
   GtOptionParser *op;
   GtOption  *option, *option2;
-  OPrval oprval;
+  GtOPrval oprval;
   bool force;
   static const char *formats[] = { "png",
 #ifdef CAIRO_HAS_PDF_SURFACE

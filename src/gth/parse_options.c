@@ -80,12 +80,12 @@ static int show_gth_help_trailer(GT_UNUSED const char *progname,
   return 0;
 }
 
-OPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
-                         int *parsed_args, int argc, const char **argv,
-                         bool gthconsensus_parsing, GtStrArray *consensusfiles,
-                         GthStat *stat, void(*showverbose)(const char *),
-                         void(*showverboseVM)(char *),
-                         GtShowVersionFunc show_version, GtError *err)
+GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
+                           int *parsed_args, int argc, const char **argv,
+                           bool gthconsensus_parsing, GtStrArray *consensusfiles,
+                           GthStat *stat, void(*showverbose)(const char *),
+                           void(*showverboseVM)(char *),
+                           GtShowVersionFunc show_version, GtError *err)
 {
   unsigned long i;
   int ret, mode;
@@ -202,7 +202,7 @@ OPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
          *optmatchnumdistri = NULL,       /* statistics */
          *optfirstalshown = NULL,         /* miscellaneous */
          *optshoweops = NULL;             /* testing */
-  OPrval oprval;
+  GtOPrval oprval;
 
   gt_error_check(err);
   gt_assert(callinfo && input);

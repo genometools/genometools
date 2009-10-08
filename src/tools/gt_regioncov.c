@@ -26,12 +26,12 @@ typedef struct {
   bool verbose;
 } RegionCovArguments;
 
-static OPrval parse_options(int *parsed_args, RegionCovArguments *arguments,
-                            int argc, const char **argv, GtError *err)
+static GtOPrval parse_options(int *parsed_args, RegionCovArguments *arguments,
+                              int argc, const char **argv, GtError *err)
 {
   GtOptionParser *op;
   GtOption *o;
-  OPrval oprval;
+  GtOPrval oprval;
   gt_error_check(err);
   op = gt_option_parser_new("[option ...] GFF3_file",
                          "Show which parts of the given sequence regions are "

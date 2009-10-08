@@ -31,12 +31,12 @@ typedef struct {
        intron_length_distribution;
 } StatArguments;
 
-static OPrval parse_options(int *parsed_args, StatArguments *arguments,
-                            int argc, const char **argv, GtError *err)
+static GtOPrval parse_options(int *parsed_args, StatArguments *arguments,
+                              int argc, const char **argv, GtError *err)
 {
   GtOptionParser *op;
   GtOption *option;
-  OPrval oprval;
+  GtOPrval oprval;
   gt_error_check(err);
   op = gt_option_parser_new("[option ...] [GFF3_file ...]",
                          "Show statistics about features contained in GFF3 "

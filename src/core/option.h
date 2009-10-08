@@ -36,7 +36,7 @@ typedef enum {
   OPTIONPARSER_ERROR,        /* an error occured during option parsing */
   OPTIONPARSER_REQUESTS_EXIT /* the option parser requests an exit, because
                                 option -help, -helpdev, or -version was used */
-} OPrval;
+} GtOPrval;
 
 typedef void (*GtShowVersionFunc)(const char *progname);
 typedef int  (*GtShowCommentFunc)(const char *progname, void *data, GtError*);
@@ -69,7 +69,7 @@ void            gt_option_parser_set_min_args(GtOptionParser*, unsigned int);
 void            gt_option_parser_set_max_args(GtOptionParser*, unsigned int);
 void            gt_option_parser_set_min_max_args(GtOptionParser*, unsigned int,
                                                   unsigned int);
-OPrval          gt_option_parser_parse(GtOptionParser*, int *parsed_args,
+GtOPrval        gt_option_parser_parse(GtOptionParser*, int *parsed_args,
                                        int argc, const char **argv,
                                        GtShowVersionFunc, GtError*);
 void            gt_option_parser_delete(GtOptionParser*);

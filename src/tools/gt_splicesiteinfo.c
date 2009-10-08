@@ -32,13 +32,13 @@ typedef struct {
   bool addintrons;
 } SpliceSiteInfoArguments;
 
-static OPrval parse_options(int *parsed_args,
-                            SpliceSiteInfoArguments *arguments, int argc,
-                            const char **argv, GtError *err)
+static GtOPrval parse_options(int *parsed_args,
+                              SpliceSiteInfoArguments *arguments, int argc,
+                              const char **argv, GtError *err)
 {
   GtOptionParser *op;
   GtOption *option;
-  OPrval oprval;
+  GtOPrval oprval;
   gt_error_check(err);
   op = gt_option_parser_new("[option ...] [GFF3_file ...]", "Show information "
                          "about splice sites given in GFF3 files.");

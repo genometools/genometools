@@ -51,7 +51,7 @@ int gt_tool_run(GtTool *tool, int argc, const char **argv, GtError *err)
 {
   void *tool_arguments = NULL;
   GtOptionParser *op;
-  OPrval oprval;
+  GtOPrval oprval;
   int parsed_args, had_err = 0;
   gt_error_check(err);
   gt_assert(tool);

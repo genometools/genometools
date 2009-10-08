@@ -34,7 +34,7 @@ struct mkCtxMapOptions
   bool verboseOutput;
 };
 
-static OPrval
+static GtOPrval
 parseMkCtxMapOptions(int *parsed_args, int argc, const char **argv,
                      struct mkCtxMapOptions *params, GtError *err);
 
@@ -138,12 +138,12 @@ gt_packedindex_mkctxmap(int argc, const char *argv[], GtError *err)
   return had_err?-1:0;
 }
 
-static OPrval
+static GtOPrval
 parseMkCtxMapOptions(int *parsed_args, int argc, const char **argv,
                      struct mkCtxMapOptions *params, GtError *err)
 {
   GtOptionParser *op;
-  OPrval oprval;
+  GtOPrval oprval;
   GtOption *option;
 
   gt_error_check(err);

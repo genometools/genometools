@@ -185,9 +185,9 @@ int testmotifandencodemotif (Motif *motif, const Encodedsequence *encseq,
   return 0;
 }
 
-static OPrval parse_options(int *parsed_args,
-                            LTRharvestoptions *lo,
-                            int argc, const char **argv, GtError *err)
+static GtOPrval parse_options(int *parsed_args,
+                              LTRharvestoptions *lo,
+                              int argc, const char **argv, GtError *err)
 {
   GtOptionParser *op;
   GtOption *optionindex,
@@ -215,7 +215,7 @@ static OPrval parse_options(int *parsed_args,
          *optionout,
          *optionoutinner,
          *optiongff3;
-  OPrval oprval;
+  GtOPrval oprval;
   GtRange default_ltrsearchseqrange = {0,0};
   unsigned int vicinityforcorrectboundaries;
 
@@ -593,7 +593,7 @@ int ltrharvestoptions(LTRharvestoptions *lo, int argc, const char **argv,
                       GtError *err)
 {
   int parsed_args;
-  OPrval rval;
+  GtOPrval rval;
 
   gt_error_check(err);
 

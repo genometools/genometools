@@ -34,13 +34,13 @@ typedef struct {
   GtFile *outfp;
 } ChseqidsArguments;
 
-static OPrval parse_options(int *parsed_args, ChseqidsArguments *arguments,
-                            int argc, const char **argv, GtError *err)
+static GtOPrval parse_options(int *parsed_args, ChseqidsArguments *arguments,
+                              int argc, const char **argv, GtError *err)
 {
   GtOptionParser *op;
   GtOutputFileInfo *ofi;
   GtOption *option;
-  OPrval oprval;
+  GtOPrval oprval;
   gt_error_check(err);
 
   /* init */

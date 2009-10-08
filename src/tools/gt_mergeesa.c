@@ -22,12 +22,12 @@
 #include "match/test-mergeesa.pr"
 #include "tools/gt_mergeesa.h"
 
-static OPrval parse_options(GtStr *indexname,GtStrArray *indexnametab,
-                            int *parsed_args, int argc,
-                            const char **argv, GtError *err)
+static GtOPrval parse_options(GtStr *indexname,GtStrArray *indexnametab,
+                              int *parsed_args, int argc,
+                              const char **argv, GtError *err)
 {
   GtOptionParser *op;
-  OPrval oprval;
+  GtOPrval oprval;
   GtOption *option;
 
   gt_error_check(err);

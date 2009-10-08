@@ -34,13 +34,12 @@ typedef struct
   unsigned long fastawidth;
 } ConvertseqOptions;
 
-static OPrval parse_options(ConvertseqOptions *opts,
-                            int *parsed_args,int argc,
-                            const char **argv, GtError *err)
+static GtOPrval parse_options(ConvertseqOptions *opts, int *parsed_args,
+                              int argc, const char **argv, GtError *err)
 {
   GtOptionParser *op;
   GtOption *optionverbose, *o;
-  OPrval oprval;
+  GtOPrval oprval;
 
   gt_error_check(err);
 

@@ -24,12 +24,12 @@
 #include "extended/merge_stream.h"
 #include "tools/gt_merge.h"
 
-static OPrval parse_options(int *parsed_args, GtFile **outfp, int argc,
-                            const char **argv, GtError *err)
+static GtOPrval parse_options(int *parsed_args, GtFile **outfp, int argc,
+                              const char **argv, GtError *err)
 {
   GtOptionParser *op;
   GtOutputFileInfo *ofi;
-  OPrval oprval;
+  GtOPrval oprval;
   gt_error_check(err);
   op = gt_option_parser_new("[option ...] [GFF3_file ...]",
                          "Merge sorted GFF3 files in sorted fashion.");

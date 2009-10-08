@@ -34,7 +34,7 @@ struct trSufTabOptions
   bool verboseOutput;
 };
 
-static OPrval
+static GtOPrval
 parseTrSufTabOptions(int *parsed_args, int argc, const char **argv,
                      struct trSufTabOptions *params, const GtStr *projectName,
                      GtError *err);
@@ -83,13 +83,13 @@ gt_packedindex_trsuftab(int argc, const char *argv[], GtError *err)
   return had_err?-1:0;
 }
 
-static OPrval
+static GtOPrval
 parseTrSufTabOptions(int *parsed_args, int argc, const char **argv,
                      struct trSufTabOptions *params, const GtStr *projectName,
                      GtError *err)
 {
   GtOptionParser *op;
-  OPrval oprval;
+  GtOPrval oprval;
   GtOption *option;
 
   gt_error_check(err);

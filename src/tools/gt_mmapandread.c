@@ -22,11 +22,11 @@
 #include "core/xposix.h"
 #include "tools/gt_mmapandread.h"
 
-static OPrval parse_options(int *parsed_args, int argc, const char **argv,
-                            GtError *err)
+static GtOPrval parse_options(int *parsed_args, int argc, const char **argv,
+                              GtError *err)
 {
   GtOptionParser *op;
-  OPrval oprval;
+  GtOPrval oprval;
   gt_error_check(err);
   op = gt_option_parser_new("file [...]",
                             "Map the supplied files into memory and "

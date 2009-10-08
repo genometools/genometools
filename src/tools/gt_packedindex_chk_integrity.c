@@ -41,7 +41,7 @@ struct chkIndexOptions
   int EISFeatureSet;
 };
 
-static OPrval
+static GtOPrval
 parseChkIndexOptions(int *parsed_args, int argc, const char *argv[],
                      struct chkIndexOptions *param, GtError *err);
 
@@ -99,13 +99,13 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], GtError *err)
   return had_err?-1:0;
 }
 
-static OPrval
+static GtOPrval
 parseChkIndexOptions(int *parsed_args, int argc, const char *argv[],
                      struct chkIndexOptions *params, GtError *err)
 {
   GtOptionParser *op;
   GtOption *option;
-  OPrval oprval;
+  GtOPrval oprval;
   bool extRankCheck;
 
   gt_error_check(err);

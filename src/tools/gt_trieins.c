@@ -21,12 +21,12 @@
 #include "match/test-mtrieins.pr"
 #include "tools/gt_trieins.h"
 
-static OPrval parse_options(bool *onlyins,int *parsed_args,
-                            int argc, const char **argv, GtError *err)
+static GtOPrval parse_options(bool *onlyins,int *parsed_args,
+                              int argc, const char **argv, GtError *err)
 {
   GtOptionParser *op;
   GtOption *option;
-  OPrval oprval;
+  GtOPrval oprval;
 
   gt_error_check(err);
   op = gt_option_parser_new("[options] indexname",

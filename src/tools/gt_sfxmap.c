@@ -96,18 +96,18 @@ static void deletethespranges(const Encodedsequence *encseq,
   freespecialrangeiterator(&sri);
 }
 
-static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
-                            int *parsed_args,
-                            int argc,
-                            const char **argv,
-                            GtError *err)
+static GtOPrval parse_options(Sfxmapoptions *sfxmapoptions,
+                              int *parsed_args,
+                              int argc,
+                              const char **argv,
+                              GtError *err)
 {
   GtOptionParser *op;
   GtOption *optionstream, *optionverbose, *optionscantrials,
          *optionmulticharcmptrials, *optionbck, *optionsuf,
          *optiondes, *optionsds, *optionbwt, *optionlcp, *optiontis, *optionssp,
          *optiondelspranges;
-  OPrval oprval;
+  GtOPrval oprval;
 
   gt_error_check(err);
   op = gt_option_parser_new("[options] indexname",

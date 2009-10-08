@@ -30,11 +30,11 @@
 
 static bool spacepeak = false;
 
-static OPrval parse_env_options(int argc, const char **argv, GtError *err)
+static GtOPrval parse_env_options(int argc, const char **argv, GtError *err)
 {
   GtOptionParser *op;
   GtOption *o;
-  OPrval oprval;
+  GtOPrval oprval;
   op = gt_option_parser_new("GT_ENV_OPTIONS='[option ...]' ...",
                          "Parse the options contained in the "
                          "environment variable GT_ENV_OPTIONS.");

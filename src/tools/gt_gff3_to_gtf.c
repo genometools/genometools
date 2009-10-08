@@ -22,11 +22,11 @@
 #include "extended/gtf_out_stream.h"
 #include "tools/gt_gff3_to_gtf.h"
 
-static OPrval parse_options(int *parsed_args, int argc, const char **argv,
-                            GtError *err)
+static GtOPrval parse_options(int *parsed_args, int argc, const char **argv,
+                              GtError *err)
 {
   GtOptionParser *op;
-  OPrval oprval;
+  GtOPrval oprval;
   op = gt_option_parser_new("[GFF3_file ...]",
                             "Parse GFF3 file(s) and show it as "
                             "GTF2.2.");

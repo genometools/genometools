@@ -29,10 +29,10 @@
 #include "stamp.h"
 #include "eis-bwtseq-param.h"
 
-static OPrval parse_options(int *parsed_args,
-                            bool doesa,
-                            Suffixeratoroptions *so,
-                            int argc, const char **argv, GtError *err)
+static GtOPrval parse_options(int *parsed_args,
+                              bool doesa,
+                              Suffixeratoroptions *so,
+                              int argc, const char **argv, GtError *err)
 {
   GtOptionParser *op;
   GtOption *option,
@@ -59,7 +59,7 @@ static OPrval parse_options(int *parsed_args,
          *optiondes,
          *optionsds,
          *optionkys;
-  OPrval oprval;
+  GtOPrval oprval;
   const char *maxdepthmsg = "option of -maxdepth must the keyword abs, the "
                             "keyword he or an integer";
   GtStr *dirarg = gt_str_new();
@@ -546,7 +546,7 @@ int suffixeratoroptions(Suffixeratoroptions *so,
                         GtError *err)
 {
   int parsed_args, retval = 0;
-  OPrval rval;
+  GtOPrval rval;
 
   gt_error_check(err);
   so->isdna = false;

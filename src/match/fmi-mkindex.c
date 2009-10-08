@@ -51,14 +51,14 @@ static Indexleveldesc indexlevel[] =
   {"big",   4U, 2U}
 };
 
-static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
-                             int argc,
-                             const char **argv,
-                             GtError *err)
+static GtOPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
+                               int argc,
+                               const char **argv,
+                               GtError *err)
 {
   GtOptionParser *op;
   GtOption *option, *optionfmout;
-  OPrval oprval;
+  GtOPrval oprval;
   int parsed_args;
 
   gt_error_check(err);
@@ -164,7 +164,7 @@ static void freeconstructedfmindex(Fmindex *fm)
 static int mkfmindexoptions(Mkfmcallinfo *mkfmcallinfo,
                             int argc,const char **argv,GtError *err)
 {
-  OPrval rval;
+  GtOPrval rval;
   int retval = 0;
 
   gt_error_check(err);

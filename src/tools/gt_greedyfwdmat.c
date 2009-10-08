@@ -56,16 +56,16 @@ typedef struct
   Indextype indextype;
 } Gfmsubcallinfo;
 
-static OPrval parsegfmsub(bool doms,
-                          Gfmsubcallinfo *gfmsubcallinfo,
-                          int argc,
-                          const char **argv,
-                          GtError *err)
+static GtOPrval parsegfmsub(bool doms,
+                            Gfmsubcallinfo *gfmsubcallinfo,
+                            int argc,
+                            const char **argv,
+                            GtError *err)
 {
   GtOptionParser *op;
   GtOption *optionmin, *optionmax, *optionoutput, *optionfmindex,
          *optionesaindex, *optionpckindex, *optionquery, *optionverify;
-  OPrval oprval;
+  GtOPrval oprval;
   GtStrArray *flagsoutputoption;
   int parsed_args;
   const Optionargmodedesc msgfmsubmodedesctable[] =

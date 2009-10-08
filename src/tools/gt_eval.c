@@ -30,12 +30,12 @@ typedef struct {
   unsigned long LTRdelta;
 } EvalArguments;
 
-static OPrval parse_options(int *parsed_args, EvalArguments *arguments,
-                            int argc, const char **argv, GtError *err)
+static GtOPrval parse_options(int *parsed_args, EvalArguments *arguments,
+                              int argc, const char **argv, GtError *err)
 {
   GtOptionParser *op;
   GtOption *option, *ltroption, *ltrdeltaoption;
-  OPrval oprval;
+  GtOPrval oprval;
   gt_error_check(err);
   op = gt_option_parser_new("reality_file prediction_file ",
                          "Evaluate a gene prediction against a given "

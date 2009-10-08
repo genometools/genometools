@@ -600,9 +600,9 @@ void gt_option_parser_set_min_max_args(GtOptionParser *op,
   op->max_additional_arguments = max_additional_arguments;
 }
 
-OPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
-                              const char **argv, GtShowVersionFunc versionfunc,
-                              GtError *err)
+GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
+                                const char **argv,
+                                GtShowVersionFunc versionfunc, GtError *err)
 {
   int argnum, int_value;
   unsigned int uint_value;

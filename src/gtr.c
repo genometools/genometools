@@ -122,12 +122,12 @@ static int show_gtr_help(const char *progname, void *data, GtError *err)
   return had_err;
 }
 
-OPrval gtr_parse(GtR *gtr, int *parsed_args, int argc, const char **argv,
-                 GtError *err)
+GtOPrval gtr_parse(GtR *gtr, int *parsed_args, int argc, const char **argv,
+                   GtError *err)
 {
   GtOptionParser *op;
   GtOption *o, *debug_option, *debugfp_option;
-  OPrval oprval;
+  GtOPrval oprval;
 
   gt_error_check(err);
   gt_assert(gtr);

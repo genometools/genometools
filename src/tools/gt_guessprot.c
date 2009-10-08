@@ -21,11 +21,11 @@
 #include "core/versionfunc.h"
 #include "tools/gt_guessprot.h"
 
-static OPrval parse_options(int *parsed_args, int argc, const char **argv,
-                            GtError *err)
+static GtOPrval parse_options(int *parsed_args, int argc, const char **argv,
+                              GtError *err)
 {
   GtOptionParser *op;
-  OPrval oprval;
+  GtOPrval oprval;
   gt_error_check(err);
   op = gt_option_parser_new("filenames",
                          "Guess if sequence in filenames is protein or DNA.");

@@ -68,9 +68,9 @@ static void showsimpleoptions(const Cmppairwiseopt *opt)
   }
 }
 
-static OPrval parse_options(int *parsed_args,
-                            Cmppairwiseopt *pw,
-                            int argc, const char **argv, GtError *err)
+static GtOPrval parse_options(int *parsed_args,
+                              Cmppairwiseopt *pw,
+                              int argc, const char **argv, GtError *err)
 {
   GtOptionParser *op;
   GtOption *optionstrings,
@@ -78,7 +78,7 @@ static OPrval parse_options(int *parsed_args,
          *optioncharlistlen,
          *optiontext;
   GtStrArray *charlistlen;
-  OPrval oprval;
+  GtOPrval oprval;
 
   gt_error_check(err);
   charlistlen = gt_str_array_new();
@@ -237,7 +237,7 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
 {
   int parsed_args;
   Cmppairwiseopt cmppairwise;
-  OPrval oprval;
+  GtOPrval oprval;
 
   gt_error_check(err);
 

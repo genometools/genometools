@@ -238,13 +238,13 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
   return haserr ? -1 : 0;
 }
 
-static OPrval parse_options(Pmatchoptions *pmopt,
-                            int *parsed_args,
-                            int argc, const char **argv, GtError *err)
+static GtOPrval parse_options(Pmatchoptions *pmopt,
+                              int *parsed_args,
+                              int argc, const char **argv, GtError *err)
 {
   GtOptionParser *op;
   GtOption *option, *optionimm, *optionbck;
-  OPrval oprval;
+  GtOPrval oprval;
 
   gt_error_check(err);
   op = gt_option_parser_new("[options] -ii indexname",
@@ -298,7 +298,7 @@ int gt_patternmatch(int argc, const char **argv, GtError *err)
   bool haserr = false;
   int parsed_args;
   Pmatchoptions pmopt;
-  OPrval oprval;
+  GtOPrval oprval;
 
   gt_error_check(err);
 
