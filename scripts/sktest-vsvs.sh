@@ -23,10 +23,11 @@ cd testsuite
 num=2
 while test ${num} -lt 10 
 do
-  # the following depends on mkvtree and vseqselect and splitmultifastafile.pl
   ../scripts/iterrunmerge.sh ${num}
   num=`expr ${num} + 1`
 done
+exit 0
+
 ../scripts/cmpdbfile.sh ${outoptions} -pl -db ../testdata/Random-Small.fna
 ../scripts/cmpdbfile.sh ${outoptions} -pl -db ../testdata/Random.fna
 ../scripts/cmpdbfile.sh ${outoptions} -pl -db ../testdata/Atinsert.fna ../testdata/Random.fna

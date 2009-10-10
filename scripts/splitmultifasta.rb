@@ -1,7 +1,5 @@
 #!/usr/bin/env ruby
 
-require "scripts/countnumseq.rb"
-
 # Split a fasta file into different files
 # Stefan Kurtz, October 10, 2009.
 
@@ -23,6 +21,16 @@ require "scripts/countnumseq.rb"
 # when nothing is reported by diff, then everything is fine. Otherwise
 # check if there are other (not generated files) that begin with
 # tmp-
+
+def countnumofsequences(inputfile)
+  seqcount = 0
+  File.open(inputfile).each_line do |line|
+    if line.match(/^>/)
+      seqcount+=1
+    end
+  end
+  return seqcount
+end
 
 def openoutfile(filename)
 begin
@@ -72,8 +80,8 @@ def splitfiles(inputfile,splitprefix,numoffiles,numofsequences)
   end
 end
 
-if ARGV.length != 4
-  STDERR.puts "Usage: #{$0} <splitprefix> <width> <numoffiles> <fastafile>"
+if ARGV.length != 3
+  STDERR.puts "Usage: #{$0} <splitprefix> <numoffiles> <fastafile>"
   exit 1
 end
 

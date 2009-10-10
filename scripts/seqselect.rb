@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
 require "set"
-require "scripts/countnumseq.rb"
 
 def getselectedseqnums(numofsequences,numtoselect)
   if numofsequences < numtoselect
@@ -20,6 +19,16 @@ def getselectedseqnums(numofsequences,numtoselect)
     end
   end
   return selectedseqnums
+end
+
+def countnumofsequences(inputfile)
+  seqcount = 0
+  File.open(inputfile).each_line do |line|
+    if line.match(/^>/)
+      seqcount+=1
+    end
+  end
+  return seqcount
 end
 
 def outputselectedsequences(selectedseqnums,inputfile)
