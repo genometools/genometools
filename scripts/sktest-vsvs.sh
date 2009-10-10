@@ -26,7 +26,8 @@ do
   ../scripts/iterrunmerge.sh ${num}
   num=`expr ${num} + 1`
 done
-exit 0
+
+#depends on mkvtree.x
 
 ../scripts/cmpdbfile.sh ${outoptions} -pl -db ../testdata/Random-Small.fna
 ../scripts/cmpdbfile.sh ${outoptions} -pl -db ../testdata/Random.fna
@@ -42,15 +43,20 @@ fi
 if test ! "X${GTTESTDATA}" = "X"
 then
   AT=../testdata/at1MB
-  U8=../testdata/U89959_genomic.fas
   ATK=${GTTESTDATA}/Iowa/at100K1
   GRUMBACH=${GTTESTDATA}/DNA-mix/Grumbach.fna
-  ../scripts/rununique.sh ../bin/gt 10 20 ${U8} ${AT}
   for options in `${ALLOUTPUTOPTS}`
   do
     ../scripts/cmpdbfile.sh ${options} -pl -db ${ATK}
   done
   ../scripts/cmpdbfile.sh ${outoptions} -pl -db ${ATK} ${AT} ${GRUMBACH}/*.fna
+fi
+
+if test ! "X${GTTESTDATA}" = "X"
+then
+  AT=../testdata/at1MB
+  U8=../testdata/U89959_genomic.fas
+  ../scripts/rununique.sh ../bin/gt 10 20 ${U8} ${AT}
 fi
 
 cd ..
