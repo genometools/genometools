@@ -1,18 +1,19 @@
 #!/usr/bin/env ruby
 
+require "scripts/countnumseq.rb"
+
 # Split a fasta file into different files
 # Stefan Kurtz, October 10, 2009.
 
-# First parameter is prefix of files to generate. 
-# Second parameter is width of output line containg the sequences
-# third parameter is number of files to generate, 0 means to generate
+# first parameter is prefix of files to generate. 
+# second parameter is number of files to generate, 0 means to generate
 # one file per sequence
-# fourth parameter is input file.
+# third parameter is input file.
 
 # let infile be the name of the input file in fasta format. Suppose 
 # that it contain 1952 sequences. Then
 
-# splitmultifasta.rb tmp 70 1 infile
+# splitmultifasta.rb tmp 0 infile
 
 # generates 1952 files named tmp-0000, tmp-0001, ..., tmp-1951.
 # each containing one sequence
@@ -33,24 +34,11 @@ end
   return outfp
 end
 
-def countnumofsequences(inputfile)
-  seqcount = 0
-  File.open(inputfile).each_line do |line|
-    if line.match(/^>/)
-      seqcount+=1
-    end
-  end
-  return seqcount
-end
-
 def log10func(n)
-  puts "n=#{n}"
   return (Math.log(n.to_f)/Math.log(10.0)).to_i
 end
 
 def splitfiles(inputfile,splitprefix,numoffiles,numofsequences)
-  # Declare and initialize variable to store final sequence
-  totalseqcount = 0
   seqcount = 0
   filenum = 0
   fh = nil
@@ -77,13 +65,7 @@ def splitfiles(inputfile,splitprefix,numoffiles,numofsequences)
         outfilename = sprintf("%s-%0*d",splitprefix,numwidth,filenum)
         fh = openoutfile(outfilename)
         filenum+=1
-        if numoffiles == 0
-          maxseqnum = 1
-        else
-          maxseqnum = numofsequences/numoffiles
-        end
       end
-      totalseqcount += 1
       seqcount += 1
     end
     fh.print line
@@ -96,9 +78,8 @@ if ARGV.length != 4
 end
 
 splitprefix = ARGV[0]
-width = ARGV[1].to_i
-numoffiles = ARGV[2].to_i
-inputfile = ARGV[3]
+numoffiles = ARGV[1].to_i
+inputfile = ARGV[2]
 
 numofsequences = countnumofsequences(inputfile)
 splitfiles(inputfile,splitprefix,numoffiles,numofsequences)

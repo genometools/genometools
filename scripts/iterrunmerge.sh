@@ -20,7 +20,7 @@ then
   mkdir -p ${INDEXDIR}
   mkvtree.sh -indexname ${INDEXNAME} -db ${AT} -dna -pl -ois -tis
   runVmatchprog.sh vseqselect -randomnum ${numofsequences} ${INDEXNAME} > ${TMPFILE}
-  splitmultifasta.pl TMP 60 0 ${TMPFILE}
+  splitmultifasta.rb TMP 0 ${TMPFILE}
   filelist=`ls TMP-*`
   ../scripts/runmerge.sh ${QUERY} ${filelist}
   rm -f ${TMPFILE} TMP-*
