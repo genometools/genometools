@@ -1,0 +1,16 @@
+dbfile=../testdata/TTT-small.fna 10 7
+totallength=7
+specialcharacters=2
+specialranges=2
+realspecialranges=2
+lengthofspecialprefix=1
+lengthofspecialsuffix=0
+numofsequences=1
+numofdbsequences=1
+numofquerysequences=0
+prefixlength=0
+largelcpvalues=0
+maxbranchdepth=0
+integersize=32
+littleendian=1
+readmode=0

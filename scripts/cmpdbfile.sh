@@ -13,8 +13,6 @@ checkerror()
   then
     echo "failure: ${1}"
     exit 1
-  else
-    echo "okay ${1}"
   fi
 }
 
@@ -31,5 +29,7 @@ comparefiles()
 options="$*"
 
 checkerror "../bin/gt suffixerator -algbds 3 40 120 -indexname /tmp/idx-sfx -des ${options}"
-checkerror "mkvtree.sh -indexname /tmp/idx-mkv -dna ${options}"
+MKVTREE="/Users/stefan/bin-ops/i686-apple-darwin/mkvtree.x"
+checkerror "${MKVTREE} -indexname /tmp/idx-mkv -dna ${options}"
+echo "XXX ${options}"
 comparefiles /tmp/idx-mkv.prj /tmp/idx-sfx.prj

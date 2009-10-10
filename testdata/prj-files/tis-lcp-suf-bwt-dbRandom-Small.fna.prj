@@ -1,0 +1,16 @@
+dbfile=../testdata/Random-Small.fna 16 13
+totallength=13
+specialcharacters=8
+specialranges=4
+realspecialranges=4
+lengthofspecialprefix=0
+lengthofspecialsuffix=2
+numofsequences=1
+numofdbsequences=1
+numofquerysequences=0
+prefixlength=0
+largelcpvalues=0
+maxbranchdepth=0
+integersize=32
+littleendian=1
+readmode=0

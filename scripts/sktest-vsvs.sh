@@ -20,37 +20,43 @@ set -e -x
 outoptions="-tis -lcp -suf -bwt"
 
 cd testsuite
-num=2
-while test ${num} -lt 10 
-do
-  ../scripts/iterrunmerge.sh ${num}
-  num=`expr ${num} + 1`
-done
-
-#depends on mkvtree.x
 
 ../scripts/cmpdbfile.sh ${outoptions} -pl -db ../testdata/Random-Small.fna
 ../scripts/cmpdbfile.sh ${outoptions} -pl -db ../testdata/Random.fna
 ../scripts/cmpdbfile.sh ${outoptions} -pl -db ../testdata/Atinsert.fna ../testdata/Random.fna
 ../scripts/cmpdbfile.sh ${outoptions} -pl -db ../testdata/TTT-small.fna
-ALLOUTPUTOPTS="../scripts/alloutputoptions.rb"
-if test ! -f ${ALLOUTPUTOPTS}
-then
-  echo "cannot find ${ALLOUTPUTOPTS}"
-  exit 1
-fi
 
 if test ! "X${GTTESTDATA}" = "X"
 then
   AT=../testdata/at1MB
   ATK=${GTTESTDATA}/Iowa/at100K1
   GRUMBACH=${GTTESTDATA}/DNA-mix/Grumbach.fna
-  for options in `${ALLOUTPUTOPTS}`
-  do
-    ../scripts/cmpdbfile.sh ${options} -pl -db ${ATK}
-  done
+  ../scripts/cmpdbfile.sh -lcp -pl -db ${ATK}
+  ../scripts/cmpdbfile.sh -bwt -pl -db ${ATK}
+  ../scripts/cmpdbfile.sh -bwt -lcp -pl -db ${ATK}
+  ../scripts/cmpdbfile.sh -suf -pl -db ${ATK}
+  ../scripts/cmpdbfile.sh -suf -lcp -pl -db ${ATK}
+  ../scripts/cmpdbfile.sh -suf -bwt -pl -db ${ATK}
+  ../scripts/cmpdbfile.sh -suf -bwt -lcp -pl -db ${ATK}
+  ../scripts/cmpdbfile.sh -tis -pl -db ${ATK}
+  ../scripts/cmpdbfile.sh -tis -lcp -pl -db ${ATK}
+  ../scripts/cmpdbfile.sh -tis -bwt -pl -db ${ATK}
+  ../scripts/cmpdbfile.sh -tis -bwt -lcp -pl -db ${ATK}
+  ../scripts/cmpdbfile.sh -tis -suf -pl -db ${ATK}
+  ../scripts/cmpdbfile.sh -tis -suf -lcp -pl -db ${ATK}
+  ../scripts/cmpdbfile.sh -tis -suf -bwt -pl -db ${ATK}
+  ../scripts/cmpdbfile.sh -tis -suf -bwt -lcp -pl -db ${ATK}
   ../scripts/cmpdbfile.sh ${outoptions} -pl -db ${ATK} ${AT} ${GRUMBACH}/*.fna
 fi
+
+exit 0
+
+num=2
+while test ${num} -lt 10 
+do
+  ../scripts/iterrunmerge.sh ${num}
+  num=`expr ${num} + 1`
+done
 
 if test ! "X${GTTESTDATA}" = "X"
 then

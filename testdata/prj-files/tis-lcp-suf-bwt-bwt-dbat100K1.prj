@@ -1,0 +1,16 @@
+dbfile=/Users/stefan/gttestdata/Iowa/at100K1 76198 74997
+totallength=74997
+specialcharacters=1083
+specialranges=962
+realspecialranges=962
+lengthofspecialprefix=0
+lengthofspecialsuffix=0
+numofsequences=1
+numofdbsequences=1
+numofquerysequences=0
+prefixlength=0
+largelcpvalues=0
+maxbranchdepth=0
+integersize=32
+littleendian=1
+readmode=0

@@ -1,0 +1,16 @@
+dbfile=../testdata/Random.fna 10148 10003
+totallength=10003
+specialcharacters=3318
+specialranges=2196
+realspecialranges=2196
+lengthofspecialprefix=2
+lengthofspecialsuffix=3
+numofsequences=1
+numofdbsequences=1
+numofquerysequences=0
+prefixlength=0
+largelcpvalues=0
+maxbranchdepth=0
+integersize=32
+littleendian=1
+readmode=0
