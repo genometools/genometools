@@ -43,6 +43,8 @@ fi
 
 cd testsuite
 
+env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_mergeesa'
+
 env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb  ${MC} -keywords 'gt_extractseq' \
        -gttestdata ${GTTESTDATA}
 

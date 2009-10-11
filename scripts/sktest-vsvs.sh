@@ -19,13 +19,6 @@ set -e -x
 
 cd testsuite
 
-num=2
-while test ${num} -lt 10 
-do
-  ../scripts/iterrunmerge.sh ${num}
-  num=`expr ${num} + 1`
-done
-
 if test ! "X${GTTESTDATA}" = "X"
 then
   AT=../testdata/at1MB

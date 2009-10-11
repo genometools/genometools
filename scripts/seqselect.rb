@@ -31,7 +31,7 @@ def countnumofsequences(inputfile)
   return seqcount
 end
 
-def outputselectedsequences(selectedseqnums,inputfile)
+def outputselectedsequences(selectedseqnums,inputfile,fp=STDOUT)
   currentseqnum = 0
   dooutseq = false
   File.open(inputfile).each_line do |line|
@@ -48,11 +48,11 @@ def outputselectedsequences(selectedseqnums,inputfile)
       currentseqnum += 1
     end
     if dooutseq
-      print line
+      fp.print line
     end
   end
 end
-    
+
 if ARGV.length != 2
   STDERR.puts "Usage: #{$0} <num of seq to select> <fastafile>"
   exit 1
