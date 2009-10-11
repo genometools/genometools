@@ -182,7 +182,8 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
           } else
           {
             mmsibck
-              = newmmsearchiterator_plain(suffixarray.encseq,
+              = newmmsearchiteratorcomplete_plain(
+                                          suffixarray.encseq,
                                           suffixarray.suftab,
                                           bucketspec.left,
                                           bucketspec.left +
@@ -196,7 +197,8 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
       }
       if (pmopt->immediate)
       {
-        mmsiimm = newmmsearchiterator_plain(suffixarray.encseq,
+        mmsiimm = newmmsearchiteratorcomplete_plain(
+                                            suffixarray.encseq,
                                             suffixarray.suftab,
                                             0,  /* leftbound */
                                             totallength, /* rightbound */

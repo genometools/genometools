@@ -383,6 +383,7 @@ int testmaxpairs(const GtStr *indexname,
                       orderSubstringmatch) != 0)
     {
       const unsigned long width = 60UL;
+      printf("failure for query of length %lu\n",(unsigned long) querylen);
       printf("querymatches\n");
       (void) gt_array_iterate(tabmaxquerymatches,showSubstringmatch,NULL,
                            err);

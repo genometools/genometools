@@ -22,14 +22,15 @@
 
 typedef struct MMsearchiterator MMsearchiterator;
 
-MMsearchiterator *newmmsearchiterator_plain(const Encodedsequence *dbencseq,
-                                            const Seqpos *suftab,
-                                            Seqpos leftbound,
-                                            Seqpos rightbound,
-                                            Seqpos offset,
-                                            Readmode readmode,
-                                            const GtUchar *query,
-                                            unsigned long querylength);
+MMsearchiterator *newmmsearchiteratorcomplete_plain(
+                                    const Encodedsequence *dbencseq,
+                                    const Seqpos *suftab,
+                                    Seqpos leftbound,
+                                    Seqpos rightbound,
+                                    Seqpos itvoffset,
+                                    Readmode readmode,
+                                    const GtUchar *pattern,
+                                    unsigned long patternlength);
 
 bool nextmmsearchiterator(Seqpos *dbstart,MMsearchiterator *mmsi);
 

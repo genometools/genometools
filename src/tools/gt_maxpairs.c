@@ -36,7 +36,7 @@ typedef struct
 {
   unsigned int userdefinedleastlength;
   unsigned long samples;
-  bool scanfile, forward, palindromic;
+  bool scanfile, beverbose, forward, palindromic;
   GtStr *indexname;
   GtStrArray *queryfiles;
   GtOption *refforwardoption;
@@ -196,6 +196,12 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(queryoption);
   gt_option_parser_add_option(op, queryoption);
 
+  option = gt_option_new_bool("v",
+                              "be verbose ",
+                              &arguments->beverbose,
+                              false);
+  gt_option_parser_add_option(op, option);
+
   gt_option_exclude(queryoption,sampleoption);
   gt_option_exclude(queryoption,scanoption);
   gt_option_exclude(queryoption,palindromicoption);
@@ -226,7 +232,7 @@ static int gt_repfind_runner(GT_UNUSED int argc,
 
   gt_error_check(err);
   gt_assert(parsed_args == argc);
-  verboseinfo = newverboseinfo(false);
+  verboseinfo = newverboseinfo(arguments->beverbose);
   if (gt_str_array_size(arguments->queryfiles) == 0)
   {
     if (arguments->samples == 0)
