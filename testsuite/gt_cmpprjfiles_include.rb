@@ -72,9 +72,6 @@ if $gttestdata then
                "humhbb.fna humhdabcd.fna humhprtb.fna " +
                "mipacga.fna mpocpcg.fna mpomtcg.fna " +
                "vaccg.fna ychrIII.fna")
-else
-  STDERR.puts "gttestdata not defined"
-  exit 1
 end
 
 Name "gt checking project files"

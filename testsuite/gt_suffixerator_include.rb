@@ -298,7 +298,4 @@ if $gttestdata then
 
   checkmapped("-db #{$gttestdata}swissprot/swiss10K -parts 1 -pl -smap " +
               "TransProt11")
-else
-  STDERR.puts "gttestdata not defined"
-  exit 1
 end
