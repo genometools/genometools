@@ -169,14 +169,14 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
       {
         const GtUchar *pptr = nextEnumpatterniterator(&patternLen, epi);
         MMsearchiterator *mmsi =
-          newmmsearchiterator(suffixarray.encseq,
-                              suffixarray.suftab,
-                              0,  /* leftbound */
-                              totalLen, /* rightbound */
-                              0, /* offset */
-                              suffixarray.readmode,
-                              pptr,
-                              patternLen);
+          newmmsearchiterator_plain(suffixarray.encseq,
+                                    suffixarray.suftab,
+                                    0,  /* leftbound */
+                                    totalLen, /* rightbound */
+                                    0, /* offset */
+                                    suffixarray.readmode,
+                                    pptr,
+                                    patternLen);
         if (BWTSeqHasLocateInformation(bwtSeq))
         {
           Seqpos numMatches;

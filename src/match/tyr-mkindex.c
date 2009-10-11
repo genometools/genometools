@@ -127,14 +127,14 @@ static void checknumberofoccurrences(const Dfsstate *dfsstate,
     dfsstate->currentmer[idx] = getencodedchar(dfsstate->encseq,position+idx,
                                                dfsstate->readmode);
   }
-  mmsi = newmmsearchiterator(dfsstate->encseq,
-                             dfsstate->suftab,
-                             0,
-                             dfsstate->totallength,
-                             0,
-                             dfsstate->readmode,
-                             dfsstate->currentmer,
-                             (unsigned long) dfsstate->mersize);
+  mmsi = newmmsearchiterator_plain(dfsstate->encseq,
+                                   dfsstate->suftab,
+                                   0,
+                                   dfsstate->totallength,
+                                   0,
+                                   dfsstate->readmode,
+                                   dfsstate->currentmer,
+                                   (unsigned long) dfsstate->mersize);
   bfcount = countmmsearchiterator(mmsi);
   if (bfcount != (Seqpos) countocc)
   {

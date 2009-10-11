@@ -1329,14 +1329,14 @@ static bool esa_exactpatternmatching(const Suffixarray *suffixarray,
   bool nomatches;
   GtMatch match;
 
-  mmsi = newmmsearchiterator(suffixarray->encseq,
-                             suffixarray->suftab,
-                             0,  /* leftbound */
-                             totallength, /* rightbound */
-                             0, /* offset */
-                             suffixarray->readmode,
-                             pattern,
-                             patternlength);
+  mmsi = newmmsearchiterator_plain(suffixarray->encseq,
+                                   suffixarray->suftab,
+                                   0,  /* leftbound */
+                                   totallength, /* rightbound */
+                                   0, /* offset */
+                                   suffixarray->readmode,
+                                   pattern,
+                                   patternlength);
 
   nomatches = isemptymmsearchiterator(mmsi);
   match.dbabsolute = true;

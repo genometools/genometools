@@ -198,14 +198,14 @@ static MMsearchiterator *newmmsearchiterator2(const Encodedsequence *dbencseq,
   return mmsi;
 }
 
-MMsearchiterator *newmmsearchiterator(const Encodedsequence *dbencseq,
-                                      const Seqpos *suftab,
-                                      Seqpos leftbound,
-                                      Seqpos rightbound,
-                                      Seqpos offset,
-                                      Readmode readmode,
-                                      const GtUchar *query,
-                                      unsigned long querylength)
+MMsearchiterator *newmmsearchiterator_plain(const Encodedsequence *dbencseq,
+                                            const Seqpos *suftab,
+                                            Seqpos leftbound,
+                                            Seqpos rightbound,
+                                            Seqpos offset,
+                                            Readmode readmode,
+                                            const GtUchar *query,
+                                            unsigned long querylength)
 {
   Queryrep queryrep;
 
@@ -428,8 +428,10 @@ int callenumquerymatches(const GtStr *indexname,
     uint64_t unitnum;
 
     seqit = gt_seqiterator_new(queryfiles, err);
-    if (!seqit)
+    if (seqit == NULL)
+    {
       haserr = true;
+    }
     if (!haserr)
     {
       gt_seqiterator_set_symbolmap(seqit,

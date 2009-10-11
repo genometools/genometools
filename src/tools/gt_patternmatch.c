@@ -182,28 +182,28 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
           } else
           {
             mmsibck
-              = newmmsearchiterator(suffixarray.encseq,
-                                    suffixarray.suftab,
-                                    bucketspec.left,
-                                    bucketspec.left +
-                                      bucketspec.nonspecialsinbucket-1,
-                                    (Seqpos) suffixarray.prefixlength,
-                                    suffixarray.readmode,
-                                    pptr,
-                                    patternlen);
+              = newmmsearchiterator_plain(suffixarray.encseq,
+                                          suffixarray.suftab,
+                                          bucketspec.left,
+                                          bucketspec.left +
+                                            bucketspec.nonspecialsinbucket-1,
+                                          (Seqpos) suffixarray.prefixlength,
+                                          suffixarray.readmode,
+                                          pptr,
+                                          patternlen);
           }
         }
       }
       if (pmopt->immediate)
       {
-        mmsiimm = newmmsearchiterator(suffixarray.encseq,
-                                      suffixarray.suftab,
-                                      0,  /* leftbound */
-                                      totallength, /* rightbound */
-                                      0, /* offset */
-                                      suffixarray.readmode,
-                                      pptr,
-                                      patternlen);
+        mmsiimm = newmmsearchiterator_plain(suffixarray.encseq,
+                                            suffixarray.suftab,
+                                            0,  /* leftbound */
+                                            totallength, /* rightbound */
+                                            0, /* offset */
+                                            suffixarray.readmode,
+                                            pptr,
+                                            patternlen);
       }
       if (pmopt->immediate && pmopt->usebcktab)
       {
