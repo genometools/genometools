@@ -19,11 +19,8 @@ set -e -x
 
 cd testsuite
 
-if test ! "X${GTTESTDATA}" = "X"
-then
-  AT=../testdata/at1MB
-  U8=../testdata/U89959_genomic.fas
-  ../scripts/rununique.sh ../bin/gt 10 20 ${U8} ${AT}
-fi
+AT=../testdata/at1MB
+U8=../testdata/U89959_genomic.fas
+../scripts/rununique.sh ../bin/gt 10 20 ${U8} ${AT}
 
 cd ..

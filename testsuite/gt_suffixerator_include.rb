@@ -299,3 +299,11 @@ if $gttestdata then
   checkmapped("-db #{$gttestdata}swissprot/swiss10K -parts 1 -pl -smap " +
               "TransProt11")
 end
+
+Name "gt uniquesub"
+Keywords "gt_uniquesub"
+Test do
+  run "#{$cur}scripts/runmkfm.sh #{$bin}gt 1 . Combined.fna #{$testdata}at1MB"
+  run_test "#{$bin}gt uniquesub -output sequence querypos -min 10 " +
+           "-max 20 -fmi Combined.fna -query #{$testdata}U89959_genomic.fas"
+end

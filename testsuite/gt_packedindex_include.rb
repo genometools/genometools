@@ -154,7 +154,7 @@ Test do
 end
 
 Name "gt packedindex check tools for at1MB"
-Keywords "gt_packedindex at1MB"
+Keywords "gt_packedindex"
 Test do
   runAndCheckPackedIndex('at1MB', ["#{$testdata}at1MB"],
                          :timeOuts => { :bdxcreat => 400,
