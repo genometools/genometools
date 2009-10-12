@@ -36,7 +36,7 @@ typedef struct
 {
   unsigned int userdefinedleastlength;
   unsigned long samples;
-  bool scanfile, beverbose, forward, palindromic;
+  bool scanfile, beverbose, forward, reverse;
   GtStr *indexname;
   GtStrArray *queryfiles;
   GtOption *refforwardoption;
@@ -145,7 +145,7 @@ static void gt_repfind_arguments_delete(void *tool_arguments)
 static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
 {
   GtOptionParser *op;
-  GtOption *option, *palindromicoption, *queryoption,
+  GtOption *option, *reverseoption, *queryoption,
            *scanoption, *sampleoption, *forwardoption;
   Maxpairsoptions *arguments = tool_arguments;
 
@@ -165,10 +165,10 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, forwardoption);
   arguments->refforwardoption = gt_option_ref(forwardoption);
 
-  palindromicoption = gt_option_new_bool("p","Compute maximal palindromes",
-                                         &arguments->palindromic,
-                                         false);
-  gt_option_parser_add_option(op, palindromicoption);
+  reverseoption = gt_option_new_bool("r","Compute maximal reverse matches",
+                                     &arguments->reverse,
+                                     false);
+  gt_option_parser_add_option(op, reverseoption);
 
   sampleoption = gt_option_new_ulong_min("samples","Specify number of samples",
                                          &arguments->samples,
@@ -203,7 +203,7 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
 
   gt_option_exclude(queryoption,sampleoption);
   gt_option_exclude(queryoption,scanoption);
-  gt_option_exclude(queryoption,palindromicoption);
+  gt_option_exclude(queryoption,reverseoption);
   return op;
 }
 
@@ -213,7 +213,7 @@ static int gt_repfind_arguments_check(GT_UNUSED int rest_argc,
 {
   Maxpairsoptions *arguments = tool_arguments;
 
-  if (!gt_option_is_set(arguments->refforwardoption) && arguments->palindromic)
+  if (!gt_option_is_set(arguments->refforwardoption) && arguments->reverse)
   {
     arguments->forward = false;
   }
@@ -230,62 +230,69 @@ static int gt_repfind_runner(GT_UNUSED int argc,
   Verboseinfo *verboseinfo;
 
   gt_error_check(err);
-  gt_assert(parsed_args == argc);
   verboseinfo = newverboseinfo(arguments->beverbose);
-  if (gt_str_array_size(arguments->queryfiles) == 0)
+  if (parsed_args < argc)
   {
-    if (arguments->samples == 0)
+    gt_error_set(err,"superfluous arguments: \"%s\"\n",argv[argc-1]);
+    haserr = true;
+  }
+  if (!haserr)
+  {
+    if (gt_str_array_size(arguments->queryfiles) == 0)
     {
-      if (arguments->forward)
+      if (arguments->samples == 0)
       {
-        if (callenummaxpairs(arguments->indexname,
-                             arguments->userdefinedleastlength,
-                             arguments->scanfile,
-                             simpleexactselfmatchoutput,
-                             NULL,
-                             verboseinfo,
-                             err) != 0)
+        if (arguments->forward)
         {
-          haserr = true;
+          if (callenummaxpairs(arguments->indexname,
+                               arguments->userdefinedleastlength,
+                               arguments->scanfile,
+                               simpleexactselfmatchoutput,
+                               NULL,
+                               verboseinfo,
+                               err) != 0)
+          {
+            haserr = true;
+          }
         }
-      }
-      if (arguments->palindromic)
+        if (!haserr && arguments->reverse)
+        {
+          if (callenumselfmatches(arguments->indexname,
+                                  Reversemode,
+                                  arguments->userdefinedleastlength,
+                                  simpleexactquerymatchoutput,
+                                  NULL,
+                                  verboseinfo,
+                                  err) != 0)
+          {
+            haserr = true;
+          }
+        }
+      } else
       {
-        if (callenumselfmatches(arguments->indexname,
-                                Reversecomplementmode,
-                                arguments->userdefinedleastlength,
-                                simpleexactquerymatchoutput,
-                                NULL,
-                                verboseinfo,
-                                err) != 0)
+        if (testmaxpairs(arguments->indexname,
+                         arguments->samples,
+                         arguments->userdefinedleastlength,
+                         (Seqpos) (100 * arguments->userdefinedleastlength),
+                         verboseinfo,
+                         err) != 0)
         {
           haserr = true;
         }
       }
     } else
     {
-      if (testmaxpairs(arguments->indexname,
-                       arguments->samples,
-                       arguments->userdefinedleastlength,
-                       (Seqpos) (100 * arguments->userdefinedleastlength),
-                       verboseinfo,
-                       err) != 0)
+      if (callenumquerymatches(arguments->indexname,
+                               arguments->queryfiles,
+                               false,
+                               arguments->userdefinedleastlength,
+                               simpleexactquerymatchoutput,
+                               NULL,
+                               verboseinfo,
+                               err) != 0)
       {
         haserr = true;
       }
-    }
-  } else
-  {
-    if (callenumquerymatches(arguments->indexname,
-                             arguments->queryfiles,
-                             false,
-                             arguments->userdefinedleastlength,
-                             simpleexactquerymatchoutput,
-                             NULL,
-                             verboseinfo,
-                             err) != 0)
-    {
-      haserr = true;
     }
   }
   freeverboseinfo(&verboseinfo);

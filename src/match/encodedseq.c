@@ -2384,6 +2384,7 @@ static void getunitSeqinfo(Seqinfo *seqinfo,
 void getencseqSeqinfo(Seqinfo *seqinfo,const Encodedsequence *encseq,
                       unsigned long seqnum)
 {
+  gt_assert(encseq->numofdbsequences == 1UL || encseq->ssptab != NULL);
   getunitSeqinfo(seqinfo,
                  encseq->ssptab,
                  encseq->numofdbsequences,

@@ -46,10 +46,16 @@ typedef struct
   unsigned long offset; /* position relative to startpos */
 } Querysubstring;
 
-static GtUchar accessquery(const Queryrep *queryrep,
+static GtUchar accessquery(int line,const Queryrep *queryrep,
                            unsigned long pos)
 {
   unsigned long abspos = queryrep->startpos + pos;
+  if (pos >= queryrep->length)
+  {
+    fprintf(stderr,"line %d: pos = %lu >= %lu = queryrep->length\n",
+                    line,pos,queryrep->length);
+    exit(EXIT_FAILURE);
+  }
   gt_assert(pos < queryrep->length);
   if (queryrep->sequence != NULL)
   {
@@ -80,7 +86,7 @@ static GtUchar accessquery(const Queryrep *queryrep,
             break;\
           }\
           currentdbchar = sequentialgetencodedchar(dbencseq,esr,sidx,readmode);\
-          currentquerychar = accessquery(querysubstring->queryrep,\
+          currentquerychar = accessquery(__LINE__,querysubstring->queryrep,\
                                          querysubstring->offset + (LCPLEN));\
           retcode = (int) (currentquerychar - currentdbchar);\
           if (retcode == 0)\
@@ -302,7 +308,7 @@ static bool isleftmaximal(const Encodedsequence *dbencseq,
                               dbstart-1,
                               readmode);
   if (ISSPECIAL(dbleftchar) ||
-      dbleftchar != accessquery(querysubstring->queryrep,
+      dbleftchar != accessquery(__LINE__,querysubstring->queryrep,
                                 querysubstring->offset-1))
   {
     return true;
@@ -333,7 +339,7 @@ static unsigned long extendright(const Encodedsequence *dbencseq,
   {
     dbchar = sequentialgetencodedchar(dbencseq,esr,dbpos,readmode);
     if (ISSPECIAL(dbchar) ||
-        dbchar != accessquery(querysubstring->queryrep,querypos))
+        dbchar != accessquery(__LINE__,querysubstring->queryrep,querypos))
     {
       break;
     }
@@ -400,7 +406,8 @@ static int runquerysubstringmatch(const Encodedsequence *dbencseq,
       }
     }
     freemmsearchiterator(&mmsi);
-    if (accessquery(queryrep,querysubstring.offset) == (GtUchar) SEPARATOR)
+    if (accessquery(__LINE__,queryrep,querysubstring.offset)
+        == (GtUchar) SEPARATOR)
     {
       localunitnum++;
       localqueryoffset = 0;
@@ -524,7 +531,7 @@ int callenumselfmatches(const GtStr *indexname,
 
   gt_assert(queryreadmode != Forwardmode);
   if (mapsuffixarray(&suffixarray,
-                     SARR_ESQTAB | SARR_SUFTAB,
+                     SARR_ESQTAB | SARR_SUFTAB | SARR_SSPTAB,
                      indexname,
                      verboseinfo,
                      err) != 0)
@@ -547,21 +554,24 @@ int callenumselfmatches(const GtStr *indexname,
     for (seqnum = 0; seqnum < numofsequences; seqnum++)
     {
       getencseqSeqinfo(&seqinfo,suffixarray.encseq,seqnum);
-      queryrep.startpos = (unsigned long) seqinfo.seqstartpos;
-      queryrep.length = (unsigned long) seqinfo.seqlength;
-      if (runquerysubstringmatch(suffixarray.encseq,
-                                 suffixarray.suftab,
-                                 suffixarray.readmode,
-                                 totallength+1,
-                                 (uint64_t) seqnum,
-                                 &queryrep,
-                                 userdefinedleastlength,
-                                 processquerymatch,
-                                 processquerymatchinfo,
-                                 err) != 0)
+      if (seqinfo.seqlength >= (Seqpos) userdefinedleastlength)
       {
-        haserr = true;
-        break;
+        queryrep.startpos = (unsigned long) seqinfo.seqstartpos;
+        queryrep.length = (unsigned long) seqinfo.seqlength;
+        if (runquerysubstringmatch(suffixarray.encseq,
+                                   suffixarray.suftab,
+                                   suffixarray.readmode,
+                                   totallength+1,
+                                   (uint64_t) seqnum,
+                                   &queryrep,
+                                   userdefinedleastlength,
+                                   processquerymatch,
+                                   processquerymatchinfo,
+                                   err) != 0)
+        {
+          haserr = true;
+          break;
+        }
       }
     }
   }
