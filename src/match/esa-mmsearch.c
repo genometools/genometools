@@ -348,11 +348,8 @@ static int runquerysubstringmatch(const Encodedsequence *dbencseq,
                                   uint64_t unitnum,
                                   const Queryrep *queryrep,
                                   unsigned int minmatchlength,
-                                  int (*processmaxmatch)(void *,unsigned long,
-                                                         Seqpos,uint64_t,
-                                                         unsigned long,
-                                                         GtError *),
-                                  void *processmaxmatchinfo,
+                                  Processquerymatch processquerymatch,
+                                  void *processquerymatchinfo,
                                   GtError *err)
 {
   MMsearchiterator *mmsi;
@@ -391,7 +388,7 @@ static int runquerysubstringmatch(const Encodedsequence *dbencseq,
                              dbstart + minmatchlength,
                              &querysubstring,
                              minmatchlength);
-        if (processmaxmatch(processmaxmatchinfo,
+        if (processquerymatch(processquerymatchinfo,
                             extend + (unsigned long) minmatchlength,
                             dbstart,
                             localunitnum,
@@ -419,10 +416,8 @@ int callenumquerymatches(const GtStr *indexname,
                          const GtStrArray *queryfiles,
                          bool echoquery,
                          unsigned int userdefinedleastlength,
-                         int (*processmaxmatch)(void *,unsigned long,Seqpos,
-                                                uint64_t,unsigned long,
-                                                GtError*),
-                         void *processmaxmatchinfo,
+                         Processquerymatch processquerymatch,
+                         void *processquerymatchinfo,
                          Verboseinfo *verboseinfo,
                          GtError *err)
 {
@@ -498,8 +493,8 @@ int callenumquerymatches(const GtStr *indexname,
                                      unitnum,
                                      &queryrep,
                                      userdefinedleastlength,
-                                     processmaxmatch,
-                                     processmaxmatchinfo,
+                                     processquerymatch,
+                                     processquerymatchinfo,
                                      err) != 0)
           {
             haserr = true;
@@ -518,10 +513,8 @@ int callenumquerymatches(const GtStr *indexname,
 int callenumselfmatches(const GtStr *indexname,
                         Readmode queryreadmode,
                         unsigned int userdefinedleastlength,
-                        int (*processmaxmatch)(void *,unsigned long,Seqpos,
-                                               uint64_t,unsigned long,
-                                               GtError*),
-                        void *processmaxmatchinfo,
+                        Processquerymatch processquerymatch,
+                        void *processquerymatchinfo,
                         Verboseinfo *verboseinfo,
                         GtError *err)
 {
@@ -563,8 +556,8 @@ int callenumselfmatches(const GtStr *indexname,
                                  (uint64_t) seqnum,
                                  &queryrep,
                                  userdefinedleastlength,
-                                 processmaxmatch,
-                                 processmaxmatchinfo,
+                                 processquerymatch,
+                                 processquerymatchinfo,
                                  err) != 0)
       {
         haserr = true;
@@ -584,9 +577,9 @@ static int constructsarrandrunmmsearch(
                  const GtUchar *query,
                  unsigned long querylen,
                  unsigned int minlength,
-                 int (*processmaxmatch)(void *,unsigned long,Seqpos,
+                 int (*processquerymatch)(void *,unsigned long,Seqpos,
                                         uint64_t,unsigned long,GtError *),
-                 void *processmaxmatchinfo,
+                 void *processquerymatchinfo,
                  Sfxprogress *sfxprogress,
                  GtError *err)
 {
@@ -628,8 +621,8 @@ static int constructsarrandrunmmsearch(
                                 0,
                                 &queryrep,
                                 minlength,
-                                processmaxmatch,
-                                processmaxmatchinfo,
+                                processquerymatch,
+                                processquerymatchinfo,
                                 err) != 0)
       {
         haserr = true;
@@ -650,10 +643,8 @@ int sarrquerysubstringmatch(const GtUchar *dbseq,
                             unsigned long querylen,
                             unsigned int minlength,
                             const GtAlphabet *alpha,
-                            int (*processmaxmatch)(void *,unsigned long,Seqpos,
-                                                   uint64_t,unsigned long,
-                                                   GtError *),
-                            void *processmaxmatchinfo,
+                            Processquerymatch processquerymatch,
+                            void *processquerymatchinfo,
                             Verboseinfo *verboseinfo,
                             GtError *err)
 {
@@ -676,8 +667,8 @@ int sarrquerysubstringmatch(const GtUchar *dbseq,
                                   query,
                                   querylen,
                                   minlength,
-                                  processmaxmatch,
-                                  processmaxmatchinfo,
+                                  processquerymatch,
+                                  processquerymatchinfo,
                                   NULL,
                                   err) != 0)
   {

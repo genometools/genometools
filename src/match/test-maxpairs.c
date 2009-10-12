@@ -59,8 +59,8 @@ typedef struct
 {
   unsigned int minlength;
   Encodedsequence *encseq;
-  int (*processmaxmatch)(void *,Seqpos,Seqpos,Seqpos,GtError *);
-  void *processmaxmatchinfo;
+  Processmaxpairs processmaxpairs;
+  void *processmaxpairsinfo;
 } Substringmatchinfo;
 
 static int constructsarrandrunmaxpairs(
@@ -113,8 +113,8 @@ static int constructsarrandrunmaxpairs(
                             ssi->encseq,
                             readmode,
                             ssi->minlength,
-                            ssi->processmaxmatch,
-                            ssi->processmaxmatchinfo,
+                            ssi->processmaxpairs,
+                            ssi->processmaxpairsinfo,
                             verboseinfo,
                             err) != 0)
       {
@@ -139,10 +139,8 @@ static int sarrselfsubstringmatch(const GtUchar *dbseq,
                                   unsigned long querylen,
                                   unsigned int minlength,
                                   const GtAlphabet *alpha,
-                                  int (*processmaxmatch)(void *,Seqpos,
-                                                         Seqpos,Seqpos,
-                                                         GtError *),
-                                  void *processmaxmatchinfo,
+                                  Processmaxpairs processmaxpairs,
+                                  void *processmaxpairsinfo,
                                   Verboseinfo *verboseinfo,
                                   GtError *err)
 {
@@ -158,8 +156,8 @@ static int sarrselfsubstringmatch(const GtUchar *dbseq,
                                      alpha,
                                      verboseinfo);
   ssi.minlength = minlength;
-  ssi.processmaxmatch = processmaxmatch;
-  ssi.processmaxmatchinfo = processmaxmatchinfo;
+  ssi.processmaxpairs = processmaxpairs;
+  ssi.processmaxpairsinfo = processmaxpairsinfo;
   numofchars = gt_alphabet_num_of_chars(alpha);
   if (constructsarrandrunmaxpairs(&ssi,
                                   Forwardmode,

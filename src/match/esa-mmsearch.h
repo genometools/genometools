@@ -20,6 +20,9 @@
 #include "core/error.h"
 #include "encseq-def.h"
 
+typedef int (*Processquerymatch)(void *,unsigned long,Seqpos,
+                                 uint64_t,unsigned long,GtError *);
+
 typedef struct MMsearchiterator MMsearchiterator;
 
 MMsearchiterator *newmmsearchiteratorcomplete_plain(
@@ -45,20 +48,16 @@ int callenumquerymatches(const GtStr *indexname,
                          const GtStrArray *queryfiles,
                          bool echoquery,
                          unsigned int userdefinedleastlength,
-                         int (*processmaxmatch)(void *,unsigned long,Seqpos,
-                                                uint64_t,unsigned long,
-                                                GtError *),
-                         void *processmaxmatchinfo,
+                         Processquerymatch processquerymatch,
+                         void *processquerymatchinfo,
                          Verboseinfo *verboseinfo,
                          GtError *err);
 
 int callenumselfmatches(const GtStr *indexname,
                         Readmode queryreadmode,
                         unsigned int userdefinedleastlength,
-                        int (*processmaxmatch)(void *,unsigned long,Seqpos,
-                                               uint64_t,unsigned long,
-                                               GtError*),
-                        void *processmaxmatchinfo,
+                        Processquerymatch processquerymatch,
+                        void *processquerymatchinfo,
                         Verboseinfo *verboseinfo,
                         GtError *err);
 
@@ -68,10 +67,8 @@ int sarrquerysubstringmatch(const GtUchar *dbseq,
                             unsigned long querylen,
                             unsigned int minlength,
                             const GtAlphabet *alpha,
-                            int (*processmaxmatch)(void *,unsigned long,Seqpos,
-                                                   uint64_t,unsigned long,
-                                                   GtError *),
-                            void *processmaxmatchinfo,
+                            Processquerymatch processquerymatch,
+                            void *processquerymatchinfo,
                             Verboseinfo *verboseinfo,
                             GtError *err);
 
