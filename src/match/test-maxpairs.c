@@ -46,12 +46,12 @@ int testmaxpairs(GT_UNUSED const GtStr *indexname,
 #include "echoseq.h"
 #include "encseq-def.h"
 #include "seqpos-def.h"
-#include "esa-seqread.h"
-#include "sfx-suffixer.h"
 #include "verbose-def.h"
+#include "sfx-suffixer.h"
 #include "sfx-apfxlen.h"
 #include "sfx-progress.h"
 #include "esa-maxpairs.h"
+#include "esa-seqread.h"
 
 #include "arrcmp.pr"
 
@@ -133,17 +133,18 @@ static int constructsarrandrunmaxpairs(
   return haserr ? -1 : 0;
 }
 
-int sarrselfsubstringmatch(const GtUchar *dbseq,
-                           Seqpos dblen,
-                           const GtUchar *query,
-                           unsigned long querylen,
-                           unsigned int minlength,
-                           const GtAlphabet *alpha,
-                           int (*processmaxmatch)(void *,Seqpos,
-                                                  Seqpos,Seqpos,GtError *),
-                           void *processmaxmatchinfo,
-                           Verboseinfo *verboseinfo,
-                           GtError *err)
+static int sarrselfsubstringmatch(const GtUchar *dbseq,
+                                  Seqpos dblen,
+                                  const GtUchar *query,
+                                  unsigned long querylen,
+                                  unsigned int minlength,
+                                  const GtAlphabet *alpha,
+                                  int (*processmaxmatch)(void *,Seqpos,
+                                                         Seqpos,Seqpos,
+                                                         GtError *),
+                                  void *processmaxmatchinfo,
+                                  Verboseinfo *verboseinfo,
+                                  GtError *err)
 {
   Substringmatchinfo ssi;
   unsigned int numofchars;

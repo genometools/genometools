@@ -18,17 +18,19 @@
 #ifndef ESA_MAXPAIRS_H
 #define ESA_MAXPAIRS_H
 
+#include "core/error_api.h"
 #include "seqpos-def.h"
 #include "encseq-def.h"
 #include "esa-seqread.h"
 #include "verbose-def.h"
 
+typedef int (*Processmaxpairs)(void *,Seqpos,Seqpos,Seqpos,GtError *);
+
 int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
                       const Encodedsequence *encseq,
                       Readmode readmode,
                       unsigned int searchlength,
-                      int(*processmaxpairs)(void *,Seqpos,Seqpos,
-                                            Seqpos,GtError *),
+                      Processmaxpairs processmaxpairs,
                       void *processmaxpairsinfo,
                       Verboseinfo *verboseinfo,
                       GtError *err);

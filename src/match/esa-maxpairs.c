@@ -21,6 +21,7 @@
 #include "seqpos-def.h"
 #include "esa-seqread.h"
 #include "verbose-def.h"
+#include "esa-maxpairs.h"
 
 #define ISLEFTDIVERSE   (GtUchar) (state->alphabetsize)
 #define INITIALCHAR     (GtUchar) (state->alphabetsize+1)
@@ -63,7 +64,7 @@ typedef struct
               *poslist;
   const Encodedsequence *encseq;
   Readmode readmode;
-  int(*processmaxpairs)(void *,Seqpos,Seqpos,Seqpos,GtError *);
+  Processmaxpairs processmaxpairs;
   void *processmaxpairsinfo;
 };
 
@@ -349,8 +350,7 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
                       const Encodedsequence *encseq,
                       Readmode readmode,
                       unsigned int searchlength,
-                      int(*processmaxpairs)(void *,Seqpos,Seqpos,
-                                            Seqpos,GtError *),
+                      Processmaxpairs processmaxpairs,
                       void *processmaxpairsinfo,
                       Verboseinfo *verboseinfo,
                       GtError *err)
