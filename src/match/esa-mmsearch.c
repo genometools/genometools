@@ -301,9 +301,9 @@ static bool isleftmaximal(const Encodedsequence *dbencseq,
   dbleftchar = getencodedchar(dbencseq, /* Random access */
                               dbstart-1,
                               readmode);
-  if (dbleftchar != accessquery(querysubstring->queryrep,
-                                querysubstring->offset-1) ||
-      ISSPECIAL(dbleftchar))
+  if (ISSPECIAL(dbleftchar) ||
+      dbleftchar != accessquery(querysubstring->queryrep,
+                                querysubstring->offset-1))
   {
     return true;
   }
@@ -332,8 +332,8 @@ static unsigned long extendright(const Encodedsequence *dbencseq,
        dbpos++, querypos++)
   {
     dbchar = sequentialgetencodedchar(dbencseq,esr,dbpos,readmode);
-    if (dbchar != accessquery(querysubstring->queryrep,querypos) ||
-        ISSPECIAL(dbchar))
+    if (ISSPECIAL(dbchar) ||
+        dbchar != accessquery(querysubstring->queryrep,querypos))
     {
       break;
     }
