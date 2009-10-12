@@ -24,7 +24,7 @@
 #include "core/tool.h"
 #include "core/versionfunc.h"
 #include "match/esa-seqread.h"
-#include "match/esa-mmsearch-def.h"
+#include "match/esa-mmsearch.h"
 #include "match/format64.h"
 #include "match/verbose-def.h"
 

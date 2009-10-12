@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ESA_MMSEARCH_DEF_H
-#define ESA_MMSEARCH_DEF_H
+#ifndef ESA_MMSEARCH_H
+#define ESA_MMSEARCH_H
 #include "core/error.h"
 #include "encseq-def.h"
 

@@ -23,7 +23,7 @@
 #include "sarr-def.h"
 #include "seqpos-def.h"
 #include "spacedef.h"
-#include "esa-mmsearch-def.h"
+#include "esa-mmsearch.h"
 #include "sfx-suffixer.h"
 #include "sfx-progress.h"
 #include "format64.h"

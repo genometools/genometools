@@ -26,7 +26,7 @@
 #include "esa-splititv.h"
 #include "eis-voiditf.h"
 #include "defined-types.h"
-#include "esa-mmsearch-def.h"
+#include "esa-mmsearch.h"
 #include "absdfstrans-imp.h"
 #include "idx-limdfs.h"
 #include "stamp.h"

@@ -25,7 +25,7 @@
 #include "verbose-def.h"
 #include "spacedef.h"
 #include "format64.h"
-#include "esa-mmsearch-def.h"
+#include "esa-mmsearch.h"
 #include "opensfxfile.h"
 #include "tyr-basic.h"
 #include "tyr-mkindex.h"

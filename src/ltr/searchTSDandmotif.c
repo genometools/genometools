@@ -23,7 +23,7 @@
 #include "core/symboldef.h"
 #include "match/encseq-def.h"
 #include "match/spacedef.h"
-#include "match/esa-mmsearch-def.h"
+#include "match/esa-mmsearch.h"
 
 #include "ltrharvest-opt.h"
 #include "repeattypes.h"

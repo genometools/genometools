@@ -23,7 +23,7 @@
 #include "match/sarr-def.h"
 #include "match/stamp.h"
 #include "match/enum-patt-def.h"
-#include "match/esa-mmsearch-def.h"
+#include "match/esa-mmsearch.h"
 #include "match/qgram2code.h"
 #include "match/spacedef.h"
 #include "match/cutendpfx.h"
