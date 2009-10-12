@@ -20,7 +20,7 @@
 #include "core/error.h"
 #include "encseq-def.h"
 
-typedef int (*Processquerymatch)(void *,unsigned long,Seqpos,
+typedef int (*Processquerymatch)(void *,unsigned long,Seqpos,Readmode,
                                  uint64_t,unsigned long,GtError *);
 
 typedef struct MMsearchiterator MMsearchiterator;

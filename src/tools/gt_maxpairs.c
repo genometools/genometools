@@ -54,9 +54,10 @@ static int simpleexactselfmatchoutput(GT_UNUSED void *info,
     pos1 = pos2;
     pos2 = tmp;
   }
-  printf(FormatSeqpos " " FormatSeqpos " " FormatSeqpos "\n",
+  printf(FormatSeqpos " " FormatSeqpos " F " FormatSeqpos " " FormatSeqpos "\n",
             PRINTSeqposcast(len),
             PRINTSeqposcast(pos1),
+            PRINTSeqposcast(len),
             PRINTSeqposcast(pos2));
   return 0;
 }
@@ -64,13 +65,18 @@ static int simpleexactselfmatchoutput(GT_UNUSED void *info,
 static int simpleexactquerymatchoutput(GT_UNUSED void *info,
                                        unsigned long len,
                                        Seqpos dbstart,
+                                       Readmode readmode,
                                        uint64_t unitnum,
                                        unsigned long querystart,
                                        GT_UNUSED GtError *err)
 {
-  printf("%lu " FormatSeqpos " " Formatuint64_t " %lu\n",
+  const char *outflag = "FRCP";
+
+  gt_assert((int) readmode < 4);
+  printf("%lu " FormatSeqpos " %c " Formatuint64_t " %lu\n",
            len,
            PRINTSeqposcast(dbstart),
+           outflag[readmode],
            PRINTuint64_tcast(unitnum),
            querystart);
   return 0;

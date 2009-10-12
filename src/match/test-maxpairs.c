@@ -249,11 +249,13 @@ typedef struct
   unsigned long len, querystart;
   uint64_t queryseqnum;
   Seqpos dbstart;
+  Readmode readmode;
 } Substringmatch;
 
 static int storemaxmatchquery(void *info,
                               unsigned long len,
                               Seqpos dbstart,
+                              Readmode readmode,
                               uint64_t queryseqnum,
                               unsigned long querystart,
                               GT_UNUSED GtError *err)
@@ -263,6 +265,7 @@ static int storemaxmatchquery(void *info,
 
   subm.len = len;
   subm.dbstart = dbstart;
+  subm.readmode = readmode;
   subm.queryseqnum = queryseqnum;
   subm.querystart = querystart;
   gt_array_add(tab,subm);

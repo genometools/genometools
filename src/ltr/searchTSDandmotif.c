@@ -607,15 +607,15 @@ static int searchforTSDandorMotifoutside(
     subrepeatinfo.offset2 = startrightLTR;
 
     if (sarrquerysubstringmatch(dbseq,
-          leftlen,
-          query,
-          (unsigned long) rightlen,
-          lo->minlengthTSD,
-          getencseqAlphabet(encseq),
-          subsimpleexactselfmatchstore,
-          &subrepeatinfo,
-          NULL,
-          err) != 0)
+                                leftlen,
+                                query,
+                                (unsigned long) rightlen,
+                                lo->minlengthTSD,
+                                getencseqAlphabet(encseq),
+                                subsimpleexactselfmatchstore,
+                                &subrepeatinfo,
+                                NULL,
+                                err) != 0)
     {
        haserr = true;
     }

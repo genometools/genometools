@@ -121,13 +121,15 @@ int simpleexactselfmatchstore (void *info,
 int subsimpleexactselfmatchstore(void *info,
                                  unsigned long len,
                                  Seqpos dbstart,
-                                 GT_UNUSED uint64_t queryoffset,
+                                 Readmode readmode,
+                                 GT_UNUSED uint64_t queryunitnum,
                                  unsigned long querystart,
                                  GT_UNUSED GtError *err)
 {
   Repeat *nextfreerepeatptr;
   SubRepeatInfo *sri = (SubRepeatInfo *) info;
 
+  gt_assert(readmode == Forwardmode);
   GT_GETNEXTFREEINARRAY (nextfreerepeatptr, &sri->repeats, Repeat, 10);
   nextfreerepeatptr->pos1 = sri->offset1 + dbstart;
   nextfreerepeatptr->offset = sri->offset2 + (Seqpos)querystart -

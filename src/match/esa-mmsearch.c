@@ -351,7 +351,7 @@ static int runquerysubstringmatch(const Encodedsequence *dbencseq,
                                   const Seqpos *suftabpart,
                                   Readmode readmode,
                                   Seqpos numberofsuffixes,
-                                  uint64_t unitnum,
+                                  uint64_t queryunitnum,
                                   const Queryrep *queryrep,
                                   unsigned int minmatchlength,
                                   Processquerymatch processquerymatch,
@@ -361,7 +361,7 @@ static int runquerysubstringmatch(const Encodedsequence *dbencseq,
   MMsearchiterator *mmsi;
   Seqpos dbstart, totallength;
   unsigned long extend;
-  uint64_t localunitnum = unitnum;
+  uint64_t localqueryunitnum = queryunitnum;
   unsigned long localqueryoffset = 0;
   Querysubstring querysubstring;
 
@@ -397,7 +397,8 @@ static int runquerysubstringmatch(const Encodedsequence *dbencseq,
         if (processquerymatch(processquerymatchinfo,
                             extend + (unsigned long) minmatchlength,
                             dbstart,
-                            localunitnum,
+                            readmode,
+                            localqueryunitnum,
                             localqueryoffset,
                             err) != 0)
         {
@@ -409,7 +410,7 @@ static int runquerysubstringmatch(const Encodedsequence *dbencseq,
     if (accessquery(__LINE__,queryrep,querysubstring.offset)
         == (GtUchar) SEPARATOR)
     {
-      localunitnum++;
+      localqueryunitnum++;
       localqueryoffset = 0;
     } else
     {
@@ -457,7 +458,7 @@ int callenumquerymatches(const GtStr *indexname,
     unsigned long querylen;
     char *desc = NULL;
     int retval;
-    uint64_t unitnum;
+    uint64_t queryunitnum;
 
     seqit = gt_seqiterator_new(queryfiles, err);
     if (seqit == NULL)
@@ -469,7 +470,7 @@ int callenumquerymatches(const GtStr *indexname,
       gt_seqiterator_set_symbolmap(seqit,
                                    getencseqAlphabetsymbolmap(suffixarray.
                                                               encseq));
-      for (unitnum = 0; /* Nothing */; unitnum++)
+      for (queryunitnum = 0; /* Nothing */; queryunitnum++)
       {
         retval = gt_seqiterator_next(seqit,
                                      &query,
@@ -497,7 +498,7 @@ int callenumquerymatches(const GtStr *indexname,
                                      suffixarray.suftab,
                                      suffixarray.readmode,
                                      totallength+1,
-                                     unitnum,
+                                     queryunitnum,
                                      &queryrep,
                                      userdefinedleastlength,
                                      processquerymatch,
@@ -587,8 +588,7 @@ static int constructsarrandrunmmsearch(
                  const GtUchar *query,
                  unsigned long querylen,
                  unsigned int minlength,
-                 int (*processquerymatch)(void *,unsigned long,Seqpos,
-                                        uint64_t,unsigned long,GtError *),
+                 Processquerymatch processquerymatch,
                  void *processquerymatchinfo,
                  Sfxprogress *sfxprogress,
                  GtError *err)

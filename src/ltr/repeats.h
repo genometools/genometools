@@ -31,7 +31,8 @@ int simpleexactselfmatchstore(void *info,Seqpos len,Seqpos pos1, Seqpos pos2,
 int subsimpleexactselfmatchstore(void *info,
                                  unsigned long len,
                                  Seqpos dbstart,
-                                 GT_UNUSED uint64_t queryoffset,
+                                 Readmode readmode,
+                                 GT_UNUSED uint64_t queryunitnum,
                                  unsigned long querystart,
                                  GtError *err);
 
