@@ -102,4 +102,38 @@ typedef struct
   LargelcpvalueBufferedfile llvtabstream;
 } Suffixarray;
 
+/*@unused@*/ static inline const Largelcpvalue *getlargelcpvalue(
+                       const Suffixarray *suffixarray,
+                       Seqpos pos)
+{
+  const Largelcpvalue *leftptr, *rightptr, *midptr;
+  unsigned long len;
+
+  gt_assert(suffixarray->numoflargelcpvalues.defined);
+
+  leftptr = suffixarray->llvtab;
+  rightptr = suffixarray->llvtab +
+             suffixarray->numoflargelcpvalues.valueseqpos - 1;
+
+  while (leftptr<=rightptr)
+  {
+    len = (unsigned long) (rightptr-leftptr);
+    midptr = leftptr + GT_DIV2(len);
+    if (pos < midptr->position)
+    {
+      rightptr = midptr - 1;
+    } else
+    {
+      if (pos > midptr->position)
+      {
+        leftptr = midptr + 1;
+      } else
+      {
+        return midptr;
+      }
+    }
+  }
+  return NULL;
+}
+
 #endif
