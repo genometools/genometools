@@ -108,4 +108,7 @@ Readmode readmodeSequentialsuffixarrayreader(
 const Seqpos *suftabSequentialsuffixarrayreader(
               const Sequentialsuffixarrayreader *ssar);
 
+const Suffixarray *suffixarraySequentialsuffixarrayreader(
+              const Sequentialsuffixarrayreader *ssar);
+
 #endif

@@ -22,6 +22,7 @@
 #include "seqpos-def.h"
 #include "intcode-def.h"
 #include "encseq-def.h"
+#include "lcpoverflow.h"
 #include "bcktab.h"
 
 #define FILEBUFFERSIZE 4096
@@ -134,6 +135,24 @@ typedef struct
     }
   }
   return NULL;
+}
+
+/*@unused@*/ static inline const Seqpos lcptable_get(
+                       const Suffixarray *suffixarray,
+                       Seqpos pos)
+{
+  GtUchar smalllcpvalue;
+  const Largelcpvalue *largelcpvalue;
+
+  gt_assert(pos <= getencseqtotallength(suffixarray->encseq));
+  smalllcpvalue = suffixarray->lcptab[pos];
+  if (smalllcpvalue != LCPOVERFLOW)
+  {
+    return (Seqpos) smalllcpvalue;
+  }
+  largelcpvalue = getlargelcpvalue(suffixarray,pos);
+  gt_assert(largelcpvalue != NULL);
+  return largelcpvalue->value;
 }
 
 #endif

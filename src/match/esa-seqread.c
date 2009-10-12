@@ -294,3 +294,9 @@ const Seqpos *suftabSequentialsuffixarrayreader(
   }
   return ssar->suftab;
 }
+
+const Suffixarray *suffixarraySequentialsuffixarrayreader(
+              const Sequentialsuffixarrayreader *ssar)
+{
+  return ssar->suffixarray;
+}
