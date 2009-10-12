@@ -61,7 +61,7 @@ static GtOPrval parse_options(int *parsed_args,
          *optionkys,
          *optionshowtime,
          *optionshowprogress;
-  OPrval oprval;
+  GtOPrval oprval;
   const char *maxdepthmsg = "option of -maxdepth must the keyword abs, the "
                             "keyword he or an integer";
   GtStr *dirarg = gt_str_new();
