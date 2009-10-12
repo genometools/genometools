@@ -52,6 +52,16 @@ int callenumquerymatches(const GtStr *indexname,
                          Verboseinfo *verboseinfo,
                          GtError *err);
 
+int callenumselfmatches(const GtStr *indexname,
+                        Readmode queryreadmode,
+                        unsigned int userdefinedleastlength,
+                        int (*processmaxmatch)(void *,unsigned long,Seqpos,
+                                               uint64_t,unsigned long,
+                                               GtError*),
+                        void *processmaxmatchinfo,
+                        Verboseinfo *verboseinfo,
+                        GtError *err);
+
 int sarrquerysubstringmatch(const GtUchar *dbseq,
                             Seqpos dblen,
                             const GtUchar *query,

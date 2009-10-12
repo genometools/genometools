@@ -219,13 +219,6 @@ static MMsearchiterator *newmmsearchiterator_generic(
   return mmsi;
 }
 
-static void fillqueryreppos(Queryrep *queryrep,unsigned long startpos,
-                                               unsigned long length)
-{
-  queryrep->startpos = startpos;
-  queryrep->length = length;
-}
-
 MMsearchiterator *newmmsearchiteratorcomplete_plain(
                                    const Encodedsequence *dbencseq,
                                    const Seqpos *suftab,
@@ -241,7 +234,8 @@ MMsearchiterator *newmmsearchiteratorcomplete_plain(
 
   queryrep.sequence = pattern;
   queryrep.encseq = NULL;
-  fillqueryreppos(&queryrep,0,patternlength);
+  queryrep.startpos = 0;
+  queryrep.length = patternlength;
   querysubstring.queryrep = &queryrep;
   querysubstring.offset = 0;
   return newmmsearchiterator_generic(dbencseq,
@@ -462,7 +456,6 @@ int callenumquerymatches(const GtStr *indexname,
     char *desc = NULL;
     int retval;
     uint64_t unitnum;
-    Queryrep queryrep;
 
     seqit = gt_seqiterator_new(queryfiles, err);
     if (seqit == NULL)
@@ -492,9 +485,12 @@ int callenumquerymatches(const GtStr *indexname,
         }
         if (querylen >= (unsigned long) userdefinedleastlength)
         {
+          Queryrep queryrep;
+
           queryrep.sequence = query;
           queryrep.encseq = NULL;
-          fillqueryreppos(&queryrep,0,querylen);
+          queryrep.startpos = 0;
+          queryrep.length = querylen;
           if (runquerysubstringmatch(suffixarray.encseq,
                                      suffixarray.suftab,
                                      suffixarray.readmode,
@@ -522,12 +518,12 @@ int callenumquerymatches(const GtStr *indexname,
 int callenumselfmatches(const GtStr *indexname,
                         Readmode queryreadmode,
                         unsigned int userdefinedleastlength,
-                         int (*processmaxmatch)(void *,unsigned long,Seqpos,
-                                                uint64_t,unsigned long,
-                                                GtError*),
-                         void *processmaxmatchinfo,
-                         Verboseinfo *verboseinfo,
-                         GtError *err)
+                        int (*processmaxmatch)(void *,unsigned long,Seqpos,
+                                               uint64_t,unsigned long,
+                                               GtError*),
+                        void *processmaxmatchinfo,
+                        Verboseinfo *verboseinfo,
+                        GtError *err)
 {
   Suffixarray suffixarray;
   Seqpos totallength = 0;
@@ -558,8 +554,8 @@ int callenumselfmatches(const GtStr *indexname,
     for (seqnum = 0; seqnum < numofsequences; seqnum++)
     {
       getencseqSeqinfo(&seqinfo,suffixarray.encseq,seqnum);
-      fillqueryreppos(&queryrep,(unsigned long) seqinfo.seqstartpos,
-                      (unsigned long) seqinfo.seqlength);
+      queryrep.startpos = (unsigned long) seqinfo.seqstartpos;
+      queryrep.length = (unsigned long) seqinfo.seqlength;
       if (runquerysubstringmatch(suffixarray.encseq,
                                  suffixarray.suftab,
                                  suffixarray.readmode,
@@ -616,7 +612,8 @@ static int constructsarrandrunmmsearch(
   {
     queryrep.sequence = query;
     queryrep.encseq = NULL;
-    fillqueryreppos(&queryrep,0,querylen);
+    queryrep.startpos = 0;
+    queryrep.length = querylen;
     while (true)
     {
       suftabptr = nextSfxiterator(&numofsuffixes,&specialsuffixes,sfi);

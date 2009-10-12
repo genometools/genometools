@@ -92,6 +92,7 @@ sfx-enumcodes.c
 sfx-input.c
 sfx-linlcp.c
 sfx-partssuf.c
+sfx-progress.c
 sfx-readint.c
 sfx-readmode.c
 sfx-remainsort.c

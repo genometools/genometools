@@ -252,8 +252,16 @@ static int gt_repfind_runner(GT_UNUSED int argc,
       }
       if (arguments->palindromic)
       {
-        gt_error_set(err,"Option -p not implemented yet");
-        haserr = true;
+        if (callenumselfmatches(arguments->indexname,
+                                Reversecomplementmode,
+                                arguments->userdefinedleastlength,
+                                simpleexactquerymatchoutput,
+                                NULL,
+                                verboseinfo,
+                                err) != 0)
+        {
+          haserr = true;
+        }
       }
     } else
     {
