@@ -50,8 +50,8 @@ static int simpleexactselfmatchoutput(void *info,
                                       GT_UNUSED GtError *err)
 {
   Seqinfo seqinfo;
-  Querymatch *querymatch;
   unsigned long queryseqnum;
+  Querymatch *querymatch = (Querymatch *) info;
 
   if (pos1 > pos2)
   {
@@ -62,7 +62,6 @@ static int simpleexactselfmatchoutput(void *info,
   queryseqnum = getencseqfrompos2seqnum(encseq,pos2);
   getencseqSeqinfo(&seqinfo,encseq,queryseqnum);
   gt_assert(pos2 >= seqinfo.seqstartpos);
-  querymatch = querymatch_new();
   querymatch_fill(querymatch,
                   len,
                   pos1,
@@ -227,6 +226,7 @@ static int gt_repfind_runner(GT_UNUSED int argc,
   bool haserr = false;
   Maxpairsoptions *arguments = tool_arguments;
   Verboseinfo *verboseinfo;
+  Querymatch *querymatchspaceptr = querymatch_new();
 
   gt_error_check(err);
   verboseinfo = newverboseinfo(arguments->beverbose);
@@ -247,7 +247,7 @@ static int gt_repfind_runner(GT_UNUSED int argc,
                                arguments->userdefinedleastlength,
                                arguments->scanfile,
                                simpleexactselfmatchoutput,
-                               NULL,
+                               querymatchspaceptr,
                                verboseinfo,
                                err) != 0)
           {
@@ -294,6 +294,7 @@ static int gt_repfind_runner(GT_UNUSED int argc,
       }
     }
   }
+  querymatch_delete(querymatchspaceptr);
   freeverboseinfo(&verboseinfo);
   return haserr ? -1 : 0;
 }

@@ -362,6 +362,7 @@ static int runquerysubstringmatch(bool selfmatch,
                                   unsigned long minmatchlength,
                                   Processquerymatch processquerymatch,
                                   void *processquerymatchinfo,
+                                  Querymatch *querymatchspaceptr,
                                   GtError *err)
 {
   MMsearchiterator *mmsi;
@@ -369,13 +370,11 @@ static int runquerysubstringmatch(bool selfmatch,
   uint64_t localqueryunitnum = queryunitnum;
   Seqpos localqueryoffset = 0;
   Querysubstring querysubstring;
-  Querymatch *querymatch;
   bool haserr = false;
 
   gt_assert(numberofsuffixes > 0);
   totallength = getencseqtotallength(dbencseq);
   querysubstring.queryrep = queryrep;
-  querymatch = querymatch_new();
   for (querysubstring.offset = 0;
        querysubstring.offset <= queryrep->length - minmatchlength;
        querysubstring.offset++)
@@ -402,7 +401,8 @@ static int runquerysubstringmatch(bool selfmatch,
                              dbstart + minmatchlength,
                              &querysubstring,
                              minmatchlength);
-        querymatch_fill(querymatch,extend + minmatchlength,
+        querymatch_fill(querymatchspaceptr,
+                        extend + minmatchlength,
                         dbstart,
                         queryrep->readmode,
                         selfmatch,
@@ -411,7 +411,7 @@ static int runquerysubstringmatch(bool selfmatch,
                         queryrep->length);
         if (processquerymatch(processquerymatchinfo,
                               dbencseq,
-                              querymatch,
+                              querymatchspaceptr,
                               err) != 0)
         {
           haserr = true;
@@ -432,7 +432,6 @@ static int runquerysubstringmatch(bool selfmatch,
       }
     }
   }
-  querymatch_delete(querymatch);
   return haserr ? -1 : 0;
 }
 
@@ -448,6 +447,7 @@ int callenumquerymatches(const GtStr *indexname,
   Suffixarray suffixarray;
   Seqpos totallength = 0;
   bool haserr = false;
+  Querymatch *querymatchspaceptr = querymatch_new();
 
   if (mapsuffixarray(&suffixarray,
                      SARR_ESQTAB | SARR_SUFTAB | SARR_SSPTAB,
@@ -521,6 +521,7 @@ int callenumquerymatches(const GtStr *indexname,
                                      (unsigned long) userdefinedleastlength,
                                      processquerymatch,
                                      processquerymatchinfo,
+                                     querymatchspaceptr,
                                      err) != 0)
           {
             haserr = true;
@@ -532,6 +533,7 @@ int callenumquerymatches(const GtStr *indexname,
       gt_seqiterator_delete(seqit);
     }
   }
+  querymatch_delete(querymatchspaceptr);
   freesuffixarray(&suffixarray);
   return haserr ? -1 : 0;
 }
@@ -547,6 +549,7 @@ int callenumselfmatches(const GtStr *indexname,
   Suffixarray suffixarray;
   Seqpos totallength = 0;
   bool haserr = false;
+  Querymatch *querymatchspaceptr = querymatch_new();
 
   gt_assert(queryreadmode != Forwardmode);
   if (mapsuffixarray(&suffixarray,
@@ -587,6 +590,7 @@ int callenumselfmatches(const GtStr *indexname,
                                    (unsigned long) userdefinedleastlength,
                                    processquerymatch,
                                    processquerymatchinfo,
+                                   querymatchspaceptr,
                                    err) != 0)
         {
           haserr = true;
@@ -595,6 +599,7 @@ int callenumselfmatches(const GtStr *indexname,
       }
     }
   }
+  querymatch_delete(querymatchspaceptr);
   freesuffixarray(&suffixarray);
   return haserr ? -1 : 0;
 }
@@ -617,6 +622,7 @@ static int constructsarrandrunmmsearch(
   bool haserr = false, specialsuffixes = false;
   Sfxiterator *sfi;
   Queryrep queryrep;
+  Querymatch *querymatchspaceptr = querymatch_new();
 
   sfi = newSfxiterator(dbencseq,
                        readmode,
@@ -654,6 +660,7 @@ static int constructsarrandrunmmsearch(
                                  (unsigned long) minlength,
                                  processquerymatch,
                                  processquerymatchinfo,
+                                 querymatchspaceptr,
                                  err) != 0)
       {
         haserr = true;
@@ -661,6 +668,7 @@ static int constructsarrandrunmmsearch(
       }
     }
   }
+  querymatch_delete(querymatchspaceptr);
   if (sfi != NULL)
   {
     freeSfxiterator(&sfi);
