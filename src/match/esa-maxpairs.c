@@ -47,7 +47,7 @@ typedef struct
                 length;
 } Listtype;
 
- struct Dfsinfo /* information stored for each node of the lcp interval tree */
+struct Dfsinfo /* information stored for each node of the lcp interval tree */
 {
   GtUchar commonchar;
   unsigned long uniquecharposstart,
@@ -55,7 +55,7 @@ typedef struct
   Listtype *nodeposlist;
 };
 
- struct Dfsstate /* global information */
+struct Dfsstate /* global information */
 {
   bool initialized;
   unsigned int searchlength,
@@ -124,7 +124,7 @@ static int cartproduct1(Dfsstate *state,Seqpos fatherdepth,
   start = state->poslist[base].spaceSeqpos + pl->start;
   for (spptr = start; spptr < start + pl->length; spptr++)
   {
-    if (state->processmaxpairs(state->processmaxpairsinfo,
+    if (state->processmaxpairs(state->processmaxpairsinfo,state->encseq,
                                fatherdepth,leafnumber,*spptr,err) != 0)
     {
       return -1;
@@ -152,7 +152,7 @@ static int cartproduct2(Dfsstate *state,
   {
     for (spptr2 = start2; spptr2 < start2 + pl2->length; spptr2++)
     {
-      if (state->processmaxpairs(state->processmaxpairsinfo,
+      if (state->processmaxpairs(state->processmaxpairsinfo,state->encseq,
                                  fatherdepth,*spptr1,*spptr2,err) != 0)
       {
         return -1;
@@ -246,7 +246,7 @@ static int processleafedge(bool firstsucc,
             father->uniquecharposstart;
     for (spptr = start; spptr < start + father->uniquecharposlength; spptr++)
     {
-      if (state->processmaxpairs(state->processmaxpairsinfo,
+      if (state->processmaxpairs(state->processmaxpairsinfo,state->encseq,
                                  fatherdepth,leafnumber,*spptr,err) != 0)
       {
         return -2;
@@ -334,7 +334,7 @@ static int processbranchedge(bool firstsucc,
       }
       for (spptr = start; spptr < start + son->uniquecharposlength; spptr++)
       {
-        if (state->processmaxpairs(state->processmaxpairsinfo,
+        if (state->processmaxpairs(state->processmaxpairsinfo,state->encseq,
                                    fatherdepth,*fptr,*spptr,err) != 0)
         {
           return -4;

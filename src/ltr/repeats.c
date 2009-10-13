@@ -55,6 +55,7 @@ void showrepeats (RepeatInfo *repeatinfo,unsigned long seedminlength)
 }
 
 int simpleexactselfmatchstore (void *info,
+                               GT_UNUSED const Encodedsequence *encseq,
                                Seqpos len,
                                Seqpos pos1,
                                Seqpos pos2,
@@ -119,7 +120,8 @@ int simpleexactselfmatchstore (void *info,
 }
 
 int subsimpleexactselfmatchstore(void *info,
-                                 unsigned long len,
+                                 GT_UNUSED const Encodedsequence *encseq,
+                                 Seqpos len,
                                  Seqpos dbstart,
                                  GT_UNUSED Readmode readmode,
                                  GT_UNUSED uint64_t queryunitnum,
@@ -134,7 +136,6 @@ int subsimpleexactselfmatchstore(void *info,
   nextfreerepeatptr->pos1 = sri->offset1 + dbstart;
   nextfreerepeatptr->offset = sri->offset2 + (Seqpos)querystart -
                               (sri->offset1 + dbstart);
-  nextfreerepeatptr->len = (Seqpos) len;
-
+  nextfreerepeatptr->len = len;
   return 0;
 }

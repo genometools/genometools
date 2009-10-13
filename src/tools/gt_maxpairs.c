@@ -27,10 +27,9 @@
 #include "match/esa-mmsearch.h"
 #include "match/format64.h"
 #include "match/verbose-def.h"
-
 #include "match/esa-maxpairs.h"
-#include "tools/gt_maxpairs.h"
 #include "match/test-maxpairs.pr"
+#include "tools/gt_maxpairs.h"
 
 typedef struct
 {
@@ -42,44 +41,61 @@ typedef struct
   GtOption *refforwardoption;
 } Maxpairsoptions;
 
-static int simpleexactselfmatchoutput(GT_UNUSED void *info,
+static int simpleexactmatchoutput(GT_UNUSED void *info,
+                                  const Encodedsequence *encseq,
+                                  Seqpos len,
+                                  Seqpos absdbstart,
+                                  Readmode readmode,
+                                  uint64_t queryunitnum,
+                                  unsigned long querystart,
+                                  GT_UNUSED GtError *err)
+{
+  const char *outflag = "FRCP";
+  Seqinfo seqinfo;
+  unsigned long dbseqnum;
+
+  gt_assert(encseq != NULL);
+  dbseqnum = getencseqfrompos2seqnum(encseq,absdbstart);
+  getencseqSeqinfo(&seqinfo,encseq,dbseqnum);
+  gt_assert((int) readmode < 4);
+  printf(FormatSeqpos " %lu " FormatSeqpos " %c " FormatSeqpos
+         " " Formatuint64_t " %lu\n",
+         PRINTSeqposcast(len),
+         dbseqnum,
+         PRINTSeqposcast(absdbstart - seqinfo.seqstartpos),
+         outflag[readmode],
+         PRINTSeqposcast(len),
+         PRINTuint64_tcast(queryunitnum),
+         querystart);
+  return 0;
+}
+
+static int simpleexactselfmatchoutput(void *info,
+                                      const Encodedsequence *encseq,
                                       Seqpos len,
                                       Seqpos pos1,
                                       Seqpos pos2,
                                       GT_UNUSED GtError *err)
 {
+  Seqinfo seqinfo;
+  unsigned long queryseqnum;
+
   if (pos1 > pos2)
   {
     Seqpos tmp = pos1;
     pos1 = pos2;
     pos2 = tmp;
   }
-  printf(FormatSeqpos " " FormatSeqpos " F " FormatSeqpos " " FormatSeqpos "\n",
-            PRINTSeqposcast(len),
-            PRINTSeqposcast(pos1),
-            PRINTSeqposcast(len),
-            PRINTSeqposcast(pos2));
-  return 0;
-}
-
-static int simpleexactquerymatchoutput(GT_UNUSED void *info,
-                                       unsigned long len,
-                                       Seqpos dbstart,
-                                       Readmode readmode,
-                                       uint64_t unitnum,
-                                       unsigned long querystart,
-                                       GT_UNUSED GtError *err)
-{
-  const char *outflag = "FRCP";
-
-  gt_assert((int) readmode < 4);
-  printf("%lu " FormatSeqpos " %c " Formatuint64_t " %lu\n",
-           len,
-           PRINTSeqposcast(dbstart),
-           outflag[readmode],
-           PRINTuint64_tcast(unitnum),
-           querystart);
-  return 0;
+  queryseqnum = getencseqfrompos2seqnum(encseq,pos2);
+  getencseqSeqinfo(&seqinfo,encseq,queryseqnum);
+  return simpleexactmatchoutput(info,
+                                encseq,
+                                len,
+                                pos1,
+                                Forwardmode,
+                                (uint64_t) queryseqnum,
+                                (unsigned long) (pos2 - seqinfo.seqstartpos),
+                                err);
 }
 
 static int callenummaxpairs(const GtStr *indexname,
@@ -97,7 +113,8 @@ static int callenummaxpairs(const GtStr *indexname,
   ssar = newSequentialsuffixarrayreaderfromfile(indexname,
                                                 SARR_LCPTAB |
                                                 SARR_SUFTAB |
-                                                SARR_ESQTAB,
+                                                SARR_ESQTAB |
+                                                SARR_SSPTAB,
                                                 scanfile
                                                   ? SEQ_scan : SEQ_mappedboth,
                                                 err);
@@ -266,7 +283,7 @@ static int gt_repfind_runner(GT_UNUSED int argc,
           if (callenumselfmatches(arguments->indexname,
                                   Reversemode,
                                   arguments->userdefinedleastlength,
-                                  simpleexactquerymatchoutput,
+                                  simpleexactmatchoutput,
                                   NULL,
                                   verboseinfo,
                                   err) != 0)
@@ -292,7 +309,7 @@ static int gt_repfind_runner(GT_UNUSED int argc,
                                arguments->queryfiles,
                                false,
                                arguments->userdefinedleastlength,
-                               simpleexactquerymatchoutput,
+                               simpleexactmatchoutput,
                                NULL,
                                verboseinfo,
                                err) != 0)

@@ -246,14 +246,15 @@ static Seqpos samplesubstring(GtUchar *seqspace,
 
 typedef struct
 {
-  unsigned long len, querystart;
+  unsigned long querystart;
   uint64_t queryseqnum;
-  Seqpos dbstart;
+  Seqpos len, dbstart;
   Readmode readmode;
 } Substringmatch;
 
 static int storemaxmatchquery(void *info,
-                              unsigned long len,
+                              GT_UNUSED const Encodedsequence *encseq,
+                              Seqpos len,
                               Seqpos dbstart,
                               Readmode readmode,
                               uint64_t queryseqnum,
@@ -282,6 +283,7 @@ typedef struct
 } Maxmatchselfinfo;
 
 static int storemaxmatchself(void *info,
+                             GT_UNUSED const Encodedsequence *encseq,
                              Seqpos len,
                              Seqpos pos1,
                              Seqpos pos2,
@@ -305,7 +307,7 @@ static int storemaxmatchself(void *info,
     Substringmatch subm;
     unsigned long pos;
 
-    subm.len = (unsigned long) len;
+    subm.len = len;
     subm.dbstart = dbstart;
     pos = (unsigned long) (querystart - (maxmatchselfinfo->dblen + 1));
     if (maxmatchselfinfo->markpos == 0)
@@ -383,8 +385,8 @@ static int showSubstringmatch(void *a, GT_UNUSED void *info,
 {
   Substringmatch *m = (Substringmatch *) a;
 
-  printf("%lu " FormatSeqpos " " Formatuint64_t " %lu\n",
-           m->len,
+  printf(FormatSeqpos " " FormatSeqpos " " Formatuint64_t " %lu\n",
+           PRINTSeqposcast(m->len),
            PRINTSeqposcast(m->dbstart),
            PRINTuint64_tcast(m->queryseqnum),
            m->querystart);

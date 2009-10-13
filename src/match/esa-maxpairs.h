@@ -24,7 +24,8 @@
 #include "esa-seqread.h"
 #include "verbose-def.h"
 
-typedef int (*Processmaxpairs)(void *,Seqpos,Seqpos,Seqpos,GtError *);
+typedef int (*Processmaxpairs)(void *,const Encodedsequence *,
+                               Seqpos,Seqpos,Seqpos,GtError *);
 
 int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
                       const Encodedsequence *encseq,

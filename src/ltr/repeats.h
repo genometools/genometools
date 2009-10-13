@@ -25,11 +25,16 @@
 void showrepeats (RepeatInfo *repeatinfo,
                   unsigned long seedminlength);
 
-int simpleexactselfmatchstore(void *info,Seqpos len,Seqpos pos1, Seqpos pos2,
+int simpleexactselfmatchstore(void *info,
+                              const Encodedsequence *encseq,
+                              Seqpos len,
+                              Seqpos pos1,
+                              Seqpos pos2,
                               GtError *err);
 
 int subsimpleexactselfmatchstore(void *info,
-                                 unsigned long len,
+                                 const Encodedsequence *encseq,
+                                 Seqpos len,
                                  Seqpos dbstart,
                                  Readmode readmode,
                                  GT_UNUSED uint64_t queryunitnum,

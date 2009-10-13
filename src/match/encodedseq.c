@@ -2346,6 +2346,7 @@ static unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
 unsigned long getencseqfrompos2seqnum(const Encodedsequence *encseq,
                                       Seqpos position)
 {
+  gt_assert(encseq->numofdbsequences == 1UL || encseq->ssptab != NULL);
   return getrecordnumSeqpos(encseq->ssptab,
                             encseq->numofdbsequences,
                             encseq->totallength,

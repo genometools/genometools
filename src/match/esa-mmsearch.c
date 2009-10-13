@@ -59,9 +59,11 @@ static GtUchar accessquery(int line,const Queryrep *queryrep,
   gt_assert(pos < queryrep->length);
   if (queryrep->sequence != NULL)
   {
+    gt_assert(queryrep->readmode == Forwardmode);
     return queryrep->sequence[abspos];
   } else
   {
+    gt_assert(queryrep->readmode != Forwardmode);
     gt_assert(queryrep->encseq != NULL);
     return getencodedchar(queryrep->encseq,(Seqpos) abspos,queryrep->readmode);
   }
@@ -240,6 +242,7 @@ MMsearchiterator *newmmsearchiteratorcomplete_plain(
 
   queryrep.sequence = pattern;
   queryrep.encseq = NULL;
+  queryrep.readmode = Forwardmode;
   queryrep.startpos = 0;
   queryrep.length = patternlength;
   querysubstring.queryrep = &queryrep;
@@ -395,12 +398,14 @@ static int runquerysubstringmatch(const Encodedsequence *dbencseq,
                              &querysubstring,
                              minmatchlength);
         if (processquerymatch(processquerymatchinfo,
-                            extend + (unsigned long) minmatchlength,
-                            dbstart,
-                            readmode,
-                            localqueryunitnum,
-                            localqueryoffset,
-                            err) != 0)
+                              dbencseq,
+                              (Seqpos) (extend +
+                                        (unsigned long) minmatchlength),
+                              dbstart,
+                              queryrep->readmode,
+                              localqueryunitnum,
+                              localqueryoffset,
+                              err) != 0)
         {
           return -1;
         }
@@ -434,7 +439,7 @@ int callenumquerymatches(const GtStr *indexname,
   bool haserr = false;
 
   if (mapsuffixarray(&suffixarray,
-                     SARR_ESQTAB | SARR_SUFTAB,
+                     SARR_ESQTAB | SARR_SUFTAB | SARR_SSPTAB,
                      indexname,
                      verboseinfo,
                      err) != 0)
@@ -492,6 +497,7 @@ int callenumquerymatches(const GtStr *indexname,
 
           queryrep.sequence = query;
           queryrep.encseq = NULL;
+          queryrep.readmode = Forwardmode;
           queryrep.startpos = 0;
           queryrep.length = querylen;
           if (runquerysubstringmatch(suffixarray.encseq,
@@ -615,6 +621,7 @@ static int constructsarrandrunmmsearch(
   {
     queryrep.sequence = query;
     queryrep.encseq = NULL;
+    queryrep.readmode = Forwardmode;
     queryrep.startpos = 0;
     queryrep.length = querylen;
     while (true)

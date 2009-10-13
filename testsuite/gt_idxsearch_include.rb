@@ -86,10 +86,10 @@ end
 def checkrepfind(reffile)
   reffilepath=addfilepath(reffile)
   run_test "#{$bin}gt suffixerator -algbds 3 40 120 -db " +
-           "#{reffilepath} -indexname sfxidx -dna -suf -tis -lcp -pl"
+           "#{reffilepath} -indexname sfxidx -dna -suf -tis -lcp -ssp -pl"
   resultfile="#{$gttestdata}repfind-result/#{reffile}.result"
   run_test "#{$bin}gt repfind -l 14 -ii sfxidx"
-  run "cmp -s #{resultfile} #{$last_stdout}"
+  run "#{$scriptsdir}repfind-cmp.rb #{$last_stdout} #{resultfile}"
 end
 
 def checkrepfindwithquery(reffile,queryfile)
@@ -97,7 +97,7 @@ def checkrepfindwithquery(reffile,queryfile)
   queryfilepath=addfilepath(queryfile)
   idxname=reffile + "-idx"
   run_test "#{$bin}gt suffixerator -algbds 3 40 120 -db " +
-           "#{reffilepath} -indexname #{idxname} -dna -suf -tis -lcp -pl"
+           "#{reffilepath} -indexname #{idxname} -dna -suf -tis -lcp -ssp -pl"
   run_test "#{$bin}gt repfind -l 15 -ii #{idxname} -q #{queryfilepath}"
   run "sort #{$last_stdout}"
   #run "/Users/kurtz/bin-ops/i686-apple-darwin/mkvtree.x -indexname mkv-idx " +
@@ -105,20 +105,20 @@ def checkrepfindwithquery(reffile,queryfile)
   #run "/Users/kurtz/bin-ops/i686-apple-darwin/vmatch-mini.x 15 mkv-idx " +
   #    "#{queryfilepath}"
   #run "sed -e '/^#/d' #{$last_stdout} | sort"
-  run "cmp -s #{$gttestdata}/repfind-result/#{reffile}-#{queryfile}.result #{$last_stdout}"
+  run "#{$scriptsdir}repfind-cmp.rb #{$last_stdout} #{$gttestdata}/repfind-result/#{reffile}-#{queryfile}.result"
 end
 
 Name "gt repfind small"
 Keywords "gt_repfind"
 Test do
   run_test "#{$bin}gt suffixerator -db #{$testdata}Atinsert.fna " +
-           "-indexname sfx -dna -tis -suf -lcp -pl"
+           "-indexname sfx -dna -tis -suf -lcp -ssp -pl"
   run_test "#{$bin}gt repfind -l 8 -ii sfx"
   run "grep -v '^#' #{$last_stdout}"
-  run "diff #{$last_stdout} #{$testdata}repfind-8-Atinsert.txt"
+  run "diff -w #{$last_stdout} #{$testdata}repfind-8-Atinsert.txt"
   run_test "#{$bin}gt repfind -scan -l 8 -ii sfx"
   run "grep -v '^#' #{$last_stdout}"
-  run "diff #{$last_stdout} #{$testdata}repfind-8-Atinsert.txt"
+  run "diff -w #{$last_stdout} #{$testdata}repfind-8-Atinsert.txt"
   run_test "#{$bin}gt repfind -samples 40 -l 6 -ii sfx",:maxtime => 600
 end
 
