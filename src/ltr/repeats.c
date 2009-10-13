@@ -125,7 +125,8 @@ int subsimpleexactselfmatchstore(void *info,
                                  Seqpos dbstart,
                                  GT_UNUSED Readmode readmode,
                                  GT_UNUSED uint64_t queryunitnum,
-                                 unsigned long querystart,
+                                 Seqpos querystart,
+                                 GT_UNUSED Seqpos querytotallength,
                                  GT_UNUSED GtError *err)
 {
   Repeat *nextfreerepeatptr;

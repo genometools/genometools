@@ -175,58 +175,6 @@ static int sarrselfsubstringmatch(const GtUchar *dbseq,
   return haserr ? -1 : 0;
 }
 
-static unsigned long getrecordnumulong(const unsigned long *recordseps,
-                                       unsigned long numofrecords,
-                                       unsigned long totalwidth,
-                                       unsigned long position,
-                                       GtError *err)
-{
-  unsigned long left, mid, right, len;
-
-  gt_assert(numofrecords > 0);
-  if (numofrecords == 1UL || position < recordseps[0])
-  {
-    return 0;
-  }
-  if (position > recordseps[numofrecords-2])
-  {
-    if (position < totalwidth)
-    {
-      return numofrecords - 1;
-    }
-    gt_error_set(err,"getrecordnumulong: cannot find position %lu",position);
-    return numofrecords; /* failure */
-  }
-  left = 0;
-  right = numofrecords - 2;
-  while (left<=right)
-  {
-    len = (unsigned long) (right-left);
-    mid = left + GT_DIV2(len);
-#ifdef SKDEBUG
-    printf("left=%lu,right = %lu\n",left,right);
-    printf("mid=%lu\n",mid);
-#endif
-    if (recordseps[mid] < position)
-    {
-      if (position < recordseps[mid+1])
-      {
-        return mid + 1;
-      }
-      left = mid + 1;
-    } else
-    {
-      if (recordseps[mid-1] < position)
-      {
-        return mid;
-      }
-      right = mid-1;
-    }
-  }
-  gt_error_set(err,"getrecordnumulong: cannot find position %lu",position);
-  return numofrecords; /* failure */
-}
-
 static Seqpos samplesubstring(GtUchar *seqspace,
                               const Encodedsequence *encseq,
                               Seqpos substringlength)
@@ -246,9 +194,8 @@ static Seqpos samplesubstring(GtUchar *seqspace,
 
 typedef struct
 {
-  unsigned long querystart;
   uint64_t queryseqnum;
-  Seqpos len, dbstart;
+  Seqpos len, dbstart, querystart;
   Readmode readmode;
 } Substringmatch;
 
@@ -258,7 +205,8 @@ static int storemaxmatchquery(void *info,
                               Seqpos dbstart,
                               Readmode readmode,
                               uint64_t queryseqnum,
-                              unsigned long querystart,
+                              Seqpos querystart,
+                              GT_UNUSED Seqpos querytotallength,
                               GT_UNUSED GtError *err)
 {
   GtArray *tab = (GtArray *) info;
@@ -276,10 +224,8 @@ static int storemaxmatchquery(void *info,
 typedef struct
 {
   GtArray *results;
-  Seqpos dblen;
-  unsigned long *markpos,
-                numofquerysequences,
-                querylen;
+  Seqpos dblen, *markpos, querylen;
+  unsigned long numofquerysequences;
 } Maxmatchselfinfo;
 
 static int storemaxmatchself(void *info,
@@ -287,7 +233,7 @@ static int storemaxmatchself(void *info,
                              Seqpos len,
                              Seqpos pos1,
                              Seqpos pos2,
-                             GtError *err)
+                             GT_UNUSED GtError *err)
 {
   Maxmatchselfinfo *maxmatchselfinfo = (Maxmatchselfinfo *) info;
   Seqpos dbstart, querystart;
@@ -305,23 +251,22 @@ static int storemaxmatchself(void *info,
       maxmatchselfinfo->dblen < querystart)
   {
     Substringmatch subm;
-    unsigned long pos;
+    Seqpos pos;
 
     subm.len = len;
     subm.dbstart = dbstart;
-    pos = (unsigned long) (querystart - (maxmatchselfinfo->dblen + 1));
-    if (maxmatchselfinfo->markpos == 0)
+    pos = querystart - (maxmatchselfinfo->dblen + 1);
+    if (maxmatchselfinfo->markpos == NULL)
     {
       subm.queryseqnum = 0;
       subm.querystart = pos;
     } else
     {
       unsigned long queryseqnum
-        = getrecordnumulong(maxmatchselfinfo->markpos,
-                            maxmatchselfinfo->numofquerysequences,
-                            maxmatchselfinfo->querylen,
-                            pos,
-                            err);
+        = getrecordnumSeqpos(maxmatchselfinfo->markpos,
+                             maxmatchselfinfo->numofquerysequences,
+                             maxmatchselfinfo->querylen,
+                             pos);
       if (queryseqnum == maxmatchselfinfo->numofquerysequences)
       {
         return -1;
@@ -385,24 +330,25 @@ static int showSubstringmatch(void *a, GT_UNUSED void *info,
 {
   Substringmatch *m = (Substringmatch *) a;
 
-  printf(FormatSeqpos " " FormatSeqpos " " Formatuint64_t " %lu\n",
+  printf(FormatSeqpos " " FormatSeqpos " " Formatuint64_t " " FormatSeqpos "\n",
            PRINTSeqposcast(m->len),
            PRINTSeqposcast(m->dbstart),
            PRINTuint64_tcast(m->queryseqnum),
-           m->querystart);
+           PRINTSeqposcast(m->querystart));
   return 0;
 }
 
-static unsigned long *sequence2markpositions(unsigned long *numofsequences,
-                                             const GtUchar *seq,
-                                             unsigned long seqlen)
+static Seqpos *sequence2markpositions(unsigned long *numofsequences,
+                                      const GtUchar *seq,
+                                      Seqpos seqlen)
 {
-  unsigned long *spacemarkpos, i, allocatedmarkpos, nextfreemarkpos;
+  Seqpos *spacemarkpos, idx;
+  unsigned long allocatedmarkpos, nextfreemarkpos;
 
   *numofsequences = 1UL;
-  for (i=0; i<seqlen; i++)
+  for (idx=0; idx<seqlen; idx++)
   {
-    if (seq[i] == (GtUchar) SEPARATOR)
+    if (seq[idx] == (GtUchar) SEPARATOR)
     {
       (*numofsequences)++;
     }
@@ -412,12 +358,12 @@ static unsigned long *sequence2markpositions(unsigned long *numofsequences,
     return NULL;
   }
   allocatedmarkpos = (*numofsequences)-1;
-  ALLOCASSIGNSPACE(spacemarkpos,NULL,unsigned long,allocatedmarkpos);
-  for (i=0, nextfreemarkpos = 0; i<seqlen; i++)
+  ALLOCASSIGNSPACE(spacemarkpos,NULL,Seqpos,allocatedmarkpos);
+  for (idx=0, nextfreemarkpos = 0; idx<seqlen; idx++)
   {
-    if (seq[i] == (GtUchar) SEPARATOR)
+    if (seq[idx] == (GtUchar) SEPARATOR)
     {
-      spacemarkpos[nextfreemarkpos++] = i;
+      spacemarkpos[nextfreemarkpos++] = idx;
     }
   }
   return spacemarkpos;
@@ -491,10 +437,10 @@ int testmaxpairs(const GtStr *indexname,
            PRINTSeqposcast(dblen),PRINTSeqposcast(querylen),minlength);
     maxmatchselfinfo.results = gt_array_new(sizeof (Substringmatch));
     maxmatchselfinfo.dblen = dblen;
-    maxmatchselfinfo.querylen = (unsigned long) querylen;
+    maxmatchselfinfo.querylen = querylen;
     maxmatchselfinfo.markpos
       = sequence2markpositions(&maxmatchselfinfo.numofquerysequences,
-                               query,(unsigned long) querylen);
+                               query,querylen);
     if (sarrselfsubstringmatch(dbseq,
                                dblen,
                                query,

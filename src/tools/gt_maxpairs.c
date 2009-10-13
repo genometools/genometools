@@ -47,7 +47,8 @@ static int simpleexactmatchoutput(GT_UNUSED void *info,
                                   Seqpos absdbstart,
                                   Readmode readmode,
                                   uint64_t queryunitnum,
-                                  unsigned long querystart,
+                                  Seqpos querystart,
+                                  Seqpos querytotallength,
                                   GT_UNUSED GtError *err)
 {
   const char *outflag = "FRCP";
@@ -58,15 +59,24 @@ static int simpleexactmatchoutput(GT_UNUSED void *info,
   dbseqnum = getencseqfrompos2seqnum(encseq,absdbstart);
   getencseqSeqinfo(&seqinfo,encseq,dbseqnum);
   gt_assert((int) readmode < 4);
+  if (readmode == Reversemode)
+  {
+    gt_assert(querystart + len <= querytotallength);
+    /*
+    printf("totallength = %lu, start=%lu\n",(unsigned long) querytotallength,
+                                           (unsigned long) querystart);
+    */
+    querystart = querytotallength - querystart - len;
+  }
   printf(FormatSeqpos " %lu " FormatSeqpos " %c " FormatSeqpos
-         " " Formatuint64_t " %lu\n",
+         " " Formatuint64_t " " FormatSeqpos "\n",
          PRINTSeqposcast(len),
          dbseqnum,
          PRINTSeqposcast(absdbstart - seqinfo.seqstartpos),
          outflag[readmode],
          PRINTSeqposcast(len),
          PRINTuint64_tcast(queryunitnum),
-         querystart);
+         PRINTSeqposcast(querystart));
   return 0;
 }
 
@@ -88,13 +98,15 @@ static int simpleexactselfmatchoutput(void *info,
   }
   queryseqnum = getencseqfrompos2seqnum(encseq,pos2);
   getencseqSeqinfo(&seqinfo,encseq,queryseqnum);
+  gt_assert(pos2 >= seqinfo.seqstartpos);
   return simpleexactmatchoutput(info,
                                 encseq,
                                 len,
                                 pos1,
                                 Forwardmode,
                                 (uint64_t) queryseqnum,
-                                (unsigned long) (pos2 - seqinfo.seqstartpos),
+                                pos2 - seqinfo.seqstartpos,
+                                seqinfo.seqlength,
                                 err);
 }
 

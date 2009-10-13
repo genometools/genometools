@@ -20,7 +20,21 @@ checkerror()
 cleanhashlines()
 {
   TMPFILE=`mktemp TMP.XXXXXX` || exit 1
-  sort $1 | sed -e '/^#/d' > ${TMPFILE}
+  sed -e '/^#/d' -e 's/[ ][ ]*/ /g' $1 > ${TMPFILE}
+  mv ${TMPFILE} $1
+}
+
+sortlines()
+{
+  TMPFILE=`mktemp TMP.XXXXXX` || exit 1
+  sort -n $1 > ${TMPFILE}
+  mv ${TMPFILE} $1
+}
+
+extractlines()
+{
+  TMPFILE=`mktemp TMP.XXXXXX` || exit 1
+  gawk '/.*/ {print $1 " " $3 " " $4 " " $5 " " $7}' $1 > ${TMPFILE}
   mv ${TMPFILE} $1
 }
 
@@ -36,6 +50,9 @@ filename=$2
 checkerror "${GTDIR}/bin/gt suffixerator -db ${filename} -indexname sfxidx -dna -suf -tis -lcp -pl"
 checkerror "valgrind.sh ${GTDIR}/bin/gt repfind -l ${minlength} -r -ii sfxidx" > result.gt
 cleanhashlines result.gt
+extractlines result.gt
+sortlines result.gt
 checkerror "repfind.x -l ${minlength} -r -noevalue -nodistance $filename" > result.rep
 cleanhashlines result.rep
-checkerror "diff result.rep result.gt"
+sortlines result.rep
+checkerror "diff -w result.rep result.gt"

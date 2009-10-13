@@ -37,23 +37,26 @@ typedef struct
   const GtUchar *sequence;
   const Encodedsequence *encseq;
   Readmode readmode;
-  unsigned long startpos, length;
+  Seqpos startpos, length;
 } Queryrep;
 
 typedef struct
 {
   const Queryrep *queryrep;
-  unsigned long offset; /* position relative to startpos */
+  Seqpos offset; /* position relative to startpos */
 } Querysubstring;
 
 static GtUchar accessquery(int line,const Queryrep *queryrep,
-                           unsigned long pos)
+                           Seqpos pos)
 {
-  unsigned long abspos = queryrep->startpos + pos;
+  Seqpos abspos = queryrep->startpos + pos;
+
   if (pos >= queryrep->length)
   {
-    fprintf(stderr,"line %d: pos = %lu >= %lu = queryrep->length\n",
-                    line,pos,queryrep->length);
+    fprintf(stderr,"line %d: pos = " FormatSeqpos " >= "
+                   FormatSeqpos "=queryrep->length\n",
+                   line,PRINTSeqposcast(pos),
+                   PRINTSeqposcast(queryrep->length));
     exit(EXIT_FAILURE);
   }
   gt_assert(pos < queryrep->length);
@@ -65,7 +68,7 @@ static GtUchar accessquery(int line,const Queryrep *queryrep,
   {
     gt_assert(queryrep->readmode != Forwardmode);
     gt_assert(queryrep->encseq != NULL);
-    return getencodedchar(queryrep->encseq,(Seqpos) abspos,queryrep->readmode);
+    return getencodedchar(queryrep->encseq,abspos,queryrep->readmode);
   }
 }
 
@@ -244,7 +247,7 @@ MMsearchiterator *newmmsearchiteratorcomplete_plain(
   queryrep.encseq = NULL;
   queryrep.readmode = Forwardmode;
   queryrep.startpos = 0;
-  queryrep.length = patternlength;
+  queryrep.length = (Seqpos) patternlength;
   querysubstring.queryrep = &queryrep;
   querysubstring.offset = 0;
   return newmmsearchiterator_generic(dbencseq,
@@ -319,17 +322,16 @@ static bool isleftmaximal(const Encodedsequence *dbencseq,
   return false;
 }
 
-static unsigned long extendright(const Encodedsequence *dbencseq,
-                                 Encodedsequencescanstate *esr,
-                                 Readmode readmode,
-                                 Seqpos totallength,
-                                 Seqpos dbend,
-                                 const Querysubstring *querysubstring,
-                                 unsigned int matchlength)
+static Seqpos extendright(const Encodedsequence *dbencseq,
+                          Encodedsequencescanstate *esr,
+                          Readmode readmode,
+                          Seqpos totallength,
+                          Seqpos dbend,
+                          const Querysubstring *querysubstring,
+                          unsigned long matchlength)
 {
   GtUchar dbchar;
-  Seqpos dbpos;
-  unsigned long querypos;
+  Seqpos dbpos, querypos;
 
   if (dbend < totallength)
   {
@@ -347,7 +349,7 @@ static unsigned long extendright(const Encodedsequence *dbencseq,
       break;
     }
   }
-  return (unsigned long) (dbpos - dbend);
+  return dbpos - dbend;
 }
 
 static int runquerysubstringmatch(const Encodedsequence *dbencseq,
@@ -356,16 +358,15 @@ static int runquerysubstringmatch(const Encodedsequence *dbencseq,
                                   Seqpos numberofsuffixes,
                                   uint64_t queryunitnum,
                                   const Queryrep *queryrep,
-                                  unsigned int minmatchlength,
+                                  unsigned long minmatchlength,
                                   Processquerymatch processquerymatch,
                                   void *processquerymatchinfo,
                                   GtError *err)
 {
   MMsearchiterator *mmsi;
-  Seqpos dbstart, totallength;
-  unsigned long extend;
+  Seqpos dbstart, totallength, extend;
   uint64_t localqueryunitnum = queryunitnum;
-  unsigned long localqueryoffset = 0;
+  Seqpos localqueryoffset = 0;
   Querysubstring querysubstring;
 
   gt_assert(numberofsuffixes > 0);
@@ -382,7 +383,7 @@ static int runquerysubstringmatch(const Encodedsequence *dbencseq,
                                        0, /* offset */
                                        readmode,
                                        &querysubstring,
-                                       (unsigned long) minmatchlength);
+                                       minmatchlength);
     while (nextmmsearchiterator(&dbstart,mmsi))
     {
       if (isleftmaximal(dbencseq,
@@ -399,12 +400,12 @@ static int runquerysubstringmatch(const Encodedsequence *dbencseq,
                              minmatchlength);
         if (processquerymatch(processquerymatchinfo,
                               dbencseq,
-                              (Seqpos) (extend +
-                                        (unsigned long) minmatchlength),
+                              extend + minmatchlength,
                               dbstart,
                               queryrep->readmode,
                               localqueryunitnum,
                               localqueryoffset,
+                              queryrep->length,
                               err) != 0)
         {
           return -1;
@@ -499,14 +500,14 @@ int callenumquerymatches(const GtStr *indexname,
           queryrep.encseq = NULL;
           queryrep.readmode = Forwardmode;
           queryrep.startpos = 0;
-          queryrep.length = querylen;
+          queryrep.length = (Seqpos) querylen;
           if (runquerysubstringmatch(suffixarray.encseq,
                                      suffixarray.suftab,
                                      suffixarray.readmode,
                                      totallength+1,
                                      queryunitnum,
                                      &queryrep,
-                                     userdefinedleastlength,
+                                     (unsigned long) userdefinedleastlength,
                                      processquerymatch,
                                      processquerymatchinfo,
                                      err) != 0)
@@ -563,15 +564,15 @@ int callenumselfmatches(const GtStr *indexname,
       getencseqSeqinfo(&seqinfo,suffixarray.encseq,seqnum);
       if (seqinfo.seqlength >= (Seqpos) userdefinedleastlength)
       {
-        queryrep.startpos = (unsigned long) seqinfo.seqstartpos;
-        queryrep.length = (unsigned long) seqinfo.seqlength;
+        queryrep.startpos = seqinfo.seqstartpos;
+        queryrep.length = seqinfo.seqlength;
         if (runquerysubstringmatch(suffixarray.encseq,
                                    suffixarray.suftab,
                                    suffixarray.readmode,
                                    totallength+1,
                                    (uint64_t) seqnum,
                                    &queryrep,
-                                   userdefinedleastlength,
+                                   (unsigned long) userdefinedleastlength,
                                    processquerymatch,
                                    processquerymatchinfo,
                                    err) != 0)
@@ -623,7 +624,7 @@ static int constructsarrandrunmmsearch(
     queryrep.encseq = NULL;
     queryrep.readmode = Forwardmode;
     queryrep.startpos = 0;
-    queryrep.length = querylen;
+    queryrep.length = (Seqpos) querylen;
     while (true)
     {
       suftabptr = nextSfxiterator(&numofsuffixes,&specialsuffixes,sfi);
@@ -637,7 +638,7 @@ static int constructsarrandrunmmsearch(
                                 numofsuffixes,
                                 0,
                                 &queryrep,
-                                minlength,
+                                (unsigned long) minlength,
                                 processquerymatch,
                                 processquerymatchinfo,
                                 err) != 0)

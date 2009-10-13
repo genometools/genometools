@@ -323,6 +323,14 @@ int getsatforcevalue(const char *str,GtError *err);
 
 void checkmarkpos(const Encodedsequence *encseq);
 
+/* for a array of recordseparator, obtain the sequence
+ * number from the given position */
+
+unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
+                                 unsigned long numofrecords,
+                                 Seqpos totalwidth,
+                                 Seqpos position);
+
 /* for a given Encodedsequence mapped with withssptab=true, obtain the sequence
  * number from the given position */
 

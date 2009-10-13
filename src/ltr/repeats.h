@@ -38,7 +38,8 @@ int subsimpleexactselfmatchstore(void *info,
                                  Seqpos dbstart,
                                  Readmode readmode,
                                  GT_UNUSED uint64_t queryunitnum,
-                                 unsigned long querystart,
+                                 Seqpos querystart,
+                                 GT_UNUSED Seqpos querytotallength,
                                  GtError *err);
 
 #endif

@@ -2294,10 +2294,10 @@ static Seqpos *encseq2markpositions(const Encodedsequence *encseq)
   return asp.spaceSeqpos;
 }
 
-static unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
-                                        unsigned long numofrecords,
-                                        Seqpos totalwidth,
-                                        Seqpos position)
+unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
+                                 unsigned long numofrecords,
+                                 Seqpos totalwidth,
+                                 Seqpos position)
 {
   unsigned long left, mid, right, len;
 

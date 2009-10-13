@@ -21,7 +21,8 @@
 #include "encseq-def.h"
 
 typedef int (*Processquerymatch)(void *,const Encodedsequence *,Seqpos,Seqpos,
-                                 Readmode,uint64_t,unsigned long,GtError *);
+                                 Readmode,uint64_t,Seqpos,
+                                 Seqpos,GtError *);
 
 typedef struct MMsearchiterator MMsearchiterator;
 
