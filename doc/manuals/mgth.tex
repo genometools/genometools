@@ -47,7 +47,7 @@ a manual}
 This document describes the \MetagenomeThreader, a software tool
 for the prediction of genes in sequences of metagenome projects.
 The \MetagenomeThreader is based on the algorithem from Krause et al \cite{krause}.
-For the prediction of EGTs (Environmental Gene Tags) the metagenome sequences are
+For the prediction of PCSs (Predicted Coding Sequences) the metagenome sequences are
 blasted against a nucleotide database and the resultig BLAST-hits are used to
 process a combined score for every position in a DNA-sequence. The combined score
 reflects the potential that a specific DNA-sequence position is a coding one.
@@ -102,7 +102,7 @@ If you prefer to install the \MetagenomeThreader including the cURL-module, you 
 the command \texttt{make curl="yes"} during the \GenomeTools installation process.
 A connection to the internet is required to use the curl module.
 With the curl-module, the MetagenomeThreader will run an online query for
-missing hit-sequences, otherwise they will be ignored during the processing of the EGT's.
+missing hit-sequences, otherwise they will be ignored during the processing of the PCS's.
 
 \subsection{The Options of the \MetagenomeThreader} \label{Overview}
 
@@ -165,7 +165,7 @@ frames resume as coding-regions in the optimal reading-frame
 \\
 \Showoption{g}& specify yes$|$no for the \GenomeTools test modus - output without the creating date
 \\
-\Showoption{x}& specify yes$|$no to extend EGTs to max length
+\Showoption{x}& specify yes$|$no to extend PCSs to max length
 \\
 \Showoption{version}& display version information and exit
 \\
@@ -327,7 +327,7 @@ is \Showoptionarg{no}.
 
 \Option{x}{\Showoptionarg{yes}$|$\Showoptionarg{no}}{
 Specify if the extended mode should be switched on.
-If \Showoption{x} is set to \Showoptionarg{yes} the processed EGTs will be extended to its max
+If \Showoption{x} is set to \Showoptionarg{yes} the processed PCSs will be extended to its max
 length in both directions.
 If this option is not selected by the user, the default value of $x$
 is $no$.
@@ -469,15 +469,15 @@ Content:
 \\
 \mbox{- A:} &Output of the metagenome sequence and the metagenome sequence definition
 \\
-\mbox{- B:} &for every EGT
+\mbox{- B:} &for every PCS
 \\
 &
 \begin{tabular}{p{0,1cm}p{14.9cm}}
-\mbox{-}& EGT DNA-sequence
+\mbox{-}& PCS DNA-sequence
 \\
-\mbox{-}& EGT amino acid sequence
+\mbox{-}& PCS amino acid sequence
 \\
-\mbox{-}& for the EGT processing used hit-definition
+\mbox{-}& for the PCS processing used hit-definition
 \end{tabular}
 \end{tabular}
 
@@ -502,7 +502,7 @@ Content:
 Content:
 \\
 - &percentage of hit-sequence length vs. length of all
-hit-sequences used for the EGT prediction
+hit-sequences used for the PCS prediction
 \\
 - &BLAST-hit definitions
 \end{tabular}
