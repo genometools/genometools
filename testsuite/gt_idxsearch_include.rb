@@ -88,6 +88,9 @@ def checkrepfind(reffile)
   run_test "#{$bin}gt suffixerator -algbds 3 40 120 -db " +
            "#{reffilepath} -indexname sfxidx -dna -suf -tis -lcp -ssp -pl"
   resultfile="#{$gttestdata}repfind-result/#{reffile}.result"
+  if reffile != 'Duplicate.fna'
+    run_test "#{$scriptsdir}repfvsrepf.sh 14 #{reffilepath}"
+  end
   run_test "#{$bin}gt repfind -l 14 -ii sfxidx"
   run "#{$scriptsdir}repfind-cmp.rb #{$last_stdout} #{resultfile}"
 end
