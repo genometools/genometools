@@ -137,7 +137,7 @@ typedef struct
   return NULL;
 }
 
-/*@unused@*/ static inline const Seqpos lcptable_get(
+/*@unused@*/ static inline Seqpos lcptable_get(
                        const Suffixarray *suffixarray,
                        Seqpos pos)
 {
