@@ -121,22 +121,17 @@ int simpleexactselfmatchstore (void *info,
 
 int subsimpleexactselfmatchstore(void *info,
                                  GT_UNUSED const Encodedsequence *encseq,
-                                 Seqpos len,
-                                 Seqpos dbstart,
-                                 GT_UNUSED Readmode readmode,
-                                 GT_UNUSED uint64_t queryunitnum,
-                                 Seqpos querystart,
-                                 GT_UNUSED Seqpos querytotallength,
+                                 const Querymatch *querymatch,
                                  GT_UNUSED GtError *err)
 {
   Repeat *nextfreerepeatptr;
   SubRepeatInfo *sri = (SubRepeatInfo *) info;
 
-  gt_assert(readmode == Forwardmode);
   GT_GETNEXTFREEINARRAY (nextfreerepeatptr, &sri->repeats, Repeat, 10);
-  nextfreerepeatptr->pos1 = sri->offset1 + dbstart;
-  nextfreerepeatptr->offset = sri->offset2 + (Seqpos)querystart -
-                              (sri->offset1 + dbstart);
-  nextfreerepeatptr->len = len;
+  nextfreerepeatptr->pos1 = sri->offset1 + querymatch_dbstart(querymatch);
+  nextfreerepeatptr->offset = sri->offset2 +
+                              querymatch_querystart(querymatch) -
+                              (sri->offset1 + querymatch_dbstart(querymatch));
+  nextfreerepeatptr->len = querymatch_len(querymatch);
   return 0;
 }

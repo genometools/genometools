@@ -19,10 +19,12 @@
 #define ESA_MMSEARCH_H
 #include "core/error.h"
 #include "encseq-def.h"
+#include "querymatch.h"
 
-typedef int (*Processquerymatch)(void *,const Encodedsequence *,Seqpos,Seqpos,
-                                 Readmode,uint64_t,Seqpos,
-                                 Seqpos,GtError *);
+typedef int (*Processquerymatch)(void *,
+                                 const Encodedsequence *,
+                                 const Querymatch *,
+                                 GtError *);
 
 typedef struct MMsearchiterator MMsearchiterator;
 

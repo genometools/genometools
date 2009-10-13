@@ -84,6 +84,7 @@ optionargmode.c
 pckbucket.c
 pos2seqnum.c
 pssm.c
+querymatch.c
 revcompl.c
 sfx-apfxlen.c
 sfx-bentsedg.c

@@ -19,6 +19,7 @@
 #define REPEATS_H
 
 #include "core/unused_api.h"
+#include "match/querymatch.h"
 #include "repeattypes.h"
 #include "ltrharvest-opt.h"
 
@@ -33,13 +34,8 @@ int simpleexactselfmatchstore(void *info,
                               GtError *err);
 
 int subsimpleexactselfmatchstore(void *info,
-                                 const Encodedsequence *encseq,
-                                 Seqpos len,
-                                 Seqpos dbstart,
-                                 Readmode readmode,
-                                 GT_UNUSED uint64_t queryunitnum,
-                                 Seqpos querystart,
-                                 GT_UNUSED Seqpos querytotallength,
-                                 GtError *err);
+                                 GT_UNUSED const Encodedsequence *encseq,
+                                 const Querymatch *querymatch,
+                                 GT_UNUSED GtError *err);
 
 #endif

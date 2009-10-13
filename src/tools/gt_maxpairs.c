@@ -29,6 +29,7 @@
 #include "match/verbose-def.h"
 #include "match/esa-maxpairs.h"
 #include "match/test-maxpairs.pr"
+#include "match/querymatch.h"
 #include "tools/gt_maxpairs.h"
 
 typedef struct
@@ -41,45 +42,6 @@ typedef struct
   GtOption *refforwardoption;
 } Maxpairsoptions;
 
-static int simpleexactmatchoutput(GT_UNUSED void *info,
-                                  const Encodedsequence *encseq,
-                                  Seqpos len,
-                                  Seqpos absdbstart,
-                                  Readmode readmode,
-                                  uint64_t queryunitnum,
-                                  Seqpos querystart,
-                                  Seqpos querytotallength,
-                                  GT_UNUSED GtError *err)
-{
-  const char *outflag = "FRCP";
-  Seqinfo seqinfo;
-  unsigned long dbseqnum;
-
-  gt_assert(encseq != NULL);
-  dbseqnum = getencseqfrompos2seqnum(encseq,absdbstart);
-  getencseqSeqinfo(&seqinfo,encseq,dbseqnum);
-  gt_assert((int) readmode < 4);
-  if (readmode == Reversemode)
-  {
-    gt_assert(querystart + len <= querytotallength);
-    /*
-    printf("totallength = %lu, start=%lu\n",(unsigned long) querytotallength,
-                                           (unsigned long) querystart);
-    */
-    querystart = querytotallength - querystart - len;
-  }
-  printf(FormatSeqpos " %lu " FormatSeqpos " %c " FormatSeqpos
-         " " Formatuint64_t " " FormatSeqpos "\n",
-         PRINTSeqposcast(len),
-         dbseqnum,
-         PRINTSeqposcast(absdbstart - seqinfo.seqstartpos),
-         outflag[readmode],
-         PRINTSeqposcast(len),
-         PRINTuint64_tcast(queryunitnum),
-         PRINTSeqposcast(querystart));
-  return 0;
-}
-
 static int simpleexactselfmatchoutput(void *info,
                                       const Encodedsequence *encseq,
                                       Seqpos len,
@@ -88,6 +50,7 @@ static int simpleexactselfmatchoutput(void *info,
                                       GT_UNUSED GtError *err)
 {
   Seqinfo seqinfo;
+  Querymatch *querymatch;
   unsigned long queryseqnum;
 
   if (pos1 > pos2)
@@ -99,15 +62,16 @@ static int simpleexactselfmatchoutput(void *info,
   queryseqnum = getencseqfrompos2seqnum(encseq,pos2);
   getencseqSeqinfo(&seqinfo,encseq,queryseqnum);
   gt_assert(pos2 >= seqinfo.seqstartpos);
-  return simpleexactmatchoutput(info,
-                                encseq,
-                                len,
-                                pos1,
-                                Forwardmode,
-                                (uint64_t) queryseqnum,
-                                pos2 - seqinfo.seqstartpos,
-                                seqinfo.seqlength,
-                                err);
+  querymatch = querymatch_new();
+  querymatch_fill(querymatch,
+                  len,
+                  pos1,
+                  Forwardmode,
+                  true,
+                  (uint64_t) queryseqnum,
+                  pos2 - seqinfo.seqstartpos,
+                  seqinfo.seqlength);
+  return querymatch_output(info, encseq, querymatch, err);
 }
 
 static int callenummaxpairs(const GtStr *indexname,
@@ -295,7 +259,7 @@ static int gt_repfind_runner(GT_UNUSED int argc,
           if (callenumselfmatches(arguments->indexname,
                                   Reversemode,
                                   arguments->userdefinedleastlength,
-                                  simpleexactmatchoutput,
+                                  querymatch_output,
                                   NULL,
                                   verboseinfo,
                                   err) != 0)
@@ -321,7 +285,7 @@ static int gt_repfind_runner(GT_UNUSED int argc,
                                arguments->queryfiles,
                                false,
                                arguments->userdefinedleastlength,
-                               simpleexactmatchoutput,
+                               querymatch_output,
                                NULL,
                                verboseinfo,
                                err) != 0)
