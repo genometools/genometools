@@ -121,7 +121,7 @@ int simpleexactselfmatchstore (void *info,
 int subsimpleexactselfmatchstore(void *info,
                                  unsigned long len,
                                  Seqpos dbstart,
-                                 Readmode readmode,
+                                 GT_UNUSED Readmode readmode,
                                  GT_UNUSED uint64_t queryunitnum,
                                  unsigned long querystart,
                                  GT_UNUSED GtError *err)
