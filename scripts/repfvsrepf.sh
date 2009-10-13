@@ -48,11 +48,11 @@ minlength=$1
 filename=$2
 
 checkerror "${GTDIR}/bin/gt suffixerator -db ${filename} -indexname sfxidx -dna -suf -tis -lcp -pl"
-checkerror "valgrind.sh ${GTDIR}/bin/gt repfind -l ${minlength} -r -ii sfxidx" > result.gt
+checkerror "${GTDIR}/bin/gt repfind -l ${minlength} -r -ii sfxidx" > result.gt
 cleanhashlines result.gt
 extractlines result.gt
 sortlines result.gt
-checkerror "repfind.x -l ${minlength} -r -noevalue -nodistance $filename" > result.rep
+checkerror "repfind.x -allmax -l ${minlength} -r -noevalue -nodistance $filename" > result.rep
 cleanhashlines result.rep
 sortlines result.rep
 checkerror "diff -w result.rep result.gt"

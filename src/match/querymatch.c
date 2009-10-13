@@ -17,6 +17,7 @@
 
 #include "core/ma_api.h"
 #include "core/unused_api.h"
+#include "core/symboldef.h"
 #include "readmode-def.h"
 #include "seqpos-def.h"
 #include "querymatch.h"
@@ -64,6 +65,49 @@ void querymatch_delete(Querymatch *querymatch)
   }
 }
 
+#ifdef VERIFY
+static void verifymatch(const Encodedsequence *encseq,
+                        Seqpos len,
+                        Seqpos pos1,
+                        uint64_t seqnum2,
+                        Seqpos pos2,
+                        Readmode readmode)
+{
+  if (readmode == Reversemode)
+  {
+    Seqinfo seqinfo;
+    Seqpos offset, totallength = getencseqtotallength(encseq);
+    GtUchar cc1, cc2;
+
+    getencseqSeqinfo(&seqinfo,encseq,(Seqpos) seqnum2);
+    pos2 += seqinfo.seqstartpos;
+    for (offset = 0; offset < len; offset++)
+    {
+      gt_assert(pos1 + len - 1 < totallength);
+      gt_assert(pos2 + len - 1 < totallength);
+      cc1 = getencodedchar(encseq,pos1+offset,Forwardmode);
+      cc2 = getencodedchar(encseq,pos2+len-1-offset,Forwardmode);
+      gt_assert(cc1 == cc2 && ISNOTSPECIAL(cc1));
+    }
+    if (pos1 + len < totallength)
+    {
+      cc1 = getencodedchar(encseq,pos1+len,Forwardmode);
+    } else
+    {
+      cc1 = SEPARATOR;
+    }
+    if (pos2 > 0)
+    {
+      cc2 = getencodedchar(encseq,pos2-1,Forwardmode);
+    } else
+    {
+      cc2 = SEPARATOR;
+    }
+    gt_assert(cc1 != cc2 || ISSPECIAL(cc1));
+  }
+}
+#endif
+
 int querymatch_output(GT_UNUSED void *info,
                       const Encodedsequence *encseq,
                       const Querymatch *querymatch,
@@ -72,7 +116,7 @@ int querymatch_output(GT_UNUSED void *info,
   const char *outflag = "FRCP";
   Seqinfo seqinfo;
   unsigned long dbseqnum;
-  Seqpos querystart;
+  Seqpos querystart, dbstart_relative;
 
   gt_assert(encseq != NULL);
   dbseqnum = getencseqfrompos2seqnum(encseq,querymatch->dbstart);
@@ -89,15 +133,30 @@ int querymatch_output(GT_UNUSED void *info,
   {
     querystart = querymatch->querystart;
   }
-  printf(FormatSeqpos " %lu " FormatSeqpos " %c " FormatSeqpos
-         " " Formatuint64_t " " FormatSeqpos "\n",
-         PRINTSeqposcast(querymatch->len),
-         dbseqnum,
-         PRINTSeqposcast(querymatch->dbstart - seqinfo.seqstartpos),
-         outflag[querymatch->readmode],
-         PRINTSeqposcast(querymatch->len),
-         PRINTuint64_tcast(querymatch->queryseqnum),
-         PRINTSeqposcast(querystart));
+  gt_assert(querymatch->dbstart >= seqinfo.seqstartpos);
+  dbstart_relative = querymatch->dbstart - seqinfo.seqstartpos;
+  if (!querymatch->selfmatch || 
+      (uint64_t) dbseqnum != querymatch->queryseqnum ||
+      dbstart_relative <= querystart)
+  {
+#ifdef VERIFY
+    verifymatch(encseq,
+                querymatch->len,
+                querymatch->dbstart,
+                querymatch->queryseqnum,
+                querystart,
+                querymatch->readmode);
+#endif
+    printf(FormatSeqpos " %lu " FormatSeqpos " %c " FormatSeqpos
+           " " Formatuint64_t " " FormatSeqpos "\n",
+           PRINTSeqposcast(querymatch->len),
+           dbseqnum,
+           PRINTSeqposcast(dbstart_relative),
+           outflag[querymatch->readmode],
+           PRINTSeqposcast(querymatch->len),
+           PRINTuint64_tcast(querymatch->queryseqnum),
+           PRINTSeqposcast(querystart));
+  }
   return 0;
 }
 
