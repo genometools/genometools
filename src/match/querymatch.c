@@ -135,7 +135,7 @@ int querymatch_output(GT_UNUSED void *info,
   }
   gt_assert(querymatch->dbstart >= seqinfo.seqstartpos);
   dbstart_relative = querymatch->dbstart - seqinfo.seqstartpos;
-  if (!querymatch->selfmatch || 
+  if (!querymatch->selfmatch ||
       (uint64_t) dbseqnum != querymatch->queryseqnum ||
       dbstart_relative <= querystart)
   {
