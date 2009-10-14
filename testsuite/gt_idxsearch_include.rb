@@ -9,11 +9,12 @@ allfiles = ["Atinsert.fna",
             "trna_glutamine.fna"]
 
 repfindtestfiles=["Duplicate.fna",
-                   "Wildcards.fna",
-                   "hs5hcmvcg.fna",
-                   "humhbb.fna",
-                   "mpomtcg.fna",
-                   "ychrIII.fna"]
+                  "Wildcards.fna",
+                  "hs5hcmvcg.fna",
+                  "humhbb.fna",
+                  "mpomtcg.fna",
+                  "at1MB",
+                  "ychrIII.fna"]
 
 def makegreedyfwdmatcall(queryfile,indexarg,ms)
   prog=""
@@ -76,10 +77,18 @@ def createandcheckgreedyfwdmat(reffile,queryfile)
 end
 
 def addfilepath(filename)
-  if filename == 'Duplicate.fna'
+  if filename == 'Duplicate.fna' or filename == 'at1MB'
     return "#{$testdata}/#{filename}"
   else
     return "#{$gttestdata}/DNA-mix/Grumbach.fna/#{filename}"
+  end
+end
+
+def determineminlength(reffile)
+  if reffile == 'at1MB'
+    return 22
+  else
+    return 14
   end
 end
 
@@ -87,10 +96,11 @@ def checkrepfind(reffile)
   reffilepath=addfilepath(reffile)
   run_test "#{$bin}gt suffixerator -algbds 3 40 120 -db " +
            "#{reffilepath} -indexname sfxidx -dna -suf -tis -lcp -ssp -pl"
-  run_test "#{$bin}gt repfind -l 14 -ii sfxidx"
+  minlength = determineminlength(reffile)
+  run_test "#{$bin}gt repfind -l #{minlength} -ii sfxidx"
   resultfile="#{$gttestdata}repfind-result/#{reffile}.result"
   run "cmp -s #{$last_stdout} #{resultfile}"
-  run_test "#{$bin}gt repfind -l 14 -r -ii sfxidx"
+  run_test "#{$bin}gt repfind -l #{minlength} -r -ii sfxidx"
   resultfile="#{$gttestdata}repfind-result/#{reffile}-r.result"
   run "cmp -s #{$last_stdout} #{resultfile}"
 end
@@ -102,13 +112,14 @@ def checkrepfindwithquery(reffile,queryfile)
   run_test "#{$bin}gt suffixerator -algbds 3 40 120 -db " +
            "#{reffilepath} -indexname #{idxname} -dna -suf -tis -lcp -ssp -pl"
   run_test "#{$bin}gt repfind -l 15 -ii #{idxname} -q #{queryfilepath}"
-  run "sort #{$last_stdout}"
+  # run "sort #{$last_stdout}"
   #run "/Users/kurtz/bin-ops/i686-apple-darwin/mkvtree.x -indexname mkv-idx " +
   #    "-allout -v -pl -dna -db #{reffilepath}"
   #run "/Users/kurtz/bin-ops/i686-apple-darwin/vmatch-mini.x 15 mkv-idx " +
   #    "#{queryfilepath}"
   #run "sed -e '/^#/d' #{$last_stdout} | sort"
-  run "#{$scriptsdir}repfind-cmp.rb #{$last_stdout} #{$gttestdata}/repfind-result/#{reffile}-#{queryfile}.result"
+  # run "#{$scriptsdir}repfind-cmp.rb #{$last_stdout} #{$gttestdata}/repfind-result/#{reffile}-#{queryfile}.result"
+  run "cmp -s #{$last_stdout} #{$gttestdata}/repfind-result/#{reffile}-#{queryfile}.result"
 end
 
 Name "gt repfind small"
