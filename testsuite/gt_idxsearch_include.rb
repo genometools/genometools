@@ -83,21 +83,16 @@ def addfilepath(filename)
   end
 end
 
-def repfindreverse(minlength,reffile)
-  run_test "#{$bin}gt repfind -l #{minlength} -r -ii sfxidx"
-  run "mv #{$last_stdout} #{$gttestdata}repfind-result/#{reffile}-r.result"
-end
-
 def checkrepfind(reffile)
   reffilepath=addfilepath(reffile)
   run_test "#{$bin}gt suffixerator -algbds 3 40 120 -db " +
            "#{reffilepath} -indexname sfxidx -dna -suf -tis -lcp -ssp -pl"
-  resultfile="#{$gttestdata}repfind-result/#{reffile}.result"
-  if reffile != 'Duplicate.fna'
-    repfindreverse(14,reffile)
-  end
   run_test "#{$bin}gt repfind -l 14 -ii sfxidx"
-  run "#{$scriptsdir}repfind-cmp.rb #{$last_stdout} #{resultfile}"
+  resultfile="#{$gttestdata}repfind-result/#{reffile}.result"
+  run "cmp -s #{$last_stdout} #{resultfile}"
+  run_test "#{$bin}gt repfind -l 14 -r -ii sfxidx"
+  resultfile="#{$gttestdata}repfind-result/#{reffile}-r.result"
+  run "cmp -s #{$last_stdout} #{resultfile}"
 end
 
 def checkrepfindwithquery(reffile,queryfile)
