@@ -1,0 +1,196 @@
+\documentclass[12pt]{article}
+\usepackage[a4paper,top=20mm,bottom=20mm,left=20mm,right=20mm]{geometry}
+\usepackage{url}
+\usepackage{alltt}
+\usepackage{xspace}
+\usepackage{times}
+\usepackage{bbm}
+\usepackage{verbatim}
+\usepackage{ifthen}
+\usepackage{optionman}
+
+\newcommand{\Showrep}[2]{\begin{array}{@{}c@{}}#1\\ {#2} \end{array}}
+\newcommand{\Function}[3]{#1:#2\to#3}
+\newcommand{\Size}[1]{|#1|}
+\newcommand{\Iff}{if and only if\xspace}
+\newcommand{\Repfind}[0]{\texttt{repfind}\xspace}
+\newcommand{\Suffixerator}[0]{\texttt{suffixerator}\xspace}
+\newcommand{\Nats}{\textrm{I}\!\textrm{N}}
+\newcommand{\Substring}[3]{#1[#2..#3]}
+\newcommand{\Subchar}[2]{#1[#2]}
+
+\title{\Repfind: a program for finding exact maximal repeats\\
+       a manual}
+
+\author{\begin{tabular}{c}
+         \textit{Stefan Kurtz}\\
+         Center for Bioinformatics,\\
+         University of Hamburg
+        \end{tabular}}
+
+\begin{document}
+\maketitle
+This manual describes the options of the program \Repfind. It also gives
+some examples on how to use it. We postpone the 
+definition of the basic notions to the appendix.
+
+\Repfind computes all maximal repeats in 
+the input sequence represented by the given index,
+and echoes them to standard output. 
+If an error occurs, then the program exits with exit code 1 or 2 (depending on
+the kind of error). Otherwise, the exit code is 0. The index is constructed
+by the \Suffixerator tools, which is, like \Repfind, part of the
+Genometools, and open source software for biological sequence analysis.
+The \Suffixerator-program can process files in Fasta, Embl, Genbank or
+Swissprot format. There can be more than one sequence in any
+indexed file.  There are no special options necessary to tell 
+\Suffixerator-program the sequence format. It automatically detects the 
+appropriate format. We recommend to use either the option \Showoption{dna} or 
+\Showoption{protein}, depending on the kind of input sequences to be processed.
+However, if both of these options are missing \Suffixerator is in most
+cases able to automatically identify the kind of sequence. The input for
+DNA sequences may, besides the base symbols \(A\), \(C\), \(G\), or \(T\),
+contain IUB special characters \(R,Y,M,K,W,S,B,D,H,V,N\). None of the
+exact matches reported by \Repfind contains such a character as it
+does not match any character non even itself (at a different position).
+
+The program \Repfind is called as follows:
+\par
+\noindent\texttt{gt} \Repfind [\textit{options}] \Showoption{ii}
+\Showoptionarg{indexname} [\textit{options}] 
+
+The options for \Repfind are as follows:
+
+\begin{Justshowoptions}
+\Option{l}{$\ell$}{
+Specifies the length parameter $\ell$. This must be a positive integer 
+smaller than the length of the input sequence. Only repeats of length 
+at least \(\ell\) are reported. If this option is not used, then 
+\(\ell=20\).}
+
+\Option{f}{}{Compute maximal forward repeats}
+
+\Option{r}{}{Compute maximal forward repeats}
+
+\Option{r}{}{scan the index rather than mapping it to main memory
+(as done in the default case).}
+
+\Option{ii}{$\Showoptionarg{indexname}$}{Use the index 
+$\Showoptionarg{indexname}$. This is a mandatory option.}
+
+\Option{v}{}{Be verbose}
+
+\Option{help}{}{display help message and exit}
+
+\end{Justshowoptions}
+
+\subsubsection*{Important Remark} 
+The user of the program should carefully choose the length parameter \(\ell\).
+The number of maximal repeats exponentially decreases with increasing
+\(\ell\).
+
+\section{Output Format}\label{Output}
+\Repfind reports maximal repeats to the standard output.
+Each line of the output in the format
+
+\begin{verbatim}
+len seqnum1 relpos1 symbol len seqnum2 relpos2
+\end{verbatim}
+
+where
+\begin{itemize}
+\item
+\texttt{S} is either the symbols \texttt{F} or \texttt{R}.
+\texttt{F} stands for forward repeats and \texttt{R} stands for
+reverse repeats.
+\item
+\texttt{len} is the length of maximal repeat, which is identical for
+the first and the second instance of the repeat.
+\item
+\texttt{seqnum1} is the sequence number in which the first repeat instance
+occurs  at position \texttt{relpos1}.
+\texttt{seqnum2} is the sequence number in which the second repeat instance
+occurs  at position \texttt{relpos2}. The positions are counted beginning with
+0.
+\end{itemize}
+
+Suppose the input sequence \(S=gagctcgagcgctgct\) 
+is contained in the file \texttt{repfind-sample.fna}. Then 
+\begin{footnotesize}
+\begin{verbatim}
+gt suffixerator -db repfinf-sample.seq -indexname repidx -dna -suf -tis -lcp -ssp -pl
+\end{verbatim}
+\end{footnotesize}
+creates the index named \texttt{repidx} required for \Repfind. This is 
+called as follows:
+
+\begin{verbatim}
+gt repfind -f -r -l 4 -ii repidx
+\end{verbatim}
+gives the following output:
+\begin{verbatim}
+4 0 0 F 4 0 6
+4 1 14 R 4 0 12
+4 1 11 R 4 0 9
+10 1 0 R 10 0 0
+5 0 5 R 5 2 7
+9 0 0 R 9 2 2
+\end{verbatim}
+So, for example there is a maximal repeat of length 4  on the forward strand.
+Both instances of the repeat are in sequence 0. The first instance begins
+are position 0 and the second at position 6.
+
+\section{Remarks}
+The programs has been extensively tested, and we are not aware of any bugs.
+If the user detects a bug or would like to suggest other options or 
+features of the program, then please \texttt{kurtz@zbh.uni-hamburg.de}
+should be contacted.
+
+\section*{References}
+Kurtz, S., Choudhuri, J. V., Ohlebusch, E., Schleiermacher, C., Stoye, J.,
+Giegerich, R. (2001). REPuter: The manifold applications of repeat analysis on
+a genomic scale. Nucleic Acids Res., 29:4633–4642.
+
+\appendix
+\section{Basic Notions}\label{Basic}
+We consider a string \(S\) of length \(n\). We index the characters of
+\(S\) from \(0\) to \(n-1\), i.e.\ \(S=\Substring{S}{0}{n-1}\). By 
+\(S^{-1}\) we denote the reverse of \(S\), i.e.\ the string \(u\) of length 
+\(n\) such that \(u_{i}=S_{n-1-i}\) for 
+any \(i\in[0,n-1]\). Let \(\Sigma=\{a,c,g,t\}\) be the DNA-alphabet.
+
+We define two different kinds of repeats:
+\begin{itemize}
+\item
+\((l,i,j)\) is a \emph{forward or direct repeat} \Iff\ \(i<j\) and
+\begin{equation}
+\Substring{S}{i}{i+l-1}=\Substring{S}{j}{j+l-1}
+\label{forwardEQ}
+\end{equation}
+\item
+\((l,i,j)\) is a \emph{reversed repeat} \Iff \(i\leq j\) and
+\begin{equation}
+\Substring{S}{i}{i+l-1}=(\Substring{S}{j}{j+l-1})^{-1}
+\label{reversedEQ}
+\end{equation}
+\end{itemize}
+\((l,i,j)\) is a \emph{repeat}, if it either is a forward, reversed, 
+complemented, or palindromic repeat. Each repeat
+\((l,i,j)\) specifies two \emph{substrings} of \(S\): 
+\begin{enumerate}
+\item
+the sequence \(\Substring{S}{i}{i+l-1}\) occurring on the left-hand 
+side of (\ref{forwardEQ}) and (\ref{reversedEQ}).
+This is the \emph{first instance} of \((l,i,j)\).
+\item
+the sequence occurring on the right-hand 
+side of (\ref{forwardEQ}) and (\ref{reversedEQ}).
+This is the \emph{second instance} of \((l,i,j)\).
+\end{enumerate}
+
+By requiring repeats to be \emph{maximal} we can reduce the number of
+interesting repeats:
+An exact repeat is \emph{maximal} if it is not contained in another 
+\emph{exact} repeat of the same kind. 
+
+\end{document}
