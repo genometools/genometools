@@ -41,7 +41,7 @@ rescue => error
   STDERR.puts "#{$0}: cannot open \"#{filename}\": #{error}"
   exit 1
 end
-  return f.readlines.grep(/prefixlength|integersize|readmode|realspecialranges/)
+  return f.readlines.grep(/prefixlength|readmode|realspecialranges/)
 end
 
 outoptions="-tis -lcp -suf -bwt"
