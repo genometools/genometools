@@ -82,8 +82,9 @@ static int show_gth_help_trailer(GT_UNUSED const char *progname,
 
 GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
                            int *parsed_args, int argc, const char **argv,
-                           bool gthconsensus_parsing, GtStrArray *consensusfiles,
-                           GthStat *stat, void(*showverbose)(const char *),
+                           bool gthconsensus_parsing,
+                           GtStrArray *consensusfiles, GthStat *stat,
+                           void(*showverbose)(const char *),
                            void(*showverboseVM)(char *),
                            GtShowVersionFunc show_version, GtError *err)
 {
