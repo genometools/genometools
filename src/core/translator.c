@@ -21,6 +21,7 @@
 #include "core/codon.h"
 #include "core/ensure.h"
 #include "core/ma.h"
+#include "core/log.h"
 #include "core/translator.h"
 #include "core/unused_api.h"
 
@@ -34,9 +35,9 @@
 #define GT_UNDEFTRANSNUM GT_NUMOFTRANSSCHEMES
 
 #define GT_INCONSISTENT(BASE)\
-        gt_error_set(err, "code=%lu with wildcard %c: inconsistent " \
-                          "aminoacids %c and %c",\
-                     (unsigned long) codeof2, wildcard, aa, newaa);\
+        gt_log_log("code=%lu with wildcard %c: inconsistent " \
+                   "aminoacids %c and %c",\
+                   (unsigned long) codeof2, wildcard, aa, newaa);\
         return GT_AMINOACIDFAIL
 
 #define GT_ILLEGALCHAR(V)\
@@ -470,8 +471,7 @@ static unsigned char wbitsvector[] =
 */
 static char equivalentbits(const char *aminos,
                            unsigned int codeof2,
-                           unsigned char wildcard,
-                           GtError *err)
+                           unsigned char wildcard)
 {
   unsigned char bits = wbitsvector[(int) wildcard];
   char aa = 0, newaa;
@@ -706,7 +706,7 @@ static char codon2amino(const char *aminos, bool forward, unsigned char c0,
       }
       break;
     GT_CASEWILDCARD:
-      aa = equivalentbits(aminos,code,c2, err);
+      aa = equivalentbits(aminos,code,c2);
       if (aa == GT_AMINOACIDFAIL)
       {
         /* no unique aminoacid => choose smallest base and compute aminos
