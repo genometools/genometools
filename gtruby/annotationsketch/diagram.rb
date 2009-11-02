@@ -57,7 +57,7 @@ module GT
       gtarr = GT::Array.create(DL.sizeof("P"), false)
       array.each do |i|
         if !i.is_a?(GT::FeatureNode) then
-          gterror("Diagram array must only contain FeatureNodes!")
+          GT::gterror("Diagram array must only contain FeatureNodes!")
         end
         gtarr.add(i)
       end
