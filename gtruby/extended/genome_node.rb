@@ -18,12 +18,14 @@
 
 require 'gtdlload'
 require 'gthelper'
+require 'core/str'
 
 module GT
   extend DL::Importable
   gtdlload "libgenometools"
   extern "int gt_genome_node_accept(GtGenomeNode*, GenomeVisitor*, GtError*)"
   extern "GtGenomeNode* gt_genome_node_ref(GtGenomeNode*)"
+  extern "GtStr*        gt_genome_node_get_seqid(GtGenomeNode*)"
   extern "unsigned long gt_genome_node_get_start(GtGenomeNode*)"
   extern "unsigned long gt_genome_node_get_end(GtGenomeNode*)"
   extern "const char* gt_genome_node_get_filename(GtGenomeNode*)"
@@ -58,10 +60,18 @@ module GT
       @genome_node
     end
 
+    def get_seqid
+      str = GT::Str.new(GT.gt_genome_node_get_seqid(@genome_node))
+      if !str.nil? then
+        str.to_s
+      else
+        ""
+      end
+    end
+
     def accept(visitor)
       err = GT::Error.new()
-      rval = GT.gt_genome_node_accept(@genome_node, visitor.genome_visitor,
-                                      err.to_ptr)
+      rval = GT.gt_genome_node_accept(@genome_node, visitor.to_ptr, err.to_ptr)
       if rval != 0
         GT.gterror(err)
       end
