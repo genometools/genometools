@@ -30,12 +30,25 @@ module GT
 
   class SequenceNode < GenomeNode
     def self.create(description, sequence)
-      newsn = GT.gt_sequence_node_new(description.to_s, GT::Str.new(sequence))
+      newsn = GT.gt_sequence_node_new(description.to_s, \
+                                      GT::Str.new(sequence.to_s))
       return GT::SequenceNode.new(newsn, true)
     end
 
     def initialize(gn, newref=false)
       super(gn, newref)
+    end
+
+    def get_description
+      return GT.gt_sequence_node_get_description(@genome_node)
+    end
+
+    def get_sequence
+      (seq = GT.gt_sequence_node_get_sequence(@genome_node)) ? seq : ""
+    end
+
+    def get_sequence_length
+      return GT.gt_sequence_node_get_sequence_length(@genome_node)
     end
   end
 end
