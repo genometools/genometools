@@ -17,6 +17,7 @@ class CommentNodeTestCase(unittest.TestCase):
 
     def test_get_comment(self):
         self.assertEqual(self.fn.get_comment(), 'testcomment')
+        self.assertEqual(self.fn2.get_comment(), '333')
 
 if __name__ == "__main__":
     unittest.main()
