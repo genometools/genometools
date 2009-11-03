@@ -46,7 +46,7 @@ class SequenceNode(GenomeNode):
             return ""
 
     def get_sequence_length(self):
-        return gtlib.gt_sequence_node_get_sequence(self.gn)
+        return gtlib.gt_sequence_node_get_sequence_length(self.gn)
 
     def register(cls, gtlib):
         from ctypes import c_char_p,  c_void_p, c_ulong
