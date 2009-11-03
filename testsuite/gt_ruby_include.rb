@@ -115,4 +115,10 @@ if not $arguments["nocairo"] then
              "#{$testdata}standard_gene_as_tree.gff3"
     run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.hotspots"
   end
+
+  Name "gtruby: {Comment,Sequence,Region}Node classes"
+  Keywords "gt_ruby"
+  Test do
+    run_ruby "#{$testdata}gtruby/node_types.rb"
+  end
 end
