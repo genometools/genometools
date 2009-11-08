@@ -257,7 +257,8 @@ static int statspair_cmp(const void *y, const void *z)
 }
 
 static enum iterator_op
-insert_into_outlist(char *key, unsigned long *value, void *data, GtError *err)
+insert_into_outlist(char *key, unsigned long *value, void *data,
+                    GT_UNUSED GtError *err)
 {
   ParseStruct *parsestruct_ptr = (ParseStruct *) data;
   gt_assert(key && parsestruct_ptr && parsestruct_ptr->outlist);

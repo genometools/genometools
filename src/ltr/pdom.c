@@ -399,7 +399,7 @@ static GtPdomModel* gt_pdom_model_new(struct plan7_s *model)
 }
 
 int gt_pdom_model_set_evalue_cutoff(GtPdomModel *m, double eval_cutoff,
-                                    GtError *err)
+                                    GT_UNUSED GtError *err)
 {
   int had_err = 0;
   gt_assert(m);
