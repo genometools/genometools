@@ -10,10 +10,12 @@ h1, h2, h3, h4, h5, h6 {
   margin-top: 20px;
   background-color: #DDDDDD;
 }
+
 img {
   border-style: solid;
   border-width: 1px;
 }
+
 #menu {
   float: left;
   clear: left;
@@ -73,6 +75,21 @@ img {
 #main a:hover {
   background: rgb(90%, 90%, 20%);
 }
+
+#examplesketch {
+  text-align: center;
+}
+#examplesketch img {
+  border: none;
+  display: inline;
+  margin: 5px 0px;
+}
+#examplesketch a:link, #examplesketch a:hover {
+  text-decoration: none;
+  border: none;
+  background: none;
+}
+
 pre {
   line-height: 1.3em;
 }
