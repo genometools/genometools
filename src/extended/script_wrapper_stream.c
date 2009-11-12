@@ -45,7 +45,8 @@ static void script_wrapper_stream_free(GtNodeStream *gs)
   GtScriptWrapperStream *script_wrapper_stream;
   if (!gs) return;
   script_wrapper_stream = script_wrapper_stream_cast(gs);
-  script_wrapper_stream->free_func(NULL);
+  if (script_wrapper_stream->free_func)
+    script_wrapper_stream->free_func(NULL);
 }
 
 const GtNodeStreamClass* gt_script_wrapper_stream_class(void)
@@ -64,7 +65,7 @@ GtNodeStream* gt_script_wrapper_stream_new(GtScriptWrapperStreamNextFunc next,
 {
   GtNodeStream *gs;
   GtScriptWrapperStream *script_wrapper_stream;
-  gt_assert(next && free);
+  gt_assert(next);
   gs = gt_node_stream_create(gt_script_wrapper_stream_class(), true);
   script_wrapper_stream = script_wrapper_stream_cast(gs);
   script_wrapper_stream->next_func = next;
