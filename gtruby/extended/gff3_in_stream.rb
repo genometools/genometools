@@ -27,9 +27,7 @@ module GT
   extern "GtNodeStream* gt_gff3_in_stream_new_sorted(const char *, bool)"
   extern "GtStrArray* gt_gff3_in_stream_get_used_types(GtNodeStream*)"
 
-  class GFF3InStream
-    include GenomeStream
-    attr_reader :genome_stream
+  class GFF3InStream < GenomeStream
     def initialize(filename)
       if not File.readable?(filename)
         GT.gterror("file '#{filename}' not readable")
