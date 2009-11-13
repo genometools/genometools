@@ -15,23 +15,29 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <string.h>
 #include "core/fileutils_api.h"
 #include "core/filelengthvalues.h"
 #include "core/ma.h"
 #include "core/option.h"
+#include "core/outputfile.h"
 #include "core/sequence_buffer.h"
 #include "core/seqiterator.h"
 #include "core/unused_api.h"
 #include "core/versionfunc.h"
 #include "core/progressbar.h"
+#include "extended/reverse.h"
 #include "tools/gt_convertseq.h"
 
 typedef struct
 {
   bool verbose,
        showflv,
-       showseq;
+       showseq,
+       revcomp;
   unsigned long fastawidth;
+  GtOutputFileInfo *ofi;
+  GtFile *outfp;
 } ConvertseqOptions;
 
 static GtOPrval parse_options(ConvertseqOptions *opts, int *parsed_args,
@@ -44,10 +50,14 @@ static GtOPrval parse_options(ConvertseqOptions *opts, int *parsed_args,
   gt_error_check(err);
 
   op = gt_option_parser_new("[options] file [...]",
-                         "Parse and convert sequence file formats.");
+                            "Parse and convert sequence file formats.");
 
   optionverbose = gt_option_new_bool("v","be verbose",
                                      &opts->verbose, false);
+  gt_option_parser_add_option(op, optionverbose);
+
+  optionverbose = gt_option_new_bool("r","reverse complement sequences",
+                                     &opts->revcomp, false);
   gt_option_parser_add_option(op, optionverbose);
 
   o = gt_option_new_bool("showfilelengthvalues","show filelengths",
@@ -61,6 +71,8 @@ static GtOPrval parse_options(ConvertseqOptions *opts, int *parsed_args,
   o = gt_option_new_ulong("fastawidth","FASTA output line width",
                          &opts->fastawidth, 60);
   gt_option_parser_add_option(op, o);
+
+  gt_outputfile_register_options(op, &opts->outfp, opts->ofi);
 
   gt_option_parser_set_min_args(op, 1U);
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
@@ -81,6 +93,8 @@ int gt_convertseq(int argc, const char **argv, GtError *err)
   Filelengthvalues *flv;
   GtSeqIterator *seqit;
   GtSequenceBuffer *sb = NULL;
+  opts.ofi = gt_outputfileinfo_new();
+  opts.outfp = NULL;
 
   gt_error_check(err);
 
@@ -88,8 +102,12 @@ int gt_convertseq(int argc, const char **argv, GtError *err)
   switch (parse_options(&opts,&parsed_args, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
+        gt_file_delete(opts.outfp);
+        gt_outputfileinfo_delete(opts.ofi);
         return -1;
     case OPTIONPARSER_REQUESTS_EXIT:
+        gt_file_delete(opts.outfp);
+        gt_outputfileinfo_delete(opts.ofi);
         return 0;
   }
 
@@ -119,30 +137,41 @@ int gt_convertseq(int argc, const char **argv, GtError *err)
     }
     while (true)
     {
+      GtUchar *seq = NULL;
       desc = NULL;
-      i = 0;
-      j = 1;
+      i = 0; j = 1;
       had_err = gt_seqiterator_next(seqit, &sequence, &len, &desc, err);
       if (had_err != 1)
         break;
+      if (opts.revcomp) {
+        GtUchar *newseq = gt_calloc(len+1, sizeof (GtUchar));
+        memcpy(newseq, sequence, len*sizeof(GtUchar));
+        had_err = gt_reverse_complement((char*) newseq, len, err);
+        if (had_err)
+          break;
+        seq = newseq;
+      } else seq = (GtUchar*) sequence;
       if (!opts.showseq) {
-        printf(">%s\n", desc);
-        for (i=0;i<len;i++) {
-          putc(sequence[i], stdout);
+        gt_file_xprintf(opts.outfp, ">%s\n", desc);
+        for (i = 0;i < len;i++) {
+          gt_file_xfputc(seq[i], opts.outfp);
           if ((j % opts.fastawidth) == 0) {
-            j=0;
-            printf("\n");
+            j = 0;
+            gt_file_xprintf(opts.outfp, "\n");
           }
           j++;
         }
-        printf("\n");
+        gt_file_xprintf(opts.outfp, "\n");
       }
       gt_free(desc);
+      if (opts.revcomp) {
+        gt_free(seq);
+      }
     }
     if (opts.showflv) {
       unsigned long j;
       for (j=0;j<gt_str_array_size(files);j++) {
-        printf("file %lu (%s): %lu/%lu\n",
+        fprintf(stderr, "file %lu (%s): %lu/%lu\n",
                j,
                gt_str_array_get(files, j),
                (unsigned long) flv[j].length,
@@ -156,6 +185,8 @@ int gt_convertseq(int argc, const char **argv, GtError *err)
       gt_progressbar_stop();
     }
   }
+  gt_file_delete(opts.outfp);
+  gt_outputfileinfo_delete(opts.ofi);
   gt_str_array_delete(files);
   gt_free(flv);
   return had_err;
