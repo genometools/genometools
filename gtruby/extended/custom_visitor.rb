@@ -42,7 +42,17 @@ module GT
         err.set(msg)
         ret = -1
       end
-      ret.nil? ? 0 : ret.to_i
+      if ret.nil?
+        0
+      else
+        begin
+          Integer(ret)
+        rescue
+          err.set("Function 'visit_#{method_name}_node' of class " + \
+                  "'#{self.class}' must return an integer or nil!")
+          1
+        end
+      end
     end
 
     def initialize()
