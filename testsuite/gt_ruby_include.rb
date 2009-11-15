@@ -121,4 +121,11 @@ if not $arguments["nocairo"] then
   Test do
     run_ruby "#{$testdata}gtruby/node_types.rb"
   end
+
+  Name "gtruby: CustomStream/CustomVisitor basic tests"
+  Keywords "gt_ruby"
+  Test do
+    run_ruby "#{$testdata}gtruby/custom_stuff.rb #{$testdata}eden.gff3"
+    run "diff #{$last_stdout} #{$testdata}custom_streams_ref.txt"
+  end
 end
