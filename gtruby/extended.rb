@@ -17,6 +17,7 @@
 
 require 'extended/add_introns_stream'
 require 'extended/comment_node'
+require 'extended/custom_stream'
 require 'extended/custom_visitor'
 require 'extended/feature_node'
 require 'extended/gff3_in_stream'
