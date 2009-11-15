@@ -149,6 +149,9 @@ module GT
     end
 
     def get_attribute(attrib)
+      if @attribs.nil?
+        self.update_attribs
+      end
       @attribs[attrib]
     end
 
@@ -161,6 +164,9 @@ module GT
     end
 
     def each_attribute
+      if @attribs.nil?
+        self.update_attribs
+      end
       @attribs.each_pair do |tag, val|
         yield tag, val
       end
