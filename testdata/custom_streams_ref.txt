@@ -1,0 +1,58 @@
+. gene 1000 9000
+Name=EDEN,ID=gene00001
+. TF_binding_site 1000 1012
+Parent=gene00001,ID=tfbs00001
+. mRNA 1050 9000
+Parent=gene00001,Name=EDEN.1,ID=mRNA00001
+. exon 1050 1500
+Parent=mRNA00001,mRNA00002,ID=exon00002
+. CDS 1201 1500
+Parent=mRNA00001,Name=edenprotein.1,ID=cds00001
+. exon 3000 3902
+Parent=mRNA00001,mRNA00003,ID=exon00003
+. CDS 3000 3902
+Parent=mRNA00001,Name=edenprotein.1,ID=cds00001
+. exon 5000 5500
+Parent=mRNA00001,mRNA00002,mRNA00003,ID=exon00004
+. CDS 5000 5500
+Parent=mRNA00001,Name=edenprotein.1,ID=cds00001
+. CDS 7000 7600
+Parent=mRNA00001,Name=edenprotein.1,ID=cds00001
+. exon 7000 9000
+Parent=mRNA00001,mRNA00002,mRNA00003,ID=exon00005
+. mRNA 1050 9000
+Parent=gene00001,Name=EDEN.2,ID=mRNA00002
+. exon 1050 1500
+Parent=mRNA00001,mRNA00002,ID=exon00002
+. CDS 1201 1500
+Parent=mRNA00002,Name=edenprotein.2,ID=cds00002
+. exon 5000 5500
+Parent=mRNA00001,mRNA00002,mRNA00003,ID=exon00004
+. CDS 5000 5500
+Parent=mRNA00002,Name=edenprotein.2,ID=cds00002
+. CDS 7000 7600
+Parent=mRNA00002,Name=edenprotein.2,ID=cds00002
+. exon 7000 9000
+Parent=mRNA00001,mRNA00002,mRNA00003,ID=exon00005
+. mRNA 1300 9000
+Parent=gene00001,Name=EDEN.3,ID=mRNA00003
+. exon 1300 1500
+Parent=mRNA00003,ID=exon00001
+. exon 3000 3902
+Parent=mRNA00001,mRNA00003,ID=exon00003
+. CDS 3301 3902
+Parent=mRNA00003,Name=edenprotein.3,ID=cds00003
+. CDS 3391 3902
+Parent=mRNA00003,Name=edenprotein.4,ID=cds00004
+. exon 5000 5500
+Parent=mRNA00001,mRNA00002,mRNA00003,ID=exon00004
+. CDS 5000 5500
+Parent=mRNA00003,Name=edenprotein.3,ID=cds00003
+. CDS 5000 5500
+Parent=mRNA00003,Name=edenprotein.4,ID=cds00004
+. CDS 7000 7600
+Parent=mRNA00003,Name=edenprotein.3,ID=cds00003
+. CDS 7000 7600
+Parent=mRNA00003,Name=edenprotein.4,ID=cds00004
+. exon 7000 9000
+Parent=mRNA00001,mRNA00002,mRNA00003,ID=exon00005
