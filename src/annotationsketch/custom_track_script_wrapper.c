@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -24,6 +24,7 @@ struct GtCustomTrackScriptWrapper {
   GtCtScriptGetHeightFunc get_height_func;
   GtCtScriptGetTitleFunc get_title_func;
   GtCtScriptFreeFunc free_func;
+  GtStr *title_buffer;
 };
 
 #define gt_custom_track_script_wrapper_cast(ct) \
@@ -38,7 +39,7 @@ int gt_custom_track_script_wrapper_sketch(GtCustomTrack *ct,
 {
   GtCustomTrackScriptWrapper *cte;
   cte = gt_custom_track_script_wrapper_cast(ct);
-  return cte->render_func(graphics, start_ypos, viewrange, style, err);
+  return cte->render_func(graphics, start_ypos, &viewrange, style, err);
 }
 
 unsigned long gt_custom_track_script_wrapper_get_height(GtCustomTrack *ct)
@@ -52,7 +53,9 @@ const char* gt_custom_track_script_wrapper_get_title(GtCustomTrack *ct)
 {
   GtCustomTrackScriptWrapper *cte;
   cte = gt_custom_track_script_wrapper_cast(ct);
-  return cte->get_title_func(NULL);
+  gt_str_reset(cte->title_buffer);
+  cte->get_title_func(NULL, cte->title_buffer);
+  return gt_str_get(cte->title_buffer);
 }
 
 void gt_custom_track_script_wrapper_delete(GtCustomTrack *ct)
@@ -61,6 +64,7 @@ void gt_custom_track_script_wrapper_delete(GtCustomTrack *ct)
   if (!ct) return;
   cte = gt_custom_track_script_wrapper_cast(ct);
   cte->free_func(NULL);
+  gt_str_delete(cte->title_buffer);
 }
 
 const GtCustomTrackClass* gt_custom_track_script_wrapper_class(void)
@@ -69,10 +73,10 @@ const GtCustomTrackClass* gt_custom_track_script_wrapper_class(void)
   if (!ctc)
   {
     ctc = gt_custom_track_class_new(sizeof (GtCustomTrackScriptWrapper),
-                                      gt_custom_track_script_wrapper_sketch,
-                                      gt_custom_track_script_wrapper_get_height,
-                                      gt_custom_track_script_wrapper_get_title,
-                                      gt_custom_track_script_wrapper_delete);
+                                    gt_custom_track_script_wrapper_sketch,
+                                    gt_custom_track_script_wrapper_get_height,
+                                    gt_custom_track_script_wrapper_get_title,
+                                    gt_custom_track_script_wrapper_delete);
   }
   return ctc;
 }
@@ -94,5 +98,6 @@ GtCustomTrack* gt_custom_track_script_wrapper_new(GtCtScriptRenderFunc
   cte->get_height_func = get_height_func;
   cte->get_title_func = get_title_func;
   cte->free_func = free_func;
+  cte->title_buffer = gt_str_new();
   return ct;
 }
