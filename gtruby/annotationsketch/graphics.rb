@@ -36,6 +36,7 @@ module GT
   extern "double gt_graphics_get_ymargins(GtGraphics*)"
   extern "void   gt_graphics_draw_horizontal_line_p(GtGraphics*, void*)"
   extern "void   gt_graphics_draw_vertical_line_p(GtGraphics*, void*)"
+  extern "void   gt_graphics_draw_line_p(GtGraphics*, void*)"
   extern "void   gt_graphics_draw_box_p(GtGraphics*, void*)"
   extern "void   gt_graphics_draw_dashes_p(GtGraphics*, void*)"
   extern "void   gt_graphics_draw_caret_p(GtGraphics*, void*)"
@@ -117,7 +118,7 @@ module GT
       GT.gt_graphics_get_ymargins(@g)
     end
 
-    def draw_line(x, y, xto, yto, color, width, stroke_width)
+    def draw_line(x, y, xto, yto, color, stroke_width)
       color.struct!("DDDD", :r, :g, :b, :a)
       params = [x.to_f, y.to_f, xto.to_f, yto.to_f, color[:r], color[:g],      \
                 color[:b], color[:a], stroke_width.to_f ]
