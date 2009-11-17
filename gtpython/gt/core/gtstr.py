@@ -41,6 +41,9 @@ class Str:
     def __str__(self):
         return gtlib.gt_str_get(self.strg)
 
+    def reset(self):
+        gtlib.gt_str_reset(self.strg)
+
     def from_param(cls, obj):
         if not isinstance(obj, Str):
             raise TypeError, "argument must be a Str"
@@ -66,6 +69,7 @@ class Str:
         gtlib.gt_str_get.restype = c_char_p
         gtlib.gt_str_get_mem.restype = c_void_p
         gtlib.gt_str_length.restype = c_ulong
+        gtlib.gt_str_reset.argtypes = [c_void_p]
 
     register = classmethod(register)
 
