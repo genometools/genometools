@@ -70,6 +70,14 @@ if fn.get_filename != "generated" then
   raise TestFailedError
 end
 
+begin
+  fn.add_child(GT::FeatureNode.create("nottest", "foo", 100, 200, "+"))
+rescue GT::GTError => msg
+  # expect exception
+else
+  raise TestFailedError
+end
+
 fni = GT::FeatureNodeIteratorDepthFirst.new(fn)
 num_features = 0
 tfn = fni.next

@@ -73,7 +73,7 @@ module GT
     end
 
     def add_child(node)
-      if self.get_seqid != child_seqid = node.get_seqid
+      if self.get_seqid != node.get_seqid
         GT::gterror("nodes must have identical sequence regions! " + \
                     "(was: '#{self.get_seqid}' vs. '#{node.get_seqid}'")
       end
