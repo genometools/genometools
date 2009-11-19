@@ -17,6 +17,7 @@ Possible arguments:
 - 64bit=yes to compile a 64-bit version (not available on all platforms)
 - opt=no to disable optimization
 - assert=no to disable assertions
+- amalgamation=yes to compile as an amalgamation
 
 Example call to build GenomeTools without assertions on a system where GNU make
 is called ``gmake'':
@@ -54,10 +55,19 @@ subdirectory).
 $ make with-hmmer=yes
 
 
-Building GenomeTools as a Univeral Binary (on Mac OS X):
+Building GenomeTools as a Universal Binary (on Mac OS X):
 --------------------------------------------------------
 
 invoke make as above with the argument universal=yes
+
+
+Building GenomeTools on Windows (using Cygwin):
+--------------------------------------------------------
+
+Building GenomeTools with gcc on Windows occasionally results a warning
+regarding the '-fPIC' parameter. This can be ignored without problems.
+To ignore this warning, please append the errorcheck=no option to your
+make call. All other options given in this file can still be used.
 
 
 Testing GenomeTools (optional)

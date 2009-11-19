@@ -72,8 +72,8 @@ int gt_custom_track_gc_content_sketch(GtCustomTrack *ct, GtGraphics *graphics,
   GtRange value_range = {0, 1};
   GtColor color, grey, black;
   gt_assert(ct && graphics && viewrange.start <= viewrange.end);
-  gt_assert(gt_double_smaller_double(gt_graphics_get_image_width(graphics)
-                                     -2*gt_graphics_get_xmargins(graphics), 0));
+  gt_assert(gt_double_smaller_double(0, gt_graphics_get_image_width(graphics)
+                                        -2*gt_graphics_get_xmargins(graphics)));
 
   ctgc = gt_custom_track_gc_content_cast(ct);
 

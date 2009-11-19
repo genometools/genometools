@@ -25,6 +25,7 @@
 #include "core/array.h"
 #include "core/array2dim_api.h"
 #include "core/bioseq.h"
+#include "core/dlist_api.h"
 #include "core/error.h"
 #include "core/hashmap-generic.h"
 #include "core/ma.h"
@@ -102,8 +103,8 @@ typedef struct
     leavegene_value,
     percent_value;
   GtStr *curl_fcgi_db,
-   *outputtextfile_name;
-  GtStrArray *giexpfile_name;
+   *outputtextfile_name,
+   *giexpfile_name;
   int outputfile_format,
     codon_mode;
   bool hitfile_bool,
@@ -199,6 +200,7 @@ typedef struct
   GtHashtable *queryhash,
    *hithash,
    *resulthits;
+  GtDlist *outlist;
   GtError *err;
   int had_err;
   unsigned short def_flag,

@@ -107,6 +107,10 @@ module GT
       GT.gt_feature_index_get_range_for_seqid(@feature_index, range, seqid)
       range
     end
+
+    def to_ptr
+      @feature_index
+    end
   end
 
   class FeatureIndexMemory < FeatureIndex

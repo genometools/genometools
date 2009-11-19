@@ -1,6 +1,6 @@
 #
-# Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-# Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+# Copyright (c) 2009 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -17,29 +17,44 @@
 
 require 'gtdlload'
 require 'gthelper'
-require 'core/str_array'
 require 'extended/genome_stream'
+require 'dl/struct'
 
 module GT
   extend DL::Importable
   gtdlload "libgenometools"
-  typealias "bool", "ibool"
-  extern "GtNodeStream* gt_gff3_in_stream_new_sorted(const char *, bool)"
-  extern "GtStrArray* gt_gff3_in_stream_get_used_types(GtNodeStream*)"
+  extern "GtNodeStream* gt_script_wrapper_stream_new(void*, void*)"
 
-  class GFF3InStream < GenomeStream
-    def initialize(filename)
-      if not File.readable?(filename)
-        GT.gterror("file '#{filename}' not readable")
+  class CustomStream < GenomeStream
+    def initialize()
+      if !public_methods.include?("next") then
+        GT::gterror "#{self.class} must implement 'next' method"
       end
-      @genome_stream = GT.gt_gff3_in_stream_new_sorted(filename, false)
+
+      @next_cb = DL.callback("IPP") do |gn_ptr, err_ptr|
+        rval = 0
+        begin
+          node = self.next
+          gn_ptr.struct!("P", :val)
+          if !node.nil? then
+            GT.gt_genome_node_ref(node)
+            gn_ptr[:val] = node.to_ptr
+          else
+            gn_ptr[:val] = nil
+          end
+        rescue => errmsg
+          Error.new(err_ptr).set(errmsg)
+          rval = -1
+        end
+        rval
+      end
+
+      @genome_stream = GT.gt_script_wrapper_stream_new(@next_cb, nil)
       @genome_stream.free = GT::symbol("gt_node_stream_delete", "0P")
     end
 
-    def get_used_types
-      str_array_ptr = GT.gt_gff3_in_stream_get_used_types(@genome_stream)
-      used_types = GT::StrArray.new(str_array_ptr)
-      used_types.to_a
+    def to_ptr
+      @genome_stream
     end
   end
 end

@@ -17,6 +17,10 @@ class SequenceNodeTestCase(unittest.TestCase):
     def test_get_sequence(self):
         self.assertEqual(self.fn.get_sequence(), 'AGATATAGA')
 
+    def test_get_sequence_length(self):
+        self.assertEqual(len(self.fn.get_sequence()), \
+                         self.fn.get_sequence_length())
+
     def test_get_description(self):
         self.assertEqual(self.fn.get_description(), 'testdesc')
 

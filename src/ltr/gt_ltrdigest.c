@@ -39,8 +39,7 @@ typedef struct GtLTRdigestOptions {
 #ifdef HAVE_HMMER
   GtPdomOptions pdom_opts;
 #endif
-  GtStr *trna_lib;
-  GtStr *prefix;
+  GtStr *trna_lib, *prefix, *cutoffs;
   bool verbose;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
@@ -56,6 +55,7 @@ static void* gt_ltrdigest_arguments_new(void)
 #endif
   arguments->trna_lib = gt_str_new();
   arguments->prefix = gt_str_new();
+  arguments->cutoffs = gt_str_new();
   arguments->ofi = gt_outputfileinfo_new();
   return arguments;
 }
@@ -69,6 +69,7 @@ static void gt_ltrdigest_arguments_delete(void *tool_arguments)
 #endif
   gt_str_delete(arguments->trna_lib);
   gt_str_delete(arguments->prefix);
+  gt_str_delete(arguments->cutoffs);
   gt_file_delete(arguments->outfp);
   gt_outputfileinfo_delete(arguments->ofi);
   gt_free(arguments);
@@ -80,7 +81,8 @@ static GtOptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   GtOption *o, *ot, *oto;
 #ifdef HAVE_HMMER
-  GtOption *oh;
+  GtOption *oh, *oc, *oeval;
+  static const char *cutoffs[] = {"NONE", "GA", "TC", NULL};
 #endif
   static GtRange pptlen_defaults           = { 8, 30},
                  uboxlen_defaults          = { 3, 30},
@@ -91,8 +93,8 @@ static GtOptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
 
   /* init */
   op = gt_option_parser_new("[option ...] gff3_file indexname",
-                         "Identifies and annotates sequence features in LTR "
-                         "retrotransposon candidates.");
+                            "Identifies and annotates sequence features in LTR "
+                            "retrotransposon candidates.");
 
   /* Output files */
 
@@ -240,16 +242,27 @@ static GtOptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
                                    arguments->pdom_opts.hmm_files);
   gt_option_parser_add_option(op, oh);
 
-  o = gt_option_new_probability("pdomevalcutoff",
-                                "E-value cutoff for pHMM search",
-                                &arguments->pdom_opts.evalue_cutoff,
-                                0.000001);
-  gt_option_parser_add_option(op, o);
-  gt_option_is_extended_option(o);
-  gt_option_imply(o, oh);
+  oeval = gt_option_new_probability("pdomevalcutoff",
+                                    "global E-value cutoff for pHMM search\n"
+                                    "default 1E-6",
+                                    &arguments->pdom_opts.evalue_cutoff,
+                                    0.000001);
+  gt_option_parser_add_option(op, oeval);
+  gt_option_is_extended_option(oeval);
+  gt_option_hide_default(oeval);
+  gt_option_imply(oeval, oh);
+
+  oc = gt_option_new_choice("pdomcutoff", "model-specific score cutoff\n"
+                                       "choose from TC (trusted cutoff) | "
+                                       "GA (gathering cutoff) | "
+                                       "NONE (no cutoffs)",
+                             arguments->cutoffs, cutoffs[0], cutoffs);
+  gt_option_parser_add_option(op, oc);
+  gt_option_is_extended_option(oeval);
+  gt_option_imply(oeval, oh);
 
   o = gt_option_new_bool("aliout",
-                           "output HMMER amino acid alignments",
+                           "output pHMM to amino acid sequence alignments",
                            &arguments->pdom_opts.write_alignments,
                            false);
   gt_option_parser_add_option(op, o);
@@ -417,6 +430,16 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
   if (!had_err && gt_str_array_size(arguments->pdom_opts.hmm_files) > 0)
   {
     tests_to_run |= GT_LTRDIGEST_RUN_PDOM;
+    if (!strcmp(gt_str_get(arguments->cutoffs), "GA")) {
+      arguments->pdom_opts.cutoff = GT_PHMM_CUTOFF_GA;
+    } else if (!strcmp(gt_str_get(arguments->cutoffs), "TC")) {
+      arguments->pdom_opts.cutoff = GT_PHMM_CUTOFF_TC;
+    } else if (!strcmp(gt_str_get(arguments->cutoffs), "NONE")) {
+      arguments->pdom_opts.cutoff = GT_PHMM_CUTOFF_NONE;
+    } else {
+      gt_error_set(err, "invalid cutoff setting!");
+      had_err = -1;
+    }
   }
 #endif
 

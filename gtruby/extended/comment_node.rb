@@ -1,6 +1,6 @@
 #
-# Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-# Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+# Copyright (c) 2009 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -15,18 +15,27 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-require 'gtdlload'
-require 'extended/genome_stream'
+require 'dl/import'
+require 'gthelper'
 
 module GT
   extend DL::Importable
   gtdlload "libgenometools"
-  extern "GtNodeStream* gt_gff3_out_stream_new(GtNodeStream*, GtGenFile*)"
+  extern "GtCommentNode* gt_comment_node_new(const char*)"
+  extern "const char*    gt_comment_node_get_comment(const GtCommentNode*)"
 
-  class GFF3OutStream < GenomeStream
-    def initialize(in_stream)
-      @genome_stream = GT.gt_gff3_out_stream_new(in_stream, nil)
-      @genome_stream.free = GT::symbol("gt_node_stream_delete", "0P")
+  class CommentNode < GenomeNode
+    def self.create(comment)
+      newfn = GT.gt_comment_node_new(comment.to_s)
+      return GT::CommentNode.new(newfn, true)
+    end
+
+    def initialize(gn, newref=false)
+      super(gn, newref)
+    end
+
+    def get_comment
+      return GT.gt_comment_node_get_comment(@genome_node)
     end
   end
 end

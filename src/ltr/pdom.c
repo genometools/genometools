@@ -45,13 +45,14 @@ struct GtPdomFinder {
   GtStrArray *hmm_files;
   GtArray *models;
   GtLTRElement *elem;
-  struct threshold_s thresh;
+  double glob_eval_cutoff;
   unsigned int nof_threads,
                chain_max_gap_length;
 };
 
 struct GtPdomModel {
   struct plan7_s *model;
+  struct threshold_s thresh;
   unsigned long reference_count;
 };
 
@@ -340,13 +341,74 @@ void gt_pdom_model_hit_delete(void *value)
 
 /* --------------- GtPdomModel ------------------------------------ */
 
+static void print_cutoffs(GtPdomModel *m)
+{
+  if (!m) return;
+  gt_log_log("cutoffs for model %s are", m->model->name);
+  gt_log_log("globT = %f    domT = %f", m->thresh.globT, m->thresh.domT);
+  gt_log_log("globE = %f    domE = %f", m->thresh.globE, m->thresh.domE);
+}
+
+int gt_pdom_model_set_trusted_cutoff(GtPdomModel *m, GtError *err)
+{
+  int had_err = 0;
+  gt_assert(m);
+  gt_error_check(err);
+  gt_log_log("setting trusted cutoffs for model %s", m->model->name);
+  m->thresh.autocut = CUT_TC;
+  if (!SetAutocuts(&m->thresh, m->model)) {
+    gt_error_set(err, "HMM %s does not contain a TC cutoff!", m->model->name);
+    had_err = -1;
+  }
+  print_cutoffs(m);
+  return had_err;
+}
+
+int gt_pdom_model_set_gathering_cutoff(GtPdomModel *m, GtError *err)
+{
+  int had_err = 0;
+  gt_assert(m);
+  gt_error_check(err);
+  gt_log_log("setting gathering cutoffs for model %s", m->model->name);
+  m->thresh.autocut = CUT_GA;
+  if (!SetAutocuts(&m->thresh, m->model)) {
+    gt_error_set(err, "HMM %s does not contain a GA cutoff!", m->model->name);
+    had_err = -1;
+  }
+  print_cutoffs(m);
+  return had_err;
+}
+
+void gt_pdom_model_reset_cutoffs(GtPdomModel *m)
+{
+  gt_assert(m);
+  m->thresh.globT = m->thresh.domT = -FLT_MAX;
+  m->thresh.domE = m->thresh.globE = FLT_MAX;
+  m->thresh.autocut = CUT_NONE;
+}
+
 static GtPdomModel* gt_pdom_model_new(struct plan7_s *model)
 {
   GtPdomModel *newmodel;
   gt_assert(model);
   newmodel = gt_calloc(1, sizeof (GtPdomModel));
   newmodel->model = model;
+  /* initialize with no cutoffs */
+  gt_pdom_model_reset_cutoffs(newmodel);
   return newmodel;
+}
+
+int gt_pdom_model_set_evalue_cutoff(GtPdomModel *m, double eval_cutoff,
+                                    GT_UNUSED GtError *err)
+{
+  int had_err = 0;
+  gt_assert(m);
+  gt_error_check(err);
+  gt_log_log("setting evalue cutoff for model %s to %f", m->model->name,
+                                                         eval_cutoff);
+  m->thresh.globE   = eval_cutoff;
+  print_cutoffs(m);
+  return had_err;
 }
 
 GtPdomModel *gt_pdom_model_ref(GtPdomModel *m)
@@ -366,6 +428,12 @@ const char* gt_pdom_model_get_acc(const GtPdomModel *model)
 {
   gt_assert(model);
   return model->model->acc;
+}
+
+struct threshold_s* gt_pdom_model_get_thresholds(const GtPdomModel *model)
+{
+  gt_assert(model);
+  return (struct threshold_s*) &model->thresh;
 }
 
 void gt_pdom_model_delete(void *value)
@@ -540,6 +608,7 @@ void* gt_pdom_per_domain_worker_thread(void *data)
   bool best_fwd = TRUE;
   unsigned long i;
   GtFragment *frags;
+  struct threshold_s* thresh;
   GtPdomModelHit *hit;
 
   shared = (GtPdomSharedMem*) data;
@@ -577,12 +646,13 @@ void* gt_pdom_per_domain_worker_thread(void *data)
 
     hit = gt_pdom_model_hit_new(shared->gpf->elem);
     ghit = AllocTophits(MAX_TOPHITS);
+    thresh = gt_pdom_model_get_thresholds(hmm);
 
     gt_hmmer_search(hmm->model,
                     gt_str_get(shared->fwd[0]),
                     gt_str_length(shared->fwd[0]),
                     "0+",
-                    &shared->gpf->thresh,
+                    thresh,
                     ghit,
                     hit->hits_fwd,
                     &shared->out_lock);
@@ -590,7 +660,7 @@ void* gt_pdom_per_domain_worker_thread(void *data)
                     gt_str_get(shared->fwd[1]),
                     gt_str_length(shared->fwd[1]),
                     "1+",
-                    &shared->gpf->thresh,
+                    thresh,
                     ghit,
                     hit->hits_fwd,
                     &shared->out_lock);
@@ -598,7 +668,7 @@ void* gt_pdom_per_domain_worker_thread(void *data)
                     gt_str_get(shared->fwd[2]),
                     gt_str_length(shared->fwd[2]),
                     "2+",
-                    &shared->gpf->thresh,
+                    thresh,
                     ghit,
                     hit->hits_fwd,
                     &shared->out_lock);
@@ -606,7 +676,7 @@ void* gt_pdom_per_domain_worker_thread(void *data)
                     gt_str_get(shared->rev[0]),
                     gt_str_length(shared->rev[0]),
                     "0-",
-                    &shared->gpf->thresh,
+                    thresh,
                     ghit,
                     hit->hits_rev,
                     &shared->out_lock);
@@ -614,7 +684,7 @@ void* gt_pdom_per_domain_worker_thread(void *data)
                     gt_str_get(shared->rev[1]),
                     gt_str_length(shared->rev[1]),
                     "1-",
-                    &shared->gpf->thresh,
+                    thresh,
                     ghit,
                     hit->hits_rev,
                     &shared->out_lock);
@@ -622,7 +692,7 @@ void* gt_pdom_per_domain_worker_thread(void *data)
                     gt_str_get(shared->rev[2]),
                     gt_str_length(shared->rev[2]),
                     "2-",
-                    &shared->gpf->thresh,
+                    thresh,
                     ghit,
                     hit->hits_rev,
                     &shared->out_lock);
@@ -789,7 +859,7 @@ GtPdomResults* gt_pdom_finder_find(GtPdomFinder *gpf, const char *seq,
 {
   GtStr *fwd[3], *rev[3];
   char translated;
-  unsigned long seqlen = gt_ltrelement_length(element);
+  unsigned long seqlen;
   GtPdomSharedMem *shared = NULL;
   GtPdomResults *results = NULL;
   GtTranslator *tr;
@@ -797,7 +867,9 @@ GtPdomResults* gt_pdom_finder_find(GtPdomFinder *gpf, const char *seq,
       had_err = 0;
   unsigned int frame;
   gt_assert(seq && rev_seq && strlen(seq) == strlen(rev_seq) && element);
+  gt_error_check(err);
 
+  seqlen = gt_ltrelement_length(element);
   gpf->elem = element;
   results = gt_pdom_results_new();
   tr = gt_translator_new();
@@ -867,9 +939,10 @@ GtPdomResults* gt_pdom_finder_find(GtPdomFinder *gpf, const char *seq,
 /* --------------- GtPdomFinder ------------------------------------- */
 
 static int gt_pdom_finder_load_files(GtPdomFinder *gpf, GtStrArray *files,
-                                     GtError *err)
+                                     GtPdomCutoff cutoff, GtError *err)
 {
   int had_err = 0;
+  GtPdomModel *gpm = NULL;
   unsigned long i;
   gt_assert(gpf && files && err);
   for (i=0;i<gt_str_array_size(files);i++)
@@ -902,19 +975,25 @@ static int gt_pdom_finder_load_files(GtPdomFinder *gpf, GtStrArray *files,
     }
     if (!had_err)
     {
-      GtPdomModel *gpm;
       gpm = gt_pdom_model_new(hmm);
+      if (cutoff == GT_PHMM_CUTOFF_TC) {
+        had_err = gt_pdom_model_set_trusted_cutoff(gpm, err);
+      }
+      if (!had_err && (cutoff == GT_PHMM_CUTOFF_GA)) {
+        had_err = gt_pdom_model_set_gathering_cutoff(gpm, err);
+      }
+      if (!had_err) {
+        had_err = gt_pdom_model_set_evalue_cutoff(gpm, gpf->glob_eval_cutoff,
+                                                  err);
+      }
+      if (had_err) {
+        if (hmmfp) HMMFileClose(hmmfp);
+        break;
+      }
+    }
+    if (!had_err) {
       P7Logoddsify(hmm, true);
       gt_array_add(gpf->models, gpm);
-    }
-    if (!had_err && !SetAutocuts(&gpf->thresh, hmm))
-    {
-      gt_error_set(err, "HMM %s did not contain the GA, TC, or NC "
-                        "cutoffs you needed",
-                   hmm->name);
-      had_err = -1;
-      if (hmmfp) HMMFileClose(hmmfp);
-      break;
     }
     if (hmmfp) HMMFileClose(hmmfp);
   }
@@ -935,6 +1014,7 @@ static void gt_pdom_clear_hmms(GtArray *hmms)
 GtPdomFinder* gt_pdom_finder_new(GtStrArray *hmmfiles, double eval_cutoff,
                                  unsigned int nof_threads,
                                  unsigned int chain_max_gap_length,
+                                 GtPdomCutoff cutoff,
                                  GtError *e)
 {
   int had_err = 0;
@@ -944,15 +1024,9 @@ GtPdomFinder* gt_pdom_finder_new(GtStrArray *hmmfiles, double eval_cutoff,
   gpf->nof_threads = nof_threads;
   gpf->hmm_files = gt_str_array_ref(hmmfiles);
   gpf->chain_max_gap_length = chain_max_gap_length;
-  gpf->thresh.globT   = -FLT_MAX;
-  gpf->thresh.domT    = -FLT_MAX;
-  gpf->thresh.domE    = FLT_MAX;
-  gpf->thresh.autocut = CUT_NONE;
-  gpf->thresh.Z       = 1;
-  gpf->thresh.globE   = eval_cutoff;
   gpf->models = gt_array_new(sizeof (struct GtPdomModel*));
-
-  had_err = gt_pdom_finder_load_files(gpf, hmmfiles, e);
+  gpf->glob_eval_cutoff = eval_cutoff;
+  had_err = gt_pdom_finder_load_files(gpf, hmmfiles, cutoff, e);
   if (had_err)
   {
     gt_pdom_clear_hmms(gpf->models);

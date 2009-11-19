@@ -448,6 +448,7 @@ GtNodeStream* gt_ltrdigest_stream_new(GtNodeStream *in_stream,
                                ls->pdom_opts->evalue_cutoff,
                                ls->pdom_opts->nof_threads,
                                ls->pdom_opts->chain_max_gap_length,
+                               ls->pdom_opts->cutoff,
                                err);
 #endif
   ls->tests_to_run = tests_to_run;

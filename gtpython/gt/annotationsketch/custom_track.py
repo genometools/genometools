@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-# Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+# Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -17,17 +17,18 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-from ctypes import CFUNCTYPE, c_char_p, c_void_p, c_int, c_ulong
+from ctypes import CFUNCTYPE, POINTER, c_char_p, c_void_p, c_int, c_ulong
 from gt.dlload import gtlib
 from gt.annotationsketch.color import Color
 from gt.annotationsketch.style import Style
 from gt.annotationsketch.graphics import Graphics
 from gt.core.error import Error, gterror
 from gt.core.gtrange import Range
+from gt.core.gtstr import Str
 
-RenderFunc = CFUNCTYPE(c_int, c_void_p, c_ulong, Range, c_void_p,
+RenderFunc = CFUNCTYPE(c_int, c_void_p, c_ulong, POINTER(Range), c_void_p,
                        c_void_p)
-TitleFunc = CFUNCTYPE(c_char_p, c_void_p)
+TitleFunc = CFUNCTYPE(c_int, c_void_p, c_void_p)
 HeightFunc = CFUNCTYPE(c_ulong, c_void_p)
 FreeFunc = CFUNCTYPE(c_void_p, c_void_p)
 
@@ -38,8 +39,11 @@ class CustomTrack(object):
 
     # create callbacks to C script wrapper
 
-        def get_title_w(ptr):
-            return self.get_title()
+        def get_title_w(ptr, str):
+            s = Str(str)
+            title = self.get_title()
+            s.append_cstr(title)
+            return 0
 
         self.get_title_cb = TitleFunc(get_title_w)
 
@@ -52,7 +56,7 @@ class CustomTrack(object):
             g = Graphics(graphics)
             s = Style(sty)
             e = Error(err)
-            return self.render(g, ypos, rng, s, e)
+            return self.render(g, ypos, rng.contents, s, e)
 
         self.render_cb = RenderFunc(render_w)
 

@@ -1,6 +1,6 @@
 #
-# Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-# Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+# Copyright (c) 2009 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -15,18 +15,19 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-require 'gtdlload'
-require 'extended/genome_stream'
+require 'extended/custom_visitor'
 
 module GT
-  extend DL::Importable
-  gtdlload "libgenometools"
-  extern "GtNodeStream* gt_gff3_out_stream_new(GtNodeStream*, GtGenFile*)"
+  class CustomVisitorExample < CustomVisitor
+    def initialize()
+      super
+    end
 
-  class GFF3OutStream < GenomeStream
-    def initialize(in_stream)
-      @genome_stream = GT.gt_gff3_out_stream_new(in_stream, nil)
-      @genome_stream.free = GT::symbol("gt_node_stream_delete", "0P")
+    def visit_feature_node(feature_node)
+      new_node = GT::FeatureNode.create(feature_node.get_seqid, "test", \
+                                        100, 1000, '+')
+      feature_node.add_child(new_node)
+      0
     end
   end
 end

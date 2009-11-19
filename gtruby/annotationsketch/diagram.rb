@@ -39,10 +39,16 @@ module GT
       if range.start > range.end
         GT.gterror("range.start > range.end")
       end
+      if feature_index.nil? then
+        GT.gterror("feature index must not be nil!")
+      end
+      if seqid.nil? then
+        GT.gterror("seqid must not be nil!")
+      end
       if !style.is_a?(GT::Style) then
         GT.gterror("'style' parameter must be a Style object!")
       end
-      diagram = GT.gt_diagram_new(feature_index.feature_index, seqid, range,
+      diagram = GT.gt_diagram_new(feature_index, seqid, range,
                                   style, err)
       if diagram.nil? then
         GT::gterror(err)
@@ -57,7 +63,7 @@ module GT
       gtarr = GT::Array.create(DL.sizeof("P"), false)
       array.each do |i|
         if !i.is_a?(GT::FeatureNode) then
-          gterror("Diagram array must only contain FeatureNodes!")
+          GT::gterror("Diagram array must only contain FeatureNodes!")
         end
         gtarr.add(i)
       end

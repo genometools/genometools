@@ -27,6 +27,12 @@
 #include "core/str_array.h"
 #include "ltr/ltrelement.h"
 
+typedef enum {
+  GT_PHMM_CUTOFF_TC,
+  GT_PHMM_CUTOFF_GA,
+  GT_PHMM_CUTOFF_NONE
+} GtPdomCutoff;
+
 typedef struct GtPdomOptions {
   double evalue_cutoff;
   GtStrArray *hmm_files;
@@ -34,6 +40,7 @@ typedef struct GtPdomOptions {
                chain_max_gap_length;
   bool write_alignments,
        write_aaseqs;
+  GtPdomCutoff cutoff;
 } GtPdomOptions;
 
 typedef struct GtPdomFinder GtPdomFinder;
@@ -50,6 +57,7 @@ GtPdomFinder*    gt_pdom_finder_new(GtStrArray *hmmfiles,
                                     double eval_cutoff,
                                     unsigned int nof_threads,
                                     unsigned int chain_max_gap_length,
+                                    GtPdomCutoff cutoff,
                                     GtError*);
 unsigned int     gt_pdom_finder_get_nof_threads(const GtPdomFinder*);
 unsigned int     gt_pdom_finder_get_max_gap_length(const GtPdomFinder*);

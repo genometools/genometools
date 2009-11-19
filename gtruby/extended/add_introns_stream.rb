@@ -23,11 +23,9 @@ module GT
   gtdlload "libgenometools"
   extern "GtNodeStream* gt_add_introns_stream_new(GtNodeStream*)"
 
-  class AddIntronsStream
-    include GT::GenomeStream
-    attr_reader :genome_stream
+  class AddIntronsStream < GenomeStream
     def initialize(in_stream)
-      @genome_stream = GT.gt_add_introns_stream_new(in_stream.genome_stream)
+      @genome_stream = GT.gt_add_introns_stream_new(in_stream)
       @genome_stream.free = GT::symbol("gt_node_stream_delete", "0P")
     end
   end

@@ -23,6 +23,8 @@ module GT
   extern "GtError* gt_error_new()"
   extern "const char* gt_error_get(const GtError*)"
   extern "ibool gt_error_is_set(const GtError*)"
+  extern "const char* gt_error_get(const GtError*)"
+  extern "void gt_error_set(GtError*, const char*)"
   extern "void gt_error_unset(GtError*)"
   extern "void gt_error_delete(GtError*)"
 
@@ -38,6 +40,10 @@ module GT
 
     def get
       GT.gt_error_get(@error)
+    end
+
+    def set(str)
+      GT.gt_error_set(@error, str.to_s)
     end
 
     def is_set?

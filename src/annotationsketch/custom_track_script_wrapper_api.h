@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -23,6 +23,7 @@
 #include "annotationsketch/style_api.h"
 #include "core/error_api.h"
 #include "core/range_api.h"
+#include "core/str_api.h"
 
 /* Implements the <GtCustomTrack> interface. This custom track is
    only used to store pointers to external callbacks, e.g. written in a
@@ -32,11 +33,11 @@ typedef struct GtCustomTrackScriptWrapper GtCustomTrackScriptWrapper;
 
 typedef int           (*GtCtScriptRenderFunc)(GtGraphics*,
                                               unsigned int,
-                                              GtRange,
+                                              GtRange*,
                                               GtStyle*,
                                               GtError*);
 typedef unsigned long (*GtCtScriptGetHeightFunc)(void*);
-typedef const char*   (*GtCtScriptGetTitleFunc)(void*);
+typedef void          (*GtCtScriptGetTitleFunc)(void*, GtStr*);
 typedef void          (*GtCtScriptFreeFunc)(void*);
 
 /* Creates a new <GtCustomTrackScriptWrapper> object. */

@@ -23,12 +23,10 @@ module GT
   gtdlload "libgenometools"
   extern "GtNodeStream* gt_feature_stream_new(GtNodeStream*, GtFeatureIndex*)"
 
-  class FeatureStream
-    include GenomeStream
-    attr_reader :genome_stream
+  class FeatureStream < GenomeStream
     def initialize(genome_stream, feature_index)
-      @genome_stream = GT.gt_feature_stream_new(genome_stream.genome_stream,
-                                             feature_index.feature_index)
+      @genome_stream = GT.gt_feature_stream_new(genome_stream,
+                                                feature_index)
       @genome_stream.free = GT::symbol("gt_node_stream_delete", "0P")
     end
   end
