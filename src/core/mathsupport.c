@@ -48,24 +48,21 @@ bool gt_double_equals_double(double d1, double d2)
 
 int gt_double_compare(double d1, double d2)
 {
-  if (d1 > d2) {
-    if ((d1 - d2) < fabs(d1 * EPSILON))
-      return 0;
-    else
-      return 1;
-  }
-  if (d1 < d2) {
-    if ((d2 - d1) < fabs(d2 * EPSILON))
-      return 0;
-    else
-      return -1;
-  }
-  return 0;
+  if (fabs(d1 - d2) <= EPSILON)
+    return 0;
+  if (d1 > d2)
+    return 1;
+  else
+    return -1;
 }
 
 bool gt_double_smaller_double(double d1, double d2)
 {
-  return (d1 - d2 < EPSILON) ? true : false;
+  if (d1 > d2)
+    return false;
+  if (d2 - d1 <= EPSILON)
+    return false;
+  return true;
 }
 
 unsigned long gt_rand_max(unsigned long maximal_value)
