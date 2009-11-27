@@ -36,7 +36,7 @@ struct GthXMLPGLVisitor {
 static void xml_outputAGSline(const GthAGS *ags, unsigned long agsnum,
                               unsigned int indentlevel, GtFile *outfp)
 {
-  ExoninfoAGS *exoninfoAGS;
+  GthExonAGS *exon;
   unsigned long i;
 
   gth_indent(outfp, indentlevel);
@@ -48,11 +48,11 @@ static void xml_outputAGSline(const GthAGS *ags, unsigned long agsnum,
   indentlevel++;
 
   for (i = 0; i < gth_ags_num_of_exons(ags); i++) {
-    exoninfoAGS = gth_ags_get_exon(ags, i);
+    exon = gth_ags_get_exon(ags, i);
     gth_indent(outfp, indentlevel);
     gt_file_xprintf(outfp, "<exon e_start=\"%lu\" e_stop=\"%lu\"/>\n",
-                    SHOWGENPOSAGS(exoninfoAGS->range.start),
-                    SHOWGENPOSAGS(exoninfoAGS->range.end));
+                    SHOWGENPOSAGS(exon->range.start),
+                    SHOWGENPOSAGS(exon->range.end));
   }
 
   indentlevel--;
@@ -80,12 +80,12 @@ static void xml_outputSCRline(const GthAGS *ags, unsigned int indentlevel,
                        "acc_prob=\"%.3f\" e_score=\"%.3f\"/>\n",
                        splicesiteprob->donorsiteprob,
                        splicesiteprob->acceptorsiteprob,
-                       ((ExoninfoAGS*) gt_array_get(ags->exons, i))->exonscore);
+                       ((GthExonAGS*) gt_array_get(ags->exons, i))->exonscore);
   }
 
   gth_indent(outfp, indentlevel);
   gt_file_xprintf(outfp, "<exon-only e_score=\"%.3f\"/>\n",
-                  ((ExoninfoAGS*) gt_array_get(ags->exons, i))->exonscore);
+                  ((GthExonAGS*) gt_array_get(ags->exons, i))->exonscore);
   indentlevel--;
   gth_indent(outfp, indentlevel);
   gt_file_xprintf(outfp, "</SCR_line>\n");
@@ -96,7 +96,7 @@ static void xml_output_exon_intron_lines(const GthAGS *ags,
                                          GtFile *outfp)
 {
   Splicesiteprob *splicesiteprob;
-  ExoninfoAGS *exoninfoAGS;
+  GthExonAGS *exon;
   unsigned long i, leftexonborder, rightexonborder, exonlength,
                 leftintronborder = GT_UNDEF_ULONG, rightintronborder,
                 intronlength;
@@ -111,11 +111,11 @@ static void xml_output_exon_intron_lines(const GthAGS *ags,
   indentlevel++;
 
   for (i = 0; i < gt_array_size(ags->exons); i++) {
-    exoninfoAGS     = (ExoninfoAGS*) gt_array_get(ags->exons, i);
-    leftexonborder  = exoninfoAGS->range.start;
-    rightexonborder = exoninfoAGS->range.end;
+    exon            = (GthExonAGS*) gt_array_get(ags->exons, i);
+    leftexonborder  = exon->range.start;
+    rightexonborder = exon->range.end;
     exonlength      = rightexonborder - leftexonborder + 1;
-    exonscore       = exoninfoAGS->exonscore;
+    exonscore       = exon->exonscore;
 
     if (i > 0) {
       rightintronborder = leftexonborder - 1;

@@ -32,7 +32,7 @@
 typedef struct {
   GtRange range; /* the borders of the exon in the genomic sequence */
   GthDbl exonscore;
-} ExoninfoAGS;
+} GthExonAGS;
 
 typedef struct {
   GthFlt donorsiteprob,
@@ -68,7 +68,7 @@ unsigned long gth_ags_filenum(const GthAGS*);
 unsigned long gth_ags_total_length(const GthAGS*);
 unsigned long gth_ags_genomic_offset(const GthAGS*);
 GtStr*        gth_ags_get_gen_id(const GthAGS*);
-ExoninfoAGS*  gth_ags_get_exon(const GthAGS *ags, unsigned long exon);
+GthExonAGS*   gth_ags_get_exon(const GthAGS *ags, unsigned long exon);
 unsigned long gth_ags_num_of_exons(const GthAGS *ags);
 GtStrand      gth_ags_genomic_strand(const GthAGS*);
 GtRange       gth_ags_donor_site_range(const GthAGS*, unsigned long intron);

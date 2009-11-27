@@ -45,7 +45,7 @@ static void determineAGSscore(GthAGS *ags, double sortagswf)
   if (numofexons == 1) {
     /* if the AGS contains only one exon, the exonscore equals the overall score
     */
-    ags->overallscore = ((ExoninfoAGS*) gt_array_get_first(ags->exons))
+    ags->overallscore = ((GthExonAGS*) gt_array_get_first(ags->exons))
                         ->exonscore;
   }
   else {
@@ -53,7 +53,7 @@ static void determineAGSscore(GthAGS *ags, double sortagswf)
        site probability */
     for (i = 0; i < numofexons; i++) {
       /* sum them up */
-      average_exon_score += ((ExoninfoAGS*) gt_array_get(ags->exons, i))
+      average_exon_score += ((GthExonAGS*) gt_array_get(ags->exons, i))
                             ->exonscore;
       if (i > 0) {
         splicesiteprob = gt_array_get(ags->splicesiteprobs, i-1);

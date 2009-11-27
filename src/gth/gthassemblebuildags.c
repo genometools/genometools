@@ -85,7 +85,7 @@ void buildAGSfromassembly(GthAGS *ags, GtBittab *assembly, GtArray *saclusters)
 {
   unsigned long i;
   GtArray *nodes;
-  ExoninfoAGS exonAGS;
+  GthExonAGS exonAGS;
   Splicesiteprob splicesiteprob;
   Exonnode *exonnode;
 

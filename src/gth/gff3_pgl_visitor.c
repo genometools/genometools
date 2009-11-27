@@ -77,7 +77,7 @@ static void showPGLinGFF3(GthPGL *pgl,
                           SequenceRegionFactory *sequence_region_factory,
                           GtNodeVisitor *gff3_visitor, GtStr *gthsourcetag)
 {
-  ExoninfoAGS *exoninfoAGS, *first_exoninfoAGS, *last_exoninfoAGS;
+  GthExonAGS *exon, *first_exon, *last_exon;
   GtFeatureNode *gene_feature, *mrna_feature, *exon_feature;
   unsigned long i, j;
   GtRange range;
@@ -101,14 +101,14 @@ static void showPGLinGFF3(GthPGL *pgl,
   for (i = 0; i < gth_pgl_num_of_ags(pgl); i++) {
     ags = gth_pgl_get_ags(pgl, i);
     /* create mRNA feature */
-    first_exoninfoAGS = (ExoninfoAGS*) gt_array_get_first(ags->exons);
-    last_exoninfoAGS  = (ExoninfoAGS*) gt_array_get_last(ags->exons);
+    first_exon = (GthExonAGS*) gt_array_get_first(ags->exons);
+    last_exon  = (GthExonAGS*) gt_array_get_last(ags->exons);
     range.start = gth_pgl_is_forward(pgl)
-                  ? SHOWGENPOSAGS(first_exoninfoAGS->range.start)
-                  : SHOWGENPOSAGS(last_exoninfoAGS->range.end);
+                  ? SHOWGENPOSAGS(first_exon->range.start)
+                  : SHOWGENPOSAGS(last_exon->range.end);
     range.end   = gth_pgl_is_forward(pgl)
-                  ? SHOWGENPOSAGS(last_exoninfoAGS->range.end)
-                  : SHOWGENPOSAGS(first_exoninfoAGS->range.start);
+                  ? SHOWGENPOSAGS(last_exon->range.end)
+                  : SHOWGENPOSAGS(first_exon->range.start);
     gt_assert(range.start <= range.end);
     mrna_feature = (GtFeatureNode*)
                    gt_feature_node_new(seqid, gt_ft_mRNA, range.start,
@@ -143,20 +143,20 @@ static void showPGLinGFF3(GthPGL *pgl,
       }
 
       /* create exon */
-      exoninfoAGS = gt_array_get(ags->exons, j);
+      exon = gt_array_get(ags->exons, j);
       range.start = gth_pgl_is_forward(pgl)
-                    ? SHOWGENPOSAGS(exoninfoAGS->range.start)
-                    : SHOWGENPOSAGS(exoninfoAGS->range.end);
+                    ? SHOWGENPOSAGS(exon->range.start)
+                    : SHOWGENPOSAGS(exon->range.end);
       range.end = gth_pgl_is_forward(pgl)
-                  ? SHOWGENPOSAGS(exoninfoAGS->range.end)
-                  : SHOWGENPOSAGS(exoninfoAGS->range.start);
+                  ? SHOWGENPOSAGS(exon->range.end)
+                  : SHOWGENPOSAGS(exon->range.start);
       gt_assert(range.start <= range.end);
       exon_feature = (GtFeatureNode*)
                      gt_feature_node_new(seqid, gt_ft_exon, range.start,
                                          range.end,
                                          gth_ags_genomic_strand(ags));
       gt_feature_node_set_source(exon_feature, gthsourcetag);
-      gt_feature_node_set_score(exon_feature, exoninfoAGS->exonscore);
+      gt_feature_node_set_score(exon_feature, exon->exonscore);
       gt_feature_node_add_child(mrna_feature, exon_feature);
     }
   }

@@ -37,7 +37,7 @@ GthAGS* gth_ags_new(const GthPGL *pgl)
 
   ags->gen_id = NULL;
 
-  ags->exons = gt_array_new(sizeof (ExoninfoAGS));
+  ags->exons = gt_array_new(sizeof (GthExonAGS));
   ags->splicesiteprobs = gt_array_new(sizeof (Splicesiteprob));
   ags->alignments = gt_array_new(sizeof (GthSA*));
 
@@ -88,7 +88,7 @@ GtStr* gth_ags_get_gen_id(const GthAGS *ags)
   return ags->gen_id;
 }
 
-ExoninfoAGS* gth_ags_get_exon(const GthAGS *ags, unsigned long exon)
+GthExonAGS* gth_ags_get_exon(const GthAGS *ags, unsigned long exon)
 {
   gt_assert(ags && ags->exons);
   gt_assert(exon < gt_array_size(ags->exons));
@@ -110,19 +110,19 @@ GtStrand gth_ags_genomic_strand(const GthAGS *ags)
 static unsigned long gth_ags_left_intron_border(const GthAGS *ags,
                                             unsigned long intron)
 {
-  ExoninfoAGS *exoninfo;
+  GthExonAGS *exon;
   gt_assert(ags);
-  exoninfo = gth_ags_get_exon(ags, intron);
-  return SHOWGENPOSAGS(exoninfo->range.end + 1);
+  exon = gth_ags_get_exon(ags, intron);
+  return SHOWGENPOSAGS(exon->range.end + 1);
 }
 
 static unsigned long gth_ags_right_intron_border(const GthAGS *ags,
                                              unsigned long intron)
 {
-  ExoninfoAGS *exoninfo;
+  GthExonAGS *exon;
   gt_assert(ags);
-  exoninfo = gth_ags_get_exon(ags, intron + 1);
-  return SHOWGENPOSAGS(exoninfo->range.start - 1);
+  exon = gth_ags_get_exon(ags, intron + 1);
+  return SHOWGENPOSAGS(exon->range.start - 1);
 }
 
 GtRange gth_ags_donor_site_range(const GthAGS *ags, unsigned long intron)

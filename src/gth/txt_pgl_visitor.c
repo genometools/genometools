@@ -38,17 +38,16 @@ struct GthTxtPGLVisitor {
 static void outputAGSline(const GthAGS *ags, unsigned long agsnum,
                           GtFile *outfp)
 {
-  ExoninfoAGS *exoninfoAGS;
+  GthExonAGS *exon;
   unsigned long i;
 
   gt_file_xprintf(outfp, "AGS-%lu (",  agsnum + OUTPUTOFFSET);
   for (i = 0; i < gth_ags_num_of_exons(ags); i++) {
-    exoninfoAGS = gth_ags_get_exon(ags, i);
+    exon = gth_ags_get_exon(ags, i);
     if (i > 0)
       gt_file_xfputc(',', outfp);
-    gt_file_xprintf(outfp, "%lu  %lu",
-                       SHOWGENPOSAGS(exoninfoAGS->range.start),
-                       SHOWGENPOSAGS(exoninfoAGS->range.end));
+    gt_file_xprintf(outfp, "%lu  %lu", SHOWGENPOSAGS(exon->range.start),
+                    SHOWGENPOSAGS(exon->range.end));
   }
   gt_file_xprintf(outfp, ")\n");
 }
@@ -62,12 +61,12 @@ static void outputSCRline(const GthAGS *ags, GtFile *outfp)
   for (i = 0; i < gt_array_size(ags->exons) - 1; i++) {
     splicesiteprob = (Splicesiteprob*) gt_array_get(ags->splicesiteprobs, i);
     gt_file_xprintf(outfp, "e %5.3f  d %5.3f a %5.3f,",
-                    ((ExoninfoAGS*) gt_array_get(ags->exons, i))->exonscore,
+                    ((GthExonAGS*) gt_array_get(ags->exons, i))->exonscore,
                     splicesiteprob->donorsiteprob,
                     splicesiteprob->acceptorsiteprob);
   }
   gt_file_xprintf(outfp, "e %5.3f)\n",
-            ((ExoninfoAGS*) gt_array_get(ags->exons, i))->exonscore);
+                  ((GthExonAGS*) gt_array_get(ags->exons, i))->exonscore);
   gt_file_xfputc('\n', outfp);
 }
 
@@ -75,7 +74,7 @@ static void output_exon_intron_lines(const GthAGS *ags, int widthforgenpos,
                                      GtFile *outfp)
 {
   Splicesiteprob *splicesiteprob;
-  ExoninfoAGS *exoninfoAGS;
+  GthExonAGS *exon;
   unsigned long i, leftexonborder, rightexonborder, exonlength,
                 leftintronborder = GT_UNDEF_ULONG, rightintronborder,
                 intronlength;
@@ -83,11 +82,11 @@ static void output_exon_intron_lines(const GthAGS *ags, int widthforgenpos,
   GthFlt donorsiteprob, acceptorsiteprob;
 
   for (i = 0; i < gt_array_size(ags->exons); i++) {
-    exoninfoAGS     = (ExoninfoAGS*) gt_array_get(ags->exons, i);
-    leftexonborder  = exoninfoAGS->range.start;
-    rightexonborder = exoninfoAGS->range.end;
+    exon            = (GthExonAGS*) gt_array_get(ags->exons, i);
+    leftexonborder  = exon->range.start;
+    rightexonborder = exon->range.end;
     exonlength      = rightexonborder - leftexonborder + 1;
-    exonscore       = exoninfoAGS->exonscore;
+    exonscore       = exon->exonscore;
 
     if (i > 0) {
       rightintronborder = leftexonborder - 1;

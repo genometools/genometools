@@ -330,7 +330,7 @@ void outputtranslationandorf(unsigned long pglnum, const GthAGS *ags,
 
   ranges = gt_array_new(sizeof (GtRange));
   for (i = 0; i < gt_array_size(ags->exons); i++)
-    gt_array_add(ranges, ((ExoninfoAGS*) gt_array_get(ags->exons, i))->range);
+    gt_array_add(ranges, ((GthExonAGS*) gt_array_get(ags->exons, i))->range);
 
   /* get genomic sequence */
   gen_seq_orig = gth_input_original_genomic_sequence(input,
