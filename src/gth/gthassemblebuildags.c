@@ -101,8 +101,8 @@ void buildAGSfromassembly(GthAGS *ags, GtBittab *assembly, GtArray *saclusters)
   /* save exons */
   for (i = 0; i < gt_array_size(nodes); i++) {
     exonnode = gt_array_get(nodes, i);
-    exonAGS.range     = exonnode->range;
-    exonAGS.exonscore = computeexonscore(exonnode);
+    exonAGS.range = exonnode->range;
+    exonAGS.score = computeexonscore(exonnode);
     gt_array_add(ags->exons, exonAGS);
   }
 

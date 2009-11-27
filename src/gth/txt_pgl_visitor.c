@@ -61,12 +61,12 @@ static void outputSCRline(const GthAGS *ags, GtFile *outfp)
   for (i = 0; i < gt_array_size(ags->exons) - 1; i++) {
     splicesiteprob = (Splicesiteprob*) gt_array_get(ags->splicesiteprobs, i);
     gt_file_xprintf(outfp, "e %5.3f  d %5.3f a %5.3f,",
-                    ((GthExonAGS*) gt_array_get(ags->exons, i))->exonscore,
+                    ((GthExonAGS*) gt_array_get(ags->exons, i))->score,
                     splicesiteprob->donorsiteprob,
                     splicesiteprob->acceptorsiteprob);
   }
   gt_file_xprintf(outfp, "e %5.3f)\n",
-                  ((GthExonAGS*) gt_array_get(ags->exons, i))->exonscore);
+                  ((GthExonAGS*) gt_array_get(ags->exons, i))->score);
   gt_file_xfputc('\n', outfp);
 }
 
@@ -86,7 +86,7 @@ static void output_exon_intron_lines(const GthAGS *ags, int widthforgenpos,
     leftexonborder  = exon->range.start;
     rightexonborder = exon->range.end;
     exonlength      = rightexonborder - leftexonborder + 1;
-    exonscore       = exon->exonscore;
+    exonscore       = exon->score;
 
     if (i > 0) {
       rightintronborder = leftexonborder - 1;

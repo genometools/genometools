@@ -31,7 +31,7 @@
 
 typedef struct {
   GtRange range; /* the borders of the exon in the genomic sequence */
-  GthDbl exonscore;
+  GthDbl score;
 } GthExonAGS;
 
 typedef struct {

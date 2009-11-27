@@ -80,12 +80,12 @@ static void xml_outputSCRline(const GthAGS *ags, unsigned int indentlevel,
                        "acc_prob=\"%.3f\" e_score=\"%.3f\"/>\n",
                        splicesiteprob->donorsiteprob,
                        splicesiteprob->acceptorsiteprob,
-                       ((GthExonAGS*) gt_array_get(ags->exons, i))->exonscore);
+                       ((GthExonAGS*) gt_array_get(ags->exons, i))->score);
   }
 
   gth_indent(outfp, indentlevel);
   gt_file_xprintf(outfp, "<exon-only e_score=\"%.3f\"/>\n",
-                  ((GthExonAGS*) gt_array_get(ags->exons, i))->exonscore);
+                  ((GthExonAGS*) gt_array_get(ags->exons, i))->score);
   indentlevel--;
   gth_indent(outfp, indentlevel);
   gt_file_xprintf(outfp, "</SCR_line>\n");
@@ -115,7 +115,7 @@ static void xml_output_exon_intron_lines(const GthAGS *ags,
     leftexonborder  = exon->range.start;
     rightexonborder = exon->range.end;
     exonlength      = rightexonborder - leftexonborder + 1;
-    exonscore       = exon->exonscore;
+    exonscore       = exon->score;
 
     if (i > 0) {
       rightintronborder = leftexonborder - 1;

@@ -156,7 +156,7 @@ static void showPGLinGFF3(GthPGL *pgl,
                                          range.end,
                                          gth_ags_genomic_strand(ags));
       gt_feature_node_set_source(exon_feature, gthsourcetag);
-      gt_feature_node_set_score(exon_feature, exon->exonscore);
+      gt_feature_node_set_score(exon_feature, exon->score);
       gt_feature_node_add_child(mrna_feature, exon_feature);
     }
   }
