@@ -93,7 +93,7 @@ static GtOPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
 
   oprval = gt_option_parser_parse(op, &parsed_args, argc, argv, gt_versionfunc,
                                   err);
-  if (oprval == OPTIONPARSER_OK)
+  if (oprval == GT_OPTION_PARSER_OK)
   {
     if (!gt_option_is_set(optionfmout))
     {
@@ -101,7 +101,7 @@ static GtOPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
       {
         gt_error_set(err,"if more than one index is given, then "
                           "option -fmout is mandatory");
-        oprval = OPTIONPARSER_ERROR;
+        oprval = GT_OPTION_PARSER_ERROR;
       } else
       {
         char *basenameptr;
@@ -114,10 +114,10 @@ static GtOPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
     }
   }
   gt_option_parser_delete(op);
-  if (oprval == OPTIONPARSER_OK && parsed_args != argc)
+  if (oprval == GT_OPTION_PARSER_OK && parsed_args != argc)
   {
     gt_error_set(err,"superfluous program parameters");
-    oprval = OPTIONPARSER_ERROR;
+    oprval = GT_OPTION_PARSER_ERROR;
   }
   return oprval;
 }
@@ -169,12 +169,12 @@ static int mkfmindexoptions(Mkfmcallinfo *mkfmcallinfo,
 
   gt_error_check(err);
   rval = parsemkfmindex(mkfmcallinfo,argc,argv,err);
-  if (rval == OPTIONPARSER_ERROR)
+  if (rval == GT_OPTION_PARSER_ERROR)
   {
     retval = -1;
   } else
   {
-    if (rval == OPTIONPARSER_REQUESTS_EXIT)
+    if (rval == GT_OPTION_PARSER_REQUESTS_EXIT)
     {
       retval = 2;
     }

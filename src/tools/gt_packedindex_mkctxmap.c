@@ -59,13 +59,13 @@ gt_packedindex_mkctxmap(int argc, const char *argv[], GtError *err)
       bool exitNow = false;
       switch (parseMkCtxMapOptions(&parsedArgs, argc, argv, &params, err))
       {
-      case OPTIONPARSER_OK:
+      case GT_OPTION_PARSER_OK:
         break;
-      case OPTIONPARSER_ERROR:
+      case GT_OPTION_PARSER_ERROR:
         had_err = true;
         exitNow = true;
         break;
-      case OPTIONPARSER_REQUESTS_EXIT:
+      case GT_OPTION_PARSER_REQUESTS_EXIT:
         exitNow = true;
         break;
       }

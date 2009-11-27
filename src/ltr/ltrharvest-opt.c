@@ -465,31 +465,31 @@ static GtOPrval parse_options(int *parsed_args,
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
                                   err);
   lo->vicinityforcorrectboundaries = (Seqpos) vicinityforcorrectboundaries;
-  if (oprval == OPTIONPARSER_OK)
+  if (oprval == GT_OPTION_PARSER_OK)
   {
     if (lo->repeatinfo.lmin > lo->repeatinfo.lmax)
     {
       gt_error_set(err,"argument of -minlenltr is greater than argument of"
           " -maxlenltr");
-      oprval = OPTIONPARSER_ERROR;
+      oprval = GT_OPTION_PARSER_ERROR;
     }
     if (lo->repeatinfo.dmin > lo->repeatinfo.dmax)
     {
       gt_error_set(err,
           "argument of -mindistltr is greater than argument of -maxdistltr");
-      oprval = OPTIONPARSER_ERROR;
+      oprval = GT_OPTION_PARSER_ERROR;
     }
     if (lo->repeatinfo.lmax > lo->repeatinfo.dmin)
     {
       gt_error_set(err,"argument of -maxlenltr is greater than argument of"
                     " -mindistltr");
-      oprval = OPTIONPARSER_ERROR;
+      oprval = GT_OPTION_PARSER_ERROR;
     }
     if (lo->minlengthTSD > lo->maxlengthTSD)
     {
       gt_error_set(err,
           "argument of -mintsd is greater than argument of -maxtsd");
-      oprval = OPTIONPARSER_ERROR;
+      oprval = GT_OPTION_PARSER_ERROR;
     }
 
     /* If option motif is set,
@@ -500,7 +500,7 @@ static GtOPrval parse_options(int *parsed_args,
       {
         gt_error_set(err,
             "argument of -motif has not exactly 4 characters");
-        oprval = OPTIONPARSER_ERROR;
+        oprval = GT_OPTION_PARSER_ERROR;
       }
       lo->motif.firstleft = (GtUchar)  gt_str_get(lo->motif.str_motif)[0];
       lo->motif.secondleft = (GtUchar)  gt_str_get(lo->motif.str_motif)[1];
@@ -569,7 +569,7 @@ static GtOPrval parse_options(int *parsed_args,
       {
         gt_error_set(err,
             "arguments of -range: first arg must be <= than second arg");
-        oprval = OPTIONPARSER_ERROR;
+        oprval = GT_OPTION_PARSER_ERROR;
       }
     }
   }
@@ -599,13 +599,13 @@ int ltrharvestoptions(LTRharvestoptions *lo, int argc, const char **argv,
 
   /** init LTRharvestoptions lo **/
   rval = parse_options(&parsed_args, lo, argc, argv, err);
-  if (rval == OPTIONPARSER_OK)
+  if (rval == GT_OPTION_PARSER_OK)
   {
     if (parsed_args != argc)
     {
       gt_error_set(err, "Listing of options and arguments is not correct.");
-      rval = OPTIONPARSER_ERROR;
+      rval = GT_OPTION_PARSER_ERROR;
     }
   }
-  return (rval == OPTIONPARSER_OK) ? 0: -1;
+  return (rval == GT_OPTION_PARSER_OK) ? 0: -1;
 }

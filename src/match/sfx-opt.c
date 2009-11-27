@@ -304,12 +304,12 @@ static GtOPrval parse_options(int *parsed_args,
   }
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
                                   err);
-  if (oprval == OPTIONPARSER_OK)
+  if (oprval == GT_OPTION_PARSER_OK)
   {
     if (gt_option_is_set(optiondb) && gt_str_array_size(so->filenametab) == 0)
     {
       gt_error_set(err,"missing argument to option -db");
-      oprval = OPTIONPARSER_ERROR;
+      oprval = GT_OPTION_PARSER_ERROR;
     } else
     {
       if (!gt_option_is_set(optionindexname))
@@ -320,7 +320,7 @@ static GtOPrval parse_options(int *parsed_args,
           {
             gt_error_set(err,"if more than one input file is given, then "
                              "option -indexname is mandatory");
-            oprval = OPTIONPARSER_ERROR;
+            oprval = GT_OPTION_PARSER_ERROR;
           } else
           {
             char *basenameptr;
@@ -340,7 +340,7 @@ static GtOPrval parse_options(int *parsed_args,
       }
     }
   }
-  if (oprval == OPTIONPARSER_OK)
+  if (oprval == GT_OPTION_PARSER_OK)
   {
     if (gt_option_is_set(optionplain))
     {
@@ -350,12 +350,12 @@ static GtOPrval parse_options(int *parsed_args,
       {
         gt_error_set(err,"if option -plain is used, then any of the options "
                          "-dna, -protein, or -smap is mandatory");
-        oprval = OPTIONPARSER_ERROR;
+        oprval = GT_OPTION_PARSER_ERROR;
       }
     }
   }
   so->sfxstrategy.absoluteinversesuftab = false;
-  if (oprval == OPTIONPARSER_OK && doesa)
+  if (oprval == GT_OPTION_PARSER_OK && doesa)
   {
     gt_assert(optionmaxdepth != NULL);
     if (gt_option_is_set(optionmaxdepth))
@@ -384,12 +384,12 @@ static GtOPrval parse_options(int *parsed_args,
             } else
             {
               gt_error_set(err, "%s", maxdepthmsg);
-              oprval = OPTIONPARSER_ERROR;
+              oprval = GT_OPTION_PARSER_ERROR;
             }
           }
         }
       }
-      if (oprval != OPTIONPARSER_ERROR && so->numofparts > 1U)
+      if (oprval != GT_OPTION_PARSER_ERROR && so->numofparts > 1U)
       {
         if (so->sfxstrategy.ssortmaxdepth.valueunsignedint
             == MAXDEPTH_AUTOMATIC)
@@ -399,10 +399,10 @@ static GtOPrval parse_options(int *parsed_args,
         {
           gt_error_set(err,"option -maxdepth with argument can only be used "
                            "either without -parts or with option -parts 1");
-          oprval = OPTIONPARSER_ERROR;
+          oprval = GT_OPTION_PARSER_ERROR;
         }
       }
-      if (oprval != OPTIONPARSER_ERROR)
+      if (oprval != GT_OPTION_PARSER_ERROR)
       {
         if (so->sfxstrategy.differencecover == 0)
         {
@@ -421,13 +421,13 @@ static GtOPrval parse_options(int *parsed_args,
   {
     gt_error_set(err,"option -maxdepth with argument dc can not be combined "
                      "with option lcp");
-    oprval = OPTIONPARSER_ERROR;
+    oprval = GT_OPTION_PARSER_ERROR;
   }
-  if (oprval == OPTIONPARSER_OK && !doesa)
+  if (oprval == GT_OPTION_PARSER_OK && !doesa)
   {
     computePackedIndexDefaults(&so->bwtIdxParams, BWTBaseFeatures);
   }
-  if (oprval == OPTIONPARSER_OK && gt_option_is_set(optionkys))
+  if (oprval == GT_OPTION_PARSER_OK && gt_option_is_set(optionkys))
   {
     so->outkystab = true;
     if (strcmp(gt_str_get(so->optionkysargumentstring),"sort") == 0)
@@ -439,23 +439,23 @@ static GtOPrval parse_options(int *parsed_args,
       {
         gt_error_set(err,"illegal argument to option -kys: either use no "
                          "argument or argument \"sort\"");
-        oprval = OPTIONPARSER_ERROR;
+        oprval = GT_OPTION_PARSER_ERROR;
       }
     }
   }
   gt_option_parser_delete(op);
-  if (oprval == OPTIONPARSER_OK && *parsed_args != argc)
+  if (oprval == GT_OPTION_PARSER_OK && *parsed_args != argc)
   {
     gt_error_set(err,"superfluous program parameters");
-    oprval = OPTIONPARSER_ERROR;
+    oprval = GT_OPTION_PARSER_ERROR;
   }
-  if (oprval == OPTIONPARSER_OK)
+  if (oprval == GT_OPTION_PARSER_OK)
   {
     int retval = parsereadmode(gt_str_get(dirarg),err);
 
     if (retval < 0)
     {
-      oprval = OPTIONPARSER_ERROR;
+      oprval = GT_OPTION_PARSER_ERROR;
     } else
     {
       so->readmode = (Readmode) retval;
@@ -582,17 +582,17 @@ int suffixeratoroptions(Suffixeratoroptions *so,
   so->outbwttab = false;
   so->outbcktab = false;
   rval = parse_options(&parsed_args, doesa, so, argc, argv, err);
-  if (rval == OPTIONPARSER_ERROR)
+  if (rval == GT_OPTION_PARSER_ERROR)
   {
     retval = -1;
   } else
   {
-    if (rval == OPTIONPARSER_REQUESTS_EXIT)
+    if (rval == GT_OPTION_PARSER_REQUESTS_EXIT)
     {
       retval = 2;
     } else
     {
-      if (rval == OPTIONPARSER_OK)
+      if (rval == GT_OPTION_PARSER_OK)
       {
         if (so->beverbose)
         {

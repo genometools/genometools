@@ -306,7 +306,7 @@ int gt_patternmatch(int argc, const char **argv, GtError *err)
 
   pmopt.indexname = gt_str_new();
   oprval = parse_options(&pmopt,&parsed_args, argc, argv, err);
-  if (oprval == OPTIONPARSER_OK)
+  if (oprval == GT_OPTION_PARSER_OK)
   {
     gt_assert(parsed_args == argc);
     if (callpatternmatcher(&pmopt,err) != 0)
@@ -315,11 +315,11 @@ int gt_patternmatch(int argc, const char **argv, GtError *err)
     }
   }
   gt_str_delete(pmopt.indexname);
-  if (oprval == OPTIONPARSER_REQUESTS_EXIT)
+  if (oprval == GT_OPTION_PARSER_REQUESTS_EXIT)
   {
     return 0;
   }
-  if (oprval == OPTIONPARSER_ERROR)
+  if (oprval == GT_OPTION_PARSER_ERROR)
   {
     return -1;
   }

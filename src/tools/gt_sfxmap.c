@@ -201,9 +201,9 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
 
   switch (parse_options(&sfxmapoptions,&parsed_args, argc, argv, err))
   {
-    case OPTIONPARSER_OK: break;
-    case OPTIONPARSER_ERROR: return -1;
-    case OPTIONPARSER_REQUESTS_EXIT: return 0;
+    case GT_OPTION_PARSER_OK: break;
+    case GT_OPTION_PARSER_ERROR: return -1;
+    case GT_OPTION_PARSER_REQUESTS_EXIT: return 0;
   }
   if (argc < 2)
   {

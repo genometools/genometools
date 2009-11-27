@@ -58,11 +58,11 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], GtError *err)
 
   switch (parseChkIndexOptions(&parsedArgs, argc, argv, &params, err))
   {
-    case OPTIONPARSER_OK:
+    case GT_OPTION_PARSER_OK:
       break;
-    case OPTIONPARSER_ERROR:
+    case GT_OPTION_PARSER_ERROR:
       return -1;
-    case OPTIONPARSER_REQUESTS_EXIT:
+    case GT_OPTION_PARSER_REQUESTS_EXIT:
       return 0;
   }
 

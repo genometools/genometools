@@ -75,12 +75,12 @@ int gt_splicesiteinfo(int argc, const char **argv, GtError *err)
   arguments.seqfile = gt_str_new();
   arguments.regionmapping = gt_str_new();
   switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
-    case OPTIONPARSER_OK: break;
-    case OPTIONPARSER_ERROR:
+    case GT_OPTION_PARSER_OK: break;
+    case GT_OPTION_PARSER_ERROR:
       gt_str_delete(arguments.regionmapping);
       gt_str_delete(arguments.seqfile);
       return -1;
-    case OPTIONPARSER_REQUESTS_EXIT:
+    case GT_OPTION_PARSER_REQUESTS_EXIT:
       gt_str_delete(arguments.regionmapping);
       gt_str_delete(arguments.seqfile);
       return 0;

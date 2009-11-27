@@ -184,11 +184,11 @@ static GtOPrval parse_options(int *parsed_args,
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
                                   err);
 
-  if (oprval == OPTIONPARSER_OK && !force &&
+  if (oprval == GT_OPTION_PARSER_OK && !force &&
       gt_file_exists(argv[*parsed_args])) {
     gt_error_set(err, "file \"%s\" exists already. use option -force to "
                    "overwrite", argv[*parsed_args]);
-    oprval = OPTIONPARSER_ERROR;
+    oprval = GT_OPTION_PARSER_ERROR;
   }
 
   /* free */
@@ -243,15 +243,15 @@ int gt_sketch(int argc, const char **argv, GtError *err)
   gt_str_append_cstr(gt_style_file, "/sketch/default.style");
   arguments.stylefile = gt_str_new_cstr(gt_str_get(gt_style_file));
   switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
-    case OPTIONPARSER_OK: break;
-    case OPTIONPARSER_ERROR:
+    case GT_OPTION_PARSER_OK: break;
+    case GT_OPTION_PARSER_ERROR:
       gt_str_delete(arguments.stylefile);
       gt_str_delete(gt_style_file);
       gt_str_delete(arguments.seqid);
       gt_str_delete(arguments.format);
       gt_str_delete(arguments.input);
       return -1;
-    case OPTIONPARSER_REQUESTS_EXIT:
+    case GT_OPTION_PARSER_REQUESTS_EXIT:
       gt_str_delete(arguments.stylefile);
       gt_str_delete(gt_style_file);
       gt_str_delete(arguments.seqid);

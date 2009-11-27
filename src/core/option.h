@@ -32,9 +32,9 @@ typedef struct GtOption GtOption;
 
 /* possible option parser return values */
 typedef enum {
-  OPTIONPARSER_OK,           /* everything went fine */
-  OPTIONPARSER_ERROR,        /* an error occured during option parsing */
-  OPTIONPARSER_REQUESTS_EXIT /* the option parser requests an exit, because
+  GT_OPTION_PARSER_OK,           /* everything went fine */
+  GT_OPTION_PARSER_ERROR,        /* an error occured during option parsing */
+  GT_OPTION_PARSER_REQUESTS_EXIT /* the option parser requests an exit, because
                                 option -help, -helpdev, or -version was used */
 } GtOPrval;
 

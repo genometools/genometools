@@ -67,12 +67,12 @@ static void proc_env_options(void)
   /* parse options contained in $GT_ENV_OPTIONS */
   err = gt_error_new();
   switch (parse_env_options(argc, (const char**) argv, err)) {
-    case OPTIONPARSER_OK: break;
-    case OPTIONPARSER_ERROR:
+    case GT_OPTION_PARSER_OK: break;
+    case GT_OPTION_PARSER_ERROR:
       fprintf(stderr, "error parsing $GT_ENV_OPTIONS: %s\n", gt_error_get(err));
       gt_error_unset(err);
       break;
-    case OPTIONPARSER_REQUESTS_EXIT: break;
+    case GT_OPTION_PARSER_REQUESTS_EXIT: break;
   }
   gt_error_delete(err);
   gt_free(env_options);

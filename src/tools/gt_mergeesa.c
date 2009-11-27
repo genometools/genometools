@@ -66,10 +66,10 @@ int gt_mergeesa(int argc, const char **argv, GtError *err)
   indexnametab = gt_str_array_new();
   switch (parse_options(storeindex, indexnametab, &parsed_args, argc, argv,
                         err)) {
-    case OPTIONPARSER_OK: break;
-    case OPTIONPARSER_ERROR:
+    case GT_OPTION_PARSER_OK: break;
+    case GT_OPTION_PARSER_ERROR:
          haserr = true; break;
-    case OPTIONPARSER_REQUESTS_EXIT: return 0;
+    case GT_OPTION_PARSER_REQUESTS_EXIT: return 0;
   }
   if (!haserr)
   {

@@ -57,13 +57,13 @@ gt_packedindex_trsuftab(int argc, const char *argv[], GtError *err)
       switch (parseTrSufTabOptions(&parsedArgs, argc, argv, &params,
                                    inputProject, err))
       {
-      case OPTIONPARSER_OK:
+      case GT_OPTION_PARSER_OK:
         break;
-      case OPTIONPARSER_ERROR:
+      case GT_OPTION_PARSER_ERROR:
         had_err = true;
         exitNow = true;
         break;
-      case OPTIONPARSER_REQUESTS_EXIT:
+      case GT_OPTION_PARSER_REQUESTS_EXIT:
         exitNow = true;
         break;
       }

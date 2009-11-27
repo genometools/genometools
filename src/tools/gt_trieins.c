@@ -51,9 +51,9 @@ int gt_trieins(int argc, const char **argv, GtError *err)
   gt_error_check(err);
 
   switch (parse_options(&onlyins,&parsed_args, argc, argv, err)) {
-    case OPTIONPARSER_OK: break;
-    case OPTIONPARSER_ERROR: return -1;
-    case OPTIONPARSER_REQUESTS_EXIT: return 0;
+    case GT_OPTION_PARSER_OK: break;
+    case GT_OPTION_PARSER_ERROR: return -1;
+    case GT_OPTION_PARSER_REQUESTS_EXIT: return 0;
   }
   gt_assert(parsed_args == 1);
 

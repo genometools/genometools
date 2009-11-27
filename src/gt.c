@@ -33,15 +33,15 @@ int main(int argc, char *argv[])
   }
   gtr_register_components(gtr);
   switch (gtr_parse(gtr, &rval, argc, (const char**) argv, err)) {
-    case OPTIONPARSER_OK:
+    case GT_OPTION_PARSER_OK:
       argc -= rval;
       argv += rval;
       rval = gtr_run(gtr, argc, (const char**) argv, err);
       break;
-    case OPTIONPARSER_ERROR:
+    case GT_OPTION_PARSER_ERROR:
       rval = EXIT_FAILURE; /* user error */
       break;
-    case OPTIONPARSER_REQUESTS_EXIT:
+    case GT_OPTION_PARSER_REQUESTS_EXIT:
       rval = EXIT_SUCCESS; /* everything went fine */
   }
   if (gt_error_is_set(err)) {

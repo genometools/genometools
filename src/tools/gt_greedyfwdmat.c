@@ -155,7 +155,7 @@ static GtOPrval parsegfmsub(bool doms,
   oprval = gt_option_parser_parse(op, &parsed_args, argc, argv,
                                gt_versionfunc,err);
 
-  if (oprval == OPTIONPARSER_OK)
+  if (oprval == GT_OPTION_PARSER_OK)
   {
     if (gt_option_is_set(optionfmindex))
     {
@@ -173,11 +173,11 @@ static GtOPrval parsegfmsub(bool doms,
         } else
         {
           gt_error_set(err,"one of the options -esa, -pck must be used");
-          oprval = OPTIONPARSER_ERROR;
+          oprval = GT_OPTION_PARSER_ERROR;
         }
       }
     }
-    if (oprval != OPTIONPARSER_ERROR)
+    if (oprval != GT_OPTION_PARSER_ERROR)
     {
       if (gt_option_is_set(optionmin))
       {
@@ -190,10 +190,10 @@ static GtOPrval parsegfmsub(bool doms,
       if (!gt_option_is_set(optionmin) && !gt_option_is_set(optionmax))
       {
         gt_error_set(err,"one of the options -min or -max must be set");
-        oprval = OPTIONPARSER_ERROR;
+        oprval = GT_OPTION_PARSER_ERROR;
       }
     }
-    if (oprval != OPTIONPARSER_ERROR)
+    if (oprval != GT_OPTION_PARSER_ERROR)
     {
       if (gfmsubcallinfo->minlength.defined &&
           gfmsubcallinfo->maxlength.defined)
@@ -202,16 +202,16 @@ static GtOPrval parsegfmsub(bool doms,
             gfmsubcallinfo->minlength.valueunsignedlong)
         {
           gt_error_set(err,"minvalue must be smaller or equal than maxvalue");
-          oprval = OPTIONPARSER_ERROR;
+          oprval = GT_OPTION_PARSER_ERROR;
         }
       }
     }
-    if (oprval != OPTIONPARSER_ERROR && gt_option_is_set(optionoutput))
+    if (oprval != GT_OPTION_PARSER_ERROR && gt_option_is_set(optionoutput))
     {
       if (gt_str_array_size(flagsoutputoption) == 0)
       {
         gt_error_set(err,"missing arguments to option -output");
-        oprval = OPTIONPARSER_ERROR;
+        oprval = GT_OPTION_PARSER_ERROR;
       } else
       {
         unsigned long i;
@@ -228,7 +228,7 @@ static GtOPrval parsegfmsub(bool doms,
                                  gt_str_array_get(flagsoutputoption,i),
                                  err) != 0)
             {
-              oprval = OPTIONPARSER_ERROR;
+              oprval = GT_OPTION_PARSER_ERROR;
               break;
             }
           } else
@@ -241,7 +241,7 @@ static GtOPrval parsegfmsub(bool doms,
                                     gt_str_array_get(flagsoutputoption,i),
                                     err) != 0)
             {
-              oprval = OPTIONPARSER_ERROR;
+              oprval = GT_OPTION_PARSER_ERROR;
               break;
             }
           }
@@ -251,10 +251,10 @@ static GtOPrval parsegfmsub(bool doms,
   }
   gt_str_array_delete(flagsoutputoption);
   gt_option_parser_delete(op);
-  if (oprval == OPTIONPARSER_OK && parsed_args != argc)
+  if (oprval == GT_OPTION_PARSER_OK && parsed_args != argc)
   {
     gt_error_set(err,"superfluous program parameters");
-    oprval = OPTIONPARSER_ERROR;
+    oprval = GT_OPTION_PARSER_ERROR;
   }
   return oprval;
 }
@@ -285,12 +285,12 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
 
   gt_error_check(err);
   switch (parsegfmsub(doms,&gfmsubcallinfo, argc, argv, err)) {
-    case OPTIONPARSER_OK: break;
-    case OPTIONPARSER_ERROR:
+    case GT_OPTION_PARSER_OK: break;
+    case GT_OPTION_PARSER_ERROR:
       gt_str_delete(gfmsubcallinfo.indexname);
       gt_str_array_delete(gfmsubcallinfo.queryfilenames);
       return -1;
-    case OPTIONPARSER_REQUESTS_EXIT:
+    case GT_OPTION_PARSER_REQUESTS_EXIT:
       gt_str_delete(gfmsubcallinfo.indexname);
       gt_str_array_delete(gfmsubcallinfo.queryfilenames);
       return 0;

@@ -199,10 +199,10 @@ int gt_seqiterator(int argc, const char **argv, GtError *err)
 
   /* option parsing */
   switch (parse_options(&seqiteroptions,&parsed_args, argc, argv, err)) {
-    case OPTIONPARSER_OK: break;
-    case OPTIONPARSER_ERROR:
+    case GT_OPTION_PARSER_OK: break;
+    case GT_OPTION_PARSER_ERROR:
         return -1;
-    case OPTIONPARSER_REQUESTS_EXIT:
+    case GT_OPTION_PARSER_REQUESTS_EXIT:
         return 0;
   }
 

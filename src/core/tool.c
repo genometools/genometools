@@ -66,12 +66,12 @@ int gt_tool_run(GtTool *tool, int argc, const char **argv, GtError *err)
                                   err);
   gt_option_parser_delete(op);
   switch (oprval) {
-    case OPTIONPARSER_OK:
+    case GT_OPTION_PARSER_OK:
       break;
-    case OPTIONPARSER_ERROR:
+    case GT_OPTION_PARSER_ERROR:
       had_err = -1;
       break;
-    case OPTIONPARSER_REQUESTS_EXIT:
+    case GT_OPTION_PARSER_REQUESTS_EXIT:
       if (tool_arguments)
         tool->tool_arguments_delete(tool_arguments);
       return 0;

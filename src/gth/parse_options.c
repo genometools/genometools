@@ -1216,16 +1216,16 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
                                     err);
   }
 
-  if (oprval == OPTIONPARSER_OK &&
+  if (oprval == GT_OPTION_PARSER_OK &&
       callinfo->out->showintronmaxlen > 0 &&
       callinfo->out->showintronmaxlen < DOUBLEALIGNMENTLINEWIDTH) {
      gt_error_set(err, "argument to option -%s must be 0 or integer larger "
                        "than %u", SHOWINTRONMAXLEN_OPT_CSTR,
                   DOUBLEALIGNMENTLINEWIDTH);
-     oprval = OPTIONPARSER_ERROR;
+     oprval = GT_OPTION_PARSER_ERROR;
   }
 
-  if (oprval == OPTIONPARSER_OK) {
+  if (oprval == GT_OPTION_PARSER_OK) {
     /* process genomic files */
     for (i = 0; i < gt_str_array_size(genomic_files); i++)
       gth_input_add_genomic_file(input, gt_str_array_get(genomic_files, i));
@@ -1239,11 +1239,11 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
       gth_input_add_protein_file(input, gt_str_array_get(protein_files, i));
   }
 
-  if (oprval == OPTIONPARSER_OK && gt_str_length(parsed_species)) {
+  if (oprval == GT_OPTION_PARSER_OK && gt_str_length(parsed_species)) {
     ret = findspeciesnum(gt_str_get(parsed_species), err);
     if (ret == -1)
-      oprval = OPTIONPARSER_ERROR;
-    if (oprval == OPTIONPARSER_OK) {
+      oprval = GT_OPTION_PARSER_ERROR;
+    if (oprval == GT_OPTION_PARSER_OK) {
       callinfo->speciesnum = ret;
       /* also setting the bssm parameter file */
       gt_assert(!gt_str_length(gth_input_bssmfile(input)));
@@ -1255,52 +1255,52 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   /* XXX: the maximal translation tables is set to 15, because that is the
      current limit in Vmatch, this should be changed in Vmatch and the check
      refactored into the GtTranslator class */
-  if (oprval == OPTIONPARSER_OK &&
+  if (oprval == GT_OPTION_PARSER_OK &&
       (callinfo->translationtable < 1  || callinfo->translationtable > 15 ||
        callinfo->translationtable == 7 || callinfo->translationtable == 8)) {
     gt_error_set(err, "wrong argument '%u' to option \"-%s\": "
                  "must be number in the range [1,15] except for 7 and 8",
                  callinfo->translationtable,
                  gt_option_get_name(opttranslationtable));
-    oprval = OPTIONPARSER_ERROR;
+    oprval = GT_OPTION_PARSER_ERROR;
   }
 
   if (!gthconsensus_parsing) {
     /* some checking necessary if -frompos is set */
-    if (oprval == OPTIONPARSER_OK && gt_option_is_set(optfrompos)) {
+    if (oprval == GT_OPTION_PARSER_OK && gt_option_is_set(optfrompos)) {
       /* if -topos and -length are used at the same time throw an error */
       if (gt_option_is_set(opttopos) && gt_option_is_set(optwidth)) {
         gt_error_set(err, "-%s and -%s can not be used simultaneously",
                   TOPOS_OPT_CSTR, WIDTH_OPT_CSTR);
-        oprval = OPTIONPARSER_ERROR;
+        oprval = GT_OPTION_PARSER_ERROR;
       }
       /* if neither -topos nor -length are used throw an error */
-      if (oprval == OPTIONPARSER_OK && !gt_option_is_set(opttopos) &&
+      if (oprval == GT_OPTION_PARSER_OK && !gt_option_is_set(opttopos) &&
           !gt_option_is_set(optwidth)) {
         gt_error_set(err, "if -%s is used either -%s or -%s have to be used",
                   FROMPOS_OPT_CSTR, TOPOS_OPT_CSTR, WIDTH_OPT_CSTR);
-        oprval = OPTIONPARSER_ERROR;
+        oprval = GT_OPTION_PARSER_ERROR;
       }
     }
 
     /* make sure we have only one genomic file */
-    if (oprval == OPTIONPARSER_OK && gt_option_is_set(optfrompos) &&
+    if (oprval == GT_OPTION_PARSER_OK && gt_option_is_set(optfrompos) &&
         gth_input_num_of_gen_files(input) > 1) {
       gt_error_set(err, "-%s only allowed if exactly 1 genomic file is "
                         "specified", FROMPOS_OPT_CSTR);
-      oprval = OPTIONPARSER_ERROR;
+      oprval = GT_OPTION_PARSER_ERROR;
     }
 
     /* if optfrompos is set, we set optinverse automatically. This is more
        intuitive for the user (instead of requiring him to set -inverse) */
-    if (oprval == OPTIONPARSER_OK && gt_option_is_set(optfrompos) &&
+    if (oprval == GT_OPTION_PARSER_OK && gt_option_is_set(optfrompos) &&
         !gt_option_is_set(optinverse)) {
       callinfo->simfilterparam.inverse = true;
     }
   }
 
   /* check necessary for intron cutout technique */
-  if (oprval == OPTIONPARSER_OK && !gthconsensus_parsing &&
+  if (oprval == GT_OPTION_PARSER_OK && !gthconsensus_parsing &&
       2 * callinfo->simfilterparam.introncutoutinfo.icinitialdelta <
       callinfo->dp_options_core->dpminintronlength) {
     gt_error_set(err, "2 * %s(=%u) must be >= %s(=%u)",
@@ -1308,50 +1308,50 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
               callinfo->simfilterparam.introncutoutinfo.icinitialdelta,
               DPMININTRONLENGTH_OPT_CSTR,
               callinfo->dp_options_core->dpminintronlength);
-    oprval = OPTIONPARSER_ERROR;
+    oprval = GT_OPTION_PARSER_ERROR;
   }
 
   /* check number of genomic files */
-  if (oprval == OPTIONPARSER_OK &&
+  if (oprval == GT_OPTION_PARSER_OK &&
       gth_input_num_of_gen_files(input) >= VM_MAXNUMBEROFFILES) {
     gt_error_set(err, "maximal number of genomic files is %u",
                  VM_MAXNUMBEROFFILES);
-    oprval = OPTIONPARSER_ERROR;
+    oprval = GT_OPTION_PARSER_ERROR;
   }
 
   /* make sure minmatchlen is >= seedlength */
-  if (oprval == OPTIONPARSER_OK && !gthconsensus_parsing &&
+  if (oprval == GT_OPTION_PARSER_OK && !gthconsensus_parsing &&
       callinfo->simfilterparam.minmatchlength <
       callinfo->simfilterparam.seedlength) {
     gt_error_set(err, "-%s %lu must be >= -%s %lu", MINMATCHLEN_OPT_CSTR,
               callinfo->simfilterparam.minmatchlength, SEEDLENGTH_OPT_CSTR,
               callinfo->simfilterparam.seedlength);
-    oprval = OPTIONPARSER_ERROR;
+    oprval = GT_OPTION_PARSER_ERROR;
   }
 
   /* make sure prminmatchlen is >= prseedlength */
-  if (oprval == OPTIONPARSER_OK && !gthconsensus_parsing &&
+  if (oprval == GT_OPTION_PARSER_OK && !gthconsensus_parsing &&
       callinfo->simfilterparam.prminmatchlen <
       callinfo->simfilterparam.prseedlength) {
     gt_error_set(err, "-%s %lu must be >= -%s %lu", PRMINMATCHLEN_OPT_CSTR,
               callinfo->simfilterparam.prminmatchlen, PRSEEDLENGTH_OPT_CSTR,
               callinfo->simfilterparam.prseedlength);
-    oprval = OPTIONPARSER_ERROR;
+    oprval = GT_OPTION_PARSER_ERROR;
   }
 
   /* check that given proteinsmap is not too long (is used as suffix for
      protein index files) */
-  if (oprval == OPTIONPARSER_OK && optproteinsmap &&
+  if (oprval == GT_OPTION_PARSER_OK && optproteinsmap &&
       !gt_option_is_set(optproteinsmap)) {
     if (gt_str_length(gth_input_proteinsmap(input)) > MAXSUFFIXLEN) {
       gt_error_set(err, "\%s argument \"%s\" is too long (>MAXSUFFIXLEN=%u)",
                 PROTEINSMAP_OPT_CSTR,
                 gt_str_get(gth_input_proteinsmap(input)), MAXSUFFIXLEN);
-      oprval = OPTIONPARSER_ERROR;
+      oprval = GT_OPTION_PARSER_ERROR;
     }
   }
 
-  if (oprval == OPTIONPARSER_OK) {
+  if (oprval == GT_OPTION_PARSER_OK) {
     gt_assert(!(forward && reverse));
     if (forward)
       gth_input_set_forward_only(input);
@@ -1386,17 +1386,17 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
 
   /* post-process cutoff mode options */
   if (!gthconsensus_parsing) {
-    if (oprval == OPTIONPARSER_OK) {
+    if (oprval == GT_OPTION_PARSER_OK) {
       gt_assert(gt_str_length(leadcutoffsmode));
       mode = get_cutoffs_mode_from_table(gt_str_get(leadcutoffsmode));
       callinfo->dp_options_postpro->leadcutoffsmode = mode;
     }
-    if (oprval == OPTIONPARSER_OK) {
+    if (oprval == GT_OPTION_PARSER_OK) {
       gt_assert(gt_str_length(termcutoffsmode));
       mode = get_cutoffs_mode_from_table(gt_str_get(termcutoffsmode));
       callinfo->dp_options_postpro->termcutoffsmode = mode;
     }
-    if (oprval == OPTIONPARSER_OK && mincutoffs) {
+    if (oprval == GT_OPTION_PARSER_OK && mincutoffs) {
       callinfo->dp_options_postpro->leadcutoffsmode = MINIMAL;
       callinfo->dp_options_postpro->termcutoffsmode = MINIMAL;
     }
@@ -1404,7 +1404,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
 
   /* assertions */
 #ifndef NDEBUG
-  if (oprval == OPTIONPARSER_OK && !gthconsensus_parsing) {
+  if (oprval == GT_OPTION_PARSER_OK && !gthconsensus_parsing) {
     /* at least one genomic file defined */
     gt_assert(gth_input_num_of_gen_files(input));
     /* at least one reference file defined */
@@ -1413,7 +1413,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
 #endif
 
   /* save consensus files */
-  if (oprval == OPTIONPARSER_OK && gthconsensus_parsing) {
+  if (oprval == GT_OPTION_PARSER_OK && gthconsensus_parsing) {
     while (*parsed_args < argc) {
       gt_str_array_add_cstr(consensusfiles, argv[*parsed_args]);
       (*parsed_args)++;
@@ -1421,17 +1421,17 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   }
 
   /* load bssm parameter */
-  if (oprval == OPTIONPARSER_OK) {
+  if (oprval == GT_OPTION_PARSER_OK) {
     if (gt_str_length(gth_input_bssmfile(input))) {
       if (gth_splice_site_model_load_bssm(callinfo->splice_site_model,
                                           gt_str_get(gth_input_bssmfile(input)),
                                           err)) {
-        oprval = OPTIONPARSER_ERROR;
+        oprval = GT_OPTION_PARSER_ERROR;
       }
     }
   }
 
-  if (OPTIONPARSER_OK) {
+  if (GT_OPTION_PARSER_OK) {
     gt_assert(*parsed_args == argc);
   }
 

@@ -73,9 +73,9 @@ int gt_uniq(int argc, const char **argv, GtError *err)
 
   /* option parsing */
   switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
-    case OPTIONPARSER_OK: break;
-    case OPTIONPARSER_ERROR: return -1;
-    case OPTIONPARSER_REQUESTS_EXIT: return 0;
+    case GT_OPTION_PARSER_OK: break;
+    case GT_OPTION_PARSER_ERROR: return -1;
+    case GT_OPTION_PARSER_REQUESTS_EXIT: return 0;
   }
 
   /* create gff3 input stream */

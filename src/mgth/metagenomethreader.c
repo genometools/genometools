@@ -313,13 +313,13 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
   /* option parsing */
   switch (parse_options(&parsed_args, &parsestruct.metagenomethreader_arguments,
                         argc, argv, err)) {
-    case OPTIONPARSER_OK:
+    case GT_OPTION_PARSER_OK:
       break;
-    case OPTIONPARSER_ERROR:
+    case GT_OPTION_PARSER_ERROR:
       gt_str_delete(ARGUMENTS(curl_fcgi_db));
       gt_str_delete(ARGUMENTS(outputtextfile_name));
       return -1;
-    case OPTIONPARSER_REQUESTS_EXIT:
+    case GT_OPTION_PARSER_REQUESTS_EXIT:
       gt_str_delete(ARGUMENTS(curl_fcgi_db));
       gt_str_delete(ARGUMENTS(outputtextfile_name));
       return 0;

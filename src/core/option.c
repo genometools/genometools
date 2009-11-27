@@ -763,16 +763,16 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
               break;
             case OPTION_HELP:
               if (show_help(op, OPTION_HELP, err))
-                return OPTIONPARSER_ERROR;
-              return OPTIONPARSER_REQUESTS_EXIT;
+                return GT_OPTION_PARSER_ERROR;
+              return GT_OPTION_PARSER_REQUESTS_EXIT;
             case OPTION_HELPPLUS:
               if (show_help(op, OPTION_HELPPLUS, err))
-                return OPTIONPARSER_ERROR;
-              return OPTIONPARSER_REQUESTS_EXIT;
+                return GT_OPTION_PARSER_ERROR;
+              return GT_OPTION_PARSER_REQUESTS_EXIT;
             case OPTION_HELPDEV:
               if (show_help(op, OPTION_HELPDEV, err))
-                return OPTIONPARSER_ERROR;
-              return OPTIONPARSER_REQUESTS_EXIT;
+                return GT_OPTION_PARSER_ERROR;
+              return GT_OPTION_PARSER_REQUESTS_EXIT;
             case OPTION_OUTPUTFILE:
               had_err = check_missing_argument(argnum, argc, option->option_str,
                                                err);
@@ -1029,7 +1029,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
               break;
             case OPTION_VERSION:
               ((GtShowVersionFunc) option->value)(op->progname);
-              return OPTIONPARSER_REQUESTS_EXIT;
+              return GT_OPTION_PARSER_REQUESTS_EXIT;
             default: gt_assert(0);
           }
         }
@@ -1092,8 +1092,8 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
     *parsed_args = argnum;
 
   if (had_err)
-    return OPTIONPARSER_ERROR;
-  return OPTIONPARSER_OK;
+    return GT_OPTION_PARSER_ERROR;
+  return GT_OPTION_PARSER_OK;
 }
 
 void gt_option_parser_delete(GtOptionParser *op)
