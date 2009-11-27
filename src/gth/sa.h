@@ -52,14 +52,14 @@ typedef struct {
                 rightgenomicexonborder,   /*  genomic sequence               */
                 leftreferenceexonborder,  /* the borders of the exons in the */
                 rightreferenceexonborder; /* reference sequence              */
-  HIGHPRECPROBTYPE exonscore;             /* = exnscr                        */
+  GthDbl exonscore;                       /* = exnscr                        */
 } Exoninfo;
 
 typedef struct {
-  LOWPRECPROBTYPE  donorsiteprobability,     /* (GS = itrscr) */
-                   acceptorsiteprobability;  /* (GS = itrscr) */
-  HIGHPRECPROBTYPE donorsitescore,           /* (GS = no equivalent) */
-                   acceptorsitescore;        /* (GS = no equivalent) */
+  GthFlt donorsiteprobability,     /* (GS = itrscr) */
+         acceptorsiteprobability;  /* (GS = itrscr) */
+  GthDbl donorsitescore,           /* (GS = no equivalent) */
+         acceptorsitescore;        /* (GS = no equivalent) */
 } Introninfo;
 
 /* The following structure bundles all information necessary to represent a
@@ -99,7 +99,7 @@ GtRange         gth_sa_range_actual(const GthSA *sa);
    That is, the average probability of all donor and acceptor sites. If the
    spliced alignment contains no introns the average splice site probability is
    zero. */
-LOWPRECPROBTYPE gth_sa_average_splice_site_prob(const GthSA *sa);
+GthFlt gth_sa_average_splice_site_prob(const GthSA *sa);
 
 /* A spliced alignment <sa> is ``poor'' if one of the following statements
    holds:
@@ -112,7 +112,7 @@ LOWPRECPROBTYPE gth_sa_average_splice_site_prob(const GthSA *sa);
      probability is less than the minimum average splice site probability
      <minaveragessp>, which can be changed by a command line option (see
      manual). */
-bool            gth_sa_is_poor(const GthSA *sa, LOWPRECPROBTYPE minaveragessp);
+bool            gth_sa_is_poor(const GthSA *sa, GthFlt minaveragessp);
 
 /* Consider two spliced alignments <saA> and <saB>.
    Spliced alignment <saB> is ``better'' than spliced alignment <saA> if at
@@ -208,10 +208,10 @@ unsigned long   gth_sa_polyAtail_start(const GthSA*);
 unsigned long   gth_sa_polyAtail_stop(const GthSA*);
 void            gth_sa_set_polyAtail_start(GthSA*, unsigned long);
 void            gth_sa_set_polyAtail_stop(GthSA*, unsigned long);
-LOWPRECPROBTYPE gth_sa_score(const GthSA*);
-void            gth_sa_set_score(GthSA*, LOWPRECPROBTYPE);
-LOWPRECPROBTYPE gth_sa_coverage(const GthSA*);
-void            gth_sa_set_coverage(GthSA*, LOWPRECPROBTYPE);
+GthFlt gth_sa_score(const GthSA*);
+void            gth_sa_set_score(GthSA*, GthFlt);
+GthFlt gth_sa_coverage(const GthSA*);
+void            gth_sa_set_coverage(GthSA*, GthFlt);
 bool            gth_sa_genomic_cov_is_highest(const GthSA*);
 char            gth_sa_coverage_char(const GthSA*);
 void            gth_sa_set_highest_cov(GthSA*, bool genomic);

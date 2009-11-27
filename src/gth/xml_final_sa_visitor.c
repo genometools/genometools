@@ -209,8 +209,8 @@ static void xml_showalignmentheader(GthSA *sa,
 {
   unsigned long i, leftreferenceexonborder, rightreferenceexonborder,
                 referenceexonlength;
-  HIGHPRECPROBTYPE exonscore, donorsitescore, acceptorsitescore;
-  LOWPRECPROBTYPE donorsiteprobability, acceptorsiteprobability;
+  GthDbl exonscore, donorsitescore, acceptorsitescore;
+  GthFlt donorsiteprobability, acceptorsiteprobability;
   Exoninfo *exoninfo;
   Introninfo *introninfo;
 

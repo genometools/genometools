@@ -26,8 +26,8 @@
 #define HYPOTHESIS2     2   /*  true (Tr) or false (fs) sites */
 
 /* The following structures define the tables for the BSSM parameters. */
-typedef LOWPRECPROBTYPE Hypo2table[HYPOTHESIS2][WINSIZE+2][4][4];
-typedef LOWPRECPROBTYPE Hypo7table[HYPOTHESIS7][WINSIZE+2][4][4];
+typedef GthFlt Hypo2table[HYPOTHESIS2][WINSIZE+2][4][4];
+typedef GthFlt Hypo7table[HYPOTHESIS7][WINSIZE+2][4][4];
 
 /* The version of the Bssmparam structure */
 #define BSSMPARAMVERSION        2

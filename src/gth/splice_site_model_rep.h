@@ -22,64 +22,52 @@
 
 struct GthSpliceSiteModel {
   /* the probabilities */
-  LOWPRECPROBTYPE genericGTdonorprob,          /*     generic prob. of GT donor
-                                                */
-                  nongenericGTdonorprob,       /* non-generic prob. of GT donor
-                                                */
-                  genericGCdonorprob,          /*     generic prob. of GC donor
-                                                */
-                  nongenericGCdonorprob,       /* non-generic prob. of GC donor
-                                                */
-                  genericATdonorprob,          /*     generic prob. of AT donor
-                                                */
-                  nongenericATdonorprob,       /* non-generic prob. of AT donor
-                                                */
-                  genericAGacceptorprob,       /*     generic prob. of AG
-                                                  acceptor */
-                  nongenericAGacceptorprob,    /* non-generic prob. of AG
-                                                  acceptor */
-                  genericACacceptorprob,       /*     generic prob. of AC
-                                                  acceptor */
-                  nongenericACacceptorprob,    /* non-generic prob. of AC
-                                                  acceptor */
-                  genericothersplicesitep,     /*     generic prob. of other
-                                                  splice sites */
-                  nongenericothersplicesitep;  /* non-generic prob. of other
-                                                  splice sites */
-  bool useU12intronmodel;                      /* enable U12 intron model */
-  LOWPRECPROBTYPE U12typedonorprob,            /* prob. of U12-type donor */
-                  U12typedonorprobonemismatch; /* prob. of U12-type donor */
-                                               /* with 1 mismatch */
+  GthFlt genericGTdonorprob,          /*     generic prob. of GT donor */
+         nongenericGTdonorprob,       /* non-generic prob. of GT donor */
+         genericGCdonorprob,          /*     generic prob. of GC donor */
+         nongenericGCdonorprob,       /* non-generic prob. of GC donor */
+         genericATdonorprob,          /*     generic prob. of AT donor */
+         nongenericATdonorprob,       /* non-generic prob. of AT donor */
+         genericAGacceptorprob,       /*     generic prob. of AG acceptor */
+         nongenericAGacceptorprob,    /* non-generic prob. of AG acceptor */
+         genericACacceptorprob,       /*     generic prob. of AC acceptor */
+         nongenericACacceptorprob,    /* non-generic prob. of AC acceptor */
+         genericothersplicesitep,     /*     generic prob. of other sp. sites */
+         nongenericothersplicesitep;  /* non-generic prob. of other sp. sites */
+  bool useU12intronmodel;             /* enable U12 intron model */
+  GthFlt U12typedonorprob,            /* prob. of U12-type donor */
+         U12typedonorprobonemismatch; /* prob. of U12-type donor with 1
+                                         mismatch */
 
   /* the precomputed log values */
-  LOWPRECPROBTYPE log_genericGTdonorprob,
-                  log1minus_genericGTdonorprob,
-                  log_nongenericGTdonorprob,
-                  log1minus_nongenericGTdonorprob,
-                  log_genericGCdonorprob,
-                  log1minus_genericGCdonorprob,
-                  log_nongenericGCdonorprob,
-                  log1minus_nongenericGCdonorprob,
-                  log_genericATdonorprob,
-                  log1minus_genericATdonorprob,
-                  log_nongenericATdonorprob,
-                  log1minus_nongenericATdonorprob,
-                  log_genericAGacceptorprob,
-                  log1minus_genericAGacceptorprob,
-                  log_nongenericAGacceptorprob,
-                  log1minus_nongenericAGacceptorprob,
-                  log_genericACacceptorprob,
-                  log1minus_genericACacceptorprob,
-                  log_nongenericACacceptorprob,
-                  log1minus_nongenericACacceptorprob,
-                  log_genericothersplicesitep,
-                  log1minus_genericothersplicesitep,
-                  log_nongenericothersplicesitep,
-                  log1minus_nongenericothersplicesitep,
-                  log_U12typedonorprob,
-                  log1minus_U12typedonorprob,
-                  log_U12typedonorprobonemismatch,
-                  log1minus_U12typedonorprobonemismatch;
+  GthFlt log_genericGTdonorprob,
+         log1minus_genericGTdonorprob,
+         log_nongenericGTdonorprob,
+         log1minus_nongenericGTdonorprob,
+         log_genericGCdonorprob,
+         log1minus_genericGCdonorprob,
+         log_nongenericGCdonorprob,
+         log1minus_nongenericGCdonorprob,
+         log_genericATdonorprob,
+         log1minus_genericATdonorprob,
+         log_nongenericATdonorprob,
+         log1minus_nongenericATdonorprob,
+         log_genericAGacceptorprob,
+         log1minus_genericAGacceptorprob,
+         log_nongenericAGacceptorprob,
+         log1minus_nongenericAGacceptorprob,
+         log_genericACacceptorprob,
+         log1minus_genericACacceptorprob,
+         log_nongenericACacceptorprob,
+         log1minus_nongenericACacceptorprob,
+         log_genericothersplicesitep,
+         log1minus_genericothersplicesitep,
+         log_nongenericothersplicesitep,
+         log1minus_nongenericothersplicesitep,
+         log_U12typedonorprob,
+         log1minus_U12typedonorprob,
+         log_U12typedonorprobonemismatch,
+         log1minus_U12typedonorprobonemismatch;
 
   GthBssmParam *bssm_param; /* contains bssm parameters or is NULL,
                               if generic parameters are used. */

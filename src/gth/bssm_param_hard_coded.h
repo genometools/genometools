@@ -2108,7 +2108,7 @@ static double GU_2[2][HYPOTHESIS2][WINSIZE + 2][4][4] =
         {0.1585, 0.2666, 0.3515, 0.2234}}
     }
   }
-}; /* end of LOWPRECPROBTYPE GU_2 initialization for two classification model */
+}; /* end of GthFlt GU_2 initialization for two classification model */
 
 static double AG_2[2][HYPOTHESIS2][WINSIZE + 2][4][4] =
 {
@@ -4164,7 +4164,7 @@ static double AG_2[2][HYPOTHESIS2][WINSIZE + 2][4][4] =
         {0.1612, 0.2436, 0.3832, 0.2121}}
     }
   }
-}; /* end of LOWPRECPROBTYPE AG_2 initialization for two classification model */
+}; /* end of GthFlt AG_2 initialization for two classification model */
 
 static double GU_7[8][HYPOTHESIS7][WINSIZE + 2][4][4] =
 {
@@ -32848,7 +32848,7 @@ static double GU_7[8][HYPOTHESIS7][WINSIZE + 2][4][4] =
         {0.2174, 0.2532, 0.2870, 0.2424},
         {0.2125, 0.1968, 0.3386, 0.2521}}
     }}
-}; /* end of intialization for LOWPRECPROBTYPE GU_7 */
+}; /* end of intialization for GthFlt GU_7 */
 
 static double AG_7[8][HYPOTHESIS7][WINSIZE + 2][4][4] =
 {
@@ -61532,6 +61532,6 @@ static double AG_7[8][HYPOTHESIS7][WINSIZE + 2][4][4] =
         {0.2402, 0.3389, 0.1051, 0.3158},
         {0.1247, 0.2388, 0.2382, 0.3983}}
     }}
-}; /* end of initialization for LOWPRECPROBTYPE AG_7 */
+}; /* end of initialization for GthFlt AG_7 */
 
 #endif

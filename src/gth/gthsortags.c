@@ -25,8 +25,8 @@ static int compareAGSs(const void *dataA, const void *dataB)
 {
   GthAGS *agsA = *(GthAGS**) dataA;
   GthAGS *agsB = *(GthAGS**) dataB;
-  gt_assert(agsA->overallscore != UNDEFHIGHPRECPROBTYPE);
-  gt_assert(agsB->overallscore != UNDEFHIGHPRECPROBTYPE);
+  gt_assert(agsA->overallscore != UNDEF_GTHDBL);
+  gt_assert(agsB->overallscore != UNDEF_GTHDBL);
   if (agsA->overallscore < agsB->overallscore)
     return 1;
   if (agsA->overallscore > agsB->overallscore)
@@ -36,8 +36,8 @@ static int compareAGSs(const void *dataA, const void *dataB)
 
 static void determineAGSscore(GthAGS *ags, double sortagswf)
 {
-  HIGHPRECPROBTYPE average_exon_score              = 0.0,
-                   average_splice_site_probability = 0.0;
+  GthDbl average_exon_score              = 0.0,
+         average_splice_site_probability = 0.0;
   unsigned long i, numofexons = gt_array_size(ags->exons);
   Splicesiteprob *splicesiteprob;
   gt_assert(numofexons > 0);

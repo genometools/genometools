@@ -162,8 +162,8 @@ static void showalignmentheader(GthSA *sa, bool gs2out, int widthforgenpos,
 {
   unsigned long i, leftreferenceexonborder, rightreferenceexonborder,
                 referenceexonlength;
-  HIGHPRECPROBTYPE exonscore, donorsitescore, acceptorsitescore;
-  LOWPRECPROBTYPE donorsiteprobability, acceptorsiteprobability;
+  GthDbl exonscore, donorsitescore, acceptorsitescore;
+  GthFlt donorsiteprobability, acceptorsiteprobability;
   Exoninfo *exoninfo;
   Introninfo *introninfo;
 

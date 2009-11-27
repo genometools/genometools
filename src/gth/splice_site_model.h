@@ -33,9 +33,9 @@ void                gth_splice_site_model_U12intronmodel_set_usage(
                                                         bool useU12intronmodel);
 void                gth_splice_site_model_set_U12typedonorprob(
                                                         GthSpliceSiteModel*,
-                                                        LOWPRECPROBTYPE prob);
+                                                        GthFlt prob);
 void                gth_splice_site_model_set_U12typedonorprob_one_mismatch(
                                                         GthSpliceSiteModel*,
-                                                        LOWPRECPROBTYPE prob);
+                                                        GthFlt prob);
 
 #endif

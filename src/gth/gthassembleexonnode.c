@@ -261,10 +261,10 @@ void mergenodes(Exonnode *nodeA, Exonnode *nodeB)
   }
 }
 
-HIGHPRECPROBTYPE computeexonscore(Exonnode *node)
+GthDbl computeexonscore(Exonnode *node)
 {
   unsigned long i, maxlength = 0;
-  HIGHPRECPROBTYPE maxscore = DBL_MIN;
+  GthDbl maxscore = DBL_MIN;
   Exonscoreinfo *exonscoreinfo;
 
   /* compute maximal length */

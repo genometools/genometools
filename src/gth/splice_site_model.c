@@ -24,8 +24,8 @@
 
 #define SET_PROB_VALUE(V, PROB)                           \
         ssm->V             = PROB;                        \
-        ssm->log_##V       = (LOWPRECPROBTYPE) log(PROB); \
-        ssm->log1minus_##V = (LOWPRECPROBTYPE) log(1.0 - (PROB))
+        ssm->log_##V       = (GthFlt) log(PROB); \
+        ssm->log1minus_##V = (GthFlt) log(1.0 - (PROB))
 
 GthSpliceSiteModel* gth_splice_site_model_new(void)
 {
@@ -90,15 +90,14 @@ void gth_splice_site_model_U12intronmodel_set_usage(GthSpliceSiteModel *ssm,
 }
 
 void gth_splice_site_model_set_U12typedonorprob(GthSpliceSiteModel *ssm,
-                                                LOWPRECPROBTYPE prob)
+                                                GthFlt prob)
 {
   SET_PROB_VALUE(U12typedonorprob, prob);
 }
 
 void gth_splice_site_model_set_U12typedonorprob_one_mismatch(GthSpliceSiteModel
                                                              *ssm,
-                                                             LOWPRECPROBTYPE
-                                                             prob)
+                                                             GthFlt prob)
 {
   SET_PROB_VALUE(U12typedonorprobonemismatch, prob);
 }

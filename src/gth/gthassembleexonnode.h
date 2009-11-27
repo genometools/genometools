@@ -22,7 +22,7 @@
 #include "gth/sa.h"
 
 typedef struct {
-  HIGHPRECPROBTYPE exonscore;        /* the score of this exonnode */
+  GthDbl exonscore;        /* the score of this exonnode */
   unsigned long lengthofscoringexon; /* the length of the exon where the
                                         exonscore came from */
 } Exonscoreinfo;
@@ -44,6 +44,6 @@ Exonnode         getcoreExonnodefromSA(GthSA *sa, unsigned long exonindex);
 void             freecoreExonnode(Exonnode *node);
 bool             nodesaremergeable(Exonnode *nodeA, Exonnode *nodeB);
 void             mergenodes(Exonnode *nodeA, Exonnode *nodeB);
-HIGHPRECPROBTYPE computeexonscore(Exonnode *node);
+GthDbl computeexonscore(Exonnode *node);
 
 #endif

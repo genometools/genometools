@@ -62,12 +62,12 @@ static void evalnewexonifpossible(bool proteineop, bool *newexon,
           intron->acceptorsiteprobability = 0.0;
         }
         else {
-          intron->acceptorsiteprobability = (LOWPRECPROBTYPE)
+          intron->acceptorsiteprobability = (GthFlt)
                               exp((double) dp_param->log_Pacceptor[splicedpos]);
         }
       }
       else {
-        intron->acceptorsiteprobability = (LOWPRECPROBTYPE) exp((double)
+        intron->acceptorsiteprobability = (GthFlt) exp((double)
                               dp_param->log_Pacceptor[travstate->genomicptr-1]);
       }
 
@@ -92,10 +92,10 @@ static void evalnewintronifpossible(bool proteineop, bool *newexon,
                                     bool introncutout, bool gs2out,
                                     GthSplicedSeq *spliced_seq,
                                     Exoninfo *exon, Introninfo *intron,
-                                    LOWPRECPROBTYPE *singleexonweight,
-                                    LOWPRECPROBTYPE *maxsingleexonweight,
-                                    LOWPRECPROBTYPE *overallexonweight,
-                                    LOWPRECPROBTYPE *maxoverallexonweight,
+                                    GthFlt *singleexonweight,
+                                    GthFlt *maxsingleexonweight,
+                                    GthFlt *overallexonweight,
+                                    GthFlt *maxoverallexonweight,
                                     unsigned long
                                     *cumulativelengthofscoredexons,
                                     GthSA *sa,
@@ -117,7 +117,7 @@ static void evalnewintronifpossible(bool proteineop, bool *newexon,
     *newintron = false;
     *newexon   = true;
     if (*maxsingleexonweight > 0.0) {
-      exon->exonscore = (HIGHPRECPROBTYPE) ((*singleexonweight) /
+      exon->exonscore = (GthDbl) ((*singleexonweight) /
                                             (*maxsingleexonweight));
     }
     else
@@ -146,8 +146,8 @@ static void evalnewintronifpossible(bool proteineop, bool *newexon,
     gth_sa_add_exon(sa, exon);
 
     /* resetting scores */
-    *singleexonweight    = (LOWPRECPROBTYPE) 0.0;
-    *maxsingleexonweight = (LOWPRECPROBTYPE) 0.0;
+    *singleexonweight    = (GthFlt) 0.0;
+    *maxsingleexonweight = (GthFlt) 0.0;
 
     /* if this is not the last intron, save the donor site stuff.
        if this is the last intron, this function has been called to save the
@@ -164,12 +164,12 @@ static void evalnewintronifpossible(bool proteineop, bool *newexon,
           intron->donorsiteprobability = 0.0;
         }
         else {
-          intron->donorsiteprobability = (LOWPRECPROBTYPE)
+          intron->donorsiteprobability = (GthFlt)
                                  exp((double) dp_param->log_Pdonor[splicedpos]);
         }
       }
       else {
-        intron->donorsiteprobability = (LOWPRECPROBTYPE)
+        intron->donorsiteprobability = (GthFlt)
                       exp((double) dp_param->log_Pdonor[travstate->genomicptr]);
       }
 
@@ -198,7 +198,7 @@ typedef struct
        introncutout,
        gs2out;
   GthSplicedSeq *spliced_seq;
-  LOWPRECPROBTYPE singleexonweight,              /* (GS2 = escr) */
+  GthFlt singleexonweight,              /* (GS2 = escr) */
                   maxsingleexonweight,           /* (GS2 = oescr) */
                   overallexonweight,             /* (GS2 = gescr) */
                   maxoverallexonweight;          /* (GS2 = ogescr) */
@@ -317,7 +317,7 @@ static void computescoresprocmismatchordeletionwithgap(Traversealignmentstate
 {
   Computebordersandscoresdata *d = (Computebordersandscoresdata*) data;
   GthDPOptionsEST *dp_options_est = d->dp_options_est;
-  LOWPRECPROBTYPE score;
+  GthFlt score;
 
   gt_assert(lengthofeop == 1);
   /* a protein edit operation is processed */
@@ -353,7 +353,7 @@ static void computebordersandscoresprocinsertion(Traversealignmentstate *state,
   unsigned int gen_alphabet_mapsize = gt_alphabet_size(d->gen_alphabet);
   GthDPOptionsEST *dp_options_est = d->dp_options_est;
   unsigned char genomicchar, referencechar;
-  LOWPRECPROBTYPE score;
+  GthFlt score;
 
   gt_assert(lengthofeop == 1);
   /* we are not processing with 1 base left here */
@@ -406,7 +406,7 @@ static void computebordersandscoresprocmatch(Traversealignmentstate *state,
                 genomicchar3,
                 referencechar,
                 origreferencechar;
-  LOWPRECPROBTYPE genomicinterimvalue   = 0.0,
+  GthFlt genomicinterimvalue   = 0.0,
                   referenceinterimvalue = 0.0;
 
   evalnewexonifpossible(d->proteineop, &d->newexon, &d->newintron,
@@ -574,7 +574,7 @@ void gth_compute_scores(GthSA *sa,
   Traversealignmentfunctions travfunctions;
   Traversealignmentstate travstate;
   Computebordersandscoresdata data;
-  LOWPRECPROBTYPE score, coverageofgenomicsegment, coverageofreferencesegment;
+  GthFlt score, coverageofgenomicsegment, coverageofreferencesegment;
 
   gt_assert(!gth_sa_num_of_exons(sa));
   gt_assert(!gth_sa_num_of_introns(sa));
@@ -638,22 +638,22 @@ void gth_compute_scores(GthSA *sa,
   data.introncutout                   = introncutout;
   data.gs2out                         = gs2out;
   data.spliced_seq                    = spliced_seq;
-  data.singleexonweight               = (LOWPRECPROBTYPE) 0.0;
-  data.maxsingleexonweight            = (LOWPRECPROBTYPE) 0.0;
-  data.overallexonweight              = (LOWPRECPROBTYPE) 0.0;
-  data.maxoverallexonweight           = (LOWPRECPROBTYPE) 0.0;
+  data.singleexonweight               = (GthFlt) 0.0;
+  data.maxsingleexonweight            = (GthFlt) 0.0;
+  data.overallexonweight              = (GthFlt) 0.0;
+  data.maxoverallexonweight           = (GthFlt) 0.0;
   data.cumulativelengthofscoredexons  = 0;
 
   data.exon.leftgenomicexonborder     = GT_UNDEF_ULONG;
   data.exon.rightgenomicexonborder    = GT_UNDEF_ULONG;
   data.exon.leftreferenceexonborder   = GT_UNDEF_ULONG;
   data.exon.rightreferenceexonborder  = GT_UNDEF_ULONG;
-  data.exon.exonscore                 = UNDEFHIGHPRECPROBTYPE;
+  data.exon.exonscore                 = UNDEF_GTHDBL;
 
-  data.intron.donorsiteprobability    = UNDEFLOWPRECPROBTYPE;
-  data.intron.acceptorsiteprobability = UNDEFLOWPRECPROBTYPE;
-  data.intron.donorsitescore          = UNDEFHIGHPRECPROBTYPE;
-  data.intron.acceptorsitescore       = UNDEFHIGHPRECPROBTYPE;
+  data.intron.donorsiteprobability    = UNDEF_GTHFLT;
+  data.intron.acceptorsiteprobability = UNDEF_GTHFLT;
+  data.intron.donorsitescore          = UNDEF_GTHDBL;
+  data.intron.acceptorsitescore       = UNDEF_GTHDBL;
 
   data.sa                             = sa;
   data.dp_param                       = dp_param;
@@ -699,18 +699,15 @@ void gth_compute_scores(GthSA *sa,
                                             data.cumulativelengthofscoredexons);
 
   /* fraction of the gen_dp_length which is scored/weighted */
-  coverageofgenomicsegment   = (LOWPRECPROBTYPE)
-                               data.cumulativelengthofscoredexons /
-                               (LOWPRECPROBTYPE) gth_sa_gen_dp_length(sa);
+  coverageofgenomicsegment   = (GthFlt) data.cumulativelengthofscoredexons /
+                               (GthFlt) gth_sa_gen_dp_length(sa);
   /* coverage of genomic segment is valid value */
   gt_assert(coverageofgenomicsegment >= 0.0 && coverageofgenomicsegment <= 1.0);
 
   /* fraction of the referencelength which is scored/weighted */
-  coverageofreferencesegment = (LOWPRECPROBTYPE)
-                               data.cumulativelengthofscoredexons /
-                               (LOWPRECPROBTYPE)
-                               ((proteineop ? GT_CODON_LENGTH : 1) *
-                                gth_sa_ref_total_length(sa));
+  coverageofreferencesegment = (GthFlt) data.cumulativelengthofscoredexons /
+                               (GthFlt) ((proteineop ? GT_CODON_LENGTH : 1) *
+                                         gth_sa_ref_total_length(sa));
 
   if (coverageofgenomicsegment > coverageofreferencesegment) {
     gth_sa_set_coverage(sa, coverageofgenomicsegment);

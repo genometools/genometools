@@ -29,8 +29,8 @@
 
 typedef struct GthBssmParam GthBssmParam;
 
-typedef float  LOWPRECPROBTYPE;  /* probability type for low precision */
-typedef double HIGHPRECPROBTYPE; /* probability type for high precision */
+typedef float  GthFlt;  /* probability type for low precision */
+typedef double GthDbl; /* probability type for high precision */
 
 typedef enum {
   GT_DONOR_TYPE = 0,
@@ -39,8 +39,8 @@ typedef enum {
   NUMOFTYPES
 } Termtype;
 
-#define UNDEFLOWPRECPROBTYPE    FLT_MAX
-#define UNDEFHIGHPRECPROBTYPE   DBL_MAX
+#define UNDEF_GTHFLT    FLT_MAX
+#define UNDEF_GTHDBL   DBL_MAX
 
 #define BSSMFILEENDING          "bssm"
 

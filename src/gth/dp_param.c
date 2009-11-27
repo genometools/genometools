@@ -42,8 +42,7 @@
           return NULL;\
         }
 
-static void evalsplicesiteprobformodel(LOWPRECPROBTYPE *prob,
-                                       bool donorsite,
+static void evalsplicesiteprobformodel(GthFlt *prob, bool donorsite,
                                        const unsigned char *gen_seq_tran,
                                        const GtRange *gen_seq_bounds,
                                        unsigned long genpos,
@@ -54,7 +53,7 @@ static void evalsplicesiteprobformodel(LOWPRECPROBTYPE *prob,
                 cc, /* current char */
                 d, i, j;
   long startpos, endpos;
-  HIGHPRECPROBTYPE pval = 0.5, Tv[3] = { 0.0 }, Fv[4] = { 0.0 };
+  GthDbl pval = 0.5, Tv[3] = { 0.0 }, Fv[4] = { 0.0 };
   gt_assert(bssmmodel);
 
   /* set start and endpos */
@@ -120,16 +119,15 @@ static void evalsplicesiteprobformodel(LOWPRECPROBTYPE *prob,
     pval = 0.0;
 
   /* return probability */
-  *prob = (LOWPRECPROBTYPE) pval;
+  *prob = (GthFlt) pval;
 }
 
-static void evaldonorprob(LOWPRECPROBTYPE *prob,
-                          const unsigned char *gen_seq_tran,
+static void evaldonorprob(GthFlt *prob, const unsigned char *gen_seq_tran,
                           const GtRange *gen_seq_bounds, unsigned long genpos,
                           const GtUchar *gen_alphabet_symbolmap,
                           GthBssmParam *bssm_param)
 {
-  *prob = (LOWPRECPROBTYPE) 0.0;
+  *prob = (GthFlt) 0.0;
   gt_assert(bssm_param);
 
   if (genpos < gen_seq_bounds->end) {
@@ -150,14 +148,13 @@ static void evaldonorprob(LOWPRECPROBTYPE *prob,
   }
 }
 
-static void evalacceptorprob(LOWPRECPROBTYPE *prob,
-                             const unsigned char *gen_seq_tran,
+static void evalacceptorprob(GthFlt *prob, const unsigned char *gen_seq_tran,
                              const GtRange *gen_seq_bounds,
                              unsigned long genpos,
                              const GtUchar *gen_alphabet_symbolmap,
                              GthBssmParam *bssm_param)
 {
-  *prob = (LOWPRECPROBTYPE) 0.0;
+  *prob = (GthFlt) 0.0;
   gt_assert(bssm_param);
 
   if (genpos > 0 &&
@@ -179,21 +176,16 @@ static void evalacceptorprob(LOWPRECPROBTYPE *prob,
   updated.
 */
 
-static void evaluateU12intronmodel(LOWPRECPROBTYPE *log_Pdonor,
-                                   LOWPRECPROBTYPE *log_1minusPdonor,
+static void evaluateU12intronmodel(GthFlt *log_Pdonor, GthFlt *log_1minusPdonor,
                                    const unsigned char *gen_seq_tran,
                                    unsigned long left,
                                    unsigned long right,
                                    unsigned long probindex,
                                    GT_UNUSED unsigned long probindex_afterwards,
-                                   LOWPRECPROBTYPE
-                                   log_U12typedonorprob,
-                                   LOWPRECPROBTYPE
-                                   log1minus_U12typedonorprob,
-                                   LOWPRECPROBTYPE
-                                   log_U12typedonorprobonemismatch,
-                                   LOWPRECPROBTYPE
-                                   log1minus_U12typedonorprobonemismatch,
+                                   GthFlt log_U12typedonorprob,
+                                   GthFlt log1minus_U12typedonorprob,
+                                   GthFlt log_U12typedonorprobonemismatch,
+                                   GthFlt log1minus_U12typedonorprobonemismatch,
                                    unsigned char Achar,
                                    unsigned char Cchar,
                                    unsigned char Gchar,
@@ -257,10 +249,10 @@ static void evaluateU12intronmodel(LOWPRECPROBTYPE *log_Pdonor,
 }
 
 static void calculateprobabilities(GtArray *ranges, unsigned long totallength,
-                                   LOWPRECPROBTYPE *log_Pdonor,
-                                   LOWPRECPROBTYPE *log_1minusPdonor,
-                                   LOWPRECPROBTYPE *log_Pacceptor,
-                                   LOWPRECPROBTYPE *log_1minusPacceptor,
+                                   GthFlt *log_Pdonor,
+                                   GthFlt *log_1minusPdonor,
+                                   GthFlt *log_Pacceptor,
+                                   GthFlt *log_1minusPacceptor,
                                    const unsigned char *gen_seq_tran,
                                    const GtRange *gen_seq_bounds,
                                    const GtUchar *gen_alphabet_symbolmap,
@@ -458,10 +450,10 @@ static void calculateprobabilities(GtArray *ranges, unsigned long totallength,
 static void filllogvaluesforonestrand(GtArray *ranges,
                                       const unsigned char *gen_seq_tran,
                                       const GtRange *gen_seq_bounds,
-                                      LOWPRECPROBTYPE *log_Pdonor,
-                                      LOWPRECPROBTYPE *log_1minusPdonor,
-                                      LOWPRECPROBTYPE *log_Pacceptor,
-                                      LOWPRECPROBTYPE *log_1minusPacceptor,
+                                      GthFlt *log_Pdonor,
+                                      GthFlt *log_1minusPdonor,
+                                      GthFlt *log_Pacceptor,
+                                      GthFlt *log_1minusPacceptor,
                                       const GtUchar *gen_alphabet_symbolmap,
                                       GthSpliceSiteModel *splice_site_model)
 {
@@ -471,7 +463,7 @@ static void filllogvaluesforonestrand(GtArray *ranges,
        genomicindex,
        probindex   = 0,
        totallength = gt_ranges_total_length(ranges);
-  LOWPRECPROBTYPE donorprob, acceptorprob;
+  GthFlt donorprob, acceptorprob;
   double log_donorprob, log_acceptorprob;
 
   if (!splice_site_model->bssm_param) {
@@ -502,8 +494,8 @@ static void filllogvaluesforonestrand(GtArray *ranges,
         if (donorprob > 0.0) {
           log_donorprob = log((double) donorprob);
           if (log_donorprob > (double) log_Pdonor[probindex]) {
-            log_Pdonor[probindex]       = (LOWPRECPROBTYPE) log_donorprob;
-            log_1minusPdonor[probindex] = (LOWPRECPROBTYPE)
+            log_Pdonor[probindex]       = (GthFlt) log_donorprob;
+            log_1minusPdonor[probindex] = (GthFlt)
                                           log(1.0 - (double) donorprob);
           }
         }
@@ -513,8 +505,8 @@ static void filllogvaluesforonestrand(GtArray *ranges,
         if (acceptorprob > 0.0) {
           log_acceptorprob = log((double) acceptorprob);
           if (log_acceptorprob > (double) log_Pacceptor[probindex]) {
-            log_Pacceptor[probindex]       = (LOWPRECPROBTYPE) log_acceptorprob;
-            log_1minusPacceptor[probindex] = (LOWPRECPROBTYPE)
+            log_Pacceptor[probindex]       = (GthFlt) log_acceptorprob;
+            log_1minusPacceptor[probindex] = (GthFlt)
                                              log(1.0 - (double) acceptorprob);
           }
         }
@@ -537,17 +529,16 @@ GthDPParam* dp_param_alloc(GtArray *ranges)
   totallength = gt_ranges_total_length(ranges);
 
   /* try to allocate space for the DP parameter */
-  dp_param->log_Pdonor = malloc(sizeof (LOWPRECPROBTYPE) * totallength);
+  dp_param->log_Pdonor = malloc(sizeof (GthFlt) * totallength);
   CHECK_DP_PARAMETER_ALLOCATION(dp_param->log_Pdonor);
 
-  dp_param->log_1minusPdonor = malloc(sizeof (LOWPRECPROBTYPE) * totallength);
+  dp_param->log_1minusPdonor = malloc(sizeof (GthFlt) * totallength);
   CHECK_DP_PARAMETER_ALLOCATION(dp_param->log_1minusPdonor);
 
-  dp_param->log_Pacceptor = malloc(sizeof (LOWPRECPROBTYPE) * totallength);
+  dp_param->log_Pacceptor = malloc(sizeof (GthFlt) * totallength);
   CHECK_DP_PARAMETER_ALLOCATION(dp_param->log_Pacceptor);
 
-  dp_param->log_1minusPacceptor = malloc(sizeof (LOWPRECPROBTYPE) *
-                                         totallength);
+  dp_param->log_1minusPacceptor = malloc(sizeof (GthFlt) * totallength);
   CHECK_DP_PARAMETER_ALLOCATION(dp_param->log_1minusPacceptor);
 
   return dp_param;

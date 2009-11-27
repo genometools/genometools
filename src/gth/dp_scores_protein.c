@@ -26,12 +26,12 @@
 #define INDEL_PENALTY   -10.0
 #define SCALEFACTOR     0.4
 
-static LOWPRECPROBTYPE get_score(GtScoreMatrix *score_matrix,
+static GthFlt get_score(GtScoreMatrix *score_matrix,
                                  GtAlphabet *score_matrix_alphabet,
                                  unsigned char amino,
                                  unsigned char origreferencechar)
 {
-  LOWPRECPROBTYPE rval = 0.0,
+  GthFlt rval = 0.0,
                   scalefactor   = SCALEFACTOR,
                   indel_penalty = INDEL_PENALTY;
 
@@ -108,10 +108,10 @@ static GtUchar*** precompute_codon2amino(unsigned long translationtable)
   return codon2amino;
 }
 
-static LOWPRECPROBTYPE** precompute_scores(GtScoreMatrix *score_matrix,
+static GthFlt** precompute_scores(GtScoreMatrix *score_matrix,
                                            GtAlphabet *score_matrix_alphabet)
 {
-  LOWPRECPROBTYPE **score;
+  GthFlt **score;
   int x, y;
   gt_array2dim_malloc(score, UCHAR_MAX+1, UCHAR_MAX+1);
   for (x = 0; x < UCHAR_MAX+1; x++) {

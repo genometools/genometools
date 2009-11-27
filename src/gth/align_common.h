@@ -26,7 +26,7 @@
 #include "gth/stat.h"
 
 #define SCORE(T,N,M)       dpm->core.score[T][N][M]
-#define GTH_MINUSINFINITY  ((LOWPRECPROBTYPE) -99999.0)
+#define GTH_MINUSINFINITY  ((GthFlt) -99999.0)
 #define DASH               (SEPARATOR-3)
 #define UNSET              (SEPARATOR-4)
 

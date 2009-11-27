@@ -22,7 +22,7 @@
 #include "gth/bssm_param.h"
 #include "gth/gthtravalign.h"
 
-void gthcalcsplicesitescore(HIGHPRECPROBTYPE *splicesitescore,
+void gthcalcsplicesitescore(GthDbl *splicesitescore,
                             Traversealignmentstate *oldstate,
                             const unsigned char *gen_seq_tran,
                             const unsigned char *ref_seq_tran,

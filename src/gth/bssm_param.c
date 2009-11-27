@@ -202,9 +202,9 @@ GthBssmParam* gth_bssm_param_extract(unsigned long speciesnum, GtError *err)
         for (k = 0; k < 4; k++) {
           for (l = 0; l < 4; l++) {
             bssm_param->gt_donor_model.hypotables.hypo2table[i][j][k][l] =
-              (LOWPRECPROBTYPE) GU_2[speciesnum][i][j][k][l];
+              (GthFlt) GU_2[speciesnum][i][j][k][l];
             bssm_param->ag_acceptor_model.hypotables.hypo2table[i][j][k][l] =
-              (LOWPRECPROBTYPE) AG_2[speciesnum][i][j][k][l];
+              (GthFlt) AG_2[speciesnum][i][j][k][l];
           }
         }
       }
@@ -219,9 +219,9 @@ GthBssmParam* gth_bssm_param_extract(unsigned long speciesnum, GtError *err)
         for (k = 0; k < 4; k++) {
           for (l = 0; l < 4; l++) {
             bssm_param->gt_donor_model.hypotables.hypo7table[i][j][k][l] =
-              (LOWPRECPROBTYPE) GU_7[speciesnum - 2][i][j][k][l];
+              (GthFlt) GU_7[speciesnum - 2][i][j][k][l];
             bssm_param->ag_acceptor_model.hypotables.hypo7table[i][j][k][l] =
-              (LOWPRECPROBTYPE) AG_7[speciesnum - 2][i][j][k][l];
+              (GthFlt) AG_7[speciesnum - 2][i][j][k][l];
           }
         }
       }
@@ -563,7 +563,7 @@ static void build_bssm(GtBioseq *bioseq, GthBssmModel *bssm_model,
   for (i = 0; i < ALPHSIZE; i++) {
     for (j = 0; j < ALPHSIZE; j++) {
       bssm_model->hypotables
-      .hypo7table[hypothesisnum][0][i][j] = (LOWPRECPROBTYPE)
+      .hypo7table[hypothesisnum][0][i][j] = (GthFlt)
                                             mono_ct[0][i] / num_entries;
     }
   }
@@ -576,11 +576,11 @@ static void build_bssm(GtBioseq *bioseq, GthBssmModel *bssm_model,
         di_freq = (double) di_ct[k-1][i][j] / num_entries;
         if (mono_freq == 0.0) {
           bssm_model->hypotables
-          .hypo7table[hypothesisnum][k][i][j] = (LOWPRECPROBTYPE) NULLPROB;
+          .hypo7table[hypothesisnum][k][i][j] = (GthFlt) NULLPROB;
         }
         else {
           bssm_model->hypotables
-          .hypo7table[hypothesisnum][k][i][j] = (LOWPRECPROBTYPE)
+          .hypo7table[hypothesisnum][k][i][j] = (GthFlt)
                                                 (di_freq / mono_freq);
         }
       }
@@ -598,13 +598,13 @@ static void build_bssm(GtBioseq *bioseq, GthBssmModel *bssm_model,
             if (bssm_model->hypotables
                 .hypo7table[hypothesisnum][k][i][j] == NULLPROB) {
                bssm_model->hypotables
-                .hypo7table[hypothesisnum][k][i][j] = (LOWPRECPROBTYPE)
+                .hypo7table[hypothesisnum][k][i][j] = (GthFlt)
                                                       PSEUDOPROB;
             }
             else {
               /* Adjust non-zero transition prob */
               bssm_model->hypotables.hypo7table[hypothesisnum][k][i][j] =
-                (LOWPRECPROBTYPE)
+                (GthFlt)
                 (bssm_model->hypotables.hypo7table[hypothesisnum][k][i][j] *
                  (1 - (4 * PSEUDOPROB)) + PSEUDOPROB);
             }

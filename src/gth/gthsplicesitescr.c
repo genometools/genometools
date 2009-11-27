@@ -33,8 +33,8 @@ typedef struct {
                       *ref_seq_tran;
   GtAlphabet *gen_alphabet;
   GthDPOptionsEST *dp_options_est;
-  LOWPRECPROBTYPE splicesiteweight,    /* (GS2 = sscr) */
-                  maxsplicesiteweight; /* (GS2 = osscr) */
+  GthFlt splicesiteweight,    /* (GS2 = sscr) */
+         maxsplicesiteweight; /* (GS2 = osscr) */
   unsigned long processedalignmentpositions;
 } Calcsplicesitescoredata;
 
@@ -85,8 +85,8 @@ static void calcsplicesitescoreprocmatch(Traversealignmentstate *state,
   GthDPOptionsEST *dp_options_est = d->dp_options_est;
   unsigned char genomicchar, referencechar;
   unsigned long numofmatchestoprocess, alignmentpositionsleft;
-  LOWPRECPROBTYPE genomicinterimvalue   = 0.0,
-                  referenceinterimvalue = 0.0;
+  GthFlt genomicinterimvalue   = 0.0,
+         referenceinterimvalue = 0.0;
   if (d->processedalignmentpositions < SPLICE_SITE_SCORE_WINDOW) {
     alignmentpositionsleft = SPLICE_SITE_SCORE_WINDOW -
                              d->processedalignmentpositions;
@@ -122,7 +122,7 @@ static bool calcsplicesitescorebreakcondition(void *data)
   return d->breaktraversealignment;
 }
 
-void gthcalcsplicesitescore(HIGHPRECPROBTYPE *splicesitescore,
+void gthcalcsplicesitescore(GthDbl *splicesitescore,
                             Traversealignmentstate *oldstate,
                             const unsigned char *gen_seq_tran,
                             const unsigned char *ref_seq_tran,
@@ -161,8 +161,8 @@ void gthcalcsplicesitescore(HIGHPRECPROBTYPE *splicesitescore,
   data.ref_seq_tran                = ref_seq_tran;
   data.gen_alphabet                = gen_alphabet;
   data.dp_options_est              = dp_options_est;
-  data.splicesiteweight            = (LOWPRECPROBTYPE) 0.0;
-  data.maxsplicesiteweight         = (LOWPRECPROBTYPE) 0.0;
+  data.splicesiteweight            = (GthFlt) 0.0;
+  data.maxsplicesiteweight         = (GthFlt) 0.0;
   data.processedalignmentpositions = 0;
 
   /* for acceptorsites going forward, for donorsites going backward */
@@ -172,8 +172,8 @@ void gthcalcsplicesitescore(HIGHPRECPROBTYPE *splicesitescore,
                                                   SPLICE_SITE_SCORE_WINDOW)) &&
       (data.splicesiteweight > 0.0) &&  /* the weights must be positive */
       (data.maxsplicesiteweight > 0.0)) {
-    *splicesitescore = (HIGHPRECPROBTYPE) (data.splicesiteweight /
-                                           data.maxsplicesiteweight);
+    *splicesitescore = (GthDbl) (data.splicesiteweight /
+                                 data.maxsplicesiteweight);
   }
   else
     *splicesitescore = 0.0;

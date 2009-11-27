@@ -31,11 +31,11 @@
 
 typedef struct {
   GtRange range; /* the borders of the exon in the genomic sequence */
-  HIGHPRECPROBTYPE exonscore;
+  GthDbl exonscore;
 } ExoninfoAGS;
 
 typedef struct {
-  LOWPRECPROBTYPE donorsiteprob,
+  GthFlt donorsiteprob,
                   acceptorsiteprob;
 } Splicesiteprob;
 
@@ -56,7 +56,7 @@ typedef struct GthAGS {
                                     alternative gene structure. */
   unsigned long numofstoredsaclusters; /* number of stored SA clusters */
                                  /* (needed in assembly phase) */
-  HIGHPRECPROBTYPE overallscore; /* overall score used for sorting of AGSs */
+  GthDbl overallscore; /* overall score used for sorting of AGSs */
 
   GthAGSObject *agso;
 } GthAGS;

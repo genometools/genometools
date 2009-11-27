@@ -100,8 +100,8 @@ static void xml_output_exon_intron_lines(const GthAGS *ags,
   unsigned long i, leftexonborder, rightexonborder, exonlength,
                 leftintronborder = GT_UNDEF_ULONG, rightintronborder,
                 intronlength;
-  HIGHPRECPROBTYPE exonscore;
-  LOWPRECPROBTYPE donorsiteprob, acceptorsiteprob;
+  GthDbl exonscore;
+  GthFlt donorsiteprob, acceptorsiteprob;
 
   gth_indent(outfp, indentlevel);
   gt_file_xprintf(outfp,

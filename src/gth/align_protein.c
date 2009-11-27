@@ -112,7 +112,7 @@ static const char *retracenames[]= {
 /* the following structure bundles core all tables involved in the DP */
 typedef struct {
   /* table to store the score of a path */
-  LOWPRECPROBTYPE *score[PROTEIN_NUMOFSTATES][PROTEIN_NUMOFSCORETABLES];
+  GthFlt *score[PROTEIN_NUMOFSTATES][PROTEIN_NUMOFSCORETABLES];
   PATHTYPE *path[PROTEIN_NUMOFSTATES]; /* backtrace table of size
                                           gen_dp_length * ref_dp_length */
   unsigned long columnlength;          /* the length of a column of the DP
@@ -185,8 +185,7 @@ static int allocDPtablecore(DPtablecore *core, unsigned long gen_dp_length,
   /* allocating space for core->score and core->path */
   for (t = E_STATE; t < PROTEIN_NUMOFSTATES; t++) {
     for (n = 0; n < PROTEIN_NUMOFSCORETABLES; n++) {
-      core->score[t][n] = gt_malloc(sizeof (LOWPRECPROBTYPE) *
-                                    (ref_dp_length + 1));
+      core->score[t][n] = gt_malloc(sizeof (GthFlt) * (ref_dp_length + 1));
     }
 
     core->path[t] = malloc(sizeof (PATHTYPE) * matrixsize);
@@ -273,25 +272,25 @@ static void initDPtables(DPtables *dpm,
   /* initialize the DP matrices */
   for (n = 0; n <  PROTEIN_NUMOFSCORETABLES; n++)
   {
-    SCORE(E_STATE,n,0) = (LOWPRECPROBTYPE) 0.0;
-    PATH(E_STATE,n,0)  = (PATHTYPE)        E_N1;
-    SCORE(IA_STATE,n,0) = (LOWPRECPROBTYPE) 0.0;
+    SCORE(E_STATE,n,0)  = (GthFlt) 0.0;
+    PATH(E_STATE,n,0)   = (PATHTYPE)        E_N1;
+    SCORE(IA_STATE,n,0) = (GthFlt) 0.0;
     PATH(IA_STATE,n,0)  = (PATHTYPE)        IA_N1;
-    SCORE(IB_STATE,n,0) = (LOWPRECPROBTYPE) 0.0;
+    SCORE(IB_STATE,n,0) = (GthFlt) 0.0;
     PATH(IB_STATE,n,0)  = (PATHTYPE)        IB_N1;
-    SCORE(IC_STATE,n,0) = (LOWPRECPROBTYPE) 0.0;
+    SCORE(IC_STATE,n,0) = (GthFlt) 0.0;
     PATH(IC_STATE,n,0)  = (PATHTYPE)        IC_N1;
 
     for (m = 1; m <= ref_dp_length; m++)
     {
-      SCORE(E_STATE,n,m) = (LOWPRECPROBTYPE) 0.0;
+      SCORE(E_STATE,n,m) = (GthFlt) 0.0;
       PATH(E_STATE,n,m)  = (PATHTYPE)        E_M;
       /* disallow intron status for 5' non-matching cDNA letters: */
-      SCORE(IA_STATE,n,m) = (LOWPRECPROBTYPE) GTH_MINUSINFINITY;
+      SCORE(IA_STATE,n,m) = (GthFlt) GTH_MINUSINFINITY;
       PATH(IA_STATE,n,m)  = (PATHTYPE)        IA_N1;
-      SCORE(IB_STATE,n,m) = (LOWPRECPROBTYPE) GTH_MINUSINFINITY;
+      SCORE(IB_STATE,n,m) = (GthFlt) GTH_MINUSINFINITY;
       PATH(IB_STATE,n,m)  = (PATHTYPE)        IB_N1;
-      SCORE(IC_STATE,n,m) = (LOWPRECPROBTYPE) GTH_MINUSINFINITY;
+      SCORE(IC_STATE,n,m) = (GthFlt) GTH_MINUSINFINITY;
       PATH(IC_STATE,n,m)  = (PATHTYPE)        IC_N1;
     }
   }
@@ -361,7 +360,7 @@ static void complete_path_matrix(DPtables *dpm, GthAlignInputProtein *input,
 {
   unsigned long n, m, modn, modnminus1, modnminus2, modnminus3;
   unsigned char origreferencechar;
-  LOWPRECPROBTYPE value, maxvalue;
+  GthFlt value, maxvalue;
   PATHTYPE retrace;
 
   /* stepping along the genomic sequence */
@@ -1015,7 +1014,7 @@ static int find_optimal_path(GthBacktracePath *backtrace_path, DPtables *dpm,
                              GtFile *outfp)
 {
   int rval;
-  LOWPRECPROBTYPE value, maxvalue;
+  GthFlt value, maxvalue;
   PATHTYPE retrace;
   States state;
 

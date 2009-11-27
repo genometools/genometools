@@ -23,10 +23,10 @@
 
 typedef struct {
   GtUchar ***codon2amino;
-  LOWPRECPROBTYPE **score;
+  GthFlt **score;
 } GthDPScoresProtein;
 
-static inline LOWPRECPROBTYPE GTHGETSCORE(GthDPScoresProtein *scores,
+static inline GthFlt GTHGETSCORE(GthDPScoresProtein *scores,
                                           GtUchar n1, GtUchar n2, GtUchar n3,
                                           GtUchar aa)
 {

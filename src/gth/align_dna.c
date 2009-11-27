@@ -98,10 +98,8 @@ static const char *dna_retracenames[]= {
 /* the following structure bundles all tables involved in the dynamic
    programming for cDNAs/ESTs */
 typedef struct {
-  LOWPRECPROBTYPE *score[DNA_NUMOFSTATES][DNA_NUMOFSCORETABLES]; /* table to
-                                                                    store the
-                                                                    score of a
-                                                                    path */
+  GthFlt *score[DNA_NUMOFSTATES][DNA_NUMOFSCORETABLES]; /* table to store the
+                                                           score of a path */
   PATHTYPE **path;                   /* backtrace table of size
                                         gen_dp_length * ref_dp_length */
   unsigned long *intronstart[DNA_NUMOFSCORETABLES],
@@ -157,8 +155,7 @@ static int dp_matrix_init(DPMatrix *dpm,
   /* allocate space for dpm->score */
   for (t = DNA_E_STATE; t < DNA_NUMOFSTATES; t++) {
     for (n = 0; n <  DNA_NUMOFSCORETABLES; n++) {
-      dpm->score[t][n] = gt_malloc(sizeof (LOWPRECPROBTYPE) *
-                                   (ref_dp_length + 1));
+      dpm->score[t][n] = gt_malloc(sizeof (GthFlt) * (ref_dp_length + 1));
     }
   }
 
@@ -182,9 +179,9 @@ static int dp_matrix_init(DPMatrix *dpm,
     dpm->score[DNA_I_STATE][n][0] = 0.0;
 
     for (m = 1; m <= ref_dp_length; m++) {
-      dpm->score[DNA_E_STATE][n][m] = (LOWPRECPROBTYPE) 0.0;
+      dpm->score[DNA_E_STATE][n][m] = (GthFlt) 0.0;
       /* disallow intron status for 5' non-matching cDNA letters: */
-      dpm->score[DNA_I_STATE][n][m] = (LOWPRECPROBTYPE) GTH_MINUSINFINITY;
+      dpm->score[DNA_I_STATE][n][m] = (GthFlt) GTH_MINUSINFINITY;
     }
   }
   dpm->gen_dp_length = gen_dp_length;
@@ -209,14 +206,13 @@ static unsigned long dp_matrix_get_reference_length(DPMatrix *dpm)
    stores a backtrace reference */
 static void E_1m(DPMatrix *dpm, unsigned char genomicchar,
                  const unsigned char *ref_seq_tran, unsigned long m,
-                 GtAlphabet *gen_alphabet, HIGHPRECPROBTYPE log_probies,
+                 GtAlphabet *gen_alphabet, GthDbl log_probies,
                  GthDPOptionsEST *dp_options_est,
                  GthDPOptionsCore *dp_options_core)
 {
-  LOWPRECPROBTYPE value, maxvalue;
+  GthFlt value, maxvalue;
   PATHTYPE retrace;
-  HIGHPRECPROBTYPE rval         = 0.0,
-                   outputweight = 0.0;
+  GthDbl rval = 0.0, outputweight = 0.0;
   unsigned char referencechar = ref_seq_tran[m-1];
   unsigned int gen_alphabet_mapsize = gt_alphabet_size(gen_alphabet);
 
@@ -229,7 +225,7 @@ static void E_1m(DPMatrix *dpm, unsigned char genomicchar,
     ADDOUTPUTWEIGHT(outputweight, genomicchar, referencechar);
     rval -= (outputweight / 2.0);
   }
-  maxvalue = (LOWPRECPROBTYPE) (dpm->score[DNA_E_STATE][0][m-1] + rval);
+  maxvalue = (GthFlt) (dpm->score[DNA_E_STATE][0][m-1] + rval);
   retrace  = DNA_E_NM;
 
   /* 1. */
@@ -242,7 +238,7 @@ static void E_1m(DPMatrix *dpm, unsigned char genomicchar,
     ADDOUTPUTWEIGHT(outputweight, genomicchar, referencechar);
     rval -= (outputweight / 2.0);
   }
-  value = (LOWPRECPROBTYPE) (dpm->score[DNA_I_STATE][0][m-1] + rval);
+  value = (GthFlt) (dpm->score[DNA_I_STATE][0][m-1] + rval);
   /* intron from intronstart to n-1 => n-1 - intronstart + 1 */
   if (1 - dpm->intronstart[0][m - 1] < dp_options_core->dpminintronlength)
     value -= dp_options_core->shortintronpenalty;
@@ -253,7 +249,7 @@ static void E_1m(DPMatrix *dpm, unsigned char genomicchar,
   if (m < dpm->ref_dp_length) {
     ADDOUTPUTWEIGHT(rval, genomicchar, (unsigned char) DASH);
   }
-  value = (LOWPRECPROBTYPE) (dpm->score[DNA_E_STATE][0][m] + rval);
+  value = (GthFlt) (dpm->score[DNA_E_STATE][0][m] + rval);
   UPDATEMAX(DNA_E_N);
 
   /* 3. */
@@ -261,7 +257,7 @@ static void E_1m(DPMatrix *dpm, unsigned char genomicchar,
   if (m < dpm->ref_dp_length) {
     ADDOUTPUTWEIGHT(rval, genomicchar, (unsigned char) DASH);
   }
-  value = (LOWPRECPROBTYPE) (dpm->score[DNA_I_STATE][0][m] + rval);
+  value = (GthFlt) (dpm->score[DNA_I_STATE][0][m] + rval);
   /* intron from intronstart to n-1 => n-1 - intronstart + 1 */
   if (1 - dpm->intronstart[0][m] < dp_options_core->dpminintronlength)
     value -= dp_options_core->shortintronpenalty;
@@ -270,13 +266,13 @@ static void E_1m(DPMatrix *dpm, unsigned char genomicchar,
   /* 4. */
   rval = log_probies;
   ADDOUTPUTWEIGHT(rval, (unsigned char) DASH, referencechar);
-  value = (LOWPRECPROBTYPE) (dpm->score[DNA_E_STATE][1][m-1] + rval);
+  value = (GthFlt) (dpm->score[DNA_E_STATE][1][m-1] + rval);
   UPDATEMAX(DNA_E_M);
 
   /* 5. */
   rval = dpm->score[DNA_I_STATE][1][m-1] + log_probies;
   ADDOUTPUTWEIGHT(rval, (unsigned char) DASH, referencechar);
-  value = (LOWPRECPROBTYPE) (dpm->score[DNA_I_STATE][1][m-1] + rval);
+  value = (GthFlt) (dpm->score[DNA_I_STATE][1][m-1] + rval);
   /* intron from intronstart to n => n - intronstart + 1 */
   if (1 - dpm->intronstart[1][m - 1] + 1 < dp_options_core->dpminintronlength)
     value -= dp_options_core->shortintronpenalty;
@@ -307,20 +303,17 @@ static void E_1m(DPMatrix *dpm, unsigned char genomicchar,
 
 /* the following function evaluates state I_1m for indices 1 and <m> and
    stores a backtrace reference */
-static void I_1m(DPMatrix *dpm, unsigned long m,
-                 HIGHPRECPROBTYPE log_1minusprobies)
+static void I_1m(DPMatrix *dpm, unsigned long m, GthDbl log_1minusprobies)
 {
-  LOWPRECPROBTYPE value, maxvalue;
+  GthFlt value, maxvalue;
   PATHTYPE retrace;
 
   /* 0. */
-  maxvalue = (LOWPRECPROBTYPE) (dpm->score[DNA_E_STATE][0][m] +
-                                log_1minusprobies);
+  maxvalue = (GthFlt) (dpm->score[DNA_E_STATE][0][m] + log_1minusprobies);
   retrace  = I_STATE_E_N;
 
   /* 1. */
-  value = (LOWPRECPROBTYPE) (dpm->score[DNA_I_STATE][0][m] +
-                             log_1minusprobies);
+  value = (GthFlt) (dpm->score[DNA_I_STATE][0][m] + log_1minusprobies);
   UPDATEMAX(I_STATE_I_N);
 
   /* save maximum values */
@@ -350,24 +343,24 @@ static void dna_complete_path_matrix(DPMatrix *dpm,
                                      GthDPOptionsEST *dp_options_est,
                                      GthDPOptionsCore *dp_options_core)
 {
-  LOWPRECPROBTYPE value, maxvalue;
+  GthFlt value, maxvalue;
   PATHTYPE retrace;
   unsigned long n, m, modn, modnminus1;
-  HIGHPRECPROBTYPE rval, outputweight, **outputweights,
-                   log_probies,          /* initial exon state probability */
-                   log_1minusprobies;    /* initial intron state probability */
-  LOWPRECPROBTYPE  log_probdelgen,       /* deletion in genomic sequence */
-                   log_1minusprobdelgen;
+  GthDbl rval, outputweight, **outputweights,
+         log_probies,          /* initial exon state probability */
+         log_1minusprobies;    /* initial intron state probability */
+  GthFlt log_probdelgen,       /* deletion in genomic sequence */
+         log_1minusprobdelgen;
 
   unsigned char genomicchar, referencechar;
   unsigned int gen_alphabet_mapsize = gt_alphabet_size(gen_alphabet);
 
   gt_assert(dpm->gen_dp_length > 1);
 
-  log_probies = (HIGHPRECPROBTYPE) log((double) dp_options_est->probies);
-  log_1minusprobies = (HIGHPRECPROBTYPE) log(1.0 - dp_options_est->probies);
-  log_probdelgen = (LOWPRECPROBTYPE) log((double) dp_options_est->probdelgen);
-  log_1minusprobdelgen = (LOWPRECPROBTYPE)log(1.0 - dp_options_est->probdelgen);
+  log_probies = (GthDbl) log((double) dp_options_est->probies);
+  log_1minusprobies = (GthDbl) log(1.0 - dp_options_est->probies);
+  log_probdelgen = (GthFlt) log((double) dp_options_est->probdelgen);
+  log_1minusprobdelgen = (GthFlt) log(1.0 - dp_options_est->probdelgen);
 
   /* precompute outputweights
      XXX: move this to somewhere else, maybe make it smaller */
@@ -420,8 +413,7 @@ static void dna_complete_path_matrix(DPMatrix *dpm,
 
       /* 0. */
       outputweight = 0.0;
-      rval = (HIGHPRECPROBTYPE) (log_1minusprobdelgen +
-                                 dp_param->log_1minusPdonor[n-1]);
+      rval = (GthDbl) (log_1minusprobdelgen + dp_param->log_1minusPdonor[n-1]);
       rval += outputweights[genomicchar][referencechar];
       if ((m < dp_options_est->wdecreasedoutput ||
            m > dpm->ref_dp_length - dp_options_est->wdecreasedoutput) &&
@@ -429,14 +421,12 @@ static void dna_complete_path_matrix(DPMatrix *dpm,
         outputweight += outputweights[genomicchar][referencechar];
         rval -= (outputweight / 2.0);
       }
-      maxvalue = (LOWPRECPROBTYPE) (dpm->score[DNA_E_STATE][modnminus1][m-1] +
-                                    rval);
+      maxvalue = (GthFlt) (dpm->score[DNA_E_STATE][modnminus1][m-1] + rval);
       retrace  = DNA_E_NM;
 
       /* 1. */
       outputweight = 0.0;
-      rval = (HIGHPRECPROBTYPE) (dp_param->log_Pacceptor[n-2] +
-                                 log_1minusprobdelgen);
+      rval = (GthDbl) (dp_param->log_Pacceptor[n-2] + log_1minusprobdelgen);
       rval += outputweights[genomicchar][referencechar];
       if ((m < dp_options_est->wdecreasedoutput ||
            m > dpm->ref_dp_length - dp_options_est->wdecreasedoutput) &&
@@ -444,8 +434,7 @@ static void dna_complete_path_matrix(DPMatrix *dpm,
         outputweight += outputweights[genomicchar][referencechar];
         rval -= (outputweight / 2.0);
       }
-      value = (LOWPRECPROBTYPE) (dpm->score[DNA_I_STATE][modnminus1][m-1] +
-                                 rval);
+      value = (GthFlt) (dpm->score[DNA_I_STATE][modnminus1][m-1] + rval);
       /* intron from intronstart to n-1 => n-1 - intronstart + 1 */
       if (n - dpm->intronstart[modnminus1][m - 1] <
           dp_options_core->dpminintronlength) {
@@ -459,15 +448,14 @@ static void dna_complete_path_matrix(DPMatrix *dpm,
         rval += (log_1minusprobdelgen + dp_param->log_1minusPdonor[n-1]);
       if (m < dpm->ref_dp_length)
         rval += outputweights[genomicchar][DASH];
-      value = (LOWPRECPROBTYPE) (dpm->score[DNA_E_STATE][modnminus1][m] + rval);
+      value = (GthFlt) (dpm->score[DNA_E_STATE][modnminus1][m] + rval);
       UPDATEMAX(DNA_E_N);
 
       /* 3. */
-      rval = (HIGHPRECPROBTYPE) (dp_param->log_Pacceptor[n-2] +
-                                 log_1minusprobdelgen);
+      rval = (GthDbl) (dp_param->log_Pacceptor[n-2] + log_1minusprobdelgen);
       if (m < dpm->ref_dp_length)
         rval += outputweights[genomicchar][DASH];
-      value = (LOWPRECPROBTYPE) (dpm->score[DNA_I_STATE][modnminus1][m] + rval);
+      value = (GthFlt) (dpm->score[DNA_I_STATE][modnminus1][m] + rval);
       /* intron from intronstart to n-1 => n-1 - intronstart + 1 */
       if (n - dpm->intronstart[modnminus1][m] <
           dp_options_core->dpminintronlength) {
@@ -478,10 +466,10 @@ static void dna_complete_path_matrix(DPMatrix *dpm,
       /* 4. */
       rval = 0.0;
       if (n < dpm->gen_dp_length || m < dp_options_est->wzerotransition)
-        rval = (HIGHPRECPROBTYPE) log_probdelgen;
+        rval = (GthDbl) log_probdelgen;
       if (n < dpm->gen_dp_length)
         rval += outputweights[DASH][referencechar];
-      value = (LOWPRECPROBTYPE) (dpm->score[DNA_E_STATE][modn][m-1] + rval);
+      value = (GthFlt) (dpm->score[DNA_E_STATE][modn][m-1] + rval);
       UPDATEMAX(DNA_E_M);
 
       /* 5. */
@@ -490,7 +478,7 @@ static void dna_complete_path_matrix(DPMatrix *dpm,
        rval += (dp_param->log_Pacceptor[n-1] + log_probdelgen);
       if (n < dpm->gen_dp_length)
         rval += outputweights[DASH][referencechar];
-      value = (LOWPRECPROBTYPE) (dpm->score[DNA_I_STATE][modn][m-1] + rval);
+      value = (GthFlt) (dpm->score[DNA_I_STATE][modn][m-1] + rval);
       /* intron from intronstart to n => n - intronstart + 1 */
       if (n - dpm->intronstart[modn][m - 1] + 1 <
           dp_options_core->dpminintronlength) {
@@ -754,7 +742,7 @@ static int dna_find_optimal_path(GthBacktracePath *backtrace_path,
                                  GtFile *outfp)
 {
   int rval;
-  LOWPRECPROBTYPE value, maxvalue;
+  GthFlt value, maxvalue;
   PATHTYPE retrace;
   DnaStates state;
 
@@ -807,7 +795,7 @@ static void dp_matrix_free(DPMatrix *dpm)
 }
 
 #if 0
-static LOWPRECPROBTYPE dp_matrix_get_score_e_state(DPMatrix *dpm,
+static GthFlt dp_matrix_get_score_e_state(DPMatrix *dpm,
                                                    unsigned long n,
                                                    unsigned long m)
 {
@@ -815,7 +803,7 @@ static LOWPRECPROBTYPE dp_matrix_get_score_e_state(DPMatrix *dpm,
   return dpm->score[DNA_E_STATE][GT_MOD2(n)][m];
 }
 
-static LOWPRECPROBTYPE dp_matrix_get_score_i_state(DPMatrix *dpm,
+static GthFlt dp_matrix_get_score_i_state(DPMatrix *dpm,
                                                    unsigned long n,
                                                    unsigned long m)
 {
@@ -824,14 +812,14 @@ static LOWPRECPROBTYPE dp_matrix_get_score_i_state(DPMatrix *dpm,
 }
 
 static void dp_matrix_set_score_e_state(DPMatrix *dpm, unsigned long n,
-                                        unsigned long m, LOWPRECPROBTYPE score)
+                                        unsigned long m, GthFlt score)
 {
   gt_assert(dpm && n < dpm->gen_dp_length && m < dpm->ref_dp_length);
   dpm->score[DNA_E_STATE][GT_MOD2(n)][m] = score;
 }
 
 static void dp_matrix_set_score_i_state(DPMatrix *dpm, unsigned long n,
-                                        unsigned long m, LOWPRECPROBTYPE score)
+                                        unsigned long m, GthFlt score)
 {
   gt_assert(dpm && n < dpm->gen_dp_length && m < dpm->ref_dp_length);
   dpm->score[DNA_I_STATE][GT_MOD2(n)][m] = score;
@@ -935,7 +923,7 @@ static void dp_matrix_copy_terminal(DPMatrix *dpm_terminal, DPMatrix *dpm,
                                     unsigned long genomic_overlap,
                                     unsigned long reference_offset)
 {
-  LOWPRECPROBTYPE score;
+  GthFlt score;
   unsigned long n, m, start;
   DnaRetrace retrace;
   gt_assert(dpm_terminal && dpm);

@@ -23,10 +23,10 @@
 #include "gth/splice_site_model.h"
 
 typedef struct {
-  LOWPRECPROBTYPE *log_Pdonor,                 /* donor site */
-                  *log_1minusPdonor,
-                  *log_Pacceptor,              /* acceptor site */
-                  *log_1minusPacceptor;
+  GthFlt *log_Pdonor,                 /* donor site */
+         *log_1minusPdonor,
+         *log_Pacceptor,              /* acceptor site */
+         *log_1minusPacceptor;
 } GthDPParam;
 
 /* Can return NULL */

@@ -426,11 +426,11 @@ static void end_element_handler(void *info, const XML_Char *name)
     gth_sa_add_exon(sa, &parseinfo->exoninfo);
   else if (strcmp(name, DONORSITEPROBABILITY_TAG) == 0) {
     SCANDOUBLE;
-    parseinfo->introninfo.donorsiteprobability = (LOWPRECPROBTYPE) retdouble;
+    parseinfo->introninfo.donorsiteprobability = (GthFlt) retdouble;
   }
   else if (strcmp(name, ACCEPTORSITEPROBABILITY_TAG) == 0) {
     SCANDOUBLE;
-    parseinfo->introninfo.acceptorsiteprobability = (LOWPRECPROBTYPE) retdouble;
+    parseinfo->introninfo.acceptorsiteprobability = (GthFlt) retdouble;
   }
   else if (strcmp(name, DONORSITESCORE_TAG) == 0) {
     SCANDOUBLE;

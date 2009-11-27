@@ -79,8 +79,8 @@ static void output_exon_intron_lines(const GthAGS *ags, int widthforgenpos,
   unsigned long i, leftexonborder, rightexonborder, exonlength,
                 leftintronborder = GT_UNDEF_ULONG, rightintronborder,
                 intronlength;
-  HIGHPRECPROBTYPE exonscore;
-  LOWPRECPROBTYPE donorsiteprob, acceptorsiteprob;
+  GthDbl exonscore;
+  GthFlt donorsiteprob, acceptorsiteprob;
 
   for (i = 0; i < gt_array_size(ags->exons); i++) {
     exoninfoAGS     = (ExoninfoAGS*) gt_array_get(ags->exons, i);

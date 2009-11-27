@@ -62,9 +62,9 @@ struct GthSA {
                                         sequence. Iff both positions are equal
                                         to zero, no poly-A tail could be
                                         determined. */
-  LOWPRECPROBTYPE alignmentscore,    /* the score of the alignment
+  GthFlt alignmentscore,             /* the score of the alignment
                                         (GS2 = simscore) */
-                  coverage;          /* coverage of the genomic DNA or cDNA
+         coverage;                   /* coverage of the genomic DNA or cDNA
                                         segment, whichever is highest
                                         (GS2 = cvrge) */
   bool genomic_cov_is_highest;       /* (GS2 = no equivalent) */
@@ -267,10 +267,10 @@ GtRange gth_sa_range_actual(const GthSA *sa)
   return range;
 }
 
-LOWPRECPROBTYPE gth_sa_average_splice_site_prob(const GthSA *sa)
+GthFlt gth_sa_average_splice_site_prob(const GthSA *sa)
 {
   unsigned long i, numofintrons;
-  LOWPRECPROBTYPE averagepdpa = 0.0;
+  GthFlt averagepdpa = 0.0;
   Introninfo *introninfo;
   gt_assert(sa);
   numofintrons = gt_array_size(sa->introns);
@@ -285,10 +285,10 @@ LOWPRECPROBTYPE gth_sa_average_splice_site_prob(const GthSA *sa)
   return averagepdpa;
 }
 
-bool gth_sa_is_poor(const GthSA *sa, LOWPRECPROBTYPE minaveragessp)
+bool gth_sa_is_poor(const GthSA *sa, GthFlt minaveragessp)
 {
   unsigned long num_of_introns;
-  LOWPRECPROBTYPE averagepdpa;
+  GthFlt averagepdpa;
 
   gt_assert(sa);
 
@@ -299,7 +299,7 @@ bool gth_sa_is_poor(const GthSA *sa, LOWPRECPROBTYPE minaveragessp)
       sa->polyAtailpos.start > sa->polyAtailpos.end)
     return true;
   if (num_of_introns == 1 &&
-      averagepdpa < (LOWPRECPROBTYPE) (1.5 * minaveragessp)) {
+      averagepdpa < (GthFlt) (1.5 * minaveragessp)) {
     return true;
   }
   if (num_of_introns > 1 && averagepdpa < minaveragessp)
@@ -310,7 +310,7 @@ bool gth_sa_is_poor(const GthSA *sa, LOWPRECPROBTYPE minaveragessp)
 
 bool gth_sa_B_is_better_than_A(const GthSA *saA, const GthSA *saB)
 {
-  LOWPRECPROBTYPE firstaveragepdpa, secondaveragepdpa;
+  GthFlt firstaveragepdpa, secondaveragepdpa;
 
   gt_assert(saA && saB);
 
@@ -880,25 +880,25 @@ void gth_sa_set_polyAtail_stop(GthSA *sa, unsigned long stop)
   sa->polyAtailpos.end = stop;
 }
 
-LOWPRECPROBTYPE gth_sa_score(const GthSA *sa)
+GthFlt gth_sa_score(const GthSA *sa)
 {
   gt_assert(sa);
   return sa->alignmentscore;
 }
 
-void gth_sa_set_score(GthSA *sa, LOWPRECPROBTYPE score)
+void gth_sa_set_score(GthSA *sa, GthFlt score)
 {
   gt_assert(sa);
   sa->alignmentscore = score;
 }
 
-LOWPRECPROBTYPE gth_sa_coverage(const GthSA *sa)
+GthFlt gth_sa_coverage(const GthSA *sa)
 {
   gt_assert(sa);
   return sa->coverage;
 }
 
-void gth_sa_set_coverage(GthSA *sa, LOWPRECPROBTYPE coverage)
+void gth_sa_set_coverage(GthSA *sa, GthFlt coverage)
 {
   gt_assert(sa);
   sa->coverage = coverage;
