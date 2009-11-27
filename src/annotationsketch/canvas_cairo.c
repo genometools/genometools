@@ -604,6 +604,7 @@ void gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange)
   double step, minorstep, vmajor, vminor, theight = TOY_TEXT_HEIGHT;
   long base_length, tick;
   GtColor rulercol, gridcol;
+  GtStr *left_str, *right_str, *unit;
   char str[BUFSIZ];
   bool showgrid = true;
   gt_assert(canvas);
@@ -612,6 +613,20 @@ void gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange)
                            NULL);
   (void) gt_style_get_num(canvas->pvt->sty, "format", "ruler_font_size",
                           &theight, NULL);
+
+  /* get unit value from style */
+  unit = gt_str_new();
+  (void) gt_style_get_str(canvas->pvt->sty, "format", "unit", unit, NULL);
+
+  /* get additional description texts from style */
+  left_str = gt_str_new();
+  if (!gt_style_get_str(canvas->pvt->sty, "format",
+                        "ruler_left_text", left_str, NULL))
+    gt_str_append_cstr(left_str, FIVE_PRIME_STRING);
+  right_str = gt_str_new();
+  if (!gt_style_get_str(canvas->pvt->sty, "format",
+                        "ruler_right_text", right_str, NULL))
+    gt_str_append_cstr(right_str, THREE_PRIME_STRING);
 
   /* reset font to default */
   gt_graphics_set_font(canvas->pvt->g,
@@ -649,7 +664,7 @@ void gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange)
                                    rulercol,
                                    10,
                                    1.0);
-    gt_format_ruler_label(str, tick, BUFSIZ);
+    gt_format_ruler_label(str, tick, gt_str_get(unit), BUFSIZ);
     gt_graphics_draw_text_centered(canvas->pvt->g,
                                    drawtick,
                                    canvas->pvt->y + 20,
@@ -691,13 +706,17 @@ void gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange)
                                    canvas->pvt->width - 2
                                      * canvas->pvt->margins,
                                    1.25);
-  /* put 3' and 5' captions at the ends */
-  gt_graphics_draw_text_centered(canvas->pvt->g,
-                                 canvas->pvt->margins - 10,
-                                 canvas->pvt->y + 39 + (theight/2),
-                                 FIVE_PRIME_STRING);
-  gt_graphics_draw_text_centered(canvas->pvt->g,
-                                 canvas->pvt->width - canvas->pvt->margins + 10,
-                                 canvas->pvt->y + 39 + (theight/2),
-                                 THREE_PRIME_STRING);
+
+    gt_graphics_draw_text_right(canvas->pvt->g,
+                              canvas->pvt->margins - 10,
+                              canvas->pvt->y + 39 + (theight/2),
+                              gt_str_get(left_str));
+  gt_graphics_draw_text(canvas->pvt->g,
+                        canvas->pvt->width - canvas->pvt->margins + 10,
+                        canvas->pvt->y + 39 + (theight/2),
+                        gt_str_get(right_str));
+
+  gt_str_delete(unit);
+  gt_str_delete(left_str);
+  gt_str_delete(right_str);
 }
