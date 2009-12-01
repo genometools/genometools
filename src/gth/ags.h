@@ -37,7 +37,7 @@ typedef struct {
 typedef struct {
   GthFlt donorsiteprob,
          acceptorsiteprob;
-} Splicesiteprob;
+} GthSpliceSiteProb;
 
 typedef struct GthAGSObject GthAGSObject;
 

@@ -38,7 +38,7 @@ GthAGS* gth_ags_new(const GthPGL *pgl)
   ags->gen_id = NULL;
 
   ags->exons = gt_array_new(sizeof (GthExonAGS));
-  ags->splicesiteprobs = gt_array_new(sizeof (Splicesiteprob));
+  ags->splicesiteprobs = gt_array_new(sizeof (GthSpliceSiteProb));
   ags->alignments = gt_array_new(sizeof (GthSA*));
 
   ags->numofstoredsaclusters = 0;
@@ -146,13 +146,13 @@ GtRange gth_ags_acceptor_site_range(const GthAGS *ags, unsigned long intron)
 double gth_ags_donor_site_prob(const GthAGS *ags, unsigned long intron)
 {
   gt_assert(ags);
-  return ((Splicesiteprob*) gt_array_get(ags->splicesiteprobs, intron))
+  return ((GthSpliceSiteProb*) gt_array_get(ags->splicesiteprobs, intron))
          ->donorsiteprob;
 }
 
 double gth_ags_acceptor_site_prob(const GthAGS *ags, unsigned long intron)
 {
   gt_assert(ags);
-  return ((Splicesiteprob*) gt_array_get(ags->splicesiteprobs, intron))
+  return ((GthSpliceSiteProb*) gt_array_get(ags->splicesiteprobs, intron))
          ->acceptorsiteprob;
 }

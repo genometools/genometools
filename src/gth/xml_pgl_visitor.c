@@ -66,7 +66,7 @@ static void xml_outputAGSline(const GthAGS *ags, unsigned long agsnum,
 static void xml_outputSCRline(const GthAGS *ags, unsigned int indentlevel,
                               GtFile *outfp)
 {
-  Splicesiteprob *splicesiteprob;
+  GthSpliceSiteProb *splicesiteprob;
   unsigned long i;
 
   gth_indent(outfp, indentlevel);
@@ -74,7 +74,7 @@ static void xml_outputSCRline(const GthAGS *ags, unsigned int indentlevel,
   indentlevel++;
 
   for (i = 0; i < gt_array_size(ags->exons) - 1; i++) {
-    splicesiteprob = (Splicesiteprob*) gt_array_get(ags->splicesiteprobs, i);
+    splicesiteprob = (GthSpliceSiteProb*) gt_array_get(ags->splicesiteprobs, i);
     gth_indent(outfp, indentlevel);
     gt_file_xprintf(outfp, "<exon-intron don_prob=\"%.3f\" "
                        "acc_prob=\"%.3f\" e_score=\"%.3f\"/>\n",
@@ -95,7 +95,7 @@ static void xml_output_exon_intron_lines(const GthAGS *ags,
                                          unsigned int indentlevel,
                                          GtFile *outfp)
 {
-  Splicesiteprob *splicesiteprob;
+  GthSpliceSiteProb *splicesiteprob;
   GthExonAGS *exon;
   unsigned long i, leftexonborder, rightexonborder, exonlength,
                 leftintronborder = GT_UNDEF_ULONG, rightintronborder,
@@ -120,8 +120,8 @@ static void xml_output_exon_intron_lines(const GthAGS *ags,
     if (i > 0) {
       rightintronborder = leftexonborder - 1;
       intronlength      = rightintronborder - leftintronborder + 1;
-      splicesiteprob    = (Splicesiteprob*) gt_array_get(ags->splicesiteprobs,
-                                                      i-1);
+      splicesiteprob    = (GthSpliceSiteProb*)
+                          gt_array_get(ags->splicesiteprobs, i-1);
       donorsiteprob     = splicesiteprob->donorsiteprob;
       acceptorsiteprob  = splicesiteprob->acceptorsiteprob;
 

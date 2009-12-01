@@ -39,7 +39,7 @@ static void determineAGSscore(GthAGS *ags, double sortagswf)
   GthDbl average_exon_score              = 0.0,
          average_splice_site_probability = 0.0;
   unsigned long i, numofexons = gt_array_size(ags->exons);
-  Splicesiteprob *splicesiteprob;
+  GthSpliceSiteProb *splicesiteprob;
   gt_assert(numofexons > 0);
 
   if (numofexons == 1) {
