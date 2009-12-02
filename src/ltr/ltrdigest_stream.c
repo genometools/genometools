@@ -100,10 +100,14 @@ static int pdom_hit_attach_gff3(GtPdomModel *model, GtPdomModelHit *hit,
     gt_feature_node_set_score((GtFeatureNode*) gf,
                               gt_pdom_single_hit_get_evalue(singlehit));
     gt_feature_node_set_phase((GtFeatureNode*) gf, frame);
-    gt_feature_node_add_attribute((GtFeatureNode*) gf,"pfamname",
-                                  gt_pdom_model_get_name(model));
-    gt_feature_node_add_attribute((GtFeatureNode*) gf,"pfamid",
-                                  gt_pdom_model_get_acc(model));
+    if (gt_pdom_model_get_name(model)) {
+      gt_feature_node_add_attribute((GtFeatureNode*) gf, "pfamname",
+                                    gt_pdom_model_get_name(model));
+    }
+    if (gt_pdom_model_get_acc(model)) {
+      gt_feature_node_add_attribute((GtFeatureNode*) gf, "pfamid",
+                                    gt_pdom_model_get_acc(model));
+    }
     gt_feature_node_add_child(ls->element.mainnode, (GtFeatureNode*) gf);
   }
   return 0;
@@ -147,15 +151,17 @@ static void pbs_attach_results_to_gff3(GtPBSResults *results,
                            gt_pbs_hit_get_strand(hit));
   gt_feature_node_set_source((GtFeatureNode*) gf, tag);
   gt_feature_node_set_score((GtFeatureNode*) gf, gt_pbs_hit_get_score(hit));
-  gt_feature_node_add_attribute((GtFeatureNode*) gf,"trna",
-                                 gt_pbs_hit_get_trna(hit));
+  if (gt_pbs_hit_get_trna(hit)) {
+    gt_feature_node_add_attribute((GtFeatureNode*) gf, "trna",
+                                   gt_pbs_hit_get_trna(hit));
+  }
   gt_feature_node_set_strand(element->mainnode, gt_pbs_hit_get_strand(hit));
   (void) snprintf(buffer, BUFSIZ-1, "%lu", gt_pbs_hit_get_tstart(hit));
-  gt_feature_node_add_attribute((GtFeatureNode*) gf,"trnaoffset", buffer);
+  gt_feature_node_add_attribute((GtFeatureNode*) gf, "trnaoffset", buffer);
   (void) snprintf(buffer, BUFSIZ-1, "%lu", gt_pbs_hit_get_offset(hit));
-  gt_feature_node_add_attribute((GtFeatureNode*) gf,"pbsoffset", buffer);
+  gt_feature_node_add_attribute((GtFeatureNode*) gf, "pbsoffset", buffer);
   (void) snprintf(buffer, BUFSIZ-1, "%lu", gt_pbs_hit_get_edist(hit));
-  gt_feature_node_add_attribute((GtFeatureNode*) gf,"edist", buffer);
+  gt_feature_node_add_attribute((GtFeatureNode*) gf, "edist", buffer);
   gt_feature_node_add_child(element->mainnode, (GtFeatureNode*) gf);
 }
 
