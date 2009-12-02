@@ -98,7 +98,7 @@ static int ltr_visitor_feature_node(GtNodeVisitor *gv, GtFeatureNode *gf,
                                           gt_free_func,
                                           (GtFree) gt_array_delete);
     }
-    pfamname = gt_feature_node_get_attribute(gf, "pfamname");
+    pfamname = gt_feature_node_get_attribute(gf, "name");
     if (!(pdomarr = (GtArray*) gt_hashmap_get(lv->element->pdoms, pfamname)))
     {
       char *pfamcpy = gt_cstr_dup(pfamname);

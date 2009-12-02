@@ -101,11 +101,11 @@ static int pdom_hit_attach_gff3(GtPdomModel *model, GtPdomModelHit *hit,
                               gt_pdom_single_hit_get_evalue(singlehit));
     gt_feature_node_set_phase((GtFeatureNode*) gf, frame);
     if (gt_pdom_model_get_name(model)) {
-      gt_feature_node_add_attribute((GtFeatureNode*) gf, "pfamname",
+      gt_feature_node_add_attribute((GtFeatureNode*) gf, "name",
                                     gt_pdom_model_get_name(model));
     }
     if (gt_pdom_model_get_acc(model)) {
-      gt_feature_node_add_attribute((GtFeatureNode*) gf, "pfamid",
+      gt_feature_node_add_attribute((GtFeatureNode*) gf, "id",
                                     gt_pdom_model_get_acc(model));
     }
     gt_feature_node_add_child(ls->element.mainnode, (GtFeatureNode*) gf);
