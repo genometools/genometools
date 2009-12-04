@@ -212,7 +212,8 @@ GtStr* gt_str_clone(const GtStr *s)
   s_copy = gt_malloc(sizeof *s_copy);
   s->cstr[s->length] = '\0';
   s_copy->cstr = gt_cstr_dup(s->cstr);
-  s_copy->length = s_copy->allocated = s->length;
+  s_copy->length = s->length;
+  s_copy->allocated = s->length + 1;
   s_copy->reference_count = 0;
   return s_copy;
 }
@@ -348,6 +349,18 @@ int gt_str_unit_test(GtError *err)
   ensure(had_err, strcmp("foo", gt_str_get(s)) == 0);
   ensure(had_err, gt_str_length(s) == 3);
   gt_str_delete(s);
+
+  /* test gt_str_clone() */
+  s  = gt_str_new_cstr("foobarbaz");
+  s1 = gt_str_clone(s);
+  ensure(had_err, gt_str_cmp(s, s1) == 0);
+  gt_str_append_cstr(s1, "boo");
+  ensure(had_err, gt_str_cmp(s, s1) != 0);
+  gt_str_append_cstr(s, "boo");
+  ensure(had_err, gt_str_cmp(s, s1) == 0);
+  gt_str_delete(s);
+  gt_str_delete(s1);
+
 
   return had_err;
 }
