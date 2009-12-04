@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <inttypes.h>
 #include "core/assert_api.h"
+#include "core/ensure.h"
 #include "core/mathsupport.h"
 #include "core/yarandom.h"
 
@@ -119,3 +120,47 @@ unsigned int gt_determinebitspervalue(uint64_t maxvalue)
   gt_assert(bits <= GT_MAXLOG2VALUE);
   return bits;
 }
+
+int gt_mathsupport_unit_test(GtError *err)
+{
+  int had_err = 0;
+  double less_than_epsilon = 0.0000000000000001;
+  gt_error_check(err);
+
+  ensure(had_err, !gt_double_equals_one(1.1));
+  ensure(had_err, gt_double_equals_one(1));
+  ensure(had_err, gt_double_equals_one(1+less_than_epsilon));
+  ensure(had_err, !gt_double_equals_one(-1-less_than_epsilon));
+
+  ensure(had_err, !gt_double_equals_double(1.0, 2.0));
+  ensure(had_err, !gt_double_equals_double(-1.0, 1.0));
+  ensure(had_err, !gt_double_equals_double(1.0, -1.0));
+  ensure(had_err, !gt_double_equals_double(-1.0, 1+less_than_epsilon));
+  ensure(had_err, !gt_double_equals_double(1.0, 1.1));
+  ensure(had_err, gt_double_equals_double(1.0, 1+less_than_epsilon));
+  ensure(had_err, gt_double_equals_double(1.0, 1.0));
+  ensure(had_err, gt_double_equals_double(-1.0, -1.0));
+  ensure(had_err, gt_double_equals_double(-1.0+less_than_epsilon, -1.0));
+  ensure(had_err, gt_double_equals_double(-1.0, -1.0+less_than_epsilon));
+  ensure(had_err, gt_double_equals_double(1.0+less_than_epsilon, 1.0));
+  ensure(had_err, gt_double_equals_double(1.0, 1.0+less_than_epsilon));
+
+  ensure(had_err, gt_double_compare(1.0, 1.0) == 0);
+  ensure(had_err, gt_double_compare(1.0, 1.1) < 0);
+  ensure(had_err, gt_double_compare(1.1, 1.0) > 0);
+  ensure(had_err, gt_double_compare(1.1, -1.0) > 0);
+  ensure(had_err, gt_double_compare(-1.1, -1.0) < 0);
+  ensure(had_err, gt_double_compare(1+less_than_epsilon, 1.0) == 0);
+  ensure(had_err, gt_double_compare(1+less_than_epsilon, -1.0) > 0);
+  ensure(had_err, gt_double_compare(-1+less_than_epsilon, -1.0) == 0);
+  ensure(had_err, gt_double_compare(-1+less_than_epsilon, 1.0) < 0);
+
+  ensure(had_err, gt_double_smaller_double(1.0, 1.1));
+  ensure(had_err, gt_double_smaller_double(-1.0, 1.1));
+  ensure(had_err, gt_double_smaller_double(-1.1, -1.0));
+  ensure(had_err, !gt_double_smaller_double(-1.0, -1.1));
+  ensure(had_err, !gt_double_smaller_double(1.0-less_than_epsilon, 1.0));
+
+  return had_err;
+}
+

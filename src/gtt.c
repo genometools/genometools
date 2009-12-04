@@ -35,6 +35,7 @@
 #include "core/interval_tree.h"
 #include "core/quality.h"
 #include "core/queue.h"
+#include "core/mathsupport.h"
 #include "core/sequence_buffer.h"
 #include "core/splitter.h"
 #include "core/tokenizer.h"
@@ -207,6 +208,7 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "Lua serializer module",
                  gt_lua_serializer_unit_test);
   gt_hashmap_add(unit_tests, "ltrelement module", gt_ltrelement_unit_test);
+  gt_hashmap_add(unit_tests, "mathsupport module", gt_mathsupport_unit_test);
   gt_hashmap_add(unit_tests, "PPT finder module", gt_ppt_unit_test);
   gt_hashmap_add(unit_tests, "PBS finder module", gt_pbs_unit_test);
   gt_hashmap_add(unit_tests, "queue class", gt_queue_unit_test);

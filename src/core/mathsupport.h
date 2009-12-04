@@ -21,6 +21,7 @@
 #include <stdbool.h>
 #include <math.h>
 #include <inttypes.h>
+#include "core/error_api.h"
 
 /* Returns the log of the sum of two log probabilities. */
 double        gt_logsum(double p1, double p2);
@@ -43,5 +44,7 @@ char          gt_rand_char(void);
 #define GT_MAXLOG2VALUE 63
 
 unsigned int gt_determinebitspervalue(uint64_t maxvalue);
+
+int gt_mathsupport_unit_test(GtError *err);
 
 #endif
