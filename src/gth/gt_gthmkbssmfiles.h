@@ -21,7 +21,6 @@
 #include "core/error.h"
 
 /* the gthmkbssmfiles tool */
-int gt_gthmkbssmfiles(int argc, const char **argv,
-                      GtShowVersionFunc gth_version_func, GtError*);
+int gt_gthmkbssmfiles(int argc, const char **argv, GtError*);
 
 #endif

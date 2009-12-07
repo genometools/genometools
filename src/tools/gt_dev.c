@@ -19,6 +19,7 @@
 #include "core/option.h"
 #include "core/versionfunc.h"
 #include "extended/toolbox.h"
+#include "gth/gt_gthmkbssmfiles.h"
 #include "tools/gt_consensus_sa.h"
 #include "tools/gt_dev.h"
 #include "tools/gt_extracttarget.h"
@@ -42,6 +43,7 @@ static void* gt_dev_arguments_new(void)
      gt_toolbox_add(dev_toolbox, "devtool", gt_devtool); */
   gt_toolbox_add_tool(dev_toolbox, "consensus_sa", gt_consensus_sa_tool());
   gt_toolbox_add_tool(dev_toolbox, "extracttarget", gt_extracttarget());
+  gt_toolbox_add(dev_toolbox, "gthmkbssmfiles", gt_gthmkbssmfiles);
   gt_toolbox_add(dev_toolbox, "guessprot", gt_guessprot);
   gt_toolbox_add_tool(dev_toolbox, "magicmatch", gt_magicmatch());
   gt_toolbox_add_tool(dev_toolbox, "idxlocali", gt_idxlocali());

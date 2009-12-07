@@ -17,6 +17,7 @@
 */
 
 #include "core/option.h"
+#include "core/versionfunc.h"
 #include "gth/bssm_param.h"
 #include "gth/gthspeciestab.h" /* XXX */
 #include "gth/gt_gthmkbssmfiles.h"
@@ -25,7 +26,7 @@
 #define LASTSPECIESNUM 9
 
 static GtOPrval parse_options(int *parsed_args, int argc, const char **argv,
-                              GtShowVersionFunc gth_version_func, GtError *err)
+                              GtError *err)
 {
   GtOptionParser *op;
   GtOPrval oprval;
@@ -34,21 +35,20 @@ static GtOPrval parse_options(int *parsed_args, int argc, const char **argv,
                          "output_path.");
   gt_option_parser_set_min_max_args(op, 1, 1);
   gt_option_parser_set_mailaddress(op, "<gremme@zbh.uni-hamburg.de>");
-  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gth_version_func,
-                               err);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
+                                  err);
   gt_option_parser_delete(op);
   return oprval;
 }
 
-int gt_gthmkbssmfiles(int argc, const char **argv,
-                      GtShowVersionFunc gth_version_func, GtError *err)
+int gt_gthmkbssmfiles(int argc, const char **argv, GtError *err)
 {
   unsigned long i;
   GtStr *filename;
   int parsed_args, had_err = 0;
 
   /* option parsing */
-  switch (parse_options(&parsed_args, argc, argv, gth_version_func, err)) {
+  switch (parse_options(&parsed_args, argc, argv, err)) {
     case GT_OPTION_PARSER_OK: break;
     case GT_OPTION_PARSER_ERROR: return -1;
     case GT_OPTION_PARSER_REQUESTS_EXIT: return 0;
