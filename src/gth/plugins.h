@@ -17,9 +17,11 @@
 #ifndef PLUGINS_H
 #define PLUGINS_H
 
+#include "gth/input.h"
 #include "gth/matcher.h"
 
 typedef struct {
+  GthInputFilePreprocessor file_preprocessor;
   GthMatcherArgumentsNew matcher_arguments_new;
   GthMatcherArgumentsDelete matcher_arguments_delete;
   GthMatcherRunner matcher_runner;
