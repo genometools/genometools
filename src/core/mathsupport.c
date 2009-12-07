@@ -163,4 +163,3 @@ int gt_mathsupport_unit_test(GtError *err)
 
   return had_err;
 }
-

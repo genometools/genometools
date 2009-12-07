@@ -361,7 +361,6 @@ int gt_str_unit_test(GtError *err)
   gt_str_delete(s);
   gt_str_delete(s1);
 
-
   return had_err;
 }
 
