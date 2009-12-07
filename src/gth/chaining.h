@@ -46,7 +46,7 @@ typedef struct {
                 ref_file_num,
                 bucketnum,
                 maxbucketnum;
-} ChainingInfo;
+} GthChainingInfo;
 
 typedef struct {
   GthChainCollection *chain_collection;
@@ -56,7 +56,7 @@ typedef struct {
        online,
        refseqisindex; /* (inverse || !refseqisdna) */
   GthStat *stat;
-  ChainingInfo *chaining_info;
+  GthChainingInfo *chaining_info;
   unsigned long *matchnumcounter,
                 maxnumofmatches,
                 rare,

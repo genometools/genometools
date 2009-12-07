@@ -325,7 +325,7 @@ static void show_chain_calc_status(void (*showverbose)(const char *),
   }
 }
 
-static void chaining_info_init(ChainingInfo *chaining_info,
+static void chaining_info_init(GthChainingInfo *chaining_info,
                                bool directmatches,
                                bool refseqisdna,
                                GthCallInfo *call_info,
@@ -364,7 +364,7 @@ static void showmatches(GthMatch *matches, unsigned long numofmatches,
 
 static void calc_chains_from_matches(GthChainCollection *chain_collection,
                                      GtArray *matches,
-                                     ChainingInfo *chaining_info,
+                                     GthChainingInfo *chaining_info,
                                      GthSeqCol *gen_seq_col,
                                      GthSeqCol *ref_seq_col,
                                      unsigned long rare,
@@ -530,7 +530,7 @@ static void match_processor_info_init(GthMatchProcessorInfo
                                       GthChainCollection *chain_collection,
                                       bool directmatches, bool refseqisdna,
                                       bool online, bool inverse, GthStat *stat,
-                                      ChainingInfo *chaining_info,
+                                      GthChainingInfo *chaining_info,
                                       unsigned long maxnumofmatches,
                                       unsigned long rare,
                                       double fragweightfactor)
@@ -612,7 +612,7 @@ void gth_chaining(GthChainCollection *chain_collection,
 {
   unsigned long i, numofsequences = 0;
   GtArray *matches;
-  ChainingInfo chaining_info;
+  GthChainingInfo chaining_info;
   void *matcher_arguments;
   GtFile *outfp = call_info->out->outfp;
   GthMatchProcessorInfo match_processor_info;
