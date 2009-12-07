@@ -19,12 +19,14 @@
 
 #include "gth/input.h"
 #include "gth/matcher.h"
+#include "gth/seq_col.h"
 
 typedef struct {
-  GthInputFilePreprocessor file_preprocessor;
-  GthMatcherArgumentsNew matcher_arguments_new;
-  GthMatcherArgumentsDelete matcher_arguments_delete;
-  GthMatcherRunner matcher_runner;
+  GthInputFilePreprocessor file_preprocessor;         /* required */
+  GthSeqColConstructor seq_col_new;                   /* required */
+  GthMatcherArgumentsNew matcher_arguments_new;       /* required */
+  GthMatcherArgumentsDelete matcher_arguments_delete; /* required */
+  GthMatcherRunner matcher_runner;                    /* required */
 } GthPlugins;
 
 #endif
