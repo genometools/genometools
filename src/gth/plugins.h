@@ -27,6 +27,7 @@ typedef struct {
   GthMatcherArgumentsNew matcher_arguments_new;       /* required */
   GthMatcherArgumentsDelete matcher_arguments_delete; /* required */
   GthMatcherRunner matcher_runner;                    /* required */
+  GtShowVersionFunc gth_version_func;                 /* required */
 } GthPlugins;
 
 #endif
