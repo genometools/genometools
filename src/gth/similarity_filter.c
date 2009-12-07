@@ -573,7 +573,7 @@ static GthChainCollection* match_and_chain(GthCallInfo *call_info,
                                            unsigned long ref_file_num,
                                            bool directmatches,
                                            GthMatchInfo *match_info,
-                                           GthPlugins *plugins)
+                                           const GthPlugins *plugins)
 {
   GtFile *outfp = call_info->out->outfp;
   GthChainCollection *chain_collection = gth_chain_collection_new();
@@ -798,7 +798,7 @@ static int compute_sa_collection(GthSACollection *sa_collection,
                                  GthCallInfo *call_info,
                                  GthInput *input,
                                  GthStat *stat,
-                                 GthPlugins *plugins)
+                                 const GthPlugins *plugins)
 {
   GthChainCollection *chain_collection;
   GthMatchInfo match_info;
@@ -862,7 +862,7 @@ static int compute_sa_collection(GthSACollection *sa_collection,
 
 int gth_similarity_filter(GthCallInfo *call_info, GthInput *input,
                           GthStat *stat, unsigned int indentlevel,
-                          GthPlugins *plugins, GT_UNUSED GtError *err)
+                          const GthPlugins *plugins, GT_UNUSED GtError *err)
 {
   GthSACollection *sa_collection; /* stores the calculated spliced alignments */
 

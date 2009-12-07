@@ -33,7 +33,7 @@ void gth_chaining(GthChainCollection *chain_collection,
                   GthInput*,
                   GthStat*,
                   bool directmatches,
-                  GthPlugins *plugins);
+                  const GthPlugins *plugins);
 
 typedef struct {
   bool directmatches,

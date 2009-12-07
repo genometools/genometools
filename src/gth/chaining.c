@@ -606,7 +606,7 @@ void gth_chaining(GthChainCollection *chain_collection,
                   GthInput *input,
                   GthStat *stat,
                   bool directmatches,
-                  GthPlugins *plugins)
+                  const GthPlugins *plugins)
 {
   unsigned long i, numofsequences = 0;
   GtArray *matches;

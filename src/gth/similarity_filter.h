@@ -22,7 +22,7 @@
 #include "gth/stat.h"
 
 int gth_similarity_filter(GthCallInfo*, GthInput*, GthStat*,
-                          unsigned int indentlevel, GthPlugins *plugins,
+                          unsigned int indentlevel, const GthPlugins *plugins,
                           GtError*);
 
 #endif
