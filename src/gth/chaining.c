@@ -606,9 +606,7 @@ void gth_chaining(GthChainCollection *chain_collection,
                   GthInput *input,
                   GthStat *stat,
                   bool directmatches,
-                  GthMatcherArgumentsNew matcher_arguments_new,
-                  GthMatcherArgumentsDelete matcher_arguments_delete,
-                  GthMatcherRunner matcher_runner)
+                  GthPlugins *plugins)
 {
   unsigned long i, numofsequences = 0;
   GtArray *matches;
@@ -618,6 +616,12 @@ void gth_chaining(GthChainCollection *chain_collection,
   GthMatchProcessorInfo match_processor_info;
   bool refseqisdna = gth_input_ref_file_is_dna(input, ref_file_num);
 
+  /* make sure matcher is defined */
+  gt_assert(plugins);
+  gt_assert(plugins->matcher_arguments_new);
+  gt_assert(plugins->matcher_arguments_delete);
+  gt_assert(plugins->matcher_runner);
+
   /* init */
   matches = gt_array_new(sizeof (GthMatch));
 
@@ -625,7 +629,7 @@ void gth_chaining(GthChainCollection *chain_collection,
                      input, stat, gen_file_num, ref_file_num);
 
   matcher_arguments =
-    matcher_arguments_new(true,
+    plugins->matcher_arguments_new(true,
                           input,
                           call_info->simfilterparam.inverse || !refseqisdna
                           ? gth_input_get_genomic_filename(input, gen_file_num)
@@ -685,12 +689,12 @@ void gth_chaining(GthChainCollection *chain_collection,
   if (call_info->out->showverbose)
     call_info->out->showverbose("call vmatch to compute matches");
 
-  matcher_runner(matcher_arguments, call_info->out->showverbose,
-                 call_info->out->showverboseVM, &match_processor_info);
+  plugins->matcher_runner(matcher_arguments, call_info->out->showverbose,
+                          call_info->out->showverboseVM, &match_processor_info);
 
   /* free matcher stuff here, because otherwise the reference file is mapped
      twice below */
-  matcher_arguments_delete(matcher_arguments);
+  plugins->matcher_arguments_delete(matcher_arguments);
 
   /* free sequence collections (if they have been filled by the matcher) */
   gth_seq_col_delete(match_processor_info.gen_seq_col);

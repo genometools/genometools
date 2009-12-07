@@ -573,19 +573,14 @@ static GthChainCollection* match_and_chain(GthCallInfo *call_info,
                                            unsigned long ref_file_num,
                                            bool directmatches,
                                            GthMatchInfo *match_info,
-                                           GthMatcherArgumentsNew
-                                           matcher_arguments_new,
-                                           GthMatcherArgumentsDelete
-                                           matcher_arguments_delete,
-                                           GthMatcherRunner matcher_runner)
+                                           GthPlugins *plugins)
 {
   GtFile *outfp = call_info->out->outfp;
   GthChainCollection *chain_collection = gth_chain_collection_new();
 
   /* compute the chains */
   gth_chaining(chain_collection, gen_file_num, ref_file_num, call_info, input,
-               stat, directmatches, matcher_arguments_new,
-               matcher_arguments_delete, matcher_runner);
+               stat, directmatches, plugins);
 
   /* update statistics */
   gth_stat_increase_numofchains(stat,
@@ -803,10 +798,7 @@ static int compute_sa_collection(GthSACollection *sa_collection,
                                  GthCallInfo *call_info,
                                  GthInput *input,
                                  GthStat *stat,
-                                 GthMatcherArgumentsNew matcher_arguments_new,
-                                 GthMatcherArgumentsDelete
-                                 matcher_arguments_delete,
-                                 GthMatcherRunner matcher_runner)
+                                 GthPlugins *plugins)
 {
   GthChainCollection *chain_collection;
   GthMatchInfo match_info;
@@ -828,9 +820,7 @@ static int compute_sa_collection(GthSACollection *sa_collection,
         }
         /* compute direct matches */
         chain_collection = match_and_chain(call_info, input, stat, g, r, true,
-                                           &match_info, matcher_arguments_new,
-                                           matcher_arguments_delete,
-                                           matcher_runner);
+                                           &match_info, plugins);
         if (chain_collection) {
           rval = calc_spliced_alignments(sa_collection, chain_collection,
                                          call_info, input, stat, g, r, true,
@@ -852,9 +842,7 @@ static int compute_sa_collection(GthSACollection *sa_collection,
         }
         /* compute reverse complemented (palindromic) matches */
         chain_collection = match_and_chain(call_info, input, stat, g, r, false,
-                                           &match_info, matcher_arguments_new,
-                                           matcher_arguments_delete,
-                                           matcher_runner);
+                                           &match_info, plugins);
         if (chain_collection) {
           rval = calc_spliced_alignments(sa_collection, chain_collection,
                                          call_info, input, stat, g, r, false,
@@ -874,10 +862,7 @@ static int compute_sa_collection(GthSACollection *sa_collection,
 
 int gth_similarity_filter(GthCallInfo *call_info, GthInput *input,
                           GthStat *stat, unsigned int indentlevel,
-                          GthMatcherArgumentsNew matcher_arguments_new,
-                          GthMatcherArgumentsDelete matcher_arguments_delete,
-                          GthMatcherRunner matcher_runner,
-                          GT_UNUSED GtError *err)
+                          GthPlugins *plugins, GT_UNUSED GtError *err)
 {
   GthSACollection *sa_collection; /* stores the calculated spliced alignments */
 
@@ -887,9 +872,7 @@ int gth_similarity_filter(GthCallInfo *call_info, GthInput *input,
   sa_collection = gth_sa_collection_new();
 
   /* compute the spliced alignments */
-  if (compute_sa_collection(sa_collection, call_info, input, stat,
-                            matcher_arguments_new, matcher_arguments_delete,
-                            matcher_runner)) {
+  if (compute_sa_collection(sa_collection, call_info, input, stat, plugins)) {
     gth_sa_collection_delete(sa_collection);
     return -1;
   }

@@ -1,6 +1,5 @@
 /*
-  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,14 +14,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SIMILARITY_FILTER_H
-#define SIMILARITY_FILTER_H
+#ifndef PLUGINS_H
+#define PLUGINS_H
 
-#include "gth/plugins.h"
-#include "gth/stat.h"
+#include "gth/matcher.h"
 
-int gth_similarity_filter(GthCallInfo*, GthInput*, GthStat*,
-                          unsigned int indentlevel, GthPlugins *plugins,
-                          GtError*);
+typedef struct {
+  GthMatcherArgumentsNew matcher_arguments_new;
+  GthMatcherArgumentsDelete matcher_arguments_delete;
+  GthMatcherRunner matcher_runner;
+} GthPlugins;
 
 #endif

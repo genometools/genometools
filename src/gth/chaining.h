@@ -24,6 +24,7 @@
 #include "gth/gthmatch.h"
 #include "gth/input.h"
 #include "gth/matcher.h"
+#include "gth/plugins.h"
 
 void gth_chaining(GthChainCollection *chain_collection,
                   unsigned long gen_file_num,
@@ -32,9 +33,7 @@ void gth_chaining(GthChainCollection *chain_collection,
                   GthInput*,
                   GthStat*,
                   bool directmatches,
-                  GthMatcherArgumentsNew matcher_arguments_new,
-                  GthMatcherArgumentsDelete matcher_arguments_delete,
-                  GthMatcherRunner matcher_runner);
+                  GthPlugins *plugins);
 
 typedef struct {
   bool directmatches,
