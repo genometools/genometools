@@ -28,11 +28,10 @@
 #include "gth/stat.h"
 #include "gth/gt_gthconsensus.h"
 
-static int gth_process_consensus_files(GtStrArray *consensusfiles,
-                                       GthCallInfo *callinfo,
-                                       GthInput *input,
-                                       GthStat *stat,
-                                       unsigned long indentlevel, GtError *err)
+static int process_consensus_files(GtStrArray *consensusfiles,
+                                   GthCallInfo *callinfo, GthInput *input,
+                                   GthStat *stat, unsigned long indentlevel,
+                                   GtError *err)
 {
   GthSACollection *sa_collection;
   int had_err;
@@ -123,8 +122,8 @@ int gt_gthconsensus(int argc, const char **argv, const GthPlugins *plugins,
 
   /* process consensus files */
   if (!had_err) {
-    had_err = gth_process_consensus_files(consensusfiles, callinfo, input,
-                                          stat, INITIAL_XML_INDENTLEVEL, err);
+    had_err = process_consensus_files(consensusfiles, callinfo, input, stat,
+                                      INITIAL_XML_INDENTLEVEL, err);
   }
 
   /* output statistics */
