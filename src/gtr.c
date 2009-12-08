@@ -54,6 +54,7 @@ struct GtR {
       *testspacepeak;
   GtToolbox *tools;
   GtHashmap *unit_tests;
+  GtStr *test_only;
   lua_State *L;
 #ifndef WITHOUT_CAIRO
   GtStyle *style;
@@ -71,6 +72,7 @@ GtR* gtr_new(GtError *err)
   gtr = gt_calloc(1, sizeof (GtR));
   gtr->debugfp = gt_str_new();
   gtr->testspacepeak = gt_str_new();
+  gtr->test_only = gt_str_new();
   gtr->L = luaL_newstate();
   if (!gtr->L) {
     gt_error_set(err, "out of memory (cannot create new lua state)");
@@ -126,14 +128,14 @@ GtOPrval gtr_parse(GtR *gtr, int *parsed_args, int argc, const char **argv,
                    GtError *err)
 {
   GtOptionParser *op;
-  GtOption *o, *debug_option, *debugfp_option;
+  GtOption *o, *only_option, *debug_option, *debugfp_option;
   GtOPrval oprval;
 
   gt_error_check(err);
   gt_assert(gtr);
   op = gt_option_parser_new("[option ...] [tool | script] [argument ...]",
-                         "The GenomeTools (gt) genome analysis system "
-                          "(http://genometools.org).");
+                            "The GenomeTools (gt) genome analysis system "
+                            "(http://genometools.org).");
   gt_option_parser_set_comment_func(op, show_gtr_help, gtr->tools);
   o = gt_option_new_bool("i",
                          "enter interactive mode after executing 'tool' or "
@@ -144,6 +146,12 @@ GtOPrval gtr_parse(GtR *gtr, int *parsed_args, int argc, const char **argv,
                          false);
   gt_option_hide_default(o);
   gt_option_parser_add_option(op, o);
+  only_option = gt_option_new_string("only", "perform single unit test "
+                                     "(requires -test)", gtr->test_only, "");
+  gt_option_imply(only_option, o);
+  gt_option_is_development_option(only_option);
+  gt_option_hide_default(only_option);
+  gt_option_parser_add_option(op, only_option);
   debug_option = gt_option_new_debug(&gtr->debug);
   gt_option_parser_add_option(op, debug_option);
   debugfp_option = gt_option_new_string("debugfp",
@@ -164,11 +172,11 @@ GtOPrval gtr_parse(GtR *gtr, int *parsed_args, int argc, const char **argv,
   gt_option_is_development_option(o);
   gt_option_parser_add_option(op, o);
   o = gt_option_new_bool("64bit", "exit with code 0 if this is a 64bit binary, "
-                      "with 1 otherwise", &gtr->check64bit, false);
+                         "with 1 otherwise", &gtr->check64bit, false);
   gt_option_is_development_option(o);
   gt_option_parser_add_option(op, o);
   o = gt_option_new_filename("testspacepeak", "alloc 64 MB and mmap the given "
-                          "file", gtr->testspacepeak);
+                             "file", gtr->testspacepeak);
   gt_option_is_development_option(o);
   gt_option_parser_add_option(op, o);
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
@@ -222,6 +230,8 @@ static int check64bit(void)
 static int run_tests(GtR *gtr, GtError *err)
 {
   int test_err = 0, had_err = 0;
+  char* key;
+  void* value;
   gt_error_check(err);
   gt_assert(gtr);
 
@@ -242,9 +252,21 @@ static int run_tests(GtR *gtr, GtError *err)
   printf("seed=%u\n", gtr->seed);
   gt_hashmap_unit_test(err);
   if (gtr->unit_tests) {
-    had_err = gt_hashmap_foreach_in_key_order(
-      gtr->unit_tests, run_test, &test_err, err);
-    gt_assert(!had_err); /* cannot happen, run_test() is sane */
+    if (gt_str_length(gtr->test_only) > 0) {
+      key = gt_str_get(gtr->test_only);
+      value = gt_hashmap_get(gtr->unit_tests, key);
+      if (value) {
+        had_err = run_test(key, value, &test_err, err);
+        gt_assert(!had_err); /* cannot happen, run_test() is sane */
+      } else {
+        gt_error_set(err, "Test \"%s\" not found", key);
+        return EXIT_FAILURE;
+      }
+    } else {
+      had_err = gt_hashmap_foreach_in_key_order(
+        gtr->unit_tests, run_test, &test_err, err);
+      gt_assert(!had_err); /* cannot happen, run_test() is sane */
+    }
   }
   if (test_err)
     return EXIT_FAILURE;
@@ -346,6 +368,7 @@ void gtr_delete(GtR *gtr)
   gt_fa_fclose(gtr->logfp);
   gt_str_delete(gtr->testspacepeak);
   gt_str_delete(gtr->debugfp);
+  gt_str_delete(gtr->test_only);
   gt_toolbox_delete(gtr->tools);
   gt_hashmap_delete(gtr->unit_tests);
   if (gtr->L) lua_close(gtr->L);
