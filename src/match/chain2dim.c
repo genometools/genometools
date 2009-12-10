@@ -35,9 +35,9 @@ struct GtFragmentinfotable
 GtFragmentinfotable *fragmentinfotable_new(unsigned long numberoffragments)
 {
   GtFragmentinfotable *fragmentinfotable
-    = gt_malloc(sizeof(*fragmentinfotable));
+    = gt_malloc(sizeof (*fragmentinfotable));
   fragmentinfotable->fragments
-    = gt_malloc(sizeof(*fragmentinfotable->fragments) * numberoffragments);
+    = gt_malloc(sizeof (*fragmentinfotable->fragments) * numberoffragments);
   fragmentinfotable->nextfree = 0;
   fragmentinfotable->allocated = numberoffragments;
   return fragmentinfotable;
@@ -88,8 +88,8 @@ void fragmentinfotable_add(GtFragmentinfotable *fragmentinfotable,
         {\
          chain->chainedfragments.spaceGtChainref = \
            gt_realloc(chain->chainedfragments.spaceGtChainref,\
-                      sizeof (*chain->chainedfragments.spaceGtChainref *\
-                              lengthofchain));\
+                      sizeof (*chain->chainedfragments.spaceGtChainref) *\
+                              lengthofchain);\
           chain->chainedfragments.allocatedGtChainref = lengthofchain;\
           chain->chainedfragments.nextfreeGtChainref = 0;\
         }
@@ -714,7 +714,7 @@ static Dictmaxsize *dictmaxsize_new(unsigned long maxsize)
 {
   Dictmaxsize *dict;
 
-  dict = gt_malloc(sizeof(*dict));
+  dict = gt_malloc(sizeof (*dict));
   dict->currentdictsize = 0;
   dict->maxdictsize = maxsize;
   dict->root = NULL;
@@ -915,7 +915,7 @@ static Fragpoint *makeactivationpoint(const Fragmentinfo *fragmentinfo,
 {
   Fragpoint *fpptr;
 
-  fpptr = gt_malloc(sizeof(*fpptr));
+  fpptr = gt_malloc(sizeof (*fpptr));
   gt_assert(fpptr != NULL);
   fpptr->fpident = MAKEENDPOINT(fpident);
   fpptr->fpposition = GETSTOREDENDPOINT(postsortdim,fpident);
@@ -1010,7 +1010,7 @@ static int findmaximalscores(const GtChainmode *chainmode,
         chainmode->chainkind == LOCALCHAININGBEST ||
         chainmode->chainkind == LOCALCHAININGPERCENTAWAY)
     {
-      chainequivalenceclasses = gt_malloc(sizeof(*chainequivalenceclasses) *
+      chainequivalenceclasses = gt_malloc(sizeof (*chainequivalenceclasses) *
                                           numofmatches);
       determineequivreps(chainequivalenceclasses, fragmentinfo, numofmatches);
     } else
@@ -1132,7 +1132,7 @@ static void fastchainingscores(const GtChainmode *chainmode,
                                bool gapsL1)
 {
   fragmentstore->endpointperm
-    = gt_malloc(sizeof(*fragmentstore->endpointperm) * numofmatches);
+    = gt_malloc(sizeof (*fragmentstore->endpointperm) * numofmatches);
   makesortedendpointpermutation(fragmentstore->endpointperm,
                                 fragmentinfo,
                                 numofmatches,
