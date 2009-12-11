@@ -1,22 +1,40 @@
+/*
+  Copyright (c) 2009 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2009 Center for Bioinformatics, University of Hamburg
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+*/
+
 #include <stdbool.h>
 #include "core/minmax.h"
 #include "core/unused_api.h"
 #include "extended/redblack.h"
-#include "chaindef.h"
 #include "verbose-def.h"
+#include "chaindef.h"
 
 /*
   The basic information required for each fragment is stored
   in a structure of the following type. The user has to specify
-  those components which a tagged `user defined'. The chaining
-  algorithms computes the remaining components score and previous
+  those components which are tagged `user defined'. The chaining
+  algorithms computes the remaining components tagged 'compute'
   in chain.
 */
 
 typedef struct
 {
-  Seqpos startpos[2],  /* start of fragments in the 2 dimensions, userdef */
-         endpos[2];    /* end of fragments in the 2 dimensions, userdef */
+  GtChainpostype startpos[2], /* start of fragments in the 2 dimensions, 
+                                 userdef */
+                 endpos[2];  /* end of fragments in the 2 dimensions, userdef */
   unsigned long firstinchain,   /* first element in chain, compute */
                 previousinchain;  /* previous index in chain, compute */
   GtChainscoretype
@@ -50,8 +68,10 @@ void fragmentinfotable_delete(GtFragmentinfotable *fragmentinfotable)
 }
 
 void fragmentinfotable_add(GtFragmentinfotable *fragmentinfotable,
-                           Seqpos start1,Seqpos end1,
-                           Seqpos start2,Seqpos end2,
+                           GtChainpostype start1,
+                           GtChainpostype end1,
+                           GtChainpostype start2,
+                           GtChainpostype end2,
                            GtChainscoretype initialgap,
                            GtChainscoretype terminalgap,
                            GtChainscoretype weight)
@@ -100,7 +120,7 @@ typedef GtChainscoretype (*GtChaingapcostfunction)(const Fragmentinfo *,
 typedef struct
 {
   unsigned long fpident;
-  Seqpos fpposition;
+  GtChainpostype fpposition;
 } Fragpoint;
 
 typedef struct
@@ -160,7 +180,7 @@ static GtChainscoretype overlapcost(const Fragmentinfo *fragmentinfo,
                                     unsigned long i,
                                     unsigned long j)
 {
-  Seqpos overlaplength = 0;
+  GtChainpostype overlaplength = 0;
 
   /* add overlap in first dimension */
   if (GETSTOREDSTARTPOINT(0, j) <= GETSTOREDENDPOINT(0, i))
@@ -191,7 +211,7 @@ static GtChainscoretype overlapcost(const Fragmentinfo *fragmentinfo,
 static GtChainscoretype gapcostCc(const Fragmentinfo *fragmentinfo,
                                   unsigned long i,unsigned long j)
 {
-  Seqpos value1, value2;
+  GtChainpostype value1, value2;
 
   gt_assert(GETSTOREDSTARTPOINT(0,j) > GETSTOREDENDPOINT(0,i) &&
             GETSTOREDSTARTPOINT(1,j) > GETSTOREDENDPOINT(1,i));
@@ -255,11 +275,11 @@ static void retracepreviousinchain(GtChain *chain,
 }
 
 static bool checkmaxgapwidth(const Fragmentinfo *fragmentinfo,
-                             Seqpos maxgapwidth,
+                             GtChainpostype maxgapwidth,
                              unsigned long leftfrag,
                              unsigned long rightfrag)
 {
-  Seqpos gapwidth, startpoint, endpoint;
+  GtChainpostype gapwidth, startpoint, endpoint;
 
   startpoint = GETSTOREDSTARTPOINT(0,rightfrag);
   endpoint = GETSTOREDENDPOINT(0,leftfrag);
@@ -525,7 +545,7 @@ static void evalfragmentscore(const GtChainmode *chainmode,
                               unsigned int presortdim)
 {
   unsigned long previous;
-  Seqpos startpos2;
+  GtChainpostype startpos2;
   Fragpoint *qfrag2;
   GtChainscoretype score;
 

@@ -71,10 +71,13 @@ typedef int (*GtChainprocessor)(void *,GtChain *,GtError *err);
   component percentawayfrombest is defined
 */
 
+typedef Seqpos GtChainpostype;
+
 typedef struct
 {
   GtChainkind chainkind;
-  Seqpos maxgapwidth;   /* 0 if undefined or otherwise maximal width of gap */
+  GtChainpostype maxgapwidth;  /* 0 if undefined or 
+                                  otherwise maximal width of gap */
   GtChainscoretype minimumscore; /* only defined if
                                   chainkind = LOCALCHAININGTHRESHOLD */
   unsigned long howmanybest,   /* only defined if
