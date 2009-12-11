@@ -72,8 +72,6 @@ void fragmentinfotable_add(GtFragmentinfotable *fragmentinfotable,
                            GtChainpostype end1,
                            GtChainpostype start2,
                            GtChainpostype end2,
-                           GtChainscoretype initialgap,
-                           GtChainscoretype terminalgap,
                            GtChainscoretype weight)
 {
   Fragmentinfo *frag;
@@ -84,8 +82,6 @@ void fragmentinfotable_add(GtFragmentinfotable *fragmentinfotable,
   frag->startpos[1] = start2;
   frag->endpos[0] = end1;
   frag->endpos[1] = end2;
-  frag->initialgap = initialgap;
-  frag->terminalgap = terminalgap;
   frag->weight = weight;
 }
 

@@ -88,4 +88,29 @@ typedef struct
 
 typedef struct GtFragmentinfotable GtFragmentinfotable;
 
+GtFragmentinfotable *fragmentinfotable_new(unsigned long numberoffragments);
+
+void fragmentinfotable_delete(GtFragmentinfotable *fragmentinfotable);
+
+void fragmentinfotable_add(GtFragmentinfotable *fragmentinfotable,
+                           GtChainpostype start1,
+                           GtChainpostype end1,
+                           GtChainpostype start2,
+                           GtChainpostype end2,
+                           GtChainscoretype initialgap,
+                           GtChainscoretype terminalgap,
+                           GtChainscoretype weight);
+
+int fastchaining(const GtChainmode *chainmode,
+                 GtChain *chain,
+                 Fragmentinfo *fragmentinfo,
+                 unsigned long numofmatches,
+                 bool gapsL1,
+                 unsigned int presortdim,
+                 bool withequivclasses,
+                 GtChainprocessor chainprocessor,
+                 void *cpinfo,
+                 Verboseinfo *verboseinfo,
+                 GtError *err);
+
 #endif
