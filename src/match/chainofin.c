@@ -16,6 +16,7 @@
 */
 
 #include <stdbool.h>
+#include <ctype.h>
 #include "chaindef.h"
 #include "core/fa.h"
 #include "core/error_api.h"
@@ -32,68 +33,70 @@ typedef struct
 } Ofchainoutinfo;
 
 #define CANNOTPARSELINE(S)\
-        gt_error_set("matchfile \"%s\", line %lu, column %lu: %s",\
+        gt_error_set(err,"matchfile \"%s\", line %lu, column %lu: %s",\
                      matchfile,linenum,countcolumns,S)
 
-DECLARESAFECASTFUNCTION(size_t,size_t,unsigned long,unsigned_long)
-
-static size_t numberoflinesinfile(const char *filename,GtError *err)
+static int numberoflinesinfile(unsigned long *linenum,
+                               const char *filename,GtError *err)
 {
-  size_t numberoflinesinfile = 0;
   FILE *fp;
   int cc;
 
   fp = gt_fa_fopen(filename,"r",err);
+  *linenum = 0;
   if (fp == NULL)
   {
     return -1;
   }
-  while((cc = getc(fp)) != EOF)
+  while ((cc = getc(fp)) != EOF)
   {
     if (cc == '\n')
     {
-      numberoflinesinfile++;
+      (*linenum)++;
     }
   }
-  return CALLCASTFUNC(size_t,unsigned_long,numberoflinesinfile)\
+  gt_fa_fclose(fp);
+  return 0;
 }
 
-static GtFragmentinfotable *analyzeopenformatfile(double weightfactor,
-                                                  const char *matchfile,
-                                                  GtError *err)
+GtFragmentinfotable *analyzeopenformatfile(double weightfactor,
+                                           const char *matchfile,
+                                           GtError *err)
 {
-  GtFragmentinfotable *finfotab;
+  GtFragmentinfotable *fragmentinfotable;
   GtStr *currentline;
-  char *matchline;
-  unsigned long linenum = 0, countcolumns;
+  unsigned long linenum;
   GtChainpostype storeinteger[READNUMS];
   FILE *matchfp;
   long readint;
   bool haserr = false;
-  Chainscoretype weight;
+  GtChainscoretype weight;
 
+  if (numberoflinesinfile(&linenum,matchfile,err) != 0)
+  {
+    return NULL;
+  }
   matchfp = gt_fa_fopen(matchfile,"r",err);
   if (matchfp == NULL)
   {
     return NULL;
   }
-  finfotab = fragmentinfotable_new(numberoflinesinfile(matchfile));
+  fragmentinfotable = fragmentinfotable_new(linenum);
   currentline = gt_str_new();
   for (linenum = 0; gt_str_read_next_line(currentline, matchfp) != EOF;
        linenum++)
   {
-    unsigned long idx = 0;
-    matchline = gt_str_get(currenline);
-    matchlinelength = gt_str_length(currentline);
+    const char *matchline = (const char *) gt_str_get(currentline);
     gt_assert(matchline != NULL);
-    idx = 0;
-    if(matchline[idx] != '#')
+    if (matchline[0] != '#')
     {
-      countcolumns = 0;
-      while(!haserr && countcolumns < (unsigned long) READNUMS &&
-            idx < matchlinelength)
+      unsigned long idx = 0,
+                    countcolumns = 0,
+                    matchlinelength = gt_str_length(currentline);
+      while (!haserr && countcolumns < (unsigned long) READNUMS &&
+             idx < matchlinelength)
       {
-        while(isspace((int) matchline[idx]))
+        while (isspace((int) matchline[idx]))
         {
           idx++;
         }
@@ -102,14 +105,14 @@ static GtFragmentinfotable *analyzeopenformatfile(double weightfactor,
           storeinteger[countcolumns] = (GtChainpostype) readint;
         } else
         {
-          CANNOTPARSE("cannot read positive integer");
+          CANNOTPARSELINE("cannot read positive integer");
           haserr = true;
         }
         if (!haserr)
         {
-          while(isdigit((Ctypeargumenttype) *matchline))
+          while (isdigit((int) matchline[idx]))
           {
-            matchline++;
+            idx++;
           }
           countcolumns++;
         }
@@ -118,26 +121,27 @@ static GtFragmentinfotable *analyzeopenformatfile(double weightfactor,
       {
         break;
       }
-      if(countcolumns != READNUMS)
+      if (countcolumns != (unsigned long) READNUMS)
       {
-        CANNOTPARSE("not enough integers: there must be exactly five integers");
+        CANNOTPARSELINE("not enough integers: there must be exactly five "
+                        "integers");
         haserr = true;
         break;
       }
-      if(storeinteger[0] > storeinteger[1])
-      {
-        CANNOTPARSELINE("startpos1 > endpos1");
-        haserr = true;
-        break;
-      }
-      if(storeinteger[2] > storeinteger[3])
+      if (storeinteger[0] > storeinteger[1])
       {
         CANNOTPARSELINE("startpos1 > endpos1");
         haserr = true;
         break;
       }
-      weight = (Chainscoretype) (weightfactor *
-                                 (double) storeinteger[READNUMS-1]);
+      if (storeinteger[2] > storeinteger[3])
+      {
+        CANNOTPARSELINE("startpos1 > endpos1");
+        haserr = true;
+        break;
+      }
+      weight = (GtChainscoretype) (weightfactor *
+                                  (double) storeinteger[READNUMS-1]);
       fragmentinfotable_add(fragmentinfotable,
                             storeinteger[0],
                             storeinteger[1],
@@ -149,5 +153,10 @@ static GtFragmentinfotable *analyzeopenformatfile(double weightfactor,
   }
   gt_str_delete(currentline);
   gt_fa_fclose(matchfp);
-  return haserr ? -1 : 0;
+  if (haserr)
+  {
+    fragmentinfotable_delete(fragmentinfotable);
+    return NULL;
+  }
+  return fragmentinfotable;
 }

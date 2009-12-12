@@ -32,7 +32,7 @@
 
 typedef struct
 {
-  GtChainpostype startpos[2], /* start of fragments in the 2 dimensions, 
+  GtChainpostype startpos[2], /* start of fragments in the 2 dimensions,
                                  userdef */
                  endpos[2];  /* end of fragments in the 2 dimensions, userdef */
   unsigned long firstinchain,   /* first element in chain, compute */
@@ -47,7 +47,8 @@ typedef struct
 struct GtFragmentinfotable
 {
    Fragmentinfo *fragments;
-   unsigned long nextfree, allocated;
+   unsigned long nextfree,
+                 allocated;
 };
 
 GtFragmentinfotable *fragmentinfotable_new(unsigned long numberoffragments)
@@ -63,8 +64,11 @@ GtFragmentinfotable *fragmentinfotable_new(unsigned long numberoffragments)
 
 void fragmentinfotable_delete(GtFragmentinfotable *fragmentinfotable)
 {
-  gt_free(fragmentinfotable->fragments);
-  gt_free(fragmentinfotable);
+  if (fragmentinfotable != NULL)
+  {
+    gt_free(fragmentinfotable->fragments);
+    gt_free(fragmentinfotable);
+  }
 }
 
 void fragmentinfotable_add(GtFragmentinfotable *fragmentinfotable,
@@ -1201,8 +1205,7 @@ static GtChaingapcostfunction assignchaingapcostfunction(GtChainkind chainkind,
 
 int fastchaining(const GtChainmode *chainmode,
                  GtChain *chain,
-                 Fragmentinfo *fragmentinfo,
-                 unsigned long numofmatches,
+                 GtFragmentinfotable *fragmentinfotable,
                  bool gapsL1,
                  unsigned int presortdim,
                  bool withequivclasses,
@@ -1218,7 +1221,7 @@ int fastchaining(const GtChainmode *chainmode,
   gt_assert(presortdim <= 1U);
   chaingapcostfunction
     = assignchaingapcostfunction(chainmode->chainkind,gapsL1);
-  if (numofmatches > 1UL)
+  if (fragmentinfotable->nextfree > 1UL)
   {
     Fragmentstore fragmentstore;
 
@@ -1226,14 +1229,14 @@ int fastchaining(const GtChainmode *chainmode,
     if (chainmode->chainkind == GLOBALCHAININGWITHOVERLAPS)
     {
       bruteforcechainingscores(chainmode,
-                               fragmentinfo,
-                               numofmatches,
+                               fragmentinfotable->fragments,
+                               fragmentinfotable->nextfree,
                                chaingapcostfunction);
     } else
     {
       fastchainingscores(chainmode,
-                         fragmentinfo,
-                         numofmatches,
+                         fragmentinfotable->fragments,
+                         fragmentinfotable->nextfree,
                          &fragmentstore,
                          presortdim,
                          gapsL1);
@@ -1241,8 +1244,8 @@ int fastchaining(const GtChainmode *chainmode,
     showverbose(verboseinfo,"retrieve optimal chains");
     retcode = findmaximalscores(chainmode,
                                 chain,
-                                fragmentinfo,
-                                numofmatches,
+                                fragmentinfotable->fragments,
+                                fragmentinfotable->nextfree,
                                 &fragmentstore,
                                 chainprocessor,
                                 withequivclasses,
@@ -1261,8 +1264,8 @@ int fastchaining(const GtChainmode *chainmode,
   {
     chainingboundarycases(chainmode,
                           chain,
-                          fragmentinfo,
-                          numofmatches);
+                          fragmentinfotable->fragments,
+                          fragmentinfotable->nextfree);
     if (chainprocessor(cpinfo,chain,err))
     {
       haserr = true;

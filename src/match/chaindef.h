@@ -21,6 +21,7 @@
 #include "core/arraydef.h"
 #include "core/error_api.h"
 #include "seqpos-def.h"
+#include "verbose-def.h"
 
 typedef long GtChainscoretype;
 
@@ -76,7 +77,7 @@ typedef Seqpos GtChainpostype;
 typedef struct
 {
   GtChainkind chainkind;
-  GtChainpostype maxgapwidth;  /* 0 if undefined or 
+  GtChainpostype maxgapwidth;  /* 0 if undefined or
                                   otherwise maximal width of gap */
   GtChainscoretype minimumscore; /* only defined if
                                   chainkind = LOCALCHAININGTHRESHOLD */
@@ -97,14 +98,11 @@ void fragmentinfotable_add(GtFragmentinfotable *fragmentinfotable,
                            GtChainpostype end1,
                            GtChainpostype start2,
                            GtChainpostype end2,
-                           GtChainscoretype initialgap,
-                           GtChainscoretype terminalgap,
                            GtChainscoretype weight);
 
 int fastchaining(const GtChainmode *chainmode,
                  GtChain *chain,
-                 Fragmentinfo *fragmentinfo,
-                 unsigned long numofmatches,
+                 GtFragmentinfotable *fragmentinfotable,
                  bool gapsL1,
                  unsigned int presortdim,
                  bool withequivclasses,
