@@ -47,6 +47,8 @@ typedef struct
 struct GtFragmentinfotable
 {
    Fragmentinfo *fragments;
+   GtChainscoretype largestdim1,
+                    largestdim2;
    unsigned long nextfree,
                  allocated;
 };
@@ -59,6 +61,7 @@ GtFragmentinfotable *fragmentinfotable_new(unsigned long numberoffragments)
     = gt_malloc(sizeof (*fragmentinfotable->fragments) * numberoffragments);
   fragmentinfotable->nextfree = 0;
   fragmentinfotable->allocated = numberoffragments;
+  fragmentinfotable->largestdim1 = fragmentinfotable->largestdim2 = 0;
   return fragmentinfotable;
 }
 
@@ -87,6 +90,30 @@ void fragmentinfotable_add(GtFragmentinfotable *fragmentinfotable,
   frag->endpos[0] = end1;
   frag->endpos[1] = end2;
   frag->weight = weight;
+  if (fragmentinfotable->largestdim1 < (GtChainscoretype) end1)
+  {
+    fragmentinfotable->largestdim1 = (GtChainscoretype) end1;
+  }
+  if (fragmentinfotable->largestdim2 < (GtChainscoretype) end2)
+  {
+    fragmentinfotable->largestdim2 = (GtChainscoretype) end2;
+  }
+}
+
+void fillthegapvalues(GtFragmentinfotable *fragmentinfotable)
+{
+  Fragmentinfo *fiptr;
+
+  for (fiptr = fragmentinfotable->fragments;
+       fiptr < fragmentinfotable->fragments + fragmentinfotable->nextfree;
+       fiptr++)
+  {
+    fiptr->initialgap
+      = (GtChainscoretype) (fiptr->startpos[0] + fiptr->startpos[1]);
+    fiptr->terminalgap
+      = (GtChainscoretype) (fragmentinfotable->largestdim1 - fiptr->endpos[0] +
+                            fragmentinfotable->largestdim2 - fiptr->endpos[1]);
+  }
 }
 
 #define MAKEENDPOINT(FID)       (FID)

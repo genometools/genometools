@@ -100,6 +100,8 @@ void fragmentinfotable_add(GtFragmentinfotable *fragmentinfotable,
                            GtChainpostype end2,
                            GtChainscoretype weight);
 
+void fillthegapvalues(GtFragmentinfotable *fragmentinfotable);
+
 int fastchaining(const GtChainmode *chainmode,
                  GtChain *chain,
                  GtFragmentinfotable *fragmentinfotable,

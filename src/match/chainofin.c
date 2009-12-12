@@ -158,5 +158,6 @@ GtFragmentinfotable *analyzeopenformatfile(double weightfactor,
     fragmentinfotable_delete(fragmentinfotable);
     return NULL;
   }
+  fillthegapvalues(fragmentinfotable);
   return fragmentinfotable;
 }
