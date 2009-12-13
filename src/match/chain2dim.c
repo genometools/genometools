@@ -53,7 +53,8 @@ struct GtFragmentinfotable
                  allocated;
 };
 
-GtFragmentinfotable *fragmentinfotable_new(unsigned long numberoffragments)
+GtFragmentinfotable *gt_chain_fragmentinfotable_new(
+                               unsigned long numberoffragments)
 {
   GtFragmentinfotable *fragmentinfotable
     = gt_malloc(sizeof (*fragmentinfotable));
@@ -65,7 +66,7 @@ GtFragmentinfotable *fragmentinfotable_new(unsigned long numberoffragments)
   return fragmentinfotable;
 }
 
-void fragmentinfotable_delete(GtFragmentinfotable *fragmentinfotable)
+void gt_chain_fragmentinfotable_delete(GtFragmentinfotable *fragmentinfotable)
 {
   if (fragmentinfotable != NULL)
   {
@@ -74,12 +75,12 @@ void fragmentinfotable_delete(GtFragmentinfotable *fragmentinfotable)
   }
 }
 
-void fragmentinfotable_add(GtFragmentinfotable *fragmentinfotable,
-                           GtChainpostype start1,
-                           GtChainpostype end1,
-                           GtChainpostype start2,
-                           GtChainpostype end2,
-                           GtChainscoretype weight)
+void gt_chain_fragmentinfotable_add(GtFragmentinfotable *fragmentinfotable,
+                                    GtChainpostype start1,
+                                    GtChainpostype end1,
+                                    GtChainpostype start2,
+                                    GtChainpostype end2,
+                                    GtChainscoretype weight)
 {
   Fragmentinfo *frag;
 
@@ -100,7 +101,7 @@ void fragmentinfotable_add(GtFragmentinfotable *fragmentinfotable,
   }
 }
 
-void fillthegapvalues(GtFragmentinfotable *fragmentinfotable)
+void gt_chain_fillthegapvalues(GtFragmentinfotable *fragmentinfotable)
 {
   Fragmentinfo *fiptr;
 
@@ -1230,16 +1231,16 @@ static GtChaingapcostfunction assignchaingapcostfunction(GtChainkind chainkind,
   is \texttt{NULL}, then nothing is generated and shown.
 */
 
-int fastchaining(const GtChainmode *chainmode,
-                 GtChain *chain,
-                 GtFragmentinfotable *fragmentinfotable,
-                 bool gapsL1,
-                 unsigned int presortdim,
-                 bool withequivclasses,
-                 GtChainprocessor chainprocessor,
-                 void *cpinfo,
-                 Verboseinfo *verboseinfo,
-                 GtError *err)
+int gt_chain_fastchaining(const GtChainmode *chainmode,
+                          GtChain *chain,
+                          GtFragmentinfotable *fragmentinfotable,
+                          bool gapsL1,
+                          unsigned int presortdim,
+                          bool withequivclasses,
+                          GtChainprocessor chainprocessor,
+                          void *cpinfo,
+                          Verboseinfo *verboseinfo,
+                          GtError *err)
 {
   int retcode;
   GtChaingapcostfunction chaingapcostfunction;
@@ -1300,4 +1301,33 @@ int fastchaining(const GtChainmode *chainmode,
     retcode = 0;
   }
   return haserr ? -1 : retcode;
+}
+
+int gt_outputformatchain(const GtFragmentinfotable *fragmentinfotable,
+                         bool silent,const GtChain *chain,
+                         GT_UNUSED GtError *err)
+{
+  const Fragmentinfo *fiptr;
+  unsigned long chaincounter = 0, i;
+
+  printf("# chain %lu: length %lu score %ld\n",
+         chaincounter,
+         chain->chainedfragments.nextfreeGtChainref,
+         chain->scoreofchain);
+  if (!silent)
+  {
+    for (i=0; i < chain->chainedfragments.nextfreeGtChainref; i++)
+    {
+      fiptr = fragmentinfotable->fragments +
+              chain->chainedfragments.spaceGtChainref[i];
+      printf(FormatSeqpos " " FormatSeqpos " " FormatSeqpos " " FormatSeqpos
+             " %ld\n",PRINTSeqposcast(fiptr->startpos[0]),
+                      PRINTSeqposcast(fiptr->endpos[0]),
+                      PRINTSeqposcast(fiptr->startpos[1]),
+                      PRINTSeqposcast(fiptr->endpos[1]),
+                      fiptr->weight);
+    }
+  }
+  chaincounter++;
+  return 0;
 }

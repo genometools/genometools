@@ -89,28 +89,29 @@ typedef struct
 
 typedef struct GtFragmentinfotable GtFragmentinfotable;
 
-GtFragmentinfotable *fragmentinfotable_new(unsigned long numberoffragments);
+GtFragmentinfotable *gt_chain_fragmentinfotable_new(
+                           unsigned long numberoffragments);
 
-void fragmentinfotable_delete(GtFragmentinfotable *fragmentinfotable);
+void gt_chain_fragmentinfotable_delete(GtFragmentinfotable *fragmentinfotable);
 
-void fragmentinfotable_add(GtFragmentinfotable *fragmentinfotable,
-                           GtChainpostype start1,
-                           GtChainpostype end1,
-                           GtChainpostype start2,
-                           GtChainpostype end2,
-                           GtChainscoretype weight);
+void gt_chain_fragmentinfotable_add(GtFragmentinfotable *fragmentinfotable,
+                                    GtChainpostype start1,
+                                    GtChainpostype end1,
+                                    GtChainpostype start2,
+                                    GtChainpostype end2,
+                                    GtChainscoretype weight);
 
-void fillthegapvalues(GtFragmentinfotable *fragmentinfotable);
+void gt_chain_fillthegapvalues(GtFragmentinfotable *fragmentinfotable);
 
-int fastchaining(const GtChainmode *chainmode,
-                 GtChain *chain,
-                 GtFragmentinfotable *fragmentinfotable,
-                 bool gapsL1,
-                 unsigned int presortdim,
-                 bool withequivclasses,
-                 GtChainprocessor chainprocessor,
-                 void *cpinfo,
-                 Verboseinfo *verboseinfo,
-                 GtError *err);
+int gt_chain_fastchaining(const GtChainmode *chainmode,
+                    GtChain *chain,
+                    GtFragmentinfotable *fragmentinfotable,
+                    bool gapsL1,
+                    unsigned int presortdim,
+                    bool withequivclasses,
+                    GtChainprocessor chainprocessor,
+                    void *cpinfo,
+                    Verboseinfo *verboseinfo,
+                    GtError *err);
 
 #endif

@@ -25,13 +25,6 @@
 
 #define READNUMS 5
 
-typedef struct
-{
-  bool silent;
-  GtFragmentinfotable *fragementinfotable;
-  unsigned long chaincounter;
-} Ofchainoutinfo;
-
 #define CANNOTPARSELINE(S)\
         gt_error_set(err,"matchfile \"%s\", line %lu, column %lu: %s",\
                      matchfile,linenum,countcolumns,S)
@@ -81,7 +74,7 @@ GtFragmentinfotable *analyzeopenformatfile(double weightfactor,
   {
     return NULL;
   }
-  fragmentinfotable = fragmentinfotable_new(linenum);
+  fragmentinfotable = gt_chain_fragmentinfotable_new(linenum);
   currentline = gt_str_new();
   for (linenum = 0; gt_str_read_next_line(currentline, matchfp) != EOF;
        linenum++)
@@ -142,12 +135,12 @@ GtFragmentinfotable *analyzeopenformatfile(double weightfactor,
       }
       weight = (GtChainscoretype) (weightfactor *
                                   (double) storeinteger[READNUMS-1]);
-      fragmentinfotable_add(fragmentinfotable,
-                            storeinteger[0],
-                            storeinteger[1],
-                            storeinteger[2],
-                            storeinteger[3],
-                            weight);
+      gt_chain_fragmentinfotable_add(fragmentinfotable,
+                                     storeinteger[0],
+                                     storeinteger[1],
+                                     storeinteger[2],
+                                     storeinteger[3],
+                                     weight);
     }
     gt_str_reset(currentline);
   }
@@ -155,9 +148,9 @@ GtFragmentinfotable *analyzeopenformatfile(double weightfactor,
   gt_fa_fclose(matchfp);
   if (haserr)
   {
-    fragmentinfotable_delete(fragmentinfotable);
+    gt_chain_fragmentinfotable_delete(fragmentinfotable);
     return NULL;
   }
-  fillthegapvalues(fragmentinfotable);
+  gt_chain_fillthegapvalues(fragmentinfotable);
   return fragmentinfotable;
 }
