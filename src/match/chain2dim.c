@@ -1331,3 +1331,70 @@ int gt_outputformatchain(const GtFragmentinfotable *fragmentinfotable,
   chaincounter++;
   return 0;
 }
+
+static int cmpFragmentinfo0(const void *keya,const void *keyb)
+{
+  if (((const Fragmentinfo *) keya)->startpos[0] <
+      ((const Fragmentinfo *) keyb)->startpos[0])
+  {
+    return -1;
+  }
+  if (((const Fragmentinfo *) keya)->startpos[0] >
+      ((const Fragmentinfo *) keyb)->startpos[0])
+  {
+    return 1;
+  }
+  return 0;
+}
+
+static int cmpFragmentinfo1(const void *keya,const void *keyb)
+{
+  if (((const Fragmentinfo *) keya)->startpos[1] <
+      ((const Fragmentinfo *) keyb)->startpos[1])
+  {
+    return -1;
+  }
+  if (((const Fragmentinfo *) keya)->startpos[1] >
+      ((const Fragmentinfo *) keyb)->startpos[1])
+  {
+    return 1;
+  }
+  return 0;
+}
+
+typedef int (*Qsortcomparefunction)(const void *,const void *);
+
+void gt_chain_possiblysortopenformatfragments(
+                             Verboseinfo *verboseinfo,
+                             GtFragmentinfotable *fragmentinfotable,
+                             unsigned int presortdim)
+{
+  if (fragmentinfotable->nextfree > 1UL)
+  {
+    Qsortcomparefunction qsortcomparefunction;
+    Fragmentinfo *fptr;
+    bool fragmentsaresorted = true;
+
+    gt_assert(presortdim <= 1U);
+    qsortcomparefunction
+      = (presortdim == 0) ? cmpFragmentinfo0 : cmpFragmentinfo1;
+    for (fptr = fragmentinfotable->fragments;
+         fptr < fragmentinfotable->fragments + fragmentinfotable->nextfree - 1;
+         fptr++)
+    {
+      if (qsortcomparefunction((const void *) fptr,
+                               (const void *) (fptr+1)) == 1)
+      {
+        fragmentsaresorted = false;
+        break;
+      }
+    }
+    if (!fragmentsaresorted)
+    {
+      showverbose(verboseinfo,"input fragments are not yet sorted => "
+                              "sort them");
+    }
+    qsort(fragmentinfotable->fragments,(size_t) fragmentinfotable->nextfree,
+          sizeof (Fragmentinfo),qsortcomparefunction);
+  }
+}

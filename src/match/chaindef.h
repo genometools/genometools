@@ -114,4 +114,9 @@ int gt_chain_fastchaining(const GtChainmode *chainmode,
                     Verboseinfo *verboseinfo,
                     GtError *err);
 
+void gt_chain_possiblysortopenformatfragments(
+                             Verboseinfo *verboseinfo,
+                             GtFragmentinfotable *fragmentinfotable,
+                             unsigned int presortdim);
+
 #endif
