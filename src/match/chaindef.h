@@ -21,6 +21,7 @@
 #include "core/arraydef.h"
 #include "core/error_api.h"
 #include "core/str_api.h"
+#include "core/str_array_api.h"
 #include "seqpos-def.h"
 #include "verbose-def.h"
 
@@ -93,10 +94,10 @@ typedef struct
   bool silent;
   GtChainmode chainmode;
   double weightfactor;
-  const GtStr *matchfile,
-              *outprefix;
+  GtStr *matchfile;
+  GtStrArray *globalargs;
   Verboseinfo *verboseinfo;
-} Chaincallinfo;
+} Chaincalloptions;
 
 typedef struct GtFragmentinfotable GtFragmentinfotable;
 
