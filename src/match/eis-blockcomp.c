@@ -1823,6 +1823,31 @@ updateIdxOutput(struct blockCompositionSeq *seqIdx,
   AlphabetRangeSize blockAlphabetSize;
   gt_assert(seqIdx && aState && buck);
   /* seek2/write constant width indices */
+  if (!(seqIdx->externalData.cwDataPos + aState->cwDiskOffset
+         < seqIdx->externalData.varDataPos
+         + aState->varDiskOffset/bitElemBits * sizeof (BitElem)))
+  {
+    fprintf(stderr,"cwDatapos=%lu\n",
+           (unsigned long) seqIdx->externalData.cwDataPos);
+    fprintf(stderr,"cwDiskOffset=%lu\n",(unsigned long) aState->cwDiskOffset);
+    fprintf(stderr,"varDataPos=%lu\n",
+                   (unsigned long) seqIdx->externalData.varDataPos);
+    fprintf(stderr,"bitElemBits=%lu\n",(unsigned long) bitElemBits);
+    fprintf(stderr,"aState->varDiskOffset=%lu\n",
+                    (unsigned long) aState->varDiskOffset);
+    fprintf(stderr,"aState->varDiskOffset/bitElemBits=%lu\n",
+                    (unsigned long) (aState->varDiskOffset/bitElemBits));
+    fprintf(stderr,"sizeof (BitElem)=%lu\n",(unsigned long) sizeof (BitElem));
+    fprintf(stderr,"aState->varDiskOffset/bitElemBits * sizeof(BitElem)=%lu\n",
+            (unsigned long) (aState->varDiskOffset/bitElemBits * 
+                             sizeof (BitElem)));
+    fprintf(stderr,"seqIdx->externalData.varDataPos + " 
+                   "aState->varDiskOffset/bitElemBits * sizeof(BitElem)=%lu\n",
+            (unsigned long) (seqIdx->externalData.varDataPos + 
+                             aState->varDiskOffset/bitElemBits 
+                             * sizeof (BitElem)));
+    exit(EXIT_FAILURE);
+  }
   gt_assert(seqIdx->externalData.cwDataPos + aState->cwDiskOffset
          < seqIdx->externalData.varDataPos
          + aState->varDiskOffset/bitElemBits * sizeof (BitElem));
