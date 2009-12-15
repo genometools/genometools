@@ -16,12 +16,17 @@
 */
 
 #include <stdbool.h>
+#include <string.h>
 #include "core/minmax.h"
+#include "core/mathsupport.h"
+#include "core/str_api.h"
+#include "core/str_array_api.h"
 #include "core/unused_api.h"
 #include "core/arraydef.h"
 #include "extended/redblack.h"
 #include "verbose-def.h"
 #include "chaindef.h"
+#include "prsqualint.h"
 
 /*
   The basic information required for each fragment is stored
@@ -1458,5 +1463,163 @@ void gt_chain_possiblysortopenformatfragments(
     }
     qsort(fragmentinfotable->fragments,(size_t) fragmentinfotable->nextfree,
           sizeof (Fragmentinfo),qsortcomparefunction);
+  }
+}
+
+static int parselocalchainingparameter(GtChainmode *gtchainmode,
+                                       const char *option,
+                                       const char *lparam,
+                                       GtError *err)
+{
+  Qualifiedinteger *qualint;
+
+  qualint = parsequalifiedinteger(option,lparam,err);
+  if (qualint == NULL)
+  {
+    return -1;
+  }
+  switch (qualint->qualtag)
+  {
+    case Qualbestof:
+      gtchainmode->chainkind = LOCALCHAININGBEST;
+      gtchainmode->howmanybest = qualint->integervalue;
+      break;
+    case Qualpercentaway:
+      gtchainmode->chainkind = LOCALCHAININGPERCENTAWAY;
+      gtchainmode->percentawayfrombest = qualint->integervalue;
+      break;
+    case Qualabsolute:
+      gtchainmode->chainkind = LOCALCHAININGTHRESHOLD;
+      gtchainmode->minimumscore = (GtChainscoretype) qualint->integervalue;
+      break;
+  }
+  return 0;
+}
+
+/*
+  The following string is used to trigger the usage of gap costs
+  for global chaining.
+*/
+
+#define GAPCOSTSWITCH        "gc"
+
+/*
+  The following string is used to trigger the use of a chaining algorithm
+  allowing for overlaps between the hits.
+*/
+
+#define OVERLAPSWITCH        "ov"
+
+static int parseglobalchainingparameter(GtChainmode *chainmode,
+                                        const char *option,
+                                        const char *gparam,
+                                        GtError *err)
+{
+  if (strcmp(gparam,GAPCOSTSWITCH) == 0)
+  {
+    chainmode->chainkind = GLOBALCHAININGWITHGAPCOST;
+    return 0;
+  }
+  if (strcmp(gparam,OVERLAPSWITCH) == 0)
+  {
+    chainmode->chainkind = GLOBALCHAININGWITHOVERLAPS;
+    return 0;
+  }
+  gt_error_set(err,"argument of option -%s must be %s or %s: ",
+                    option,
+                    GAPCOSTSWITCH,
+                    OVERLAPSWITCH);
+  return -1;
+}
+
+GtChainmode *gt_chain_chainmode_new(double weightfactor,
+                                    unsigned long maxgap,
+                                    bool globalset,
+                                    const GtStrArray *globalargs,
+                                    bool localset,
+                                    const GtStrArray *localargs,
+                                    GtError *err)
+{
+  GtChainmode *gtchainmode = gt_malloc(sizeof( GtChainmode));
+  bool haserr = false;
+
+  gt_assert(!(globalset && localset));
+  gtchainmode->chainkind = GLOBALCHAINING;
+  gtchainmode->maxgapwidth = (GtChainpostype) maxgap;
+  if (localset)
+  {
+    unsigned long localargsnum = gt_str_array_size(localargs);
+    if (localargsnum == 0)
+    {
+      gtchainmode->chainkind = LOCALCHAININGMAX;
+    } else
+    {
+      if (localargsnum == 1UL)
+      {
+        if (parselocalchainingparameter(gtchainmode,
+                                        "local",
+                                        gt_str_array_get(localargs,0),
+                                        err) != 0)
+        {
+          haserr = true;
+        }
+      } else
+      {
+        gt_error_set(err,"option -local can only have one optional argument");
+        haserr = true;
+      }
+    }
+  }
+  if (globalset)
+  {
+    unsigned long globalargsnum = gt_str_array_size(globalargs);
+    if (globalargsnum == 0)
+    {
+      gtchainmode->chainkind = GLOBALCHAINING;
+    } else
+    {
+      if (globalargsnum == 1UL)
+      {
+        if (parseglobalchainingparameter(gtchainmode,
+                                         "global",
+                                          gt_str_array_get(globalargs,0),
+                                          err) != 0)
+        {
+          haserr = true;
+        }
+      } else
+      {
+        gt_error_set(err,"option -global can only have one optional argument");
+        haserr = true;
+      }
+    }
+  }
+  if (!haserr && !gt_double_equals_double(weightfactor, 0.0))
+  {
+    if (!localset &&
+        gtchainmode->chainkind != GLOBALCHAININGWITHGAPCOST &&
+        gtchainmode->chainkind != GLOBALCHAININGWITHOVERLAPS)
+    {
+      gt_error_set(err,
+                   "option wf requires either option -local or option -global "
+                   "with argument %s or %s",
+                   GAPCOSTSWITCH,
+                   OVERLAPSWITCH);
+      haserr = true;
+    }
+  }
+  if (haserr)
+  {
+    gt_free(gtchainmode);
+    return NULL;
+  }
+  return gtchainmode;
+}
+
+void gt_chain_chainmode_free(GtChainmode *gtchainmode)
+{
+  if (gtchainmode != NULL)
+  {
+    gt_free(gtchainmode);
   }
 }

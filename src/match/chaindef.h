@@ -19,9 +19,7 @@
 #define CHAINDEF_H
 
 #include "core/error_api.h"
-#include "core/str_api.h"
 #include "core/str_array_api.h"
-#include "tools/gt_chain2dim.h"
 #include "seqpos-def.h"
 #include "verbose-def.h"
 
@@ -68,5 +66,15 @@ void gt_chain_possiblysortopenformatfragments(
                              Verboseinfo *verboseinfo,
                              GtFragmentinfotable *fragmentinfotable,
                              unsigned int presortdim);
+
+GtChainmode *gt_chain_chainmode_new(double weightfactor,
+                                    unsigned long maxgap,
+                                    bool globalset,
+                                    const GtStrArray *globalargs,
+                                    bool localset,
+                                    const GtStrArray *localargs,
+                                    GtError *err);
+
+void gt_chain_chainmode_free(GtChainmode *gtchainmode);
 
 #endif

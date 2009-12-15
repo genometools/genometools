@@ -15,31 +15,29 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GT_CHAIN2DIM_H
-#define GT_CHAIN2DIM_H
+#ifndef PRSQUALINT_H
+#define PRSQUALINT_H
 
-#include <stdbool.h>
-#include "core/tool.h"
-#include "core/str_array_api.h"
-#include "core/option.h"
-#include "match/chaindef.h"
+#include "core/error_api.h"
 
-/* the chain2dim tool */
+#define BESTCHARACTER        'b'
+#define PERCENTAWAYCHARACTER 'p'
+
+typedef enum
+{
+  Qualabsolute,
+  Qualpercentaway,
+  Qualbestof
+} Qualificationtag;
 
 typedef struct
 {
-  bool silent,
-       verbose;
-  double weightfactor;
-  unsigned long maxgap;
-  GtStr *matchfile;
-  GtStrArray *globalargs,
-             *localargs;
-  GtChainmode *gtchainmode;
-  GtOption *refoptionmaxgap,
-           *refoptionweightfactor;
-} GtChain2dimoptions;
+  Qualificationtag qualtag;
+  unsigned long integervalue;
+} Qualifiedinteger;
 
-GtTool* gt_chain2dim(void);
+Qualifiedinteger *parsequalifiedinteger(const char *option,
+                                        const char *lparam,
+                                        GtError *err);
 
 #endif

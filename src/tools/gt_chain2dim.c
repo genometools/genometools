@@ -37,6 +37,8 @@ static void gt_chain2dim_arguments_delete (void *tool_arguments)
   gt_str_delete (arguments->matchfile);
   gt_str_array_delete (arguments->globalargs);
   gt_str_array_delete (arguments->localargs);
+  gt_option_delete (arguments->refoptionmaxgap);
+  gt_option_delete (arguments->refoptionweightfactor);
   gt_free (arguments);
 }
 
@@ -92,9 +94,11 @@ static GtOptionParser *gt_chain2dim_option_parser_new (void *tool_arguments)
                                      "the options\n-localconst\n-global "
                                      "gc\n-global ov",
                                      &arguments->weightfactor,0.0);
+  arguments->refoptionweightfactor = gt_option_ref (option);
   gt_option_parser_add_option(op, option);
   option = gt_option_new_ulong("maxgap","specify maximal width of gap in chain",
                                          &arguments->maxgap,0);
+  arguments->refoptionmaxgap = gt_option_ref (option);
   gt_option_parser_add_option(op, option);
   option = gt_option_new_bool("silent","do not output the chains but only "
                                        "report their lengths and scores",
@@ -105,24 +109,28 @@ static GtOptionParser *gt_chain2dim_option_parser_new (void *tool_arguments)
   return op;
 }
 
-/*
-  The following string is used to trigger the usage of gap costs
-  for global chaining.
-*/
-
-#define GAPCOSTSWITCH        "gc"
-
-/*
-  The following string is used to trigger the use of a chaining algorithm
-  allowing for overlaps between the hits.
-*/
-
-#define OVERLAPSWITCH        "ov"
-
 static int gt_chain2dim_arguments_check (GT_UNUSED int rest_argc,
-                                         GT_UNUSED void *tool_arguments,
-                                         GT_UNUSED GtError * err)
+                                         void *tool_arguments,
+                                         GtError * err)
 {
+  GtChain2dimoptions *arguments = tool_arguments;
+
+  if (gt_option_is_set (arguments->refoptionmaxgap))
+  {
+    if (arguments->maxgap == 0)
+    {
+      gt_error_set(err,"argument of option -maxgap must be positive integer");
+      return -1;
+    }
+  }
+  if (gt_option_is_set (arguments->refoptionweightfactor))
+  {
+    if (arguments->weightfactor <= 0.0)
+    {
+      gt_error_set(err,"argument of option -wf must be positive real value");
+      return -1;
+    }
+  }
   return 0;
 }
 
