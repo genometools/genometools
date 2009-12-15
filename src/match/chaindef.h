@@ -18,7 +18,6 @@
 #ifndef CHAINDEF_H
 #define CHAINDEF_H
 
-#include "core/arraydef.h"
 #include "core/error_api.h"
 #include "core/str_api.h"
 #include "core/str_array_api.h"
@@ -26,65 +25,24 @@
 #include "seqpos-def.h"
 #include "verbose-def.h"
 
+typedef Seqpos GtChainpostype;
 typedef long GtChainscoretype;
-
-/*
-  The following type defines the possible kinds of chaining.
-  The mode can be one of the two following values.
-*/
-
-typedef enum
-{
-  GLOBALCHAINING,              /* global chaining without gap costs */
-  GLOBALCHAININGWITHGAPCOST,   /* global chaining with L1 gap costs */
-  GLOBALCHAININGWITHOVERLAPS,  /* chaining with overlaps */
-  LOCALCHAININGMAX,            /* local chaining; one maximum is reported */
-  LOCALCHAININGTHRESHOLD,      /* local chaining; all chains >= minscore */
-  LOCALCHAININGBEST,           /* local chaining; k best local chains */
-  LOCALCHAININGPERCENTAWAY     /* local chaining; percent away from best */
-} GtChainkind;
-
-/*
-  A chain consists of an array of integers. These refer to the array of
-  fragment informations.
-*/
-
-typedef unsigned long GtChainref;
-
-GT_DECLAREARRAYSTRUCT(GtChainref);
-
-typedef struct
-{
-  GtArrayGtChainref chainedfragments;
-  GtChainscoretype scoreofchain;
-} GtChain;
+typedef struct GtChain GtChain;
 
 /*
   We use functions of the following type to report chains.
 */
 
 typedef int (*GtChainprocessor)(void *,GtChain *,GtError *err);
-
-/*
-  The following type defines the chain mode consisting of a chainkind.
-  If chainkind = LOCALCHAININGTHRESHOLD, then an additional
-  component minimumscore is used.
-  If chainkind = LOCALCHAININGBEST, then  an additional
-  component howmanybest is used.
-  If chainkind = LOCALCHAININGPERCENTAWAY, then  an additional
-  component percentawayfrombest is defined
-*/
-
-typedef Seqpos GtChainpostype;
-
 typedef struct GtFragmentinfotable GtFragmentinfotable;
-
 typedef struct GtChainmode GtChainmode;
 
 GtFragmentinfotable *gt_chain_fragmentinfotable_new(
                            unsigned long numberoffragments);
 
 void gt_chain_fragmentinfotable_delete(GtFragmentinfotable *fragmentinfotable);
+
+void gt_chain_fragmentinfotable_empty(GtFragmentinfotable *fragmentinfotable);
 
 void gt_chain_fragmentinfotable_add(GtFragmentinfotable *fragmentinfotable,
                                     GtChainpostype start1,

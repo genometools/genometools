@@ -18,6 +18,7 @@
 #include <stdbool.h>
 #include "core/minmax.h"
 #include "core/unused_api.h"
+#include "core/arraydef.h"
 #include "extended/redblack.h"
 #include "verbose-def.h"
 #include "chaindef.h"
@@ -53,6 +54,32 @@ struct GtFragmentinfotable
                  allocated;
 };
 
+/*
+  The following type defines the possible kinds of chaining.
+  The mode can be one of the two following values.
+*/
+
+typedef enum
+{
+  GLOBALCHAINING,              /* global chaining without gap costs */
+  GLOBALCHAININGWITHGAPCOST,   /* global chaining with L1 gap costs */
+  GLOBALCHAININGWITHOVERLAPS,  /* chaining with overlaps */
+  LOCALCHAININGMAX,            /* local chaining; one maximum is reported */
+  LOCALCHAININGTHRESHOLD,      /* local chaining; all chains >= minscore */
+  LOCALCHAININGBEST,           /* local chaining; k best local chains */
+  LOCALCHAININGPERCENTAWAY     /* local chaining; percent away from best */
+} GtChainkind;
+
+/*
+  The following type defines the chain mode consisting of a chainkind.
+  If chainkind = LOCALCHAININGTHRESHOLD, then an additional
+  component minimumscore is used.
+  If chainkind = LOCALCHAININGBEST, then  an additional
+  component howmanybest is used.
+  If chainkind = LOCALCHAININGPERCENTAWAY, then  an additional
+  component percentawayfrombest is defined
+*/
+
 struct GtChainmode
 {
   GtChainkind chainkind;
@@ -64,6 +91,21 @@ struct GtChainmode
                                   chainkind = LOCALCHAININGBEST */
                 percentawayfrombest;  /* only defined if
                                          chainkind = LOCALCHAININGPERCENTAWAY */
+};
+
+typedef unsigned long GtChainref;
+
+GT_DECLAREARRAYSTRUCT(GtChainref);
+
+/*
+  A chain consists of an array of integers. These refer to the array of
+  fragment informations.
+*/
+
+struct GtChain
+{
+  GtArrayGtChainref chainedfragments;
+  GtChainscoretype scoreofchain;
 };
 
 GtFragmentinfotable *gt_chain_fragmentinfotable_new(
@@ -86,6 +128,13 @@ void gt_chain_fragmentinfotable_delete(GtFragmentinfotable *fragmentinfotable)
     gt_free(fragmentinfotable->fragments);
     gt_free(fragmentinfotable);
   }
+}
+
+void gt_chain_fragmentinfotable_empty(GtFragmentinfotable *fragmentinfotable)
+{
+  gt_assert(fragmentinfotable != NULL);
+  fragmentinfotable->largestdim1 = fragmentinfotable->largestdim2 = 0;
+  fragmentinfotable->nextfree = 0;
 }
 
 void gt_chain_fragmentinfotable_add(GtFragmentinfotable *fragmentinfotable,
