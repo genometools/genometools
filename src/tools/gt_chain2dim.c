@@ -20,6 +20,7 @@
 #include "core/unused_api.h"
 #include "core/tool.h"
 #include "gt_chain2dim.h"
+#include "match/chaindef.h"
 
 static void *gt_chain2dim_arguments_new (void)
 {
@@ -39,6 +40,8 @@ static void gt_chain2dim_arguments_delete (void *tool_arguments)
   gt_str_array_delete (arguments->localargs);
   gt_option_delete (arguments->refoptionmaxgap);
   gt_option_delete (arguments->refoptionweightfactor);
+  gt_option_delete (arguments->refoptionglobal);
+  gt_option_delete (arguments->refoptionlocal);
   gt_free (arguments);
 }
 
@@ -70,6 +73,8 @@ static GtOptionParser *gt_chain2dim_option_parser_new (void *tool_arguments)
                    "optional parameter ov means\n"
                    "that overlaps between matches are allowed",
                    arguments->globalargs);
+  gt_option_argument_is_optional(optionglobal);
+  arguments->refoptionglobal = gt_option_ref (optionglobal);
   gt_option_parser_add_option(op, optionglobal);
 
   optionlocal = gt_option_new_stringarray("local",
@@ -87,7 +92,9 @@ static GtOptionParser *gt_chain2dim_option_parser_new (void *tool_arguments)
                    "chains with scores at most k percent away\n"
                    "from the best score.",
                    arguments->localargs);
+  gt_option_argument_is_optional(optionlocal);
   gt_option_parser_add_option(op, optionlocal);
+  arguments->refoptionglobal = gt_option_ref (optionlocal);
   gt_option_exclude(optionlocal,optionglobal);
   option = gt_option_new_double("wf","specify weight factor > 0.0 to obtain "
                                      "score of a fragment\nrequires one of "
@@ -138,13 +145,24 @@ static int gt_chain2dim_runner (GT_UNUSED int argc,
                                 GT_UNUSED const char **argv,
                                 GT_UNUSED int parsed_args,
                                 void *tool_arguments,
-                                GT_UNUSED GtError * err)
+                                GtError * err)
 {
   GtChain2dimoptions *arguments = tool_arguments;
+  GtChainmode *gtchainmode;
 
   gt_error_check (err);
   gt_assert (arguments != NULL);
   gt_assert (parsed_args == argc);
+  gtchainmode = gt_chain_chainmode_new(arguments->weightfactor,
+                                       arguments->maxgap,
+                                       gt_option_is_set(arguments->
+                                                        refoptionglobal),
+                                       arguments->globalargs,
+                                       gt_option_is_set(arguments->
+                                                        refoptionlocal),
+                                       arguments->localargs,
+                                       err);
+  gt_chain_chainmode_free(gtchainmode);
   return 0;
 }
 

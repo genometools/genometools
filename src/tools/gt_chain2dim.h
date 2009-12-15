@@ -22,7 +22,6 @@
 #include "core/tool.h"
 #include "core/str_array_api.h"
 #include "core/option.h"
-#include "match/chaindef.h"
 
 /* the chain2dim tool */
 
@@ -35,9 +34,10 @@ typedef struct
   GtStr *matchfile;
   GtStrArray *globalargs,
              *localargs;
-  GtChainmode *gtchainmode;
   GtOption *refoptionmaxgap,
-           *refoptionweightfactor;
+           *refoptionweightfactor,
+           *refoptionglobal,
+           *refoptionlocal;
 } GtChain2dimoptions;
 
 GtTool* gt_chain2dim(void);
