@@ -53,6 +53,19 @@ struct GtFragmentinfotable
                  allocated;
 };
 
+struct GtChainmode
+{
+  GtChainkind chainkind;
+  GtChainpostype maxgapwidth;  /* 0 if undefined or
+                                  otherwise maximal width of gap */
+  GtChainscoretype minimumscore; /* only defined if
+                                  chainkind = LOCALCHAININGTHRESHOLD */
+  unsigned long howmanybest,   /* only defined if
+                                  chainkind = LOCALCHAININGBEST */
+                percentawayfrombest;  /* only defined if
+                                         chainkind = LOCALCHAININGPERCENTAWAY */
+};
+
 GtFragmentinfotable *gt_chain_fragmentinfotable_new(
                                unsigned long numberoffragments)
 {

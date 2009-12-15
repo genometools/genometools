@@ -60,6 +60,7 @@
 #include "tools/gt_bed_to_gff3.h"
 #include "tools/gt_bioseq.h"
 #include "tools/gt_cds.h"
+#include "tools/gt_chain2dim.h"
 #include "tools/gt_chseqids.h"
 #include "tools/gt_clean.h"
 #include "tools/gt_csa.h"
@@ -123,6 +124,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "bioseq", gt_bioseq());
   gt_toolbox_add_tool(tools, "cds", gt_cds());
   gt_toolbox_add(tools, "chseqids", gt_chseqids);
+  gt_toolbox_add_tool(tools, "chain2dim", gt_chain2dim());
   gt_toolbox_add(tools, "clean", gt_clean);
   gt_toolbox_add_tool(tools, "csa", gt_csa());
   gt_toolbox_add_tool(tools, "congruence", gt_congruence());

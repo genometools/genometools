@@ -22,6 +22,7 @@
 #include "core/error_api.h"
 #include "core/str_api.h"
 #include "core/str_array_api.h"
+#include "tools/gt_chain2dim.h"
 #include "seqpos-def.h"
 #include "verbose-def.h"
 
@@ -76,30 +77,9 @@ typedef int (*GtChainprocessor)(void *,GtChain *,GtError *err);
 
 typedef Seqpos GtChainpostype;
 
-typedef struct
-{
-  GtChainkind chainkind;
-  GtChainpostype maxgapwidth;  /* 0 if undefined or
-                                  otherwise maximal width of gap */
-  GtChainscoretype minimumscore; /* only defined if
-                                  chainkind = LOCALCHAININGTHRESHOLD */
-  unsigned long howmanybest,   /* only defined if
-                                  chainkind = LOCALCHAININGBEST */
-                percentawayfrombest;  /* only defined if
-                                         chainkind = LOCALCHAININGPERCENTAWAY */
-} GtChainmode;
-
-typedef struct
-{
-  bool silent;
-  GtChainmode chainmode;
-  double weightfactor;
-  GtStr *matchfile;
-  GtStrArray *globalargs;
-  Verboseinfo *verboseinfo;
-} Chaincalloptions;
-
 typedef struct GtFragmentinfotable GtFragmentinfotable;
+
+typedef struct GtChainmode GtChainmode;
 
 GtFragmentinfotable *gt_chain_fragmentinfotable_new(
                            unsigned long numberoffragments);
@@ -116,15 +96,15 @@ void gt_chain_fragmentinfotable_add(GtFragmentinfotable *fragmentinfotable,
 void gt_chain_fillthegapvalues(GtFragmentinfotable *fragmentinfotable);
 
 int gt_chain_fastchaining(const GtChainmode *chainmode,
-                    GtChain *chain,
-                    GtFragmentinfotable *fragmentinfotable,
-                    bool gapsL1,
-                    unsigned int presortdim,
-                    bool withequivclasses,
-                    GtChainprocessor chainprocessor,
-                    void *cpinfo,
-                    Verboseinfo *verboseinfo,
-                    GtError *err);
+                          GtChain *chain,
+                          GtFragmentinfotable *fragmentinfotable,
+                          bool gapsL1,
+                          unsigned int presortdim,
+                          bool withequivclasses,
+                          GtChainprocessor chainprocessor,
+                          void *cpinfo,
+                          Verboseinfo *verboseinfo,
+                          GtError *err);
 
 void gt_chain_possiblysortopenformatfragments(
                              Verboseinfo *verboseinfo,
