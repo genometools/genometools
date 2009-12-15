@@ -4,6 +4,7 @@ ALL=ltrharvest.pdf\
     matstat.pdf\
     mgth.pdf\
     packedindex.pdf\
+    repfind.pdf\
     tallymer.pdf\
     tagerator.pdf
 
