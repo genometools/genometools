@@ -20,7 +20,6 @@
 #include "core/unused_api.h"
 #include "core/tool.h"
 #include "gt_chain2dim.h"
-#include "match/chaindef.h"
 
 static void *gt_chain2dim_arguments_new (void)
 {
@@ -138,6 +137,14 @@ static int gt_chain2dim_arguments_check (GT_UNUSED int rest_argc,
       return -1;
     }
   }
+  arguments->gtchainmode
+    = gt_chain_chainmode_new(arguments->weightfactor,
+                             arguments->maxgap,
+                             gt_option_is_set(arguments->refoptionglobal),
+                             arguments->globalargs,
+                             gt_option_is_set(arguments->refoptionlocal),
+                             arguments->localargs,
+                             err);
   return 0;
 }
 
@@ -148,21 +155,11 @@ static int gt_chain2dim_runner (GT_UNUSED int argc,
                                 GtError * err)
 {
   GtChain2dimoptions *arguments = tool_arguments;
-  GtChainmode *gtchainmode;
 
   gt_error_check (err);
   gt_assert (arguments != NULL);
   gt_assert (parsed_args == argc);
-  gtchainmode = gt_chain_chainmode_new(arguments->weightfactor,
-                                       arguments->maxgap,
-                                       gt_option_is_set(arguments->
-                                                        refoptionglobal),
-                                       arguments->globalargs,
-                                       gt_option_is_set(arguments->
-                                                        refoptionlocal),
-                                       arguments->localargs,
-                                       err);
-  gt_chain_chainmode_free(gtchainmode);
+  gt_chain_chainmode_free(arguments->gtchainmode);
   return 0;
 }
 
