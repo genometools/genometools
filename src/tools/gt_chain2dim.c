@@ -93,7 +93,7 @@ static GtOptionParser *gt_chain2dim_option_parser_new (void *tool_arguments)
                    arguments->localargs);
   gt_option_argument_is_optional(optionlocal);
   gt_option_parser_add_option(op, optionlocal);
-  arguments->refoptionglobal = gt_option_ref (optionlocal);
+  arguments->refoptionlocal = gt_option_ref (optionlocal);
   gt_option_exclude(optionlocal,optionglobal);
   option = gt_option_new_double("wf","specify weight factor > 0.0 to obtain "
                                      "score of a fragment\nrequires one of "
@@ -137,6 +137,8 @@ static int gt_chain2dim_arguments_check (GT_UNUSED int rest_argc,
       return -1;
     }
   }
+  gt_assert(arguments->refoptionglobal != NULL);
+  gt_assert(arguments->refoptionlocal != NULL);
   arguments->gtchainmode
     = gt_chain_chainmode_new(arguments->weightfactor,
                              arguments->maxgap,
