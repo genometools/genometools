@@ -145,6 +145,7 @@ require 'gt_mergeesa_include'
 require 'gt_trieins_include'
 require 'gt_packedindex_include'
 require 'gt_idxsearch_include'
+require 'gt_chain2dim_include'
 require 'gt_tallymer_include'
 if not $arguments["nocairo"] then
   require 'gt_sketch_include'

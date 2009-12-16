@@ -1493,6 +1493,7 @@ static int parselocalchainingparameter(GtChainmode *gtchainmode,
       gtchainmode->minimumscore = (GtChainscoretype) qualint->integervalue;
       break;
   }
+  gt_free(qualint);
   return 0;
 }
 

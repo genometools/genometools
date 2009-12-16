@@ -147,7 +147,7 @@ static int gt_chain2dim_arguments_check (GT_UNUSED int rest_argc,
                              gt_option_is_set(arguments->refoptionlocal),
                              arguments->localargs,
                              err);
-  return 0;
+  return (arguments->gtchainmode == NULL) ? -1 : 0;
 }
 
 static int gt_chain2dim_runner (GT_UNUSED int argc,
