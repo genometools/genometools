@@ -99,7 +99,7 @@ static GtOptionParser *gt_chain2dim_option_parser_new (void *tool_arguments)
                                      "score of a fragment\nrequires one of "
                                      "the options\n-localconst\n-global "
                                      "gc\n-global ov",
-                                     &arguments->weightfactor,0.0);
+                                     &arguments->weightfactor,1.0);
   arguments->refoptionweightfactor = gt_option_ref (option);
   gt_option_parser_add_option(op, option);
   option = gt_option_new_ulong("maxgap","specify maximal width of gap in chain",
@@ -140,7 +140,7 @@ static int gt_chain2dim_arguments_check (GT_UNUSED int rest_argc,
   gt_assert(arguments->refoptionglobal != NULL);
   gt_assert(arguments->refoptionlocal != NULL);
   arguments->gtchainmode
-    = gt_chain_chainmode_new(arguments->weightfactor,
+    = gt_chain_chainmode_new(gt_option_is_set(arguments->refoptionweightfactor),
                              arguments->maxgap,
                              gt_option_is_set(arguments->refoptionglobal),
                              arguments->globalargs,
@@ -161,6 +161,7 @@ static int gt_chain2dim_runner (GT_UNUSED int argc,
   gt_error_check (err);
   gt_assert (arguments != NULL);
   gt_assert (parsed_args == argc);
+
   gt_chain_chainmode_free(arguments->gtchainmode);
   return 0;
 }

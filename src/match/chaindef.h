@@ -67,7 +67,7 @@ void gt_chain_possiblysortopenformatfragments(
                              GtFragmentinfotable *fragmentinfotable,
                              unsigned int presortdim);
 
-GtChainmode *gt_chain_chainmode_new(double weightfactor,
+GtChainmode *gt_chain_chainmode_new(bool weightfactorset,
                                     unsigned long maxgap,
                                     bool globalset,
                                     const GtStrArray *globalargs,

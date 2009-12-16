@@ -1533,7 +1533,7 @@ static int parseglobalchainingparameter(GtChainmode *chainmode,
   return -1;
 }
 
-GtChainmode *gt_chain_chainmode_new(double weightfactor,
+GtChainmode *gt_chain_chainmode_new(bool weightfactorset,
                                     unsigned long maxgap,
                                     bool globalset,
                                     const GtStrArray *globalargs,
@@ -1595,7 +1595,7 @@ GtChainmode *gt_chain_chainmode_new(double weightfactor,
       }
     }
   }
-  if (!haserr && !gt_double_equals_double(weightfactor, 0.0))
+  if (!haserr && weightfactorset)
   {
     if (!localset &&
         gtchainmode->chainkind != GLOBALCHAININGWITHGAPCOST &&

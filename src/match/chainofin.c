@@ -52,9 +52,9 @@ static int numberoflinesinfile(unsigned long *linenum,
   return 0;
 }
 
-GtFragmentinfotable *analyzeopenformatfile(double weightfactor,
-                                           const char *matchfile,
-                                           GtError *err)
+GtFragmentinfotable *gt_chain_analyzeopenformatfile(double weightfactor,
+                                                    const char *matchfile,
+                                                    GtError *err)
 {
   GtFragmentinfotable *fragmentinfotable;
   GtStr *currentline;
