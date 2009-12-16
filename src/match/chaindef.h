@@ -77,4 +77,8 @@ GtChainmode *gt_chain_chainmode_new(bool weightfactorset,
 
 void gt_chain_chainmode_free(GtChainmode *gtchainmode);
 
+GtFragmentinfotable *gt_chain_analyzeopenformatfile(double weightfactor,
+                                                    const char *matchfile,
+                                                    GtError *err);
+
 #endif
