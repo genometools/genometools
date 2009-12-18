@@ -6,11 +6,11 @@ def runchain2dimfailure(args,matchfile='matchfile')
   end
 end
 
-def runchain2dim(args)
+def runchain2dim(args,matchfile="#{$testdata}/ecolicmp.of")
   Name "gt chain2dim failure"
   Keywords "gt_chain2dim"
   Test do
-    run_test "#{$bin}gt chain2dim -m #{$testdata}/ecolicmp.of " + args
+    run_test "#{$bin}gt chain2dim -m #{matchfile} " + args
   end
 end
 
@@ -27,9 +27,16 @@ runchain2dimfailure("-global","#{$testdata}/ecolicmp-neg.of")
 runchain2dimfailure("-local","#{$testdata}/ecolicmp-4Â.of")
 runchain2dimfailure("-global","#{$testdata}/ecolicmp-seÂ.of")
 
+runchain2dim("-global")
+runchain2dim("-silent -global")
+runchain2dim("-local -wf 1.8")
+runchain2dim("-local -wf 0.5")
+runchain2dim("-local -maxgap 20")
+runchain2dim("-local 2b -v")
+runchain2dim("-local 55p -silent")
+
 runchain2dim("-global gc")
 runchain2dim("-global ov")
-runchain2dim("-global")
 runchain2dim("-global gc -wf 1.5")
 runchain2dim("-global ov -wf 1.8")
 runchain2dim("-global -maxgap 10")
@@ -39,11 +46,11 @@ runchain2dim("-local")
 runchain2dim("-local 2p")
 runchain2dim("-local 2b")
 runchain2dim("-local 20")
-runchain2dim("-local -wf 1.6")
-runchain2dim("-local 2p -wf 1.6")
-runchain2dim("-local 2b -wf 1.6")
-runchain2dim("-local 20 -wf 1.6")
-runchain2dim("-local -wf 1.6 -maxgap 10")
-runchain2dim("-local 2p -wf 1.6 -maxgap 10")
-runchain2dim("-local 2b -wf 1.6 -maxgap 10")
-runchain2dim("-local 20 -wf 1.6 -maxgap 10")
+runchain2dim("-local -wf 1.8")
+runchain2dim("-local 2p -wf 1.8")
+runchain2dim("-local 2b -wf 1.8")
+runchain2dim("-local 20 -wf 1.8")
+runchain2dim("-local -wf 1.8 -maxgap 20")
+runchain2dim("-local 2p -wf 1.8 -maxgap 10")
+runchain2dim("-local 2b -wf 1.8 -maxgap 10")
+runchain2dim("-local 20 -wf 1.8 -maxgap 10")

@@ -23,6 +23,7 @@
 #include "core/str_array_api.h"
 #include "core/unused_api.h"
 #include "core/arraydef.h"
+#include "stamp.h"
 #include "extended/redblack.h"
 #include "verbose-def.h"
 #include "chain2dim.h"
@@ -152,7 +153,7 @@ void gt_chain_fragmentinfotable_add(GtFragmentinfotable *fragmentinfotable,
   Fragmentinfo *frag;
 
   gt_assert(fragmentinfotable->nextfree < fragmentinfotable->allocated);
-  frag = fragmentinfotable->fragments + fragmentinfotable->nextfree;
+  frag = fragmentinfotable->fragments + fragmentinfotable->nextfree++;
   frag->startpos[0] = start1;
   frag->startpos[1] = start2;
   frag->endpos[0] = end1;
