@@ -157,13 +157,24 @@ static int gt_chain2dim_runner (GT_UNUSED int argc,
                                 GtError * err)
 {
   GtChain2dimoptions *arguments = tool_arguments;
+  GtFragmentinfotable *fragmentinfotable;
+  bool haserr = false;
 
   gt_error_check (err);
   gt_assert (arguments != NULL);
   gt_assert (parsed_args == argc);
 
-  gt_chain_chainmode_free(arguments->gtchainmode);
-  return 0;
+  fragmentinfotable = gt_chain_analyzeopenformatfile(arguments->weightfactor,
+                                                     gt_str_get(arguments->
+                                                                matchfile),
+                                                     err);
+  if (fragmentinfotable == NULL)
+  {
+    haserr = true;
+  }
+  gt_chain_chainmode_delete(arguments->gtchainmode);
+  gt_chain_fragmentinfotable_delete(fragmentinfotable);
+  return haserr ? -1 : 0;
 }
 
 GtTool *gt_chain2dim (void)

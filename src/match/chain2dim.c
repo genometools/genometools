@@ -1617,7 +1617,7 @@ GtChainmode *gt_chain_chainmode_new(bool weightfactorset,
   return gtchainmode;
 }
 
-void gt_chain_chainmode_free(GtChainmode *gtchainmode)
+void gt_chain_chainmode_delete(GtChainmode *gtchainmode)
 {
   if (gtchainmode != NULL)
   {

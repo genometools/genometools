@@ -10,7 +10,7 @@ def runchain2dim(args)
   Name "gt chain2dim failure"
   Keywords "gt_chain2dim"
   Test do
-    run_test "#{$bin}gt chain2dim -m matchfile " + args
+    run_test "#{$bin}gt chain2dim -m #{$testdata}/ecolicmp.of " + args
   end
 end
 
