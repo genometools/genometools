@@ -187,16 +187,16 @@ void gt_chain_fillthegapvalues(GtFragmentinfotable *fragmentinfotable)
 #define MAKEENDPOINT(FID)       (FID)
 #define FRAGIDENT(FRAG)         ((FRAG)->fpident)
 
-#define UNDEFPREVIOUS           numofmatches
+#define UNDEFPREVIOUS           fragmentinfotable->nextfree
 
 #define GETSTOREDSTARTPOINT(DIM,IDX)\
-        fragmentinfo[IDX].startpos[DIM]
+        fragmentinfotable->fragments[IDX].startpos[DIM]
 #define GETSTOREDENDPOINT(DIM,IDX)\
-        fragmentinfo[IDX].endpos[DIM]
+        fragmentinfotable->fragments[IDX].endpos[DIM]
 #define INITIALGAP(IDX)\
-        fragmentinfo[IDX].initialgap
+        fragmentinfotable->fragments[IDX].initialgap
 #define TERMINALGAP(IDX)\
-        fragmentinfo[IDX].terminalgap
+        fragmentinfotable->fragments[IDX].terminalgap
 
 #define CHECKCHAINSPACE\
         if (lengthofchain >= chain->chainedfragments.allocatedGtChainref)\
@@ -209,7 +209,7 @@ void gt_chain_fillthegapvalues(GtFragmentinfotable *fragmentinfotable)
           chain->chainedfragments.nextfreeGtChainref = 0;\
         }
 
-typedef GtChainscoretype (*GtChaingapcostfunction)(const Fragmentinfo *,
+typedef GtChainscoretype (*GtChaingapcostfunction)(const GtFragmentinfotable *,
                                                    unsigned long,unsigned long);
 
 typedef struct
@@ -244,7 +244,7 @@ typedef struct
   GtChainscoretype score;
 } Bestofclass;
 
-static bool overlappingfragments(const Fragmentinfo *fragmentinfo,
+static bool overlappingfragments(const GtFragmentinfotable *fragmentinfotable,
                                  unsigned long i,
                                  unsigned long j)
 {
@@ -252,7 +252,7 @@ static bool overlappingfragments(const Fragmentinfo *fragmentinfo,
           GETSTOREDENDPOINT(1,i) >= GETSTOREDSTARTPOINT(1,j)) ? true : false;
 }
 
-static bool colinearfragments(const Fragmentinfo *fragmentinfo,
+static bool colinearfragments(const GtFragmentinfotable *fragmentinfotable,
                               unsigned long i,
                               unsigned long j)
 {
@@ -262,7 +262,7 @@ static bool colinearfragments(const Fragmentinfo *fragmentinfo,
           GETSTOREDENDPOINT(1, i)   < GETSTOREDENDPOINT(1, j)) ? true : false;
 }
 
-static GtChainscoretype gapcostL1(const Fragmentinfo *fragmentinfo,
+static GtChainscoretype gapcostL1(const GtFragmentinfotable *fragmentinfotable,
                                   unsigned long i,
                                   unsigned long j)
 {
@@ -271,9 +271,10 @@ static GtChainscoretype gapcostL1(const Fragmentinfo *fragmentinfo,
           (GETSTOREDSTARTPOINT(1,j) - GETSTOREDENDPOINT(1,i)));
 }
 
-static GtChainscoretype overlapcost(const Fragmentinfo *fragmentinfo,
-                                    unsigned long i,
-                                    unsigned long j)
+static GtChainscoretype overlapcost(
+                            const GtFragmentinfotable *fragmentinfotable,
+                            unsigned long i,
+                            unsigned long j)
 {
   GtChainpostype overlaplength = 0;
 
@@ -303,7 +304,7 @@ static GtChainscoretype overlapcost(const Fragmentinfo *fragmentinfo,
   following function generalizes to MEMs as well.
 */
 
-static GtChainscoretype gapcostCc(const Fragmentinfo *fragmentinfo,
+static GtChainscoretype gapcostCc(const GtFragmentinfotable *fragmentinfotable,
                                   unsigned long i,unsigned long j)
 {
   GtChainpostype value1, value2;
@@ -317,20 +318,19 @@ static GtChainscoretype gapcostCc(const Fragmentinfo *fragmentinfo,
 
 static void chainingboundarycases(const GtChainmode *chainmode,
                                   GtChain *chain,
-                                  const Fragmentinfo *fragmentinfo,
-                                  unsigned long numofmatches)
+                                  const GtFragmentinfotable *fragmentinfotable)
 {
-  if (numofmatches == 0)
+  if (fragmentinfotable->nextfree == 0)
   {
     chain->scoreofchain = 0;
     chain->chainedfragments.nextfreeGtChainref = 0;
   } else
   {
-    if (numofmatches == 1UL)
+    if (fragmentinfotable->nextfree == 1UL)
     {
       unsigned long lengthofchain;
 
-      chain->scoreofchain = fragmentinfo[0].weight;
+      chain->scoreofchain = fragmentinfotable->fragments[0].weight;
       if (chainmode->chainkind == GLOBALCHAININGWITHGAPCOST)
       {
         chain->scoreofchain -= (INITIALGAP(0) + TERMINALGAP(0));
@@ -344,8 +344,7 @@ static void chainingboundarycases(const GtChainmode *chainmode,
 }
 
 static void retracepreviousinchain(GtChain *chain,
-                                   const Fragmentinfo *fragmentinfo,
-                                   unsigned long numofmatches,
+                                   const GtFragmentinfotable *fragmentinfotable,
                                    unsigned long retracestart)
 {
   unsigned long fragnum, idx, lengthofchain;
@@ -353,7 +352,7 @@ static void retracepreviousinchain(GtChain *chain,
   for (lengthofchain = 0, fragnum = retracestart;
        fragnum != UNDEFPREVIOUS; lengthofchain++)
   {
-    fragnum = fragmentinfo[fragnum].previousinchain;
+    fragnum = fragmentinfotable->fragments[fragnum].previousinchain;
   }
   CHECKCHAINSPACE
   fragnum = retracestart;
@@ -363,13 +362,13 @@ static void retracepreviousinchain(GtChain *chain,
     gt_assert(idx > 0);
     idx--;
     chain->chainedfragments.spaceGtChainref[idx] = fragnum;
-    fragnum = fragmentinfo[fragnum].previousinchain;
+    fragnum = fragmentinfotable->fragments[fragnum].previousinchain;
   }
   gt_assert(idx == 0);
   chain->chainedfragments.nextfreeGtChainref = lengthofchain;
 }
 
-static bool checkmaxgapwidth(const Fragmentinfo *fragmentinfo,
+static bool checkmaxgapwidth(const GtFragmentinfotable *fragmentinfotable,
                              GtChainpostype maxgapwidth,
                              unsigned long leftfrag,
                              unsigned long rightfrag)
@@ -406,8 +405,7 @@ static bool checkmaxgapwidth(const Fragmentinfo *fragmentinfo,
 }
 
 static void bruteforcechainingscores(const GtChainmode *chainmode,
-                                     Fragmentinfo *fragmentinfo,
-                                     unsigned long numofmatches,
+                                     GtFragmentinfotable *fragmentinfotable,
                                      GtChaingapcostfunction
                                        chaingapcostfunction)
 {
@@ -416,25 +414,26 @@ static void bruteforcechainingscores(const GtChainmode *chainmode,
   Maxfragvalue localmaxfrag;
   bool combinable;
 
-  if (numofmatches > 1UL)
+  if (fragmentinfotable->nextfree > 1UL)
   {
-    fragmentinfo[0].firstinchain = 0;
-    fragmentinfo[0].previousinchain = UNDEFPREVIOUS;
-    fragmentinfo[0].score = fragmentinfo[0].weight;
+    fragmentinfotable->fragments[0].firstinchain = 0;
+    fragmentinfotable->fragments[0].previousinchain = UNDEFPREVIOUS;
+    fragmentinfotable->fragments[0].score
+      = fragmentinfotable->fragments[0].weight;
     if (chainmode->chainkind == GLOBALCHAININGWITHGAPCOST)
     {
-      fragmentinfo[0].score -= (INITIALGAP(0) + TERMINALGAP(0));
+      fragmentinfotable->fragments[0].score -= (INITIALGAP(0) + TERMINALGAP(0));
     }
-    for (rightfrag=1Ul; rightfrag<numofmatches; rightfrag++)
+    for (rightfrag=1Ul; rightfrag<fragmentinfotable->nextfree; rightfrag++)
     {
-      weightright = fragmentinfo[rightfrag].weight;
+      weightright = fragmentinfotable->fragments[rightfrag].weight;
       localmaxfrag.defined = false;
       localmaxfrag.maxscore = 0;
       localmaxfrag.maxfragnum = 0;
       for (leftfrag=0; leftfrag<rightfrag; leftfrag++)
       {
         if (chainmode->maxgapwidth != 0 &&
-           !checkmaxgapwidth(fragmentinfo,
+           !checkmaxgapwidth(fragmentinfotable,
                              chainmode->maxgapwidth,
                              leftfrag,
                              rightfrag))
@@ -444,10 +443,11 @@ static void bruteforcechainingscores(const GtChainmode *chainmode,
         {
           if (chainmode->chainkind == GLOBALCHAININGWITHOVERLAPS)
           {
-            combinable = colinearfragments(fragmentinfo,leftfrag,rightfrag);
+            combinable = colinearfragments(fragmentinfotable,leftfrag,
+                                           rightfrag);
           } else
           {
-            if (overlappingfragments(fragmentinfo,leftfrag,rightfrag))
+            if (overlappingfragments(fragmentinfotable,leftfrag,rightfrag))
             {
               combinable = false;
             } else
@@ -458,7 +458,7 @@ static void bruteforcechainingscores(const GtChainmode *chainmode,
         }
         if (combinable)
         {
-          score = fragmentinfo[leftfrag].score;
+          score = fragmentinfotable->fragments[leftfrag].score;
           if (chainmode->chainkind == GLOBALCHAINING)
           {
             /* process chainkinds without gap costs */
@@ -466,7 +466,7 @@ static void bruteforcechainingscores(const GtChainmode *chainmode,
             previous = leftfrag;
           } else
           {
-            score -= chaingapcostfunction(fragmentinfo,leftfrag,rightfrag);
+            score -= chaingapcostfunction(fragmentinfotable,leftfrag,rightfrag);
             if (chainmode->chainkind == GLOBALCHAININGWITHGAPCOST)
             {
               score += (weightright + TERMINALGAP(leftfrag)
@@ -495,24 +495,26 @@ static void bruteforcechainingscores(const GtChainmode *chainmode,
       }
       if (localmaxfrag.defined)
       {
-        fragmentinfo[rightfrag].previousinchain = localmaxfrag.maxfragnum;
+        fragmentinfotable->fragments[rightfrag].previousinchain
+          = localmaxfrag.maxfragnum;
         if (localmaxfrag.maxfragnum == UNDEFPREVIOUS)
         {
-          fragmentinfo[rightfrag].firstinchain = rightfrag;
+          fragmentinfotable->fragments[rightfrag].firstinchain = rightfrag;
         } else
         {
-          fragmentinfo[rightfrag].firstinchain
-            = fragmentinfo[localmaxfrag.maxfragnum].firstinchain;
+          fragmentinfotable->fragments[rightfrag].firstinchain
+            = fragmentinfotable->fragments[localmaxfrag.maxfragnum].
+              firstinchain;
         }
-        fragmentinfo[rightfrag].score = localmaxfrag.maxscore;
+        fragmentinfotable->fragments[rightfrag].score = localmaxfrag.maxscore;
       } else
       {
-        fragmentinfo[rightfrag].previousinchain = UNDEFPREVIOUS;
-        fragmentinfo[rightfrag].firstinchain = rightfrag;
-        fragmentinfo[rightfrag].score = weightright;
+        fragmentinfotable->fragments[rightfrag].previousinchain = UNDEFPREVIOUS;
+        fragmentinfotable->fragments[rightfrag].firstinchain = rightfrag;
+        fragmentinfotable->fragments[rightfrag].score = weightright;
         if (chainmode->chainkind == GLOBALCHAININGWITHGAPCOST)
         {
-          fragmentinfo[rightfrag].score
+          fragmentinfotable->fragments[rightfrag].score
             -= (INITIALGAP(rightfrag) + TERMINALGAP(rightfrag));
         }
       }
@@ -549,19 +551,20 @@ static int cmpendFragpoint2(const GtKeytype keya,
   return 0;
 }
 
-static GtChainscoretype evalpriority(bool addterminal,
-                                     const Fragmentinfo *fragmentinfo,
-                                     unsigned long fragnum)
+static GtChainscoretype evalpriority(
+                               bool addterminal,
+                               const GtFragmentinfotable *fragmentinfotable,
+                               unsigned long fragnum)
 {
   if (addterminal)
   {
-    return fragmentinfo[fragnum].score - TERMINALGAP(fragnum);
+    return fragmentinfotable->fragments[fragnum].score - TERMINALGAP(fragnum);
   }
-  return fragmentinfo[fragnum].score;
+  return fragmentinfotable->fragments[fragnum].score;
 }
 
 static void insertintodict(bool addterminal,
-                           const Fragmentinfo *fragmentinfo,
+                           const GtFragmentinfotable *fragmentinfotable,
                            Fragmentstore *fragmentstore,
                            Fragpoint *qfrag2)
 {
@@ -569,15 +572,15 @@ static void insertintodict(bool addterminal,
   bool nodecreated;
 
   retval2 = (Fragpoint *) gt_rbt_search ((const GtKeytype) qfrag2,
-                                           &nodecreated,
-                                           &fragmentstore->dictroot,
-                                           cmpendFragpoint2,
-                                           NULL);
+                                         &nodecreated,
+                                         &fragmentstore->dictroot,
+                                         cmpendFragpoint2,
+                                         NULL);
   gt_assert(retval2 != NULL);
   if (!nodecreated)
   {
-    if (evalpriority(addterminal,fragmentinfo,FRAGIDENT(retval2)) <
-        evalpriority(addterminal,fragmentinfo,FRAGIDENT(qfrag2)))
+    if (evalpriority(addterminal,fragmentinfotable,FRAGIDENT(retval2)) <
+        evalpriority(addterminal,fragmentinfotable,FRAGIDENT(qfrag2)))
     {
       gt_assert(retval2->fpposition == qfrag2->fpposition);
       retval2->fpident = qfrag2->fpident;
@@ -587,30 +590,30 @@ static void insertintodict(bool addterminal,
 }
 
 static void activatefragpoint(bool addterminal,
-                              const Fragmentinfo *fragmentinfo,
+                              const GtFragmentinfotable *fragmentinfotable,
                               Fragmentstore *fragmentstore,
                               Fragpoint *qfrag2)
 {
   Fragpoint *tmp2;
   GtChainscoretype qpriority;
 
-  qpriority = evalpriority(addterminal,fragmentinfo,FRAGIDENT(qfrag2));
+  qpriority = evalpriority(addterminal,fragmentinfotable,FRAGIDENT(qfrag2));
   tmp2 = (Fragpoint *) gt_rbt_previousequalkey ((const GtKeytype) qfrag2,
                                                 fragmentstore->dictroot,
                                                 cmpendFragpoint2,
                                                 NULL);
   if (tmp2 == NULL ||
-      qpriority > evalpriority(addterminal,fragmentinfo,FRAGIDENT(tmp2)))
+      qpriority > evalpriority(addterminal,fragmentinfotable,FRAGIDENT(tmp2)))
   {
-    insertintodict(addterminal,fragmentinfo,fragmentstore,qfrag2);
+    insertintodict(addterminal,fragmentinfotable,fragmentstore,qfrag2);
     while (true)
     {
       tmp2 = (Fragpoint *) gt_rbt_nextkey ((const GtKeytype) qfrag2,
-                                                fragmentstore->dictroot,
-                                                cmpendFragpoint2,
-                                                NULL);
+                                           fragmentstore->dictroot,
+                                           cmpendFragpoint2,
+                                           NULL);
       if (tmp2 == NULL || qpriority <= evalpriority(addterminal,
-                                                    fragmentinfo,
+                                                    fragmentinfotable,
                                                     FRAGIDENT(tmp2)))
       {
         break;
@@ -632,8 +635,7 @@ static void activatefragpoint(bool addterminal,
 }
 
 static void evalfragmentscore(const GtChainmode *chainmode,
-                              Fragmentinfo *fragmentinfo,
-                              unsigned long numofmatches,
+                              GtFragmentinfotable *fragmentinfotable,
                               Fragmentstore *fragmentstore,
                               bool gapsL1,
                               unsigned long fragpointident,
@@ -663,7 +665,7 @@ static void evalfragmentscore(const GtChainmode *chainmode,
     if (qfrag2 != NULL)
     {
       if (chainmode->maxgapwidth != 0 &&
-         !checkmaxgapwidth(fragmentinfo,
+         !checkmaxgapwidth(fragmentinfotable,
                            chainmode->maxgapwidth,
                            FRAGIDENT(qfrag2),
                            fragpointident))
@@ -674,7 +676,7 @@ static void evalfragmentscore(const GtChainmode *chainmode,
   }
   if (qfrag2 == NULL)
   {
-    score = fragmentinfo[fragpointident].weight;
+    score = fragmentinfotable->fragments[fragpointident].weight;
     if (chainmode->chainkind == GLOBALCHAININGWITHGAPCOST)
     {
       score -= INITIALGAP(fragpointident);
@@ -682,10 +684,10 @@ static void evalfragmentscore(const GtChainmode *chainmode,
     previous = UNDEFPREVIOUS;
   } else
   {
-    score = fragmentinfo[FRAGIDENT(qfrag2)].score;
+    score = fragmentinfotable->fragments[FRAGIDENT(qfrag2)].score;
     if (chainmode->chainkind == GLOBALCHAINING)
     {
-      score += fragmentinfo[fragpointident].weight;
+      score += fragmentinfotable->fragments[fragpointident].weight;
       previous = FRAGIDENT(qfrag2);
     } else
     {
@@ -693,47 +695,49 @@ static void evalfragmentscore(const GtChainmode *chainmode,
 
       if (gapsL1)
       {
-        tmpgc = gapcostL1(fragmentinfo,FRAGIDENT(qfrag2),fragpointident);
+        tmpgc = gapcostL1(fragmentinfotable,FRAGIDENT(qfrag2),fragpointident);
       } else
       {
-        tmpgc = gapcostCc(fragmentinfo,FRAGIDENT(qfrag2),fragpointident);
+        tmpgc = gapcostCc(fragmentinfotable,FRAGIDENT(qfrag2),fragpointident);
       }
       if (chainmode->chainkind == GLOBALCHAININGWITHGAPCOST || score > tmpgc)
       {
-        score += (fragmentinfo[fragpointident].weight - tmpgc);
+        score += (fragmentinfotable->fragments[fragpointident].weight - tmpgc);
         previous = FRAGIDENT(qfrag2);
       } else
       {
-        score = fragmentinfo[fragpointident].weight;
+        score = fragmentinfotable->fragments[fragpointident].weight;
         previous = UNDEFPREVIOUS;
       }
     }
   }
-  fragmentinfo[fragpointident].score = score;
-  fragmentinfo[fragpointident].previousinchain = previous;
+  fragmentinfotable->fragments[fragpointident].score = score;
+  fragmentinfotable->fragments[fragpointident].previousinchain = previous;
   if (previous == UNDEFPREVIOUS)
   {
-    fragmentinfo[fragpointident].firstinchain = fragpointident;
+    fragmentinfotable->fragments[fragpointident].firstinchain = fragpointident;
   } else
   {
-    fragmentinfo[fragpointident].firstinchain
-      = fragmentinfo[previous].firstinchain;
+    fragmentinfotable->fragments[fragpointident].firstinchain
+      = fragmentinfotable->fragments[previous].firstinchain;
   }
 }
 
-static bool isrightmaximallocalchain(const Fragmentinfo *fragmentinfo,
-                                     unsigned long numofmatches,
-                                     unsigned long currentfrag)
+static bool isrightmaximallocalchain(
+                        const GtFragmentinfotable *fragmentinfotable,
+                        unsigned long currentfrag)
 {
-  if (currentfrag == numofmatches - 1)
+  if (currentfrag == fragmentinfotable->nextfree - 1)
   {
     return true;
   }
-  if (fragmentinfo[currentfrag+1].previousinchain != currentfrag)
+  if (fragmentinfotable->fragments[currentfrag+1].previousinchain !=
+      currentfrag)
   {
     return true;
   }
-  if (fragmentinfo[currentfrag+1].score < fragmentinfo[currentfrag].score)
+  if (fragmentinfotable->fragments[currentfrag+1].score <
+      fragmentinfotable->fragments[currentfrag].score)
   {
     return true;
   }
@@ -741,28 +745,27 @@ static bool isrightmaximallocalchain(const Fragmentinfo *fragmentinfo,
 }
 
 static void determineequivreps(Bestofclass *chainequivalenceclasses,
-                               const Fragmentinfo *fragmentinfo,
-                               unsigned long numofmatches)
+                               const GtFragmentinfotable *fragmentinfotable)
 {
   unsigned long matchnum;
   Bestofclass *classptr, *classrep;
 
   for (classptr = chainequivalenceclasses;
-       classptr < chainequivalenceclasses + numofmatches;
+       classptr < chainequivalenceclasses + fragmentinfotable->nextfree;
        classptr++)
   {
     classptr->isavailable = false;
   }
-  for (matchnum=0; matchnum<numofmatches; matchnum++)
+  for (matchnum=0; matchnum<fragmentinfotable->nextfree; matchnum++)
   {
-    if (isrightmaximallocalchain(fragmentinfo,numofmatches,matchnum))
+    if (isrightmaximallocalchain(fragmentinfotable,matchnum))
     {
       classrep = chainequivalenceclasses +
-                 fragmentinfo[matchnum].firstinchain;
+                 fragmentinfotable->fragments[matchnum].firstinchain;
       if (!classrep->isavailable ||
-          classrep->score < fragmentinfo[matchnum].score)
+          classrep->score < fragmentinfotable->fragments[matchnum].score)
       {
-        classrep->score = fragmentinfo[matchnum].score;
+        classrep->score = fragmentinfotable->fragments[matchnum].score;
         classrep->isavailable = true;
       }
     }
@@ -771,17 +774,16 @@ static void determineequivreps(Bestofclass *chainequivalenceclasses,
 
 static bool retrievemaximalscore(GtChainscoretype *maxscore,
                                  const GtChainmode *chainmode,
-                                 const Fragmentinfo *fragmentinfo,
-                                 unsigned long numofmatches)
+                                 const GtFragmentinfotable *fragmentinfotable)
 {
   unsigned long matchnum;
   GtChainscoretype tgap;
   bool maxscoredefined = false;
 
   *maxscore = 0;
-  for (matchnum=0; matchnum<numofmatches; matchnum++)
+  for (matchnum=0; matchnum<fragmentinfotable->nextfree; matchnum++)
   {
-    if (isrightmaximallocalchain(fragmentinfo,numofmatches,matchnum))
+    if (isrightmaximallocalchain(fragmentinfotable,matchnum))
     {
       if (chainmode->chainkind == GLOBALCHAININGWITHGAPCOST)
       {
@@ -790,9 +792,10 @@ static bool retrievemaximalscore(GtChainscoretype *maxscore,
       {
         tgap = 0;
       }
-      if (!maxscoredefined || *maxscore < fragmentinfo[matchnum].score - tgap)
+      if (!maxscoredefined ||
+          *maxscore < fragmentinfotable->fragments[matchnum].score - tgap)
       {
-        *maxscore = fragmentinfo[matchnum].score - tgap;
+        *maxscore = fragmentinfotable->fragments[matchnum].score - tgap;
         maxscoredefined = true;
       }
     }
@@ -904,28 +907,28 @@ static void insertDictmaxsize(Dictmaxsize *dict,
   }
 }
 
-static void retrievechainbestscores(bool *minscoredefined,
-                                    GtChainscoretype *minscore,
-                                    const Fragmentinfo *fragmentinfo,
-                                    unsigned long numofmatches,
-                                    unsigned long howmanybest)
+static void retrievechainbestscores(
+                          bool *minscoredefined,
+                          GtChainscoretype *minscore,
+                          const GtFragmentinfotable *fragmentinfotable,
+                          unsigned long howmanybest)
 {
   unsigned long matchnum, fragnum = 0;
   GtChainscoretype *scores;
   Dictmaxsize *dictbestfragments;
   void *minkey;
 
-  scores = gt_malloc(sizeof (*scores) * numofmatches);
+  scores = gt_malloc(sizeof (*scores) * fragmentinfotable->nextfree);
   dictbestfragments = dictmaxsize_new(howmanybest);
-  for (matchnum=0; matchnum<numofmatches; matchnum++)
+  for (matchnum=0; matchnum<fragmentinfotable->nextfree; matchnum++)
   {
-    if (isrightmaximallocalchain(fragmentinfo,numofmatches,matchnum))
+    if (isrightmaximallocalchain(fragmentinfotable,matchnum))
     {
-      scores[fragnum] = fragmentinfo[matchnum].score;
+      scores[fragnum] = fragmentinfotable->fragments[matchnum].score;
       insertDictmaxsize(dictbestfragments,
-                            comparescores,
-                            NULL,
-                            (void *) (scores + fragnum));
+                        comparescores,
+                        NULL,
+                        (void *) (scores + fragnum));
       fragnum++;
     }
   }
@@ -944,8 +947,7 @@ static void retrievechainbestscores(bool *minscoredefined,
 }
 
 static int retrievechainthreshold(const GtChainmode *chainmode,
-                                  Fragmentinfo *fragmentinfo,
-                                  unsigned long numofmatches,
+                                  GtFragmentinfotable *fragmentinfotable,
                                   GtChain *chain,
                                   GtChainscoretype minscore,
                                   Bestofclass *chainequivalenceclasses,
@@ -957,9 +959,9 @@ static int retrievechainthreshold(const GtChainmode *chainmode,
   GtChainscoretype tgap;
   Bestofclass *classrep;
 
-  for (matchnum=0; matchnum < numofmatches; matchnum++)
+  for (matchnum=0; matchnum < fragmentinfotable->nextfree; matchnum++)
   {
-    if (isrightmaximallocalchain(fragmentinfo,numofmatches,matchnum))
+    if (isrightmaximallocalchain(fragmentinfotable,matchnum))
     {
       if (chainmode->chainkind == GLOBALCHAININGWITHGAPCOST)
       {
@@ -968,35 +970,31 @@ static int retrievechainthreshold(const GtChainmode *chainmode,
       {
         tgap = 0;
       }
-      if (fragmentinfo[matchnum].score - tgap >= minscore)
+      if (fragmentinfotable->fragments[matchnum].score - tgap >= minscore)
       {
         if (chainequivalenceclasses != NULL)
         {
           classrep = chainequivalenceclasses +
-                     fragmentinfo[matchnum].firstinchain;
+                     fragmentinfotable->fragments[matchnum].firstinchain;
           gt_assert(classrep != NULL);
           if (classrep->isavailable &&
-              classrep->score == fragmentinfo[matchnum].score - tgap)
+              classrep->score == fragmentinfotable->fragments[matchnum].score -
+                                 tgap)
           {
             chain->scoreofchain = classrep->score;
             classrep->isavailable = false;
-            retracepreviousinchain(chain,
-                                   fragmentinfo,
-                                   numofmatches,
-                                   matchnum);
-            if (chainprocessor(cpinfo,chain,err) != 0)
+            retracepreviousinchain(chain, fragmentinfotable, matchnum);
+            if (chainprocessor(cpinfo,fragmentinfotable,chain,err) != 0)
             {
               return -1;
             }
           }
         } else
         {
-          chain->scoreofchain = fragmentinfo[matchnum].score - tgap;
-          retracepreviousinchain(chain,
-                                 fragmentinfo,
-                                 numofmatches,
-                                 matchnum);
-          if (chainprocessor(cpinfo,chain,err) != 0)
+          chain->scoreofchain = fragmentinfotable->fragments[matchnum].score -
+                                tgap;
+          retracepreviousinchain(chain, fragmentinfotable, matchnum);
+          if (chainprocessor(cpinfo,fragmentinfotable,chain,err) != 0)
           {
             return -1;
           }
@@ -1024,9 +1022,10 @@ static int comparestartandend(const Fragmentinfo *sortedstartpoints,
   return -1;
 }
 
-static Fragpoint *makeactivationpoint(const Fragmentinfo *fragmentinfo,
-                                      unsigned long fpident,
-                                      unsigned int postsortdim)
+static Fragpoint *makeactivationpoint(
+                            const GtFragmentinfotable *fragmentinfotable,
+                            unsigned long fpident,
+                            unsigned int postsortdim)
 {
   Fragpoint *fpptr;
 
@@ -1038,8 +1037,7 @@ static Fragpoint *makeactivationpoint(const Fragmentinfo *fragmentinfo,
 }
 
 static void mergestartandendpoints(const GtChainmode *chainmode,
-                                   Fragmentinfo *fragmentinfo,
-                                   unsigned long numofmatches,
+                                   GtFragmentinfotable *fragmentinfotable,
                                    Fragmentstore *fragmentstore,
                                    bool gapsL1,
                                    unsigned int presortdim)
@@ -1051,16 +1049,17 @@ static void mergestartandendpoints(const GtChainmode *chainmode,
   addterminal = (chainmode->chainkind == GLOBALCHAINING) ? false : true;
   fragmentstore->dictroot = NULL;
   for (xidx = 0, startcount = 0, endcount = 0;
-       startcount < numofmatches && endcount < numofmatches;
+       startcount < fragmentinfotable->nextfree &&
+       endcount < fragmentinfotable->nextfree;
        xidx++)
   {
-    if (comparestartandend(fragmentinfo + startcount,
-                          fragmentinfo + fragmentstore->endpointperm[endcount],
-                          presortdim) < 0)
+    if (comparestartandend(fragmentinfotable->fragments + startcount,
+                           fragmentinfotable->fragments +
+                           fragmentstore->endpointperm[endcount],
+                           presortdim) < 0)
     {
       evalfragmentscore(chainmode,
-                        fragmentinfo,
-                        numofmatches,
+                        fragmentinfotable,
                         fragmentstore,
                         gapsL1,
                         startcount,
@@ -1068,19 +1067,18 @@ static void mergestartandendpoints(const GtChainmode *chainmode,
       startcount++;
     } else
     {
-      activatefragpoint(addterminal,fragmentinfo,fragmentstore,
-                        makeactivationpoint(fragmentinfo,
+      activatefragpoint(addterminal,fragmentinfotable,fragmentstore,
+                        makeactivationpoint(fragmentinfotable,
                                             fragmentstore->
                                             endpointperm[endcount],
                                             postsortdim));
       endcount++;
     }
   }
-  while (startcount < numofmatches)
+  while (startcount < fragmentinfotable->nextfree)
   {
     evalfragmentscore(chainmode,
-                      fragmentinfo,
-                      numofmatches,
+                      fragmentinfotable,
                       fragmentstore,
                       gapsL1,
                       startcount,
@@ -1088,10 +1086,10 @@ static void mergestartandendpoints(const GtChainmode *chainmode,
     startcount++;
     xidx++;
   }
-  while (endcount < numofmatches)
+  while (endcount < fragmentinfotable->nextfree)
   {
-    activatefragpoint(addterminal,fragmentinfo,fragmentstore,
-                      makeactivationpoint(fragmentinfo,
+    activatefragpoint(addterminal,fragmentinfotable,fragmentstore,
+                      makeactivationpoint(fragmentinfotable,
                                           fragmentstore->
                                           endpointperm[endcount],
                                           postsortdim));
@@ -1102,8 +1100,7 @@ static void mergestartandendpoints(const GtChainmode *chainmode,
 
 static int findmaximalscores(const GtChainmode *chainmode,
                              GtChain *chain,
-                             Fragmentinfo *fragmentinfo,
-                             unsigned long numofmatches,
+                             GtFragmentinfotable *fragmentinfotable,
                              Fragmentstore *fragmentstore,
                              GtChainprocessor chainprocessor,
                              bool withequivclasses,
@@ -1126,8 +1123,8 @@ static int findmaximalscores(const GtChainmode *chainmode,
         chainmode->chainkind == LOCALCHAININGPERCENTAWAY)
     {
       chainequivalenceclasses = gt_malloc(sizeof (*chainequivalenceclasses) *
-                                          numofmatches);
-      determineequivreps(chainequivalenceclasses, fragmentinfo, numofmatches);
+                                          fragmentinfotable->nextfree);
+      determineequivreps(chainequivalenceclasses, fragmentinfotable);
     } else
     {
       chainequivalenceclasses = NULL;
@@ -1142,14 +1139,14 @@ static int findmaximalscores(const GtChainmode *chainmode,
       maxpoint = gt_rbt_maximumkey(fragmentstore->dictroot);
       gt_assert(maxpoint != NULL);
       fragnum = FRAGIDENT(maxpoint);
-      minscore = fragmentinfo[fragnum].score;
+      minscore = fragmentinfotable->fragments[fragnum].score;
       minscoredefined = true;
       break;
     case GLOBALCHAININGWITHGAPCOST:
     case GLOBALCHAININGWITHOVERLAPS:
     case LOCALCHAININGMAX:
       minscoredefined
-        = retrievemaximalscore(&minscore,chainmode,fragmentinfo,numofmatches);
+        = retrievemaximalscore(&minscore,chainmode,fragmentinfotable);
       break;
     case LOCALCHAININGTHRESHOLD:
       minscore = chainmode->minimumscore;
@@ -1158,13 +1155,12 @@ static int findmaximalscores(const GtChainmode *chainmode,
     case LOCALCHAININGBEST:
       retrievechainbestscores(&minscoredefined,
                               &minscore,
-                              fragmentinfo,
-                              numofmatches,
+                              fragmentinfotable,
                               chainmode->howmanybest);
       break;
     case LOCALCHAININGPERCENTAWAY:
       minscoredefined
-        = retrievemaximalscore(&minscore,chainmode,fragmentinfo,numofmatches);
+        = retrievemaximalscore(&minscore,chainmode,fragmentinfotable);
       if (minscoredefined)
       {
         minscore = (GtChainscoretype)
@@ -1188,8 +1184,7 @@ static int findmaximalscores(const GtChainmode *chainmode,
                 : "local",
                minscore);
     if (retrievechainthreshold(chainmode,
-                               fragmentinfo,
-                               numofmatches,
+                               fragmentinfotable,
                                chain,
                                minscore,
                                chainequivalenceclasses,
@@ -1211,18 +1206,18 @@ static int findmaximalscores(const GtChainmode *chainmode,
   return haserr ? -1 : retval;
 }
 
-static void makesortedendpointpermutation(unsigned long *perm,
-                                          Fragmentinfo *fragmentinfo,
-                                          unsigned long numofmatches,
-                                          unsigned int presortdim)
+static void makesortedendpointpermutation(
+                                     unsigned long *perm,
+                                     GtFragmentinfotable *fragmentinfotable,
+                                     unsigned int presortdim)
 {
   unsigned long temp, *iptr, *jptr, i, moves = 0;
 
-  for (i = 0; i < numofmatches; i++)
+  for (i = 0; i < fragmentinfotable->nextfree; i++)
   {
     perm[i] = i;
   }
-  for (iptr = perm + 1UL; iptr < perm + numofmatches; iptr++)
+  for (iptr = perm + 1UL; iptr < perm + fragmentinfotable->nextfree; iptr++)
   {
     for (jptr = iptr; jptr > perm; jptr--)
     {
@@ -1240,21 +1235,19 @@ static void makesortedendpointpermutation(unsigned long *perm,
 }
 
 static void fastchainingscores(const GtChainmode *chainmode,
-                               Fragmentinfo *fragmentinfo,
-                               unsigned long numofmatches,
+                               GtFragmentinfotable *fragmentinfotable,
                                Fragmentstore *fragmentstore,
                                unsigned int presortdim,
                                bool gapsL1)
 {
   fragmentstore->endpointperm
-    = gt_malloc(sizeof (*fragmentstore->endpointperm) * numofmatches);
+    = gt_malloc(sizeof (*fragmentstore->endpointperm) *
+                fragmentinfotable->nextfree);
   makesortedendpointpermutation(fragmentstore->endpointperm,
-                                fragmentinfo,
-                                numofmatches,
+                                fragmentinfotable,
                                 presortdim);
   mergestartandendpoints(chainmode,
-                         fragmentinfo,
-                         numofmatches,
+                         fragmentinfotable,
                          fragmentstore,
                          gapsL1,
                          presortdim);
@@ -1323,15 +1316,12 @@ int gt_chain_fastchaining(const GtChainmode *chainmode,
     showverbose(verboseinfo,"compute chain scores");
     if (chainmode->chainkind == GLOBALCHAININGWITHOVERLAPS)
     {
-      bruteforcechainingscores(chainmode,
-                               fragmentinfotable->fragments,
-                               fragmentinfotable->nextfree,
+      bruteforcechainingscores(chainmode,fragmentinfotable,
                                chaingapcostfunction);
     } else
     {
       fastchainingscores(chainmode,
-                         fragmentinfotable->fragments,
-                         fragmentinfotable->nextfree,
+                         fragmentinfotable,
                          &fragmentstore,
                          presortdim,
                          gapsL1);
@@ -1339,8 +1329,7 @@ int gt_chain_fastchaining(const GtChainmode *chainmode,
     showverbose(verboseinfo,"retrieve optimal chains");
     retcode = findmaximalscores(chainmode,
                                 chain,
-                                fragmentinfotable->fragments,
-                                fragmentinfotable->nextfree,
+                                fragmentinfotable,
                                 &fragmentstore,
                                 chainprocessor,
                                 withequivclasses,
@@ -1357,46 +1346,14 @@ int gt_chain_fastchaining(const GtChainmode *chainmode,
     }
   } else
   {
-    chainingboundarycases(chainmode,
-                          chain,
-                          fragmentinfotable->fragments,
-                          fragmentinfotable->nextfree);
-    if (chainprocessor(cpinfo,chain,err))
+    chainingboundarycases(chainmode, chain, fragmentinfotable);
+    if (chainprocessor(cpinfo,fragmentinfotable,chain,err))
     {
       haserr = true;
     }
     retcode = 0;
   }
   return haserr ? -1 : retcode;
-}
-
-int gt_outputformatchain(const GtFragmentinfotable *fragmentinfotable,
-                         bool silent,const GtChain *chain,
-                         GT_UNUSED GtError *err)
-{
-  const Fragmentinfo *fiptr;
-  unsigned long chaincounter = 0, i;
-
-  printf("# chain %lu: length %lu score %ld\n",
-         chaincounter,
-         chain->chainedfragments.nextfreeGtChainref,
-         chain->scoreofchain);
-  if (!silent)
-  {
-    for (i=0; i < chain->chainedfragments.nextfreeGtChainref; i++)
-    {
-      fiptr = fragmentinfotable->fragments +
-              chain->chainedfragments.spaceGtChainref[i];
-      printf(FormatSeqpos " " FormatSeqpos " " FormatSeqpos " " FormatSeqpos
-             " %ld\n",PRINTSeqposcast(fiptr->startpos[0]),
-                      PRINTSeqposcast(fiptr->endpos[0]),
-                      PRINTSeqposcast(fiptr->startpos[1]),
-                      PRINTSeqposcast(fiptr->endpos[1]),
-                      fiptr->weight);
-    }
-  }
-  chaincounter++;
-  return 0;
 }
 
 static int cmpFragmentinfo0(const void *keya,const void *keyb)
@@ -1623,4 +1580,78 @@ void gt_chain_chainmode_delete(GtChainmode *gtchainmode)
   {
     gt_free(gtchainmode);
   }
+}
+
+GtChain *gt_chain_chain_new(void)
+{
+  GtChain *chain;
+
+  chain = gt_malloc(sizeof (GtChain));
+  GT_INITARRAY(&chain->chainedfragments,GtChainref);
+  return chain;
+}
+
+void gt_chain_chain_delete(GtChain *chain)
+{
+  if (chain != NULL)
+  {
+    GT_FREEARRAY(&chain->chainedfragments,GtChainref);
+    gt_free(chain);
+  }
+}
+
+static int gt_outputformatchaingeneric(
+                                bool silent,
+                                GT_UNUSED void *data,
+                                const GtFragmentinfotable *fragmentinfotable,
+                                const GtChain *chain,
+                                GT_UNUSED GtError *err)
+{
+  const Fragmentinfo *fiptr;
+  unsigned long chaincounter = 0, i;
+
+  printf("# chain %lu: length %lu score %ld\n",
+         chaincounter,
+         chain->chainedfragments.nextfreeGtChainref,
+         chain->scoreofchain);
+  if (!silent)
+  {
+    for (i=0; i < chain->chainedfragments.nextfreeGtChainref; i++)
+    {
+      fiptr = fragmentinfotable->fragments +
+              chain->chainedfragments.spaceGtChainref[i];
+      printf(FormatSeqpos " " FormatSeqpos " " FormatSeqpos " " FormatSeqpos
+             " %ld\n",PRINTSeqposcast(fiptr->startpos[0]),
+                      PRINTSeqposcast(fiptr->endpos[0]),
+                      PRINTSeqposcast(fiptr->startpos[1]),
+                      PRINTSeqposcast(fiptr->endpos[1]),
+                      fiptr->weight);
+    }
+  }
+  chaincounter++;
+  return 0;
+}
+
+int gt_outputformatchainsilent(void *data,
+                               const GtFragmentinfotable *fragmentinfotable,
+                               const GtChain *chain,
+                               GT_UNUSED GtError *err)
+{
+  return gt_outputformatchaingeneric(true,
+                                     data,
+                                     fragmentinfotable,
+                                     chain,
+                                     err);
+}
+
+int gt_outputformatchain(void *data,
+                         const GtFragmentinfotable *fragmentinfotable,
+                         const GtChain *chain,
+                         GT_UNUSED GtError *err)
+{
+  return gt_outputformatchaingeneric(false,
+                                     data,
+                                     fragmentinfotable,
+                                     chain,
+                                     err);
 }

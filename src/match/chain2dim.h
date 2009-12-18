@@ -20,6 +20,7 @@
 
 #include "core/error_api.h"
 #include "core/str_array_api.h"
+#include "core/unused_api.h"
 #include "seqpos-def.h"
 #include "verbose-def.h"
 
@@ -31,8 +32,9 @@ typedef struct GtChain GtChain;
   We use functions of the following type to report chains.
 */
 
-typedef int (*GtChainprocessor)(void *,GtChain *,GtError *err);
 typedef struct GtFragmentinfotable GtFragmentinfotable;
+typedef int (*GtChainprocessor)(void *,const GtFragmentinfotable *,
+                                const GtChain *,GtError *err);
 typedef struct GtChainmode GtChainmode;
 
 GtFragmentinfotable *gt_chain_fragmentinfotable_new(
@@ -77,8 +79,22 @@ GtChainmode *gt_chain_chainmode_new(bool weightfactorset,
 
 void gt_chain_chainmode_delete(GtChainmode *gtchainmode);
 
+GtChain *gt_chain_chain_new(void);
+
+void gt_chain_chain_delete(GtChain *chain);
+
 GtFragmentinfotable *gt_chain_analyzeopenformatfile(double weightfactor,
                                                     const char *matchfile,
                                                     GtError *err);
+
+int gt_outputformatchain(void *data,
+                         const GtFragmentinfotable *fragmentinfotable,
+                         const GtChain *chain,
+                         GT_UNUSED GtError *err);
+
+int gt_outputformatchainsilent(void *data,
+                               const GtFragmentinfotable *fragmentinfotable,
+                               const GtChain *chain,
+                               GT_UNUSED GtError *err);
 
 #endif
