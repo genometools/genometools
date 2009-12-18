@@ -159,6 +159,7 @@ static int gt_chain2dim_runner (GT_UNUSED int argc,
   GtChain2dimoptions *arguments = tool_arguments;
   GtFragmentinfotable *fragmentinfotable;
   bool haserr = false;
+  Verboseinfo *verboseinfo = NULL;
 
   gt_error_check (err);
   gt_assert (arguments != NULL);
@@ -172,8 +173,22 @@ static int gt_chain2dim_runner (GT_UNUSED int argc,
   {
     haserr = true;
   }
+  if (!haserr)
+  {
+    unsigned int presortdim = 1U;
+
+    verboseinfo = newverboseinfo(arguments->verbose);
+    gt_chain_possiblysortopenformatfragments(
+                             verboseinfo,
+                             fragmentinfotable,
+                             presortdim);
+  }
   gt_chain_chainmode_delete(arguments->gtchainmode);
   gt_chain_fragmentinfotable_delete(fragmentinfotable);
+  if (verboseinfo != NULL)
+  {
+    freeverboseinfo(&verboseinfo);
+  }
   return haserr ? -1 : 0;
 }
 

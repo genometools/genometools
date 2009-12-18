@@ -51,6 +51,11 @@ void gt_chain_fragmentinfotable_add(GtFragmentinfotable *fragmentinfotable,
 
 void gt_chain_fillthegapvalues(GtFragmentinfotable *fragmentinfotable);
 
+void gt_chain_possiblysortopenformatfragments(
+                             Verboseinfo *verboseinfo,
+                             GtFragmentinfotable *fragmentinfotable,
+                             unsigned int presortdim);
+
 int gt_chain_fastchaining(const GtChainmode *chainmode,
                           GtChain *chain,
                           GtFragmentinfotable *fragmentinfotable,
@@ -61,11 +66,6 @@ int gt_chain_fastchaining(const GtChainmode *chainmode,
                           void *cpinfo,
                           Verboseinfo *verboseinfo,
                           GtError *err);
-
-void gt_chain_possiblysortopenformatfragments(
-                             Verboseinfo *verboseinfo,
-                             GtFragmentinfotable *fragmentinfotable,
-                             unsigned int presortdim);
 
 GtChainmode *gt_chain_chainmode_new(bool weightfactorset,
                                     unsigned long maxgap,
