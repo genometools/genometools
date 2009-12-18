@@ -1,8 +1,8 @@
-def runchain2dimfailure(args)
+def runchain2dimfailure(args,matchfile='matchfile')
   Name "gt chain2dim failure"
   Keywords "gt_chain2dim"
   Test do
-    run_test "#{$bin}gt chain2dim -m matchfile " + args,:retval => 1
+    run_test "#{$bin}gt chain2dim -m #{matchfile} " + args,:retval => 1
   end
 end
 
@@ -23,6 +23,7 @@ runchain2dimfailure("-global xv")
 runchain2dimfailure("-global ov h")
 runchain2dimfailure("-local 2p h")
 runchain2dimfailure("-local -global")
+runchain2dimfailure("-global","#{$testdata}/ecolicmp-neg.of")
 
 runchain2dim("-global gc")
 runchain2dim("-global ov")

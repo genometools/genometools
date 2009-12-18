@@ -26,7 +26,7 @@
 
 #define CANNOTPARSELINE(S)\
         gt_error_set(err,"matchfile \"%s\", line %lu, column %lu: %s",\
-                     matchfile,linenum,countcolumns,S)
+                     matchfile,linenum+1,countcolumns+1,S)
 
 static int numberoflinesinfile(unsigned long *linenum,
                                const char *filename,GtError *err)
@@ -92,12 +92,12 @@ GtFragmentinfotable *gt_chain_analyzeopenformatfile(double weightfactor,
         {
           idx++;
         }
-        if (sscanf(matchline,"%ld",&readint) == 1 || readint < 0)
+        if (sscanf(matchline+idx,"%ld",&readint) == 1 && readint >= 0)
         {
           storeinteger[countcolumns] = (GtChainpostype) readint;
         } else
         {
-          CANNOTPARSELINE("cannot read positive integer");
+          CANNOTPARSELINE("non-negative integer expected");
           haserr = true;
         }
         if (!haserr)
