@@ -26,6 +26,15 @@
 
 typedef Seqpos GtChainpostype;
 typedef long GtChainscoretype;
+
+typedef struct
+{
+  GtChainpostype startpos[2], /* start of fragments in the 2 dimensions,
+                                 userdef */
+                 endpos[2];  /* end of fragments in the 2 dimensions, userdef */
+  GtChainscoretype weight; /* weight of fragment, user defined */
+} GtFragmentvalues;
+
 typedef struct GtChain GtChain;
 
 /*
@@ -87,14 +96,12 @@ GtFragmentinfotable *gt_chain_analyzeopenformatfile(double weightfactor,
                                                     const char *matchfile,
                                                     GtError *err);
 
-int gt_outputformatchain(void *data,
-                         const GtFragmentinfotable *fragmentinfotable,
-                         const GtChain *chain,
-                         GT_UNUSED GtError *err);
+GtChainscoretype gt_chain_chainscore(const GtChain *chain);
 
-int gt_outputformatchainsilent(void *data,
-                               const GtFragmentinfotable *fragmentinfotable,
-                               const GtChain *chain,
-                               GT_UNUSED GtError *err);
+unsigned long gt_chain_chainlength(const GtChain *chain);
+
+void gt_chain_display(GtFragmentvalues *value,
+                      const GtFragmentinfotable *fragmentinfotable,
+                      const GtChain *chain,unsigned long idx);
 
 #endif

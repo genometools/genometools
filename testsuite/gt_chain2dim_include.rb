@@ -11,6 +11,11 @@ def runchain2dim(args,matchfile="#{$testdata}/ecolicmp.of")
   Keywords "gt_chain2dim"
   Test do
     run_test "#{$bin}gt chain2dim -m #{matchfile} " + args
+    run "cp #{$last_stdout} gtchain.out"
+    run "/Users/kurtz/bin-ops/i686-apple-darwin/chain2dim.x " + args + 
+        " #{matchfile}"
+    run "cp #{$last_stdout} vschain.out"
+    run "cmp -s gtchain.out vschain.out"
   end
 end
 
@@ -32,7 +37,7 @@ runchain2dim("-silent -global")
 runchain2dim("-local -wf 1.8")
 runchain2dim("-local -wf 0.5")
 runchain2dim("-local -maxgap 20")
-runchain2dim("-local 2b -v")
+runchain2dim("-local 2b ")
 runchain2dim("-local 55p -silent")
 
 runchain2dim("-global gc")

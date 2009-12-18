@@ -150,6 +150,67 @@ static int gt_chain2dim_arguments_check (GT_UNUSED int rest_argc,
   return (arguments->gtchainmode == NULL) ? -1 : 0;
 }
 
+typedef struct
+{
+  unsigned long chaincounter;
+} Counter;
+
+static int gt_outputformatchaingeneric(
+                                bool silent,
+                                void *data,
+                                const GtFragmentinfotable *fragmentinfotable,
+                                const GtChain *chain,
+                                GT_UNUSED GtError *err)
+{
+  unsigned long idx, chainlength;
+  Counter *counter = (Counter *) data;
+
+  chainlength = gt_chain_chainlength(chain);
+  printf("# chain %lu: length %lu score %ld\n",
+         counter->chaincounter,chainlength,gt_chain_chainscore(chain));
+  if (!silent)
+  {
+    GtFragmentvalues value;
+
+    for (idx=0; idx < chainlength; idx++)
+    {
+      gt_chain_display(&value, fragmentinfotable, chain,idx);
+      printf(FormatSeqpos " " FormatSeqpos " " FormatSeqpos " " FormatSeqpos
+             " %ld\n",PRINTSeqposcast(value.startpos[0]),
+                      PRINTSeqposcast(value.endpos[0]),
+                      PRINTSeqposcast(value.startpos[1]),
+                      PRINTSeqposcast(value.endpos[1]),
+                      value.weight);
+    }
+  }
+  counter->chaincounter++;
+  return 0;
+}
+
+int gt_outputformatchainsilent(void *data,
+                               const GtFragmentinfotable *fragmentinfotable,
+                               const GtChain *chain,
+                               GT_UNUSED GtError *err)
+{
+  return gt_outputformatchaingeneric(true,
+                                     data,
+                                     fragmentinfotable,
+                                     chain,
+                                     err);
+}
+
+int gt_outputformatchain(void *data,
+                         const GtFragmentinfotable *fragmentinfotable,
+                         const GtChain *chain,
+                         GT_UNUSED GtError *err)
+{
+  return gt_outputformatchaingeneric(false,
+                                     data,
+                                     fragmentinfotable,
+                                     chain,
+                                     err);
+}
+
 static int gt_chain2dim_runner (GT_UNUSED int argc,
                                 GT_UNUSED const char **argv,
                                 GT_UNUSED int parsed_args,
@@ -177,6 +238,7 @@ static int gt_chain2dim_runner (GT_UNUSED int argc,
   {
     unsigned int presortdim = 1U;
     GtChain *chain;
+    Counter counter;
 
     verboseinfo = newverboseinfo(arguments->verbose);
     gt_chain_possiblysortopenformatfragments(
@@ -184,14 +246,16 @@ static int gt_chain2dim_runner (GT_UNUSED int argc,
                              fragmentinfotable,
                              presortdim);
     chain = gt_chain_chain_new();
+    counter.chaincounter = 0;
     if (gt_chain_fastchaining(arguments->gtchainmode,
                               chain,
                               fragmentinfotable,
                               true,
                               presortdim,
                               true,
-                              gt_outputformatchain,
-                              tool_arguments,
+                              arguments->silent ? gt_outputformatchainsilent
+                                                : gt_outputformatchain,
+                              &counter,
                               verboseinfo,
                               err) != 0)
     {

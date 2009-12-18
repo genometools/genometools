@@ -1601,58 +1601,28 @@ void gt_chain_chain_delete(GtChain *chain)
   }
 }
 
-static int gt_outputformatchaingeneric(
-                                bool silent,
-                                GT_UNUSED void *data,
-                                const GtFragmentinfotable *fragmentinfotable,
-                                const GtChain *chain,
-                                GT_UNUSED GtError *err)
+GtChainscoretype gt_chain_chainscore(const GtChain *chain)
+{
+  return chain->scoreofchain;
+}
+
+unsigned long gt_chain_chainlength(const GtChain *chain)
+{
+  return chain->chainedfragments.nextfreeGtChainref;
+}
+
+void gt_chain_display(GtFragmentvalues *value,
+                     const GtFragmentinfotable *fragmentinfotable,
+                     const GtChain *chain,unsigned long idx)
 {
   const Fragmentinfo *fiptr;
-  unsigned long chaincounter = 0, i;
 
-  printf("# chain %lu: length %lu score %ld\n",
-         chaincounter,
-         chain->chainedfragments.nextfreeGtChainref,
-         chain->scoreofchain);
-  if (!silent)
-  {
-    for (i=0; i < chain->chainedfragments.nextfreeGtChainref; i++)
-    {
-      fiptr = fragmentinfotable->fragments +
-              chain->chainedfragments.spaceGtChainref[i];
-      printf(FormatSeqpos " " FormatSeqpos " " FormatSeqpos " " FormatSeqpos
-             " %ld\n",PRINTSeqposcast(fiptr->startpos[0]),
-                      PRINTSeqposcast(fiptr->endpos[0]),
-                      PRINTSeqposcast(fiptr->startpos[1]),
-                      PRINTSeqposcast(fiptr->endpos[1]),
-                      fiptr->weight);
-    }
-  }
-  chaincounter++;
-  return 0;
-}
-
-int gt_outputformatchainsilent(void *data,
-                               const GtFragmentinfotable *fragmentinfotable,
-                               const GtChain *chain,
-                               GT_UNUSED GtError *err)
-{
-  return gt_outputformatchaingeneric(true,
-                                     data,
-                                     fragmentinfotable,
-                                     chain,
-                                     err);
-}
-
-int gt_outputformatchain(void *data,
-                         const GtFragmentinfotable *fragmentinfotable,
-                         const GtChain *chain,
-                         GT_UNUSED GtError *err)
-{
-  return gt_outputformatchaingeneric(false,
-                                     data,
-                                     fragmentinfotable,
-                                     chain,
-                                     err);
+  gt_assert(idx <  gt_chain_chainlength(chain));
+  fiptr = fragmentinfotable->fragments +
+          chain->chainedfragments.spaceGtChainref[idx];
+  value->startpos[0] = fiptr->startpos[0];
+  value->startpos[1] = fiptr->startpos[1];
+  value->startpos[2] = fiptr->startpos[2];
+  value->startpos[3] = fiptr->startpos[3];
+  value->weight = fiptr->weight;
 }
