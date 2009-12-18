@@ -115,8 +115,7 @@ GtFragmentinfotable *gt_chain_analyzeopenformatfile(double weightfactor,
       }
       if (countcolumns != (unsigned long) READNUMS)
       {
-        CANNOTPARSELINE("not enough integers: there must be exactly five "
-                        "integers");
+        CANNOTPARSELINE("five integers per line expected");
         haserr = true;
         break;
       }
