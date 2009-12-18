@@ -25,7 +25,7 @@
 #include "core/arraydef.h"
 #include "extended/redblack.h"
 #include "verbose-def.h"
-#include "chaindef.h"
+#include "chain2dim.h"
 #include "prsqualint.h"
 
 /*

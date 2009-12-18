@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef CHAINDEF_H
-#define CHAINDEF_H
+#ifndef CHAIN2DIM_H
+#define CHAIN2DIM_H
 
 #include "core/error_api.h"
 #include "core/str_array_api.h"

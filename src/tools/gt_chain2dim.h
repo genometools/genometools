@@ -22,7 +22,7 @@
 #include "core/tool.h"
 #include "core/str_array_api.h"
 #include "core/option.h"
-#include "match/chaindef.h"
+#include "match/chain2dim.h"
 
 /* the chain2dim tool */
 
