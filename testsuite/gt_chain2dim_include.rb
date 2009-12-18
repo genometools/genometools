@@ -25,6 +25,7 @@ runchain2dimfailure("-local 2p h")
 runchain2dimfailure("-local -global")
 runchain2dimfailure("-global","#{$testdata}/ecolicmp-neg.of")
 runchain2dimfailure("-local","#{$testdata}/ecolicmp-4Â.of")
+runchain2dimfailure("-global","#{$testdata}/ecolicmp-seÂ.of")
 
 runchain2dim("-global gc")
 runchain2dim("-global ov")

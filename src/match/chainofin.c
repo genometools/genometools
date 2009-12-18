@@ -121,13 +121,13 @@ GtFragmentinfotable *gt_chain_analyzeopenformatfile(double weightfactor,
       }
       if (storeinteger[0] > storeinteger[1])
       {
-        CANNOTPARSELINE("startpos1 > endpos1");
+        CANNOTPARSELINE("startpos1 <= endpos1 expected");
         haserr = true;
         break;
       }
       if (storeinteger[2] > storeinteger[3])
       {
-        CANNOTPARSELINE("startpos1 > endpos1");
+        CANNOTPARSELINE("startpos2 <= endpos2 expected");
         haserr = true;
         break;
       }
