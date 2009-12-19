@@ -20,14 +20,13 @@ def runchain2dimvschain2dim(args,matchfile)
   Name "gt chain2dim #{args}"
   Keywords "gt_chain2dim"
   Test do
+    run "rf2
     run_test "#{$bin}gt chain2dim -m #{matchfile} " + args
     run "cp #{$last_stdout} gtchain.out"
     run "/Users/stefan/bin-ops/i686-apple-darwin/chain2dim.x " + args + 
         " #{matchfile}"
     run "cp #{$last_stdout} vschain.out"
     run "cmp -s gtchain.out vschain.out"
-    argstring = args.gsub(/[ ]/,"")
-    run "cp gtchain.out chain#{argstring}"
   end
 end
 
@@ -78,3 +77,12 @@ params = ["-global",
 	  "-local 20 -wf 1.8 -maxgap 10"]
 
 runchain2dimall(params,"#{$testdata}/ecolicmp250.of")
+
+resultdir="#{$gttestdata}/repfind-result"
+Dir.foreach("#{resultdir}") do |matchfile|
+  if matchfile.match(/^\S+\.fna-\S+\.fna.result$/)
+    params.each do |args|
+      runchain2dimvschain2dim(args,"#{resultdir}/#{matchfile}")
+    end
+  end
+end
