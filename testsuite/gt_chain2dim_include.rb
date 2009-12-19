@@ -31,31 +31,10 @@ def runchain2dimvschain2dim(args,matchfile)
   end
 end
 
-def runchain2dimall(matchfile)
-  runchain2dim("-global",matchfile)
-  runchain2dim("-silent -global",matchfile)
-  runchain2dim("-local -wf 1.8",matchfile)
-  runchain2dim("-local -wf 0.5",matchfile)
-  runchain2dim("-local -maxgap 20",matchfile)
-  runchain2dim("-local 2b ",matchfile)
-  runchain2dim("-local 55p -silent",matchfile)
-  runchain2dim("-global gc",matchfile)
-  runchain2dim("-global ov",matchfile)
-  runchain2dim("-global gc -wf 1.5",matchfile)
-  runchain2dim("-global ov -wf 1.8",matchfile)
-  runchain2dim("-global -maxgap 10",matchfile)
-  runchain2dim("-global gc -wf 1.5 -maxgap 10",matchfile)
-  runchain2dim("-global ov -wf 1.8 -maxgap 10",matchfile)
-  runchain2dim("-local",matchfile)
-  runchain2dim("-local 2p",matchfile)
-  runchain2dim("-local 20",matchfile)
-  runchain2dim("-local 2p -wf 1.8",matchfile)
-  runchain2dim("-local 2b -wf 1.8",matchfile)
-  runchain2dim("-local 20 -wf 1.8",matchfile)
-  runchain2dim("-local -wf 1.8 -maxgap 20",matchfile)
-  runchain2dim("-local 2p -wf 1.8 -maxgap 10",matchfile)
-  runchain2dim("-local 2b -wf 1.8 -maxgap 10",matchfile)
-  runchain2dim("-local 20 -wf 1.8 -maxgap 10",matchfile)
+def runchain2dimall(params,matchfile)
+  params.each do |args|
+    runchain2dim(args,matchfile)
+  end
 end
 
 runchain2dimfailure("-maxgap 0")
@@ -72,4 +51,30 @@ runchain2dimfailure("-local","#{$testdata}/ecolicmp-4.of")
 runchain2dimfailure("-global","#{$testdata}/ecolicmp-seÂ.of")
 
 # runchain2dimall("#{$testdata}/ecolicmp.of")
-runchain2dimall("#{$testdata}/ecolicmp250.of")
+
+params = ["-global",
+	  "-silent -global",
+	  "-local -wf 1.8",
+	  "-local -wf 0.5",
+	  "-local -maxgap 20",
+	  "-local 2b",
+	  "-local 55p -silent",
+	  "-global gc",
+	  "-global ov",
+	  "-global gc -wf 1.5",
+	  "-global ov -wf 1.8",
+	  "-global -maxgap 10",
+	  "-global gc -wf 1.5 -maxgap 10",
+	  "-global ov -wf 1.8 -maxgap 10",
+	  "-local",
+	  "-local 2p",
+	  "-local 20",
+	  "-local 2p -wf 1.8",
+	  "-local 2b -wf 1.8",
+	  "-local 20 -wf 1.8",
+	  "-local -wf 1.8 -maxgap 20",
+	  "-local 2p -wf 1.8 -maxgap 10",
+	  "-local 2b -wf 1.8 -maxgap 10",
+	  "-local 20 -wf 1.8 -maxgap 10"]
+
+runchain2dimall(params,"#{$testdata}/ecolicmp250.of")
