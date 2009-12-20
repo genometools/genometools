@@ -947,14 +947,13 @@ static void retrievechainbestscores(
   gt_free(scores);
 }
 
-static int retrievechainthreshold(const GtChainmode *chainmode,
-                                  GtFragmentinfotable *fragmentinfotable,
-                                  GtChain *chain,
-                                  GtChainscoretype minscore,
-                                  Bestofclass *chainequivalenceclasses,
-                                  GtChainprocessor chainprocessor,
-                                  void *cpinfo,
-                                  GtError *err)
+static void retrievechainthreshold(const GtChainmode *chainmode,
+                                   GtFragmentinfotable *fragmentinfotable,
+                                   GtChain *chain,
+                                   GtChainscoretype minscore,
+                                   Bestofclass *chainequivalenceclasses,
+                                   GtChainprocessor chainprocessor,
+                                   void *cpinfo)
 {
   unsigned long matchnum;
   GtChainscoretype tgap;
@@ -985,25 +984,18 @@ static int retrievechainthreshold(const GtChainmode *chainmode,
             chain->scoreofchain = classrep->score;
             classrep->isavailable = false;
             retracepreviousinchain(chain, fragmentinfotable, matchnum);
-            if (chainprocessor(cpinfo,fragmentinfotable,chain,err) != 0)
-            {
-              return -1;
-            }
+            chainprocessor(cpinfo,fragmentinfotable,chain);
           }
         } else
         {
           chain->scoreofchain = fragmentinfotable->fragments[matchnum].score -
                                 tgap;
           retracepreviousinchain(chain, fragmentinfotable, matchnum);
-          if (chainprocessor(cpinfo,fragmentinfotable,chain,err) != 0)
-          {
-            return -1;
-          }
+          chainprocessor(cpinfo,fragmentinfotable,chain);
         }
       }
     }
   }
-  return 0;
 }
 
 static int comparestartandend(const Fragmentinfo *sortedstartpoints,
@@ -1099,22 +1091,21 @@ static void mergestartandendpoints(const GtChainmode *chainmode,
   }
 }
 
-static int findmaximalscores(const GtChainmode *chainmode,
-                             GtChain *chain,
-                             GtFragmentinfotable *fragmentinfotable,
-                             Fragmentstore *fragmentstore,
-                             GtChainprocessor chainprocessor,
-                             bool withequivclasses,
-                             void *cpinfo,
-                             Verboseinfo *verboseinfo,
-                             GtError *err)
+static unsigned int findmaximalscores(const GtChainmode *chainmode,
+                                      GtChain *chain,
+                                      GtFragmentinfotable *fragmentinfotable,
+                                      Fragmentstore *fragmentstore,
+                                      GtChainprocessor chainprocessor,
+                                      bool withequivclasses,
+                                      void *cpinfo,
+                                      Verboseinfo *verboseinfo)
 {
   unsigned long fragnum;
   GtChainscoretype minscore = 0;
   Fragpoint *maxpoint;
-  bool minscoredefined = false, haserr = false;
+  bool minscoredefined = false;
   Bestofclass *chainequivalenceclasses;
-  int retval;
+  unsigned int retval;
 
   if (withequivclasses)
   {
@@ -1184,27 +1175,23 @@ static int findmaximalscores(const GtChainmode *chainmode,
                 ? "global"
                 : "local",
                minscore);
-    if (retrievechainthreshold(chainmode,
-                               fragmentinfotable,
-                               chain,
-                               minscore,
-                               chainequivalenceclasses,
-                               chainprocessor,
-                               cpinfo,
-                               err) != 0)
-    {
-      haserr = true;
-    }
+    retrievechainthreshold(chainmode,
+                           fragmentinfotable,
+                           chain,
+                           minscore,
+                           chainequivalenceclasses,
+                           chainprocessor,
+                           cpinfo);
     retval = 0;
   } else
   {
-    retval = 1;
+    retval = 1U;
   }
   if (chainequivalenceclasses != NULL)
   {
     gt_free(chainequivalenceclasses);
   }
-  return haserr ? -1 : retval;
+  return retval;
 }
 
 static void makesortedendpointpermutation(
@@ -1292,20 +1279,18 @@ static GtChaingapcostfunction assignchaingapcostfunction(GtChainkind chainkind,
   is \texttt{NULL}, then nothing is generated and shown.
 */
 
-int gt_chain_fastchaining(const GtChainmode *chainmode,
-                          GtChain *chain,
-                          GtFragmentinfotable *fragmentinfotable,
-                          bool gapsL1,
-                          unsigned int presortdim,
-                          bool withequivclasses,
-                          GtChainprocessor chainprocessor,
-                          void *cpinfo,
-                          Verboseinfo *verboseinfo,
-                          GtError *err)
+void gt_chain_fastchaining(const GtChainmode *chainmode,
+                           GtChain *chain,
+                           GtFragmentinfotable *fragmentinfotable,
+                           bool gapsL1,
+                           unsigned int presortdim,
+                           bool withequivclasses,
+                           GtChainprocessor chainprocessor,
+                           void *cpinfo,
+                           Verboseinfo *verboseinfo)
 {
-  int retcode;
+  unsigned int retval;
   GtChaingapcostfunction chaingapcostfunction;
-  bool haserr = false;
 
   gt_assert(presortdim <= 1U);
   chaingapcostfunction
@@ -1328,33 +1313,25 @@ int gt_chain_fastchaining(const GtChainmode *chainmode,
                          gapsL1);
     }
     showverbose(verboseinfo,"retrieve optimal chains");
-    retcode = findmaximalscores(chainmode,
-                                chain,
-                                fragmentinfotable,
-                                &fragmentstore,
-                                chainprocessor,
-                                withequivclasses,
-                                cpinfo,
-                                verboseinfo,
-                                err);
+    retval = findmaximalscores(chainmode,
+                               chain,
+                               fragmentinfotable,
+                               &fragmentstore,
+                               chainprocessor,
+                               withequivclasses,
+                               cpinfo,
+                               verboseinfo);
     if (chainmode->chainkind != GLOBALCHAININGWITHOVERLAPS)
     {
       gt_rbt_destroy (true,NULL,NULL,fragmentstore.dictroot);
     }
-    if (retcode < 0)
-    {
-      haserr = true;
-    }
   } else
   {
     chainingboundarycases(chainmode, chain, fragmentinfotable);
-    if (chainprocessor(cpinfo,fragmentinfotable,chain,err))
-    {
-      haserr = true;
-    }
-    retcode = 0;
+    chainprocessor(cpinfo,fragmentinfotable,chain);
+    retval = 0;
   }
-  return haserr ? -1 : retcode;
+  /* retval is not reported. */
 }
 
 static int cmpFragmentinfo0(const void *keya,const void *keyb)
@@ -1389,10 +1366,9 @@ static int cmpFragmentinfo1(const void *keya,const void *keyb)
 
 typedef int (*Qsortcomparefunction)(const void *,const void *);
 
-void gt_chain_possiblysortopenformatfragments(
-                             Verboseinfo *verboseinfo,
-                             GtFragmentinfotable *fragmentinfotable,
-                             unsigned int presortdim)
+void gt_chain_possiblysortfragments(Verboseinfo *verboseinfo,
+                                    GtFragmentinfotable *fragmentinfotable,
+                                    unsigned int presortdim)
 {
   if (fragmentinfotable->nextfree > 1UL)
   {
@@ -1455,20 +1431,6 @@ static int parselocalchainingparameter(GtChainmode *gtchainmode,
   return 0;
 }
 
-/*
-  The following string is used to trigger the usage of gap costs
-  for global chaining.
-*/
-
-#define GAPCOSTSWITCH        "gc"
-
-/*
-  The following string is used to trigger the use of a chaining algorithm
-  allowing for overlaps between the hits.
-*/
-
-#define OVERLAPSWITCH        "ov"
-
 static int parseglobalchainingparameter(GtChainmode *chainmode,
                                         const char *option,
                                         const char *gparam,
@@ -1484,19 +1446,27 @@ static int parseglobalchainingparameter(GtChainmode *chainmode,
     chainmode->chainkind = GLOBALCHAININGWITHOVERLAPS;
     return 0;
   }
-  gt_error_set(err,"argument of option -%s must be %s or %s: ",
-                    option,
-                    GAPCOSTSWITCH,
-                    OVERLAPSWITCH);
+  if (err != NULL)
+  {
+    gt_error_set(err,"argument of option -%s must be %s or %s: ",
+                      option,
+                      GAPCOSTSWITCH,
+                      OVERLAPSWITCH);
+  } else
+  {
+    fprintf(stderr,"argument of option -%s must be %s or %s: ",
+                   option,
+                   GAPCOSTSWITCH,
+                   OVERLAPSWITCH);
+  }
   return -1;
 }
 
-GtChainmode *gt_chain_chainmode_new(bool weightfactorset,
-                                    unsigned long maxgap,
+GtChainmode *gt_chain_chainmode_new(unsigned long maxgap,
                                     bool globalset,
-                                    const GtStrArray *globalargs,
+                                    const char *globalargs,
                                     bool localset,
-                                    const GtStrArray *localargs,
+                                    const char *localargs,
                                     GtError *err)
 {
   GtChainmode *gtchainmode = gt_malloc(sizeof( GtChainmode));
@@ -1507,64 +1477,34 @@ GtChainmode *gt_chain_chainmode_new(bool weightfactorset,
   gtchainmode->maxgapwidth = (GtChainpostype) maxgap;
   if (localset)
   {
-    unsigned long localargsnum = gt_str_array_size(localargs);
-    if (localargsnum == 0)
+    if (localargs == NULL)
     {
       gtchainmode->chainkind = LOCALCHAININGMAX;
     } else
     {
-      if (localargsnum == 1UL)
+      if (parselocalchainingparameter(gtchainmode,
+                                      "local",
+                                      localargs,
+                                      err) != 0)
       {
-        if (parselocalchainingparameter(gtchainmode,
-                                        "local",
-                                        gt_str_array_get(localargs,0),
-                                        err) != 0)
-        {
-          haserr = true;
-        }
-      } else
-      {
-        gt_error_set(err,"option -local can only have one optional argument");
         haserr = true;
       }
     }
   }
   if (globalset)
   {
-    unsigned long globalargsnum = gt_str_array_size(globalargs);
-    if (globalargsnum == 0)
+    if (globalargs == NULL)
     {
       gtchainmode->chainkind = GLOBALCHAINING;
     } else
     {
-      if (globalargsnum == 1UL)
+      if (parseglobalchainingparameter(gtchainmode,
+                                       "global",
+                                        globalargs,
+                                        err) != 0)
       {
-        if (parseglobalchainingparameter(gtchainmode,
-                                         "global",
-                                          gt_str_array_get(globalargs,0),
-                                          err) != 0)
-        {
-          haserr = true;
-        }
-      } else
-      {
-        gt_error_set(err,"option -global can only have one optional argument");
         haserr = true;
       }
-    }
-  }
-  if (!haserr && weightfactorset)
-  {
-    if (!localset &&
-        gtchainmode->chainkind != GLOBALCHAININGWITHGAPCOST &&
-        gtchainmode->chainkind != GLOBALCHAININGWITHOVERLAPS)
-    {
-      gt_error_set(err,
-                   "option wf requires either option -local or option -global "
-                   "with argument %s or %s",
-                   GAPCOSTSWITCH,
-                   OVERLAPSWITCH);
-      haserr = true;
     }
   }
   if (haserr)

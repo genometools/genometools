@@ -120,6 +120,7 @@ static int gt_chain2dim_arguments_check (GT_UNUSED int rest_argc,
                                          GtError * err)
 {
   GtChain2dimoptions *arguments = tool_arguments;
+  const char *globalargs = NULL, *localargs = NULL;
 
   if (gt_option_is_set (arguments->refoptionmaxgap))
   {
@@ -139,13 +140,49 @@ static int gt_chain2dim_arguments_check (GT_UNUSED int rest_argc,
   }
   gt_assert(arguments->refoptionglobal != NULL);
   gt_assert(arguments->refoptionlocal != NULL);
+  if (gt_option_is_set(arguments->refoptionglobal))
+  {
+    unsigned long globalargsnum = gt_str_array_size(arguments->globalargs);
+    if (globalargsnum > 1UL)
+    {
+      gt_error_set(err,"option -global can only have one optional argument");
+      return -1;
+    }
+    if (globalargsnum == 1UL)
+    {
+      globalargs = gt_str_array_get(arguments->globalargs,0);
+    }
+  }
+  if (gt_option_is_set(arguments->refoptionlocal))
+  {
+    unsigned long localargsnum = gt_str_array_size(arguments->localargs);
+    if (localargsnum > 1UL)
+    {
+      gt_error_set(err,"option -local can only have one optional argument");
+      return -1;
+    }
+    if (localargsnum == 1UL)
+    {
+      localargs = gt_str_array_get(arguments->localargs,0);
+    }
+  }
+  if (gt_option_is_set(arguments->refoptionweightfactor) &&
+      !gt_option_is_set(arguments->refoptionlocal) &&
+      globalargs == NULL)
+  {
+    gt_error_set(err,
+                 "option wf requires either option -local or option -global "
+                 "with argument %s or %s",
+                 GAPCOSTSWITCH,
+                 OVERLAPSWITCH);
+    return -1;
+  }
   arguments->gtchainmode
-    = gt_chain_chainmode_new(gt_option_is_set(arguments->refoptionweightfactor),
-                             arguments->maxgap,
+    = gt_chain_chainmode_new(arguments->maxgap,
                              gt_option_is_set(arguments->refoptionglobal),
-                             arguments->globalargs,
+                             globalargs,
                              gt_option_is_set(arguments->refoptionlocal),
-                             arguments->localargs,
+                             localargs,
                              err);
   return (arguments->gtchainmode == NULL) ? -1 : 0;
 }
@@ -155,12 +192,11 @@ typedef struct
   unsigned long chaincounter;
 } Counter;
 
-static int gt_outputformatchaingeneric(
+static void gt_outputformatchaingeneric(
                                 bool silent,
                                 void *data,
                                 const GtFragmentinfotable *fragmentinfotable,
-                                const GtChain *chain,
-                                GT_UNUSED GtError *err)
+                                const GtChain *chain)
 {
   unsigned long idx, chainlength;
   Counter *counter = (Counter *) data;
@@ -184,31 +220,20 @@ static int gt_outputformatchaingeneric(
     }
   }
   counter->chaincounter++;
-  return 0;
 }
 
-int gt_outputformatchainsilent(void *data,
+void gt_outputformatchainsilent(void *data,
                                const GtFragmentinfotable *fragmentinfotable,
-                               const GtChain *chain,
-                               GT_UNUSED GtError *err)
+                               const GtChain *chain)
 {
-  return gt_outputformatchaingeneric(true,
-                                     data,
-                                     fragmentinfotable,
-                                     chain,
-                                     err);
+  gt_outputformatchaingeneric(true,data,fragmentinfotable,chain);
 }
 
-int gt_outputformatchain(void *data,
-                         const GtFragmentinfotable *fragmentinfotable,
-                         const GtChain *chain,
-                         GT_UNUSED GtError *err)
+void gt_outputformatchain(void *data,
+                          const GtFragmentinfotable *fragmentinfotable,
+                          const GtChain *chain)
 {
-  return gt_outputformatchaingeneric(false,
-                                     data,
-                                     fragmentinfotable,
-                                     chain,
-                                     err);
+  gt_outputformatchaingeneric(false,data,fragmentinfotable,chain);
 }
 
 static int gt_chain2dim_runner (GT_UNUSED int argc,
@@ -241,26 +266,19 @@ static int gt_chain2dim_runner (GT_UNUSED int argc,
     Counter counter;
 
     verboseinfo = newverboseinfo(arguments->verbose);
-    gt_chain_possiblysortopenformatfragments(
-                             verboseinfo,
-                             fragmentinfotable,
-                             presortdim);
+    gt_chain_possiblysortfragments(verboseinfo,fragmentinfotable,presortdim);
     chain = gt_chain_chain_new();
     counter.chaincounter = 0;
-    if (gt_chain_fastchaining(arguments->gtchainmode,
-                              chain,
-                              fragmentinfotable,
-                              true,
-                              presortdim,
-                              true,
-                              arguments->silent ? gt_outputformatchainsilent
-                                                : gt_outputformatchain,
-                              &counter,
-                              verboseinfo,
-                              err) != 0)
-    {
-      haserr = true;
-    }
+    gt_chain_fastchaining(arguments->gtchainmode,
+                          chain,
+                          fragmentinfotable,
+                          true,
+                          presortdim,
+                          true,
+                          arguments->silent ? gt_outputformatchainsilent
+                                            : gt_outputformatchain,
+                          &counter,
+                          verboseinfo);
     gt_chain_chain_delete(chain);
   }
   gt_chain_chainmode_delete(arguments->gtchainmode);

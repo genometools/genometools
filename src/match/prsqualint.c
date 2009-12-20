@@ -24,14 +24,24 @@
 #include "core/error_api.h"
 #include "prsqualint.h"
 
+#define ERRORMSG\
+        "argument \"%s\" of option %s must be positive number "\
+        "possibly followed by character %c or %c; if the "\
+        "number is followed by character %c, then it must be "\
+        " <= 100"
+
 #define ERRORLPARAM\
-        gt_error_set(err,\
-                     "argument \"%s\" of option %s must be positive number "\
-                     "possibly followed by character %c or %c; if the number "\
-                     "is followed by character %c, then it must be <= 100",\
-                     lparam,option,BESTCHARACTER,\
-                     PERCENTAWAYCHARACTER,\
-                     PERCENTAWAYCHARACTER)
+        if (err != NULL)\
+        {\
+          gt_error_set(err,ERRORMSG,lparam,option,BESTCHARACTER,\
+                       PERCENTAWAYCHARACTER,\
+                       PERCENTAWAYCHARACTER);\
+        } else\
+        {\
+          fprintf(stderr,ERRORMSG,lparam,option,BESTCHARACTER,\
+                         PERCENTAWAYCHARACTER,\
+                         PERCENTAWAYCHARACTER);\
+        }
 
 Qualifiedinteger *parsequalifiedinteger(const char *option,
                                         const char *lparam,
