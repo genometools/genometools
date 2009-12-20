@@ -77,12 +77,3 @@ params = ["-global",
 	  "-local 20 -wf 1.8 -maxgap 10"]
 
 runchain2dimall(params,"#{$testdata}/ecolicmp250.of")
-
-resultdir="#{$gttestdata}/repfind-result"
-Dir.foreach("#{resultdir}") do |matchfile|
-  if matchfile.match(/^\S+\.fna-\S+\.fna.result$/)
-    params.each do |args|
-      runchain2dimvschain2dim(args,"#{resultdir}/#{matchfile}")
-    end
-  end
-end
