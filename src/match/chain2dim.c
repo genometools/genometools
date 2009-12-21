@@ -54,8 +54,8 @@ typedef struct
 struct GtFragmentinfotable
 {
    Fragmentinfo *fragments;
-   GtChainscoretype largestdim1,
-                    largestdim2;
+   GtChainscoretype largestdim0,
+                    largestdim1;
    unsigned long nextfree,
                  allocated;
 };
@@ -123,7 +123,7 @@ GtFragmentinfotable *gt_chain_fragmentinfotable_new(
     = gt_malloc(sizeof (*fragmentinfotable->fragments) * numberoffragments);
   fragmentinfotable->nextfree = 0;
   fragmentinfotable->allocated = numberoffragments;
-  fragmentinfotable->largestdim1 = fragmentinfotable->largestdim2 = 0;
+  fragmentinfotable->largestdim0 = fragmentinfotable->largestdim1 = 0;
   return fragmentinfotable;
 }
 
@@ -139,33 +139,29 @@ void gt_chain_fragmentinfotable_delete(GtFragmentinfotable *fragmentinfotable)
 void gt_chain_fragmentinfotable_empty(GtFragmentinfotable *fragmentinfotable)
 {
   gt_assert(fragmentinfotable != NULL);
-  fragmentinfotable->largestdim1 = fragmentinfotable->largestdim2 = 0;
+  fragmentinfotable->largestdim0 = fragmentinfotable->largestdim1 = 0;
   fragmentinfotable->nextfree = 0;
 }
 
 void gt_chain_fragmentinfotable_add(GtFragmentinfotable *fragmentinfotable,
-                                    GtChainpostype start1,
-                                    GtChainpostype end1,
-                                    GtChainpostype start2,
-                                    GtChainpostype end2,
-                                    GtChainscoretype weight)
+                                    const GtFragmentvalues *infragment)
 {
   Fragmentinfo *frag;
 
   gt_assert(fragmentinfotable->nextfree < fragmentinfotable->allocated);
   frag = fragmentinfotable->fragments + fragmentinfotable->nextfree++;
-  frag->startpos[0] = start1;
-  frag->startpos[1] = start2;
-  frag->endpos[0] = end1;
-  frag->endpos[1] = end2;
-  frag->weight = weight;
-  if (fragmentinfotable->largestdim1 < (GtChainscoretype) end1)
+  frag->startpos[0] = infragment->startpos[0];
+  frag->startpos[1] = infragment->startpos[1];
+  frag->endpos[0] = infragment->endpos[0];
+  frag->endpos[1] = infragment->endpos[1];
+  frag->weight = infragment->weight;
+  if (fragmentinfotable->largestdim0 < (GtChainscoretype) infragment->endpos[0])
   {
-    fragmentinfotable->largestdim1 = (GtChainscoretype) end1;
+    fragmentinfotable->largestdim0 = (GtChainscoretype) infragment->endpos[0];
   }
-  if (fragmentinfotable->largestdim2 < (GtChainscoretype) end2)
+  if (fragmentinfotable->largestdim1 < (GtChainscoretype) infragment->endpos[1])
   {
-    fragmentinfotable->largestdim2 = (GtChainscoretype) end2;
+    fragmentinfotable->largestdim1 = (GtChainscoretype) infragment->endpos[1];
   }
 }
 
@@ -180,8 +176,8 @@ void gt_chain_fillthegapvalues(GtFragmentinfotable *fragmentinfotable)
     fiptr->initialgap
       = (GtChainscoretype) (fiptr->startpos[0] + fiptr->startpos[1]);
     fiptr->terminalgap
-      = (GtChainscoretype) (fragmentinfotable->largestdim1 - fiptr->endpos[0] +
-                            fragmentinfotable->largestdim2 - fiptr->endpos[1]);
+      = (GtChainscoretype) (fragmentinfotable->largestdim0 - fiptr->endpos[0] +
+                            fragmentinfotable->largestdim1 - fiptr->endpos[1]);
   }
 }
 

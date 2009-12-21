@@ -62,7 +62,7 @@ GtFragmentinfotable *gt_chain_analyzeopenformatfile(double weightfactor,
   FILE *matchfp;
   long readint;
   bool haserr = false;
-  GtChainscoretype weight;
+  GtFragmentvalues fragment;
 
   if (numberoflinesinfile(&linenum,matchfile,err) != 0)
   {
@@ -131,14 +131,13 @@ GtFragmentinfotable *gt_chain_analyzeopenformatfile(double weightfactor,
         haserr = true;
         break;
       }
-      weight = (GtChainscoretype) (weightfactor *
-                                  (double) storeinteger[READNUMS-1]);
-      gt_chain_fragmentinfotable_add(fragmentinfotable,
-                                     storeinteger[0],
-                                     storeinteger[1],
-                                     storeinteger[2],
-                                     storeinteger[3],
-                                     weight);
+      fragment.weight = (GtChainscoretype) (weightfactor *
+                                           (double) storeinteger[READNUMS-1]);
+      fragment.startpos[0] = storeinteger[0];
+      fragment.endpos[0] = storeinteger[1];
+      fragment.startpos[1] = storeinteger[2];
+      fragment.endpos[1] = storeinteger[3];
+      gt_chain_fragmentinfotable_add(fragmentinfotable,&fragment);
     }
     gt_str_reset(currentline);
   }

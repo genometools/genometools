@@ -92,11 +92,7 @@ void gt_chain_fragmentinfotable_empty(GtFragmentinfotable *fragmentinfotable);
 /* the following function adds the relevant values describing a fragment */
 
 void gt_chain_fragmentinfotable_add(GtFragmentinfotable *fragmentinfotable,
-                                    GtChainpostype start1,
-                                    GtChainpostype end1,
-                                    GtChainpostype start2,
-                                    GtChainpostype end2,
-                                    GtChainscoretype weight);
+                                    const GtFragmentvalues *infragment);
 
 /* the following functions reads a file describing fragments in open format.
    It returns the corresponding fragment table */
