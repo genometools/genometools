@@ -49,11 +49,11 @@ typedef struct
          initialgap, /* gap to start of sequences, user defined */
          terminalgap, /* gap to last positions of fragment, user defined */
          score; /* score of highest scoreing chain ending here, compute */
-} Fragmentinfo;
+} Matchchaininfo;
 
-struct GtFragmentinfotable
+struct GtChainmatchtable
 {
-   Fragmentinfo *fragments;
+   Matchchaininfo *fragments;
    GtChainscoretype largestdim0,
                     largestdim1;
    unsigned long nextfree,
@@ -114,10 +114,10 @@ struct GtChain
   GtChainscoretype scoreofchain;
 };
 
-GtFragmentinfotable *gt_chain_fragmentinfotable_new(
+GtChainmatchtable *gt_chain_fragmentinfotable_new(
                                unsigned long numberoffragments)
 {
-  GtFragmentinfotable *fragmentinfotable
+  GtChainmatchtable *fragmentinfotable
     = gt_malloc(sizeof (*fragmentinfotable));
   fragmentinfotable->fragments
     = gt_malloc(sizeof (*fragmentinfotable->fragments) * numberoffragments);
@@ -127,7 +127,7 @@ GtFragmentinfotable *gt_chain_fragmentinfotable_new(
   return fragmentinfotable;
 }
 
-void gt_chain_fragmentinfotable_delete(GtFragmentinfotable *fragmentinfotable)
+void gt_chain_fragmentinfotable_delete(GtChainmatchtable *fragmentinfotable)
 {
   if (fragmentinfotable != NULL)
   {
@@ -136,17 +136,17 @@ void gt_chain_fragmentinfotable_delete(GtFragmentinfotable *fragmentinfotable)
   }
 }
 
-void gt_chain_fragmentinfotable_empty(GtFragmentinfotable *fragmentinfotable)
+void gt_chain_fragmentinfotable_empty(GtChainmatchtable *fragmentinfotable)
 {
   gt_assert(fragmentinfotable != NULL);
   fragmentinfotable->largestdim0 = fragmentinfotable->largestdim1 = 0;
   fragmentinfotable->nextfree = 0;
 }
 
-void gt_chain_fragmentinfotable_add(GtFragmentinfotable *fragmentinfotable,
+void gt_chain_fragmentinfotable_add(GtChainmatchtable *fragmentinfotable,
                                     const GtFragmentvalues *infragment)
 {
-  Fragmentinfo *frag;
+  Matchchaininfo *frag;
 
   gt_assert(fragmentinfotable->nextfree < fragmentinfotable->allocated);
   gt_assert(infragment->startpos[0] <= infragment->endpos[0]);
@@ -167,9 +167,9 @@ void gt_chain_fragmentinfotable_add(GtFragmentinfotable *fragmentinfotable,
   }
 }
 
-void gt_chain_fillthegapvalues(GtFragmentinfotable *fragmentinfotable)
+void gt_chain_fillthegapvalues(GtChainmatchtable *fragmentinfotable)
 {
-  Fragmentinfo *fiptr;
+  Matchchaininfo *fiptr;
 
   for (fiptr = fragmentinfotable->fragments;
        fiptr < fragmentinfotable->fragments + fragmentinfotable->nextfree;
@@ -208,7 +208,7 @@ void gt_chain_fillthegapvalues(GtFragmentinfotable *fragmentinfotable)
           chain->chainedfragments.nextfreeGtChainref = 0;\
         }
 
-typedef GtChainscoretype (*GtChaingapcostfunction)(const GtFragmentinfotable *,
+typedef GtChainscoretype (*GtChaingapcostfunction)(const GtChainmatchtable *,
                                                    unsigned long,unsigned long);
 
 typedef struct
@@ -243,7 +243,7 @@ typedef struct
   GtChainscoretype score;
 } Bestofclass;
 
-static bool overlappingfragments(const GtFragmentinfotable *fragmentinfotable,
+static bool overlappingfragments(const GtChainmatchtable *fragmentinfotable,
                                  unsigned long i,
                                  unsigned long j)
 {
@@ -251,7 +251,7 @@ static bool overlappingfragments(const GtFragmentinfotable *fragmentinfotable,
           GETSTOREDENDPOINT(1,i) >= GETSTOREDSTARTPOINT(1,j)) ? true : false;
 }
 
-static bool colinearfragments(const GtFragmentinfotable *fragmentinfotable,
+static bool colinearfragments(const GtChainmatchtable *fragmentinfotable,
                               unsigned long i,
                               unsigned long j)
 {
@@ -261,7 +261,7 @@ static bool colinearfragments(const GtFragmentinfotable *fragmentinfotable,
           GETSTOREDENDPOINT(1, i)   < GETSTOREDENDPOINT(1, j)) ? true : false;
 }
 
-static GtChainscoretype gapcostL1(const GtFragmentinfotable *fragmentinfotable,
+static GtChainscoretype gapcostL1(const GtChainmatchtable *fragmentinfotable,
                                   unsigned long i,
                                   unsigned long j)
 {
@@ -271,7 +271,7 @@ static GtChainscoretype gapcostL1(const GtFragmentinfotable *fragmentinfotable,
 }
 
 static GtChainscoretype overlapcost(
-                            const GtFragmentinfotable *fragmentinfotable,
+                            const GtChainmatchtable *fragmentinfotable,
                             unsigned long i,
                             unsigned long j)
 {
@@ -303,7 +303,7 @@ static GtChainscoretype overlapcost(
   following function generalizes to MEMs as well.
 */
 
-static GtChainscoretype gapcostCc(const GtFragmentinfotable *fragmentinfotable,
+static GtChainscoretype gapcostCc(const GtChainmatchtable *fragmentinfotable,
                                   unsigned long i,unsigned long j)
 {
   GtChainpostype value1, value2;
@@ -317,7 +317,7 @@ static GtChainscoretype gapcostCc(const GtFragmentinfotable *fragmentinfotable,
 
 static void chainingboundarycases(const GtChainmode *chainmode,
                                   GtChain *chain,
-                                  const GtFragmentinfotable *fragmentinfotable)
+                                  const GtChainmatchtable *fragmentinfotable)
 {
   if (fragmentinfotable->nextfree == 0)
   {
@@ -343,7 +343,7 @@ static void chainingboundarycases(const GtChainmode *chainmode,
 }
 
 static void retracepreviousinchain(GtChain *chain,
-                                   const GtFragmentinfotable *fragmentinfotable,
+                                   const GtChainmatchtable *fragmentinfotable,
                                    unsigned long retracestart)
 {
   unsigned long fragnum, idx, lengthofchain;
@@ -367,7 +367,7 @@ static void retracepreviousinchain(GtChain *chain,
   chain->chainedfragments.nextfreeGtChainref = lengthofchain;
 }
 
-static bool checkmaxgapwidth(const GtFragmentinfotable *fragmentinfotable,
+static bool checkmaxgapwidth(const GtChainmatchtable *fragmentinfotable,
                              GtChainpostype maxgapwidth,
                              unsigned long leftfrag,
                              unsigned long rightfrag)
@@ -404,7 +404,7 @@ static bool checkmaxgapwidth(const GtFragmentinfotable *fragmentinfotable,
 }
 
 static void bruteforcechainingscores(const GtChainmode *chainmode,
-                                     GtFragmentinfotable *fragmentinfotable,
+                                     GtChainmatchtable *fragmentinfotable,
                                      GtChaingapcostfunction
                                        chaingapcostfunction)
 {
@@ -552,7 +552,7 @@ static int cmpendFragpoint2(const GtKeytype keya,
 
 static GtChainscoretype evalpriority(
                                bool addterminal,
-                               const GtFragmentinfotable *fragmentinfotable,
+                               const GtChainmatchtable *fragmentinfotable,
                                unsigned long fragnum)
 {
   if (addterminal)
@@ -563,7 +563,7 @@ static GtChainscoretype evalpriority(
 }
 
 static void insertintodict(bool addterminal,
-                           const GtFragmentinfotable *fragmentinfotable,
+                           const GtChainmatchtable *fragmentinfotable,
                            Fragmentstore *fragmentstore,
                            Fragpoint *qfrag2)
 {
@@ -589,7 +589,7 @@ static void insertintodict(bool addterminal,
 }
 
 static void activatefragpoint(bool addterminal,
-                              const GtFragmentinfotable *fragmentinfotable,
+                              const GtChainmatchtable *fragmentinfotable,
                               Fragmentstore *fragmentstore,
                               Fragpoint *qfrag2)
 {
@@ -634,7 +634,7 @@ static void activatefragpoint(bool addterminal,
 }
 
 static void evalfragmentscore(const GtChainmode *chainmode,
-                              GtFragmentinfotable *fragmentinfotable,
+                              GtChainmatchtable *fragmentinfotable,
                               Fragmentstore *fragmentstore,
                               bool gapsL1,
                               unsigned long fragpointident,
@@ -723,7 +723,7 @@ static void evalfragmentscore(const GtChainmode *chainmode,
 }
 
 static bool isrightmaximallocalchain(
-                        const GtFragmentinfotable *fragmentinfotable,
+                        const GtChainmatchtable *fragmentinfotable,
                         unsigned long currentfrag)
 {
   if (currentfrag == fragmentinfotable->nextfree - 1)
@@ -744,7 +744,7 @@ static bool isrightmaximallocalchain(
 }
 
 static void determineequivreps(Bestofclass *chainequivalenceclasses,
-                               const GtFragmentinfotable *fragmentinfotable)
+                               const GtChainmatchtable *fragmentinfotable)
 {
   unsigned long matchnum;
   Bestofclass *classptr, *classrep;
@@ -773,7 +773,7 @@ static void determineequivreps(Bestofclass *chainequivalenceclasses,
 
 static bool retrievemaximalscore(GtChainscoretype *maxscore,
                                  const GtChainmode *chainmode,
-                                 const GtFragmentinfotable *fragmentinfotable)
+                                 const GtChainmatchtable *fragmentinfotable)
 {
   unsigned long matchnum;
   GtChainscoretype tgap;
@@ -909,7 +909,7 @@ static void insertDictmaxsize(Dictmaxsize *dict,
 static void retrievechainbestscores(
                           bool *minscoredefined,
                           GtChainscoretype *minscore,
-                          const GtFragmentinfotable *fragmentinfotable,
+                          const GtChainmatchtable *fragmentinfotable,
                           unsigned long howmanybest)
 {
   unsigned long matchnum, fragnum = 0;
@@ -946,7 +946,7 @@ static void retrievechainbestscores(
 }
 
 static void retrievechainthreshold(const GtChainmode *chainmode,
-                                   GtFragmentinfotable *fragmentinfotable,
+                                   GtChainmatchtable *fragmentinfotable,
                                    GtChain *chain,
                                    GtChainscoretype minscore,
                                    Bestofclass *chainequivalenceclasses,
@@ -996,8 +996,8 @@ static void retrievechainthreshold(const GtChainmode *chainmode,
   }
 }
 
-static int comparestartandend(const Fragmentinfo *sortedstartpoints,
-                              const Fragmentinfo *sortedendpoints,
+static int comparestartandend(const Matchchaininfo *sortedstartpoints,
+                              const Matchchaininfo *sortedendpoints,
                               unsigned int presortdim)
 {
   if (sortedstartpoints->startpos[presortdim] <
@@ -1014,7 +1014,7 @@ static int comparestartandend(const Fragmentinfo *sortedstartpoints,
 }
 
 static Fragpoint *makeactivationpoint(
-                            const GtFragmentinfotable *fragmentinfotable,
+                            const GtChainmatchtable *fragmentinfotable,
                             unsigned long fpident,
                             unsigned int postsortdim)
 {
@@ -1028,7 +1028,7 @@ static Fragpoint *makeactivationpoint(
 }
 
 static void mergestartandendpoints(const GtChainmode *chainmode,
-                                   GtFragmentinfotable *fragmentinfotable,
+                                   GtChainmatchtable *fragmentinfotable,
                                    Fragmentstore *fragmentstore,
                                    bool gapsL1,
                                    unsigned int presortdim)
@@ -1091,7 +1091,7 @@ static void mergestartandendpoints(const GtChainmode *chainmode,
 
 static unsigned int findmaximalscores(const GtChainmode *chainmode,
                                       GtChain *chain,
-                                      GtFragmentinfotable *fragmentinfotable,
+                                      GtChainmatchtable *fragmentinfotable,
                                       Fragmentstore *fragmentstore,
                                       GtChainprocessor chainprocessor,
                                       bool withequivclasses,
@@ -1194,7 +1194,7 @@ static unsigned int findmaximalscores(const GtChainmode *chainmode,
 
 static void makesortedendpointpermutation(
                                      unsigned long *perm,
-                                     GtFragmentinfotable *fragmentinfotable,
+                                     GtChainmatchtable *fragmentinfotable,
                                      unsigned int presortdim)
 {
   unsigned long temp, *iptr, *jptr, i, moves = 0;
@@ -1221,7 +1221,7 @@ static void makesortedendpointpermutation(
 }
 
 static void fastchainingscores(const GtChainmode *chainmode,
-                               GtFragmentinfotable *fragmentinfotable,
+                               GtChainmatchtable *fragmentinfotable,
                                Fragmentstore *fragmentstore,
                                unsigned int presortdim,
                                bool gapsL1)
@@ -1279,7 +1279,7 @@ static GtChaingapcostfunction assignchaingapcostfunction(GtChainkind chainkind,
 
 void gt_chain_fastchaining(const GtChainmode *chainmode,
                            GtChain *chain,
-                           GtFragmentinfotable *fragmentinfotable,
+                           GtChainmatchtable *fragmentinfotable,
                            bool gapsL1,
                            unsigned int presortdim,
                            bool withequivclasses,
@@ -1334,13 +1334,13 @@ void gt_chain_fastchaining(const GtChainmode *chainmode,
 
 static int cmpFragmentinfo0(const void *keya,const void *keyb)
 {
-  if (((const Fragmentinfo *) keya)->startpos[0] <
-      ((const Fragmentinfo *) keyb)->startpos[0])
+  if (((const Matchchaininfo *) keya)->startpos[0] <
+      ((const Matchchaininfo *) keyb)->startpos[0])
   {
     return -1;
   }
-  if (((const Fragmentinfo *) keya)->startpos[0] >
-      ((const Fragmentinfo *) keyb)->startpos[0])
+  if (((const Matchchaininfo *) keya)->startpos[0] >
+      ((const Matchchaininfo *) keyb)->startpos[0])
   {
     return 1;
   }
@@ -1349,13 +1349,13 @@ static int cmpFragmentinfo0(const void *keya,const void *keyb)
 
 static int cmpFragmentinfo1(const void *keya,const void *keyb)
 {
-  if (((const Fragmentinfo *) keya)->startpos[1] <
-      ((const Fragmentinfo *) keyb)->startpos[1])
+  if (((const Matchchaininfo *) keya)->startpos[1] <
+      ((const Matchchaininfo *) keyb)->startpos[1])
   {
     return -1;
   }
-  if (((const Fragmentinfo *) keya)->startpos[1] >
-      ((const Fragmentinfo *) keyb)->startpos[1])
+  if (((const Matchchaininfo *) keya)->startpos[1] >
+      ((const Matchchaininfo *) keyb)->startpos[1])
   {
     return 1;
   }
@@ -1365,13 +1365,13 @@ static int cmpFragmentinfo1(const void *keya,const void *keyb)
 typedef int (*Qsortcomparefunction)(const void *,const void *);
 
 void gt_chain_possiblysortfragments(Verboseinfo *verboseinfo,
-                                    GtFragmentinfotable *fragmentinfotable,
+                                    GtChainmatchtable *fragmentinfotable,
                                     unsigned int presortdim)
 {
   if (fragmentinfotable->nextfree > 1UL)
   {
     Qsortcomparefunction qsortcomparefunction;
-    Fragmentinfo *fptr;
+    Matchchaininfo *fptr;
     bool fragmentsaresorted = true;
 
     gt_assert(presortdim <= 1U);
@@ -1394,7 +1394,7 @@ void gt_chain_possiblysortfragments(Verboseinfo *verboseinfo,
                               "sort them");
     }
     qsort(fragmentinfotable->fragments,(size_t) fragmentinfotable->nextfree,
-          sizeof (Fragmentinfo),qsortcomparefunction);
+          sizeof (*fragmentinfotable->fragments),qsortcomparefunction);
   }
 }
 
@@ -1467,10 +1467,11 @@ GtChainmode *gt_chain_chainmode_new(unsigned long maxgap,
                                     const char *localargs,
                                     GtError *err)
 {
-  GtChainmode *gtchainmode = gt_malloc(sizeof( GtChainmode));
+  GtChainmode *gtchainmode;
   bool haserr = false;
 
   gt_assert(!(globalset && localset));
+  gtchainmode = gt_malloc(sizeof (*gtchainmode));
   gtchainmode->chainkind = GLOBALCHAINING;
   gtchainmode->maxgapwidth = (GtChainpostype) maxgap;
   if (localset)
@@ -1525,7 +1526,7 @@ GtChain *gt_chain_chain_new(void)
 {
   GtChain *chain;
 
-  chain = gt_malloc(sizeof (GtChain));
+  chain = gt_malloc(sizeof (*chain));
   GT_INITARRAY(&chain->chainedfragments,GtChainref);
   return chain;
 }
@@ -1550,10 +1551,10 @@ unsigned long gt_chain_chainlength(const GtChain *chain)
 }
 
 void gt_chain_extractchainelem(GtFragmentvalues *value,
-                               const GtFragmentinfotable *fragmentinfotable,
+                               const GtChainmatchtable *fragmentinfotable,
                                const GtChain *chain,unsigned long idx)
 {
-  const Fragmentinfo *fiptr;
+  const Matchchaininfo *fiptr;
 
   gt_assert(idx <  gt_chain_chainlength(chain));
   fiptr = fragmentinfotable->fragments +

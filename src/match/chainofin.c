@@ -51,11 +51,11 @@ static int numberoflinesinfile(unsigned long *linenum,
   return 0;
 }
 
-GtFragmentinfotable *gt_chain_analyzeopenformatfile(double weightfactor,
+GtChainmatchtable *gt_chain_analyzeopenformatfile(double weightfactor,
                                                     const char *matchfile,
                                                     GtError *err)
 {
-  GtFragmentinfotable *fragmentinfotable;
+  GtChainmatchtable *fragmentinfotable;
   GtStr *currentline;
   unsigned long linenum;
   GtChainpostype storeinteger[READNUMS];

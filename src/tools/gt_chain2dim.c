@@ -195,7 +195,7 @@ typedef struct
 static void gt_outputformatchaingeneric(
                                 bool silent,
                                 void *data,
-                                const GtFragmentinfotable *fragmentinfotable,
+                                const GtChainmatchtable *fragmentinfotable,
                                 const GtChain *chain)
 {
   unsigned long idx, chainlength;
@@ -218,14 +218,14 @@ static void gt_outputformatchaingeneric(
 }
 
 void gt_outputformatchainsilent(void *data,
-                               const GtFragmentinfotable *fragmentinfotable,
+                               const GtChainmatchtable *fragmentinfotable,
                                const GtChain *chain)
 {
   gt_outputformatchaingeneric(true,data,fragmentinfotable,chain);
 }
 
 void gt_outputformatchain(void *data,
-                          const GtFragmentinfotable *fragmentinfotable,
+                          const GtChainmatchtable *fragmentinfotable,
                           const GtChain *chain)
 {
   gt_outputformatchaingeneric(false,data,fragmentinfotable,chain);
@@ -238,7 +238,7 @@ static int gt_chain2dim_runner (GT_UNUSED int argc,
                                 GtError * err)
 {
   GtChain2dimoptions *arguments = tool_arguments;
-  GtFragmentinfotable *fragmentinfotable;
+  GtChainmatchtable *fragmentinfotable;
   bool haserr = false;
   Verboseinfo *verboseinfo = NULL;
 

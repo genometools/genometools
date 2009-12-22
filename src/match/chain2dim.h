@@ -51,7 +51,7 @@ typedef struct GtChain GtChain;
 
 /* the anonymous type for a table storing the fragments */
 
-typedef struct GtFragmentinfotable GtFragmentinfotable;
+typedef struct GtChainmatchtable GtChainmatchtable;
 
 /* the following type is used for relevant values to output for a chained
    frgament */
@@ -69,7 +69,7 @@ typedef struct
 */
 
 typedef void (*GtChainprocessor)(void *,
-                                 const GtFragmentinfotable *,
+                                 const GtChainmatchtable *,
                                  const GtChain *);
 
 /* the type of value describing how to chain */
@@ -78,37 +78,37 @@ typedef struct GtChainmode GtChainmode;
 
 /* the constructor for tables of fragments */
 
-GtFragmentinfotable *gt_chain_fragmentinfotable_new(
+GtChainmatchtable *gt_chain_fragmentinfotable_new(
                            unsigned long numberoffragments);
 
 /* the destructor for tables of fragments */
 
-void gt_chain_fragmentinfotable_delete(GtFragmentinfotable *fragmentinfotable);
+void gt_chain_fragmentinfotable_delete(GtChainmatchtable *fragmentinfotable);
 
 /* the function for emptying tables of fragments, without freeing the space */
 
-void gt_chain_fragmentinfotable_empty(GtFragmentinfotable *fragmentinfotable);
+void gt_chain_fragmentinfotable_empty(GtChainmatchtable *fragmentinfotable);
 
 /* the following function adds the relevant values describing a fragment */
 
-void gt_chain_fragmentinfotable_add(GtFragmentinfotable *fragmentinfotable,
+void gt_chain_fragmentinfotable_add(GtChainmatchtable *fragmentinfotable,
                                     const GtFragmentvalues *infragment);
 
 /* the following functions reads a file describing fragments in open format.
    It returns the corresponding fragment table */
 
-GtFragmentinfotable *gt_chain_analyzeopenformatfile(double weightfactor,
+GtChainmatchtable *gt_chain_analyzeopenformatfile(double weightfactor,
                                                     const char *matchfile,
                                                     GtError *err);
 
 /* the function to fill the gap values for all fragments */
 
-void gt_chain_fillthegapvalues(GtFragmentinfotable *fragmentinfotable);
+void gt_chain_fillthegapvalues(GtChainmatchtable *fragmentinfotable);
 
 /* the function to sort an array of fragments */
 
 void gt_chain_possiblysortfragments(Verboseinfo *verboseinfo,
-                                    GtFragmentinfotable *fragmentinfotable,
+                                    GtChainmatchtable *fragmentinfotable,
                                     unsigned int presortdim);
 
 /* the constructor for chainmode objects. Use err = NULL to print
@@ -137,7 +137,7 @@ void gt_chain_chain_delete(GtChain *chain);
 
 void gt_chain_fastchaining(const GtChainmode *chainmode,
                            GtChain *chain,
-                           GtFragmentinfotable *fragmentinfotable,
+                           GtChainmatchtable *fragmentinfotable,
                            bool gapsL1,
                            unsigned int presortdim,
                            bool withequivclasses,
@@ -156,7 +156,7 @@ unsigned long gt_chain_chainlength(const GtChain *chain);
 /* store the values of element idx in given chain in the first parameter */
 
 void gt_chain_extractchainelem(GtFragmentvalues *value,
-                               const GtFragmentinfotable *fragmentinfotable,
+                               const GtChainmatchtable *fragmentinfotable,
                                const GtChain *chain,
                                unsigned long idx);
 
