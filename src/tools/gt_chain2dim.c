@@ -210,13 +210,8 @@ static void gt_outputformatchaingeneric(
 
     for (idx=0; idx < chainlength; idx++)
     {
-      gt_chain_display(&value, fragmentinfotable, chain,idx);
-      printf(FormatSeqpos " " FormatSeqpos " " FormatSeqpos " " FormatSeqpos
-             " %ld\n",PRINTSeqposcast(value.startpos[0]),
-                      PRINTSeqposcast(value.endpos[0]),
-                      PRINTSeqposcast(value.startpos[1]),
-                      PRINTSeqposcast(value.endpos[1]),
-                      value.weight);
+      gt_chain_extractchainelem(&value, fragmentinfotable, chain, idx);
+      gt_chain_printchainelem(stdout,&value);
     }
   }
   counter->chaincounter++;

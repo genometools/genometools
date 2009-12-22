@@ -149,6 +149,8 @@ void gt_chain_fragmentinfotable_add(GtFragmentinfotable *fragmentinfotable,
   Fragmentinfo *frag;
 
   gt_assert(fragmentinfotable->nextfree < fragmentinfotable->allocated);
+  gt_assert(infragment->startpos[0] <= infragment->endpos[0]);
+  gt_assert(infragment->startpos[1] <= infragment->endpos[1]);
   frag = fragmentinfotable->fragments + fragmentinfotable->nextfree++;
   frag->startpos[0] = infragment->startpos[0];
   frag->startpos[1] = infragment->startpos[1];
@@ -1547,9 +1549,9 @@ unsigned long gt_chain_chainlength(const GtChain *chain)
   return chain->chainedfragments.nextfreeGtChainref;
 }
 
-void gt_chain_display(GtFragmentvalues *value,
-                     const GtFragmentinfotable *fragmentinfotable,
-                     const GtChain *chain,unsigned long idx)
+void gt_chain_extractchainelem(GtFragmentvalues *value,
+                               const GtFragmentinfotable *fragmentinfotable,
+                               const GtChain *chain,unsigned long idx)
 {
   const Fragmentinfo *fiptr;
 
@@ -1561,4 +1563,15 @@ void gt_chain_display(GtFragmentvalues *value,
   value->startpos[2] = fiptr->startpos[2];
   value->startpos[3] = fiptr->startpos[3];
   value->weight = fiptr->weight;
+}
+
+void gt_chain_printchainelem(FILE *outfp,const GtFragmentvalues *value)
+{
+  fprintf(outfp,
+          FormatSeqpos " " FormatSeqpos " " FormatSeqpos " " FormatSeqpos
+          " %ld\n",PRINTSeqposcast(value->startpos[0]),
+                   PRINTSeqposcast(value->endpos[0]),
+                   PRINTSeqposcast(value->startpos[1]),
+                   PRINTSeqposcast(value->endpos[1]),
+                   value->weight);
 }

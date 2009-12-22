@@ -155,9 +155,13 @@ unsigned long gt_chain_chainlength(const GtChain *chain);
 
 /* store the values of element idx in given chain in the first parameter */
 
-void gt_chain_display(GtFragmentvalues *value,
-                      const GtFragmentinfotable *fragmentinfotable,
-                      const GtChain *chain,
-                      unsigned long idx);
+void gt_chain_extractchainelem(GtFragmentvalues *value,
+                               const GtFragmentinfotable *fragmentinfotable,
+                               const GtChain *chain,
+                               unsigned long idx);
+
+/* print a chain element to the given file pointer */
+
+void gt_chain_printchainelem(FILE *outfp,const GtFragmentvalues *value);
 
 #endif
