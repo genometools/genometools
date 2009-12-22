@@ -206,7 +206,7 @@ static void gt_outputformatchaingeneric(
          counter->chaincounter,chainlength,gt_chain_chainscore(chain));
   if (!silent)
   {
-    GtFragmentvalues value;
+    GtChainmatchvalues value;
 
     for (idx=0; idx < chainlength; idx++)
     {

@@ -23,7 +23,6 @@
 #include "core/str_array_api.h"
 #include "core/unused_api.h"
 #include "core/arraydef.h"
-#include "stamp.h"
 #include "extended/redblack.h"
 #include "verbose-def.h"
 #include "chain2dim.h"
@@ -144,7 +143,7 @@ void gt_chain_fragmentinfotable_empty(GtChainmatchtable *fragmentinfotable)
 }
 
 void gt_chain_fragmentinfotable_add(GtChainmatchtable *fragmentinfotable,
-                                    const GtFragmentvalues *infragment)
+                                    const GtChainmatchvalues *infragment)
 {
   Matchchaininfo *frag;
 
@@ -221,7 +220,7 @@ typedef struct
 {
   GtRBTnode *dictroot;
   unsigned long *endpointperm;
-} Fragmentstore;
+} Matchstore;
 
 typedef struct
 {
@@ -564,7 +563,7 @@ static GtChainscoretype evalpriority(
 
 static void insertintodict(bool addterminal,
                            const GtChainmatchtable *fragmentinfotable,
-                           Fragmentstore *fragmentstore,
+                           Matchstore *fragmentstore,
                            Fragpoint *qfrag2)
 {
   Fragpoint *retval2;
@@ -590,7 +589,7 @@ static void insertintodict(bool addterminal,
 
 static void activatefragpoint(bool addterminal,
                               const GtChainmatchtable *fragmentinfotable,
-                              Fragmentstore *fragmentstore,
+                              Matchstore *fragmentstore,
                               Fragpoint *qfrag2)
 {
   Fragpoint *tmp2;
@@ -635,7 +634,7 @@ static void activatefragpoint(bool addterminal,
 
 static void evalfragmentscore(const GtChainmode *chainmode,
                               GtChainmatchtable *fragmentinfotable,
-                              Fragmentstore *fragmentstore,
+                              Matchstore *fragmentstore,
                               bool gapsL1,
                               unsigned long fragpointident,
                               unsigned int presortdim)
@@ -1029,7 +1028,7 @@ static Fragpoint *makeactivationpoint(
 
 static void mergestartandendpoints(const GtChainmode *chainmode,
                                    GtChainmatchtable *fragmentinfotable,
-                                   Fragmentstore *fragmentstore,
+                                   Matchstore *fragmentstore,
                                    bool gapsL1,
                                    unsigned int presortdim)
 {
@@ -1092,7 +1091,7 @@ static void mergestartandendpoints(const GtChainmode *chainmode,
 static unsigned int findmaximalscores(const GtChainmode *chainmode,
                                       GtChain *chain,
                                       GtChainmatchtable *fragmentinfotable,
-                                      Fragmentstore *fragmentstore,
+                                      Matchstore *fragmentstore,
                                       GtChainprocessor chainprocessor,
                                       bool withequivclasses,
                                       void *cpinfo,
@@ -1222,7 +1221,7 @@ static void makesortedendpointpermutation(
 
 static void fastchainingscores(const GtChainmode *chainmode,
                                GtChainmatchtable *fragmentinfotable,
-                               Fragmentstore *fragmentstore,
+                               Matchstore *fragmentstore,
                                unsigned int presortdim,
                                bool gapsL1)
 {
@@ -1295,7 +1294,7 @@ void gt_chain_fastchaining(const GtChainmode *chainmode,
     = assignchaingapcostfunction(chainmode->chainkind,gapsL1);
   if (fragmentinfotable->nextfree > 1UL)
   {
-    Fragmentstore fragmentstore;
+    Matchstore fragmentstore;
 
     showverbose(verboseinfo,"compute chain scores");
     if (chainmode->chainkind == GLOBALCHAININGWITHOVERLAPS)
@@ -1550,7 +1549,7 @@ unsigned long gt_chain_chainlength(const GtChain *chain)
   return chain->chainedfragments.nextfreeGtChainref;
 }
 
-void gt_chain_extractchainelem(GtFragmentvalues *value,
+void gt_chain_extractchainelem(GtChainmatchvalues *value,
                                const GtChainmatchtable *fragmentinfotable,
                                const GtChain *chain,unsigned long idx)
 {
@@ -1566,7 +1565,7 @@ void gt_chain_extractchainelem(GtFragmentvalues *value,
   value->weight = fiptr->weight;
 }
 
-void gt_chain_printchainelem(FILE *outfp,const GtFragmentvalues *value)
+void gt_chain_printchainelem(FILE *outfp,const GtChainmatchvalues *value)
 {
   fprintf(outfp,
           FormatSeqpos " " FormatSeqpos " " FormatSeqpos " " FormatSeqpos

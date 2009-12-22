@@ -29,7 +29,8 @@
                      matchfile,linenum+1,countcolumns+1,S)
 
 static int numberoflinesinfile(unsigned long *linenum,
-                               const char *filename,GtError *err)
+                               const char *filename,
+                               GtError *err)
 {
   FILE *fp;
   int cc;
@@ -52,8 +53,8 @@ static int numberoflinesinfile(unsigned long *linenum,
 }
 
 GtChainmatchtable *gt_chain_analyzeopenformatfile(double weightfactor,
-                                                    const char *matchfile,
-                                                    GtError *err)
+                                                  const char *matchfile,
+                                                  GtError *err)
 {
   GtChainmatchtable *fragmentinfotable;
   GtStr *currentline;
@@ -62,7 +63,7 @@ GtChainmatchtable *gt_chain_analyzeopenformatfile(double weightfactor,
   FILE *matchfp;
   long readint;
   bool haserr = false;
-  GtFragmentvalues fragment;
+  GtChainmatchvalues fragment;
 
   if (numberoflinesinfile(&linenum,matchfile,err) != 0)
   {

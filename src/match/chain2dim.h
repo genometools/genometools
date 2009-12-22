@@ -62,7 +62,7 @@ typedef struct
                                  userdef */
                  endpos[2];  /* end of fragments in the 2 dimensions, userdef */
   GtChainscoretype weight; /* weight of fragment, user defined */
-} GtFragmentvalues;
+} GtChainmatchvalues;
 
 /*
   the type of function to report chains.
@@ -92,7 +92,7 @@ void gt_chain_fragmentinfotable_empty(GtChainmatchtable *fragmentinfotable);
 /* the following function adds the relevant values describing a fragment */
 
 void gt_chain_fragmentinfotable_add(GtChainmatchtable *fragmentinfotable,
-                                    const GtFragmentvalues *infragment);
+                                    const GtChainmatchvalues *infragment);
 
 /* the following functions reads a file describing fragments in open format.
    It returns the corresponding fragment table */
@@ -155,13 +155,13 @@ unsigned long gt_chain_chainlength(const GtChain *chain);
 
 /* store the values of element idx in given chain in the first parameter */
 
-void gt_chain_extractchainelem(GtFragmentvalues *value,
+void gt_chain_extractchainelem(GtChainmatchvalues *value,
                                const GtChainmatchtable *fragmentinfotable,
                                const GtChain *chain,
                                unsigned long idx);
 
 /* print a chain element to the given file pointer */
 
-void gt_chain_printchainelem(FILE *outfp,const GtFragmentvalues *value);
+void gt_chain_printchainelem(FILE *outfp,const GtChainmatchvalues *value);
 
 #endif
