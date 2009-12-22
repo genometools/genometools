@@ -29,7 +29,7 @@
 #include "prsqualint.h"
 
 /*
-  The basic information required for each fragment is stored
+  The basic information required for each match is stored
   in a structure of the following type. The user has to specify
   those components which are tagged `user defined'. The chaining
   algorithms computes the remaining components tagged 'compute'
@@ -38,21 +38,21 @@
 
 typedef struct
 {
-  GtChainpostype startpos[2], /* start of fragments in the 2 dimensions,
+  GtChainpostype startpos[2], /* start of matches in the 2 dimensions,
                                  userdef */
-                 endpos[2];  /* end of fragments in the 2 dimensions, userdef */
+                 endpos[2];  /* end of matches in the 2 dimensions, userdef */
   unsigned long firstinchain,   /* first element in chain, compute */
                 previousinchain;  /* previous index in chain, compute */
   GtChainscoretype
-         weight, /* weight of fragment, user defined */
+         weight, /* weight of match, user defined */
          initialgap, /* gap to start of sequences, user defined */
-         terminalgap, /* gap to last positions of fragment, user defined */
+         terminalgap, /* gap to last positions of match, user defined */
          score; /* score of highest scoreing chain ending here, compute */
 } Matchchaininfo;
 
 struct GtChainmatchtable
 {
-   Matchchaininfo *fragments;
+   Matchchaininfo *matches;
    GtChainscoretype largestdim0,
                     largestdim1;
    unsigned long nextfree,
@@ -103,13 +103,13 @@ typedef unsigned long GtChainref;
 GT_DECLAREARRAYSTRUCT(GtChainref);
 
 /*
-  A chain consists of an array of integers. These refer to the array of
-  fragment informations.
+  A chain consists of an array of references to chained matches.
+  These refer to an array of matchchaininfos.
 */
 
 struct GtChain
 {
-  GtArrayGtChainref chainedfragments;
+  GtArrayGtChainref chainedmatches;
   GtChainscoretype scoreofchain;
 };
 
@@ -117,8 +117,8 @@ GtChainmatchtable *gt_chain_matchtable_new(unsigned long numberofmatches)
 {
   GtChainmatchtable *matchtable
     = gt_malloc(sizeof (*matchtable));
-  matchtable->fragments
-    = gt_malloc(sizeof (*matchtable->fragments) * numberofmatches);
+  matchtable->matches
+    = gt_malloc(sizeof (*matchtable->matches) * numberofmatches);
   matchtable->nextfree = 0;
   matchtable->allocated = numberofmatches;
   matchtable->largestdim0 = matchtable->largestdim1 = 0;
@@ -129,7 +129,7 @@ void gt_chain_matchtable_delete(GtChainmatchtable *matchtable)
 {
   if (matchtable != NULL)
   {
-    gt_free(matchtable->fragments);
+    gt_free(matchtable->matches);
     gt_free(matchtable);
   }
 }
@@ -142,26 +142,26 @@ void gt_chain_matchtable_empty(GtChainmatchtable *matchtable)
 }
 
 void gt_chain_matchtable_add(GtChainmatchtable *matchtable,
-                                    const GtChainmatchvalues *infragment)
+                             const GtChainmatchvalues *inmatch)
 {
-  Matchchaininfo *frag;
+  Matchchaininfo *matchchaininfo;
 
   gt_assert(matchtable->nextfree < matchtable->allocated);
-  gt_assert(infragment->startpos[0] <= infragment->endpos[0]);
-  gt_assert(infragment->startpos[1] <= infragment->endpos[1]);
-  frag = matchtable->fragments + matchtable->nextfree++;
-  frag->startpos[0] = infragment->startpos[0];
-  frag->startpos[1] = infragment->startpos[1];
-  frag->endpos[0] = infragment->endpos[0];
-  frag->endpos[1] = infragment->endpos[1];
-  frag->weight = infragment->weight;
-  if (matchtable->largestdim0 < (GtChainscoretype) infragment->endpos[0])
+  gt_assert(inmatch->startpos[0] <= inmatch->endpos[0]);
+  gt_assert(inmatch->startpos[1] <= inmatch->endpos[1]);
+  matchchaininfo = matchtable->matches + matchtable->nextfree++;
+  matchchaininfo->startpos[0] = inmatch->startpos[0];
+  matchchaininfo->startpos[1] = inmatch->startpos[1];
+  matchchaininfo->endpos[0] = inmatch->endpos[0];
+  matchchaininfo->endpos[1] = inmatch->endpos[1];
+  matchchaininfo->weight = inmatch->weight;
+  if (matchtable->largestdim0 < (GtChainscoretype) inmatch->endpos[0])
   {
-    matchtable->largestdim0 = (GtChainscoretype) infragment->endpos[0];
+    matchtable->largestdim0 = (GtChainscoretype) inmatch->endpos[0];
   }
-  if (matchtable->largestdim1 < (GtChainscoretype) infragment->endpos[1])
+  if (matchtable->largestdim1 < (GtChainscoretype) inmatch->endpos[1])
   {
-    matchtable->largestdim1 = (GtChainscoretype) infragment->endpos[1];
+    matchtable->largestdim1 = (GtChainscoretype) inmatch->endpos[1];
   }
 }
 
@@ -169,8 +169,8 @@ void gt_chain_fillthegapvalues(GtChainmatchtable *matchtable)
 {
   Matchchaininfo *fiptr;
 
-  for (fiptr = matchtable->fragments;
-       fiptr < matchtable->fragments + matchtable->nextfree;
+  for (fiptr = matchtable->matches;
+       fiptr < matchtable->matches + matchtable->nextfree;
        fiptr++)
   {
     fiptr->initialgap
@@ -187,23 +187,23 @@ void gt_chain_fillthegapvalues(GtChainmatchtable *matchtable)
 #define UNDEFPREVIOUS           matchtable->nextfree
 
 #define GETSTOREDSTARTPOINT(DIM,IDX)\
-        matchtable->fragments[IDX].startpos[DIM]
+        matchtable->matches[IDX].startpos[DIM]
 #define GETSTOREDENDPOINT(DIM,IDX)\
-        matchtable->fragments[IDX].endpos[DIM]
+        matchtable->matches[IDX].endpos[DIM]
 #define INITIALGAP(IDX)\
-        matchtable->fragments[IDX].initialgap
+        matchtable->matches[IDX].initialgap
 #define TERMINALGAP(IDX)\
-        matchtable->fragments[IDX].terminalgap
+        matchtable->matches[IDX].terminalgap
 
 #define CHECKCHAINSPACE\
-        if (lengthofchain >= chain->chainedfragments.allocatedGtChainref)\
+        if (lengthofchain >= chain->chainedmatches.allocatedGtChainref)\
         {\
-         chain->chainedfragments.spaceGtChainref = \
-           gt_realloc(chain->chainedfragments.spaceGtChainref,\
-                      sizeof (*chain->chainedfragments.spaceGtChainref) *\
+         chain->chainedmatches.spaceGtChainref = \
+           gt_realloc(chain->chainedmatches.spaceGtChainref,\
+                      sizeof (*chain->chainedmatches.spaceGtChainref) *\
                               lengthofchain);\
-          chain->chainedfragments.allocatedGtChainref = lengthofchain;\
-          chain->chainedfragments.nextfreeGtChainref = 0;\
+          chain->chainedmatches.allocatedGtChainref = lengthofchain;\
+          chain->chainedmatches.nextfreeGtChainref = 0;\
         }
 
 typedef GtChainscoretype (*GtChaingapcostfunction)(const GtChainmatchtable *,
@@ -213,7 +213,7 @@ typedef struct
 {
   unsigned long fpident;
   GtChainpostype fpposition;
-} Fragpoint;
+} Matchpoint;
 
 typedef struct
 {
@@ -224,9 +224,9 @@ typedef struct
 typedef struct
 {
   GtChainscoretype maxscore;
-  unsigned long maxfragnum;
+  unsigned long maxmatchnum;
   bool defined;
-} Maxfragvalue;
+} Maxmatchvalue;
 
 /*
   The component isavailable is used to
@@ -241,17 +241,17 @@ typedef struct
   GtChainscoretype score;
 } Bestofclass;
 
-static bool overlappingfragments(const GtChainmatchtable *matchtable,
-                                 unsigned long i,
-                                 unsigned long j)
+static bool overlappingmatches(const GtChainmatchtable *matchtable,
+                               unsigned long i,
+                               unsigned long j)
 {
   return (GETSTOREDENDPOINT(0,i) >= GETSTOREDSTARTPOINT(0,j) ||
           GETSTOREDENDPOINT(1,i) >= GETSTOREDSTARTPOINT(1,j)) ? true : false;
 }
 
-static bool colinearfragments(const GtChainmatchtable *matchtable,
-                              unsigned long i,
-                              unsigned long j)
+static bool colinearmatches(const GtChainmatchtable *matchtable,
+                            unsigned long i,
+                            unsigned long j)
 {
   return (GETSTOREDSTARTPOINT(0, i) < GETSTOREDSTARTPOINT(0, j) &&
           GETSTOREDENDPOINT(0, i)   < GETSTOREDENDPOINT(0, j)   &&
@@ -268,10 +268,9 @@ static GtChainscoretype gapcostL1(const GtChainmatchtable *matchtable,
           (GETSTOREDSTARTPOINT(1,j) - GETSTOREDENDPOINT(1,i)));
 }
 
-static GtChainscoretype overlapcost(
-                            const GtChainmatchtable *matchtable,
-                            unsigned long i,
-                            unsigned long j)
+static GtChainscoretype overlapcost(const GtChainmatchtable *matchtable,
+                                    unsigned long i,
+                                    unsigned long j)
 {
   GtChainpostype overlaplength = 0;
 
@@ -295,8 +294,8 @@ static GtChainscoretype overlapcost(
 
                       max{|i'-i-q|,|j'-j-q|},
 
-  whereas i+q-1 is the end point in i-dimension of fragment 1 and
-  j+q-1 is the end point in j-dimension of fragment 1.
+  whereas i+q-1 is the end point in i-dimension of match 1 and
+  j+q-1 is the end point in j-dimension of match 1.
   In using the match specific end points, other than fixed values for q,
   following function generalizes to MEMs as well.
 */
@@ -320,22 +319,22 @@ static void chainingboundarycases(const GtChainmode *chainmode,
   if (matchtable->nextfree == 0)
   {
     chain->scoreofchain = 0;
-    chain->chainedfragments.nextfreeGtChainref = 0;
+    chain->chainedmatches.nextfreeGtChainref = 0;
   } else
   {
     if (matchtable->nextfree == 1UL)
     {
       unsigned long lengthofchain;
 
-      chain->scoreofchain = matchtable->fragments[0].weight;
+      chain->scoreofchain = matchtable->matches[0].weight;
       if (chainmode->chainkind == GLOBALCHAININGWITHGAPCOST)
       {
         chain->scoreofchain -= (INITIALGAP(0) + TERMINALGAP(0));
       }
       lengthofchain = 1UL;
       CHECKCHAINSPACE;
-      chain->chainedfragments.spaceGtChainref[0] = 0;
-      chain->chainedfragments.nextfreeGtChainref = 1UL;
+      chain->chainedmatches.spaceGtChainref[0] = 0;
+      chain->chainedmatches.nextfreeGtChainref = 1UL;
     }
   }
 }
@@ -344,36 +343,36 @@ static void retracepreviousinchain(GtChain *chain,
                                    const GtChainmatchtable *matchtable,
                                    unsigned long retracestart)
 {
-  unsigned long fragnum, idx, lengthofchain;
+  unsigned long matchnum, idx, lengthofchain;
 
-  for (lengthofchain = 0, fragnum = retracestart;
-       fragnum != UNDEFPREVIOUS; lengthofchain++)
+  for (lengthofchain = 0, matchnum = retracestart;
+       matchnum != UNDEFPREVIOUS; lengthofchain++)
   {
-    fragnum = matchtable->fragments[fragnum].previousinchain;
+    matchnum = matchtable->matches[matchnum].previousinchain;
   }
   CHECKCHAINSPACE
-  fragnum = retracestart;
+  matchnum = retracestart;
   idx = lengthofchain;
-  while (fragnum != UNDEFPREVIOUS)
+  while (matchnum != UNDEFPREVIOUS)
   {
     gt_assert(idx > 0);
     idx--;
-    chain->chainedfragments.spaceGtChainref[idx] = fragnum;
-    fragnum = matchtable->fragments[fragnum].previousinchain;
+    chain->chainedmatches.spaceGtChainref[idx] = matchnum;
+    matchnum = matchtable->matches[matchnum].previousinchain;
   }
   gt_assert(idx == 0);
-  chain->chainedfragments.nextfreeGtChainref = lengthofchain;
+  chain->chainedmatches.nextfreeGtChainref = lengthofchain;
 }
 
 static bool checkmaxgapwidth(const GtChainmatchtable *matchtable,
                              GtChainpostype maxgapwidth,
-                             unsigned long leftfrag,
-                             unsigned long rightfrag)
+                             unsigned long leftmatch,
+                             unsigned long rightmatch)
 {
   GtChainpostype gapwidth, startpoint, endpoint;
 
-  startpoint = GETSTOREDSTARTPOINT(0,rightfrag);
-  endpoint = GETSTOREDENDPOINT(0,leftfrag);
+  startpoint = GETSTOREDSTARTPOINT(0,rightmatch);
+  endpoint = GETSTOREDENDPOINT(0,leftmatch);
   if (startpoint <= endpoint)
   {
     gapwidth = 0;
@@ -385,8 +384,8 @@ static bool checkmaxgapwidth(const GtChainmatchtable *matchtable,
   {
     return false;
   }
-  startpoint = GETSTOREDSTARTPOINT(1,rightfrag);
-  endpoint = GETSTOREDENDPOINT(1,leftfrag);
+  startpoint = GETSTOREDSTARTPOINT(1,rightmatch);
+  endpoint = GETSTOREDENDPOINT(1,leftmatch);
   if (startpoint <= endpoint)
   {
     gapwidth = 0;
@@ -406,45 +405,45 @@ static void bruteforcechainingscores(const GtChainmode *chainmode,
                                      GtChaingapcostfunction
                                        chaingapcostfunction)
 {
-  unsigned long previous, leftfrag, rightfrag;
+  unsigned long previous, leftmatch, rightmatch;
   GtChainscoretype weightright, score;
-  Maxfragvalue localmaxfrag;
+  Maxmatchvalue localmaxmatch;
   bool combinable;
 
   if (matchtable->nextfree > 1UL)
   {
-    matchtable->fragments[0].firstinchain = 0;
-    matchtable->fragments[0].previousinchain = UNDEFPREVIOUS;
-    matchtable->fragments[0].score
-      = matchtable->fragments[0].weight;
+    matchtable->matches[0].firstinchain = 0;
+    matchtable->matches[0].previousinchain = UNDEFPREVIOUS;
+    matchtable->matches[0].score
+      = matchtable->matches[0].weight;
     if (chainmode->chainkind == GLOBALCHAININGWITHGAPCOST)
     {
-      matchtable->fragments[0].score -= (INITIALGAP(0) + TERMINALGAP(0));
+      matchtable->matches[0].score -= (INITIALGAP(0) + TERMINALGAP(0));
     }
-    for (rightfrag=1Ul; rightfrag<matchtable->nextfree; rightfrag++)
+    for (rightmatch=1Ul; rightmatch<matchtable->nextfree; rightmatch++)
     {
-      weightright = matchtable->fragments[rightfrag].weight;
-      localmaxfrag.defined = false;
-      localmaxfrag.maxscore = 0;
-      localmaxfrag.maxfragnum = 0;
-      for (leftfrag=0; leftfrag<rightfrag; leftfrag++)
+      weightright = matchtable->matches[rightmatch].weight;
+      localmaxmatch.defined = false;
+      localmaxmatch.maxscore = 0;
+      localmaxmatch.maxmatchnum = 0;
+      for (leftmatch=0; leftmatch<rightmatch; leftmatch++)
       {
         if (chainmode->maxgapwidth != 0 &&
            !checkmaxgapwidth(matchtable,
                              chainmode->maxgapwidth,
-                             leftfrag,
-                             rightfrag))
+                             leftmatch,
+                             rightmatch))
         {
           combinable = false;
         } else
         {
           if (chainmode->chainkind == GLOBALCHAININGWITHOVERLAPS)
           {
-            combinable = colinearfragments(matchtable,leftfrag,
-                                           rightfrag);
+            combinable = colinearmatches(matchtable,leftmatch,
+                                           rightmatch);
           } else
           {
-            if (overlappingfragments(matchtable,leftfrag,rightfrag))
+            if (overlappingmatches(matchtable,leftmatch,rightmatch))
             {
               combinable = false;
             } else
@@ -455,26 +454,26 @@ static void bruteforcechainingscores(const GtChainmode *chainmode,
         }
         if (combinable)
         {
-          score = matchtable->fragments[leftfrag].score;
+          score = matchtable->matches[leftmatch].score;
           if (chainmode->chainkind == GLOBALCHAINING)
           {
             /* process chainkinds without gap costs */
             score += weightright;
-            previous = leftfrag;
+            previous = leftmatch;
           } else
           {
-            score -= chaingapcostfunction(matchtable,leftfrag,rightfrag);
+            score -= chaingapcostfunction(matchtable,leftmatch,rightmatch);
             if (chainmode->chainkind == GLOBALCHAININGWITHGAPCOST)
             {
-              score += (weightright + TERMINALGAP(leftfrag)
-                                    - TERMINALGAP(rightfrag));
-              previous = leftfrag;
+              score += (weightright + TERMINALGAP(leftmatch)
+                                    - TERMINALGAP(rightmatch));
+              previous = leftmatch;
             } else
             {
               if (score > 0)
               {
                 score += weightright;
-                previous = leftfrag;
+                previous = leftmatch;
               } else
               {
                 score = weightright;
@@ -482,37 +481,37 @@ static void bruteforcechainingscores(const GtChainmode *chainmode,
               }
             }
           }
-          if (!localmaxfrag.defined || localmaxfrag.maxscore < score)
+          if (!localmaxmatch.defined || localmaxmatch.maxscore < score)
           {
-            localmaxfrag.maxscore = score;
-            localmaxfrag.maxfragnum = previous;
-            localmaxfrag.defined = true;
+            localmaxmatch.maxscore = score;
+            localmaxmatch.maxmatchnum = previous;
+            localmaxmatch.defined = true;
           }
         }
       }
-      if (localmaxfrag.defined)
+      if (localmaxmatch.defined)
       {
-        matchtable->fragments[rightfrag].previousinchain
-          = localmaxfrag.maxfragnum;
-        if (localmaxfrag.maxfragnum == UNDEFPREVIOUS)
+        matchtable->matches[rightmatch].previousinchain
+          = localmaxmatch.maxmatchnum;
+        if (localmaxmatch.maxmatchnum == UNDEFPREVIOUS)
         {
-          matchtable->fragments[rightfrag].firstinchain = rightfrag;
+          matchtable->matches[rightmatch].firstinchain = rightmatch;
         } else
         {
-          matchtable->fragments[rightfrag].firstinchain
-            = matchtable->fragments[localmaxfrag.maxfragnum].
+          matchtable->matches[rightmatch].firstinchain
+            = matchtable->matches[localmaxmatch.maxmatchnum].
               firstinchain;
         }
-        matchtable->fragments[rightfrag].score = localmaxfrag.maxscore;
+        matchtable->matches[rightmatch].score = localmaxmatch.maxscore;
       } else
       {
-        matchtable->fragments[rightfrag].previousinchain = UNDEFPREVIOUS;
-        matchtable->fragments[rightfrag].firstinchain = rightfrag;
-        matchtable->fragments[rightfrag].score = weightright;
+        matchtable->matches[rightmatch].previousinchain = UNDEFPREVIOUS;
+        matchtable->matches[rightmatch].firstinchain = rightmatch;
+        matchtable->matches[rightmatch].score = weightright;
         if (chainmode->chainkind == GLOBALCHAININGWITHGAPCOST)
         {
-          matchtable->fragments[rightfrag].score
-            -= (INITIALGAP(rightfrag) + TERMINALGAP(rightfrag));
+          matchtable->matches[rightmatch].score
+            -= (INITIALGAP(rightmatch) + TERMINALGAP(rightmatch));
         }
       }
     }
@@ -520,94 +519,93 @@ static void bruteforcechainingscores(const GtChainmode *chainmode,
 }
 
 /*
-  The following function compares fragment points. These are
-  end points of fragments in dimension 2.
-  If the fragment points are identical, then the order is undefined.
+  The following function compares match points. These are
+  end points of matches in dimension 2.
+  If the match points are identical, then the order is undefined.
 */
 
-static int cmpendFragpoint2(const GtKeytype keya,
-                            const GtKeytype keyb,
-                            GT_UNUSED void *info)
+static int cmpendMatchpoint2(const GtKeytype keya,
+                             const GtKeytype keyb,
+                             GT_UNUSED void *info)
 {
-  if (((Fragpoint *) keya)->fpposition < ((Fragpoint *) keyb)->fpposition)
+  if (((Matchpoint *) keya)->fpposition < ((Matchpoint *) keyb)->fpposition)
   {
     return -1;
   }
-  if (((Fragpoint *) keya)->fpposition > ((Fragpoint *) keyb)->fpposition)
+  if (((Matchpoint *) keya)->fpposition > ((Matchpoint *) keyb)->fpposition)
   {
     return 1;
   }
-  if (FRAGIDENT((Fragpoint *) keya) < FRAGIDENT((Fragpoint *) keyb))
+  if (FRAGIDENT((Matchpoint *) keya) < FRAGIDENT((Matchpoint *) keyb))
   {
     return -1;
   }
-  if (FRAGIDENT((Fragpoint *) keya) > FRAGIDENT((Fragpoint *) keyb))
+  if (FRAGIDENT((Matchpoint *) keya) > FRAGIDENT((Matchpoint *) keyb))
   {
     return 1;
   }
   return 0;
 }
 
-static GtChainscoretype evalpriority(
-                               bool addterminal,
-                               const GtChainmatchtable *matchtable,
-                               unsigned long fragnum)
+static GtChainscoretype evalpriority(bool addterminal,
+                                     const GtChainmatchtable *matchtable,
+                                     unsigned long matchnum)
 {
   if (addterminal)
   {
-    return matchtable->fragments[fragnum].score - TERMINALGAP(fragnum);
+    return matchtable->matches[matchnum].score - TERMINALGAP(matchnum);
   }
-  return matchtable->fragments[fragnum].score;
+  return matchtable->matches[matchnum].score;
 }
 
 static void insertintodict(bool addterminal,
                            const GtChainmatchtable *matchtable,
-                           Matchstore *fragmentstore,
-                           Fragpoint *qfrag2)
+                           Matchstore *matchstore,
+                           Matchpoint *qmatch2)
 {
-  Fragpoint *retval2;
+  Matchpoint *retval2;
   bool nodecreated;
 
-  retval2 = (Fragpoint *) gt_rbt_search ((const GtKeytype) qfrag2,
-                                         &nodecreated,
-                                         &fragmentstore->dictroot,
-                                         cmpendFragpoint2,
-                                         NULL);
+  retval2 = (Matchpoint *) gt_rbt_search ((const GtKeytype) qmatch2,
+                                          &nodecreated,
+                                          &matchstore->dictroot,
+                                          cmpendMatchpoint2,
+                                          NULL);
   gt_assert(retval2 != NULL);
   if (!nodecreated)
   {
     if (evalpriority(addterminal,matchtable,FRAGIDENT(retval2)) <
-        evalpriority(addterminal,matchtable,FRAGIDENT(qfrag2)))
+        evalpriority(addterminal,matchtable,FRAGIDENT(qmatch2)))
     {
-      gt_assert(retval2->fpposition == qfrag2->fpposition);
-      retval2->fpident = qfrag2->fpident;
+      gt_assert(retval2->fpposition == qmatch2->fpposition);
+      retval2->fpident = qmatch2->fpident;
     }
-    gt_free(qfrag2);
+    gt_free(qmatch2);
   }
 }
 
-static void activatefragpoint(bool addterminal,
-                              const GtChainmatchtable *matchtable,
-                              Matchstore *fragmentstore,
-                              Fragpoint *qfrag2)
+static void activatematchpoint(bool addterminal,
+                               const GtChainmatchtable *matchtable,
+                               Matchstore *matchstore,
+                               Matchpoint *qmatch2)
 {
-  Fragpoint *tmp2;
+  Matchpoint *tmp2;
   GtChainscoretype qpriority;
 
-  qpriority = evalpriority(addterminal,matchtable,FRAGIDENT(qfrag2));
-  tmp2 = (Fragpoint *) gt_rbt_previousequalkey ((const GtKeytype) qfrag2,
-                                                fragmentstore->dictroot,
-                                                cmpendFragpoint2,
+  qpriority = evalpriority(addterminal,matchtable,FRAGIDENT(qmatch2));
+  tmp2 = (Matchpoint *) gt_rbt_previousequalkey ((const GtKeytype) qmatch2,
+                                                matchstore->dictroot,
+                                                cmpendMatchpoint2,
                                                 NULL);
   if (tmp2 == NULL ||
       qpriority > evalpriority(addterminal,matchtable,FRAGIDENT(tmp2)))
   {
-    insertintodict(addterminal,matchtable,fragmentstore,qfrag2);
+    insertintodict(addterminal,matchtable,matchstore,qmatch2);
     while (true)
     {
-      tmp2 = (Fragpoint *) gt_rbt_nextkey ((const GtKeytype) qfrag2,
-                                           fragmentstore->dictroot,
-                                           cmpendFragpoint2,
+      tmp2 = (Matchpoint *) gt_rbt_nextkey ((const GtKeytype) qmatch2,
+                                           matchstore->dictroot,
+                                           cmpendMatchpoint2,
                                            NULL);
       if (tmp2 == NULL || qpriority <= evalpriority(addterminal,
                                                     matchtable,
@@ -616,8 +614,8 @@ static void activatefragpoint(bool addterminal,
         break;
       }
       if (gt_rbt_delete ((const GtKeytype) tmp2,
-                        &fragmentstore->dictroot,
-                        cmpendFragpoint2,
+                        &matchstore->dictroot,
+                        cmpendMatchpoint2,
                         NULL) != 0)
       {
         fprintf(stderr,"cannot delete successor node\n");
@@ -627,114 +625,113 @@ static void activatefragpoint(bool addterminal,
     }
   } else
   {
-    gt_free(qfrag2);
+    gt_free(qmatch2);
   }
 }
 
-static void evalfragmentscore(const GtChainmode *chainmode,
-                              GtChainmatchtable *matchtable,
-                              Matchstore *fragmentstore,
-                              bool gapsL1,
-                              unsigned long fragpointident,
-                              unsigned int presortdim)
+static void evalmatchscore(const GtChainmode *chainmode,
+                           GtChainmatchtable *matchtable,
+                           Matchstore *matchstore,
+                           bool gapsL1,
+                           unsigned long matchpointident,
+                           unsigned int presortdim)
 {
   unsigned long previous;
   GtChainpostype startpos2;
-  Fragpoint *qfrag2;
+  Matchpoint *qmatch2;
   GtChainscoretype score;
 
-  startpos2 = GETSTOREDSTARTPOINT(1-presortdim,fragpointident);
+  startpos2 = GETSTOREDSTARTPOINT(1-presortdim,matchpointident);
   if (startpos2 == 0)
   {
-    qfrag2 = NULL;
+    qmatch2 = NULL;
   } else
   {
-    Fragpoint keyfrag2;
+    Matchpoint keymatch2;
 
-    keyfrag2.fpposition = startpos2 - 1;  /* it is a start position */
-    keyfrag2.fpident = MAKEENDPOINT(fragpointident);
+    keymatch2.fpposition = startpos2 - 1;  /* it is a start position */
+    keymatch2.fpident = MAKEENDPOINT(matchpointident);
                        /* but considered as endpoint */
-    qfrag2 = (Fragpoint *) gt_rbt_previousequalkey(
-                                  (const GtKeytype) &keyfrag2,
-                                  fragmentstore->dictroot,
-                                  cmpendFragpoint2,
+    qmatch2 = (Matchpoint *) gt_rbt_previousequalkey(
+                                  (const GtKeytype) &keymatch2,
+                                  matchstore->dictroot,
+                                  cmpendMatchpoint2,
                                   NULL);
-    if (qfrag2 != NULL)
+    if (qmatch2 != NULL)
     {
       if (chainmode->maxgapwidth != 0 &&
          !checkmaxgapwidth(matchtable,
                            chainmode->maxgapwidth,
-                           FRAGIDENT(qfrag2),
-                           fragpointident))
+                           FRAGIDENT(qmatch2),
+                           matchpointident))
       {
-        qfrag2 = NULL;
+        qmatch2 = NULL;
       }
     }
   }
-  if (qfrag2 == NULL)
+  if (qmatch2 == NULL)
   {
-    score = matchtable->fragments[fragpointident].weight;
+    score = matchtable->matches[matchpointident].weight;
     if (chainmode->chainkind == GLOBALCHAININGWITHGAPCOST)
     {
-      score -= INITIALGAP(fragpointident);
+      score -= INITIALGAP(matchpointident);
     }
     previous = UNDEFPREVIOUS;
   } else
   {
-    score = matchtable->fragments[FRAGIDENT(qfrag2)].score;
+    score = matchtable->matches[FRAGIDENT(qmatch2)].score;
     if (chainmode->chainkind == GLOBALCHAINING)
     {
-      score += matchtable->fragments[fragpointident].weight;
-      previous = FRAGIDENT(qfrag2);
+      score += matchtable->matches[matchpointident].weight;
+      previous = FRAGIDENT(qmatch2);
     } else
     {
       GtChainscoretype tmpgc;
 
       if (gapsL1)
       {
-        tmpgc = gapcostL1(matchtable,FRAGIDENT(qfrag2),fragpointident);
+        tmpgc = gapcostL1(matchtable,FRAGIDENT(qmatch2),matchpointident);
       } else
       {
-        tmpgc = gapcostCc(matchtable,FRAGIDENT(qfrag2),fragpointident);
+        tmpgc = gapcostCc(matchtable,FRAGIDENT(qmatch2),matchpointident);
       }
       if (chainmode->chainkind == GLOBALCHAININGWITHGAPCOST || score > tmpgc)
       {
-        score += (matchtable->fragments[fragpointident].weight - tmpgc);
-        previous = FRAGIDENT(qfrag2);
+        score += (matchtable->matches[matchpointident].weight - tmpgc);
+        previous = FRAGIDENT(qmatch2);
       } else
       {
-        score = matchtable->fragments[fragpointident].weight;
+        score = matchtable->matches[matchpointident].weight;
         previous = UNDEFPREVIOUS;
       }
     }
   }
-  matchtable->fragments[fragpointident].score = score;
-  matchtable->fragments[fragpointident].previousinchain = previous;
+  matchtable->matches[matchpointident].score = score;
+  matchtable->matches[matchpointident].previousinchain = previous;
   if (previous == UNDEFPREVIOUS)
   {
-    matchtable->fragments[fragpointident].firstinchain = fragpointident;
+    matchtable->matches[matchpointident].firstinchain = matchpointident;
   } else
   {
-    matchtable->fragments[fragpointident].firstinchain
-      = matchtable->fragments[previous].firstinchain;
+    matchtable->matches[matchpointident].firstinchain
+      = matchtable->matches[previous].firstinchain;
   }
 }
 
-static bool isrightmaximallocalchain(
-                        const GtChainmatchtable *matchtable,
-                        unsigned long currentfrag)
+static bool isrightmaximallocalchain(const GtChainmatchtable *matchtable,
+                                     unsigned long currentmatch)
 {
-  if (currentfrag == matchtable->nextfree - 1)
+  if (currentmatch == matchtable->nextfree - 1)
   {
     return true;
   }
-  if (matchtable->fragments[currentfrag+1].previousinchain !=
-      currentfrag)
+  if (matchtable->matches[currentmatch+1].previousinchain !=
+      currentmatch)
   {
     return true;
   }
-  if (matchtable->fragments[currentfrag+1].score <
-      matchtable->fragments[currentfrag].score)
+  if (matchtable->matches[currentmatch+1].score <
+      matchtable->matches[currentmatch].score)
   {
     return true;
   }
@@ -758,11 +755,11 @@ static void determineequivreps(Bestofclass *chainequivalenceclasses,
     if (isrightmaximallocalchain(matchtable,matchnum))
     {
       classrep = chainequivalenceclasses +
-                 matchtable->fragments[matchnum].firstinchain;
+                 matchtable->matches[matchnum].firstinchain;
       if (!classrep->isavailable ||
-          classrep->score < matchtable->fragments[matchnum].score)
+          classrep->score < matchtable->matches[matchnum].score)
       {
-        classrep->score = matchtable->fragments[matchnum].score;
+        classrep->score = matchtable->matches[matchnum].score;
         classrep->isavailable = true;
       }
     }
@@ -790,9 +787,9 @@ static bool retrievemaximalscore(GtChainscoretype *maxscore,
         tgap = 0;
       }
       if (!maxscoredefined ||
-          *maxscore < matchtable->fragments[matchnum].score - tgap)
+          *maxscore < matchtable->matches[matchnum].score - tgap)
       {
-        *maxscore = matchtable->fragments[matchnum].score - tgap;
+        *maxscore = matchtable->matches[matchnum].score - tgap;
         maxscoredefined = true;
       }
     }
@@ -904,42 +901,41 @@ static void insertDictmaxsize(Dictmaxsize *dict,
   }
 }
 
-static void retrievechainbestscores(
-                          bool *minscoredefined,
-                          GtChainscoretype *minscore,
-                          const GtChainmatchtable *matchtable,
-                          unsigned long howmanybest)
+static void retrievechainbestscores(bool *minscoredefined,
+                                    GtChainscoretype *minscore,
+                                    const GtChainmatchtable *matchtable,
+                                    unsigned long howmanybest)
 {
-  unsigned long matchnum, fragnum = 0;
+  unsigned long idx, matchnum = 0;
   GtChainscoretype *scores;
-  Dictmaxsize *dictbestfragments;
+  Dictmaxsize *dictbestmatches;
   void *minkey;
 
   scores = gt_malloc(sizeof (*scores) * matchtable->nextfree);
-  dictbestfragments = dictmaxsize_new(howmanybest);
-  for (matchnum=0; matchnum<matchtable->nextfree; matchnum++)
+  dictbestmatches = dictmaxsize_new(howmanybest);
+  for (idx=0; idx<matchtable->nextfree; idx++)
   {
-    if (isrightmaximallocalchain(matchtable,matchnum))
+    if (isrightmaximallocalchain(matchtable,idx))
     {
-      scores[fragnum] = matchtable->fragments[matchnum].score;
-      insertDictmaxsize(dictbestfragments,
+      scores[matchnum] = matchtable->matches[idx].score;
+      insertDictmaxsize(dictbestmatches,
                         comparescores,
                         NULL,
-                        (void *) (scores + fragnum));
-      fragnum++;
+                        (void *) (scores + matchnum));
+      matchnum++;
     }
   }
-  if (fragnum == 0)
+  if (matchnum == 0)
   {
     *minscoredefined = false;
   } else
   {
-    minkey = gt_rbt_minimumkey(dictbestfragments->root);
+    minkey = gt_rbt_minimumkey(dictbestmatches->root);
     gt_assert(minkey != NULL);
     *minscore = *((GtChainscoretype *) minkey);
     *minscoredefined = true;
   }
-  dictmaxsize_delete(dictbestfragments);
+  dictmaxsize_delete(dictbestmatches);
   gt_free(scores);
 }
 
@@ -966,16 +962,15 @@ static void retrievechainthreshold(const GtChainmode *chainmode,
       {
         tgap = 0;
       }
-      if (matchtable->fragments[matchnum].score - tgap >= minscore)
+      if (matchtable->matches[matchnum].score - tgap >= minscore)
       {
         if (chainequivalenceclasses != NULL)
         {
           classrep = chainequivalenceclasses +
-                     matchtable->fragments[matchnum].firstinchain;
+                     matchtable->matches[matchnum].firstinchain;
           gt_assert(classrep != NULL);
           if (classrep->isavailable &&
-              classrep->score == matchtable->fragments[matchnum].score -
-                                 tgap)
+              classrep->score == matchtable->matches[matchnum].score - tgap)
           {
             chain->scoreofchain = classrep->score;
             classrep->isavailable = false;
@@ -984,8 +979,7 @@ static void retrievechainthreshold(const GtChainmode *chainmode,
           }
         } else
         {
-          chain->scoreofchain = matchtable->fragments[matchnum].score -
-                                tgap;
+          chain->scoreofchain = matchtable->matches[matchnum].score - tgap;
           retracepreviousinchain(chain, matchtable, matchnum);
           chainprocessor(cpinfo,matchtable,chain);
         }
@@ -1011,12 +1005,11 @@ static int comparestartandend(const Matchchaininfo *sortedstartpoints,
   return -1;
 }
 
-static Fragpoint *makeactivationpoint(
-                            const GtChainmatchtable *matchtable,
-                            unsigned long fpident,
-                            unsigned int postsortdim)
+static Matchpoint *makeactivationpoint(const GtChainmatchtable *matchtable,
+                                       unsigned long fpident,
+                                       unsigned int postsortdim)
 {
-  Fragpoint *fpptr;
+  Matchpoint *fpptr;
 
   fpptr = gt_malloc(sizeof (*fpptr));
   gt_assert(fpptr != NULL);
@@ -1027,7 +1020,7 @@ static Fragpoint *makeactivationpoint(
 
 static void mergestartandendpoints(const GtChainmode *chainmode,
                                    GtChainmatchtable *matchtable,
-                                   Matchstore *fragmentstore,
+                                   Matchstore *matchstore,
                                    bool gapsL1,
                                    unsigned int presortdim)
 {
@@ -1036,29 +1029,29 @@ static void mergestartandendpoints(const GtChainmode *chainmode,
   unsigned int postsortdim = 1U - presortdim;
 
   addterminal = (chainmode->chainkind == GLOBALCHAINING) ? false : true;
-  fragmentstore->dictroot = NULL;
+  matchstore->dictroot = NULL;
   for (xidx = 0, startcount = 0, endcount = 0;
        startcount < matchtable->nextfree &&
        endcount < matchtable->nextfree;
        xidx++)
   {
-    if (comparestartandend(matchtable->fragments + startcount,
-                           matchtable->fragments +
-                           fragmentstore->endpointperm[endcount],
+    if (comparestartandend(matchtable->matches + startcount,
+                           matchtable->matches +
+                           matchstore->endpointperm[endcount],
                            presortdim) < 0)
     {
-      evalfragmentscore(chainmode,
-                        matchtable,
-                        fragmentstore,
-                        gapsL1,
-                        startcount,
-                        presortdim);
+      evalmatchscore(chainmode,
+                     matchtable,
+                     matchstore,
+                     gapsL1,
+                     startcount,
+                     presortdim);
       startcount++;
     } else
     {
-      activatefragpoint(addterminal,matchtable,fragmentstore,
+      activatematchpoint(addterminal,matchtable,matchstore,
                         makeactivationpoint(matchtable,
-                                            fragmentstore->
+                                            matchstore->
                                             endpointperm[endcount],
                                             postsortdim));
       endcount++;
@@ -1066,20 +1059,20 @@ static void mergestartandendpoints(const GtChainmode *chainmode,
   }
   while (startcount < matchtable->nextfree)
   {
-    evalfragmentscore(chainmode,
-                      matchtable,
-                      fragmentstore,
-                      gapsL1,
-                      startcount,
-                      presortdim);
+    evalmatchscore(chainmode,
+                   matchtable,
+                   matchstore,
+                   gapsL1,
+                   startcount,
+                   presortdim);
     startcount++;
     xidx++;
   }
   while (endcount < matchtable->nextfree)
   {
-    activatefragpoint(addterminal,matchtable,fragmentstore,
+    activatematchpoint(addterminal,matchtable,matchstore,
                       makeactivationpoint(matchtable,
-                                          fragmentstore->
+                                          matchstore->
                                           endpointperm[endcount],
                                           postsortdim));
     endcount++;
@@ -1090,15 +1083,15 @@ static void mergestartandendpoints(const GtChainmode *chainmode,
 static unsigned int findmaximalscores(const GtChainmode *chainmode,
                                       GtChain *chain,
                                       GtChainmatchtable *matchtable,
-                                      Matchstore *fragmentstore,
+                                      Matchstore *matchstore,
                                       GtChainprocessor chainprocessor,
                                       bool withequivclasses,
                                       void *cpinfo,
                                       Verboseinfo *verboseinfo)
 {
-  unsigned long fragnum;
+  unsigned long matchnum;
   GtChainscoretype minscore = 0;
-  Fragpoint *maxpoint;
+  Matchpoint *maxpoint;
   bool minscoredefined = false;
   Bestofclass *chainequivalenceclasses;
   unsigned int retval;
@@ -1124,10 +1117,10 @@ static unsigned int findmaximalscores(const GtChainmode *chainmode,
   switch (chainmode->chainkind)
   {
     case GLOBALCHAINING:
-      maxpoint = gt_rbt_maximumkey(fragmentstore->dictroot);
+      maxpoint = gt_rbt_maximumkey(matchstore->dictroot);
       gt_assert(maxpoint != NULL);
-      fragnum = FRAGIDENT(maxpoint);
-      minscore = matchtable->fragments[fragnum].score;
+      matchnum = FRAGIDENT(maxpoint);
+      minscore = matchtable->matches[matchnum].score;
       minscoredefined = true;
       break;
     case GLOBALCHAININGWITHGAPCOST:
@@ -1190,10 +1183,9 @@ static unsigned int findmaximalscores(const GtChainmode *chainmode,
   return retval;
 }
 
-static void makesortedendpointpermutation(
-                                     unsigned long *perm,
-                                     GtChainmatchtable *matchtable,
-                                     unsigned int presortdim)
+static void makesortedendpointpermutation(unsigned long *perm,
+                                          GtChainmatchtable *matchtable,
+                                          unsigned int presortdim)
 {
   unsigned long temp, *iptr, *jptr, i, moves = 0;
 
@@ -1220,22 +1212,22 @@ static void makesortedendpointpermutation(
 
 static void fastchainingscores(const GtChainmode *chainmode,
                                GtChainmatchtable *matchtable,
-                               Matchstore *fragmentstore,
+                               Matchstore *matchstore,
                                unsigned int presortdim,
                                bool gapsL1)
 {
-  fragmentstore->endpointperm
-    = gt_malloc(sizeof (*fragmentstore->endpointperm) *
+  matchstore->endpointperm
+    = gt_malloc(sizeof (*matchstore->endpointperm) *
                 matchtable->nextfree);
-  makesortedendpointpermutation(fragmentstore->endpointperm,
+  makesortedendpointpermutation(matchstore->endpointperm,
                                 matchtable,
                                 presortdim);
   mergestartandendpoints(chainmode,
                          matchtable,
-                         fragmentstore,
+                         matchstore,
                          gapsL1,
                          presortdim);
-  gt_free(fragmentstore->endpointperm);
+  gt_free(matchstore->endpointperm);
 }
 
 static GtChaingapcostfunction assignchaingapcostfunction(GtChainkind chainkind,
@@ -1260,12 +1252,12 @@ static GtChaingapcostfunction assignchaingapcostfunction(GtChainkind chainkind,
   The following function implements the different kinds of chaining
   algorithms for global and local chaining. The mode is specified
   by \texttt{chainmode}. There are \texttt{numofmatches} many matches,
-  each specified in an array \texttt{fragmentinfo} points to.
+  each specified in an array \texttt{matchtable} points to.
   \texttt{chain} is the array in which a chain is stored. However,
   do not further process chain. Just use
-  INITARRAY(&chain.chainedfragments,Uint) to initialize it before calling
+  INITARRAY(&chain.chainedmatches,Uint) to initialize it before calling
   \textttt{fastchaining} and
-  FREEARRAY(&chain.chainedfragments,Uint) to free the space after calling
+  FREEARRAY(&chain.chainedmatches,Uint) to free the space after calling
   \textttt{fastchaining}. The function \texttt{chainprocessor} processes
   each chain found, and \texttt{cpinfo} is used as a the first argument
   in each call to \texttt{chainprocessor}. The function returns
@@ -1293,7 +1285,7 @@ void gt_chain_fastchaining(const GtChainmode *chainmode,
     = assignchaingapcostfunction(chainmode->chainkind,gapsL1);
   if (matchtable->nextfree > 1UL)
   {
-    Matchstore fragmentstore;
+    Matchstore matchstore;
 
     showverbose(verboseinfo,"compute chain scores");
     if (chainmode->chainkind == GLOBALCHAININGWITHOVERLAPS)
@@ -1304,7 +1296,7 @@ void gt_chain_fastchaining(const GtChainmode *chainmode,
     {
       fastchainingscores(chainmode,
                          matchtable,
-                         &fragmentstore,
+                         &matchstore,
                          presortdim,
                          gapsL1);
     }
@@ -1312,14 +1304,14 @@ void gt_chain_fastchaining(const GtChainmode *chainmode,
     retval = findmaximalscores(chainmode,
                                chain,
                                matchtable,
-                               &fragmentstore,
+                               &matchstore,
                                chainprocessor,
                                withequivclasses,
                                cpinfo,
                                verboseinfo);
     if (chainmode->chainkind != GLOBALCHAININGWITHOVERLAPS)
     {
-      gt_rbt_destroy (true,NULL,NULL,fragmentstore.dictroot);
+      gt_rbt_destroy (true,NULL,NULL,matchstore.dictroot);
     }
   } else
   {
@@ -1330,7 +1322,7 @@ void gt_chain_fastchaining(const GtChainmode *chainmode,
   /* retval is not reported. */
 }
 
-static int cmpFragmentinfo0(const void *keya,const void *keyb)
+static int cmpMatchchaininfo0(const void *keya,const void *keyb)
 {
   if (((const Matchchaininfo *) keya)->startpos[0] <
       ((const Matchchaininfo *) keyb)->startpos[0])
@@ -1345,7 +1337,7 @@ static int cmpFragmentinfo0(const void *keya,const void *keyb)
   return 0;
 }
 
-static int cmpFragmentinfo1(const void *keya,const void *keyb)
+static int cmpMatchchaininfo1(const void *keya,const void *keyb)
 {
   if (((const Matchchaininfo *) keya)->startpos[1] <
       ((const Matchchaininfo *) keyb)->startpos[1])
@@ -1370,29 +1362,29 @@ void gt_chain_possiblysortmatches(Verboseinfo *verboseinfo,
   {
     Qsortcomparefunction qsortcomparefunction;
     Matchchaininfo *fptr;
-    bool fragmentsaresorted = true;
+    bool matchesaresorted = true;
 
     gt_assert(presortdim <= 1U);
     qsortcomparefunction
-      = (presortdim == 0) ? cmpFragmentinfo0 : cmpFragmentinfo1;
-    for (fptr = matchtable->fragments;
-         fptr < matchtable->fragments + matchtable->nextfree - 1;
+      = (presortdim == 0) ? cmpMatchchaininfo0 : cmpMatchchaininfo1;
+    for (fptr = matchtable->matches;
+         fptr < matchtable->matches + matchtable->nextfree - 1;
          fptr++)
     {
       if (qsortcomparefunction((const void *) fptr,
                                (const void *) (fptr+1)) == 1)
       {
-        fragmentsaresorted = false;
+        matchesaresorted = false;
         break;
       }
     }
-    if (!fragmentsaresorted)
+    if (!matchesaresorted)
     {
-      showverbose(verboseinfo,"input fragments are not yet sorted => "
+      showverbose(verboseinfo,"input matches are not yet sorted => "
                               "sort them");
     }
-    qsort(matchtable->fragments,(size_t) matchtable->nextfree,
-          sizeof (*matchtable->fragments),qsortcomparefunction);
+    qsort(matchtable->matches,(size_t) matchtable->nextfree,
+          sizeof (*matchtable->matches),qsortcomparefunction);
   }
 }
 
@@ -1525,7 +1517,7 @@ GtChain *gt_chain_chain_new(void)
   GtChain *chain;
 
   chain = gt_malloc(sizeof (*chain));
-  GT_INITARRAY(&chain->chainedfragments,GtChainref);
+  GT_INITARRAY(&chain->chainedmatches,GtChainref);
   return chain;
 }
 
@@ -1533,7 +1525,7 @@ void gt_chain_chain_delete(GtChain *chain)
 {
   if (chain != NULL)
   {
-    GT_FREEARRAY(&chain->chainedfragments,GtChainref);
+    GT_FREEARRAY(&chain->chainedmatches,GtChainref);
     gt_free(chain);
   }
 }
@@ -1545,7 +1537,7 @@ GtChainscoretype gt_chain_chainscore(const GtChain *chain)
 
 unsigned long gt_chain_chainlength(const GtChain *chain)
 {
-  return chain->chainedfragments.nextfreeGtChainref;
+  return chain->chainedmatches.nextfreeGtChainref;
 }
 
 void gt_chain_extractchainelem(GtChainmatchvalues *value,
@@ -1555,8 +1547,8 @@ void gt_chain_extractchainelem(GtChainmatchvalues *value,
   const Matchchaininfo *fiptr;
 
   gt_assert(idx <  gt_chain_chainlength(chain));
-  fiptr = matchtable->fragments +
-          chain->chainedfragments.spaceGtChainref[idx];
+  fiptr = matchtable->matches +
+          chain->chainedmatches.spaceGtChainref[idx];
   value->startpos[0] = fiptr->startpos[0];
   value->startpos[1] = fiptr->startpos[1];
   value->startpos[2] = fiptr->startpos[2];

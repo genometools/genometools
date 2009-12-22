@@ -91,7 +91,7 @@ void gt_chain_matchtable_empty(GtChainmatchtable *matchtable);
 /* the following function adds the relevant values describing a match */
 
 void gt_chain_matchtable_add(GtChainmatchtable *matchtable,
-                                    const GtChainmatchvalues *infragment);
+                                    const GtChainmatchvalues *inmatch);
 
 /* the following functions reads a file describing matches in open format.
    It returns the corresponding table of matches. */
