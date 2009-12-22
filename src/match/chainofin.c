@@ -56,7 +56,7 @@ GtChainmatchtable *gt_chain_analyzeopenformatfile(double weightfactor,
                                                   const char *matchfile,
                                                   GtError *err)
 {
-  GtChainmatchtable *fragmentinfotable;
+  GtChainmatchtable *matchtable;
   GtStr *currentline;
   unsigned long linenum;
   GtChainpostype storeinteger[READNUMS];
@@ -74,7 +74,7 @@ GtChainmatchtable *gt_chain_analyzeopenformatfile(double weightfactor,
   {
     return NULL;
   }
-  fragmentinfotable = gt_chain_fragmentinfotable_new(linenum);
+  matchtable = gt_chain_matchtable_new(linenum);
   currentline = gt_str_new();
   for (linenum = 0; gt_str_read_next_line(currentline, matchfp) != EOF;
        linenum++)
@@ -138,7 +138,7 @@ GtChainmatchtable *gt_chain_analyzeopenformatfile(double weightfactor,
       fragment.endpos[0] = storeinteger[1];
       fragment.startpos[1] = storeinteger[2];
       fragment.endpos[1] = storeinteger[3];
-      gt_chain_fragmentinfotable_add(fragmentinfotable,&fragment);
+      gt_chain_matchtable_add(matchtable,&fragment);
     }
     gt_str_reset(currentline);
   }
@@ -146,9 +146,9 @@ GtChainmatchtable *gt_chain_analyzeopenformatfile(double weightfactor,
   gt_fa_fclose(matchfp);
   if (haserr)
   {
-    gt_chain_fragmentinfotable_delete(fragmentinfotable);
+    gt_chain_matchtable_delete(matchtable);
     return NULL;
   }
-  gt_chain_fillthegapvalues(fragmentinfotable);
-  return fragmentinfotable;
+  gt_chain_fillthegapvalues(matchtable);
+  return matchtable;
 }

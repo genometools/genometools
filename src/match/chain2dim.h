@@ -36,8 +36,8 @@
 
 #define OVERLAPSWITCH        "ov"
 
-/* the followin type is used position describing fragments
-   to be chained */
+/* the followin type is used for the position values in the matches to be
+   chained */
 
 typedef Seqpos GtChainpostype;
 
@@ -49,7 +49,7 @@ typedef long GtChainscoretype;
 
 typedef struct GtChain GtChain;
 
-/* the anonymous type for a table storing the fragments */
+/* the anonymous type for a table storing the matches */
 
 typedef struct GtChainmatchtable GtChainmatchtable;
 
@@ -58,10 +58,10 @@ typedef struct GtChainmatchtable GtChainmatchtable;
 
 typedef struct
 {
-  GtChainpostype startpos[2], /* start of fragments in the 2 dimensions,
+  GtChainpostype startpos[2], /* start of matches in the 2 dimensions,
                                  userdef */
-                 endpos[2];  /* end of fragments in the 2 dimensions, userdef */
-  GtChainscoretype weight; /* weight of fragment, user defined */
+                 endpos[2];  /* end of matches in the 2 dimensions, userdef */
+  GtChainscoretype weight; /* weight of match, user defined */
 } GtChainmatchvalues;
 
 /*
@@ -76,40 +76,39 @@ typedef void (*GtChainprocessor)(void *,
 
 typedef struct GtChainmode GtChainmode;
 
-/* the constructor for tables of fragments */
+/* the constructor for tables of matches */
 
-GtChainmatchtable *gt_chain_fragmentinfotable_new(
-                           unsigned long numberoffragments);
+GtChainmatchtable *gt_chain_matchtable_new(unsigned long numberofmatches);
 
-/* the destructor for tables of fragments */
+/* the destructor for tables of matches */
 
-void gt_chain_fragmentinfotable_delete(GtChainmatchtable *fragmentinfotable);
+void gt_chain_matchtable_delete(GtChainmatchtable *matchtable);
 
-/* the function for emptying tables of fragments, without freeing the space */
+/* the function for emptying a table of matches, without freeing the space */
 
-void gt_chain_fragmentinfotable_empty(GtChainmatchtable *fragmentinfotable);
+void gt_chain_matchtable_empty(GtChainmatchtable *matchtable);
 
-/* the following function adds the relevant values describing a fragment */
+/* the following function adds the relevant values describing a match */
 
-void gt_chain_fragmentinfotable_add(GtChainmatchtable *fragmentinfotable,
+void gt_chain_matchtable_add(GtChainmatchtable *matchtable,
                                     const GtChainmatchvalues *infragment);
 
-/* the following functions reads a file describing fragments in open format.
-   It returns the corresponding fragment table */
+/* the following functions reads a file describing matches in open format.
+   It returns the corresponding table of matches. */
 
 GtChainmatchtable *gt_chain_analyzeopenformatfile(double weightfactor,
-                                                    const char *matchfile,
-                                                    GtError *err);
+                                                  const char *matchfile,
+                                                  GtError *err);
 
-/* the function to fill the gap values for all fragments */
+/* the function to fill the gap values for all matches */
 
-void gt_chain_fillthegapvalues(GtChainmatchtable *fragmentinfotable);
+void gt_chain_fillthegapvalues(GtChainmatchtable *matchtable);
 
-/* the function to sort an array of fragments */
+/* the function to sort an array of matches */
 
-void gt_chain_possiblysortfragments(Verboseinfo *verboseinfo,
-                                    GtChainmatchtable *fragmentinfotable,
-                                    unsigned int presortdim);
+void gt_chain_possiblysortmatches(Verboseinfo *verboseinfo,
+                                  GtChainmatchtable *matchtable,
+                                  unsigned int presortdim);
 
 /* the constructor for chainmode objects. Use err = NULL to print
    error messages to stderr. */
@@ -137,7 +136,7 @@ void gt_chain_chain_delete(GtChain *chain);
 
 void gt_chain_fastchaining(const GtChainmode *chainmode,
                            GtChain *chain,
-                           GtChainmatchtable *fragmentinfotable,
+                           GtChainmatchtable *matchtable,
                            bool gapsL1,
                            unsigned int presortdim,
                            bool withequivclasses,
@@ -156,7 +155,7 @@ unsigned long gt_chain_chainlength(const GtChain *chain);
 /* store the values of element idx in given chain in the first parameter */
 
 void gt_chain_extractchainelem(GtChainmatchvalues *value,
-                               const GtChainmatchtable *fragmentinfotable,
+                               const GtChainmatchtable *matchtable,
                                const GtChain *chain,
                                unsigned long idx);
 

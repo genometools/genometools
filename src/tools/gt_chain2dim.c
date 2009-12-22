@@ -195,7 +195,7 @@ typedef struct
 static void gt_outputformatchaingeneric(
                                 bool silent,
                                 void *data,
-                                const GtChainmatchtable *fragmentinfotable,
+                                const GtChainmatchtable *matchtable,
                                 const GtChain *chain)
 {
   unsigned long idx, chainlength;
@@ -210,7 +210,7 @@ static void gt_outputformatchaingeneric(
 
     for (idx=0; idx < chainlength; idx++)
     {
-      gt_chain_extractchainelem(&value, fragmentinfotable, chain, idx);
+      gt_chain_extractchainelem(&value, matchtable, chain, idx);
       gt_chain_printchainelem(stdout,&value);
     }
   }
@@ -218,17 +218,17 @@ static void gt_outputformatchaingeneric(
 }
 
 void gt_outputformatchainsilent(void *data,
-                               const GtChainmatchtable *fragmentinfotable,
+                               const GtChainmatchtable *matchtable,
                                const GtChain *chain)
 {
-  gt_outputformatchaingeneric(true,data,fragmentinfotable,chain);
+  gt_outputformatchaingeneric(true,data,matchtable,chain);
 }
 
 void gt_outputformatchain(void *data,
-                          const GtChainmatchtable *fragmentinfotable,
+                          const GtChainmatchtable *matchtable,
                           const GtChain *chain)
 {
-  gt_outputformatchaingeneric(false,data,fragmentinfotable,chain);
+  gt_outputformatchaingeneric(false,data,matchtable,chain);
 }
 
 static int gt_chain2dim_runner (GT_UNUSED int argc,
@@ -238,7 +238,7 @@ static int gt_chain2dim_runner (GT_UNUSED int argc,
                                 GtError * err)
 {
   GtChain2dimoptions *arguments = tool_arguments;
-  GtChainmatchtable *fragmentinfotable;
+  GtChainmatchtable *matchtable;
   bool haserr = false;
   Verboseinfo *verboseinfo = NULL;
 
@@ -246,11 +246,11 @@ static int gt_chain2dim_runner (GT_UNUSED int argc,
   gt_assert (arguments != NULL);
   gt_assert (parsed_args == argc);
 
-  fragmentinfotable = gt_chain_analyzeopenformatfile(arguments->weightfactor,
+  matchtable = gt_chain_analyzeopenformatfile(arguments->weightfactor,
                                                      gt_str_get(arguments->
                                                                 matchfile),
                                                      err);
-  if (fragmentinfotable == NULL)
+  if (matchtable == NULL)
   {
     haserr = true;
   }
@@ -261,12 +261,12 @@ static int gt_chain2dim_runner (GT_UNUSED int argc,
     Counter counter;
 
     verboseinfo = newverboseinfo(arguments->verbose);
-    gt_chain_possiblysortfragments(verboseinfo,fragmentinfotable,presortdim);
+    gt_chain_possiblysortmatches(verboseinfo,matchtable,presortdim);
     chain = gt_chain_chain_new();
     counter.chaincounter = 0;
     gt_chain_fastchaining(arguments->gtchainmode,
                           chain,
-                          fragmentinfotable,
+                          matchtable,
                           true,
                           presortdim,
                           true,
@@ -277,7 +277,7 @@ static int gt_chain2dim_runner (GT_UNUSED int argc,
     gt_chain_chain_delete(chain);
   }
   gt_chain_chainmode_delete(arguments->gtchainmode);
-  gt_chain_fragmentinfotable_delete(fragmentinfotable);
+  gt_chain_matchtable_delete(matchtable);
   if (verboseinfo != NULL)
   {
     freeverboseinfo(&verboseinfo);
