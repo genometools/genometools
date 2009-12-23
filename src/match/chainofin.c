@@ -59,7 +59,7 @@ GtChainmatchtable *gt_chain_analyzeopenformatfile(double weightfactor,
   GtChainmatchtable *matchtable;
   GtStr *currentline;
   unsigned long linenum;
-  GtChainpostype storeinteger[READNUMS];
+  GtChainpostype storeinteger[READNUMS-1];
   FILE *matchfp;
   long readint;
   bool haserr = false;
@@ -93,9 +93,23 @@ GtChainmatchtable *gt_chain_analyzeopenformatfile(double weightfactor,
         {
           idx++;
         }
-        if (sscanf(matchline+idx,"%ld",&readint) == 1 && readint >= 0)
+        if (sscanf(matchline+idx,"%ld",&readint) == 1)
         {
-          storeinteger[countcolumns] = (GtChainpostype) readint;
+          if (countcolumns == READNUMS-1)
+          {
+            fragment.weight 
+              = (GtChainscoretype) (weightfactor * (double) readint);
+          } else
+          {
+            if (readint >= 0)
+            {
+              storeinteger[countcolumns] = (GtChainpostype) readint;
+            } else
+            {
+              CANNOTPARSELINE("non-negative integer expected");
+              haserr = true;
+            }
+          }
         } else
         {
           CANNOTPARSELINE("non-negative integer expected");
@@ -132,8 +146,6 @@ GtChainmatchtable *gt_chain_analyzeopenformatfile(double weightfactor,
         haserr = true;
         break;
       }
-      fragment.weight = (GtChainscoretype) (weightfactor *
-                                           (double) storeinteger[READNUMS-1]);
       fragment.startpos[0] = storeinteger[0];
       fragment.endpos[0] = storeinteger[1];
       fragment.startpos[1] = storeinteger[2];
