@@ -181,6 +181,21 @@ void gt_chain_fillthegapvalues(GtChainmatchtable *matchtable)
   }
 }
 
+void gt_chain_applyweight(double weightfactor,GtChainmatchtable *matchtable)
+{
+  if (!gt_double_equals_double(weightfactor, 1.0))
+  {
+    Matchchaininfo *fiptr;
+
+    for (fiptr = matchtable->matches;
+         fiptr < matchtable->matches + matchtable->nextfree;
+         fiptr++)
+    {
+      fiptr->weight *= weightfactor;
+    }
+  }
+}
+
 #define MAKEENDPOINT(FID)       (FID)
 #define FRAGIDENT(FRAG)         ((FRAG)->fpident)
 

@@ -104,6 +104,10 @@ GtChainmatchtable *gt_chain_analyzeopenformatfile(double weightfactor,
 
 void gt_chain_fillthegapvalues(GtChainmatchtable *matchtable);
 
+/* function to apply an additional weight to the elements to be chained */
+
+void gt_chain_applyweight(double weightfactor,GtChainmatchtable *matchtable);
+
 /* the function to sort an array of matches */
 
 void gt_chain_possiblysortmatches(Verboseinfo *verboseinfo,

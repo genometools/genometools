@@ -226,7 +226,7 @@ GtChainmatchtable *gt_chain_analyzeopenformatfile(double weightfactor,
     fragment.weight
       = (GtChainscoretype) (weightfactor * (double) storeinteger[4]);
     gt_chain_matchtable_add(matchtable,&fragment);
-    /* gt_chain_printchainelem(stdout,&fragment); */
+    /*gt_chain_printchainelem(stdout,&fragment); */
   }
   gt_fa_fclose(matchfp);
   if (haserr)
