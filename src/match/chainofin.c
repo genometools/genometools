@@ -16,10 +16,8 @@
 */
 
 #include <stdbool.h>
-#include <ctype.h>
 #include "core/fa.h"
 #include "core/error_api.h"
-#include "core/str_api.h"
 #include "chain2dim.h"
 
 #define READNUMS 5
@@ -51,122 +49,6 @@ static int numberoflinesinfile(unsigned long *linenum,
   gt_fa_fclose(fp);
   return 0;
 }
-
-#ifdef CHAINPARSEOLD
-GtChainmatchtable *gt_chain_analyzeopenformatfile(double weightfactor,
-                                                  const char *matchfile,
-                                                  GtError *err)
-{
-  GtChainmatchtable *matchtable;
-  GtStr *currentline;
-  unsigned long linenum;
-  GtChainpostype storeinteger[READNUMS-1];
-  FILE *matchfp;
-  long readint;
-  bool haserr = false;
-  GtChainmatchvalues fragment;
-
-  if (numberoflinesinfile(&linenum,matchfile,err) != 0)
-  {
-    return NULL;
-  }
-  matchfp = gt_fa_fopen(matchfile,"r",err);
-  if (matchfp == NULL)
-  {
-    return NULL;
-  }
-  matchtable = gt_chain_matchtable_new(linenum);
-  currentline = gt_str_new();
-  for (linenum = 0; gt_str_read_next_line(currentline, matchfp) != EOF;
-       linenum++)
-  {
-    const char *matchline = (const char *) gt_str_get(currentline);
-    gt_assert(matchline != NULL);
-    if (matchline[0] != '#')
-    {
-      unsigned long idx = 0,
-                    countcolumns = 0,
-                    matchlinelength = gt_str_length(currentline);
-      while (!haserr && countcolumns < (unsigned long) READNUMS &&
-             idx < matchlinelength)
-      {
-        while (isspace((int) matchline[idx]))
-        {
-          idx++;
-        }
-        if (sscanf(matchline+idx,"%ld",&readint) == 1)
-        {
-          if (countcolumns == READNUMS-1)
-          {
-            fragment.weight
-              = (GtChainscoretype) (weightfactor * (double) readint);
-          } else
-          {
-            if (readint >= 0)
-            {
-              storeinteger[countcolumns] = (GtChainpostype) readint;
-            } else
-            {
-              CANNOTPARSELINE("non-negative integer expected");
-              haserr = true;
-            }
-          }
-        } else
-        {
-          CANNOTPARSELINE("non-negative integer expected");
-          haserr = true;
-        }
-        if (!haserr)
-        {
-          while (isdigit((int) matchline[idx]))
-          {
-            idx++;
-          }
-          countcolumns++;
-        }
-      }
-      if (haserr)
-      {
-        break;
-      }
-      if (countcolumns != (unsigned long) READNUMS)
-      {
-        CANNOTPARSELINE("five integers per line expected");
-        haserr = true;
-        break;
-      }
-      if (storeinteger[0] > storeinteger[1])
-      {
-        CANNOTPARSELINE("startpos1 <= endpos1 expected");
-        haserr = true;
-        break;
-      }
-      if (storeinteger[2] > storeinteger[3])
-      {
-        CANNOTPARSELINE("startpos2 <= endpos2 expected");
-        haserr = true;
-        break;
-      }
-      fragment.startpos[0] = storeinteger[0];
-      fragment.endpos[0] = storeinteger[1];
-      fragment.startpos[1] = storeinteger[2];
-      fragment.endpos[1] = storeinteger[3];
-      gt_chain_matchtable_add(matchtable,&fragment);
-      gt_chain_printchainelem(stdout,&fragment);
-    }
-    gt_str_reset(currentline);
-  }
-  gt_str_delete(currentline);
-  gt_fa_fclose(matchfp);
-  if (haserr)
-  {
-    gt_chain_matchtable_delete(matchtable);
-    return NULL;
-  }
-  gt_chain_fillthegapvalues(matchtable);
-  return matchtable;
-}
-#endif
 
 GtChainmatchtable *gt_chain_analyzeopenformatfile(double weightfactor,
                                                   const char *matchfile,
