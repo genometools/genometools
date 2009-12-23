@@ -53,8 +53,8 @@ Qualifiedinteger *parsequalifiedinteger(const char *option,
   bool haserr = false;
   Qualifiedinteger *qualint;
 
-  lparamcopy = gt_malloc(sizeof (char) * strlen(lparam+1));
-  qualint = gt_malloc(sizeof (Qualifiedinteger));
+  lparamcopy = gt_malloc(sizeof (char) * (strlen(lparam)+1));
+  qualint = gt_malloc(sizeof (*qualint));
   strcpy(lparamcopy,lparam);
   for (i=0; lparamcopy[i] != '\0'; i++)
   {
