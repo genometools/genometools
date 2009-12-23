@@ -52,6 +52,7 @@ static int numberoflinesinfile(unsigned long *linenum,
   return 0;
 }
 
+#ifdef CHAINPARSEOLD
 GtChainmatchtable *gt_chain_analyzeopenformatfile(double weightfactor,
                                                   const char *matchfile,
                                                   GtError *err)
@@ -97,7 +98,7 @@ GtChainmatchtable *gt_chain_analyzeopenformatfile(double weightfactor,
         {
           if (countcolumns == READNUMS-1)
           {
-            fragment.weight 
+            fragment.weight
               = (GtChainscoretype) (weightfactor * (double) readint);
           } else
           {
@@ -151,10 +152,82 @@ GtChainmatchtable *gt_chain_analyzeopenformatfile(double weightfactor,
       fragment.startpos[1] = storeinteger[2];
       fragment.endpos[1] = storeinteger[3];
       gt_chain_matchtable_add(matchtable,&fragment);
+      gt_chain_printchainelem(stdout,&fragment);
     }
     gt_str_reset(currentline);
   }
   gt_str_delete(currentline);
+  gt_fa_fclose(matchfp);
+  if (haserr)
+  {
+    gt_chain_matchtable_delete(matchtable);
+    return NULL;
+  }
+  gt_chain_fillthegapvalues(matchtable);
+  return matchtable;
+}
+#endif
+
+GtChainmatchtable *gt_chain_analyzeopenformatfile(double weightfactor,
+                                                  const char *matchfile,
+                                                  GtError *err)
+{
+  GtChainmatchtable *matchtable;
+  unsigned long linenum;
+  long storeinteger[READNUMS];
+  FILE *matchfp;
+  bool haserr = false;
+  GtChainmatchvalues fragment;
+
+  if (numberoflinesinfile(&linenum,matchfile,err) != 0)
+  {
+    return NULL;
+  }
+  matchfp = gt_fa_fopen(matchfile,"r",err);
+  if (matchfp == NULL)
+  {
+    return NULL;
+  }
+  matchtable = gt_chain_matchtable_new(linenum);
+  for (linenum = 0; fscanf(matchfp,"%ld %ld %ld %ld %ld\n",
+                           &storeinteger[0],
+                           &storeinteger[1],
+                           &storeinteger[2],
+                           &storeinteger[3],
+                           &storeinteger[4]) == READNUMS; linenum++)
+  {
+    unsigned long countcolumns;
+
+    for (countcolumns = 0; countcolumns < (unsigned long) (READNUMS-1);
+         countcolumns++)
+    {
+      if (storeinteger[countcolumns] < 0)
+      {
+        CANNOTPARSELINE("non-negative integer expected");
+        haserr = true;
+      }
+    }
+    if (storeinteger[0] > storeinteger[1])
+    {
+      CANNOTPARSELINE("startpos1 <= endpos1 expected");
+      haserr = true;
+      break;
+    }
+    if (storeinteger[2] > storeinteger[3])
+    {
+      CANNOTPARSELINE("startpos2 <= endpos2 expected");
+      haserr = true;
+      break;
+    }
+    fragment.startpos[0] = (GtChainpostype) storeinteger[0];
+    fragment.endpos[0] = (GtChainpostype) storeinteger[1];
+    fragment.startpos[1] = (GtChainpostype) storeinteger[2];
+    fragment.endpos[1] = (GtChainpostype) storeinteger[3];
+    fragment.weight
+      = (GtChainscoretype) (weightfactor * (double) storeinteger[4]);
+    gt_chain_matchtable_add(matchtable,&fragment);
+    /* gt_chain_printchainelem(stdout,&fragment); */
+  }
   gt_fa_fclose(matchfp);
   if (haserr)
   {
