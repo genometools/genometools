@@ -458,13 +458,13 @@ that the file is a compressed file in gzip format (because of the ending
 
 First, we create the enhanced suffix array.
 We invoke \Gtsuffixerator with options \Showoption{tis}, \Showoption{suf},
-\Showoption{lcp}, \Showoption{des} and \Showoption{sds}  since \LTRharvest needs the corresponding
+\Showoption{lcp}, \Showoption{des}, \Showoption{ssp} and \Showoption{sds} since \LTRharvest needs the corresponding
 tables. Furthermore, we specify \Showoption{dna}, as we process DNA-sequences.
 
 \begin{footnotesize}
 \begin{verbatim}
 $ gt suffixerator -db chr02.19970727.fsa.gz -indexname chr02.19970727.fsa -tis
--suf -lcp -des -sds -dna
+-suf -lcp -des -ssp -sds -dna
 # dna=yes
 # indexname="chr02.19970727.fsa"
 .
