@@ -33,9 +33,9 @@ void gt_warning(const char *format, ...)
    have no effect. */
 void gt_warning_disable(void);
 
-/* Set <warning_handler> to handle all warnings issued with <gt_warning()>.
+/* Set <warn_handler> to handle all warnings issued with <gt_warning()>.
    The <data> is passed to <warning_handler> on each invocation. */
-void gt_warning_set_handler(GtWarningHandler warning_handler, void *data);
+void gt_warning_set_handler(GtWarningHandler warn_handler, void *data);
 
 /* The default warning handler which prints on <stderr>.
    "warning: " is prepended and a newline is appended to the message defined by

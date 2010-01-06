@@ -40,9 +40,9 @@ void gt_warning_disable(void)
   warning_data = NULL;
 }
 
-void gt_warning_set_handler(GtWarningHandler warning_handler, void *data)
+void gt_warning_set_handler(GtWarningHandler warn_handler, void *data)
 {
-  warning_handler = warning_handler;
+  warning_handler = warn_handler;
   warning_data = data;
 }
 
