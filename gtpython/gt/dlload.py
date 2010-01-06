@@ -20,7 +20,7 @@
 from ctypes import CDLL, CFUNCTYPE, c_char_p, c_void_p
 import sys
 
-# inspired from the ruby bindings, maybe there is a better way
+# inspired by the ruby bindings, maybe there is a better way
 
 if sys.platform == "darwin":
     soext = ".dylib"
