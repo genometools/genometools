@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-# Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+# Copyright (c) 2010 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -17,14 +17,12 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-from array import *
-from error import *
-from gtrange import *
-from gtstr import *
-from str_array import *
-from warning import *
+from gt.dlload import gtlib
 
-Array.register(gtlib)
-Error.register(gtlib)
-Str.register(gtlib)
-StrArray.register(gtlib)
+def warning_disable():
+    gtlib.gt_warning_disable()
+
+def warning_enable_default():
+    from ctypes import CFUNCTYPE, c_void_p, c_char_p, addressof
+    defhand = CFUNCTYPE(None, c_void_p, c_char_p, c_char_p).in_dll(gtlib, "gt_warning_default_handler")
+    gtlib.gt_warning_set_handler(addressof(defhand), None)
