@@ -415,8 +415,10 @@ static void assign_dna_alphabet(GtAlphabet *alpha)
   memcpy(alpha->mapdomain,(GtUchar *) DNAALPHABETDOMAIN,
          (size_t) alpha->domainsize);
   alpha->mapsize = MAPSIZEDNA;
-  alpha->characters = gt_malloc(sizeof (GtUchar) * (MAPSIZEDNA-1));
+  alpha->characters = gt_calloc(UCHAR_MAX+1, sizeof (GtUchar));
   memcpy(alpha->characters,"acgt",(size_t) (MAPSIZEDNA-1));
+  alpha->characters[WILDCARD] = DNAWILDCARDS[0];
+  alpha->characters[MAPSIZEDNA-1] = DNAWILDCARDS[0];
   assign_dna_symbolmap(alpha->symbolmap);
 }
 
@@ -480,8 +482,10 @@ static void assign_protein_alphabet(GtAlphabet *alpha)
   memcpy(alpha->mapdomain,
          (GtUchar *) PROTEINALPHABETDOMAIN,(size_t) alpha->domainsize);
   alpha->mapsize = MAPSIZEPROTEIN;
-  alpha->characters = gt_malloc(sizeof (GtUchar) * (MAPSIZEPROTEIN-1));
+  alpha->characters = gt_calloc(UCHAR_MAX+1, sizeof (GtUchar));
   memcpy(alpha->characters,PROTEINUPPERAMINOACIDS,(size_t) (MAPSIZEPROTEIN-1));
+  alpha->characters[WILDCARD] = PROTEINWILDCARDS[0];
+  alpha->characters[MAPSIZEPROTEIN-1] = PROTEINWILDCARDS[0];
   assignproteinsymbolmap(alpha->symbolmap);
 }
 
