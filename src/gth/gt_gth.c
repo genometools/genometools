@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -66,7 +66,8 @@ int gt_gth(int argc, const char **argv, const GthPlugins *plugins, GtError *err)
     gth_xml_show_leader(callinfo->intermediate, callinfo->out->outfp);
 
   /* show header for this run */
-  gth_run_header_show(callinfo, input, INITIAL_XML_INDENTLEVEL + 1, argv + 1);
+  gth_run_header_show(callinfo, input, plugins->gth_version,
+                      INITIAL_XML_INDENTLEVEL + 1, argv + 1);
 
   /* make sure the necessary indices of all input files are created */
   if (!had_err) {

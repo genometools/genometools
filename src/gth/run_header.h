@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -21,7 +21,7 @@
 #include "gth/stat.h"
 
 /* output the run header in plain or XML format */
-void gth_run_header_show(GthCallInfo*, GthInput*, unsigned int indentlevel,
-                         const char **args);
+void gth_run_header_show(GthCallInfo*, GthInput*, const char *gth_version,
+                         unsigned int indentlevel, const char **args);
 
 #endif

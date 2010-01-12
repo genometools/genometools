@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -58,7 +58,7 @@ static void show_overall_reference_type(GthAlphatype overallalphatype,
 }
 
 static void show_xml_run_header(GthCallInfo *callinfo, GthInput *input,
-                                const char *timestring,
+                                const char *timestring, const char *gth_version,
                                 unsigned int indentlevel, const char **args)
 {
   GtFile *outfp = callinfo->out->outfp;
@@ -86,8 +86,8 @@ static void show_xml_run_header(GthCallInfo *callinfo, GthInput *input,
   indentlevel++;
   gth_indent(outfp, indentlevel);
   gt_file_xprintf(outfp, "<source program=\"GenomeThreader\" version=\"%s\" "
-                  "build_date=\"%s\" run_date=\"%s\"/>\n", GT_VERSION, GT_BUILT,
-                  timestring);
+                  "build_date=\"%s\" run_date=\"%s\"/>\n", gth_version,
+                  GT_BUILT, timestring);
 
   /* show genomic file names */
   gth_indent(outfp, indentlevel);
@@ -167,7 +167,8 @@ static void show_xml_run_header(GthCallInfo *callinfo, GthInput *input,
 }
 
 void gth_run_header_show(GthCallInfo *callinfo, GthInput *input,
-                         unsigned int indentlevel, const char **args)
+                         const char *gth_version, unsigned int indentlevel,
+                         const char **args)
 {
   char *timestring;
   GtFile *outfp = callinfo->out->outfp;
@@ -176,11 +177,13 @@ void gth_run_header_show(GthCallInfo *callinfo, GthInput *input,
   timestring = gth_get_time();
 
   /* output XML header */
-  if (callinfo->out->xmlout)
-    show_xml_run_header(callinfo, input, timestring, indentlevel, args);
+  if (callinfo->out->xmlout) {
+    show_xml_run_header(callinfo, input, timestring, gth_version, indentlevel,
+                        args);
+  }
   else if (!callinfo->out->gff3out) {
     gt_file_xprintf(outfp, "%c GenomeThreader %s (%s)\n", COMMENTCHAR,
-                    GT_VERSION, GT_BUILT);
+                    gth_version, GT_BUILT);
     gt_file_xprintf(outfp, "%c Date run: %s\n", COMMENTCHAR, timestring);
     gt_file_xprintf(outfp, "%c Arguments: ", COMMENTCHAR);
     gt_cstr_array_show_genfile(args, outfp);

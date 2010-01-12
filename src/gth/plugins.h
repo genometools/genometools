@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2009-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -27,6 +27,7 @@ typedef struct {
   GthMatcherArgumentsNew matcher_arguments_new;       /* required */
   GthMatcherArgumentsDelete matcher_arguments_delete; /* required */
   GthMatcherRunner matcher_runner;                    /* required */
+  const char *gth_version;                            /* required */
   GtShowVersionFunc gth_version_func;                 /* required */
 } GthPlugins;
 
