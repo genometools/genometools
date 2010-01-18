@@ -759,21 +759,40 @@ Test do
   run "diff #{$last_stdout} #{$testdata}duplicate_attribute_fixed.gff3"
 end
 
-Name "gt gff3 multi-feature with different parent"
+Name "gt gff3 multi-feature with different parent 1"
 Keywords "gt_gff3"
 Test do
   run_test("#{$bin}gt gff3 " +
-           "#{$testdata}multi_feature_with_different_parent.gff3", :retval => 1)
+           "#{$testdata}multi_feature_with_different_parent_1.gff3",
+           :retval => 1)
   grep $last_stderr, "has a different attribute 'Parent' than its counterpart"
 end
 
-Name "gt gff3 multi-feature with different parent (-tidy)"
+Name "gt gff3 multi-feature with different parent 1 (-tidy)"
 Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 -tidy " +
-           "#{$testdata}multi_feature_with_different_parent.gff3"
+           "#{$testdata}multi_feature_with_different_parent_1.gff3"
   run "diff #{$last_stdout} " +
-      "#{$testdata}multi_feature_with_different_parent_tidy.gff3"
+      "#{$testdata}multi_feature_with_different_parent_1_tidy.gff3"
+end
+
+Name "gt gff3 multi-feature with different parent 2"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 " +
+           "#{$testdata}multi_feature_with_different_parent_2.gff3",
+           :retval => 1)
+  grep $last_stderr, "has a different attribute 'Parent' than its counterpart"
+end
+
+Name "gt gff3 multi-feature with different parent 2 (-tidy)"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 -tidy " +
+           "#{$testdata}multi_feature_with_different_parent_2.gff3"
+  run "diff #{$last_stdout} " +
+      "#{$testdata}multi_feature_with_different_parent_2_tidy.gff3"
 end
 
 Name "custom_stream (C)"

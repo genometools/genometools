@@ -1,0 +1,9 @@
+##gff-version   3
+##sequence-region   I 2921000 2931362
+I	.	gene	2929785	2931362	.	+	.	ID=gene1
+I	.	exon	2921000	2931362	.	+	.	ID=exon1;Parent=gene1
+I	.	exon	2929947	2930089	.	+	.	ID=exon1;Parent=gene1
+###
+I	.	gene	2928394	2931254	.	+	.	ID=gene2
+I	.	exon	2929947	2930089	.	+	.	Parent=gene2
+###

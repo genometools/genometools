@@ -1,0 +1,6 @@
+##gff-version 3
+I	.	gene	2929785	2931362	.	+	.	ID=Gene1
+I	.	exon	2929947	2930089	.	+	.	ID=1;Parent=Gene1
+I	.	exon	2921000	2931362	.	+	.	ID=1;Parent=Gene1
+I	.	gene	2928394	2931254	.	+	.	ID=Gene2
+I	.	exon	2929947	2930089	.	+	.	ID=1;Parent=Gene2
