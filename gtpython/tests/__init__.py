@@ -7,6 +7,7 @@ from test_featurenode import *
 from test_sequencenode import *
 from test_iterators import *
 from test_stream import *
+from test_range import *
 
 import unittest
 unittest.main()
