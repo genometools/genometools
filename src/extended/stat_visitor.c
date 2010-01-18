@@ -33,10 +33,10 @@ struct GtStatVisitor {
                 exon_number_for_distri;
   unsigned long long total_length_of_sequence_regions;
   GtDiscDistri *gene_length_distribution,
-             *gene_score_distribution,
-             *exon_length_distribution,
-             *exon_number_distribution,
-             *intron_length_distribution;
+               *gene_score_distribution,
+               *exon_length_distribution,
+               *exon_number_distribution,
+               *intron_length_distribution;
 };
 
 #define stat_visitor_cast(GV)\
