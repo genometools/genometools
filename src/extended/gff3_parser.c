@@ -200,8 +200,8 @@ static int parse_target_attribute(const char *value, GtStr *target_id,
   num_of_tokens = gt_splitter_size(splitter);
   if (!(num_of_tokens == 3 || num_of_tokens == 4)) {
     gt_error_set(err, "Target attribute value '%s' on line %u in file \"%s\" "
-              "must have 3 or 4 blank separated entries", value, line_number,
-              filename);
+                 "must have 3 or 4 blank separated entries", value, line_number,
+                 filename);
     had_err = -1;
   }
   /* parse target id */
