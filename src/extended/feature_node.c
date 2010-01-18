@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -376,6 +376,13 @@ void gt_feature_node_set_multi_representative(GtFeatureNode *fn,
   gt_assert(rep && gt_feature_node_is_multi(rep));
   feature_node_set_multi(fn);
   fn->representative = rep;
+}
+
+void gt_feature_node_unset_multi(GtFeatureNode *fn)
+{
+  gt_assert(fn);
+  fn->bit_field &= ~(1 << MULTI_FEATURE_OFFSET);
+  fn->representative = NULL;
 }
 
 GtFeatureNode* gt_feature_node_get_multi_representative(GtFeatureNode *fn)

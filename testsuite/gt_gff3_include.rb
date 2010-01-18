@@ -760,11 +760,20 @@ Test do
 end
 
 Name "gt gff3 multi-feature with different parent"
-Keywords "gt_gff3 xxx"
+Keywords "gt_gff3"
 Test do
   run_test("#{$bin}gt gff3 " +
            "#{$testdata}multi_feature_with_different_parent.gff3", :retval => 1)
   grep $last_stderr, "has a different attribute 'Parent' than its counterpart"
+end
+
+Name "gt gff3 multi-feature with different parent (-tidy)"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 -tidy " +
+           "#{$testdata}multi_feature_with_different_parent.gff3"
+  run "diff #{$last_stdout} " +
+      "#{$testdata}multi_feature_with_different_parent_tidy.gff3"
 end
 
 Name "custom_stream (C)"

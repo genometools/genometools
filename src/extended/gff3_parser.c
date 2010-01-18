@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -775,30 +775,68 @@ static int compare_target_attribute(GtFeatureNode *new_gf,
   return had_err;
 }
 
+static void tidy_multi_feature_with_different_parent(GtFeatureNode *new_gf,
+                                                     GtFeatureNode *old_gf,
+                                                     const char *id,
+                                                     GtFeatureInfo
+                                                     *feature_info)
+{
+  GtGenomeNode *parent;
+  gt_assert(new_gf && old_gf && id && feature_info);
+  gt_warning("the multi-feature with %s \"%s\" on line %u in file \"%s\" has a "
+             "different attribute '%s' than its counterpart on line %u "
+             "('%s' vs. '%s') -> tidy this as normal feature", ID_STRING, id,
+             gt_genome_node_get_line_number((GtGenomeNode*) new_gf),
+             gt_genome_node_get_filename((GtGenomeNode*) new_gf), PARENT_STRING,
+             gt_genome_node_get_line_number((GtGenomeNode*) old_gf),
+             gt_feature_node_get_attribute(new_gf, PARENT_STRING),
+             gt_feature_node_get_attribute(old_gf, PARENT_STRING));
+  /* the new feature is not a multi-feature anymore */
+  gt_feature_node_unset_multi(new_gf);
+  /* unset multi-feature status of the old feature, if it is the only child of
+     its parent (with the given type) */
+  parent = (GtGenomeNode*)
+           gt_feature_info_get(feature_info,
+                               gt_feature_node_get_attribute(old_gf,
+                                                             PARENT_STRING));
+  if (gt_genome_node_number_of_children_of_type(parent, (GtGenomeNode*) old_gf)
+      == 1) {
+    gt_feature_node_unset_multi(old_gf);
+  }
+}
+
 static int compare_other_attribute(const char *attr_name, GtFeatureNode *new_gf,
                                    GtFeatureNode *old_gf, const char *id,
-                                   GtError *err)
+                                   GtGFF3Parser *parser, GtError *err)
 {
   gt_error_check(err);
-  gt_assert(attr_name && new_gf && old_gf);
+  gt_assert(attr_name && new_gf && old_gf && parser);
   if (strcmp(gt_feature_node_get_attribute(new_gf, attr_name),
              gt_feature_node_get_attribute(old_gf, attr_name))) {
-    gt_error_set(err, "the multi-feature with %s \"%s\" on line %u in file "
-                 "\"%s\" has a different attribute '%s' than its counterpart "
-                 "on line %u ('%s' vs. '%s')",
-                 ID_STRING, id,
-                 gt_genome_node_get_line_number((GtGenomeNode*) new_gf),
-                 gt_genome_node_get_filename((GtGenomeNode*) new_gf), attr_name,
-                 gt_genome_node_get_line_number((GtGenomeNode*) old_gf),
-                 gt_feature_node_get_attribute(new_gf, attr_name),
-                 gt_feature_node_get_attribute(old_gf, attr_name));
-    return -1;
+    if (parser->tidy && !strcmp(attr_name, PARENT_STRING)) {
+      tidy_multi_feature_with_different_parent(new_gf, old_gf, id,
+                                               parser->feature_info);
+    }
+    else {
+      gt_error_set(err, "the multi-feature with %s \"%s\" on line %u in file "
+                   "\"%s\" has a different attribute '%s' than its counterpart "
+                   "on line %u ('%s' vs. '%s')",
+                   ID_STRING, id,
+                   gt_genome_node_get_line_number((GtGenomeNode*) new_gf),
+                   gt_genome_node_get_filename((GtGenomeNode*) new_gf),
+                   attr_name,
+                   gt_genome_node_get_line_number((GtGenomeNode*) old_gf),
+                   gt_feature_node_get_attribute(new_gf, attr_name),
+                   gt_feature_node_get_attribute(old_gf, attr_name));
+      return -1;
+    }
   }
   return 0;
 }
 
 static int check_multi_feature_constrains(GtGenomeNode *new_gf,
                                           GtGenomeNode *old_gf, const char *id,
+                                          GtGFF3Parser *parser,
                                           const char *filename,
                                           unsigned int line_number,
                                           GtError *err)
@@ -866,7 +904,8 @@ static int check_multi_feature_constrains(GtGenomeNode *new_gf,
         }
         else {
           had_err = compare_other_attribute(attr_name, (GtFeatureNode*) new_gf,
-                                            (GtFeatureNode*) old_gf, id, err);
+                                            (GtFeatureNode*) old_gf, id, parser,
+                                            err);
         }
       }
     }
@@ -1014,11 +1053,11 @@ static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
   if (!had_err && gt_feature_node_is_multi((GtFeatureNode*) feature_node)) {
     had_err =
       check_multi_feature_constrains(feature_node, (GtGenomeNode*)
-                  gt_feature_node_get_multi_representative((GtFeatureNode*)
+                    gt_feature_node_get_multi_representative((GtFeatureNode*)
                                                              feature_node),
-                  gt_feature_node_get_attribute((GtFeatureNode*) feature_node,
-                                                ID_STRING), filename,
-                                                line_number, err);
+                    gt_feature_node_get_attribute((GtFeatureNode*) feature_node,
+                                                  ID_STRING),
+                                     parser, filename, line_number, err);
   }
 
   gt_splitter_delete(parent_splitter);
