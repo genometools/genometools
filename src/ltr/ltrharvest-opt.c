@@ -242,7 +242,8 @@ static GtOPrval parse_options(int *parsed_args,
   /* -range */
   optionltrsearchseqrange
     = gt_option_new_range("range",
-                          "specify sequence range in which LTRs are searched",
+                          "specify range in the input sequence(s) in which LTR "
+                          "pairs are searched",
                           &lo->repeatinfo.ltrsearchseqrange,
                           &default_ltrsearchseqrange);
   gt_option_parser_add_option(op, optionltrsearchseqrange);

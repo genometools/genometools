@@ -109,6 +109,9 @@ All options can be specified only once.
 \Showoptiongroup{Input options}
 \Showoption{index}& specify the name of the enhanced suffix array index
 \\
+\Showoption{range}& specify the range in the input sequences to be searched for
+LTR retrotransposon candidates
+\\
 \Showoptiongroup{Output options}
 \Showoption{out}& specify outputfilename for predictions in multiple FASTA
 format
@@ -182,7 +185,6 @@ the right)
 \subsection{Input options}
 
 \begin{Justshowoptions}
-
 \Option{index}{\Showoptionarg{indexname}}{
 Specify the name of the enhanced suffix array index. The index must comprise
 the tables $\tt{suf}$, $\tt{lcp}$, $\tt{des}$ and
@@ -192,6 +194,17 @@ with the program \Suffixerator can be found in section~\ref{Examples}.
 \end{Justshowoptions}
 
 The option \Showoption{index} is mandatory.
+
+\begin{Justshowoptions}
+\Option{range}{\Showoptionarg{$x$ $y$}}{
+Specify the range in the input sequence(s) to be searched for LTR
+retrotransposon candidates. That is, if $x=1000$ and $y=10000$ then candidates
+are only reported if they start after position 1000 and end before position
+10000 in their respective sequence coordinates.
+
+If $x=y=0$ (default), then the whole sequences are searched.
+}
+\end{Justshowoptions}
 
 %%%%
 \subsection{Output options}
@@ -748,7 +761,7 @@ $ vmatch -dbcluster 95 7 Cluster-pred-chrAll -p -d -seedlength 50
 \begin{thebibliography}{1}
 
 \bibitem{LTRharvesturl}
-  \url{http://www.zbh.uni-hamburg.de/ltrharvest/}
+  \url{http://www.zbh.uni-hamburg.de/ltrharvest}
 
 \bibitem{gff3}
 \textsc{GFF3}, tab delimited file format for genome annotation.
@@ -763,7 +776,7 @@ M.I. Abouelhoda, S.~Kurtz, and E.~Ohlebusch.
 D.~Ellinghaus, S.~Kurtz, and U.~Willhoeft.
 \newblock \LTRharvest, an efficient and flexible software for de novo
   detection of \normalsize{LTR} retrotransposons.
-\newblock {\em submitted}, 2007.
+\newblock {\em BMC Bioinformatics}, 9:18, 2008.
 
 \bibitem{genometools}
 G.~Gremme.
