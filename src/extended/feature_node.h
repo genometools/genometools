@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -89,6 +89,9 @@ void           gt_feature_node_set_multi_representative(GtFeatureNode
                                                         *feature_node,
                                                         GtFeatureNode
                                                         *representative);
+/* Unset the multi-feature status of <feature_node> and remove its multi-feature
+   representative. */
+void           gt_feature_node_unset_multi(GtFeatureNode *feature_node);
 /* Return the representative of the multi-feature <feature_node>. */
 GtFeatureNode* gt_feature_node_get_multi_representative(GtFeatureNode
                                                         *feature_node);
@@ -123,9 +126,9 @@ int            gt_genome_node_traverse_direct_children(GtGenomeNode*, void*,
                                                        GtError*);
 unsigned long  gt_genome_node_number_of_children(const GtGenomeNode*);
 unsigned long  gt_genome_node_number_of_children_of_type(const GtGenomeNode
-                                                           *parent,
+                                                         *parent,
                                                          const GtGenomeNode
-                                                           *node);
+                                                         *node);
 /* does not free the leaf, do not use during traversal! */
 void           gt_genome_node_remove_leaf(GtGenomeNode *tree,
                                           GtGenomeNode *leafn);

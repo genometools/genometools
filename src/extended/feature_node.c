@@ -370,7 +370,7 @@ void gt_feature_node_make_multi_representative(GtFeatureNode *fn)
 }
 
 void gt_feature_node_set_multi_representative(GtFeatureNode *fn,
-                                             GtFeatureNode *rep)
+                                              GtFeatureNode *rep)
 {
   gt_assert(fn && !gt_feature_node_is_multi(fn));
   gt_assert(rep && gt_feature_node_is_multi(rep));
@@ -378,8 +378,7 @@ void gt_feature_node_set_multi_representative(GtFeatureNode *fn,
   fn->representative = rep;
 }
 
-GtFeatureNode* gt_feature_node_get_multi_representative(GtFeatureNode
-                                                             *fn)
+GtFeatureNode* gt_feature_node_get_multi_representative(GtFeatureNode *fn)
 {
   gt_assert(fn && gt_feature_node_is_multi(fn) &&
             !gt_feature_node_is_pseudo(fn));

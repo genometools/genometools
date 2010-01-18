@@ -450,9 +450,8 @@ static int store_id(const char *id, GtFeatureNode *feature_node,
     }
     if (!had_err) {
       GtFeatureNode *pseudo_parent;
-      bool has_parent ;
-      has_parent = gt_feature_node_get_attribute(fn, PARENT_STRING)
-                   ? true : false;
+      bool has_parent = gt_feature_node_get_attribute(fn, PARENT_STRING)
+                        ? true : false;
       gt_assert(!gt_feature_node_is_pseudo(fn));
       pseudo_parent = gt_feature_info_get_pseudo_parent(parser->feature_info,
                                                         id);
@@ -1012,8 +1011,7 @@ static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
     }
   }
 
-  if (!had_err &&
-      gt_feature_node_is_multi((GtFeatureNode*) feature_node)) {
+  if (!had_err && gt_feature_node_is_multi((GtFeatureNode*) feature_node)) {
     had_err =
       check_multi_feature_constrains(feature_node, (GtGenomeNode*)
                   gt_feature_node_get_multi_representative((GtFeatureNode*)

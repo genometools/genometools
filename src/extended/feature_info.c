@@ -25,7 +25,7 @@
 
 struct GtFeatureInfo {
   GtHashmap *id_to_genome_node,
-             *id_to_pseudo_parent;
+            *id_to_pseudo_parent;
 };
 
 GtFeatureInfo* gt_feature_info_new(void)
