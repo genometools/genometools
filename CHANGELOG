@@ -1,6 +1,7 @@
 changes in version 1.3.5 (2010-01-18)
 
 - `gt gff3 -tidy` cleans up multi-features with different parents
+- `gt stat` shows number of multi-features
 
 
 changes in version 1.3.4 (2009-11-19)

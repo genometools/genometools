@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -24,6 +24,7 @@
 struct GtStatVisitor {
   const GtNodeVisitor parent_instance;
   unsigned long number_of_sequence_regions,
+                number_of_multi_features,
                 number_of_genes,
                 number_of_protein_coding_genes,
                 number_of_mRNAs,
@@ -74,6 +75,10 @@ static int compute_statistics(GtGenomeNode *gn, void *data, GtError *err)
   gt_assert(data);
   stat_visitor = (GtStatVisitor*) data;
   gf = (GtFeatureNode*) gn;
+  if (gt_feature_node_is_multi(gf) &&
+      gt_feature_node_get_multi_representative(gf) == gf) {
+    stat_visitor->number_of_multi_features++;
+  }
   if (gt_feature_node_has_type(gf, gt_ft_gene)) {
     stat_visitor->number_of_genes++;
     if (gt_feature_node_has_CDS(gf))
@@ -132,7 +137,7 @@ static int stat_visitor_genome_feature(GtNodeVisitor *gv, GtFeatureNode *gf,
   gt_error_check(err);
   stat_visitor = stat_visitor_cast(gv);
   return gt_genome_node_traverse_children((GtGenomeNode*) gf, stat_visitor,
-                                       compute_statistics, false, err);
+                                          compute_statistics, false, err);
 }
 
 static int stat_visitor_region_node(GtNodeVisitor *gv, GtRegionNode *rn,
@@ -190,6 +195,10 @@ void gt_stat_visitor_show_stats(GtNodeVisitor *gv)
     printf("sequence regions: %lu (total length: %llu)\n",
            stat_visitor->number_of_sequence_regions,
            stat_visitor->total_length_of_sequence_regions);
+  }
+  if (stat_visitor->number_of_multi_features) {
+    printf("multi-features: %lu\n",
+           stat_visitor->number_of_multi_features);
   }
   if (stat_visitor->number_of_genes)
     printf("genes: %lu\n", stat_visitor->number_of_genes);
