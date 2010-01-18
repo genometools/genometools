@@ -759,6 +759,14 @@ Test do
   run "diff #{$last_stdout} #{$testdata}duplicate_attribute_fixed.gff3"
 end
 
+Name "gt gff3 multi-feature with different parent"
+Keywords "gt_gff3 xxx"
+Test do
+  run_test("#{$bin}gt gff3 " +
+           "#{$testdata}multi_feature_with_different_parent.gff3", :retval => 1)
+  grep $last_stderr, "has a different attribute 'Parent' than its counterpart"
+end
+
 Name "custom_stream (C)"
 Keywords "gt_gff3 examples"
 Test do
@@ -776,7 +784,7 @@ def large_gff3_test(name, file)
   Name "gt gff3 #{name} (-sort)"
   Keywords "gt_gff3 large_gff3"
   Test do
-    run_test("#{$bin}gt gff3 -sort -width 80 " + "#{$gttestdata}gff3/#{file}",
+    run_test("#{$bin}gt gff3 -sort -width 80 #{$gttestdata}gff3/#{file}",
              :maxtime => 90)
     run      "diff #{$last_stdout} #{$gttestdata}gff3/#{file}.sorted"
   end

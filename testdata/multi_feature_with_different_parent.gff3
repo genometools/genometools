@@ -1,0 +1,6 @@
+##gff-version 3
+# region I:2000001..3000000
+I	Coding_transcript	gene	2929785	2931362	.	+	.	Alias=Y71F9AM.5;Dbxref=CGC:nxt-1;ID=Gene:WBGene00003836;Name=WBGene00003836
+I	Coding_transcript	exon	2929947	2930089	.	+	.	ID=45166;Parent=Gene:WBGene00003836
+I	Coding_transcript	gene	2928394	2931254	.	+	.	Alias=Y71F9AM.6;ID=Gene:WBGene00022122;Name=WBGene00022122
+I	Coding_transcript	exon	2929947	2930089	.	+	.	ID=45166;Parent=Gene:WBGene00022122
