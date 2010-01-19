@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -120,7 +120,6 @@ void* gt_malloc_mem(size_t size, const char *filename, int line)
 {
   MAInfo *mainfo;
   void *mem;
-  if (!ma) gt_ma_init(false);
   gt_assert(ma);
   if (ma->bookkeeping) {
     ma->bookkeeping = false;
@@ -142,7 +141,6 @@ void* gt_calloc_mem(size_t nmemb, size_t size, const char *filename, int line)
 {
   MAInfo *mainfo;
   void *mem;
-  if (!ma) gt_ma_init(false);
   gt_assert(ma);
   if (ma->bookkeeping) {
     ma->bookkeeping = false;
@@ -164,7 +162,6 @@ void* gt_realloc_mem(void *ptr, size_t size, const char *filename, int line)
 {
   MAInfo *mainfo;
   void *mem;
-  if (!ma) gt_ma_init(false);
   gt_assert(ma);
   if (ma->bookkeeping) {
     ma->bookkeeping = false;
