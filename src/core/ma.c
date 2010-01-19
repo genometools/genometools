@@ -206,7 +206,7 @@ void gt_free_mem(void *ptr, GT_UNUSED const char *filename, GT_UNUSED int line)
     if (!gt_hashmap_get(ma->allocated_pointer, ptr)) {
       fprintf(stderr, "bug: double free() attempted on line %d in file "
               "\"%s\"\n", line, filename);
-      exit(2); /* programmer error */
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
 #endif
     mainfo = gt_hashmap_get(ma->allocated_pointer, ptr);
