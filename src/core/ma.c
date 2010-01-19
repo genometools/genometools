@@ -307,8 +307,6 @@ int gt_ma_unit_test(GtError *err)
 {
   int had_err;
   gt_error_check(err);
-  printf("\nbefore gt_multithread() call\n");
   had_err = gt_multithread(test_malloc, NULL, err);
-  printf("after gt_multithread() call\n");
   return had_err;
 }
