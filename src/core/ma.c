@@ -16,6 +16,7 @@
 */
 
 #include <stdbool.h>
+#include "core/array_api.h"
 #include "core/hashmap.h"
 #include "core/ma.h"
 #include "core/thread.h"
@@ -279,4 +280,35 @@ void gt_ma_clean(void)
   gt_mutex_delete(ma->mutex);
   free(ma);
   ma = NULL;
+}
+
+#define NUMBER_OF_ALLOCS 100000
+#define SIZE_OF_ALLOCS   64
+
+static void* test_malloc(GT_UNUSED void *data)
+{
+  GtArray *chunks;
+  unsigned int i;
+  void *mem;
+  chunks = gt_array_new(sizeof (void*));
+  for (i = 0; i < NUMBER_OF_ALLOCS; i++) {
+    mem = gt_malloc(64);
+    gt_array_add(chunks, mem);
+  }
+  for (i = 0; i < NUMBER_OF_ALLOCS; i++) {
+    mem = *(void**) gt_array_get(chunks, i);
+    gt_free(mem);
+  }
+  gt_array_delete(chunks);
+  return NULL;
+}
+
+int gt_ma_unit_test(GtError *err)
+{
+  int had_err;
+  gt_error_check(err);
+  printf("\nbefore gt_multithread() call\n");
+  had_err = gt_multithread(test_malloc, NULL, err);
+  printf("after gt_multithread() call\n");
+  return had_err;
 }

@@ -37,6 +37,8 @@ GtThread* gt_thread_new(GtThreadFunc function, void *data, GtError *err);
 /* Delete the given <thread> handle. Does not stop the thread itself! */
 void      gt_thread_delete(GtThread *thread);
 
+void      gt_thread_join(GtThread *thread);
+
 /* Return a new <GtMutex*> object. */
 GtMutex*  gt_mutex_new(void);
 

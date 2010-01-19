@@ -14,7 +14,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <errno.h>
 #include <string.h>
+#include "core/array_api.h"
 #include "core/assert_api.h"
 #include "core/error_api.h"
 #include "core/ma_api.h"
@@ -29,16 +31,36 @@ unsigned int gt_jobs = 1;
 
 int gt_multithread(GtThreadFunc function, void *data, GtError *err)
 {
+  GtArray *threads;
   GtThread *thread;
-  unsigned int i;
+  unsigned int i, j;
+
   gt_error_check(err);
   gt_assert(function);
+
+  threads = gt_array_new(sizeof (GtThread*));
+
+  /* start all other threads and store them */
   for (i = 1; i < gt_jobs; i++) {
-    if (!(thread = gt_thread_new(function, data, err)))
+    if (!(thread = gt_thread_new(function, data, err))) {
+      for (j = 0; j < gt_array_size(threads); j++)
+        gt_thread_delete(*(GtThread**) gt_array_get(threads, j));
+      gt_array_delete(threads);
       return -1;
+    }
+    gt_array_add(threads, thread);
+  }
+
+  function(data); /* execute function in main thread, too */
+
+  /* wait until all other threads are finished */
+  for (i = 0; i < gt_array_size(threads); i++) {
+    thread = *(GtThread**) gt_array_get(threads, i);
+    gt_thread_join(thread);
     gt_thread_delete(thread);
   }
-  function(data); /* execute function in main thread, too */
+  gt_array_delete(threads);
+
   return 0;
 }
 
@@ -58,11 +80,31 @@ GtThread* gt_thread_new(GtThreadFunc function, void *data, GtError *err)
   return thread;
 }
 
+void gt_thread_join(GtThread *thread)
+{
+  int rval;
+  gt_assert(thread);
+  rval = pthread_join(*(pthread_t*) thread, NULL);
+  gt_assert(!rval); /* XXX */
+}
+
+static void* xmalloc(size_t size, const char *filename, int line)
+{
+  void *p;
+  if ((p = malloc(size)) == NULL) {
+    fprintf(stderr, "cannot malloc(%zu) memory: %s\n", size, strerror(errno));
+    fprintf(stderr, "attempted on line %d in file \"%s\"\n", line, filename);
+    exit(EXIT_FAILURE);
+  }
+  return p;
+}
+
 GtMutex* gt_mutex_new(void)
 {
   GtMutex* mutex;
   int rval;
-  mutex = gt_malloc(sizeof (pthread_mutex_t));
+  /* XXX: can we use gt_malloc() here? */
+  mutex = xmalloc(sizeof (pthread_mutex_t), __FILE__, __LINE__);
   /* initialize mutex with default attributes */
   rval = pthread_mutex_init((pthread_mutex_t*) mutex, NULL);
   gt_assert(!rval);
@@ -75,7 +117,7 @@ void gt_mutex_delete(GtMutex *mutex)
   if (!mutex) return;
   rval = pthread_mutex_destroy((pthread_mutex_t*) mutex);
   gt_assert(!rval);
-  gt_free(mutex);
+  free(mutex);
 }
 
 void gt_mutex_lock_func(GtMutex *mutex)

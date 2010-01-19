@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "core/ma_api.h"
+#include "core/error_api.h"
 
 void          gt_ma_init(bool bookkeeping);
 unsigned long gt_ma_get_space_peak(void); /* in bytes */
@@ -29,5 +30,6 @@ void          gt_ma_show_space_peak(FILE*);
 /* check if all allocated memory has been freed, prints to stderr */
 int           gt_ma_check_space_leak(void);
 void          gt_ma_clean(void);
+int           gt_ma_unit_test(GtError*);
 
 #endif

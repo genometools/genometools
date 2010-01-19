@@ -209,6 +209,7 @@ GtHashmap* gtt_unit_tests(void)
                  gt_lua_serializer_unit_test);
   gt_hashmap_add(unit_tests, "ltrelement module", gt_ltrelement_unit_test);
   gt_hashmap_add(unit_tests, "mathsupport module", gt_mathsupport_unit_test);
+  gt_hashmap_add(unit_tests, "memory allocator module", gt_ma_unit_test);
   gt_hashmap_add(unit_tests, "PPT finder module", gt_ppt_unit_test);
   gt_hashmap_add(unit_tests, "PBS finder module", gt_pbs_unit_test);
   gt_hashmap_add(unit_tests, "queue class", gt_queue_unit_test);
