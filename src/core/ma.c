@@ -25,6 +25,7 @@
 
 /* the memory allocator class */
 typedef struct {
+  GtRWLock *rwlock;
   GtMutex *mutex;
   GtHashmap *allocated_pointer;
   bool bookkeeping;
@@ -98,6 +99,7 @@ void gt_ma_init(bool bookkeeping)
   gt_assert(!ma);
   ma = xcalloc(1, sizeof (MA), 0, __FILE__, __LINE__);
   gt_assert(!ma->bookkeeping);
+  ma->rwlock = gt_rwlock_new();
   ma->mutex = gt_mutex_new();
   ma->allocated_pointer = gt_hashmap_new(HASH_DIRECT, NULL,
                                          (GtFree) ma_info_free);
@@ -125,9 +127,13 @@ void* gt_malloc_mem(size_t size, const char *filename, int line)
   MAInfo *mainfo;
   void *mem;
   gt_assert(ma);
+  gt_rwlock_rdlock(ma->rwlock);
   if (ma->bookkeeping) {
+    gt_rwlock_unlock(ma->rwlock);
     gt_mutex_lock(ma->mutex);
+    gt_rwlock_wrlock(ma->rwlock);
     ma->bookkeeping = false;
+    gt_rwlock_unlock(ma->rwlock);
     ma->mallocevents++;
     mainfo = xmalloc(sizeof *mainfo, ma->current_size, filename, line);
     mainfo->size = size;
@@ -136,10 +142,13 @@ void* gt_malloc_mem(size_t size, const char *filename, int line)
     mem = xmalloc(size, ma->current_size, filename, line);
     gt_hashmap_add(ma->allocated_pointer, mem, mainfo);
     add_size(ma, size);
+    gt_rwlock_wrlock(ma->rwlock);
     ma->bookkeeping = true;
+    gt_rwlock_unlock(ma->rwlock);
     gt_mutex_unlock(ma->mutex);
     return mem;
   }
+  gt_rwlock_unlock(ma->rwlock);
   return xmalloc(size, ma->current_size, filename, line);
 }
 
@@ -148,9 +157,13 @@ void* gt_calloc_mem(size_t nmemb, size_t size, const char *filename, int line)
   MAInfo *mainfo;
   void *mem;
   gt_assert(ma);
+  gt_rwlock_rdlock(ma->rwlock);
   if (ma->bookkeeping) {
+    gt_rwlock_unlock(ma->rwlock);
     gt_mutex_lock(ma->mutex);
+    gt_rwlock_wrlock(ma->rwlock);
     ma->bookkeeping = false;
+    gt_rwlock_unlock(ma->rwlock);
     ma->mallocevents++;
     mainfo = xmalloc(sizeof *mainfo, ma->current_size, filename, line);
     mainfo->size = nmemb * size;
@@ -159,10 +172,13 @@ void* gt_calloc_mem(size_t nmemb, size_t size, const char *filename, int line)
     mem = xcalloc(nmemb, size, ma->current_size, filename, line);
     gt_hashmap_add(ma->allocated_pointer, mem, mainfo);
     add_size(ma, nmemb * size);
+    gt_rwlock_wrlock(ma->rwlock);
     ma->bookkeeping = true;
+    gt_rwlock_unlock(ma->rwlock);
     gt_mutex_unlock(ma->mutex);
     return mem;
   }
+  gt_rwlock_unlock(ma->rwlock);
   return xcalloc(nmemb, size, ma->current_size, filename, line);
 }
 
@@ -171,9 +187,13 @@ void* gt_realloc_mem(void *ptr, size_t size, const char *filename, int line)
   MAInfo *mainfo;
   void *mem;
   gt_assert(ma);
+  gt_rwlock_rdlock(ma->rwlock);
   if (ma->bookkeeping) {
+    gt_rwlock_unlock(ma->rwlock);
     gt_mutex_lock(ma->mutex);
+    gt_rwlock_wrlock(ma->rwlock);
     ma->bookkeeping = false;
+    gt_rwlock_unlock(ma->rwlock);
     ma->mallocevents++;
     if (ptr) {
       mainfo = gt_hashmap_get(ma->allocated_pointer, ptr);
@@ -188,10 +208,13 @@ void* gt_realloc_mem(void *ptr, size_t size, const char *filename, int line)
     mem = xrealloc(ptr, size, ma->current_size, filename, line);
     gt_hashmap_add(ma->allocated_pointer, mem, mainfo);
     add_size(ma, size);
+    gt_rwlock_wrlock(ma->rwlock);
     ma->bookkeeping = true;
+    gt_rwlock_unlock(ma->rwlock);
     gt_mutex_unlock(ma->mutex);
     return mem;
   }
+  gt_rwlock_unlock(ma->rwlock);
   return xrealloc(ptr, size, ma->current_size, filename, line);
 }
 
@@ -200,9 +223,13 @@ void gt_free_mem(void *ptr, GT_UNUSED const char *filename, GT_UNUSED int line)
   MAInfo *mainfo;
   gt_assert(ma);
   if (!ptr) return;
+  gt_rwlock_rdlock(ma->rwlock);
   if (ma->bookkeeping) {
+    gt_rwlock_unlock(ma->rwlock);
     gt_mutex_lock(ma->mutex);
+    gt_rwlock_wrlock(ma->rwlock);
     ma->bookkeeping = false;
+    gt_rwlock_unlock(ma->rwlock);
 #ifndef NDEBUG
     if (!gt_hashmap_get(ma->allocated_pointer, ptr)) {
       fprintf(stderr, "bug: double free() attempted on line %d in file "
@@ -215,11 +242,15 @@ void gt_free_mem(void *ptr, GT_UNUSED const char *filename, GT_UNUSED int line)
     subtract_size(ma, mainfo->size);
     gt_hashmap_remove(ma->allocated_pointer, ptr);
     free(ptr);
+    gt_rwlock_wrlock(ma->rwlock);
     ma->bookkeeping = true;
+    gt_rwlock_unlock(ma->rwlock);
     gt_mutex_unlock(ma->mutex);
   }
-  else
+  else {
+    gt_rwlock_unlock(ma->rwlock);
     free(ptr);
+  }
 }
 
 void gt_free_func(void *ptr)
@@ -278,6 +309,7 @@ void gt_ma_clean(void)
   ma->bookkeeping = false;
   gt_hashmap_delete(ma->allocated_pointer);
   gt_mutex_delete(ma->mutex);
+  gt_rwlock_delete(ma->rwlock);
   free(ma);
   ma = NULL;
 }
