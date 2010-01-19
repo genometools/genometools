@@ -37,7 +37,7 @@ class Range(Structure):
 
     @start.setter
     def start(self, val):
-        if val > self.end or not val > 0:
+        if val > self.end or not val >= 0:
             gterror("Invalid range start component: %d" % val)
         self.w_start = val
 
@@ -47,6 +47,6 @@ class Range(Structure):
 
     @end.setter
     def end(self, val):
-        if val < self.start or not val > 0:
+        if val < self.start or not val >= 0:
             gterror("Invalid range end component: %d" % val)
         self.w_end = val
