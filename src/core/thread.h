@@ -17,32 +17,43 @@
 #ifndef THREAD_H
 #define THREAD_H
 
+typedef struct GtThread GtThread;
 typedef struct GtMutex GtMutex;
 
+typedef void* (*GtThreadFunc)(void *data);
+
+/* Create a new thread which executes the given <function> (with <data> passed
+   to it). Returns a <GtThread*> handle to the newly created thread, if
+   successful. Returns NULL and sets <err> accordingly upon failure.  */
+GtThread* gt_thread_new(GtThreadFunc function, void *data, GtError *err);
+
+/* Delete the given <thread> handle. Does not stop the thread itself! */
+void      gt_thread_delete(GtThread *thread);
+
 /* Return a new <GtMutex*> object. */
-GtMutex* gt_mutex_new(void);
+GtMutex*  gt_mutex_new(void);
 
 /* Delete the given <mutex>. */
-void     gt_mutex_delete(GtMutex *mutex);
+void      gt_mutex_delete(GtMutex *mutex);
 
 /* Lock the given <mutex>. */
 #ifdef GT_THREADS_ENABLED
-#define  gt_mutex_lock(mutex) \
-         gt_mutex_lock_func(mutex)
-void     gt_mutex_lock_func(GtMutex *mutex);
+#define   gt_mutex_lock(mutex) \
+          gt_mutex_lock_func(mutex)
+void      gt_mutex_lock_func(GtMutex *mutex);
 #else
-#define  gt_mutex_lock(mutex) \
-         ((void) 0)
+#define   gt_mutex_lock(mutex) \
+          ((void) 0)
 #endif
 
 /* Unlock the given <mutex>. */
 #ifdef GT_THREADS_ENABLED
-#define  gt_mutex_unlock(mutex) \
-         gt_mutex_unlock_func(mutex)
-void     gt_mutex_unlock_func(GtMutex *mutex);
+#define   gt_mutex_unlock(mutex) \
+          gt_mutex_unlock_func(mutex)
+void      gt_mutex_unlock_func(GtMutex *mutex);
 #else
-#define  gt_mutex_unlock(mutex) \
-         ((void) 0)
+#define   gt_mutex_unlock(mutex) \
+          ((void) 0)
 #endif
 
 #endif

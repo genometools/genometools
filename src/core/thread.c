@@ -14,8 +14,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <stdio.h>
+#include <string.h>
 #include "core/assert_api.h"
+#include "core/error_api.h"
 #include "core/ma_api.h"
 #include "core/thread.h"
 #include "core/unused_api.h"
@@ -23,6 +24,22 @@
 #ifdef GT_THREADS_ENABLED
 
 #include <pthread.h>
+
+GtThread* gt_thread_new(GtThreadFunc function, void *data, GtError *err)
+{
+  GtThread *thread;
+  int rval;
+  gt_error_check(err);
+  gt_assert(function);
+  thread = gt_malloc(sizeof (pthread_t));
+  rval = pthread_create((pthread_t*) thread, NULL, function, data);
+  if (rval) {
+    gt_error_set(err, "cannot create thread: %s\n", strerror(rval));
+    gt_free(thread);
+    return NULL;
+  }
+  return thread;
+}
 
 GtMutex* gt_mutex_new(void)
 {
@@ -58,6 +75,16 @@ void gt_mutex_unlock_func(GtMutex *mutex)
 
 #else
 
+GtThread* gt_thread_new(GtThreadFunc function, void *data, GtError *err)
+{
+  GtThread *thread;
+  gt_error_check(err);
+  gt_assert(function);
+  thread = gt_malloc(sizeof (void*));
+  function(data);
+  return thread;
+}
+
 GtMutex* gt_mutex_new(void)
 {
   return NULL;
@@ -69,3 +96,9 @@ void gt_mutex_delete(GT_UNUSED GtMutex *mutex)
 }
 
 #endif
+
+void gt_thread_delete(GtThread *thread)
+{
+  if (!thread);
+  gt_free(thread);
+}
