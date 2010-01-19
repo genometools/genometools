@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -26,6 +26,7 @@
 #include "gt_config.h"
 
 /* the core module */
+#include "core/allocators_api.h"
 #include "core/array_api.h"
 #include "core/array2dim_api.h"
 #include "core/assert_api.h"

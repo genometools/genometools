@@ -15,17 +15,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ALLOCATORS_H
-#define ALLOCATORS_H
+#ifndef ALLOCATORS_API_H
+#define ALLOCATORS_API_H
 
-#include "allocators_api.h"
-
-/* high level wrapper module for the allocators (memory & files) */
-
-/* registers exit function which calls gt_allocators_clean() */
-void gt_allocators_reg_atexit_func(void);
-/* returns 0 if no memory map, file pointer, or memory has been leaked and a
-   value != 0 otherwise */
-int  gt_allocators_clean(void);
+/* Initialize the GenomeTools allocators.
+   This has to be called before the library is used! */
+void gt_allocators_init(void);
 
 #endif
