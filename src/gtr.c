@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -32,6 +32,7 @@
 #include "core/gtdatapath.h"
 #include "core/log.h"
 #include "core/ma.h"
+#include "core/thread.h"
 #include "core/versionfunc.h"
 #include "core/xansi.h"
 #include "core/yarandom.h"
@@ -141,6 +142,10 @@ GtOPrval gtr_parse(GtR *gtr, int *parsed_args, int argc, const char **argv,
                          "enter interactive mode after executing 'tool' or "
                          "'script'", &gtr->interactive, false);
   gt_option_hide_default(o);
+  gt_option_parser_add_option(op, o);
+  o = gt_option_new_uint_min("j", "set number of parallel threads used at once",
+                             &gt_jobs, 1, 1);
+  gt_option_is_development_option(o);
   gt_option_parser_add_option(op, o);
   o = gt_option_new_bool("test", "perform unit tests and exit", &gtr->test,
                          false);

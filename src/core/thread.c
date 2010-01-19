@@ -21,6 +21,8 @@
 #include "core/thread.h"
 #include "core/unused_api.h"
 
+unsigned int gt_jobs = 1;
+
 #ifdef GT_THREADS_ENABLED
 
 #include <pthread.h>

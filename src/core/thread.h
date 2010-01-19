@@ -17,6 +17,8 @@
 #ifndef THREAD_H
 #define THREAD_H
 
+extern unsigned int gt_jobs; /* number of parallel threads to be used */
+
 typedef struct GtThread GtThread;
 typedef struct GtMutex GtMutex;
 
