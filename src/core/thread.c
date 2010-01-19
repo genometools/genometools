@@ -27,6 +27,21 @@ unsigned int gt_jobs = 1;
 
 #include <pthread.h>
 
+int gt_multithread(GtThreadFunc function, void *data, GtError *err)
+{
+  GtThread *thread;
+  unsigned int i;
+  gt_error_check(err);
+  gt_assert(function);
+  for (i = 1; i < gt_jobs; i++) {
+    if (!(thread = gt_thread_new(function, data, err)))
+      return -1;
+    gt_thread_delete(thread);
+  }
+  function(data); /* execute function in main thread, too */
+  return 0;
+}
+
 GtThread* gt_thread_new(GtThreadFunc function, void *data, GtError *err)
 {
   GtThread *thread;
@@ -76,6 +91,16 @@ void gt_mutex_unlock_func(GtMutex *mutex)
 }
 
 #else
+
+int gt_multithread(GtThreadFunc function, void *data, GtError *err)
+{
+  unsigned int i;
+  gt_error_check(err);
+  gt_assert(function);
+  for (i = 0; i < gt_jobs; i++)
+    function(data);
+  return 0;
+}
 
 GtThread* gt_thread_new(GtThreadFunc function, void *data, GtError *err)
 {

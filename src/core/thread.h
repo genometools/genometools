@@ -24,6 +24,11 @@ typedef struct GtMutex GtMutex;
 
 typedef void* (*GtThreadFunc)(void *data);
 
+/* Execute <function> (with <data> passed to it) in <gt_jobs> many parallel
+   threads, if threading is enabled. Otherwise <function> is executed <gt_jobs>
+   many times sequentially. */
+int       gt_multithread(GtThreadFunc function, void *data, GtError *err);
+
 /* Create a new thread which executes the given <function> (with <data> passed
    to it). Returns a <GtThread*> handle to the newly created thread, if
    successful. Returns NULL and sets <err> accordingly upon failure.  */
