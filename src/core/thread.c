@@ -167,10 +167,10 @@ void gt_mutex_delete(GtMutex *mutex)
 
 void gt_mutex_lock_func(GtMutex *mutex)
 {
- int rval;
- gt_assert(mutex);
- rval = pthread_mutex_lock((pthread_mutex_t*) mutex);
- gt_assert(!rval);
+  int rval;
+  gt_assert(mutex);
+  rval = pthread_mutex_lock((pthread_mutex_t*) mutex);
+  gt_assert(!rval);
 }
 
 void gt_mutex_unlock_func(GtMutex *mutex)
