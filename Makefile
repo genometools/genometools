@@ -469,6 +469,7 @@ $(eval $(call PROGRAM_template, bin/skproto, $(SKPROTO_OBJ) \
                                              obj/src/core/str_array.o\
                                              obj/src/core/strcmp.o\
                                              obj/src/core/symbol.o\
+                                             obj/src/core/thread.o\
                                              obj/src/core/tool.o\
                                              obj/src/core/tooldriver.o\
                                              obj/src/core/versionfunc.o\
