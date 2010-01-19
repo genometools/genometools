@@ -99,9 +99,54 @@ static void* xmalloc(size_t size, const char *filename, int line)
   return p;
 }
 
+GtRWLock* gt_rwlock_new(void)
+{
+  GtRWLock *rwlock;
+  int rval;
+  /* XXX: can we use gt_malloc() here? */
+  rwlock = xmalloc(sizeof (pthread_rwlock_t), __FILE__, __LINE__);
+  /* initialize read/write lock with default attributes */
+  rval = pthread_rwlock_init((pthread_rwlock_t*) rwlock, NULL);
+  gt_assert(!rval);
+  return rwlock;
+}
+
+void gt_rwlock_delete(GtRWLock *rwlock)
+{
+  int rval;
+  if (!rwlock) return;
+  rval = pthread_rwlock_destroy((pthread_rwlock_t*) rwlock);
+  gt_assert(!rval);
+  free(rwlock);
+}
+
+void gt_rwlock_rdlock_func(GtRWLock *rwlock)
+{
+  int rval;
+  gt_assert(rwlock);
+  rval = pthread_rwlock_rdlock((pthread_rwlock_t*) rwlock);
+  gt_assert(!rval);
+}
+
+void gt_rwlock_wrlock_func(GtRWLock *rwlock)
+{
+  int rval;
+  gt_assert(rwlock);
+  rval = pthread_rwlock_wrlock((pthread_rwlock_t*) rwlock);
+  gt_assert(!rval);
+}
+
+void gt_rwlock_unlock_func(GtRWLock *rwlock)
+{
+  int rval;
+  gt_assert(rwlock);
+  rval = pthread_rwlock_unlock((pthread_rwlock_t*) rwlock);
+  gt_assert(!rval);
+}
+
 GtMutex* gt_mutex_new(void)
 {
-  GtMutex* mutex;
+  GtMutex *mutex;
   int rval;
   /* XXX: can we use gt_malloc() here? */
   mutex = xmalloc(sizeof (pthread_mutex_t), __FILE__, __LINE__);
@@ -122,13 +167,17 @@ void gt_mutex_delete(GtMutex *mutex)
 
 void gt_mutex_lock_func(GtMutex *mutex)
 {
- int rval = pthread_mutex_lock((pthread_mutex_t*) mutex);
+ int rval;
+ gt_assert(mutex);
+ rval = pthread_mutex_lock((pthread_mutex_t*) mutex);
  gt_assert(!rval);
 }
 
 void gt_mutex_unlock_func(GtMutex *mutex)
 {
-  int rval = pthread_mutex_unlock((pthread_mutex_t*) mutex);
+  int rval;
+  gt_assert(mutex);
+  rval = pthread_mutex_unlock((pthread_mutex_t*) mutex);
   gt_assert(!rval);
 }
 
@@ -152,6 +201,16 @@ GtThread* gt_thread_new(GtThreadFunc function, void *data, GtError *err)
   thread = gt_malloc(sizeof (void*));
   function(data);
   return thread;
+}
+
+GtRWLock* gt_rwlock_new(void)
+{
+  return NULL;
+}
+
+void gt_rwlock_delete(GT_UNUSED GtRWLock *rwlock)
+{
+  return;
 }
 
 GtMutex* gt_mutex_new(void)

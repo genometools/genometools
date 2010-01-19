@@ -20,6 +20,7 @@
 extern unsigned int gt_jobs; /* number of parallel threads to be used */
 
 typedef struct GtThread GtThread;
+typedef struct GtRWLock GtRWLock;
 typedef struct GtMutex GtMutex;
 
 typedef void* (*GtThreadFunc)(void *data);
@@ -38,6 +39,42 @@ GtThread* gt_thread_new(GtThreadFunc function, void *data, GtError *err);
 void      gt_thread_delete(GtThread *thread);
 
 void      gt_thread_join(GtThread *thread);
+
+/* Return a new <GtRWLock*> object. */
+GtRWLock* gt_rwlock_new(void);
+
+/* Delete the given <rwlock>. */
+void      gt_rwlock_delete(GtRWLock *rwlock);
+
+/* Acquire a read lock for <rwlock>. */
+#ifdef GT_THREADS_ENABLED
+#define   gt_rwlock_rdlock(rwlock) \
+          gt_rwlock_rdlock_func(rwlock)
+void      gt_rwlock_rdlock_func(GtRWLock *rwlock);
+#else
+#define   gt_rwlock_rdlock(rwlock) \
+          ((void) 0)
+#endif
+
+/* Acquire a write lock for <rwlock>. */
+#ifdef GT_THREADS_ENABLED
+#define   gt_rwlock_wrlock(rwlock) \
+          gt_rwlock_wrlock_func(rwlock)
+void      gt_rwlock_wrlock_func(GtRWLock *rwlock);
+#else
+#define   gt_rwlock_wrlock(rwlock) \
+          ((void) 0)
+#endif
+
+/* Unlock the given <rwlock>. */
+#ifdef GT_THREADS_ENABLED
+#define   gt_rwlock_unlock(rwlock) \
+          gt_rwlock_unlock_func(rwlock)
+void      gt_rwlock_unlock_func(GtRWLock *rwlock);
+#else
+#define   gt_rwlock_unlock(rwlock) \
+          ((void) 0)
+#endif
 
 /* Return a new <GtMutex*> object. */
 GtMutex*  gt_mutex_new(void);
