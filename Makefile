@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+# Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 # Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
@@ -306,6 +306,10 @@ else
   OVERRIDELIBS += lib/libz.a # using own zlib together with cairo doesn't work
   EXP_CPPFLAGS += -DWITHOUT_CAIRO
   STEST_FLAGS += -nocairo
+endif
+
+ifeq ($(threads),yes)
+  EXP_CPPFLAGS += -DGT_THREADS_ENABLED
 endif
 
 # the GenomeTools library
