@@ -53,7 +53,8 @@
 #include <unistd.h>  /* for getpid() */
 #include <sys/time.h> /* for gettimeofday() */
 
-#include "yarandom.h"
+#include "core/thread.h"
+#include "core/yarandom.h"
 # undef gt_ya_rand_init
 
 /* The following 'random' numbers are taken from CRC, 18th Edition, page 622.
@@ -78,13 +79,18 @@ static unsigned int a[VectorSize] = {
 
 static int i1, i2;
 
+static GtMutex *mutex = NULL;
+
 unsigned int
 gt_ya_random (void)
 {
-  register int ret = a[i1] + a[i2];
+  register int ret;
+  gt_mutex_lock(mutex);
+  ret = a[i1] + a[i2];
   a[i1] = ret;
   if (++i1 >= VectorSize) i1 = 0;
   if (++i2 >= VectorSize) i2 = 0;
+  gt_mutex_unlock(mutex);
   return ret;
 }
 
@@ -93,6 +99,8 @@ gt_ya_rand_init(unsigned int seed)
 {
   unsigned int generated_seed;
   int i;
+  if (!mutex)
+    mutex = gt_mutex_new();
   if (seed == 0)
     {
       struct timeval tp;

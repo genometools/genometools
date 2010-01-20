@@ -17,6 +17,8 @@
 #ifndef THREAD_H
 #define THREAD_H
 
+#include "core/error_api.h"
+
 extern unsigned int gt_jobs; /* number of parallel threads to be used */
 
 typedef struct GtThread GtThread;

@@ -27,6 +27,7 @@
 #include "core/versionfunc.h"
 #include "core/warning_api.h"
 #include "core/xansi.h"
+#include "core/yarandom.h"
 
 static bool spacepeak = false;
 
@@ -89,6 +90,7 @@ void gt_allocators_init(void)
   if (spacepeak && !(bookkeeping && !strcmp(bookkeeping, "on")))
     gt_warning("GT_ENV_OPTIONS=-spacepeak used without GT_MEM_BOOKKEEPING=on");
   gt_symbol_init();
+  gt_ya_rand_init(0);
 }
 
 static void gt_allocators_atexit_func(void)
