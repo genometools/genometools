@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008      Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,6 +18,8 @@
 #ifndef SYMBOL_H
 #define SYMBOL_H
 
+void        gt_symbol_init(void);
+
 /* Return a symbol (a canonical representation) for <cstr>.  An advantage of
    symbols is that they can be compared for equality by a simple pointer
    comparison, rather than using <strcmp()> (as it is done in <gt_strcmp()>).
@@ -28,5 +30,7 @@ const char* gt_symbol(const char *cstr);
 
 /* Free (and thereby invalidate) all created symbols! */
 void        gt_symbol_clean(void);
+
+int         gt_symbol_unit_test(GtError*);
 
 #endif

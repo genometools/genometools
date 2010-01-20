@@ -38,6 +38,7 @@
 #include "core/mathsupport.h"
 #include "core/sequence_buffer.h"
 #include "core/splitter.h"
+#include "core/symbol.h"
 #include "core/tokenizer.h"
 #include "core/translator.h"
 #include "extended/alignment.h"
@@ -225,6 +226,7 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "string class", gt_str_unit_test);
   gt_hashmap_add(unit_tests, "string matching module",
                  gt_string_matching_unit_test);
+  gt_hashmap_add(unit_tests, "symbol module", gt_symbol_unit_test);
   gt_hashmap_add(unit_tests, "tag value map class", gt_tag_value_map_unit_test);
   gt_hashmap_add(unit_tests, "tag value map example", gt_tag_value_map_example);
   gt_hashmap_add(unit_tests, "tokenizer class", gt_tokenizer_unit_test);

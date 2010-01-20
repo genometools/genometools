@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -88,6 +88,7 @@ void gt_allocators_init(void)
   proc_env_options();
   if (spacepeak && !(bookkeeping && !strcmp(bookkeeping, "on")))
     gt_warning("GT_ENV_OPTIONS=-spacepeak used without GT_MEM_BOOKKEEPING=on");
+  gt_symbol_init();
 }
 
 static void gt_allocators_atexit_func(void)
