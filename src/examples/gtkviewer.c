@@ -118,6 +118,7 @@ int main(int argc, char *argv[])
 
   gtk_init(&argc, &argv);
 
+  gt_allocators_init();
   err = gt_error_new();
   sty = gt_style_new(err);
   gt_style_load_file(sty, "gtdata/sketch/default.style", err);

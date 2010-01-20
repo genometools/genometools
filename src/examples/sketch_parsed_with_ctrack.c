@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
   GtCanvas *canvas;
   GtCustomTrack *custom;
   unsigned long height, windowsize;
-  GtError *err = gt_error_new();
+  GtError *err;
 
   if (argc != 9) {
     fprintf(stderr, "Usage: %s style_file PNG_file GFF3_file Seq_file seqid"
@@ -36,6 +36,9 @@ int main(int argc, char *argv[])
 
   /* initialize */
   gt_allocators_init();
+
+  /* create error object */
+  err = gt_error_new();
 
   /* create style */
   if (!(style = gt_style_new(err)))
