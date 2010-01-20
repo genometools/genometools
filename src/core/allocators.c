@@ -89,6 +89,7 @@ void gt_allocators_init(void)
   proc_env_options();
   if (spacepeak && !(bookkeeping && !strcmp(bookkeeping, "on")))
     gt_warning("GT_ENV_OPTIONS=-spacepeak used without GT_MEM_BOOKKEEPING=on");
+  gt_fa_init();
   gt_symbol_init();
   gt_ya_rand_init(0);
 }

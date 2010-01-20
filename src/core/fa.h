@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinforfatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -26,6 +26,8 @@
 #include "core/str.h"
 
 /* the file allocator module */
+
+void    gt_fa_init(void);
 
 /* functions for normal file pointer */
 #define gt_fa_fopen(path, mode, err)\
