@@ -282,7 +282,44 @@ static void* test_malloc(GT_UNUSED void *data)
   void *mem;
   chunks = gt_array_new(sizeof (void*));
   for (i = 0; i < NUMBER_OF_ALLOCS; i++) {
-    mem = gt_malloc(64);
+    mem = gt_malloc(SIZE_OF_ALLOCS);
+    gt_array_add(chunks, mem);
+  }
+  for (i = 0; i < NUMBER_OF_ALLOCS; i++) {
+    mem = *(void**) gt_array_get(chunks, i);
+    gt_free(mem);
+  }
+  gt_array_delete(chunks);
+  return NULL;
+}
+
+static void* test_calloc(GT_UNUSED void *data)
+{
+  GtArray *chunks;
+  unsigned int i;
+  void *mem;
+  chunks = gt_array_new(sizeof (void*));
+  for (i = 0; i < NUMBER_OF_ALLOCS; i++) {
+    mem = gt_calloc(1, SIZE_OF_ALLOCS);
+    gt_array_add(chunks, mem);
+  }
+  for (i = 0; i < NUMBER_OF_ALLOCS; i++) {
+    mem = *(void**) gt_array_get(chunks, i);
+    gt_free(mem);
+  }
+  gt_array_delete(chunks);
+  return NULL;
+}
+
+static void* test_realloc(GT_UNUSED void *data)
+{
+  GtArray *chunks;
+  unsigned int i;
+  void *mem;
+  chunks = gt_array_new(sizeof (void*));
+  for (i = 0; i < NUMBER_OF_ALLOCS; i++) {
+    mem = gt_realloc(NULL, SIZE_OF_ALLOCS / 2);
+    mem = gt_realloc(mem, SIZE_OF_ALLOCS / 2);
     gt_array_add(chunks, mem);
   }
   for (i = 0; i < NUMBER_OF_ALLOCS; i++) {
@@ -298,5 +335,9 @@ int gt_ma_unit_test(GtError *err)
   int had_err;
   gt_error_check(err);
   had_err = gt_multithread(test_malloc, NULL, err);
+  if (!had_err)
+    had_err = gt_multithread(test_calloc, NULL, err);
+  if (!had_err)
+    had_err = gt_multithread(test_realloc, NULL, err);
   return had_err;
 }
