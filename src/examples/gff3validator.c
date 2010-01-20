@@ -17,7 +17,7 @@ int main(int argc, const char *argv[])
     return EXIT_FAILURE;
   }
 
-  /* initialize allocators */
+  /* initialize */
   gt_allocators_init();
 
   /* create error object */
