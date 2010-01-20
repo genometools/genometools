@@ -183,7 +183,7 @@ void gt_mutex_unlock_func(GtMutex *mutex)
 
 #else
 
-int gt_multithread(GtThreadFunc function, void *data, GtError *err)
+int gt_multithread(GtThreadFunc function, void *data, GT_UNUSED GtError *err)
 {
   unsigned int i;
   gt_error_check(err);
@@ -193,7 +193,8 @@ int gt_multithread(GtThreadFunc function, void *data, GtError *err)
   return 0;
 }
 
-GtThread* gt_thread_new(GtThreadFunc function, void *data, GtError *err)
+GtThread* gt_thread_new(GtThreadFunc function, void *data,
+                        GT_UNUSED GtError *err)
 {
   GtThread *thread;
   gt_error_check(err);
