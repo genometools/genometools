@@ -66,6 +66,7 @@ static void* test_symbol(GT_UNUSED void *data)
     gt_str_reset(symbol);
     gt_str_append_ulong(symbol, gt_rand_max(MAX_SYMBOL));
     gt_symbol(gt_str_get(symbol));
+    gt_assert(!strcmp(gt_symbol(gt_str_get(symbol)), gt_str_get(symbol)));
   }
   gt_str_delete(symbol);
   return NULL;
