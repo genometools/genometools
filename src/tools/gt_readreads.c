@@ -23,14 +23,17 @@
 #include "core/seqiterator_qual_fastq.h"
 #include "core/str_array_api.h"
 #include "core/unused_api.h"
+#include "core/fasta.h"
 #include "tools/gt_readreads.h"
 
 #define SEQUENCE_CHAR_SEPARATOR '|'
 
 typedef struct {
   bool verbose,
-       showseq;
+       showseq,
+       fasta;
   GtStr *qualformat;
+  unsigned long fastawidth;
 } GtReadreads;
 
 static void* gt_readreads_arguments_new(void)
@@ -52,7 +55,7 @@ static GtOptionParser* gt_readreads_option_parser_new(void *tool_arguments)
 {
   GtReadreads *opts = tool_arguments;
   GtOptionParser *op;
-  GtOption *option;
+  GtOption *option, *fasta;
   gt_assert(opts);
 
   static const char *qualformats[] = {
@@ -72,6 +75,16 @@ static GtOptionParser* gt_readreads_option_parser_new(void *tool_arguments)
 
   option = gt_option_new_bool("showseq","show sequences",
                               &opts->showseq, false);
+  gt_option_parser_add_option(op, option);
+
+  fasta = gt_option_new_bool("fasta","output reads in fasta format",
+                              &opts->fasta, false);
+  gt_option_exclude(fasta, option);
+  gt_option_parser_add_option(op, fasta);
+
+  option = gt_option_new_ulong("fastawidth","fasta output line width",
+                               &opts->fastawidth, 60);
+  gt_option_imply(option, fasta);
   gt_option_parser_add_option(op, option);
 
   option = gt_option_new_choice("format", "quality score scale\n"
@@ -137,7 +150,10 @@ static int gt_readreads_runner(int argc, const char **argv, int parsed_args,
     had_err = gt_seqiterator_qual_next(siq, &seq, &qual, &len, &desc, err);
     if (had_err != 1)
       break;
-    if (opts->showseq) {
+    if (opts->fasta) {
+      gt_fasta_show_entry((char*)desc, (char*)seq, len, opts->fastawidth);
+    }
+    else if (opts->showseq) {
       unsigned long *lens = gt_malloc(sizeof (unsigned long)*len);
       gt_str_reset(scores);
       for (i=0;i<len;i++) {
