@@ -81,6 +81,7 @@ static GtOptionParser* gt_readreads_option_parser_new(void *tool_arguments)
                                 qualformats);
   gt_option_parser_add_option(op, option);
 
+  gt_option_parser_set_min_args(op, 1);
   return op;
 }
 
