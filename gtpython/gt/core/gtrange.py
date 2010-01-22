@@ -31,22 +31,20 @@ class Range(Structure):
             gterror("range error: start > end!")
         super(Range, self).__init__(start, end)
 
-    @property
-    def start(self):
+    def _get_start(self):
         return self.w_start
 
-    @start.setter
-    def start(self, val):
+    def _set_start(self, val):
         if val > self.end or not val >= 0:
             gterror("Invalid range start component: %d" % val)
         self.w_start = val
+    start = property(_get_start, _set_start)
 
-    @property
-    def end(self):
+    def _get_end(self):
         return self.w_end
 
-    @end.setter
-    def end(self, val):
+    def _set_end(self, val):
         if val < self.start or not val >= 0:
             gterror("Invalid range end component: %d" % val)
         self.w_end = val
+    end = property(_get_end, _set_end)
