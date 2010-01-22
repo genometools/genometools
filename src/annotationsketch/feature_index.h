@@ -24,5 +24,7 @@ typedef struct GtFeatureIndexClass GtFeatureIndexClass;
 #include "annotationsketch/feature_index_api.h"
 
 GtFeatureIndex* gt_feature_index_ref(GtFeatureIndex*);
+int             gt_feature_index_unit_test(GtFeatureIndex *fi, GtError *err);
+int             gt_feature_index_mt_unit_test(GtFeatureIndex *fi, GtError *err);
 
 #endif

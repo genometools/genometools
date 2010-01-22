@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,13 +15,19 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <string.h>
 #include "core/assert_api.h"
 #include "core/class_alloc.h"
 #include "core/array.h"
+#include "core/ensure.h"
 #include "core/ma.h"
+#include "core/thread.h"
 #include "core/unused_api.h"
 #include "annotationsketch/feature_index_rep.h"
 #include "annotationsketch/feature_visitor.h"
+#ifdef GT_THREADS_ENABLED
+#include "extended/genome_node.h"
+#endif
 #include "extended/gff3_in_stream.h"
 
 struct GtFeatureIndexClass {
@@ -39,6 +45,7 @@ struct GtFeatureIndexClass {
 
 struct GtFeatureIndexMembers {
   unsigned int reference_count;
+  GtRWLock *lock;
 };
 
 const GtFeatureIndexClass* gt_feature_index_class_new(size_t size,
@@ -82,26 +89,33 @@ GtFeatureIndex* gt_feature_index_create(const GtFeatureIndexClass *fic)
   fi = gt_calloc(1, fic->size);
   fi->c_class = fic;
   fi->pvt = gt_calloc(1, sizeof (GtFeatureIndexMembers));
+  fi->pvt->lock = gt_rwlock_new();
   return fi;
 }
 
 GtFeatureIndex* gt_feature_index_ref(GtFeatureIndex *fi)
 {
   gt_assert(fi);
+  gt_rwlock_wrlock(fi->pvt->lock);
   fi->pvt->reference_count++;
+  gt_rwlock_unlock(fi->pvt->lock);
   return fi;
 }
 
 void gt_feature_index_delete(GtFeatureIndex *fi)
 {
   if (!fi) return;
+  gt_rwlock_wrlock(fi->pvt->lock);
   if (fi->pvt->reference_count) {
     fi->pvt->reference_count--;
+    gt_rwlock_unlock(fi->pvt->lock);
     return;
   }
+  gt_rwlock_unlock(fi->pvt->lock);
   gt_assert(fi->c_class);
   if (fi->c_class->free)
     fi->c_class->free(fi);
+  gt_rwlock_delete(fi->pvt->lock);
   gt_free(fi->pvt);
   gt_free(fi);
 }
@@ -110,14 +124,18 @@ void gt_feature_index_add_region_node(GtFeatureIndex *feature_index,
                                       GtRegionNode *region_node)
 {
   gt_assert(feature_index && feature_index->c_class && region_node);
+  gt_rwlock_wrlock(feature_index->pvt->lock);
   feature_index->c_class->add_region_node(feature_index, region_node);
+  gt_rwlock_unlock(feature_index->pvt->lock);
 }
 
 void gt_feature_index_add_feature_node(GtFeatureIndex *feature_index,
                                        GtFeatureNode *feature_node)
 {
   gt_assert(feature_index && feature_index->c_class && feature_node);
+  gt_rwlock_wrlock(feature_index->pvt->lock);
   feature_index->c_class->add_feature_node(feature_index, feature_node);
+  gt_rwlock_unlock(feature_index->pvt->lock);
 }
 
 int gt_feature_index_add_gff3file(GtFeatureIndex *feature_index,
@@ -135,12 +153,14 @@ int gt_feature_index_add_gff3file(GtFeatureIndex *feature_index,
   while (!(had_err = gt_node_stream_next(gff3_in_stream, &gn, err)) && gn)
     gt_array_add(tmp, gn);
   if (!had_err) {
-    GtNodeVisitor  *feature_visitor = gt_feature_visitor_new(feature_index);
+    GtNodeVisitor *feature_visitor = gt_feature_visitor_new(feature_index);
     for (i=0;i<gt_array_size(tmp);i++) {
       gn = *(GtGenomeNode**) gt_array_get(tmp, i);
+      /* no need to lock, add_*_node() is synchronized */
       had_err = gt_genome_node_accept(gn, feature_visitor, NULL);
       gt_assert(!had_err); /* cannot happen */
     }
+
     gt_node_visitor_delete(feature_visitor);
   }
   gt_node_stream_delete(gff3_in_stream);
@@ -153,8 +173,12 @@ int gt_feature_index_add_gff3file(GtFeatureIndex *feature_index,
 GtArray* gt_feature_index_get_features_for_seqid(GtFeatureIndex *fi,
                                                  const char *seqid)
 {
+  GtArray *arr;
   gt_assert(fi && fi->c_class && seqid);
-  return fi->c_class->get_features_for_seqid(fi, seqid);
+  gt_rwlock_rdlock(fi->pvt->lock);
+  arr = fi->c_class->get_features_for_seqid(fi, seqid);
+  gt_rwlock_unlock(fi->pvt->lock);
+  return arr;
 }
 
 int gt_feature_index_get_features_for_range(GtFeatureIndex *feature_index,
@@ -162,38 +186,56 @@ int gt_feature_index_get_features_for_range(GtFeatureIndex *feature_index,
                                             const char *seqid,
                                             const GtRange *range, GtError *err)
 {
+  int ret;
   gt_assert(feature_index && feature_index->c_class && results && seqid &&
             range);
   gt_assert(gt_range_length(range) > 0);
-  return feature_index->c_class->get_features_for_range(feature_index, results,
-                                                        seqid, range, err);
+  gt_rwlock_rdlock(feature_index->pvt->lock);
+  ret = feature_index->c_class->get_features_for_range(feature_index, results,
+                                                       seqid, range, err);
+  gt_rwlock_unlock(feature_index->pvt->lock);
+  return ret;
 }
 
 const char* gt_feature_index_get_first_seqid(const GtFeatureIndex
                                               *feature_index)
 {
+  const char *str;
   gt_assert(feature_index && feature_index->c_class);
-  return feature_index->c_class->get_first_seqid(feature_index);
+  gt_rwlock_rdlock(feature_index->pvt->lock);
+  str = feature_index->c_class->get_first_seqid(feature_index);
+  gt_rwlock_unlock(feature_index->pvt->lock);
+  return str;
 }
 
 GtStrArray* gt_feature_index_get_seqids(const GtFeatureIndex *feature_index)
 {
+  GtStrArray *strarr;
   gt_assert(feature_index && feature_index->c_class);
-  return feature_index->c_class->get_seqids(feature_index);
+  gt_rwlock_rdlock(feature_index->pvt->lock);
+  strarr = feature_index->c_class->get_seqids(feature_index);
+  gt_rwlock_unlock(feature_index->pvt->lock);
+  return strarr;
 }
 
 void gt_feature_index_get_range_for_seqid(GtFeatureIndex *feature_index,
                                           GtRange *range, const char *seqid)
 {
   gt_assert(feature_index && feature_index->c_class && range && seqid);
+  gt_rwlock_rdlock(feature_index->pvt->lock);
   feature_index->c_class->get_range_for_seqid(feature_index, range, seqid);
+  gt_rwlock_unlock(feature_index->pvt->lock);
 }
 
 bool gt_feature_index_has_seqid(const GtFeatureIndex *feature_index,
                                 const char *seqid)
 {
+  bool ret;
   gt_assert(feature_index && feature_index->c_class && seqid);
-  return feature_index->c_class->has_seqid(feature_index, seqid);
+  gt_rwlock_rdlock(feature_index->pvt->lock);
+  ret = feature_index->c_class->has_seqid(feature_index, seqid);
+  gt_rwlock_unlock(feature_index->pvt->lock);
+  return ret;
 }
 
 void* gt_feature_index_cast(GT_UNUSED const GtFeatureIndexClass *fic,
@@ -202,3 +244,266 @@ void* gt_feature_index_cast(GT_UNUSED const GtFeatureIndexClass *fic,
   gt_assert(fic && fi && fi->c_class == fic);
   return fi;
 }
+
+/* to be called from implementing class! */
+int gt_feature_index_unit_test(GtFeatureIndex *fi, GtError *err)
+{
+  GtGenomeNode *gn1, *gn2, *ex1, *ex2, *ex3, *cds1;
+  GtRange check_range, rs;
+  GtStr *seqid1, *seqid2;
+  GtStrArray *seqids = NULL;
+  GtRegionNode *rn1, *rn2;
+  GtArray *features = NULL;
+  int had_err = 0;
+  gt_error_check(err);
+
+  rs.start=100UL; rs.end=1200UL;
+  seqid1 = gt_str_new_cstr("test1");
+  seqid2 = gt_str_new_cstr("test2");
+
+  rn1 = (GtRegionNode*) gt_region_node_new(seqid1, rs.start, rs.end);
+  rn2 = (GtRegionNode*) gt_region_node_new(seqid2, rs.start, rs.end);
+
+  gn1 = gt_feature_node_new(seqid1, gt_ft_gene, 100, 1000, GT_STRAND_UNKNOWN);
+  gn2 = gt_feature_node_new(seqid2, gt_ft_gene, 600, 1200, GT_STRAND_UNKNOWN);
+  ex1 = gt_feature_node_new(seqid1, gt_ft_exon, 100, 300, GT_STRAND_UNKNOWN);
+  ex2 = gt_feature_node_new(seqid1, gt_ft_exon, 500, 1000, GT_STRAND_UNKNOWN);
+  ex3 = gt_feature_node_new(seqid2, gt_ft_exon, 600, 1200 , GT_STRAND_UNKNOWN);
+  cds1 = gt_feature_node_new(seqid2, gt_ft_CDS, 600, 1200, GT_STRAND_UNKNOWN);
+  gt_feature_node_add_child((GtFeatureNode*) gn1, (GtFeatureNode*) ex1);
+  gt_feature_node_add_child((GtFeatureNode*) gn1, (GtFeatureNode*) ex2);
+  gt_feature_node_add_child((GtFeatureNode*) gn2, (GtFeatureNode*) ex3);
+  gt_feature_node_add_child((GtFeatureNode*) gn2, (GtFeatureNode*) cds1);
+
+  ensure(had_err, !gt_feature_index_has_seqid(fi, "test1"));
+  ensure(had_err, !gt_feature_index_has_seqid(fi, "test2"));
+
+  /* add a sequence region directly and check if it has been added */
+  gt_feature_index_add_region_node(fi, rn1);
+  ensure(had_err, gt_feature_index_has_seqid(fi, "test1"));
+  ensure(had_err, !gt_feature_index_has_seqid(fi, "test2"));
+
+  gt_feature_index_get_range_for_seqid(fi, &check_range, "test1");
+  ensure(had_err, check_range.start == 100UL && check_range.end == 1200UL);
+
+  /* test if we get a empty data structure for every added sequence region */
+  if (!had_err)
+    features = gt_feature_index_get_features_for_seqid(fi, "test1");
+  ensure(had_err, features);
+  ensure(had_err, gt_array_size(features) == 0);
+  gt_array_delete(features);
+  features = NULL;
+  if (!had_err)
+    features = gt_feature_index_get_features_for_seqid(fi, "test2");
+  ensure(had_err, features);
+  ensure(had_err, gt_array_size(features) == 0);
+  gt_array_delete(features);
+  features = NULL;
+
+  if (!had_err) {
+    gt_feature_index_add_feature_node(fi, (GtFeatureNode*) gn1);
+    features = gt_feature_index_get_features_for_seqid(fi, "test1");
+  }
+  ensure(had_err, gt_array_size(features) == 1UL);
+  gt_array_delete(features);
+  features = NULL;
+
+  if (!had_err) {
+    gt_feature_index_add_feature_node(fi, (GtFeatureNode*) gn2);
+    features = gt_feature_index_get_features_for_seqid(fi, "test2");
+  }
+  ensure(had_err, gt_array_size(features) == 1UL);
+  gt_array_delete(features);
+  features = NULL;
+
+  /* test gt_feature_index_get_first_seqid() */
+  ensure(had_err, gt_feature_index_get_first_seqid(fi));
+  ensure(had_err, strcmp("test1", gt_feature_index_get_first_seqid(fi)) == 0);
+
+  if (!had_err) {
+    seqids = gt_feature_index_get_seqids(fi);
+    ensure(had_err, gt_str_array_size(seqids) == 2);
+    ensure(had_err, !strcmp(gt_str_array_get(seqids, 0), "test1"));
+    ensure(had_err, !strcmp(gt_str_array_get(seqids, 1), "test2"));
+  }
+
+  gt_feature_index_get_range_for_seqid(fi, &check_range, "test1");
+  ensure(had_err, check_range.start == 100UL && check_range.end == 1000UL);
+
+  gt_feature_index_get_range_for_seqid(fi, &check_range, "test2");
+  ensure(had_err, check_range.start == 600UL && check_range.end == 1200UL);
+
+  if (!had_err)
+    features = gt_feature_index_get_features_for_seqid(fi, "test1");
+  ensure(had_err, features);
+  gt_array_delete(features);
+
+  gt_str_array_delete(seqids);
+  gt_genome_node_delete(gn1);
+  gt_genome_node_delete(gn2);
+  gt_genome_node_delete((GtGenomeNode*) rn1);
+  gt_genome_node_delete((GtGenomeNode*) rn2);
+  gt_str_delete(seqid1);
+  gt_str_delete(seqid2);
+  return had_err;
+}
+
+#ifdef GT_THREADS_ENABLED
+
+#define GT_FI_TEST_FEATURES_PER_THREAD 50000
+#define GT_FI_TEST_START 1
+#define GT_FI_TEST_END 10000000
+#define GT_FI_TEST_FEATURE_WIDTH 500
+#define GT_FI_TEST_QUERY_WIDTH 50000
+#define GT_FI_TEST_SEQID "testseqid"
+
+typedef struct {
+  GtFeatureIndex *fi;
+  GtError *err;
+  GtArray *nodes;
+  GtMutex *mutex;
+  unsigned long next_node_idx,
+                error_count;
+} GtFeatureIndexTestShared;
+
+static void* gt_feature_index_mt_unit_test_add(void *data)
+{
+  GtFeatureNode *feature;
+  GtFeatureIndexTestShared *shm = (GtFeatureIndexTestShared*) data;
+
+  while (true) {
+    gt_mutex_lock(shm->mutex);
+    if (shm->next_node_idx == GT_FI_TEST_FEATURES_PER_THREAD * gt_jobs) {
+      gt_mutex_unlock(shm->mutex);
+      return NULL;
+    }
+    gt_assert(shm->next_node_idx < gt_array_size(shm->nodes));
+    feature = *(GtFeatureNode**) gt_array_get(shm->nodes, shm->next_node_idx++);
+    gt_mutex_unlock(shm->mutex);
+    gt_feature_index_add_feature_node(shm->fi, feature);
+    gt_genome_node_delete((GtGenomeNode*) feature);
+  }
+  return NULL;
+}
+
+static int cmp_range_start(const void *v1, const void *v2)
+{
+  return gt_genome_node_compare((GtGenomeNode**) v1, (GtGenomeNode**) v2);
+}
+
+static void* gt_feature_index_mt_unit_test_query(void *data)
+{
+  GtFeatureIndexTestShared *shm = (GtFeatureIndexTestShared*) data;
+  GtRange rng;
+  unsigned long i;
+  int had_err = 0;
+  GtArray *arr, *arr_ref;
+
+  gt_mutex_lock(shm->mutex);
+  if (gt_error_is_set(shm->err)) {
+    gt_mutex_unlock(shm->mutex);
+    return NULL;
+  }
+  gt_mutex_unlock(shm->mutex);
+
+  arr = gt_array_new(sizeof (GtFeatureNode*));
+  arr_ref = gt_array_new(sizeof (GtFeatureNode*));
+  rng.start = rand() % (GT_FI_TEST_END - GT_FI_TEST_QUERY_WIDTH);
+  rng.end = rng.start + rand() % (GT_FI_TEST_QUERY_WIDTH);
+
+  /* get reference set by linear search */
+  gt_mutex_lock(shm->mutex);
+  for (i=0;i<GT_FI_TEST_FEATURES_PER_THREAD * gt_jobs;i++) {
+    GtRange rng2;
+    GtFeatureNode *fn;
+    fn = *(GtFeatureNode**) gt_array_get(shm->nodes, i);
+    rng2 = gt_genome_node_get_range((GtGenomeNode*) fn);
+    if (gt_range_overlap(&rng, &rng2)) {
+      gt_array_add(arr_ref, fn);
+    }
+  }
+  gt_mutex_unlock(shm->mutex);
+
+  /* query feature index */
+  gt_feature_index_get_features_for_range(shm->fi, arr, GT_FI_TEST_SEQID, &rng,
+                                          shm->err);
+
+  /* result size must be equal */
+  if (gt_array_size(arr) != gt_array_size(arr_ref))
+    had_err = -1;
+
+  /* nodes must be the same (note that we should not rely on ptr equality) */
+  if (!had_err) {
+    gt_array_sort(arr_ref, cmp_range_start);
+    gt_array_sort(arr    , cmp_range_start);
+
+    for (i=0;i<gt_array_size(arr);i++) {
+      if (had_err)
+        break;
+      if (!gt_genome_features_are_similar(*(GtFeatureNode**)
+                                            gt_array_get(arr, i),
+                                          *(GtFeatureNode**)
+                                            gt_array_get(arr_ref, i))) {
+        had_err = -1;
+      }
+    }
+  }
+
+  if (had_err) {
+    gt_mutex_lock(shm->mutex);
+    shm->error_count++;
+    gt_mutex_unlock(shm->mutex);
+  }
+
+  gt_array_delete(arr);
+  gt_array_delete(arr_ref);
+  return NULL;
+}
+
+/* to be called from implementing class! */
+int gt_feature_index_mt_unit_test(GtFeatureIndex *fi, GtError *err)
+{
+  int had_err = 0, i;
+  GtFeatureIndexTestShared sh;
+  GtStrArray *seqids;
+  gt_error_check(err);
+
+  sh.mutex = gt_mutex_new();
+  sh.nodes = gt_array_new(sizeof (GtFeatureNode*));
+  sh.error_count = 0;
+  sh.next_node_idx = 0;
+  sh.fi = fi;
+  sh.err = err;
+
+  /* set up nodes to store */
+  GtStr *seqid = gt_str_new_cstr(GT_FI_TEST_SEQID);
+  for (i=0;i<GT_FI_TEST_FEATURES_PER_THREAD*gt_jobs;i++) {
+    unsigned long start, end;
+    GtFeatureNode *fn;
+    start = rand() % (GT_FI_TEST_END - GT_FI_TEST_FEATURE_WIDTH);
+    end = start + rand() % (GT_FI_TEST_FEATURE_WIDTH);
+    fn = gt_feature_node_cast(gt_feature_node_new(seqid, "gene", start, end,
+                                                  GT_STRAND_FORWARD));
+    gt_array_add(sh.nodes, fn);
+  }
+
+  /* test parallel addition */
+  gt_multithread(gt_feature_index_mt_unit_test_add, &sh, err);
+  seqids = gt_feature_index_get_seqids(fi);
+  ensure(had_err, seqids);
+  ensure(had_err, gt_feature_index_has_seqid(fi, GT_FI_TEST_SEQID));
+  ensure(had_err, gt_str_array_size(seqids) == 1);
+
+  /* test parallel query */
+  if (!had_err)
+    gt_multithread(gt_feature_index_mt_unit_test_query, &sh, err);
+  ensure(had_err, sh.error_count == 0);
+
+  gt_mutex_delete(sh.mutex);
+  gt_str_array_delete(seqids);
+  gt_array_delete(sh.nodes);
+  gt_str_delete(seqid);
+  return had_err;
+}
+
+#endif
