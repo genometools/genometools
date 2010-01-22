@@ -65,7 +65,7 @@ static GtOptionParser* gt_readreads_option_parser_new(void *tool_arguments)
   };
 
   /* init */
-  op = gt_option_parser_new("[option ...] [file]",
+  op = gt_option_parser_new("[option ...] file [...]",
                             "Read in FASTQ reads with PHRED or Solexa "
                             "qualities and print them.");
 
