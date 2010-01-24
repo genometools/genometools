@@ -1,0 +1,228 @@
+#!/usr/bin/env ruby
+#
+# Copyright (c) 2009-2010 Giorgio Gonnella <ggonnella@yahoo.it>
+#
+# Permission to use, copy, modify, and distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+#
+
+require "erb"
+$CONFIG = ENV["GT_CODEGEN_CONFIG"] || "~/.gitconfig"
+
+$help = <<-END_HELP
+\nCode generator for:
+- header file (license, ifndef/def/endif)
+- module files (header file and c file including the header)
+- class files (h and c files, basic skeleton)
+- tool files (based on tools/gt_template.[ch])
+
+It requires name and email of the user, that are expected
+to be found in the [user] section of the user-specific git
+configuration file (#$CONFIG). You may specify another file
+using the env variable GT_CODEGEN_CONFIG.
+
+Usage:
+
+  #$0 header|module|class|tool <subdir> <basename>
+
+where <subdir> is the directory under src where the files are written
+and <basename> has no gt_ prefix and is written in lower case,
+and if it consists in multiple words they are connected_with_underscores
+e.g.
+  #$0 tool tools xyz
+  #$0 header core abc_def
+
+There is absolutely no guarantee that the results are correct.
+Existing files are not overwritten or modified.
+Report bugs to <ggonnell@yahoo.it>.
+END_HELP
+
+$license = <<-END_LICENSE
+/*
+  Copyright (c) <%=year%> <%=name%> <<%=email%>>
+  Copyright (c) <%=year%> Center for Bioinformatics, University of Hamburg
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+*/
+END_LICENSE
+
+$hwrapper = <<-END_HWRAPPER
+#ifndef <%=guard_macro%>
+#define <%=guard_macro%>
+<%=content%>
+#endif
+END_HWRAPPER
+
+$gt_class_c = <<-END_GT_CLASS_C
+
+#include "core/ma.h"
+
+struct <%=klass%>
+{
+};
+
+<%=creatordecl%>
+{
+  <%=klass%>* <%=basename%>;
+  <%=basename%> = gt_malloc(sizeof (<%=klass%>));
+  return <%=basename%>;
+}
+
+<%=destructordecl%>
+{
+  gt_free(<%=basename%>);
+}
+END_GT_CLASS_C
+
+$gt_class_h = <<-END_GT_CLASS_H
+
+typedef struct <%=klass%> <%=klass%>;
+
+<%=creatordecl%>;
+<%=destructordecl%>;
+END_GT_CLASS_H
+
+def perror(msg)
+  STDERR.puts "#$0: error: #{msg}"
+  STDERR.puts "Use '#$0 help' to print usage instructions"
+  exit(1)
+end
+
+def find_user_data
+  configfile = File.expand_path($CONFIG)
+  if File.exist?(configfile)
+    name = nil
+    email = nil
+    File.open(configfile) do |f|
+      while (line = f.gets) && (!name||!email) do
+        name = $1  if !name  && line =~ /\s*name\s*=\s*(.*)\s*\n/
+        email = $1 if !email && line =~ /\s*email\s*=\s*(.*)\s*\n/
+      end
+    end
+    return name, email
+  else
+    perror("#$CONFIG file not found")
+  end
+end
+
+def find_src_directory
+  scripts_dir = File.dirname(File.expand_path($0))
+  src_dir = File.join(scripts_dir, "..", "src")
+  return File.expand_path(src_dir)
+end
+
+def parse_args
+  generators = %w{header module class tool help}
+  perror("too less arguments") if ARGV.size < 1
+  generator = ARGV[0]
+  if (generator=="help")
+    puts($help)
+    exit(0)
+  end
+  perror("generator #{generator} unknown") if !generators.include?(generator)
+  perror("too less arguments") if ARGV.size < 3
+  perror("too many arguments") if ARGV.size > 3
+  path = File.join(find_src_directory, ARGV[1])
+  perror("Directory #{path} not found") if !File.directory?(path)
+  basename = ARGV[2]
+  return generator, path, basename 
+end
+
+def check_file(path, basename, extension)
+  filename = File.join(path, basename+"."+extension)
+  perror("File #{filename} exists already") if File.exist?(filename)
+end
+
+def write_file(path, basename, extension, content)
+  filename = File.join(path, basename+"."+extension)
+  file = File.open(filename, "w+")
+  puts File.expand_path(file.path)
+  file.puts(content)
+  file.close
+end
+
+def gen_header(path, basename, content = "")
+  guard_macro = basename.upcase+"_H"
+  header = $license + "\n" + ERB.new($hwrapper).result(binding)
+  check_file(path, basename, "h")
+  write_file(path, basename, "h", header)
+end
+
+def gen_module(path, basename, ccontent = "", hcontent = "")
+  code = $license + "\n" +
+         "#include \"#{File.basename(path)}/#{basename}.h\"" +
+         ccontent + "\n"
+  check_file(path, basename, "c")
+  gen_header(path, basename, hcontent)
+  write_file(path, basename, "c", code)
+end
+
+def gen_class(path, basename)
+  prefix = "gt_#{basename}_"
+  klass = "Gt"+basename.gsub(/(^|_)(.)/){$2.upcase}
+  creatordecl = "#{klass}* #{prefix}new(void)"
+  destructordecl = "void #{prefix}delete(#{klass}* #{basename})"
+  gen_module(path, basename,
+             ERB.new($gt_class_c).result(binding),
+             ERB.new($gt_class_h).result(binding))
+end
+
+def prepare_tool_c(path, basename)
+  tools_dir = File.join(find_src_directory, "tools")
+  gt_template_c = File.expand_path(File.join(tools_dir, "gt_template.c"))
+  perror("File #{gt_template_c} not found") if !File.exists?(gt_template_c)
+  # skip license template:
+  c_template = IO.read(gt_template_c)
+  c_template =~ /(.*?)(#include.*)/m
+  c_template = $2
+  structprefix = "Gt"+basename.gsub(/(^|_)(.)/){$2.upcase}
+  c_template.gsub!("template", basename)
+  c_template.gsub!("Template", structprefix)
+  return $license + "\n" + c_template
+end
+
+def prepare_tool_h(path, basename)
+  tools_dir = File.join(find_src_directory, "tools")
+  gt_template_h = File.expand_path(File.join(tools_dir, "gt_template.h")) 
+  perror("File #{gt_template_h} not found") if !File.exists?(gt_template_h)
+  h_template = IO.read(gt_template_h)
+  # skip license template:
+  h_template =~ /(.*?)(#ifndef.*)/m
+  h_template = $2
+  h_template.gsub!("TEMPLATE", basename.upcase)
+  h_template.gsub!("template", basename)
+  return $license + "\n" + h_template
+end
+
+def gen_tool(path, basename)
+  check_file(path, "gt_"+basename, "h")
+  check_file(path, "gt_"+basename, "c")
+  write_file(path, "gt_"+basename, "h", prepare_tool_h(path, basename))
+  write_file(path, "gt_"+basename, "c", prepare_tool_c(path, basename))
+end
+
+# main
+generator, path, basename = parse_args
+name, email = find_user_data
+year = Time.now.year
+$license = ERB.new($license).result
+send("gen_#{generator}", path, basename)
