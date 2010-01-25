@@ -36,7 +36,7 @@ Usage:
 
 where <subdir> is the directory under src where the files are written
 and <basename> has no gt_ prefix and is written in lower case,
-and if it consists in multiple words they are connected_with_underscores
+and if it consists of multiple words they are connected_with_underscores
 e.g.
   #$0 tool tools xyz
   #$0 header core abc_def
