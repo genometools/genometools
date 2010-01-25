@@ -82,7 +82,7 @@ struct <%=klass%>
 
 <%=creatordecl%>
 {
-  <%=klass%>* <%=basename%>;
+  <%=klass%> *<%=basename%>;
   <%=basename%> = gt_malloc(sizeof (<%=klass%>));
   return <%=basename%>;
 }
@@ -167,10 +167,10 @@ def gen_header(path, basename, content = "")
   write_file(path, basename, "h", header)
 end
 
-def gen_module(path, basename, ccontent = "", hcontent = "")
+def gen_module(path, basename, ccontent = "\n", hcontent = "")
   code = $license + "\n" +
          "#include \"#{File.basename(path)}/#{basename}.h\"" +
-         ccontent + "\n"
+         ccontent
   check_file(path, basename, "c")
   gen_header(path, basename, hcontent)
   write_file(path, basename, "c", code)
@@ -179,8 +179,8 @@ end
 def gen_class(path, basename)
   prefix = "gt_#{basename}_"
   klass = "Gt"+basename.gsub(/(^|_)(.)/){$2.upcase}
-  creatordecl = "#{klass}* #{prefix}new(void)"
-  destructordecl = "void #{prefix}delete(#{klass}* #{basename})"
+  creatordecl = "#{klass} *#{prefix}new(void)"
+  destructordecl = "void #{prefix}delete(#{klass} *#{basename})"
   gen_module(path, basename,
              ERB.new($gt_class_c).result(binding),
              ERB.new($gt_class_h).result(binding))
