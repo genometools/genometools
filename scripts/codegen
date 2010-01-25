@@ -132,14 +132,14 @@ end
 
 def parse_args
   generators = %w{header module class tool help}
-  perror("too less arguments") if ARGV.size < 1
+  perror("not enough arguments") if ARGV.size < 1
   generator = ARGV[0]
   if (generator=="help")
     puts($help)
     exit(0)
   end
   perror("generator #{generator} unknown") if !generators.include?(generator)
-  perror("too less arguments") if ARGV.size < 3
+  perror("not enough arguments") if ARGV.size < 3
   perror("too many arguments") if ARGV.size > 3
   path = File.join(find_src_directory, ARGV[1])
   perror("Directory #{path} not found") if !File.directory?(path)
