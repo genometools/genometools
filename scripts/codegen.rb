@@ -144,7 +144,7 @@ def parse_args
   path = File.join(find_src_directory, ARGV[1])
   perror("Directory #{path} not found") if !File.directory?(path)
   basename = ARGV[2]
-  return generator, path, basename 
+  return generator, path, basename
 end
 
 def check_file(path, basename, extension)
@@ -202,7 +202,7 @@ end
 
 def prepare_tool_h(path, basename)
   tools_dir = File.join(find_src_directory, "tools")
-  gt_template_h = File.expand_path(File.join(tools_dir, "gt_template.h")) 
+  gt_template_h = File.expand_path(File.join(tools_dir, "gt_template.h"))
   perror("File #{gt_template_h} not found") if !File.exists?(gt_template_h)
   h_template = IO.read(gt_template_h)
   # skip license template:
