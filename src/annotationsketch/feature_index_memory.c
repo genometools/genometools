@@ -348,13 +348,6 @@ int gt_feature_index_memory_unit_test(GtError *err)
   gt_genome_node_delete((GtGenomeNode*) fn);
   gt_feature_index_delete(fi);
 
-#if GT_THREADS_ENABLED
-  /* run threadsafety tests */
-  fi = gt_feature_index_memory_new();
-  gt_feature_index_mt_unit_test(fi, err);
-  gt_feature_index_delete(fi);
-#endif
-
   gt_error_delete(testerr);
   return had_err;
 }
