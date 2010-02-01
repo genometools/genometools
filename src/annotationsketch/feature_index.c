@@ -111,10 +111,10 @@ void gt_feature_index_delete(GtFeatureIndex *fi)
     gt_rwlock_unlock(fi->pvt->lock);
     return;
   }
-  gt_rwlock_unlock(fi->pvt->lock);
   gt_assert(fi->c_class);
   if (fi->c_class->free)
     fi->c_class->free(fi);
+  gt_rwlock_unlock(fi->pvt->lock);
   gt_rwlock_delete(fi->pvt->lock);
   gt_free(fi->pvt);
   gt_free(fi);
@@ -160,7 +160,6 @@ int gt_feature_index_add_gff3file(GtFeatureIndex *feature_index,
       had_err = gt_genome_node_accept(gn, feature_visitor, NULL);
       gt_assert(!had_err); /* cannot happen */
     }
-
     gt_node_visitor_delete(feature_visitor);
   }
   gt_node_stream_delete(gff3_in_stream);
