@@ -27,6 +27,7 @@
 #include "core/ensure.h"
 #include "core/log.h"
 #include "core/ma.h"
+#include "core/thread.h"
 #include "core/unused_api.h"
 #include "core/warning_api.h"
 #include "extended/luahelper.h"
@@ -38,10 +39,11 @@ struct GtStyle
 {
   lua_State *L;
   unsigned long reference_count;
+  GtRWLock *lock, *clone_lock;
   char *filename;
 };
 
-static void style_lua_new_table(lua_State *L, const char *key)
+static inline void style_lua_new_table(lua_State *L, const char *key)
 {
   lua_pushstring(L, key);
   lua_newtable(L);
@@ -77,6 +79,8 @@ GtStyle* gt_style_new(GtError *err)
   sty = gt_calloc(1, sizeof (GtStyle));
   sty->filename = NULL;
   sty->L = luaL_newstate();
+  sty->lock = gt_rwlock_new();
+  sty->clone_lock = gt_rwlock_new();
   if (!sty->L) {
     gt_error_set(err, "out of memory (cannot create new Lua state)");
     gt_free(sty);
@@ -93,13 +97,16 @@ GtStyle* gt_style_new_with_state(lua_State *L)
   gt_assert(L && !lua_gettop(L)); /* make sure the Lua stack is empty */
   sty = gt_calloc(1, sizeof (GtStyle));
   sty->L = L;
+  sty->lock = gt_rwlock_new();
   return sty;
 }
 
 GtStyle* gt_style_ref(GtStyle *style)
 {
   gt_assert(style);
+  gt_rwlock_wrlock(style->lock);
   style->reference_count++;
+  gt_rwlock_unlock(style->lock);
   return style;
 }
 
@@ -110,10 +117,13 @@ int gt_style_load_file(GtStyle *sty, const char *filename, GtError *err)
 #endif
   int had_err = 0;
   gt_error_check(err);
+  gt_rwlock_wrlock(sty->lock);
   gt_assert(sty && sty->L && filename);
 #ifndef NDEBUG
   stack_size = lua_gettop(sty->L);
 #endif
+  gt_rwlock_unlock(sty->lock);
+  gt_rwlock_wrlock(sty->lock);
   sty->filename = gt_cstr_dup(filename);
   gt_log_log("Trying to load style file: %s...", filename);
   if (luaL_loadfile(sty->L, filename) || lua_pcall(sty->L, 0, 0, 0)) {
@@ -132,6 +142,7 @@ int gt_style_load_file(GtStyle *sty, const char *filename, GtError *err)
     lua_pop(sty->L, 1);
   }
   gt_assert(lua_gettop(sty->L) == stack_size);
+  gt_rwlock_unlock(sty->lock);
   return had_err;
 }
 
@@ -146,7 +157,8 @@ void gt_style_reload(GtStyle *sty)
 /* Searches for <section> inside the style table, creating it if it does not
    exist and finally pushing it on the Lua stack (at the top).
    Returns the total number of items pushed on the stack by this function. */
-static int style_find_section_for_setting(GtStyle* sty, const char *section)
+static int style_find_section_for_setting(GtStyle* sty,
+                                          const char *section)
 {
   int depth = 0;
   gt_assert(sty && section);
@@ -197,6 +209,7 @@ bool gt_style_get_color(const GtStyle *sty, const char *section,
 #endif
   int i = 0;
   gt_assert(sty && section && key && color);
+  gt_rwlock_wrlock(sty->lock);
 #ifndef NDEBUG
   stack_size = lua_gettop(sty->L);
 #endif
@@ -207,6 +220,7 @@ bool gt_style_get_color(const GtStyle *sty, const char *section,
   /* could not get section, return default */
   if (i < 0) {
     gt_assert(lua_gettop(sty->L) == stack_size);
+    gt_rwlock_unlock(sty->lock);
     return false;
   }
   /* lookup color entry for given feature */
@@ -221,6 +235,7 @@ bool gt_style_get_color(const GtStyle *sty, const char *section,
     {
       lua_pop(sty->L, 3);
       gt_assert(lua_gettop(sty->L) == stack_size);
+      gt_rwlock_unlock(sty->lock);
       return false;
     }
   }
@@ -228,6 +243,7 @@ bool gt_style_get_color(const GtStyle *sty, const char *section,
   if (lua_isnil(sty->L, -1) || !lua_istable(sty->L, -1)) {
     lua_pop(sty->L, 3);
     gt_assert(lua_gettop(sty->L) == stack_size);
+    gt_rwlock_unlock(sty->lock);
     return false;
   } else i++;
   /* update color struct */
@@ -250,6 +266,7 @@ bool gt_style_get_color(const GtStyle *sty, const char *section,
   /* reset stack to original state for subsequent calls */
   lua_pop(sty->L, i);
   gt_assert(lua_gettop(sty->L) == stack_size);
+  gt_rwlock_unlock(sty->lock);
   return true;
 }
 
@@ -261,6 +278,7 @@ void gt_style_set_color(GtStyle *sty, const char *section, const char *key,
 #endif
   int i = 0;
   gt_assert(sty && section && key && color);
+  gt_rwlock_wrlock(sty->lock);
 #ifndef NDEBUG
   stack_size = lua_gettop(sty->L);
 #endif
@@ -286,6 +304,7 @@ void gt_style_set_color(GtStyle *sty, const char *section, const char *key,
   lua_settable(sty->L, -3);
   lua_pop(sty->L, i);
   gt_assert(lua_gettop(sty->L) == stack_size);
+  gt_rwlock_unlock(sty->lock);
 }
 
 bool gt_style_get_str(const GtStyle *sty, const char *section,
@@ -296,6 +315,7 @@ bool gt_style_get_str(const GtStyle *sty, const char *section,
 #endif
   int i = 0;
   gt_assert(sty && key && section);
+  gt_rwlock_wrlock(sty->lock);
 #ifndef NDEBUG
   stack_size = lua_gettop(sty->L);
 #endif
@@ -304,6 +324,7 @@ bool gt_style_get_str(const GtStyle *sty, const char *section,
   /* could not get section, return default */
   if (i < 0) {
     gt_assert(lua_gettop(sty->L) == stack_size);
+    gt_rwlock_unlock(sty->lock);
     return false;
   }
   /* lookup entry for given key */
@@ -318,6 +339,7 @@ bool gt_style_get_str(const GtStyle *sty, const char *section,
     {
       lua_pop(sty->L, 3);
       gt_assert(lua_gettop(sty->L) == stack_size);
+      gt_rwlock_unlock(sty->lock);
       return false;
     }
   }
@@ -325,6 +347,7 @@ bool gt_style_get_str(const GtStyle *sty, const char *section,
   if (lua_isnil(sty->L, -1) || !lua_isstring(sty->L, -1)) {
     lua_pop(sty->L, i+1);
     gt_assert(lua_gettop(sty->L) == stack_size);
+    gt_rwlock_unlock(sty->lock);
     return false;
   } else i++;
   /* retrieve string */
@@ -332,6 +355,7 @@ bool gt_style_get_str(const GtStyle *sty, const char *section,
   /* reset stack to original state for subsequent calls */
   lua_pop(sty->L, i);
   gt_assert(lua_gettop(sty->L) == stack_size);
+  gt_rwlock_unlock(sty->lock);
   return true;
 }
 
@@ -343,6 +367,7 @@ void gt_style_set_str(GtStyle *sty, const char *section, const char *key,
 #endif
   int i = 0;
   gt_assert(sty && section && key && value);
+  gt_rwlock_wrlock(sty->lock);
 #ifndef NDEBUG
   stack_size = lua_gettop(sty->L);
 #endif
@@ -352,16 +377,18 @@ void gt_style_set_str(GtStyle *sty, const char *section, const char *key,
   lua_settable(sty->L, -3);
   lua_pop(sty->L, i);
   gt_assert(lua_gettop(sty->L) == stack_size);
+  gt_rwlock_unlock(sty->lock);
 }
 
 bool gt_style_get_num(const GtStyle *sty, const char *section, const char *key,
-                    double *val, GtFeatureNode *gn)
+                      double *val, GtFeatureNode *gn)
 {
 #ifndef NDEBUG
   int stack_size;
 #endif
   int i = 0;
   gt_assert(sty && key && section && val);
+  gt_rwlock_wrlock(sty->lock);
 #ifndef NDEBUG
   stack_size = lua_gettop(sty->L);
 #endif
@@ -370,6 +397,7 @@ bool gt_style_get_num(const GtStyle *sty, const char *section, const char *key,
   /* could not get section, return default */
   if (i < 0) {
     gt_assert(lua_gettop(sty->L) == stack_size);
+    gt_rwlock_unlock(sty->lock);
     return false;
   }
   /* lookup entry for given key */
@@ -384,6 +412,7 @@ bool gt_style_get_num(const GtStyle *sty, const char *section, const char *key,
     {
       lua_pop(sty->L, 3);
       gt_assert(lua_gettop(sty->L) == stack_size);
+      gt_rwlock_unlock(sty->lock);
       return false;
     }
   }
@@ -391,6 +420,7 @@ bool gt_style_get_num(const GtStyle *sty, const char *section, const char *key,
   if (lua_isnil(sty->L, -1) || !lua_isnumber(sty->L, -1)) {
     lua_pop(sty->L, i+1);
     gt_assert(lua_gettop(sty->L) == stack_size);
+    gt_rwlock_unlock(sty->lock);
     return false;
   } else i++;
   /* retrieve value */
@@ -398,6 +428,7 @@ bool gt_style_get_num(const GtStyle *sty, const char *section, const char *key,
   /* reset stack to original state for subsequent calls */
   lua_pop(sty->L, i);
   gt_assert(lua_gettop(sty->L) == stack_size);
+  gt_rwlock_unlock(sty->lock);
   return true;
 }
 
@@ -409,6 +440,7 @@ void gt_style_set_num(GtStyle *sty, const char *section, const char *key,
 #endif
   int i = 0;
   gt_assert(sty && section && key);
+  gt_rwlock_wrlock(sty->lock);
 #ifndef NDEBUG
   stack_size = lua_gettop(sty->L);
 #endif
@@ -418,6 +450,7 @@ void gt_style_set_num(GtStyle *sty, const char *section, const char *key,
   lua_settable(sty->L, -3);
   lua_pop(sty->L, i);
   gt_assert(lua_gettop(sty->L) == stack_size);
+  gt_rwlock_unlock(sty->lock);
 }
 
 bool gt_style_get_bool(const GtStyle *sty, const char *section,
@@ -428,6 +461,7 @@ bool gt_style_get_bool(const GtStyle *sty, const char *section,
 #endif
   int i = 0;
   gt_assert(sty && key && section);
+  gt_rwlock_wrlock(sty->lock);
 #ifndef NDEBUG
   stack_size = lua_gettop(sty->L);
 #endif
@@ -436,6 +470,7 @@ bool gt_style_get_bool(const GtStyle *sty, const char *section,
   /* could not get section, return default */
   if (i < 0) {
     gt_assert(lua_gettop(sty->L) == stack_size);
+    gt_rwlock_unlock(sty->lock);
     return false;
   }
   /* lookup entry for given key */
@@ -443,6 +478,7 @@ bool gt_style_get_bool(const GtStyle *sty, const char *section,
   if (lua_isnil(sty->L, -1) || !lua_isboolean(sty->L, -1)) {
     lua_pop(sty->L, i+1);
     gt_assert(lua_gettop(sty->L) == stack_size);
+    gt_rwlock_unlock(sty->lock);
     return false;
   } else i++;
   /* retrieve value */
@@ -450,6 +486,7 @@ bool gt_style_get_bool(const GtStyle *sty, const char *section,
   /* reset stack to original state for subsequent calls */
   lua_pop(sty->L, i);
   gt_assert(lua_gettop(sty->L) == stack_size);
+  gt_rwlock_unlock(sty->lock);
   return true;
 }
 
@@ -461,6 +498,7 @@ void gt_style_set_bool(GtStyle *sty, const char *section, const char *key,
 #endif
   int i = 0;
   gt_assert(sty && section && key);
+  gt_rwlock_wrlock(sty->lock);
 #ifndef NDEBUG
   stack_size = lua_gettop(sty->L);
 #endif
@@ -470,6 +508,7 @@ void gt_style_set_bool(GtStyle *sty, const char *section, const char *key,
   lua_settable(sty->L, -3);
   lua_pop(sty->L, i);
   gt_assert(lua_gettop(sty->L) == stack_size);
+  gt_rwlock_unlock(sty->lock);
 }
 
 void gt_style_unset(GtStyle *sty, const char *section, const char *key)
@@ -478,6 +517,7 @@ void gt_style_unset(GtStyle *sty, const char *section, const char *key)
   int stack_size;
 #endif
   gt_assert(sty && section && key);
+  gt_rwlock_wrlock(sty->lock);
 #ifndef NDEBUG
   stack_size = lua_gettop(sty->L);
 #endif
@@ -495,6 +535,7 @@ void gt_style_unset(GtStyle *sty, const char *section, const char *key)
   }
   lua_pop(sty->L, 1);
   gt_assert(lua_gettop(sty->L) == stack_size);
+  gt_rwlock_unlock(sty->lock);
 }
 
 int gt_style_to_str(const GtStyle *sty, GtStr *outstr, GtError *err)
@@ -505,6 +546,7 @@ int gt_style_to_str(const GtStyle *sty, GtStr *outstr, GtError *err)
   int had_err;
   gt_error_check(err);
   gt_assert(sty && outstr);
+  gt_rwlock_wrlock(sty->lock);
 #ifndef NDEBUG
   stack_size = lua_gettop(sty->L);
 #endif
@@ -520,6 +562,7 @@ int gt_style_to_str(const GtStyle *sty, GtStr *outstr, GtError *err)
   gt_str_append_cstr(outstr, "}");
   lua_pop(sty->L, 1);
   gt_assert(lua_gettop(sty->L) == stack_size);
+  gt_rwlock_unlock(sty->lock);
   return had_err;
 }
 
@@ -531,6 +574,7 @@ int gt_style_load_str(GtStyle *sty, GtStr *instr, GtError *err)
   int had_err = 0;
   gt_error_check(err);
   gt_assert(sty && instr);
+  gt_rwlock_wrlock(sty->lock);
 #ifndef NDEBUG
   stack_size = lua_gettop(sty->L);;
 #endif
@@ -542,6 +586,7 @@ int gt_style_load_str(GtStyle *sty, GtStr *instr, GtError *err)
     lua_pop(sty->L, 1);
   }
   gt_assert(lua_gettop(sty->L) == stack_size);
+  gt_rwlock_unlock(sty->lock);
   return had_err;
 }
 
@@ -553,10 +598,12 @@ GtStyle* gt_style_clone(const GtStyle *sty, GtError *err)
   gt_assert(sty);
   if (!(new_sty = gt_style_new(err)))
     had_err = -1;
+  gt_rwlock_wrlock(sty->clone_lock);
   if (!had_err)
     had_err = gt_style_to_str(sty, sty_buffer, err);
   if (!had_err)
     had_err = gt_style_load_str(new_sty, sty_buffer, err);
+  gt_rwlock_unlock(sty->clone_lock);
   gt_str_delete(sty_buffer);
   return new_sty;
 }
@@ -660,23 +707,31 @@ int gt_style_unit_test(GtError *err)
 void gt_style_delete_without_state(GtStyle *sty)
 {
   if (!sty) return;
+  gt_rwlock_wrlock(sty->lock);
   if (sty->reference_count)
   {
     sty->reference_count--;
+    gt_rwlock_unlock(sty->lock);
     return;
   }
   gt_free(sty->filename);
+  gt_rwlock_unlock(sty->lock);
+  gt_rwlock_delete(sty->lock);
+  gt_rwlock_delete(sty->clone_lock);
   gt_free(sty);
 }
 
 void gt_style_delete(GtStyle *style)
 {
   if (!style) return;
+  gt_rwlock_wrlock(style->lock);
   if (style->reference_count)
   {
     style->reference_count--;
+    gt_rwlock_unlock(style->lock);
     return;
   }
   if (style->L) lua_close(style->L);
+  gt_rwlock_unlock(style->lock);
   gt_style_delete_without_state(style);
 }
