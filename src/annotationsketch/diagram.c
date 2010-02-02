@@ -32,6 +32,7 @@
 #include "core/msort.h"
 #include "core/log.h"
 #include "core/str.h"
+#include "core/thread.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
 #include "extended/feature_node.h"
@@ -56,6 +57,7 @@ struct GtDiagram {
   GtRange range;
   void *ptr;
   GtTrackSelectorFunc select_func;
+  GtRWLock *lock;
 };
 
 typedef enum {
@@ -666,10 +668,9 @@ int gt_diagram_build(GtDiagram *diagram)
   unsigned long i = 0;
   int had_err = 0;
   NodeTraverseInfo nti;
-
   gt_assert(diagram);
-  nti.diagram = diagram;
 
+  nti.diagram = diagram;
   /* clear caches */
   gt_hashmap_reset(diagram->collapsingtypes);
   gt_hashmap_reset(diagram->groupedtypes);
@@ -708,6 +709,7 @@ static GtDiagram* gt_diagram_new_generic(GtArray *features,
   diagram = gt_calloc(1, sizeof (GtDiagram));
   diagram->nodeinfo = gt_hashmap_new(HASH_DIRECT, NULL, NULL);
   diagram->style = style;
+  diagram->lock = gt_rwlock_new();
   diagram->range = *range;
   if (ref_features)
     diagram->features = gt_array_ref(features);
@@ -731,7 +733,7 @@ GtDiagram* gt_diagram_new(GtFeatureIndex *feature_index, const char *seqid,
   int had_err = 0;
   GtArray *features = NULL;
   gt_assert(seqid && range && style);
-  if (range->start ==  range->end)
+  if (range->start == range->end)
   {
     gt_error_set(err, "range start must not be equal to range end");
     return NULL;
@@ -757,8 +759,12 @@ GtDiagram* gt_diagram_new_from_array(GtArray *features, const GtRange *range,
 
 GtRange gt_diagram_get_range(const GtDiagram *diagram)
 {
+  GtRange rng;
   gt_assert(diagram);
-  return diagram->range;
+  gt_rwlock_rdlock(diagram->lock);
+  rng = diagram->range;
+  gt_rwlock_unlock(diagram->lock);
+  return rng;
 }
 
 void gt_diagram_set_track_selector_func(GtDiagram *diagram,
@@ -766,43 +772,119 @@ void gt_diagram_set_track_selector_func(GtDiagram *diagram,
                                         void *ptr)
 {
   gt_assert(diagram);
+  gt_rwlock_wrlock(diagram->lock);
   /* register selector function and attached pointer */
   diagram->select_func = bsfunc;
   diagram->ptr = ptr;
   /* this could change track assignment -> discard current blocks and requeue */
   gt_hashmap_delete(diagram->blocks);
   diagram->blocks = NULL;
+  gt_rwlock_unlock(diagram->lock);
 }
 
 void gt_diagram_reset_track_selector_func(GtDiagram *diagram)
 {
   gt_assert(diagram);
+  gt_rwlock_wrlock(diagram->lock);
   diagram->select_func = default_track_selector;
   gt_hashmap_delete(diagram->blocks);
   diagram->blocks = NULL;
+  gt_rwlock_unlock(diagram->lock);
 }
 
 GtHashmap* gt_diagram_get_blocks(const GtDiagram *diagram)
 {
+  GtHashmap *ret;
   gt_assert(diagram);
-  return diagram->blocks;
+  gt_rwlock_wrlock(diagram->lock);
+  ret = diagram->blocks;
+  gt_rwlock_unlock(diagram->lock);
+  return ret;
 }
 
 GtArray* gt_diagram_get_custom_tracks(const GtDiagram *diagram)
 {
+  GtArray *ret;
   gt_assert(diagram);
-  return diagram->custom_tracks;
+  gt_rwlock_rdlock(diagram->lock);
+  ret = diagram->custom_tracks;
+  gt_rwlock_unlock(diagram->lock);
+  return ret;
 }
 
 void gt_diagram_add_custom_track(GtDiagram *diagram, GtCustomTrack* ctrack)
 {
   gt_assert(diagram && ctrack);
+  gt_rwlock_wrlock(diagram->lock);
   gt_array_add(diagram->custom_tracks, ctrack);
+  gt_rwlock_unlock(diagram->lock);
+}
+
+typedef struct {
+  GtFeatureIndex *fi;
+  GtError *err;
+  GtDiagram *d;
+  GtStyle *sty;
+  int errstatus;
+} GtDiagramTestShared;
+
+void* gt_diagram_unit_test_sketch_func(void *data)
+{
+  int had_err = 0;
+  GtLayout *l = NULL;
+  GtCanvas *c = NULL;
+  GtDiagramTestShared *sh = (GtDiagramTestShared*) data;
+
+  l = gt_layout_new(sh->d, 1000, sh->sty, sh->err);
+  if (!l)
+    had_err = -1;
+  if (!had_err) {
+    c = gt_canvas_cairo_file_new(sh->sty, GT_GRAPHICS_PNG, 1000,
+                                 gt_layout_get_height(l), NULL);
+    if (!c)
+      had_err = -1;
+  }
+  if (!had_err) {
+    had_err = gt_layout_sketch(l, c, sh->err);
+  }
+  if (had_err)
+    sh->errstatus = 1;
+  gt_layout_delete(l);
+  gt_canvas_delete(c);
+  return NULL;
+}
+
+int gt_diagram_unit_test(GtError *err)
+{
+  int had_err = 0;
+  GtGenomeNode *gn;
+  GtDiagramTestShared sh;
+  GtRange testrng = {100, 10000};
+  gt_error_check(err);
+
+  gn = gt_feature_node_new_standard_gene();
+  sh.fi = gt_feature_index_memory_new();
+  sh.sty = gt_style_new(err);
+  sh.err = err;
+  sh.errstatus = 0;
+  gt_feature_index_add_feature_node(sh.fi, gt_feature_node_cast(gn));
+  gt_genome_node_delete(gn);
+  sh.d = gt_diagram_new(sh.fi, "ctg123", &testrng, sh.sty, err);
+
+  gt_multithread(gt_diagram_unit_test_sketch_func, &sh, err);
+  ensure(had_err, sh.errstatus == 0);
+
+  gt_style_delete(sh.sty);
+  gt_diagram_delete(sh.d);
+  gt_feature_index_delete(sh.fi);
+
+  return had_err;
 }
 
 void gt_diagram_delete(GtDiagram *diagram)
 {
   if (!diagram) return;
+  gt_rwlock_wrlock(diagram->lock);
   gt_array_delete(diagram->features);
   if (diagram->blocks)
     gt_hashmap_delete(diagram->blocks);
@@ -811,5 +893,7 @@ void gt_diagram_delete(GtDiagram *diagram)
   gt_hashmap_delete(diagram->groupedtypes);
   gt_hashmap_delete(diagram->caption_display_status);
   gt_array_delete(diagram->custom_tracks);
+  gt_rwlock_unlock(diagram->lock);
+  gt_rwlock_delete(diagram->lock);
   gt_free(diagram);
 }
