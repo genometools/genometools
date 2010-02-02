@@ -35,6 +35,7 @@
 #include "core/minmax.h"
 #include "core/msort.h"
 #include "core/str.h"
+#include "core/thread.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
 #include "extended/feature_node.h"
@@ -64,6 +65,7 @@ struct GtLayout {
   GtRange viewrange;
   unsigned long nof_tracks;
   unsigned int width;
+  GtRWLock *lock;
   GtTrackOrderingFunc track_ordering_func;
   void *cmp_data;
 };
@@ -205,6 +207,7 @@ GtLayout* gt_layout_new_with_twc(GtDiagram *diagram,
   layout->nof_tracks = 0;
   layout->track_ordering_func = NULL;
   layout->cmp_data = NULL;
+  layout->lock = gt_rwlock_new();
   lti.layout = layout;
   lti.twc = twc;
   layout->own_twc = false;
@@ -223,10 +226,13 @@ GtLayout* gt_layout_new_with_twc(GtDiagram *diagram,
 void gt_layout_delete(GtLayout *layout)
 {
   if (!layout) return;
+  gt_rwlock_wrlock(layout->lock);
   if (layout->twc && layout->own_twc)
     gt_text_width_calculator_delete(layout->twc);
   gt_hashmap_delete(layout->tracks);
   gt_array_delete(layout->custom_tracks);
+  gt_rwlock_unlock(layout->lock);
+  gt_rwlock_delete(layout->lock);
   gt_free(layout);
 }
 
