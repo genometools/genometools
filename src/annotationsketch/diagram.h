@@ -27,7 +27,6 @@
 GtHashmap* gt_diagram_get_blocks(const GtDiagram*);
 GtArray*   gt_diagram_get_custom_tracks(const GtDiagram *diagram);
 void       gt_diagram_reset(GtDiagram *diagram);
-int        gt_diagram_build(GtDiagram*);
 int        gt_diagram_unit_test(GtError*);
 
 #endif

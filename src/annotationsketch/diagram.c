@@ -797,6 +797,7 @@ GtHashmap* gt_diagram_get_blocks(const GtDiagram *diagram)
   GtHashmap *ret;
   gt_assert(diagram);
   gt_rwlock_wrlock(diagram->lock);
+  (void) gt_diagram_build((GtDiagram*) diagram);
   ret = diagram->blocks;
   gt_rwlock_unlock(diagram->lock);
   return ret;

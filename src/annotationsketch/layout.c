@@ -211,7 +211,6 @@ GtLayout* gt_layout_new_with_twc(GtDiagram *diagram,
   lti.layout = layout;
   lti.twc = twc;
   layout->own_twc = false;
-  (void) gt_diagram_build(diagram);
   layout->custom_tracks = gt_array_ref(gt_diagram_get_custom_tracks(diagram));
   /* XXX: use other container type here! */
   layout->tracks = gt_hashmap_new(HASH_STRING, gt_free_func,
