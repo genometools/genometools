@@ -233,6 +233,7 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "translator class", gt_translator_unit_test);
 #ifndef WITHOUT_CAIRO
   gt_hashmap_add(unit_tests, "block class", gt_block_unit_test);
+  gt_hashmap_add(unit_tests, "diagram class", gt_diagram_unit_test);
   gt_hashmap_add(unit_tests, "style class", gt_style_unit_test);
   gt_hashmap_add(unit_tests, "element class", gt_element_unit_test);
   gt_hashmap_add(unit_tests, "memory feature index class",
