@@ -34,15 +34,19 @@ typedef struct {
 GtGenomeNode* gt_genome_node_ref(GtGenomeNode *gn)
 {
   gt_assert(gn);
+  gt_rwlock_wrlock(gn->lock);
   gn->reference_count++;
+  gt_rwlock_unlock(gn->lock);
   return gn;
 }
 
 void gt_genome_node_delete(GtGenomeNode *gn)
 {
   if (!gn) return;
+  gt_rwlock_wrlock(gn->lock);
   if (gn->reference_count) {
     gn->reference_count--;
+    gt_rwlock_unlock(gn->lock);
     return;
   }
   gt_assert(gn->c_class);
@@ -51,6 +55,8 @@ void gt_genome_node_delete(GtGenomeNode *gn)
   gt_str_delete(gn->filename);
   if (gn->userdata)
     gt_hashmap_delete(gn->userdata);
+  gt_rwlock_unlock(gn->lock);
+  gt_rwlock_delete(gn->lock);
   gt_free(gn);
 }
 
@@ -141,6 +147,7 @@ GtGenomeNode* gt_genome_node_create(const GtGenomeNodeClass *gnc)
   gn->reference_count    = 0;
   gn->userdata           = NULL;
   gn->userdata_nof_items = 0;
+  gn-> lock              = gt_rwlock_new();
   return gn;
 }
 
