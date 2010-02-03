@@ -116,6 +116,7 @@ int gt_allocators_clean(void)
   gt_fa_clean();
   gt_symbol_clean();
   gt_class_alloc_clean();
+  gt_ya_rand_clean();
   gt_rval = gt_ma_check_space_leak();
   gt_ma_clean();
   return fa_fptr_rval || fa_mmap_rval || gt_rval;

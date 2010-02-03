@@ -23,6 +23,7 @@
 
 extern unsigned int gt_ya_random (void);
 extern unsigned int gt_ya_rand_init (unsigned int);
+extern void         gt_ya_rand_clean(void);
 
 #define RAND_MAX   0x7FFFFFFF
 #define random()   ((long) (gt_ya_random() & RAND_MAX))

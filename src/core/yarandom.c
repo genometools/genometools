@@ -128,3 +128,10 @@ gt_ya_rand_init(unsigned int seed)
   i2 = (i1 + 024) % VectorSize;
   return generated_seed;
 }
+
+void gt_ya_rand_clean(void)
+{
+  if (!mutex) return;
+  gt_mutex_delete(mutex);
+  mutex = NULL;
+}
