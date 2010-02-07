@@ -63,7 +63,7 @@
    skipped. The high order digit was taken mod 4.
  */
 #define VectorSize 55
-static unsigned int a[VectorSize] = {
+static const unsigned int a_source[VectorSize] = {
  035340171546, 010401501101, 022364657325, 024130436022, 002167303062, /*  5 */
  037570375137, 037210607110, 016272055420, 023011770546, 017143426366, /* 10 */
  014753657433, 021657231332, 023553406142, 004236526362, 010365611275, /* 14 */
@@ -76,6 +76,8 @@ static unsigned int a[VectorSize] = {
  036072251540, 007255221037, 024364674123, 006200353166, 010126373326, /* 50 */
  015664104320, 016401041535, 016215305520, 033115351014, 017411670323  /* 55 */
 };
+
+static unsigned int a[VectorSize];
 
 static int i1, i2;
 
@@ -110,6 +112,10 @@ gt_ya_rand_init(unsigned int seed)
       seed = (999*tp.tv_sec) + (1001*tp.tv_usec) + (1003 * getpid());
     }
   generated_seed = seed;
+
+  /* allow to call gt_ya_rand_init() multiple times */
+  for (i = 0; i < VectorSize; i++)
+    a[i] = a_source[i];
 
   a[0] += seed;
   for (i = 1; i < VectorSize; i++)
