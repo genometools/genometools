@@ -18,7 +18,7 @@
 
 GENOMETOOLS_PATH = "/home/gordon/gt_for_annotationsketch_demo"
 GTRUBY_PATH      = "#{GENOMETOOLS_PATH}/gtruby"
-LD_LIBRARY_PATH  = "#{GENOMETOOLS_PATH}/lib"
+# the LD_LIBRARY_PATH has to be set externally to "#{GENOMETOOLS_PATH}/lib"!
 STYLE_FILE       = "#{GENOMETOOLS_PATH}/gtdata/sketch/default.style"
 DEFAULT_ANNOTATION_FILE = "#{GENOMETOOLS_PATH}/testdata/standard_gene_as_tree.gff3"
 SCRIPT_PATH      = "/var/www/servers/genometools.org/htdocs/cgi-bin"
