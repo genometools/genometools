@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   }
 
-  gt_allocators_init();
+  gt_lib_init();
 
   features = create_example_features();
 

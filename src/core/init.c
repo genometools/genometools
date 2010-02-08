@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/allocators.h"
+#include "core/init.h"
 #include "core/class_alloc.h"
 #include "core/cstr.h"
 #include "core/cstr_array.h"
@@ -81,7 +81,7 @@ static void proc_env_options(void)
   gt_cstr_array_delete(argv);
 }
 
-void gt_allocators_init(void)
+void gt_lib_init(void)
 {
   const char *bookkeeping;
   bookkeeping = getenv("GT_MEM_BOOKKEEPING");
@@ -94,17 +94,17 @@ void gt_allocators_init(void)
   gt_ya_rand_init(0);
 }
 
-static void gt_allocators_atexit_func(void)
+static void gt_lib_atexit_func(void)
 {
-  (void) gt_allocators_clean();
+  (void) gt_lib_clean();
 }
 
-void gt_allocators_reg_atexit_func(void)
+void gt_lib_reg_atexit_func(void)
 {
-  gt_xatexit(gt_allocators_atexit_func);
+  gt_xatexit(gt_lib_atexit_func);
 }
 
-int gt_allocators_clean(void)
+int gt_lib_clean(void)
 {
   int fa_fptr_rval, fa_mmap_rval, gt_rval;
   if (spacepeak) {
@@ -120,4 +120,19 @@ int gt_allocators_clean(void)
   gt_rval = gt_ma_check_space_leak();
   gt_ma_clean();
   return fa_fptr_rval || fa_mmap_rval || gt_rval;
+}
+
+void gt_allocators_init(void)
+{
+  return gt_lib_init();
+}
+
+int gt_allocators_clean(void)
+{
+  return gt_lib_clean();
+}
+
+void gt_allocators_reg_atexit_func(void)
+{
+  return gt_lib_reg_atexit_func();
 }

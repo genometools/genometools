@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
   gff3_file = argv[3];
 
   /* initialize */
-  gt_allocators_init();
+  gt_lib_init();
 
   /* create error object */
   err = gt_error_new();

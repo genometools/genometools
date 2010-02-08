@@ -17,7 +17,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "core/allocators.h"
+#include "core/init.h"
 #include "core/error.h"
 #include "core/tooldriver.h"
 
@@ -26,7 +26,7 @@ int gt_tooldriver(int(*tool)(int argc, const char **argv, GtError*),
 {
   GtError *err;
   int had_err;
-  gt_allocators_init();
+  gt_lib_init();
   err = gt_error_new();
   gt_error_set_progname(err, argv[0]);
   had_err = tool(argc, (const char**) argv, err);
@@ -36,7 +36,7 @@ int gt_tooldriver(int(*tool)(int argc, const char **argv, GtError*),
     gt_assert(had_err);
   }
   gt_error_delete(err);
-  if (gt_allocators_clean())
+  if (gt_lib_clean())
     return 2; /* programmer error */
   if (had_err)
     return EXIT_FAILURE;
@@ -48,7 +48,7 @@ int gt_toolobjdriver(GtToolConstructor tool_constructor, int argc, char *argv[])
   GtTool *tool;
   GtError *err;
   int had_err;
-  gt_allocators_init();
+  gt_lib_init();
   err = gt_error_new();
   gt_error_set_progname(err, argv[0]);
   tool = tool_constructor();
@@ -60,7 +60,7 @@ int gt_toolobjdriver(GtToolConstructor tool_constructor, int argc, char *argv[])
     gt_assert(had_err);
   }
   gt_error_delete(err);
-  if (gt_allocators_clean())
+  if (gt_lib_clean())
     return 2; /* programmer error */
   if (had_err)
     return EXIT_FAILURE;

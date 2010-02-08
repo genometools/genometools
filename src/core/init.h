@@ -15,17 +15,24 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ALLOCATORS_H
-#define ALLOCATORS_H
+#ifndef INIT_H
+#define INIT_H
 
-#include "allocators_api.h"
+#include "init_api.h"
 
 /* high level wrapper module for the allocators (memory & files) */
 
-/* registers exit function which calls gt_allocators_clean() */
+/* registers exit function which calls gt_lib_clean() */
+void gt_lib_reg_atexit_func(void);
+
+/* For legacy applications using the library. Deprecated! */
 void gt_allocators_reg_atexit_func(void);
+
 /* returns 0 if no memory map, file pointer, or memory has been leaked and a
    value != 0 otherwise */
+int  gt_lib_clean(void);
+
+/* For legacy applications using the library. Deprecated! */
 int  gt_allocators_clean(void);
 
 #endif

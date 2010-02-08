@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
   GtError *err;
   GtR *gtr;
   int rval;
-  gt_allocators_init();
+  gt_lib_init();
   err = gt_error_new();
   gt_error_set_progname(err, argv[0]);
   if (!(gtr = gtr_new(err))) {
@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
   }
   gtr_delete(gtr);
   gt_error_delete(err);
-  if (gt_allocators_clean())
+  if (gt_lib_clean())
     return GT_EXIT_PROGRAMMING_ERROR; /* programmer error */
   return rval;
 }

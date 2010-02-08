@@ -26,7 +26,7 @@
 #include "gt_config.h"
 
 /* the core module */
-#include "core/allocators_api.h"
+#include "core/init_api.h"
 #include "core/array_api.h"
 #include "core/array2dim_api.h"
 #include "core/assert_api.h"

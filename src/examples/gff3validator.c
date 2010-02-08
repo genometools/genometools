@@ -18,7 +18,7 @@ int main(int argc, const char *argv[])
   }
 
   /* initialize */
-  gt_allocators_init();
+  gt_lib_init();
 
   /* create error object */
   err = gt_error_new();

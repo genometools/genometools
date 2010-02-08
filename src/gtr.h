@@ -19,7 +19,7 @@
 #define GTR_H
 
 #include <stdio.h>
-#include "core/allocators.h"
+#include "core/init.h"
 #include "core/error.h"
 #include "core/option.h"
 
