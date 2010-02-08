@@ -17,6 +17,7 @@
 
 #include "core/init.h"
 #include "core/class_alloc.h"
+#include "core/class_prealloc.h"
 #include "core/cstr.h"
 #include "core/cstr_array.h"
 #include "core/fa.h"
@@ -91,6 +92,7 @@ void gt_lib_init(void)
     gt_warning("GT_ENV_OPTIONS=-spacepeak used without GT_MEM_BOOKKEEPING=on");
   gt_fa_init();
   gt_symbol_init();
+  gt_class_prealloc_run();
   gt_ya_rand_init(0);
 }
 
