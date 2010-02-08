@@ -243,6 +243,14 @@ ifeq ($(memcheck),yes)
 endif
 
 # system specific stuff (concerning 64bit compilation)
+ifeq ($(SYSTEM),Darwin)
+  ifeq ($(64bit),yes)
+    m64=yes
+  else
+    m32=yes
+  endif
+endif
+
 ifeq ($(64bit),yes)
   ifneq ($(MACHINE),x86_64)
     m64=yes
