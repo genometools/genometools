@@ -30,8 +30,10 @@
 #include "gth/bssm_param.h"
 #include "gth/gt_gthbssmprint.h"
 
-static GtOPrval parse_options(int *parsed_args, int argc, const char **argv,
-                              GtShowVersionFunc gth_version_func, GtError *err)
+static GtOPrval gthbssmprint_parse_options(int *parsed_args, int argc,
+                                           const char **argv,
+                                           GtShowVersionFunc gth_version_func,
+                                           GtError *err)
 {
   GtOptionParser *op;
   GtOPrval oprval;
@@ -53,7 +55,8 @@ int gt_gthbssmprint(int argc, const char **argv,
   int parsed_args, had_err = 0;
 
   /* verify command line specification of a parameter file to inspect */
-  switch (parse_options(&parsed_args, argc, argv, gth_version_func, err)) {
+  switch (gthbssmprint_parse_options(&parsed_args, argc, argv, gth_version_func,
+                                     err)) {
     case GT_OPTION_PARSER_OK: break;
     case GT_OPTION_PARSER_ERROR: return -1;
     case GT_OPTION_PARSER_REQUESTS_EXIT: return 0;

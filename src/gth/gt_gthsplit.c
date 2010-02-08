@@ -328,8 +328,8 @@ static GtOPrval gthsplit_parse_options(int *parsed_args,
   return oprval;
 }
 
-static int process_files(Gthsplitinfo *gthsplitinfo, const GthPlugins *plugins,
-                         GtError *err)
+static int gthsplit_process_files(Gthsplitinfo *gthsplitinfo,
+                                  const GthPlugins *plugins, GtError *err)
 {
   Store_in_subset_file_data store_in_subset_file_data;
   GthInput *inputinfo;
@@ -408,7 +408,7 @@ int gt_gthsplit(int argc, const char **argv, const GthPlugins *plugins,
   gt_assert(parsed_args == argc);
 
   /* process files */
-  had_err = process_files(&gthsplitinfo, plugins, err);
+  had_err = gthsplit_process_files(&gthsplitinfo, plugins, err);
 
   /* free */
   freeGthsplitinfo(&gthsplitinfo);

@@ -48,9 +48,11 @@ static void gth_file_stat_info_delete(GthFileStatInfo *file_stat_info)
   gt_str_array_delete(file_stat_info->consensusfiles);
 }
 
-static GtOPrval parse_options(int *parsed_args, GthFileStatInfo *file_stat_info,
-                              int argc, const char **argv,
-                              const GthPlugins *plugins, GtError *err)
+static GtOPrval gthfilestat_parse_options(int *parsed_args,
+                                          GthFileStatInfo *file_stat_info,
+                                          int argc, const char **argv,
+                                          const GthPlugins *plugins,
+                                          GtError *err)
 {
   GtOptionParser *op;
   GtOption *o;
@@ -90,8 +92,8 @@ static GtOPrval parse_options(int *parsed_args, GthFileStatInfo *file_stat_info,
   return oprval;
 }
 
-static int process_files(GthFileStatInfo *file_stat_info,
-                         const GthPlugins *plugins, GtError *err)
+static int gthfilestat_process_files(GthFileStatInfo *file_stat_info,
+                                     const GthPlugins *plugins, GtError *err)
 {
   GthSACollection *sa_collection;
   GthStat *stat;
@@ -148,8 +150,8 @@ int gt_gthfilestat(int argc, const char **argv, const GthPlugins *plugins,
   /* init data structures */
   gth_file_stat_info_new(&file_stat_info);
 
-  switch (parse_options(&parsed_args, &file_stat_info, argc, argv, plugins,
-                        err)) {
+  switch (gthfilestat_parse_options(&parsed_args, &file_stat_info, argc, argv,
+                                    plugins, err)) {
     case GT_OPTION_PARSER_OK: break;
     case GT_OPTION_PARSER_ERROR:
       gth_file_stat_info_delete(&file_stat_info);
@@ -161,7 +163,7 @@ int gt_gthfilestat(int argc, const char **argv, const GthPlugins *plugins,
   gt_assert(parsed_args == argc);
 
   /* process files */
-  had_err = process_files(&file_stat_info, plugins, err);
+  had_err = gthfilestat_process_files(&file_stat_info, plugins, err);
 
   /* free */
   gth_file_stat_info_delete(&file_stat_info);

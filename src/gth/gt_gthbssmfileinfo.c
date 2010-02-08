@@ -19,8 +19,10 @@
 #include "gth/bssm_param.h"
 #include "gth/gt_gthbssmfileinfo.h"
 
-static GtOPrval parse_options(int *parsed_args, int argc, const char **argv,
-                              GtShowVersionFunc gth_version_func, GtError *err)
+static GtOPrval gthbssmfileinfo_parse_options(int *parsed_args, int argc,
+                                              const char **argv,
+                                              GtShowVersionFunc
+                                              gth_version_func, GtError *err)
 {
   GtOptionParser *op;
   GtOPrval oprval;
@@ -45,7 +47,8 @@ int gt_gthbssmfileinfo(int argc, const char **argv,
   gt_error_check(err);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, argc, argv, gth_version_func, err)) {
+  switch (gthbssmfileinfo_parse_options(&parsed_args, argc, argv,
+                                        gth_version_func, err)) {
     case GT_OPTION_PARSER_OK: break;
     case GT_OPTION_PARSER_ERROR: return -1;
     case GT_OPTION_PARSER_REQUESTS_EXIT: return 0;

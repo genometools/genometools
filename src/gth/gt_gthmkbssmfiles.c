@@ -25,8 +25,8 @@
 /* The number of the last species defined in header file */
 #define LASTSPECIESNUM 9
 
-static GtOPrval parse_options(int *parsed_args, int argc, const char **argv,
-                              GtError *err)
+static GtOPrval gthmkbssmfiles_parse_options(int *parsed_args, int argc,
+                                             const char **argv, GtError *err)
 {
   GtOptionParser *op;
   GtOPrval oprval;
@@ -48,7 +48,7 @@ int gt_gthmkbssmfiles(int argc, const char **argv, GtError *err)
   int parsed_args, had_err = 0;
 
   /* option parsing */
-  switch (parse_options(&parsed_args, argc, argv, err)) {
+  switch (gthmkbssmfiles_parse_options(&parsed_args, argc, argv, err)) {
     case GT_OPTION_PARSER_OK: break;
     case GT_OPTION_PARSER_ERROR: return -1;
     case GT_OPTION_PARSER_REQUESTS_EXIT: return 0;
