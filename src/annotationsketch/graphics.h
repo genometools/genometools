@@ -23,4 +23,6 @@
 
 typedef struct GtGraphicsClass GtGraphicsClass;
 
+GtGraphics* gt_graphics_ref(GtGraphics *g);
+
 #endif
