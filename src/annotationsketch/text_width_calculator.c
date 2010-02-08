@@ -20,10 +20,12 @@
 #include "core/assert_api.h"
 #include "core/class_alloc.h"
 #include "core/ma.h"
+#include "core/thread.h"
 #include "core/unused_api.h"
 
 struct GtTextWidthCalculatorMembers {
   unsigned int reference_count;
+  GtRWLock *lock;
 };
 
 struct GtTextWidthCalculatorClass {
@@ -52,26 +54,33 @@ GtTextWidthCalculator* gt_text_width_calculator_create(
   twc = gt_calloc(1, twcc->size);
   twc->c_class = twcc;
   twc->pvt = gt_calloc(1, sizeof (GtTextWidthCalculatorMembers));
+  twc->pvt->lock = gt_rwlock_new();
   return twc;
 }
 
 GtTextWidthCalculator* gt_text_width_calculator_ref(GtTextWidthCalculator *twc)
 {
   gt_assert(twc);
+  gt_rwlock_wrlock(twc->pvt->lock);
   twc->pvt->reference_count++;
+  gt_rwlock_unlock(twc->pvt->lock);
   return twc;
 }
 
 void gt_text_width_calculator_delete(GtTextWidthCalculator *twc)
 {
   if (!twc) return;
+  gt_rwlock_wrlock(twc->pvt->lock);
   if (twc->pvt->reference_count) {
     twc->pvt->reference_count--;
+    gt_rwlock_unlock(twc->pvt->lock);
     return;
   }
   gt_assert(twc->c_class);
   if (twc->c_class->free)
     twc->c_class->free(twc);
+  gt_rwlock_unlock(twc->pvt->lock);
+  gt_rwlock_delete(twc->pvt->lock);
   gt_free(twc->pvt);
   gt_free(twc);
 }
@@ -79,6 +88,13 @@ void gt_text_width_calculator_delete(GtTextWidthCalculator *twc)
 double gt_text_width_calculator_get_text_width(GtTextWidthCalculator *twc,
                                                const char* text)
 {
+  double width;
+  gt_assert(twc && text);
+  gt_rwlock_rdlock(twc->pvt->lock);
+  gt_assert(twc->c_class);
+  width = twc->c_class->get_text_width(twc, text);
+  gt_rwlock_unlock(twc->pvt->lock);
+  return width;
   gt_assert(twc && twc->c_class && text);
   return twc->c_class->get_text_width(twc, text);
 }
