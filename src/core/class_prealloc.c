@@ -22,8 +22,13 @@
 #include "extended/comment_node_api.h"
 #ifndef WITHOUT_CAIRO
 #include "annotationsketch/feature_index_memory.h"
+#include "annotationsketch/feature_stream.h"
+#include "annotationsketch/feature_visitor.h"
 #include "annotationsketch/canvas_cairo_file.h"
 #include "annotationsketch/canvas_cairo_context.h"
+#include "annotationsketch/custom_track_example.h"
+#include "annotationsketch/custom_track_gc_content.h"
+#include "annotationsketch/custom_track_script_wrapper.h"
 #include "annotationsketch/text_width_calculator_cairo.h"
 #include "annotationsketch/line_breaker_captions.h"
 #include "annotationsketch/line_breaker_bases.h"
@@ -37,9 +42,14 @@ void gt_class_prealloc_run(void)
   (void) gt_region_node_class();
   (void) gt_sequence_node_class();
 #ifndef WITHOUT_CAIRO
+  (void) gt_feature_stream_class();
+  (void) gt_feature_visitor_class();
   (void) gt_feature_index_memory_class();
   (void) gt_canvas_cairo_context_class();
   (void) gt_canvas_cairo_file_class();
+  (void) gt_custom_track_example_class();
+  (void) gt_custom_track_gc_content_class();
+  (void) gt_custom_track_script_wrapper_class();
   (void) gt_text_width_calculator_cairo_class();
   (void) gt_line_breaker_bases_class();
   (void) gt_line_breaker_captions_class();
