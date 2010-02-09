@@ -22,6 +22,6 @@ require 'core'
 require 'extended'
 require 'annotationsketch'
 
-# to allow for memory bookkeeping analog to `gt` binary
-GT::gt_allocators_init()
-GT::gt_allocators_reg_atexit_func()
+# initialize library globals
+GT::gt_lib_init()
+GT::gt_lib_reg_atexit_func()
