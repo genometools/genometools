@@ -68,15 +68,18 @@ static int comment_node_accept(GtGenomeNode *gn, GtNodeVisitor *gv,
 
 const GtGenomeNodeClass* gt_comment_node_class()
 {
-  static const GtGenomeNodeClass gnc = { sizeof (GtCommentNode),
-                                         comment_node_free,
-                                         NULL,
-                                         comment_node_get_idstr,
-                                         comment_node_get_range,
-                                         NULL,
-                                         NULL,
-                                         comment_node_accept };
-  return &gnc;
+  static const GtGenomeNodeClass *gnc = NULL;
+  if (!gnc) {
+    gnc = gt_genome_node_class_new(sizeof (GtCommentNode),
+                                   comment_node_free,
+                                   NULL,
+                                   comment_node_get_idstr,
+                                   comment_node_get_range,
+                                   NULL,
+                                   NULL,
+                                   comment_node_accept);
+  }
+  return gnc;
 }
 
 GtGenomeNode* gt_comment_node_new(const char *comment)

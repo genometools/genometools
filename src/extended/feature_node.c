@@ -163,15 +163,18 @@ static int feature_node_accept(GtGenomeNode *gn, GtNodeVisitor *gv,
 
 const GtGenomeNodeClass* gt_feature_node_class()
 {
-  static const GtGenomeNodeClass gnc = { sizeof (GtFeatureNode),
-                                         feature_node_free,
-                                         feature_node_get_seqid,
-                                         feature_node_get_seqid,
-                                         feature_node_get_range,
-                                         feature_node_set_range,
-                                         feature_node_change_seqid,
-                                         feature_node_accept };
-  return &gnc;
+  static const GtGenomeNodeClass *gnc = NULL;
+  if (!gnc) {
+    gnc = gt_genome_node_class_new(sizeof (GtFeatureNode),
+                                   feature_node_free,
+                                   feature_node_get_seqid,
+                                   feature_node_get_seqid,
+                                   feature_node_get_range,
+                                   feature_node_set_range,
+                                   feature_node_change_seqid,
+                                   feature_node_accept);
+  }
+  return gnc;
 }
 
 static void set_transcriptfeaturetype(GtFeatureNode *fn,

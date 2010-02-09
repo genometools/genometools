@@ -17,6 +17,7 @@
 
 #include <stdarg.h>
 #include "core/assert_api.h"
+#include "core/class_alloc.h"
 #include "core/ensure.h"
 #include "core/hashtable.h"
 #include "core/ma.h"
@@ -58,6 +59,30 @@ void gt_genome_node_delete(GtGenomeNode *gn)
   gt_rwlock_unlock(gn->lock);
   gt_rwlock_delete(gn->lock);
   gt_free(gn);
+}
+
+const GtGenomeNodeClass*
+gt_genome_node_class_new(size_t size,
+                         GtGenomeNodeFreeFunc free,
+                         GtGenomeNodeSetSeqidFunc get_seqid,
+                         GtGenomeNodeGetIdstrFunc get_idstr,
+                         GtGenomeNodeGetRangeFunc get_range,
+                         GtGenomeNodeSetRangeFunc set_range,
+                         GtGenomeNodeChangeSeqidFunc change_seqid,
+                         GtGenomeNodeAcceptFunc accept)
+{
+  GtGenomeNodeClass *c_class;
+  gt_assert(size);
+  c_class = gt_class_alloc(sizeof *c_class);
+  c_class->size = size;
+  c_class->free = free;
+  c_class->get_seqid = get_seqid;
+  c_class->get_idstr = get_idstr;
+  c_class->get_range = get_range;
+  c_class->set_range = set_range;
+  c_class->change_seqid = change_seqid;
+  c_class->accept = accept;
+  return c_class;
 }
 
 static void userdata_delete(void *data)

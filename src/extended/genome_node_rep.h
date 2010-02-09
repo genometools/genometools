@@ -24,17 +24,27 @@
 #include "core/thread.h"
 #include "extended/genome_node.h"
 
+typedef void    (*GtGenomeNodeFreeFunc)(GtGenomeNode*);
+typedef GtStr*  (*GtGenomeNodeSetSeqidFunc)(GtGenomeNode*);
+/* Used to sort nodes. */
+typedef GtStr*  (*GtGenomeNodeGetIdstrFunc)(GtGenomeNode*);
+typedef GtRange (*GtGenomeNodeGetRangeFunc)(GtGenomeNode*);
+typedef void    (*GtGenomeNodeSetRangeFunc)(GtGenomeNode*, const GtRange*);
+typedef void    (*GtGenomeNodeChangeSeqidFunc)(GtGenomeNode*, GtStr*);
+typedef int     (*GtGenomeNodeAcceptFunc)(GtGenomeNode*, GtNodeVisitor*,
+                                          GtError*);
+
 /* the ``genome node'' interface */
 struct GtGenomeNodeClass
 {
   size_t size;
-  void    (*free)(GtGenomeNode*);
-  GtStr*  (*get_seqid)(GtGenomeNode*);
-  GtStr*  (*get_idstr)(GtGenomeNode*); /* Used to sort nodes. */
-  GtRange (*get_range)(GtGenomeNode*);
-  void    (*set_range)(GtGenomeNode*, const GtRange*);
-  void    (*change_seqid)(GtGenomeNode*, GtStr*);
-  int     (*accept)(GtGenomeNode*, GtNodeVisitor*, GtError*);
+  GtGenomeNodeFreeFunc free;
+  GtGenomeNodeSetSeqidFunc get_seqid;
+  GtGenomeNodeGetIdstrFunc get_idstr;
+  GtGenomeNodeGetRangeFunc get_range;
+  GtGenomeNodeSetRangeFunc set_range;
+  GtGenomeNodeChangeSeqidFunc change_seqid;
+  GtGenomeNodeAcceptFunc accept;
 };
 
 struct GtGenomeNode
@@ -48,6 +58,14 @@ struct GtGenomeNode
                userdata_nof_items;
 };
 
+const GtGenomeNodeClass* gt_genome_node_class_new(size_t size,
+                                       GtGenomeNodeFreeFunc free,
+                                       GtGenomeNodeSetSeqidFunc get_seqid,
+                                       GtGenomeNodeGetIdstrFunc get_idstr,
+                                       GtGenomeNodeGetRangeFunc get_range,
+                                       GtGenomeNodeSetRangeFunc set_range,
+                                       GtGenomeNodeChangeSeqidFunc change_seqid,
+                                       GtGenomeNodeAcceptFunc accept);
 GtGenomeNode* gt_genome_node_create(const GtGenomeNodeClass*);
 
 #endif

@@ -65,15 +65,18 @@ static int sequence_node_accept(GtGenomeNode *gn, GtNodeVisitor *gv,
 
 const GtGenomeNodeClass* gt_sequence_node_class()
 {
-  static const GtGenomeNodeClass gnc = { sizeof (GtSequenceNode),
-                                         sequence_node_free,
-                                         sequence_node_get_seqid,
-                                         sequence_node_get_seqid,
-                                         sequence_node_get_range,
-                                         NULL,
-                                         sequence_node_change_seqid,
-                                         sequence_node_accept };
-  return &gnc;
+  static const GtGenomeNodeClass *gnc = NULL;
+  if (!gnc) {
+    gnc = gt_genome_node_class_new(sizeof (GtSequenceNode),
+                                   sequence_node_free,
+                                   sequence_node_get_seqid,
+                                   sequence_node_get_seqid,
+                                   sequence_node_get_range,
+                                   NULL,
+                                   sequence_node_change_seqid,
+                                   sequence_node_accept);
+  }
+  return gnc;
 }
 
 GtGenomeNode* gt_sequence_node_new(const char *description, GtStr *sequence)

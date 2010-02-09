@@ -70,15 +70,18 @@ static int region_node_accept(GtGenomeNode *gn, GtNodeVisitor *gv, GtError *err)
 
 const GtGenomeNodeClass* gt_region_node_class()
 {
-  static const GtGenomeNodeClass gnc = { sizeof (GtRegionNode),
-                                         region_node_free,
-                                         region_node_get_seqid,
-                                         region_node_get_seqid,
-                                         region_node_get_range,
-                                         region_node_set_range,
-                                         region_node_change_seqid,
-                                         region_node_accept };
-  return &gnc;
+  static const GtGenomeNodeClass *gnc = NULL;
+  if (!gnc) {
+    gnc = gt_genome_node_class_new(sizeof (GtRegionNode),
+                                   region_node_free,
+                                   region_node_get_seqid,
+                                   region_node_get_seqid,
+                                   region_node_get_range,
+                                   region_node_set_range,
+                                   region_node_change_seqid,
+                                   region_node_accept);
+  }
+  return gnc;
 }
 
 GtGenomeNode* gt_region_node_new(GtStr *seqid, unsigned long start,
