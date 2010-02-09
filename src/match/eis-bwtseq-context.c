@@ -314,7 +314,7 @@ BWTSeqCRMapOpen(unsigned short mapIntervalLog2, unsigned short bitsPerSeqpos,
       }
     }
     mapMap = gt_fa_mmap_generic_fd(fileno(mapFile), mapSize, 0, createMapFile,
-                                   false);
+                                   false, NULL);
     newBWTSeqCR->revMap = (newBWTSeqCR->revMapMMap = mapMap) + headerSize;
   } while (0);
   if (mapName) gt_str_delete(mapName);

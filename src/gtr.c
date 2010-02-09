@@ -310,7 +310,7 @@ int gtr_run(GtR *gtr, int argc, const char **argv, GtError *err)
     return run_tests(gtr, err);
   if (gt_str_length(gtr->testspacepeak)) {
     mem = gt_malloc(1 << 26); /* alloc 64 MB */;
-    map = gt_fa_mmap_read(gt_str_get(gtr->testspacepeak), NULL);
+    map = gt_fa_xmmap_read(gt_str_get(gtr->testspacepeak), NULL);
     gt_fa_xmunmap(map);
     gt_free(mem);
   }

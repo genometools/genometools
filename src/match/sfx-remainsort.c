@@ -408,7 +408,7 @@ static Seqpos nextsuftabentry_get(Sortblock *sortblock)
       = gt_fa_mmap_generic_fd_func(sortblock->mmapfiledesc,
                                    entries2map * sizeof (Seqpos),
                                    sortblock->pageoffset * sizeof (Seqpos),
-                                   false,false,__FILE__,__LINE__);
+                                   false,false,__FILE__,__LINE__,NULL);
     gt_assert(sortblock->mappedsection != NULL);
   }
   value = sortblock->mappedsection[sortblock->currentindex -
@@ -948,7 +948,7 @@ static void possiblychangemappedsection(Sortblock *sortblock,Seqpos left,
       = gt_fa_mmap_generic_fd_func(sortblock->mmapfiledesc,
                                    entries2map * sizeof (Seqpos),
                                    sortblock->pageoffset * sizeof (Seqpos),
-                                   true,false,__FILE__,__LINE__);
+                                   true,false,__FILE__,__LINE__,NULL);
     gt_assert(sortblock->mappedsection != NULL);
     sortblock->pagechanges++;
   }
@@ -1314,7 +1314,7 @@ Compressedtable *rmnsufinfo_wrap(Seqpos *longest,
                                      rmnsufinfo->sortblock.mapableentries
                                      * sizeof (Seqpos),
                                      0,
-                                     false,false,__FILE__,__LINE__);
+                                     false,false,__FILE__,__LINE__,NULL);
     }
 #define NOINVERSESUFTAB
 #ifdef NOINVERSESUFTAB

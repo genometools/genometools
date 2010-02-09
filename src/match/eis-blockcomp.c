@@ -2335,7 +2335,8 @@ tryMMapOfIndex(struct onDiskBlockCompIdx *idxData)
   size_t len = idxData->rangeEncPos - idxData->cwDataPos;
   gt_assert(idxData && idxData->idxFP && idxData->idxMMap == NULL);
   idxData->idxMMap = gt_fa_mmap_generic_fd(fileno(idxData->idxFP), len,
-                                           idxData->cwDataPos, false, false);
+                                           idxData->cwDataPos, false, false,
+                                           NULL);
   return idxData->idxMMap != NULL;
 }
 

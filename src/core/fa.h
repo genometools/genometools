@@ -85,12 +85,14 @@ FILE*   gt_xtmpfp_generic_func(GtStr *template, int flags, const char*, int);
         gt_xtmpfp_generic(template, TMPFP_DEFAULT_FLAGS)
 
 /* memory map functions */
-#define gt_fa_mmap_read(path, len)\
-        gt_fa_mmap_read_func(path, len, __FILE__, __LINE__)
-void*   gt_fa_mmap_read_func(const char *path, size_t *len, const char*, int);
-#define gt_fa_mmap_write(path, len)\
-        gt_fa_mmap_write_func(path, len, __FILE__, __LINE__)
-void*   gt_fa_mmap_write_func(const char *path, size_t *len, const char*, int);
+#define gt_fa_mmap_read(path, len, err)\
+        gt_fa_mmap_read_func(path, len, __FILE__, __LINE__, err)
+void*   gt_fa_mmap_read_func(const char *path, size_t *len, const char*, int,
+                             GtError*);
+#define gt_fa_mmap_write(path, len, err)\
+        gt_fa_mmap_write_func(path, len, __FILE__, __LINE__, err)
+void*   gt_fa_mmap_write_func(const char *path, size_t *len, const char*, int,
+                              GtError*);
 #define gt_fa_xmmap_read(path, len)\
         gt_fa_xmmap_read_func(path, len, __FILE__, __LINE__)
 void*   gt_fa_xmmap_read_func(const char *path, size_t *len, const char*, int);
@@ -98,12 +100,12 @@ void*   gt_fa_xmmap_read_func(const char *path, size_t *len, const char*, int);
         gt_fa_xmmap_write_func(path, len, __FILE__, __LINE__)
 void*   gt_fa_xmmap_write_func(const char *path, size_t *len, const char*, int);
 void    gt_fa_xmunmap(void *addr);
-#define gt_fa_mmap_generic_fd(fd, len, offset, mapwritable, hard_fail) \
+#define gt_fa_mmap_generic_fd(fd, len, offset, mapwritable, hard_fail, err) \
         gt_fa_mmap_generic_fd_func(fd, len, offset, mapwritable, hard_fail, \
-                                   __FILE__, __LINE__)
+                                   __FILE__, __LINE__, err)
 void*   gt_fa_mmap_generic_fd_func(int fd, size_t len, size_t offset,
                                    bool mapwritable, bool hard_fail,
-                                   const char *filename, int line);
+                                   const char *filename, int line, GtError*);
 /* check if all allocated file pointer have been released, prints to stderr */
 int     gt_fa_check_fptr_leak(void);
 /* check if all allocated memory maps have been freed, prints to stderr */

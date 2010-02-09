@@ -68,11 +68,9 @@ void *genericmaponlytable(const GtStr *indexname,const char *suffix,
   gt_error_check(err);
   tmpfilename = gt_str_clone(indexname);
   gt_str_append_cstr(tmpfilename,suffix);
-  ptr = gt_fa_mmap_read(gt_str_get(tmpfilename),numofbytes);
+  ptr = gt_fa_mmap_read(gt_str_get(tmpfilename),numofbytes,err);
   if (ptr == NULL)
   {
-    gt_error_set(err,"cannot map file \"%s\": %s",gt_str_get(tmpfilename),
-                  strerror(errno));
     haserr = true;
   }
   gt_str_delete(tmpfilename);

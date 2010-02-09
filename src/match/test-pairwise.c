@@ -34,19 +34,22 @@ void runcheckfunctionontwofiles(Checkcmppairfuntype checkfunction,
   const GtUchar *useq = NULL, *vseq = NULL;
   size_t ulen, vlen;
   bool forward = true;
+  GtError *err;
 
-  useq = (const GtUchar *) gt_fa_mmap_read(file1,&ulen);
+  err = gt_error_new();
+  useq = (const GtUchar *) gt_fa_mmap_read(file1,&ulen,err);
   if (useq == NULL)
   {
-    fprintf(stderr,"cannot map file \"%s\": %s\n",file1,strerror(errno));
+    fprintf(stderr, "error: %s\n", gt_error_get(err));
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
-  vseq = (const GtUchar *) gt_fa_mmap_read(file2,&vlen);
+  vseq = (const GtUchar *) gt_fa_mmap_read(file2,&vlen,err);
   if (vseq == NULL)
   {
-    fprintf(stderr,"cannot map file \"%s\": %s",file2,strerror(errno));
+    fprintf(stderr, "error: %s\n", gt_error_get(err));
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
+  gt_error_delete(err);
   while (true)
   {
     checkfunction(forward,useq,(unsigned long) ulen,
