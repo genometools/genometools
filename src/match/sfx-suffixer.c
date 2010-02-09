@@ -829,6 +829,8 @@ int postsortsuffixesfromstream(Sfxiterator *sfi, const GtStr *str_indexname,
   }
   if (!haserr && fstat(mmapfiledesc, &sb) == -1)
   {
+    gt_error_set(err,"cannot fstat file \"%s\": %s",gt_str_get(tmpfilename),
+                 strerror(errno));
     haserr = true;
   }
   if (!haserr && sizeof (off_t) > sizeof (size_t) && sb.st_size > SIZE_MAX)
