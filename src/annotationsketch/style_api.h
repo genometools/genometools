@@ -35,6 +35,8 @@ typedef struct GtStyle GtStyle;
 GtStyle*      gt_style_new(GtError*);
 /* Increments the reference count of the given <GtStyle>. */
 GtStyle*      gt_style_ref(GtStyle*);
+/* Enables unsafe mode (``io'' and ``os'' libraries loaded). */
+void           gt_style_unsafe_mode(GtStyle*);
 /* Creates a independent (``deep'') copy of the given <GtStyle> object. */
 GtStyle*      gt_style_clone(const GtStyle*, GtError*);
 /* Loads and executes Lua style file with given <filename>.

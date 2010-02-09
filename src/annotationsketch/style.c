@@ -40,6 +40,7 @@ struct GtStyle
   lua_State *L;
   unsigned long reference_count;
   GtRWLock *lock, *clone_lock;
+  bool unsafe;
   char *filename;
 };
 
@@ -53,7 +54,8 @@ static inline void style_lua_new_table(lua_State *L, const char *key)
 static const luaL_Reg luasecurelibs[] = {
   /* Think very hard before adding additional Lua libraries to this list, it
      might compromise the security of web applications like GenomeViewer!
-     Do not add the 'io', 'os', or 'debug' library under any circumstances! */
+     Do not add the 'io', 'os', or 'debug' library under any circumstances!
+     Use the luainsecurelibs list for that. */
   {"", luaopen_base},
   {LUA_TABLIBNAME, luaopen_table},
   {LUA_STRLIBNAME, luaopen_string},
@@ -62,9 +64,17 @@ static const luaL_Reg luasecurelibs[] = {
   {NULL, NULL}
 };
 
-static void luaL_opensecurelibs(lua_State *L)
+static const luaL_Reg luainsecurelibs[] = {
+  /* These are functions affecting the system outside the Lua sandbox!
+     They should only be loaded in environments where unwanted code execution
+     is not a security issue! */
+  {LUA_OSLIBNAME, luaopen_os},
+  {LUA_IOLIBNAME, luaopen_io},
+  {NULL, NULL}
+};
+
+static void luaL_opencustomlibs(lua_State *L, const luaL_Reg *lib)
 {
-  const luaL_Reg *lib = luasecurelibs;
   for (; lib->func; lib++) {
     lua_pushcfunction(L, lib->func);
     lua_pushstring(L, lib->name);
@@ -80,6 +90,7 @@ GtStyle* gt_style_new(GtError *err)
   sty->filename = NULL;
   sty->L = luaL_newstate();
   sty->lock = gt_rwlock_new();
+  sty->unsafe = false;
   sty->clone_lock = gt_rwlock_new();
   if (!sty->L) {
     gt_error_set(err, "out of memory (cannot create new Lua state)");
@@ -87,7 +98,7 @@ GtStyle* gt_style_new(GtError *err)
     return NULL;
   }
   else
-    luaL_opensecurelibs(sty->L); /* do not replace with luaL_openlibs()! */
+    luaL_opencustomlibs(sty->L, luasecurelibs);
   return sty;
 }
 
@@ -97,6 +108,7 @@ GtStyle* gt_style_new_with_state(lua_State *L)
   gt_assert(L && !lua_gettop(L)); /* make sure the Lua stack is empty */
   sty = gt_calloc(1, sizeof (GtStyle));
   sty->L = L;
+  sty->unsafe = true;
   sty->lock = gt_rwlock_new();
   return sty;
 }
@@ -108,6 +120,14 @@ GtStyle* gt_style_ref(GtStyle *style)
   style->reference_count++;
   gt_rwlock_unlock(style->lock);
   return style;
+}
+
+void gt_style_unsafe_mode(GtStyle *style)
+{
+  gt_assert(style);
+  gt_rwlock_wrlock(style->lock);
+  luaL_opencustomlibs(style->L, luainsecurelibs);
+  gt_rwlock_unlock(style->lock);
 }
 
 int gt_style_load_file(GtStyle *sty, const char *filename, GtError *err)

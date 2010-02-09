@@ -50,7 +50,8 @@ typedef struct {
        verbose,
        addintrons,
        showrecmaps,
-       flattenfiles;
+       flattenfiles,
+       unsafe;
   GtStr *seqid, *format, *stylefile, *input;
   unsigned long start,
                 end;
@@ -170,6 +171,11 @@ static GtOPrval parse_options(int *parsed_args,
   option = gt_option_new_bool("addintrons", "add intron features between "
                            "existing exon features (before drawing)",
                            &arguments->addintrons, false);
+  gt_option_parser_add_option(op, option);
+
+    /* -unsafe */
+  option = gt_option_new_bool("unsafe", "enable unsafe mode",
+                              &arguments->unsafe, false);
   gt_option_parser_add_option(op, option);
 
   /* -showrecmaps */
@@ -364,8 +370,11 @@ int gt_sketch(int argc, const char **argv, GtError *err)
 
     if (!(sty = gt_style_new(err)))
       had_err = -1;
-    if (!had_err && gt_file_exists(gt_str_get(arguments.stylefile)))
+    if (!had_err && gt_file_exists(gt_str_get(arguments.stylefile))){
+      if (arguments.unsafe)
+        gt_style_unsafe_mode(sty);
       had_err = gt_style_load_file(sty, gt_str_get(arguments.stylefile), err);
+    }
     else
     {
       had_err = -1;
