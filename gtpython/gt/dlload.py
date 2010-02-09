@@ -28,7 +28,7 @@ else:
     soext = ".so"
 
 gtlib = CDLL("libgenometools" + soext)
-gtlib.gt_allocators_init()
-gtlib.gt_allocators_reg_atexit_func()
+gtlib.gt_lib_init()
+gtlib.gt_lib_reg_atexit_func()
 
 CollectFunc = CFUNCTYPE(c_void_p, c_char_p, c_char_p, c_void_p)
