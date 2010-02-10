@@ -123,18 +123,3 @@ int gt_lib_clean(void)
   gt_ma_clean();
   return fa_fptr_rval || fa_mmap_rval || gt_rval;
 }
-
-void gt_allocators_init(void)
-{
-  return gt_lib_init();
-}
-
-int gt_allocators_clean(void)
-{
-  return gt_lib_clean();
-}
-
-void gt_allocators_reg_atexit_func(void)
-{
-  return gt_lib_reg_atexit_func();
-}

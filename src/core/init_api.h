@@ -22,7 +22,4 @@
    This has to be called before the library is used! */
 void gt_lib_init(void);
 
-/* For legacy applications using the library. Deprecated! */
-void gt_allocators_init(void);
-
 #endif
