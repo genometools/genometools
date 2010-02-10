@@ -144,6 +144,22 @@ void gt_style_safe_mode(GtStyle *style)
   gt_rwlock_unlock(style->lock);
 }
 
+bool gt_style_is_unsafe(GtStyle *sty)
+{
+  const luaL_Reg *lib = luainsecurelibs;
+  bool safe = true;
+  gt_rwlock_wrlock(style->lock);
+  for (; safe && lib->name; lib++) {
+    lua_getglobal(sty->L, lib->name);
+    if (!lua_isnil(sty->L, -1)) {
+      safe = false;
+    }
+    lua_pop(sty->L, 1);
+  }
+  gt_rwlock_unlock(style->lock);
+  return !safe;
+}
+
 int gt_style_load_file(GtStyle *sty, const char *filename, GtError *err)
 {
 #ifndef NDEBUG
@@ -647,9 +663,10 @@ int gt_style_unit_test(GtError *err)
   int had_err = 0;
   GtStyle *sty = NULL, *new_sty = NULL;
   bool val;
-  GtStr *test1   = gt_str_new_cstr("mRNA"),
-      *str     = gt_str_new(),
-      *sty_buffer = gt_str_new();
+  GtError *testerr;
+  GtStr *test1      = gt_str_new_cstr("mRNA"),
+        *str        = gt_str_new(),
+        *sty_buffer = gt_str_new();
   GtColor col1, col2, col, defcol, tmpcol;
   double num;
   gt_error_check(err);
@@ -660,9 +677,18 @@ int gt_style_unit_test(GtError *err)
   col.red=1.0;col.green=1.0;col.blue=1.0;col.alpha=0.5;
   defcol.red=.5;defcol.green=.5;defcol.blue=.5;defcol.alpha=0.5;
 
+  testerr = gt_error_new();
+
   /* instantiate new style object */
-  if (!(sty = gt_style_new(err)))
-    had_err = -1;
+  ensure(had_err, (sty = gt_style_new(testerr)) != NULL);
+  ensure(had_err, !gt_error_is_set(testerr));
+
+  /* test safe/unsafe mode switching */
+  ensure(had_err, !gt_style_is_unsafe(sty));
+  gt_style_unsafe_mode(sty);
+  ensure(had_err, gt_style_is_unsafe(sty));
+  gt_style_safe_mode(sty);
+  ensure(had_err, !gt_style_is_unsafe(sty));
 
   /* at the beginning, all values are defaults, since nothing is defined */
   (void) gt_style_get_color(sty, "exon", "fill", &tmpcol, NULL);
@@ -710,25 +736,24 @@ int gt_style_unit_test(GtError *err)
     gt_str_set(str, "");
   ensure(had_err, (strcmp(gt_str_get(str),"")==0));
 
-  gt_error_check(err);
   /* clone a GtStyle object */
-  new_sty = gt_style_clone(sty, err);
-  gt_error_check(err);
-  if (!gt_error_is_set(err))
-  {
-    /* check again */
-    (void) gt_style_get_color(new_sty, "foo", "fill", &tmpcol, NULL);
-    ensure(had_err, !gt_color_equals(&tmpcol, &defcol));
-    ensure(had_err, gt_color_equals(&tmpcol, &col2));
-    if (!gt_style_get_str(new_sty, "bar", "baz", str, NULL))
-      gt_str_set(str, "");
-    ensure(had_err, (strcmp(gt_str_get(str),"")!=0));
-    ensure(had_err, (gt_str_cmp(str,test1)==0));
-    if (!gt_style_get_str(new_sty, "bar", "test", str, NULL))
-      gt_str_set(str, "");
-    ensure(had_err, (strcmp(gt_str_get(str),"")==0));
-  }
+  ensure(had_err, (new_sty = gt_style_clone(sty, testerr)) != NULL);
+  ensure(had_err, !gt_error_is_set(testerr));
+
+  /* check again */
+  (void) gt_style_get_color(new_sty, "foo", "fill", &tmpcol, NULL);
+  ensure(had_err, !gt_color_equals(&tmpcol, &defcol));
+  ensure(had_err, gt_color_equals(&tmpcol, &col2));
+  if (!gt_style_get_str(new_sty, "bar", "baz", str, NULL))
+    gt_str_set(str, "");
+  ensure(had_err, (strcmp(gt_str_get(str),"")!=0));
+  ensure(had_err, (gt_str_cmp(str,test1)==0));
+  if (!gt_style_get_str(new_sty, "bar", "test", str, NULL))
+    gt_str_set(str, "");
+  ensure(had_err, (strcmp(gt_str_get(str),"")==0));
+
   /* mem cleanup */
+  gt_error_delete(testerr);
   gt_str_delete(test1);
   gt_str_delete(str);
   gt_str_delete(sty_buffer);

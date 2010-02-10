@@ -39,6 +39,8 @@ GtStyle*      gt_style_ref(GtStyle*);
 void           gt_style_unsafe_mode(GtStyle*);
 /* Enables safe mode (``io'' and ``os'' libraries not accessible). */
 void           gt_style_safe_mode(GtStyle*);
+/* Returns true if <sty> is in unsafe mode. */
+bool           gt_style_is_unsafe(GtStyle *sty);
 /* Creates a independent (``deep'') copy of the given <GtStyle> object. */
 GtStyle*      gt_style_clone(const GtStyle*, GtError*);
 /* Loads and executes Lua style file with given <filename>.
