@@ -110,6 +110,7 @@ int main(int argc, char *argv[])
   }
 
   gt_lib_init();
+  gt_lib_reg_atexit_func();
 
   features = create_example_features();
 

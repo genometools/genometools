@@ -29,6 +29,7 @@ int main(int argc, char *argv[])
 
   /* initialize */
   gt_lib_init();
+  gt_lib_reg_atexit_func();
 
   /* create error object */
   err = gt_error_new();
