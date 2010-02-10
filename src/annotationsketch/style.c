@@ -133,22 +133,36 @@ void gt_style_unsafe_mode(GtStyle *style)
 
 void gt_style_safe_mode(GtStyle *style)
 {
+#ifndef NDEBUG
+  int stack_size;
+#endif
   const luaL_Reg *lib = luainsecurelibs;
   gt_assert(style);
   gt_rwlock_wrlock(style->lock);
+#ifndef NDEBUG
+  stack_size = lua_gettop(style->L);
+#endif
   for (; lib->name; lib++) {
     lua_pushnil(style->L);
     lua_setglobal(style->L, lib->name);
   }
   style->unsafe = false;
+  gt_assert(lua_gettop(style->L) == stack_size);
   gt_rwlock_unlock(style->lock);
 }
 
 bool gt_style_is_unsafe(GtStyle *sty)
 {
+#ifndef NDEBUG
+  int stack_size;
+#endif
   const luaL_Reg *lib = luainsecurelibs;
   bool safe = true;
+  gt_assert(sty);
   gt_rwlock_wrlock(style->lock);
+#ifndef NDEBUG
+  stack_size = lua_gettop(sty->L);
+#endif
   for (; safe && lib->name; lib++) {
     lua_getglobal(sty->L, lib->name);
     if (!lua_isnil(sty->L, -1)) {
@@ -156,6 +170,7 @@ bool gt_style_is_unsafe(GtStyle *sty)
     }
     lua_pop(sty->L, 1);
   }
+  gt_assert(lua_gettop(sty->L) == stack_size);
   gt_rwlock_unlock(style->lock);
   return !safe;
 }
