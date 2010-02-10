@@ -370,7 +370,7 @@ int gt_sketch(int argc, const char **argv, GtError *err)
 
     if (!(sty = gt_style_new(err)))
       had_err = -1;
-    if (!had_err && gt_file_exists(gt_str_get(arguments.stylefile))){
+    if (!had_err && gt_file_exists(gt_str_get(arguments.stylefile))) {
       if (arguments.unsafe)
         gt_style_unsafe_mode(sty);
       had_err = gt_style_load_file(sty, gt_str_get(arguments.stylefile), err);
