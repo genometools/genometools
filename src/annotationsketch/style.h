@@ -42,7 +42,7 @@ bool           gt_style_get_num(const GtStyle*, const char *section,
 bool           gt_style_get_bool(const GtStyle*, const char *section,
                                  const char *key, bool*, GtFeatureNode*);
 int            gt_style_unit_test(GtError*);
-/* Deletes a GT_Style object but leaves the internal Lua state intact. */
+/* Deletes a GtStyle object but leaves the internal Lua state intact. */
 void           gt_style_delete_without_state(GtStyle*);
 
 #endif
