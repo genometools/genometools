@@ -127,6 +127,20 @@ void gt_style_unsafe_mode(GtStyle *style)
   gt_assert(style);
   gt_rwlock_wrlock(style->lock);
   luaL_opencustomlibs(style->L, luainsecurelibs);
+  style->unsafe = true;
+  gt_rwlock_unlock(style->lock);
+}
+
+void gt_style_safe_mode(GtStyle *style)
+{
+  const luaL_Reg *lib = luainsecurelibs;
+  gt_assert(style);
+  gt_rwlock_wrlock(style->lock);
+  for (; lib->name; lib++) {
+    lua_pushnil(style->L);
+    lua_setglobal(style->L, lib->name);
+  }
+  style->unsafe = false;
   gt_rwlock_unlock(style->lock);
 }
 
