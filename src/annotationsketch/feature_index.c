@@ -303,8 +303,8 @@ static void* gt_feature_index_unit_test_query(void *data)
 
   arr = gt_array_new(sizeof (GtFeatureNode*));
   arr_ref = gt_array_new(sizeof (GtFeatureNode*));
-  rng.start = rand() % (GT_FI_TEST_END - GT_FI_TEST_QUERY_WIDTH);
-  rng.end = rng.start + rand() % (GT_FI_TEST_QUERY_WIDTH);
+  rng.start = random() % (GT_FI_TEST_END - GT_FI_TEST_QUERY_WIDTH);
+  rng.end = rng.start + random() % (GT_FI_TEST_QUERY_WIDTH);
 
   /* get reference set by linear search */
   gt_mutex_lock(shm->mutex);
@@ -394,8 +394,8 @@ int gt_feature_index_unit_test(GtFeatureIndex *fi, GtError *err)
   for (i=0;i<GT_FI_TEST_FEATURES_PER_THREAD*gt_jobs;i++) {
     unsigned long start, end;
     GtFeatureNode *fn;
-    start = rand() % (GT_FI_TEST_END - GT_FI_TEST_FEATURE_WIDTH);
-    end = start + rand() % (GT_FI_TEST_FEATURE_WIDTH);
+    start = random() % (GT_FI_TEST_END - GT_FI_TEST_FEATURE_WIDTH);
+    end = start + random() % (GT_FI_TEST_FEATURE_WIDTH);
     fn = gt_feature_node_cast(gt_feature_node_new(seqid, "gene", start, end,
                                                   GT_STRAND_FORWARD));
     gt_array_add(sh.nodes, fn);
