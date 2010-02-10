@@ -22,4 +22,8 @@
    This has to be called before the library is used! */
 void gt_lib_init(void);
 
+/* Registers the functions to perform cleanup when the program using the
+   library exits. */
+void gt_lib_reg_atexit_func(void);
+
 #endif
