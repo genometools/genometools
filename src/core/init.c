@@ -15,6 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifndef WITHOUT_CAIRO
+#include <fontconfig.h>
+#endif
 #include "core/init.h"
 #include "core/class_alloc.h"
 #include "core/class_prealloc.h"
@@ -121,5 +124,8 @@ int gt_lib_clean(void)
   gt_ya_rand_clean();
   gt_rval = gt_ma_check_space_leak();
   gt_ma_clean();
+#ifndef WITHOUT_CAIRO
+  FcFini();
+#endif
   return fa_fptr_rval || fa_mmap_rval || gt_rval;
 }

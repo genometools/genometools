@@ -302,7 +302,8 @@ endif
 ifneq ($(cairo),no)
   GTSHAREDLIB_LIBDEP:= $(GTSHAREDLIB_LIBDEP) -lcairo
   GT_CPPFLAGS += -I/usr/include/cairo -I/usr/local/include/cairo \
-                 -I/opt/local/include/cairo
+                 -I/opt/local/include/cairo -I/usr/include/fontconfig \
+                 -I/usr/local/include/fontconfig -I/opt/local/include/fontconfig
   EXP_LDLIBS:=-lcairo $(EXP_LDLIBS)
   ANNOTATIONSKETCH_EXAMPLES := bin/examples/sketch_constructed \
                                bin/examples/sketch_parsed_with_ctrack \
