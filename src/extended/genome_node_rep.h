@@ -52,7 +52,11 @@ struct GtGenomeNode
   const GtGenomeNodeClass *c_class;
   GtStr *filename;
   GtHashmap *userdata;
+  /* GtGenomeNodes are very space critical, therefore we can justify a bit
+     ifdef-hell here... */
+#ifdef GT_THREADS_ENABLED
   GtRWLock *lock;
+#endif
   unsigned int line_number,
                reference_count,
                userdata_nof_items;

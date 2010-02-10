@@ -57,7 +57,9 @@ void gt_genome_node_delete(GtGenomeNode *gn)
   if (gn->userdata)
     gt_hashmap_delete(gn->userdata);
   gt_rwlock_unlock(gn->lock);
+#ifdef GT_THREADS_ENABLED
   gt_rwlock_delete(gn->lock);
+#endif
   gt_free(gn);
 }
 
@@ -172,7 +174,9 @@ GtGenomeNode* gt_genome_node_create(const GtGenomeNodeClass *gnc)
   gn->reference_count    = 0;
   gn->userdata           = NULL;
   gn->userdata_nof_items = 0;
+#ifdef GT_THREADS_ENABLED
   gn-> lock              = gt_rwlock_new();
+#endif
   return gn;
 }
 
