@@ -319,6 +319,7 @@ endif
 
 ifeq ($(threads),yes)
   EXP_CPPFLAGS += -DGT_THREADS_ENABLED
+  EXP_LDLIBS += -lpthread
 endif
 
 # the GenomeTools library
