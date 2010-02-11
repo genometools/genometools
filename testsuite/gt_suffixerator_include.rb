@@ -116,7 +116,7 @@ alldir.each do |dir|
     Keywords "gt_suffixerator"
     Test do
        run_test "#{$bin}gt suffixerator -dir #{dir} -tis -suf -bwt -lcp " +
-                "-indexname sfx -pl -db " + 
+                "-indexname sfx -pl -db " +
                 flattenfilelist(filelist)
        run_test "#{$bin}gt suffixerator -storespecialcodes -dir #{dir} -tis " +
                 "-suf -lcp -indexname sfx -pl -db " +
@@ -305,5 +305,6 @@ Keywords "gt_uniquesub"
 Test do
   run "#{$scriptsdir}runmkfm.sh #{$bin}gt 1 . Combined.fna #{$testdata}at1MB"
   run_test "#{$bin}gt uniquesub -output sequence querypos -min 10 " +
-           "-max 20 -fmi Combined.fna -query #{$testdata}U89959_genomic.fas"
+           "-max 20 -fmi Combined.fna -query #{$testdata}U89959_genomic.fas", \
+           :maxtime => 600
 end
