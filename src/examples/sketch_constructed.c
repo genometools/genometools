@@ -110,7 +110,6 @@ int main(int argc, char *argv[])
   }
 
   gt_lib_init();
-  gt_lib_reg_atexit_func();
 
   features = create_example_features();
 
@@ -118,5 +117,6 @@ int main(int argc, char *argv[])
 
   delete_example_features(features);
 
+  gt_lib_clean();
   return EXIT_SUCCESS;
 }

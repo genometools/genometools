@@ -40,7 +40,6 @@ int main(int argc, char *argv[])
 
   /* initialize */
   gt_lib_init();
-  gt_lib_reg_atexit_func();
 
   /* create error object */
   err = gt_error_new();
@@ -95,5 +94,7 @@ int main(int argc, char *argv[])
   gt_style_delete(style);
   gt_error_delete(err);
 
+  /* perform static data cleanup */
+  gt_lib_clean();
   return EXIT_SUCCESS;
 }
