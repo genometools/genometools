@@ -22,8 +22,11 @@
    This has to be called before the library is used! */
 void gt_lib_init(void);
 
-/* Registers the functions to perform cleanup when the program using the
-   library exits. */
+/* registers exit function which calls gt_lib_clean() */
 void gt_lib_reg_atexit_func(void);
+
+/* returns 0 if no memory map, file pointer, or memory has been leaked and a
+   value != 0 otherwise */
+int  gt_lib_clean(void);
 
 #endif

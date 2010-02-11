@@ -22,11 +22,4 @@
 
 /* high level wrapper module for the allocators (memory & files) */
 
-/* registers exit function which calls gt_lib_clean() */
-void gt_lib_reg_atexit_func(void);
-
-/* returns 0 if no memory map, file pointer, or memory has been leaked and a
-   value != 0 otherwise */
-int  gt_lib_clean(void);
-
 #endif
