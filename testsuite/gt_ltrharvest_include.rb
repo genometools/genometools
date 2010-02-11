@@ -125,7 +125,7 @@ if $gttestdata then
     Name "gt ltrharvest test on #{k} Dmel"
     Keywords "gt_ltrharvest"
     Test do
-      run_test "#{$bin}gt suffixerator -db #{$gttestdata}ltrharvest/d_mel/#{v} -dna -suf -lcp -tis -des -ssp", :maxtime => 32000
+      run_test "#{$bin}gt suffixerator -db #{$gttestdata}ltrharvest/d_mel/#{v} -dna -suf -sds -lcp -tis -des -ssp", :maxtime => 32000
       run_test "#{$bin}gt ltrharvest -index #{v} -seed 76 -minlenltr 116 -maxlenltr 800 -mindistltr 2280 -maxdistltr 8773 -similar 91 -mintsd 4 -maxtsd 20 -vic 60 -overlaps best -xdrop 7 -mat 2 -mis -2 -ins -3 -del -3 -v -gff3 #{k}.gff3", :maxtime => 1500
       run "diff #{$last_stdout} #{$gttestdata}ltrharvest/d_mel/#{k}.out"
       run "#{$bin}gt gff3 #{k}.gff3"
@@ -143,14 +143,14 @@ end
 Name "gt ltrharvest only index"
 Keywords "gt_ltrharvest"
 Test do
-  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -lcp -tis -des -ssp"
+  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -sds -lcp -tis -des -ssp"
   run_test "#{$bin}gt ltrharvest -index Random.fna"
 end
 
 Name "gt ltrharvest motif and motifmis"
 Keywords "gt_ltrharvest"
 Test do
-  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -lcp -tis -des -ssp"
+  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -sds -lcp -tis -des -ssp"
   run_test "#{$bin}gt ltrharvest -index Random.fna" +
            " -motif tgca -motifmis 0"
 end
@@ -158,7 +158,7 @@ end
 Name "gt ltrharvest unvalid motif characters"
 Keywords "gt_ltrharvest"
 Test do
-  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -lcp -tis -des -ssp"
+  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -sds -lcp -tis -des -ssp"
   run_test "#{$bin}gt ltrharvest -index Random.fna" +
            " -motif qgca -motifmis 0", :retval => 1
 end
@@ -166,7 +166,7 @@ end
 Name "gt ltrharvest motif not palindromic"
 Keywords "gt_ltrharvest"
 Test do
-  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -lcp -tis -des -ssp"
+  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -sds -lcp -tis -des -ssp"
   run_test "#{$bin}gt ltrharvest -index Random.fna" +
            " -motif agga -motifmis 0", :retval => 1
 end
@@ -174,7 +174,7 @@ end
 Name "gt ltrharvest maxtsd requires mintsd"
 Keywords "gt_ltrharvest"
 Test do
-  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -lcp -tis -des -ssp"
+  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -sds -lcp -tis -des -ssp"
   run_test "#{$bin}gt ltrharvest -index Random.fna" +
            " -maxtsd 20", :retval => 1
 end
@@ -190,7 +190,7 @@ end
 Name "gt ltrharvest motifmis requires motif"
 Keywords "gt_ltrharvest"
 Test do
-  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -lcp -tis -des -ssp"
+  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -sds -lcp -tis -des -ssp"
   run_test "#{$bin}gt ltrharvest -index Random.fna" +
            " -motifmis 0", :retval => 1
 end
@@ -198,7 +198,7 @@ end
 Name "gt ltrharvest longoutput missing args"
 Keywords "gt_ltrharvest"
 Test do
-  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -lcp -tis -des -ssp"
+  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -sds -lcp -tis -des -ssp"
   run_test "#{$bin}gt ltrharvest -index Random.fna" +
            " -longoutput", :retval => 1
 end
@@ -206,7 +206,7 @@ end
 Name "gt ltrharvest longoutput motif random"
 Keywords "gt_ltrharvest"
 Test do
-  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -lcp -tis -des -ssp"
+  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -sds -lcp -tis -des -ssp"
   run_test "#{$bin}gt ltrharvest -index Random.fna" +
            " -longoutput -motif tgca"
 end
@@ -214,7 +214,7 @@ end
 Name "gt ltrharvest longoutput mintsd random"
 Keywords "gt_ltrharvest"
 Test do
-  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -lcp -tis -des -ssp"
+  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -sds -lcp -tis -des -ssp"
   run_test "#{$bin}gt ltrharvest -index Random.fna" +
            " -longoutput -mintsd 5"
 end
@@ -222,7 +222,7 @@ end
 Name "gt ltrharvest overlaps1"
 Keywords "gt_ltrharvest"
 Test do
-  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -lcp -tis -des -ssp"
+  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -sds -lcp -tis -des -ssp"
   run_test "#{$bin}gt ltrharvest -index Random.fna" +
            " -overlaps no"
 end
@@ -230,7 +230,7 @@ end
 Name "gt ltrharvest overlaps2"
 Keywords "gt_ltrharvest"
 Test do
-  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -lcp -tis -des -ssp"
+  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -sds -lcp -tis -des -ssp"
   run_test "#{$bin}gt ltrharvest -index Random.fna" +
            " -overlaps best"
 end
@@ -238,7 +238,7 @@ end
 Name "gt ltrharvest overlaps3"
 Keywords "gt_ltrharvest"
 Test do
-  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -lcp -tis -des -ssp"
+  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -sds -lcp -tis -des -ssp"
   run_test "#{$bin}gt ltrharvest -index Random.fna" +
            " -overlaps all"
 end
@@ -246,7 +246,7 @@ end
 Name "gt ltrharvest FASTA output"
 Keywords "gt_ltrharvest"
 Test do
-  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -lcp -tis -des -ssp"
+  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -sds -lcp -tis -des -ssp"
   run_test "#{$bin}gt ltrharvest -index Random.fna" +
            " -out out.fna"
 end
@@ -254,7 +254,7 @@ end
 Name "gt ltrharvest FASTA inner output"
 Keywords "gt_ltrharvest"
 Test do
-  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -lcp -tis -des -ssp"
+  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -sds -lcp -tis -des -ssp"
   run_test "#{$bin}gt ltrharvest -index Random.fna" +
            " -outinner outinner.fna"
 end
@@ -262,7 +262,7 @@ end
 Name "gt ltrharvest GFF3 output"
 Keywords "gt_ltrharvest"
 Test do
-  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -lcp -tis -des -ssp"
+  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -sds -lcp -tis -des -ssp"
   run_test "#{$bin}gt ltrharvest -index Random.fna" +
            " -gff3 out.gff3"
 end
