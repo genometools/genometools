@@ -159,7 +159,7 @@ bool gt_style_is_unsafe(GtStyle *sty)
   const luaL_Reg *lib = luainsecurelibs;
   bool safe = true;
   gt_assert(sty);
-  gt_rwlock_wrlock(style->lock);
+  gt_rwlock_wrlock(sty->lock);
 #ifndef NDEBUG
   stack_size = lua_gettop(sty->L);
 #endif
@@ -171,7 +171,7 @@ bool gt_style_is_unsafe(GtStyle *sty)
     lua_pop(sty->L, 1);
   }
   gt_assert(lua_gettop(sty->L) == stack_size);
-  gt_rwlock_unlock(style->lock);
+  gt_rwlock_unlock(sty->lock);
   return !safe;
 }
 
