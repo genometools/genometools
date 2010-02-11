@@ -37,6 +37,8 @@
 #include "annotationsketch/graphics_cairo.h"
 #include "annotationsketch/graphics_rep.h"
 
+static unsigned long cairo_object_count = 0;
+
 struct GtGraphicsCairo {
   const GtGraphics parent_instance;
   cairo_t *cr;
@@ -101,6 +103,7 @@ void gt_graphics_cairo_initialize(GtGraphics *gg, GtGraphicsOutType type,
   }
   gt_assert(g->surf && cairo_surface_status(g->surf) == CAIRO_STATUS_SUCCESS);
   g->cr = cairo_create(g->surf);
+  cairo_object_count++;
   gt_assert(cairo_status(g->cr) == CAIRO_STATUS_SUCCESS);
   /* set background default to transparent */
   g->bg_color.red = g->bg_color.green  = 0.0;
@@ -676,6 +679,12 @@ void gt_graphics_cairo_delete(GtGraphics *gg)
     cairo_surface_destroy(g->surf); /* reference counted */
   if (g->outbuf)
     gt_str_delete(g->outbuf);
+  if (cairo_object_count > 0) {
+    cairo_object_count--;
+  } else {
+    /* no cairo objects are around any more, flush cairo caches */
+    cairo_debug_reset_static_data();
+  }
 }
 
 const GtGraphicsClass* gt_graphics_cairo_class(void)
