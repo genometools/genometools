@@ -14,3 +14,18 @@
    fun:deflate
    fun:png_write_filtered_row
 }
+{
+   toy_font_static_data_problem
+   Memcheck:Leak
+   obj:*libfreetype*
+   ...
+   fun:*FT_*
+   ...
+}
+{
+   toy_font_static_data_problem
+   Memcheck:Leak
+   ...
+   fun:cairo_text_extents
+   ...
+}
