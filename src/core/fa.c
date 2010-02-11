@@ -329,9 +329,10 @@ void* gt_fa_mmap_generic_fd_func(int fd, size_t len, size_t offset,
   else
   {
     if ((map = mmap(0, len, PROT_READ | (mapwritable ? PROT_WRITE : 0),
-                    MAP_SHARED, fd, offset)) == MAP_FAILED)
+                    MAP_SHARED, fd, offset)) == MAP_FAILED) {
       gt_error_set(err,"cannot map file \"%s\": %s", filename, strerror(errno));
       map = NULL;
+    }
   }
 
   if (map) {
