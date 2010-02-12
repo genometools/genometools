@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -83,6 +83,9 @@ void           gth_input_echo_reference_sequence(GthInput*, bool format,
                                                  unsigned long seqnum,
                                                  bool forward,
                                                  GtFile*);
+void           gth_input_get_genomic_description(GthInput*, GtStr *desc,
+                                                 unsigned long filenum,
+                                                 unsigned long seqnum);
 void           gth_input_save_gen_id(GthInput*, GtStr *id,
                                      unsigned long file_num,
                                      unsigned long seq_num);

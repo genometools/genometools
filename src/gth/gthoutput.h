@@ -67,6 +67,7 @@ typedef struct
        showseqnums,                 /* show sequence numbers in output */
        xmlout,                      /* show output in XML format */
        gff3out,                     /* show output in GFF3 format */
+       gff3descranges,              /* use description ranges for GFF3 output */
        gs2out,                      /* output in deprecated GeneSeqer2 format */
        comments,                    /* output (additional) comments */
        showeops,                    /* show edit operations after (protein) DP

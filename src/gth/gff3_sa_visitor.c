@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2004-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2004-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -57,6 +57,7 @@ static void showSAinGFF3(GthSA *sa,
   GtRange range;
   GtStr *seqid;
   unsigned long i;
+  long offset;
   int had_err;
 
   gt_assert(sa && sequence_region_factory && gff3_visitor);
@@ -64,12 +65,15 @@ static void showSAinGFF3(GthSA *sa,
   seqid = sequence_region_factory_get_seqid(sequence_region_factory,
                                             gth_sa_gen_file_num(sa),
                                             gth_sa_gen_seq_num(sa));
-
+  offset = sequence_region_factory_offset(sequence_region_factory,
+                                          gth_sa_gen_file_num(sa),
+                                          gth_sa_gen_seq_num(sa)) - 1;
   /* create gene feature */
   range.start = gth_sa_left_genomic_exon_border(sa, 0);
   range.end   = gth_sa_right_genomic_exon_border(sa,
                                           gth_sa_num_of_exons(sa)-1);
   range = gt_range_reorder(range);
+  range = gt_range_offset(&range, offset);
   gene_feature = (GtFeatureNode*)
                  gt_feature_node_new(seqid, gt_ft_gene, range.start, range.end,
                                      gth_sa_gen_strand(sa));
@@ -87,6 +91,7 @@ static void showSAinGFF3(GthSA *sa,
       GtGenomeNode *ss_feature;
       /* donor site */
       range = gth_sa_donor_site_range(sa, i-1),
+      range = gt_range_offset(&range, offset);
       ss_feature = gt_feature_node_new(seqid, gt_ft_five_prime_splice_site,
                                        range.start, range.end,
                                        gth_sa_gen_strand(sa));
@@ -97,6 +102,7 @@ static void showSAinGFF3(GthSA *sa,
 
       /* acceptor site */
       range = gth_sa_acceptor_site_range(sa, i-1),
+      range = gt_range_offset(&range, offset);
       ss_feature = gt_feature_node_new(seqid, gt_ft_three_prime_splice_site,
                                        range.start, range.end,
                                        gth_sa_gen_strand(sa));
@@ -110,6 +116,7 @@ static void showSAinGFF3(GthSA *sa,
     range.start = gth_sa_left_genomic_exon_border(sa, i);
     range.end   = gth_sa_right_genomic_exon_border(sa, i);
     range = gt_range_reorder(range);
+    range = gt_range_offset(&range, offset);
     exon_feature = (GtFeatureNode*)
                    gt_feature_node_new(seqid, gt_ft_exon, range.start,
                                        range.end, gth_sa_gen_strand(sa));
@@ -142,12 +149,14 @@ const GthSAVisitorClass* gth_gff3_sa_visitor_class()
   return &savc;
 }
 
-GthSAVisitor* gth_gff3_sa_visitor_new(GthInput *input, GtFile *outfp)
+GthSAVisitor* gth_gff3_sa_visitor_new(GthInput *input, bool use_desc_ranges,
+                                      GtFile *outfp)
 {
   GthSAVisitor *sa_visitor = gth_sa_visitor_create(gth_gff3_sa_visitor_class());
   GthGFF3SAVisitor *visitor = gff3_sa_visitor_cast(sa_visitor);
   visitor->input = input;
-  visitor->sequence_region_factory = sequence_region_factory_new();
+  visitor->sequence_region_factory =
+    sequence_region_factory_new(use_desc_ranges);
   visitor->gthsourcetag = gt_str_new_cstr(GTHSOURCETAG);
   visitor->gff3_visitor = gt_gff3_visitor_new(outfp);
   return sa_visitor;

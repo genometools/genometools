@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2004-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2004-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -84,15 +84,20 @@ static void showPGLinGFF3(GthPGL *pgl,
   GtStr *seqid;
   int had_err;
   struct GthAGS *ags;
+  long offset;
 
   gt_assert(pgl && sequence_region_factory && gff3_visitor);
 
   seqid = sequence_region_factory_get_seqid(sequence_region_factory,
                                             gth_pgl_filenum(pgl),
                                             gth_pgl_seqnum(pgl));
+  offset = sequence_region_factory_offset(sequence_region_factory,
+                                          gth_pgl_filenum(pgl),
+                                          gth_pgl_seqnum(pgl)) - 1;
 
   /* create gene feature */
   range = gth_pgl_genomic_range(pgl);
+  range = gt_range_offset(&range, offset);
   gene_feature = (GtFeatureNode*)
                  gt_feature_node_new(seqid, gt_ft_gene, range.start, range.end,
                                      gth_pgl_genomic_strand(pgl));
@@ -110,6 +115,7 @@ static void showPGLinGFF3(GthPGL *pgl,
                   ? SHOWGENPOSAGS(last_exon->range.end)
                   : SHOWGENPOSAGS(first_exon->range.start);
     gt_assert(range.start <= range.end);
+    range = gt_range_offset(&range, offset);
     mrna_feature = (GtFeatureNode*)
                    gt_feature_node_new(seqid, gt_ft_mRNA, range.start,
                                        range.end, gth_ags_genomic_strand(ags));
@@ -123,6 +129,7 @@ static void showPGLinGFF3(GthPGL *pgl,
         GtGenomeNode *ss_feature;
         /* donor site */
         range = gth_ags_donor_site_range(ags, j-1),
+        range = gt_range_offset(&range, offset);
         ss_feature = gt_feature_node_new(seqid, gt_ft_five_prime_splice_site,
                                          range.start, range.end,
                                          gth_ags_genomic_strand(ags));
@@ -133,6 +140,7 @@ static void showPGLinGFF3(GthPGL *pgl,
 
         /* acceptor site */
         range = gth_ags_acceptor_site_range(ags, j-1),
+        range = gt_range_offset(&range, offset);
         ss_feature = gt_feature_node_new(seqid, gt_ft_three_prime_splice_site,
                                          range.start, range.end,
                                          gth_ags_genomic_strand(ags));
@@ -151,6 +159,7 @@ static void showPGLinGFF3(GthPGL *pgl,
                   ? SHOWGENPOSAGS(exon->range.end)
                   : SHOWGENPOSAGS(exon->range.start);
       gt_assert(range.start <= range.end);
+      range = gt_range_offset(&range, offset);
       exon_feature = (GtFeatureNode*)
                      gt_feature_node_new(seqid, gt_ft_exon, range.start,
                                          range.end,
@@ -186,13 +195,15 @@ const GthPGLVisitorClass* gth_gff3_pgl_visitor_class()
   return &pglvc;
 }
 
-GthPGLVisitor* gth_gff3_pgl_visitor_new(GthInput *input, GtFile *outfp)
+GthPGLVisitor* gth_gff3_pgl_visitor_new(GthInput *input, bool use_desc_ranges,
+                                        GtFile *outfp)
 {
   GthPGLVisitor *pgl_visitor =
     gth_pgl_visitor_create(gth_gff3_pgl_visitor_class());
   GthGFF3PGLVisitor *visitor = gff3_pgl_visitor_cast(pgl_visitor);
   visitor->input = input;
-  visitor->sequence_region_factory = sequence_region_factory_new();
+  visitor->sequence_region_factory =
+    sequence_region_factory_new(use_desc_ranges);
   visitor->gthsourcetag = gt_str_new_cstr(GTHSOURCETAG);
   visitor->gff3_visitor = gt_gff3_visitor_new(outfp);
   return pgl_visitor;

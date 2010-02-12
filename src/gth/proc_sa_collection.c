@@ -66,7 +66,9 @@ void proc_sa_collection(GthSACollection *sa_collection, GthCallInfo *call_info,
       }
     }
     else if (call_info->out->gff3out) {
-      sa_visitor = gth_gff3_sa_visitor_new(input, call_info->out->outfp);
+      sa_visitor = gth_gff3_sa_visitor_new(input,
+                                           call_info->out->gff3descranges,
+                                           call_info->out->outfp);
     }
     else {
       sa_visitor = gth_txt_sa_visitor_new(input, call_info->out->gs2out,
@@ -108,7 +110,9 @@ void proc_sa_collection(GthSACollection *sa_collection, GthCallInfo *call_info,
                                             indentlevel + 1, call_info->out);
     }
     else if (call_info->out->gff3out) {
-      pgl_visitor = gth_gff3_pgl_visitor_new(input, call_info->out->outfp);
+      pgl_visitor = gth_gff3_pgl_visitor_new(input,
+                                             call_info->out->gff3descranges,
+                                             call_info->out->outfp);
     }
     else {
       pgl_visitor = gth_txt_pgl_visitor_new(input, call_info->translationtable,

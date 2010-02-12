@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008      Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -19,26 +19,39 @@
 #include "core/cstr_table.h"
 #include "core/basename_api.h"
 #include "core/ma.h"
+#include "core/parseutils.h"
+#include "core/undef.h"
 #include "gth/sequence_region_factory.h"
 
 typedef struct {
   unsigned long num_of_files,
                 *num_of_sequences;
   GtStr ***store;
+  long **offsets;
 } SeqidStore;
 
 static SeqidStore* seqid_store_new(GthInput *input)
 {
   SeqidStore *ss;
-  unsigned long i;
+  unsigned long i, j;
   gt_assert(input);
   ss = gt_malloc(sizeof *ss);
   ss->num_of_files = gth_input_num_of_gen_files(input);
   ss->num_of_sequences = gt_calloc(ss->num_of_files, sizeof (unsigned long));
+  /* allocate room for store */
   ss->store = gt_calloc(ss->num_of_files, sizeof *ss->store);
   for (i = 0; i < ss->num_of_files; i++) {
     ss->num_of_sequences[i] = gth_input_num_of_gen_seqs(input, i);
     ss->store[i] = gt_calloc(ss->num_of_sequences[i], sizeof **ss->store);
+  }
+  /* allocate room for offsets */
+  ss->offsets = gt_malloc(ss->num_of_files * sizeof *ss->offsets);
+  for (i = 0; i < ss->num_of_files; i++)
+    ss->offsets[i] = gt_malloc(ss->num_of_sequences[i] * sizeof **ss->offsets);
+  /* initialize offsets to undefined values */
+  for (i = 0; i < ss->num_of_files; i++) {
+    for (j = 0; j < ss->num_of_sequences[i]; j++)
+      ss->offsets[i][j] = GT_UNDEF_LONG;
   }
   return ss;
 }
@@ -47,6 +60,9 @@ static void seqid_store_delete(SeqidStore *ss)
 {
   unsigned long i, j;
   if (!ss) return;
+  for (i = 0; i < ss->num_of_files; i++)
+    gt_free(ss->offsets[i]);
+  gt_free(ss->offsets);
   for (i = 0; i < ss->num_of_files; i++) {
     for (j = 0; j < ss->num_of_sequences[i]; j++)
       gt_str_delete(ss->store[i][j]);
@@ -58,7 +74,7 @@ static void seqid_store_delete(SeqidStore *ss)
 }
 
 static void seqid_store_add(SeqidStore *ss, unsigned long filenum,
-                            unsigned long seqnum, GtStr *seqid)
+                            unsigned long seqnum, GtStr *seqid, long offset)
 {
   gt_assert(ss && seqid);
   gt_assert(gt_str_length(seqid)); /* is not empty */
@@ -66,6 +82,7 @@ static void seqid_store_add(SeqidStore *ss, unsigned long filenum,
   gt_assert(seqnum < ss->num_of_sequences[filenum]);
   gt_assert(!ss->store[filenum][seqnum]); /* is unused */
   ss->store[filenum][seqnum] = gt_str_clone(seqid);
+  ss->offsets[filenum][seqnum] = offset == GT_UNDEF_LONG ? 1 : offset;
 }
 
 static GtStr* seqid_store_get(SeqidStore *ss, unsigned long filenum,
@@ -81,16 +98,30 @@ static GtStr* seqid_store_get(SeqidStore *ss, unsigned long filenum,
   return seqid;
 }
 
+static long seqid_store_offset(SeqidStore *ss, unsigned long filenum,
+                               unsigned long seqnum)
+{
+  long offset;
+  gt_assert(ss);
+  gt_assert(filenum < ss->num_of_files);
+  gt_assert(seqnum < ss->num_of_sequences[filenum]);
+  offset = ss->offsets[filenum][seqnum];
+  gt_assert(offset != GT_UNDEF_LONG); /* is defined */
+  return offset;
+}
+
 struct SequenceRegionFactory{
   GtCstrTable *used_seqids;
-  bool factory_was_used;
+  bool factory_was_used,
+       use_desc_ranges;
   SeqidStore *seqid_store;
 };
 
-SequenceRegionFactory* sequence_region_factory_new(void)
+SequenceRegionFactory* sequence_region_factory_new(bool use_desc_ranges)
 {
   SequenceRegionFactory *srf = gt_calloc(1, sizeof *srf);
   srf->used_seqids = gt_cstr_table_new();
+  srf->use_desc_ranges = use_desc_ranges;
   return srf;
 }
 
@@ -102,6 +133,54 @@ void sequence_region_factory_delete(SequenceRegionFactory *srf)
   gt_free(srf);
 }
 
+/* Range descriptions have the folowing format: III:1000001..2000000
+   That is, the part between ':' and '..' denotes the offset. */
+static long parse_desc_range(GthInput *input,
+                             unsigned long filenum, unsigned long seqnum)
+{
+  long offset;
+  GtStr *description;
+  unsigned long i;
+  char *desc;
+  gt_assert(input);
+  description = gt_str_new();
+  gth_input_get_genomic_description(input, description, filenum, seqnum);
+  desc = gt_str_get(description);
+  /* find ':' */
+  for (i = 0; i < gt_str_length(description); i++) {
+    if (desc[i] == ':')
+      break;
+  }
+  if (i == gt_str_length(description)) {
+    /* no ':' found */
+    gt_str_delete(description);
+    return GT_UNDEF_LONG;
+  }
+  desc += i + 1;
+  /* find '..' */
+  i = 0;
+  while (desc[i] != '\0') {
+    if (desc[i-1] == '.' && desc[i] == '.')
+      break;
+    i++;
+  }
+  if (desc[i] == '\0') {
+    /* no '..' found */
+    gt_str_delete(description);
+    return GT_UNDEF_LONG;
+  }
+  /* parse range */
+  gt_assert(desc[i-1] == '.' && desc[i] == '.');
+  desc[i-1] = '\0';
+  if (gt_parse_long(&offset, desc)) {
+    /* parsing failed */
+    gt_str_delete(description);
+    return GT_UNDEF_LONG;
+  }
+  gt_str_delete(description);
+  return offset;
+}
+
 static GtGenomeNode *make_sequence_region(GtStr *sequenceid,
                                           SequenceRegionFactory *srf,
                                           GthInput *input,
@@ -110,6 +189,7 @@ static GtGenomeNode *make_sequence_region(GtStr *sequenceid,
 {
   GtGenomeNode *sr = NULL;
   GtRange range;
+  long offset = GT_UNDEF_LONG;
   gt_assert(sequenceid && srf && input);
   if (gth_input_use_substring_spec(input)) {
     range.start = gth_input_genomic_substring_from(input);
@@ -118,10 +198,17 @@ static GtGenomeNode *make_sequence_region(GtStr *sequenceid,
   else {
     range = gth_input_get_relative_genomic_range(input, filenum, seqnum);
   }
-  range = gt_range_offset(&range, 1); /* 1-based */
+  if (srf->use_desc_ranges)
+    offset = parse_desc_range(input, filenum, seqnum);
+  if (offset != GT_UNDEF_LONG)
+    range = gt_range_offset(&range, offset);
+  else
+    range = gt_range_offset(&range, 1); /* 1-based */
   if (!gt_str_length(sequenceid) ||
-      gt_cstr_table_get(srf->used_seqids, gt_str_get(sequenceid))) {
-    /* sequenceid is empty or exists already -> make one up */
+      (gt_cstr_table_get(srf->used_seqids, gt_str_get(sequenceid)) &&
+       offset == GT_UNDEF_LONG)) {
+    /* sequenceid is empty or exists already (and no offset has been parsed)
+       -> make one up */
     GtStr *seqid;
     char *base;
     base = gt_basename(gth_input_get_genomic_filename(input, filenum));
@@ -130,14 +217,16 @@ static GtGenomeNode *make_sequence_region(GtStr *sequenceid,
     gt_str_append_char(seqid, '|');
     gt_str_append_ulong(seqid, seqnum + 1); /* 1-based */
     sr = gt_region_node_new(seqid, range.start, range.end);
-    seqid_store_add(srf->seqid_store, filenum, seqnum, seqid);
+    seqid_store_add(srf->seqid_store, filenum, seqnum, seqid, offset);
     gt_str_delete(seqid);
   }
   else {
-    /* sequenceid does not exists already -> use this one */
+    /* sequenceid does not exists already (or an offset has been parsed)
+       -> use this one */
     sr = gt_region_node_new(sequenceid, range.start, range.end);
-    seqid_store_add(srf->seqid_store, filenum, seqnum, sequenceid);
-    gt_cstr_table_add(srf->used_seqids, gt_str_get(sequenceid));
+    seqid_store_add(srf->seqid_store, filenum, seqnum, sequenceid, offset);
+    if (!gt_cstr_table_get(srf->used_seqids, gt_str_get(sequenceid)))
+      gt_cstr_table_add(srf->used_seqids, gt_str_get(sequenceid));
   }
   gt_assert(sr);
   return sr;
@@ -175,4 +264,12 @@ GtStr* sequence_region_factory_get_seqid(SequenceRegionFactory *srf,
 {
   gt_assert(srf && srf->factory_was_used);
   return seqid_store_get(srf->seqid_store, filenum, seqnum);
+}
+
+long sequence_region_factory_offset(SequenceRegionFactory *srf,
+                                    unsigned long filenum,
+                                    unsigned long seqnum)
+{
+  gt_assert(srf && srf->factory_was_used);
+  return seqid_store_offset(srf->seqid_store, filenum, seqnum);
 }

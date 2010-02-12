@@ -116,6 +116,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
          *optcomments = NULL,             /* output */
          *optxmlout = NULL,               /* output */
          *optgff3out = NULL,              /* output */
+         *optgff3descranges = NULL,       /* output */
          *optskipalignmentout = NULL,     /* output */
          *optmincutoffs = NULL,           /* output */
          *optshowintronmaxlen = NULL,     /* output */
@@ -375,6 +376,14 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
                                &call_info->out->gff3out, false);
   gt_option_is_development_option(optgff3out);
   gt_option_parser_add_option(op, optgff3out);
+
+  /* -gff3descrange */
+  optgff3descranges = gt_option_new_bool("gff3descranges", "use description "
+                                         "ranges to offset GFF3 output",
+                                         &call_info->out->gff3descranges,
+                                         false);
+  gt_option_is_development_option(optgff3descranges);
+  gt_option_parser_add_option(op, optgff3descranges);
 
   /* output file options */
   gt_outputfile_register_options(op, &call_info->out->outfp, ofi);
@@ -1185,6 +1194,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
     gt_option_imply(optverboseseqs, optverbose);
   if (optsortagswf && optsortags)
     gt_option_imply(optsortagswf, optsortags);
+  gt_option_imply(optgff3descranges, optgff3out);
 
   /* option implications (either 2) */
   if (optgff3out && optskipalignmentout && optintermediate)

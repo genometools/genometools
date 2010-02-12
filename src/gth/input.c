@@ -282,6 +282,15 @@ void gth_input_echo_reference_sequence(GthInput *input, bool format,
   }
 }
 
+void gth_input_get_genomic_description(GthInput *input, GtStr *description,
+                                       unsigned long filenum,
+                                       unsigned long seqnum)
+{
+  gt_assert(input && description);
+  gth_input_load_genomic_file(input, filenum);
+  gth_seq_col_get_description(input->genomic_seq_col, seqnum, description);
+}
+
 static void save_sequenceid(GtStr *sequenceid, GthSeqCol *seqcol,
                             unsigned long seqnum)
 {

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008      Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -23,7 +23,7 @@
 
 typedef struct SequenceRegionFactory SequenceRegionFactory;
 
-SequenceRegionFactory* sequence_region_factory_new(void);
+SequenceRegionFactory* sequence_region_factory_new(bool use_desc_ranges);
 void                   sequence_region_factory_delete(SequenceRegionFactory*);
 /* Use <sequence_region_factory> to produce sequence regions for each genomic
    sequence in <input> and let them accept the given <visitor>. */
@@ -33,5 +33,8 @@ void                   sequence_region_factory_make(SequenceRegionFactory*,
 GtStr*                 sequence_region_factory_get_seqid(SequenceRegionFactory*,
                                                          unsigned long filenum,
                                                          unsigned long seqnum);
+long                   sequence_region_factory_offset(SequenceRegionFactory*,
+                                                      unsigned long filenum,
+                                                      unsigned long seqnum);
 
 #endif

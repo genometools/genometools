@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2008-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2008      Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -24,6 +24,8 @@
 typedef struct GthGFF3SAVisitor GthGFF3SAVisitor;
 
 const GthSAVisitorClass* gth_gff3_sa_visitor_class(void);
-GthSAVisitor*            gth_gff3_sa_visitor_new(GthInput*, GtFile *outfp);
+GthSAVisitor*            gth_gff3_sa_visitor_new(GthInput*,
+                                                 bool use_desc_ranges,
+                                                 GtFile *outfp);
 
 #endif
