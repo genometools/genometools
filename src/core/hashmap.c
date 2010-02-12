@@ -100,7 +100,7 @@ gt_hashmap_remove(GtHashmap *hm, const void *key)
 /* iteration support structures and functions */
 struct hashiteration_state
 {
-  Mapentryvisitfunc visit;
+  GtHashmapVisitFunc visit;
   void *data;
   GtCompare keycmp;
 };
@@ -126,7 +126,7 @@ gt_hashmap_visit(void *elem, void *data, GtError *err)
 
 /* iterate over the hashmap in key order given by compare function <cmp> */
 extern int
-gt_hashmap_foreach_ordered(GtHashmap *hm, Mapentryvisitfunc visit, void *data,
+gt_hashmap_foreach_ordered(GtHashmap *hm, GtHashmapVisitFunc visit, void *data,
                         GtCompare cmp, GtError *err)
 {
   struct hashiteration_state state = { visit, data, cmp};
@@ -135,7 +135,7 @@ gt_hashmap_foreach_ordered(GtHashmap *hm, Mapentryvisitfunc visit, void *data,
 }
 
 extern int
-gt_hashmap_foreach(GtHashmap *hm, Mapentryvisitfunc visit, void *data,
+gt_hashmap_foreach(GtHashmap *hm, GtHashmapVisitFunc visit, void *data,
                    GtError *err)
 {
   struct hashiteration_state state = { visit, data, NULL };
@@ -143,7 +143,7 @@ gt_hashmap_foreach(GtHashmap *hm, Mapentryvisitfunc visit, void *data,
 }
 
 extern int
-gt_hashmap_foreach_in_key_order(GtHashmap *hm, Mapentryvisitfunc iter,
+gt_hashmap_foreach_in_key_order(GtHashmap *hm, GtHashmapVisitFunc iter,
                              void *data, GtError *err)
 {
   struct hashiteration_state state = { iter, data, NULL };

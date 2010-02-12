@@ -35,7 +35,7 @@ typedef enum {
    2 = deleted element, 3 = modified key, 4 = redo iteration).
    Gets called with the key and value of the current hashmap member, and the
    <GtError> object given in the original gt_hashmap_foreach*() call. */
-typedef int (*Mapentryvisitfunc)(void *key, void *value, void *data, GtError*);
+typedef int (*GtHashmapVisitFunc)(void *key, void *value, void *data, GtError*);
 
 /* Creates a new <GtHashmap> of type <keyhashtype>. If <keyfree> and/or
    <valuefree> are given, they will be used to free the hashmap members
@@ -57,17 +57,17 @@ void       gt_hashmap_add(GtHashmap *hm, void *key, void *value);
 void       gt_hashmap_remove(GtHashmap *hm, const void *key);
 /* Iterate over <hm> in order given by compare function <cmp>.
    For each member, <func> is called (see interface). */
-int        gt_hashmap_foreach_ordered(GtHashmap *hm, Mapentryvisitfunc func,
+int        gt_hashmap_foreach_ordered(GtHashmap *hm, GtHashmapVisitFunc func,
                                       void *data, GtCompare cmp, GtError*);
 /* Iterate over <hm> in arbitrary order given by compare function <cmp>.
    For each member, <func> is called (see interface). */
-int        gt_hashmap_foreach(GtHashmap *hm, Mapentryvisitfunc func, void *data,
-                              GtError*);
+int        gt_hashmap_foreach(GtHashmap *hm, GtHashmapVisitFunc func,
+                              void *data, GtError*);
 /* Iterate over <hm> in either alphabetical order (if GtHashType was specified
    as GT_HASH_STRING) or numerical order (if GtHashType was specified as
    GT_HASH_DIRECT). */
 int        gt_hashmap_foreach_in_key_order(GtHashmap *hm,
-                                           Mapentryvisitfunc func,
+                                           GtHashmapVisitFunc func,
                                            void *data, GtError*);
 /* Resets <hm> by unsetting values for all keys, calling the free function if
    necessary. */
