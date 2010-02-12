@@ -173,7 +173,7 @@ GtToolbox* gtt_tools(void)
 
 GtHashmap* gtt_unit_tests(void)
 {
-  GtHashmap *unit_tests = gt_hashmap_new(HASH_STRING, NULL, NULL);
+  GtHashmap *unit_tests = gt_hashmap_new(GT_HASH_STRING, NULL, NULL);
 
   /* add unit tests */
   gt_hashmap_add(unit_tests, "alignment class", gt_alignment_unit_test);

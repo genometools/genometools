@@ -75,10 +75,10 @@ void gt_fa_init(void)
   fa = gt_calloc(1, sizeof (FA));
   fa->file_mutex = gt_mutex_new();
   fa->mmap_mutex = gt_mutex_new();
-  fa->file_pointer = gt_hashmap_new(HASH_DIRECT, NULL,
-                                 (GtFree) free_FAFileInfo);
-  fa->memory_maps = gt_hashmap_new(HASH_DIRECT, NULL,
-                                (GtFree) free_FAMapInfo);
+  fa->file_pointer = gt_hashmap_new(GT_HASH_DIRECT, NULL,
+                                    (GtFree) free_FAFileInfo);
+  fa->memory_maps = gt_hashmap_new(GT_HASH_DIRECT, NULL,
+                                   (GtFree) free_FAMapInfo);
 }
 
 static void* fileopen_generic(FA *fa, const char *path, const char *mode,

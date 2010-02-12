@@ -375,9 +375,9 @@ GtNodeVisitor* gt_gff3_visitor_new(GtFile *outfp)
   gff3_visitor->fasta_directive_shown = false;
   gff3_visitor->id_counter = gt_string_distri_new();
   gff3_visitor->feature_node_to_id_array =
-    gt_hashmap_new(HASH_DIRECT, NULL, (GtFree) gt_array_delete);
+    gt_hashmap_new(GT_HASH_DIRECT, NULL, (GtFree) gt_array_delete);
   gff3_visitor->feature_node_to_unique_id_str =
-    gt_hashmap_new(HASH_DIRECT, NULL, (GtFree) gt_str_delete);
+    gt_hashmap_new(GT_HASH_DIRECT, NULL, (GtFree) gt_str_delete);
   gff3_visitor->fasta_width = 0;
   gff3_visitor->outfp = outfp;
   gff3_visitor->used_ids = gt_cstr_table_new();

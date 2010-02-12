@@ -31,9 +31,9 @@ struct GtFeatureInfo {
 GtFeatureInfo* gt_feature_info_new(void)
 {
   GtFeatureInfo *fi = gt_malloc(sizeof *fi);
-  fi->id_to_genome_node = gt_hashmap_new(HASH_STRING, gt_free_func,
+  fi->id_to_genome_node = gt_hashmap_new(GT_HASH_STRING, gt_free_func,
                                          (GtFree) gt_genome_node_delete);
-  fi->id_to_pseudo_parent = gt_hashmap_new(HASH_STRING, gt_free_func,
+  fi->id_to_pseudo_parent = gt_hashmap_new(GT_HASH_STRING, gt_free_func,
                                            (GtFree) gt_genome_node_delete);
   return fi;
 }

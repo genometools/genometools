@@ -336,7 +336,7 @@ void gt_genome_node_add_user_data(GtGenomeNode *gn, const char *key, void *data,
   ud->ptr = data;
   ud->free_func = free_func;
   if (!gn->userdata) {
-    gn->userdata = gt_hashmap_new(HASH_STRING, NULL, userdata_delete);
+    gn->userdata = gt_hashmap_new(GT_HASH_STRING, NULL, userdata_delete);
   } else /* free old data if overwriting */
     gt_genome_node_release_user_data(gn, key);
   gt_hashmap_add(gn->userdata, (char*) key, ud);

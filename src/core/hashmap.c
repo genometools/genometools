@@ -45,14 +45,14 @@ hm_elem_free(void *elem, void *table_data)
 }
 
 extern GtHashmap *
-gt_hashmap_new(HashType keyhashtype, GtFree keyfree, GtFree valuefree)
+gt_hashmap_new(GtHashType keyhashtype, GtFree keyfree, GtFree valuefree)
 {
   struct hm_freefuncs *ff = gt_malloc(sizeof (*ff));
   ff->keyfree = keyfree;
   ff->valuefree = valuefree;
   switch (keyhashtype)
   {
-  case HASH_DIRECT:
+  case GT_HASH_DIRECT:
     {
       HashElemInfo hm_directkey_eleminfo = {
         gt_ht_ptr_elem_hash, { .free_elem_with_data = hm_elem_free },
@@ -60,7 +60,7 @@ gt_hashmap_new(HashType keyhashtype, GtFree keyfree, GtFree valuefree)
       };
       return (GtHashmap*) gt_hashtable_new(hm_directkey_eleminfo);
     }
-  case HASH_STRING:
+  case GT_HASH_STRING:
     {
       HashElemInfo hm_strkey_eleminfo = {
         gt_ht_cstr_elem_hash, { .free_elem_with_data = hm_elem_free },
@@ -164,7 +164,7 @@ gt_hashmap_reset(GtHashmap *hm)
   }
 
 static int
-gt_hashmap_test(HashType hash_type)
+gt_hashmap_test(GtHashType hash_type)
 {
   char *s1 = "foo", *s2 = "bar";
   GtHashmap *hm;
@@ -202,7 +202,7 @@ gt_hashmap_test(HashType hash_type)
     /* hashes containing two elements (store key and value in
      * hashmap) where simple free is the correct way to get rid of them
      */
-    if (hash_type == HASH_STRING)
+    if (hash_type == GT_HASH_STRING)
     {
       hm = gt_hashmap_new(hash_type, gt_free_func, gt_free_func);
 
@@ -226,11 +226,11 @@ gt_hashmap_unit_test(GtError *err)
   gt_error_check(err);
 
   /* direct hash */
-  had_err = gt_hashmap_test(HASH_DIRECT);
+  had_err = gt_hashmap_test(GT_HASH_DIRECT);
 
   /* string hash */
   if (!had_err)
-    had_err = gt_hashmap_test(HASH_STRING);
+    had_err = gt_hashmap_test(GT_HASH_STRING);
 
   if (had_err)
   {

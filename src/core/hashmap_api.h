@@ -26,9 +26,9 @@
 typedef struct GtHashmap GtHashmap;
 
 typedef enum {
-  HASH_DIRECT,
-  HASH_STRING
-} HashType;
+  GT_HASH_DIRECT,
+  GT_HASH_STRING
+} GtHashType;
 
 /* Callback function when using the gt_hashmap_foreach*() functions.
    Must return a status code (0 = continue iteration, 1 = stop iteration,
@@ -41,11 +41,11 @@ typedef int (*Mapentryvisitfunc)(void *key, void *value, void *data, GtError*);
    <valuefree> are given, they will be used to free the hashmap members
    when the <GtHashmap> is deleted. <keyhashtype> defines how to hash the
    keys given when using the <GtHashmap>.
-   HASH_DIRECT uses the key pointer as a basis for the hash function.
-   Equal pointers will refer to the same value. If HASH_STRING is used, the
+   GT_HASH_DIRECT uses the key pointer as a basis for the hash function.
+   Equal pointers will refer to the same value. If GT_HASH_STRING is used, the
    keys will be  evaluated as strings and keys will be considered equal if the
    strings are identical, regardless of their address in memory */
-GtHashmap* gt_hashmap_new(HashType keyhashtype, GtFree keyfree,
+GtHashmap* gt_hashmap_new(GtHashType keyhashtype, GtFree keyfree,
                           GtFree valuefree);
 
 /* Returns the value stored in <hm> for <key> or NULL if no such key exists. */
@@ -63,9 +63,9 @@ int        gt_hashmap_foreach_ordered(GtHashmap *hm, Mapentryvisitfunc func,
    For each member, <func> is called (see interface). */
 int        gt_hashmap_foreach(GtHashmap *hm, Mapentryvisitfunc func, void *data,
                               GtError*);
-/* Iterate over <hm> in either alphabetical order (if HashType was specified as
-   HASH_STRING) or numerical order (if HashType was specified as HASH_DIRECT).
-*/
+/* Iterate over <hm> in either alphabetical order (if GtHashType was specified
+   as GT_HASH_STRING) or numerical order (if GtHashType was specified as
+   GT_HASH_DIRECT). */
 int        gt_hashmap_foreach_in_key_order(GtHashmap *hm,
                                            Mapentryvisitfunc func,
                                            void *data, GtError*);

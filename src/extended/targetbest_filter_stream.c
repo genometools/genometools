@@ -186,6 +186,6 @@ GtNodeStream* gt_targetbest_filter_stream_new(GtNodeStream *in_stream)
   tfs->in_stream = gt_node_stream_ref(in_stream);
   tfs->in_stream_processed = false;
   tfs->trees = gt_dlist_new(NULL);
-  tfs->target_to_elem = gt_hashmap_new(HASH_STRING, gt_free_func, NULL);
+  tfs->target_to_elem = gt_hashmap_new(GT_HASH_STRING, gt_free_func, NULL);
   return gs;
 }

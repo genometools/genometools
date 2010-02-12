@@ -47,7 +47,7 @@ GtToolbox* gt_toolbox_new(void)
 {
   GtToolbox *tb;
   tb = gt_malloc(sizeof (GtToolbox));
-  tb->tools = gt_hashmap_new(HASH_STRING, NULL, (GtFree) gt_toolinfo_delete);
+  tb->tools = gt_hashmap_new(GT_HASH_STRING, NULL, (GtFree) gt_toolinfo_delete);
   return tb;
 }
 

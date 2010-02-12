@@ -125,6 +125,6 @@ GtLineBreaker* gt_line_breaker_captions_new(GtLayout *layout,
   lbcap->width = width;
   if (!gt_style_get_num(style, "format", "margins", &lbcap->margins, NULL))
     lbcap->margins = MARGINS_DEFAULT;
-  lbcap->linepositions = gt_hashmap_new(HASH_DIRECT, NULL, gt_free_func);
+  lbcap->linepositions = gt_hashmap_new(GT_HASH_DIRECT, NULL, gt_free_func);
   return lb;
 }

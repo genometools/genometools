@@ -673,14 +673,11 @@ GtNodeStream* gt_ltr_fileout_stream_new(GtNodeStream *in_stream,
   ls->metadata_file = gt_file_open(GFM_UNCOMPRESSED, fn, "w+", e);
 
   /* create hashmaps to hold protein domain output files */
-  ls->pdomout_files = gt_hashmap_new(HASH_STRING,
-                                     gt_free_func,
+  ls->pdomout_files = gt_hashmap_new(GT_HASH_STRING, gt_free_func,
                                      (GtFree) gt_file_delete);
-  ls->pdomali_files = gt_hashmap_new(HASH_STRING,
-                                     gt_free_func,
+  ls->pdomali_files = gt_hashmap_new(GT_HASH_STRING, gt_free_func,
                                      (GtFree) gt_file_delete);
-  ls->pdomaa_files  = gt_hashmap_new(HASH_STRING,
-                                     gt_free_func,
+  ls->pdomaa_files  = gt_hashmap_new(GT_HASH_STRING, gt_free_func,
                                      (GtFree) gt_file_delete);
 
   /* log run conditions in file */

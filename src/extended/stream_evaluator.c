@@ -236,8 +236,8 @@ GtStreamEvaluator* gt_stream_evaluator_new(GtNodeStream *reality,
   evaluator->nuceval = nuceval;
   evaluator->evalLTR = evalLTR;
   evaluator->LTRdelta = LTRdelta;
-  evaluator->slots = gt_hashmap_new(HASH_STRING, gt_free_func,
-                                 (GtFree) slot_delete);
+  evaluator->slots = gt_hashmap_new(GT_HASH_STRING, gt_free_func,
+                                    (GtFree) slot_delete);
   evaluator->gene_evaluator = gt_evaluator_new();
   evaluator->mRNA_evaluator = gt_evaluator_new();
   evaluator->LTR_evaluator = gt_evaluator_new();

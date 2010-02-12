@@ -97,7 +97,7 @@ void gt_ma_init(bool bookkeeping)
   gt_assert(!ma);
   ma = xcalloc(1, sizeof (MA), 0, __FILE__, __LINE__);
   gt_assert(!ma->bookkeeping);
-  ma->allocated_pointer = gt_hashmap_new(HASH_DIRECT, NULL,
+  ma->allocated_pointer = gt_hashmap_new(GT_HASH_DIRECT, NULL,
                                          (GtFree) ma_info_free);
   /* MA is ready to use */
   ma->bookkeeping = bookkeeping;

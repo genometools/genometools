@@ -111,11 +111,11 @@ GtGFF3Parser* gt_gff3_parser_new(GtTypeChecker *type_checker)
   GtGFF3Parser *parser;
   parser = gt_malloc(sizeof *parser);
   parser->feature_info = gt_feature_info_new();
-  parser->seqid_to_ssr_mapping = gt_hashmap_new(
-    HASH_STRING, NULL, (GtFree) simple_sequence_region_delete);
-  parser->source_to_str_mapping = gt_hashmap_new(HASH_STRING, NULL,
-                                              (GtFree) gt_str_delete);
-  parser->undefined_sequence_regions = gt_hashmap_new(HASH_STRING, NULL,
+  parser->seqid_to_ssr_mapping = gt_hashmap_new(GT_HASH_STRING, NULL,
+                                        (GtFree) simple_sequence_region_delete);
+  parser->source_to_str_mapping = gt_hashmap_new(GT_HASH_STRING, NULL,
+                                                 (GtFree) gt_str_delete);
+  parser->undefined_sequence_regions = gt_hashmap_new(GT_HASH_STRING, NULL,
                                      (GtFree) automatic_sequence_region_delete);
   parser->incomplete_node = false;
   parser->checkids = false;

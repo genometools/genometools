@@ -88,15 +88,15 @@ static int GTF_feature_type_get(GTF_feature_type *type, char *feature_string)
 GtGTFParser* gt_gtf_parser_new(GtTypeChecker *type_checker)
 {
   GtGTFParser *parser = gt_malloc(sizeof (GtGTFParser));
-  parser->gene_id_hash = gt_hashmap_new(HASH_STRING, gt_free_func,
+  parser->gene_id_hash = gt_hashmap_new(GT_HASH_STRING, gt_free_func,
                                         (GtFree) gt_hashmap_delete);
-  parser->seqid_to_str_mapping = gt_hashmap_new(HASH_STRING, NULL,
+  parser->seqid_to_str_mapping = gt_hashmap_new(GT_HASH_STRING, NULL,
                                                 (GtFree) gt_str_delete);
-  parser->source_to_str_mapping = gt_hashmap_new(HASH_STRING, NULL,
+  parser->source_to_str_mapping = gt_hashmap_new(GT_HASH_STRING, NULL,
                                                  (GtFree) gt_str_delete);
-  parser->gene_id_to_name_mapping = gt_hashmap_new(HASH_STRING, gt_free_func,
+  parser->gene_id_to_name_mapping = gt_hashmap_new(GT_HASH_STRING, gt_free_func,
                                                    gt_free_func);
-  parser->transcript_id_to_name_mapping = gt_hashmap_new(HASH_STRING,
+  parser->transcript_id_to_name_mapping = gt_hashmap_new(GT_HASH_STRING,
                                                          gt_free_func,
                                                          gt_free_func);
   parser->region_node_builder = gt_region_node_builder_new();
@@ -468,8 +468,8 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
       /* process the mandatory attributes */
       if (!(transcript_id_hash = gt_hashmap_get(parser->gene_id_hash,
                                              gene_id))) {
-        transcript_id_hash = gt_hashmap_new(HASH_STRING, gt_free_func,
-                                         (GtFree) gt_array_delete);
+        transcript_id_hash = gt_hashmap_new(GT_HASH_STRING, gt_free_func,
+                                            (GtFree) gt_array_delete);
         gt_hashmap_add(parser->gene_id_hash, gt_cstr_dup(gene_id),
                     transcript_id_hash);
       }

@@ -91,7 +91,7 @@ GtLineBreaker* gt_line_breaker_bases_new()
   GtLineBreaker *lb;
   lb = gt_line_breaker_create(gt_line_breaker_bases_class());
   lbb = gt_line_breaker_bases_cast(lb);
-  lbb->itrees = gt_hashmap_new(HASH_DIRECT, NULL,
+  lbb->itrees = gt_hashmap_new(GT_HASH_DIRECT, NULL,
                                (GtFree) gt_interval_tree_delete);
   return lb;
 }

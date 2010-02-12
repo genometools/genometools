@@ -94,8 +94,7 @@ static int ltr_visitor_feature_node(GtNodeVisitor *gv, GtFeatureNode *gf,
   {
     if (!lv->element->pdoms)
     {
-      lv->element->pdoms = gt_hashmap_new(HASH_STRING,
-                                          gt_free_func,
+      lv->element->pdoms = gt_hashmap_new(GT_HASH_STRING, gt_free_func,
                                           (GtFree) gt_array_delete);
     }
     pfamname = gt_feature_node_get_attribute(gf, "name");

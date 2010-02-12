@@ -304,9 +304,9 @@ GtFeatureIndex* gt_feature_index_memory_new(void)
   fi = gt_feature_index_create(gt_feature_index_memory_class());
   fim = gt_feature_index_memory_cast(fi);
   fim->nof_nodes = 0;
-  fim->regions = gt_hashmap_new(HASH_STRING, NULL,
+  fim->regions = gt_hashmap_new(GT_HASH_STRING, NULL,
                                 (GtFree) region_info_delete);
-  fim->nodes_in_index = gt_hashmap_new(HASH_DIRECT, NULL, NULL);
+  fim->nodes_in_index = gt_hashmap_new(GT_HASH_DIRECT, NULL, NULL);
   return fi;
 }
 

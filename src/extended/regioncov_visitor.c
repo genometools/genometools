@@ -102,10 +102,8 @@ GtNodeVisitor* gt_regioncov_visitor_new(unsigned long max_feature_dist)
   GtNodeVisitor *gv = gt_node_visitor_create(gt_regioncov_visitor_class());
   GtRegionCovVisitor *regioncov_visitor = gt_regioncov_visitor_cast(gv);
   regioncov_visitor->max_feature_dist = max_feature_dist;
-  regioncov_visitor->region2rangelist = gt_hashmap_new(HASH_STRING,
-                                                    gt_free_func,
-                                                    (GtFree)
-                                                    gt_array_delete);
+  regioncov_visitor->region2rangelist =
+    gt_hashmap_new(GT_HASH_STRING, gt_free_func, (GtFree) gt_array_delete);
   return gv;
 }
 

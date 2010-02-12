@@ -132,7 +132,7 @@ GtNodeVisitor* gt_merge_feature_visitor_new(void)
   GtNodeVisitor *nv = gt_node_visitor_create(gt_merge_feature_visitor_class());
   GtMergeFeatureVisitor *merge_feature_visitor =
     gt_merge_feature_visitor_cast(nv);
-  merge_feature_visitor->hm = gt_hashmap_new(HASH_STRING, NULL, NULL);
+  merge_feature_visitor->hm = gt_hashmap_new(GT_HASH_STRING, NULL, NULL);
   merge_feature_visitor->nodes_to_remove = gt_array_new(sizeof (GtGenomeNode*));
   return nv;
 }

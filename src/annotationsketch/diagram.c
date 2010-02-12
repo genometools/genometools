@@ -111,8 +111,7 @@ static inline NodeInfoElement* nodeinfo_get(GtDiagram *d,
   gt_assert(d && node);
   if (!(ni = gt_hashmap_get(d->nodeinfo, node))) {
     ni = gt_calloc(1, sizeof (NodeInfoElement));
-    ni->type_index  = gt_hashmap_new(HASH_STRING, NULL,
-                                     gt_free_func);
+    ni->type_index  = gt_hashmap_new(GT_HASH_STRING, NULL, gt_free_func);
     ni->types       = gt_str_array_new();
     gt_hashmap_add(d->nodeinfo, node, ni);
   }
@@ -145,13 +144,12 @@ static inline void nodeinfo_add_block(NodeInfoElement *ni,
   bt = blocktuple_new(gft, rep, block);
   if (!(ni->type_index))
   {
-    ni->type_index  = gt_hashmap_new(HASH_STRING, NULL,
-                                     gt_free_func);
+    ni->type_index = gt_hashmap_new(GT_HASH_STRING, NULL, gt_free_func);
   }
   if (!(type_struc = gt_hashmap_get(ni->type_index, gft)))
   {
     type_struc = gt_calloc(1, sizeof (PerTypeInfo));
-    type_struc->rep_index = gt_hashmap_new(HASH_DIRECT, NULL, NULL);
+    type_struc->rep_index = gt_hashmap_new(GT_HASH_DIRECT, NULL, NULL);
     type_struc->blocktuples = gt_array_new(sizeof (GtBlockTuple*));
     gt_hashmap_add(ni->type_index, (char*) gft, type_struc);
     gt_str_array_add_cstr(ni->types, gft);
@@ -686,8 +684,8 @@ int gt_diagram_build(GtDiagram *diagram)
                                            gt_array_get(diagram->features,i);
       traverse_genome_nodes(current_root, &nti);
     }
-    diagram->blocks = gt_hashmap_new(HASH_STRING, gt_free_func,
-                                    (GtFree) blocklist_delete);
+    diagram->blocks = gt_hashmap_new(GT_HASH_STRING, gt_free_func,
+                                     (GtFree) blocklist_delete);
     /* collect blocks from nodeinfo structures */
     had_err = gt_hashmap_foreach_ordered(diagram->nodeinfo,
                                          collect_blocks,
@@ -707,7 +705,7 @@ static GtDiagram* gt_diagram_new_generic(GtArray *features,
 {
   GtDiagram *diagram;
   diagram = gt_calloc(1, sizeof (GtDiagram));
-  diagram->nodeinfo = gt_hashmap_new(HASH_DIRECT, NULL, NULL);
+  diagram->nodeinfo = gt_hashmap_new(GT_HASH_DIRECT, NULL, NULL);
   diagram->style = style;
   diagram->lock = gt_rwlock_new();
   diagram->range = *range;
@@ -718,9 +716,9 @@ static GtDiagram* gt_diagram_new_generic(GtArray *features,
   diagram->select_func = default_track_selector;
   diagram->custom_tracks = gt_array_new(sizeof (GtCustomTrack*));
   /* init caches */
-  diagram->collapsingtypes = gt_hashmap_new(HASH_STRING, NULL, gt_free_func);
-  diagram->groupedtypes = gt_hashmap_new(HASH_STRING, NULL, gt_free_func);
-  diagram->caption_display_status = gt_hashmap_new(HASH_DIRECT, NULL,
+  diagram->collapsingtypes = gt_hashmap_new(GT_HASH_STRING, NULL, gt_free_func);
+  diagram->groupedtypes = gt_hashmap_new(GT_HASH_STRING, NULL, gt_free_func);
+  diagram->caption_display_status = gt_hashmap_new(GT_HASH_DIRECT, NULL,
                                                    gt_free_func);
   return diagram;
 }

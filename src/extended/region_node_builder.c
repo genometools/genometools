@@ -29,7 +29,7 @@ struct GtRegionNodeBuilder {
 GtRegionNodeBuilder* gt_region_node_builder_new(void)
 {
   GtRegionNodeBuilder *rnb = gt_malloc(sizeof *rnb);
-  rnb->sequence_region_to_range = gt_hashmap_new(HASH_STRING, gt_free_func,
+  rnb->sequence_region_to_range = gt_hashmap_new(GT_HASH_STRING, gt_free_func,
                                                  gt_free_func);
   return rnb;
 }

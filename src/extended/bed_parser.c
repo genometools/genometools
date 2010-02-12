@@ -54,7 +54,7 @@ GtBEDParser* gt_bed_parser_new(void)
   GtBEDParser *bed_parser = gt_calloc(1, sizeof *bed_parser);
   bed_parser->region_node_builder = gt_region_node_builder_new();
   bed_parser->feature_nodes = gt_queue_new();
-  bed_parser->seqid_to_str_mapping = gt_hashmap_new(HASH_STRING, NULL,
+  bed_parser->seqid_to_str_mapping = gt_hashmap_new(GT_HASH_STRING, NULL,
                                                     (GtFree) gt_str_delete);
   bed_parser->word = gt_str_new();
   bed_parser->another_word = gt_str_new();
