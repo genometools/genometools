@@ -80,7 +80,7 @@ static int show_gth_help_trailer(GT_UNUSED const char *progname,
   return 0;
 }
 
-GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
+GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
                            int *parsed_args, int argc, const char **argv,
                            bool gthconsensus_parsing,
                            GtStrArray *consensusfiles, GthStat *stat,
@@ -206,7 +206,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   GtOPrval oprval;
 
   gt_error_check(err);
-  gt_assert(callinfo && input);
+  gt_assert(call_info && input);
 
   /* init */
   if (gthconsensus_parsing) {
@@ -290,7 +290,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
                                      "substitution scoring matrix from file in "
                                      "the path given by the environment "
                                       "variable GTHDATADIR",
-                                      callinfo->scorematrixfile,
+                                      call_info->scorematrixfile,
                                       DEFAULT_SCOREMATRIX);
   if (gthconsensus_parsing)
     gt_option_is_extended_option(optscorematrix);
@@ -301,7 +301,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
                                            "translation table used for codon "
                                            "translation in matching, DP, and "
                                            "output",
-                                           &callinfo->translationtable,
+                                           &call_info->translationtable,
                                            DEFAULT_TRANSLATIONTABLE);
   gt_option_parser_add_option(op, opttranslationtable);
 
@@ -354,35 +354,35 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   /* -verboseseqs */
   optverboseseqs = gt_option_new_bool("verboseseqs", "show additonal sequence "
                                    "information\n(for debugging purposes)",
-                                   &callinfo->out->verboseseqs, false);
+                                   &call_info->out->verboseseqs, false);
   gt_option_is_development_option(optverboseseqs);
   gt_option_parser_add_option(op, optverboseseqs);
 
   /* -comments */
   optcomments = gt_option_new_bool("comments", "show (additional) comments",
-                                &callinfo->out->comments, false);
+                                &call_info->out->comments, false);
   gt_option_is_extended_option(optcomments);
   gt_option_is_development_option(optcomments);
   gt_option_parser_add_option(op, optcomments);
 
   /* -xmlout */
   optxmlout = gt_option_new_bool("xmlout", "show output in XML format",
-                              &callinfo->out->xmlout, false);
+                              &call_info->out->xmlout, false);
   gt_option_parser_add_option(op, optxmlout);
 
   /* -gff3out */
   optgff3out = gt_option_new_bool("gff3out" , "show output in GFF3 format",
-                               &callinfo->out->gff3out, false);
+                               &call_info->out->gff3out, false);
   gt_option_is_development_option(optgff3out);
   gt_option_parser_add_option(op, optgff3out);
 
   /* output file options */
-  gt_outputfile_register_options(op, &callinfo->out->outfp, ofi);
+  gt_outputfile_register_options(op, &call_info->out->outfp, ofi);
 
   /* -skipalignmentout */
   optskipalignmentout = gt_option_new_bool("skipalignmentout", "skip output of "
                                         "spliced alignments",
-                                        &callinfo->out->skipalignmentout,
+                                        &call_info->out->skipalignmentout,
                                         false);
   gt_option_is_extended_option(optskipalignmentout);
   gt_option_parser_add_option(op, optskipalignmentout);
@@ -402,7 +402,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
                                             "the maximum length of a fully "
                                             "shown intron\nIf set to 0, all "
                                             "introns are shown completely",
-                                            &callinfo->out->showintronmaxlen,
+                                            &call_info->out->showintronmaxlen,
                                             DEFAULT_SHOWINTRONMAXLEN);
   gt_option_is_extended_option(optshowintronmaxlen);
   gt_option_parser_add_option(op, optshowintronmaxlen);
@@ -410,29 +410,29 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   /* -minorflen */
   optminorflength = gt_option_new_ulong_min("minorflen", "set the minimum "
                                             "length of an ORF to be shown",
-                                            &callinfo->out->minORFlength,
+                                            &call_info->out->minORFlength,
                                             DEFAULT_MINORFLENGTH, 1);
   gt_option_is_extended_option(optminorflength);
   gt_option_parser_add_option(op, optminorflength);
 
   /* -showseqnums */
   optshowseqnums = gt_option_new_bool("showseqnums", "show sequence numbers in "
-                                   "output", &callinfo->out->showseqnums,
+                                   "output", &call_info->out->showseqnums,
                                    DEFAULT_SHOWSEQNUMS);
   gt_option_is_extended_option(optshowseqnums);
   gt_option_parser_add_option(op, optshowseqnums);
 
   /* -gs2out */
   optgs2out = gt_option_new_bool("gs2out", "output in old GeneSeqer2 format",
-                              &callinfo->out->gs2out, DEFAULT_GS2OUT);
+                              &call_info->out->gs2out, DEFAULT_GS2OUT);
   gt_option_parser_add_option(op, optgs2out);
 
   /* -maskpolyatails */
-  callinfo->simfilterparam.maskpolyAtails = false;
+  call_info->simfilterparam.maskpolyAtails = false;
   if (!gthconsensus_parsing) {
     optmaskpolyatails = gt_option_new_bool("maskpolyatails", "mask poly(A) "
                                            "tails in cDNA/EST files",
-                                           &callinfo->simfilterparam
+                                           &call_info->simfilterparam
                                            .maskpolyAtails,
                                            DEFAULT_MASKPOLYATAILS);
     gt_option_is_extended_option(optmaskpolyatails);
@@ -453,7 +453,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
                                      "automatically\nexcept for the .dna.* "
                                      "files used for the DP.\nexistence is not "
                                      "tested before an index is actually used!",
-                                     &callinfo->simfilterparam.noautoindex,
+                                     &call_info->simfilterparam.noautoindex,
                                      DEFAULT_NOAUTOINDEX);
     gt_option_is_extended_option(optnoautoindex);
     gt_option_parser_add_option(op, optnoautoindex);
@@ -463,7 +463,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   optcreateindicesonly = gt_option_new_bool("createindicesonly", "stop program "
                                          "flow after the indices have been "
                                          "created",
-                                         &callinfo->simfilterparam
+                                         &call_info->simfilterparam
                                          .createindicesonly,
                                          DEFAULT_CREATEINDICESONLY);
   gt_option_is_extended_option(optcreateindicesonly);
@@ -472,7 +472,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   /* -skipindexcheck */
   optskipindexcheck = gt_option_new_bool("skipindexcheck", "skip index check "
                                          "(in preprocessing phase)",
-                                         &callinfo->simfilterparam
+                                         &call_info->simfilterparam
                                          .skipindexcheck,
                                          DEFAULT_SKIPINDEXCHECK);
   gt_option_is_extended_option(optskipindexcheck);
@@ -481,28 +481,30 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   /* -minmatchlen */
   if (!gthconsensus_parsing) {
     optminmatchlen = gt_option_new_ulong_min(MINMATCHLEN_OPT_CSTR, "specify "
-                                          "minimum match length (cDNA "
-                                          "matching)", &callinfo->simfilterparam
-                                          .minmatchlength,
-                                          DEFAULT_MINMATCHLENGTH, 1);
+                                             "minimum match length (cDNA "
+                                             "matching)",
+                                             &call_info->simfilterparam
+                                             .minmatchlength,
+                                             DEFAULT_MINMATCHLENGTH, 1);
     gt_option_parser_add_option(op, optminmatchlen);
   }
 
   /* -seedlength */
   if (!gthconsensus_parsing) {
     optseedlength = gt_option_new_ulong_min(SEEDLENGTH_OPT_CSTR, "specify the "
-                                         "seed length (cDNA matching)",
-                                         &callinfo->simfilterparam.seedlength,
-                                         DEFAULT_SEEDLENGTH, 1);
+                                            "seed length (cDNA matching)",
+                                            &call_info->simfilterparam
+                                            .seedlength, DEFAULT_SEEDLENGTH, 1);
     gt_option_parser_add_option(op, optseedlength);
   }
 
   /* -exdrop */
   if (!gthconsensus_parsing) {
     optexdrop = gt_option_new_ulong_min("exdrop", "specify the Xdrop value for "
-                                     "edit distance extension (cDNA matching)",
-                                     &callinfo->simfilterparam.exdrop,
-                                     DEFAULT_EXDROP, 1);
+                                        "edit distance extension (cDNA "
+                                        "matching)",
+                                        &call_info->simfilterparam.exdrop,
+                                        DEFAULT_EXDROP, 1);
     gt_option_parser_add_option(op, optexdrop);
   }
 
@@ -511,7 +513,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
     optprminmatchlen = gt_option_new_ulong_min(PRMINMATCHLEN_OPT_CSTR,
                                                "specify minimum match length "
                                                "(protein matches)",
-                                               &callinfo->simfilterparam
+                                               &call_info->simfilterparam
                                                .prminmatchlen,
                                                DEFAULT_PRMINMATCHLEN, 1);
     gt_option_parser_add_option(op, optprminmatchlen);
@@ -521,7 +523,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   if (!gthconsensus_parsing) {
     optprseedlength = gt_option_new_ulong_min(PRSEEDLENGTH_OPT_CSTR, "specify "
                                            "seed length (protein matching)",
-                                           &callinfo->simfilterparam
+                                           &call_info->simfilterparam
                                            .prseedlength, DEFAULT_PRSEEDLENGTH,
                                            1);
     gt_option_parser_add_option(op, optprseedlength);
@@ -531,7 +533,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   if (!gthconsensus_parsing) {
     optprhdist = gt_option_new_ulong_min("prhdist", "specify Hamming distance "
                                       "(protein matching)",
-                                      &callinfo->simfilterparam.prhdist,
+                                      &call_info->simfilterparam.prhdist,
                                       DEFAULT_PRHDIST, 1);
     gt_option_parser_add_option(op, optprhdist);
   }
@@ -540,7 +542,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   if (!gthconsensus_parsing) {
     optonline = gt_option_new_bool("online", "run the similarity filter online "
                                 "without using the complete index (increases "
-                                "runtime)", &callinfo->simfilterparam.online,
+                                "runtime)", &call_info->simfilterparam.online,
                                 DEFAULT_ONLINE);
     gt_option_is_extended_option(optonline);
     gt_option_parser_add_option(op, optonline);
@@ -550,7 +552,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   if (!gthconsensus_parsing) {
     optinverse = gt_option_new_bool("inverse", "invert query and index in "
                                     "vmatch call",
-                                    &callinfo->simfilterparam.inverse,
+                                    &call_info->simfilterparam.inverse,
                                     DEFAULT_INVERSE);
     gt_option_is_extended_option(optinverse);
     gt_option_parser_add_option(op, optinverse);
@@ -560,7 +562,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   if (!gthconsensus_parsing) {
     optexact = gt_option_new_bool("exact", "use exact matches in the "
                                   "similarity filter",
-                                  &callinfo->simfilterparam.exact,
+                                  &call_info->simfilterparam.exact,
                                   DEFAULT_EXACT);
     gt_option_is_extended_option(optexact);
     gt_option_parser_add_option(op, optexact);
@@ -569,7 +571,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   /* -edist */
   if (!gthconsensus_parsing) {
     optedist = gt_option_new_bool("edist", "use edist instead of exdrop in "
-                               "simfilter", &callinfo->simfilterparam.edist,
+                               "simfilter", &call_info->simfilterparam.edist,
                                DEFAULT_EDIST);
     gt_option_is_extended_option(optedist);
     gt_option_is_development_option(optedist);
@@ -583,7 +585,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
                                              "genomic file. I.e., only that "
                                              "number of matches will be saved "
                                              "for every reference sequence",
-                                             &callinfo->simfilterparam
+                                             &call_info->simfilterparam
                                              .maxnumofmatches,
                                              DEFAULT_MAXNUMOFMATCHES);
     gt_option_is_extended_option(optmaxnumofmatches);
@@ -599,7 +601,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
                                                    "multiplied before the "
                                                    "global chaining is "
                                                    "performed",
-                                                   &callinfo->fragweightfactor,
+                                                   &call_info->fragweightfactor,
                                                    DEFAULT_FRAGWEIGHTFACTOR,
                                                    0.1);
     gt_option_is_development_option(optfragweightfactor);
@@ -617,7 +619,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
                                           "exons) at the sequence ends, it is "
                                           "very important to set this "
                                           "parameter appropriately!",
-                                          &callinfo->gcmaxgapwidth,
+                                          &call_info->gcmaxgapwidth,
                                           DEFAULT_GCMAXGAPWIDTH);
     gt_option_parser_add_option(op, optgcmaxgapwidth);
   }
@@ -628,7 +630,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
                                "matches. I.e., for any given start position in "
                                "the reference sequence, maximally ``rare'' "
                                "number of matches are allowed.",
-                               &callinfo->simfilterparam.rare, DEFAULT_RARE);
+                               &call_info->simfilterparam.rare, DEFAULT_RARE);
     gt_option_is_development_option(optrare);
     gt_option_parser_add_option(op, optrare);
   }
@@ -639,7 +641,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
                                               "minimum coverage of global "
                                               "chains regarding to the "
                                               "reference sequence",
-                                              &callinfo->gcmincoverage,
+                                              &call_info->gcmincoverage,
                                               DEFAULT_GCMINCOVERAGE, 100);
     gt_option_parser_add_option(op, optgcmincoverage);
   }
@@ -648,7 +650,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   if (!gthconsensus_parsing) {
     optparalogs = gt_option_new_bool("paralogs", "compute paralogous genes "
                                   "(different chaining procedure)",
-                                  &callinfo->simfilterparam.paralogs,
+                                  &call_info->simfilterparam.paralogs,
                                   DEFAULT_PARALOGS);
     gt_option_parser_add_option(op, optparalogs);
   }
@@ -658,7 +660,8 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
     optenrichchains = gt_option_new_bool("enrichchains", "enrich genomic "
                                          "sequence part of global chains with "
                                          "additional matches",
-                                         &callinfo->simfilterparam.enrichchains,
+                                         &call_info->simfilterparam
+                                         .enrichchains,
                                          DEFAULT_ENRICHCHAINS);
     gt_option_is_development_option(optenrichchains);
     gt_option_parser_add_option(op, optenrichchains);
@@ -669,7 +672,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
     optstopafterchaining = gt_option_new_bool("stopafterchaining", "stop gth "
                                            "after chaining phase and show "
                                            "stored global chains",
-                                           &callinfo->simfilterparam
+                                           &call_info->simfilterparam
                                            .stopafterchaining,
                                            DEFAULT_STOPAFTERCHAINING);
     gt_option_is_development_option(optstopafterchaining);
@@ -679,9 +682,10 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   /* -introncutout */
   if (!gthconsensus_parsing) {
     optintroncutout = gt_option_new_bool("introncutout", "enable the intron "
-                                      "cutout technique",
-                                      &callinfo->simfilterparam.introncutoutinfo
-                                      .introncutout, DEFAULT_INTRONCUTOUT);
+                                         "cutout technique",
+                                         &call_info->simfilterparam
+                                         .introncutoutinfo.introncutout,
+                                         DEFAULT_INTRONCUTOUT);
     gt_option_parser_add_option(op, optintroncutout);
   }
 
@@ -691,7 +695,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
                                           "automatic intron cutout matrix size "
                                           "in megabytes and enable the "
                                           "automatic intron cutout technique",
-                                           &callinfo->simfilterparam
+                                           &call_info->simfilterparam
                                            .introncutoutinfo
                                            .autoicmaxmatrixsize,
                                            DEFAULT_AUTOICMAXMATRIXSIZE);
@@ -702,7 +706,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   if (!gthconsensus_parsing) {
     opticinitialdelta = gt_option_new_uint(ICINITIALDELTA_OPT_CSTR, "set the "
                                         "initial delta used for intron cutouts",
-                                        &callinfo->simfilterparam
+                                        &call_info->simfilterparam
                                         .introncutoutinfo.icinitialdelta,
                                         DEFAULT_ICINITIALDELTA);
     gt_option_is_extended_option(opticinitialdelta);
@@ -712,9 +716,10 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   /* -iciterations */
   if (!gthconsensus_parsing) {
     opticiterations = gt_option_new_uint("iciterations", "set the number of "
-                                      "intron cutout iterations",
-                                      &callinfo->simfilterparam.introncutoutinfo
-                                      .iciterations, DEFAULT_ICITERATIONS);
+                                         "intron cutout iterations",
+                                         &call_info->simfilterparam
+                                         .introncutoutinfo.iciterations,
+                                         DEFAULT_ICITERATIONS);
     gt_option_is_extended_option(opticiterations);
     gt_option_parser_add_option(op, opticiterations);
   }
@@ -723,7 +728,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   if (!gthconsensus_parsing) {
     opticdeltaincrease = gt_option_new_uint("icdeltaincrease", "set the delta "
                                          "increase during every iteration",
-                                         &callinfo->simfilterparam
+                                         &call_info->simfilterparam
                                          .introncutoutinfo.icdeltaincrease,
                                          DEFAULT_ICDELTAINCREASE);
     gt_option_is_extended_option(opticdeltaincrease);
@@ -735,7 +740,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
     opticminremlength = gt_option_new_uint("icminremintronlen", "set the "
                                            "minimum remaining intron length "
                                            "for an intron to be cut out",
-                                           &callinfo->simfilterparam
+                                           &call_info->simfilterparam
                                            .introncutoutinfo
                                            .icminremintronlength,
                                            DEFAULT_ICMINREMLENGTH);
@@ -779,7 +784,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   if (!gthconsensus_parsing) {
     optprobies = gt_option_new_probability("probies", "set the initial exon "
                                            "state probability",
-                                           &callinfo->dp_options_est->probies,
+                                           &call_info->dp_options_est->probies,
                                            GTH_DEFAULT_PROBIES);
     gt_option_is_extended_option(optprobies);
     gt_option_parser_add_option(op, optprobies);
@@ -789,7 +794,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   if (!gthconsensus_parsing) {
     optprobdelgen = gt_option_new_probability("probdelgen", "set the genomic "
                                               "sequence deletion probability",
-                                              &callinfo->dp_options_est
+                                              &call_info->dp_options_est
                                               ->probdelgen,
                                               GTH_DEFAULT_PROBDELGEN);
     gt_option_is_extended_option(optprobdelgen);
@@ -800,7 +805,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   if (!gthconsensus_parsing) {
     optidentityweight = gt_option_new_double("identityweight", "set the pairs "
                                              "of identical characters weight",
-                                             &callinfo->dp_options_est
+                                             &call_info->dp_options_est
                                              ->identityweight,
                                              GTH_DEFAULT_IDENTITYWEIGHT);
     gt_option_is_extended_option(optidentityweight);
@@ -811,7 +816,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   if (!gthconsensus_parsing) {
     optmismatchweight = gt_option_new_double("mismatchweight", "set the weight "
                                              "for mismatching characters",
-                                             &callinfo->dp_options_est
+                                             &call_info->dp_options_est
                                              ->mismatchweight,
                                              GTH_DEFAULT_MISMATCHWEIGHT);
     gt_option_is_extended_option(optmismatchweight);
@@ -823,7 +828,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
     optundetcharweight = gt_option_new_double("undetcharweight", "set the "
                                               "weight for undetermined "
                                               "characters",
-                                              &callinfo->dp_options_est
+                                              &call_info->dp_options_est
                                               ->undetcharweight,
                                               GTH_DEFAULT_UNDETCHARWEIGHT);
     gt_option_is_extended_option(optundetcharweight);
@@ -834,7 +839,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   if (!gthconsensus_parsing) {
     optdeletionweight = gt_option_new_double("deletionweight", "set the weight "
                                              "for deletions",
-                                             &callinfo->dp_options_est
+                                             &call_info->dp_options_est
                                              ->deletionweight,
                                              GTH_DEFAULT_DELETIONWEIGHT);
     gt_option_is_extended_option(optdeletionweight);
@@ -844,7 +849,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   /* -freeintrontrans */
   optfreeintrontrans = gt_option_new_bool("freeintrontrans", "free transitions "
                                           "between intron states",
-                                          &callinfo->dp_options_core
+                                          &call_info->dp_options_core
                                           ->freeintrontrans,
                                           GTH_DEFAULT_FREEINTRONTRANS);
   gt_option_is_development_option(optfreeintrontrans);
@@ -854,8 +859,9 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   if (!gthconsensus_parsing) {
     optdpminexonlength = gt_option_new_uint_min("dpminexonlen", "set the "
                                                 "minimum exon length for the "
-                                                "DP", &callinfo->dp_options_core
-                                                      ->dpminexonlength,
+                                                "DP",
+                                                &call_info->dp_options_core
+                                                ->dpminexonlength,
                                                 GTH_DEFAULT_DPMINEXONLENGTH, 1);
     gt_option_is_extended_option(optdpminexonlength);
     gt_option_parser_add_option(op, optdpminexonlength);
@@ -866,7 +872,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
     optdpminintronlength = gt_option_new_uint_min(DPMININTRONLENGTH_OPT_CSTR,
                                                "set the minimum intron length "
                                                "for the DP",
-                                               &callinfo->dp_options_core
+                                               &call_info->dp_options_core
                                                ->dpminintronlength,
                                                GTH_DEFAULT_DPMININTRONLENGTH,
                                                1);
@@ -878,7 +884,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   if (!gthconsensus_parsing) {
     optshortexonpenalty = gt_option_new_double_min("shortexonpenal", "set the "
                                                 "short exon penalty",
-                                                &callinfo->dp_options_core
+                                                &call_info->dp_options_core
                                                 ->shortexonpenalty,
                                                 GTH_DEFAULT_SHORTEXONPENALTY,
                                                 0.0);
@@ -891,7 +897,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
     optshortintronpenalty =
       gt_option_new_double_min("shortintronpenal",
                                "set the short intron penalty",
-                               &callinfo->dp_options_core->shortintronpenalty,
+                               &call_info->dp_options_core->shortintronpenalty,
                                GTH_DEFAULT_SHORTINTRONPENALTY, 0.0);
     gt_option_is_extended_option(optshortintronpenalty);
     gt_option_parser_add_option(op, optshortintronpenalty);
@@ -901,7 +907,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   if (!gthconsensus_parsing) {
     optwzerotransition = gt_option_new_uint("wzerotransition", "set the zero "
                                          "transition weights window size",
-                                         &callinfo->dp_options_est
+                                         &call_info->dp_options_est
                                          ->wzerotransition,
                                          GTH_DEFAULT_WZEROTRANSITION);
     gt_option_is_extended_option(optwzerotransition);
@@ -912,7 +918,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   if (!gthconsensus_parsing) {
     optwdecreasedoutput = gt_option_new_uint("wdecreasedoutput", "set the "
                                           "decreased output weights window "
-                                          "size", &callinfo->dp_options_est
+                                          "size", &call_info->dp_options_est
                                           ->wdecreasedoutput,
                                           GTH_DEFAULT_WDECREASEDOUTPUT);
     gt_option_is_extended_option(optwdecreasedoutput);
@@ -924,7 +930,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
     optdetectsmallexons = gt_option_new_bool("detectsmallexons", "detect small "
                                             "exons with additional dynamic "
                                             "programming calls",
-                                            &callinfo->dp_options_est
+                                            &call_info->dp_options_est
                                             ->detectsmallexons,
                                             GTH_DEFAULT_DETECTSMALLEXONS);
     gt_option_is_development_option(optdetectsmallexons);
@@ -937,7 +943,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
                                            "intron cutout in intron check\nin "
                                            "such cases include exon consisting "
                                            "of deletions instead",
-                                           &callinfo->dp_options_core
+                                           &call_info->dp_options_core
                                            ->noicinintroncheck,
                                            GTH_DEFAULT_NOICININTRONCHECK);
     gt_option_is_extended_option(optnoicinintroncheck);
@@ -949,7 +955,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   if (!gthconsensus_parsing) {
     optproteinexonpenal = gt_option_new_bool("proteinexonpenal", "use short "
                                              "exon penalties in protein DP",
-                                             &callinfo->proteinexonpenal,
+                                             &call_info->proteinexonpenal,
                                              DEFAULT_PROTEINEXONPENAL);
     gt_option_is_extended_option(optproteinexonpenal);
     gt_option_is_development_option(optproteinexonpenal);
@@ -983,12 +989,13 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   /* -cutoffsminexonlen */
   if (!gthconsensus_parsing) {
     optcutoffsminexonlength = gt_option_new_uint_min("cutoffsminexonlen",
-                                                  "set the cutoffs minimum "
-                                                  "exon length",
-                                                  &callinfo->dp_options_postpro
-                                                  ->cutoffsminexonlen,
+                                                     "set the cutoffs minimum "
+                                                     "exon length",
+                                                     &call_info
+                                                     ->dp_options_postpro
+                                                     ->cutoffsminexonlen,
                                                   GTH_DEFAULT_CUTOFFSMINEXONLEN,
-                                                  1);
+                                                     1);
     gt_option_is_extended_option(optcutoffsminexonlength);
     gt_option_parser_add_option(op, optcutoffsminexonlength);
   }
@@ -996,10 +1003,12 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   /* -scoreminexonlen */
   if (!gthconsensus_parsing) {
     optscoreminexonlength = gt_option_new_uint_min("scoreminexonlen", "set the "
-                                                "score minimum exon length",
-                                                &callinfo->dp_options_postpro
-                                                ->scoreminexonlen,
-                                                GTH_DEFAULT_SCOREMINEXONLEN, 1);
+                                                   "score minimum exon length",
+                                                    &call_info
+                                                    ->dp_options_postpro
+                                                    ->scoreminexonlen,
+                                                    GTH_DEFAULT_SCOREMINEXONLEN,
+                                                    1);
     gt_option_is_extended_option(optscoreminexonlength);
     gt_option_parser_add_option(op, optscoreminexonlength);
   }
@@ -1007,15 +1016,16 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   /* -minaveragessp */
   if (!gthconsensus_parsing) {
     optminaveragessp = gt_option_new_probability("minaveragessp", "set the "
-                                              "minimum average splice site "
-                                              "prob.", &callinfo->minaveragessp,
-                                              DEFAULT_MINAVERAGESSP);
+                                                 "minimum average splice site "
+                                                 "prob.",
+                                                 &call_info->minaveragessp,
+                                                 DEFAULT_MINAVERAGESSP);
     gt_option_is_extended_option(optminaveragessp);
     gt_option_parser_add_option(op, optminaveragessp);
   }
 
   /* add spliced alignment filter options */
-  gth_sa_filter_register_options(op, callinfo->sa_filter,
+  gth_sa_filter_register_options(op, call_info->sa_filter,
                                  !gthconsensus_parsing);
 
   /* -intermediate */
@@ -1024,7 +1034,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
                                        "results in reusable XML format. Do not "
                                        "process this output yourself, use the "
                                        "``normal'' XML output instead!",
-                                       &callinfo->intermediate,
+                                       &call_info->intermediate,
                                        DEFAULT_INTERMEDIATE);
   gt_option_parser_add_option(op, optintermediate);
 
@@ -1032,7 +1042,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   optsortags = gt_option_new_bool("sortags", "sort alternative gene structures "
                                "according to the weighted mean of the average "
                                "exon score and the average splice site "
-                               "probability", &callinfo->out->sortags,
+                               "probability", &call_info->out->sortags,
                                DEFAULT_SORTAGS);
   gt_option_is_extended_option(optsortags);
   gt_option_parser_add_option(op, optsortags);
@@ -1040,7 +1050,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   /* -sortagswf */
   optsortagswf = gt_option_new_double_min("sortagswf", "set the weight factor "
                                           "for the sorting of AGSs",
-                                          &callinfo->out->sortagswf,
+                                          &call_info->out->sortagswf,
                                           DEFAULT_SORTAGSWF, 0.001);
   gt_option_is_extended_option(optsortagswf);
   gt_option_parser_add_option(op, optsortagswf);
@@ -1050,7 +1060,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
                                          "clustering of spliced alignments in "
                                          "the consensus phase (should not "
                                          "change the results)",
-                                         &callinfo->disableclustersas,
+                                         &call_info->disableclustersas,
                                          DEFAULT_DISABLECLUSTERSAS);
   gt_option_is_extended_option(optdisableclustersas);
   gt_option_is_development_option(optdisableclustersas);
@@ -1060,7 +1070,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   if (!gthconsensus_parsing) {
     optcdnaforwardonly = gt_option_new_bool("cdnaforwardonly", "consider only "
                                          "forward strand of cDNAs",
-                                         &callinfo->cdnaforwardonly, false);
+                                         &call_info->cdnaforwardonly, false);
     gt_option_is_development_option(optcdnaforwardonly);
     gt_option_parser_add_option(op, optcdnaforwardonly);
   }
@@ -1103,7 +1113,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
     optfirstalshown = gt_option_new_uint("first", "set the maximum number of "
                                       "spliced alignments per genomic DNA "
                                       "input. Set to 0 for unlimited number.",
-                                      &callinfo->firstalshown,
+                                      &call_info->firstalshown,
                                       DEFAULT_FIRSTALSHOWN);
     gt_option_parser_add_option(op, optfirstalshown);
   }
@@ -1112,7 +1122,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   if (!gthconsensus_parsing) {
     optshoweops = gt_option_new_bool("showeops", "show complete array of multi "
                                   "edit operations after each DP",
-                                  &callinfo->out->showeops, DEFAULT_SHOWEOPS);
+                                  &call_info->out->showeops, DEFAULT_SHOWEOPS);
     gt_option_is_extended_option(optshoweops);
     gt_option_is_development_option(optshoweops);
     gt_option_parser_add_option(op, optshoweops);
@@ -1217,8 +1227,8 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   }
 
   if (oprval == GT_OPTION_PARSER_OK &&
-      callinfo->out->showintronmaxlen > 0 &&
-      callinfo->out->showintronmaxlen < DOUBLEALIGNMENTLINEWIDTH) {
+      call_info->out->showintronmaxlen > 0 &&
+      call_info->out->showintronmaxlen < DOUBLEALIGNMENTLINEWIDTH) {
      gt_error_set(err, "argument to option -%s must be 0 or integer larger "
                        "than %u", SHOWINTRONMAXLEN_OPT_CSTR,
                   DOUBLEALIGNMENTLINEWIDTH);
@@ -1244,7 +1254,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
     if (ret == -1)
       oprval = GT_OPTION_PARSER_ERROR;
     if (oprval == GT_OPTION_PARSER_OK) {
-      callinfo->speciesnum = ret;
+      call_info->speciesnum = ret;
       /* also setting the bssm parameter file */
       gt_assert(!gt_str_length(gth_input_bssmfile(input)));
       gt_str_append_cstr(gth_input_bssmfile(input), speciestab[ret]);
@@ -1256,11 +1266,11 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
      current limit in Vmatch, this should be changed in Vmatch and the check
      refactored into the GtTranslator class */
   if (oprval == GT_OPTION_PARSER_OK &&
-      (callinfo->translationtable < 1  || callinfo->translationtable > 15 ||
-       callinfo->translationtable == 7 || callinfo->translationtable == 8)) {
+      (call_info->translationtable < 1  || call_info->translationtable > 15 ||
+       call_info->translationtable == 7 || call_info->translationtable == 8)) {
     gt_error_set(err, "wrong argument '%u' to option \"-%s\": "
                  "must be number in the range [1,15] except for 7 and 8",
-                 callinfo->translationtable,
+                 call_info->translationtable,
                  gt_option_get_name(opttranslationtable));
     oprval = GT_OPTION_PARSER_ERROR;
   }
@@ -1295,19 +1305,19 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
        intuitive for the user (instead of requiring him to set -inverse) */
     if (oprval == GT_OPTION_PARSER_OK && gt_option_is_set(optfrompos) &&
         !gt_option_is_set(optinverse)) {
-      callinfo->simfilterparam.inverse = true;
+      call_info->simfilterparam.inverse = true;
     }
   }
 
   /* check necessary for intron cutout technique */
   if (oprval == GT_OPTION_PARSER_OK && !gthconsensus_parsing &&
-      2 * callinfo->simfilterparam.introncutoutinfo.icinitialdelta <
-      callinfo->dp_options_core->dpminintronlength) {
+      2 * call_info->simfilterparam.introncutoutinfo.icinitialdelta <
+      call_info->dp_options_core->dpminintronlength) {
     gt_error_set(err, "2 * %s(=%u) must be >= %s(=%u)",
               ICINITIALDELTA_OPT_CSTR,
-              callinfo->simfilterparam.introncutoutinfo.icinitialdelta,
+              call_info->simfilterparam.introncutoutinfo.icinitialdelta,
               DPMININTRONLENGTH_OPT_CSTR,
-              callinfo->dp_options_core->dpminintronlength);
+              call_info->dp_options_core->dpminintronlength);
     oprval = GT_OPTION_PARSER_ERROR;
   }
 
@@ -1321,21 +1331,21 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
 
   /* make sure minmatchlen is >= seedlength */
   if (oprval == GT_OPTION_PARSER_OK && !gthconsensus_parsing &&
-      callinfo->simfilterparam.minmatchlength <
-      callinfo->simfilterparam.seedlength) {
+      call_info->simfilterparam.minmatchlength <
+      call_info->simfilterparam.seedlength) {
     gt_error_set(err, "-%s %lu must be >= -%s %lu", MINMATCHLEN_OPT_CSTR,
-              callinfo->simfilterparam.minmatchlength, SEEDLENGTH_OPT_CSTR,
-              callinfo->simfilterparam.seedlength);
+              call_info->simfilterparam.minmatchlength, SEEDLENGTH_OPT_CSTR,
+              call_info->simfilterparam.seedlength);
     oprval = GT_OPTION_PARSER_ERROR;
   }
 
   /* make sure prminmatchlen is >= prseedlength */
   if (oprval == GT_OPTION_PARSER_OK && !gthconsensus_parsing &&
-      callinfo->simfilterparam.prminmatchlen <
-      callinfo->simfilterparam.prseedlength) {
+      call_info->simfilterparam.prminmatchlen <
+      call_info->simfilterparam.prseedlength) {
     gt_error_set(err, "-%s %lu must be >= -%s %lu", PRMINMATCHLEN_OPT_CSTR,
-              callinfo->simfilterparam.prminmatchlen, PRSEEDLENGTH_OPT_CSTR,
-              callinfo->simfilterparam.prseedlength);
+              call_info->simfilterparam.prminmatchlen, PRSEEDLENGTH_OPT_CSTR,
+              call_info->simfilterparam.prseedlength);
     oprval = GT_OPTION_PARSER_ERROR;
   }
 
@@ -1359,17 +1369,17 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
       gth_input_set_reverse_only(input);
 
     if (verbose) {
-      callinfo->out->showverbose   = showverbose;
-      callinfo->out->showverboseVM = showverboseVM;
+      call_info->out->showverbose   = showverbose;
+      call_info->out->showverboseVM = showverboseVM;
     }
 
     if (!gthconsensus_parsing) {
-      gth_splice_site_model_U12intronmodel_set_usage(callinfo
+      gth_splice_site_model_U12intronmodel_set_usage(call_info
                                                      ->splice_site_model,
                                                      !nou12intronmodel);
-      gth_splice_site_model_set_U12typedonorprob(callinfo->splice_site_model,
+      gth_splice_site_model_set_U12typedonorprob(call_info->splice_site_model,
                                                  u12donorprob);
-      gth_splice_site_model_set_U12typedonorprob_one_mismatch(callinfo
+      gth_splice_site_model_set_U12typedonorprob_one_mismatch(call_info
                                                             ->splice_site_model,
                                                              u12donorprob1mism);
     }
@@ -1389,16 +1399,16 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
     if (oprval == GT_OPTION_PARSER_OK) {
       gt_assert(gt_str_length(leadcutoffsmode));
       mode = get_cutoffs_mode_from_table(gt_str_get(leadcutoffsmode));
-      callinfo->dp_options_postpro->leadcutoffsmode = mode;
+      call_info->dp_options_postpro->leadcutoffsmode = mode;
     }
     if (oprval == GT_OPTION_PARSER_OK) {
       gt_assert(gt_str_length(termcutoffsmode));
       mode = get_cutoffs_mode_from_table(gt_str_get(termcutoffsmode));
-      callinfo->dp_options_postpro->termcutoffsmode = mode;
+      call_info->dp_options_postpro->termcutoffsmode = mode;
     }
     if (oprval == GT_OPTION_PARSER_OK && mincutoffs) {
-      callinfo->dp_options_postpro->leadcutoffsmode = MINIMAL;
-      callinfo->dp_options_postpro->termcutoffsmode = MINIMAL;
+      call_info->dp_options_postpro->leadcutoffsmode = MINIMAL;
+      call_info->dp_options_postpro->termcutoffsmode = MINIMAL;
     }
   }
 
@@ -1423,7 +1433,7 @@ GtOPrval gth_parse_options(GthCallInfo *callinfo, GthInput *input,
   /* load bssm parameter */
   if (oprval == GT_OPTION_PARSER_OK) {
     if (gt_str_length(gth_input_bssmfile(input))) {
-      if (gth_splice_site_model_load_bssm(callinfo->splice_site_model,
+      if (gth_splice_site_model_load_bssm(call_info->splice_site_model,
                                           gt_str_get(gth_input_bssmfile(input)),
                                           err)) {
         oprval = GT_OPTION_PARSER_ERROR;

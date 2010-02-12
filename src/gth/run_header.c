@@ -57,15 +57,15 @@ static void show_overall_reference_type(GthAlphatype overallalphatype,
   gt_file_xprintf(outfp, "</overall_reference_type>\n");
 }
 
-static void show_xml_run_header(GthCallInfo *callinfo, GthInput *input,
+static void show_xml_run_header(GthCallInfo *call_info, GthInput *input,
                                 const char *timestring, const char *gth_version,
                                 unsigned int indentlevel, const char **args)
 {
-  GtFile *outfp = callinfo->out->outfp;
+  GtFile *outfp = call_info->out->outfp;
   unsigned long i;
 
   gth_indent(outfp, indentlevel);
-  if (callinfo->intermediate) {
+  if (call_info->intermediate) {
     gt_file_xprintf(outfp, "<header xmlns=\"http://www.GenomeThreader.org/"
                        "SplicedAlignment/header/\">\n");
   }
@@ -124,9 +124,9 @@ static void show_xml_run_header(GthCallInfo *callinfo, GthInput *input,
   gth_indent(outfp, indentlevel);
   gt_file_xprintf(outfp, "<splice_site_parameters parameter_type=\"%s\" "
                   "species=\"%s\"/>\n", SPLICE_SITE_MODEL_NAME,
-                  callinfo->speciesnum ==  NUMOFSPECIES
+                  call_info->speciesnum ==  NUMOFSPECIES
                   ? GENERIC_SPECIES_NAME
-                  : speciestab[callinfo->speciesnum]);
+                  : speciestab[call_info->speciesnum]);
 
   gth_indent(outfp, indentlevel);
   gt_file_xprintf(outfp, "<parameters>\n");
@@ -139,8 +139,8 @@ static void show_xml_run_header(GthCallInfo *callinfo, GthInput *input,
 
   /* output name of scorematrix */
   gth_indent(outfp, indentlevel);
-  gt_file_xprintf(outfp, "<parameter name=\"scorematrixfile\" "
-                     "value=\"%s\"/>\n", gt_str_get(callinfo->scorematrixfile));
+  gt_file_xprintf(outfp, "<parameter name=\"scorematrixfile\" value=\"%s\"/>\n",
+                  gt_str_get(call_info->scorematrixfile));
 
   /* output searchmode */
   gth_indent(outfp, indentlevel);
@@ -166,22 +166,22 @@ static void show_xml_run_header(GthCallInfo *callinfo, GthInput *input,
   gt_file_xprintf(outfp, "</header>\n");
 }
 
-void gth_run_header_show(GthCallInfo *callinfo, GthInput *input,
+void gth_run_header_show(GthCallInfo *call_info, GthInput *input,
                          const char *gth_version, unsigned int indentlevel,
                          const char **args)
 {
   char *timestring;
-  GtFile *outfp = callinfo->out->outfp;
+  GtFile *outfp = call_info->out->outfp;
 
   /* determine time */
   timestring = gth_get_time();
 
   /* output XML header */
-  if (callinfo->out->xmlout) {
-    show_xml_run_header(callinfo, input, timestring, gth_version, indentlevel,
+  if (call_info->out->xmlout) {
+    show_xml_run_header(call_info, input, timestring, gth_version, indentlevel,
                         args);
   }
-  else if (!callinfo->out->gff3out) {
+  else if (!call_info->out->gff3out) {
     gt_file_xprintf(outfp, "%c GenomeThreader %s (%s)\n", COMMENTCHAR,
                     gth_version, GT_BUILT);
     gt_file_xprintf(outfp, "%c Date run: %s\n", COMMENTCHAR, timestring);

@@ -29,7 +29,7 @@
 #include "gth/gt_gthconsensus.h"
 
 static int process_consensus_files(GtStrArray *consensusfiles,
-                                   GthCallInfo *callinfo, GthInput *input,
+                                   GthCallInfo *call_info, GthInput *input,
                                    GthStat *stat, unsigned long indentlevel,
                                    GtError *err)
 {
@@ -41,36 +41,36 @@ static int process_consensus_files(GtStrArray *consensusfiles,
   /* initialization */
   sa_collection = gth_sa_collection_new();
 
-  if (callinfo->out->showverbose)
-    callinfo->out->showverbose("process all intermediate output files");
+  if (call_info->out->showverbose)
+    call_info->out->showverbose("process all intermediate output files");
 
   /* build tree of alignments from intermediate files */
   had_err = gth_build_sa_collection(sa_collection, input, consensusfiles,
-                                    callinfo->sa_filter, stat,
-                                    callinfo->out->showverbose, err);
+                                    call_info->sa_filter, stat,
+                                    call_info->out->showverbose, err);
 
   /* make sure the necessary indices of all input files are created */
   if (!had_err) {
     had_err = gth_input_preprocess(input, true,
-                                   callinfo->simfilterparam.noautoindex,
-                                   callinfo->simfilterparam.skipindexcheck,
-                                   callinfo->simfilterparam.maskpolyAtails,
-                                   callinfo->simfilterparam.online,
-                                   callinfo->simfilterparam.inverse,
-                                   callinfo->progname,
-                                   gt_str_get(callinfo->scorematrixfile),
-                                   callinfo->translationtable, callinfo->out,
+                                   call_info->simfilterparam.noautoindex,
+                                   call_info->simfilterparam.skipindexcheck,
+                                   call_info->simfilterparam.maskpolyAtails,
+                                   call_info->simfilterparam.online,
+                                   call_info->simfilterparam.inverse,
+                                   call_info->progname,
+                                   gt_str_get(call_info->scorematrixfile),
+                                   call_info->translationtable, call_info->out,
                                    err);
   }
 
   /* process the alignments */
   if (!had_err) {
-    proc_sa_collection(sa_collection, callinfo, input, stat, indentlevel);
+    proc_sa_collection(sa_collection, call_info, input, stat, indentlevel);
   }
 
   /* show XML trailer */
-  if (!had_err && callinfo->out->xmlout)
-    gth_xml_show_trailer(callinfo->intermediate, callinfo->out->outfp);
+  if (!had_err && call_info->out->xmlout)
+    gth_xml_show_trailer(call_info->intermediate, call_info->out->outfp);
 
   /* free collection of spliced alignments */
   gth_sa_collection_delete(sa_collection);
@@ -81,7 +81,7 @@ static int process_consensus_files(GtStrArray *consensusfiles,
 int gt_gthconsensus(int argc, const char **argv, const GthPlugins *plugins,
                     GtError *err)
 {
-  GthCallInfo *callinfo;
+  GthCallInfo *call_info;
   GthInput *input;
   GthStat *stat;
   GtStrArray *consensusfiles;
@@ -90,13 +90,13 @@ int gt_gthconsensus(int argc, const char **argv, const GthPlugins *plugins,
   gt_error_check(err);
 
   /* init data structures */
-  callinfo = gth_call_info_new(argv[0]);
+  call_info = gth_call_info_new(argv[0]);
   input = gth_input_new(plugins->file_preprocessor, plugins->seq_col_new);
   stat = gth_stat_new();
   consensusfiles = gt_str_array_new();
 
   /* parse the options */
-  switch (gth_parse_options(callinfo, input, &parsed_args, argc,
+  switch (gth_parse_options(call_info, input, &parsed_args, argc,
                             (const char**) argv, true, consensusfiles, stat,
                             gth_show_on_stdout, gth_show_on_stdout_vmatch,
                             plugins->gth_version_func, err)) {
@@ -105,36 +105,36 @@ int gt_gthconsensus(int argc, const char **argv, const GthPlugins *plugins,
       gt_str_array_delete(consensusfiles);
       gth_stat_delete(stat);
       gth_input_delete_complete(input);
-      gth_call_info_delete(callinfo);
+      gth_call_info_delete(call_info);
       return -1;
     case GT_OPTION_PARSER_REQUESTS_EXIT:
       gt_str_array_delete(consensusfiles);
       gth_stat_delete(stat);
       gth_input_delete_complete(input);
-      gth_call_info_delete(callinfo);
+      gth_call_info_delete(call_info);
       return 0;
   }
   gt_assert(parsed_args == argc);
 
   /* show XML leader */
-  if (callinfo->out->xmlout)
-    gth_xml_show_leader(callinfo->intermediate, callinfo->out->outfp);
+  if (call_info->out->xmlout)
+    gth_xml_show_leader(call_info->intermediate, call_info->out->outfp);
 
   /* process consensus files */
   if (!had_err) {
-    had_err = process_consensus_files(consensusfiles, callinfo, input, stat,
+    had_err = process_consensus_files(consensusfiles, call_info, input, stat,
                                       INITIAL_XML_INDENTLEVEL, err);
   }
 
   /* output statistics */
-  if (!had_err && !callinfo->out->gff3out)
-    gth_stat_show(stat, false, callinfo->out->xmlout, callinfo->out->outfp);
+  if (!had_err && !call_info->out->gff3out)
+    gth_stat_show(stat, false, call_info->out->xmlout, call_info->out->outfp);
 
   /* free space */
   gt_str_array_delete(consensusfiles);
   gth_stat_delete(stat);
   gth_input_delete_complete(input);
-  gth_call_info_delete(callinfo);
+  gth_call_info_delete(call_info);
 
   return had_err;
 }

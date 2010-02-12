@@ -41,78 +41,78 @@ static void calc_sa_distributions(GthStat *stat, GthSACollection *sa_collection)
   }
 }
 
-void proc_sa_collection(GthSACollection *sa_collection, GthCallInfo *callinfo,
+void proc_sa_collection(GthSACollection *sa_collection, GthCallInfo *call_info,
                         GthInput *input, GthStat *stat,
                         unsigned int indentlevel)
 {
-  if (callinfo->out->showverbose)
-    callinfo->out->showverbose("output spliced alignments");
+  if (call_info->out->showverbose)
+    call_info->out->showverbose("output spliced alignments");
 
   /* output alignments */
-  if (!callinfo->out->skipalignmentout) {
+  if (!call_info->out->skipalignmentout) {
     GthSAVisitor *sa_visitor;
-    if (callinfo->out->xmlout) {
-      if (callinfo->intermediate) {
+    if (call_info->out->xmlout) {
+      if (call_info->intermediate) {
         sa_visitor = gth_xml_inter_sa_visitor_new(input, indentlevel + 1,
-                                                  callinfo->out->outfp);
+                                                  call_info->out->outfp);
       }
       else {
         sa_visitor = gth_xml_final_sa_visitor_new(input,
-                                                  callinfo->dp_options_core
+                                                  call_info->dp_options_core
                                                   ->dpminintronlength,
-                                                  callinfo->translationtable,
+                                                  call_info->translationtable,
                                                   indentlevel,
-                                                  callinfo->out->outfp);
+                                                  call_info->out->outfp);
       }
     }
-    else if (callinfo->out->gff3out) {
-      sa_visitor = gth_gff3_sa_visitor_new(input, callinfo->out->outfp);
+    else if (call_info->out->gff3out) {
+      sa_visitor = gth_gff3_sa_visitor_new(input, call_info->out->outfp);
     }
     else {
-      sa_visitor = gth_txt_sa_visitor_new(input, callinfo->out->gs2out,
-                                      callinfo->dp_options_core
+      sa_visitor = gth_txt_sa_visitor_new(input, call_info->out->gs2out,
+                                      call_info->dp_options_core
                                       ->dpminintronlength,
-                                      callinfo->out->widthforgenpos,
-                                      callinfo->out->showintronmaxlen,
-                                      callinfo->translationtable,
-                                      callinfo->out->showseqnums,
-                                      callinfo->out->outfp);
+                                      call_info->out->widthforgenpos,
+                                      call_info->out->showintronmaxlen,
+                                      call_info->translationtable,
+                                      call_info->out->showseqnums,
+                                      call_info->out->outfp);
     }
     gth_sa_collection_traverse(sa_collection, sa_visitor);
     gth_sa_visitor_delete(sa_visitor);
   }
 
   if (gth_sa_collection_contains_sa(sa_collection) &&
-      !callinfo->intermediate) { /* do not stop after SA computation */
+      !call_info->intermediate) { /* do not stop after SA computation */
     GthPGLCollection *pgl_collection;
     GthPGLVisitor *pgl_visitor;
-    if (callinfo->out->showverbose)
-      callinfo->out->showverbose("compute predicted gene locations");
+    if (call_info->out->showverbose)
+      call_info->out->showverbose("compute predicted gene locations");
 
     /* compute PGLs */
     pgl_collection = gth_pgl_collection_new(sa_collection,
-                                            callinfo->disableclustersas);
-    if (callinfo->out->sortags)
-      gth_pgl_collection_sortAGSs(pgl_collection, callinfo->out->sortagswf);
+                                            call_info->disableclustersas);
+    if (call_info->out->sortags)
+      gth_pgl_collection_sortAGSs(pgl_collection, call_info->out->sortagswf);
 
-    if (callinfo->out->showverbose)
-      callinfo->out->showverbose("output predicted gene locations");
+    if (call_info->out->showverbose)
+      call_info->out->showverbose("output predicted gene locations");
 
     /* save memory statistics for PGLs */
     gth_stat_increase_numofPGLs_stored(stat,
                                        gth_pgl_collection_size(pgl_collection));
 
     /* output PGLs */
-    if (callinfo->out->xmlout) {
-      pgl_visitor = gth_xml_pgl_visitor_new(input, callinfo->translationtable,
-                                            indentlevel + 1, callinfo->out);
+    if (call_info->out->xmlout) {
+      pgl_visitor = gth_xml_pgl_visitor_new(input, call_info->translationtable,
+                                            indentlevel + 1, call_info->out);
     }
-    else if (callinfo->out->gff3out) {
-      pgl_visitor = gth_gff3_pgl_visitor_new(input, callinfo->out->outfp);
+    else if (call_info->out->gff3out) {
+      pgl_visitor = gth_gff3_pgl_visitor_new(input, call_info->out->outfp);
     }
     else {
-      pgl_visitor = gth_txt_pgl_visitor_new(input, callinfo->translationtable,
-                                            indentlevel + 1, callinfo->out);
+      pgl_visitor = gth_txt_pgl_visitor_new(input, call_info->translationtable,
+                                            indentlevel + 1, call_info->out);
     }
     gth_pgl_collection_traverse(pgl_collection, pgl_visitor);
     gth_pgl_visitor_delete(pgl_visitor);
