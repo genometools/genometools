@@ -455,7 +455,7 @@ static GtPdomResults* gt_pdom_results_new(void)
 {
   GtPdomResults *res;
   res = gt_calloc(1, sizeof (GtPdomResults));
-  res->domains = gt_hashmap_new(HASH_DIRECT, gt_pdom_model_delete,
+  res->domains = gt_hashmap_new(GT_HASH_DIRECT, gt_pdom_model_delete,
                                 gt_pdom_model_hit_delete);
   res->empty = TRUE;
   res->combined_e_value_fwd = res->combined_e_value_rev = 0.0;
