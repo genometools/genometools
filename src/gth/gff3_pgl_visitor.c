@@ -21,12 +21,12 @@
 #include "gth/ags.h"
 #include "gth/gff3_pgl_visitor.h"
 #include "gth/pgl_visitor_rep.h"
-#include "gth/sequence_region_factory.h"
+#include "gth/region_factory.h"
 
 struct GthGFF3PGLVisitor {
   const GthPGLVisitor parent_instance;
   GthInput *input;
-  SequenceRegionFactory *sequence_region_factory;
+  GthRegionFactory *region_factory;
   GtStr *gthsourcetag;
   GtNodeVisitor *gff3_visitor;
 };
@@ -39,15 +39,15 @@ static void gff3_pgl_visitor_free(GthPGLVisitor *pgl_visitor)
   GthGFF3PGLVisitor *visitor = gff3_pgl_visitor_cast(pgl_visitor);
   gt_node_visitor_delete(visitor->gff3_visitor);
   gt_str_delete(visitor->gthsourcetag);
-  sequence_region_factory_delete(visitor->sequence_region_factory);
+  gth_region_factory_delete(visitor->region_factory);
 }
 
 static void gff3_pgl_visitor_preface(GthPGLVisitor *pgl_visitor,
                                      GT_UNUSED unsigned long num_of_pgls)
 {
   GthGFF3PGLVisitor *visitor = gff3_pgl_visitor_cast(pgl_visitor);
-  sequence_region_factory_make(visitor->sequence_region_factory,
-                               visitor->gff3_visitor, visitor->input);
+  gth_region_factory_make(visitor->region_factory, visitor->gff3_visitor,
+                          visitor->input);
 }
 
 static void add_target_attributes(GtFeatureNode *mrna_feature, GthAGS *ags)
@@ -73,8 +73,7 @@ static void add_target_attributes(GtFeatureNode *mrna_feature, GthAGS *ags)
   gt_str_delete(target_attribute);
 }
 
-static void showPGLinGFF3(GthPGL *pgl,
-                          SequenceRegionFactory *sequence_region_factory,
+static void showPGLinGFF3(GthPGL *pgl, GthRegionFactory *region_factory,
                           GtNodeVisitor *gff3_visitor, GtStr *gthsourcetag)
 {
   GthExonAGS *exon, *first_exon, *last_exon;
@@ -86,14 +85,12 @@ static void showPGLinGFF3(GthPGL *pgl,
   struct GthAGS *ags;
   long offset;
 
-  gt_assert(pgl && sequence_region_factory && gff3_visitor);
+  gt_assert(pgl && region_factory && gff3_visitor);
 
-  seqid = sequence_region_factory_get_seqid(sequence_region_factory,
-                                            gth_pgl_filenum(pgl),
-                                            gth_pgl_seqnum(pgl));
-  offset = sequence_region_factory_offset(sequence_region_factory,
-                                          gth_pgl_filenum(pgl),
-                                          gth_pgl_seqnum(pgl)) - 1;
+  seqid = gth_region_factory_get_seqid(region_factory, gth_pgl_filenum(pgl),
+                                       gth_pgl_seqnum(pgl));
+  offset = gth_region_factory_offset(region_factory, gth_pgl_filenum(pgl),
+                                     gth_pgl_seqnum(pgl)) - 1;
 
   /* create gene feature */
   range = gth_pgl_genomic_range(pgl);
@@ -181,7 +178,7 @@ static void gff3_pgl_visitor_visit_pgl(GthPGLVisitor *pgl_visitor,
 {
   GthGFF3PGLVisitor *visitor = gff3_pgl_visitor_cast(pgl_visitor);
   gt_assert(pgl);
-  showPGLinGFF3(pgl, visitor->sequence_region_factory, visitor->gff3_visitor,
+  showPGLinGFF3(pgl, visitor->region_factory, visitor->gff3_visitor,
                 visitor->gthsourcetag);
 }
 
@@ -202,8 +199,7 @@ GthPGLVisitor* gth_gff3_pgl_visitor_new(GthInput *input, bool use_desc_ranges,
     gth_pgl_visitor_create(gth_gff3_pgl_visitor_class());
   GthGFF3PGLVisitor *visitor = gff3_pgl_visitor_cast(pgl_visitor);
   visitor->input = input;
-  visitor->sequence_region_factory =
-    sequence_region_factory_new(use_desc_ranges);
+  visitor->region_factory = gth_region_factory_new(use_desc_ranges);
   visitor->gthsourcetag = gt_str_new_cstr(GTHSOURCETAG);
   visitor->gff3_visitor = gt_gff3_visitor_new(outfp);
   return pgl_visitor;

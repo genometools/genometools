@@ -21,7 +21,7 @@
 #include "core/ma.h"
 #include "core/parseutils.h"
 #include "core/undef.h"
-#include "gth/sequence_region_factory.h"
+#include "gth/region_factory.h"
 
 typedef struct {
   unsigned long num_of_files,
@@ -110,22 +110,22 @@ static long seqid_store_offset(SeqidStore *ss, unsigned long filenum,
   return offset;
 }
 
-struct SequenceRegionFactory{
+struct GthRegionFactory{
   GtCstrTable *used_seqids;
   bool factory_was_used,
        use_desc_ranges;
   SeqidStore *seqid_store;
 };
 
-SequenceRegionFactory* sequence_region_factory_new(bool use_desc_ranges)
+GthRegionFactory* gth_region_factory_new(bool use_desc_ranges)
 {
-  SequenceRegionFactory *srf = gt_calloc(1, sizeof *srf);
+  GthRegionFactory *srf = gt_calloc(1, sizeof *srf);
   srf->used_seqids = gt_cstr_table_new();
   srf->use_desc_ranges = use_desc_ranges;
   return srf;
 }
 
-void sequence_region_factory_delete(SequenceRegionFactory *srf)
+void gth_region_factory_delete(GthRegionFactory *srf)
 {
   if (!srf) return;
   gt_cstr_table_delete(srf->used_seqids);
@@ -182,7 +182,7 @@ static long parse_desc_range(GthInput *input,
 }
 
 static GtGenomeNode *make_sequence_region(GtStr *sequenceid,
-                                          SequenceRegionFactory *srf,
+                                          GthRegionFactory *srf,
                                           GthInput *input,
                                           unsigned long filenum,
                                           unsigned long seqnum)
@@ -232,9 +232,8 @@ static GtGenomeNode *make_sequence_region(GtStr *sequenceid,
   return sr;
 }
 
-void sequence_region_factory_make(SequenceRegionFactory *srf,
-                                  GtNodeVisitor *visitor,
-                                  GthInput *input)
+void gth_region_factory_make(GthRegionFactory *srf, GtNodeVisitor *visitor,
+                             GthInput *input)
 {
   unsigned long i, j;
   GtStr *sequenceid;
@@ -258,17 +257,15 @@ void sequence_region_factory_make(SequenceRegionFactory *srf,
   srf->factory_was_used = true;
 }
 
-GtStr* sequence_region_factory_get_seqid(SequenceRegionFactory *srf,
-                                         unsigned long filenum,
-                                         unsigned long seqnum)
+GtStr* gth_region_factory_get_seqid(GthRegionFactory *srf,
+                                    unsigned long filenum, unsigned long seqnum)
 {
   gt_assert(srf && srf->factory_was_used);
   return seqid_store_get(srf->seqid_store, filenum, seqnum);
 }
 
-long sequence_region_factory_offset(SequenceRegionFactory *srf,
-                                    unsigned long filenum,
-                                    unsigned long seqnum)
+long gth_region_factory_offset(GthRegionFactory *srf,
+                               unsigned long filenum, unsigned long seqnum)
 {
   gt_assert(srf && srf->factory_was_used);
   return seqid_store_offset(srf->seqid_store, filenum, seqnum);

@@ -15,26 +15,26 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SEQUENCE_REGION_FACTORY_H
-#define SEQUENCE_REGION_FACTORY_H
+#ifndef REGION_FACTORY_H
+#define REGION_FACTORY_H
 
 #include "extended/node_visitor.h"
 #include "gth/input.h"
 
-typedef struct SequenceRegionFactory SequenceRegionFactory;
+typedef struct GthRegionFactory GthRegionFactory;
 
-SequenceRegionFactory* sequence_region_factory_new(bool use_desc_ranges);
-void                   sequence_region_factory_delete(SequenceRegionFactory*);
+GthRegionFactory* gth_region_factory_new(bool use_desc_ranges);
+void              gth_region_factory_delete(GthRegionFactory*);
 /* Use <sequence_region_factory> to produce sequence regions for each genomic
    sequence in <input> and let them accept the given <visitor>. */
-void                   sequence_region_factory_make(SequenceRegionFactory*,
-                                                    GtNodeVisitor *visitor,
-                                                    GthInput *input);
-GtStr*                 sequence_region_factory_get_seqid(SequenceRegionFactory*,
-                                                         unsigned long filenum,
-                                                         unsigned long seqnum);
-long                   sequence_region_factory_offset(SequenceRegionFactory*,
-                                                      unsigned long filenum,
-                                                      unsigned long seqnum);
+void              gth_region_factory_make(GthRegionFactory*,
+                                          GtNodeVisitor *visitor,
+                                          GthInput *input);
+GtStr*            gth_region_factory_get_seqid(GthRegionFactory*,
+                                               unsigned long filenum,
+                                               unsigned long seqnum);
+long              gth_region_factory_offset(GthRegionFactory*,
+                                            unsigned long filenum,
+                                            unsigned long seqnum);
 
 #endif

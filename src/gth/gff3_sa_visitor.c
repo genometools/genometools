@@ -19,14 +19,14 @@
 #include "gth/indent.h"
 #include "gth/gff3_sa_visitor.h"
 #include "gth/sa_visitor_rep.h"
-#include "gth/sequence_region_factory.h"
+#include "gth/region_factory.h"
 
 #define SA_DELIMITERLINECHAR  '*'
 
 struct GthGFF3SAVisitor {
   const GthSAVisitor parent_instance;
   GthInput *input;
-  SequenceRegionFactory *sequence_region_factory;
+  GthRegionFactory *region_factory;
   GtStr *gthsourcetag;
   GtNodeVisitor *gff3_visitor;
 };
@@ -39,18 +39,17 @@ static void gff3_sa_visitor_free(GthSAVisitor *sa_visitor)
   GthGFF3SAVisitor *visitor = gff3_sa_visitor_cast(sa_visitor);
   gt_node_visitor_delete(visitor->gff3_visitor);
   gt_str_delete(visitor->gthsourcetag);
-  sequence_region_factory_delete(visitor->sequence_region_factory);
+  gth_region_factory_delete(visitor->region_factory);
 }
 
 static void gff3_sa_visitor_preface(GthSAVisitor *sa_visitor)
 {
   GthGFF3SAVisitor *visitor = gff3_sa_visitor_cast(sa_visitor);
-  sequence_region_factory_make(visitor->sequence_region_factory,
-                               visitor->gff3_visitor, visitor->input);
+  gth_region_factory_make(visitor->region_factory, visitor->gff3_visitor,
+                          visitor->input);
 }
 
-static void showSAinGFF3(GthSA *sa,
-                         SequenceRegionFactory *sequence_region_factory,
+static void showSAinGFF3(GthSA *sa, GthRegionFactory *region_factory,
                          GtNodeVisitor *gff3_visitor, GtStr *gthsourcetag)
 {
   GtFeatureNode *gene_feature, *exon_feature;
@@ -60,14 +59,12 @@ static void showSAinGFF3(GthSA *sa,
   long offset;
   int had_err;
 
-  gt_assert(sa && sequence_region_factory && gff3_visitor);
+  gt_assert(sa && region_factory && gff3_visitor);
 
-  seqid = sequence_region_factory_get_seqid(sequence_region_factory,
-                                            gth_sa_gen_file_num(sa),
-                                            gth_sa_gen_seq_num(sa));
-  offset = sequence_region_factory_offset(sequence_region_factory,
-                                          gth_sa_gen_file_num(sa),
-                                          gth_sa_gen_seq_num(sa)) - 1;
+  seqid = gth_region_factory_get_seqid(region_factory, gth_sa_gen_file_num(sa),
+                                       gth_sa_gen_seq_num(sa));
+  offset = gth_region_factory_offset(region_factory, gth_sa_gen_file_num(sa),
+                                     gth_sa_gen_seq_num(sa)) - 1;
   /* create gene feature */
   range.start = gth_sa_left_genomic_exon_border(sa, 0);
   range.end   = gth_sa_right_genomic_exon_border(sa,
@@ -135,7 +132,7 @@ static void gff3_sa_visitor_visit_sa(GthSAVisitor *sa_visitor, GthSA *sa)
 {
   GthGFF3SAVisitor *visitor = gff3_sa_visitor_cast(sa_visitor);
   gt_assert(sa);
-  showSAinGFF3(sa, visitor->sequence_region_factory, visitor->gff3_visitor,
+  showSAinGFF3(sa, visitor->region_factory, visitor->gff3_visitor,
                visitor->gthsourcetag);
 }
 
@@ -155,8 +152,7 @@ GthSAVisitor* gth_gff3_sa_visitor_new(GthInput *input, bool use_desc_ranges,
   GthSAVisitor *sa_visitor = gth_sa_visitor_create(gth_gff3_sa_visitor_class());
   GthGFF3SAVisitor *visitor = gff3_sa_visitor_cast(sa_visitor);
   visitor->input = input;
-  visitor->sequence_region_factory =
-    sequence_region_factory_new(use_desc_ranges);
+  visitor->region_factory = gth_region_factory_new(use_desc_ranges);
   visitor->gthsourcetag = gt_str_new_cstr(GTHSOURCETAG);
   visitor->gff3_visitor = gt_gff3_visitor_new(outfp);
   return sa_visitor;
