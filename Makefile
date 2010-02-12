@@ -278,7 +278,8 @@ ifeq ($(m64),yes)
 endif
 
 ifneq ($(sharedlib),no)
-  SHARED_LIBGENOMETOOLS := lib/libgenometools$(SHARED_OBJ_NAME_EXT)
+  SHARED_LIBGENOMETOOLS := lib/libgenometools$(SHARED_OBJ_NAME_EXT) \
+                           lib/libgtunstable$(SHARED_OBJ_NAME_EXT)
 endif
 
 LIBGENOMETOOLS_DIRS:= src/core \
@@ -342,7 +343,7 @@ LIBGTUNSTABLE_OBJ:=$(LIBGTUNSTABLE_SRC:%.c=obj/%.o)
 LIBGTUNSTABLE_DEP:=$(LIBGTUNSTABLE_SRC:%.c=obj/%.d)
 
 ifeq ($(with-hmmer),yes)
-  LIBGTUNSTABLE_OBJ := $(LIBGTUNSTABLE_OBJ) lib/libhmmer.a
+  LIBGTUNSTABLE_OBJ := lib/libhmmer.a $(LIBGTUNSTABLE_OBJ) lib/libhmmer.a
 endif
 
 # set prefix for install target
