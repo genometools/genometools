@@ -252,6 +252,7 @@ static void make_sequence_region(GtHashmap *sequence_regions,
       prev_range = gt_genome_node_get_range(sr);
       new_range = gt_range_join(&prev_range, &range);
       gt_genome_node_set_range(sr, &new_range);
+      seqid_store_add(srf->seqid_store, filenum, seqnum, sequenceid, offset);
     }
   }
   gt_assert(sr);
