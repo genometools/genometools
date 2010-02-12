@@ -259,7 +259,7 @@ static void make_sequence_region(GtHashmap *sequence_regions,
 }
 
 static int accept_visitor(GT_UNUSED void *key, void *value, void *data,
-                          GtError *err)
+                          GT_UNUSED GtError *err)
 {
   GtGenomeNode *sr = value;
   GtNodeVisitor *visitor = data;
