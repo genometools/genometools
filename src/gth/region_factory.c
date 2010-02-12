@@ -222,7 +222,8 @@ static void make_sequence_region(GtHashmap *sequence_regions,
     seqid_store_add(srf->seqid_store, filenum, seqnum, seqid, offset);
     gt_assert(!gt_cstr_table_get(srf->used_seqids, gt_str_get(seqid)));
     gt_cstr_table_add(srf->used_seqids, gt_str_get(seqid));
-    sr = gt_region_node_new(seqid, range.start, range.end);
+    sr = gt_region_node_new(seqid_store_get(srf->seqid_store, filenum, seqnum),
+                            range.start, range.end);
     gt_hashmap_add(sequence_regions,
                    (void*) gt_cstr_table_get(srf->used_seqids,
                                              gt_str_get(seqid)),
@@ -235,8 +236,9 @@ static void make_sequence_region(GtHashmap *sequence_regions,
     if (!gt_cstr_table_get(srf->used_seqids, gt_str_get(sequenceid))) {
       /* no sequence region with this id exists -> create one */
       gt_cstr_table_add(srf->used_seqids, gt_str_get(sequenceid));
-      sr = gt_region_node_new(sequenceid, range.start, range.end);
       seqid_store_add(srf->seqid_store, filenum, seqnum, sequenceid, offset);
+      sr = gt_region_node_new(seqid_store_get(srf->seqid_store, filenum,
+                                              seqnum), range.start, range.end);
       gt_hashmap_add(sequence_regions,
                      (void*) gt_cstr_table_get(srf->used_seqids,
                                               gt_str_get(sequenceid)),
