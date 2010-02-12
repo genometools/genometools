@@ -1437,7 +1437,7 @@ static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
       else {
         ssr = simple_sequence_region_new(seqid, range, line_number);
         gt_hashmap_add(parser->seqid_to_ssr_mapping, gt_str_get(ssr->seqid_str),
-                    ssr);
+                       ssr);
       }
     }
     if (!had_err) {
