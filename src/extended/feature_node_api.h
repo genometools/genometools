@@ -34,7 +34,7 @@ typedef struct GtFeatureNode GtFeatureNode;
 /* Create an new <GtFeatureNode*> on sequence with ID <seqid> and type <type>
    which lies from <start> to <end> on strand <strand>.
    The <GtFeatureNode*> stores a new reference to <seqid>, so make sure you do
-   not modify the original <seqid> afterwards.
+   not modify the original <seqid> afterwards!
    <start> and <end> always refer to the forward strand, therefore <start> has
    to be smaller or equal than <end>. */
 GtGenomeNode* gt_feature_node_new(GtStr *seqid, const char *type,

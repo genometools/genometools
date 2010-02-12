@@ -29,7 +29,9 @@ const GtGenomeNodeClass* gt_region_node_class(void);
 
 /* Create a new <GtRegionNode*> representing sequence with ID <seqid> from
    base position <start> to base position <end> (1-based).
-   <start> has to be smaller or equal than <end>. */
+   <start> has to be smaller or equal than <end>.
+   The <GtRegionNode*> stores a new reference to <seqid>, so make sure you do
+   not modify the original <seqid> afterwards! */
 GtGenomeNode* gt_region_node_new(GtStr *seqid, unsigned long start,
                                                unsigned long end);
 
