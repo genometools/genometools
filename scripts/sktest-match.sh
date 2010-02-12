@@ -38,7 +38,6 @@ then
   env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb \
        ${MC} -keywords 'gt_chain2dim' \
        -gttestdata ${GTTESTDATA}
-  exit 0
   env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb \
        ${MC} -keywords 'gt_tallymer' \
        -gttestdata ${GTTESTDATA}
