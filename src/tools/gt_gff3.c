@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2005-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -74,7 +74,7 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
   GFF3Arguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *sort_option, *mergefeat_option, *addintrons_option, *offset_option,
-         *offsetfile_option, *typecheck_option, *built_in_option, *option;
+           *offsetfile_option, *typecheck_option, *built_in_option, *option;
   gt_assert(arguments);
 
   /* init */
@@ -83,72 +83,70 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
 
   /* -sort */
   sort_option = gt_option_new_bool("sort", "sort the GFF3 features (memory "
-                                "consumption is O(file_size))",
-                                &arguments->sort, false);
+                                   "consumption is O(file_size))",
+                                   &arguments->sort, false);
   gt_option_parser_add_option(op, sort_option);
 
   /* -tidy */
   option = gt_option_new_bool("tidy", "try to tidy the GFF3 files up during "
-                           "parsing", &arguments->tidy, false);
+                              "parsing", &arguments->tidy, false);
   gt_option_parser_add_option(op, option);
 
   /* -retainids */
   option = gt_option_new_bool("retainids",
-                           "when available, use the original IDs provided "
-                           "in the source file\n"
-                           "(memory consumption is O(file_size))",
-                           &arguments->retainids, false);
+                              "when available, use the original IDs provided "
+                              "in the source file\n"
+                              "(memory consumption is O(file_size))",
+                              &arguments->retainids, false);
   gt_option_parser_add_option(op, option);
 
   /* -checkids */
   option = gt_option_new_bool("checkids",
-                           "make sure the ID attributes are unique "
-                           "within the scope of each GFF3_file, as required by "
-                           "GFF3 specification\n"
-                           "(memory consumption is O(file_size))",
-                           &arguments->checkids, false);
+                              "make sure the ID attributes are unique "
+                              "within the scope of each GFF3_file, as required "
+                              "by GFF3 specification\n"
+                              "(memory consumption is O(file_size))",
+                              &arguments->checkids, false);
   gt_option_parser_add_option(op, option);
 
   /* -mergefeat */
   mergefeat_option = gt_option_new_bool("mergefeat",
-                                     "merge adjacent features of "
-                                     "the same type", &arguments->mergefeat,
-                                     false);
+                                        "merge adjacent features of the same "
+                                        "type", &arguments->mergefeat, false);
   gt_option_is_development_option(mergefeat_option);
   gt_option_imply(mergefeat_option, sort_option);
   gt_option_parser_add_option(op, mergefeat_option);
 
   /* -addintrons */
   addintrons_option = gt_option_new_bool("addintrons", "add intron features "
-                                      "between existing exon features",
-                                      &arguments->addintrons, false);
+                                         "between existing exon features",
+                                         &arguments->addintrons, false);
   gt_option_parser_add_option(op, addintrons_option);
 
   /* -offset */
-  offset_option = gt_option_new_long("offset",
-                                 "transform all features by the given offset",
-                                  &arguments->offset, GT_UNDEF_LONG);
+  offset_option = gt_option_new_long("offset", "transform all features by the "
+                                     "given offset", &arguments->offset,
+                                     GT_UNDEF_LONG);
   gt_option_parser_add_option(op, offset_option);
 
   /* -offsetfile */
   offsetfile_option = gt_option_new_filename("offsetfile", "transform all "
-                                          "features by the offsets given in "
-                                          "file", arguments->offsetfile);
+                                             "features by the offsets given in "
+                                             "file", arguments->offsetfile);
   gt_option_parser_add_option(op, offsetfile_option);
   gt_option_exclude(offset_option, offsetfile_option);
 
   /* -typecheck */
   typecheck_option = gt_option_new_filename("typecheck", "check GFF3 types "
-                                         "against \"id\" and \"name\" tags "
-                                         "in given OBO file",
-                                         arguments->typecheck);
+                                            "against \"id\" and \"name\" tags "
+                                            "in given OBO file",
+                                            arguments->typecheck);
   gt_option_parser_add_option(op, typecheck_option);
 
   /* -typecheck-built-in */
-  built_in_option = gt_option_new_bool("typecheck-built-in",
-                                    "use built-in type "
-                                    "checker", &arguments->typecheck_built_in,
-                                    false);
+  built_in_option = gt_option_new_bool("typecheck-built-in", "use built-in "
+                                       "type checker",
+                                       &arguments->typecheck_built_in, false);
   gt_option_is_development_option(built_in_option);
   gt_option_parser_add_option(op, built_in_option);
   gt_option_exclude(typecheck_option, built_in_option);
@@ -159,9 +157,9 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
 
   /* -width */
   option = gt_option_new_ulong("width",
-                            "set output width for showing of embedded "
-                            "FASTA sequences\n(0 disables formatting)",
-                            &arguments->width, 0);
+                               "set output width for showing of embedded "
+                               "FASTA sequences\n(0 disables formatting)",
+                               &arguments->width, 0);
   gt_option_parser_add_option(op, option);
 
   /* output file options */

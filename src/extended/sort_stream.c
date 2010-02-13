@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -44,7 +44,7 @@ static int gt_sort_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
 
   if (!sort_stream->sorted) {
     while (!(had_err = gt_node_stream_next(sort_stream->in_stream, &node,
-                                               err)) && node) {
+                                           err)) && node) {
       gt_array_add(sort_stream->trees, node);
     }
     if (!had_err) {
@@ -56,8 +56,8 @@ static int gt_sort_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
   if (!had_err) {
     gt_assert(sort_stream->sorted);
     if (sort_stream->idx < gt_array_size(sort_stream->trees)) {
-      *gn = *(GtGenomeNode**)
-            gt_array_get(sort_stream->trees, sort_stream->idx);
+      *gn = *(GtGenomeNode**) gt_array_get(sort_stream->trees,
+                                           sort_stream->idx);
       sort_stream->idx++;
       return 0;
     }
