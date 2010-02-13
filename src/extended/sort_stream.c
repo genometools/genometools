@@ -59,6 +59,26 @@ static int gt_sort_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
       *gn = *(GtGenomeNode**) gt_array_get(sort_stream->trees,
                                            sort_stream->idx);
       sort_stream->idx++;
+      /* join region nodes with the same sequence ID */
+      if (gt_region_node_try_cast(*gn)) {
+        GtRange range_a, range_b;
+        while (sort_stream->idx < gt_array_size(sort_stream->trees)) {
+          node = *(GtGenomeNode**) gt_array_get(sort_stream->trees,
+                                                sort_stream->idx);
+          if (!gt_region_node_try_cast(node) ||
+              gt_str_cmp(gt_genome_node_get_seqid(*gn),
+                         gt_genome_node_get_seqid(node))) {
+            /* the next node is not a region node with the same ID */
+            break;
+          }
+          range_a = gt_genome_node_get_range(*gn);
+          range_b = gt_genome_node_get_range(node);
+          range_a = gt_range_join(&range_a, &range_b);
+          gt_genome_node_set_range(*gn, &range_a);
+          gt_genome_node_delete(node);
+          sort_stream->idx++;
+        }
+      }
       return 0;
     }
   }

@@ -795,6 +795,14 @@ Test do
       "#{$testdata}multi_feature_with_different_parent_2_tidy.gff3"
 end
 
+Name "gt gff3 join sequence regions with same ID (-sort)"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 -sort #{$testdata}sequence_region_1.gff3 " +
+           "#{$testdata}sequence_region_2.gff3 "
+  run "diff #{$last_stdout} #{$testdata}sequence_region_joined.gff3"
+end
+
 Name "custom_stream (C)"
 Keywords "gt_gff3 examples"
 Test do

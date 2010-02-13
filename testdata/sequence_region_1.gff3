@@ -1,0 +1,11 @@
+##gff-version   3
+##sequence-region   I 2064302 12995457
+I	Coding_transcript	gene	2064302	2064690	.	+	.	ID=gene1;Alias=Y37E3.3;Name=WBGene00021347
+I	Coding_transcript	exon	2064302	2064400	.	+	.	Parent=gene1
+I	Coding_transcript	mRNA	2064302	2064690	.	+	.	ID=mRNA1;Parent=gene1;Alias=WBGene00021347;prediction_status=Confirmed;Note=Y37E3.3;Dbxref=CDS:Y37E3.3,WormPep:WP:CE26662;Name=Y37E3.3
+I	Coding_transcript	five_prime_UTR	2064302	2064306	.	+	.	Parent=mRNA1;Name=Y37E3.3
+I	Coding_transcript	CDS	2064307	2064400	.	+	.	Parent=mRNA1;Name=Y37E3.3
+I	Coding_transcript	CDS	2064452	2064561	.	+	2	Parent=mRNA1;Name=Y37E3.3
+I	Coding_transcript	three_prime_UTR	2064562	2064690	.	+	.	Parent=mRNA1;Name=Y37E3.3
+I	Coding_transcript	intron	2064401	2064451	.	+	.	Parent=gene1;confirmed_est=yk498f7.3
+I	Coding_transcript	exon	2064452	2064690	.	+	.	Parent=gene1

@@ -1,0 +1,32 @@
+##gff-version   3
+##sequence-region   I 2006120 12995457
+I	Coding_transcript	gene	2006120	2010481	.	-	.	ID=gene1;Alias=Y20F4.3;Name=WBGene00021238
+I	Coding_transcript	exon	2006120	2006306	.	-	.	Parent=gene1
+I	Coding_transcript	mRNA	2006120	2010481	.	-	.	ID=mRNA1;Parent=gene1;Alias=WBGene00021238;prediction_status=Predicted;Note=Y20F4.3;Dbxref=CDS:Y20F4.3,WormPep:WP:CE40152;Name=Y20F4.3
+I	Coding_transcript	CDS	2006120	2006306	.	-	1	Parent=mRNA1;Name=Y20F4.3
+I	Coding_transcript	CDS	2007324	2007568	.	-	.	Parent=mRNA1;Name=Y20F4.3
+I	Coding_transcript	CDS	2008590	2008772	.	-	.	Parent=mRNA1;Name=Y20F4.3
+I	Coding_transcript	CDS	2009865	2009961	.	-	1	Parent=mRNA1;Name=Y20F4.3
+I	Coding_transcript	CDS	2010006	2010259	.	-	.	Parent=mRNA1;Name=Y20F4.3
+I	Coding_transcript	CDS	2010407	2010481	.	-	.	Parent=mRNA1;Name=Y20F4.3
+I	Coding_transcript	intron	2006307	2007323	.	-	.	Parent=gene1
+I	Coding_transcript	exon	2007324	2007568	.	-	.	Parent=gene1
+I	Coding_transcript	intron	2007569	2008589	.	-	.	Parent=gene1
+I	Coding_transcript	exon	2008590	2008772	.	-	.	Parent=gene1
+I	Coding_transcript	intron	2008773	2009864	.	-	.	Parent=gene1
+I	Coding_transcript	exon	2009865	2009961	.	-	.	Parent=gene1
+I	Coding_transcript	intron	2009962	2010005	.	-	.	Parent=gene1
+I	Coding_transcript	exon	2010006	2010259	.	-	.	Parent=gene1
+I	Coding_transcript	intron	2010260	2010406	.	-	.	Parent=gene1
+I	Coding_transcript	exon	2010407	2010481	.	-	.	Parent=gene1
+###
+I	Coding_transcript	gene	2064302	2064690	.	+	.	ID=gene2;Alias=Y37E3.3;Name=WBGene00021347
+I	Coding_transcript	exon	2064302	2064400	.	+	.	Parent=gene2
+I	Coding_transcript	mRNA	2064302	2064690	.	+	.	ID=mRNA2;Parent=gene2;Alias=WBGene00021347;prediction_status=Confirmed;Note=Y37E3.3;Dbxref=CDS:Y37E3.3,WormPep:WP:CE26662;Name=Y37E3.3
+I	Coding_transcript	five_prime_UTR	2064302	2064306	.	+	.	Parent=mRNA2;Name=Y37E3.3
+I	Coding_transcript	CDS	2064307	2064400	.	+	.	Parent=mRNA2;Name=Y37E3.3
+I	Coding_transcript	CDS	2064452	2064561	.	+	2	Parent=mRNA2;Name=Y37E3.3
+I	Coding_transcript	three_prime_UTR	2064562	2064690	.	+	.	Parent=mRNA2;Name=Y37E3.3
+I	Coding_transcript	intron	2064401	2064451	.	+	.	Parent=gene2;confirmed_est=yk498f7.3
+I	Coding_transcript	exon	2064452	2064690	.	+	.	Parent=gene2
+###

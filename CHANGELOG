@@ -1,7 +1,8 @@
-changes in version 1.3.5 (2010-01-18)
+changes in version 1.3.5 (2010-02-13)
 
 - `gt gff3 -tidy` cleans up multi-features with different parents
 - `gt stat` shows number of multi-features
+- `gt gff3 -sort` joins sequence regions with the same ID
 
 
 changes in version 1.3.4 (2009-11-19)

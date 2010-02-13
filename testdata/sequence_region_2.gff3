@@ -1,0 +1,21 @@
+##gff-version   3
+##sequence-region   I 2006120 12983734
+I	Coding_transcript	gene	2006120	2010481	.	-	.	ID=gene1;Alias=Y20F4.3;Name=WBGene00021238
+I	Coding_transcript	exon	2006120	2006306	.	-	.	Parent=gene1
+I	Coding_transcript	mRNA	2006120	2010481	.	-	.	ID=mRNA1;Parent=gene1;Alias=WBGene00021238;prediction_status=Predicted;Note=Y20F4.3;Dbxref=CDS:Y20F4.3,WormPep:WP:CE40152;Name=Y20F4.3
+I	Coding_transcript	CDS	2006120	2006306	.	-	1	Parent=mRNA1;Name=Y20F4.3
+I	Coding_transcript	CDS	2007324	2007568	.	-	.	Parent=mRNA1;Name=Y20F4.3
+I	Coding_transcript	CDS	2008590	2008772	.	-	.	Parent=mRNA1;Name=Y20F4.3
+I	Coding_transcript	CDS	2009865	2009961	.	-	1	Parent=mRNA1;Name=Y20F4.3
+I	Coding_transcript	CDS	2010006	2010259	.	-	.	Parent=mRNA1;Name=Y20F4.3
+I	Coding_transcript	CDS	2010407	2010481	.	-	.	Parent=mRNA1;Name=Y20F4.3
+I	Coding_transcript	intron	2006307	2007323	.	-	.	Parent=gene1
+I	Coding_transcript	exon	2007324	2007568	.	-	.	Parent=gene1
+I	Coding_transcript	intron	2007569	2008589	.	-	.	Parent=gene1
+I	Coding_transcript	exon	2008590	2008772	.	-	.	Parent=gene1
+I	Coding_transcript	intron	2008773	2009864	.	-	.	Parent=gene1
+I	Coding_transcript	exon	2009865	2009961	.	-	.	Parent=gene1
+I	Coding_transcript	intron	2009962	2010005	.	-	.	Parent=gene1
+I	Coding_transcript	exon	2010006	2010259	.	-	.	Parent=gene1
+I	Coding_transcript	intron	2010260	2010406	.	-	.	Parent=gene1
+I	Coding_transcript	exon	2010407	2010481	.	-	.	Parent=gene1
