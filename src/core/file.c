@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2005-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -227,20 +227,38 @@ void gt_file_unget_char(GtFile *genfile, char c)
 
 static int vgzprintf(gzFile file, const char *format, va_list va)
 {
-  char buf[BUFSIZ];
-  int len;
+  char buf[BUFSIZ], *dynbuf;
+  int len, rval;
   len = vsnprintf(buf, sizeof (buf), format, va);
-  gt_assert(len <= BUFSIZ);
-  return gzwrite(file, buf, (unsigned) len);
+  if (len > BUFSIZ) {
+    /* static buffer was to small -> use dynamic one */
+    dynbuf = gt_malloc(len * sizeof (char));
+    rval = vsnprintf(dynbuf, sizeof (dynbuf), format, va);
+    gt_assert(rval == len);
+    rval = gzwrite(file, dynbuf, len);
+    gt_free(dynbuf);
+  }
+  else
+    rval = gzwrite(file, buf, len);
+  return rval;
 }
 
 static int vbzprintf(BZFILE *file, const char *format, va_list va)
 {
-  char buf[BUFSIZ];
-  int len;
+  char buf[BUFSIZ], *dynbuf;
+  int len, rval;
   len = vsnprintf(buf, sizeof (buf), format, va);
-  gt_assert(len <= BUFSIZ);
-  return BZ2_bzwrite(file, buf, len);
+  if (len > BUFSIZ) {
+    /* static buffer was to small -> use dynamic one */
+    dynbuf = gt_malloc(len * sizeof (char));
+    rval = vsnprintf(buf, sizeof (buf), format, va);
+    gt_assert(rval == len);
+    rval =BZ2_bzwrite(file, dynbuf, len);
+    gt_free(dynbuf);
+  }
+  else
+    rval = BZ2_bzwrite(file, buf, len);
+  return rval;
 }
 
 static int xvprintf(GtFile *genfile, const char *format, va_list va)
@@ -271,8 +289,7 @@ void gt_file_xprintf(GtFile *genfile, const char *format, ...)
   va_list va;
   va_start(va, format);
   if (xvprintf(genfile, format, va) < 0) {
-    fprintf(stderr,
-            "gt_file_xprintf(): xvprintf() returned negative value\n");
+    fprintf(stderr, "gt_file_xprintf(): xvprintf() returned negative value\n");
     exit(EXIT_FAILURE);
   }
   va_end(va);

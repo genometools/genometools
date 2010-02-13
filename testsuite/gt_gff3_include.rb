@@ -803,6 +803,18 @@ Test do
   run "diff #{$last_stdout} #{$testdata}sequence_region_joined.gff3"
 end
 
+Name "gt gff3 print very long attributes (-gzip)"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 -gzip -o out.gff3.gz -sort #{$testdata}dynbuf.gff3"
+end
+
+Name "gt gff3 print very long attributes (-bzip2)"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 -bzip2 -o out.gff3.bz2 -sort #{$testdata}dynbuf.gff3"
+end
+
 Name "custom_stream (C)"
 Keywords "gt_gff3 examples"
 Test do
