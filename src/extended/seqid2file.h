@@ -22,11 +22,11 @@
 #include "extended/region_mapping.h"
 
 /* add the options -seqfile and -regionmapping to the given option parser */
-void           gt_seqid2file_options(GtOptionParser*, GtStr *seqfile,
-                                  GtStr *regionmapping);
+void             gt_seqid2file_options(GtOptionParser*, GtStr *seqfile,
+                                       GtStr *regionmapping);
 
 GtRegionMapping* gt_seqid2file_regionmapping_new(GtStr *seqfile,
-                                            GtStr *regionmapping,
-                                            GtError*);
+                                                 GtStr *regionmapping,
+                                                 GtError*);
 
 #endif

@@ -31,7 +31,7 @@
 typedef struct {
   bool verbose;
   GtStr *seqfile,
-      *regionmapping;
+        *regionmapping;
 } CDSArguments;
 
 static void *gt_cds_arguments_new(void)
@@ -93,7 +93,8 @@ static int gt_cds_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
 
   /* create region mapping */
   regionmapping = gt_seqid2file_regionmapping_new(arguments->seqfile,
-                                               arguments->regionmapping, err);
+                                                  arguments->regionmapping,
+                                                  err);
   if (!regionmapping)
     had_err = -1;
 
@@ -124,8 +125,8 @@ static int gt_cds_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
 GtTool *gt_cds(void)
 {
   return gt_tool_new(gt_cds_arguments_new,
-                  gt_cds_arguments_delete,
-                  gt_cds_option_parser_new,
-                  NULL,
-                  gt_cds_runner);
+                     gt_cds_arguments_delete,
+                     gt_cds_option_parser_new,
+                     NULL,
+                     gt_cds_runner);
 }

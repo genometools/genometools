@@ -25,15 +25,15 @@ void gt_seqid2file_options(GtOptionParser *op, GtStr *seqfile,
 
   /* -seqfile */
   seqfile_option = gt_option_new_string("seqfile", "set the sequence file from "
-                                     "which to extract the features", seqfile,
-                                     NULL);
+                                        "which to extract the features",
+                                        seqfile, NULL);
   gt_option_parser_add_option(op, seqfile_option);
 
   /* -regionmapping */
   regionmapping_option = gt_option_new_string("regionmapping", "set file "
-                                           "containing sequence-region to "
-                                           "sequence file mapping",
-                                           regionmapping, NULL);
+                                              "containing sequence-region to "
+                                              "sequence file mapping",
+                                              regionmapping, NULL);
   gt_option_parser_add_option(op, regionmapping_option);
 
   /* either option -seqfile or -regionmapping is mandatory */
@@ -44,8 +44,8 @@ void gt_seqid2file_options(GtOptionParser *op, GtStr *seqfile,
 }
 
 GtRegionMapping* gt_seqid2file_regionmapping_new(GtStr *seqfile,
-                                            GtStr *regionmapping,
-                                            GtError *err)
+                                                 GtStr *regionmapping,
+                                                 GtError *err)
 {
   gt_error_check(err);
   gt_assert(seqfile && regionmapping);
