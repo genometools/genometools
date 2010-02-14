@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -37,18 +37,13 @@ static int extract_join_feature(GtGenomeNode *gn, const char *type,
 
   if (gt_feature_node_has_type(gf, type)) {
     had_err = gt_region_mapping_get_raw_sequence(region_mapping, &raw_sequence,
-                                              gt_genome_node_get_seqid(gn),
-                                              err);
+                                                 &raw_sequence_length,
+                                                 gt_genome_node_get_seqid(gn),
+                                                 err);
     if (!had_err) {
       range = gt_genome_node_get_range(gn);
       gt_assert(range.start); /* 1-based coordinates */
       raw_sequence += range.start - 1;
-      had_err = gt_region_mapping_get_raw_sequence_length(region_mapping,
-                                                       &raw_sequence_length,
-                                                   gt_genome_node_get_seqid(gn),
-                                                       err);
-    }
-    if (!had_err) {
       gt_assert(range.end <= raw_sequence_length);
       gt_str_append_cstr_nt(sequence, raw_sequence, gt_range_length(&range));
       if (gt_feature_node_get_strand(gf) == GT_STRAND_REVERSE)
@@ -98,18 +93,13 @@ int gt_extract_feat_sequence(GtStr *sequence, GtGenomeNode *gn,
     /* otherwise we only have to look this feature */
     range = gt_genome_node_get_range(gn);
     gt_assert(range.start); /* 1-based coordinates */
-    had_err = gt_region_mapping_get_raw_sequence_length(region_mapping,
-                                                     &raw_sequence_length,
-                                                   gt_genome_node_get_seqid(gn),
-                                                     err);
+    had_err = gt_region_mapping_get_raw_sequence(region_mapping,
+                                                 &raw_sequence,
+                                                 &raw_sequence_length,
+                                                 gt_genome_node_get_seqid(gn),
+                                                 err);
     if (!had_err) {
       gt_assert(range.end <= raw_sequence_length);
-      had_err = gt_region_mapping_get_raw_sequence(region_mapping,
-                                                &raw_sequence,
-                                                gt_genome_node_get_seqid(gn),
-                                                err);
-    }
-    if (!had_err) {
       gt_str_append_cstr_nt(sequence, raw_sequence + range.start - 1,
                             gt_range_length(&range));
       if (gt_feature_node_get_strand(gf) == GT_STRAND_REVERSE) {

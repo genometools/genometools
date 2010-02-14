@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -62,20 +62,15 @@ static int extract_cds_if_necessary(GtGenomeNode *gn, void *data,
        gt_feature_node_get_strand(gf) == GT_STRAND_REVERSE)) {
     had_err = gt_region_mapping_get_raw_sequence(v->region_mapping,
                                                  &raw_sequence,
+                                                 &raw_sequence_length,
                                                  gt_genome_node_get_seqid(gn),
                                                  err);
     if (!had_err) {
       range = gt_genome_node_get_range(gn);
       gt_assert(range.start && range.end); /* 1-based coordinates */
-      had_err = gt_region_mapping_get_raw_sequence_length(v->region_mapping,
-                                                       &raw_sequence_length,
-                                                   gt_genome_node_get_seqid(gn),
-                                                       err);
-    }
-    if (!had_err) {
       gt_assert(range.end <= raw_sequence_length);
       gt_splicedseq_add(v->splicedseq, range.start - 1, range.end - 1,
-                     raw_sequence);
+                        raw_sequence);
     }
   }
   return had_err;

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -70,11 +70,8 @@ static int process_intron(GtSpliceSiteInfoVisitor *ssiv, GtGenomeNode *intron,
   if (gt_range_length(&range) >= 4) {
     seqid = gt_genome_node_get_seqid(intron);
     had_err = gt_region_mapping_get_raw_sequence(ssiv->region_mapping,
-                                                 &sequence, seqid, err);
-    if (!had_err) {
-      had_err = gt_region_mapping_get_raw_sequence_length(ssiv->region_mapping,
-                                                          &seqlen, seqid, err);
-    }
+                                                 &sequence, &seqlen, seqid,
+                                                 err);
     if (!had_err) {
       gt_assert(range.end <= seqlen);
       strand = gt_feature_node_get_strand((GtFeatureNode*) intron);

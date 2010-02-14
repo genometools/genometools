@@ -29,12 +29,9 @@ GtRegionMapping* gt_region_mapping_new_seqfile(GtStr *sequence_filename,
                                                bool usedesc);
 GtRegionMapping* gt_region_mapping_ref(GtRegionMapping*);
 int              gt_region_mapping_get_raw_sequence(GtRegionMapping*,
-                                                    const char **raw,
+                                                    const char **rawseq,
+                                                    unsigned long *length,
                                                     GtStr *seqid, GtError*);
-int              gt_region_mapping_get_raw_sequence_length(GtRegionMapping*,
-                                                           unsigned long*,
-                                                           GtStr *seqid,
-                                                           GtError*);
 void             gt_region_mapping_delete(GtRegionMapping*);
 
 #endif

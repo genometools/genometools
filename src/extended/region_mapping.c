@@ -105,28 +105,18 @@ static int update_bioseq_if_necessary(GtRegionMapping *rm, GtStr *seqid,
   return had_err;
 }
 
-int gt_region_mapping_get_raw_sequence(GtRegionMapping *rm, const char **raw,
-                                       GtStr *seqid, GtError *err)
+int gt_region_mapping_get_raw_sequence(GtRegionMapping *rm, const char **rawseq,
+                                       unsigned long *length, GtStr *seqid,
+                                       GtError *err)
 {
   int had_err = 0;
   gt_error_check(err);
-  gt_assert(rm && raw && seqid);
+  gt_assert(rm && rawseq && length && seqid);
   had_err = update_bioseq_if_necessary(rm, seqid, err);
-  if (!had_err)
-    *raw = gt_bioseq_get_raw_sequence(rm->bioseq);
-  return had_err;
-}
-
-int gt_region_mapping_get_raw_sequence_length(GtRegionMapping *rm,
-                                              unsigned long *length,
-                                              GtStr *seqid, GtError *err)
-{
-  int had_err = 0;
-  gt_error_check(err);
-  gt_assert(rm && length && seqid);
-  had_err = update_bioseq_if_necessary(rm, seqid, err);
-  if (!had_err)
+  if (!had_err) {
+    *rawseq = gt_bioseq_get_raw_sequence(rm->bioseq);
     *length = gt_bioseq_get_raw_sequence_length(rm->bioseq);
+  }
   return had_err;
 }
 
