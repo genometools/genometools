@@ -31,6 +31,7 @@ void gt_seqid2file_options(GtOptionParser *op, GtStr *seqfile, bool *usedesc,
 
   /* -usedesc */
   usedesc_option = gt_option_new_bool("usedesc", "XXX", usedesc, false);
+  gt_option_is_development_option(usedesc_option);
   gt_option_parser_add_option(op, usedesc_option);
 
   /* -regionmapping */
