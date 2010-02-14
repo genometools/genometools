@@ -30,7 +30,7 @@ typedef struct {
   unsigned long num_of_files,
                 *num_of_sequences;
   GtStr ***store;
-  long **offsets;
+  unsigned long **offsets;
 } SeqidStore;
 
 static SeqidStore* seqid_store_new(GthInput *input)
@@ -54,7 +54,7 @@ static SeqidStore* seqid_store_new(GthInput *input)
   /* initialize offsets to undefined values */
   for (i = 0; i < ss->num_of_files; i++) {
     for (j = 0; j < ss->num_of_sequences[i]; j++)
-      ss->offsets[i][j] = GT_UNDEF_LONG;
+      ss->offsets[i][j] = GT_UNDEF_ULONG;
   }
   return ss;
 }
@@ -77,7 +77,8 @@ static void seqid_store_delete(SeqidStore *ss)
 }
 
 static void seqid_store_add(SeqidStore *ss, unsigned long filenum,
-                            unsigned long seqnum, GtStr *seqid, long offset)
+                            unsigned long seqnum, GtStr *seqid,
+                            unsigned long offset)
 {
   gt_assert(ss && seqid);
   gt_assert(gt_str_length(seqid)); /* is not empty */
@@ -85,7 +86,7 @@ static void seqid_store_add(SeqidStore *ss, unsigned long filenum,
   gt_assert(seqnum < ss->num_of_sequences[filenum]);
   gt_assert(!ss->store[filenum][seqnum]); /* is unused */
   ss->store[filenum][seqnum] = gt_str_clone(seqid);
-  ss->offsets[filenum][seqnum] = offset == GT_UNDEF_LONG ? 1 : offset;
+  ss->offsets[filenum][seqnum] = offset == GT_UNDEF_ULONG ? 1 : offset;
 }
 
 static GtStr* seqid_store_get(SeqidStore *ss, unsigned long filenum,
@@ -101,15 +102,15 @@ static GtStr* seqid_store_get(SeqidStore *ss, unsigned long filenum,
   return seqid;
 }
 
-static long seqid_store_offset(SeqidStore *ss, unsigned long filenum,
-                               unsigned long seqnum)
+static unsigned long seqid_store_offset(SeqidStore *ss, unsigned long filenum,
+                                        unsigned long seqnum)
 {
-  long offset;
+  unsigned long offset;
   gt_assert(ss);
   gt_assert(filenum < ss->num_of_files);
   gt_assert(seqnum < ss->num_of_sequences[filenum]);
   offset = ss->offsets[filenum][seqnum];
-  gt_assert(offset != GT_UNDEF_LONG); /* is defined */
+  gt_assert(offset != GT_UNDEF_ULONG); /* is defined */
   return offset;
 }
 
@@ -138,10 +139,9 @@ void gth_region_factory_delete(GthRegionFactory *srf)
 
 /* Range descriptions have the folowing format: III:1000001..2000000
    That is, the part between ':' and '..' denotes the offset. */
-static long parse_description_range(const char *description)
+static unsigned long parse_description_range(const char *description)
 {
-  long offset;
-  unsigned long i, desclen;
+  unsigned long i, desclen, offset;
   char *desc;
   gt_assert(description);
   desc = gt_xstrdup(description);
@@ -154,7 +154,7 @@ static long parse_description_range(const char *description)
   if (i == desclen) {
     /* no ':' found */
     gt_free(desc);
-    return GT_UNDEF_LONG;
+    return GT_UNDEF_ULONG;
   }
   desc += i + 1;
   /* find '..' */
@@ -167,15 +167,15 @@ static long parse_description_range(const char *description)
   if (desc[i] == '\0') {
     /* no '..' found */
     gt_free(desc);
-    return GT_UNDEF_LONG;
+    return GT_UNDEF_ULONG;
   }
   /* parse range */
   gt_assert(desc[i-1] == '.' && desc[i] == '.');
   desc[i-1] = '\0';
-  if (gt_parse_long(&offset, desc)) {
+  if (gt_parse_ulong(&offset, desc)) {
     /* parsing failed */
     gt_free(desc);
-    return GT_UNDEF_LONG;
+    return GT_UNDEF_ULONG;
   }
   gt_free(desc);
   return offset;
@@ -190,7 +190,7 @@ static void make_sequence_region(GtHashmap *sequence_regions,
 {
   GtGenomeNode *sr = NULL;
   GtRange range;
-  long offset = GT_UNDEF_LONG;
+  unsigned long offset = GT_UNDEF_ULONG;
   gt_assert(sequence_regions && sequenceid && srf && input);
   if (gth_input_use_substring_spec(input)) {
     range.start = gth_input_genomic_substring_from(input);
@@ -205,13 +205,13 @@ static void make_sequence_region(GtHashmap *sequence_regions,
     offset = parse_description_range(gt_str_get(description));
     gt_str_delete(description);
   }
-  if (offset != GT_UNDEF_LONG)
+  if (offset != GT_UNDEF_ULONG)
     range = gt_range_offset(&range, offset);
   else
     range = gt_range_offset(&range, 1); /* 1-based */
   if (!gt_str_length(sequenceid) ||
       (gt_cstr_table_get(srf->used_seqids, gt_str_get(sequenceid)) &&
-       offset == GT_UNDEF_LONG)) {
+       offset == GT_UNDEF_ULONG)) {
     /* sequenceid is empty or exists already (and no offset has been parsed)
        -> make one up */
     GtStr *seqid;
