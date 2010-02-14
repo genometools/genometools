@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2005-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -163,6 +163,14 @@ void gt_xungetc(int c, FILE *stream)
 {
   if (ungetc(c, stream) == EOF) {
     fprintf(stderr, "cannot ungetc character '%c'\n", c);
+    exit(EXIT_FAILURE);
+  }
+}
+
+void gt_xvfprintf(FILE *stream, const char *format, va_list ap)
+{
+  if (vfprintf(stream, format, ap) < 0) {
+    perror("cannot vfprintf");
     exit(EXIT_FAILURE);
   }
 }
