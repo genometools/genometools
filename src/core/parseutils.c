@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -20,9 +20,11 @@
 #include <stdio.h>
 #include <string.h>
 #include "core/assert_api.h"
+#include "core/ma_api.h"
 #include "core/parseutils.h"
 #include "core/undef.h"
 #include "core/warning_api.h"
+#include "core/xansi.h"
 
 int gt_parse_int(int *out, const char *nptr)
 {
@@ -274,4 +276,46 @@ int gt_parse_int_line(int *int_value, const char *integer,
     return -1;
   }
   return 0;
+}
+
+unsigned long gt_parse_description_range(const char *description)
+{
+  unsigned long i, desclen, offset;
+  char *desc;
+  gt_assert(description);
+  desc = gt_xstrdup(description);
+  desclen = strlen(desc);
+  /* find ':' */
+  for (i = 0; i < desclen; i++) {
+    if (desc[i] == ':')
+      break;
+  }
+  if (i == desclen) {
+    /* no ':' found */
+    gt_free(desc);
+    return GT_UNDEF_ULONG;
+  }
+  desc += i + 1;
+  /* find '..' */
+  i = 0;
+  while (desc[i] != '\0') {
+    if (desc[i-1] == '.' && desc[i] == '.')
+      break;
+    i++;
+  }
+  if (desc[i] == '\0') {
+    /* no '..' found */
+    gt_free(desc);
+    return GT_UNDEF_ULONG;
+  }
+  /* parse range */
+  gt_assert(desc[i-1] == '.' && desc[i] == '.');
+  desc[i-1] = '\0';
+  if (gt_parse_ulong(&offset, desc)) {
+    /* parsing failed */
+    gt_free(desc);
+    return GT_UNDEF_ULONG;
+  }
+  gt_free(desc);
+  return offset;
 }

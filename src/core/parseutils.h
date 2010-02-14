@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -67,5 +67,11 @@ int gt_parse_phase(GtPhase*, const char *phase,
 
 int gt_parse_int_line(int*, const char *integer,
                       unsigned int line_number, const char *filename, GtError*);
+
+/* Parse the range description offset in the given <description> and return it.
+   If the description cannot be parsed, <GT_UNDEF_ULONG> is returned.
+   Range descriptions have the folowing format: III:1000001..2000000
+   That is, the part between ':' and '..' denotes the offset. */
+unsigned long gt_parse_description_range(const char *description);
 
 #endif

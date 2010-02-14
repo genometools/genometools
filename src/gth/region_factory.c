@@ -23,7 +23,6 @@
 #include "core/parseutils.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
-#include "core/xansi.h"
 #include "gth/region_factory.h"
 
 typedef struct {
@@ -137,50 +136,6 @@ void gth_region_factory_delete(GthRegionFactory *srf)
   gt_free(srf);
 }
 
-/* Range descriptions have the folowing format: III:1000001..2000000
-   That is, the part between ':' and '..' denotes the offset. */
-static unsigned long parse_description_range(const char *description)
-{
-  unsigned long i, desclen, offset;
-  char *desc;
-  gt_assert(description);
-  desc = gt_xstrdup(description);
-  desclen = strlen(desc);
-  /* find ':' */
-  for (i = 0; i < desclen; i++) {
-    if (desc[i] == ':')
-      break;
-  }
-  if (i == desclen) {
-    /* no ':' found */
-    gt_free(desc);
-    return GT_UNDEF_ULONG;
-  }
-  desc += i + 1;
-  /* find '..' */
-  i = 0;
-  while (desc[i] != '\0') {
-    if (desc[i-1] == '.' && desc[i] == '.')
-      break;
-    i++;
-  }
-  if (desc[i] == '\0') {
-    /* no '..' found */
-    gt_free(desc);
-    return GT_UNDEF_ULONG;
-  }
-  /* parse range */
-  gt_assert(desc[i-1] == '.' && desc[i] == '.');
-  desc[i-1] = '\0';
-  if (gt_parse_ulong(&offset, desc)) {
-    /* parsing failed */
-    gt_free(desc);
-    return GT_UNDEF_ULONG;
-  }
-  gt_free(desc);
-  return offset;
-}
-
 static void make_sequence_region(GtHashmap *sequence_regions,
                                  GtStr *sequenceid,
                                  GthRegionFactory *srf,
@@ -202,7 +157,7 @@ static void make_sequence_region(GtHashmap *sequence_regions,
   if (srf->use_desc_ranges) {
     GtStr *description = gt_str_new();
     gth_input_get_genomic_description(input, description, filenum, seqnum);
-    offset = parse_description_range(gt_str_get(description));
+    offset = gt_parse_description_range(gt_str_get(description));
     gt_str_delete(description);
   }
   if (offset != GT_UNDEF_ULONG)
