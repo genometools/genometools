@@ -15,6 +15,24 @@
    fun:png_write_filtered_row
 }
 {
+   <zlib>
+   Memcheck:Cond
+   fun:longest_match
+   fun:deflate_slow
+   fun:deflate
+   fun:do_flush
+   fun:gzclose
+   ...
+}
+{
+   <zlib>
+   Memcheck:Cond
+   fun:deflate_slow
+   fun:deflate
+   fun:gzclose
+   ...
+}
+{
    toy_font_static_data_problem
    Memcheck:Leak
    obj:*libfreetype*
