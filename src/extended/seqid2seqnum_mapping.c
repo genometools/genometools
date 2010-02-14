@@ -16,6 +16,9 @@
 
 #include "core/hashmap_api.h"
 #include "core/ma_api.h"
+#include "core/parseutils.h"
+#include "core/undef.h"
+#include "core/xansi.h"
 #include "extended/seqid2seqnum_mapping.h"
 
 struct GtSeqid2SeqnumMapping {
@@ -27,11 +30,30 @@ struct GtSeqid2SeqnumMapping {
 static int fill_mapping(GtSeqid2SeqnumMapping *mapping, GtBioseq *bioseq,
                         GtError *err)
 {
+  unsigned long i, j, offset;
   gt_error_check(err);
   gt_assert(mapping && bioseq);
-
-  /* XXX */
-
+  for (i = 0; i < gt_bioseq_number_of_sequences(bioseq); i++) {
+    const char *desc = gt_bioseq_get_description(bioseq, i);
+    mapping->seqnums[i] = i;
+    if ((offset = gt_parse_description_range(desc)) == GT_UNDEF_ULONG) {
+      /* no offset could be parsed -> store description as sequence id */
+      gt_hashmap_add(mapping->map, gt_xstrdup(desc), mapping->seqnums + i);
+      mapping->offsets[i] = 1;
+    }
+    else {
+      char *dup;
+      /* offset could be parsed -> store description up to ':' as sequence id */
+      j = 0;
+      while (desc[j] != ':')
+        j++;
+      dup = gt_malloc((j + 1) * sizeof *dup);
+      strncpy(dup, desc, j);
+      dup[j] = '\0';
+      gt_hashmap_add(mapping->map, dup, mapping->seqnums + i);
+      mapping->offsets[i] = offset;
+    }
+  }
   return 0;
 }
 
@@ -43,7 +65,7 @@ GtSeqid2SeqnumMapping* gt_seqid2seqnum_mapping_new(GtBioseq *bioseq,
   gt_error_check(err);
   gt_assert(bioseq);
   mapping = gt_malloc(sizeof *mapping);
-  mapping->map = gt_hashmap_new(GT_HASH_DIRECT, gt_free_func, NULL);
+  mapping->map = gt_hashmap_new(GT_HASH_STRING, gt_free_func, NULL);
   num_of_seqs = gt_bioseq_number_of_sequences(bioseq);
   mapping->seqnums = gt_malloc(num_of_seqs * sizeof *mapping->seqnums);
   mapping->offsets = gt_malloc(num_of_seqs * sizeof *mapping->offsets);
@@ -67,11 +89,15 @@ int gt_seqid2seqnum_mapping_map(GtSeqid2SeqnumMapping *mapping,
                                 const char *seqid, unsigned long *seqnum,
                                 unsigned long *offset, GtError *err)
 {
+  unsigned long *seqval;
   gt_error_check(err);
   gt_assert(mapping && seqid && seqnum && offset);
-
-  /* XXX */
-  *offset = 1;
-
+  if (!(seqval = gt_hashmap_get(mapping->map, seqid))) {
+    gt_error_set(err, "sequence ID to sequence number mapping does not contain "
+                      "a sequence with ID \"%s\"", seqid);
+    return -1;
+  }
+  *seqnum = *seqval;
+  *offset = mapping->offsets[*seqval];
   return 0;
 }

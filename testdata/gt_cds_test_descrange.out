@@ -1,0 +1,6 @@
+##gff-version   3
+##sequence-region   dna 101 109
+dna	.	gene	101	109	.	+	.	ID=gene1
+dna	.	exon	101	109	.	+	.	Parent=gene1
+dna	gt cds	CDS	101	109	.	+	0	Parent=gene1
+###

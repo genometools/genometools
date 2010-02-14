@@ -125,7 +125,7 @@ int gt_region_mapping_get_raw_sequence(GtRegionMapping *rm, const char **rawseq,
   if (!had_err) {
     if (rm->usedesc) {
       unsigned long seqnum;
-      gt_assert(!rm->seqid2seqnum_mapping);
+      gt_assert(rm->seqid2seqnum_mapping);
       had_err = gt_seqid2seqnum_mapping_map(rm->seqid2seqnum_mapping,
                                             gt_str_get(seqid), &seqnum, offset,
                                             err);
@@ -138,6 +138,7 @@ int gt_region_mapping_get_raw_sequence(GtRegionMapping *rm, const char **rawseq,
       gt_assert(!rm->seqid2seqnum_mapping);
       *rawseq = gt_bioseq_get_raw_sequence(rm->bioseq);
       *length = gt_bioseq_get_raw_sequence_length(rm->bioseq);
+      *offset = 1;
     }
   }
   return had_err;

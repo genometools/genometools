@@ -30,7 +30,14 @@ void gt_seqid2file_options(GtOptionParser *op, GtStr *seqfile, bool *usedesc,
   gt_option_parser_add_option(op, seqfile_option);
 
   /* -usedesc */
-  usedesc_option = gt_option_new_bool("usedesc", "XXX", usedesc, false);
+  usedesc_option = gt_option_new_bool("usedesc", "use sequence descriptions to "
+                                      "map the sequence IDs (in GFF3) to "
+                                      "actual sequence entries.\nIf a "
+                                      "description contains a sequence range "
+                                      "(e.g., III:1000001..2000000), the first "
+                                      " part is used as sequence ID ('III') "
+                                      "and the first range as offset "
+                                      "('1000001')", usedesc, false);
   gt_option_is_development_option(usedesc_option);
   gt_option_parser_add_option(op, usedesc_option);
 
