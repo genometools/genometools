@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -28,8 +28,9 @@
 
 typedef struct {
   GtStr *seqfile,
-      *regionmapping;
-  bool addintrons;
+        *regionmapping;
+  bool addintrons,
+       usedesc;
 } SpliceSiteInfoArguments;
 
 static GtOPrval parse_options(int *parsed_args,
@@ -43,8 +44,9 @@ static GtOPrval parse_options(int *parsed_args,
   op = gt_option_parser_new("[option ...] [GFF3_file ...]", "Show information "
                          "about splice sites given in GFF3 files.");
 
-  /* -seqfile and -regionmapping */
-  gt_seqid2file_options(op, arguments->seqfile, arguments->regionmapping);
+  /* -seqfile, -usedesc and -regionmapping */
+  gt_seqid2file_options(op, arguments->seqfile, &arguments->usedesc,
+                        arguments->regionmapping);
 
   /* -addintrons */
   option = gt_option_new_bool("addintrons",
@@ -93,7 +95,9 @@ int gt_splicesiteinfo(int argc, const char **argv, GtError *err)
 
     /* create region mapping */
     regionmapping = gt_seqid2file_regionmapping_new(arguments.seqfile,
-                                                 arguments.regionmapping, err);
+                                                    arguments.usedesc,
+                                                    arguments.regionmapping,
+                                                    err);
     if (!regionmapping)
       had_err = -1;
   }

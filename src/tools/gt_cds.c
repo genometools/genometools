@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -29,7 +29,8 @@
 #define GT_CDS_SOURCE_TAG "gt cds"
 
 typedef struct {
-  bool verbose;
+  bool verbose,
+       usedesc;
   GtStr *seqfile,
         *regionmapping;
 } CDSArguments;
@@ -62,8 +63,9 @@ static GtOptionParser* gt_cds_option_parser_new(void *tool_arguments)
                             "Add CDS features to exon "
                             "features given in GFF3_file.");
 
-  /* -seqfile and -regionmapping */
-  gt_seqid2file_options(op, arguments->seqfile, arguments->regionmapping);
+  /* -seqfile, -usedesc and -regionmapping */
+  gt_seqid2file_options(op, arguments->seqfile, &arguments->usedesc,
+                        arguments->regionmapping);
 
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
@@ -93,6 +95,7 @@ static int gt_cds_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
 
   /* create region mapping */
   regionmapping = gt_seqid2file_regionmapping_new(arguments->seqfile,
+                                                  arguments->usedesc,
                                                   arguments->regionmapping,
                                                   err);
   if (!regionmapping)

@@ -31,7 +31,8 @@ static int region_mapping_lua_new_seqfile(lua_State *L)
   region_mapping = lua_newuserdata(L, sizeof (GtRegionMapping*));
   gt_assert(region_mapping);
   seqfile = gt_str_new_cstr(seqfilename);
-  *region_mapping = gt_region_mapping_new_seqfile(seqfile);
+  /* XXX: make second parameter available */
+  *region_mapping = gt_region_mapping_new_seqfile(seqfile, false);
   gt_str_delete(seqfile);
   luaL_getmetatable(L, REGION_MAPPING_METATABLE);
   lua_setmetatable(L, -2);

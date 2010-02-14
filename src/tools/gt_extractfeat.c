@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -29,7 +29,8 @@
 typedef struct {
   bool join,
        translate,
-       verbose;
+       verbose,
+       usedesc;
   GtStr *type,
         *seqfile,
         *regionmapping;
@@ -88,8 +89,9 @@ static GtOptionParser* gt_extractfeat_option_parser_new(void *tool_arguments)
                            false);
   gt_option_parser_add_option(op, option);
 
-  /* -seqfile and -regionmapping */
-  gt_seqid2file_options(op, arguments->seqfile, arguments->regionmapping);
+  /* -seqfile, -usedesc and -regionmapping */
+  gt_seqid2file_options(op, arguments->seqfile, &arguments->usedesc,
+                        arguments->regionmapping);
 
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
@@ -124,7 +126,9 @@ static int gt_extractfeat_runner(GT_UNUSED int argc, const char **argv,
 
     /* create region mapping */
     regionmapping = gt_seqid2file_regionmapping_new(arguments->seqfile,
-                                                 arguments->regionmapping, err);
+                                                    arguments->usedesc,
+                                                    arguments->regionmapping,
+                                                    err);
     if (!regionmapping)
       had_err = -1;
   }

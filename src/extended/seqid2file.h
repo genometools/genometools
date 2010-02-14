@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -23,9 +23,9 @@
 
 /* add the options -seqfile and -regionmapping to the given option parser */
 void             gt_seqid2file_options(GtOptionParser*, GtStr *seqfile,
-                                       GtStr *regionmapping);
+                                       bool *usedesc, GtStr *regionmapping);
 
-GtRegionMapping* gt_seqid2file_regionmapping_new(GtStr *seqfile,
+GtRegionMapping* gt_seqid2file_regionmapping_new(GtStr *seqfile, bool usedesc,
                                                  GtStr *regionmapping,
                                                  GtError*);
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -26,8 +26,9 @@
 
 struct GtRegionMapping {
   GtStr *sequence_filename,
-      *sequence_file, /* the (current) sequence file */
-      *sequence_name; /* the (current) sequence name */
+        *sequence_file, /* the (current) sequence file */
+        *sequence_name; /* the (current) sequence name */
+  bool usedesc;
   GtMapping *mapping;
   GtBioseq *bioseq; /* the current bioseq */
   unsigned int reference_count;
@@ -49,12 +50,14 @@ GtRegionMapping* gt_region_mapping_new_mapping(GtStr *mapping_filename,
   return rm;
 }
 
-GtRegionMapping* gt_region_mapping_new_seqfile(GtStr *sequence_filename)
+GtRegionMapping* gt_region_mapping_new_seqfile(GtStr *sequence_filename,
+                                               bool usedesc)
 {
   GtRegionMapping *rm;
   gt_assert(sequence_filename);
   rm = gt_calloc(1, sizeof (GtRegionMapping));
   rm->sequence_filename = gt_str_ref(sequence_filename);
+  rm->usedesc = usedesc;
   return rm;
 }
 
