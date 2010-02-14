@@ -253,7 +253,7 @@ static int vbzprintf(BZFILE *file, const char *format, va_list va)
     dynbuf = gt_malloc(len * sizeof (char));
     rval = vsnprintf(buf, sizeof (buf), format, va);
     gt_assert(rval == len);
-    rval =BZ2_bzwrite(file, dynbuf, len);
+    rval = BZ2_bzwrite(file, dynbuf, len);
     gt_free(dynbuf);
   }
   else
