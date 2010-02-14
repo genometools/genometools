@@ -225,58 +225,69 @@ void gt_file_unget_char(GtFile *genfile, char c)
   genfile->unget_used = true;
 }
 
-static int vgzprintf(gzFile file, const char *format, va_list va)
+static int vgzprintf(gzFile file, const char *format, va_list va, int buflen)
 {
-  char buf[BUFSIZ], *dynbuf;
-  int len, rval;
-  len = vsnprintf(buf, sizeof (buf), format, va);
-  if (len > BUFSIZ) {
-    /* static buffer was to small -> use dynamic one */
-    dynbuf = gt_malloc(len * sizeof (char));
-    rval = vsnprintf(dynbuf, sizeof (dynbuf), format, va);
-    gt_assert(rval == len);
-    rval = gzwrite(file, dynbuf, len);
+  int len;
+  if (!buflen) {
+    char buf[BUFSIZ];
+    /* no buffer length given -> try static buffer */
+    len = gt_xvsnprintf(buf, sizeof (buf), format, va);
+    if (len >= BUFSIZ) {
+      return len; /* unsuccessful trial -> return buffer length for next call */
+    }
+    gt_xgzwrite(file, buf, len);
+  }
+  else {
+    char *dynbuf;
+    /* buffer length given -> use dynamic buffer */
+    dynbuf = gt_malloc((buflen + 1) * sizeof (char));
+    len = gt_xvsnprintf(dynbuf, (buflen + 1) * sizeof (char), format, va);
+    gt_assert(len == buflen);
+    gt_xgzwrite(file, dynbuf, buflen);
     gt_free(dynbuf);
   }
-  else
-    rval = gzwrite(file, buf, len);
-  return rval;
+  return 0; /* success */
 }
 
-static int vbzprintf(BZFILE *file, const char *format, va_list va)
+static int vbzprintf(BZFILE *file, const char *format, va_list va, int buflen)
 {
-  char buf[BUFSIZ], *dynbuf;
-  int len, rval;
-  len = vsnprintf(buf, sizeof (buf), format, va);
-  if (len > BUFSIZ) {
-    /* static buffer was to small -> use dynamic one */
-    dynbuf = gt_malloc(len * sizeof (char));
-    rval = vsnprintf(buf, sizeof (buf), format, va);
-    gt_assert(rval == len);
-    rval = BZ2_bzwrite(file, dynbuf, len);
+  int len;
+  if (!buflen) {
+    char buf[BUFSIZ];
+    /* no buffer length given -> try static buffer */
+    len = gt_xvsnprintf(buf, sizeof (buf), format, va);
+    if (len >= BUFSIZ)
+      return len; /* unsuccessful trial -> return buffer length for next call */
+    gt_xbzwrite(file, buf, len);
+  }
+  else {
+    char *dynbuf;
+    /* buffer length given -> use dynamic buffer */
+    dynbuf = gt_malloc((buflen + 1) * sizeof (char));
+    len = gt_xvsnprintf(dynbuf, (buflen + 1) * sizeof (char), format, va);
+    gt_assert(len == buflen);
+    gt_xbzwrite(file, dynbuf, buflen);
     gt_free(dynbuf);
   }
-  else
-    rval = BZ2_bzwrite(file, buf, len);
-  return rval;
+  return 0; /* success */
 }
 
-static int xvprintf(GtFile *genfile, const char *format, va_list va)
+static int xvprintf(GtFile *genfile, const char *format, va_list va, int buflen)
 {
-  int rval = -1;
+  int rval = 0;
 
   if (!genfile) /* implies stdout */
-    rval = vfprintf(stdout, format, va);
+    gt_xvfprintf(stdout, format, va);
   else {
     switch (genfile->mode) {
       case GFM_UNCOMPRESSED:
-        rval = vfprintf(genfile->fileptr.file, format, va);
+        gt_xvfprintf(genfile->fileptr.file, format, va);
         break;
       case GFM_GZIP:
-        rval = vgzprintf(genfile->fileptr.gzfile, format, va);
+        rval = vgzprintf(genfile->fileptr.gzfile, format, va, buflen);
         break;
       case GFM_BZIP2:
-        rval = vbzprintf(genfile->fileptr.bzfile, format, va);
+        rval = vbzprintf(genfile->fileptr.bzfile, format, va, buflen);
         break;
       default: gt_assert(0);
     }
@@ -287,10 +298,17 @@ static int xvprintf(GtFile *genfile, const char *format, va_list va)
 void gt_file_xprintf(GtFile *genfile, const char *format, ...)
 {
   va_list va;
+  int rval;
   va_start(va, format);
-  if (xvprintf(genfile, format, va) < 0) {
-    fprintf(stderr, "gt_file_xprintf(): xvprintf() returned negative value\n");
-    exit(EXIT_FAILURE);
+  if ((rval = xvprintf(genfile, format, va, 0))) {
+    gt_assert(rval > 0); /* negative return is not possible, rval should denote
+                            the necessary buffer length -> try again with it */
+    /* reset variable arguments */
+    va_end(va);
+    va_start(va, format);
+    /* try again */
+    rval = xvprintf(genfile, format, va, rval);
+    gt_assert(!rval); /* xvprintf() should not fail with given buffer length */
   }
   va_end(va);
 }
