@@ -174,3 +174,13 @@ void gt_xvfprintf(FILE *stream, const char *format, va_list ap)
     exit(EXIT_FAILURE);
   }
 }
+
+int gt_xvsnprintf(char *str, size_t size, const char *format, va_list ap)
+{
+  int rval;
+  if ((rval = vsnprintf(str, size, format, ap)) < 0) {
+    perror("cannot vsnprintf");
+    exit(EXIT_FAILURE);
+  }
+  return rval;
+}
