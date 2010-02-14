@@ -56,7 +56,7 @@ static int process_intron(GtSpliceSiteInfoVisitor *ssiv, GtGenomeNode *intron,
                           GtError *err)
 {
   const char *sequence;
-  unsigned long seqlen;
+  unsigned long seqlen, offset;
   GtStrand strand;
   GtRange range;
   char site[5];
@@ -70,17 +70,17 @@ static int process_intron(GtSpliceSiteInfoVisitor *ssiv, GtGenomeNode *intron,
   if (gt_range_length(&range) >= 4) {
     seqid = gt_genome_node_get_seqid(intron);
     had_err = gt_region_mapping_get_raw_sequence(ssiv->region_mapping,
-                                                 &sequence, &seqlen, seqid,
-                                                 err);
+                                                 &sequence, &seqlen, &offset,
+                                                 seqid, err);
     if (!had_err) {
       gt_assert(range.end <= seqlen);
       strand = gt_feature_node_get_strand((GtFeatureNode*) intron);
       if (strand == GT_STRAND_FORWARD || strand == GT_STRAND_REVERSE) {
         /* fill site */
-        site[0] = tolower(sequence[range.start-1]);
-        site[1] = tolower(sequence[range.start]);
-        site[2] = tolower(sequence[range.end-2]);
-        site[3] = tolower(sequence[range.end-1]);
+        site[0] = tolower(sequence[range.start-offset]);
+        site[1] = tolower(sequence[range.start-offset+1]);
+        site[2] = tolower(sequence[range.end-offset-1]);
+        site[3] = tolower(sequence[range.end-offset]);
         site[4] = '\0';
         if (strand == GT_STRAND_REVERSE)
           had_err = gt_reverse_complement(site, 4, err);

@@ -26,7 +26,7 @@ static int extract_join_feature(GtGenomeNode *gn, const char *type,
                                 GtError *err)
 {
   const char *raw_sequence;
-  unsigned long raw_sequence_length;
+  unsigned long raw_sequence_length, offset;
   GtFeatureNode *gf;
   GtRange range;
   int had_err = 0;
@@ -37,13 +37,13 @@ static int extract_join_feature(GtGenomeNode *gn, const char *type,
 
   if (gt_feature_node_has_type(gf, type)) {
     had_err = gt_region_mapping_get_raw_sequence(region_mapping, &raw_sequence,
-                                                 &raw_sequence_length,
+                                                 &raw_sequence_length, &offset,
                                                  gt_genome_node_get_seqid(gn),
                                                  err);
     if (!had_err) {
       range = gt_genome_node_get_range(gn);
       gt_assert(range.start); /* 1-based coordinates */
-      raw_sequence += range.start - 1;
+      raw_sequence += range.start - offset;
       gt_assert(range.end <= raw_sequence_length);
       gt_str_append_cstr_nt(sequence, raw_sequence, gt_range_length(&range));
       if (gt_feature_node_get_strand(gf) == GT_STRAND_REVERSE)
@@ -61,7 +61,7 @@ int gt_extract_feat_sequence(GtStr *sequence, GtGenomeNode *gn,
   GtFeatureNode *gf;
   GtRange range;
   const char *raw_sequence;
-  unsigned long raw_sequence_length;
+  unsigned long raw_sequence_length, offset;
   int had_err = 0;
 
   gt_error_check(err);
@@ -96,11 +96,12 @@ int gt_extract_feat_sequence(GtStr *sequence, GtGenomeNode *gn,
     had_err = gt_region_mapping_get_raw_sequence(region_mapping,
                                                  &raw_sequence,
                                                  &raw_sequence_length,
+                                                 &offset,
                                                  gt_genome_node_get_seqid(gn),
                                                  err);
     if (!had_err) {
       gt_assert(range.end <= raw_sequence_length);
-      gt_str_append_cstr_nt(sequence, raw_sequence + range.start - 1,
+      gt_str_append_cstr_nt(sequence, raw_sequence + range.start - offset,
                             gt_range_length(&range));
       if (gt_feature_node_get_strand(gf) == GT_STRAND_REVERSE) {
         had_err = gt_reverse_complement(gt_str_get(sequence),

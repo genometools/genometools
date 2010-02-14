@@ -31,6 +31,7 @@ GtRegionMapping* gt_region_mapping_ref(GtRegionMapping*);
 int              gt_region_mapping_get_raw_sequence(GtRegionMapping*,
                                                     const char **rawseq,
                                                     unsigned long *length,
+                                                    unsigned long *offset,
                                                     GtStr *seqid, GtError*);
 void             gt_region_mapping_delete(GtRegionMapping*);
 

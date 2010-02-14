@@ -23,6 +23,7 @@
 #include "core/ma.h"
 #include "extended/mapping.h"
 #include "extended/region_mapping.h"
+#include "extended/seqid2seqnum_mapping.h"
 
 struct GtRegionMapping {
   GtStr *sequence_filename,
@@ -31,6 +32,7 @@ struct GtRegionMapping {
   bool usedesc;
   GtMapping *mapping;
   GtBioseq *bioseq; /* the current bioseq */
+  GtSeqid2SeqnumMapping *seqid2seqnum_mapping;
   unsigned int reference_count;
 };
 
@@ -100,13 +102,20 @@ static int update_bioseq_if_necessary(GtRegionMapping *rm, GtStr *seqid,
       rm->bioseq = gt_bioseq_new_str(rm->sequence_file, err);
       if (!rm->bioseq)
         had_err = -1;
+      if (!had_err && rm->usedesc) {
+        gt_assert(!rm->seqid2seqnum_mapping);
+        rm->seqid2seqnum_mapping = gt_seqid2seqnum_mapping_new(rm->bioseq, err);
+        if (!rm->seqid2seqnum_mapping)
+          had_err = -1;
+      }
     }
   }
   return had_err;
 }
 
 int gt_region_mapping_get_raw_sequence(GtRegionMapping *rm, const char **rawseq,
-                                       unsigned long *length, GtStr *seqid,
+                                       unsigned long *length,
+                                       unsigned long *offset, GtStr *seqid,
                                        GtError *err)
 {
   int had_err = 0;
@@ -114,8 +123,22 @@ int gt_region_mapping_get_raw_sequence(GtRegionMapping *rm, const char **rawseq,
   gt_assert(rm && rawseq && length && seqid);
   had_err = update_bioseq_if_necessary(rm, seqid, err);
   if (!had_err) {
-    *rawseq = gt_bioseq_get_raw_sequence(rm->bioseq);
-    *length = gt_bioseq_get_raw_sequence_length(rm->bioseq);
+    if (rm->usedesc) {
+      unsigned long seqnum;
+      gt_assert(!rm->seqid2seqnum_mapping);
+      had_err = gt_seqid2seqnum_mapping_map(rm->seqid2seqnum_mapping,
+                                            gt_str_get(seqid), &seqnum, offset,
+                                            err);
+      if (!had_err) {
+      *rawseq = gt_bioseq_get_sequence(rm->bioseq, seqnum);
+      *length = gt_bioseq_get_sequence_length(rm->bioseq, seqnum);
+      }
+    }
+    else {
+      gt_assert(!rm->seqid2seqnum_mapping);
+      *rawseq = gt_bioseq_get_raw_sequence(rm->bioseq);
+      *length = gt_bioseq_get_raw_sequence_length(rm->bioseq);
+    }
   }
   return had_err;
 }
@@ -132,5 +155,6 @@ void gt_region_mapping_delete(GtRegionMapping *rm)
   gt_str_delete(rm->sequence_name);
   gt_mapping_delete(rm->mapping);
   gt_bioseq_delete(rm->bioseq);
+  gt_seqid2seqnum_mapping_delete(rm->seqid2seqnum_mapping);
   gt_free(rm);
 }

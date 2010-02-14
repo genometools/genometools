@@ -50,7 +50,7 @@ static int extract_cds_if_necessary(GtGenomeNode *gn, void *data,
   GtFeatureNode *gf;
   GtRange range;
   const char *raw_sequence;
-  unsigned long raw_sequence_length;
+  unsigned long raw_sequence_length, offset;
   int had_err = 0;
 
   gt_error_check(err);
@@ -63,13 +63,14 @@ static int extract_cds_if_necessary(GtGenomeNode *gn, void *data,
     had_err = gt_region_mapping_get_raw_sequence(v->region_mapping,
                                                  &raw_sequence,
                                                  &raw_sequence_length,
+                                                 &offset,
                                                  gt_genome_node_get_seqid(gn),
                                                  err);
     if (!had_err) {
       range = gt_genome_node_get_range(gn);
       gt_assert(range.start && range.end); /* 1-based coordinates */
       gt_assert(range.end <= raw_sequence_length);
-      gt_splicedseq_add(v->splicedseq, range.start - 1, range.end - 1,
+      gt_splicedseq_add(v->splicedseq, range.start - offset, range.end - offset,
                         raw_sequence);
     }
   }
