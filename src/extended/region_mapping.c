@@ -110,7 +110,7 @@ int gt_region_mapping_get_raw_sequence(GtRegionMapping *rm, const char **raw,
 {
   int had_err = 0;
   gt_error_check(err);
-  gt_assert(rm && seqid);
+  gt_assert(rm && raw && seqid);
   had_err = update_bioseq_if_necessary(rm, seqid, err);
   if (!had_err)
     *raw = gt_bioseq_get_raw_sequence(rm->bioseq);
@@ -123,7 +123,7 @@ int gt_region_mapping_get_raw_sequence_length(GtRegionMapping *rm,
 {
   int had_err = 0;
   gt_error_check(err);
-  gt_assert(rm && seqid);
+  gt_assert(rm && length && seqid);
   had_err = update_bioseq_if_necessary(rm, seqid, err);
   if (!had_err)
     *length = gt_bioseq_get_raw_sequence_length(rm->bioseq);
