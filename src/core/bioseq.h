@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -50,7 +50,7 @@ const char*   gt_bioseq_get_sequence(GtBioseq*, unsigned long index);
 const char*   gt_bioseq_get_raw_sequence(GtBioseq*);
 /* Return MD5 fingerprint of sequence with given <index>. */
 const char*   gt_bioseq_get_md5_fingerprint(GtBioseq*, unsigned long index);
-unsigned long gt_bioseq_get_sequence_length(GtBioseq*, unsigned long);
+unsigned long gt_bioseq_get_sequence_length(GtBioseq*, unsigned long index);
 unsigned long gt_bioseq_get_raw_sequence_length(GtBioseq*);
 unsigned long gt_bioseq_number_of_sequences(GtBioseq*);
 
