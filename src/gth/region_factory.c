@@ -23,6 +23,7 @@
 #include "core/parseutils.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
+#include "core/xansi.h"
 #include "gth/region_factory.h"
 
 typedef struct {
@@ -137,25 +138,22 @@ void gth_region_factory_delete(GthRegionFactory *srf)
 
 /* Range descriptions have the folowing format: III:1000001..2000000
    That is, the part between ':' and '..' denotes the offset. */
-static long parse_description_range(GthInput *input,
-                                    unsigned long filenum, unsigned long seqnum)
+static long parse_description_range(const char *description)
 {
   long offset;
-  GtStr *description;
-  unsigned long i;
+  unsigned long i, desclen;
   char *desc;
-  gt_assert(input);
-  description = gt_str_new();
-  gth_input_get_genomic_description(input, description, filenum, seqnum);
-  desc = gt_str_get(description);
+  gt_assert(description);
+  desc = gt_xstrdup(description);
+  desclen = strlen(desc);
   /* find ':' */
-  for (i = 0; i < gt_str_length(description); i++) {
+  for (i = 0; i < desclen; i++) {
     if (desc[i] == ':')
       break;
   }
-  if (i == gt_str_length(description)) {
+  if (i == desclen) {
     /* no ':' found */
-    gt_str_delete(description);
+    gt_free(desc);
     return GT_UNDEF_LONG;
   }
   desc += i + 1;
@@ -168,7 +166,7 @@ static long parse_description_range(GthInput *input,
   }
   if (desc[i] == '\0') {
     /* no '..' found */
-    gt_str_delete(description);
+    gt_free(desc);
     return GT_UNDEF_LONG;
   }
   /* parse range */
@@ -176,10 +174,10 @@ static long parse_description_range(GthInput *input,
   desc[i-1] = '\0';
   if (gt_parse_long(&offset, desc)) {
     /* parsing failed */
-    gt_str_delete(description);
+    gt_free(desc);
     return GT_UNDEF_LONG;
   }
-  gt_str_delete(description);
+  gt_free(desc);
   return offset;
 }
 
@@ -201,8 +199,12 @@ static void make_sequence_region(GtHashmap *sequence_regions,
   else {
     range = gth_input_get_relative_genomic_range(input, filenum, seqnum);
   }
-  if (srf->use_desc_ranges)
-    offset = parse_description_range(input, filenum, seqnum);
+  if (srf->use_desc_ranges) {
+    GtStr *description = gt_str_new();
+    gth_input_get_genomic_description(input, description, filenum, seqnum);
+    offset = parse_description_range(gt_str_get(description));
+    gt_str_delete(description);
+  }
   if (offset != GT_UNDEF_LONG)
     range = gt_range_offset(&range, offset);
   else
