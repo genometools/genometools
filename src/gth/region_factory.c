@@ -137,8 +137,8 @@ void gth_region_factory_delete(GthRegionFactory *srf)
 
 /* Range descriptions have the folowing format: III:1000001..2000000
    That is, the part between ':' and '..' denotes the offset. */
-static long parse_desc_range(GthInput *input,
-                             unsigned long filenum, unsigned long seqnum)
+static long parse_description_range(GthInput *input,
+                                    unsigned long filenum, unsigned long seqnum)
 {
   long offset;
   GtStr *description;
@@ -202,7 +202,7 @@ static void make_sequence_region(GtHashmap *sequence_regions,
     range = gth_input_get_relative_genomic_range(input, filenum, seqnum);
   }
   if (srf->use_desc_ranges)
-    offset = parse_desc_range(input, filenum, seqnum);
+    offset = parse_description_range(input, filenum, seqnum);
   if (offset != GT_UNDEF_LONG)
     range = gt_range_offset(&range, offset);
   else
