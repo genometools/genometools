@@ -50,28 +50,22 @@ GtHashmap* gt_hashmap_new(GtHashType keyhashtype, GtFree keyfree,
   struct hm_freefuncs *ff = gt_malloc(sizeof (*ff));
   ff->keyfree = keyfree;
   ff->valuefree = valuefree;
-  switch (keyhashtype)
-  {
-  case GT_HASH_DIRECT:
-    {
+  switch (keyhashtype) {
+    case GT_HASH_DIRECT:
       HashElemInfo hm_directkey_eleminfo = {
         gt_ht_ptr_elem_hash, { .free_elem_with_data = hm_elem_free },
         sizeof (struct map_entry), gt_ht_ptr_elem_cmp, ff, gt_free_func
       };
       return (GtHashmap*) gt_hashtable_new(hm_directkey_eleminfo);
-    }
-  case GT_HASH_STRING:
-    {
+    case GT_HASH_STRING:
       HashElemInfo hm_strkey_eleminfo = {
         gt_ht_cstr_elem_hash, { .free_elem_with_data = hm_elem_free },
         sizeof (struct map_entry), gt_ht_cstr_elem_cmp, ff, gt_free_func
       };
       return (GtHashmap*) gt_hashtable_new(hm_strkey_eleminfo);
-    }
+    default: gt_assert(0);
   }
-  fprintf(stderr, "Illegal hashtype requested!");
-  abort();
-  return NULL;                  /* for stupid compilers nagging too much */
+  return NULL; /* for stupid compilers nagging too much */
 }
 
 void* gt_hashmap_get(GtHashmap *hm, const void *key)
