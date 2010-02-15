@@ -1,0 +1,8 @@
+##gff-version   3
+##sequence-region   dna 101 209
+dna	.	gene	101	109	.	+	.	ID=gene1
+dna	.	exon	101	109	.	+	.	Parent=gene1
+###
+dna	.	gene	201	209	.	+	.	ID=gene2
+dna	.	exon	201	209	.	+	.	Parent=gene2
+###

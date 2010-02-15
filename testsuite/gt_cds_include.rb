@@ -25,6 +25,51 @@ Test do
   run "diff #{$last_stdout} #{$testdata}/gt_cds_test_descrange.out"
 end
 
+Name "gt cds test (multi description)"
+Keywords "gt_cds usedesc"
+Test do
+  run_test "#{$bin}gt cds -usedesc -seqfile " +
+           "#{$testdata}gt_cds_descrange_multi.fas " +
+           "#{$testdata}gt_cds_descrange_multi.in"
+  run "diff #{$last_stdout} #{$testdata}/gt_cds_descrange_multi.out"
+end
+
+Name "gt cds test (multi description fail 1)"
+Keywords "gt_cds usedesc"
+Test do
+  run_test("#{$bin}gt cds -usedesc -seqfile " +
+           "#{$testdata}gt_cds_descrange_multi_fail_1.fas " +
+           "#{$testdata}gt_cds_test_descrange.in", :retval => 1)
+  grep $last_stderr, "does contain multiple sequences with ID"
+end
+
+Name "gt cds test (multi description fail 2)"
+Keywords "gt_cds usedesc"
+Test do
+  run_test("#{$bin}gt cds -usedesc -seqfile " +
+           "#{$testdata}gt_cds_descrange_multi_fail_2.fas " +
+           "#{$testdata}gt_cds_test_descrange.in", :retval => 1)
+  grep $last_stderr, "does contain multiple sequences with ID"
+end
+
+Name "gt cds test (wrong ID)"
+Keywords "gt_cds usedesc"
+Test do
+  run_test("#{$bin}gt cds -usedesc -seqfile " +
+           "#{$testdata}gt_cds_descrange_wrong_id.fas " +
+           "#{$testdata}gt_cds_test_descrange.in", :retval => 1)
+  grep $last_stderr, "does not contain a sequence with ID"
+end
+
+Name "gt cds test (wrong range)"
+Keywords "gt_cds usedesc"
+Test do
+  run_test("#{$bin}gt cds -usedesc -seqfile " +
+           "#{$testdata}gt_cds_descrange_wrong_range.fas " +
+           "#{$testdata}gt_cds_test_descrange.in", :retval => 1)
+  grep $last_stderr, "cannot find sequence ID"
+end
+
 if $gttestdata then
   Name "gt cds bug"
   Keywords "gt_cds"

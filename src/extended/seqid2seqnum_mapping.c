@@ -69,24 +69,24 @@ static int seqid_info_add(SeqidInfo *seqid_info, unsigned long seqnum,
 }
 
 static int seqid_info_get(SeqidInfo *seqid_info, unsigned long *seqnum,
-                          unsigned long *offset, const GtRange *range,
+                          GtRange *outrange, const GtRange *inrange,
                           const char *filename, const char *seqid, GtError *err)
 {
   SeqidInfoElem *seqid_info_elem;
   unsigned long i;
   gt_error_check(err);
-  gt_assert(seqid_info && seqnum && offset && range);
+  gt_assert(seqid_info && seqnum && outrange && inrange);
   for (i = 0; i < gt_array_size(seqid_info); i++) {
     seqid_info_elem = gt_array_get(seqid_info, i);
     if (seqid_info_elem->descrange.end == GT_UNDEF_ULONG ||
-        gt_range_contains(&seqid_info_elem->descrange, range)) {
+        gt_range_contains(&seqid_info_elem->descrange, inrange)) {
       *seqnum = seqid_info_elem->seqnum;
-      *offset = seqid_info_elem->descrange.start;
+      *outrange = seqid_info_elem->descrange;
       return 0;
     }
   }
   gt_error_set(err, "cannot find sequence ID \"%s\" (with range %lu,%lu) in "
-               "sequence file \"%s\"", seqid, range->start, range->end,
+               "sequence file \"%s\"", seqid, inrange->start, inrange->end,
                filename);
   return -1;
 }
@@ -95,8 +95,8 @@ struct GtSeqid2SeqnumMapping {
   char *filename;
   GtHashmap *map;
   const char *cached_seqid;
-  unsigned long cached_seqnum,
-                cached_offset;
+  unsigned long cached_seqnum;
+  GtRange cached_range;
 };
 
 static int fill_mapping(GtSeqid2SeqnumMapping *mapping, GtBioseq *bioseq,
@@ -174,17 +174,20 @@ void gt_seqid2seqnum_mapping_delete(GtSeqid2SeqnumMapping *mapping)
 }
 
 int gt_seqid2seqnum_mapping_map(GtSeqid2SeqnumMapping *mapping,
-                                const char *seqid, const GtRange *range,
+                                const char *seqid, const GtRange *inrange,
                                 unsigned long *seqnum, unsigned long *offset,
                                 GtError *err)
 {
   SeqidInfo *seqid_info;
+  GtRange outrange;
   gt_error_check(err);
   gt_assert(mapping && seqid && seqnum && offset);
   /* try to answer request from cache */
-  if (mapping->cached_seqid && !strcmp(seqid, mapping->cached_seqid)) {
+  if (mapping->cached_seqid && !strcmp(seqid, mapping->cached_seqid) &&
+      (mapping->cached_range.end == GT_UNDEF_ULONG ||
+       gt_range_contains(&mapping->cached_range, inrange))) {
     *seqnum = mapping->cached_seqnum;
-    *offset = mapping->cached_offset;
+    *offset = mapping->cached_range.start;
     return 0;
   }
   /* cache miss -> regular mapping */
@@ -194,14 +197,16 @@ int gt_seqid2seqnum_mapping_map(GtSeqid2SeqnumMapping *mapping,
     return -1;
   }
   /* get results from seqid info */
-  if (seqid_info_get(seqid_info, seqnum, offset, range, mapping->filename,
+  if (seqid_info_get(seqid_info, seqnum, &outrange, inrange, mapping->filename,
                      seqid, err)) {
     return -1;
   }
+  /* report offset */
+  *offset = outrange.start;
   /* store result in cache */
   mapping->cached_seqid = gt_hashmap_get_key(mapping->map, seqid);
   gt_assert(mapping->cached_seqid);
   mapping->cached_seqnum = *seqnum;
-  mapping->cached_offset = *offset;
+  mapping->cached_range = outrange;
   return 0;
 }
