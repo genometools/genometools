@@ -281,10 +281,11 @@ int gt_parse_int_line(int *int_value, const char *integer,
 unsigned long gt_parse_description_range(const char *description)
 {
   unsigned long i, desclen, offset;
-  char *desc;
+  char *desc, *descptr;
   gt_assert(description);
   desc = gt_cstr_dup(description);
   desclen = strlen(desc);
+  descptr = desc;
   /* find ':' */
   for (i = 0; i < desclen; i++) {
     if (desc[i] == ':')
@@ -292,7 +293,7 @@ unsigned long gt_parse_description_range(const char *description)
   }
   if (i == desclen) {
     /* no ':' found */
-    gt_free(desc);
+    gt_free(descptr);
     return GT_UNDEF_ULONG;
   }
   desc += i + 1;
@@ -305,7 +306,7 @@ unsigned long gt_parse_description_range(const char *description)
   }
   if (desc[i] == '\0') {
     /* no '..' found */
-    gt_free(desc);
+    gt_free(descptr);
     return GT_UNDEF_ULONG;
   }
   /* parse range */
@@ -313,9 +314,9 @@ unsigned long gt_parse_description_range(const char *description)
   desc[i-1] = '\0';
   if (gt_parse_ulong(&offset, desc)) {
     /* parsing failed */
-    gt_free(desc);
+    gt_free(descptr);
     return GT_UNDEF_ULONG;
   }
-  gt_free(desc);
+  gt_free(descptr);
   return offset;
 }
