@@ -69,7 +69,7 @@ static int extract_cds_if_necessary(GtGenomeNode *gn, void *data,
     if (!had_err) {
       range = gt_genome_node_get_range(gn);
       gt_assert(range.start && range.end); /* 1-based coordinates */
-      gt_assert(range.end <= raw_sequence_length);
+      gt_assert(range.end - offset < raw_sequence_length);
       gt_splicedseq_add(v->splicedseq, range.start - offset, range.end - offset,
                         raw_sequence);
     }
