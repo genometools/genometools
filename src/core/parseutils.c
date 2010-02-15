@@ -20,11 +20,11 @@
 #include <stdio.h>
 #include <string.h>
 #include "core/assert_api.h"
+#include "core/cstr_api.h"
 #include "core/ma_api.h"
 #include "core/parseutils.h"
 #include "core/undef.h"
 #include "core/warning_api.h"
-#include "core/xansi.h"
 
 int gt_parse_int(int *out, const char *nptr)
 {
@@ -283,7 +283,7 @@ unsigned long gt_parse_description_range(const char *description)
   unsigned long i, desclen, offset;
   char *desc;
   gt_assert(description);
-  desc = gt_xstrdup(description);
+  desc = gt_cstr_dup(description);
   desclen = strlen(desc);
   /* find ':' */
   for (i = 0; i < desclen; i++) {

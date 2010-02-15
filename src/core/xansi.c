@@ -149,16 +149,6 @@ void gt_xremove(const char *path)
   }
 }
 
-char* gt_xstrdup(const char *s)
-{
-  char *d;
-  if ((d = strdup(s)) == NULL) {
-    perror("cannot strdup");
-    exit(EXIT_FAILURE);
-  }
-  return d;
-}
-
 void gt_xungetc(int c, FILE *stream)
 {
   if (ungetc(c, stream) == EOF) {

@@ -46,7 +46,6 @@ void   gt_xfwrite(const void *ptr, size_t size, size_t nmemb, FILE*);
 void   gt_xputchar(int);
 void   gt_xputs(const char*);
 void   gt_xremove(const char*);
-char*  gt_xstrdup(const char*);
 void   gt_xungetc(int, FILE*);
 void   gt_xvfprintf(FILE *stream, const char *format, va_list ap);
 int    gt_xvsnprintf(char *str, size_t size, const char *format, va_list ap);

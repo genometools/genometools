@@ -14,11 +14,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <string.h>
+#include "core/cstr_api.h"
 #include "core/hashmap_api.h"
 #include "core/ma_api.h"
 #include "core/parseutils.h"
 #include "core/undef.h"
-#include "core/xansi.h"
 #include "extended/seqid2seqnum_mapping.h"
 
 struct GtSeqid2SeqnumMapping {
@@ -38,7 +39,7 @@ static int fill_mapping(GtSeqid2SeqnumMapping *mapping, GtBioseq *bioseq,
     mapping->seqnums[i] = i;
     if ((offset = gt_parse_description_range(desc)) == GT_UNDEF_ULONG) {
       /* no offset could be parsed -> store description as sequence id */
-      gt_hashmap_add(mapping->map, gt_xstrdup(desc), mapping->seqnums + i);
+      gt_hashmap_add(mapping->map, gt_cstr_dup(desc), mapping->seqnums + i);
       mapping->offsets[i] = 1;
     }
     else {
