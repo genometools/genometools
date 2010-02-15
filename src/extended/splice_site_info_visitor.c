@@ -73,7 +73,7 @@ static int process_intron(GtSpliceSiteInfoVisitor *ssiv, GtGenomeNode *intron,
                                                  &sequence, &seqlen, &offset,
                                                  seqid, &range, err);
     if (!had_err) {
-      gt_assert(range.end <= seqlen);
+      gt_assert(range.end - offset < seqlen);
       strand = gt_feature_node_get_strand((GtFeatureNode*) intron);
       if (strand == GT_STRAND_FORWARD || strand == GT_STRAND_REVERSE) {
         /* fill site */

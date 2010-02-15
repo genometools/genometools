@@ -44,7 +44,7 @@ static int extract_join_feature(GtGenomeNode *gn, const char *type,
     if (!had_err) {
       gt_assert(range.start); /* 1-based coordinates */
       raw_sequence += range.start - offset;
-      gt_assert(range.end <= raw_sequence_length);
+      gt_assert(range.end - offset < raw_sequence_length);
       gt_str_append_cstr_nt(sequence, raw_sequence, gt_range_length(&range));
       if (gt_feature_node_get_strand(gf) == GT_STRAND_REVERSE)
         *reverse_strand = true;
