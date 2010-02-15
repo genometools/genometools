@@ -16,7 +16,7 @@
 
 #include <string.h>
 #include "core/cstr_api.h"
-#include "core/hashmap_api.h"
+#include "core/hashmap.h"
 #include "core/ma_api.h"
 #include "core/parseutils.h"
 #include "core/undef.h"
@@ -25,7 +25,10 @@
 struct GtSeqid2SeqnumMapping {
   GtHashmap *map;
   unsigned long *seqnums,
-                *offsets;
+                *offsets,
+                cached_seqnum,
+                cached_offset;
+  const char *cached_seqid;
 };
 
 static int fill_mapping(GtSeqid2SeqnumMapping *mapping, GtBioseq *bioseq,
@@ -74,6 +77,7 @@ GtSeqid2SeqnumMapping* gt_seqid2seqnum_mapping_new(GtBioseq *bioseq,
     gt_seqid2seqnum_mapping_delete(mapping);
     return NULL;
   }
+  mapping->cached_seqid = NULL;
   return mapping;
 }
 
@@ -97,6 +101,13 @@ int gt_seqid2seqnum_mapping_map(GtSeqid2SeqnumMapping *mapping,
   unsigned long *seqval;
   gt_error_check(err);
   gt_assert(mapping && seqid && seqnum && offset);
+  /* try to answer request from cache */
+  if (mapping->cached_seqid && !strcmp(seqid, mapping->cached_seqid)) {
+    *seqnum = mapping->cached_seqnum;
+    *offset = mapping->cached_offset;
+    return 0;
+  }
+  /* cache miss -> regular mapping */
   if (!(seqval = gt_hashmap_get(mapping->map, seqid))) {
     gt_error_set(err, "sequence ID to sequence number mapping does not contain "
                       "a sequence with ID \"%s\"", seqid);
@@ -104,5 +115,10 @@ int gt_seqid2seqnum_mapping_map(GtSeqid2SeqnumMapping *mapping,
   }
   *seqnum = *seqval;
   *offset = mapping->offsets[*seqval];
+  /* store result in cache */
+  mapping->cached_seqid = gt_hashmap_get_key(mapping->map, seqid);
+  gt_assert(mapping->cached_seqid);
+  mapping->cached_seqnum = *seqval;
+  mapping->cached_offset = mapping->offsets[*seqval];
   return 0;
 }
