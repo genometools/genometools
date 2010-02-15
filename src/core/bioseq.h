@@ -50,6 +50,8 @@ const char*   gt_bioseq_get_sequence(GtBioseq*, unsigned long index);
 const char*   gt_bioseq_get_raw_sequence(GtBioseq*);
 /* Return MD5 fingerprint of sequence with given <index>. */
 const char*   gt_bioseq_get_md5_fingerprint(GtBioseq*, unsigned long index);
+/* Return filename of sequence file underlying <bioseq>. */
+const char*   gt_bioseq_filename(const GtBioseq *bioseq);
 unsigned long gt_bioseq_get_sequence_length(GtBioseq*, unsigned long index);
 unsigned long gt_bioseq_get_raw_sequence_length(GtBioseq*);
 unsigned long gt_bioseq_number_of_sequences(GtBioseq*);

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -573,6 +573,12 @@ const char* gt_bioseq_get_md5_fingerprint(GtBioseq *bs, unsigned long idx)
     bs->fingerprints = gt_bioseq_fingerprints_new(bs);
   gt_assert(gt_bioseq_fingerprints_get(bs->fingerprints, idx));
   return gt_bioseq_fingerprints_get(bs->fingerprints, idx);
+}
+
+const char* gt_bioseq_filename(const GtBioseq *bs)
+{
+  gt_assert(bs);
+  return gt_str_get(bs->sequence_file);
 }
 
 unsigned long gt_bioseq_get_sequence_length(GtBioseq *bs, unsigned long idx)
