@@ -143,8 +143,7 @@ gt_requiredUInt16Bits(uint16_t val);
  * @param val value to compute log2 of.
  * @return \f$\lfloor{}gt_log_2v\rfloor + 1\f$
  */
-extern int
-gt_requiredUInt32Bits(uint32_t val);
+int gt_requiredUInt32Bits(uint32_t val);
 /**
  * \brief Computes \f$\gt_log_2v + 1\f$, where \f$v\f$ is of unsigned
  * 64-bit type.
@@ -153,8 +152,7 @@ gt_requiredUInt32Bits(uint32_t val);
  * @param val value to compute log2 of.
  * @return \f$\lfloor{}gt_log_2v\rfloor + 1\f$
  */
-extern int
-gt_requiredUInt64Bits(uint64_t val);
+int gt_requiredUInt64Bits(uint64_t val);
 /**
  * \brief Computes \f$\gt_log_2v + 2\f$, where \f$v\f$ is of signed 8-bit
  * type.
@@ -210,8 +208,7 @@ gt_requiredInt64Bits(int64_t v);
  * @param numBits number of bits composing integer to be read
  * @return value read
  */
-extern uint8_t
-gt_bsGetUInt8(constBitString str, BitOffset offset, unsigned numBits);
+uint8_t gt_bsGetUInt8(constBitString str, BitOffset offset, unsigned numBits);
 /**
  * \brief Retrieve unsigned integer of specified length from bitstring
  * at given position.
@@ -220,8 +217,7 @@ gt_bsGetUInt8(constBitString str, BitOffset offset, unsigned numBits);
  * @param numBits number of bits composing integer to be read
  * @return value read
  */
-extern uint16_t
-gt_bsGetUInt16(constBitString str, BitOffset offset, unsigned numBits);
+uint16_t gt_bsGetUInt16(constBitString str, BitOffset offset, unsigned numBits);
 /**
  * \brief Retrieve unsigned integer of specified length from bitstring
  * at given position.
@@ -230,8 +226,7 @@ gt_bsGetUInt16(constBitString str, BitOffset offset, unsigned numBits);
  * @param numBits number of bits composing integer to be read
  * @return value read
  */
-extern uint32_t
-gt_bsGetUInt32(constBitString str, BitOffset offset, unsigned numBits);
+uint32_t gt_bsGetUInt32(constBitString str, BitOffset offset, unsigned numBits);
 /**
  * \brief Retrieve unsigned integer of specified length from bitstring
  * at given position.
@@ -240,8 +235,7 @@ gt_bsGetUInt32(constBitString str, BitOffset offset, unsigned numBits);
  * @param numBits number of bits composing integer to be read
  * @return value read
  */
-extern uint64_t
-gt_bsGetUInt64(constBitString str, BitOffset offset, unsigned numBits);
+uint64_t gt_bsGetUInt64(constBitString str, BitOffset offset, unsigned numBits);
 /**
  * \brief Store unsigned integer of specified length in bitstring at
  * given position.
@@ -251,8 +245,8 @@ gt_bsGetUInt64(constBitString str, BitOffset offset, unsigned numBits);
  * @param numBits number of bits composing integer to be written
  * @param val value to store
  */
-extern void
-gt_bsStoreUInt8(BitString str, BitOffset offset, unsigned numBits, uint8_t val);
+void gt_bsStoreUInt8(BitString str, BitOffset offset, unsigned numBits,
+                     uint8_t val);
 /**
  * \brief Store unsigned integer of specified length in bitstring at
  * given position.
@@ -262,9 +256,8 @@ gt_bsStoreUInt8(BitString str, BitOffset offset, unsigned numBits, uint8_t val);
  * @param numBits number of bits composing integer to be written
  * @param val value to store
  */
-extern void
-gt_bsStoreUInt16(BitString str, BitOffset offset, unsigned numBits,
-                 uint16_t val);
+void gt_bsStoreUInt16(BitString str, BitOffset offset, unsigned numBits,
+                      uint16_t val);
 /**
  * \brief Store unsigned integer of specified length in bitstring at
  * given position.
@@ -274,9 +267,8 @@ gt_bsStoreUInt16(BitString str, BitOffset offset, unsigned numBits,
  * @param numBits number of bits composing integer to be written
  * @param val value to store
  */
-extern void
-gt_bsStoreUInt32(BitString str, BitOffset offset, unsigned numBits,
-                 uint32_t val);
+void gt_bsStoreUInt32(BitString str, BitOffset offset, unsigned numBits,
+                      uint32_t val);
 /**
  * \brief Store unsigned integer of specified length in bitstring at
  * given position.
@@ -286,9 +278,8 @@ gt_bsStoreUInt32(BitString str, BitOffset offset, unsigned numBits,
  * @param numBits number of bits composing integer to be written
  * @param val value to store
  */
-extern void
-gt_bsStoreUInt64(BitString str, BitOffset offset, unsigned numBits,
-                 uint64_t val);
+void gt_bsStoreUInt64(BitString str, BitOffset offset, unsigned numBits,
+                      uint64_t val);
 /**
  * \brief Retrieve integer of specified length from bitstring at given
  * position.
@@ -970,9 +961,8 @@ gt_bsGetNonUniformInt64ArrayAdd(
  * @param numBitsB length of substring \f$b'\f$ in b to use for comparison.
  * @return 0 for equality, \f$-1\f$ if \f$a < b\f$, \f$1\f$ if \f$b > a\f$
  */
-extern int
-gt_bsCompare(constBitString a, BitOffset offsetA, BitOffset numBitsA,
-          constBitString b, BitOffset offsetB, BitOffset numBitsB);
+int gt_bsCompare(constBitString a, BitOffset offsetA, BitOffset numBitsA,
+                 constBitString b, BitOffset offsetB, BitOffset numBitsB);
 
 /**
  * \brief copy (sub-)bitstring to another position (in same or other
@@ -983,9 +973,8 @@ gt_bsCompare(constBitString a, BitOffset offsetA, BitOffset numBitsA,
  * @param offsetDest bit position in dest to start writing at
  * @param numBits number of bits to copy
  */
-extern void
-gt_bsCopy(constBitString src, BitOffset offsetSrc,
-       BitString dest, BitOffset offsetDest, BitOffset numBits);
+void gt_bsCopy(constBitString src, BitOffset offsetSrc,
+               BitString dest, BitOffset offsetDest, BitOffset numBits);
 
 /**
  * \brief set (sub-)bitstring to all one or zero bits
@@ -994,8 +983,7 @@ gt_bsCopy(constBitString src, BitOffset offsetSrc,
  * @param numBits number of bits to copy
  * @param bitVal set all numBits bits to 0 if 0, to 1 otherwise
  */
-extern void
-gt_bsClear(BitString str, BitOffset offset, BitOffset numBits, int bitVal);
+void gt_bsClear(BitString str, BitOffset offset, BitOffset numBits, int bitVal);
 
 /**
  * \brief set singular bit in bitstring to 1
@@ -1033,8 +1021,8 @@ gt_bsGetBit(constBitString str, BitOffset pos);
  * \brief Compute Hamming weight of (sub-)bitstring
  * @return number of bits set in (sub-)bitstring
  */
-extern BitOffset
-gt_bs1BitsCount(constBitString str, BitOffset offset, BitOffset numBits);
+BitOffset gt_bs1BitsCount(constBitString str, BitOffset offset,
+                          BitOffset numBits);
 
 /**
  * \brief Print sequence of 0s and 1s to stream to display BitString
@@ -1045,46 +1033,40 @@ gt_bs1BitsCount(constBitString str, BitOffset offset, BitOffset numBits);
  * @param numBits print 0,1 chars for this many bits
  * @return -1 in case of error, 0 otherwise
  */
-extern int
-gt_bsPrint(FILE *fp, constBitString str, BitOffset offset, BitOffset numBits);
+int gt_bsPrint(FILE *fp, constBitString str, BitOffset offset,
+               BitOffset numBits);
 
 /**
  * \brief Meta-Unit test function for bitPackString, calls all functions
  * mentioned below.
  * @return 0 on success, -1 on error.
  */
-extern int
-gt_bitPackString_unit_test(GtError*);
+int gt_bitPackString_unit_test(GtError*);
 /**
  * \brief Unit test function for bitPackString, integer functions.
  * @return 0 on success, -1 on error.
  */
-extern int
-gt_bitPackStringInt_unit_test(GtError*);
+int gt_bitPackStringInt_unit_test(GtError*);
 /**
  * \brief Unit test function for bitPackString, 8-bit functions.
  * @return 0 on success, -1 on error.
  */
-extern int
-gt_bitPackStringInt8_unit_test(GtError*);
+int gt_bitPackStringInt8_unit_test(GtError*);
 /**
  * \brief Unit test function for bitPackString, 16-bit functions.
  * @return 0 on success, -1 on error.
  */
-extern int
-gt_bitPackStringInt16_unit_test(GtError*);
+int gt_bitPackStringInt16_unit_test(GtError*);
 /**
  * \brief Unit test function for bitPackString, 32-bit functions.
  * @return 0 on success, -1 on error.
  */
-extern int
-gt_bitPackStringInt32_unit_test(GtError*);
+int gt_bitPackStringInt32_unit_test(GtError*);
 /**
  * \brief Unit test function for bitPackString, 64-bit functions.
  * @return 0 on success, -1 on error.
  */
-extern int
-gt_bitPackStringInt64_unit_test(GtError*);
+int gt_bitPackStringInt64_unit_test(GtError*);
 
 #include "bitpackstringsimpleop.h"
 

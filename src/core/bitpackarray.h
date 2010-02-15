@@ -165,8 +165,7 @@ bitpackarray_get_uint64(const BitPackArray *array, BitOffset index)
  * Unit test function for BitPackArray.
  * @return 0 on success, -1 on error.
  */
-extern int
-gt_bitpackarray_unit_test(GtError*);
+int gt_bitpackarray_unit_test(GtError*);
 
 /*
 static inline void showbitpackarray(const BitPackArray *bitpackarray)

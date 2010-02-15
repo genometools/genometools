@@ -86,8 +86,7 @@ gt_ht_cp_elem(GtHashtable *ht, htsize_t dest_idx, const void *src)
 static void
 gt_ht_resize(GtHashtable *ht, unsigned short new_size_log);
 
-extern GtHashtable *
-gt_hashtable_new(HashElemInfo table_info)
+GtHashtable* gt_hashtable_new(HashElemInfo table_info)
 {
   return gt_hashtable_new_with_start_size(table_info, MIN_SIZE_LOG);
 }
@@ -137,9 +136,8 @@ gt_ht_destruct(GtHashtable *ht)
   gt_free(ht->links.table);
 }
 
-extern GtHashtable *
-gt_hashtable_new_with_start_size(HashElemInfo table_info,
-                                 unsigned short size_log)
+GtHashtable* gt_hashtable_new_with_start_size(HashElemInfo table_info,
+                                              unsigned short size_log)
 {
   GtHashtable *ht;
   ht = gt_malloc(sizeof (*ht));
@@ -227,8 +225,7 @@ gt_ht_traverse_list_of_key_debug(GtHashtable *ht, const void *elem)
 }
 #endif
 
-extern void *
-gt_hashtable_get(GtHashtable *ht, const void *elem)
+void* gt_hashtable_get(GtHashtable *ht, const void *elem)
 {
   gt_assert(ht);
 #if TJ_DEBUG > 1
@@ -242,8 +239,7 @@ gt_hashtable_get(GtHashtable *ht, const void *elem)
   return NULL;
 }
 
-extern int
-gt_hashtable_add(GtHashtable *ht, const void *elem)
+int gt_hashtable_add(GtHashtable *ht, const void *elem)
 {
   int insert_count;
   gt_assert(ht && elem);
@@ -321,8 +317,7 @@ gt_ht_remove(GtHashtable *ht, const void *elem);
 static inline void
 gt_ht_shrink(GtHashtable *ht);
 
-extern int
-gt_hashtable_remove(GtHashtable *ht, const void *elem)
+int gt_hashtable_remove(GtHashtable *ht, const void *elem)
 {
   htsize_t remove_pos;
   gt_assert(ht && elem);
@@ -409,9 +404,8 @@ gt_ht_save_entry_to_array(void *elem, void *data, GT_UNUSED GtError *err)
   return CONTINUE_ITERATION;
 }
 
-extern int
-gt_hashtable_foreach_ordered(GtHashtable *ht, Elemvisitfunc iter, void *data,
-                          GtCompare cmp, GtError *err)
+int gt_hashtable_foreach_ordered(GtHashtable *ht, Elemvisitfunc iter,
+                                 void *data, GtCompare cmp, GtError *err)
 {
   GtArray *hash_entries;
   void *elem;
@@ -441,16 +435,14 @@ gt_hashtable_foreach_ordered(GtHashtable *ht, Elemvisitfunc iter, void *data,
   return had_err;
 }
 
-extern int
-gt_hashtable_foreach_in_default_order(GtHashtable *ht, Elemvisitfunc iter,
-                                      void *data, GtError *err)
+int gt_hashtable_foreach_in_default_order(GtHashtable *ht, Elemvisitfunc iter,
+                                          void *data, GtError *err)
 {
   return gt_hashtable_foreach_ordered(ht, iter, data, ht->table_info.cmp, err);
 }
 
-extern int
-gt_hashtable_foreach(GtHashtable *ht, Elemvisitfunc visitor, void *data,
-                     GtError *err)
+int gt_hashtable_foreach(GtHashtable *ht, Elemvisitfunc visitor, void *data,
+                         GtError *err)
 {
   htsize_t i, table_size = ht->table_mask + 1, deletion_count = 0;
   jmp_buf env;
@@ -509,8 +501,7 @@ gt_hashtable_foreach(GtHashtable *ht, Elemvisitfunc visitor, void *data,
   return 0;
 }
 
-extern size_t
-gt_hashtable_fill(GtHashtable *ht)
+size_t gt_hashtable_fill(GtHashtable *ht)
 {
   gt_assert(ht);
   return ht->current_fill;
@@ -533,8 +524,7 @@ gt_hashtable_fill(GtHashtable *ht)
       }                                                         \
   } while (0)
 
-extern void
-gt_hashtable_reset(GtHashtable *ht)
+void gt_hashtable_reset(GtHashtable *ht)
 {
   gt_assert(ht);
   FreeFuncWData free_elem_with_data =
@@ -546,8 +536,7 @@ gt_hashtable_reset(GtHashtable *ht)
             DEFAULT_LOW_MUL);
 }
 
-extern void
-gt_hashtable_delete(GtHashtable *ht)
+void gt_hashtable_delete(GtHashtable *ht)
 {
   if (ht)
   {
@@ -562,8 +551,7 @@ gt_hashtable_delete(GtHashtable *ht)
   }
 }
 
-extern uint32_t
-gt_ht_ptr_elem_hash(const void *elem)
+uint32_t gt_ht_ptr_elem_hash(const void *elem)
 {
   /* rotate right by 3 because memory addresses are to often aligned
    * at oct addresses. */
@@ -581,8 +569,7 @@ gt_ht_ptr_elem_hash(const void *elem)
 #endif
 }
 
-extern uint32_t
-gt_ht_ul_elem_hash(const void *elem)
+uint32_t gt_ht_ul_elem_hash(const void *elem)
 {
 #if CHAR_BIT == 8
   if (sizeof (void *) == 4)
@@ -604,8 +591,7 @@ gt_ht_ul_elem_hash(const void *elem)
     c -= b;  c ^= gt_ht_rotate_left_u32(b, 4);  b += a;           \
   }
 
-extern uint32_t
-gt_uint32_data_hash(const void *data, size_t length)
+uint32_t gt_uint32_data_hash(const void *data, size_t length)
 {
   uint32_t a,b,c;
   a = b = c = 0xdeadbeef + ((uint32_t)length);
@@ -660,26 +646,22 @@ uint32_str_key_hash(const char *str)
   return h;
 }
 
-extern uint32_t
-gt_ht_cstr_elem_hash(const void *elem)
+uint32_t gt_ht_cstr_elem_hash(const void *elem)
 {
   return uint32_str_key_hash(*(const char **)elem);
 }
 
-extern int
-gt_ht_ptr_elem_cmp(const void *elemA, const void *elemB)
+int gt_ht_ptr_elem_cmp(const void *elemA, const void *elemB)
 {
   return gt_ht_ptr_cmp(*(void **)elemA, *(void **)elemB);
 }
 
-extern int
-gt_ht_ul_elem_cmp(const void *elemA, const void *elemB)
+int gt_ht_ul_elem_cmp(const void *elemA, const void *elemB)
 {
   return gt_ht_ul_cmp(*(unsigned long *)elemA, *(unsigned long *)elemB);
 }
 
-extern int
-gt_ht_cstr_elem_cmp(const void *elemA, const void *elemB)
+int gt_ht_cstr_elem_cmp(const void *elemA, const void *elemB)
 {
   return strcmp(*(const char **)elemA, *(const char **)elemB);
 }
@@ -704,8 +686,7 @@ struct gt_ht_elem_2cstr
   char *key, *value;
 };
 
-extern void
-gt_ht_2ptr_elem_free(void *elem)
+void gt_ht_2ptr_elem_free(void *elem)
 {
   struct gt_ht_elem_2cstr *p = elem;
   gt_assert(elem);

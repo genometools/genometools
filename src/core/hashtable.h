@@ -63,41 +63,37 @@ struct HashElemInfo
 
 typedef struct HashElemInfo HashElemInfo;
 
-extern GtHashtable *
-gt_hashtable_new(HashElemInfo);
-extern GtHashtable *
-gt_hashtable_new_with_start_size(HashElemInfo htype, unsigned short size_log);
-void*      gt_hashtable_get(GtHashtable*, const void *elem);
+GtHashtable* gt_hashtable_new(HashElemInfo);
+GtHashtable* gt_hashtable_new_with_start_size(HashElemInfo htype,
+                                              unsigned short size_log);
+void*        gt_hashtable_get(GtHashtable*, const void *elem);
 /**
  * @return 1 if add succeeded, 0 if elem is already in table.
  */
-int        gt_hashtable_add(GtHashtable*, const void *elem);
-int        gt_hashtable_remove(GtHashtable*, const void *elem);
+int          gt_hashtable_add(GtHashtable*, const void *elem);
+int          gt_hashtable_remove(GtHashtable*, const void *elem);
 /**
  * @brief iterate over the hashtable in key order given by compare
  * function <cmp>
  * @return 0 => no error, -1 => error occured
  */
-extern int
-gt_hashtable_foreach_ordered(GtHashtable *ht, Elemvisitfunc iter, void *data,
-                          GtCompare cmp, GtError *err);
+int          gt_hashtable_foreach_ordered(GtHashtable *ht, Elemvisitfunc iter,
+                                          void *data, GtCompare cmp,
+                                          GtError *err);
 /**
  * @brief iterate over the hashtable in implementation-defined order
  * @return 0 => no error, -1 => error occured
  */
-extern int
-gt_hashtable_foreach(GtHashtable *ht, Elemvisitfunc iter, void *data,
-                  GtError *err);
+int          gt_hashtable_foreach(GtHashtable *ht, Elemvisitfunc iter,
+                                  void *data, GtError *err);
 /* iterate over the hashtable in default order. Requires that the hashtable
    was constructed with an ordering compare function. */
-extern int
-gt_hashtable_foreach_in_default_order(GtHashtable*, Elemvisitfunc, void *data,
-                                   GtError *err);
-size_t
-gt_hashtable_fill(GtHashtable *);
-void       gt_hashtable_reset(GtHashtable*);
-int        gt_hashtable_unit_test(GtError*);
-void       gt_hashtable_delete(GtHashtable*);
+int          gt_hashtable_foreach_in_default_order(GtHashtable*, Elemvisitfunc,
+                                                   void *data, GtError *err);
+size_t       gt_hashtable_fill(GtHashtable *);
+void         gt_hashtable_reset(GtHashtable*);
+int          gt_hashtable_unit_test(GtError*);
+void         gt_hashtable_delete(GtHashtable*);
 
 /*
  * helper functions for users constructing their own HashElemInfos
@@ -110,36 +106,29 @@ gt_uint32_key_mul_hash(uint32_t key);
  * @param elem treated as a void ** so that *(void **)elem is used as
  * key to hash
  */
-extern uint32_t
-gt_ht_ptr_elem_hash(const void *elem);
+uint32_t     gt_ht_ptr_elem_hash(const void *elem);
 
 /**
  * @brief Hash unsigned long by value
  * @param elem *(unsigned long *)elem is used as key to hash
  */
-extern uint32_t
-gt_ht_ul_elem_hash(const void *elem);
+uint32_t     gt_ht_ul_elem_hash(const void *elem);
 
 /**
  * @brief Hash string by mixing hash value of characters
  *
  * @param elem *(char **)elem is used as key to hash
  */
-extern uint32_t
-gt_ht_cstr_elem_hash(const void *elem);
+uint32_t     gt_ht_cstr_elem_hash(const void *elem);
 /**
  * @brief hash binary data
  */
-extern uint32_t
-gt_uint32_data_hash(const void *data, size_t length);
-extern int
-gt_ht_ptr_elem_cmp(const void *elemA, const void *elemB);
-/*@unused@*/  static inline int
+uint32_t     gt_uint32_data_hash(const void *data, size_t length);
+int          gt_ht_ptr_elem_cmp(const void *elemA, const void *elemB);
+/*@unused@*/ static inline int
 gt_ht_ul_cmp(unsigned long a, unsigned long b);
-extern int
-gt_ht_ul_elem_cmp(const void *elemA, const void *elemB);
-extern int
-gt_ht_cstr_elem_cmp(const void *elemA, const void *elemB);
+int          gt_ht_ul_elem_cmp(const void *elemA, const void *elemB);
+int          gt_ht_cstr_elem_cmp(const void *elemA, const void *elemB);
 
 #include "core/hashtable-siop.h"
 

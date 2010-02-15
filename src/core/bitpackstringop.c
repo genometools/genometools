@@ -103,9 +103,8 @@ computeDeBruijn()
 }
 #endif
 
-extern int
-gt_bsCompare(constBitString a, BitOffset offsetA, BitOffset numBitsA,
-          constBitString b, BitOffset offsetB, BitOffset numBitsB)
+int gt_bsCompare(constBitString a, BitOffset offsetA, BitOffset numBitsA,
+                 constBitString b, BitOffset offsetB, BitOffset numBitsB)
 {
   BitOffset totalBitsLeftA = numBitsA, totalBitsLeftB = numBitsB;
   size_t elemStartA = offsetA/bitElemBits, elemStartB = offsetB/bitElemBits;
@@ -442,8 +441,8 @@ gt_bsClear(BitString str, BitOffset offset, BitOffset numBits, int bitVal)
   }
 }
 
-extern BitOffset
-gt_bs1BitsCount(constBitString str, BitOffset offset, BitOffset numBits)
+BitOffset gt_bs1BitsCount(constBitString str, BitOffset offset,
+                          BitOffset numBits)
 {
   uint32_t accum = 0;
   BitOffset weight = 0, bitsLeft = numBits;
@@ -504,8 +503,8 @@ bits2buf(char *buf, uint32_t v, unsigned numBits)
     break;                                      \
   }
 
-extern int
-gt_bsPrint(FILE *fp, constBitString str, BitOffset offset, BitOffset numBits)
+int gt_bsPrint(FILE *fp, constBitString str, BitOffset offset,
+               BitOffset numBits)
 {
   uint32_t accum = 0;
   unsigned bitsLeft = numBits, bitTop = offset%bitElemBits, bitsInAccum = 0;
