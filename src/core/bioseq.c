@@ -375,7 +375,7 @@ static int construct_bioseq_files(GtBioseq *bs, GtStr *gt_bioseq_index_file,
 }
 
 static int gt_bioseq_fill(GtBioseq *bs, bool recreate,
-                       GtFastaReaderType gt_fasta_reader_type, GtError *err)
+                          GtFastaReaderType gt_fasta_reader_type, GtError *err)
 {
   GtStr *gt_bioseq_index_file = NULL,
          *gt_bioseq_raw_file = NULL;
@@ -418,10 +418,10 @@ static int gt_bioseq_fill(GtBioseq *bs, bool recreate,
 }
 
 static GtBioseq* gt_bioseq_new_with_recreate_and_type(GtStr *sequence_file,
-                                                 bool recreate,
-                                                 GtFastaReaderType
-                                                 gt_fasta_reader_type,
-                                                 GtError *err)
+                                                      bool recreate,
+                                                      GtFastaReaderType
+                                                      gt_fasta_reader_type,
+                                                      GtError *err)
 {
   GtBioseq *bs;
   int had_err = 0;
@@ -431,7 +431,7 @@ static GtBioseq* gt_bioseq_new_with_recreate_and_type(GtStr *sequence_file,
     bs->use_stdin = true;
   if (!bs->use_stdin && !gt_file_exists(gt_str_get(sequence_file))) {
     gt_error_set(err, "sequence file \"%s\" does not exist or is not readable",
-              gt_str_get(sequence_file));
+                 gt_str_get(sequence_file));
     had_err = -1;
   }
   if (!had_err) {
@@ -478,8 +478,8 @@ GtBioseq* gt_bioseq_new_str(GtStr *sequence_file, GtError *err)
 }
 
 GtBioseq* gt_bioseq_new_with_fasta_reader(const char *sequence_file,
-                                           GtFastaReaderType fasta_reader,
-                                           GtError *err)
+                                          GtFastaReaderType fasta_reader,
+                                          GtError *err)
 {
   GtBioseq *bs;
   GtStr *seqfile;
