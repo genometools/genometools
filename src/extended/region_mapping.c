@@ -87,7 +87,8 @@ static int update_bioseq_if_necessary(GtRegionMapping *rm, GtStr *seqid,
   int had_err = 0;
   gt_error_check(err);
   gt_assert(rm && seqid);
-  if (!rm->sequence_file || gt_str_cmp(rm->sequence_name, seqid)) {
+  if (!rm->sequence_file ||
+      (gt_str_cmp(rm->sequence_name, seqid) && !rm->usedesc)) {
     gt_str_delete(rm->sequence_file);
     rm->sequence_file = region_mapping_map(rm, gt_str_get(seqid), err);
     if (!rm->sequence_file)
