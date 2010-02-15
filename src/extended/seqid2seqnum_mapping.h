@@ -18,6 +18,7 @@
 #define SEQID2SEQNUM_MAPPING_H
 
 #include "core/bioseq.h"
+#include "core/range_api.h"
 
 /* Helper class which maps a sequence id to a sequence number.
    Currently based to GtBioseq, but as a matter of principle independent from
@@ -33,12 +34,14 @@ GtSeqid2SeqnumMapping* gt_seqid2seqnum_mapping_new(GtBioseq *bioseq, GtError*);
 /* Delete the given <seqid2seqnum_mapping> object. */
 void                   gt_seqid2seqnum_mapping_delete(GtSeqid2SeqnumMapping
                                                       *seqid2seqnum_mapping);
-/* Use <seqid2seqnum_mapping> to map the given <seqid> and store the result in
-   <seqnum>. The corresponding offset is stored in <offset>. If the mapping is
-   not possible, -1 is returned and <err> is set accordingly. */
+/* Use <seqid2seqnum_mapping> to map the given <seqid> (in the given <range>)
+   and store the result in <seqnum>. The corresponding offset is stored in
+   <offset>. If the mapping is not possible, -1 is returned and <err> is set
+   accordingly. */
 int                    gt_seqid2seqnum_mapping_map(GtSeqid2SeqnumMapping
                                                    *seqid2seqnum_mapping,
                                                    const char *seqid,
+                                                   const GtRange *range,
                                                    unsigned long *seqnum,
                                                    unsigned long *offset,
                                                    GtError *err);

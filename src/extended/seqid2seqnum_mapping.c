@@ -86,9 +86,13 @@ void gt_seqid2seqnum_mapping_delete(GtSeqid2SeqnumMapping *mapping)
   gt_free(mapping);
 }
 
+#include "core/unused_api.h"
+
 int gt_seqid2seqnum_mapping_map(GtSeqid2SeqnumMapping *mapping,
-                                const char *seqid, unsigned long *seqnum,
-                                unsigned long *offset, GtError *err)
+                                const char *seqid,
+                                GT_UNUSED const GtRange *range,
+                                unsigned long *seqnum, unsigned long *offset,
+                                GtError *err)
 {
   unsigned long *seqval;
   gt_error_check(err);

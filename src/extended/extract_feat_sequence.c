@@ -36,12 +36,12 @@ static int extract_join_feature(GtGenomeNode *gn, const char *type,
   gt_assert(gf);
 
   if (gt_feature_node_has_type(gf, type)) {
+    range = gt_genome_node_get_range(gn);
     had_err = gt_region_mapping_get_raw_sequence(region_mapping, &raw_sequence,
                                                  &raw_sequence_length, &offset,
                                                  gt_genome_node_get_seqid(gn),
-                                                 err);
+                                                 &range, err);
     if (!had_err) {
-      range = gt_genome_node_get_range(gn);
       gt_assert(range.start); /* 1-based coordinates */
       raw_sequence += range.start - offset;
       gt_assert(range.end <= raw_sequence_length);
@@ -98,7 +98,7 @@ int gt_extract_feat_sequence(GtStr *sequence, GtGenomeNode *gn,
                                                  &raw_sequence_length,
                                                  &offset,
                                                  gt_genome_node_get_seqid(gn),
-                                                 err);
+                                                 &range, err);
     if (!had_err) {
       gt_assert(range.end <= raw_sequence_length);
       gt_str_append_cstr_nt(sequence, raw_sequence + range.start - offset,

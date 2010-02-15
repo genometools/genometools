@@ -18,6 +18,7 @@
 #ifndef REGION_MAPPING_H
 #define REGION_MAPPING_H
 
+#include "core/range_api.h"
 #include "core/str.h"
 
 /* maps a sequence-region to a sequence file */
@@ -32,7 +33,9 @@ int              gt_region_mapping_get_raw_sequence(GtRegionMapping*,
                                                     const char **rawseq,
                                                     unsigned long *length,
                                                     unsigned long *offset,
-                                                    GtStr *seqid, GtError*);
+                                                    GtStr *seqid,
+                                                    const GtRange *range,
+                                                    GtError*);
 void             gt_region_mapping_delete(GtRegionMapping*);
 
 #endif

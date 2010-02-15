@@ -116,7 +116,7 @@ static int update_bioseq_if_necessary(GtRegionMapping *rm, GtStr *seqid,
 int gt_region_mapping_get_raw_sequence(GtRegionMapping *rm, const char **rawseq,
                                        unsigned long *length,
                                        unsigned long *offset, GtStr *seqid,
-                                       GtError *err)
+                                       const GtRange *range, GtError *err)
 {
   int had_err = 0;
   gt_error_check(err);
@@ -127,8 +127,8 @@ int gt_region_mapping_get_raw_sequence(GtRegionMapping *rm, const char **rawseq,
       unsigned long seqnum;
       gt_assert(rm->seqid2seqnum_mapping);
       had_err = gt_seqid2seqnum_mapping_map(rm->seqid2seqnum_mapping,
-                                            gt_str_get(seqid), &seqnum, offset,
-                                            err);
+                                            gt_str_get(seqid), range, &seqnum,
+                                            offset, err);
       if (!had_err) {
       *rawseq = gt_bioseq_get_sequence(rm->bioseq, seqnum);
       *length = gt_bioseq_get_sequence_length(rm->bioseq, seqnum);

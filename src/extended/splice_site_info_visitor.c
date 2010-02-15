@@ -71,7 +71,7 @@ static int process_intron(GtSpliceSiteInfoVisitor *ssiv, GtGenomeNode *intron,
     seqid = gt_genome_node_get_seqid(intron);
     had_err = gt_region_mapping_get_raw_sequence(ssiv->region_mapping,
                                                  &sequence, &seqlen, &offset,
-                                                 seqid, err);
+                                                 seqid, &range, err);
     if (!had_err) {
       gt_assert(range.end <= seqlen);
       strand = gt_feature_node_get_strand((GtFeatureNode*) intron);
