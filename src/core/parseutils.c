@@ -286,6 +286,16 @@ int gt_parse_description_range(const char *description, GtRange *range)
   desc = gt_cstr_dup(description);
   desclen = strlen(desc);
   descptr = desc;
+  /* ignore terminal '\n' */
+  if (desclen && desc[desclen-1] == '\n') {
+    desc[desclen-1] = '\0';
+    desclen--;
+  }
+  /* ignore terminal '\r' */
+  if (desclen && desc[desclen-1] == '\r') {
+    desc[desclen-1] = '\0';
+    desclen--;
+  }
   /* find ':' */
   for (i = 0; i < desclen; i++) {
     if (desc[i] == ':')
