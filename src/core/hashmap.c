@@ -81,6 +81,13 @@ gt_hashmap_get(GtHashmap *hm, const void *key)
   return (elem!=NULL)?elem->value:NULL;
 }
 
+extern void *
+gt_hashmap_get_key(GtHashmap *hm, const void *key)
+{
+  struct map_entry *elem = gt_hashtable_get((GtHashtable*) hm, &key);
+  return (elem!=NULL)?elem->key:NULL;
+}
+
 extern void
 gt_hashmap_add(GtHashmap *hm, void *key, void *value)
 {

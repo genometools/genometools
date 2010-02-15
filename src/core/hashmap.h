@@ -19,6 +19,8 @@
 
 #include "core/hashmap_api.h"
 
-int gt_hashmap_unit_test(GtError*);
+/* Returns the key stored in <hm> for <key> or NULL if no such key exists. */
+void* gt_hashmap_get_key(GtHashmap *hm, const void *key);
+int   gt_hashmap_unit_test(GtError*);
 
 #endif
