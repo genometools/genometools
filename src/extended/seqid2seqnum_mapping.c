@@ -47,17 +47,52 @@ static void seqid_info_delete(SeqidInfo *seqid_info)
   gt_array_delete(seqid_info);
 }
 
-static void seqid_info_get(SeqidInfo *seqid_info, unsigned long *seqnum,
-                           unsigned long *offset, const GtRange *range)
+static int seqid_info_add(SeqidInfo *seqid_info, unsigned long seqnum,
+                          const GtRange *range, const char *filename,
+                          const char *seqid, GtError *err)
+{
+  SeqidInfoElem *seqid_info_elem_ptr, seqid_info_elem;
+  gt_error_check(err);
+  gt_assert(range);
+  seqid_info_elem_ptr = gt_array_get_first(seqid_info);
+  if (range->end == GT_UNDEF_ULONG ||
+      seqid_info_elem_ptr->descrange.end == GT_UNDEF_ULONG) {
+    gt_error_set(err, "sequence file \"%s\" does contain multiple sequences "
+                  "with ID \"%s\" and not all of them have description ranges",
+                  filename, seqid);
+    return -1;
+  }
+  seqid_info_elem.seqnum = seqnum;
+  seqid_info_elem.descrange = *range;
+  gt_array_add(seqid_info, seqid_info_elem);
+  return 0;
+}
+
+static int seqid_info_get(SeqidInfo *seqid_info, unsigned long *seqnum,
+                          unsigned long *offset, const GtRange *range,
+                          const char *filename, const char *seqid, GtError *err)
 {
   SeqidInfoElem *seqid_info_elem;
+  unsigned long i;
+  gt_error_check(err);
   gt_assert(seqid_info && seqnum && offset && range);
-  seqid_info_elem = gt_array_get_first(seqid_info);
-  *seqnum = seqid_info_elem->seqnum;
-  *offset = seqid_info_elem->descrange.start;
+  for (i = 0; i < gt_array_size(seqid_info); i++) {
+    seqid_info_elem = gt_array_get(seqid_info, i);
+    if (seqid_info_elem->descrange.end == GT_UNDEF_ULONG ||
+        gt_range_contains(&seqid_info_elem->descrange, range)) {
+      *seqnum = seqid_info_elem->seqnum;
+      *offset = seqid_info_elem->descrange.start;
+      return 0;
+    }
+  }
+  gt_error_set(err, "cannot find sequence ID \"%s\" (with range %lu,%lu) in "
+               "sequence file \"%s\"", seqid, range->start, range->end,
+               filename);
+  return -1;
 }
 
 struct GtSeqid2SeqnumMapping {
+  char *filename;
   GtHashmap *map;
   const char *cached_seqid;
   unsigned long cached_seqnum,
@@ -70,17 +105,24 @@ static int fill_mapping(GtSeqid2SeqnumMapping *mapping, GtBioseq *bioseq,
   SeqidInfo *seqid_info;
   unsigned long i, j;
   GtRange descrange;
+  int had_err = 0;
   gt_error_check(err);
   gt_assert(mapping && bioseq);
-  for (i = 0; i < gt_bioseq_number_of_sequences(bioseq); i++) {
+  for (i = 0; !had_err && i < gt_bioseq_number_of_sequences(bioseq); i++) {
     const char *desc = gt_bioseq_get_description(bioseq, i);
     if (gt_parse_description_range(desc, &descrange)) {
       /* no offset could be parsed -> store description as sequence id */
-      gt_assert(!gt_hashmap_get(mapping->map, desc)); /* XXX */
       descrange.start = 1;
       descrange.end = GT_UNDEF_ULONG;
-      seqid_info = seqid_info_new(i, &descrange);
-      gt_hashmap_add(mapping->map, gt_cstr_dup(desc), seqid_info);
+      if ((seqid_info = gt_hashmap_get(mapping->map, desc))) {
+        had_err = seqid_info_add(seqid_info, i, &descrange, mapping->filename,
+                                 desc, err);
+        gt_assert(had_err); /* adding a seqid without range should fail */
+      }
+      else {
+        seqid_info = seqid_info_new(i, &descrange);
+        gt_hashmap_add(mapping->map, gt_cstr_dup(desc), seqid_info);
+      }
     }
     else {
       char *dup;
@@ -91,12 +133,18 @@ static int fill_mapping(GtSeqid2SeqnumMapping *mapping, GtBioseq *bioseq,
       dup = gt_malloc((j + 1) * sizeof *dup);
       strncpy(dup, desc, j);
       dup[j] = '\0';
-      gt_assert(!gt_hashmap_get(mapping->map, desc)); /* XXX */
-      seqid_info = seqid_info_new(i, &descrange);
-      gt_hashmap_add(mapping->map, dup, seqid_info);
+      if ((seqid_info = gt_hashmap_get(mapping->map, dup))) {
+        had_err = seqid_info_add(seqid_info, i, &descrange, mapping->filename,
+                                 dup, err);
+        gt_free(dup);
+      }
+      else {
+        seqid_info = seqid_info_new(i, &descrange);
+        gt_hashmap_add(mapping->map, dup, seqid_info);
+      }
     }
   }
-  return 0;
+  return had_err;
 }
 
 GtSeqid2SeqnumMapping* gt_seqid2seqnum_mapping_new(GtBioseq *bioseq,
@@ -106,6 +154,7 @@ GtSeqid2SeqnumMapping* gt_seqid2seqnum_mapping_new(GtBioseq *bioseq,
   gt_error_check(err);
   gt_assert(bioseq);
   mapping = gt_malloc(sizeof *mapping);
+  mapping->filename = gt_cstr_dup(gt_bioseq_filename(bioseq));
   mapping->map = gt_hashmap_new(GT_HASH_STRING, gt_free_func,
                                 (GtFree) seqid_info_delete);
   if (fill_mapping(mapping, bioseq, err)) {
@@ -120,6 +169,7 @@ void gt_seqid2seqnum_mapping_delete(GtSeqid2SeqnumMapping *mapping)
 {
   if (!mapping) return;
   gt_hashmap_delete(mapping->map);
+  gt_free(mapping->filename);
   gt_free(mapping);
 }
 
@@ -139,12 +189,15 @@ int gt_seqid2seqnum_mapping_map(GtSeqid2SeqnumMapping *mapping,
   }
   /* cache miss -> regular mapping */
   if (!(seqid_info = gt_hashmap_get(mapping->map, seqid))) {
-    gt_error_set(err, "sequence ID to sequence number mapping does not contain "
-                      "a sequence with ID \"%s\"", seqid);
+    gt_error_set(err, "sequence file \"%s\" does not contain a sequence with "
+                      "ID \"%s\"", mapping->filename, seqid);
     return -1;
   }
   /* get results from seqid info */
-  seqid_info_get(seqid_info, seqnum, offset, range);
+  if (seqid_info_get(seqid_info, seqnum, offset, range, mapping->filename,
+                     seqid, err)) {
+    return -1;
+  }
   /* store result in cache */
   mapping->cached_seqid = gt_hashmap_get_key(mapping->map, seqid);
   gt_assert(mapping->cached_seqid);
