@@ -16,7 +16,7 @@
 */
 
 #include <math.h>
-#include "core/cstr.h"
+#include "core/cstr_api.h"
 #include "core/ma.h"
 #include "core/option.h"
 #include "gth/gthxml.h"

@@ -21,7 +21,7 @@
 #include "core/init.h"
 #include "core/class_alloc.h"
 #include "core/class_prealloc.h"
-#include "core/cstr.h"
+#include "core/cstr_api.h"
 #include "core/cstr_array.h"
 #include "core/fa.h"
 #include "core/ma.h"

@@ -16,7 +16,7 @@
 */
 
 #include "core/assert_api.h"
-#include "core/cstr.h"
+#include "core/cstr_api.h"
 #include "core/fa.h"
 #include "core/ma.h"
 #include "core/unused_api.h"

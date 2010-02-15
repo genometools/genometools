@@ -17,7 +17,7 @@
 
 #include "core/assert_api.h"
 #include "core/bsearch.h"
-#include "core/cstr.h"
+#include "core/cstr_api.h"
 #include "core/hashmap.h"
 #include "core/log.h"
 #include "core/ma.h"

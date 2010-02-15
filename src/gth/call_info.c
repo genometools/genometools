@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/cstr.h"
+#include "core/cstr_api.h"
 #include "core/ma.h"
 #include "gth/default.h"
 #include "gth/call_info.h"

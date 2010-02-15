@@ -25,7 +25,7 @@
 #include "annotationsketch/style.h"
 #include "annotationsketch/track.h"
 #include "core/basename_api.h"
-#include "core/cstr.h"
+#include "core/cstr_api.h"
 #include "core/ensure.h"
 #include "core/hashmap.h"
 #include "core/ma.h"

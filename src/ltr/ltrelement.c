@@ -17,7 +17,7 @@
 
 #include <string.h>
 #include "core/alphabet.h"
-#include "core/cstr.h"
+#include "core/cstr_api.h"
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/range.h"

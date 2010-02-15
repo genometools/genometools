@@ -18,7 +18,7 @@
 #include <string.h>
 #include "lauxlib.h"
 #include "core/assert_api.h"
-#include "core/cstr.h"
+#include "core/cstr_api.h"
 #include "core/gtdatapath.h"
 #include "core/ma.h"
 #include "extended/luahelper.h"

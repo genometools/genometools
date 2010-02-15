@@ -27,7 +27,7 @@
 #include <cairo-svg.h>
 #endif
 #include "core/bioseq.h"
-#include "core/cstr.h"
+#include "core/cstr_api.h"
 #include "core/fileutils_api.h"
 #include "core/gtdatapath.h"
 #include "core/log.h"

@@ -23,7 +23,7 @@
 #include "annotationsketch/color_api.h"
 #include "annotationsketch/style.h"
 #include "core/assert_api.h"
-#include "core/cstr.h"
+#include "core/cstr_api.h"
 #include "core/ensure.h"
 #include "core/log.h"
 #include "core/ma.h"

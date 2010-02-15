@@ -17,7 +17,7 @@
 
 #include <string.h>
 #include "core/bioseq.h"
-#include "core/cstr.h"
+#include "core/cstr_api.h"
 #include "core/fasta.h"
 #include "core/ma.h"
 #include "core/option.h"

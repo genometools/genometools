@@ -17,7 +17,7 @@
 
 #include <math.h>
 #include "core/assert_api.h"
-#include "core/cstr.h"
+#include "core/cstr_api.h"
 #include "core/dynalloc.h"
 #include "core/ensure.h"
 #include "core/ma.h"

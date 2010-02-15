@@ -19,7 +19,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <unistd.h>
-#include "core/cstr.h"
+#include "core/cstr_api.h"
 #include "core/fasta.h"
 #include "core/hashmap.h"
 #include "core/ma.h"

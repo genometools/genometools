@@ -14,7 +14,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/cstr.h"
+#include "core/cstr_api.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
 #include "extended/bed_in_stream.h"

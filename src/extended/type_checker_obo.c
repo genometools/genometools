@@ -16,7 +16,7 @@
 */
 
 #include <string.h>
-#include "core/cstr.h"
+#include "core/cstr_api.h"
 #include "core/cstr_table.h"
 #include "core/ma.h"
 #include "extended/obo_parse_tree.h"

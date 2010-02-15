@@ -18,7 +18,7 @@
 #include "core/assert_api.h"
 #include "core/array.h"
 #include "core/bioseq.h"
-#include "core/cstr.h"
+#include "core/cstr_api.h"
 #include "core/disc_distri.h"
 #include "core/dynalloc.h"
 #include "core/error.h"

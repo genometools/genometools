@@ -19,7 +19,7 @@
 
 #include <string.h>
 #include <cairo.h>
-#include "core/cstr.h"
+#include "core/cstr_api.h"
 #include "core/fileutils_api.h"
 #include "core/gtdatapath.h"
 #include "core/option.h"

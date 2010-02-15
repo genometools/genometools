@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/cstr.h"
+#include "core/cstr_api.h"
 #include "core/file.h"
 #include "core/str_array.h"
 #include "core/seqiterator_qual_fastq.h"

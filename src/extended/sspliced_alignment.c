@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/cstr.h"
+#include "core/cstr_api.h"
 #include "core/ma.h"
 #include "extended/sspliced_alignment.h"
 

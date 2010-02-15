@@ -16,7 +16,7 @@
 */
 
 #include "core/assert_api.h"
-#include "core/cstr.h"
+#include "core/cstr_api.h"
 #include "core/error.h"
 #include "core/mailaddress.h"
 #include "core/outputfile.h"

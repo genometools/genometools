@@ -23,7 +23,7 @@
 #include <string.h>
 #include "core/assert_api.h"
 #include "core/array.h"
-#include "core/cstr.h"
+#include "core/cstr_api.h"
 #include "core/hashtable.h"
 #include "core/ma.h"
 #include "core/qsort_r.h"

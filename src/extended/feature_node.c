@@ -18,7 +18,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "core/assert_api.h"
-#include "core/cstr.h"
+#include "core/cstr_api.h"
 #include "core/ensure.h"
 #include "core/hashtable.h"
 #include "core/ma.h"

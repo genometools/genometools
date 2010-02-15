@@ -17,7 +17,7 @@
 
 #include <ctype.h>
 #include "core/chardef.h"
-#include "core/cstr.h"
+#include "core/cstr_api.h"
 #include "core/error.h"
 #include "core/str_array.h"
 #include "core/fastabuffer.h"

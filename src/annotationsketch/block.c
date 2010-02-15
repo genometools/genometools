@@ -21,7 +21,7 @@
 #include "annotationsketch/default_formats.h"
 #include "annotationsketch/element.h"
 #include "core/array.h"
-#include "core/cstr.h"
+#include "core/cstr_api.h"
 #include "core/ensure.h"
 #include "core/log.h"
 #include "core/ma.h"

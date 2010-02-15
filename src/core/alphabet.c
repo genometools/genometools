@@ -24,7 +24,7 @@
 #include <limits.h>
 #include <errno.h>
 #include "core/chardef.h"
-#include "core/cstr.h"
+#include "core/cstr_api.h"
 #include "core/error.h"
 #include "core/fileutils_api.h"
 #include "core/ma.h"
