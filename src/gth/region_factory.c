@@ -143,9 +143,9 @@ static void make_sequence_region(GtHashmap *sequence_regions,
                                  unsigned long filenum,
                                  unsigned long seqnum)
 {
+  unsigned long offset_is_defined = false;
+  GtRange range, descrange;
   GtGenomeNode *sr = NULL;
-  GtRange range;
-  unsigned long offset = GT_UNDEF_ULONG;
   gt_assert(sequence_regions && sequenceid && srf && input);
   if (gth_input_use_substring_spec(input)) {
     range.start = gth_input_genomic_substring_from(input);
@@ -157,16 +157,17 @@ static void make_sequence_region(GtHashmap *sequence_regions,
   if (srf->use_desc_ranges) {
     GtStr *description = gt_str_new();
     gth_input_get_genomic_description(input, description, filenum, seqnum);
-    offset = gt_parse_description_range(gt_str_get(description));
+    if (!gt_parse_description_range(gt_str_get(description), &descrange))
+      offset_is_defined = true;
     gt_str_delete(description);
   }
-  if (offset != GT_UNDEF_ULONG)
-    range = gt_range_offset(&range, offset);
+  if (offset_is_defined)
+    range = gt_range_offset(&range, descrange.start);
   else
     range = gt_range_offset(&range, 1); /* 1-based */
   if (!gt_str_length(sequenceid) ||
       (gt_cstr_table_get(srf->used_seqids, gt_str_get(sequenceid)) &&
-       offset == GT_UNDEF_ULONG)) {
+       !offset_is_defined)) {
     /* sequenceid is empty or exists already (and no offset has been parsed)
        -> make one up */
     GtStr *seqid;
@@ -176,7 +177,7 @@ static void make_sequence_region(GtHashmap *sequence_regions,
     gt_free(base);
     gt_str_append_char(seqid, '|');
     gt_str_append_ulong(seqid, seqnum + 1); /* 1-based */
-    seqid_store_add(srf->seqid_store, filenum, seqnum, seqid, offset);
+    seqid_store_add(srf->seqid_store, filenum, seqnum, seqid, GT_UNDEF_ULONG);
     gt_assert(!gt_cstr_table_get(srf->used_seqids, gt_str_get(seqid)));
     gt_cstr_table_add(srf->used_seqids, gt_str_get(seqid));
     sr = gt_region_node_new(seqid_store_get(srf->seqid_store, filenum, seqnum),
@@ -193,7 +194,8 @@ static void make_sequence_region(GtHashmap *sequence_regions,
     if (!gt_cstr_table_get(srf->used_seqids, gt_str_get(sequenceid))) {
       /* no sequence region with this id exists -> create one */
       gt_cstr_table_add(srf->used_seqids, gt_str_get(sequenceid));
-      seqid_store_add(srf->seqid_store, filenum, seqnum, sequenceid, offset);
+      seqid_store_add(srf->seqid_store, filenum, seqnum, sequenceid,
+                      offset_is_defined ? descrange.start : GT_UNDEF_ULONG);
       sr = gt_region_node_new(seqid_store_get(srf->seqid_store, filenum,
                                               seqnum), range.start, range.end);
       gt_hashmap_add(sequence_regions,
@@ -209,7 +211,8 @@ static void make_sequence_region(GtHashmap *sequence_regions,
       prev_range = gt_genome_node_get_range(sr);
       new_range = gt_range_join(&prev_range, &range);
       gt_genome_node_set_range(sr, &new_range);
-      seqid_store_add(srf->seqid_store, filenum, seqnum, sequenceid, offset);
+      seqid_store_add(srf->seqid_store, filenum, seqnum, sequenceid,
+                      offset_is_defined ? descrange.start : GT_UNDEF_ULONG);
     }
   }
   gt_assert(sr);

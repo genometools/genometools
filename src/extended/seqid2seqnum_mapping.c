@@ -67,17 +67,18 @@ struct GtSeqid2SeqnumMapping {
 static int fill_mapping(GtSeqid2SeqnumMapping *mapping, GtBioseq *bioseq,
                         GtError *err)
 {
-  GtRange descrange = { GT_UNDEF_ULONG, GT_UNDEF_ULONG };
-  unsigned long i, j, offset;
   SeqidInfo *seqid_info;
+  unsigned long i, j;
+  GtRange descrange;
   gt_error_check(err);
   gt_assert(mapping && bioseq);
   for (i = 0; i < gt_bioseq_number_of_sequences(bioseq); i++) {
     const char *desc = gt_bioseq_get_description(bioseq, i);
-    if ((offset = gt_parse_description_range(desc)) == GT_UNDEF_ULONG) {
+    if (gt_parse_description_range(desc, &descrange)) {
       /* no offset could be parsed -> store description as sequence id */
       gt_assert(!gt_hashmap_get(mapping->map, desc)); /* XXX */
       descrange.start = 1;
+      descrange.end = GT_UNDEF_ULONG;
       seqid_info = seqid_info_new(i, &descrange);
       gt_hashmap_add(mapping->map, gt_cstr_dup(desc), seqid_info);
     }
@@ -91,7 +92,6 @@ static int fill_mapping(GtSeqid2SeqnumMapping *mapping, GtBioseq *bioseq,
       strncpy(dup, desc, j);
       dup[j] = '\0';
       gt_assert(!gt_hashmap_get(mapping->map, desc)); /* XXX */
-      descrange.start = offset;
       seqid_info = seqid_info_new(i, &descrange);
       gt_hashmap_add(mapping->map, dup, seqid_info);
     }

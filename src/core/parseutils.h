@@ -68,10 +68,10 @@ int gt_parse_phase(GtPhase*, const char *phase,
 int gt_parse_int_line(int*, const char *integer,
                       unsigned int line_number, const char *filename, GtError*);
 
-/* Parse the range description offset in the given <description> and return it.
-   If the description cannot be parsed, <GT_UNDEF_ULONG> is returned.
-   Range descriptions have the folowing format: III:1000001..2000000
-   That is, the part between ':' and '..' denotes the offset. */
-unsigned long gt_parse_description_range(const char *description);
+/* Parse the range description in the given <description> and store it in
+   <range>. Range descriptions have the folowing format: III:1000001..2000000
+   That is, the part between ':' and '..' denotes the range start and the part
+   after '..' the end. Returns 0 upon success and -1 upon failure. */
+int gt_parse_description_range(const char *description, GtRange *range);
 
 #endif
