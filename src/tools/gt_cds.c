@@ -17,6 +17,7 @@
 
 #include "core/ma.h"
 #include "core/option.h"
+#include "core/outputfile.h"
 #include "core/unused_api.h"
 #include "extended/cds_stream.h"
 #include "extended/genome_node.h"
@@ -33,6 +34,8 @@ typedef struct {
        usedesc;
   GtStr *seqfile,
         *regionmapping;
+  GtOutputFileInfo *ofi;
+  GtFile *outfp;
 } CDSArguments;
 
 static void *gt_cds_arguments_new(void)
@@ -40,6 +43,7 @@ static void *gt_cds_arguments_new(void)
   CDSArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->seqfile = gt_str_new();
   arguments->regionmapping = gt_str_new();
+  arguments->ofi = gt_outputfileinfo_new();
   return arguments;
 }
 
@@ -47,6 +51,8 @@ static void gt_cds_arguments_delete(void *tool_arguments)
 {
   CDSArguments *arguments = tool_arguments;
   if (!arguments) return;
+  gt_file_delete(arguments->outfp);
+  gt_outputfileinfo_delete(arguments->ofi);
   gt_str_delete(arguments->regionmapping);
   gt_str_delete(arguments->seqfile);
   gt_free(arguments);
@@ -71,6 +77,9 @@ static GtOptionParser* gt_cds_option_parser_new(void *tool_arguments)
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
 
+  /* output file options */
+  gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
+
   gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
   gt_option_parser_set_min_max_args(op, 1, 1);
 
@@ -90,7 +99,7 @@ static int gt_cds_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
 
   /* create gff3 input stream */
   gff3_in_stream = gt_gff3_in_stream_new_sorted(argv[parsed_args]);
-  if (arguments->verbose)
+  if (arguments->verbose && arguments->outfp)
     gt_gff3_in_stream_show_progress_bar((GtGFF3InStream*) gff3_in_stream);
 
   /* create region mapping */
@@ -110,9 +119,8 @@ static int gt_cds_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
   }
 
   /* create gff3 output stream */
-  /* XXX: replace NULL with proper outfile */
   if (!had_err)
-    gff3_out_stream = gt_gff3_out_stream_new(cds_stream, NULL);
+    gff3_out_stream = gt_gff3_out_stream_new(cds_stream, arguments->outfp);
 
   /* pull the features through the stream and free them afterwards */
   had_err = gt_node_stream_pull(gff3_out_stream, err);
