@@ -34,6 +34,7 @@ EXP_CPPFLAGS:=$(CPPFLAGS)
 EXP_LDLIBS:=$(LIBS) -lm
 # ...while those starting with GT_ are for internal purposes only
 GT_CFLAGS:=-g -Wall -Wunused-parameter -pipe -fPIC -Wpointer-arith
+GT_CFLAGS_NO_WERROR:=$(GT_CFLAGS) -w
 # expat needs -DHAVE_MEMMOVE
 # lua needs -DLUA_USE_POSIX
 # rnv needs -DUNISTD_H="<unistd.h>" -DEXPAT_H="<expat.h>" -DRNV_VERSION="\"1.7.8\""
@@ -598,18 +599,19 @@ $(SQUID_DIR)/%.c: $(HMMER_DIR)/config.h
 $(HMMER_DIR)/%.c: $(HMMER_DIR)/config.h
 	@true
 
-# HMMER will not compile without warnings, so no GT_CFLAGS
 obj/$(SQUID_DIR)/%.o: $(SQUID_DIR)/%.c
 	@echo "[compile $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(EXP_CFLAGS) $(3)
+	@$(CC) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(EXP_CFLAGS) \
+	  $(GT_CFLAGS_NO_WERROR) $(3)
 	@$(CC) -c $< -o $(@:.o=.d) $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(3) -MM -MP \
 	  -MT $@
 
 obj/$(HMMER_DIR)/%.o: $(HMMER_DIR)/%.c
 	@echo "[compile $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(EXP_CFLAGS) $(3)
+	@$(CC) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(EXP_CFLAGS) \
+	  $(GT_CFLAGS_NO_WERROR) $(3)
 	@$(CC) -c $< -o $(@:.o=.d) $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(3) -MM -MP \
 	  -MT $@
 
