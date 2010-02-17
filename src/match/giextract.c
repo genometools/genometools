@@ -26,7 +26,7 @@
 #include "core/error.h"
 #include "core/ma.h"
 #include "core/fa.h"
-#include "core/seqiterator.h"
+#include "core/seqiterator_sequence_buffer.h"
 #include "core/progressbar.h"
 #include "core/fasta.h"
 #include "giextract.h"
@@ -874,7 +874,7 @@ int gt_extractkeysfromfastafile(bool verbose,
     printf("# estimated total size is " Formatuint64_t "\n",
             PRINTuint64_tcast(totalsize));
   }
-  seqit = gt_seqiterator_new(referencefiletab, err);
+  seqit = gt_seqiterator_sequence_buffer_new(referencefiletab, err);
   if (!seqit)
   {
     had_err = -1;

@@ -25,13 +25,13 @@ Test do
 end
 
 Name "seqiterator w/ qualities FASTQ (success)"
-Keywords "gt_seqiterator_qual"
+Keywords "gt_seqiterator_fastq"
 Test do
   run_test "#{$bin}gt dev readreads -showseq #{$testdata}test1.fastq"
 end
 
 Name "seqiterator w/ qualities FASTQ (non-FASTQ file)"
-Keywords "gt_seqiterator_qual"
+Keywords "gt_seqiterator_fastq"
 Test do
   run_test "#{$bin}gt dev readreads #{$testdata}eden.gff3", \
            :retval => 1
@@ -39,7 +39,7 @@ Test do
 end
 
 Name "seqiterator w/ qualities FASTQ (invalid block start)"
-Keywords "gt_seqiterator_qual"
+Keywords "gt_seqiterator_fastq"
 Test do
   run_test "#{$bin}gt dev readreads #{$testdata}test2_wrong_begin.fastq", \
            :retval => 1
@@ -47,7 +47,7 @@ Test do
 end
 
 Name "seqiterator w/ qualities FASTQ (different seqnames)"
-Keywords "gt_seqiterator_qual"
+Keywords "gt_seqiterator_fastq"
 Test do
   run_test "#{$bin}gt dev readreads " + \
            "#{$testdata}test3_different_seqnames.fastq", \
@@ -58,7 +58,7 @@ Test do
 end
 
 Name "seqiterator w/ qualities FASTQ (different seqlengths 1)"
-Keywords "gt_seqiterator_qual"
+Keywords "gt_seqiterator_fastq"
 Test do
   run_test "#{$bin}gt dev readreads " + \
            "#{$testdata}test4_different_seqlengths.fastq", \
@@ -68,7 +68,7 @@ Test do
 end
 
 Name "seqiterator w/ qualities FASTQ (different seqlengths 2)"
-Keywords "gt_seqiterator_qual"
+Keywords "gt_seqiterator_fastq"
 Test do
   run_test "#{$bin}gt dev readreads " + \
            "#{$testdata}test9_uneven_length.fastq", \
@@ -78,14 +78,14 @@ Test do
 end
 
 Name "seqiterator w/ qualities FASTQ (tricky)"
-Keywords "gt_seqiterator_qual"
+Keywords "gt_seqiterator_fastq"
 Test do
   run_test "#{$bin}gt dev readreads " + \
            "#{$testdata}test5_tricky.fastq"
 end
 
 Name "seqiterator w/ qualities FASTQ (empty sequence)"
-Keywords "gt_seqiterator_qual"
+Keywords "gt_seqiterator_fastq"
 Test do
   run_test "#{$bin}gt dev readreads #{$testdata}test7_empty_seq.fastq", \
            :retval => 1
@@ -93,7 +93,7 @@ Test do
 end
 
 Name "seqiterator w/ qualities FASTQ (premature end)"
-Keywords "gt_seqiterator_qual"
+Keywords "gt_seqiterator_fastq"
 Test do
   run_test "#{$bin}gt dev readreads #{$testdata}test6_premature_end.fastq", \
            :retval => 1

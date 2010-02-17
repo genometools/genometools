@@ -22,7 +22,7 @@
 #include "core/option.h"
 #include "core/outputfile.h"
 #include "core/sequence_buffer.h"
-#include "core/seqiterator.h"
+#include "core/seqiterator_sequence_buffer.h"
 #include "core/unused_api.h"
 #include "core/versionfunc.h"
 #include "core/progressbar.h"
@@ -127,7 +127,7 @@ int gt_convertseq(int argc, const char **argv, GtError *err)
   if (!had_err) {
     gt_sequence_buffer_set_filelengthtab(sb, flv);
     /* read input using seqiterator */
-    seqit = gt_seqiterator_new_with_buffer(sb);
+    seqit = gt_seqiterator_sequence_buffer_new_with_buffer(sb);
     if (opts.verbose)
     {
       gt_progressbar_start(gt_seqiterator_getcurrentcounter(seqit,

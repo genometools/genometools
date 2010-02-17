@@ -19,7 +19,7 @@
 #include "core/fasta_reader_seqit.h"
 #include "core/fasta_reader_rep.h"
 #include "core/ma.h"
-#include "core/seqiterator.h"
+#include "core/seqiterator_sequence_buffer.h"
 #include "core/str_array.h"
 
 struct GtFastaReaderSeqIt {
@@ -98,7 +98,8 @@ GtFastaReader* gt_fasta_reader_seqit_new(GtStr *sequence_filename)
   gt_fasta_reader_seqit->filenametab = gt_str_array_new();
   gt_str_array_add_cstr(gt_fasta_reader_seqit->filenametab,
                        gt_str_get(sequence_filename));
-  gt_fasta_reader_seqit->seqit = gt_seqiterator_new(gt_fasta_reader_seqit
-                                                     ->filenametab, NULL);
+  gt_fasta_reader_seqit->seqit = gt_seqiterator_sequence_buffer_new(
+                                             gt_fasta_reader_seqit->filenametab,
+                                             NULL);
   return fr;
 }

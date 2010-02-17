@@ -20,7 +20,7 @@
 #include <stdbool.h>
 #include "core/alphabet.h"
 #include "core/error.h"
-#include "core/seqiterator.h"
+#include "core/seqiterator_sequence_buffer.h"
 #include "core/unused_api.h"
 #include "defined-types.h"
 #include "spacedef.h"
@@ -245,7 +245,7 @@ int findsubquerygmatchforward(const Encodedsequence *encseq,
   substringinfo.processinfo = &rangespecinfo;
   substringinfo.gmatchforward = gmatchforward;
   substringinfo.encseq = encseq;
-  seqit = gt_seqiterator_new(queryfilenames, err);
+  seqit = gt_seqiterator_sequence_buffer_new(queryfilenames, err);
   if (!seqit)
     haserr = true;
   if (!haserr)

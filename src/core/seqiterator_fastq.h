@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2009 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2009-2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2009-2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,19 +15,20 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SEQITERATOR_QUAL_FASTQ_H
-#define SEQITERATOR_QUAL_FASTQ_H
+#ifndef SEQITERATOR_FASTQ_H
+#define SEQITERATOR_FASTQ_H
 
 #include "core/error.h"
-#include "core/seqiterator_qual.h"
+#include "core/seqiterator.h"
 #include "core/str_array.h"
 
-typedef struct GtSeqIteratorQualFASTQ GtSeqIteratorQualFASTQ;
+typedef struct GtSeqIteratorFastQ GtSeqIteratorFastQ;
 
 /* Create a new <GtSeqIteratorQual> for all sequence files in <filenametab>. */
-GtSeqIteratorQual* gt_seqiterator_qual_fastq_new(const GtStrArray *filenametab,
-                                                 GtError *err);
+GtSeqIterator* gt_seqiterator_fastq_new(const GtStrArray *filenametab,
+                                             GtError *err);
+unsigned long  gt_seqiterator_fastq_get_file_index(GtSeqIteratorFastQ*);
 
-const GtSeqIteratorQualClass* gt_seqiterator_qual_fastq_class(void);
+const GtSeqIteratorClass* gt_seqiterator_fastq_class(void);
 
 #endif

@@ -19,7 +19,7 @@
 #include "core/assert_api.h"
 #include "core/chardef.h"
 #include "core/error.h"
-#include "core/seqiterator.h"
+#include "core/seqiterator_sequence_buffer.h"
 #include "spacedef.h"
 #include "encseq-def.h"
 
@@ -167,7 +167,7 @@ int echodescriptionandsequence(const GtStrArray *filenametab,GtError *err)
   bool haserr = false;
   int retval;
 
-  seqit = gt_seqiterator_new(filenametab, err);
+  seqit = gt_seqiterator_sequence_buffer_new(filenametab, err);
   if (!seqit)
     return -1;
   while (true)

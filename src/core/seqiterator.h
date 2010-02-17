@@ -1,6 +1,7 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007      Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c)      2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -25,16 +26,7 @@
 #include "core/symboldef.h"
 
 typedef struct GtSeqIterator GtSeqIterator;
-
-/* Create a new <GtSeqIterator> for all sequence files in <filenametab>.
-   All files have to be of the same format, which will be guessed by examining
-   the beginning of the first file. If an error occurs, NULL is returned (see
-   the <err> object for details). */
-GtSeqIterator* gt_seqiterator_new(const GtStrArray *filenametab, GtError *err);
-
-/* Create a new <GtSeqIterator> for files in <filenametab> using the
-   <GtSequenceBuffer> implementation <buffer>. */
-GtSeqIterator* gt_seqiterator_new_with_buffer(GtSequenceBuffer *buffer);
+typedef struct GtSeqIteratorClass GtSeqIteratorClass;
 
 /* Sets a symbol map for the <GtSeqIterator>.
    If a <symbolmap> is given, all read in sequences are transformed with it.
@@ -61,7 +53,16 @@ const unsigned
 long long*     gt_seqiterator_getcurrentcounter(GtSeqIterator*,
                                                 unsigned long long);
 
-/* Deletes the <GtSeqIterator> and frees associated memory. */
-void           gt_seqiterator_delete(GtSeqIterator*);
+/* Returns TRUE if <seqit> supports setting of a quality buffer. */
+bool           gt_seqiterator_has_qualities(GtSeqIterator *seqit);
+
+/* Turns on reporting of sequence qualities to the location
+   pointed to by <qualities>. That pointer will be set to a string containing
+   the quality data (which must then be processed into scores). */
+void           gt_seqiterator_set_quality_buffer(GtSeqIterator *seqit,
+                                                 const GtUchar **qualities);
+
+/* Deletes <seqit> and frees associated memory. */
+void           gt_seqiterator_delete(GtSeqIterator *seqit);
 
 #endif

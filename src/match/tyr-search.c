@@ -18,7 +18,7 @@
 #include "core/alphabet.h"
 #include "core/fa.h"
 #include "core/unused_api.h"
-#include "core/seqiterator.h"
+#include "core/seqiterator_sequence_buffer.h"
 #include "core/chardef.h"
 #include "revcompl.h"
 #include "format64.h"
@@ -268,7 +268,7 @@ int tyrsearch(const GtStr *tyrindexname,
 
     gt_assert(tyrindex != NULL);
     tyrsearchinfo_init(&tyrsearchinfo,tyrindex,showmode,searchstrand);
-    seqit = gt_seqiterator_new(queryfilenames, err);
+    seqit = gt_seqiterator_sequence_buffer_new(queryfilenames, err);
     if (!seqit)
       haserr = true;
     if (!haserr)

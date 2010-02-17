@@ -17,7 +17,7 @@
 
 #include "core/unused_api.h"
 #include "core/ma_api.h"
-#include "core/seqiterator.h"
+#include "core/seqiterator_sequence_buffer.h"
 #include "extended/alignment.h"
 #include "sarr-def.h"
 #include "intbits-tab.h"
@@ -248,7 +248,8 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
                                            NULL, /* processresult info */
                                            dfst);
     }
-    seqit = gt_seqiterator_new(idxlocalioptions->queryfiles, err);
+    seqit = gt_seqiterator_sequence_buffer_new(idxlocalioptions->queryfiles,
+                                               err);
     if (!seqit)
       haserr = true;
     if (!haserr)

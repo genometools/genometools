@@ -22,7 +22,8 @@
 #include "core/fileutils_api.h"
 #include "core/ma.h"
 #include "core/option.h"
-#include "core/seqiterator.h"
+#include "core/seqiterator_sequence_buffer.h"
+#include "core/seqiterator_fastq.h"
 #include "core/unused_api.h"
 #include "core/versionfunc.h"
 #include "core/xposix.h"
@@ -216,7 +217,7 @@ int gt_seqiterator(int argc, const char **argv, GtError *err)
             PRINTuint64_tcast(totalsize));
   if (!had_err) {
     /* read input using seqiterator */
-    seqit = gt_seqiterator_new(files, err);
+    seqit = gt_seqiterator_sequence_buffer_new(files, err);
     if (!seqit)
       had_err = -1;
     if (!had_err)

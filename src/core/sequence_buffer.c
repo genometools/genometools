@@ -23,6 +23,7 @@
 #include "core/sequence_buffer_embl.h"
 #include "core/sequence_buffer_fasta.h"
 #include "core/sequence_buffer_gb.h"
+#include "core/sequence_buffer_inline.h"
 #include "core/unused_api.h"
 #include "core/xansi.h"
 
@@ -143,6 +144,30 @@ int gt_sequence_buffer_advance(GtSequenceBuffer *sb, GtError *err)
 {
   gt_assert(sb && sb->c_class && sb->c_class->advance);
   return sb->c_class->advance(sb, err);
+}
+
+int gt_sequence_buffer_next(GtSequenceBuffer *sb, GtUchar *val, GtError *err)
+{
+  GtSequenceBufferMembers *pvt;
+  pvt = sb->pvt;
+  if (pvt->nextread >= pvt->nextfree)
+  {
+    if (pvt->complete)
+    {
+      return 0;
+    }
+    if (gt_sequence_buffer_advance(sb, err) != 0)
+    {
+      return -1;
+    }
+    pvt->nextread = 0;
+    if (pvt->nextfree == 0)
+    {
+      return 0;
+    }
+  }
+  *val = pvt->outbuf[pvt->nextread++];
+  return 1;
 }
 
 int gt_sequence_buffer_unit_test(GtError *err)

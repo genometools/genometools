@@ -17,7 +17,7 @@
 
 #include "core/unused_api.h"
 #include "core/ma_api.h"
-#include "core/seqiterator.h"
+#include "core/seqiterator_sequence_buffer.h"
 #include "cgr_spacedseed.h"
 #include "sarr-def.h"
 #include "intbits.h"
@@ -246,7 +246,7 @@ int matchspacedseed(bool withesa,
                                          NULL, /* processresult info */
                                          dfst);
     encseq = genericindex_getencseq(genericindex);
-    seqit = gt_seqiterator_new(queryfilenames, err);
+    seqit = gt_seqiterator_sequence_buffer_new(queryfilenames, err);
     if (!seqit)
       haserr = true;
     if (!haserr)

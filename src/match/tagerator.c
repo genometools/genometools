@@ -22,7 +22,7 @@
 #include "core/ma.h"
 #include "core/error.h"
 #include "core/fileutils_api.h"
-#include "core/seqiterator.h"
+#include "core/seqiterator_sequence_buffer.h"
 #include "core/arraydef.h"
 #include "revcompl.h"
 #include "sarr-def.h"
@@ -670,7 +670,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     getsetargmodekeywords(tageratoroptions->modedesc,
                           tageratoroptions->numberofmodedescentries,
                           tageratoroptions->outputmode);
-    seqit = gt_seqiterator_new(tageratoroptions->tagfiles, err);
+    seqit = gt_seqiterator_sequence_buffer_new(tageratoroptions->tagfiles, err);
     if (!seqit)
       haserr = true;
     if (!haserr)

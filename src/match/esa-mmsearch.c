@@ -18,7 +18,7 @@
 #include "core/chardef.h"
 #include "core/divmodmul.h"
 #include "core/minmax.h"
-#include "core/seqiterator.h"
+#include "core/seqiterator_sequence_buffer.h"
 #include "core/symboldef.h"
 #include "sarr-def.h"
 #include "seqpos-def.h"
@@ -476,7 +476,7 @@ int callenumquerymatches(const GtStr *indexname,
     int retval;
     uint64_t queryunitnum;
 
-    seqit = gt_seqiterator_new(queryfiles, err);
+    seqit = gt_seqiterator_sequence_buffer_new(queryfiles, err);
     if (seqit == NULL)
     {
       haserr = true;

@@ -24,7 +24,7 @@
 #include "core/outputfile.h"
 #include "core/option.h"
 #include "core/progressbar.h"
-#include "core/seqiterator.h"
+#include "core/seqiterator_sequence_buffer.h"
 #include "core/string_distri.h"
 #include "core/unused_api.h"
 #include "tools/gt_sequniq.h"
@@ -129,7 +129,7 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
     for (i = parsed_args; i < argc; i++)
       gt_str_array_add_cstr(files, argv[i]);
     totalsize = gt_files_estimate_total_size(files);
-    seqit = gt_seqiterator_new(files, err);
+    seqit = gt_seqiterator_sequence_buffer_new(files, err);
     if (!seqit)
       had_err = -1;
     if (!had_err) {

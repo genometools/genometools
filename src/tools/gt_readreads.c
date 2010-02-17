@@ -20,7 +20,7 @@
 #include "core/ma.h"
 #include "core/progressbar.h"
 #include "core/quality.h"
-#include "core/seqiterator_qual_fastq.h"
+#include "core/seqiterator_fastq.h"
 #include "core/str_array_api.h"
 #include "core/unused_api.h"
 #include "core/fasta.h"
@@ -115,13 +115,13 @@ static int gt_readreads_runner(int argc, const char **argv, int parsed_args,
 {
   GtReadreads *opts = tool_arguments;
   GtStrArray *files;
-  GtSeqIteratorQual *siq;
+  GtSeqIterator *siq;
   int had_err = 0;
   unsigned long i,
                 totalsize,
                 len;
   const GtUchar *seq,
-                *qual;
+                *qual = NULL;
   char *desc;
   GtStr *scores = gt_str_new();
 
@@ -135,11 +135,12 @@ static int gt_readreads_runner(int argc, const char **argv, int parsed_args,
   }
   totalsize = gt_files_estimate_total_size(files);
 
-  siq = gt_seqiterator_qual_fastq_new(files, err);
+  siq = gt_seqiterator_fastq_new(files, err);
+  gt_seqiterator_set_quality_buffer(siq, &qual);
 
   if (opts->verbose)
   {
-    gt_progressbar_start(gt_seqiterator_qual_getcurrentcounter(siq,
+    gt_progressbar_start(gt_seqiterator_getcurrentcounter(siq,
                                                          (unsigned long long)
                                                          totalsize),
                          (unsigned long long) totalsize);
@@ -147,7 +148,7 @@ static int gt_readreads_runner(int argc, const char **argv, int parsed_args,
 
   while (true)
   {
-    had_err = gt_seqiterator_qual_next(siq, &seq, &qual, &len, &desc, err);
+    had_err = gt_seqiterator_next(siq, &seq, &len, &desc, err);
     if (had_err != 1)
       break;
     if (opts->fasta) {
@@ -186,7 +187,7 @@ static int gt_readreads_runner(int argc, const char **argv, int parsed_args,
     gt_progressbar_stop();
   gt_str_array_delete(files);
   gt_str_delete(scores);
-  gt_seqiterator_qual_delete(siq);
+  gt_seqiterator_delete(siq);
   return had_err;
 }
 
