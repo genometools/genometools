@@ -21,7 +21,8 @@ def checktallymer(reffile,mersize)
   outoptions="-counts -pl -mersize #{mersize} -minocc 2 -maxocc 30"
   run_test "#{$bin}gt suffixerator -db #{reffilepath} -pl -dna " +
            "-tis -suf -lcp -indexname sfxidx"
-  run_test "#{$bin}gt tallymer mkindex -test -mersize #{mersize} -esa sfxidx"
+  run_test("#{$bin}gt tallymer mkindex -test -mersize #{mersize} -esa sfxidx",
+           :maxtime => 120)
   suffix="tyrmkiout"
   run "mv #{$last_stdout} #{reffile}.gt#{suffix}"
   #run "#{vstreebin}/mkvtree.x -indexname mkvidx -allout -pl -dna " +

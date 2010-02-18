@@ -97,7 +97,7 @@ def checkrepfind(reffile)
   run_test "#{$bin}gt suffixerator -algbds 3 40 120 -db " +
            "#{reffilepath} -indexname sfxidx -dna -suf -tis -lcp -ssp -pl"
   minlength = determineminlength(reffile)
-  run_test "#{$bin}gt repfind -l #{minlength} -ii sfxidx"
+  run_test("#{$bin}gt repfind -l #{minlength} -ii sfxidx", :maxtime => 120)
   resultfile="#{$gttestdata}repfind-result/#{reffile}.result"
   run "cmp -s #{$last_stdout} #{resultfile}"
   run_test "#{$bin}gt repfind -l #{minlength} -r -ii sfxidx"
@@ -111,7 +111,8 @@ def checkrepfindwithquery(reffile,queryfile)
   idxname=reffile + "-idx"
   run_test "#{$bin}gt suffixerator -algbds 3 40 120 -db " +
            "#{reffilepath} -indexname #{idxname} -dna -suf -tis -lcp -ssp -pl"
-  run_test "#{$bin}gt repfind -l 15 -ii #{idxname} -q #{queryfilepath}"
+  run_test("#{$bin}gt repfind -l 15 -ii #{idxname} -q #{queryfilepath}",
+           :maxtime => 120)
   # run "sort #{$last_stdout}"
   #run "/Users/kurtz/bin-ops/i686-apple-darwin/mkvtree.x -indexname mkv-idx " +
   #    "-allout -v -pl -dna -db #{reffilepath}"
