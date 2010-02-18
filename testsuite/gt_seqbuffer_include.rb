@@ -172,3 +172,97 @@ gbfiles.each do |file|
     run "diff -i #{file}_out1 #{file}_out2"
   end
 end
+
+Name "sequence buffer: FastQ success"
+Keywords "gt_convertseq sequencebuffer fastq"
+Test do
+  run_test "#{$bin}gt convertseq #{$testdata}test1.fastq"
+  run "diff -i #{$last_stdout} #{$testdata}test1.fasta"
+end
+
+Name "sequence buffer: FastQ success, seq > buffersize"
+Keywords "gt_convertseq sequencebuffer fastq"
+Test do
+  run_test "#{$bin}gt dev readreads -fasta #{$testdata}fastq_long.fastq > ref.fasta"
+  run_test "#{$bin}gt convertseq #{$testdata}fastq_long.fastq"
+  run "diff -i #{$last_stdout} ref.fasta"
+end
+
+Name "sequence buffer: FastQ non-FASTQ file"
+Keywords "gt_convertseq sequencebuffer fastq"
+Test do
+  run_test "#{$bin}gt convertseq #{$testdata}eden.gff3", \
+           :retval => 1
+  grep($last_stderr, /unknown file contents/)
+end
+
+Name "sequence buffer: FastQ invalid block start"
+Keywords "gt_convertseq sequencebuffer fastq"
+Test do
+  run_test "#{$bin}gt convertseq #{$testdata}test2_wrong_begin.fastq", \
+           :retval => 1
+  grep($last_stderr, /unknown file contents/)
+end
+
+Name "sequence buffer: FastQ different seqnames"
+Keywords "gt_convertseq sequencebuffer fastq"
+Test do
+  run_test "#{$bin}gt convertseq " + \
+           "#{$testdata}test3_different_seqnames.fastq", \
+           :retval => 1
+  grep($last_stderr, "sequence description 'HWI-EAS306_9_FC305MP_6_1_1331" + \
+                     "_1843' is not equal to qualities description 'HWI-EAS3" +\
+                     "06_9_FC305MP_6_1_1331' in line")
+end
+
+Name "sequence buffer: FastQ different seqlengths 1"
+Keywords "gt_convertseq sequencebuffer fastq"
+Test do
+  run_test "#{$bin}gt convertseq " + \
+           "#{$testdata}test4_different_seqlengths.fastq", \
+           :retval => 1
+  grep($last_stderr, "lengths of character sequence and qualities sequence " + \
+                     "differ")
+end
+
+Name "sequence buffer: FastQ different seqlengths 2"
+Keywords "gt_convertseq sequencebuffer fastq"
+Test do
+  run_test "#{$bin}gt convertseq " + \
+           "#{$testdata}test9_uneven_length.fastq", \
+           :retval => 1
+  grep($last_stderr, "qualities string of sequence length 33 is not ended " + \
+                     "by newline")
+end
+
+Name "sequence buffer: FastQ tricky"
+Keywords "gt_convertseq sequencebuffer fastq"
+Test do
+  run_test "#{$bin}gt dev readreads -fasta " + \
+           "#{$testdata}test5_tricky.fastq > ref.fas"
+  run_test "#{$bin}gt convertseq " + \
+           "#{$testdata}test5_tricky.fastq"
+  run "diff -i #{$last_stdout} ref.fas"
+end
+
+Name "sequence buffer: FastQ empty sequence"
+Keywords "gt_convertseq sequencebuffer fastq"
+Test do
+  run_test "#{$bin}gt convertseq #{$testdata}test7_empty_seq.fastq", \
+           :retval => 1
+  grep($last_stderr, /empty sequence/)
+end
+
+Name "sequence buffer: FastQ premature end"
+Keywords "gt_convertseq sequencebuffer fastq"
+Test do
+  run_test "#{$bin}gt convertseq #{$testdata}test6_premature_end.fastq", \
+           :retval => 1
+  grep($last_stderr, /premature end/)
+end
+
+Name "sequence buffer: FastQ multiline"
+Keywords "gt_convertseq sequencebuffer fastq"
+Test do
+  run_test "#{$bin}gt convertseq #{$testdata}test10_multiline.fastq"
+end

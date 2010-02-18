@@ -88,6 +88,11 @@ allmultifiles += (all_multiemblfiles = all_multifastafiles.collect{ |f|
                                                          f.gsub(".fna",".embl")
                                                                   })
 
+all_fastqfiles = ["fastq_long.fastq",
+                  "test10_multiline.fastq",
+                  "test1.fastq",
+                  "test5_tricky.fastq"]
+
 alldir = ["fwd","cpl","rev","rcl"]
 
 # put the tests with paircmp, maxpair, patternmatch, into a file gt_idxmatch
@@ -111,7 +116,9 @@ end
 
 alldir.each do |dir|
   {"FASTA" => all_fastafiles,
-   "EMBL" => all_emblfiles, "GenBank" => all_genbankfiles}.each do |k,filelist|
+   "EMBL" => all_emblfiles,
+   "GenBank" => all_genbankfiles,
+   "FastQ" => all_fastqfiles}.each do |k,filelist|
     Name "gt suffixerator #{dir} (#{k})"
     Keywords "gt_suffixerator"
     Test do
