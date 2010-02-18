@@ -2,15 +2,7 @@
 
 # copy this file to .git/hooks (i.e., overwrite the file .git/hooks/pre-commit)
 # to perform source checks before commits
-# test with:
-# GIT_INDEX_FILE=`pwd`/.git/index .git/hooks/pre-commit
 
-# this hack allows us to determine the GenomeTools directory automatically
-# (GIT_INDEX_FILE is the only environment variable given to us by git)
-GTDIR=`echo /$GIT_INDEX_FILE | sed -e 's%/\.git/.*$%%' -e 's%^//%/%'`
-test -z "$GTDIR" && GTDIR=.
-PATH=`echo $PATH | sed -e 's!^[^:]*:!!'`
-export PATH
-find "$GTDIR/src" \( -path "$GTDIR/src/external" -prune \) -o \
+find "$PWD/src" \( -path "$PWD/src/external" -prune \) -o \
   \( -name "*.c" -o -name "*.h" \) -print0 | \
-  xargs -0 "$GTDIR/scripts/src_check"
+  xargs -0 "$PWD/scripts/src_check"
