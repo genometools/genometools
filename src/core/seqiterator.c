@@ -23,6 +23,7 @@
 #include "core/str_array.h"
 #include "core/symboldef.h"
 #include "core/seqiterator_rep.h"
+#include "core/unused_api.h"
 
 struct GtSeqIteratorClass {
   size_t size;
@@ -64,7 +65,8 @@ GtSeqIterator* gt_seqiterator_create(const GtSeqIteratorClass *sic)
   return si;
 }
 
-void* gt_seqiterator_cast(const GtSeqIteratorClass *sic, GtSeqIterator *si)
+void* gt_seqiterator_cast(GT_UNUSED const GtSeqIteratorClass *sic,
+                          GtSeqIterator *si)
 {
   gt_assert(sic && si && si->c_class == sic);
   return si;
