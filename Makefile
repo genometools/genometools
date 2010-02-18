@@ -728,10 +728,10 @@ docs: bin/gt bin/examples/sketch_parsed bin/examples/sketch_constructed
 	  www/genometools.org/htdocs/images/constructed.png
 	sed -nf scripts/incl.sed \
 	  www/genometools.org/htdocs/examples_tmpl.html | \
-          sed 'N;N;s/\n//' > /tmp/tmp.sed
-	sed -f /tmp/tmp.sed \
+          sed 'N;N;s/\n//' > /tmp/tmp.sed.$$$$ && \
+	sed -f /tmp/tmp.sed.$$$$ \
 	  www/genometools.org/htdocs/examples_tmpl.html > \
-	  www/genometools.org/htdocs/examples.html
+	  www/genometools.org/htdocs/examples.html; rm -f /tmp/tmp.sed.$$$$
 	bin/gt gtscripts/gtdoc.lua -tex $(CURDIR) \
 	> doc/manuals/api_reference.tex
 	bin/gt gtscripts/gtdoc.lua -lua -tex $(CURDIR) \
