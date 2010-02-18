@@ -26,8 +26,8 @@
 #include "core/sequence_buffer.h"
 #include "core/str_array.h"
 
-#define INBUFSIZE  4096
-#define OUTBUFSIZE 4096
+#define INBUFSIZE  8192
+#define OUTBUFSIZE 8192
 
 struct GtSequenceBufferClass {
   size_t        size;
