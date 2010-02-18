@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -37,6 +37,11 @@ static int cds_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
   had_err = gt_node_stream_next(cds_stream->in_stream, gn, err);
   if (!had_err && *gn)
     had_err = gt_genome_node_accept(*gn, cds_stream->cds_visitor, err);
+  if (had_err) {
+    /* we own the node -> delete it */
+    gt_genome_node_delete(*gn);
+    *gn = NULL;
+  }
   return had_err;
 }
 
