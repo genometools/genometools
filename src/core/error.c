@@ -41,6 +41,12 @@ void gt_error_set(GtError *err, const char *format, ...)
   va_end(ap);
 }
 
+void gt_error_set_nonvariadic(GtError *err, const char *msg)
+{
+  if (!err) return;
+  gt_error_set(err, "%s", msg);
+}
+
 void gt_error_vset(GtError *err, const char *format, va_list ap)
 {
   gt_assert(err && format);

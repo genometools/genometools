@@ -58,6 +58,8 @@ void        gt_error_set(GtError *err, const char *format, ...)
 /* Set the error message stored in <err> according to <format> (as in
    <vprintf(3)>). */
 void        gt_error_vset(GtError *err, const char *format, va_list ap);
+/* Set the error message stored in <err> to <msg>. */
+void        gt_error_set_nonvariadic(GtError *err, const char *msg);
 /* Return <true> if the error <err> is set, <false> otherwise. */
 bool        gt_error_is_set(const GtError *err);
 /* Unset the error <err>. */
