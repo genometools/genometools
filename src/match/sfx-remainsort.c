@@ -186,10 +186,10 @@ static Lowerboundwithrank *filllowerboundwithrank(const Encodedsequence *encseq,
     Lowerboundwithrank *lowerboundwithrank, *lbptr;
 
     realspecialranges = getencseqrealspecialranges(encseq);
-    lowerboundwithrank = gt_malloc(sizeof(*lowerboundwithrank) *
+    lowerboundwithrank = gt_malloc(sizeof (*lowerboundwithrank) *
                                    realspecialranges);
     printf("lowerboundwithrank requires %lu bytes\n",
-               (unsigned long) (sizeof(*lowerboundwithrank) *
+               (unsigned long) (sizeof (*lowerboundwithrank) *
                                        realspecialranges));
     sri = newspecialrangeiterator(encseq,
                                   ISDIRREVERSE(readmode)
@@ -281,7 +281,7 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
 {
   Rmnsufinfo *rmnsufinfo;
 
-  rmnsufinfo = gt_malloc(sizeof(Rmnsufinfo));
+  rmnsufinfo = gt_malloc(sizeof (Rmnsufinfo));
   rmnsufinfo->totallength = getencseqtotallength(encseq);
   rmnsufinfo->partwidth = partwidth;
   rmnsufinfo->encseq = encseq;
@@ -1054,7 +1054,7 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos left,
   }
   if (rmnsufinfo->absoluteinversesuftab)
   {
-    qsort(rmnsufinfo->itvinfo,(size_t) width,sizeof(Itventry),compareitv);
+    qsort(rmnsufinfo->itvinfo,(size_t) width,sizeof (Itventry),compareitv);
     for (idx=0; idx<width; idx++)
     {
       suftabentryfromsection_update(&rmnsufinfo->sortblock,left+idx,
@@ -1062,7 +1062,7 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos left,
     }
   } else
   {
-    gt_qsort_r(rmnsufinfo->itvfullinfo,(size_t) width,sizeof(Itvfullentry),
+    gt_qsort_r(rmnsufinfo->itvfullinfo,(size_t) width,sizeof (Itvfullentry),
                rmnsufinfo,compareitvfull);
     for (idx=0; idx<width; idx++)
     {

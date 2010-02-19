@@ -25,7 +25,7 @@
 #ifdef NOSPACEBOOKKEEPING
 
 #define ALLOCASSIGNSPACEGENERIC(FILENAME,LINENUM,V,S,T,N)\
-        gt_assert(sizeof(*(V)) == sizeof (T));\
+        gt_assert(sizeof (*(V)) == sizeof (T));\
         V = (T *) realloc(S,sizeof (T) * (size_t) (N));\
         if ((V) == NULL)\
         {\
@@ -47,7 +47,7 @@
 
 #else
 #define ALLOCASSIGNSPACEGENERIC(FILENAME,LINENUM,V,S,T,N)\
-        gt_assert(sizeof(*(V)) == sizeof (T));\
+        gt_assert(sizeof (*(V)) == sizeof (T));\
         V = gt_realloc_mem(S, sizeof (T) * (N), FILENAME,\
                            LINENUM)
 

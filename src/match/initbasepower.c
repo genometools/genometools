@@ -57,7 +57,7 @@ Codetype *filllargestchartable(unsigned int numofchars,
 {
   Codetype code, *ptr, *filltable;
 
-  filltable = gt_malloc(sizeof(Codetype) * kmersize);
+  filltable = gt_malloc(sizeof (Codetype) * kmersize);
   code = (Codetype) numofchars;
   for (ptr = filltable + kmersize - 1; ptr >= filltable; ptr--)
   {

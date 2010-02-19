@@ -29,9 +29,9 @@ Charatpos *newCharatpos(unsigned long patternlength,unsigned int alphasize)
 {
   Charatpos *catpos;
 
-  catpos = gt_malloc(sizeof(*catpos));
-  catpos->endindex = gt_malloc(sizeof(unsigned long) * alphasize);
-  catpos->positions = gt_malloc(sizeof(unsigned long) * patternlength);
+  catpos = gt_malloc(sizeof (*catpos));
+  catpos->endindex = gt_malloc(sizeof (unsigned long) * alphasize);
+  catpos->positions = gt_malloc(sizeof (unsigned long) * patternlength);
   return catpos;
 }
 

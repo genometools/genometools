@@ -178,7 +178,7 @@ static int extractkeyfromcurrentline(Fastakeyquery *fastakeyptr,
     /* nothing */ ;
   if (keysize == 0)
   {
-    fastakeyptr->fastakey = gt_malloc(sizeof(char) * (idx+1));
+    fastakeyptr->fastakey = gt_malloc(sizeof (char) * (idx+1));
   } else
   {
     if (idx != (size_t) keysize)
@@ -620,7 +620,7 @@ int gt_extractkeysfromdesfile(const GtStr *indexname,
     gt_assert(keytabptr != NULL);
     gt_assert(numofentries > 0);
     gt_assert(keytabptr == keytab + numofentries);
-    qsort(keytab,(size_t) numofentries,sizeof(*keytab),compareFixedkeys);
+    qsort(keytab,(size_t) numofentries,sizeof (*keytab),compareFixedkeys);
     gt_assert(keytabptr != NULL);
     for (keytabptr = keytab; !haserr && keytabptr < keytab + numofentries;
          keytabptr++)
@@ -707,7 +707,7 @@ static int itersearchoverallkeys(const Encodedsequence *encseq,
     return -1;
   }
   currentline = gt_str_new();
-  fastakeyquery.fastakey = gt_malloc(sizeof(char) * (keysize+1));
+  fastakeyquery.fastakey = gt_malloc(sizeof (char) * (keysize+1));
   for (linenum = 0; gt_str_read_next_line(currentline, fp) != EOF; linenum++)
   {
     if (extractkeyfromcurrentline(&fastakeyquery,
@@ -902,7 +902,7 @@ int gt_extractkeysfromfastafile(bool verbose,
     {
       if (allockeyspace < keylen)
       {
-        keyspace = gt_realloc(keyspace,sizeof(*keyspace) * (keylen+1));
+        keyspace = gt_realloc(keyspace,sizeof (*keyspace) * (keylen+1));
         allockeyspace = keylen;
       }
       gt_assert(keyspace != NULL);

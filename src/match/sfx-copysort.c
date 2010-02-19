@@ -157,7 +157,7 @@ static Seqpos *leftcontextofspecialchardist(unsigned int numofchars,
   unsigned int idx;
   Seqpos *specialchardist, totallength = getencseqtotallength(encseq);
 
-  specialchardist = gt_malloc(sizeof(*specialchardist) * numofchars);
+  specialchardist = gt_malloc(sizeof (*specialchardist) * numofchars);
   for (idx = 0; idx<numofchars; idx++)
   {
     specialchardist[idx] = 0;
@@ -217,7 +217,7 @@ static Seqpos *leftcontextofspecialchardist(unsigned int numofchars,
   unsigned int idx;
   Seqpos *specialchardist, totallength = getencseqtotallength(encseq);
 
-  specialchardist = gt_malloc(sizeof(*specialchardist) * numofchars);
+  specialchardist = gt_malloc(sizeof (*specialchardist) * numofchars);
   for (idx = 0; idx<numofchars; idx++)
   {
     specialchardist[idx] = 0;
@@ -409,16 +409,16 @@ GtBucketspec2 *gt_bucketspec2_new(const Bcktab *bcktab,
   unsigned int idx;
 
   gt_assert(numofchars > 0);
-  bucketspec2 = gt_malloc(sizeof(*bucketspec2));
+  bucketspec2 = gt_malloc(sizeof (*bucketspec2));
   bucketspec2->partwidth = partwidth;
   bucketspec2->prefixlength = bcktab_prefixlength(bcktab);
   bucketspec2->numofchars = numofchars;
   bucketspec2->numofcharssquared = numofchars * numofchars;
   bucketspec2->encseq = encseq;
   bucketspec2->readmode = readmode;
-  bucketspec2->order = gt_malloc(sizeof(*bucketspec2->order) * numofchars);
+  bucketspec2->order = gt_malloc(sizeof (*bucketspec2->order) * numofchars);
   bucketspec2->superbuckettab
-    = gt_malloc(sizeof(*bucketspec2->superbuckettab) * numofchars);
+    = gt_malloc(sizeof (*bucketspec2->superbuckettab) * numofchars);
   gt_array2dim_malloc(bucketspec2->subbuckettab,(unsigned long) numofchars,
                       (unsigned long) numofchars);
   if (bucketspec2->prefixlength == 2U)
@@ -543,7 +543,7 @@ void gt_copysortsuffixes(const GtBucketspec2 *bucketspec2,
     }
   }
 #endif
-  targetptr = gt_malloc(sizeof(*targetptr) * bucketspec2->numofchars);
+  targetptr = gt_malloc(sizeof (*targetptr) * bucketspec2->numofchars);
   for (idxsource = 0; idxsource<bucketspec2->numofchars; idxsource++)
   {
     source = bucketspec2->order[idxsource];

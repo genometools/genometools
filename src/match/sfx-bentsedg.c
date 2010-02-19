@@ -1976,7 +1976,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   if (bsr->sfxstrategy->ssortmaxdepth.defined ||
       bsr->sfxstrategy->differencecover > 0)
   {
-    bsr->equalwithprevious = gt_malloc(sizeof(*bsr->equalwithprevious) *
+    bsr->equalwithprevious = gt_malloc(sizeof (*bsr->equalwithprevious) *
                                        bsr->sfxstrategy->maxinsertionsort);
     for (idx=0; idx < bsr->sfxstrategy->maxinsertionsort; idx++)
     {

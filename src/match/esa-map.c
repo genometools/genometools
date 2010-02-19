@@ -427,7 +427,7 @@ int mapsuffixarray(Suffixarray *suffixarray,
                    GtError *err)
 {
   gt_error_check(err);
-  /* printf("sizeof(Suffixarray)=%lu\n",sizeof(Suffixarray)); */
+  /* printf("sizeof (Suffixarray)=%lu\n",sizeof (Suffixarray)); */
   return inputsuffixarray(true,
                           suffixarray,
                           demand,

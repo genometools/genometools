@@ -32,7 +32,7 @@ Seqpos *lcp13_manzini(const Encodedsequence *encseq,
 {
   Seqpos pos, lcpvalue = 0, *lcptab;
 
-  lcptab = gt_malloc(sizeof(Seqpos) * partwidth);
+  lcptab = gt_malloc(sizeof (Seqpos) * partwidth);
   lcptab[0] = 0;
   for (pos=0; pos <= totallength; pos++)
   {

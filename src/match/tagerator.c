@@ -625,7 +625,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
       showmatchinfo.tageratoroptions = tageratoroptions;
       showmatchinfo.alphasize = (unsigned int) numofchars;
       showmatchinfo.alpha = alpha;
-      showmatchinfo.eqsvector = gt_malloc(sizeof(*showmatchinfo.eqsvector) *
+      showmatchinfo.eqsvector = gt_malloc(sizeof (*showmatchinfo.eqsvector) *
                                           showmatchinfo.alphasize);
       showmatchinfo.encseq = encseq;
       processmatchinfooffline = &showmatchinfo;

@@ -46,7 +46,7 @@ static inline Inl_Queue *gt_inl_queue_new(unsigned long queuesize)
 {
   Inl_Queue *q;
 
-  q = gt_malloc(sizeof(*q));
+  q = gt_malloc(sizeof (*q));
   gt_assert(queuesize > 0);
   ALLOCASSIGNSPACE(q->queuespace,NULL,Inl_Queueelem,queuesize);
   q->noofelements = 0;

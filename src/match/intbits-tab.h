@@ -47,8 +47,8 @@
 #define INITBITTABGENERIC(TAB,OLDTAB,NUMOFBITS)\
         {\
           size_t tabsize = NUMOFINTSFORBITS(NUMOFBITS);\
-          TAB = gt_realloc(OLDTAB,sizeof(Bitsequence) * tabsize);\
-          (void) memset(TAB,0,sizeof(Bitsequence) * tabsize);\
+          TAB = gt_realloc(OLDTAB,sizeof (Bitsequence) * tabsize);\
+          (void) memset(TAB,0,sizeof (Bitsequence) * tabsize);\
         }
 
 #define INITBITTAB(TAB,N) INITBITTABGENERIC(TAB,NULL,N)
@@ -59,7 +59,7 @@
 */
 
 #define CLEARBITTAB(TAB,N)\
-        (void) memset(TAB,0,sizeof(Bitsequence) * NUMOFINTSFORBITS(N))
+        (void) memset(TAB,0,sizeof (Bitsequence) * NUMOFINTSFORBITS(N))
 
 /*
   \texttt{SETIBIT(TAB,I)} sets the \texttt{I}-th bit in bitarray

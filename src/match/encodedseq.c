@@ -2707,7 +2707,7 @@ static int scanprjfiledbfileviafileptr(Encodedsequence *encseq,
       if (numoffiles >= numofallocatedfiles)
       {
         numofallocatedfiles += 2;
-        filelengthtab = gt_realloc(filelengthtab,sizeof(Filelengthvalues) *
+        filelengthtab = gt_realloc(filelengthtab,sizeof (Filelengthvalues) *
                                                  numofallocatedfiles);
       }
       if (scandbfileline(filenametab,

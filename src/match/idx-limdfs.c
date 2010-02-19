@@ -81,7 +81,7 @@ Genericindex *genericindex_new(const GtStr *indexname,
   bool haserr = false;
   Genericindex *genericindex;
 
-  genericindex = gt_malloc(sizeof(*genericindex));
+  genericindex = gt_malloc(sizeof (*genericindex));
   if (withesa)
   {
     demand |= SARR_SUFTAB;
@@ -99,7 +99,7 @@ Genericindex *genericindex_new(const GtStr *indexname,
     demand |= SARR_SSPTAB;
   }
   genericindex->withesa = withesa;
-  genericindex->suffixarray = gt_malloc(sizeof(*genericindex->suffixarray));
+  genericindex->suffixarray = gt_malloc(sizeof (*genericindex->suffixarray));
   if (mapsuffixarray(genericindex->suffixarray,
                      demand,
                      indexname,

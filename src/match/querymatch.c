@@ -36,7 +36,7 @@ struct Querymatch
 
 Querymatch *querymatch_new(void)
 {
-  return gt_malloc(sizeof(Querymatch));
+  return gt_malloc(sizeof (Querymatch));
 }
 
 void querymatch_fill(Querymatch *querymatch,

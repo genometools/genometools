@@ -355,7 +355,8 @@ static int outputsortedstring2indexviafileptr(const Encodedsequence *encseq,
                                               GtError *err)
 {
   sequence2bytecode(bytebuffer,encseq,position,(Seqpos) mersize);
-  if (fwrite(bytebuffer,sizeof(*bytebuffer),(size_t) sizeofbuffer,merindexfpout)
+  if (fwrite(bytebuffer, sizeof (*bytebuffer),
+             (size_t) sizeofbuffer,merindexfpout)
             != (size_t) sizeofbuffer)
   {
     gt_error_set(err,"cannot write %lu items of size %u: errormsg=\"%s\"",

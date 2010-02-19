@@ -40,7 +40,7 @@ static Spacedseed *spacedseed_new(const char *seedstring,GtError *err)
   unsigned long idx, fillindex;
   bool haserr = false;
 
-  spse = gt_malloc(sizeof(*spse));
+  spse = gt_malloc(sizeof (*spse));
   spse->seedwidth = spse->numofonepositions = 0;
   spse->seedbitvector = 0;
   spse->onepositions = NULL;

@@ -55,7 +55,7 @@ static void spse_showLimdfsstate(const DECLAREPTRDFSSTATE(aliascol),
 static Limdfsconstinfo *spse_allocatedfsconstinfo(
                                GT_UNUSED unsigned int alphasize)
 {
-  Limdfsconstinfo *mti = gt_malloc(sizeof(Limdfsconstinfo));
+  Limdfsconstinfo *mti = gt_malloc(sizeof (Limdfsconstinfo));
   return mti;
 }
 

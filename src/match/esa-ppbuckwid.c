@@ -20,7 +20,7 @@
  {
    start[idx] = 0;
    nextcode[idx] = 0;
-   bucket[idx] = malloc(sizeof(unsigned long) * 4^(idx+1));
+   bucket[idx] = malloc(sizeof (unsigned long) * 4^(idx+1));
  }
  for all lcp-values lcptab[j]
  {

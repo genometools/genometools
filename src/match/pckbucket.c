@@ -62,7 +62,7 @@ static Pckbuckettable *allocandinitpckbuckettable(unsigned int numofchars,
   unsigned int idx;
   Pckbuckettable *pckbt;
 
-  pckbt = gt_malloc(sizeof(Pckbuckettable));
+  pckbt = gt_malloc(sizeof (Pckbuckettable));
   pckbt->basepower = initbasepower(numofchars,maxdepth);
   pckbt->numofchars = numofchars;
   pckbt->maxdepth = maxdepth;
@@ -72,13 +72,13 @@ static Pckbuckettable *allocandinitpckbuckettable(unsigned int numofchars,
     /*printf("basepower[%u]=%lu\n",idx,pckbt->basepower[idx]); */
     pckbt->maxnumofvalues += pckbt->basepower[idx];
   }
-  pckbt->mbtab = gt_malloc(sizeof(Mbtab *) * (maxdepth+1));
+  pckbt->mbtab = gt_malloc(sizeof (Mbtab *) * (maxdepth+1));
   if (writemode)
   {
     pckbt->mapptr = NULL;
-    pckbt->mbtab[0] = gt_malloc(sizeof(Mbtab) * pckbt->maxnumofvalues);
+    pckbt->mbtab[0] = gt_malloc(sizeof (Mbtab) * pckbt->maxnumofvalues);
     /*
-    printf("allocated = %u * %lu\n",sizeof(Mbtab),pckbt->maxnumofvalues);
+    printf("allocated = %u * %lu\n",sizeof (Mbtab),pckbt->maxnumofvalues);
     */
     for (cptr = pckbt->mbtab[0];
          cptr < pckbt->mbtab[0] + pckbt->maxnumofvalues; cptr++)
@@ -167,8 +167,8 @@ Pckbuckettable *pckbuckettable_new(const void *voidbwtseq,
   child.depth = 0;
   child.code = (Codetype) 0;
   GT_STOREINARRAY(&stack,Boundsatdepth,128,child);
-  rangeOccs = gt_malloc(sizeof(*rangeOccs) * GT_MULT2(numofchars));
-  tmpmbtab = gt_malloc(sizeof(*tmpmbtab) * numofchars);
+  rangeOccs = gt_malloc(sizeof (*rangeOccs) * GT_MULT2(numofchars));
+  tmpmbtab = gt_malloc(sizeof (*tmpmbtab) * numofchars);
   pckbt = allocandinitpckbuckettable(numofchars,maxdepth,true);
   while (stack.nextfreeBoundsatdepth > 0)
   {

@@ -161,7 +161,7 @@ static void fillcoverrank(Differencecover *dcov)
   unsigned int i;
   Diffrank j;
 
-  dcov->coverrank = gt_malloc(sizeof(*dcov->coverrank) * dcov->vparam);
+  dcov->coverrank = gt_malloc(sizeof (*dcov->coverrank) * dcov->vparam);
   gt_assert(dcov->size <= Diffrankmax);
   for (i=0; i<dcov->vparam; i++)
   {
@@ -183,7 +183,7 @@ static void filldiff2pos(Differencecover *dcov)
 {
   Diffvalue *iptr, *jptr;
 
-  dcov->diff2pos = gt_malloc(sizeof(*dcov->diff2pos) * dcov->vparam);
+  dcov->diff2pos = gt_malloc(sizeof (*dcov->diff2pos) * dcov->vparam);
   for (iptr=dcov->diffvalues + dcov->size - 1; iptr>=dcov->diffvalues; iptr--)
   {
     for (jptr=dcov->diffvalues; jptr<dcov->diffvalues + dcov->size; jptr++)
@@ -552,7 +552,7 @@ static unsigned long insertfullspecialrangesample(Differencecover *dcov,
 
 static void initinversesuftabspecials(Differencecover *dcov)
 {
-  dcov->inversesuftab = gt_malloc(sizeof(*dcov->inversesuftab) *
+  dcov->inversesuftab = gt_malloc(sizeof (*dcov->inversesuftab) *
                                   dcov->maxsamplesize);
   if (hasspecialranges(dcov->encseq))
   {
@@ -775,7 +775,7 @@ static void dc_sortsuffixesonthislevel(Differencecover *dcov,
                     (unsigned long) dcov->currentdepth);
     */
   }
-  qsort(dcov->itvinfo,(size_t) width,sizeof(*dcov->itvinfo),compareitv);
+  qsort(dcov->itvinfo,(size_t) width,sizeof (*dcov->itvinfo),compareitv);
   for (idx=0; idx<width; idx++)
   {
     left[idx] = dcov->itvinfo[idx].suffixstart;
@@ -948,7 +948,7 @@ void dc_sortunsortedbucket(void *data,
                       (Seqpos) dcov->vparam);
 #endif
 #ifdef QSORT_INTEGER
-  gt_qsort_r(left,(size_t) (right - left + 1),sizeof(Seqpos),data,
+  gt_qsort_r(left,(size_t) (right - left + 1),sizeof (Seqpos),data,
              comparedcov_presortedsuffixes);
 #else
   gt_inlined_qsort_r (left,(unsigned long) (right - left + 1),data);
@@ -1103,7 +1103,7 @@ void differencecover_sortsample(Differencecover *dcov,bool cmpcharbychar,
           (size_t) codelist.nextfreeCodeatposition,
           sizeof (*codelist.spaceCodeatposition),compareCodeatpositon);
   }
-  dcov->sortedsample = gt_malloc(sizeof(*dcov->sortedsample) *
+  dcov->sortedsample = gt_malloc(sizeof (*dcov->sortedsample) *
                                  dcov->effectivesamplesize);
   posinserted = derivespecialcodesonthefly(dcov,withcheck ? &codelist : NULL);
   GT_FREEARRAY(&codelist,Codeatposition);
@@ -1246,7 +1246,7 @@ void differencecovers_check(const Encodedsequence *encseq,Readmode readmode)
   unsigned int vparam;
   bool withcheck = true;
 
-  printf("sizeof(differencecovertab)=%lu\n",
+  printf("sizeof (differencecovertab)=%lu\n",
           (unsigned long) sizeof (differencecovertab));
   for (logmod = (size_t) 4;
        logmod < sizeof (differencecoversizes)/sizeof (differencecoversizes[0]);

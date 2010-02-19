@@ -179,8 +179,8 @@ static void apme_initdfsconstinfo(Limdfsconstinfo *mti,
 
 static Limdfsconstinfo *apme_allocatedfsconstinfo(unsigned int alphasize)
 {
-  Limdfsconstinfo *mti = gt_malloc(sizeof(Limdfsconstinfo));
-  mti->eqsvector = gt_malloc(sizeof(*mti->eqsvector) * alphasize);
+  Limdfsconstinfo *mti = gt_malloc(sizeof (Limdfsconstinfo));
+  mti->eqsvector = gt_malloc(sizeof (*mti->eqsvector) * alphasize);
   return mti;
 }
 

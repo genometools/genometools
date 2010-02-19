@@ -136,7 +136,7 @@ static void iteroverallwords(const Encodedsequence *encseq,
   gt_assert(endpos <= getencseqtotallength(encseq));
   esr = newEncodedsequencescanstate();
   initEncodedsequencescanstate(esr,encseq,Forwardmode,startpos);
-  buffer = gt_malloc(sizeof(GtUchar) * windowsize);
+  buffer = gt_malloc(sizeof (GtUchar) * windowsize);
   firstpos = bufsize = 0;
   for (currentpos=startpos; currentpos < endpos; currentpos++)
   {

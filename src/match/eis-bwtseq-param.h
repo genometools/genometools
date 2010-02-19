@@ -52,14 +52,14 @@ struct bwtParam
                                    * rank mode reversibly sorted:
                                    * -1:
                                    *     inactive
-                                   * 0...sizeof(Seqpos)*CHAR_BIT:
+                                   * 0...sizeof (Seqpos)*CHAR_BIT:
                                    *     build accel table
                                    *     with 1<<SourceRankInterval
                                    *     sampling interval
                                    */
   int ctxMapILog;                 /**< according to the value of
                                    * ctxMapIlog:
-                                   * 0..sizeof(Seqpos)*CHAR_BIT:
+                                   * 0..sizeof (Seqpos)*CHAR_BIT:
                                    *   a context map is produced with
                                    *   interval 1 << ctxMapILog
                                    * -1: use log(seqlen)
