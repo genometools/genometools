@@ -35,9 +35,15 @@
 {
    toy_font_static_data_problem
    Memcheck:Leak
-   obj:*libfreetype*
    ...
-   fun:*FT_*
+   fun:FT_New_Face
+   ...
+}
+{
+   toy_font_static_data_problem
+   Memcheck:Leak
+   ...
+   fun:FT_Load_Glyph
    ...
 }
 {
