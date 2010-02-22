@@ -93,6 +93,9 @@ all_fastqfiles = ["fastq_long.fastq",
                   "test1.fastq",
                   "test5_tricky.fastq"]
 
+allmultifiles += all_fastqfiles
+allfiles += all_fastqfiles
+
 alldir = ["fwd","cpl","rev","rcl"]
 
 # put the tests with paircmp, maxpair, patternmatch, into a file gt_idxmatch

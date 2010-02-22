@@ -45,7 +45,7 @@ def checktagerator(queryfile,ms)
   if File.size("patternfile") > 0
     run_test("#{$bin}gt tagerator -rw -cmp -e 0 -esa sfx -q patternfile",
              :maxtime => 100)
-    run_test("#{$bin}gt tagerator -rw -cmp -e 1 -esa sfx -q patternfile " + 
+    run_test("#{$bin}gt tagerator -rw -cmp -e 1 -esa sfx -q patternfile " +
              "-withwildcards",:maxtime => 100)
     run_test("#{$bin}gt tagerator -rw -cmp -e 2 -esa sfx -q patternfile " +
              "-withwildcards",:maxtime => 100)
@@ -94,13 +94,14 @@ end
 
 def checkrepfind(reffile)
   reffilepath=addfilepath(reffile)
-  run_test "#{$bin}gt suffixerator -algbds 3 40 120 -db " +
-           "#{reffilepath} -indexname sfxidx -dna -suf -tis -lcp -ssp -pl"
+  run_test("#{$bin}gt suffixerator -algbds 3 40 120 -db " +
+           "#{reffilepath} -indexname sfxidx -dna -suf -tis -lcp -ssp -pl",
+           :maxtime => 320)
   minlength = determineminlength(reffile)
-  run_test("#{$bin}gt repfind -l #{minlength} -ii sfxidx", :maxtime => 120)
+  run_test("#{$bin}gt repfind -l #{minlength} -ii sfxidx", :maxtime => 320)
   resultfile="#{$gttestdata}repfind-result/#{reffile}.result"
   run "cmp -s #{$last_stdout} #{resultfile}"
-  run_test "#{$bin}gt repfind -l #{minlength} -r -ii sfxidx"
+  run_test("#{$bin}gt repfind -l #{minlength} -r -ii sfxidx", :maxtime => 320)
   resultfile="#{$gttestdata}repfind-result/#{reffile}-r.result"
   run "cmp -s #{$last_stdout} #{resultfile}"
 end
@@ -112,7 +113,7 @@ def checkrepfindwithquery(reffile,queryfile)
   run_test "#{$bin}gt suffixerator -algbds 3 40 120 -db " +
            "#{reffilepath} -indexname #{idxname} -dna -suf -tis -lcp -ssp -pl"
   run_test("#{$bin}gt repfind -l 15 -ii #{idxname} -q #{queryfilepath}",
-           :maxtime => 120)
+           :maxtime => 320)
   # run "sort #{$last_stdout}"
   #run "/Users/kurtz/bin-ops/i686-apple-darwin/mkvtree.x -indexname mkv-idx " +
   #    "-allout -v -pl -dna -db #{reffilepath}"
@@ -180,7 +181,7 @@ allfiles.each do |reffile|
       Test do
         run("#{$bin}gt packedindex mkindex -ssp -tis -indexname pck -db " +
             "#{$testdata}/#{reffile} -sprank -dna -pl -bsize 10 " +
-            "-locfreq 32 -dir rev", 
+            "-locfreq 32 -dir rev",
             :maxtime => 100)
         run_test("#{$bin}gt dev idxlocali -s -th 7 -pck pck " +
                  "-q #{$testdata}/#{queryfile}",
@@ -191,7 +192,7 @@ allfiles.each do |reffile|
         run_test "#{$bin}gt suffixerator -indexname sfx -ssp -tis -suf -dna " +
                  "-v -db #{$testdata}/#{reffile}"
         run_test("#{$bin}gt dev idxlocali -s -th 7 -esa sfx " +
-                 "-q #{$testdata}/#{queryfile}", 
+                 "-q #{$testdata}/#{queryfile}",
                  :maxtime => 100)
         run_test("#{$bin}gt dev idxlocali -s -th 7 -esa sfx -online " +
                  "-q #{$testdata}/#{queryfile}",
@@ -207,7 +208,7 @@ allfiles.each do |reffile|
   Test do
     run_test("#{$bin}gt packedindex mkindex -tis -ssp -indexname pck " +
              "-sprank -db #{$testdata}/#{reffile} -dna -pl -bsize 10 " +
-             " -locfreq 32 -dir rev", 
+             " -locfreq 32 -dir rev",
              :maxtime => 1200)
   end
 end
