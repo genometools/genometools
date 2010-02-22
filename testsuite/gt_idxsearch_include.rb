@@ -217,5 +217,7 @@ Keywords "gt_greedyfwdmat gttestdata"
 Test do
   createandcheckgreedyfwdmat("#{$testdata}at1MB",
                              "#{$testdata}U89959_genomic.fas")
+  run_test "#{$bin}gt tagerator -e 0 -q #{$testdata}corruptpatternfile.fna -pck",
+           :retval => 1
   run "rm -f sfx.* fmi.* pck.*"
 end

@@ -672,7 +672,9 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
                           tageratoroptions->outputmode);
     seqit = gt_seqiterator_new(tageratoroptions->tagfiles, err);
     if (!seqit)
+    {
       haserr = true;
+    }
     if (!haserr)
     {
       for (tagnumber = 0; !haserr; tagnumber++)
@@ -750,14 +752,14 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
                           &storeoffline);
         gt_free(desc);
       }
-      gt_free(showmatchinfo.eqsvector);
-      if (limdfsresources != NULL)
-      {
-        freeLimdfsresources(&limdfsresources,dfst);
-      }
-      GT_FREEARRAY(&storeonline,Simplematch);
-      GT_FREEARRAY(&storeoffline,Simplematch);
       gt_seqiterator_delete(seqit);
+    }
+    GT_FREEARRAY(&storeonline,Simplematch);
+    GT_FREEARRAY(&storeoffline,Simplematch);
+    gt_free(showmatchinfo.eqsvector);
+    if (limdfsresources != NULL)
+    {
+      freeLimdfsresources(&limdfsresources,dfst);
     }
   }
   if (mor != NULL)
