@@ -16,7 +16,6 @@
 */
 
 #include <math.h>
-#include <stdlib.h>
 #include <stdio.h>
 #include <inttypes.h>
 #include "core/assert_api.h"
@@ -24,7 +23,8 @@
 #include "core/mathsupport.h"
 #include "core/yarandom.h"
 
-#define EPSILON  0.0000000000001
+#define GT_DBL_MAX_ABS_ERROR 1.0E-100
+#define GT_DBL_MAX_REL_ERROR 1.0E-8
 
 double gt_logsum(double p1, double p2)
 {
@@ -33,37 +33,42 @@ double gt_logsum(double p1, double p2)
   return (p2-p1 > 50.0) ? p2 : p2 + log(1.0 + exp(p1-p2));
 }
 
-bool gt_double_equals_one(double d)
+static inline bool gt_double_relative_equal(double d1, double d2)
 {
-  if (fabs(1.0 - d) <= EPSILON)
+  double relerr;
+  if (fabs(d1 - d2) < GT_DBL_MAX_ABS_ERROR)
+    return true;
+  if (fabs(d2) > fabs(d1))
+    relerr = fabs((d1 - d2) / d2);
+  else
+    relerr = fabs((d1 - d2) / d1);
+  if (relerr <= GT_DBL_MAX_REL_ERROR)
     return true;
   return false;
+}
+
+bool gt_double_equals_one(double d)
+{
+  return gt_double_relative_equal(d, 1.0);
 }
 
 bool gt_double_equals_double(double d1, double d2)
 {
-  if (fabs(d1 - d2) <= EPSILON)
-    return true;
-  return false;
+  return gt_double_relative_equal(d1, d2);
 }
 
 int gt_double_compare(double d1, double d2)
 {
-  if (fabs(d1 - d2) <= EPSILON)
+  if (gt_double_relative_equal(d1, d2))
     return 0;
   if (d1 > d2)
     return 1;
-  else
-    return -1;
+  return -1;
 }
 
 bool gt_double_smaller_double(double d1, double d2)
 {
-  if (d1 > d2)
-    return false;
-  if (d2 - d1 <= EPSILON)
-    return false;
-  return true;
+  return gt_double_compare(d1, d2) < 0;
 }
 
 unsigned long gt_rand_max(unsigned long maximal_value)
@@ -139,6 +144,7 @@ int gt_mathsupport_unit_test(GtError *err)
   ensure(had_err, !gt_double_equals_double(1.0, 1.1));
   ensure(had_err, gt_double_equals_double(1.0, 1+less_than_epsilon));
   ensure(had_err, gt_double_equals_double(1.0, 1.0));
+  ensure(had_err, gt_double_equals_double(0.0, 0.0));
   ensure(had_err, gt_double_equals_double(-1.0, -1.0));
   ensure(had_err, gt_double_equals_double(-1.0+less_than_epsilon, -1.0));
   ensure(had_err, gt_double_equals_double(-1.0, -1.0+less_than_epsilon));
