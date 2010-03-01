@@ -16,6 +16,7 @@
 */
 
 #include "mg_computepath.h"
+#include "core/mathsupport.h"
 
 /* Funktion zur Berechnung der erlaubten Vorgaenger-Leserahmen
    Parameter: aktueller Leserahmen, Position in der Query-Sequence,
@@ -133,7 +134,7 @@ int mg_computepath(CombinedScoreMatrixEntry **combinedscore_matrix,
 
         /* Bestimmen des Max-Wertes der max. 3 Moeglichkeiten und Speichern der
            Zeile, von der der Max-Wert stammt */
-        if (max_new > max_old)
+        if (gt_double_compare(max_new, max_old) > 0)
         {
             max_old = max_new;
             maxpath_frame = precursors_row;
