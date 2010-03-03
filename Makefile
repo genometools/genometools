@@ -414,11 +414,11 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
-lib/libgtunstable$(SHARED_OBJ_NAME_EXT): $(LIBGTUNSTABLE_OBJ)
+lib/libgtunstable$(SHARED_OBJ_NAME_EXT): $(LIBGTUNSTABLE_OBJ) $(LIBGENOMETOOLS_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) $(LIBGTUNSTABLE_OBJ) \
-	-o $@ $(GTSHAREDLIB_LIBDEP)
+	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) $(LIBGENOMETOOLS_OBJ) \
+	$(LIBGTUNSTABLE_OBJ) -o $@ $(GTSHAREDLIB_LIBDEP)
 
 lib/libtecla.a: $(LIBTECLA_OBJ)
 	@echo "[link $(@F)]"
