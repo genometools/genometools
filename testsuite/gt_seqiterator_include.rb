@@ -31,6 +31,18 @@ Test do
   end
 end
 
+Name "seqiterator contigs"
+Keywords "gt_seqiterator"
+Test do
+  run_test "#{$bin}gt dev seqiterator -contigs #{$testdata}at1MB"
+  grep($last_stdout, "number.*1952")
+  grep($last_stdout, "total.*770425")
+  grep($last_stdout, "average.*394")
+  grep($last_stdout, "longest.*1102")
+  grep($last_stdout, "N50.*421")
+  grep($last_stdout, "smallest.*56")
+end
+
 Name "seqiterator fail (unknown file type)"
 Keywords "gt_seqiterator"
 Test do

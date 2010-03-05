@@ -37,7 +37,8 @@ typedef struct
 {
   bool verbose,
        dodistlen,
-       doastretch;
+       doastretch,
+       docstats;
   unsigned int bucketsize;
 } Seqiteroptions;
 
@@ -46,7 +47,8 @@ static GtOPrval parse_options(Seqiteroptions *seqiteroptions,
                               const char **argv, GtError *err)
 {
   GtOptionParser *op;
-  GtOption *optionverbose, *optiondistlen, *optionbucketsize, *optionastretch;
+  GtOption *optionverbose, *optiondistlen, *optionbucketsize,
+           *optioncstats, *optionastretch;
   GtOPrval oprval;
 
   gt_error_check(err);
@@ -69,6 +71,11 @@ static GtOPrval parse_options(Seqiteroptions *seqiteroptions,
                                 &seqiteroptions->bucketsize,100, 1);
   gt_option_imply(optionbucketsize, optiondistlen);
   gt_option_parser_add_option(op, optionbucketsize);
+
+  optioncstats = gt_option_new_bool("contigs",
+                                   "show statistics of a contigs set",
+                                   &seqiteroptions->docstats,false);
+  gt_option_parser_add_option(op, optioncstats);
 
   optionastretch = gt_option_new_bool("astretch",
                                    "show distribution of A-substrings",
@@ -185,6 +192,66 @@ static void processastretches(const GtDiscDistri *distastretch,
   gt_free(astretchinfo.mmercount);
 }
 
+#define NOF_NSTATS 2 /* N50, N80 */
+
+typedef struct
+{
+  unsigned long       nvalue[NOF_NSTATS];
+  unsigned long long  min[NOF_NSTATS];
+  bool                 done[NOF_NSTATS];
+  char                 *name[NOF_NSTATS];
+  unsigned long long  current;
+} Nstats;
+
+static void calcNstats(unsigned long key, unsigned long long value,
+                        void *data)
+{
+  Nstats *nstats = data;
+  int i;
+  nstats->current += (key*value);
+  for (i = 0; i < NOF_NSTATS; i++)
+  {
+    if (!nstats->done[i])
+    {
+      if (nstats->current >= nstats->min[i])
+      {
+        nstats->done[i] = true;
+        nstats->nvalue[i] = key;
+      }
+    }
+  }
+}
+
+#define initNstat(INDEX, NAME, PORTION)\
+    nstats.name[INDEX] = (NAME);\
+    nstats.min[INDEX] = (double)sumlength * (PORTION);\
+    nstats.nvalue[INDEX] = 0;\
+    nstats.done[INDEX] = false
+
+static void showcstats(uint64_t numofseq, uint64_t sumlength,
+                        unsigned long minlength, unsigned long maxlength,
+                        GtDiscDistri *distctglen)
+{
+  Nstats nstats;
+  int i;
+
+  initNstat(0, "N50", 0.50);
+  initNstat(1, "N80", 0.80);
+  nstats.current = 0;
+
+  gt_disc_distri_foreach_in_reverse_order(distctglen, calcNstats,
+                                          &nstats);
+  printf("# number of contigs: "Formatuint64_t"\n",
+         PRINTuint64_tcast(numofseq));
+  printf("# total length:      "Formatuint64_t"\n",
+         PRINTuint64_tcast(sumlength));
+  printf("# average size:      %.2f\n", (double) sumlength/numofseq);
+  printf("# longest contig:    %lu\n", maxlength);
+  for (i = 0; i < NOF_NSTATS ; i++)
+    printf("# %s:               %lu\n", nstats.name[i], nstats.nvalue[i]);
+  printf("# smallest contig:   %lu\n", minlength);
+}
+
 int gt_seqiterator(int argc, const char **argv, GtError *err)
 {
   GtStrArray *files;
@@ -195,6 +262,7 @@ int gt_seqiterator(int argc, const char **argv, GtError *err)
   int i, parsed_args, had_err = 0;
   off_t totalsize;
   GtDiscDistri *distseqlen = NULL;
+  GtDiscDistri *distctglen = NULL;
   GtDiscDistri *distastretch = NULL;
   uint64_t numofseq = 0, sumlength = 0;
   unsigned long minlength = 0, maxlength = 0;
@@ -232,6 +300,10 @@ int gt_seqiterator(int argc, const char **argv, GtError *err)
       {
         distseqlen = gt_disc_distri_new();
       }
+      if (seqiteroptions.docstats)
+      {
+        distctglen = gt_disc_distri_new();
+      }
       if (seqiteroptions.doastretch)
       {
         distastretch = gt_disc_distri_new();
@@ -249,7 +321,7 @@ int gt_seqiterator(int argc, const char **argv, GtError *err)
         had_err = gt_seqiterator_next(seqit, &sequence, &len, &desc, err);
         gt_free(desc);
         if (had_err != 1) break; /* 0: finished; 1: error */
-        if (seqiteroptions.dodistlen)
+        if (seqiteroptions.dodistlen || seqiteroptions.docstats)
         {
           if (!minlengthdefined || minlength > len)
           {
@@ -262,7 +334,14 @@ int gt_seqiterator(int argc, const char **argv, GtError *err)
           }
           sumlength += (uint64_t) len;
           numofseq++;
-          gt_disc_distri_add(distseqlen,len/seqiteroptions.bucketsize);
+          if (seqiteroptions.dodistlen)
+          {
+            gt_disc_distri_add(distseqlen,len/seqiteroptions.bucketsize);
+          }
+          if (seqiteroptions.docstats)
+          {
+            gt_disc_distri_add(distctglen,len);
+          }
         }
         if (seqiteroptions.doastretch)
         {
@@ -289,6 +368,12 @@ int gt_seqiterator(int argc, const char **argv, GtError *err)
                            &(seqiteroptions.bucketsize));
     gt_disc_distri_delete(distseqlen);
   }
+  if (!had_err && seqiteroptions.docstats)
+  {
+    showcstats(numofseq, sumlength, minlength,
+               maxlength, distctglen);
+  }
+  if (distctglen) gt_disc_distri_delete(distctglen);
   if (!had_err && seqiteroptions.doastretch)
   {
     processastretches(distastretch,countA);
