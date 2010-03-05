@@ -38,7 +38,8 @@ typedef struct
   bool verbose,
        dodistlen,
        doastretch,
-       docstats;
+       docstats,
+       showestimsize;
   unsigned int bucketsize;
 } Seqiteroptions;
 
@@ -48,7 +49,7 @@ static GtOPrval parse_options(Seqiteroptions *seqiteroptions,
 {
   GtOptionParser *op;
   GtOption *optionverbose, *optiondistlen, *optionbucketsize,
-           *optioncstats, *optionastretch;
+           *optioncstats, *optionastretch, *optionestimsize;
   GtOPrval oprval;
 
   gt_error_check(err);
@@ -82,6 +83,11 @@ static GtOPrval parse_options(Seqiteroptions *seqiteroptions,
                                    &seqiteroptions->doastretch,false);
   gt_option_exclude(optiondistlen, optionastretch);
   gt_option_parser_add_option(op, optionastretch);
+
+  optionestimsize = gt_option_new_bool("estimsize",
+                                   "show estimated size",
+                                   &seqiteroptions->showestimsize,false);
+  gt_option_parser_add_option(op, optionestimsize);
 
   gt_option_parser_set_min_args(op, 1U);
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
@@ -287,8 +293,11 @@ int gt_seqiterator(int argc, const char **argv, GtError *err)
     gt_str_array_add_cstr(files, argv[i]);
   }
   totalsize = gt_files_estimate_total_size(files);
-  printf("# estimated total size is " Formatuint64_t "\n",
-            PRINTuint64_tcast(totalsize));
+  if (seqiteroptions.showestimsize)
+  {
+    printf("# estimated total size is " Formatuint64_t "\n",
+              PRINTuint64_tcast(totalsize));
+  }
   if (!had_err) {
     /* read input using seqiterator */
     seqit = gt_seqiterator_sequence_buffer_new(files, err);
