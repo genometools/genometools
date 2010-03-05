@@ -19,6 +19,18 @@ Test do
   grep($last_stdout, /21 sequences/)
 end
 
+Name "seqiterator distlen"
+Keywords "gt_seqiterator"
+Test do
+  {10 => "860--869 1", 
+   100 => "800--899 4",
+   1000 => "0--999 21"}.each_pair do |bucketsize, expected|
+    run_test "#{$bin}gt dev seqiterator -v -distlen"+
+                      " -bucketsize #{bucketsize} #{$testdata}Atinsert.gbk"
+    grep($last_stdout, expected)
+  end
+end
+
 Name "seqiterator fail (unknown file type)"
 Keywords "gt_seqiterator"
 Test do

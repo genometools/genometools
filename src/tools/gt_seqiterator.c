@@ -33,13 +33,12 @@
 #include "match/stamp.h"
 #include "tools/gt_seqiterator.h"
 
-#define BUCKETSIZE 100
-
 typedef struct
 {
   bool verbose,
        dodistlen,
        doastretch;
+  unsigned int bucketsize;
 } Seqiteroptions;
 
 static GtOPrval parse_options(Seqiteroptions *seqiteroptions,
@@ -47,7 +46,7 @@ static GtOPrval parse_options(Seqiteroptions *seqiteroptions,
                               const char **argv, GtError *err)
 {
   GtOptionParser *op;
-  GtOption *optionverbose, *optiondistlen, *optionastretch;
+  GtOption *optionverbose, *optiondistlen, *optionbucketsize, *optionastretch;
   GtOPrval oprval;
 
   gt_error_check(err);
@@ -65,6 +64,12 @@ static GtOPrval parse_options(Seqiteroptions *seqiteroptions,
                                   &seqiteroptions->dodistlen,false);
   gt_option_parser_add_option(op, optiondistlen);
 
+  optionbucketsize = gt_option_new_uint_min("bucketsize",
+                                "bucket size for distlen option",
+                                &seqiteroptions->bucketsize,100, 1);
+  gt_option_imply(optionbucketsize, optiondistlen);
+  gt_option_parser_add_option(op, optionbucketsize);
+
   optionastretch = gt_option_new_bool("astretch",
                                    "show distribution of A-substrings",
                                    &seqiteroptions->doastretch,false);
@@ -79,15 +84,16 @@ static GtOPrval parse_options(Seqiteroptions *seqiteroptions,
 }
 
 static void showdistseqlen(unsigned long key, unsigned long long value,
-                           GT_UNUSED void *data)
+                            void *data)
 {
   unsigned long distvalue;
+  unsigned int *bucketsize = data;
 
   gt_assert(value <= (unsigned long long) ULONG_MAX);
   distvalue = (unsigned long) value;
   printf("%lu--%lu %lu\n",
-         BUCKETSIZE * key,
-         BUCKETSIZE * (key+1) - 1,
+         (*bucketsize) * key,
+         (*bucketsize) * (key+1) - 1,
          distvalue);
 }
 
@@ -256,7 +262,7 @@ int gt_seqiterator(int argc, const char **argv, GtError *err)
           }
           sumlength += (uint64_t) len;
           numofseq++;
-          gt_disc_distri_add(distseqlen,len/BUCKETSIZE);
+          gt_disc_distri_add(distseqlen,len/seqiteroptions.bucketsize);
         }
         if (seqiteroptions.doastretch)
         {
@@ -277,9 +283,10 @@ int gt_seqiterator(int argc, const char **argv, GtError *err)
              PRINTuint64_tcast(numofseq),(double) sumlength/numofseq);
     printf("# minimum length %lu\n",minlength);
     printf("# maximum length %lu\n",maxlength);
-    printf("# distribution of sequence length in buckets of size %d\n",
-           BUCKETSIZE);
-    gt_disc_distri_foreach(distseqlen,showdistseqlen,NULL);
+    printf("# distribution of sequence length in buckets of size %u\n",
+           seqiteroptions.bucketsize);
+    gt_disc_distri_foreach(distseqlen, showdistseqlen,
+                           &(seqiteroptions.bucketsize));
     gt_disc_distri_delete(distseqlen);
   }
   if (!had_err && seqiteroptions.doastretch)
