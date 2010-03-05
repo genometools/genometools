@@ -39,6 +39,11 @@ void               gt_disc_distri_show_generic(const GtDiscDistri*, GtFile*);
 void               gt_disc_distri_foreach(const GtDiscDistri*,
                                           GtDiscDistriIterFunc,
                                           void *data);
+/* same as foreach, but from the longest to the smallest key: */
+void               gt_disc_distri_foreach_in_reverse_order(
+                                             const GtDiscDistri *d,
+                                             GtDiscDistriIterFunc func,
+                                             void *data);
 int                gt_disc_distri_unit_test(GtError*);
 void               gt_disc_distri_delete(GtDiscDistri*);
 
