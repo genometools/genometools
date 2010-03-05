@@ -241,6 +241,8 @@ int gt_seqiterator(int argc, const char **argv, GtError *err)
       {
         desc = NULL;
         had_err = gt_seqiterator_next(seqit, &sequence, &len, &desc, err);
+        gt_free(desc);
+        if (had_err != 1) break; /* 0: finished; 1: error */
         if (seqiteroptions.dodistlen)
         {
           if (!minlengthdefined || minlength > len)
@@ -259,11 +261,6 @@ int gt_seqiterator(int argc, const char **argv, GtError *err)
         if (seqiteroptions.doastretch)
         {
           countA += accumulateastretch(distastretch,sequence,len);
-        }
-        gt_free(desc);
-        if (had_err != 1)
-        {
-          break;
         }
       }
       if (seqiteroptions.verbose)

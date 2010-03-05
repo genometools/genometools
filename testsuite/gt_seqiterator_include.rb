@@ -2,18 +2,21 @@ Name "seqiterator (FASTA)"
 Keywords "gt_seqiterator"
 Test do
   run_test "#{$bin}gt dev seqiterator -v -distlen #{$testdata}Atinsert.fna"
+  grep($last_stdout, /21 sequences/)
 end
 
 Name "seqiterator (GenBank)"
 Keywords "gt_seqiterator"
 Test do
   run_test "#{$bin}gt dev seqiterator -v -distlen #{$testdata}Atinsert.gbk"
+  grep($last_stdout, /21 sequences/)
 end
 
 Name "seqiterator (EMBL)"
 Keywords "gt_seqiterator"
 Test do
   run_test "#{$bin}gt dev seqiterator -v -distlen #{$testdata}Atinsert.embl"
+  grep($last_stdout, /21 sequences/)
 end
 
 Name "seqiterator fail (unknown file type)"
