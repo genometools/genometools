@@ -350,7 +350,7 @@ SfxIGetOrigSeq(const void *state, Symbol *dest, Seqpos pos, size_t len)
   return EncSeqGetSubSeq(sfxi->encseq, sfxi->readmode, pos, len, dest);
 }
 
-/** writes substring of suffix table to output, puts older data into
+/** writes substring of suffix table to output, stores older data into
  * cache if necessary */
 static size_t
 SfxIGenerate(void *iface, void *backlogState,

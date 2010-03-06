@@ -1838,13 +1838,13 @@ updateIdxOutput(struct blockCompositionSeq *seqIdx,
     fprintf(stderr,"aState->varDiskOffset/bitElemBits=%lu\n",
                     (unsigned long) (aState->varDiskOffset/bitElemBits));
     fprintf(stderr,"sizeof (BitElem)=%lu\n",(unsigned long) sizeof (BitElem));
-    fprintf(stderr,"aState->varDiskOffset/bitElemBits * sizeof(BitElem)=%lu\n",
-            (unsigned long) (aState->varDiskOffset/bitElemBits * 
+    fprintf(stderr,"aState->varDiskOffset/bitElemBits * sizeof (BitElem)=%lu\n",
+            (unsigned long) (aState->varDiskOffset/bitElemBits *
                              sizeof (BitElem)));
-    fprintf(stderr,"seqIdx->externalData.varDataPos + " 
-                   "aState->varDiskOffset/bitElemBits * sizeof(BitElem)=%lu\n",
-            (unsigned long) (seqIdx->externalData.varDataPos + 
-                             aState->varDiskOffset/bitElemBits 
+    fprintf(stderr,"seqIdx->externalData.varDataPos + "
+                   "aState->varDiskOffset/bitElemBits * sizeof (BitElem)=%lu\n",
+            (unsigned long) (seqIdx->externalData.varDataPos +
+                             aState->varDiskOffset/bitElemBits
                              * sizeof (BitElem)));
     exit(EXIT_FAILURE);
   }

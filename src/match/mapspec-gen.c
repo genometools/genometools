@@ -97,6 +97,9 @@ static int assigncorrecttype(Mapspecification *mapspec,
   gt_error_check(err);
   switch (mapspec->typespec)
   {
+    case CharType:
+      ASSIGNPTR2STARTPTR(char);
+      break;
     case GtUcharType:
       ASSIGNPTR2STARTPTR(GtUchar);
       break;
@@ -268,6 +271,16 @@ int flushtheindex2file(FILE *fp,
     {
       switch (mapspecptr->typespec)
       {
+        case CharType:
+          if (fputs (*((char **) mapspecptr->startptr),fp) == EOF)
+          {
+            gt_error_set(err,"cannot write string items of length %u: "
+                             "errormsg=\"%s\"",
+                             (unsigned int) mapspecptr->sizeofunit,
+                             strerror(errno));
+            haserr = true;
+          }
+          break;
         case GtUcharType:
           WRITEACTIONWITHTYPE(GtUchar);
           break;

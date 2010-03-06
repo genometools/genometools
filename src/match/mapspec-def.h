@@ -31,9 +31,11 @@
         mapspecptr->name = #PTR
 
 typedef unsigned long Unsignedlong;
+typedef char Char;
 
 typedef enum
 {
+  CharType, /* \0 terminated string */
   GtUcharType,
   UshortType,
   Uint32Type,

@@ -116,6 +116,7 @@ static void doupdatesumranges(Specialcharinfo *specialcharinfo,
                               unsigned int forcetable,
                               Seqpos *specialrangestab,
                               Seqpos totallength,
+                              unsigned long lengthofdbfilenames,
                               unsigned int numofchars,
                               GtDiscDistri *distspralen,
                               Verboseinfo *verboseinfo)
@@ -131,7 +132,9 @@ static void doupdatesumranges(Specialcharinfo *specialcharinfo,
   {
     if (forcetable == 3U || c == (int) forcetable)
     {
-      tmp = detencseqofsatviatables(c,totallength,specialrangestab[c],
+      tmp = detencseqofsatviatables(c,totallength,
+                                    lengthofdbfilenames,
+                                    specialrangestab[c],
                                     numofchars);
       if (!smallestdefined || tmp < smallestsize)
       {
@@ -334,6 +337,7 @@ int gt_inputfiles2sequencekeyvalues(
     *totallength = currentpos;
     specialcharinfo->lengthofspecialsuffix = lastspeciallength;
     doupdatesumranges(specialcharinfo,forcetable,specialrangestab,currentpos,
+                      determinelengthofdbfilenames(filenametab),
                       gt_alphabet_num_of_chars(alpha),distspralen,verboseinfo);
   }
   gt_fa_xfclose(desfp);

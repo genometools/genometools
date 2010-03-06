@@ -162,6 +162,7 @@ int compareTwobitencodings(bool fwd,
 
 uint64_t detencseqofsatviatables(int kind,
                                  Seqpos totallength,
+                                 unsigned long lengthofdbfilenames,
                                  Seqpos specialranges,
                                  unsigned int numofchars);
 
@@ -404,5 +405,7 @@ void showgetencodedcharcounters(void);
 
 void gt_showsequencefeatures(Verboseinfo *verboseinfo,
                              const Encodedsequence *encseq);
+
+unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab);
 
 #endif
