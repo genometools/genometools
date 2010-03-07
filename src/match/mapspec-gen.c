@@ -272,14 +272,7 @@ int flushtheindex2file(FILE *fp,
       switch (mapspecptr->typespec)
       {
         case CharType:
-          if (fputs (*((char **) mapspecptr->startptr),fp) == EOF)
-          {
-            gt_error_set(err,"cannot write string items of length %u: "
-                             "errormsg=\"%s\"",
-                             (unsigned int) mapspecptr->sizeofunit,
-                             strerror(errno));
-            haserr = true;
-          }
+          WRITEACTIONWITHTYPE(char);
           break;
         case GtUcharType:
           WRITEACTIONWITHTYPE(GtUchar);

@@ -103,7 +103,8 @@ void    gt_fa_xmunmap(void *addr);
 #define gt_fa_mmap_generic_fd(fd, len, offset, mapwritable, hard_fail, err) \
         gt_fa_mmap_generic_fd_func(fd, len, offset, mapwritable, hard_fail, \
                                    __FILE__, __LINE__, err)
-void*   gt_fa_mmap_generic_fd_func(int fd, size_t len, size_t offset,
+void*   gt_fa_mmap_generic_fd_func(int fd, size_t len, 
+                                   size_t offset,
                                    bool mapwritable, bool hard_fail,
                                    const char *filename, int line, GtError*);
 /* check if all allocated file pointer have been released, prints to stderr */

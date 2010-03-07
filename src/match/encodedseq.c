@@ -571,6 +571,8 @@ static void assignencseqmapspecification(GtArrayMapspecification *mapspectable,
 
   if (writemode)
   {
+    unsigned long idx, offset = 0;
+
     ALLOCASSIGNSPACE(encseq->satcharptr,NULL,unsigned long,1);
     encseq->satcharptr[0] = (unsigned long) encseq->sat;
 
@@ -588,6 +590,16 @@ static void assignencseqmapspecification(GtArrayMapspecification *mapspectable,
 
     ALLOCASSIGNSPACE(encseq->specialcharinfoptr,NULL,Specialcharinfo,1);
     encseq->specialcharinfoptr[0] = encseq->specialcharinfo;
+
+    ALLOCASSIGNSPACE(encseq->firstfilename,NULL,char,
+                     encseq->lengthofdbfilenames);
+    for (idx = 0; idx < gt_str_array_size(encseq->filenametab); idx++)
+    {
+      strcpy(encseq->firstfilename+offset,
+             gt_str_array_get(encseq->filenametab,idx));
+      offset += gt_str_length(gt_str_array_get_str(encseq->filenametab,idx))+1;
+    }
+    gt_assert(offset == encseq->lengthofdbfilenames);
   }
   NEWMAPSPEC(encseq->satcharptr,Unsignedlong,1UL);
   NEWMAPSPEC(encseq->totallengthptr,Seqpos,1UL);
@@ -595,7 +607,7 @@ static void assignencseqmapspecification(GtArrayMapspecification *mapspectable,
   NEWMAPSPEC(encseq->numofdbfilesptr,Unsignedlong,1UL);
   NEWMAPSPEC(encseq->lengthofdbfilenamesptr,Unsignedlong,1UL);
   NEWMAPSPEC(encseq->specialcharinfoptr,Specialcharinfo,1UL);
-  /*NEWMAPSPEC(encseq->firstfilename,Char,encseq->lengthofdbfilenames); */
+  NEWMAPSPEC(encseq->firstfilename,Char,encseq->lengthofdbfilenames);
   numofchars = gt_alphabet_num_of_chars(encseq->alpha);
   NEWMAPSPEC(encseq->characterdistribution,Unsignedlong,
              (unsigned long) numofchars);
@@ -705,6 +717,7 @@ int flushencseqfile(const GtStr *indexname,Encodedsequence *encseq,
   FREESPACE(encseq->numofdbsequencesptr);
   FREESPACE(encseq->numofdbfilesptr);
   FREESPACE(encseq->lengthofdbfilenamesptr);
+  FREESPACE(encseq->firstfilename);
   FREESPACE(encseq->specialcharinfoptr);
   gt_fa_xfclose(fp);
   return haserr ? -1 : 0;
@@ -742,7 +755,7 @@ static int fillencseqmapspecstartptr(Encodedsequence *encseq,
 
 static uint64_t localdetsizeencseq(Positionaccesstype sat,
                                    Seqpos totallength,
-                                   GT_UNUSED unsigned long lengthofdbfilenames,
+                                   unsigned long lengthofdbfilenames,
                                    Seqpos specialranges,
                                    unsigned int numofchars,
                                    unsigned int bitspersymbol)
@@ -810,7 +823,7 @@ static uint64_t localdetsizeencseq(Positionaccesstype sat,
   sum += sizeof (unsigned long); /* for lengthofdbfilenames type */
   sum += sizeof (Specialcharinfo); /* for specialcharinfo */
   sum += sizeof (unsigned long) * numofchars; /* for characterdistribution */
-  /* sum += sizeof (char) * lengthofdbfilenames; */
+  sum += sizeof (char) * lengthofdbfilenames;
   return sum;
 }
 
@@ -2486,6 +2499,7 @@ static Encodedsequence *determineencseqkeyvalues(
   encseq->numofdbsequencesptr = NULL;
   encseq->numofdbfilesptr = NULL;
   encseq->lengthofdbfilenamesptr = NULL;
+  encseq->firstfilename = NULL;
   encseq->specialcharinfoptr = NULL;
   encseq->destab = NULL;
   encseq->sdstab = NULL;
@@ -2894,7 +2908,8 @@ unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab)
 
   for (idx = 0; idx < gt_str_array_size(filenametab); idx++)
   {
-    lengthofdbfilenames += strlen(gt_str_array_get(filenametab,idx)) + 1;
+    lengthofdbfilenames
+      += gt_str_length(gt_str_array_get_str(filenametab,idx)) + 1;
   }
   return lengthofdbfilenames;
 }
@@ -3086,6 +3101,22 @@ static unsigned long *calcdescendpositions(const Encodedsequence *encseq)
   if (!haserr && scanprjfiledbfile(encseq,indexname,verboseinfo,err))
   {
     haserr = true;
+  }
+  if (!haserr && withesqtab)
+  {
+    unsigned long idx, offset = 0;
+
+    gt_assert(encseq != NULL &&
+              gt_str_array_size(encseq->filenametab) == encseq->numofdbfiles);
+    for (idx = 0; idx < encseq->numofdbfiles; idx++)
+    {
+      const char *ptr1, *ptr2;
+
+      ptr1 = gt_str_array_get(encseq->filenametab,idx);
+      ptr2 = encseq->firstfilename + offset;
+      gt_assert(strcmp(ptr1,ptr2) == 0);
+      offset += gt_str_length(gt_str_array_get_str(encseq->filenametab,idx))+1;
+    }
   }
 #ifdef RANGEDEBUG
   if (!haserr && withesqtab)

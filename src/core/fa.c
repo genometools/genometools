@@ -330,7 +330,8 @@ void* gt_fa_mmap_generic_fd_func(int fd, size_t len, size_t offset,
   {
     if ((map = mmap(0, len, PROT_READ | (mapwritable ? PROT_WRITE : 0),
                     MAP_SHARED, fd, offset)) == MAP_FAILED) {
-      gt_error_set(err,"cannot map file \"%s\": %s", filename, strerror(errno));
+      gt_error_set(err,"cannot map file \"%s\": %s", "unknown filename", 
+                                                     strerror(errno));
       map = NULL;
     }
   }
@@ -360,21 +361,22 @@ static void* mmap_generic_path_func(const char *path, size_t *len,
   gt_assert(fa && path);
   fd = open(path, mapwritable?O_RDWR:O_RDONLY, 0);
   if (fd == -1) {
-    gt_error_set(err,"cannot open file \"%s\": %s", filename, strerror(errno));
+    gt_error_set(err,"cannot open file \"%s\": %s", path, strerror(errno));
     return NULL;
   }
   if (hard_fail)
     gt_xfstat(fd, &sb);
   else if (fstat(fd, &sb)) {
-    gt_error_set(err,"cannot fstat file \"%s\": %s", filename, strerror(errno));
+    gt_error_set(err,"cannot fstat file \"%s\": %s", path, strerror(errno));
     return NULL;
   }
   if (sizeof (off_t) > sizeof (size_t) && sb.st_size > SIZE_MAX) {
     gt_error_set(err,"file \"%s\" of size %llu is too large to map",
-                 filename, (unsigned long long) sb.st_size);
+                 path, (unsigned long long) sb.st_size);
     return NULL;
   }
-  map = gt_fa_mmap_generic_fd_func(fd, sb.st_size, 0, mapwritable, hard_fail,
+  map = gt_fa_mmap_generic_fd_func(fd, sb.st_size, 0, 
+                                   mapwritable, hard_fail,
                                    filename, line, err);
   if (map && len)
     *len = sb.st_size;
