@@ -488,7 +488,7 @@ static int runsuffixerator(bool doesa,
   }
   if (!haserr)
   {
-    gt_showsequencefeatures(verboseinfo,sfxseqinfo.encseq);
+    gt_showsequencefeatures(verboseinfo,sfxseqinfo.encseq,false);
     if (so->readmode == Complementmode ||
         so->readmode == Reversecomplementmode)
     {

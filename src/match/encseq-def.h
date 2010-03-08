@@ -391,8 +391,6 @@ GtUchar getencseqAlphabetwildcardshow(const Encodedsequence *encseq);
 
 const GtStrArray *getencseqfilenametab(const Encodedsequence *encseq);
 
-const Filelengthvalues *getencseqfilelengthtab(const Encodedsequence *encseq);
-
 unsigned long getencseqcharactercount(const Encodedsequence *encseq,GtUchar cc);
 
 /* some function to remove reference from an Encodedsequence to prevent that
@@ -405,7 +403,7 @@ void removefilenametabref(Encodedsequence *encseq);
 void showgetencodedcharcounters(void);
 
 void gt_showsequencefeatures(Verboseinfo *verboseinfo,
-                             const Encodedsequence *encseq);
+                             const Encodedsequence *encseq,bool withfilenames);
 
 unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab);
 

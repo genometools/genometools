@@ -594,14 +594,11 @@ static void assignencseqmapspecification(GtArrayMapspecification *mapspectable,
     ALLOCASSIGNSPACE(encseq->firstfilename,NULL,char,
                      encseq->lengthofdbfilenames);
     gt_assert(gt_str_array_size(encseq->filenametab) == encseq->numofdbfiles);
-    ALLOCASSIGNSPACE(encseq->newfilelengthvalues,NULL,Filelengthvalues,
-                     encseq->numofdbfiles);
-    for (idx = 0; idx < gt_str_array_size(encseq->filenametab); idx++)
+    for (idx = 0; idx < encseq->numofdbfiles; idx++)
     {
       strcpy(encseq->firstfilename+offset,
              gt_str_array_get(encseq->filenametab,idx));
       offset += gt_str_length(gt_str_array_get_str(encseq->filenametab,idx))+1;
-      encseq->newfilelengthvalues[idx] = encseq->filelengthtab[idx];
     }
     gt_assert(offset == encseq->lengthofdbfilenames);
   }
@@ -612,8 +609,7 @@ static void assignencseqmapspecification(GtArrayMapspecification *mapspectable,
   NEWMAPSPEC(encseq->lengthofdbfilenamesptr,Unsignedlong,1UL);
   NEWMAPSPEC(encseq->specialcharinfoptr,Specialcharinfo,1UL);
   NEWMAPSPEC(encseq->firstfilename,Char,encseq->lengthofdbfilenames);
-  NEWMAPSPEC(encseq->newfilelengthvalues,Filelengthvalues,
-               encseq->numofdbfiles);
+  NEWMAPSPEC(encseq->filelengthtab,Filelengthvalues,encseq->numofdbfiles);
   numofchars = gt_alphabet_num_of_chars(encseq->alpha);
   NEWMAPSPEC(encseq->characterdistribution,Unsignedlong,
              (unsigned long) numofchars);
@@ -724,7 +720,6 @@ int flushencseqfile(const GtStr *indexname,Encodedsequence *encseq,
   FREESPACE(encseq->numofdbfilesptr);
   FREESPACE(encseq->lengthofdbfilenamesptr);
   FREESPACE(encseq->firstfilename);
-  FREESPACE(encseq->newfilelengthvalues);
   FREESPACE(encseq->specialcharinfoptr);
   gt_fa_xfclose(fp);
   return haserr ? -1 : 0;
@@ -737,6 +732,8 @@ static int fillencseqmapspecstartptr(Encodedsequence *encseq,
 {
   bool haserr = false;
   GtStr *tmpfilename;
+  char *nextstart;
+  unsigned long idx;
 
   gt_error_check(err);
   tmpfilename = gt_str_clone(indexname);
@@ -755,6 +752,16 @@ static int fillencseqmapspecstartptr(Encodedsequence *encseq,
   encseq->numofdbfiles = *encseq->numofdbfilesptr;
   encseq->lengthofdbfilenames = *encseq->lengthofdbfilenamesptr;
   encseq->specialcharinfo = *encseq->specialcharinfoptr;
+  encseq->filenametab = gt_str_array_new();
+  nextstart = encseq->firstfilename;
+  for (idx = 0; idx < encseq->numofdbfiles; idx++)
+  {
+    gt_str_array_add_cstr(encseq->filenametab,nextstart);
+    nextstart = strchr(nextstart,(int) '\0');
+    gt_assert(nextstart != NULL);
+    nextstart++;
+  }
+  gt_assert(encseq->characterdistribution != NULL);
   showverbose(verboseinfo,"sat=%s",encseqaccessname(encseq));
   gt_str_delete(tmpfilename);
   return haserr ? -1 : 0;
@@ -1029,9 +1036,12 @@ void encodedsequence_free(Encodedsequence **encseqptr)
     encseq->ssptab = NULL;
   }
   gt_alphabet_delete((GtAlphabet*) encseq->alpha);
-  gt_str_array_delete((GtStrArray *) encseq->filenametab);
+  gt_str_array_delete(encseq->filenametab);
   encseq->filenametab = NULL;
-  gt_free((Filelengthvalues *) encseq->filelengthtab);
+  if (encseq->mappedptr == NULL)
+  {
+    gt_free(encseq->filelengthtab);
+  }
   encseq->filelengthtab = NULL;
   FREESPACE(*encseqptr);
 /*
@@ -2513,7 +2523,6 @@ static Encodedsequence *determineencseqkeyvalues(
   encseq->numofdbfilesptr = NULL;
   encseq->lengthofdbfilenamesptr = NULL;
   encseq->firstfilename = NULL;
-  encseq->newfilelengthvalues = NULL;
   encseq->specialcharinfoptr = NULL;
   encseq->destab = NULL;
   encseq->sdstab = NULL;
@@ -2673,16 +2682,6 @@ void removefilenametabref(Encodedsequence *encseq)
   encseq->filenametab = NULL;
 }
 
-const GtStrArray *getencseqfilenametab(const Encodedsequence *encseq)
-{
-  return encseq->filenametab;
-}
-
-const Filelengthvalues *getencseqfilelengthtab(const Encodedsequence *encseq)
-{
-  return encseq->filelengthtab;
-}
-
 unsigned long getencseqcharactercount(const Encodedsequence *encseq,GtUchar cc)
 {
   gt_assert(encseq != NULL &&
@@ -2690,6 +2689,7 @@ unsigned long getencseqcharactercount(const Encodedsequence *encseq,GtUchar cc)
   return encseq->characterdistribution[cc];
 }
 
+/*
 static int scandbfileline(GtStrArray *filenametab,
                           Filelengthvalues *filelengthtab,
                           unsigned long numoffiles,
@@ -2756,8 +2756,6 @@ static int scanprjfiledbfileviafileptr(Encodedsequence *encseq,
   size_t dbfilelen = strlen(DBFILEKEY);
   bool haserr = false;
   GtStr *currentline;
-  /* the following five variables are local as the parsed values are
-     not required: they are determined by reading the encodedsequence */
 
   gt_error_check(err);
   filenametab = gt_str_array_new();
@@ -2790,7 +2788,9 @@ static int scanprjfiledbfileviafileptr(Encodedsequence *encseq,
   }
   gt_str_delete(currentline);
   encseq->filenametab = (const GtStrArray *) filenametab;
+  gt_str_array_delete(filenametab);
   encseq->filelengthtab = (const Filelengthvalues *) filelengthtab;
+  gt_free(filelengthtab);
   return haserr ? -1 : 0;
 }
 
@@ -2815,6 +2815,7 @@ static bool scanprjfiledbfile(Encodedsequence *encseq,
   gt_fa_xfclose(fp);
   return haserr;
 }
+*/
 
 static Encodedsequencefunctions encodedseqfunctab[] =
   {
@@ -2986,8 +2987,8 @@ unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab)
     showverbose(verboseinfo,"deliverchar=%s",encseq->delivercharname);
     encseq->mappedptr = NULL;
     encseq->characterdistribution = characterdistribution;
-    encseq->filenametab = filenametab;
-    encseq->filelengthtab = filelengthtab;
+    encseq->filenametab = (GtStrArray *) filenametab;
+    encseq->filelengthtab = (Filelengthvalues *) filelengthtab;
     encseq->specialcharinfo = *specialcharinfo;
     gt_assert(filenametab != NULL);
     if (plainformat) {
@@ -3113,10 +3114,13 @@ static unsigned long *calcdescendpositions(const Encodedsequence *encseq)
       }
     }
   }
+  /*
   if (!haserr && scanprjfiledbfile(encseq,indexname,verboseinfo,err))
   {
     haserr = true;
   }
+  */
+  /*
   if (!haserr && withesqtab)
   {
     unsigned long idx, offset = 0;
@@ -3133,6 +3137,7 @@ static unsigned long *calcdescendpositions(const Encodedsequence *encseq)
       offset += gt_str_length(gt_str_array_get_str(encseq->filenametab,idx))+1;
     }
   }
+  */
 #ifdef RANGEDEBUG
   if (!haserr && withesqtab)
   {
@@ -3229,6 +3234,11 @@ const char *retrievesequencedescription(unsigned long *desclen,
     *desclen = encseq->destablength - 1;
   }
   return encseq->destab;
+}
+
+const GtStrArray *getencseqfilenametab(const Encodedsequence *encseq)
+{
+  return encseq->filenametab;
 }
 
 void checkallsequencedescriptions(const Encodedsequence *encseq)
@@ -4714,11 +4724,24 @@ static void showcharacterdistribution(
 }
 
 void gt_showsequencefeatures(Verboseinfo *verboseinfo,
-                             const Encodedsequence *encseq)
+                             const Encodedsequence *encseq,
+                             bool withfilenames)
 {
   const GtAlphabet *alpha = getencseqAlphabet(encseq);
-  /* unsigned long idx; */
+  unsigned long idx;
 
+  if (withfilenames)
+  {
+    for (idx = 0; idx < encseq->numofdbfiles; idx++)
+    {
+      gt_assert(encseq->filenametab != NULL);
+      showverbose(verboseinfo,"dbfile=%s " Formatuint64_t " " Formatuint64_t,
+                     gt_str_array_get(encseq->filenametab,idx),
+                     PRINTuint64_tcast(encseq->filelengthtab[idx].length),
+                     PRINTuint64_tcast(encseq->filelengthtab[idx].
+                                       effectivelength));
+    }
+  }
   showverbose(verboseinfo,"totallength=" FormatSeqpos,
               PRINTSeqposcast(encseq->totallength));
   showverbose(verboseinfo,"numofsequences=%lu",encseq->numofdbsequences);
@@ -4728,15 +4751,6 @@ void gt_showsequencefeatures(Verboseinfo *verboseinfo,
               PRINTSeqposcast(getencseqspecialranges(encseq)));
   showverbose(verboseinfo,"realspecialranges=" FormatSeqpos,
               PRINTSeqposcast(getencseqrealspecialranges(encseq)));
-  /*
-  for (idx = 0; idx < encseq->numofdbfiles; idx++)
-  {
-    fprintf(outprj,"dbfile=%s " Formatuint64_t " " Formatuint64_t "\n",
-                    gt_str_array_get(filenametab,i),
-                    PRINTuint64_tcast(filelengthtab[i].length),
-                    PRINTuint64_tcast(filelengthtab[i].effectivelength));
-  }
-  */
   gt_assert(encseq->characterdistribution != NULL);
   showcharacterdistribution(alpha,encseq->characterdistribution,verboseinfo);
 }

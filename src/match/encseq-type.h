@@ -77,10 +77,9 @@ struct Encodedsequence
   unsigned long *characterdistribution;
   Specialcharinfo *specialcharinfoptr, /* need for writing specialcharinfo */
                   specialcharinfo; /* information about specialcharacters */
-  const GtStrArray *filenametab;    /* table of filenames */
+  GtStrArray *filenametab;    /* table of filenames */
   char *firstfilename;
-  Filelengthvalues *newfilelengthvalues;  /* table of length of files */
-  const Filelengthvalues *filelengthtab;  /* table of length of files */
+  Filelengthvalues *filelengthtab;  /* table of length of files */
 
   const char *destab;
   unsigned long destablength, *sdstab;
