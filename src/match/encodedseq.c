@@ -53,7 +53,7 @@
 #include "sfx-cmpsuf.pr"
 
 #define CHECKANDUPDATE(VAL,IDX)\
-        tmp = localdetsizeencseq(VAL,totallength,\
+        tmp = localdetsizeencseq(VAL,totallength,numofdbfiles,\
                                  lengthofdbfilenames,\
                                  specialrangestab[IDX],\
                                  numofchars,\
@@ -593,11 +593,15 @@ static void assignencseqmapspecification(GtArrayMapspecification *mapspectable,
 
     ALLOCASSIGNSPACE(encseq->firstfilename,NULL,char,
                      encseq->lengthofdbfilenames);
+    gt_assert(gt_str_array_size(encseq->filenametab) == encseq->numofdbfiles);
+    ALLOCASSIGNSPACE(encseq->newfilelengthvalues,NULL,Filelengthvalues,
+                     encseq->numofdbfiles);
     for (idx = 0; idx < gt_str_array_size(encseq->filenametab); idx++)
     {
       strcpy(encseq->firstfilename+offset,
              gt_str_array_get(encseq->filenametab,idx));
       offset += gt_str_length(gt_str_array_get_str(encseq->filenametab,idx))+1;
+      encseq->newfilelengthvalues[idx] = encseq->filelengthtab[idx];
     }
     gt_assert(offset == encseq->lengthofdbfilenames);
   }
@@ -608,6 +612,8 @@ static void assignencseqmapspecification(GtArrayMapspecification *mapspectable,
   NEWMAPSPEC(encseq->lengthofdbfilenamesptr,Unsignedlong,1UL);
   NEWMAPSPEC(encseq->specialcharinfoptr,Specialcharinfo,1UL);
   NEWMAPSPEC(encseq->firstfilename,Char,encseq->lengthofdbfilenames);
+  NEWMAPSPEC(encseq->newfilelengthvalues,Filelengthvalues,
+               encseq->numofdbfiles);
   numofchars = gt_alphabet_num_of_chars(encseq->alpha);
   NEWMAPSPEC(encseq->characterdistribution,Unsignedlong,
              (unsigned long) numofchars);
@@ -718,6 +724,7 @@ int flushencseqfile(const GtStr *indexname,Encodedsequence *encseq,
   FREESPACE(encseq->numofdbfilesptr);
   FREESPACE(encseq->lengthofdbfilenamesptr);
   FREESPACE(encseq->firstfilename);
+  FREESPACE(encseq->newfilelengthvalues);
   FREESPACE(encseq->specialcharinfoptr);
   gt_fa_xfclose(fp);
   return haserr ? -1 : 0;
@@ -755,6 +762,7 @@ static int fillencseqmapspecstartptr(Encodedsequence *encseq,
 
 static uint64_t localdetsizeencseq(Positionaccesstype sat,
                                    Seqpos totallength,
+                                   unsigned long numofdbfiles,
                                    unsigned long lengthofdbfilenames,
                                    Seqpos specialranges,
                                    unsigned int numofchars,
@@ -822,6 +830,7 @@ static uint64_t localdetsizeencseq(Positionaccesstype sat,
   sum += sizeof (unsigned long); /* for numofdbfilenames type */
   sum += sizeof (unsigned long); /* for lengthofdbfilenames type */
   sum += sizeof (Specialcharinfo); /* for specialcharinfo */
+  sum += sizeof (Filelengthvalues) * numofdbfiles;
   sum += sizeof (unsigned long) * numofchars; /* for characterdistribution */
   sum += sizeof (char) * lengthofdbfilenames;
   return sum;
@@ -829,6 +838,7 @@ static uint64_t localdetsizeencseq(Positionaccesstype sat,
 
 uint64_t detencseqofsatviatables(int kind,
                                  Seqpos totallength,
+                                 unsigned long numofdbfiles,
                                  unsigned long lengthofdbfilenames,
                                  Seqpos specialranges,
                                  unsigned int numofchars)
@@ -836,7 +846,7 @@ uint64_t detencseqofsatviatables(int kind,
   Positionaccesstype sat[] = {Viauchartables,Viaushorttables,Viauint32tables};
 
   gt_assert(kind < (int) (sizeof (sat)/sizeof (sat[0])));
-  return localdetsizeencseq(sat[kind],totallength,
+  return localdetsizeencseq(sat[kind],totallength,numofdbfiles,
                             lengthofdbfilenames,specialranges,numofchars,0);
 }
 
@@ -844,6 +854,7 @@ uint64_t detencseqofsatviatables(int kind,
 static Positionaccesstype determinesmallestrep(
                                   Seqpos *specialranges,
                                   Seqpos totallength,
+                                  unsigned long numofdbfiles,
                                   unsigned long lengthofdbfilenames,
                                   const Seqpos *specialrangestab,
                                   unsigned int numofchars)
@@ -851,7 +862,8 @@ static Positionaccesstype determinesmallestrep(
   Positionaccesstype cret;
   uint64_t tmp, cmin;
 
-  cmin = localdetsizeencseq(Viabitaccess,totallength,lengthofdbfilenames,
+  cmin = localdetsizeencseq(Viabitaccess,totallength,numofdbfiles,
+                            lengthofdbfilenames,
                             specialrangestab[0],numofchars,0);
   cret = Viabitaccess;
   *specialranges = specialrangestab[0];
@@ -863,6 +875,7 @@ static Positionaccesstype determinesmallestrep(
 
 static int determinesattype(Seqpos *specialranges,
                             Seqpos totallength,
+                            unsigned long numofdbfiles,
                             unsigned long lengthofdbfilenames,
                             const Seqpos *specialrangestab,
                             unsigned int numofchars,
@@ -878,7 +891,7 @@ static int determinesattype(Seqpos *specialranges,
     if (numofchars == GT_DNAALPHASIZE)
     {
       sat = determinesmallestrep(specialranges,
-                                 totallength,lengthofdbfilenames,
+                                 totallength,numofdbfiles,lengthofdbfilenames,
                                  specialrangestab,numofchars);
     } else
     {
@@ -2500,6 +2513,7 @@ static Encodedsequence *determineencseqkeyvalues(
   encseq->numofdbfilesptr = NULL;
   encseq->lengthofdbfilenamesptr = NULL;
   encseq->firstfilename = NULL;
+  encseq->newfilelengthvalues = NULL;
   encseq->specialcharinfoptr = NULL;
   encseq->destab = NULL;
   encseq->sdstab = NULL;
@@ -2515,8 +2529,8 @@ static Encodedsequence *determineencseqkeyvalues(
   encseq->numofchars = gt_alphabet_num_of_chars(alpha);
   encseq->sizeofrep
     = CALLCASTFUNC(uint64_t,unsigned_long,
-                   localdetsizeencseq(sat,totallength,lengthofdbfilenames,
-                                      specialranges,
+                   localdetsizeencseq(sat,totallength,numofdbfiles,
+                                      lengthofdbfilenames,specialranges,
                                       encseq->numofchars,
                                       gt_alphabet_bits_per_symbol(alpha)));
   encseq->name = accesstype2name(sat);
@@ -2939,6 +2953,7 @@ unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab)
   gt_error_check(err);
   retcode = determinesattype(&specialranges,
                              totallength,
+                             gt_str_array_size(filenametab),
                              determinelengthofdbfilenames(filenametab),
                              specialrangestab,
                              gt_alphabet_num_of_chars(alphabet),
@@ -4702,6 +4717,7 @@ void gt_showsequencefeatures(Verboseinfo *verboseinfo,
                              const Encodedsequence *encseq)
 {
   const GtAlphabet *alpha = getencseqAlphabet(encseq);
+  /* unsigned long idx; */
 
   showverbose(verboseinfo,"totallength=" FormatSeqpos,
               PRINTSeqposcast(encseq->totallength));
@@ -4712,6 +4728,15 @@ void gt_showsequencefeatures(Verboseinfo *verboseinfo,
               PRINTSeqposcast(getencseqspecialranges(encseq)));
   showverbose(verboseinfo,"realspecialranges=" FormatSeqpos,
               PRINTSeqposcast(getencseqrealspecialranges(encseq)));
+  /*
+  for (idx = 0; idx < encseq->numofdbfiles; idx++)
+  {
+    fprintf(outprj,"dbfile=%s " Formatuint64_t " " Formatuint64_t "\n",
+                    gt_str_array_get(filenametab,i),
+                    PRINTuint64_tcast(filelengthtab[i].length),
+                    PRINTuint64_tcast(filelengthtab[i].effectivelength));
+  }
+  */
   gt_assert(encseq->characterdistribution != NULL);
   showcharacterdistribution(alpha,encseq->characterdistribution,verboseinfo);
 }

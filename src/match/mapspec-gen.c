@@ -20,6 +20,7 @@
 #include "core/error.h"
 #include "core/fa.h"
 #include "core/str.h"
+#include "core/filelengthvalues.h"
 #include "bitpack-itf.h"
 #include "ushort-def.h"
 #include "fmi-bwtbound.h"
@@ -99,6 +100,9 @@ static int assigncorrecttype(Mapspecification *mapspec,
   {
     case CharType:
       ASSIGNPTR2STARTPTR(char);
+      break;
+    case FilelengthvaluesType:
+      ASSIGNPTR2STARTPTR(Filelengthvalues);
       break;
     case GtUcharType:
       ASSIGNPTR2STARTPTR(GtUchar);
@@ -273,6 +277,9 @@ int flushtheindex2file(FILE *fp,
       {
         case CharType:
           WRITEACTIONWITHTYPE(char);
+          break;
+        case FilelengthvaluesType:
+          WRITEACTIONWITHTYPE(Filelengthvalues);
           break;
         case GtUcharType:
           WRITEACTIONWITHTYPE(GtUchar);

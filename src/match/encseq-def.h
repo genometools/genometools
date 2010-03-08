@@ -162,6 +162,7 @@ int compareTwobitencodings(bool fwd,
 
 uint64_t detencseqofsatviatables(int kind,
                                  Seqpos totallength,
+                                 unsigned long numofdbfiles,
                                  unsigned long lengthofdbfilenames,
                                  Seqpos specialranges,
                                  unsigned int numofchars);

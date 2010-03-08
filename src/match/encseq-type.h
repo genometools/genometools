@@ -79,6 +79,7 @@ struct Encodedsequence
                   specialcharinfo; /* information about specialcharacters */
   const GtStrArray *filenametab;    /* table of filenames */
   char *firstfilename;
+  Filelengthvalues *newfilelengthvalues;  /* table of length of files */
   const Filelengthvalues *filelengthtab;  /* table of length of files */
 
   const char *destab;

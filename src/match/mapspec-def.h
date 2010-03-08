@@ -36,6 +36,7 @@ typedef char Char;
 typedef enum
 {
   CharType, /* \0 terminated string */
+  FilelengthvaluesType,
   GtUcharType,
   UshortType,
   Uint32Type,
