@@ -22,6 +22,7 @@
 #include "core/fa.h"
 #include "core/error.h"
 #include "core/str.h"
+#include "core/alphabet.h"
 #include "emimergeesa.h"
 #include "esa-fileend.h"
 #include "fmindex.h"
@@ -299,7 +300,8 @@ int sufbwt2fmindex(Fmindex *fmindex,
     {
       numofchars = getencseqAlphabetnumofchars(suffixarray.encseq);
       firstignorespecial = totallength - specialcharinfo->specialcharacters;
-      if (copytheindexfile(outfmindex,indexname,ALPHABETFILESUFFIX,0,err) != 0)
+      if (copytheindexfile(outfmindex,indexname,GT_ALPHABETFILESUFFIX,
+                           0,err) != 0)
       {
         haserr = true;
       }
@@ -329,7 +331,8 @@ int sufbwt2fmindex(Fmindex *fmindex,
     {
       GtStr *indexname = gt_str_array_get_str(indexnametab,0);
       suffixlength = 0;
-      if (copytheindexfile(outfmindex,indexname,ALPHABETFILESUFFIX,0,err) != 0)
+      if (copytheindexfile(outfmindex,indexname,GT_ALPHABETFILESUFFIX,
+                           0,err) != 0)
       {
         haserr = true;
       }

@@ -461,7 +461,7 @@ static int runsuffixerator(bool doesa,
     {
       FILE *outfp;
 
-      outfp = opensfxfile(so->str_indexname,SSPTABSUFFIX,"wb",err);
+      outfp = openssptabfile(so->str_indexname,"wb",err);
       if (outfp == NULL)
       {
         haserr = true;

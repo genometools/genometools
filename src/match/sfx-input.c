@@ -38,7 +38,7 @@ static int outal1file(const GtStr *indexname,const GtAlphabet *alpha,
   bool haserr = false;
 
   gt_error_check(err);
-  al1fp = opensfxfile(indexname,ALPHABETFILESUFFIX,"wb",err);
+  al1fp = opensfxfile(indexname,GT_ALPHABETFILESUFFIX,"wb",err);
   if (al1fp == NULL)
   {
     haserr = true;

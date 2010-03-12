@@ -22,6 +22,7 @@
 #include "core/fa.h"
 #include "core/array.h"
 #include "core/str.h"
+#include "core/alphabet.h"
 #include "sfx-ri-def.h"
 #include "esa-fileend.h"
 #include "fmindex.h"
@@ -204,7 +205,7 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
     fmindex->specpos.spacePairBwtidx = NULL;
     fmindex->specpos.allocatedPairBwtidx = 0;
     tmpfilename = gt_str_clone(indexname);
-    gt_str_append_cstr(tmpfilename,ALPHABETFILESUFFIX);
+    gt_str_append_cstr(tmpfilename,GT_ALPHABETFILESUFFIX);
     fmindex->alphabet = gt_alphabet_new(false, false, tmpfilename, NULL, err);
     if (fmindex->alphabet == NULL)
     {

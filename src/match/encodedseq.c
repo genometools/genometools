@@ -39,10 +39,8 @@
 #include "intbits-tab.h"
 #include "mapspec-def.h"
 #include "safecast-gen.h"
-#include "esa-fileend.h"
 #include "verbose-def.h"
 #include "opensfxfile.h"
-#include "stamp.h"
 #include "encseq-def.h"
 #include "intcode-def.h"
 #include "giextract.h"
@@ -119,7 +117,31 @@
           *tbeptr = bitwise;\
         }
 
+/*
+  The following defines the suffix of a file to store sequences.
+*/
+
 #define ENCSEQFILESUFFIX     ".esq"
+
+/*
+  The following defines the suffix of a file to store sequence descriptions.
+*/
+
+#define DESTABSUFFIX ".des"
+
+/*
+  The following defines the suffix of a file to store sequence description
+  separator positions.
+*/
+
+#define SDSTABSUFFIX ".sds"
+
+/*
+  The following defines the suffix of a file to store sequence seperator
+  positions.
+*/
+
+#define SSPTABSUFFIX ".ssp"
 
 #define NAMEDFUNCTION(F) {#F,F}
 
@@ -2892,29 +2914,6 @@ unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab)
   return haserr ? NULL : encseq;
 }
 
-static const GtAlphabet *scanal1file(const GtStr *indexname,GtError *err)
-{
-  GtStr *tmpfilename;
-  bool haserr = false;
-  const GtAlphabet *alpha;
-
-  gt_error_check(err);
-  tmpfilename = gt_str_clone(indexname);
-  gt_str_append_cstr(tmpfilename,ALPHABETFILESUFFIX);
-  alpha = gt_alphabet_new(false,false,tmpfilename,NULL,err);
-  if (alpha == NULL)
-  {
-    haserr = true;
-  }
-  gt_str_delete(tmpfilename);
-  if (haserr)
-  {
-    gt_alphabet_delete((GtAlphabet*) alpha);
-    return NULL;
-  }
-  return alpha;
-}
-
 /*@null@*/ Encodedsequence *mapencodedsequence(bool withrange,
                                                const GtStr *indexname,
                                                bool withesqtab,
@@ -2931,7 +2930,7 @@ static const GtAlphabet *scanal1file(const GtStr *indexname,GtError *err)
   const GtAlphabet *alpha;
 
   gt_error_check(err);
-  alpha = scanal1file(indexname,err);
+  alpha = gt_scanal1file(indexname,err);
   if (alpha == NULL)
   {
     haserr = true;
@@ -3231,6 +3230,16 @@ static void doupdatesumranges(Specialcharinfo *specialcharinfo,
   }
 }
 
+FILE *opendestabfile(const GtStr *indexname,const char *mode,GtError *err)
+{
+  return opensfxfile(indexname,DESTABSUFFIX,mode,err);
+}
+
+FILE *openssptabfile(const GtStr *indexname,const char *mode,GtError *err)
+{
+  return opensfxfile(indexname,SSPTABSUFFIX,mode,err);
+}
+
 int gt_inputfiles2sequencekeyvalues(
         const GtStr *indexname,
         Seqpos *totallength,
@@ -3271,7 +3280,7 @@ int gt_inputfiles2sequencekeyvalues(
   if (outdestab)
   {
     descqueue = gt_queue_new();
-    desfp = opensfxfile(indexname,DESTABSUFFIX,"wb",err);
+    desfp = opendestabfile(indexname,"wb",err);
     if (desfp == NULL)
     {
       haserr = true;
@@ -4960,4 +4969,3 @@ void gt_showsequencefeatures(Verboseinfo *verboseinfo,
   gt_assert(encseq->characterdistribution != NULL);
   showcharacterdistribution(alpha,encseq->characterdistribution,verboseinfo);
 }
-

@@ -29,6 +29,13 @@
 #define GT_COMPAREOFFSET        (GT_MAXALPHABETCHARACTER + 1)
 
 /*
+  The following defines the suffix of a file to store alphabet.
+*/
+
+#define GT_ALPHABETFILESUFFIX ".al1"
+
+
+/*
   the size of the DNA alphabet
 */
 
@@ -111,5 +118,7 @@ char           gt_alphabet_decode(const GtAlphabet *alphabet, GtUchar c);
    in <out>. <in> has to be encodable with the given <alphabet>! */
 void           gt_alphabet_encode_seq(const GtAlphabet *alphabet, GtUchar *out,
                                       const char *in, unsigned long length);
+
+const GtAlphabet *gt_scanal1file(const GtStr *indexname,GtError *err);
 
 #endif

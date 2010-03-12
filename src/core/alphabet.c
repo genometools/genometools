@@ -926,3 +926,26 @@ void gt_alphabet_encode_seq(const GtAlphabet *alphabet, GtUchar *out,
     out[i] = alphabet->symbolmap[(int) in[i]];
   }
 }
+
+const GtAlphabet *gt_scanal1file(const GtStr *indexname,GtError *err)
+{
+  GtStr *tmpfilename;
+  bool haserr = false;
+  const GtAlphabet *alpha;
+
+  gt_error_check(err);
+  tmpfilename = gt_str_clone(indexname);
+  gt_str_append_cstr(tmpfilename,GT_ALPHABETFILESUFFIX);
+  alpha = gt_alphabet_new(false,false,tmpfilename,NULL,err);
+  if (alpha == NULL)
+  {
+    haserr = true;
+  }
+  gt_str_delete(tmpfilename);
+  if (haserr)
+  {
+    gt_alphabet_delete((GtAlphabet*) alpha);
+    return NULL;
+  }
+  return alpha;
+}

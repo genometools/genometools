@@ -428,4 +428,8 @@ int gt_inputfiles2sequencekeyvalues(
         Verboseinfo *verboseinfo,
         GtError *err);
 
+FILE *opendestabfile(const GtStr *indexname,const char *mode,GtError *err);
+
+FILE *openssptabfile(const GtStr *indexname,const char *mode,GtError *err);
+
 #endif

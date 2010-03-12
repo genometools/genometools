@@ -474,7 +474,7 @@ int gt_extractkeysfromdesfile(const GtStr *indexname,
   unsigned long numofentries = 0;
   const unsigned long linewidth = 60UL;
 
-  fpin = opensfxfile(indexname,DESTABSUFFIX,"rb",err);
+  fpin = opendestabfile(indexname,"rb",err);
   if (fpin == NULL)
   {
     return -1;
