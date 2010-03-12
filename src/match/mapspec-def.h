@@ -19,7 +19,7 @@
 #define MAPSPEC_DEF_H
 
 #include "core/arraydef.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/error.h"
 
 #define NEWMAPSPEC(PTR,TYPE,ELEMS)\

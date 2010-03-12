@@ -26,8 +26,8 @@
 #include "fmi-bwtbound.h"
 #include "intbits.h"
 #include "safecast-gen.h"
-#include "mapspec-def.h"
 #include "format64.h"
+#include "mapspec-def.h"
 
 #define ASSIGNPTR2STARTPTR(TYPE)\
         if (mapspec->numofunits == 0)\
@@ -45,7 +45,7 @@
         if (fwrite(*((TYPE **) mapspecptr->startptr),\
                    mapspecptr->sizeofunit,\
                    (size_t) mapspecptr->numofunits, fp) !=\
-                    (size_t) mapspecptr->numofunits)\
+                   (size_t) mapspecptr->numofunits)\
         {\
           gt_error_set(err,"cannot write %lu items of size %u: "\
                             "errormsg=\"%s\"",\
