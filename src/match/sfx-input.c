@@ -28,12 +28,9 @@
 #include "sfx-progress.h"
 #include "esa-fileend.h"
 #include "verbose-def.h"
-#include "sarr-def.h"
-#include "stamp.h"
-#include "sfx-input.h"
 #include "opensfxfile.h"
 #include "fillsci.h"
-#include "esa-map.h"
+#include "sfx-input.h"
 
 static int outal1file(const GtStr *indexname,const GtAlphabet *alpha,
                       GtError *err)
