@@ -837,9 +837,9 @@ static uint64_t localdetsizeencseq(Positionaccesstype sat,
   sum += sizeof (unsigned long); /* for numofdbfilenames type */
   sum += sizeof (unsigned long); /* for lengthofdbfilenames type */
   sum += sizeof (Specialcharinfo); /* for specialcharinfo */
-  sum += sizeof (Filelengthvalues) * numofdbfiles;
+  sum += sizeof (Filelengthvalues) * numofdbfiles; /* for filelengthtab */
   sum += sizeof (unsigned long) * numofchars; /* for characterdistribution */
-  sum += sizeof (char) * lengthofdbfilenames;
+  sum += sizeof (char) * lengthofdbfilenames; /* for firstfilename */
   return sum;
 }
 
@@ -2689,134 +2689,6 @@ unsigned long getencseqcharactercount(const Encodedsequence *encseq,GtUchar cc)
   return encseq->characterdistribution[cc];
 }
 
-/*
-static int scandbfileline(GtStrArray *filenametab,
-                          Filelengthvalues *filelengthtab,
-                          unsigned long numoffiles,
-                          const GtStr *currentline,
-                          Verboseinfo *verboseinfo,
-                          GtError *err)
-{
-  char *tmpfilename;
-  int64_t readint1, readint2;
-  unsigned long currentlinelength;
-  bool haserr = false;
-
-  gt_assert(filelengthtab != NULL);
-  currentlinelength = gt_str_length(currentline);
-  ALLOCASSIGNSPACE(tmpfilename,NULL,char,currentlinelength);
-  if (sscanf((const char *) gt_str_get(currentline),
-              "dbfile=%s " FormatScanint64_t " " FormatScanint64_t "\n",
-               tmpfilename,
-               SCANint64_tcast(&readint1),
-               SCANint64_tcast(&readint2)) != 3)
-  {
-    gt_error_set(err,"cannot parse line %*.*s",
-                      (int) currentlinelength,
-                      (int) currentlinelength,
-                      (const char *) gt_str_get(currentline));
-    FREESPACE(tmpfilename);
-    haserr = true;
-  }
-  if (!haserr && (readint1 < (int64_t) 1 || readint2 < (int64_t) 1))
-  {
-    gt_error_set(err,"need positive integers in line %*.*s",
-                      (int) currentlinelength,
-                      (int) currentlinelength,
-                      (const char *) gt_str_get(currentline));
-    FREESPACE(tmpfilename);
-    haserr = true;
-  }
-  if (!haserr)
-  {
-    gt_str_array_add_cstr(filenametab,tmpfilename);
-    FREESPACE(tmpfilename);
-    gt_assert(filelengthtab != NULL);
-    filelengthtab[numoffiles].length = (Seqpos) readint1;
-    filelengthtab[numoffiles].effectivelength = (Seqpos) readint2;
-    showverbose(verboseinfo,
-                "%s%s " Formatuint64_t " " Formatuint64_t,
-                DBFILEKEY,
-                gt_str_array_get(filenametab,numoffiles),
-                PRINTuint64_tcast(filelengthtab[numoffiles].length),
-                PRINTuint64_tcast(filelengthtab[numoffiles].effectivelength));
-  }
-  return haserr ? -1 : 0;
-}
-
-static int scanprjfiledbfileviafileptr(Encodedsequence *encseq,
-                                       Verboseinfo *verboseinfo,
-                                       FILE *fpin,
-                                       GtError *err)
-{
-  unsigned int linenum;
-  unsigned long numoffiles = 0, numofallocatedfiles = 0, currentlinelength;
-  GtStrArray *filenametab;
-  Filelengthvalues *filelengthtab;
-  size_t dbfilelen = strlen(DBFILEKEY);
-  bool haserr = false;
-  GtStr *currentline;
-
-  gt_error_check(err);
-  filenametab = gt_str_array_new();
-  filelengthtab = NULL;
-  currentline = gt_str_new();
-  for (linenum = 0; gt_str_read_next_line(currentline, fpin) != EOF; linenum++)
-  {
-    currentlinelength = gt_str_length(currentline);
-    if (dbfilelen <= (size_t) currentlinelength &&
-        memcmp(DBFILEKEY,gt_str_get(currentline),dbfilelen) == 0)
-    {
-      if (numoffiles >= numofallocatedfiles)
-      {
-        numofallocatedfiles += 2;
-        filelengthtab = gt_realloc(filelengthtab,sizeof(Filelengthvalues) *
-                                                 numofallocatedfiles);
-      }
-      if (scandbfileline(filenametab,
-                         filelengthtab,
-                         numoffiles,currentline,verboseinfo,err) != 0)
-      {
-        haserr = true;
-        gt_free(filelengthtab);
-        filelengthtab = NULL;
-        break;
-      }
-      numoffiles++;
-    }
-    gt_str_reset(currentline);
-  }
-  gt_str_delete(currentline);
-  encseq->filenametab = (const GtStrArray *) filenametab;
-  gt_str_array_delete(filenametab);
-  encseq->filelengthtab = (const Filelengthvalues *) filelengthtab;
-  gt_free(filelengthtab);
-  return haserr ? -1 : 0;
-}
-
-static bool scanprjfiledbfile(Encodedsequence *encseq,
-                              const GtStr *indexname,
-                              Verboseinfo *verboseinfo,
-                              GtError *err)
-{
-  bool haserr = false;
-  FILE *fp;
-
-  gt_error_check(err);
-  fp = opensfxfile(indexname,PROJECTFILESUFFIX,"rb",err);
-  if (fp == NULL)
-  {
-    haserr = true;
-  }
-  if (!haserr && scanprjfiledbfileviafileptr(encseq,verboseinfo,fp,err) != 0)
-  {
-    haserr = true;
-  }
-  gt_fa_xfclose(fp);
-  return haserr;
-}
-*/
-
 static Encodedsequencefunctions encodedseqfunctab[] =
   {
     { /* Viadirectaccess */
@@ -3043,26 +2915,6 @@ static const GtAlphabet *scanal1file(const GtStr *indexname,GtError *err)
   return alpha;
 }
 
-/*
-static unsigned long *calcdescendpositions(const Encodedsequence *encseq)
-{
-  unsigned long *descendtab, i, idx = 0;
-
-  ALLOCASSIGNSPACE(descendtab,NULL,unsigned long,encseq->numofdbsequences);
-  gt_assert(encseq->destab != NULL);
-  for (i=0; i<encseq->destablength; i++)
-  {
-    if (encseq->destab[i] == '\n')
-    {
-      gt_assert(idx < encseq->numofdbsequences);
-      descendtab[idx++] = i;
-    }
-  }
-  gt_assert(idx == encseq->numofdbsequences);
-  return descendtab;
-}
-*/
-
 /*@null@*/ Encodedsequence *mapencodedsequence(bool withrange,
                                                const GtStr *indexname,
                                                bool withesqtab,
@@ -3114,30 +2966,6 @@ static unsigned long *calcdescendpositions(const Encodedsequence *encseq)
       }
     }
   }
-  /*
-  if (!haserr && scanprjfiledbfile(encseq,indexname,verboseinfo,err))
-  {
-    haserr = true;
-  }
-  */
-  /*
-  if (!haserr && withesqtab)
-  {
-    unsigned long idx, offset = 0;
-
-    gt_assert(encseq != NULL &&
-              gt_str_array_size(encseq->filenametab) == encseq->numofdbfiles);
-    for (idx = 0; idx < encseq->numofdbfiles; idx++)
-    {
-      const char *ptr1, *ptr2;
-
-      ptr1 = gt_str_array_get(encseq->filenametab,idx);
-      ptr2 = encseq->firstfilename + offset;
-      gt_assert(strcmp(ptr1,ptr2) == 0);
-      offset += gt_str_length(gt_str_array_get_str(encseq->filenametab,idx))+1;
-    }
-  }
-  */
 #ifdef RANGEDEBUG
   if (!haserr && withesqtab)
   {
