@@ -29,7 +29,6 @@
 #include "esa-fileend.h"
 #include "verbose-def.h"
 #include "opensfxfile.h"
-#include "fillsci.h"
 #include "sfx-input.h"
 
 static int outal1file(const GtStr *indexname,const GtAlphabet *alpha,

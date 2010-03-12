@@ -24,6 +24,7 @@
 #include "core/str_array.h"
 #include "core/symboldef.h"
 #include "core/filelengthvalues.h"
+#include "core/disc_distri.h"
 #include "seqpos-def.h"
 #include "intcode-def.h"
 #include "intbits.h"
@@ -406,5 +407,25 @@ void gt_showsequencefeatures(Verboseinfo *verboseinfo,
                              const Encodedsequence *encseq,bool withfilenames);
 
 unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab);
+
+int gt_inputfiles2sequencekeyvalues(
+        const GtStr *indexname,
+        Seqpos *totallength,
+        Specialcharinfo *specialcharinfo,
+        unsigned int forcetable,
+        Seqpos *specialrangestab,
+        const GtStrArray *filenametab,
+        Filelengthvalues **filelengthtab,
+        const GtAlphabet *alpha,
+        bool plainformat,
+        bool outdestab,
+        bool outsdstab,
+        bool outkystab,
+        bool outkyssort,
+        unsigned long *characterdistribution,
+        bool outssptab,
+        ArraySeqpos *sequenceseppos,
+        Verboseinfo *verboseinfo,
+        GtError *err);
 
 #endif
