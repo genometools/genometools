@@ -41,8 +41,6 @@
 #include "kmer2string.h"
 #include "stamp.h"
 
-#include "sfx-cmpsuf.pr"
-
 #define UNIQUEINT(P)           ((Seqpos) ((P) + GT_COMPAREOFFSET))
 #define ACCESSCHAR(POS)        getencodedchar(bsr->encseq,POS,bsr->readmode)
 #define ACCESSCHARSEQ(POS,ESR) sequentialgetencodedchar(bsr->encseq,ESR,POS,\

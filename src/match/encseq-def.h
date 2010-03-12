@@ -432,4 +432,32 @@ FILE *opendestabfile(const GtStr *indexname,const char *mode,GtError *err);
 
 FILE *openssptabfile(const GtStr *indexname,const char *mode,GtError *err);
 
+int comparetwosuffixes(const Encodedsequence *encseq,
+                       Readmode readmode,
+                       Seqpos *maxlcp,
+                       bool specialsareequal,
+                       bool specialsareequalatdepth0,
+                       Seqpos maxdepth,
+                       Seqpos start1,
+                       Seqpos start2,
+                       Encodedsequencescanstate *esr1,
+                       Encodedsequencescanstate *esr2);
+
+int comparetwostrings(const Encodedsequence *encseq,
+                      bool fwd,
+                      bool complement,
+                      Seqpos *maxcommon,
+                      Seqpos pos1,
+                      Seqpos pos2,
+                      Seqpos maxdepth);
+
+int comparetwostringsgeneric(const Encodedsequence *encseq,
+                             bool fwd,
+                             bool complement,
+                             Seqpos *maxcommon,
+                             Seqpos pos1,
+                             Seqpos pos2,
+                             Seqpos depth,
+                             Seqpos maxdepth);
+
 #endif

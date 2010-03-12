@@ -26,7 +26,6 @@
 
 #undef SKDEBUG
 #ifdef SKDEBUG
-#include "sfx-cmpsuf.pr"
 
 #define NODENUM(PTR)\
         ((PTR) == NULL\

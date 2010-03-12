@@ -25,8 +25,6 @@
 #include "esa-seqread.h"
 #include "sfx-suftaborder.h"
 
-#include "sfx-cmpsuf.pr"
-
 static void showlocalsuffix(FILE *fpout,
                             const Encodedsequence *encseq,
                             Readmode readmode,
