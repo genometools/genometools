@@ -22,7 +22,6 @@
 #include "eis-voiditf.h"
 #include "pckbucket.h"
 #include "initbasepower.h"
-#include "opensfxfile.h"
 
 typedef struct
 {
@@ -222,7 +221,7 @@ int pckbucket2file(const GtStr *indexname,const Pckbuckettable *pckbuckettable,
   Seqpos seqposmaxdepth;
 
   gt_error_check(err);
-  fp = opensfxfile(indexname,PCKBUCKETTABLE,"wb",err);
+  fp = gt_fa_fopen_filename_with_suffix(indexname,PCKBUCKETTABLE,"wb",err);
   if (fp == NULL)
   {
     return -1;
@@ -257,7 +256,8 @@ Pckbuckettable *mappckbuckettable(const GtStr *indexname,
   Pckbuckettable *pckbt;
 
   gt_error_check(err);
-  mapptr = genericmaponlytable(indexname,PCKBUCKETTABLE,&numofbytes,err);
+  mapptr = gt_mmap_filename_with_suffix(indexname,PCKBUCKETTABLE,
+                                        &numofbytes,err);
   if (mapptr == NULL)
   {
     return NULL;

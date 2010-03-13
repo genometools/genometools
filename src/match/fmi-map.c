@@ -30,7 +30,6 @@
 #include "verbose-def.h"
 #include "spacedef.h"
 #include "stamp.h"
-#include "opensfxfile.h"
 #include "esa-map.h"
 
 #include "fmi-keyval.pr"
@@ -38,11 +37,11 @@
 
 bool fmindexexists(const GtStr *indexname)
 {
-  if (!indexfilealreadyexists(indexname,FMASCIIFILESUFFIX))
+  if (!gt_exists_filename_with_suffix(indexname,FMASCIIFILESUFFIX))
   {
     return false;
   }
-  if (!indexfilealreadyexists(indexname,FMDATAFILESUFFIX))
+  if (!gt_exists_filename_with_suffix(indexname,FMDATAFILESUFFIX))
   {
     return false;
   }
@@ -169,7 +168,7 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
   fmindex->mappedptr = NULL;
   fmindex->bwtformatching = NULL;
   fmindex->alphabet = NULL;
-  fpin = opensfxfile(indexname,FMASCIIFILESUFFIX,"rb",err);
+  fpin = gt_fa_fopen_filename_with_suffix(indexname,FMASCIIFILESUFFIX,"rb",err);
   if (fpin == NULL)
   {
     haserr = true;

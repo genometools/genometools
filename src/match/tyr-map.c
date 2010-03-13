@@ -19,7 +19,6 @@
 #include "core/fa.h"
 #include "encseq-def.h"
 #include "defined-types.h"
-#include "opensfxfile.h"
 #include "spacedef.h"
 #include "tyr-basic.h"
 #include "tyr-map.h"
@@ -67,8 +66,9 @@ Tyrindex *tyrindex_new(const GtStr *tyrindexname,GtError *err)
   gt_error_check(err);
   ALLOCASSIGNSPACE(tyrindex,NULL,Tyrindex,1);
   tyrindex->indexfilename = tyrindexname;
-  tyrindex->mappedfileptr = genericmaponlytable(tyrindexname,
-                                                MERSUFFIX,&numofbytes,err);
+  tyrindex->mappedfileptr = gt_mmap_filename_with_suffix(tyrindexname,
+                                                         MERSUFFIX,&numofbytes,
+                                                         err);
   if (tyrindex->mappedfileptr == NULL)
   {
     haserr = true;
@@ -195,7 +195,7 @@ Tyrcountinfo *tyrcountinfo_new(const Tyrindex *tyrindex,
   ALLOCASSIGNSPACE(tyrcountinfo,NULL,Tyrcountinfo,1);
   tyrcountinfo->indexfilename = tyrindexname;
   tyrcountinfo->mappedmctfileptr
-    = genericmaponlytable(tyrindexname,COUNTSSUFFIX,&numofbytes,err);
+    = gt_mmap_filename_with_suffix(tyrindexname,COUNTSSUFFIX,&numofbytes,err);
   if (tyrcountinfo->mappedmctfileptr == NULL)
   {
     tyrcountinfo->smallcounts = NULL;

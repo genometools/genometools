@@ -31,7 +31,6 @@
 #include "core/fasta.h"
 #include "giextract.h"
 #include "format64.h"
-#include "opensfxfile.h"
 #include "esa-fileend.h"
 #include "encseq-def.h"
 #include "echoseq.h"
@@ -481,7 +480,7 @@ int gt_extractkeysfromdesfile(const GtStr *indexname,
   }
   if (!sortkeys)
   {
-    fpout = opensfxfile(indexname,KEYSTABSUFFIX,"wb",err);
+    fpout = gt_fa_fopen_filename_with_suffix(indexname,KEYSTABSUFFIX,"wb",err);
     if (fpout == NULL)
     {
       haserr = true;
@@ -647,7 +646,7 @@ int gt_extractkeysfromdesfile(const GtStr *indexname,
 
 bool gt_deskeysfileexists(const GtStr *indexname)
 {
-  return indexfilealreadyexists(indexname,KEYSTABSUFFIX);
+  return gt_exists_filename_with_suffix(indexname,KEYSTABSUFFIX);
 }
 
 static unsigned long searchfastaqueryindes(const char *extractkey,
@@ -757,7 +756,7 @@ static int readkeysize(const GtStr *indexname,GtError *err)
   char cc;
 
   gt_error_check(err);
-  fp = opensfxfile(indexname,KEYSTABSUFFIX,"rb",err);
+  fp = gt_fa_fopen_filename_with_suffix(indexname,KEYSTABSUFFIX,"rb",err);
   if (fp == NULL)
   {
     haserr = true;
@@ -817,11 +816,11 @@ int gt_extractkeysfromfastaindex(const GtStr *indexname,
     unsigned long keytablength;
 
     keytablength = 1UL + numofdbsequences * (keysize+1);
-    keytab = genericmaptable(indexname,
-                             KEYSTABSUFFIX,
-                             keytablength,
-                             sizeof (GtUchar),
-                             err);
+    keytab = gt_mmap_check_filename_with_suffix(indexname,
+                                                KEYSTABSUFFIX,
+                                                keytablength,
+                                                sizeof (GtUchar),
+                                                err);
     if (keytab == NULL)
     {
       haserr = true;

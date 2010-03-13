@@ -33,7 +33,6 @@
 #include "readmode-def.h"
 #include "encseq-def.h"
 #include "stamp.h"
-#include "opensfxfile.h"
 
 #define PRJSPECIALOUT(VAL)\
         fprintf(outprj,"%s=" FormatSeqpos "\n",#VAL,\
@@ -98,7 +97,8 @@ int outprjfile(const GtStr *indexname,
   bool haserr = false;
 
   gt_error_check(err);
-  prjfp = opensfxfile(indexname,PROJECTFILESUFFIX,"wb",err);
+  prjfp = gt_fa_fopen_filename_with_suffix(indexname,PROJECTFILESUFFIX,
+                                           "wb",err);
   if (prjfp == NULL)
   {
     haserr = true;

@@ -27,7 +27,6 @@
 #include "esa-fileend.h"
 #include "fmindex.h"
 #include "spacedef.h"
-#include "opensfxfile.h"
 #include "esa-map.h"
 
 #include "encseq2offset.pr"
@@ -49,14 +48,14 @@ static int copytheindexfile(const GtStr *destindex,
   bool haserr = false;
 
   gt_error_check(err);
-  fpdest = opensfxfile(destindex,suffix,"wb",err);
+  fpdest = gt_fa_fopen_filename_with_suffix(destindex,suffix,"wb",err);
   if (fpdest == NULL)
   {
     haserr = true;
   }
   if (!haserr)
   {
-    fpsource = opensfxfile(sourceindex,suffix,"rb",err);
+    fpsource = gt_fa_fopen_filename_with_suffix(sourceindex,suffix,"rb",err);
     if (fpsource == NULL)
     {
       haserr = true;
@@ -352,7 +351,8 @@ int sufbwt2fmindex(Fmindex *fmindex,
     {
       longest.defined = false;
       longest.valueseqpos = 0;
-      outbwt = opensfxfile(outfmindex,BWTTABSUFFIX,"wb",err);
+      outbwt = gt_fa_fopen_filename_with_suffix(outfmindex,BWTTABSUFFIX,"wb",
+                                                err);
       if (outbwt == NULL)
       {
         haserr = true;

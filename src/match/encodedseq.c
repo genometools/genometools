@@ -41,11 +41,9 @@
 #include "verbose-def.h"
 #include "encseq-def.h"
 
-/* the following modules lead to input of corresponding header files */
+/* the following module reveal a dependency on mapspec-gen.c */
 
-#include "opensfxfile.h"
 #include "mapspec-def.h"
-#include "giextract.h"
 
 #ifndef INLINEDENCSEQ
 #include "encseq-type.h"
@@ -722,7 +720,7 @@ int flushencseqfile(const GtStr *indexname,Encodedsequence *encseq,
   bool haserr = false;
 
   gt_error_check(err);
-  fp = opensfxfile(indexname,ENCSEQFILESUFFIX,"wb",err);
+  fp = gt_fa_fopen_filename_with_suffix(indexname,ENCSEQFILESUFFIX,"wb",err);
   if (fp == NULL)
   {
     haserr = true;
@@ -2651,7 +2649,7 @@ static int readfirstvaluesfromfile(Firstencseqvalues *firstencseqvalues,
   unsigned long cc;
 
   gt_error_check(err);
-  fp = opensfxfile(indexname,ENCSEQFILESUFFIX,"rb",err);
+  fp = gt_fa_fopen_filename_with_suffix(indexname,ENCSEQFILESUFFIX,"rb",err);
   if (fp == NULL)
   {
     haserr = true;
@@ -2997,10 +2995,10 @@ unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab)
     size_t numofbytes;
 
     gt_assert(encseq != NULL);
-    encseq->destab = genericmaponlytable(indexname,
-                                         DESTABSUFFIX,
-                                         &numofbytes,
-                                         err);
+    encseq->destab = gt_mmap_filename_with_suffix(indexname,
+                                                  DESTABSUFFIX,
+                                                  &numofbytes,
+                                                  err);
     encseq->destablength = (unsigned long) numofbytes;
     if (encseq->destab == NULL)
     {
@@ -3012,11 +3010,12 @@ unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab)
     gt_assert(encseq != NULL);
     if (encseq->numofdbsequences > 1UL)
     {
-      encseq->sdstab = genericmaptable(indexname,
-                                       SDSTABSUFFIX,
-                                       encseq->numofdbsequences - 1,
-                                       sizeof *encseq->sdstab,
-                                       err);
+      encseq->sdstab
+        = gt_mmap_check_filename_with_suffix(indexname,
+                                             SDSTABSUFFIX,
+                                             encseq->numofdbsequences - 1,
+                                             sizeof (*encseq->sdstab),
+                                             err);
       if (encseq->sdstab == NULL)
       {
         haserr = true;
@@ -3031,11 +3030,12 @@ unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab)
     gt_assert(encseq != NULL);
     if (encseq->numofdbsequences > 1UL)
     {
-      encseq->ssptab = genericmaptable(indexname,
-                                       SSPTABSUFFIX,
-                                       encseq->numofdbsequences - 1,
-                                       sizeof (Seqpos),
-                                       err);
+      encseq->ssptab
+        = gt_mmap_check_filename_with_suffix(indexname,
+                                             SSPTABSUFFIX,
+                                             encseq->numofdbsequences - 1,
+                                             sizeof (Seqpos),
+                                             err);
       if (encseq->ssptab == NULL)
       {
         haserr = true;
@@ -3253,12 +3253,12 @@ static void doupdatesumranges(Specialcharinfo *specialcharinfo,
 
 FILE *opendestabfile(const GtStr *indexname,const char *mode,GtError *err)
 {
-  return opensfxfile(indexname,DESTABSUFFIX,mode,err);
+  return gt_fa_fopen_filename_with_suffix(indexname,DESTABSUFFIX,mode,err);
 }
 
 FILE *openssptabfile(const GtStr *indexname,const char *mode,GtError *err)
 {
-  return opensfxfile(indexname,SSPTABSUFFIX,mode,err);
+  return gt_fa_fopen_filename_with_suffix(indexname,SSPTABSUFFIX,mode,err);
 }
 
 int gt_inputfiles2sequencekeyvalues(
@@ -3273,8 +3273,6 @@ int gt_inputfiles2sequencekeyvalues(
         bool plainformat,
         bool outdestab,
         bool outsdstab,
-        bool outkystab,
-        bool outkyssort,
         unsigned long *characterdistribution,
         bool outssptab,
         ArraySeqpos *sequenceseppos,
@@ -3309,7 +3307,7 @@ int gt_inputfiles2sequencekeyvalues(
   }
   if (outsdstab)
   {
-    sdsfp = opensfxfile(indexname,SDSTABSUFFIX,"wb",err);
+    sdsfp = gt_fa_fopen_filename_with_suffix(indexname,SDSTABSUFFIX,"wb",err);
     if (sdsfp == NULL)
     {
       haserr = true;
@@ -3463,13 +3461,6 @@ int gt_inputfiles2sequencekeyvalues(
   gt_disc_distri_delete(distspralen);
   gt_sequence_buffer_delete(fb);
   gt_queue_delete_with_contents(descqueue);
-  if (!haserr && outkystab && !outkyssort)
-  {
-    if (gt_extractkeysfromdesfile(indexname, false, verboseinfo, err) != 0)
-    {
-      haserr = true;
-    }
-  }
   return haserr ? -1 : 0;
 }
 

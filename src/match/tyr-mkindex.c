@@ -26,7 +26,6 @@
 #include "spacedef.h"
 #include "format64.h"
 #include "esa-mmsearch.h"
-#include "opensfxfile.h"
 #include "tyr-basic.h"
 #include "tyr-mkindex.h"
 #include "echoseq.h"
@@ -616,10 +615,10 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
       state.processoccurrencecount = adddistpos2distribution;
     } else
     {
-      state.merindexfpout = opensfxfile(str_storeindex,
-                                        MERSUFFIX,
-                                        "wb",
-                                        err);
+      state.merindexfpout = gt_fa_fopen_filename_with_suffix(str_storeindex,
+                                                             MERSUFFIX,
+                                                             "wb",
+                                                             err);
       if (state.merindexfpout == NULL)
       {
         haserr = true;
@@ -627,8 +626,9 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
       {
         if (state.storecounts)
         {
-          state.countsfilefpout = opensfxfile(str_storeindex,
-                                              COUNTSSUFFIX,"wb",err);
+          state.countsfilefpout
+            = gt_fa_fopen_filename_with_suffix(str_storeindex,
+                                               COUNTSSUFFIX,"wb",err);
           if (state.countsfilefpout == NULL)
           {
             haserr = true;

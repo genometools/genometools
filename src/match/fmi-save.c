@@ -18,7 +18,6 @@
 #include <math.h>
 #include "core/fa.h"
 #include "fmindex.h"
-#include "opensfxfile.h"
 
 #include "fmi-mapspec.pr"
 
@@ -31,7 +30,9 @@ static int writefmascii (const GtStr *indexname,
   FILE *fmafp;
 
   gt_error_check(err);
-  if ((fmafp = opensfxfile (indexname, FMASCIIFILESUFFIX,"wb",err)) == NULL)
+  fmafp = gt_fa_fopen_filename_with_suffix (indexname,FMASCIIFILESUFFIX,"wb",
+                                            err);
+  if (fmafp == NULL)
   {
     return -1;
   }
@@ -65,7 +66,8 @@ static int writefmdata (const GtStr *indexname,
   FILE *fp;
 
   gt_error_check(err);
-  if ((fp = opensfxfile (indexname, FMDATAFILESUFFIX,"wb",err)) == NULL)
+  fp = gt_fa_fopen_filename_with_suffix (indexname, FMDATAFILESUFFIX,"wb",err);
+  if (fp == NULL)
   {
     return -1;
   }

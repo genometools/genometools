@@ -506,3 +506,102 @@ void gt_fa_clean(void)
   gt_free(fa);
   fa = NULL;
 }
+
+/* Gordon, please think about whether the following functions should 
+   remain here */
+
+FILE *gt_fa_fopen_filename_with_suffix(const GtStr *filenameprefix,
+                                       const char *suffix,
+                                       const char *mode,
+                                       GtError *err)
+{
+  GtStr *tmpfilename;
+  FILE *fp;
+
+  gt_error_check(err);
+  tmpfilename = gt_str_clone(filenameprefix);
+  gt_str_append_cstr(tmpfilename,suffix);
+  fp = gt_fa_fopen(gt_str_get(tmpfilename),mode,err);
+  gt_str_delete(tmpfilename);
+  return fp;
+}
+
+bool gt_exists_filename_with_suffix(const GtStr *indexname,const char *suffix)
+{
+  struct stat statbuf;
+  GtStr *tmpfilename;
+
+  tmpfilename = gt_str_clone(indexname);
+  gt_str_append_cstr(tmpfilename,suffix);
+
+  if (stat(gt_str_get(tmpfilename),&statbuf) == 0)
+  {
+    gt_str_delete(tmpfilename);
+    return true;
+  }
+  gt_str_delete(tmpfilename);
+  return false;
+}
+
+void *gt_mmap_filename_with_suffix(const GtStr *indexname,const char *suffix,
+                                   size_t *numofbytes,GtError *err)
+{
+  GtStr *tmpfilename;
+  void *ptr;
+  bool haserr = false;
+
+  gt_error_check(err);
+  tmpfilename = gt_str_clone(indexname);
+  gt_str_append_cstr(tmpfilename,suffix);
+  ptr = gt_fa_mmap_read(gt_str_get(tmpfilename),numofbytes,err);
+  if (ptr == NULL)
+  {
+    haserr = true;
+  }
+  gt_str_delete(tmpfilename);
+  return haserr ? NULL : ptr;
+}
+
+static int checkmappedfilesize(const GtStr *indexname,
+                               const char *suffix,
+                               size_t numofbytes,
+                               unsigned long expectedunits,
+                               size_t sizeofunit,
+                               GtError *err)
+{
+  gt_error_check(err);
+  if (expectedunits != (unsigned long) (numofbytes/sizeofunit))
+  {
+    gt_error_set(err,"mapping file %s%s: number of mapped units (of size %u) "
+                     " = %lu != %lu = expected number of mapped units",
+                      gt_str_get(indexname),
+                      suffix,
+                      (unsigned int) sizeofunit,
+                      (unsigned long) (numofbytes/sizeofunit),
+                      expectedunits);
+    return -1;
+  }
+  return 0;
+}
+
+void *gt_mmap_check_filename_with_suffix(const GtStr *indexname,
+                                         const char *suffix,
+                                         unsigned long expectedunits,
+                                         size_t sizeofunit,
+                                         GtError *err)
+{
+  size_t numofbytes;
+
+  void *ptr = gt_mmap_filename_with_suffix(indexname,suffix,&numofbytes,err);
+  if (ptr == NULL)
+  {
+    return NULL;
+  }
+  if (checkmappedfilesize(indexname,suffix,
+                          numofbytes,expectedunits,sizeofunit,err) != 0)
+  {
+    gt_fa_xmunmap(ptr);
+    return NULL;
+  }
+  return ptr;
+}

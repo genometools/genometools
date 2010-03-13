@@ -33,10 +33,10 @@
 #include "spacedef.h"
 #include "bcktab.h"
 #include "stamp.h"
-#include "opensfxfile.h"
 
 #define INITBufferedfile(INDEXNAME,STREAM,TYPE,SUFFIX)\
-        (STREAM)->fp = opensfxfile(INDEXNAME,SUFFIX,"rb",err);\
+        (STREAM)->fp = gt_fa_fopen_filename_with_suffix(INDEXNAME,SUFFIX,\
+                                                        "rb",err);\
         if ((STREAM)->fp == NULL)\
         {\
           haserr = true;\
@@ -206,7 +206,7 @@ static bool scanprjfileuintkeys(Suffixarray *suffixarray,
   FILE *fp;
 
   gt_error_check(err);
-  fp = opensfxfile(indexname,PROJECTFILESUFFIX,"rb",err);
+  fp = gt_fa_fopen_filename_with_suffix(indexname,PROJECTFILESUFFIX,"rb",err);
   if (fp == NULL)
   {
     haserr = true;
@@ -289,11 +289,12 @@ static int inputsuffixarray(bool map,
   {
     if (map)
     {
-      suffixarray->suftab = genericmaptable(indexname,
-                                            SUFTABSUFFIX,
-                                            (unsigned long) (totallength+1),
-                                            sizeof (Seqpos),
-                                            err);
+      suffixarray->suftab
+        = gt_mmap_check_filename_with_suffix(indexname,
+                                             SUFTABSUFFIX,
+                                             (unsigned long) (totallength+1),
+                                             sizeof (Seqpos),
+                                             err);
       if (suffixarray->suftab == NULL)
       {
         haserr = true;
@@ -313,7 +314,7 @@ static int inputsuffixarray(bool map,
   {
     if (map)
     {
-      suffixarray->lcptab = genericmaptable(indexname,
+      suffixarray->lcptab = gt_mmap_check_filename_with_suffix(indexname,
                                             LCPTABSUFFIX,
                                             (unsigned long) (totallength+1),
                                             sizeof (GtUchar),
@@ -343,12 +344,13 @@ static int inputsuffixarray(bool map,
       if (map)
       {
         suffixarray->llvtab
-          = genericmaptable(indexname,
-                            LARGELCPTABSUFFIX,
-                            (unsigned long) suffixarray->numoflargelcpvalues.
-                            valueseqpos,
-                            sizeof (Largelcpvalue),
-                            err);
+          = gt_mmap_check_filename_with_suffix(indexname,
+                                               LARGELCPTABSUFFIX,
+                                               (unsigned long)
+                                               suffixarray->numoflargelcpvalues.
+                                                            valueseqpos,
+                                               sizeof (Largelcpvalue),
+                                               err);
         if (suffixarray->llvtab == NULL)
         {
           haserr = true;
@@ -364,11 +366,12 @@ static int inputsuffixarray(bool map,
   {
     if (map)
     {
-      suffixarray->bwttab = genericmaptable(indexname,
-                                            BWTTABSUFFIX,
-                                            (unsigned long) (totallength+1),
-                                            sizeof (GtUchar),
-                                            err);
+      suffixarray->bwttab
+        = gt_mmap_check_filename_with_suffix(indexname,
+                                             BWTTABSUFFIX,
+                                             (unsigned long) (totallength+1),
+                                             sizeof (GtUchar),
+                                             err);
       if (suffixarray->bwttab == NULL)
       {
         haserr = true;

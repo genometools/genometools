@@ -36,7 +36,7 @@
 #include "sfx-bentsedg.h"
 #include "sfx-input.h"
 #include "sfx-run.h"
-#include "opensfxfile.h"
+#include "giextract.h"
 #include "stamp.h"
 
 #include "sfx-opt.pr"
@@ -52,7 +52,8 @@
 #define INITOUTFILEPTR(PTR,FLAG,SUFFIX)\
         if (!haserr && (FLAG))\
         {\
-          PTR = opensfxfile(so->str_indexname,SUFFIX,"wb",err);\
+          PTR = gt_fa_fopen_filename_with_suffix(so->str_indexname,SUFFIX,\
+                                                 "wb",err);\
           if ((PTR) == NULL)\
           {\
             haserr = true;\
@@ -498,6 +499,14 @@ static int runsuffixerator(bool doesa,
                           so->readmode == Complementmode ? "cpl" : "rcl");
         haserr = true;
       }
+    }
+  }
+  if (!haserr && so->outkystab && !so->outkyssort)
+  {
+    if (gt_extractkeysfromdesfile(so->str_indexname, false, verboseinfo,
+                                  err) != 0)
+    {
+      haserr = true;
     }
   }
   prefixlength = so->prefixlength;

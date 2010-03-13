@@ -121,4 +121,7 @@ void           gt_alphabet_encode_seq(const GtAlphabet *alphabet, GtUchar *out,
 
 const GtAlphabet *gt_scanal1file(const GtStr *indexname,GtError *err);
 
+int gt_outal1file(const GtStr *indexname,const GtAlphabet *alpha,
+                  GtError *err);
+
 #endif

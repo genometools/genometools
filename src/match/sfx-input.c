@@ -20,36 +20,13 @@
 #include <stdbool.h>
 #include <errno.h>
 #include "core/alphabet.h"
-#include "core/fa.h"
 #include "core/filelengthvalues.h"
 #include "spacedef.h"
 #include "sfx-optdef.h"
 #include "encseq-def.h"
 #include "sfx-progress.h"
-#include "esa-fileend.h"
 #include "verbose-def.h"
-#include "opensfxfile.h"
 #include "sfx-input.h"
-
-static int outal1file(const GtStr *indexname,const GtAlphabet *alpha,
-                      GtError *err)
-{
-  FILE *al1fp;
-  bool haserr = false;
-
-  gt_error_check(err);
-  al1fp = opensfxfile(indexname,GT_ALPHABETFILESUFFIX,"wb",err);
-  if (al1fp == NULL)
-  {
-    haserr = true;
-  }
-  if (!haserr)
-  {
-    gt_alphabet_output(alpha,al1fp);
-    gt_fa_xfclose(al1fp);
-  }
-  return haserr ? -1 : 0;
-}
 
 static unsigned long *initcharacterdistribution(const GtAlphabet *alpha)
 {
@@ -110,7 +87,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   }
   if (!haserr)
   {
-    if (outal1file(so->str_indexname,alpha,err) != 0)
+    if (gt_outal1file(so->str_indexname,alpha,err) != 0)
     {
       haserr = true;
     }
@@ -130,8 +107,6 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                                 so->isplain,
                                 so->outdestab,
                                 so->outsdstab,
-                                so->outkystab,
-                                so->outkyssort,
                                 characterdistribution,
                                 so->outssptab,
                                 &sfxseqinfo->sequenceseppos,

@@ -420,8 +420,6 @@ int gt_inputfiles2sequencekeyvalues(
         bool plainformat,
         bool outdestab,
         bool outsdstab,
-        bool outkystab,
-        bool outkyssort,
         unsigned long *characterdistribution,
         bool outssptab,
         ArraySeqpos *sequenceseppos,
