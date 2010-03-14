@@ -23,24 +23,31 @@
 #include "seqpos-def.h"
 #include "sfx-progress.h"
 #include "encseq-def.h"
-#include "sfx-optdef.h"
 
 typedef struct
 {
   Encodedsequence *encseq;
-  Readmode readmode;
-  ArraySeqpos sequenceseppos;
 } Sfxseqinfo;
 
 int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
+                         ArraySeqpos *sequenceseppos,
                          Sfxprogress *sfxprogress,
-                         const Suffixeratoroptions *so,
+                         const GtStr *str_indexname,
+                         const GtStr *str_smap,
+                         const GtStr *str_sat,
+                         const GtStrArray *filenametab,
+                         bool isdna,
+                         bool isprotein,
+                         bool isplain,
+                         bool outtistab,
+                         bool outdestab,
+                         bool outsdstab,
+                         bool outssptab,
                          Verboseinfo *verboseinfo,
                          GtError *err);
 
 int fromsarr2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                         const GtStr *indexname,
-                        Readmode readmodeoption,
                         Verboseinfo *verboseinfo,
                         GtError *err);
 

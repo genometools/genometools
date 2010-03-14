@@ -826,11 +826,13 @@ LTRdigestfiles=${CURDIR}/src/ltr/gt_ltrdigest.c\
 
 SKTOOLS=${shell grep -l Kurtz src/tools/*.c}
 
-spgt:${addprefix obj/,${notdir ${subst .c,.splint,\
+ALLSPLINT=${addprefix obj/,${notdir ${subst .c,.splint,\
 	             ${filter-out ${EISFILES},${wildcard ${CURDIR}/src/match/*.c}}\
                      ${filter-out ${LTRdigestfiles},${wildcard ${CURDIR}/src/ltr/*.c}}\
                                 ${SKTOOLS}}}}\
      obj/redblack.splint
+
+spgt:${ALLSPLINT}
 
 scgt:
 	src_check src/match/*
