@@ -27,7 +27,7 @@
 #include "intbits.h"
 #include "safecast-gen.h"
 #include "format64.h"
-#include "mapspec-def.h"
+#include "mapspec-gen.h"
 
 #define ASSIGNPTR2STARTPTR(TYPE)\
         if (mapspec->numofunits == 0)\

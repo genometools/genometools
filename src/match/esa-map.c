@@ -32,7 +32,8 @@
 #include "intcode-def.h"
 #include "spacedef.h"
 #include "bcktab.h"
-#include "stamp.h"
+
+#define DBFILEKEY "dbfile="
 
 #define INITBufferedfile(INDEXNAME,STREAM,TYPE,SUFFIX)\
         (STREAM)->fp = gt_fa_fopen_filename_with_suffix(INDEXNAME,SUFFIX,\

@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef MAPSPEC_DEF_H
-#define MAPSPEC_DEF_H
+#ifndef MAPSPEC_GEN_H
+#define MAPSPEC_GEN_H
 
 #include "core/arraydef.h"
 #include "core/str_api.h"

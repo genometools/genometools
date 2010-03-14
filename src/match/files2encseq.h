@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef FILE2ENCSEQ_H
-#define FILE2ENCSEQ_H
+#ifndef FILES2ENCSEQ_H
+#define FILES2ENCSEQ_H
 
 #include <stdbool.h>
 #include "core/str_api.h"

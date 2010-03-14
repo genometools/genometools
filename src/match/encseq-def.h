@@ -31,8 +31,6 @@
 #include "readmode-def.h"
 #include "verbose-def.h"
 
-#define DBFILEKEY "dbfile="
-
 #ifdef SKDEBUG
 #define CHECKENCCHAR(CC,ENCSEQ,POS,READMODE)\
         {\

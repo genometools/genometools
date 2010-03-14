@@ -31,7 +31,6 @@
 #include "core/unused_api.h"
 #include "match/seqpos-def.h"
 #include "match/verbose-def.h"
-#include "match/esa-fileend.h"
 #include "match/intcode-def.h"
 #include "match/encseq-def.h"
 

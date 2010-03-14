@@ -31,7 +31,6 @@
 #include "core/fasta.h"
 #include "giextract.h"
 #include "format64.h"
-#include "esa-fileend.h"
 #include "encseq-def.h"
 #include "echoseq.h"
 

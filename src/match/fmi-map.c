@@ -24,13 +24,9 @@
 #include "core/str.h"
 #include "core/alphabet.h"
 #include "sfx-ri-def.h"
-#include "esa-fileend.h"
 #include "fmindex.h"
-#include "sarr-def.h"
 #include "verbose-def.h"
 #include "spacedef.h"
-#include "stamp.h"
-#include "esa-map.h"
 
 #include "fmi-keyval.pr"
 #include "fmi-mapspec.pr"
@@ -139,7 +135,7 @@ void freefmindex(Fmindex *fmindex)
     gt_encodedsequence_delete(fmindex->bwtformatching);
     fmindex->bwtformatching = NULL;
   }
-  gt_alphabet_delete(fmindex->alphabet);
+  gt_alphabet_delete((GtAlphabet *) fmindex->alphabet);
 }
 
 static Encodedsequence *mapbwtencoding(const GtStr *indexname,
@@ -198,20 +194,15 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
   }
   if (!haserr)
   {
-    GtStr *tmpfilename;
-
     fmindex->specpos.nextfreePairBwtidx
       = (unsigned long) determinenumberofspecialstostore(&specialcharinfo);
     fmindex->specpos.spacePairBwtidx = NULL;
     fmindex->specpos.allocatedPairBwtidx = 0;
-    tmpfilename = gt_str_clone(indexname);
-    gt_str_append_cstr(tmpfilename,GT_ALPHABETFILESUFFIX);
-    fmindex->alphabet = gt_alphabet_new(false, false, tmpfilename, NULL, err);
+    fmindex->alphabet = gt_scanal1file(indexname,err);
     if (fmindex->alphabet == NULL)
     {
       haserr = true;
     }
-    gt_str_delete(tmpfilename);
   }
   if (!haserr)
   {

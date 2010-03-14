@@ -26,7 +26,7 @@
 #include "core/mathsupport.h"
 #include "core/unused_api.h"
 #include "esa-fileend.h"
-#include "mapspec-def.h"
+#include "mapspec-gen.h"
 #include "spacedef.h"
 #include "bcktab.h"
 #include "format64.h"

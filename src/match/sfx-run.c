@@ -436,8 +436,8 @@ static int runsuffixerator(bool doesa,
                                 so->str_inputindex,
                                 true,
                                 false,
-			        false,
-			        false,
+                                false,
+                                false,
                                 verboseinfo,
                                 err);
     if (encseq == NULL)

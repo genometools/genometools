@@ -27,7 +27,7 @@
 #include "cstr_api.h"
 #include "error.h"
 #include "fileutils_api.h"
-#include "ma.h"
+#include "ma_api.h"
 #include "gtdatapath.h"
 #include "str.h"
 #include "str_array.h"

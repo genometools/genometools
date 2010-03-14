@@ -40,10 +40,7 @@
 #include "safecast-gen.h"
 #include "verbose-def.h"
 #include "encseq-def.h"
-
-/* the following module reveal a dependency on mapspec-gen.c */
-
-#include "mapspec-def.h"
+#include "mapspec-gen.h"
 
 #ifndef INLINEDENCSEQ
 #include "encseq-type.h"
