@@ -23,7 +23,7 @@
 #include "core/filelengthvalues.h"
 #include "bitpack-itf.h"
 #include "ushort-def.h"
-#include "fmi-bwtbound.h"
+#include "seqpos-def.h"
 #include "intbits.h"
 #include "safecast-gen.h"
 #include "format64.h"
@@ -124,8 +124,8 @@ static int assigncorrecttype(Mapspecification *mapspec,
     case SeqposType:
       ASSIGNPTR2STARTPTR(Seqpos);
       break;
-    case BwtboundType:
-      ASSIGNPTR2STARTPTR(Bwtbound);
+    case SeqposboundType:
+      ASSIGNPTR2STARTPTR(Seqposbound);
       break;
     case PairBwtidxType:
       ASSIGNPTR2STARTPTR(PairBwtidx);
@@ -301,8 +301,8 @@ int flushtheindex2file(FILE *fp,
         case SeqposType:
           WRITEACTIONWITHTYPE(Seqpos);
           break;
-        case BwtboundType:
-          WRITEACTIONWITHTYPE(Bwtbound);
+        case SeqposboundType:
+          WRITEACTIONWITHTYPE(Seqposbound);
           break;
         case PairBwtidxType:
           WRITEACTIONWITHTYPE(PairBwtidx);

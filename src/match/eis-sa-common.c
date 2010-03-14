@@ -16,7 +16,7 @@
 
 #include <stdlib.h>
 
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "match/eis-sa-common.h"
 #include "match/encseq-def.h"
 

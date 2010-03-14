@@ -20,7 +20,7 @@
 #include "core/assert_api.h"
 #include "core/symboldef.h"
 #include "core/chardef.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/arraydef.h"
 #include "seqpos-def.h"
 #include "spacedef.h"

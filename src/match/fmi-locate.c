@@ -18,7 +18,6 @@
 #include "core/divmodmul.h"
 #include "seqpos-def.h"
 #include "fmindex.h"
-#include "fmi-bwtbound.h"
 #include "fmi-occ.gen"
 
 static Seqpos searchsmallestgeq(const PairBwtidx *left,

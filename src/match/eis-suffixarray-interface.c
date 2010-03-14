@@ -18,7 +18,7 @@
 
 #include "core/chardef.h"
 #include "core/error.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/unused_api.h"
 #include "match/sarr-def.h"
 #include "match/eis-mrangealphabet.h"

@@ -34,7 +34,7 @@
 #include "stamp.h"
 #include "sfx-suffixer.h"
 #include "sfx-bentsedg.h"
-#include "sfx-input.h"
+#include "files2encseq.h"
 #include "sfx-run.h"
 #include "giextract.h"
 #include "stamp.h"
@@ -349,7 +349,7 @@ static int run_packedindexconstruction(Verboseinfo *verboseinfo,
                                        FILE *outfpbcktab,
                                        const Suffixeratoroptions *so,
                                        unsigned int prefixlength,
-                                       Sfxseqinfo *sfxseqinfo,
+                                       const Encodedsequence *encseq,
                                        const Sfxstrategy *sfxstrategy,
                                        GtError *err)
 {
@@ -367,9 +367,9 @@ static int run_packedindexconstruction(Verboseinfo *verboseinfo,
                        prefixlength,
                        so->numofparts,
                        sfxstrategy,
-                       sfxseqinfo->encseq,
+                       encseq,
                        sfxprogress,
-                       getencseqtotallength(sfxseqinfo->encseq) + 1,
+                       getencseqtotallength(encseq) + 1,
                        verboseinfo,
                        err);
   if (si == NULL)
@@ -411,9 +411,9 @@ static int runsuffixerator(bool doesa,
   Sfxprogress *sfxprogress;
   Outfileinfo outfileinfo;
   bool haserr = false;
-  Sfxseqinfo sfxseqinfo;
   unsigned int prefixlength;
   Sfxstrategy sfxstrategy;
+  Encodedsequence *encseq;
 
   gt_error_check(err);
   if (so->showtime)
@@ -432,10 +432,15 @@ static int runsuffixerator(bool doesa,
   }
   if (gt_str_length(so->str_inputindex) > 0)
   {
-    if (fromsarr2Sfxseqinfo(&sfxseqinfo,
-                            so->str_inputindex,
-                            verboseinfo,
-                            err) != 0)
+    encseq = mapencodedsequence(true,
+                                so->str_inputindex,
+                                true,
+                                false,
+			        false,
+			        false,
+                                verboseinfo,
+                                err);
+    if (encseq == NULL)
     {
       haserr = true;
     }
@@ -443,8 +448,7 @@ static int runsuffixerator(bool doesa,
         strcmp(gt_str_get(so->str_inputindex),
                gt_str_get(so->fn2encopt.str_indexname)) != 0)
     {
-      if (flushencseqfile(so->fn2encopt.str_indexname,sfxseqinfo.encseq,
-                          err) != 0)
+      if (flushencseqfile(so->fn2encopt.str_indexname,encseq,err) != 0)
       {
         haserr = true;
       }
@@ -454,22 +458,22 @@ static int runsuffixerator(bool doesa,
     ArraySeqpos sequenceseppos;
 
     GT_INITARRAY(&sequenceseppos,Seqpos);
-    if (fromfiles2Sfxseqinfo(&sfxseqinfo,
-                             &sequenceseppos,
-                             sfxprogress,
-                             so->fn2encopt.str_indexname,
-                             so->fn2encopt.str_smap,
-                             so->fn2encopt.str_sat,
-                             so->fn2encopt.filenametab,
-                             so->fn2encopt.isdna,
-                             so->fn2encopt.isprotein,
-                             so->fn2encopt.isplain,
-                             so->fn2encopt.outtistab,
-                             so->fn2encopt.outdestab,
-                             so->fn2encopt.outsdstab,
-                             so->fn2encopt.outssptab,
-                             verboseinfo,
-                             err) != 0)
+    encseq = fromfiles2encseq(&sequenceseppos,
+                              sfxprogress,
+                              so->fn2encopt.str_indexname,
+                              so->fn2encopt.str_smap,
+                              so->fn2encopt.str_sat,
+                              so->fn2encopt.filenametab,
+                              so->fn2encopt.isdna,
+                              so->fn2encopt.isprotein,
+                              so->fn2encopt.isplain,
+                              so->fn2encopt.outtistab,
+                              so->fn2encopt.outdestab,
+                              so->fn2encopt.outsdstab,
+                              so->fn2encopt.outssptab,
+                              verboseinfo,
+                              err);
+    if (encseq == NULL)
     {
       haserr = true;
     }
@@ -504,11 +508,11 @@ static int runsuffixerator(bool doesa,
   }
   if (!haserr)
   {
-    gt_showsequencefeatures(verboseinfo,sfxseqinfo.encseq,false);
+    gt_showsequencefeatures(verboseinfo,encseq,false);
     if (so->readmode == Complementmode ||
         so->readmode == Reversecomplementmode)
     {
-      if (!gt_alphabet_is_dna(getencseqAlphabet(sfxseqinfo.encseq)))
+      if (!gt_alphabet_is_dna(getencseqAlphabet(encseq)))
       {
         gt_error_set(err,"option -%s only can be used for DNA alphabets",
                           so->readmode == Complementmode ? "cpl" : "rcl");
@@ -532,13 +536,13 @@ static int runsuffixerator(bool doesa,
     if (so->outsuftab || so->outbwttab || so->outlcptab || so->outbcktab ||
         !doesa)
     {
-      unsigned int numofchars = getencseqAlphabetnumofchars(sfxseqinfo.encseq);
+      unsigned int numofchars = getencseqAlphabetnumofchars(encseq);
 
       if (detpfxlenandmaxdepth(&prefixlength,
                                &sfxstrategy.ssortmaxdepth,
                                so,
                                numofchars,
-                               getencseqtotallength(sfxseqinfo.encseq),
+                               getencseqtotallength(encseq),
                                verboseinfo,
                                err) != 0)
       {
@@ -562,8 +566,7 @@ static int runsuffixerator(bool doesa,
   outfileinfo.outfpbcktab = NULL;
   if (!haserr)
   {
-    if (initoutfileinfo(&outfileinfo,prefixlength,
-                        sfxseqinfo.encseq,so,err) != 0)
+    if (initoutfileinfo(&outfileinfo,prefixlength,encseq,so,err) != 0)
     {
       haserr = true;
     }
@@ -576,7 +579,7 @@ static int runsuffixerator(bool doesa,
       {
         if (suffixeratorwithoutput(so->fn2encopt.str_indexname,
                                    &outfileinfo,
-                                   sfxseqinfo.encseq,
+                                   encseq,
                                    so->readmode,
                                    prefixlength,
                                    so->numofparts,
@@ -594,7 +597,7 @@ static int runsuffixerator(bool doesa,
                                         outfileinfo.outfpbcktab,
                                         so,
                                         prefixlength,
-                                        &sfxseqinfo,
+                                        encseq,
                                         &sfxstrategy,
                                         err) != 0)
         {
@@ -621,7 +624,7 @@ static int runsuffixerator(bool doesa,
     }
     if (outprjfile(so->fn2encopt.str_indexname,
                    so->readmode,
-                   sfxseqinfo.encseq,
+                   encseq,
                    prefixlength,
                    &sfxstrategy.ssortmaxdepth,
                    numoflargelcpvalues,
@@ -632,15 +635,16 @@ static int runsuffixerator(bool doesa,
       haserr = true;
     }
   }
-  if (gt_str_length(so->str_inputindex) == 0 && sfxseqinfo.encseq != NULL)
+  if (gt_str_length(so->str_inputindex) == 0 && encseq != NULL)
   {
-    removefilenametabref(sfxseqinfo.encseq);
+    removefilenametabref(encseq);
   }
   if (outfileinfo.outlcpinfo != NULL)
   {
     freeOutlcptab(&outfileinfo.outlcpinfo);
   }
-  freeSfxseqinfo(&sfxseqinfo);
+  gt_encodedsequence_delete(encseq);
+  encseq = NULL;
   if (!haserr && so->outkystab && so->outkyssort)
   {
     if (gt_extractkeysfromdesfile(so->fn2encopt.str_indexname, true,

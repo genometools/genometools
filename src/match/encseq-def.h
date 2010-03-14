@@ -177,7 +177,7 @@ int flushencseqfile(const GtStr *indexname,Encodedsequence *encseq,GtError*);
 
 Encodedsequencescanstate *newEncodedsequencescanstate(void);
 
-void encodedsequence_free(Encodedsequence **encseqptr);
+void gt_encodedsequence_delete(Encodedsequence *encseq);
 
 void initEncodedsequencescanstate(Encodedsequencescanstate *esr,
                                   const Encodedsequence *encseq,

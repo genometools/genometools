@@ -18,7 +18,7 @@
 #define EIS_ENCIDXSEQ_SIOP_H
 
 #include <string.h>
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "match/eis-mrangealphabet.h"
 #include "match/eis-encidxseq.h"
 #include "match/eis-encidxseq-priv.h"

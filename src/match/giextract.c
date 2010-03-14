@@ -24,7 +24,7 @@
 #include "core/divmodmul.h"
 #include "core/fileutils_api.h"
 #include "core/error.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/fa.h"
 #include "core/seqiterator.h"
 #include "core/progressbar.h"
@@ -638,7 +638,8 @@ int gt_extractkeysfromdesfile(const GtStr *indexname,
   }
   if (encseq != NULL)
   {
-    encodedsequence_free(&encseq);
+    gt_encodedsequence_delete(encseq);
+    encseq = NULL;
   }
   gt_free(keytab);
   return haserr ? -1 : 0;
@@ -837,7 +838,8 @@ int gt_extractkeysfromfastaindex(const GtStr *indexname,
   }
   if (encseq != NULL)
   {
-    encodedsequence_free(&encseq);
+    gt_encodedsequence_delete(encseq);
+    encseq = NULL;
   }
   return haserr ? -1 : 0;
 }

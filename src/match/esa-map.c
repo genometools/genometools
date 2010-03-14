@@ -243,7 +243,8 @@ void freesuffixarray(Suffixarray *suffixarray)
   gt_fa_xfclose(suffixarray->bwttabstream.fp);
   suffixarray->bwttabstream.fp = NULL;
   FREESPACE(suffixarray->bwttabstream.bufferedfilespace);
-  encodedsequence_free(&suffixarray->encseq);
+  gt_encodedsequence_delete(suffixarray->encseq);
+  suffixarray->encseq = NULL;
   if (suffixarray->bcktab != NULL)
   {
     bcktab_delete(&suffixarray->bcktab);

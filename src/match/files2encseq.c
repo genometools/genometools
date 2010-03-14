@@ -20,11 +20,12 @@
 #include <stdbool.h>
 #include <errno.h>
 #include "core/alphabet.h"
+#include "core/ma_api.h"
 #include "core/filelengthvalues.h"
 #include "encseq-def.h"
 #include "sfx-progress.h"
 #include "verbose-def.h"
-#include "sfx-input.h"
+#include "files2encseq.h"
 
 static unsigned long *initcharacterdistribution(const GtAlphabet *alpha)
 {
@@ -41,22 +42,21 @@ static unsigned long *initcharacterdistribution(const GtAlphabet *alpha)
   return characterdistribution;
 }
 
-int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
-                         ArraySeqpos *sequenceseppos,
-                         Sfxprogress *sfxprogress,
-                         const GtStr *str_indexname,
-                         const GtStr *str_smap,
-                         const GtStr *str_sat,
-                         const GtStrArray *filenametab,
-                         bool isdna,
-                         bool isprotein,
-                         bool isplain,
-                         bool outtistab,
-                         bool outdestab,
-                         bool outsdstab,
-                         bool outssptab,
-                         Verboseinfo *verboseinfo,
-                         GtError *err)
+Encodedsequence *fromfiles2encseq(ArraySeqpos *sequenceseppos,
+                                  Sfxprogress *sfxprogress,
+                                  const GtStr *str_indexname,
+                                  const GtStr *str_smap,
+                                  const GtStr *str_sat,
+                                  const GtStrArray *filenametab,
+                                  bool isdna,
+                                  bool isprotein,
+                                  bool isplain,
+                                  bool outtistab,
+                                  bool outdestab,
+                                  bool outsdstab,
+                                  bool outssptab,
+                                  Verboseinfo *verboseinfo,
+                                  GtError *err)
 {
   Seqpos totallength;
   bool haserr = false;
@@ -67,9 +67,10 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   Filelengthvalues *filelengthtab = NULL;
   Seqpos specialrangestab[3];
   unsigned long *characterdistribution = NULL;
+  Encodedsequence *encseq = NULL;
 
   gt_error_check(err);
-  sfxseqinfo->encseq = NULL;
+  encseq = NULL;
   if (gt_str_length(str_sat) > 0)
   {
     int retval = getsatforcevalue(gt_str_get(str_sat),err);
@@ -86,8 +87,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   }
   if (!haserr)
   {
-    alpha = gt_alphabet_new(isdna, isprotein,
-                            str_smap, filenametab, err);
+    alpha = gt_alphabet_new(isdna, isprotein,str_smap, filenametab, err);
     if (alpha == NULL)
     {
       haserr = true;
@@ -130,23 +130,22 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
       sfxprogress_deliverthetime(stdout,
                                  sfxprogress,"computing sequence encoding");
     }
-    sfxseqinfo->encseq
-      = files2encodedsequence(true,
-                              filenametab,
-                              filelengthtab,
-                              isplain,
-                              totallength,
-                              sequenceseppos->nextfreeSeqpos+1,
-                              specialrangestab,
-                              alpha,
-                              gt_str_length(str_sat) > 0
-                                ? gt_str_get(str_sat)
-                                : NULL,
-                              characterdistribution,
-                              &specialcharinfo,
-                              verboseinfo,
-                              err);
-    if (sfxseqinfo->encseq == NULL)
+    encseq = files2encodedsequence(true,
+                                   filenametab,
+                                   filelengthtab,
+                                   isplain,
+                                   totallength,
+                                   sequenceseppos->nextfreeSeqpos+1,
+                                   specialrangestab,
+                                   alpha,
+                                   gt_str_length(str_sat) > 0
+                                     ? gt_str_get(str_sat)
+                                     : NULL,
+                                   characterdistribution,
+                                   &specialcharinfo,
+                                   verboseinfo,
+                                   err);
+    if (encseq == NULL)
     {
       haserr = true;
     } else
@@ -154,8 +153,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
       alphaisbound = true;
       if (outtistab)
       {
-        if (flushencseqfile(str_indexname,
-                            sfxseqinfo->encseq,err) != 0)
+        if (flushencseqfile(str_indexname,encseq,err) != 0)
         {
           haserr = true;
         }
@@ -172,33 +170,5 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
       gt_alphabet_delete((GtAlphabet*) alpha);
     }
   }
-  return haserr ? -1 : 0;
-}
-
-int fromsarr2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
-                        const GtStr *indexname,
-                        Verboseinfo *verboseinfo,
-                        GtError *err)
-{
-  sfxseqinfo->encseq = mapencodedsequence(true,
-                                          indexname,
-                                          true,
-                                          false,
-                                          false,
-                                          false,
-                                          verboseinfo,
-                                          err);
-  if (sfxseqinfo->encseq == NULL)
-  {
-    return -1;
-  }
-  return 0;
-}
-
-void freeSfxseqinfo(Sfxseqinfo *sfxseqinfo)
-{
-  if (sfxseqinfo->encseq != NULL)
-  {
-    encodedsequence_free(&sfxseqinfo->encseq);
-  }
+  return haserr ? NULL : encseq;
 }

@@ -44,7 +44,7 @@ typedef enum
   UnsignedlongType,
   BitsequenceType,
   SeqposType,
-  BwtboundType,
+  SeqposboundType,
   PairBwtidxType,
   TwobitencodingType,
   SpecialcharinfoType,

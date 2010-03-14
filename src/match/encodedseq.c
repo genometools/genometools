@@ -990,10 +990,8 @@ static int determinesattype(Seqpos *specialranges,
 static unsigned long countcompareEncseqsequencesmaxdepth = 0;
 static unsigned long countcompareEncseqsequences = 0;
 
-void encodedsequence_free(Encodedsequence **encseqptr)
+void gt_encodedsequence_delete(Encodedsequence *encseq)
 {
-  Encodedsequence *encseq = *encseqptr;
-
   if (encseq == NULL)
   {
     return;
@@ -1086,8 +1084,7 @@ void encodedsequence_free(Encodedsequence **encseqptr)
     gt_free(encseq->filelengthtab);
   }
   encseq->filelengthtab = NULL;
-  gt_free(*encseqptr);
-  *encseqptr = NULL;
+  gt_free(encseq);
 }
 
 #define ADDTYPE(V)               uchar##V
@@ -2927,7 +2924,8 @@ unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab)
 #endif
   if (haserr && encseq != NULL)
   {
-    encodedsequence_free(&encseq);
+    gt_encodedsequence_delete(encseq);
+    encseq = NULL;
   }
   gt_sequence_buffer_delete(fb);
   return haserr ? NULL : encseq;
@@ -3047,7 +3045,8 @@ unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab)
     gt_alphabet_delete((GtAlphabet*) alpha);
     if (encseq != NULL)
     {
-      encodedsequence_free(&encseq);
+      gt_encodedsequence_delete(encseq);
+      encseq = NULL;
     }
     return NULL;
   }

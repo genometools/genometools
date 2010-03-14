@@ -136,7 +136,8 @@ void freefmindex(Fmindex *fmindex)
   }
   if (fmindex->bwtformatching != NULL)
   {
-    encodedsequence_free(&fmindex->bwtformatching);
+    gt_encodedsequence_delete(fmindex->bwtformatching);
+    fmindex->bwtformatching = NULL;
   }
   gt_alphabet_delete(fmindex->alphabet);
 }

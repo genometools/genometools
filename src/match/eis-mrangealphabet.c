@@ -22,7 +22,7 @@
 #include "core/assert_api.h"
 #include "core/chardef.h"
 #include "core/dataalign.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/str.h"
 #include "core/symboldef.h"
 #include "core/str_array.h"

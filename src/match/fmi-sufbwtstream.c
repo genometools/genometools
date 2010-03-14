@@ -498,7 +498,8 @@ int sufbwt2fmindex(Fmindex *fmindex,
     finalizefmfrequencies(fmindex);
     if (fmindex->suffixlength > 0)
     {
-      ALLOCASSIGNSPACE(fmindex->boundarray,NULL,Bwtbound,fmindex->numofcodes);
+      ALLOCASSIGNSPACE(fmindex->boundarray,NULL,Seqposbound,
+                       fmindex->numofcodes);
     }
     if (numofindexes == 1U)
     {

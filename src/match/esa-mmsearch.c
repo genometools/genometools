@@ -714,6 +714,7 @@ int sarrquerysubstringmatch(const GtUchar *dbseq,
     haserr = true;
   }
   removealpharef(dbencseq);
-  encodedsequence_free(&dbencseq);
+  gt_encodedsequence_delete(dbencseq);
+  dbencseq = NULL;
   return haserr ? -1 : 0;
 }

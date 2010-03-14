@@ -37,7 +37,8 @@ static void assignfmmapspecification(GtArrayMapspecification *mapspectable,
              ? (unsigned long) MARKPOSTABLELENGTH(fmindex->bwtlength,
                                                   fmindex->markdist)
              : 0);
-  NEWMAPSPEC(fmindex->boundarray,Bwtbound,(unsigned long) fmindex->numofcodes);
+  NEWMAPSPEC(fmindex->boundarray,Seqposbound,
+             (unsigned long) fmindex->numofcodes);
   NEWMAPSPEC(fmindex->specpos.spacePairBwtidx,PairBwtidx,
              fmwithoptions->storeindexpos
              ? fmindex->specpos.nextfreePairBwtidx

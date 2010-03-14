@@ -19,7 +19,7 @@
 #include "core/alphabet.h"
 #include "core/unused_api.h"
 #include "core/str_array.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/error.h"
 #include "core/fileutils_api.h"
 #include "core/seqiterator.h"
@@ -770,7 +770,8 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
   {
     if (encseq != NULL)
     {
-      encodedsequence_free((Encodedsequence **) &encseq);
+      gt_encodedsequence_delete((Encodedsequence *) encseq);
+      encseq = NULL;
     }
   } else
   {
