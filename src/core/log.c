@@ -18,48 +18,50 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include "core/log.h"
+#include "core/logger.h"
 #include "core/xansi.h"
 
-static bool logging = false;
-static FILE *logfp = NULL;
+static GtLogger *gt_global_logger;
+
+void gt_log_init()
+{
+  gt_global_logger = gt_logger_new(false, "debug: ", stderr);
+}
 
 void gt_log_enable(void)
 {
-  logfp = stderr;
-  logging = true;
+  gt_logger_enable(gt_global_logger);
 }
 
 bool gt_log_enabled(void)
 {
-  return logging;
+  return gt_logger_enabled(gt_global_logger);
 }
 
 void gt_log_log(const char *format, ...)
 {
   va_list ap;
-  if (!logging) return;
   va_start(ap, format);
-  gt_log_vlog(format, ap);
+  gt_logger_log_va(gt_global_logger, format, ap);
   va_end(ap);
 }
 
 void gt_log_vlog(const char *format, va_list ap)
 {
-  if (!logging) return;
-  gt_assert(logfp);
-  fprintf(logfp, "debug: ");
-  (void) vfprintf(logfp, format, ap);
-  (void) putc('\n', logfp);
+  gt_logger_log_va(gt_global_logger, format, ap);
 }
 
 FILE* gt_log_fp(void)
 {
-  gt_assert(logging);
-  return logfp;
+  return gt_logger_target(gt_global_logger);
 }
 
 void gt_log_set_fp(FILE *fp)
 {
-  gt_assert(logging);
-  logfp = fp;
+  gt_logger_set_target(gt_global_logger, fp);
+}
+
+void gt_log_clean()
+{
+  gt_logger_delete(gt_global_logger);
 }

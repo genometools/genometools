@@ -24,6 +24,7 @@
 #include "core/cstr_api.h"
 #include "core/cstr_array.h"
 #include "core/fa.h"
+#include "core/log.h"
 #include "core/ma.h"
 #include "core/option.h"
 #include "core/splitter.h"
@@ -94,6 +95,7 @@ void gt_lib_init(void)
   if (spacepeak && !(bookkeeping && !strcmp(bookkeeping, "on")))
     gt_warning("GT_ENV_OPTIONS=-spacepeak used without GT_MEM_BOOKKEEPING=on");
   gt_fa_init();
+  gt_log_init();
   gt_symbol_init();
   gt_class_prealloc_run();
   gt_ya_rand_init(0);
@@ -122,6 +124,7 @@ int gt_lib_clean(void)
   gt_symbol_clean();
   gt_class_alloc_clean();
   gt_ya_rand_clean();
+  gt_log_clean();
   gt_rval = gt_ma_check_space_leak();
   gt_ma_clean();
 #ifndef WITHOUT_CAIRO

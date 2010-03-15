@@ -20,4 +20,7 @@
 
 #include "core/log_api.h"
 
+void gt_log_init();
+void gt_log_clean();
+
 #endif
