@@ -24,7 +24,7 @@
 #include "core/filelengthvalues.h"
 #include "encseq-def.h"
 #include "sfx-progress.h"
-#include "verbose-def.h"
+#include "core/logger.h"
 #include "files2encseq.h"
 
 static unsigned long *initcharacterdistribution(const GtAlphabet *alpha)
@@ -55,7 +55,7 @@ Encodedsequence *fromfiles2encseq(ArraySeqpos *sequenceseppos,
                                   bool outdestab,
                                   bool outsdstab,
                                   bool outssptab,
-                                  Verboseinfo *verboseinfo,
+                                  GtLogger *logger,
                                   GtError *err)
 {
   Seqpos totallength;
@@ -117,7 +117,7 @@ Encodedsequence *fromfiles2encseq(ArraySeqpos *sequenceseppos,
                                         characterdistribution,
                                         outssptab,
                                         sequenceseppos,
-                                        verboseinfo,
+                                        logger,
                                         err) != 0)
     {
       haserr = true;
@@ -143,7 +143,7 @@ Encodedsequence *fromfiles2encseq(ArraySeqpos *sequenceseppos,
                                      : NULL,
                                    characterdistribution,
                                    &specialcharinfo,
-                                   verboseinfo,
+                                   logger,
                                    err);
     if (encseq == NULL)
     {

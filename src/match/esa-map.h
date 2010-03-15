@@ -19,20 +19,20 @@
 #define ESA_MAP_H
 #include "sarr-def.h"
 #include "seqpos-def.h"
-#include "verbose-def.h"
+#include "core/logger.h"
 
 void freesuffixarray(Suffixarray *suffixarray);
 
 int streamsuffixarray(Suffixarray *suffixarray,
                       unsigned int demand,
                       const GtStr *indexname,
-                      Verboseinfo *verboseinfo,
+                      GtLogger *logger,
                       GtError *err);
 
 int mapsuffixarray(Suffixarray *suffixarray,
                    unsigned int demand,
                    const GtStr *indexname,
-                   Verboseinfo *verboseinfo,
+                   GtLogger *logger,
                    GtError *err);
 
 #endif

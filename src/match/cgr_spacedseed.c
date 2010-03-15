@@ -188,9 +188,9 @@ int matchspacedseed(bool withesa,
   Genericindex *genericindex = NULL;
   bool haserr = false;
   Spacedseed *spse;
-  Verboseinfo *verboseinfo;
+  GtLogger *logger;
 
-  verboseinfo = newverboseinfo(verbose);
+  logger = gt_logger_new(verbose, GT_LOGGER_DEFLT_PREFIX, stdout);
   /*
   spse = spacedseed_new("11011011000011011",err);
   */
@@ -203,7 +203,7 @@ int matchspacedseed(bool withesa,
   {
     genericindex = genericindex_new(str_inputindex,withesa,
                                     withesa && docompare,false,false,
-                                    0,verboseinfo,err);
+                                    0,logger,err);
     if (genericindex == NULL)
     {
       haserr = true;
@@ -284,6 +284,6 @@ int matchspacedseed(bool withesa,
   }
   genericindex_delete(genericindex);
   spacedseed_delete(spse);
-  freeverboseinfo(&verboseinfo);
+  gt_logger_delete(logger);
   return haserr ? -1 : 0;
 }

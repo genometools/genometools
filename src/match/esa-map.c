@@ -52,7 +52,7 @@
 
 static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
                                          const GtStr *indexname,
-                                         Verboseinfo *verboseinfo,
+                                         GtLogger *logger,
                                          FILE *fpin,
                                          GtError *err)
 {
@@ -126,7 +126,7 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
   }
   gt_str_delete(currentline);
   if (!haserr && allkeysdefined(indexname,PROJECTFILESUFFIX,riktab,
-                                verboseinfo,err) != 0)
+                                logger,err) != 0)
   {
     haserr = true;
   }
@@ -200,7 +200,7 @@ static void initsuffixarray(Suffixarray *suffixarray)
 
 static bool scanprjfileuintkeys(Suffixarray *suffixarray,
                                 const GtStr *indexname,
-                                Verboseinfo *verboseinfo,
+                                GtLogger *logger,
                                 GtError *err)
 {
   bool haserr = false;
@@ -213,7 +213,7 @@ static bool scanprjfileuintkeys(Suffixarray *suffixarray,
     haserr = true;
   }
   if (!haserr && scanprjfileuintkeysviafileptr(suffixarray,
-                                               indexname,verboseinfo,
+                                               indexname,logger,
                                                fp,err) != 0)
   {
     haserr = true;
@@ -256,7 +256,7 @@ static int inputsuffixarray(bool map,
                             Suffixarray *suffixarray,
                             unsigned int demand,
                             const GtStr *indexname,
-                            Verboseinfo *verboseinfo,
+                            GtLogger *logger,
                             GtError *err)
 {
   bool haserr = false;
@@ -274,7 +274,7 @@ static int inputsuffixarray(bool map,
                                                                   : false,
                                            (demand & SARR_SSPTAB) ? true
                                                                   : false,
-                                           verboseinfo,
+                                           logger,
                                            err);
   if (suffixarray->encseq == NULL)
   {
@@ -285,7 +285,7 @@ static int inputsuffixarray(bool map,
   }
   if (!haserr)
   {
-    haserr = scanprjfileuintkeys(suffixarray,indexname,verboseinfo,err);
+    haserr = scanprjfileuintkeys(suffixarray,indexname,logger,err);
   }
   if (!haserr && (demand & SARR_SUFTAB))
   {
@@ -413,7 +413,7 @@ static int inputsuffixarray(bool map,
 int streamsuffixarray(Suffixarray *suffixarray,
                       unsigned int demand,
                       const GtStr *indexname,
-                      Verboseinfo *verboseinfo,
+                      GtLogger *logger,
                       GtError *err)
 {
   gt_error_check(err);
@@ -421,14 +421,14 @@ int streamsuffixarray(Suffixarray *suffixarray,
                           suffixarray,
                           demand,
                           indexname,
-                          verboseinfo,
+                          logger,
                           err);
 }
 
 int mapsuffixarray(Suffixarray *suffixarray,
                    unsigned int demand,
                    const GtStr *indexname,
-                   Verboseinfo *verboseinfo,
+                   GtLogger *logger,
                    GtError *err)
 {
   gt_error_check(err);
@@ -437,6 +437,6 @@ int mapsuffixarray(Suffixarray *suffixarray,
                           suffixarray,
                           demand,
                           indexname,
-                          verboseinfo,
+                          logger,
                           err);
 }

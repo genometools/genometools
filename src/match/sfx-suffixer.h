@@ -22,7 +22,7 @@
 #include "sfx-progress.h"
 #include "sfx-strategy.h"
 #include "sfx-bentsedg.h"
-#include "verbose-def.h"
+#include "core/logger.h"
 #include "seqpos-def.h"
 
 typedef struct Sfxiterator Sfxiterator;
@@ -36,7 +36,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
                             Outlcpinfo *outlcpinfo,
                             const Sfxstrategy *sfxstrategy,
                             Sfxprogress *sfxprogress,
-                            Verboseinfo *verboseinfo,
+                            GtLogger *logger,
                             GtError *err);
 
 const Seqpos *nextSfxiterator(Seqpos *numberofsuffixes,

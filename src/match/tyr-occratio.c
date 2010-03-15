@@ -18,7 +18,7 @@
 #include "core/str.h"
 #include "core/unused_api.h"
 #include "esa-seqread.h"
-#include "verbose-def.h"
+#include "core/logger.h"
 #include "spacedef.h"
 #include "tyr-occratio.h"
 
@@ -193,7 +193,7 @@ static int computeoccurrenceratio(Sequentialsuffixarrayreader *ssar,
                                   GtArrayuint64_t *uniquedistribution,
                                   GtArrayuint64_t *nonuniquedistribution,
                                   GtArrayuint64_t *nonuniquemultidistribution,
-                                  Verboseinfo *verboseinfo,
+                                  GtLogger *logger,
                                   GtError *err)
 {
   Dfsstate state;
@@ -217,7 +217,7 @@ static int computeoccurrenceratio(Sequentialsuffixarrayreader *ssar,
                     assignleftmostleaf,
                     assignrightmostleaf,
                     &state,
-                    verboseinfo,
+                    logger,
                     err) != 0)
   {
     haserr = true;
@@ -232,7 +232,7 @@ int tyr_occratio(const GtStr *str_inputindex,
                  GtArrayuint64_t *uniquedistribution,
                  GtArrayuint64_t *nonuniquedistribution,
                  GtArrayuint64_t *nonuniquemultidistribution,
-                 Verboseinfo *verboseinfo,
+                 GtLogger *logger,
                  GtError *err)
 {
   bool haserr = false;
@@ -258,7 +258,7 @@ int tyr_occratio(const GtStr *str_inputindex,
                                uniquedistribution,
                                nonuniquedistribution,
                                nonuniquemultidistribution,
-                               verboseinfo,
+                               logger,
                                err) != 0)
     {
       haserr = true;

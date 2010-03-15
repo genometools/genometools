@@ -19,7 +19,7 @@
 #define SFX_PARTSSUF_DEF_H
 
 #include "seqpos-def.h"
-#include "verbose-def.h"
+#include "core/logger.h"
 #include "intcode-def.h"
 
 typedef struct Suftabparts Suftabparts;
@@ -29,7 +29,7 @@ Suftabparts *newsuftabparts(unsigned int numofparts,
                             Codetype numofallcodes,
                             Seqpos numofsuffixestoinsert,
                             Seqpos fullspecials,
-                            Verboseinfo *verboseinfo);
+                            GtLogger *logger);
 
 Codetype stpgetcurrentmincode(unsigned int part,
                               const Suftabparts *suftabparts);

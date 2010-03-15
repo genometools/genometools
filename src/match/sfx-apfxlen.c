@@ -22,7 +22,7 @@
 #include "core/minmax.h"
 #include "intcode-def.h"
 #include "seqpos-def.h"
-#include "verbose-def.h"
+#include "core/logger.h"
 #include "bcktab.h"
 #include "initbasepower.h"
 
@@ -150,13 +150,13 @@ int checkprefixlength(unsigned int maxprefixlen,
   return 0;
 }
 
-void showmaximalprefixlength(Verboseinfo *verboseinfo,
+void showmaximalprefixlength(GtLogger *logger,
                              unsigned int maxprefixlen,
                              unsigned int recommended)
 {
-  showverbose(verboseinfo,
+  gt_logger_log(logger,
               "for this input size and alphabet size, "
               "the maximal prefixlength");
-  showverbose(verboseinfo,"(argument of option -pl) is %u,",maxprefixlen);
-  showverbose(verboseinfo,"the recommended prefixlength is %u",recommended);
+  gt_logger_log(logger,"(argument of option -pl) is %u,",maxprefixlen);
+  gt_logger_log(logger,"the recommended prefixlength is %u",recommended);
 }

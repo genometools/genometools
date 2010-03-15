@@ -24,7 +24,7 @@
 #include "seqpos-def.h"
 #include "sfx-progress.h"
 #include "encseq-def.h"
-#include "verbose-def.h"
+#include "core/logger.h"
 
 Encodedsequence *fromfiles2encseq(ArraySeqpos *sequenceseppos,
                                   Sfxprogress *sfxprogress,
@@ -39,7 +39,7 @@ Encodedsequence *fromfiles2encseq(ArraySeqpos *sequenceseppos,
                                   bool outdestab,
                                   bool outsdstab,
                                   bool outssptab,
-                                  Verboseinfo *verboseinfo,
+                                  GtLogger *logger,
                                   GtError *err);
 
 #endif

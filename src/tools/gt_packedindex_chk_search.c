@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "core/error.h"
+#include "core/logger.h"
 #include "core/minmax.h"
 #include "core/option.h"
 #include "core/str.h"
@@ -28,7 +29,6 @@
 #include "match/esa-mmsearch.h"
 #include "match/sarr-def.h"
 #include "match/esa-map.h"
-#include "match/verbose-def.h"
 #include "tools/gt_packedindex_chk_search.h"
 #include "match/sfx-apfxlen.h"
 
@@ -61,7 +61,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
   bool had_err = false;
   BWTSeqExactMatchesIterator EMIter;
   bool EMIterInitialized = false;
-  Verboseinfo *verbosity = NULL;
+  GtLogger *logger = NULL;
   inputProject = gt_str_new();
 
   do {
@@ -86,16 +86,17 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
     }
     gt_str_set(inputProject, argv[parsedArgs]);
 
-    verbosity = newverboseinfo(params.verboseOutput);
+    logger = gt_logger_new(params.verboseOutput,
+                           GT_LOGGER_DEFLT_PREFIX, stdout);
 
-    bwtSeq = availBWTSeq(&params.idx.final, verbosity, err);
+    bwtSeq = availBWTSeq(&params.idx.final, logger, err);
     if ((had_err = bwtSeq == NULL))
       break;
 
     {
       enum verifyBWTSeqErrCode retval =
         BWTSeqVerifyIntegrity(bwtSeq, inputProject, params.flags,
-                              params.progressInterval, stderr, verbosity, err);
+                              params.progressInterval, stderr, logger, err);
       if ((had_err = (retval != VERIFY_BWTSEQ_NO_ERROR)))
       {
         fprintf(stderr, "index integrity check failed: %s\n",
@@ -250,7 +251,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
   if (saIsLoaded) freesuffixarray(&suffixarray);
   if (epi) freeEnumpatterniterator(&epi);
   if (bwtSeq) deleteBWTSeq(bwtSeq);
-  if (verbosity) freeverboseinfo(&verbosity);
+  if (logger) gt_logger_delete(logger);
   if (inputProject) gt_str_delete(inputProject);
   return had_err?-1:0;
 }

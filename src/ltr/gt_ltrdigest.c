@@ -19,6 +19,7 @@
 #include <string.h>
 #include "core/fileutils_api.h"
 #include "core/log.h"
+#include "core/logger.h"
 #include "core/ma.h"
 #include "core/option.h"
 #include "core/outputfile.h"
@@ -31,7 +32,6 @@
 #include "ltr/ltrdigest_stream.h"
 #include "ltr/ltrfileout_stream.h"
 #include "match/encseq-def.h"
-#include "match/verbose-def.h"
 
 typedef struct GtLTRdigestOptions {
   GtPBSOptions  pbs_opts;
@@ -395,7 +395,8 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
       tests_to_run = 0,
       arg = parsed_args;
   GtStr *indexname = gt_str_new_cstr(argv[arg+1]);
-  Verboseinfo *vbi = newverboseinfo(arguments->verbose);
+  GtLogger *logger = gt_logger_new(arguments->verbose,
+                                   GT_LOGGER_DEFLT_PREFIX, stdout);
   gt_error_check(err);
   gt_assert(arguments);
 
@@ -406,7 +407,7 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
                                                true,
                                                true,
                                                true,
-                                               vbi,
+                                               logger,
                                                err);
   if (gt_error_is_set(err))
     had_err = -1;
@@ -506,7 +507,7 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
   gt_encodedsequence_delete(encseq);
   encseq = NULL;
   gt_bioseq_delete(arguments->pbs_opts.trna_lib);
-  freeverboseinfo(&vbi);
+  gt_logger_delete(logger);
 
   return had_err;
 }

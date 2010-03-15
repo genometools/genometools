@@ -458,7 +458,7 @@ static int compareFixedkeys(const void *a,const void *b)
 
 int gt_extractkeysfromdesfile(const GtStr *indexname,
                               bool sortkeys,
-                              Verboseinfo *verboseinfo,
+                              GtLogger *logger,
                               GtError *err)
 {
   FILE *fpin, *fpout = NULL;
@@ -602,10 +602,10 @@ int gt_extractkeysfromdesfile(const GtStr *indexname,
   }
   if (!haserr)
   {
-    showverbose(verboseinfo,"number of keys of length %lu = %lu",
+    gt_logger_log(logger,"number of keys of length %lu = %lu",
                 constantkeylen,linenum);
     /*
-    showverbose(verboseinfo,"number of incorrectly ordered keys = %lu",
+    gt_logger_log(logger,"number of incorrectly ordered keys = %lu",
                 incorrectorder);
     */
   }

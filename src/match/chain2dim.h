@@ -20,7 +20,7 @@
 
 #include "core/error_api.h"
 #include "seqpos-def.h"
-#include "verbose-def.h"
+#include "core/logger.h"
 
 /*
   The following string is used to trigger the usage of gap costs
@@ -110,7 +110,7 @@ void gt_chain_applyweight(double weightfactor,GtChainmatchtable *matchtable);
 
 /* the function to sort an array of matches */
 
-void gt_chain_possiblysortmatches(Verboseinfo *verboseinfo,
+void gt_chain_possiblysortmatches(GtLogger *logger,
                                   GtChainmatchtable *matchtable,
                                   unsigned int presortdim);
 
@@ -146,7 +146,7 @@ void gt_chain_fastchaining(const GtChainmode *chainmode,
                            bool withequivclasses,
                            GtChainprocessor chainprocessor,
                            void *cpinfo,
-                           Verboseinfo *verboseinfo);
+                           GtLogger *logger);
 
 /* obtain the score of a chain */
 

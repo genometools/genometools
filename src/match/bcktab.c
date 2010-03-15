@@ -135,7 +135,7 @@ static unsigned long **allocdistprefixindexcounts(const Codetype *basepower,
       ALLOCASSIGNSPACE(distpfxidx,NULL,unsigned long *,prefixlength-1);
       ALLOCASSIGNSPACE(counters,NULL,unsigned long,numofcounters);
       /*
-      showverbose(verboseinfo,"sizeof (distpfxidx)=%lu",
+      gt_logger_log(logger,"sizeof (distpfxidx)=%lu",
                   (unsigned long) sizeof (*distpfxidx) * (prefixlength-1) +
                                   sizeof (*counters) * numofcounters);
       */
@@ -177,7 +177,7 @@ static Bcktab *newBcktab(unsigned int numofchars,
 Bcktab *allocBcktab(unsigned int numofchars,
                     unsigned int prefixlength,
                     bool storespecialcodes,
-                    Verboseinfo *verboseinfo,
+                    GtLogger *logger,
                     GtError *err)
 {
   Bcktab *bcktab;
@@ -200,7 +200,7 @@ Bcktab *allocBcktab(unsigned int numofchars,
     ALLOCASSIGNSPACE(bcktab->leftborder,NULL,Seqpos,
                      bcktab->numofallcodes+1);
     /*
-    showverbose(verboseinfo,"sizeof (leftborder)=%lu",
+    gt_logger_log(logger,"sizeof (leftborder)=%lu",
               (unsigned long) sizeof (*bcktab->leftborder) *
                               (bcktab->numofallcodes+1));
     */
@@ -210,7 +210,7 @@ Bcktab *allocBcktab(unsigned int numofchars,
     ALLOCASSIGNSPACE(bcktab->countspecialcodes,NULL,unsigned long,
                      bcktab->numofspecialcodes);
     /*
-    showverbose(verboseinfo,
+    gt_logger_log(logger,
                 "sizeof (countspecialcodes)=%lu",
                 (unsigned long) sizeof (*bcktab->countspecialcodes) *
                 bcktab->numofspecialcodes);
@@ -220,8 +220,8 @@ Bcktab *allocBcktab(unsigned int numofchars,
                   (size_t) bcktab->numofspecialcodes);
     bcktab->distpfxidx = allocdistprefixindexcounts(bcktab->basepower,
                                                     prefixlength);
-    showverbose(verboseinfo,"sizeof (bcktab)=" Formatuint64_t " bytes",
-                PRINTuint64_tcast(sizeofbuckettable(numofchars,prefixlength)));
+    gt_logger_log(logger,"sizeof (bcktab)=" Formatuint64_t " bytes",
+                 PRINTuint64_tcast(sizeofbuckettable(numofchars,prefixlength)));
   }
   if (haserr)
   {
@@ -735,19 +735,19 @@ void determinemaxbucketsize(Bcktab *bcktab,
     bcktab->logofremaining = 0;
   }
   /*
-  showverbose(verboseinfo,"maxbucket (specials)=%lu",
+  gt_logger_log(logger,"maxbucket (specials)=%lu",
               bcktab->maxbucketinfo.specialsmaxbucketsize);
-  showverbose(verboseinfo,"maxbucket (nonspecials)=%lu",
+  gt_logger_log(logger,"maxbucket (nonspecials)=%lu",
               bcktab->maxbucketinfo.nonspecialsmaxbucketsize);
-  showverbose(verboseinfo,"maxbucket (all)=%lu",
+  gt_logger_log(logger,"maxbucket (all)=%lu",
               bcktab->maxbucketinfo.maxbucketsize);
   */
 }
 
 static void showlog2info(const char *tag,const unsigned long *log2tab,
-                         Verboseinfo *verboseinfo)
+                         GtLogger *logger)
 {
-  if (verboseinfo != NULL)
+  if (logger != NULL)
   {
     int maxbits;
     unsigned long currentsum = 0, total = 0;
@@ -760,22 +760,22 @@ static void showlog2info(const char *tag,const unsigned long *log2tab,
       if (log2tab[maxbits] > 0)
       {
         currentsum += log2tab[maxbits];
-        showverbose(verboseinfo,"%s[%d]=%lu (%.4f)",tag,maxbits,
+        gt_logger_log(logger,"%s[%d]=%lu (%.4f)",tag,maxbits,
                                  log2tab[maxbits],(double) currentsum/total);
       }
     }
-    showverbose(verboseinfo,"total=%lu",total);
+    gt_logger_log(logger,"total=%lu",total);
   }
 }
 
-void bcktab_showlog2info(const Bcktab *bcktab,Verboseinfo *verboseinfo)
+void bcktab_showlog2info(const Bcktab *bcktab,GtLogger *logger)
 {
   showlog2info("log2nonspecialbucketsizedist",
                 bcktab->maxbucketinfo.log2nonspecialbucketsizedist,
-                verboseinfo);
+                logger);
   showlog2info("log2specialbucketsizedist",
                 bcktab->maxbucketinfo.log2specialbucketsizedist,
-                verboseinfo);
+                logger);
 }
 
 unsigned long bcktab_specialsmaxbucketsize(const Bcktab *bcktab)

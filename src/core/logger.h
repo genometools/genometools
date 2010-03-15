@@ -24,6 +24,8 @@
 
 typedef struct GtLogger GtLogger;
 
+#define GT_LOGGER_DEFLT_PREFIX "# "
+
 /* Creates a new <GtLogger>, with logging <enabled> or not,
    and prefixing all log entries with <prefix> (e.g. "debug").
    The log output is terminated by a newline. All log output will

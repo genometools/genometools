@@ -83,7 +83,7 @@ const char *EISIntegrityCheckResultStrings[] =
 extern enum EISIntegrityCheckResults
 EISVerifyIntegrity(EISeq *seqIdx, const GtStr *projectName, Seqpos skip,
                    unsigned long tickPrint, FILE *fp, int chkFlags,
-                   Verboseinfo *verbosity, GtError *err)
+                   GtLogger *verbosity, GtError *err)
 {
   FILE *bwtFP;
   Seqpos pos = 0;
@@ -124,7 +124,7 @@ EISVerifyIntegrity(EISeq *seqIdx, const GtStr *projectName, Seqpos skip,
       unsigned sym;
       if (skip >= len)
       {
-        showverbose(verbosity, "Invalid skip request: %lld,"
+        gt_logger_log(verbosity, "Invalid skip request: %lld,"
                     " too large for sequence length: "FormatSeqpos,
                     (long long)skip, len);
         return -1;

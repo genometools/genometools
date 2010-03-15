@@ -154,10 +154,11 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
 {
   Genericindex *genericindex = NULL;
   bool haserr = false;
-  Verboseinfo *verboseinfo;
+  GtLogger *logger;
   const Encodedsequence *encseq = NULL;
 
-  verboseinfo = newverboseinfo(idxlocalioptions->verbose);
+  logger = gt_logger_new(idxlocalioptions->verbose,
+                         GT_LOGGER_DEFLT_PREFIX, stdout);
 
   if (idxlocalioptions->doonline)
   {
@@ -167,7 +168,7 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
                                  false,
                                  false,
                                  true,
-                                 verboseinfo,
+                                 logger,
                                  err);
     if (encseq == NULL)
     {
@@ -182,7 +183,7 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
                                     false,
                                     true,
                                     0,
-                                    verboseinfo,
+                                    logger,
                                     err);
     if (genericindex == NULL)
     {
@@ -323,6 +324,7 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
   {
     genericindex_delete(genericindex);
   }
-  freeverboseinfo(&verboseinfo);
+  gt_logger_delete(logger);
+  logger = NULL;
   return haserr ? -1 : 0;
 }

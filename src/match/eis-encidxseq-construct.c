@@ -39,7 +39,7 @@ createEncIdxSeq(const GtStr *projectName,
                 headerWriteFunc *extHeaderCallbacks, void **headerCBData,
                 bitInsertFunc biFunc, BitOffset cwExtBitsPerPos,
                 varExtBitsEstimator biVarBits, void *cbState,
-                Verboseinfo *verbosity, GtError *err)
+                GtLogger *verbosity, GtError *err)
 {
   Suffixarray suffixArray;
   struct encIdxSeq *newSeqIdx;
@@ -211,7 +211,7 @@ loadEncIdxSeqForSA(const Suffixarray *sa, Seqpos totalLen,
 extern EISeq *
 loadEncIdxSeq(const GtStr *projectName,
               enum seqBaseEncoding encType, int features,
-              Verboseinfo *verbosity, GtError *err)
+              GtLogger *verbosity, GtError *err)
 {
   struct encIdxSeq *newSeqIdx = NULL;
   Suffixarray suffixArray;

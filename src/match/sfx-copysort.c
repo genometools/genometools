@@ -22,7 +22,7 @@
 #include "bcktab.h"
 #include "kmer2string.h"
 #include "sfx-copysort.h"
-#include "verbose-def.h"
+#include "core/logger.h"
 
 typedef struct
 {
@@ -525,7 +525,7 @@ bool gt_hardworkbeforecopysort(const GtBucketspec2 *bucketspec2,
 
 void gt_copysortsuffixes(const GtBucketspec2 *bucketspec2,
                          Seqpos *suftab,
-                         Verboseinfo *verboseinfo)
+                         GtLogger *logger)
 {
   Seqpos hardwork = 0, **targetptr;
   unsigned int idx, idxsource, source, second;
@@ -552,7 +552,7 @@ void gt_copysortsuffixes(const GtBucketspec2 *bucketspec2,
       if (!bucketspec2->subbuckettab[source][second].sorted && source != second)
       {
         gt_assert(bucketspec2->subbuckettab[source][second].hardworktodo);
-        showverbose(verboseinfo,"hard work for %u %u",source,second);
+        gt_logger_log(logger,"hard work for %u %u",source,second);
         hardwork += getendidx(bucketspec2,source,second) -
                     getstartidx(bucketspec2,source,second);
         bucketspec2->subbuckettab[source][second].sorted = true;
@@ -593,7 +593,7 @@ void gt_copysortsuffixes(const GtBucketspec2 *bucketspec2,
     bucketspec2->superbuckettab[source].sorted = true;
   }
   gt_free(targetptr);
-  showverbose(verboseinfo,"hardwork = " FormatSeqpos " (%.2f)",
+  gt_logger_log(logger,"hardwork = " FormatSeqpos " (%.2f)",
             PRINTSeqposcast(hardwork),
             (double) hardwork/getencseqtotallength(bucketspec2->encseq));
 }

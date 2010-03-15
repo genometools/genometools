@@ -35,7 +35,7 @@
 #include "encseq-def.h"
 #include "sfx-suftaborder.h"
 #include "sfx-bentsedg.h"
-#include "verbose-def.h"
+#include "core/logger.h"
 #include "stamp.h"
 
 typedef unsigned char Diffrank;
@@ -104,7 +104,7 @@ struct Differencecover
   GtArrayPairsuffixptr firstgeneration;
   unsigned long firstgenerationtotalwidth,
                 firstgenerationcount;
-  Verboseinfo *verboseinfo;
+  GtLogger *logger;
 };
 
 /* Compute difference cover on the fly */
@@ -239,7 +239,7 @@ int differencecover_vparamverify(const Differencecover *dcov,GtError *err)
 Differencecover *differencecover_new(unsigned int vparam,
                                      const Encodedsequence *encseq,
                                      Readmode readmode,
-                                     Verboseinfo *verboseinfo)
+                                     GtLogger *logger)
 {
   unsigned int offset = 0, v = 1U;
   Differencecover *dcov;
@@ -251,7 +251,7 @@ Differencecover *differencecover_new(unsigned int vparam,
   dcov = gt_malloc(sizeof (*dcov));
   dcov->numofchars = getencseqAlphabetnumofchars(encseq);
   dcov->totallength = getencseqtotallength(encseq);
-  dcov->verboseinfo = verboseinfo;
+  dcov->logger = logger;
   for (dcov->logmod = 0;
        dcov->logmod < (unsigned int) (sizeof (differencecoversizes)/
                                      sizeof (differencecoversizes[0]));
@@ -658,9 +658,9 @@ static void dc_showintervalsizes(unsigned long count,unsigned long totalwidth,
                                  unsigned long effectivesamplesize,
                                  unsigned long maxwidth,
                                  Seqpos depth,
-                                 Verboseinfo *verboseinfo)
+                                 GtLogger *logger)
 {
-  showverbose(verboseinfo,
+  gt_logger_log(logger,
               "level " FormatSeqpos
               ": (intervals=%lu,total=%lu,avg=%.2f,%.2f%% of all,maxwidth=%lu)",
               PRINTSeqposcast(depth),
@@ -700,12 +700,12 @@ static void dc_processunsortedrange(Differencecover *dcov,
                            dcov->effectivesamplesize,
                            dcov->firstwithnewdepth.maxwidth,
                            dcov->firstwithnewdepth.depth,
-                           dcov->verboseinfo);
+                           dcov->logger);
     } else
     {
       dcov->firstwithnewdepth.defined = true;
     }
-    showverbose(dcov->verboseinfo,
+    gt_logger_log(dcov->logger,
                 "enter new level " FormatSeqpos,PRINTSeqposcast(depth));
     dcov->firstwithnewdepth.left = left;
     dcov->firstwithnewdepth.right = right;
@@ -966,7 +966,7 @@ static void dc_sortremainingsamples(Differencecover *dcov)
                          dcov->effectivesamplesize,
                          dcov->allocateditvinfo,
                          dcov->currentdepth,
-                         dcov->verboseinfo);
+                         dcov->logger);
   }
   if (dcov->inversesuftab == NULL)
   { /* now maxdepth > prefixlength */
@@ -998,7 +998,7 @@ static void dc_sortremainingsamples(Differencecover *dcov)
     dcov->currentqueuesize--;
     dc_sortsuffixesonthislevel(dcov,pair.left,pair.right);
   }
-  showverbose(dcov->verboseinfo,"maxqueuesize = %lu",dcov->maxqueuesize);
+  gt_logger_log(dcov->logger,"maxqueuesize = %lu",dcov->maxqueuesize);
   gt_free(dcov->itvinfo);
   dcov->itvinfo = NULL;
   gt_inl_queue_delete(dcov->rangestobesorted);
@@ -1090,12 +1090,12 @@ void differencecover_sortsample(Differencecover *dcov,bool cmpcharbychar,
   }
   dcov->effectivesamplesize = dcov->samplesize - fullspecials;
   bcktab_leftborderpartialsums(dcov->bcktab,(Seqpos) dcov->effectivesamplesize);
-  showverbose(dcov->verboseinfo,
+  gt_logger_log(dcov->logger,
               "%lu positions are sampled (%.2f) pl=%u",
               dcov->samplesize,
               100.0 * (double) dcov->samplesize/(dcov->totallength+1),
               dcov->prefixlength);
-  showverbose(dcov->verboseinfo,"specials = %lu, fullspecials=%lu",
+  gt_logger_log(dcov->logger,"specials = %lu, fullspecials=%lu",
               specials,fullspecials);
   if (withcheck)
   {

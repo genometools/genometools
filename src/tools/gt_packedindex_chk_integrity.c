@@ -21,12 +21,12 @@
 
 #include "gt_packedindex_chk_integrity.h"
 #include "core/error.h"
+#include "core/logger.h"
 #include "core/option.h"
 #include "core/versionfunc.h"
 #include "match/eis-encidxseq.h"
 #include "match/eis-encidxseq-param.h"
 #include "match/eis-encidxseq-construct.h"
-#include "match/verbose-def.h"
 #include "tools/gt_packedindex_chk_integrity.h"
 
 #define DEFAULT_PROGRESS_INTERVAL  100000UL
@@ -53,7 +53,7 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], GtError *err)
   GtStr *inputProject;
   int parsedArgs;
   int had_err = 0;
-  Verboseinfo *verbosity = NULL;
+  GtLogger *logger = NULL;
   gt_error_check(err);
 
   switch (parseChkIndexOptions(&parsedArgs, argc, argv, &params, err))
@@ -68,10 +68,10 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], GtError *err)
 
   inputProject = gt_str_new_cstr(argv[parsedArgs]);
 
-  verbosity = newverboseinfo(params.verboseOutput);
+  logger = gt_logger_new(params.verboseOutput, GT_LOGGER_DEFLT_PREFIX, stdout);
 
   seq = loadEncIdxSeq(inputProject, params.encType, params.EISFeatureSet,
-                      verbosity, err);
+                      logger, err);
   if ((had_err = seq == NULL))
   {
     gt_error_set(err, "Failed to load index: %s", gt_str_get(inputProject));
@@ -84,7 +84,7 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], GtError *err)
       int corrupt
         = EISVerifyIntegrity(seq, inputProject, params.skipCount,
                              params.progressInterval, stderr,
-                             params.checkFlags, verbosity, err);
+                             params.checkFlags, logger, err);
       if ((had_err = corrupt != 0))
       {
         fputs(gt_error_get(err), stderr); fputs("\n", stderr);
@@ -95,7 +95,7 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], GtError *err)
   }
   if (seq) deleteEncIdxSeq(seq);
   if (inputProject) gt_str_delete(inputProject);
-  if (verbosity) freeverboseinfo(&verbosity);
+  if (logger) gt_logger_delete(logger);
   return had_err?-1:0;
 }
 

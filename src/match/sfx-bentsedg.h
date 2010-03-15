@@ -78,7 +78,7 @@ void sortallbuckets(Suftab *suftab,
                     Outlcpinfo *outlcpinfo,
                     const Sfxstrategy *sfxstrategy,
                     unsigned long long *bucketiterstep,
-                    Verboseinfo *verboseinfo);
+                    GtLogger *logger);
 
 void sortbucketofsuffixes(Seqpos *suffixestobesorted,
                           GtBucketspec2 *bucketspec2,
@@ -94,6 +94,6 @@ void sortbucketofsuffixes(Seqpos *suffixestobesorted,
                           void *voiddcov,
                           void (*dc_processunsortedrange)(void *,Seqpos *,
                                                           Seqpos *,Seqpos),
-                          Verboseinfo *verboseinfo);
+                          GtLogger *logger);
 
 #endif

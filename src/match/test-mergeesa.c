@@ -23,7 +23,7 @@
 #include "spacedef.h"
 #include "emimergeesa.h"
 #include "esa-fileend.h"
-#include "verbose-def.h"
+#include "core/logger.h"
 #include "lcpoverflow.h"
 
 #include "encseq2offset.pr"
@@ -214,7 +214,7 @@ static int mergeandstoreindex(const GtStr *storeindex,
 
 int performtheindexmerging(const GtStr *storeindex,
                            const GtStrArray *indexnametab,
-                           Verboseinfo *verboseinfo,
+                           GtLogger *logger,
                            GtError *err)
 {
   Emissionmergedesa emmesa;
@@ -225,7 +225,7 @@ int performtheindexmerging(const GtStr *storeindex,
   if (emissionmergedesa_init(&emmesa,
                              indexnametab,
                              demand,
-                             verboseinfo,
+                             logger,
                              err) != 0)
   {
     haserr = true;

@@ -38,7 +38,7 @@
 #include "intbits-tab.h"
 #include "intcode-def.h"
 #include "safecast-gen.h"
-#include "verbose-def.h"
+#include "core/logger.h"
 #include "encseq-def.h"
 #include "mapspec-gen.h"
 
@@ -753,7 +753,7 @@ int flushencseqfile(const GtStr *indexname,Encodedsequence *encseq,
 
 static int fillencseqmapspecstartptr(Encodedsequence *encseq,
                                      const GtStr *indexname,
-                                     Verboseinfo *verboseinfo,
+                                     GtLogger *logger,
                                      GtError *err)
 {
   bool haserr = false;
@@ -788,7 +788,7 @@ static int fillencseqmapspecstartptr(Encodedsequence *encseq,
     nextstart++;
   }
   gt_assert(encseq->characterdistribution != NULL);
-  showverbose(verboseinfo,"sat=%s",encseqaccessname(encseq));
+  gt_logger_log(logger,"sat=%s",encseqaccessname(encseq));
   gt_str_delete(tmpfilename);
   return haserr ? -1 : 0;
 }
@@ -2539,7 +2539,7 @@ static Encodedsequence *determineencseqkeyvalues(
                                           unsigned long lengthofdbfilenames,
                                           Seqpos specialranges,
                                           const GtAlphabet *alpha,
-                                          Verboseinfo *verboseinfo)
+                                          GtLogger *logger)
 {
   double spaceinbitsperchar;
   Encodedsequence *encseq;
@@ -2606,7 +2606,7 @@ static Encodedsequence *determineencseqkeyvalues(
   spaceinbitsperchar
     = (double) ((uint64_t) CHAR_BIT * (uint64_t) encseq->sizeofrep)/
       (double) totallength;
-  showverbose(verboseinfo,
+  gt_logger_log(logger,
               "init character encoding (%s,%lu bytes,%.2f bits/symbol)",
               encseq->name,encseq->sizeofrep,spaceinbitsperchar);
   return encseq;
@@ -2848,7 +2848,7 @@ unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab)
                                 const char *str_sat,
                                 unsigned long *characterdistribution,
                                 const Specialcharinfo *specialcharinfo,
-                                Verboseinfo *verboseinfo,
+                                GtLogger *logger,
                                 GtError *err)
 {
   Encodedsequence *encseq = NULL;
@@ -2875,7 +2875,7 @@ unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab)
     sat = (Positionaccesstype) retcode;
   }
 #ifdef INLINEDENCSEQ
-  showverbose(verboseinfo,"inlined encodeded sequence");
+  gt_logger_log(logger,"inlined encodeded sequence");
 #endif
   if (!haserr)
   {
@@ -2889,9 +2889,9 @@ unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab)
                                       lengthofdbfilenames,
                                       specialranges,
                                       alphabet,
-                                      verboseinfo);
+                                      logger);
     ALLASSIGNAPPENDFUNC(sat);
-    showverbose(verboseinfo,"deliverchar=%s",encseq->delivercharname);
+    gt_logger_log(logger,"deliverchar=%s",encseq->delivercharname);
     encseq->mappedptr = NULL;
     encseq->characterdistribution = characterdistribution;
     encseq->filenametab = (GtStrArray *) filenametab;
@@ -2934,7 +2934,7 @@ unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab)
                                                bool withdestab,
                                                bool withsdstab,
                                                bool withssptab,
-                                               Verboseinfo *verboseinfo,
+                                               GtLogger *logger,
                                                GtError *err)
 {
   Encodedsequence *encseq = NULL;
@@ -2967,13 +2967,13 @@ unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab)
                                       firstencseqvalues.specialcharinfo
                                                        .specialranges,
                                       alpha,
-                                      verboseinfo);
+                                      logger);
     alpha = NULL;
     ALLASSIGNAPPENDFUNC(firstencseqvalues.sat);
-    showverbose(verboseinfo,"deliverchar=%s",encseq->delivercharname);
+    gt_logger_log(logger,"deliverchar=%s",encseq->delivercharname);
     if (withesqtab)
     {
-      if (fillencseqmapspecstartptr(encseq,indexname,verboseinfo,err) != 0)
+      if (fillencseqmapspecstartptr(encseq,indexname,logger,err) != 0)
       {
         haserr = true;
       }
@@ -3165,7 +3165,7 @@ static unsigned long currentspecialrangevalue(
 
 typedef struct
 {
-  Verboseinfo *verboseinfo;
+  GtLogger *logger;
   Seqpos specialrangesGtUchar,
          specialrangesUshort,
          specialrangesUint32,
@@ -3187,13 +3187,13 @@ static void updatesumranges(unsigned long key, unsigned long long value,
   updatesumrangeinfo->specialrangesUint32
      += currentspecialrangevalue(key,distvalue,(unsigned long) UINT32_MAX);
   updatesumrangeinfo->realspecialranges += distvalue;
-  showverbose(updatesumrangeinfo->verboseinfo,
+  gt_logger_log(updatesumrangeinfo->logger,
               "specialranges of length %lu=%lu",key,distvalue);
 }
 
 static Seqpos calcspecialranges(Seqpos *specialrangestab,
                          GtDiscDistri *distspralen,
-                         Verboseinfo *verboseinfo)
+                         GtLogger *logger)
 {
   Updatesumrangeinfo updatesumrangeinfo;
 
@@ -3201,7 +3201,7 @@ static Seqpos calcspecialranges(Seqpos *specialrangestab,
   updatesumrangeinfo.specialrangesUshort = 0;
   updatesumrangeinfo.specialrangesUint32 = 0;
   updatesumrangeinfo.realspecialranges = 0;
-  updatesumrangeinfo.verboseinfo = verboseinfo;
+  updatesumrangeinfo.logger = logger;
   gt_disc_distri_foreach(distspralen,updatesumranges,&updatesumrangeinfo);
   if (specialrangestab != NULL)
   {
@@ -3220,14 +3220,14 @@ static void doupdatesumranges(Specialcharinfo *specialcharinfo,
                               unsigned long lengthofdbfilenames,
                               unsigned int numofchars,
                               GtDiscDistri *distspralen,
-                              Verboseinfo *verboseinfo)
+                              GtLogger *logger)
 {
   uint64_t smallestsize = 0, tmp;
   bool smallestdefined = false;
   int c;
 
   specialcharinfo->realspecialranges
-    = calcspecialranges(specialrangestab,distspralen,verboseinfo);
+    = calcspecialranges(specialrangestab,distspralen,logger);
   gt_assert(forcetable <= 3U);
   for (c = 0; c<3; c++)
   {
@@ -3272,7 +3272,7 @@ int gt_inputfiles2sequencekeyvalues(
         unsigned long *characterdistribution,
         bool outssptab,
         ArraySeqpos *sequenceseppos,
-        Verboseinfo *verboseinfo,
+        GtLogger *logger,
         GtError *err)
 {
   GtSequenceBuffer *fb = NULL;
@@ -3450,7 +3450,7 @@ int gt_inputfiles2sequencekeyvalues(
     doupdatesumranges(specialcharinfo,forcetable,specialrangestab,currentpos,
                       gt_str_array_size(filenametab),
                       determinelengthofdbfilenames(filenametab),
-                      gt_alphabet_num_of_chars(alpha),distspralen,verboseinfo);
+                      gt_alphabet_num_of_chars(alpha),distspralen,logger);
   }
   gt_fa_xfclose(desfp);
   gt_fa_xfclose(sdsfp);
@@ -3463,7 +3463,7 @@ int gt_inputfiles2sequencekeyvalues(
 static void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
                                      const GtUchar *seq,
                                      const Seqpos len,
-                                     Verboseinfo *verboseinfo)
+                                     GtLogger *logger)
 {
   GtUchar charcode;
   Seqpos pos;
@@ -3514,7 +3514,7 @@ static void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
   }
   specialcharinfo->lengthofspecialsuffix = lastspeciallength;
   specialcharinfo->realspecialranges
-    = calcspecialranges(NULL,distspralen,verboseinfo);
+    = calcspecialranges(NULL,distspralen,logger);
   specialcharinfo->specialranges = specialcharinfo->realspecialranges;
   gt_disc_distri_delete(distspralen);
 }
@@ -3525,7 +3525,7 @@ Encodedsequence *plain2encodedsequence(bool withrange,
                                        const GtUchar *seq2,
                                        unsigned long len2,
                                        const GtAlphabet *alpha,
-                                       Verboseinfo *verboseinfo)
+                                       GtLogger *logger)
 {
   Encodedsequence *encseq;
   GtUchar *seqptr;
@@ -3547,7 +3547,7 @@ Encodedsequence *plain2encodedsequence(bool withrange,
     seqptr[len1] = (GtUchar) SEPARATOR;
     memcpy(seqptr + len1 + 1,seq2,sizeof (GtUchar) * len2);
   }
-  sequence2specialcharinfo(&samplespecialcharinfo,seqptr,len,verboseinfo);
+  sequence2specialcharinfo(&samplespecialcharinfo,seqptr,len,logger);
   encseq = determineencseqkeyvalues(sat,
                                     len,
                                     2UL,
@@ -3555,7 +3555,7 @@ Encodedsequence *plain2encodedsequence(bool withrange,
                                     0,
                                     samplespecialcharinfo.specialranges,
                                     alpha,
-                                    verboseinfo);
+                                    logger);
   encseq->specialcharinfo = samplespecialcharinfo;
   encseq->plainseq = seqptr;
   encseq->hasplainseqptr = (seq2 == NULL) ? true : false;
@@ -4934,7 +4934,7 @@ Codetype extractprefixcode(unsigned int *unitsnotspecial,
 static void showcharacterdistribution(
                    const GtAlphabet *alpha,
                    const unsigned long *characterdistribution,
-                   Verboseinfo *verboseinfo)
+                   GtLogger *logger)
 {
   unsigned int numofchars, idx;
 
@@ -4942,13 +4942,13 @@ static void showcharacterdistribution(
   gt_assert(characterdistribution != NULL);
   for (idx=0; idx<numofchars; idx++)
   {
-    showverbose(verboseinfo,"occurrences(%c)=%lu",
+    gt_logger_log(logger,"occurrences(%c)=%lu",
                 (int) gt_alphabet_pretty_symbol(alpha,idx),
                 characterdistribution[idx]);
   }
 }
 
-void gt_showsequencefeatures(Verboseinfo *verboseinfo,
+void gt_showsequencefeatures(GtLogger *logger,
                              const Encodedsequence *encseq,
                              bool withfilenames)
 {
@@ -4960,24 +4960,24 @@ void gt_showsequencefeatures(Verboseinfo *verboseinfo,
     for (idx = 0; idx < encseq->numofdbfiles; idx++)
     {
       gt_assert(encseq->filenametab != NULL);
-      showverbose(verboseinfo,"dbfile=%s " Formatuint64_t " " Formatuint64_t,
+      gt_logger_log(logger,"dbfile=%s " Formatuint64_t " " Formatuint64_t,
                      gt_str_array_get(encseq->filenametab,idx),
                      PRINTuint64_tcast(encseq->filelengthtab[idx].length),
                      PRINTuint64_tcast(encseq->filelengthtab[idx].
                                        effectivelength));
     }
   }
-  showverbose(verboseinfo,"totallength=" FormatSeqpos,
+  gt_logger_log(logger,"totallength=" FormatSeqpos,
               PRINTSeqposcast(encseq->totallength));
-  showverbose(verboseinfo,"numofsequences=%lu",encseq->numofdbsequences);
-  showverbose(verboseinfo,"specialcharacters=" FormatSeqpos,
+  gt_logger_log(logger,"numofsequences=%lu",encseq->numofdbsequences);
+  gt_logger_log(logger,"specialcharacters=" FormatSeqpos,
               PRINTSeqposcast(getencseqspecialcharacters(encseq)));
-  showverbose(verboseinfo,"specialranges=" FormatSeqpos,
+  gt_logger_log(logger,"specialranges=" FormatSeqpos,
               PRINTSeqposcast(getencseqspecialranges(encseq)));
-  showverbose(verboseinfo,"realspecialranges=" FormatSeqpos,
+  gt_logger_log(logger,"realspecialranges=" FormatSeqpos,
               PRINTSeqposcast(getencseqrealspecialranges(encseq)));
   gt_assert(encseq->characterdistribution != NULL);
-  showcharacterdistribution(alpha,encseq->characterdistribution,verboseinfo);
+  showcharacterdistribution(alpha,encseq->characterdistribution,logger);
 }
 
 int comparetwosuffixes(const Encodedsequence *encseq,

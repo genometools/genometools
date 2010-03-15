@@ -22,7 +22,7 @@
 #include "seqpos-def.h"
 #include "encseq-def.h"
 #include "esa-seqread.h"
-#include "verbose-def.h"
+#include "core/logger.h"
 
 typedef int (*Processmaxpairs)(void *,const Encodedsequence *,
                                Seqpos,Seqpos,Seqpos,GtError *);
@@ -33,7 +33,7 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
                       unsigned int searchlength,
                       Processmaxpairs processmaxpairs,
                       void *processmaxpairsinfo,
-                      Verboseinfo *verboseinfo,
+                      GtLogger *logger,
                       GtError *err);
 
 #endif

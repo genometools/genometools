@@ -25,7 +25,7 @@
 #include "core/alphabet.h"
 #include "sfx-ri-def.h"
 #include "fmindex.h"
-#include "verbose-def.h"
+#include "core/logger.h"
 #include "spacedef.h"
 
 #include "fmi-keyval.pr"
@@ -49,7 +49,7 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
                                  bool *storeindexpos,
                                  const GtStr *indexname,
                                  FILE *fpin,
-                                 Verboseinfo *verboseinfo,
+                                 GtLogger *logger,
                                  GtError *err)
 {
   bool haserr = false;
@@ -99,7 +99,7 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
     gt_str_delete(currentline);
   }
   if (!haserr && allkeysdefined(indexname,FMASCIIFILESUFFIX,riktab,
-                                verboseinfo,err) != 0)
+                                logger,err) != 0)
   {
     haserr = true;
   }
@@ -139,7 +139,7 @@ void freefmindex(Fmindex *fmindex)
 }
 
 static Encodedsequence *mapbwtencoding(const GtStr *indexname,
-                                       Verboseinfo *verboseinfo,
+                                       GtLogger *logger,
                                        GtError *err)
 {
   gt_error_check(err);
@@ -150,12 +150,12 @@ static Encodedsequence *mapbwtencoding(const GtStr *indexname,
                             false,
                             false,
                             false,
-                            verboseinfo,
+                            logger,
                             err);
 }
 
 int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
-                Verboseinfo *verboseinfo,GtError *err)
+                GtLogger *logger,GtError *err)
 {
   FILE *fpin = NULL;
   bool haserr = false, storeindexpos = true;
@@ -177,7 +177,7 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
                               &storeindexpos,
                               indexname,
                               fpin,
-                              verboseinfo,
+                              logger,
                               err) != 0)
     {
       haserr = true;
@@ -186,7 +186,7 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
   gt_fa_xfclose(fpin);
   if (!haserr)
   {
-    fmindex->bwtformatching = mapbwtencoding(indexname,verboseinfo,err);
+    fmindex->bwtformatching = mapbwtencoding(indexname,logger,err);
     if (fmindex->bwtformatching == NULL)
     {
       haserr = true;

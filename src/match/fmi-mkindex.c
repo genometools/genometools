@@ -20,7 +20,7 @@
 #include "core/option.h"
 #include "core/versionfunc.h"
 #include "fmindex.h"
-#include "verbose-def.h"
+#include "core/logger.h"
 #include "spacedef.h"
 #include "stamp.h"
 
@@ -182,7 +182,7 @@ static int mkfmindexoptions(Mkfmcallinfo *mkfmcallinfo,
   return retval;
 }
 
-static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,Verboseinfo *verboseinfo,
+static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,GtLogger *logger,
                         GtError *err)
 {
   Fmindex fm;
@@ -215,7 +215,7 @@ static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,Verboseinfo *verboseinfo,
                                 mkfmcallinfo->outfmindex,
                                 mkfmcallinfo->indexnametab,
                                 mkfmcallinfo->noindexpos ? false : true,
-                                verboseinfo,
+                                logger,
                                 err) != 0)
   {
     haserr = true;
@@ -241,12 +241,13 @@ int parseargsandcallmkfmindex(int argc,const char **argv,GtError *err)
   retval = mkfmindexoptions(&mkfmcallinfo,argc,argv,err);
   if (retval == 0)
   {
-    Verboseinfo *verboseinfo = newverboseinfo(false);
-    if (runmkfmindex(&mkfmcallinfo,verboseinfo,err) < 0)
+    GtLogger *logger = gt_logger_new(false, GT_LOGGER_DEFLT_PREFIX, stdout);
+    if (runmkfmindex(&mkfmcallinfo,logger,err) < 0)
     {
       haserr = true;
     }
-    freeverboseinfo(&verboseinfo);
+    gt_logger_delete(logger);
+    logger = NULL;
   } else
   {
     if (retval < 0)

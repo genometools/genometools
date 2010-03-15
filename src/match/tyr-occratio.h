@@ -22,7 +22,7 @@
 #include "core/str.h"
 #include "core/error_api.h"
 #include "core/arraydef.h"
-#include "verbose-def.h"
+#include "core/logger.h"
 
 GT_DECLAREARRAYSTRUCT(uint64_t);
 
@@ -33,7 +33,7 @@ int tyr_occratio(const GtStr *str_inputindex,
                  GtArrayuint64_t *uniquedistribution,
                  GtArrayuint64_t *nonuniquedistribution,
                  GtArrayuint64_t *nonuniquemultidistribution,
-                 Verboseinfo *verboseinfo,
+                 GtLogger *logger,
                  GtError *err);
 
 #endif

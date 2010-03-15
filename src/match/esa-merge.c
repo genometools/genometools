@@ -24,7 +24,7 @@
 #include "encseq-def.h"
 #include "merger-trie.h"
 #include "lcpoverflow.h"
-#include "verbose-def.h"
+#include "core/logger.h"
 
 #include "esa-map.h"
 
@@ -55,7 +55,7 @@ static int inputthesequences(unsigned int *numofchars,
                              Suffixarray *suffixarraytable,
                              const GtStrArray *indexnametab,
                              unsigned int demand,
-                             Verboseinfo *verboseinfo,
+                             GtLogger *logger,
                              GtError *err)
 {
   unsigned long idx;
@@ -68,7 +68,7 @@ static int inputthesequences(unsigned int *numofchars,
     if (streamsuffixarray(&suffixarraytable[idx],
                           demand,
                           indexname,
-                          verboseinfo,
+                          logger,
                           err) != 0)
     {
       gt_str_delete(indexname);
@@ -237,7 +237,7 @@ int emissionmergedesa_stepdeleteandinsertothersuffixes(
 int emissionmergedesa_init(Emissionmergedesa *emmesa,
                            const GtStrArray *indexnametab,
                            unsigned int demand,
-                           Verboseinfo *verboseinfo,
+                           GtLogger *logger,
                            GtError *err)
 {
   unsigned int numofindexes;
@@ -256,7 +256,7 @@ int emissionmergedesa_init(Emissionmergedesa *emmesa,
                         emmesa->suffixarraytable,
                         indexnametab,
                         demand,
-                        verboseinfo,
+                        logger,
                         err) != 0)
   {
     haserr = true;

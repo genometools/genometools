@@ -32,7 +32,7 @@ int checkprefixlength(unsigned int maxprefixlen,
                       unsigned int prefixlength,
                       GtError *err);
 
-void showmaximalprefixlength(Verboseinfo *verboseinfo,
+void showmaximalprefixlength(GtLogger *logger,
                              unsigned int maxprefixlen,
                              unsigned int recommended);
 

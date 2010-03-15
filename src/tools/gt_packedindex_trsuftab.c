@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "core/error.h"
+#include "core/logger.h"
 #include "core/option.h"
 #include "core/str.h"
 #include "core/versionfunc.h"
@@ -47,7 +48,7 @@ gt_packedindex_trsuftab(int argc, const char *argv[], GtError *err)
   GtStr *inputProject = NULL;
   int parsedArgs;
   bool had_err = false;
-  Verboseinfo *verbosity = NULL;
+  GtLogger *logger = NULL;
   inputProject = gt_str_new();
 
   do {
@@ -71,14 +72,15 @@ gt_packedindex_trsuftab(int argc, const char *argv[], GtError *err)
         break;
     }
     gt_str_set(inputProject, argv[parsedArgs]);
-    verbosity = newverboseinfo(params.verboseOutput);
-    bwtSeq = trSuftab2BWTSeq(&params.idx.final, verbosity, err);
+    logger = gt_logger_new(params.verboseOutput,
+                           GT_LOGGER_DEFLT_PREFIX, stdout);
+    bwtSeq = trSuftab2BWTSeq(&params.idx.final, logger, err);
     had_err = bwtSeq == NULL;
     if (had_err)
       break;
   } while (0);
   if (bwtSeq) deleteBWTSeq(bwtSeq);
-  if (verbosity) freeverboseinfo(&verbosity);
+  if (logger) gt_logger_delete(logger);
   if (inputProject) gt_str_delete(inputProject);
   return had_err?-1:0;
 }

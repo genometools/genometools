@@ -16,9 +16,9 @@
 */
 
 #include "core/error.h"
+#include "core/logger.h"
 #include "core/option.h"
 #include "core/versionfunc.h"
-#include "match/verbose-def.h"
 #include "match/test-mergeesa.pr"
 #include "tools/gt_mergeesa.h"
 
@@ -74,22 +74,22 @@ int gt_mergeesa(int argc, const char **argv, GtError *err)
   if (!haserr)
   {
     unsigned long i;
-    Verboseinfo *verboseinfo;
+    GtLogger *logger;
 
     printf("# storeindex=%s\n",gt_str_get(storeindex));
     for (i=0; i<gt_str_array_size(indexnametab); i++)
     {
       printf("# input=%s\n",gt_str_array_get(indexnametab,i));
     }
-    verboseinfo = newverboseinfo(false);
+    logger = gt_logger_new(false, GT_LOGGER_DEFLT_PREFIX, stdout);
     if (performtheindexmerging(storeindex,
                               indexnametab,
-                              verboseinfo,
+                              logger,
                               err) != 0)
     {
       haserr = true;
     }
-    freeverboseinfo(&verboseinfo);
+    gt_logger_delete(logger);
   }
   gt_str_delete(storeindex);
   gt_str_array_delete(indexnametab);

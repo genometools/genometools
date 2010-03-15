@@ -5,14 +5,14 @@ int testmaxpairs(GT_UNUSED const GtStr *indexname,
                  GT_UNUSED unsigned long samples,
                  GT_UNUSED unsigned int minlength,
                  GT_UNUSED Seqpos substringlength,
-                 GT_UNUSED Verboseinfo *verboseinfo,
+                 GT_UNUSED GtLogger *logger,
                  GT_UNUSED GtError *err);
 
 int testmaxpairs(const GtStr *indexname,
                  unsigned long samples,
                  unsigned int minlength,
                  Seqpos substringlength,
-                 Verboseinfo *verboseinfo,
+                 GtLogger *logger,
                  GtError *err);
 
 #ifdef __cplusplus

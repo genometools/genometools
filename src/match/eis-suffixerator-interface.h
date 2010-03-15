@@ -49,7 +49,7 @@ typedef struct sfxInterface sfxInterface;
  * separators
  * @param alpha alphabet to use
  * generate statistics
- * @param verbosity used as argument of showverbose
+ * @param verbosity used as argument of gt_logger_log
  * @param err
  * @return interface object reference
  */
@@ -61,7 +61,7 @@ newSfxInterface(Readmode readmode,
                 const Encodedsequence *encseq,
                 Sfxprogress *sfxprogress,
                 Seqpos length,
-                Verboseinfo *verbosity,
+                GtLogger *verbosity,
                 GtError *err);
 
 /**
@@ -82,7 +82,7 @@ newSfxInterface(Readmode readmode,
  * separators
  * @param alpha alphabet to use
  * generate statistics
- * @param verbosity used as argument of showverbose
+ * @param verbosity used as argument of gt_logger_log
  * @param err
  * @return interface object reference
  */
@@ -97,7 +97,7 @@ newSfxInterfaceWithReaders(Readmode readmode,
                            const Encodedsequence *encseq,
                            Sfxprogress *sfxprogress,
                            Seqpos length,
-                           Verboseinfo *verbosity,
+                           GtLogger *verbosity,
                            GtError *err);
 
 /**

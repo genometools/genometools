@@ -29,7 +29,7 @@
 #include "core/error.h"
 #include "core/str.h"
 #include "match/seqpos-def.h"
-#include "match/verbose-def.h"
+#include "core/logger.h"
 #include "match/eis-encidxseq-param.h"
 #include "match/eis-headerid.h"
 #include "match/eis-mrangealphabet.h"
@@ -419,7 +419,7 @@ enum EISIntegrityCheckFlags
 extern enum EISIntegrityCheckResults
 EISVerifyIntegrity(EISeq *seqIdx, const GtStr *projectName, Seqpos skip,
                    unsigned long tickPrint, FILE *fp, int chkFlags,
-                   Verboseinfo *verbosity, GtError *err);
+                   GtLogger *verbosity, GtError *err);
 
 /**
  * @brief Position file pointer at header written by upper layer.

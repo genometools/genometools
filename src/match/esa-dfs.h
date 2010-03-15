@@ -44,7 +44,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
                   void(*assignrightmostleaf)(Dfsinfo *,Seqpos,Seqpos,
                                              Seqpos,Dfsstate *),
                   Dfsstate *state,
-                  GT_UNUSED Verboseinfo *verboseinfo,
+                  GT_UNUSED GtLogger *logger,
                   GtError *err);
 
 #endif

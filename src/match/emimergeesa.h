@@ -59,7 +59,7 @@ int emissionmergedesa_stepdeleteandinsertothersuffixes(
 int emissionmergedesa_init(Emissionmergedesa *emmesa,
                            const GtStrArray *indexnametab,
                            unsigned int demand,
-                           Verboseinfo *verboseinfo,
+                           GtLogger *logger,
                            GtError *err);
 
 void emissionmergedesa_wrap(Emissionmergedesa *emmesa);

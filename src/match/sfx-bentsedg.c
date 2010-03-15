@@ -1900,7 +1900,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
                            numofchars,
                            false,
                            0); /* not necesarry as hashexceptions = false */
-    /* bcktab_showlog2info(bcktab,verboseinfo); */
+    /* bcktab_showlog2info(bcktab,logger); */
     if (outlcpinfo != NULL && outlcpinfo->assideeffect)
     {
       size_t sizespeciallcps, sizelcps;
@@ -1997,7 +1997,7 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
                                   Lcpsubtab *lcpsubtab,
                                   FILE *outfplcptab,
                                   FILE *outfpllvtab,
-                                  Verboseinfo *verboseinfo)
+                                  GtLogger *logger)
 {
   FREESPACE(bsr->countingsortinfo);
   FREESPACE(bsr->medianinfospace);
@@ -2031,10 +2031,10 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
   }
   gt_free(bsr->equalwithprevious);
   GT_FREEARRAY(&bsr->mkvauxstack,MKVstack);
-  showverbose(verboseinfo,"countinsertionsort=%lu",bsr->countinsertionsort);
-  showverbose(verboseinfo,"countbltriesort=%lu",bsr->countbltriesort);
-  showverbose(verboseinfo,"countcountingsort=%lu",bsr->countcountingsort);
-  showverbose(verboseinfo,"countqsort=%lu",bsr->countqsort);
+  gt_logger_log(logger,"countinsertionsort=%lu",bsr->countinsertionsort);
+  gt_logger_log(logger,"countbltriesort=%lu",bsr->countbltriesort);
+  gt_logger_log(logger,"countcountingsort=%lu",bsr->countcountingsort);
+  gt_logger_log(logger,"countqsort=%lu",bsr->countqsort);
 }
 
 void qsufsort(Seqpos *sortspace,
@@ -2096,7 +2096,7 @@ void sortallbuckets(Suftab *suftab,
                     Outlcpinfo *outlcpinfo,
                     const Sfxstrategy *sfxstrategy,
                     unsigned long long *bucketiterstep,
-                    Verboseinfo *verboseinfo)
+                    GtLogger *logger)
 {
   Codetype code;
   unsigned int rightchar = (unsigned int) (mincode % numofchars),
@@ -2283,7 +2283,7 @@ void sortallbuckets(Suftab *suftab,
                         outlcpinfo == NULL ? NULL : &outlcpinfo->lcpsubtab,
                         outlcpinfo == NULL ? NULL : outlcpinfo->outfplcptab,
                         outlcpinfo == NULL ? NULL : outlcpinfo->outfpllvtab,
-                        verboseinfo);
+                        logger);
 }
 
 void sortbucketofsuffixes(Seqpos *suffixestobesorted,
@@ -2300,7 +2300,7 @@ void sortbucketofsuffixes(Seqpos *suffixestobesorted,
                           void *voiddcov,
                           void (*dc_processunsortedrange)(void *,Seqpos *,
                                                           Seqpos *,Seqpos),
-                          Verboseinfo *verboseinfo)
+                          GtLogger *logger)
 {
   Bentsedgresources bsr;
   Bucketspecification bucketspec;
@@ -2355,5 +2355,5 @@ void sortbucketofsuffixes(Seqpos *suffixestobesorted,
                         NULL,
                         NULL,
                         NULL,
-                        verboseinfo);
+                        logger);
 }

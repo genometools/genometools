@@ -17,6 +17,7 @@
 
 #include "core/cstr_array.h"
 #include "core/error.h"
+#include "core/logger.h"
 #include "core/ma_api.h"
 #include "core/option.h"
 #include "core/str.h"
@@ -24,7 +25,6 @@
 #include "core/versionfunc.h"
 #include "core/minmax.h"
 #include "extended/toolbox.h"
-#include "match/verbose-def.h"
 #include "match/optionargmode.h"
 #include "match/defined-types.h"
 #include "match/intbits.h"
@@ -216,10 +216,10 @@ static int gt_tyr_mkindex_runner(GT_UNUSED int argc,
                                  GtError *err)
 {
   Tyr_mkindex_options *arguments = tool_arguments;
-  Verboseinfo *verboseinfo;
+  GtLogger *logger;
   bool haserr = false;
 
-  verboseinfo = newverboseinfo(arguments->verbose);
+  logger = gt_logger_new(arguments->verbose, GT_LOGGER_DEFLT_PREFIX, stdout);
   if (arguments->verbose)
   {
     printf("# mersize=%lu\n",arguments->mersize);
@@ -266,7 +266,7 @@ static int gt_tyr_mkindex_runner(GT_UNUSED int argc,
                     arguments->storecounts,
                     arguments->scanfile,
                     arguments->performtest,
-                    verboseinfo,
+                    logger,
                     err) != 0)
   {
     haserr = true;
@@ -291,7 +291,7 @@ static int gt_tyr_mkindex_runner(GT_UNUSED int argc,
       haserr = true;
     }
   }
-  freeverboseinfo(&verboseinfo);
+  gt_logger_delete(logger);
   return haserr ? - 1 : 0;
 }
 
@@ -742,14 +742,14 @@ static int gt_tyr_occratio_runner(GT_UNUSED int argc,
                                   void *tool_arguments,
                                   GtError *err)
 {
-  Verboseinfo *verboseinfo;
+  GtLogger *logger;
   Tyr_occratio_options *arguments = tool_arguments;
   bool haserr = false;
   GtArrayuint64_t uniquedistribution,
                   nonuniquedistribution,
                   nonuniquemultidistribution;
 
-  verboseinfo = newverboseinfo(arguments->verbose);
+  logger = gt_logger_new(arguments->verbose, GT_LOGGER_DEFLT_PREFIX, stdout);
   GT_INITARRAY(&uniquedistribution,uint64_t);
   GT_INITARRAY(&nonuniquedistribution,uint64_t);
   GT_INITARRAY(&nonuniquemultidistribution,uint64_t);
@@ -760,7 +760,7 @@ static int gt_tyr_occratio_runner(GT_UNUSED int argc,
                    &uniquedistribution,
                    &nonuniquedistribution,
                    &nonuniquemultidistribution,
-                   verboseinfo,
+                   logger,
                    err) != 0)
   {
     haserr = true;
@@ -773,7 +773,7 @@ static int gt_tyr_occratio_runner(GT_UNUSED int argc,
                   arguments->outputmode,
                   arguments->outputvector);
   }
-  freeverboseinfo(&verboseinfo);
+  gt_logger_delete(logger);
   GT_FREEARRAY(&uniquedistribution,uint64_t);
   GT_FREEARRAY(&nonuniquedistribution,uint64_t);
   GT_FREEARRAY(&nonuniquemultidistribution,uint64_t);

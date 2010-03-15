@@ -18,6 +18,7 @@
 #include <inttypes.h>
 #include "core/error_api.h"
 #include "core/str_api.h"
+#include "core/logger.h"
 #include "core/ma_api.h"
 #include "core/unused_api.h"
 #include "core/option.h"
@@ -26,7 +27,6 @@
 #include "match/esa-seqread.h"
 #include "match/esa-mmsearch.h"
 #include "match/format64.h"
-#include "match/verbose-def.h"
 #include "match/esa-maxpairs.h"
 #include "match/test-maxpairs.pr"
 #include "match/querymatch.h"
@@ -78,7 +78,7 @@ static int callenummaxpairs(const GtStr *indexname,
                             bool scanfile,
                             Processmaxpairs processmaxpairs,
                             void *processmaxpairsinfo,
-                            Verboseinfo *verboseinfo,
+                            GtLogger *logger,
                             GtError *err)
 {
   bool haserr = false;
@@ -104,7 +104,7 @@ static int callenummaxpairs(const GtStr *indexname,
                         userdefinedleastlength,
                         processmaxpairs,
                         processmaxpairsinfo,
-                        verboseinfo,
+                        logger,
                         err) != 0)
   {
     haserr = true;
@@ -225,11 +225,11 @@ static int gt_repfind_runner(GT_UNUSED int argc,
 {
   bool haserr = false;
   Maxpairsoptions *arguments = tool_arguments;
-  Verboseinfo *verboseinfo;
+  GtLogger *logger = NULL;
   Querymatch *querymatchspaceptr = querymatch_new();
 
   gt_error_check(err);
-  verboseinfo = newverboseinfo(arguments->beverbose);
+  logger = gt_logger_new(arguments->beverbose, GT_LOGGER_DEFLT_PREFIX, stdout);
   if (parsed_args < argc)
   {
     gt_error_set(err,"superfluous arguments: \"%s\"\n",argv[argc-1]);
@@ -248,7 +248,7 @@ static int gt_repfind_runner(GT_UNUSED int argc,
                                arguments->scanfile,
                                simpleexactselfmatchoutput,
                                querymatchspaceptr,
-                               verboseinfo,
+                               logger,
                                err) != 0)
           {
             haserr = true;
@@ -261,7 +261,7 @@ static int gt_repfind_runner(GT_UNUSED int argc,
                                   arguments->userdefinedleastlength,
                                   querymatch_output,
                                   NULL,
-                                  verboseinfo,
+                                  logger,
                                   err) != 0)
           {
             haserr = true;
@@ -273,7 +273,7 @@ static int gt_repfind_runner(GT_UNUSED int argc,
                          arguments->samples,
                          arguments->userdefinedleastlength,
                          (Seqpos) (100 * arguments->userdefinedleastlength),
-                         verboseinfo,
+                         logger,
                          err) != 0)
         {
           haserr = true;
@@ -287,7 +287,7 @@ static int gt_repfind_runner(GT_UNUSED int argc,
                                arguments->userdefinedleastlength,
                                querymatch_output,
                                NULL,
-                               verboseinfo,
+                               logger,
                                err) != 0)
       {
         haserr = true;
@@ -295,7 +295,7 @@ static int gt_repfind_runner(GT_UNUSED int argc,
     }
   }
   querymatch_delete(querymatchspaceptr);
-  freeverboseinfo(&verboseinfo);
+  gt_logger_delete(logger);
   return haserr ? -1 : 0;
 }
 

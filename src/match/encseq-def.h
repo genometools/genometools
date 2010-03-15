@@ -29,7 +29,7 @@
 #include "intcode-def.h"
 #include "intbits.h"
 #include "readmode-def.h"
-#include "verbose-def.h"
+#include "core/logger.h"
 
 #ifdef SKDEBUG
 #define CHECKENCCHAR(CC,ENCSEQ,POS,READMODE)\
@@ -201,7 +201,7 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr);
                                     const char *str_sat,
                                     unsigned long *characterdistribution,
                                     const Specialcharinfo *specialcharinfo,
-                                    Verboseinfo *verboseinfo,
+                                    GtLogger *logger,
                                     GtError *err);
 
 /*@null@*/ Encodedsequence *mapencodedsequence(bool withrange,
@@ -210,7 +210,7 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr);
                                                bool withdestab,
                                                bool withsdstab,
                                                bool withssptab,
-                                               Verboseinfo *verboseinfo,
+                                               GtLogger *logger,
                                                GtError *err);
 
 void checkallsequencedescriptions(const Encodedsequence *encseq);
@@ -221,7 +221,7 @@ Encodedsequence *plain2encodedsequence(bool withrange,
                                        const GtUchar *seq2,
                                        unsigned long len2,
                                        const GtAlphabet *alpha,
-                                       Verboseinfo *verboseinfo);
+                                       GtLogger *logger);
 
 Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
                                               bool moveforward);
@@ -401,7 +401,7 @@ void removefilenametabref(Encodedsequence *encseq);
 
 void showgetencodedcharcounters(void);
 
-void gt_showsequencefeatures(Verboseinfo *verboseinfo,
+void gt_showsequencefeatures(GtLogger *logger,
                              const Encodedsequence *encseq,bool withfilenames);
 
 unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab);
@@ -421,7 +421,7 @@ int gt_inputfiles2sequencekeyvalues(
         unsigned long *characterdistribution,
         bool outssptab,
         ArraySeqpos *sequenceseppos,
-        Verboseinfo *verboseinfo,
+        GtLogger *logger,
         GtError *err);
 
 FILE *opendestabfile(const GtStr *indexname,const char *mode,GtError *err);

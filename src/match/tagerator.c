@@ -545,9 +545,10 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
   Myersonlineresources *mor = NULL;
   Genericindex *genericindex = NULL;
   const Encodedsequence *encseq = NULL;
-  Verboseinfo *verboseinfo;
+  GtLogger *logger;
 
-  verboseinfo = newverboseinfo(tageratoroptions->verbose);
+  logger = gt_logger_new(tageratoroptions->verbose,
+                         GT_LOGGER_DEFLT_PREFIX, stdout);
   if (tageratoroptions->doonline)
   {
     encseq = mapencodedsequence (true,
@@ -556,7 +557,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
                                  false,
                                  false,
                                  false,
-                                 verboseinfo,
+                                 logger,
                                  err);
     if (encseq == NULL)
     {
@@ -572,7 +573,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
                                     (tageratoroptions->outputmode &
                                      TAGOUT_DBABSPOS) ? false : true,
                                     tageratoroptions->userdefinedmaxdepth,
-                                    verboseinfo,
+                                    logger,
                                     err);
     if (genericindex == NULL)
     {
@@ -777,6 +778,6 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
   {
     genericindex_delete(genericindex);
   }
-  freeverboseinfo(&verboseinfo);
+  gt_logger_delete(logger);
   return haserr ? -1 : 0;
 }

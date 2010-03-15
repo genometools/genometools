@@ -78,7 +78,7 @@ struct Sfxiterator
   Seqpos *leftborder; /* points to bcktab->leftborder */
   unsigned long long bucketiterstep; /* for progressbar */
   Sfxstrategy sfxstrategy;
-  Verboseinfo *verboseinfo;
+  GtLogger *logger;
   Sfxprogress *sfxprogress;
   Differencecover *dcov;
 };
@@ -464,7 +464,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
                             Outlcpinfo *outlcpinfo,
                             const Sfxstrategy *sfxstrategy,
                             Sfxprogress *sfxprogress,
-                            Verboseinfo *verboseinfo,
+                            GtLogger *logger,
                             GtError *err)
 {
   Sfxiterator *sfi = NULL;
@@ -490,7 +490,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
     {
       ALLOCASSIGNSPACE(sfi->spaceCodeatposition,NULL,
                        Codeatposition,realspecialranges+1);
-      showverbose(verboseinfo,"sizeof (spaceCodeatposition)=%lu",
+      gt_logger_log(logger,"sizeof (spaceCodeatposition)=%lu",
                               (unsigned long) (sizeof (Codeatposition) *
                                                (realspecialranges+1)));
     } else
@@ -521,26 +521,26 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
       defaultsfxstrategy(&sfi->sfxstrategy,
                          possibletocmpbitwise(encseq) ? false : true);
     }
-    showverbose(verboseinfo,"maxinsertionsort=%lu",
+    gt_logger_log(logger,"maxinsertionsort=%lu",
                 sfi->sfxstrategy.maxinsertionsort);
-    showverbose(verboseinfo,"maxbltriesort=%lu",
+    gt_logger_log(logger,"maxbltriesort=%lu",
                 sfi->sfxstrategy.maxbltriesort);
-    showverbose(verboseinfo,"maxcountingsort=%lu",
+    gt_logger_log(logger,"maxcountingsort=%lu",
                 sfi->sfxstrategy.maxcountingsort);
-    showverbose(verboseinfo,"storespecialcodes=%s",
+    gt_logger_log(logger,"storespecialcodes=%s",
                 sfi->sfxstrategy.storespecialcodes ? "true" : "false");
-    showverbose(verboseinfo,"cmpcharbychar=%s",
+    gt_logger_log(logger,"cmpcharbychar=%s",
                 sfi->sfxstrategy.cmpcharbychar ? "true" : "false");
     if (sfi->sfxstrategy.ssortmaxdepth.defined)
     {
-      showverbose(verboseinfo,"ssortmaxdepth=%u",
+      gt_logger_log(logger,"ssortmaxdepth=%u",
                                sfi->sfxstrategy.ssortmaxdepth.valueunsignedint);
     } else
     {
-      showverbose(verboseinfo,"ssortmaxdepth=undefined");
+      gt_logger_log(logger,"ssortmaxdepth=undefined");
     }
     sfi->totallength = getencseqtotallength(encseq);
-    showverbose(verboseinfo,"totallength=" FormatSeqpos,
+    gt_logger_log(logger,"totallength=" FormatSeqpos,
                         PRINTSeqposcast(sfi->totallength));
     sfi->specialcharacters = specialcharacters;
     sfi->outlcpinfo = outlcpinfo;
@@ -548,7 +548,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
     sfi->part = 0;
     sfi->exhausted = false;
     sfi->bucketiterstep = 0;
-    sfi->verboseinfo = verboseinfo;
+    sfi->logger = logger;
     sfi->sfxprogress = sfxprogress;
 
     if (sfi->sfxstrategy.differencecover > 0 &&
@@ -560,7 +560,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
                                    "sorting difference cover sample");
       }
       sfi->dcov = differencecover_new(sfi->sfxstrategy.differencecover,
-                                      encseq,readmode,verboseinfo);
+                                      encseq,readmode,logger);
       if (sfi->dcov == NULL)
       {
         gt_error_set(err,"no difference cover modulo %u found",
@@ -575,7 +575,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
           sfi->dcov = NULL;
         } else
         {
-          showverbose(verboseinfo,"presorting sample suffixes according to "
+          gt_logger_log(logger,"presorting sample suffixes according to "
                                   "difference cover modulo %u",
                                   sfi->sfxstrategy.differencecover);
           differencecover_sortsample(sfi->dcov,sfi->sfxstrategy.cmpcharbychar,
@@ -590,7 +590,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
     sfi->bcktab = allocBcktab(sfi->numofchars,
                               prefixlength,
                               sfi->sfxstrategy.storespecialcodes,
-                              verboseinfo,
+                              logger,
                               err);
     if (sfi->bcktab == NULL)
     {
@@ -642,7 +642,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
                                       sfi->numofallcodes,
                                       sfi->totallength - specialcharacters,
                                       specialcharacters + 1,
-                                      verboseinfo);
+                                      logger);
     gt_assert(sfi->suftabparts != NULL);
     ALLOCASSIGNSPACE(sfi->suftab.sortspace,NULL,Seqpos,
                      stpgetlargestwidth(sfi->suftabparts));
@@ -770,7 +770,7 @@ static void preparethispart(Sfxiterator *sfi)
                            &sfi->sfxstrategy,
                            (void *) sfi->dcov,
                            dc_sortunsortedbucket,
-                           sfi->verboseinfo);
+                           sfi->logger);
     } else
     {
       sortallbuckets (&sfi->suftab,
@@ -786,12 +786,12 @@ static void preparethispart(Sfxiterator *sfi)
                       sfi->outlcpinfo,
                       &sfi->sfxstrategy,
                       &sfi->bucketiterstep,
-                      sfi->verboseinfo);
+                      sfi->logger);
     }
     if (bucketspec2 != NULL)
     {
       Seqpos *suftabptr = sfi->suftab.sortspace - sfi->suftab.offset;
-      gt_copysortsuffixes(bucketspec2,suftabptr,sfi->verboseinfo);
+      gt_copysortsuffixes(bucketspec2,suftabptr,sfi->logger);
       gt_bucketspec2_delete(bucketspec2);
       bucketspec2 = NULL;
     }

@@ -22,7 +22,7 @@
 #include "seqpos-def.h"
 #include "readmode-def.h"
 #include "procmatch.h"
-#include "verbose-def.h"
+#include "core/logger.h"
 #include "absdfstrans-def.h"
 
 typedef struct Genericindex Genericindex;
@@ -38,7 +38,7 @@ Genericindex *genericindex_new(const GtStr *indexname,
                                bool withdestab,
                                bool withssptab,
                                int userdefinedmaxdepth,
-                               Verboseinfo *verboseinfo,
+                               GtLogger *logger,
                                GtError *err);
 
 typedef struct Limdfsresources Limdfsresources;

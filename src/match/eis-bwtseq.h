@@ -26,7 +26,7 @@
 
 #include "core/error.h"
 #include "core/str.h"
-#include "match/verbose-def.h"
+#include "core/logger.h"
 #include "match/seqpos-def.h"
 
 #include "match/eis-encidxseq.h"
@@ -74,7 +74,7 @@ typedef struct BWTSeqExactMatchesIterator BWTSeqExactMatchesIterator;
  * @return reference to new BWT sequence object
  */
 extern BWTSeq *
-availBWTSeq(const struct bwtParam *params, Verboseinfo *verbosity, GtError*);
+availBWTSeq(const struct bwtParam *params, GtLogger *verbosity, GtError*);
 
 /**
  * \brief Creates an encoded indexed sequence object of the BWT
@@ -85,7 +85,7 @@ availBWTSeq(const struct bwtParam *params, Verboseinfo *verbosity, GtError*);
  * @return reference to new BWT sequence object
  */
 extern BWTSeq *
-trSuftab2BWTSeq(const struct bwtParam *params, Verboseinfo *verbosity,
+trSuftab2BWTSeq(const struct bwtParam *params, GtLogger *verbosity,
                 GtError *err);
 
 /**
@@ -98,7 +98,7 @@ trSuftab2BWTSeq(const struct bwtParam *params, Verboseinfo *verbosity,
  * @return reference to new BWT sequence object
  */
 extern BWTSeq *
-loadBWTSeq(const GtStr *projectName, int BWTOptFlags, Verboseinfo *verbosity,
+loadBWTSeq(const GtStr *projectName, int BWTOptFlags, GtLogger *verbosity,
            GtError *err);
 
 /**
@@ -376,7 +376,7 @@ extern enum verifyBWTSeqErrCode
 BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
                       int checkFlags,
                       unsigned long tickPrint, FILE *fp,
-                      Verboseinfo *verbosity, GtError *err);
+                      GtLogger *verbosity, GtError *err);
 
 /**
  * \brief Given a query string produce iterator for all matches in

@@ -24,7 +24,7 @@
 #include "core/unused_api.h"
 #include "core/arraydef.h"
 #include "extended/redblack.h"
-#include "verbose-def.h"
+#include "core/logger.h"
 #include "chain2dim.h"
 #include "prsqualint.h"
 
@@ -1102,7 +1102,7 @@ static unsigned int findmaximalscores(const GtChainmode *chainmode,
                                       GtChainprocessor chainprocessor,
                                       bool withequivclasses,
                                       void *cpinfo,
-                                      Verboseinfo *verboseinfo)
+                                      GtLogger *logger)
 {
   unsigned long matchnum;
   GtChainscoretype minscore = 0;
@@ -1171,7 +1171,7 @@ static unsigned int findmaximalscores(const GtChainmode *chainmode,
   }
   if (minscoredefined)
   {
-    showverbose(verboseinfo,
+    gt_logger_log(logger,
                "compute optimal %s chains with score >= %ld",
                (chainmode->chainkind == GLOBALCHAINING ||
                 chainmode->chainkind == GLOBALCHAININGWITHGAPCOST ||
@@ -1277,8 +1277,8 @@ static GtChaingapcostfunction assignchaingapcostfunction(GtChainkind chainkind,
   each chain found, and \texttt{cpinfo} is used as a the first argument
   in each call to \texttt{chainprocessor}. The function returns
   0 upon success and otherwise, if an error occurs.
-  Finally \texttt{showverbose} is applied to each status message generated
-  during the execution of \texttt{fastchaining}. If \texttt{showverbose}
+  Finally \texttt{gt_logger_log} is applied to each status message generated
+  during the execution of \texttt{fastchaining}. If \texttt{gt_logger_log}
   is \texttt{NULL}, then nothing is generated and shown.
 */
 
@@ -1290,7 +1290,7 @@ void gt_chain_fastchaining(const GtChainmode *chainmode,
                            bool withequivclasses,
                            GtChainprocessor chainprocessor,
                            void *cpinfo,
-                           Verboseinfo *verboseinfo)
+                           GtLogger *logger)
 {
   unsigned int retval;
   GtChaingapcostfunction chaingapcostfunction;
@@ -1302,7 +1302,7 @@ void gt_chain_fastchaining(const GtChainmode *chainmode,
   {
     Matchstore matchstore;
 
-    showverbose(verboseinfo,"compute chain scores");
+    gt_logger_log(logger,"compute chain scores");
     if (chainmode->chainkind == GLOBALCHAININGWITHOVERLAPS)
     {
       bruteforcechainingscores(chainmode,matchtable,
@@ -1315,7 +1315,7 @@ void gt_chain_fastchaining(const GtChainmode *chainmode,
                          presortdim,
                          gapsL1);
     }
-    showverbose(verboseinfo,"retrieve optimal chains");
+    gt_logger_log(logger,"retrieve optimal chains");
     retval = findmaximalscores(chainmode,
                                chain,
                                matchtable,
@@ -1323,7 +1323,7 @@ void gt_chain_fastchaining(const GtChainmode *chainmode,
                                chainprocessor,
                                withequivclasses,
                                cpinfo,
-                               verboseinfo);
+                               logger);
     if (chainmode->chainkind != GLOBALCHAININGWITHOVERLAPS)
     {
       gt_rbt_destroy (true,NULL,NULL,matchstore.dictroot);
@@ -1369,7 +1369,7 @@ static int cmpMatchchaininfo1(const void *keya,const void *keyb)
 
 typedef int (*Qsortcomparefunction)(const void *,const void *);
 
-void gt_chain_possiblysortmatches(Verboseinfo *verboseinfo,
+void gt_chain_possiblysortmatches(GtLogger *logger,
                                     GtChainmatchtable *matchtable,
                                     unsigned int presortdim)
 {
@@ -1395,7 +1395,7 @@ void gt_chain_possiblysortmatches(Verboseinfo *verboseinfo,
     }
     if (!matchesaresorted)
     {
-      showverbose(verboseinfo,"input matches are not yet sorted => "
+      gt_logger_log(logger,"input matches are not yet sorted => "
                               "sort them");
     }
     qsort(matchtable->matches,(size_t) matchtable->nextfree,

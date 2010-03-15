@@ -20,7 +20,7 @@
 #include "core/array.h"
 #include "core/error.h"
 #include "core/str.h"
-#include "verbose-def.h"
+#include "core/logger.h"
 
 #define SETREADINTKEYS(VALNAME,VAL,FORCEREAD)\
         setreadintkeys(riktab,VALNAME,VAL,sizeof (*(VAL)),FORCEREAD)
@@ -36,7 +36,7 @@ void setreadintkeys(GtArray *riktab,
                     bool *readflag);
 
 int allkeysdefined(const GtStr *indexname,const char *suffix,
-                   const GtArray *riktab,Verboseinfo *verboseinfo,
+                   const GtArray *riktab,GtLogger *logger,
                    GtError *err);
 
 int analyzeuintline(const GtStr *indexname,

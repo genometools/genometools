@@ -246,7 +246,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
                    const GtStr *outfmindex,
                    const GtStrArray *indexnametab,
                    bool storeindexpos,
-                   Verboseinfo *verboseinfo,
+                   GtLogger *logger,
                    GtError *err)
 {
   Suffixarray suffixarray;
@@ -283,7 +283,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
     if (streamsuffixarray(&suffixarray,
                           SARR_BWTTAB | (storeindexpos ? SARR_SUFTAB : 0),
                           indexname,
-                          verboseinfo,
+                          logger,
                           err) != 0)
     {
       haserr = true;
@@ -321,7 +321,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
     if (emissionmergedesa_init(&emmesa,
                                indexnametab,
                                SARR_ESQTAB | SARR_SUFTAB | SARR_LCPTAB,
-                               verboseinfo,
+                               logger,
                                err) != 0)
     {
       haserr = true;

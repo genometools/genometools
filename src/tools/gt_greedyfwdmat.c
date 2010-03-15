@@ -276,7 +276,7 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
   Fmindex fmindex;
   Suffixarray suffixarray;
   void *packedindex = NULL;
-  Verboseinfo *verboseinfo;
+  GtLogger *logger = NULL;
   bool haserr = false;
   const GtAlphabet *alphabet = NULL;
   unsigned int prefixlength = 0;
@@ -295,11 +295,11 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
       gt_str_array_delete(gfmsubcallinfo.queryfilenames);
       return 0;
   }
-  verboseinfo = newverboseinfo(false);
+  logger = gt_logger_new(false, GT_LOGGER_DEFLT_PREFIX, stdout);
   if (gfmsubcallinfo.indextype == Fmindextype)
   {
     if (mapfmindex (&fmindex,gfmsubcallinfo.indexname,
-                    verboseinfo,err) != 0)
+                    logger, err) != 0)
     {
       haserr = true;
       mapfmindexfail = true;
@@ -333,7 +333,7 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
     if (mapsuffixarray(&suffixarray,
                        mappedbits,
                        gfmsubcallinfo.indexname,
-                       verboseinfo,
+                       logger,
                        err) != 0)
     {
       haserr = true;
@@ -456,7 +456,7 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
     }
     freesuffixarray(&suffixarray);
   }
-  freeverboseinfo(&verboseinfo);
+  gt_logger_delete(logger);
   gt_str_delete(gfmsubcallinfo.indexname);
   gt_str_array_delete(gfmsubcallinfo.queryfilenames);
   return haserr ? -1 : 0;

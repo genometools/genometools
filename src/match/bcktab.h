@@ -22,7 +22,7 @@
 #include "core/error.h"
 #include "core/str.h"
 #include "core/symboldef.h"
-#include "verbose-def.h"
+#include "core/logger.h"
 #include "seqpos-def.h"
 #include "intcode-def.h"
 
@@ -46,7 +46,7 @@ void bcktab_delete(Bcktab **bcktab);
 Bcktab *allocBcktab(unsigned int numofchars,
                     unsigned int prefixlength,
                     bool storespecialcodes,
-                    Verboseinfo *verboseinfo,
+                    GtLogger *logger,
                     GtError *err);
 
 void updatebckspecials(Bcktab *bcktab,
@@ -92,7 +92,7 @@ void determinemaxbucketsize(Bcktab *bcktab,
                             bool hashexceptions,
                             Seqpos totallength);/* relevant for hashexception */
 
-void bcktab_showlog2info(const Bcktab *bcktab,Verboseinfo *verboseinfo);
+void bcktab_showlog2info(const Bcktab *bcktab, GtLogger *logger);
 
 unsigned int singletonmaxprefixindex(const Bcktab *bcktab,Codetype code);
 

@@ -53,7 +53,7 @@ int callenumquerymatches(const GtStr *indexname,
                          unsigned int userdefinedleastlength,
                          Processquerymatch processquerymatch,
                          void *processquerymatchinfo,
-                         Verboseinfo *verboseinfo,
+                         GtLogger *logger,
                          GtError *err);
 
 int callenumselfmatches(const GtStr *indexname,
@@ -61,7 +61,7 @@ int callenumselfmatches(const GtStr *indexname,
                         unsigned int userdefinedleastlength,
                         Processquerymatch processquerymatch,
                         void *processquerymatchinfo,
-                        Verboseinfo *verboseinfo,
+                        GtLogger *logger,
                         GtError *err);
 
 int sarrquerysubstringmatch(const GtUchar *dbseq,
@@ -72,7 +72,7 @@ int sarrquerysubstringmatch(const GtUchar *dbseq,
                             const GtAlphabet *alpha,
                             Processquerymatch processquerymatch,
                             void *processquerymatchinfo,
-                            Verboseinfo *verboseinfo,
+                            GtLogger *logger,
                             GtError *err);
 
 Seqpos countmmsearchiterator(const MMsearchiterator *mmsi);

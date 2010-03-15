@@ -62,7 +62,7 @@ static Codetype findfirstlarger(const Seqpos *leftborder,
 }
 
 static void removeemptyparts(Suftabparts *suftabparts,
-                             Verboseinfo *verboseinfo)
+                             GtLogger *logger)
 {
   if (suftabparts->numofparts > 0)
   {
@@ -86,7 +86,7 @@ static void removeemptyparts(Suftabparts *suftabparts,
     for (srcpart = 0; srcpart < suftabparts->numofparts; srcpart++)
     {
       gt_assert(suftabparts->components[srcpart].widthofpart > 0);
-      showverbose(verboseinfo,"widthofpart[%u]=" FormatSeqpos,
+      gt_logger_log(logger,"widthofpart[%u]=" FormatSeqpos,
                   srcpart,
                   PRINTSeqposcast(suftabparts->components[srcpart].
                                   widthofpart));
@@ -99,7 +99,7 @@ Suftabparts *newsuftabparts(unsigned int numofparts,
                             Codetype numofallcodes,
                             Seqpos numofsuffixestoinsert,
                             Seqpos fullspecials,
-                            Verboseinfo *verboseinfo)
+                            GtLogger *logger)
 {
   Suftabparts *suftabparts;
 
@@ -176,7 +176,7 @@ Suftabparts *newsuftabparts(unsigned int numofparts,
     }
     gt_assert(sumofwidth == numofsuffixestoinsert);
   }
-  removeemptyparts(suftabparts,verboseinfo);
+  removeemptyparts(suftabparts,logger);
   return suftabparts;
 }
 

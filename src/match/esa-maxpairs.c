@@ -20,7 +20,7 @@
 #include "spacedef.h"
 #include "seqpos-def.h"
 #include "esa-seqread.h"
-#include "verbose-def.h"
+#include "core/logger.h"
 #include "esa-maxpairs.h"
 
 #define ISLEFTDIVERSE   (GtUchar) (state->alphabetsize)
@@ -352,7 +352,7 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
                       unsigned int searchlength,
                       Processmaxpairs processmaxpairs,
                       void *processmaxpairsinfo,
-                      Verboseinfo *verboseinfo,
+                      GtLogger *logger,
                       GtError *err)
 {
   unsigned int base;
@@ -384,7 +384,7 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
                     NULL,
                     NULL,
                     &state,
-                    verboseinfo,
+                    logger,
                     err) != 0)
   {
     haserr = true;

@@ -22,7 +22,7 @@
 #include "core/unused_api.h"
 #include "core/fa.h"
 #include "esa-seqread.h"
-#include "verbose-def.h"
+#include "core/logger.h"
 #include "spacedef.h"
 #include "format64.h"
 #include "esa-mmsearch.h"
@@ -263,7 +263,7 @@ static void showmerdistribution(const Dfsstate *state)
 
 static void showfinalstatistics(const Dfsstate *state,
                                 const GtStr *inputindex,
-                                Verboseinfo *verboseinfo)
+                                GtLogger *logger)
 {
   uint64_t dnumofmers = addupdistribution(&state->occdistribution);
 
@@ -271,21 +271,21 @@ static void showfinalstatistics(const Dfsstate *state,
   {
     checknumofmers(state,dnumofmers);
   }
-  showverbose(verboseinfo,
+  gt_logger_log(logger,
               "the following output refers to the set of all sequences");
-  showverbose(verboseinfo,
+  gt_logger_log(logger,
               "represented by the index \"%s\"",gt_str_get(inputindex));
-  showverbose(verboseinfo,
+  gt_logger_log(logger,
               "number of %lu-mers in the sequences not containing a "
               "wildcard: " Formatuint64_t,
               (unsigned long) state->mersize,
               PRINTuint64_tcast(dnumofmers));
-  showverbose(verboseinfo,
+  gt_logger_log(logger,
               "show the distribution of the number of occurrences of %lu-mers",
                (unsigned long) state->mersize);
-  showverbose(verboseinfo,"not containing a wildcard as rows of the form "
+  gt_logger_log(logger,"not containing a wildcard as rows of the form "
               "i d where");
-  showverbose(verboseinfo,
+  gt_logger_log(logger,
               "d is the number of events that a %lu-mer occurs exactly i times",
               (unsigned long) state->mersize);
   showmerdistribution(state);
@@ -560,7 +560,7 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
                                  unsigned long minocc,
                                  unsigned long maxocc,
                                  bool performtest,
-                                 Verboseinfo *verboseinfo,
+                                 GtLogger *logger,
                                  GtError *err)
 {
   Dfsstate state;
@@ -649,21 +649,21 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
                         assignleftmostleaf,
                         assignrightmostleaf,
                         &state,
-                        verboseinfo,
+                        logger,
                         err) != 0)
       {
         haserr = true;
       }
       if (gt_str_length(str_storeindex) == 0)
       {
-        showfinalstatistics(&state,str_inputindex,verboseinfo);
+        showfinalstatistics(&state,str_inputindex,logger);
       }
     }
     if (!haserr)
     {
       if (state.countsfilefpout != NULL)
       {
-        showverbose(verboseinfo,"write %lu mercounts > %lu to file \"%s%s\"",
+        gt_logger_log(logger,"write %lu mercounts > %lu to file \"%s%s\"",
                     state.largecounts.nextfreeLargecount,
                     (unsigned long) MAXSMALLMERCOUNT,
                     gt_str_get(str_storeindex),
@@ -685,10 +685,10 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
     }
     if (!haserr)
     {
-      showverbose(verboseinfo,"number of %lu-mers in index: %lu",
+      gt_logger_log(logger,"number of %lu-mers in index: %lu",
                   mersize,
                   state.countoutputmers);
-      showverbose(verboseinfo,"index size: %.2f megabytes\n",
+      gt_logger_log(logger,"index size: %.2f megabytes\n",
                   MEGABYTES(state.countoutputmers * state.sizeofbuffer +
                             sizeof (unsigned long) * EXTRAINTEGERS));
     }
@@ -718,7 +718,7 @@ int merstatistics(const GtStr *str_inputindex,
                   bool storecounts,
                   bool scanfile,
                   bool performtest,
-                  Verboseinfo *verboseinfo,
+                  GtLogger *logger,
                   GtError *err)
 {
   bool haserr = false;
@@ -746,7 +746,7 @@ int merstatistics(const GtStr *str_inputindex,
                               minocc,
                               maxocc,
                               performtest,
-                              verboseinfo,
+                              logger,
                               err) != 0)
     {
       haserr = true;

@@ -17,13 +17,13 @@
 
 #include "core/cstr_array.h"
 #include "core/error.h"
+#include "core/logger.h"
 #include "core/ma_api.h"
 #include "core/option.h"
 #include "core/str.h"
 #include "core/unused_api.h"
 #include "core/versionfunc.h"
 #include "extended/toolbox.h"
-#include "match/verbose-def.h"
 #include "match/cgr_spacedseed.h"
 #include "tools/gt_congruence.h"
 
@@ -138,11 +138,11 @@ static int gt_cge_spacedseed_runner(GT_UNUSED int argc,
                                     GtError *err)
 {
   Cge_spacedseed_options *arguments = tool_arguments;
-  Verboseinfo *verboseinfo;
+  GtLogger *logger = NULL;
   bool haserr = false;
 
   gt_assert(parsed_args == argc);
-  verboseinfo = newverboseinfo(arguments->verbose);
+  logger = gt_logger_new(arguments->verbose, GT_LOGGER_DEFLT_PREFIX, stdout);
   if (arguments->verbose)
   {
     unsigned long idx;
@@ -164,7 +164,7 @@ static int gt_cge_spacedseed_runner(GT_UNUSED int argc,
   {
     haserr = true;
   }
-  freeverboseinfo(&verboseinfo);
+  gt_logger_delete(logger);
   return haserr ? - 1 : 0;
 }
 

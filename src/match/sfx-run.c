@@ -28,7 +28,7 @@
 #include "sfx-progress.h"
 #include "esa-fileend.h"
 #include "readmode-def.h"
-#include "verbose-def.h"
+#include "core/logger.h"
 #include "intcode-def.h"
 #include "spacedef.h"
 #include "stamp.h"
@@ -198,7 +198,7 @@ static int suffixeratorwithoutput(const GtStr *str_indexname,
                                   unsigned int numofparts,
                                   const Sfxstrategy *sfxstrategy,
                                   Sfxprogress *sfxprogress,
-                                  Verboseinfo *verboseinfo,
+                                  GtLogger *logger,
                                   GtError *err)
 {
   const Seqpos *suftabptr;
@@ -213,7 +213,7 @@ static int suffixeratorwithoutput(const GtStr *str_indexname,
                        outfileinfo->outlcpinfo,
                        sfxstrategy,
                        sfxprogress,
-                       verboseinfo,
+                       logger,
                        err);
   if (sfi == NULL)
   {
@@ -280,7 +280,7 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
                                 const Suffixeratoroptions *so,
                                 unsigned int numofchars,
                                 Seqpos totallength,
-                                Verboseinfo *verboseinfo,
+                                GtLogger *logger,
                                 GtError *err)
 {
   bool haserr = false;
@@ -288,7 +288,7 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
   if (so->prefixlength == PREFIXLENGTH_AUTOMATIC)
   {
     *prefixlength = recommendedprefixlength(numofchars,totallength);
-    showverbose(verboseinfo,
+    gt_logger_log(logger,
                 "automatically determined prefixlength=%u",
                 *prefixlength);
   } else
@@ -307,7 +307,7 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
       haserr = true;
     } else
     {
-      showmaximalprefixlength(verboseinfo,
+      showmaximalprefixlength(logger,
                               maxprefixlen,
                               recommendedprefixlength(
                               numofchars,
@@ -320,7 +320,7 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
     {
       maxdepth->defined = true;
       maxdepth->valueunsignedint = *prefixlength;
-      showverbose(verboseinfo,
+      gt_logger_log(logger,
                   "automatically determined maxdepth=%u",
                   maxdepth->valueunsignedint);
     } else
@@ -329,14 +329,14 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
       {
         maxdepth->defined = true;
         maxdepth->valueunsignedint = *prefixlength;
-        showverbose(verboseinfo,
+        gt_logger_log(logger,
                     "set maxdepth=%u",maxdepth->valueunsignedint);
       } else
       {
         maxdepth->defined = true;
         maxdepth->valueunsignedint
           = so->sfxstrategy.ssortmaxdepth.valueunsignedint;
-        showverbose(verboseinfo,
+        gt_logger_log(logger,
                     "use maxdepth=%u",maxdepth->valueunsignedint);
       }
     }
@@ -344,7 +344,7 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
   return haserr ? -1 : 0;
 }
 
-static int run_packedindexconstruction(Verboseinfo *verboseinfo,
+static int run_packedindexconstruction(GtLogger *logger,
                                        Sfxprogress *sfxprogress,
                                        FILE *outfpbcktab,
                                        const Suffixeratoroptions *so,
@@ -358,7 +358,7 @@ static int run_packedindexconstruction(Verboseinfo *verboseinfo,
   const Sfxiterator *sfi;
   bool haserr = false;
 
-  showverbose(verboseinfo, "run construction of packed index for:\n"
+  gt_logger_log(logger, "run construction of packed index for:\n"
               "blocksize=%u\nblocks-per-bucket=%u\nlocfreq=%u",
               so->bwtIdxParams.final.seqParams.encParams.blockEnc.blockSize,
               so->bwtIdxParams.final.seqParams.encParams.blockEnc.bucketBlocks,
@@ -370,7 +370,7 @@ static int run_packedindexconstruction(Verboseinfo *verboseinfo,
                        encseq,
                        sfxprogress,
                        getencseqtotallength(encseq) + 1,
-                       verboseinfo,
+                       logger,
                        err);
   if (si == NULL)
   {
@@ -405,7 +405,7 @@ static int run_packedindexconstruction(Verboseinfo *verboseinfo,
 
 static int runsuffixerator(bool doesa,
                            const Suffixeratoroptions *so,
-                           Verboseinfo *verboseinfo,
+                           GtLogger *logger,
                            GtError *err)
 {
   Sfxprogress *sfxprogress;
@@ -438,7 +438,7 @@ static int runsuffixerator(bool doesa,
                                 false,
                                 false,
                                 false,
-                                verboseinfo,
+                                logger,
                                 err);
     if (encseq == NULL)
     {
@@ -471,7 +471,7 @@ static int runsuffixerator(bool doesa,
                               so->fn2encopt.outdestab,
                               so->fn2encopt.outsdstab,
                               so->fn2encopt.outssptab,
-                              verboseinfo,
+                              logger,
                               err);
     if (encseq == NULL)
     {
@@ -508,7 +508,7 @@ static int runsuffixerator(bool doesa,
   }
   if (!haserr)
   {
-    gt_showsequencefeatures(verboseinfo,encseq,false);
+    gt_showsequencefeatures(logger,encseq,false);
     if (so->readmode == Complementmode ||
         so->readmode == Reversecomplementmode)
     {
@@ -523,7 +523,7 @@ static int runsuffixerator(bool doesa,
   if (!haserr && so->outkystab && !so->outkyssort)
   {
     if (gt_extractkeysfromdesfile(so->fn2encopt.str_indexname, false,
-                                  verboseinfo, err) != 0)
+                                  logger, err) != 0)
     {
       haserr = true;
     }
@@ -543,7 +543,7 @@ static int runsuffixerator(bool doesa,
                                so,
                                numofchars,
                                getencseqtotallength(encseq),
-                               verboseinfo,
+                               logger,
                                err) != 0)
       {
         haserr = true;
@@ -585,14 +585,14 @@ static int runsuffixerator(bool doesa,
                                    so->numofparts,
                                    &sfxstrategy,
                                    sfxprogress,
-                                   verboseinfo,
+                                   logger,
                                    err) != 0)
         {
           haserr = true;
         }
       } else
       {
-        if (run_packedindexconstruction(verboseinfo,
+        if (run_packedindexconstruction(logger,
                                         sfxprogress,
                                         outfileinfo.outfpbcktab,
                                         so,
@@ -648,7 +648,7 @@ static int runsuffixerator(bool doesa,
   if (!haserr && so->outkystab && so->outkyssort)
   {
     if (gt_extractkeysfromdesfile(so->fn2encopt.str_indexname, true,
-                                  verboseinfo, err) != 0)
+                                  logger, err) != 0)
     {
       haserr = true;
     }
@@ -672,15 +672,17 @@ int parseargsandcallsuffixerator(bool doesa,int argc,
   retval = suffixeratoroptions(&so,doesa,argc,argv,err);
   if (retval == 0)
   {
-    Verboseinfo *verboseinfo = newverboseinfo(so.beverbose);
+    GtLogger *logger = gt_logger_new(so.beverbose,
+                                     GT_LOGGER_DEFLT_PREFIX, stdout);
 
-    showverbose(verboseinfo,"sizeof (Seqpos)=%lu",
-                (unsigned long) (sizeof (Seqpos) * CHAR_BIT));
-    if (runsuffixerator(doesa,&so,verboseinfo,err) < 0)
+    gt_logger_log(logger,"sizeof (Seqpos)=%lu",
+                  (unsigned long) (sizeof (Seqpos) * CHAR_BIT));
+    if (runsuffixerator(doesa,&so,logger,err) < 0)
     {
       haserr = true;
     }
-    freeverboseinfo(&verboseinfo);
+    gt_logger_delete(logger);
+    logger = NULL;
     /*showgetencodedcharcounters(); */
   } else
   {

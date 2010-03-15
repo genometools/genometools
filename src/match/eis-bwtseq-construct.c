@@ -28,7 +28,7 @@
 #include "match/eis-encidxseq-construct.h"
 
 extern BWTSeq *
-availBWTSeq(const struct bwtParam *params, Verboseinfo *verbosity,
+availBWTSeq(const struct bwtParam *params, GtLogger *verbosity,
             GtError *err)
 {
   struct BWTSeq *bwtSeq = NULL;
@@ -56,7 +56,7 @@ availBWTSeq(const struct bwtParam *params, Verboseinfo *verbosity,
 }
 
 extern BWTSeq *
-trSuftab2BWTSeq(const struct bwtParam *params, Verboseinfo *verbosity,
+trSuftab2BWTSeq(const struct bwtParam *params, GtLogger *verbosity,
                 GtError *err)
 {
   struct BWTSeq *bwtSeq = NULL;
@@ -123,7 +123,7 @@ static const enum rangeSortMode GTAlphabetRangeSort[][2] =
 };
 
 extern BWTSeq *
-loadBWTSeq(const GtStr *projectName, int BWTOptFlags, Verboseinfo *verbosity,
+loadBWTSeq(const GtStr *projectName, int BWTOptFlags, GtLogger *verbosity,
            GtError *err)
 {
   struct BWTSeq *bwtSeq = NULL;

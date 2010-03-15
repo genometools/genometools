@@ -19,14 +19,14 @@
 
 #include "core/error.h"
 #include "core/str.h"
-#include "verbose-def.h"
+#include "core/logger.h"
 #include "seqpos-def.h"
 
 int testmaxpairs(GT_UNUSED const GtStr *indexname,
                  GT_UNUSED unsigned long samples,
                  GT_UNUSED unsigned int minlength,
                  GT_UNUSED Seqpos substringlength,
-                 GT_UNUSED Verboseinfo *verboseinfo,
+                 GT_UNUSED GtLogger *logger,
                  GT_UNUSED GtError *err)
 {
   return 0;
@@ -46,7 +46,7 @@ int testmaxpairs(GT_UNUSED const GtStr *indexname,
 #include "echoseq.h"
 #include "encseq-def.h"
 #include "seqpos-def.h"
-#include "verbose-def.h"
+#include "core/logger.h"
 #include "sfx-suffixer.h"
 #include "sfx-apfxlen.h"
 #include "sfx-progress.h"
@@ -69,7 +69,7 @@ static int constructsarrandrunmaxpairs(
                  unsigned int prefixlength,
                  unsigned int numofparts,
                  Sfxprogress *sfxprogress,
-                 Verboseinfo *verboseinfo,
+                 GtLogger *logger,
                  GtError *err)
 {
   const Seqpos *suftabptr;
@@ -115,7 +115,7 @@ static int constructsarrandrunmaxpairs(
                             ssi->minlength,
                             ssi->processmaxpairs,
                             ssi->processmaxpairsinfo,
-                            verboseinfo,
+                            logger,
                             err) != 0)
       {
         haserr = true;
@@ -141,7 +141,7 @@ static int sarrselfsubstringmatch(const GtUchar *dbseq,
                                   const GtAlphabet *alpha,
                                   Processmaxpairs processmaxpairs,
                                   void *processmaxpairsinfo,
-                                  Verboseinfo *verboseinfo,
+                                  GtLogger *logger,
                                   GtError *err)
 {
   Substringmatchinfo ssi;
@@ -154,7 +154,7 @@ static int sarrselfsubstringmatch(const GtUchar *dbseq,
                                      query,
                                      querylen,
                                      alpha,
-                                     verboseinfo);
+                                     logger);
   ssi.minlength = minlength;
   ssi.processmaxpairs = processmaxpairs;
   ssi.processmaxpairsinfo = processmaxpairsinfo;
@@ -165,7 +165,7 @@ static int sarrselfsubstringmatch(const GtUchar *dbseq,
                                                           dblen+querylen+1),
                                   1U, /* parts */
                                   NULL,
-                                  verboseinfo,
+                                  logger,
                                   err) != 0)
   {
     haserr = true;
@@ -370,7 +370,7 @@ int testmaxpairs(const GtStr *indexname,
                  unsigned long samples,
                  unsigned int minlength,
                  Seqpos substringlength,
-                 Verboseinfo *verboseinfo,
+                 GtLogger *logger,
                  GtError *err)
 {
   Encodedsequence *encseq;
@@ -381,14 +381,14 @@ int testmaxpairs(const GtStr *indexname,
   GtArray *tabmaxquerymatches;
   Maxmatchselfinfo maxmatchselfinfo;
 
-  showverbose(verboseinfo,"draw %lu samples",samples);
+  gt_logger_log(logger,"draw %lu samples",samples);
   encseq = mapencodedsequence(true,
                               indexname,
                               true,
                               false,
                               false,
                               false,
-                              verboseinfo,
+                              logger,
                               err);
   if (encseq == NULL)
   {
@@ -411,7 +411,7 @@ int testmaxpairs(const GtStr *indexname,
   {
     dblen = samplesubstring(dbseq,encseq,substringlength);
     querylen = samplesubstring(query,encseq,substringlength);
-    showverbose(verboseinfo,"run query match for dblen=" FormatSeqpos
+    gt_logger_log(logger,"run query match for dblen=" FormatSeqpos
                             ",querylen= " FormatSeqpos ", minlength=%u",
            PRINTSeqposcast(dblen),PRINTSeqposcast(querylen),minlength);
     tabmaxquerymatches = gt_array_new(sizeof (Substringmatch));
@@ -423,13 +423,13 @@ int testmaxpairs(const GtStr *indexname,
                                 getencseqAlphabet(encseq),
                                 storemaxmatchquery,
                                 tabmaxquerymatches,
-                                verboseinfo,
+                                logger,
                                 err) != 0)
     {
       haserr = true;
       break;
     }
-    showverbose(verboseinfo,"run self match for dblen=" FormatSeqpos
+    gt_logger_log(logger,"run self match for dblen=" FormatSeqpos
                             ",querylen= " FormatSeqpos ", minlength=%u",
            PRINTSeqposcast(dblen),PRINTSeqposcast(querylen),minlength);
     maxmatchselfinfo.results = gt_array_new(sizeof (Substringmatch));
@@ -446,7 +446,7 @@ int testmaxpairs(const GtStr *indexname,
                                getencseqAlphabet(encseq),
                                storemaxmatchself,
                                &maxmatchselfinfo,
-                               verboseinfo,
+                               logger,
                                err) != 0)
     {
       haserr = true;

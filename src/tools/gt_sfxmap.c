@@ -16,19 +16,18 @@
 */
 
 #include "core/error.h"
+#include "core/logger.h"
 #include "core/option.h"
 #include "core/versionfunc.h"
 #include "match/sarr-def.h"
-#include "match/verbose-def.h"
 #include "match/stamp.h"
 #include "match/esa-seqread.h"
 #include "match/esa-map.h"
 #include "match/echoseq.h"
-#include "tools/gt_sfxmap.h"
-
 #include "match/sfx-suftaborder.h"
 #include "match/test-encseq.pr"
 #include "match/test-mappedstr.pr"
+#include "tools/gt_sfxmap.h"
 
 typedef struct
 {
@@ -193,7 +192,7 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
   bool haserr = false;
   Suffixarray suffixarray;
   int parsed_args;
-  Verboseinfo *verboseinfo;
+  GtLogger *logger;
   Sfxmapoptions sfxmapoptions;
   unsigned int demand = 0;
 
@@ -216,7 +215,7 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
     return -1;
   }
   indexname = gt_str_new_cstr(argv[parsed_args]);
-  verboseinfo = newverboseinfo(sfxmapoptions.verbose);
+  logger = gt_logger_new(sfxmapoptions.verbose, GT_LOGGER_DEFLT_PREFIX, stdout);
   if (sfxmapoptions.inputtis || sfxmapoptions.delspranges > 0 ||
       sfxmapoptions.inputsuf)
   {
@@ -254,7 +253,7 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
                                : mapsuffixarray)(&suffixarray,
                                                  demand,
                                                  indexname,
-                                                 verboseinfo,
+                                                 logger,
                                                  err) != 0)
   {
     haserr = true;
@@ -276,8 +275,8 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
              ((Readmode) readmode) == Forwardmode ||
              ((Readmode) readmode) == Reversemode)
           {
-            showverbose(verboseinfo,"testencodedsequence(readmode=%s)",
-                                    showreadmode((Readmode) readmode));
+            gt_logger_log(logger, "testencodedsequence(readmode=%s)",
+                                   showreadmode((Readmode) readmode));
             if (testencodedsequence(getencseqfilenametab(suffixarray.encseq),
                                     suffixarray.encseq,
                                     (Readmode) readmode,
@@ -293,7 +292,7 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
       }
       if (!haserr && sfxmapoptions.inputtis)
       {
-        showverbose(verboseinfo,"checkspecialrangesfast");
+        gt_logger_log(logger, "checkspecialrangesfast");
         if (checkspecialrangesfast(suffixarray.encseq) != 0)
         {
           haserr = true;
@@ -301,14 +300,14 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
       }
       if (!haserr && sfxmapoptions.inputtis)
       {
-        showverbose(verboseinfo,"checkmarkpos");
+        gt_logger_log(logger, "checkmarkpos");
         checkmarkpos(suffixarray.encseq);
       }
       if (!haserr && sfxmapoptions.inputtis &&
           suffixarray.readmode == Forwardmode &&
           suffixarray.prefixlength > 0)
       {
-        showverbose(verboseinfo,"verifymappedstr");
+        gt_logger_log(logger, "verifymappedstr");
         if (verifymappedstr(suffixarray.encseq,suffixarray.prefixlength,
                             err) != 0)
         {
@@ -329,7 +328,7 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
         {
           ssar = NULL;
         }
-        showverbose(verboseinfo,"checkentiresuftab");
+        gt_logger_log(logger, "checkentiresuftab");
         checkentiresuftab(__FILE__,
                           __LINE__,
                           suffixarray.encseq,
@@ -345,7 +344,7 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
         {
           freeSequentialsuffixarrayreader(&ssar);
         }
-        showverbose(verboseinfo,"okay");
+        gt_logger_log(logger, "okay");
       }
       if (!haserr && sfxmapoptions.inputbwt)
       {
@@ -391,11 +390,11 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
   }
   if (!haserr && sfxmapoptions.inputdes)
   {
-    showverbose(verboseinfo,"checkallsequencedescriptions");
+    gt_logger_log(logger, "checkallsequencedescriptions");
     checkallsequencedescriptions(suffixarray.encseq);
   }
   gt_str_delete(indexname);
   freesuffixarray(&suffixarray);
-  freeverboseinfo(&verboseinfo);
+  gt_logger_delete(logger);
   return haserr ? -1 : 0;
 }

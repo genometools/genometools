@@ -21,7 +21,7 @@
 #include "bcktab.h"
 #include "intcode-def.h"
 #include "encseq-def.h"
-#include "verbose-def.h"
+#include "core/logger.h"
 
 typedef struct GtBucketspec2 GtBucketspec2;
 
@@ -33,7 +33,7 @@ GtBucketspec2 *gt_bucketspec2_new(const Bcktab *bcktab,
 
 void gt_copysortsuffixes(const GtBucketspec2 *bucketspec2,
                          Seqpos *suftab,
-                         Verboseinfo *verboseinfo);
+                         GtLogger *logger);
 
 bool gt_hardworkbeforecopysort(const GtBucketspec2 *bucketspec2,
                                Codetype code);

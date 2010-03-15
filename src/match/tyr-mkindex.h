@@ -21,7 +21,7 @@
 #include <stdbool.h>
 #include "core/str.h"
 #include "core/error_api.h"
-#include "verbose-def.h"
+#include "core/logger.h"
 
 int merstatistics(const GtStr *str_inputindex,
                   unsigned long mersize,
@@ -31,7 +31,7 @@ int merstatistics(const GtStr *str_inputindex,
                   bool storecounts,
                   bool scanfile,
                   bool performtest,
-                  Verboseinfo *verboseinfo,
+                  GtLogger *logger,
                   GtError *err);
 
 #endif

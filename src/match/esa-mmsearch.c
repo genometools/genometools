@@ -441,7 +441,7 @@ int callenumquerymatches(const GtStr *indexname,
                          unsigned int userdefinedleastlength,
                          Processquerymatch processquerymatch,
                          void *processquerymatchinfo,
-                         Verboseinfo *verboseinfo,
+                         GtLogger *logger,
                          GtError *err)
 {
   Suffixarray suffixarray;
@@ -452,7 +452,7 @@ int callenumquerymatches(const GtStr *indexname,
   if (mapsuffixarray(&suffixarray,
                      SARR_ESQTAB | SARR_SUFTAB | SARR_SSPTAB,
                      indexname,
-                     verboseinfo,
+                     logger,
                      err) != 0)
   {
     haserr = true;
@@ -543,7 +543,7 @@ int callenumselfmatches(const GtStr *indexname,
                         unsigned int userdefinedleastlength,
                         Processquerymatch processquerymatch,
                         void *processquerymatchinfo,
-                        Verboseinfo *verboseinfo,
+                        GtLogger *logger,
                         GtError *err)
 {
   Suffixarray suffixarray;
@@ -555,7 +555,7 @@ int callenumselfmatches(const GtStr *indexname,
   if (mapsuffixarray(&suffixarray,
                      SARR_ESQTAB | SARR_SUFTAB | SARR_SSPTAB,
                      indexname,
-                     verboseinfo,
+                     logger,
                      err) != 0)
   {
     haserr = true;
@@ -631,7 +631,7 @@ static int constructsarrandrunmmsearch(
                        NULL, /* outlcpinfo */
                        NULL, /* sfxstrategy */
                        sfxprogress,
-                       NULL, /* verboseinfo */
+                       NULL, /* logger */
                        err);
   if (sfi == NULL)
   {
@@ -684,7 +684,7 @@ int sarrquerysubstringmatch(const GtUchar *dbseq,
                             const GtAlphabet *alpha,
                             Processquerymatch processquerymatch,
                             void *processquerymatchinfo,
-                            Verboseinfo *verboseinfo,
+                            GtLogger *logger,
                             GtError *err)
 {
   unsigned int numofchars;
@@ -697,7 +697,7 @@ int sarrquerysubstringmatch(const GtUchar *dbseq,
                                    NULL,
                                    0,
                                    alpha,
-                                   verboseinfo);
+                                   logger);
   numofchars = gt_alphabet_num_of_chars(alpha);
   if (constructsarrandrunmmsearch(dbencseq,
                                   Forwardmode,

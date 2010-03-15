@@ -22,7 +22,7 @@
 #include "core/str.h"
 #include "core/array.h"
 #include "core/symboldef.h"
-#include "verbose-def.h"
+#include "core/logger.h"
 #include "format64.h"
 #include "sfx-ri-def.h"
 
@@ -133,7 +133,7 @@ static int scanuintintline(uint32_t *lengthofkey,
 }
 
 int allkeysdefined(const GtStr *indexname,const char *suffix,
-                   const GtArray *riktab,Verboseinfo *verboseinfo,
+                   const GtArray *riktab,GtLogger *logger,
                    GtError *err)
 {
   unsigned long i;
@@ -149,14 +149,14 @@ int allkeysdefined(const GtStr *indexname,const char *suffix,
       {
         if (rikptr->smallvalueptr != NULL)
         {
-          showverbose(verboseinfo,"%s=%u",
+          gt_logger_log(logger,"%s=%u",
                       rikptr->keystring,
                       (unsigned int) *(rikptr->smallvalueptr));
         } else
         {
           if (rikptr->bigvalueptr != NULL)
           {
-            showverbose(verboseinfo,"%s=" Formatuint64_t,
+            gt_logger_log(logger,"%s=" Formatuint64_t,
                         rikptr->keystring,
                         PRINTuint64_tcast(*(rikptr->bigvalueptr)));
           } else
@@ -166,7 +166,7 @@ int allkeysdefined(const GtStr *indexname,const char *suffix,
         }
       } else
       {
-        showverbose(verboseinfo,"%s=0",rikptr->keystring);
+        gt_logger_log(logger,"%s=0",rikptr->keystring);
       }
       if (rikptr->readflag != NULL)
       {

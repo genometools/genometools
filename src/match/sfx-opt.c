@@ -25,7 +25,7 @@
 #include "core/versionfunc.h"
 #include "readmode-def.h"
 #include "sfx-optdef.h"
-#include "verbose-def.h"
+#include "core/logger.h"
 #include "stamp.h"
 #include "eis-bwtseq-param.h"
 
@@ -470,47 +470,50 @@ static GtOPrval parse_options(int *parsed_args,
 static void showoptions(const Suffixeratoroptions *so)
 {
   unsigned long i;
+  GtLogger *logger = gt_logger_new(true, GT_LOGGER_DEFLT_PREFIX, stdout);
 
   if (gt_str_length(so->fn2encopt.str_smap) > 0)
   {
-    showdefinitelyverbose("smap=\"%s\"",gt_str_get(so->fn2encopt.str_smap));
+    gt_logger_log_force(logger, "smap=\"%s\"",
+                                gt_str_get(so->fn2encopt.str_smap));
   }
   if (so->fn2encopt.isdna)
   {
-    showdefinitelyverbose("dna=yes");
+    gt_logger_log_force(logger, "dna=yes");
   }
   if (so->fn2encopt.isprotein)
   {
-    showdefinitelyverbose("protein=yes");
+    gt_logger_log_force(logger, "protein=yes");
   }
   if (so->fn2encopt.isplain)
   {
-    showdefinitelyverbose("plain=yes");
+    gt_logger_log_force(logger, "plain=yes");
   }
-  showdefinitelyverbose("indexname=\"%s\"",
+  gt_logger_log_force(logger, "indexname=\"%s\"",
                         gt_str_get(so->fn2encopt.str_indexname));
   if (so->prefixlength == PREFIXLENGTH_AUTOMATIC)
   {
-    showdefinitelyverbose("prefixlength=automatic");
+    gt_logger_log_force(logger, "prefixlength=automatic");
   } else
   {
-    showdefinitelyverbose("prefixlength=%u",so->prefixlength);
+    gt_logger_log_force(logger, "prefixlength=%u",so->prefixlength);
   }
-  showdefinitelyverbose("storespecialcodes=%s",
+  gt_logger_log_force(logger, "storespecialcodes=%s",
                         so->sfxstrategy.storespecialcodes ? "true" : "false");
-  showdefinitelyverbose("parts=%u",so->numofparts);
+  gt_logger_log_force(logger, "parts=%u",so->numofparts);
   for (i=0; i<gt_str_array_size(so->fn2encopt.filenametab); i++)
   {
-    showdefinitelyverbose("inputfile[%lu]=%s",i,
+    gt_logger_log_force(logger, "inputfile[%lu]=%s",i,
                           gt_str_array_get(so->fn2encopt.filenametab,i));
   }
   if (gt_str_length(so->str_inputindex) > 0)
   {
-    showdefinitelyverbose("inputindex=%s",gt_str_get(so->str_inputindex));
+    gt_logger_log_force(logger, "inputindex=%s",gt_str_get(so->str_inputindex));
   }
   gt_assert(gt_str_length(so->fn2encopt.str_indexname) > 0);
-  showdefinitelyverbose("indexname=%s",gt_str_get(so->fn2encopt.str_indexname));
-  showdefinitelyverbose("outtistab=%s,outsuftab=%s,outlcptab=%s,"
+  gt_logger_log_force(logger, "indexname=%s",
+                              gt_str_get(so->fn2encopt.str_indexname));
+  gt_logger_log_force(logger, "outtistab=%s,outsuftab=%s,outlcptab=%s,"
                         "outbwttab=%s,outbcktab=%s,outdestab=%s,"
                         "outsdstab=%s,outssptab=%s,outkystab=%s",
           so->fn2encopt.outtistab ? "true" : "false",
@@ -524,6 +527,7 @@ static void showoptions(const Suffixeratoroptions *so)
           so->outkystab ? (so->outkyssort ? "true with sort" : "true") :
                           "false"
           );
+  gt_logger_delete(logger);
 }
 
 void wrapsfxoptions(Suffixeratoroptions *so)
@@ -561,6 +565,7 @@ int suffixeratoroptions(Suffixeratoroptions *so,
 {
   int parsed_args, retval = 0;
   GtOPrval rval;
+  GtLogger *logger = gt_logger_new(true, GT_LOGGER_DEFLT_PREFIX, stdout);
 
   gt_error_check(err);
   so->fn2encopt.isdna = false;
@@ -627,11 +632,11 @@ int suffixeratoroptions(Suffixeratoroptions *so,
   {
     if (so->beverbose)
     {
-      showdefinitelyverbose("maxinsertionsort=%lu",
+      gt_logger_log_force(logger, "maxinsertionsort=%lu",
                             so->sfxstrategy.maxinsertionsort);
-      showdefinitelyverbose("maxbltriesort=%lu",
+      gt_logger_log_force(logger, "maxbltriesort=%lu",
                             so->sfxstrategy.maxbltriesort);
-      showdefinitelyverbose("maxcountingsort=%lu",
+      gt_logger_log_force(logger, "maxcountingsort=%lu",
                             so->sfxstrategy.maxcountingsort);
     }
     if (so->sfxstrategy.maxinsertionsort > so->sfxstrategy.maxbltriesort)
@@ -649,5 +654,6 @@ int suffixeratoroptions(Suffixeratoroptions *so,
       }
     }
   }
+  gt_logger_delete(logger);
   return retval;
 }

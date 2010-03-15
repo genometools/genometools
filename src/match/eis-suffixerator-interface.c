@@ -23,6 +23,7 @@
 #include "core/dataalign.h"
 #include "core/fa.h"
 #include "core/filelengthvalues.h"
+#include "core/logger.h"
 #include "core/minmax.h"
 #include "core/seqiterator.h"
 #include "core/str.h"
@@ -30,7 +31,6 @@
 #include "core/symboldef.h"
 #include "core/unused_api.h"
 #include "match/seqpos-def.h"
-#include "match/verbose-def.h"
 #include "match/intcode-def.h"
 #include "match/encseq-def.h"
 
@@ -157,7 +157,7 @@ newSfxInterface(Readmode readmode,
                 const Encodedsequence *encseq,
                 Sfxprogress *sfxprogress,
                 Seqpos length,
-                Verboseinfo *verbosity,
+                GtLogger *verbosity,
                 GtError *err)
 {
   return newSfxInterfaceWithReaders(readmode,
@@ -228,7 +228,7 @@ newSfxInterfaceWithReaders(Readmode readmode,
                            const Encodedsequence *encseq,
                            Sfxprogress *sfxprogress,
                            Seqpos length,
-                           Verboseinfo *verbosity, GtError *err)
+                           GtLogger *verbosity, GtError *err)
 {
   sfxInterface *sfxi = NULL;
   gt_error_check(err);

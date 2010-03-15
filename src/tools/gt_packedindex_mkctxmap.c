@@ -15,10 +15,10 @@
 */
 
 #include "core/error.h"
+#include "core/logger.h"
 #include "core/option.h"
 #include "core/str.h"
 #include "core/versionfunc.h"
-
 #include "match/eis-bwtseq.h"
 #include "match/eis-bwtseq-construct.h"
 #include "match/eis-bwtseq-context-param.h"
@@ -43,7 +43,7 @@ gt_packedindex_mkctxmap(int argc, const char *argv[], GtError *err)
 {
   struct mkCtxMapOptions params;
   GtStr *projectName = NULL;
-  Verboseinfo *verbosity = NULL;
+  GtLogger *logger = NULL;
   BWTSeq *bwtSeq = NULL;
   SASeqSrc *src;
   int parsedArgs;
@@ -73,14 +73,15 @@ gt_packedindex_mkctxmap(int argc, const char *argv[], GtError *err)
         break;
     }
     gt_str_set(projectName, argv[parsedArgs]);
-    verbosity = newverboseinfo(params.verboseOutput);
+    logger = gt_logger_new(params.verboseOutput,
+                           GT_LOGGER_DEFLT_PREFIX, stdout);
     /* try to find appropriate suffix source */
     {
       Seqpos len;
-      if (streamsuffixarray(&sa, SARR_SUFTAB, projectName, verbosity, err))
+      if (streamsuffixarray(&sa, SARR_SUFTAB, projectName, logger, err))
       {
         gt_error_unset(err);
-        if (streamsuffixarray(&sa, 0, projectName, verbosity, err))
+        if (streamsuffixarray(&sa, 0, projectName, logger, err))
         {
           had_err = true;
           break;
@@ -133,7 +134,7 @@ gt_packedindex_mkctxmap(int argc, const char *argv[], GtError *err)
   }
   if (saiInitialized) destructSuffixarrayFileInterface(&sai);;
   if (saInitialized) freesuffixarray(&sa);
-  if (verbosity) freeverboseinfo(&verbosity);
+  if (logger) gt_logger_delete(logger);
   if (projectName) gt_str_delete(projectName);
   return had_err?-1:0;
 }

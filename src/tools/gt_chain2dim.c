@@ -240,16 +240,16 @@ static int gt_chain2dim_runner (GT_UNUSED int argc,
   GtChain2dimoptions *arguments = tool_arguments;
   GtChainmatchtable *matchtable;
   bool haserr = false;
-  Verboseinfo *verboseinfo = NULL;
+  GtLogger *logger = NULL;
 
   gt_error_check (err);
   gt_assert (arguments != NULL);
   gt_assert (parsed_args == argc);
 
   matchtable = gt_chain_analyzeopenformatfile(arguments->weightfactor,
-                                                     gt_str_get(arguments->
-                                                                matchfile),
-                                                     err);
+                                              gt_str_get(arguments->
+                                                         matchfile),
+                                              err);
   if (matchtable == NULL)
   {
     haserr = true;
@@ -260,8 +260,8 @@ static int gt_chain2dim_runner (GT_UNUSED int argc,
     GtChain *chain;
     Counter counter;
 
-    verboseinfo = newverboseinfo(arguments->verbose);
-    gt_chain_possiblysortmatches(verboseinfo,matchtable,presortdim);
+    logger = gt_logger_new(arguments->verbose, GT_LOGGER_DEFLT_PREFIX, stdout);
+    gt_chain_possiblysortmatches(logger, matchtable, presortdim);
     chain = gt_chain_chain_new();
     counter.chaincounter = 0;
     gt_chain_fastchaining(arguments->gtchainmode,
@@ -273,14 +273,14 @@ static int gt_chain2dim_runner (GT_UNUSED int argc,
                           arguments->silent ? gt_outputformatchainsilent
                                             : gt_outputformatchain,
                           &counter,
-                          verboseinfo);
+                          logger);
     gt_chain_chain_delete(chain);
   }
   gt_chain_chainmode_delete(arguments->gtchainmode);
   gt_chain_matchtable_delete(matchtable);
-  if (verboseinfo != NULL)
+  if (logger != NULL)
   {
-    freeverboseinfo(&verboseinfo);
+    gt_logger_delete(logger);
   }
   return haserr ? -1 : 0;
 }
