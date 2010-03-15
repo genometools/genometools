@@ -28,7 +28,6 @@
 #include "spacedef.h"
 #include "tyr-map.h"
 #include "tyr-mersplit.h"
-#include "opensfxfile.h"
 
 #define BUCKETSUFFIX                     ".mbd"
 #define MAXUCHARVALUEWITHBITS(BITNUM)    ((1 << (BITNUM)) - 1)
@@ -358,7 +357,8 @@ int constructmerbuckets(const GtStr *inputindex,
                      tyrbckinfo.numofcodes+1);
     INITBITTAB(tyrbckinfo.boundisdefined,tyrbckinfo.numofcodes+1);
     splitmerinterval(&tyrbckinfo,tyrindex);
-    bucketfp = opensfxfile(inputindex,BUCKETSUFFIX,"wb",err);
+    bucketfp = gt_fa_fopen_filename_with_suffix(inputindex,BUCKETSUFFIX,
+                                                "wb",err);
     if (bucketfp == NULL)
     {
       haserr = true;
@@ -419,9 +419,9 @@ Tyrbckinfo *tyrbckinfo_new(const GtStr *tyrindexname,unsigned int alphasize,
   bool haserr = false;
 
   ALLOCASSIGNSPACE(tyrbckinfo,NULL,Tyrbckinfo,1);
-  tyrbckinfo->mappedmbdfileptr = genericmaponlytable(tyrindexname,
-                                                     BUCKETSUFFIX,
-                                                     &numofbytes,err);
+  tyrbckinfo->mappedmbdfileptr = gt_mmap_filename_with_suffix(tyrindexname,
+                                                              BUCKETSUFFIX,
+                                                              &numofbytes,err);
   if (tyrbckinfo->mappedmbdfileptr == NULL)
   {
     haserr = true;

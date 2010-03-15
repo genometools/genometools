@@ -22,7 +22,7 @@
 #include "core/combinatorics.h"
 #include "core/dynalloc.h"
 #include "core/log.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/unused_api.h"
 #include "match/eis-seqblocktranslate.h"
 

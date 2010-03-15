@@ -18,9 +18,9 @@
 #ifndef SPLITITV_H
 #define SPLITITV_H
 
-#include "seqpos-def.h"
 #include "core/symboldef.h"
 #include "core/arraydef.h"
+#include "seqpos-def.h"
 
 typedef struct
 {

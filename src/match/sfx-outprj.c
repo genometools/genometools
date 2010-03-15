@@ -33,7 +33,6 @@
 #include "readmode-def.h"
 #include "encseq-def.h"
 #include "stamp.h"
-#include "opensfxfile.h"
 
 #define PRJSPECIALOUT(VAL)\
         fprintf(outprj,"%s=" FormatSeqpos "\n",#VAL,\
@@ -48,23 +47,9 @@ static void showprjinfo(FILE *outprj,
                         Seqpos maxbranchdepth,
                         const DefinedSeqpos *longest)
 {
-  unsigned long i;
   Seqpos totallength;
   unsigned long numofsequences;
-  const GtStrArray *filenametab;
-  const Filelengthvalues *filelengthtab;
 
-  filenametab = getencseqfilenametab(encseq);
-  filelengthtab = getencseqfilelengthtab(encseq);
-  gt_assert(filelengthtab != NULL);
-  gt_assert(filenametab != NULL);
-  for (i=0; i<gt_str_array_size(filenametab); i++)
-  {
-    fprintf(outprj,"dbfile=%s " Formatuint64_t " " Formatuint64_t "\n",
-                    gt_str_array_get(filenametab,i),
-                    PRINTuint64_tcast(filelengthtab[i].length),
-                    PRINTuint64_tcast(filelengthtab[i].effectivelength));
-  }
   totallength = getencseqtotallength(encseq);
   fprintf(outprj,"totallength=" FormatSeqpos "\n",PRINTSeqposcast(totallength));
   PRJSPECIALOUT(specialcharacters);
@@ -112,7 +97,8 @@ int outprjfile(const GtStr *indexname,
   bool haserr = false;
 
   gt_error_check(err);
-  prjfp = opensfxfile(indexname,PROJECTFILESUFFIX,"wb",err);
+  prjfp = gt_fa_fopen_filename_with_suffix(indexname,PROJECTFILESUFFIX,
+                                           "wb",err);
   if (prjfp == NULL)
   {
     haserr = true;

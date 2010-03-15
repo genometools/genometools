@@ -23,7 +23,6 @@
 #include "core/arraydef.h"
 #include "seqpos-def.h"
 #include "encseq-def.h"
-#include "fmi-bwtbound.h"
 
 /*
   TO DO:
@@ -75,6 +74,8 @@
 #define SUPERBFREQSIZE(MAPSIZE,NOFSUPERBLOCKS)\
         ((MAPSIZE) * (NOFSUPERBLOCKS))
 
+GT_DECLAREARRAYSTRUCT(PairBwtidx);
+
 typedef int(*FMprocessqhit)(void *,Seqpos,Seqpos);
 
 typedef struct
@@ -92,7 +93,7 @@ typedef struct
          negatesuperbsizeones,
          markdistminus1;   /* markdist - 1 */
   GtArrayPairBwtidx specpos; /* positions of special characters */
-  GtAlphabet *alphabet;
+  const GtAlphabet *alphabet;
   void *mappedptr; /* NULL or pointer to the mapped space block */
   unsigned int mapsize,      /* copy of alphabet.mapsize, used for searching */
            bsize,            /* size of block */
@@ -108,7 +109,7 @@ typedef struct
          nofsuperblocks,     /* number of superblocks (bwtlength/superbsize+2)*/
          markdist,           /* multiple of entry num stored in suffix array */
          numofcodes;         /* number of entries in boundaries */
-  Bwtbound *boundarray;      /* corresponding boundaries */
+  Seqposbound *boundarray;      /* corresponding boundaries */
 } Fmindex;
 
 typedef struct

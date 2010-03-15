@@ -34,14 +34,14 @@ static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
 #endif
   DECLARESEQBUFFER(encseq->twobitencoding);
 
-  ALLOCASSIGNSPACE(ACCESSENCSEQ(encseq,specialpositions),NULL,SPECIALTYPE,
-                   encseq->numofspecialstostore);
-  ALLOCASSIGNSPACE(ACCESSENCSEQ(encseq,specialrangelength),NULL,SPECIALTYPE,
-                   encseq->numofspecialstostore);
+  ACCESSENCSEQ(encseq,specialpositions)
+    = gt_malloc(sizeof(SPECIALTYPE) * encseq->numofspecialstostore);
+  ACCESSENCSEQ(encseq,specialrangelength)
+    = gt_malloc(sizeof(SPECIALTYPE) * encseq->numofspecialstostore);
 #ifndef NOENDPTR
   endspecialcells = (unsigned long) (encseq->totallength/MAXSPECIALTYPE + 1);
-  ALLOCASSIGNSPACE(ACCESSENCSEQ(encseq,endspecialsubsUint),NULL,unsigned long,
-                   endspecialcells);
+  ACCESSENCSEQ(encseq,endspecialsubsUint) = gt_malloc(sizeof(unsigned long) *
+                                                      endspecialcells);
   nextcheck = (Seqpos) MAXSPECIALTYPE;
   endptrUint = ACCESSENCSEQ(encseq,endspecialsubsUint);
 #endif

@@ -17,7 +17,7 @@
 
 #include <stdarg.h>
 #include "core/assert_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "verbose-def.h"
 
 struct Verboseinfo

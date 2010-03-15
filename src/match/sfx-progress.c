@@ -17,7 +17,7 @@
 
 #include <stdio.h>
 #include <time.h>
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "sfx-progress.h"
 
 struct Sfxprogress

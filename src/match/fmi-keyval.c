@@ -60,7 +60,7 @@ static unsigned long determinefmindexsize (const Fmindex *fm,
   }
   if (suffixlength > 0)
   {
-    sumsize += (uint64_t) sizeof (Bwtbound) * (uint64_t) fm->numofcodes;
+    sumsize += (uint64_t) sizeof (Seqposbound) * (uint64_t) fm->numofcodes;
   }
   if (storeindexpos)
   {

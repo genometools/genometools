@@ -171,7 +171,8 @@ static int sarrselfsubstringmatch(const GtUchar *dbseq,
     haserr = true;
   }
   removealpharef(ssi.encseq);
-  encodedsequence_free(&ssi.encseq);
+  gt_encodedsequence_delete(ssi.encseq);
+  ssi.encseq = NULL;
   return haserr ? -1 : 0;
 }
 
@@ -483,7 +484,8 @@ int testmaxpairs(const GtStr *indexname,
   }
   FREESPACE(dbseq);
   FREESPACE(query);
-  encodedsequence_free(&encseq);
+  gt_encodedsequence_delete(encseq);
+  encseq = NULL;
   return haserr ? -1 : 0;
 }
 

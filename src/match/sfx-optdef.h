@@ -22,7 +22,6 @@
 #include "core/str.h"
 #include "core/str_array.h"
 #include "readmode-def.h"
-#include "defined-types.h"
 #include "sfx-strategy.h"
 #include "eis-bwtseq-param.h"
 
@@ -31,34 +30,40 @@
 
 typedef struct
 {
-  unsigned int numofparts,
-               prefixlength;
-  GtStr *str_inputindex,
-      *str_indexname,
-      *str_smap,
-      *str_sat,
-      *str_maxdepth;
-  GtOption *optionalgboundsref;
-  GtStrArray *filenametab, *algbounds;
-  Readmode readmode;
+  GtStr *str_indexname,
+        *str_smap,
+        *str_sat;
+  GtStrArray *filenametab;
   bool isdna,
        isprotein,
        isplain,
-       beverbose,
+       outtistab,
+       outdestab,
+       outsdstab,
+       outssptab;
+} Filenames2encseqoptions;
+
+typedef struct
+{
+  unsigned int numofparts,
+               prefixlength;
+  GtStr *str_inputindex,
+        *str_maxdepth;
+  GtOption *optionalgboundsref;
+  GtStrArray *algbounds;
+  Readmode readmode;
+  bool beverbose,
        showtime,
        showprogress,
-       outtistab,
        outsuftab,
        outlcptab,
        outbwttab,
-       outdestab,
-       outsdstab,
        outbcktab,
-       outssptab,
        outkystab,
        outkyssort;
   GtStr *optionkysargumentstring;
   Sfxstrategy sfxstrategy;
+  Filenames2encseqoptions fn2encopt;
   struct bwtOptions bwtIdxParams;
 } Suffixeratoroptions;
 

@@ -19,7 +19,7 @@
 
 #include "core/assert_api.h"
 #include "core/dataalign.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/minmax.h"
 
 #include "match/encseq-specialsrank.h"

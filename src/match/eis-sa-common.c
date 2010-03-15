@@ -16,10 +16,9 @@
 
 #include <stdlib.h>
 
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "match/eis-sa-common.h"
 #include "match/encseq-def.h"
-#include "match/sfx-cmpsuf.pr"
 
 extern size_t
 translateSuftab2BWT(struct encSeqTrState *trState, GtUchar *dest, Seqpos *src,

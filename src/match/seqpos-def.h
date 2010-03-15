@@ -102,6 +102,18 @@ typedef struct
 
 typedef struct
 {
+  Seqpos lbound,
+         ubound;
+} Seqposbound;
+
+typedef struct
+{
+  Seqpos bwtpos,
+         suftabvalue;
+} PairBwtidx;
+
+typedef struct
+{
   Seqpos *spaceSeqpos;
   unsigned long allocatedSeqpos,
                 nextfreeSeqpos;

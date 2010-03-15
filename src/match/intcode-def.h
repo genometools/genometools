@@ -17,8 +17,8 @@
 
 #ifndef INTCODE_DEF_H
 #define INTCODE_DEF_H
-#include "seqpos-def.h"
 #include <stdbool.h>
+#include "seqpos-def.h"
 
 #define PREFIXLENBITS   4
 #define CODEBITS        (32-PREFIXLENBITS)

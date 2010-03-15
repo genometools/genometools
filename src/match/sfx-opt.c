@@ -19,7 +19,7 @@
 #include <inttypes.h>
 #include "core/error.h"
 #include "core/basename_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/option.h"
 #include "core/str.h"
 #include "core/versionfunc.h"
@@ -72,7 +72,7 @@ static GtOPrval parse_options(int *parsed_args,
                                   : "Compute packed index.");
   gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
   optiondb = gt_option_new_filenamearray("db","specify database files",
-                                         so->filenametab);
+                                         so->fn2encopt.filenametab);
   gt_option_parser_add_option(op, optiondb);
 
   optionii = gt_option_new_filename("ii","specify sequence index created "
@@ -83,19 +83,19 @@ static GtOPrval parse_options(int *parsed_args,
 
   optionsmap = gt_option_new_string("smap",
                                     "specify file containing a symbol mapping",
-                                    so->str_smap, NULL);
+                                    so->fn2encopt.str_smap, NULL);
   gt_option_parser_add_option(op, optionsmap);
 
   optiondna = gt_option_new_bool("dna","input is DNA sequence",
-                                 &so->isdna,false);
+                                 &so->fn2encopt.isdna,false);
   gt_option_parser_add_option(op, optiondna);
 
   optionprotein = gt_option_new_bool("protein","input is Protein sequence",
-                                     &so->isprotein,false);
+                                     &so->fn2encopt.isprotein,false);
   gt_option_parser_add_option(op, optionprotein);
 
   optionplain = gt_option_new_bool("plain","process as plain text",
-                                   &so->isplain,false);
+                                   &so->fn2encopt.isplain,false);
   gt_option_parser_add_option(op, optionplain);
 
   optiondir = gt_option_new_string("dir",
@@ -107,7 +107,7 @@ static GtOPrval parse_options(int *parsed_args,
   optionindexname = gt_option_new_string("indexname",
                                          "specify name for index to "
                                          "be generated",
-                                         so->str_indexname, NULL);
+                                         so->fn2encopt.str_indexname, NULL);
   gt_option_parser_add_option(op, optionindexname);
 
   optionpl = gt_option_new_uint_min("pl",
@@ -192,32 +192,32 @@ static GtOPrval parse_options(int *parsed_args,
 
   optionsat = gt_option_new_string("sat",
                                    "specify kind of sequence representation",
-                                   so->str_sat, NULL);
+                                   so->fn2encopt.str_sat, NULL);
   gt_option_parser_add_option(op, optionsat);
 
   option = gt_option_new_bool("tis",
                               "output transformed and encoded input "
                               "sequence to file",
-                              &so->outtistab,
+                              &so->fn2encopt.outtistab,
                               false);
   gt_option_parser_add_option(op, option);
 
   option = gt_option_new_bool("ssp",
                               "output sequence separator positions to file",
-                              &so->outssptab,
+                              &so->fn2encopt.outssptab,
                               false);
   gt_option_parser_add_option(op, option);
 
   optiondes = gt_option_new_bool("des",
                                  "output sequence descriptions to file",
-                                 &so->outdestab,
+                                 &so->fn2encopt.outdestab,
                                  false);
   gt_option_parser_add_option(op, optiondes);
 
   optionsds = gt_option_new_bool("sds",
                                  "output sequence description separator "
                                  "positions to file",
-                                 &so->outsdstab,
+                                 &so->fn2encopt.outsdstab,
                                  false);
   gt_option_parser_add_option(op, optionsds);
 
@@ -259,7 +259,7 @@ static GtOPrval parse_options(int *parsed_args,
   {
     optionsuf = optionlcp = optionbwt = NULL;
     registerPackedIndexOptions(op, &so->bwtIdxParams, BWTDEFOPT_CONSTRUCTION,
-                               so->str_indexname);
+                               so->fn2encopt.str_indexname);
   }
   optionshowtime
     = gt_option_new_bool("showtime",
@@ -306,7 +306,8 @@ static GtOPrval parse_options(int *parsed_args,
                                   err);
   if (oprval == GT_OPTION_PARSER_OK)
   {
-    if (gt_option_is_set(optiondb) && gt_str_array_size(so->filenametab) == 0)
+    if (gt_option_is_set(optiondb) &&
+        gt_str_array_size(so->fn2encopt.filenametab) == 0)
     {
       gt_error_set(err,"missing argument to option -db");
       oprval = GT_OPTION_PARSER_ERROR;
@@ -316,7 +317,7 @@ static GtOPrval parse_options(int *parsed_args,
       {
         if (gt_option_is_set(optiondb))
         {
-          if (gt_str_array_size(so->filenametab) > 1UL)
+          if (gt_str_array_size(so->fn2encopt.filenametab) > 1UL)
           {
             gt_error_set(err,"if more than one input file is given, then "
                              "option -indexname is mandatory");
@@ -325,8 +326,9 @@ static GtOPrval parse_options(int *parsed_args,
           {
             char *basenameptr;
 
-            basenameptr = gt_basename(gt_str_array_get(so->filenametab,0));
-            gt_str_set(so->str_indexname,basenameptr);
+            basenameptr
+              = gt_basename(gt_str_array_get(so->fn2encopt.filenametab,0));
+            gt_str_set(so->fn2encopt.str_indexname,basenameptr);
             gt_free(basenameptr);
           }
         } else
@@ -334,7 +336,7 @@ static GtOPrval parse_options(int *parsed_args,
           char *basenameptr;
 
           basenameptr = gt_basename(gt_str_get(so->str_inputindex));
-          gt_str_set(so->str_indexname,basenameptr);
+          gt_str_set(so->fn2encopt.str_indexname,basenameptr);
           gt_free(basenameptr);
         }
       }
@@ -469,23 +471,24 @@ static void showoptions(const Suffixeratoroptions *so)
 {
   unsigned long i;
 
-  if (gt_str_length(so->str_smap) > 0)
+  if (gt_str_length(so->fn2encopt.str_smap) > 0)
   {
-    showdefinitelyverbose("smap=\"%s\"",gt_str_get(so->str_smap));
+    showdefinitelyverbose("smap=\"%s\"",gt_str_get(so->fn2encopt.str_smap));
   }
-  if (so->isdna)
+  if (so->fn2encopt.isdna)
   {
     showdefinitelyverbose("dna=yes");
   }
-  if (so->isprotein)
+  if (so->fn2encopt.isprotein)
   {
     showdefinitelyverbose("protein=yes");
   }
-  if (so->isplain)
+  if (so->fn2encopt.isplain)
   {
     showdefinitelyverbose("plain=yes");
   }
-  showdefinitelyverbose("indexname=\"%s\"",gt_str_get(so->str_indexname));
+  showdefinitelyverbose("indexname=\"%s\"",
+                        gt_str_get(so->fn2encopt.str_indexname));
   if (so->prefixlength == PREFIXLENGTH_AUTOMATIC)
   {
     showdefinitelyverbose("prefixlength=automatic");
@@ -496,28 +499,28 @@ static void showoptions(const Suffixeratoroptions *so)
   showdefinitelyverbose("storespecialcodes=%s",
                         so->sfxstrategy.storespecialcodes ? "true" : "false");
   showdefinitelyverbose("parts=%u",so->numofparts);
-  for (i=0; i<gt_str_array_size(so->filenametab); i++)
+  for (i=0; i<gt_str_array_size(so->fn2encopt.filenametab); i++)
   {
     showdefinitelyverbose("inputfile[%lu]=%s",i,
-                          gt_str_array_get(so->filenametab,i));
+                          gt_str_array_get(so->fn2encopt.filenametab,i));
   }
   if (gt_str_length(so->str_inputindex) > 0)
   {
     showdefinitelyverbose("inputindex=%s",gt_str_get(so->str_inputindex));
   }
-  gt_assert(gt_str_length(so->str_indexname) > 0);
-  showdefinitelyverbose("indexname=%s",gt_str_get(so->str_indexname));
+  gt_assert(gt_str_length(so->fn2encopt.str_indexname) > 0);
+  showdefinitelyverbose("indexname=%s",gt_str_get(so->fn2encopt.str_indexname));
   showdefinitelyverbose("outtistab=%s,outsuftab=%s,outlcptab=%s,"
                         "outbwttab=%s,outbcktab=%s,outdestab=%s,"
                         "outsdstab=%s,outssptab=%s,outkystab=%s",
-          so->outtistab ? "true" : "false",
+          so->fn2encopt.outtistab ? "true" : "false",
           so->outsuftab ? "true" : "false",
           so->outlcptab ? "true" : "false",
           so->outbwttab ? "true" : "false",
           so->outbcktab ? "true" : "false",
-          so->outdestab ? "true" : "false",
-          so->outsdstab ? "true" : "false",
-          so->outssptab ? "true" : "false",
+          so->fn2encopt.outdestab ? "true" : "false",
+          so->fn2encopt.outsdstab ? "true" : "false",
+          so->fn2encopt.outssptab ? "true" : "false",
           so->outkystab ? (so->outkyssort ? "true with sort" : "true") :
                           "false"
           );
@@ -526,13 +529,13 @@ static void showoptions(const Suffixeratoroptions *so)
 void wrapsfxoptions(Suffixeratoroptions *so)
 {
   /* no checking if error occurs, since errors have been output before */
-  gt_str_delete(so->str_indexname);
+  gt_str_delete(so->fn2encopt.str_indexname);
   gt_str_delete(so->str_inputindex);
-  gt_str_delete(so->str_smap);
-  gt_str_delete(so->str_sat);
+  gt_str_delete(so->fn2encopt.str_smap);
+  gt_str_delete(so->fn2encopt.str_sat);
   gt_str_delete(so->optionkysargumentstring);
   gt_str_delete(so->str_maxdepth);
-  gt_str_array_delete(so->filenametab);
+  gt_str_array_delete(so->fn2encopt.filenametab);
   gt_str_array_delete(so->algbounds);
   gt_option_delete(so->optionalgboundsref);
 }
@@ -560,17 +563,17 @@ int suffixeratoroptions(Suffixeratoroptions *so,
   GtOPrval rval;
 
   gt_error_check(err);
-  so->isdna = false;
-  so->isprotein = false;
+  so->fn2encopt.isdna = false;
+  so->fn2encopt.isprotein = false;
   so->str_inputindex = gt_str_new();
-  so->str_indexname = gt_str_new();
-  so->str_smap = gt_str_new();
-  so->str_sat = gt_str_new();
+  so->fn2encopt.str_indexname = gt_str_new();
+  so->fn2encopt.str_smap = gt_str_new();
+  so->fn2encopt.str_sat = gt_str_new();
   so->str_maxdepth = gt_str_new();
   so->outkystab = false;
   so->outkyssort = false;
   so->optionkysargumentstring = gt_str_new();
-  so->filenametab = gt_str_array_new();
+  so->fn2encopt.filenametab = gt_str_array_new();
   so->algbounds = gt_str_array_new();
   so->prefixlength = PREFIXLENGTH_AUTOMATIC;
   so->sfxstrategy.ssortmaxdepth.defined = false;

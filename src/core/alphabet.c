@@ -23,16 +23,17 @@
 #include <stdbool.h>
 #include <limits.h>
 #include <errno.h>
-#include "core/chardef.h"
-#include "core/cstr_api.h"
-#include "core/error.h"
-#include "core/fileutils_api.h"
-#include "core/ma.h"
-#include "core/gtdatapath.h"
-#include "core/str.h"
-#include "core/str_array.h"
-#include "core/symboldef.h"
-#include "core/mathsupport.h"
+#include "chardef.h"
+#include "cstr_api.h"
+#include "error.h"
+#include "fileutils_api.h"
+#include "ma_api.h"
+#include "gtdatapath.h"
+#include "str.h"
+#include "str_array.h"
+#include "symboldef.h"
+#include "mathsupport.h"
+#include "fa.h"
 #include "alphabet.h"
 
 #define ALPHABET_GUESS_MAX_LENGTH       5000
@@ -925,4 +926,48 @@ void gt_alphabet_encode_seq(const GtAlphabet *alphabet, GtUchar *out,
     gt_assert(alphabet->symbolmap[(int) in[i]] != UNDEFCHAR);
     out[i] = alphabet->symbolmap[(int) in[i]];
   }
+}
+
+const GtAlphabet *gt_scanal1file(const GtStr *indexname,GtError *err)
+{
+  GtStr *tmpfilename;
+  bool haserr = false;
+  const GtAlphabet *alpha;
+
+  gt_error_check(err);
+  tmpfilename = gt_str_clone(indexname);
+  gt_str_append_cstr(tmpfilename,GT_ALPHABETFILESUFFIX);
+  alpha = gt_alphabet_new(false,false,tmpfilename,NULL,err);
+  if (alpha == NULL)
+  {
+    haserr = true;
+  }
+  gt_str_delete(tmpfilename);
+  if (haserr)
+  {
+    gt_alphabet_delete((GtAlphabet*) alpha);
+    return NULL;
+  }
+  return alpha;
+}
+
+int gt_outal1file(const GtStr *indexname,const GtAlphabet *alpha,
+                  GtError *err)
+{
+  FILE *al1fp;
+  bool haserr = false;
+
+  gt_error_check(err);
+  al1fp = gt_fa_fopen_filename_with_suffix(indexname,GT_ALPHABETFILESUFFIX,
+                                           "wb",err);
+  if (al1fp == NULL)
+  {
+    haserr = true;
+  }
+  if (!haserr)
+  {
+    gt_alphabet_output(alpha,al1fp);
+    gt_fa_xfclose(al1fp);
+  }
+  return haserr ? -1 : 0;
 }

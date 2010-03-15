@@ -19,7 +19,7 @@
 #include <stdarg.h>
 #include "core/symboldef.h"
 #include "core/unused_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "seqpos-def.h"
 #include "encseq-def.h"
 #include "defined-types.h"

@@ -20,6 +20,7 @@
 #include "core/str.h"
 #include "core/option.h"
 #include "core/versionfunc.h"
+#include "match/encseq-def.h"
 #include "match/sarr-def.h"
 #include "match/stamp.h"
 #include "match/enum-patt-def.h"
@@ -28,8 +29,6 @@
 #include "match/spacedef.h"
 #include "match/cutendpfx.h"
 #include "match/esa-map.h"
-
-#include "match/sfx-cmpsuf.pr"
 
 #include "tools/gt_patternmatch.h"
 

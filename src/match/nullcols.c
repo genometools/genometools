@@ -17,7 +17,7 @@
 
 #include <stdlib.h>
 #include "core/symboldef.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 
 typedef struct
 {

@@ -330,7 +330,8 @@ void* gt_fa_mmap_generic_fd_func(int fd, size_t len, size_t offset,
   {
     if ((map = mmap(0, len, PROT_READ | (mapwritable ? PROT_WRITE : 0),
                     MAP_SHARED, fd, offset)) == MAP_FAILED) {
-      gt_error_set(err,"cannot map file \"%s\": %s", filename, strerror(errno));
+      gt_error_set(err,"cannot map file \"%s\": %s","unknown filename",/* XXX */
+                                                    strerror(errno));
       map = NULL;
     }
   }
@@ -360,21 +361,22 @@ static void* mmap_generic_path_func(const char *path, size_t *len,
   gt_assert(fa && path);
   fd = open(path, mapwritable?O_RDWR:O_RDONLY, 0);
   if (fd == -1) {
-    gt_error_set(err,"cannot open file \"%s\": %s", filename, strerror(errno));
+    gt_error_set(err,"cannot open file \"%s\": %s", path, strerror(errno));
     return NULL;
   }
   if (hard_fail)
     gt_xfstat(fd, &sb);
   else if (fstat(fd, &sb)) {
-    gt_error_set(err,"cannot fstat file \"%s\": %s", filename, strerror(errno));
+    gt_error_set(err,"cannot fstat file \"%s\": %s", path, strerror(errno));
     return NULL;
   }
   if (sizeof (off_t) > sizeof (size_t) && sb.st_size > SIZE_MAX) {
     gt_error_set(err,"file \"%s\" of size %llu is too large to map",
-                 filename, (unsigned long long) sb.st_size);
+                 path, (unsigned long long) sb.st_size);
     return NULL;
   }
-  map = gt_fa_mmap_generic_fd_func(fd, sb.st_size, 0, mapwritable, hard_fail,
+  map = gt_fa_mmap_generic_fd_func(fd, sb.st_size, 0,
+                                   mapwritable, hard_fail,
                                    filename, line, err);
   if (map && len)
     *len = sb.st_size;
@@ -503,4 +505,103 @@ void gt_fa_clean(void)
   gt_hashmap_delete(fa->memory_maps);
   gt_free(fa);
   fa = NULL;
+}
+
+/* Gordon, please think about whether the following functions should
+   remain here */
+
+FILE *gt_fa_fopen_filename_with_suffix(const GtStr *filenameprefix,
+                                       const char *suffix,
+                                       const char *mode,
+                                       GtError *err)
+{
+  GtStr *tmpfilename;
+  FILE *fp;
+
+  gt_error_check(err);
+  tmpfilename = gt_str_clone(filenameprefix);
+  gt_str_append_cstr(tmpfilename,suffix);
+  fp = gt_fa_fopen(gt_str_get(tmpfilename),mode,err);
+  gt_str_delete(tmpfilename);
+  return fp;
+}
+
+bool gt_exists_filename_with_suffix(const GtStr *indexname,const char *suffix)
+{
+  struct stat statbuf;
+  GtStr *tmpfilename;
+
+  tmpfilename = gt_str_clone(indexname);
+  gt_str_append_cstr(tmpfilename,suffix);
+
+  if (stat(gt_str_get(tmpfilename),&statbuf) == 0)
+  {
+    gt_str_delete(tmpfilename);
+    return true;
+  }
+  gt_str_delete(tmpfilename);
+  return false;
+}
+
+void *gt_mmap_filename_with_suffix(const GtStr *indexname,const char *suffix,
+                                   size_t *numofbytes,GtError *err)
+{
+  GtStr *tmpfilename;
+  void *ptr;
+  bool haserr = false;
+
+  gt_error_check(err);
+  tmpfilename = gt_str_clone(indexname);
+  gt_str_append_cstr(tmpfilename,suffix);
+  ptr = gt_fa_mmap_read(gt_str_get(tmpfilename),numofbytes,err);
+  if (ptr == NULL)
+  {
+    haserr = true;
+  }
+  gt_str_delete(tmpfilename);
+  return haserr ? NULL : ptr;
+}
+
+static int checkmappedfilesize(const GtStr *indexname,
+                               const char *suffix,
+                               size_t numofbytes,
+                               unsigned long expectedunits,
+                               size_t sizeofunit,
+                               GtError *err)
+{
+  gt_error_check(err);
+  if (expectedunits != (unsigned long) (numofbytes/sizeofunit))
+  {
+    gt_error_set(err,"mapping file %s%s: number of mapped units (of size %u) "
+                     " = %lu != %lu = expected number of mapped units",
+                      gt_str_get(indexname),
+                      suffix,
+                      (unsigned int) sizeofunit,
+                      (unsigned long) (numofbytes/sizeofunit),
+                      expectedunits);
+    return -1;
+  }
+  return 0;
+}
+
+void *gt_mmap_check_filename_with_suffix(const GtStr *indexname,
+                                         const char *suffix,
+                                         unsigned long expectedunits,
+                                         size_t sizeofunit,
+                                         GtError *err)
+{
+  size_t numofbytes;
+
+  void *ptr = gt_mmap_filename_with_suffix(indexname,suffix,&numofbytes,err);
+  if (ptr == NULL)
+  {
+    return NULL;
+  }
+  if (checkmappedfilesize(indexname,suffix,
+                          numofbytes,expectedunits,sizeofunit,err) != 0)
+  {
+    gt_fa_xmunmap(ptr);
+    return NULL;
+  }
+  return ptr;
 }

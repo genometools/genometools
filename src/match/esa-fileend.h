@@ -67,32 +67,6 @@
 #define BCKTABSUFFIX  ".bck"
 
 /*
-  The following defines the suffix of a file to store alphabet.
-*/
-
-#define ALPHABETFILESUFFIX ".al1"
-
-/*
-  The following defines the suffix of a file to store sequence descriptions.
-*/
-
-#define DESTABSUFFIX ".des"
-
-/*
-  The following defines the suffix of a file to store sequence description
-  separator positions.
-*/
-
-#define SDSTABSUFFIX ".sds"
-
-/*
-  The following defines the suffix of a file to store sequence seperator
-  positions.
-*/
-
-#define SSPTABSUFFIX ".ssp"
-
-/*
   The following defines the suffix of the project file.
 */
 

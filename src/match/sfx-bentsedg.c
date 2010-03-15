@@ -35,13 +35,10 @@
 #include "bcktab.h"
 #include "bltrie-ssort.h"
 #include "lcpoverflow.h"
-#include "opensfxfile.h"
 #include "sfx-remainsort.h"
 #include "sfx-copysort.h"
 #include "kmer2string.h"
 #include "stamp.h"
-
-#include "sfx-cmpsuf.pr"
 
 #define UNIQUEINT(P)           ((Seqpos) ((P) + GT_COMPAREOFFSET))
 #define ACCESSCHAR(POS)        getencodedchar(bsr->encseq,POS,bsr->readmode)
@@ -1625,7 +1622,9 @@ Outlcpinfo *newOutlcpinfo(const GtStr *indexname,
     outlcpinfo->outfpllvtab = NULL;
   } else
   {
-    outlcpinfo->outfplcptab = opensfxfile(indexname,LCPTABSUFFIX,"wb",err);
+    outlcpinfo->outfplcptab = gt_fa_fopen_filename_with_suffix(indexname,
+                                                               LCPTABSUFFIX,
+                                                               "wb",err);
     if (outlcpinfo->outfplcptab == NULL)
     {
       haserr = true;
@@ -1633,7 +1632,8 @@ Outlcpinfo *newOutlcpinfo(const GtStr *indexname,
     if (!haserr)
     {
       outlcpinfo->outfpllvtab
-        = opensfxfile(indexname,LARGELCPTABSUFFIX,"wb",err);
+        = gt_fa_fopen_filename_with_suffix(indexname,LARGELCPTABSUFFIX,"wb",
+                                           err);
       if (outlcpinfo->outfpllvtab == NULL)
       {
         haserr = true;

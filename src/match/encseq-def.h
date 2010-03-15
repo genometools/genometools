@@ -24,13 +24,12 @@
 #include "core/str_array.h"
 #include "core/symboldef.h"
 #include "core/filelengthvalues.h"
+#include "core/disc_distri.h"
 #include "seqpos-def.h"
 #include "intcode-def.h"
 #include "intbits.h"
 #include "readmode-def.h"
 #include "verbose-def.h"
-
-#define DBFILEKEY "dbfile="
 
 #ifdef SKDEBUG
 #define CHECKENCCHAR(CC,ENCSEQ,POS,READMODE)\
@@ -162,6 +161,8 @@ int compareTwobitencodings(bool fwd,
 
 uint64_t detencseqofsatviatables(int kind,
                                  Seqpos totallength,
+                                 unsigned long numofdbfiles,
+                                 unsigned long lengthofdbfilenames,
                                  Seqpos specialranges,
                                  unsigned int numofchars);
 
@@ -174,7 +175,7 @@ int flushencseqfile(const GtStr *indexname,Encodedsequence *encseq,GtError*);
 
 Encodedsequencescanstate *newEncodedsequencescanstate(void);
 
-void encodedsequence_free(Encodedsequence **encseqptr);
+void gt_encodedsequence_delete(Encodedsequence *encseq);
 
 void initEncodedsequencescanstate(Encodedsequencescanstate *esr,
                                   const Encodedsequence *encseq,
@@ -389,8 +390,6 @@ GtUchar getencseqAlphabetwildcardshow(const Encodedsequence *encseq);
 
 const GtStrArray *getencseqfilenametab(const Encodedsequence *encseq);
 
-const Filelengthvalues *getencseqfilelengthtab(const Encodedsequence *encseq);
-
 unsigned long getencseqcharactercount(const Encodedsequence *encseq,GtUchar cc);
 
 /* some function to remove reference from an Encodedsequence to prevent that
@@ -403,6 +402,58 @@ void removefilenametabref(Encodedsequence *encseq);
 void showgetencodedcharcounters(void);
 
 void gt_showsequencefeatures(Verboseinfo *verboseinfo,
-                             const Encodedsequence *encseq);
+                             const Encodedsequence *encseq,bool withfilenames);
+
+unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab);
+
+int gt_inputfiles2sequencekeyvalues(
+        const GtStr *indexname,
+        Seqpos *totallength,
+        Specialcharinfo *specialcharinfo,
+        unsigned int forcetable,
+        Seqpos *specialrangestab,
+        const GtStrArray *filenametab,
+        Filelengthvalues **filelengthtab,
+        const GtAlphabet *alpha,
+        bool plainformat,
+        bool outdestab,
+        bool outsdstab,
+        unsigned long *characterdistribution,
+        bool outssptab,
+        ArraySeqpos *sequenceseppos,
+        Verboseinfo *verboseinfo,
+        GtError *err);
+
+FILE *opendestabfile(const GtStr *indexname,const char *mode,GtError *err);
+
+FILE *openssptabfile(const GtStr *indexname,const char *mode,GtError *err);
+
+int comparetwosuffixes(const Encodedsequence *encseq,
+                       Readmode readmode,
+                       Seqpos *maxlcp,
+                       bool specialsareequal,
+                       bool specialsareequalatdepth0,
+                       Seqpos maxdepth,
+                       Seqpos start1,
+                       Seqpos start2,
+                       Encodedsequencescanstate *esr1,
+                       Encodedsequencescanstate *esr2);
+
+int comparetwostrings(const Encodedsequence *encseq,
+                      bool fwd,
+                      bool complement,
+                      Seqpos *maxcommon,
+                      Seqpos pos1,
+                      Seqpos pos2,
+                      Seqpos maxdepth);
+
+int comparetwostringsgeneric(const Encodedsequence *encseq,
+                             bool fwd,
+                             bool complement,
+                             Seqpos *maxcommon,
+                             Seqpos pos1,
+                             Seqpos pos2,
+                             Seqpos depth,
+                             Seqpos maxdepth);
 
 #endif

@@ -20,8 +20,6 @@
 #include "spacedef.h"
 #include "esa-lcpval.h"
 
-#include "sfx-cmpsuf.pr"
-
  struct Lcpvalueiterator
 {
   Seqpos relpos,

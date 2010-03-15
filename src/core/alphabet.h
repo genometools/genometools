@@ -28,16 +28,13 @@
 #define GT_MAXALPHABETCHARACTER UCHAR_MAX
 #define GT_COMPAREOFFSET        (GT_MAXALPHABETCHARACTER + 1)
 
-/*
-  the size of the DNA alphabet
-*/
+/* The following defines the suffix of a file to store alphabet. */
+#define GT_ALPHABETFILESUFFIX ".al1"
 
+/* the size of the DNA alphabet */
 #define GT_DNAALPHASIZE        4U
 
-/*
-  The following type is for storing alphabets.
-*/
-
+/* The following type is for storing alphabets.*/
 typedef struct GtAlphabet GtAlphabet;
 
 /*@null@*/
@@ -111,5 +108,10 @@ char           gt_alphabet_decode(const GtAlphabet *alphabet, GtUchar c);
    in <out>. <in> has to be encodable with the given <alphabet>! */
 void           gt_alphabet_encode_seq(const GtAlphabet *alphabet, GtUchar *out,
                                       const char *in, unsigned long length);
+
+const GtAlphabet *gt_scanal1file(const GtStr *indexname,GtError *err);
+
+int gt_outal1file(const GtStr *indexname,const GtAlphabet *alpha,
+                  GtError *err);
 
 #endif

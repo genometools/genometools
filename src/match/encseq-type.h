@@ -59,6 +59,8 @@ struct Encodedsequence
          totallength;
   unsigned long numofdbsequences,
                 *numofdbsequencesptr; /* need for writing numofdbsequences */
+  unsigned long numofdbfiles, *numofdbfilesptr;
+  unsigned long lengthofdbfilenames, *lengthofdbfilenamesptr;
   unsigned long sizeofrep;
   const char *name;
   GtUchar(*deliverchar)(const Encodedsequence *,Seqpos);
@@ -75,9 +77,9 @@ struct Encodedsequence
   unsigned long *characterdistribution;
   Specialcharinfo *specialcharinfoptr, /* need for writing specialcharinfo */
                   specialcharinfo; /* information about specialcharacters */
-
-  const GtStrArray *filenametab;    /* table of filenames */
-  const Filelengthvalues *filelengthtab;  /* table of length of files */
+  GtStrArray *filenametab;    /* table of filenames */
+  char *firstfilename;
+  Filelengthvalues *filelengthtab;  /* table of length of files */
 
   const char *destab;
   unsigned long destablength, *sdstab;

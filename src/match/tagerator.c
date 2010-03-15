@@ -19,7 +19,7 @@
 #include "core/alphabet.h"
 #include "core/unused_api.h"
 #include "core/str_array.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/error.h"
 #include "core/fileutils_api.h"
 #include "core/seqiterator_sequence_buffer.h"
@@ -672,7 +672,9 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
                           tageratoroptions->outputmode);
     seqit = gt_seqiterator_sequence_buffer_new(tageratoroptions->tagfiles, err);
     if (!seqit)
+    {
       haserr = true;
+    }
     if (!haserr)
     {
       for (tagnumber = 0; !haserr; tagnumber++)
@@ -750,14 +752,14 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
                           &storeoffline);
         gt_free(desc);
       }
-      gt_free(showmatchinfo.eqsvector);
-      if (limdfsresources != NULL)
-      {
-        freeLimdfsresources(&limdfsresources,dfst);
-      }
-      GT_FREEARRAY(&storeonline,Simplematch);
-      GT_FREEARRAY(&storeoffline,Simplematch);
       gt_seqiterator_delete(seqit);
+    }
+    GT_FREEARRAY(&storeonline,Simplematch);
+    GT_FREEARRAY(&storeoffline,Simplematch);
+    gt_free(showmatchinfo.eqsvector);
+    if (limdfsresources != NULL)
+    {
+      freeLimdfsresources(&limdfsresources,dfst);
     }
   }
   if (mor != NULL)
@@ -768,7 +770,8 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
   {
     if (encseq != NULL)
     {
-      encodedsequence_free((Encodedsequence **) &encseq);
+      gt_encodedsequence_delete((Encodedsequence *) encseq);
+      encseq = NULL;
     }
   } else
   {

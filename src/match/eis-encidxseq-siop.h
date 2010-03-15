@@ -18,7 +18,7 @@
 #define EIS_ENCIDXSEQ_SIOP_H
 
 #include <string.h>
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "match/eis-mrangealphabet.h"
 #include "match/eis-encidxseq.h"
 #include "match/eis-encidxseq-priv.h"
@@ -94,6 +94,13 @@ static inline struct SeqposPair
 EISSymTransformedPosPairRank(EISeq *seq, Symbol tSym, Seqpos posA, Seqpos posB,
                              union EISHint *hint)
 {
+  if (tSym >= MRAEncGetSize(EISGetAlphabet(seq)))
+  {
+    fprintf(stderr,"tsym=%lu,MRAEncGetSize(EISGetAlphabet(seq)=%lu\n",
+           (unsigned long) tSym,
+           (unsigned long) MRAEncGetSize(EISGetAlphabet(seq)));
+    exit(EXIT_FAILURE);
+  }
   gt_assert(tSym < MRAEncGetSize(EISGetAlphabet(seq)));
   return seq->classInfo->posPairRank(seq, tSym, posA, posB, hint);
 }

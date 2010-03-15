@@ -20,14 +20,14 @@
 #include "core/error.h"
 #include "core/fa.h"
 #include "core/str.h"
+#include "core/filelengthvalues.h"
 #include "bitpack-itf.h"
 #include "ushort-def.h"
-#include "fmi-bwtbound.h"
+#include "seqpos-def.h"
 #include "intbits.h"
 #include "safecast-gen.h"
-#include "mapspec-def.h"
 #include "format64.h"
-#include "stamp.h"
+#include "mapspec-gen.h"
 
 #define ASSIGNPTR2STARTPTR(TYPE)\
         if (mapspec->numofunits == 0)\
@@ -45,7 +45,7 @@
         if (fwrite(*((TYPE **) mapspecptr->startptr),\
                    mapspecptr->sizeofunit,\
                    (size_t) mapspecptr->numofunits, fp) !=\
-                    (size_t) mapspecptr->numofunits)\
+                   (size_t) mapspecptr->numofunits)\
         {\
           gt_error_set(err,"cannot write %lu items of size %u: "\
                             "errormsg=\"%s\"",\
@@ -97,6 +97,12 @@ static int assigncorrecttype(Mapspecification *mapspec,
   gt_error_check(err);
   switch (mapspec->typespec)
   {
+    case CharType:
+      ASSIGNPTR2STARTPTR(char);
+      break;
+    case FilelengthvaluesType:
+      ASSIGNPTR2STARTPTR(Filelengthvalues);
+      break;
     case GtUcharType:
       ASSIGNPTR2STARTPTR(GtUchar);
       break;
@@ -118,8 +124,8 @@ static int assigncorrecttype(Mapspecification *mapspec,
     case SeqposType:
       ASSIGNPTR2STARTPTR(Seqpos);
       break;
-    case BwtboundType:
-      ASSIGNPTR2STARTPTR(Bwtbound);
+    case SeqposboundType:
+      ASSIGNPTR2STARTPTR(Seqposbound);
       break;
     case PairBwtidxType:
       ASSIGNPTR2STARTPTR(PairBwtidx);
@@ -268,6 +274,12 @@ int flushtheindex2file(FILE *fp,
     {
       switch (mapspecptr->typespec)
       {
+        case CharType:
+          WRITEACTIONWITHTYPE(char);
+          break;
+        case FilelengthvaluesType:
+          WRITEACTIONWITHTYPE(Filelengthvalues);
+          break;
         case GtUcharType:
           WRITEACTIONWITHTYPE(GtUchar);
           break;
@@ -289,8 +301,8 @@ int flushtheindex2file(FILE *fp,
         case SeqposType:
           WRITEACTIONWITHTYPE(Seqpos);
           break;
-        case BwtboundType:
-          WRITEACTIONWITHTYPE(Bwtbound);
+        case SeqposboundType:
+          WRITEACTIONWITHTYPE(Seqposbound);
           break;
         case PairBwtidxType:
           WRITEACTIONWITHTYPE(PairBwtidx);

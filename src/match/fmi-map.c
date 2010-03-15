@@ -22,26 +22,22 @@
 #include "core/fa.h"
 #include "core/array.h"
 #include "core/str.h"
+#include "core/alphabet.h"
 #include "sfx-ri-def.h"
-#include "esa-fileend.h"
 #include "fmindex.h"
-#include "sarr-def.h"
 #include "verbose-def.h"
 #include "spacedef.h"
-#include "stamp.h"
-#include "opensfxfile.h"
-#include "esa-map.h"
 
 #include "fmi-keyval.pr"
 #include "fmi-mapspec.pr"
 
 bool fmindexexists(const GtStr *indexname)
 {
-  if (!indexfilealreadyexists(indexname,FMASCIIFILESUFFIX))
+  if (!gt_exists_filename_with_suffix(indexname,FMASCIIFILESUFFIX))
   {
     return false;
   }
-  if (!indexfilealreadyexists(indexname,FMDATAFILESUFFIX))
+  if (!gt_exists_filename_with_suffix(indexname,FMDATAFILESUFFIX))
   {
     return false;
   }
@@ -136,9 +132,10 @@ void freefmindex(Fmindex *fmindex)
   }
   if (fmindex->bwtformatching != NULL)
   {
-    encodedsequence_free(&fmindex->bwtformatching);
+    gt_encodedsequence_delete(fmindex->bwtformatching);
+    fmindex->bwtformatching = NULL;
   }
-  gt_alphabet_delete(fmindex->alphabet);
+  gt_alphabet_delete((GtAlphabet *) fmindex->alphabet);
 }
 
 static Encodedsequence *mapbwtencoding(const GtStr *indexname,
@@ -168,7 +165,7 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
   fmindex->mappedptr = NULL;
   fmindex->bwtformatching = NULL;
   fmindex->alphabet = NULL;
-  fpin = opensfxfile(indexname,FMASCIIFILESUFFIX,"rb",err);
+  fpin = gt_fa_fopen_filename_with_suffix(indexname,FMASCIIFILESUFFIX,"rb",err);
   if (fpin == NULL)
   {
     haserr = true;
@@ -197,20 +194,15 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
   }
   if (!haserr)
   {
-    GtStr *tmpfilename;
-
     fmindex->specpos.nextfreePairBwtidx
       = (unsigned long) determinenumberofspecialstostore(&specialcharinfo);
     fmindex->specpos.spacePairBwtidx = NULL;
     fmindex->specpos.allocatedPairBwtidx = 0;
-    tmpfilename = gt_str_clone(indexname);
-    gt_str_append_cstr(tmpfilename,ALPHABETFILESUFFIX);
-    fmindex->alphabet = gt_alphabet_new(false, false, tmpfilename, NULL, err);
+    fmindex->alphabet = gt_scanal1file(indexname,err);
     if (fmindex->alphabet == NULL)
     {
       haserr = true;
     }
-    gt_str_delete(tmpfilename);
   }
   if (!haserr)
   {
