@@ -19,16 +19,16 @@
 #define DIFF_COVER_H
 
 #include "seqpos-def.h"
-#include "encseq-def.h"
+#include "encodedsequence.h"
 #include "readmode-def.h"
 #include "core/logger.h"
 
 typedef struct Differencecover Differencecover;
 
-void differencecovers_check(const Encodedsequence *encseq,Readmode readmode);
+void differencecovers_check(const GtEncodedsequence *encseq,Readmode readmode);
 
 Differencecover *differencecover_new(unsigned int vparam,
-                                     const Encodedsequence *encseq,
+                                     const GtEncodedsequence *encseq,
                                      Readmode readmode,
                                      GtLogger *logger);
 

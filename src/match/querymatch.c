@@ -66,7 +66,7 @@ void querymatch_delete(Querymatch *querymatch)
 }
 
 #ifdef VERIFY
-static void verifymatch(const Encodedsequence *encseq,
+static void verifymatch(const GtEncodedsequence *encseq,
                         Seqpos len,
                         Seqpos pos1,
                         uint64_t seqnum2,
@@ -75,30 +75,31 @@ static void verifymatch(const Encodedsequence *encseq,
 {
   if (readmode == Reversemode)
   {
-    Seqinfo seqinfo;
-    Seqpos offset, totallength = getencseqtotallength(encseq);
+    GtSeqinfo seqinfo;
+    Seqpos offset, totallength = gt_encodedsequence_total_length(encseq);
     GtUchar cc1, cc2;
 
-    getencseqSeqinfo(&seqinfo,encseq,(Seqpos) seqnum2);
+    gt_encodedsequence_seqinfo(&seqinfo,encseq,(Seqpos) seqnum2);
     pos2 += seqinfo.seqstartpos;
     for (offset = 0; offset < len; offset++)
     {
       gt_assert(pos1 + len - 1 < totallength);
       gt_assert(pos2 + len - 1 < totallength);
-      cc1 = getencodedchar(encseq,pos1+offset,Forwardmode);
-      cc2 = getencodedchar(encseq,pos2+len-1-offset,Forwardmode);
+      cc1 = gt_encodedsequence_getencodedchar(encseq,pos1+offset,Forwardmode);
+      cc2 = gt_encodedsequence_getencodedchar(encseq,pos2+len-1-offset,
+                                              Forwardmode);
       gt_assert(cc1 == cc2 && ISNOTSPECIAL(cc1));
     }
     if (pos1 + len < totallength)
     {
-      cc1 = getencodedchar(encseq,pos1+len,Forwardmode);
+      cc1 = gt_encodedsequence_getencodedchar(encseq,pos1+len,Forwardmode);
     } else
     {
       cc1 = SEPARATOR;
     }
     if (pos2 > 0)
     {
-      cc2 = getencodedchar(encseq,pos2-1,Forwardmode);
+      cc2 = gt_encodedsequence_getencodedchar(encseq,pos2-1,Forwardmode);
     } else
     {
       cc2 = SEPARATOR;
@@ -109,18 +110,18 @@ static void verifymatch(const Encodedsequence *encseq,
 #endif
 
 int querymatch_output(GT_UNUSED void *info,
-                      const Encodedsequence *encseq,
+                      const GtEncodedsequence *encseq,
                       const Querymatch *querymatch,
                       GT_UNUSED GtError *err)
 {
   const char *outflag = "FRCP";
-  Seqinfo seqinfo;
+  GtSeqinfo seqinfo;
   unsigned long dbseqnum;
   Seqpos querystart, dbstart_relative;
 
   gt_assert(encseq != NULL);
   dbseqnum = getencseqfrompos2seqnum(encseq,querymatch->dbstart);
-  getencseqSeqinfo(&seqinfo,encseq,dbseqnum);
+  gt_encodedsequence_seqinfo(encseq,&seqinfo,dbseqnum);
   gt_assert((int) querymatch->readmode < 4);
   if (querymatch->readmode == Reversemode ||
       querymatch->readmode == Reversecomplementmode)

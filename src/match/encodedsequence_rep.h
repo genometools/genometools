@@ -14,15 +14,15 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-#ifndef ENCSEQ_TYPE_H
-#define ENCSEQ_TYPE_H
+#ifndef ENCODEDSEQUENCE_REP_H
+#define ENCODEDSEQUENCE_REP_H
 
 /*
   The contents of this file is to be considered private
   implementation detail but, whenever the code is compiled with option
   INLINEDENCSEQ, is exposed to the compiler solely for performance
   optimization. So we can compare the time overhead of a bytearray
-  implementation of strings to all other represenations implemented in
+  implementation of strings to all other representations implemented in
   encodedseq.c.
 */
 
@@ -44,15 +44,15 @@ typedef enum
   Viaushorttables,
   Viauint32tables,
   Undefpositionaccesstype
-} Positionaccesstype;
+} GtPositionaccesstype;
 
 typedef uint32_t Uint32;
 
-struct Encodedsequence
+struct GtEncodedsequence
 {
   /* Common part */
   unsigned long *satcharptr; /* need for writing char */
-  Positionaccesstype sat;
+  GtPositionaccesstype sat;
   void *mappedptr; /* NULL or pointer to the mapped space block */
   unsigned long numofspecialstostore;
   Seqpos *totallengthptr,
@@ -63,15 +63,18 @@ struct Encodedsequence
   unsigned long lengthofdbfilenames, *lengthofdbfilenamesptr;
   unsigned long sizeofrep;
   const char *name;
-  GtUchar(*deliverchar)(const Encodedsequence *,Seqpos);
+  GtUchar(*deliverchar)(const GtEncodedsequence *,Seqpos);
   const char *delivercharname;
-  GtUchar(*delivercharnospecial)(const Encodedsequence *,Seqpos);
+  GtUchar(*delivercharnospecial)(const GtEncodedsequence *,Seqpos);
   const char *delivercharnospecialname;
-  GtUchar(*seqdeliverchar)(const Encodedsequence *,
-                         Encodedsequencescanstate *,Seqpos);
+  GtUchar(*seqdeliverchar)(const GtEncodedsequence *,
+                         GtEncodedsequenceScanstate *,Seqpos);
   const char *seqdelivercharname;
-  bool(*delivercontainsspecial)(const Encodedsequence *,
-                                bool,Encodedsequencescanstate *,Seqpos,Seqpos);
+  bool(*delivercontainsspecial)(const GtEncodedsequence *,
+                                bool,
+                                GtEncodedsequenceScanstate *,
+                                Seqpos,
+                                Seqpos);
   const char *delivercontainsspecialname;
   unsigned int maxspecialtype;  /* maximal value of special type */
   unsigned long *characterdistribution;
@@ -111,7 +114,7 @@ struct Encodedsequence
   unsigned int numofchars; /* used to have faster access in getencodedchar */
 
   /* only for Viabitaccess */
-  Bitsequence *specialbits;
+  GtBitsequence *specialbits;
 
   /* only for Viauchartables */
   GtUchar *ucharspecialpositions,

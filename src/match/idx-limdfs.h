@@ -29,8 +29,8 @@ typedef struct Genericindex Genericindex;
 
 void genericindex_delete(Genericindex *genericindex);
 
-const Encodedsequence *genericindex_getencseq(const Genericindex
-                                              *genericindex);
+const GtEncodedsequence *genericindex_getencseq(const Genericindex
+                                                *genericindex);
 
 Genericindex *genericindex_new(const GtStr *indexname,
                                bool withesa,
@@ -72,7 +72,7 @@ void indexbasedmstats(Limdfsresources *limdfsresources,
 
 void indexbasedspacedseeds(Limdfsresources *limdfsresources,
                            const GtUchar *pattern,
-                           Bitsequence seedbitvector,
+                           GtBitsequence seedbitvector,
                            unsigned long seedweight,
                            const AbstractDfstransformer *adfst);
 
@@ -94,9 +94,9 @@ bool indexbasedexactpatternmatching(const Limdfsresources *limdfsresources,
                                     const GtUchar *pattern,
                                     unsigned long patternlength);
 
-GtUchar limdfsgetencodedchar(const Limdfsresources *limdfsresources,
-                           Seqpos pos,
-                           Readmode readmode);
+GtUchar limdfs_getencodedchar(const Limdfsresources *limdfsresources,
+                              Seqpos pos,
+                              Readmode readmode);
 
 bool intervalwidthleq(const Limdfsresources *limdfsresources,
                       Seqpos leftbound,Seqpos rightbound);

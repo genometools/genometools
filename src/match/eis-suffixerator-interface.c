@@ -32,7 +32,7 @@
 #include "core/unused_api.h"
 #include "match/seqpos-def.h"
 #include "match/intcode-def.h"
-#include "match/encseq-def.h"
+#include "match/encodedsequence.h"
 
 #include "match/eis-encidxseq.h"
 #include "match/eis-sa-common.h"
@@ -46,7 +46,7 @@ struct sfxInterface
   unsigned int prefixlength, numofparts;
   const Sfxstrategy *sfxstrategy;
   const GtAlphabet *alpha;
-  const Encodedsequence *encseq;
+  const GtEncodedsequence *encseq;
   struct seqStats *stats;
   Sfxiterator *sfi;
   DefinedSeqpos rot0Pos;
@@ -154,7 +154,7 @@ newSfxInterface(Readmode readmode,
                 unsigned int prefixlength,
                 unsigned int numofparts,
                 const Sfxstrategy *sfxstrategy,
-                const Encodedsequence *encseq,
+                const GtEncodedsequence *encseq,
                 Sfxprogress *sfxprogress,
                 Seqpos length,
                 GtLogger *verbosity,
@@ -175,7 +175,7 @@ newSfxInterface(Readmode readmode,
 }
 
 static struct seqStats *
-newSeqStatsFromCharDist(const Encodedsequence *encseq,
+newSeqStatsFromCharDist(const GtEncodedsequence *encseq,
                         const GtAlphabet *alpha, Seqpos len)
 {
   struct seqStats *stats = NULL;
@@ -185,7 +185,7 @@ newSeqStatsFromCharDist(const Encodedsequence *encseq,
                     + (UINT8_MAX + 1) * sizeof (Seqpos));
   unsigned int numOfSeqs;
 
-  numOfSeqs = getencseqnumofdbsequences(encseq);
+  numOfSeqs = gt_encodedsequence_num_of_sequences(encseq);
   stats->sourceAlphaType = sourceUInt8;
   stats->symbolDistributionTable =
     (Seqpos *)((char *)stats + offsetAlign(sizeof (*stats), sizeof (Seqpos)));
@@ -225,7 +225,7 @@ newSfxInterfaceWithReaders(Readmode readmode,
                            size_t numReaders,
                            enum sfxDataRequest readerRequests[],
                            SeqDataReader readers[],
-                           const Encodedsequence *encseq,
+                           const GtEncodedsequence *encseq,
                            Sfxprogress *sfxprogress,
                            Seqpos length,
                            GtLogger *verbosity, GtError *err)
@@ -243,7 +243,7 @@ newSfxInterfaceWithReaders(Readmode readmode,
   }
   sfxi->readmode = readmode;
   sfxi->encseq = encseq;
-  sfxi->alpha = getencseqAlphabet(encseq);
+  sfxi->alpha = gt_encodedsequence_alphabet(encseq);
   sfxi->stats = newSeqStatsFromCharDist(encseq,sfxi->alpha, length);
   if (!(sfxi->sfi = newSfxiterator(encseq,
                                    readmode,
@@ -321,7 +321,7 @@ SfxIGetRot0Pos(const struct sfxInterface *si)
   return si->rot0Pos;
 }
 
-extern const Encodedsequence *
+extern const GtEncodedsequence *
 SfxIGetEncSeq(const sfxInterface *si)
 {
   return si->encseq;

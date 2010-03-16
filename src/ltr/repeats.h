@@ -27,14 +27,14 @@ void showrepeats (RepeatInfo *repeatinfo,
                   unsigned long seedminlength);
 
 int simpleexactselfmatchstore(void *info,
-                              const Encodedsequence *encseq,
+                              const GtEncodedsequence *encseq,
                               Seqpos len,
                               Seqpos pos1,
                               Seqpos pos2,
                               GtError *err);
 
 int subsimpleexactselfmatchstore(void *info,
-                                 GT_UNUSED const Encodedsequence *encseq,
+                                 GT_UNUSED const GtEncodedsequence *encseq,
                                  const Querymatch *querymatch,
                                  GT_UNUSED GtError *err);
 

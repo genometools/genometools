@@ -29,7 +29,7 @@ typedef struct Sfxiterator Sfxiterator;
 
 void freeSfxiterator(Sfxiterator **sfiptr);
 
-Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
+Sfxiterator *newSfxiterator(const GtEncodedsequence *encseq,
                             Readmode readmode,
                             unsigned int prefixlength,
                             unsigned int numofparts,

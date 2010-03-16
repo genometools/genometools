@@ -26,12 +26,12 @@ typedef Seqpos (*RankReportFunc)(const SpecialsRankLookup *ranker,
 struct specialsRankLookup
 {
   RankReportFunc rankFunc;
-  const Encodedsequence *encseq;
+  const GtEncodedsequence *encseq;
   union
   {
     struct specialsRankTable
     {
-      Encodedsequencescanstate *scanState;
+      GtEncodedsequenceScanstate *scanState;
       Seqpos *rankSumSamples, numSamples, sampleInterval;
       Readmode readmode;
       unsigned sampleIntervalLog2;

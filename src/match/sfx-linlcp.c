@@ -19,11 +19,11 @@
 #include "core/chardef.h"
 #include "core/ma_api.h"
 #include "seqpos-def.h"
-#include "encseq-def.h"
+#include "encodedsequence.h"
 #include "compressedtab.h"
 #include "sfx-linlcp.h"
 
-Seqpos *lcp13_manzini(const Encodedsequence *encseq,
+Seqpos *lcp13_manzini(const GtEncodedsequence *encseq,
                       Readmode readmode,
                       Seqpos partwidth,
                       Seqpos totallength,
@@ -45,8 +45,9 @@ Seqpos *lcp13_manzini(const Encodedsequence *encseq,
       {
         GtUchar cc1, cc2;
 
-        cc1 = getencodedchar(encseq,pos+lcpvalue,readmode);
-        cc2 = getencodedchar(encseq,previousstart+lcpvalue,readmode);
+        cc1 = gt_encodedsequence_getencodedchar(encseq,pos+lcpvalue,readmode);
+        cc2 = gt_encodedsequence_getencodedchar(encseq,previousstart+lcpvalue,
+                                                readmode);
         if (cc1 == cc2 && ISNOTSPECIAL(cc1))
         {
           lcpvalue++;
@@ -65,11 +66,11 @@ Seqpos *lcp13_manzini(const Encodedsequence *encseq,
   return lcptab;
 }
 
-static unsigned long *computeocclesstab(const Encodedsequence *encseq)
+static unsigned long *computeocclesstab(const GtEncodedsequence *encseq)
 {
   unsigned long *occless, numofchars, idx;
 
-  numofchars = (unsigned long) getencseqAlphabetnumofchars(encseq);
+  numofchars = (unsigned long) gt_encodedsequence_alphabetnumofchars(encseq);
   occless = gt_malloc(sizeof (unsigned long) * numofchars);
   occless[0] = 0;
   for (idx = 1UL; idx < numofchars; idx++)
@@ -90,7 +91,7 @@ static unsigned long *computeocclesstab(const Encodedsequence *encseq)
 */
 
 static void setrelevantfrominversetab(Compressedtable *rightposinverse,
-                                      const Encodedsequence *encseq,
+                                      const GtEncodedsequence *encseq,
                                       Readmode readmode,
                                       const Seqpos *sortedsuffixes,
                                       Seqpos partwidth)
@@ -104,7 +105,7 @@ static void setrelevantfrominversetab(Compressedtable *rightposinverse,
       Seqpos pos = sortedsuffixes[idx];
       if (pos > 0)
       {
-        GtUchar cc = getencodedchar(encseq,pos-1,readmode);
+        GtUchar cc = gt_encodedsequence_getencodedchar(encseq,pos-1,readmode);
         if (ISSPECIAL(cc))
         {
           compressedtable_update(rightposinverse,pos,idx);
@@ -115,13 +116,13 @@ static void setrelevantfrominversetab(Compressedtable *rightposinverse,
 }
 
 static Seqpos *fillrightofpartwidth(const Compressedtable *rightposinverse,
-                                    const Encodedsequence *encseq,
+                                    const GtEncodedsequence *encseq,
                                     Readmode readmode,
                                     Seqpos partwidth,
                                     Seqpos totallength)
 {
   Specialrangeiterator *sri;
-  Sequencerange range;
+  GtSequencerange range;
   Seqpos realspecialranges, *rightofpartwidth = NULL;
   unsigned long countranges = 0, nextrightofpartwidth = 0;
 
@@ -155,7 +156,7 @@ static Seqpos *fillrightofpartwidth(const Compressedtable *rightposinverse,
 static void inversesuffixarray2specialranknext(
                          const Compressedtable *rightposinverse,
                          Compressedtable *ranknext,
-                         const Encodedsequence *encseq,
+                         const GtEncodedsequence *encseq,
                          Readmode readmode,
                          Seqpos partwidth,
                          Seqpos totallength)
@@ -163,7 +164,7 @@ static void inversesuffixarray2specialranknext(
   if (hasspecialranges(encseq))
   {
     Specialrangeiterator *sri;
-    Sequencerange range;
+    GtSequencerange range;
     Seqpos specialcharacters, idx, *rightofpartwidth = NULL;
     Seqpos specialranklistindex, nextrightofpartwidth = 0;
 
@@ -215,7 +216,7 @@ static void inversesuffixarray2specialranknext(
 }
 
 static Seqpos sa2ranknext(Compressedtable *ranknext,
-                          const Encodedsequence *encseq,
+                          const GtEncodedsequence *encseq,
                           Readmode readmode,
                           Seqpos partwidth,
                           Seqpos totallength,
@@ -234,7 +235,7 @@ static Seqpos sa2ranknext(Compressedtable *ranknext,
     Seqpos pos = sortedsuffixes[idx];
     if (pos > 0)
     {
-      GtUchar cc = getencodedchar(encseq,pos-1, readmode);
+      GtUchar cc = gt_encodedsequence_getencodedchar(encseq,pos-1, readmode);
       if (ISNOTSPECIAL(cc))
       {
         gt_assert(occless[cc] < (unsigned long) partwidth);
@@ -255,7 +256,7 @@ static Seqpos sa2ranknext(Compressedtable *ranknext,
   if (hasspecialranges(encseq))
   {
     Specialrangeiterator *sri;
-    Sequencerange range;
+    GtSequencerange range;
     Seqpos specialidx, specialpos;
 
     sri = newspecialrangeiterator(encseq,
@@ -269,7 +270,8 @@ static Seqpos sa2ranknext(Compressedtable *ranknext,
       {
         if (specialpos > 0)
         {
-          GtUchar cc = getencodedchar(encseq,specialpos-1,readmode);
+          GtUchar cc = gt_encodedsequence_getencodedchar(encseq,specialpos-1,
+                                                         readmode);
           if (ISNOTSPECIAL(cc))
           {
             gt_assert(occless[cc] < (unsigned long) partwidth);
@@ -294,7 +296,7 @@ static Seqpos sa2ranknext(Compressedtable *ranknext,
 }
 
 Compressedtable *lcp9_manzini(Compressedtable *spacefortab,
-                              const Encodedsequence *encseq,
+                              const GtEncodedsequence *encseq,
                               Readmode readmode,
                               Seqpos partwidth,
                               Seqpos totallength,
@@ -304,7 +306,7 @@ Compressedtable *lcp9_manzini(Compressedtable *spacefortab,
   Compressedtable *lcptab, *ranknext, *rightposinverse;
   Seqpos previouscc1pos, previouscc2pos;
   GtUchar cc1, cc2;
-  Encodedsequencescanstate *esr1, *esr2;
+  GtEncodedsequenceScanstate *esr1, *esr2;
 
   if (spacefortab == NULL)
   {
@@ -330,11 +332,11 @@ Compressedtable *lcp9_manzini(Compressedtable *spacefortab,
      ranknext at position fillpos, the same cell is used for storing
      the determined lcp-value */
   /* exploit the fact, that pos + lcpvalue is monotone */
-  esr1 = newEncodedsequencescanstate();
-  initEncodedsequencescanstate(esr1,encseq,readmode,0);
-  cc1 = sequentialgetencodedchar(encseq,esr1,0,readmode);
+  esr1 = gt_encodedsequence_scanstate_new();
+  gt_encodedsequence_scanstate_init(esr1,encseq,readmode,0);
+  cc1 = gt_encodedsequence_sequentialgetencodedchar(encseq,esr1,0,readmode);
   previouscc1pos = 0;
-  esr2 = newEncodedsequencescanstate();
+  esr2 = gt_encodedsequence_scanstate_new();
   previouscc2pos = totallength;
   cc2 = 0;
   for (pos = 0; pos < totallength; pos++)
@@ -353,10 +355,10 @@ Compressedtable *lcp9_manzini(Compressedtable *spacefortab,
         while (previouscc1pos < pos + lcpvalue)
         {
           previouscc1pos++;
-          cc1 = sequentialgetencodedchar(encseq,
-                                         esr1,
-                                         previouscc1pos,
-                                         readmode);
+          cc1 = gt_encodedsequence_sequentialgetencodedchar(encseq,
+                                                            esr1,
+                                                            previouscc1pos,
+                                                            readmode);
         }
         if (ISSPECIAL(cc1))
         {
@@ -366,21 +368,21 @@ Compressedtable *lcp9_manzini(Compressedtable *spacefortab,
             previousstart+lcpvalue > previouscc2pos+1)
         {
           previouscc2pos = previousstart+lcpvalue;
-          initEncodedsequencescanstate(esr2,encseq,
+          gt_encodedsequence_scanstate_init(esr2,encseq,
                                        readmode,
                                        previouscc2pos);
-          cc2 = sequentialgetencodedchar(encseq,
-                                         esr2,previouscc2pos,
-                                         readmode);
+          cc2 = gt_encodedsequence_sequentialgetencodedchar(encseq,
+                                                            esr2,previouscc2pos,
+                                                            readmode);
         } else
         {
           if (previousstart+lcpvalue == previouscc2pos+1)
           {
             previouscc2pos++;
-            cc2 = sequentialgetencodedchar(encseq,
-                                           esr2,
-                                           previouscc2pos,
-                                           readmode);
+            cc2 = gt_encodedsequence_sequentialgetencodedchar(encseq,
+                                                              esr2,
+                                                              previouscc2pos,
+                                                              readmode);
           } else
           {
             gt_assert(previousstart+lcpvalue == previouscc2pos);
@@ -400,7 +402,7 @@ Compressedtable *lcp9_manzini(Compressedtable *spacefortab,
     }
     fillpos = nextfillpos;
   }
-  freeEncodedsequencescanstate(&esr1);
-  freeEncodedsequencescanstate(&esr2);
+  gt_encodedsequence_scanstate_delete(esr1);
+  gt_encodedsequence_scanstate_delete(esr2);
   return lcptab;
 }

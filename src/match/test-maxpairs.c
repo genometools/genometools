@@ -44,7 +44,7 @@ int testmaxpairs(GT_UNUSED const GtStr *indexname,
 #include "esa-mmsearch.h"
 #include "format64.h"
 #include "echoseq.h"
-#include "encseq-def.h"
+#include "encodedsequence.h"
 #include "seqpos-def.h"
 #include "core/logger.h"
 #include "sfx-suffixer.h"
@@ -58,7 +58,7 @@ int testmaxpairs(GT_UNUSED const GtStr *indexname,
 typedef struct
 {
   unsigned int minlength;
-  Encodedsequence *encseq;
+  GtEncodedsequence *encseq;
   Processmaxpairs processmaxpairs;
   void *processmaxpairsinfo;
 } Substringmatchinfo;
@@ -177,19 +177,20 @@ static int sarrselfsubstringmatch(const GtUchar *dbseq,
 }
 
 static Seqpos samplesubstring(GtUchar *seqspace,
-                              const Encodedsequence *encseq,
+                              const GtEncodedsequence *encseq,
                               Seqpos substringlength)
 {
   Seqpos start, totallength;
 
-  totallength = getencseqtotallength(encseq);
+  totallength = gt_encodedsequence_total_length(encseq);
   start = (Seqpos) (drand48() * (double) totallength);
   if (start + substringlength > totallength)
   {
     substringlength = totallength - start;
   }
   gt_assert(substringlength > 0);
-  encseqextract(seqspace,encseq,start,start+substringlength-1);
+  gt_encodedsequence_extract_substring(encseq,seqspace,start,
+                                       start+substringlength-1);
   return substringlength;
 }
 
@@ -202,7 +203,7 @@ typedef struct
 } Substringmatch;
 
 static int storemaxmatchquery(void *info,
-                              GT_UNUSED const Encodedsequence *encseq,
+                              GT_UNUSED const GtEncodedsequence *encseq,
                               const Querymatch *querymatch,
                               GT_UNUSED GtError *err)
 {
@@ -225,7 +226,7 @@ typedef struct
 } Maxmatchselfinfo;
 
 static int storemaxmatchself(void *info,
-                             GT_UNUSED const Encodedsequence *encseq,
+                             GT_UNUSED const GtEncodedsequence *encseq,
                              Seqpos len,
                              Seqpos pos1,
                              Seqpos pos2,
@@ -373,7 +374,7 @@ int testmaxpairs(const GtStr *indexname,
                  GtLogger *logger,
                  GtError *err)
 {
-  Encodedsequence *encseq;
+  GtEncodedsequence *encseq;
   Seqpos totallength = 0, dblen, querylen;
   GtUchar *dbseq = NULL, *query = NULL;
   bool haserr = false;
@@ -382,7 +383,7 @@ int testmaxpairs(const GtStr *indexname,
   Maxmatchselfinfo maxmatchselfinfo;
 
   gt_logger_log(logger,"draw %lu samples",samples);
-  encseq = mapencodedsequence(true,
+  encseq = gt_encodedsequence_new_from_index(true,
                               indexname,
                               true,
                               false,
@@ -395,7 +396,7 @@ int testmaxpairs(const GtStr *indexname,
     haserr = true;
   } else
   {
-    totallength = getencseqtotallength(encseq);
+    totallength = gt_encodedsequence_total_length(encseq);
   }
   if (!haserr)
   {
@@ -420,7 +421,7 @@ int testmaxpairs(const GtStr *indexname,
                                 query,
                                 (unsigned long) querylen,
                                 minlength,
-                                getencseqAlphabet(encseq),
+                                gt_encodedsequence_alphabet(encseq),
                                 storemaxmatchquery,
                                 tabmaxquerymatches,
                                 logger,
@@ -443,7 +444,7 @@ int testmaxpairs(const GtStr *indexname,
                                query,
                                (unsigned long) querylen,
                                minlength,
-                               getencseqAlphabet(encseq),
+                               gt_encodedsequence_alphabet(encseq),
                                storemaxmatchself,
                                &maxmatchselfinfo,
                                logger,
@@ -466,12 +467,12 @@ int testmaxpairs(const GtStr *indexname,
       (void) gt_array_iterate(maxmatchselfinfo.results,showSubstringmatch,
                            NULL,err);
       symbolstring2fasta(stdout,"dbseq",
-                         getencseqAlphabet(encseq),
+                         gt_encodedsequence_alphabet(encseq),
                          dbseq,
                          (unsigned long) dblen,
                          width);
       symbolstring2fasta(stdout,"queryseq",
-                         getencseqAlphabet(encseq),
+                         gt_encodedsequence_alphabet(encseq),
                          query,
                          (unsigned long) querylen,
                          width);

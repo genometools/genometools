@@ -32,7 +32,7 @@
 #include "spacedef.h"
 #include "sfx-progress.h"
 #include "intcode-def.h"
-#include "encseq-def.h"
+#include "encodedsequence.h"
 #include "safecast-gen.h"
 #include "esa-fileend.h"
 #include "sfx-partssuf-def.h"
@@ -63,7 +63,7 @@ struct Sfxiterator
   unsigned long nextfreeCodeatposition;
   Codeatposition *spaceCodeatposition;
   Suftabparts *suftabparts;
-  const Encodedsequence *encseq;
+  const GtEncodedsequence *encseq;
   Readmode readmode;
   Outlcpinfo *outlcpinfo;
   unsigned int part,
@@ -71,7 +71,7 @@ struct Sfxiterator
                prefixlength;
   ArraySeqpos fusp;
   Specialrangeiterator *sri;
-  Sequencerange overhang;
+  GtSequencerange overhang;
   bool exhausted;
   Bcktab *bcktab;
   Codetype numofallcodes;
@@ -85,7 +85,7 @@ struct Sfxiterator
 
 #ifdef SKDEBUG
 static unsigned long iterproduceCodeatposition(Codeatposition *codelist,
-                                               const  Encodedsequence *encseq,
+                                               const  GtEncodedsequence *encseq,
                                                Readmode readmode,
                                                unsigned int prefixlength,
                                                unsigned int numofchars)
@@ -159,7 +159,7 @@ static void compareCodeatpositionlists(const Codeatposition *codelist1,
 }
 
 static void verifycodelistcomputation(
-                       const Encodedsequence *encseq,
+                       const GtEncodedsequence *encseq,
                        Readmode readmode,
                        Seqpos realspecialranges,
                        unsigned int prefixlength,
@@ -187,7 +187,7 @@ static void verifycodelistcomputation(
 #endif
 
 #ifdef SKDEBUG
-static Codetype getencseqcode(const Encodedsequence *encseq,
+static Codetype getencseqcode(const GtEncodedsequence *encseq,
                               Readmode readmode,
                               Seqpos totallength,
                               const Codetype **multimappower,
@@ -201,7 +201,7 @@ static Codetype getencseqcode(const Encodedsequence *encseq,
   for (idx=0; idx<prefixlength; idx++)
   {
     gt_assert((Seqpos) (pos + idx) < totallength);
-    cc = getencodedcharnospecial(encseq,pos + idx, readmode);
+    cc = gt_encodedsequence_getencodedcharnospecial(encseq,pos + idx, readmode);
     gt_assert(ISNOTSPECIAL(cc));
     code += multimappower[idx][cc];
   }
@@ -259,11 +259,11 @@ static void updatekmercount(void *processinfo,
     if (code == 0)
     {
       Codetype code2 = getencseqcode(sfi->encseq,
-                                     sfi->readmode,
-                                     getencseqtotallength(sfi->encseq),
-                                     bcktab_multimappower(sfi->bcktab),
-                                     sfi->prefixlength,
-                                     position);
+                                   sfi->readmode,
+                                   gt_encodedsequence_total_length(sfi->encseq),
+                                   bcktab_multimappower(sfi->bcktab),
+                                   sfi->prefixlength,
+                                   position);
       if (code2 != 0)
       {
         printf("### position " FormatSeqpos ", code2 = %lu != 0\n",
@@ -457,7 +457,7 @@ static void showleftborder(const Seqpos *leftborder,
 }
 #endif
 
-Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
+Sfxiterator *newSfxiterator(const GtEncodedsequence *encseq,
                             Readmode readmode,
                             unsigned int prefixlength,
                             unsigned int numofparts,
@@ -503,7 +503,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
     sfi->suftabparts = NULL;
     sfi->encseq = encseq;
     sfi->readmode = readmode;
-    sfi->numofchars = getencseqAlphabetnumofchars(encseq);
+    sfi->numofchars = gt_encodedsequence_alphabetnumofchars(encseq);
     sfi->prefixlength = prefixlength;
     sfi->dcov = NULL;
     if (sfxstrategy != NULL)
@@ -539,7 +539,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
     {
       gt_logger_log(logger,"ssortmaxdepth=undefined");
     }
-    sfi->totallength = getencseqtotallength(encseq);
+    sfi->totallength = gt_encodedsequence_total_length(encseq);
     gt_logger_log(logger,"totallength=" FormatSeqpos,
                         PRINTSeqposcast(sfi->totallength));
     sfi->specialcharacters = specialcharacters;
@@ -552,7 +552,8 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
     sfi->sfxprogress = sfxprogress;
 
     if (sfi->sfxstrategy.differencecover > 0 &&
-        getencseqspecialcharacters(encseq) < getencseqtotallength(encseq))
+        getencseqspecialcharacters(encseq)
+          < gt_encodedsequence_total_length(encseq))
     {
       if (sfxprogress != NULL)
       {
@@ -896,7 +897,7 @@ static void insertfullspecialrange(Sfxiterator *sfi,
     if (ISDIRREVERSE(sfi->readmode))
     {
       sfi->fusp.spaceSeqpos[sfi->fusp.nextfreeSeqpos++]
-        = REVERSEPOS(sfi->totallength,pos);
+        = GT_REVERSEPOS(sfi->totallength,pos);
       if (pos == leftpos)
       {
         break;
@@ -916,7 +917,7 @@ static void insertfullspecialrange(Sfxiterator *sfi,
 
 static void fillspecialnextpage(Sfxiterator *sfi)
 {
-  Sequencerange range;
+  GtSequencerange range;
   Seqpos width;
 
   while (true)

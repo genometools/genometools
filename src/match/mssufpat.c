@@ -35,10 +35,10 @@ typedef struct
 struct Limdfsconstinfo
 {
   unsigned long patternlength,
-                mstatlength[INTWORDSIZE],
+                mstatlength[GT_INTWORDSIZE],
                 *eqsvector;
-  Seqpos mstatwitnessleftbound[INTWORDSIZE],
-         mstatwitnessrightbound[INTWORDSIZE];
+  Seqpos mstatwitnessleftbound[GT_INTWORDSIZE],
+         mstatwitnessrightbound[GT_INTWORDSIZE];
 };
 
 #ifdef SKDEBUG
@@ -172,7 +172,7 @@ static void pms_initLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
   unsigned long idx;
 
   column->prefixofsuffixbits = ~0UL;
-  gt_assert(mti->patternlength <= (unsigned long) INTWORDSIZE);
+  gt_assert(mti->patternlength <= (unsigned long) GT_INTWORDSIZE);
   for (idx = 0; idx<mti->patternlength; idx++)
   {
     mti->mstatlength[idx] = 0;
@@ -228,7 +228,7 @@ static void pms_nextLimdfsstate(const Limdfsconstinfo *mti,
                                 const DECLAREPTRDFSSTATE(aliasincol))
 {
 #ifdef SKDEBUG
-  char buffer1[INTWORDSIZE+1], buffer2[INTWORDSIZE+1];
+  char buffer1[GT_INTWORDSIZE+1], buffer2[GT_INTWORDSIZE+1];
 #endif
   Limdfsstate *outcol = (Limdfsstate *) aliasoutcol;
   const Limdfsstate *incol = (const Limdfsstate *) aliasincol;

@@ -18,7 +18,7 @@
 #include <stdlib.h>
 #include "core/chardef.h"
 #include "core/symboldef.h"
-#include "encseq-def.h"
+#include "encodedsequence.h"
 #include "spacedef.h"
 #include "enum-patt-def.h"
 
@@ -29,15 +29,15 @@
                 samplecount,
                 *patternstat;
   GtUchar *patternspace;
-  const Encodedsequence *sampleencseq;
+  const GtEncodedsequence *sampleencseq;
   unsigned int alphasize;
   Seqpos totallength;
-  Encodedsequencescanstate *esr;
+  GtEncodedsequenceScanstate *esr;
 };
 
 Enumpatterniterator *newenumpatterniterator(unsigned long minpatternlen,
                                             unsigned long maxpatternlen,
-                                            const Encodedsequence *encseq,
+                                            const GtEncodedsequence *encseq,
                                             GtError *err)
 {
   Enumpatterniterator *epi = NULL;
@@ -51,7 +51,7 @@ Enumpatterniterator *newenumpatterniterator(unsigned long minpatternlen,
     return NULL;
   }
   ALLOCASSIGNSPACE(epi,NULL,Enumpatterniterator,1);
-  epi->totallength = getencseqtotallength(encseq);
+  epi->totallength = gt_encodedsequence_total_length(encseq);
   if (epi->totallength <= (Seqpos) maxpatternlen)
   {
     gt_error_set(err,"totallength=" FormatSeqpos " <= maxpatternlen = %lu\n",
@@ -70,8 +70,8 @@ Enumpatterniterator *newenumpatterniterator(unsigned long minpatternlen,
   epi->maxpatternlen = maxpatternlen;
   epi->sampleencseq = encseq;
   epi->samplecount = 0;
-  epi->alphasize = getencseqAlphabetnumofchars(encseq);
-  epi->esr = newEncodedsequencescanstate();
+  epi->alphasize = gt_encodedsequence_alphabetnumofchars(encseq);
+  epi->esr = gt_encodedsequence_scanstate_new();
   srand48(42349421);
   return epi;
 }
@@ -107,11 +107,14 @@ const GtUchar *nextEnumpatterniterator(unsigned long *patternlen,
   }
   start = (Seqpos) (drand48() * (double) (epi->totallength - *patternlen));
   gt_assert(start < (Seqpos) (epi->totallength - *patternlen));
-  initEncodedsequencescanstate(epi->esr,epi->sampleencseq,Forwardmode,start);
+  gt_encodedsequence_scanstate_init(epi->esr,epi->sampleencseq,Forwardmode,
+                                    start);
   for (j=0; j<*patternlen; j++)
   {
-    cc = sequentialgetencodedchar(epi->sampleencseq,epi->esr,start+j,
-                                  Forwardmode);
+    cc = gt_encodedsequence_sequentialgetencodedchar(epi->sampleencseq,
+                                                     epi->esr,
+                                                     start+j,
+                                                     Forwardmode);
     if (ISSPECIAL(cc))
     {
       cc = (GtUchar) (drand48() * epi->alphasize);
@@ -154,6 +157,6 @@ void freeEnumpatterniterator(Enumpatterniterator **epi)
   if (!(*epi)) return;
   FREESPACE((*epi)->patternspace);
   FREESPACE((*epi)->patternstat);
-  freeEncodedsequencescanstate(&((*epi)->esr));
+  gt_encodedsequence_scanstate_delete(((*epi)->esr));
   FREESPACE(*epi);
 }

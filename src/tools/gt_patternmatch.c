@@ -20,7 +20,7 @@
 #include "core/str.h"
 #include "core/option.h"
 #include "core/versionfunc.h"
-#include "match/encseq-def.h"
+#include "match/encodedsequence.h"
 #include "match/sarr-def.h"
 #include "match/stamp.h"
 #include "match/enum-patt-def.h"
@@ -88,7 +88,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
     haserr = true;
   } else
   {
-    totallength = getencseqtotallength(suffixarray.encseq);
+    totallength = gt_encodedsequence_total_length(suffixarray.encseq);
   }
   if (!haserr)
   {
@@ -101,7 +101,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
     Bucketenumerator *bucketenumerator;
     Lcpinterval itv;
     Seqpos refstart;
-    Encodedsequencescanstate *esr1, *esr2;
+    GtEncodedsequenceScanstate *esr1, *esr2;
     int retval;
     Seqpos idx, maxlcp;
     Codetype code = 0;
@@ -119,9 +119,9 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
                                  pmopt->maxpatternlen,
                                  suffixarray.encseq,
                                  err);
-    esr1 = newEncodedsequencescanstate();
-    esr2 = newEncodedsequencescanstate();
-    alpha = getencseqAlphabet(suffixarray.encseq);
+    esr1 = gt_encodedsequence_scanstate_new();
+    esr2 = gt_encodedsequence_scanstate_new();
+    alpha = gt_encodedsequence_alphabet(suffixarray.encseq);
     for (trial = 0; trial < pmopt->numofsamples; trial++)
     {
       pptr = nextEnumpatterniterator(&patternlen,epi);
@@ -227,8 +227,8 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
         freemmsearchiterator(&mmsiimm);
       }
     }
-    freeEncodedsequencescanstate(&esr1);
-    freeEncodedsequencescanstate(&esr2);
+    gt_encodedsequence_scanstate_delete(esr1);
+    gt_encodedsequence_scanstate_delete(esr2);
     if (pmopt->showpatt)
     {
       showPatterndistribution(epi);

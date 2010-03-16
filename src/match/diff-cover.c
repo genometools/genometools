@@ -26,13 +26,13 @@
 #include "core/mathsupport.h"
 #include "core/qsort_r.h"
 #include "core/unused_api.h"
-#include "intbits-tab.h"
+#include "intbits.h"
 #include "diff-cover.h"
 #include "sfx-apfxlen.h"
 #include "sfx-enumcodes.h"
 #include "bcktab.h"
 #include "initbasepower.h"
-#include "encseq-def.h"
+#include "encodedsequence.h"
 #include "sfx-suftaborder.h"
 #include "sfx-bentsedg.h"
 #include "core/logger.h"
@@ -86,12 +86,12 @@ struct Differencecover
   Seqpos totallength, *sortedsample,
          *leftborder; /* points to bcktab->leftborder */
   Bcktab *bcktab;
-  const Encodedsequence *encseq;
+  const GtEncodedsequence *encseq;
   Readmode readmode;
   unsigned long samplesize, effectivesamplesize, maxsamplesize;
   const Codetype **multimappower;
   Codetype *filltable;
-  Encodedsequencescanstate *esr;
+  GtEncodedsequenceScanstate *esr;
   unsigned long *inversesuftab;
   unsigned long allocateditvinfo,
                 currentqueuesize,
@@ -237,7 +237,7 @@ int differencecover_vparamverify(const Differencecover *dcov,GtError *err)
 }
 
 Differencecover *differencecover_new(unsigned int vparam,
-                                     const Encodedsequence *encseq,
+                                     const GtEncodedsequence *encseq,
                                      Readmode readmode,
                                      GtLogger *logger)
 {
@@ -249,8 +249,8 @@ Differencecover *differencecover_new(unsigned int vparam,
   checkqsort();
 #endif
   dcov = gt_malloc(sizeof (*dcov));
-  dcov->numofchars = getencseqAlphabetnumofchars(encseq);
-  dcov->totallength = getencseqtotallength(encseq);
+  dcov->numofchars = gt_encodedsequence_alphabetnumofchars(encseq);
+  dcov->totallength = gt_encodedsequence_total_length(encseq);
   dcov->logger = logger;
   for (dcov->logmod = 0;
        dcov->logmod < (unsigned int) (sizeof (differencecoversizes)/
@@ -445,9 +445,9 @@ static void validate_samplepositons(const Differencecover *dcov)
   unsigned int modvalue;
   Diffvalue *diffptr, *afterend;
   unsigned long idx;
-  Bitsequence *sampleidxused = NULL;
+  GtBitsequence *sampleidxused = NULL;
 
-  INITBITTAB(sampleidxused,dcov->maxsamplesize);
+  GT_INITBITTAB(sampleidxused,dcov->maxsamplesize);
   diffptr = dcov->diffvalues;
   afterend = dcov->diffvalues + dcov->size;
   for (pos = 0, modvalue = 0; pos <= dcov->totallength; pos++)
@@ -458,13 +458,13 @@ static void validate_samplepositons(const Differencecover *dcov)
     {
       idx = differencecover_packsamplepos(dcov,pos);
       gt_assert(sampleidxused != NULL);
-      if (ISIBITSET(sampleidxused,idx))
+      if (GT_ISIBITSET(sampleidxused,idx))
       {
         fprintf(stderr,"sample index %lu for pos %lu already used before\n",
                        idx,(unsigned long) pos);
         exit(GT_EXIT_PROGRAMMING_ERROR);
       }
-      SETIBIT(sampleidxused,idx);
+      GT_SETIBIT(sampleidxused,idx);
       diffptr++;
     }
     if (modvalue < dcov->vmodmask)
@@ -522,7 +522,7 @@ static unsigned long insertfullspecialrangesample(Differencecover *dcov,
   {
     if (ISDIRREVERSE(dcov->readmode))
     {
-      Seqpos revpos = REVERSEPOS(dcov->totallength,pos);
+      Seqpos revpos = GT_REVERSEPOS(dcov->totallength,pos);
       if (checkifindifferencecover(dcov,MODV(revpos)))
       {
         inversesuftab_set(dcov,revpos,specialidx);
@@ -557,7 +557,7 @@ static void initinversesuftabspecials(Differencecover *dcov)
   if (hasspecialranges(dcov->encseq))
   {
     Specialrangeiterator *sri;
-    Sequencerange range;
+    GtSequencerange range;
     unsigned long specialidx;
 
     sri = newspecialrangeiterator(dcov->encseq,
@@ -1026,7 +1026,7 @@ void differencecover_sortsample(Differencecover *dcov,bool cmpcharbychar,
                              NULL,
                              NULL);
   dcov->multimappower = bcktab_multimappower(dcov->bcktab);
-  dcov->esr = newEncodedsequencescanstate();
+  dcov->esr = gt_encodedsequence_scanstate_new();
   dcov->maxcode = bcktab_numofallcodes(dcov->bcktab) - 1;
   dcov->rangestobesorted = gt_inl_queue_new(MAX(16UL,GT_DIV2(dcov->maxcode)));
   gt_assert(dcov->bcktab != NULL);
@@ -1144,7 +1144,7 @@ void differencecover_sortsample(Differencecover *dcov,bool cmpcharbychar,
   dcov->filltable = NULL;
   if (dcov->esr != NULL)
   {
-    freeEncodedsequencescanstate(&dcov->esr);
+    gt_encodedsequence_scanstate_delete(dcov->esr);
   }
   gt_assert(posinserted == dcov->effectivesamplesize);
   if (withcheck)
@@ -1239,7 +1239,7 @@ void differencecover_sortsample(Differencecover *dcov,bool cmpcharbychar,
   filldiff2pos(dcov);
 }
 
-void differencecovers_check(const Encodedsequence *encseq,Readmode readmode)
+void differencecovers_check(const GtEncodedsequence *encseq,Readmode readmode)
 {
   Differencecover *dcov;
   size_t logmod;

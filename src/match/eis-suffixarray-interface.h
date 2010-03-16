@@ -81,7 +81,7 @@ SAIGetRot0Pos(const void *state);
  * @param sai SuffixarrayFileInterface reference
  * @return reference of sequence object
  */
-static inline const Encodedsequence *
+static inline const GtEncodedsequence *
 SAIGetEncSeq(const SuffixarrayFileInterface *sai);
 
 static inline Readmode

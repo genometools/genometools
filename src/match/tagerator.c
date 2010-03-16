@@ -38,7 +38,7 @@
 #include "esa-map.h"
 #include "echoseq.h"
 
-#define MAXTAGSIZE INTWORDSIZE
+#define MAXTAGSIZE GT_INTWORDSIZE
 
 #define ISRCDIR(TWL)  (((TWL)->tagptr == (TWL)->transformedtag)\
                         ? false\
@@ -67,7 +67,7 @@ typedef struct
   const GtAlphabet *alpha;
   unsigned long *eqsvector;
   const Tagwithlength *twlptr;
-  const Encodedsequence *encseq;
+  const GtEncodedsequence *encseq;
 } Showmatchinfo;
 
 #define ADDTABULATOR\
@@ -98,10 +98,10 @@ static void showmatch(void *processinfo,const GtMatch *match)
       printf(FormatSeqpos,PRINTSeqposcast(match->dbstartpos));
     } else
     {
-      Seqinfo seqinfo;
+      GtSeqinfo seqinfo;
       unsigned long seqnum = getencseqfrompos2seqnum(showmatchinfo->encseq,
                                                      match->dbstartpos);
-      getencseqSeqinfo(&seqinfo,showmatchinfo->encseq,seqnum);
+      gt_encodedsequence_seqinfo(showmatchinfo->encseq,&seqinfo,seqnum);
       gt_assert(seqinfo.seqstartpos <= match->dbstartpos);
       printf("%lu\t" FormatSeqpos,seqnum,
                     PRINTSeqposcast(match->dbstartpos - seqinfo.seqstartpos));
@@ -243,7 +243,7 @@ static void checkmstats(void *processinfo,
       witnessposition = *sptr;
       for (idx = patternstartpos; idx < patternstartpos + mstatlength; idx++)
       {
-        cc = limdfsgetencodedchar((const Limdfsresources *) processinfo,
+        cc = limdfs_getencodedchar((const Limdfsresources *) processinfo,
                                   witnessposition + idx - patternstartpos,
                                   Forwardmode);
         if (twl->tagptr[idx] != cc)
@@ -544,14 +544,14 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
   int retval;
   Myersonlineresources *mor = NULL;
   Genericindex *genericindex = NULL;
-  const Encodedsequence *encseq = NULL;
+  const GtEncodedsequence *encseq = NULL;
   GtLogger *logger;
 
   logger = gt_logger_new(tageratoroptions->verbose,
                          GT_LOGGER_DEFLT_PREFIX, stdout);
   if (tageratoroptions->doonline)
   {
-    encseq = mapencodedsequence (true,
+    encseq = gt_encodedsequence_new_from_index (true,
                                  tageratoroptions->indexname,
                                  true,
                                  false,
@@ -609,7 +609,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     GT_INITARRAY(&storeonline,Simplematch);
     GT_INITARRAY(&storeoffline,Simplematch);
     storeonline.twlptr = storeoffline.twlptr = &twl;
-    alpha = getencseqAlphabet(encseq);
+    alpha = gt_encodedsequence_alphabet(encseq);
     symbolmap = gt_alphabet_symbolmap(alpha);
     numofchars = gt_alphabet_num_of_chars(alpha);
     if (tageratoroptions->docompare)
@@ -771,7 +771,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
   {
     if (encseq != NULL)
     {
-      gt_encodedsequence_delete((Encodedsequence *) encseq);
+      gt_encodedsequence_delete((GtEncodedsequence *) encseq);
       encseq = NULL;
     }
   } else

@@ -2,13 +2,13 @@
 extern "C" {
 #endif
 int testencodedsequence(const GtStrArray *filenametab,
-                        const Encodedsequence *encseq,
+                        const GtEncodedsequence *encseq,
                         Readmode readmode,
                         unsigned long scantrials,
                         unsigned long multicharcmptrials,
                         GtError *err);
 
-int checkspecialrangesfast(const Encodedsequence *encseq);
+int checkspecialrangesfast(const GtEncodedsequence *encseq);
 
 #ifdef __cplusplus
 }

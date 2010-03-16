@@ -19,7 +19,7 @@
 #define SFX_ENUMCODES_H
 
 #include "intcode-def.h"
-#include "encseq-def.h"
+#include "encodedsequence.h"
 #include "seqpos-def.h"
 
 typedef struct Enumcodeatposition Enumcodeatposition;
@@ -30,7 +30,7 @@ typedef struct
   Seqpos position;
 } Specialcontext;
 
-Enumcodeatposition *newEnumcodeatposition(const Encodedsequence *encseq,
+Enumcodeatposition *newEnumcodeatposition(const GtEncodedsequence *encseq,
                                           Readmode readmode,
                                           unsigned int prefixlength,
                                           unsigned int numofchars);

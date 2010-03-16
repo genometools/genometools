@@ -62,7 +62,7 @@ struct Dfsstate /* global information */
                alphabetsize;
   ArraySeqpos uniquechar,
               *poslist;
-  const Encodedsequence *encseq;
+  const GtEncodedsequence *encseq;
   Readmode readmode;
   Processmaxpairs processmaxpairs;
   void *processmaxpairsinfo;
@@ -205,9 +205,10 @@ static int processleafedge(bool firstsucc,
     leftchar = INITIALCHAR;
   } else
   {
-    leftchar = getencodedchar(state->encseq, /* Random access */
-                              leafnumber-1,
-                              state->readmode);
+    /* Random access */
+    leftchar = gt_encodedsequence_getencodedchar(state->encseq,
+                                                 leafnumber-1,
+                                                 state->readmode);
   }
   state->initialized = false;
 #ifdef SKDEBUG
@@ -347,7 +348,7 @@ static int processbranchedge(bool firstsucc,
 }
 
 int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
-                      const Encodedsequence *encseq,
+                      const GtEncodedsequence *encseq,
                       Readmode readmode,
                       unsigned int searchlength,
                       Processmaxpairs processmaxpairs,
@@ -360,7 +361,7 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
   Dfsstate state;
   bool haserr = false;
 
-  state.alphabetsize = getencseqAlphabetnumofchars(encseq);
+  state.alphabetsize = gt_encodedsequence_alphabetnumofchars(encseq);
   state.searchlength = searchlength;
   state.processmaxpairs = processmaxpairs;
   state.processmaxpairsinfo = processmaxpairsinfo;

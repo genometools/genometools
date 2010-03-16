@@ -38,37 +38,37 @@ unsigned long gt_ltrelement_leftltrlen(GtLTRElement *e)
 }
 
 char* gt_ltrelement_get_sequence(unsigned long start, unsigned long end,
-                                 GtStrand strand, Encodedsequence *seq,
-                                 Seqinfo *seqinfo, GtError *err)
+                                 GtStrand strand, GtEncodedsequence *seq,
+                                 GtSeqinfo *seqinfo, GtError *err)
 {
   char *out;
   int had_err = 0;
   GtUchar *symbolstring;
   const GtAlphabet *alpha;
-  Encodedsequencescanstate *ess;
+  GtEncodedsequenceScanstate *ess;
   unsigned long len, i;
 
   gt_assert(seq && end >= start);
   gt_error_check(err);
 
-  ess = newEncodedsequencescanstate();
-  alpha = getencseqAlphabet(seq);
+  ess = gt_encodedsequence_scanstate_new();
+  alpha = gt_encodedsequence_alphabet(seq);
   len = end - start + 1;
 
   out          = gt_malloc((len + 1) * sizeof (char));
   symbolstring = gt_malloc((len + 1) * sizeof (GtUchar));
 
-  initEncodedsequencescanstate(ess, seq, Forwardmode,
+  gt_encodedsequence_scanstate_init(ess, seq, Forwardmode,
                                seqinfo->seqstartpos + start);
   for (i=0;i<len;i++)
   {
-    symbolstring[i] = sequentialgetencodedchar(seq, ess,
+    symbolstring[i] = gt_encodedsequence_sequentialgetencodedchar(seq, ess,
                                                seqinfo->seqstartpos + start + i,
                                                Forwardmode);
   }
   gt_alphabet_sprintf_symbolstring(alpha, out, symbolstring, len);
   gt_free(symbolstring);
-  freeEncodedsequencescanstate(&ess);
+  gt_encodedsequence_scanstate_delete(ess);
 
   if (strand == GT_STRAND_REVERSE)
     had_err = gt_reverse_complement(out, len, err);

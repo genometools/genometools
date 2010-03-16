@@ -56,7 +56,7 @@ static GtOptionParser* gt_prebwt_option_parser_new(void *tool_arguments)
   gt_assert(arguments != NULL);
   arguments->indexname = gt_str_new();
   op = gt_option_parser_new("[options] -pck indexname",
-                         "Precompute bwt-bounds for some prefix length.");
+                            "Precompute bwt-bounds for some prefix length.");
   gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
 
   optionpck = gt_option_new_string("pck","Specify index (packed index)",
@@ -65,8 +65,8 @@ static GtOptionParser* gt_prebwt_option_parser_new(void *tool_arguments)
   gt_option_is_mandatory(optionpck);
 
   option = gt_option_new_uint_min("maxdepth",
-                                "specify maximum depth (value > 0)",
-                                &arguments->maxdepth,0,1U);
+                                  "specify maximum depth (value > 0)",
+                                  &arguments->maxdepth,0,1U);
   gt_option_parser_add_option(op, option);
   return op;
 }
@@ -91,7 +91,7 @@ static int gt_prebwt_runner(GT_UNUSED int argc,
     haserr = true;
   } else
   {
-    totallength = getencseqtotallength(suffixarray.encseq);
+    totallength = gt_encodedsequence_total_length(suffixarray.encseq);
   }
   if (!haserr)
   {
@@ -105,7 +105,8 @@ static int gt_prebwt_runner(GT_UNUSED int argc,
   }
   if (!haserr)
   {
-    unsigned int numofchars = getencseqAlphabetnumofchars(suffixarray.encseq);
+    unsigned int numofchars =
+                      gt_encodedsequence_alphabetnumofchars(suffixarray.encseq);
     Pckbuckettable *pckbt;
 
     pckbt = pckbuckettable_new((const void *) packedindex,

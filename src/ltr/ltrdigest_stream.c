@@ -33,7 +33,7 @@
 struct GtLTRdigestStream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
-  Encodedsequence *encseq;
+  GtEncodedsequence *encseq;
   GtPBSOptions *pbs_opts;
   GtPPTOptions *ppt_opts;
 #ifdef HAVE_HMMER
@@ -356,7 +356,7 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
     }
     if (!had_err)
     {
-      if (seqid > getencseqnumofdbsequences(ls->encseq)-1) {
+      if (seqid > gt_encodedsequence_num_of_sequences(ls->encseq)-1) {
         gt_error_set(e, "Sequence region number exceeds number of sequences in "
                         "encoded sequence file: 'seq%lu'!", seqid);
         had_err = -1;
@@ -365,23 +365,23 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
     if (!had_err)
     {
       GtUchar *symbolstring;
-      Seqinfo seqinfo;
+      GtSeqinfo seqinfo;
       unsigned long length;
       const GtAlphabet *alpha;
 
-      getencseqSeqinfo(&seqinfo, ls->encseq, seqid);
+      gt_encodedsequence_seqinfo(ls->encseq, &seqinfo, seqid);
 
       if (ls->element.rightLTR_3 <= seqinfo.seqlength)
       {
-        alpha        = getencseqAlphabet(ls->encseq);
+        alpha        = gt_encodedsequence_alphabet(ls->encseq);
         length       = gt_ltrelement_length(&ls->element);
         seq          = gt_malloc((length+1) * sizeof (char));
         symbolstring = gt_malloc((length+1) * sizeof (GtUchar));
-        encseqextract(symbolstring,
-                      ls->encseq,
-                      seqinfo.seqstartpos + (ls->element.leftLTR_5),
-                      seqinfo.seqstartpos + (ls->element.leftLTR_5)
-                        + length - 1);
+        gt_encodedsequence_extract_substring(ls->encseq,
+                                  symbolstring,
+                                  seqinfo.seqstartpos + (ls->element.leftLTR_5),
+                                  seqinfo.seqstartpos + (ls->element.leftLTR_5)
+                                    + length - 1);
         gt_alphabet_sprintf_symbolstring(alpha, seq, symbolstring, length);
         gt_free(symbolstring);
 
@@ -431,7 +431,7 @@ const GtNodeStreamClass* gt_ltrdigest_stream_class(void)
 
 GtNodeStream* gt_ltrdigest_stream_new(GtNodeStream *in_stream,
                                       int tests_to_run,
-                                      Encodedsequence *encseq,
+                                      GtEncodedsequence *encseq,
                                       GtPBSOptions *pbs_opts,
                                       GtPPTOptions *ppt_opts,
 #ifdef HAVE_HMMER

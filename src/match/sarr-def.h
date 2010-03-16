@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include "seqpos-def.h"
 #include "intcode-def.h"
-#include "encseq-def.h"
+#include "encodedsequence.h"
 #include "lcpoverflow.h"
 #include "bcktab.h"
 
@@ -85,7 +85,7 @@ DECLAREBufferedfiletype(Largelcpvalue);
 
 typedef struct
 {
-  Encodedsequence *encseq;
+  GtEncodedsequence *encseq;
   DefinedSeqpos numoflargelcpvalues; /* only in esa-map.c */
   DefinedSeqpos longest; /* for BWT */
   Readmode readmode; /* relevant when reading the encoded sequence */
@@ -144,7 +144,7 @@ typedef struct
   GtUchar smalllcpvalue;
   const Largelcpvalue *largelcpvalue;
 
-  gt_assert(pos <= getencseqtotallength(suffixarray->encseq));
+  gt_assert(pos <= gt_encodedsequence_total_length(suffixarray->encseq));
   smalllcpvalue = suffixarray->lcptab[pos];
   if (smalllcpvalue != LCPOVERFLOW)
   {

@@ -20,7 +20,7 @@
 #include "core/minmax.h"
 #include "seqpos-def.h"
 #include "spacedef.h"
-#include "encseq-def.h"
+#include "encodedsequence.h"
 #include "lcpoverflow.h"
 #include "bltrie-ssort.h"
 
@@ -55,8 +55,8 @@ GT_DECLAREARRAYSTRUCT(Nodeptr);
 
 struct Blindtrie
 {
-  const Encodedsequence *encseq;
-  Encodedsequencescanstate *esr1, *esr2;
+  const GtEncodedsequence *encseq;
+  GtEncodedsequenceScanstate *esr1, *esr2;
   Readmode readmode;
   Seqpos totallength,
          offset,
@@ -124,9 +124,10 @@ static Nodeptr makeroot(Blindtrie *blindtrie,Seqpos currentstartpos)
   SETLEAF(root,false);
   if (isleftofboundary(currentstartpos,0,blindtrie))
   {
-    firstchar = getencodedchar(blindtrie->encseq, /* Random access */
-                               currentstartpos,
-                               blindtrie->readmode);
+    /* Random access */
+    firstchar = gt_encodedsequence_getencodedchar(blindtrie->encseq,
+                                                  currentstartpos,
+                                                  blindtrie->readmode);
     if (firstchar == (GtUchar) WILDCARD)
     {
       firstchar = (GtUchar) SEPARATOR;
@@ -193,9 +194,10 @@ static Nodeptr findcompanion(Blindtrie *blindtrie,Seqpos currentstartpos)
     GT_STOREINARRAY (&blindtrie->stack, Nodeptr, 128, head);
     if (isleftofboundary(currentstartpos,head->depth,blindtrie))
     {
-      newchar = getencodedchar(blindtrie->encseq, /* Random access */
-                               currentstartpos + head->depth,
-                               blindtrie->readmode);
+      /* Random access */
+      newchar = gt_encodedsequence_getencodedchar(blindtrie->encseq,
+                                                  currentstartpos + head->depth,
+                                                  blindtrie->readmode);
       if (newchar == (GtUchar) WILDCARD)
       {
         newchar = (GtUchar) SEPARATOR;
@@ -281,16 +283,18 @@ static Seqpos cmpcharbychargetlcp(GtUchar *mm_oldsuffix,
   Seqpos lcp;
   GtUchar cc1, cc2;
 
-  initEncodedsequencescanstate(blindtrie->esr1,blindtrie->encseq,
+  gt_encodedsequence_scanstate_init(blindtrie->esr1,blindtrie->encseq,
                                blindtrie->readmode,leafpos);
-  initEncodedsequencescanstate(blindtrie->esr2,blindtrie->encseq,
+  gt_encodedsequence_scanstate_init(blindtrie->esr2,blindtrie->encseq,
                                blindtrie->readmode,currentstartpos);
   for (lcp = 0; /* Nothing */; lcp++)
   {
     if (isleftofboundary(leafpos,lcp,blindtrie))
     {
-      cc1 = sequentialgetencodedchar(blindtrie->encseq,blindtrie->esr1,
-                                     leafpos+lcp,blindtrie->readmode);
+      cc1 = gt_encodedsequence_sequentialgetencodedchar(blindtrie->encseq,
+                                                        blindtrie->esr1,
+                                                        leafpos+lcp,
+                                                        blindtrie->readmode);
       if (cc1 == (GtUchar) WILDCARD)
       {
         cc1 = (GtUchar) SEPARATOR;
@@ -301,8 +305,10 @@ static Seqpos cmpcharbychargetlcp(GtUchar *mm_oldsuffix,
     }
     if (isleftofboundary(currentstartpos,lcp,blindtrie))
     {
-      cc2 = sequentialgetencodedchar(blindtrie->encseq,blindtrie->esr2,
-                                     currentstartpos+lcp,blindtrie->readmode);
+      cc2 = gt_encodedsequence_sequentialgetencodedchar(blindtrie->encseq,
+                                                        blindtrie->esr2,
+                                                        currentstartpos+lcp,
+                                                        blindtrie->readmode);
       if (cc2 == (GtUchar) WILDCARD)
       {
         cc2 = (GtUchar) SEPARATOR;
@@ -363,7 +369,7 @@ static Seqpos fastgetlcp(GtUchar *mm_oldsuffix,
   {
 #ifdef OLDVERSION
     /*
-    *mm_oldsuffix = getencodedchar(blindtrie->encseq,
+    *mm_oldsuffix = gt_encodedsequence_getencodedchar(blindtrie->encseq,
                                    leafpos + commonunits.finaldepth,
                                    blindtrie->readmode);
     if (ISSPECIAL(*mm_oldsuffix))
@@ -371,9 +377,10 @@ static Seqpos fastgetlcp(GtUchar *mm_oldsuffix,
       gt_assert(commonunits.leftspecial);
     } else
     {
-      GtUchar tmp = extractencodedchar(blindtrie->encseq,leafpos +
-                                       commonunits.finaldepth,
-                                       blindtrie->readmode);
+      GtUchar tmp = gt_encodedsequence_extractencodedchar(blindtrie->encseq,
+                                                         leafpos +
+                                                         commonunits.finaldepth,
+                                                         blindtrie->readmode);
       gt_assert(tmp == *mm_oldsuffix);
     }
     if (*mm_oldsuffix == (GtUchar) WILDCARD)
@@ -382,9 +389,10 @@ static Seqpos fastgetlcp(GtUchar *mm_oldsuffix,
     }
     */
 #endif
-    *mm_oldsuffix = extractencodedchar(blindtrie->encseq,leafpos +
-                                       commonunits.finaldepth,
-                                       blindtrie->readmode);
+    *mm_oldsuffix = gt_encodedsequence_extractencodedchar(blindtrie->encseq,
+                                                         leafpos +
+                                                         commonunits.finaldepth,
+                                                         blindtrie->readmode);
   } else
   {
     *mm_oldsuffix = (GtUchar) SEPARATOR;
@@ -393,17 +401,18 @@ static Seqpos fastgetlcp(GtUchar *mm_oldsuffix,
       !commonunits.rightspecial)
   {
 #ifdef OLDVERSION
-    *mm_newsuffix = getencodedchar(blindtrie->encseq, /* Random access */
-                                   currentstartpos + commonunits.finaldepth,
-                                   blindtrie->readmode);
+    /* Random access */
+    *mm_newsuffix = gt_encodedsequence_getencodedchar(blindtrie->encseq,
+                                       currentstartpos + commonunits.finaldepth,
+                                       blindtrie->readmode);
     if (ISSPECIAL(*mm_newsuffix))
     {
       gt_assert(commonunits.rightspecial);
     } else
     {
-      GtUchar tmp = extractencodedchar(blindtrie->encseq, /* Random access */
-                                       currentstartpos +
-                                       commonunits.finaldepth,
+      /* Random access */
+      GtUchar tmp = gt_encodedsequence_extractencodedchar(blindtrie->encseq,
+                                       currentstartpos + commonunits.finaldepth,
                                        blindtrie->readmode);
       gt_assert(tmp == *mm_newsuffix);
     }
@@ -412,7 +421,7 @@ static Seqpos fastgetlcp(GtUchar *mm_oldsuffix,
       *mm_newsuffix = (GtUchar) SEPARATOR;
     }
 #endif
-    *mm_newsuffix = extractencodedchar(blindtrie->encseq,
+    *mm_newsuffix = gt_encodedsequence_extractencodedchar(blindtrie->encseq,
                                        currentstartpos +
                                        commonunits.finaldepth,
                                        blindtrie->readmode);
@@ -538,10 +547,10 @@ static unsigned long enumeratetrieleaves (Seqpos *suffixtable,
 }
 
 Blindtrie *blindtrie_new(unsigned long numofsuffixes,
-                         const Encodedsequence *encseq,
+                         const GtEncodedsequence *encseq,
                          bool cmpcharbychar,
-                         Encodedsequencescanstate *esr1,
-                         Encodedsequencescanstate *esr2,
+                         GtEncodedsequenceScanstate *esr1,
+                         GtEncodedsequenceScanstate *esr2,
                          Readmode readmode)
 {
   Blindtrie *blindtrie;
@@ -562,7 +571,7 @@ Blindtrie *blindtrie_new(unsigned long numofsuffixes,
   blindtrie->root = NULL;
   blindtrie->esr1 = esr1;
   blindtrie->esr2 = esr2;
-  blindtrie->totallength = getencseqtotallength(encseq);
+  blindtrie->totallength = gt_encodedsequence_total_length(encseq);
   blindtrie->cmpcharbychar = cmpcharbychar;
   GT_INITARRAY (&blindtrie->stack, Nodeptr);
   return blindtrie;

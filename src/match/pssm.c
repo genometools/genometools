@@ -24,7 +24,7 @@
 #include "core/arraydef.h"
 #include "seqpos-def.h"
 #include "spacedef.h"
-#include "encseq-def.h"
+#include "encodedsequence.h"
 #include "absdfstrans-imp.h"
 
 typedef int ProfScore;
@@ -102,23 +102,24 @@ void makeitmthresholds(Profilematrix *prof,
   FREESPACE(maxscore);
 }
 
-void lookaheadsearchPSSM(const Encodedsequence *encseq,
+void lookaheadsearchPSSM(const GtEncodedsequence *encseq,
                                 const Profilematrix *prof)
 {
   unsigned long firstpos, bufsize;
   GtUchar currentchar;
   Seqpos pos;
-  Encodedsequencescanstate *esr;
-  Seqpos totallength = getencseqtotallength(encseq);
+  GtEncodedsequenceScanstate *esr;
+  Seqpos totallength = gt_encodedsequence_total_length(encseq);
   GtUchar *buffer;
 
-  esr = newEncodedsequencescanstate();
-  initEncodedsequencescanstate(esr,encseq,Forwardmode,0);
+  esr = gt_encodedsequence_scanstate_new();
+  gt_encodedsequence_scanstate_init(esr,encseq,Forwardmode,0);
   ALLOCASSIGNSPACE(buffer,NULL,GtUchar,prof->dimension);
   firstpos = bufsize = 0;
   for (pos=0; pos < totallength; pos++)
   {
-    currentchar = sequentialgetencodedchar(encseq,esr,pos,Forwardmode);
+    currentchar = gt_encodedsequence_sequentialgetencodedchar(encseq,esr,pos,
+                                                              Forwardmode);
     if (ISSPECIAL(currentchar))
     {
       bufsize = firstpos = 0;
@@ -137,6 +138,6 @@ void lookaheadsearchPSSM(const Encodedsequence *encseq,
       }
     }
   }
-  freeEncodedsequencescanstate(&esr);
+  gt_encodedsequence_scanstate_delete(esr);
   FREESPACE(buffer);
 }

@@ -566,7 +566,8 @@ createBWTSeqGeneric(const struct bwtParam *params, indexCreateFunc createIndex,
       {
         Seqpos
 #ifndef NDEBUG
-          origSeqLen = getencseqtotallength(SPRTGetOrigEncseq(sprTable)),
+          origSeqLen = gt_encodedsequence_total_length(
+                                                   SPRTGetOrigEncseq(sprTable)),
 #endif
           maxRank;
         gt_assert(origSeqLen == totalLen - 1);

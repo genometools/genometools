@@ -25,7 +25,7 @@
 #include "defined-types.h"
 #include "seqpos-def.h"
 #include "ushort-def.h"
-#include "encseq-def.h"
+#include "encodedsequence.h"
 
 typedef unsigned long (*Greedygmatchforwardfunction) (const void *,
                                                       unsigned long offset,
@@ -35,7 +35,7 @@ typedef unsigned long (*Greedygmatchforwardfunction) (const void *,
                                                       const GtUchar *,
                                                       const GtUchar *);
 
-int findsubquerygmatchforward(const Encodedsequence *encseq,
+int findsubquerygmatchforward(const GtEncodedsequence *encseq,
                               const void *genericindex,
                               Seqpos totallength,
                               Greedygmatchforwardfunction gmatchforward,

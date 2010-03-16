@@ -48,11 +48,11 @@ typedef struct
 
 DECLAREREADFUNCTION(GtUchar);
 
-static void deletethespranges(const Encodedsequence *encseq,
+static void deletethespranges(const GtEncodedsequence *encseq,
                               unsigned long delspranges)
 {
   Specialrangeiterator *sri;
-  Sequencerange range;
+  GtSequencerange range;
   Seqpos rangewidth, nextpos = 0, totallength;
   const unsigned long fastawidth = 70UL;
 
@@ -82,7 +82,7 @@ static void deletethespranges(const Encodedsequence *encseq,
       }
     }
   }
-  totallength = getencseqtotallength(encseq);
+  totallength = gt_encodedsequence_total_length(encseq);
   if (nextpos < totallength-1)
   {
     encseq2symbolstring(stdout,
@@ -271,18 +271,20 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
 
         for (readmode = 0; readmode < 4; readmode++)
         {
-          if (gt_alphabet_is_dna(getencseqAlphabet(suffixarray.encseq)) ||
-             ((Readmode) readmode) == Forwardmode ||
-             ((Readmode) readmode) == Reversemode)
+          if (gt_alphabet_is_dna(
+            gt_encodedsequence_alphabet(suffixarray.encseq)) ||
+               ((Readmode) readmode) == Forwardmode ||
+               ((Readmode) readmode) == Reversemode)
           {
             gt_logger_log(logger, "testencodedsequence(readmode=%s)",
                                    showreadmode((Readmode) readmode));
-            if (testencodedsequence(getencseqfilenametab(suffixarray.encseq),
-                                    suffixarray.encseq,
-                                    (Readmode) readmode,
-                                    sfxmapoptions.scantrials,
-                                    sfxmapoptions.multicharcmptrials,
-                                    err) != 0)
+            if (testencodedsequence(
+                               gt_encodedsequence_filenames(suffixarray.encseq),
+                               suffixarray.encseq,
+                               (Readmode) readmode,
+                               sfxmapoptions.scantrials,
+                               sfxmapoptions.multicharcmptrials,
+                               err) != 0)
             {
               haserr = true;
               break;
@@ -334,7 +336,7 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
                           suffixarray.encseq,
                           suffixarray.readmode,
                           suffixarray.suftab,
-                          getencseqtotallength(suffixarray.encseq)+1,
+                          gt_encodedsequence_total_length(suffixarray.encseq)+1,
                           ssar,
                           false, /* specialsareequal  */
                           false,  /* specialsareequalatdepth0 */
@@ -353,7 +355,7 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
         gt_assert(suffixarray.longest.defined);
         longest = suffixarray.longest.valueseqpos;
         printf("longest=%lu\n",(unsigned long) longest);
-        totallength = getencseqtotallength(suffixarray.encseq);
+        totallength = gt_encodedsequence_total_length(suffixarray.encseq);
         printf("totallength=%lu\n",(unsigned long) totallength);
         if (!sfxmapoptions.usestream)
         {

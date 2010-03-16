@@ -47,7 +47,7 @@ Sfxprogress *sfxprogress_new(const char *event)
   return sfxprogress;
 }
 
-void sfxprogress_deliverthetime(FILE *fp,Sfxprogress *sfxprogress,
+void sfxprogress_deliverthetime(FILE *fp, Sfxprogress *sfxprogress,
                                 const char *newevent)
 {
   if (sfxprogress->showprogressbar)

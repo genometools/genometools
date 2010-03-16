@@ -49,7 +49,7 @@ createEncIdxSeq(const GtStr *projectName,
   if (streamsuffixarray(&suffixArray,
                        SARR_SUFTAB | SARR_BWTTAB, projectName, verbosity, err))
     return NULL;
-  length = getencseqtotallength(suffixArray.encseq) + 1;
+  length = gt_encodedsequence_total_length(suffixArray.encseq) + 1;
   newSeqIdx = createEncIdxSeqFromSA(&suffixArray, length,
                                       projectName, params,
                                       numExtHeaders, headerIDs,
@@ -220,7 +220,7 @@ loadEncIdxSeq(const GtStr *projectName,
   {
     if (streamsuffixarray(&suffixArray, 0, projectName, verbosity, err))
       break;
-    len = getencseqtotallength(suffixArray.encseq) + 1;
+    len = gt_encodedsequence_total_length(suffixArray.encseq) + 1;
     newSeqIdx = loadEncIdxSeqForSA(&suffixArray, len, projectName,
                                    encType, features, err);
     freesuffixarray(&suffixArray);

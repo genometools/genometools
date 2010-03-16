@@ -35,7 +35,7 @@
 typedef struct
 {
   const GtUchar *sequence;
-  const Encodedsequence *encseq;
+  const GtEncodedsequence *encseq;
   Readmode readmode;
   Seqpos startpos, length;
 } Queryrep;
@@ -68,7 +68,9 @@ static GtUchar accessquery(int line,const Queryrep *queryrep,
   {
     gt_assert(queryrep->readmode != Forwardmode);
     gt_assert(queryrep->encseq != NULL);
-    return getencodedchar(queryrep->encseq,abspos,queryrep->readmode);
+    return gt_encodedsequence_getencodedchar(queryrep->encseq,
+                                             abspos,
+                                             queryrep->readmode);
   }
 }
 
@@ -76,7 +78,7 @@ static GtUchar accessquery(int line,const Queryrep *queryrep,
         sidx = (OFFSET) + (LCPLEN);\
         if (sidx < totallength)\
         {\
-          initEncodedsequencescanstate(esr,dbencseq,readmode,sidx);\
+          gt_encodedsequence_scanstate_init(esr,dbencseq,readmode,sidx);\
         }\
         for (/* Nothing */ ; /* Nothing */; sidx++, (LCPLEN)++)\
         {\
@@ -90,7 +92,8 @@ static GtUchar accessquery(int line,const Queryrep *queryrep,
             retcode = -1;\
             break;\
           }\
-          currentdbchar = sequentialgetencodedchar(dbencseq,esr,sidx,readmode);\
+          currentdbchar = gt_encodedsequence_sequentialgetencodedchar(dbencseq,\
+                                                            esr,sidx,readmode);\
           currentquerychar = accessquery(__LINE__,querysubstring->queryrep,\
                                          querysubstring->offset + (LCPLEN));\
           retcode = (int) (currentquerychar - currentdbchar);\
@@ -107,8 +110,8 @@ static GtUchar accessquery(int line,const Queryrep *queryrep,
           }\
         }
 
-static bool mmsearch(const Encodedsequence *dbencseq,
-                     Encodedsequencescanstate *esr,
+static bool mmsearch(const GtEncodedsequence *dbencseq,
+                     GtEncodedsequenceScanstate *esr,
                      const Seqpos *suftab,
                      Readmode readmode,
                      Lcpinterval *lcpitv,
@@ -119,7 +122,7 @@ static bool mmsearch(const Encodedsequence *dbencseq,
   int retcode = 0;
   GtUchar currentdbchar, currentquerychar;
 
-  totallength = getencseqtotallength(dbencseq);
+  totallength = gt_encodedsequence_total_length(dbencseq);
   leftsave = left = lcpitv->left;
   right = lcpitv->right;
   lcplen = lcpitv->offset;
@@ -198,11 +201,11 @@ static bool mmsearch(const Encodedsequence *dbencseq,
   Lcpinterval lcpitv;
   Seqpos sufindex;
   const Seqpos *suftab;
-  Encodedsequencescanstate *esr;
+  GtEncodedsequenceScanstate *esr;
 };
 
 static MMsearchiterator *newmmsearchiterator_generic(
-                                       const Encodedsequence *dbencseq,
+                                       const GtEncodedsequence *dbencseq,
                                        const Seqpos *suftab,
                                        Seqpos leftbound,
                                        Seqpos rightbound,
@@ -219,7 +222,7 @@ static MMsearchiterator *newmmsearchiterator_generic(
   mmsi->lcpitv.right = rightbound;
   mmsi->lcpitv.offset = itvoffset;
   mmsi->suftab = suftab;
-  mmsi->esr = newEncodedsequencescanstate();
+  mmsi->esr = gt_encodedsequence_scanstate_new();
   if (!mmsearch(dbencseq,mmsi->esr,suftab,readmode,&mmsi->lcpitv,
                 querysubstring,minmatchlength))
   {
@@ -231,7 +234,7 @@ static MMsearchiterator *newmmsearchiterator_generic(
 }
 
 MMsearchiterator *newmmsearchiteratorcomplete_plain(
-                                   const Encodedsequence *dbencseq,
+                                   const GtEncodedsequence *dbencseq,
                                    const Seqpos *suftab,
                                    Seqpos leftbound,
                                    Seqpos rightbound,
@@ -295,11 +298,11 @@ bool identicalmmsearchiterators(const MMsearchiterator *mmsi1,
 
 void freemmsearchiterator(MMsearchiterator **mmsi)
 {
-  freeEncodedsequencescanstate(&(*mmsi)->esr);
+  gt_encodedsequence_scanstate_delete((*mmsi)->esr);
   FREESPACE(*mmsi);
 }
 
-static bool isleftmaximal(const Encodedsequence *dbencseq,
+static bool isleftmaximal(const GtEncodedsequence *dbencseq,
                           Readmode readmode,
                           Seqpos dbstart,
                           const Querysubstring *querysubstring)
@@ -310,7 +313,7 @@ static bool isleftmaximal(const Encodedsequence *dbencseq,
   {
     return true;
   }
-  dbleftchar = getencodedchar(dbencseq, /* Random access */
+  dbleftchar = gt_encodedsequence_getencodedchar(dbencseq, /* Random access */
                               dbstart-1,
                               readmode);
   if (ISSPECIAL(dbleftchar) ||
@@ -322,8 +325,8 @@ static bool isleftmaximal(const Encodedsequence *dbencseq,
   return false;
 }
 
-static Seqpos extendright(const Encodedsequence *dbencseq,
-                          Encodedsequencescanstate *esr,
+static Seqpos extendright(const GtEncodedsequence *dbencseq,
+                          GtEncodedsequenceScanstate *esr,
                           Readmode readmode,
                           Seqpos totallength,
                           Seqpos dbend,
@@ -335,14 +338,15 @@ static Seqpos extendright(const Encodedsequence *dbencseq,
 
   if (dbend < totallength)
   {
-    initEncodedsequencescanstate(esr,dbencseq,readmode,dbend);
+    gt_encodedsequence_scanstate_init(esr,dbencseq,readmode,dbend);
   }
   for (dbpos = dbend, querypos = querysubstring->offset + matchlength;
        dbpos < totallength &&
        querypos < querysubstring->queryrep->length;
        dbpos++, querypos++)
   {
-    dbchar = sequentialgetencodedchar(dbencseq,esr,dbpos,readmode);
+    dbchar = gt_encodedsequence_sequentialgetencodedchar(dbencseq,esr,dbpos,
+                                                         readmode);
     if (ISSPECIAL(dbchar) ||
         dbchar != accessquery(__LINE__,querysubstring->queryrep,querypos))
     {
@@ -353,7 +357,7 @@ static Seqpos extendright(const Encodedsequence *dbencseq,
 }
 
 static int runquerysubstringmatch(bool selfmatch,
-                                  const Encodedsequence *dbencseq,
+                                  const GtEncodedsequence *dbencseq,
                                   const Seqpos *suftabpart,
                                   Readmode readmode,
                                   Seqpos numberofsuffixes,
@@ -373,7 +377,7 @@ static int runquerysubstringmatch(bool selfmatch,
   bool haserr = false;
 
   gt_assert(numberofsuffixes > 0);
-  totallength = getencseqtotallength(dbencseq);
+  totallength = gt_encodedsequence_total_length(dbencseq);
   querysubstring.queryrep = queryrep;
   for (querysubstring.offset = 0;
        querysubstring.offset <= queryrep->length - minmatchlength;
@@ -458,7 +462,7 @@ int callenumquerymatches(const GtStr *indexname,
     haserr = true;
   } else
   {
-    totallength = getencseqtotallength(suffixarray.encseq);
+    totallength = gt_encodedsequence_total_length(suffixarray.encseq);
   }
   if (!haserr && echoquery)
   {
@@ -484,8 +488,7 @@ int callenumquerymatches(const GtStr *indexname,
     if (!haserr)
     {
       gt_seqiterator_set_symbolmap(seqit,
-                                   getencseqAlphabetsymbolmap(suffixarray.
-                                                              encseq));
+                      gt_encodedsequence_alphabetsymbolmap(suffixarray.encseq));
       for (queryunitnum = 0; /* Nothing */; queryunitnum++)
       {
         retval = gt_seqiterator_next(seqit,
@@ -561,21 +564,21 @@ int callenumselfmatches(const GtStr *indexname,
     haserr = true;
   } else
   {
-    totallength = getencseqtotallength(suffixarray.encseq);
+    totallength = gt_encodedsequence_total_length(suffixarray.encseq);
   }
   if (!haserr)
   {
     unsigned long seqnum, numofsequences;
     Queryrep queryrep;
-    Seqinfo seqinfo;
+    GtSeqinfo seqinfo;
 
-    numofsequences = getencseqnumofdbsequences(suffixarray.encseq);
+    numofsequences = gt_encodedsequence_num_of_sequences(suffixarray.encseq);
     queryrep.sequence = NULL;
     queryrep.encseq = suffixarray.encseq;
     queryrep.readmode = queryreadmode;
     for (seqnum = 0; seqnum < numofsequences; seqnum++)
     {
-      getencseqSeqinfo(&seqinfo,suffixarray.encseq,seqnum);
+      gt_encodedsequence_seqinfo(suffixarray.encseq,&seqinfo,seqnum);
       if (seqinfo.seqlength >= (Seqpos) userdefinedleastlength)
       {
         queryrep.startpos = seqinfo.seqstartpos;
@@ -605,7 +608,7 @@ int callenumselfmatches(const GtStr *indexname,
 }
 
 static int constructsarrandrunmmsearch(
-                 const Encodedsequence *dbencseq,
+                 const GtEncodedsequence *dbencseq,
                  Readmode readmode,
                  unsigned int prefixlength,
                  unsigned int numofparts,
@@ -689,7 +692,7 @@ int sarrquerysubstringmatch(const GtUchar *dbseq,
 {
   unsigned int numofchars;
   bool haserr = false;
-  Encodedsequence *dbencseq;
+  GtEncodedsequence *dbencseq;
 
   dbencseq = plain2encodedsequence(true,
                                    dbseq,

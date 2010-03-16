@@ -33,7 +33,7 @@ typedef struct
 
 struct Limdfsconstinfo
 {
-  Bitsequence seedbitvector;
+  GtBitsequence seedbitvector;
   unsigned long seedweight;
   const GtUchar *pattern;
 };
@@ -72,7 +72,7 @@ static void spse_initdfsconstinfo(Limdfsconstinfo *mti,
 
   va_start(ap,alphasize);
   mti->pattern = va_arg(ap, const GtUchar *);
-  mti->seedbitvector = va_arg(ap, Bitsequence);
+  mti->seedbitvector = va_arg(ap, GtBitsequence);
   mti->seedweight = va_arg(ap, unsigned long);
   va_end(ap);
 }
@@ -119,12 +119,12 @@ static void spse_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
   limdfsresult->status = Limdfsstop;
 }
 
-static bool setpathmatch(Bitsequence seedbitvector,
+static bool setpathmatch(GtBitsequence seedbitvector,
                          const GtUchar *pattern,
                          unsigned long currentdepth,
                          GtUchar currentchar)
 {
-  return (!ISBITSET(seedbitvector,currentdepth-1) ||
+  return (!GT_ISBITSET(seedbitvector,currentdepth-1) ||
           currentchar == pattern[currentdepth-1]) ? true : false;
 }
 

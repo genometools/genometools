@@ -26,7 +26,7 @@
 #include "core/fa.h"
 #include "format64.h"
 #include "sarr-def.h"
-#include "encseq-def.h"
+#include "encodedsequence.h"
 #include "esa-fileend.h"
 #include "sfx-ri-def.h"
 #include "intcode-def.h"
@@ -264,7 +264,7 @@ static int inputsuffixarray(bool map,
 
   gt_error_check(err);
   initsuffixarray(suffixarray);
-  suffixarray->encseq = mapencodedsequence(true,
+  suffixarray->encseq = gt_encodedsequence_new_from_index(true,
                                            indexname,
                                            (demand & SARR_ESQTAB) ? true
                                                                   : false,
@@ -281,7 +281,7 @@ static int inputsuffixarray(bool map,
     haserr = true;
   } else
   {
-    totallength = getencseqtotallength(suffixarray->encseq);
+    totallength = gt_encodedsequence_total_length(suffixarray->encseq);
   }
   if (!haserr)
   {
@@ -389,10 +389,9 @@ static int inputsuffixarray(bool map,
     if (map)
     {
       suffixarray->bcktab = mapbcktab(indexname,
-                                      getencseqAlphabetnumofchars(suffixarray->
-                                                                  encseq),
-                                      suffixarray->prefixlength,
-                                      err);
+                     gt_encodedsequence_alphabetnumofchars(suffixarray->encseq),
+                     suffixarray->prefixlength,
+                     err);
       if (suffixarray->bcktab == NULL)
       {
         haserr = true;

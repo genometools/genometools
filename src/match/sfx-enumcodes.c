@@ -20,25 +20,25 @@
 #include "core/assert_api.h"
 #include "spacedef.h"
 #include "intcode-def.h"
-#include "encseq-def.h"
+#include "encodedsequence.h"
 #include "sfx-enumcodes.h"
 #include "stamp.h"
 #include "initbasepower.h"
 
 struct Enumcodeatposition
 {
-  Sequencerange previousrange;
+  GtSequencerange previousrange;
   Specialrangeiterator *sri;
   bool moveforward;
   Seqpos totallength;
   bool exhausted;
-  const Encodedsequence *encseq;
+  const GtEncodedsequence *encseq;
   Readmode readmode;
   unsigned int prefixlength;
   Codetype **multimappower, *filltable;
 };
 
-Enumcodeatposition *newEnumcodeatposition(const Encodedsequence *encseq,
+Enumcodeatposition *newEnumcodeatposition(const GtEncodedsequence *encseq,
                                           Readmode readmode,
                                           unsigned int prefixlength,
                                           unsigned int numofchars)
@@ -52,7 +52,7 @@ Enumcodeatposition *newEnumcodeatposition(const Encodedsequence *encseq,
   ecp->filltable = initfilltable(numofchars,prefixlength);
   ecp->prefixlength = prefixlength;
   ecp->moveforward = ISDIRREVERSE(readmode) ? true : false;
-  ecp->totallength = getencseqtotallength(encseq);
+  ecp->totallength = gt_encodedsequence_total_length(encseq);
   if (ecp->moveforward)
   {
     ecp->previousrange.leftpos = ecp->previousrange.rightpos = 0;
@@ -102,7 +102,7 @@ static bool newcodelistelem(Specialcontext *specialcontext,
 bool nextEnumcodeatposition(Specialcontext *specialcontext,
                             Enumcodeatposition *ecp)
 {
-  Sequencerange currentrange;
+  GtSequencerange currentrange;
   bool done;
 
   if (ecp->exhausted)
@@ -177,7 +177,9 @@ Codetype computefilledqgramcode(const Enumcodeatposition *ecp,
   for (idx=0; idx<prefixindex; idx++)
   {
     gt_assert((Seqpos) (pos + idx) < ecp->totallength);
-    cc = getencodedcharnospecial(ecp->encseq,pos + idx, ecp->readmode);
+    cc = gt_encodedsequence_getencodedcharnospecial(ecp->encseq,
+                                                    pos + idx,
+                                                    ecp->readmode);
     gt_assert(ISNOTSPECIAL(cc));
     code += ecp->multimappower[idx][cc];
   }
@@ -203,7 +205,9 @@ bool computefilledqgramcodestopatmax(Codetype *code,
   for (idx=0; idx<prefixindex; idx++)
   {
     gt_assert((Seqpos) (pos + idx) < ecp->totallength);
-    cc = getencodedcharnospecial(ecp->encseq,pos + idx, ecp->readmode);
+    cc = gt_encodedsequence_getencodedcharnospecial(ecp->encseq,
+                                                    pos + idx,
+                                                    ecp->readmode);
     gt_assert(ISNOTSPECIAL(cc));
     tmpcode += ecp->multimappower[idx][cc];
     if (tmpcode > stopcode)

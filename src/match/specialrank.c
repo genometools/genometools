@@ -21,7 +21,7 @@
 #include "core/divmodmul.h"
 #include "core/ma_api.h"
 #include "seqpos-def.h"
-#include "encseq-def.h"
+#include "encodedsequence.h"
 
 typedef struct
 {
@@ -30,13 +30,13 @@ typedef struct
          rank;
 } Rankedbounds;
 
-Rankedbounds *fillrankbounds(const Encodedsequence *encseq,
+Rankedbounds *fillrankbounds(const GtEncodedsequence *encseq,
                              Readmode readmode)
 {
   if (hasspecialranges(encseq))
   {
     Specialrangeiterator *sri;
-    Sequencerange range;
+    GtSequencerange range;
     Seqpos currentrank = 0, realspecialranges;
     Rankedbounds *rankedbounds, *rbptr;
 
@@ -144,18 +144,18 @@ static int compareSpecialrank(const void *a,const void *b)
   return 0;
 }
 
-Specialrank *fillspecialranklist(const Encodedsequence *encseq,
+Specialrank *fillspecialranklist(const GtEncodedsequence *encseq,
                                  Readmode readmode,
                                  const Seqpos *inversesuftab)
 {
   if (hasspecialranges(encseq))
   {
     Specialrangeiterator *sri;
-    Sequencerange range;
+    GtSequencerange range;
     Seqpos realspecialranges, specialrank, totallength;
     Specialrank *specialranklist, *rbptr;
 
-    totallength = getencseqtotallength(encseq);
+    totallength = gt_encodedsequence_total_length(encseq);
     realspecialranges = getencseqrealspecialranges(encseq);
     specialranklist = gt_malloc(sizeof (Specialrank) * realspecialranges);
     sri = newspecialrangeiterator(encseq,

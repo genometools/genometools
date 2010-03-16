@@ -31,7 +31,7 @@
 #include "ltr/ltrdigest_def.h"
 #include "ltr/ltrdigest_stream.h"
 #include "ltr/ltrfileout_stream.h"
-#include "match/encseq-def.h"
+#include "match/encodedsequence.h"
 
 typedef struct GtLTRdigestOptions {
   GtPBSOptions  pbs_opts;
@@ -401,7 +401,7 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
   gt_assert(arguments);
 
   /* Open sequence file */
-  Encodedsequence *encseq = mapencodedsequence(true,
+  GtEncodedsequence *encseq = gt_encodedsequence_new_from_index(true,
                                                indexname,
                                                true,
                                                true,

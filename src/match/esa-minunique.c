@@ -37,7 +37,7 @@ unsigned long suffixarrayuniqueforward (const void *genericindex,
 
   itv.left = left;
   itv.right = right;
-  totallength = getencseqtotallength(suffixarray->encseq);
+  totallength = gt_encodedsequence_total_length(suffixarray->encseq);
   for (qptr = qstart; /* Nothing */; qptr++, offset++)
   {
     if (itv.left < itv.right)
@@ -78,7 +78,7 @@ unsigned long suffixarraymstats (const void *genericindex,
 
   itv.left = left;
   itv.right = right;
-  totallength = getencseqtotallength(suffixarray->encseq);
+  totallength = gt_encodedsequence_total_length(suffixarray->encseq);
   for (qptr = qstart; /* Nothing */; qptr++, offset++)
   {
     gt_assert(itv.left <= itv.right);

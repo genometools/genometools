@@ -42,7 +42,7 @@ typedef enum
   Uint32Type,
   Uint64Type,
   UnsignedlongType,
-  BitsequenceType,
+  GtBitsequenceType,
   SeqposType,
   SeqposboundType,
   PairBwtidxType,

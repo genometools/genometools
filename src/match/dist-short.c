@@ -19,7 +19,7 @@
 #include "core/assert_api.h"
 #include "core/symboldef.h"
 #include "core/chardef.h"
-#include "encseq-def.h"
+#include "encodedsequence.h"
 #include "defined-types.h"
 #include "initeqsvec.h"
 #include "dist-short.h"
@@ -90,7 +90,7 @@ unsigned long distanceofshortstringsencseq(unsigned long *eqsvector,
                                            unsigned int alphasize,
                                            const GtUchar *useq,
                                            unsigned long ulen,
-                                           const Encodedsequence *encseq,
+                                           const GtEncodedsequence *encseq,
                                            Seqpos vstartpos,
                                            Seqpos vlen)
 {
@@ -101,7 +101,7 @@ unsigned long distanceofshortstringsencseq(unsigned long *eqsvector,
   initeqsvector(eqsvector,(unsigned long) alphasize,useq,ulen);
   for (pos = vstartpos; pos < vstartpos + vlen; pos++)
   {
-    cc = getencodedchar(encseq,pos,Forwardmode);
+    cc = gt_encodedsequence_getencodedchar(encseq,pos,Forwardmode);
     COMPUTENEWDIST(cc);
   }
   return distval;
@@ -132,7 +132,7 @@ unsigned long reversesuffixmatch(unsigned long *eqsvector,
   return (unsigned long) (vseq + vlen - vptr);
 }
 
-Definedunsignedlong forwardprefixmatch(const Encodedsequence *encseq,
+Definedunsignedlong forwardprefixmatch(const GtEncodedsequence *encseq,
                                        unsigned int alphasize,
                                        Seqpos startpos,
                                        bool nowildcards,
@@ -142,7 +142,7 @@ Definedunsignedlong forwardprefixmatch(const Encodedsequence *encseq,
                                        unsigned long maxdistance)
 {
   DECLARELOCALVARS;
-  Seqpos pos, totallength = getencseqtotallength(encseq);
+  Seqpos pos, totallength = gt_encodedsequence_total_length(encseq);
   GtUchar cc;
   Definedunsignedlong result;
 
@@ -151,7 +151,7 @@ Definedunsignedlong forwardprefixmatch(const Encodedsequence *encseq,
   for (pos = startpos; /* Nothing */; pos++)
   {
     gt_assert(pos - startpos <= (Seqpos) (ulen + maxdistance));
-    cc = getencodedchar(encseq,pos,Forwardmode);
+    cc = gt_encodedsequence_getencodedchar(encseq,pos,Forwardmode);
     if (nowildcards && cc == (GtUchar) WILDCARD)
     {
       result.defined = false;

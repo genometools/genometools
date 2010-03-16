@@ -138,13 +138,13 @@ void freefmindex(Fmindex *fmindex)
   gt_alphabet_delete((GtAlphabet *) fmindex->alphabet);
 }
 
-static Encodedsequence *mapbwtencoding(const GtStr *indexname,
+static GtEncodedsequence *mapbwtencoding(const GtStr *indexname,
                                        GtLogger *logger,
                                        GtError *err)
 {
   gt_error_check(err);
 
-  return mapencodedsequence(true,
+  return gt_encodedsequence_new_from_index(true,
                             indexname,
                             true,
                             false,

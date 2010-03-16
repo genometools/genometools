@@ -24,7 +24,7 @@
 #include "core/seq.h"
 #include "core/strand.h"
 #include "extended/feature_node.h"
-#include "match/encseq-def.h"
+#include "match/encodedsequence.h"
 
 enum GtOffset {
   GT_OFFSET_END_LEFT_LTR,
@@ -51,9 +51,11 @@ typedef struct GtLTRElement {
 } GtLTRElement;
 
 unsigned long gt_ltrelement_length(GtLTRElement *e);
-char*         gt_ltrelement_get_sequence(unsigned long start, unsigned long end,
-                                         GtStrand strand, Encodedsequence *seq,
-                                         Seqinfo *seqinfo, GtError *err);
+char*         gt_ltrelement_get_sequence(unsigned long start,
+                                         unsigned long end,
+                                         GtStrand strand,
+                                         GtEncodedsequence *seq,
+                                         GtSeqinfo *seqinfo, GtError *err);
 unsigned long gt_ltrelement_leftltrlen(GtLTRElement *e);
 unsigned long gt_ltrelement_rightltrlen(GtLTRElement *e);
 int           gt_ltrelement_format_description(GtLTRElement *e,

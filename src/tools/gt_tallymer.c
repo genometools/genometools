@@ -28,7 +28,6 @@
 #include "match/optionargmode.h"
 #include "match/defined-types.h"
 #include "match/intbits.h"
-#include "match/intbits-tab.h"
 #include "match/tyr-mkindex.h"
 #include "match/tyr-show.h"
 #include "match/tyr-search.h"
@@ -310,7 +309,7 @@ typedef struct
   GtStr *str_inputindex;
   GtOption *refoptionmersizes;
   unsigned long minmersize, maxmersize, stepmersize;
-  Bitsequence *outputvector;
+  GtBitsequence *outputvector;
   unsigned int outputmode;
   bool scanfile,
        verbose;
@@ -485,10 +484,10 @@ static int gt_tyr_occratio_arguments_check(int rest_argc,
       gt_assert(mersizes != NULL);
       arguments->minmersize = mersizes[0];
       arguments->maxmersize = mersizes[numofmersizes-1];
-      INITBITTAB(arguments->outputvector,arguments->maxmersize+1);
+      GT_INITBITTAB(arguments->outputvector,arguments->maxmersize+1);
       for (idx=0; idx<numofmersizes; idx++)
       {
-        SETIBIT(arguments->outputvector,mersizes[idx]);
+        GT_SETIBIT(arguments->outputvector,mersizes[idx]);
       }
     }
     gt_free(mersizes);
@@ -531,12 +530,12 @@ static int gt_tyr_occratio_arguments_check(int rest_argc,
     {
       unsigned long outputval;
 
-      INITBITTAB(arguments->outputvector,arguments->maxmersize+1);
+      GT_INITBITTAB(arguments->outputvector,arguments->maxmersize+1);
       for (outputval = arguments->minmersize;
            outputval <= arguments->maxmersize;
            outputval += arguments->stepmersize)
       {
-        SETIBIT(arguments->outputvector,outputval);
+        GT_SETIBIT(arguments->outputvector,outputval);
       }
     }
   }
@@ -575,14 +574,14 @@ static int gt_tyr_occratio_arguments_check(int rest_argc,
 }
 
 static void showitvdistribution(const GtArrayuint64_t *dist,
-                                const Bitsequence *outputvector)
+                                const GtBitsequence *outputvector)
 {
   unsigned long idx;
 
   gt_assert(outputvector != NULL && dist->nextfreeuint64_t > 0);
   for (idx=0; idx < dist->nextfreeuint64_t; idx++)
   {
-    if (ISIBITSET(outputvector,idx) && dist->spaceuint64_t[idx] > 0)
+    if (GT_ISIBITSET(outputvector,idx) && dist->spaceuint64_t[idx] > 0)
     {
       /*@ignore@*/
       printf("%lu " Formatuint64_t "\n",
@@ -603,7 +602,7 @@ typedef enum
 static void showitvsumdistributionoftwo(Summode mode,
                                         const GtArrayuint64_t *dist1,
                                         const GtArrayuint64_t *dist2,
-                                        const Bitsequence *outputvector)
+                                        const GtBitsequence *outputvector)
 {
   unsigned long idx;
   uint64_t sumoftwo, tmp;
@@ -612,7 +611,7 @@ static void showitvsumdistributionoftwo(Summode mode,
                               && dist2->nextfreeuint64_t > 0);
   for (idx=0; /* Nothing */; idx++)
   {
-    if (ISIBITSET(outputvector,idx))
+    if (GT_ISIBITSET(outputvector,idx))
     {
       if (idx < dist1->nextfreeuint64_t)
       {
@@ -677,7 +676,7 @@ static void showoccratios(const GtArrayuint64_t *uniquedistribution,
                           const GtArrayuint64_t *nonuniquedistribution,
                           const GtArrayuint64_t *nonuniquemultidistribution,
                           unsigned int outputmode,
-                          const Bitsequence *outputvector)
+                          const GtBitsequence *outputvector)
 {
   if (outputmode & TYROCC_OUTPUTUNIQUE)
   {

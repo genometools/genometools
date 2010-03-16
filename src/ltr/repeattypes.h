@@ -23,7 +23,7 @@
 #include "core/arraydef.h"
 #include "core/range_api.h"
 #include "match/seqpos-def.h"
-#include "match/encseq-def.h"
+#include "match/encodedsequence.h"
 
 /* The datatype Repeat stores information about the maximal repeats (seeds).*/
 typedef struct
@@ -45,7 +45,7 @@ typedef struct
   unsigned long lmax;        /* maximum allowed length of a LTR */
   unsigned long dmin;        /* minimum distance between LTRs */
   unsigned long dmax;        /* maximum distance between LTRs */
-  const Encodedsequence *encseq;
+  const GtEncodedsequence *encseq;
   GtRange ltrsearchseqrange; /* if start and end are 0, then no range */
 } RepeatInfo;
 

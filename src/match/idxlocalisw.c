@@ -17,7 +17,7 @@
 
 #include "core/unused_api.h"
 #include "extended/alignment.h"
-#include "encseq-def.h"
+#include "encodedsequence.h"
 #include "spacedef.h"
 #include "format64.h"
 #include "idxlocalisw.h"
@@ -41,7 +41,7 @@ static Scoretype swlocalsimilarityscore(Scoretype *scol,
                                         const Scorevalues *scorevalues,
                                         const GtUchar *useq,
                                         unsigned long ulen,
-                                        const Encodedsequence *vencseq,
+                                        const GtEncodedsequence *vencseq,
                                         Seqpos startpos,
                                         Seqpos endpos)
 {
@@ -58,7 +58,7 @@ static Scoretype swlocalsimilarityscore(Scoretype *scol,
   for (j = startpos; j < endpos; j++)
   {
     nw = 0;
-    vcurrent = getencodedchar(vencseq,j,Forwardmode);
+    vcurrent = gt_encodedsequence_getencodedchar(vencseq,j,Forwardmode);
     gt_assert(vcurrent != (GtUchar) SEPARATOR);
     for (scolptr = scol+1, uptr = useq; uptr < useq + ulen; scolptr++, uptr++)
     {
@@ -111,7 +111,7 @@ static void swlocalsimilarityregion(DPpoint *scol,
                                     const Scorevalues *scorevalues,
                                     const GtUchar *useq,
                                     unsigned long ulen,
-                                    const Encodedsequence *vencseq,
+                                    const GtEncodedsequence *vencseq,
                                     Seqpos startpos,
                                     Seqpos endpos)
 {
@@ -134,7 +134,7 @@ static void swlocalsimilarityregion(DPpoint *scol,
   }
   for (j = startpos; j < endpos; j++)
   {
-    vcurrent = getencodedchar(vencseq,j,Forwardmode);
+    vcurrent = gt_encodedsequence_getencodedchar(vencseq,j,Forwardmode);
     gt_assert(vcurrent != (GtUchar) SEPARATOR);
     nw = *scol;
     for (scolptr = scol+1, uptr = useq; uptr < useq + ulen; scolptr++, uptr++)
@@ -184,7 +184,7 @@ static void swmaximalDPedges(Retracebits *edges,
                              const Scorevalues *scorevalues,
                              const GtUchar *useq,
                              unsigned long ulen,
-                             const Encodedsequence *vencseq,
+                             const GtEncodedsequence *vencseq,
                              Seqpos startpos,
                              Seqpos endpos)
 {
@@ -204,7 +204,7 @@ static void swmaximalDPedges(Retracebits *edges,
   }
   for (j = startpos; j < endpos; j++)
   {
-    vcurrent = getencodedchar(vencseq,j,Forwardmode);
+    vcurrent = gt_encodedsequence_getencodedchar(vencseq,j,Forwardmode);
     gt_assert(vcurrent != (GtUchar) SEPARATOR);
     nw = *scol;
     *scol = nw + scorevalues->gapextend;
@@ -246,7 +246,7 @@ static void swmaximalDPedges(Retracebits *edges,
 
 static void swtracebackDPedges(GtAlignment *alignment,
                                unsigned long ulen,
-                               const Encodedsequence *encseq,
+                               const GtEncodedsequence *encseq,
                                Seqpos vlen,
                                GtUchar *dbsubstring,
                                Seqpos startpos,
@@ -279,7 +279,9 @@ static void swtracebackDPedges(GtAlignment *alignment,
       }
       gt_assert(vlen > 0);
       vlen--;
-      dbsubstring[vlen] = getencodedchar(encseq,startpos + vlen,Forwardmode);
+      dbsubstring[vlen] = gt_encodedsequence_getencodedchar(encseq,
+                                                            startpos + vlen,
+                                                            Forwardmode);
     }
   }
 }
@@ -292,7 +294,7 @@ static void swproducealignment(GtAlignment *alignment,
                                GT_UNUSED unsigned long scorethreshold,
                                const GtUchar *useq,
                                unsigned long ulen,
-                               const Encodedsequence *vencseq,
+                               const GtEncodedsequence *vencseq,
                                Seqpos startpos,
                                Seqpos endpos)
 {
@@ -334,7 +336,7 @@ struct SWdpresource
 };
 
 static void applysmithwaterman(SWdpresource *dpresource,
-                               const Encodedsequence *encseq,
+                               const GtEncodedsequence *encseq,
                                unsigned long encsequnit,
                                Seqpos startpos,
                                Seqpos endpos,
@@ -414,16 +416,17 @@ static void applysmithwaterman(SWdpresource *dpresource,
 }
 
 void multiapplysmithwaterman(SWdpresource *dpresource,
-                             const Encodedsequence *encseq,
+                             const GtEncodedsequence *encseq,
                              const GtUchar *query,
                              unsigned long querylen)
 {
-  Seqinfo seqinfo;
-  unsigned long seqnum, numofdbsequences = getencseqnumofdbsequences(encseq);
+  GtSeqinfo seqinfo;
+  unsigned long seqnum,
+                numofdbsequences = gt_encodedsequence_num_of_sequences(encseq);
 
   for (seqnum = 0; seqnum < numofdbsequences; seqnum++)
   {
-    getencseqSeqinfo(&seqinfo,encseq,seqnum);
+    gt_encodedsequence_seqinfo(encseq,&seqinfo,seqnum);
     applysmithwaterman(dpresource,
                        encseq,
                        seqnum,

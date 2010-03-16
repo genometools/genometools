@@ -1,7 +1,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-Lcpvalueiterator *newLcpvalueiterator(const Encodedsequence *encseq,
+Lcpvalueiterator *newLcpvalueiterator(const GtEncodedsequence *encseq,
                                       Readmode readmode);
 
 Seqpos nextLcpvalueiterator(Lcpvalueiterator *lvi,

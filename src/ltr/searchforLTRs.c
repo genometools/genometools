@@ -19,7 +19,7 @@
 #include "core/error.h"
 #include "core/minmax.h"
 #include "core/mathsupport.h"
-#include "match/encseq-def.h"
+#include "match/encodedsequence.h"
 #include "match/spacedef.h"
 
 #include "searchforLTRs.h"
@@ -100,7 +100,7 @@ static void adjustboundariesfromXdropextension(Myxdropbest xdropbest_left,
 */
 int searchforLTRs(LTRharvestoptions *lo,
                   GtArrayLTRboundaries *arrayLTRboundaries,
-                  const Encodedsequence *encseq,
+                  const GtEncodedsequence *encseq,
                   GtError *err)
 {
   unsigned long repeatcounter;
@@ -171,7 +171,7 @@ int searchforLTRs(LTRharvestoptions *lo,
 
     /**** right xdrop alignment ****/
     GT_INITARRAY (&fronts, Myfrontvalue);
-    totallength = getencseqtotallength(encseq);
+    totallength = gt_encodedsequence_total_length(encseq);
     if (alilen <= totallength - (repeatptr->pos1 + repeatptr->offset +
                                 repeatptr->len) )
     {
@@ -315,8 +315,12 @@ int searchforLTRs(LTRharvestoptions *lo,
       ALLOCASSIGNSPACE(vseq, vseq, GtUchar, maxvlen);
     }
 
-    encseqextract(useq,encseq,boundaries->leftLTR_5,boundaries->leftLTR_3);
-    encseqextract(vseq,encseq,boundaries->rightLTR_5,boundaries->rightLTR_3);
+    gt_encodedsequence_extract_substring(encseq, useq,
+                                         boundaries->leftLTR_5,
+                                         boundaries->leftLTR_3);
+    gt_encodedsequence_extract_substring(encseq, vseq,
+                                         boundaries->rightLTR_5,
+                                         boundaries->rightLTR_3);
     edist = greedyunitedist(useq,(unsigned long) ulen, /*Implement for encseq */
                             vseq,(unsigned long) vlen);
 

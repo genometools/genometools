@@ -20,7 +20,7 @@
 #include "spacedef.h"
 #include "sarr-def.h"
 #include "merger-trie.h"
-#include "encseq-def.h"
+#include "encodedsequence.h"
 #include "esa-map.h"
 
 static void maketrie(Mergertrierep *trierep,
@@ -88,7 +88,7 @@ int test_trieins(bool onlyins,const GtStr *indexname,GtError *err)
     haserr = true;
   } else
   {
-    totallength = getencseqtotallength(suffixarray.encseq);
+    totallength = gt_encodedsequence_total_length(suffixarray.encseq);
   }
   if (!haserr)
   {
@@ -98,7 +98,7 @@ int test_trieins(bool onlyins,const GtStr *indexname,GtError *err)
     ALLOCASSIGNSPACE(trierep.encseqreadinfo,NULL,Encseqreadinfo,1);
     trierep.encseqreadinfo[0].encseqptr = suffixarray.encseq;
     trierep.encseqreadinfo[0].readmode = suffixarray.readmode;
-    characters = getencseqAlphabetcharacters(suffixarray.encseq);
+    characters = gt_encodedsequence_alphabetcharacters(suffixarray.encseq);
     mergertrie_initnodetable(&trierep,totallength,1U);
     maketrie(&trierep,characters,totallength);
     if (onlyins)

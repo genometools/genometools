@@ -20,7 +20,7 @@
 #include "core/seqiterator_sequence_buffer.h"
 #include "extended/alignment.h"
 #include "sarr-def.h"
-#include "intbits-tab.h"
+#include "intbits.h"
 #include "format64.h"
 #include "idx-limdfs.h"
 #include "idxlocali.h"
@@ -36,7 +36,7 @@ typedef struct
   uint64_t queryunit;
   GtUchar wildcardshow;
   bool showalignment;
-  const Encodedsequence *encseq;
+  const GtEncodedsequence *encseq;
 } Showmatchinfo;
 
 static void showmatch(void *processinfo,const GtMatch *match)
@@ -47,10 +47,10 @@ static void showmatch(void *processinfo,const GtMatch *match)
 
   if (match->dbabsolute)
   {
-    Seqinfo seqinfo;
+    GtSeqinfo seqinfo;
 
     seqnum = getencseqfrompos2seqnum(showmatchinfo->encseq,match->dbstartpos);
-    getencseqSeqinfo(&seqinfo,showmatchinfo->encseq,seqnum);
+    gt_encodedsequence_seqinfo(showmatchinfo->encseq,&seqinfo,seqnum);
     gt_assert(seqinfo.seqstartpos <= match->dbstartpos);
     relpos = match->dbstartpos - seqinfo.seqstartpos;
   } else
@@ -77,17 +77,17 @@ static void showmatch(void *processinfo,const GtMatch *match)
 
 typedef struct
 {
-  const Encodedsequence *encseq;
-  Bitsequence *hasmatch;
+  const GtEncodedsequence *encseq;
+  GtBitsequence *hasmatch;
 } Storematchinfo;
 
 void initstorematch(Storematchinfo *storematch,
-                    const Encodedsequence *encseq)
+                    const GtEncodedsequence *encseq)
 {
-  unsigned long numofdbsequences = getencseqnumofdbsequences(encseq);
+  unsigned long numofdbsequences = gt_encodedsequence_num_of_sequences(encseq);
 
   storematch->encseq = encseq;
-  INITBITTAB(storematch->hasmatch,numofdbsequences);
+  GT_INITBITTAB(storematch->hasmatch,numofdbsequences);
 }
 
 static void storematch(void *info,const GtMatch *match)
@@ -102,9 +102,9 @@ static void storematch(void *info,const GtMatch *match)
   {
     seqnum = match->dbseqnum;
   }
-  if (!ISIBITSET(storematch->hasmatch,seqnum))
+  if (!GT_ISIBITSET(storematch->hasmatch,seqnum))
   {
-    SETIBIT(storematch->hasmatch,seqnum);
+    GT_SETIBIT(storematch->hasmatch,seqnum);
   }
 }
 
@@ -113,21 +113,21 @@ void checkandresetstorematch(GT_UNUSED uint64_t queryunit,
                              Storematchinfo *storeoffline)
 {
   unsigned long seqnum, countmatchseq = 0,
-    numofdbsequences = getencseqnumofdbsequences(storeonline->encseq);
+    numofdbsequences = gt_encodedsequence_num_of_sequences(storeonline->encseq);
 
   for (seqnum = 0; seqnum < numofdbsequences; seqnum++)
   {
 #ifndef NDEBUG
-    if (ISIBITSET(storeonline->hasmatch,seqnum) &&
-        !ISIBITSET(storeoffline->hasmatch,seqnum))
+    if (GT_ISIBITSET(storeonline->hasmatch,seqnum) &&
+        !GT_ISIBITSET(storeoffline->hasmatch,seqnum))
     {
       fprintf(stderr,"query " Formatuint64_t " refseq %lu: "
                      "online has match but offline not\n",
                      PRINTuint64_tcast(queryunit),seqnum);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
-    if (!ISIBITSET(storeonline->hasmatch,seqnum) &&
-        ISIBITSET(storeoffline->hasmatch,seqnum))
+    if (!GT_ISIBITSET(storeonline->hasmatch,seqnum) &&
+        GT_ISIBITSET(storeoffline->hasmatch,seqnum))
     {
       fprintf(stderr,"query " Formatuint64_t " refseq %lu: "
                      "offline has match but online not\n",
@@ -135,13 +135,13 @@ void checkandresetstorematch(GT_UNUSED uint64_t queryunit,
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
 #endif
-    if (ISIBITSET(storeonline->hasmatch,seqnum))
+    if (GT_ISIBITSET(storeonline->hasmatch,seqnum))
     {
       countmatchseq++;
     }
   }
-  CLEARBITTAB(storeonline->hasmatch,numofdbsequences);
-  CLEARBITTAB(storeoffline->hasmatch,numofdbsequences);
+  GT_CLEARBITTAB(storeonline->hasmatch,numofdbsequences);
+  GT_CLEARBITTAB(storeoffline->hasmatch,numofdbsequences);
   printf("matching sequences: %lu\n",countmatchseq);
 }
 
@@ -155,14 +155,14 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
   Genericindex *genericindex = NULL;
   bool haserr = false;
   GtLogger *logger;
-  const Encodedsequence *encseq = NULL;
+  const GtEncodedsequence *encseq = NULL;
 
   logger = gt_logger_new(idxlocalioptions->verbose,
                          GT_LOGGER_DEFLT_PREFIX, stdout);
 
   if (idxlocalioptions->doonline)
   {
-    encseq = mapencodedsequence (true,
+    encseq = gt_encodedsequence_new_from_index (true,
                                  idxlocalioptions->indexname,
                                  true,
                                  false,
@@ -219,8 +219,9 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
     {
       processmatch = showmatch;
       showmatchinfo.encseq = encseq;
-      showmatchinfo.characters = getencseqAlphabetcharacters(encseq);
-      showmatchinfo.wildcardshow = getencseqAlphabetwildcardshow(encseq);
+      showmatchinfo.characters = gt_encodedsequence_alphabetcharacters(encseq);
+      showmatchinfo.wildcardshow =
+                               gt_encodedsequence_alphabetwildcardshow(encseq);
       showmatchinfo.showalignment = idxlocalioptions->showalignment;
       processmatchinfoonline = processmatchinfooffline = &showmatchinfo;
     }
@@ -255,7 +256,8 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
       haserr = true;
     if (!haserr)
     {
-      gt_seqiterator_set_symbolmap(seqit, getencseqAlphabetsymbolmap(encseq));
+      gt_seqiterator_set_symbolmap(seqit,
+                                  gt_encodedsequence_alphabetsymbolmap(encseq));
       for (showmatchinfo.queryunit = 0; /* Nothing */;
            showmatchinfo.queryunit++)
       {
@@ -318,7 +320,7 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
   if (genericindex == NULL)
   {
     gt_assert(encseq != NULL);
-    gt_encodedsequence_delete((Encodedsequence *) encseq);
+    gt_encodedsequence_delete((GtEncodedsequence *) encseq);
     encseq = NULL;
   } else
   {

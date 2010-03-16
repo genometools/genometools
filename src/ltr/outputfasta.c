@@ -18,7 +18,7 @@
 #include "core/error.h"
 #include "core/fa.h"
 #include "core/str.h"
-#include "match/encseq-def.h"
+#include "match/encodedsequence.h"
 #include "match/echoseq.h"
 #include "outputfasta.h"
 #include "ltrharvest-opt.h"
@@ -31,7 +31,7 @@
 
 typedef struct
 {
-  const Encodedsequence *encseq; /* encoded sequence */
+  const GtEncodedsequence *encseq; /* encoded sequence */
   unsigned long linewidth;        /* the line width to show the alignment */
   bool showseqnum;     /* with or without the sequence number */
   FILE *formatout;     /* file pointer to show the alignment */
@@ -85,11 +85,11 @@ static void showpredictionfastasequence(Fastaoutinfo *fastainfo,
 {
   unsigned long desclen;
   const char *desptr;
-  Seqinfo seqinfo;
+  GtSeqinfo seqinfo;
   unsigned long seqnum = getencseqfrompos2seqnum(fastainfo->encseq,startpos);
 
-  desptr = retrievesequencedescription(&desclen,fastainfo->encseq,seqnum);
-  getencseqSeqinfo(&seqinfo,fastainfo->encseq,seqnum);
+  desptr = gt_encodedsequence_description(fastainfo->encseq,&desclen,seqnum);
+  gt_encodedsequence_seqinfo(fastainfo->encseq,&seqinfo,seqnum);
   myencseq2symbolstring(fastainfo,
                         seqnum,
                         seqinfo.seqstartpos,

@@ -20,11 +20,11 @@
 
 #include "seqpos-def.h"
 #include "readmode-def.h"
-#include "encseq-def.h"
+#include "encodedsequence.h"
 
 typedef struct Lcpvalueiterator Lcpvalueiterator;
 
-Lcpvalueiterator *newLcpvalueiterator(const Encodedsequence *encseq,
+Lcpvalueiterator *newLcpvalueiterator(const GtEncodedsequence *encseq,
                                       Readmode readmode);
 
 Seqpos nextLcpvalueiterator(Lcpvalueiterator *lvi,

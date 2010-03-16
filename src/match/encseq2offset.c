@@ -48,7 +48,8 @@ Seqpos *encseqtable2sequenceoffsets(Seqpos *totallength,
       sequenceoffsettable[idx] = 0;
     } else
     {
-      tmplength = getencseqtotallength(suffixarraytable[idx - 1].encseq);
+      tmplength =
+              gt_encodedsequence_total_length(suffixarraytable[idx - 1].encseq);
       sequenceoffsettable[idx]
         = sequenceoffsettable[idx-1] + tmplength + (Seqpos) 1;
     }
@@ -60,14 +61,16 @@ Seqpos *encseqtable2sequenceoffsets(Seqpos *totallength,
       += (uint64_t) getencseqrealspecialranges(suffixarraytable[idx].encseq);
     if (idx > 0)
     {
+      /* Random access */
       lastofprevious
-        = getencodedchar(suffixarraytable[idx - 1].encseq, /* Random access */
-                         tmplength-1,
-                         suffixarraytable[idx - 1].readmode);
+        = gt_encodedsequence_getencodedchar(suffixarraytable[idx - 1].encseq,
+                                            tmplength-1,
+                                            suffixarraytable[idx - 1].readmode);
+      /* Random access */
       firstofcurrent
-        = getencodedchar(suffixarraytable[idx].encseq, /* Random access */
-                         0,
-                         suffixarraytable[idx].readmode);
+        = gt_encodedsequence_getencodedchar(suffixarraytable[idx].encseq,
+                                            0,
+                                            suffixarraytable[idx].readmode);
       if (ISSPECIAL(lastofprevious))
       {
          if (ISSPECIAL(firstofcurrent))
@@ -85,16 +88,18 @@ Seqpos *encseqtable2sequenceoffsets(Seqpos *totallength,
       }
     }
     tmplarge = (uint64_t) sequenceoffsettable[idx] +
-               (uint64_t) getencseqtotallength(suffixarraytable[idx].encseq);
+       (uint64_t) gt_encodedsequence_total_length(suffixarraytable[idx].encseq);
     (void) CALLCASTFUNC(uint64_t,Seqpos,tmplarge);
     (void) CALLCASTFUNC(uint64_t,Seqpos,tmpspecialcharacters);
     (void) CALLCASTFUNC(uint64_t,Seqpos,tmpspecialranges);
     (void) CALLCASTFUNC(uint64_t,Seqpos,tmprealspecialranges);
     printf("# seqlen[%u] = " FormatSeqpos "\n",
            idx,
-           PRINTSeqposcast(getencseqtotallength(suffixarraytable[idx].encseq)));
+           PRINTSeqposcast(
+                gt_encodedsequence_total_length(suffixarraytable[idx].encseq)));
   }
-  tmplength = getencseqtotallength(suffixarraytable[numofindexes -1].encseq);
+  tmplength
+    = gt_encodedsequence_total_length(suffixarraytable[numofindexes -1].encseq);
   *totallength = sequenceoffsettable[numofindexes-1] + tmplength;
   specialcharinfo->specialcharacters = (Seqpos) tmpspecialcharacters;
   specialcharinfo->specialranges = (Seqpos) tmpspecialranges;

@@ -474,7 +474,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
       break;
     }
     suffixArrayIsInitialized = true;
-    seqLen = getencseqtotallength(suffixArray.encseq) + 1;
+    seqLen = gt_encodedsequence_total_length(suffixArray.encseq) + 1;
     if (BWTSeqLength(bwtSeq) != seqLen)
     {
       gt_error_set(err, "length mismatch for suffix array project %s and "
@@ -555,7 +555,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
         }
         while (i > 0)
         {
-          Symbol symRef = getencodedchar(suffixArray.encseq,
+          Symbol symRef = gt_encodedsequence_getencodedchar(suffixArray.encseq,
                                          --i, suffixArray.readmode);
           Symbol symCmp = BWTSeqGetSym(bwtSeq, nextLocate);
           if (symCmp != symRef)
@@ -598,7 +598,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
           numTries = MIN(MAX_NUM_CONTEXT_CHECKS,
                          MAX(2, seqLen/CONTEXT_INTERVAL));
         Symbol *contextBuf = gt_malloc(sizeof (Symbol) * MAX_CONTEXT_LEN);
-        Encodedsequencescanstate *esr = newEncodedsequencescanstate();
+        GtEncodedsequenceScanstate *esr = gt_encodedsequence_scanstate_new();
         for (i = 0; i < numTries && retval == VERIFY_BWTSEQ_NO_ERROR; ++i)
         {
           Seqpos j, end, inSubSeqLen;
@@ -607,11 +607,12 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
           end = start + subSeqLen;
           inSubSeqLen = subSeqLen - ((end==seqLen)?1:0);
           BWTSeqCRAccessSubseq(bwtSeqCR, start, subSeqLen, contextBuf);
-          initEncodedsequencescanstate(esr, suffixArray.encseq,
+          gt_encodedsequence_scanstate_init(esr, suffixArray.encseq,
                                        suffixArray.readmode, start);
           for (j = 0; j < inSubSeqLen; ++j)
           {
-            Symbol symRef = sequentialgetencodedchar(suffixArray.encseq, esr,
+            Symbol symRef = gt_encodedsequence_sequentialgetencodedchar(
+                                                     suffixArray.encseq, esr,
                                                      start + j,
                                                      suffixArray.readmode);
             Symbol symCmp = contextBuf[j];
@@ -641,7 +642,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
         }
         if (retval == VERIFY_BWTSEQ_NO_ERROR)
           fputs("Context regeneration completed successfully.\n", stderr);
-        freeEncodedsequencescanstate(&esr);
+        gt_encodedsequence_scanstate_delete(esr);
         gt_free(contextBuf);
       }
       deleteBWTSeqCR(bwtSeqCR);

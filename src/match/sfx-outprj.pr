@@ -3,7 +3,7 @@ extern "C" {
 #endif
 int outprjfile(const GtStr *indexname,
                Readmode readmode,
-               const Encodedsequence *encseq,
+               const GtEncodedsequence *encseq,
                unsigned int prefixlength,
                const Definedunsignedint *maxdepth,
                Seqpos numoflargelcpvalues,

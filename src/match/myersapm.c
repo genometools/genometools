@@ -19,7 +19,7 @@
 #include "core/symboldef.h"
 #include "seqpos-def.h"
 #include "spacedef.h"
-#include "encseq-def.h"
+#include "encodedsequence.h"
 #include "myersapm.h"
 #include "defined-types.h"
 #include "procmatch.h"
@@ -28,8 +28,8 @@
 
 struct Myersonlineresources
 {
-  Encodedsequencescanstate *esr;
-  const Encodedsequence *encseq;
+  GtEncodedsequenceScanstate *esr;
+  const GtEncodedsequence *encseq;
   Seqpos totallength;
   unsigned long *eqsvectorrev,
                 *eqsvector;
@@ -42,7 +42,7 @@ struct Myersonlineresources
 Myersonlineresources *newMyersonlineresources(
                             unsigned int numofchars,
                             bool nowildcards,
-                            const Encodedsequence *encseq,
+                            const GtEncodedsequence *encseq,
                             Processmatch processmatch,
                             void *processmatchinfo)
 {
@@ -52,10 +52,10 @@ Myersonlineresources *newMyersonlineresources(
   ALLOCASSIGNSPACE(mor->eqsvectorrev,NULL,unsigned long,numofchars);
   ALLOCASSIGNSPACE(mor->eqsvector,NULL,unsigned long,numofchars);
   mor->encseq = encseq;
-  mor->esr = newEncodedsequencescanstate();
+  mor->esr = gt_encodedsequence_scanstate_new();
   gt_assert(numofchars <= GT_MAXALPHABETCHARACTER);
   mor->alphasize = numofchars;
-  mor->totallength = getencseqtotallength(encseq);
+  mor->totallength = gt_encodedsequence_total_length(encseq);
   mor->nowildcards = nowildcards;
   mor->processmatch = processmatch;
   mor->processmatchinfo = processmatchinfo;
@@ -68,7 +68,7 @@ void freeMyersonlineresources(Myersonlineresources **ptrmyersonlineresources)
 
   FREESPACE(mor->eqsvectorrev);
   FREESPACE(mor->eqsvector);
-  freeEncodedsequencescanstate(&mor->esr);
+  gt_encodedsequence_scanstate_delete(mor->esr);
   FREESPACE(*ptrmyersonlineresources);
 }
 
@@ -95,7 +95,7 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
                    (unsigned long) mor->alphasize,
                    pattern,patternlength);
   score = patternlength;
-  initEncodedsequencescanstate(mor->esr,
+  gt_encodedsequence_scanstate_init(mor->esr,
                                mor->encseq,
                                readmode,
                                0);
@@ -106,10 +106,10 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
   match.alignment = NULL;
   for (pos = 0; pos < mor->totallength; pos++)
   {
-    cc = sequentialgetencodedchar(mor->encseq,
-                                  mor->esr,
-                                  pos,
-                                  readmode);
+    cc = gt_encodedsequence_sequentialgetencodedchar(mor->encseq,
+                                                     mor->esr,
+                                                     pos,
+                                                     readmode);
     if (cc == (GtUchar) SEPARATOR)
     {
       Pv = ~0UL;
@@ -147,7 +147,7 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
       Mv = Ph & Xv;                                   /* 18 */
       if (score <= maxdistance)
       {
-        Seqpos dbstartpos = REVERSEPOS(mor->totallength,pos);
+        Seqpos dbstartpos = GT_REVERSEPOS(mor->totallength,pos);
         Definedunsignedlong matchlength;
 
         if (maxdistance > 0)

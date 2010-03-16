@@ -19,14 +19,14 @@
 #define OUTPUTGFF3_H
 
 #include "core/error.h"
-#include "match/encseq-def.h"
+#include "match/encodedsequence.h"
 #include "ltrharvest-opt.h"
 #include "repeattypes.h"
 
 int printgff3format(const LTRharvestoptions *lo,
                     const LTRboundaries **bdptrtab,
                     unsigned long numofboundaries,
-                    const Encodedsequence *encseq,
+                    const GtEncodedsequence *encseq,
                     GtError *err);
 
 #endif

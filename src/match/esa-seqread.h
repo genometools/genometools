@@ -21,7 +21,7 @@
 #include "core/str.h"
 #include "core/error.h"
 #include "seqpos-def.h"
-#include "encseq-def.h"
+#include "encodedsequence.h"
 #include "sarr-def.h"
 #include "lcpoverflow.h"
 
@@ -71,7 +71,7 @@ typedef struct Sequentialsuffixarrayreader Sequentialsuffixarrayreader;
 /* The following only can be used for this case */
 
 Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromRAM(
-                                        const Encodedsequence *encseq,
+                                        const GtEncodedsequence *encseq,
                                         Readmode readmode);
 
 /* The following can only be used for this case */
@@ -99,7 +99,7 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
 
 void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar);
 
-const Encodedsequence *encseqSequentialsuffixarrayreader(
+const GtEncodedsequence *encseqSequentialsuffixarrayreader(
                           const Sequentialsuffixarrayreader *ssar);
 
 Readmode readmodeSequentialsuffixarrayreader(

@@ -23,9 +23,11 @@
 
 #define SEQUENCE(ENCSEQ,POS) (((POS) == totallength) \
                              ? (GtUchar) SEPARATOR\
-                             : getencodedchar(ENCSEQ,POS,readmode))
+                             : gt_encodedsequence_getencodedchar(ENCSEQ, \
+                                                                 POS, \
+                                                                 readmode))
 
-static Seqpos lcpintervalfindrightbound(const Encodedsequence *encseq,
+static Seqpos lcpintervalfindrightbound(const GtEncodedsequence *encseq,
                                         Readmode readmode,
                                         Seqpos totallength,
                                         const Seqpos *suftab,
@@ -53,7 +55,7 @@ static Seqpos lcpintervalfindrightbound(const Encodedsequence *encseq,
   return left;
 }
 
-bool lcpintervalfindcharchildintv(const Encodedsequence *encseq,
+bool lcpintervalfindcharchildintv(const GtEncodedsequence *encseq,
                                   Readmode readmode,
                                   Seqpos totallength,
                                   const Seqpos *suftab,
@@ -113,7 +115,7 @@ bool lcpintervalfindcharchildintv(const Encodedsequence *encseq,
         bwci->spaceBoundswithchar[bwci->nextfreeBoundswithchar++].inchar = V
 
 void lcpintervalsplitwithoutspecial(GtArrayBoundswithchar *bwci,
-                                    const Encodedsequence *encseq,
+                                    const GtEncodedsequence *encseq,
                                     Readmode readmode,
                                     Seqpos totallength,
                                     const Seqpos *suftab,
@@ -155,7 +157,7 @@ void lcpintervalsplitwithoutspecial(GtArrayBoundswithchar *bwci,
   ADDCURRENTLBOUND(parentright+1);
 }
 
-GtUchar lcpintervalextendlcp(const Encodedsequence *encseq,
+GtUchar lcpintervalextendlcp(const GtEncodedsequence *encseq,
                            Readmode readmode,
                            const Seqpos *suftab,
                            Seqpos totallength,

@@ -16,7 +16,7 @@
 */
 
 #include "seqpos-def.h"
-#include "encseq-def.h"
+#include "encodedsequence.h"
 #include "spacedef.h"
 #include "esa-lcpval.h"
 
@@ -25,18 +25,18 @@
   Seqpos relpos,
          lastsuftabentry;
   Readmode readmode;
-  const Encodedsequence *encseq;
-  Encodedsequencescanstate *esr1, *esr2;
+  const GtEncodedsequence *encseq;
+  GtEncodedsequenceScanstate *esr1, *esr2;
 };
 
-Lcpvalueiterator *newLcpvalueiterator(const Encodedsequence *encseq,
+Lcpvalueiterator *newLcpvalueiterator(const GtEncodedsequence *encseq,
                                       Readmode readmode)
 {
   Lcpvalueiterator *lvi;
 
   ALLOCASSIGNSPACE(lvi,NULL,Lcpvalueiterator,1);
-  lvi->esr1 = newEncodedsequencescanstate();
-  lvi->esr2 = newEncodedsequencescanstate();
+  lvi->esr1 = gt_encodedsequence_scanstate_new();
+  lvi->esr2 = gt_encodedsequence_scanstate_new();
   lvi->encseq = encseq;
   lvi->relpos = 0;
   lvi->readmode = readmode;
@@ -97,7 +97,7 @@ Seqpos nextLcpvalueiterator(Lcpvalueiterator *lvi,
 
 void freeLcpvalueiterator(Lcpvalueiterator **lvi)
 {
-  freeEncodedsequencescanstate(&(*lvi)->esr1);
-  freeEncodedsequencescanstate(&(*lvi)->esr2);
+  gt_encodedsequence_scanstate_delete((*lvi)->esr1);
+  gt_encodedsequence_scanstate_delete((*lvi)->esr2);
   FREESPACE(*lvi);
 }

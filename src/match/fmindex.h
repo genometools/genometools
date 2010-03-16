@@ -22,7 +22,7 @@
 #include "core/alphabet.h"
 #include "core/arraydef.h"
 #include "seqpos-def.h"
-#include "encseq-def.h"
+#include "encodedsequence.h"
 
 /*
   TO DO:
@@ -81,7 +81,7 @@ typedef int(*FMprocessqhit)(void *,Seqpos,Seqpos);
 typedef struct
 {
   /* Note: do not use specialcharinfo of bwtformatching */
-  Encodedsequence *bwtformatching;
+  GtEncodedsequence *bwtformatching;
   GtUchar *bfreq;            /* bfreq[c][i] = #c in block i */
   Seqpos bwtlength,        /* also totallength + 1 */
          *tfreq,           /* tfreq[c] = #characters < c in text */

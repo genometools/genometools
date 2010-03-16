@@ -20,13 +20,13 @@
 
 #include "bcktab.h"
 #include "intcode-def.h"
-#include "encseq-def.h"
+#include "encodedsequence.h"
 #include "core/logger.h"
 
 typedef struct GtBucketspec2 GtBucketspec2;
 
 GtBucketspec2 *gt_bucketspec2_new(const Bcktab *bcktab,
-                                  const Encodedsequence *encseq,
+                                  const GtEncodedsequence *encseq,
                                   Readmode readmode,
                                   Seqpos partwidth,
                                   unsigned int numofchars);

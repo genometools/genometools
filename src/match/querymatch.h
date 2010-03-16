@@ -22,7 +22,7 @@
 #include "core/error_api.h"
 #include "readmode-def.h"
 #include "seqpos-def.h"
-#include "encseq-def.h"
+#include "encodedsequence.h"
 
 typedef struct Querymatch Querymatch;
 
@@ -40,7 +40,7 @@ void querymatch_fill(Querymatch *querymatch,
 void querymatch_delete(Querymatch *querymatch);
 
 int querymatch_output(void *info,
-                      const Encodedsequence *encseq,
+                      const GtEncodedsequence *encseq,
                       const Querymatch *querymatch,
                       GtError *err);
 

@@ -32,7 +32,7 @@ struct Dfsinfo /* information stored for each node of the lcp interval tree */
 
 struct Dfsstate /* global information */
 {
-  const Encodedsequence *encseq;
+  const GtEncodedsequence *encseq;
   Readmode readmode;
   Seqpos totallength;
   unsigned long minmersize,
@@ -84,7 +84,7 @@ static void adddistributionuint64_t(GtArrayuint64_t *occdistribution,
 }
 
 static void iteritvdistribution(GtArrayuint64_t *distribution,
-                                const Encodedsequence *encseq,
+                                const GtEncodedsequence *encseq,
                                 Readmode readmode,
                                 Seqpos totallength,
                                 unsigned long minmersize,
@@ -101,7 +101,7 @@ static void iteritvdistribution(GtArrayuint64_t *distribution,
          pos = startpos + length - 1;
          ulen <= (Seqpos) maxmersize &&
          pos < totallength &&
-         ISNOTSPECIAL(getencodedchar(encseq,pos,readmode));
+         ISNOTSPECIAL(gt_encodedsequence_getencodedchar(encseq,pos,readmode));
          pos++, ulen++)
     {
       if (ulen >= (Seqpos) minmersize)
@@ -202,7 +202,7 @@ static int computeoccurrenceratio(Sequentialsuffixarrayreader *ssar,
   gt_error_check(err);
   state.encseq = encseqSequentialsuffixarrayreader(ssar);
   state.readmode = readmodeSequentialsuffixarrayreader(ssar);
-  state.totallength = getencseqtotallength(state.encseq);
+  state.totallength = gt_encodedsequence_total_length(state.encseq);
   state.minmersize = minmersize;
   state.maxmersize = maxmersize;
   state.uniquedistribution = uniquedistribution;

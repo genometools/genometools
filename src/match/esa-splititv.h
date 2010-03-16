@@ -21,7 +21,7 @@
 #include "core/arraydef.h"
 #include "core/symboldef.h"
 #include "seqpos-def.h"
-#include "encseq-def.h"
+#include "encodedsequence.h"
 #include "splititv.h"
 
 typedef struct
@@ -30,7 +30,7 @@ typedef struct
          right;
 } Simplelcpinterval;
 
-bool lcpintervalfindcharchildintv(const Encodedsequence *encseq,
+bool lcpintervalfindcharchildintv(const GtEncodedsequence *encseq,
                                   Readmode readmode,
                                   Seqpos totallength,
                                   const Seqpos *suftab,
@@ -41,7 +41,7 @@ bool lcpintervalfindcharchildintv(const Encodedsequence *encseq,
                                   Seqpos right);
 
 void lcpintervalsplitwithoutspecial(GtArrayBoundswithchar *bwci,
-                                    const Encodedsequence *encseq,
+                                    const GtEncodedsequence *encseq,
                                     Readmode readmode,
                                     Seqpos totallength,
                                     const Seqpos *suftab,
@@ -49,7 +49,7 @@ void lcpintervalsplitwithoutspecial(GtArrayBoundswithchar *bwci,
                                     Seqpos parentleft,
                                     Seqpos parentright);
 
-GtUchar lcpintervalextendlcp(const Encodedsequence *encseq,
+GtUchar lcpintervalextendlcp(const GtEncodedsequence *encseq,
                            Readmode readmode,
                            const Seqpos *suftab,
                            Seqpos totallength,

@@ -34,7 +34,7 @@ static Seqpos
 specialsRankFromTermPos(const SpecialsRankLookup *rankTable, Seqpos pos);
 
 static inline struct specialsRankLookup *
-allocSpecialsRankTable(const Encodedsequence *encseq, Seqpos lastSeqPos,
+allocSpecialsRankTable(const GtEncodedsequence *encseq, Seqpos lastSeqPos,
                        unsigned sampleIntervalLog2, Readmode readmode)
 {
   struct specialsRankTable *rankTable;
@@ -51,14 +51,14 @@ allocSpecialsRankTable(const Encodedsequence *encseq, Seqpos lastSeqPos,
   rankTable->sampleInterval = ((Seqpos)1) << sampleIntervalLog2;
   rankTable->readmode = readmode;
   rankTable->numSamples = numSamples;
-  rankTable->scanState = newEncodedsequencescanstate();
+  rankTable->scanState = gt_encodedsequence_scanstate_new();
   ranker->encseq = encseq;
   ranker->rankFunc = specialsRankFromSampleTable;
   return ranker;
 }
 
 static inline struct specialsRankLookup *
-allocEmptySpecialsRankLookup(const Encodedsequence *encseq, Seqpos lastSeqPos)
+allocEmptySpecialsRankLookup(const GtEncodedsequence *encseq, Seqpos lastSeqPos)
 {
   struct specialsRankLookup *ranker;
   ranker = gt_malloc(sizeof (*ranker));
@@ -69,7 +69,7 @@ allocEmptySpecialsRankLookup(const Encodedsequence *encseq, Seqpos lastSeqPos)
 }
 
 static inline bool
-nextRange(Sequencerange *range, Specialrangeiterator *sri,
+nextRange(GtSequencerange *range, Specialrangeiterator *sri,
           Readmode readmode, Seqpos seqLastPos)
 {
   bool hasNextRange = nextspecialrangeiterator(range, sri);
@@ -88,7 +88,7 @@ nextRange(Sequencerange *range, Specialrangeiterator *sri,
 }
 
 extern SpecialsRankLookup *
-newSpecialsRankLookup(const Encodedsequence *encseq, Readmode readmode,
+newSpecialsRankLookup(const GtEncodedsequence *encseq, Readmode readmode,
                      unsigned sampleIntervalLog2)
 {
   struct specialsRankLookup *ranker;
@@ -96,7 +96,7 @@ newSpecialsRankLookup(const Encodedsequence *encseq, Readmode readmode,
   Seqpos sampleInterval = ((Seqpos)1) << sampleIntervalLog2;
   gt_assert(encseq);
   gt_assert(sampleIntervalLog2 < sizeof (Seqpos) * CHAR_BIT);
-  seqLastPos = getencseqtotallength(encseq);
+  seqLastPos = gt_encodedsequence_total_length(encseq);
   seqLen = seqLastPos + 1;
   if (hasspecialranges(encseq))
   {
@@ -104,7 +104,7 @@ newSpecialsRankLookup(const Encodedsequence *encseq, Readmode readmode,
     struct specialsRankTable *rankTable;
     Specialrangeiterator *sri;
     Seqpos *sample, *maxSample, sum = 0, pos = 0, nextSamplePos;
-    Sequencerange range = { 0, 0 };
+    GtSequencerange range = { 0, 0 };
     ranker = allocSpecialsRankTable(encseq, seqLen, sampleIntervalLog2,
                                     readmode);
     rankTable = &ranker->implementationData.sampleTable;
@@ -144,8 +144,8 @@ extern void
 deleteSpecialsRankLookup(SpecialsRankLookup *ranker)
 {
   if (ranker->rankFunc == specialsRankFromSampleTable)
-    freeEncodedsequencescanstate(
-      &ranker->implementationData.sampleTable.scanState);
+    gt_encodedsequence_scanstate_delete(
+      ranker->implementationData.sampleTable.scanState);
   gt_free(ranker);
 }
 
@@ -155,7 +155,7 @@ specialsRankFromSampleTable(const SpecialsRankLookup *ranker, Seqpos pos)
   const SpecialsRankTable *rankTable = &ranker->implementationData.sampleTable;
   Seqpos rankCount, samplePos, encSeqLen;
   gt_assert(ranker);
-  encSeqLen = getencseqtotallength(ranker->encseq);
+  encSeqLen = gt_encodedsequence_total_length(ranker->encseq);
   gt_assert(pos <= encSeqLen + 1);
   samplePos = pos & ~(rankTable->sampleInterval - 1);
   {
@@ -163,16 +163,17 @@ specialsRankFromSampleTable(const SpecialsRankLookup *ranker, Seqpos pos)
     rankCount = rankTable->rankSumSamples[sampleIdx];
   }
   {
-    const Encodedsequence *encseq = ranker->encseq;
-    Encodedsequencescanstate *esr = rankTable->scanState;
+    const GtEncodedsequence *encseq = ranker->encseq;
+    GtEncodedsequenceScanstate *esr = rankTable->scanState;
     Readmode readmode = rankTable->readmode;
     Seqpos encseqQueryMax = MIN(pos, encSeqLen);
     if (samplePos < encseqQueryMax)
     {
-      initEncodedsequencescanstate(esr, encseq, readmode, samplePos);
+      gt_encodedsequence_scanstate_init(esr, encseq, readmode, samplePos);
       do {
-        if (ISSPECIAL(sequentialgetencodedchar(encseq, esr, samplePos++,
-                                               readmode)))
+        if (ISSPECIAL(gt_encodedsequence_sequentialgetencodedchar(encseq, esr,
+                                                                  samplePos++,
+                                                                  readmode)))
           ++rankCount;
       } while (samplePos < encseqQueryMax);
     }
@@ -189,7 +190,7 @@ specialsRankFromTermPos(const SpecialsRankLookup *ranker, Seqpos pos)
   return ((pos == ranker->implementationData.lastSeqPos + 1)?1:0);
 }
 
-extern const Encodedsequence *
+extern const GtEncodedsequence *
 SPRTGetOrigEncseq(const SpecialsRankLookup *ranker)
 {
   return ranker->encseq;

@@ -2,7 +2,7 @@
 extern "C" {
 #endif
 void getencseqkmers(
-        const Encodedsequence *encseq,
+        const GtEncodedsequence *encseq,
         Readmode readmode,
         void(*processkmercode)(void *,Codetype,Seqpos,const Firstspecialpos *),
         void *processkmercodeinfo,

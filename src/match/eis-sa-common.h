@@ -26,7 +26,7 @@
 #include <stdlib.h>
 
 #include "core/symboldef.h"
-#include "match/encseq-def.h"
+#include "match/encodedsequence.h"
 #include "match/seqpos-def.h"
 
 #include "match/eis-mrangealphabet.h"
@@ -50,15 +50,16 @@ enum sfxDataRequest {
  * @return Symbol at position sufIdx or UNDEFBWTCHAR i.e. the terminator
  */
 static inline GtUchar
-sfxIdx2BWTSym(Seqpos sufIdx, const Encodedsequence *encseq, Readmode readmode);
+sfxIdx2BWTSym(Seqpos sufIdx, const GtEncodedsequence *encseq,
+              Readmode readmode);
 
 static inline size_t
-EncSeqGetSubSeq(const Encodedsequence *encseq, Readmode readmode, Seqpos pos,
+EncSeqGetSubSeq(const GtEncodedsequence *encseq, Readmode readmode, Seqpos pos,
                 size_t len, GtUchar *subStr);
 
 struct encSeqTrState
 {
-  const Encodedsequence *encseq;
+  const GtEncodedsequence *encseq;
   Readmode readmode;
 };
 
@@ -78,7 +79,7 @@ translateSuftab2BWT(struct encSeqTrState *trState, GtUchar *dest, Seqpos *src,
 struct encSeqLCPState
 {
   Seqpos lastSufIdx;
-  const Encodedsequence *encseq;
+  const GtEncodedsequence *encseq;
   Readmode readmode;
 };
 

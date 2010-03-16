@@ -21,7 +21,7 @@
 #include "core/error.h"
 #include "core/seqiterator_sequence_buffer.h"
 #include "spacedef.h"
-#include "encseq-def.h"
+#include "encodedsequence.h"
 
 void symbolstring2fasta(FILE *fpout,
                         const char *desc,
@@ -70,7 +70,7 @@ void symbolstring2fasta(FILE *fpout,
 }
 
 void encseq2symbolstring(FILE *fpout,
-                         const Encodedsequence *encseq,
+                         const GtEncodedsequence *encseq,
                          Readmode readmode,
                          Seqpos start,
                          Seqpos wlen,
@@ -79,17 +79,18 @@ void encseq2symbolstring(FILE *fpout,
   unsigned long j;
   Seqpos idx, lastpos;
   GtUchar currentchar;
-  Encodedsequencescanstate *esr;
+  GtEncodedsequenceScanstate *esr;
   const GtAlphabet *alpha;
 
-  esr = newEncodedsequencescanstate();
-  initEncodedsequencescanstate(esr,encseq,readmode,start);
+  esr = gt_encodedsequence_scanstate_new();
+  gt_encodedsequence_scanstate_init(esr,encseq,readmode,start);
   gt_assert(width > 0);
   lastpos = start + wlen - 1;
-  alpha = getencseqAlphabet(encseq);
+  alpha = gt_encodedsequence_alphabet(encseq);
   for (idx = start, j = 0; /* Nothing */ ; idx++)
   {
-    currentchar = sequentialgetencodedchar(encseq,esr,idx,readmode);
+    currentchar = gt_encodedsequence_sequentialgetencodedchar(encseq,esr,idx,
+                                                              readmode);
     if (currentchar == (GtUchar) SEPARATOR)
     {
       fprintf(fpout,"\n>\n");
@@ -113,11 +114,11 @@ void encseq2symbolstring(FILE *fpout,
       }
     }
   }
-  freeEncodedsequencescanstate(&esr);
+  gt_encodedsequence_scanstate_delete(esr);
 }
 
 void fprintfencseq(FILE *fpout,
-                   const Encodedsequence *encseq,
+                   const GtEncodedsequence *encseq,
                    Seqpos start,
                    Seqpos wlen)
 {
@@ -125,10 +126,10 @@ void fprintfencseq(FILE *fpout,
   GtUchar currentchar;
   const GtAlphabet *alpha;
 
-  alpha = getencseqAlphabet(encseq);
+  alpha = gt_encodedsequence_alphabet(encseq);
   for (idx = start; idx < start + wlen; idx++)
   {
-    currentchar = getencodedchar(encseq,idx,Forwardmode);
+    currentchar = gt_encodedsequence_getencodedchar(encseq,idx,Forwardmode);
     gt_assert(ISNOTSPECIAL(currentchar));
     gt_alphabet_echo_pretty_symbol(alpha,fpout,currentchar);
   }
@@ -136,7 +137,7 @@ void fprintfencseq(FILE *fpout,
 
 void encseq2fastaoutput(FILE *fpout,
                         const char *desc,
-                        const Encodedsequence *encseq,
+                        const GtEncodedsequence *encseq,
                         Readmode readmode,
                         Seqpos start,
                         Seqpos wlen,

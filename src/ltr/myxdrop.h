@@ -21,7 +21,7 @@
 #include "core/arraydef.h"
 #include "core/unused_api.h"
 #include "match/seqpos-def.h"
-#include "match/encseq-def.h"
+#include "match/encodedsequence.h"
 
 typedef struct
 {
@@ -101,8 +101,8 @@ void calculateallowedMININFINITYINTgenerations(
 void evalxdroparbitscoresright(Arbitraryscores *arbitscores,
                                Myxdropbest * xdropbest,
                                GtArrayMyfrontvalue * fronts,
-                               const Encodedsequence *str_useq,
-                               const Encodedsequence *str_vseq,
+                               const GtEncodedsequence *str_useq,
+                               const GtEncodedsequence *str_vseq,
                                Seqpos useq,
                                Seqpos vseq,
                                int ulen,
@@ -113,8 +113,8 @@ void evalxdroparbitscoresright(Arbitraryscores *arbitscores,
       void evalxdroparbitscoresright(Arbitraryscores *arbitscores,\
                                      Myxdropbest * xdropbest,\
                                      GtArrayMyfrontvalue * fronts,\
-                                     const Encodedsequence *str_useq,\
-                                     const Encodedsequence *str_vseq,\
+                                     const GtEncodedsequence *str_useq,\
+                                     const GtEncodedsequence *str_vseq,\
                                      Seqpos useq,\
                                      Seqpos vseq,\
                                      int ulen,\
@@ -124,8 +124,8 @@ void evalxdroparbitscoresright(Arbitraryscores *arbitscores,
 void evalxdroparbitscoresleft(Arbitraryscores * arbitscores,
                               Myxdropbest * xdropbest,
                               GtArrayMyfrontvalue * fronts,
-                              const Encodedsequence *str_useq,
-                              const Encodedsequence *str_vseq,
+                              const GtEncodedsequence *str_useq,
+                              const GtEncodedsequence *str_vseq,
                               Seqpos useq,
                               Seqpos vseq,
                               int ulen,
@@ -136,8 +136,8 @@ void evalxdroparbitscoresleft(Arbitraryscores * arbitscores,
        void evalxdroparbitscoresleft(Arbitraryscores * arbitscores,\
                                      Myxdropbest * xdropbest,\
                                      GtArrayMyfrontvalue * fronts,\
-                                     const Encodedsequence *str_useq,\
-                                     const Encodedsequence *str_vseq,\
+                                     const GtEncodedsequence *str_useq,\
+                                     const GtEncodedsequence *str_vseq,\
                                      Seqpos useq,\
                                      Seqpos vseq,\
                                      int ulen,\

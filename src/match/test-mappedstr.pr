@@ -1,7 +1,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-int verifymappedstr(const Encodedsequence *encseq,unsigned int prefixlength,
+int verifymappedstr(const GtEncodedsequence *encseq,unsigned int prefixlength,
                     GtError *err);
 
 #ifdef __cplusplus

@@ -22,24 +22,25 @@
 #include "core/progressbar.h"
 #include "spacedef.h"
 #include "readmode-def.h"
-#include "encseq-def.h"
+#include "encodedsequence.h"
 #include "stamp.h"
 
 #include "arrcmp.pr"
 
-static void runscanatpostrial(const Encodedsequence *encseq,
-                              Encodedsequencescanstate *esr,
+static void runscanatpostrial(const GtEncodedsequence *encseq,
+                              GtEncodedsequenceScanstate *esr,
                               Readmode readmode,Seqpos startpos)
 {
   Seqpos pos, totallength;
   GtUchar ccra, ccsr;
 
-  totallength = getencseqtotallength(encseq);
-  initEncodedsequencescanstate(esr,encseq,readmode,startpos);
+  totallength = gt_encodedsequence_total_length(encseq);
+  gt_encodedsequence_scanstate_init(esr,encseq,readmode,startpos);
   for (pos=startpos; pos < totallength; pos++)
   {
-    ccra = getencodedchar(encseq,pos,readmode); /* Random access */
-    ccsr = sequentialgetencodedchar(encseq,esr,pos,readmode);
+    /* Random access */
+    ccra = gt_encodedsequence_getencodedchar(encseq,pos,readmode);
+    ccsr = gt_encodedsequence_sequentialgetencodedchar(encseq,esr,pos,readmode);
     if (ccra != ccsr)
     {
       fprintf(stderr,"startpos = " FormatSeqpos
@@ -57,17 +58,17 @@ static void runscanatpostrial(const Encodedsequence *encseq,
   }
 }
 
-static void testscanatpos(const Encodedsequence *encseq,
+static void testscanatpos(const GtEncodedsequence *encseq,
                           Readmode readmode,
                           unsigned long scantrials)
 {
-  Encodedsequencescanstate *esr = NULL;
+  GtEncodedsequenceScanstate *esr = NULL;
   Seqpos startpos, totallength;
   unsigned long trial;
 
-  totallength = getencseqtotallength(encseq);
+  totallength = gt_encodedsequence_total_length(encseq);
   srand48(42349421);
-  esr = newEncodedsequencescanstate();
+  esr = gt_encodedsequence_scanstate_new();
   runscanatpostrial(encseq,esr,readmode,0);
   runscanatpostrial(encseq,esr,readmode,totallength-1);
   for (trial = 0; trial < scantrials; trial++)
@@ -76,22 +77,22 @@ static void testscanatpos(const Encodedsequence *encseq,
     printf("trial %lu at " FormatSeqpos "\n",trial,PRINTSeqposcast(startpos));
     runscanatpostrial(encseq,esr,readmode,startpos);
   }
-  freeEncodedsequencescanstate(&esr);
+  gt_encodedsequence_scanstate_delete(esr);
 }
 
-static void testmulticharactercompare(const Encodedsequence *encseq,
+static void testmulticharactercompare(const GtEncodedsequence *encseq,
                                       Readmode readmode,
                                       unsigned long multicharcmptrials)
 {
-  Encodedsequencescanstate *esr1, *esr2;
+  GtEncodedsequenceScanstate *esr1, *esr2;
   Seqpos pos1, pos2, totallength;
   unsigned long trial;
   bool fwd = ISDIRREVERSE(readmode) ? false : true,
        complement = ISDIRCOMPLEMENT(readmode) ? true : false;
 
-  esr1 = newEncodedsequencescanstate();
-  esr2 = newEncodedsequencescanstate();
-  totallength = getencseqtotallength(encseq);
+  esr1 = gt_encodedsequence_scanstate_new();
+  esr2 = gt_encodedsequence_scanstate_new();
+  totallength = gt_encodedsequence_total_length(encseq);
   srand48(42349421);
   (void) multicharactercompare_withtest(encseq,fwd,complement,esr1,0,esr2,0);
   (void) multicharactercompare_withtest(encseq,fwd,complement,esr1,0,esr2,
@@ -107,12 +108,12 @@ static void testmulticharactercompare(const Encodedsequence *encseq,
     (void) multicharactercompare_withtest(encseq,fwd,complement,
                                           esr1,pos1,esr2,pos2);
   }
-  freeEncodedsequencescanstate(&esr1);
-  freeEncodedsequencescanstate(&esr2);
+  gt_encodedsequence_scanstate_delete(esr1);
+  gt_encodedsequence_scanstate_delete(esr2);
 }
 
 static int testfullscan(const GtStrArray *filenametab,
-                        const Encodedsequence *encseq,
+                        const GtEncodedsequence *encseq,
                         Readmode readmode,
                         GtError *err)
 {
@@ -121,11 +122,11 @@ static int testfullscan(const GtStrArray *filenametab,
   GtSequenceBuffer *fb = NULL;
   int retval;
   bool haserr = false;
-  Encodedsequencescanstate *esr;
+  GtEncodedsequenceScanstate *esr;
   unsigned long long fullscanpbar = 0;
 
   gt_error_check(err);
-  totallength = getencseqtotallength(encseq);
+  totallength = gt_encodedsequence_total_length(encseq);
   gt_progressbar_start(&fullscanpbar,(unsigned long long) totallength);
   if (filenametab != NULL)
   {
@@ -133,11 +134,12 @@ static int testfullscan(const GtStrArray *filenametab,
     if (!fb)
       haserr = true;
     if (!haserr)
-      gt_sequence_buffer_set_symbolmap(fb, getencseqAlphabetsymbolmap(encseq));
+      gt_sequence_buffer_set_symbolmap(fb,
+                                  gt_encodedsequence_alphabetsymbolmap(encseq));
   }
   if (!haserr) {
-    esr = newEncodedsequencescanstate();
-    initEncodedsequencescanstate(esr,encseq,readmode,0);
+    esr = gt_encodedsequence_scanstate_new();
+    gt_encodedsequence_scanstate_init(esr,encseq,readmode,0);
     for (pos=0; /* Nothing */; pos++)
     {
       if (filenametab != NULL && readmode == Forwardmode)
@@ -159,7 +161,8 @@ static int testfullscan(const GtStrArray *filenametab,
           break;
         }
       }
-      ccra = getencodedchar(encseq,pos,readmode); /* Random access */
+      /* Random access */
+      ccra = gt_encodedsequence_getencodedchar(encseq,pos,readmode);
       if (filenametab != NULL && readmode == Forwardmode)
       {
         if (ccscan != ccra)
@@ -175,7 +178,8 @@ static int testfullscan(const GtStrArray *filenametab,
           break;
         }
       }
-      ccsr = sequentialgetencodedchar(encseq,esr,pos,readmode);
+      ccsr = gt_encodedsequence_sequentialgetencodedchar(encseq,esr,pos,
+                                                         readmode);
       if (ccra != ccsr)
       {
         gt_error_set(err,"access=%s, mode=%s: position=" FormatSeqpos
@@ -201,13 +205,13 @@ static int testfullscan(const GtStrArray *filenametab,
       haserr = true;
     }
   }
-  freeEncodedsequencescanstate(&esr);
+  gt_encodedsequence_scanstate_delete(esr);
   gt_sequence_buffer_delete(fb);
   return haserr ? -1 : 0;
 }
 
 int testencodedsequence(const GtStrArray *filenametab,
-                        const Encodedsequence *encseq,
+                        const GtEncodedsequence *encseq,
                         Readmode readmode,
                         unsigned long scantrials,
                         unsigned long multicharcmptrials,
@@ -235,7 +239,8 @@ int testencodedsequence(const GtStrArray *filenametab,
   return testfullscan(filenametab,encseq,readmode,err);
 }
 
-static void makeerrormsg(const Sequencerange *vala,const Sequencerange *valb,
+static void makeerrormsg(const GtSequencerange *vala,
+                         const GtSequencerange *valb,
                          const char *cmpflag)
 {
   fprintf(stderr,
@@ -249,12 +254,12 @@ static void makeerrormsg(const Sequencerange *vala,const Sequencerange *valb,
                 PRINTSeqposcast(valb->rightpos));
 }
 
-static int compareSequencerange(const void *a,const void *b)
+static int compareGtSequencerange(const void *a,const void *b)
 {
-  const Sequencerange *vala, *valb;
+  const GtSequencerange *vala, *valb;
 
-  vala = (Sequencerange *) a;
-  valb = (Sequencerange *) b;
+  vala = (GtSequencerange *) a;
+  valb = (GtSequencerange *) b;
   if (vala->leftpos < valb->leftpos)
   {
     makeerrormsg(vala,valb,"<");
@@ -278,19 +283,19 @@ static int compareSequencerange(const void *a,const void *b)
   return 0;
 }
 
-int checkspecialrangesfast(const Encodedsequence *encseq)
+int checkspecialrangesfast(const GtEncodedsequence *encseq)
 {
   GtArray *rangesforward, *rangesbackward;
   bool haserr = false;
   Specialrangeiterator *sri;
-  Sequencerange range;
+  GtSequencerange range;
 
   if (!hasspecialranges(encseq))
   {
     return 0;
   }
-  rangesforward = gt_array_new(sizeof (Sequencerange));
-  rangesbackward = gt_array_new(sizeof (Sequencerange));
+  rangesforward = gt_array_new(sizeof (GtSequencerange));
+  rangesbackward = gt_array_new(sizeof (GtSequencerange));
 
   sri = newspecialrangeiterator(encseq,true);
   while (nextspecialrangeiterator(&range,sri))
@@ -308,7 +313,7 @@ int checkspecialrangesfast(const Encodedsequence *encseq)
   if (!haserr)
   {
     if (array_compare(rangesforward,rangesbackward,
-                      compareSequencerange) != 0)
+                      compareGtSequencerange) != 0)
     {
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }

@@ -20,10 +20,10 @@
 
 #include "compressedtab.h"
 #include "seqpos-def.h"
-#include "encseq-def.h"
+#include "encodedsequence.h"
 
 Compressedtable *lcp9_manzini(Compressedtable *spacefortab,
-                              const Encodedsequence *encseq,
+                              const GtEncodedsequence *encseq,
                               Readmode readmode,
                               Seqpos partwidth,
                               Seqpos totallength,

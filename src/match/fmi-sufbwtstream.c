@@ -230,7 +230,7 @@ static int nextesamergedsufbwttabvalues(DefinedSeqpos *longest,
   } else
   {
     *bwtvalue
-      = getencodedchar( /* Random access */
+      = gt_encodedsequence_getencodedchar( /* Random access */
            emmesa->suffixarraytable[indexedsuffix.idx].encseq,
            indexedsuffix.startpos-1,
            emmesa->suffixarraytable[indexedsuffix.idx].readmode);
@@ -289,7 +289,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
       haserr = true;
     } else
     {
-      totallength = getencseqtotallength(suffixarray.encseq);
+      totallength = gt_encodedsequence_total_length(suffixarray.encseq);
     }
     if (!haserr && readSpecialcharinfo(specialcharinfo,indexname,err) != 0)
     {
@@ -297,7 +297,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
     }
     if (!haserr)
     {
-      numofchars = getencseqAlphabetnumofchars(suffixarray.encseq);
+      numofchars = gt_encodedsequence_alphabetnumofchars(suffixarray.encseq);
       firstignorespecial = totallength - specialcharinfo->specialcharacters;
       if (copytheindexfile(outfmindex,indexname,GT_ALPHABETFILESUFFIX,
                            0,err) != 0)

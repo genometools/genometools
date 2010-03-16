@@ -24,15 +24,14 @@
 #include "core/fa.h"
 #include "defined-types.h"
 #include "intbits.h"
-#include "intbits-tab.h"
 #include "spacedef.h"
 #include "tyr-map.h"
 #include "tyr-mersplit.h"
 
 #define BUCKETSUFFIX                     ".mbd"
 #define MAXUCHARVALUEWITHBITS(BITNUM)    ((1 << (BITNUM)) - 1)
-#define ISBOUNDDEFINED(UDB,IDX)          ISIBITSET(UDB,IDX)
-#define SETDEFINEDBOUND(UDB,IDX)         SETIBIT(UDB,IDX)
+#define ISBOUNDDEFINED(UDB,IDX)          GT_ISIBITSET(UDB,IDX)
+#define SETDEFINEDBOUND(UDB,IDX)         GT_SETIBIT(UDB,IDX)
 
 struct Tyrbckinfo
 {
@@ -355,7 +354,7 @@ int constructmerbuckets(const GtStr *inputindex,
     tyrindex_show(tyrindex);
     ALLOCASSIGNSPACE(tyrbckinfo.bounds,NULL,unsigned long,
                      tyrbckinfo.numofcodes+1);
-    INITBITTAB(tyrbckinfo.boundisdefined,tyrbckinfo.numofcodes+1);
+    GT_INITBITTAB(tyrbckinfo.boundisdefined,tyrbckinfo.numofcodes+1);
     splitmerinterval(&tyrbckinfo,tyrindex);
     bucketfp = gt_fa_fopen_filename_with_suffix(inputindex,BUCKETSUFFIX,
                                                 "wb",err);
@@ -395,8 +394,8 @@ int constructmerbuckets(const GtStr *inputindex,
     gt_assert(bucketfp != NULL);
     if (fwrite(tyrbckinfo.boundisdefined,
                sizeof (*tyrbckinfo.boundisdefined),
-               NUMOFINTSFORBITS(tyrbckinfo.numofcodes+1),
-               bucketfp) != NUMOFINTSFORBITS(tyrbckinfo.numofcodes+1))
+               GT_NUMOFINTSFORBITS(tyrbckinfo.numofcodes+1),
+               bucketfp) != GT_NUMOFINTSFORBITS(tyrbckinfo.numofcodes+1))
     {
       haserr = true;
     }
@@ -440,7 +439,7 @@ Tyrbckinfo *tyrbckinfo_new(const GtStr *tyrindexname,unsigned int alphasize,
       = sizeof (unsigned long) *
         (1UL +
          (tyrbckinfo->numofcodes+1) +
-         NUMOFINTSFORBITS(tyrbckinfo->numofcodes + 1));
+         GT_NUMOFINTSFORBITS(tyrbckinfo->numofcodes + 1));
     gt_assert(expectedsize == numofbytes);
     tyrbckinfo->bounds = ((unsigned long *) tyrbckinfo->mappedmbdfileptr) + 1;
     tyrbckinfo->boundisdefined

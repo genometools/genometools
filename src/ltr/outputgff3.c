@@ -18,7 +18,7 @@
 #include "core/fa.h"
 #include "core/str.h"
 #include "match/echoseq.h"
-#include "match/encseq-def.h"
+#include "match/encodedsequence.h"
 #include "match/defined-types.h"
 #include "ltrharvest-opt.h"
 #include "repeattypes.h"
@@ -161,7 +161,7 @@ static void showboundaries(FILE *fp,
 int printgff3format(const LTRharvestoptions *lo,
                     const LTRboundaries **bdptrtab,
                     unsigned long numofboundaries,
-                    const Encodedsequence *encseq,
+                    const GtEncodedsequence *encseq,
                     GtError *err)
 {
   bool haserr = false;
@@ -174,7 +174,7 @@ int printgff3format(const LTRharvestoptions *lo,
   } else
   {
     LTRcounter ltrc;
-    Seqinfo seqinfo;
+    GtSeqinfo seqinfo;
     const char *desptr = NULL;
     Definedunsignedlong previouscontignum = {false, 0};
     unsigned long seqnum, i, desclen;
@@ -192,15 +192,13 @@ int printgff3format(const LTRharvestoptions *lo,
       {
         previouscontignum.defined = true;
         previouscontignum.valueunsignedlong = seqnum;
-        getencseqSeqinfo(&seqinfo,encseq,seqnum);
+        gt_encodedsequence_seqinfo(encseq,&seqinfo,seqnum);
         fprintf(fp, "##sequence-region seq%lu " FormatSeqpos
                                             " " FormatSeqpos "\n",
                     seqnum,
                     PRINTSeqposcast(1 + (Seqpos) lo->offset),
                     PRINTSeqposcast(seqinfo.seqlength + (Seqpos) lo->offset));
-        desptr = retrievesequencedescription(&desclen,
-                                             encseq,
-                                             seqnum);
+        desptr = gt_encodedsequence_description(encseq, &desclen, seqnum);
         fprintf(fp,"# %*.*s\n",(int) desclen,(int) desclen,desptr);
       }
       showboundaries(fp,

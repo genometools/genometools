@@ -21,7 +21,7 @@
 #include "core/error_api.h"
 #include "core/str.h"
 #include "defined-types.h"
-#include "encseq-def.h"
+#include "encodedsequence.h"
 #include "intcode-def.h"
 #include "seqpos-def.h"
 #include "sfx-strategy.h"
@@ -53,7 +53,7 @@ Seqpos getmaxbranchdepth(const Outlcpinfo *outlcpinfo);
 void qsufsort(Seqpos *sortspace,
               int mmapfiledesc,
               Seqpos *longest,
-              const Encodedsequence *encseq,
+              const GtEncodedsequence *encseq,
               Readmode readmode,
               Codetype mincode,
               Codetype maxcode,
@@ -67,7 +67,7 @@ void qsufsort(Seqpos *sortspace,
 
 void sortallbuckets(Suftab *suftab,
                     GtBucketspec2 *bucketspec2,
-                    const Encodedsequence *encseq,
+                    const GtEncodedsequence *encseq,
                     Readmode readmode,
                     Codetype mincode,
                     Codetype maxcode,
@@ -83,7 +83,7 @@ void sortallbuckets(Suftab *suftab,
 void sortbucketofsuffixes(Seqpos *suffixestobesorted,
                           GtBucketspec2 *bucketspec2,
                           unsigned long numberofsuffixes,
-                          const Encodedsequence *encseq,
+                          const GtEncodedsequence *encseq,
                           Readmode readmode,
                           Codetype mincode,
                           Codetype maxcode,

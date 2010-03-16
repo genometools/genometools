@@ -118,8 +118,8 @@ static int assigncorrecttype(Mapspecification *mapspec,
     case Uint64Type:
       ASSIGNPTR2STARTPTR(uint64_t);
       break;
-    case BitsequenceType:
-      ASSIGNPTR2STARTPTR(Bitsequence);
+    case GtBitsequenceType:
+      ASSIGNPTR2STARTPTR(GtBitsequence);
       break;
     case SeqposType:
       ASSIGNPTR2STARTPTR(Seqpos);
@@ -295,8 +295,8 @@ int flushtheindex2file(FILE *fp,
         case Uint64Type:
           WRITEACTIONWITHTYPE(uint64_t);
           break;
-        case BitsequenceType:
-          WRITEACTIONWITHTYPE(Bitsequence);
+        case GtBitsequenceType:
+          WRITEACTIONWITHTYPE(GtBitsequence);
           break;
         case SeqposType:
           WRITEACTIONWITHTYPE(Seqpos);

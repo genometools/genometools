@@ -340,9 +340,9 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
       totallength = 0;
     } else
     {
-      alphabet = getencseqAlphabet(suffixarray.encseq);
+      alphabet = gt_encodedsequence_alphabet(suffixarray.encseq);
       prefixlength = suffixarray.prefixlength;
-      totallength = getencseqtotallength(suffixarray.encseq);
+      totallength = gt_encodedsequence_total_length(suffixarray.encseq);
     }
     if (!haserr)
     {

@@ -58,7 +58,7 @@ newSfxInterface(Readmode readmode,
                 unsigned int prefixlength,
                 unsigned int numofparts,
                 const Sfxstrategy *sfxstrategy,
-                const Encodedsequence *encseq,
+                const GtEncodedsequence *encseq,
                 Sfxprogress *sfxprogress,
                 Seqpos length,
                 GtLogger *verbosity,
@@ -94,7 +94,7 @@ newSfxInterfaceWithReaders(Readmode readmode,
                            size_t numReaders,
                            enum sfxDataRequest readerRequests[],
                            SeqDataReader readers[],
-                           const Encodedsequence *encseq,
+                           const GtEncodedsequence *encseq,
                            Sfxprogress *sfxprogress,
                            Seqpos length,
                            GtLogger *verbosity,
@@ -152,7 +152,7 @@ SfxIGetAlphabet(const sfxInterface *si);
  * @param si reference of interface to suffixerator
  * @return reference of sequence object
  */
-extern const Encodedsequence *
+extern const GtEncodedsequence *
 SfxIGetEncSeq(const sfxInterface *si);
 
 /**

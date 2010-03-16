@@ -20,7 +20,7 @@
 
 #include "core/arraydef.h"
 #include "seqpos-def.h"
-#include "encseq-def.h"
+#include "encodedsequence.h"
 
 typedef struct
 {
@@ -46,7 +46,7 @@ GT_DECLAREARRAYSTRUCT(Mergertrienodeptr);
 
 typedef struct
 {
-  Encodedsequence *encseqptr;
+  GtEncodedsequence *encseqptr;
   Readmode readmode;
 } Encseqreadinfo;
 

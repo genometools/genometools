@@ -43,13 +43,13 @@ typedef struct
 } Maxpairsoptions;
 
 static int simpleexactselfmatchoutput(void *info,
-                                      const Encodedsequence *encseq,
+                                      const GtEncodedsequence *encseq,
                                       Seqpos len,
                                       Seqpos pos1,
                                       Seqpos pos2,
                                       GT_UNUSED GtError *err)
 {
-  Seqinfo seqinfo;
+  GtSeqinfo seqinfo;
   unsigned long queryseqnum;
   Querymatch *querymatch = (Querymatch *) info;
 
@@ -60,7 +60,7 @@ static int simpleexactselfmatchoutput(void *info,
     pos2 = tmp;
   }
   queryseqnum = getencseqfrompos2seqnum(encseq,pos2);
-  getencseqSeqinfo(&seqinfo,encseq,queryseqnum);
+  gt_encodedsequence_seqinfo(encseq,&seqinfo,queryseqnum);
   gt_assert(pos2 >= seqinfo.seqstartpos);
   querymatch_fill(querymatch,
                   len,

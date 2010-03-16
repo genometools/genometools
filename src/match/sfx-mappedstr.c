@@ -28,7 +28,7 @@
 #include "core/str_array.h"
 #include "spacedef.h"
 #include "intcode-def.h"
-#include "encseq-def.h"
+#include "encodedsequence.h"
 #include "stamp.h"
 #ifdef SKDEBUG
 #include "sfx-nextchar.h"
@@ -424,7 +424,7 @@ static void doovershoot(Streamstate *spwp,
 }
 
 void getencseqkmers(
-        const Encodedsequence *encseq,
+        const GtEncodedsequence *encseq,
         Readmode readmode,
         void(*processkmercode)(void *,Codetype,Seqpos,const Firstspecialpos *),
         void *processkmercodeinfo,
@@ -433,24 +433,26 @@ void getencseqkmers(
   Seqpos currentposition = 0, totallength;
   Streamstate spwp;
   GtUchar charcode;
-  Encodedsequencescanstate *esr;
+  GtEncodedsequenceScanstate *esr;
   unsigned int numofchars;
 
-  totallength = getencseqtotallength(encseq);
-  numofchars = getencseqAlphabetnumofchars(encseq);
+  totallength = gt_encodedsequence_total_length(encseq);
+  numofchars = gt_encodedsequence_alphabetnumofchars(encseq);
   initstreamstate(&spwp,numofchars,kmersize);
-  esr = newEncodedsequencescanstate();
-  initEncodedsequencescanstate(esr,encseq,readmode,0);
+  esr = gt_encodedsequence_scanstate_new();
+  gt_encodedsequence_scanstate_init(esr,encseq,readmode,0);
   for (currentposition = 0; currentposition<totallength; currentposition++)
   {
-    charcode = sequentialgetencodedchar(encseq,esr,currentposition,readmode);
-    CHECKENCCHAR(charcode,encseq,currentposition,readmode);
+    charcode = gt_encodedsequence_sequentialgetencodedchar(encseq,esr,
+                                                           currentposition,
+                                                           readmode);
+    GT_CHECKENCCHAR(charcode,encseq,currentposition,readmode);
     shiftrightwithchar(processkmercode,processkmercodeinfo,
                        &spwp,currentposition,charcode);
   }
   if (esr != NULL)
   {
-    freeEncodedsequencescanstate(&esr);
+    gt_encodedsequence_scanstate_delete(esr);
   }
   doovershoot(&spwp,
               processkmercode,

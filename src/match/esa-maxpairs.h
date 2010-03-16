@@ -20,15 +20,15 @@
 
 #include "core/error_api.h"
 #include "seqpos-def.h"
-#include "encseq-def.h"
+#include "encodedsequence.h"
 #include "esa-seqread.h"
 #include "core/logger.h"
 
-typedef int (*Processmaxpairs)(void *,const Encodedsequence *,
+typedef int (*Processmaxpairs)(void *,const GtEncodedsequence *,
                                Seqpos,Seqpos,Seqpos,GtError *);
 
 int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
-                      const Encodedsequence *encseq,
+                      const GtEncodedsequence *encseq,
                       Readmode readmode,
                       unsigned int searchlength,
                       Processmaxpairs processmaxpairs,

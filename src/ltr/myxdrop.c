@@ -243,12 +243,12 @@ void calculateallowedMININFINITYINTgenerations(
         (XDROPBELOWSCORE + HALFMATCHSCORE) / GCD + 1
 
 #define EVALXDROPARBITSCORES EVALXDROPARBITSCORESRIGHT
-#define USEQ(A,I) A = getencodedchar(str_useq,/* Random access */\
-                                     useq+(Seqpos)(I),\
-                                     Forwardmode)
-#define VSEQ(A,J) A = getencodedchar(str_vseq,/* Random access */\
-                                     vseq+(Seqpos)(J),\
-                                     Forwardmode)
+#define USEQ(A,I) A = gt_encodedsequence_getencodedchar(str_useq, \
+                                                        useq+(Seqpos)(I),\
+                                                        Forwardmode)
+#define VSEQ(A,J) A = gt_encodedsequence_getencodedchar(str_vseq, \
+                                                        vseq+(Seqpos)(J),\
+                                                        Forwardmode)
 
 #include "myxdrop.gen"
 
@@ -264,11 +264,11 @@ void calculateallowedMININFINITYINTgenerations(
 */
 
 #define EVALXDROPARBITSCORES EVALXDROPARBITSCORESLEFT
-#define USEQ(A,I) A = getencodedchar(str_useq,/* Random access */\
-                                     useq-(Seqpos)1-(I),\
-                                     Forwardmode)
-#define VSEQ(A,J) A = getencodedchar(str_vseq,/* Random access */\
-                                     vseq-(Seqpos)1-(J),\
-                                     Forwardmode)
+#define USEQ(A,I) A = gt_encodedsequence_getencodedchar(str_useq, \
+                                                        useq-(Seqpos)1-(I),\
+                                                        Forwardmode)
+#define VSEQ(A,J) A = gt_encodedsequence_getencodedchar(str_vseq, \
+                                                        vseq-(Seqpos)1-(J),\
+                                                        Forwardmode)
 
 #include "myxdrop.gen"

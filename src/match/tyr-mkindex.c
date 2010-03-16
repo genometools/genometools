@@ -60,14 +60,14 @@ struct Dfsstate /* global information */
          totallength;
   unsigned long minocc,
                 maxocc;
-  const Encodedsequence *encseq;
+  const GtEncodedsequence *encseq;
   Readmode readmode;
   Processoccurrencecount processoccurrencecount;
   GtArrayCountwithpositions occdistribution;
   FILE *merindexfpout,
        *countsfilefpout;
   bool moveforward;
-  Encodedsequencescanstate *esrspace;
+  GtEncodedsequenceScanstate *esrspace;
   bool performtest;
   bool storecounts;
   GtUchar *bytebuffer;
@@ -123,8 +123,9 @@ static void checknumberofoccurrences(const Dfsstate *dfsstate,
 
   for (idx = 0; idx < dfsstate->mersize; idx++)
   {
-    dfsstate->currentmer[idx] = getencodedchar(dfsstate->encseq,position+idx,
-                                               dfsstate->readmode);
+    dfsstate->currentmer[idx] =
+              gt_encodedsequence_getencodedchar(dfsstate->encseq,position+idx,
+                                                dfsstate->readmode);
   }
   mmsi = newmmsearchiteratorcomplete_plain(dfsstate->encseq,
                                            dfsstate->suftab,
@@ -176,7 +177,7 @@ static void wrapListSeqpos(ListSeqpos *node)
   }
 }
 
-static void showListSeqpos(const Encodedsequence *encseq,
+static void showListSeqpos(const GtEncodedsequence *encseq,
                            Seqpos mersize,
                            const ListSeqpos *node)
 {
@@ -341,7 +342,7 @@ static int adddistpos2distribution(unsigned long countocc,
 
 #define MAXSMALLMERCOUNT UCHAR_MAX
 
-static int outputsortedstring2indexviafileptr(const Encodedsequence *encseq,
+static int outputsortedstring2indexviafileptr(const GtEncodedsequence *encseq,
                                               Seqpos mersize,
                                               GtUchar *bytebuffer,
                                               unsigned long sizeofbuffer,
@@ -434,9 +435,9 @@ static void freeDfsinfo(Dfsinfo *dfsinfo, GT_UNUSED Dfsstate *state)
 }
 
 #ifdef WITHcontainsspecial2
-static bool containsspecial2(const Encodedsequence *encseq,
+static bool containsspecial2(const GtEncodedsequence *encseq,
                      GT_UNUSED bool moveforward,
-                     GT_UNUSED Encodedsequencescanstate *esrspace,
+                     GT_UNUSED GtEncodedsequenceScanstate *esrspace,
                      Seqpos startpos,
                      Seqpos len)
 {
@@ -445,7 +446,7 @@ static bool containsspecial2(const Encodedsequence *encseq,
 
   for (pos=startpos; pos<startpos+len; pos++)
   {
-    if (ISSPECIAL(getencodedchar(encseq,pos,Forwardmode)))
+    if (ISSPECIAL(gt_encodedsequence_getencodedchar(encseq,pos,Forwardmode)))
     {
       result = true;
       break;
@@ -569,16 +570,16 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
 
   gt_error_check(err);
   GT_INITARRAY(&state.occdistribution,Countwithpositions);
-  state.esrspace = newEncodedsequencescanstate();
+  state.esrspace = gt_encodedsequence_scanstate_new();
   state.mersize = (Seqpos) mersize;
   state.encseq = encseqSequentialsuffixarrayreader(ssar);
-  alphasize = getencseqAlphabetnumofchars(state.encseq);
+  alphasize = gt_encodedsequence_alphabetnumofchars(state.encseq);
   state.readmode = readmodeSequentialsuffixarrayreader(ssar);
   state.storecounts = storecounts;
   state.minocc = minocc;
   state.maxocc = maxocc;
   state.moveforward = ISDIRREVERSE(state.readmode) ? false : true;
-  state.totallength = getencseqtotallength(state.encseq);
+  state.totallength = gt_encodedsequence_total_length(state.encseq);
   state.performtest = performtest;
   state.countoutputmers = 0;
   state.merindexfpout = NULL;
@@ -706,7 +707,7 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   FREESPACE(state.currentmer);
   FREESPACE(state.bytebuffer);
   GT_FREEARRAY(&state.largecounts,Largecount);
-  freeEncodedsequencescanstate(&state.esrspace);
+  gt_encodedsequence_scanstate_delete(state.esrspace);
   return haserr ? -1 : 0;
 }
 

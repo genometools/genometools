@@ -945,7 +945,7 @@ void bcktab_leftborderpartialsums(Bcktab *bcktab,Seqpos numofsuffixestosort)
 #ifdef SKDEBUG
 #include "qgram2code.h"
 void consistencyofsuffix(int line,
-                         const Encodedsequence *encseq,
+                         const GtEncodedsequence *encseq,
                          Readmode readmode,
                          const Bcktab *bcktab,
                          unsigned int numofchars,
@@ -956,7 +956,7 @@ void consistencyofsuffix(int line,
   Seqpos totallength;
   GtUchar cc = 0;
 
-  totallength = getencseqtotallength(encseq);
+  totallength = gt_encodedsequence_total_length(encseq);
   for (idx=0; idx<bcktab->prefixlength; idx++)
   {
     if ((Seqpos) (suffix->startpos + idx) >= totallength)
@@ -964,7 +964,8 @@ void consistencyofsuffix(int line,
       firstspecial = idx;
       break;
     }
-    cc = getencodedchar(encseq,suffix->startpos + idx, readmode);
+    cc = gt_encodedsequence_getencodedchar(encseq,suffix->startpos + idx,
+                                           readmode);
     if (ISSPECIAL(cc))
     {
       firstspecial = idx;
