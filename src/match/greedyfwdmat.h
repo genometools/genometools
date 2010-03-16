@@ -21,10 +21,10 @@
 #include <stdbool.h>
 #include "core/alphabet.h"
 #include "core/error.h"
+#include "core/intdef.h"
 #include "core/str_array.h"
 #include "defined-types.h"
 #include "seqpos-def.h"
-#include "ushort-def.h"
 #include "encodedsequence.h"
 
 typedef unsigned long (*Greedygmatchforwardfunction) (const void *,

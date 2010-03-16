@@ -19,10 +19,10 @@
 #include <string.h>
 #include "core/error.h"
 #include "core/fa.h"
+#include "core/intdef.h"
 #include "core/str.h"
 #include "core/filelengthvalues.h"
 #include "bitpack-itf.h"
-#include "ushort-def.h"
 #include "seqpos-def.h"
 #include "intbits.h"
 #include "safecast-gen.h"
@@ -106,8 +106,8 @@ static int assigncorrecttype(Mapspecification *mapspec,
     case GtUcharType:
       ASSIGNPTR2STARTPTR(GtUchar);
       break;
-    case UshortType:
-      ASSIGNPTR2STARTPTR(Ushort);
+    case GtUshortType:
+      ASSIGNPTR2STARTPTR(GtUshort);
       break;
     case Uint32Type:
       ASSIGNPTR2STARTPTR(uint32_t);
@@ -283,8 +283,8 @@ int flushtheindex2file(FILE *fp,
         case GtUcharType:
           WRITEACTIONWITHTYPE(GtUchar);
           break;
-        case UshortType:
-          WRITEACTIONWITHTYPE(Ushort);
+        case GtUshortType:
+          WRITEACTIONWITHTYPE(GtUshort);
           break;
         case Uint32Type:
           WRITEACTIONWITHTYPE(uint32_t);

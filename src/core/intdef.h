@@ -15,10 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef USHORT_DEF_H
-#define USHORT_DEF_H
+#ifndef INTDEF_H
+#define INTDEF_H
 #include <inttypes.h>
 
-typedef uint16_t Ushort;        /* \Typedef{Ushort} */
+typedef uint16_t GtUshort;        /* \Typedef{Ushort} */
 
 #endif

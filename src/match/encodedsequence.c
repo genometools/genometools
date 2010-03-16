@@ -27,6 +27,7 @@
 #include "core/divmodmul.h"
 #include "core/error.h"
 #include "core/fa.h"
+#include "core/intdef.h"
 #include "core/logger.h"
 #include "core/sequence_buffer_fasta.h"
 #include "core/sequence_buffer_plain.h"
@@ -37,7 +38,6 @@
 #include "core/filelengthvalues.h"
 #include "bitpack-itf.h"
 #include "seqpos-def.h"
-#include "ushort-def.h"
 #include "format64.h"
 #include "intbits.h"
 #include "intcode-def.h"
@@ -698,9 +698,9 @@ static void assignencseqmapspecification(GtArrayMapspecification *mapspectable,
                  encseq->unitsoftwobitencoding);
       if (encseq->numofspecialstostore > 0)
       {
-        NEWMAPSPEC(encseq->ushortspecialpositions,Ushort,
+        NEWMAPSPEC(encseq->ushortspecialpositions,GtUshort,
                    encseq->numofspecialstostore);
-        NEWMAPSPEC(encseq->ushortspecialrangelength,Ushort,
+        NEWMAPSPEC(encseq->ushortspecialrangelength,GtUshort,
                    encseq->numofspecialstostore);
         numofunits = CALLCASTFUNC(Seqpos,unsigned_long,
                                   encseq->totallength/USHRT_MAX+1);
@@ -852,8 +852,8 @@ static uint64_t localdetsizeencseq(GtPositionaccesstype sat,
          sum = sizeoftwobitencoding;
          if (specialranges > 0)
          {
-           sum += (uint64_t) sizeof (Ushort) * specialranges +
-                  (uint64_t) sizeof (Ushort) * specialranges +
+           sum += (uint64_t) sizeof (GtUshort) * specialranges +
+                  (uint64_t) sizeof (GtUshort) * specialranges +
                   (uint64_t) sizeof (unsigned long) *
                                     (totallength/USHRT_MAX+1);
          }
@@ -1115,7 +1115,7 @@ void gt_encodedsequence_delete(GtEncodedsequence *encseq)
 
 #define ADDTYPE(V)               ushort##V
 #define ACCESSENCSEQ(ES,V)       (ES)->ushort##V
-#define SPECIALTYPE              Ushort
+#define SPECIALTYPE              GtUshort
 #define MAXSPECIALTYPE           USHRT_MAX
 #define POS2PAGENUM(V)           ((V) >> 16)
 
@@ -3190,7 +3190,7 @@ typedef struct
 {
   GtLogger *logger;
   Seqpos specialrangesGtUchar,
-         specialrangesUshort,
+         specialrangesGtUshort,
          specialrangesUint32,
          realspecialranges;
 } Updatesumrangeinfo;
@@ -3205,7 +3205,7 @@ static void updatesumranges(unsigned long key, unsigned long long value,
   distvalue = (unsigned long) value;
   updatesumrangeinfo->specialrangesGtUchar
      += currentspecialrangevalue(key,distvalue,(unsigned long) UCHAR_MAX);
-  updatesumrangeinfo->specialrangesUshort
+  updatesumrangeinfo->specialrangesGtUshort
      += currentspecialrangevalue(key,distvalue,(unsigned long) USHRT_MAX);
   updatesumrangeinfo->specialrangesUint32
      += currentspecialrangevalue(key,distvalue,(unsigned long) UINT32_MAX);
@@ -3221,7 +3221,7 @@ static Seqpos calcspecialranges(Seqpos *specialrangestab,
   Updatesumrangeinfo updatesumrangeinfo;
 
   updatesumrangeinfo.specialrangesGtUchar = 0;
-  updatesumrangeinfo.specialrangesUshort = 0;
+  updatesumrangeinfo.specialrangesGtUshort = 0;
   updatesumrangeinfo.specialrangesUint32 = 0;
   updatesumrangeinfo.realspecialranges = 0;
   updatesumrangeinfo.logger = logger;
@@ -3229,7 +3229,7 @@ static Seqpos calcspecialranges(Seqpos *specialrangestab,
   if (specialrangestab != NULL)
   {
     specialrangestab[0] = updatesumrangeinfo.specialrangesGtUchar;
-    specialrangestab[1] = updatesumrangeinfo.specialrangesUshort;
+    specialrangestab[1] = updatesumrangeinfo.specialrangesGtUshort;
     specialrangestab[2] = updatesumrangeinfo.specialrangesUint32;
   }
   return updatesumrangeinfo.realspecialranges;

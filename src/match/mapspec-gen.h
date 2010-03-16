@@ -38,7 +38,7 @@ typedef enum
   CharType, /* \0 terminated string */
   FilelengthvaluesType,
   GtUcharType,
-  UshortType,
+  GtUshortType,
   Uint32Type,
   Uint64Type,
   UnsignedlongType,

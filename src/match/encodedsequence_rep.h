@@ -27,13 +27,13 @@
 */
 
 #include "core/alphabet.h"
+#include "core/intdef.h"
+#include "core/filelengthvalues.h"
 #include "core/symboldef.h"
 #include "core/str_array_api.h"
-#include "core/filelengthvalues.h"
 #include "bitpack-itf.h"
 #include "seqpos-def.h"
 #include "intbits.h"
-#include "ushort-def.h"
 
 typedef enum
 {
@@ -122,7 +122,7 @@ struct GtEncodedsequence
   unsigned long *ucharendspecialsubsUint;
 
   /* only for Viaushorttables */
-  Ushort *ushortspecialpositions,
+  GtUshort *ushortspecialpositions,
          *ushortspecialrangelength;
   unsigned long *ushortendspecialsubsUint;
 
