@@ -576,7 +576,7 @@ bool hasfastspecialrangeenumerator(const GtEncodedsequence *encseq)
   return satviautables(encseq->sat);
 }
 
-DECLARESAFECASTFUNCTION(uint64_t,uint64_t,unsigned long,unsigned_long)
+DECLARESAFECASTFUNCTION(uint64_t,uint64_t_e,unsigned long,unsigned_long_e)
 
 static unsigned long detunitsoftwobitencoding(Seqpos totallength)
 {
@@ -588,10 +588,10 @@ static unsigned long detunitsoftwobitencoding(Seqpos totallength)
   }
   unitsoftwobitencoding = (uint64_t) 2 +
                           GT_DIVBYUNITSIN2BITENC(totallength - 1);
-  return CALLCASTFUNC(uint64_t,unsigned_long,unitsoftwobitencoding);
+  return CALLCASTFUNC(uint64_t_e,unsigned_long_e,unitsoftwobitencoding);
 }
 
-DECLARESAFECASTFUNCTION(Seqpos,Seqpos,unsigned long,unsigned_long)
+DECLARESAFECASTFUNCTION(Seqpos,Seqpos_e,unsigned long,unsigned_long_e)
 
 static void assignencseqmapspecification(GtArrayMapspecification *mapspectable,
                                          void *voidinfo,
@@ -651,7 +651,7 @@ static void assignencseqmapspecification(GtArrayMapspecification *mapspectable,
   switch (encseq->sat)
   {
     case Viadirectaccess:
-      numofunits = CALLCASTFUNC(Seqpos,unsigned_long,encseq->totallength);
+      numofunits = CALLCASTFUNC(Seqpos_e,unsigned_long_e,encseq->totallength);
       NEWMAPSPEC(encseq->plainseq,GtUchar,numofunits);
       break;
     case Viabytecompress:
@@ -674,7 +674,7 @@ static void assignencseqmapspecification(GtArrayMapspecification *mapspectable,
                  encseq->unitsoftwobitencoding);
       if (encseq->numofspecialstostore > 0)
       {
-        numofunits = CALLCASTFUNC(Seqpos,unsigned_long,
+        numofunits = CALLCASTFUNC(Seqpos_e,unsigned_long_e,
                                   GT_NUMOFINTSFORBITS(encseq->totallength +
                                                    GT_INTWORDSIZE));
         NEWMAPSPEC(encseq->specialbits,GtBitsequence,numofunits);
@@ -689,7 +689,7 @@ static void assignencseqmapspecification(GtArrayMapspecification *mapspectable,
                    encseq->numofspecialstostore);
         NEWMAPSPEC(encseq->ucharspecialrangelength,GtUchar,
                    encseq->numofspecialstostore);
-        numofunits = CALLCASTFUNC(Seqpos,unsigned_long,
+        numofunits = CALLCASTFUNC(Seqpos_e,unsigned_long_e,
                                   encseq->totallength/UCHAR_MAX+1);
         NEWMAPSPEC(encseq->ucharendspecialsubsUint,Unsignedlong,numofunits);
       }
@@ -703,7 +703,7 @@ static void assignencseqmapspecification(GtArrayMapspecification *mapspectable,
                    encseq->numofspecialstostore);
         NEWMAPSPEC(encseq->ushortspecialrangelength,GtUshort,
                    encseq->numofspecialstostore);
-        numofunits = CALLCASTFUNC(Seqpos,unsigned_long,
+        numofunits = CALLCASTFUNC(Seqpos_e,unsigned_long_e,
                                   encseq->totallength/USHRT_MAX+1);
         NEWMAPSPEC(encseq->ushortendspecialsubsUint,Unsignedlong,numofunits);
       }
@@ -717,7 +717,7 @@ static void assignencseqmapspecification(GtArrayMapspecification *mapspectable,
                    encseq->numofspecialstostore);
         NEWMAPSPEC(encseq->uint32specialrangelength,Uint32,
                    encseq->numofspecialstostore);
-        numofunits = CALLCASTFUNC(Seqpos,unsigned_long,
+        numofunits = CALLCASTFUNC(Seqpos_e,unsigned_long_e,
                                   encseq->totallength/UINT32_MAX+1);
         NEWMAPSPEC(encseq->uint32endspecialsubsUint,Unsignedlong,numofunits);
       }
@@ -2584,7 +2584,7 @@ static GtEncodedsequence *determineencseqkeyvalues(
   encseq->destablength = 0;
   encseq->ssptab = NULL;
   encseq->alpha = alpha;
-  encseq->numofspecialstostore = CALLCASTFUNC(Seqpos,unsigned_long,
+  encseq->numofspecialstostore = CALLCASTFUNC(Seqpos_e,unsigned_long_e,
                                               specialranges);
   encseq->totallength = totallength;
   encseq->numofdbsequences = numofsequences;
@@ -2592,7 +2592,7 @@ static GtEncodedsequence *determineencseqkeyvalues(
   encseq->lengthofdbfilenames = lengthofdbfilenames;
   encseq->numofchars = gt_alphabet_num_of_chars(alpha);
   encseq->sizeofrep
-    = CALLCASTFUNC(uint64_t,unsigned_long,
+    = CALLCASTFUNC(uint64_t_e,unsigned_long_e,
                    localdetsizeencseq(sat,totallength,numofdbfiles,
                                       lengthofdbfilenames,specialranges,
                                       encseq->numofchars,
@@ -3381,7 +3381,7 @@ static int gt_inputfiles2sequencekeyvalues(const GtStr *indexname,
         {
           if (lastspeciallength > 0)
           {
-            idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
+            idx = CALLCASTFUNC(Seqpos_e,unsigned_long_e,lastspeciallength);
             gt_disc_distri_add(distspralen,idx);
           }
           break;
@@ -3446,7 +3446,7 @@ static int gt_inputfiles2sequencekeyvalues(const GtStr *indexname,
           }
           if (lastspeciallength > 0)
           {
-            idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
+            idx = CALLCASTFUNC(Seqpos_e,unsigned_long_e,lastspeciallength);
             gt_disc_distri_add(distspralen,idx);
             lastspeciallength = 0;
           }
@@ -3525,7 +3525,7 @@ static void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
       }
       if (lastspeciallength > 0)
       {
-        idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
+        idx = CALLCASTFUNC(Seqpos_e,unsigned_long_e,lastspeciallength);
         gt_disc_distri_add(distspralen,idx);
         lastspeciallength = 0;
       }
@@ -3533,7 +3533,7 @@ static void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
   }
   if (lastspeciallength > 0)
   {
-    idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
+    idx = CALLCASTFUNC(Seqpos_e,unsigned_long_e,lastspeciallength);
     gt_disc_distri_add(distspralen,idx);
   }
   specialcharinfo->lengthofspecialsuffix = lastspeciallength;
