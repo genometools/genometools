@@ -33,7 +33,7 @@
 #include "core/filelengthvalues.h"
 #include "core/symboldef.h"
 #include "core/str_array_api.h"
-#include "bitpack-itf.h"
+#include "core/bitpackarray.h"
 #include "seqpos-def.h"
 #include "intbits.h"
 

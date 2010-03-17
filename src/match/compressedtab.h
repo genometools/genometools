@@ -22,7 +22,7 @@
 #include "core/unused_api.h"
 #include "core/mathsupport.h"
 #include "seqpos-def.h"
-#include "bitpack-itf.h"
+#include "core/bitpackarray.h"
 
 typedef struct
 {

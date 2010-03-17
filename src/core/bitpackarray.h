@@ -17,6 +17,7 @@
 #ifndef BITPACKARRAY_H
 #define BITPACKARRAY_H
 
+#ifndef S_SPLINT_S
 /**
  * \file bitpackarray.h
  * \brief The class presented in this file encapsulates a bitstring in
@@ -184,5 +185,34 @@ static inline void showbitpackarray(const BitPackArray *bitpackarray)
   }
 }
 */
+
+#else
+
+/* some minimal set of declaration to satisfy splint. We cannot use the
+   original implementation, as this produces many errors when fed into
+   splint
+*/
+
+typedef unsigned char BitElem;
+typedef BitElem *BitString;
+
+typedef struct
+{
+  BitString store;
+  /* and others */
+} BitPackArray;
+
+typedef unsigned long long BitOffset;
+size_t sizeofbitarray(unsigned bits, BitOffset numValues);
+void bitpackarray_delete(BitPackArray *bpa);
+BitPackArray *bitpackarray_new(unsigned bits, BitOffset numValues,
+                               bool withstorealloc);
+void bitpackarray_store_uint32(BitPackArray *array, BitOffset index,
+                               uint32_t val);
+void bitpackarray_store_uint64(BitPackArray *array, BitOffset index,
+                               uint64_t val);
+uint32_t bitpackarray_get_uint32(const BitPackArray *array, BitOffset index);
+uint64_t bitpackarray_get_uint64(const BitPackArray *array, BitOffset index);
+#endif
 
 #endif

@@ -28,6 +28,7 @@
 #include "core/divmodmul.h"
 #include "core/error.h"
 #include "core/fa.h"
+#include "core/filelengthvalues.h"
 #include "core/intdef.h"
 #include "core/logger.h"
 #include "core/sequence_buffer_fasta.h"
@@ -35,9 +36,9 @@
 #include "core/str.h"
 #include "core/ma_api.h"
 #include "core/minmax.h"
+#include "core/progress_timer.h"
 #include "core/unused_api.h"
-#include "core/filelengthvalues.h"
-#include "bitpack-itf.h"
+#include "core/bitpackarray.h"
 #include "seqpos-def.h"
 #include "format64.h"
 #include "intbits.h"
@@ -45,7 +46,6 @@
 #include "safecast-gen.h"
 #include "encodedsequence.h"
 #include "mapspec-gen.h"
-#include "core/progress_timer.h"
 #ifndef INLINEDENCSEQ
 #include "encodedsequence_rep.h"
 #endif

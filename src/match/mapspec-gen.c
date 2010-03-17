@@ -22,7 +22,7 @@
 #include "core/intdef.h"
 #include "core/str.h"
 #include "core/filelengthvalues.h"
-#include "bitpack-itf.h"
+#include "core/bitpackarray.h"
 #include "seqpos-def.h"
 #include "intbits.h"
 #include "safecast-gen.h"
