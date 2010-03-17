@@ -1,6 +1,7 @@
 /*
-  Copyright (c) 2009 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2009 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2009      Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c)      2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2009-2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -14,6 +15,7 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+
 #ifndef ENCODEDSEQUENCE_REP_H
 #define ENCODEDSEQUENCE_REP_H
 
