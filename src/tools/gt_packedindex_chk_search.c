@@ -24,7 +24,7 @@
 #include "core/versionfunc.h"
 #include "match/eis-bwtseq.h"
 #include "match/eis-bwtseq-param.h"
-#include "match/encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "match/enum-patt-def.h"
 #include "match/esa-mmsearch.h"
 #include "match/sarr-def.h"

@@ -16,7 +16,7 @@
 */
 
 #include "core/symboldef.h"
-#include "match/encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "ltrharvest-opt.h"
 #include "outputstd.h"
 

@@ -19,7 +19,7 @@
 #define SEARCHFORLTRS_H
 
 #include "core/error.h"
-#include "match/encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "repeattypes.h"
 #include "ltrharvest-opt.h"
 

@@ -44,10 +44,10 @@
 #include "core/sequence_buffer_plain.h"
 #include "core/str.h"
 #include "core/unused_api.h"
-#include "intcode-def.h"
-#include "encodedsequence.h"
+#include "match/intcode-def.h"
+#include "core/encodedsequence.h"
 #ifndef INLINEDENCSEQ
-#include "encodedsequence_rep.h"
+#include "core/encodedsequence_rep.h"
 #endif
 
 #define CHECKANDUPDATE(VAL,IDX)\
@@ -1106,7 +1106,7 @@ void gt_encodedsequence_delete(GtEncodedsequence *encseq)
 #define MAXSPECIALTYPE           UCHAR_MAX
 #define POS2PAGENUM(V)           ((V) >> 8)
 
-#include "accessspecial.gen"
+#include "core/accessspecial.gen"
 
 #undef ADDTYPE
 #undef ACCESSENCSEQ
@@ -1120,7 +1120,7 @@ void gt_encodedsequence_delete(GtEncodedsequence *encseq)
 #define MAXSPECIALTYPE           USHRT_MAX
 #define POS2PAGENUM(V)           ((V) >> 16)
 
-#include "accessspecial.gen"
+#include "core/accessspecial.gen"
 
 #undef ADDTYPE
 #undef ACCESSENCSEQ
@@ -1136,7 +1136,7 @@ void gt_encodedsequence_delete(GtEncodedsequence *encseq)
 #define POS2PAGENUM(V)           ((V) >> 32)
 #endif
 
-#include "accessspecial.gen"
+#include "core/accessspecial.gen"
 
 #undef ADDTYPE
 #undef ACCESSENCSEQ

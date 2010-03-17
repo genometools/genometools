@@ -24,7 +24,7 @@
 #include "core/arraydef.h"
 #include "core/seqpos.h"
 #include "spacedef.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "absdfstrans-imp.h"
 
 typedef int ProfScore;

@@ -32,7 +32,7 @@
 #include "core/unused_api.h"
 #include "core/seqpos.h"
 #include "match/intcode-def.h"
-#include "match/encodedsequence.h"
+#include "core/encodedsequence.h"
 
 #include "match/eis-encidxseq.h"
 #include "match/eis-sa-common.h"

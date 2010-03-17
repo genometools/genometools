@@ -28,7 +28,7 @@
 #include "core/str_array.h"
 #include "spacedef.h"
 #include "intcode-def.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "stamp.h"
 #ifdef SKDEBUG
 #include "sfx-nextchar.h"

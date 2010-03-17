@@ -34,7 +34,7 @@ typedef struct GtEncodedsequenceScanstate GtEncodedsequenceScanstate;
 
 #undef GT_INLINEDENCSEQ
 #ifdef GT_INLINEDENCSEQ
-#include "encodedsequence_rep.h"
+#include "core/encodedsequence_rep.h"
 #endif
 
 /*@null@*/

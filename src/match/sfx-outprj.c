@@ -31,7 +31,7 @@
 #include "spacedef.h"
 #include "esa-fileend.h"
 #include "core/readmode.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "stamp.h"
 
 #define PRJSPECIALOUT(VAL)\

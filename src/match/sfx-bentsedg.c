@@ -27,7 +27,7 @@
 #include "core/unused_api.h"
 #include "core/symboldef.h"
 #include "spacedef.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "turnwheels.h"
 #include "esa-fileend.h"
 #include "sfx-bentsedg.h"

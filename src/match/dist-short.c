@@ -19,7 +19,7 @@
 #include "core/assert_api.h"
 #include "core/symboldef.h"
 #include "core/chardef.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "defined-types.h"
 #include "initeqsvec.h"
 #include "dist-short.h"

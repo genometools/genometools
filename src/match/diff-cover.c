@@ -32,7 +32,7 @@
 #include "sfx-enumcodes.h"
 #include "bcktab.h"
 #include "initbasepower.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "sfx-suftaborder.h"
 #include "sfx-bentsedg.h"
 #include "core/logger.h"

@@ -20,7 +20,7 @@
 
 #include "core/seqpos.h"
 #include "core/readmode.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 
 typedef struct Lcpvalueiterator Lcpvalueiterator;
 

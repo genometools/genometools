@@ -20,7 +20,7 @@
 #include "core/str.h"
 #include "core/option.h"
 #include "core/versionfunc.h"
-#include "match/encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "match/sarr-def.h"
 #include "match/stamp.h"
 #include "match/enum-patt-def.h"

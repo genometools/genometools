@@ -21,7 +21,7 @@
 #include "core/arraydef.h"
 #include "core/symboldef.h"
 #include "core/seqpos.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "splititv.h"
 
 typedef struct

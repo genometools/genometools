@@ -18,7 +18,7 @@
 #include <stdlib.h>
 #include "core/chardef.h"
 #include "core/symboldef.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "spacedef.h"
 #include "enum-patt-def.h"
 

@@ -20,7 +20,7 @@
 
 #include "core/error_api.h"
 #include "core/seqpos.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "esa-seqread.h"
 #include "core/logger.h"
 

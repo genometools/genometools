@@ -27,7 +27,7 @@
 #include "core/hashmap-generic.h"
 #include "core/minmax.h"
 #include "core/seqpos.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "core/intbits.h"
 #include "bcktab.h"
 #include "compressedtab.h"

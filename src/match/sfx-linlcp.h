@@ -20,7 +20,7 @@
 
 #include "compressedtab.h"
 #include "core/seqpos.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 
 Compressedtable *lcp9_manzini(Compressedtable *spacefortab,
                               const GtEncodedsequence *encseq,

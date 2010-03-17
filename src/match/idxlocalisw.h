@@ -18,7 +18,7 @@
 #ifndef IDXLOCALISW_H
 #define IDXLOCALISW_H
 #include <inttypes.h>
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "procmatch.h"
 
 typedef long Scoretype;

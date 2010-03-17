@@ -17,7 +17,7 @@
 
 #include "core/unused_api.h"
 #include "extended/alignment.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "spacedef.h"
 #include "core/format64.h"
 #include "idxlocalisw.h"

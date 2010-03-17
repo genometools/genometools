@@ -22,7 +22,7 @@
 #include "core/chardef.h"
 #include "revcompl.h"
 #include "core/format64.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "tyr-map.h"
 #include "tyr-search.h"
 #include "tyr-show.h"

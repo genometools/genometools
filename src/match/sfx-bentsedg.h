@@ -21,7 +21,7 @@
 #include "core/error_api.h"
 #include "core/str.h"
 #include "defined-types.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "intcode-def.h"
 #include "core/seqpos.h"
 #include "sfx-strategy.h"

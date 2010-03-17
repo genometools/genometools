@@ -21,7 +21,7 @@
 #include "core/error.h"
 #include "core/seqiterator_sequence_buffer.h"
 #include "spacedef.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 
 void symbolstring2fasta(FILE *fpout,
                         const char *desc,

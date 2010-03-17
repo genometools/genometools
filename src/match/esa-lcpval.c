@@ -16,7 +16,7 @@
 */
 
 #include "core/seqpos.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "spacedef.h"
 #include "esa-lcpval.h"
 

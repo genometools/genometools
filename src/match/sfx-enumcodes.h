@@ -19,7 +19,7 @@
 #define SFX_ENUMCODES_H
 
 #include "intcode-def.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "core/seqpos.h"
 
 typedef struct Enumcodeatposition Enumcodeatposition;

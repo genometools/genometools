@@ -44,7 +44,7 @@ int testmaxpairs(GT_UNUSED const GtStr *indexname,
 #include "esa-mmsearch.h"
 #include "core/format64.h"
 #include "echoseq.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "core/seqpos.h"
 #include "core/logger.h"
 #include "sfx-suffixer.h"

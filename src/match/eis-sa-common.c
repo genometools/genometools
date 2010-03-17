@@ -18,7 +18,7 @@
 
 #include "core/ma_api.h"
 #include "match/eis-sa-common.h"
-#include "match/encodedsequence.h"
+#include "core/encodedsequence.h"
 
 extern size_t
 translateSuftab2BWT(struct encSeqTrState *trState, GtUchar *dest, Seqpos *src,

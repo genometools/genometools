@@ -20,7 +20,7 @@
 #include "core/assert_api.h"
 #include "spacedef.h"
 #include "intcode-def.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "sfx-enumcodes.h"
 #include "stamp.h"
 #include "initbasepower.h"

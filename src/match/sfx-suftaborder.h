@@ -19,7 +19,7 @@
 #define SFX_SUFTABORDER_H
 
 #include "core/error_api.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "core/readmode.h"
 #include "core/seqpos.h"
 #include "esa-seqread.h"

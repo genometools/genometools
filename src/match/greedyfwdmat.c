@@ -28,7 +28,7 @@
 #include "core/format64.h"
 #include "greedyfwdmat.h"
 #include "intcode-def.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "initbasepower.h"
 
 typedef struct

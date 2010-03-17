@@ -16,7 +16,7 @@
 */
 
 #include "core/ma_api.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "iter-window.h"
 
 struct Windowiterator

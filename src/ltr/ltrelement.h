@@ -24,7 +24,7 @@
 #include "core/seq.h"
 #include "core/strand.h"
 #include "extended/feature_node.h"
-#include "match/encodedsequence.h"
+#include "core/encodedsequence.h"
 
 enum GtOffset {
   GT_OFFSET_END_LEFT_LTR,

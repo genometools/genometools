@@ -18,7 +18,7 @@
 #ifndef OUTPUTSTD_H
 #define OUTPUTSTD_H
 
-#include "match/encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "repeattypes.h"
 #include "ltrharvest-opt.h"
 

@@ -21,7 +21,7 @@
 #include "core/str.h"
 #include "core/error.h"
 #include "core/seqpos.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "sarr-def.h"
 #include "lcpoverflow.h"
 

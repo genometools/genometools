@@ -19,7 +19,7 @@
 #define OUTPUTGFF3_H
 
 #include "core/error.h"
-#include "match/encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "ltrharvest-opt.h"
 #include "repeattypes.h"
 

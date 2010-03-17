@@ -22,7 +22,7 @@
 #include "core/error_api.h"
 #include "core/readmode.h"
 #include "core/seqpos.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 
 typedef struct Querymatch Querymatch;
 

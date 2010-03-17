@@ -21,7 +21,7 @@
 #include <stdbool.h>
 #include "core/error.h"
 #include "core/seqpos.h"
-#include "match/encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "repeattypes.h"
 #include "ltrharvest-opt.h"
 

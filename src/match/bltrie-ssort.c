@@ -20,7 +20,7 @@
 #include "core/minmax.h"
 #include "core/seqpos.h"
 #include "spacedef.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "lcpoverflow.h"
 #include "bltrie-ssort.h"
 

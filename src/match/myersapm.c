@@ -19,7 +19,7 @@
 #include "core/symboldef.h"
 #include "core/seqpos.h"
 #include "spacedef.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "myersapm.h"
 #include "defined-types.h"
 #include "procmatch.h"

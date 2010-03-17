@@ -17,7 +17,7 @@
 
 #include "core/divmodmul.h"
 #include "core/fa.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "defined-types.h"
 #include "spacedef.h"
 #include "tyr-basic.h"

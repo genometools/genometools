@@ -31,7 +31,7 @@
 #include "core/fasta.h"
 #include "giextract.h"
 #include "core/format64.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "echoseq.h"
 
 #define COMPLETE(VALUE)\

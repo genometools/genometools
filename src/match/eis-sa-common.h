@@ -26,7 +26,7 @@
 #include <stdlib.h>
 
 #include "core/symboldef.h"
-#include "match/encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "core/seqpos.h"
 
 #include "match/eis-mrangealphabet.h"

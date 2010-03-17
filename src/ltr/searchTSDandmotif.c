@@ -21,7 +21,7 @@
 #include "core/log.h"
 #include "core/minmax.h"
 #include "core/symboldef.h"
-#include "match/encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "match/spacedef.h"
 #include "match/esa-mmsearch.h"
 

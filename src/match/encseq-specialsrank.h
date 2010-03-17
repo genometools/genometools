@@ -18,7 +18,7 @@
 #ifndef ENCSEQ_SPECIALSRANK_H
 #define ENCSEQ_SPECIALSRANK_H
 
-#include "match/encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "core/seqpos.h"
 
 typedef struct specialsRankLookup SpecialsRankLookup;

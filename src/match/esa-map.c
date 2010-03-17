@@ -26,7 +26,7 @@
 #include "core/fa.h"
 #include "core/format64.h"
 #include "sarr-def.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "esa-fileend.h"
 #include "sfx-ri-def.h"
 #include "intcode-def.h"

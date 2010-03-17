@@ -21,7 +21,7 @@
 #include "sarr-def.h"
 #include "spacedef.h"
 #include "emimergeesa.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "merger-trie.h"
 #include "lcpoverflow.h"
 #include "core/logger.h"

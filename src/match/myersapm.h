@@ -19,7 +19,7 @@
 #define MYERSAPM_H
 
 #include "core/seqpos.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "procmatch.h"
 
 typedef struct Myersonlineresources Myersonlineresources;

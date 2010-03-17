@@ -20,7 +20,7 @@
 #include "core/error.h"
 #include "core/log.h"
 #include "core/unused_api.h"
-#include "match/encodedsequence.h"
+#include "core/encodedsequence.h"
 
 #include "repeattypes.h"
 #include "ltrharvest-opt.h"

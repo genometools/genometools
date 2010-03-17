@@ -22,7 +22,7 @@
 #include "core/chardef.h"
 #include "core/error.h"
 #include "core/unused_api.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "intcode-def.h"
 #include "sfx-nextchar.h"
 #include "kmer2string.h"

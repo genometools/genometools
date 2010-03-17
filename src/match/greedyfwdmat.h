@@ -25,7 +25,7 @@
 #include "core/str_array.h"
 #include "defined-types.h"
 #include "core/seqpos.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 
 typedef unsigned long (*Greedygmatchforwardfunction) (const void *,
                                                       unsigned long offset,

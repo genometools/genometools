@@ -22,7 +22,7 @@
 #include "core/format64.h"
 #include "core/intbits.h"
 #include "spacedef.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 
 #include "merger-trie.h"
 

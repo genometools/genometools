@@ -22,7 +22,7 @@
 #include "core/str.h"
 #include "core/versionfunc.h"
 #include "match/eis-bwtseq.h"
-#include "match/encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "match/sarr-def.h"
 #include "match/eis-bwtseq-param.h"
 #include "tools/gt_packedindex_trsuftab.h"

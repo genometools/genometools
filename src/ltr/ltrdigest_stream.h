@@ -25,7 +25,7 @@
 #ifdef HAVE_HMMER
 #include "ltr/pdom.h"
 #endif
-#include "match/encodedsequence.h"
+#include "core/encodedsequence.h"
 
 /* implements the ``node stream'' interface */
 typedef struct GtLTRdigestStream GtLTRdigestStream;

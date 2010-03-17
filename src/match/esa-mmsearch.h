@@ -18,7 +18,7 @@
 #ifndef ESA_MMSEARCH_H
 #define ESA_MMSEARCH_H
 #include "core/error.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "querymatch.h"
 
 typedef int (*Processquerymatch)(void *,

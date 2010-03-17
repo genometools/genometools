@@ -32,7 +32,7 @@
 #include "spacedef.h"
 #include "core/progress_timer.h"
 #include "intcode-def.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "core/safecast-gen.h"
 #include "esa-fileend.h"
 #include "sfx-partssuf-def.h"

@@ -21,7 +21,7 @@
 #include "core/error_api.h"
 #include "core/minmax.h"
 #include "core/intbits.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "esa-seqread.h"
 #include "sfx-suftaborder.h"
 

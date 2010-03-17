@@ -24,7 +24,7 @@
 #include "core/fa.h"
 #include "core/unused_api.h"
 #include "sfx-optdef.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "core/progress_timer.h"
 #include "esa-fileend.h"
 #include "core/readmode.h"

@@ -19,7 +19,7 @@
 #include "core/error.h"
 #include "core/minmax.h"
 #include "core/mathsupport.h"
-#include "match/encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "match/spacedef.h"
 
 #include "searchforLTRs.h"

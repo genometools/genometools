@@ -18,7 +18,7 @@
 #include "core/error.h"
 #include "core/fa.h"
 #include "core/str.h"
-#include "match/encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "match/echoseq.h"
 #include "outputfasta.h"
 #include "ltrharvest-opt.h"

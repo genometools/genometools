@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include "core/seqpos.h"
 #include "intcode-def.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "lcpoverflow.h"
 #include "bcktab.h"
 

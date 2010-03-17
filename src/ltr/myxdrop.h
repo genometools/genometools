@@ -21,7 +21,7 @@
 #include "core/arraydef.h"
 #include "core/unused_api.h"
 #include "core/seqpos.h"
-#include "match/encodedsequence.h"
+#include "core/encodedsequence.h"
 
 typedef struct
 {

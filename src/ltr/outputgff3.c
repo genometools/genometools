@@ -18,7 +18,7 @@
 #include "core/fa.h"
 #include "core/str.h"
 #include "match/echoseq.h"
-#include "match/encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "match/defined-types.h"
 #include "ltrharvest-opt.h"
 #include "repeattypes.h"

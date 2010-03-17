@@ -18,7 +18,7 @@
 #ifndef ITER_WINDOW_H
 #define ITER_WINDOW_H
 
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 
 typedef struct Windowiterator Windowiterator;
 

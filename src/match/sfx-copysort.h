@@ -20,7 +20,7 @@
 
 #include "bcktab.h"
 #include "intcode-def.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "core/logger.h"
 
 typedef struct GtBucketspec2 GtBucketspec2;

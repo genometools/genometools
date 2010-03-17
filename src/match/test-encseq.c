@@ -22,7 +22,7 @@
 #include "core/progressbar.h"
 #include "spacedef.h"
 #include "core/readmode.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "stamp.h"
 
 #include "arrcmp.pr"

@@ -21,7 +21,7 @@
 #include "core/bioseq.h"
 #include "extended/node_stream_api.h"
 #include "ltr/ltrdigest_def.h"
-#include "match/encodedsequence.h"
+#include "core/encodedsequence.h"
 
 /* implements the ``node_stream'' interface */
 typedef struct GtLTRFileOutStream GtLTRFileOutStream;

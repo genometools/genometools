@@ -19,7 +19,7 @@
 #include "core/chardef.h"
 #include "core/ma_api.h"
 #include "core/seqpos.h"
-#include "encodedsequence.h"
+#include "core/encodedsequence.h"
 #include "compressedtab.h"
 #include "sfx-linlcp.h"
 

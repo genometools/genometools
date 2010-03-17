@@ -31,7 +31,7 @@
 #include "ltr/ltrdigest_def.h"
 #include "ltr/ltrdigest_stream.h"
 #include "ltr/ltrfileout_stream.h"
-#include "match/encodedsequence.h"
+#include "core/encodedsequence.h"
 
 typedef struct GtLTRdigestOptions {
   GtPBSOptions  pbs_opts;
