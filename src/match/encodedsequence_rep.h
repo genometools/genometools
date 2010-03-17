@@ -29,13 +29,13 @@
 */
 
 #include "core/alphabet.h"
-#include "core/intdef.h"
-#include "core/filelengthvalues.h"
-#include "core/symboldef.h"
-#include "core/str_array_api.h"
 #include "core/bitpackarray.h"
-#include "core/seqpos.h"
+#include "core/filelengthvalues.h"
 #include "core/intbits.h"
+#include "core/intdef.h"
+#include "core/seqpos.h"
+#include "core/str_array_api.h"
+#include "core/symboldef.h"
 
 typedef enum
 {

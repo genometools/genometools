@@ -24,28 +24,28 @@
 #include <errno.h>
 #include "core/alphabet.h"
 #include "core/arraydef.h"
+#include "core/bitpackarray.h"
 #include "core/chardef.h"
 #include "core/divmodmul.h"
 #include "core/error.h"
 #include "core/fa.h"
 #include "core/filelengthvalues.h"
+#include "core/format64.h"
+#include "core/intbits.h"
 #include "core/intdef.h"
 #include "core/logger.h"
+#include "core/ma_api.h"
+#include "core/mapspec-gen.h"
+#include "core/minmax.h"
+#include "core/progress_timer.h"
+#include "core/safecast-gen.h"
+#include "core/seqpos.h"
 #include "core/sequence_buffer_fasta.h"
 #include "core/sequence_buffer_plain.h"
 #include "core/str.h"
-#include "core/ma_api.h"
-#include "core/minmax.h"
-#include "core/progress_timer.h"
 #include "core/unused_api.h"
-#include "core/bitpackarray.h"
-#include "core/seqpos.h"
-#include "core/format64.h"
-#include "core/intbits.h"
 #include "intcode-def.h"
-#include "core/safecast-gen.h"
 #include "encodedsequence.h"
-#include "core/mapspec-gen.h"
 #ifndef INLINEDENCSEQ
 #include "encodedsequence_rep.h"
 #endif
@@ -2954,7 +2954,7 @@ unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab)
 
 /*@null@*/ GtEncodedsequence *gt_encodedsequence_new_from_index(bool withrange,
                                                const GtStr *indexname,
-                                               bool withesqtab,
+                                               bool withtistab,
                                                bool withdestab,
                                                bool withsdstab,
                                                bool withssptab,
@@ -2995,7 +2995,7 @@ unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab)
     alpha = NULL;
     ALLASSIGNAPPENDFUNC(firstencseqvalues.sat);
     gt_logger_log(logger,"deliverchar=%s",encseq->delivercharname);
-    if (withesqtab)
+    if (withtistab)
     {
       if (fillencseqmapspecstartptr(encseq,indexname,logger,err) != 0)
       {
@@ -3004,7 +3004,7 @@ unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab)
     }
   }
 #ifdef RANGEDEBUG
-  if (!haserr && withesqtab)
+  if (!haserr && withtistab)
   {
     showallspecialpositions(encseq);
   }

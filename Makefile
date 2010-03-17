@@ -827,11 +827,15 @@ LTRdigestfiles=${CURDIR}/src/ltr/gt_ltrdigest.c\
 
 SKTOOLS=${shell grep -l Kurtz src/tools/*.c}
 
+MOVEDENCSEQFILES = ${CURDIR}/src/core/mapspec-gen.c\
+                   ${CURDIR}/src/core/readmode.c
+
 ALLSPLINT=${addprefix obj/,${notdir ${subst .c,.splint,\
 	             ${filter-out ${EISFILES},${wildcard ${CURDIR}/src/match/*.c}}\
                      ${filter-out ${LTRdigestfiles},${wildcard ${CURDIR}/src/ltr/*.c}}\
-                                ${SKTOOLS}}}}\
+                                ${SKTOOLS} ${MOVEDENCSEQFILES}}}}\
      obj/redblack.splint
+
 
 spgt:${ALLSPLINT}
 
@@ -854,6 +858,11 @@ obj/%.splint: ${CURDIR}/src/tools/%.c
 	@touch $@
 
 obj/%.splint: ${CURDIR}/src/ltr/%.c
+	@echo "splint $<"
+	@splint -DBIGSEQPOS -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
+	@touch $@
+
+obj/%.splint: ${CURDIR}/src/core/%.c
 	@echo "splint $<"
 	@splint -DBIGSEQPOS -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
 	@touch $@

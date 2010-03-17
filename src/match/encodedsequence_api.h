@@ -24,10 +24,10 @@
 #include "core/logger.h"
 #include "core/progress_timer.h"
 #include "core/readmode.h"
+#include "core/seqpos.h"
 #include "core/str.h"
 #include "core/str_array.h"
 #include "core/symboldef.h"
-#include "core/seqpos.h"
 
 typedef struct GtEncodedsequence GtEncodedsequence;
 typedef struct GtEncodedsequenceScanstate GtEncodedsequenceScanstate;
@@ -37,7 +37,7 @@ typedef struct GtEncodedsequenceScanstate GtEncodedsequenceScanstate;
 #include "encodedsequence_rep.h"
 #endif
 
-/* was: fromfiles2encseq */
+/*@null@*/
 GtEncodedsequence* gt_encodedsequence_new_from_files(
                                                   GtProgressTimer *sfxprogress,
                                                   const GtStr *str_indexname,
@@ -54,6 +54,7 @@ GtEncodedsequence* gt_encodedsequence_new_from_files(
                                                   GtLogger *logger,
                                                   GtError *err);
 
+/*@null@*/
 GtEncodedsequence* gt_encodedsequence_new_from_index(bool withrange,
                                                      const GtStr *indexname,
                                                      bool withtistab,
@@ -173,7 +174,7 @@ const GtStrArray*  gt_encodedsequence_filenames(
 
 void               gt_encodedsequence_delete(GtEncodedsequence *encseq);
 
-/* document: needed for efficient sequential reading */
+/* TODO document: needed for efficient sequential reading */
 GtEncodedsequenceScanstate* gt_encodedsequence_scanstate_new(void);
 void                        gt_encodedsequence_scanstate_init(
                                                 GtEncodedsequenceScanstate *esr,
@@ -183,7 +184,7 @@ void                        gt_encodedsequence_scanstate_init(
 void                        gt_encodedsequence_scanstate_initgeneric(
                                                 GtEncodedsequenceScanstate *esr,
                                                 const GtEncodedsequence *encseq,
-                                                bool foe,
+                                                bool moveforward,
                                                 Seqpos startpos);
 void                        gt_encodedsequence_scanstate_delete(
                                                GtEncodedsequenceScanstate *esr);
