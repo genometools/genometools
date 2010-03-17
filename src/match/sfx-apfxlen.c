@@ -21,7 +21,7 @@
 #include "core/error.h"
 #include "core/minmax.h"
 #include "intcode-def.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "core/logger.h"
 #include "bcktab.h"
 #include "initbasepower.h"

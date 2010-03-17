@@ -25,7 +25,7 @@
 #include "defined-types.h"
 #include "spacedef.h"
 #include "optionargmode.h"
-#include "format64.h"
+#include "core/format64.h"
 #include "greedyfwdmat.h"
 #include "intcode-def.h"
 #include "encodedsequence.h"

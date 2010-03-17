@@ -23,7 +23,7 @@
 #include "defined-types.h"
 #include "encodedsequence.h"
 #include "intcode-def.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "sfx-strategy.h"
 #include "sfx-copysort.h"
 #include "bcktab.h"

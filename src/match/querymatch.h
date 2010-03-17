@@ -21,7 +21,7 @@
 #include <inttypes.h>
 #include "core/error_api.h"
 #include "core/readmode.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "encodedsequence.h"
 
 typedef struct Querymatch Querymatch;

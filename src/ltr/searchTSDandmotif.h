@@ -20,7 +20,7 @@
 
 #include <stdbool.h>
 #include "core/error.h"
-#include "match/seqpos-def.h"
+#include "core/seqpos.h"
 #include "match/encodedsequence.h"
 #include "repeattypes.h"
 #include "ltrharvest-opt.h"

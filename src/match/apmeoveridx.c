@@ -20,7 +20,7 @@
 #include "core/symboldef.h"
 #include "core/unused_api.h"
 #include "core/ma_api.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "encodedsequence.h"
 #include "defined-types.h"
 #include "apmeoveridx.h"

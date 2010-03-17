@@ -18,7 +18,7 @@
 #ifndef DIFF_COVER_H
 #define DIFF_COVER_H
 
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "encodedsequence.h"
 #include "core/readmode.h"
 #include "core/logger.h"

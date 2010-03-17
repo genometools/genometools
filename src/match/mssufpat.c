@@ -22,8 +22,8 @@
 #include "core/unused_api.h"
 #include "core/chardef.h"
 #include "core/ma_api.h"
-#include "intbits.h"
-#include "seqpos-def.h"
+#include "core/intbits.h"
+#include "core/seqpos.h"
 #include "absdfstrans-imp.h"
 #include "initeqsvec.h"
 

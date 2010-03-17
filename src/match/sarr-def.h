@@ -19,7 +19,7 @@
 #define SARR_DEF_H
 
 #include <stdio.h>
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "intcode-def.h"
 #include "encodedsequence.h"
 #include "lcpoverflow.h"

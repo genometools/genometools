@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SEQPOS_DEF_H
-#define SEQPOS_DEF_H
+#ifndef SEQPOS_H
+#define SEQPOS_H
 
 #include <stdbool.h>
 #include <inttypes.h>

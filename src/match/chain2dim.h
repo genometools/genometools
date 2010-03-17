@@ -19,7 +19,7 @@
 #define CHAIN2DIM_H
 
 #include "core/error_api.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "core/logger.h"
 
 /*

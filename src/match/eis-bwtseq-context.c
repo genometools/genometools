@@ -24,7 +24,7 @@
 #include "core/dataalign.h"
 #include "core/fa.h"
 #include "core/str.h"
-#include "match/seqpos-def.h"
+#include "core/seqpos.h"
 #include "match/eis-bitpackseqpos.h"
 #include "match/eis-bwtseq.h"
 #include "match/eis-bwtseq-context.h"

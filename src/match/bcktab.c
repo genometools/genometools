@@ -26,10 +26,10 @@
 #include "core/mathsupport.h"
 #include "core/unused_api.h"
 #include "esa-fileend.h"
-#include "mapspec-gen.h"
+#include "core/mapspec-gen.h"
 #include "spacedef.h"
 #include "bcktab.h"
-#include "format64.h"
+#include "core/format64.h"
 #include "initbasepower.h"
 
 #define FROMCODE2SPECIALCODE(CODE,NUMOFCHARS)\

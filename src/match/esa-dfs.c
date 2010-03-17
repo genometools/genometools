@@ -18,7 +18,7 @@
 #include <limits.h>
 #include "core/symboldef.h"
 #include "core/unused_api.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "spacedef.h"
 #include "esa-seqread.h"
 #include "esa-dfs.h"

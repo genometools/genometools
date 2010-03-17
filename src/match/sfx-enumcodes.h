@@ -20,7 +20,7 @@
 
 #include "intcode-def.h"
 #include "encodedsequence.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 
 typedef struct Enumcodeatposition Enumcodeatposition;
 

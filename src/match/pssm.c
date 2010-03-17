@@ -22,7 +22,7 @@
 #include "core/chardef.h"
 #include "core/ma_api.h"
 #include "core/arraydef.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "spacedef.h"
 #include "encodedsequence.h"
 #include "absdfstrans-imp.h"

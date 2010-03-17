@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include "core/error.h"
 #include "match/sarr-def.h"
-#include "match/seqpos-def.h"
+#include "core/seqpos.h"
 #include "match/eis-mrangealphabet.h"
 #include "match/eis-seqdatasrc.h"
 #include "match/eis-sequencemultiread.h"

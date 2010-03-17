@@ -21,7 +21,7 @@
 #include "core/symboldef.h"
 #include "core/unused_api.h"
 #include "sarr-def.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "spacedef.h"
 #include "esa-splititv.h"
 #include "eis-voiditf.h"

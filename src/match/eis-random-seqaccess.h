@@ -29,7 +29,7 @@
 #include <stdlib.h>
 
 #include "core/error.h"
-#include "match/seqpos-def.h"
+#include "core/seqpos.h"
 #include "match/eis-mrangealphabet.h"
 
 /**

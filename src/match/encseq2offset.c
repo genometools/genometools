@@ -18,7 +18,7 @@
 #include "core/chardef.h"
 #include "spacedef.h"
 #include "sarr-def.h"
-#include "safecast-gen.h"
+#include "core/safecast-gen.h"
 
  DECLARESAFECASTFUNCTION(uint64_t,uint64_t,Seqpos,Seqpos)
 

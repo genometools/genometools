@@ -30,7 +30,7 @@
 #include "match/eis-suffixerator-interface.h"
 #include "match/eis-suffixarray-interface.h"
 #include "match/sarr-def.h"
-#include "match/seqpos-def.h"
+#include "core/seqpos.h"
 
 /**
  * \brief Construct block-encoded indexed sequence object and write

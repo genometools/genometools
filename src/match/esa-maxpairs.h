@@ -19,7 +19,7 @@
 #define ESA_MAXPAIRS_H
 
 #include "core/error_api.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "encodedsequence.h"
 #include "esa-seqread.h"
 #include "core/logger.h"

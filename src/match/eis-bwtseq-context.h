@@ -24,7 +24,7 @@
  */
 
 #include "match/eis-seqdatasrc.h"
-#include "match/seqpos-def.h"
+#include "core/seqpos.h"
 #include "match/eis-bwtseq-context-param.h"
 
 typedef struct BWTSeqContextRetriever BWTSeqContextRetriever;

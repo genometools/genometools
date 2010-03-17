@@ -28,7 +28,7 @@
 #include "core/bitpackstring.h"
 #include "core/error.h"
 #include "core/str.h"
-#include "match/seqpos-def.h"
+#include "core/seqpos.h"
 #include "core/logger.h"
 #include "match/eis-encidxseq-param.h"
 #include "match/eis-headerid.h"

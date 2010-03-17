@@ -19,7 +19,7 @@
 #define IDX_LIMDFS_H
 
 #include "core/arraydef.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "core/readmode.h"
 #include "procmatch.h"
 #include "core/logger.h"

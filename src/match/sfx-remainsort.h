@@ -19,7 +19,7 @@
 #define SFX_REMAINSORT_H
 
 #include "core/error_api.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "core/readmode.h"
 #include "bcktab.h"
 #include "intcode-def.h"

@@ -16,7 +16,7 @@
 */
 
 #include "core/divmodmul.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "fmindex.h"
 #include "fmi-occ.gen"
 

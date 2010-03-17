@@ -20,7 +20,7 @@
 #include <stdbool.h>
 #include "core/error_api.h"
 #include "core/unused_api.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "esa-seqread.h"
 
 typedef struct Dfsinfo Dfsinfo;

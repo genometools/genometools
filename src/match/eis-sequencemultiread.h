@@ -24,7 +24,7 @@
 #include "core/assert_api.h"
 #include "core/minmax.h"
 #include "match/eis-seqdatasrc.h"
-#include "match/seqpos-def.h"
+#include "core/seqpos.h"
 
 /** every reader is identified by a unique scalar */
 typedef unsigned consumerID;

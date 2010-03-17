@@ -23,7 +23,7 @@
 #include "match/eis-bwtseq-construct.h"
 #include "match/eis-bwtseq-context-param.h"
 #include "match/eis-bwtseq-sass.h"
-#include "match/seqpos-def.h"
+#include "core/seqpos.h"
 #include "match/sarr-def.h"
 #include "match/esa-map.h"
 #include "tools/gt_packedindex_mkctxmap.h"

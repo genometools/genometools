@@ -19,7 +19,7 @@
 #define SFX_APFXLEN_H
 
 #include "core/error_api.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 
 unsigned int recommendedprefixlength(unsigned int numofchars,
                                      Seqpos totallength);

@@ -27,7 +27,7 @@
 #include "core/str.h"
 #include "core/str_array.h"
 #include "core/symboldef.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 
 typedef struct GtEncodedsequence GtEncodedsequence;
 typedef struct GtEncodedsequenceScanstate GtEncodedsequenceScanstate;

@@ -24,7 +24,7 @@
 #include "core/endianess_api.h"
 #include "core/error.h"
 #include "core/fa.h"
-#include "format64.h"
+#include "core/format64.h"
 #include "sarr-def.h"
 #include "encodedsequence.h"
 #include "esa-fileend.h"

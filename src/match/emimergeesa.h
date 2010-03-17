@@ -18,7 +18,7 @@
 #ifndef EMIMERGEESA_H
 #define EMIMERGEESA_H
 
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "sarr-def.h"
 #include "merger-trie.h"
 

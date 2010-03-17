@@ -23,7 +23,7 @@
 #include "sfx-strategy.h"
 #include "sfx-bentsedg.h"
 #include "core/logger.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 
 typedef struct Sfxiterator Sfxiterator;
 

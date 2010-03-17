@@ -17,7 +17,7 @@
 
 #include "core/unused_api.h"
 #include "fmindex.h"
-#include "mapspec-gen.h"
+#include "core/mapspec-gen.h"
 
 static void assignfmmapspecification(GtArrayMapspecification *mapspectable,
                                      void *voidinfo,

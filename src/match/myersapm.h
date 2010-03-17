@@ -18,7 +18,7 @@
 #ifndef MYERSAPM_H
 #define MYERSAPM_H
 
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "encodedsequence.h"
 #include "procmatch.h"
 

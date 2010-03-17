@@ -20,7 +20,7 @@
 #include "core/error.h"
 #include "core/str.h"
 #include "core/logger.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 
 int testmaxpairs(GT_UNUSED const GtStr *indexname,
                  GT_UNUSED unsigned long samples,
@@ -42,10 +42,10 @@ int testmaxpairs(GT_UNUSED const GtStr *indexname,
 #include "core/unused_api.h"
 #include "spacedef.h"
 #include "esa-mmsearch.h"
-#include "format64.h"
+#include "core/format64.h"
 #include "echoseq.h"
 #include "encodedsequence.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "core/logger.h"
 #include "sfx-suffixer.h"
 #include "sfx-apfxlen.h"

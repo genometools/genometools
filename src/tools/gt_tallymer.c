@@ -27,13 +27,13 @@
 #include "extended/toolbox.h"
 #include "match/optionargmode.h"
 #include "match/defined-types.h"
-#include "match/intbits.h"
+#include "core/intbits.h"
 #include "match/tyr-mkindex.h"
 #include "match/tyr-show.h"
 #include "match/tyr-search.h"
 #include "match/tyr-mersplit.h"
 #include "match/tyr-occratio.h"
-#include "match/format64.h"
+#include "core/format64.h"
 #include "tools/gt_tallymer.h"
 
 typedef enum

@@ -23,7 +23,7 @@
  * Seqpos values in/from BitString.
  */
 
-#include "match/seqpos-def.h"
+#include "core/seqpos.h"
 #include "core/bitpackstring.h"
 
 #ifdef Seqposequalsunsignedint

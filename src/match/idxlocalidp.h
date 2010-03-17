@@ -18,7 +18,7 @@
 #ifndef IDXLOCALIDP_H
 #define IDXLOCALIDP_H
 #include "core/symboldef.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "absdfstrans-def.h"
 
 const AbstractDfstransformer *locali_AbstractDfstransformer(void);

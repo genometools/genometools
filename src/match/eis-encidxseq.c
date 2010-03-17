@@ -18,7 +18,7 @@
 #include <string.h>
 #include "core/yarandom.h"
 
-#include "match/seqpos-def.h"
+#include "core/seqpos.h"
 #include "match/sarr-def.h"
 #include "match/esa-map.h"
 

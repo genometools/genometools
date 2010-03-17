@@ -27,9 +27,9 @@
 #include "core/filelengthvalues.h"
 #include "core/disc_distri.h"
 #include "encodedsequence_api.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "intcode-def.h"
-#include "intbits.h"
+#include "core/intbits.h"
 #include "core/readmode.h"
 #include "core/logger.h"
 

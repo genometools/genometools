@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "encodedsequence.h"
 #include "spacedef.h"
 #include "esa-lcpval.h"

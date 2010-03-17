@@ -20,7 +20,7 @@
 
 #include "core/arraydef.h"
 #include "core/unused_api.h"
-#include "match/seqpos-def.h"
+#include "core/seqpos.h"
 #include "match/encodedsequence.h"
 
 typedef struct

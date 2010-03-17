@@ -39,13 +39,13 @@
 #include "core/progress_timer.h"
 #include "core/unused_api.h"
 #include "core/bitpackarray.h"
-#include "seqpos-def.h"
-#include "format64.h"
-#include "intbits.h"
+#include "core/seqpos.h"
+#include "core/format64.h"
+#include "core/intbits.h"
 #include "intcode-def.h"
-#include "safecast-gen.h"
+#include "core/safecast-gen.h"
 #include "encodedsequence.h"
-#include "mapspec-gen.h"
+#include "core/mapspec-gen.h"
 #ifndef INLINEDENCSEQ
 #include "encodedsequence_rep.h"
 #endif

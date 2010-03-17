@@ -18,7 +18,7 @@
 #ifndef SFX_PARTSSUF_DEF_H
 #define SFX_PARTSSUF_DEF_H
 
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "core/logger.h"
 #include "intcode-def.h"
 

@@ -30,7 +30,7 @@
 #include "core/str_array.h"
 #include "core/symboldef.h"
 #include "core/unused_api.h"
-#include "match/seqpos-def.h"
+#include "core/seqpos.h"
 #include "match/intcode-def.h"
 #include "match/encodedsequence.h"
 

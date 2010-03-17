@@ -18,7 +18,7 @@
 
 #include "core/error.h"
 #include "core/option.h"
-#include "match/seqpos-def.h"
+#include "core/seqpos.h"
 
 #include "match/eis-bwtseq.h"
 #include "match/eis-bwtseq-param.h"

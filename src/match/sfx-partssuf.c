@@ -16,7 +16,7 @@
 */
 
 #include "core/divmodmul.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "spacedef.h"
 #include "intcode-def.h"
 #include "sfx-partssuf-def.h"

@@ -22,7 +22,7 @@
 #include <errno.h>
 #include <stdbool.h>
 #include "core/symboldef.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "bcktab.h"
 
 typedef struct Bucketenumerator Bucketenumerator;

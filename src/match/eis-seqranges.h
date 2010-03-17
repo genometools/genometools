@@ -32,7 +32,7 @@
 
 #include "core/error.h"
 #include "core/bitpackstring.h"
-#include "match/seqpos-def.h"
+#include "core/seqpos.h"
 #include "match/eis-mrangealphabet.h"
 
 /**

@@ -20,7 +20,7 @@
 #include "core/seqiterator_sequence_buffer.h"
 #include "cgr_spacedseed.h"
 #include "sarr-def.h"
-#include "intbits.h"
+#include "core/intbits.h"
 #include "idx-limdfs.h"
 #include "absdfstrans-def.h"
 #include "spaced-seeds.h"

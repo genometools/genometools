@@ -19,7 +19,7 @@
 #include "extended/alignment.h"
 #include "encodedsequence.h"
 #include "spacedef.h"
-#include "format64.h"
+#include "core/format64.h"
 #include "idxlocalisw.h"
 #include "procmatch.h"
 #include "stamp.h"

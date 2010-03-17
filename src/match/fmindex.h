@@ -21,7 +21,7 @@
 #include <stdbool.h>
 #include "core/alphabet.h"
 #include "core/arraydef.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "encodedsequence.h"
 
 /*

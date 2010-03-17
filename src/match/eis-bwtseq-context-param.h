@@ -21,7 +21,7 @@
 
 #include "core/minmax.h"
 #include "core/option.h"
-#include "match/seqpos-def.h"
+#include "core/seqpos.h"
 /* #include "core/bitpackstring.h" Not necessary. Stefan */
 #include "match/eis-bitpackseqpos.h"
 

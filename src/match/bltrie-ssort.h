@@ -18,7 +18,7 @@
 #ifndef BLTRIE_SSORT_H
 #define BLTRIE_SSORT_H
 
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "encodedsequence.h"
 #include "core/readmode.h"
 

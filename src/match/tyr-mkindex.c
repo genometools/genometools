@@ -24,7 +24,7 @@
 #include "esa-seqread.h"
 #include "core/logger.h"
 #include "spacedef.h"
-#include "format64.h"
+#include "core/format64.h"
 #include "esa-mmsearch.h"
 #include "tyr-basic.h"
 #include "tyr-mkindex.h"

@@ -30,7 +30,7 @@
 #include "core/progressbar.h"
 #include "core/fasta.h"
 #include "giextract.h"
-#include "format64.h"
+#include "core/format64.h"
 #include "encodedsequence.h"
 #include "echoseq.h"
 

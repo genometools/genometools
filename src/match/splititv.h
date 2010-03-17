@@ -20,7 +20,7 @@
 
 #include "core/symboldef.h"
 #include "core/arraydef.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 
 typedef struct
 {

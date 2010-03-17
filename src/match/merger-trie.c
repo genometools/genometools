@@ -19,8 +19,8 @@
 #include "core/arraydef.h"
 #include "core/chardef.h"
 #include "core/divmodmul.h"
-#include "format64.h"
-#include "intbits.h"
+#include "core/format64.h"
+#include "core/intbits.h"
 #include "spacedef.h"
 #include "encodedsequence.h"
 

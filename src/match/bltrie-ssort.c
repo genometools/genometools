@@ -18,7 +18,7 @@
 #include "core/arraydef.h"
 #include "core/divmodmul.h"
 #include "core/minmax.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "spacedef.h"
 #include "encodedsequence.h"
 #include "lcpoverflow.h"

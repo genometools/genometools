@@ -23,7 +23,7 @@
 #include "core/symboldef.h"
 #include "core/str_array_api.h"
 #include "core/readmode.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "encodedsequence.h"
 
 void symbolstring2fasta(FILE *fpout,

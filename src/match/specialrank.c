@@ -20,7 +20,7 @@
 #include "core/chardef.h"
 #include "core/divmodmul.h"
 #include "core/ma_api.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "encodedsequence.h"
 
 typedef struct

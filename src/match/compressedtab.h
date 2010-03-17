@@ -21,7 +21,7 @@
 #include "core/ma_api.h"
 #include "core/unused_api.h"
 #include "core/mathsupport.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "core/bitpackarray.h"
 
 typedef struct

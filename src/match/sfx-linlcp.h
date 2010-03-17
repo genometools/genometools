@@ -19,7 +19,7 @@
 #define SFX_LINLCP_H
 
 #include "compressedtab.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "encodedsequence.h"
 
 Compressedtable *lcp9_manzini(Compressedtable *spacefortab,

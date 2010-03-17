@@ -22,7 +22,7 @@
 
 #include "core/arraydef.h"
 #include "core/range_api.h"
-#include "match/seqpos-def.h"
+#include "core/seqpos.h"
 #include "match/encodedsequence.h"
 
 /* The datatype Repeat stores information about the maximal repeats (seeds).*/

@@ -23,7 +23,7 @@
 #include "core/symboldef.h"
 #include "core/fa.h"
 #include "defined-types.h"
-#include "intbits.h"
+#include "core/intbits.h"
 #include "spacedef.h"
 #include "tyr-map.h"
 #include "tyr-mersplit.h"

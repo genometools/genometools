@@ -21,7 +21,7 @@
 #include "core/error_api.h"
 #include "encodedsequence.h"
 #include "core/readmode.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "esa-seqread.h"
 
 void checkifprefixesareidentical(const char *filename,

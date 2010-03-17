@@ -17,7 +17,7 @@
 
 #include "core/chardef.h"
 #include "core/symboldef.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "spacedef.h"
 #include "encodedsequence.h"
 #include "myersapm.h"

@@ -19,9 +19,9 @@
 #include "core/unused_api.h"
 #include "core/symboldef.h"
 #include "core/readmode.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "querymatch.h"
-#include "format64.h"
+#include "core/format64.h"
 
 struct Querymatch
 {

@@ -41,7 +41,7 @@
 #include "core/minmax.h"
 #include "core/str.h"
 #include "core/unused_api.h"
-#include "match/seqpos-def.h"
+#include "core/seqpos.h"
 
 #include "match/eis-bitpackseqpos.h"
 #include "match/eis-encidxseq.h"

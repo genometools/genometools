@@ -21,7 +21,7 @@
 #include "core/seqiterator_sequence_buffer.h"
 #include "core/chardef.h"
 #include "revcompl.h"
-#include "format64.h"
+#include "core/format64.h"
 #include "encodedsequence.h"
 #include "tyr-map.h"
 #include "tyr-search.h"

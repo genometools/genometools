@@ -19,7 +19,7 @@
 #define EIS_VOIDITF_H
 
 #include "core/unused_api.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "sarr-def.h"
 #include "splititv.h"
 #include "procmatch.h"

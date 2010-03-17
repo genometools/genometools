@@ -23,7 +23,7 @@
 #include "core/str.h"
 #include "core/symboldef.h"
 #include "core/logger.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "intcode-def.h"
 
 typedef struct

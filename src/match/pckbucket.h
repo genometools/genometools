@@ -20,7 +20,7 @@
 
 #include "core/str.h"
 #include "core/error.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "splititv.h"
 #include "intcode-def.h"
 

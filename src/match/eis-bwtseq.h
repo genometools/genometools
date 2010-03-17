@@ -27,7 +27,7 @@
 #include "core/error.h"
 #include "core/str.h"
 #include "core/logger.h"
-#include "match/seqpos-def.h"
+#include "core/seqpos.h"
 
 #include "match/eis-encidxseq.h"
 #include "match/eis-mrangealphabet.h"

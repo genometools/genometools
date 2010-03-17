@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include "core/chardef.h"
 #include "core/ma_api.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "encodedsequence.h"
 #include "compressedtab.h"
 #include "sfx-linlcp.h"

@@ -27,7 +27,7 @@
 #include <string.h>
 #include <inttypes.h>
 
-#include "match/seqpos-def.h"
+#include "core/seqpos.h"
 #include "match/eis-bitpackseqpos.h"
 #include "match/eis-mrangealphabet.h"
 

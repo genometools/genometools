@@ -29,7 +29,7 @@
 #include "core/xposix.h"
 #include "core/progressbar.h"
 #include "core/disc_distri.h"
-#include "match/format64.h"
+#include "core/format64.h"
 #include "match/stamp.h"
 #include "tools/gt_seqiterator.h"
 

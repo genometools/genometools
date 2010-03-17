@@ -18,7 +18,7 @@
 #ifndef ESA_LCPVAL_H
 #define ESA_LCPVAL_H
 
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "core/readmode.h"
 #include "encodedsequence.h"
 

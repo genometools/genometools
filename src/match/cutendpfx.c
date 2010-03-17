@@ -20,7 +20,7 @@
 #include "core/symboldef.h"
 #include "core/chardef.h"
 #include "intcode-def.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "spacedef.h"
 #include "bcktab.h"
 #include "cutendpfx.h"

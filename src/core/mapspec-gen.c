@@ -23,11 +23,11 @@
 #include "core/str.h"
 #include "core/filelengthvalues.h"
 #include "core/bitpackarray.h"
-#include "seqpos-def.h"
-#include "intbits.h"
-#include "safecast-gen.h"
-#include "format64.h"
-#include "mapspec-gen.h"
+#include "core/seqpos.h"
+#include "core/intbits.h"
+#include "core/safecast-gen.h"
+#include "core/format64.h"
+#include "core/mapspec-gen.h"
 
 #define ASSIGNPTR2STARTPTR(TYPE)\
         if (mapspec->numofunits == 0)\

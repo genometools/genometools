@@ -27,7 +27,7 @@
 
 #include "core/symboldef.h"
 #include "match/encodedsequence.h"
-#include "match/seqpos-def.h"
+#include "core/seqpos.h"
 
 #include "match/eis-mrangealphabet.h"
 #include "match/eis-random-seqaccess.h"

@@ -26,7 +26,7 @@
 #include "core/versionfunc.h"
 #include "match/esa-seqread.h"
 #include "match/esa-mmsearch.h"
-#include "match/format64.h"
+#include "core/format64.h"
 #include "match/esa-maxpairs.h"
 #include "match/test-maxpairs.pr"
 #include "match/querymatch.h"

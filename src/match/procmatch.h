@@ -19,7 +19,7 @@
 #define PROCMATCH_H
 
 #include "core/symboldef.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 
 typedef struct
 {

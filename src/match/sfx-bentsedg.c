@@ -31,7 +31,7 @@
 #include "turnwheels.h"
 #include "esa-fileend.h"
 #include "sfx-bentsedg.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "bcktab.h"
 #include "bltrie-ssort.h"
 #include "lcpoverflow.h"

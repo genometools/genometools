@@ -23,7 +23,7 @@
 #include "core/array.h"
 #include "core/symboldef.h"
 #include "core/logger.h"
-#include "format64.h"
+#include "core/format64.h"
 #include "sfx-ri-def.h"
 
 typedef union

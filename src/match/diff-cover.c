@@ -26,7 +26,7 @@
 #include "core/mathsupport.h"
 #include "core/qsort_r.h"
 #include "core/unused_api.h"
-#include "intbits.h"
+#include "core/intbits.h"
 #include "diff-cover.h"
 #include "sfx-apfxlen.h"
 #include "sfx-enumcodes.h"

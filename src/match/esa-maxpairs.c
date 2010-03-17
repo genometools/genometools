@@ -18,7 +18,7 @@
 #include "core/arraydef.h"
 #include "core/unused_api.h"
 #include "spacedef.h"
-#include "seqpos-def.h"
+#include "core/seqpos.h"
 #include "esa-seqread.h"
 #include "core/logger.h"
 #include "esa-maxpairs.h"

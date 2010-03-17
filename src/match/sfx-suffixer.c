@@ -33,7 +33,7 @@
 #include "core/progress_timer.h"
 #include "intcode-def.h"
 #include "encodedsequence.h"
-#include "safecast-gen.h"
+#include "core/safecast-gen.h"
 #include "esa-fileend.h"
 #include "sfx-partssuf-def.h"
 #include "sfx-suffixer.h"
