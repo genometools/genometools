@@ -456,11 +456,8 @@ static int runsuffixerator(bool doesa,
     }
   } else
   {
-    ArraySeqpos sequenceseppos;
 
-    GT_INITARRAY(&sequenceseppos,Seqpos);
-    encseq = gt_encodedsequence_new_from_files(&sequenceseppos,
-                                               sfxprogress,
+    encseq = gt_encodedsequence_new_from_files(sfxprogress,
                                                so->fn2encopt.str_indexname,
                                                so->fn2encopt.str_smap,
                                                so->fn2encopt.str_sat,
@@ -478,34 +475,6 @@ static int runsuffixerator(bool doesa,
     {
       haserr = true;
     }
-    if (!haserr && so->fn2encopt.outssptab)
-    {
-      FILE *outfp;
-
-      outfp = openssptabfile(so->fn2encopt.str_indexname,"wb",err);
-      if (outfp == NULL)
-      {
-        haserr = true;
-      } else
-      {
-        if (fwrite(sequenceseppos.spaceSeqpos,
-                   sizeof (*sequenceseppos.spaceSeqpos),
-                   (size_t) sequenceseppos.nextfreeSeqpos,
-                   outfp)
-                   != (size_t) sequenceseppos.nextfreeSeqpos)
-        {
-          gt_error_set(err,"cannot write %lu items of size %u: "
-                           "errormsg=\"%s\"",
-                            sequenceseppos.nextfreeSeqpos,
-                            (unsigned int)
-                            sizeof (*sequenceseppos.spaceSeqpos),
-                            strerror(errno));
-          haserr = true;
-        }
-      }
-      gt_fa_fclose(outfp);
-    }
-    GT_FREEARRAY(&sequenceseppos,Seqpos);
   }
   if (!haserr)
   {

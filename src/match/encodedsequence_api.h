@@ -22,12 +22,12 @@
 #include "core/alphabet.h"
 #include "core/chardef.h"
 #include "core/logger.h"
+#include "core/progress_timer.h"
+#include "core/readmode.h"
 #include "core/str.h"
 #include "core/str_array.h"
 #include "core/symboldef.h"
 #include "seqpos-def.h"
-#include "core/readmode.h"
-#include "core/progress_timer.h"
 
 typedef struct GtEncodedsequence GtEncodedsequence;
 typedef struct GtEncodedsequenceScanstate GtEncodedsequenceScanstate;
@@ -39,7 +39,6 @@ typedef struct GtEncodedsequenceScanstate GtEncodedsequenceScanstate;
 
 /* was: fromfiles2encseq */
 GtEncodedsequence* gt_encodedsequence_new_from_files(
-                                       /* XXX */  ArraySeqpos *sequenceseppos,
                                                   GtProgressTimer *sfxprogress,
                                                   const GtStr *str_indexname,
                                                   const GtStr *str_smap,

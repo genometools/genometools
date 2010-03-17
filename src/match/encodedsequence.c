@@ -3282,23 +3282,22 @@ FILE *openssptabfile(const GtStr *indexname,const char *mode,GtError *err)
   return gt_fa_fopen_filename_with_suffix(indexname,SSPTABSUFFIX,mode,err);
 }
 
-static int gt_inputfiles2sequencekeyvalues(
-        const GtStr *indexname,
-        Seqpos *totallength,
-        Specialcharinfo *specialcharinfo,
-        unsigned int forcetable,
-        Seqpos *specialrangestab,
-        const GtStrArray *filenametab,
-        Filelengthvalues **filelengthtab,
-        const GtAlphabet *alpha,
-        bool plainformat,
-        bool outdestab,
-        bool outsdstab,
-        unsigned long *characterdistribution,
-        bool outssptab,
-        ArraySeqpos *sequenceseppos,
-        GtLogger *logger,
-        GtError *err)
+static int gt_inputfiles2sequencekeyvalues(const GtStr *indexname,
+                                           Seqpos *totallength,
+                                           Specialcharinfo *specialcharinfo,
+                                           unsigned int forcetable,
+                                           Seqpos *specialrangestab,
+                                           const GtStrArray *filenametab,
+                                           Filelengthvalues **filelengthtab,
+                                           const GtAlphabet *alpha,
+                                           bool plainformat,
+                                           bool outdestab,
+                                           bool outsdstab,
+                                           unsigned long *characterdistribution,
+                                           bool outssptab,
+                                           ArraySeqpos *sequenceseppos,
+                                           GtLogger *logger,
+                                           GtError *err)
 {
   GtSequenceBuffer *fb = NULL;
   GtUchar charcode;
@@ -5326,8 +5325,7 @@ static unsigned long *initcharacterdistribution(const GtAlphabet *alpha)
 }
 
 GtEncodedsequence*
-gt_encodedsequence_new_from_files(ArraySeqpos *sequenceseppos,
-                                  GtProgressTimer *sfxprogress,
+gt_encodedsequence_new_from_files(GtProgressTimer *sfxprogress,
                                   const GtStr *str_indexname,
                                   const GtStr *str_smap,
                                   const GtStr *str_sat,
@@ -5352,9 +5350,11 @@ gt_encodedsequence_new_from_files(ArraySeqpos *sequenceseppos,
   Seqpos specialrangestab[3];
   unsigned long *characterdistribution = NULL;
   GtEncodedsequence *encseq = NULL;
+  ArraySeqpos sequenceseppos;
 
   gt_error_check(err);
   encseq = NULL;
+  GT_INITARRAY(&sequenceseppos, Seqpos);
   if (gt_str_length(str_sat) > 0)
   {
     int retval = getsatforcevalue(gt_str_get(str_sat),err);
@@ -5400,7 +5400,7 @@ gt_encodedsequence_new_from_files(ArraySeqpos *sequenceseppos,
                                         outsdstab,
                                         characterdistribution,
                                         outssptab,
-                                        sequenceseppos,
+                                        &sequenceseppos,
                                         logger,
                                         err) != 0)
     {
@@ -5420,7 +5420,7 @@ gt_encodedsequence_new_from_files(ArraySeqpos *sequenceseppos,
                                    filelengthtab,
                                    isplain,
                                    totallength,
-                                   sequenceseppos->nextfreeSeqpos+1,
+                                   sequenceseppos.nextfreeSeqpos+1,
                                    specialrangestab,
                                    alpha,
                                    gt_str_length(str_sat) > 0
@@ -5443,6 +5443,32 @@ gt_encodedsequence_new_from_files(ArraySeqpos *sequenceseppos,
           haserr = true;
         }
       }
+      if (!haserr && outssptab)
+      {
+        FILE *outfp;
+        outfp = openssptabfile(str_indexname,"wb",err);
+        if (outfp == NULL)
+        {
+          haserr = true;
+        } else
+        {
+          if (fwrite(sequenceseppos.spaceSeqpos,
+                     sizeof (*sequenceseppos.spaceSeqpos),
+                     (size_t) sequenceseppos.nextfreeSeqpos,
+                     outfp)
+                     != (size_t) sequenceseppos.nextfreeSeqpos)
+          {
+            gt_error_set(err,"cannot write %lu items of size %u: "
+                             "errormsg=\"%s\"",
+                              sequenceseppos.nextfreeSeqpos,
+                              (unsigned int)
+                              sizeof (*sequenceseppos.spaceSeqpos),
+                              strerror(errno));
+            haserr = true;
+          }
+        }
+        gt_fa_fclose(outfp);
+      }
     }
   }
   if (haserr)
@@ -5455,5 +5481,6 @@ gt_encodedsequence_new_from_files(ArraySeqpos *sequenceseppos,
       gt_alphabet_delete((GtAlphabet*) alpha);
     }
   }
+  GT_FREEARRAY(&sequenceseppos, Seqpos);
   return haserr ? NULL : encseq;
 }
