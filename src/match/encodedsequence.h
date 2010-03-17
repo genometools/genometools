@@ -29,7 +29,7 @@
 #include "seqpos-def.h"
 #include "intcode-def.h"
 #include "intbits.h"
-#include "readmode-def.h"
+#include "core/readmode.h"
 #include "core/logger.h"
 
 #ifdef SKDEBUG
@@ -127,7 +127,7 @@ void freespecialrangeiterator(Specialrangeiterator **sri);
 Codetype extractprefixcode(unsigned int *unitsnotspecial,
                            const GtEncodedsequence *encseq,
                            const Codetype *filltable,
-                           Readmode readmode,
+                           GtReadmode readmode,
                            GtEncodedsequenceScanstate *esr,
                            const Codetype **multimappower,
                            Seqpos frompos,
@@ -276,7 +276,7 @@ FILE *opendestabfile(const GtStr *indexname,const char *mode,GtError *err);
 FILE *openssptabfile(const GtStr *indexname,const char *mode,GtError *err);
 
 int comparetwosuffixes(const GtEncodedsequence *encseq,
-                       Readmode readmode,
+                       GtReadmode readmode,
                        Seqpos *maxlcp,
                        bool specialsareequal,
                        bool specialsareequalatdepth0,

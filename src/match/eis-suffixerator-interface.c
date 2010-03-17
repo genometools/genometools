@@ -42,7 +42,7 @@
 struct sfxInterface
 {
   struct SASeqSrc baseClass;
-  Readmode readmode;
+  GtReadmode readmode;
   unsigned int prefixlength, numofparts;
   const Sfxstrategy *sfxstrategy;
   const GtAlphabet *alpha;
@@ -150,7 +150,7 @@ SfxIGenerate(void *iface, void *backlogState,
              size_t len, SeqDataTranslator xltor);
 
 extern sfxInterface *
-newSfxInterface(Readmode readmode,
+newSfxInterface(GtReadmode readmode,
                 unsigned int prefixlength,
                 unsigned int numofparts,
                 const Sfxstrategy *sfxstrategy,
@@ -218,7 +218,7 @@ deleteSeqStats(struct seqStats *stats)
   } while (0)
 
 extern sfxInterface *
-newSfxInterfaceWithReaders(Readmode readmode,
+newSfxInterfaceWithReaders(GtReadmode readmode,
                            unsigned int prefixlength,
                            unsigned int numofparts,
                            const Sfxstrategy *sfxstrategy,
@@ -327,7 +327,7 @@ SfxIGetEncSeq(const sfxInterface *si)
   return si->encseq;
 }
 
-extern Readmode
+extern GtReadmode
 SfxIGetReadmode(const sfxInterface *si)
 {
   return si->readmode;

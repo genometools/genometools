@@ -32,8 +32,8 @@ SAIGetEncSeq(const SuffixarrayFileInterface *sai)
   return sai->sa->encseq;
 }
 
-static inline Readmode
-SAIGetReadmode(const SuffixarrayFileInterface *sai)
+static inline GtReadmode
+SAIGetGtReadmode(const SuffixarrayFileInterface *sai)
 {
   return sai->sa->readmode;
 }

@@ -31,7 +31,7 @@ typedef struct
 } Specialcontext;
 
 Enumcodeatposition *newEnumcodeatposition(const GtEncodedsequence *encseq,
-                                          Readmode readmode,
+                                          GtReadmode readmode,
                                           unsigned int prefixlength,
                                           unsigned int numofchars);
 

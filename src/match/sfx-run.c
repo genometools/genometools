@@ -27,7 +27,7 @@
 #include "encodedsequence.h"
 #include "sfx-progress.h"
 #include "esa-fileend.h"
-#include "readmode-def.h"
+#include "core/readmode.h"
 #include "core/logger.h"
 #include "intcode-def.h"
 #include "spacedef.h"
@@ -139,7 +139,7 @@ static int suftab2file(FILE *outfpsuftab,
 
 static int bwttab2file(Outfileinfo *outfileinfo,
                        const Seqpos *suftab,
-                       Readmode readmode,
+                       GtReadmode readmode,
                        Seqpos numberofsuffixes,
                        GtError *err)
 {
@@ -194,7 +194,7 @@ static int bwttab2file(Outfileinfo *outfileinfo,
 static int suffixeratorwithoutput(const GtStr *str_indexname,
                                   Outfileinfo *outfileinfo,
                                   const GtEncodedsequence *encseq,
-                                  Readmode readmode,
+                                  GtReadmode readmode,
                                   unsigned int prefixlength,
                                   unsigned int numofparts,
                                   const Sfxstrategy *sfxstrategy,
@@ -510,13 +510,13 @@ static int runsuffixerator(bool doesa,
   if (!haserr)
   {
     gt_showsequencefeatures(logger,encseq,false);
-    if (so->readmode == Complementmode ||
-        so->readmode == Reversecomplementmode)
+    if (so->readmode == GT_READMODE_COMPL ||
+        so->readmode == GT_READMODE_REVCOMPL)
     {
       if (!gt_alphabet_is_dna(gt_encodedsequence_alphabet(encseq)))
       {
         gt_error_set(err,"option -%s only can be used for DNA alphabets",
-                          so->readmode == Complementmode ? "cpl" : "rcl");
+                          so->readmode == GT_READMODE_COMPL ? "cpl" : "rcl");
         haserr = true;
       }
     }
@@ -551,12 +551,12 @@ static int runsuffixerator(bool doesa,
       }
     } else
     {
-      if (so->readmode != Forwardmode)
+      if (so->readmode != GT_READMODE_FORWARD)
       {
         gt_error_set(err,"option '-dir %s' only makes sense in combination "
                           "with at least one of the options -suf, -lcp, or "
                           "-bwt",
-                          showreadmode(so->readmode));
+                          gt_readmode_show(so->readmode));
         haserr = true;
       }
     }

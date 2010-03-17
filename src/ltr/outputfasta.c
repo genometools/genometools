@@ -47,7 +47,7 @@ static void myencseq2symbolstring(Fastaoutinfo *fastainfo,
                                   Seqpos offset,
                                   const char *desc,
                                   unsigned long desclength,
-                                  Readmode readmode,
+                                  GtReadmode readmode,
                                   Seqpos start,
                                   Seqpos wlen)
 {
@@ -95,7 +95,7 @@ static void showpredictionfastasequence(Fastaoutinfo *fastainfo,
                         seqinfo.seqstartpos,
                         desptr,
                         desclen,
-                        Forwardmode,
+                        GT_READMODE_FORWARD,
                         startpos,
                         len);
 }

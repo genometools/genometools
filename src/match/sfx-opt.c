@@ -23,7 +23,7 @@
 #include "core/option.h"
 #include "core/str.h"
 #include "core/versionfunc.h"
-#include "readmode-def.h"
+#include "core/readmode.h"
 #include "sfx-optdef.h"
 #include "core/logger.h"
 #include "stamp.h"
@@ -453,14 +453,14 @@ static GtOPrval parse_options(int *parsed_args,
   }
   if (oprval == GT_OPTION_PARSER_OK)
   {
-    int retval = parsereadmode(gt_str_get(dirarg),err);
+    int retval = gt_readmode_parse(gt_str_get(dirarg),err);
 
     if (retval < 0)
     {
       oprval = GT_OPTION_PARSER_ERROR;
     } else
     {
-      so->readmode = (Readmode) retval;
+      so->readmode = (GtReadmode) retval;
     }
   }
   gt_str_delete(dirarg);

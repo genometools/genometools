@@ -28,7 +28,7 @@
                                                                  readmode))
 
 static Seqpos lcpintervalfindrightbound(const GtEncodedsequence *encseq,
-                                        Readmode readmode,
+                                        GtReadmode readmode,
                                         Seqpos totallength,
                                         const Seqpos *suftab,
                                         GtUchar cc,
@@ -56,7 +56,7 @@ static Seqpos lcpintervalfindrightbound(const GtEncodedsequence *encseq,
 }
 
 bool lcpintervalfindcharchildintv(const GtEncodedsequence *encseq,
-                                  Readmode readmode,
+                                  GtReadmode readmode,
                                   Seqpos totallength,
                                   const Seqpos *suftab,
                                   Simplelcpinterval *itv,
@@ -116,7 +116,7 @@ bool lcpintervalfindcharchildintv(const GtEncodedsequence *encseq,
 
 void lcpintervalsplitwithoutspecial(GtArrayBoundswithchar *bwci,
                                     const GtEncodedsequence *encseq,
-                                    Readmode readmode,
+                                    GtReadmode readmode,
                                     Seqpos totallength,
                                     const Seqpos *suftab,
                                     Seqpos parentoffset,
@@ -158,7 +158,7 @@ void lcpintervalsplitwithoutspecial(GtArrayBoundswithchar *bwci,
 }
 
 GtUchar lcpintervalextendlcp(const GtEncodedsequence *encseq,
-                           Readmode readmode,
+                           GtReadmode readmode,
                            const Seqpos *suftab,
                            Seqpos totallength,
                            GtUchar alphasize,

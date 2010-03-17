@@ -87,7 +87,7 @@ struct Differencecover
          *leftborder; /* points to bcktab->leftborder */
   Bcktab *bcktab;
   const GtEncodedsequence *encseq;
-  Readmode readmode;
+  GtReadmode readmode;
   unsigned long samplesize, effectivesamplesize, maxsamplesize;
   const Codetype **multimappower;
   Codetype *filltable;
@@ -238,7 +238,7 @@ int differencecover_vparamverify(const Differencecover *dcov,GtError *err)
 
 Differencecover *differencecover_new(unsigned int vparam,
                                      const GtEncodedsequence *encseq,
-                                     Readmode readmode,
+                                     GtReadmode readmode,
                                      GtLogger *logger)
 {
   unsigned int offset = 0, v = 1U;
@@ -511,7 +511,7 @@ static unsigned long insertfullspecialrangesample(Differencecover *dcov,
   Seqpos pos;
 
   gt_assert(leftpos < rightpos);
-  if (ISDIRREVERSE(dcov->readmode))
+  if (GT_ISDIRREVERSE(dcov->readmode))
   {
     pos = rightpos - 1;
   } else
@@ -520,7 +520,7 @@ static unsigned long insertfullspecialrangesample(Differencecover *dcov,
   }
   while (true)
   {
-    if (ISDIRREVERSE(dcov->readmode))
+    if (GT_ISDIRREVERSE(dcov->readmode))
     {
       Seqpos revpos = GT_REVERSEPOS(dcov->totallength,pos);
       if (checkifindifferencecover(dcov,MODV(revpos)))
@@ -561,7 +561,7 @@ static void initinversesuftabspecials(Differencecover *dcov)
     unsigned long specialidx;
 
     sri = newspecialrangeiterator(dcov->encseq,
-                                  ISDIRREVERSE(dcov->readmode)
+                                  GT_ISDIRREVERSE(dcov->readmode)
                                   ? false : true);
     specialidx = dcov->effectivesamplesize;
     while (nextspecialrangeiterator(&range,sri))
@@ -1239,7 +1239,7 @@ void differencecover_sortsample(Differencecover *dcov,bool cmpcharbychar,
   filldiff2pos(dcov);
 }
 
-void differencecovers_check(const GtEncodedsequence *encseq,Readmode readmode)
+void differencecovers_check(const GtEncodedsequence *encseq,GtReadmode readmode)
 {
   Differencecover *dcov;
   size_t logmod;

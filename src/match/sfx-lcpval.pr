@@ -2,7 +2,7 @@
 extern "C" {
 #endif
 Lcpvalueiterator *newLcpvalueiterator(const GtEncodedsequence *encseq,
-                                      Readmode readmode);
+                                      GtReadmode readmode);
 
 Seqpos nextLcpvalueiterator(Lcpvalueiterator *lvi,
                             bool firstpage,

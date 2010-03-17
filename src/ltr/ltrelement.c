@@ -58,13 +58,13 @@ char* gt_ltrelement_get_sequence(unsigned long start, unsigned long end,
   out          = gt_malloc((len + 1) * sizeof (char));
   symbolstring = gt_malloc((len + 1) * sizeof (GtUchar));
 
-  gt_encodedsequence_scanstate_init(ess, seq, Forwardmode,
+  gt_encodedsequence_scanstate_init(ess, seq, GT_READMODE_FORWARD,
                                seqinfo->seqstartpos + start);
   for (i=0;i<len;i++)
   {
     symbolstring[i] = gt_encodedsequence_sequentialgetencodedchar(seq, ess,
                                                seqinfo->seqstartpos + start + i,
-                                               Forwardmode);
+                                               GT_READMODE_FORWARD);
   }
   gt_alphabet_sprintf_symbolstring(alpha, out, symbolstring, len);
   gt_free(symbolstring);

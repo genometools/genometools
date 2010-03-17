@@ -174,7 +174,7 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
       gt_error_set(err,"illegal readmode %u",(unsigned int) readmodeint);
       haserr = true;
     }
-    suffixarray->readmode = (Readmode) readmodeint;
+    suffixarray->readmode = (GtReadmode) readmodeint;
   }
   gt_array_delete(riktab);
   return haserr ? -1 : 0;

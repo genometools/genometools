@@ -21,7 +21,7 @@
 #include <stdbool.h>
 #include "core/str.h"
 #include "core/str_array.h"
-#include "readmode-def.h"
+#include "core/readmode.h"
 #include "sfx-strategy.h"
 #include "eis-bwtseq-param.h"
 
@@ -51,7 +51,7 @@ typedef struct
         *str_maxdepth;
   GtOption *optionalgboundsref;
   GtStrArray *algbounds;
-  Readmode readmode;
+  GtReadmode readmode;
   bool beverbose,
        showtime,
        showprogress,

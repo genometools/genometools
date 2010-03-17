@@ -31,7 +31,7 @@ typedef struct
 } Simplelcpinterval;
 
 bool lcpintervalfindcharchildintv(const GtEncodedsequence *encseq,
-                                  Readmode readmode,
+                                  GtReadmode readmode,
                                   Seqpos totallength,
                                   const Seqpos *suftab,
                                   Simplelcpinterval *itv,
@@ -42,7 +42,7 @@ bool lcpintervalfindcharchildintv(const GtEncodedsequence *encseq,
 
 void lcpintervalsplitwithoutspecial(GtArrayBoundswithchar *bwci,
                                     const GtEncodedsequence *encseq,
-                                    Readmode readmode,
+                                    GtReadmode readmode,
                                     Seqpos totallength,
                                     const Seqpos *suftab,
                                     Seqpos parentoffset,
@@ -50,7 +50,7 @@ void lcpintervalsplitwithoutspecial(GtArrayBoundswithchar *bwci,
                                     Seqpos parentright);
 
 GtUchar lcpintervalextendlcp(const GtEncodedsequence *encseq,
-                           Readmode readmode,
+                           GtReadmode readmode,
                            const Seqpos *suftab,
                            Seqpos totallength,
                            GtUchar alphasize,

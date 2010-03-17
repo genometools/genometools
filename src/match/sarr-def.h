@@ -88,7 +88,7 @@ typedef struct
   GtEncodedsequence *encseq;
   DefinedSeqpos numoflargelcpvalues; /* only in esa-map.c */
   DefinedSeqpos longest; /* for BWT */
-  Readmode readmode; /* relevant when reading the encoded sequence */
+  GtReadmode readmode; /* relevant when reading the encoded sequence */
   /* either with mapped input */
   const Seqpos *suftab;
   const GtUchar *lcptab;

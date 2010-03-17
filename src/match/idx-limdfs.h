@@ -20,7 +20,7 @@
 
 #include "core/arraydef.h"
 #include "seqpos-def.h"
-#include "readmode-def.h"
+#include "core/readmode.h"
 #include "procmatch.h"
 #include "core/logger.h"
 #include "absdfstrans-def.h"
@@ -96,7 +96,7 @@ bool indexbasedexactpatternmatching(const Limdfsresources *limdfsresources,
 
 GtUchar limdfs_getencodedchar(const Limdfsresources *limdfsresources,
                               Seqpos pos,
-                              Readmode readmode);
+                              GtReadmode readmode);
 
 bool intervalwidthleq(const Limdfsresources *limdfsresources,
                       Seqpos leftbound,Seqpos rightbound);

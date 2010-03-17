@@ -20,7 +20,7 @@
 
 #include <inttypes.h>
 #include "core/error_api.h"
-#include "readmode-def.h"
+#include "core/readmode.h"
 #include "seqpos-def.h"
 #include "encodedsequence.h"
 
@@ -31,7 +31,7 @@ Querymatch *querymatch_new(void);
 void querymatch_fill(Querymatch *querymatch,
                      Seqpos len,
                      Seqpos dbstart,
-                     Readmode readmode,
+                     GtReadmode readmode,
                      bool selfmatch,
                      uint64_t queryseqnum,
                      Seqpos querystart,

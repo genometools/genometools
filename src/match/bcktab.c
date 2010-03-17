@@ -946,7 +946,7 @@ void bcktab_leftborderpartialsums(Bcktab *bcktab,Seqpos numofsuffixestosort)
 #include "qgram2code.h"
 void consistencyofsuffix(int line,
                          const GtEncodedsequence *encseq,
-                         Readmode readmode,
+                         GtReadmode readmode,
                          const Bcktab *bcktab,
                          unsigned int numofchars,
                          const Suffixwithcode *suffix)

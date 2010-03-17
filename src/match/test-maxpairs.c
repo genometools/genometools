@@ -65,7 +65,7 @@ typedef struct
 
 static int constructsarrandrunmaxpairs(
                  Substringmatchinfo *ssi,
-                 Readmode readmode,
+                 GtReadmode readmode,
                  unsigned int prefixlength,
                  unsigned int numofparts,
                  Sfxprogress *sfxprogress,
@@ -160,7 +160,7 @@ static int sarrselfsubstringmatch(const GtUchar *dbseq,
   ssi.processmaxpairsinfo = processmaxpairsinfo;
   numofchars = gt_alphabet_num_of_chars(alpha);
   if (constructsarrandrunmaxpairs(&ssi,
-                                  Forwardmode,
+                                  GT_READMODE_FORWARD,
                                   recommendedprefixlength(numofchars,
                                                           dblen+querylen+1),
                                   1U, /* parts */

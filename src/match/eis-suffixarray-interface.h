@@ -84,8 +84,8 @@ SAIGetRot0Pos(const void *state);
 static inline const GtEncodedsequence *
 SAIGetEncSeq(const SuffixarrayFileInterface *sai);
 
-static inline Readmode
-SAIGetReadmode(const SuffixarrayFileInterface *sai);
+static inline GtReadmode
+SAIGetGtReadmode(const SuffixarrayFileInterface *sai);
 
 static inline Seqpos
 SAIGetLength(const SuffixarrayFileInterface *sai);

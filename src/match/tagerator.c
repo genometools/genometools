@@ -245,7 +245,7 @@ static void checkmstats(void *processinfo,
       {
         cc = limdfs_getencodedchar((const Limdfsresources *) processinfo,
                                   witnessposition + idx - patternstartpos,
-                                  Forwardmode);
+                                  GT_READMODE_FORWARD);
         if (twl->tagptr[idx] != cc)
         {
           fprintf(stderr,"patternstartpos = %lu: pattern[%lu] = %u != %u = "

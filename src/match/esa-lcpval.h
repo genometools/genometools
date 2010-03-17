@@ -19,13 +19,13 @@
 #define ESA_LCPVAL_H
 
 #include "seqpos-def.h"
-#include "readmode-def.h"
+#include "core/readmode.h"
 #include "encodedsequence.h"
 
 typedef struct Lcpvalueiterator Lcpvalueiterator;
 
 Lcpvalueiterator *newLcpvalueiterator(const GtEncodedsequence *encseq,
-                                      Readmode readmode);
+                                      GtReadmode readmode);
 
 Seqpos nextLcpvalueiterator(Lcpvalueiterator *lvi,
                             bool firstpage,

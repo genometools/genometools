@@ -245,10 +245,10 @@ void calculateallowedMININFINITYINTgenerations(
 #define EVALXDROPARBITSCORES EVALXDROPARBITSCORESRIGHT
 #define USEQ(A,I) A = gt_encodedsequence_getencodedchar(str_useq, \
                                                         useq+(Seqpos)(I),\
-                                                        Forwardmode)
+                                                        GT_READMODE_FORWARD)
 #define VSEQ(A,J) A = gt_encodedsequence_getencodedchar(str_vseq, \
                                                         vseq+(Seqpos)(J),\
-                                                        Forwardmode)
+                                                        GT_READMODE_FORWARD)
 
 #include "myxdrop.gen"
 
@@ -266,9 +266,9 @@ void calculateallowedMININFINITYINTgenerations(
 #define EVALXDROPARBITSCORES EVALXDROPARBITSCORESLEFT
 #define USEQ(A,I) A = gt_encodedsequence_getencodedchar(str_useq, \
                                                         useq-(Seqpos)1-(I),\
-                                                        Forwardmode)
+                                                        GT_READMODE_FORWARD)
 #define VSEQ(A,J) A = gt_encodedsequence_getencodedchar(str_vseq, \
                                                         vseq-(Seqpos)1-(J),\
-                                                        Forwardmode)
+                                                        GT_READMODE_FORWARD)
 
 #include "myxdrop.gen"

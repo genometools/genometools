@@ -432,9 +432,9 @@ static Mergertrienode *makenewbranch(Mergertrierep *trierep,
   return newbranch;
 }
 
-static Seqpos getlcp(const GtEncodedsequence *encseq1,Readmode readmode1,
+static Seqpos getlcp(const GtEncodedsequence *encseq1,GtReadmode readmode1,
                      Seqpos start1,Seqpos end1,
-                     const GtEncodedsequence *encseq2,Readmode readmode2,
+                     const GtEncodedsequence *encseq2,GtReadmode readmode2,
                      Seqpos start2,Seqpos end2)
 {
   Seqpos i1, i2;

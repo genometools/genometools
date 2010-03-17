@@ -27,7 +27,7 @@ typedef struct GtBucketspec2 GtBucketspec2;
 
 GtBucketspec2 *gt_bucketspec2_new(const Bcktab *bcktab,
                                   const GtEncodedsequence *encseq,
-                                  Readmode readmode,
+                                  GtReadmode readmode,
                                   Seqpos partwidth,
                                   unsigned int numofchars);
 

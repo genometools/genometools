@@ -21,7 +21,7 @@
 #include "core/sequence_buffer_plain.h"
 #include "core/progressbar.h"
 #include "spacedef.h"
-#include "readmode-def.h"
+#include "core/readmode.h"
 #include "encodedsequence.h"
 #include "stamp.h"
 
@@ -29,7 +29,7 @@
 
 static void runscanatpostrial(const GtEncodedsequence *encseq,
                               GtEncodedsequenceScanstate *esr,
-                              Readmode readmode,Seqpos startpos)
+                              GtReadmode readmode,Seqpos startpos)
 {
   Seqpos pos, totallength;
   GtUchar ccra, ccsr;
@@ -49,7 +49,7 @@ static void runscanatpostrial(const GtEncodedsequence *encseq,
                      " sequential read (wrong)\n",
                      PRINTSeqposcast(startpos),
                      encseqaccessname(encseq),
-                     showreadmode(readmode),
+                     gt_readmode_show(readmode),
                      PRINTSeqposcast(pos),
                      (unsigned int) ccra,
                      (unsigned int) ccsr);
@@ -59,7 +59,7 @@ static void runscanatpostrial(const GtEncodedsequence *encseq,
 }
 
 static void testscanatpos(const GtEncodedsequence *encseq,
-                          Readmode readmode,
+                          GtReadmode readmode,
                           unsigned long scantrials)
 {
   GtEncodedsequenceScanstate *esr = NULL;
@@ -81,14 +81,14 @@ static void testscanatpos(const GtEncodedsequence *encseq,
 }
 
 static void testmulticharactercompare(const GtEncodedsequence *encseq,
-                                      Readmode readmode,
+                                      GtReadmode readmode,
                                       unsigned long multicharcmptrials)
 {
   GtEncodedsequenceScanstate *esr1, *esr2;
   Seqpos pos1, pos2, totallength;
   unsigned long trial;
-  bool fwd = ISDIRREVERSE(readmode) ? false : true,
-       complement = ISDIRCOMPLEMENT(readmode) ? true : false;
+  bool fwd = GT_ISDIRREVERSE(readmode) ? false : true,
+       complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
 
   esr1 = gt_encodedsequence_scanstate_new();
   esr2 = gt_encodedsequence_scanstate_new();
@@ -114,7 +114,7 @@ static void testmulticharactercompare(const GtEncodedsequence *encseq,
 
 static int testfullscan(const GtStrArray *filenametab,
                         const GtEncodedsequence *encseq,
-                        Readmode readmode,
+                        GtReadmode readmode,
                         GtError *err)
 {
   Seqpos pos, totallength;
@@ -142,7 +142,7 @@ static int testfullscan(const GtStrArray *filenametab,
     gt_encodedsequence_scanstate_init(esr,encseq,readmode,0);
     for (pos=0; /* Nothing */; pos++)
     {
-      if (filenametab != NULL && readmode == Forwardmode)
+      if (filenametab != NULL && readmode == GT_READMODE_FORWARD)
       {
         retval = gt_sequence_buffer_next(fb,&ccscan,err);
         if (retval < 0)
@@ -163,7 +163,7 @@ static int testfullscan(const GtStrArray *filenametab,
       }
       /* Random access */
       ccra = gt_encodedsequence_getencodedchar(encseq,pos,readmode);
-      if (filenametab != NULL && readmode == Forwardmode)
+      if (filenametab != NULL && readmode == GT_READMODE_FORWARD)
       {
         if (ccscan != ccra)
         {
@@ -185,7 +185,7 @@ static int testfullscan(const GtStrArray *filenametab,
         gt_error_set(err,"access=%s, mode=%s: position=" FormatSeqpos
                           ": random access = %u != %u = sequential read",
                           encseqaccessname(encseq),
-                          showreadmode(readmode),
+                          gt_readmode_show(readmode),
                           pos,
                           (unsigned int) ccra,
                           (unsigned int) ccsr);
@@ -212,13 +212,13 @@ static int testfullscan(const GtStrArray *filenametab,
 
 int testencodedsequence(const GtStrArray *filenametab,
                         const GtEncodedsequence *encseq,
-                        Readmode readmode,
+                        GtReadmode readmode,
                         unsigned long scantrials,
                         unsigned long multicharcmptrials,
                         GtError *err)
 {
-  bool fwd = ISDIRREVERSE(readmode) ? false : true,
-       complement = ISDIRCOMPLEMENT(readmode) ? true : false;
+  bool fwd = GT_ISDIRREVERSE(readmode) ? false : true,
+       complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
 
   if (hasfastspecialrangeenumerator(encseq))
   {

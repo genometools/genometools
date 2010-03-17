@@ -188,7 +188,7 @@ static inline void
 buildSpRTable(const struct bwtParam *params,
               Seqpos totalLen,
               const GtEncodedsequence *encseq,
-              Readmode readmode,
+              GtReadmode readmode,
               SpecialsRankLookup **sprTable,
               const enum rangeSortMode **rangeSort)
 {
@@ -223,7 +223,7 @@ createBWTSeqFromSAI(const struct bwtParam *params,
   const enum rangeSortMode *rangeSort;
   gt_assert(sai && err && params);
   buildSpRTable(params, SAIGetLength(sai), SAIGetEncSeq(sai),
-                SAIGetReadmode(sai), &sprTable, &rangeSort);
+                SAIGetGtReadmode(sai), &sprTable, &rangeSort);
   bwtSeq = createBWTSeqFromSASS(params, SAI2SASS(sai), sprTable, rangeSort,
                                 err);
   if (sprTable)

@@ -18,7 +18,7 @@
 #ifndef SFX_SUFFIXER_H
 #define SFX_SUFFIXER_H
 #include "core/error.h"
-#include "readmode-def.h"
+#include "core/readmode.h"
 #include "sfx-progress.h"
 #include "sfx-strategy.h"
 #include "sfx-bentsedg.h"
@@ -30,7 +30,7 @@ typedef struct Sfxiterator Sfxiterator;
 void freeSfxiterator(Sfxiterator **sfiptr);
 
 Sfxiterator *newSfxiterator(const GtEncodedsequence *encseq,
-                            Readmode readmode,
+                            GtReadmode readmode,
                             unsigned int prefixlength,
                             unsigned int numofparts,
                             Outlcpinfo *outlcpinfo,

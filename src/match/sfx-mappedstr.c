@@ -425,7 +425,7 @@ static void doovershoot(Streamstate *spwp,
 
 void getencseqkmers(
         const GtEncodedsequence *encseq,
-        Readmode readmode,
+        GtReadmode readmode,
         void(*processkmercode)(void *,Codetype,Seqpos,const Firstspecialpos *),
         void *processkmercodeinfo,
         unsigned int kmersize)

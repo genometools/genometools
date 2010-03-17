@@ -24,7 +24,7 @@
 typedef struct specialsRankLookup SpecialsRankLookup;
 
 extern SpecialsRankLookup *
-newSpecialsRankLookup(const GtEncodedsequence *encseq, Readmode readmode,
+newSpecialsRankLookup(const GtEncodedsequence *encseq, GtReadmode readmode,
                      unsigned sampleIntervalLog2);
 
 extern void

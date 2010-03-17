@@ -22,7 +22,7 @@
 #include "core/error_api.h"
 #include "core/symboldef.h"
 #include "core/str_array_api.h"
-#include "readmode-def.h"
+#include "core/readmode.h"
 #include "seqpos-def.h"
 #include "encodedsequence.h"
 
@@ -35,7 +35,7 @@ void symbolstring2fasta(FILE *fpout,
 
 void encseq2symbolstring(FILE *fpout,
                          const GtEncodedsequence *encseq,
-                         Readmode readmode,
+                         GtReadmode readmode,
                          Seqpos start,
                          Seqpos wlen,
                          unsigned long width);
@@ -48,7 +48,7 @@ void fprintfencseq(FILE *fpout,
 void encseq2fastaoutput(FILE *fpout,
                         const char *desc,
                         const GtEncodedsequence *encseq,
-                        Readmode readmode,
+                        GtReadmode readmode,
                         Seqpos start,
                         Seqpos wlen,
                         unsigned long width);

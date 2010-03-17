@@ -64,7 +64,7 @@ struct Sfxiterator
   Codeatposition *spaceCodeatposition;
   Suftabparts *suftabparts;
   const GtEncodedsequence *encseq;
-  Readmode readmode;
+  GtReadmode readmode;
   Outlcpinfo *outlcpinfo;
   unsigned int part,
                numofchars,
@@ -86,7 +86,7 @@ struct Sfxiterator
 #ifdef SKDEBUG
 static unsigned long iterproduceCodeatposition(Codeatposition *codelist,
                                                const  GtEncodedsequence *encseq,
-                                               Readmode readmode,
+                                               GtReadmode readmode,
                                                unsigned int prefixlength,
                                                unsigned int numofchars)
 {
@@ -160,7 +160,7 @@ static void compareCodeatpositionlists(const Codeatposition *codelist1,
 
 static void verifycodelistcomputation(
                        const GtEncodedsequence *encseq,
-                       Readmode readmode,
+                       GtReadmode readmode,
                        Seqpos realspecialranges,
                        unsigned int prefixlength,
                        unsigned int numofchars,
@@ -188,7 +188,7 @@ static void verifycodelistcomputation(
 
 #ifdef SKDEBUG
 static Codetype getencseqcode(const GtEncodedsequence *encseq,
-                              Readmode readmode,
+                              GtReadmode readmode,
                               Seqpos totallength,
                               const Codetype **multimappower,
                               unsigned int prefixlength,
@@ -458,7 +458,7 @@ static void showleftborder(const Seqpos *leftborder,
 #endif
 
 Sfxiterator *newSfxiterator(const GtEncodedsequence *encseq,
-                            Readmode readmode,
+                            GtReadmode readmode,
                             unsigned int prefixlength,
                             unsigned int numofparts,
                             Outlcpinfo *outlcpinfo,
@@ -652,7 +652,7 @@ Sfxiterator *newSfxiterator(const GtEncodedsequence *encseq,
     if (hasspecialranges(sfi->encseq))
     {
       sfi->sri = newspecialrangeiterator(sfi->encseq,
-                                         ISDIRREVERSE(sfi->readmode)
+                                         GT_ISDIRREVERSE(sfi->readmode)
                                            ? false : true);
     } else
     {
@@ -885,7 +885,7 @@ static void insertfullspecialrange(Sfxiterator *sfi,
   Seqpos pos;
 
   gt_assert(leftpos < rightpos);
-  if (ISDIRREVERSE(sfi->readmode))
+  if (GT_ISDIRREVERSE(sfi->readmode))
   {
     pos = rightpos - 1;
   } else
@@ -894,7 +894,7 @@ static void insertfullspecialrange(Sfxiterator *sfi,
   }
   while (true)
   {
-    if (ISDIRREVERSE(sfi->readmode))
+    if (GT_ISDIRREVERSE(sfi->readmode))
     {
       sfi->fusp.spaceSeqpos[sfi->fusp.nextfreeSeqpos++]
         = GT_REVERSEPOS(sfi->totallength,pos);
@@ -931,7 +931,7 @@ static void fillspecialnextpage(Sfxiterator *sfi)
         unsigned long rest = sfi->fusp.nextfreeSeqpos +
                              width - sfi->fusp.allocatedSeqpos;
         gt_assert(rest > 0);
-        if (ISDIRREVERSE(sfi->readmode))
+        if (GT_ISDIRREVERSE(sfi->readmode))
         {
           insertfullspecialrange(sfi,sfi->overhang.leftpos + rest,
                                  sfi->overhang.rightpos);
@@ -965,7 +965,7 @@ static void fillspecialnextpage(Sfxiterator *sfi)
         { /* does not fit into the buffer, so only output a part */
           unsigned long rest = sfi->fusp.nextfreeSeqpos +
                                width - sfi->fusp.allocatedSeqpos;
-          if (ISDIRREVERSE(sfi->readmode))
+          if (GT_ISDIRREVERSE(sfi->readmode))
           {
             insertfullspecialrange(sfi,range.leftpos + rest,
                                    range.rightpos);

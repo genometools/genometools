@@ -20,7 +20,7 @@
 
 #include "core/error_api.h"
 #include "seqpos-def.h"
-#include "readmode-def.h"
+#include "core/readmode.h"
 #include "bcktab.h"
 #include "intcode-def.h"
 #include "defined-types.h"
@@ -35,7 +35,7 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                           Codetype maxcode,
                           unsigned int numofchars,
                           unsigned int prefixlength,
-                          Readmode readmode,
+                          GtReadmode readmode,
                           Seqpos partwidth,
                           bool hashexceptions,
                           bool absoluteinversesuftab);

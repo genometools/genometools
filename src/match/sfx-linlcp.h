@@ -24,7 +24,7 @@
 
 Compressedtable *lcp9_manzini(Compressedtable *spacefortab,
                               const GtEncodedsequence *encseq,
-                              Readmode readmode,
+                              GtReadmode readmode,
                               Seqpos partwidth,
                               Seqpos totallength,
                               const Seqpos *sortedsuffixes);

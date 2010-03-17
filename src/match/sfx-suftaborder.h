@@ -20,14 +20,14 @@
 
 #include "core/error_api.h"
 #include "encodedsequence.h"
-#include "readmode-def.h"
+#include "core/readmode.h"
 #include "seqpos-def.h"
 #include "esa-seqread.h"
 
 void checkifprefixesareidentical(const char *filename,
                                  int line,
                                  const GtEncodedsequence *encseq,
-                                 Readmode readmode,
+                                 GtReadmode readmode,
                                  const Seqpos *suftab,
                                  unsigned int prefixlength,
                                  Seqpos depth,
@@ -35,14 +35,14 @@ void checkifprefixesareidentical(const char *filename,
                                  Seqpos right);
 
 void showentiresuftab(const GtEncodedsequence *encseq,
-                      Readmode readmode,
+                      GtReadmode readmode,
                       const Seqpos *suftab,
                       Seqpos depth);
 
 void checkentiresuftab(const char *filename,
                        int line,
                        const GtEncodedsequence *encseq,
-                       Readmode readmode,
+                       GtReadmode readmode,
                        const Seqpos *suftab,
                        Seqpos numberofsuffixes,
                        Sequentialsuffixarrayreader *ssar,
@@ -54,7 +54,7 @@ void checkentiresuftab(const char *filename,
 void checksortedsuffixes(const char *filename,
                          int line,
                          const GtEncodedsequence *encseq,
-                         Readmode readmode,
+                         GtReadmode readmode,
                          const Seqpos *suftab,
                          Seqpos numberofsuffixes,
                          bool specialsareequal,

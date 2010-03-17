@@ -32,7 +32,7 @@
 static Codetype qgram2codefillspecial(unsigned int numofchars,
                                       unsigned int kmersize,
                                       const GtEncodedsequence *encseq,
-                                      Readmode readmode,
+                                      GtReadmode readmode,
                                       Seqpos startpos,
                                       Seqpos totallength)
 {
@@ -104,9 +104,9 @@ static void outkmeroccurrence(void *processinfo,
 /*
    The function to collect the code from a stream of fasta files
    can only produce the sequence of code in forward mode.
-   Hence we compute the corresponding sequence also in Forwardmode.
+   Hence we compute the corresponding sequence also in GT_READMODE_FORWARD.
    Thus we restrict the call for verifymappedstr to the case where
-   the suffix array is in readmode = Forwardmode.
+   the suffix array is in readmode = GT_READMODE_FORWARD.
 */
 
 static void collectkmercode(GtArrayCodetype *codelist,
@@ -123,7 +123,7 @@ static void collectkmercode(GtArrayCodetype *codelist,
     code = qgram2codefillspecial(numofchars,
                                  kmersize,
                                  encseq,
-                                 Forwardmode,
+                                 GT_READMODE_FORWARD,
                                  offset,
                                  stringtotallength);
     GT_STOREINARRAY(codelist,Codetype,1024,code);

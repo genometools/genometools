@@ -47,7 +47,7 @@ GT_DECLAREARRAYSTRUCT(Mergertrienodeptr);
 typedef struct
 {
   GtEncodedsequence *encseqptr;
-  Readmode readmode;
+  GtReadmode readmode;
 } Encseqreadinfo;
 
 typedef struct

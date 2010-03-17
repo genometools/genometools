@@ -24,13 +24,13 @@
 {
   Seqpos relpos,
          lastsuftabentry;
-  Readmode readmode;
+  GtReadmode readmode;
   const GtEncodedsequence *encseq;
   GtEncodedsequenceScanstate *esr1, *esr2;
 };
 
 Lcpvalueiterator *newLcpvalueiterator(const GtEncodedsequence *encseq,
-                                      Readmode readmode)
+                                      GtReadmode readmode)
 {
   Lcpvalueiterator *lvi;
 

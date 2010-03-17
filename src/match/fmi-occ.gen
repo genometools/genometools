@@ -16,7 +16,7 @@
 */
 
 #define ACCESSBWTTEXT(POS)\
-        gt_encodedsequence_getencodedchar(fm->bwtformatching,POS,Forwardmode)
+        gt_encodedsequence_getencodedchar(fm->bwtformatching,POS,GT_READMODE_FORWARD)
 
 static Seqpos fmoccurrence (const Fmindex *fm,GtUchar cc,Seqpos pos)
 {

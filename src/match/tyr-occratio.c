@@ -33,7 +33,7 @@ struct Dfsinfo /* information stored for each node of the lcp interval tree */
 struct Dfsstate /* global information */
 {
   const GtEncodedsequence *encseq;
-  Readmode readmode;
+  GtReadmode readmode;
   Seqpos totallength;
   unsigned long minmersize,
                 maxmersize;
@@ -85,7 +85,7 @@ static void adddistributionuint64_t(GtArrayuint64_t *occdistribution,
 
 static void iteritvdistribution(GtArrayuint64_t *distribution,
                                 const GtEncodedsequence *encseq,
-                                Readmode readmode,
+                                GtReadmode readmode,
                                 Seqpos totallength,
                                 unsigned long minmersize,
                                 unsigned long maxmersize,

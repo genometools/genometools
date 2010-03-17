@@ -103,7 +103,7 @@ static void producelongutput(const LTRharvestoptions *lo,
       printf("%c",(char) characters[gt_encodedsequence_getencodedchar(encseq,
                                                    boundaries->leftLTR_5 -
                                                    boundaries->lenleftTSD + j,
-                                                   Forwardmode)]);
+                                                   GT_READMODE_FORWARD)]);
     }
     printf("  " FormatSeqpos "  ",
            PRINTSeqposcast(boundaries->lenleftTSD));
@@ -114,19 +114,19 @@ static void producelongutput(const LTRharvestoptions *lo,
         /* Random access */
         (char) characters[gt_encodedsequence_getencodedchar(encseq,
                        boundaries->leftLTR_5,
-                       Forwardmode)],
+                       GT_READMODE_FORWARD)],
         /* Random access */
         (char) characters[gt_encodedsequence_getencodedchar(encseq,
                        boundaries->leftLTR_5+1,
-                       Forwardmode)],
+                       GT_READMODE_FORWARD)],
         /* Random access */
         (char) characters[gt_encodedsequence_getencodedchar(encseq,
                        boundaries->leftLTR_3-1,
-                       Forwardmode)],
+                       GT_READMODE_FORWARD)],
         /* Random access */
         (char) characters[gt_encodedsequence_getencodedchar(encseq,
                        boundaries->leftLTR_3,
-                       Forwardmode)] );
+                       GT_READMODE_FORWARD)] );
   }
   /* increase by 1 */
   printf(FormatSeqpos "  ",
@@ -143,7 +143,7 @@ static void producelongutput(const LTRharvestoptions *lo,
     {
       printf("%c", (char) characters[gt_encodedsequence_getencodedchar(encseq,
                                                     boundaries->rightLTR_3+j+1,
-                                                    Forwardmode)]);
+                                                    GT_READMODE_FORWARD)]);
     }
     printf("  " FormatSeqpos "  ",PRINTSeqposcast(boundaries->lenrightTSD));
   }
@@ -153,19 +153,19 @@ static void producelongutput(const LTRharvestoptions *lo,
         /* Random access */
         (char) characters[gt_encodedsequence_getencodedchar(encseq,
                        boundaries->rightLTR_5,
-                       Forwardmode)],
+                       GT_READMODE_FORWARD)],
         /* Random access */
         (char) characters[gt_encodedsequence_getencodedchar(encseq,
                        boundaries->rightLTR_5+1,
-                       Forwardmode)],
+                       GT_READMODE_FORWARD)],
         /* Random access */
         (char) characters[gt_encodedsequence_getencodedchar(encseq,
                        boundaries->rightLTR_3-1,
-                       Forwardmode)],
+                       GT_READMODE_FORWARD)],
         /* Random access */
         (char) characters[gt_encodedsequence_getencodedchar(encseq,
                        boundaries->rightLTR_3,
-                       Forwardmode)] );
+                       GT_READMODE_FORWARD)] );
   }
   /* print similarity */
   printf("  %.2f", boundaries->similarity);

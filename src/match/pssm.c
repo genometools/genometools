@@ -113,13 +113,13 @@ void lookaheadsearchPSSM(const GtEncodedsequence *encseq,
   GtUchar *buffer;
 
   esr = gt_encodedsequence_scanstate_new();
-  gt_encodedsequence_scanstate_init(esr,encseq,Forwardmode,0);
+  gt_encodedsequence_scanstate_init(esr,encseq,GT_READMODE_FORWARD,0);
   ALLOCASSIGNSPACE(buffer,NULL,GtUchar,prof->dimension);
   firstpos = bufsize = 0;
   for (pos=0; pos < totallength; pos++)
   {
     currentchar = gt_encodedsequence_sequentialgetencodedchar(encseq,esr,pos,
-                                                              Forwardmode);
+                                                           GT_READMODE_FORWARD);
     if (ISSPECIAL(currentchar))
     {
       bufsize = firstpos = 0;

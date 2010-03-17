@@ -34,7 +34,7 @@ translateSuftab2BWT(struct encSeqTrState *trState, GtUchar *dest, Seqpos *src,
 }
 
 static inline void
-writeLCPVal(const GtEncodedsequence *encseq, Readmode readmode,
+writeLCPVal(const GtEncodedsequence *encseq, GtReadmode readmode,
             Seqpos *dest, Seqpos a, Seqpos b)
 {
 #ifndef NDEBUG

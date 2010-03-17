@@ -26,7 +26,7 @@
 #include "core/str_array.h"
 #include "core/symboldef.h"
 #include "seqpos-def.h"
-#include "readmode-def.h"
+#include "core/readmode.h"
 #include "sfx-progress.h"
 
 typedef struct GtEncodedsequence GtEncodedsequence;
@@ -90,13 +90,13 @@ unsigned long      gt_encodedsequence_num_of_sequences(
 GtUchar            gt_encodedsequence_getencodedchar(
                                                 const GtEncodedsequence *encseq,
                                                 Seqpos pos,
-                                                Readmode readmode)
+                                                GtReadmode readmode)
 {
-  return (readmode == Forwardmode)
+  return (readmode == GT_READMODE_FORWARD)
           ? encseq->plainseq[pos]
-          : ((readmode == Reversemode)
+          : ((readmode == GT_READMODE_REVERSE)
             ? encseq->plainseq[GT_REVERSEPOS(encseq->totallength,pos)]
-            : ((readmode == Complementmode)
+            : ((readmode == GT_READMODE_COMPL)
               ? GT_MAKECOMPL(encseq->plainseq[pos])
               : GT_MAKECOMPL(encseq->plainseq[
                            GT_REVERSEPOS(encseq->totallength,pos)])
@@ -110,11 +110,11 @@ GtUchar            gt_encodedsequence_getencodedchar(
 GtUchar            gt_encodedsequence_getencodedchar(
                                                 const GtEncodedsequence *encseq,
                                                 Seqpos pos,
-                                                Readmode readmode);
+                                                GtReadmode readmode);
 GtUchar            gt_encodedsequence_extractencodedchar(
                                                 const GtEncodedsequence *encseq,
                                                 Seqpos pos,
-                                                Readmode readmode);
+                                                GtReadmode readmode);
 #endif
 
 #ifdef GT_INLINEDENCSEQ
@@ -124,7 +124,7 @@ GtUchar            gt_encodedsequence_extractencodedchar(
 GtUchar            gt_encodedsequence_getencodedcharnospecial(
                                                 const GtEncodedsequence *encseq,
                                                 Seqpos pos,
-                                                Readmode readmode);
+                                                GtReadmode readmode);
 #endif
 
 #ifdef GT_INLINEDENCSEQ
@@ -136,7 +136,7 @@ GtUchar            gt_encodedsequence_sequentialgetencodedchar(
                                                 const GtEncodedsequence *encseq,
                                                 GtEncodedsequenceScanstate *esr,
                                                 Seqpos pos,
-                                                Readmode readmode);
+                                                GtReadmode readmode);
 #endif
 
 void               gt_encodedsequence_extract_substring(
@@ -179,7 +179,7 @@ GtEncodedsequenceScanstate* gt_encodedsequence_scanstate_new(void);
 void                        gt_encodedsequence_scanstate_init(
                                                 GtEncodedsequenceScanstate *esr,
                                                 const GtEncodedsequence *encseq,
-                                                Readmode readmode,
+                                                GtReadmode readmode,
                                                 Seqpos startpos);
 void                        gt_encodedsequence_scanstate_initgeneric(
                                                 GtEncodedsequenceScanstate *esr,

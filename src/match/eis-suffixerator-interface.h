@@ -54,7 +54,7 @@ typedef struct sfxInterface sfxInterface;
  * @return interface object reference
  */
 extern sfxInterface *
-newSfxInterface(Readmode readmode,
+newSfxInterface(GtReadmode readmode,
                 unsigned int prefixlength,
                 unsigned int numofparts,
                 const Sfxstrategy *sfxstrategy,
@@ -87,7 +87,7 @@ newSfxInterface(Readmode readmode,
  * @return interface object reference
  */
 extern sfxInterface *
-newSfxInterfaceWithReaders(Readmode readmode,
+newSfxInterfaceWithReaders(GtReadmode readmode,
                            unsigned int prefixlength,
                            unsigned int numofparts,
                            const Sfxstrategy *sfxstrategy,
@@ -160,7 +160,7 @@ SfxIGetEncSeq(const sfxInterface *si);
  * @param si suffixerator interface object reference
  * @return read mode
  */
-extern Readmode
+extern GtReadmode
 SfxIGetReadmode(const sfxInterface *si);
 
 /**

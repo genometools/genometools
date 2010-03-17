@@ -77,7 +77,7 @@ const GtEncodedsequence *encseqSequentialsuffixarrayreader(
   return ssar->suffixarray->encseq;
 }
 
-Readmode readmodeSequentialsuffixarrayreader(
+GtReadmode readmodeSequentialsuffixarrayreader(
                           const Sequentialsuffixarrayreader *ssar)
 {
   return ssar->suffixarray->readmode;
@@ -102,7 +102,7 @@ Readmode readmodeSequentialsuffixarrayreader(
   Lcpvalueiterator *lvi;
   const Seqpos *suftab;
   const GtEncodedsequence *encseq;
-  Readmode readmode;
+  GtReadmode readmode;
 };
 
 Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
@@ -141,7 +141,7 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
 
 Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromRAM(
                                         const GtEncodedsequence *encseq,
-                                        Readmode readmode)
+                                        GtReadmode readmode)
 {
   Sequentialsuffixarrayreader *ssar;
 
@@ -277,7 +277,7 @@ const GtEncodedsequence *encseqSequentialsuffixarrayreader(
   return ssar->encseq;
 }
 
-Readmode readmodeSequentialsuffixarrayreader(
+GtReadmode readmodeSequentialsuffixarrayreader(
                           const Sequentialsuffixarrayreader *ssar)
 {
   return ssar->readmode;

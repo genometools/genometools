@@ -72,7 +72,7 @@ typedef struct Sequentialsuffixarrayreader Sequentialsuffixarrayreader;
 
 Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromRAM(
                                         const GtEncodedsequence *encseq,
-                                        Readmode readmode);
+                                        GtReadmode readmode);
 
 /* The following can only be used for this case */
 
@@ -102,7 +102,7 @@ void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar);
 const GtEncodedsequence *encseqSequentialsuffixarrayreader(
                           const Sequentialsuffixarrayreader *ssar);
 
-Readmode readmodeSequentialsuffixarrayreader(
+GtReadmode readmodeSequentialsuffixarrayreader(
                           const Sequentialsuffixarrayreader *ssar);
 
 const Seqpos *suftabSequentialsuffixarrayreader(

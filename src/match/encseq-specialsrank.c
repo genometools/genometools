@@ -35,7 +35,7 @@ specialsRankFromTermPos(const SpecialsRankLookup *rankTable, Seqpos pos);
 
 static inline struct specialsRankLookup *
 allocSpecialsRankTable(const GtEncodedsequence *encseq, Seqpos lastSeqPos,
-                       unsigned sampleIntervalLog2, Readmode readmode)
+                       unsigned sampleIntervalLog2, GtReadmode readmode)
 {
   struct specialsRankTable *rankTable;
   struct specialsRankLookup *ranker;
@@ -70,12 +70,12 @@ allocEmptySpecialsRankLookup(const GtEncodedsequence *encseq, Seqpos lastSeqPos)
 
 static inline bool
 nextRange(GtSequencerange *range, Specialrangeiterator *sri,
-          Readmode readmode, Seqpos seqLastPos)
+          GtReadmode readmode, Seqpos seqLastPos)
 {
   bool hasNextRange = nextspecialrangeiterator(range, sri);
   if (hasNextRange)
   {
-    if (ISDIRREVERSE(readmode))
+    if (GT_ISDIRREVERSE(readmode))
     {
       Seqpos temp = range->rightpos;
       range->rightpos = seqLastPos - range->leftpos;
@@ -88,7 +88,7 @@ nextRange(GtSequencerange *range, Specialrangeiterator *sri,
 }
 
 extern SpecialsRankLookup *
-newSpecialsRankLookup(const GtEncodedsequence *encseq, Readmode readmode,
+newSpecialsRankLookup(const GtEncodedsequence *encseq, GtReadmode readmode,
                      unsigned sampleIntervalLog2)
 {
   struct specialsRankLookup *ranker;
@@ -108,7 +108,7 @@ newSpecialsRankLookup(const GtEncodedsequence *encseq, Readmode readmode,
     ranker = allocSpecialsRankTable(encseq, seqLen, sampleIntervalLog2,
                                     readmode);
     rankTable = &ranker->implementationData.sampleTable;
-    sri = newspecialrangeiterator(encseq, !ISDIRREVERSE(readmode));
+    sri = newspecialrangeiterator(encseq, !GT_ISDIRREVERSE(readmode));
     sample = rankTable->rankSumSamples;
     maxSample = sample + rankTable->numSamples;
     *sample++ = sum;
@@ -165,7 +165,7 @@ specialsRankFromSampleTable(const SpecialsRankLookup *ranker, Seqpos pos)
   {
     const GtEncodedsequence *encseq = ranker->encseq;
     GtEncodedsequenceScanstate *esr = rankTable->scanState;
-    Readmode readmode = rankTable->readmode;
+    GtReadmode readmode = rankTable->readmode;
     Seqpos encseqQueryMax = MIN(pos, encSeqLen);
     if (samplePos < encseqQueryMax)
     {

@@ -20,7 +20,7 @@
 
 #include "seqpos-def.h"
 #include "encodedsequence.h"
-#include "readmode-def.h"
+#include "core/readmode.h"
 
 typedef struct Blindtrie Blindtrie;
 
@@ -36,7 +36,7 @@ Blindtrie *blindtrie_new(unsigned long numofsuffixes,
                          bool cmpcharbychar,
                          GtEncodedsequenceScanstate *esr1,
                          GtEncodedsequenceScanstate *esr2,
-                         Readmode readmode);
+                         GtReadmode readmode);
 
 Seqpos blindtrie_suffixsort(Blindtrie *blindtrie,
                             Seqpos *suffixtable,

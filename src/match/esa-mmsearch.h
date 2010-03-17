@@ -34,7 +34,7 @@ MMsearchiterator *newmmsearchiteratorcomplete_plain(
                                     Seqpos leftbound,
                                     Seqpos rightbound,
                                     Seqpos itvoffset,
-                                    Readmode readmode,
+                                    GtReadmode readmode,
                                     const GtUchar *pattern,
                                     unsigned long patternlength);
 
@@ -57,7 +57,7 @@ int callenumquerymatches(const GtStr *indexname,
                          GtError *err);
 
 int callenumselfmatches(const GtStr *indexname,
-                        Readmode queryreadmode,
+                        GtReadmode queryreadmode,
                         unsigned int userdefinedleastlength,
                         Processquerymatch processquerymatch,
                         void *processquerymatchinfo,

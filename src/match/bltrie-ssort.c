@@ -57,7 +57,7 @@ struct Blindtrie
 {
   const GtEncodedsequence *encseq;
   GtEncodedsequenceScanstate *esr1, *esr2;
-  Readmode readmode;
+  GtReadmode readmode;
   Seqpos totallength,
          offset,
          maxdepth,
@@ -340,9 +340,9 @@ static Seqpos fastgetlcp(GtUchar *mm_oldsuffix,
   {
     (void) compareEncseqsequences(&commonunits,
                                   blindtrie->encseq,
-                                  ISDIRREVERSE(blindtrie->readmode)
+                                  GT_ISDIRREVERSE(blindtrie->readmode)
                                   ? false : true,
-                                  ISDIRCOMPLEMENT(blindtrie->readmode)
+                                  GT_ISDIRCOMPLEMENT(blindtrie->readmode)
                                   ? true : false,
                                   blindtrie->esr1,
                                   blindtrie->esr2,
@@ -352,17 +352,17 @@ static Seqpos fastgetlcp(GtUchar *mm_oldsuffix,
   } else
   {
     (void) compareEncseqsequencesmaxdepth(&commonunits,
-                                          blindtrie->encseq,
-                                          ISDIRREVERSE(blindtrie->readmode)
-                                          ? false : true,
-                                          ISDIRCOMPLEMENT(blindtrie->readmode)
-                                          ? true : false,
-                                          blindtrie->esr1,
-                                          blindtrie->esr2,
-                                          leafpos,
-                                          currentstartpos,
-                                          0,
-                                          blindtrie->maxdepthminusoffset);
+                                         blindtrie->encseq,
+                                         GT_ISDIRREVERSE(blindtrie->readmode)
+                                         ? false : true,
+                                         GT_ISDIRCOMPLEMENT(blindtrie->readmode)
+                                         ? true : false,
+                                         blindtrie->esr1,
+                                         blindtrie->esr2,
+                                         leafpos,
+                                         currentstartpos,
+                                         0,
+                                         blindtrie->maxdepthminusoffset);
   }
   if (isleftofboundary(leafpos,commonunits.finaldepth,blindtrie) &&
       !commonunits.leftspecial)
@@ -551,7 +551,7 @@ Blindtrie *blindtrie_new(unsigned long numofsuffixes,
                          bool cmpcharbychar,
                          GtEncodedsequenceScanstate *esr1,
                          GtEncodedsequenceScanstate *esr2,
-                         Readmode readmode)
+                         GtReadmode readmode)
 {
   Blindtrie *blindtrie;
 
@@ -597,9 +597,9 @@ static void checkcurrentblindtrie(Blindtrie *blindtrie)
   {
     maxcommon = 0;
     retval = comparetwostringsgeneric(blindtrie->encseq,
-                                      ISDIRREVERSE(blindtrie->readmode)
+                                      GT_ISDIRREVERSE(blindtrie->readmode)
                                         ? false : true,
-                                      ISDIRCOMPLEMENT(blindtrie->readmode)
+                                      GT_ISDIRCOMPLEMENT(blindtrie->readmode)
                                         ? true : false,
                                       &maxcommon,
                                       suffixtable[idx-1],

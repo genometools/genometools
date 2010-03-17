@@ -24,7 +24,7 @@
 #include "sfx-linlcp.h"
 
 Seqpos *lcp13_manzini(const GtEncodedsequence *encseq,
-                      Readmode readmode,
+                      GtReadmode readmode,
                       Seqpos partwidth,
                       Seqpos totallength,
                       const Seqpos *sortedsuffixes,
@@ -92,7 +92,7 @@ static unsigned long *computeocclesstab(const GtEncodedsequence *encseq)
 
 static void setrelevantfrominversetab(Compressedtable *rightposinverse,
                                       const GtEncodedsequence *encseq,
-                                      Readmode readmode,
+                                      GtReadmode readmode,
                                       const Seqpos *sortedsuffixes,
                                       Seqpos partwidth)
 {
@@ -117,7 +117,7 @@ static void setrelevantfrominversetab(Compressedtable *rightposinverse,
 
 static Seqpos *fillrightofpartwidth(const Compressedtable *rightposinverse,
                                     const GtEncodedsequence *encseq,
-                                    Readmode readmode,
+                                    GtReadmode readmode,
                                     Seqpos partwidth,
                                     Seqpos totallength)
 {
@@ -127,7 +127,8 @@ static Seqpos *fillrightofpartwidth(const Compressedtable *rightposinverse,
   unsigned long countranges = 0, nextrightofpartwidth = 0;
 
   realspecialranges = getencseqrealspecialranges(encseq);
-  sri = newspecialrangeiterator(encseq,ISDIRREVERSE(readmode) ? false : true);
+  sri = newspecialrangeiterator(encseq,
+                                GT_ISDIRREVERSE(readmode) ? false : true);
   while (nextspecialrangeiterator(&range,sri))
   {
     if (range.rightpos < partwidth)
@@ -157,7 +158,7 @@ static void inversesuffixarray2specialranknext(
                          const Compressedtable *rightposinverse,
                          Compressedtable *ranknext,
                          const GtEncodedsequence *encseq,
-                         Readmode readmode,
+                         GtReadmode readmode,
                          Seqpos partwidth,
                          Seqpos totallength)
 {
@@ -176,7 +177,7 @@ static void inversesuffixarray2specialranknext(
     specialcharacters = getencseqspecialcharacters(encseq);
     specialranklistindex = partwidth;
     sri = newspecialrangeiterator(encseq,
-                                  ISDIRREVERSE(readmode) ? false : true);
+                                  GT_ISDIRREVERSE(readmode) ? false : true);
     nextrightofpartwidth = 0;
     while (nextspecialrangeiterator(&range,sri))
     {
@@ -217,7 +218,7 @@ static void inversesuffixarray2specialranknext(
 
 static Seqpos sa2ranknext(Compressedtable *ranknext,
                           const GtEncodedsequence *encseq,
-                          Readmode readmode,
+                          GtReadmode readmode,
                           Seqpos partwidth,
                           Seqpos totallength,
                           const Seqpos *sortedsuffixes)
@@ -260,7 +261,7 @@ static Seqpos sa2ranknext(Compressedtable *ranknext,
     Seqpos specialidx, specialpos;
 
     sri = newspecialrangeiterator(encseq,
-                                  ISDIRREVERSE(readmode) ? false : true);
+                                  GT_ISDIRREVERSE(readmode) ? false : true);
     gt_assert(partwidth > 0); /* otherwise all lcps would be 0 */
     specialidx = partwidth;
     while (nextspecialrangeiterator(&range,sri))
@@ -297,7 +298,7 @@ static Seqpos sa2ranknext(Compressedtable *ranknext,
 
 Compressedtable *lcp9_manzini(Compressedtable *spacefortab,
                               const GtEncodedsequence *encseq,
-                              Readmode readmode,
+                              GtReadmode readmode,
                               Seqpos partwidth,
                               Seqpos totallength,
                               const Seqpos *sortedsuffixes)

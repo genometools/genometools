@@ -86,28 +86,28 @@ static void searchforbestTSDandormotifatborders(SubRepeatInfo *info,
       {
         tmp_motifmismatchesleftLTR = tmp_motifmismatchesrightLTR = 0;
         if (gt_encodedsequence_getencodedchar(/* Random access */ encseq,
-                            motifpos1 - back, Forwardmode)
+                            motifpos1 - back, GT_READMODE_FORWARD)
             != lo->motif.firstleft)
         {
           tmp_motifmismatchesleftLTR++;
         }
         if (gt_encodedsequence_getencodedchar(/* Random access */ encseq,
                                               motifpos1 + 1 - back,
-                                              Forwardmode)
+                                              GT_READMODE_FORWARD)
             != lo->motif.secondleft)
         {
           tmp_motifmismatchesleftLTR++;
         }
         if (gt_encodedsequence_getencodedchar(/* Random access */ encseq,
                                               motifpos2 + forward,
-                                              Forwardmode)
+                                              GT_READMODE_FORWARD)
             != lo->motif.firstright)
         {
           tmp_motifmismatchesrightLTR++;
         }
         if (gt_encodedsequence_getencodedchar(/* Random access */ encseq,
                                               motifpos2 + 1 + forward,
-                                              Forwardmode)
+                                              GT_READMODE_FORWARD)
             != lo->motif.secondright)
         {
           tmp_motifmismatchesrightLTR++;
@@ -219,14 +219,15 @@ static void searchformotifonlyborders(LTRharvestoptions *lo,
   for (idx = startleftLTR; idx < endleftLTR; idx++)
   {
     tmp_motifmismatchesleftLTR = 0;
-    if (gt_encodedsequence_getencodedchar(/* XXX */ encseq, idx, Forwardmode)
+    if (gt_encodedsequence_getencodedchar(/* XXX */ encseq, idx,
+                                          GT_READMODE_FORWARD)
         != lo->motif.firstleft)
     {
       tmp_motifmismatchesleftLTR++;
     }
     if (gt_encodedsequence_getencodedchar(/* XXX */ encseq,
                                           idx+1,
-                                          Forwardmode) !=
+                                          GT_READMODE_FORWARD) !=
         lo->motif.secondleft)
     {
       tmp_motifmismatchesleftLTR++;
@@ -271,14 +272,15 @@ static void searchformotifonlyborders(LTRharvestoptions *lo,
   for (idx = startrightLTR + 1; idx <= endrightLTR; idx++)
   {
     tmp_motifmismatchesrightLTR = 0;
-    if (gt_encodedsequence_getencodedchar(/* XXX */ encseq, idx, Forwardmode) !=
+    if (gt_encodedsequence_getencodedchar(/* XXX */ encseq, idx,
+                                          GT_READMODE_FORWARD) !=
                        lo->motif.secondright)
     {
       tmp_motifmismatchesrightLTR++;
     }
     if (gt_encodedsequence_getencodedchar(/* XXX */ encseq,
                                           idx-1,
-                                          Forwardmode) !=
+                                          GT_READMODE_FORWARD) !=
                        lo->motif.firstright)
     {
       tmp_motifmismatchesrightLTR++;
@@ -395,14 +397,15 @@ static void searchformotifonlyinside(LTRharvestoptions *lo,
   for (idx = startleftLTR + 1; idx <= endleftLTR; idx++)
   {
     tmp_motifmismatchesleftLTR = (unsigned int)0;
-    if (gt_encodedsequence_getencodedchar(/* XXX */ encseq, idx, Forwardmode)
+    if (gt_encodedsequence_getencodedchar(/* XXX */ encseq, idx,
+                                          GT_READMODE_FORWARD)
                        != lo->motif.secondright)
     {
       tmp_motifmismatchesleftLTR++;
     }
     if (gt_encodedsequence_getencodedchar(/* XXX */ encseq,
                                           idx-1,
-                                          Forwardmode) !=
+                                          GT_READMODE_FORWARD) !=
                        lo->motif.firstright)
     {
       tmp_motifmismatchesleftLTR++;
@@ -449,12 +452,14 @@ static void searchformotifonlyinside(LTRharvestoptions *lo,
   for (idx = startrightLTR ; idx < endrightLTR; idx++)
   {
     tmp_motifmismatchesrightLTR = 0;
-    if (gt_encodedsequence_getencodedchar(/* XXX */ encseq, idx, Forwardmode)
+    if (gt_encodedsequence_getencodedchar(/* XXX */ encseq, idx,
+                                          GT_READMODE_FORWARD)
                        != lo->motif.firstleft)
     {
       tmp_motifmismatchesrightLTR++;
     }
-    if (gt_encodedsequence_getencodedchar(/* XXX */ encseq, idx+1, Forwardmode)
+    if (gt_encodedsequence_getencodedchar(/* XXX */ encseq, idx+1,
+                                          GT_READMODE_FORWARD)
                        != lo->motif.secondleft)
     {
       tmp_motifmismatchesrightLTR++;

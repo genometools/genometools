@@ -30,7 +30,7 @@
 #include "format64.h"
 #include "spacedef.h"
 #include "esa-fileend.h"
-#include "readmode-def.h"
+#include "core/readmode.h"
 #include "encodedsequence.h"
 #include "stamp.h"
 
@@ -39,7 +39,7 @@
                 PRINTSeqposcast(getencseq##VAL(encseq)))
 
 static void showprjinfo(FILE *outprj,
-                        Readmode readmode,
+                        GtReadmode readmode,
                         const GtEncodedsequence *encseq,
                         unsigned int prefixlength,
                         GT_UNUSED const Definedunsignedint *maxdepth,
@@ -84,7 +84,7 @@ static void showprjinfo(FILE *outprj,
 }
 
 int outprjfile(const GtStr *indexname,
-               Readmode readmode,
+               GtReadmode readmode,
                const GtEncodedsequence *encseq,
                unsigned int prefixlength,
                const Definedunsignedint *maxdepth,

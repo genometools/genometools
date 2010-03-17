@@ -73,7 +73,7 @@ static void deletethespranges(const GtEncodedsequence *encseq,
         {
           encseq2symbolstring(stdout,
                               encseq,
-                              Forwardmode,
+                              GT_READMODE_FORWARD,
                               nextpos,
                               range.leftpos + delspranges - nextpos,
                               fastawidth);
@@ -87,7 +87,7 @@ static void deletethespranges(const GtEncodedsequence *encseq,
   {
     encseq2symbolstring(stdout,
                         encseq,
-                        Forwardmode,
+                        GT_READMODE_FORWARD,
                         nextpos,
                         totallength - nextpos,
                         fastawidth);
@@ -273,15 +273,15 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
         {
           if (gt_alphabet_is_dna(
             gt_encodedsequence_alphabet(suffixarray.encseq)) ||
-               ((Readmode) readmode) == Forwardmode ||
-               ((Readmode) readmode) == Reversemode)
+               ((GtReadmode) readmode) == GT_READMODE_FORWARD ||
+               ((GtReadmode) readmode) == GT_READMODE_REVERSE)
           {
             gt_logger_log(logger, "testencodedsequence(readmode=%s)",
-                                   showreadmode((Readmode) readmode));
+                                   gt_readmode_show((GtReadmode) readmode));
             if (testencodedsequence(
                                gt_encodedsequence_filenames(suffixarray.encseq),
                                suffixarray.encseq,
-                               (Readmode) readmode,
+                               (GtReadmode) readmode,
                                sfxmapoptions.scantrials,
                                sfxmapoptions.multicharcmptrials,
                                err) != 0)
@@ -306,7 +306,7 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
         checkmarkpos(suffixarray.encseq);
       }
       if (!haserr && sfxmapoptions.inputtis &&
-          suffixarray.readmode == Forwardmode &&
+          suffixarray.readmode == GT_READMODE_FORWARD &&
           suffixarray.prefixlength > 0)
       {
         gt_logger_log(logger, "verifymappedstr");

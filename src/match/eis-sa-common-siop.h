@@ -21,7 +21,8 @@
 #include "match/eis-sa-common-priv.h"
 
 static inline GtUchar
-sfxIdx2BWTSym(Seqpos sufIdx, const GtEncodedsequence *encseq, Readmode readmode)
+sfxIdx2BWTSym(Seqpos sufIdx, const GtEncodedsequence *encseq,
+              GtReadmode readmode)
 {
   return sufIdx != 0
     ? gt_encodedsequence_getencodedchar(encseq, sufIdx - 1, readmode)
@@ -29,8 +30,8 @@ sfxIdx2BWTSym(Seqpos sufIdx, const GtEncodedsequence *encseq, Readmode readmode)
 }
 
 static inline size_t
-EncSeqGetSubSeq(const GtEncodedsequence *encseq, Readmode readmode, Seqpos pos,
-                size_t len, GtUchar *subSeq)
+EncSeqGetSubSeq(const GtEncodedsequence *encseq, GtReadmode readmode,
+                Seqpos pos, size_t len, GtUchar *subSeq)
 {
   size_t i;
   gt_assert(encseq);

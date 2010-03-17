@@ -3,7 +3,7 @@ extern "C" {
 #endif
 int testencodedsequence(const GtStrArray *filenametab,
                         const GtEncodedsequence *encseq,
-                        Readmode readmode,
+                        GtReadmode readmode,
                         unsigned long scantrials,
                         unsigned long multicharcmptrials,
                         GtError *err);

@@ -63,7 +63,7 @@ struct Dfsstate /* global information */
   ArraySeqpos uniquechar,
               *poslist;
   const GtEncodedsequence *encseq;
-  Readmode readmode;
+  GtReadmode readmode;
   Processmaxpairs processmaxpairs;
   void *processmaxpairsinfo;
 };
@@ -349,7 +349,7 @@ static int processbranchedge(bool firstsucc,
 
 int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
                       const GtEncodedsequence *encseq,
-                      Readmode readmode,
+                      GtReadmode readmode,
                       unsigned int searchlength,
                       Processmaxpairs processmaxpairs,
                       void *processmaxpairsinfo,

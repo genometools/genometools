@@ -345,7 +345,7 @@ typedef struct
   const GtEncodedsequence *encseq;
   GtEncodedsequenceScanstate *esr1, /* XXX be carefull with threads */
                            *esr2;
-  Readmode readmode;
+  GtReadmode readmode;
   bool fwd, complement, assideeffect;
   Seqpos totallength;
   GtArrayMKVstack mkvauxstack; /* XXX be carefull with treads */
@@ -1476,7 +1476,7 @@ static void showSuffixwithcode(FILE *fp,const Suffixwithcode *suffix)
 }
 
 static Seqpos bruteforcelcpvalue(const GtEncodedsequence *encseq,
-                                 Readmode readmode,
+                                 GtReadmode readmode,
                                  const Suffixwithcode *previoussuffix,
                                  const Suffixwithcode *currentsuffix,
                                  unsigned int minchanged,
@@ -1856,7 +1856,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
                                   Suftab *suftab,
                                   DefinedSeqpos *longest,
                                   const GtEncodedsequence *encseq,
-                                  Readmode readmode,
+                                  GtReadmode readmode,
                                   Bcktab *bcktab,
                                   Codetype mincode,
                                   Codetype maxcode,
@@ -1874,8 +1874,8 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   bsr->suftab = suftab;
   bsr->encseq = encseq;
   bsr->longest = longest;
-  bsr->fwd = ISDIRREVERSE(bsr->readmode) ? false : true;
-  bsr->complement = ISDIRCOMPLEMENT(bsr->readmode) ? true : false;
+  bsr->fwd = GT_ISDIRREVERSE(bsr->readmode) ? false : true;
+  bsr->complement = GT_ISDIRCOMPLEMENT(bsr->readmode) ? true : false;
   for (idx = 0; idx < (unsigned long) GT_UNITSIN2BITENC; idx++)
   {
     bsr->leftlcpdist[idx] = bsr->rightlcpdist[idx] = 0;
@@ -2046,7 +2046,7 @@ void qsufsort(Seqpos *sortspace,
               int mmapfiledesc,
               Seqpos *longest,
               const GtEncodedsequence *encseq,
-              Readmode readmode,
+              GtReadmode readmode,
               GT_UNUSED Codetype mincode,
               Codetype maxcode,
               Seqpos partwidth,
@@ -2092,7 +2092,7 @@ void qsufsort(Seqpos *sortspace,
 void sortallbuckets(Suftab *suftab,
                     GtBucketspec2 *bucketspec2,
                     const GtEncodedsequence *encseq,
-                    Readmode readmode,
+                    GtReadmode readmode,
                     Codetype mincode,
                     Codetype maxcode,
                     Seqpos partwidth,
@@ -2296,7 +2296,7 @@ void sortbucketofsuffixes(Seqpos *suffixestobesorted,
                           GtBucketspec2 *bucketspec2,
                           unsigned long numberofsuffixes,
                           const GtEncodedsequence *encseq,
-                          Readmode readmode,
+                          GtReadmode readmode,
                           Codetype mincode,
                           Codetype maxcode,
                           const Bcktab *bcktab,

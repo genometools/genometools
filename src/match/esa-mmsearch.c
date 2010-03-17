@@ -36,7 +36,7 @@ typedef struct
 {
   const GtUchar *sequence;
   const GtEncodedsequence *encseq;
-  Readmode readmode;
+  GtReadmode readmode;
   Seqpos startpos, length;
 } Queryrep;
 
@@ -62,11 +62,11 @@ static GtUchar accessquery(int line,const Queryrep *queryrep,
   gt_assert(pos < queryrep->length);
   if (queryrep->sequence != NULL)
   {
-    gt_assert(queryrep->readmode == Forwardmode);
+    gt_assert(queryrep->readmode == GT_READMODE_FORWARD);
     return queryrep->sequence[abspos];
   } else
   {
-    gt_assert(queryrep->readmode != Forwardmode);
+    gt_assert(queryrep->readmode != GT_READMODE_FORWARD);
     gt_assert(queryrep->encseq != NULL);
     return gt_encodedsequence_getencodedchar(queryrep->encseq,
                                              abspos,
@@ -113,7 +113,7 @@ static GtUchar accessquery(int line,const Queryrep *queryrep,
 static bool mmsearch(const GtEncodedsequence *dbencseq,
                      GtEncodedsequenceScanstate *esr,
                      const Seqpos *suftab,
-                     Readmode readmode,
+                     GtReadmode readmode,
                      Lcpinterval *lcpitv,
                      const Querysubstring *querysubstring,
                      unsigned long minmatchlength)
@@ -210,7 +210,7 @@ static MMsearchiterator *newmmsearchiterator_generic(
                                        Seqpos leftbound,
                                        Seqpos rightbound,
                                        Seqpos itvoffset,
-                                       Readmode readmode,
+                                       GtReadmode readmode,
                                        const Querysubstring *querysubstring,
                                        unsigned long minmatchlength)
 
@@ -239,7 +239,7 @@ MMsearchiterator *newmmsearchiteratorcomplete_plain(
                                    Seqpos leftbound,
                                    Seqpos rightbound,
                                    Seqpos itvoffset,
-                                   Readmode readmode,
+                                   GtReadmode readmode,
                                    const GtUchar *pattern,
                                    unsigned long patternlength)
 {
@@ -248,7 +248,7 @@ MMsearchiterator *newmmsearchiteratorcomplete_plain(
 
   queryrep.sequence = pattern;
   queryrep.encseq = NULL;
-  queryrep.readmode = Forwardmode;
+  queryrep.readmode = GT_READMODE_FORWARD;
   queryrep.startpos = 0;
   queryrep.length = (Seqpos) patternlength;
   querysubstring.queryrep = &queryrep;
@@ -303,7 +303,7 @@ void freemmsearchiterator(MMsearchiterator **mmsi)
 }
 
 static bool isleftmaximal(const GtEncodedsequence *dbencseq,
-                          Readmode readmode,
+                          GtReadmode readmode,
                           Seqpos dbstart,
                           const Querysubstring *querysubstring)
 {
@@ -327,7 +327,7 @@ static bool isleftmaximal(const GtEncodedsequence *dbencseq,
 
 static Seqpos extendright(const GtEncodedsequence *dbencseq,
                           GtEncodedsequenceScanstate *esr,
-                          Readmode readmode,
+                          GtReadmode readmode,
                           Seqpos totallength,
                           Seqpos dbend,
                           const Querysubstring *querysubstring,
@@ -359,7 +359,7 @@ static Seqpos extendright(const GtEncodedsequence *dbencseq,
 static int runquerysubstringmatch(bool selfmatch,
                                   const GtEncodedsequence *dbencseq,
                                   const Seqpos *suftabpart,
-                                  Readmode readmode,
+                                  GtReadmode readmode,
                                   Seqpos numberofsuffixes,
                                   uint64_t queryunitnum,
                                   const Queryrep *queryrep,
@@ -511,7 +511,7 @@ int callenumquerymatches(const GtStr *indexname,
 
           queryrep.sequence = query;
           queryrep.encseq = NULL;
-          queryrep.readmode = Forwardmode;
+          queryrep.readmode = GT_READMODE_FORWARD;
           queryrep.startpos = 0;
           queryrep.length = (Seqpos) querylen;
           if (runquerysubstringmatch(false,
@@ -542,7 +542,7 @@ int callenumquerymatches(const GtStr *indexname,
 }
 
 int callenumselfmatches(const GtStr *indexname,
-                        Readmode queryreadmode,
+                        GtReadmode queryreadmode,
                         unsigned int userdefinedleastlength,
                         Processquerymatch processquerymatch,
                         void *processquerymatchinfo,
@@ -554,7 +554,7 @@ int callenumselfmatches(const GtStr *indexname,
   bool haserr = false;
   Querymatch *querymatchspaceptr = querymatch_new();
 
-  gt_assert(queryreadmode != Forwardmode);
+  gt_assert(queryreadmode != GT_READMODE_FORWARD);
   if (mapsuffixarray(&suffixarray,
                      SARR_ESQTAB | SARR_SUFTAB | SARR_SSPTAB,
                      indexname,
@@ -609,7 +609,7 @@ int callenumselfmatches(const GtStr *indexname,
 
 static int constructsarrandrunmmsearch(
                  const GtEncodedsequence *dbencseq,
-                 Readmode readmode,
+                 GtReadmode readmode,
                  unsigned int prefixlength,
                  unsigned int numofparts,
                  const GtUchar *query,
@@ -643,7 +643,7 @@ static int constructsarrandrunmmsearch(
   {
     queryrep.sequence = query;
     queryrep.encseq = NULL;
-    queryrep.readmode = Forwardmode;
+    queryrep.readmode = GT_READMODE_FORWARD;
     queryrep.startpos = 0;
     queryrep.length = (Seqpos) querylen;
     while (true)
@@ -703,7 +703,7 @@ int sarrquerysubstringmatch(const GtUchar *dbseq,
                                    logger);
   numofchars = gt_alphabet_num_of_chars(alpha);
   if (constructsarrandrunmmsearch(dbencseq,
-                                  Forwardmode,
+                                  GT_READMODE_FORWARD,
                                   recommendedprefixlength(numofchars,dblen),
                                   1U, /* parts */
                                   query,

@@ -33,13 +33,13 @@ struct Enumcodeatposition
   Seqpos totallength;
   bool exhausted;
   const GtEncodedsequence *encseq;
-  Readmode readmode;
+  GtReadmode readmode;
   unsigned int prefixlength;
   Codetype **multimappower, *filltable;
 };
 
 Enumcodeatposition *newEnumcodeatposition(const GtEncodedsequence *encseq,
-                                          Readmode readmode,
+                                          GtReadmode readmode,
                                           unsigned int prefixlength,
                                           unsigned int numofchars)
 {
@@ -51,7 +51,7 @@ Enumcodeatposition *newEnumcodeatposition(const GtEncodedsequence *encseq,
   ecp->multimappower = initmultimappower(numofchars,prefixlength);
   ecp->filltable = initfilltable(numofchars,prefixlength);
   ecp->prefixlength = prefixlength;
-  ecp->moveforward = ISDIRREVERSE(readmode) ? true : false;
+  ecp->moveforward = GT_ISDIRREVERSE(readmode) ? true : false;
   ecp->totallength = gt_encodedsequence_total_length(encseq);
   if (ecp->moveforward)
   {

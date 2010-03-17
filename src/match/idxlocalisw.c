@@ -58,7 +58,7 @@ static Scoretype swlocalsimilarityscore(Scoretype *scol,
   for (j = startpos; j < endpos; j++)
   {
     nw = 0;
-    vcurrent = gt_encodedsequence_getencodedchar(vencseq,j,Forwardmode);
+    vcurrent = gt_encodedsequence_getencodedchar(vencseq,j,GT_READMODE_FORWARD);
     gt_assert(vcurrent != (GtUchar) SEPARATOR);
     for (scolptr = scol+1, uptr = useq; uptr < useq + ulen; scolptr++, uptr++)
     {
@@ -134,7 +134,7 @@ static void swlocalsimilarityregion(DPpoint *scol,
   }
   for (j = startpos; j < endpos; j++)
   {
-    vcurrent = gt_encodedsequence_getencodedchar(vencseq,j,Forwardmode);
+    vcurrent = gt_encodedsequence_getencodedchar(vencseq,j,GT_READMODE_FORWARD);
     gt_assert(vcurrent != (GtUchar) SEPARATOR);
     nw = *scol;
     for (scolptr = scol+1, uptr = useq; uptr < useq + ulen; scolptr++, uptr++)
@@ -204,7 +204,7 @@ static void swmaximalDPedges(Retracebits *edges,
   }
   for (j = startpos; j < endpos; j++)
   {
-    vcurrent = gt_encodedsequence_getencodedchar(vencseq,j,Forwardmode);
+    vcurrent = gt_encodedsequence_getencodedchar(vencseq,j,GT_READMODE_FORWARD);
     gt_assert(vcurrent != (GtUchar) SEPARATOR);
     nw = *scol;
     *scol = nw + scorevalues->gapextend;
@@ -280,8 +280,8 @@ static void swtracebackDPedges(GtAlignment *alignment,
       gt_assert(vlen > 0);
       vlen--;
       dbsubstring[vlen] = gt_encodedsequence_getencodedchar(encseq,
-                                                            startpos + vlen,
-                                                            Forwardmode);
+                                                           startpos + vlen,
+                                                           GT_READMODE_FORWARD);
     }
   }
 }

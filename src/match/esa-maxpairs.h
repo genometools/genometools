@@ -29,7 +29,7 @@ typedef int (*Processmaxpairs)(void *,const GtEncodedsequence *,
 
 int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
                       const GtEncodedsequence *encseq,
-                      Readmode readmode,
+                      GtReadmode readmode,
                       unsigned int searchlength,
                       Processmaxpairs processmaxpairs,
                       void *processmaxpairsinfo,

@@ -82,7 +82,7 @@ static void checkifsequenceisthere(const GtEncodedsequence *encseq,
   {
     cc = gt_encodedsequence_getencodedcharnospecial(encseq,
                                                     witnessposition+i,
-                                                    Forwardmode);
+                                                    GT_READMODE_FORWARD);
     if (qptr[i] != cc)
     {
       fprintf(stderr,"sequence of length %lu at witnesspos " FormatSeqpos

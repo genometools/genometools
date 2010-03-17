@@ -45,7 +45,10 @@ Windowiterator *windowiterator_new(const GtEncodedsequence *encseq,
   wit->endpos = endpos;
   wit->esr = gt_encodedsequence_scanstate_new();
   wit->encseq = encseq;
-  gt_encodedsequence_scanstate_init(wit->esr,encseq,Forwardmode,startpos);
+  gt_encodedsequence_scanstate_init(wit->esr,
+                                    encseq,
+                                    GT_READMODE_FORWARD,
+                                    startpos);
   return wit;
 }
 
@@ -63,9 +66,9 @@ const GtUchar *windowiterator_next(Seqpos *currentpos,unsigned long *firstpos,
   while (wit->currentpos < wit->endpos)
   {
     currentchar = gt_encodedsequence_sequentialgetencodedchar(wit->encseq,
-                                                              wit->esr,
-                                                              wit->currentpos,
-                                                              Forwardmode);
+                                                           wit->esr,
+                                                           wit->currentpos,
+                                                           GT_READMODE_FORWARD);
     if (ISSPECIAL(currentchar))
     {
       wit->bufsize = wit->firstpos = 0;
@@ -118,7 +121,7 @@ static void checkcurrentwindow(const GtEncodedsequence *encseq,
     cc1 = buffer[bfbufpos];
     cc2 = gt_encodedsequence_getencodedchar(encseq,
                                             currentpos-(windowsize-1)+idx,
-                                            Forwardmode);
+                                            GT_READMODE_FORWARD);
     gt_assert(cc1 == cc2);
     bufpos = (bufpos == windowsize-1) ? 0 : (bufpos + 1);
   }
@@ -138,13 +141,13 @@ static void iteroverallwords(const GtEncodedsequence *encseq,
 
   gt_assert(endpos <= gt_encodedsequence_total_length(encseq));
   esr = gt_encodedsequence_scanstate_new();
-  gt_encodedsequence_scanstate_init(esr,encseq,Forwardmode,startpos);
+  gt_encodedsequence_scanstate_init(esr,encseq,GT_READMODE_FORWARD,startpos);
   buffer = gt_malloc(sizeof (GtUchar) * windowsize);
   firstpos = bufsize = 0;
   for (currentpos=startpos; currentpos < endpos; currentpos++)
   {
     currentchar = gt_encodedsequence_getencodedchar(encseq,esr,currentpos,
-                                                    Forwardmode);
+                                                    GT_READMODE_FORWARD);
     if (ISSPECIAL(currentchar))
     {
       bufsize = firstpos = 0;

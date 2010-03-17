@@ -88,7 +88,7 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
   const unsigned long Ebit = 1UL << (patternlength-1);
   GtUchar cc;
   Seqpos pos;
-  const Readmode readmode = Reversemode;
+  const GtReadmode readmode = GT_READMODE_REVERSE;
   GtMatch match;
 
   initeqsvectorrev(mor->eqsvectorrev,

@@ -430,7 +430,7 @@ static int giextract_encodedseq2fasta(FILE *fpout,
     }
     encseq2symbolstring(fpout,
                         encseq,
-                        Forwardmode,
+                        GT_READMODE_FORWARD,
                         seqinfo.seqstartpos + frompos,
                         topos,
                         linewidth);

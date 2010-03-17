@@ -61,7 +61,7 @@ struct Dfsstate /* global information */
   unsigned long minocc,
                 maxocc;
   const GtEncodedsequence *encseq;
-  Readmode readmode;
+  GtReadmode readmode;
   Processoccurrencecount processoccurrencecount;
   GtArrayCountwithpositions occdistribution;
   FILE *merindexfpout,
@@ -446,7 +446,9 @@ static bool containsspecial2(const GtEncodedsequence *encseq,
 
   for (pos=startpos; pos<startpos+len; pos++)
   {
-    if (ISSPECIAL(gt_encodedsequence_getencodedchar(encseq,pos,Forwardmode)))
+    if (ISSPECIAL(gt_encodedsequence_getencodedchar(encseq,
+                                                    pos,
+                                                    GT_READMODE_FORWARD)))
     {
       result = true;
       break;
@@ -578,7 +580,7 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   state.storecounts = storecounts;
   state.minocc = minocc;
   state.maxocc = maxocc;
-  state.moveforward = ISDIRREVERSE(state.readmode) ? false : true;
+  state.moveforward = GT_ISDIRREVERSE(state.readmode) ? false : true;
   state.totallength = gt_encodedsequence_total_length(state.encseq);
   state.performtest = performtest;
   state.countoutputmers = 0;

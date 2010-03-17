@@ -51,16 +51,16 @@ enum sfxDataRequest {
  */
 static inline GtUchar
 sfxIdx2BWTSym(Seqpos sufIdx, const GtEncodedsequence *encseq,
-              Readmode readmode);
+              GtReadmode readmode);
 
 static inline size_t
-EncSeqGetSubSeq(const GtEncodedsequence *encseq, Readmode readmode, Seqpos pos,
-                size_t len, GtUchar *subStr);
+EncSeqGetSubSeq(const GtEncodedsequence *encseq, GtReadmode readmode,
+                Seqpos pos, size_t len, GtUchar *subStr);
 
 struct encSeqTrState
 {
   const GtEncodedsequence *encseq;
-  Readmode readmode;
+  GtReadmode readmode;
 };
 
 /**
@@ -80,7 +80,7 @@ struct encSeqLCPState
 {
   Seqpos lastSufIdx;
   const GtEncodedsequence *encseq;
-  Readmode readmode;
+  GtReadmode readmode;
 };
 
 extern size_t

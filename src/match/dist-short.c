@@ -101,7 +101,7 @@ unsigned long distanceofshortstringsencseq(unsigned long *eqsvector,
   initeqsvector(eqsvector,(unsigned long) alphasize,useq,ulen);
   for (pos = vstartpos; pos < vstartpos + vlen; pos++)
   {
-    cc = gt_encodedsequence_getencodedchar(encseq,pos,Forwardmode);
+    cc = gt_encodedsequence_getencodedchar(encseq,pos,GT_READMODE_FORWARD);
     COMPUTENEWDIST(cc);
   }
   return distval;
@@ -151,7 +151,7 @@ Definedunsignedlong forwardprefixmatch(const GtEncodedsequence *encseq,
   for (pos = startpos; /* Nothing */; pos++)
   {
     gt_assert(pos - startpos <= (Seqpos) (ulen + maxdistance));
-    cc = gt_encodedsequence_getencodedchar(encseq,pos,Forwardmode);
+    cc = gt_encodedsequence_getencodedchar(encseq,pos,GT_READMODE_FORWARD);
     if (nowildcards && cc == (GtUchar) WILDCARD)
     {
       result.defined = false;

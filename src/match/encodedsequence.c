@@ -281,7 +281,7 @@ static uint64_t countgt_encodedsequence_getencodedchar = 0;
 
 GtUchar gt_encodedsequence_getencodedchar(const GtEncodedsequence *encseq,
                      Seqpos pos,
-                     Readmode readmode)
+                     GtReadmode readmode)
 {
 #ifdef WITHshowgetencodedcharcounters
   countgt_encodedsequence_getencodedchar++;
@@ -289,20 +289,20 @@ GtUchar gt_encodedsequence_getencodedchar(const GtEncodedsequence *encseq,
   gt_assert(pos < encseq->totallength);
   switch (readmode)
   {
-    case Forwardmode:
+    case GT_READMODE_FORWARD:
       return encseq->deliverchar(encseq,pos);
-    case Reversemode:
+    case GT_READMODE_REVERSE:
       return encseq->deliverchar(encseq,GT_REVERSEPOS(encseq->totallength,pos));
-    case Complementmode: /* only works with dna */
+    case GT_READMODE_COMPL: /* only works with dna */
       {
         GtUchar cc = encseq->deliverchar(encseq,pos);
-        return ISSPECIAL(cc) ? cc : COMPLEMENTBASE(cc);
+        return ISSPECIAL(cc) ? cc : GT_COMPLEMENTBASE(cc);
       }
-    case Reversecomplementmode: /* only works with dna */
+    case GT_READMODE_REVCOMPL: /* only works with dna */
       {
         GtUchar cc = encseq->deliverchar(encseq,
                                        GT_REVERSEPOS(encseq->totallength,pos));
-        return ISSPECIAL(cc) ? cc : COMPLEMENTBASE(cc);
+        return ISSPECIAL(cc) ? cc : GT_COMPLEMENTBASE(cc);
       }
     default:
       fprintf(stderr,"gt_encodedsequence_getencodedchar: "
@@ -314,28 +314,28 @@ GtUchar gt_encodedsequence_getencodedchar(const GtEncodedsequence *encseq,
 
 GtUchar gt_encodedsequence_extractencodedchar(const GtEncodedsequence *encseq,
                            Seqpos pos,
-                           Readmode readmode)
+                           GtReadmode readmode)
 {
   gt_assert(pos < encseq->totallength);
   gt_assert(possibletocmpbitwise(encseq));
   switch (readmode)
   {
-    case Forwardmode:
+    case GT_READMODE_FORWARD:
       return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
-    case Reversemode:
+    case GT_READMODE_REVERSE:
       return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,
                                           GT_REVERSEPOS(encseq->totallength,
                                                         pos));
-    case Complementmode: /* only works with dna */
+    case GT_READMODE_COMPL: /* only works with dna */
       {
         GtUchar cc = (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
-        return ISSPECIAL(cc) ? cc : COMPLEMENTBASE(cc);
+        return ISSPECIAL(cc) ? cc : GT_COMPLEMENTBASE(cc);
       }
-    case Reversecomplementmode: /* only works with dna */
+    case GT_READMODE_REVCOMPL: /* only works with dna */
       {
         GtUchar cc = (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,
                                         GT_REVERSEPOS(encseq->totallength,pos));
-        return ISSPECIAL(cc) ? cc : COMPLEMENTBASE(cc);
+        return ISSPECIAL(cc) ? cc : GT_COMPLEMENTBASE(cc);
       }
     default:
       fprintf(stderr,"gt_encodedsequence_extractencodedchar: "
@@ -348,28 +348,28 @@ GtUchar gt_encodedsequence_extractencodedchar(const GtEncodedsequence *encseq,
 GtUchar gt_encodedsequence_getencodedcharnospecial(
                                                 const GtEncodedsequence *encseq,
                                                 Seqpos pos,
-                                                Readmode readmode)
+                                                GtReadmode readmode)
 {
   gt_assert(pos < encseq->totallength);
   switch (readmode)
   {
-    case Forwardmode:
+    case GT_READMODE_FORWARD:
       return encseq->delivercharnospecial(encseq,pos);
-    case Reversemode:
+    case GT_READMODE_REVERSE:
       return encseq->delivercharnospecial(encseq,
                                           GT_REVERSEPOS(encseq->totallength,
                                                         pos));
-    case Complementmode: /* only works with dna */
+    case GT_READMODE_COMPL: /* only works with dna */
       {
         GtUchar cc = encseq->delivercharnospecial(encseq,pos);
-        return ISSPECIAL(cc) ? cc : COMPLEMENTBASE(cc);
+        return ISSPECIAL(cc) ? cc : GT_COMPLEMENTBASE(cc);
       }
-    case Reversecomplementmode: /* only works with dna */
+    case GT_READMODE_REVCOMPL: /* only works with dna */
       {
         GtUchar cc = encseq->delivercharnospecial(encseq,
                                               GT_REVERSEPOS(encseq->totallength,
                                                             pos));
-        return ISSPECIAL(cc) ? cc : COMPLEMENTBASE(cc);
+        return ISSPECIAL(cc) ? cc : GT_COMPLEMENTBASE(cc);
       }
     default:
       fprintf(stderr,"gt_encodedsequence_getencodedcharnospecial: "
@@ -404,7 +404,7 @@ GtUchar gt_encodedsequence_sequentialgetencodedchar(
                                                 const GtEncodedsequence *encseq,
                                                 GtEncodedsequenceScanstate *esr,
                                                 Seqpos pos,
-                                                Readmode readmode)
+                                                GtReadmode readmode)
 {
 #ifdef WITHshowgetencodedcharcounters
   countgt_encodedsequence_getencodedchar++;
@@ -412,22 +412,22 @@ GtUchar gt_encodedsequence_sequentialgetencodedchar(
   gt_assert(pos < encseq->totallength);
   switch (readmode)
   {
-    case Forwardmode:
+    case GT_READMODE_FORWARD:
       return encseq->seqdeliverchar(encseq,esr,pos);
-    case Reversemode:
+    case GT_READMODE_REVERSE:
       return encseq->seqdeliverchar(encseq,esr,
                                     GT_REVERSEPOS(encseq->totallength,pos));
-    case Complementmode: /* only works with dna */
+    case GT_READMODE_COMPL: /* only works with dna */
       {
         GtUchar cc = encseq->seqdeliverchar(encseq,esr,pos);
-        return ISSPECIAL(cc) ? cc : COMPLEMENTBASE(cc);
+        return ISSPECIAL(cc) ? cc : GT_COMPLEMENTBASE(cc);
       }
-    case Reversecomplementmode: /* only works with dna */
+    case GT_READMODE_REVCOMPL: /* only works with dna */
       {
         GtUchar cc = encseq->seqdeliverchar(encseq,esr,
                                           GT_REVERSEPOS(encseq->totallength,
                                                         pos));
-        return ISSPECIAL(cc) ? cc : COMPLEMENTBASE(cc);
+        return ISSPECIAL(cc) ? cc : GT_COMPLEMENTBASE(cc);
       }
     default:
       fprintf(stderr,"gt_encodedsequence_getencodedchar: "
@@ -493,11 +493,11 @@ void gt_encodedsequence_extract_substring(const GtEncodedsequence *encseq,
 
   gt_assert(frompos <= topos && topos < encseq->totallength);
   esr = gt_encodedsequence_scanstate_new();
-  gt_encodedsequence_scanstate_init(esr,encseq,Forwardmode,frompos);
+  gt_encodedsequence_scanstate_init(esr,encseq,GT_READMODE_FORWARD,frompos);
   for (pos=frompos, idx = 0; pos <= topos; pos++, idx++)
   {
     buffer[idx] = gt_encodedsequence_sequentialgetencodedchar(encseq,esr,pos,
-                                                              Forwardmode);
+                                                           GT_READMODE_FORWARD);
   }
   gt_encodedsequence_scanstate_delete(esr);
 }
@@ -1951,10 +1951,10 @@ void gt_encodedsequence_scanstate_initgeneric(GtEncodedsequenceScanstate *esr,
 
 void gt_encodedsequence_scanstate_init(GtEncodedsequenceScanstate *esr,
                                   const GtEncodedsequence *encseq,
-                                  Readmode readmode,
+                                  GtReadmode readmode,
                                   Seqpos startpos)
 {
-  if (ISDIRREVERSE(readmode))
+  if (GT_ISDIRREVERSE(readmode))
   {
     gt_encodedsequence_scanstate_initgeneric(esr,
                                         encseq,
@@ -2373,11 +2373,12 @@ static void addmarkpos(ArraySeqpos *asp,
   Seqpos pos;
   GtUchar currentchar;
 
-  gt_encodedsequence_scanstate_init(esr,encseq,Forwardmode,seqrange->leftpos);
+  gt_encodedsequence_scanstate_init(esr,encseq,GT_READMODE_FORWARD,
+                                    seqrange->leftpos);
   for (pos=seqrange->leftpos; pos<seqrange->rightpos; pos++)
   {
     currentchar = gt_encodedsequence_sequentialgetencodedchar(encseq,esr,pos,
-                                                              Forwardmode);
+                                                           GT_READMODE_FORWARD);
     gt_assert(ISSPECIAL(currentchar));
     if (currentchar == (GtUchar) SEPARATOR)
     {
@@ -2521,11 +2522,11 @@ void checkmarkpos(const GtEncodedsequence *encseq)
     markpos = encseq2markpositions(encseq);
     totallength = gt_encodedsequence_total_length(encseq);
     esr = gt_encodedsequence_scanstate_new();
-    gt_encodedsequence_scanstate_init(esr,encseq,Forwardmode,0);
+    gt_encodedsequence_scanstate_init(esr,encseq,GT_READMODE_FORWARD,0);
     for (pos=0; pos<totallength; pos++)
     {
       currentchar = gt_encodedsequence_sequentialgetencodedchar(encseq,esr,pos,
-                                                                Forwardmode);
+                                                           GT_READMODE_FORWARD);
       if (currentchar == (GtUchar) SEPARATOR)
       {
         currentseqnum++;
@@ -3982,8 +3983,10 @@ static int prefixofdifftbe(bool complement,
   commonunits->leftspecial = commonunits->rightspecial = false;
   if (complement)
   {
-    return COMPLEMENTBASE(EXTRACTENCODEDCHARSCALARFROMLEFT(tbe1,tmplcpvalue)) <
-           COMPLEMENTBASE(EXTRACTENCODEDCHARSCALARFROMLEFT(tbe2,tmplcpvalue))
+    return GT_COMPLEMENTBASE(EXTRACTENCODEDCHARSCALARFROMLEFT(tbe1,
+                                                              tmplcpvalue)) <
+           GT_COMPLEMENTBASE(EXTRACTENCODEDCHARSCALARFROMLEFT(tbe2,
+                                                              tmplcpvalue))
            ? -1 : 1;
   }
   return tbe1 < tbe2 ? -1 : 1;
@@ -4002,8 +4005,10 @@ static int suffixofdifftbe(bool complement,GtCommonunits *commonunits,
   commonunits->leftspecial = commonunits->rightspecial = false;
   if (complement)
   {
-    return COMPLEMENTBASE(EXTRACTENCODEDCHARSCALARFROMRIGHT(tbe1,tmplcsvalue)) <
-           COMPLEMENTBASE(EXTRACTENCODEDCHARSCALARFROMRIGHT(tbe2,tmplcsvalue))
+    return GT_COMPLEMENTBASE(EXTRACTENCODEDCHARSCALARFROMRIGHT(tbe1,
+                                                               tmplcsvalue)) <
+           GT_COMPLEMENTBASE(EXTRACTENCODEDCHARSCALARFROMRIGHT(tbe2,
+                                                               tmplcsvalue))
            ? -1 : 1;
   }
   return EXTRACTENCODEDCHARSCALARFROMRIGHT(tbe1,tmplcsvalue) <
@@ -4139,7 +4144,9 @@ static Seqpos extractsinglecharacter(const GtEncodedsequence *encseq,
       cc = pos + depth + GT_COMPAREOFFSET;
     } else
     {
-      cc = gt_encodedsequence_getencodedchar(encseq,pos + depth,Forwardmode);
+      cc = gt_encodedsequence_getencodedchar(encseq,
+                                             pos + depth,
+                                             GT_READMODE_FORWARD);
       if (ISSPECIAL(cc))
       {
         cc = pos + depth + GT_COMPAREOFFSET;
@@ -4147,7 +4154,7 @@ static Seqpos extractsinglecharacter(const GtEncodedsequence *encseq,
       {
         if (complement)
         {
-          cc = COMPLEMENTBASE(cc);
+          cc = GT_COMPLEMENTBASE(cc);
         }
       }
     }
@@ -4158,7 +4165,9 @@ static Seqpos extractsinglecharacter(const GtEncodedsequence *encseq,
       cc = depth - pos + GT_COMPAREOFFSET;
     } else
     {
-      cc = gt_encodedsequence_getencodedchar(encseq,pos - depth,Forwardmode);
+      cc = gt_encodedsequence_getencodedchar(encseq,
+                                             pos - depth,
+                                             GT_READMODE_FORWARD);
       if (ISSPECIAL(cc))
       {
         cc = pos - depth + GT_COMPAREOFFSET;
@@ -4166,7 +4175,7 @@ static Seqpos extractsinglecharacter(const GtEncodedsequence *encseq,
       {
         if (complement)
         {
-          cc = COMPLEMENTBASE(cc);
+          cc = GT_COMPLEMENTBASE(cc);
         }
       }
     }
@@ -4529,7 +4538,7 @@ static void fwdextract2bitenc_bruteforce(EndofTwobitencoding *ptbe,
       ptbe->tbe <<= GT_MULT2(startpos + GT_UNITSIN2BITENC - pos);
       return;
     }
-    cc = gt_encodedsequence_getencodedchar(encseq,pos,Forwardmode);
+    cc = gt_encodedsequence_getencodedchar(encseq,pos,GT_READMODE_FORWARD);
     if (ISSPECIAL(cc))
     {
       ptbe->unitsnotspecial = (unsigned int) (pos - startpos);
@@ -4555,7 +4564,7 @@ static void revextract2bitenc_bruteforce(EndofTwobitencoding *ptbe,
        unit < (unsigned int) GT_UNITSIN2BITENC;
        unit++)
   {
-    cc = gt_encodedsequence_getencodedchar(encseq,pos,Forwardmode);
+    cc = gt_encodedsequence_getencodedchar(encseq,pos,GT_READMODE_FORWARD);
     if (ISSPECIAL(cc))
     {
       ptbe->unitsnotspecial = unit;
@@ -4601,7 +4610,7 @@ static void showbufchar(FILE *fp,bool complement,GtUchar cc)
     {
       if (complement)
       {
-        cc = COMPLEMENTBASE(cc);
+        cc = GT_COMPLEMENTBASE(cc);
       }
       gt_assert(cc < (GtUchar) 4);
       fprintf(fp,"%c","acgt"[cc]);
@@ -4925,7 +4934,7 @@ void multicharactercompare_withtest(const GtEncodedsequence *encseq,
 Codetype extractprefixcode(unsigned int *unitsnotspecial,
                            const GtEncodedsequence *encseq,
                            const Codetype *filltable,
-                           Readmode readmode,
+                           GtReadmode readmode,
                            GtEncodedsequenceScanstate *esr,
                            const Codetype **multimappower,
                            Seqpos frompos,
@@ -5014,7 +5023,7 @@ void gt_showsequencefeatures(GtLogger *logger,
 }
 
 int comparetwosuffixes(const GtEncodedsequence *encseq,
-                       Readmode readmode,
+                       GtReadmode readmode,
                        Seqpos *maxlcp,
                        bool specialsareequal,
                        bool specialsareequalatdepth0,
@@ -5154,14 +5163,14 @@ static Seqpos derefcharboundaries(const GtEncodedsequence *encseq,
   if (currentoffset <= maxoffset)
   {
     GtUchar cc;
-    cc = gt_encodedsequence_getencodedchar(encseq,start,Forwardmode);
+    cc = gt_encodedsequence_getencodedchar(encseq,start,GT_READMODE_FORWARD);
     if (ISSPECIAL(cc))
     {
       return start + GT_COMPAREOFFSET;
     }
     if (complement)
     {
-      cc = COMPLEMENTBASE(cc);
+      cc = GT_COMPLEMENTBASE(cc);
     }
     return cc;
   }

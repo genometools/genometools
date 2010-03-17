@@ -33,7 +33,7 @@ struct specialsRankLookup
     {
       GtEncodedsequenceScanstate *scanState;
       Seqpos *rankSumSamples, numSamples, sampleInterval;
-      Readmode readmode;
+      GtReadmode readmode;
       unsigned sampleIntervalLog2;
     } sampleTable;
     Seqpos lastSeqPos;

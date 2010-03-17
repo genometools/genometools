@@ -15,32 +15,26 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <string.h>
+#ifndef READMODE_H
+#define READMODE_H
 #include "core/error.h"
-#include "readmode-def.h"
 
-static char *readmodes[] = {"fwd",
-                            "rev",
-                            "cpl",
-                            "rcl"};
-
-const char *showreadmode(Readmode readmode)
+typedef enum
 {
-  return readmodes[(int) readmode];
-}
+  GT_READMODE_FORWARD = 0,
+  GT_READMODE_REVERSE,
+  GT_READMODE_COMPL,
+  GT_READMODE_REVCOMPL
+} GtReadmode;
 
-int parsereadmode(const char *dirargstring,GtError *err)
-{
-  size_t i;
+#define GT_ISDIRREVERSE(R)    ((R) == GT_READMODE_REVERSE ||\
+                               (R) == GT_READMODE_REVCOMPL)
+#define GT_ISDIRCOMPLEMENT(R) ((R) == GT_READMODE_COMPL ||\
+                               (R) == GT_READMODE_REVCOMPL)
 
-  gt_error_check(err);
-  for (i=0; i<sizeof (readmodes)/sizeof (readmodes[0]); i++)
-  {
-    if (strcmp(dirargstring,readmodes[i]) == 0)
-    {
-      return (int) i;
-    }
-  }
-  gt_error_set(err,"argument to option -dir must be fwd or rev or cpl or rcl");
-  return -1;
-}
+#define GT_COMPLEMENTBASE(B) ((GtUchar) 3 - (B))
+
+const char* gt_readmode_show(GtReadmode readmode);
+int         gt_readmode_parse(const char *dirargstring, GtError *err);
+
+#endif

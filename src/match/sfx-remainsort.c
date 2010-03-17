@@ -146,7 +146,7 @@ struct Rmnsufinfo
   /* the following are used to compute lcp-values in linear time */
   Seqpos partwidth,
          totallength;
-  Readmode readmode;
+  GtReadmode readmode;
   const GtEncodedsequence *encseq;
   const Codetype **multimappower;
   Seqpos *sortedsuffixes;
@@ -177,7 +177,7 @@ static void initsortblock(Sortblock *sortblock,
 #ifdef Lowerboundwithrank
 static Lowerboundwithrank *filllowerboundwithrank(
                                                 const GtEncodedsequence *encseq,
-                                                Readmode readmode)
+                                                GtReadmode readmode)
 {
   if (hasspecialranges(encseq))
   {
@@ -193,7 +193,7 @@ static Lowerboundwithrank *filllowerboundwithrank(
                (unsigned long) (sizeof (*lowerboundwithrank) *
                                        realspecialranges));
     sri = newspecialrangeiterator(encseq,
-                                  ISDIRREVERSE(readmode)
+                                  GT_ISDIRREVERSE(readmode)
                                   ? false : true);
     for (lbptr = lowerboundwithrank; nextspecialrangeiterator(&range,sri);
          lbptr++)
@@ -275,7 +275,7 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                           Codetype maxcode,
                           unsigned int numofchars,
                           unsigned int prefixlength,
-                          Readmode readmode,
+                          GtReadmode readmode,
                           Seqpos partwidth,
                           bool hashexceptions,
                           bool absoluteinversesuftab)
@@ -631,7 +631,7 @@ static void initinversesuftabspecials(Rmnsufinfo *rmnsufinfo)
     Seqpos specialidx;
 
     sri = newspecialrangeiterator(rmnsufinfo->encseq,
-                                  ISDIRREVERSE(rmnsufinfo->readmode)
+                                  GT_ISDIRREVERSE(rmnsufinfo->readmode)
                                   ? false : true);
     specialidx = rmnsufinfo->partwidth;
     while (nextspecialrangeiterator(&range,sri))

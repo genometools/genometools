@@ -116,14 +116,15 @@ Genericindex *genericindex_new(const GtStr *indexname,
   }
   if (!haserr)
   {
-    if (withesa && genericindex->suffixarray->readmode != Forwardmode)
+    if (withesa && genericindex->suffixarray->readmode != GT_READMODE_FORWARD)
     {
       gt_error_set(err,"using option -esa you can only process index "
                        "in forward mode");
       haserr = true;
     } else
     {
-      if (!withesa && genericindex->suffixarray->readmode != Reversemode)
+      if (!withesa
+            && genericindex->suffixarray->readmode != GT_READMODE_REVERSE)
       {
         gt_error_set(err,"with option -pck you can only process index "
                          "in reverse mode");
@@ -1384,7 +1385,7 @@ bool indexbasedexactpatternmatching(const Limdfsresources *limdfsresources,
 
 GtUchar limdfs_getencodedchar(const Limdfsresources *limdfsresources,
                               Seqpos pos,
-                              Readmode readmode)
+                              GtReadmode readmode)
 {
   gt_assert(limdfsresources->encseq != NULL);
 

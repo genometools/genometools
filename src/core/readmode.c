@@ -15,27 +15,32 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef READMODE_DEF_H
-#define READMODE_DEF_H
+#include <string.h>
 #include "core/error.h"
+#include "core/readmode.h"
 
-typedef enum
+static char *readmodes[] = {"fwd",
+                            "rev",
+                            "cpl",
+                            "rcl"};
+
+const char *gt_readmode_show(GtReadmode readmode)
 {
-  Forwardmode = 0,
-  Reversemode,
-  Complementmode,
-  Reversecomplementmode
-} Readmode;
+  return readmodes[(int) readmode];
+}
 
-#define ISDIRREVERSE(R)    ((R) == Reversemode ||\
-                            (R) == Reversecomplementmode)
-#define ISDIRCOMPLEMENT(R) ((R) == Complementmode ||\
-                            (R) == Reversecomplementmode)
+int gt_readmode_parse(const char *dirargstring, GtError *err)
+{
+  size_t i;
 
-#define COMPLEMENTBASE(B) ((GtUchar) 3 - (B))
-
-const char *showreadmode(Readmode readmode);
-
-int parsereadmode(const char *dirargstring,GtError *err);
-
-#endif
+  gt_error_check(err);
+  for (i=0; i<sizeof (readmodes)/sizeof (readmodes[0]); i++)
+  {
+    if (strcmp(dirargstring,readmodes[i]) == 0)
+    {
+      return (int) i;
+    }
+  }
+  gt_error_set(err,"argument to option -dir must be fwd or rev or cpl or rcl");
+  return -1;
+}

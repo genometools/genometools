@@ -35,7 +35,7 @@ struct GtBucketspec2
 {
   Seqpos partwidth;
   const GtEncodedsequence *encseq;
-  Readmode readmode;
+  GtReadmode readmode;
   unsigned int numofchars, numofcharssquared, prefixlength, *order;
   Codetype expandfactor, expandfillsum;
   Bucketinfo *superbuckettab, **subbuckettab;
@@ -151,7 +151,7 @@ static Codetype expandtwocharcode(Codetype twocharcode,
 /*
 static Seqpos *leftcontextofspecialchardist(unsigned int numofchars,
                                             const GtEncodedsequence *encseq,
-                                            Readmode readmode)
+                                            GtReadmode readmode)
 {
   GtUchar cc;
   unsigned int idx;
@@ -168,19 +168,20 @@ static Seqpos *leftcontextofspecialchardist(unsigned int numofchars,
     Specialrangeiterator *sri;
     GtSequencerange range;
 
-    sri = newspecialrangeiterator(encseq,ISDIRREVERSE(readmode) ? false : true);
+    sri = newspecialrangeiterator(encseq,
+                                  GT_ISDIRREVERSE(readmode) ? false : true);
     while (nextspecialrangeiterator(&range,sri))
     {
       printf("range %lu %lu\n",(unsigned long) range.leftpos,
                                (unsigned long) range.rightpos);
       gt_assert(range.leftpos < totallength);
-      if (ISDIRREVERSE(readmode))
+      if (GT_ISDIRREVERSE(readmode))
       {
         if (range.rightpos < totallength)
         {
           cc = gt_encodedsequence_getencodedchar(encseq,range.rightpos,
-                              readmode == Reversemode ? Forwardmode
-                                                      : Complementmode);
+                           readmode == GT_READMODE_REVERSE ? GT_READMODE_FORWARD
+                                                   : GT_READMODE_COMPL);
           if (ISNOTSPECIAL(cc))
           {
             specialchardist[cc]++;
@@ -212,7 +213,7 @@ static Seqpos *leftcontextofspecialchardist(unsigned int numofchars,
 
 static Seqpos *leftcontextofspecialchardist(unsigned int numofchars,
                                             const GtEncodedsequence *encseq,
-                                            Readmode readmode)
+                                            GtReadmode readmode)
 {
   GtUchar cc;
   unsigned int idx;
@@ -230,10 +231,11 @@ static Seqpos *leftcontextofspecialchardist(unsigned int numofchars,
     GtSequencerange range;
 
     sri = newspecialrangeiterator(encseq,true);
-    if (ISDIRREVERSE(readmode))
+    if (GT_ISDIRREVERSE(readmode))
     {
-      Readmode thismode = (readmode == Reversemode) ? Forwardmode
-                                                    : Complementmode;
+      GtReadmode thismode =
+                 (readmode == GT_READMODE_REVERSE) ? GT_READMODE_FORWARD
+                                                    : GT_READMODE_COMPL;
       while (nextspecialrangeiterator(&range,sri))
       {
         if (range.rightpos < totallength)
@@ -406,7 +408,7 @@ static void fillanysubbuckets(GtBucketspec2 *bucketspec2,
 
 GtBucketspec2 *gt_bucketspec2_new(const Bcktab *bcktab,
                                   const GtEncodedsequence *encseq,
-                                  Readmode readmode,
+                                  GtReadmode readmode,
                                   Seqpos partwidth,
                                   unsigned int numofchars)
 {
@@ -545,8 +547,8 @@ void gt_copysortsuffixes(const GtBucketspec2 *bucketspec2,
     for (ptr = suftab; ptr < suftab + bucketspec2->partwidth; ptr++)
     {
       showsequenceatstartpos(stdout,
-                             ISDIRREVERSE(readmode) ? false : true,
-                             ISDIRCOMPLEMENT(readmode) ? true : false,
+                             GT_ISDIRREVERSE(readmode) ? false : true,
+                             GT_ISDIRCOMPLEMENT(readmode) ? true : false,
                              encseq,
                              *ptr);
     }

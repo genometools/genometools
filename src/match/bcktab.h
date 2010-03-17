@@ -129,7 +129,7 @@ void checkcountspecialcodes(const Bcktab *bcktab);
 
 void consistencyofsuffix(int line,
                          const GtEncodedsequence *encseq,
-                         Readmode readmode,
+                         GtReadmode readmode,
                          const Bcktab *bcktab,
                          unsigned int numofchars,
                          const Suffixwithcode *suffix);

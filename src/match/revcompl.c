@@ -16,7 +16,7 @@
 */
 
 #include "core/symboldef.h"
-#include "readmode-def.h"
+#include "core/readmode.h"
 
 void inplace_reversecomplement(GtUchar *seq,unsigned long len)
 {
@@ -26,8 +26,8 @@ void inplace_reversecomplement(GtUchar *seq,unsigned long len)
        frontptr < backptr; frontptr++, backptr--)
   {
     tmp = *frontptr;
-    *frontptr = COMPLEMENTBASE(*backptr);
-    *backptr = COMPLEMENTBASE(tmp);
+    *frontptr = GT_COMPLEMENTBASE(*backptr);
+    *backptr = GT_COMPLEMENTBASE(tmp);
   }
 }
 
@@ -39,6 +39,6 @@ void copy_reversecomplement(GtUchar *dest,const GtUchar *src,unsigned long len)
   for (destptr = dest, srcptr = src + len - 1;
        destptr < dest + len; destptr++, srcptr--)
   {
-    *destptr = COMPLEMENTBASE(*srcptr);
+    *destptr = GT_COMPLEMENTBASE(*srcptr);
   }
 }

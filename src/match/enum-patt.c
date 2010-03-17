@@ -107,14 +107,16 @@ const GtUchar *nextEnumpatterniterator(unsigned long *patternlen,
   }
   start = (Seqpos) (drand48() * (double) (epi->totallength - *patternlen));
   gt_assert(start < (Seqpos) (epi->totallength - *patternlen));
-  gt_encodedsequence_scanstate_init(epi->esr,epi->sampleencseq,Forwardmode,
+  gt_encodedsequence_scanstate_init(epi->esr,
+                                    epi->sampleencseq,
+                                    GT_READMODE_FORWARD,
                                     start);
   for (j=0; j<*patternlen; j++)
   {
     cc = gt_encodedsequence_sequentialgetencodedchar(epi->sampleencseq,
                                                      epi->esr,
                                                      start+j,
-                                                     Forwardmode);
+                                                     GT_READMODE_FORWARD);
     if (ISSPECIAL(cc))
     {
       cc = (GtUchar) (drand48() * epi->alphasize);
