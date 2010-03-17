@@ -155,7 +155,7 @@ newSfxInterface(GtReadmode readmode,
                 unsigned int numofparts,
                 const Sfxstrategy *sfxstrategy,
                 const GtEncodedsequence *encseq,
-                Sfxprogress *sfxprogress,
+                GtProgressTimer *sfxprogress,
                 Seqpos length,
                 GtLogger *verbosity,
                 GtError *err)
@@ -226,7 +226,7 @@ newSfxInterfaceWithReaders(GtReadmode readmode,
                            enum sfxDataRequest readerRequests[],
                            SeqDataReader readers[],
                            const GtEncodedsequence *encseq,
-                           Sfxprogress *sfxprogress,
+                           GtProgressTimer *sfxprogress,
                            Seqpos length,
                            GtLogger *verbosity, GtError *err)
 {

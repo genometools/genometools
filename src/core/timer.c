@@ -58,9 +58,9 @@ void gt_timer_stop(GtTimer *t)
   }
 }
 
-static int timeval_subtract (struct timeval *result,
-                             struct timeval *x,
-                             struct timeval *y)
+static int timeval_subtract(struct timeval *result,
+                            struct timeval *x,
+                            struct timeval *y)
 {
   if (x->tv_usec < y->tv_usec) {
     int nsec = (y->tv_usec - x->tv_usec) / 1000000 + 1;
@@ -77,19 +77,23 @@ static int timeval_subtract (struct timeval *result,
   return x->tv_sec < y->tv_sec;
 }
 
-void gt_timer_show(GtTimer *t, FILE *fp)
+void gt_timer_show_formatted(GtTimer *t, const char *fmt, FILE *fp)
 {
   struct timeval elapsed_tv;
-
   if (t->state == TIMER_RUNNING)
     gt_timer_stop(t);
   gt_assert(t->state == TIMER_STOPPED);
   timeval_subtract(&elapsed_tv, &t->stop_tv, &t->start_tv);
-  fprintf(fp, "%ld.%06lds real %lds user %lds system\n",
+  fprintf(fp, fmt,
           (long)(elapsed_tv.tv_sec),
           (long)(elapsed_tv.tv_usec),
           (long)(t->stop_ru.ru_utime.tv_sec - t->stop_ru.ru_utime.tv_sec),
           (long)(t->stop_ru.ru_stime.tv_sec - t->stop_ru.ru_stime.tv_sec));
+}
+
+void gt_timer_show(GtTimer *t, FILE *fp)
+{
+  gt_timer_show_formatted(t, "%ld.%06lds real %lds user %lds system\n", fp);
 }
 
 void gt_timer_delete(GtTimer *t)

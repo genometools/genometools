@@ -30,6 +30,10 @@ GtTimer* gt_timer_new(void);
 void     gt_timer_start(GtTimer*);
 void     gt_timer_stop(GtTimer*);
 void     gt_timer_show(GtTimer*, FILE*);
+/* <fmt> must be a format string for four %ld numbers, which are filled with:
+   elapsed seconds, elapsed microseconds, used usertime in seconds,
+   systemtime in seconds. */
+void     gt_timer_show_formatted(GtTimer*, const char *fmt, FILE*);
 void     gt_timer_delete(GtTimer*);
 
 #endif

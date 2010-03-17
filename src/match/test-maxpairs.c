@@ -49,7 +49,7 @@ int testmaxpairs(GT_UNUSED const GtStr *indexname,
 #include "core/logger.h"
 #include "sfx-suffixer.h"
 #include "sfx-apfxlen.h"
-#include "sfx-progress.h"
+#include "core/progress_timer.h"
 #include "esa-maxpairs.h"
 #include "esa-seqread.h"
 
@@ -68,7 +68,7 @@ static int constructsarrandrunmaxpairs(
                  GtReadmode readmode,
                  unsigned int prefixlength,
                  unsigned int numofparts,
-                 Sfxprogress *sfxprogress,
+                 GtProgressTimer *sfxprogress,
                  GtLogger *logger,
                  GtError *err)
 {

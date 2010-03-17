@@ -27,7 +27,7 @@
 #include "core/symboldef.h"
 #include "seqpos-def.h"
 #include "core/readmode.h"
-#include "sfx-progress.h"
+#include "core/progress_timer.h"
 
 typedef struct GtEncodedsequence GtEncodedsequence;
 typedef struct GtEncodedsequenceScanstate GtEncodedsequenceScanstate;
@@ -40,7 +40,7 @@ typedef struct GtEncodedsequenceScanstate GtEncodedsequenceScanstate;
 /* was: fromfiles2encseq */
 GtEncodedsequence* gt_encodedsequence_new_from_files(
                                        /* XXX */  ArraySeqpos *sequenceseppos,
-                                                  Sfxprogress *sfxprogress,
+                                                  GtProgressTimer *sfxprogress,
                                                   const GtStr *str_indexname,
                                                   const GtStr *str_smap,
                                                   const GtStr *str_sat,

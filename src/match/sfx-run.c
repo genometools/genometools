@@ -25,7 +25,7 @@
 #include "core/unused_api.h"
 #include "sfx-optdef.h"
 #include "encodedsequence.h"
-#include "sfx-progress.h"
+#include "core/progress_timer.h"
 #include "esa-fileend.h"
 #include "core/readmode.h"
 #include "core/logger.h"
@@ -198,7 +198,7 @@ static int suffixeratorwithoutput(const GtStr *str_indexname,
                                   unsigned int prefixlength,
                                   unsigned int numofparts,
                                   const Sfxstrategy *sfxstrategy,
-                                  Sfxprogress *sfxprogress,
+                                  GtProgressTimer *sfxprogress,
                                   GtLogger *logger,
                                   GtError *err)
 {
@@ -346,7 +346,7 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
 }
 
 static int run_packedindexconstruction(GtLogger *logger,
-                                       Sfxprogress *sfxprogress,
+                                       GtProgressTimer *sfxprogress,
                                        FILE *outfpbcktab,
                                        const Suffixeratoroptions *so,
                                        unsigned int prefixlength,
@@ -409,7 +409,7 @@ static int runsuffixerator(bool doesa,
                            GtLogger *logger,
                            GtError *err)
 {
-  Sfxprogress *sfxprogress;
+  GtProgressTimer *sfxprogress;
   Outfileinfo outfileinfo;
   bool haserr = false;
   unsigned int prefixlength;
@@ -419,13 +419,13 @@ static int runsuffixerator(bool doesa,
   gt_error_check(err);
   if (so->showtime)
   {
-    sfxprogress = sfxprogress_new("determining sequence length and number of "
-                                  "special symbols");
+    sfxprogress = gt_progress_timer_new("determining sequence length and "
+                                        "number of special symbols", false);
   } else
   {
     if (so->showprogress)
     {
-      sfxprogress = sfxprogress_new(NULL);
+      sfxprogress = gt_progress_timer_new(NULL, true);
     } else
     {
       sfxprogress = NULL;
@@ -656,8 +656,8 @@ static int runsuffixerator(bool doesa,
   }
   if (sfxprogress != NULL)
   {
-    sfxprogress_deliverthetime(stdout,sfxprogress,NULL);
-    gt_free(sfxprogress);
+    gt_progress_timer_start_new_state(sfxprogress,NULL,stdout);
+    gt_progress_timer_delete(sfxprogress);
   }
   return haserr ? -1 : 0;
 }

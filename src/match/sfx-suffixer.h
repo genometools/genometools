@@ -19,7 +19,7 @@
 #define SFX_SUFFIXER_H
 #include "core/error.h"
 #include "core/readmode.h"
-#include "sfx-progress.h"
+#include "core/progress_timer.h"
 #include "sfx-strategy.h"
 #include "sfx-bentsedg.h"
 #include "core/logger.h"
@@ -35,7 +35,7 @@ Sfxiterator *newSfxiterator(const GtEncodedsequence *encseq,
                             unsigned int numofparts,
                             Outlcpinfo *outlcpinfo,
                             const Sfxstrategy *sfxstrategy,
-                            Sfxprogress *sfxprogress,
+                            GtProgressTimer *sfxprogress,
                             GtLogger *logger,
                             GtError *err);
 

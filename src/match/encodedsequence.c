@@ -45,7 +45,7 @@
 #include "safecast-gen.h"
 #include "encodedsequence.h"
 #include "mapspec-gen.h"
-#include "sfx-progress.h"
+#include "core/progress_timer.h"
 #ifndef INLINEDENCSEQ
 #include "encodedsequence_rep.h"
 #endif
@@ -5327,7 +5327,7 @@ static unsigned long *initcharacterdistribution(const GtAlphabet *alpha)
 
 GtEncodedsequence*
 gt_encodedsequence_new_from_files(ArraySeqpos *sequenceseppos,
-                                  Sfxprogress *sfxprogress,
+                                  GtProgressTimer *sfxprogress,
                                   const GtStr *str_indexname,
                                   const GtStr *str_smap,
                                   const GtStr *str_sat,
@@ -5411,8 +5411,9 @@ gt_encodedsequence_new_from_files(ArraySeqpos *sequenceseppos,
   {
     if (sfxprogress != NULL)
     {
-      sfxprogress_deliverthetime(stdout,
-                                 sfxprogress,"computing sequence encoding");
+      gt_progress_timer_start_new_state(sfxprogress,
+                                        "computing sequence encoding",
+                                        stdout);
     }
     encseq = files2encodedsequence(true,
                                    filenametab,

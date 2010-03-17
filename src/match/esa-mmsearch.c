@@ -25,7 +25,7 @@
 #include "spacedef.h"
 #include "esa-mmsearch.h"
 #include "sfx-suffixer.h"
-#include "sfx-progress.h"
+#include "core/progress_timer.h"
 #include "format64.h"
 #include "stamp.h"
 #include "esa-map.h"
@@ -617,7 +617,7 @@ static int constructsarrandrunmmsearch(
                  unsigned int minlength,
                  Processquerymatch processquerymatch,
                  void *processquerymatchinfo,
-                 Sfxprogress *sfxprogress,
+                 GtProgressTimer *sfxprogress,
                  GtError *err)
 {
   const Seqpos *suftabptr;
