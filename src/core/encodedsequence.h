@@ -83,8 +83,6 @@ void gt_encodedsequence_sequence2bytecode(GtUchar *dest,
                                           unsigned long startindex,
                                           unsigned long len);
 
-int flushencseqfile(const GtStr *indexname,GtEncodedsequence *encseq,GtError*);
-
 void checkallsequencedescriptions(const GtEncodedsequence *encseq);
 
 GtEncodedsequence *plain2encodedsequence(bool withrange,

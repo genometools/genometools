@@ -730,8 +730,8 @@ static void assignencseqmapspecification(GtArrayMapspecification *mapspectable,
   }
 }
 
-int flushencseqfile(const GtStr *indexname,GtEncodedsequence *encseq,
-                    GtError *err)
+static int flushencseqfile(const GtStr *indexname,GtEncodedsequence *encseq,
+                           GtError *err)
 {
   FILE *fp;
   bool haserr = false;

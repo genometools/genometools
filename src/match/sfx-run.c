@@ -446,15 +446,6 @@ static int runsuffixerator(bool doesa,
     {
       haserr = true;
     }
-    if (!haserr && so->fn2encopt.outtistab &&
-        strcmp(gt_str_get(so->str_inputindex),
-               gt_str_get(so->fn2encopt.str_indexname)) != 0)
-    {
-      if (flushencseqfile(so->fn2encopt.str_indexname,encseq,err) != 0)
-      {
-        haserr = true;
-      }
-    }
   } else
   {
 
