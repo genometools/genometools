@@ -3553,13 +3553,13 @@ static void sequence2specialcharinfo(GtSpecialcharinfo *specialcharinfo,
   gt_disc_distri_delete(distspralen);
 }
 
-GtEncodedsequence *plain2encodedsequence(bool withrange,
-                                       const GtUchar *seq1,
-                                       unsigned long len1,
-                                       const GtUchar *seq2,
-                                       unsigned long len2,
-                                       const GtAlphabet *alpha,
-                                       GtLogger *logger)
+GtEncodedsequence* gt_encodedsequence_new_from_plain(bool withrange,
+                                                     const GtUchar *seq1,
+                                                     unsigned long len1,
+                                                     const GtUchar *seq2,
+                                                     unsigned long len2,
+                                                     const GtAlphabet *alpha,
+                                                     GtLogger *logger)
 {
   GtEncodedsequence *encseq;
   GtUchar *seqptr;

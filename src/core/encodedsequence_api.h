@@ -64,6 +64,14 @@ GtEncodedsequence* gt_encodedsequence_new_from_index(bool withrange,
                                                      GtLogger *logger,
                                                      GtError *err);
 
+GtEncodedsequence* gt_encodedsequence_new_from_plain(bool withrange,
+                                                     const GtUchar *seq1,
+                                                     unsigned long len1,
+                                                     const GtUchar *seq2,
+                                                     unsigned long len2,
+                                                     const GtAlphabet *alpha,
+                                                     GtLogger *logger);
+
 #ifdef GT_INLINEDENCSEQ
 #define            gt_encodedsequence_total_length(ENCSEQ) \
                      ((ENCSEQ)->totallength)

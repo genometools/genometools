@@ -695,13 +695,13 @@ int sarrquerysubstringmatch(const GtUchar *dbseq,
   bool haserr = false;
   GtEncodedsequence *dbencseq;
 
-  dbencseq = plain2encodedsequence(true,
-                                   dbseq,
-                                   dblen,
-                                   NULL,
-                                   0,
-                                   alpha,
-                                   logger);
+  dbencseq = gt_encodedsequence_new_from_plain(true,
+                                               dbseq,
+                                               dblen,
+                                               NULL,
+                                               0,
+                                               alpha,
+                                               logger);
   numofchars = gt_alphabet_num_of_chars(alpha);
   if (constructsarrandrunmmsearch(dbencseq,
                                   GT_READMODE_FORWARD,

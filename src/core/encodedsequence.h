@@ -85,14 +85,6 @@ void gt_encodedsequence_sequence2bytecode(GtUchar *dest,
 
 void gt_encodedsequence_check_descriptions(const GtEncodedsequence *encseq);
 
-GtEncodedsequence *plain2encodedsequence(bool withrange,
-                                         const GtUchar *seq1,
-                                         unsigned long len1,
-                                         const GtUchar *seq2,
-                                         unsigned long len2,
-                                         const GtAlphabet *alpha,
-                                         GtLogger *logger);
-
 bool hasspecialranges(const GtEncodedsequence *encseq);
 
 bool hasfastspecialrangeenumerator(const GtEncodedsequence *encseq);

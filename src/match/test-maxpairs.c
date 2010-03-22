@@ -147,13 +147,13 @@ static int sarrselfsubstringmatch(const GtUchar *dbseq,
   unsigned int numofchars;
   bool haserr = false;
 
-  ssi.encseq = plain2encodedsequence(true,
-                                     dbseq,
-                                     dblen,
-                                     query,
-                                     querylen,
-                                     alpha,
-                                     logger);
+  ssi.encseq = gt_encodedsequence_new_from_plain(true,
+                                                 dbseq,
+                                                 dblen,
+                                                 query,
+                                                 querylen,
+                                                 alpha,
+                                                 logger);
   ssi.minlength = minlength;
   ssi.processmaxpairs = processmaxpairs;
   ssi.processmaxpairsinfo = processmaxpairsinfo;
