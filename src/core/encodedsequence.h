@@ -85,7 +85,7 @@ void gt_encodedsequence_sequence2bytecode(GtUchar *dest,
 
 void gt_encodedsequence_check_descriptions(const GtEncodedsequence *encseq);
 
-bool hasspecialranges(const GtEncodedsequence *encseq);
+bool gt_encodedsequence_has_specialranges(const GtEncodedsequence *encseq);
 
 bool hasfastspecialrangeenumerator(const GtEncodedsequence *encseq);
 

@@ -33,7 +33,7 @@ typedef struct
 Rankedbounds *fillrankbounds(const GtEncodedsequence *encseq,
                              GtReadmode readmode)
 {
-  if (hasspecialranges(encseq))
+  if (gt_encodedsequence_has_specialranges(encseq))
   {
     GtSpecialrangeiterator *sri;
     GtRange range;
@@ -150,7 +150,7 @@ Specialrank *fillspecialranklist(const GtEncodedsequence *encseq,
                                  GtReadmode readmode,
                                  const unsigned long *inversesuftab)
 {
-  if (hasspecialranges(encseq))
+  if (gt_encodedsequence_has_specialranges(encseq))
   {
     GtSpecialrangeiterator *sri;
     GtRange range;

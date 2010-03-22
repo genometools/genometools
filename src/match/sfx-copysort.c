@@ -163,7 +163,7 @@ static unsigned long *leftcontextofspecialchardist(unsigned int numofchars,
   {
     specialchardist[idx] = 0;
   }
-  if (hasspecialranges(encseq))
+  if (gt_encodedsequence_has_specialranges(encseq))
   {
     GtSpecialrangeiterator *sri;
     GtRange range;
@@ -225,7 +225,7 @@ static unsigned long *leftcontextofspecialchardist(unsigned int numofchars,
   {
     specialchardist[idx] = 0;
   }
-  if (hasspecialranges(encseq))
+  if (gt_encodedsequence_has_specialranges(encseq))
   {
     GtSpecialrangeiterator *sri;
     GtRange range;

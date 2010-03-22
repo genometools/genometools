@@ -651,7 +651,7 @@ Sfxiterator *newSfxiterator(const GtEncodedsequence *encseq,
                      stpgetlargestwidth(sfi->suftabparts));
     sfi->suftab.longest.defined = false;
     sfi->suftab.longest.valueunsignedlong = 0;
-    if (hasspecialranges(sfi->encseq))
+    if (gt_encodedsequence_has_specialranges(sfi->encseq))
     {
       sfi->sri = gt_specialrangeiterator_new(sfi->encseq,
                                          GT_ISDIRREVERSE(sfi->readmode)

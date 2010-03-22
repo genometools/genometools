@@ -2103,7 +2103,7 @@ static bool containsspecialViatables(const GtEncodedsequence *encseq,
   return false;
 }
 
-bool hasspecialranges(const GtEncodedsequence *encseq)
+bool gt_encodedsequence_has_specialranges(const GtEncodedsequence *encseq)
 {
   return (encseq->numofspecialstostore > 0) ? true : false;
 }
@@ -3859,7 +3859,7 @@ static void fwdextract2bitenc(GtEndofTwobitencoding *ptbe,
   {
     unsigned long stoppos;
 
-    if (hasspecialranges(encseq))
+    if (gt_encodedsequence_has_specialranges(encseq))
     {
       stoppos = fwdgetnextstoppos(encseq,esr,startpos);
     } else
@@ -3883,7 +3883,7 @@ static void fwdextract2bitenc(GtEndofTwobitencoding *ptbe,
     }
   } else
   {
-    if (hasspecialranges(encseq))
+    if (gt_encodedsequence_has_specialranges(encseq))
     {
       GtBitsequence spbits;
 
@@ -3915,7 +3915,7 @@ static void revextract2bitenc(GtEndofTwobitencoding *ptbe,
   {
     unsigned long stoppos;
 
-    if (hasspecialranges(encseq))
+    if (gt_encodedsequence_has_specialranges(encseq))
     {
       stoppos = revgetnextstoppos(encseq,esr,startpos);
     } else
@@ -3939,7 +3939,7 @@ static void revextract2bitenc(GtEndofTwobitencoding *ptbe,
     }
   } else
   {
-    if (hasspecialranges(encseq))
+    if (gt_encodedsequence_has_specialranges(encseq))
     {
       GtBitsequence spbits;
 
@@ -4853,7 +4853,8 @@ void checkextractspecialbits(const GtEncodedsequence *encseq,bool fwd)
   GtBitsequence spbits1, spbits2;
   unsigned int unitsnotspecial_bruteforce, unitsnotspecial;
 
-  if (encseq->sat != Viabitaccess || !hasspecialranges(encseq))
+  if (encseq->sat != Viabitaccess
+        || !gt_encodedsequence_has_specialranges(encseq))
   {
     return;
   }

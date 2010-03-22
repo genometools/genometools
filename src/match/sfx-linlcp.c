@@ -96,7 +96,7 @@ static void setrelevantfrominversetab(Compressedtable *rightposinverse,
                                       const unsigned long *sortedsuffixes,
                                       unsigned long partwidth)
 {
-  if (hasspecialranges(encseq))
+  if (gt_encodedsequence_has_specialranges(encseq))
   {
     unsigned long idx;
 
@@ -165,7 +165,7 @@ static void inversesuffixarray2specialranknext(
                          unsigned long partwidth,
                          unsigned long totallength)
 {
-  if (hasspecialranges(encseq))
+  if (gt_encodedsequence_has_specialranges(encseq))
   {
     GtSpecialrangeiterator *sri;
     GtRange range;
@@ -257,7 +257,7 @@ static unsigned long sa2ranknext(Compressedtable *ranknext,
       longest = idx;
     }
   }
-  if (hasspecialranges(encseq))
+  if (gt_encodedsequence_has_specialranges(encseq))
   {
     GtSpecialrangeiterator *sri;
     GtRange range;

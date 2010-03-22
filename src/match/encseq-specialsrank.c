@@ -103,7 +103,7 @@ newSpecialsRankLookup(const GtEncodedsequence *encseq, GtReadmode readmode,
   gt_assert(sampleIntervalLog2 < sizeof (unsigned long) * CHAR_BIT);
   seqLastPos = gt_encodedsequence_total_length(encseq);
   seqLen = seqLastPos + 1;
-  if (hasspecialranges(encseq))
+  if (gt_encodedsequence_has_specialranges(encseq))
   {
     /* this sequence has some special characters */
     struct specialsRankTable *rankTable;

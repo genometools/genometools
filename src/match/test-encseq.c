@@ -288,7 +288,7 @@ int checkspecialrangesfast(const GtEncodedsequence *encseq)
   GtSpecialrangeiterator *sri;
   GtRange range;
 
-  if (!hasspecialranges(encseq))
+  if (!gt_encodedsequence_has_specialranges(encseq))
   {
     return 0;
   }

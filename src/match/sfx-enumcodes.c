@@ -61,7 +61,7 @@ Enumcodeatposition *newEnumcodeatposition(const GtEncodedsequence *encseq,
     ecp->previousrange.start = ecp->previousrange.end = ecp->totallength;
   }
   ecp->exhausted = false;
-  if (hasspecialranges(encseq))
+  if (gt_encodedsequence_has_specialranges(encseq))
   {
     ecp->sri = gt_specialrangeiterator_new(encseq,ecp->moveforward);
   } else

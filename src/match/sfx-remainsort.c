@@ -179,7 +179,7 @@ static Lowerboundwithrank *filllowerboundwithrank(
                                                 const GtEncodedsequence *encseq,
                                                 GtReadmode readmode)
 {
-  if (hasspecialranges(encseq))
+  if (gt_encodedsequence_has_specialranges(encseq))
   {
     GtSpecialrangeiterator *sri;
     GtRange range;
@@ -629,7 +629,7 @@ static void initinversesuftabspecials(Rmnsufinfo *rmnsufinfo)
   rmnsufinfo->inversesuftab = compressedtable_new(rmnsufinfo->totallength+1,
                                                   rmnsufinfo->totallength);
   inversesuftab_set(rmnsufinfo,rmnsufinfo->totallength,rmnsufinfo->totallength);
-  if (hasspecialranges(rmnsufinfo->encseq))
+  if (gt_encodedsequence_has_specialranges(rmnsufinfo->encseq))
   {
     GtSpecialrangeiterator *sri;
     GtRange range;

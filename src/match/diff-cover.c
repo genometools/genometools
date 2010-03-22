@@ -557,7 +557,7 @@ static void initinversesuftabspecials(Differencecover *dcov)
 {
   dcov->inversesuftab = gt_malloc(sizeof (*dcov->inversesuftab) *
                                   dcov->maxsamplesize);
-  if (hasspecialranges(dcov->encseq))
+  if (gt_encodedsequence_has_specialranges(dcov->encseq))
   {
     GtSpecialrangeiterator *sri;
     GtRange range;
