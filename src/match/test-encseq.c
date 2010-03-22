@@ -220,7 +220,7 @@ int testencodedsequence(const GtStrArray *filenametab,
   bool fwd = GT_ISDIRREVERSE(readmode) ? false : true,
        complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
 
-  if (hasfastspecialrangeenumerator(encseq))
+  if (gt_encodedsequence_has_fast_specialrangeenumerator(encseq))
   {
     checkextractunitatpos(encseq,fwd,complement);
     if (multicharcmptrials > 0)

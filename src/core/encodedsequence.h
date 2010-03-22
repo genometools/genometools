@@ -87,7 +87,8 @@ void gt_encodedsequence_check_descriptions(const GtEncodedsequence *encseq);
 
 bool gt_encodedsequence_has_specialranges(const GtEncodedsequence *encseq);
 
-bool hasfastspecialrangeenumerator(const GtEncodedsequence *encseq);
+bool gt_encodedsequence_has_fast_specialrangeenumerator(
+                                               const GtEncodedsequence *encseq);
 
 bool possibletocmpbitwise(const GtEncodedsequence *encseq);
 

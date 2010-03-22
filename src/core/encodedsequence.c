@@ -582,7 +582,8 @@ static bool satviautables(GtPositionaccesstype sat)
           sat == Viauint32tables) ? true : false;
 }
 
-bool hasfastspecialrangeenumerator(const GtEncodedsequence *encseq)
+bool gt_encodedsequence_has_fast_specialrangeenumerator(
+                                                const GtEncodedsequence *encseq)
 {
   return satviautables(encseq->sat);
 }
@@ -1591,7 +1592,8 @@ static void showallspecialpositionswithpages(const GtEncodedsequence *encseq)
 
 static void showallspecialpositions(const GtEncodedsequence *encseq)
 {
-  if (encseq->numofspecialstostore > 0 && hasfastspecialrangeenumerator(encseq))
+  if (encseq->numofspecialstostore > 0
+        && gt_encodedsequence_has_fast_specialrangeenumerator(encseq))
   {
     showallspecialpositionswithpages(encseq);
   }
@@ -1944,7 +1946,7 @@ void gt_encodedsequence_scanstate_initgeneric(GtEncodedsequenceScanstate *esr,
                                          bool moveforward,
                                          unsigned long startpos)
 {
-  if (hasfastspecialrangeenumerator(encseq))
+  if (gt_encodedsequence_has_fast_specialrangeenumerator(encseq))
   {
     gt_assert(startpos < encseq->totallength);
     gt_assert(esr != NULL);

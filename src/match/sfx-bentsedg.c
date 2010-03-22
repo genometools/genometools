@@ -1902,7 +1902,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   {
     bsr->lcpsubtab = NULL;
   }
-  if (hasfastspecialrangeenumerator(encseq)
+  if (gt_encodedsequence_has_fast_specialrangeenumerator(encseq)
         && gt_encodedsequence_has_specialranges(encseq))
   {
     bsr->esr1 = gt_encodedsequence_scanstate_new();
