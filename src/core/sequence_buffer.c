@@ -123,7 +123,7 @@ void gt_sequence_buffer_set_desc_queue(GtSequenceBuffer *si, GtQueue *dq)
 }
 
 void gt_sequence_buffer_set_filelengthtab(GtSequenceBuffer *si,
-                                          Filelengthvalues *flv)
+                                          GtFilelengthvalues *flv)
 {
   gt_assert(si && si->pvt);
   si->pvt->filelengthtab = flv;

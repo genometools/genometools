@@ -40,7 +40,7 @@ struct GtFastaBuffer
         inputbuffer[INPUTFILEBUFFERSIZE];
   ssize_t currentinpos, currentfillpos;
   uint64_t lastspeciallength;
-  Filelengthvalues *filelengthtab;
+  GtFilelengthvalues *filelengthtab;
   const GtStrArray *filenametab;
   const GtUchar *symbolmap;
   bool plainformat;

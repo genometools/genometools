@@ -90,7 +90,7 @@ int gt_convertseq(int argc, const char **argv, GtError *err)
   int i, parsed_args, had_err = 0;
   off_t totalsize;
   ConvertseqOptions opts;
-  Filelengthvalues *flv;
+  GtFilelengthvalues *flv;
   GtSeqIterator *seqit;
   GtSequenceBuffer *sb = NULL;
   opts.ofi = gt_outputfileinfo_new();
@@ -118,7 +118,7 @@ int gt_convertseq(int argc, const char **argv, GtError *err)
   }
   totalsize = gt_files_estimate_total_size(files);
 
-  flv = gt_calloc(gt_str_array_size(files), sizeof (Filelengthvalues));
+  flv = gt_calloc(gt_str_array_size(files), sizeof (GtFilelengthvalues));
 
   sb = gt_sequence_buffer_new_guess_type(files, err);
   if (!sb) {

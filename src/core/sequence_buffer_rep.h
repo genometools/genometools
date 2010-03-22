@@ -46,7 +46,7 @@ struct GtSequenceBuffer {
 struct GtSequenceBufferMembers {
   unsigned int filenum;
   uint64_t linenum;
-  Filelengthvalues *filelengthtab;
+  GtFilelengthvalues *filelengthtab;
   bool complete,
        use_ungetchar;
   GtQueue *descptr;

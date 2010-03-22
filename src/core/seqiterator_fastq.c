@@ -29,7 +29,7 @@ struct GtSeqIteratorFastQ
   const GtSeqIterator parent_instance;
   unsigned int filenum;
   uint64_t linenum;
-  Filelengthvalues *filelengthtab;
+  GtFilelengthvalues *filelengthtab;
   bool complete,
        use_ungetchar;
   GtStr *sequencebuffer,

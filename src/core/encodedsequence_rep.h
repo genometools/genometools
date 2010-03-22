@@ -84,7 +84,7 @@ struct GtEncodedsequence
                   specialcharinfo; /* information about specialcharacters */
   GtStrArray *filenametab;    /* table of filenames */
   char *firstfilename;
-  Filelengthvalues *filelengthtab;  /* table of length of files */
+  GtFilelengthvalues *filelengthtab;  /* table of length of files */
 
   const char *destab;
   unsigned long destablength, *sdstab;

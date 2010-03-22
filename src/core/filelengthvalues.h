@@ -23,6 +23,6 @@ typedef struct
 {
   uint64_t length,
            effectivelength;
-} Filelengthvalues;
+} GtFilelengthvalues;
 
 #endif

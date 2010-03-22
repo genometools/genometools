@@ -102,8 +102,8 @@ static int assigncorrecttype(Mapspecification *mapspec,
     case GtCharType:
       ASSIGNPTR2STARTPTR(char);
       break;
-    case FilelengthvaluesType:
-      ASSIGNPTR2STARTPTR(Filelengthvalues);
+    case GtFilelengthvaluesType:
+      ASSIGNPTR2STARTPTR(GtFilelengthvalues);
       break;
     case GtUcharType:
       ASSIGNPTR2STARTPTR(GtUchar);
@@ -276,8 +276,8 @@ int flushtheindex2file(FILE *fp,
         case GtCharType:
           WRITEACTIONWITHTYPE(char);
           break;
-        case FilelengthvaluesType:
-          WRITEACTIONWITHTYPE(Filelengthvalues);
+        case GtFilelengthvaluesType:
+          WRITEACTIONWITHTYPE(GtFilelengthvalues);
           break;
         case GtUcharType:
           WRITEACTIONWITHTYPE(GtUchar);

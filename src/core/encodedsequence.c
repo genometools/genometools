@@ -653,7 +653,7 @@ static void assignencseqmapspecification(GtArrayMapspecification *mapspectable,
   NEWMAPSPEC(encseq->lengthofdbfilenamesptr,GtUlong,1UL);
   NEWMAPSPEC(encseq->specialcharinfoptr,GtSpecialcharinfo,1UL);
   NEWMAPSPEC(encseq->firstfilename,GtChar,encseq->lengthofdbfilenames);
-  NEWMAPSPEC(encseq->filelengthtab,Filelengthvalues,encseq->numofdbfiles);
+  NEWMAPSPEC(encseq->filelengthtab,GtFilelengthvalues,encseq->numofdbfiles);
   numofchars = gt_alphabet_num_of_chars(encseq->alpha);
   NEWMAPSPEC(encseq->characterdistribution,GtUlong,(unsigned long) numofchars);
   switch (encseq->sat)
@@ -883,7 +883,7 @@ static uint64_t localdetsizeencseq(GtPositionaccesstype sat,
   sum += sizeof (unsigned long); /* for numofdbfilenames type */
   sum += sizeof (unsigned long); /* for lengthofdbfilenames type */
   sum += sizeof (GtSpecialcharinfo); /* for specialcharinfo */
-  sum += sizeof (Filelengthvalues) * numofdbfiles; /* for filelengthtab */
+  sum += sizeof (GtFilelengthvalues) * numofdbfiles; /* for filelengthtab */
   sum += sizeof (unsigned long) * numofchars; /* for characterdistribution */
   sum += sizeof (char) * lengthofdbfilenames; /* for firstfilename */
   return sum;
@@ -2873,7 +2873,7 @@ unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab)
 /*@null@*/ GtEncodedsequence *files2encodedsequence(
                                 bool withrange,
                                 const GtStrArray *filenametab,
-                                const Filelengthvalues *filelengthtab,
+                                const GtFilelengthvalues *filelengthtab,
                                 bool plainformat,
                                 unsigned long totallength,
                                 unsigned long numofsequences,
@@ -2929,7 +2929,7 @@ unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab)
     encseq->mappedptr = NULL;
     encseq->characterdistribution = characterdistribution;
     encseq->filenametab = (GtStrArray *) filenametab;
-    encseq->filelengthtab = (Filelengthvalues *) filelengthtab;
+    encseq->filelengthtab = (GtFilelengthvalues *) filelengthtab;
     encseq->specialcharinfo = *specialcharinfo;
     gt_assert(filenametab != NULL);
     if (plainformat) {
@@ -3298,7 +3298,7 @@ static int gt_inputfiles2sequencekeyvalues(const GtStr *indexname,
                                            unsigned int forcetable,
                                            unsigned long *specialrangestab,
                                            const GtStrArray *filenametab,
-                                           Filelengthvalues **filelengthtab,
+                                           GtFilelengthvalues **filelengthtab,
                                            const GtAlphabet *alpha,
                                            bool plainformat,
                                            bool outdestab,
@@ -3360,7 +3360,7 @@ static int gt_inputfiles2sequencekeyvalues(const GtStr *indexname,
     {
       gt_sequence_buffer_set_symbolmap(fb, gt_alphabet_symbolmap(alpha));
       *filelengthtab = gt_calloc((size_t) gt_str_array_size(filenametab),
-                                 sizeof (Filelengthvalues));
+                                 sizeof (GtFilelengthvalues));
       gt_sequence_buffer_set_filelengthtab(fb, *filelengthtab);
       if (descqueue != NULL)
       {
@@ -5364,7 +5364,7 @@ gt_encodedsequence_new_from_files(GtProgressTimer *sfxprogress,
   GtSpecialcharinfo specialcharinfo;
   const GtAlphabet *alpha = NULL;
   bool alphaisbound = false;
-  Filelengthvalues *filelengthtab = NULL;
+  GtFilelengthvalues *filelengthtab = NULL;
   unsigned long specialrangestab[3];
   unsigned long *characterdistribution = NULL;
   GtEncodedsequence *encseq = NULL;

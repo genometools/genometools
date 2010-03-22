@@ -30,7 +30,7 @@ typedef struct GtFastaBuffer GtFastaBuffer;
 GtFastaBuffer* gt_fastabuffer_new(const GtStrArray *filenametab,
                                   const GtUchar *symbolmap,
                                   bool plainformat,
-                                  Filelengthvalues **filelengthtab,
+                                  GtFilelengthvalues **filelengthtab,
                                   GtQueue *descptr,
                                   unsigned long *characterdistribution);
 static int   gt_fastabuffer_next(GtFastaBuffer*, GtUchar *val, GtError*);

@@ -63,7 +63,7 @@ void          gt_sequence_buffer_set_symbolmap(GtSequenceBuffer*,
    number of sequence files traversed.
    Set to NULL to disable Filelengthvalue counting (default). */
 void          gt_sequence_buffer_set_filelengthtab(GtSequenceBuffer*,
-                                                   Filelengthvalues*);
+                                                   GtFilelengthvalues*);
 
 /* Assigns a <GtQueue> in which for each sequence file, the respective
    description string is written. If this is not set, or set to NULL,

@@ -35,7 +35,7 @@
 typedef enum
 {
   GtCharType, /* \0 terminated string */
-  FilelengthvaluesType,
+  GtFilelengthvaluesType,
   GtUcharType,
   GtUshortType,
   Uint32Type,
