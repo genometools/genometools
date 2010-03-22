@@ -1182,7 +1182,7 @@ void differencecover_sortsample(Differencecover *dcov,bool cmpcharbychar,
     } else
     {
       defaultsfxstrategy(&sfxstrategy,
-                         possibletocmpbitwise(dcov->encseq) ? false : true);
+                gt_encodedsequence_bitwise_cmp_ok(dcov->encseq) ? false : true);
     }
     sfxstrategy.differencecover = dcov->vparam;
     sortbucketofsuffixes(dcov->sortedsample,

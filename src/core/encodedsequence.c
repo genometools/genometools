@@ -329,7 +329,7 @@ GtUchar gt_encodedsequence_extractencodedchar(const GtEncodedsequence *encseq,
                            GtReadmode readmode)
 {
   gt_assert(pos < encseq->totallength);
-  gt_assert(possibletocmpbitwise(encseq));
+  gt_assert(gt_encodedsequence_bitwise_cmp_ok(encseq));
   switch (readmode)
   {
     case GT_READMODE_FORWARD:
@@ -2110,7 +2110,7 @@ bool gt_encodedsequence_has_specialranges(const GtEncodedsequence *encseq)
   return (encseq->numofspecialstostore > 0) ? true : false;
 }
 
-bool possibletocmpbitwise(const GtEncodedsequence *encseq)
+bool gt_encodedsequence_bitwise_cmp_ok(const GtEncodedsequence *encseq)
 {
   return (encseq->sat == Viadirectaccess ||
           encseq->sat == Viabytecompress) ? false : true;

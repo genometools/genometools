@@ -508,7 +508,8 @@ Sfxiterator *newSfxiterator(const GtEncodedsequence *encseq,
     if (sfxstrategy != NULL)
     {
        sfi->sfxstrategy = *sfxstrategy;
-       if (sfxstrategy->cmpcharbychar || !possibletocmpbitwise(encseq))
+       if (sfxstrategy->cmpcharbychar
+             || !gt_encodedsequence_bitwise_cmp_ok(encseq))
        {
          sfi->sfxstrategy.cmpcharbychar = true;
        } else
@@ -518,7 +519,7 @@ Sfxiterator *newSfxiterator(const GtEncodedsequence *encseq,
     } else
     {
       defaultsfxstrategy(&sfi->sfxstrategy,
-                         possibletocmpbitwise(encseq) ? false : true);
+                      gt_encodedsequence_bitwise_cmp_ok(encseq) ? false : true);
     }
     gt_logger_log(logger,"maxinsertionsort=%lu",
                 sfi->sfxstrategy.maxinsertionsort);
