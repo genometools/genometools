@@ -3951,7 +3951,7 @@ static void revextract2bitenc(GtEndofTwobitencoding *ptbe,
   }
 }
 
-void extract2bitenc(bool fwd,
+void gt_encodedsequence_extract2bitenc(bool fwd,
                     GtEndofTwobitencoding *ptbe,
                     const GtEncodedsequence *encseq,
                     GtEncodedsequenceScanstate *esr,
@@ -4028,7 +4028,7 @@ static int endofdifftbe(bool fwd,
          (complement,commonunits,tbe1,tbe2);
 }
 
-int compareTwobitencodings(bool fwd,
+int gt_encodedsequence_compare_twobitencodings(bool fwd,
                            bool complement,
                            GtCommonunits *commonunits,
                            const GtEndofTwobitencoding *ptbe1,
@@ -4272,8 +4272,9 @@ int compareEncseqsequences(GtCommonunits *commonunits,
       {
         fwdextract2bitenc(&ptbe1,encseq,esr1,pos1 + depth);
         fwdextract2bitenc(&ptbe2,encseq,esr2,pos2 + depth);
-        retval = compareTwobitencodings(true,complement,commonunits,
-                                        &ptbe1,&ptbe2);
+        retval = gt_encodedsequence_compare_twobitencodings(true,complement,
+                                                            commonunits,
+                                                            &ptbe1,&ptbe2);
         depth += commonunits->common;
       } else
       {
@@ -4293,8 +4294,9 @@ int compareEncseqsequences(GtCommonunits *commonunits,
       {
         revextract2bitenc(&ptbe1,encseq,esr1,pos1 - depth);
         revextract2bitenc(&ptbe2,encseq,esr2,pos2 - depth);
-        retval = compareTwobitencodings(false,complement,commonunits,
-                                        &ptbe1,&ptbe2);
+        retval = gt_encodedsequence_compare_twobitencodings(false,complement,
+                                                            commonunits,
+                                                            &ptbe1,&ptbe2);
         depth += commonunits->common;
       } else
       {
@@ -4407,8 +4409,9 @@ int compareEncseqsequencesmaxdepth(GtCommonunits *commonunits,
       {
         fwdextract2bitenc(&ptbe1,encseq,esr1,pos1 + depth);
         fwdextract2bitenc(&ptbe2,encseq,esr2,pos2 + depth);
-        retval = compareTwobitencodings(true,complement,commonunits,
-                                        &ptbe1,&ptbe2);
+        retval = gt_encodedsequence_compare_twobitencodings(true,complement,
+                                                            commonunits,
+                                                            &ptbe1,&ptbe2);
         if (depth + commonunits->common < maxdepth)
         {
           depth += commonunits->common;
@@ -4436,8 +4439,9 @@ int compareEncseqsequencesmaxdepth(GtCommonunits *commonunits,
       {
         revextract2bitenc(&ptbe1,encseq,esr1,pos1 - depth);
         revextract2bitenc(&ptbe2,encseq,esr2,pos2 - depth);
-        retval = compareTwobitencodings(false,complement,commonunits,
-                                        &ptbe1,&ptbe2);
+        retval = gt_encodedsequence_compare_twobitencodings(false,complement,
+                                                            commonunits,
+                                                            &ptbe1,&ptbe2);
         if (depth + commonunits->common < maxdepth)
         {
           depth += commonunits->common;
@@ -4509,9 +4513,11 @@ int multicharactercompare(const GtEncodedsequence *encseq,
 
   gt_encodedsequence_scanstate_initgeneric(esr1,encseq,fwd,pos1);
   gt_encodedsequence_scanstate_initgeneric(esr2,encseq,fwd,pos2);
-  extract2bitenc(fwd,&ptbe1,encseq,esr1,pos1);
-  extract2bitenc(fwd,&ptbe2,encseq,esr2,pos2);
-  retval = compareTwobitencodings(fwd,complement,&commonunits,&ptbe1,&ptbe2);
+  gt_encodedsequence_extract2bitenc(fwd,&ptbe1,encseq,esr1,pos1);
+  gt_encodedsequence_extract2bitenc(fwd,&ptbe2,encseq,esr2,pos2);
+  retval = gt_encodedsequence_compare_twobitencodings(fwd,complement,
+                                                      &commonunits,
+                                                      &ptbe1,&ptbe2);
   if (retval == 0)
   {
     gt_assert(commonunits.common == (unsigned int) GT_UNITSIN2BITENC);
@@ -4791,7 +4797,7 @@ void checkextractunitatpos(const GtEncodedsequence *encseq,
   gt_encodedsequence_scanstate_initgeneric(esr,encseq,fwd,startpos);
   while (true)
   {
-    extract2bitenc(fwd,&ptbe1,encseq,esr,startpos);
+    gt_encodedsequence_extract2bitenc(fwd,&ptbe1,encseq,esr,startpos);
     extract2bitenc_bruteforce(fwd,&ptbe2,encseq,startpos);
     if (ptbe1.unitsnotspecial != ptbe2.unitsnotspecial)
     {
@@ -4906,9 +4912,11 @@ void multicharactercompare_withtest(const GtEncodedsequence *encseq,
 
   gt_encodedsequence_scanstate_initgeneric(esr1,encseq,fwd,pos1);
   gt_encodedsequence_scanstate_initgeneric(esr2,encseq,fwd,pos2);
-  extract2bitenc(fwd,&ptbe1,encseq,esr1,pos1);
-  extract2bitenc(fwd,&ptbe2,encseq,esr2,pos2);
-  ret1 = compareTwobitencodings(fwd,complement,&commonunits1,&ptbe1,&ptbe2);
+  gt_encodedsequence_extract2bitenc(fwd,&ptbe1,encseq,esr1,pos1);
+  gt_encodedsequence_extract2bitenc(fwd,&ptbe2,encseq,esr2,pos2);
+  ret1 = gt_encodedsequence_compare_twobitencodings(fwd,complement,
+                                                    &commonunits1,&ptbe1,
+                                                    &ptbe2);
   commonunits2 = (unsigned long) GT_UNITSIN2BITENC;
   ret2 = comparetwostrings(encseq,fwd,complement,&commonunits2,pos1,pos2,0);
   if (ret1 != ret2 || (unsigned long) commonunits1.common != commonunits2)

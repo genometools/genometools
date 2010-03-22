@@ -152,7 +152,8 @@ typedef GtEndofTwobitencoding Sfxcmp;
               pos += depth;\
               gt_encodedsequence_scanstate_initgeneric(bsr->esr1,bsr->encseq,\
                                                   true,pos);\
-              extract2bitenc(true,&(VAR),bsr->encseq,bsr->esr1,pos);\
+              gt_encodedsequence_extract2bitenc(true,&(VAR),bsr->encseq,\
+                                                bsr->esr1,pos);\
             } else\
             {\
               VAR.tbe = 0;\
@@ -167,7 +168,8 @@ typedef GtEndofTwobitencoding Sfxcmp;
               pos -= depth;\
               gt_encodedsequence_scanstate_initgeneric(bsr->esr1,bsr->encseq,\
                                                   false,pos);\
-              extract2bitenc(false,&(VAR),bsr->encseq,bsr->esr1,pos);\
+              gt_encodedsequence_extract2bitenc(false,&(VAR),bsr->encseq,\
+                                                bsr->esr1,pos);\
             } else\
             {\
               VAR.tbe = 0;\
@@ -178,8 +180,9 @@ typedef GtEndofTwobitencoding Sfxcmp;
         }
 
 #define Sfxdocompare(COMMONUNITS,X,Y)\
-        ret##X##Y = compareTwobitencodings(bsr->fwd,bsr->complement,\
-                                           COMMONUNITS,&X,&Y)
+        ret##X##Y = gt_encodedsequence_compare_twobitencodings(bsr->fwd,\
+                                                              bsr->complement,\
+                                                              COMMONUNITS,&X,&Y)
 
 #define SfxcmpEQUAL(X,Y)      (ret##X##Y == 0)
 #define SfxcmpSMALLER(X,Y)    (ret##X##Y < 0)
@@ -691,7 +694,7 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
 }
 
 #define DOMEDIANCOMPARE(A,B)\
-        compareTwobitencodings(fwd,complement,&commonunits,\
+        gt_encodedsequence_compare_twobitencodings(fwd,complement,&commonunits,\
                                &((A)->etbe),&((B)->etbe))
 
 #define MedianElemGREATER(A,B)  (DOMEDIANCOMPARE(A,B) > 0)
@@ -1097,8 +1100,11 @@ static void sarrcountingsort(Bentsedgresources *bsr,
     if (idx != pivotidx)
     {
       PTR2INT(etbecurrent,left+idx);
-      cmp = compareTwobitencodings(bsr->fwd,bsr->complement,&commonunits,
-                                   &etbecurrent,pivotcmpbits);
+      cmp = gt_encodedsequence_compare_twobitencodings(bsr->fwd,
+                                                       bsr->complement,
+                                                       &commonunits,
+                                                       &etbecurrent,
+                                                       pivotcmpbits);
       bsr->countingsortinfo[idx].suffix = left[idx];
       gt_assert(commonunits.common <= (unsigned int) GT_UNITSIN2BITENC);
       bsr->countingsortinfo[idx].lcpwithpivot = commonunits.common;

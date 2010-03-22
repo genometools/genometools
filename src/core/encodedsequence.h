@@ -36,9 +36,16 @@
 typedef struct
 {
   GtTwobitencoding tbe;           /* two bit encoding */
-  unsigned int unitsnotspecial; /* units which are not special */
+  unsigned int unitsnotspecial;   /* units which are not special */
   unsigned long position;
 } GtEndofTwobitencoding;
+
+typedef struct
+{
+  unsigned int common;
+  bool leftspecial, rightspecial;
+  unsigned long finaldepth;
+} GtCommonunits;
 
 /* GtSpecialrangeiterator */
 
@@ -55,24 +62,17 @@ void gt_specialrangeiterator_delete(GtSpecialrangeiterator *sri);
 
 /* XXX: clean up interface funcs below */
 
-void extract2bitenc(bool fwd,
-                    GtEndofTwobitencoding *ptbe,
-                    const GtEncodedsequence *encseq,
-                    GtEncodedsequenceScanstate *esr,
-                    unsigned long startpos);
+void gt_encodedsequence_extract2bitenc(bool fwd,
+                                       GtEndofTwobitencoding *ptbe,
+                                       const GtEncodedsequence *encseq,
+                                       GtEncodedsequenceScanstate *esr,
+                                       unsigned long startpos);
 
-typedef struct
-{
-  unsigned int common;
-  bool leftspecial, rightspecial;
-  unsigned long finaldepth;
-} GtCommonunits;
-
-int compareTwobitencodings(bool fwd,
-                           bool complement,
-                           GtCommonunits *commonunits,
-                           const GtEndofTwobitencoding *ptbe1,
-                           const GtEndofTwobitencoding *ptbe2);
+int gt_encodedsequence_compare_twobitencodings(bool fwd,
+                                            bool complement,
+                                            GtCommonunits *commonunits,
+                                            const GtEndofTwobitencoding *ptbe1,
+                                            const GtEndofTwobitencoding *ptbe2);
 
 uint64_t detencseqofsatviatables(int kind,
                                  unsigned long totallength,
