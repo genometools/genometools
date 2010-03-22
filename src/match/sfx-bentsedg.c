@@ -114,7 +114,7 @@ typedef struct
 typedef struct
 {
   bool defined;
-  Codetype code;
+  GtCodetype code;
   unsigned int prefixindex;
 #undef SKDEBUG
 #ifdef SKDEBUG
@@ -1569,7 +1569,7 @@ static unsigned int bucketends(Outlcpinfo *outlcpinfo,
                                GT_UNUSED unsigned long firstspecialsuffix,
                                unsigned int minchanged,
                                unsigned long specialsinbucket,
-                               Codetype code,
+                               GtCodetype code,
                                const Bcktab *bcktab)
 {
   unsigned long lcpvalue;
@@ -1872,8 +1872,8 @@ static void initBentsedgresources(Bentsedgresources *bsr,
                                   const GtEncodedsequence *encseq,
                                   GtReadmode readmode,
                                   Bcktab *bcktab,
-                                  Codetype mincode,
-                                  Codetype maxcode,
+                                  GtCodetype mincode,
+                                  GtCodetype maxcode,
                                   unsigned long partwidth,
                                   unsigned int numofchars,
                                   unsigned int prefixlength,
@@ -2062,8 +2062,8 @@ void qsufsort(unsigned long *sortspace,
               unsigned long *longest,
               const GtEncodedsequence *encseq,
               GtReadmode readmode,
-              GT_UNUSED Codetype mincode,
-              Codetype maxcode,
+              GT_UNUSED GtCodetype mincode,
+              GtCodetype maxcode,
               unsigned long partwidth,
               Bcktab *bcktab,
               unsigned int numofchars,
@@ -2108,8 +2108,8 @@ void sortallbuckets(Suftab *suftab,
                     GtBucketspec2 *bucketspec2,
                     const GtEncodedsequence *encseq,
                     GtReadmode readmode,
-                    Codetype mincode,
-                    Codetype maxcode,
+                    GtCodetype mincode,
+                    GtCodetype maxcode,
                     unsigned long partwidth,
                     Bcktab *bcktab,
                     unsigned int numofchars,
@@ -2119,7 +2119,7 @@ void sortallbuckets(Suftab *suftab,
                     unsigned long long *bucketiterstep,
                     GtLogger *logger)
 {
-  Codetype code;
+  GtCodetype code;
   unsigned int rightchar = (unsigned int) (mincode % numofchars),
                minprefixindex;
   Bucketspecification bucketspec;
@@ -2312,8 +2312,8 @@ void sortbucketofsuffixes(unsigned long *suffixestobesorted,
                           unsigned long numberofsuffixes,
                           const GtEncodedsequence *encseq,
                           GtReadmode readmode,
-                          Codetype mincode,
-                          Codetype maxcode,
+                          GtCodetype mincode,
+                          GtCodetype maxcode,
                           const Bcktab *bcktab,
                           unsigned int numofchars,
                           unsigned int prefixlength,
@@ -2328,7 +2328,7 @@ void sortbucketofsuffixes(unsigned long *suffixestobesorted,
   Bentsedgresources bsr;
   Bucketspecification bucketspec;
   unsigned int rightchar =  (unsigned int) (mincode % numofchars);
-  Codetype code;
+  GtCodetype code;
 
   initBentsedgresources(&bsr,
                         NULL,

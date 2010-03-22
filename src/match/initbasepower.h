@@ -22,15 +22,15 @@
 
 unsigned int maxbasepower(unsigned int numofchars);
 
-Codetype *initbasepower(unsigned int numofchars,unsigned int prefixlength);
+GtCodetype *initbasepower(unsigned int numofchars,unsigned int prefixlength);
 
-Codetype *filllargestchartable(unsigned int numofchars,
+GtCodetype *filllargestchartable(unsigned int numofchars,
                                unsigned int kmersize);
 
-Codetype *initfilltable(unsigned int numofchars,unsigned int prefixlength);
+GtCodetype *initfilltable(unsigned int numofchars,unsigned int prefixlength);
 
-Codetype **initmultimappower(unsigned int numofchars,unsigned int qvalue);
+GtCodetype **initmultimappower(unsigned int numofchars,unsigned int qvalue);
 
-void multimappowerfree(Codetype ***multimappower);
+void multimappowerfree(GtCodetype ***multimappower);
 
 #endif

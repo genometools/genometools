@@ -24,9 +24,9 @@
 #define MAXPREFIXLENGTH ((1U << PREFIXLENBITS) - 1)
 #define MAXCODEVALUE    ((1U << CODEBITS) - 1)
 
-typedef unsigned long Codetype;      /* \Typedef{Codetype} */
+typedef unsigned long GtCodetype;      /* \Typedef{GtCodetype} */
 
-#define FormatCodetype "%lu"
+#define FormatGtCodetype "%lu"
 
 typedef struct
 {

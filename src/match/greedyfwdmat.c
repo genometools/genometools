@@ -298,7 +298,7 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
   int retval;
   unsigned int numofchars;
   unsigned long gmatchlength, gmatchlength2;
-  Codetype maxcode;
+  GtCodetype maxcode;
   Bucketspecification bucketspec;
 
   substriter->seqit = gt_seqiterator_new(filenames,
@@ -389,7 +389,7 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
   int retval;
   unsigned int numofchars;
   unsigned long gmatchlength, gmatchlength2;
-  Codetype maxcode;
+  GtCodetype maxcode;
   Bucketspecification bucketspec;
   bool haserr = false;
 

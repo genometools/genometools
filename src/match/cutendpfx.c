@@ -31,17 +31,17 @@ struct Bucketenumerator
   unsigned int prefixlength,
                demandprefixlength;
   Bucketspecification bucketspec;
-  Codetype currentcode, lastcode;
+  GtCodetype currentcode, lastcode;
 };
 
-static inline unsigned int prefixqgram2code(Codetype *code,
-                                            const Codetype **multimappower,
+static inline unsigned int prefixqgram2code(GtCodetype *code,
+                                            const GtCodetype **multimappower,
                                             unsigned int qvalue,
                                             unsigned int qvalueprefix,
                                             const GtUchar *qgram)
 {
   int i;
-  Codetype tmpcode = 0;
+  GtCodetype tmpcode = 0;
   GtUchar a;
 
   gt_assert(qvalueprefix > 0);

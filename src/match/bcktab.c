@@ -47,7 +47,7 @@ typedef struct
 struct Bcktab
 {
   unsigned long *leftborder;
-  Codetype numofallcodes,
+  GtCodetype numofallcodes,
            numofspecialcodes,
            **multimappower,
            *basepower,
@@ -64,7 +64,7 @@ struct Bcktab
   void *mappedptr;
 };
 
-static unsigned long numofdistpfxidxcounters(const Codetype *basepower,
+static unsigned long numofdistpfxidxcounters(const GtCodetype *basepower,
                                              unsigned int prefixlength)
 {
   if (prefixlength > 2U)
@@ -86,7 +86,7 @@ uint64_t sizeofbuckettable(unsigned int numofchars,
 {
   uint64_t sizeofrep;
   double numofallcodes, numofspecialcodes;
-  Codetype *basepower;
+  GtCodetype *basepower;
 
   numofallcodes = pow((double) numofchars,(double) prefixlength);
   numofspecialcodes = pow((double) numofchars,(double) (prefixlength-1));
@@ -108,7 +108,7 @@ uint64_t sizeofbuckettable(unsigned int numofchars,
 
 static void setdistpfxidxptrs(unsigned long **distpfxidx,
                               unsigned long *ptr,
-                              const Codetype *basepower,
+                              const GtCodetype *basepower,
                               unsigned int prefixlength)
 {
   unsigned int idx;
@@ -120,7 +120,7 @@ static void setdistpfxidxptrs(unsigned long **distpfxidx,
   }
 }
 
-static unsigned long **allocdistprefixindexcounts(const Codetype *basepower,
+static unsigned long **allocdistprefixindexcounts(const GtCodetype *basepower,
                                                   unsigned int prefixlength)
 {
   if (prefixlength > 2U)
@@ -188,7 +188,7 @@ Bcktab *allocBcktab(unsigned int numofchars,
   if (storespecialcodes && bcktab->numofallcodes > 0 &&
       bcktab->numofallcodes-1 > (unsigned long) MAXCODEVALUE)
   {
-    gt_error_set(err,"alphasize^prefixlength-1 = " FormatCodetype
+    gt_error_set(err,"alphasize^prefixlength-1 = " FormatGtCodetype
                   " does not fit into %u"
                   " bits: choose smaller value for prefixlength",
                   bcktab->numofallcodes-1,
@@ -243,8 +243,9 @@ static void assignbcktabmapspecification(GtArrayMapspecification *mapspectable,
              (unsigned long) (bcktab->numofallcodes+1));
   NEWMAPSPEC(bcktab->countspecialcodes,GtUlong,
              (unsigned long) bcktab->numofspecialcodes);
-  numofcounters = numofdistpfxidxcounters((const Codetype *) bcktab->basepower,
-                                          bcktab->prefixlength);
+  numofcounters =
+                 numofdistpfxidxcounters((const GtCodetype *) bcktab->basepower,
+                                         bcktab->prefixlength);
   if (numofcounters > 0)
   {
     if (!writemode)
@@ -322,7 +323,7 @@ void showbcktab(const Bcktab *bcktab)
 
   for (prefixindex=1U; prefixindex < bcktab->prefixlength-1; prefixindex++)
   {
-    Codetype code;
+    GtCodetype code;
     unsigned long sum = 0;
     for (code = 0; code < bcktab->basepower[prefixindex]; code++)
     {
@@ -373,7 +374,7 @@ void bcktab_delete(Bcktab **bcktab)
 }
 
 void updatebckspecials(Bcktab *bcktab,
-                       Codetype code,
+                       GtCodetype code,
                        unsigned int numofchars,
                        unsigned int prefixindex)
 {
@@ -382,7 +383,7 @@ void updatebckspecials(Bcktab *bcktab,
   gt_assert(code < bcktab->numofallcodes);
   if (prefixindex < bcktab->prefixlength-1)
   {
-    Codetype ordercode = (code - bcktab->filltable[prefixindex])/
+    GtCodetype ordercode = (code - bcktab->filltable[prefixindex])/
                          (bcktab->filltable[prefixindex]+1);
     /*
     printf("prefixindex=%u\n",(unsigned int) prefixindex);
@@ -397,7 +398,7 @@ void updatebckspecials(Bcktab *bcktab,
 void addfinalbckspecials(Bcktab *bcktab,unsigned int numofchars,
                          unsigned long specialcharacters)
 {
-  Codetype specialcode;
+  GtCodetype specialcode;
 
   specialcode = FROMCODE2SPECIALCODE(bcktab->filltable[0],numofchars);
   bcktab->countspecialcodes[specialcode]
@@ -405,13 +406,13 @@ void addfinalbckspecials(Bcktab *bcktab,unsigned int numofchars,
 }
 
 #ifdef SKDEBUG
-static unsigned long fromcode2countspecialcodes(Codetype code,
+static unsigned long fromcode2countspecialcodes(GtCodetype code,
                                                 const Bcktab *bcktab)
 {
   if (code >= bcktab->filltable[bcktab->prefixlength-1])
   {
-    Codetype ordercode = code - bcktab->filltable[bcktab->prefixlength-1];
-    Codetype divisor = bcktab->filltable[bcktab->prefixlength-1] + 1;
+    GtCodetype ordercode = code - bcktab->filltable[bcktab->prefixlength-1];
+    GtCodetype divisor = bcktab->filltable[bcktab->prefixlength-1] + 1;
     if (ordercode % divisor == 0)
     {
       ordercode /= divisor;
@@ -422,12 +423,12 @@ static unsigned long fromcode2countspecialcodes(Codetype code,
 }
 
 static void pfxidxpartialsums(unsigned long *count,
-                              Codetype code,
+                              GtCodetype code,
                               const Bcktab *bcktab)
 {
   unsigned int prefixindex;
   unsigned long sum = 0, specialsinbucket;
-  Codetype ordercode, divisor;
+  GtCodetype ordercode, divisor;
 
   memset(count,0,sizeof (*count) * (size_t) bcktab->prefixlength);
   for (prefixindex=bcktab->prefixlength-2; prefixindex>=1U; prefixindex--)
@@ -459,7 +460,7 @@ static void pfxidxpartialsums(unsigned long *count,
 #ifndef NDEBUG
     if (specialsinbucket != count[1])
     {
-      fprintf(stderr,"code " FormatCodetype ": sum = %lu != %lu = count[1]\n",
+      fprintf(stderr,"code " FormatGtCodetype ": sum = %lu != %lu = count[1]\n",
               code,sum,count[1]);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
@@ -469,7 +470,7 @@ static void pfxidxpartialsums(unsigned long *count,
 
 void checkcountspecialcodes(const Bcktab *bcktab)
 {
-  Codetype code;
+  GtCodetype code;
   unsigned long *count;
 
   if (bcktab->prefixlength >= 2U)
@@ -486,8 +487,8 @@ void checkcountspecialcodes(const Bcktab *bcktab)
 }
 #endif
 
-Codetype codedownscale(const Bcktab *bcktab,
-                       Codetype code,
+GtCodetype codedownscale(const Bcktab *bcktab,
+                       GtCodetype code,
                        unsigned int prefixindex,
                        unsigned int maxprefixlen)
 {
@@ -503,8 +504,8 @@ Codetype codedownscale(const Bcktab *bcktab,
 
 unsigned int calcbucketboundsparts(Bucketspecification *bucketspec,
                                    const Bcktab *bcktab,
-                                   Codetype code,
-                                   Codetype maxcode,
+                                   GtCodetype code,
+                                   GtCodetype maxcode,
                                    unsigned long totalwidth,
                                    unsigned int rightchar,
                                    unsigned int numofchars)
@@ -549,7 +550,7 @@ unsigned int calcbucketboundsparts(Bucketspecification *bucketspec,
 
 void calcbucketboundaries(Bucketspecification *bucketspec,
                           const Bcktab *bcktab,
-                          Codetype code)
+                          GtCodetype code)
 {
   unsigned int numofchars = (unsigned int) bcktab->basepower[1];
   gt_assert(code != bcktab->numofallcodes);
@@ -563,8 +564,8 @@ void calcbucketboundaries(Bucketspecification *bucketspec,
 }
 
 unsigned long calcbucketrightbounds(const Bcktab *bcktab,
-                             Codetype code,
-                             Codetype maxcode,
+                             GtCodetype code,
+                             GtCodetype maxcode,
                              unsigned long totalwidth)
 {
   if (code == maxcode)
@@ -660,8 +661,8 @@ static unsigned int calc_optimalnumofbits(unsigned short *logofremaining,
 }
 
 void determinemaxbucketsize(Bcktab *bcktab,
-                            const Codetype mincode,
-                            const Codetype maxcode,
+                            const GtCodetype mincode,
+                            const GtCodetype maxcode,
                             unsigned long partwidth,
                             unsigned int numofchars,
                             bool hashexceptions,
@@ -670,7 +671,7 @@ void determinemaxbucketsize(Bcktab *bcktab,
 {
   unsigned int rightchar = (unsigned int) (mincode % numofchars);
   Bucketspecification bucketspec;
-  Codetype code;
+  GtCodetype code;
 
   bcktab->maxbucketinfo.specialsmaxbucketsize = 1UL;
   bcktab->maxbucketinfo.nonspecialsmaxbucketsize = 1UL;
@@ -802,11 +803,11 @@ unsigned int bcktab_prefixlength(const Bcktab *bcktab)
   return bcktab->prefixlength;
 }
 
-unsigned int singletonmaxprefixindex(const Bcktab *bcktab,Codetype code)
+unsigned int singletonmaxprefixindex(const Bcktab *bcktab,GtCodetype code)
 {
   if (bcktab->prefixlength > 2U)
   {
-    Codetype ordercode, divisor;
+    GtCodetype ordercode, divisor;
     unsigned int prefixindex;
 
     for (prefixindex=bcktab->prefixlength-2; prefixindex>=1U; prefixindex--)
@@ -832,10 +833,10 @@ unsigned int singletonmaxprefixindex(const Bcktab *bcktab,Codetype code)
   return bcktab->prefixlength-1;
 }
 
-unsigned long distpfxidxpartialsums(const Bcktab *bcktab,Codetype code,
+unsigned long distpfxidxpartialsums(const Bcktab *bcktab,GtCodetype code,
                                     unsigned int lowerbound)
 {
-  Codetype ordercode, divisor;
+  GtCodetype ordercode, divisor;
   unsigned long sum = 0;
   unsigned int prefixindex;
 
@@ -863,10 +864,10 @@ unsigned int pfxidx2lcpvalues(unsigned int *minprefixindex,
                               uint8_t *lcpsubtab,
                               unsigned long specialsinbucket,
                               const Bcktab *bcktab,
-                              Codetype code)
+                              GtCodetype code)
 {
   unsigned int prefixindex, maxprefixindex = 0;
-  Codetype ordercode, divisor;
+  GtCodetype ordercode, divisor;
   unsigned long idx;
   uint8_t *insertptr;
 
@@ -912,12 +913,12 @@ unsigned int pfxidx2lcpvalues(unsigned int *minprefixindex,
   return maxprefixindex;
 }
 
-const Codetype **bcktab_multimappower(const Bcktab *bcktab)
+const GtCodetype **bcktab_multimappower(const Bcktab *bcktab)
 {
-  return (const Codetype **) bcktab->multimappower;
+  return (const GtCodetype **) bcktab->multimappower;
 }
 
-Codetype bcktab_filltable(const Bcktab *bcktab,unsigned int idx)
+GtCodetype bcktab_filltable(const Bcktab *bcktab,unsigned int idx)
 {
   return bcktab->filltable[idx];
 }
@@ -927,7 +928,7 @@ unsigned long *bcktab_leftborder(Bcktab *bcktab)
   return bcktab->leftborder;
 }
 
-Codetype bcktab_numofallcodes(const Bcktab *bcktab)
+GtCodetype bcktab_numofallcodes(const Bcktab *bcktab)
 {
   return bcktab->numofallcodes;
 }
@@ -955,7 +956,7 @@ void consistencyofsuffix(int line,
                          const Suffixwithcode *suffix)
 {
   unsigned int idx, firstspecial = bcktab->prefixlength, gramfirstspecial;
-  Codetype qgramcode = 0;
+  GtCodetype qgramcode = 0;
   unsigned long totallength;
   GtUchar cc = 0;
 
@@ -981,7 +982,7 @@ void consistencyofsuffix(int line,
     bcktab->qgrambuffer[idx] = (GtUchar) (numofchars-1);
   }
   gramfirstspecial = qgram2code(&qgramcode,
-                                (const Codetype **) bcktab->multimappower,
+                                (const GtCodetype **) bcktab->multimappower,
                                 bcktab->prefixlength,
                                 bcktab->qgrambuffer);
   gt_assert(gramfirstspecial == bcktab->prefixlength);

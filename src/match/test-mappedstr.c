@@ -29,21 +29,21 @@
 
 #include "sfx-mappedstr.pr"
 
-static Codetype qgram2codefillspecial(unsigned int numofchars,
+static GtCodetype qgram2codefillspecial(unsigned int numofchars,
                                       unsigned int kmersize,
                                       const GtEncodedsequence *encseq,
                                       GtReadmode readmode,
                                       unsigned long startpos,
                                       unsigned long totallength)
 {
-  Codetype integercode;
+  GtCodetype integercode;
   unsigned long pos;
   bool foundspecial;
   GtUchar cc;
 
   if (startpos >= totallength)
   {
-    integercode = (Codetype) (numofchars - 1);
+    integercode = (GtCodetype) (numofchars - 1);
     foundspecial = true;
   } else
   {
@@ -51,11 +51,11 @@ static Codetype qgram2codefillspecial(unsigned int numofchars,
     cc = gt_encodedsequence_getencodedchar(encseq,startpos,readmode);
     if (ISSPECIAL(cc))
     {
-      integercode = (Codetype) (numofchars - 1);
+      integercode = (GtCodetype) (numofchars - 1);
       foundspecial = true;
     } else
     {
-      integercode = (Codetype) cc;
+      integercode = (GtCodetype) cc;
       foundspecial = false;
     }
   }
@@ -88,17 +88,17 @@ static Codetype qgram2codefillspecial(unsigned int numofchars,
   return integercode;
 }
 
-GT_DECLAREARRAYSTRUCT(Codetype);
+GT_DECLAREARRAYSTRUCT(GtCodetype);
 
 static void outkmeroccurrence(void *processinfo,
-                              Codetype code,
+                              GtCodetype code,
                               GT_UNUSED unsigned long position,
                               GT_UNUSED const Firstspecialpos
                                            *firstspecialposition)
 {
-  GtArrayCodetype *codelist = (GtArrayCodetype *) processinfo;
+  GtArrayGtCodetype *codelist = (GtArrayGtCodetype *) processinfo;
 
-  GT_STOREINARRAY(codelist,Codetype,1024,code);
+  GT_STOREINARRAY(codelist,GtCodetype,1024,code);
 }
 
 /*
@@ -109,14 +109,14 @@ static void outkmeroccurrence(void *processinfo,
    the suffix array is in readmode = GT_READMODE_FORWARD.
 */
 
-static void collectkmercode(GtArrayCodetype *codelist,
+static void collectkmercode(GtArrayGtCodetype *codelist,
                             const GtEncodedsequence *encseq,
                             unsigned int kmersize,
                             unsigned int numofchars,
                             unsigned long stringtotallength)
 {
   unsigned long offset;
-  Codetype code;
+  GtCodetype code;
 
   for (offset=0; offset<=stringtotallength; offset++)
   {
@@ -126,12 +126,12 @@ static void collectkmercode(GtArrayCodetype *codelist,
                                  GT_READMODE_FORWARD,
                                  offset,
                                  stringtotallength);
-    GT_STOREINARRAY(codelist,Codetype,1024,code);
+    GT_STOREINARRAY(codelist,GtCodetype,1024,code);
   }
 }
 
-static int comparecodelists(const GtArrayCodetype *codeliststream,
-                            const GtArrayCodetype *codeliststring,
+static int comparecodelists(const GtArrayGtCodetype *codeliststream,
+                            const GtArrayGtCodetype *codeliststring,
                             unsigned int kmersize,
                             unsigned int numofchars,
                             const char *characters,
@@ -141,32 +141,33 @@ static int comparecodelists(const GtArrayCodetype *codeliststream,
   char buffer1[64+1], buffer2[64+1];
 
   gt_error_check(err);
-  if (codeliststream->nextfreeCodetype != codeliststring->nextfreeCodetype)
+  if (codeliststream->nextfreeGtCodetype != codeliststring->nextfreeGtCodetype)
   {
     gt_error_set(err,"length codeliststream= %lu != %lu =length codeliststring",
-                  (unsigned long) codeliststream->nextfreeCodetype,
-                  (unsigned long) codeliststring->nextfreeCodetype);
+                  (unsigned long) codeliststream->nextfreeGtCodetype,
+                  (unsigned long) codeliststring->nextfreeGtCodetype);
     return -1;
   }
-  for (i=0; i<codeliststream->nextfreeCodetype; i++)
+  for (i=0; i<codeliststream->nextfreeGtCodetype; i++)
   {
-    if (codeliststream->spaceCodetype[i] != codeliststring->spaceCodetype[i])
+    if (codeliststream->spaceGtCodetype[i] !=
+          codeliststring->spaceGtCodetype[i])
     {
       fromkmercode2string(buffer1,
-                          codeliststream->spaceCodetype[i],
+                          codeliststream->spaceGtCodetype[i],
                           numofchars,
                           kmersize,
                           characters);
       fromkmercode2string(buffer2,
-                          codeliststring->spaceCodetype[i],
+                          codeliststring->spaceGtCodetype[i],
                           numofchars,
                           kmersize,
                           characters);
-      gt_error_set(err,"codeliststream[%lu] = " FormatCodetype " != "
-                    FormatCodetype " = codeliststring[%lu]\n%s != %s",
+      gt_error_set(err,"codeliststream[%lu] = " FormatGtCodetype " != "
+                    FormatGtCodetype " = codeliststring[%lu]\n%s != %s",
                     i,
-                    codeliststream->spaceCodetype[i],
-                    codeliststring->spaceCodetype[i],
+                    codeliststream->spaceGtCodetype[i],
+                    codeliststring->spaceGtCodetype[i],
                     i,
                     buffer1,
                     buffer2);
@@ -179,18 +180,18 @@ static int comparecodelists(const GtArrayCodetype *codeliststream,
 static int verifycodelists(const GtEncodedsequence *encseq,
                            unsigned int kmersize,
                            unsigned int numofchars,
-                           const GtArrayCodetype *codeliststream,
+                           const GtArrayGtCodetype *codeliststream,
                            GtError *err)
 {
   bool haserr = false;
-  GtArrayCodetype codeliststring;
+  GtArrayGtCodetype codeliststring;
   const GtUchar *characters;
   unsigned long stringtotallength;
 
   gt_error_check(err);
   stringtotallength = gt_encodedsequence_total_length(encseq);
   characters = gt_encodedsequence_alphabetcharacters(encseq);
-  GT_INITARRAY(&codeliststring,Codetype);
+  GT_INITARRAY(&codeliststring,GtCodetype);
   collectkmercode(&codeliststring,
                   encseq,
                   kmersize,
@@ -205,7 +206,7 @@ static int verifycodelists(const GtEncodedsequence *encseq,
   {
     haserr = true;
   }
-  GT_FREEARRAY(&codeliststring,Codetype);
+  GT_FREEARRAY(&codeliststring,GtCodetype);
   return haserr ? -1 : 0;
 }
 
@@ -213,12 +214,12 @@ int verifymappedstr(const GtEncodedsequence *encseq,unsigned int prefixlength,
                     GtError *err)
 {
   unsigned int numofchars;
-  GtArrayCodetype codeliststream;
+  GtArrayGtCodetype codeliststream;
   bool haserr = false;
 
   gt_error_check(err);
   numofchars = gt_encodedsequence_alphabetnumofchars(encseq);
-  GT_INITARRAY(&codeliststream,Codetype);
+  GT_INITARRAY(&codeliststream,GtCodetype);
   if (getfastastreamkmers(gt_encodedsequence_filenames(encseq),
                           outkmeroccurrence,
                           &codeliststream,
@@ -241,6 +242,6 @@ int verifymappedstr(const GtEncodedsequence *encseq,unsigned int prefixlength,
       haserr = true;
     }
   }
-  GT_FREEARRAY(&codeliststream,Codetype);
+  GT_FREEARRAY(&codeliststream,GtCodetype);
   return haserr ? -1 : 0;
 }

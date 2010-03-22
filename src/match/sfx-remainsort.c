@@ -122,7 +122,7 @@ struct Rmnsufinfo
   Inl_Queue *rangestobesorted;
   unsigned long currentdepth;
   const Bcktab *bcktab;
-  Codetype maxcode;
+  GtCodetype maxcode;
   unsigned long allocateditvinfo,
                 currentqueuesize,
                 maxqueuesize;
@@ -139,7 +139,7 @@ struct Rmnsufinfo
   /* XXX the following is only used for parts > 0 && maxdepth */
   unsigned long overallspecials;
   unsigned long realspecialranges;
-  Codetype *filltable;
+  GtCodetype *filltable;
 #ifdef Lowerboundwithrank
   Lowerboundwithrank *lowerboundwithrank;
 #endif
@@ -148,7 +148,7 @@ struct Rmnsufinfo
          totallength;
   GtReadmode readmode;
   const GtEncodedsequence *encseq;
-  const Codetype **multimappower;
+  const GtCodetype **multimappower;
   unsigned long *sortedsuffixes;
 };
 
@@ -272,7 +272,7 @@ Rmnsufinfo *newRmnsufinfo(unsigned long *presortedsuffixes,
                           int mmapfiledesc,
                           const GtEncodedsequence *encseq,
                           Bcktab *bcktab,
-                          Codetype maxcode,
+                          GtCodetype maxcode,
                           unsigned int numofchars,
                           unsigned int prefixlength,
                           GtReadmode readmode,
@@ -552,7 +552,7 @@ static void inversesuftabrel_get(Itvfullentry *itvfullentry,
                                  const Rmnsufinfo *rmnsufinfo,
                                  unsigned long startpos)
 {
-  Codetype code;
+  GtCodetype code;
   Bucketspecification bucketspec;
 
   itvfullentry->suffixstart = startpos;
@@ -585,7 +585,7 @@ static void inversesuftabrel_get(Itvfullentry *itvfullentry,
     gt_assert(code <= rmnsufinfo->maxcode);
     (void) calcbucketboundsparts(&bucketspec,
                                  rmnsufinfo->bcktab,
-                                 (Codetype) code,
+                                 (GtCodetype) code,
                                  rmnsufinfo->maxcode,
                                  rmnsufinfo->partwidth,
                                  (unsigned int)
@@ -675,11 +675,11 @@ static void updatewidth (Rmnsufinfo *rmnsufinfo,unsigned long width,
 
 static void initinversesuftabnonspecialsadjust(Rmnsufinfo *rmnsufinfo)
 {
-  Codetype code;
+  GtCodetype code;
   unsigned int rightchar;
   Bucketspecification bucketspec;
   unsigned long idx, startpos;
-  const Codetype mincode = 0;
+  const GtCodetype mincode = 0;
 
   gt_assert(SUFINMEM(&rmnsufinfo->sortblock));
   rightchar = (unsigned int) (mincode % rmnsufinfo->numofchars);
@@ -716,11 +716,11 @@ static void initinversesuftabnonspecialsadjust(Rmnsufinfo *rmnsufinfo)
 
 static void initinversesuftabnonspecialsadjuststream(Rmnsufinfo *rmnsufinfo)
 {
-  Codetype code;
+  GtCodetype code;
   unsigned int rightchar;
   Bucketspecification bucketspec;
   unsigned long idx, startpos;
-  const Codetype mincode = 0;
+  const GtCodetype mincode = 0;
 
   gt_assert(!SUFINMEM(&rmnsufinfo->sortblock));
   rightchar = 0;
@@ -1240,10 +1240,10 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
 
 void bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo)
 {
-  Codetype code;
+  GtCodetype code;
   unsigned int rightchar;
   Bucketspecification bucketspec;
-  const Codetype mincode = 0;
+  const GtCodetype mincode = 0;
 
   if (rmnsufinfo->absoluteinversesuftab)
   {

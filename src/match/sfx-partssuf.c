@@ -23,7 +23,7 @@
 
 typedef struct
 {
-  Codetype nextcode;
+  GtCodetype nextcode;
   unsigned long widthofpart,
          suftaboffset,
          sumofwidth;
@@ -36,11 +36,11 @@ typedef struct
   unsigned long largestwidth;
 };
 
-static Codetype findfirstlarger(const unsigned long *leftborder,
-                                Codetype numofallcodes,
+static GtCodetype findfirstlarger(const unsigned long *leftborder,
+                                GtCodetype numofallcodes,
                                 unsigned long suftaboffset)
 {
-  Codetype left = 0, right = numofallcodes, mid, found = numofallcodes;
+  GtCodetype left = 0, right = numofallcodes, mid, found = numofallcodes;
 
   while (left+1 < right)
   {
@@ -95,7 +95,7 @@ static void removeemptyparts(Suftabparts *suftabparts,
 
 Suftabparts *newsuftabparts(unsigned int numofparts,
                             const unsigned long *leftborder,
-                            Codetype numofallcodes,
+                            GtCodetype numofallcodes,
                             unsigned long numofsuffixestoinsert,
                             unsigned long fullspecials,
                             GtLogger *logger)
@@ -180,7 +180,7 @@ Suftabparts *newsuftabparts(unsigned int numofparts,
   return suftabparts;
 }
 
-Codetype stpgetcurrentmincode(unsigned int part,
+GtCodetype stpgetcurrentmincode(unsigned int part,
                               const Suftabparts *suftabparts)
 {
   if (part == 0)
@@ -196,7 +196,7 @@ unsigned long stpgetcurrentsuftaboffset(unsigned int part,
   return suftabparts->components[part].suftaboffset;
 }
 
-Codetype stpgetcurrentmaxcode(unsigned int part,
+GtCodetype stpgetcurrentmaxcode(unsigned int part,
                               const Suftabparts *suftabparts)
 {
   if (part == suftabparts->numofparts - 1)

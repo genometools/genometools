@@ -39,13 +39,13 @@ bool nextEnumcodeatposition(Specialcontext *specialcontext,
 
 void freeEnumcodeatposition(Enumcodeatposition **ecp);
 
-Codetype computefilledqgramcode(const Enumcodeatposition *ecp,
+GtCodetype computefilledqgramcode(const Enumcodeatposition *ecp,
                                 unsigned int prefixindex,
                                 unsigned long pos);
 
-bool computefilledqgramcodestopatmax(Codetype *code,
+bool computefilledqgramcodestopatmax(GtCodetype *code,
                                      const Enumcodeatposition *ecp,
                                      unsigned int prefixindex,
                                      unsigned long pos,
-                                     Codetype stopcode);
+                                     GtCodetype stopcode);
 #endif

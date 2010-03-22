@@ -89,15 +89,15 @@ struct Differencecover
   const GtEncodedsequence *encseq;
   GtReadmode readmode;
   unsigned long samplesize, effectivesamplesize, maxsamplesize;
-  const Codetype **multimappower;
-  Codetype *filltable;
+  const GtCodetype **multimappower;
+  GtCodetype *filltable;
   GtEncodedsequenceScanstate *esr;
   unsigned long *inversesuftab;
   unsigned long allocateditvinfo,
                 currentqueuesize,
                 maxqueuesize;
   unsigned long currentdepth;
-  Codetype maxcode;
+  GtCodetype maxcode;
   Firstwithnewdepth firstwithnewdepth;
   Inl_Queue *rangestobesorted;
   Itventry *itvinfo;
@@ -355,7 +355,7 @@ static unsigned long derivespecialcodesonthefly(Differencecover *dcov,
   Specialcontext specialcontext;
   unsigned long countderived = 0;
   unsigned long pos, sampleindex;
-  Codetype code;
+  GtCodetype code;
 
   for (prefixindex=1U; prefixindex < dcov->prefixlength; prefixindex++)
   {
@@ -389,7 +389,7 @@ static unsigned long derivespecialcodesonthefly(Differencecover *dcov,
                                    dcov->prefixlength);
           if (codelist != NULL)
           {
-            gt_assert((Codetype) codelist->spaceCodeatposition[
+            gt_assert((GtCodetype) codelist->spaceCodeatposition[
                                            countderived].code == code);
           }
           /*
@@ -611,11 +611,11 @@ static void dc_updatewidth (Differencecover *dcov,unsigned long width,
 
 static void dc_initinversesuftabnonspecialsadjust(Differencecover *dcov)
 {
-  Codetype code;
+  GtCodetype code;
   unsigned int rightchar = 0;
   Bucketspecification bucketspec;
   unsigned long idx = 0;
-  const Codetype mincode = 0;
+  const GtCodetype mincode = 0;
 
   for (code = mincode; code <= dcov->maxcode; code++)
   {
@@ -828,10 +828,10 @@ static void dc_sortsuffixesonthislevel(Differencecover *dcov,
 
 static void dc_bcktab2firstlevelintervals(Differencecover *dcov)
 {
-  Codetype code;
+  GtCodetype code;
   unsigned int rightchar;
   Bucketspecification bucketspec;
-  const Codetype mincode = 0;
+  const GtCodetype mincode = 0;
 
   printf("# maxbucketsize=%lu\n",dcov->allocateditvinfo);
   rightchar = (unsigned int) (mincode % dcov->numofchars);
@@ -1019,7 +1019,7 @@ void differencecover_sortsample(Differencecover *dcov,bool cmpcharbychar,
   Diffvalue *diffptr, *afterend;
   unsigned long fullspecials = 0, specials = 0;
   unsigned int unitsnotspecial;
-  Codetype code;
+  GtCodetype code;
   GtArrayCodeatposition codelist;
   Codeatposition *codeptr;
   unsigned long sampleindex;
@@ -1072,7 +1072,7 @@ void differencecover_sortsample(Differencecover *dcov,bool cmpcharbychar,
             GT_GETNEXTFREEINARRAY(codeptr,&codelist,Codeatposition,128);
             gt_assert(codelist.spaceCodeatposition != NULL);
             codeptr->position = pos;
-            gt_assert(code <= (Codetype) MAXCODEVALUE);
+            gt_assert(code <= (GtCodetype) MAXCODEVALUE);
             codeptr->code = (unsigned int) code;
             gt_assert(unitsnotspecial <= MAXPREFIXLENGTH);
             codeptr->maxprefixindex = unitsnotspecial;

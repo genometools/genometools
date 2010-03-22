@@ -50,12 +50,12 @@ Bcktab *allocBcktab(unsigned int numofchars,
                     GtError *err);
 
 void updatebckspecials(Bcktab *bcktab,
-                       Codetype code,
+                       GtCodetype code,
                        unsigned int numofchars,
                        unsigned int prefixindex);
 
-Codetype codedownscale(const Bcktab *bcktab,
-                       Codetype code,
+GtCodetype codedownscale(const Bcktab *bcktab,
+                       GtCodetype code,
                        unsigned int prefixindex,
                        unsigned int maxprefixlen);
 
@@ -66,27 +66,27 @@ int bcktab2file(FILE *fp,const Bcktab *bcktab,GtError *err);
 
 unsigned int calcbucketboundsparts(Bucketspecification *bucketspec,
                                    const Bcktab *bcktab,
-                                   Codetype code,
-                                   Codetype maxcode,
+                                   GtCodetype code,
+                                   GtCodetype maxcode,
                                    unsigned long totalwidth,
                                    unsigned int rightchar,
                                    unsigned int numofchars);
 
 unsigned long calcbucketrightbounds(const Bcktab *bcktab,
-                             Codetype code,
-                             Codetype maxcode,
+                             GtCodetype code,
+                             GtCodetype maxcode,
                              unsigned long totalwidth);
 
-unsigned long distpfxidxpartialsums(const Bcktab *bcktab,Codetype code,
+unsigned long distpfxidxpartialsums(const Bcktab *bcktab,GtCodetype code,
                                     unsigned int lowerbound);
 
 void calcbucketboundaries(Bucketspecification *bucketspec,
                           const Bcktab *bcktab,
-                          Codetype code);
+                          GtCodetype code);
 
 void determinemaxbucketsize(Bcktab *bcktab,
-                            const Codetype mincode,
-                            const Codetype maxcode,
+                            const GtCodetype mincode,
+                            const GtCodetype maxcode,
                             unsigned long partwidth,
                             unsigned int numofchars,
                             bool hashexceptions,
@@ -95,7 +95,7 @@ void determinemaxbucketsize(Bcktab *bcktab,
 
 void bcktab_showlog2info(const Bcktab *bcktab, GtLogger *logger);
 
-unsigned int singletonmaxprefixindex(const Bcktab *bcktab,Codetype code);
+unsigned int singletonmaxprefixindex(const Bcktab *bcktab,GtCodetype code);
 
 unsigned long bcktab_specialsmaxbucketsize(const Bcktab *bcktab);
 
@@ -108,15 +108,15 @@ unsigned int pfxidx2lcpvalues(unsigned int *minprefixindex,
                               uint8_t *lcpsubtab,
                               unsigned long specialsinbucket,
                               const Bcktab *bcktab,
-                              Codetype code);
+                              GtCodetype code);
 
-const Codetype **bcktab_multimappower(const Bcktab *bcktab);
+const GtCodetype **bcktab_multimappower(const Bcktab *bcktab);
 
-Codetype bcktab_filltable(const Bcktab *bcktab,unsigned int idx);
+GtCodetype bcktab_filltable(const Bcktab *bcktab,unsigned int idx);
 
 unsigned long *bcktab_leftborder(Bcktab *bcktab);
 
-Codetype bcktab_numofallcodes(const Bcktab *bcktab);
+GtCodetype bcktab_numofallcodes(const Bcktab *bcktab);
 
 uint64_t sizeofbuckettable(unsigned int numofchars,
                            unsigned int prefixlength);

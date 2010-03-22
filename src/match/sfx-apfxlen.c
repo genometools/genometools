@@ -33,7 +33,7 @@
 */
 
 #define MAXREMAININGAFTERPREFIXLEN(PFXLENBITS)\
-        ((((Codetype) 1) << (32-(PFXLENBITS))) - 1)
+        ((((GtCodetype) 1) << (32-(PFXLENBITS))) - 1)
 
 /*
   We allow to choose the prefixlength \(l\) in such a way that the size of

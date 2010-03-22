@@ -95,12 +95,12 @@ bool gt_encodedsequence_bitwise_cmp_ok(const GtEncodedsequence *encseq);
 /*@null@*/
 const char* gt_encodedsequence_accessname(const GtEncodedsequence *encseq);
 
-Codetype extractprefixcode(unsigned int *unitsnotspecial,
+GtCodetype extractprefixcode(unsigned int *unitsnotspecial,
                            const GtEncodedsequence *encseq,
-                           const Codetype *filltable,
+                           const GtCodetype *filltable,
                            GtReadmode readmode,
                            GtEncodedsequenceScanstate *esr,
-                           const Codetype **multimappower,
+                           const GtCodetype **multimappower,
                            unsigned long frompos,
                            unsigned int prefixlength);
 

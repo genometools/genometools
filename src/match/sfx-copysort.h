@@ -36,7 +36,7 @@ void gt_copysortsuffixes(const GtBucketspec2 *bucketspec2,
                          GtLogger *logger);
 
 bool gt_hardworkbeforecopysort(const GtBucketspec2 *bucketspec2,
-                               Codetype code);
+                               GtCodetype code);
 
 void gt_bucketspec2_delete(GtBucketspec2 *bucketspec2);
 

@@ -40,7 +40,6 @@
 #include "core/minmax.h"
 #include "core/progress_timer.h"
 #include "core/safecast-gen.h"
-
 #include "core/sequence_buffer_fasta.h"
 #include "core/sequence_buffer_plain.h"
 #include "core/str.h"
@@ -4953,17 +4952,17 @@ void multicharactercompare_withtest(const GtEncodedsequence *encseq,
   }
 }
 
-Codetype extractprefixcode(unsigned int *unitsnotspecial,
+GtCodetype extractprefixcode(unsigned int *unitsnotspecial,
                            const GtEncodedsequence *encseq,
-                           const Codetype *filltable,
+                           const GtCodetype *filltable,
                            GtReadmode readmode,
                            GtEncodedsequenceScanstate *esr,
-                           const Codetype **multimappower,
+                           const GtCodetype **multimappower,
                            unsigned long frompos,
                            unsigned int prefixlength)
 {
   unsigned long pos, stoppos;
-  Codetype code = 0;
+  GtCodetype code = 0;
   GtUchar cc;
 
   gt_assert(prefixlength > 0);
@@ -4990,7 +4989,7 @@ Codetype extractprefixcode(unsigned int *unitsnotspecial,
   }
   if (*unitsnotspecial < prefixlength)
   {
-    code += (Codetype) filltable[*unitsnotspecial];
+    code += (GtCodetype) filltable[*unitsnotspecial];
   }
   return code;
 }

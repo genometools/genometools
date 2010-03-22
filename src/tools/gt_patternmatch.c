@@ -104,8 +104,8 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
     GtEncodedsequenceScanstate *esr1, *esr2;
     int retval;
     unsigned long idx, maxlcp;
-    Codetype code = 0;
-    const Codetype **multimappower;
+    GtCodetype code = 0;
+    const GtCodetype **multimappower;
     const GtAlphabet *alpha;
 
     if (pmopt->usebcktab)

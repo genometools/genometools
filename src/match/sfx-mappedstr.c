@@ -53,7 +53,7 @@
           CODE = MULT4((CODE) - MULTIMAPPOWER[(unsigned int) (LCHAR)]) | (CC);\
         } else\
         {\
-          CODE = (Codetype) ((CODE) - MULTIMAPPOWER[(unsigned int) (LCHAR)]) *\
+          CODE = (GtCodetype) ((CODE) - MULTIMAPPOWER[(unsigned int) (LCHAR)])*\
                             (NUMOFCHARS) + (CC);\
         }
 #else
@@ -61,29 +61,29 @@
         CODE = ((CODE) - MULTIMAPPOWER[(unsigned int) (LCHAR)]) * (NUMOFCHARS)
 
 #define SUBTRACTLCHARSHIFTADDNEXT(CODE,LCHAR,NUMOFCHARS,MULTIMAPPOWER,CC)\
-        CODE = (Codetype) (((CODE) - MULTIMAPPOWER[(unsigned int) (LCHAR)]) *\
+        CODE = (GtCodetype) (((CODE) - MULTIMAPPOWER[(unsigned int) (LCHAR)])*\
                            (NUMOFCHARS) + (CC))
 #endif
 
 #ifdef SKDEBUG
-static Codetype windowkmer2code(unsigned int numofchars,
+static GtCodetype windowkmer2code(unsigned int numofchars,
                                 unsigned int kmersize,
                                 const GtUchar *cyclicwindow,
                                 unsigned int firstindex)
 {
   unsigned int i;
-  Codetype integercode;
+  GtCodetype integercode;
   GtUchar cc;
   bool foundspecial;
 
   cc = cyclicwindow[firstindex];
   if (ISSPECIAL(cc))
   {
-    integercode = (Codetype) (numofchars-1);
+    integercode = (GtCodetype) (numofchars-1);
     foundspecial = true;
   } else
   {
-    integercode = (Codetype) cc;
+    integercode = (GtCodetype) cc;
     foundspecial = false;
   }
   for (i=1U; i < kmersize; i++)
@@ -107,14 +107,14 @@ static Codetype windowkmer2code(unsigned int numofchars,
   return integercode;
 }
 
-static Codetype prefixwindowkmer2code(unsigned int firstspecialpos,
+static GtCodetype prefixwindowkmer2code(unsigned int firstspecialpos,
                                       unsigned int kmersize,
-                                      const Codetype **multimappower,
+                                      const GtCodetype **multimappower,
                                       const GtUchar *cyclicwindow,
                                       unsigned int firstindex)
 {
   unsigned int i;
-  Codetype integercode = 0;
+  GtCodetype integercode = 0;
   GtUchar cc;
 
   for (i=0; i<firstspecialpos; i++)
@@ -152,7 +152,7 @@ static Firstspecialpos determinefirstspecialposition(unsigned int windowwidth,
 typedef struct
 {
   unsigned int distvalue;
-  Codetype codeforleftcontext;
+  GtCodetype codeforleftcontext;
 } Specialitem;
 
 typedef struct
@@ -174,9 +174,9 @@ typedef struct
                windowwidth,
                firstindex,
                lengthwithoutspecial;
-  Codetype codewithoutspecial,
+  GtCodetype codewithoutspecial,
            *filltable;
-  Codetype **multimappower;
+  GtCodetype **multimappower;
 } Streamstate;
 
 static void specialemptyqueue(Specialpositions *spos,unsigned int queuesize)
@@ -296,7 +296,7 @@ static void updatespecialpositions(Streamstate *spwp,
 }
 
 static void shiftrightwithchar(
-               void(*processkmercode)(void *,Codetype,unsigned long,
+               void(*processkmercode)(void *,GtCodetype,unsigned long,
                                       const Firstspecialpos *),
                void *processkmercodeinfo,
                Streamstate *spwp,
@@ -329,7 +329,7 @@ static void shiftrightwithchar(
   if (!specialqueueisempty(&spwp->spos))
   {
     Specialitem *head = specialheadofqueue(&spwp->spos);
-    Codetype tmpprefixcode = prefixwindowkmer2code(head->distvalue,
+    GtCodetype tmpprefixcode = prefixwindowkmer2code(head->distvalue,
                                                    spwp->kmersize,
                                                    spwp->multimappower,
                                                    spwp->cyclicwindow,
@@ -353,10 +353,10 @@ static void shiftrightwithchar(
   if (spwp->windowwidth == spwp->kmersize)
   {
     Firstspecialpos localfirstspecial;
-    Codetype code;
+    GtCodetype code;
 
 #ifdef SKDEBUG
-    Codetype wcode;
+    GtCodetype wcode;
 
     wcode = windowkmer2code(spwp->numofchars,
                             spwp->kmersize,
@@ -409,7 +409,7 @@ static void freestreamstate(Streamstate *spwp)
 }
 
 static void doovershoot(Streamstate *spwp,
-                        void(*processkmercode)(void *,Codetype,unsigned long,
+                        void(*processkmercode)(void *,GtCodetype,unsigned long,
                                                const Firstspecialpos *),
                         void *processkmercodeinfo,
                         unsigned long currentposition,
@@ -428,7 +428,7 @@ void getencseqkmers(
         const GtEncodedsequence *encseq,
         GtReadmode readmode,
         void(*processkmercode)(void *,
-                               Codetype,
+                               GtCodetype,
                                unsigned long,
                                const Firstspecialpos *),
         void *processkmercodeinfo,
@@ -469,7 +469,7 @@ void getencseqkmers(
 int getfastastreamkmers(
         const GtStrArray *filenametab,
         void(*processkmercode)(void *,
-                               Codetype,
+                               GtCodetype,
                                unsigned long,
                                const Firstspecialpos *),
         void *processkmercodeinfo,

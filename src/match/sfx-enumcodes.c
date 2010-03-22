@@ -35,7 +35,7 @@ struct Enumcodeatposition
   const GtEncodedsequence *encseq;
   GtReadmode readmode;
   unsigned int prefixlength;
-  Codetype **multimappower, *filltable;
+  GtCodetype **multimappower, *filltable;
 };
 
 Enumcodeatposition *newEnumcodeatposition(const GtEncodedsequence *encseq,
@@ -164,11 +164,11 @@ void freeEnumcodeatposition(Enumcodeatposition **ecp)
   FREESPACE(*ecp);
 }
 
-Codetype computefilledqgramcode(const Enumcodeatposition *ecp,
+GtCodetype computefilledqgramcode(const Enumcodeatposition *ecp,
                                 unsigned int prefixindex,
                                 unsigned long pos)
 {
-  Codetype code;
+  GtCodetype code;
   unsigned int idx;
   GtUchar cc;
 
@@ -186,13 +186,13 @@ Codetype computefilledqgramcode(const Enumcodeatposition *ecp,
   return code;
 }
 
-bool computefilledqgramcodestopatmax(Codetype *code,
+bool computefilledqgramcodestopatmax(GtCodetype *code,
                                      const Enumcodeatposition *ecp,
                                      unsigned int prefixindex,
                                      unsigned long pos,
-                                     Codetype stopcode)
+                                     GtCodetype stopcode)
 {
-  Codetype tmpcode;
+  GtCodetype tmpcode;
   unsigned int idx;
   GtUchar cc;
 

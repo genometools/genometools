@@ -55,7 +55,7 @@ static inline void setsortspace(Suftab *suftab,unsigned long idx,
 struct Sfxiterator
 {
   bool storespecials;
-  Codetype currentmincode,
+  GtCodetype currentmincode,
            currentmaxcode;
   unsigned long specialcharacters,
          widthofpart,
@@ -75,7 +75,7 @@ struct Sfxiterator
   GtRange overhang;
   bool exhausted;
   Bcktab *bcktab;
-  Codetype numofallcodes;
+  GtCodetype numofallcodes;
   unsigned long *leftborder; /* points to bcktab->leftborder */
   unsigned long long bucketiterstep; /* for progressbar */
   Sfxstrategy sfxstrategy;
@@ -188,14 +188,14 @@ static void verifycodelistcomputation(
 #endif
 
 #ifdef SKDEBUG
-static Codetype getencseqcode(const GtEncodedsequence *encseq,
+static GtCodetype getencseqcode(const GtEncodedsequence *encseq,
                               GtReadmode readmode,
                               unsigned long totallength,
-                              const Codetype **multimappower,
+                              const GtCodetype **multimappower,
                               unsigned int prefixlength,
                               unsigned long pos)
 {
-  Codetype code = 0;
+  GtCodetype code = 0;
   unsigned int idx;
   GtUchar cc;
 
@@ -209,14 +209,14 @@ static Codetype getencseqcode(const GtEncodedsequence *encseq,
   return code;
 }
 
-static Codetype previouscode = 0;
+static GtCodetype previouscode = 0;
 static bool previousfirstspecialdefined = false,
             previousstorespecials = false;
 unsigned int previousspecialpos = 0;
 #endif
 
 static void updatekmercount(void *processinfo,
-                            Codetype code,
+                            GtCodetype code,
                             unsigned long position,
                             const Firstspecialpos *firstspecial)
 {
@@ -233,7 +233,7 @@ static void updatekmercount(void *processinfo,
           Codeatposition *cp;
 
           cp = sfi->spaceCodeatposition + sfi->nextfreeCodeatposition++;
-          gt_assert(code <= (Codetype) MAXCODEVALUE);
+          gt_assert(code <= (GtCodetype) MAXCODEVALUE);
           cp->code = (unsigned int) code;
           gt_assert(firstspecial->specialpos <= MAXPREFIXLENGTH);
           cp->maxprefixindex = firstspecial->specialpos;
@@ -259,7 +259,7 @@ static void updatekmercount(void *processinfo,
 #ifdef SKDEBUG
     if (code == 0)
     {
-      Codetype code2 = getencseqcode(sfi->encseq,
+      GtCodetype code2 = getencseqcode(sfi->encseq,
                                    sfi->readmode,
                                    gt_encodedsequence_total_length(sfi->encseq),
                                    bcktab_multimappower(sfi->bcktab),
@@ -269,7 +269,7 @@ static void updatekmercount(void *processinfo,
       {
         printf("### position " FormatSeqpos ", code2 = %lu != 0\n",
                         PRINTSeqposcast(position),code2);
-        printf("previouscode = " FormatCodetype "\n",
+        printf("previouscode = " FormatGtCodetype "\n",
                         previouscode);
         if (previousfirstspecialdefined)
         {
@@ -293,7 +293,7 @@ static void updatekmercount(void *processinfo,
 }
 
 static void insertwithoutspecial(void *processinfo,
-                                 Codetype code,
+                                 GtCodetype code,
                                  unsigned long position,
                                  const Firstspecialpos *firstspecial)
 {
@@ -326,7 +326,7 @@ static void reversespecialcodes(Codeatposition *spaceCodeatposition,
 
 static void derivespecialcodesfromtable(Sfxiterator *sfi,bool deletevalues)
 {
-  Codetype code;
+  GtCodetype code;
   unsigned int prefixindex;
   unsigned long insertindex, j;
   unsigned long stidx;
@@ -338,7 +338,7 @@ static void derivespecialcodesfromtable(Sfxiterator *sfi,bool deletevalues)
       if (prefixindex <= sfi->spaceCodeatposition[j].maxprefixindex)
       {
         code = codedownscale(sfi->bcktab,
-                             (Codetype) sfi->spaceCodeatposition[j].code,
+                             (GtCodetype) sfi->spaceCodeatposition[j].code,
                              prefixindex,
                              sfi->spaceCodeatposition[j].maxprefixindex);
         if (code >= sfi->currentmincode && code <= sfi->currentmaxcode)
@@ -373,7 +373,7 @@ static void derivespecialcodesfromtable(Sfxiterator *sfi,bool deletevalues)
 
 static void derivespecialcodesonthefly(Sfxiterator *sfi)
 {
-  Codetype code;
+  GtCodetype code;
   unsigned int prefixindex;
   unsigned long stidx;
   Enumcodeatposition *ecp;
@@ -444,13 +444,13 @@ void freeSfxiterator(Sfxiterator **sfiptr)
 
 #ifdef SKDEBUG
 static void showleftborder(const unsigned long *leftborder,
-                           Codetype numofallcodes)
+                           GtCodetype numofallcodes)
 {
-  Codetype i;
+  GtCodetype i;
 
-  for (i=0; i<MIN(numofallcodes,(Codetype) 1024); i++)
+  for (i=0; i<MIN(numofallcodes,(GtCodetype) 1024); i++)
   {
-    printf("leftborder[" FormatCodetype "]=" FormatSeqpos "\n",
+    printf("leftborder[" FormatGtCodetype "]=" FormatSeqpos "\n",
             i,leftborder[i]);
   }
 }

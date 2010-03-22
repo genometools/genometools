@@ -25,18 +25,18 @@ typedef struct Suftabparts Suftabparts;
 
 Suftabparts *newsuftabparts(unsigned int numofparts,
                             const unsigned long *leftborder,
-                            Codetype numofallcodes,
+                            GtCodetype numofallcodes,
                             unsigned long numofsuffixestoinsert,
                             unsigned long fullspecials,
                             GtLogger *logger);
 
-Codetype stpgetcurrentmincode(unsigned int part,
+GtCodetype stpgetcurrentmincode(unsigned int part,
                               const Suftabparts *suftabparts);
 
 unsigned long stpgetcurrentsuftaboffset(unsigned int part,
                                  const Suftabparts *suftabparts);
 
-Codetype stpgetcurrentmaxcode(unsigned int part,
+GtCodetype stpgetcurrentmaxcode(unsigned int part,
                               const Suftabparts *suftabparts);
 
 unsigned long stpgetcurrentsumofwdith(unsigned int part,

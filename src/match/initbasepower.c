@@ -21,10 +21,10 @@
 
 unsigned int maxbasepower(unsigned int numofchars)
 {
-  Codetype minfailure, thepower = (Codetype) 1;
+  GtCodetype minfailure, thepower = (GtCodetype) 1;
   unsigned int i;
 
-  minfailure = (~(Codetype) 0)/(Codetype) numofchars;
+  minfailure = (~(GtCodetype) 0)/(GtCodetype) numofchars;
   for (i=0; thepower < minfailure; i++)
   {
     thepower *= numofchars;
@@ -32,13 +32,13 @@ unsigned int maxbasepower(unsigned int numofchars)
   return i;
 }
 
-Codetype *initbasepower(unsigned int numofchars,unsigned int prefixlength)
+GtCodetype *initbasepower(unsigned int numofchars,unsigned int prefixlength)
 {
-  Codetype thepower = (Codetype) 1, minfailure, *basepower;
+  GtCodetype thepower = (GtCodetype) 1, minfailure, *basepower;
   unsigned int i;
 
-  ALLOCASSIGNSPACE(basepower,NULL,Codetype,prefixlength+1);
-  minfailure = (~(Codetype) 0)/(Codetype) numofchars;
+  ALLOCASSIGNSPACE(basepower,NULL,GtCodetype,prefixlength+1);
+  minfailure = (~(GtCodetype) 0)/(GtCodetype) numofchars;
   for (i=0; /* Nothing */; i++)
   {
     basepower[i] = thepower;
@@ -52,13 +52,13 @@ Codetype *initbasepower(unsigned int numofchars,unsigned int prefixlength)
   return basepower;
 }
 
-Codetype *filllargestchartable(unsigned int numofchars,
+GtCodetype *filllargestchartable(unsigned int numofchars,
                                unsigned int kmersize)
 {
-  Codetype code, *ptr, *filltable;
+  GtCodetype code, *ptr, *filltable;
 
-  filltable = gt_malloc(sizeof (Codetype) * kmersize);
-  code = (Codetype) numofchars;
+  filltable = gt_malloc(sizeof (GtCodetype) * kmersize);
+  code = (GtCodetype) numofchars;
   for (ptr = filltable + kmersize - 1; ptr >= filltable; ptr--)
   {
     *ptr = code-1;
@@ -67,13 +67,13 @@ Codetype *filllargestchartable(unsigned int numofchars,
   return filltable;
 }
 
-Codetype *initfilltable(unsigned int numofchars,unsigned int prefixlength)
+GtCodetype *initfilltable(unsigned int numofchars,unsigned int prefixlength)
 {
   unsigned int i;
-  Codetype *filltable, *basepower;
+  GtCodetype *filltable, *basepower;
 
   basepower = initbasepower(numofchars,prefixlength);
-  ALLOCASSIGNSPACE(filltable,NULL,Codetype,prefixlength);
+  ALLOCASSIGNSPACE(filltable,NULL,GtCodetype,prefixlength);
   for (i=0; i<prefixlength; i++)
   {
     filltable[i] = basepower[prefixlength-i]-1;
@@ -93,13 +93,13 @@ Codetype *initfilltable(unsigned int numofchars,unsigned int prefixlength)
           }\
         }
 
-Codetype **initmultimappower(unsigned int numofchars,unsigned int qvalue)
+GtCodetype **initmultimappower(unsigned int numofchars,unsigned int qvalue)
 {
   int offset;
   unsigned int mapindex;
-  Codetype thepower = (Codetype) 1, *mmptr, **multimappower;
+  GtCodetype thepower = (GtCodetype) 1, *mmptr, **multimappower;
 
-  ARRAY2DIMMALLOC(multimappower,qvalue,numofchars,Codetype);
+  ARRAY2DIMMALLOC(multimappower,qvalue,numofchars,GtCodetype);
   for (offset=(int) (qvalue - 1); offset>=0; offset--)
   {
     mmptr = multimappower[offset];
@@ -113,7 +113,7 @@ Codetype **initmultimappower(unsigned int numofchars,unsigned int qvalue)
   return multimappower;
 }
 
-void multimappowerfree(Codetype ***multimappower)
+void multimappowerfree(GtCodetype ***multimappower)
 {
   if (*multimappower != NULL)
   {

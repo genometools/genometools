@@ -22,13 +22,13 @@
 #include "core/chardef.h"
 #include "intcode-def.h"
 
-static inline unsigned int qgram2code(Codetype *code,
-                                      const Codetype **multimappower,
+static inline unsigned int qgram2code(GtCodetype *code,
+                                      const GtCodetype **multimappower,
                                       unsigned int qvalue,
                                       const GtUchar *qgram)
 {
   int i;
-  Codetype tmpcode = 0;
+  GtCodetype tmpcode = 0;
   GtUchar a;
 
   for (i=(int) (qvalue-1); i>=0; i--)

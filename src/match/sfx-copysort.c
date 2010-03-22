@@ -37,7 +37,7 @@ struct GtBucketspec2
   const GtEncodedsequence *encseq;
   GtReadmode readmode;
   unsigned int numofchars, numofcharssquared, prefixlength, *order;
-  Codetype expandfactor, expandfillsum;
+  GtCodetype expandfactor, expandfillsum;
   Bucketinfo *superbuckettab, **subbuckettab;
 };
 
@@ -141,10 +141,10 @@ static void determinehardwork(GtBucketspec2 *bucketspec2)
   }
 }
 
-static Codetype expandtwocharcode(Codetype twocharcode,
+static GtCodetype expandtwocharcode(GtCodetype twocharcode,
                                   const GtBucketspec2 *bucketspec2)
 {
-  gt_assert(twocharcode < (Codetype) bucketspec2->numofcharssquared);
+  gt_assert(twocharcode < (GtCodetype) bucketspec2->numofcharssquared);
   return twocharcode * bucketspec2->expandfactor + bucketspec2->expandfillsum;
 }
 
@@ -303,11 +303,11 @@ static void showbucketspec2(const GtBucketspec2 *bucketspec2)
 static void showexpandcode(const GtBucketspec2 *bucketspec2,
                            unsigned int prefixlength)
 {
-  Codetype ecode, code2;
+  GtCodetype ecode, code2;
   const GtUchar *characters =
                      gt_encodedsequence_alphabetcharacters(bucketspec2->encseq);
 
-  for (code2 = 0; code2 < (Codetype) bucketspec2->numofcharssquared; code2++)
+  for (code2 = 0; code2 < (GtCodetype) bucketspec2->numofcharssquared; code2++)
   {
     char buffer[100];
 
@@ -324,7 +324,7 @@ static void showexpandcode(const GtBucketspec2 *bucketspec2,
 
 static void fill2subbuckets(GtBucketspec2 *bucketspec2,const Bcktab *bcktab)
 {
-  Codetype code, maxcode;
+  GtCodetype code, maxcode;
   unsigned int rightchar = 0, currentchar = 0;
   Bucketspecification bucketspec;
   unsigned long accubucketsize = 0;
@@ -361,13 +361,13 @@ static void fill2subbuckets(GtBucketspec2 *bucketspec2,const Bcktab *bcktab)
 static void fillanysubbuckets(GtBucketspec2 *bucketspec2,
                               const Bcktab *bcktab)
 {
-  Codetype code2, maxcode;
+  GtCodetype code2, maxcode;
   unsigned int rightchar = 0, currentchar = 0;
   unsigned long rightbound, *specialchardist;
 
   maxcode = bcktab_numofallcodes(bcktab) - 1;
   bucketspec2->expandfactor
-    = (Codetype) pow((double) bucketspec2->numofchars,
+    = (GtCodetype) pow((double) bucketspec2->numofchars,
                      (double) (bucketspec2->prefixlength-2));
   bucketspec2->expandfillsum = bcktab_filltable(bcktab,2U);
 #ifdef SHOWBUCKETSPEC2
@@ -376,20 +376,20 @@ static void fillanysubbuckets(GtBucketspec2 *bucketspec2,
   specialchardist = leftcontextofspecialchardist(bucketspec2->numofchars,
                                                  bucketspec2->encseq,
                                                  bucketspec2->readmode);
-  for (code2 = 0; code2 < (Codetype) bucketspec2->numofcharssquared; code2++)
+  for (code2 = 0; code2 < (GtCodetype) bucketspec2->numofcharssquared; code2++)
   {
-    Codetype ecode = expandtwocharcode(code2,bucketspec2);
+    GtCodetype ecode = expandtwocharcode(code2,bucketspec2);
     gt_assert(ecode / bucketspec2->expandfactor == code2);
     rightbound = calcbucketrightbounds(bcktab,
                                        ecode,
                                        maxcode,
                                        bucketspec2->partwidth);
     rightchar = (unsigned int) ((code2+1) % bucketspec2->numofchars);
-    gt_assert((Codetype) currentchar == code2 / bucketspec2->numofchars);
+    gt_assert((GtCodetype) currentchar == code2 / bucketspec2->numofchars);
     if (rightchar == 0)
     {
       gt_assert(rightbound >= specialchardist[currentchar]);
-      gt_assert((Codetype) (bucketspec2->numofchars-1) ==
+      gt_assert((GtCodetype) (bucketspec2->numofchars-1) ==
                 code2 % bucketspec2->numofchars);
       bucketspec2->subbuckettab[currentchar]
                                [bucketspec2->numofchars-1].bucketend
@@ -398,7 +398,7 @@ static void fillanysubbuckets(GtBucketspec2 *bucketspec2,
       currentchar++;
     } else
     {
-      gt_assert((Codetype) (rightchar-1) == code2 % bucketspec2->numofchars);
+      gt_assert((GtCodetype) (rightchar-1) == code2 % bucketspec2->numofchars);
       bucketspec2->subbuckettab[currentchar][rightchar-1].bucketend
         = rightbound;
     }
@@ -522,7 +522,7 @@ static void backwardderive(const GtBucketspec2 *bucketspec2,
 }
 
 bool gt_hardworkbeforecopysort(const GtBucketspec2 *bucketspec2,
-                               Codetype code)
+                               GtCodetype code)
 {
   if (bucketspec2->prefixlength > 2U)
   {

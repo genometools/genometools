@@ -169,7 +169,7 @@ typedef struct
   unsigned long offset,
          leftbound,
          rightbound;
-  Codetype code;
+  GtCodetype code;
   GtUchar inchar;
 } Indexbounds;
 
@@ -1007,10 +1007,10 @@ static void esa_splitandprocess(Limdfsresources *limdfsresources,
 static void smalldepthbwtrangesplitwithoutspecial(GtArrayBoundswithchar *bwci,
                                                   const Mbtab **mbtab,
                                                   GtUchar alphasize,
-                                                  Codetype parentcode,
+                                                  GtCodetype parentcode,
                                                   unsigned long childdepth)
 {
-  Codetype childcode;
+  GtCodetype childcode;
   const Mbtab *mbptr;
 
   gt_assert(childdepth > 0);
@@ -1039,7 +1039,7 @@ unsigned long exactmatchuptomaxdepth(const Mbtab *mbptr,
                                      const GtUchar *sequence,
                                      unsigned long seqlen)
 {
-  Codetype code = 0;
+  GtCodetype code = 0;
   unsigned int depth = 0;
   GtUchar cc;
 
@@ -1068,7 +1068,7 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
   unsigned long idx;
   unsigned long sumwidth = 0;
   const Indexbounds *parent = &(currentparent(limdfsresources)->lcpitv);
-  Codetype startcode;
+  GtCodetype startcode;
 
   if (parent->offset < (unsigned long) limdfsresources->genericindex->maxdepth)
   {

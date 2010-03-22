@@ -18,14 +18,14 @@
 #include "intcode-def.h"
 
 void fromkmercode2string(char *buffer,
-                         Codetype code,
+                         GtCodetype code,
                          unsigned int numofchars,
                          unsigned int kmersize,
                          const char *characters)
 {
   int i;
   unsigned int cc;
-  Codetype tmpcode = code;
+  GtCodetype tmpcode = code;
 
   buffer[kmersize] = '\0';
   for (i=(int) (kmersize-1); i>=0; i--)

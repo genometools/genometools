@@ -44,7 +44,7 @@ Pckbuckettable *mappckbuckettable(const GtStr *indexname,
 
 void enumlowlevelchildintervals(GtArrayBoundswithchar *bwci,
                                 const Pckbuckettable *pcktb,
-                                Codetype parentcode,
+                                GtCodetype parentcode,
                                 unsigned long childdepth);
 
 unsigned int pcktb2maxdepth(const Pckbuckettable *pckbuckettable);

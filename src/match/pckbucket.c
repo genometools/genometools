@@ -28,7 +28,7 @@ typedef struct
   unsigned long lowerbound,
          upperbound;
   unsigned int depth;
-  Codetype code;
+  GtCodetype code;
 } Boundsatdepth;
 
 GT_DECLAREARRAYSTRUCT(Boundsatdepth);
@@ -40,7 +40,7 @@ struct Pckbuckettable
   unsigned int maxdepth;
   Mbtab **mbtab;
   void *mapptr;
-  Codetype *basepower;
+  GtCodetype *basepower;
 };
 
 static void setbcktaboffsets(Pckbuckettable *pckbt)
@@ -164,7 +164,7 @@ Pckbuckettable *pckbuckettable_new(const void *voidbwtseq,
   child.lowerbound = 0;
   child.upperbound = totallength+1;
   child.depth = 0;
-  child.code = (Codetype) 0;
+  child.code = (GtCodetype) 0;
   GT_STOREINARRAY(&stack,Boundsatdepth,128,child);
   rangeOccs = gt_malloc(sizeof (*rangeOccs) * GT_MULT2(numofchars));
   tmpmbtab = gt_malloc(sizeof (*tmpmbtab) * numofchars);
