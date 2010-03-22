@@ -100,7 +100,7 @@ struct GtEncodedsequence
               Viaushorttables,
               Viauint32tables */
 
-  Twobitencoding *twobitencoding;
+  GtTwobitencoding *twobitencoding;
   unsigned long unitsoftwobitencoding;
 
   /* only for Viauchartables,

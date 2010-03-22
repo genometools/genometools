@@ -23,7 +23,7 @@ static int ADDTYPE(fillspecialtables)(GtEncodedsequence *encseq,
   unsigned long currentspecialchar = 0;
   unsigned long pos;
   int retval;
-  Twobitencoding bitwise = 0;
+  GtTwobitencoding bitwise = 0;
   unsigned int lastspeciallength = 0;
 #ifndef NDEBUG
   unsigned long sumspecials = 0, countspecials = 0;

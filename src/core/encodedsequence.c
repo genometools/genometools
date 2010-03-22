@@ -69,10 +69,10 @@
 #define EXTRACTENCODEDCHARSCALARFROMLEFT(SCALAR,PREFIX)\
         (((SCALAR) >> \
          GT_MULT2(GT_UNITSIN2BITENC - 1 - (unsigned long) (PREFIX)))\
-         & (Twobitencoding) 3)
+         & (GtTwobitencoding) 3)
 
 #define EXTRACTENCODEDCHARSCALARFROMRIGHT(SCALAR,SUFFIX)\
-        (((SCALAR) >> GT_MULT2(SUFFIX)) & (Twobitencoding) 3)
+        (((SCALAR) >> GT_MULT2(SUFFIX)) & (GtTwobitencoding) 3)
 
 #define EXTRACTENCODEDCHAR(TWOBITENCODING,IDX)\
         EXTRACTENCODEDCHARSCALARFROMLEFT(\
@@ -81,7 +81,7 @@
 
 #define DECLARESEQBUFFER(TABLE)\
         unsigned long widthbuffer = 0;\
-        Twobitencoding *tbeptr;\
+        GtTwobitencoding *tbeptr;\
         encseq->unitsoftwobitencoding\
           = detunitsoftwobitencoding(encseq->totallength);\
         TABLE = gt_malloc(sizeof(*(TABLE)) * encseq->unitsoftwobitencoding);\
@@ -92,12 +92,12 @@
         bitwise <<= 2;\
         if (ISNOTSPECIAL(CC))\
         {\
-          bitwise |= (Twobitencoding) (CC);\
+          bitwise |= (GtTwobitencoding) (CC);\
         } else\
         {\
           if ((CC) == (GtUchar) SEPARATOR)\
           {\
-            bitwise |= (Twobitencoding) 1;\
+            bitwise |= (GtTwobitencoding) 1;\
           }\
         }\
         if (widthbuffer == (unsigned long) (GT_UNITSIN2BITENC - 1))\
@@ -670,7 +670,7 @@ static void assignencseqmapspecification(GtArrayMapspecification *mapspectable,
       NEWMAPSPEC(BITPACKARRAYSTOREVAR(encseq->bitpackarray),BitElem,numofunits);
       break;
     case Viabitaccess:
-      NEWMAPSPEC(encseq->twobitencoding,Twobitencoding,
+      NEWMAPSPEC(encseq->twobitencoding,GtTwobitencoding,
                  encseq->unitsoftwobitencoding);
       if (encseq->numofspecialstostore > 0)
       {
@@ -680,7 +680,7 @@ static void assignencseqmapspecification(GtArrayMapspecification *mapspectable,
       }
       break;
     case Viauchartables:
-      NEWMAPSPEC(encseq->twobitencoding,Twobitencoding,
+      NEWMAPSPEC(encseq->twobitencoding,GtTwobitencoding,
                  encseq->unitsoftwobitencoding);
       if (encseq->numofspecialstostore > 0)
       {
@@ -693,7 +693,7 @@ static void assignencseqmapspecification(GtArrayMapspecification *mapspectable,
       }
       break;
     case Viaushorttables:
-      NEWMAPSPEC(encseq->twobitencoding,Twobitencoding,
+      NEWMAPSPEC(encseq->twobitencoding,GtTwobitencoding,
                  encseq->unitsoftwobitencoding);
       if (encseq->numofspecialstostore > 0)
       {
@@ -706,7 +706,7 @@ static void assignencseqmapspecification(GtArrayMapspecification *mapspectable,
       }
       break;
     case Viauint32tables:
-      NEWMAPSPEC(encseq->twobitencoding,Twobitencoding,
+      NEWMAPSPEC(encseq->twobitencoding,GtTwobitencoding,
                  encseq->unitsoftwobitencoding);
       if (encseq->numofspecialstostore > 0)
       {
@@ -816,7 +816,7 @@ static uint64_t localdetsizeencseq(GtPositionaccesstype sat,
   uint64_t sum,
            sizeoftwobitencoding
              = (uint64_t) detunitsoftwobitencoding(totallength) *
-               (uint64_t) sizeof (Twobitencoding);
+               (uint64_t) sizeof (GtTwobitencoding);
 
   switch (sat)
   {
@@ -1449,7 +1449,7 @@ static int fillbitaccesstab(GtEncodedsequence *encseq,
   GtUchar cc;
   unsigned long pos;
   int retval;
-  Twobitencoding bitwise = 0;
+  GtTwobitencoding bitwise = 0;
   DECLARESEQBUFFER(encseq->twobitencoding);
 
   gt_error_check(err);
@@ -3654,7 +3654,7 @@ static unsigned long revgetnextstoppos(const GtEncodedsequence *encseq,
   return 0; /* virtual stop at -1 */
 }
 
-static inline Twobitencoding calctbeforward(const Twobitencoding *tbe,
+static inline GtTwobitencoding calctbeforward(const GtTwobitencoding *tbe,
                                             unsigned long startpos)
 {
   unsigned long remain = (unsigned long) GT_MODBYUNITSIN2BITENC(startpos);
@@ -3662,14 +3662,14 @@ static inline Twobitencoding calctbeforward(const Twobitencoding *tbe,
   if (remain > 0)
   {
     unsigned long unit = (unsigned long) GT_DIVBYUNITSIN2BITENC(startpos);
-    return (Twobitencoding)
+    return (GtTwobitencoding)
            ((tbe[unit] << GT_MULT2(remain)) |
             (tbe[unit+1] >> GT_MULT2(GT_UNITSIN2BITENC - remain)));
   }
   return tbe[GT_DIVBYUNITSIN2BITENC(startpos)];
 }
 
-static inline Twobitencoding calctbereverse(const Twobitencoding *tbe,
+static inline GtTwobitencoding calctbereverse(const GtTwobitencoding *tbe,
                                             unsigned long startpos)
 {
   unsigned int remain = (unsigned int) GT_MODBYUNITSIN2BITENC(startpos);
@@ -3680,7 +3680,7 @@ static inline Twobitencoding calctbereverse(const Twobitencoding *tbe,
   } else
   {
     unsigned long unit = (unsigned long) GT_DIVBYUNITSIN2BITENC(startpos);
-    Twobitencoding tmp = (Twobitencoding)
+    GtTwobitencoding tmp = (GtTwobitencoding)
                         (tbe[unit] >> GT_MULT2(GT_UNITSIN2BITENC - 1 - remain));
     if (unit > 0)
     {
@@ -3961,19 +3961,19 @@ void extract2bitenc(bool fwd,
 }
 
 #define MASKPREFIX(PREFIX)\
-        (Twobitencoding)\
-       (~((((Twobitencoding) 1) << GT_MULT2(GT_UNITSIN2BITENC - (PREFIX))) - 1))
+      (GtTwobitencoding)\
+     (~((((GtTwobitencoding) 1) << GT_MULT2(GT_UNITSIN2BITENC - (PREFIX))) - 1))
 
 #define MASKSUFFIX(SUFFIX)\
-        ((((Twobitencoding) 1) << GT_MULT2((int) SUFFIX)) - 1)
+        ((((GtTwobitencoding) 1) << GT_MULT2((int) SUFFIX)) - 1)
 
 #define MASKEND(FWD,END)\
         (((END) == 0) ? 0 : ((FWD) ? MASKPREFIX(END) : MASKSUFFIX(END)))
 
 static int prefixofdifftbe(bool complement,
                            GtCommonunits *commonunits,
-                           Twobitencoding tbe1,
-                           Twobitencoding tbe2)
+                           GtTwobitencoding tbe1,
+                           GtTwobitencoding tbe2)
 {
   unsigned int tmplcpvalue = 0;
 
@@ -3995,7 +3995,7 @@ static int prefixofdifftbe(bool complement,
 }
 
 static int suffixofdifftbe(bool complement,GtCommonunits *commonunits,
-                           Twobitencoding tbe1,Twobitencoding tbe2)
+                           GtTwobitencoding tbe1,GtTwobitencoding tbe2)
 {
   unsigned int tmplcsvalue = 0;
 
@@ -4021,8 +4021,8 @@ static int suffixofdifftbe(bool complement,GtCommonunits *commonunits,
 static int endofdifftbe(bool fwd,
                         bool complement,
                         GtCommonunits *commonunits,
-                        Twobitencoding tbe1,
-                        Twobitencoding tbe2)
+                        GtTwobitencoding tbe1,
+                        GtTwobitencoding tbe2)
 {
   return (fwd ? prefixofdifftbe : suffixofdifftbe)
          (complement,commonunits,tbe1,tbe2);
@@ -4034,13 +4034,13 @@ int compareTwobitencodings(bool fwd,
                            const GtEndofTwobitencoding *ptbe1,
                            const GtEndofTwobitencoding *ptbe2)
 {
-  Twobitencoding mask;
+  GtTwobitencoding mask;
 
   if (ptbe1->unitsnotspecial < ptbe2->unitsnotspecial)
       /* ISSPECIAL(seq1[ptbe1.unitsnotspecial]) &&
          ISNOTSPECIAL(seq2[ptbe2.unitsnotspecial]) */
   {
-    Twobitencoding tbe1, tbe2;
+    GtTwobitencoding tbe1, tbe2;
 
     mask = MASKEND(fwd,ptbe1->unitsnotspecial);
     tbe1 = ptbe1->tbe & mask;
@@ -4060,7 +4060,7 @@ int compareTwobitencodings(bool fwd,
      /* ISSPECIAL(seq2[ptbe2->unitsnotspecial]) &&
         ISNOTSPECIAL(seq1[ptbe2NOT->unitsnotspecial]) */
   {
-    Twobitencoding tbe1, tbe2;
+    GtTwobitencoding tbe1, tbe2;
 
     mask = MASKEND(fwd,ptbe2->unitsnotspecial);
     tbe1 = ptbe1->tbe & mask;
@@ -4079,7 +4079,7 @@ int compareTwobitencodings(bool fwd,
   gt_assert(ptbe1->unitsnotspecial == ptbe2->unitsnotspecial);
   if (ptbe1->unitsnotspecial < (unsigned int) GT_UNITSIN2BITENC)
   {
-    Twobitencoding tbe1, tbe2;
+    GtTwobitencoding tbe1, tbe2;
 
     mask = MASKEND(fwd,ptbe1->unitsnotspecial);
     tbe1 = ptbe1->tbe & mask;
@@ -4662,10 +4662,10 @@ void showsequenceatstartpos(FILE *fp,
   fprintf(fp,"\"\n");
 }
 
-static bool checktbe(bool fwd,Twobitencoding tbe1,Twobitencoding tbe2,
+static bool checktbe(bool fwd,GtTwobitencoding tbe1,GtTwobitencoding tbe2,
                      unsigned int unitsnotspecial)
 {
-  Twobitencoding mask;
+  GtTwobitencoding mask;
 
   if (unitsnotspecial == 0)
   {

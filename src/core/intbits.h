@@ -71,7 +71,7 @@ typedef uint32_t GtBitsequence;
 #define GT_EXCEPTFIRSTFOURBITS\
         (GT_EXCEPTFIRSTBIT >> 3)             /* \(00001^{w-4}\) */
 
-typedef GtBitsequence Twobitencoding;
+typedef GtBitsequence GtTwobitencoding;
 #define GT_UNITSIN2BITENC              GT_DIV2(GT_INTWORDSIZE)
 #define GT_DIVBYUNITSIN2BITENC(V)      ((V) >> (GT_LOGWORDSIZE-1))
 #define GT_MODBYUNITSIN2BITENC(V)      ((V) & ((1 << (GT_LOGWORDSIZE-1))-1))

@@ -44,7 +44,7 @@ typedef enum
   GtUlongBoundType,
   GtBitsequenceType,
   GtPairBwtidxType,
-  TwobitencodingType,
+  GtTwobitencodingType,
   GtSpecialcharinfoType,
   BitElemType
 } Typespec;

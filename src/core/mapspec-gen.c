@@ -129,8 +129,8 @@ static int assigncorrecttype(Mapspecification *mapspec,
     case GtPairBwtidxType:
       ASSIGNPTR2STARTPTR(GtPairBwtidx);
       break;
-    case TwobitencodingType:
-      ASSIGNPTR2STARTPTR(Twobitencoding);
+    case GtTwobitencodingType:
+      ASSIGNPTR2STARTPTR(GtTwobitencoding);
       break;
     case GtSpecialcharinfoType:
       ASSIGNPTR2STARTPTR(GtSpecialcharinfo);
@@ -303,8 +303,8 @@ int flushtheindex2file(FILE *fp,
         case GtPairBwtidxType:
           WRITEACTIONWITHTYPE(GtPairBwtidx);
           break;
-        case TwobitencodingType:
-          WRITEACTIONWITHTYPE(Twobitencoding);
+        case GtTwobitencodingType:
+          WRITEACTIONWITHTYPE(GtTwobitencoding);
           break;
         case GtSpecialcharinfoType:
           WRITEACTIONWITHTYPE(GtSpecialcharinfo);

@@ -35,7 +35,7 @@
 
 typedef struct
 {
-  Twobitencoding tbe;           /* two bit encoding */
+  GtTwobitencoding tbe;           /* two bit encoding */
   unsigned int unitsnotspecial; /* units which are not special */
   unsigned long position;
 } GtEndofTwobitencoding;
