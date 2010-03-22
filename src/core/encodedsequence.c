@@ -530,19 +530,21 @@ static WrittenPositionaccesstype wpa[] = {
 
 static char *wpalist = "direct, bytecompress, bit, uchar, ushort, uint32";
 
-/*@null@*/ static const char *accesstype2name(GtPositionaccesstype sat)
+/*@null@*/
+static const char *accesstype2name(GtPositionaccesstype sat)
 {
   gt_assert((int) sat < (int) Undefpositionaccesstype);
   return wpa[sat].name;
 }
 
-/*@null@*/ const char *gt_encodedsequence_accessname(
-                                                const GtEncodedsequence *encseq)
+/*@null@*/
+const char *gt_encodedsequence_accessname(const GtEncodedsequence *encseq)
 {
   return accesstype2name(encseq->sat);
 }
 
-/*@null@*/ static GtPositionaccesstype str2positionaccesstype(const char *str)
+/*@null@*/
+static GtPositionaccesstype str2positionaccesstype(const char *str)
 {
   size_t i;
 
