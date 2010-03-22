@@ -881,12 +881,12 @@ static uint64_t localdetsizeencseq(GtPositionaccesstype sat,
   return sum;
 }
 
-uint64_t detencseqofsatviatables(int kind,
-                                 unsigned long totallength,
-                                 unsigned long numofdbfiles,
-                                 unsigned long lengthofdbfilenames,
-                                 unsigned long specialranges,
-                                 unsigned int numofchars)
+static uint64_t detencseqofsatviatables(int kind,
+                                        unsigned long totallength,
+                                        unsigned long numofdbfiles,
+                                        unsigned long lengthofdbfilenames,
+                                        unsigned long specialranges,
+                                        unsigned int numofchars)
 {
   GtPositionaccesstype sat[] = {Viauchartables,Viaushorttables,Viauint32tables};
 

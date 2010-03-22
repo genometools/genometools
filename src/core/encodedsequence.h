@@ -74,13 +74,6 @@ int gt_encodedsequence_compare_twobitencodings(bool fwd,
                                             const GtEndofTwobitencoding *ptbe1,
                                             const GtEndofTwobitencoding *ptbe2);
 
-uint64_t detencseqofsatviatables(int kind,
-                                 unsigned long totallength,
-                                 unsigned long numofdbfiles,
-                                 unsigned long lengthofdbfilenames,
-                                 unsigned long specialranges,
-                                 unsigned int numofchars);
-
 void plainseq2bytecode(GtUchar *bytecode,const GtUchar *seq,unsigned long len);
 
 void sequence2bytecode(GtUchar *dest,const GtEncodedsequence *encseq,
