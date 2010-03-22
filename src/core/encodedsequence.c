@@ -3120,7 +3120,7 @@ const GtStrArray *gt_encodedsequence_filenames(const GtEncodedsequence *encseq)
   return encseq->filenametab;
 }
 
-void checkallsequencedescriptions(const GtEncodedsequence *encseq)
+void gt_encodedsequence_check_descriptions(const GtEncodedsequence *encseq)
 {
   unsigned long desclen, seqnum, totaldesclength, offset = 0;
   const char *desptr;

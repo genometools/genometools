@@ -83,7 +83,7 @@ void gt_encodedsequence_sequence2bytecode(GtUchar *dest,
                                           unsigned long startindex,
                                           unsigned long len);
 
-void checkallsequencedescriptions(const GtEncodedsequence *encseq);
+void gt_encodedsequence_check_descriptions(const GtEncodedsequence *encseq);
 
 GtEncodedsequence *plain2encodedsequence(bool withrange,
                                          const GtUchar *seq1,

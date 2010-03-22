@@ -393,7 +393,7 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
   if (!haserr && sfxmapoptions.inputdes)
   {
     gt_logger_log(logger, "checkallsequencedescriptions");
-    checkallsequencedescriptions(suffixarray.encseq);
+    gt_encodedsequence_check_descriptions(suffixarray.encseq);
   }
   gt_str_delete(indexname);
   freesuffixarray(&suffixarray);
