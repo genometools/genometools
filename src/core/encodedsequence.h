@@ -92,7 +92,8 @@ bool gt_encodedsequence_has_fast_specialrangeenumerator(
 
 bool gt_encodedsequence_bitwise_cmp_ok(const GtEncodedsequence *encseq);
 
-/*@null@*/ const char *encseqaccessname(const GtEncodedsequence *encseq);
+/*@null@*/
+const char* gt_encodedsequence_accessname(const GtEncodedsequence *encseq);
 
 Codetype extractprefixcode(unsigned int *unitsnotspecial,
                            const GtEncodedsequence *encseq,

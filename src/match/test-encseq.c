@@ -48,7 +48,7 @@ static void runscanatpostrial(const GtEncodedsequence *encseq,
                      ": random access (correct) = %u != %u = "
                      " sequential read (wrong)\n",
                      startpos,
-                     encseqaccessname(encseq),
+                     gt_encodedsequence_accessname(encseq),
                      gt_readmode_show(readmode),
                      pos,
                      (unsigned int) ccra,
@@ -170,7 +170,7 @@ static int testfullscan(const GtStrArray *filenametab,
           gt_error_set(err,"access=%s, position=%lu"
                             ": scan (readnextchar) = %u != "
                             "%u = random access",
-                            encseqaccessname(encseq),
+                            gt_encodedsequence_accessname(encseq),
                             pos,
                             (unsigned int) ccscan,
                             (unsigned int) ccra);
@@ -184,7 +184,7 @@ static int testfullscan(const GtStrArray *filenametab,
       {
         gt_error_set(err,"access=%s, mode=%s: position=%lu"
                           ": random access = %u != %u = sequential read",
-                          encseqaccessname(encseq),
+                          gt_encodedsequence_accessname(encseq),
                           gt_readmode_show(readmode),
                           pos,
                           (unsigned int) ccra,

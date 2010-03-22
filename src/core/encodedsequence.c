@@ -537,7 +537,8 @@ static char *wpalist = "direct, bytecompress, bit, uchar, ushort, uint32";
   return wpa[sat].name;
 }
 
-/*@null@*/ const char *encseqaccessname(const GtEncodedsequence *encseq)
+/*@null@*/ const char *gt_encodedsequence_accessname(
+                                                const GtEncodedsequence *encseq)
 {
   return accesstype2name(encseq->sat);
 }
@@ -809,7 +810,7 @@ static int fillencseqmapspecstartptr(GtEncodedsequence *encseq,
     nextstart++;
   }
   gt_assert(encseq->characterdistribution != NULL);
-  gt_logger_log(logger,"sat=%s",encseqaccessname(encseq));
+  gt_logger_log(logger,"sat=%s",gt_encodedsequence_accessname(encseq));
   gt_str_delete(tmpfilename);
   return haserr ? -1 : 0;
 }
