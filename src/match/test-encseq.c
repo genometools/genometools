@@ -29,9 +29,9 @@
 
 static void runscanatpostrial(const GtEncodedsequence *encseq,
                               GtEncodedsequenceScanstate *esr,
-                              GtReadmode readmode,Seqpos startpos)
+                              GtReadmode readmode,unsigned long startpos)
 {
-  Seqpos pos, totallength;
+  unsigned long pos, totallength;
   GtUchar ccra, ccsr;
 
   totallength = gt_encodedsequence_total_length(encseq);
@@ -43,14 +43,14 @@ static void runscanatpostrial(const GtEncodedsequence *encseq,
     ccsr = gt_encodedsequence_sequentialgetencodedchar(encseq,esr,pos,readmode);
     if (ccra != ccsr)
     {
-      fprintf(stderr,"startpos = " FormatSeqpos
-                     " access=%s, mode=%s: position=" FormatSeqpos
+      fprintf(stderr,"startpos = %lu"
+                     " access=%s, mode=%s: position=%lu"
                      ": random access (correct) = %u != %u = "
                      " sequential read (wrong)\n",
-                     PRINTSeqposcast(startpos),
+                     startpos,
                      encseqaccessname(encseq),
                      gt_readmode_show(readmode),
-                     PRINTSeqposcast(pos),
+                     pos,
                      (unsigned int) ccra,
                      (unsigned int) ccsr);
       exit(GT_EXIT_PROGRAMMING_ERROR);
@@ -63,7 +63,7 @@ static void testscanatpos(const GtEncodedsequence *encseq,
                           unsigned long scantrials)
 {
   GtEncodedsequenceScanstate *esr = NULL;
-  Seqpos startpos, totallength;
+  unsigned long startpos, totallength;
   unsigned long trial;
 
   totallength = gt_encodedsequence_total_length(encseq);
@@ -73,8 +73,8 @@ static void testscanatpos(const GtEncodedsequence *encseq,
   runscanatpostrial(encseq,esr,readmode,totallength-1);
   for (trial = 0; trial < scantrials; trial++)
   {
-    startpos = (Seqpos) (drand48() * (double) totallength);
-    printf("trial %lu at " FormatSeqpos "\n",trial,PRINTSeqposcast(startpos));
+    startpos = (unsigned long) (drand48() * (double) totallength);
+    printf("trial %lu at %lu\n",trial,startpos);
     runscanatpostrial(encseq,esr,readmode,startpos);
   }
   gt_encodedsequence_scanstate_delete(esr);
@@ -85,7 +85,7 @@ static void testmulticharactercompare(const GtEncodedsequence *encseq,
                                       unsigned long multicharcmptrials)
 {
   GtEncodedsequenceScanstate *esr1, *esr2;
-  Seqpos pos1, pos2, totallength;
+  unsigned long pos1, pos2, totallength;
   unsigned long trial;
   bool fwd = GT_ISDIRREVERSE(readmode) ? false : true,
        complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
@@ -103,8 +103,8 @@ static void testmulticharactercompare(const GtEncodedsequence *encseq,
                                         totallength-1,esr2,totallength-1);
   for (trial = 0; trial < multicharcmptrials; trial++)
   {
-    pos1 = (Seqpos) (drand48() * (double) totallength);
-    pos2 = (Seqpos) (drand48() * (double) totallength);
+    pos1 = (unsigned long) (drand48() * (double) totallength);
+    pos2 = (unsigned long) (drand48() * (double) totallength);
     (void) multicharactercompare_withtest(encseq,fwd,complement,
                                           esr1,pos1,esr2,pos2);
   }
@@ -117,7 +117,7 @@ static int testfullscan(const GtStrArray *filenametab,
                         GtReadmode readmode,
                         GtError *err)
 {
-  Seqpos pos, totallength;
+  unsigned long pos, totallength;
   GtUchar ccscan = 0, ccra, ccsr;
   GtSequenceBuffer *fb = NULL;
   int retval;
@@ -167,7 +167,7 @@ static int testfullscan(const GtStrArray *filenametab,
       {
         if (ccscan != ccra)
         {
-          gt_error_set(err,"access=%s, position=" FormatSeqpos
+          gt_error_set(err,"access=%s, position=%lu"
                             ": scan (readnextchar) = %u != "
                             "%u = random access",
                             encseqaccessname(encseq),
@@ -182,7 +182,7 @@ static int testfullscan(const GtStrArray *filenametab,
                                                          readmode);
       if (ccra != ccsr)
       {
-        gt_error_set(err,"access=%s, mode=%s: position=" FormatSeqpos
+        gt_error_set(err,"access=%s, mode=%s: position=%lu"
                           ": random access = %u != %u = sequential read",
                           encseqaccessname(encseq),
                           gt_readmode_show(readmode),
@@ -200,8 +200,8 @@ static int testfullscan(const GtStrArray *filenametab,
   {
     if (pos != totallength)
     {
-      gt_error_set(err,"sequence length must be " FormatSeqpos " but is "
-                         FormatSeqpos,totallength,pos);
+      gt_error_set(err,"sequence length must be %lu but is %lu",
+                       totallength,pos);
       haserr = true;
     }
   }
@@ -244,14 +244,12 @@ static void makeerrormsg(const GtSequencerange *vala,
                          const char *cmpflag)
 {
   fprintf(stderr,
-                "(" FormatSeqpos "," FormatSeqpos
-                ") %s (" FormatSeqpos "," FormatSeqpos
-                ")\n",
-                PRINTSeqposcast(vala->leftpos),
-                PRINTSeqposcast(vala->rightpos),
+                "(%lu,%lu) %s (%lu,%lu)\n",
+                vala->leftpos,
+                vala->rightpos,
                 cmpflag,
-                PRINTSeqposcast(valb->leftpos),
-                PRINTSeqposcast(valb->rightpos));
+                valb->leftpos,
+                valb->rightpos);
 }
 
 static int compareGtSequencerange(const void *a,const void *b)

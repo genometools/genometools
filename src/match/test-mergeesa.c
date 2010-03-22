@@ -39,7 +39,7 @@ typedef struct
   NameandFILE outsuf,
               outlcp,
               outllv;
-  Seqpos currentlcpindex,
+  unsigned long currentlcpindex,
          absstartpostable[SIZEOFMERGERESULTBUFFER];
 } Mergeoutinfo;
 
@@ -66,14 +66,14 @@ static void freeNameandFILE(NameandFILE *nf)
 }
 
 static int outputsuflcpllv(void *processinfo,
-                           const Seqpos *sequenceoffsettable,
+                           const unsigned long *sequenceoffsettable,
                            const Suflcpbuffer *buf,
                            GtError *err)
 {
   Mergeoutinfo *mergeoutinfo = (Mergeoutinfo *) processinfo;
 
   unsigned int i, lastindex;
-  Seqpos lcpvalue;
+  unsigned long lcpvalue;
   Largelcpvalue currentexception;
   GtUchar smallvalue;
   bool haserr = false;
@@ -86,12 +86,12 @@ static int outputsuflcpllv(void *processinfo,
         buf->suftabstore[i].startpos;
   }
   if (fwrite(mergeoutinfo->absstartpostable,
-            sizeof (Seqpos),
+            sizeof (unsigned long),
             (size_t) buf->nextstoreidx,
             mergeoutinfo->outsuf.fp)
          != (size_t) buf->nextstoreidx)
   {
-    gt_error_set(err,"fwrite(%s) of %u Seqpos-value failed: %s",
+    gt_error_set(err,"fwrite(%s) of %u unsigned long-value failed: %s",
                   gt_str_get(mergeoutinfo->outsuf.outfilename),
                   buf->nextstoreidx,strerror(errno));
     haserr = true;
@@ -108,7 +108,7 @@ static int outputsuflcpllv(void *processinfo,
     for (i=0; i<lastindex; i++)
     {
       lcpvalue = buf->lcptabstore[i];
-      if (lcpvalue < (Seqpos) LCPOVERFLOW)
+      if (lcpvalue < (unsigned long) LCPOVERFLOW)
       {
         smallvalue = (GtUchar) lcpvalue;
       } else
@@ -147,8 +147,8 @@ static int mergeandstoreindex(const GtStr *storeindex,
 {
   Mergeoutinfo mergeoutinfo;
   GtUchar smalllcpvalue;
-  Specialcharinfo specialcharinfo;
-  Seqpos *sequenceoffsettable, totallength;
+  GtSpecialcharinfo specialcharinfo;
+  unsigned long *sequenceoffsettable, totallength;
   bool haserr = false;
 
   gt_error_check(err);
@@ -182,7 +182,7 @@ static int mergeandstoreindex(const GtStr *storeindex,
   }
   if (!haserr)
   {
-    mergeoutinfo.currentlcpindex = (Seqpos) 1;
+    mergeoutinfo.currentlcpindex = (unsigned long) 1;
     sequenceoffsettable = encseqtable2sequenceoffsets(&totallength,
                                                       &specialcharinfo,
                                                       emmesa->suffixarraytable,

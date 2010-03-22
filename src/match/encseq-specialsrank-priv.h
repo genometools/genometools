@@ -20,8 +20,8 @@
 
 #include "match/encseq-specialsrank.h"
 
-typedef Seqpos (*RankReportFunc)(const SpecialsRankLookup *ranker,
-                                 Seqpos pos);
+typedef unsigned long (*RankReportFunc)(const SpecialsRankLookup *ranker,
+                                 unsigned long pos);
 
 struct specialsRankLookup
 {
@@ -32,16 +32,16 @@ struct specialsRankLookup
     struct specialsRankTable
     {
       GtEncodedsequenceScanstate *scanState;
-      Seqpos *rankSumSamples, numSamples, sampleInterval;
+      unsigned long *rankSumSamples, numSamples, sampleInterval;
       GtReadmode readmode;
       unsigned sampleIntervalLog2;
     } sampleTable;
-    Seqpos lastSeqPos;
+    unsigned long lastSeqPos;
   } implementationData;
 };
 
-static inline Seqpos
-specialsRank(const SpecialsRankLookup *ranker, Seqpos pos)
+static inline unsigned long
+specialsRank(const SpecialsRankLookup *ranker, unsigned long pos)
 {
   return ranker->rankFunc(ranker, pos);
 }

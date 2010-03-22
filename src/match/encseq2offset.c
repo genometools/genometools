@@ -20,23 +20,23 @@
 #include "sarr-def.h"
 #include "core/safecast-gen.h"
 
- DECLARESAFECASTFUNCTION(uint64_t,uint64_t,Seqpos,Seqpos)
+DECLARESAFECASTFUNCTION(uint64_t,uint64_t,unsigned long,unsigned_long)
 
-Seqpos *encseqtable2sequenceoffsets(Seqpos *totallength,
-                                    Specialcharinfo *specialcharinfo,
+unsigned long *encseqtable2sequenceoffsets(unsigned long *totallength,
+                                    GtSpecialcharinfo *specialcharinfo,
                                     const Suffixarray *suffixarraytable,
                                     unsigned int numofindexes)
 {
   unsigned int idx;
   GtUchar lastofprevious, firstofcurrent;
-  Seqpos tmplength, *sequenceoffsettable;
+  unsigned long tmplength, *sequenceoffsettable;
   uint64_t tmpspecialcharacters,
            tmpspecialranges,
            tmprealspecialranges,
            tmplarge;
 
   gt_assert(numofindexes > 0);
-  ALLOCASSIGNSPACE(sequenceoffsettable,NULL,Seqpos,numofindexes);
+  ALLOCASSIGNSPACE(sequenceoffsettable,NULL,unsigned long,numofindexes);
   tmpspecialcharacters = (uint64_t) (numofindexes-1);
   tmpspecialranges = 0;
   tmprealspecialranges = 0;
@@ -51,7 +51,7 @@ Seqpos *encseqtable2sequenceoffsets(Seqpos *totallength,
       tmplength =
               gt_encodedsequence_total_length(suffixarraytable[idx - 1].encseq);
       sequenceoffsettable[idx]
-        = sequenceoffsettable[idx-1] + tmplength + (Seqpos) 1;
+        = sequenceoffsettable[idx-1] + tmplength + (unsigned long) 1;
     }
     tmpspecialcharacters
       += (uint64_t) getencseqspecialcharacters(suffixarraytable[idx].encseq);
@@ -89,21 +89,20 @@ Seqpos *encseqtable2sequenceoffsets(Seqpos *totallength,
     }
     tmplarge = (uint64_t) sequenceoffsettable[idx] +
        (uint64_t) gt_encodedsequence_total_length(suffixarraytable[idx].encseq);
-    (void) CALLCASTFUNC(uint64_t,Seqpos,tmplarge);
-    (void) CALLCASTFUNC(uint64_t,Seqpos,tmpspecialcharacters);
-    (void) CALLCASTFUNC(uint64_t,Seqpos,tmpspecialranges);
-    (void) CALLCASTFUNC(uint64_t,Seqpos,tmprealspecialranges);
-    printf("# seqlen[%u] = " FormatSeqpos "\n",
+    (void) CALLCASTFUNC(uint64_t,unsigned_long,tmplarge);
+    (void) CALLCASTFUNC(uint64_t,unsigned_long,tmpspecialcharacters);
+    (void) CALLCASTFUNC(uint64_t,unsigned_long,tmpspecialranges);
+    (void) CALLCASTFUNC(uint64_t,unsigned_long,tmprealspecialranges);
+    printf("# seqlen[%u] = %lu\n",
            idx,
-           PRINTSeqposcast(
-                gt_encodedsequence_total_length(suffixarraytable[idx].encseq)));
+           gt_encodedsequence_total_length(suffixarraytable[idx].encseq));
   }
   tmplength
     = gt_encodedsequence_total_length(suffixarraytable[numofindexes -1].encseq);
   *totallength = sequenceoffsettable[numofindexes-1] + tmplength;
-  specialcharinfo->specialcharacters = (Seqpos) tmpspecialcharacters;
-  specialcharinfo->specialranges = (Seqpos) tmpspecialranges;
-  specialcharinfo->realspecialranges = (Seqpos) tmprealspecialranges;
+  specialcharinfo->specialcharacters = (unsigned long) tmpspecialcharacters;
+  specialcharinfo->specialranges = (unsigned long) tmpspecialranges;
+  specialcharinfo->realspecialranges = (unsigned long) tmprealspecialranges;
   specialcharinfo->lengthofspecialprefix
     = getencseqlengthofspecialprefix(suffixarraytable[0].encseq);
   specialcharinfo->lengthofspecialsuffix

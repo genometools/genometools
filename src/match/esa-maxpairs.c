@@ -18,7 +18,7 @@
 #include "core/arraydef.h"
 #include "core/unused_api.h"
 #include "spacedef.h"
-#include "core/seqpos.h"
+
 #include "esa-seqread.h"
 #include "core/logger.h"
 #include "esa-maxpairs.h"
@@ -60,7 +60,7 @@ struct Dfsstate /* global information */
   bool initialized;
   unsigned int searchlength,
                alphabetsize;
-  ArraySeqpos uniquechar,
+  GtArrayGtUlong uniquechar,
               *poslist;
   const GtEncodedsequence *encseq;
   GtReadmode readmode;
@@ -86,18 +86,18 @@ static void freeDfsinfo(Dfsinfo *dfsinfo, GT_UNUSED Dfsstate *state)
 }
 
 static void add2poslist(Dfsstate *state,Dfsinfo *ninfo,unsigned int base,
-                        Seqpos leafnumber)
+                        unsigned long leafnumber)
 {
-  ArraySeqpos *ptr;
+  GtArrayGtUlong *ptr;
 
   if (base >= state->alphabetsize)
   {
     ninfo->uniquecharposlength++;
-    GT_STOREINARRAY(&state->uniquechar,Seqpos,4,leafnumber);
+    GT_STOREINARRAY(&state->uniquechar,GtUlong,4,leafnumber);
   } else
   {
     ptr = &state->poslist[base];
-    GT_STOREINARRAY(ptr,Seqpos,4,leafnumber);
+    GT_STOREINARRAY(ptr,GtUlong,4,leafnumber);
     NODEPOSLISTLENGTH(ninfo,base)++;
   }
 }
@@ -113,15 +113,15 @@ static void concatlists(Dfsstate *state,Dfsinfo *father,Dfsinfo *son)
   father->uniquecharposlength += son->uniquecharposlength;
 }
 
-static int cartproduct1(Dfsstate *state,Seqpos fatherdepth,
+static int cartproduct1(Dfsstate *state,unsigned long fatherdepth,
                         const Dfsinfo *ninfo,unsigned int base,
-                        Seqpos leafnumber,GtError *err)
+                        unsigned long leafnumber,GtError *err)
 {
   Listtype *pl;
-  Seqpos *spptr, *start;
+  unsigned long *spptr, *start;
 
   pl = &NODEPOSLISTENTRY(ninfo,base);
-  start = state->poslist[base].spaceSeqpos + pl->start;
+  start = state->poslist[base].spaceGtUlong + pl->start;
   for (spptr = start; spptr < start + pl->length; spptr++)
   {
     if (state->processmaxpairs(state->processmaxpairsinfo,state->encseq,
@@ -134,7 +134,7 @@ static int cartproduct1(Dfsstate *state,Seqpos fatherdepth,
 }
 
 static int cartproduct2(Dfsstate *state,
-                        Seqpos fatherdepth,
+                        unsigned long fatherdepth,
                         const Dfsinfo *ninfo1,
                         unsigned int base1,
                         const Dfsinfo *ninfo2,
@@ -142,12 +142,12 @@ static int cartproduct2(Dfsstate *state,
                         GtError *err)
 {
   Listtype *pl1, *pl2;
-  Seqpos *start1, *start2, *spptr1, *spptr2;
+  unsigned long *start1, *start2, *spptr1, *spptr2;
 
   pl1 = &NODEPOSLISTENTRY(ninfo1,base1);
-  start1 = state->poslist[base1].spaceSeqpos + pl1->start;
+  start1 = state->poslist[base1].spaceGtUlong + pl1->start;
   pl2 = &NODEPOSLISTENTRY(ninfo2,base2);
-  start2 = state->poslist[base2].spaceSeqpos + pl2->start;
+  start2 = state->poslist[base2].spaceGtUlong + pl2->start;
   for (spptr1 = start1; spptr1 < start1 + pl1->length; spptr1++)
   {
     for (spptr2 = start2; spptr2 < start2 + pl2->length; spptr2++)
@@ -170,32 +170,32 @@ static void setpostabto0(Dfsstate *state)
   {
     for (base = 0; base < state->alphabetsize; base++)
     {
-      state->poslist[base].nextfreeSeqpos = 0;
+      state->poslist[base].nextfreeGtUlong = 0;
     }
-    state->uniquechar.nextfreeSeqpos = 0;
+    state->uniquechar.nextfreeGtUlong = 0;
     state->initialized = true;
   }
 }
 
 static int processleafedge(bool firstsucc,
-                           Seqpos fatherdepth,
+                           unsigned long fatherdepth,
                            Dfsinfo *father,
-                           Seqpos leafnumber,
+                           unsigned long leafnumber,
                            Dfsstate *state,
                            GtError *err)
 {
   unsigned int base;
-  Seqpos *start, *spptr;
+  unsigned long *start, *spptr;
   GtUchar leftchar;
 
 #ifdef SKDEBUG
-  printf("processleafedge " FormatSeqpos " firstsucc=%s, "
-         " depth(father)= " FormatSeqpos "\n",
-         PRINTSeqposcast(leafnumber),
+  printf("processleafedge %lu firstsucc=%s, "
+         " depth(father)= %lu\n",
+         leafnumber,
          firstsucc ? "true" : "false",
-         PRINTSeqposcast(fatherdepth));
+         fatherdepth);
 #endif
-  if (fatherdepth < (Seqpos) state->searchlength)
+  if (fatherdepth < (unsigned long) state->searchlength)
   {
     setpostabto0(state);
     return 0;
@@ -218,10 +218,10 @@ static int processleafedge(bool firstsucc,
   {
     father->commonchar = leftchar;
     father->uniquecharposlength = 0;
-    father->uniquecharposstart = state->uniquechar.nextfreeSeqpos;
+    father->uniquecharposstart = state->uniquechar.nextfreeGtUlong;
     for (base = 0; base < state->alphabetsize; base++)
     {
-      NODEPOSLISTSTART(father,base) = state->poslist[base].nextfreeSeqpos;
+      NODEPOSLISTSTART(father,base) = state->poslist[base].nextfreeGtUlong;
       NODEPOSLISTLENGTH(father,base) = 0;
     }
     add2poslist(state,father,(unsigned int) leftchar,leafnumber);
@@ -243,7 +243,7 @@ static int processleafedge(bool firstsucc,
         }
       }
     }
-    start = state->uniquechar.spaceSeqpos +
+    start = state->uniquechar.spaceGtUlong +
             father->uniquecharposstart;
     for (spptr = start; spptr < start + father->uniquecharposlength; spptr++)
     {
@@ -259,14 +259,14 @@ static int processleafedge(bool firstsucc,
 }
 
 static int processbranchedge(bool firstsucc,
-                             Seqpos fatherdepth,
+                             unsigned long fatherdepth,
                              Dfsinfo *father,
                              Dfsinfo *son,
                              Dfsstate *state,
                              GtError *err)
 {
   unsigned int chfather, chson;
-  Seqpos *start, *spptr, *fptr, *fstart;
+  unsigned long *start, *spptr, *fptr, *fstart;
 
 #ifdef SKDEBUG
   printf("processbranchedge firstsucc=%s, "
@@ -274,7 +274,7 @@ static int processbranchedge(bool firstsucc,
          firstsucc ? "true" : "false",
          PRINTSeqposcast(fatherdepth));
 #endif
-  if (fatherdepth < (Seqpos) state->searchlength)
+  if (fatherdepth < (unsigned long) state->searchlength)
   {
     setpostabto0(state);
     return 0;
@@ -300,7 +300,7 @@ static int processbranchedge(bool firstsucc,
   }
   if (father->commonchar == ISLEFTDIVERSE)
   {
-    start = state->uniquechar.spaceSeqpos + son->uniquecharposstart;
+    start = state->uniquechar.spaceGtUlong + son->uniquecharposstart;
     for (chfather = 0; chfather < state->alphabetsize; chfather++)
     {
       for (chson = 0; chson < state->alphabetsize; chson++)
@@ -322,7 +322,7 @@ static int processbranchedge(bool firstsucc,
         }
       }
     }
-    fstart = state->uniquechar.spaceSeqpos +
+    fstart = state->uniquechar.spaceGtUlong +
              father->uniquecharposstart;
     for (fptr = fstart; fptr < fstart + father->uniquecharposlength; fptr++)
     {
@@ -357,7 +357,7 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
                       GtError *err)
 {
   unsigned int base;
-  ArraySeqpos *ptr;
+  GtArrayGtUlong *ptr;
   Dfsstate state;
   bool haserr = false;
 
@@ -369,12 +369,12 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
   state.encseq = encseq;
   state.readmode = readmode;
 
-  GT_INITARRAY(&state.uniquechar,Seqpos);
-  ALLOCASSIGNSPACE(state.poslist,NULL,ArraySeqpos,state.alphabetsize);
+  GT_INITARRAY(&state.uniquechar,GtUlong);
+  ALLOCASSIGNSPACE(state.poslist,NULL,GtArrayGtUlong,state.alphabetsize);
   for (base = 0; base < state.alphabetsize; base++)
   {
     ptr = &state.poslist[base];
-    GT_INITARRAY(ptr,Seqpos);
+    GT_INITARRAY(ptr,GtUlong);
   }
   if (depthfirstesa(ssar,
                     allocateDfsinfo,
@@ -390,11 +390,11 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
   {
     haserr = true;
   }
-  GT_FREEARRAY(&state.uniquechar,Seqpos);
+  GT_FREEARRAY(&state.uniquechar,GtUlong);
   for (base = 0; base < state.alphabetsize; base++)
   {
     ptr = &state.poslist[base];
-    GT_FREEARRAY(ptr,Seqpos);
+    GT_FREEARRAY(ptr,GtUlong);
   }
   FREESPACE(state.poslist);
   return haserr ? -1 : 0;

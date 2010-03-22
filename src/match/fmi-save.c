@@ -23,7 +23,7 @@
 
 static int writefmascii (const GtStr *indexname,
                          const Fmindex *fm,
-                         const Specialcharinfo *specialcharinfo,
+                         const GtSpecialcharinfo *specialcharinfo,
                          bool storeindexpos,
                          GtError *err)
 {
@@ -36,23 +36,23 @@ static int writefmascii (const GtStr *indexname,
   {
     return -1;
   }
-  fprintf (fmafp, "bwtlength=" FormatSeqpos "\n",
-           PRINTSeqposcast(fm->bwtlength));
-  fprintf (fmafp, "longest=" FormatSeqpos "\n",
-                   PRINTSeqposcast(fm->longestsuffixpos));
+  fprintf (fmafp, "bwtlength=%lu\n",
+           fm->bwtlength);
+  fprintf (fmafp, "longest=%lu\n",
+                   fm->longestsuffixpos);
   fprintf (fmafp, "storeindexpos=%d\n", storeindexpos ? 1 : 0);
   fprintf (fmafp, "log2blocksize=%u\n", fm->log2bsize);
   fprintf (fmafp, "log2markdist=%u\n", fm->log2markdist);
-  fprintf (fmafp, "specialcharacters=" FormatSeqpos "\n",
-               PRINTSeqposcast(specialcharinfo->specialcharacters));
-  fprintf (fmafp, "specialranges=" FormatSeqpos "\n",
-               PRINTSeqposcast(specialcharinfo->specialranges));
-  fprintf (fmafp, "realspecialranges=" FormatSeqpos "\n",
-               PRINTSeqposcast(specialcharinfo->realspecialranges));
-  fprintf (fmafp, "lengthofspecialprefix=" FormatSeqpos "\n",
-           PRINTSeqposcast(specialcharinfo->lengthofspecialprefix));
-  fprintf (fmafp, "lengthofspecialsuffix=" FormatSeqpos "\n",
-           PRINTSeqposcast(specialcharinfo->lengthofspecialsuffix));
+  fprintf (fmafp, "specialcharacters=%lu\n",
+               specialcharinfo->specialcharacters);
+  fprintf (fmafp, "specialranges=%lu\n",
+               specialcharinfo->specialranges);
+  fprintf (fmafp, "realspecialranges=%lu\n",
+               specialcharinfo->realspecialranges);
+  fprintf (fmafp, "lengthofspecialprefix=%lu\n",
+           specialcharinfo->lengthofspecialprefix);
+  fprintf (fmafp, "lengthofspecialsuffix=%lu\n",
+           specialcharinfo->lengthofspecialsuffix);
   fprintf (fmafp, "suffixlength=%u\n", fm->suffixlength);
   gt_fa_xfclose(fmafp);
   return 0;
@@ -80,7 +80,7 @@ static int writefmdata (const GtStr *indexname,
 }
 
 int saveFmindex (const GtStr *indexname,Fmindex *fm,
-                 const Specialcharinfo *specialcharinfo,
+                 const GtSpecialcharinfo *specialcharinfo,
                  bool storeindexpos,GtError *err)
 {
   gt_error_check(err);

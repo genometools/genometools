@@ -60,7 +60,7 @@ newSfxInterface(GtReadmode readmode,
                 const Sfxstrategy *sfxstrategy,
                 const GtEncodedsequence *encseq,
                 GtProgressTimer *sfxprogress,
-                Seqpos length,
+                unsigned long length,
                 GtLogger *verbosity,
                 GtError *err);
 
@@ -96,7 +96,7 @@ newSfxInterfaceWithReaders(GtReadmode readmode,
                            SeqDataReader readers[],
                            const GtEncodedsequence *encseq,
                            GtProgressTimer *sfxprogress,
-                           Seqpos length,
+                           unsigned long length,
                            GtLogger *verbosity,
                            GtError *err);
 
@@ -173,7 +173,7 @@ SfxIGetReadmode(const sfxInterface *si);
  * @return number of symbols actually read
  */
 extern size_t
-SfxIGetOrigSeq(const void *si, Symbol *dest, Seqpos pos, size_t len);
+SfxIGetOrigSeq(const void *si, Symbol *dest, unsigned long pos, size_t len);
 
 /**
  * \brief Query original sequence for statistics.
@@ -193,7 +193,7 @@ SfxIGetSeqStats(const sfxInterface *si);
  * @param si reference of interface to suffixerator
  * @return length of sequence
  */
-extern Seqpos
+extern unsigned long
 SfxIGetLength(const sfxInterface *si);
 
 /**
@@ -204,7 +204,7 @@ SfxIGetLength(const sfxInterface *si);
  * @return tuple of boolean (position is known) and position (if
  * known) or undefined value.
  */
-extern DefinedSeqpos
+extern Definedunsignedlong
 SfxIGetRot0Pos(const struct sfxInterface *si);
 
 /**
@@ -230,15 +230,15 @@ readSfxIBWTRange(sfxInterface *iface, listenerID id, size_t len, GtUchar *dest);
  * @return actual number of symbols read
  */
 extern size_t
-readSfxILCPRange(sfxInterface *iface, listenerID id, size_t len, Seqpos *dest,
-                 GtError *err);
+readSfxILCPRange(sfxInterface *iface, listenerID id, size_t len,
+                 unsigned long *dest, GtError *err);
 
 /**
  * @return actual number of symbols read
  */
 extern size_t
 readSfxISufTabRange(sfxInterface *iface, listenerID id, size_t len,
-                    Seqpos *dest);
+                    unsigned long *dest);
 #endif
 
 extern SeqDataReader

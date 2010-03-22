@@ -17,7 +17,7 @@
 
 #ifndef ABSDFSTRANS_IMP_H
 #define ABSDFSTRANS_IMP_H
-#include "defined-types.h"
+#include "core/defined-types.h"
 #include "absdfstrans-def.h"
 #include "procmatch.h"
 
@@ -63,9 +63,9 @@ struct AbstractDfstransformer
                           Limdfsconstinfo *dfsconstinfo);
   void (*fullmatchLimdfsstate)(Limdfsresult *limdfsresult,
                                DECLAREPTRDFSSTATE(aliascolumn),
-                               Seqpos left,
-                               Seqpos right,
-                               Seqpos width,
+                               unsigned long left,
+                               unsigned long right,
+                               unsigned long width,
                                unsigned long currentdepth,
                                Limdfsconstinfo *dfsconstinfo);
   void (*nextLimdfsstate)(const Limdfsconstinfo *dfsconstinfo,

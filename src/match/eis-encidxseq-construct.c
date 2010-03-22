@@ -43,7 +43,7 @@ createEncIdxSeq(const GtStr *projectName,
 {
   Suffixarray suffixArray;
   struct encIdxSeq *newSeqIdx;
-  Seqpos length;
+  unsigned long length;
   gt_assert(projectName);
   /* map and interpret index project file */
   if (streamsuffixarray(&suffixArray,
@@ -61,7 +61,7 @@ createEncIdxSeq(const GtStr *projectName,
 }
 
 extern EISeq *
-createEncIdxSeqFromSA(Suffixarray *sa, Seqpos totalLen,
+createEncIdxSeqFromSA(Suffixarray *sa, unsigned long totalLen,
                       const GtStr *projectName,
                       const struct seqBaseParam *params,
                       size_t numExtHeaders, const uint16_t *headerIDs,
@@ -156,7 +156,7 @@ createEncIdxSeqFromSASeqSrc(SASeqSrc *src,
 }
 
 extern EISeq *
-createEncIdxSeqGen(Seqpos totalLen, const GtStr *projectName,
+createEncIdxSeqGen(unsigned long totalLen, const GtStr *projectName,
                    MRAEnc *alphabet, const struct seqStats *stats,
                    SeqDataReader seqGenerator,
                    const struct seqBaseParam *params,
@@ -185,7 +185,7 @@ createEncIdxSeqGen(Seqpos totalLen, const GtStr *projectName,
 }
 
 extern struct encIdxSeq *
-loadEncIdxSeqForSA(const Suffixarray *sa, Seqpos totalLen,
+loadEncIdxSeqForSA(const Suffixarray *sa, unsigned long totalLen,
                    const GtStr *projectName,
                    enum seqBaseEncoding encType, int features, GtError *err)
 {
@@ -215,7 +215,7 @@ loadEncIdxSeq(const GtStr *projectName,
 {
   struct encIdxSeq *newSeqIdx = NULL;
   Suffixarray suffixArray;
-  Seqpos len;
+  unsigned long len;
   do
   {
     if (streamsuffixarray(&suffixArray, 0, projectName, verbosity, err))

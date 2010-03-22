@@ -44,12 +44,12 @@ typedef struct
 
 static void myencseq2symbolstring(Fastaoutinfo *fastainfo,
                                   unsigned long seqnum,
-                                  Seqpos offset,
+                                  unsigned long offset,
                                   const char *desc,
                                   unsigned long desclength,
                                   GtReadmode readmode,
-                                  Seqpos start,
-                                  Seqpos wlen)
+                                  unsigned long start,
+                                  unsigned long wlen)
 {
   gt_assert(fastainfo->linewidth > 0);
   if (desc == NULL)
@@ -66,11 +66,11 @@ static void myencseq2symbolstring(Fastaoutinfo *fastainfo,
   {
     fprintf(fastainfo->formatout," %lu) ", seqnum);
   }
-  fprintf(fastainfo->formatout,"[" FormatSeqpos "," FormatSeqpos "]\n",
+  fprintf(fastainfo->formatout,"[%lu,%lu]\n",
                        /* increase by one for output */
-                       PRINTSeqposcast(start - offset + 1),
+                       start - offset + 1,
                        /* increase by one for output */
-                       PRINTSeqposcast(start - offset + wlen));
+                       start - offset + wlen);
   encseq2symbolstring(fastainfo->formatout,
                       fastainfo->encseq,
                       readmode,
@@ -80,8 +80,8 @@ static void myencseq2symbolstring(Fastaoutinfo *fastainfo,
 }
 
 static void showpredictionfastasequence(Fastaoutinfo *fastainfo,
-                                        Seqpos startpos,
-                                        Seqpos len)
+                                        unsigned long startpos,
+                                        unsigned long len)
 {
   unsigned long desclen;
   const char *desptr;
@@ -111,7 +111,7 @@ static void overallpredictionsequences(const LTRboundaries **bdptrtab,
                                        Fastaoutinfo *fastainfo)
 {
   unsigned long i;
-  Seqpos start, end;
+  unsigned long start, end;
 
   for (i = 0; i < numofboundaries; i++)
   {

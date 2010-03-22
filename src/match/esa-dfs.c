@@ -18,7 +18,7 @@
 #include <limits.h>
 #include "core/symboldef.h"
 #include "core/unused_api.h"
-#include "core/seqpos.h"
+
 #include "spacedef.h"
 #include "esa-seqread.h"
 #include "esa-dfs.h"
@@ -47,7 +47,7 @@
 typedef struct
 {
   bool lastisleafedge;
-  Seqpos depth;
+  unsigned long depth;
   Dfsinfo *dfsinfo;
 } Itvinfo;
 
@@ -90,27 +90,30 @@ static void freeItvinfo(Itvinfo *ptr,
 int depthfirstesa(Sequentialsuffixarrayreader *ssar,
                   Dfsinfo *(*allocateDfsinfo)(Dfsstate *),
                   void(*freeDfsinfo)(Dfsinfo *,Dfsstate *),
-                  int(*processleafedge)(bool,Seqpos,Dfsinfo *,
-                                        Seqpos,Dfsstate *,
+                  int(*processleafedge)(bool,unsigned long,Dfsinfo *,
+                                        unsigned long,Dfsstate *,
                                         GtError *),
                   int(*processbranchedge)(bool,
-                                          Seqpos,
+                                          unsigned long,
                                           Dfsinfo *,
                                           Dfsinfo *,
                                           Dfsstate *,
                                           GtError *),
-                  int(*processcompletenode)(Seqpos,Dfsinfo *,Seqpos,
+                  int(*processcompletenode)(unsigned long,
+                                            Dfsinfo *,unsigned long,
                                             Dfsstate *,GtError *),
-                  void (*assignleftmostleaf)(Dfsinfo *,Seqpos,Dfsstate *),
-                  void (*assignrightmostleaf)(Dfsinfo *,Seqpos,Seqpos,
-                                              Seqpos,Dfsstate *),
+                  void (*assignleftmostleaf)(Dfsinfo *,unsigned long,
+                                             Dfsstate *),
+                  void (*assignrightmostleaf)(Dfsinfo *,unsigned long,
+                                              unsigned long,
+                                              unsigned long,Dfsstate *),
                   Dfsstate *state,
                   GT_UNUSED GtLogger *logger,
                   GtError *err)
 {
   bool firstedge,
        firstrootedge;
-  Seqpos previoussuffix = 0,
+  unsigned long previoussuffix = 0,
          previouslcp,
          currentindex,
          currentlcp = 0; /* May be necessary if currentlcp is used after the

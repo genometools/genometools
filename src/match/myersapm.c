@@ -17,11 +17,11 @@
 
 #include "core/chardef.h"
 #include "core/symboldef.h"
-#include "core/seqpos.h"
+
 #include "spacedef.h"
 #include "core/encodedsequence.h"
 #include "myersapm.h"
-#include "defined-types.h"
+#include "core/defined-types.h"
 #include "procmatch.h"
 #include "dist-short.h"
 #include "initeqsvec.h"
@@ -30,7 +30,7 @@ struct Myersonlineresources
 {
   GtEncodedsequenceScanstate *esr;
   const GtEncodedsequence *encseq;
-  Seqpos totallength;
+  unsigned long totallength;
   unsigned long *eqsvectorrev,
                 *eqsvector;
   unsigned int alphasize;
@@ -87,7 +87,7 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
                 score;
   const unsigned long Ebit = 1UL << (patternlength-1);
   GtUchar cc;
-  Seqpos pos;
+  unsigned long pos;
   const GtReadmode readmode = GT_READMODE_REVERSE;
   GtMatch match;
 
@@ -147,7 +147,7 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
       Mv = Ph & Xv;                                   /* 18 */
       if (score <= maxdistance)
       {
-        Seqpos dbstartpos = GT_REVERSEPOS(mor->totallength,pos);
+        unsigned long dbstartpos = GT_REVERSEPOS(mor->totallength,pos);
         Definedunsignedlong matchlength;
 
         if (maxdistance > 0)
@@ -169,7 +169,7 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
         if (matchlength.defined)
         {
           match.dbstartpos = dbstartpos;
-          match.dblen = (Seqpos) matchlength.valueunsignedlong;
+          match.dblen = (unsigned long) matchlength.valueunsignedlong;
           match.distance = score;
           mor->processmatch(mor->processmatchinfo,&match);
         }

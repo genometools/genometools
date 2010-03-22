@@ -22,7 +22,7 @@
 #include "core/error.h"
 #include "core/seqiterator_sequence_buffer.h"
 #include "core/unused_api.h"
-#include "defined-types.h"
+#include "core/defined-types.h"
 #include "spacedef.h"
 #include "optionargmode.h"
 #include "core/format64.h"
@@ -47,7 +47,7 @@ typedef void (*Processgmatchlength)(const GtAlphabet *,
                                     const GtUchar *,
                                     unsigned long,
                                     unsigned long,
-                                    Seqpos,
+                                    unsigned long,
                                     void *);
 typedef void (*Postprocessgmatchlength)(const GtAlphabet *,
                                         uint64_t,
@@ -59,7 +59,7 @@ typedef void (*Postprocessgmatchlength)(const GtAlphabet *,
 typedef struct
 {
   const void *genericindex;
-  Seqpos totallength;
+  unsigned long totallength;
   const GtAlphabet *alphabet;
   Greedygmatchforwardfunction gmatchforward;
   Preprocessgmatchlength preprocessgmatchlength;
@@ -71,7 +71,7 @@ typedef struct
 
 #ifndef NDEBUG
 static void checkifsequenceisthere(const GtEncodedsequence *encseq,
-                                   Seqpos witnessposition,
+                                   unsigned long witnessposition,
                                    unsigned long gmatchlength,
                                    const GtUchar *qptr)
 {
@@ -85,14 +85,14 @@ static void checkifsequenceisthere(const GtEncodedsequence *encseq,
                                                     GT_READMODE_FORWARD);
     if (qptr[i] != cc)
     {
-      fprintf(stderr,"sequence of length %lu at witnesspos " FormatSeqpos
-                     " query[%lu] = %u != %u = subject[" FormatSeqpos "]\n",
+      fprintf(stderr,"sequence of length %lu at witnesspos %lu"
+                     " query[%lu] = %u != %u = subject[%lu]\n",
                      gmatchlength,
-                     PRINTSeqposcast(witnessposition),
+                     witnessposition,
                      i,
                      (unsigned int) qptr[i],
                      (unsigned int) cc,
-                     PRINTSeqposcast(witnessposition+(Seqpos) i));
+                     witnessposition+(unsigned long) i);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   }
@@ -107,7 +107,7 @@ static void gmatchposinsinglesequence(Substringinfo *substringinfo,
 {
   const GtUchar *qptr;
   unsigned long gmatchlength, remaining;
-  Seqpos witnessposition, *wptr;
+  unsigned long witnessposition, *wptr;
 
   if (substringinfo->preprocessgmatchlength != NULL)
   {
@@ -149,7 +149,7 @@ static void gmatchposinsinglesequence(Substringinfo *substringinfo,
                                          gmatchlength,
                                          (unsigned long) (qptr-query),
                                          wptr == NULL
-                                           ? (Seqpos) 0
+                                           ? (unsigned long) 0
                                            : witnessposition,
                                          substringinfo->processinfo);
     }
@@ -181,7 +181,7 @@ static void showifinlengthrange(const GtAlphabet *alphabet,
                                 const GtUchar *start,
                                 unsigned long gmatchlength,
                                 unsigned long querystart,
-                                Seqpos subjectpos,
+                                unsigned long subjectpos,
                                 void *info)
 {
   Rangespecinfo *rangespecinfo = (Rangespecinfo *) info;
@@ -198,7 +198,7 @@ static void showifinlengthrange(const GtAlphabet *alphabet,
     printf("%lu",gmatchlength);
     if (rangespecinfo->showsubjectpos)
     {
-      printf(" " FormatSeqpos,PRINTSeqposcast(subjectpos));
+      printf(" %lu",subjectpos);
     }
     if (rangespecinfo->showsequence)
     {
@@ -211,7 +211,7 @@ static void showifinlengthrange(const GtAlphabet *alphabet,
 
 int findsubquerygmatchforward(const GtEncodedsequence *encseq,
                               const void *genericindex,
-                              Seqpos totallength,
+                              unsigned long totallength,
                               Greedygmatchforwardfunction gmatchforward,
                               const GtAlphabet *alphabet,
                               const GtStrArray *queryfilenames,
@@ -284,9 +284,9 @@ int findsubquerygmatchforward(const GtEncodedsequence *encseq,
 #ifdef WITHrunsubstringiteration
 int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
                           const void *genericindex,
-                          Seqpos totalwidth,
-                          const Seqpos *leftborder,
-                          const Seqpos *countspecialcodes,
+                          unsigned long totalwidth,
+                          const unsigned long *leftborder,
+                          const unsigned long *countspecialcodes,
                           const Alphabet *alphabet,
                           unsigned int prefixlength,
                           const GtStrArray *queryfilenames,
@@ -371,9 +371,9 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
 
 int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
                           const void *genericindex,
-                          Seqpos totalwidth,
-                          const Seqpos *leftborder,
-                          const Seqpos *countspecialcodes,
+                          unsigned long totalwidth,
+                          const unsigned long *leftborder,
+                          const unsigned long *countspecialcodes,
                           const Alphabet *alphabet,
                           unsigned int prefixlength,
                           const GtStrArray *queryfilenames,

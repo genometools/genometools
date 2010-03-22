@@ -19,7 +19,7 @@
 #define CHAIN2DIM_H
 
 #include "core/error_api.h"
-#include "core/seqpos.h"
+
 #include "core/logger.h"
 
 /*
@@ -39,7 +39,7 @@
 /* the followin type is used for the position values in the matches to be
    chained */
 
-typedef Seqpos GtChainpostype;
+typedef unsigned long GtChainpostype;
 
 /* the following type is used for scores of chains */
 

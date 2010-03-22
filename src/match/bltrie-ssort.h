@@ -18,7 +18,6 @@
 #ifndef BLTRIE_SSORT_H
 #define BLTRIE_SSORT_H
 
-#include "core/seqpos.h"
 #include "core/encodedsequence.h"
 #include "core/readmode.h"
 
@@ -38,16 +37,18 @@ Blindtrie *blindtrie_new(unsigned long numofsuffixes,
                          GtEncodedsequenceScanstate *esr2,
                          GtReadmode readmode);
 
-Seqpos blindtrie_suffixsort(Blindtrie *blindtrie,
-                            Seqpos *suffixtable,
-                            Seqpos *lcpsubtab,
+unsigned long blindtrie_suffixsort(Blindtrie *blindtrie,
+                            unsigned long *suffixtable,
+                            unsigned long *lcpsubtab,
                             unsigned long numberofsuffixes,
-                            Seqpos offset,
-                            Seqpos maxdepth,
+                            unsigned long offset,
+                            unsigned long maxdepth,
                             Ordertype ordertype,
                             void *voiddcov,
-                            void (*dc_processunsortedrange)(void *,Seqpos *,
-                                                            Seqpos *,Seqpos));
+                            void (*dc_processunsortedrange)(void *,
+                                                            unsigned long *,
+                                                            unsigned long *,
+                                                            unsigned long));
 
 void blindtrie_delete(Blindtrie **blindtrie);
 

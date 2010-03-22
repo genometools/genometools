@@ -415,14 +415,14 @@ static int giextract_encodedseq2fasta(FILE *fpout,
   if (!haserr)
   {
     GtSeqinfo seqinfo;
-    Seqpos frompos, topos;
+    unsigned long frompos, topos;
 
     (void) putc('\n',fpout);
     gt_encodedsequence_seqinfo(encseq,&seqinfo,seqnum);
     if (fastakeyquery != NULL && !COMPLETE(fastakeyquery))
     {
-      frompos = (Seqpos) (fastakeyquery->frompos-1);
-      topos = (Seqpos) (fastakeyquery->topos - fastakeyquery->frompos + 1);
+      frompos = fastakeyquery->frompos-1;
+      topos = fastakeyquery->topos - fastakeyquery->frompos + 1;
     } else
     {
       frompos = 0;

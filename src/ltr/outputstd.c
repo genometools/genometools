@@ -76,27 +76,25 @@ static void printlongheader(const LTRharvestoptions *lo)
 static void producelongutput(const LTRharvestoptions *lo,
                              const LTRboundaries *boundaries,
                              const GtEncodedsequence *encseq,
-                             Seqpos offset)
+                             unsigned long offset)
 {
   const GtUchar *characters = gt_encodedsequence_alphabetcharacters(encseq);
 
-  printf(FormatSeqpos "  ",
-      PRINTSeqposcast(boundaries->leftLTR_5 -offset + 1));
-  printf(FormatSeqpos "  ",
-      PRINTSeqposcast(boundaries->rightLTR_3 -offset  + 1));
-  printf(FormatSeqpos "  ",
-      PRINTSeqposcast((boundaries->rightLTR_3 - boundaries->leftLTR_5
-          + 1)));
-  printf(FormatSeqpos "  ",
-      PRINTSeqposcast(boundaries->leftLTR_5 -offset  + 1));
-  printf(FormatSeqpos "  ",
-      PRINTSeqposcast(boundaries->leftLTR_3 -offset  + 1));
-  printf(FormatSeqpos "  ",
-      PRINTSeqposcast((boundaries->leftLTR_3 - boundaries->leftLTR_5
-          + 1)));
+  printf("%lu  ",
+      boundaries->leftLTR_5 -offset + 1);
+  printf("%lu  ",
+      boundaries->rightLTR_3 -offset  + 1);
+  printf("%lu  ",
+      boundaries->rightLTR_3 - boundaries->leftLTR_5 + 1);
+  printf("%lu  ",
+      boundaries->leftLTR_5 -offset  + 1);
+  printf("%lu  ",
+      boundaries->leftLTR_3 -offset  + 1);
+  printf("%lu  ",
+      boundaries->leftLTR_3 - boundaries->leftLTR_5 + 1);
   if (lo->minlengthTSD > 1U)
   {
-    Seqpos j;
+    unsigned long j;
 
     for (j = 0; j < boundaries->lenleftTSD; j++)
     {
@@ -105,8 +103,8 @@ static void producelongutput(const LTRharvestoptions *lo,
                                                    boundaries->lenleftTSD + j,
                                                    GT_READMODE_FORWARD)]);
     }
-    printf("  " FormatSeqpos "  ",
-           PRINTSeqposcast(boundaries->lenleftTSD));
+    printf("  " "%lu  ",
+           boundaries->lenleftTSD);
   }
   if (lo->motif.allowedmismatches < 4U)
   {
@@ -129,15 +127,15 @@ static void producelongutput(const LTRharvestoptions *lo,
                        GT_READMODE_FORWARD)] );
   }
   /* increase by 1 */
-  printf(FormatSeqpos "  ",
-      PRINTSeqposcast(boundaries->rightLTR_5 -offset + 1));
+  printf("%lu  ",
+      boundaries->rightLTR_5 -offset + 1);
   /* increase by 1 */
-  printf(FormatSeqpos "  ",PRINTSeqposcast(boundaries->rightLTR_3 -offset + 1));
-  printf(FormatSeqpos "  ",PRINTSeqposcast(boundaries->rightLTR_3
-                                           - boundaries->rightLTR_5 + 1));
+  printf("%lu  ",boundaries->rightLTR_3 -offset + 1);
+  printf("%lu  ",boundaries->rightLTR_3
+                                           - boundaries->rightLTR_5 + 1);
   if (lo->minlengthTSD > 1U)
   {
-    Seqpos j;
+    unsigned long j;
 
     for (j = 0; j < boundaries->lenrightTSD; j++)
     {
@@ -145,7 +143,7 @@ static void producelongutput(const LTRharvestoptions *lo,
                                                     boundaries->rightLTR_3+j+1,
                                                     GT_READMODE_FORWARD)]);
     }
-    printf("  " FormatSeqpos "  ",PRINTSeqposcast(boundaries->lenrightTSD));
+    printf("  " "%lu  ",boundaries->lenrightTSD);
   }
   if (lo->motif.allowedmismatches < 4U)
   {
@@ -189,31 +187,32 @@ static void printshortheader(void)
   printf("# seq-nr = sequence number\n");
 }
 
-static void produceshortoutput(const LTRboundaries *boundaries,Seqpos offset)
+static void produceshortoutput(const LTRboundaries *boundaries,
+                               unsigned long offset)
 {
 
   /* increase positions by 1 */
-  printf(FormatSeqpos "  ",
-      PRINTSeqposcast( boundaries->leftLTR_5 -offset + 1));
-  printf(FormatSeqpos "  ",
-      PRINTSeqposcast( boundaries->rightLTR_3 -offset + 1));
-  printf(FormatSeqpos "  ",
-      PRINTSeqposcast( (boundaries->rightLTR_3
-          - boundaries->leftLTR_5 + 1)));
-  printf(FormatSeqpos "  ",
-      PRINTSeqposcast( boundaries->leftLTR_5 -offset + 1));
-  printf(FormatSeqpos "  ",
-      PRINTSeqposcast( boundaries->leftLTR_3 -offset + 1));
-  printf(FormatSeqpos "  ",
-      PRINTSeqposcast( (boundaries->leftLTR_3
-          - boundaries->leftLTR_5 + 1)));
-  printf(FormatSeqpos "  ",
-      PRINTSeqposcast( boundaries->rightLTR_5 -offset + 1));
-  printf(FormatSeqpos "  ",
-      PRINTSeqposcast( boundaries->rightLTR_3 -offset + 1));
-  printf(FormatSeqpos "  ",
-      PRINTSeqposcast( (boundaries->rightLTR_3
-          - boundaries->rightLTR_5 + 1)));
+  printf("%lu  ",
+      boundaries->leftLTR_5 -offset + 1);
+  printf("%lu  ",
+       boundaries->rightLTR_3 -offset + 1);
+  printf("%lu  ",
+      boundaries->rightLTR_3
+          - boundaries->leftLTR_5 + 1);
+  printf("%lu  ",
+      boundaries->leftLTR_5 -offset + 1);
+  printf("%lu  ",
+      boundaries->leftLTR_3 -offset + 1);
+  printf("%lu  ",
+      boundaries->leftLTR_3
+          - boundaries->leftLTR_5 + 1);
+  printf("%lu  ",
+      boundaries->rightLTR_5 -offset + 1);
+  printf("%lu  ",
+      boundaries->rightLTR_3 -offset + 1);
+  printf("%lu  ",
+      boundaries->rightLTR_3
+          - boundaries->rightLTR_5 + 1);
   /* print similarity */
   printf("%.2f  ", boundaries->similarity);
   /* print sequence number */

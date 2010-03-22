@@ -24,27 +24,27 @@ typedef uint16_t regionLength;
 
 struct seqRange
 {
-  Seqpos startPos;
-  BitElem symLenStr[sizeof (Seqpos) / sizeof (BitElem)];
+  unsigned long startPos;
+  BitElem symLenStr[sizeof (unsigned long) / sizeof (BitElem)];
   /**< holds the bits required for the symbol stored and the length
    * of the range */
 };
 
 enum {
-  symLenStrBits = sizeof (Seqpos) / sizeof (BitElem) * bitElemBits,
+  symLenStrBits = sizeof (unsigned long) / sizeof (BitElem) * bitElemBits,
 };
 
 struct seqRangeList
 {
   size_t numRangesStorable, numRanges;
   struct seqRange *ranges;
-  Seqpos *partialSymSums;
+  unsigned long *partialSymSums;
   const MRAEnc *alphabet;
   unsigned symBits;
-  Seqpos maxRangeLen;
+  unsigned long maxRangeLen;
 };
 
-static inline Seqpos
+static inline unsigned long
 seqRangeLen(const struct seqRange *p, unsigned symBits)
 {
   return gt_bsGetSeqpos(p->symLenStr, symBits, symLenStrBits - symBits);
@@ -57,7 +57,7 @@ seqRangeSym(const struct seqRange *p, unsigned symBits)
 }
 
 static inline void
-seqRangeSetLen(struct seqRange *p, Seqpos len, unsigned symBits)
+seqRangeSetLen(struct seqRange *p, unsigned long len, unsigned symBits)
 {
   return gt_bsStoreSeqpos(p->symLenStr, symBits, symLenStrBits - symBits, len);
 }
@@ -69,7 +69,7 @@ seqRangeSetSym(struct seqRange *p, Symbol sym, unsigned symBits)
 }
 
 static inline int
-posIsInSeqRange(struct seqRange *p, Seqpos pos, unsigned symBits)
+posIsInSeqRange(struct seqRange *p, unsigned long pos, unsigned symBits)
 {
   return (pos >= p->startPos && pos < p->startPos + seqRangeLen(p, symBits));
 }

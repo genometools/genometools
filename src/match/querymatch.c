@@ -19,13 +19,13 @@
 #include "core/unused_api.h"
 #include "core/symboldef.h"
 #include "core/readmode.h"
-#include "core/seqpos.h"
+
 #include "querymatch.h"
 #include "core/format64.h"
 
 struct Querymatch
 {
-   Seqpos len,
+   unsigned long len,
           dbstart,
           querystart,
           querytotallength;
@@ -40,13 +40,13 @@ Querymatch *querymatch_new(void)
 }
 
 void querymatch_fill(Querymatch *querymatch,
-                     Seqpos len,
-                     Seqpos dbstart,
+                     unsigned long len,
+                     unsigned long dbstart,
                      GtReadmode readmode,
                      bool selfmatch,
                      uint64_t queryseqnum,
-                     Seqpos querystart,
-                     Seqpos querytotallength)
+                     unsigned long querystart,
+                     unsigned long querytotallength)
 {
   querymatch->len = len;
   querymatch->dbstart = dbstart;
@@ -67,19 +67,19 @@ void querymatch_delete(Querymatch *querymatch)
 
 #ifdef VERIFY
 static void verifymatch(const GtEncodedsequence *encseq,
-                        Seqpos len,
-                        Seqpos pos1,
+                        unsigned long len,
+                        unsigned long pos1,
                         uint64_t seqnum2,
-                        Seqpos pos2,
+                        unsigned long pos2,
                         GtReadmode readmode)
 {
   if (readmode == GT_READMODE_REVERSE)
   {
     GtSeqinfo seqinfo;
-    Seqpos offset, totallength = gt_encodedsequence_total_length(encseq);
+    unsigned long offset, totallength = gt_encodedsequence_total_length(encseq);
     GtUchar cc1, cc2;
 
-    gt_encodedsequence_seqinfo(&seqinfo,encseq,(Seqpos) seqnum2);
+    gt_encodedsequence_seqinfo(&seqinfo,encseq,(unsigned long) seqnum2);
     pos2 += seqinfo.seqstartpos;
     for (offset = 0; offset < len; offset++)
     {
@@ -124,7 +124,7 @@ int querymatch_output(GT_UNUSED void *info,
   const char *outflag = "FRCP";
   GtSeqinfo seqinfo;
   unsigned long dbseqnum;
-  Seqpos querystart, dbstart_relative;
+  unsigned long querystart, dbstart_relative;
 
   gt_assert(encseq != NULL);
   dbseqnum = getencseqfrompos2seqnum(encseq,querymatch->dbstart);
@@ -155,30 +155,29 @@ int querymatch_output(GT_UNUSED void *info,
                 querystart,
                 querymatch->readmode);
 #endif
-    printf(FormatSeqpos " %lu " FormatSeqpos " %c " FormatSeqpos
-           " " Formatuint64_t " " FormatSeqpos "\n",
-           PRINTSeqposcast(querymatch->len),
+    printf("%lu %lu %lu %c %lu " Formatuint64_t " %lu\n",
+           querymatch->len,
            dbseqnum,
-           PRINTSeqposcast(dbstart_relative),
+           dbstart_relative,
            outflag[querymatch->readmode],
-           PRINTSeqposcast(querymatch->len),
+           querymatch->len,
            PRINTuint64_tcast(querymatch->queryseqnum),
-           PRINTSeqposcast(querystart));
+           querystart);
   }
   return 0;
 }
 
-Seqpos querymatch_len(const Querymatch *querymatch)
+unsigned long querymatch_len(const Querymatch *querymatch)
 {
   return querymatch->len;
 }
 
-Seqpos querymatch_dbstart(const Querymatch *querymatch)
+unsigned long querymatch_dbstart(const Querymatch *querymatch)
 {
   return querymatch->dbstart;
 }
 
-Seqpos querymatch_querystart(const Querymatch *querymatch)
+unsigned long querymatch_querystart(const Querymatch *querymatch)
 {
   return querymatch->querystart;
 }

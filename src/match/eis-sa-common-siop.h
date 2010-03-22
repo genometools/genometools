@@ -21,7 +21,7 @@
 #include "match/eis-sa-common-priv.h"
 
 static inline GtUchar
-sfxIdx2BWTSym(Seqpos sufIdx, const GtEncodedsequence *encseq,
+sfxIdx2BWTSym(unsigned long sufIdx, const GtEncodedsequence *encseq,
               GtReadmode readmode)
 {
   return sufIdx != 0
@@ -31,7 +31,7 @@ sfxIdx2BWTSym(Seqpos sufIdx, const GtEncodedsequence *encseq,
 
 static inline size_t
 EncSeqGetSubSeq(const GtEncodedsequence *encseq, GtReadmode readmode,
-                Seqpos pos, size_t len, GtUchar *subSeq)
+                unsigned long pos, size_t len, GtUchar *subSeq)
 {
   size_t i;
   gt_assert(encseq);
@@ -46,13 +46,13 @@ SASSCreateReader(SASeqSrc *src, enum sfxDataRequest request)
   return src->createReader(src, request);
 }
 
-static inline DefinedSeqpos
+static inline Definedunsignedlong
 SASSGetRot0Pos(const SASeqSrc *src)
 {
   return src->getRot0Pos(src);
 }
 
-static inline Seqpos
+static inline unsigned long
 SASSGetLength(const SASeqSrc *src)
 {
   return src->seqLen;
@@ -81,7 +81,8 @@ SASSGetSeqStats(const SASeqSrc *src)
 }
 
 static inline size_t
-SASSAccessSequence(const SASeqSrc *src, Symbol *dest, Seqpos pos, size_t len)
+SASSAccessSequence(const SASeqSrc *src, Symbol *dest,
+                   unsigned long pos, size_t len)
 {
   return accessSequence(src->origSequenceAccess, dest, pos, len);
 }
@@ -93,7 +94,7 @@ SASSGetOrigSeqAccessor(const SASeqSrc *src)
 }
 
 static inline void
-initSASeqSrc(SASeqSrc *src, Seqpos seqLen,
+initSASeqSrc(SASeqSrc *src, unsigned long seqLen,
              createTranslatorFunc createTranslator,
              createReaderFunc createReader, getRot0PosFunc getRot0Pos,
              getSeqStatsFunc getSeqStats, RandomSeqAccessor origSeqAccess,
@@ -118,7 +119,9 @@ initSASeqSrc(SASeqSrc *src, Seqpos seqLen,
   src->deleteSASS = deleteSASS;
   src->newMRAEnc = newMRAEnc;
   src->alphabet = NULL;
-  initEmptySeqReaderSet(&src->readerSet, SFX_REQUEST_NONE, sizeof (Seqpos),
+  initEmptySeqReaderSet(&src->readerSet,
+                        SFX_REQUEST_NONE,
+                        sizeof (unsigned long),
                         generator, generatorState);
   initSATaggedXltorStateList(&src->xltorStates);
 }

@@ -28,12 +28,12 @@ typedef struct
 {
   bool hardworktodo,
        sorted;
-  Seqpos bucketend;
+  unsigned long bucketend;
 } Bucketinfo;
 
 struct GtBucketspec2
 {
-  Seqpos partwidth;
+  unsigned long partwidth;
   const GtEncodedsequence *encseq;
   GtReadmode readmode;
   unsigned int numofchars, numofcharssquared, prefixlength, *order;
@@ -41,8 +41,8 @@ struct GtBucketspec2
   Bucketinfo *superbuckettab, **subbuckettab;
 };
 
-static Seqpos superbucketsize(const GtBucketspec2 *bucketspec2,
-                              unsigned int bucketnum)
+static unsigned long superbucketsize(const GtBucketspec2 *bucketspec2,
+                                     unsigned int bucketnum)
 {
   if (bucketnum == 0)
   {
@@ -55,8 +55,8 @@ static Seqpos superbucketsize(const GtBucketspec2 *bucketspec2,
 static int comparesuperbucketsizes(const void *a,const void *b,void *data)
 {
   const GtBucketspec2 *bucketspec2 = (const GtBucketspec2 *) data;
-  Seqpos size1 = superbucketsize(bucketspec2, *(const unsigned int *) a);
-  Seqpos size2 = superbucketsize(bucketspec2, *(const unsigned int *) b);
+  unsigned long size1 = superbucketsize(bucketspec2, *(const unsigned int *) a);
+  unsigned long size2 = superbucketsize(bucketspec2, *(const unsigned int *) b);
   if (size1 < size2)
   {
     return -1;
@@ -68,7 +68,7 @@ static int comparesuperbucketsizes(const void *a,const void *b,void *data)
   return 0;
 }
 
-static Seqpos getstartidx(const GtBucketspec2 *bucketspec2,
+static unsigned long getstartidx(const GtBucketspec2 *bucketspec2,
                           unsigned int first,
                           unsigned int second)
 {
@@ -85,7 +85,7 @@ static Seqpos getstartidx(const GtBucketspec2 *bucketspec2,
   return 0;
 }
 
-static Seqpos getendidx(const GtBucketspec2 *bucketspec2,
+static unsigned long getendidx(const GtBucketspec2 *bucketspec2,
                         unsigned int first,
                         unsigned int second)
 {
@@ -107,7 +107,7 @@ static void resetsorted(GtBucketspec2 *bucketspec2)
     bucketspec2->superbuckettab[idx].sorted = false;
     for (idx2 = 0; idx2<bucketspec2->numofchars; idx2++)
     {
-      Seqpos startidx = getstartidx(bucketspec2,idx,idx2),
+      unsigned long startidx = getstartidx(bucketspec2,idx,idx2),
              endidx = getendidx(bucketspec2,idx,idx2);
       bucketspec2->subbuckettab[idx][idx2].sorted =
         (startidx < endidx) ? false : true;
@@ -149,13 +149,13 @@ static Codetype expandtwocharcode(Codetype twocharcode,
 }
 
 /*
-static Seqpos *leftcontextofspecialchardist(unsigned int numofchars,
+static unsigned long *leftcontextofspecialchardist(unsigned int numofchars,
                                             const GtEncodedsequence *encseq,
                                             GtReadmode readmode)
 {
   GtUchar cc;
   unsigned int idx;
-  Seqpos *specialchardist,
+  unsigned long *specialchardist,
          totallength = gt_encodedsequence_total_length(encseq);
 
   specialchardist = gt_malloc(sizeof (*specialchardist) * numofchars);
@@ -211,13 +211,13 @@ static Seqpos *leftcontextofspecialchardist(unsigned int numofchars,
 }
 */
 
-static Seqpos *leftcontextofspecialchardist(unsigned int numofchars,
+static unsigned long *leftcontextofspecialchardist(unsigned int numofchars,
                                             const GtEncodedsequence *encseq,
                                             GtReadmode readmode)
 {
   GtUchar cc;
   unsigned int idx;
-  Seqpos *specialchardist,
+  unsigned long *specialchardist,
          totallength = gt_encodedsequence_total_length(encseq);
 
   specialchardist = gt_malloc(sizeof (*specialchardist) * numofchars);
@@ -327,7 +327,7 @@ static void fill2subbuckets(GtBucketspec2 *bucketspec2,const Bcktab *bcktab)
   Codetype code, maxcode;
   unsigned int rightchar = 0, currentchar = 0;
   Bucketspecification bucketspec;
-  Seqpos accubucketsize = 0;
+  unsigned long accubucketsize = 0;
 
   maxcode = bcktab_numofallcodes(bcktab) - 1;
   for (code = 0; code <= maxcode; code++)
@@ -363,7 +363,7 @@ static void fillanysubbuckets(GtBucketspec2 *bucketspec2,
 {
   Codetype code2, maxcode;
   unsigned int rightchar = 0, currentchar = 0;
-  Seqpos rightbound, *specialchardist;
+  unsigned long rightbound, *specialchardist;
 
   maxcode = bcktab_numofallcodes(bcktab) - 1;
   bucketspec2->expandfactor
@@ -409,7 +409,7 @@ static void fillanysubbuckets(GtBucketspec2 *bucketspec2,
 GtBucketspec2 *gt_bucketspec2_new(const Bcktab *bcktab,
                                   const GtEncodedsequence *encseq,
                                   GtReadmode readmode,
-                                  Seqpos partwidth,
+                                  unsigned long partwidth,
                                   unsigned int numofchars)
 {
   GtBucketspec2 *bucketspec2;
@@ -452,11 +452,11 @@ GtBucketspec2 *gt_bucketspec2_new(const Bcktab *bcktab,
 }
 
 static void forwardderive(const GtBucketspec2 *bucketspec2,
-                          Seqpos **targetptr,
+                          unsigned long **targetptr,
                           unsigned int source,
-                          Seqpos *idx)
+                          unsigned long *idx)
 {
-  Seqpos startpos;
+  unsigned long startpos;
   GtUchar cc;
 
   gt_assert (idx < targetptr[source]);
@@ -481,11 +481,11 @@ static void forwardderive(const GtBucketspec2 *bucketspec2,
 }
 
 static void backwardderive(const GtBucketspec2 *bucketspec2,
-                           Seqpos **targetptr,
+                           unsigned long **targetptr,
                            unsigned int source,
-                           Seqpos *idx)
+                           unsigned long *idx)
 {
-  Seqpos startpos;
+  unsigned long startpos;
   GtUchar cc;
 
   gt_assert (idx > targetptr[source]);
@@ -535,15 +535,15 @@ bool gt_hardworkbeforecopysort(const GtBucketspec2 *bucketspec2,
 }
 
 void gt_copysortsuffixes(const GtBucketspec2 *bucketspec2,
-                         Seqpos *suftab,
+                         unsigned long *suftab,
                          GtLogger *logger)
 {
-  Seqpos hardwork = 0, **targetptr;
+  unsigned long hardwork = 0, **targetptr;
   unsigned int idx, idxsource, source, second;
 
 #ifdef WITHSUFFIXES
   {
-    const Seqpos *ptr;
+    const unsigned long *ptr;
     for (ptr = suftab; ptr < suftab + bucketspec2->partwidth; ptr++)
     {
       showsequenceatstartpos(stdout,
@@ -604,8 +604,8 @@ void gt_copysortsuffixes(const GtBucketspec2 *bucketspec2,
     bucketspec2->superbuckettab[source].sorted = true;
   }
   gt_free(targetptr);
-  gt_logger_log(logger,"hardwork = " FormatSeqpos " (%.2f)",
-        PRINTSeqposcast(hardwork),
+  gt_logger_log(logger,"hardwork = %lu (%.2f)",
+        hardwork,
         (double) hardwork/gt_encodedsequence_total_length(bucketspec2->encseq));
 }
 

@@ -19,9 +19,11 @@
 #define SARR_DEF_H
 
 #include <stdio.h>
-#include "core/seqpos.h"
-#include "intcode-def.h"
+#include "core/defined-types.h"
 #include "core/encodedsequence.h"
+#include "core/intdef.h"
+
+#include "intcode-def.h"
 #include "lcpoverflow.h"
 #include "bcktab.h"
 
@@ -52,7 +54,7 @@
           FILE *fp;\
         } TYPE ## Bufferedfile
 
-DECLAREBufferedfiletype(Seqpos);
+DECLAREBufferedfiletype(GtUlong);
 
 DECLAREBufferedfiletype(GtUchar);
 
@@ -86,18 +88,18 @@ DECLAREBufferedfiletype(Largelcpvalue);
 typedef struct
 {
   GtEncodedsequence *encseq;
-  DefinedSeqpos numoflargelcpvalues; /* only in esa-map.c */
-  DefinedSeqpos longest; /* for BWT */
+  Definedunsignedlong numoflargelcpvalues; /* only in esa-map.c */
+  Definedunsignedlong longest; /* for BWT */
   GtReadmode readmode; /* relevant when reading the encoded sequence */
   /* either with mapped input */
-  const Seqpos *suftab;
+  const unsigned long *suftab;
   const GtUchar *lcptab;
   const Largelcpvalue *llvtab;
   const GtUchar *bwttab;
   unsigned int prefixlength;
   Bcktab *bcktab;
   /* or with streams */
-  SeqposBufferedfile suftabstream;
+  GtUlongBufferedfile suftabstream;
   GtUcharBufferedfile bwttabstream,
                     lcptabstream;
   LargelcpvalueBufferedfile llvtabstream;
@@ -105,7 +107,7 @@ typedef struct
 
 /*@unused@*/ static inline const Largelcpvalue *getlargelcpvalue(
                        const Suffixarray *suffixarray,
-                       Seqpos pos)
+                       unsigned long pos)
 {
   const Largelcpvalue *leftptr, *rightptr, *midptr;
   unsigned long len;
@@ -114,7 +116,7 @@ typedef struct
 
   leftptr = suffixarray->llvtab;
   rightptr = suffixarray->llvtab +
-             suffixarray->numoflargelcpvalues.valueseqpos - 1;
+             suffixarray->numoflargelcpvalues.valueunsignedlong - 1;
 
   while (leftptr<=rightptr)
   {
@@ -137,9 +139,9 @@ typedef struct
   return NULL;
 }
 
-/*@unused@*/ static inline Seqpos lcptable_get(
+/*@unused@*/ static inline unsigned long lcptable_get(
                        const Suffixarray *suffixarray,
-                       Seqpos pos)
+                       unsigned long pos)
 {
   GtUchar smalllcpvalue;
   const Largelcpvalue *largelcpvalue;
@@ -148,7 +150,7 @@ typedef struct
   smalllcpvalue = suffixarray->lcptab[pos];
   if (smalllcpvalue != LCPOVERFLOW)
   {
-    return (Seqpos) smalllcpvalue;
+    return (unsigned long) smalllcpvalue;
   }
   largelcpvalue = getlargelcpvalue(suffixarray,pos);
   gt_assert(largelcpvalue != NULL);

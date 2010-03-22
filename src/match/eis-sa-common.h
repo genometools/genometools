@@ -24,11 +24,9 @@
 #define EIS_SA_COMMON_H
 
 #include <stdlib.h>
-
-#include "core/symboldef.h"
+#include "core/defined-types.h"
 #include "core/encodedsequence.h"
-#include "core/seqpos.h"
-
+#include "core/symboldef.h"
 #include "match/eis-mrangealphabet.h"
 #include "match/eis-random-seqaccess.h"
 #include "match/eis-seqdatasrc.h"
@@ -50,12 +48,12 @@ enum sfxDataRequest {
  * @return Symbol at position sufIdx or UNDEFBWTCHAR i.e. the terminator
  */
 static inline GtUchar
-sfxIdx2BWTSym(Seqpos sufIdx, const GtEncodedsequence *encseq,
+sfxIdx2BWTSym(unsigned long sufIdx, const GtEncodedsequence *encseq,
               GtReadmode readmode);
 
 static inline size_t
 EncSeqGetSubSeq(const GtEncodedsequence *encseq, GtReadmode readmode,
-                Seqpos pos, size_t len, GtUchar *subStr);
+                unsigned long pos, size_t len, GtUchar *subStr);
 
 struct encSeqTrState
 {
@@ -73,18 +71,22 @@ struct encSeqTrState
  * @param len length of string to read
  */
 extern size_t
-translateSuftab2BWT(struct encSeqTrState *trState, GtUchar *dest, Seqpos *src,
+translateSuftab2BWT(struct encSeqTrState *trState,
+                    GtUchar *dest,
+                    unsigned long *src,
                     size_t len);
 
 struct encSeqLCPState
 {
-  Seqpos lastSufIdx;
+  unsigned long lastSufIdx;
   const GtEncodedsequence *encseq;
   GtReadmode readmode;
 };
 
 extern size_t
-translateSuftab2LCP(struct encSeqLCPState *lcpState, Seqpos *dest, Seqpos *src,
+translateSuftab2LCP(struct encSeqLCPState *lcpState,
+                    unsigned long *dest,
+                    unsigned long *src,
                     size_t len);
 
 union saXltorState
@@ -122,10 +124,10 @@ typedef struct SASeqSrc SASeqSrc;
 static inline SeqDataReader
 SASSCreateReader(SASeqSrc *src, enum sfxDataRequest request);
 
-static inline DefinedSeqpos
+static inline Definedunsignedlong
 SASSGetRot0Pos(const SASeqSrc *src);
 
-static inline Seqpos
+static inline unsigned long
 SASSGetLength(const SASeqSrc *src);
 
 static inline MRAEnc *
@@ -138,7 +140,10 @@ static inline const struct seqStats *
 SASSGetSeqStats(const SASeqSrc *src);
 
 static inline size_t
-SASSAccessSequence(const SASeqSrc *src, Symbol *dest, Seqpos pos, size_t len);
+SASSAccessSequence(const SASeqSrc *src,
+                   Symbol *dest,
+                   unsigned long pos,
+                   size_t len);
 
 static inline RandomSeqAccessor
 SASSGetOrigSeqAccessor(const SASeqSrc *src);

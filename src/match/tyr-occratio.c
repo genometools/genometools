@@ -24,7 +24,7 @@
 
 struct Dfsinfo /* information stored for each node of the lcp interval tree */
 {
-  Seqpos leftmostleaf,
+  unsigned long leftmostleaf,
          rightmostleaf,
          suftabrightmostleaf,
          lcptabrightmostleafplus1;
@@ -34,7 +34,7 @@ struct Dfsstate /* global information */
 {
   const GtEncodedsequence *encseq;
   GtReadmode readmode;
-  Seqpos totallength;
+  unsigned long totallength;
   unsigned long minmersize,
                 maxmersize;
   GtArrayuint64_t *uniquedistribution,
@@ -86,25 +86,25 @@ static void adddistributionuint64_t(GtArrayuint64_t *occdistribution,
 static void iteritvdistribution(GtArrayuint64_t *distribution,
                                 const GtEncodedsequence *encseq,
                                 GtReadmode readmode,
-                                Seqpos totallength,
+                                unsigned long totallength,
                                 unsigned long minmersize,
                                 unsigned long maxmersize,
-                                Seqpos length,
-                                Seqpos startpos)
+                                unsigned long length,
+                                unsigned long startpos)
 {
 
-  if (length <= (Seqpos) maxmersize)
+  if (length <= (unsigned long) maxmersize)
   {
-    Seqpos ulen, pos;
+    unsigned long ulen, pos;
 
     for (ulen = length,
          pos = startpos + length - 1;
-         ulen <= (Seqpos) maxmersize &&
+         ulen <= (unsigned long) maxmersize &&
          pos < totallength &&
          ISNOTSPECIAL(gt_encodedsequence_getencodedchar(encseq,pos,readmode));
          pos++, ulen++)
     {
-      if (ulen >= (Seqpos) minmersize)
+      if (ulen >= (unsigned long) minmersize)
       {
         adddistributionuint64_t(distribution,(unsigned long) ulen,1UL);
       }
@@ -113,9 +113,9 @@ static void iteritvdistribution(GtArrayuint64_t *distribution,
 }
 
 static int processleafedge(GT_UNUSED bool firstsucc,
-                           Seqpos fatherdepth,
+                           unsigned long fatherdepth,
                            GT_UNUSED Dfsinfo *father,
-                           Seqpos leafnumber,
+                           unsigned long leafnumber,
                            Dfsstate *state,
                            GT_UNUSED GtError *err)
 {
@@ -130,13 +130,13 @@ static int processleafedge(GT_UNUSED bool firstsucc,
   return 0;
 }
 
-static int processcompletenode(Seqpos nodeptrdepth,
+static int processcompletenode(unsigned long nodeptrdepth,
                                Dfsinfo *nodeptr,
-                               Seqpos nodeptrminusonedepth,
+                               unsigned long nodeptrminusonedepth,
                                Dfsstate *state,
                                GT_UNUSED GtError *err)
 {
-  Seqpos fatherdepth;
+  unsigned long fatherdepth;
   unsigned long startlength, endlength;
 
   fatherdepth = nodeptr->lcptabrightmostleafplus1;
@@ -157,7 +157,7 @@ static int processcompletenode(Seqpos nodeptrdepth,
   if (startlength <= endlength)
   {
     unsigned long lenval;
-    Seqpos occcount = nodeptr->rightmostleaf - nodeptr->leftmostleaf + 1;
+    unsigned long occcount = nodeptr->rightmostleaf - nodeptr->leftmostleaf + 1;
 
     for (lenval = startlength; lenval <= endlength; lenval++)
     {
@@ -172,14 +172,15 @@ static int processcompletenode(Seqpos nodeptrdepth,
   return 0;
 }
 
-static void assignleftmostleaf(Dfsinfo *dfsinfo,Seqpos leftmostleaf,
+static void assignleftmostleaf(Dfsinfo *dfsinfo,unsigned long leftmostleaf,
                                GT_UNUSED Dfsstate *dfsstate)
 {
   dfsinfo->leftmostleaf = leftmostleaf;
 }
 
-static void assignrightmostleaf(Dfsinfo *dfsinfo,Seqpos currentindex,
-                                Seqpos previoussuffix,Seqpos currentlcp,
+static void assignrightmostleaf(Dfsinfo *dfsinfo,unsigned long currentindex,
+                                unsigned long previoussuffix,
+                                unsigned long currentlcp,
                                 GT_UNUSED Dfsstate *dfsstate)
 {
   dfsinfo->rightmostleaf = currentindex;

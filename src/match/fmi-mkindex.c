@@ -150,7 +150,7 @@ static int levedescl2levelnum(const char *name,
 
 static void freeconstructedfmindex(Fmindex *fm)
 {
-  GT_FREEARRAY (&fm->specpos, PairBwtidx);
+  GT_FREEARRAY (&fm->specpos, GtPairBwtidx);
   FREESPACE (fm->bfreq);
   FREESPACE (fm->superbfreq);
   FREESPACE (fm->tfreq);
@@ -189,10 +189,10 @@ static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,GtLogger *logger,
   unsigned int log2bsize,
                log2markdist;
   bool haserr = false;
-  Specialcharinfo specialcharinfo;
+  GtSpecialcharinfo specialcharinfo;
 
   gt_error_check(err);
-  GT_INITARRAY(&fm.specpos, PairBwtidx);
+  GT_INITARRAY(&fm.specpos, GtPairBwtidx);
   fm.bfreq = NULL;
   fm.superbfreq = NULL;
   fm.tfreq = NULL;

@@ -25,7 +25,7 @@
 
 static void maketrie(Mergertrierep *trierep,
                      GT_UNUSED const GtUchar *characters,
-                     Seqpos len)
+                     unsigned long len)
 {
   Suffixinfo suffixinfo;
 
@@ -48,7 +48,7 @@ static void maketrie(Mergertrierep *trierep,
 }
 
 static void successivelydeletesmallest(Mergertrierep *trierep,
-                                       GT_UNUSED Seqpos seqlen,
+                                       GT_UNUSED unsigned long seqlen,
                                        GT_UNUSED const GtUchar *characters,
                                        GT_UNUSED GtError *err)
 {
@@ -76,7 +76,7 @@ int test_trieins(bool onlyins,const GtStr *indexname,GtError *err)
 {
   Suffixarray suffixarray;
   bool haserr = false;
-  Seqpos totallength = 0;
+  unsigned long totallength = 0;
 
   gt_error_check(err);
   if (streamsuffixarray(&suffixarray,

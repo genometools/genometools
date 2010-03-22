@@ -19,7 +19,6 @@
 #define ENCSEQ_SPECIALSRANK_H
 
 #include "core/encodedsequence.h"
-#include "core/seqpos.h"
 
 typedef struct specialsRankLookup SpecialsRankLookup;
 
@@ -30,8 +29,8 @@ newSpecialsRankLookup(const GtEncodedsequence *encseq, GtReadmode readmode,
 extern void
 deleteSpecialsRankLookup(SpecialsRankLookup *table);
 
-static inline Seqpos
-specialsRank(const SpecialsRankLookup *rankTable, Seqpos pos);
+static inline unsigned long
+specialsRank(const SpecialsRankLookup *rankTable, unsigned long pos);
 
 extern const GtEncodedsequence *
 SPRTGetOrigEncseq(const SpecialsRankLookup *rankTable);

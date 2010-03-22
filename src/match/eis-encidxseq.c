@@ -17,13 +17,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include "core/yarandom.h"
-
-#include "core/seqpos.h"
-#include "match/sarr-def.h"
-#include "match/esa-map.h"
-
 #include "match/eis-encidxseq.h"
 #include "match/eis-encidxseq-priv.h"
+#include "match/esa-map.h"
+#include "match/sarr-def.h"
 
 enum {
   AVG_RANGE_RANK_INTERVAL = 128, /**< do range rank queries
@@ -51,22 +48,21 @@ const char *EISIntegrityCheckResultStrings[] =
   {                                                                     \
     switch (retcode) {                                                  \
     case EIS_INTEGRITY_CHECK_INVALID_SYMBOL:                            \
-      fprintf(stderr, "Comparision failed at position "FormatSeqpos     \
+      fprintf(stderr, "Comparision failed at position %lu"              \
               ", reference symbol: %u, symbol read: %u\n",              \
               pos, symOrig, symEnc);                                    \
-      gt_error_set(err, "Invalid symbol encountered.");                    \
+      gt_error_set(err, "Invalid symbol encountered.");                 \
       break;                                                            \
     case EIS_INTEGRITY_CHECK_BWT_READ_ERROR:                            \
-      fprintf(stderr, "Read of symbol failed at position "              \
-              FormatSeqpos"\n", pos);                                   \
-      gt_error_set(err, "Failed reading reference BWT source.");           \
+      fprintf(stderr, "Read of symbol failed at position %lu\n", pos);  \
+      gt_error_set(err, "Failed reading reference BWT source.");        \
       break;                                                            \
     case EIS_INTEGRITY_CHECK_RANK_FAILED:                               \
-      fprintf(stderr, "At position "FormatSeqpos                        \
-              ", rank operation yielded  wrong count: "FormatSeqpos     \
-              ", expected "FormatSeqpos" for symbol %d\n",              \
+      fprintf(stderr, "At position %lu"                                 \
+              ", rank operation yielded  wrong count: %lu"              \
+              ", expected %lu for symbol %d\n",                         \
               pos, rankQueryResult, rankExpect, rankCmpSym);            \
-      gt_error_set(err, "Invalid rank result.");                           \
+      gt_error_set(err, "Invalid rank result.");                        \
       break;                                                            \
     }                                                                   \
     EISPrintDiagsForPos(seqIdx, pos, stderr, hint);                     \
@@ -81,17 +77,17 @@ const char *EISIntegrityCheckResultStrings[] =
  * @return -1 on error, 0 on identity, >0 on inconsistency
  */
 extern enum EISIntegrityCheckResults
-EISVerifyIntegrity(EISeq *seqIdx, const GtStr *projectName, Seqpos skip,
+EISVerifyIntegrity(EISeq *seqIdx, const GtStr *projectName, unsigned long skip,
                    unsigned long tickPrint, FILE *fp, int chkFlags,
                    GtLogger *verbosity, GtError *err)
 {
   FILE *bwtFP;
-  Seqpos pos = 0;
+  unsigned long pos = 0;
   Suffixarray suffixArray;
   Symbol symOrig;
   unsigned symEnc;
   EISHint hint;
-  Seqpos rankQueryResult, rankExpect;
+  unsigned long rankQueryResult, rankExpect;
   const MRAEnc *alphabet;
   AlphabetRangeSize alphabetSize;
   AlphabetRangeID numRanges;
@@ -111,7 +107,7 @@ EISVerifyIntegrity(EISeq *seqIdx, const GtStr *projectName, Seqpos skip,
   numRanges = MRAEncGetNumRanges(alphabet);
   do
   {
-    Seqpos rankTable[alphabetSize], rangeRanks[2][alphabetSize],
+    unsigned long rankTable[alphabetSize], rangeRanks[2][alphabetSize],
       pairRangeRanks[2* alphabetSize], lastRangeRankPos = 0;
     int symRead, rt = 0;
     AlphabetRangeID lastRangeID = 0;
@@ -120,12 +116,12 @@ EISVerifyIntegrity(EISeq *seqIdx, const GtStr *projectName, Seqpos skip,
     memset(rangeRanks, 0, sizeof (rangeRanks));
     if (skip > 0)
     {
-      Seqpos len = EISLength(seqIdx);
+      unsigned long len = EISLength(seqIdx);
       unsigned sym;
       if (skip >= len)
       {
         gt_logger_log(verbosity, "Invalid skip request: %lld,"
-                    " too large for sequence length: "FormatSeqpos,
+                    " too large for sequence length: %lu",
                     (long long)skip, len);
         return -1;
       }

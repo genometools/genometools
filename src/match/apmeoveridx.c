@@ -20,9 +20,9 @@
 #include "core/symboldef.h"
 #include "core/unused_api.h"
 #include "core/ma_api.h"
-#include "core/seqpos.h"
+
 #include "core/encodedsequence.h"
-#include "defined-types.h"
+#include "core/defined-types.h"
 #include "apmeoveridx.h"
 #include "absdfstrans-imp.h"
 #include "initeqsvec.h"
@@ -212,9 +212,9 @@ static void apme_initLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
 
 static void apme_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
                                       DECLAREPTRDFSSTATE(aliascolumn),
-                                      GT_UNUSED Seqpos leftbound,
-                                      GT_UNUSED Seqpos rightbound,
-                                      Seqpos width,
+                                      GT_UNUSED unsigned long leftbound,
+                                      GT_UNUSED unsigned long rightbound,
+                                      unsigned long width,
                                       GT_UNUSED unsigned long currentdepth,
                                       Limdfsconstinfo *mti)
 {
@@ -225,7 +225,7 @@ static void apme_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
     limdfsresult->status = Limdfsstop; /* stop depth first traversal */
     return;
   }
-  if (mti->maxintervalwidth == 0 || width == (Seqpos) 1)
+  if (mti->maxintervalwidth == 0 || width == (unsigned long) 1)
   {
     if (col->maxleqk == SUCCESSMAXLEQK)
     {
@@ -237,7 +237,7 @@ static void apme_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
     }
   } else
   {
-    if (width <= (Seqpos) mti->maxintervalwidth)
+    if (width <= (unsigned long) mti->maxintervalwidth)
     {
       /* success with match of length maxleqk */
       gt_assert(col->maxleqk > 0);

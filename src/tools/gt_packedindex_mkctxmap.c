@@ -23,7 +23,7 @@
 #include "match/eis-bwtseq-construct.h"
 #include "match/eis-bwtseq-context-param.h"
 #include "match/eis-bwtseq-sass.h"
-#include "core/seqpos.h"
+
 #include "match/sarr-def.h"
 #include "match/esa-map.h"
 #include "tools/gt_packedindex_mkctxmap.h"
@@ -77,7 +77,7 @@ gt_packedindex_mkctxmap(int argc, const char *argv[], GtError *err)
                            GT_LOGGER_DEFLT_PREFIX, stdout);
     /* try to find appropriate suffix source */
     {
-      Seqpos len;
+      unsigned long len;
       if (streamsuffixarray(&sa, SARR_SUFTAB, projectName, logger, err))
       {
         gt_error_unset(err);

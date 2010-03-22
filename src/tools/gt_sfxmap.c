@@ -53,7 +53,7 @@ static void deletethespranges(const GtEncodedsequence *encseq,
 {
   Specialrangeiterator *sri;
   GtSequencerange range;
-  Seqpos rangewidth, nextpos = 0, totallength;
+  unsigned long rangewidth, nextpos = 0, totallength;
   const unsigned long fastawidth = 70UL;
 
   sri = newspecialrangeiterator(encseq,true);
@@ -62,7 +62,7 @@ static void deletethespranges(const GtEncodedsequence *encseq,
   {
     gt_assert(range.rightpos > range.leftpos);
     rangewidth = range.rightpos - range.leftpos;
-    if (rangewidth > (Seqpos) delspranges)
+    if (rangewidth > (unsigned long) delspranges)
     {
       if (range.leftpos == 0)
       {
@@ -350,16 +350,16 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
       }
       if (!haserr && sfxmapoptions.inputbwt)
       {
-        Seqpos totallength, bwtdifferentconsecutive = 0, idx, longest;
+        unsigned long totallength, bwtdifferentconsecutive = 0, idx, longest;
 
         gt_assert(suffixarray.longest.defined);
-        longest = suffixarray.longest.valueseqpos;
+        longest = suffixarray.longest.valueunsignedlong;
         printf("longest=%lu\n",(unsigned long) longest);
         totallength = gt_encodedsequence_total_length(suffixarray.encseq);
         printf("totallength=%lu\n",(unsigned long) totallength);
         if (!sfxmapoptions.usestream)
         {
-          for (idx = (Seqpos) 1; idx<totallength; idx++)
+          for (idx = (unsigned long) 1; idx<totallength; idx++)
           {
             if (suffixarray.bwttab[idx-1] != suffixarray.bwttab[idx] ||
                 ISSPECIAL(suffixarray.bwttab[idx]))
@@ -384,8 +384,8 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
             }
           }
         }
-        printf("bwtdifferentconsecutive=" FormatSeqpos " (%.4f)\n",
-               PRINTSeqposcast(bwtdifferentconsecutive),
+        printf("bwtdifferentconsecutive=%lu (%.4f)\n",
+               bwtdifferentconsecutive,
                (double) bwtdifferentconsecutive/totallength);
       }
     }

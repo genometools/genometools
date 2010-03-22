@@ -28,11 +28,11 @@ typedef struct GtBucketspec2 GtBucketspec2;
 GtBucketspec2 *gt_bucketspec2_new(const Bcktab *bcktab,
                                   const GtEncodedsequence *encseq,
                                   GtReadmode readmode,
-                                  Seqpos partwidth,
+                                  unsigned long partwidth,
                                   unsigned int numofchars);
 
 void gt_copysortsuffixes(const GtBucketspec2 *bucketspec2,
-                         Seqpos *suftab,
+                         unsigned long *suftab,
                          GtLogger *logger);
 
 bool gt_hardworkbeforecopysort(const GtBucketspec2 *bucketspec2,

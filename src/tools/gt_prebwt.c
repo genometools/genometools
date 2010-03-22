@@ -77,7 +77,7 @@ static int gt_prebwt_runner(GT_UNUSED int argc,
                             void *tool_arguments, GtError *err)
 {
   Suffixarray suffixarray;
-  Seqpos totallength = 0;
+  unsigned long totallength = 0;
   void *packedindex = NULL;
   bool haserr = false;
   Prebwtoptions *prebwtoptions = (Prebwtoptions *) tool_arguments;

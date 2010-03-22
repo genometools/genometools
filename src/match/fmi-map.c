@@ -45,7 +45,7 @@ bool fmindexexists(const GtStr *indexname)
 }
 
 static int scanfmafileviafileptr(Fmindex *fmindex,
-                                 Specialcharinfo *specialcharinfo,
+                                 GtSpecialcharinfo *specialcharinfo,
                                  bool *storeindexpos,
                                  const GtStr *indexname,
                                  FILE *fpin,
@@ -159,7 +159,7 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
 {
   FILE *fpin = NULL;
   bool haserr = false, storeindexpos = true;
-  Specialcharinfo specialcharinfo;
+  GtSpecialcharinfo specialcharinfo;
 
   gt_error_check(err);
   fmindex->mappedptr = NULL;
@@ -194,10 +194,10 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
   }
   if (!haserr)
   {
-    fmindex->specpos.nextfreePairBwtidx
+    fmindex->specpos.nextfreeGtPairBwtidx
       = (unsigned long) determinenumberofspecialstostore(&specialcharinfo);
-    fmindex->specpos.spacePairBwtidx = NULL;
-    fmindex->specpos.allocatedPairBwtidx = 0;
+    fmindex->specpos.spaceGtPairBwtidx = NULL;
+    fmindex->specpos.allocatedGtPairBwtidx = 0;
     fmindex->alphabet = gt_scanal1file(indexname,err);
     if (fmindex->alphabet == NULL)
     {

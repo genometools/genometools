@@ -24,7 +24,7 @@
 #include "core/logger.h"
 #include "core/progress_timer.h"
 #include "core/readmode.h"
-#include "core/seqpos.h"
+
 #include "core/str.h"
 #include "core/str_array.h"
 #include "core/symboldef.h"
@@ -68,7 +68,7 @@ GtEncodedsequence* gt_encodedsequence_new_from_index(bool withrange,
 #define            gt_encodedsequence_total_length(ENCSEQ) \
                      ((ENCSEQ)->totallength)
 #else
-Seqpos             gt_encodedsequence_total_length(
+unsigned long             gt_encodedsequence_total_length(
                                                const GtEncodedsequence *encseq);
 #endif
 
@@ -89,7 +89,7 @@ unsigned long      gt_encodedsequence_num_of_sequences(
 /*@unused@*/ static inline
 GtUchar            gt_encodedsequence_getencodedchar(
                                                 const GtEncodedsequence *encseq,
-                                                Seqpos pos,
+                                                unsigned long pos,
                                                 GtReadmode readmode)
 {
   return (readmode == GT_READMODE_FORWARD)
@@ -109,11 +109,11 @@ GtUchar            gt_encodedsequence_getencodedchar(
 #else
 GtUchar            gt_encodedsequence_getencodedchar(
                                                 const GtEncodedsequence *encseq,
-                                                Seqpos pos,
+                                                unsigned long pos,
                                                 GtReadmode readmode);
 GtUchar            gt_encodedsequence_extractencodedchar(
                                                 const GtEncodedsequence *encseq,
-                                                Seqpos pos,
+                                                unsigned long pos,
                                                 GtReadmode readmode);
 #endif
 
@@ -123,7 +123,7 @@ GtUchar            gt_encodedsequence_extractencodedchar(
 #else
 GtUchar            gt_encodedsequence_getencodedcharnospecial(
                                                 const GtEncodedsequence *encseq,
-                                                Seqpos pos,
+                                                unsigned long pos,
                                                 GtReadmode readmode);
 #endif
 
@@ -135,20 +135,21 @@ GtUchar            gt_encodedsequence_getencodedcharnospecial(
 GtUchar            gt_encodedsequence_sequentialgetencodedchar(
                                                 const GtEncodedsequence *encseq,
                                                 GtEncodedsequenceScanstate *esr,
-                                                Seqpos pos,
+                                                unsigned long pos,
                                                 GtReadmode readmode);
 #endif
 
 void               gt_encodedsequence_extract_substring(
                                                 const GtEncodedsequence *encseq,
                                                 GtUchar *buffer,
-                                                Seqpos frompos,
-                                                Seqpos topos);
+                                                unsigned long frompos,
+                                                unsigned long topos);
 
 typedef struct
 {
-  Seqpos seqstartpos,  /* the position of the first character in the encseq */
-         seqlength;    /* the length of the sequence */
+  unsigned long seqstartpos,  /* the position of the first character
+                                 in the encoded sequence */
+                seqlength;    /* the length of the sequence */
 } GtSeqinfo;
 
 /* Fills the <seqinfo> struct for the <seqnum>-th sequence in the <encseq>. */
@@ -180,12 +181,12 @@ void                        gt_encodedsequence_scanstate_init(
                                                 GtEncodedsequenceScanstate *esr,
                                                 const GtEncodedsequence *encseq,
                                                 GtReadmode readmode,
-                                                Seqpos startpos);
+                                                unsigned long startpos);
 void                        gt_encodedsequence_scanstate_initgeneric(
                                                 GtEncodedsequenceScanstate *esr,
                                                 const GtEncodedsequence *encseq,
                                                 bool moveforward,
-                                                Seqpos startpos);
+                                                unsigned long startpos);
 void                        gt_encodedsequence_scanstate_delete(
                                                GtEncodedsequenceScanstate *esr);
 

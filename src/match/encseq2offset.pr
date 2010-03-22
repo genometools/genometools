@@ -1,8 +1,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-Seqpos *encseqtable2sequenceoffsets(Seqpos *totallength,
-                                    Specialcharinfo *specialcharinfo,
+unsigned long *encseqtable2sequenceoffsets(unsigned long *totallength,
+                                    GtSpecialcharinfo *specialcharinfo,
                                     const Suffixarray *suffixarraytable,
                                     unsigned int numofindexes);
 

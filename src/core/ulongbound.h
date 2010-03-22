@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,22 +15,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ESA_LCPVAL_H
-#define ESA_LCPVAL_H
+#ifndef ULONGBOUND_H
+#define ULONGBOUND_H
 
-#include "core/readmode.h"
-#include "core/encodedsequence.h"
+typedef struct GtUlongBound GtUlongBound;
 
-typedef struct Lcpvalueiterator Lcpvalueiterator;
-
-Lcpvalueiterator *newLcpvalueiterator(const GtEncodedsequence *encseq,
-                                      GtReadmode readmode);
-
-unsigned long nextLcpvalueiterator(Lcpvalueiterator *lvi,
-                            bool firstpage,
-                            const unsigned long *suftabptr,
-                            unsigned long numberofsuffixes);
-
-void freeLcpvalueiterator(Lcpvalueiterator **lvi);
+struct GtUlongBound
+{
+  unsigned long lbound,
+                ubound;
+};
 
 #endif

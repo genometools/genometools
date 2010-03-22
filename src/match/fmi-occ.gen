@@ -16,19 +16,21 @@
 */
 
 #define ACCESSBWTTEXT(POS)\
-        gt_encodedsequence_getencodedchar(fm->bwtformatching,POS,GT_READMODE_FORWARD)
+        gt_encodedsequence_getencodedchar(fm->bwtformatching,POS,\
+                                          GT_READMODE_FORWARD)
 
-static Seqpos fmoccurrence (const Fmindex *fm,GtUchar cc,Seqpos pos)
+static unsigned long fmoccurrence (const Fmindex *fm,GtUchar cc,
+                                   unsigned long pos)
 {
-  Seqpos bwtidx,
+  unsigned long bwtidx,
          bwtlastidx,
          numofocc,
          idx,
          maxbfreqidx,
-         ctimesnumofblocks = cc * fm->nofblocks,
-         ctimesnumofsuperblocks = cc * fm->nofsuperblocks,
-         posshiftbsizepow = pos >> (Seqpos) fm->log2bsize,
-         posshiftsuperbsizepow = pos >> (Seqpos) fm->log2superbsize;
+         ctimesnumofblocks = (unsigned long) (cc * fm->nofblocks),
+         ctimesnumofsuperblocks = (unsigned long) (cc * fm->nofsuperblocks),
+         posshiftbsizepow = pos >> (unsigned long) fm->log2bsize,
+         posshiftsuperbsizepow = pos >> (unsigned long) fm->log2superbsize;
 
 #ifdef SKDEBUG
   printf("bwtlength=%u,",(unsigned int) fm->bwtlength);
@@ -37,9 +39,9 @@ static Seqpos fmoccurrence (const Fmindex *fm,GtUchar cc,Seqpos pos)
   printf("pos=%u,cc=%u\n",pos,cc);
 #endif
   if ((pos <= fm->longestsuffixpos &&
-       fm->longestsuffixpos - pos < (Seqpos) fm->bsize) ||
+       fm->longestsuffixpos - pos < (unsigned long) fm->bsize) ||
       (pos >  fm->longestsuffixpos &&
-       pos - fm->longestsuffixpos < (Seqpos) fm->bsize))
+       pos - fm->longestsuffixpos < (unsigned long) fm->bsize))
   {                                    /* dollar in block */
     maxbfreqidx = ctimesnumofblocks + posshiftbsizepow;
     numofocc = fm->superbfreq[ctimesnumofsuperblocks + posshiftsuperbsizepow];
@@ -74,7 +76,7 @@ static Seqpos fmoccurrence (const Fmindex *fm,GtUchar cc,Seqpos pos)
     return numofocc;
   }
   if ((pos & (fm->superbsize >> 1)) &&       /* first halve of superbuckets */
-      fm->bwtlength - pos > (Seqpos) fm->superbsize)
+      fm->bwtlength - pos > (unsigned long) fm->superbsize)
   {
     maxbfreqidx = ctimesnumofblocks +
                   ((posshiftsuperbsizepow + 1) <<
@@ -97,7 +99,7 @@ static Seqpos fmoccurrence (const Fmindex *fm,GtUchar cc,Seqpos pos)
 #ifdef SKDEBUG
       printf("case 5: numofocc %u\n",numofocc);
 #endif
-      bwtlastidx = (posshiftbsizepow + 1) << (Seqpos) fm->log2bsize;
+      bwtlastidx = (posshiftbsizepow + 1) << (unsigned long) fm->log2bsize;
       for (bwtidx = pos; bwtidx < bwtlastidx; bwtidx++)
       {
         if (ACCESSBWTTEXT(bwtidx) == cc)
@@ -138,7 +140,7 @@ static Seqpos fmoccurrence (const Fmindex *fm,GtUchar cc,Seqpos pos)
 #endif
     }
     if ((pos & fm->bsizehalve)           /* second halve of bucket */
-        && (fm->bwtlength - pos > (Seqpos) fm->bsize))
+        && (fm->bwtlength - pos > (unsigned long) fm->bsize))
     {
       numofocc += fm->bfreq[ctimesnumofblocks + posshiftbsizepow];
 #ifdef SKDEBUG

@@ -30,7 +30,6 @@
 #include "match/eis-suffixerator-interface.h"
 #include "match/eis-suffixarray-interface.h"
 #include "match/sarr-def.h"
-#include "core/seqpos.h"
 
 /**
  * \brief Construct block-encoded indexed sequence object and write
@@ -102,7 +101,7 @@ createEncIdxSeqFromSfxI(sfxInterface *si,
  */
 extern EISeq *
 createEncIdxSeqFromSA(Suffixarray *sa,
-                      Seqpos totalLen, const GtStr *projectName,
+                      unsigned long totalLen, const GtStr *projectName,
                       const struct seqBaseParam *params,
                       size_t numExtHeaders, const uint16_t *headerIDs,
                       const uint32_t *extHeaderSizes,
@@ -202,7 +201,7 @@ createEncIdxSeq(const GtStr *projectName,
  * @param err genometools reference for core functions
  */
 extern EISeq *
-loadEncIdxSeqForSA(const Suffixarray *sa, Seqpos totalLen,
+loadEncIdxSeqForSA(const Suffixarray *sa, unsigned long totalLen,
                    const GtStr *projectName,
                    enum seqBaseEncoding encType, int features, GtError *err);
 
@@ -220,7 +219,7 @@ loadEncIdxSeq(const GtStr *projectName,
               GtLogger *verbosity, GtError *err);
 
 extern EISeq *
-createEncIdxSeqGen(Seqpos totalLen, const GtStr *projectName,
+createEncIdxSeqGen(unsigned long totalLen, const GtStr *projectName,
                    MRAEnc *alphabet, const struct seqStats *stats,
                    SeqDataReader seqGenerator,
                    const struct seqBaseParam *params,

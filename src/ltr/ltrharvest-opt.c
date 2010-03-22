@@ -89,14 +89,14 @@ void showuserdefinedoptionsandvalues(const LTRharvestoptions *lo)
   printf("#   maxTSDlength: %u\n",  lo->maxlengthTSD);
   printf("#   palindromic motif: %s\n", gt_str_get(lo->motif.str_motif));
   printf("#   motifmismatchesallowed: %u\n", lo->motif.allowedmismatches);
-  printf("#   vicinity: " FormatSeqpos " nt\n",
-          PRINTSeqposcast(lo->vicinityforcorrectboundaries));
+  printf("#   vicinity: %lu nt\n",
+          lo->vicinityforcorrectboundaries);
   if (lo->repeatinfo.ltrsearchseqrange.start != 0 ||
       lo->repeatinfo.ltrsearchseqrange.end != 0)
   {
     printf("# ltrsearchseqrange=(%lu,%lu)\n",
-          PRINTSeqposcast(lo->repeatinfo.ltrsearchseqrange.start),
-          PRINTSeqposcast(lo->repeatinfo.ltrsearchseqrange.end));
+          lo->repeatinfo.ltrsearchseqrange.start,
+          lo->repeatinfo.ltrsearchseqrange.end);
   }
 }
 
@@ -465,7 +465,8 @@ static GtOPrval parse_options(int *parsed_args,
   gt_option_parser_refer_to_manual(op);
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
                                   err);
-  lo->vicinityforcorrectboundaries = (Seqpos) vicinityforcorrectboundaries;
+  lo->vicinityforcorrectboundaries =
+                                   (unsigned long) vicinityforcorrectboundaries;
   if (oprval == GT_OPTION_PARSER_OK)
   {
     if (lo->repeatinfo.lmin > lo->repeatinfo.lmax)

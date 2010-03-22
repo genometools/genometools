@@ -15,14 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/seqpos.h"
 #include "core/encodedsequence.h"
 #include "spacedef.h"
 #include "esa-lcpval.h"
 
  struct Lcpvalueiterator
 {
-  Seqpos relpos,
+  unsigned long relpos,
          lastsuftabentry;
   GtReadmode readmode;
   const GtEncodedsequence *encseq;
@@ -44,12 +43,12 @@ Lcpvalueiterator *newLcpvalueiterator(const GtEncodedsequence *encseq,
   return lvi;
 }
 
-Seqpos nextLcpvalueiterator(Lcpvalueiterator *lvi,
+unsigned long nextLcpvalueiterator(Lcpvalueiterator *lvi,
                             bool firstpage,
-                            const Seqpos *suftabptr,
-                            Seqpos numberofsuffixes)
+                            const unsigned long *suftabptr,
+                            unsigned long numberofsuffixes)
 {
-  Seqpos lcpvalue;
+  unsigned long lcpvalue;
 
   gt_assert(lvi->relpos < numberofsuffixes);
   if (firstpage && lvi->relpos == 0)
@@ -72,14 +71,14 @@ Seqpos nextLcpvalueiterator(Lcpvalueiterator *lvi,
 #ifndef NDEBUG
     if (cmp > 0)
     {
-      fprintf(stderr,"pos=" FormatSeqpos
-              ": cmp " FormatSeqpos
-              " " FormatSeqpos " = %d, lcpval=" FormatSeqpos "\n",
-              PRINTSeqposcast(lvi->relpos),
-              PRINTSeqposcast(lvi->lastsuftabentry),
-              PRINTSeqposcast(suftabptr[lvi->relpos]),
+      fprintf(stderr,"pos=%lu"
+              ": cmp %lu"
+              " %lu = %d, lcpval=%lu\n",
+              lvi->relpos,
+              lvi->lastsuftabentry,
+              suftabptr[lvi->relpos],
               cmp,
-              PRINTSeqposcast(lcpvalue));
+              lcpvalue);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
 #endif

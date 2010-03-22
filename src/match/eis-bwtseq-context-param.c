@@ -27,6 +27,6 @@ registerCtxMapOptions(GtOptionParser *op, int *ilogOut)
     "rank\n-1 => chooses default of log(log(sequence length))\n"
     "-2 => generates no map",
     ilogOut, CTX_MAP_ILOG_NOMAP, CTX_MAP_ILOG_AUTOSIZE,
-    sizeof (Seqpos) * CHAR_BIT - 1);
+    sizeof (unsigned long) * CHAR_BIT - 1);
   gt_option_parser_add_option(op, option);
 }

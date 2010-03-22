@@ -21,7 +21,7 @@
 #include "core/error.h"
 #include "core/minmax.h"
 #include "intcode-def.h"
-#include "core/seqpos.h"
+
 #include "core/logger.h"
 #include "bcktab.h"
 #include "initbasepower.h"
@@ -47,7 +47,7 @@
 #define MAXVALUEWITHBITS(BITNUM)    ((1U << (BITNUM)) - 1)
 
 static unsigned int prefixlengthwithmaxspace(unsigned int numofchars,
-                                             Seqpos maxbytes,
+                                             unsigned long maxbytes,
                                              double factor)
 {
   unsigned int prefixlength;
@@ -77,7 +77,7 @@ static unsigned int prefixlengthwithmaxspace(unsigned int numofchars,
 }
 
 unsigned int recommendedprefixlength(unsigned int numofchars,
-                                     Seqpos totallength)
+                                     unsigned long totallength)
 {
   unsigned int prefixlength;
 
@@ -100,7 +100,7 @@ unsigned int recommendedprefixlength(unsigned int numofchars,
 }
 
 unsigned int whatisthemaximalprefixlength(unsigned int numofchars,
-                                          Seqpos totallength,
+                                          unsigned long totallength,
                                           unsigned int prefixlenbits)
 {
   unsigned int maxprefixlen, mbp;
@@ -114,7 +114,7 @@ unsigned int whatisthemaximalprefixlength(unsigned int numofchars,
     unsigned int tmplength;
     tmplength
       = prefixlengthwithmaxspace(numofchars,
-                                 (Seqpos)
+                                 (unsigned long)
                                  MAXREMAININGAFTERPREFIXLEN(prefixlenbits),
                                  RECOMMENDEDMULTIPLIER);
     if (tmplength > 0 && maxprefixlen > tmplength)

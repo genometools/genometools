@@ -6,9 +6,9 @@ int outprjfile(const GtStr *indexname,
                const GtEncodedsequence *encseq,
                unsigned int prefixlength,
                const Definedunsignedint *maxdepth,
-               Seqpos numoflargelcpvalues,
-               Seqpos maxbranchdepth,
-               const DefinedSeqpos *longest,
+               unsigned long numoflargelcpvalues,
+               unsigned long maxbranchdepth,
+               const Definedunsignedlong *longest,
                GtError *err);
 
 #ifdef __cplusplus

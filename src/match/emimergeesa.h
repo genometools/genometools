@@ -18,7 +18,6 @@
 #ifndef EMIMERGEESA_H
 #define EMIMERGEESA_H
 
-#include "core/seqpos.h"
 #include "sarr-def.h"
 #include "merger-trie.h"
 
@@ -29,14 +28,14 @@
 typedef struct
 {
   unsigned int idx;  /* index of genome in list of all genomes */
-  Seqpos startpos;   /* in the range [0..totallength single index] */
+  unsigned long startpos;   /* in the range [0..totallength single index] */
 } Indexedsuffix;
 
 typedef struct
 {
   unsigned int nextaccessidx,  /* in the range [0..SIZEOFMERGERESULTBUFFER] */
                nextstoreidx;   /* in the range [0..SIZEOFMERGERESULTBUFFER] */
-  Seqpos lcptabstore[SIZEOFMERGERESULTBUFFER];
+  unsigned long lcptabstore[SIZEOFMERGERESULTBUFFER];
   Indexedsuffix suftabstore[SIZEOFMERGERESULTBUFFER];
   bool lastpage;
 } Suflcpbuffer;
@@ -46,7 +45,7 @@ typedef struct
   uint64_t ident;              /* can be arbitrary large */
   unsigned int numofentries,   /* in the range [0..numofindexes-1] */
                numofindexes;   /* number of indexes */
-  Seqpos *nextpostable;        /* in the range [0..totallength single index] */
+  unsigned long *nextpostable; /* in the range [0..totallength single index] */
   Suflcpbuffer buf;
   Mergertrierep trierep;
   Suffixarray *suffixarraytable;

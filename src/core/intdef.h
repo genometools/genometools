@@ -19,6 +19,7 @@
 #define INTDEF_H
 #include <inttypes.h>
 
-typedef uint16_t GtUshort;        /* \Typedef{Ushort} */
+typedef uint16_t      GtUshort;
+typedef unsigned long GtUlong;
 
 #endif

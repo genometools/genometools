@@ -26,7 +26,7 @@
 #include "core/qsort_r.h"
 #include "core/hashmap-generic.h"
 #include "core/minmax.h"
-#include "core/seqpos.h"
+
 #include "core/encodedsequence.h"
 #include "core/intbits.h"
 #include "bcktab.h"
@@ -42,19 +42,19 @@
 typedef struct
 {
   unsigned int unitsnotspecial;
-  Seqpos rank,
+  unsigned long rank,
          suffixstart;
 } Itvfullentry;
 
 typedef struct
 {
-  Seqpos key,
+  unsigned long key,
          suffixstart;
 } Itventry;
 
 typedef struct
 {
-  Seqpos left,
+  unsigned long left,
          right,
          base;
 } Pairsuffixptrwithbase;
@@ -65,7 +65,7 @@ typedef Pairsuffixptrwithbase Inl_Queueelem;
 
 typedef struct
 {
-  Seqpos left,
+  unsigned long left,
          right;
 } Pairsuffixptr;
 
@@ -73,7 +73,7 @@ GT_DECLAREARRAYSTRUCT(Pairsuffixptr);
 
 typedef struct
 {
-  Seqpos left,
+  unsigned long left,
          right,
          depth;
   unsigned long count,
@@ -85,7 +85,7 @@ typedef struct
 typedef struct
 {
   int mmapfiledesc;
-  Seqpos *sortspace,
+  unsigned long *sortspace,
          *mappedsection,
          currentindex,
          mapableentries,
@@ -98,7 +98,7 @@ typedef struct
 #ifdef Lowerboundwithrank
 typedef struct
 {
-  Seqpos lowerbound,
+  unsigned long lowerbound,
          rank;
 } Lowerboundwithrank;
 #endif
@@ -106,7 +106,7 @@ typedef struct
 typedef struct
 {
   Compressedtable *offset;
-  Seqpos maxvalue;
+  unsigned long maxvalue;
   GtHashtable *hashstore;
 #ifdef ITVDEBUG
   Bitsequence *is_inversesuftab_set;
@@ -120,7 +120,7 @@ struct Rmnsufinfo
   Inversesuftab_rel itvrel;
   Sortblock sortblock;
   Inl_Queue *rangestobesorted;
-  Seqpos currentdepth;
+  unsigned long currentdepth;
   const Bcktab *bcktab;
   Codetype maxcode;
   unsigned long allocateditvinfo,
@@ -133,29 +133,29 @@ struct Rmnsufinfo
                 firstgenerationcount;
   Firstwithnewdepth firstwithnewdepth;
   GtEncodedsequenceScanstate *esr;
-  Seqpos longestrel;
+  unsigned long longestrel;
   unsigned int prefixlength,
                numofchars;
   /* XXX the following is only used for parts > 0 && maxdepth */
   unsigned long overallspecials;
-  Seqpos realspecialranges;
+  unsigned long realspecialranges;
   Codetype *filltable;
 #ifdef Lowerboundwithrank
   Lowerboundwithrank *lowerboundwithrank;
 #endif
   /* the following are used to compute lcp-values in linear time */
-  Seqpos partwidth,
+  unsigned long partwidth,
          totallength;
   GtReadmode readmode;
   const GtEncodedsequence *encseq;
   const Codetype **multimappower;
-  Seqpos *sortedsuffixes;
+  unsigned long *sortedsuffixes;
 };
 
 static void initsortblock(Sortblock *sortblock,
-                          Seqpos *presortedsuffixes,
+                          unsigned long *presortedsuffixes,
                           int mmapfiledesc,
-                          Seqpos partwidth)
+                          unsigned long partwidth)
 {
   sortblock->mmapfiledesc = mmapfiledesc;
   if (presortedsuffixes != NULL)
@@ -183,7 +183,7 @@ static Lowerboundwithrank *filllowerboundwithrank(
   {
     Specialrangeiterator *sri;
     GtSequencerange range;
-    Seqpos currentrank = 0, realspecialranges;
+    unsigned long currentrank = 0, realspecialranges;
     Lowerboundwithrank *lowerboundwithrank, *lbptr;
 
     realspecialranges = getencseqrealspecialranges(encseq);
@@ -210,9 +210,9 @@ static Lowerboundwithrank *filllowerboundwithrank(
   return NULL;
 }
 
-static Seqpos frompos2rank(const Lowerboundwithrank *leftptr,
+static unsigned long frompos2rank(const Lowerboundwithrank *leftptr,
                            const Lowerboundwithrank *rightptr,
-                           Seqpos specialpos)
+                           unsigned long specialpos)
 {
   const Lowerboundwithrank *midptr;
 
@@ -246,29 +246,29 @@ static Seqpos frompos2rank(const Lowerboundwithrank *leftptr,
 extern uint32_t
 gt_ht_seqpos_elem_hash(const void *elem)
 {
-#ifdef Seqposequalsunsignedint
-  return gt_uint32_key_mul_hash((uint32_t) *((Seqpos *) elem));
+#ifndef _LP64
+  return gt_uint32_key_mul_hash((uint32_t) *((unsigned long *) elem));
 #else
-  return gt_uint64_key_mul_hash((uint64_t) *((Seqpos *) elem));
+  return gt_uint64_key_mul_hash((uint64_t) *((unsigned long *) elem));
 #endif
 }
 
-static inline int gt_ht_seqpos_cmp(Seqpos a, Seqpos b)
+static inline int gt_ht_seqpos_cmp(unsigned long a, unsigned long b)
 {
   return (int) (a > b) - (int) (a < b);
 }
 
 static inline int gt_ht_seqpos_elem_cmp(const void *elemA, const void *elemB)
 {
-  return gt_ht_seqpos_cmp(*(Seqpos *)elemA, *(Seqpos *)elemB);
+  return gt_ht_seqpos_cmp(*(unsigned long *)elemA, *(unsigned long *)elemB);
 }
 
-DECLARE_HASHMAP(Seqpos, seqpos, unsigned long, ul, static, inline)
-DEFINE_HASHMAP(Seqpos, seqpos, unsigned long, ul, gt_ht_seqpos_elem_hash,
+DECLARE_HASHMAP(unsigned long, seqpos, unsigned long, ul, static, inline)
+DEFINE_HASHMAP(unsigned long, seqpos, unsigned long, ul, gt_ht_seqpos_elem_hash,
                gt_ht_seqpos_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR,
                static, inline)
 
-Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
+Rmnsufinfo *newRmnsufinfo(unsigned long *presortedsuffixes,
                           int mmapfiledesc,
                           const GtEncodedsequence *encseq,
                           Bcktab *bcktab,
@@ -276,7 +276,7 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                           unsigned int numofchars,
                           unsigned int prefixlength,
                           GtReadmode readmode,
-                          Seqpos partwidth,
+                          unsigned long partwidth,
                           bool hashexceptions,
                           bool absoluteinversesuftab)
 {
@@ -341,7 +341,8 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
       printf("logofremaining=%hu\n",logofremaining);
     } else
     {
-      rmnsufinfo->itvrel.maxvalue = (Seqpos) rmnsufinfo->allocateditvinfo;
+      rmnsufinfo->itvrel.maxvalue
+                                 = (unsigned long) rmnsufinfo->allocateditvinfo;
       rmnsufinfo->itvrel.offset
         = compressedtable_new(rmnsufinfo->totallength+1,
                               rmnsufinfo->itvrel.maxvalue);
@@ -375,13 +376,13 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   return rmnsufinfo;
 }
 
-static Seqpos nextsuftabentry_get(Sortblock *sortblock)
+static unsigned long nextsuftabentry_get(Sortblock *sortblock)
 {
-  Seqpos value;
+  unsigned long value;
 
   if (sortblock->currentindex == sortblock->pageoffset + sortblock->pagesize)
   {
-    Seqpos entries2map;
+    unsigned long entries2map;
 
     gt_assert(sortblock->mapableentries > sortblock->pageoffset);
     if (sortblock->mappedsection != NULL)
@@ -391,7 +392,7 @@ static Seqpos nextsuftabentry_get(Sortblock *sortblock)
       sortblock->mappedsection = NULL;
     } else
     {
-      sortblock->pagesize = (Seqpos) PAGESIZE;
+      sortblock->pagesize = (unsigned long) PAGESIZE;
     }
     if (sortblock->pageoffset + sortblock->pagesize <=
         sortblock->mapableentries)
@@ -407,9 +408,9 @@ static Seqpos nextsuftabentry_get(Sortblock *sortblock)
     gt_assert(!SUFINMEM(sortblock));
     sortblock->mappedsection
       = gt_fa_mmap_generic_fd_func(sortblock->mmapfiledesc,
-                                   entries2map * sizeof (Seqpos),
-                                   sortblock->pageoffset * sizeof (Seqpos),
-                                   false,false,__FILE__,__LINE__,NULL);
+                        (size_t) entries2map * sizeof (unsigned long),
+                        (size_t) sortblock->pageoffset * sizeof (unsigned long),
+                        false,false,__FILE__,__LINE__,NULL);
     gt_assert(sortblock->mappedsection != NULL);
   }
   value = sortblock->mappedsection[sortblock->currentindex -
@@ -418,12 +419,14 @@ static Seqpos nextsuftabentry_get(Sortblock *sortblock)
   return value;
 }
 
-static void inversesuftab_set(Rmnsufinfo *rmnsufinfo,Seqpos idx,Seqpos value)
+static void inversesuftab_set(Rmnsufinfo *rmnsufinfo,
+                              unsigned long idx,
+                              unsigned long value)
 {
   compressedtable_update(rmnsufinfo->inversesuftab,idx,value);
 }
 
-static unsigned long largebasedist_get(GtHashtable *htab, Seqpos key)
+static unsigned long largebasedist_get(GtHashtable *htab, unsigned long key)
 {
   unsigned long *valueptr;
 
@@ -433,7 +436,7 @@ static unsigned long largebasedist_get(GtHashtable *htab, Seqpos key)
   return *valueptr;
 }
 
-static void largebasedist_add(GtHashtable *htab, Seqpos key,
+static void largebasedist_add(GtHashtable *htab, unsigned long key,
                               unsigned long basedist)
 {
   unsigned long *valueptr;
@@ -449,10 +452,10 @@ static void largebasedist_add(GtHashtable *htab, Seqpos key,
   }
 }
 
-static void inversesuftabrel_set(Rmnsufinfo *rmnsufinfo,Seqpos idx,
-                                 Seqpos value,Seqpos base)
+static void inversesuftabrel_set(Rmnsufinfo *rmnsufinfo,unsigned long idx,
+                                 unsigned long value,unsigned long base)
 {
-  Seqpos basedist = (Seqpos) (value-base);
+  unsigned long basedist = (unsigned long) (value-base);
 
 #ifndef NDEBUG
   if (value < base)
@@ -471,7 +474,7 @@ static void inversesuftabrel_set(Rmnsufinfo *rmnsufinfo,Seqpos idx,
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 #endif
-  basedist = (Seqpos) (value-base);
+  basedist = (unsigned long) (value-base);
   if (rmnsufinfo->itvrel.hashstore != NULL)
   {
 
@@ -500,9 +503,9 @@ static void inversesuftabrel_set(Rmnsufinfo *rmnsufinfo,Seqpos idx,
 }
 
 #ifdef Lowerboundwithrank
-static Seqpos frompos2rank(const Lowerboundwithrank *leftptr,
+static unsigned long frompos2rank(const Lowerboundwithrank *leftptr,
                            const Lowerboundwithrank *rightptr,
-                           Seqpos specialpos)
+                           unsigned long specialpos)
 {
   const Lowerboundwithrank *midptr;
 
@@ -532,7 +535,8 @@ static Seqpos frompos2rank(const Lowerboundwithrank *leftptr,
 }
 #endif
 
-static Seqpos inversesuftab_get(const Rmnsufinfo *rmnsufinfo,Seqpos startpos)
+static unsigned long inversesuftab_get(const Rmnsufinfo *rmnsufinfo,
+                                       unsigned long startpos)
 {
   gt_assert(startpos <= rmnsufinfo->totallength);
   if (startpos == rmnsufinfo->totallength)
@@ -546,7 +550,7 @@ static Seqpos inversesuftab_get(const Rmnsufinfo *rmnsufinfo,Seqpos startpos)
 
 static void inversesuftabrel_get(Itvfullentry *itvfullentry,
                                  const Rmnsufinfo *rmnsufinfo,
-                                 Seqpos startpos)
+                                 unsigned long startpos)
 {
   Codetype code;
   Bucketspecification bucketspec;
@@ -603,7 +607,8 @@ static void inversesuftabrel_get(Itvfullentry *itvfullentry,
         {
           itvfullentry->rank
             = bucketspec.left +
-              (Seqpos) largebasedist_get(rmnsufinfo->itvrel.hashstore,startpos);
+              (unsigned long) largebasedist_get(rmnsufinfo->itvrel.hashstore,
+                                                startpos);
         }
       } else
       {
@@ -619,7 +624,7 @@ static void inversesuftabrel_get(Itvfullentry *itvfullentry,
 
 static void initinversesuftabspecials(Rmnsufinfo *rmnsufinfo)
 {
-  Seqpos idx;
+  unsigned long idx;
 
   rmnsufinfo->inversesuftab = compressedtable_new(rmnsufinfo->totallength+1,
                                                   rmnsufinfo->totallength);
@@ -628,7 +633,7 @@ static void initinversesuftabspecials(Rmnsufinfo *rmnsufinfo)
   {
     Specialrangeiterator *sri;
     GtSequencerange range;
-    Seqpos specialidx;
+    unsigned long specialidx;
 
     sri = newspecialrangeiterator(rmnsufinfo->encseq,
                                   GT_ISDIRREVERSE(rmnsufinfo->readmode)
@@ -648,7 +653,7 @@ static void initinversesuftabspecials(Rmnsufinfo *rmnsufinfo)
 }
 
 static void updatewidth (Rmnsufinfo *rmnsufinfo,unsigned long width,
-                         Seqpos depth)
+                         unsigned long depth)
 {
   if (width > 1UL)
   {
@@ -673,7 +678,7 @@ static void initinversesuftabnonspecialsadjust(Rmnsufinfo *rmnsufinfo)
   Codetype code;
   unsigned int rightchar;
   Bucketspecification bucketspec;
-  Seqpos idx, startpos;
+  unsigned long idx, startpos;
   const Codetype mincode = 0;
 
   gt_assert(SUFINMEM(&rmnsufinfo->sortblock));
@@ -694,7 +699,7 @@ static void initinversesuftabnonspecialsadjust(Rmnsufinfo *rmnsufinfo)
       inversesuftab_set(rmnsufinfo,startpos,idx);
     }
     updatewidth (rmnsufinfo,bucketspec.nonspecialsinbucket,
-                 (Seqpos) rmnsufinfo->prefixlength);
+                 (unsigned long) rmnsufinfo->prefixlength);
     for (/* Nothing */;
          idx < bucketspec.left+bucketspec.nonspecialsinbucket; idx++)
     {
@@ -714,7 +719,7 @@ static void initinversesuftabnonspecialsadjuststream(Rmnsufinfo *rmnsufinfo)
   Codetype code;
   unsigned int rightchar;
   Bucketspecification bucketspec;
-  Seqpos idx, startpos;
+  unsigned long idx, startpos;
   const Codetype mincode = 0;
 
   gt_assert(!SUFINMEM(&rmnsufinfo->sortblock));
@@ -741,7 +746,7 @@ static void initinversesuftabnonspecialsadjuststream(Rmnsufinfo *rmnsufinfo)
       }
     }
     updatewidth (rmnsufinfo,bucketspec.nonspecialsinbucket,
-                 (Seqpos) rmnsufinfo->prefixlength);
+                 (unsigned long) rmnsufinfo->prefixlength);
     for (/* Nothing */;
          idx < bucketspec.left+bucketspec.nonspecialsinbucket; idx++)
     {
@@ -772,7 +777,7 @@ static void initinversesuftabnonspecialsadjuststream(Rmnsufinfo *rmnsufinfo)
 
 static void initinversesuftabnonspecials(Rmnsufinfo *rmnsufinfo)
 {
-  Seqpos idx;
+  unsigned long idx;
 
   for (idx=0; idx < rmnsufinfo->partwidth; idx++)
   {
@@ -781,7 +786,9 @@ static void initinversesuftabnonspecials(Rmnsufinfo *rmnsufinfo)
 }
 
 void rmnsufinfo_addunsortedrange(Rmnsufinfo *rmnsufinfo,
-                                 Seqpos left, Seqpos right, Seqpos depth)
+                                 unsigned long left,
+                                 unsigned long right,
+                                 unsigned long depth)
 {
   Pairsuffixptr *ptr;
 
@@ -833,7 +840,7 @@ static int compareitv(const void *a,const void *b)
 }
 
 static void showintervalsizes(unsigned long count,unsigned long totalwidth,
-                              Seqpos totallength,unsigned long maxwidth)
+                              unsigned long totallength,unsigned long maxwidth)
 {
   printf("%lu\n(total=%lu,avg=%.2f,%.2f%% of all, maxwidth=%lu)\n",
           count,
@@ -844,8 +851,8 @@ static void showintervalsizes(unsigned long count,unsigned long totalwidth,
 }
 
 static void processunsortedrange(Rmnsufinfo *rmnsufinfo,
-                                 Seqpos left,Seqpos right,
-                                 Seqpos base,Seqpos depth)
+                                 unsigned long left,unsigned long right,
+                                 unsigned long base,unsigned long depth)
 {
   Pairsuffixptrwithbase pairptrwithbase;
   unsigned long width;
@@ -868,8 +875,8 @@ static void processunsortedrange(Rmnsufinfo *rmnsufinfo,
   {
     if (rmnsufinfo->firstwithnewdepth.defined)
     {
-      printf("intervals in level " FormatSeqpos "=",
-             PRINTSeqposcast(rmnsufinfo->firstwithnewdepth.depth));
+      printf("intervals in level %lu=",
+             rmnsufinfo->firstwithnewdepth.depth);
       showintervalsizes(rmnsufinfo->firstwithnewdepth.count,
                         rmnsufinfo->firstwithnewdepth.totalwidth,
                         rmnsufinfo->totallength,
@@ -878,8 +885,8 @@ static void processunsortedrange(Rmnsufinfo *rmnsufinfo,
     {
       rmnsufinfo->firstwithnewdepth.defined = true;
     }
-    printf("enter new level with depth=" FormatSeqpos "\n",
-            PRINTSeqposcast(depth));
+    printf("enter new level with depth=%lu\n",
+            depth);
     rmnsufinfo->firstwithnewdepth.left = left;
     rmnsufinfo->firstwithnewdepth.right = right;
     rmnsufinfo->firstwithnewdepth.depth = depth;
@@ -901,14 +908,14 @@ static void processunsortedrange(Rmnsufinfo *rmnsufinfo,
 /* access to suftab for qsufsort is restricted to the following two functions
  * */
 
-static void possiblychangemappedsection(Sortblock *sortblock,Seqpos left,
-                                        Seqpos right)
+static void possiblychangemappedsection(Sortblock *sortblock,unsigned long left,
+                                        unsigned long right)
 {
   if (sortblock->mappedsection == NULL ||
       right >= sortblock->pageoffset + sortblock->mappedwidth ||
       left < sortblock->pageoffset)
   {
-    Seqpos entries2map;
+    unsigned long entries2map;
 
     sortblock->pageoffset = left - (left % GT_DIV2(sortblock->mappedwidth));
 #ifndef NDEBUG
@@ -947,15 +954,16 @@ static void possiblychangemappedsection(Sortblock *sortblock,Seqpos left,
     gt_assert(!SUFINMEM(sortblock));
     sortblock->mappedsection
       = gt_fa_mmap_generic_fd_func(sortblock->mmapfiledesc,
-                                   entries2map * sizeof (Seqpos),
-                                   sortblock->pageoffset * sizeof (Seqpos),
-                                   true,false,__FILE__,__LINE__,NULL);
+                        (size_t) entries2map * sizeof (unsigned long),
+                        (size_t) sortblock->pageoffset * sizeof (unsigned long),
+                        true,false,__FILE__,__LINE__,NULL);
     gt_assert(sortblock->mappedsection != NULL);
     sortblock->pagechanges++;
   }
 }
 
-static Seqpos suftabentryfromsection_get(const Sortblock *sortblock,Seqpos idx)
+static unsigned long suftabentryfromsection_get(const Sortblock *sortblock,
+                                                unsigned long idx)
 {
   if (SUFINMEM(sortblock))
   {
@@ -966,8 +974,9 @@ static Seqpos suftabentryfromsection_get(const Sortblock *sortblock,Seqpos idx)
   return sortblock->mappedsection[idx - sortblock->pageoffset];
 }
 
-static void suftabentryfromsection_update(Sortblock *sortblock,Seqpos idx,
-                                          Seqpos value)
+static void suftabentryfromsection_update(Sortblock *sortblock,
+                                          unsigned long idx,
+                                          unsigned long value)
 {
   if (SUFINMEM(sortblock))
   {
@@ -980,9 +989,11 @@ static void suftabentryfromsection_update(Sortblock *sortblock,Seqpos idx,
   }
 }
 
-static void anchorleftmost(Rmnsufinfo *rmnsufinfo,Seqpos left,Seqpos right)
+static void anchorleftmost(Rmnsufinfo *rmnsufinfo,
+                           unsigned long left,
+                           unsigned long right)
 {
-  Seqpos idx;
+  unsigned long idx;
 
   for (idx = left; idx <= right; idx++)
   {
@@ -992,10 +1003,12 @@ static void anchorleftmost(Rmnsufinfo *rmnsufinfo,Seqpos left,Seqpos right)
   }
 }
 
-static void anchorleftmostrel(Rmnsufinfo *rmnsufinfo,Seqpos left,Seqpos right,
-                              Seqpos base)
+static void anchorleftmostrel(Rmnsufinfo *rmnsufinfo,
+                              unsigned long left,
+                              unsigned long right,
+                              unsigned long base)
 {
-  Seqpos idx;
+  unsigned long idx;
 
   for (idx = left; idx <= right; idx++)
   {
@@ -1005,11 +1018,11 @@ static void anchorleftmostrel(Rmnsufinfo *rmnsufinfo,Seqpos left,Seqpos right,
   }
 }
 
-static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos left,
-                                    Seqpos right, Seqpos base)
+static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,unsigned long left,
+                                    unsigned long right, unsigned long base)
 {
   unsigned long idx, rangestart;
-  Seqpos startpos;
+  unsigned long startpos;
   const unsigned long width = (unsigned long) (right - left + 1);
 
   gt_assert(left >= base &&
@@ -1109,7 +1122,7 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos left,
         }
       } else
       {
-        Seqpos currentsuftabentry
+        unsigned long currentsuftabentry
           = suftabentryfromsection_get(&rmnsufinfo->sortblock,left+rangestart);
         if (rmnsufinfo->absoluteinversesuftab)
         {
@@ -1144,7 +1157,7 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos left,
     }
   } else
   {
-    Seqpos currentsuftabentry
+    unsigned long currentsuftabentry
       = suftabentryfromsection_get(&rmnsufinfo->sortblock,left+rangestart);
     if (rmnsufinfo->absoluteinversesuftab)
     {
@@ -1163,8 +1176,8 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
 
   if (rmnsufinfo->firstgenerationcount > 0)
   {
-    printf("number of intervals at base level " FormatSeqpos " was ",
-            PRINTSeqposcast(rmnsufinfo->currentdepth));
+    printf("number of intervals at base level %lu was ",
+            rmnsufinfo->currentdepth);
     showintervalsizes(rmnsufinfo->firstgenerationcount,
                       rmnsufinfo->firstgenerationtotalwidth,
                       rmnsufinfo->totallength,
@@ -1251,7 +1264,7 @@ void bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo)
     {
       pagesize += PAGESIZE;
     }
-    rmnsufinfo->sortblock.mappedwidth = (Seqpos) pagesize;
+    rmnsufinfo->sortblock.mappedwidth = (unsigned long) pagesize;
     printf("mappedwidth = %lu\n",
             (unsigned long) rmnsufinfo->sortblock.mappedwidth);
   }
@@ -1275,7 +1288,7 @@ void bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo)
   }
 }
 
-Compressedtable *rmnsufinfo_wrap(Seqpos *longest,
+Compressedtable *rmnsufinfo_wrap(unsigned long *longest,
                                  Rmnsufinfo **rmnsufinfoptr,
                                  bool withlcptab)
 {
@@ -1312,10 +1325,10 @@ Compressedtable *rmnsufinfo_wrap(Seqpos *longest,
     {
       rmnsufinfo->sortedsuffixes
         = gt_fa_mmap_generic_fd_func(rmnsufinfo->sortblock.mmapfiledesc,
-                                     rmnsufinfo->sortblock.mapableentries
-                                     * sizeof (Seqpos),
-                                     0,
-                                     false,false,__FILE__,__LINE__,NULL);
+                                   (size_t) rmnsufinfo->sortblock.mapableentries
+                                     * sizeof (unsigned long),
+                                   (size_t) 0,
+                                   false,false,__FILE__,__LINE__,NULL);
     }
 #define NOINVERSESUFTAB
 #ifdef NOINVERSESUFTAB

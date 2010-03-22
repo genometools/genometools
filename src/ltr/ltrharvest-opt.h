@@ -56,7 +56,7 @@ typedef struct
   unsigned int minlengthTSD,   /* minlength of TSD, default */
                maxlengthTSD;   /* maxlength of TSD, default */
                                /* by default no search for TSDs */
-  Seqpos vicinityforcorrectboundaries; /* vicinity for search of TSD and
+  unsigned long vicinityforcorrectboundaries; /* vicinity for search of TSD and
                                           motif */
 } LTRharvestoptions;
 

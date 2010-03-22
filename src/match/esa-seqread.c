@@ -47,7 +47,7 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
     return NULL;
   }
   ssar->nextsuftabindex = 0;
-  ssar->nextlcptabindex = (Seqpos) 1;
+  ssar->nextlcptabindex = (unsigned long) 1;
   ssar->largelcpindex = 0;
   ssar->numberofsuffixes = totallength+1;
   return ssar;
@@ -63,7 +63,7 @@ void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar)
   FREESPACE(*ssar);
 }
 
-int nextSequentialsuftabvalue(Seqpos *currentsuffix,
+int nextSequentialsuftabvalue(unsigned long *currentsuffix,
                               Sequentialsuffixarrayreader *ssar,
                               GT_UNUSED GtError *err)
 {
@@ -85,7 +85,7 @@ GtReadmode readmodeSequentialsuffixarrayreader(
 
 #else
 
- DECLAREREADFUNCTION(Seqpos);
+ DECLAREREADFUNCTION(GtUlong);
 
  DECLAREREADFUNCTION(GtUchar);
 
@@ -94,13 +94,13 @@ GtReadmode readmodeSequentialsuffixarrayreader(
  struct Sequentialsuffixarrayreader
 {
   Suffixarray *suffixarray;
-  Seqpos numberofsuffixes,
+  unsigned long numberofsuffixes,
          nextsuftabindex, /* for SEQ_mappedboth | SEQ_suftabfrommemory */
          nextlcptabindex, /* for SEQ_mappedboth */
          largelcpindex;   /* SEQ_mappedboth */
   Sequentialaccesstype seqactype;
   Lcpvalueiterator *lvi;
-  const Seqpos *suftab;
+  const unsigned long *suftab;
   const GtEncodedsequence *encseq;
   GtReadmode readmode;
 };
@@ -128,7 +128,7 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
     return NULL;
   }
   ssar->nextsuftabindex = 0;
-  ssar->nextlcptabindex = (Seqpos) 1;
+  ssar->nextlcptabindex = (unsigned long) 1;
   ssar->largelcpindex = 0;
   ssar->seqactype = seqactype;
   ssar->suftab = NULL;
@@ -148,7 +148,7 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromRAM(
   ALLOCASSIGNSPACE(ssar,NULL,Sequentialsuffixarrayreader,1);
   ssar->lvi = newLcpvalueiterator(encseq,readmode);
   ssar->suffixarray = NULL;
-  ssar->nextlcptabindex = (Seqpos) 1; /* not required here */
+  ssar->nextlcptabindex = (unsigned long) 1; /* not required here */
   ssar->largelcpindex = 0; /* not required here */
   ssar->seqactype = SEQ_suftabfrommemory;
   ssar->readmode = readmode;
@@ -158,9 +158,9 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromRAM(
 
 void updateSequentialsuffixarrayreaderfromRAM(
                     Sequentialsuffixarrayreader *ssar,
-                    const Seqpos *suftab,
+                    const unsigned long *suftab,
                     bool firstpage,
-                    Seqpos numberofsuffixes)
+                    unsigned long numberofsuffixes)
 {
   ssar->nextsuftabindex = 0;
   ssar->suftab = suftab;
@@ -188,7 +188,7 @@ void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar)
   FREESPACE(*ssar);
 }
 
-int nextSequentiallcpvalue(Seqpos *currentlcp,
+int nextSequentiallcpvalue(unsigned long *currentlcp,
                            Sequentialsuffixarrayreader *ssar,
                            GtError *err)
 {
@@ -248,18 +248,18 @@ int nextSequentiallcpvalue(Seqpos *currentlcp,
       }
     } else
     {
-      *currentlcp = (Seqpos) tmpsmalllcpvalue;
+      *currentlcp = (unsigned long) tmpsmalllcpvalue;
     }
   }
   return 1;
 }
 
-int nextSequentialsuftabvalue(Seqpos *currentsuffix,
+int nextSequentialsuftabvalue(unsigned long *currentsuffix,
                               Sequentialsuffixarrayreader *ssar)
 {
   if (ssar->seqactype == SEQ_scan)
   {
-    return readnextSeqposfromstream(currentsuffix,
+    return readnextGtUlongfromstream(currentsuffix,
                                     &ssar->suffixarray->suftabstream);
   }
   if (ssar->seqactype == SEQ_mappedboth)
@@ -284,7 +284,7 @@ GtReadmode readmodeSequentialsuffixarrayreader(
 }
 #endif /* ifdef INLINEDSequentialsuffixarrayreader */
 
-const Seqpos *suftabSequentialsuffixarrayreader(
+const unsigned long *suftabSequentialsuffixarrayreader(
               const Sequentialsuffixarrayreader *ssar)
 {
   gt_assert(ssar->seqactype != SEQ_scan);

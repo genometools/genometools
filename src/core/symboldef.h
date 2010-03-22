@@ -21,5 +21,6 @@
 #include <inttypes.h>
 
 typedef uint8_t GtUchar;
+typedef char    GtChar;
 
 #endif

@@ -27,7 +27,7 @@
 #include "core/filelengthvalues.h"
 #include "core/disc_distri.h"
 #include "core/encodedsequence_api.h"
-#include "core/seqpos.h"
+
 #include "match/intcode-def.h"
 #include "core/intbits.h"
 #include "core/readmode.h"
@@ -54,7 +54,7 @@
 
 typedef struct
 {
-  Seqpos leftpos,
+  unsigned long leftpos,
          rightpos;
 } GtSequencerange;          /* \Typedef{Sequencerange} */
 
@@ -62,7 +62,7 @@ typedef struct
 {
   Twobitencoding tbe;           /* two bit encoding */
   unsigned int unitsnotspecial; /* units which are not special */
-  Seqpos position;
+  unsigned long position;
 } EndofTwobitencoding;
 
 typedef struct Specialrangeiterator Specialrangeiterator;
@@ -71,13 +71,13 @@ void extract2bitenc(bool fwd,
                     EndofTwobitencoding *ptbe,
                     const GtEncodedsequence *encseq,
                     GtEncodedsequenceScanstate *esr,
-                    Seqpos startpos);
+                    unsigned long startpos);
 
 typedef struct
 {
   unsigned int common;
   bool leftspecial, rightspecial;
-  Seqpos finaldepth;
+  unsigned long finaldepth;
 } GtCommonunits;
 
 int compareTwobitencodings(bool fwd,
@@ -87,16 +87,16 @@ int compareTwobitencodings(bool fwd,
                            const EndofTwobitencoding *ptbe2);
 
 uint64_t detencseqofsatviatables(int kind,
-                                 Seqpos totallength,
+                                 unsigned long totallength,
                                  unsigned long numofdbfiles,
                                  unsigned long lengthofdbfilenames,
-                                 Seqpos specialranges,
+                                 unsigned long specialranges,
                                  unsigned int numofchars);
 
 void plainseq2bytecode(GtUchar *bytecode,const GtUchar *seq,unsigned long len);
 
 void sequence2bytecode(GtUchar *dest,const GtEncodedsequence *encseq,
-                       Seqpos startindex,Seqpos len);
+                       unsigned long startindex,unsigned long len);
 
 int flushencseqfile(const GtStr *indexname,GtEncodedsequence *encseq,GtError*);
 
@@ -104,7 +104,7 @@ void checkallsequencedescriptions(const GtEncodedsequence *encseq);
 
 GtEncodedsequence *plain2encodedsequence(bool withrange,
                                          const GtUchar *seq1,
-                                         Seqpos len1,
+                                         unsigned long len1,
                                          const GtUchar *seq2,
                                          unsigned long len2,
                                          const GtAlphabet *alpha,
@@ -131,7 +131,7 @@ Codetype extractprefixcode(unsigned int *unitsnotspecial,
                            GtReadmode readmode,
                            GtEncodedsequenceScanstate *esr,
                            const Codetype **multimappower,
-                           Seqpos frompos,
+                           unsigned long frompos,
                            unsigned int prefixlength);
 
 int comparewithonespecial(bool *leftspecial,
@@ -139,10 +139,10 @@ int comparewithonespecial(bool *leftspecial,
                           const GtEncodedsequence *encseq,
                           bool fwd,
                           bool complement,
-                          Seqpos pos1,
-                          Seqpos pos2,
-                          Seqpos depth,
-                          Seqpos maxdepth);
+                          unsigned long pos1,
+                          unsigned long pos2,
+                          unsigned long depth,
+                          unsigned long maxdepth);
 
 int compareEncseqsequences(GtCommonunits *commonunits,
                            const GtEncodedsequence *encseq,
@@ -150,9 +150,9 @@ int compareEncseqsequences(GtCommonunits *commonunits,
                            bool complement,
                            GtEncodedsequenceScanstate *esr1,
                            GtEncodedsequenceScanstate *esr2,
-                           Seqpos pos1,
-                           Seqpos pos2,
-                           Seqpos depth);
+                           unsigned long pos1,
+                           unsigned long pos2,
+                           unsigned long depth);
 
 int compareEncseqsequencesmaxdepth(GtCommonunits *commonunits,
                                    const GtEncodedsequence *encseq,
@@ -160,10 +160,10 @@ int compareEncseqsequencesmaxdepth(GtCommonunits *commonunits,
                                    bool complement,
                                    GtEncodedsequenceScanstate *esr1,
                                    GtEncodedsequenceScanstate *esr2,
-                                   Seqpos pos1,
-                                   Seqpos pos2,
-                                   Seqpos depth,
-                                   Seqpos maxdepth);
+                                   unsigned long pos1,
+                                   unsigned long pos2,
+                                   unsigned long depth,
+                                   unsigned long maxdepth);
 
 /* some check functions called in test-encseq.c */
 
@@ -171,9 +171,9 @@ int multicharactercompare(const GtEncodedsequence *encseq,
                           bool fwd,
                           bool complement,
                           GtEncodedsequenceScanstate *esr1,
-                          Seqpos pos1,
+                          unsigned long pos1,
                           GtEncodedsequenceScanstate *esr2,
-                          Seqpos pos2);
+                          unsigned long pos2);
 
 void checkextractunitatpos(const GtEncodedsequence *encseq,
                            bool fwd,bool complement);
@@ -184,21 +184,21 @@ void multicharactercompare_withtest(const GtEncodedsequence *encseq,
                                     bool fwd,
                                     bool complement,
                                     GtEncodedsequenceScanstate *esr1,
-                                    Seqpos pos1,
+                                    unsigned long pos1,
                                     GtEncodedsequenceScanstate *esr2,
-                                    Seqpos pos2);
+                                    unsigned long pos2);
 
 void showsequenceatstartpos(FILE *fp,
                             bool fwd,
                             bool complement,
                             const GtEncodedsequence *encseq,
-                            Seqpos startpos);
+                            unsigned long startpos);
 
 bool containsspecial(const GtEncodedsequence *encseq,
                      bool moveforward,
                      GtEncodedsequenceScanstate *esrspace,
-                     Seqpos startpos,
-                     Seqpos len);
+                     unsigned long startpos,
+                     unsigned long len);
 
 int getsatforcevalue(const char *str,GtError *err);
 
@@ -209,35 +209,35 @@ void checkmarkpos(const GtEncodedsequence *encseq);
 /* for a array of recordseparator, obtain the sequence
  * number from the given position */
 
-unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
+unsigned long getrecordnumSeqpos(const unsigned long *recordseps,
                                  unsigned long numofrecords,
-                                 Seqpos totalwidth,
-                                 Seqpos position);
+                                 unsigned long totalwidth,
+                                 unsigned long position);
 
 /* for a given GtEncodedsequence mapped with withssptab=true, obtain the
  * sequence number from the given position */
 
 unsigned long getencseqfrompos2seqnum(const GtEncodedsequence *encseq,
-                                      Seqpos position);
+                                      unsigned long position);
 
 /* here are some functions to extract the different components of the
  * specialcharinfo included in encseq */
 
-Seqpos getencseqspecialcharacters(const GtEncodedsequence *encseq);
+unsigned long getencseqspecialcharacters(const GtEncodedsequence *encseq);
 
-Seqpos getencseqspecialranges(const GtEncodedsequence *encseq);
+unsigned long getencseqspecialranges(const GtEncodedsequence *encseq);
 
-Seqpos getencseqrealspecialranges(const GtEncodedsequence *encseq);
+unsigned long getencseqrealspecialranges(const GtEncodedsequence *encseq);
 
-Seqpos getencseqlengthofspecialprefix(const GtEncodedsequence *encseq);
+unsigned long getencseqlengthofspecialprefix(const GtEncodedsequence *encseq);
 
-Seqpos getencseqlengthofspecialsuffix(const GtEncodedsequence *encseq);
+unsigned long getencseqlengthofspecialsuffix(const GtEncodedsequence *encseq);
 
 /* In case an GtEncodedsequence is not mapped, we still need to obtain the
    Specialcharainfo. This is done by the following function */
 
-int readSpecialcharinfo(Specialcharinfo *specialcharinfo,
-                        const GtStr *indexname,GtError *err);
+int readGtSpecialcharinfo(GtSpecialcharinfo *specialcharinfo,
+                          const GtStr *indexname,GtError *err);
 
 /* some functions to obtain some components from the Alphabet pointed to
    by encseq->alpha */
@@ -278,30 +278,30 @@ FILE *openssptabfile(const GtStr *indexname,const char *mode,GtError *err);
 
 int comparetwosuffixes(const GtEncodedsequence *encseq,
                        GtReadmode readmode,
-                       Seqpos *maxlcp,
+                       unsigned long *maxlcp,
                        bool specialsareequal,
                        bool specialsareequalatdepth0,
-                       Seqpos maxdepth,
-                       Seqpos start1,
-                       Seqpos start2,
+                       unsigned long maxdepth,
+                       unsigned long start1,
+                       unsigned long start2,
                        GtEncodedsequenceScanstate *esr1,
                        GtEncodedsequenceScanstate *esr2);
 
 int comparetwostrings(const GtEncodedsequence *encseq,
                       bool fwd,
                       bool complement,
-                      Seqpos *maxcommon,
-                      Seqpos pos1,
-                      Seqpos pos2,
-                      Seqpos maxdepth);
+                      unsigned long *maxcommon,
+                      unsigned long pos1,
+                      unsigned long pos2,
+                      unsigned long maxdepth);
 
 int comparetwostringsgeneric(const GtEncodedsequence *encseq,
                              bool fwd,
                              bool complement,
-                             Seqpos *maxcommon,
-                             Seqpos pos1,
-                             Seqpos pos2,
-                             Seqpos depth,
-                             Seqpos maxdepth);
+                             unsigned long *maxcommon,
+                             unsigned long pos1,
+                             unsigned long pos2,
+                             unsigned long depth,
+                             unsigned long maxdepth);
 
 #endif

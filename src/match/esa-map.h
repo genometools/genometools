@@ -18,7 +18,7 @@
 #ifndef ESA_MAP_H
 #define ESA_MAP_H
 #include "sarr-def.h"
-#include "core/seqpos.h"
+
 #include "core/logger.h"
 
 void freesuffixarray(Suffixarray *suffixarray);

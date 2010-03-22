@@ -56,7 +56,7 @@ typedef struct
 
 static GtUchar getfirstedgechar(const Mergertrierep *trierep,
                               const Mergertrienode *node,
-                              Seqpos prevdepth)
+                              unsigned long prevdepth)
 {
   Encseqreadinfo *eri = trierep->encseqreadinfo + node->suffixinfo.idx;
 
@@ -120,7 +120,7 @@ static void showmergertrie2(const Mergertrierep *trierep,
                             const Mergertrienode *node)
 {
   GtUchar cc = 0;
-  Seqpos pos, endpos;
+  unsigned long pos, endpos;
   Mergertrienode *current;
 
   for (current = node->firstchild;
@@ -195,7 +195,7 @@ static void checkmergertrie2(Mergertrierep *trierep,
 
   if (ISLEAF(node))
   {
-    Seqpos start = node->suffixinfo.startpos;
+    unsigned long start = node->suffixinfo.startpos;
 #ifndef NDEBUG
     if (ISIBITSET(leafused,start))
     {
@@ -392,7 +392,7 @@ static void makesuccs(Mergertrienode *newbranch,Mergertrienode *first,
 
 static Mergertrienode *makenewbranch(Mergertrierep *trierep,
                                      Suffixinfo *suffixinfo,
-                                     Seqpos currentdepth,
+                                     unsigned long currentdepth,
                                      Mergertrienode *oldnode)
 {
   Mergertrienode *newbranch, *newleaf;
@@ -432,12 +432,14 @@ static Mergertrienode *makenewbranch(Mergertrierep *trierep,
   return newbranch;
 }
 
-static Seqpos getlcp(const GtEncodedsequence *encseq1,GtReadmode readmode1,
-                     Seqpos start1,Seqpos end1,
-                     const GtEncodedsequence *encseq2,GtReadmode readmode2,
-                     Seqpos start2,Seqpos end2)
+static unsigned long getlcp(const GtEncodedsequence *encseq1,
+                            GtReadmode readmode1,
+                            unsigned long start1, unsigned long end1,
+                            const GtEncodedsequence *encseq2,
+                            GtReadmode readmode2,
+                            unsigned long start2, unsigned long end2)
 {
-  Seqpos i1, i2;
+  unsigned long i1, i2;
   GtUchar cc1;
 
   for (i1=start1, i2=start2; i1 <= end1 && i2 <= end2; i1++, i2++)
@@ -454,7 +456,7 @@ static Seqpos getlcp(const GtEncodedsequence *encseq1,GtReadmode readmode1,
 
 static bool hassuccessor(const Mergertrierep *trierep,
                          Nodepair *np,
-                         Seqpos prevdepth,
+                         unsigned long prevdepth,
                          const Mergertrienode *node,
                          GtUchar cc2,
                          unsigned int idx2)
@@ -490,7 +492,7 @@ void mergertrie_insertsuffix(Mergertrierep *trierep,
     trierep->root = makeroot(trierep,suffixinfo);
   } else
   {
-    Seqpos currentdepth, lcpvalue, totallength;
+    unsigned long currentdepth, lcpvalue, totallength;
     Mergertrienode *currentnode, *newleaf, *newbranch, *succ;
     Nodepair np;
     GtUchar cc;
@@ -643,7 +645,8 @@ void mergertrie_deletesmallestpath(Mergertrienode *smallest,
   }
 }
 
-void mergertrie_initnodetable(Mergertrierep *trierep,Seqpos numofsuffixes,
+void mergertrie_initnodetable(Mergertrierep *trierep,
+                              unsigned long numofsuffixes,
                               unsigned int numofindexes)
 {
   trierep->numofindexes = numofindexes;

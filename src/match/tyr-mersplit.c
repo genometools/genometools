@@ -22,7 +22,7 @@
 #include "core/minmax.h"
 #include "core/symboldef.h"
 #include "core/fa.h"
-#include "defined-types.h"
+#include "core/defined-types.h"
 #include "core/intbits.h"
 #include "spacedef.h"
 #include "tyr-map.h"

@@ -18,7 +18,7 @@
 #include "core/chardef.h"
 #include "core/divmodmul.h"
 #include "core/symboldef.h"
-#include "core/seqpos.h"
+
 #include "esa-splititv.h"
 
 #define SEQUENCE(ENCSEQ,POS) (((POS) == totallength) \
@@ -27,16 +27,16 @@
                                                                  POS, \
                                                                  readmode))
 
-static Seqpos lcpintervalfindrightbound(const GtEncodedsequence *encseq,
+static unsigned long lcpintervalfindrightbound(const GtEncodedsequence *encseq,
                                         GtReadmode readmode,
-                                        Seqpos totallength,
-                                        const Seqpos *suftab,
+                                        unsigned long totallength,
+                                        const unsigned long *suftab,
                                         GtUchar cc,
-                                        Seqpos offset,
-                                        Seqpos left,
-                                        Seqpos right)
+                                        unsigned long offset,
+                                        unsigned long left,
+                                        unsigned long right)
 {
-  Seqpos pos, mid;
+  unsigned long pos, mid;
   GtUchar midcc;
 
   while (right > left+1)
@@ -57,16 +57,16 @@ static Seqpos lcpintervalfindrightbound(const GtEncodedsequence *encseq,
 
 bool lcpintervalfindcharchildintv(const GtEncodedsequence *encseq,
                                   GtReadmode readmode,
-                                  Seqpos totallength,
-                                  const Seqpos *suftab,
+                                  unsigned long totallength,
+                                  const unsigned long *suftab,
                                   Simplelcpinterval *itv,
                                   GtUchar cc,
-                                  Seqpos offset,
-                                  Seqpos left,
-                                  Seqpos right)
+                                  unsigned long offset,
+                                  unsigned long left,
+                                  unsigned long right)
 {
   GtUchar leftcc, rightcc;
-  Seqpos pos, rightbound, leftbound = left;
+  unsigned long pos, rightbound, leftbound = left;
 
   pos = suftab[right] + offset;
   rightcc = SEQUENCE(encseq,pos);
@@ -117,14 +117,14 @@ bool lcpintervalfindcharchildintv(const GtEncodedsequence *encseq,
 void lcpintervalsplitwithoutspecial(GtArrayBoundswithchar *bwci,
                                     const GtEncodedsequence *encseq,
                                     GtReadmode readmode,
-                                    Seqpos totallength,
-                                    const Seqpos *suftab,
-                                    Seqpos parentoffset,
-                                    Seqpos parentleft,
-                                    Seqpos parentright)
+                                    unsigned long totallength,
+                                    const unsigned long *suftab,
+                                    unsigned long parentoffset,
+                                    unsigned long parentleft,
+                                    unsigned long parentright)
 {
   GtUchar leftcc, rightcc;
-  Seqpos rightbound = 0, leftbound = parentleft;
+  unsigned long rightbound = 0, leftbound = parentleft;
 
   /* call lcpintervalextendlcp and verify if interval can be extended by
      some character */
@@ -159,12 +159,12 @@ void lcpintervalsplitwithoutspecial(GtArrayBoundswithchar *bwci,
 
 GtUchar lcpintervalextendlcp(const GtEncodedsequence *encseq,
                            GtReadmode readmode,
-                           const Seqpos *suftab,
-                           Seqpos totallength,
+                           const unsigned long *suftab,
+                           unsigned long totallength,
                            GtUchar alphasize,
-                           Seqpos parentoffset,
-                           Seqpos parentleft,
-                           Seqpos parentright)
+                           unsigned long parentoffset,
+                           unsigned long parentleft,
+                           unsigned long parentright)
 {
   GtUchar ccl, ccr;
 

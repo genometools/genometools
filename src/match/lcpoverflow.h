@@ -23,4 +23,10 @@
 
 #define LCPOVERFLOW ((uint8_t) UCHAR_MAX)
 
+typedef struct
+{
+  unsigned long position,
+                value;
+} Largelcpvalue;
+
 #endif

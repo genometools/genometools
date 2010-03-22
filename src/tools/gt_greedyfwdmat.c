@@ -15,13 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/defined-types.h"
 #include "core/error.h"
 #include "core/option.h"
 #include "core/unused_api.h"
 #include "core/versionfunc.h"
 #include "match/fmindex.h"
 #include "match/sarr-def.h"
-#include "match/defined-types.h"
 #include "match/optionargmode.h"
 #include "match/greedyfwdmat.h"
 #include "match/esa-map.h"
@@ -280,7 +280,7 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
   bool haserr = false;
   const GtAlphabet *alphabet = NULL;
   unsigned int prefixlength = 0;
-  Seqpos totallength;
+  unsigned long totallength;
   bool mapfmindexfail = false;
 
   gt_error_check(err);

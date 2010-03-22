@@ -18,28 +18,28 @@
 #include <stdio.h>
 #include "core/chardef.h"
 #include "core/ma_api.h"
-#include "core/seqpos.h"
+
 #include "core/encodedsequence.h"
 #include "compressedtab.h"
 #include "sfx-linlcp.h"
 
-Seqpos *lcp13_manzini(const GtEncodedsequence *encseq,
+unsigned long *lcp13_manzini(const GtEncodedsequence *encseq,
                       GtReadmode readmode,
-                      Seqpos partwidth,
-                      Seqpos totallength,
-                      const Seqpos *sortedsuffixes,
+                      unsigned long partwidth,
+                      unsigned long totallength,
+                      const unsigned long *sortedsuffixes,
                       Compressedtable *inversesuftab)
 {
-  Seqpos pos, lcpvalue = 0, *lcptab;
+  unsigned long pos, lcpvalue = 0, *lcptab;
 
-  lcptab = gt_malloc(sizeof (Seqpos) * partwidth);
+  lcptab = gt_malloc(sizeof (unsigned long) * partwidth);
   lcptab[0] = 0;
   for (pos=0; pos <= totallength; pos++)
   {
-    Seqpos fillpos = compressedtable_get(inversesuftab,pos);
+    unsigned long fillpos = compressedtable_get(inversesuftab,pos);
     if (fillpos > 0 && fillpos < partwidth)
     {
-      Seqpos previousstart = sortedsuffixes[fillpos-1];
+      unsigned long previousstart = sortedsuffixes[fillpos-1];
       while (pos+lcpvalue < totallength &&
              previousstart+lcpvalue < totallength)
       {
@@ -93,16 +93,16 @@ static unsigned long *computeocclesstab(const GtEncodedsequence *encseq)
 static void setrelevantfrominversetab(Compressedtable *rightposinverse,
                                       const GtEncodedsequence *encseq,
                                       GtReadmode readmode,
-                                      const Seqpos *sortedsuffixes,
-                                      Seqpos partwidth)
+                                      const unsigned long *sortedsuffixes,
+                                      unsigned long partwidth)
 {
   if (hasspecialranges(encseq))
   {
-    Seqpos idx;
+    unsigned long idx;
 
     for (idx = 0; idx < partwidth; idx++)
     {
-      Seqpos pos = sortedsuffixes[idx];
+      unsigned long pos = sortedsuffixes[idx];
       if (pos > 0)
       {
         GtUchar cc = gt_encodedsequence_getencodedchar(encseq,pos-1,readmode);
@@ -115,15 +115,16 @@ static void setrelevantfrominversetab(Compressedtable *rightposinverse,
   }
 }
 
-static Seqpos *fillrightofpartwidth(const Compressedtable *rightposinverse,
-                                    const GtEncodedsequence *encseq,
-                                    GtReadmode readmode,
-                                    Seqpos partwidth,
-                                    Seqpos totallength)
+static unsigned long *fillrightofpartwidth(
+                                         const Compressedtable *rightposinverse,
+                                         const GtEncodedsequence *encseq,
+                                         GtReadmode readmode,
+                                         unsigned long partwidth,
+                                         unsigned long totallength)
 {
   Specialrangeiterator *sri;
   GtSequencerange range;
-  Seqpos realspecialranges, *rightofpartwidth = NULL;
+  unsigned long realspecialranges, *rightofpartwidth = NULL;
   unsigned long countranges = 0, nextrightofpartwidth = 0;
 
   realspecialranges = getencseqrealspecialranges(encseq);
@@ -138,14 +139,16 @@ static Seqpos *fillrightofpartwidth(const Compressedtable *rightposinverse,
     {
       if (nextrightofpartwidth == 0)
       {
-        size_t allocsize = sizeof (Seqpos) * (realspecialranges - countranges);
+        size_t allocsize =
+                     sizeof (unsigned long) * (realspecialranges - countranges);
         rightofpartwidth = gt_malloc(allocsize);
         printf("allocated %lu bytes for rightofpartwidth (%.2f)\n",
                  (unsigned long) allocsize,
                  (double) allocsize/totallength);
       }
-      gt_assert(rightofpartwidth != NULL && (Seqpos) nextrightofpartwidth <
-                (realspecialranges - countranges));
+      gt_assert(rightofpartwidth != NULL
+                   && (unsigned long) nextrightofpartwidth <
+                      (realspecialranges - countranges));
       rightofpartwidth[nextrightofpartwidth++]
         = compressedtable_get(rightposinverse,range.rightpos);
     }
@@ -159,15 +162,15 @@ static void inversesuffixarray2specialranknext(
                          Compressedtable *ranknext,
                          const GtEncodedsequence *encseq,
                          GtReadmode readmode,
-                         Seqpos partwidth,
-                         Seqpos totallength)
+                         unsigned long partwidth,
+                         unsigned long totallength)
 {
   if (hasspecialranges(encseq))
   {
     Specialrangeiterator *sri;
     GtSequencerange range;
-    Seqpos specialcharacters, idx, *rightofpartwidth = NULL;
-    Seqpos specialranklistindex, nextrightofpartwidth = 0;
+    unsigned long specialcharacters, idx, *rightofpartwidth = NULL;
+    unsigned long specialranklistindex, nextrightofpartwidth = 0;
 
     rightofpartwidth = fillrightofpartwidth(rightposinverse,
                                             encseq,
@@ -216,14 +219,14 @@ static void inversesuffixarray2specialranknext(
   }
 }
 
-static Seqpos sa2ranknext(Compressedtable *ranknext,
+static unsigned long sa2ranknext(Compressedtable *ranknext,
                           const GtEncodedsequence *encseq,
                           GtReadmode readmode,
-                          Seqpos partwidth,
-                          Seqpos totallength,
-                          const Seqpos *sortedsuffixes)
+                          unsigned long partwidth,
+                          unsigned long totallength,
+                          const unsigned long *sortedsuffixes)
 {
-  Seqpos idx, longest = 0;
+  unsigned long idx, longest = 0;
   unsigned long *occless;
 
   gt_assert(partwidth > 0);
@@ -233,7 +236,7 @@ static Seqpos sa2ranknext(Compressedtable *ranknext,
      ranknext array (which points to ranknext can savely be stored */
   for (idx=0; idx < partwidth; idx++)
   {
-    Seqpos pos = sortedsuffixes[idx];
+    unsigned long pos = sortedsuffixes[idx];
     if (pos > 0)
     {
       GtUchar cc = gt_encodedsequence_getencodedchar(encseq,pos-1, readmode);
@@ -246,7 +249,7 @@ static Seqpos sa2ranknext(Compressedtable *ranknext,
                         (unsigned long) occless[cc],
                         (unsigned long) idx);
         */
-        compressedtable_update(ranknext,(Seqpos) occless[cc],idx);
+        compressedtable_update(ranknext,(unsigned long) occless[cc],idx);
         occless[cc]++;
       }
     } else
@@ -258,7 +261,7 @@ static Seqpos sa2ranknext(Compressedtable *ranknext,
   {
     Specialrangeiterator *sri;
     GtSequencerange range;
-    Seqpos specialidx, specialpos;
+    unsigned long specialidx, specialpos;
 
     sri = newspecialrangeiterator(encseq,
                                   GT_ISDIRREVERSE(readmode) ? false : true);
@@ -276,7 +279,9 @@ static Seqpos sa2ranknext(Compressedtable *ranknext,
           if (ISNOTSPECIAL(cc))
           {
             gt_assert(occless[cc] < (unsigned long) partwidth);
-            compressedtable_update(ranknext,(Seqpos) occless[cc],specialidx);
+            compressedtable_update(ranknext,
+                                   (unsigned long) occless[cc],
+                                   specialidx);
             occless[cc]++;
           }
         } else
@@ -299,13 +304,13 @@ static Seqpos sa2ranknext(Compressedtable *ranknext,
 Compressedtable *lcp9_manzini(Compressedtable *spacefortab,
                               const GtEncodedsequence *encseq,
                               GtReadmode readmode,
-                              Seqpos partwidth,
-                              Seqpos totallength,
-                              const Seqpos *sortedsuffixes)
+                              unsigned long partwidth,
+                              unsigned long totallength,
+                              const unsigned long *sortedsuffixes)
 {
-  Seqpos pos, previousstart, nextfillpos = 0, fillpos, lcpvalue = 0;
+  unsigned long pos, previousstart, nextfillpos = 0, fillpos, lcpvalue = 0;
   Compressedtable *lcptab, *ranknext, *rightposinverse;
-  Seqpos previouscc1pos, previouscc2pos;
+  unsigned long previouscc1pos, previouscc2pos;
   GtUchar cc1, cc2;
   GtEncodedsequenceScanstate *esr1, *esr2;
 
@@ -327,7 +332,7 @@ Compressedtable *lcp9_manzini(Compressedtable *spacefortab,
                                      totallength);
   fillpos = sa2ranknext(ranknext,encseq,readmode,partwidth,totallength,
                         sortedsuffixes);
-  printf("longest=" FormatSeqpos "\n",PRINTSeqposcast(fillpos));
+  printf("longest=%lu\n",fillpos);
   lcptab = ranknext;
   /* now ranknext and lcptab point to the same memory area. After reading
      ranknext at position fillpos, the same cell is used for storing

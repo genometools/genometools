@@ -46,7 +46,8 @@
 
 #include "sfx-mappedstr.pr"
 
-static inline void setsortspace(Suftab *suftab,Seqpos idx,Seqpos value)
+static inline void setsortspace(Suftab *suftab,unsigned long idx,
+                                unsigned long value)
 {
   suftab->sortspace[idx - suftab->offset] = value;
 }
@@ -56,7 +57,7 @@ struct Sfxiterator
   bool storespecials;
   Codetype currentmincode,
            currentmaxcode;
-  Seqpos specialcharacters,
+  unsigned long specialcharacters,
          widthofpart,
          totallength;
   Suftab suftab;
@@ -69,13 +70,13 @@ struct Sfxiterator
   unsigned int part,
                numofchars,
                prefixlength;
-  ArraySeqpos fusp;
+  GtArrayGtUlong fusp;
   Specialrangeiterator *sri;
   GtSequencerange overhang;
   bool exhausted;
   Bcktab *bcktab;
   Codetype numofallcodes;
-  Seqpos *leftborder; /* points to bcktab->leftborder */
+  unsigned long *leftborder; /* points to bcktab->leftborder */
   unsigned long long bucketiterstep; /* for progressbar */
   Sfxstrategy sfxstrategy;
   GtLogger *logger;
@@ -161,7 +162,7 @@ static void compareCodeatpositionlists(const Codeatposition *codelist1,
 static void verifycodelistcomputation(
                        const GtEncodedsequence *encseq,
                        GtReadmode readmode,
-                       Seqpos realspecialranges,
+                       unsigned long realspecialranges,
                        unsigned int prefixlength,
                        unsigned int numofchars,
                        unsigned long nextfreeCodeatposition1,
@@ -177,7 +178,7 @@ static void verifycodelistcomputation(
                                                       readmode,
                                                       prefixlength,
                                                       numofchars);
-  gt_assert(realspecialranges+1 >= (Seqpos) nextfreeCodeatposition2);
+  gt_assert(realspecialranges+1 >= (unsigned long) nextfreeCodeatposition2);
   compareCodeatpositionlists(spaceCodeatposition1,
                              nextfreeCodeatposition1,
                              spaceCodeatposition2,
@@ -189,10 +190,10 @@ static void verifycodelistcomputation(
 #ifdef SKDEBUG
 static Codetype getencseqcode(const GtEncodedsequence *encseq,
                               GtReadmode readmode,
-                              Seqpos totallength,
+                              unsigned long totallength,
                               const Codetype **multimappower,
                               unsigned int prefixlength,
-                              Seqpos pos)
+                              unsigned long pos)
 {
   Codetype code = 0;
   unsigned int idx;
@@ -200,7 +201,7 @@ static Codetype getencseqcode(const GtEncodedsequence *encseq,
 
   for (idx=0; idx<prefixlength; idx++)
   {
-    gt_assert((Seqpos) (pos + idx) < totallength);
+    gt_assert((unsigned long) (pos + idx) < totallength);
     cc = gt_encodedsequence_getencodedcharnospecial(encseq,pos + idx, readmode);
     gt_assert(ISNOTSPECIAL(cc));
     code += multimappower[idx][cc];
@@ -216,7 +217,7 @@ unsigned int previousspecialpos = 0;
 
 static void updatekmercount(void *processinfo,
                             Codetype code,
-                            Seqpos position,
+                            unsigned long position,
                             const Firstspecialpos *firstspecial)
 {
   Sfxiterator *sfi = (Sfxiterator *) processinfo;
@@ -293,7 +294,7 @@ static void updatekmercount(void *processinfo,
 
 static void insertwithoutspecial(void *processinfo,
                                  Codetype code,
-                                 Seqpos position,
+                                 unsigned long position,
                                  const Firstspecialpos *firstspecial)
 {
   if (!firstspecial->defined)
@@ -328,7 +329,7 @@ static void derivespecialcodesfromtable(Sfxiterator *sfi,bool deletevalues)
   Codetype code;
   unsigned int prefixindex;
   unsigned long insertindex, j;
-  Seqpos stidx;
+  unsigned long stidx;
 
   for (prefixindex=1U; prefixindex < sfi->prefixlength; prefixindex++)
   {
@@ -374,7 +375,7 @@ static void derivespecialcodesonthefly(Sfxiterator *sfi)
 {
   Codetype code;
   unsigned int prefixindex;
-  Seqpos stidx;
+  unsigned long stidx;
   Enumcodeatposition *ecp;
   Specialcontext specialcontext;
 
@@ -441,10 +442,8 @@ void freeSfxiterator(Sfxiterator **sfiptr)
   FREESPACE(*sfiptr);
 }
 
- DECLARESAFECASTFUNCTION(Seqpos,Seqpos,unsigned long,unsigned_long)
-
 #ifdef SKDEBUG
-static void showleftborder(const Seqpos *leftborder,
+static void showleftborder(const unsigned long *leftborder,
                            Codetype numofallcodes)
 {
   Codetype i;
@@ -468,7 +467,7 @@ Sfxiterator *newSfxiterator(const GtEncodedsequence *encseq,
                             GtError *err)
 {
   Sfxiterator *sfi = NULL;
-  Seqpos realspecialranges, specialcharacters;
+  unsigned long realspecialranges, specialcharacters;
   bool haserr = false;
 
   gt_error_check(err);
@@ -540,8 +539,8 @@ Sfxiterator *newSfxiterator(const GtEncodedsequence *encseq,
       gt_logger_log(logger,"ssortmaxdepth=undefined");
     }
     sfi->totallength = gt_encodedsequence_total_length(encseq);
-    gt_logger_log(logger,"totallength=" FormatSeqpos,
-                        PRINTSeqposcast(sfi->totallength));
+    gt_logger_log(logger,"totallength=%lu",
+                        sfi->totallength);
     sfi->specialcharacters = specialcharacters;
     sfi->outlcpinfo = outlcpinfo;
     sfi->sri = NULL;
@@ -622,7 +621,8 @@ Sfxiterator *newSfxiterator(const GtEncodedsequence *encseq,
                    prefixlength);
     if (sfi->sfxstrategy.storespecialcodes)
     {
-      gt_assert(realspecialranges+1 >= (Seqpos) sfi->nextfreeCodeatposition);
+      gt_assert(realspecialranges+1
+                  >= (unsigned long) sfi->nextfreeCodeatposition);
       reversespecialcodes(sfi->spaceCodeatposition,sfi->nextfreeCodeatposition);
     }
 #ifdef SKDEBUG
@@ -647,10 +647,10 @@ Sfxiterator *newSfxiterator(const GtEncodedsequence *encseq,
                                       specialcharacters + 1,
                                       logger);
     gt_assert(sfi->suftabparts != NULL);
-    ALLOCASSIGNSPACE(sfi->suftab.sortspace,NULL,Seqpos,
+    ALLOCASSIGNSPACE(sfi->suftab.sortspace,NULL,GtUlong,
                      stpgetlargestwidth(sfi->suftabparts));
     sfi->suftab.longest.defined = false;
-    sfi->suftab.longest.valueseqpos = 0;
+    sfi->suftab.longest.valueunsignedlong = 0;
     if (hasspecialranges(sfi->encseq))
     {
       sfi->sri = newspecialrangeiterator(sfi->encseq,
@@ -660,10 +660,8 @@ Sfxiterator *newSfxiterator(const GtEncodedsequence *encseq,
     {
       sfi->sri = NULL;
     }
-    sfi->fusp.spaceSeqpos = sfi->suftab.sortspace;
-    sfi->fusp.allocatedSeqpos
-      = CALLCASTFUNC(Seqpos,unsigned_long,
-                     stpgetlargestwidth(sfi->suftabparts));
+    sfi->fusp.spaceGtUlong = sfi->suftab.sortspace;
+    sfi->fusp.allocatedGtUlong = stpgetlargestwidth(sfi->suftabparts);
     sfi->overhang.leftpos = sfi->overhang.rightpos = 0;
   }
   if (haserr)
@@ -677,11 +675,11 @@ Sfxiterator *newSfxiterator(const GtEncodedsequence *encseq,
   return sfi;
 }
 
-bool sfi2longestsuffixpos(Seqpos *longest,const Sfxiterator *sfi)
+bool sfi2longestsuffixpos(unsigned long *longest,const Sfxiterator *sfi)
 {
   if (sfi->suftab.longest.defined)
   {
-    *longest = sfi->suftab.longest.valueseqpos;
+    *longest = sfi->suftab.longest.valueunsignedlong;
     return true;
   }
   return false;
@@ -689,7 +687,7 @@ bool sfi2longestsuffixpos(Seqpos *longest,const Sfxiterator *sfi)
 
 static void preparethispart(Sfxiterator *sfi)
 {
-  Seqpos partwidth;
+  unsigned long partwidth;
   unsigned int numofparts = stpgetnumofparts(sfi->suftabparts);
 
   if (sfi->part == 0 &&
@@ -738,7 +736,7 @@ static void preparethispart(Sfxiterator *sfi)
     {
       qsufsort(sfi->suftab.sortspace,
                -1,
-               &sfi->suftab.longest.valueseqpos,
+               &sfi->suftab.longest.valueunsignedlong,
                sfi->encseq,
                sfi->readmode,
                sfi->currentmincode,
@@ -796,7 +794,7 @@ static void preparethispart(Sfxiterator *sfi)
     }
     if (bucketspec2 != NULL)
     {
-      Seqpos *suftabptr = sfi->suftab.sortspace - sfi->suftab.offset;
+      unsigned long *suftabptr = sfi->suftab.sortspace - sfi->suftab.offset;
       gt_copysortsuffixes(bucketspec2,suftabptr,sfi->logger);
       gt_bucketspec2_delete(bucketspec2);
       bucketspec2 = NULL;
@@ -845,13 +843,14 @@ int postsortsuffixesfromstream(Sfxiterator *sfi, const GtStr *str_indexname,
                  gt_str_get(tmpfilename),(unsigned long long) sb.st_size);
     haserr = true;
   }
-  if (!haserr && (size_t) sb.st_size != sizeof (Seqpos) * (sfi->totallength+1))
+  if (!haserr
+        && (size_t) sb.st_size != sizeof (unsigned long) * (sfi->totallength+1))
   {
     gt_error_set(err,"mapping file %s: file size "
                      " = %lu != %lu = expected number of units",
-                      gt_str_get(tmpfilename),
-                      (unsigned long) sb.st_size,
-                      (unsigned long) (sfi->totallength+1) * sizeof (Seqpos));
+                 gt_str_get(tmpfilename),
+                 (unsigned long) sb.st_size,
+                 (unsigned long) (sfi->totallength+1) * sizeof (unsigned long));
     haserr = true;
   }
   if (!haserr)
@@ -859,7 +858,7 @@ int postsortsuffixesfromstream(Sfxiterator *sfi, const GtStr *str_indexname,
     gt_assert(sfi->totallength >= sfi->specialcharacters);
     qsufsort(NULL,
              mmapfiledesc,
-             &sfi->suftab.longest.valueseqpos,
+             &sfi->suftab.longest.valueunsignedlong,
              sfi->encseq,
              sfi->readmode,
              0,
@@ -884,10 +883,10 @@ int postsortsuffixesfromstream(Sfxiterator *sfi, const GtStr *str_indexname,
 }
 
 static void insertfullspecialrange(Sfxiterator *sfi,
-                                   Seqpos leftpos,
-                                   Seqpos rightpos)
+                                   unsigned long leftpos,
+                                   unsigned long rightpos)
 {
-  Seqpos pos;
+  unsigned long pos;
 
   gt_assert(leftpos < rightpos);
   if (GT_ISDIRREVERSE(sfi->readmode))
@@ -901,7 +900,7 @@ static void insertfullspecialrange(Sfxiterator *sfi,
   {
     if (GT_ISDIRREVERSE(sfi->readmode))
     {
-      sfi->fusp.spaceSeqpos[sfi->fusp.nextfreeSeqpos++]
+      sfi->fusp.spaceGtUlong[sfi->fusp.nextfreeGtUlong++]
         = GT_REVERSEPOS(sfi->totallength,pos);
       if (pos == leftpos)
       {
@@ -910,7 +909,7 @@ static void insertfullspecialrange(Sfxiterator *sfi,
       pos--;
     } else
     {
-      sfi->fusp.spaceSeqpos[sfi->fusp.nextfreeSeqpos++] = pos;
+      sfi->fusp.spaceGtUlong[sfi->fusp.nextfreeGtUlong++] = pos;
       if (pos == rightpos-1)
       {
         break;
@@ -923,18 +922,18 @@ static void insertfullspecialrange(Sfxiterator *sfi,
 static void fillspecialnextpage(Sfxiterator *sfi)
 {
   GtSequencerange range;
-  Seqpos width;
+  unsigned long width;
 
   while (true)
   {
     if (sfi->overhang.leftpos < sfi->overhang.rightpos)
     {
       width = sfi->overhang.rightpos - sfi->overhang.leftpos;
-      if (sfi->fusp.nextfreeSeqpos + width > sfi->fusp.allocatedSeqpos)
+      if (sfi->fusp.nextfreeGtUlong + width > sfi->fusp.allocatedGtUlong)
       {
         /* does not fit into the buffer, so only output a part */
-        unsigned long rest = sfi->fusp.nextfreeSeqpos +
-                             width - sfi->fusp.allocatedSeqpos;
+        unsigned long rest = sfi->fusp.nextfreeGtUlong +
+                             width - sfi->fusp.allocatedGtUlong;
         gt_assert(rest > 0);
         if (GT_ISDIRREVERSE(sfi->readmode))
         {
@@ -949,7 +948,7 @@ static void fillspecialnextpage(Sfxiterator *sfi)
         }
         break;
       }
-      if (sfi->fusp.nextfreeSeqpos + width == sfi->fusp.allocatedSeqpos)
+      if (sfi->fusp.nextfreeGtUlong + width == sfi->fusp.allocatedGtUlong)
       { /* overhang fits into the buffer and buffer is full */
         insertfullspecialrange(sfi,sfi->overhang.leftpos,
                                sfi->overhang.rightpos);
@@ -966,10 +965,10 @@ static void fillspecialnextpage(Sfxiterator *sfi)
       {
         width = range.rightpos - range.leftpos;
         gt_assert(width > 0);
-        if (sfi->fusp.nextfreeSeqpos + width > sfi->fusp.allocatedSeqpos)
+        if (sfi->fusp.nextfreeGtUlong + width > sfi->fusp.allocatedGtUlong)
         { /* does not fit into the buffer, so only output a part */
-          unsigned long rest = sfi->fusp.nextfreeSeqpos +
-                               width - sfi->fusp.allocatedSeqpos;
+          unsigned long rest = sfi->fusp.nextfreeGtUlong +
+                               width - sfi->fusp.allocatedGtUlong;
           if (GT_ISDIRREVERSE(sfi->readmode))
           {
             insertfullspecialrange(sfi,range.leftpos + rest,
@@ -984,7 +983,7 @@ static void fillspecialnextpage(Sfxiterator *sfi)
           }
           break;
         }
-        if (sfi->fusp.nextfreeSeqpos + width == sfi->fusp.allocatedSeqpos)
+        if (sfi->fusp.nextfreeGtUlong + width == sfi->fusp.allocatedGtUlong)
         { /* overhang fits into the buffer and buffer is full */
           insertfullspecialrange(sfi,range.leftpos,range.rightpos);
           sfi->overhang.leftpos = sfi->overhang.rightpos = 0;
@@ -994,9 +993,10 @@ static void fillspecialnextpage(Sfxiterator *sfi)
         sfi->overhang.leftpos = sfi->overhang.rightpos = 0;
       } else
       {
-        if (sfi->fusp.nextfreeSeqpos < sfi->fusp.allocatedSeqpos)
+        if (sfi->fusp.nextfreeGtUlong < sfi->fusp.allocatedGtUlong)
         {
-          sfi->fusp.spaceSeqpos[sfi->fusp.nextfreeSeqpos++] = sfi->totallength;
+          sfi->fusp.spaceGtUlong[sfi->fusp.nextfreeGtUlong++]
+                                                             = sfi->totallength;
           sfi->exhausted = true;
         }
         break;
@@ -1005,8 +1005,9 @@ static void fillspecialnextpage(Sfxiterator *sfi)
   }
 }
 
-const Seqpos *nextSfxiterator(Seqpos *numberofsuffixes,bool *specialsuffixes,
-                              Sfxiterator *sfi)
+const unsigned long *nextSfxiterator(unsigned long *numberofsuffixes,
+                                     bool *specialsuffixes,
+                                     Sfxiterator *sfi)
 {
   if (sfi->part < stpgetnumofparts(sfi->suftabparts))
   {
@@ -1023,10 +1024,10 @@ const Seqpos *nextSfxiterator(Seqpos *numberofsuffixes,bool *specialsuffixes,
     }
     return NULL;
   }
-  sfi->fusp.nextfreeSeqpos = 0;
+  sfi->fusp.nextfreeGtUlong = 0;
   fillspecialnextpage(sfi);
-  gt_assert(sfi->fusp.nextfreeSeqpos > 0);
-  *numberofsuffixes = (Seqpos) sfi->fusp.nextfreeSeqpos;
+  gt_assert(sfi->fusp.nextfreeGtUlong > 0);
+  *numberofsuffixes = (unsigned long) sfi->fusp.nextfreeGtUlong;
   *specialsuffixes = true;
   return sfi->suftab.sortspace;
 }

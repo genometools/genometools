@@ -32,17 +32,20 @@
 
 struct Dfsinfo /* information stored for each node of the lcp interval tree */
 {
-  Seqpos leftmostleaf,
-         rightmostleaf,
-         suftabrightmostleaf,
-         lcptabrightmostleafplus1;
+  unsigned long leftmostleaf,
+                rightmostleaf,
+                suftabrightmostleaf,
+                lcptabrightmostleafplus1;
 };
 
-typedef int (*Processoccurrencecount)(unsigned long,Seqpos,void *,GtError *);
+typedef int (*Processoccurrencecount)(unsigned long,
+                                      unsigned long,
+                                      void *,
+                                      GtError *);
 
 typedef struct _listSeqpos
 {
-  Seqpos position;
+  unsigned long position;
   struct _listSeqpos *nextptr;
 } ListSeqpos;
 
@@ -56,7 +59,7 @@ GT_DECLAREARRAYSTRUCT(Countwithpositions);
 
 struct Dfsstate /* global information */
 {
-  Seqpos mersize,
+  unsigned long mersize,
          totallength;
   unsigned long minocc,
                 maxocc;
@@ -74,7 +77,7 @@ struct Dfsstate /* global information */
   unsigned long sizeofbuffer;
   GtArrayLargecount largecounts;
   unsigned long countoutputmers;
-  const Seqpos *suftab; /* only necessary for performtest */
+  const unsigned long *suftab; /* only necessary for performtest */
   GtUchar *currentmer;    /* only necessary for performtest */
 };
 
@@ -82,7 +85,7 @@ struct Dfsstate /* global information */
 
 static uint64_t bruteforcecountnumofmers(const Dfsstate *state)
 {
-  Seqpos idx;
+  unsigned long idx;
   uint64_t numofmers = 0;
 
   for (idx=0; idx <= state->totallength - state->mersize; idx++)
@@ -116,10 +119,10 @@ static void checknumofmers(const Dfsstate *state,
 
 static void checknumberofoccurrences(const Dfsstate *dfsstate,
                                      unsigned long countocc,
-                                     Seqpos position)
+                                     unsigned long position)
 {
   MMsearchiterator *mmsi;
-  Seqpos idx, bfcount;
+  unsigned long idx, bfcount;
 
   for (idx = 0; idx < dfsstate->mersize; idx++)
   {
@@ -136,10 +139,10 @@ static void checknumberofoccurrences(const Dfsstate *dfsstate,
                                            dfsstate->currentmer,
                                            (unsigned long) dfsstate->mersize);
   bfcount = countmmsearchiterator(mmsi);
-  if (bfcount != (Seqpos) countocc)
+  if (bfcount != (unsigned long) countocc)
   {
-    fprintf(stderr,"bfcount = " FormatSeqpos " != %lu = countocc\n",
-                   PRINTSeqposcast(bfcount),
+    fprintf(stderr,"bfcount = %lu != %lu = countocc\n",
+                   bfcount,
                    countocc);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
@@ -147,7 +150,7 @@ static void checknumberofoccurrences(const Dfsstate *dfsstate,
 }
 
 static /*@null@*/ ListSeqpos *insertListSeqpos(ListSeqpos *liststart,
-                                               Seqpos position)
+                                               unsigned long position)
 {
   ListSeqpos *newnode;
 
@@ -178,7 +181,7 @@ static void wrapListSeqpos(ListSeqpos *node)
 }
 
 static void showListSeqpos(const GtEncodedsequence *encseq,
-                           Seqpos mersize,
+                           unsigned long mersize,
                            const ListSeqpos *node)
 {
   const ListSeqpos *tmp;
@@ -297,7 +300,7 @@ static void incrementdistribcounts(GtArrayCountwithpositions *occdistribution,
 {
   if (countocc >= occdistribution->allocatedCountwithpositions)
   {
-    const Seqpos addamount = (Seqpos) 128;
+    const unsigned long addamount = (unsigned long) 128;
     unsigned long idx;
 
     ALLOCASSIGNSPACE(occdistribution->spaceCountwithpositions,
@@ -319,7 +322,7 @@ static void incrementdistribcounts(GtArrayCountwithpositions *occdistribution,
 }
 
 static int adddistpos2distribution(unsigned long countocc,
-                                   Seqpos position,
+                                   unsigned long position,
                                    void *adddistposinfo,
                                    GT_UNUSED GtError *err)
 {
@@ -343,18 +346,18 @@ static int adddistpos2distribution(unsigned long countocc,
 #define MAXSMALLMERCOUNT UCHAR_MAX
 
 static int outputsortedstring2indexviafileptr(const GtEncodedsequence *encseq,
-                                              Seqpos mersize,
+                                              unsigned long mersize,
                                               GtUchar *bytebuffer,
                                               unsigned long sizeofbuffer,
                                               FILE *merindexfpout,
                                               FILE *countsfilefpout,
-                                              Seqpos position,
+                                              unsigned long position,
                                               unsigned long countocc,
                                               GtArrayLargecount *largecounts,
                                               unsigned long countoutputmers,
                                               GtError *err)
 {
-  sequence2bytecode(bytebuffer,encseq,position,(Seqpos) mersize);
+  sequence2bytecode(bytebuffer,encseq,position,(unsigned long) mersize);
   if (fwrite(bytebuffer, sizeof (*bytebuffer),
              (size_t) sizeofbuffer,merindexfpout)
             != (size_t) sizeofbuffer)
@@ -394,7 +397,7 @@ static int outputsortedstring2indexviafileptr(const GtEncodedsequence *encseq,
 }
 
 static int outputsortedstring2index(unsigned long countocc,
-                                    Seqpos position,
+                                    unsigned long position,
                                     void *adddistposinfo,
                                     GtError *err)
 {
@@ -438,10 +441,10 @@ static void freeDfsinfo(Dfsinfo *dfsinfo, GT_UNUSED Dfsstate *state)
 static bool containsspecial2(const GtEncodedsequence *encseq,
                      GT_UNUSED bool moveforward,
                      GT_UNUSED GtEncodedsequenceScanstate *esrspace,
-                     Seqpos startpos,
-                     Seqpos len)
+                     unsigned long startpos,
+                     unsigned long len)
 {
-  Seqpos pos;
+  unsigned long pos;
   bool result = false, result2;
 
   for (pos=startpos; pos<startpos+len; pos++)
@@ -472,9 +475,9 @@ static bool containsspecial2(const GtEncodedsequence *encseq,
 #endif
 
 static int processleafedge(GT_UNUSED bool firstsucc,
-                           Seqpos fatherdepth,
+                           unsigned long fatherdepth,
                            GT_UNUSED Dfsinfo *father,
-                           Seqpos leafnumber,
+                           unsigned long leafnumber,
                            Dfsstate *state,
                            GtError *err)
 {
@@ -495,16 +498,16 @@ static int processleafedge(GT_UNUSED bool firstsucc,
   return 0;
 }
 
-static int processcompletenode(Seqpos nodeptrdepth,
+static int processcompletenode(unsigned long nodeptrdepth,
                                Dfsinfo *nodeptr,
-                               Seqpos nodeptrminusonedepth,
+                               unsigned long nodeptrminusonedepth,
                                Dfsstate *state,
                                GtError *err)
 {
   gt_error_check(err);
   if (state->mersize <= nodeptrdepth)
   {
-    Seqpos fatherdepth;
+    unsigned long fatherdepth;
 
     fatherdepth = nodeptr->lcptabrightmostleafplus1;
     if (fatherdepth < nodeptrminusonedepth)
@@ -527,14 +530,15 @@ static int processcompletenode(Seqpos nodeptrdepth,
   return 0;
 }
 
-static void assignleftmostleaf(Dfsinfo *dfsinfo,Seqpos leftmostleaf,
+static void assignleftmostleaf(Dfsinfo *dfsinfo,unsigned long leftmostleaf,
                                GT_UNUSED Dfsstate *dfsstate)
 {
   dfsinfo->leftmostleaf = leftmostleaf;
 }
 
-static void assignrightmostleaf(Dfsinfo *dfsinfo,Seqpos currentindex,
-                                Seqpos previoussuffix,Seqpos currentlcp,
+static void assignrightmostleaf(Dfsinfo *dfsinfo,unsigned long currentindex,
+                                unsigned long previoussuffix,
+                                unsigned long currentlcp,
                                 GT_UNUSED Dfsstate *dfsstate)
 {
   dfsinfo->rightmostleaf = currentindex;
@@ -573,7 +577,7 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   gt_error_check(err);
   GT_INITARRAY(&state.occdistribution,Countwithpositions);
   state.esrspace = gt_encodedsequence_scanstate_new();
-  state.mersize = (Seqpos) mersize;
+  state.mersize = (unsigned long) mersize;
   state.encseq = encseqSequentialsuffixarrayreader(ssar);
   alphasize = gt_encodedsequence_alphabetnumofchars(state.encseq);
   state.readmode = readmodeSequentialsuffixarrayreader(ssar);
@@ -607,10 +611,9 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   }
   if (state.mersize > state.totallength)
   {
-    gt_error_set(err,"mersize " FormatSeqpos " > " FormatSeqpos
-                     " = totallength not allowed",
-                 PRINTSeqposcast(state.mersize),
-                 PRINTSeqposcast(state.totallength));
+    gt_error_set(err,"mersize %lu > %lu = totallength not allowed",
+                 state.mersize,
+                 state.totallength);
     haserr = true;
   } else
   {

@@ -35,7 +35,7 @@
 
  DECLAREREADFUNCTION(GtUchar);
 
- DECLAREREADFUNCTION(Seqpos);
+ DECLAREREADFUNCTION(GtUlong);
 
 static int copytheindexfile(const GtStr *destindex,
                             const GtStr *sourceindex,
@@ -91,32 +91,31 @@ static int copytheindexfile(const GtStr *destindex,
 }
 
 static void allocatefmtables(Fmindex *fm,
-                             const Specialcharinfo *specialcharinfo,
+                             const GtSpecialcharinfo *specialcharinfo,
                              bool storeindexpos)
 {
-  ALLOCASSIGNSPACE (fm->tfreq, NULL, Seqpos,TFREQSIZE(fm->mapsize));
-  ALLOCASSIGNSPACE (fm->superbfreq, NULL, Seqpos ,
+  ALLOCASSIGNSPACE (fm->tfreq, NULL, unsigned long,TFREQSIZE(fm->mapsize));
+  ALLOCASSIGNSPACE (fm->superbfreq, NULL, unsigned long ,
                     SUPERBFREQSIZE(fm->mapsize,fm->nofsuperblocks));
   if (storeindexpos)
   {
-    ALLOCASSIGNSPACE (fm->markpostable,NULL,Seqpos,
+    ALLOCASSIGNSPACE (fm->markpostable,NULL,unsigned long,
                       MARKPOSTABLELENGTH(fm->bwtlength,fm->markdist));
-    fm->specpos.nextfreePairBwtidx = 0;
-    fm->specpos.allocatedPairBwtidx
+    fm->specpos.nextfreeGtPairBwtidx = 0;
+    fm->specpos.allocatedGtPairBwtidx
       = (unsigned long) determinenumberofspecialstostore(specialcharinfo);
-    printf("# %lu wildcards in the last " FormatSeqpos
-           " characters (%.2f)\n",
+    printf("# %lu wildcards in the last %lu characters (%.2f)\n",
            (unsigned long) specialcharinfo->specialcharacters -
-                           fm->specpos.allocatedPairBwtidx,
-           PRINTSeqposcast(specialcharinfo->specialcharacters),
+                           fm->specpos.allocatedGtPairBwtidx,
+           specialcharinfo->specialcharacters,
             (double) (specialcharinfo->specialcharacters -
-                      fm->specpos.allocatedPairBwtidx)/
+                      fm->specpos.allocatedGtPairBwtidx)/
                      specialcharinfo->specialcharacters);
-    ALLOCASSIGNSPACE(fm->specpos.spacePairBwtidx,NULL,PairBwtidx,
-                     fm->specpos.allocatedPairBwtidx);
+    ALLOCASSIGNSPACE(fm->specpos.spaceGtPairBwtidx,NULL,GtPairBwtidx,
+                     fm->specpos.allocatedGtPairBwtidx);
   } else
   {
-    GT_INITARRAY(&fm->specpos,PairBwtidx);
+    GT_INITARRAY(&fm->specpos,GtPairBwtidx);
     fm->markpostable = NULL;
   }
   ALLOCASSIGNSPACE (fm->bfreq, NULL, GtUchar,
@@ -125,17 +124,19 @@ static void allocatefmtables(Fmindex *fm,
 
 static void set0frequencies(Fmindex *fm)
 {
-  Seqpos i;
+  unsigned long i;
 
-  for (i = 0; i < (Seqpos) TFREQSIZE(fm->mapsize); i++)
+  for (i = 0; i < (unsigned long) TFREQSIZE(fm->mapsize); i++)
   {
     fm->tfreq[i] = 0;
   }
-  for (i = 0; i < (Seqpos) BFREQSIZE(fm->mapsize,fm->nofblocks); i++)
+  for (i = 0; i < (unsigned long) BFREQSIZE(fm->mapsize,fm->nofblocks); i++)
   {
     fm->bfreq[i] = 0;
   }
-  for (i = 0; i < (Seqpos) SUPERBFREQSIZE(fm->mapsize,fm->nofsuperblocks); i++)
+  for (i = 0;
+       i < (unsigned long) SUPERBFREQSIZE(fm->mapsize,fm->nofsuperblocks);
+       i++)
   {
     fm->superbfreq[i] = 0;
   }
@@ -144,7 +145,7 @@ static void set0frequencies(Fmindex *fm)
 static void finalizefmfrequencies(Fmindex *fm)
 {
   unsigned int j;
-  Seqpos i, *freqptr;
+  unsigned long i, *freqptr;
 
   for (j = 2U; j <= fm->mapsize; j++)
   {
@@ -153,7 +154,7 @@ static void finalizefmfrequencies(Fmindex *fm)
   freqptr = fm->superbfreq;
   for (j = 0; j < fm->mapsize; j++)
   {
-    for (i = (Seqpos) 2; i < fm->nofsuperblocks; i++)
+    for (i = (unsigned long) 2; i < fm->nofsuperblocks; i++)
     {
       freqptr[i] += freqptr[i-1];
     }
@@ -162,7 +163,7 @@ static void finalizefmfrequencies(Fmindex *fm)
 }
 
 static void showconstructionmessage(const GtStr *indexname,
-                                    Seqpos totallength,
+                                    unsigned long totallength,
                                     unsigned long fmsize,
                                     unsigned int log2bsize,
                                     unsigned int log2markdist,
@@ -172,21 +173,21 @@ static void showconstructionmessage(const GtStr *indexname,
           gt_str_get(indexname),
           (unsigned long) GT_POW2(log2bsize),
           (unsigned long) GT_POW2(log2markdist));
-  printf(" len=" FormatSeqpos ", alphasize=%u: size ",
-          PRINTSeqposcast(totallength),
+  printf(" len=%lu, alphasize=%u: size ",
+          totallength,
           numofchars);
   printf("%lu bytes, space overhead %.2f\n",
           fmsize,
           (double) fmsize/(double) (totallength+1));
 }
 
-static int nextesamergedsufbwttabvalues(DefinedSeqpos *longest,
-                                        GtUchar *bwtvalue,
-                                        Seqpos *suftabvalue,
-                                        Emissionmergedesa *emmesa,
-                                        const Seqpos *sequenceoffsettable,
-                                        Seqpos bwtpos,
-                                        GtError *err)
+static int nextesamergedsufbwttabvalues(Definedunsignedlong *longest,
+                                       GtUchar *bwtvalue,
+                                       unsigned long *suftabvalue,
+                                       Emissionmergedesa *emmesa,
+                                       const unsigned long *sequenceoffsettable,
+                                       unsigned long bwtpos,
+                                       GtError *err)
 {
   Indexedsuffix indexedsuffix;
 
@@ -216,12 +217,12 @@ static int nextesamergedsufbwttabvalues(DefinedSeqpos *longest,
     {
       if (longest->defined)
       {
-        gt_error_set(err,"longest is already defined as " FormatSeqpos,
-                      longest->valueseqpos);
+        gt_error_set(err,"longest is already defined as %lu",
+                      longest->valueunsignedlong);
         return -2;
       }
       longest->defined = true;
-      longest->valueseqpos = bwtpos;
+      longest->valueunsignedlong = bwtpos;
       *bwtvalue = (GtUchar) UNDEFBWTCHAR;
     } else
     {
@@ -240,7 +241,7 @@ static int nextesamergedsufbwttabvalues(DefinedSeqpos *longest,
 }
 
 int sufbwt2fmindex(Fmindex *fmindex,
-                   Specialcharinfo *specialcharinfo,
+                   GtSpecialcharinfo *specialcharinfo,
                    unsigned int log2bsize,
                    unsigned int log2markdist,
                    const GtStr *outfmindex,
@@ -252,7 +253,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
   Suffixarray suffixarray;
   Emissionmergedesa emmesa;
   GtUchar cc;
-  Seqpos bwtpos,
+  unsigned long bwtpos,
          totallength = 0,
          suftabvalue = 0,
          *sequenceoffsettable = NULL,
@@ -266,15 +267,15 @@ int sufbwt2fmindex(Fmindex *fmindex,
                suffixlength = 0,
                numofindexes;
   int retval;
-  DefinedSeqpos longest = { false, 0 };
-  PairBwtidx *pairptr;
+  Definedunsignedlong longest = { false, 0 };
+  GtPairBwtidx *pairptr;
   FILE *outbwt = NULL;
   GtStr *tmpfilename = NULL;
   bool haserr = false;
 
   gt_error_check(err);
   longest.defined = false;
-  longest.valueseqpos = 0;
+  longest.valueunsignedlong = 0;
   numofindexes = (unsigned int) gt_str_array_size(indexnametab);
   if (numofindexes == 1U)
   {
@@ -291,7 +292,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
     {
       totallength = gt_encodedsequence_total_length(suffixarray.encseq);
     }
-    if (!haserr && readSpecialcharinfo(specialcharinfo,indexname,err) != 0)
+    if (!haserr && readGtSpecialcharinfo(specialcharinfo,indexname,err) != 0)
     {
       haserr = true;
     }
@@ -310,7 +311,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
       if (copytheindexfile(outfmindex,
                             indexname,
                             BWTTABSUFFIX,
-                            firstignorespecial,
+                            (uint64_t) firstignorespecial,
                             err) != 0)
       {
         haserr = true;
@@ -350,7 +351,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
     if (!haserr)
     {
       longest.defined = false;
-      longest.valueseqpos = 0;
+      longest.valueunsignedlong = 0;
       outbwt = gt_fa_fopen_filename_with_suffix(outfmindex,BWTTABSUFFIX,"wb",
                                                 err);
       if (outbwt == NULL)
@@ -366,8 +367,8 @@ int sufbwt2fmindex(Fmindex *fmindex,
   }
   if (!haserr)
   {
-    printf("# firstignorespecial=" FormatSeqpos "\n",
-              PRINTSeqposcast(firstignorespecial));
+    printf("# firstignorespecial=%lu\n",
+              firstignorespecial);
     computefmkeyvalues (fmindex,
                         specialcharinfo,
                         totallength+1,
@@ -398,13 +399,13 @@ int sufbwt2fmindex(Fmindex *fmindex,
       {
         if (storeindexpos)
         {
-          retval = readnextSeqposfromstream(&tmpsuftabvalue,
+          retval = readnextGtUlongfromstream(&tmpsuftabvalue,
                                             &suffixarray.suftabstream);
           if (retval == 0)
           {
             break;
           }
-          suftabvalue = (Seqpos) tmpsuftabvalue;
+          suftabvalue = (unsigned long) tmpsuftabvalue;
         }
         retval = readnextGtUcharfromstream(&cc,&suffixarray.bwttabstream);
         if (retval == 0)
@@ -457,10 +458,10 @@ int sufbwt2fmindex(Fmindex *fmindex,
       {
         if (storeindexpos && bwtpos < firstignorespecial)
         {
-          pairptr = fmindex->specpos.spacePairBwtidx +
-                    fmindex->specpos.nextfreePairBwtidx++;
-          if (pairptr >= fmindex->specpos.spacePairBwtidx +
-                         fmindex->specpos.allocatedPairBwtidx)
+          pairptr = fmindex->specpos.spaceGtPairBwtidx +
+                    fmindex->specpos.nextfreeGtPairBwtidx++;
+          if (pairptr >= fmindex->specpos.spaceGtPairBwtidx +
+                         fmindex->specpos.allocatedGtPairBwtidx)
           {
             gt_error_set(err,"program error: not enough space for specpos");
             haserr = true;
@@ -482,13 +483,13 @@ int sufbwt2fmindex(Fmindex *fmindex,
   if (!haserr)
   {
     if (storeindexpos &&
-        fmindex->specpos.allocatedPairBwtidx !=
-        fmindex->specpos.nextfreePairBwtidx)
+        fmindex->specpos.allocatedGtPairBwtidx !=
+        fmindex->specpos.nextfreeGtPairBwtidx)
     {
       gt_error_set(err,"program error: too much space for specpos: "
                     "allocated = %lu != %lu = used",
-                    fmindex->specpos.allocatedPairBwtidx,
-                    fmindex->specpos.nextfreePairBwtidx);
+                    fmindex->specpos.allocatedGtPairBwtidx,
+                    fmindex->specpos.nextfreeGtPairBwtidx);
       haserr = true;
     }
   }
@@ -498,12 +499,12 @@ int sufbwt2fmindex(Fmindex *fmindex,
     finalizefmfrequencies(fmindex);
     if (fmindex->suffixlength > 0)
     {
-      ALLOCASSIGNSPACE(fmindex->boundarray,NULL,Seqposbound,
+      ALLOCASSIGNSPACE(fmindex->boundarray,NULL,GtUlongBound,
                        fmindex->numofcodes);
     }
     if (numofindexes == 1U)
     {
-      fmindex->longestsuffixpos = suffixarray.longest.valueseqpos;
+      fmindex->longestsuffixpos = suffixarray.longest.valueunsignedlong;
       freesuffixarray(&suffixarray);
     } else
     {
@@ -514,7 +515,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
       }
       if (!haserr)
       {
-        fmindex->longestsuffixpos = longest.valueseqpos;
+        fmindex->longestsuffixpos = longest.valueunsignedlong;
       }
       gt_fa_xfclose(outbwt);
       emissionmergedesa_wrap(&emmesa);

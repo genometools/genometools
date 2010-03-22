@@ -28,7 +28,7 @@
 #include "core/bitpackstring.h"
 #include "core/error.h"
 #include "core/str.h"
-#include "core/seqpos.h"
+
 #include "core/logger.h"
 #include "match/eis-encidxseq-param.h"
 #include "match/eis-headerid.h"
@@ -53,7 +53,7 @@
  */
 typedef BitOffset (*bitInsertFunc)(BitString cwDest, BitOffset cwOffset,
                                    BitString varDest, BitOffset varOffset,
-                                   Seqpos start, Seqpos len,
+                                   unsigned long start, unsigned long len,
                                    void *cbState);
 
 /**
@@ -73,13 +73,13 @@ struct extBitsRetrieval
   BitOffset cwOffset,           /**< offset in constant-width string
                                  * at which data was earlier stored by
                                  * a bitInsertFunc */
-    varOffset;                  /**< offset in variable-width string
+            varOffset;          /**< offset in variable-width string
                                  * at which data was earlier stored by
                                  * a bitInsertFunc  */
-  Seqpos start,                 /**< start position of region for
+  unsigned long start,          /**< start position of region for
                                  * which the retried information was
                                  * stored */
-    len;                        /**< length of region */
+                len;            /**< length of region */
   BitString cwPart,             /**< string containing
                                  * constant-width part of data  */
     varPart;                    /**< string containg variable-width data */
@@ -108,7 +108,7 @@ enum extBitsRetrievalFlags
  */
 struct seqStats
 {
-  Seqpos *symbolDistributionTable;          /**< indexed by symbol value */
+  unsigned long *symbolDistributionTable;   /**< indexed by symbol value */
   enum sourceEncType sourceAlphaType;       /**< defines alphabet width */
 };
 
@@ -121,7 +121,7 @@ struct varBitsEstimate
 
 struct segmentDesc
 {
-  Seqpos repeatCount;
+  unsigned long repeatCount;
   size_t len;
 };
 
@@ -168,8 +168,8 @@ EISGetAlphabet(const EISeq *seq);
  * @param hint provides cache and direction information for queries
  * based on previous queries
  */
-static inline Seqpos
-EISRank(EISeq *seq, Symbol sym, Seqpos pos, union EISHint *hint);
+static inline unsigned long
+EISRank(EISeq *seq, Symbol sym, unsigned long pos, union EISHint *hint);
 
 /**
  * \brief Return number of occurrences of symbol tSym in index up to
@@ -181,13 +181,13 @@ EISRank(EISeq *seq, Symbol sym, Seqpos pos, union EISHint *hint);
  * @param hint provides cache and direction information for queries
  * based on previous queries
  */
-static inline Seqpos
-EISSymTransformedRank(EISeq *seq, Symbol tSym, Seqpos pos,
+static inline unsigned long
+EISSymTransformedRank(EISeq *seq, Symbol tSym, unsigned long pos,
                       union EISHint *hint);
 
-struct SeqposPair
+struct GtUlongPair
 {
-  Seqpos a,b;
+  unsigned long a,b;
 };
 
 /**
@@ -204,8 +204,8 @@ struct SeqposPair
  * @return members a and b of returned struct contain Occ results for
  * posA and posB respectively
  */
-static inline struct SeqposPair
-EISPosPairRank(EISeq *seq, Symbol sym, Seqpos posA, Seqpos posB,
+static inline struct GtUlongPair
+EISPosPairRank(EISeq *seq, Symbol sym, unsigned long posA, unsigned long posB,
                union EISHint *hint);
 
 /**
@@ -223,9 +223,9 @@ EISPosPairRank(EISeq *seq, Symbol sym, Seqpos posA, Seqpos posB,
  * @return members a and b of returned struct contain Occ results for
  * posA and posB respectively
  */
-static inline struct SeqposPair
-EISSymTransformedPosPairRank(EISeq *seq, Symbol tSym, Seqpos posA, Seqpos posB,
-                             union EISHint *hint);
+static inline struct GtUlongPair
+EISSymTransformedPosPairRank(EISeq *seq, Symbol tSym, unsigned long posA,
+                             unsigned long posB, union EISHint *hint);
 
 /**
  * \brief Return number of occurrences of all symbols in selected
@@ -243,8 +243,8 @@ EISSymTransformedPosPairRank(EISeq *seq, Symbol tSym, Seqpos posA, Seqpos posB,
  * based on previous queries
  */
 static inline void
-EISRangeRank(EISeq *seq, AlphabetRangeID range, Seqpos pos, Seqpos *rankCounts,
-             union EISHint *hint);
+EISRangeRank(EISeq *seq, AlphabetRangeID range, unsigned long pos,
+             unsigned long *rankCounts, union EISHint *hint);
 
 /**
  * \brief Return number of occurrences of all symbols in selected
@@ -266,8 +266,9 @@ EISRangeRank(EISeq *seq, AlphabetRangeID range, Seqpos pos, Seqpos *rankCounts,
  * based on previous queries
  */
 static inline void
-EISPosPairRangeRank(EISeq *seq, AlphabetRangeID range, Seqpos posA, Seqpos posB,
-                    Seqpos *rankCounts, union EISHint *hint);
+EISPosPairRangeRank(EISeq *seq, AlphabetRangeID range, unsigned long posA,
+                    unsigned long posB, unsigned long *rankCounts,
+                    union EISHint *hint);
 
 /**
  * Presents the bits previously stored by a bitInsertFunc callback.
@@ -279,7 +280,7 @@ EISPosPairRangeRank(EISeq *seq, AlphabetRangeID range, Seqpos posA, Seqpos posB,
  * @param hint provides cache and direction information for queries
  */
 static inline void
-EISRetrieveExtraBits(EISeq *seq, Seqpos pos, int flags,
+EISRetrieveExtraBits(EISeq *seq, unsigned long pos, int flags,
                      struct extBitsRetrieval *retval, union EISHint *hint);
 
 /**
@@ -316,15 +317,15 @@ deleteExtBitsRetrieval(struct extBitsRetrieval *r);
 /**
  * \brief Find positions of nth symbol occurrence. TODO: NOT IMPLEMENTED
  */
-extern Seqpos
-EISSelect(EISeq *seq, Symbol sym, Seqpos count);
+extern unsigned long
+EISSelect(EISeq *seq, Symbol sym, unsigned long count);
 
 /**
  * \brief Query length of stored sequence.
  * @param seq indexed sequence object to query
  * @return length of sequence
  */
-static inline Seqpos
+static inline unsigned long
 EISLength(const EISeq *seq);
 
 /**
@@ -337,7 +338,7 @@ EISLength(const EISeq *seq);
  * @return value of symbol as encoded in original alphabet
  */
 static inline Symbol
-EISGetSym(EISeq *seq, Seqpos pos, EISHint hint);
+EISGetSym(EISeq *seq, unsigned long pos, EISHint hint);
 
 /**
  * \brief Return symbol at specified position. Comparable to c[pos] if the
@@ -350,7 +351,7 @@ EISGetSym(EISeq *seq, Seqpos pos, EISHint hint);
  * @return value of symbol as processed by encoding alphabet
  */
 static inline Symbol
-EISGetTransformedSym(EISeq *seq, Seqpos pos, EISHint hint);
+EISGetTransformedSym(EISeq *seq, unsigned long pos, EISHint hint);
 
 /**
  * \brief Construct new hinting structure to accelerate operations on
@@ -417,7 +418,7 @@ enum EISIntegrityCheckFlags
  * @param chkFlags select additional tests (see enum EISIntegrityCheckFlags)
  */
 extern enum EISIntegrityCheckResults
-EISVerifyIntegrity(EISeq *seqIdx, const GtStr *projectName, Seqpos skip,
+EISVerifyIntegrity(EISeq *seqIdx, const GtStr *projectName, unsigned long skip,
                    unsigned long tickPrint, FILE *fp, int chkFlags,
                    GtLogger *verbosity, GtError *err);
 
@@ -441,7 +442,8 @@ EISSeekToHeader(const EISeq *seqIdx, uint16_t headerID,
  * @return 0 if an I/O error occured wrt fp
  */
 static inline int
-EISPrintDiagsForPos(const EISeq *seqIdx, Seqpos pos, FILE *fp, EISHint hint);
+EISPrintDiagsForPos(const EISeq *seqIdx, unsigned long pos, FILE *fp,
+                    EISHint hint);
 
 #include "match/eis-encidxseq-siop.h"
 

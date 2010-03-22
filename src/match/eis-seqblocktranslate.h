@@ -27,7 +27,6 @@
 #include <string.h>
 #include <inttypes.h>
 
-#include "core/seqpos.h"
 #include "match/eis-bitpackseqpos.h"
 #include "match/eis-mrangealphabet.h"
 
@@ -196,7 +195,7 @@ symCountFromComposition(struct compList *compositionTable,
 static inline void
 addSymCountsFromComposition(struct compList *compositionTable,
                             unsigned alphabetSize,
-                            PermCompIndex compIndex, Seqpos *counts)
+                            PermCompIndex compIndex, unsigned long *counts)
 {
   BitOffset bitsPerComp, bitsPerCount;
   gt_assert(compositionTable);
@@ -205,7 +204,12 @@ addSymCountsFromComposition(struct compList *compositionTable,
   gt_assert(compIndex < compositionTable->numCompositions);
   gt_bsGetUniformSeqposArrayAdd(compositionTable->catCompsPerms,
                              compIndex * bitsPerComp, bitsPerCount,
-                             alphabetSize, counts);
+                             alphabetSize,
+#ifdef _LP64
+                             (uint64_t*) counts);
+#else
+                             (uint32_t*) counts);
+#endif
 }
 
 #endif

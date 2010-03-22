@@ -20,7 +20,7 @@
 
 #include "core/arraydef.h"
 #include "core/unused_api.h"
-#include "core/seqpos.h"
+
 #include "core/encodedsequence.h"
 
 typedef struct
@@ -103,8 +103,8 @@ void evalxdroparbitscoresright(Arbitraryscores *arbitscores,
                                GtArrayMyfrontvalue * fronts,
                                const GtEncodedsequence *str_useq,
                                const GtEncodedsequence *str_vseq,
-                               Seqpos useq,
-                               Seqpos vseq,
+                               unsigned long useq,
+                               unsigned long vseq,
                                int ulen,
                                int vlen,
                                Xdropscore xdropbelowscore);
@@ -115,8 +115,8 @@ void evalxdroparbitscoresright(Arbitraryscores *arbitscores,
                                      GtArrayMyfrontvalue * fronts,\
                                      const GtEncodedsequence *str_useq,\
                                      const GtEncodedsequence *str_vseq,\
-                                     Seqpos useq,\
-                                     Seqpos vseq,\
+                                     unsigned long useq,\
+                                     unsigned long vseq,\
                                      int ulen,\
                                      int vlen,\
                                      Xdropscore xdropbelowscore)
@@ -126,8 +126,8 @@ void evalxdroparbitscoresleft(Arbitraryscores * arbitscores,
                               GtArrayMyfrontvalue * fronts,
                               const GtEncodedsequence *str_useq,
                               const GtEncodedsequence *str_vseq,
-                              Seqpos useq,
-                              Seqpos vseq,
+                              unsigned long useq,
+                              unsigned long vseq,
                               int ulen,
                               int vlen,
                               Xdropscore xdropbelowscore);
@@ -138,8 +138,8 @@ void evalxdroparbitscoresleft(Arbitraryscores * arbitscores,
                                      GtArrayMyfrontvalue * fronts,\
                                      const GtEncodedsequence *str_useq,\
                                      const GtEncodedsequence *str_vseq,\
-                                     Seqpos useq,\
-                                     Seqpos vseq,\
+                                     unsigned long useq,\
+                                     unsigned long vseq,\
                                      int ulen,\
                                      int vlen,\
                                      Xdropscore xdropbelowscore)

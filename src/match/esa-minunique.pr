@@ -2,18 +2,18 @@
 extern "C" {
 #endif
 unsigned long suffixarrayuniqueforward (const void *genericindex,
-                                        unsigned long offset,
-                                        Seqpos left,
-                                        Seqpos right,
-                                        GT_UNUSED Seqpos *witnessposition,
-                                        const GtUchar *qstart,
-                                        const GtUchar *qend);
+                                       unsigned long offset,
+                                       unsigned long left,
+                                       unsigned long right,
+                                       GT_UNUSED unsigned long *witnessposition,
+                                       const GtUchar *qstart,
+                                       const GtUchar *qend);
 
 unsigned long suffixarraymstats (const void *genericindex,
                                  unsigned long offset,
-                                 Seqpos left,
-                                 Seqpos right,
-                                 Seqpos *witnessposition,
+                                 unsigned long left,
+                                 unsigned long right,
+                                 unsigned long *witnessposition,
                                  const GtUchar *qstart,
                                  const GtUchar *qend);
 

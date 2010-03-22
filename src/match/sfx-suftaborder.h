@@ -21,44 +21,44 @@
 #include "core/error_api.h"
 #include "core/encodedsequence.h"
 #include "core/readmode.h"
-#include "core/seqpos.h"
+
 #include "esa-seqread.h"
 
 void checkifprefixesareidentical(const char *filename,
                                  int line,
                                  const GtEncodedsequence *encseq,
                                  GtReadmode readmode,
-                                 const Seqpos *suftab,
+                                 const unsigned long *suftab,
                                  unsigned int prefixlength,
-                                 Seqpos depth,
-                                 Seqpos left,
-                                 Seqpos right);
+                                 unsigned long depth,
+                                 unsigned long left,
+                                 unsigned long right);
 
 void showentiresuftab(const GtEncodedsequence *encseq,
                       GtReadmode readmode,
-                      const Seqpos *suftab,
-                      Seqpos depth);
+                      const unsigned long *suftab,
+                      unsigned long depth);
 
 void checkentiresuftab(const char *filename,
                        int line,
                        const GtEncodedsequence *encseq,
                        GtReadmode readmode,
-                       const Seqpos *suftab,
-                       Seqpos numberofsuffixes,
+                       const unsigned long *suftab,
+                       unsigned long numberofsuffixes,
                        Sequentialsuffixarrayreader *ssar,
                        bool specialsareequal,
                        bool specialsareequalatdepth0,
-                       Seqpos depth,
+                       unsigned long depth,
                        GtError *err);
 
 void checksortedsuffixes(const char *filename,
                          int line,
                          const GtEncodedsequence *encseq,
                          GtReadmode readmode,
-                         const Seqpos *suftab,
-                         Seqpos numberofsuffixes,
+                         const unsigned long *suftab,
+                         unsigned long numberofsuffixes,
                          bool specialsareequal,
                          bool specialsareequalatdepth0,
-                         Seqpos depth);
+                         unsigned long depth);
 
 #endif

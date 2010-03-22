@@ -24,7 +24,7 @@
  */
 
 #include "match/eis-seqdatasrc.h"
-#include "core/seqpos.h"
+
 #include "match/eis-bwtseq-context-param.h"
 
 typedef struct BWTSeqContextRetriever BWTSeqContextRetriever;
@@ -38,18 +38,20 @@ typedef struct BWTSeqContextRetrieverFactory BWTSeqContextRetrieverFactory;
  * If equal CTX_MAP_ILOG_AUTOSIZE, uses @f$gt_log_2\mathrm{seqLen}@f$.
  */
 extern BWTSeqContextRetrieverFactory *
-newBWTSeqContextRetrieverFactory(Seqpos seqLen,
+newBWTSeqContextRetrieverFactory(unsigned long seqLen,
                                  short mapIntervalLog2);
 
 extern void
 deleteBWTSeqContextRetrieverFactory(BWTSeqContextRetrieverFactory *factory);
 
-extern Seqpos
-BWTSCRFReadAdvance(BWTSeqContextRetrieverFactory *factory, Seqpos chunkSize,
+extern unsigned long
+BWTSCRFReadAdvance(BWTSeqContextRetrieverFactory *factory,
+                   unsigned long chunkSize,
                    SeqDataReader readSfxIdx);
 
 extern size_t
-BWTSCRFMapAdvance(BWTSeqContextRetrieverFactory *factory, const Seqpos *src,
+BWTSCRFMapAdvance(BWTSeqContextRetrieverFactory *factory,
+                  const unsigned long *src,
                   size_t chunkSize);
 
 extern bool
@@ -86,7 +88,7 @@ deleteBWTSeqCR(BWTSeqContextRetriever *bwtSeqCR);
 
 struct SeqMark
 {
-  Seqpos textPos, bwtPos;
+  unsigned long textPos, bwtPos;
 };
 
 /**
@@ -95,14 +97,14 @@ struct SeqMark
  */
 extern void
 BWTSeqCRAccessSubseq(const BWTSeqContextRetriever *bwtSeqCR,
-                     Seqpos start, size_t len, Symbol subseq[]);
+                     unsigned long start, size_t len, Symbol subseq[]);
 
 /**
  * @brief Compute next position in original sequence following pos
  * that is marked for efficient retrieval.
  */
 static inline struct SeqMark
-BWTSeqCRNextMark(const BWTSeqContextRetriever *bwtSeqCR, Seqpos pos);
+BWTSeqCRNextMark(const BWTSeqContextRetriever *bwtSeqCR, unsigned long pos);
 
 #include "match/eis-bwtseq-context-siop.h"
 

@@ -38,16 +38,18 @@
 static bool checklengthanddistanceconstraints(LTRboundaries *boundaries,
                                              RepeatInfo *repeatinfo)
 {
-  Seqpos ulen, vlen, dist_between_LTRs;
+  unsigned long ulen, vlen, dist_between_LTRs;
 
   ulen = boundaries->leftLTR_3  - boundaries->leftLTR_5  + 1;
   vlen = boundaries->rightLTR_3 - boundaries->rightLTR_5 + 1;
   dist_between_LTRs = boundaries->rightLTR_5 - boundaries->leftLTR_5;
-  if (ulen > (Seqpos)repeatinfo->lmax || vlen > (Seqpos)repeatinfo->lmax ||
-     ulen < (Seqpos)repeatinfo->lmin || vlen < (Seqpos)repeatinfo->lmin ||
-     dist_between_LTRs > (Seqpos)repeatinfo->dmax ||
-     dist_between_LTRs < (Seqpos)repeatinfo->dmin ||
-     boundaries->leftLTR_3 >= boundaries->rightLTR_5)
+  if (ulen > (unsigned long)repeatinfo->lmax
+        || vlen > (unsigned long)repeatinfo->lmax
+        || ulen < (unsigned long)repeatinfo->lmin
+        || vlen < (unsigned long)repeatinfo->lmin
+        || dist_between_LTRs > (unsigned long)repeatinfo->dmax
+        || dist_between_LTRs < (unsigned long)repeatinfo->dmin
+        || boundaries->leftLTR_3 >= boundaries->rightLTR_5)
   {
     boundaries->lengthdistconstraint = false;
     boundaries->similarity = 0.0;
@@ -61,10 +63,10 @@ static bool checklengthanddistanceconstraints(LTRboundaries *boundaries,
 
 static void adjustboundariesfromXdropextension(Myxdropbest xdropbest_left,
                                                Myxdropbest xdropbest_right,
-                                               Seqpos seed1_startpos,
-                                               Seqpos seed2_startpos,
-                                               Seqpos seed1_endpos,
-                                               Seqpos seed2_endpos,
+                                               unsigned long seed1_startpos,
+                                               unsigned long seed2_startpos,
+                                               unsigned long seed1_endpos,
+                                               unsigned long seed2_endpos,
                                                LTRboundaries *boundaries)
 {
   /* left alignment */
@@ -107,7 +109,7 @@ int searchforLTRs(LTRharvestoptions *lo,
   GtArrayMyfrontvalue fronts;
   Myxdropbest xdropbest_left;
   Myxdropbest xdropbest_right;
-  Seqpos alilen = 0,
+  unsigned long alilen = 0,
          totallength,
          ulen,
          vlen,
@@ -137,7 +139,7 @@ int searchforLTRs(LTRharvestoptions *lo,
     /* printf("\n\nAlignments of repeat nr. = %u :\n", repeatcounter+1); */
 
     repeatptr = &(lo->repeatinfo.repeats.spaceRepeat[repeatcounter]);
-    alilen = ((Seqpos)lo->repeatinfo.lmax) - repeatptr->len;
+    alilen = ((unsigned long)lo->repeatinfo.lmax) - repeatptr->len;
 
     /**** left (reverse) xdrop alignment ****/
     GT_INITARRAY (&fronts, Myfrontvalue);
@@ -209,12 +211,12 @@ int searchforLTRs(LTRharvestoptions *lo,
     GT_GETNEXTFREEINARRAY(boundaries,arrayLTRboundaries,LTRboundaries,5);
 
     boundaries->contignumber = repeatptr->contignumber;
-    boundaries->leftLTR_5 = (Seqpos) 0;
-    boundaries->leftLTR_3 = (Seqpos) 0;
-    boundaries->rightLTR_5 = (Seqpos) 0;
-    boundaries->rightLTR_3 = (Seqpos) 0;
-    boundaries->lenleftTSD = (Seqpos) 0;
-    boundaries->lenrightTSD = (Seqpos) 0;
+    boundaries->leftLTR_5 = (unsigned long) 0;
+    boundaries->leftLTR_3 = (unsigned long) 0;
+    boundaries->rightLTR_5 = (unsigned long) 0;
+    boundaries->rightLTR_3 = (unsigned long) 0;
+    boundaries->lenleftTSD = (unsigned long) 0;
+    boundaries->lenrightTSD = (unsigned long) 0;
     boundaries->tsd = false;
     boundaries->motif_near_tsd = false;
     boundaries->motif_far_tsd = false;

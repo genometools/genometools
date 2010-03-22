@@ -26,16 +26,16 @@
 #include "match/eis-bwtseq-context-priv.h"
 #include "match/eis-encidxseq.h"
 
-static inline Seqpos
-numMapEntries(Seqpos seqLen, unsigned short mapIntervalLog2)
+static inline unsigned long
+numMapEntries(unsigned long seqLen, unsigned short mapIntervalLog2)
 {
   return (seqLen + (1<<mapIntervalLog2) - 1)>> mapIntervalLog2;
 }
 
 static inline struct SeqMark
-BWTSeqCRNextMark(const BWTSeqContextRetriever *bwtSeqCR, Seqpos pos)
+BWTSeqCRNextMark(const BWTSeqContextRetriever *bwtSeqCR, unsigned long pos)
 {
-  Seqpos seqLen, mapMask;
+  unsigned long seqLen, mapMask;
   struct SeqMark nextMark;
   gt_assert(bwtSeqCR);
   seqLen = BWTSeqLength(bwtSeqCR->bwtSeq);

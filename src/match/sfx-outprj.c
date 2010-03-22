@@ -25,8 +25,8 @@
 #include "core/str_array.h"
 #include "core/str.h"
 #include "core/unused_api.h"
-#include "core/seqpos.h"
-#include "defined-types.h"
+
+#include "core/defined-types.h"
 #include "core/format64.h"
 #include "spacedef.h"
 #include "esa-fileend.h"
@@ -35,23 +35,23 @@
 #include "stamp.h"
 
 #define PRJSPECIALOUT(VAL)\
-        fprintf(outprj,"%s=" FormatSeqpos "\n",#VAL,\
-                PRINTSeqposcast(getencseq##VAL(encseq)))
+        fprintf(outprj,"%s=%lu\n",#VAL,\
+                getencseq##VAL(encseq))
 
 static void showprjinfo(FILE *outprj,
                         GtReadmode readmode,
                         const GtEncodedsequence *encseq,
                         unsigned int prefixlength,
                         GT_UNUSED const Definedunsignedint *maxdepth,
-                        Seqpos numoflargelcpvalues,
-                        Seqpos maxbranchdepth,
-                        const DefinedSeqpos *longest)
+                        unsigned long numoflargelcpvalues,
+                        unsigned long maxbranchdepth,
+                        const Definedunsignedlong *longest)
 {
-  Seqpos totallength;
+  unsigned long totallength;
   unsigned long numofsequences;
 
   totallength = gt_encodedsequence_total_length(encseq);
-  fprintf(outprj,"totallength=" FormatSeqpos "\n",PRINTSeqposcast(totallength));
+  fprintf(outprj,"totallength=%lu\n",totallength);
   PRJSPECIALOUT(specialcharacters);
   PRJSPECIALOUT(specialranges);
   PRJSPECIALOUT(realspecialranges);
@@ -63,8 +63,8 @@ static void showprjinfo(FILE *outprj,
   fprintf(outprj,"numofquerysequences=0\n");
   if (longest->defined)
   {
-    fprintf(outprj,"longest=" FormatSeqpos "\n",
-            PRINTSeqposcast(longest->valueseqpos));
+    fprintf(outprj,"longest=%lu\n",
+            longest->valueunsignedlong);
   }
   fprintf(outprj,"prefixlength=%u\n",prefixlength);
   /*
@@ -73,12 +73,12 @@ static void showprjinfo(FILE *outprj,
     fprintf(outprj,"maxdepth=%u\n",maxdepth->valueunsignedint);
   }
   */
-  fprintf(outprj,"largelcpvalues=" FormatSeqpos "\n",
-                   PRINTSeqposcast(numoflargelcpvalues));
-  fprintf(outprj,"maxbranchdepth=" FormatSeqpos "\n",
-                   PRINTSeqposcast(maxbranchdepth));
+  fprintf(outprj,"largelcpvalues=%lu\n",
+                   numoflargelcpvalues);
+  fprintf(outprj,"maxbranchdepth=%lu\n",
+                   maxbranchdepth);
   fprintf(outprj,"integersize=%u\n",
-                  (unsigned int) (sizeof (Seqpos) * CHAR_BIT));
+                  (unsigned int) (sizeof (unsigned long) * CHAR_BIT));
   fprintf(outprj,"littleendian=%c\n",gt_is_little_endian() ? '1' : '0');
   fprintf(outprj,"readmode=%u\n",(unsigned int) readmode);
 }
@@ -88,9 +88,9 @@ int outprjfile(const GtStr *indexname,
                const GtEncodedsequence *encseq,
                unsigned int prefixlength,
                const Definedunsignedint *maxdepth,
-               Seqpos numoflargelcpvalues,
-               Seqpos maxbranchdepth,
-               const DefinedSeqpos *longest,
+               unsigned long numoflargelcpvalues,
+               unsigned long maxbranchdepth,
+               const Definedunsignedlong *longest,
                GtError *err)
 {
   FILE *prjfp;

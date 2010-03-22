@@ -19,14 +19,14 @@
 #define SFX_LINLCP_H
 
 #include "compressedtab.h"
-#include "core/seqpos.h"
+
 #include "core/encodedsequence.h"
 
 Compressedtable *lcp9_manzini(Compressedtable *spacefortab,
                               const GtEncodedsequence *encseq,
                               GtReadmode readmode,
-                              Seqpos partwidth,
-                              Seqpos totallength,
-                              const Seqpos *sortedsuffixes);
+                              unsigned long partwidth,
+                              unsigned long totallength,
+                              const unsigned long *sortedsuffixes);
 
 #endif

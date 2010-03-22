@@ -132,8 +132,8 @@ static void singlequerymatchspacedseed(Limdfsresources *limdfsresources,
 static void showmatch(GT_UNUSED void *processinfo,
                       const GtMatch *match)
 {
-  printf(FormatSeqpos "\t",PRINTSeqposcast(match->dblen));
-  printf(FormatSeqpos "\n",PRINTSeqposcast(match->dbstartpos));
+  printf("%lu\t",match->dblen);
+  printf("%lu\n",match->dbstartpos);
 }
 
 #ifdef WITHONLINE
@@ -143,7 +143,7 @@ static void onlinespacedseedsearch(const GtEncodedsequence *encseq,
 {
   Windowiterator *wit;
   const GtUchar *buffer;
-  Seqpos currentpos, totallength;
+  unsigned long currentpos, totallength;
   unsigned long firstpos, windowschecked = 0;
   Bitsequence bitmask;
   bool matched;

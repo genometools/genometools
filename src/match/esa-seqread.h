@@ -20,7 +20,7 @@
 #include <stdbool.h>
 #include "core/str.h"
 #include "core/error.h"
-#include "core/seqpos.h"
+
 #include "core/encodedsequence.h"
 #include "sarr-def.h"
 #include "lcpoverflow.h"
@@ -37,7 +37,7 @@ typedef enum
 typedef struct
 {
   Suffixarray *suffixarray;
-  Seqpos numberofsuffixes,
+  unsigned long numberofsuffixes,
          nextsuftabindex, /* for SEQ_mappedboth | SEQ_suftabfrommemory */
          nextlcptabindex, /* for SEQ_mappedboth */
          largelcpindex;   /* SEQ_mappedboth */
@@ -57,7 +57,7 @@ typedef struct
                     (SSAR)->largelcpindex++].value;\
           } else\
           {\
-            VALUE = (Seqpos) tmpsmalllcpvalue;\
+            VALUE = (unsigned long) tmpsmalllcpvalue;\
           }\
         }
 
@@ -78,15 +78,15 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromRAM(
 
 void updateSequentialsuffixarrayreaderfromRAM(
                     Sequentialsuffixarrayreader *ssar,
-                    const Seqpos *suftab,
+                    const unsigned long *suftab,
                     bool firstpage,
-                    Seqpos numberofsuffixes);
+                    unsigned long numberofsuffixes);
 
-int nextSequentiallcpvalue(Seqpos *currentlcp,
+int nextSequentiallcpvalue(unsigned long *currentlcp,
                            Sequentialsuffixarrayreader *ssar,
                            GtError *err);
 
-int nextSequentialsuftabvalue(Seqpos *currentsuffix,
+int nextSequentialsuftabvalue(unsigned long *currentsuffix,
                               Sequentialsuffixarrayreader *ssar);
 
 #endif
@@ -105,7 +105,7 @@ const GtEncodedsequence *encseqSequentialsuffixarrayreader(
 GtReadmode readmodeSequentialsuffixarrayreader(
                           const Sequentialsuffixarrayreader *ssar);
 
-const Seqpos *suftabSequentialsuffixarrayreader(
+const unsigned long *suftabSequentialsuffixarrayreader(
               const Sequentialsuffixarrayreader *ssar);
 
 const Suffixarray *suffixarraySequentialsuffixarrayreader(

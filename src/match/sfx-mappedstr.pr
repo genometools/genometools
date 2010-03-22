@@ -4,13 +4,15 @@ extern "C" {
 void getencseqkmers(
         const GtEncodedsequence *encseq,
         GtReadmode readmode,
-        void(*processkmercode)(void *,Codetype,Seqpos,const Firstspecialpos *),
+        void(*processkmercode)(void *,Codetype,unsigned long,
+                               const Firstspecialpos *),
         void *processkmercodeinfo,
         unsigned int kmersize);
 
 int getfastastreamkmers(
         const GtStrArray *filenametab,
-        void(*processkmercode)(void *,Codetype,Seqpos,const Firstspecialpos *),
+        void(*processkmercode)(void *,Codetype,unsigned long,
+                               const Firstspecialpos *),
         void *processkmercodeinfo,
         unsigned int numofchars,
         unsigned int kmersize,

@@ -28,7 +28,7 @@
 void removeduplicates(GtArrayLTRboundaries *arrayLTRboundaries)
 {
   unsigned long i, j;
-  Seqpos startpos_i, endpos_i, startpos_j, endpos_j;
+  unsigned long startpos_i, endpos_i, startpos_j, endpos_j;
   LTRboundaries *boundaries_i,
                 *boundaries_j;
 
@@ -70,7 +70,7 @@ void removeoverlapswithlowersimilarity(
   )
 {
   unsigned long i, j;
-  Seqpos startpos_i, endpos_i, startpos_j, endpos_j;
+  unsigned long startpos_i, endpos_i, startpos_j, endpos_j;
   LTRboundaries *boundaries_i,
                 *boundaries_j;
 

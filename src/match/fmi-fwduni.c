@@ -26,15 +26,15 @@
 
 unsigned long skfmuniqueforward (const void *genericindex,
                                  GT_UNUSED unsigned long offset,
-                                 GT_UNUSED Seqpos left,
-                                 GT_UNUSED Seqpos right,
-                                 GT_UNUSED Seqpos *witnessposition,
+                                 GT_UNUSED unsigned long left,
+                                 GT_UNUSED unsigned long right,
+                                 GT_UNUSED unsigned long *witnessposition,
                                  const GtUchar *qstart,
                                  const GtUchar *qend)
 {
   GtUchar cc;
   const GtUchar *qptr;
-  Seqposbound bwtbound;
+  GtUlongBound bwtbound;
   const Fmindex *fmindex = (Fmindex *) genericindex;
 
   gt_assert(qstart < qend);
@@ -68,17 +68,17 @@ unsigned long skfmuniqueforward (const void *genericindex,
 
 unsigned long skfmmstats (const void *genericindex,
                           GT_UNUSED unsigned long offset,
-                          GT_UNUSED Seqpos left,
-                          GT_UNUSED Seqpos right,
-                          Seqpos *witnessposition,
+                          GT_UNUSED unsigned long left,
+                          GT_UNUSED unsigned long right,
+                          unsigned long *witnessposition,
                           const GtUchar *qstart,
                           const GtUchar *qend)
 {
   GtUchar cc;
   const GtUchar *qptr;
-  Seqpos prevlbound;
+  unsigned long prevlbound;
   unsigned long matchlength;
-  Seqposbound bwtbound;
+  GtUlongBound bwtbound;
   const Fmindex *fmindex = (Fmindex *) genericindex;
 
   gt_assert(qstart < qend);
@@ -115,7 +115,7 @@ unsigned long skfmmstats (const void *genericindex,
   matchlength = (unsigned long) (qptr - qstart);
   if (witnessposition != NULL)
   {
-    Seqpos startpos = fmfindtextpos (fmindex,prevlbound);
+    unsigned long startpos = fmfindtextpos (fmindex,prevlbound);
     gt_assert((fmindex->bwtlength-1) >= (startpos + matchlength));
     *witnessposition = (fmindex->bwtlength-1) - (startpos + matchlength);
   }

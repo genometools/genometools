@@ -20,10 +20,10 @@
 #include <stdio.h>
 #include "core/error_api.h"
 #include "core/str.h"
-#include "defined-types.h"
+#include "core/defined-types.h"
 #include "core/encodedsequence.h"
 #include "intcode-def.h"
-#include "core/seqpos.h"
+
 #include "sfx-strategy.h"
 #include "sfx-copysort.h"
 #include "bcktab.h"
@@ -32,32 +32,32 @@ typedef struct Outlcpinfo Outlcpinfo;
 
 typedef struct
 {
-  Seqpos *sortspace,
+  unsigned long *sortspace,
          offset;    /* negative offset */
-  DefinedSeqpos longest;
+  Definedunsignedlong longest;
 } Suftab;
 
 Outlcpinfo *newOutlcpinfo(const GtStr *indexname,
                           unsigned int prefixlength,
                           unsigned int numofchars,
-                          Seqpos totallength,
+                          unsigned long totallength,
                           bool assideeffect,
                           GtError *err);
 
 void freeOutlcptab(Outlcpinfo **outlcpinfoptr);
 
-Seqpos getnumoflargelcpvalues(const Outlcpinfo *outlcpinfo);
+unsigned long getnumoflargelcpvalues(const Outlcpinfo *outlcpinfo);
 
-Seqpos getmaxbranchdepth(const Outlcpinfo *outlcpinfo);
+unsigned long getmaxbranchdepth(const Outlcpinfo *outlcpinfo);
 
-void qsufsort(Seqpos *sortspace,
+void qsufsort(unsigned long *sortspace,
               int mmapfiledesc,
-              Seqpos *longest,
+              unsigned long *longest,
               const GtEncodedsequence *encseq,
               GtReadmode readmode,
               Codetype mincode,
               Codetype maxcode,
-              Seqpos partwidth,
+              unsigned long partwidth,
               Bcktab *bcktab,
               unsigned int numofchars,
               unsigned int prefixlength,
@@ -71,7 +71,7 @@ void sortallbuckets(Suftab *suftab,
                     GtReadmode readmode,
                     Codetype mincode,
                     Codetype maxcode,
-                    Seqpos partwidth,
+                    unsigned long partwidth,
                     Bcktab *bcktab,
                     unsigned int numofchars,
                     unsigned int prefixlength,
@@ -80,7 +80,7 @@ void sortallbuckets(Suftab *suftab,
                     unsigned long long *bucketiterstep,
                     GtLogger *logger);
 
-void sortbucketofsuffixes(Seqpos *suffixestobesorted,
+void sortbucketofsuffixes(unsigned long *suffixestobesorted,
                           GtBucketspec2 *bucketspec2,
                           unsigned long numberofsuffixes,
                           const GtEncodedsequence *encseq,
@@ -92,8 +92,10 @@ void sortbucketofsuffixes(Seqpos *suffixestobesorted,
                           unsigned int prefixlength,
                           const Sfxstrategy *sfxstrategy,
                           void *voiddcov,
-                          void (*dc_processunsortedrange)(void *,Seqpos *,
-                                                          Seqpos *,Seqpos),
+                          void (*dc_processunsortedrange)(void *,
+                                                          unsigned long *,
+                                                          unsigned long *,
+                                                          unsigned long),
                           GtLogger *logger);
 
 #endif

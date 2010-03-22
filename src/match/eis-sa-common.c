@@ -21,7 +21,9 @@
 #include "core/encodedsequence.h"
 
 extern size_t
-translateSuftab2BWT(struct encSeqTrState *trState, GtUchar *dest, Seqpos *src,
+translateSuftab2BWT(struct encSeqTrState *trState,
+                    GtUchar *dest,
+                    unsigned long *src,
                     size_t len)
 {
   size_t i;
@@ -35,7 +37,7 @@ translateSuftab2BWT(struct encSeqTrState *trState, GtUchar *dest, Seqpos *src,
 
 static inline void
 writeLCPVal(const GtEncodedsequence *encseq, GtReadmode readmode,
-            Seqpos *dest, Seqpos a, Seqpos b)
+            unsigned long *dest, unsigned long a, unsigned long b)
 {
 #ifndef NDEBUG
   int cmp =
@@ -53,24 +55,26 @@ writeLCPVal(const GtEncodedsequence *encseq, GtReadmode readmode,
 #ifndef NDEBUG
   if (cmp > 0)
   {
-    fprintf(stderr, ": cmp " FormatSeqpos " " FormatSeqpos " = %d",
-            PRINTSeqposcast(a), PRINTSeqposcast(b), cmp);
+    fprintf(stderr, ": cmp %lu %lu = %d",
+            a, b, cmp);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 #endif /* NDEBUG */
 }
 
 extern size_t
-translateSuftab2LCP(struct encSeqLCPState *lcpState, Seqpos *dest, Seqpos *src,
+translateSuftab2LCP(struct encSeqLCPState *lcpState,
+                    unsigned long *dest,
+                    unsigned long *src,
                     size_t len)
 {
   size_t elemsLeft = len;
-  Seqpos lastSufIdx;
+  unsigned long lastSufIdx;
   gt_assert(lcpState && dest && src);
   lastSufIdx = lcpState->lastSufIdx;
   if (elemsLeft)
   {
-    Seqpos nextSufIdx = *src;
+    unsigned long nextSufIdx = *src;
     if (lastSufIdx != -1)
     {
       writeLCPVal(lcpState->encseq, lcpState->readmode, dest,

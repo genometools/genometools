@@ -60,15 +60,15 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
   unsigned int linenum;
   unsigned long currentlinelength;
 
-  DefinedSeqpos maxbranchdepth;
+  Definedunsignedlong maxbranchdepth;
   size_t dbfilelen = strlen(DBFILEKEY);
   bool haserr = false;
   GtArray *riktab;
   GtStr *currentline;
   /* the following five variables are local as the parsed values are
      not required: they are determined by reading the encodedsequence */
-  Seqpos totallength;
-  Specialcharinfo specialcharinfo;
+  unsigned long totallength;
+  GtSpecialcharinfo specialcharinfo;
   unsigned long numofsequences,
                 numofdbsequences,
                 numofquerysequences;
@@ -89,13 +89,13 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
   SETREADINTKEYS("numofsequences",&numofsequences,NULL);
   SETREADINTKEYS("numofdbsequences",&numofdbsequences,NULL);
   setreadintkeys(riktab,"numofquerysequences",&numofquerysequences,0,NULL);
-  SETREADINTKEYS("longest",&suffixarray->longest.valueseqpos,
+  SETREADINTKEYS("longest",&suffixarray->longest.valueunsignedlong,
                            &suffixarray->longest.defined);
   SETREADINTKEYS("prefixlength",&suffixarray->prefixlength,NULL);
   SETREADINTKEYS("largelcpvalues",
-                 &suffixarray->numoflargelcpvalues.valueseqpos,
+                 &suffixarray->numoflargelcpvalues.valueunsignedlong,
                  &suffixarray->numoflargelcpvalues.defined);
-  SETREADINTKEYS("maxbranchdepth",&maxbranchdepth.valueseqpos,
+  SETREADINTKEYS("maxbranchdepth",&maxbranchdepth.valueunsignedlong,
                  &maxbranchdepth.defined);
   SETREADINTKEYS("integersize",&integersize,NULL);
   SETREADINTKEYS("littleendian",&littleendian,NULL);
@@ -138,12 +138,12 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
                   gt_str_get(indexname),PROJECTFILESUFFIX);
     haserr = true;
   }
-  if (!haserr && integersize != (uint32_t) (sizeof (Seqpos) * CHAR_BIT))
+  if (!haserr && integersize != (uint32_t) (sizeof (unsigned long) * CHAR_BIT))
   {
     gt_error_set(err,"index was generated for %u-bit integers while "
                       "this program uses %u-bit integers",
                       (unsigned int) integersize,
-                      (unsigned int) (sizeof (Seqpos) * CHAR_BIT));
+                      (unsigned int) (sizeof (unsigned long) * CHAR_BIT));
     haserr = true;
   }
   if (!haserr)
@@ -260,7 +260,7 @@ static int inputsuffixarray(bool map,
                             GtError *err)
 {
   bool haserr = false;
-  Seqpos totallength = 0;
+  unsigned long totallength = 0;
 
   gt_error_check(err);
   initsuffixarray(suffixarray);
@@ -295,7 +295,7 @@ static int inputsuffixarray(bool map,
         = gt_mmap_check_filename_with_suffix(indexname,
                                              SUFTABSUFFIX,
                                              (unsigned long) (totallength+1),
-                                             sizeof (Seqpos),
+                                             sizeof (unsigned long),
                                              err);
       if (suffixarray->suftab == NULL)
       {
@@ -303,7 +303,7 @@ static int inputsuffixarray(bool map,
       }
     } else
     {
-      INITBufferedfile(indexname,&suffixarray->suftabstream,Seqpos,
+      INITBufferedfile(indexname,&suffixarray->suftabstream,unsigned long,
                        SUFTABSUFFIX);
     }
     if (!haserr && !suffixarray->longest.defined)
@@ -341,7 +341,7 @@ static int inputsuffixarray(bool map,
       gt_error_set(err,"numoflargelcpvalues not defined");
       haserr = true;
     }
-    if (!haserr && suffixarray->numoflargelcpvalues.valueseqpos > 0)
+    if (!haserr && suffixarray->numoflargelcpvalues.valueunsignedlong > 0)
     {
       if (map)
       {
@@ -350,7 +350,7 @@ static int inputsuffixarray(bool map,
                                                LARGELCPTABSUFFIX,
                                                (unsigned long)
                                                suffixarray->numoflargelcpvalues.
-                                                            valueseqpos,
+                                                            valueunsignedlong,
                                                sizeof (Largelcpvalue),
                                                err);
         if (suffixarray->llvtab == NULL)

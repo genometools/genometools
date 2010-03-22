@@ -46,7 +46,7 @@ typedef struct
 
 struct Bcktab
 {
-  Seqpos *leftborder;
+  unsigned long *leftborder;
   Codetype numofallcodes,
            numofspecialcodes,
            **multimappower,
@@ -99,8 +99,8 @@ uint64_t sizeofbuckettable(unsigned int numofchars,
   }
   sizeofrep
     = (uint64_t)
-      sizeof (Seqpos) * (numofallcodes + 1.0) +
-      sizeof (Seqpos) * numofspecialcodes +
+      sizeof (unsigned long) * (numofallcodes + 1.0) +
+      sizeof (unsigned long) * numofspecialcodes +
       sizeof (unsigned long) * numofdistpfxidxcounters(basepower,prefixlength);
   FREESPACE(basepower);
   return sizeofrep;
@@ -197,7 +197,7 @@ Bcktab *allocBcktab(unsigned int numofchars,
   }
   if (!haserr)
   {
-    ALLOCASSIGNSPACE(bcktab->leftborder,NULL,Seqpos,
+    ALLOCASSIGNSPACE(bcktab->leftborder,NULL,unsigned long,
                      bcktab->numofallcodes+1);
     /*
     gt_logger_log(logger,"sizeof (leftborder)=%lu",
@@ -239,9 +239,9 @@ static void assignbcktabmapspecification(GtArrayMapspecification *mapspectable,
   Mapspecification *mapspecptr;
   unsigned long numofcounters;
 
-  NEWMAPSPEC(bcktab->leftborder,Seqpos,
+  NEWMAPSPEC(bcktab->leftborder,GtUlong,
              (unsigned long) (bcktab->numofallcodes+1));
-  NEWMAPSPEC(bcktab->countspecialcodes,Unsignedlong,
+  NEWMAPSPEC(bcktab->countspecialcodes,GtUlong,
              (unsigned long) bcktab->numofspecialcodes);
   numofcounters = numofdistpfxidxcounters((const Codetype *) bcktab->basepower,
                                           bcktab->prefixlength);
@@ -252,7 +252,7 @@ static void assignbcktabmapspecification(GtArrayMapspecification *mapspectable,
       ALLOCASSIGNSPACE(bcktab->distpfxidx,NULL,unsigned long *,
                        bcktab->prefixlength-1);
     }
-    NEWMAPSPEC(bcktab->distpfxidx[0],Unsignedlong,numofcounters);
+    NEWMAPSPEC(bcktab->distpfxidx[0],GtUlong,numofcounters);
   }
 }
 
@@ -395,7 +395,7 @@ void updatebckspecials(Bcktab *bcktab,
 }
 
 void addfinalbckspecials(Bcktab *bcktab,unsigned int numofchars,
-                         Seqpos specialcharacters)
+                         unsigned long specialcharacters)
 {
   Codetype specialcode;
 
@@ -505,7 +505,7 @@ unsigned int calcbucketboundsparts(Bucketspecification *bucketspec,
                                    const Bcktab *bcktab,
                                    Codetype code,
                                    Codetype maxcode,
-                                   Seqpos totalwidth,
+                                   unsigned long totalwidth,
                                    unsigned int rightchar,
                                    unsigned int numofchars)
 {
@@ -562,10 +562,10 @@ void calcbucketboundaries(Bucketspecification *bucketspec,
                                numofchars);
 }
 
-Seqpos calcbucketrightbounds(const Bcktab *bcktab,
+unsigned long calcbucketrightbounds(const Bcktab *bcktab,
                              Codetype code,
                              Codetype maxcode,
-                             Seqpos totalwidth)
+                             unsigned long totalwidth)
 {
   if (code == maxcode)
   {
@@ -593,13 +593,13 @@ static void updatelog2values(unsigned long *tab,unsigned long maxvalue)
 
 static unsigned int calc_optimalnumofbits(unsigned short *logofremaining,
                                           const unsigned long *log2tab,
-                                          Seqpos totallength)
+                                          unsigned long totallength)
 {
   unsigned int lastbitset = 0, maxbits, optbits = 0;
   unsigned long currentsum = 0, total = 0, optcurrentsum = 0;
   unsigned short tmplogofremaining;
   const size_t size_entry = sizeof (uint32_t) +
-                            sizeof (Seqpos) +
+                            sizeof (unsigned long) +
                             sizeof (unsigned long);
   size_t savedbitsinbytes,
          hashtablesize, saved, maxsaved = 0;
@@ -623,7 +623,8 @@ static unsigned int calc_optimalnumofbits(unsigned short *logofremaining,
       tmplogofremaining = (unsigned short) gt_determinebitspervalue(
                                            (uint64_t) (total - currentsum));
       hashtablesize = ((1 << tmplogofremaining)-1) * size_entry;
-      savedbitsinbytes = (totallength/CHAR_BIT) * (lastbitset - maxbits + 1);
+      savedbitsinbytes =
+                   (size_t) (totallength/CHAR_BIT) * (lastbitset - maxbits + 1);
 #ifdef WITHsave
       printf("savedbitsintbytes=%lu,hashtablesize=%lu\n",
               (unsigned long) savedbitsinbytes,(unsigned long) hashtablesize);
@@ -661,10 +662,11 @@ static unsigned int calc_optimalnumofbits(unsigned short *logofremaining,
 void determinemaxbucketsize(Bcktab *bcktab,
                             const Codetype mincode,
                             const Codetype maxcode,
-                            Seqpos partwidth,
+                            unsigned long partwidth,
                             unsigned int numofchars,
                             bool hashexceptions,
-                            Seqpos totallength) /* relevant for hashexception */
+                            /* relevant for hashexception */
+                            unsigned long totallength)
 {
   unsigned int rightchar = (unsigned int) (mincode % numofchars);
   Bucketspecification bucketspec;
@@ -920,7 +922,7 @@ Codetype bcktab_filltable(const Bcktab *bcktab,unsigned int idx)
   return bcktab->filltable[idx];
 }
 
-Seqpos *bcktab_leftborder(Bcktab *bcktab)
+unsigned long *bcktab_leftborder(Bcktab *bcktab)
 {
   return bcktab->leftborder;
 }
@@ -930,9 +932,10 @@ Codetype bcktab_numofallcodes(const Bcktab *bcktab)
   return bcktab->numofallcodes;
 }
 
-void bcktab_leftborderpartialsums(Bcktab *bcktab,Seqpos numofsuffixestosort)
+void bcktab_leftborderpartialsums(Bcktab *bcktab,
+                                  unsigned long numofsuffixestosort)
 {
-  Seqpos *optr;
+  unsigned long *optr;
 
   for (optr = bcktab->leftborder + 1;
        optr < bcktab->leftborder + bcktab->numofallcodes; optr++)
@@ -953,13 +956,13 @@ void consistencyofsuffix(int line,
 {
   unsigned int idx, firstspecial = bcktab->prefixlength, gramfirstspecial;
   Codetype qgramcode = 0;
-  Seqpos totallength;
+  unsigned long totallength;
   GtUchar cc = 0;
 
   totallength = gt_encodedsequence_total_length(encseq);
   for (idx=0; idx<bcktab->prefixlength; idx++)
   {
-    if ((Seqpos) (suffix->startpos + idx) >= totallength)
+    if ((unsigned long) (suffix->startpos + idx) >= totallength)
     {
       firstspecial = idx;
       break;

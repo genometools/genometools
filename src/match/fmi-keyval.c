@@ -20,14 +20,16 @@
 #include "fmindex.h"
 #include "core/safecast-gen.h"
 
-Seqpos determinenumofcodes(unsigned int numofchars,unsigned int prefixlength)
+unsigned long determinenumofcodes(unsigned int numofchars,
+                                  unsigned int prefixlength)
 {
-  return (Seqpos) pow((double) numofchars,(double) prefixlength);
+  return (unsigned long) pow((double) numofchars,(double) prefixlength);
 }
 
-Seqpos determinenumberofspecialstostore(const Specialcharinfo *specialcharinfo)
+unsigned long determinenumberofspecialstostore(const GtSpecialcharinfo
+                                                               *specialcharinfo)
 {
-  Seqpos addprefixsuffix = 0;
+  unsigned long addprefixsuffix = 0;
 
   if (specialcharinfo->lengthofspecialprefix > 0)
   {
@@ -43,28 +45,29 @@ Seqpos determinenumberofspecialstostore(const Specialcharinfo *specialcharinfo)
  DECLARESAFECASTFUNCTION(uint64_t,uint64_t,unsigned long,unsigned_long)
 
 static unsigned long determinefmindexsize (const Fmindex *fm,
-                                           const Specialcharinfo
+                                           const GtSpecialcharinfo
                                               *specialcharinfo,
                                            unsigned int suffixlength,
                                            bool storeindexpos)
 {
   uint64_t sumsize = 0;
 
-  sumsize += (uint64_t) sizeof (Seqpos) * (uint64_t) TFREQSIZE(fm->mapsize);
-  sumsize += (uint64_t) sizeof (Seqpos) *
+  sumsize +=
+          (uint64_t) sizeof (unsigned long) * (uint64_t) TFREQSIZE(fm->mapsize);
+  sumsize += (uint64_t) sizeof (unsigned long) *
              (uint64_t) SUPERBFREQSIZE(fm->mapsize,fm->nofsuperblocks);
   if (storeindexpos)
   {
-    sumsize += (uint64_t) sizeof (Seqpos) *
+    sumsize += (uint64_t) sizeof (unsigned long) *
                (uint64_t) MARKPOSTABLELENGTH(fm->bwtlength,fm->markdist);
   }
   if (suffixlength > 0)
   {
-    sumsize += (uint64_t) sizeof (Seqposbound) * (uint64_t) fm->numofcodes;
+    sumsize += (uint64_t) sizeof (GtUlongBound) * (uint64_t) fm->numofcodes;
   }
   if (storeindexpos)
   {
-    sumsize += (uint64_t) sizeof (PairBwtidx) *
+    sumsize += (uint64_t) sizeof (GtPairBwtidx) *
                (uint64_t) determinenumberofspecialstostore(specialcharinfo);
   }
   sumsize += (uint64_t) sizeof (GtUchar) *
@@ -73,8 +76,8 @@ static unsigned long determinefmindexsize (const Fmindex *fm,
 }
 
 void computefmkeyvalues (Fmindex *fm,
-                         const Specialcharinfo *specialcharinfo,
-                         Seqpos bwtlength,
+                         const GtSpecialcharinfo *specialcharinfo,
+                         unsigned long bwtlength,
                          unsigned int log2bsize,
                          unsigned int log2markdist,
                          unsigned int numofchars,
@@ -89,12 +92,12 @@ void computefmkeyvalues (Fmindex *fm,
   fm->bsize = (unsigned int) GT_POW2 (fm->log2bsize);
   fm->bsizehalve = GT_DIV2(fm->bsize);
   fm->superbsize = (unsigned int) GT_POW2 (fm->log2superbsize);
-  fm->nofblocks = (Seqpos) (fm->bwtlength / fm->bsize) + 1;
-  fm->nofsuperblocks = (Seqpos) (fm->bwtlength / fm->superbsize) + 2;
-  fm->markdist = (Seqpos) GT_POW2 (fm->log2markdist);
-  fm->markdistminus1 = (Seqpos) (fm->markdist - 1);
-  fm->negatebsizeones = ~ (Seqpos) (fm->bsize - 1);
-  fm->negatesuperbsizeones = ~ (Seqpos) (fm->superbsize - 1);
+  fm->nofblocks = (unsigned long) (fm->bwtlength / fm->bsize) + 1;
+  fm->nofsuperblocks = (unsigned long) (fm->bwtlength / fm->superbsize) + 2;
+  fm->markdist = (unsigned long) GT_POW2 (fm->log2markdist);
+  fm->markdistminus1 = (unsigned long) (fm->markdist - 1);
+  fm->negatebsizeones = ~ (unsigned long) (fm->bsize - 1);
+  fm->negatesuperbsizeones = ~ (unsigned long) (fm->superbsize - 1);
   fm->log2superbsizeminuslog2bsize = fm->log2superbsize - fm->log2bsize;
   fm->mapsize = numofchars+1;
   fm->suffixlength = suffixlength;

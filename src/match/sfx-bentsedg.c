@@ -31,7 +31,7 @@
 #include "turnwheels.h"
 #include "esa-fileend.h"
 #include "sfx-bentsedg.h"
-#include "core/seqpos.h"
+
 #include "bcktab.h"
 #include "bltrie-ssort.h"
 #include "lcpoverflow.h"
@@ -40,7 +40,7 @@
 #include "kmer2string.h"
 #include "stamp.h"
 
-#define UNIQUEINT(P)           ((Seqpos) ((P) + GT_COMPAREOFFSET))
+#define UNIQUEINT(P)           ((unsigned long) ((P) + GT_COMPAREOFFSET))
 #define ACCESSCHAR(POS)        gt_encodedsequence_getencodedchar(bsr->encseq, \
                                                              POS,bsr->readmode)
 #define ACCESSCHARSEQ(POS,ESR) gt_encodedsequence_sequentialgetencodedchar( \
@@ -51,11 +51,11 @@
 
 #define DEREFSTOPPOSSEQ(VAR,PTR,STOPPOS,ESR)\
         (((PTR) < (STOPPOS) && ISNOTSPECIAL(VAR = ACCESSCHARSEQ(PTR,ESR))) ?\
-        ((Seqpos) VAR) : UNIQUEINT(PTR))
+        ((unsigned long) VAR) : UNIQUEINT(PTR))
 
 #define DEREFSEQ(VAR,PTR,ESR) DEREFSTOPPOSSEQ(VAR,PTR,bsr->totallength,ESR)
 
-#define LCPINDEX(LCPSUBTAB,I)   (Seqpos) ((I) - (LCPSUBTAB)->suftabbase)
+#define LCPINDEX(LCPSUBTAB,I)   (unsigned long) ((I) - (LCPSUBTAB)->suftabbase)
 
 #define SWAP(TMP,A,B)\
         if ((A) != (B))\
@@ -75,7 +75,7 @@
           *bptr++ = temp;\
         }
 
-#define SUFTABINDEX(PTR) (Seqpos) ((PTR) + bsr->suftab->offset -\
+#define SUFTABINDEX(PTR) (unsigned long) ((PTR) + bsr->suftab->offset -\
                                            bsr->suftab->sortspace)
 
 #define STACKTOP\
@@ -92,7 +92,7 @@
           MAXVAL = commonunits.common;\
         }
 
-typedef Seqpos Suffixptr;
+typedef unsigned long Suffixptr;
 
 GT_DECLAREARRAYSTRUCT(Largelcpvalue);
 
@@ -100,7 +100,7 @@ typedef struct
 {
   void *reservoir;
   size_t sizereservoir;
-  Seqpos *bucketoflcpvalues, /* pointer into reservoir */
+  unsigned long *bucketoflcpvalues, /* pointer into reservoir */
          maxbranchdepth,
          numoflargelcpvalues,
          totalnumoflargelcpvalues,
@@ -108,7 +108,7 @@ typedef struct
   uint8_t *smalllcpvalues; /* pointer into reservoir */
   const Compressedtable *completelcpvalues;
   GtArrayLargelcpvalue largelcpvalues;
-  const Seqpos *suftabbase;
+  const unsigned long *suftabbase;
 } Lcpsubtab;
 
 typedef struct
@@ -118,7 +118,7 @@ typedef struct
   unsigned int prefixindex;
 #undef SKDEBUG
 #ifdef SKDEBUG
-  Seqpos startpos;
+  unsigned long startpos;
 #endif
 } Suffixwithcode;
 
@@ -126,7 +126,7 @@ struct Outlcpinfo
 {
   FILE *outfplcptab,
        *outfpllvtab;
-  Seqpos totallength;
+  unsigned long totallength;
   Turningwheel *tw;
   unsigned int minchanged;
   Lcpsubtab lcpsubtab;
@@ -137,14 +137,14 @@ struct Outlcpinfo
 
 #define CMPCHARBYCHARPTR2INT(VAR,TMPVAR,I)\
         VAR = (((cptr = *(I)+depth) < bsr->totallength &&\
-              ISNOTSPECIAL(TMPVAR = ACCESSCHAR(cptr))) ? ((Seqpos) TMPVAR)\
-                                                       : UNIQUEINT(cptr))
+            ISNOTSPECIAL(TMPVAR = ACCESSCHAR(cptr))) ? ((unsigned long) TMPVAR)\
+                                                     : UNIQUEINT(cptr))
 
 typedef EndofTwobitencoding Sfxcmp;
 
 #define PTR2INT(VAR,IDXPTR)\
         {\
-          Seqpos pos = *(IDXPTR);\
+          unsigned long pos = *(IDXPTR);\
           if (bsr->fwd)\
           {\
             if (pos + depth < bsr->totallength)\
@@ -186,7 +186,7 @@ typedef EndofTwobitencoding Sfxcmp;
 #define SfxcmpGREATER(X,Y)    (ret##X##Y > 0)
 
 #ifdef SKDEBUG
-static Seqpos baseptr;
+static unsigned long baseptr;
 
 static void showsuffixrange(const GtEncodedsequence *encseq,
                             bool fwd,
@@ -194,7 +194,7 @@ static void showsuffixrange(const GtEncodedsequence *encseq,
                             const Lcpsubtab *lcpsubtab,
                             const Suffixptr *leftptr,
                             const Suffixptr *rightptr,
-                            Seqpos depth)
+                            unsigned long depth)
 {
   const Suffixptr *pi;
 
@@ -229,12 +229,12 @@ static void checksuffixrange(const GtEncodedsequence *encseq,
                              bool fwd,
                              bool complement,
                              const Lcpsubtab *lcpsubtab,
-                             Seqpos *left,
-                             Seqpos *right,
-                             Seqpos depth,
+                             unsigned long *left,
+                             unsigned long *right,
+                             unsigned long depth,
                              int line)
 {
-  Seqpos *sufptr, newdepth = depth, pos1, pos2;
+  unsigned long *sufptr, newdepth = depth, pos1, pos2;
 
 #ifdef SKDEBUG
   printf("checksuffixrange ");
@@ -282,10 +282,10 @@ static void checksuffixrange(const GtEncodedsequence *encseq,
 #endif
 
 #ifdef WITHCHECKSTARTPOINTER
-static unsigned int checkstartpointorder(const Seqpos *left,
-                                         const Seqpos *right)
+static unsigned int checkstartpointorder(const unsigned long *left,
+                                         const unsigned long *right)
 {
-  const Seqpos *ptr;
+  const unsigned long *ptr;
   bool ascending;
 
   gt_assert(left < right);
@@ -319,7 +319,7 @@ typedef struct
 {
   Suffixptr *left,
             *right;
-  Seqpos depth;
+  unsigned long depth;
   Ordertype ordertype;
 } MKVstack;
 
@@ -333,7 +333,7 @@ typedef Medianinfo MedianElem;
 
 typedef struct
 {
-  Seqpos suffix;
+  unsigned long suffix;
   unsigned char lcpwithpivot;
   char cmpresult;
 } Countingsortinfo;
@@ -347,7 +347,7 @@ typedef struct
                            *esr2;
   GtReadmode readmode;
   bool fwd, complement, assideeffect;
-  Seqpos totallength;
+  unsigned long totallength;
   GtArrayMKVstack mkvauxstack; /* XXX be carefull with treads */
   Lcpsubtab *lcpsubtab;
   Medianinfo *medianinfospace;
@@ -357,9 +357,12 @@ typedef struct
   Rmnsufinfo *rmnsufinfo;
   unsigned long leftlcpdist[GT_UNITSIN2BITENC],
                 rightlcpdist[GT_UNITSIN2BITENC];
-  DefinedSeqpos *longest;
+  Definedunsignedlong *longest;
   Suftab *suftab;
-  void (*dc_processunsortedrange)(void *,Seqpos *,Seqpos *,Seqpos);
+  void (*dc_processunsortedrange)(void *,
+                                  unsigned long *,
+                                  unsigned long *,
+                                  unsigned long);
   void *voiddcov;
   bool *equalwithprevious;
   unsigned long countinsertionsort,
@@ -369,12 +372,12 @@ typedef struct
 } Bentsedgresources;
 
 static Suffixptr *medianof3cmpcharbychar(const Bentsedgresources *bsr,
-                                         Seqpos depth,
+                                         unsigned long depth,
                                          Suffixptr *a,
                                          Suffixptr *b,
                                          Suffixptr *c)
 {
-  Seqpos vala, valb, valc;
+  unsigned long vala, valb, valc;
   Suffixptr cptr;
   GtUchar tmpavar, tmpbvar;
 
@@ -395,7 +398,7 @@ static Suffixptr *medianof3cmpcharbychar(const Bentsedgresources *bsr,
 }
 
 static Suffixptr *medianof3(const Bentsedgresources *bsr,
-                            Seqpos depth,
+                            unsigned long depth,
                             Suffixptr *a,
                             Suffixptr *b,
                             Suffixptr *c)
@@ -427,9 +430,11 @@ static Suffixptr *medianof3(const Bentsedgresources *bsr,
       : (SfxcmpGREATER(valb,valc) ? b : (SfxcmpSMALLER(vala,valc) ? a : c));
 }
 
-static void updatelcpvalue(Bentsedgresources *bsr,Seqpos idx,Seqpos value)
+static void updatelcpvalue(Bentsedgresources *bsr,
+                           unsigned long idx,
+                           unsigned long value)
 {
-  if (value >= (Seqpos) LCPOVERFLOW)
+  if (value >= (unsigned long) LCPOVERFLOW)
   {
     bsr->lcpsubtab->numoflargelcpvalues++; /* this may overcount as
                                               there may be some value
@@ -441,10 +446,10 @@ static void updatelcpvalue(Bentsedgresources *bsr,Seqpos idx,Seqpos value)
 static void insertionsort(Bentsedgresources *bsr,
                           Suffixptr *leftptr,
                           Suffixptr *rightptr,
-                          Seqpos offset)
+                          unsigned long offset)
 {
   Suffixptr *pi, *pj;
-  Seqpos lcpindex, lcplen = 0;
+  unsigned long lcpindex, lcplen = 0;
   int retval;
   Suffixptr ptr1, ptr2, temp;
   GtCommonunits commonunits;
@@ -469,14 +474,14 @@ static void insertionsort(Bentsedgresources *bsr,
                                           ptr2);
         for (;;)
         {
-          Seqpos ccs, cct;
+          unsigned long ccs, cct;
           GtUchar tmp1, tmp2;
 
           ccs = DEREFSEQ(tmp1,ptr1,bsr->esr1);
           cct = DEREFSEQ(tmp2,ptr2,bsr->esr2);
           if (ccs != cct)
           {
-            lcplen = (Seqpos) (ptr2 - *pj);
+            lcplen = (unsigned long) (ptr2 - *pj);
             retval = (ccs < cct) ? -1 : 1;
             break;
           }
@@ -527,11 +532,11 @@ static void insertionsort(Bentsedgresources *bsr,
 static void insertionsortmaxdepth(Bentsedgresources *bsr,
                                   Suffixptr *leftptr,
                                   Suffixptr *rightptr,
-                                  Seqpos offset,
-                                  Seqpos maxdepth)
+                                  unsigned long offset,
+                                  unsigned long maxdepth)
 {
   Suffixptr *pi, *pj, ptr1, ptr2, temp;
-  Seqpos lcpindex, lcplen = 0;
+  unsigned long lcpindex, lcplen = 0;
   int retval;
   unsigned long idx = 0;
   bool tempb;
@@ -551,7 +556,7 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
     {
       if (bsr->sfxstrategy->cmpcharbychar)
       {
-        Seqpos endpos1, endpos2;
+        unsigned long endpos1, endpos2;
 
         endpos1 = MIN(bsr->totallength,*(pj-1)+maxdepth);
         endpos2 = MIN(bsr->totallength,*pj+maxdepth);
@@ -569,12 +574,12 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
         }
         for (;;)
         {
-          Seqpos ccs, cct;
+          unsigned long ccs, cct;
           GtUchar tmp1, tmp2;
 
           ccs = DEREFSTOPPOSSEQ(tmp1,ptr1,endpos1,bsr->esr1);
           cct = DEREFSTOPPOSSEQ(tmp2,ptr2,endpos2,bsr->esr2);
-          lcplen = (Seqpos) (ptr2 - *pj);
+          lcplen = (unsigned long) (ptr2 - *pj);
           if (lcplen == maxdepth)
           {
             retval = 0;
@@ -846,7 +851,7 @@ static void checkmedian(bool fwd,
 
 static Suffixptr *realmedian(const Bentsedgresources *bsr,
                              Suffixptr *left,
-                             Seqpos depth,
+                             unsigned long depth,
                              unsigned long width)
 {
   Medianinfo *medianptr;
@@ -868,12 +873,12 @@ static Suffixptr *realmedian(const Bentsedgresources *bsr,
 #define MINMEDIANOF9WIDTH 31UL
 
 static Suffixptr *cmpcharbychardelivermedian(const Bentsedgresources *bsr,
-                                             Seqpos *left,
-                                             Seqpos *right,
-                                             Seqpos depth,
+                                             unsigned long *left,
+                                             unsigned long *right,
+                                             unsigned long depth,
                                              unsigned long width)
 {
-  Seqpos *pl = left, *pm = left + GT_DIV2(width), *pr = right;
+  unsigned long *pl = left, *pm = left + GT_DIV2(width), *pr = right;
 
   if (width >= MINMEDIANOF9WIDTH)
   { /* On big arrays, pseudomedian of 9 */
@@ -888,9 +893,9 @@ static Suffixptr *cmpcharbychardelivermedian(const Bentsedgresources *bsr,
 }
 
 static Suffixptr *blockcmpdelivermedian(const Bentsedgresources *bsr,
-                                        Seqpos *left,
-                                        Seqpos *right,
-                                        Seqpos depth,
+                                        unsigned long *left,
+                                        unsigned long *right,
+                                        unsigned long depth,
                                         unsigned long width,
                                         unsigned long maxwidthrealmedian)
 {
@@ -945,7 +950,7 @@ static Ordertype deriveordertype(Ordertype parentordertype,bool turn)
 static bool comparisonsort(Bentsedgresources *bsr,
                            Suffixptr *left,
                            Suffixptr *right,
-                           Seqpos depth,
+                           unsigned long depth,
                            unsigned long width,
                            Ordertype ordertype)
 {
@@ -959,7 +964,7 @@ static bool comparisonsort(Bentsedgresources *bsr,
   }
   if (width <= bsr->sfxstrategy->maxbltriesort)
   {
-    Seqpos numoflargelcpvalues;
+    unsigned long numoflargelcpvalues;
 
     gt_assert(bsr->sfxstrategy->differencecover == 0);
     numoflargelcpvalues
@@ -969,7 +974,7 @@ static bool comparisonsort(Bentsedgresources *bsr,
                                : bsr->lcpsubtab->bucketoflcpvalues +
                                  LCPINDEX(bsr->lcpsubtab,left),
                              width,depth,
-                             (Seqpos) bsr->sfxstrategy->differencecover,
+                             (unsigned long) bsr->sfxstrategy->differencecover,
                              ordertype,
                              NULL,
                              NULL);
@@ -985,9 +990,9 @@ static bool comparisonsort(Bentsedgresources *bsr,
 
 static void subsort_bentleysedgewick(Bentsedgresources *bsr,
                                      unsigned long width,
-                                     Seqpos *left,
-                                     Seqpos *right,
-                                     Seqpos depth,
+                                     unsigned long *left,
+                                     unsigned long *right,
+                                     unsigned long depth,
                                      Ordertype ordertype)
 {
   /*
@@ -1004,7 +1009,8 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
   {
     if (bsr->sfxstrategy->ssortmaxdepth.defined)
     {
-      if (depth >= (Seqpos) bsr->sfxstrategy->ssortmaxdepth.valueunsignedint)
+      if (depth >=
+               (unsigned long) bsr->sfxstrategy->ssortmaxdepth.valueunsignedint)
       {
         rmnsufinfo_addunsortedrange(bsr->rmnsufinfo,SUFTABINDEX(left),
                                     SUFTABINDEX(right),depth);
@@ -1014,7 +1020,7 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
     {
       if (bsr->sfxstrategy->differencecover > 0)
       {
-        if (depth >= (Seqpos) bsr->sfxstrategy->differencecover)
+        if (depth >= (unsigned long) bsr->sfxstrategy->differencecover)
         {
           bsr->dc_processunsortedrange(bsr->voiddcov,left,right,depth);
           return;
@@ -1022,27 +1028,27 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
         if (width <= bsr->sfxstrategy->maxinsertionsort)
         {
           insertionsortmaxdepth(bsr,left,right,depth,
-                                (Seqpos) bsr->sfxstrategy->
+                                (unsigned long) bsr->sfxstrategy->
                                               differencecover);
           return;
         }
         if (width <= bsr->sfxstrategy->maxbltriesort)
         {
-          Seqpos numoflargelcpvalues;
+          unsigned long numoflargelcpvalues;
 
           numoflargelcpvalues
             = blindtrie_suffixsort(bsr->blindtrie,
-                                   left,
-                                   bsr->lcpsubtab == NULL
-                                     ? NULL
-                                     : bsr->lcpsubtab->bucketoflcpvalues +
-                                       LCPINDEX(bsr->lcpsubtab,left),
-                                   width,
-                                   depth,
-                                   (Seqpos) bsr->sfxstrategy->differencecover,
-                                   ordertype,
-                                   bsr->voiddcov,
-                                   bsr->dc_processunsortedrange);
+                              left,
+                              bsr->lcpsubtab == NULL
+                                ? NULL
+                                : bsr->lcpsubtab->bucketoflcpvalues +
+                                  LCPINDEX(bsr->lcpsubtab,left),
+                              width,
+                              depth,
+                              (unsigned long) bsr->sfxstrategy->differencecover,
+                              ordertype,
+                              bsr->voiddcov,
+                              bsr->dc_processunsortedrange);
           if (bsr->lcpsubtab != NULL)
           {
             bsr->lcpsubtab->numoflargelcpvalues += numoflargelcpvalues;
@@ -1069,11 +1075,11 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
 }
 
 static void sarrcountingsort(Bentsedgresources *bsr,
-                             Seqpos *left,
+                             unsigned long *left,
                              const Sfxcmp *pivotcmpbits,
                              unsigned long pivotidx,
                              Ordertype parentordertype,
-                             Seqpos depth,
+                             unsigned long depth,
                              unsigned long width)
 {
   int cmp;
@@ -1220,7 +1226,7 @@ static void sarrcountingsort(Bentsedgresources *bsr,
 static void bentleysedgewick(Bentsedgresources *bsr,
                              Suffixptr *left,
                              Suffixptr *right,
-                             Seqpos depth)
+                             unsigned long depth)
 {
   bsr->mkvauxstack.nextfreeMKVstack = 0;
   subsort_bentleysedgewick(bsr, (unsigned long) (right - left + 1),
@@ -1228,7 +1234,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
   while (bsr->mkvauxstack.nextfreeMKVstack > 0)
   {
     Suffixptr *leftplusw, *pa, *pb, *pc, *pd, *pm, *aptr, *bptr, cptr, temp;
-    Seqpos pivotcmpcharbychar = 0, valcmpcharbychar;
+    unsigned long pivotcmpcharbychar = 0, valcmpcharbychar;
     Sfxcmp pivotcmpbits, val;
     int retvalpivotcmpbits;
     GtUchar tmpvar;
@@ -1475,7 +1481,7 @@ static void showSuffixwithcode(FILE *fp,const Suffixwithcode *suffix)
               buffer);
 }
 
-static Seqpos bruteforcelcpvalue(const GtEncodedsequence *encseq,
+static unsigned long bruteforcelcpvalue(const GtEncodedsequence *encseq,
                                  GtReadmode readmode,
                                  const Suffixwithcode *previoussuffix,
                                  const Suffixwithcode *currentsuffix,
@@ -1483,7 +1489,7 @@ static Seqpos bruteforcelcpvalue(const GtEncodedsequence *encseq,
                                  GtEncodedsequenceScanstate *esr1,
                                  GtEncodedsequenceScanstate *esr2)
 {
-  Seqpos lcpvalue;
+  unsigned long lcpvalue;
   unsigned int lcpvalue2;
   int cmp;
 
@@ -1533,7 +1539,7 @@ static Seqpos bruteforcelcpvalue(const GtEncodedsequence *encseq,
 }
 #endif
 
-static Seqpos computelocallcpvalue(const Suffixwithcode *previoussuffix,
+static unsigned long computelocallcpvalue(const Suffixwithcode *previoussuffix,
                                    const Suffixwithcode *currentsuffix,
                                    unsigned int minchanged)
 {
@@ -1549,18 +1555,18 @@ static Seqpos computelocallcpvalue(const Suffixwithcode *previoussuffix,
     lcpvalue = MIN(minchanged,MIN(previoussuffix->prefixindex,
                                   currentsuffix->prefixindex));
   }
-  return (Seqpos) lcpvalue;
+  return (unsigned long) lcpvalue;
 }
 
 static unsigned int bucketends(Outlcpinfo *outlcpinfo,
                                Suffixwithcode *previoussuffix,
-                               GT_UNUSED Seqpos firstspecialsuffix,
+                               GT_UNUSED unsigned long firstspecialsuffix,
                                unsigned int minchanged,
                                unsigned long specialsinbucket,
                                Codetype code,
                                const Bcktab *bcktab)
 {
-  Seqpos lcpvalue;
+  unsigned long lcpvalue;
   unsigned int maxprefixindex, minprefixindex;
   Suffixwithcode firstspecialsuffixwithcode;
 
@@ -1576,9 +1582,9 @@ static unsigned int bucketends(Outlcpinfo *outlcpinfo,
                                       specialsinbucket,
                                       bcktab,
                                       code);
-    if (outlcpinfo->lcpsubtab.maxbranchdepth < (Seqpos) maxprefixindex)
+    if (outlcpinfo->lcpsubtab.maxbranchdepth < (unsigned long) maxprefixindex)
     {
-      outlcpinfo->lcpsubtab.maxbranchdepth = (Seqpos) maxprefixindex;
+      outlcpinfo->lcpsubtab.maxbranchdepth = (unsigned long) maxprefixindex;
     }
   } else
   {
@@ -1613,7 +1619,7 @@ static unsigned int bucketends(Outlcpinfo *outlcpinfo,
 Outlcpinfo *newOutlcpinfo(const GtStr *indexname,
                           unsigned int prefixlength,
                           unsigned int numofchars,
-                          Seqpos totallength,
+                          unsigned long totallength,
                           bool assideeffect,
                           GtError *err)
 {
@@ -1680,18 +1686,18 @@ Outlcpinfo *newOutlcpinfo(const GtStr *indexname,
 static void outlcpvalues(Lcpsubtab *lcpsubtab,
                          unsigned long bucketleft,
                          unsigned long bucketright,
-                         Seqpos posoffset,
+                         unsigned long posoffset,
                          FILE *fplcptab,
                          FILE *fpllvtab)
 {
   unsigned long idx;
-  Seqpos lcpvalue;
+  unsigned long lcpvalue;
   Largelcpvalue *largelcpvalueptr;
 
   lcpsubtab->largelcpvalues.nextfreeLargelcpvalue = 0;
   if (lcpsubtab->numoflargelcpvalues > 0 &&
       lcpsubtab->numoflargelcpvalues >=
-      (Seqpos) lcpsubtab->largelcpvalues.allocatedLargelcpvalue)
+      (unsigned long) lcpsubtab->largelcpvalues.allocatedLargelcpvalue)
   {
     lcpsubtab->largelcpvalues.spaceLargelcpvalue
       = gt_realloc(lcpsubtab->largelcpvalues.spaceLargelcpvalue,
@@ -1706,13 +1712,14 @@ static void outlcpvalues(Lcpsubtab *lcpsubtab,
       lcpvalue = lcpsubtab->bucketoflcpvalues[idx];
     } else
     {
-      lcpvalue = compressedtable_get(lcpsubtab->completelcpvalues,(Seqpos) idx);
+      lcpvalue = compressedtable_get(lcpsubtab->completelcpvalues,
+                                    (unsigned long) idx);
     }
     if (lcpsubtab->maxbranchdepth < lcpvalue)
     {
       lcpsubtab->maxbranchdepth = lcpvalue;
     }
-    if (lcpvalue < (Seqpos) LCPOVERFLOW)
+    if (lcpvalue < (unsigned long) LCPOVERFLOW)
     {
       lcpsubtab->smalllcpvalues[idx-bucketleft] = (uint8_t) lcpvalue;
     } else
@@ -1744,10 +1751,11 @@ static void outlcpvalues(Lcpsubtab *lcpsubtab,
 
 #define NUMBEROFZEROS 1024
 
-static Seqpos outmany0lcpvalues(Seqpos countoutputlcpvalues,Seqpos totallength,
-                                FILE *outfplcptab)
+static unsigned long outmany0lcpvalues(unsigned long countoutputlcpvalues,
+                                       unsigned long totallength,
+                                       FILE *outfplcptab)
 {
-  Seqpos i, countout, many;
+  unsigned long i, countout, many;
   uint8_t outvalues[NUMBEROFZEROS] = {0};
 
   many = totallength + 1 - countoutputlcpvalues;
@@ -1762,7 +1770,7 @@ static Seqpos outmany0lcpvalues(Seqpos countoutputlcpvalues,Seqpos totallength,
 }
 
 static void multioutlcpvalues(Lcpsubtab *lcpsubtab,
-                              Seqpos totallength,
+                              unsigned long totallength,
                               const Compressedtable *lcptab,
                               unsigned long bucketsize,
                               FILE *fplcptab,
@@ -1772,11 +1780,11 @@ static void multioutlcpvalues(Lcpsubtab *lcpsubtab,
   unsigned long remaining, left, width;
   bool mallocsmalllcpvalues;
 
-  if ((Seqpos) buffersize > totallength + 1)
+  if ((unsigned long) buffersize > totallength + 1)
   {
     buffersize = (unsigned long) (totallength+1);
   }
-  lcpsubtab->numoflargelcpvalues = (Seqpos) buffersize;
+  lcpsubtab->numoflargelcpvalues = (unsigned long) buffersize;
   lcpsubtab->bucketoflcpvalues = NULL;
   lcpsubtab->completelcpvalues = lcptab;
   sizeforsmalllcpvalues = (unsigned long)
@@ -1811,7 +1819,7 @@ static void multioutlcpvalues(Lcpsubtab *lcpsubtab,
   {
     gt_free(lcpsubtab->smalllcpvalues);
   }
-  lcpsubtab->countoutputlcpvalues = (Seqpos) bucketsize;
+  lcpsubtab->countoutputlcpvalues = (unsigned long) bucketsize;
 }
 
 void freeOutlcptab(Outlcpinfo **outlcpinfoptr)
@@ -1842,25 +1850,25 @@ void freeOutlcptab(Outlcpinfo **outlcpinfoptr)
   FREESPACE(*outlcpinfoptr);
 }
 
-Seqpos getnumoflargelcpvalues(const Outlcpinfo *outlcpinfo)
+unsigned long getnumoflargelcpvalues(const Outlcpinfo *outlcpinfo)
 {
   return outlcpinfo->lcpsubtab.totalnumoflargelcpvalues;
 }
 
-Seqpos getmaxbranchdepth(const Outlcpinfo *outlcpinfo)
+unsigned long getmaxbranchdepth(const Outlcpinfo *outlcpinfo)
 {
   return outlcpinfo->lcpsubtab.maxbranchdepth;
 }
 
 static void initBentsedgresources(Bentsedgresources *bsr,
                                   Suftab *suftab,
-                                  DefinedSeqpos *longest,
+                                  Definedunsignedlong *longest,
                                   const GtEncodedsequence *encseq,
                                   GtReadmode readmode,
                                   Bcktab *bcktab,
                                   Codetype mincode,
                                   Codetype maxcode,
-                                  Seqpos partwidth,
+                                  unsigned long partwidth,
                                   unsigned int numofchars,
                                   unsigned int prefixlength,
                                   Outlcpinfo *outlcpinfo,
@@ -1924,7 +1932,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
         /* be careful for the parallel version */
         bsr->lcpsubtab->smalllcpvalues = (uint8_t *) bsr->lcpsubtab->reservoir;
         bsr->lcpsubtab->bucketoflcpvalues
-          = (Seqpos *) bsr->lcpsubtab->reservoir;
+          = (unsigned long *) bsr->lcpsubtab->reservoir;
       }
     }
   }
@@ -1998,7 +2006,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
 }
 
 static void wrapBentsedgresources(Bentsedgresources *bsr,
-                                  Seqpos partwidth,
+                                  unsigned long partwidth,
                                   Lcpsubtab *lcpsubtab,
                                   FILE *outfplcptab,
                                   FILE *outfpllvtab,
@@ -2014,7 +2022,7 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
   {
     Compressedtable *lcptab;
 
-    lcptab = rmnsufinfo_wrap(&bsr->longest->valueseqpos,
+    lcptab = rmnsufinfo_wrap(&bsr->longest->valueunsignedlong,
                              &bsr->rmnsufinfo,
                              bsr->lcpsubtab == NULL ? false : true);
     bsr->longest->defined = true;
@@ -2042,14 +2050,14 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
   gt_logger_log(logger,"countqsort=%lu",bsr->countqsort);
 }
 
-void qsufsort(Seqpos *sortspace,
+void qsufsort(unsigned long *sortspace,
               int mmapfiledesc,
-              Seqpos *longest,
+              unsigned long *longest,
               const GtEncodedsequence *encseq,
               GtReadmode readmode,
               GT_UNUSED Codetype mincode,
               Codetype maxcode,
-              Seqpos partwidth,
+              unsigned long partwidth,
               Bcktab *bcktab,
               unsigned int numofchars,
               unsigned int prefixlength,
@@ -2095,7 +2103,7 @@ void sortallbuckets(Suftab *suftab,
                     GtReadmode readmode,
                     Codetype mincode,
                     Codetype maxcode,
-                    Seqpos partwidth,
+                    unsigned long partwidth,
                     Bcktab *bcktab,
                     unsigned int numofchars,
                     unsigned int prefixlength,
@@ -2108,10 +2116,10 @@ void sortallbuckets(Suftab *suftab,
   unsigned int rightchar = (unsigned int) (mincode % numofchars),
                minprefixindex;
   Bucketspecification bucketspec;
-  Seqpos lcpvalue;
+  unsigned long lcpvalue;
   Suffixwithcode firstsuffixofbucket;
   Bentsedgresources bsr;
-  Seqpos *suftabptr = suftab->sortspace - suftab->offset;
+  unsigned long *suftabptr = suftab->sortspace - suftab->offset;
 
   initBentsedgresources(&bsr,
                         suftab,
@@ -2175,7 +2183,7 @@ void sortallbuckets(Suftab *suftab,
                          suftabptr + bucketspec.left,
                          suftabptr + bucketspec.left +
                                      bucketspec.nonspecialsinbucket - 1,
-                         (Seqpos) prefixlength);
+                         (unsigned long) prefixlength);
       }
       if (outlcpinfo != NULL && outlcpinfo->assideeffect)
       {
@@ -2292,7 +2300,7 @@ void sortallbuckets(Suftab *suftab,
                         logger);
 }
 
-void sortbucketofsuffixes(Seqpos *suffixestobesorted,
+void sortbucketofsuffixes(unsigned long *suffixestobesorted,
                           GtBucketspec2 *bucketspec2,
                           unsigned long numberofsuffixes,
                           const GtEncodedsequence *encseq,
@@ -2304,8 +2312,10 @@ void sortbucketofsuffixes(Seqpos *suffixestobesorted,
                           unsigned int prefixlength,
                           const Sfxstrategy *sfxstrategy,
                           void *voiddcov,
-                          void (*dc_processunsortedrange)(void *,Seqpos *,
-                                                          Seqpos *,Seqpos),
+                          void (*dc_processunsortedrange)(void *,
+                                                          unsigned long *,
+                                                          unsigned long *,
+                                                          unsigned long),
                           GtLogger *logger)
 {
   Bentsedgresources bsr;
@@ -2344,7 +2354,7 @@ void sortbucketofsuffixes(Seqpos *suffixestobesorted,
                                       bcktab,
                                       code,
                                       maxcode,
-                                      (Seqpos) numberofsuffixes,
+                                      (unsigned long) numberofsuffixes,
                                       rightchar,
                                       numofchars);
     if (bucketspec.nonspecialsinbucket > 1UL)
@@ -2353,7 +2363,7 @@ void sortbucketofsuffixes(Seqpos *suffixestobesorted,
                        suffixestobesorted + bucketspec.left,
                        suffixestobesorted + bucketspec.left +
                                       bucketspec.nonspecialsinbucket - 1,
-                       (Seqpos) prefixlength);
+                       (unsigned long) prefixlength);
     }
   }
   wrapBentsedgresources(&bsr,

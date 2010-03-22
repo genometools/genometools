@@ -24,12 +24,13 @@ typedef struct Windowiterator Windowiterator;
 
 Windowiterator *windowiterator_new(const GtEncodedsequence *encseq,
                                    unsigned long windowsize,
-                                   Seqpos startpos,
-                                   Seqpos endpos);
+                                   unsigned long startpos,
+                                   unsigned long endpos);
 
 void windowiterator_delete(Windowiterator *wit);
 
-const GtUchar *windowiterator_next(Seqpos *currentpos,unsigned long *firstpos,
-                                 Windowiterator *wit);
+const GtUchar *windowiterator_next(unsigned long *currentpos,
+                                   unsigned long *firstpos,
+                                   Windowiterator *wit);
 
 #endif

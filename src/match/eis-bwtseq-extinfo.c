@@ -37,7 +37,7 @@
 
 struct locateHeader
 {
-  Seqpos rot0Pos;
+  unsigned long rot0Pos;
   unsigned locateInterval;
   int featureToggles;
 };
@@ -57,7 +57,7 @@ static int
 writeLocateInfoHeader(FILE *fp, void *cbData)
 {
   struct locateHeader headerData;
-  DefinedSeqpos rot0Pos;
+  Definedunsignedlong rot0Pos;
   const struct locateHeaderWriteInfo *headerSrc = cbData;
   gt_assert(cbData);
   headerData.locateInterval = headerSrc->locateInterval;
@@ -68,7 +68,7 @@ writeLocateInfoHeader(FILE *fp, void *cbData)
           stderr);
     abort();
   }
-  headerData.rot0Pos = rot0Pos.valueseqpos;
+  headerData.rot0Pos = rot0Pos.valueunsignedlong;
   headerData.featureToggles = headerSrc->featureToggles;
   return fwrite(&headerData, sizeof (headerData), 1, fp);
 }
@@ -147,12 +147,12 @@ readRankSortHeader(EISeq *seqIdx, uint32_t *bitsPerOrigRank,
 
 struct seqRevMapEntry
 {
-  Seqpos bwtPos, origPos;
+  unsigned long bwtPos, origPos;
 };
 
 struct addLocateInfoState
 {
-  Seqpos seqLen, extraLocMarksUpperBound;
+  unsigned long seqLen, extraLocMarksUpperBound;
   const MRAEnc *alphabet;
   const enum rangeSortMode *rangeSort;
   SeqDataReader readSeqpos;
@@ -164,7 +164,7 @@ struct addLocateInfoState
   size_t revMapQueueSize;
   struct seqRevMapEntry *revMapQueue;
   size_t origRanksQueueSize;
-  Seqpos *origRanksQueue;
+  unsigned long *origRanksQueue;
   BWTSeqContextRetrieverFactory *ctxFactory;
 };
 
@@ -208,7 +208,7 @@ locBitsUpperBounds(void *cbState, struct segmentDesc *desc,
     {
       size_t i, maxSegLen = 0;
       BitOffset maxBitsTotal = 0;
-      Seqpos numSegmentsTotal = 0;
+      unsigned long numSegmentsTotal = 0;
       unsigned bitsPerOrigRank = state->bitsPerOrigRank;
       for (i = 0; i < numSegmentDesc; ++i)
       {
@@ -225,7 +225,7 @@ locBitsUpperBounds(void *cbState, struct segmentDesc *desc,
            + state->bitsPerOrigPos);
       if (bitsPerOrigRank)
       {
-        Seqpos maxRank = specialsRank(state->sprTable, state->seqLen);
+        unsigned long maxRank = specialsRank(state->sprTable, state->seqLen);
         /* rank values stored */
         maxBitsTotal += maxRank * bitsPerOrigRank;
       }
@@ -255,12 +255,12 @@ initAddLocateInfoState(struct addLocateInfoState *state,
                        SeqDataReader readSeqpos,
                        const MRAEnc *alphabet, const struct seqStats *stats,
                        const enum rangeSortMode *rangeSort,
-                       Seqpos srcLen, const struct bwtParam *params,
+                       unsigned long srcLen, const struct bwtParam *params,
                        const SpecialsRankLookup *sprTable,
                        unsigned bitsPerOrigRank,
                        BWTSeqContextRetrieverFactory *ctxFactory)
 {
-  Seqpos lastPos;
+  unsigned long lastPos;
   unsigned aggregationExpVal;
   unsigned locateInterval;
   gt_assert(state);
@@ -297,11 +297,11 @@ initAddLocateInfoState(struct addLocateInfoState *state,
     if (!(params->featureToggles & BWTReversiblySorted)
         && locateInterval > 1)
     {
-      Seqpos stdLocMarks = srcLen / locateInterval,
+      unsigned long stdLocMarks = srcLen / locateInterval,
         extraLocMarksUpperBound = MIN(srcLen/2, srcLen - stdLocMarks);
       if (stats)
       {
-        Seqpos nonValSortSyms = 0;
+        unsigned long nonValSortSyms = 0;
         unsigned i;
         for (i = 0; i <= UINT8_MAX; ++i)
           if (MRAEncSymbolHasValidMapping(alphabet, i)
@@ -338,10 +338,10 @@ destructAddLocateInfoState(struct addLocateInfoState *state)
 }
 
 static inline int
-isSortModeTransition(RandomSeqAccessor origSeqAccess, Seqpos seqLen,
+isSortModeTransition(RandomSeqAccessor origSeqAccess, unsigned long seqLen,
                      const MRAEnc *alphabet,
                      const enum rangeSortMode *rangeSort,
-                     Seqpos pos)
+                     unsigned long pos)
 {
   Symbol syms[2];
   if (pos > 0 && pos < seqLen - 1)
@@ -383,7 +383,7 @@ isSortModeTransition(RandomSeqAccessor origSeqAccess, Seqpos seqLen,
 static BitOffset
 addLocateInfo(BitString cwDest, BitOffset cwOffset,
               BitString varDest, BitOffset varOffset,
-              GT_UNUSED Seqpos start, Seqpos len, void *cbState)
+              GT_UNUSED unsigned long start, unsigned long len, void *cbState)
 {
   BitOffset bitsWritten = 0;
   struct addLocateInfoState *state = cbState;
@@ -410,7 +410,7 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
   bitsPerOrigPos = state->bitsPerOrigPos;
   bitsPerOrigRank = state->bitsPerOrigRank;
   {
-    Seqpos i, mapVal;
+    unsigned long i, mapVal;
     size_t revMapQueueLen = 0, origRanksQueueLen = 0;
     int reversiblySorted = state->featureToggles & BWTReversiblySorted,
       locateBitmap = state->featureToggles & BWTLocateBitmap;
@@ -502,7 +502,11 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
       {
         gt_bsStoreUniformSeqposArray(varDest, varOffset + bitsWritten,
                                   bitsPerOrigRank, origRanksQueueLen,
-                                  state->origRanksQueue);
+#ifdef _LP64
+                             (uint64_t*) state->origRanksQueue);
+#else
+                             (uint32_t*) state->origRanksQueue);
+#endif
         bitsWritten += bitsPerOrigRank * origRanksQueueLen;
       }
     }
@@ -551,7 +555,7 @@ createBWTSeqGeneric(const struct bwtParam *params, indexCreateFunc createIndex,
                                       writeRankSortHeader };
     size_t numHeaders = 0;
     unsigned bitsPerOrigRank = 0;
-    Seqpos totalLen = SASSGetLength(src);
+    unsigned long totalLen = SASSGetLength(src);
     const MRAEnc *alphabet = SASSGetMRAEnc(src);
     MRAEnc *baseAlphabet = SASSNewMRAEnc(src);
     /* FIXME: this  has to work also when locateInterval == 0 and
@@ -564,7 +568,7 @@ createBWTSeqGeneric(const struct bwtParam *params, indexCreateFunc createIndex,
       ++numHeaders;
       if (sortModeHeaderNeeded(alphabet, rangeSort, sprTable))
       {
-        Seqpos
+        unsigned long
 #ifndef NDEBUG
           origSeqLen = gt_encodedsequence_total_length(
                                                    SPRTGetOrigEncseq(sprTable)),
@@ -631,7 +635,7 @@ createBWTSeqGeneric(const struct bwtParam *params, indexCreateFunc createIndex,
 }
 
 static inline BitOffset
-searchLocateCountMark(const BWTSeq *bwtSeq, Seqpos pos,
+searchLocateCountMark(const BWTSeq *bwtSeq, unsigned long pos,
                       struct extBitsRetrieval *extBits)
 {
   unsigned i, numMarks, bitsPerCount;
@@ -648,11 +652,11 @@ searchLocateCountMark(const BWTSeq *bwtSeq, Seqpos pos,
         ((bwtSeq->featureToggles & BWTReversiblySorted) ?
          (BWTSeqLength(bwtSeq) - 1) / bwtSeq->locateSampleInterval :
          BWTSeqLength(bwtSeq) - 1));
-    Seqpos cmpPos = pos - extBits->start;
+    unsigned long cmpPos = pos - extBits->start;
     markOffset += bitsPerCount;
     for (i = 0; i < numMarks; ++i)
     {
-      Seqpos markedPos = gt_bsGetSeqpos(extBits->varPart, markOffset,
+      unsigned long markedPos = gt_bsGetSeqpos(extBits->varPart, markOffset,
                                      bitsPerBWTPos);
       if (markedPos < cmpPos)
         markOffset += bitsPerBWTPos + bitsPerOrigPos;
@@ -666,7 +670,7 @@ searchLocateCountMark(const BWTSeq *bwtSeq, Seqpos pos,
 }
 
 extern int
-BWTSeqPosHasLocateInfo(const BWTSeq *bwtSeq, Seqpos pos,
+BWTSeqPosHasLocateInfo(const BWTSeq *bwtSeq, unsigned long pos,
                        struct extBitsRetrieval *extBits)
 {
   if (bwtSeq->featureToggles & BWTLocateBitmap)
@@ -692,13 +696,13 @@ BWTSeqPosHasLocateInfo(const BWTSeq *bwtSeq, Seqpos pos,
   return 0;
 }
 
-extern Seqpos
-BWTSeqLocateMatch(const BWTSeq *bwtSeq, Seqpos pos,
+extern unsigned long
+BWTSeqLocateMatch(const BWTSeq *bwtSeq, unsigned long pos,
                   struct extBitsRetrieval *extBits)
 {
   if (bwtSeq->featureToggles & BWTLocateBitmap)
   {
-    Seqpos nextLocate = pos;
+    unsigned long nextLocate = pos;
     unsigned locateOffset = 0;
     while (!BWTSeqPosHasLocateInfo(bwtSeq, nextLocate, extBits))
       nextLocate = BWTSeqLFMap(bwtSeq, nextLocate, extBits), ++locateOffset;
@@ -706,7 +710,7 @@ BWTSeqLocateMatch(const BWTSeq *bwtSeq, Seqpos pos,
                          EBRF_RETRIEVE_CWBITS | EBRF_RETRIEVE_VARBITS,
                          extBits, bwtSeq->hint);
     {
-      Seqpos maxPosVal = ((bwtSeq->featureToggles & BWTReversiblySorted)?
+      unsigned long maxPosVal = ((bwtSeq->featureToggles & BWTReversiblySorted)?
                           (BWTSeqLength(bwtSeq) - 1)
                           /bwtSeq->locateSampleInterval:
                           BWTSeqLength(bwtSeq) - 1);
@@ -720,7 +724,7 @@ BWTSeqLocateMatch(const BWTSeq *bwtSeq, Seqpos pos,
                                bitsPerBWTPos:0) + bitsPerOrigPos)
         * locateRecordIndex
         + ((bwtSeq->featureToggles & BWTLocateCount)?bitsPerCount:0);
-      Seqpos matchPos =
+      unsigned long matchPos =
         gt_bsGetSeqpos(
           extBits->varPart, extBits->varOffset + locateRecordOffset
           + ((bwtSeq->featureToggles & BWTLocateCount)?bitsPerBWTPos:0),
@@ -739,7 +743,7 @@ BWTSeqLocateMatch(const BWTSeq *bwtSeq, Seqpos pos,
   else if (bwtSeq->featureToggles & BWTLocateCount)
   {
     BitOffset markOffset;
-    Seqpos nextLocate = pos, matchPos;
+    unsigned long nextLocate = pos, matchPos;
     unsigned locateOffset = 0;  /* mark is at most locateInterval
                                  * positions away */
     unsigned bitsPerOrigPos
@@ -791,9 +795,9 @@ locateVarBits(const BWTSeq *bwtSeq, struct extBitsRetrieval *extBits)
   return numLocBits;
 }
 
-extern Seqpos
-BWTSeqGetRankSort(const BWTSeq *bwtSeq, Seqpos pos, AlphabetRangeID range,
-                  struct extBitsRetrieval *extBits)
+extern unsigned long
+BWTSeqGetRankSort(const BWTSeq *bwtSeq, unsigned long pos,
+                  AlphabetRangeID range, struct extBitsRetrieval *extBits)
 {
   BitOffset locVarBits;
   AlphabetRangeSize rSize;
@@ -803,8 +807,8 @@ BWTSeqGetRankSort(const BWTSeq *bwtSeq, Seqpos pos, AlphabetRangeID range,
   locVarBits = locateVarBits(bwtSeq, extBits);
   rSize = MRAEncGetRangeSize(EISGetAlphabet(bwtSeq->seqIdx), range);
   {
-    Seqpos ranks[rSize * 2];
-    Seqpos BWTRankTotal = 0;
+    unsigned long ranks[rSize * 2];
+    unsigned long BWTRankTotal = 0;
     AlphabetRangeSize i;
     EISPosPairRangeRank(bwtSeq->seqIdx, range, extBits->start, pos, ranks,
                         bwtSeq->hint);

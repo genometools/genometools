@@ -21,7 +21,7 @@
 #include <inttypes.h>
 #include "core/error_api.h"
 #include "core/readmode.h"
-#include "core/seqpos.h"
+
 #include "core/encodedsequence.h"
 
 typedef struct Querymatch Querymatch;
@@ -29,13 +29,13 @@ typedef struct Querymatch Querymatch;
 Querymatch *querymatch_new(void);
 
 void querymatch_fill(Querymatch *querymatch,
-                     Seqpos len,
-                     Seqpos dbstart,
+                     unsigned long len,
+                     unsigned long dbstart,
                      GtReadmode readmode,
                      bool selfmatch,
                      uint64_t queryseqnum,
-                     Seqpos querystart,
-                     Seqpos querytotallength);
+                     unsigned long querystart,
+                     unsigned long querytotallength);
 
 void querymatch_delete(Querymatch *querymatch);
 
@@ -44,9 +44,9 @@ int querymatch_output(void *info,
                       const Querymatch *querymatch,
                       GtError *err);
 
-Seqpos querymatch_len(const Querymatch *querymatch);
-Seqpos querymatch_dbstart(const Querymatch *querymatch);
-Seqpos querymatch_querystart(const Querymatch *querymatch);
+unsigned long querymatch_len(const Querymatch *querymatch);
+unsigned long querymatch_dbstart(const Querymatch *querymatch);
+unsigned long querymatch_querystart(const Querymatch *querymatch);
 uint64_t querymatch_queryseqnum(const Querymatch *querymatch);
 
 #endif

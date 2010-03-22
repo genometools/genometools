@@ -19,7 +19,7 @@
 #define SFX_STRATEGY_H
 
 #include <stdbool.h>
-#include "defined-types.h"
+#include "core/defined-types.h"
 
 #define MAXINSERTIONSORTDEFAULT  3UL
 #define MAXBLTRIESORTDEFAULT     1000UL

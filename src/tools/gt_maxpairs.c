@@ -44,9 +44,9 @@ typedef struct
 
 static int simpleexactselfmatchoutput(void *info,
                                       const GtEncodedsequence *encseq,
-                                      Seqpos len,
-                                      Seqpos pos1,
-                                      Seqpos pos2,
+                                      unsigned long len,
+                                      unsigned long pos1,
+                                      unsigned long pos2,
                                       GT_UNUSED GtError *err)
 {
   GtSeqinfo seqinfo;
@@ -55,7 +55,7 @@ static int simpleexactselfmatchoutput(void *info,
 
   if (pos1 > pos2)
   {
-    Seqpos tmp = pos1;
+    unsigned long tmp = pos1;
     pos1 = pos2;
     pos2 = tmp;
   }
@@ -270,11 +270,11 @@ static int gt_repfind_runner(GT_UNUSED int argc,
       } else
       {
         if (testmaxpairs(arguments->indexname,
-                         arguments->samples,
-                         arguments->userdefinedleastlength,
-                         (Seqpos) (100 * arguments->userdefinedleastlength),
-                         logger,
-                         err) != 0)
+                      arguments->samples,
+                      arguments->userdefinedleastlength,
+                      (unsigned long) (100 * arguments->userdefinedleastlength),
+                      logger,
+                      err) != 0)
         {
           haserr = true;
         }

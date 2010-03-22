@@ -33,7 +33,7 @@
 #include "core/filelengthvalues.h"
 #include "core/intbits.h"
 #include "core/intdef.h"
-#include "core/seqpos.h"
+
 #include "core/str_array_api.h"
 #include "core/symboldef.h"
 
@@ -57,7 +57,7 @@ struct GtEncodedsequence
   GtPositionaccesstype sat;
   void *mappedptr; /* NULL or pointer to the mapped space block */
   unsigned long numofspecialstostore;
-  Seqpos *totallengthptr,
+  unsigned long *totallengthptr,
          totallength;
   unsigned long numofdbsequences,
                 *numofdbsequencesptr; /* need for writing numofdbsequences */
@@ -65,22 +65,22 @@ struct GtEncodedsequence
   unsigned long lengthofdbfilenames, *lengthofdbfilenamesptr;
   unsigned long sizeofrep;
   const char *name;
-  GtUchar(*deliverchar)(const GtEncodedsequence *,Seqpos);
+  GtUchar(*deliverchar)(const GtEncodedsequence *,unsigned long);
   const char *delivercharname;
-  GtUchar(*delivercharnospecial)(const GtEncodedsequence *,Seqpos);
+  GtUchar(*delivercharnospecial)(const GtEncodedsequence *,unsigned long);
   const char *delivercharnospecialname;
   GtUchar(*seqdeliverchar)(const GtEncodedsequence *,
-                         GtEncodedsequenceScanstate *,Seqpos);
+                         GtEncodedsequenceScanstate *,unsigned long);
   const char *seqdelivercharname;
   bool(*delivercontainsspecial)(const GtEncodedsequence *,
                                 bool,
                                 GtEncodedsequenceScanstate *,
-                                Seqpos,
-                                Seqpos);
+                                unsigned long,
+                                unsigned long);
   const char *delivercontainsspecialname;
   unsigned int maxspecialtype;  /* maximal value of special type */
   unsigned long *characterdistribution;
-  Specialcharinfo *specialcharinfoptr, /* need for writing specialcharinfo */
+  GtSpecialcharinfo *specialcharinfoptr, /* need for writing specialcharinfo */
                   specialcharinfo; /* information about specialcharacters */
   GtStrArray *filenametab;    /* table of filenames */
   char *firstfilename;
@@ -91,7 +91,7 @@ struct GtEncodedsequence
 
   const GtAlphabet *alpha;   /* alphabet representation */
 
-  const Seqpos *ssptab; /* (if numofdbsequences = 1 then NULL  else
+  const unsigned long *ssptab; /* (if numofdbsequences = 1 then NULL  else
                                                          numofdbsequences  -1)
                            entries */
 

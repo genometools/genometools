@@ -30,7 +30,7 @@
 #include "core/str_array.h"
 #include "core/symboldef.h"
 #include "core/unused_api.h"
-#include "core/seqpos.h"
+
 #include "match/intcode-def.h"
 #include "core/encodedsequence.h"
 
@@ -49,11 +49,11 @@ struct sfxInterface
   const GtEncodedsequence *encseq;
   struct seqStats *stats;
   Sfxiterator *sfi;
-  DefinedSeqpos rot0Pos;
+  Definedunsignedlong rot0Pos;
   bool specialsuffixes;
   /* data relevant to holding portions of the suffix array */
-  Seqpos lastGeneratedLen, lastGeneratedStart;
-  const Seqpos *lastGeneratedSufTabSegment;
+  unsigned long lastGeneratedLen, lastGeneratedStart;
+  const unsigned long *lastGeneratedSufTabSegment;
 };
 
 static SeqDataTranslator
@@ -74,7 +74,7 @@ SfxIRequest2XltorFunc(sfxInterface *sfxi,
     tr.translateData = (seqDataTranslateFunc)translateSuftab2BWT;
     break;
   case SFX_REQUEST_SUFTAB:
-    tr.state.elemSize = sizeof (Seqpos);
+    tr.state.elemSize = sizeof (unsigned long);
     break;
   case SFX_REQUEST_LCPTAB:
     readState.lcpState.readmode = sfxi->readmode;
@@ -120,7 +120,7 @@ SfxIBaseRequest2XltorFunc(SASeqSrc *baseClass,
   return SfxIRequest2XltorFunc(SASS2SfxI(baseClass), rtype);
 }
 
-static DefinedSeqpos
+static Definedunsignedlong
 SfxIBaseGetRot0Pos(const SASeqSrc *baseClass)
 {
   return SfxIGetRot0Pos(constSASS2SfxI(baseClass));
@@ -145,9 +145,13 @@ deleteSfxInterfaceBase(SASeqSrc *baseClass)
 }
 
 static size_t
-SfxIGenerate(void *iface, void *backlogState,
-             move2BacklogFunc move2Backlog, void *output, Seqpos generateStart,
-             size_t len, SeqDataTranslator xltor);
+SfxIGenerate(void *iface,
+             void *backlogState,
+             move2BacklogFunc move2Backlog,
+             void *output,
+             unsigned long generateStart,
+             size_t len,
+             SeqDataTranslator xltor);
 
 extern sfxInterface *
 newSfxInterface(GtReadmode readmode,
@@ -156,7 +160,7 @@ newSfxInterface(GtReadmode readmode,
                 const Sfxstrategy *sfxstrategy,
                 const GtEncodedsequence *encseq,
                 GtProgressTimer *sfxprogress,
-                Seqpos length,
+                unsigned long length,
                 GtLogger *verbosity,
                 GtError *err)
 {
@@ -176,25 +180,28 @@ newSfxInterface(GtReadmode readmode,
 
 static struct seqStats *
 newSeqStatsFromCharDist(const GtEncodedsequence *encseq,
-                        const GtAlphabet *alpha, Seqpos len)
+                        const GtAlphabet *alpha, unsigned long len)
 {
   struct seqStats *stats = NULL;
   unsigned i, numofchars;
-  Seqpos regularSymsSum = 0;
-  stats = gt_malloc(offsetAlign(sizeof (*stats), sizeof (Seqpos))
-                    + (UINT8_MAX + 1) * sizeof (Seqpos));
+  unsigned long regularSymsSum = 0;
+  stats = gt_malloc(offsetAlign(sizeof (*stats), sizeof (unsigned long))
+                    + (UINT8_MAX + 1) * sizeof (unsigned long));
   unsigned int numOfSeqs;
 
   numOfSeqs = gt_encodedsequence_num_of_sequences(encseq);
   stats->sourceAlphaType = sourceUInt8;
   stats->symbolDistributionTable =
-    (Seqpos *)((char *)stats + offsetAlign(sizeof (*stats), sizeof (Seqpos)));
-  memset(stats->symbolDistributionTable, 0, sizeof (Seqpos) * (UINT8_MAX + 1));
+    (unsigned long *)((char *)stats + offsetAlign(sizeof (*stats),
+                                                  sizeof (unsigned long)));
+  memset(stats->symbolDistributionTable,
+         0,
+         sizeof (unsigned long) * (UINT8_MAX + 1));
   numofchars = gt_alphabet_num_of_chars(alpha);
   for (i = 0; i < numofchars; ++i)
   {
     stats->symbolDistributionTable[i]
-      = (Seqpos) getencseqcharactercount(encseq,(GtUchar) i);
+      = (unsigned long) getencseqcharactercount(encseq,(GtUchar) i);
     regularSymsSum += stats->symbolDistributionTable[i];
   }
   stats->symbolDistributionTable[WILDCARD] = len - regularSymsSum - numOfSeqs;
@@ -227,7 +234,7 @@ newSfxInterfaceWithReaders(GtReadmode readmode,
                            SeqDataReader readers[],
                            const GtEncodedsequence *encseq,
                            GtProgressTimer *sfxprogress,
-                           Seqpos length,
+                           unsigned long length,
                            GtLogger *verbosity, GtError *err)
 {
   sfxInterface *sfxi = NULL;
@@ -302,7 +309,7 @@ SfxINewMRAEnc(const sfxInterface *si)
   return alphabet;
 }
 
-Seqpos
+unsigned long
 SfxIGetLength(const sfxInterface *si)
 {
   gt_assert(si);
@@ -315,7 +322,7 @@ SfxIGetSeqStats(const sfxInterface *si)
   return si->stats;
 }
 
-extern DefinedSeqpos
+extern Definedunsignedlong
 SfxIGetRot0Pos(const struct sfxInterface *si)
 {
   return si->rot0Pos;
@@ -341,7 +348,7 @@ SfxIRegisterReader(sfxInterface *sfxi, enum sfxDataRequest rtype)
 }
 
 extern size_t
-SfxIGetOrigSeq(const void *state, Symbol *dest, Seqpos pos, size_t len)
+SfxIGetOrigSeq(const void *state, Symbol *dest, unsigned long pos, size_t len)
 {
   const struct sfxInterface *sfxi;
   gt_assert(state);
@@ -352,9 +359,13 @@ SfxIGetOrigSeq(const void *state, Symbol *dest, Seqpos pos, size_t len)
 /** writes substring of suffix table to output, stores older data into
  * cache if necessary */
 static size_t
-SfxIGenerate(void *iface, void *backlogState,
-             move2BacklogFunc move2Backlog, void *output, Seqpos generateStart,
-             size_t len, SeqDataTranslator xltor)
+SfxIGenerate(void *iface,
+             void *backlogState,
+             move2BacklogFunc move2Backlog,
+             void *output,
+             unsigned long generateStart,
+             size_t len,
+             SeqDataTranslator xltor)
 {
   sfxInterface *sfxi = iface;
   size_t elemsLeft = len;
@@ -387,14 +398,14 @@ SfxIGenerate(void *iface, void *backlogState,
         /* size_t because the current approach cannot generate more
          * than memory will hold anyway */
         size_t lastGeneratedLen = sfxi->lastGeneratedLen;
-        const Seqpos *suftab = sfxi->lastGeneratedSufTabSegment;
+        const unsigned long *suftab = sfxi->lastGeneratedSufTabSegment;
         if (!sfxi->rot0Pos.defined)
           for (pos=0; pos < lastGeneratedLen; pos++)
           {
             if (suftab[pos] == 0)
             {
               sfxi->rot0Pos.defined = true;
-              sfxi->rot0Pos.valueseqpos = sfxi->lastGeneratedStart + pos;
+              sfxi->rot0Pos.valueunsignedlong = sfxi->lastGeneratedStart + pos;
               break;
             }
           }

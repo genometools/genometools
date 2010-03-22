@@ -23,7 +23,6 @@
 #include "sfx-strategy.h"
 #include "sfx-bentsedg.h"
 #include "core/logger.h"
-#include "core/seqpos.h"
 
 typedef struct Sfxiterator Sfxiterator;
 
@@ -39,14 +38,14 @@ Sfxiterator *newSfxiterator(const GtEncodedsequence *encseq,
                             GtLogger *logger,
                             GtError *err);
 
-const Seqpos *nextSfxiterator(Seqpos *numberofsuffixes,
+const unsigned long *nextSfxiterator(unsigned long *numberofsuffixes,
                               bool *specialsuffixes,
                               Sfxiterator *sfi);
 
 int postsortsuffixesfromstream(Sfxiterator *sfi, const GtStr *str_indexname,
                                GtError *err);
 
-bool sfi2longestsuffixpos(Seqpos *longest,const Sfxiterator *sfi);
+bool sfi2longestsuffixpos(unsigned long *longest,const Sfxiterator *sfi);
 
 int sfibcktab2file(FILE *fp,const Sfxiterator *sfi,GtError *err);
 

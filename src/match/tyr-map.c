@@ -18,7 +18,7 @@
 #include "core/divmodmul.h"
 #include "core/fa.h"
 #include "core/encodedsequence.h"
-#include "defined-types.h"
+#include "core/defined-types.h"
 #include "spacedef.h"
 #include "tyr-basic.h"
 #include "tyr-map.h"
@@ -408,7 +408,9 @@ int determinetyrbckpfxlen(unsigned int *prefixlength,
   if (callprefixlength->defined)
   {
     unsigned int maxprefixlen
-      = whatisthemaximalprefixlength(tyrindex->alphasize,tyrindex->numofmers,0);
+      = whatisthemaximalprefixlength(tyrindex->alphasize,
+                                     (unsigned long) tyrindex->numofmers,
+                                     0);
     if (maxprefixlen > (unsigned int) tyrindex->mersize)
     {
       maxprefixlen = (unsigned int) tyrindex->mersize;
@@ -422,7 +424,7 @@ int determinetyrbckpfxlen(unsigned int *prefixlength,
   } else
   {
     unsigned int recommended = recommendedprefixlength(tyrindex->alphasize,
-                                                       tyrindex->numofmers);
+                                           (unsigned long) tyrindex->numofmers);
     if (recommended > (unsigned int) tyrindex->mersize)
     {
       recommended = (unsigned int) tyrindex->mersize;

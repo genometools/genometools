@@ -18,35 +18,34 @@
 #ifndef SFX_PARTSSUF_DEF_H
 #define SFX_PARTSSUF_DEF_H
 
-#include "core/seqpos.h"
 #include "core/logger.h"
 #include "intcode-def.h"
 
 typedef struct Suftabparts Suftabparts;
 
 Suftabparts *newsuftabparts(unsigned int numofparts,
-                            const Seqpos *leftborder,
+                            const unsigned long *leftborder,
                             Codetype numofallcodes,
-                            Seqpos numofsuffixestoinsert,
-                            Seqpos fullspecials,
+                            unsigned long numofsuffixestoinsert,
+                            unsigned long fullspecials,
                             GtLogger *logger);
 
 Codetype stpgetcurrentmincode(unsigned int part,
                               const Suftabparts *suftabparts);
 
-Seqpos stpgetcurrentsuftaboffset(unsigned int part,
+unsigned long stpgetcurrentsuftaboffset(unsigned int part,
                                  const Suftabparts *suftabparts);
 
 Codetype stpgetcurrentmaxcode(unsigned int part,
                               const Suftabparts *suftabparts);
 
-Seqpos stpgetcurrentsumofwdith(unsigned int part,
+unsigned long stpgetcurrentsumofwdith(unsigned int part,
                                const Suftabparts *suftabparts);
 
-Seqpos stpgetcurrentwidthofpart(unsigned int part,
+unsigned long stpgetcurrentwidthofpart(unsigned int part,
                                 const Suftabparts *suftabparts);
 
-Seqpos stpgetlargestwidth(const Suftabparts *suftabparts);
+unsigned long stpgetlargestwidth(const Suftabparts *suftabparts);
 
 unsigned int stpgetnumofparts(const Suftabparts *suftabparts);
 

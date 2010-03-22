@@ -19,16 +19,16 @@
 #define SFX_REMAINSORT_H
 
 #include "core/error_api.h"
-#include "core/seqpos.h"
+
 #include "core/readmode.h"
 #include "bcktab.h"
 #include "intcode-def.h"
-#include "defined-types.h"
+#include "core/defined-types.h"
 #include "compressedtab.h"
 
 typedef struct Rmnsufinfo Rmnsufinfo;
 
-Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
+Rmnsufinfo *newRmnsufinfo(unsigned long *presortedsuffixes,
                           int mmapfiledesc,
                           const GtEncodedsequence *encseq,
                           Bcktab *bcktab,
@@ -36,15 +36,18 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                           unsigned int numofchars,
                           unsigned int prefixlength,
                           GtReadmode readmode,
-                          Seqpos partwidth,
+                          unsigned long partwidth,
                           bool hashexceptions,
                           bool absoluteinversesuftab);
 
 void rmnsufinfo_addunsortedrange(Rmnsufinfo *rmnsufinfo,
-                                 Seqpos left,Seqpos right,Seqpos depth);
+                                 unsigned long left,
+                                 unsigned long right,
+                                 unsigned long depth);
 
 void bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo );
-Compressedtable *rmnsufinfo_wrap(Seqpos *longest,
-                                 Rmnsufinfo **rmnsufinfoptr,bool withlcptab);
+Compressedtable *rmnsufinfo_wrap(unsigned long *longest,
+                                 Rmnsufinfo **rmnsufinfoptr,
+                                 bool withlcptab);
 
 #endif

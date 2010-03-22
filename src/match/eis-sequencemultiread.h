@@ -24,14 +24,13 @@
 #include "core/assert_api.h"
 #include "core/minmax.h"
 #include "match/eis-seqdatasrc.h"
-#include "core/seqpos.h"
 
 /** every reader is identified by a unique scalar */
 typedef unsigned consumerID;
 
 /* moves data that can no longer be regenerated to the backlog */
 typedef void (*move2BacklogFunc)(void *backlogState, const void *seqData,
-                                 Seqpos requestStart, size_t requestLen);
+                                 unsigned long requestStart, size_t requestLen);
 
 /**
  * basic idea: let this function write the required data to output
@@ -41,7 +40,7 @@ typedef void (*move2BacklogFunc)(void *backlogState, const void *seqData,
  */
 typedef size_t (*generatorFunc)(void *generatorState, void *backlogState,
                                 move2BacklogFunc move2Backlog, void *output,
-                                Seqpos generateStart, size_t len,
+                                unsigned long generateStart, size_t len,
                                 SeqDataTranslator xltor);
 
 typedef struct seqReaderSet SeqReaderSet;
@@ -52,7 +51,7 @@ struct seqReaderSet
   int tagSuperSet;
   struct seqReaderState *consumerList;
   struct seqSinkState *autoConsumerList;
-  Seqpos backlogStartPos;
+  unsigned long backlogStartPos;
   size_t backlogSize, backlogLen, backlogElemSize;
   void *seqDataBacklog, *generatorState;
   generatorFunc generator;

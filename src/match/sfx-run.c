@@ -64,9 +64,9 @@ typedef struct
   FILE *outfpsuftab,
        *outfpbwttab,
        *outfpbcktab;
-  Seqpos pageoffset;
+  unsigned long pageoffset;
   const GtEncodedsequence *encseq;
-  DefinedSeqpos longest;
+  Definedunsignedlong longest;
   Outlcpinfo *outlcpinfo;
 } Outfileinfo;
 
@@ -83,7 +83,7 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
   outfileinfo->outfpbcktab = NULL;
   outfileinfo->pageoffset = 0;
   outfileinfo->longest.defined = false;
-  outfileinfo->longest.valueseqpos = 0;
+  outfileinfo->longest.valueunsignedlong = 0;
   if (so->outlcptab)
   {
     outfileinfo->outlcpinfo
@@ -115,8 +115,8 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
 }
 
 static int suftab2file(FILE *outfpsuftab,
-                       const Seqpos *suftab,
-                       Seqpos numberofsuffixes,
+                       const unsigned long *suftab,
+                       unsigned long numberofsuffixes,
                        GtError *err)
 {
   bool haserr = false;
@@ -127,9 +127,9 @@ static int suftab2file(FILE *outfpsuftab,
              outfpsuftab)
              != (size_t) numberofsuffixes)
   {
-    gt_error_set(err,"cannot write " FormatSeqpos " items of size %u: "
+    gt_error_set(err,"cannot write %lu items of size %u: "
                      "errormsg=\"%s\"",
-         PRINTSeqposcast(numberofsuffixes),
+         numberofsuffixes,
          (unsigned int) sizeof (*suftab),
          strerror(errno));
     haserr = true;
@@ -138,9 +138,9 @@ static int suftab2file(FILE *outfpsuftab,
 }
 
 static int bwttab2file(Outfileinfo *outfileinfo,
-                       const Seqpos *suftab,
+                       const unsigned long *suftab,
                        GtReadmode readmode,
-                       Seqpos numberofsuffixes,
+                       unsigned long numberofsuffixes,
                        GtError *err)
 {
   bool haserr = false;
@@ -149,7 +149,7 @@ static int bwttab2file(Outfileinfo *outfileinfo,
   if (!haserr &&
       (!outfileinfo->longest.defined || outfileinfo->outfpbwttab != NULL))
   {
-    Seqpos startpos, pos;
+    unsigned long startpos, pos;
     GtUchar cc = 0;
 
     for (pos=0; pos < numberofsuffixes; pos++)
@@ -161,7 +161,8 @@ static int bwttab2file(Outfileinfo *outfileinfo,
         if (!outfileinfo->longest.defined)
         {
           outfileinfo->longest.defined = true;
-          outfileinfo->longest.valueseqpos = outfileinfo->pageoffset + pos;
+          outfileinfo->longest.valueunsignedlong =
+                                                  outfileinfo->pageoffset + pos;
         }
       } else
       {
@@ -202,8 +203,8 @@ static int suffixeratorwithoutput(const GtStr *str_indexname,
                                   GtLogger *logger,
                                   GtError *err)
 {
-  const Seqpos *suftabptr;
-  Seqpos numberofsuffixes;
+  const unsigned long *suftabptr;
+  unsigned long numberofsuffixes;
   bool haserr = false, specialsuffixes = false;
   Sfxiterator *sfi = NULL;
 
@@ -223,7 +224,7 @@ static int suffixeratorwithoutput(const GtStr *str_indexname,
   {
     while (true)
     {
-      Seqpos longest;
+      unsigned long longest;
 
       suftabptr = nextSfxiterator(&numberofsuffixes,&specialsuffixes,sfi);
       if (suftabptr == NULL)
@@ -233,7 +234,7 @@ static int suffixeratorwithoutput(const GtStr *str_indexname,
       if (numofparts == 1U && sfi2longestsuffixpos(&longest,sfi))
       {
         outfileinfo->longest.defined = true;
-        outfileinfo->longest.valueseqpos = longest;
+        outfileinfo->longest.valueunsignedlong = longest;
       }
       if (outfileinfo->outfpsuftab != NULL)
       {
@@ -280,7 +281,7 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
                                 Definedunsignedint *maxdepth,
                                 const Suffixeratoroptions *so,
                                 unsigned int numofchars,
-                                Seqpos totallength,
+                                unsigned long totallength,
                                 GtLogger *logger,
                                 GtError *err)
 {
@@ -581,7 +582,7 @@ static int runsuffixerator(bool doesa,
   gt_fa_fclose(outfileinfo.outfpbcktab);
   if (!haserr)
   {
-    Seqpos numoflargelcpvalues,
+    unsigned long numoflargelcpvalues,
            maxbranchdepth;
 
     if (outfileinfo.outlcpinfo == NULL)
@@ -645,8 +646,8 @@ int parseargsandcallsuffixerator(bool doesa,int argc,
     GtLogger *logger = gt_logger_new(so.beverbose,
                                      GT_LOGGER_DEFLT_PREFIX, stdout);
 
-    gt_logger_log(logger,"sizeof (Seqpos)=%lu",
-                  (unsigned long) (sizeof (Seqpos) * CHAR_BIT));
+    gt_logger_log(logger,"sizeof (unsigned long)=%lu",
+                  (unsigned long) (sizeof (unsigned long) * CHAR_BIT));
     if (runsuffixerator(doesa,&so,logger,err) < 0)
     {
       haserr = true;

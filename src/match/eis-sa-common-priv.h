@@ -27,7 +27,7 @@ typedef SeqDataReader (*createReaderFunc)(SASeqSrc *src,
 typedef SeqDataTranslator (*createTranslatorFunc)(SASeqSrc *src,
                                                   enum sfxDataRequest request);
 
-typedef DefinedSeqpos (*getRot0PosFunc)(const SASeqSrc *src);
+typedef Definedunsignedlong (*getRot0PosFunc)(const SASeqSrc *src);
 
 typedef const struct seqStats *(*getSeqStatsFunc)(const SASeqSrc *src);
 
@@ -37,7 +37,7 @@ typedef MRAEnc *(*newMRAEncFunc)(const SASeqSrc *src);
 
 struct SASeqSrc
 {
-  Seqpos seqLen;
+  unsigned long seqLen;
   createReaderFunc createReader;
   createTranslatorFunc createTranslator;
   getRot0PosFunc getRot0Pos;
@@ -51,7 +51,7 @@ struct SASeqSrc
 };
 
 static inline void
-initSASeqSrc(SASeqSrc *src, Seqpos seqLen,
+initSASeqSrc(SASeqSrc *src, unsigned long seqLen,
              createTranslatorFunc createTranslator,
              createReaderFunc createReader,
              getRot0PosFunc getRot0Pos, getSeqStatsFunc getSeqStats,

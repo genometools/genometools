@@ -15,11 +15,8 @@
 */
 
 #include <limits.h>
-
 #include "core/error.h"
 #include "core/option.h"
-#include "core/seqpos.h"
-
 #include "match/eis-bwtseq.h"
 #include "match/eis-bwtseq-param.h"
 #include "match/eis-bwtseq-context-param.h"
@@ -61,7 +58,7 @@ registerPackedIndexOptions(GtOptionParser *op, struct bwtOptions *paramOutput,
     "parameter i means that each 2^i-th position of source is sampled for "
     "rank\nundefined => chooses default of log(log(sequence length))",
     &paramOutput->final.sourceRankInterval, -1, -1,
-    sizeof (Seqpos) * CHAR_BIT - 1);
+    sizeof (unsigned long) * CHAR_BIT - 1);
   gt_option_parser_add_option(op, option);
 
   registerCtxMapOptions(op, &paramOutput->final.ctxMapILog);

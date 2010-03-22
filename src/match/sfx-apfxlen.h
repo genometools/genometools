@@ -19,13 +19,12 @@
 #define SFX_APFXLEN_H
 
 #include "core/error_api.h"
-#include "core/seqpos.h"
 
 unsigned int recommendedprefixlength(unsigned int numofchars,
-                                     Seqpos totallength);
+                                     unsigned long totallength);
 
 unsigned int whatisthemaximalprefixlength(unsigned int numofchars,
-                                          Seqpos totallength,
+                                          unsigned long totallength,
                                           unsigned int prefixlenbits);
 
 int checkprefixlength(unsigned int maxprefixlen,

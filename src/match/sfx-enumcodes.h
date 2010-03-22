@@ -20,14 +20,13 @@
 
 #include "intcode-def.h"
 #include "core/encodedsequence.h"
-#include "core/seqpos.h"
 
 typedef struct Enumcodeatposition Enumcodeatposition;
 
 typedef struct
 {
   unsigned int maxprefixindex;
-  Seqpos position;
+  unsigned long position;
 } Specialcontext;
 
 Enumcodeatposition *newEnumcodeatposition(const GtEncodedsequence *encseq,
@@ -42,11 +41,11 @@ void freeEnumcodeatposition(Enumcodeatposition **ecp);
 
 Codetype computefilledqgramcode(const Enumcodeatposition *ecp,
                                 unsigned int prefixindex,
-                                Seqpos pos);
+                                unsigned long pos);
 
 bool computefilledqgramcodestopatmax(Codetype *code,
                                      const Enumcodeatposition *ecp,
                                      unsigned int prefixindex,
-                                     Seqpos pos,
+                                     unsigned long pos,
                                      Codetype stopcode);
 #endif

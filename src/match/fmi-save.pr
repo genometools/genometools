@@ -2,7 +2,7 @@
 extern "C" {
 #endif
 int saveFmindex (const GtStr *indexname,Fmindex *fm,
-                 const Specialcharinfo *specialcharinfo,
+                 const GtSpecialcharinfo *specialcharinfo,
                  bool storeindexpos,GtError *err);
 
 #ifdef __cplusplus

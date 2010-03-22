@@ -115,7 +115,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
       EMIterInitialized = true;
     }
     {
-      Seqpos totalLen, dbstart;
+      unsigned long totalLen, dbstart;
       unsigned long trial, patternLen;
 
       if ((had_err =
@@ -154,7 +154,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
       if ((had_err = totalLen + 1 != BWTSeqLength(bwtSeq)))
       {
         gt_error_set(err, "base suffix array and index have diferrent lengths!"
-                  FormatSeqpos" vs. "FormatSeqpos,  totalLen + 1,
+                          "%lu vs. %lu",  totalLen + 1,
                   BWTSeqLength(bwtSeq));
         break;
       }
@@ -180,7 +180,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
                                             patternLen);
         if (BWTSeqHasLocateInformation(bwtSeq))
         {
-          Seqpos numMatches;
+          unsigned long numMatches;
           if ((had_err = !reinitEMIterator(&EMIter, bwtSeq, pptr, patternLen,
                                            false)))
           {
@@ -199,7 +199,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
 /*        putc('\n', stderr); */
           while (nextmmsearchiterator(&dbstart,mmsi))
           {
-            Seqpos matchPos = 0;
+            unsigned long matchPos = 0;
             bool match = EMIGetNextMatch(&EMIter, &matchPos, bwtSeq);
             if ((had_err = !match))
             {
@@ -210,13 +210,13 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
             if ((had_err = matchPos != dbstart))
             {
               gt_error_set(err, "packedindex match doesn't equal mmsearch "
-                           "match result!\n"FormatSeqpos" vs. "FormatSeqpos"\n",
+                           "match result!\n%lu vs. %lu\n",
                            matchPos, dbstart);
             }
           }
           if (!had_err)
           {
-            Seqpos matchPos;
+            unsigned long matchPos;
             bool trailingMatch = EMIGetNextMatch(&EMIter, &matchPos, bwtSeq);
             if ((had_err = trailingMatch))
             {
@@ -227,13 +227,14 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
         }
         else
         {
-          Seqpos numFMIMatches = BWTSeqMatchCount(bwtSeq, pptr, patternLen,
-                                                  false),
+          unsigned long numFMIMatches = BWTSeqMatchCount(bwtSeq, pptr,
+                                                         patternLen,
+                                                         false),
             numMMSearchMatches = countmmsearchiterator(mmsi);
           if ((had_err = numFMIMatches != numMMSearchMatches))
           {
             gt_error_set(err, "Number of matches not equal for suffix array ("
-                      FormatSeqpos") and fmindex ("FormatSeqpos".\n",
+                              "%lu) and fmindex (%lu).\n",
                       numFMIMatches, numMMSearchMatches);
           }
         }

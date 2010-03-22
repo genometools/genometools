@@ -29,13 +29,13 @@ BWTSeqGetAlphabet(const BWTSeq *seq)
   return seq->alphabet;
 }
 
-static inline Seqpos
+static inline unsigned long
 BWTSeqLength(const BWTSeq *seq)
 {
   return EISLength(seq->seqIdx);
 }
 
-static inline Seqpos
+static inline unsigned long
 BWTSeqTerminatorPos(const BWTSeq *bwtSeq)
 {
   return bwtSeq->rot0Pos;
@@ -47,8 +47,8 @@ BWTSeqHasLocateInformation(const BWTSeq *bwtSeq)
   return bwtSeq->locateSampleInterval != 0;
 }
 
-static inline Seqpos
-BWTSeqTransformedOcc(const BWTSeq *bwtSeq, Symbol tsym, Seqpos pos)
+static inline unsigned long
+BWTSeqTransformedOcc(const BWTSeq *bwtSeq, Symbol tsym, unsigned long pos)
 {
   gt_assert(bwtSeq);
   /* two counts must be treated specially:
@@ -69,9 +69,9 @@ BWTSeqTransformedOcc(const BWTSeq *bwtSeq, Symbol tsym, Seqpos pos)
   }
 }
 
-static inline struct SeqposPair
+static inline struct GtUlongPair
 BWTSeqTransformedPosPairOcc(const BWTSeq *bwtSeq, Symbol tSym,
-                            Seqpos posA, Seqpos posB)
+                            unsigned long posA, unsigned long posB)
 {
   gt_assert(bwtSeq);
   /* two counts must be treated specially:
@@ -90,7 +90,7 @@ BWTSeqTransformedPosPairOcc(const BWTSeq *bwtSeq, Symbol tSym,
 /*       - ((pos > BWTSeqTerminatorPos(bwtSeq))?1:0); */
   else /* tSym == not flattened terminator == alphabetSize - 1 */
   {
-    struct SeqposPair occ;
+    struct GtUlongPair occ;
     gt_assert(tSym == bwtSeq->alphabetSize - 1);
     occ.a = (posA > BWTSeqTerminatorPos(bwtSeq))?1:0;
     occ.b = (posB > BWTSeqTerminatorPos(bwtSeq))?1:0;
@@ -98,16 +98,17 @@ BWTSeqTransformedPosPairOcc(const BWTSeq *bwtSeq, Symbol tSym,
   }
 }
 
-static inline Seqpos
-BWTSeqOcc(const BWTSeq *bwtSeq, Symbol sym, Seqpos pos)
+static inline unsigned long
+BWTSeqOcc(const BWTSeq *bwtSeq, Symbol sym, unsigned long pos)
 {
   gt_assert(bwtSeq);
   Symbol tSym = MRAEncMapSymbol(BWTSeqGetAlphabet(bwtSeq), sym);
   return BWTSeqTransformedOcc(bwtSeq, tSym, pos);
 }
 
-static inline struct SeqposPair
-BWTSeqPosPairOcc(const BWTSeq *bwtSeq, Symbol sym, Seqpos posA, Seqpos posB)
+static inline struct GtUlongPair
+BWTSeqPosPairOcc(const BWTSeq *bwtSeq, Symbol sym, unsigned long posA,
+                 unsigned long posB)
 {
   gt_assert(bwtSeq);
   Symbol tSym = MRAEncMapSymbol(BWTSeqGetAlphabet(bwtSeq), sym);
@@ -115,8 +116,8 @@ BWTSeqPosPairOcc(const BWTSeq *bwtSeq, Symbol sym, Seqpos posA, Seqpos posB)
 }
 
 static inline void
-BWTSeqRangeOcc(const BWTSeq *bwtSeq, AlphabetRangeID range, Seqpos pos,
-               Seqpos *rangeOccs)
+BWTSeqRangeOcc(const BWTSeq *bwtSeq, AlphabetRangeID range, unsigned long pos,
+               unsigned long *rangeOccs)
 {
   gt_assert(bwtSeq && rangeOccs);
   gt_assert(range < MRAEncGetNumRanges(BWTSeqGetAlphabet(bwtSeq)));
@@ -140,8 +141,9 @@ BWTSeqRangeOcc(const BWTSeq *bwtSeq, AlphabetRangeID range, Seqpos pos,
 }
 
 static inline void
-BWTSeqPosPairRangeOcc(const BWTSeq *bwtSeq, AlphabetRangeID range, Seqpos posA,
-                      Seqpos posB, Seqpos *rangeOccs)
+BWTSeqPosPairRangeOcc(const BWTSeq *bwtSeq, AlphabetRangeID range,
+                      unsigned long posA, unsigned long posB,
+                      unsigned long *rangeOccs)
 {
   gt_assert(bwtSeq && rangeOccs);
   gt_assert(posA <= posB);
@@ -175,12 +177,12 @@ BWTSeqPosPairRangeOcc(const BWTSeq *bwtSeq, AlphabetRangeID range, Seqpos posA,
   }
 }
 
-static inline Seqpos
-BWTSeqLFMap(const BWTSeq *bwtSeq, Seqpos LPos,
+static inline unsigned long
+BWTSeqLFMap(const BWTSeq *bwtSeq, unsigned long LPos,
             struct extBitsRetrieval *extBits)
 {
   Symbol tSym = EISGetTransformedSym(bwtSeq->seqIdx, LPos, bwtSeq->hint);
-  Seqpos FPos;
+  unsigned long FPos;
   const MRAEnc *alphabet = BWTSeqGetAlphabet(bwtSeq);
   if (LPos != BWTSeqTerminatorPos(bwtSeq))
   {
@@ -201,7 +203,7 @@ BWTSeqLFMap(const BWTSeq *bwtSeq, Seqpos LPos,
             stderr);
       abort();
 #endif
-      FPos = (Seqpos)-1;
+      FPos = (unsigned long)-1;
       break;
     }
   }
@@ -213,7 +215,7 @@ BWTSeqLFMap(const BWTSeq *bwtSeq, Seqpos LPos,
   return FPos;
 }
 
-static inline Seqpos
+static inline unsigned long
 BWTSeqAggCount(const BWTSeq *bwtSeq, Symbol sym)
 {
   Symbol  tSym;
@@ -223,7 +225,7 @@ BWTSeqAggCount(const BWTSeq *bwtSeq, Symbol sym)
   return bwtSeq->count[tSym];
 }
 
-static inline Seqpos
+static inline unsigned long
 BWTSeqAggTransformedCount(const BWTSeq *bwtSeq, Symbol tSym)
 {
   gt_assert(bwtSeq);
@@ -258,14 +260,14 @@ BWTSeqGetEncIdxSeq(const BWTSeq *bwtSeq)
 }
 
 static inline Symbol
-BWTSeqGetSym(const BWTSeq *bwtSeq, Seqpos pos)
+BWTSeqGetSym(const BWTSeq *bwtSeq, unsigned long pos)
 {
   gt_assert(bwtSeq);
   return EISGetSym(bwtSeq->seqIdx, pos, bwtSeq->hint);
 }
 
 static inline bool
-EMIGetNextMatch(struct BWTSeqExactMatchesIterator *iter, Seqpos *pos,
+EMIGetNextMatch(struct BWTSeqExactMatchesIterator *iter, unsigned long *pos,
                 const BWTSeq *bwtSeq)
 {
   if (iter->nextMatchBWTPos < iter->bounds.end)

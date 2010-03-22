@@ -24,7 +24,7 @@
  * index produced unless NULL is returned
  */
 extern EISeq *
-newGenBlockEncIdxSeq(Seqpos totalLen, const GtStr *projectName,
+newGenBlockEncIdxSeq(unsigned long totalLen, const GtStr *projectName,
                      MRAEnc *alphabet, const struct seqStats *stats,
                      SeqDataReader BWTGenerator,
                      const struct seqBaseParam *params,
@@ -48,7 +48,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const GtStr *projectName,
  * @return new encoded indexed sequence object reference
  */
 extern EISeq *
-loadBlockEncIdxSeqGen(MRAEnc *alphabet, Seqpos totalLen,
+loadBlockEncIdxSeqGen(MRAEnc *alphabet, unsigned long totalLen,
                       const GtStr *projectName, int features, GtError *err);
 
 #endif

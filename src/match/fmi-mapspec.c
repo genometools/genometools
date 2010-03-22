@@ -28,20 +28,22 @@ static void assignfmmapspecification(GtArrayMapspecification *mapspectable,
   Mapspecification *mapspecptr;
 
   fmindex = fmwithoptions->fmptr;
-  NEWMAPSPEC(fmindex->tfreq,Seqpos,(unsigned long) TFREQSIZE(fmindex->mapsize));
-  NEWMAPSPEC(fmindex->superbfreq,Seqpos,
+  NEWMAPSPEC(fmindex->tfreq,
+             GtUlong,
+             (unsigned long) TFREQSIZE(fmindex->mapsize));
+  NEWMAPSPEC(fmindex->superbfreq,GtUlong,
              (unsigned long) SUPERBFREQSIZE(fmindex->mapsize,
                                             fmindex->nofsuperblocks));
-  NEWMAPSPEC(fmindex->markpostable,Seqpos,
+  NEWMAPSPEC(fmindex->markpostable,GtUlong,
              fmwithoptions->storeindexpos
              ? (unsigned long) MARKPOSTABLELENGTH(fmindex->bwtlength,
                                                   fmindex->markdist)
              : 0);
-  NEWMAPSPEC(fmindex->boundarray,Seqposbound,
+  NEWMAPSPEC(fmindex->boundarray,GtUlongBound,
              (unsigned long) fmindex->numofcodes);
-  NEWMAPSPEC(fmindex->specpos.spacePairBwtidx,PairBwtidx,
+  NEWMAPSPEC(fmindex->specpos.spaceGtPairBwtidx,GtPairBwtidx,
              fmwithoptions->storeindexpos
-             ? fmindex->specpos.nextfreePairBwtidx
+             ? fmindex->specpos.nextfreeGtPairBwtidx
              : 0);
   NEWMAPSPEC(fmindex->bfreq,GtUchar,
              (unsigned long) BFREQSIZE(fmindex->mapsize,fmindex->nofblocks));

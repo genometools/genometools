@@ -20,7 +20,7 @@
 
 #include "core/str_api.h"
 #include "core/error_api.h"
-#include "defined-types.h"
+#include "core/defined-types.h"
 #include "tyr-map.h"
 
 typedef struct Tyrbckinfo Tyrbckinfo;

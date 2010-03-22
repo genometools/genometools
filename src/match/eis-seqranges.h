@@ -32,7 +32,7 @@
 
 #include "core/error.h"
 #include "core/bitpackstring.h"
-#include "core/seqpos.h"
+
 #include "match/eis-mrangealphabet.h"
 
 /**
@@ -84,7 +84,9 @@ deleteSeqRangeList(struct seqRangeList *rangeList);
  * @param sym the range is a contiguous sequence of this symbol
  */
 extern void
-SRLAppendNewRange(struct seqRangeList *rangeList, Seqpos pos, Seqpos len,
+SRLAppendNewRange(struct seqRangeList *rangeList,
+                  unsigned long pos,
+                  unsigned long len,
                   Symbol sym);
 
 /**
@@ -94,7 +96,7 @@ SRLAppendNewRange(struct seqRangeList *rangeList, Seqpos pos, Seqpos len,
  * @param sym this symbol occurs
  */
 extern void
-SRLAddPosition(struct seqRangeList *rangeList, Seqpos pos,
+SRLAddPosition(struct seqRangeList *rangeList, unsigned long pos,
                Symbol sym);
 
 /**
@@ -115,7 +117,7 @@ SRLInitListSearchHint(struct seqRangeList *rangeList,
  * @return NULL if no range overlaps or succeeds pos
  */
 struct seqRange *
-SRLFindPositionNext(struct seqRangeList *rangeList, Seqpos pos,
+SRLFindPositionNext(struct seqRangeList *rangeList, unsigned long pos,
                     seqRangeListSearchHint *hint);
 
 /**
@@ -129,7 +131,7 @@ SRLFindPositionNext(struct seqRangeList *rangeList, Seqpos pos,
  * @return true if an overlap exits, false if not
  */
 extern int
-SRLOverlapsPosition(struct seqRangeList *rangeList, Seqpos pos,
+SRLOverlapsPosition(struct seqRangeList *rangeList, unsigned long pos,
                     seqRangeListSearchHint *hint, Symbol *symAtPos);
 
 /**
@@ -144,8 +146,8 @@ SRLOverlapsPosition(struct seqRangeList *rangeList, Seqpos pos,
  * @param hint
  */
 extern void
-SRLSymbolsInSeqRegion(struct seqRangeList *rangeList, Seqpos start,
-                      Seqpos end, Seqpos *occStore,
+SRLSymbolsInSeqRegion(struct seqRangeList *rangeList, unsigned long start,
+                      unsigned long end, unsigned long *occStore,
                       seqRangeListSearchHint *hint);
 
 /**
@@ -156,9 +158,12 @@ SRLSymbolsInSeqRegion(struct seqRangeList *rangeList, Seqpos start,
  * @param sym only account for ranges matching this symbol
  * @param hint
  */
-extern Seqpos
-SRLSymbolCountInSeqRegion(struct seqRangeList *rangeList, Seqpos start,
-                          Seqpos end, Symbol sym, seqRangeListSearchHint *hint);
+extern unsigned long
+SRLSymbolCountInSeqRegion(struct seqRangeList *rangeList,
+                          unsigned long start,
+                          unsigned long end,
+                          Symbol sym,
+                          seqRangeListSearchHint *hint);
 
 /**
  * @brief Sum over the occurrence counts for all symbols in a given region.
@@ -167,9 +172,11 @@ SRLSymbolCountInSeqRegion(struct seqRangeList *rangeList, Seqpos start,
  * @param end
  * @param hint
  */
-extern Seqpos
-SRLAllSymbolsCountInSeqRegion(struct seqRangeList *rangeList, Seqpos start,
-                              Seqpos end, seqRangeListSearchHint *hint);
+extern unsigned long
+SRLAllSymbolsCountInSeqRegion(struct seqRangeList *rangeList,
+                              unsigned long start,
+                              unsigned long end,
+                              seqRangeListSearchHint *hint);
 
 /**
  * @brief Overwrite all positions in a string that coincide with
@@ -185,8 +192,11 @@ SRLAllSymbolsCountInSeqRegion(struct seqRangeList *rangeList, Seqpos start,
  */
 extern void
 SRLApplyRangesToSubString(struct seqRangeList *rangeList,
-                          Symbol *subString, Seqpos start, Seqpos len,
-                          Seqpos subStringOffset, seqRangeListSearchHint *hint);
+                          Symbol *subString,
+                          unsigned long start,
+                          unsigned long len,
+                          unsigned long subStringOffset,
+                          seqRangeListSearchHint *hint);
 
 /**
  * @brief Print text description of ranges overlapping the given
@@ -200,8 +210,11 @@ SRLApplyRangesToSubString(struct seqRangeList *rangeList,
  * @return <0 in case of I/O error, >=0 otherwise.
  */
 extern int
-SRLPrintRangesInfo(struct seqRangeList *rangeList, FILE *fp, Seqpos start,
-                   Seqpos len, seqRangeListSearchHint *hint);
+SRLPrintRangesInfo(struct seqRangeList *rangeList,
+                   FILE *fp,
+                   unsigned long start,
+                   unsigned long len,
+                   seqRangeListSearchHint *hint);
 /**
  * @brief Save a range list structure to file.
  * @param rangeList

@@ -1,13 +1,15 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-Seqpos determinenumofcodes(unsigned int numofchars,unsigned int prefixlength);
+unsigned long determinenumofcodes(unsigned int numofchars,
+                                  unsigned int prefixlength);
 
-Seqpos determinenumberofspecialstostore(const Specialcharinfo *specialcharinfo);
+unsigned long determinenumberofspecialstostore(
+                                      const GtSpecialcharinfo *specialcharinfo);
 
 void computefmkeyvalues (Fmindex *fm,
-                         const Specialcharinfo *specialcharinfo,
-                         Seqpos bwtlength,
+                         const GtSpecialcharinfo *specialcharinfo,
+                         unsigned long bwtlength,
                          unsigned int log2bsize,
                          unsigned int log2markdist,
                          unsigned int numofchars,

@@ -20,6 +20,7 @@
 
 #include "core/assert_api.h"
 #include "core/ma.h"
+#include "core/intdef.h"
 #include "core/symboldef.h"
 
 /*
@@ -126,6 +127,7 @@
 */
 
 GT_DECLAREARRAYSTRUCT(GtUchar);
+GT_DECLAREARRAYSTRUCT(GtUlong);
 GT_DECLAREARRAYSTRUCT(char);
 
 #endif

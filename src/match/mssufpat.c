@@ -23,7 +23,7 @@
 #include "core/chardef.h"
 #include "core/ma_api.h"
 #include "core/intbits.h"
-#include "core/seqpos.h"
+
 #include "absdfstrans-imp.h"
 #include "initeqsvec.h"
 
@@ -37,7 +37,7 @@ struct Limdfsconstinfo
   unsigned long patternlength,
                 mstatlength[GT_INTWORDSIZE],
                 *eqsvector;
-  Seqpos mstatwitnessleftbound[GT_INTWORDSIZE],
+  unsigned long mstatwitnessleftbound[GT_INTWORDSIZE],
          mstatwitnessrightbound[GT_INTWORDSIZE];
 };
 
@@ -183,9 +183,9 @@ static void pms_initLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
 
 static void pms_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
                                      DECLAREPTRDFSSTATE(aliascolumn),
-                                     Seqpos leftbound,
-                                     Seqpos rightbound,
-                                     GT_UNUSED Seqpos width,
+                                     unsigned long leftbound,
+                                     unsigned long rightbound,
+                                     GT_UNUSED unsigned long width,
                                      unsigned long currentdepth,
                                      Limdfsconstinfo *mti)
 {

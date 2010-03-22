@@ -19,7 +19,7 @@
 #define IDX_LIMDFS_H
 
 #include "core/arraydef.h"
-#include "core/seqpos.h"
+
 #include "core/readmode.h"
 #include "procmatch.h"
 #include "core/logger.h"
@@ -95,15 +95,15 @@ bool indexbasedexactpatternmatching(const Limdfsresources *limdfsresources,
                                     unsigned long patternlength);
 
 GtUchar limdfs_getencodedchar(const Limdfsresources *limdfsresources,
-                              Seqpos pos,
+                              unsigned long pos,
                               GtReadmode readmode);
 
 bool intervalwidthleq(const Limdfsresources *limdfsresources,
-                      Seqpos leftbound,Seqpos rightbound);
+                      unsigned long leftbound,unsigned long rightbound);
 
-ArraySeqpos *fromitv2sortedmatchpositions(Limdfsresources *limdfsresources,
-                                          Seqpos leftbound,
-                                          Seqpos rightbound,
+GtArrayGtUlong *fromitv2sortedmatchpositions(Limdfsresources *limdfsresources,
+                                          unsigned long leftbound,
+                                          unsigned long rightbound,
                                           unsigned long offset);
 
 #endif

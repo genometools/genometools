@@ -44,11 +44,11 @@ void showrepeats (RepeatInfo *repeatinfo,unsigned long seedminlength)
   {
     for (i = 0; i < repeats->nextfreeRepeat; i++)
     {
-      printf ("\n#   len: " FormatSeqpos " ", PRINTSeqposcast(reptab[i].len));
-      printf ("pos1: " FormatSeqpos " ", PRINTSeqposcast(reptab[i].pos1));
-      printf ("pos2: " FormatSeqpos " ",
-              PRINTSeqposcast((reptab[i].pos1 + reptab[i].offset)));
-      printf ("offset: " FormatSeqpos " ", PRINTSeqposcast(reptab[i].offset));
+      printf ("\n#   len: %lu ", reptab[i].len);
+      printf ("pos1: %lu ", reptab[i].pos1);
+      printf ("pos2: %lu ",
+              reptab[i].pos1 + reptab[i].offset);
+      printf ("offset: %lu ", reptab[i].offset);
     }
   }
   printf ("\n");
@@ -56,12 +56,12 @@ void showrepeats (RepeatInfo *repeatinfo,unsigned long seedminlength)
 
 int simpleexactselfmatchstore (void *info,
                                GT_UNUSED const GtEncodedsequence *encseq,
-                               Seqpos len,
-                               Seqpos pos1,
-                               Seqpos pos2,
+                               unsigned long len,
+                               unsigned long pos1,
+                               unsigned long pos2,
                                GT_UNUSED GtError *err)
 {
-  Seqpos tmp;
+  unsigned long tmp;
   unsigned long contignumber = 0,
                 seqnum1,
                 seqnum2;
@@ -78,8 +78,8 @@ int simpleexactselfmatchstore (void *info,
   if (repeatinfo->ltrsearchseqrange.start != 0 ||
       repeatinfo->ltrsearchseqrange.end != 0)
   {
-    if (pos1 < (Seqpos) repeatinfo->ltrsearchseqrange.start  ||
-        pos2 + len - 1 > (Seqpos) repeatinfo->ltrsearchseqrange.end)
+    if (pos1 < (unsigned long) repeatinfo->ltrsearchseqrange.start  ||
+        pos2 + len - 1 > (unsigned long) repeatinfo->ltrsearchseqrange.end)
     {
       return 0;
     }
@@ -91,25 +91,27 @@ int simpleexactselfmatchstore (void *info,
   if (seqnum1 == seqnum2)
   {
     gt_log_log("accepted:\n");
-    gt_log_log("pos1: " FormatSeqpos "\n", PRINTSeqposcast(pos1));
-    gt_log_log("pos2: " FormatSeqpos "\n", PRINTSeqposcast(pos2));
+    gt_log_log("pos1: %lu\n", pos1);
+    gt_log_log("pos2: %lu\n", pos2);
     samecontig = true;
     contignumber = seqnum1;
   }
 
   /*test maximal length of candidate pair and distance constraints*/
-  if (samecontig && len <= (Seqpos) repeatinfo->lmax &&
-      (Seqpos) repeatinfo->dmin <= tmp && tmp <= (Seqpos) repeatinfo->dmax)
+  if (samecontig
+        && len <= (unsigned long) repeatinfo->lmax
+        && (unsigned long) repeatinfo->dmin <= tmp
+        && tmp <= (unsigned long) repeatinfo->dmax)
   {
     Repeat *nextfreerepeatptr;
 
     GT_GETNEXTFREEINARRAY(nextfreerepeatptr, &repeatinfo->repeats,
                        Repeat, 10);
-    gt_log_log("maximal repeat pos1: " FormatSeqpos "\n",
-               PRINTSeqposcast(pos1));
-    gt_log_log("maximal repeat pos2: " FormatSeqpos "\n",
-               PRINTSeqposcast(pos2));
-    gt_log_log("len: " FormatSeqpos "\n", PRINTSeqposcast(len));
+    gt_log_log("maximal repeat pos1: %lu\n",
+               pos1);
+    gt_log_log("maximal repeat pos2: %lu\n",
+               pos2);
+    gt_log_log("len: %lu\n", len);
     gt_log_log("seq number: %lu\n\n", contignumber);
     nextfreerepeatptr->pos1 = pos1;
     nextfreerepeatptr->offset = tmp;

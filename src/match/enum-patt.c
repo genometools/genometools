@@ -31,7 +31,7 @@
   GtUchar *patternspace;
   const GtEncodedsequence *sampleencseq;
   unsigned int alphasize;
-  Seqpos totallength;
+  unsigned long totallength;
   GtEncodedsequenceScanstate *esr;
 };
 
@@ -52,10 +52,10 @@ Enumpatterniterator *newenumpatterniterator(unsigned long minpatternlen,
   }
   ALLOCASSIGNSPACE(epi,NULL,Enumpatterniterator,1);
   epi->totallength = gt_encodedsequence_total_length(encseq);
-  if (epi->totallength <= (Seqpos) maxpatternlen)
+  if (epi->totallength <= (unsigned long) maxpatternlen)
   {
-    gt_error_set(err,"totallength=" FormatSeqpos " <= maxpatternlen = %lu\n",
-                    PRINTSeqposcast(epi->totallength),
+    gt_error_set(err,"totallength=%lu <= maxpatternlen = %lu\n",
+                    epi->totallength,
                     maxpatternlen);
     FREESPACE(epi);
     return NULL;
@@ -89,9 +89,9 @@ static void reversesequenceinplace(GtUchar *s,unsigned long len)
 }
 
 const GtUchar *nextEnumpatterniterator(unsigned long *patternlen,
-                                     Enumpatterniterator *epi)
+                                       Enumpatterniterator *epi)
 {
-  Seqpos start;
+  unsigned long start;
   unsigned long j;
   GtUchar cc;
 
@@ -105,8 +105,9 @@ const GtUchar *nextEnumpatterniterator(unsigned long *patternlen,
                                    (double) (epi->maxpatternlen -
                                              epi->minpatternlen+1)));
   }
-  start = (Seqpos) (drand48() * (double) (epi->totallength - *patternlen));
-  gt_assert(start < (Seqpos) (epi->totallength - *patternlen));
+  start =
+        (unsigned long) (drand48() * (double) (epi->totallength - *patternlen));
+  gt_assert(start < (unsigned long) (epi->totallength - *patternlen));
   gt_encodedsequence_scanstate_init(epi->esr,
                                     epi->sampleencseq,
                                     GT_READMODE_FORWARD,

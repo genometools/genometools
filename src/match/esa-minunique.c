@@ -19,21 +19,21 @@
 #include "core/symboldef.h"
 #include "core/unused_api.h"
 #include "sarr-def.h"
-#include "core/seqpos.h"
+
 #include "esa-splititv.h"
 
 unsigned long suffixarrayuniqueforward (const void *genericindex,
-                                        unsigned long offset,
-                                        Seqpos left,
-                                        Seqpos right,
-                                        GT_UNUSED Seqpos *witnessposition,
-                                        const GtUchar *qstart,
-                                        const GtUchar *qend)
+                                       unsigned long offset,
+                                       unsigned long left,
+                                       unsigned long right,
+                                       GT_UNUSED unsigned long *witnessposition,
+                                       const GtUchar *qstart,
+                                       const GtUchar *qend)
 {
   Simplelcpinterval itv;
   const GtUchar *qptr;
   const Suffixarray *suffixarray = (const Suffixarray *) genericindex;
-  Seqpos totallength;
+  unsigned long totallength;
 
   itv.left = left;
   itv.right = right;
@@ -49,7 +49,7 @@ unsigned long suffixarrayuniqueforward (const void *genericindex,
                                         suffixarray->suftab,
                                         &itv,
                                         *qptr,
-                                        (Seqpos) offset,
+                                        (unsigned long) offset,
                                         itv.left,
                                         itv.right))
       {
@@ -65,16 +65,16 @@ unsigned long suffixarrayuniqueforward (const void *genericindex,
 
 unsigned long suffixarraymstats (const void *genericindex,
                                  unsigned long offset,
-                                 Seqpos left,
-                                 Seqpos right,
-                                 Seqpos *witnessposition,
+                                 unsigned long left,
+                                 unsigned long right,
+                                 unsigned long *witnessposition,
                                  const GtUchar *qstart,
                                  const GtUchar *qend)
 {
   Simplelcpinterval itv;
   const GtUchar *qptr;
   const Suffixarray *suffixarray = (const Suffixarray *) genericindex;
-  Seqpos totallength;
+  unsigned long totallength;
 
   itv.left = left;
   itv.right = right;
@@ -89,7 +89,7 @@ unsigned long suffixarraymstats (const void *genericindex,
                                       suffixarray->suftab,
                                       &itv,
                                       *qptr,
-                                      (Seqpos) offset,
+                                      (unsigned long) offset,
                                       itv.left,itv.right))
     {
       if (witnessposition != NULL)

@@ -18,7 +18,6 @@
 #ifndef DIFF_COVER_H
 #define DIFF_COVER_H
 
-#include "core/seqpos.h"
 #include "core/encodedsequence.h"
 #include "core/readmode.h"
 #include "core/logger.h"
@@ -41,8 +40,8 @@ void differencecover_sortsample(Differencecover *dcov,bool cmpcharbychar,
 void differencecover_delete(Differencecover *dcov);
 
 void dc_sortunsortedbucket(void *data,
-                           Seqpos *left,
-                           Seqpos *right,
-                           Seqpos depth);
+                           unsigned long *left,
+                           unsigned long *right,
+                           unsigned long depth);
 
 #endif

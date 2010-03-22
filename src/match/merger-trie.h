@@ -19,13 +19,13 @@
 #define MERGER_TRIE_H
 
 #include "core/arraydef.h"
-#include "core/seqpos.h"
+
 #include "core/encodedsequence.h"
 
 typedef struct
 {
   unsigned int idx;
-  Seqpos startpos;
+  unsigned long startpos;
 #ifdef WITHTRIEIDENT
   uint64_t  ident;
 #endif
@@ -37,7 +37,7 @@ typedef struct Mergertrienode
   struct Mergertrienode *firstchild,
                         *rightsibling,
                         *parent;
-  Seqpos depth;
+  unsigned long depth;
 } Mergertrienode;
 
 typedef Mergertrienode * Mergertrienodeptr;
@@ -79,7 +79,8 @@ Mergertrienode *mergertrie_findsmallestnode(const Mergertrierep *trierep);
 void mergertrie_deletesmallestpath(Mergertrienode *smallest,
                                    Mergertrierep *trierep);
 
-void mergertrie_initnodetable(Mergertrierep *trierep,Seqpos numofsuffixes,
+void mergertrie_initnodetable(Mergertrierep *trierep,
+                              unsigned long numofsuffixes,
                               unsigned int numofindexes);
 
 void mergertrie_delete(Mergertrierep *trierep);

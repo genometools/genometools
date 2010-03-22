@@ -29,14 +29,16 @@
 #include <stdlib.h>
 
 #include "core/error.h"
-#include "core/seqpos.h"
+
 #include "match/eis-mrangealphabet.h"
 
 /**
  * \brief generic method to access the original encoded sequence
  * @return actual number of symbols acquired
  */
-typedef size_t (*accessSeqSubStr)(const void *state, Symbol *dest, Seqpos pos,
+typedef size_t (*accessSeqSubStr)(const void *state,
+                                  Symbol *dest,
+                                  unsigned long pos,
                                   size_t len);
 
 struct randomSeqAccessor
@@ -48,7 +50,7 @@ struct randomSeqAccessor
 typedef struct randomSeqAccessor RandomSeqAccessor;
 
 static inline size_t
-accessSequence(RandomSeqAccessor accessor, Symbol *dest, Seqpos pos,
+accessSequence(RandomSeqAccessor accessor, Symbol *dest, unsigned long pos,
                size_t len)
 {
   return accessor.accessFunc(accessor.state, dest, pos, len);

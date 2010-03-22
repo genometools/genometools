@@ -16,15 +16,15 @@
 */
 
 #include "core/divmodmul.h"
-#include "core/seqpos.h"
+
 #include "fmindex.h"
 #include "fmi-occ.gen"
 
-static Seqpos searchsmallestgeq(const PairBwtidx *left,
-                                const PairBwtidx *right,
-                                Seqpos key)
+static unsigned long searchsmallestgeq(const GtPairBwtidx *left,
+                                const GtPairBwtidx *right,
+                                unsigned long key)
 {
-  const PairBwtidx *leftptr, *midptr, *rightptr, *found = NULL;
+  const GtPairBwtidx *leftptr, *midptr, *rightptr, *found = NULL;
   unsigned long len;
 
   gt_assert(left != NULL);
@@ -54,7 +54,7 @@ static Seqpos searchsmallestgeq(const PairBwtidx *left,
   return found->suftabvalue;
 }
 
-Seqpos fmfindtextpos (const Fmindex *fm,Seqpos idx)
+unsigned long fmfindtextpos (const Fmindex *fm,unsigned long idx)
 {
   unsigned long offset = 0;
   GtUchar cc;
@@ -63,10 +63,10 @@ Seqpos fmfindtextpos (const Fmindex *fm,Seqpos idx)
   {
     if (idx == fm->longestsuffixpos || ISSPECIAL(cc = ACCESSBWTTEXT(idx)))
     {
-      Seqpos smallestgeq
-               = searchsmallestgeq(fm->specpos.spacePairBwtidx,
-                                   fm->specpos.spacePairBwtidx +
-                                   fm->specpos.nextfreePairBwtidx - 1,
+      unsigned long smallestgeq
+               = searchsmallestgeq(fm->specpos.spaceGtPairBwtidx,
+                                   fm->specpos.spaceGtPairBwtidx +
+                                   fm->specpos.nextfreeGtPairBwtidx - 1,
                                    idx);
       return (smallestgeq + offset) % fm->bwtlength;
     }

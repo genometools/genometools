@@ -20,42 +20,42 @@
 
 #include "core/arraydef.h"
 #include "core/symboldef.h"
-#include "core/seqpos.h"
+
 #include "core/encodedsequence.h"
 #include "splititv.h"
 
 typedef struct
 {
-  Seqpos left,
+  unsigned long left,
          right;
 } Simplelcpinterval;
 
 bool lcpintervalfindcharchildintv(const GtEncodedsequence *encseq,
                                   GtReadmode readmode,
-                                  Seqpos totallength,
-                                  const Seqpos *suftab,
+                                  unsigned long totallength,
+                                  const unsigned long *suftab,
                                   Simplelcpinterval *itv,
                                   GtUchar cc,
-                                  Seqpos offset,
-                                  Seqpos left,
-                                  Seqpos right);
+                                  unsigned long offset,
+                                  unsigned long left,
+                                  unsigned long right);
 
 void lcpintervalsplitwithoutspecial(GtArrayBoundswithchar *bwci,
                                     const GtEncodedsequence *encseq,
                                     GtReadmode readmode,
-                                    Seqpos totallength,
-                                    const Seqpos *suftab,
-                                    Seqpos parentoffset,
-                                    Seqpos parentleft,
-                                    Seqpos parentright);
+                                    unsigned long totallength,
+                                    const unsigned long *suftab,
+                                    unsigned long parentoffset,
+                                    unsigned long parentleft,
+                                    unsigned long parentright);
 
 GtUchar lcpintervalextendlcp(const GtEncodedsequence *encseq,
                            GtReadmode readmode,
-                           const Seqpos *suftab,
-                           Seqpos totallength,
+                           const unsigned long *suftab,
+                           unsigned long totallength,
                            GtUchar alphasize,
-                           Seqpos parentoffset,
-                           Seqpos parentleft,
-                           Seqpos parentright);
+                           unsigned long parentoffset,
+                           unsigned long parentleft,
+                           unsigned long parentright);
 
 #endif

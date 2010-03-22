@@ -17,17 +17,19 @@
 
 #include <errno.h>
 #include <string.h>
+#include "core/bitpackarray.h"
+#include "core/chardef.h"
 #include "core/error.h"
 #include "core/fa.h"
-#include "core/intdef.h"
-#include "core/str.h"
 #include "core/filelengthvalues.h"
-#include "core/bitpackarray.h"
-#include "core/seqpos.h"
-#include "core/intbits.h"
-#include "core/safecast-gen.h"
 #include "core/format64.h"
+#include "core/intbits.h"
+#include "core/intdef.h"
 #include "core/mapspec-gen.h"
+#include "core/pairbwtidx.h"
+#include "core/safecast-gen.h"
+#include "core/str.h"
+#include "core/ulongbound.h"
 
 #define ASSIGNPTR2STARTPTR(TYPE)\
         if (mapspec->numofunits == 0)\
@@ -97,7 +99,7 @@ static int assigncorrecttype(Mapspecification *mapspec,
   gt_error_check(err);
   switch (mapspec->typespec)
   {
-    case CharType:
+    case GtCharType:
       ASSIGNPTR2STARTPTR(char);
       break;
     case FilelengthvaluesType:
@@ -112,8 +114,8 @@ static int assigncorrecttype(Mapspecification *mapspec,
     case Uint32Type:
       ASSIGNPTR2STARTPTR(uint32_t);
       break;
-    case UnsignedlongType:
-      ASSIGNPTR2STARTPTR(Unsignedlong);
+    case GtUlongType:
+      ASSIGNPTR2STARTPTR(unsigned long);
       break;
     case Uint64Type:
       ASSIGNPTR2STARTPTR(uint64_t);
@@ -121,20 +123,17 @@ static int assigncorrecttype(Mapspecification *mapspec,
     case GtBitsequenceType:
       ASSIGNPTR2STARTPTR(GtBitsequence);
       break;
-    case SeqposType:
-      ASSIGNPTR2STARTPTR(Seqpos);
+    case GtUlongBoundType:
+      ASSIGNPTR2STARTPTR(GtUlongBound);
       break;
-    case SeqposboundType:
-      ASSIGNPTR2STARTPTR(Seqposbound);
-      break;
-    case PairBwtidxType:
-      ASSIGNPTR2STARTPTR(PairBwtidx);
+    case GtPairBwtidxType:
+      ASSIGNPTR2STARTPTR(GtPairBwtidx);
       break;
     case TwobitencodingType:
       ASSIGNPTR2STARTPTR(Twobitencoding);
       break;
-    case SpecialcharinfoType:
-      ASSIGNPTR2STARTPTR(Specialcharinfo);
+    case GtSpecialcharinfoType:
+      ASSIGNPTR2STARTPTR(GtSpecialcharinfo);
       break;
     case BitElemType:
       ASSIGNPTR2STARTPTR(BitElem);
@@ -274,7 +273,7 @@ int flushtheindex2file(FILE *fp,
     {
       switch (mapspecptr->typespec)
       {
-        case CharType:
+        case GtCharType:
           WRITEACTIONWITHTYPE(char);
           break;
         case FilelengthvaluesType:
@@ -289,8 +288,8 @@ int flushtheindex2file(FILE *fp,
         case Uint32Type:
           WRITEACTIONWITHTYPE(uint32_t);
           break;
-        case UnsignedlongType:
-          WRITEACTIONWITHTYPE(Unsignedlong);
+        case GtUlongType:
+          WRITEACTIONWITHTYPE(GtUlong);
           break;
         case Uint64Type:
           WRITEACTIONWITHTYPE(uint64_t);
@@ -298,20 +297,17 @@ int flushtheindex2file(FILE *fp,
         case GtBitsequenceType:
           WRITEACTIONWITHTYPE(GtBitsequence);
           break;
-        case SeqposType:
-          WRITEACTIONWITHTYPE(Seqpos);
+        case GtUlongBoundType:
+          WRITEACTIONWITHTYPE(GtUlongBound);
           break;
-        case SeqposboundType:
-          WRITEACTIONWITHTYPE(Seqposbound);
-          break;
-        case PairBwtidxType:
-          WRITEACTIONWITHTYPE(PairBwtidx);
+        case GtPairBwtidxType:
+          WRITEACTIONWITHTYPE(GtPairBwtidx);
           break;
         case TwobitencodingType:
           WRITEACTIONWITHTYPE(Twobitencoding);
           break;
-        case SpecialcharinfoType:
-          WRITEACTIONWITHTYPE(Specialcharinfo);
+        case GtSpecialcharinfoType:
+          WRITEACTIONWITHTYPE(GtSpecialcharinfo);
           break;
         case BitElemType:
           WRITEACTIONWITHTYPE(BitElem);

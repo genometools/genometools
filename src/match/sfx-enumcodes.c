@@ -30,7 +30,7 @@ struct Enumcodeatposition
   GtSequencerange previousrange;
   Specialrangeiterator *sri;
   bool moveforward;
-  Seqpos totallength;
+  unsigned long totallength;
   bool exhausted;
   const GtEncodedsequence *encseq;
   GtReadmode readmode;
@@ -72,17 +72,17 @@ Enumcodeatposition *newEnumcodeatposition(const GtEncodedsequence *encseq,
 }
 
 static bool newcodelistelem(Specialcontext *specialcontext,
-                            Seqpos smallerval,
-                            Seqpos largerval,
+                            unsigned long smallerval,
+                            unsigned long largerval,
                             const Enumcodeatposition *ecp)
 {
   if (smallerval < largerval)
   {
-    Seqpos distance = largerval - smallerval;
+    unsigned long distance = largerval - smallerval;
 
-    if (distance > (Seqpos) (ecp->prefixlength-1))
+    if (distance > (unsigned long) (ecp->prefixlength-1))
     {
-      distance = (Seqpos) (ecp->prefixlength-1);
+      distance = (unsigned long) (ecp->prefixlength-1);
     }
     specialcontext->maxprefixindex = (unsigned int) distance;
     if (ecp->moveforward)
@@ -93,7 +93,7 @@ static bool newcodelistelem(Specialcontext *specialcontext,
       specialcontext->position = largerval;
     }
     gt_assert(specialcontext->position >=
-              (Seqpos) specialcontext->maxprefixindex);
+              (unsigned long) specialcontext->maxprefixindex);
     return true;
   }
   return false;
@@ -166,7 +166,7 @@ void freeEnumcodeatposition(Enumcodeatposition **ecp)
 
 Codetype computefilledqgramcode(const Enumcodeatposition *ecp,
                                 unsigned int prefixindex,
-                                Seqpos pos)
+                                unsigned long pos)
 {
   Codetype code;
   unsigned int idx;
@@ -176,7 +176,7 @@ Codetype computefilledqgramcode(const Enumcodeatposition *ecp,
   code = ecp->filltable[prefixindex];
   for (idx=0; idx<prefixindex; idx++)
   {
-    gt_assert((Seqpos) (pos + idx) < ecp->totallength);
+    gt_assert((unsigned long) (pos + idx) < ecp->totallength);
     cc = gt_encodedsequence_getencodedcharnospecial(ecp->encseq,
                                                     pos + idx,
                                                     ecp->readmode);
@@ -189,7 +189,7 @@ Codetype computefilledqgramcode(const Enumcodeatposition *ecp,
 bool computefilledqgramcodestopatmax(Codetype *code,
                                      const Enumcodeatposition *ecp,
                                      unsigned int prefixindex,
-                                     Seqpos pos,
+                                     unsigned long pos,
                                      Codetype stopcode)
 {
   Codetype tmpcode;
@@ -204,7 +204,7 @@ bool computefilledqgramcodestopatmax(Codetype *code,
   }
   for (idx=0; idx<prefixindex; idx++)
   {
-    gt_assert((Seqpos) (pos + idx) < ecp->totallength);
+    gt_assert((unsigned long) (pos + idx) < ecp->totallength);
     cc = gt_encodedsequence_getencodedcharnospecial(ecp->encseq,
                                                     pos + idx,
                                                     ecp->readmode);

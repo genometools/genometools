@@ -23,7 +23,7 @@
 #include "core/str.h"
 #include "core/unused_api.h"
 #include "core/yarandom.h"
-#include "core/seqpos.h"
+
 #include "match/sarr-def.h"
 #include "match/esa-map.h"
 
@@ -44,7 +44,7 @@
  */
 static int
 initBWTSeqFromEncSeqIdx(BWTSeq *bwtSeq, struct encIdxSeq *seqIdx,
-                        MRAEnc *alphabet, Seqpos *counts,
+                        MRAEnc *alphabet, unsigned long *counts,
                         enum rangeSortMode *rangeSort,
                         const enum rangeSortMode *defaultRangeSort)
 {
@@ -74,7 +74,7 @@ initBWTSeqFromEncSeqIdx(BWTSeq *bwtSeq, struct encIdxSeq *seqIdx,
   bwtSeq->hint = hint = newEISHint(seqIdx);
   {
     Symbol i;
-    Seqpos len = EISLength(seqIdx), *count = bwtSeq->count;
+    unsigned long len = EISLength(seqIdx), *count = bwtSeq->count;
     count[0] = 0;
     for (i = 0; i < bwtTerminatorFlat; ++i)
       count[i + 1] = count[i]
@@ -110,7 +110,7 @@ newBWTSeq(EISeq *seqIdx, MRAEnc *alphabet,
           const enum rangeSortMode *defaultRangeSort)
 {
   BWTSeq *bwtSeq;
-  Seqpos *counts;
+  unsigned long *counts;
   size_t countsOffset, rangeSortOffset, totalSize;
   enum rangeSortMode *rangeSort;
   unsigned alphabetSize;
@@ -118,14 +118,14 @@ newBWTSeq(EISeq *seqIdx, MRAEnc *alphabet,
   /* alphabetSize is increased by one to handle the flattened
    * terminator symbol correctly */
   alphabetSize = MRAEncGetSize(alphabet) + 1;
-  countsOffset = offsetAlign(sizeof (struct BWTSeq), sizeof (Seqpos));
+  countsOffset = offsetAlign(sizeof (struct BWTSeq), sizeof (unsigned long));
   rangeSortOffset = offsetAlign(countsOffset
-                                + sizeof (Seqpos) * (alphabetSize + 1),
+                                + sizeof (unsigned long) * (alphabetSize + 1),
                                 sizeof (enum rangeSortMode));
   totalSize = rangeSortOffset + sizeof (enum rangeSortMode)
     * MRAEncGetNumRanges(alphabet);
   bwtSeq = gt_malloc(totalSize);
-  counts = (Seqpos *)((char  *)bwtSeq + countsOffset);
+  counts = (unsigned long *)((char  *)bwtSeq + countsOffset);
   rangeSort = (enum rangeSortMode *)((char *)bwtSeq + rangeSortOffset);
   if (!initBWTSeqFromEncSeqIdx(bwtSeq, seqIdx, alphabet, counts, rangeSort,
                                defaultRangeSort))
@@ -179,7 +179,7 @@ getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
   match->end   = bwtSeq->count[curSym + 1];
   while (match->start <= match->end && qptr != qend)
   {
-    struct SeqposPair occPair;
+    struct GtUlongPair occPair;
     curSym = MRAEncMapSymbol(alphabet, *qptr);
     /*printf("query[%lu]=%d\n",(unsigned long) (qptr-query),(int) *qptr); */
     occPair = BWTSeqTransformedPosPairOcc(bwtSeq, curSym, match->start,
@@ -201,7 +201,7 @@ unsigned long packedindexuniqueforward(const BWTSeq *bwtSeq,
   GtUchar cc;
   const GtUchar *qptr;
   struct matchBound bwtbound;
-  struct SeqposPair seqpospair;
+  struct GtUlongPair seqpospair;
   Symbol curSym;
   const MRAEnc *alphabet;
 
@@ -221,11 +221,11 @@ unsigned long packedindexuniqueforward(const BWTSeq *bwtSeq,
   bwtbound.start = bwtSeq->count[curSym];
   bwtbound.end = bwtSeq->count[curSym+1];
 #ifdef SKDEBUG
-  printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqpos
+  printf("# bounds=%lu,%lu = %lu"
           "occurrences\n",
-         PRINTSeqposcast(bwtbound.start),
-         PRINTSeqposcast(bwtbound.end),
-         PRINTSeqposcast(bwtbound.end - bwtbound.start));
+         bwtbound.start,
+         bwtbound.end,
+         bwtbound.end - bwtbound.start);
 #endif
   while (qptr < qend && bwtbound.start + 1 < bwtbound.end)
   {
@@ -243,11 +243,11 @@ unsigned long packedindexuniqueforward(const BWTSeq *bwtSeq,
     bwtbound.start = bwtSeq->count[curSym] + seqpospair.a;
     bwtbound.end = bwtSeq->count[curSym] + seqpospair.b;
 #ifdef SKDEBUG
-    printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqpos
+    printf("# bounds=%lu,%lu = %lu"
             "occurrences\n",
-           PRINTSeqposcast(bwtbound.start),
-           PRINTSeqposcast(bwtbound.end),
-           PRINTSeqposcast(bwtbound.end - bwtbound.start));
+           bwtbound.start,
+           bwtbound.end,
+           bwtbound.end - bwtbound.start);
 #endif
     qptr++;
   }
@@ -259,15 +259,15 @@ unsigned long packedindexuniqueforward(const BWTSeq *bwtSeq,
 }
 
 unsigned long packedindexmstatsforward(const BWTSeq *bwtSeq,
-                                       Seqpos *witnessleftbound,
+                                       unsigned long *witnessleftbound,
                                        const GtUchar *qstart,
                                        const GtUchar *qend)
 {
   GtUchar cc;
   const GtUchar *qptr;
-  Seqpos prevlbound;
+  unsigned long prevlbound;
   struct matchBound bwtbound;
-  struct SeqposPair seqpospair;
+  struct GtUlongPair seqpospair;
   Symbol curSym;
   unsigned long matchlength;
   const MRAEnc *alphabet;
@@ -292,11 +292,11 @@ unsigned long packedindexmstatsforward(const BWTSeq *bwtSeq,
     return 0;
   }
 #ifdef SKDEBUG
-  printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqpos
+  printf("# bounds=%lu,%lu = %lu"
           "occurrences\n",
-         PRINTSeqposcast(bwtbound.start),
-         PRINTSeqposcast(bwtbound.end),
-         PRINTSeqposcast(bwtbound.end - bwtbound.start));
+         bwtbound.start,
+         bwtbound.end,
+         bwtbound.end - bwtbound.start);
 #endif
   prevlbound = bwtbound.start;
   for (qptr++; qptr < qend; qptr++)
@@ -315,11 +315,11 @@ unsigned long packedindexmstatsforward(const BWTSeq *bwtSeq,
     bwtbound.start = bwtSeq->count[curSym] + seqpospair.a;
     bwtbound.end = bwtSeq->count[curSym] + seqpospair.b;
 #ifdef SKDEBUG
-    printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqpos
+    printf("# bounds=%lu,%lu = %lu"
             "occurrences\n",
-           PRINTSeqposcast(bwtbound.start),
-           PRINTSeqposcast(bwtbound.end),
-           PRINTSeqposcast(bwtbound.end - bwtbound.start));
+           bwtbound.start,
+           bwtbound.end,
+           bwtbound.end - bwtbound.start);
 #endif
     if (bwtbound.start >= bwtbound.end)
     {
@@ -335,7 +335,7 @@ unsigned long packedindexmstatsforward(const BWTSeq *bwtSeq,
   return matchlength;
 }
 
-extern Seqpos
+extern unsigned long
 BWTSeqMatchCount(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
                  bool forward)
 {
@@ -416,7 +416,7 @@ deleteEMIterator(struct BWTSeqExactMatchesIterator *iter)
   gt_free(iter);
 }
 
-Seqpos
+unsigned long
 EMINumMatchesTotal(const struct BWTSeqExactMatchesIterator *iter)
 {
   gt_assert(iter);
@@ -426,7 +426,7 @@ EMINumMatchesTotal(const struct BWTSeqExactMatchesIterator *iter)
     return iter->bounds.end - iter->bounds.start;
 }
 
-extern Seqpos
+extern unsigned long
 EMINumMatchesLeft(const struct BWTSeqExactMatchesIterator *iter)
 {
   gt_assert(iter);
@@ -457,7 +457,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
   enum verifyBWTSeqErrCode retval = VERIFY_BWTSEQ_NO_ERROR;
   do
   {
-    Seqpos seqLen;
+    unsigned long seqLen;
     gt_assert(bwtSeq && projectName && err);
     gt_error_check(err);
 
@@ -486,17 +486,16 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
     if (checkFlags & VERIFY_BWTSEQ_SUFVAL
         && BWTSeqHasLocateInformation(bwtSeq))
     {
-      Seqpos i;
+      unsigned long i;
       for (i = 0; i < seqLen && retval == VERIFY_BWTSEQ_NO_ERROR; ++i)
       {
         if (BWTSeqPosHasLocateInfo(bwtSeq, i, &extBits))
         {
-          Seqpos sfxArrayValue = BWTSeqLocateMatch(bwtSeq, i, &extBits);
+          unsigned long sfxArrayValue = BWTSeqLocateMatch(bwtSeq, i, &extBits);
           if (sfxArrayValue != suffixArray.suftab[i])
           {
             gt_error_set(err, "Failed suffix array value comparison"
-                          " at position "FormatSeqpos": "FormatSeqpos" != "
-                          FormatSeqpos,
+                          " at position %lu: %lu != %lu",
                           i, sfxArrayValue, suffixArray.suftab[i]);
             retval = VERIFY_BWTSEQ_SUFVAL_ERROR;
             break;
@@ -524,12 +523,12 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
     }
     if (BWTSeqHasLocateInformation(bwtSeq))
     {
-      Seqpos nextLocate = BWTSeqTerminatorPos(bwtSeq);
+      unsigned long nextLocate = BWTSeqTerminatorPos(bwtSeq);
       if (suffixArray.longest.defined &&
-          suffixArray.longest.valueseqpos != nextLocate)
+          suffixArray.longest.valueunsignedlong != nextLocate)
       {
-        gt_error_set(err, "terminator/0-rotation position mismatch "FormatSeqpos
-                  " vs. "FormatSeqpos, suffixArray.longest.valueseqpos,
+        gt_error_set(err, "terminator/0-rotation position mismatch %lu"
+                  " vs. %lu", suffixArray.longest.valueunsignedlong,
                   nextLocate);
         retval = VERIFY_BWTSEQ_TERMPOS_ERROR;
         break;
@@ -537,14 +536,14 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
       if ((checkFlags & VERIFY_BWTSEQ_LFMAPWALK)
           && (bwtSeq->featureToggles & BWTReversiblySorted))
       {
-        Seqpos i = seqLen;
+        unsigned long i = seqLen;
         /* handle first symbol specially because the encodedsequence
          * will not return the terminator symbol */
         {
           Symbol sym = BWTSeqGetSym(bwtSeq, nextLocate);
           if (sym != UNDEFBWTCHAR)
           {
-            gt_error_set(err, "symbol mismatch at position "FormatSeqpos": "
+            gt_error_set(err, "symbol mismatch at position %lu: "
                       "%d vs. reference symbol %d", i - 1, (int)sym,
                       (int)UNDEFBWTCHAR);
             retval = VERIFY_BWTSEQ_LFMAPWALK_ERROR;
@@ -560,7 +559,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
           Symbol symCmp = BWTSeqGetSym(bwtSeq, nextLocate);
           if (symCmp != symRef)
           {
-            gt_error_set(err, "symbol mismatch at position "FormatSeqpos": "
+            gt_error_set(err, "symbol mismatch at position %lu: "
                       "%d vs. reference symbol %d", i, symCmp, symRef);
             retval = VERIFY_BWTSEQ_LFMAPWALK_ERROR;
             break;
@@ -592,7 +591,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
       }
       fputs("Checking context regeneration.\n", stderr);
       {
-        Seqpos i, start, subSeqLen,
+        unsigned long i, start, subSeqLen,
           maxSubSeqLen = MIN(MAX(MIN_CONTEXT_LEN, seqLen/CONTEXT_FRACTION),
                              MAX_CONTEXT_LEN),
           numTries = MIN(MAX_NUM_CONTEXT_CHECKS,
@@ -601,7 +600,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
         GtEncodedsequenceScanstate *esr = gt_encodedsequence_scanstate_new();
         for (i = 0; i < numTries && retval == VERIFY_BWTSEQ_NO_ERROR; ++i)
         {
-          Seqpos j, end, inSubSeqLen;
+          unsigned long j, end, inSubSeqLen;
           subSeqLen = random()%maxSubSeqLen + 1;
           start = random()%(seqLen - subSeqLen + 1);
           end = start + subSeqLen;
@@ -618,7 +617,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
             Symbol symCmp = contextBuf[j];
             if (symCmp != symRef)
             {
-              gt_error_set(err, "symbol mismatch at position "FormatSeqpos": "
+              gt_error_set(err, "symbol mismatch at position %lu: "
                         "%d vs. reference symbol %d", start + j, (int)symCmp,
                         (int)symRef);
               retval = VERIFY_BWTSEQ_CONTEXT_SYMFAIL;
@@ -631,7 +630,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
             Symbol symCmp = contextBuf[j];
             if (symCmp != symRef)
             {
-              gt_error_set(err, "symbol mismatch at position "FormatSeqpos": "
+              gt_error_set(err, "symbol mismatch at position %lu: "
                         "%d vs. reference symbol %d", start + j, (int)symCmp,
                         (int)symRef);
               retval = VERIFY_BWTSEQ_CONTEXT_SYMFAIL;

@@ -20,45 +20,44 @@
 /**
  * @file eis-bitpackseqpos.h
  * @brief Defines appropriate width routines for storing and retrieving
- * Seqpos values in/from BitString.
+ * unsigned long values in/from BitString.
  */
 
-#include "core/seqpos.h"
 #include "core/bitpackstring.h"
 
-#ifdef Seqposequalsunsignedint
-/** retrieve Seqpos from BitString */
+#ifndef _LP64
+/** retrieve unsigned long from BitString */
 #define gt_bsGetSeqpos gt_bsGetUInt32
-/** store Seqpos in BitString */
+/** store unsigned long in BitString */
 #define gt_bsStoreSeqpos gt_bsStoreUInt32
-/** read back array of Seqpos values in BitString */
+/** read back array of unsigned long values in BitString */
 #define gt_bsGetUniformSeqposArray gt_bsGetUniformUInt32Array
-/** read back array of Seqpos values in BitString */
+/** read back array of unsigned long values in BitString */
 #define gt_bsGetUniformSeqposArrayAdd gt_bsGetUniformUInt32ArrayAdd
-/** read back array of Seqpos values in BitString */
+/** read back array of unsigned long values in BitString */
 #define gt_bsGetNonUniformSeqposArray gt_bsGetNonUniformUInt32Array
-/** read back array of Seqpos values in BitString */
+/** read back array of unsigned long values in BitString */
 #define gt_bsGetNonUniformSeqposArrayAdd gt_bsGetNonUniformUInt32ArrayAdd
-/** store array of Seqpos values in BitString */
+/** store array of unsigned long values in BitString */
 #define gt_bsStoreUniformSeqposArray gt_bsStoreUniformUInt32Array
-/** how many bits are required to store given Seqpos value */
+/** how many bits are required to store given unsigned long value */
 #define requiredSeqposBits gt_requiredUInt32Bits
 #else
-/** retrieve Seqpos from BitString */
+/** retrieve unsigned long from BitString */
 #define gt_bsGetSeqpos gt_bsGetUInt64
-/** store Seqpos in BitString */
+/** store unsigned long in BitString */
 #define gt_bsStoreSeqpos gt_bsStoreUInt64
-/** read back array of Seqpos values in BitString */
+/** read back array of unsigned long values in BitString */
 #define gt_bsGetUniformSeqposArray gt_bsGetUniformUInt64Array
-/** read back array of Seqpos values in BitString */
+/** read back array of unsigned long values in BitString */
 #define gt_bsGetUniformSeqposArrayAdd gt_bsGetUniformUInt64ArrayAdd
-/** read back array of Seqpos values in BitString */
+/** read back array of unsigned long values in BitString */
 #define gt_bsGetNonUniformSeqposArray gt_bsGetNonUniformUInt64Array
-/** read back array of Seqpos values in BitString */
+/** read back array of unsigned long values in BitString */
 #define gt_bsGetNonUniformSeqposArrayAdd gt_bsGetNonUniformUInt64ArrayAdd
-/** store array of Seqpos values in BitString  */
+/** store array of unsigned long values in BitString  */
 #define gt_bsStoreUniformSeqposArray gt_bsStoreUniformUInt64Array
-/** how many bits are required to store given Seqpos value */
+/** how many bits are required to store given unsigned long value */
 #define requiredSeqposBits gt_requiredUInt64Bits
 #endif
 

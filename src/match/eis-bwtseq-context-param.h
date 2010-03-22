@@ -21,7 +21,7 @@
 
 #include "core/minmax.h"
 #include "core/option.h"
-#include "core/seqpos.h"
+
 /* #include "core/bitpackstring.h" Not necessary. Stefan */
 #include "match/eis-bitpackseqpos.h"
 
@@ -34,14 +34,14 @@ extern void
 registerCtxMapOptions(GtOptionParser *op, int *ilogOut);
 
 static inline bool
-ctxMapILogIsValid(Seqpos seqLen, short mapIntervalLog2)
+ctxMapILogIsValid(unsigned long seqLen, short mapIntervalLog2)
 {
   return (mapIntervalLog2 == CTX_MAP_ILOG_NOMAP
           || mapIntervalLog2 == CTX_MAP_ILOG_AUTOSIZE
           || (mapIntervalLog2 >= 0
               && mapIntervalLog2
               < MIN(requiredSeqposBits(seqLen),
-                    sizeof (Seqpos) * CHAR_BIT)));
+                    sizeof (unsigned long) * CHAR_BIT)));
 }
 
 #endif

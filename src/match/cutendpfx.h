@@ -21,8 +21,9 @@
 #include <stdio.h>
 #include <errno.h>
 #include <stdbool.h>
+#include "core/lcpinterval.h"
 #include "core/symboldef.h"
-#include "core/seqpos.h"
+
 #include "bcktab.h"
 
 typedef struct Bucketenumerator Bucketenumerator;

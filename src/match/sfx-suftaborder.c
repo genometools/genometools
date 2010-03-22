@@ -28,12 +28,12 @@
 static void showlocalsuffix(FILE *fpout,
                             const GtEncodedsequence *encseq,
                             GtReadmode readmode,
-                            Seqpos start,
-                            Seqpos depth)
+                            unsigned long start,
+                            unsigned long depth)
 {
-  Seqpos i, end, totallength;
+  unsigned long i, end, totallength;
   GtUchar cc;
-  const Seqpos maxshow = (Seqpos) 30;
+  const unsigned long maxshow = (unsigned long) 30;
   const GtUchar *characters;
 
   totallength = gt_encodedsequence_total_length(encseq);
@@ -67,41 +67,41 @@ static void showcomparisonfailure(const char *filename,
                                   const char *where,
                                   const GtEncodedsequence *encseq,
                                   GtReadmode readmode,
-                                  const Seqpos *suftab,
-                                  Seqpos depth,
-                                  const Seqpos *ptr1,
-                                  const Seqpos *ptr2,
+                                  const unsigned long *suftab,
+                                  unsigned long depth,
+                                  const unsigned long *ptr1,
+                                  const unsigned long *ptr2,
                                   int cmp,
-                                  Seqpos maxlcp)
+                                  unsigned long maxlcp)
 {
   fprintf(stderr,"ERROR: file \"%s\", line %d: ",filename,line);
-  fprintf(stderr,"%s(" FormatSeqpos " vs " FormatSeqpos
-                 " " FormatSeqpos "=\"",
+  fprintf(stderr,"%s(%lu vs %lu"
+                 " %lu=\"",
                        where,
-                       PRINTSeqposcast((Seqpos) (ptr1 - suftab)),
-                       PRINTSeqposcast((Seqpos) (ptr2 - suftab)),
-                       PRINTSeqposcast(*ptr1));
+                       (unsigned long) (ptr1 - suftab),
+                       (unsigned long) (ptr2 - suftab),
+                       *ptr1);
   showlocalsuffix(stderr,encseq,readmode,*ptr1,depth);
   fprintf(stderr,"\",\"");
   showlocalsuffix(stderr,encseq,readmode,*ptr2,depth);
-  fprintf(stderr,"\"=" FormatSeqpos ")=%d with maxlcp " FormatSeqpos "\n",
-              PRINTSeqposcast(*ptr2),
+  fprintf(stderr,"\"=%lu)=%d with maxlcp %lu\n",
+              *ptr2,
               cmp,
-              PRINTSeqposcast(maxlcp));
+              maxlcp);
 }
 
 void checkifprefixesareidentical(const char *filename,
                                  int line,
                                  const GtEncodedsequence *encseq,
                                  GtReadmode readmode,
-                                 const Seqpos *suftab,
+                                 const unsigned long *suftab,
                                  unsigned int prefixlength,
-                                 Seqpos depth,
-                                 Seqpos left,
-                                 Seqpos right)
+                                 unsigned long depth,
+                                 unsigned long left,
+                                 unsigned long right)
 {
-  const Seqpos *ptr;
-  Seqpos maxlcp;
+  const unsigned long *ptr;
+  unsigned long maxlcp;
   int cmp;
   GtEncodedsequenceScanstate *esr1, *esr2;
   bool haserr = false;
@@ -120,7 +120,7 @@ void checkifprefixesareidentical(const char *filename,
                              *(ptr+1),
                              esr1,
                              esr2);
-    if (cmp != 0 || maxlcp != (Seqpos) prefixlength)
+    if (cmp != 0 || maxlcp != (unsigned long) prefixlength)
     {
       showcomparisonfailure(filename,
                             line,
@@ -144,17 +144,17 @@ void checkifprefixesareidentical(const char *filename,
 
 void showentiresuftab(const GtEncodedsequence *encseq,
                       GtReadmode readmode,
-                      const Seqpos *suftab,
-                      Seqpos depth)
+                      const unsigned long *suftab,
+                      unsigned long depth)
 {
-  const Seqpos *ptr;
-  Seqpos totallength = gt_encodedsequence_total_length(encseq);
+  const unsigned long *ptr;
+  unsigned long totallength = gt_encodedsequence_total_length(encseq);
 
   for (ptr = suftab; ptr <= suftab + totallength; ptr++)
   {
-    printf("suftab[" FormatSeqpos "]=" FormatSeqpos " ",
-            PRINTSeqposcast((Seqpos) (ptr-suftab)),
-            PRINTSeqposcast(*ptr));
+    printf("suftab[%lu]=%lu ",
+            (unsigned long) (ptr-suftab),
+            *ptr);
     showlocalsuffix(stdout,encseq,readmode,*ptr,depth);
     printf("\n");
   }
@@ -164,14 +164,14 @@ void checksortedsuffixes(const char *filename,
                          int line,
                          const GtEncodedsequence *encseq,
                          GtReadmode readmode,
-                         const Seqpos *suftab,
-                         Seqpos numberofsuffixes,
+                         const unsigned long *suftab,
+                         unsigned long numberofsuffixes,
                          bool specialsareequal,
                          bool specialsareequalatdepth0,
-                         Seqpos depth)
+                         unsigned long depth)
 {
-  const Seqpos *ptr;
-  Seqpos maxlcp, totallength = gt_encodedsequence_total_length(encseq);
+  const unsigned long *ptr;
+  unsigned long maxlcp, totallength = gt_encodedsequence_total_length(encseq);
   GtEncodedsequenceScanstate *esr1, *esr2;
   int cmp;
 
@@ -226,16 +226,16 @@ void checkentiresuftab(const char *filename,
                        int line,
                        const GtEncodedsequence *encseq,
                        GtReadmode readmode,
-                       const Seqpos *suftab,
-                       Seqpos numberofsuffixes,
+                       const unsigned long *suftab,
+                       unsigned long numberofsuffixes,
                        Sequentialsuffixarrayreader *ssar,
                        bool specialsareequal,
                        bool specialsareequalatdepth0,
-                       Seqpos depth,
+                       unsigned long depth,
                        GtError *err)
 {
-  const Seqpos *ptr;
-  Seqpos maxlcp,
+  const unsigned long *ptr;
+  unsigned long maxlcp,
          currentlcp = 0,
          totallength = gt_encodedsequence_total_length(encseq);
   int cmp;
@@ -253,16 +253,16 @@ void checkentiresuftab(const char *filename,
   if (numberofsuffixes == totallength+1)
   {
     GtBitsequence *startposoccurs;
-    Seqpos countbitsset = 0;
+    unsigned long countbitsset = 0;
 
     GT_INITBITTAB(startposoccurs,totallength+1);
     for (ptr = suftab; ptr <= suftab + totallength; ptr++)
     {
       if (GT_ISIBITSET(startposoccurs,*ptr))
       {
-        fprintf(stderr,"ERROR: suffix with startpos " FormatSeqpos
+        fprintf(stderr,"ERROR: suffix with startpos %lu"
                        " already occurs\n",
-                        PRINTSeqposcast(*ptr));
+                        *ptr);
         exit(GT_EXIT_PROGRAMMING_ERROR);
       }
       GT_SETIBIT(startposoccurs,*ptr);
@@ -336,23 +336,23 @@ void checkentiresuftab(const char *filename,
 #endif
       if (maxlcp != currentlcp)
       {
-        fprintf(stderr,"%lu: startpos=" FormatSeqpos ", firstchar=%u, "
-                "startpos=" FormatSeqpos ",firstchar=%u",
+        fprintf(stderr,"%lu: startpos=%lu, firstchar=%u, "
+                "startpos=%lu,firstchar=%u",
                 (unsigned long) (ptr - suftab),
-                PRINTSeqposcast(*(ptr-1)),
+                *(ptr-1),
                 (unsigned int) gt_encodedsequence_getencodedchar(encseq,
                                                                  *(ptr-1),
                                                                  readmode),
-                PRINTSeqposcast(*ptr),
+                *ptr,
                 (*ptr < totallength)
                 ? (unsigned int) gt_encodedsequence_getencodedchar(encseq,
                                                                    *ptr,
                                                                    readmode)
                 : SEPARATOR);
-        fprintf(stderr,", maxlcp(bruteforce) = " FormatSeqpos " != "
-                          FormatSeqpos "(fast)\n",
-                    PRINTSeqposcast(maxlcp),
-                    PRINTSeqposcast(currentlcp));
+        fprintf(stderr,", maxlcp(bruteforce) = %lu != "
+                          "%lu(fast)\n",
+                    maxlcp,
+                    currentlcp);
         exit(GT_EXIT_PROGRAMMING_ERROR);
       }
     }

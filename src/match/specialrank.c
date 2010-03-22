@@ -20,12 +20,12 @@
 #include "core/chardef.h"
 #include "core/divmodmul.h"
 #include "core/ma_api.h"
-#include "core/seqpos.h"
+
 #include "core/encodedsequence.h"
 
 typedef struct
 {
-  Seqpos lowerbound,
+  unsigned long lowerbound,
          upperbound,
          rank;
 } Rankedbounds;
@@ -37,7 +37,7 @@ Rankedbounds *fillrankbounds(const GtEncodedsequence *encseq,
   {
     Specialrangeiterator *sri;
     GtSequencerange range;
-    Seqpos currentrank = 0, realspecialranges;
+    unsigned long currentrank = 0, realspecialranges;
     Rankedbounds *rankedbounds, *rbptr;
 
     realspecialranges = getencseqrealspecialranges(encseq);
@@ -59,9 +59,9 @@ Rankedbounds *fillrankbounds(const GtEncodedsequence *encseq,
   return NULL;
 }
 
-Seqpos frompos2rank(const Rankedbounds *leftptr,
+unsigned long frompos2rank(const Rankedbounds *leftptr,
                     const Rankedbounds *rightptr,
-                    Seqpos specialpos)
+                    unsigned long specialpos)
 {
   const Rankedbounds *midptr;
 
@@ -82,17 +82,17 @@ Seqpos frompos2rank(const Rankedbounds *leftptr,
       }
     }
   }
-  fprintf(stderr,"frompos2rank: cannot find pos " FormatSeqpos
-                 " in ranges",PRINTSeqposcast(specialpos));
+  fprintf(stderr,"frompos2rank: cannot find pos %lu"
+                 " in ranges",specialpos);
   exit(GT_EXIT_PROGRAMMING_ERROR);
   /*@ignore@*/
   return 0;
   /*@end@*/
 }
 
-Seqpos fromrank2pos(const Rankedbounds *leftptr,
+unsigned long fromrank2pos(const Rankedbounds *leftptr,
                     const Rankedbounds *rightptr,
-                    Seqpos rank)
+                    unsigned long rank)
 {
   const Rankedbounds *midptr;
 
@@ -113,8 +113,8 @@ Seqpos fromrank2pos(const Rankedbounds *leftptr,
       }
     }
   }
-  fprintf(stderr,"fromrank2rank: cannot find rank " FormatSeqpos
-                 " in ranges",PRINTSeqposcast(rank));
+  fprintf(stderr,"fromrank2rank: cannot find rank %lu"
+                 " in ranges",rank);
   exit(GT_EXIT_PROGRAMMING_ERROR);
   /*@ignore@*/
   return 0;
@@ -123,7 +123,7 @@ Seqpos fromrank2pos(const Rankedbounds *leftptr,
 
 typedef struct
 {
-  Seqpos specialrank,
+  unsigned long specialrank,
          key;
 } Specialrank;
 
@@ -146,13 +146,13 @@ static int compareSpecialrank(const void *a,const void *b)
 
 Specialrank *fillspecialranklist(const GtEncodedsequence *encseq,
                                  GtReadmode readmode,
-                                 const Seqpos *inversesuftab)
+                                 const unsigned long *inversesuftab)
 {
   if (hasspecialranges(encseq))
   {
     Specialrangeiterator *sri;
     GtSequencerange range;
-    Seqpos realspecialranges, specialrank, totallength;
+    unsigned long realspecialranges, specialrank, totallength;
     Specialrank *specialranklist, *rbptr;
 
     totallength = gt_encodedsequence_total_length(encseq);

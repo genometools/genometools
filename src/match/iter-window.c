@@ -23,15 +23,15 @@ struct Windowiterator
 {
   GtUchar *buffer;
   unsigned long firstpos, bufsize, windowsize;
-  Seqpos currentpos, endpos;
+  unsigned long currentpos, endpos;
   const GtEncodedsequence *encseq;
   GtEncodedsequenceScanstate *esr;
 };
 
 Windowiterator *windowiterator_new(const GtEncodedsequence *encseq,
                                    unsigned long windowsize,
-                                   Seqpos startpos,
-                                   Seqpos endpos)
+                                   unsigned long startpos,
+                                   unsigned long endpos)
 {
   Windowiterator *wit;
 
@@ -58,8 +58,9 @@ void windowiterator_delete(Windowiterator *wit)
   gt_free(wit);
 }
 
-const GtUchar *windowiterator_next(Seqpos *currentpos,unsigned long *firstpos,
-                                 Windowiterator *wit)
+const GtUchar *windowiterator_next(unsigned long *currentpos,
+                                   unsigned long *firstpos,
+                                   Windowiterator *wit)
 {
   GtUchar currentchar;
 
@@ -88,7 +89,7 @@ const GtUchar *windowiterator_next(Seqpos *currentpos,unsigned long *firstpos,
     }
     if (wit->bufsize == wit->windowsize)
     {
-      gt_assert(wit->currentpos >= (Seqpos) (wit->windowsize-1));
+      gt_assert(wit->currentpos >= (unsigned long) (wit->windowsize-1));
       gt_assert(wit->firstpos < wit->windowsize);
       *currentpos = wit->currentpos++;
       *firstpos = wit->firstpos;
@@ -104,7 +105,7 @@ static void checkcurrentwindow(const GtEncodedsequence *encseq,
                                const GtUchar *buffer,
                                unsigned long windowsize,
                                unsigned long firstpos,
-                               Seqpos currentpos)
+                               unsigned long currentpos)
 {
   unsigned long idx, bufpos, bfbufpos;
   GtUchar cc1, cc2;
@@ -129,12 +130,12 @@ static void checkcurrentwindow(const GtEncodedsequence *encseq,
 
 static void iteroverallwords(const GtEncodedsequence *encseq,
                              unsigned long windowsize,
-                             Seqpos startpos,
-                             Seqpos endpos)
+                             unsigned long startpos,
+                             unsigned long endpos)
 {
   unsigned long firstpos, bufsize;
   GtUchar currentchar;
-  Seqpos currentpos;
+  unsigned long currentpos;
   GtEncodedsequenceScanstate *esr;
   GtUchar *buffer;
   unsigned long windowschecked = 0;
@@ -182,12 +183,12 @@ static void iteroverallwords(const GtEncodedsequence *encseq,
 
 static void iteroverallwords2(const GtEncodedsequence *encseq,
                               unsigned long windowsize,
-                              Seqpos startpos,
-                              Seqpos endpos)
+                              unsigned long startpos,
+                              unsigned long endpos)
 {
   Windowiterator *wit;
   const GtUchar *buffer;
-  Seqpos currentpos;
+  unsigned long currentpos;
   unsigned long firstpos, windowschecked = 0;
 
   wit = windowiterator_new(encseq,windowsize,startpos,endpos);

@@ -33,11 +33,11 @@ static Codetype qgram2codefillspecial(unsigned int numofchars,
                                       unsigned int kmersize,
                                       const GtEncodedsequence *encseq,
                                       GtReadmode readmode,
-                                      Seqpos startpos,
-                                      Seqpos totallength)
+                                      unsigned long startpos,
+                                      unsigned long totallength)
 {
   Codetype integercode;
-  Seqpos pos;
+  unsigned long pos;
   bool foundspecial;
   GtUchar cc;
 
@@ -92,7 +92,7 @@ GT_DECLAREARRAYSTRUCT(Codetype);
 
 static void outkmeroccurrence(void *processinfo,
                               Codetype code,
-                              GT_UNUSED Seqpos position,
+                              GT_UNUSED unsigned long position,
                               GT_UNUSED const Firstspecialpos
                                            *firstspecialposition)
 {
@@ -113,9 +113,9 @@ static void collectkmercode(GtArrayCodetype *codelist,
                             const GtEncodedsequence *encseq,
                             unsigned int kmersize,
                             unsigned int numofchars,
-                            Seqpos stringtotallength)
+                            unsigned long stringtotallength)
 {
-  Seqpos offset;
+  unsigned long offset;
   Codetype code;
 
   for (offset=0; offset<=stringtotallength; offset++)
@@ -185,7 +185,7 @@ static int verifycodelists(const GtEncodedsequence *encseq,
   bool haserr = false;
   GtArrayCodetype codeliststring;
   const GtUchar *characters;
-  Seqpos stringtotallength;
+  unsigned long stringtotallength;
 
   gt_error_check(err);
   stringtotallength = gt_encodedsequence_total_length(encseq);

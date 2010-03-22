@@ -23,7 +23,7 @@
 #include "match/eis-encidxseq.h"
 #include "match/eis-encidxseq-priv.h"
 
-static inline Seqpos
+static inline unsigned long
 EISLength(const EISeq *seq)
 {
   return seq->seqLen;
@@ -37,7 +37,7 @@ EISGetAlphabet(const EISeq *seq)
 }
 
 static inline Symbol
-EISGetSym(EISeq *seq, Seqpos pos, EISHint hint)
+EISGetSym(EISeq *seq, unsigned long pos, EISHint hint)
 {
   gt_assert(seq && hint);
   return MRAEncRevMapSymbol(seq->alphabet,
@@ -45,30 +45,30 @@ EISGetSym(EISeq *seq, Seqpos pos, EISHint hint)
 }
 
 static inline Symbol
-EISGetTransformedSym(EISeq *seq, Seqpos pos, EISHint hint)
+EISGetTransformedSym(EISeq *seq, unsigned long pos, EISHint hint)
 {
   gt_assert(seq && hint);
   return seq->classInfo->get(seq, pos, hint);
 }
 
-static inline Seqpos
-EISRank(EISeq *seq, Symbol sym, Seqpos pos, union EISHint *hint)
+static inline unsigned long
+EISRank(EISeq *seq, Symbol sym, unsigned long pos, union EISHint *hint)
 {
   Symbol mSym;
   mSym = MRAEncMapSymbol(seq->alphabet, sym);
   return seq->classInfo->rank(seq, mSym, pos, hint);
 }
 
-static inline Seqpos
-EISSymTransformedRank(EISeq *seq, Symbol tSym, Seqpos pos,
+static inline unsigned long
+EISSymTransformedRank(EISeq *seq, Symbol tSym, unsigned long pos,
                       union EISHint *hint)
 {
   gt_assert(tSym < MRAEncGetSize(EISGetAlphabet(seq)));
   return seq->classInfo->rank(seq, tSym, pos, hint);
 }
 
-static inline struct SeqposPair
-EISPosPairRank(EISeq *seq, Symbol sym, Seqpos posA, Seqpos posB,
+static inline struct GtUlongPair
+EISPosPairRank(EISeq *seq, Symbol sym, unsigned long posA, unsigned long posB,
                union EISHint *hint)
 {
   Symbol tSym;
@@ -77,22 +77,23 @@ EISPosPairRank(EISeq *seq, Symbol sym, Seqpos posA, Seqpos posB,
 }
 
 static inline void
-EISRangeRank(EISeq *seq, AlphabetRangeID range, Seqpos pos, Seqpos *rankCounts,
-             union EISHint *hint)
+EISRangeRank(EISeq *seq, AlphabetRangeID range, unsigned long pos,
+             unsigned long *rankCounts, union EISHint *hint)
 {
   return seq->classInfo->rangeRank(seq, range, pos, rankCounts, hint);
 }
 
 static inline void
-EISPosPairRangeRank(EISeq *seq, AlphabetRangeID range, Seqpos posA, Seqpos posB,
-                    Seqpos *rankCounts, union EISHint *hint)
+EISPosPairRangeRank(EISeq *seq, AlphabetRangeID range, unsigned long posA,
+                    unsigned long posB, unsigned long *rankCounts,
+                    union EISHint *hint)
 {
   seq->classInfo->posPairRangeRank(seq, range, posA, posB, rankCounts, hint);
 }
 
-static inline struct SeqposPair
-EISSymTransformedPosPairRank(EISeq *seq, Symbol tSym, Seqpos posA, Seqpos posB,
-                             union EISHint *hint)
+static inline struct GtUlongPair
+EISSymTransformedPosPairRank(EISeq *seq, Symbol tSym, unsigned long posA,
+                             unsigned long posB, union EISHint *hint)
 {
   if (tSym >= MRAEncGetSize(EISGetAlphabet(seq)))
   {
@@ -106,7 +107,7 @@ EISSymTransformedPosPairRank(EISeq *seq, Symbol tSym, Seqpos posA, Seqpos posB,
 }
 
 static inline void
-EISRetrieveExtraBits(EISeq *seq, Seqpos pos, int flags,
+EISRetrieveExtraBits(EISeq *seq, unsigned long pos, int flags,
                      struct extBitsRetrieval *retval, union EISHint *hint)
 {
   return seq->classInfo->expose(seq, pos, flags, retval, hint);
@@ -164,7 +165,7 @@ deleteEISHint(EISeq *seq, EISHint hint)
 }
 
 static inline int
-EISPrintDiagsForPos(const EISeq *seq, Seqpos pos, FILE *fp, EISHint hint)
+EISPrintDiagsForPos(const EISeq *seq, unsigned long pos, FILE *fp, EISHint hint)
 {
   if (seq->classInfo->printPosDiags)
     return seq->classInfo->printPosDiags(seq, pos, fp, hint);
@@ -173,7 +174,8 @@ EISPrintDiagsForPos(const EISeq *seq, Seqpos pos, FILE *fp, EISHint hint)
 }
 
 static inline int
-EISPrintExtDiagsForPos(const EISeq *seq, Seqpos pos, FILE *fp, EISHint hint)
+EISPrintExtDiagsForPos(const EISeq *seq, unsigned long pos, FILE *fp,
+                       EISHint hint)
 {
   if (seq->classInfo->printExtPosDiags)
     return seq->classInfo->printExtPosDiags(seq, pos, fp, hint);

@@ -69,7 +69,7 @@ static void comparemmsis(const MMsearchiterator *mmsi1,
 static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
 {
   Suffixarray suffixarray;
-  Seqpos totallength = 0;
+  unsigned long totallength = 0;
   bool haserr = false;
   const GtUchar *pptr;
   unsigned long patternlen;
@@ -93,17 +93,17 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
   if (!haserr)
   {
     unsigned long trial;
-    Seqpos dbstart;
+    unsigned long dbstart;
     Enumpatterniterator *epi;
     unsigned int firstspecial;
     MMsearchiterator *mmsibck, *mmsiimm;
     Bucketspecification bucketspec;
     Bucketenumerator *bucketenumerator;
     Lcpinterval itv;
-    Seqpos refstart;
+    unsigned long refstart;
     GtEncodedsequenceScanstate *esr1, *esr2;
     int retval;
-    Seqpos idx, maxlcp;
+    unsigned long idx, maxlcp;
     Codetype code = 0;
     const Codetype **multimappower;
     const GtAlphabet *alpha;
@@ -155,12 +155,12 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
                                             &maxlcp,
                                             false,
                                             false,
-                                            (Seqpos) patternlen,
+                                            (unsigned long) patternlen,
                                             refstart,
                                             suffixarray.suftab[idx],
                                             esr1,
                                             esr2);
-                gt_assert(retval == 0 && maxlcp == (Seqpos) patternlen);
+                gt_assert(retval == 0 && maxlcp == (unsigned long) patternlen);
               }
             }
           }
@@ -182,15 +182,15 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
           {
             mmsibck
               = newmmsearchiteratorcomplete_plain(
-                                          suffixarray.encseq,
-                                          suffixarray.suftab,
-                                          bucketspec.left,
-                                          bucketspec.left +
-                                            bucketspec.nonspecialsinbucket-1,
-                                          (Seqpos) suffixarray.prefixlength,
-                                          suffixarray.readmode,
-                                          pptr,
-                                          patternlen);
+                                       suffixarray.encseq,
+                                       suffixarray.suftab,
+                                       bucketspec.left,
+                                       bucketspec.left +
+                                         bucketspec.nonspecialsinbucket-1,
+                                       (unsigned long) suffixarray.prefixlength,
+                                       suffixarray.readmode,
+                                       pptr,
+                                       patternlen);
           }
         }
       }

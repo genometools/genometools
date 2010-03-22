@@ -46,7 +46,7 @@
 
 typedef struct
 {
-  Seqpos dbstartpos,
+  unsigned long dbstartpos,
          matchlength;
   bool rcmatch;
 } Simplematch;
@@ -87,7 +87,7 @@ static void showmatch(void *processinfo,const GtMatch *match)
   gt_assert(showmatchinfo->tageratoroptions != NULL);
   if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_DBLENGTH)
   {
-    printf(FormatSeqpos,PRINTSeqposcast(match->dblen));
+    printf("%lu",match->dblen);
     firstitem = false;
   }
   if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_DBSTARTPOS)
@@ -95,7 +95,7 @@ static void showmatch(void *processinfo,const GtMatch *match)
     ADDTABULATOR;
     if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_DBABSPOS)
     {
-      printf(FormatSeqpos,PRINTSeqposcast(match->dbstartpos));
+      printf("%lu",match->dbstartpos);
     } else
     {
       GtSeqinfo seqinfo;
@@ -103,8 +103,8 @@ static void showmatch(void *processinfo,const GtMatch *match)
                                                      match->dbstartpos);
       gt_encodedsequence_seqinfo(showmatchinfo->encseq,&seqinfo,seqnum);
       gt_assert(seqinfo.seqstartpos <= match->dbstartpos);
-      printf("%lu\t" FormatSeqpos,seqnum,
-                    PRINTSeqposcast(match->dbstartpos - seqinfo.seqstartpos));
+      printf("%lu\t%lu",seqnum,
+                        match->dbstartpos - seqinfo.seqstartpos);
     }
   }
   if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_DBSEQUENCE)
@@ -207,8 +207,8 @@ static void checkmstats(void *processinfo,
                         const void *patterninfo,
                         unsigned long patternstartpos,
                         unsigned long mstatlength,
-                        Seqpos leftbound,
-                        Seqpos rightbound)
+                        unsigned long leftbound,
+                        unsigned long rightbound)
 {
   unsigned long realmstatlength;
   Tagwithlength *twl = (Tagwithlength *) patterninfo;
@@ -229,15 +229,15 @@ static void checkmstats(void *processinfo,
                        rightbound))
   {
     GtUchar cc;
-    Seqpos *sptr, witnessposition;
+    unsigned long *sptr, witnessposition;
     unsigned long idx;
-    ArraySeqpos *mstatspos = fromitv2sortedmatchpositions(
+    GtArrayGtUlong *mstatspos = fromitv2sortedmatchpositions(
                                   (Limdfsresources *) processinfo,
                                   leftbound,
                                   rightbound,
                                   mstatlength);
-    for (sptr = mstatspos->spaceSeqpos; sptr < mstatspos->spaceSeqpos +
-                                               mstatspos->nextfreeSeqpos;
+    for (sptr = mstatspos->spaceGtUlong; sptr < mstatspos->spaceGtUlong +
+                                               mstatspos->nextfreeGtUlong;
          sptr++)
     {
       witnessposition = *sptr;
@@ -267,8 +267,8 @@ static void showmstats(void *processinfo,
                        const void *patterninfo,
                        GT_UNUSED unsigned long patternstartpos,
                        unsigned long mstatlength,
-                       Seqpos leftbound,
-                       Seqpos rightbound)
+                       unsigned long leftbound,
+                       unsigned long rightbound)
 {
   Tagwithlength *twl = (Tagwithlength *) patterninfo;
 
@@ -277,14 +277,14 @@ static void showmstats(void *processinfo,
                        rightbound))
   {
     unsigned long idx;
-    ArraySeqpos *mstatspos = fromitv2sortedmatchpositions(
+    GtArrayGtUlong *mstatspos = fromitv2sortedmatchpositions(
                                   (Limdfsresources *) processinfo,
                                   leftbound,
                                   rightbound,
                                   mstatlength);
-    for (idx = 0; idx<mstatspos->nextfreeSeqpos; idx++)
+    for (idx = 0; idx<mstatspos->nextfreeGtUlong; idx++)
     {
-      printf(" " FormatSeqpos,PRINTSeqposcast(mstatspos->spaceSeqpos[idx]));
+      printf(" %lu",mstatspos->spaceGtUlong[idx]);
     }
   }
   printf("\n");
@@ -442,26 +442,22 @@ static void compareresults(const ArraySimplematch *storeonline,
     if (storeonline->spaceSimplematch[ss].matchlength !=
         storeoffline->spaceSimplematch[ss].matchlength)
     {
-      fprintf(stderr,"matchlength: storeonline[%lu] = " FormatSeqpos
-                     " != " FormatSeqpos "= storeoffline[%lu]\n",
+      fprintf(stderr,"matchlength: storeonline[%lu] = %lu"
+                     " != %lu = storeoffline[%lu]\n",
                      ss,
-                     PRINTSeqposcast(storeonline->spaceSimplematch[ss].
-                                     matchlength),
-                     PRINTSeqposcast(storeoffline->spaceSimplematch[ss].
-                                     matchlength),
+                     storeonline->spaceSimplematch[ss].matchlength,
+                     storeoffline->spaceSimplematch[ss].matchlength,
                      ss);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     if (storeonline->spaceSimplematch[ss].dbstartpos !=
         storeoffline->spaceSimplematch[ss].dbstartpos)
     {
-      fprintf(stderr,"dbstartpos: storeonline[%lu] = " FormatSeqpos
-                     " != " FormatSeqpos "= storeoffline[%lu]\n",
+      fprintf(stderr,"dbstartpos: storeonline[%lu] = %lu"
+                     " != %lu = storeoffline[%lu]\n",
                      ss,
-                     PRINTSeqposcast(storeonline->spaceSimplematch[ss].
-                                     dbstartpos),
-                     PRINTSeqposcast(storeoffline->spaceSimplematch[ss].
-                                     dbstartpos),
+                     storeonline->spaceSimplematch[ss].dbstartpos,
+                     storeoffline->spaceSimplematch[ss].dbstartpos,
                      ss);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }

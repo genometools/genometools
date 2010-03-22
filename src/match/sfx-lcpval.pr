@@ -4,10 +4,10 @@ extern "C" {
 Lcpvalueiterator *newLcpvalueiterator(const GtEncodedsequence *encseq,
                                       GtReadmode readmode);
 
-Seqpos nextLcpvalueiterator(Lcpvalueiterator *lvi,
+unsigned long nextLcpvalueiterator(Lcpvalueiterator *lvi,
                             bool firstpage,
-                            const Seqpos *suftabptr,
-                            Seqpos numberofsuffixes);
+                            const unsigned long *suftabptr,
+                            unsigned long numberofsuffixes);
 
 void freeLcpvalueiterator(Lcpvalueiterator **lvi);
 

@@ -19,13 +19,14 @@
 #define ESA_MAXPAIRS_H
 
 #include "core/error_api.h"
-#include "core/seqpos.h"
+
 #include "core/encodedsequence.h"
 #include "esa-seqread.h"
 #include "core/logger.h"
 
 typedef int (*Processmaxpairs)(void *,const GtEncodedsequence *,
-                               Seqpos,Seqpos,Seqpos,GtError *);
+                               unsigned long,unsigned long,unsigned long,
+                               GtError *);
 
 int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
                       const GtEncodedsequence *encseq,

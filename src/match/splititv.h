@@ -20,11 +20,10 @@
 
 #include "core/symboldef.h"
 #include "core/arraydef.h"
-#include "core/seqpos.h"
 
 typedef struct
 {
-  Seqpos lbound,
+  unsigned long lbound,
          rbound;
   GtUchar inchar;
 } Boundswithchar;

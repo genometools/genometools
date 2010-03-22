@@ -20,7 +20,7 @@
 #include "core/symboldef.h"
 #include "core/chardef.h"
 #include "intcode-def.h"
-#include "core/seqpos.h"
+
 #include "spacedef.h"
 #include "bcktab.h"
 #include "cutendpfx.h"
@@ -100,7 +100,7 @@ bool nextbucketenumerator(Lcpinterval *itv,Bucketenumerator *bucketenumerator)
       itv->left = bucketenumerator->bucketspec.left;
       itv->right = itv->left +
                    bucketenumerator->bucketspec.nonspecialsinbucket - 1;
-      itv->offset = (Seqpos) bucketenumerator->demandprefixlength;
+      itv->offset = (unsigned long) bucketenumerator->demandprefixlength;
       return true;
     }
   }

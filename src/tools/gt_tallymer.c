@@ -16,7 +16,10 @@
 */
 
 #include "core/cstr_array.h"
+#include "core/defined-types.h"
 #include "core/error.h"
+#include "core/format64.h"
+#include "core/intbits.h"
 #include "core/logger.h"
 #include "core/ma_api.h"
 #include "core/option.h"
@@ -26,14 +29,11 @@
 #include "core/minmax.h"
 #include "extended/toolbox.h"
 #include "match/optionargmode.h"
-#include "match/defined-types.h"
-#include "core/intbits.h"
 #include "match/tyr-mkindex.h"
 #include "match/tyr-show.h"
 #include "match/tyr-search.h"
 #include "match/tyr-mersplit.h"
 #include "match/tyr-occratio.h"
-#include "core/format64.h"
 #include "tools/gt_tallymer.h"
 
 typedef enum

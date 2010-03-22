@@ -20,7 +20,7 @@
 #include <stdbool.h>
 #include "core/error_api.h"
 #include "core/unused_api.h"
-#include "core/seqpos.h"
+
 #include "esa-seqread.h"
 
 typedef struct Dfsinfo Dfsinfo;
@@ -29,20 +29,28 @@ typedef struct Dfsstate Dfsstate;
 int depthfirstesa(Sequentialsuffixarrayreader *ssar,
                   Dfsinfo *(*allocateDfsinfo)(Dfsstate *),
                   void(*freeDfsinfo)(Dfsinfo *,Dfsstate *),
-                  int(*processleafedge)(bool,Seqpos,Dfsinfo *,
-                                        Seqpos,Dfsstate *,
+                  int(*processleafedge)(bool,unsigned long,Dfsinfo *,
+                                        unsigned long,Dfsstate *,
                                         GtError *),
                   int(*processbranchedge)(bool,
-                                          Seqpos,
+                                          unsigned long,
                                           Dfsinfo *,
                                           Dfsinfo *,
                                           Dfsstate *,
                                           GtError *),
-                  int(*processcompletenode)(Seqpos,Dfsinfo *,Seqpos,
-                                            Dfsstate *,GtError *),
-                  void(*assignleftmostleaf)(Dfsinfo *,Seqpos,Dfsstate *),
-                  void(*assignrightmostleaf)(Dfsinfo *,Seqpos,Seqpos,
-                                             Seqpos,Dfsstate *),
+                  int(*processcompletenode)(unsigned long,
+                                            Dfsinfo *,
+                                            unsigned long,
+                                            Dfsstate *,
+                                            GtError *),
+                  void(*assignleftmostleaf)(Dfsinfo *,
+                                            unsigned long,
+                                            Dfsstate *),
+                  void(*assignrightmostleaf)(Dfsinfo *,
+                                             unsigned long,
+                                             unsigned long,
+                                             unsigned long,
+                                             Dfsstate *),
                   Dfsstate *state,
                   GT_UNUSED GtLogger *logger,
                   GtError *err);

@@ -19,7 +19,9 @@
 #define MAPSPEC_GEN_H
 
 #include "core/arraydef.h"
+#include "core/intdef.h"
 #include "core/str_api.h"
+#include "core/symboldef.h"
 #include "core/error.h"
 
 #define NEWMAPSPEC(PTR,TYPE,ELEMS)\
@@ -30,24 +32,20 @@
         mapspecptr->numofunits = ELEMS;\
         mapspecptr->name = #PTR
 
-typedef unsigned long Unsignedlong;
-typedef char Char;
-
 typedef enum
 {
-  CharType, /* \0 terminated string */
+  GtCharType, /* \0 terminated string */
   FilelengthvaluesType,
   GtUcharType,
   GtUshortType,
   Uint32Type,
   Uint64Type,
-  UnsignedlongType,
+  GtUlongType,
+  GtUlongBoundType,
   GtBitsequenceType,
-  SeqposType,
-  SeqposboundType,
-  PairBwtidxType,
+  GtPairBwtidxType,
   TwobitencodingType,
-  SpecialcharinfoType,
+  GtSpecialcharinfoType,
   BitElemType
 } Typespec;
 

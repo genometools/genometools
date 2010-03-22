@@ -39,14 +39,14 @@ SAIBaseMakeReader(SASeqSrc *baseClass, enum sfxDataRequest rtype)
   return SAIMakeReader(SASS2SAI(baseClass), rtype);
 }
 
-static DefinedSeqpos
+static Definedunsignedlong
 SAIBaseGetRot0Pos(const SASeqSrc *baseClass)
 {
   return SAIGetRot0Pos(constSASS2SAI(baseClass));
 }
 
 static inline size_t
-SAIBaseGetOrigSeq(const SASeqSrc *baseClass, Symbol *dest, Seqpos pos,
+SAIBaseGetOrigSeq(const SASeqSrc *baseClass, Symbol *dest, unsigned long pos,
                   size_t len)
 {
   return SAIGetOrigSeq(constSASS2SAI(baseClass), dest, pos, len);
@@ -61,12 +61,12 @@ SAIBaseNewMRAEnc(const SASeqSrc *baseClass)
 static size_t
 SAIGenerate(void *generatorState, void *backlogState,
             move2BacklogFunc move2Backlog, void *output,
-            Seqpos generateStart, size_t len,
+            unsigned long generateStart, size_t len,
             SeqDataTranslator xltor);
 
 extern void
-initSuffixarrayFileInterface(SuffixarrayFileInterface *sai, Seqpos seqLen,
-                             Suffixarray *sa)
+initSuffixarrayFileInterface(SuffixarrayFileInterface *sai,
+                             unsigned long seqLen, Suffixarray *sa)
 {
   {
     RandomSeqAccessor origSeqAccess = { SAIGetOrigSeq, sai };
@@ -82,7 +82,7 @@ initSuffixarrayFileInterface(SuffixarrayFileInterface *sai, Seqpos seqLen,
 }
 
 extern SuffixarrayFileInterface *
-newSuffixarrayFileInterface(Suffixarray *sa, Seqpos seqLen)
+newSuffixarrayFileInterface(Suffixarray *sa, unsigned long seqLen)
 {
   SuffixarrayFileInterface *sai = gt_malloc(sizeof (*sai));
   initSuffixarrayFileInterface(sai, seqLen, sa);
@@ -151,7 +151,7 @@ SAIMakeSufTabReader(SuffixarrayFileInterface *sai)
   if (sai->sa->suftabstream.fp)
   {
     struct seqDataTranslator xltor = {
-      { .elemSize = sizeof (Seqpos) }, NULL
+      { .elemSize = sizeof (unsigned long) }, NULL
     };
     reader = seqReaderSetRegisterConsumer(&sai->baseClass.readerSet,
                                           SFX_REQUEST_SUFTAB, xltor);
@@ -232,10 +232,10 @@ SAIReadBWT(void *state, GtUchar *dest, size_t len, GT_UNUSED GtError *err)
   return fread(dest, sizeof (GtUchar), len, sai->sa->bwttabstream.fp);
 }
 
-DECLAREREADFUNCTION(Seqpos)
+DECLAREREADFUNCTION(GtUlong)
 
 extern size_t
-SAIGetOrigSeq(const void *state, Symbol *dest, Seqpos pos, size_t len)
+SAIGetOrigSeq(const void *state, Symbol *dest, unsigned long pos, size_t len)
 {
   const SuffixarrayFileInterface *sai;
   gt_assert(state);
@@ -243,7 +243,7 @@ SAIGetOrigSeq(const void *state, Symbol *dest, Seqpos pos, size_t len)
   return EncSeqGetSubSeq(sai->sa->encseq, sai->sa->readmode, pos, len, dest);
 }
 
-extern DefinedSeqpos
+extern Definedunsignedlong
 SAIGetRot0Pos(const void *state)
 {
   const SuffixarrayFileInterface *sai = state;
@@ -264,17 +264,17 @@ SANewMRAEnc(const Suffixarray *sa)
 static size_t
 SAIGenerate(void *generatorState, void *backlogState,
             move2BacklogFunc move2Backlog, void *output,
-            Seqpos generateStart, size_t len,
+            unsigned long generateStart, size_t len,
             SeqDataTranslator xltor)
 {
   size_t i;
   SuffixarrayFileInterface *sai = generatorState;
   Suffixarray *sa;
-  Seqpos buf[len];
+  unsigned long buf[len];
   gt_assert(sai);
   sa = sai->sa;
   for (i = 0; i < len; ++i)
-    if (readnextSeqposfromstream(buf + i, &sa->suftabstream) != 1)
+    if (readnextGtUlongfromstream(buf + i, &sa->suftabstream) != 1)
       break;
   move2Backlog(backlogState, buf, generateStart, i);
   SDRTranslate(xltor, output, buf, i);

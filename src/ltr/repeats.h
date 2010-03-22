@@ -28,9 +28,9 @@ void showrepeats (RepeatInfo *repeatinfo,
 
 int simpleexactselfmatchstore(void *info,
                               const GtEncodedsequence *encseq,
-                              Seqpos len,
-                              Seqpos pos1,
-                              Seqpos pos2,
+                              unsigned long len,
+                              unsigned long pos1,
+                              unsigned long pos2,
                               GtError *err);
 
 int subsimpleexactselfmatchstore(void *info,

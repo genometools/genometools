@@ -42,13 +42,13 @@ static Scoretype swlocalsimilarityscore(Scoretype *scol,
                                         const GtUchar *useq,
                                         unsigned long ulen,
                                         const GtEncodedsequence *vencseq,
-                                        Seqpos startpos,
-                                        Seqpos endpos)
+                                        unsigned long startpos,
+                                        unsigned long endpos)
 {
   Scoretype val, we, nw, *scolptr, maximalscore = 0;
   const GtUchar *uptr;
   GtUchar vcurrent;
-  Seqpos j;
+  unsigned long j;
 
   maxpair->umax = maxpair->vmax = 0;
   for (scolptr = scol; scolptr <= scol + ulen; scolptr++)
@@ -95,14 +95,14 @@ typedef struct
 {
   Scoretype similarity;
   unsigned long lu;
-  Seqpos lv;
+  unsigned long lv;
 } DPpoint;
 
 typedef struct
 {
   unsigned long len1,
                 start1;
-  Seqpos start2, len2;
+  unsigned long start2, len2;
   Scoretype similarity;
 } DPregion;
 
@@ -112,14 +112,14 @@ static void swlocalsimilarityregion(DPpoint *scol,
                                     const GtUchar *useq,
                                     unsigned long ulen,
                                     const GtEncodedsequence *vencseq,
-                                    Seqpos startpos,
-                                    Seqpos endpos)
+                                    unsigned long startpos,
+                                    unsigned long endpos)
 {
   Scoretype val;
   DPpoint *scolptr, we, nw;
   const GtUchar *uptr;
   GtUchar vcurrent;
-  Seqpos j;
+  unsigned long j;
 
   maxentry->similarity = 0;
   maxentry->len1 = 0;
@@ -185,13 +185,13 @@ static void swmaximalDPedges(Retracebits *edges,
                              const GtUchar *useq,
                              unsigned long ulen,
                              const GtEncodedsequence *vencseq,
-                             Seqpos startpos,
-                             Seqpos endpos)
+                             unsigned long startpos,
+                             unsigned long endpos)
 {
   Scoretype val, we, nw, *scolptr;
   const GtUchar *uptr;
   GtUchar vcurrent;
-  Seqpos j;
+  unsigned long j;
   Retracebits *eptr;
 
   eptr = edges;
@@ -247,9 +247,9 @@ static void swmaximalDPedges(Retracebits *edges,
 static void swtracebackDPedges(GtAlignment *alignment,
                                unsigned long ulen,
                                const GtEncodedsequence *encseq,
-                               Seqpos vlen,
+                               unsigned long vlen,
                                GtUchar *dbsubstring,
-                               Seqpos startpos,
+                               unsigned long startpos,
                                const Retracebits *edges)
 {
   const Retracebits *eptr = edges + (ulen+1) * (vlen+1) - 1;
@@ -295,10 +295,10 @@ static void swproducealignment(GtAlignment *alignment,
                                const GtUchar *useq,
                                unsigned long ulen,
                                const GtEncodedsequence *vencseq,
-                               Seqpos startpos,
-                               Seqpos endpos)
+                               unsigned long startpos,
+                               unsigned long endpos)
 {
-  Seqpos vlen = endpos - startpos;
+  unsigned long vlen = endpos - startpos;
 
   swmaximalDPedges(edges,scol,scorevalues,useq,ulen,vencseq,startpos,endpos);
   swtracebackDPedges(alignment,ulen,vencseq,vlen,dbsubstring,startpos,edges);
@@ -338,8 +338,8 @@ struct SWdpresource
 static void applysmithwaterman(SWdpresource *dpresource,
                                const GtEncodedsequence *encseq,
                                unsigned long encsequnit,
-                               Seqpos startpos,
-                               Seqpos endpos,
+                               unsigned long startpos,
+                               unsigned long endpos,
                                const GtUchar *query,
                                unsigned long querylen)
 {

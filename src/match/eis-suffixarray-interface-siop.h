@@ -38,7 +38,7 @@ SAIGetGtReadmode(const SuffixarrayFileInterface *sai)
   return sai->sa->readmode;
 }
 
-static inline Seqpos
+static inline unsigned long
 SAIGetLength(const SuffixarrayFileInterface *sai)
 {
   return SASSGetLength(constSAI2SASS(sai));

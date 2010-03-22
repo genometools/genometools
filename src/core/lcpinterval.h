@@ -15,22 +15,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ESA_LCPVAL_H
-#define ESA_LCPVAL_H
+#ifndef LCPINTERVAL_H
+#define LCPINTERVAL_H
 
-#include "core/readmode.h"
-#include "core/encodedsequence.h"
-
-typedef struct Lcpvalueiterator Lcpvalueiterator;
-
-Lcpvalueiterator *newLcpvalueiterator(const GtEncodedsequence *encseq,
-                                      GtReadmode readmode);
-
-unsigned long nextLcpvalueiterator(Lcpvalueiterator *lvi,
-                            bool firstpage,
-                            const unsigned long *suftabptr,
-                            unsigned long numberofsuffixes);
-
-void freeLcpvalueiterator(Lcpvalueiterator **lvi);
+typedef struct
+{
+  unsigned long offset,
+                left,
+                right;
+} Lcpinterval;
 
 #endif

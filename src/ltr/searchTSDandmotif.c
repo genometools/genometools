@@ -49,7 +49,7 @@ static void searchforbestTSDandormotifatborders(SubRepeatInfo *info,
                                                 *motifmismatchesrightLTR)
 {
   unsigned long i;
-  Seqpos motifpos1,
+  unsigned long motifpos1,
          motifpos2,
          back, forward,
          oldleftLTR_5  = boundaries->leftLTR_5,
@@ -117,15 +117,15 @@ static void searchforbestTSDandormotifatborders(SubRepeatInfo *info,
             &&
             tmp_motifmismatchesrightLTR <= lo->motif.allowedmismatches)
         {
-          Seqpos tsd_len;
+          unsigned long tsd_len;
           tsd_len = info->repeats.spaceRepeat[i].len - back - forward;
 
           /* TSD length not too big */
-          if (tsd_len <= (Seqpos)info->lmax)
+          if (tsd_len <= (unsigned long)info->lmax)
           {
             if ( !boundaries->motif_near_tsd )
             {
-              Seqpos max, min;
+              unsigned long max, min;
 
               /* save number of mismatches */
               *motifmismatchesleftLTR  = tmp_motifmismatchesleftLTR;
@@ -151,7 +151,7 @@ static void searchforbestTSDandormotifatborders(SubRepeatInfo *info,
             }
             else
             {
-              Seqpos max, min, difffromnewboundary1,
+              unsigned long max, min, difffromnewboundary1,
                    difffromnewboundary2;
 
               /* test if hit is nearer to old boundaries than previous hit */
@@ -196,10 +196,10 @@ static void searchforbestTSDandormotifatborders(SubRepeatInfo *info,
 static void searchformotifonlyborders(LTRharvestoptions *lo,
     LTRboundaries *boundaries,
     const GtEncodedsequence *encseq,
-    Seqpos startleftLTR,
-    Seqpos endleftLTR,
-    Seqpos startrightLTR,
-    Seqpos endrightLTR,
+    unsigned long startleftLTR,
+    unsigned long endleftLTR,
+    unsigned long startrightLTR,
+    unsigned long endrightLTR,
     unsigned int *motifmismatchesleftLTR,
     unsigned int *motifmismatchesrightLTR
     )
@@ -209,7 +209,7 @@ static void searchformotifonlyborders(LTRharvestoptions *lo,
   unsigned int tmp_motifmismatchesleftLTR,
          tmp_motifmismatchesrightLTR,
          motifmismatches_frombestmatch = 0;
-  Seqpos idx,
+  unsigned long idx,
          oldleftLTR_5  = boundaries->leftLTR_5,
          oldrightLTR_3 = boundaries->rightLTR_3,
          difffromoldboundary = 0;
@@ -238,7 +238,7 @@ static void searchformotifonlyborders(LTRharvestoptions *lo,
        /* first hit */
        if ( !motif1 )
        {
-         Seqpos max, min;
+         unsigned long max, min;
 
          motifmismatches_frombestmatch = tmp_motifmismatchesleftLTR;
          boundaries->leftLTR_5 = idx;
@@ -250,7 +250,7 @@ static void searchformotifonlyborders(LTRharvestoptions *lo,
        /* next hit */
        else
        {
-         Seqpos maxval, minval, difffromnewboundary;
+         unsigned long maxval, minval, difffromnewboundary;
 
          /* test if hit is nearer to old boundaries than previous hit */
          maxval = MAX(oldleftLTR_5, idx);
@@ -292,7 +292,7 @@ static void searchformotifonlyborders(LTRharvestoptions *lo,
        /* first hit */
        if ( !motif2 )
        {
-         Seqpos max, min;
+         unsigned long max, min;
 
          motifmismatches_frombestmatch = tmp_motifmismatchesrightLTR;
          boundaries->rightLTR_3 = idx;
@@ -304,7 +304,7 @@ static void searchformotifonlyborders(LTRharvestoptions *lo,
        /* next hit */
        else
        {
-         Seqpos maxval, minval, difffromnewboundary;
+         unsigned long maxval, minval, difffromnewboundary;
 
          /* test if hit is nearer to old boundaries than previous hit */
          maxval = MAX(oldrightLTR_3, idx);
@@ -348,7 +348,7 @@ static void searchformotifonlyinside(LTRharvestoptions *lo,
 {
   bool motif1 = false,
        motif2 = false;
-  Seqpos startleftLTR,
+  unsigned long startleftLTR,
          endleftLTR,
          startrightLTR,
          endrightLTR,
@@ -416,7 +416,7 @@ static void searchformotifonlyinside(LTRharvestoptions *lo,
        /* first hit */
        if ( !motif1 )
        {
-         Seqpos maxval, minval;
+         unsigned long maxval, minval;
 
          motifmismatches_frombestmatch = tmp_motifmismatchesleftLTR;
          boundaries->leftLTR_3 = idx;
@@ -428,7 +428,7 @@ static void searchformotifonlyinside(LTRharvestoptions *lo,
        /* next hit */
        else
        {
-         Seqpos maxval, minval, difffromnewboundary;
+         unsigned long maxval, minval, difffromnewboundary;
 
          /* test if hit is nearer to old boundaries than previous hit */
          maxval = MAX(oldleftLTR_3, idx);
@@ -470,7 +470,7 @@ static void searchformotifonlyinside(LTRharvestoptions *lo,
        /* first hit */
        if ( !motif2 )
        {
-         Seqpos maxval, minval;
+         unsigned long maxval, minval;
 
          motifmismatches_frombestmatch = tmp_motifmismatchesrightLTR;
          boundaries->rightLTR_5 = idx;
@@ -482,7 +482,7 @@ static void searchformotifonlyinside(LTRharvestoptions *lo,
        /* next hit */
        else
        {
-         Seqpos maxval, minval, difffromnewboundary;
+         unsigned long maxval, minval, difffromnewboundary;
 
          /* test if hit is nearer to old boundaries than previous hit */
          maxval = MAX(oldrightLTR_5, idx);
@@ -522,7 +522,7 @@ static int searchforTSDandorMotifoutside(
   unsigned int *motifmismatchesrightLTR,
   GtError *err)
 {
-  Seqpos startleftLTR,
+  unsigned long startleftLTR,
          endleftLTR,
          startrightLTR,
          endrightLTR,

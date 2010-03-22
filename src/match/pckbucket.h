@@ -20,7 +20,7 @@
 
 #include "core/str.h"
 #include "core/error.h"
-#include "core/seqpos.h"
+
 #include "splititv.h"
 #include "intcode-def.h"
 
@@ -30,7 +30,7 @@ void pckbuckettable_free(Pckbuckettable *pckbt);
 
 Pckbuckettable *pckbuckettable_new(const void *voidbwtseq,
                                    unsigned int numofchars,
-                                   Seqpos totallength,
+                                   unsigned long totallength,
                                    unsigned int maxdepth);
 
 int pckbucket2file(const GtStr *indexname,const Pckbuckettable *pckbuckettable,

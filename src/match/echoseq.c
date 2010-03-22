@@ -72,12 +72,12 @@ void symbolstring2fasta(FILE *fpout,
 void encseq2symbolstring(FILE *fpout,
                          const GtEncodedsequence *encseq,
                          GtReadmode readmode,
-                         Seqpos start,
-                         Seqpos wlen,
+                         unsigned long start,
+                         unsigned long wlen,
                          unsigned long width)
 {
   unsigned long j;
-  Seqpos idx, lastpos;
+  unsigned long idx, lastpos;
   GtUchar currentchar;
   GtEncodedsequenceScanstate *esr;
   const GtAlphabet *alpha;
@@ -119,10 +119,10 @@ void encseq2symbolstring(FILE *fpout,
 
 void fprintfencseq(FILE *fpout,
                    const GtEncodedsequence *encseq,
-                   Seqpos start,
-                   Seqpos wlen)
+                   unsigned long start,
+                   unsigned long wlen)
 {
-  Seqpos idx;
+  unsigned long idx;
   GtUchar currentchar;
   const GtAlphabet *alpha;
 
@@ -141,8 +141,8 @@ void encseq2fastaoutput(FILE *fpout,
                         const char *desc,
                         const GtEncodedsequence *encseq,
                         GtReadmode readmode,
-                        Seqpos start,
-                        Seqpos wlen,
+                        unsigned long start,
+                        unsigned long wlen,
                         unsigned long width)
 {
   gt_assert(width > 0);

@@ -31,7 +31,7 @@
 
 typedef struct
 {
-  Seqpos dbcurrent, dbprefixlen;
+  unsigned long dbcurrent, dbprefixlen;
   unsigned long querypos, queryend;
   GtUchar *spaceGtUchardbsubstring;
   unsigned long allocatedGtUchardbsubstring;
@@ -600,9 +600,9 @@ static void locali_copyLimdfsstate (DECLAREPTRDFSSTATE(deststate),
 
 static void locali_fullmatchLimdfsstate (Limdfsresult *limdfsresult,
                                          DECLAREPTRDFSSTATE(aliasstate),
-                                         GT_UNUSED Seqpos leftbound,
-                                         GT_UNUSED Seqpos rightbound,
-                                         GT_UNUSED Seqpos width,
+                                         GT_UNUSED unsigned long leftbound,
+                                         GT_UNUSED unsigned long rightbound,
+                                         GT_UNUSED unsigned long width,
                                          GT_UNUSED unsigned long currentdepth,
                                          Limdfsconstinfo *lci)
 {
@@ -668,14 +668,14 @@ static void locali_inplacenextLimdfsstate (const Limdfsconstinfo *lci,
 #endif
 
 void reinitLocalitracebackstate(Limdfsconstinfo *lci,
-                                Seqpos dbprefixlen,
+                                unsigned long dbprefixlen,
                                 unsigned long pprefixlen)
 {
   Localitracebackstate *tbs = &lci->tbs;
 
   tbs->dbprefixlen = tbs->dbcurrent = dbprefixlen;
   tbs->queryend = tbs->querypos = pprefixlen;
-  if (dbprefixlen > (Seqpos) tbs->allocatedGtUchardbsubstring)
+  if (dbprefixlen > (unsigned long) tbs->allocatedGtUchardbsubstring)
   {
     tbs->spaceGtUchardbsubstring = gt_realloc(tbs->spaceGtUchardbsubstring,
                                             sizeof (GtUchar) * dbprefixlen);

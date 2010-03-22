@@ -295,11 +295,11 @@ static void updatespecialpositions(Streamstate *spwp,
 }
 
 static void shiftrightwithchar(
-               void(*processkmercode)(void *,Codetype,Seqpos,
+               void(*processkmercode)(void *,Codetype,unsigned long,
                                       const Firstspecialpos *),
                void *processkmercodeinfo,
                Streamstate *spwp,
-               Seqpos currentposition,
+               unsigned long currentposition,
                GtUchar charcode)
 {
 #ifdef SKDEBUG
@@ -408,10 +408,10 @@ static void freestreamstate(Streamstate *spwp)
 }
 
 static void doovershoot(Streamstate *spwp,
-                        void(*processkmercode)(void *,Codetype,Seqpos,
+                        void(*processkmercode)(void *,Codetype,unsigned long,
                                                const Firstspecialpos *),
                         void *processkmercodeinfo,
-                        Seqpos currentposition,
+                        unsigned long currentposition,
                         unsigned int kmersize)
 {
   unsigned int overshoot;
@@ -426,11 +426,14 @@ static void doovershoot(Streamstate *spwp,
 void getencseqkmers(
         const GtEncodedsequence *encseq,
         GtReadmode readmode,
-        void(*processkmercode)(void *,Codetype,Seqpos,const Firstspecialpos *),
+        void(*processkmercode)(void *,
+                               Codetype,
+                               unsigned long,
+                               const Firstspecialpos *),
         void *processkmercodeinfo,
         unsigned int kmersize)
 {
-  Seqpos currentposition = 0, totallength;
+  unsigned long currentposition = 0, totallength;
   Streamstate spwp;
   GtUchar charcode;
   GtEncodedsequenceScanstate *esr;
@@ -464,7 +467,10 @@ void getencseqkmers(
 
 int getfastastreamkmers(
         const GtStrArray *filenametab,
-        void(*processkmercode)(void *,Codetype,Seqpos,const Firstspecialpos *),
+        void(*processkmercode)(void *,
+                               Codetype,
+                               unsigned long,
+                               const Firstspecialpos *),
         void *processkmercodeinfo,
         unsigned int numofchars,
         unsigned int kmersize,
@@ -472,7 +478,7 @@ int getfastastreamkmers(
         bool plainformat,
         GtError *err)
 {
-  Seqpos currentposition = 0;
+  unsigned long currentposition = 0;
   Streamstate spwp;
   GtUchar charcode;
   bool haserr = false;

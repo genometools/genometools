@@ -23,7 +23,7 @@
 #include "core/chardef.h"
 #include "core/ma_api.h"
 #include "core/intbits.h"
-#include "core/seqpos.h"
+
 #include "absdfstrans-imp.h"
 
 typedef struct
@@ -93,9 +93,9 @@ static void spse_initLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
 
 static void spse_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
                                       DECLAREPTRDFSSTATE(aliascolumn),
-                                      GT_UNUSED Seqpos leftbound,
-                                      GT_UNUSED Seqpos rightbound,
-                                      GT_UNUSED Seqpos width,
+                                      GT_UNUSED unsigned long leftbound,
+                                      GT_UNUSED unsigned long rightbound,
+                                      GT_UNUSED unsigned long width,
                                       unsigned long currentdepth,
                                       Limdfsconstinfo *mti)
 {

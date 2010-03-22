@@ -21,8 +21,9 @@
 #include <stdbool.h>
 #include "core/alphabet.h"
 #include "core/arraydef.h"
-#include "core/seqpos.h"
 #include "core/encodedsequence.h"
+#include "core/pairbwtidx.h"
+#include "core/ulongbound.h"
 
 /*
   TO DO:
@@ -74,16 +75,16 @@
 #define SUPERBFREQSIZE(MAPSIZE,NOFSUPERBLOCKS)\
         ((MAPSIZE) * (NOFSUPERBLOCKS))
 
-GT_DECLAREARRAYSTRUCT(PairBwtidx);
+GT_DECLAREARRAYSTRUCT(GtPairBwtidx);
 
-typedef int(*FMprocessqhit)(void *,Seqpos,Seqpos);
+typedef int(*FMprocessqhit)(void *,unsigned long,unsigned long);
 
 typedef struct
 {
   /* Note: do not use specialcharinfo of bwtformatching */
   GtEncodedsequence *bwtformatching;
   GtUchar *bfreq;            /* bfreq[c][i] = #c in block i */
-  Seqpos bwtlength,        /* also totallength + 1 */
+  unsigned long bwtlength,        /* also totallength + 1 */
          *tfreq,           /* tfreq[c] = #characters < c in text */
          *superbfreq,      /* superbfreq[c][i] = #c in all superblocks */
                            /* which are previous to superblock i */
@@ -92,7 +93,7 @@ typedef struct
          negatebsizeones,
          negatesuperbsizeones,
          markdistminus1;   /* markdist - 1 */
-  GtArrayPairBwtidx specpos; /* positions of special characters */
+  GtArrayGtPairBwtidx specpos; /* positions of special characters */
   const GtAlphabet *alphabet;
   void *mappedptr; /* NULL or pointer to the mapped space block */
   unsigned int mapsize,      /* copy of alphabet.mapsize, used for searching */
@@ -105,11 +106,11 @@ typedef struct
            log2markdist,     /* gt_log_{2}(markdist) */
            suffixlength;     /* len of suffix for which buckets are computed*/
   unsigned long sizeofindex; /* size of the fmindex in bytes */
-  Seqpos nofblocks,          /* number of blocks (bwtlength/bsize + 1) */
+  unsigned long nofblocks,          /* number of blocks (bwtlength/bsize + 1) */
          nofsuperblocks,     /* number of superblocks (bwtlength/superbsize+2)*/
          markdist,           /* multiple of entry num stored in suffix array */
          numofcodes;         /* number of entries in boundaries */
-  Seqposbound *boundarray;      /* corresponding boundaries */
+  GtUlongBound *boundarray;      /* corresponding boundaries */
 } Fmindex;
 
 typedef struct

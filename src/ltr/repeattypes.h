@@ -22,15 +22,15 @@
 
 #include "core/arraydef.h"
 #include "core/range_api.h"
-#include "core/seqpos.h"
+
 #include "core/encodedsequence.h"
 
 /* The datatype Repeat stores information about the maximal repeats (seeds).*/
 typedef struct
 {
-  Seqpos pos1;         /* first position of maximal repeat (seed) */
-  Seqpos offset;       /* second position = pos1 + offset */
-  Seqpos len;          /* length of maximal repeat  */
+  unsigned long pos1;         /* first position of maximal repeat (seed) */
+  unsigned long offset;       /* second position = pos1 + offset */
+  unsigned long len;          /* length of maximal repeat  */
   unsigned long contignumber; /* number of contig for this repeat */
 } Repeat;
 
@@ -56,8 +56,8 @@ typedef struct
   GtArrayRepeat repeats; /* array of maximal repeats for TSDs */
   unsigned long lmin;   /* minimal length of TSD */
   unsigned long lmax;   /* maximal length of TSD */
-  Seqpos offset1;      /* offset1 for absolute position 1 in sequence */
-  Seqpos offset2;      /* offset2 for absolute position 2 in sequence */
+  unsigned long offset1;      /* offset1 for absolute position 1 in sequence */
+  unsigned long offset2;      /* offset2 for absolute position 2 in sequence */
                        /* pos1 < pos2 */
 } SubRepeatInfo;
 
@@ -66,7 +66,7 @@ typedef struct
 typedef struct
 {
   unsigned long contignumber; /* ordinal number of sequence in encseq */
-  Seqpos leftLTR_5,    /* 5' boundary of left LTR */
+  unsigned long leftLTR_5,    /* 5' boundary of left LTR */
          leftLTR_3,    /* 3' boundary of left LTR */
          rightLTR_5,   /* 5' boundary of right LTR */
          rightLTR_3,   /* 3' boundary of right LTR */

@@ -23,7 +23,7 @@
 #include "core/symboldef.h"
 #include "core/str_array_api.h"
 #include "core/readmode.h"
-#include "core/seqpos.h"
+
 #include "core/encodedsequence.h"
 
 void symbolstring2fasta(FILE *fpout,
@@ -36,21 +36,21 @@ void symbolstring2fasta(FILE *fpout,
 void encseq2symbolstring(FILE *fpout,
                          const GtEncodedsequence *encseq,
                          GtReadmode readmode,
-                         Seqpos start,
-                         Seqpos wlen,
+                         unsigned long start,
+                         unsigned long wlen,
                          unsigned long width);
 
 void fprintfencseq(FILE *fpout,
                    const GtEncodedsequence *encseq,
-                   Seqpos start,
-                   Seqpos wlen);
+                   unsigned long start,
+                   unsigned long wlen);
 
 void encseq2fastaoutput(FILE *fpout,
                         const char *desc,
                         const GtEncodedsequence *encseq,
                         GtReadmode readmode,
-                        Seqpos start,
-                        Seqpos wlen,
+                        unsigned long start,
+                        unsigned long wlen,
                         unsigned long width);
 
 int echodescriptionandsequence(const GtStrArray *filenametab,GtError *err);

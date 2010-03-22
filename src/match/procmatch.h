@@ -19,13 +19,12 @@
 #define PROCMATCH_H
 
 #include "core/symboldef.h"
-#include "core/seqpos.h"
 
 typedef struct
 {
   bool dbabsolute;
   unsigned long dbseqnum;
-  Seqpos dbstartpos,
+  unsigned long dbstartpos,
          dblen;
   const GtUchar *dbsubstring;
   unsigned long querystartpos,
@@ -41,7 +40,7 @@ typedef void (*Processresult)(void *,
                               const void *,
                               unsigned long,
                               unsigned long,
-                              Seqpos,
-                              Seqpos);
+                              unsigned long,
+                              unsigned long);
 
 #endif

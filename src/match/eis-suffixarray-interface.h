@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include "core/error.h"
 #include "match/sarr-def.h"
-#include "core/seqpos.h"
+
 #include "match/eis-mrangealphabet.h"
 #include "match/eis-seqdatasrc.h"
 #include "match/eis-sequencemultiread.h"
@@ -33,11 +33,12 @@
 typedef struct suffixarrayFileInterface SuffixarrayFileInterface;
 
 extern void
-initSuffixarrayFileInterface(SuffixarrayFileInterface *sai, Seqpos seqLen,
+initSuffixarrayFileInterface(SuffixarrayFileInterface *sai,
+                             unsigned long seqLen,
                              Suffixarray *sa);
 
 extern SuffixarrayFileInterface *
-newSuffixarrayFileInterface(Suffixarray *sa, Seqpos seqLen);
+newSuffixarrayFileInterface(Suffixarray *sa, unsigned long seqLen);
 
 extern void
 destructSuffixarrayFileInterface(SuffixarrayFileInterface *sai);
@@ -63,7 +64,7 @@ SAIMakeSufTabReader(SuffixarrayFileInterface *sai);
  * @return actual number of symbols read
  */
 extern size_t
-SAIGetOrigSeq(const void *state, Symbol *dest, Seqpos pos, size_t len);
+SAIGetOrigSeq(const void *state, Symbol *dest, unsigned long pos, size_t len);
 
 /**
  * @brief Query position of suffix starting at position 0, can be
@@ -72,7 +73,7 @@ SAIGetOrigSeq(const void *state, Symbol *dest, Seqpos pos, size_t len);
  * @param state reference of Suffixarray object
  * @return
  */
-extern DefinedSeqpos
+extern Definedunsignedlong
 SAIGetRot0Pos(const void *state);
 
 /**
@@ -87,7 +88,7 @@ SAIGetEncSeq(const SuffixarrayFileInterface *sai);
 static inline GtReadmode
 SAIGetGtReadmode(const SuffixarrayFileInterface *sai);
 
-static inline Seqpos
+static inline unsigned long
 SAIGetLength(const SuffixarrayFileInterface *sai);
 
 /**

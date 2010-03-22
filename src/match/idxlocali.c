@@ -43,7 +43,7 @@ static void showmatch(void *processinfo,const GtMatch *match)
 {
   Showmatchinfo *showmatchinfo = (Showmatchinfo *) processinfo;
   unsigned long seqnum;
-  Seqpos relpos;
+  unsigned long relpos;
 
   if (match->dbabsolute)
   {
@@ -58,8 +58,8 @@ static void showmatch(void *processinfo,const GtMatch *match)
     relpos = match->dbstartpos;
     seqnum = match->dbseqnum;
   }
-  printf("%lu\t" FormatSeqpos "\t",seqnum,PRINTSeqposcast(relpos));
-  printf(FormatSeqpos "\t",PRINTSeqposcast(match->dblen));
+  printf("%lu\t%lu\t",seqnum,relpos);
+  printf("%lu\t",match->dblen);
   printf("\t" Formatuint64_t "\t%lu\t%lu\t%lu\n",
               PRINTuint64_tcast(showmatchinfo->queryunit),
               match->querystartpos,

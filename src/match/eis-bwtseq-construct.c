@@ -33,7 +33,7 @@ availBWTSeq(const struct bwtParam *params, GtLogger *verbosity,
 {
   struct BWTSeq *bwtSeq = NULL;
   Suffixarray suffixArray;
-  Seqpos len;
+  unsigned long len;
   gt_assert(params && err);
   gt_error_check(err);
   if (streamsuffixarray(&suffixArray, SARR_SUFTAB | SARR_BWTTAB
@@ -61,7 +61,7 @@ trSuftab2BWTSeq(const struct bwtParam *params, GtLogger *verbosity,
 {
   struct BWTSeq *bwtSeq = NULL;
   Suffixarray suffixArray;
-  Seqpos len;
+  unsigned long len;
   gt_assert(params && err);
   gt_error_check(err);
   do
@@ -89,7 +89,7 @@ trSuftab2BWTSeq(const struct bwtParam *params, GtLogger *verbosity,
 
 extern BWTSeq *
 availBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
-                  Seqpos totalLen, GtError *err)
+                  unsigned long totalLen, GtError *err)
 {
   BWTSeq *bwtSeq;
   gt_assert(sa && params && err);
@@ -128,7 +128,7 @@ loadBWTSeq(const GtStr *projectName, int BWTOptFlags, GtLogger *verbosity,
 {
   struct BWTSeq *bwtSeq = NULL;
   Suffixarray suffixArray;
-  Seqpos len;
+  unsigned long len;
   gt_assert(projectName && err);
   gt_error_check(err);
   if (mapsuffixarray(&suffixArray, 0, projectName, verbosity, err))
@@ -143,7 +143,7 @@ loadBWTSeq(const GtStr *projectName, int BWTOptFlags, GtLogger *verbosity,
 extern BWTSeq *
 loadBWTSeqForSA(const GtStr *projectName, enum seqBaseEncoding encType,
                 int BWTOptFlags, const Suffixarray *sa,
-                Seqpos totalLen, GtError *err)
+                unsigned long totalLen, GtError *err)
 {
   struct BWTSeq *bwtSeq = NULL;
   EISeq *seqIdx = NULL;
@@ -166,7 +166,7 @@ loadBWTSeqForSA(const GtStr *projectName, enum seqBaseEncoding encType,
 
 extern BWTSeq *
 createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
-                   Seqpos totalLen, GtError *err)
+                   unsigned long totalLen, GtError *err)
 {
   BWTSeq *bwtSeq = NULL;
   if (!sa->longest.defined)
@@ -186,7 +186,7 @@ createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
 
 static inline void
 buildSpRTable(const struct bwtParam *params,
-              Seqpos totalLen,
+              unsigned long totalLen,
               const GtEncodedsequence *encseq,
               GtReadmode readmode,
               SpecialsRankLookup **sprTable,

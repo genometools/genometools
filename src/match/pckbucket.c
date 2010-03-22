@@ -25,7 +25,7 @@
 
 typedef struct
 {
-  Seqpos lowerbound,
+  unsigned long lowerbound,
          upperbound;
   unsigned int depth;
   Codetype code;
@@ -150,13 +150,13 @@ static void followleafedge(Pckbuckettable *pckbt,const void *voidbwtseq,
 
 Pckbuckettable *pckbuckettable_new(const void *voidbwtseq,
                                    unsigned int numofchars,
-                                   Seqpos totallength,
+                                   unsigned long totallength,
                                    unsigned int maxdepth)
 {
   GtArrayBoundsatdepth stack;
   Boundsatdepth parent, child;
   unsigned long rangesize, idx;
-  Seqpos *rangeOccs;
+  unsigned long *rangeOccs;
   Pckbuckettable *pckbt;
   Mbtab *tmpmbtab;
 
@@ -218,7 +218,7 @@ int pckbucket2file(const GtStr *indexname,const Pckbuckettable *pckbuckettable,
                    GtError *err)
 {
   FILE *fp;
-  Seqpos seqposmaxdepth;
+  unsigned long seqposmaxdepth;
 
   gt_error_check(err);
   fp = gt_fa_fopen_filename_with_suffix(indexname,PCKBUCKETTABLE,"wb",err);
@@ -226,8 +226,8 @@ int pckbucket2file(const GtStr *indexname,const Pckbuckettable *pckbuckettable,
   {
     return -1;
   }
-  seqposmaxdepth = (Seqpos) pckbuckettable->maxdepth;
-  gt_xfwrite(&seqposmaxdepth,sizeof (Seqpos),(size_t) 1,fp);
+  seqposmaxdepth = (unsigned long) pckbuckettable->maxdepth;
+  gt_xfwrite(&seqposmaxdepth,sizeof (unsigned long),(size_t) 1,fp);
   gt_xfwrite(pckbuckettable->mbtab[0],sizeof (Mbtab),
              (size_t) pckbuckettable->maxnumofvalues,fp);
   gt_fa_fclose(fp);
@@ -262,13 +262,13 @@ Pckbuckettable *mappckbuckettable(const GtStr *indexname,
   {
     return NULL;
   }
-  maxdepth = (unsigned int) ((Seqpos *) mapptr)[0];
+  maxdepth = (unsigned int) ((unsigned long *) mapptr)[0];
   pckbt = allocandinitpckbuckettable(numofchars,maxdepth,false);
   pckbt->mapptr = mapptr;
-  pckbt->mbtab[0] = (Mbtab *) (((Seqpos *) mapptr) + 1);
+  pckbt->mbtab[0] = (Mbtab *) (((unsigned long *) mapptr) + 1);
   setbcktaboffsets(pckbt);
   gt_assert(numofbytes ==
-            sizeof (Seqpos) + sizeof (Mbtab) * pckbt->maxnumofvalues);
+            sizeof (unsigned long) + sizeof (Mbtab) * pckbt->maxnumofvalues);
   return pckbt;
 }
 

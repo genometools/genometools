@@ -18,7 +18,7 @@
 #include "core/arraydef.h"
 #include "core/divmodmul.h"
 #include "core/minmax.h"
-#include "core/seqpos.h"
+
 #include "spacedef.h"
 #include "core/encodedsequence.h"
 #include "lcpoverflow.h"
@@ -39,12 +39,12 @@
 
 typedef struct Blindtrienode
 {
-  Seqpos depth;
+  unsigned long depth;
   struct Blindtrienode *rightsibling;
   union
   {
     struct Blindtrienode *firstchild;
-    Seqpos nodestartpos;
+    unsigned long nodestartpos;
   } either;
   GtUchar firstchar;
 } Blindtrienode;
@@ -58,7 +58,7 @@ struct Blindtrie
   const GtEncodedsequence *encseq;
   GtEncodedsequenceScanstate *esr1, *esr2;
   GtReadmode readmode;
-  Seqpos totallength,
+  unsigned long totallength,
          offset,
          maxdepth,
          maxdepthminusoffset;
@@ -70,10 +70,10 @@ struct Blindtrie
   GtArrayNodeptr stack;
 };
 
-static bool isleftofboundary(Seqpos currentstartpos,Seqpos add,
+static bool isleftofboundary(unsigned long currentstartpos,unsigned long add,
                              const Blindtrie *blindtrie)
 {
-  Seqpos endpos;
+  unsigned long endpos;
 
   gt_assert(currentstartpos >= blindtrie->offset);
   if (blindtrie->maxdepth == 0)
@@ -98,7 +98,7 @@ static Nodeptr newBlindtrienode(Blindtrie *blindtrie)
 }
 
 static Blindtrienode *makenewleaf(Blindtrie *blindtrie,
-                                  Seqpos currentstartpos,
+                                  unsigned long currentstartpos,
                                   GtUchar firstchar)
 {
   Blindtrienode *newleaf;
@@ -112,7 +112,7 @@ static Blindtrienode *makenewleaf(Blindtrie *blindtrie,
   return newleaf;
 }
 
-static Nodeptr makeroot(Blindtrie *blindtrie,Seqpos currentstartpos)
+static Nodeptr makeroot(Blindtrie *blindtrie,unsigned long currentstartpos)
 {
   Blindtrienode *root;
   GtUchar firstchar;
@@ -182,7 +182,7 @@ static Nodeptr findsucc(Nodeptr node,GtUchar newchar)
   }
 }
 
-static Nodeptr findcompanion(Blindtrie *blindtrie,Seqpos currentstartpos)
+static Nodeptr findcompanion(Blindtrie *blindtrie,unsigned long currentstartpos)
 {
   GtUchar newchar;
   Nodeptr head, succ;
@@ -224,9 +224,9 @@ static Nodeptr findcompanion(Blindtrie *blindtrie,Seqpos currentstartpos)
 static void insertsuffixintoblindtrie(Blindtrie *blindtrie,
                                       Nodeptr oldnode,
                                       GtUchar mm_oldsuffix,
-                                      Seqpos lcp,
+                                      unsigned long lcp,
                                       GtUchar mm_newsuffix,
-                                      Seqpos currentstartpos)
+                                      unsigned long currentstartpos)
 {
   Nodeptr newleaf, newnode, previous, current;
 
@@ -274,13 +274,13 @@ static void insertsuffixintoblindtrie(Blindtrie *blindtrie,
   newleaf->rightsibling = current;
 }
 
-static Seqpos cmpcharbychargetlcp(GtUchar *mm_oldsuffix,
+static unsigned long cmpcharbychargetlcp(GtUchar *mm_oldsuffix,
                                   GtUchar *mm_newsuffix,
                                   const Blindtrie *blindtrie,
-                                  Seqpos leafpos,
-                                  Seqpos currentstartpos)
+                                  unsigned long leafpos,
+                                  unsigned long currentstartpos)
 {
-  Seqpos lcp;
+  unsigned long lcp;
   GtUchar cc1, cc2;
 
   gt_encodedsequence_scanstate_init(blindtrie->esr1,blindtrie->encseq,
@@ -328,11 +328,11 @@ static Seqpos cmpcharbychargetlcp(GtUchar *mm_oldsuffix,
   return lcp;
 }
 
-static Seqpos fastgetlcp(GtUchar *mm_oldsuffix,
+static unsigned long fastgetlcp(GtUchar *mm_oldsuffix,
                          GtUchar *mm_newsuffix,
                          const Blindtrie *blindtrie,
-                         Seqpos leafpos,
-                         Seqpos currentstartpos)
+                         unsigned long leafpos,
+                         unsigned long currentstartpos)
 {
   GtCommonunits commonunits;
 
@@ -436,14 +436,16 @@ static Seqpos fastgetlcp(GtUchar *mm_oldsuffix,
         currentnodeisleaf = ISLEAF(VAL) ? true : false;\
         currentnode = VAL
 
-static unsigned long enumeratetrieleaves (Seqpos *suffixtable,
-                                          Seqpos *lcpsubtab,
-                                          Seqpos *numoflargelcpvalues,
+static unsigned long enumeratetrieleaves (unsigned long *suffixtable,
+                                          unsigned long *lcpsubtab,
+                                          unsigned long *numoflargelcpvalues,
                                           Blindtrie *blindtrie,
                                           void *voiddcov,
                                           void (*dc_processunsortedrange)(
-                                                   void *,Seqpos *,Seqpos *,
-                                                          Seqpos))
+                                                   void *,
+                                                   unsigned long *,
+                                                   unsigned long *,
+                                                   unsigned long))
 {
   bool readyforpop = false, currentnodeisleaf;
   Nodeptr currentnode, siblval, lcpnode = blindtrie->root;
@@ -462,7 +464,7 @@ static unsigned long enumeratetrieleaves (Seqpos *suffixtable,
         if (lcpsubtab != NULL)
         {
           lcpsubtab[nextfree] = lcpnode->depth + blindtrie->offset;
-          if (lcpnode->depth + blindtrie->offset >= (Seqpos) LCPOVERFLOW)
+          if (lcpnode->depth + blindtrie->offset >= (unsigned long) LCPOVERFLOW)
           {
             (*numoflargelcpvalues)++;
           }
@@ -587,9 +589,9 @@ void blindtrie_delete(Blindtrie **blindtrie)
 #ifdef SKDEBUG
 static void checkcurrentblindtrie(Blindtrie *blindtrie)
 {
-  Seqpos suffixtable[6];
+  unsigned long suffixtable[6];
   unsigned long idx, numofsuffixes;
-  Seqpos maxcommon;
+  unsigned long maxcommon;
   int retval;
 
   numofsuffixes = enumeratetrieleaves (&suffixtable[0], NULL, NULL, blindtrie);
@@ -670,8 +672,8 @@ static void showblindtrie(const Blindtrie *blindtrie)
 
 static int suffixcompare(const void *a, const void *b)
 {
-  gt_assert(*((Seqpos *) a) != *((Seqpos *) b));
-  if (*((Seqpos *) a) < *((Seqpos *) b))
+  gt_assert(*((unsigned long *) a) != *((unsigned long *) b));
+  if (*((unsigned long *) a) < *((unsigned long *) b))
   {
     return -1;
   }
@@ -681,7 +683,7 @@ static int suffixcompare(const void *a, const void *b)
 #ifndef NDEBUG
 
 static void checksorting(bool ascending,
-                         const Seqpos *suffixtable,
+                         const unsigned long *suffixtable,
                          unsigned long numberofsuffixes)
 {
   unsigned long idx;
@@ -703,9 +705,9 @@ static void checksorting(bool ascending,
 
 #endif
 
-static void inplace_reverseSeqpos(Seqpos *tab,unsigned long len)
+static void inplace_reverseSeqpos(unsigned long *tab,unsigned long len)
 {
-  Seqpos tmp, *frontptr, *backptr;
+  unsigned long tmp, *frontptr, *backptr;
 
   for (frontptr = tab, backptr = tab + len - 1;
        frontptr < backptr; frontptr++, backptr--)
@@ -716,25 +718,30 @@ static void inplace_reverseSeqpos(Seqpos *tab,unsigned long len)
   }
 }
 
-Seqpos blindtrie_suffixsort(Blindtrie *blindtrie,
-                            Seqpos *suffixtable,
-                            Seqpos *lcpsubtab,
+unsigned long blindtrie_suffixsort(Blindtrie *blindtrie,
+                            unsigned long *suffixtable,
+                            unsigned long *lcpsubtab,
                             unsigned long numberofsuffixes,
-                            Seqpos offset,
-                            Seqpos maxdepth,
+                            unsigned long offset,
+                            unsigned long maxdepth,
                             Ordertype ordertype,
                             void *voiddcov,
-                            void (*dc_processunsortedrange)(void *,Seqpos *,
-                                                            Seqpos *,Seqpos))
+                            void (*dc_processunsortedrange)(void *,
+                                                            unsigned long *,
+                                                            unsigned long *,
+                                                            unsigned long))
 {
   unsigned long idx, stackidx;
   Nodeptr leafinsubtree, currentnode;
-  Seqpos lcp, numoflargelcpvalues = 0;
+  unsigned long lcp, numoflargelcpvalues = 0;
   GtUchar mm_oldsuffix, mm_newsuffix;
 
   if (ordertype == Noorder)
   {
-    qsort(suffixtable,(size_t) numberofsuffixes,sizeof (Seqpos), suffixcompare);
+    qsort(suffixtable,
+          (size_t) numberofsuffixes,
+          sizeof (unsigned long),
+          suffixcompare);
   } else
   {
     if (ordertype == Descending)
@@ -813,7 +820,7 @@ Seqpos blindtrie_suffixsort(Blindtrie *blindtrie,
                               blindtrie,voiddcov,dc_processunsortedrange);
   if (lcpsubtab != NULL)
   {
-    if (idx < numberofsuffixes && offset >= (Seqpos) LCPOVERFLOW)
+    if (idx < numberofsuffixes && offset >= (unsigned long) LCPOVERFLOW)
     {
       numoflargelcpvalues += numberofsuffixes - idx;
     }

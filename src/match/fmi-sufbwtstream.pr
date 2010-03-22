@@ -2,7 +2,7 @@
 extern "C" {
 #endif
 int sufbwt2fmindex(Fmindex *fmindex,
-                   Specialcharinfo *specialcharinfo,
+                   GtSpecialcharinfo *specialcharinfo,
                    unsigned int log2bsize,
                    unsigned int log2markdist,
                    const GtStr *outfmindex,

@@ -28,7 +28,7 @@
 
 #include "esa-map.h"
 
- DECLAREREADFUNCTION(Seqpos);
+ DECLAREREADFUNCTION(GtUlong);
 
  DECLAREREADFUNCTION(GtUchar);
 
@@ -36,7 +36,7 @@
 
 static void fillandinsert(Mergertrierep *trierep,
                           unsigned int idx,
-                          Seqpos suftabvalue,
+                          unsigned long suftabvalue,
                           Mergertrienode *node,
                           GT_UNUSED uint64_t ident)
 {
@@ -51,7 +51,7 @@ static void fillandinsert(Mergertrierep *trierep,
 }
 
 static int inputthesequences(unsigned int *numofchars,
-                             Seqpos *nextpostable,
+                             unsigned long *nextpostable,
                              Suffixarray *suffixarraytable,
                              const GtStrArray *indexnametab,
                              unsigned int demand,
@@ -85,19 +85,19 @@ static int inputthesequences(unsigned int *numofchars,
 }
 
 static int insertfirstsuffixes(Mergertrierep *trierep,
-                               Seqpos *nextpostable,
+                               unsigned long *nextpostable,
                                Suffixarray *suffixarraytable,
                                unsigned int numofindexes,
                                GtError *err)
 {
   unsigned int idx;
-  Seqpos suftabvalue;
+  unsigned long suftabvalue;
   int retval;
 
   gt_error_check(err);
   for (idx=0; idx<numofindexes; idx++)
   {
-    retval = readnextSeqposfromstream(&suftabvalue,
+    retval = readnextGtUlongfromstream(&suftabvalue,
                                       &suffixarraytable[idx].suftabstream);
     if (retval == 0)
     {
@@ -117,7 +117,7 @@ static int insertfirstsuffixes(Mergertrierep *trierep,
 
 /*@null@*/ static Mergertrienode *findlargestnodeleqlcpvalue(
                                           Mergertrienode *smallest,
-                                          Seqpos lcpvalue,
+                                          unsigned long lcpvalue,
                                           GtError *err)
 {
   Mergertrienode *tmp;
@@ -130,8 +130,8 @@ static int insertfirstsuffixes(Mergertrierep *trierep,
       return tmp;
     }
   }
-  gt_error_set(err,"path does not contain a node of depth <= " FormatSeqpos,
-                PRINTSeqposcast(lcpvalue));
+  gt_error_set(err,"path does not contain a node of depth <= %lu",
+                lcpvalue);
   return NULL;
 }
 
@@ -142,7 +142,7 @@ int emissionmergedesa_stepdeleteandinsertothersuffixes(
   Largelcpvalue tmpexception;
   GtUchar tmpsmalllcpvalue;
   int retval;
-  Seqpos tmpsuftabvalue,
+  unsigned long tmpsuftabvalue,
          tmplcpvalue,
          tmplastbranchdepth;
   unsigned int tmpidx;
@@ -197,14 +197,14 @@ int emissionmergedesa_stepdeleteandinsertothersuffixes(
         tmplcpvalue = tmpexception.value;
       } else
       {
-        tmplcpvalue = (Seqpos) tmpsmalllcpvalue;
+        tmplcpvalue = (unsigned long) tmpsmalllcpvalue;
       }
       if (tmplcpvalue > tmplastbranchdepth)
       {
         tmplastbranchdepth = tmplcpvalue;
       }
       tmplcpnode = findlargestnodeleqlcpvalue(tmpsmallestleaf,tmplcpvalue,err);
-      retval = readnextSeqposfromstream(&tmpsuftabvalue,
+      retval = readnextGtUlongfromstream(&tmpsuftabvalue,
                                         &emmesa->suffixarraytable[tmpidx].
                                         suftabstream);
       if (retval == 0)
@@ -251,7 +251,7 @@ int emissionmergedesa_init(Emissionmergedesa *emmesa,
   emmesa->ident = (uint64_t) numofindexes;
   emmesa->trierep.encseqreadinfo = NULL;
   ALLOCASSIGNSPACE(emmesa->suffixarraytable,NULL,Suffixarray,numofindexes);
-  ALLOCASSIGNSPACE(emmesa->nextpostable,NULL,Seqpos,numofindexes);
+  ALLOCASSIGNSPACE(emmesa->nextpostable,NULL,unsigned long,numofindexes);
   if (inputthesequences(&emmesa->numofchars,
                         emmesa->nextpostable,
                         emmesa->suffixarraytable,
@@ -276,7 +276,7 @@ int emissionmergedesa_init(Emissionmergedesa *emmesa,
       emmesa->trierep.encseqreadinfo[idx].readmode
         = emmesa->suffixarraytable[idx].readmode;
     }
-    mergertrie_initnodetable(&emmesa->trierep,(Seqpos) numofindexes,
+    mergertrie_initnodetable(&emmesa->trierep,(unsigned long) numofindexes,
                              numofindexes);
     if (insertfirstsuffixes(&emmesa->trierep,
                            emmesa->nextpostable,

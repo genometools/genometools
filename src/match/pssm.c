@@ -22,7 +22,7 @@
 #include "core/chardef.h"
 #include "core/ma_api.h"
 #include "core/arraydef.h"
-#include "core/seqpos.h"
+
 #include "spacedef.h"
 #include "core/encodedsequence.h"
 #include "absdfstrans-imp.h"
@@ -107,9 +107,9 @@ void lookaheadsearchPSSM(const GtEncodedsequence *encseq,
 {
   unsigned long firstpos, bufsize;
   GtUchar currentchar;
-  Seqpos pos;
+  unsigned long pos;
   GtEncodedsequenceScanstate *esr;
-  Seqpos totallength = gt_encodedsequence_total_length(encseq);
+  unsigned long totallength = gt_encodedsequence_total_length(encseq);
   GtUchar *buffer;
 
   esr = gt_encodedsequence_scanstate_new();

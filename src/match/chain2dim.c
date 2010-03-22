@@ -1574,10 +1574,10 @@ void gt_chain_extractchainelem(GtChainmatchvalues *value,
 void gt_chain_printchainelem(FILE *outfp,const GtChainmatchvalues *value)
 {
   fprintf(outfp,
-          FormatSeqpos " " FormatSeqpos " " FormatSeqpos " " FormatSeqpos
-          " %ld\n",PRINTSeqposcast(value->startpos[0]),
-                   PRINTSeqposcast(value->endpos[0]),
-                   PRINTSeqposcast(value->startpos[1]),
-                   PRINTSeqposcast(value->endpos[1]),
+          "%lu %lu %lu %lu"
+          " %ld\n",value->startpos[0],
+                   value->endpos[0],
+                   value->startpos[1],
+                   value->endpos[1],
                    value->weight);
 }

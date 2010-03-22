@@ -23,21 +23,21 @@
 #include "core/error.h"
 #include "core/intdef.h"
 #include "core/str_array.h"
-#include "defined-types.h"
-#include "core/seqpos.h"
+#include "core/defined-types.h"
+
 #include "core/encodedsequence.h"
 
 typedef unsigned long (*Greedygmatchforwardfunction) (const void *,
                                                       unsigned long offset,
-                                                      Seqpos left,
-                                                      Seqpos right,
-                                                      Seqpos *,
+                                                      unsigned long left,
+                                                      unsigned long right,
+                                                      unsigned long *,
                                                       const GtUchar *,
                                                       const GtUchar *);
 
 int findsubquerygmatchforward(const GtEncodedsequence *encseq,
                               const void *genericindex,
-                              Seqpos totallength,
+                              unsigned long totallength,
                               Greedygmatchforwardfunction gmatchforward,
                               const GtAlphabet *alphabet,
                               const GtStrArray *queryfilenames,
@@ -50,9 +50,9 @@ int findsubquerygmatchforward(const GtEncodedsequence *encseq,
 
 int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
                           const void *genericindex,
-                          Seqpos totalwidth,
-                          const Seqpos *leftborder,
-                          const Seqpos *countspecialcodes,
+                          unsigned long totalwidth,
+                          const unsigned long *leftborder,
+                          const unsigned long *countspecialcodes,
                           const GtAlphabet *alphabet,
                           unsigned int prefixlength,
                           const GtStrArray *queryfilenames,

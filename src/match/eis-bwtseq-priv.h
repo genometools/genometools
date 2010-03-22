@@ -38,8 +38,8 @@ struct BWTSeq
                                   * flattened into this symbol for
                                   * storage reasons */
   AlphabetRangeID bwtTerminatorFallbackRange;
-  Seqpos rot0Pos;
-  Seqpos *count;
+  unsigned long rot0Pos;
+  unsigned long *count;
   int featureToggles;
   unsigned bitsPerOrigRank;
   enum rangeSortMode *rangeSort;
@@ -49,12 +49,12 @@ struct BWTSeq
 struct BWTSeqExactMatchesIterator
 {
   struct matchBound bounds;
-  Seqpos nextMatchBWTPos;
+  unsigned long nextMatchBWTPos;
   struct extBitsRetrieval extBits;
 };
 
-extern Seqpos
-BWTSeqLocateMatch(const BWTSeq *bwtSeq, Seqpos pos,
+extern unsigned long
+BWTSeqLocateMatch(const BWTSeq *bwtSeq, unsigned long pos,
                   struct extBitsRetrieval *extBits);
 
 extern BWTSeq *

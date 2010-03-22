@@ -30,15 +30,15 @@ typedef struct MMsearchiterator MMsearchiterator;
 
 MMsearchiterator *newmmsearchiteratorcomplete_plain(
                                     const GtEncodedsequence *dbencseq,
-                                    const Seqpos *suftab,
-                                    Seqpos leftbound,
-                                    Seqpos rightbound,
-                                    Seqpos itvoffset,
+                                    const unsigned long *suftab,
+                                    unsigned long leftbound,
+                                    unsigned long rightbound,
+                                    unsigned long itvoffset,
                                     GtReadmode readmode,
                                     const GtUchar *pattern,
                                     unsigned long patternlength);
 
-bool nextmmsearchiterator(Seqpos *dbstart,MMsearchiterator *mmsi);
+bool nextmmsearchiterator(unsigned long *dbstart,MMsearchiterator *mmsi);
 
 bool isemptymmsearchiterator(const MMsearchiterator *mmsi);
 
@@ -65,7 +65,7 @@ int callenumselfmatches(const GtStr *indexname,
                         GtError *err);
 
 int sarrquerysubstringmatch(const GtUchar *dbseq,
-                            Seqpos dblen,
+                            unsigned long dblen,
                             const GtUchar *query,
                             unsigned long querylen,
                             unsigned int minlength,
@@ -75,6 +75,6 @@ int sarrquerysubstringmatch(const GtUchar *dbseq,
                             GtLogger *logger,
                             GtError *err);
 
-Seqpos countmmsearchiterator(const MMsearchiterator *mmsi);
+unsigned long countmmsearchiterator(const MMsearchiterator *mmsi);
 
 #endif

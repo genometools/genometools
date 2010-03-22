@@ -18,7 +18,7 @@
 #ifndef DIST_SHORT_H
 #define DIST_SHORT_H
 #include "core/symboldef.h"
-#include "defined-types.h"
+#include "core/defined-types.h"
 
 unsigned long distanceofshortstringsbytearray(unsigned long *eqsvector,
                                      unsigned int alphasize,
@@ -32,8 +32,8 @@ unsigned long distanceofshortstringsencseq(unsigned long *eqsvector,
                                            const GtUchar *useq,
                                            unsigned long ulen,
                                            const GtEncodedsequence *encseq,
-                                           Seqpos vstartpos,
-                                           Seqpos vlen);
+                                           unsigned long vstartpos,
+                                           unsigned long vlen);
 
 unsigned long reversesuffixmatch(unsigned long *eqsvector,
                                  unsigned int alphasize,
@@ -45,7 +45,7 @@ unsigned long reversesuffixmatch(unsigned long *eqsvector,
 
 Definedunsignedlong forwardprefixmatch(const GtEncodedsequence *encseq,
                                        unsigned int alphasize,
-                                       Seqpos startpos,
+                                       unsigned long startpos,
                                        bool nowildcards,
                                        unsigned long *eqsvector,
                                        const GtUchar *useq,
