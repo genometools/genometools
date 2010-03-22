@@ -182,7 +182,8 @@ typedef struct
   Containsspecialfunc delivercontainsspecial;
 } GtEncodedsequencefunctions;
 
-void plainseq2bytecode(GtUchar *bytecode,const GtUchar *seq,unsigned long len)
+void gt_encodedsequence_plainseq2bytecode(GtUchar *bytecode,const GtUchar *seq,
+                                          unsigned long len)
 {
   unsigned long j;
   const GtUchar *seqptr;
@@ -246,24 +247,31 @@ static void encseq2bytecode(GtUchar *dest,
   }
 }
 
-void sequence2bytecode(GtUchar *dest,const GtEncodedsequence *encseq,
-                       unsigned long startindex,unsigned long len)
+void gt_encodedsequence_sequence2bytecode(GtUchar *dest,
+                                          const GtEncodedsequence *encseq,
+                                          unsigned long startindex,
+                                          unsigned long len)
 {
   gt_assert(encseq->sat != Viabytecompress);
   if (encseq->sat == Viadirectaccess)
   {
-    plainseq2bytecode(dest,encseq->plainseq + startindex,(unsigned long) len);
+    gt_encodedsequence_plainseq2bytecode(dest,
+                                         encseq->plainseq + startindex,
+                                         len);
   } else
   {
     encseq2bytecode(dest,encseq,startindex,len);
   }
 }
 #else
-void sequence2bytecode(GtUchar *dest,const GtEncodedsequence *encseq,
-                       unsigned long startindex,unsigned long len)
+void gt_encodedsequence_sequence2bytecode(GtUchar *dest,
+                                          const GtEncodedsequence *encseq,
+                                          unsigned long startindex,
+                                          unsigned long len)
 {
   gt_assert(encseq->sat == Viadirectaccess);
-  plainseq2bytecode(dest,encseq->plainseq + startindex,(unsigned long) len);
+  gt_encodedsequence_plainseq2bytecode(dest,encseq->plainseq + startindex,
+                                       len);
 }
 #endif
 

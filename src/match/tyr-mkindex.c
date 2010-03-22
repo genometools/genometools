@@ -357,7 +357,7 @@ static int outputsortedstring2indexviafileptr(const GtEncodedsequence *encseq,
                                               unsigned long countoutputmers,
                                               GtError *err)
 {
-  sequence2bytecode(bytebuffer,encseq,position,(unsigned long) mersize);
+  gt_encodedsequence_sequence2bytecode(bytebuffer,encseq,position,mersize);
   if (fwrite(bytebuffer, sizeof (*bytebuffer),
              (size_t) sizeofbuffer,merindexfpout)
             != (size_t) sizeofbuffer)

@@ -74,10 +74,14 @@ int gt_encodedsequence_compare_twobitencodings(bool fwd,
                                             const GtEndofTwobitencoding *ptbe1,
                                             const GtEndofTwobitencoding *ptbe2);
 
-void plainseq2bytecode(GtUchar *bytecode,const GtUchar *seq,unsigned long len);
+void gt_encodedsequence_plainseq2bytecode(GtUchar *bytecode,
+                                          const GtUchar *seq,
+                                          unsigned long len);
 
-void sequence2bytecode(GtUchar *dest,const GtEncodedsequence *encseq,
-                       unsigned long startindex,unsigned long len);
+void gt_encodedsequence_sequence2bytecode(GtUchar *dest,
+                                          const GtEncodedsequence *encseq,
+                                          unsigned long startindex,
+                                          unsigned long len);
 
 int flushencseqfile(const GtStr *indexname,GtEncodedsequence *encseq,GtError*);
 

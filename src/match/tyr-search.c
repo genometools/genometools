@@ -72,7 +72,8 @@ void tyrsearchinfo_delete(Tyrsearchinfo *tyrsearchinfo)
 {
   const GtUchar *result;
 
-  plainseq2bytecode(tyrsearchinfo->bytecode,qptr,tyrsearchinfo->mersize);
+  gt_encodedsequence_plainseq2bytecode(tyrsearchinfo->bytecode,qptr,
+                                       tyrsearchinfo->mersize);
   if (tyrbckinfo == NULL)
   {
     result = tyrindex_binmersearch(tyrindex,0,tyrsearchinfo->bytecode,
