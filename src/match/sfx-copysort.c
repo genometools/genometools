@@ -165,12 +165,12 @@ static unsigned long *leftcontextofspecialchardist(unsigned int numofchars,
   }
   if (hasspecialranges(encseq))
   {
-    Specialrangeiterator *sri;
-    GtSequencerange range;
+    GtSpecialrangeiterator *sri;
+    GtRange range;
 
-    sri = newspecialrangeiterator(encseq,
+    sri = gt_specialrangeiterator_new(encseq,
                                   GT_ISDIRREVERSE(readmode) ? false : true);
-    while (nextspecialrangeiterator(&range,sri))
+    while (gt_specialrangeiterator_next(&range,sri))
     {
       printf("range %lu %lu\n",(unsigned long) range.leftpos,
                                (unsigned long) range.rightpos);
@@ -199,7 +199,7 @@ static unsigned long *leftcontextofspecialchardist(unsigned int numofchars,
         }
       }
     }
-    freespecialrangeiterator(&sri);
+    gt_specialrangeiterator_delete(&sri);
   }
   if (getencseqlengthofspecialsuffix(encseq) == 0)
   {
@@ -227,20 +227,20 @@ static unsigned long *leftcontextofspecialchardist(unsigned int numofchars,
   }
   if (hasspecialranges(encseq))
   {
-    Specialrangeiterator *sri;
-    GtSequencerange range;
+    GtSpecialrangeiterator *sri;
+    GtRange range;
 
-    sri = newspecialrangeiterator(encseq,true);
+    sri = gt_specialrangeiterator_new(encseq,true);
     if (GT_ISDIRREVERSE(readmode))
     {
       GtReadmode thismode =
                  (readmode == GT_READMODE_REVERSE) ? GT_READMODE_FORWARD
                                                     : GT_READMODE_COMPL;
-      while (nextspecialrangeiterator(&range,sri))
+      while (gt_specialrangeiterator_next(sri,&range))
       {
-        if (range.rightpos < totallength)
+        if (range.end < totallength)
         {
-          cc = gt_encodedsequence_getencodedchar(encseq,range.rightpos,
+          cc = gt_encodedsequence_getencodedchar(encseq,range.end,
                                                  thismode);
           if (ISNOTSPECIAL(cc))
           {
@@ -250,12 +250,12 @@ static unsigned long *leftcontextofspecialchardist(unsigned int numofchars,
       }
     } else
     {
-      while (nextspecialrangeiterator(&range,sri))
+      while (gt_specialrangeiterator_next(sri,&range))
       {
-        gt_assert(range.leftpos < totallength);
-        if (range.leftpos > 0)
+        gt_assert(range.start < totallength);
+        if (range.start > 0)
         {
-          cc = gt_encodedsequence_getencodedchar(encseq,range.leftpos-1,
+          cc = gt_encodedsequence_getencodedchar(encseq,range.start-1,
                                                  readmode);
           if (ISNOTSPECIAL(cc))
           {
@@ -264,7 +264,7 @@ static unsigned long *leftcontextofspecialchardist(unsigned int numofchars,
         }
       }
     }
-    freespecialrangeiterator(&sri);
+    gt_specialrangeiterator_delete(sri);
   }
   if (getencseqlengthofspecialsuffix(encseq) == 0)
   {

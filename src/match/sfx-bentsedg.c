@@ -140,7 +140,7 @@ struct Outlcpinfo
             ISNOTSPECIAL(TMPVAR = ACCESSCHAR(cptr))) ? ((unsigned long) TMPVAR)\
                                                      : UNIQUEINT(cptr))
 
-typedef EndofTwobitencoding Sfxcmp;
+typedef GtEndofTwobitencoding Sfxcmp;
 
 #define PTR2INT(VAR,IDXPTR)\
         {\
@@ -325,7 +325,7 @@ typedef struct
 
 typedef struct
 {
-  EndofTwobitencoding etbe;
+  GtEndofTwobitencoding etbe;
   Suffixptr *suffixptr;
 } Medianinfo;
 
@@ -1085,7 +1085,7 @@ static void sarrcountingsort(Bentsedgresources *bsr,
   int cmp;
   unsigned int maxsmallerwithlcp = 0, maxlargerwithlcp = 0;
   GtCommonunits commonunits;
-  EndofTwobitencoding etbecurrent;
+  GtEndofTwobitencoding etbecurrent;
   unsigned long idx, smaller = 0, larger = 0,
                 insertindex, end, equaloffset, currentwidth;
   Countingsortinfo *csiptr;

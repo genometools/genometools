@@ -181,8 +181,8 @@ static Lowerboundwithrank *filllowerboundwithrank(
 {
   if (hasspecialranges(encseq))
   {
-    Specialrangeiterator *sri;
-    GtSequencerange range;
+    GtSpecialrangeiterator *sri;
+    GtRange range;
     unsigned long currentrank = 0, realspecialranges;
     Lowerboundwithrank *lowerboundwithrank, *lbptr;
 
@@ -192,19 +192,19 @@ static Lowerboundwithrank *filllowerboundwithrank(
     printf("lowerboundwithrank requires %lu bytes\n",
                (unsigned long) (sizeof (*lowerboundwithrank) *
                                        realspecialranges));
-    sri = newspecialrangeiterator(encseq,
+    sri = gt_specialrangeiterator_new(encseq,
                                   GT_ISDIRREVERSE(readmode)
                                   ? false : true);
-    for (lbptr = lowerboundwithrank; nextspecialrangeiterator(&range,sri);
+    for (lbptr = lowerboundwithrank; gt_specialrangeiterator_next(&range,sri);
          lbptr++)
     {
       gt_assert(lbptr < lowerboundwithrank + realspecialranges);
-      lbptr->lowerbound = range.leftpos;
+      lbptr->lowerbound = range.start;
       lbptr->rank = currentrank;
-      currentrank += range.rightpos - range.leftpos;
+      currentrank += range.end - range.start;
     }
     gt_assert(lbptr == lowerboundwithrank + realspecialranges);
-    freespecialrangeiterator(&sri);
+    gt_specialrangeiterator_delete(&sri);
     return lowerboundwithrank;
   }
   return NULL;
@@ -631,24 +631,24 @@ static void initinversesuftabspecials(Rmnsufinfo *rmnsufinfo)
   inversesuftab_set(rmnsufinfo,rmnsufinfo->totallength,rmnsufinfo->totallength);
   if (hasspecialranges(rmnsufinfo->encseq))
   {
-    Specialrangeiterator *sri;
-    GtSequencerange range;
+    GtSpecialrangeiterator *sri;
+    GtRange range;
     unsigned long specialidx;
 
-    sri = newspecialrangeiterator(rmnsufinfo->encseq,
-                                  GT_ISDIRREVERSE(rmnsufinfo->readmode)
-                                  ? false : true);
+    sri = gt_specialrangeiterator_new(rmnsufinfo->encseq,
+                                      GT_ISDIRREVERSE(rmnsufinfo->readmode)
+                                      ? false : true);
     specialidx = rmnsufinfo->partwidth;
-    while (nextspecialrangeiterator(&range,sri))
+    while (gt_specialrangeiterator_next(sri,&range))
     {
-      for (idx = range.leftpos; idx < range.rightpos; idx++)
+      for (idx = range.start; idx < range.end; idx++)
       {
         inversesuftab_set(rmnsufinfo,idx,specialidx);
         specialidx++;
       }
     }
     gt_assert(specialidx == rmnsufinfo->totallength);
-    freespecialrangeiterator(&sri);
+    gt_specialrangeiterator_delete(sri);
   }
 }
 

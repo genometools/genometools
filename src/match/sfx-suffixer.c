@@ -71,8 +71,8 @@ struct Sfxiterator
                numofchars,
                prefixlength;
   GtArrayGtUlong fusp;
-  Specialrangeiterator *sri;
-  GtSequencerange overhang;
+  GtSpecialrangeiterator *sri;
+  GtRange overhang;
   bool exhausted;
   Bcktab *bcktab;
   Codetype numofallcodes;
@@ -426,7 +426,7 @@ void freeSfxiterator(Sfxiterator **sfiptr)
   }
   if (sfi->sri != NULL)
   {
-    freespecialrangeiterator(&sfi->sri);
+    gt_specialrangeiterator_delete(sfi->sri);
   }
   FREESPACE(sfi->spaceCodeatposition);
   FREESPACE(sfi->suftab.sortspace);
@@ -653,7 +653,7 @@ Sfxiterator *newSfxiterator(const GtEncodedsequence *encseq,
     sfi->suftab.longest.valueunsignedlong = 0;
     if (hasspecialranges(sfi->encseq))
     {
-      sfi->sri = newspecialrangeiterator(sfi->encseq,
+      sfi->sri = gt_specialrangeiterator_new(sfi->encseq,
                                          GT_ISDIRREVERSE(sfi->readmode)
                                            ? false : true);
     } else
@@ -662,7 +662,7 @@ Sfxiterator *newSfxiterator(const GtEncodedsequence *encseq,
     }
     sfi->fusp.spaceGtUlong = sfi->suftab.sortspace;
     sfi->fusp.allocatedGtUlong = stpgetlargestwidth(sfi->suftabparts);
-    sfi->overhang.leftpos = sfi->overhang.rightpos = 0;
+    sfi->overhang.start = sfi->overhang.end = 0;
   }
   if (haserr)
   {
@@ -921,14 +921,14 @@ static void insertfullspecialrange(Sfxiterator *sfi,
 
 static void fillspecialnextpage(Sfxiterator *sfi)
 {
-  GtSequencerange range;
+  GtRange range;
   unsigned long width;
 
   while (true)
   {
-    if (sfi->overhang.leftpos < sfi->overhang.rightpos)
+    if (sfi->overhang.start < sfi->overhang.end)
     {
-      width = sfi->overhang.rightpos - sfi->overhang.leftpos;
+      width = sfi->overhang.end - sfi->overhang.start;
       if (sfi->fusp.nextfreeGtUlong + width > sfi->fusp.allocatedGtUlong)
       {
         /* does not fit into the buffer, so only output a part */
@@ -937,33 +937,33 @@ static void fillspecialnextpage(Sfxiterator *sfi)
         gt_assert(rest > 0);
         if (GT_ISDIRREVERSE(sfi->readmode))
         {
-          insertfullspecialrange(sfi,sfi->overhang.leftpos + rest,
-                                 sfi->overhang.rightpos);
-          sfi->overhang.rightpos = sfi->overhang.leftpos + rest;
+          insertfullspecialrange(sfi,sfi->overhang.start + rest,
+                                 sfi->overhang.end);
+          sfi->overhang.end = sfi->overhang.start + rest;
         } else
         {
-          insertfullspecialrange(sfi,sfi->overhang.leftpos,
-                                     sfi->overhang.rightpos - rest);
-          sfi->overhang.leftpos = sfi->overhang.rightpos - rest;
+          insertfullspecialrange(sfi,sfi->overhang.start,
+                                     sfi->overhang.end - rest);
+          sfi->overhang.start = sfi->overhang.end - rest;
         }
         break;
       }
       if (sfi->fusp.nextfreeGtUlong + width == sfi->fusp.allocatedGtUlong)
       { /* overhang fits into the buffer and buffer is full */
-        insertfullspecialrange(sfi,sfi->overhang.leftpos,
-                               sfi->overhang.rightpos);
-        sfi->overhang.leftpos = sfi->overhang.rightpos = 0;
+        insertfullspecialrange(sfi,sfi->overhang.start,
+                               sfi->overhang.end);
+        sfi->overhang.start = sfi->overhang.end = 0;
         break;
       }
       /* overhang fits into the buffer and buffer is not full */
-      insertfullspecialrange(sfi,sfi->overhang.leftpos,
-                             sfi->overhang.rightpos);
-      sfi->overhang.leftpos = sfi->overhang.rightpos = 0;
+      insertfullspecialrange(sfi,sfi->overhang.start,
+                             sfi->overhang.end);
+      sfi->overhang.start = sfi->overhang.end = 0;
     } else
     {
-      if (sfi->sri != NULL && nextspecialrangeiterator(&range,sfi->sri))
+      if (sfi->sri != NULL && gt_specialrangeiterator_next(sfi->sri,&range))
       {
-        width = range.rightpos - range.leftpos;
+        width = range.end - range.start;
         gt_assert(width > 0);
         if (sfi->fusp.nextfreeGtUlong + width > sfi->fusp.allocatedGtUlong)
         { /* does not fit into the buffer, so only output a part */
@@ -971,26 +971,26 @@ static void fillspecialnextpage(Sfxiterator *sfi)
                                width - sfi->fusp.allocatedGtUlong;
           if (GT_ISDIRREVERSE(sfi->readmode))
           {
-            insertfullspecialrange(sfi,range.leftpos + rest,
-                                   range.rightpos);
-            sfi->overhang.leftpos = range.leftpos;
-            sfi->overhang.rightpos = range.leftpos + rest;
+            insertfullspecialrange(sfi,range.start + rest,
+                                   range.end);
+            sfi->overhang.start = range.start;
+            sfi->overhang.end = range.start + rest;
           } else
           {
-            insertfullspecialrange(sfi,range.leftpos,range.rightpos - rest);
-            sfi->overhang.leftpos = range.rightpos - rest;
-            sfi->overhang.rightpos = range.rightpos;
+            insertfullspecialrange(sfi,range.start,range.end - rest);
+            sfi->overhang.start = range.end - rest;
+            sfi->overhang.end = range.end;
           }
           break;
         }
         if (sfi->fusp.nextfreeGtUlong + width == sfi->fusp.allocatedGtUlong)
         { /* overhang fits into the buffer and buffer is full */
-          insertfullspecialrange(sfi,range.leftpos,range.rightpos);
-          sfi->overhang.leftpos = sfi->overhang.rightpos = 0;
+          insertfullspecialrange(sfi,range.start,range.end);
+          sfi->overhang.start = sfi->overhang.end = 0;
           break;
         }
-        insertfullspecialrange(sfi,range.leftpos,range.rightpos);
-        sfi->overhang.leftpos = sfi->overhang.rightpos = 0;
+        insertfullspecialrange(sfi,range.start,range.end);
+        sfi->overhang.start = sfi->overhang.end = 0;
       } else
       {
         if (sfi->fusp.nextfreeGtUlong < sfi->fusp.allocatedGtUlong)

@@ -35,33 +35,35 @@ Rankedbounds *fillrankbounds(const GtEncodedsequence *encseq,
 {
   if (hasspecialranges(encseq))
   {
-    Specialrangeiterator *sri;
-    GtSequencerange range;
+    GtSpecialrangeiterator *sri;
+    GtRange range;
     unsigned long currentrank = 0, realspecialranges;
     Rankedbounds *rankedbounds, *rbptr;
 
     realspecialranges = getencseqrealspecialranges(encseq);
     rankedbounds = gt_malloc(sizeof (Rankedbounds) * realspecialranges);
-    sri = newspecialrangeiterator(encseq,
-                                  GT_ISDIRREVERSE(readmode)
-                                  ? false : true);
-    for (rbptr = rankedbounds; nextspecialrangeiterator(&range,sri); rbptr++)
+    sri = gt_specialrangeiterator_new(encseq,
+                                      GT_ISDIRREVERSE(readmode)
+                                      ? false : true);
+    for (rbptr = rankedbounds;
+         gt_specialrangeiterator_next(sri,&range);
+         rbptr++)
     {
-      rbptr->lowerbound = range.leftpos;
-      rbptr->upperbound = range.rightpos;
+      rbptr->lowerbound = range.start;
+      rbptr->upperbound = range.end;
       rbptr->rank = currentrank;
       currentrank += rbptr->upperbound - rbptr->lowerbound;
     }
     gt_assert(rbptr == rankedbounds + realspecialranges);
-    freespecialrangeiterator(&sri);
+    gt_specialrangeiterator_delete(sri);
     return rankedbounds;
   }
   return NULL;
 }
 
 unsigned long frompos2rank(const Rankedbounds *leftptr,
-                    const Rankedbounds *rightptr,
-                    unsigned long specialpos)
+                           const Rankedbounds *rightptr,
+                           unsigned long specialpos)
 {
   const Rankedbounds *midptr;
 
@@ -91,8 +93,8 @@ unsigned long frompos2rank(const Rankedbounds *leftptr,
 }
 
 unsigned long fromrank2pos(const Rankedbounds *leftptr,
-                    const Rankedbounds *rightptr,
-                    unsigned long rank)
+                           const Rankedbounds *rightptr,
+                           unsigned long rank)
 {
   const Rankedbounds *midptr;
 
@@ -150,30 +152,30 @@ Specialrank *fillspecialranklist(const GtEncodedsequence *encseq,
 {
   if (hasspecialranges(encseq))
   {
-    Specialrangeiterator *sri;
-    GtSequencerange range;
+    GtSpecialrangeiterator *sri;
+    GtRange range;
     unsigned long realspecialranges, specialrank, totallength;
     Specialrank *specialranklist, *rbptr;
 
     totallength = gt_encodedsequence_total_length(encseq);
     realspecialranges = getencseqrealspecialranges(encseq);
     specialranklist = gt_malloc(sizeof (Specialrank) * realspecialranges);
-    sri = newspecialrangeiterator(encseq,
+    sri = gt_specialrangeiterator_new(encseq,
                                   GT_ISDIRREVERSE(readmode)
                                   ? false : true);
     rbptr = specialranklist;
     specialrank = 0;
-    while (nextspecialrangeiterator(&range,sri))
+    while (gt_specialrangeiterator_next(sri,&range))
     {
       gt_assert(rbptr < specialranklist + realspecialranges);
-      gt_assert(range.rightpos<=totallength);
-      specialrank += range.rightpos - range.leftpos;
+      gt_assert(range.end<=totallength);
+      specialrank += range.end - range.start;
       rbptr->specialrank = specialrank - 1;
-      rbptr->key = inversesuftab[range.rightpos];
+      rbptr->key = inversesuftab[range.end];
       rbptr++;
     }
     gt_assert(rbptr == specialranklist + realspecialranges);
-    freespecialrangeiterator(&sri);
+    gt_specialrangeiterator_delete(sri);
     qsort(specialranklist,(size_t) realspecialranges,
           sizeof (Specialrank),compareSpecialrank);
     return specialranklist;

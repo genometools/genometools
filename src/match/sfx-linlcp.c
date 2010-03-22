@@ -82,10 +82,10 @@ static unsigned long *computeocclesstab(const GtEncodedsequence *encseq)
 }
 
 /* for computing the ranknext-values of special positions, we only
-   need the values inversesuftab[range.rightpos] in this order,
+   need the values inversesuftab[range.end] in this order,
    where range is a special range
-   Now, if range.rightpos = suffixarray[i] for some i, then
-   inversesuftab[range.rightpos] = inversesuftab[suffixarray[i]] = i.
+   Now, if range.end = suffixarray[i] for some i, then
+   inversesuftab[range.end] = inversesuftab[suffixarray[i]] = i.
    Thus, in case where the inversesuftab is not available,
    we obtain these values by the following function:
 */
@@ -122,17 +122,17 @@ static unsigned long *fillrightofpartwidth(
                                          unsigned long partwidth,
                                          unsigned long totallength)
 {
-  Specialrangeiterator *sri;
-  GtSequencerange range;
+  GtSpecialrangeiterator *sri;
+  GtRange range;
   unsigned long realspecialranges, *rightofpartwidth = NULL;
   unsigned long countranges = 0, nextrightofpartwidth = 0;
 
   realspecialranges = getencseqrealspecialranges(encseq);
-  sri = newspecialrangeiterator(encseq,
+  sri = gt_specialrangeiterator_new(encseq,
                                 GT_ISDIRREVERSE(readmode) ? false : true);
-  while (nextspecialrangeiterator(&range,sri))
+  while (gt_specialrangeiterator_next(sri,&range))
   {
-    if (range.rightpos < partwidth)
+    if (range.end < partwidth)
     {
       countranges++;
     } else
@@ -150,10 +150,10 @@ static unsigned long *fillrightofpartwidth(
                    && (unsigned long) nextrightofpartwidth <
                       (realspecialranges - countranges));
       rightofpartwidth[nextrightofpartwidth++]
-        = compressedtable_get(rightposinverse,range.rightpos);
+        = compressedtable_get(rightposinverse,range.end);
     }
   }
-  freespecialrangeiterator(&sri);
+  gt_specialrangeiterator_delete(sri);
   return rightofpartwidth;
 }
 
@@ -167,8 +167,8 @@ static void inversesuffixarray2specialranknext(
 {
   if (hasspecialranges(encseq))
   {
-    Specialrangeiterator *sri;
-    GtSequencerange range;
+    GtSpecialrangeiterator *sri;
+    GtRange range;
     unsigned long specialcharacters, idx, *rightofpartwidth = NULL;
     unsigned long specialranklistindex, nextrightofpartwidth = 0;
 
@@ -179,13 +179,13 @@ static void inversesuffixarray2specialranknext(
                                             totallength);
     specialcharacters = getencseqspecialcharacters(encseq);
     specialranklistindex = partwidth;
-    sri = newspecialrangeiterator(encseq,
-                                  GT_ISDIRREVERSE(readmode) ? false : true);
+    sri = gt_specialrangeiterator_new(encseq,
+                                      GT_ISDIRREVERSE(readmode) ? false : true);
     nextrightofpartwidth = 0;
-    while (nextspecialrangeiterator(&range,sri))
+    while (gt_specialrangeiterator_next(sri,&range))
     {
-      gt_assert(range.rightpos <= totallength);
-      for (idx = range.leftpos; idx < range.rightpos-1; idx++)
+      gt_assert(range.end <= totallength);
+      for (idx = range.start; idx < range.end-1; idx++)
       {
         gt_assert(specialranklistindex < totallength);
         compressedtable_update(ranknext,specialranklistindex,
@@ -193,16 +193,16 @@ static void inversesuffixarray2specialranknext(
         specialranklistindex++;
       }
       gt_assert(specialranklistindex < totallength);
-      if (range.rightpos < partwidth)
+      if (range.end < partwidth)
       {
         compressedtable_update(ranknext,specialranklistindex,
                                compressedtable_get(rightposinverse,
-                                                   range.rightpos));
+                                                   range.end));
         /*
         printf("(2) set ranknext[%lu] = %lu = rightposinverse[%lu]\n",
                   (unsigned long) specialranklistindex,
                   (unsigned long) ranknext[specialranklistindex],
-                  (unsigned long) range.rightpos);
+                  (unsigned long) range.end);
         fflush(stdout);
         */
       } else
@@ -215,7 +215,7 @@ static void inversesuffixarray2specialranknext(
     }
     gt_free(rightofpartwidth);
     gt_assert(specialranklistindex == totallength);
-    freespecialrangeiterator(&sri);
+    gt_specialrangeiterator_delete(sri);
   }
 }
 
@@ -259,17 +259,17 @@ static unsigned long sa2ranknext(Compressedtable *ranknext,
   }
   if (hasspecialranges(encseq))
   {
-    Specialrangeiterator *sri;
-    GtSequencerange range;
+    GtSpecialrangeiterator *sri;
+    GtRange range;
     unsigned long specialidx, specialpos;
 
-    sri = newspecialrangeiterator(encseq,
+    sri = gt_specialrangeiterator_new(encseq,
                                   GT_ISDIRREVERSE(readmode) ? false : true);
     gt_assert(partwidth > 0); /* otherwise all lcps would be 0 */
     specialidx = partwidth;
-    while (nextspecialrangeiterator(&range,sri))
+    while (gt_specialrangeiterator_next(sri,&range))
     {
-      for (specialpos = range.leftpos; specialpos < range.rightpos;
+      for (specialpos = range.start; specialpos < range.end;
            specialpos++)
       {
         if (specialpos > 0)
@@ -295,7 +295,7 @@ static unsigned long sa2ranknext(Compressedtable *ranknext,
     {
       compressedtable_update(ranknext,totallength-1,totallength);
     }
-    freespecialrangeiterator(&sri);
+    gt_specialrangeiterator_delete(sri);
   }
   gt_free(occless);
   return longest;

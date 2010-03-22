@@ -239,41 +239,41 @@ int testencodedsequence(const GtStrArray *filenametab,
   return testfullscan(filenametab,encseq,readmode,err);
 }
 
-static void makeerrormsg(const GtSequencerange *vala,
-                         const GtSequencerange *valb,
+static void makeerrormsg(const GtRange *vala,
+                         const GtRange *valb,
                          const char *cmpflag)
 {
   fprintf(stderr,
                 "(%lu,%lu) %s (%lu,%lu)\n",
-                vala->leftpos,
-                vala->rightpos,
+                vala->start,
+                vala->end,
                 cmpflag,
-                valb->leftpos,
-                valb->rightpos);
+                valb->start,
+                valb->end);
 }
 
-static int compareGtSequencerange(const void *a,const void *b)
+static int compareGtRange(const void *a,const void *b)
 {
-  const GtSequencerange *vala, *valb;
+  const GtRange *vala, *valb;
 
-  vala = (GtSequencerange *) a;
-  valb = (GtSequencerange *) b;
-  if (vala->leftpos < valb->leftpos)
+  vala = (GtRange *) a;
+  valb = (GtRange *) b;
+  if (vala->start < valb->start)
   {
     makeerrormsg(vala,valb,"<");
     return -1;
   }
-  if (vala->leftpos > valb->leftpos)
+  if (vala->start > valb->start)
   {
     makeerrormsg(vala,valb,">");
     return 1;
   }
-  if (vala->rightpos < valb->rightpos)
+  if (vala->end < valb->end)
   {
     makeerrormsg(vala,valb,"<");
     return -1;
   }
-  if (vala->rightpos > valb->rightpos)
+  if (vala->end > valb->end)
   {
     makeerrormsg(vala,valb,">");
     return 1;
@@ -285,33 +285,33 @@ int checkspecialrangesfast(const GtEncodedsequence *encseq)
 {
   GtArray *rangesforward, *rangesbackward;
   bool haserr = false;
-  Specialrangeiterator *sri;
-  GtSequencerange range;
+  GtSpecialrangeiterator *sri;
+  GtRange range;
 
   if (!hasspecialranges(encseq))
   {
     return 0;
   }
-  rangesforward = gt_array_new(sizeof (GtSequencerange));
-  rangesbackward = gt_array_new(sizeof (GtSequencerange));
+  rangesforward = gt_array_new(sizeof (GtRange));
+  rangesbackward = gt_array_new(sizeof (GtRange));
 
-  sri = newspecialrangeiterator(encseq,true);
-  while (nextspecialrangeiterator(&range,sri))
+  sri = gt_specialrangeiterator_new(encseq,true);
+  while (gt_specialrangeiterator_next(sri,&range))
   {
     gt_array_add(rangesforward,range);
   }
-  freespecialrangeiterator(&sri);
-  sri = newspecialrangeiterator(encseq,false);
-  while (nextspecialrangeiterator(&range,sri))
+  gt_specialrangeiterator_delete(sri);
+  sri = gt_specialrangeiterator_new(encseq,false);
+  while (gt_specialrangeiterator_next(sri,&range))
   {
     gt_array_add(rangesbackward,range);
   }
-  freespecialrangeiterator(&sri);
+  gt_specialrangeiterator_delete(sri);
   gt_array_reverse(rangesbackward);
   if (!haserr)
   {
     if (array_compare(rangesforward,rangesbackward,
-                      compareGtSequencerange) != 0)
+                      compareGtRange) != 0)
     {
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }

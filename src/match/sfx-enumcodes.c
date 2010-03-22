@@ -27,8 +27,8 @@
 
 struct Enumcodeatposition
 {
-  GtSequencerange previousrange;
-  Specialrangeiterator *sri;
+  GtRange previousrange;
+  GtSpecialrangeiterator *sri;
   bool moveforward;
   unsigned long totallength;
   bool exhausted;
@@ -55,15 +55,15 @@ Enumcodeatposition *newEnumcodeatposition(const GtEncodedsequence *encseq,
   ecp->totallength = gt_encodedsequence_total_length(encseq);
   if (ecp->moveforward)
   {
-    ecp->previousrange.leftpos = ecp->previousrange.rightpos = 0;
+    ecp->previousrange.start = ecp->previousrange.end = 0;
   } else
   {
-    ecp->previousrange.leftpos = ecp->previousrange.rightpos = ecp->totallength;
+    ecp->previousrange.start = ecp->previousrange.end = ecp->totallength;
   }
   ecp->exhausted = false;
   if (hasspecialranges(encseq))
   {
-    ecp->sri = newspecialrangeiterator(encseq,ecp->moveforward);
+    ecp->sri = gt_specialrangeiterator_new(encseq,ecp->moveforward);
   } else
   {
     ecp->sri = NULL;
@@ -102,7 +102,7 @@ static bool newcodelistelem(Specialcontext *specialcontext,
 bool nextEnumcodeatposition(Specialcontext *specialcontext,
                             Enumcodeatposition *ecp)
 {
-  GtSequencerange currentrange;
+  GtRange currentrange;
   bool done;
 
   if (ecp->exhausted)
@@ -111,17 +111,17 @@ bool nextEnumcodeatposition(Specialcontext *specialcontext,
   }
   while (ecp->sri != NULL)
   {
-    if (!nextspecialrangeiterator(&currentrange,ecp->sri))
+    if (!gt_specialrangeiterator_next(ecp->sri,&currentrange))
     {
-      freespecialrangeiterator(&ecp->sri);
+      gt_specialrangeiterator_delete(ecp->sri);
       ecp->sri = NULL;
       break;
     }
     if (ecp->moveforward)
     {
       if (newcodelistelem(specialcontext,
-                          ecp->previousrange.rightpos,
-                          currentrange.leftpos,
+                          ecp->previousrange.end,
+                          currentrange.start,
                           ecp))
       {
         ecp->previousrange = currentrange;
@@ -130,8 +130,8 @@ bool nextEnumcodeatposition(Specialcontext *specialcontext,
     } else
     {
       if (newcodelistelem(specialcontext,
-                          currentrange.rightpos,
-                          ecp->previousrange.leftpos,
+                          currentrange.end,
+                          ecp->previousrange.start,
                           ecp))
       {
         ecp->previousrange = currentrange;
@@ -144,14 +144,14 @@ bool nextEnumcodeatposition(Specialcontext *specialcontext,
   if (ecp->moveforward)
   {
     done = newcodelistelem(specialcontext,
-                           ecp->previousrange.rightpos,
+                           ecp->previousrange.end,
                            ecp->totallength,
                            ecp);
   } else
   {
     done = newcodelistelem(specialcontext,
                            0,
-                           ecp->previousrange.leftpos,
+                           ecp->previousrange.start,
                            ecp);
   }
   return done;

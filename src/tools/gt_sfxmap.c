@@ -51,33 +51,33 @@ DECLAREREADFUNCTION(GtUchar);
 static void deletethespranges(const GtEncodedsequence *encseq,
                               unsigned long delspranges)
 {
-  Specialrangeiterator *sri;
-  GtSequencerange range;
+  GtSpecialrangeiterator *sri;
+  GtRange range;
   unsigned long rangewidth, nextpos = 0, totallength;
   const unsigned long fastawidth = 70UL;
 
-  sri = newspecialrangeiterator(encseq,true);
+  sri = gt_specialrangeiterator_new(encseq,true);
   printf(">\n");
-  while (nextspecialrangeiterator(&range,sri))
+  while (gt_specialrangeiterator_next(sri,&range))
   {
-    gt_assert(range.rightpos > range.leftpos);
-    rangewidth = range.rightpos - range.leftpos;
+    gt_assert(range.end > range.start);
+    rangewidth = range.end - range.start;
     if (rangewidth > (unsigned long) delspranges)
     {
-      if (range.leftpos == 0)
+      if (range.start == 0)
       {
-        nextpos = range.rightpos;
+        nextpos = range.end;
       } else
       {
-        if (range.leftpos > nextpos)
+        if (range.start > nextpos)
         {
           encseq2symbolstring(stdout,
                               encseq,
                               GT_READMODE_FORWARD,
                               nextpos,
-                              range.leftpos + delspranges - nextpos,
+                              range.start + delspranges - nextpos,
                               fastawidth);
-          nextpos = range.rightpos;
+          nextpos = range.end;
         }
       }
     }
@@ -92,7 +92,7 @@ static void deletethespranges(const GtEncodedsequence *encseq,
                         totallength - nextpos,
                         fastawidth);
   }
-  freespecialrangeiterator(&sri);
+  gt_specialrangeiterator_delete(sri);
 }
 
 static GtOPrval parse_options(Sfxmapoptions *sfxmapoptions,

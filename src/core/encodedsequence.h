@@ -27,48 +27,36 @@
 #include "core/filelengthvalues.h"
 #include "core/disc_distri.h"
 #include "core/encodedsequence_api.h"
-
-#include "match/intcode-def.h"
 #include "core/intbits.h"
-#include "core/readmode.h"
 #include "core/logger.h"
-
-#ifdef SKDEBUG
-#define GT_CHECKENCCHAR(CC,ENCSEQ,POS,READMODE)\
-        {\
-          GtUchar cctmp = gt_encodedsequence_getencodedchar(ENCSEQ,POS, \
-                                                            READMODE);\
-          if ((CC) != cctmp)\
-          {\
-            printf("file %s, line %d: pos = %lu:cc = %u != %u = ccreal\n",\
-                   __FILE__,__LINE__,\
-                   (unsigned long) (POS),\
-                   (unsigned int) (CC),\
-                   (unsigned int) cctmp);\
-            exit(GT_EXIT_PROGRAMMING_ERROR);\
-          }\
-        }
-#else
-#define GT_CHECKENCCHAR(CC,ENCSEQ,POS,READMODE)
-#endif
-
-typedef struct
-{
-  unsigned long leftpos,
-         rightpos;
-} GtSequencerange;          /* \Typedef{Sequencerange} */
+#include "core/range.h"
+#include "core/readmode.h"
+#include "match/intcode-def.h"
 
 typedef struct
 {
   Twobitencoding tbe;           /* two bit encoding */
   unsigned int unitsnotspecial; /* units which are not special */
   unsigned long position;
-} EndofTwobitencoding;
+} GtEndofTwobitencoding;
 
-typedef struct Specialrangeiterator Specialrangeiterator;
+/* GtSpecialrangeiterator */
+
+typedef struct GtSpecialrangeiterator GtSpecialrangeiterator;
+
+GtSpecialrangeiterator *
+     gt_specialrangeiterator_new(const GtEncodedsequence *encseq,
+                                 bool moveforward);
+
+bool gt_specialrangeiterator_next(GtSpecialrangeiterator *sri,
+                                  GtRange *range);
+
+void gt_specialrangeiterator_delete(GtSpecialrangeiterator *sri);
+
+/* XXX: clean up interface funcs below */
 
 void extract2bitenc(bool fwd,
-                    EndofTwobitencoding *ptbe,
+                    GtEndofTwobitencoding *ptbe,
                     const GtEncodedsequence *encseq,
                     GtEncodedsequenceScanstate *esr,
                     unsigned long startpos);
@@ -83,8 +71,8 @@ typedef struct
 int compareTwobitencodings(bool fwd,
                            bool complement,
                            GtCommonunits *commonunits,
-                           const EndofTwobitencoding *ptbe1,
-                           const EndofTwobitencoding *ptbe2);
+                           const GtEndofTwobitencoding *ptbe1,
+                           const GtEndofTwobitencoding *ptbe2);
 
 uint64_t detencseqofsatviatables(int kind,
                                  unsigned long totallength,
@@ -110,18 +98,11 @@ GtEncodedsequence *plain2encodedsequence(bool withrange,
                                          const GtAlphabet *alpha,
                                          GtLogger *logger);
 
-Specialrangeiterator *newspecialrangeiterator(const GtEncodedsequence *encseq,
-                                              bool moveforward);
-
 bool hasspecialranges(const GtEncodedsequence *encseq);
 
 bool hasfastspecialrangeenumerator(const GtEncodedsequence *encseq);
 
 bool possibletocmpbitwise(const GtEncodedsequence *encseq);
-
-bool nextspecialrangeiterator(GtSequencerange *range,Specialrangeiterator *sri);
-
-void freespecialrangeiterator(Specialrangeiterator **sri);
 
 /*@null@*/ const char *encseqaccessname(const GtEncodedsequence *encseq);
 

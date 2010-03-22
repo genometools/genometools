@@ -22,13 +22,14 @@
 #include <stdbool.h>
 #include "core/assert_api.h"
 #include "core/chardef.h"
+#include "core/checkencchar.h"
+#include "core/encodedsequence.h"
 #include "core/error.h"
 #include "core/sequence_buffer_fasta.h"
 #include "core/sequence_buffer_plain.h"
 #include "core/str_array.h"
 #include "spacedef.h"
 #include "intcode-def.h"
-#include "core/encodedsequence.h"
 #include "stamp.h"
 #ifdef SKDEBUG
 #include "sfx-nextchar.h"

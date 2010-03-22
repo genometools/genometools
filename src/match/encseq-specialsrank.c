@@ -74,21 +74,21 @@ allocEmptySpecialsRankLookup(const GtEncodedsequence *encseq,
 }
 
 static inline bool
-nextRange(GtSequencerange *range, Specialrangeiterator *sri,
+nextRange(GtRange *range, GtSpecialrangeiterator *sri,
           GtReadmode readmode, unsigned long seqLastPos)
 {
-  bool hasNextRange = nextspecialrangeiterator(range, sri);
+  bool hasNextRange = gt_specialrangeiterator_next(sri, range);
   if (hasNextRange)
   {
     if (GT_ISDIRREVERSE(readmode))
     {
-      unsigned long temp = range->rightpos;
-      range->rightpos = seqLastPos - range->leftpos;
-      range->leftpos = seqLastPos - temp;
+      unsigned long temp = range->end;
+      range->end = seqLastPos - range->start;
+      range->start = seqLastPos - temp;
     }
   }
   else
-    range->rightpos = seqLastPos + 1, range->leftpos = seqLastPos;
+    range->end = seqLastPos + 1, range->start = seqLastPos;
   return hasNextRange;
 }
 
@@ -107,13 +107,13 @@ newSpecialsRankLookup(const GtEncodedsequence *encseq, GtReadmode readmode,
   {
     /* this sequence has some special characters */
     struct specialsRankTable *rankTable;
-    Specialrangeiterator *sri;
+    GtSpecialrangeiterator *sri;
     unsigned long *sample, *maxSample, sum = 0, pos = 0, nextSamplePos;
-    GtSequencerange range = { 0, 0 };
+    GtRange range = { 0, 0 };
     ranker = allocSpecialsRankTable(encseq, seqLen, sampleIntervalLog2,
                                     readmode);
     rankTable = &ranker->implementationData.sampleTable;
-    sri = newspecialrangeiterator(encseq, !GT_ISDIRREVERSE(readmode));
+    sri = gt_specialrangeiterator_new(encseq, !GT_ISDIRREVERSE(readmode));
     sample = rankTable->rankSumSamples;
     maxSample = sample + rankTable->numSamples;
     *sample++ = sum;
@@ -123,9 +123,9 @@ newSpecialsRankLookup(const GtEncodedsequence *encseq, GtReadmode readmode,
     {
       while (pos < nextSamplePos)
       {
-        pos = MIN(MAX(pos, range.leftpos), nextSamplePos);
-        sum += MIN(range.rightpos - pos, nextSamplePos - pos);
-        pos = MIN(range.rightpos, nextSamplePos);
+        pos = MIN(MAX(pos, range.start), nextSamplePos);
+        sum += MIN(range.end - pos, nextSamplePos - pos);
+        pos = MIN(range.end, nextSamplePos);
         if (pos < nextSamplePos)
         {
           nextRange(&range, sri, readmode, seqLastPos);
@@ -134,7 +134,8 @@ newSpecialsRankLookup(const GtEncodedsequence *encseq, GtReadmode readmode,
       *sample++ = sum;
       nextSamplePos += sampleInterval;
     }
-    freespecialrangeiterator(&sri);
+    gt_specialrangeiterator_delete(sri);
+    sri = NULL;
   }
   else
   {

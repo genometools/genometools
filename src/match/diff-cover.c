@@ -559,15 +559,15 @@ static void initinversesuftabspecials(Differencecover *dcov)
                                   dcov->maxsamplesize);
   if (hasspecialranges(dcov->encseq))
   {
-    Specialrangeiterator *sri;
-    GtSequencerange range;
+    GtSpecialrangeiterator *sri;
+    GtRange range;
     unsigned long specialidx;
 
-    sri = newspecialrangeiterator(dcov->encseq,
+    sri = gt_specialrangeiterator_new(dcov->encseq,
                                   GT_ISDIRREVERSE(dcov->readmode)
                                   ? false : true);
     specialidx = dcov->effectivesamplesize;
-    while (nextspecialrangeiterator(&range,sri))
+    while (gt_specialrangeiterator_next(sri,&range))
     {
       /*
       printf("specialrange %lu %lu\n",(unsigned long) range.leftpos,
@@ -575,10 +575,11 @@ static void initinversesuftabspecials(Differencecover *dcov)
       */
       specialidx = insertfullspecialrangesample(dcov,
                                                 specialidx,
-                                                range.leftpos,
-                                                range.rightpos);
+                                                range.start,
+                                                range.end);
     }
-    freespecialrangeiterator(&sri);
+    gt_specialrangeiterator_delete(sri);
+    sri = NULL;
   }
   if (checkifindifferencecover(dcov,MODV(dcov->totallength)))
   {

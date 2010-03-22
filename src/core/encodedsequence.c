@@ -26,6 +26,7 @@
 #include "core/arraydef.h"
 #include "core/bitpackarray.h"
 #include "core/chardef.h"
+#include "core/checkencchar.h"
 #include "core/divmodmul.h"
 #include "core/error.h"
 #include "core/fa.h"
@@ -389,7 +390,7 @@ struct GtEncodedsequenceScanstate
                 lastcell,  /* last index of tables with startpos and length */
                 nextpage,  /* next page to be used */
                 numofspecialcells; /* number of pages */
-  GtSequencerange previousrange,  /* previous range of wildcards */
+  GtRange previousrange,  /* previous range of wildcards */
                 currentrange;   /* current range of wildcards */
   bool moveforward,
        morepagesleft,
@@ -471,16 +472,16 @@ bool containsspecial(const GtEncodedsequence *encseq,
 #undef RANGEDEBUG
 
 #ifdef RANGEDEBUG
-static void showsequencerange(const GtSequencerange *range)
+static void showsequencerange(const GtRange *range)
 {
-  if (range->leftpos + 1 == range->rightpos)
+  if (range->start + 1 == range->end)
   {
-    printf(FormatSeqpos,PRINTSeqposcast(range->leftpos));
+    printf(FormatSeqpos,PRINTSeqposcast(range->start));
   } else
   {
     printf(FormatSeqpos "," FormatSeqpos,
-           PRINTSeqposcast(range->leftpos),
-           PRINTSeqposcast(range->rightpos));
+           PRINTSeqposcast(range->start),
+           PRINTSeqposcast(range->end));
   }
 }
 #endif
@@ -1537,7 +1538,7 @@ static void showspecialpositionswithpages(const GtEncodedsequence *encseq,
 {
   unsigned long idx;
   unsigned long startpos;
-  GtSequencerange range;
+  GtRange range;
 
   printf("page %lu: %lu elems at offset " FormatSeqpos "\n",
           pgnum,
@@ -1546,8 +1547,8 @@ static void showspecialpositionswithpages(const GtEncodedsequence *encseq,
   for (idx=first; idx<=last; idx++)
   {
     startpos = accessspecialpositions(encseq,idx);
-    range.leftpos = offset + startpos;
-    range.rightpos = range.leftpos + accessspecialrangelength(encseq,idx) + 1;
+    range.start = offset + startpos;
+    range.end = range.start + accessspecialrangelength(encseq,idx) + 1;
     printf("%lu: ",idx);
     showsequencerange(&range);
     printf("\n");
@@ -1641,15 +1642,15 @@ static bool nextnonemptypage(const GtEncodedsequence *encseq,
   return false;
 }
 
-static void determinerange(GtSequencerange *range,
+static void determinerange(GtRange *range,
                            const GtEncodedsequence *encseq,
                            unsigned long transpagenum,
                            unsigned long cellnum)
 {
-  range->leftpos = (unsigned long) transpagenum *
+  range->start = (unsigned long) transpagenum *
                    (1 + (unsigned long) encseq->maxspecialtype) +
                    accessspecialpositions(encseq,cellnum);
-  range->rightpos = range->leftpos +
+  range->end = range->start +
                     accessspecialrangelength(encseq,cellnum) + 1;
 }
 
@@ -1703,9 +1704,9 @@ static void advanceEncodedseqstate(const GtEncodedsequence *encseq,
     {
       if (moveforward)
       {
-        if (esr->previousrange.rightpos == esr->currentrange.leftpos)
+        if (esr->previousrange.end == esr->currentrange.start)
         {
-          esr->previousrange.rightpos = esr->currentrange.rightpos;
+          esr->previousrange.end = esr->currentrange.end;
           esr->hascurrent = false;
         } else
         {
@@ -1714,9 +1715,9 @@ static void advanceEncodedseqstate(const GtEncodedsequence *encseq,
         }
       } else
       {
-        if (esr->currentrange.rightpos == esr->previousrange.leftpos)
+        if (esr->currentrange.end == esr->previousrange.start)
         {
-          esr->previousrange.leftpos = esr->currentrange.leftpos;
+          esr->previousrange.start = esr->currentrange.start;
           esr->hascurrent = false;
         } else
         {
@@ -1758,7 +1759,7 @@ static void binpreparenextrange(const GtEncodedsequence *encseq,
 {
   unsigned long endpos0, endpos1, cellnum, pagenum;
   bool found = false;
-  GtSequencerange range;
+  GtRange range;
 
   pagenum = startpos2pagenum(encseq->sat,startpos);
   if (pagenum > 0)
@@ -1783,14 +1784,14 @@ static void binpreparenextrange(const GtEncodedsequence *encseq,
 #endif
       if (moveforward)
       {
-        if (startpos > range.rightpos)
+        if (startpos > range.end)
         {
           found = true;
           esr->firstcell = cellnum;
           endpos0 = cellnum+1;
         } else
         {
-          if (startpos >= range.leftpos)
+          if (startpos >= range.start)
           {
             found = true;
             esr->firstcell = cellnum;
@@ -1800,14 +1801,14 @@ static void binpreparenextrange(const GtEncodedsequence *encseq,
         }
       } else
       {
-        if (startpos < range.leftpos)
+        if (startpos < range.start)
         {
           found = true;
           esr->lastcell = cellnum+1;
           endpos1 = cellnum;
         } else
         {
-          if (startpos < range.rightpos)
+          if (startpos < range.end)
           {
             found = true;
             esr->lastcell = cellnum+1;
@@ -1824,7 +1825,7 @@ static void binpreparenextrange(const GtEncodedsequence *encseq,
       determinerange(&range,encseq,pagenum,0);
       if (moveforward)
       {
-        if (range.leftpos == 0)
+        if (range.start == 0)
         {
           found = true;
           esr->firstcell = 0;
@@ -1880,8 +1881,8 @@ static void binpreparenextrange(const GtEncodedsequence *encseq,
     showsequencerange(&esr->previousrange);
     printf("\n");
 #endif
-    if (esr->previousrange.leftpos <= startpos &&
-        startpos < esr->previousrange.rightpos)
+    if (esr->previousrange.start <= startpos &&
+        startpos < esr->previousrange.end)
     {
       esr->hasprevious = true;
     }
@@ -2023,16 +2024,16 @@ static GtUchar seqdelivercharSpecial(const GtEncodedsequence *encseq,
 #ifdef RANGEDEBUG
   printf("pos=" FormatSeqpos ",previous=(" FormatSeqpos "," FormatSeqpos ")\n",
           PRINTSeqposcast(pos),
-          PRINTSeqposcast(esr->previousrange.leftpos),
-          PRINTSeqposcast(esr->previousrange.rightpos));
+          PRINTSeqposcast(esr->previousrange.start),
+          PRINTSeqposcast(esr->previousrange.end));
 #endif
   if (esr->hasprevious)
   {
     if (esr->moveforward)
     {
-      if (pos >= esr->previousrange.leftpos)
+      if (pos >= esr->previousrange.start)
       {
-        if (pos < esr->previousrange.rightpos)
+        if (pos < esr->previousrange.end)
         {
           return EXTRACTENCODEDCHAR(encseq->twobitencoding,pos)
                     ? (GtUchar) SEPARATOR
@@ -2045,9 +2046,9 @@ static GtUchar seqdelivercharSpecial(const GtEncodedsequence *encseq,
       }
     } else
     {
-      if (pos < esr->previousrange.rightpos)
+      if (pos < esr->previousrange.end)
       {
-        if (pos >= esr->previousrange.leftpos)
+        if (pos >= esr->previousrange.start)
         {
           return EXTRACTENCODEDCHAR(encseq->twobitencoding,pos)
                      ? (GtUchar) SEPARATOR
@@ -2076,16 +2077,16 @@ static bool containsspecialViatables(const GtEncodedsequence *encseq,
     if (esrspace->moveforward)
     {
       gt_assert(startpos + len > 0);
-      if (startpos + len - 1 >= esrspace->previousrange.leftpos &&
-          startpos < esrspace->previousrange.rightpos)
+      if (startpos + len - 1 >= esrspace->previousrange.start &&
+          startpos < esrspace->previousrange.end)
       {
         return true;
       }
     } else
     {
       gt_assert(startpos + 1 >= len);
-      if (startpos + 1 - len < esrspace->previousrange.rightpos &&
-          startpos >= esrspace->previousrange.leftpos)
+      if (startpos + 1 - len < esrspace->previousrange.end &&
+          startpos >= esrspace->previousrange.start)
       {
         return true;
       }
@@ -2105,7 +2106,7 @@ bool possibletocmpbitwise(const GtEncodedsequence *encseq)
           encseq->sat == Viabytecompress) ? false : true;
 }
 
-struct Specialrangeiterator
+struct GtSpecialrangeiterator
 {
   bool moveforward, exhausted;
   const GtEncodedsequence *encseq;
@@ -2114,10 +2115,11 @@ struct Specialrangeiterator
          lengthofspecialrange;
 };
 
-Specialrangeiterator *newspecialrangeiterator(const GtEncodedsequence *encseq,
-                                              bool moveforward)
+GtSpecialrangeiterator*
+gt_specialrangeiterator_new(const GtEncodedsequence *encseq,
+                            bool moveforward)
 {
-  Specialrangeiterator *sri;
+  GtSpecialrangeiterator *sri;
 
   gt_assert(encseq->numofspecialstostore > 0);
   sri = gt_malloc(sizeof(*sri));
@@ -2156,9 +2158,9 @@ Specialrangeiterator *newspecialrangeiterator(const GtEncodedsequence *encseq,
   return sri;
 }
 
-static bool dabcnextspecialrangeiterator(bool directaccess,
-                                         GtSequencerange *range,
-                                         Specialrangeiterator *sri)
+static bool dabcgt_specialrangeiterator_next(bool directaccess,
+                                         GtRange *range,
+                                         GtSpecialrangeiterator *sri)
 {
   bool success = false;
   GtUchar cc;
@@ -2181,12 +2183,12 @@ static bool dabcnextspecialrangeiterator(bool directaccess,
       {
         if (sri->moveforward)
         {
-          range->leftpos = sri->pos - sri->lengthofspecialrange;
-          range->rightpos = sri->pos;
+          range->start = sri->pos - sri->lengthofspecialrange;
+          range->end = sri->pos;
         } else
         {
-          range->leftpos = sri->pos+1;
-          range->rightpos = sri->pos+1+sri->lengthofspecialrange;
+          range->start = sri->pos+1;
+          range->end = sri->pos+1+sri->lengthofspecialrange;
         }
         success = true;
         sri->lengthofspecialrange = 0;
@@ -2198,8 +2200,8 @@ static bool dabcnextspecialrangeiterator(bool directaccess,
       {
         if (sri->lengthofspecialrange > 0)
         {
-          range->leftpos = sri->encseq->totallength - sri->lengthofspecialrange;
-          range->rightpos = sri->encseq->totallength;
+          range->start = sri->encseq->totallength - sri->lengthofspecialrange;
+          range->end = sri->encseq->totallength;
           success = true;
         }
         sri->exhausted = true;
@@ -2212,8 +2214,8 @@ static bool dabcnextspecialrangeiterator(bool directaccess,
       {
         if (sri->lengthofspecialrange > 0)
         {
-          range->leftpos = 0;
-          range->rightpos = sri->lengthofspecialrange;
+          range->start = 0;
+          range->end = sri->lengthofspecialrange;
           success = true;
         }
         sri->exhausted = true;
@@ -2225,8 +2227,8 @@ static bool dabcnextspecialrangeiterator(bool directaccess,
   return success;
 }
 
-static bool bitaccessnextspecialrangeiterator(GtSequencerange *range,
-                                              Specialrangeiterator *sri)
+static bool bitaccessgt_specialrangeiterator_next(GtRange *range,
+                                              GtSpecialrangeiterator *sri)
 {
   bool success = false;
   GtBitsequence currentword;
@@ -2243,12 +2245,12 @@ static bool bitaccessnextspecialrangeiterator(GtSequencerange *range,
       {
         if (sri->moveforward)
         {
-          range->leftpos = sri->pos - sri->lengthofspecialrange;
-          range->rightpos = sri->pos;
+          range->start = sri->pos - sri->lengthofspecialrange;
+          range->end = sri->pos;
         } else
         {
-          range->leftpos = sri->pos+1;
-          range->rightpos = sri->pos+1+sri->lengthofspecialrange;
+          range->start = sri->pos+1;
+          range->end = sri->pos+1+sri->lengthofspecialrange;
         }
         success = true;
         sri->lengthofspecialrange = 0;
@@ -2260,8 +2262,8 @@ static bool bitaccessnextspecialrangeiterator(GtSequencerange *range,
       {
         if (sri->lengthofspecialrange > 0)
         {
-          range->leftpos = sri->encseq->totallength - sri->lengthofspecialrange;
-          range->rightpos = sri->encseq->totallength;
+          range->start = sri->encseq->totallength - sri->lengthofspecialrange;
+          range->end = sri->encseq->totallength;
           success = true;
         }
         sri->exhausted = true;
@@ -2286,8 +2288,8 @@ static bool bitaccessnextspecialrangeiterator(GtSequencerange *range,
       {
         if (sri->lengthofspecialrange > 0)
         {
-          range->leftpos = 0;
-          range->rightpos = sri->lengthofspecialrange;
+          range->start = 0;
+          range->end = sri->lengthofspecialrange;
           success = true;
         }
         sri->exhausted = true;
@@ -2312,7 +2314,7 @@ static bool bitaccessnextspecialrangeiterator(GtSequencerange *range,
   return success;
 }
 
-bool nextspecialrangeiterator(GtSequencerange *range,Specialrangeiterator *sri)
+bool gt_specialrangeiterator_next(GtSpecialrangeiterator *sri, GtRange *range)
 {
   if (sri->exhausted)
   {
@@ -2321,11 +2323,11 @@ bool nextspecialrangeiterator(GtSequencerange *range,Specialrangeiterator *sri)
   switch (sri->encseq->sat)
   {
     case Viadirectaccess:
-      return dabcnextspecialrangeiterator(true,range,sri);
+      return dabcgt_specialrangeiterator_next(true,range,sri);
     case Viabytecompress:
-      return dabcnextspecialrangeiterator(false,range,sri);
+      return dabcgt_specialrangeiterator_next(false,range,sri);
     case Viabitaccess:
-      return bitaccessnextspecialrangeiterator(range,sri);
+      return bitaccessgt_specialrangeiterator_next(range,sri);
     default:
       gt_assert(sri->esr->hasprevious);
       *range = sri->esr->previousrange;
@@ -2340,14 +2342,14 @@ bool nextspecialrangeiterator(GtSequencerange *range,Specialrangeiterator *sri)
   }
 }
 
-void freespecialrangeiterator(Specialrangeiterator **sri)
+void gt_specialrangeiterator_delete(GtSpecialrangeiterator *sri)
 {
-  if ((*sri)->esr != NULL)
+  if (!sri) return;
+  if (sri->esr != NULL)
   {
-    gt_encodedsequence_scanstate_delete((*sri)->esr);
+    gt_encodedsequence_scanstate_delete(sri->esr);
   }
-  gt_free(*sri);
-  *sri = NULL;
+  gt_free(sri);
 }
 
 static unsigned int sat2maxspecialtype(GtPositionaccesstype sat)
@@ -2372,14 +2374,14 @@ static unsigned int sat2maxspecialtype(GtPositionaccesstype sat)
 static void addmarkpos(GtArrayGtUlong *asp,
                       const GtEncodedsequence *encseq,
                       GtEncodedsequenceScanstate *esr,
-                      const GtSequencerange *seqrange)
+                      const GtRange *seqrange)
 {
   unsigned long pos;
   GtUchar currentchar;
 
   gt_encodedsequence_scanstate_init(esr,encseq,GT_READMODE_FORWARD,
-                                    seqrange->leftpos);
-  for (pos=seqrange->leftpos; pos<seqrange->rightpos; pos++)
+                                    seqrange->start);
+  for (pos=seqrange->start; pos<seqrange->end; pos++)
   {
     currentchar = gt_encodedsequence_sequentialgetencodedchar(encseq,esr,pos,
                                                            GT_READMODE_FORWARD);
@@ -2395,8 +2397,8 @@ static void addmarkpos(GtArrayGtUlong *asp,
 static unsigned long *encseq2markpositions(const GtEncodedsequence *encseq)
 {
   GtArrayGtUlong asp;
-  Specialrangeiterator *sri;
-  GtSequencerange range;
+  GtSpecialrangeiterator *sri;
+  GtRange range;
   GtEncodedsequenceScanstate *esr;
 
   gt_assert (encseq->numofdbsequences > 1UL);
@@ -2404,13 +2406,13 @@ static unsigned long *encseq2markpositions(const GtEncodedsequence *encseq)
   asp.nextfreeGtUlong = 0;
   asp.spaceGtUlong =
                    gt_malloc(sizeof (*asp.spaceGtUlong) * asp.allocatedGtUlong);
-  sri = newspecialrangeiterator(encseq,true);
+  sri = gt_specialrangeiterator_new(encseq,true);
   esr = gt_encodedsequence_scanstate_new();
-  while (nextspecialrangeiterator(&range,sri))
+  while (gt_specialrangeiterator_next(sri,&range))
   {
     addmarkpos(&asp,encseq,esr,&range);
   }
-  freespecialrangeiterator(&sri);
+  gt_specialrangeiterator_delete(sri);
   gt_encodedsequence_scanstate_delete(esr);
   return asp.spaceGtUlong;
 }
@@ -3598,9 +3600,9 @@ static unsigned long fwdgetnextstoppos(const GtEncodedsequence *encseq,
   gt_assert(esr->moveforward);
   while (esr->hasprevious)
   {
-    if (pos >= esr->previousrange.leftpos)
+    if (pos >= esr->previousrange.start)
     {
-      if (pos < esr->previousrange.rightpos)
+      if (pos < esr->previousrange.end)
       {
         return pos; /* is in current special range */
       }
@@ -3614,7 +3616,7 @@ static unsigned long fwdgetnextstoppos(const GtEncodedsequence *encseq,
       }
     } else
     {
-      return esr->previousrange.leftpos;
+      return esr->previousrange.start;
     }
   }
   return encseq->totallength;
@@ -3630,9 +3632,9 @@ static unsigned long revgetnextstoppos(const GtEncodedsequence *encseq,
   gt_assert(!esr->moveforward);
   while (esr->hasprevious)
   {
-    if (pos < esr->previousrange.rightpos)
+    if (pos < esr->previousrange.end)
     {
-      if (pos >= esr->previousrange.leftpos)
+      if (pos >= esr->previousrange.start)
       {
         return pos+1; /* is in current special range */
       }
@@ -3646,7 +3648,7 @@ static unsigned long revgetnextstoppos(const GtEncodedsequence *encseq,
       }
     } else
     {
-      return esr->previousrange.rightpos;
+      return esr->previousrange.end;
     }
   }
   return 0; /* virtual stop at -1 */
@@ -3838,7 +3840,7 @@ static inline unsigned int revbitaccessunitsnotspecial(GtBitsequence spbits,
                        : (unsigned int) numberoftrailingzeros(spbits);
 }
 
-static void fwdextract2bitenc(EndofTwobitencoding *ptbe,
+static void fwdextract2bitenc(GtEndofTwobitencoding *ptbe,
                               const GtEncodedsequence *encseq,
                               GtEncodedsequenceScanstate *esr,
                               unsigned long startpos)
@@ -3894,7 +3896,7 @@ static void fwdextract2bitenc(EndofTwobitencoding *ptbe,
   }
 }
 
-static void revextract2bitenc(EndofTwobitencoding *ptbe,
+static void revextract2bitenc(GtEndofTwobitencoding *ptbe,
                               const GtEncodedsequence *encseq,
                               GtEncodedsequenceScanstate *esr,
                               unsigned long startpos)
@@ -3950,7 +3952,7 @@ static void revextract2bitenc(EndofTwobitencoding *ptbe,
 }
 
 void extract2bitenc(bool fwd,
-                    EndofTwobitencoding *ptbe,
+                    GtEndofTwobitencoding *ptbe,
                     const GtEncodedsequence *encseq,
                     GtEncodedsequenceScanstate *esr,
                     unsigned long startpos)
@@ -4029,8 +4031,8 @@ static int endofdifftbe(bool fwd,
 int compareTwobitencodings(bool fwd,
                            bool complement,
                            GtCommonunits *commonunits,
-                           const EndofTwobitencoding *ptbe1,
-                           const EndofTwobitencoding *ptbe2)
+                           const GtEndofTwobitencoding *ptbe1,
+                           const GtEndofTwobitencoding *ptbe2)
 {
   Twobitencoding mask;
 
@@ -4230,7 +4232,7 @@ int compareEncseqsequences(GtCommonunits *commonunits,
                            unsigned long pos2,
                            unsigned long depth)
 {
-  EndofTwobitencoding ptbe1, ptbe2;
+  GtEndofTwobitencoding ptbe1, ptbe2;
   int retval;
 
   countcompareEncseqsequences++;
@@ -4352,7 +4354,7 @@ int compareEncseqsequencesmaxdepth(GtCommonunits *commonunits,
                                    unsigned long depth,
                                    unsigned long maxdepth)
 {
-  EndofTwobitencoding ptbe1, ptbe2;
+  GtEndofTwobitencoding ptbe1, ptbe2;
   int retval;
   unsigned long endpos1, endpos2;
 
@@ -4501,7 +4503,7 @@ int multicharactercompare(const GtEncodedsequence *encseq,
                           GtEncodedsequenceScanstate *esr2,
                           unsigned long pos2)
 {
-  EndofTwobitencoding ptbe1, ptbe2;
+  GtEndofTwobitencoding ptbe1, ptbe2;
   int retval;
   GtCommonunits commonunits;
 
@@ -4522,7 +4524,7 @@ int multicharactercompare(const GtEncodedsequence *encseq,
 
 /* now some functions for testing the different functions follow */
 
-static void fwdextract2bitenc_bruteforce(EndofTwobitencoding *ptbe,
+static void fwdextract2bitenc_bruteforce(GtEndofTwobitencoding *ptbe,
                                          const GtEncodedsequence *encseq,
                                          unsigned long startpos)
 {
@@ -4551,7 +4553,7 @@ static void fwdextract2bitenc_bruteforce(EndofTwobitencoding *ptbe,
   ptbe->unitsnotspecial = (unsigned int) GT_UNITSIN2BITENC;
 }
 
-static void revextract2bitenc_bruteforce(EndofTwobitencoding *ptbe,
+static void revextract2bitenc_bruteforce(GtEndofTwobitencoding *ptbe,
                                          const GtEncodedsequence *encseq,
                                          unsigned long startpos)
 {
@@ -4583,7 +4585,7 @@ static void revextract2bitenc_bruteforce(EndofTwobitencoding *ptbe,
 }
 
 static void extract2bitenc_bruteforce(bool fwd,
-                                      EndofTwobitencoding *ptbe,
+                                      GtEndofTwobitencoding *ptbe,
                                       const GtEncodedsequence *encseq,
                                       unsigned long startpos)
 {
@@ -4780,7 +4782,7 @@ static inline GtBitsequence revextractspecialbits_bruteforce(
 void checkextractunitatpos(const GtEncodedsequence *encseq,
                            bool fwd,bool complement)
 {
-  EndofTwobitencoding ptbe1, ptbe2;
+  GtEndofTwobitencoding ptbe1, ptbe2;
   GtEncodedsequenceScanstate *esr;
   unsigned long startpos;
 
@@ -4897,7 +4899,7 @@ void multicharactercompare_withtest(const GtEncodedsequence *encseq,
                                     GtEncodedsequenceScanstate *esr2,
                                     unsigned long pos2)
 {
-  EndofTwobitencoding ptbe1, ptbe2;
+  GtEndofTwobitencoding ptbe1, ptbe2;
   GtCommonunits commonunits1;
   unsigned long commonunits2;
   int ret1, ret2;
