@@ -104,16 +104,6 @@ GtCodetype gt_encodedsequence_extractprefixcode(unsigned int *unitsnotspecial,
                                                unsigned long frompos,
                                                unsigned int prefixlength);
 
-int comparewithonespecial(bool *leftspecial,
-                          bool *rightspecial,
-                          const GtEncodedsequence *encseq,
-                          bool fwd,
-                          bool complement,
-                          unsigned long pos1,
-                          unsigned long pos2,
-                          unsigned long depth,
-                          unsigned long maxdepth);
-
 int compareEncseqsequences(GtCommonunits *commonunits,
                            const GtEncodedsequence *encseq,
                            bool fwd,

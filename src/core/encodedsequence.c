@@ -4197,15 +4197,15 @@ static unsigned long extractsinglecharacter(const GtEncodedsequence *encseq,
   return cc;
 }
 
-int comparewithonespecial(bool *leftspecial,
-                          bool *rightspecial,
-                          const GtEncodedsequence *encseq,
-                          bool fwd,
-                          bool complement,
-                          unsigned long pos1,
-                          unsigned long pos2,
-                          unsigned long depth,
-                          unsigned long maxdepth)
+static int comparewithonespecial(bool *leftspecial,
+                                 bool *rightspecial,
+                                 const GtEncodedsequence *encseq,
+                                 bool fwd,
+                                 bool complement,
+                                 unsigned long pos1,
+                                 unsigned long pos2,
+                                 unsigned long depth,
+                                 unsigned long maxdepth)
 {
   unsigned long cc1, cc2, totallength = gt_encodedsequence_total_length(encseq);
 
