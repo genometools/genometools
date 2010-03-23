@@ -95,14 +95,14 @@ bool gt_encodedsequence_bitwise_cmp_ok(const GtEncodedsequence *encseq);
 /*@null@*/
 const char* gt_encodedsequence_accessname(const GtEncodedsequence *encseq);
 
-GtCodetype extractprefixcode(unsigned int *unitsnotspecial,
-                           const GtEncodedsequence *encseq,
-                           const GtCodetype *filltable,
-                           GtReadmode readmode,
-                           GtEncodedsequenceScanstate *esr,
-                           const GtCodetype **multimappower,
-                           unsigned long frompos,
-                           unsigned int prefixlength);
+GtCodetype gt_encodedsequence_extractprefixcode(unsigned int *unitsnotspecial,
+                                               const GtEncodedsequence *encseq,
+                                               const GtCodetype *filltable,
+                                               GtReadmode readmode,
+                                               GtEncodedsequenceScanstate *esr,
+                                               const GtCodetype **multimappower,
+                                               unsigned long frompos,
+                                               unsigned int prefixlength);
 
 int comparewithonespecial(bool *leftspecial,
                           bool *rightspecial,

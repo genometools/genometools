@@ -563,7 +563,7 @@ static void inversesuftabrel_get(Itvfullentry *itvfullentry,
     itvfullentry->rank = rmnsufinfo->totallength;
     return;
   }
-  code = extractprefixcode(&itvfullentry->unitsnotspecial,
+  code = gt_encodedsequence_extractprefixcode(&itvfullentry->unitsnotspecial,
                            rmnsufinfo->encseq,
                            rmnsufinfo->filltable,
                            rmnsufinfo->readmode,

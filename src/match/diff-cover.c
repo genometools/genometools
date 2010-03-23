@@ -379,7 +379,7 @@ static unsigned long derivespecialcodesonthefly(Differencecover *dcov,
             gt_assert(codelist->spaceCodeatposition[countderived].position
                       == pos);
           }
-          code = extractprefixcode(&unitsnotspecial,
+          code = gt_encodedsequence_extractprefixcode(&unitsnotspecial,
                                    dcov->encseq,
                                    dcov->filltable,
                                    dcov->readmode,
@@ -1048,7 +1048,7 @@ void differencecover_sortsample(Differencecover *dcov,bool cmpcharbychar,
       /* printf("pos mod %u in difference cover\n",dcov->vparam); */
       if (pos < dcov->totallength)
       {
-        code = extractprefixcode(&unitsnotspecial,
+        code = gt_encodedsequence_extractprefixcode(&unitsnotspecial,
                                  dcov->encseq,
                                  dcov->filltable,
                                  dcov->readmode,
@@ -1120,7 +1120,7 @@ void differencecover_sortsample(Differencecover *dcov,bool cmpcharbychar,
   {
     if (diffptr < afterend && (Diffvalue) modvalue == *diffptr)
     {
-      code = extractprefixcode(&unitsnotspecial,
+      code = gt_encodedsequence_extractprefixcode(&unitsnotspecial,
                                dcov->encseq,
                                dcov->filltable,
                                dcov->readmode,

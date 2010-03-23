@@ -4954,7 +4954,7 @@ void multicharactercompare_withtest(const GtEncodedsequence *encseq,
   }
 }
 
-GtCodetype extractprefixcode(unsigned int *unitsnotspecial,
+GtCodetype gt_encodedsequence_extractprefixcode(unsigned int *unitsnotspecial,
                            const GtEncodedsequence *encseq,
                            const GtCodetype *filltable,
                            GtReadmode readmode,
