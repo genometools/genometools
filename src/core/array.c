@@ -228,6 +228,26 @@ int gt_array_cmp(const GtArray *array_a, const GtArray *array_b)
                 array_a->size_of_elem * array_a->next_free);
 }
 
+bool gt_array_equal(const GtArray *a, const GtArray *b, GtCompare cmpfunc)
+{
+  unsigned long idx, size_a, size_b;
+  int cmp;
+  gt_assert(gt_array_elem_size(a) == gt_array_elem_size(b));
+  size_a = gt_array_size(a);
+  size_b = gt_array_size(b);
+  if (size_a < size_b)
+    return false;
+  if (size_a > size_b)
+    return false;
+  for (idx=0; idx < size_a; idx++)
+  {
+    cmp = cmpfunc(gt_array_get(a,idx),gt_array_get(b,idx));
+    if (cmp != 0)
+      return false;
+  }
+  return true;
+}
+
 int gt_array_iterate(GtArray *a, GtArrayProcessor array_processor, void *info,
                   GtError *err)
 {

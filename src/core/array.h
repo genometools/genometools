@@ -23,10 +23,16 @@
 
 typedef int (*GtArrayProcessor)(void *elem, void *info, GtError*);
 
-/* Compare the content of <array_a> with the content of <array_b>.
+/* Compare the raw content of <array_a> with the content of <array_b>.
    <array_a> and <array_b> must have the same gt_array_size() and
    gt_array_elem_size(). */
 int           gt_array_cmp(const GtArray  *array_a, const GtArray *array_b);
+/* Compare the content of <array_a> with the content of <array_b> using the
+   comparator function <cmpfunc>. If the elements of both arrays are equal
+   w.r.t. <cmpfunc>, true is returned. If the array sizes or content w.r.t.
+   <cmpfunc> are different, false is returned. */
+bool          gt_array_equal(const GtArray *a, const GtArray *b,
+                             GtCompare cmpfunc);
 /* Iterate over all elements in <array> and call <array_processor> with them.
    <info> and <err> are passed to <array_processor>.
    If <array_processor> returns a value != 0, the iteration is stopped and the

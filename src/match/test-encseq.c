@@ -25,8 +25,6 @@
 #include "core/encodedsequence.h"
 #include "stamp.h"
 
-#include "arrcmp.pr"
-
 static void runscanatpostrial(const GtEncodedsequence *encseq,
                               GtEncodedsequenceScanstate *esr,
                               GtReadmode readmode,unsigned long startpos)
@@ -310,8 +308,8 @@ int checkspecialrangesfast(const GtEncodedsequence *encseq)
   gt_array_reverse(rangesbackward);
   if (!haserr)
   {
-    if (array_compare(rangesforward,rangesbackward,
-                      compareGtRange) != 0)
+    if (!gt_array_equal(rangesforward,rangesbackward,
+                      compareGtRange))
     {
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }

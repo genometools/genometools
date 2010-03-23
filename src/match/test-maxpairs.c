@@ -38,21 +38,18 @@ int testmaxpairs(GT_UNUSED const GtStr *indexname,
 #include "core/array.h"
 #include "core/arraydef.h"
 #include "core/divmodmul.h"
+#include "core/encodedsequence.h"
+#include "core/format64.h"
+#include "core/logger.h"
+#include "core/progress_timer.h"
 #include "core/unused_api.h"
 #include "spacedef.h"
 #include "esa-mmsearch.h"
-#include "core/format64.h"
 #include "echoseq.h"
-#include "core/encodedsequence.h"
-
-#include "core/logger.h"
 #include "sfx-suffixer.h"
 #include "sfx-apfxlen.h"
-#include "core/progress_timer.h"
 #include "esa-maxpairs.h"
 #include "esa-seqread.h"
-
-#include "arrcmp.pr"
 
 typedef struct
 {
@@ -458,8 +455,8 @@ int testmaxpairs(const GtStr *indexname,
     }
     gt_array_sort(tabmaxquerymatches,orderSubstringmatch);
     gt_array_sort(maxmatchselfinfo.results,orderSubstringmatch);
-    if (array_compare(tabmaxquerymatches,maxmatchselfinfo.results,
-                      orderSubstringmatch) != 0)
+    if (!gt_array_equal(tabmaxquerymatches,maxmatchselfinfo.results,
+                        orderSubstringmatch))
     {
       const unsigned long width = 60UL;
       printf("failure for query of length %lu\n",(unsigned long) querylen);
