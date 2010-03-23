@@ -2527,7 +2527,7 @@ void gt_encodedsequence_seqinfo(const GtEncodedsequence *encseq,
                  seqnum);
 }
 
-void checkmarkpos(const GtEncodedsequence *encseq)
+void gt_encodedsequence_check_markpos(const GtEncodedsequence *encseq)
 {
   if (encseq->numofdbsequences > 1UL)
   {

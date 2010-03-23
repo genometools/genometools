@@ -302,8 +302,8 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
       }
       if (!haserr && sfxmapoptions.inputtis)
       {
-        gt_logger_log(logger, "checkmarkpos");
-        checkmarkpos(suffixarray.encseq);
+        gt_logger_log(logger, "gt_encodedsequence_check_markpos");
+        gt_encodedsequence_check_markpos(suffixarray.encseq);
       }
       if (!haserr && sfxmapoptions.inputtis &&
           suffixarray.readmode == GT_READMODE_FORWARD &&

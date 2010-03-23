@@ -85,6 +85,9 @@ void gt_encodedsequence_sequence2bytecode(GtUchar *dest,
 
 void gt_encodedsequence_check_descriptions(const GtEncodedsequence *encseq);
 
+/* check if the marked positions are correct */
+void gt_encodedsequence_check_markpos(const GtEncodedsequence *encseq);
+
 bool gt_encodedsequence_has_specialranges(const GtEncodedsequence *encseq);
 
 bool gt_encodedsequence_has_fast_specialrangeenumerator(
@@ -161,10 +164,6 @@ bool containsspecial(const GtEncodedsequence *encseq,
                      unsigned long len);
 
 int getsatforcevalue(const char *str,GtError *err);
-
-/* check if the marked positions are correct */
-
-void checkmarkpos(const GtEncodedsequence *encseq);
 
 /* for a array of recordseparator, obtain the sequence
  * number from the given position */
