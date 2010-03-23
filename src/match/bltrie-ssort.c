@@ -338,31 +338,33 @@ static unsigned long fastgetlcp(GtUchar *mm_oldsuffix,
 
   if (blindtrie->maxdepth == 0)
   {
-    (void) compareEncseqsequences(&commonunits,
-                                  blindtrie->encseq,
-                                  GT_ISDIRREVERSE(blindtrie->readmode)
-                                  ? false : true,
-                                  GT_ISDIRCOMPLEMENT(blindtrie->readmode)
-                                  ? true : false,
-                                  blindtrie->esr1,
-                                  blindtrie->esr2,
-                                  leafpos,
-                                  currentstartpos,
-                                  0);
+    (void) gt_encodedsequence_compare(blindtrie->encseq,
+                                      &commonunits,
+                                      GT_ISDIRREVERSE(blindtrie->readmode)
+                                      ? false : true,
+                                      GT_ISDIRCOMPLEMENT(blindtrie->readmode)
+                                      ? true : false,
+                                      blindtrie->esr1,
+                                      blindtrie->esr2,
+                                      leafpos,
+                                      currentstartpos,
+                                      0);
   } else
   {
-    (void) compareEncseqsequencesmaxdepth(&commonunits,
-                                         blindtrie->encseq,
-                                         GT_ISDIRREVERSE(blindtrie->readmode)
-                                         ? false : true,
-                                         GT_ISDIRCOMPLEMENT(blindtrie->readmode)
-                                         ? true : false,
-                                         blindtrie->esr1,
-                                         blindtrie->esr2,
-                                         leafpos,
-                                         currentstartpos,
-                                         0,
-                                         blindtrie->maxdepthminusoffset);
+    (void) gt_encodedsequence_compare_maxdepth(blindtrie->encseq,
+                                               &commonunits,
+                                               GT_ISDIRREVERSE(
+                                                            blindtrie->readmode)
+                                               ? false : true,
+                                               GT_ISDIRCOMPLEMENT(
+                                                            blindtrie->readmode)
+                                               ? true : false,
+                                               blindtrie->esr1,
+                                               blindtrie->esr2,
+                                               leafpos,
+                                               currentstartpos,
+                                               0,
+                                               blindtrie->maxdepthminusoffset);
   }
   if (isleftofboundary(leafpos,commonunits.finaldepth,blindtrie) &&
       !commonunits.leftspecial)

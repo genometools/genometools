@@ -1007,8 +1007,8 @@ static int determinesattype(unsigned long *specialranges,
 }
 #endif
 
-static unsigned long countcompareEncseqsequencesmaxdepth = 0;
-static unsigned long countcompareEncseqsequences = 0;
+static unsigned long countgt_encodedsequence_compare_maxdepth = 0;
+static unsigned long countgt_encodedsequence_compare = 0;
 
 void gt_encodedsequence_delete(GtEncodedsequence *encseq)
 {
@@ -4234,20 +4234,20 @@ static int comparewithonespecial(bool *leftspecial,
   return cc1 < cc2 ? -1 : 1;
 }
 
-int compareEncseqsequences(GtCommonunits *commonunits,
-                           const GtEncodedsequence *encseq,
-                           bool fwd,
-                           bool complement,
-                           GtEncodedsequenceScanstate *esr1,
-                           GtEncodedsequenceScanstate *esr2,
-                           unsigned long pos1,
-                           unsigned long pos2,
-                           unsigned long depth)
+int gt_encodedsequence_compare(const GtEncodedsequence *encseq,
+                               GtCommonunits *commonunits,
+                               bool fwd,
+                               bool complement,
+                               GtEncodedsequenceScanstate *esr1,
+                               GtEncodedsequenceScanstate *esr2,
+                               unsigned long pos1,
+                               unsigned long pos2,
+                               unsigned long depth)
 {
   GtEndofTwobitencoding ptbe1, ptbe2;
   int retval;
 
-  countcompareEncseqsequences++;
+  countgt_encodedsequence_compare++;
   gt_assert(pos1 != pos2);
   if (!fwd)
   {
@@ -4357,22 +4357,22 @@ int compareEncseqsequences(GtCommonunits *commonunits,
   return retval;
 }
 
-int compareEncseqsequencesmaxdepth(GtCommonunits *commonunits,
-                                   const GtEncodedsequence *encseq,
-                                   bool fwd,
-                                   bool complement,
-                                   GtEncodedsequenceScanstate *esr1,
-                                   GtEncodedsequenceScanstate *esr2,
-                                   unsigned long pos1,
-                                   unsigned long pos2,
-                                   unsigned long depth,
-                                   unsigned long maxdepth)
+int gt_encodedsequence_compare_maxdepth(const GtEncodedsequence *encseq,
+                                        GtCommonunits *commonunits,
+                                        bool fwd,
+                                        bool complement,
+                                        GtEncodedsequenceScanstate *esr1,
+                                        GtEncodedsequenceScanstate *esr2,
+                                        unsigned long pos1,
+                                        unsigned long pos2,
+                                        unsigned long depth,
+                                        unsigned long maxdepth)
 {
   GtEndofTwobitencoding ptbe1, ptbe2;
   int retval;
   unsigned long endpos1, endpos2;
 
-  countcompareEncseqsequencesmaxdepth++;
+  countgt_encodedsequence_compare_maxdepth++;
   gt_assert(pos1 != pos2);
   gt_assert(depth < maxdepth);
   if (fwd)

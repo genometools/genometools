@@ -104,26 +104,26 @@ GtCodetype gt_encodedsequence_extractprefixcode(unsigned int *unitsnotspecial,
                                                unsigned long frompos,
                                                unsigned int prefixlength);
 
-int compareEncseqsequences(GtCommonunits *commonunits,
-                           const GtEncodedsequence *encseq,
-                           bool fwd,
-                           bool complement,
-                           GtEncodedsequenceScanstate *esr1,
-                           GtEncodedsequenceScanstate *esr2,
-                           unsigned long pos1,
-                           unsigned long pos2,
-                           unsigned long depth);
+int        gt_encodedsequence_compare(const GtEncodedsequence *encseq,
+                                      GtCommonunits *commonunits,
+                                      bool fwd,
+                                      bool complement,
+                                      GtEncodedsequenceScanstate *esr1,
+                                      GtEncodedsequenceScanstate *esr2,
+                                      unsigned long pos1,
+                                      unsigned long pos2,
+                                      unsigned long depth);
 
-int compareEncseqsequencesmaxdepth(GtCommonunits *commonunits,
-                                   const GtEncodedsequence *encseq,
-                                   bool fwd,
-                                   bool complement,
-                                   GtEncodedsequenceScanstate *esr1,
-                                   GtEncodedsequenceScanstate *esr2,
-                                   unsigned long pos1,
-                                   unsigned long pos2,
-                                   unsigned long depth,
-                                   unsigned long maxdepth);
+int        gt_encodedsequence_compare_maxdepth(const GtEncodedsequence *encseq,
+                                               GtCommonunits *commonunits,
+                                               bool fwd,
+                                               bool complement,
+                                               GtEncodedsequenceScanstate *esr1,
+                                               GtEncodedsequenceScanstate *esr2,
+                                               unsigned long pos1,
+                                               unsigned long pos2,
+                                               unsigned long depth,
+                                               unsigned long maxdepth);
 
 /* some check functions called in test-encseq.c */
 
