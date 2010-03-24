@@ -207,8 +207,6 @@ GtUchar gt_encodedsequence_alphabetwildcardshow(
 unsigned long gt_encodedsequence_charcount(const GtEncodedsequence *encseq,
                                            GtUchar cc);
 
-void showgetencodedcharcounters(void);
-
 void gt_showsequencefeatures(GtLogger *logger,
                              const GtEncodedsequence *encseq,
                              bool withfilenames);
