@@ -211,8 +211,6 @@ void gt_encodedsequence_show_features(const GtEncodedsequence *encseq,
                                       GtLogger *logger,
                                       bool withfilenames);
 
-unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab);
-
 FILE *opendestabfile(const GtStr *indexname,const char *mode,GtError *err);
 
 FILE *openssptabfile(const GtStr *indexname,const char *mode,GtError *err);

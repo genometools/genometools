@@ -2864,7 +2864,7 @@ static GtEncodedsequencefunctions encodedseqfunctab[] =
         encseq->delivercontainsspecialname\
           = encodedseqfunctab[(int) (SAT)].delivercontainsspecial.funcname
 
-unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab)
+static unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab)
 {
   unsigned long idx, lengthofdbfilenames = 0;
 
