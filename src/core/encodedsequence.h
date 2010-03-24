@@ -203,8 +203,9 @@ const GtUchar *gt_encodedsequence_alphabetcharacters(
 GtUchar gt_encodedsequence_alphabetwildcardshow(
                                                const GtEncodedsequence *encseq);
 
-unsigned long getencseqcharactercount(const GtEncodedsequence *encseq,
-                                      GtUchar cc);
+/* Returns the number of times that <cc> occurs in the sequences in <encseq>. */
+unsigned long gt_encodedsequence_charcount(const GtEncodedsequence *encseq,
+                                           GtUchar cc);
 
 /* some functions to remove reference from an GtEncodedsequence to prevent that
    the referenced alphabet or filenametab are freed */

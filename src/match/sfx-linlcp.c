@@ -76,7 +76,7 @@ static unsigned long *computeocclesstab(const GtEncodedsequence *encseq)
   for (idx = 1UL; idx < numofchars; idx++)
   {
     occless[idx] = occless[idx-1] +
-                   getencseqcharactercount(encseq,(GtUchar) (idx-1));
+                   gt_encodedsequence_charcount(encseq,(GtUchar) (idx-1));
   }
   return occless;
 }

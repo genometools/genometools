@@ -201,7 +201,7 @@ newSeqStatsFromCharDist(const GtEncodedsequence *encseq,
   for (i = 0; i < numofchars; ++i)
   {
     stats->symbolDistributionTable[i]
-      = (unsigned long) getencseqcharactercount(encseq,(GtUchar) i);
+      = (unsigned long) gt_encodedsequence_charcount(encseq,(GtUchar) i);
     regularSymsSum += stats->symbolDistributionTable[i];
   }
   stats->symbolDistributionTable[WILDCARD] = len - regularSymsSum - numOfSeqs;

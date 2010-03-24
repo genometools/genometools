@@ -2756,8 +2756,8 @@ void removefilenametabref(GtEncodedsequence *encseq)
   encseq->filenametab = NULL;
 }
 
-unsigned long getencseqcharactercount(const GtEncodedsequence *encseq,
-                                      GtUchar cc)
+unsigned long gt_encodedsequence_charcount(const GtEncodedsequence *encseq,
+                                           GtUchar cc)
 {
   gt_assert(encseq != NULL &&
             (unsigned int) cc < gt_alphabet_num_of_chars(encseq->alpha));
