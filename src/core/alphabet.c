@@ -937,11 +937,11 @@ void gt_alphabet_encode_seq(const GtAlphabet *alphabet, GtUchar *out,
   }
 }
 
-const GtAlphabet *gt_scanal1file(const GtStr *indexname,GtError *err)
+GtAlphabet *gt_scanal1file(const GtStr *indexname,GtError *err)
 {
   GtStr *tmpfilename;
   bool haserr = false;
-  const GtAlphabet *alpha;
+  GtAlphabet *alpha;
 
   gt_error_check(err);
   tmpfilename = gt_str_clone(indexname);

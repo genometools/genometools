@@ -109,7 +109,7 @@ char           gt_alphabet_decode(const GtAlphabet *alphabet, GtUchar c);
 void           gt_alphabet_encode_seq(const GtAlphabet *alphabet, GtUchar *out,
                                       const char *in, unsigned long length);
 
-const GtAlphabet *gt_scanal1file(const GtStr *indexname,GtError *err);
+GtAlphabet *gt_scanal1file(const GtStr *indexname,GtError *err);
 
 int gt_outal1file(const GtStr *indexname,const GtAlphabet *alpha,
                   GtError *err);
