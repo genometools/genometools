@@ -5506,7 +5506,7 @@ gt_encodedsequence_new_from_files(GtProgressTimer *sfxprogress,
     gt_free(characterdistribution);
     gt_free(filelengthtab);
     filelengthtab = NULL;
-    gt_str_array_delete(encseq->filenametab);
+    gt_str_array_delete(filenametab);
     if (alpha != NULL && !alphaisbound)
     {
       gt_alphabet_delete((GtAlphabet*) alpha);
