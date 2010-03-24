@@ -179,18 +179,27 @@ unsigned long getencseqlengthofspecialsuffix(const GtEncodedsequence *encseq);
 int readGtSpecialcharinfo(GtSpecialcharinfo *specialcharinfo,
                           const GtStr *indexname,GtError *err);
 
-/* some functions to obtain some components from the Alphabet pointed to
-   by encseq->alpha */
-
+/* Obtains the number of characters in the Alphabet associated with <encseq>.
+   This saves one function call for extracting the alphabet pointer
+   from <encseq> (performance reasons). */
 unsigned int gt_encodedsequence_alphabetnumofchars(
                                                const GtEncodedsequence *encseq);
 
+/* Obtains the symbolmap from the Alphabet associated with <encseq>.
+   This saves one function call for extracting the alphabet pointer
+   from <encseq> (performance reasons). */
 const GtUchar *gt_encodedsequence_alphabetsymbolmap(
                                                const GtEncodedsequence *encseq);
 
+/* Obtains an ordered array of characters from the Alphabet associated with
+   <encseq>. This saves one function call for extracting the alphabet pointer
+   from <encseq> (performance reasons). */
 const GtUchar *gt_encodedsequence_alphabetcharacters(
                                                const GtEncodedsequence *encseq);
 
+/* Obtains the character used for displaying wildcards from the Alphabet
+   associated with <encseq>. This saves one function call for extracting the
+   alphabet pointer from <encseq> (performance reasons). */
 GtUchar gt_encodedsequence_alphabetwildcardshow(
                                                const GtEncodedsequence *encseq);
 
