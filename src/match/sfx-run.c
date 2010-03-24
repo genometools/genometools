@@ -470,7 +470,7 @@ static int runsuffixerator(bool doesa,
   }
   if (!haserr)
   {
-    gt_showsequencefeatures(logger,encseq,false);
+    gt_encodedsequence_show_features(encseq,logger,false);
     if (so->readmode == GT_READMODE_COMPL ||
         so->readmode == GT_READMODE_REVCOMPL)
     {

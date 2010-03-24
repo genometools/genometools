@@ -207,9 +207,9 @@ GtUchar gt_encodedsequence_alphabetwildcardshow(
 unsigned long gt_encodedsequence_charcount(const GtEncodedsequence *encseq,
                                            GtUchar cc);
 
-void gt_showsequencefeatures(GtLogger *logger,
-                             const GtEncodedsequence *encseq,
-                             bool withfilenames);
+void gt_encodedsequence_show_features(const GtEncodedsequence *encseq,
+                                      GtLogger *logger,
+                                      bool withfilenames);
 
 unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab);
 

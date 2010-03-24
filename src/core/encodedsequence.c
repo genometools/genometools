@@ -5019,9 +5019,9 @@ static void showcharacterdistribution(
   }
 }
 
-void gt_showsequencefeatures(GtLogger *logger,
-                             const GtEncodedsequence *encseq,
-                             bool withfilenames)
+void gt_encodedsequence_show_features(const GtEncodedsequence *encseq,
+                                      GtLogger *logger,
+                                      bool withfilenames)
 {
   const GtAlphabet *alpha = gt_encodedsequence_alphabet(encseq);
   unsigned long idx;
