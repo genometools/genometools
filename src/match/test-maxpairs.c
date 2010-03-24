@@ -134,7 +134,7 @@ static int sarrselfsubstringmatch(const GtUchar *dbseq,
                                   const GtUchar *query,
                                   unsigned long querylen,
                                   unsigned int minlength,
-                                  const GtAlphabet *alpha,
+                                  GtAlphabet *alpha,
                                   Processmaxpairs processmaxpairs,
                                   void *processmaxpairsinfo,
                                   GtLogger *logger,
@@ -166,7 +166,6 @@ static int sarrselfsubstringmatch(const GtUchar *dbseq,
   {
     haserr = true;
   }
-  removealpharef(ssi.encseq);
   gt_encodedsequence_delete(ssi.encseq);
   ssi.encseq = NULL;
   return haserr ? -1 : 0;
@@ -380,13 +379,13 @@ int testmaxpairs(const GtStr *indexname,
 
   gt_logger_log(logger,"draw %lu samples",samples);
   encseq = gt_encodedsequence_new_from_index(true,
-                              indexname,
-                              true,
-                              false,
-                              false,
-                              false,
-                              logger,
-                              err);
+                                             indexname,
+                                             true,
+                                             false,
+                                             false,
+                                             false,
+                                             logger,
+                                             err);
   if (encseq == NULL)
   {
     haserr = true;

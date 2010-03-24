@@ -685,7 +685,7 @@ int sarrquerysubstringmatch(const GtUchar *dbseq,
                             const GtUchar *query,
                             unsigned long querylen,
                             unsigned int minlength,
-                            const GtAlphabet *alpha,
+                            GtAlphabet *alpha,
                             Processquerymatch processquerymatch,
                             void *processquerymatchinfo,
                             GtLogger *logger,
@@ -717,7 +717,6 @@ int sarrquerysubstringmatch(const GtUchar *dbseq,
   {
     haserr = true;
   }
-  removealpharef(dbencseq);
   gt_encodedsequence_delete(dbencseq);
   dbencseq = NULL;
   return haserr ? -1 : 0;

@@ -43,7 +43,7 @@ GtEncodedsequence* gt_encodedsequence_new_from_files(
                                                   const GtStr *str_indexname,
                                                   const GtStr *str_smap,
                                                   const GtStr *str_sat,
-                                                  const GtStrArray *filenametab,
+                                                  GtStrArray *filenametab,
                                                   bool isdna,
                                                   bool isprotein,
                                                   bool isplain,
@@ -69,7 +69,7 @@ GtEncodedsequence* gt_encodedsequence_new_from_plain(bool withrange,
                                                      unsigned long len1,
                                                      const GtUchar *seq2,
                                                      unsigned long len2,
-                                                     const GtAlphabet *alpha,
+                                                     GtAlphabet *alpha,
                                                      GtLogger *logger);
 
 #ifdef GT_INLINEDENCSEQ
@@ -174,7 +174,7 @@ const char*        gt_encodedsequence_description(
                                                 unsigned long seqnum);
 
 /* Returns the <GtAlphabet> associated with <encseq>. */
-const GtAlphabet*  gt_encodedsequence_alphabet(const GtEncodedsequence *encseq);
+GtAlphabet*  gt_encodedsequence_alphabet(const GtEncodedsequence *encseq);
 
 /* Returns a <GtStrArray> of the names of the original sequence files
    contained in <encseq>. */

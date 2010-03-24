@@ -89,7 +89,7 @@ struct GtEncodedsequence
   const char *destab;
   unsigned long destablength, *sdstab;
 
-  const GtAlphabet *alpha;   /* alphabet representation */
+  GtAlphabet *alpha;   /* alphabet representation */
 
   const unsigned long *ssptab; /* (if numofdbsequences = 1 then NULL  else
                                                          numofdbsequences  -1)

@@ -207,13 +207,6 @@ GtUchar gt_encodedsequence_alphabetwildcardshow(
 unsigned long gt_encodedsequence_charcount(const GtEncodedsequence *encseq,
                                            GtUchar cc);
 
-/* some functions to remove reference from an GtEncodedsequence to prevent that
-   the referenced alphabet or filenametab are freed */
-
-void removealpharef(GtEncodedsequence *encseq);
-
-void removefilenametabref(GtEncodedsequence *encseq);
-
 void showgetencodedcharcounters(void);
 
 void gt_showsequencefeatures(GtLogger *logger,

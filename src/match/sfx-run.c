@@ -435,13 +435,13 @@ static int runsuffixerator(bool doesa,
   if (gt_str_length(so->str_inputindex) > 0)
   {
     encseq = gt_encodedsequence_new_from_index(true,
-                                so->str_inputindex,
-                                true,
-                                false,
-                                false,
-                                false,
-                                logger,
-                                err);
+                                               so->str_inputindex,
+                                               true,
+                                               false,
+                                               false,
+                                               false,
+                                               logger,
+                                               err);
     if (encseq == NULL)
     {
       haserr = true;
@@ -596,10 +596,6 @@ static int runsuffixerator(bool doesa,
     {
       haserr = true;
     }
-  }
-  if (gt_str_length(so->str_inputindex) == 0 && encseq != NULL)
-  {
-    removefilenametabref(encseq);
   }
   if (outfileinfo.outlcpinfo != NULL)
   {

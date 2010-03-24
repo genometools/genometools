@@ -2575,7 +2575,7 @@ static GtEncodedsequence *determineencseqkeyvalues(
                                           unsigned long numofdbfiles,
                                           unsigned long lengthofdbfilenames,
                                           unsigned long specialranges,
-                                          const GtAlphabet *alpha,
+                                          GtAlphabet *alpha,
                                           GtLogger *logger)
 {
   double spaceinbitsperchar;
@@ -2730,7 +2730,7 @@ const GtUchar *gt_encodedsequence_alphabetsymbolmap(
   return gt_alphabet_symbolmap(encseq->alpha);
 }
 
-const GtAlphabet *gt_encodedsequence_alphabet(const GtEncodedsequence *encseq)
+GtAlphabet *gt_encodedsequence_alphabet(const GtEncodedsequence *encseq)
 {
   return encseq->alpha;
 }
@@ -2884,7 +2884,7 @@ unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab)
                                 unsigned long totallength,
                                 unsigned long numofsequences,
                                 const unsigned long *specialrangestab,
-                                const GtAlphabet *alphabet,
+                                GtAlphabet *alphabet,
                                 const char *str_sat,
                                 unsigned long *characterdistribution,
                                 const GtSpecialcharinfo *specialcharinfo,
@@ -2981,7 +2981,7 @@ unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab)
   bool haserr = false;
   int retcode;
   Firstencseqvalues firstencseqvalues;
-  const GtAlphabet *alpha;
+  GtAlphabet *alpha;
 
   gt_error_check(err);
   alpha = gt_scanal1file(indexname,err);
@@ -3564,7 +3564,7 @@ GtEncodedsequence* gt_encodedsequence_new_from_plain(bool withrange,
                                                      unsigned long len1,
                                                      const GtUchar *seq2,
                                                      unsigned long len2,
-                                                     const GtAlphabet *alpha,
+                                                     GtAlphabet *alpha,
                                                      GtLogger *logger)
 {
   GtEncodedsequence *encseq;
@@ -3575,6 +3575,10 @@ GtEncodedsequence* gt_encodedsequence_new_from_plain(bool withrange,
 
   gt_assert(seq1 != NULL);
   gt_assert(len1 > 0);
+
+  /* Ref alphabet as it comes from outside. */
+  alpha = gt_alphabet_ref(alpha);
+
   if (seq2 == NULL)
   {
     seqptr = (GtUchar *) seq1;
@@ -5354,7 +5358,7 @@ gt_encodedsequence_new_from_files(GtProgressTimer *sfxprogress,
                                   const GtStr *str_indexname,
                                   const GtStr *str_smap,
                                   const GtStr *str_sat,
-                                  const GtStrArray *filenametab,
+                                  GtStrArray *filenametab,
                                   bool isdna,
                                   bool isprotein,
                                   bool isplain,
@@ -5369,7 +5373,7 @@ gt_encodedsequence_new_from_files(GtProgressTimer *sfxprogress,
   bool haserr = false;
   unsigned int forcetable;
   GtSpecialcharinfo specialcharinfo;
-  const GtAlphabet *alpha = NULL;
+  GtAlphabet *alpha = NULL;
   bool alphaisbound = false;
   GtFilelengthvalues *filelengthtab = NULL;
   unsigned long specialrangestab[3];
@@ -5378,6 +5382,7 @@ gt_encodedsequence_new_from_files(GtProgressTimer *sfxprogress,
   GtArrayGtUlong sequenceseppos;
 
   gt_error_check(err);
+  filenametab = gt_str_array_ref(filenametab);
   encseq = NULL;
   GT_INITARRAY(&sequenceseppos, GtUlong);
   if (gt_str_length(str_sat) > 0)
@@ -5501,9 +5506,11 @@ gt_encodedsequence_new_from_files(GtProgressTimer *sfxprogress,
     gt_free(characterdistribution);
     gt_free(filelengthtab);
     filelengthtab = NULL;
+    gt_str_array_delete(encseq->filenametab);
     if (alpha != NULL && !alphaisbound)
     {
       gt_alphabet_delete((GtAlphabet*) alpha);
+
     }
   }
   GT_FREEARRAY(&sequenceseppos, GtUlong);
