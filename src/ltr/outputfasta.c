@@ -86,7 +86,8 @@ static void showpredictionfastasequence(Fastaoutinfo *fastainfo,
   unsigned long desclen;
   const char *desptr;
   GtSeqinfo seqinfo;
-  unsigned long seqnum = getencseqfrompos2seqnum(fastainfo->encseq,startpos);
+  unsigned long seqnum = gt_encodedsequence_pos2seqnum(fastainfo->encseq,
+                                                       startpos);
 
   desptr = gt_encodedsequence_description(fastainfo->encseq,&desclen,seqnum);
   gt_encodedsequence_seqinfo(fastainfo->encseq,&seqinfo,seqnum);

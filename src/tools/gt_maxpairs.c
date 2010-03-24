@@ -59,7 +59,7 @@ static int simpleexactselfmatchoutput(void *info,
     pos1 = pos2;
     pos2 = tmp;
   }
-  queryseqnum = getencseqfrompos2seqnum(encseq,pos2);
+  queryseqnum = gt_encodedsequence_pos2seqnum(encseq,pos2);
   gt_encodedsequence_seqinfo(encseq,&seqinfo,queryseqnum);
   gt_assert(pos2 >= seqinfo.seqstartpos);
   querymatch_fill(querymatch,

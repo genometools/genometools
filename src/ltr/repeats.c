@@ -86,8 +86,8 @@ int simpleexactselfmatchstore (void *info,
   }
 
   tmp = pos2 - pos1;
-  seqnum1 = getencseqfrompos2seqnum(repeatinfo->encseq,pos1);
-  seqnum2 = getencseqfrompos2seqnum(repeatinfo->encseq,pos2);
+  seqnum1 = gt_encodedsequence_pos2seqnum(repeatinfo->encseq,pos1);
+  seqnum2 = gt_encodedsequence_pos2seqnum(repeatinfo->encseq,pos2);
   if (seqnum1 == seqnum2)
   {
     gt_log_log("accepted:\n");

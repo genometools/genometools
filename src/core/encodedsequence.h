@@ -33,6 +33,7 @@
 #include "core/readmode.h"
 #include "match/intcode-def.h"
 
+/* TODO: what does this struct contain and how can it be used? */
 typedef struct
 {
   GtTwobitencoding tbe;           /* two bit encoding */
@@ -40,6 +41,7 @@ typedef struct
   unsigned long position;
 } GtEndofTwobitencoding;
 
+/* TODO: what does this struct contain and how can it be used? */
 typedef struct
 {
   unsigned int common;
@@ -47,50 +49,64 @@ typedef struct
   unsigned long finaldepth;
 } GtCommonunits;
 
-/* GtSpecialrangeiterator */
-
+/* The <GtSpecialrangeiterator> type. */
 typedef struct GtSpecialrangeiterator GtSpecialrangeiterator;
 
+/* Create a new <GtSpecialrangeiterator> for <encseq>. */
 GtSpecialrangeiterator *
      gt_specialrangeiterator_new(const GtEncodedsequence *encseq,
                                  bool moveforward);
 
+/* Make <sri> supply the next special range <range>. Returns true if another
+   range was returned, false otherwise. */
 bool gt_specialrangeiterator_next(GtSpecialrangeiterator *sri,
                                   GtRange *range);
 
+/* Delete <sri> and free associated memory. */
 void gt_specialrangeiterator_delete(GtSpecialrangeiterator *sri);
 
+/* TODO: please document me */
 void gt_encodedsequence_extract2bitenc(bool fwd,
                                        GtEndofTwobitencoding *ptbe,
                                        const GtEncodedsequence *encseq,
                                        GtEncodedsequenceScanstate *esr,
                                        unsigned long startpos);
 
+/* TODO: please document me */
 int gt_encodedsequence_compare_twobitencodings(bool fwd,
                                             bool complement,
                                             GtCommonunits *commonunits,
                                             const GtEndofTwobitencoding *ptbe1,
                                             const GtEndofTwobitencoding *ptbe2);
 
+/* TODO: please document me */
 void gt_encodedsequence_plainseq2bytecode(GtUchar *bytecode,
                                           const GtUchar *seq,
                                           unsigned long len);
 
+/* TODO: please document me */
 void gt_encodedsequence_sequence2bytecode(GtUchar *dest,
                                           const GtEncodedsequence *encseq,
                                           unsigned long startindex,
                                           unsigned long len);
 
+/* Similar to <gt_error_check()>, this function exits with an error message
+   if <encseq> returns inconsistent descriptions when compared to the
+   destab. */
 void gt_encodedsequence_check_descriptions(const GtEncodedsequence *encseq);
 
-/* check if the marked positions are correct */
+/* Similar to <gt_error_check()>, this function exits with an error message
+   if <encseq> returns inconsistent marked positions. */
 void gt_encodedsequence_check_markpos(const GtEncodedsequence *encseq);
 
+/* Returns true is <encseq> has special ranges, false otherwise. */
 bool gt_encodedsequence_has_specialranges(const GtEncodedsequence *encseq);
 
+/* TODO: please document me */
 bool gt_encodedsequence_has_fast_specialrangeenumerator(
                                                const GtEncodedsequence *encseq);
 
+/* TODO: please document me */
 bool gt_encodedsequence_bitwise_cmp_ok(const GtEncodedsequence *encseq);
 
 /*@null@*/
@@ -132,19 +148,17 @@ bool       gt_encodedsequence_contains_special(const GtEncodedsequence *encseq,
                                            unsigned long startpos,
                                            unsigned long len);
 
-/* for a array of recordseparator, obtain the sequence
- * number from the given position */
+/* Returns the sequence number from the given <position> for an array of of
+   SEPARATOR positions <recordseps>.  */
+unsigned long gt_encodedsequence_sep2seqnum(const unsigned long *recordseps,
+                                            unsigned long numofrecords,
+                                            unsigned long totalwidth,
+                                            unsigned long position);
 
-unsigned long getrecordnumSeqpos(const unsigned long *recordseps,
-                                 unsigned long numofrecords,
-                                 unsigned long totalwidth,
-                                 unsigned long position);
-
-/* for a given GtEncodedsequence mapped with withssptab=true, obtain the
- * sequence number from the given position */
-
-unsigned long getencseqfrompos2seqnum(const GtEncodedsequence *encseq,
-                                      unsigned long position);
+/* Returns the sequence number from the given <position> for a given
+   GtEncodedsequence <encseq> mapped with withssptab=true. */
+unsigned long gt_encodedsequence_pos2seqnum(const GtEncodedsequence *encseq,
+                                            unsigned long position);
 
 /* here are some functions to extract the different components of the
  * specialcharinfo included in encseq */

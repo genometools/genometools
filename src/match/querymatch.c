@@ -127,7 +127,7 @@ int querymatch_output(GT_UNUSED void *info,
   unsigned long querystart, dbstart_relative;
 
   gt_assert(encseq != NULL);
-  dbseqnum = getencseqfrompos2seqnum(encseq,querymatch->dbstart);
+  dbseqnum = gt_encodedsequence_pos2seqnum(encseq,querymatch->dbstart);
   gt_encodedsequence_seqinfo(encseq,&seqinfo,dbseqnum);
   gt_assert((int) querymatch->readmode < 4);
   if (querymatch->readmode == GT_READMODE_REVERSE ||

@@ -99,7 +99,8 @@ static void showmatch(void *processinfo,const GtMatch *match)
     } else
     {
       GtSeqinfo seqinfo;
-      unsigned long seqnum = getencseqfrompos2seqnum(showmatchinfo->encseq,
+      unsigned long seqnum =
+                       gt_encodedsequence_pos2seqnum(showmatchinfo->encseq,
                                                      match->dbstartpos);
       gt_encodedsequence_seqinfo(showmatchinfo->encseq,&seqinfo,seqnum);
       gt_assert(seqinfo.seqstartpos <= match->dbstartpos);

@@ -2431,10 +2431,10 @@ static unsigned long *encseq2markpositions(const GtEncodedsequence *encseq)
   return asp.spaceGtUlong;
 }
 
-unsigned long getrecordnumSeqpos(const unsigned long *recordseps,
-                                 unsigned long numofrecords,
-                                 unsigned long totalwidth,
-                                 unsigned long position)
+unsigned long gt_encodedsequence_sep2seqnum(const unsigned long *recordseps,
+                                            unsigned long numofrecords,
+                                            unsigned long totalwidth,
+                                            unsigned long position)
 {
   unsigned long left, mid, right, len;
 
@@ -2478,14 +2478,14 @@ unsigned long getrecordnumSeqpos(const unsigned long *recordseps,
   exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 
-unsigned long getencseqfrompos2seqnum(const GtEncodedsequence *encseq,
-                                      unsigned long position)
+unsigned long gt_encodedsequence_pos2seqnum(const GtEncodedsequence *encseq,
+                                             unsigned long position)
 {
   gt_assert(encseq->numofdbsequences == 1UL || encseq->ssptab != NULL);
-  return getrecordnumSeqpos(encseq->ssptab,
-                            encseq->numofdbsequences,
-                            encseq->totallength,
-                            position);
+  return gt_encodedsequence_sep2seqnum(encseq->ssptab,
+                                       encseq->numofdbsequences,
+                                       encseq->totallength,
+                                       position);
 }
 
 static void getunitGtSeqinfo(GtSeqinfo *seqinfo,
@@ -2551,10 +2551,10 @@ void gt_encodedsequence_check_markpos(const GtEncodedsequence *encseq)
         currentseqnum++;
       } else
       {
-        seqnum = getrecordnumSeqpos(markpos,
-                                    encseq->numofdbsequences,
-                                    totallength,
-                                    pos);
+        seqnum = gt_encodedsequence_sep2seqnum(markpos,
+                                               encseq->numofdbsequences,
+                                               totallength,
+                                               pos);
         if (seqnum != currentseqnum)
         {
           fprintf(stderr,"pos= %lu seqnum = %lu != %lu = currentseqnum\n",

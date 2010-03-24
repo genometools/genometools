@@ -256,10 +256,10 @@ static int storemaxmatchself(void *info,
     } else
     {
       unsigned long queryseqnum
-        = getrecordnumSeqpos(maxmatchselfinfo->querymarkpos,
-                             maxmatchselfinfo->numofquerysequences,
-                             maxmatchselfinfo->querylen,
-                             pos);
+        = gt_encodedsequence_sep2seqnum(maxmatchselfinfo->querymarkpos,
+                                        maxmatchselfinfo->numofquerysequences,
+                                        maxmatchselfinfo->querylen,
+                                        pos);
       if (queryseqnum == maxmatchselfinfo->numofquerysequences)
       {
         return -1;
