@@ -60,8 +60,6 @@ bool gt_specialrangeiterator_next(GtSpecialrangeiterator *sri,
 
 void gt_specialrangeiterator_delete(GtSpecialrangeiterator *sri);
 
-/* XXX: clean up interface funcs below */
-
 void gt_encodedsequence_extract2bitenc(bool fwd,
                                        GtEndofTwobitencoding *ptbe,
                                        const GtEncodedsequence *encseq,
@@ -128,42 +126,11 @@ int        gt_encodedsequence_compare_maxdepth(const GtEncodedsequence *encseq,
                                                unsigned long depth,
                                                unsigned long maxdepth);
 
-/* some check functions called in test-encseq.c */
-
-int multicharactercompare(const GtEncodedsequence *encseq,
-                          bool fwd,
-                          bool complement,
-                          GtEncodedsequenceScanstate *esr1,
-                          unsigned long pos1,
-                          GtEncodedsequenceScanstate *esr2,
-                          unsigned long pos2);
-
-void checkextractunitatpos(const GtEncodedsequence *encseq,
-                           bool fwd,bool complement);
-
-void checkextractspecialbits(const GtEncodedsequence *encseq,bool fwd);
-
-void multicharactercompare_withtest(const GtEncodedsequence *encseq,
-                                    bool fwd,
-                                    bool complement,
-                                    GtEncodedsequenceScanstate *esr1,
-                                    unsigned long pos1,
-                                    GtEncodedsequenceScanstate *esr2,
-                                    unsigned long pos2);
-
-void showsequenceatstartpos(FILE *fp,
-                            bool fwd,
-                            bool complement,
-                            const GtEncodedsequence *encseq,
-                            unsigned long startpos);
-
-bool containsspecial(const GtEncodedsequence *encseq,
-                     bool moveforward,
-                     GtEncodedsequenceScanstate *esrspace,
-                     unsigned long startpos,
-                     unsigned long len);
-
-int getsatforcevalue(const char *str,GtError *err);
+bool       gt_encodedsequence_contains_special(const GtEncodedsequence *encseq,
+                                           bool moveforward,
+                                           GtEncodedsequenceScanstate *esrspace,
+                                           unsigned long startpos,
+                                           unsigned long len);
 
 /* for a array of recordseparator, obtain the sequence
  * number from the given position */
@@ -262,5 +229,14 @@ int comparetwostringsgeneric(const GtEncodedsequence *encseq,
                              unsigned long pos2,
                              unsigned long depth,
                              unsigned long maxdepth);
+
+int testencodedsequence(const GtStrArray *filenametab,
+                        const GtEncodedsequence *encseq,
+                        GtReadmode readmode,
+                        unsigned long scantrials,
+                        unsigned long multicharcmptrials,
+                        GtError *err);
+
+int checkspecialrangesfast(const GtEncodedsequence *encseq);
 
 #endif

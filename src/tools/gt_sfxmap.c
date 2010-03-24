@@ -25,7 +25,6 @@
 #include "match/esa-map.h"
 #include "match/echoseq.h"
 #include "match/sfx-suftaborder.h"
-#include "match/test-encseq.pr"
 #include "match/test-mappedstr.pr"
 #include "tools/gt_sfxmap.h"
 

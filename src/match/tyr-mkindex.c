@@ -90,11 +90,11 @@ static uint64_t bruteforcecountnumofmers(const Dfsstate *state)
 
   for (idx=0; idx <= state->totallength - state->mersize; idx++)
   {
-    if (!containsspecial(state->encseq,
-                         state->moveforward,
-                         state->esrspace,
-                         idx,
-                         state->mersize))
+    if (!gt_encodedsequence_contains_special(state->encseq,
+                                             state->moveforward,
+                                             state->esrspace,
+                                             idx,
+                                             state->mersize))
     {
       numofmers++;
     }
@@ -484,11 +484,11 @@ static int processleafedge(GT_UNUSED bool firstsucc,
   gt_error_check(err);
   if (fatherdepth < state->mersize &&
       leafnumber + state->mersize <= state->totallength &&
-      !containsspecial(state->encseq,
-                       state->moveforward,
-                       state->esrspace,
-                       leafnumber + fatherdepth,
-                       state->mersize - fatherdepth))
+      !gt_encodedsequence_contains_special(state->encseq,
+                                           state->moveforward,
+                                           state->esrspace,
+                                           leafnumber + fatherdepth,
+                                           state->mersize - fatherdepth))
   {
     if (state->processoccurrencecount(1UL,leafnumber,state,err) != 0)
     {
