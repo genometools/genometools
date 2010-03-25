@@ -219,10 +219,13 @@ GtUchar gt_encodedsequence_alphabetwildcardshow(
 unsigned long gt_encodedsequence_charcount(const GtEncodedsequence *encseq,
                                            GtUchar cc);
 
+/* Prints information about <encseq> via <logger>. If <withfilenames> is set,
+   then the filenames of the original sequence files are also printed. */
 void gt_encodedsequence_show_features(const GtEncodedsequence *encseq,
                                       GtLogger *logger,
                                       bool withfilenames);
 
+/* TODO: please document me */
 int comparetwosuffixes(const GtEncodedsequence *encseq,
                        GtReadmode readmode,
                        unsigned long *maxlcp,
@@ -234,6 +237,7 @@ int comparetwosuffixes(const GtEncodedsequence *encseq,
                        GtEncodedsequenceScanstate *esr1,
                        GtEncodedsequenceScanstate *esr2);
 
+/* TODO: please document me */
 int comparetwostrings(const GtEncodedsequence *encseq,
                       bool fwd,
                       bool complement,
@@ -242,6 +246,7 @@ int comparetwostrings(const GtEncodedsequence *encseq,
                       unsigned long pos2,
                       unsigned long maxdepth);
 
+/* TODO: please document me */
 int comparetwostringsgeneric(const GtEncodedsequence *encseq,
                              bool fwd,
                              bool complement,
