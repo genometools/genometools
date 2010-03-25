@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <inttypes.h>
+#include "core/unused_api.h"
 
 #ifdef S_SPLINT_S
 #define PRINTLLUcast(X)  ((unsigned int) (X))
@@ -28,7 +29,7 @@
 #endif
 
 #define DECLARESAFECASTFUNCTION(FROMTYPE,FROMTYPEALIAS,TOTYPE,TOTYPEALIAS)\
-        static TOTYPE safecast_ ## FROMTYPEALIAS ## _ ## TOTYPEALIAS(\
+        static TOTYPE gt_safecast_ ## FROMTYPEALIAS ## _ ## TOTYPEALIAS(\
                                                         const char *filename,\
                                                         int line,\
                                                         FROMTYPE from)\
@@ -46,6 +47,8 @@
         }
 
 #define CALLCASTFUNC(FROMTYPEALIAS,TOTYPEALIAS,VAL)\
-        safecast_ ## FROMTYPEALIAS ## _ ## TOTYPEALIAS(__FILE__,__LINE__,VAL)
+        gt_safecast_ ## FROMTYPEALIAS ## _ ## TOTYPEALIAS(__FILE__,__LINE__,VAL)
+
+GT_UNUSED DECLARESAFECASTFUNCTION(uint64_t,uint64_t,unsigned long,unsigned_long)
 
 #endif

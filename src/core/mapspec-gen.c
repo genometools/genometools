@@ -146,8 +146,6 @@ static int assigncorrecttype(Mapspecification *mapspec,
   return haserr ? -1 : 0;
 }
 
-DECLARESAFECASTFUNCTION(uint64_t,uint64_t,unsigned long,unsigned_long)
-
 int fillmapspecstartptr(Assignmapspec assignmapspec,
                         void **mappeduserptr,
                         void *assignmapinfo,

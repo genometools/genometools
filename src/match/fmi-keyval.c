@@ -42,8 +42,6 @@ unsigned long determinenumberofspecialstostore(const GtSpecialcharinfo
   return specialcharinfo->realspecialranges + 1 - addprefixsuffix;
 }
 
- DECLARESAFECASTFUNCTION(uint64_t,uint64_t,unsigned long,unsigned_long)
-
 static unsigned long determinefmindexsize (const Fmindex *fm,
                                            const GtSpecialcharinfo
                                               *specialcharinfo,

@@ -566,8 +566,6 @@ bool gt_encodedsequence_has_fast_specialrangeenumerator(
   return satviautables(encseq->sat);
 }
 
-DECLARESAFECASTFUNCTION(uint64_t,uint64_t_e,unsigned long,unsigned_long_e)
-
 static unsigned long detunitsoftwobitencoding(unsigned long totallength)
 {
   uint64_t unitsoftwobitencoding;
@@ -578,7 +576,7 @@ static unsigned long detunitsoftwobitencoding(unsigned long totallength)
   }
   unitsoftwobitencoding = (uint64_t) (2 +
                           GT_DIVBYUNITSIN2BITENC(totallength - 1));
-  return CALLCASTFUNC(uint64_t_e,unsigned_long_e,unitsoftwobitencoding);
+  return CALLCASTFUNC(uint64_t,unsigned_long,unitsoftwobitencoding);
 }
 
 static void assignencseqmapspecification(GtArrayMapspecification *mapspectable,
@@ -2581,7 +2579,7 @@ static GtEncodedsequence *determineencseqkeyvalues(
   encseq->numofdbfiles = numofdbfiles;
   encseq->lengthofdbfilenames = lengthofdbfilenames;
   encseq->numofchars = gt_alphabet_num_of_chars(alpha);
-  encseq->sizeofrep = CALLCASTFUNC(uint64_t_e, unsigned_long_e,
+  encseq->sizeofrep = CALLCASTFUNC(uint64_t, unsigned_long,
                                    localdetsizeencseq(sat,totallength,
                                          numofdbfiles,
                                          lengthofdbfilenames,specialranges,
@@ -5530,13 +5528,12 @@ static void testscanatpos(const GtEncodedsequence *encseq,
   unsigned long trial;
 
   totallength = gt_encodedsequence_total_length(encseq);
-  srand48(42349421);
   esr = gt_encodedsequence_scanstate_new();
   runscanatpostrial(encseq,esr,readmode,0);
   runscanatpostrial(encseq,esr,readmode,totallength-1);
   for (trial = 0; trial < scantrials; trial++)
   {
-    startpos = (unsigned long) (drand48() * (double) totallength);
+    startpos = (unsigned long) (random() % totallength);
     printf("trial %lu at %lu\n",trial,startpos);
     runscanatpostrial(encseq,esr,readmode,startpos);
   }
@@ -5556,7 +5553,6 @@ static void testmulticharactercompare(const GtEncodedsequence *encseq,
   esr1 = gt_encodedsequence_scanstate_new();
   esr2 = gt_encodedsequence_scanstate_new();
   totallength = gt_encodedsequence_total_length(encseq);
-  srand48(42349421);
   (void) multicharactercompare_withtest(encseq,fwd,complement,esr1,0,esr2,0);
   (void) multicharactercompare_withtest(encseq,fwd,complement,esr1,0,esr2,
                                         totallength-1);
@@ -5566,8 +5562,8 @@ static void testmulticharactercompare(const GtEncodedsequence *encseq,
                                         totallength-1,esr2,totallength-1);
   for (trial = 0; trial < multicharcmptrials; trial++)
   {
-    pos1 = (unsigned long) (drand48() * (double) totallength);
-    pos2 = (unsigned long) (drand48() * (double) totallength);
+    pos1 = (unsigned long) (random() % totallength);
+    pos2 = (unsigned long) (random() % totallength);
     (void) multicharactercompare_withtest(encseq,fwd,complement,
                                           esr1,pos1,esr2,pos2);
   }
