@@ -188,18 +188,21 @@ const GtStrArray*  gt_encodedsequence_filenames(
 
 void               gt_encodedsequence_delete(GtEncodedsequence *encseq);
 
-/* TODO document: needed for efficient sequential reading */
+/* TODO: please document me */
 GtEncodedsequenceScanstate* gt_encodedsequence_scanstate_new(void);
+/* TODO: please document me */
 void                        gt_encodedsequence_scanstate_init(
                                                 GtEncodedsequenceScanstate *esr,
                                                 const GtEncodedsequence *encseq,
                                                 GtReadmode readmode,
                                                 unsigned long startpos);
+/* TODO: please document me */
 void                        gt_encodedsequence_scanstate_initgeneric(
                                                 GtEncodedsequenceScanstate *esr,
                                                 const GtEncodedsequence *encseq,
                                                 bool moveforward,
                                                 unsigned long startpos);
+/* TODO: please document me */
 void                        gt_encodedsequence_scanstate_delete(
                                                GtEncodedsequenceScanstate *esr);
 

@@ -124,6 +124,7 @@ bool gt_encodedsequence_bitwise_cmp_ok(const GtEncodedsequence *encseq);
 /*@null@*/
 const char* gt_encodedsequence_accessname(const GtEncodedsequence *encseq);
 
+/* TODO: please document me */
 GtCodetype gt_encodedsequence_extractprefixcode(unsigned int *unitsnotspecial,
                                                const GtEncodedsequence *encseq,
                                                const GtCodetype *filltable,
@@ -133,6 +134,7 @@ GtCodetype gt_encodedsequence_extractprefixcode(unsigned int *unitsnotspecial,
                                                unsigned long frompos,
                                                unsigned int prefixlength);
 
+/* TODO: please document me */
 int        gt_encodedsequence_compare(const GtEncodedsequence *encseq,
                                       GtCommonunits *commonunits,
                                       bool fwd,
@@ -143,6 +145,7 @@ int        gt_encodedsequence_compare(const GtEncodedsequence *encseq,
                                       unsigned long pos2,
                                       unsigned long depth);
 
+/* TODO: please document me */
 int        gt_encodedsequence_compare_maxdepth(const GtEncodedsequence *encseq,
                                                GtCommonunits *commonunits,
                                                bool fwd,
@@ -154,6 +157,7 @@ int        gt_encodedsequence_compare_maxdepth(const GtEncodedsequence *encseq,
                                                unsigned long depth,
                                                unsigned long maxdepth);
 
+/* TODO: please document me */
 bool       gt_encodedsequence_contains_special(const GtEncodedsequence *encseq,
                                            bool moveforward,
                                            GtEncodedsequenceScanstate *esrspace,

@@ -22,10 +22,10 @@
 /*
   The contents of this file is to be considered private
   implementation detail but, whenever the code is compiled with option
-  INLINEDENCSEQ, is exposed to the compiler solely for performance
+  GT_INLINEDENCSEQ, is exposed to the compiler solely for performance
   optimization. So we can compare the time overhead of a bytearray
   implementation of strings to all other representations implemented in
-  encodedseq.c.
+  encodedsequence.c.
 */
 
 #include "core/alphabet.h"
@@ -33,7 +33,6 @@
 #include "core/filelengthvalues.h"
 #include "core/intbits.h"
 #include "core/intdef.h"
-
 #include "core/str_array_api.h"
 #include "core/symboldef.h"
 
