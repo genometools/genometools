@@ -201,7 +201,7 @@ static unsigned long *leftcontextofspecialchardist(unsigned int numofchars,
     }
     gt_specialrangeiterator_delete(&sri);
   }
-  if (getencseqlengthofspecialsuffix(encseq) == 0)
+  if (gt_encodedsequence_lengthofspecialsuffix(encseq) == 0)
   {
     cc = gt_encodedsequence_getencodedchar(encseq,totallength-1,readmode);
     gt_assert(ISNOTSPECIAL(cc));
@@ -266,7 +266,7 @@ static unsigned long *leftcontextofspecialchardist(unsigned int numofchars,
     }
     gt_specialrangeiterator_delete(sri);
   }
-  if (getencseqlengthofspecialsuffix(encseq) == 0)
+  if (gt_encodedsequence_lengthofspecialsuffix(encseq) == 0)
   {
     cc = gt_encodedsequence_getencodedchar(encseq,totallength-1,readmode);
     gt_assert(ISNOTSPECIAL(cc));

@@ -237,22 +237,28 @@ int gt_encodedsequence_comparetwostringsgeneric(const GtEncodedsequence *encseq,
                                                 unsigned long depth,
                                                 unsigned long maxdepth);
 
-/* here are some functions to extract the different components of the
- * specialcharinfo included in encseq */
+/* TODO: please document me */
+unsigned long gt_encodedsequence_specialcharacters(
+                                               const GtEncodedsequence *encseq);
 
-unsigned long getencseqspecialcharacters(const GtEncodedsequence *encseq);
+/* TODO: please document me */
+unsigned long gt_encodedsequence_specialranges(const GtEncodedsequence *encseq);
 
-unsigned long getencseqspecialranges(const GtEncodedsequence *encseq);
+/* TODO: please document me */
+unsigned long gt_encodedsequence_realspecialranges(
+                                               const GtEncodedsequence *encseq);
 
-unsigned long getencseqrealspecialranges(const GtEncodedsequence *encseq);
+/* TODO: please document me */
+unsigned long gt_encodedsequence_lengthofspecialprefix(
+                                               const GtEncodedsequence *encseq);
 
-unsigned long getencseqlengthofspecialprefix(const GtEncodedsequence *encseq);
-
-unsigned long getencseqlengthofspecialsuffix(const GtEncodedsequence *encseq);
+/* TODO: please document me */
+unsigned long gt_encodedsequence_lengthofspecialsuffix(
+                                               const GtEncodedsequence *encseq);
 
 /* In case an GtEncodedsequence is not mapped, we still need to obtain the
    Specialcharainfo. This is done by the following function */
 
 int readGtSpecialcharinfo(GtSpecialcharinfo *specialcharinfo,
-                          const GtStr *indexname,GtError *err);
+                          const GtStr *indexname, GtError *err);
 #endif

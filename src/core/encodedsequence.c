@@ -3128,35 +3128,38 @@ void gt_encodedsequence_check_descriptions(const GtEncodedsequence *encseq)
   gt_free(copydestab);
 }
 
-unsigned long getencseqspecialcharacters(const GtEncodedsequence *encseq)
+unsigned long gt_encodedsequence_specialcharacters(
+                                                const GtEncodedsequence *encseq)
 {
   return encseq->specialcharinfo.specialcharacters;
 }
 
-unsigned long getencseqspecialranges(const GtEncodedsequence *encseq)
+unsigned long gt_encodedsequence_specialranges(const GtEncodedsequence *encseq)
 {
   return encseq->specialcharinfo.specialranges;
 }
 
-unsigned long getencseqrealspecialranges(const GtEncodedsequence *encseq)
+unsigned long gt_encodedsequence_realspecialranges(
+                                                const GtEncodedsequence *encseq)
 {
   return encseq->specialcharinfo.realspecialranges;
 }
 
-unsigned long getencseqlengthofspecialprefix(const GtEncodedsequence *encseq)
+unsigned long gt_encodedsequence_lengthofspecialprefix(
+                                                const GtEncodedsequence *encseq)
 {
   return encseq->specialcharinfo.lengthofspecialprefix;
 }
 
-unsigned long getencseqlengthofspecialsuffix(const GtEncodedsequence *encseq)
+unsigned long gt_encodedsequence_lengthofspecialsuffix(
+                                                const GtEncodedsequence *encseq)
 {
   return encseq->specialcharinfo.lengthofspecialsuffix;
 }
 
-static unsigned long currentspecialrangevalue(
-                             unsigned long len,
-                             unsigned long occcount,
-                             unsigned long maxspecialtype)
+static unsigned long currentspecialrangevalue(unsigned long len,
+                                              unsigned long occcount,
+                                              unsigned long maxspecialtype)
 {
 /*
   printf("len=%lu,occcount=%lu,maxspecialtype=%lu\n",
@@ -5010,11 +5013,11 @@ void gt_encodedsequence_show_features(const GtEncodedsequence *encseq,
                        encseq->totallength);
   gt_logger_log(logger,"numofsequences=%lu",encseq->numofdbsequences);
   gt_logger_log(logger,"specialcharacters=%lu",
-                       getencseqspecialcharacters(encseq));
+                       gt_encodedsequence_specialcharacters(encseq));
   gt_logger_log(logger,"specialranges=%lu",
-                       getencseqspecialranges(encseq));
+                       gt_encodedsequence_specialranges(encseq));
   gt_logger_log(logger,"realspecialranges=%lu",
-                       getencseqrealspecialranges(encseq));
+                       gt_encodedsequence_realspecialranges(encseq));
   gt_assert(encseq->characterdistribution != NULL);
   showcharacterdistribution(alpha,encseq->characterdistribution,logger);
 }

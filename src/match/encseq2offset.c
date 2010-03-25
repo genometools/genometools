@@ -54,11 +54,14 @@ unsigned long *encseqtable2sequenceoffsets(unsigned long *totallength,
         = sequenceoffsettable[idx-1] + tmplength + (unsigned long) 1;
     }
     tmpspecialcharacters
-      += (uint64_t) getencseqspecialcharacters(suffixarraytable[idx].encseq);
+      += (uint64_t) gt_encodedsequence_specialcharacters(
+                                                  suffixarraytable[idx].encseq);
     tmpspecialranges
-      += (uint64_t) getencseqspecialranges(suffixarraytable[idx].encseq);
+      += (uint64_t) gt_encodedsequence_specialranges(
+                                                  suffixarraytable[idx].encseq);
     tmprealspecialranges
-      += (uint64_t) getencseqrealspecialranges(suffixarraytable[idx].encseq);
+      += (uint64_t) gt_encodedsequence_realspecialranges(
+                                                  suffixarraytable[idx].encseq);
     if (idx > 0)
     {
       /* Random access */
@@ -104,8 +107,8 @@ unsigned long *encseqtable2sequenceoffsets(unsigned long *totallength,
   specialcharinfo->specialranges = (unsigned long) tmpspecialranges;
   specialcharinfo->realspecialranges = (unsigned long) tmprealspecialranges;
   specialcharinfo->lengthofspecialprefix
-    = getencseqlengthofspecialprefix(suffixarraytable[0].encseq);
+    = gt_encodedsequence_lengthofspecialprefix(suffixarraytable[0].encseq);
   specialcharinfo->lengthofspecialsuffix
-    = getencseqlengthofspecialsuffix(suffixarraytable[idx-1].encseq);
+    = gt_encodedsequence_lengthofspecialsuffix(suffixarraytable[idx-1].encseq);
   return sequenceoffsettable;
 }

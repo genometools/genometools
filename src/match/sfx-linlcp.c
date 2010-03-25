@@ -127,7 +127,7 @@ static unsigned long *fillrightofpartwidth(
   unsigned long realspecialranges, *rightofpartwidth = NULL;
   unsigned long countranges = 0, nextrightofpartwidth = 0;
 
-  realspecialranges = getencseqrealspecialranges(encseq);
+  realspecialranges = gt_encodedsequence_realspecialranges(encseq);
   sri = gt_specialrangeiterator_new(encseq,
                                 GT_ISDIRREVERSE(readmode) ? false : true);
   while (gt_specialrangeiterator_next(sri,&range))
@@ -177,7 +177,7 @@ static void inversesuffixarray2specialranknext(
                                             readmode,
                                             partwidth,
                                             totallength);
-    specialcharacters = getencseqspecialcharacters(encseq);
+    specialcharacters = gt_encodedsequence_specialcharacters(encseq);
     specialranklistindex = partwidth;
     sri = gt_specialrangeiterator_new(encseq,
                                       GT_ISDIRREVERSE(readmode) ? false : true);
@@ -291,7 +291,7 @@ static unsigned long sa2ranknext(Compressedtable *ranknext,
         specialidx++;
       }
     }
-    if (getencseqlengthofspecialsuffix(encseq))
+    if (gt_encodedsequence_lengthofspecialsuffix(encseq))
     {
       compressedtable_update(ranknext,totallength-1,totallength);
     }

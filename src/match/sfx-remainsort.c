@@ -186,7 +186,7 @@ static Lowerboundwithrank *filllowerboundwithrank(
     unsigned long currentrank = 0, realspecialranges;
     Lowerboundwithrank *lowerboundwithrank, *lbptr;
 
-    realspecialranges = getencseqrealspecialranges(encseq);
+    realspecialranges = gt_encodedsequence_realspecialranges(encseq);
     lowerboundwithrank = gt_malloc(sizeof (*lowerboundwithrank) *
                                    realspecialranges);
     printf("lowerboundwithrank requires %lu bytes\n",
@@ -366,7 +366,7 @@ Rmnsufinfo *newRmnsufinfo(unsigned long *presortedsuffixes,
   rmnsufinfo->multimappower = bcktab_multimappower(bcktab);
   rmnsufinfo->esr = gt_encodedsequence_scanstate_new();
   GT_INITARRAY(&rmnsufinfo->firstgeneration,Pairsuffixptr);
-  rmnsufinfo->realspecialranges = getencseqrealspecialranges(encseq);
+  rmnsufinfo->realspecialranges = gt_encodedsequence_realspecialranges(encseq);
   rmnsufinfo->filltable = filllargestchartable(numofchars,prefixlength);
 #ifdef Lowerboundwithrank
   rmnsufinfo->lowerboundwithrank = filllowerboundwithrank(encseq,readmode);

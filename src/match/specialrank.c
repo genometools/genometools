@@ -40,7 +40,7 @@ Rankedbounds *fillrankbounds(const GtEncodedsequence *encseq,
     unsigned long currentrank = 0, realspecialranges;
     Rankedbounds *rankedbounds, *rbptr;
 
-    realspecialranges = getencseqrealspecialranges(encseq);
+    realspecialranges = gt_encodedsequence_realspecialranges(encseq);
     rankedbounds = gt_malloc(sizeof (Rankedbounds) * realspecialranges);
     sri = gt_specialrangeiterator_new(encseq,
                                       GT_ISDIRREVERSE(readmode)
@@ -158,7 +158,7 @@ Specialrank *fillspecialranklist(const GtEncodedsequence *encseq,
     Specialrank *specialranklist, *rbptr;
 
     totallength = gt_encodedsequence_total_length(encseq);
-    realspecialranges = getencseqrealspecialranges(encseq);
+    realspecialranges = gt_encodedsequence_realspecialranges(encseq);
     specialranklist = gt_malloc(sizeof (Specialrank) * realspecialranges);
     sri = gt_specialrangeiterator_new(encseq,
                                   GT_ISDIRREVERSE(readmode)

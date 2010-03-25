@@ -36,7 +36,7 @@
 
 #define PRJSPECIALOUT(VAL)\
         fprintf(outprj,"%s=%lu\n",#VAL,\
-                getencseq##VAL(encseq))
+                gt_encodedsequence_##VAL(encseq))
 
 static void showprjinfo(FILE *outprj,
                         GtReadmode readmode,

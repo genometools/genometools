@@ -472,8 +472,8 @@ Sfxiterator *newSfxiterator(const GtEncodedsequence *encseq,
 
   gt_error_check(err);
 
-  realspecialranges = getencseqrealspecialranges(encseq);
-  specialcharacters = getencseqspecialcharacters(encseq);
+  realspecialranges = gt_encodedsequence_realspecialranges(encseq);
+  specialcharacters = gt_encodedsequence_specialcharacters(encseq);
   gt_assert(prefixlength > 0);
   if (sfxstrategy != NULL && sfxstrategy->storespecialcodes &&
       prefixlength > MAXPREFIXLENGTH)
@@ -552,7 +552,7 @@ Sfxiterator *newSfxiterator(const GtEncodedsequence *encseq,
     sfi->sfxprogress = sfxprogress;
 
     if (sfi->sfxstrategy.differencecover > 0 &&
-        getencseqspecialcharacters(encseq)
+        gt_encodedsequence_specialcharacters(encseq)
           < gt_encodedsequence_total_length(encseq))
     {
       if (sfxprogress != NULL)
