@@ -293,7 +293,7 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
       if (!haserr && sfxmapoptions.inputtis)
       {
         gt_logger_log(logger, "checkspecialrangesfast");
-        if (checkspecialrangesfast(suffixarray.encseq) != 0)
+        if (gt_encodedsequence_check_specialranges(suffixarray.encseq) != 0)
         {
           haserr = true;
         }

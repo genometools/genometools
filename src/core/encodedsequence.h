@@ -99,6 +99,8 @@ void gt_encodedsequence_check_descriptions(const GtEncodedsequence *encseq);
    if <encseq> returns inconsistent marked positions. */
 void gt_encodedsequence_check_markpos(const GtEncodedsequence *encseq);
 
+/* TODO: please document me */
+int gt_encodedsequence_check_specialranges(const GtEncodedsequence *encseq);
 
 /* TODO: please document me */
 int gt_encodedsequence_check_consistency(const GtEncodedsequence *encseq,
@@ -107,6 +109,7 @@ int gt_encodedsequence_check_consistency(const GtEncodedsequence *encseq,
                                          unsigned long scantrials,
                                          unsigned long multicharcmptrials,
                                          GtError *err);
+
 /* Returns true is <encseq> has special ranges, false otherwise. */
 bool gt_encodedsequence_has_specialranges(const GtEncodedsequence *encseq);
 
@@ -117,6 +120,7 @@ bool gt_encodedsequence_has_fast_specialrangeenumerator(
 /* TODO: please document me */
 bool gt_encodedsequence_bitwise_cmp_ok(const GtEncodedsequence *encseq);
 
+/* TODO: please document me */
 /*@null@*/
 const char* gt_encodedsequence_accessname(const GtEncodedsequence *encseq);
 
@@ -248,6 +252,5 @@ int comparetwostringsgeneric(const GtEncodedsequence *encseq,
                              unsigned long maxdepth);
 
 
-int checkspecialrangesfast(const GtEncodedsequence *encseq);
 
 #endif

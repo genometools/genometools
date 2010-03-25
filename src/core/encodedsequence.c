@@ -5740,7 +5740,7 @@ static int compareGtRange(const void *a,const void *b)
   return 0;
 }
 
-int checkspecialrangesfast(const GtEncodedsequence *encseq)
+int gt_encodedsequence_check_specialranges(const GtEncodedsequence *encseq)
 {
   GtArray *rangesforward, *rangesbackward;
   bool haserr = false;
