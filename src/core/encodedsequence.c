@@ -5669,12 +5669,12 @@ static int testfullscan(const GtStrArray *filenametab,
   return haserr ? -1 : 0;
 }
 
-int testencodedsequence(const GtStrArray *filenametab,
-                        const GtEncodedsequence *encseq,
-                        GtReadmode readmode,
-                        unsigned long scantrials,
-                        unsigned long multicharcmptrials,
-                        GtError *err)
+int gt_encodedsequence_check_consistency(const GtEncodedsequence *encseq,
+                                         const GtStrArray *filenametab,
+                                         GtReadmode readmode,
+                                         unsigned long scantrials,
+                                         unsigned long multicharcmptrials,
+                                         GtError *err)
 {
   bool fwd = GT_ISDIRREVERSE(readmode) ? false : true,
        complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;

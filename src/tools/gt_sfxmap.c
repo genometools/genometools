@@ -277,9 +277,8 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
           {
             gt_logger_log(logger, "testencodedsequence(readmode=%s)",
                                    gt_readmode_show((GtReadmode) readmode));
-            if (testencodedsequence(
+            if (gt_encodedsequence_check_consistency(suffixarray.encseq,
                                gt_encodedsequence_filenames(suffixarray.encseq),
-                               suffixarray.encseq,
                                (GtReadmode) readmode,
                                sfxmapoptions.scantrials,
                                sfxmapoptions.multicharcmptrials,
