@@ -454,7 +454,7 @@ static int compareFixedkeys(const void *a,const void *b)
                 ((const Fixedsizekey *) fb)->key);
 }
 
-#define KEYSTABSUFFIX ".kys"
+#define GT_KEYSTABFILESUFFIX ".kys"
 
 int gt_extractkeysfromdesfile(const GtStr *indexname,
                               bool sortkeys,
@@ -472,14 +472,16 @@ int gt_extractkeysfromdesfile(const GtStr *indexname,
   unsigned long numofentries = 0;
   const unsigned long linewidth = 60UL;
 
-  fpin = opendestabfile(indexname,"rb",err);
+  fpin = gt_fa_fopen_filename_with_suffix(indexname,GT_DESTABFILESUFFIX,"rb",
+                                          err);
   if (fpin == NULL)
   {
     return -1;
   }
   if (!sortkeys)
   {
-    fpout = gt_fa_fopen_filename_with_suffix(indexname,KEYSTABSUFFIX,"wb",err);
+    fpout = gt_fa_fopen_filename_with_suffix(indexname,GT_KEYSTABFILESUFFIX,
+                                             "wb",err);
     if (fpout == NULL)
     {
       haserr = true;
@@ -646,7 +648,7 @@ int gt_extractkeysfromdesfile(const GtStr *indexname,
 
 bool gt_deskeysfileexists(const GtStr *indexname)
 {
-  return gt_exists_filename_with_suffix(indexname,KEYSTABSUFFIX);
+  return gt_exists_filename_with_suffix(indexname,GT_KEYSTABFILESUFFIX);
 }
 
 static unsigned long searchfastaqueryindes(const char *extractkey,
@@ -756,7 +758,8 @@ static int readkeysize(const GtStr *indexname,GtError *err)
   char cc;
 
   gt_error_check(err);
-  fp = gt_fa_fopen_filename_with_suffix(indexname,KEYSTABSUFFIX,"rb",err);
+  fp = gt_fa_fopen_filename_with_suffix(indexname,GT_KEYSTABFILESUFFIX,"rb",
+                                        err);
   if (fp == NULL)
   {
     haserr = true;
@@ -769,7 +772,7 @@ static int readkeysize(const GtStr *indexname,GtError *err)
     if (ferror(fp))
     {
       gt_error_set(err,"error when trying to read first byte of file %s%s: %s",
-                   gt_str_get(indexname),KEYSTABSUFFIX,strerror(errno));
+                   gt_str_get(indexname),GT_KEYSTABFILESUFFIX,strerror(errno));
       haserr = true;
     }
   }
@@ -817,7 +820,7 @@ int gt_extractkeysfromfastaindex(const GtStr *indexname,
 
     keytablength = 1UL + numofdbsequences * (keysize+1);
     keytab = gt_mmap_check_filename_with_suffix(indexname,
-                                                KEYSTABSUFFIX,
+                                                GT_KEYSTABFILESUFFIX,
                                                 keytablength,
                                                 sizeof (GtUchar),
                                                 err);

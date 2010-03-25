@@ -37,6 +37,11 @@ typedef struct GtEncodedsequenceScanstate GtEncodedsequenceScanstate;
 #include "core/encodedsequence_rep.h"
 #endif
 
+#define GT_ENCSEQFILESUFFIX ".esq"
+#define GT_DESTABFILESUFFIX ".des"
+#define GT_SDSTABFILESUFFIX ".sds"
+#define GT_SSPTABFILESUFFIX ".ssp"
+
 /*@null@*/
 GtEncodedsequence* gt_encodedsequence_new_from_files(
                                                   GtProgressTimer *sfxprogress,

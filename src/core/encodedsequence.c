@@ -118,32 +118,6 @@
           *tbeptr = bitwise;\
         }
 
-/*
-  The following defines the suffix of a file to store sequences.
-*/
-
-#define ENCSEQFILESUFFIX     ".esq"
-
-/*
-  The following defines the suffix of a file to store sequence descriptions.
-*/
-
-#define DESTABSUFFIX ".des"
-
-/*
-  The following defines the suffix of a file to store sequence description
-  separator positions.
-*/
-
-#define SDSTABSUFFIX ".sds"
-
-/*
-  The following defines the suffix of a file to store sequence seperator
-  positions.
-*/
-
-#define SSPTABSUFFIX ".ssp"
-
 #define NAMEDFUNCTION(F) {#F,F}
 
 typedef struct
@@ -742,7 +716,7 @@ static int flushencseqfile(const GtStr *indexname,GtEncodedsequence *encseq,
   bool haserr = false;
 
   gt_error_check(err);
-  fp = gt_fa_fopen_filename_with_suffix(indexname,ENCSEQFILESUFFIX,"wb",err);
+  fp = gt_fa_fopen_filename_with_suffix(indexname,GT_ENCSEQFILESUFFIX,"wb",err);
   if (fp == NULL)
   {
     haserr = true;
@@ -788,7 +762,7 @@ static int fillencseqmapspecstartptr(GtEncodedsequence *encseq,
 
   gt_error_check(err);
   tmpfilename = gt_str_clone(indexname);
-  gt_str_append_cstr(tmpfilename,ENCSEQFILESUFFIX);
+  gt_str_append_cstr(tmpfilename,GT_ENCSEQFILESUFFIX);
   if (fillmapspecstartptr(assignencseqmapspecification,
                           &encseq->mappedptr,
                           encseq,
@@ -2679,7 +2653,7 @@ static int readfirstvaluesfromfile(Firstencseqvalues *firstencseqvalues,
   unsigned long cc;
 
   gt_error_check(err);
-  fp = gt_fa_fopen_filename_with_suffix(indexname,ENCSEQFILESUFFIX,"rb",err);
+  fp = gt_fa_fopen_filename_with_suffix(indexname,GT_ENCSEQFILESUFFIX,"rb",err);
   if (fp == NULL)
   {
     haserr = true;
@@ -2690,7 +2664,7 @@ static int readfirstvaluesfromfile(Firstencseqvalues *firstencseqvalues,
     if (cc >= (unsigned long) Undefpositionaccesstype)
     {
       gt_error_set(err,"illegal type %lu in \"%s%s\"",cc,
-                    gt_str_get(indexname),ENCSEQFILESUFFIX);
+                    gt_str_get(indexname),GT_ENCSEQFILESUFFIX);
       haserr = true;
     }
   }
@@ -3031,7 +3005,7 @@ static unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab)
 
     gt_assert(encseq != NULL);
     encseq->destab = gt_mmap_filename_with_suffix(indexname,
-                                                  DESTABSUFFIX,
+                                                  GT_DESTABFILESUFFIX,
                                                   &numofbytes,
                                                   err);
     encseq->destablength = (unsigned long) numofbytes;
@@ -3047,7 +3021,7 @@ static unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab)
     {
       encseq->sdstab
         = gt_mmap_check_filename_with_suffix(indexname,
-                                             SDSTABSUFFIX,
+                                             GT_SDSTABFILESUFFIX,
                                              encseq->numofdbsequences - 1,
                                              sizeof (*encseq->sdstab),
                                              err);
@@ -3067,7 +3041,7 @@ static unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab)
     {
       encseq->ssptab
         = gt_mmap_check_filename_with_suffix(indexname,
-                                             SSPTABSUFFIX,
+                                             GT_SSPTABFILESUFFIX,
                                              encseq->numofdbsequences - 1,
                                              sizeof (unsigned long),
                                              err);
@@ -3288,16 +3262,6 @@ static void doupdatesumranges(GtSpecialcharinfo *specialcharinfo,
   }
 }
 
-FILE *opendestabfile(const GtStr *indexname,const char *mode,GtError *err)
-{
-  return gt_fa_fopen_filename_with_suffix(indexname,DESTABSUFFIX,mode,err);
-}
-
-FILE *openssptabfile(const GtStr *indexname,const char *mode,GtError *err)
-{
-  return gt_fa_fopen_filename_with_suffix(indexname,SSPTABSUFFIX,mode,err);
-}
-
 static int gt_inputfiles2sequencekeyvalues(const GtStr *indexname,
                                            unsigned long *totallength,
                                            GtSpecialcharinfo *specialcharinfo,
@@ -3335,7 +3299,8 @@ static int gt_inputfiles2sequencekeyvalues(const GtStr *indexname,
   if (outdestab)
   {
     descqueue = gt_queue_new();
-    desfp = opendestabfile(indexname,"wb",err);
+    desfp = gt_fa_fopen_filename_with_suffix(indexname,GT_DESTABFILESUFFIX,
+                                             "wb",err);
     if (desfp == NULL)
     {
       haserr = true;
@@ -3343,7 +3308,8 @@ static int gt_inputfiles2sequencekeyvalues(const GtStr *indexname,
   }
   if (outsdstab)
   {
-    sdsfp = gt_fa_fopen_filename_with_suffix(indexname,SDSTABSUFFIX,"wb",err);
+    sdsfp = gt_fa_fopen_filename_with_suffix(indexname,GT_SDSTABFILESUFFIX,
+                                             "wb",err);
     if (sdsfp == NULL)
     {
       haserr = true;
@@ -3410,7 +3376,7 @@ static int gt_inputfiles2sequencekeyvalues(const GtStr *indexname,
             if (fputs(desc,desfp) == EOF)
             {
               gt_error_set(err,"cannot write description to file %s.%s",
-                                gt_str_get(indexname),DESTABSUFFIX);
+                                gt_str_get(indexname),GT_DESTABFILESUFFIX);
               haserr = true;
               break;
             }
@@ -3425,7 +3391,8 @@ static int gt_inputfiles2sequencekeyvalues(const GtStr *indexname,
                   != (size_t) 1)
               {
                 gt_error_set(err,"cannot write description separator to file "
-                                 "%s.%s",gt_str_get(indexname),SDSTABSUFFIX);
+                                 "%s.%s",gt_str_get(indexname),
+                                 GT_SDSTABFILESUFFIX);
                 haserr = true;
                 break;
               }
@@ -3478,7 +3445,7 @@ static int gt_inputfiles2sequencekeyvalues(const GtStr *indexname,
       if (fputs(desc,desfp) == EOF)
       {
         gt_error_set(err,"cannot write description to file %s.%s",
-                          gt_str_get(indexname),DESTABSUFFIX);
+                          gt_str_get(indexname),GT_DESTABFILESUFFIX);
         haserr = true;
       }
       (void) putc((int) '\n',desfp);
@@ -5476,7 +5443,9 @@ gt_encodedsequence_new_from_files(GtProgressTimer *sfxprogress,
       if (!haserr && outssptab)
       {
         FILE *outfp;
-        outfp = openssptabfile(str_indexname,"wb",err);
+        outfp = gt_fa_fopen_filename_with_suffix(str_indexname,
+                                                 GT_SSPTABFILESUFFIX,
+                                                 "wb",err);
         if (outfp == NULL)
         {
           haserr = true;
