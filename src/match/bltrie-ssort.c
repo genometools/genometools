@@ -600,7 +600,7 @@ static void checkcurrentblindtrie(Blindtrie *blindtrie)
   for (idx=1UL; idx < numofsuffixes; idx++)
   {
     maxcommon = 0;
-    retval = comparetwostringsgeneric(blindtrie->encseq,
+    retval = gt_encodedsequence_comparetwostringsgeneric(blindtrie->encseq,
                                       GT_ISDIRREVERSE(blindtrie->readmode)
                                         ? false : true,
                                       GT_ISDIRCOMPLEMENT(blindtrie->readmode)

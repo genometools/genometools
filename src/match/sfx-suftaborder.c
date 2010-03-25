@@ -110,7 +110,7 @@ void checkifprefixesareidentical(const char *filename,
   esr2 = gt_encodedsequence_scanstate_new();
   for (ptr = suftab + left; ptr < suftab + right; ptr++)
   {
-    cmp = comparetwosuffixes(encseq,
+    cmp = gt_encodedsequence_comparetwosuffixes(encseq,
                              readmode,
                              &maxlcp,
                              false,
@@ -185,7 +185,7 @@ void checksortedsuffixes(const char *filename,
     if (ptr < suftab + numberofsuffixes - 1)
     {
       gt_assert(*ptr < totallength);
-      cmp = comparetwosuffixes(encseq,
+      cmp = gt_encodedsequence_comparetwosuffixes(encseq,
                                readmode,
                                &maxlcp,
                                specialsareequal,
@@ -284,7 +284,7 @@ void checkentiresuftab(const char *filename,
     if (ptr < suftab + numberofsuffixes - 1)
     {
       gt_assert(*ptr < totallength);
-      cmp = comparetwosuffixes(encseq,
+      cmp = gt_encodedsequence_comparetwosuffixes(encseq,
                                readmode,
                                &maxlcp,
                                specialsareequal,

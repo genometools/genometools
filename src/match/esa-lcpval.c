@@ -58,7 +58,7 @@ unsigned long nextLcpvalueiterator(Lcpvalueiterator *lvi,
   {
     int cmp;
 
-    cmp = comparetwosuffixes(lvi->encseq,
+    cmp = gt_encodedsequence_comparetwosuffixes(lvi->encseq,
                              lvi->readmode,
                              &lcpvalue,
                              false,

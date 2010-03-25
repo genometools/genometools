@@ -172,25 +172,6 @@ unsigned long gt_encodedsequence_sep2seqnum(const unsigned long *recordseps,
 unsigned long gt_encodedsequence_pos2seqnum(const GtEncodedsequence *encseq,
                                             unsigned long position);
 
-/* here are some functions to extract the different components of the
- * specialcharinfo included in encseq */
-
-unsigned long getencseqspecialcharacters(const GtEncodedsequence *encseq);
-
-unsigned long getencseqspecialranges(const GtEncodedsequence *encseq);
-
-unsigned long getencseqrealspecialranges(const GtEncodedsequence *encseq);
-
-unsigned long getencseqlengthofspecialprefix(const GtEncodedsequence *encseq);
-
-unsigned long getencseqlengthofspecialsuffix(const GtEncodedsequence *encseq);
-
-/* In case an GtEncodedsequence is not mapped, we still need to obtain the
-   Specialcharainfo. This is done by the following function */
-
-int readGtSpecialcharinfo(GtSpecialcharinfo *specialcharinfo,
-                          const GtStr *indexname,GtError *err);
-
 /* Obtains the number of characters in the Alphabet associated with <encseq>.
    This saves one function call for extracting the alphabet pointer
    from <encseq> (performance reasons). */
@@ -226,36 +207,52 @@ void gt_encodedsequence_show_features(const GtEncodedsequence *encseq,
                                       bool withfilenames);
 
 /* TODO: please document me */
-int comparetwosuffixes(const GtEncodedsequence *encseq,
-                       GtReadmode readmode,
-                       unsigned long *maxlcp,
-                       bool specialsareequal,
-                       bool specialsareequalatdepth0,
-                       unsigned long maxdepth,
-                       unsigned long start1,
-                       unsigned long start2,
-                       GtEncodedsequenceScanstate *esr1,
-                       GtEncodedsequenceScanstate *esr2);
+int gt_encodedsequence_comparetwosuffixes(const GtEncodedsequence *encseq,
+                                          GtReadmode readmode,
+                                          unsigned long *maxlcp,
+                                          bool specialsareequal,
+                                          bool specialsareequalatdepth0,
+                                          unsigned long maxdepth,
+                                          unsigned long start1,
+                                          unsigned long start2,
+                                          GtEncodedsequenceScanstate *esr1,
+                                          GtEncodedsequenceScanstate *esr2);
 
 /* TODO: please document me */
-int comparetwostrings(const GtEncodedsequence *encseq,
-                      bool fwd,
-                      bool complement,
-                      unsigned long *maxcommon,
-                      unsigned long pos1,
-                      unsigned long pos2,
-                      unsigned long maxdepth);
+int gt_encodedsequence_comparetwostrings(const GtEncodedsequence *encseq,
+                                         bool fwd,
+                                         bool complement,
+                                         unsigned long *maxcommon,
+                                         unsigned long pos1,
+                                         unsigned long pos2,
+                                         unsigned long maxdepth);
 
 /* TODO: please document me */
-int comparetwostringsgeneric(const GtEncodedsequence *encseq,
-                             bool fwd,
-                             bool complement,
-                             unsigned long *maxcommon,
-                             unsigned long pos1,
-                             unsigned long pos2,
-                             unsigned long depth,
-                             unsigned long maxdepth);
+int gt_encodedsequence_comparetwostringsgeneric(const GtEncodedsequence *encseq,
+                                                bool fwd,
+                                                bool complement,
+                                                unsigned long *maxcommon,
+                                                unsigned long pos1,
+                                                unsigned long pos2,
+                                                unsigned long depth,
+                                                unsigned long maxdepth);
 
+/* here are some functions to extract the different components of the
+ * specialcharinfo included in encseq */
 
+unsigned long getencseqspecialcharacters(const GtEncodedsequence *encseq);
 
+unsigned long getencseqspecialranges(const GtEncodedsequence *encseq);
+
+unsigned long getencseqrealspecialranges(const GtEncodedsequence *encseq);
+
+unsigned long getencseqlengthofspecialprefix(const GtEncodedsequence *encseq);
+
+unsigned long getencseqlengthofspecialsuffix(const GtEncodedsequence *encseq);
+
+/* In case an GtEncodedsequence is not mapped, we still need to obtain the
+   Specialcharainfo. This is done by the following function */
+
+int readGtSpecialcharinfo(GtSpecialcharinfo *specialcharinfo,
+                          const GtStr *indexname,GtError *err);
 #endif

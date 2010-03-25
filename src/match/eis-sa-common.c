@@ -42,7 +42,7 @@ writeLCPVal(const GtEncodedsequence *encseq, GtReadmode readmode,
 #ifndef NDEBUG
   int cmp =
 #endif /* NDEBUG */
-    comparetwosuffixes(encseq,
+    gt_encodedsequence_comparetwosuffixes(encseq,
                        readmode,
                        dest,
                        false,

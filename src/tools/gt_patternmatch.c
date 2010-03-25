@@ -150,7 +150,8 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
             {
               for (idx=itv.left; idx<=itv.right; idx++)
               {
-                retval = comparetwosuffixes(suffixarray.encseq,
+                retval = gt_encodedsequence_comparetwosuffixes(
+                                            suffixarray.encseq,
                                             suffixarray.readmode,
                                             &maxlcp,
                                             false,

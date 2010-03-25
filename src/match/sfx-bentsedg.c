@@ -260,7 +260,7 @@ static void checksuffixrange(const GtEncodedsequence *encseq,
       pos1 = GT_REVERSEPOS(gt_encodedsequence_total_length(encseq),*sufptr);
       pos2 = GT_REVERSEPOS(gt_encodedsequence_total_length(encseq),*(sufptr+1));
     }
-    (void) comparetwostrings(encseq,
+    (void) gt_encodedsequence_comparetwostrings(encseq,
                              fwd,
                              complement,
                              &newdepth,
@@ -1500,7 +1500,7 @@ static unsigned long bruteforcelcpvalue(const GtEncodedsequence *encseq,
   unsigned int lcpvalue2;
   int cmp;
 
-  cmp = comparetwosuffixes(encseq,
+  cmp = gt_encodedsequence_comparetwosuffixes(encseq,
                            readmode,
                            &lcpvalue,
                            false,

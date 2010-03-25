@@ -4304,7 +4304,7 @@ int gt_encodedsequence_compare(const GtEncodedsequence *encseq,
     unsigned long lcp2 = 0;
     int retval2;
 
-    retval2 = comparetwostringsgeneric(encseq,
+    retval2 = gt_encodedsequence_comparetwostringsgeneric(encseq,
                                        fwd,
                                        complement,
                                        &lcp2,
@@ -4457,7 +4457,7 @@ int gt_encodedsequence_compare_maxdepth(const GtEncodedsequence *encseq,
     unsigned long lcp2 = 0;
     int retval2;
 
-    retval2 = comparetwostringsgeneric(encseq,
+    retval2 = gt_encodedsequence_comparetwostringsgeneric(encseq,
                                        fwd,
                                        complement,
                                        &lcp2,
@@ -4904,7 +4904,8 @@ void multicharactercompare_withtest(const GtEncodedsequence *encseq,
                                                     &commonunits1,&ptbe1,
                                                     &ptbe2);
   commonunits2 = (unsigned long) GT_UNITSIN2BITENC;
-  ret2 = comparetwostrings(encseq,fwd,complement,&commonunits2,pos1,pos2,0);
+  ret2 = gt_encodedsequence_comparetwostrings(encseq,fwd,complement,
+                                              &commonunits2,pos1,pos2,0);
   if (ret1 != ret2 || (unsigned long) commonunits1.common != commonunits2)
   {
     char buf1[GT_INTWORDSIZE+1], buf2[GT_INTWORDSIZE+1];
@@ -5018,16 +5019,16 @@ void gt_encodedsequence_show_features(const GtEncodedsequence *encseq,
   showcharacterdistribution(alpha,encseq->characterdistribution,logger);
 }
 
-int comparetwosuffixes(const GtEncodedsequence *encseq,
-                       GtReadmode readmode,
-                       unsigned long *maxlcp,
-                       bool specialsareequal,
-                       bool specialsareequalatdepth0,
-                       unsigned long maxdepth,
-                       unsigned long start1,
-                       unsigned long start2,
-                       GtEncodedsequenceScanstate *esr1,
-                       GtEncodedsequenceScanstate *esr2)
+int gt_encodedsequence_comparetwosuffixes(const GtEncodedsequence *encseq,
+                                          GtReadmode readmode,
+                                          unsigned long *maxlcp,
+                                          bool specialsareequal,
+                                          bool specialsareequalatdepth0,
+                                          unsigned long maxdepth,
+                                          unsigned long start1,
+                                          unsigned long start2,
+                                          GtEncodedsequenceScanstate *esr1,
+                                          GtEncodedsequenceScanstate *esr2)
 {
   GtUchar cc1, cc2;
   unsigned long pos1, pos2, end1, end2;
@@ -5134,12 +5135,12 @@ int comparetwosuffixes(const GtEncodedsequence *encseq,
 }
 
 static unsigned long derefcharboundaries(const GtEncodedsequence *encseq,
-                                  bool fwd,
-                                  bool complement,
-                                  unsigned long start,
-                                  unsigned long maxoffset,
-                                  unsigned long currentoffset,
-                                  unsigned long totallength)
+                                         bool fwd,
+                                         bool complement,
+                                         unsigned long start,
+                                         unsigned long maxoffset,
+                                         unsigned long currentoffset,
+                                         unsigned long totallength)
 {
   if (fwd)
   {
@@ -5173,13 +5174,13 @@ static unsigned long derefcharboundaries(const GtEncodedsequence *encseq,
   return  start + GT_COMPAREOFFSET;
 }
 
-int comparetwostrings(const GtEncodedsequence *encseq,
-                      bool fwd,
-                      bool complement,
-                      unsigned long *maxcommon,
-                      unsigned long pos1,
-                      unsigned long pos2,
-                      unsigned long maxdepth)
+int gt_encodedsequence_comparetwostrings(const GtEncodedsequence *encseq,
+                                         bool fwd,
+                                         bool complement,
+                                         unsigned long *maxcommon,
+                                         unsigned long pos1,
+                                         unsigned long pos2,
+                                         unsigned long maxdepth)
 {
   unsigned long currentoffset, maxoffset, cc1, cc2,
          totallength = gt_encodedsequence_total_length(encseq);
@@ -5226,14 +5227,14 @@ int comparetwostrings(const GtEncodedsequence *encseq,
   return 0;
 }
 
-int comparetwostringsgeneric(const GtEncodedsequence *encseq,
-                             bool fwd,
-                             bool complement,
-                             unsigned long *maxcommon,
-                             unsigned long pos1,
-                             unsigned long pos2,
-                             unsigned long depth,
-                             unsigned long maxdepth)
+int gt_encodedsequence_comparetwostringsgeneric(const GtEncodedsequence *encseq,
+                                                bool fwd,
+                                                bool complement,
+                                                unsigned long *maxcommon,
+                                                unsigned long pos1,
+                                                unsigned long pos2,
+                                                unsigned long depth,
+                                                unsigned long maxdepth)
 {
   unsigned long totallength = gt_encodedsequence_total_length(encseq);
   int retval;
@@ -5254,7 +5255,7 @@ int comparetwostringsgeneric(const GtEncodedsequence *encseq,
     }
     if (pos1 + depth < endpos1 && pos2 + depth < endpos2)
     {
-      retval = comparetwostrings(encseq,
+      retval = gt_encodedsequence_comparetwostrings(encseq,
                                  fwd,
                                  complement,
                                  maxcommon,
@@ -5281,7 +5282,7 @@ int comparetwostringsgeneric(const GtEncodedsequence *encseq,
     }
     if (pos1 >= depth && pos2 >= depth)
     {
-      retval = comparetwostrings(encseq,
+      retval = gt_encodedsequence_comparetwostrings(encseq,
                                  fwd,
                                  complement,
                                  maxcommon,
