@@ -298,7 +298,8 @@ int sufbwt2fmindex(Fmindex *fmindex,
     }
     if (!haserr)
     {
-      numofchars = gt_encodedsequence_alphabetnumofchars(suffixarray.encseq);
+      numofchars = gt_alphabet_num_of_chars(
+                               gt_encodedsequence_alphabet(suffixarray.encseq));
       firstignorespecial = totallength - specialcharinfo->specialcharacters;
       if (copytheindexfile(outfmindex,indexname,GT_ALPHABETFILESUFFIX,
                            0,err) != 0)

@@ -579,7 +579,8 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   state.esrspace = gt_encodedsequence_scanstate_new();
   state.mersize = (unsigned long) mersize;
   state.encseq = encseqSequentialsuffixarrayreader(ssar);
-  alphasize = gt_encodedsequence_alphabetnumofchars(state.encseq);
+  alphasize = gt_alphabet_num_of_chars(
+                                     gt_encodedsequence_alphabet(state.encseq));
   state.readmode = readmodeSequentialsuffixarrayreader(ssar);
   state.storecounts = storecounts;
   state.minocc = minocc;

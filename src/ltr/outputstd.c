@@ -78,7 +78,8 @@ static void producelongutput(const LTRharvestoptions *lo,
                              const GtEncodedsequence *encseq,
                              unsigned long offset)
 {
-  const GtUchar *characters = gt_encodedsequence_alphabetcharacters(encseq);
+  const GtUchar *characters = gt_alphabet_characters(
+                                           gt_encodedsequence_alphabet(encseq));
 
   printf("%lu  ",
       boundaries->leftLTR_5 -offset + 1);

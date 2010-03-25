@@ -129,7 +129,7 @@ int testmotifandencodemotif (Motif *motif, const GtEncodedsequence *encseq,
   GtUchar c_tab[UCHAR_MAX+1];
   unsigned int i;
 
-  symbolmap = gt_encodedsequence_alphabetsymbolmap(encseq);
+  symbolmap = gt_alphabet_symbolmap(gt_encodedsequence_alphabet(encseq));
   if ( symbolmap[(unsigned int)motif->firstleft] == (GtUchar) UNDEFCHAR)
   {
     gt_error_set(err,"Illegal nucleotide character %c "

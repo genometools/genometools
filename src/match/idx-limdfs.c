@@ -226,7 +226,7 @@ Limdfsresources *newLimdfsresources(const Genericindex *genericindex,
   const GtEncodedsequence *encseq;
 
   encseq = genericindex->suffixarray->encseq;
-  numofchars = gt_encodedsequence_alphabetnumofchars(encseq);
+  numofchars = gt_alphabet_num_of_chars(gt_encodedsequence_alphabet(encseq));
   ALLOCASSIGNSPACE(limdfsresources,NULL,Limdfsresources,1);
   ALLOCASSIGNSPACE(limdfsresources->bwci.spaceBoundswithchar,NULL,
                    Boundswithchar,numofchars+1);

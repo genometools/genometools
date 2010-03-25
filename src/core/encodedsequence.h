@@ -172,30 +172,6 @@ unsigned long gt_encodedsequence_sep2seqnum(const unsigned long *recordseps,
 unsigned long gt_encodedsequence_pos2seqnum(const GtEncodedsequence *encseq,
                                             unsigned long position);
 
-/* Obtains the number of characters in the Alphabet associated with <encseq>.
-   This saves one function call for extracting the alphabet pointer
-   from <encseq> (performance reasons). */
-unsigned int gt_encodedsequence_alphabetnumofchars(
-                                               const GtEncodedsequence *encseq);
-
-/* Obtains the symbolmap from the Alphabet associated with <encseq>.
-   This saves one function call for extracting the alphabet pointer
-   from <encseq> (performance reasons). */
-const GtUchar *gt_encodedsequence_alphabetsymbolmap(
-                                               const GtEncodedsequence *encseq);
-
-/* Obtains an ordered array of characters from the Alphabet associated with
-   <encseq>. This saves one function call for extracting the alphabet pointer
-   from <encseq> (performance reasons). */
-const GtUchar *gt_encodedsequence_alphabetcharacters(
-                                               const GtEncodedsequence *encseq);
-
-/* Obtains the character used for displaying wildcards from the Alphabet
-   associated with <encseq>. This saves one function call for extracting the
-   alphabet pointer from <encseq> (performance reasons). */
-GtUchar gt_encodedsequence_alphabetwildcardshow(
-                                               const GtEncodedsequence *encseq);
-
 /* Returns the number of times that <cc> occurs in the sequences in <encseq>. */
 unsigned long gt_encodedsequence_charcount(const GtEncodedsequence *encseq,
                                            GtUchar cc);

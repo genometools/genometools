@@ -207,9 +207,11 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
     SWdpresource *swdpresource = NULL;
     Showmatchinfo showmatchinfo;
     Processmatch processmatch;
+    GtAlphabet *a;
     void *processmatchinfoonline, *processmatchinfooffline;
     Storematchinfo storeonline, storeoffline;
 
+    a = gt_encodedsequence_alphabet(encseq);
     if (idxlocalioptions->docompare)
     {
       processmatch = storematch;
@@ -221,9 +223,8 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
     {
       processmatch = showmatch;
       showmatchinfo.encseq = encseq;
-      showmatchinfo.characters = gt_encodedsequence_alphabetcharacters(encseq);
-      showmatchinfo.wildcardshow =
-                               gt_encodedsequence_alphabetwildcardshow(encseq);
+      showmatchinfo.characters = gt_alphabet_characters(a);
+      showmatchinfo.wildcardshow = gt_alphabet_wildcard_show(a);
       showmatchinfo.showalignment = idxlocalioptions->showalignment;
       processmatchinfoonline = processmatchinfooffline = &showmatchinfo;
     }
@@ -258,8 +259,7 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
       haserr = true;
     if (!haserr)
     {
-      gt_seqiterator_set_symbolmap(seqit,
-                                  gt_encodedsequence_alphabetsymbolmap(encseq));
+      gt_seqiterator_set_symbolmap(seqit, gt_alphabet_symbolmap(a));
       for (showmatchinfo.queryunit = 0; /* Nothing */;
            showmatchinfo.queryunit++)
       {

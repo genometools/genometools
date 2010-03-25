@@ -361,7 +361,8 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
   Dfsstate state;
   bool haserr = false;
 
-  state.alphabetsize = gt_encodedsequence_alphabetnumofchars(encseq);
+  state.alphabetsize = gt_alphabet_num_of_chars(
+                                           gt_encodedsequence_alphabet(encseq));
   state.searchlength = searchlength;
   state.processmaxpairs = processmaxpairs;
   state.processmaxpairsinfo = processmaxpairsinfo;

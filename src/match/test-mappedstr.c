@@ -190,7 +190,7 @@ static int verifycodelists(const GtEncodedsequence *encseq,
 
   gt_error_check(err);
   stringtotallength = gt_encodedsequence_total_length(encseq);
-  characters = gt_encodedsequence_alphabetcharacters(encseq);
+  characters = gt_alphabet_characters(gt_encodedsequence_alphabet(encseq));
   GT_INITARRAY(&codeliststring,GtCodetype);
   collectkmercode(&codeliststring,
                   encseq,
@@ -218,16 +218,16 @@ int verifymappedstr(const GtEncodedsequence *encseq,unsigned int prefixlength,
   bool haserr = false;
 
   gt_error_check(err);
-  numofchars = gt_encodedsequence_alphabetnumofchars(encseq);
+  numofchars = gt_alphabet_num_of_chars(gt_encodedsequence_alphabet(encseq));
   GT_INITARRAY(&codeliststream,GtCodetype);
   if (getfastastreamkmers(gt_encodedsequence_filenames(encseq),
-                          outkmeroccurrence,
-                          &codeliststream,
-                          numofchars,
-                          prefixlength,
-                          gt_encodedsequence_alphabetsymbolmap(encseq),
-                          false,
-                          err) != 0)
+                     outkmeroccurrence,
+                     &codeliststream,
+                     numofchars,
+                     prefixlength,
+                     gt_alphabet_symbolmap(gt_encodedsequence_alphabet(encseq)),
+                     false,
+                     err) != 0)
   {
     haserr = true;
   }

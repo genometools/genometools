@@ -77,7 +77,8 @@ static int inputthesequences(unsigned int *numofchars,
     if (idx == 0)
     {
       *numofchars =
-            gt_encodedsequence_alphabetnumofchars(suffixarraytable[idx].encseq);
+            gt_alphabet_num_of_chars(
+                     gt_encodedsequence_alphabet(suffixarraytable[idx].encseq));
     }
     nextpostable[idx] = 0;
   }

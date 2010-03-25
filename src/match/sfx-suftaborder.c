@@ -37,7 +37,7 @@ static void showlocalsuffix(FILE *fpout,
   const GtUchar *characters;
 
   totallength = gt_encodedsequence_total_length(encseq);
-  characters = gt_encodedsequence_alphabetcharacters(encseq);
+  characters = gt_alphabet_characters(gt_encodedsequence_alphabet(encseq));
   if (depth == 0)
   {
     end = MIN(start + maxshow,totallength);

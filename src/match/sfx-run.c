@@ -88,11 +88,11 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
   {
     outfileinfo->outlcpinfo
       = newOutlcpinfo(so->outlcptab ? so->fn2encopt.str_indexname : NULL,
-                      prefixlength,
-                      gt_encodedsequence_alphabetnumofchars(encseq),
-                      gt_encodedsequence_total_length(encseq),
-                      so->sfxstrategy.ssortmaxdepth.defined ? false : true,
-                      err);
+                  prefixlength,
+                  gt_alphabet_num_of_chars(gt_encodedsequence_alphabet(encseq)),
+                  gt_encodedsequence_total_length(encseq),
+                  so->sfxstrategy.ssortmaxdepth.defined ? false : true,
+                  err);
     if (outfileinfo->outlcpinfo == NULL)
     {
       haserr = true;
@@ -498,7 +498,8 @@ static int runsuffixerator(bool doesa,
     if (so->outsuftab || so->outbwttab || so->outlcptab || so->outbcktab ||
         !doesa)
     {
-      unsigned int numofchars = gt_encodedsequence_alphabetnumofchars(encseq);
+      unsigned int numofchars = gt_alphabet_num_of_chars(
+                                           gt_encodedsequence_alphabet(encseq));
 
       if (detpfxlenandmaxdepth(&prefixlength,
                                &sfxstrategy.ssortmaxdepth,

@@ -249,7 +249,8 @@ Differencecover *differencecover_new(unsigned int vparam,
   checkqsort();
 #endif
   dcov = gt_malloc(sizeof (*dcov));
-  dcov->numofchars = gt_encodedsequence_alphabetnumofchars(encseq);
+  dcov->numofchars = gt_alphabet_num_of_chars(
+                                           gt_encodedsequence_alphabet(encseq));
   dcov->totallength = gt_encodedsequence_total_length(encseq);
   dcov->logger = logger;
   for (dcov->logmod = 0;

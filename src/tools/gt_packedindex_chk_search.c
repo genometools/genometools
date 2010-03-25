@@ -139,7 +139,8 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
       if (params.minPatLen < 0 || params.maxPatLen < 0)
       {
         unsigned int numofchars
-          = gt_encodedsequence_alphabetnumofchars(suffixarray.encseq);
+          = gt_alphabet_num_of_chars(
+                               gt_encodedsequence_alphabet(suffixarray.encseq));
         if (params.minPatLen < 0)
           params.minPatLen = recommendedprefixlength(numofchars, totalLen);
         if (params.maxPatLen < 0)

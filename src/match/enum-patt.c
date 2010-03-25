@@ -70,7 +70,8 @@ Enumpatterniterator *newenumpatterniterator(unsigned long minpatternlen,
   epi->maxpatternlen = maxpatternlen;
   epi->sampleencseq = encseq;
   epi->samplecount = 0;
-  epi->alphasize = gt_encodedsequence_alphabetnumofchars(encseq);
+  epi->alphasize = gt_alphabet_num_of_chars(
+                                           gt_encodedsequence_alphabet(encseq));
   epi->esr = gt_encodedsequence_scanstate_new();
   srand48(42349421);
   return epi;

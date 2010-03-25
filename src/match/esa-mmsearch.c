@@ -489,7 +489,8 @@ int callenumquerymatches(const GtStr *indexname,
     if (!haserr)
     {
       gt_seqiterator_set_symbolmap(seqit,
-                      gt_encodedsequence_alphabetsymbolmap(suffixarray.encseq));
+                      gt_alphabet_symbolmap(gt_encodedsequence_alphabet(
+                                                          suffixarray.encseq)));
       for (queryunitnum = 0; /* Nothing */; queryunitnum++)
       {
         retval = gt_seqiterator_next(seqit,

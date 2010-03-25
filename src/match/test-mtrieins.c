@@ -98,7 +98,8 @@ int test_trieins(bool onlyins,const GtStr *indexname,GtError *err)
     ALLOCASSIGNSPACE(trierep.encseqreadinfo,NULL,Encseqreadinfo,1);
     trierep.encseqreadinfo[0].encseqptr = suffixarray.encseq;
     trierep.encseqreadinfo[0].readmode = suffixarray.readmode;
-    characters = gt_encodedsequence_alphabetcharacters(suffixarray.encseq);
+    characters = gt_alphabet_characters(
+                               gt_encodedsequence_alphabet(suffixarray.encseq));
     mergertrie_initnodetable(&trierep,totallength,1U);
     maketrie(&trierep,characters,totallength);
     if (onlyins)

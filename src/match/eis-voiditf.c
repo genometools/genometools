@@ -175,7 +175,8 @@ void *loadvoidBWTSeqForSA(const GtStr *indexname,
     if (withpckbt && pckbuckettableexists(indexname))
     {
       unsigned int numofchars
-        = gt_encodedsequence_alphabetnumofchars(suffixarray->encseq);
+        = gt_alphabet_num_of_chars(
+                           gt_encodedsequence_alphabet(suffixarray->encseq));
       bwtseq->pckbuckettable = mappckbuckettable(indexname,numofchars,err);
       if (bwtseq->pckbuckettable == NULL)
       {

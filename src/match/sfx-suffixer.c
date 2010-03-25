@@ -502,7 +502,8 @@ Sfxiterator *newSfxiterator(const GtEncodedsequence *encseq,
     sfi->suftabparts = NULL;
     sfi->encseq = encseq;
     sfi->readmode = readmode;
-    sfi->numofchars = gt_encodedsequence_alphabetnumofchars(encseq);
+    sfi->numofchars = gt_alphabet_num_of_chars(
+                                           gt_encodedsequence_alphabet(encseq));
     sfi->prefixlength = prefixlength;
     sfi->dcov = NULL;
     if (sfxstrategy != NULL)
