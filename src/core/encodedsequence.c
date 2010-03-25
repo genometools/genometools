@@ -2678,8 +2678,8 @@ static int readfirstvaluesfromfile(Firstencseqvalues *firstencseqvalues,
   return haserr ? -1 : 0;
 }
 
-int readGtSpecialcharinfo(GtSpecialcharinfo *specialcharinfo,
-                        const GtStr *indexname,GtError *err)
+int gt_specialcharinfo_read(GtSpecialcharinfo *specialcharinfo,
+                            const GtStr *indexname, GtError *err)
 {
   Firstencseqvalues firstencseqvalues;
 

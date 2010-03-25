@@ -256,9 +256,9 @@ unsigned long gt_encodedsequence_lengthofspecialprefix(
 unsigned long gt_encodedsequence_lengthofspecialsuffix(
                                                const GtEncodedsequence *encseq);
 
-/* In case an GtEncodedsequence is not mapped, we still need to obtain the
-   Specialcharainfo. This is done by the following function */
-
-int readGtSpecialcharinfo(GtSpecialcharinfo *specialcharinfo,
-                          const GtStr *indexname, GtError *err);
+/* Sets <specialcharinfo> to point to a <GtSpecialcharinfo> for the index
+   files specified by <indexname>, even if the encoded sequence is not mapped.
+   Returns 0 on success, -1 otherwise. */
+int gt_specialcharinfo_read(GtSpecialcharinfo *specialcharinfo,
+                            const GtStr *indexname, GtError *err);
 #endif

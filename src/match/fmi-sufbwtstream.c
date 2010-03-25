@@ -292,7 +292,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
     {
       totallength = gt_encodedsequence_total_length(suffixarray.encseq);
     }
-    if (!haserr && readGtSpecialcharinfo(specialcharinfo,indexname,err) != 0)
+    if (!haserr && gt_specialcharinfo_read(specialcharinfo,indexname,err) != 0)
     {
       haserr = true;
     }
