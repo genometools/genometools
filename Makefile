@@ -163,7 +163,7 @@ HMMER_SRC:=$(HMMER_DIR)/alphabet.c \
            $(SQUID_DIR)/phylip.c $(SQUID_DIR)/revcomp.c $(SQUID_DIR)/rk.c \
            $(SQUID_DIR)/selex.c $(SQUID_DIR)/seqencode.c $(SQUID_DIR)/shuffle.c \
            $(SQUID_DIR)/sqerror.c $(SQUID_DIR)/sqio.c $(SQUID_DIR)/squidcore.c \
-           $(SQUID_DIR)/sre_ctype.c $(SQUID_DIR)/sre_math.c $(SQUID_DIR)/sre_random.c\
+           $(SQUID_DIR)/sre_ctype.c $(SQUID_DIR)/sre_math.c $(SQUID_DIR)/sre_random.c \
            $(SQUID_DIR)/sre_string.c $(SQUID_DIR)/ssi.c $(SQUID_DIR)/stack.c \
            $(SQUID_DIR)/stockholm.c $(SQUID_DIR)/stopwatch.c \
            $(SQUID_DIR)/translate.c $(SQUID_DIR)/types.c \
@@ -178,6 +178,21 @@ ZLIB_SRC:=$(ZLIB_DIR)/adler32.c $(ZLIB_DIR)/compress.c $(ZLIB_DIR)/crc32.c \
           $(ZLIB_DIR)/infback.c $(ZLIB_DIR)/inftrees.c $(ZLIB_DIR)/inffast.c
 ZLIB_OBJ:=$(ZLIB_SRC:%.c=obj/%.o)
 ZLIB_DEP:=$(ZLIB_SRC:%.c=obj/%.d)
+
+LTR_DIR:=src/ltr
+LTRDIGEST_SRC:=$(LTR_DIR)/ltr_visitor.c \
+               $(LTR_DIR)/ltrdigest_stream.c \
+               $(LTR_DIR)/ltrelement.c \
+               $(LTR_DIR)/ltrfileout_stream.c \
+               $(LTR_DIR)/pbs.c \
+               $(LTR_DIR)/pdom.c \
+               $(LTR_DIR)/ppt.c
+LTRDIGEST_OBJ:=$(LTRDIGEST_SRC:%.c=obj/%.o)
+LTRDIGEST_DEP:=$(LTRDIGEST_SRC:%.c=obj/%.d)
+
+LTRHARVEST_SRC:=$(filter-out $(LTRDIGEST_SRC),$(wildcard $(LTR_DIR)/*.c))
+LTRHARVEST_OBJ:=$(LTRHARVEST_SRC:%.c=obj/%.o)
+LTRHARVEST_DEP:=$(LTRHARVEST_SRC:%.c=obj/%.d)
 
 # the objects which are included into the single GenomeTools shared library
 GTSHAREDLIB_LIBDEP:=-lbz2 -lz
@@ -288,12 +303,11 @@ LIBGENOMETOOLS_DIRS:= src/core \
                       src/gtlua
 
 LIBGTUNSTABLE_DIRS:=  src/match \
-                      src/ltr \
                       src/gth \
                       src/mgth
 
 ifeq ($(with-hmmer),yes)
-  LIBGTUNSTABLE_DIRS := src/external/hmmer-2.3.2  $(LIBGTUNSTABLE_DIRS)
+  LIBGENOMETOOLS_DIRS := src/external/hmmer-2.3.2  $(LIBGENOMETOOLS_DIRS)
   EXP_CPPFLAGS += -DHAVE_HMMER
   GT_CPPFLAGS +=  -I$(CURDIR)/$(HMMER_DIR) -I$(CURDIR)/$(SQUID_DIR)
   EXP_LDLIBS += -lpthread
@@ -326,7 +340,8 @@ ifeq ($(threads),yes)
 endif
 
 # the GenomeTools library
-LIBGENOMETOOLS_PRESRC:=$(foreach DIR,$(LIBGENOMETOOLS_DIRS),$(wildcard $(DIR)/*.c))
+LIBGENOMETOOLS_PRESRC:=$(foreach DIR,$(LIBGENOMETOOLS_DIRS),$(wildcard $(DIR)/*.c)) \
+                       $(LTRDIGEST_SRC)
 ifeq ($(amalgamation),yes)
   LIBGENOMETOOLS_SRC:=obj/amalgamation.c
 else
@@ -339,14 +354,15 @@ LIBGENOMETOOLS_DEP:=$(LIBGENOMETOOLS_SRC:%.c=obj/%.d) \
                     $(LIBLUA_DEP) \
                     $(LIBEXPAT_DEP)
 
+ifeq ($(with-hmmer),yes)
+  LIBGENOMETOOLS_OBJ := lib/libhmmer.a $(LIBGENOMETOOLS_OBJ) lib/libhmmer.a
+endif
+
 # the GenomeTools unstable library
-LIBGTUNSTABLE_SRC:=$(foreach DIR,$(LIBGTUNSTABLE_DIRS),$(wildcard $(DIR)/*.c))
+LIBGTUNSTABLE_SRC:=$(foreach DIR,$(LIBGTUNSTABLE_DIRS),$(wildcard $(DIR)/*.c)) \
+                   $(LTRHARVEST_SRC)
 LIBGTUNSTABLE_OBJ:=$(LIBGTUNSTABLE_SRC:%.c=obj/%.o)
 LIBGTUNSTABLE_DEP:=$(LIBGTUNSTABLE_SRC:%.c=obj/%.d)
-
-ifeq ($(with-hmmer),yes)
-  LIBGTUNSTABLE_OBJ := lib/libhmmer.a $(LIBGTUNSTABLE_OBJ) lib/libhmmer.a
-endif
 
 # set prefix for install target
 prefix ?= /usr/local
@@ -414,10 +430,10 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
-lib/libgtunstable$(SHARED_OBJ_NAME_EXT): $(LIBGTUNSTABLE_OBJ) $(LIBGENOMETOOLS_OBJ)
+lib/libgtunstable$(SHARED_OBJ_NAME_EXT): $(LIBGTUNSTABLE_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) $(LIBGENOMETOOLS_OBJ) \
+	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) \
 	$(LIBGTUNSTABLE_OBJ) -o $@ $(GTSHAREDLIB_LIBDEP)
 
 lib/libtecla.a: $(LIBTECLA_OBJ)
