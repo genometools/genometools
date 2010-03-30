@@ -70,7 +70,8 @@ static unsigned long *computeocclesstab(const GtEncodedsequence *encseq)
 {
   unsigned long *occless, numofchars, idx;
 
-  numofchars = gt_alphabet_num_of_chars(gt_encodedsequence_alphabet(encseq));
+  numofchars = (unsigned long)
+                  gt_alphabet_num_of_chars(gt_encodedsequence_alphabet(encseq));
   occless = gt_malloc(sizeof (unsigned long) * numofchars);
   occless[0] = 0;
   for (idx = 1UL; idx < numofchars; idx++)
