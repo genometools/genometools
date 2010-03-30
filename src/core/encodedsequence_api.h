@@ -24,18 +24,26 @@
 #include "core/logger.h"
 #include "core/progress_timer.h"
 #include "core/readmode.h"
-
 #include "core/str.h"
 #include "core/str_array.h"
 #include "core/symboldef.h"
 
+/* The GtEncodedsequence class represents a collection of sequences from one
+   or more input files in a compressed encoding. */
 typedef struct GtEncodedsequence GtEncodedsequence;
+
+/* The GtEncodedsequenceScanstate class represents the current state of a
+   sequential scan of a <GtEncodedsequence> region. */
 typedef struct GtEncodedsequenceScanstate GtEncodedsequenceScanstate;
 
+/* The file suffix used for encoded sequence files. */
 #define GT_ENCSEQFILESUFFIX ".esq"
-#define GT_DESTABFILESUFFIX ".des"
-#define GT_SDSTABFILESUFFIX ".sds"
+/* The file suffix used for encoded sequence separator position tables. */
 #define GT_SSPTABFILESUFFIX ".ssp"
+/* The file suffix used for sequence description tables. */
+#define GT_DESTABFILESUFFIX ".des"
+/* The file suffix used for sequence description separator position tables. */
+#define GT_SDSTABFILESUFFIX ".sds"
 
 /* Returns a new <GtEncodedsequence> created from a set of filenames
    (<filenametab>) and creates the on-disk representation on the fly.
@@ -180,18 +188,21 @@ void               gt_encodedsequence_delete(GtEncodedsequence *encseq);
 
 /* TODO: please document me */
 GtEncodedsequenceScanstate* gt_encodedsequence_scanstate_new(void);
+
 /* TODO: please document me */
 void                        gt_encodedsequence_scanstate_init(
                                                 GtEncodedsequenceScanstate *esr,
                                                 const GtEncodedsequence *encseq,
                                                 GtReadmode readmode,
                                                 unsigned long startpos);
+
 /* TODO: please document me */
 void                        gt_encodedsequence_scanstate_initgeneric(
                                                 GtEncodedsequenceScanstate *esr,
                                                 const GtEncodedsequence *encseq,
                                                 bool moveforward,
                                                 unsigned long startpos);
+
 /* TODO: please document me */
 void                        gt_encodedsequence_scanstate_delete(
                                                GtEncodedsequenceScanstate *esr);

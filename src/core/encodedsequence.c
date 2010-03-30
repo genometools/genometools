@@ -29,6 +29,10 @@
 #include "core/chardef.h"
 #include "core/checkencchar.h"
 #include "core/divmodmul.h"
+#include "core/encodedsequence.h"
+#ifndef GT_INLINEDENCSEQ
+#include "core/encodedsequence_rep.h"
+#endif
 #include "core/error.h"
 #include "core/fa.h"
 #include "core/filelengthvalues.h"
@@ -47,10 +51,6 @@
 #include "core/str.h"
 #include "core/unused_api.h"
 #include "match/intcode-def.h"
-#include "core/encodedsequence.h"
-#ifndef INLINEDENCSEQ
-#include "core/encodedsequence_rep.h"
-#endif
 
 #define CHECKANDUPDATE(VAL,IDX)\
         tmp = localdetsizeencseq(VAL,totallength,numofdbfiles,\
