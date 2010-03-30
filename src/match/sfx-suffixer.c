@@ -261,7 +261,7 @@ static void updatekmercount(void *processinfo,
     {
       GtCodetype code2 = getencseqcode(sfi->encseq,
                                    sfi->readmode,
-                                   gt_encodedsequence_total_length(sfi->encseq),
+                                   gt_encodedsequence_totallength(sfi->encseq),
                                    bcktab_multimappower(sfi->bcktab),
                                    sfi->prefixlength,
                                    position);
@@ -540,7 +540,7 @@ Sfxiterator *newSfxiterator(const GtEncodedsequence *encseq,
     {
       gt_logger_log(logger,"ssortmaxdepth=undefined");
     }
-    sfi->totallength = gt_encodedsequence_total_length(encseq);
+    sfi->totallength = gt_encodedsequence_totallength(encseq);
     gt_logger_log(logger,"totallength=%lu",
                         sfi->totallength);
     sfi->specialcharacters = specialcharacters;
@@ -554,7 +554,7 @@ Sfxiterator *newSfxiterator(const GtEncodedsequence *encseq,
 
     if (sfi->sfxstrategy.differencecover > 0 &&
         gt_encodedsequence_specialcharacters(encseq)
-          < gt_encodedsequence_total_length(encseq))
+          < gt_encodedsequence_totallength(encseq))
     {
       if (sfxprogress != NULL)
       {

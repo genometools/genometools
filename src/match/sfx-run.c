@@ -90,7 +90,7 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
       = newOutlcpinfo(so->outlcptab ? so->fn2encopt.str_indexname : NULL,
                   prefixlength,
                   gt_alphabet_num_of_chars(gt_encodedsequence_alphabet(encseq)),
-                  gt_encodedsequence_total_length(encseq),
+                  gt_encodedsequence_totallength(encseq),
                   so->sfxstrategy.ssortmaxdepth.defined ? false : true,
                   err);
     if (outfileinfo->outlcpinfo == NULL)
@@ -371,7 +371,7 @@ static int run_packedindexconstruction(GtLogger *logger,
                        sfxstrategy,
                        encseq,
                        sfxprogress,
-                       gt_encodedsequence_total_length(encseq) + 1,
+                       gt_encodedsequence_totallength(encseq) + 1,
                        logger,
                        err);
   if (si == NULL)
@@ -505,7 +505,7 @@ static int runsuffixerator(bool doesa,
                                &sfxstrategy.ssortmaxdepth,
                                so,
                                numofchars,
-                               gt_encodedsequence_total_length(encseq),
+                               gt_encodedsequence_totallength(encseq),
                                logger,
                                err) != 0)
       {

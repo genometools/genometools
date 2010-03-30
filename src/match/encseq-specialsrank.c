@@ -101,7 +101,7 @@ newSpecialsRankLookup(const GtEncodedsequence *encseq, GtReadmode readmode,
   unsigned long sampleInterval = ((unsigned long)1) << sampleIntervalLog2;
   gt_assert(encseq);
   gt_assert(sampleIntervalLog2 < sizeof (unsigned long) * CHAR_BIT);
-  seqLastPos = gt_encodedsequence_total_length(encseq);
+  seqLastPos = gt_encodedsequence_totallength(encseq);
   seqLen = seqLastPos + 1;
   if (gt_encodedsequence_has_specialranges(encseq))
   {
@@ -161,7 +161,7 @@ specialsRankFromSampleTable(const SpecialsRankLookup *ranker, unsigned long pos)
   const SpecialsRankTable *rankTable = &ranker->implementationData.sampleTable;
   unsigned long rankCount, samplePos, encSeqLen;
   gt_assert(ranker);
-  encSeqLen = gt_encodedsequence_total_length(ranker->encseq);
+  encSeqLen = gt_encodedsequence_totallength(ranker->encseq);
   gt_assert(pos <= encSeqLen + 1);
   samplePos = pos & ~(rankTable->sampleInterval - 1);
   {

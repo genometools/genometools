@@ -146,7 +146,7 @@ typedef struct
   GtUchar smalllcpvalue;
   const Largelcpvalue *largelcpvalue;
 
-  gt_assert(pos <= gt_encodedsequence_total_length(suffixarray->encseq));
+  gt_assert(pos <= gt_encodedsequence_totallength(suffixarray->encseq));
   smalllcpvalue = suffixarray->lcptab[pos];
   if (smalllcpvalue != LCPOVERFLOW)
   {

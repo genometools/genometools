@@ -47,7 +47,7 @@ unsigned long *encseqtable2sequenceoffsets(unsigned long *totallength,
     } else
     {
       tmplength =
-              gt_encodedsequence_total_length(suffixarraytable[idx - 1].encseq);
+              gt_encodedsequence_totallength(suffixarraytable[idx - 1].encseq);
       sequenceoffsettable[idx]
         = sequenceoffsettable[idx-1] + tmplength + (unsigned long) 1;
     }
@@ -89,17 +89,17 @@ unsigned long *encseqtable2sequenceoffsets(unsigned long *totallength,
       }
     }
     tmplarge = (uint64_t) sequenceoffsettable[idx] +
-       (uint64_t) gt_encodedsequence_total_length(suffixarraytable[idx].encseq);
+       (uint64_t) gt_encodedsequence_totallength(suffixarraytable[idx].encseq);
     (void) CALLCASTFUNC(uint64_t,unsigned_long,tmplarge);
     (void) CALLCASTFUNC(uint64_t,unsigned_long,tmpspecialcharacters);
     (void) CALLCASTFUNC(uint64_t,unsigned_long,tmpspecialranges);
     (void) CALLCASTFUNC(uint64_t,unsigned_long,tmprealspecialranges);
     printf("# seqlen[%u] = %lu\n",
            idx,
-           gt_encodedsequence_total_length(suffixarraytable[idx].encseq));
+           gt_encodedsequence_totallength(suffixarraytable[idx].encseq));
   }
   tmplength
-    = gt_encodedsequence_total_length(suffixarraytable[numofindexes -1].encseq);
+    = gt_encodedsequence_totallength(suffixarraytable[numofindexes -1].encseq);
   *totallength = sequenceoffsettable[numofindexes-1] + tmplength;
   specialcharinfo->specialcharacters = (unsigned long) tmpspecialcharacters;
   specialcharinfo->specialranges = (unsigned long) tmpspecialranges;

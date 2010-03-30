@@ -342,7 +342,7 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
     {
       alphabet = gt_encodedsequence_alphabet(suffixarray.encseq);
       prefixlength = suffixarray.prefixlength;
-      totallength = gt_encodedsequence_total_length(suffixarray.encseq);
+      totallength = gt_encodedsequence_totallength(suffixarray.encseq);
     }
     if (!haserr)
     {

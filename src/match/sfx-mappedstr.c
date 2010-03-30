@@ -440,7 +440,7 @@ void getencseqkmers(
   GtEncodedsequenceScanstate *esr;
   unsigned int numofchars;
 
-  totallength = gt_encodedsequence_total_length(encseq);
+  totallength = gt_encodedsequence_totallength(encseq);
   numofchars = gt_alphabet_num_of_chars(gt_encodedsequence_alphabet(encseq));
   initstreamstate(&spwp,numofchars,kmersize);
   esr = gt_encodedsequence_scanstate_new();

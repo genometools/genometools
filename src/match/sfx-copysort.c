@@ -156,7 +156,7 @@ static unsigned long *leftcontextofspecialchardist(unsigned int numofchars,
   GtUchar cc;
   unsigned int idx;
   unsigned long *specialchardist,
-         totallength = gt_encodedsequence_total_length(encseq);
+         totallength = gt_encodedsequence_totallength(encseq);
 
   specialchardist = gt_malloc(sizeof (*specialchardist) * numofchars);
   for (idx = 0; idx<numofchars; idx++)
@@ -218,7 +218,7 @@ static unsigned long *leftcontextofspecialchardist(unsigned int numofchars,
   GtUchar cc;
   unsigned int idx;
   unsigned long *specialchardist,
-         totallength = gt_encodedsequence_total_length(encseq);
+         totallength = gt_encodedsequence_totallength(encseq);
 
   specialchardist = gt_malloc(sizeof (*specialchardist) * numofchars);
   for (idx = 0; idx<numofchars; idx++)
@@ -606,7 +606,7 @@ void gt_copysortsuffixes(const GtBucketspec2 *bucketspec2,
   gt_free(targetptr);
   gt_logger_log(logger,"hardwork = %lu (%.2f)",
         hardwork,
-        (double) hardwork/gt_encodedsequence_total_length(bucketspec2->encseq));
+        (double) hardwork/gt_encodedsequence_totallength(bucketspec2->encseq));
 }
 
 void gt_bucketspec2_delete(GtBucketspec2 *bucketspec2)

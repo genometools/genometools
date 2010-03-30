@@ -474,7 +474,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
       break;
     }
     suffixArrayIsInitialized = true;
-    seqLen = gt_encodedsequence_total_length(suffixArray.encseq) + 1;
+    seqLen = gt_encodedsequence_totallength(suffixArray.encseq) + 1;
     if (BWTSeqLength(bwtSeq) != seqLen)
     {
       gt_error_set(err, "length mismatch for suffix array project %s and "

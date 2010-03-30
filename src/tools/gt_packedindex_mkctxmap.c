@@ -86,7 +86,7 @@ gt_packedindex_mkctxmap(int argc, const char *argv[], GtError *err)
           had_err = true;
           break;
         }
-        len = gt_encodedsequence_total_length(sa.encseq) + 1;
+        len = gt_encodedsequence_totallength(sa.encseq) + 1;
         saInitialized = true;
         bwtSeq = loadBWTSeqForSA(projectName, BWT_ON_BLOCK_ENC,
                                  BWTDEFOPT_MULTI_QUERY, &sa, len, err);
@@ -101,7 +101,7 @@ gt_packedindex_mkctxmap(int argc, const char *argv[], GtError *err)
       }
       else
       {
-        len = gt_encodedsequence_total_length(sa.encseq) + 1;
+        len = gt_encodedsequence_totallength(sa.encseq) + 1;
         saInitialized = true;
         initSuffixarrayFileInterface(&sai, len, &sa);
         src = SAI2SASS(&sai);

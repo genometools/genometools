@@ -91,7 +91,7 @@ static int gt_prebwt_runner(GT_UNUSED int argc,
     haserr = true;
   } else
   {
-    totallength = gt_encodedsequence_total_length(suffixarray.encseq);
+    totallength = gt_encodedsequence_totallength(suffixarray.encseq);
   }
   if (!haserr)
   {

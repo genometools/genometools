@@ -251,7 +251,7 @@ void gt_encodedsequence_sequence2bytecode(GtUchar *dest,
 #endif
 
 #ifndef INLINEDENCSEQ
-unsigned long gt_encodedsequence_total_length(const GtEncodedsequence *encseq)
+unsigned long gt_encodedsequence_totallength(const GtEncodedsequence *encseq)
 {
   return encseq->totallength;
 }
@@ -2511,7 +2511,7 @@ void gt_encodedsequence_check_markpos(const GtEncodedsequence *encseq)
     GtEncodedsequenceScanstate *esr;
 
     markpos = encseq2markpositions(encseq);
-    totallength = gt_encodedsequence_total_length(encseq);
+    totallength = gt_encodedsequence_totallength(encseq);
     esr = gt_encodedsequence_scanstate_new();
     gt_encodedsequence_scanstate_init(esr,encseq,GT_READMODE_FORWARD,0);
     for (pos=0; pos<totallength; pos++)
@@ -4181,7 +4181,7 @@ static int comparewithonespecial(bool *leftspecial,
                                  unsigned long depth,
                                  unsigned long maxdepth)
 {
-  unsigned long cc1, cc2, totallength = gt_encodedsequence_total_length(encseq);
+  unsigned long cc1, cc2, totallength = gt_encodedsequence_totallength(encseq);
 
   cc1 = extractsinglecharacter(encseq,
                                fwd,
@@ -5035,7 +5035,7 @@ int gt_encodedsequence_comparetwosuffixes(const GtEncodedsequence *encseq,
   unsigned long pos1, pos2, end1, end2;
   int retval;
 
-  end1 = end2 = gt_encodedsequence_total_length(encseq);
+  end1 = end2 = gt_encodedsequence_totallength(encseq);
   if (maxdepth > 0)
   {
     if (end1 > start1 + maxdepth)
@@ -5184,7 +5184,7 @@ int gt_encodedsequence_comparetwostrings(const GtEncodedsequence *encseq,
                                          unsigned long maxdepth)
 {
   unsigned long currentoffset, maxoffset, cc1, cc2,
-         totallength = gt_encodedsequence_total_length(encseq);
+         totallength = gt_encodedsequence_totallength(encseq);
 
   if (fwd)
   {
@@ -5237,7 +5237,7 @@ int gt_encodedsequence_comparetwostringsgeneric(const GtEncodedsequence *encseq,
                                                 unsigned long depth,
                                                 unsigned long maxdepth)
 {
-  unsigned long totallength = gt_encodedsequence_total_length(encseq);
+  unsigned long totallength = gt_encodedsequence_totallength(encseq);
   int retval;
   bool leftspecial, rightspecial;
 
@@ -5495,7 +5495,7 @@ static void runscanatpostrial(const GtEncodedsequence *encseq,
   unsigned long pos, totallength;
   GtUchar ccra, ccsr;
 
-  totallength = gt_encodedsequence_total_length(encseq);
+  totallength = gt_encodedsequence_totallength(encseq);
   gt_encodedsequence_scanstate_init(esr,encseq,readmode,startpos);
   for (pos=startpos; pos < totallength; pos++)
   {
@@ -5527,7 +5527,7 @@ static void testscanatpos(const GtEncodedsequence *encseq,
   unsigned long startpos, totallength;
   unsigned long trial;
 
-  totallength = gt_encodedsequence_total_length(encseq);
+  totallength = gt_encodedsequence_totallength(encseq);
   esr = gt_encodedsequence_scanstate_new();
   runscanatpostrial(encseq,esr,readmode,0);
   runscanatpostrial(encseq,esr,readmode,totallength-1);
@@ -5552,7 +5552,7 @@ static void testmulticharactercompare(const GtEncodedsequence *encseq,
 
   esr1 = gt_encodedsequence_scanstate_new();
   esr2 = gt_encodedsequence_scanstate_new();
-  totallength = gt_encodedsequence_total_length(encseq);
+  totallength = gt_encodedsequence_totallength(encseq);
   (void) multicharactercompare_withtest(encseq,fwd,complement,esr1,0,esr2,0);
   (void) multicharactercompare_withtest(encseq,fwd,complement,esr1,0,esr2,
                                         totallength-1);
@@ -5585,7 +5585,7 @@ static int testfullscan(const GtStrArray *filenametab,
   unsigned long long fullscanpbar = 0;
 
   gt_error_check(err);
-  totallength = gt_encodedsequence_total_length(encseq);
+  totallength = gt_encodedsequence_totallength(encseq);
   gt_progressbar_start(&fullscanpbar,(unsigned long long) totallength);
   if (filenametab != NULL)
   {

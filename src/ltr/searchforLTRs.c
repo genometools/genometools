@@ -173,7 +173,7 @@ int searchforLTRs(LTRharvestoptions *lo,
 
     /**** right xdrop alignment ****/
     GT_INITARRAY (&fronts, Myfrontvalue);
-    totallength = gt_encodedsequence_total_length(encseq);
+    totallength = gt_encodedsequence_totallength(encseq);
     if (alilen <= totallength - (repeatptr->pos1 + repeatptr->offset +
                                 repeatptr->len) )
     {

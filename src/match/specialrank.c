@@ -157,7 +157,7 @@ Specialrank *fillspecialranklist(const GtEncodedsequence *encseq,
     unsigned long realspecialranges, specialrank, totallength;
     Specialrank *specialranklist, *rbptr;
 
-    totallength = gt_encodedsequence_total_length(encseq);
+    totallength = gt_encodedsequence_totallength(encseq);
     realspecialranges = gt_encodedsequence_realspecialranges(encseq);
     specialranklist = gt_malloc(sizeof (Specialrank) * realspecialranges);
     sri = gt_specialrangeiterator_new(encseq,

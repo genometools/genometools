@@ -290,7 +290,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
       haserr = true;
     } else
     {
-      totallength = gt_encodedsequence_total_length(suffixarray.encseq);
+      totallength = gt_encodedsequence_totallength(suffixarray.encseq);
     }
     if (!haserr && gt_specialcharinfo_read(specialcharinfo,indexname,err) != 0)
     {

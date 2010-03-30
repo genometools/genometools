@@ -112,7 +112,7 @@ Genericindex *genericindex_new(const GtStr *indexname,
   } else
   {
     genericindex->totallength =
-             gt_encodedsequence_total_length(genericindex->suffixarray->encseq);
+             gt_encodedsequence_totallength(genericindex->suffixarray->encseq);
   }
   if (!haserr)
   {
@@ -1329,7 +1329,7 @@ static bool esa_exactpatternmatching(const Suffixarray *suffixarray,
 {
   MMsearchiterator *mmsi;
   unsigned long dbstartpos,
-         totallength = gt_encodedsequence_total_length(suffixarray->encseq);
+         totallength = gt_encodedsequence_totallength(suffixarray->encseq);
   bool nomatches;
   GtMatch match;
 

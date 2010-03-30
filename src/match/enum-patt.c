@@ -51,7 +51,7 @@ Enumpatterniterator *newenumpatterniterator(unsigned long minpatternlen,
     return NULL;
   }
   ALLOCASSIGNSPACE(epi,NULL,Enumpatterniterator,1);
-  epi->totallength = gt_encodedsequence_total_length(encseq);
+  epi->totallength = gt_encodedsequence_totallength(encseq);
   if (epi->totallength <= (unsigned long) maxpatternlen)
   {
     gt_error_set(err,"totallength=%lu <= maxpatternlen = %lu\n",

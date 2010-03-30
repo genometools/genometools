@@ -134,7 +134,7 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
   ssar->suftab = NULL;
   ssar->encseq = ssar->suffixarray->encseq;
   ssar->readmode = ssar->suffixarray->readmode;
-  ssar->numberofsuffixes = gt_encodedsequence_total_length(ssar->encseq) + 1;
+  ssar->numberofsuffixes = gt_encodedsequence_totallength(ssar->encseq) + 1;
   ssar->lvi = NULL;
   return ssar;
 }

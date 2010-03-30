@@ -586,7 +586,7 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   state.minocc = minocc;
   state.maxocc = maxocc;
   state.moveforward = GT_ISDIRREVERSE(state.readmode) ? false : true;
-  state.totallength = gt_encodedsequence_total_length(state.encseq);
+  state.totallength = gt_encodedsequence_totallength(state.encseq);
   state.performtest = performtest;
   state.countoutputmers = 0;
   state.merindexfpout = NULL;

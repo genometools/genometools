@@ -575,7 +575,7 @@ Blindtrie *blindtrie_new(unsigned long numofsuffixes,
   blindtrie->root = NULL;
   blindtrie->esr1 = esr1;
   blindtrie->esr2 = esr2;
-  blindtrie->totallength = gt_encodedsequence_total_length(encseq);
+  blindtrie->totallength = gt_encodedsequence_totallength(encseq);
   blindtrie->cmpcharbychar = cmpcharbychar;
   GT_INITARRAY (&blindtrie->stack, Nodeptr);
   return blindtrie;

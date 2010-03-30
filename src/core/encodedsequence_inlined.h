@@ -21,7 +21,7 @@
 
 #include "core/encodedsequence_rep.h"
 
-#define gt_encodedsequence_total_length(ENCSEQ) \
+#define gt_encodedsequence_totallength(ENCSEQ) \
           ((ENCSEQ)->totallength)
 
 #define gt_encodedsequence_num_of_sequences(ENCSEQ) \

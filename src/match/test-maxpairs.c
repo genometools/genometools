@@ -177,7 +177,7 @@ static unsigned long samplesubstring(GtUchar *seqspace,
 {
   unsigned long start, totallength;
 
-  totallength = gt_encodedsequence_total_length(encseq);
+  totallength = gt_encodedsequence_totallength(encseq);
   start = (unsigned long) (drand48() * (double) totallength);
   if (start + substringlength > totallength)
   {
@@ -391,7 +391,7 @@ int testmaxpairs(const GtStr *indexname,
     haserr = true;
   } else
   {
-    totallength = gt_encodedsequence_total_length(encseq);
+    totallength = gt_encodedsequence_totallength(encseq);
   }
   if (!haserr)
   {

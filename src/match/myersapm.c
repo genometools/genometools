@@ -55,7 +55,7 @@ Myersonlineresources *newMyersonlineresources(
   mor->esr = gt_encodedsequence_scanstate_new();
   gt_assert(numofchars <= GT_MAXALPHABETCHARACTER);
   mor->alphasize = numofchars;
-  mor->totallength = gt_encodedsequence_total_length(encseq);
+  mor->totallength = gt_encodedsequence_totallength(encseq);
   mor->nowildcards = nowildcards;
   mor->processmatch = processmatch;
   mor->processmatchinfo = processmatchinfo;

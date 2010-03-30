@@ -62,7 +62,7 @@ static GtUchar getfirstedgechar(const Mergertrierep *trierep,
 
   if (ISLEAF(node) &&
       node->suffixinfo.startpos + prevdepth >=
-      gt_encodedsequence_total_length(eri->encseqptr))
+      gt_encodedsequence_totallength(eri->encseqptr))
   {
     return (GtUchar) SEPARATOR;
   }
@@ -130,7 +130,7 @@ static void showmergertrie2(const Mergertrierep *trierep,
     printf("%*.*s",(int) (6 * level),(int) (6 * level)," ");
     if (ISLEAF(current))
     {
-      endpos = gt_encodedsequence_total_length(
+      endpos = gt_encodedsequence_totallength(
                                  trierep->encseqtable[current->suffixinfo.idx]);
     } else
     {
@@ -410,7 +410,7 @@ static Mergertrienode *makenewbranch(Mergertrierep *trierep,
   newbranch->rightsibling = oldnode->rightsibling;
   cc1 = getfirstedgechar(trierep,oldnode,currentdepth);
   if (suffixinfo->startpos + currentdepth >=
-      gt_encodedsequence_total_length(eri->encseqptr))
+      gt_encodedsequence_totallength(eri->encseqptr))
   {
     cc2 = (GtUchar) SEPARATOR;
   } else
@@ -501,7 +501,7 @@ void mergertrie_insertsuffix(Mergertrierep *trierep,
     gt_assert(!ISLEAF(node));
     currentnode = node;
     currentdepth = node->depth;
-    totallength = gt_encodedsequence_total_length(eri->encseqptr);
+    totallength = gt_encodedsequence_totallength(eri->encseqptr);
     while (true)
     {
       if (suffixinfo->startpos + currentdepth >= totallength)
@@ -539,13 +539,13 @@ void mergertrie_insertsuffix(Mergertrierep *trierep,
         lcpvalue = getlcp(eri->encseqptr,
                           eri->readmode,
                           suffixinfo->startpos + currentdepth + 1,
-                          gt_encodedsequence_total_length(eri->encseqptr) - 1,
+                          gt_encodedsequence_totallength(eri->encseqptr) - 1,
                           trierep->encseqreadinfo[succ->suffixinfo.idx].
                                 encseqptr,
                           trierep->encseqreadinfo[succ->suffixinfo.idx].
                                 readmode,
                           succ->suffixinfo.startpos + currentdepth + 1,
-                          gt_encodedsequence_total_length(
+                          gt_encodedsequence_totallength(
                               trierep->encseqreadinfo[succ->suffixinfo.idx].
                                         encseqptr) - 1);
         newbranch = makenewbranch(trierep,
@@ -566,7 +566,7 @@ void mergertrie_insertsuffix(Mergertrierep *trierep,
       lcpvalue = getlcp(eri->encseqptr,
                         eri->readmode,
                         suffixinfo->startpos + currentdepth + 1,
-                        gt_encodedsequence_total_length(eri->encseqptr) - 1,
+                        gt_encodedsequence_totallength(eri->encseqptr) - 1,
                         trierep->encseqreadinfo[succ->suffixinfo.idx].encseqptr,
                         trierep->encseqreadinfo[succ->suffixinfo.idx].readmode,
                         succ->suffixinfo.startpos + currentdepth + 1,
