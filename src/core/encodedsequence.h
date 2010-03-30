@@ -33,6 +33,9 @@
 #include "core/readmode.h"
 #include "match/intcode-def.h"
 
+#define GT_REVERSEPOS(TOTALLENGTH,POS) \
+          ((TOTALLENGTH) - 1 - (POS))
+
 /* TODO: what does this struct contain and how can it be used? */
 typedef struct
 {

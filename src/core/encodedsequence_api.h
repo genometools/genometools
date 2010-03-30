@@ -32,17 +32,22 @@
 typedef struct GtEncodedsequence GtEncodedsequence;
 typedef struct GtEncodedsequenceScanstate GtEncodedsequenceScanstate;
 
-#undef GT_INLINEDENCSEQ
-#ifdef GT_INLINEDENCSEQ
-#include "core/encodedsequence_rep.h"
-#endif
-
 #define GT_ENCSEQFILESUFFIX ".esq"
 #define GT_DESTABFILESUFFIX ".des"
 #define GT_SDSTABFILESUFFIX ".sds"
 #define GT_SSPTABFILESUFFIX ".ssp"
 
-/*@null@*/
+/* Returns a new <GtEncodedsequence> created from a set of filenames
+   (<filenametab>) and creates the on-disk representation on the fly.
+   Returns NULL on error.
+   The parameter <sfxprogress> specifies an <GtProgressTimer> facilitating log
+   state (can be NULL), while <logger> references a <GtLogger> specifying a log
+   target.
+   <str_indexname> specified a path prefix to use for the newly generated
+   table files, creation of which can be toggled via the
+   <out{tis,des,sds,ssp}tab> options. The <is{dna,protein,plain}> options
+   specify the kind of sequence format given in the source files.
+   TODO: document str_smap, str_sat */
 GtEncodedsequence* gt_encodedsequence_new_from_files(
                                                   GtProgressTimer *sfxprogress,
                                                   const GtStr *str_indexname,
@@ -59,7 +64,12 @@ GtEncodedsequence* gt_encodedsequence_new_from_files(
                                                   GtLogger *logger,
                                                   GtError *err);
 
-/*@null@*/
+/* Returns a new <GtEncodedsequence> created from a set of preprocessed index
+   files. Returns NULL on error. The parameter <logger> is used to pass
+   a <GtLogger> specifying a log target.
+   <indexname> specified a path prefix to the index files to map. Which tables
+   are to be mapped can be toggled via the <with{tis,des,sds,ssp}tab> options.
+   TODO: document withrange  */
 GtEncodedsequence* gt_encodedsequence_new_from_index(bool withrange,
                                                      const GtStr *indexname,
                                                      bool withtistab,
@@ -69,6 +79,11 @@ GtEncodedsequence* gt_encodedsequence_new_from_index(bool withrange,
                                                      GtLogger *logger,
                                                      GtError *err);
 
+/* Returns a new <GtEncodedsequence> created from a pre-encoded sequence in
+   memory, given by two sequence pointers <seq1> and <seq2> of lengths <len1>
+   and <len2>, respectively. Returns NULL on error.
+   <alpha> is the <GtAlphabet> used to encode the sequence. The parameter
+   <logger> is used to pass a <GtLogger> specifying a log target. */
 GtEncodedsequence* gt_encodedsequence_new_from_plain(bool withrange,
                                                      const GtUchar *seq1,
                                                      unsigned long len1,
@@ -77,74 +92,45 @@ GtEncodedsequence* gt_encodedsequence_new_from_plain(bool withrange,
                                                      GtAlphabet *alpha,
                                                      GtLogger *logger);
 
+#undef GT_INLINEDENCSEQ
 #ifdef GT_INLINEDENCSEQ
-#define            gt_encodedsequence_total_length(ENCSEQ) \
-                     ((ENCSEQ)->totallength)
+  #include "core/encodedsequence_inline.h"
 #else
-unsigned long             gt_encodedsequence_total_length(
-                                               const GtEncodedsequence *encseq);
-#endif
 
-#ifdef GT_INLINEDENCSEQ
-#define            gt_encodedsequence_num_of_sequences(ENCSEQ) \
-                     ((ENCSEQ)->numofdbsequences)
-#else
+/* Returns the total number of characters in all sequences of <encseq>,
+   not including separators. */
+unsigned long      gt_encodedsequence_total_length(
+                                               const GtEncodedsequence *encseq);
+
+/* Returns the total number of sequences contained in <encseq>. */
 unsigned long      gt_encodedsequence_num_of_sequences(
                                                const GtEncodedsequence *encseq);
-#endif
 
-#define GT_REVERSEPOS(TOTALLENGTH,POS) \
-          ((TOTALLENGTH) - 1 - (POS))
-
-#ifdef GT_INLINEDENCSEQ
-#define GT_MAKECOMPL(CC) \
-          (ISSPECIAL(CC) ? (CC) : (GtUchar) 3 - (CC))
-/*@unused@*/ static inline
-GtUchar            gt_encodedsequence_getencodedchar(
-                                                const GtEncodedsequence *encseq,
-                                                unsigned long pos,
-                                                GtReadmode readmode)
-{
-  return (readmode == GT_READMODE_FORWARD)
-          ? encseq->plainseq[pos]
-          : ((readmode == GT_READMODE_REVERSE)
-            ? encseq->plainseq[GT_REVERSEPOS(encseq->totallength,pos)]
-            : ((readmode == GT_READMODE_COMPL)
-              ? GT_MAKECOMPL(encseq->plainseq[pos])
-              : GT_MAKECOMPL(encseq->plainseq[
-                           GT_REVERSEPOS(encseq->totallength,pos)])
-              )
-            )
-         ;
-}
-#define            gt_encodedsequence_extractencodedchar(ENCSEQ,POS,RM) \
-                     gt_encodedsequence_getencodedchar(ENCSEQ,POS,RM)
-#else
+/* Returns the encoded representation of the character at position <pos> of
+   <encseq> read in the direction as indicated by <readmode>. */
 GtUchar            gt_encodedsequence_getencodedchar(
                                                 const GtEncodedsequence *encseq,
                                                 unsigned long pos,
                                                 GtReadmode readmode);
+
+/* Returns the encoded representation of the character at position <pos> of
+   <encseq> read in the direction as indicated by <readmode>.
+   TODO: How is this different from getencodedchar()? */
 GtUchar            gt_encodedsequence_extractencodedchar(
                                                 const GtEncodedsequence *encseq,
                                                 unsigned long pos,
                                                 GtReadmode readmode);
-#endif
 
-#ifdef GT_INLINEDENCSEQ
-#define            gt_encodedsequence_getencodedcharnospecial(ENCSEQ,POS,RM) \
-                     gt_encodedsequence_getencodedchar(ENCSEQ,POS,RM)
-#else
+/* TODO: please document me */
 GtUchar            gt_encodedsequence_getencodedcharnospecial(
                                                 const GtEncodedsequence *encseq,
                                                 unsigned long pos,
                                                 GtReadmode readmode);
-#endif
 
-#ifdef GT_INLINEDENCSEQ
-#define            gt_encodedsequence_sequentialgetencodedchar(ENCSEQ, \
-                                                     ENCSEQSTATE,POS,READMODE) \
-                     gt_encodedsequence_getencodedchar(ENCSEQ,POS,READMODE)
-#else
+/* Returns the encoded representation of the character at position <pos> of
+   <encseq> read in the direction as indicated by <readmode>. This function is
+   optimized for sequential access to the sequence (e.g. in a for loop). The
+   current state of the sequential scan is given by <esr>. */
 GtUchar            gt_encodedsequence_sequentialgetencodedchar(
                                                 const GtEncodedsequence *encseq,
                                                 GtEncodedsequenceScanstate *esr,
@@ -152,6 +138,9 @@ GtUchar            gt_encodedsequence_sequentialgetencodedchar(
                                                 GtReadmode readmode);
 #endif
 
+/* Returns the encoded representation of the substring from position <frompos>
+   to position <topos> of <encseq>. The result is written to the location
+   pointed to by <buffer>, which must be large enough to hold the result. */
 void               gt_encodedsequence_extract_substring(
                                                 const GtEncodedsequence *encseq,
                                                 GtUchar *buffer,
@@ -186,6 +175,7 @@ GtAlphabet*  gt_encodedsequence_alphabet(const GtEncodedsequence *encseq);
 const GtStrArray*  gt_encodedsequence_filenames(
                                                const GtEncodedsequence *encseq);
 
+/* Deletes <encseq> and frees all associated space. */
 void               gt_encodedsequence_delete(GtEncodedsequence *encseq);
 
 /* TODO: please document me */

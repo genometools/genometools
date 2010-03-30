@@ -2940,7 +2940,7 @@ static unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab)
   return haserr ? NULL : encseq;
 }
 
-/*@null@*/ GtEncodedsequence *gt_encodedsequence_new_from_index(bool withrange,
+GtEncodedsequence *gt_encodedsequence_new_from_index(bool withrange,
                                                const GtStr *indexname,
                                                bool withtistab,
                                                bool withdestab,
