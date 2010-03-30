@@ -198,7 +198,7 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
       = (unsigned long) determinenumberofspecialstostore(&specialcharinfo);
     fmindex->specpos.spaceGtPairBwtidx = NULL;
     fmindex->specpos.allocatedGtPairBwtidx = 0;
-    fmindex->alphabet = gt_scanal1file(indexname,err);
+    fmindex->alphabet = gt_alphabet_new_from_file(indexname,err);
     if (fmindex->alphabet == NULL)
     {
       haserr = true;

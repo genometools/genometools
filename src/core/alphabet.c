@@ -937,7 +937,7 @@ void gt_alphabet_encode_seq(const GtAlphabet *alphabet, GtUchar *out,
   }
 }
 
-GtAlphabet *gt_scanal1file(const GtStr *indexname,GtError *err)
+GtAlphabet *gt_alphabet_new_from_file(const GtStr *indexname,GtError *err)
 {
   GtStr *tmpfilename;
   bool haserr = false;

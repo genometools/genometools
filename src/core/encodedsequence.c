@@ -2956,7 +2956,7 @@ GtEncodedsequence *gt_encodedsequence_new_from_index(bool withrange,
   GtAlphabet *alpha;
 
   gt_error_check(err);
-  alpha = gt_scanal1file(indexname,err);
+  alpha = gt_alphabet_new_from_file(indexname,err);
   if (alpha == NULL)
   {
     haserr = true;
