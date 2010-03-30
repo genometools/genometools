@@ -55,7 +55,10 @@ typedef struct GtEncodedsequenceScanstate GtEncodedsequenceScanstate;
    table files, creation of which can be toggled via the
    <out{tis,des,sds,ssp}tab> options. The <is{dna,protein,plain}> options
    specify the kind of sequence format given in the source files.
-   TODO: document str_smap, str_sat */
+   <str_smap> is the name of an alphabet mapping file declaring an encoding
+   scheme for the input sequence(s). <str_sat> is the string representation of
+   a position access type and determines how the encoded sequence is stored
+   (e.g. "direct", "ushort", "bit", ...). */
 GtEncodedsequence* gt_encodedsequence_new_from_files(
                                                   GtProgressTimer *sfxprogress,
                                                   const GtStr *str_indexname,
@@ -91,7 +94,8 @@ GtEncodedsequence* gt_encodedsequence_new_from_index(bool withrange,
    memory, given by two sequence pointers <seq1> and <seq2> of lengths <len1>
    and <len2>, respectively. Returns NULL on error.
    <alpha> is the <GtAlphabet> used to encode the sequence. The parameter
-   <logger> is used to pass a <GtLogger> specifying a log target. */
+   <logger> is used to pass a <GtLogger> specifying a log target.
+   TODO: document withrange */
 GtEncodedsequence* gt_encodedsequence_new_from_plain(bool withrange,
                                                      const GtUchar *seq1,
                                                      unsigned long len1,
