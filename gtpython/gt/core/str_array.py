@@ -41,12 +41,6 @@ class StrArray:
 
     from_param = classmethod(from_param)
 
-  #def __str__(self):
-    #r = ""
-    #for i in range(gtlib.gt_str_array_size(self.strarr)):
-      #r = r + " " + gtlib.gt_str_array_get(self.strarr, i)
-    #return r
-
     def to_list(self):
         result = []
         for i in range(gtlib.gt_str_array_size(self.strarr)):
@@ -59,8 +53,12 @@ class StrArray:
     def get(self, i):
         return gtlib.gt_str_array_get(self.strarr, i)
 
+    def add(self, s):
+        gtlib.gt_str_array_add_cstr(self.strarr, str(s))
+
     def register(cls, gtlib):
         from ctypes import c_void_p, c_char_p, c_ulong
+        gtlib.gt_str_array_add_cstr.argtypes = [c_void_p, c_char_p]
         gtlib.gt_str_array_get.restype = c_char_p
         gtlib.gt_str_array_get.argtypes = [c_void_p, c_ulong]
         gtlib.gt_str_array_size.restype = c_ulong
