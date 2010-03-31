@@ -18,12 +18,14 @@
 #
 
 from array import *
+from alphabet import *
 from error import *
 from gtrange import *
 from gtstr import *
 from str_array import *
 from warning import *
 
+Alphabet.register(gtlib)
 Array.register(gtlib)
 Error.register(gtlib)
 Str.register(gtlib)
