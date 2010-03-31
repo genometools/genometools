@@ -203,7 +203,8 @@ static void showifinlengthrange(const GtAlphabet *alphabet,
     if (rangespecinfo->showsequence)
     {
       (void) putchar(' ');
-      gt_alphabet_printf_symbolstring(alphabet,start + querystart,gmatchlength);
+      gt_alphabet_decode_seq_to_fp(alphabet,stdout,start + querystart,
+                                   gmatchlength);
     }
     (void) putchar('\n');
   }

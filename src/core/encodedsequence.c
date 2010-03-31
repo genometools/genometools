@@ -5378,7 +5378,7 @@ gt_encodedsequence_new_from_files(GtProgressTimer *sfxprogress,
   }
   if (!haserr)
   {
-    if (gt_outal1file(str_indexname,alpha,err) != 0)
+    if (gt_alphabet_to_file(alpha,str_indexname,err) != 0)
     {
       haserr = true;
     }

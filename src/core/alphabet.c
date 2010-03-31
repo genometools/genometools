@@ -518,10 +518,11 @@ static int assign_protein_or_dna_alphabet(GtAlphabet *alpha,
   return 0;
 }
 
-/*@null@*/ GtAlphabet* gt_alphabet_new(bool isdna, bool isprotein,
-                                       const GtStr *smapfile,
-                                       const GtStrArray *filenametab,
-                                       GtError *err)
+GtAlphabet* gt_alphabet_new(bool isdna,
+                            bool isprotein,
+                            const GtStr *smapfile,
+                            const GtStrArray *filenametab,
+                            GtError *err)
 {
   GtAlphabet *alpha;
   bool haserr = false;
@@ -717,7 +718,7 @@ void gt_alphabet_output(const GtAlphabet *alphabet, FILE *fpout)
   (void) putc((int) '\n',fpout);
 }
 
-void gt_alphabet_fprintf_symbolstring(const GtAlphabet *alphabet, FILE *fpout,
+void gt_alphabet_decode_seq_to_fp(const GtAlphabet *alphabet, FILE *fpout,
                                       const GtUchar *w, unsigned long wlen)
 {
   unsigned long i;
@@ -739,7 +740,7 @@ void gt_alphabet_fprintf_symbolstring(const GtAlphabet *alphabet, FILE *fpout,
 void gt_alphabet_printf_symbolstring(const GtAlphabet *alphabet,
                                      const GtUchar *w, unsigned long wlen)
 {
-  gt_alphabet_fprintf_symbolstring(alphabet, stdout, w, wlen);
+  gt_alphabet_decode_seq_to_fp(alphabet, stdout, w, wlen);
 }
 
 static char converttoprettysymbol(const GtAlphabet *alphabet,
@@ -768,7 +769,7 @@ static char converttoprettysymbol(const GtAlphabet *alphabet,
   return ret;
 }
 
-void gt_alphabet_sprintf_symbolstring(const GtAlphabet *alphabet, char *buffer,
+void gt_alphabet_decode_seq_to_cstr(const GtAlphabet *alphabet, char *buffer,
                                       const GtUchar *w, unsigned long wlen)
 {
   unsigned long i;
@@ -778,6 +779,20 @@ void gt_alphabet_sprintf_symbolstring(const GtAlphabet *alphabet, char *buffer,
     buffer[i] = converttoprettysymbol(alphabet, (GtUchar) w[i]);
   }
   buffer[wlen] = '\0';
+}
+
+GtStr* gt_alphabet_decode_seq_to_str(const GtAlphabet *alphabet,
+                                     const GtUchar *w,
+                                     unsigned long wlen)
+{
+  char *buffer;
+  GtStr *ret;
+  gt_assert(alphabet && w);
+  buffer = gt_malloc(sizeof (char) * wlen+1);
+  gt_alphabet_decode_seq_to_cstr(alphabet, buffer, w, wlen);
+  ret = gt_str_new_cstr(buffer);
+  gt_free(buffer);
+  return ret;
 }
 
 void gt_alphabet_echo_pretty_symbol(const GtAlphabet *alphabet, FILE *fpout,
@@ -960,8 +975,8 @@ GtAlphabet *gt_alphabet_new_from_file(const GtStr *indexname,GtError *err)
   return alpha;
 }
 
-int gt_outal1file(const GtStr *indexname,const GtAlphabet *alpha,
-                  GtError *err)
+int gt_alphabet_to_file(const GtAlphabet *alpha, const GtStr *indexname,
+                        GtError *err)
 {
   FILE *al1fp;
   bool haserr = false;

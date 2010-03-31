@@ -127,7 +127,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
       pptr = nextEnumpatterniterator(&patternlen,epi);
       if (pmopt->showpatt)
       {
-        gt_alphabet_printf_symbolstring(alpha,pptr,patternlen);
+        gt_alphabet_decode_seq_to_fp(alpha,stdout,pptr,patternlen);
         printf("\n");
       }
       if (pmopt->usebcktab)

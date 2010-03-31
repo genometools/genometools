@@ -66,7 +66,7 @@ char* gt_ltrelement_get_sequence(unsigned long start, unsigned long end,
                                                seqinfo->seqstartpos + start + i,
                                                GT_READMODE_FORWARD);
   }
-  gt_alphabet_sprintf_symbolstring(alpha, out, symbolstring, len);
+  gt_alphabet_decode_seq_to_cstr(alpha, out, symbolstring, len);
   gt_free(symbolstring);
   gt_encodedsequence_scanstate_delete(ess);
 

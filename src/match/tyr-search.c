@@ -127,8 +127,10 @@ static void mermatchoutput(const Tyrindex *tyrindex,
   if (tyrsearchinfo->showmode & SHOWSEQUENCE)
   {
     ADDTABULATOR;
-    gt_alphabet_printf_symbolstring(tyrsearchinfo->dnaalpha,qptr,
-                                    tyrsearchinfo->mersize);
+    gt_alphabet_decode_seq_to_fp(tyrsearchinfo->dnaalpha,
+                                 stdout,
+                                 qptr,
+                                 tyrsearchinfo->mersize);
   }
   if (tyrsearchinfo->showmode & (SHOWSEQUENCE | SHOWQPOS | SHOWCOUNTS))
   {

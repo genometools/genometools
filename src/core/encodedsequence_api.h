@@ -28,6 +28,14 @@
 #include "core/str_array.h"
 #include "core/symboldef.h"
 
+/* Holds information about one sequence in a <GtEncodedsequence>. */
+typedef struct
+{
+  unsigned long seqstartpos,  /* the position of the first character
+                                 in the encoded sequence */
+                seqlength;    /* the length of the sequence */
+} GtSeqinfo;
+
 /* The GtEncodedsequence class represents a collection of sequences from one
    or more input files in a compressed encoding. */
 typedef struct GtEncodedsequence GtEncodedsequence;
@@ -158,13 +166,6 @@ void               gt_encodedsequence_extract_substring(
                                                 GtUchar *buffer,
                                                 unsigned long frompos,
                                                 unsigned long topos);
-
-typedef struct
-{
-  unsigned long seqstartpos,  /* the position of the first character
-                                 in the encoded sequence */
-                seqlength;    /* the length of the sequence */
-} GtSeqinfo;
 
 /* Fills the <seqinfo> struct for the <seqnum>-th sequence in the <encseq>. */
 void               gt_encodedsequence_seqinfo(const GtEncodedsequence *encseq,
