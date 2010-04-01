@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+from test_alphabet import *
 from test_commentnode import *
 from test_customvisitor import *
 from test_featurenode import *
