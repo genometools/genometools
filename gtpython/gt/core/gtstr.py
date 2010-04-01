@@ -39,7 +39,7 @@ class Str:
                 pass
 
     def __str__(self):
-        return gtlib.gt_str_get(self.strg)
+        return str(gtlib.gt_str_get(self.strg))
 
     def reset(self):
         gtlib.gt_str_reset(self.strg)
