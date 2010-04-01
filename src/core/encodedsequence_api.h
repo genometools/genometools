@@ -28,12 +28,14 @@
 #include "core/str_array.h"
 #include "core/symboldef.h"
 
-/* Holds information about one sequence in a <GtEncodedsequence>. */
+/* Holds information about one sequence in a <GtEncodedsequence>.
+   The field <seqstartpos> contains the position of the first character
+   in the encoded sequence while <seqlength> contains the length of the
+   sequence. */
 typedef struct
 {
-  unsigned long seqstartpos,  /* the position of the first character
-                                 in the encoded sequence */
-                seqlength;    /* the length of the sequence */
+  unsigned long seqstartpos,
+                seqlength;
 } GtSeqinfo;
 
 /* The GtEncodedsequence class represents a collection of sequences from one
