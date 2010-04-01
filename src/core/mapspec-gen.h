@@ -25,7 +25,7 @@
 #include "core/error.h"
 
 #define NEWMAPSPEC(PTR,TYPE,ELEMS)\
-        GT_GETNEXTFREEINARRAY(mapspecptr,mapspectable,Mapspecification,10);\
+        GT_GETNEXTFREEINARRAY(mapspecptr,mapspectable,GtMapspecification,10);\
         mapspecptr->typespec = TYPE ## Type;\
         mapspecptr->startptr = &(PTR);\
         mapspecptr->sizeofunit = sizeof (TYPE);\
@@ -47,32 +47,32 @@ typedef enum
   GtTwobitencodingType,
   GtSpecialcharinfoType,
   BitElemType
-} Typespec;
+} GtTypespec;
 
 typedef struct
 {
-  Typespec typespec;
+  GtTypespec typespec;
   char *name;
   void *startptr;
   size_t sizeofunit;
   unsigned long numofunits;
-} Mapspecification;
+} GtMapspecification;
 
-GT_DECLAREARRAYSTRUCT(Mapspecification);
+GT_DECLAREARRAYSTRUCT(GtMapspecification);
 
-typedef void(*Assignmapspec)(GtArrayMapspecification *,void *,bool);
+typedef void(*GtAssignmapspec)(GtArrayGtMapspecification *,void *,bool);
 
-int fillmapspecstartptr(Assignmapspec assignmapspec,
-                        void **mappeduserptr,
-                        void *assignmapinfo,
-                        const GtStr *tmpfilename,
-                        unsigned long expectedsize,
-                        GtError *err);
+int gt_mapspec_fillmapspecstartptr(GtAssignmapspec assignmapspec,
+                                   void **mappeduserptr,
+                                   void *assignmapinfo,
+                                   const GtStr *tmpfilename,
+                                   unsigned long expectedsize,
+                                   GtError *err);
 
-int flushtheindex2file(FILE *fp,
-                       Assignmapspec assignmapspec,
-                       void *assignmapinfo,
-                       unsigned long expectedsize,
-                       GtError *err);
+int gt_mapspec_flushtheindex2file(FILE *fp,
+                                  GtAssignmapspec assignmapspec,
+                                  void *assignmapinfo,
+                                  unsigned long expectedsize,
+                                  GtError *err);
 
 #endif

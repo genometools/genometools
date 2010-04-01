@@ -19,13 +19,13 @@
 #include "fmindex.h"
 #include "core/mapspec-gen.h"
 
-static void assignfmmapspecification(GtArrayMapspecification *mapspectable,
+static void assignfmmapspecification(GtArrayGtMapspecification *mapspectable,
                                      void *voidinfo,
                                      GT_UNUSED bool writemode)
 {
   Fmindexwithoptions *fmwithoptions = (Fmindexwithoptions *) voidinfo;
   Fmindex *fmindex;
-  Mapspecification *mapspecptr;
+  GtMapspecification *mapspecptr;
 
   fmindex = fmwithoptions->fmptr;
   NEWMAPSPEC(fmindex->tfreq,
@@ -59,7 +59,7 @@ int flushfmindex2file(FILE *fp,
   gt_error_check(err);
   fmwithoptions.fmptr = fmindex;
   fmwithoptions.storeindexpos = storeindexpos;
-  return flushtheindex2file(fp,assignfmmapspecification,
+  return gt_mapspec_flushtheindex2file(fp,assignfmmapspecification,
                             (void *) &fmwithoptions,fmindex->sizeofindex,err);
 }
 
@@ -73,7 +73,7 @@ int fillfmmapspecstartptr(Fmindex *fmindex,
   gt_error_check(err);
   fmwithoptions.fmptr = fmindex;
   fmwithoptions.storeindexpos = storeindexpos;
-  return fillmapspecstartptr(assignfmmapspecification,
+  return gt_mapspec_fillmapspecstartptr(assignfmmapspecification,
                              &fmindex->mappedptr,
                              (void *) &fmwithoptions,
                              tmpfilename,

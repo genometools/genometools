@@ -57,15 +57,15 @@
           haserr = true;\
         }
 
-static uint64_t detexpectedaccordingtomapspec(const GtArrayMapspecification
+static uint64_t detexpectedaccordingtomapspec(const GtArrayGtMapspecification
                                               *mapspectable)
 {
   uint64_t sumup = 0;
-  Mapspecification *mapspecptr;
+  GtMapspecification *mapspecptr;
 
-  for (mapspecptr = mapspectable->spaceMapspecification;
-       mapspecptr < mapspectable->spaceMapspecification +
-                    mapspectable->nextfreeMapspecification; mapspecptr++)
+  for (mapspecptr = mapspectable->spaceGtMapspecification;
+       mapspecptr < mapspectable->spaceGtMapspecification +
+                    mapspectable->nextfreeGtMapspecification; mapspecptr++)
   {
     sumup += (uint64_t) mapspecptr->sizeofunit *
              (uint64_t) mapspecptr->numofunits;
@@ -79,7 +79,7 @@ static uint64_t detexpectedaccordingtomapspec(const GtArrayMapspecification
 
 #undef SKDEBUG
 #ifdef SKDEBUG
-static void showmapspec(const Mapspecification *mapspec)
+static void showmapspec(const GtMapspecification *mapspec)
 {
   printf("(%s,size=%lu,elems=%lu)",
            mapspec->name,
@@ -88,7 +88,7 @@ static void showmapspec(const Mapspecification *mapspec)
 }
 #endif
 
-static int assigncorrecttype(Mapspecification *mapspec,
+static int assigncorrecttype(GtMapspecification *mapspec,
                              void *ptr,
                              unsigned long byteoffset,
                              GtError *err)
@@ -146,7 +146,7 @@ static int assigncorrecttype(Mapspecification *mapspec,
   return haserr ? -1 : 0;
 }
 
-int fillmapspecstartptr(Assignmapspec assignmapspec,
+int gt_mapspec_fillmapspecstartptr(GtAssignmapspec assignmapspec,
                         void **mappeduserptr,
                         void *assignmapinfo,
                         const GtStr *tmpfilename,
@@ -157,13 +157,13 @@ int fillmapspecstartptr(Assignmapspec assignmapspec,
   uint64_t expectedaccordingtomapspec;
   unsigned long byteoffset = 0;
   size_t numofbytes;
-  GtArrayMapspecification mapspectable;
-  Mapspecification *mapspecptr;
+  GtArrayGtMapspecification mapspectable;
+  GtMapspecification *mapspecptr;
   bool haserr = false;
   unsigned long totalpadunits = 0;
 
   gt_error_check(err);
-  GT_INITARRAY(&mapspectable,Mapspecification);
+  GT_INITARRAY(&mapspectable,GtMapspecification);
   assignmapspec(&mapspectable,assignmapinfo,false);
   mapptr = gt_fa_mmap_read(gt_str_get(tmpfilename), &numofbytes, err);
   if (mapptr == NULL)
@@ -173,7 +173,7 @@ int fillmapspecstartptr(Assignmapspec assignmapspec,
   *mappeduserptr = mapptr;
   if (!haserr)
   {
-    if (assigncorrecttype(mapspectable.spaceMapspecification,
+    if (assigncorrecttype(mapspectable.spaceGtMapspecification,
                           mapptr,0,err) != 0)
     {
       haserr = true;
@@ -194,7 +194,7 @@ int fillmapspecstartptr(Assignmapspec assignmapspec,
   }
   if (!haserr)
   {
-    mapspecptr = mapspectable.spaceMapspecification;
+    mapspecptr = mapspectable.spaceGtMapspecification;
     gt_assert(mapspecptr != NULL);
     byteoffset = CALLCASTFUNC(uint64_t,unsigned_long,
                               (uint64_t) (mapspecptr->sizeofunit *
@@ -206,8 +206,8 @@ int fillmapspecstartptr(Assignmapspec assignmapspec,
       totalpadunits += (unsigned long) padunits;
     }
     for (mapspecptr++;
-         mapspecptr < mapspectable.spaceMapspecification +
-                      mapspectable.nextfreeMapspecification; mapspecptr++)
+         mapspecptr < mapspectable.spaceGtMapspecification +
+                      mapspectable.nextfreeGtMapspecification; mapspecptr++)
     {
       if (assigncorrecttype(mapspecptr,mapptr,byteoffset,err) != 0)
       {
@@ -236,34 +236,34 @@ int fillmapspecstartptr(Assignmapspec assignmapspec,
       haserr = true;
     }
   }
-  GT_FREEARRAY(&mapspectable,Mapspecification);
+  GT_FREEARRAY(&mapspectable,GtMapspecification);
   return haserr ? -1 : 0;
 }
 
-int flushtheindex2file(FILE *fp,
-                       Assignmapspec assignmapspec,
+int gt_mapspec_flushtheindex2file(FILE *fp,
+                       GtAssignmapspec assignmapspec,
                        void *assignmapinfo,
                        unsigned long expectedsize,
                        GtError *err)
 {
-  GtArrayMapspecification mapspectable;
-  Mapspecification *mapspecptr;
+  GtArrayGtMapspecification mapspectable;
+  GtMapspecification *mapspecptr;
   unsigned long byteoffset = 0;
   bool haserr = false;
   GtUchar padbuffer[ALIGNSIZE-1] = {0};
   unsigned long totalpadunits = 0;
 
   gt_error_check(err);
-  GT_INITARRAY(&mapspectable,Mapspecification);
+  GT_INITARRAY(&mapspectable,GtMapspecification);
   assignmapspec(&mapspectable,assignmapinfo,true);
-  gt_assert(mapspectable.spaceMapspecification != NULL);
-  for (mapspecptr = mapspectable.spaceMapspecification;
-       mapspecptr < mapspectable.spaceMapspecification +
-                    mapspectable.nextfreeMapspecification;
+  gt_assert(mapspectable.spaceGtMapspecification != NULL);
+  for (mapspecptr = mapspectable.spaceGtMapspecification;
+       mapspecptr < mapspectable.spaceGtMapspecification +
+                    mapspectable.nextfreeGtMapspecification;
        mapspecptr++)
   {
 #ifdef SKDEBUG
-    printf("# flushtheindex2file");
+    printf("# gt_mapspec_flushtheindex2file");
     showmapspec(mapspecptr);
     printf(" at byteoffset %lu\n",byteoffset);
 #endif
@@ -352,6 +352,6 @@ int flushtheindex2file(FILE *fp,
       haserr = true;
     }
   }
-  GT_FREEARRAY(&mapspectable,Mapspecification);
+  GT_FREEARRAY(&mapspectable,GtMapspecification);
   return haserr ? -1 : 0;
 }

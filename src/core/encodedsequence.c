@@ -579,12 +579,13 @@ static unsigned long detunitsoftwobitencoding(unsigned long totallength)
   return CALLCASTFUNC(uint64_t,unsigned_long,unitsoftwobitencoding);
 }
 
-static void assignencseqmapspecification(GtArrayMapspecification *mapspectable,
-                                         void *voidinfo,
-                                         bool writemode)
+static void assignencseqmapspecification(
+                                        GtArrayGtMapspecification *mapspectable,
+                                        void *voidinfo,
+                                        bool writemode)
 {
   GtEncodedsequence *encseq = (GtEncodedsequence *) voidinfo;
-  Mapspecification *mapspecptr;
+  GtMapspecification *mapspecptr;
   unsigned long numofunits;
   unsigned int numofchars, bitspersymbol;
 
@@ -721,7 +722,7 @@ static int flushencseqfile(const GtStr *indexname,GtEncodedsequence *encseq,
   }
   if (!haserr)
   {
-    if (flushtheindex2file(fp,
+    if (gt_mapspec_flushtheindex2file(fp,
                            assignencseqmapspecification,
                            encseq,
                            encseq->sizeofrep,
@@ -761,7 +762,7 @@ static int fillencseqmapspecstartptr(GtEncodedsequence *encseq,
   gt_error_check(err);
   tmpfilename = gt_str_clone(indexname);
   gt_str_append_cstr(tmpfilename,GT_ENCSEQFILESUFFIX);
-  if (fillmapspecstartptr(assignencseqmapspecification,
+  if (gt_mapspec_fillmapspecstartptr(assignencseqmapspecification,
                           &encseq->mappedptr,
                           encseq,
                           tmpfilename,
@@ -2718,16 +2719,6 @@ GtUchar gt_encodedsequence_alphabetwildcardshow(const GtEncodedsequence *encseq)
   return gt_alphabet_wildcard_show(encseq->alpha);
 }
 
-void removealpharef(GtEncodedsequence *encseq)
-{
-  encseq->alpha = NULL;
-}
-
-void removefilenametabref(GtEncodedsequence *encseq)
-{
-  encseq->filenametab = NULL;
-}
-
 unsigned long gt_encodedsequence_charcount(const GtEncodedsequence *encseq,
                                            GtUchar cc)
 {
@@ -2848,7 +2839,7 @@ static unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab)
   return lengthofdbfilenames;
 }
 
-/*@null@*/ GtEncodedsequence *files2encodedsequence(
+static GtEncodedsequence *files2encodedsequence(
                                 bool withrange,
                                 const GtStrArray *filenametab,
                                 const GtFilelengthvalues *filelengthtab,
@@ -4485,13 +4476,13 @@ int gt_encodedsequence_compare_maxdepth(const GtEncodedsequence *encseq,
   return retval;
 }
 
-int multicharactercompare(const GtEncodedsequence *encseq,
-                          bool fwd,
-                          bool complement,
-                          GtEncodedsequenceScanstate *esr1,
-                          unsigned long pos1,
-                          GtEncodedsequenceScanstate *esr2,
-                          unsigned long pos2)
+GT_UNUSED static int multicharactercompare(const GtEncodedsequence *encseq,
+                                           bool fwd,
+                                           bool complement,
+                                           GtEncodedsequenceScanstate *esr1,
+                                           unsigned long pos1,
+                                           GtEncodedsequenceScanstate *esr2,
+                                           unsigned long pos2)
 {
   GtEndofTwobitencoding ptbe1, ptbe2;
   int retval;
@@ -4613,11 +4604,11 @@ static void showbufchar(FILE *fp,bool complement,GtUchar cc)
 }
 
 /* remove this from the interface */
-void showsequenceatstartpos(FILE *fp,
-                            bool fwd,
-                            bool complement,
-                            const GtEncodedsequence *encseq,
-                            unsigned long startpos)
+static void showsequenceatstartpos(FILE *fp,
+                                   bool fwd,
+                                   bool complement,
+                                   const GtEncodedsequence *encseq,
+                                   unsigned long startpos)
 {
   unsigned long pos, endpos;
   GtUchar buffer[GT_UNITSIN2BITENC];
@@ -4707,9 +4698,9 @@ static bool checktbe(bool fwd,GtTwobitencoding tbe1,GtTwobitencoding tbe2,
 }
 
 static inline GtBitsequence fwdextractspecialbits_bruteforce(
-                                     unsigned int *unitsnotspecial,
-                                     const GtBitsequence *specialbits,
-                                     unsigned long startpos)
+                                               unsigned int *unitsnotspecial,
+                                               const GtBitsequence *specialbits,
+                                               unsigned long startpos)
 {
   unsigned long idx;
   GtBitsequence result = 0, mask = GT_FIRSTBIT;
@@ -4771,8 +4762,8 @@ static inline GtBitsequence revextractspecialbits_bruteforce(
   return result;
 }
 
-void checkextractunitatpos(const GtEncodedsequence *encseq,
-                           bool fwd,bool complement)
+static void checkextractunitatpos(const GtEncodedsequence *encseq,
+                                  bool fwd,bool complement)
 {
   GtEndofTwobitencoding ptbe1, ptbe2;
   GtEncodedsequenceScanstate *esr;
@@ -4825,7 +4816,7 @@ void checkextractunitatpos(const GtEncodedsequence *encseq,
   gt_encodedsequence_scanstate_delete(esr);
 }
 
-void checkextractspecialbits(const GtEncodedsequence *encseq,bool fwd)
+static void checkextractspecialbits(const GtEncodedsequence *encseq,bool fwd)
 {
   unsigned long startpos;
   GtBitsequence spbits1, spbits2;
@@ -4884,7 +4875,7 @@ void checkextractspecialbits(const GtEncodedsequence *encseq,bool fwd)
   }
 }
 
-void multicharactercompare_withtest(const GtEncodedsequence *encseq,
+static void multicharactercompare_withtest(const GtEncodedsequence *encseq,
                                     bool fwd,
                                     bool complement,
                                     GtEncodedsequenceScanstate *esr1,
@@ -5341,7 +5332,7 @@ gt_encodedsequence_new_from_files(GtProgressTimer *sfxprogress,
   unsigned long totallength;
   bool haserr = false;
   unsigned int forcetable;
-  GtSpecialcharinfo specialcharinfo;
+  GtSpecialcharinfo specialcharinfo = {0,0,0,0,0};
   GtAlphabet *alpha = NULL;
   bool alphaisbound = false;
   GtFilelengthvalues *filelengthtab = NULL;

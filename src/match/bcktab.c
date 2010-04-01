@@ -231,12 +231,13 @@ Bcktab *allocBcktab(unsigned int numofchars,
   return bcktab;
 }
 
-static void assignbcktabmapspecification(GtArrayMapspecification *mapspectable,
-                                         void *voidinfo,
-                                         bool writemode)
+static void assignbcktabmapspecification(
+                                        GtArrayGtMapspecification *mapspectable,
+                                        void *voidinfo,
+                                        bool writemode)
 {
   Bcktab *bcktab = (Bcktab *) voidinfo;
-  Mapspecification *mapspecptr;
+  GtMapspecification *mapspecptr;
   unsigned long numofcounters;
 
   NEWMAPSPEC(bcktab->leftborder,GtUlong,
@@ -260,7 +261,7 @@ static void assignbcktabmapspecification(GtArrayMapspecification *mapspectable,
 int bcktab2file(FILE *fp,const Bcktab *bcktab,GtError *err)
 {
   gt_error_check(err);
-  return flushtheindex2file(fp,
+  return gt_mapspec_flushtheindex2file(fp,
                             assignbcktabmapspecification,
                             (Bcktab *) bcktab,
                             bcktab->sizeofrep,
@@ -277,7 +278,7 @@ static int fillbcktabmapspecstartptr(Bcktab *bcktab,
   gt_error_check(err);
   tmpfilename = gt_str_clone(indexname);
   gt_str_append_cstr(tmpfilename,BCKTABSUFFIX);
-  if (fillmapspecstartptr(assignbcktabmapspecification,
+  if (gt_mapspec_fillmapspecstartptr(assignbcktabmapspecification,
                           &bcktab->mappedptr,
                           bcktab,
                           tmpfilename,
