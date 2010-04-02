@@ -244,10 +244,10 @@ void* gt_feature_index_cast(GT_UNUSED const GtFeatureIndexClass *fic,
   return fi;
 }
 
-#define GT_FI_TEST_FEATURES_PER_THREAD 100000
+#define GT_FI_TEST_FEATURES_PER_THREAD 1000
 #define GT_FI_TEST_START 1
 #define GT_FI_TEST_END 10000000
-#define GT_FI_TEST_FEATURE_WIDTH 500
+#define GT_FI_TEST_FEATURE_WIDTH 2000
 #define GT_FI_TEST_QUERY_WIDTH 50000
 #define GT_FI_TEST_SEQID "testseqid"
 
