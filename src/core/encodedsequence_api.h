@@ -24,25 +24,16 @@
 #include "core/logger.h"
 #include "core/progress_timer.h"
 #include "core/readmode.h"
+#include "core/seqinfo.h"
 #include "core/str.h"
 #include "core/str_array.h"
 #include "core/symboldef.h"
 
-/* Holds information about one sequence in a <GtEncodedsequence>.
-   The field <seqstartpos> contains the position of the first character
-   in the encoded sequence while <seqlength> contains the length of the
-   sequence. */
-typedef struct
-{
-  unsigned long seqstartpos,
-                seqlength;
-} GtSeqinfo;
-
-/* The GtEncodedsequence class represents a collection of sequences from one
+/* The <GtEncodedsequence> class represents a collection of sequences from one
    or more input files in a compressed encoding. */
 typedef struct GtEncodedsequence GtEncodedsequence;
 
-/* The GtEncodedsequenceScanstate class represents the current state of a
+/* The <GtEncodedsequenceScanstate> class represents the current state of a
    sequential scan of a <GtEncodedsequence> region. */
 typedef struct GtEncodedsequenceScanstate GtEncodedsequenceScanstate;
 
