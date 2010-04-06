@@ -140,7 +140,7 @@ void gthtraversealignment(bool forward, Traversealignmentstate *state,
         break;
       case EOP_TYPE_DELETION:
         gt_assert(eoplength == 1);
-        if (travfunctions->processdeletion);
+        if (travfunctions->processdeletion)
           travfunctions->processdeletion(state, data, eoplength);
         if (proteineop) {
           if (forward)
