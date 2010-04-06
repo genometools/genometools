@@ -228,6 +228,6 @@ void gt_mutex_delete(GT_UNUSED GtMutex *mutex)
 
 void gt_thread_delete(GtThread *thread)
 {
-  if (!thread);
+  if (!thread) return;
   gt_free(thread);
 }
