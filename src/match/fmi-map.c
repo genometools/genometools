@@ -142,16 +142,17 @@ static GtEncodedsequence *mapbwtencoding(const GtStr *indexname,
                                        GtLogger *logger,
                                        GtError *err)
 {
+  GtEncodedsequenceOptions *o;
+  GtEncodedsequence *ret;
   gt_error_check(err);
 
-  return gt_encodedsequence_new_from_index(true,
-                            indexname,
-                            true,
-                            false,
-                            false,
-                            false,
-                            logger,
-                            err);
+  o = gt_encodedsequence_options_new();
+  gt_encodedsequence_options_enable_tis_table_usage(o);
+  gt_encodedsequence_options_set_indexname(o, (GtStr*) indexname);
+  gt_encodedsequence_options_set_logger(o, logger);
+  ret = gt_encodedsequence_new_from_index(true, o, err);
+  gt_encodedsequence_options_delete(o);
+  return ret;
 }
 
 int mapfmindex (Fmindex *fmindex,const GtStr *indexname,

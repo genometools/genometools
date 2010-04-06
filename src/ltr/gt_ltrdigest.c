@@ -397,18 +397,22 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
   GtStr *indexname = gt_str_new_cstr(argv[arg+1]);
   GtLogger *logger = gt_logger_new(arguments->verbose,
                                    GT_LOGGER_DEFLT_PREFIX, stdout);
+  GtEncodedsequenceOptions *o;
+  GtEncodedsequence *encseq;
   gt_error_check(err);
   gt_assert(arguments);
 
+  /* Set sequence encoder options */
+  o = gt_encodedsequence_options_new();
+  gt_encodedsequence_options_enable_tis_table_usage(o);
+  gt_encodedsequence_options_enable_des_table_usage(o);
+  gt_encodedsequence_options_enable_sds_table_usage(o);
+  gt_encodedsequence_options_enable_ssp_table_usage(o);
+  gt_encodedsequence_options_set_indexname(o, indexname);
+  gt_encodedsequence_options_set_logger(o, logger);
+
   /* Open sequence file */
-  GtEncodedsequence *encseq = gt_encodedsequence_new_from_index(true,
-                                               indexname,
-                                               true,
-                                               true,
-                                               true,
-                                               true,
-                                               logger,
-                                               err);
+  encseq = gt_encodedsequence_new_from_index(true, o, err);
   if (gt_error_is_set(err))
     had_err = -1;
 
@@ -504,6 +508,7 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
   gt_node_stream_delete(gff3_in_stream);
 
   gt_str_delete(indexname);
+  gt_encodedsequence_options_delete(o);
   gt_encodedsequence_delete(encseq);
   encseq = NULL;
   gt_bioseq_delete(arguments->pbs_opts.trna_lib);

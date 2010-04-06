@@ -260,22 +260,24 @@ static int inputsuffixarray(bool map,
                             GtError *err)
 {
   bool haserr = false;
+  GtEncodedsequenceOptions *o;
   unsigned long totallength = 0;
 
   gt_error_check(err);
   initsuffixarray(suffixarray);
-  suffixarray->encseq = gt_encodedsequence_new_from_index(true,
-                                           indexname,
-                                           (demand & SARR_ESQTAB) ? true
-                                                                  : false,
-                                           (demand & SARR_DESTAB) ? true
-                                                                  : false,
-                                           (demand & SARR_SDSTAB) ? true
-                                                                  : false,
-                                           (demand & SARR_SSPTAB) ? true
-                                                                  : false,
-                                           logger,
-                                           err);
+  o = gt_encodedsequence_options_new();
+  if (demand & SARR_ESQTAB)
+    gt_encodedsequence_options_enable_tis_table_usage(o);
+  if (demand & SARR_DESTAB)
+    gt_encodedsequence_options_enable_des_table_usage(o);
+  if (demand & SARR_SDSTAB)
+    gt_encodedsequence_options_enable_sds_table_usage(o);
+  if (demand & SARR_SSPTAB)
+    gt_encodedsequence_options_enable_ssp_table_usage(o);
+  gt_encodedsequence_options_set_indexname(o, (GtStr*) indexname);
+  gt_encodedsequence_options_set_logger(o, logger);
+  suffixarray->encseq = gt_encodedsequence_new_from_index(true, o, err);
+  gt_encodedsequence_options_delete(o);
   if (suffixarray->encseq == NULL)
   {
     haserr = true;

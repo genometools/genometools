@@ -164,14 +164,15 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
 
   if (idxlocalioptions->doonline)
   {
-    encseq = gt_encodedsequence_new_from_index (true,
-                                 idxlocalioptions->indexname,
-                                 true,
-                                 false,
-                                 false,
-                                 true,
-                                 logger,
-                                 err);
+    GtEncodedsequenceOptions *o;
+    o = gt_encodedsequence_options_new();
+    gt_encodedsequence_options_enable_tis_table_usage(o);
+    gt_encodedsequence_options_enable_ssp_table_usage(o);
+    gt_encodedsequence_options_set_indexname(o,
+                                      (GtStr*) idxlocalioptions->indexname);
+    gt_encodedsequence_options_set_logger(o, logger);
+    encseq = gt_encodedsequence_new_from_index(true, o, err);
+    gt_encodedsequence_options_delete(o);
     if (encseq == NULL)
     {
       haserr = true;

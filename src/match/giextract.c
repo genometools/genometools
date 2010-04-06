@@ -525,6 +525,7 @@ int gt_extractkeysfromdesfile(const GtStr *indexname,
         (void) putc((char) constantkeylen,fpout);
       } else
       {
+        GtEncodedsequenceOptions *o;
         if (constantkeylen > (unsigned long) MAXFIXEDKEYSIZE)
         {
           gt_error_set(err,"key \"%*.*s\" of length %lu not allowed; "
@@ -534,14 +535,14 @@ int gt_extractkeysfromdesfile(const GtStr *indexname,
           haserr = true;
           break;
         }
-        encseq = gt_encodedsequence_new_from_index(false,
-                                    indexname,
-                                    true,
-                                    true,
-                                    true,
-                                    true,
-                                    NULL,
-                                    err);
+        o = gt_encodedsequence_options_new();
+        gt_encodedsequence_options_enable_tis_table_usage(o);
+        gt_encodedsequence_options_enable_des_table_usage(o);
+        gt_encodedsequence_options_enable_sds_table_usage(o);
+        gt_encodedsequence_options_enable_ssp_table_usage(o);
+        gt_encodedsequence_options_set_indexname(o, (GtStr*) indexname);
+        encseq = gt_encodedsequence_new_from_index(false, o, err);
+        gt_encodedsequence_options_delete(o);
         if (encseq == NULL)
         {
           haserr = true;
@@ -786,17 +787,18 @@ int gt_extractkeysfromfastaindex(const GtStr *indexname,
                                  unsigned long linewidth,GtError *err)
 {
   GtEncodedsequence *encseq = NULL;
+  GtEncodedsequenceOptions *o;
   bool haserr = false;
   unsigned long numofdbsequences = 0, keysize = 0;
 
-  encseq = gt_encodedsequence_new_from_index(false,
-                              indexname,
-                              true,
-                              true,
-                              true,
-                              true,
-                              NULL,
-                              err);
+  o = gt_encodedsequence_options_new();
+  gt_encodedsequence_options_enable_tis_table_usage(o);
+  gt_encodedsequence_options_enable_des_table_usage(o);
+  gt_encodedsequence_options_enable_sds_table_usage(o);
+  gt_encodedsequence_options_enable_ssp_table_usage(o);
+  gt_encodedsequence_options_set_indexname(o, (GtStr*) indexname);
+  encseq = gt_encodedsequence_new_from_index(false, o, err);
+  gt_encodedsequence_options_delete(o);
   if (encseq == NULL)
   {
     haserr = true;

@@ -2932,22 +2932,19 @@ static GtEncodedsequence *files2encodedsequence(
 }
 
 GtEncodedsequence *gt_encodedsequence_new_from_index(bool withrange,
-                                               const GtStr *indexname,
-                                               bool withtistab,
-                                               bool withdestab,
-                                               bool withsdstab,
-                                               bool withssptab,
-                                               GtLogger *logger,
+                                               GtEncodedsequenceOptions *o,
                                                GtError *err)
 {
   GtEncodedsequence *encseq = NULL;
   bool haserr = false;
   int retcode;
+  GtStr *indexname;
   Firstencseqvalues firstencseqvalues;
   GtAlphabet *alpha;
 
   gt_error_check(err);
-  alpha = gt_alphabet_new_from_file(indexname,err);
+  indexname = gt_encodedsequence_options_get_indexname(o);
+  alpha = gt_alphabet_new_from_file(indexname, err);
   if (alpha == NULL)
   {
     haserr = true;
@@ -2970,25 +2967,28 @@ GtEncodedsequence *gt_encodedsequence_new_from_index(bool withrange,
                                       firstencseqvalues.specialcharinfo
                                                        .specialranges,
                                       alpha,
-                                      logger);
+                                      gt_encodedsequence_options_get_logger(o));
     alpha = NULL;
     ALLASSIGNAPPENDFUNC(firstencseqvalues.sat);
-    gt_logger_log(logger,"deliverchar=%s",encseq->delivercharname);
-    if (withtistab)
+    gt_logger_log(gt_encodedsequence_options_get_logger(o),
+                  "deliverchar=%s",encseq->delivercharname);
+    if (gt_encodedsequence_options_get_tis_table_usage(o))
     {
-      if (fillencseqmapspecstartptr(encseq,indexname,logger,err) != 0)
+      if (fillencseqmapspecstartptr(encseq,indexname,
+                                    gt_encodedsequence_options_get_logger(o),
+                                    err) != 0)
       {
         haserr = true;
       }
     }
   }
 #ifdef RANGEDEBUG
-  if (!haserr && withtistab)
+  if (!haserr && gt_encodedsequence_options_get_tis_table_usage(o))
   {
     showallspecialpositions(encseq);
   }
 #endif
-  if (!haserr && withdestab)
+  if (!haserr && gt_encodedsequence_options_get_des_table_usage(o))
   {
     size_t numofbytes;
 
@@ -3003,7 +3003,7 @@ GtEncodedsequence *gt_encodedsequence_new_from_index(bool withrange,
       haserr = true;
     }
   }
-  if (!haserr && withsdstab)
+  if (!haserr && gt_encodedsequence_options_get_sds_table_usage(o))
   {
     gt_assert(encseq != NULL);
     if (encseq->numofdbsequences > 1UL)
@@ -3023,7 +3023,7 @@ GtEncodedsequence *gt_encodedsequence_new_from_index(bool withrange,
       encseq->sdstab = NULL;
     }
   }
-  if (!haserr && withssptab)
+  if (!haserr && gt_encodedsequence_options_get_ssp_table_usage(o))
   {
     gt_assert(encseq != NULL);
     if (encseq->numofdbsequences > 1UL)
@@ -5314,19 +5314,7 @@ static unsigned long *initcharacterdistribution(const GtAlphabet *alpha)
 }
 
 GtEncodedsequence*
-gt_encodedsequence_new_from_files(GtProgressTimer *sfxprogress,
-                                  const GtStr *str_indexname,
-                                  const GtStr *str_smap,
-                                  const GtStr *str_sat,
-                                  GtStrArray *filenametab,
-                                  bool isdna,
-                                  bool isprotein,
-                                  bool isplain,
-                                  bool outtistab,
-                                  bool outdestab,
-                                  bool outsdstab,
-                                  bool outssptab,
-                                  GtLogger *logger,
+gt_encodedsequence_new_from_files(GtEncodedsequenceOptions *o,
                                   GtError *err)
 {
   unsigned long totallength;
@@ -5335,6 +5323,9 @@ gt_encodedsequence_new_from_files(GtProgressTimer *sfxprogress,
   GtSpecialcharinfo specialcharinfo = {0,0,0,0,0};
   GtAlphabet *alpha = NULL;
   bool alphaisbound = false;
+  GtStrArray *filenametab;
+  GtStr *indexname,
+        *accesstype;
   GtFilelengthvalues *filelengthtab = NULL;
   unsigned long specialrangestab[3];
   unsigned long *characterdistribution = NULL;
@@ -5342,12 +5333,16 @@ gt_encodedsequence_new_from_files(GtProgressTimer *sfxprogress,
   GtArrayGtUlong sequenceseppos;
 
   gt_error_check(err);
-  filenametab = gt_str_array_ref(filenametab);
+  filenametab =
+            gt_str_array_ref(gt_encodedsequence_options_get_input_sequences(o));
+  indexname = gt_encodedsequence_options_get_indexname(o);
+  accesstype = gt_encodedsequence_options_get_access_type(o);
   encseq = NULL;
   GT_INITARRAY(&sequenceseppos, GtUlong);
-  if (gt_str_length(str_sat) > 0)
+  if (gt_str_length(gt_encodedsequence_options_get_access_type(o)) > 0)
   {
-    int retval = getsatforcevalue(gt_str_get(str_sat),err);
+    int retval = getsatforcevalue(
+                 gt_str_get(gt_encodedsequence_options_get_access_type(o)),err);
     if (retval < 0)
     {
       haserr = true;
@@ -5361,7 +5356,10 @@ gt_encodedsequence_new_from_files(GtProgressTimer *sfxprogress,
   }
   if (!haserr)
   {
-    alpha = gt_alphabet_new(isdna, isprotein,str_smap, filenametab, err);
+    alpha = gt_alphabet_new(gt_encodedsequence_options_get_input_dna(o),
+                            gt_encodedsequence_options_get_input_protein(o),
+                            gt_encodedsequence_options_get_symbolmap_file(o),
+                            filenametab, err);
     if (alpha == NULL)
     {
       haserr = true;
@@ -5369,7 +5367,7 @@ gt_encodedsequence_new_from_files(GtProgressTimer *sfxprogress,
   }
   if (!haserr)
   {
-    if (gt_alphabet_to_file(alpha,str_indexname,err) != 0)
+    if (gt_alphabet_to_file(alpha,indexname,err) != 0)
     {
       haserr = true;
     }
@@ -5377,48 +5375,49 @@ gt_encodedsequence_new_from_files(GtProgressTimer *sfxprogress,
   if (!haserr)
   {
     characterdistribution = initcharacterdistribution(alpha);
-    if (gt_inputfiles2sequencekeyvalues(str_indexname,
-                                        &totallength,
-                                        &specialcharinfo,
-                                        forcetable,
-                                        specialrangestab,
-                                        filenametab,
-                                        &filelengthtab,
-                                        alpha,
-                                        isplain,
-                                        outdestab,
-                                        outsdstab,
-                                        characterdistribution,
-                                        outssptab,
-                                        &sequenceseppos,
-                                        logger,
-                                        err) != 0)
+    if (gt_inputfiles2sequencekeyvalues(indexname,
+                              &totallength,
+                              &specialcharinfo,
+                              forcetable,
+                              specialrangestab,
+                              filenametab,
+                              &filelengthtab,
+                              alpha,
+                              gt_encodedsequence_options_get_input_plain(o),
+                              gt_encodedsequence_options_get_des_table_usage(o),
+                              gt_encodedsequence_options_get_sds_table_usage(o),
+                              characterdistribution,
+                              gt_encodedsequence_options_get_ssp_table_usage(o),
+                              &sequenceseppos,
+                              gt_encodedsequence_options_get_logger(o),
+                              err) != 0)
     {
       haserr = true;
     }
   }
   if (!haserr)
   {
-    if (sfxprogress != NULL)
+    if (gt_encodedsequence_options_get_progress_timer(o) != NULL)
     {
-      gt_progress_timer_start_new_state(sfxprogress,
-                                        "computing sequence encoding",
-                                        stdout);
+      gt_progress_timer_start_new_state(
+                               gt_encodedsequence_options_get_progress_timer(o),
+                               "computing sequence encoding",
+                               stdout);
     }
     encseq = files2encodedsequence(true,
                                    filenametab,
                                    filelengthtab,
-                                   isplain,
+                                  gt_encodedsequence_options_get_input_plain(o),
                                    totallength,
                                    sequenceseppos.nextfreeGtUlong+1,
                                    specialrangestab,
                                    alpha,
-                                   gt_str_length(str_sat) > 0
-                                     ? gt_str_get(str_sat)
+                                   gt_str_length(accesstype) > 0
+                                     ? gt_str_get(accesstype)
                                      : NULL,
                                    characterdistribution,
                                    &specialcharinfo,
-                                   logger,
+                                   gt_encodedsequence_options_get_logger(o),
                                    err);
     if (encseq == NULL)
     {
@@ -5426,17 +5425,17 @@ gt_encodedsequence_new_from_files(GtProgressTimer *sfxprogress,
     } else
     {
       alphaisbound = true;
-      if (outtistab)
+      if (gt_encodedsequence_options_get_tis_table_usage(o))
       {
-        if (flushencseqfile(str_indexname,encseq,err) != 0)
+        if (flushencseqfile(indexname,encseq,err) != 0)
         {
           haserr = true;
         }
       }
-      if (!haserr && outssptab)
+      if (!haserr && gt_encodedsequence_options_get_ssp_table_usage(o))
       {
         FILE *outfp;
-        outfp = gt_fa_fopen_filename_with_suffix(str_indexname,
+        outfp = gt_fa_fopen_filename_with_suffix(indexname,
                                                  GT_SSPTABFILESUFFIX,
                                                  "wb",err);
         if (outfp == NULL)

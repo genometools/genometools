@@ -416,6 +416,7 @@ static int runsuffixerator(bool doesa,
   unsigned int prefixlength;
   Sfxstrategy sfxstrategy;
   GtEncodedsequence *encseq;
+  GtEncodedsequenceOptions *o;
 
   gt_error_check(err);
   if (so->showtime)
@@ -434,35 +435,44 @@ static int runsuffixerator(bool doesa,
   }
   if (gt_str_length(so->str_inputindex) > 0)
   {
-    encseq = gt_encodedsequence_new_from_index(true,
-                                               so->str_inputindex,
-                                               true,
-                                               false,
-                                               false,
-                                               false,
-                                               logger,
-                                               err);
+    o = gt_encodedsequence_options_new();
+    gt_encodedsequence_options_enable_tis_table_usage(o);
+    gt_encodedsequence_options_set_indexname(o, (GtStr*) so->str_inputindex);
+    gt_encodedsequence_options_set_logger(o, logger);
+    encseq = gt_encodedsequence_new_from_index(true, o, err);
+    gt_encodedsequence_options_delete(o);
     if (encseq == NULL)
     {
       haserr = true;
     }
   } else
   {
-
-    encseq = gt_encodedsequence_new_from_files(sfxprogress,
-                                               so->fn2encopt.str_indexname,
-                                               so->fn2encopt.str_smap,
-                                               so->fn2encopt.str_sat,
-                                               so->fn2encopt.filenametab,
-                                               so->fn2encopt.isdna,
-                                               so->fn2encopt.isprotein,
-                                               so->fn2encopt.isplain,
-                                               so->fn2encopt.outtistab,
-                                               so->fn2encopt.outdestab,
-                                               so->fn2encopt.outsdstab,
-                                               so->fn2encopt.outssptab,
-                                               logger,
-                                               err);
+    o = gt_encodedsequence_options_new();
+    if (so->fn2encopt.outtistab)
+      gt_encodedsequence_options_enable_tis_table_usage(o);
+    if (so->fn2encopt.outdestab)
+      gt_encodedsequence_options_enable_des_table_usage(o);
+    if (so->fn2encopt.outsdstab)
+      gt_encodedsequence_options_enable_sds_table_usage(o);
+    if (so->fn2encopt.outssptab)
+      gt_encodedsequence_options_enable_ssp_table_usage(o);
+    if (so->fn2encopt.isdna)
+      gt_encodedsequence_options_set_input_dna(o);
+    if (so->fn2encopt.isprotein)
+      gt_encodedsequence_options_set_input_protein(o);
+    if (so->fn2encopt.isplain)
+      gt_encodedsequence_options_set_input_plain(o);
+    gt_encodedsequence_options_set_progress_timer(o, sfxprogress);
+    gt_encodedsequence_options_set_indexname(o,
+                                          (GtStr*) so->fn2encopt.str_indexname);
+    gt_encodedsequence_options_set_symbolmap_file(o,
+                                               (GtStr*) so->fn2encopt.str_smap);
+    gt_encodedsequence_options_set_access_type(o, so->fn2encopt.str_sat);
+    gt_encodedsequence_options_set_input_sequences(o,
+                                                     so->fn2encopt.filenametab);
+    gt_encodedsequence_options_set_logger(o, logger);
+    encseq = gt_encodedsequence_new_from_files(o,  err);
+    gt_encodedsequence_options_delete(o);
     if (encseq == NULL)
     {
       haserr = true;

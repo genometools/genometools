@@ -21,12 +21,13 @@
 
 #include "core/alphabet.h"
 #include "core/chardef.h"
+#include "core/encodedsequence_options_api.h"
 #include "core/logger.h"
 #include "core/progress_timer.h"
 #include "core/readmode.h"
 #include "core/seqinfo.h"
-#include "core/str.h"
-#include "core/str_array.h"
+#include "core/str_api.h"
+#include "core/str_array_api.h"
 #include "core/symboldef.h"
 
 /* The <GtEncodedsequence> class represents a collection of sequences from one
@@ -46,57 +47,24 @@ typedef struct GtEncodedsequenceScanstate GtEncodedsequenceScanstate;
 /* The file suffix used for sequence description separator position tables. */
 #define GT_SDSTABFILESUFFIX ".sds"
 
-/* Returns a new <GtEncodedsequence> created from a set of filenames
-   (<filenametab>) and creates the on-disk representation on the fly.
-   Returns NULL on error.
-   The parameter <sfxprogress> specifies an <GtProgressTimer> facilitating log
-   state (can be NULL), while <logger> references a <GtLogger> specifying a log
-   target.
-   <str_indexname> specified a path prefix to use for the newly generated
-   table files, creation of which can be toggled via the
-   <out{tis,des,sds,ssp}tab> options. The <is{dna,protein,plain}> options
-   specify the kind of sequence format given in the source files.
-   <str_smap> is the name of an alphabet mapping file declaring an encoding
-   scheme for the input sequence(s). <str_sat> is the string representation of
-   a position access type and determines how the encoded sequence is stored
-   (e.g. "direct", "ushort", "bit", ...). */
+/* Returns a new <GtEncodedsequence> created from a set of sequence input files
+   as specified in the option object <o>. Returns NULL on error. */
 GtEncodedsequence* gt_encodedsequence_new_from_files(
-                                                  GtProgressTimer *sfxprogress,
-                                                  const GtStr *str_indexname,
-                                                  const GtStr *str_smap,
-                                                  const GtStr *str_sat,
-                                                  GtStrArray *filenametab,
-                                                  bool isdna,
-                                                  bool isprotein,
-                                                  bool isplain,
-                                                  bool outtistab,
-                                                  bool outdestab,
-                                                  bool outsdstab,
-                                                  bool outssptab,
-                                                  GtLogger *logger,
-                                                  GtError *err);
+                                                    GtEncodedsequenceOptions *o,
+                                                    GtError *err);
 
 /* Returns a new <GtEncodedsequence> created from a set of preprocessed index
-   files. Returns NULL on error. The parameter <logger> is used to pass
-   a <GtLogger> specifying a log target.
-   <indexname> specified a path prefix to the index files to map. Which tables
-   are to be mapped can be toggled via the <with{tis,des,sds,ssp}tab> options.
-   TODO: document withrange  */
+   files as specified in the option object <o>. Returns NULL on error. */
 GtEncodedsequence* gt_encodedsequence_new_from_index(bool withrange,
-                                                     const GtStr *indexname,
-                                                     bool withtistab,
-                                                     bool withdestab,
-                                                     bool withsdstab,
-                                                     bool withssptab,
-                                                     GtLogger *logger,
-                                                     GtError *err);
+                                                    GtEncodedsequenceOptions *o,
+                                                    GtError *err);
 
 /* Returns a new <GtEncodedsequence> created from a pre-encoded sequence in
    memory, given by two sequence pointers <seq1> and <seq2> of lengths <len1>
    and <len2>, respectively. Returns NULL on error.
    <alpha> is the <GtAlphabet> used to encode the sequence. The parameter
    <logger> is used to pass a <GtLogger> specifying a log target.
-   TODO: document withrange */
+   TODO: why are there two sequences? document 'withrange'! */
 GtEncodedsequence* gt_encodedsequence_new_from_plain(bool withrange,
                                                      const GtUchar *seq1,
                                                      unsigned long len1,
