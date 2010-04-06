@@ -174,7 +174,7 @@ const char*        gt_encodedsequence_description(
                                                 unsigned long seqnum);
 
 /* Returns the <GtAlphabet> associated with <encseq>. */
-GtAlphabet*  gt_encodedsequence_alphabet(const GtEncodedsequence *encseq);
+GtAlphabet*        gt_encodedsequence_alphabet(const GtEncodedsequence *encseq);
 
 /* Returns a <GtStrArray> of the names of the original sequence files
    contained in <encseq>. */
