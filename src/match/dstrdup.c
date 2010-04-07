@@ -19,7 +19,7 @@
 #include "spacedef.h"
 #include "core/assert_api.h"
 
-char *dynamicstrdup(const char *file,int linenum,const char *source)
+char *gt_dynamicstrdup(const char *file,int linenum,const char *source)
 {
   size_t sourcelength;
   char *dest;

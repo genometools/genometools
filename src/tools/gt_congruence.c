@@ -155,7 +155,7 @@ static int gt_cge_spacedseed_runner(GT_UNUSED int argc,
              gt_str_array_get(arguments->queryfilenames,idx));
     }
   }
-  if (matchspacedseed(arguments->withesa,
+  if (gt_matchspacedseed(arguments->withesa,
                       arguments->docompare,
                       arguments->str_inputindex,
                       arguments->queryfilenames,

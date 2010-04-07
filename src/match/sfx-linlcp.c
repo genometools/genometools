@@ -23,7 +23,7 @@
 #include "compressedtab.h"
 #include "sfx-linlcp.h"
 
-unsigned long *lcp13_manzini(const GtEncodedsequence *encseq,
+unsigned long *gt_lcp13_manzini(const GtEncodedsequence *encseq,
                       GtReadmode readmode,
                       unsigned long partwidth,
                       unsigned long totallength,
@@ -302,7 +302,7 @@ static unsigned long sa2ranknext(Compressedtable *ranknext,
   return longest;
 }
 
-Compressedtable *lcp9_manzini(Compressedtable *spacefortab,
+Compressedtable *gt_lcp9_manzini(Compressedtable *spacefortab,
                               const GtEncodedsequence *encseq,
                               GtReadmode readmode,
                               unsigned long partwidth,

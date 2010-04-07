@@ -70,7 +70,7 @@ static void deletethespranges(const GtEncodedsequence *encseq,
       {
         if (range.start > nextpos)
         {
-          encseq2symbolstring(stdout,
+          gt_encseq2symbolstring(stdout,
                               encseq,
                               GT_READMODE_FORWARD,
                               nextpos,
@@ -84,7 +84,7 @@ static void deletethespranges(const GtEncodedsequence *encseq,
   totallength = gt_encodedsequence_totallength(encseq);
   if (nextpos < totallength-1)
   {
-    encseq2symbolstring(stdout,
+    gt_encseq2symbolstring(stdout,
                         encseq,
                         GT_READMODE_FORWARD,
                         nextpos,
@@ -249,7 +249,7 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
     demand |= SARR_SSPTAB;
   }
   if ((sfxmapoptions.usestream ? streamsuffixarray
-                               : mapsuffixarray)(&suffixarray,
+                               : gt_mapsuffixarray)(&suffixarray,
                                                  demand,
                                                  indexname,
                                                  logger,
@@ -308,7 +308,7 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
           suffixarray.prefixlength > 0)
       {
         gt_logger_log(logger, "verifymappedstr");
-        if (verifymappedstr(suffixarray.encseq,suffixarray.prefixlength,
+        if (gt_verifymappedstr(suffixarray.encseq,suffixarray.prefixlength,
                             err) != 0)
         {
           haserr = true;
@@ -320,7 +320,7 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
 
         if (sfxmapoptions.inputlcp)
         {
-          ssar = newSequentialsuffixarrayreaderfromfile(indexname,
+          ssar = gt_newSequentialsuffixarrayreaderfromfile(indexname,
                                                         SARR_LCPTAB,
                                                         SEQ_scan,
                                                         err);
@@ -329,7 +329,7 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
           ssar = NULL;
         }
         gt_logger_log(logger, "checkentiresuftab");
-        checkentiresuftab(__FILE__,
+        gt_checkentiresuftab(__FILE__,
                           __LINE__,
                           suffixarray.encseq,
                           suffixarray.readmode,
@@ -342,7 +342,7 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
                           err);
         if (ssar != NULL)
         {
-          freeSequentialsuffixarrayreader(&ssar);
+          gt_freeSequentialsuffixarrayreader(&ssar);
         }
         gt_logger_log(logger, "okay");
       }
@@ -394,7 +394,7 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
     gt_encodedsequence_check_descriptions(suffixarray.encseq);
   }
   gt_str_delete(indexname);
-  freesuffixarray(&suffixarray);
+  gt_freesuffixarray(&suffixarray);
   gt_logger_delete(logger);
   return haserr ? -1 : 0;
 }

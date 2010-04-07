@@ -103,7 +103,7 @@ static void allocatefmtables(Fmindex *fm,
                       MARKPOSTABLELENGTH(fm->bwtlength,fm->markdist));
     fm->specpos.nextfreeGtPairBwtidx = 0;
     fm->specpos.allocatedGtPairBwtidx
-      = (unsigned long) determinenumberofspecialstostore(specialcharinfo);
+      = (unsigned long) gt_determinenumberofspecialstostore(specialcharinfo);
     printf("# %lu wildcards in the last %lu characters (%.2f)\n",
            (unsigned long) specialcharinfo->specialcharacters -
                            fm->specpos.allocatedGtPairBwtidx,
@@ -198,7 +198,7 @@ static int nextesamergedsufbwttabvalues(Definedunsignedlong *longest,
     {
       return 0;
     }
-    if (emissionmergedesa_stepdeleteandinsertothersuffixes(emmesa,err) != 0)
+    if (gt_emissionmergedesa_stepdeleteandinsertothersuffixes(emmesa,err) != 0)
     {
       return -1;
     }
@@ -240,7 +240,7 @@ static int nextesamergedsufbwttabvalues(Definedunsignedlong *longest,
   return 1;
 }
 
-int sufbwt2fmindex(Fmindex *fmindex,
+int gt_sufbwt2fmindex(Fmindex *fmindex,
                    GtSpecialcharinfo *specialcharinfo,
                    unsigned int log2bsize,
                    unsigned int log2markdist,
@@ -320,7 +320,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
     }
   } else
   {
-    if (emissionmergedesa_init(&emmesa,
+    if (gt_emissionmergedesa_init(&emmesa,
                                indexnametab,
                                SARR_ESQTAB | SARR_SUFTAB | SARR_LCPTAB,
                                logger,
@@ -340,7 +340,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
     }
     if (!haserr)
     {
-      sequenceoffsettable = encseqtable2sequenceoffsets(&totallength,
+      sequenceoffsettable = gt_encseqtable2sequenceoffsets(&totallength,
                                                         specialcharinfo,
                                                         emmesa.suffixarraytable,
                                                         numofindexes);
@@ -370,7 +370,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
   {
     printf("# firstignorespecial=%lu\n",
               firstignorespecial);
-    computefmkeyvalues (fmindex,
+    gt_computefmkeyvalues (fmindex,
                         specialcharinfo,
                         totallength+1,
                         log2bsize,
@@ -506,7 +506,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
     if (numofindexes == 1U)
     {
       fmindex->longestsuffixpos = suffixarray.longest.valueunsignedlong;
-      freesuffixarray(&suffixarray);
+      gt_freesuffixarray(&suffixarray);
     } else
     {
       if (!longest.defined)
@@ -519,7 +519,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
         fmindex->longestsuffixpos = longest.valueunsignedlong;
       }
       gt_fa_xfclose(outbwt);
-      emissionmergedesa_wrap(&emmesa);
+      gt_emissionmergedesa_wrap(&emmesa);
     }
   }
   FREESPACE(sequenceoffsettable);

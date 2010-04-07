@@ -30,7 +30,7 @@ typedef struct
          rank;
 } Rankedbounds;
 
-Rankedbounds *fillrankbounds(const GtEncodedsequence *encseq,
+Rankedbounds *gt_fillrankbounds(const GtEncodedsequence *encseq,
                              GtReadmode readmode)
 {
   if (gt_encodedsequence_has_specialranges(encseq))
@@ -61,7 +61,7 @@ Rankedbounds *fillrankbounds(const GtEncodedsequence *encseq,
   return NULL;
 }
 
-unsigned long frompos2rank(const Rankedbounds *leftptr,
+unsigned long gt_frompos2rank(const Rankedbounds *leftptr,
                            const Rankedbounds *rightptr,
                            unsigned long specialpos)
 {
@@ -92,7 +92,7 @@ unsigned long frompos2rank(const Rankedbounds *leftptr,
   /*@end@*/
 }
 
-unsigned long fromrank2pos(const Rankedbounds *leftptr,
+unsigned long gt_fromrank2pos(const Rankedbounds *leftptr,
                            const Rankedbounds *rightptr,
                            unsigned long rank)
 {
@@ -146,7 +146,7 @@ static int compareSpecialrank(const void *a,const void *b)
   return 0;
 }
 
-Specialrank *fillspecialranklist(const GtEncodedsequence *encseq,
+Specialrank *gt_fillspecialranklist(const GtEncodedsequence *encseq,
                                  GtReadmode readmode,
                                  const unsigned long *inversesuftab)
 {

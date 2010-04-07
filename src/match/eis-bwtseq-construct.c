@@ -28,7 +28,7 @@
 #include "match/eis-encidxseq-construct.h"
 
 extern BWTSeq *
-availBWTSeq(const struct bwtParam *params, GtLogger *verbosity,
+gt_availBWTSeq(const struct bwtParam *params, GtLogger *verbosity,
             GtError *err)
 {
   struct BWTSeq *bwtSeq = NULL;
@@ -50,13 +50,13 @@ availBWTSeq(const struct bwtParam *params, GtLogger *verbosity,
     }
   }
   len = gt_encodedsequence_totallength(suffixArray.encseq) + 1;
-  bwtSeq = availBWTSeqFromSA(params, &suffixArray, len, err);
-  freesuffixarray(&suffixArray);
+  bwtSeq = gt_availBWTSeqFromSA(params, &suffixArray, len, err);
+  gt_freesuffixarray(&suffixArray);
   return bwtSeq;
 }
 
 extern BWTSeq *
-trSuftab2BWTSeq(const struct bwtParam *params, GtLogger *verbosity,
+gt_trSuftab2BWTSeq(const struct bwtParam *params, GtLogger *verbosity,
                 GtError *err)
 {
   struct BWTSeq *bwtSeq = NULL;
@@ -81,28 +81,28 @@ trSuftab2BWTSeq(const struct bwtParam *params, GtLogger *verbosity,
       }
     }
     len = gt_encodedsequence_totallength(suffixArray.encseq) + 1;
-    bwtSeq = createBWTSeqFromSA(params, &suffixArray, len, err);
-    freesuffixarray(&suffixArray);
+    bwtSeq = gt_createBWTSeqFromSA(params, &suffixArray, len, err);
+    gt_freesuffixarray(&suffixArray);
   } while (0);
   return bwtSeq;
 }
 
 extern BWTSeq *
-availBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
+gt_availBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
                   unsigned long totalLen, GtError *err)
 {
   BWTSeq *bwtSeq;
   gt_assert(sa && params && err);
   gt_error_check(err);
   /* try loading index */
-  bwtSeq = loadBWTSeqForSA(params->projectName, params->seqParams.encType,
+  bwtSeq = gt_loadBWTSeqForSA(params->projectName, params->seqParams.encType,
                            params->seqParams.EISFeatureSet,
                            sa, totalLen, err);
   /* if loading didn't work try on-demand creation */
   if (!bwtSeq)
   {
     gt_error_unset(err);
-    bwtSeq = createBWTSeqFromSA(params, sa, totalLen, err);
+    bwtSeq = gt_createBWTSeqFromSA(params, sa, totalLen, err);
   }
   else
   {
@@ -123,7 +123,7 @@ static const enum rangeSortMode GTAlphabetRangeSort[][2] =
 };
 
 extern BWTSeq *
-loadBWTSeq(const GtStr *projectName, int BWTOptFlags, GtLogger *verbosity,
+gt_loadBWTSeq(const GtStr *projectName, int BWTOptFlags, GtLogger *verbosity,
            GtError *err)
 {
   struct BWTSeq *bwtSeq = NULL;
@@ -131,17 +131,17 @@ loadBWTSeq(const GtStr *projectName, int BWTOptFlags, GtLogger *verbosity,
   unsigned long len;
   gt_assert(projectName && err);
   gt_error_check(err);
-  if (mapsuffixarray(&suffixArray, 0, projectName, verbosity, err))
+  if (gt_mapsuffixarray(&suffixArray, 0, projectName, verbosity, err))
     return NULL;
   len = gt_encodedsequence_totallength(suffixArray.encseq) + 1;
-  bwtSeq = loadBWTSeqForSA(projectName, BWT_ON_BLOCK_ENC, BWTOptFlags,
+  bwtSeq = gt_loadBWTSeqForSA(projectName, BWT_ON_BLOCK_ENC, BWTOptFlags,
                            &suffixArray, len, err);
-  freesuffixarray(&suffixArray);
+  gt_freesuffixarray(&suffixArray);
   return bwtSeq;
 }
 
 extern BWTSeq *
-loadBWTSeqForSA(const GtStr *projectName, enum seqBaseEncoding encType,
+gt_loadBWTSeqForSA(const GtStr *projectName, enum seqBaseEncoding encType,
                 int BWTOptFlags, const Suffixarray *sa,
                 unsigned long totalLen, GtError *err)
 {
@@ -149,23 +149,23 @@ loadBWTSeqForSA(const GtStr *projectName, enum seqBaseEncoding encType,
   EISeq *seqIdx = NULL;
   MRAEnc *alphabet = NULL;
   gt_assert(projectName && sa && err);
-  alphabet = SANewMRAEnc(sa);
-  if ((seqIdx = loadEncIdxSeqForSA(
+  alphabet = gt_SANewMRAEnc(sa);
+  if ((seqIdx = gt_loadEncIdxSeqForSA(
          sa, totalLen, projectName, encType,
-         convertBWTOptFlags2EISFeatures(BWTOptFlags), err)))
-    bwtSeq = newBWTSeq(seqIdx, alphabet,
+         gt_convertBWTOptFlags2EISFeatures(BWTOptFlags), err)))
+    bwtSeq = gt_newBWTSeq(seqIdx, alphabet,
                        GTAlphabetRangeSort[GT_ALPHABETHANDLING_DEFAULT]);
   if (!bwtSeq)
   {
-    MRAEncDelete(alphabet);
+    gt_MRAEncDelete(alphabet);
     if (seqIdx)
-      deleteEncIdxSeq(seqIdx);
+      gt_deleteEncIdxSeq(seqIdx);
   }
   return bwtSeq;
 }
 
 extern BWTSeq *
-createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
+gt_createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
                    unsigned long totalLen, GtError *err)
 {
   BWTSeq *bwtSeq = NULL;
@@ -177,9 +177,9 @@ createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
   else
   {
     SuffixarrayFileInterface sai;
-    initSuffixarrayFileInterface(&sai, totalLen, sa);
-    bwtSeq = createBWTSeqFromSAI(params, &sai, err);
-    destructSuffixarrayFileInterface(&sai);
+    gt_initSuffixarrayFileInterface(&sai, totalLen, sa);
+    bwtSeq = gt_createBWTSeqFromSAI(params, &sai, err);
+    gt_destructSuffixarrayFileInterface(&sai);
   }
   return bwtSeq;
 }
@@ -200,7 +200,7 @@ buildSpRTable(const struct bwtParam *params,
       sampleIntervalLog2
         = gt_requiredUIntBits(requiredSeqposBits(totalLen));
     }
-    *sprTable = newSpecialsRankLookup(encseq, readmode, sampleIntervalLog2);
+    *sprTable = gt_newSpecialsRankLookup(encseq, readmode, sampleIntervalLog2);
   }
   *rangeSort = GTAlphabetRangeSort[sprTable?
                                    GT_ALPHABETHANDLING_W_RANK:
@@ -208,13 +208,13 @@ buildSpRTable(const struct bwtParam *params,
 }
 
 static BWTSeq *
-createBWTSeqFromSASS(const struct bwtParam *params, SASeqSrc *src,
+gt_createBWTSeqFromSASS(const struct bwtParam *params, SASeqSrc *src,
                      SpecialsRankLookup *sprTable,
                      const enum rangeSortMode *rangeSort,
                      GtError *err);
 
 extern BWTSeq *
-createBWTSeqFromSAI(const struct bwtParam *params,
+gt_createBWTSeqFromSAI(const struct bwtParam *params,
                     SuffixarrayFileInterface *sai,
                     GtError *err)
 {
@@ -224,48 +224,49 @@ createBWTSeqFromSAI(const struct bwtParam *params,
   gt_assert(sai && err && params);
   buildSpRTable(params, SAIGetLength(sai), SAIGetEncSeq(sai),
                 SAIGetGtReadmode(sai), &sprTable, &rangeSort);
-  bwtSeq = createBWTSeqFromSASS(params, SAI2SASS(sai), sprTable, rangeSort,
+  bwtSeq = gt_createBWTSeqFromSASS(params, SAI2SASS(sai), sprTable, rangeSort,
                                 err);
   if (sprTable)
-    deleteSpecialsRankLookup(sprTable);
+    gt_deleteSpecialsRankLookup(sprTable);
   return bwtSeq;
 }
 
 extern BWTSeq *
-createBWTSeqFromSfxI(const struct bwtParam *params, sfxInterface *sfxi,
+gt_createBWTSeqFromSfxI(const struct bwtParam *params, sfxInterface *sfxi,
                      GtError *err)
 {
   BWTSeq *bwtSeq;
   SpecialsRankLookup *sprTable = NULL;
   const enum rangeSortMode *rangeSort;
   gt_assert(sfxi && params && err);
-  buildSpRTable(params, SfxIGetLength(sfxi), SfxIGetEncSeq(sfxi),
-                SfxIGetReadmode(sfxi), &sprTable, &rangeSort);
-  bwtSeq = createBWTSeqFromSASS(params, SfxI2SASS(sfxi), sprTable, rangeSort,
-                                err);
+  buildSpRTable(params, gt_SfxIGetLength(sfxi), gt_SfxIGetEncSeq(sfxi),
+                gt_SfxIGetReadmode(sfxi), &sprTable, &rangeSort);
+  bwtSeq = gt_createBWTSeqFromSASS(params, gt_SfxI2SASS(sfxi), sprTable,
+                                   rangeSort,
+                                   err);
   if (sprTable)
-    deleteSpecialsRankLookup(sprTable);
+    gt_deleteSpecialsRankLookup(sprTable);
   return bwtSeq;
 }
 
 static BWTSeq *
-createBWTSeqFromSASS(const struct bwtParam *params, SASeqSrc *src,
+gt_createBWTSeqFromSASS(const struct bwtParam *params, SASeqSrc *src,
                      SpecialsRankLookup *sprTable,
                      const enum rangeSortMode *rangeSort,
                      GtError *err)
 {
   EISeq *seqIdx = NULL;
   BWTSeq *bwtSeq = NULL;
-  seqIdx = createBWTSeqGeneric(params, createEncIdxSeqGen, src,
+  seqIdx = gt_createBWTSeqGeneric(params, gt_createEncIdxSeqGen, src,
                                rangeSort, sprTable, err);
   if (seqIdx)
   {
     MRAEnc *alphabet = SASSNewMRAEnc(src);
-    bwtSeq = newBWTSeq(seqIdx, alphabet, rangeSort);
+    bwtSeq = gt_newBWTSeq(seqIdx, alphabet, rangeSort);
     if (!bwtSeq)
     {
-      deleteEncIdxSeq(seqIdx);
-      MRAEncDelete(alphabet);
+      gt_deleteEncIdxSeq(seqIdx);
+      gt_MRAEncDelete(alphabet);
     }
   }
   return bwtSeq;

@@ -20,7 +20,7 @@
 #include "core/chardef.h"
 #include "initeqsvec.h"
 
-void initeqsvector(unsigned long *eqsvector,
+void gt_initeqsvector(unsigned long *eqsvector,
                    unsigned long eqslen,
                    const GtUchar *pattern,
                    unsigned long patternlength)
@@ -46,7 +46,7 @@ void initeqsvector(unsigned long *eqsvector,
   }
 }
 
-void initeqsvectorrev(unsigned long *eqsvectorrev,
+void gt_initeqsvectorrev(unsigned long *eqsvectorrev,
                       unsigned long eqslen,
                       const GtUchar *pattern,
                       unsigned long patternlength)

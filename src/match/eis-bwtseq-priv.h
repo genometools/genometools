@@ -54,11 +54,11 @@ struct BWTSeqExactMatchesIterator
 };
 
 extern unsigned long
-BWTSeqLocateMatch(const BWTSeq *bwtSeq, unsigned long pos,
+gt_BWTSeqLocateMatch(const BWTSeq *bwtSeq, unsigned long pos,
                   struct extBitsRetrieval *extBits);
 
 extern BWTSeq *
-newBWTSeq(EISeq *seqIdx, MRAEnc *alphabet,
+gt_newBWTSeq(EISeq *seqIdx, MRAEnc *alphabet,
           const enum rangeSortMode *defaultRangeSort);
 
 #endif

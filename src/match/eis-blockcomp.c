@@ -230,9 +230,9 @@ symSumBitsDefaultSetup(struct blockCompositionSeq *seqIdx);
     if (newSeqIdx->externalData.idxFP)                                  \
       destructOnDiskBlockCompIdx(&newSeqIdx->externalData);             \
     if (newSeqIdx->compositionTable.bitsPerCount)                       \
-      destructCompositionList(&newSeqIdx->compositionTable);            \
+      gt_destructCompositionList(&newSeqIdx->compositionTable);         \
     if (newSeqIdx->rangeEncs)                                           \
-      deleteSeqRangeList(newSeqIdx->rangeEncs);                         \
+      gt_deleteSeqRangeList(newSeqIdx->rangeEncs);                      \
     if (newSeqIdx->extHeaderPos)                                        \
       gt_free(newSeqIdx->extHeaderPos);                                 \
     if (newSeqIdx->partialSymSumBits)                                   \
@@ -242,8 +242,8 @@ symSumBitsDefaultSetup(struct blockCompositionSeq *seqIdx);
     if (newSeqIdx) gt_free(newSeqIdx);                                  \
     if (modesCopy)                                                      \
       gt_free(modesCopy);                                               \
-    if (blockMapAlphabet) MRAEncDelete(blockMapAlphabet);               \
-    if (rangeMapAlphabet) MRAEncDelete(rangeMapAlphabet);               \
+    if (blockMapAlphabet) gt_MRAEncDelete(blockMapAlphabet);            \
+    if (rangeMapAlphabet) gt_MRAEncDelete(rangeMapAlphabet);            \
     return NULL;                                                        \
   } while (0)
 
@@ -267,10 +267,10 @@ addBlock2OutputBuffer(
                       blockNum, alphabet, REGIONS_LIST,
                       modes);
   /* c. add to table of composition/permutation indices */
-  MRAEncSymbolsTransform(blockMapAlphabet, block, blockSize);
+  gt_MRAEncSymbolsTransform(blockMapAlphabet, block, blockSize);
   /* FIXME control remapping */
   /* currently invalid characters in input can seriously break this */
-  block2IndexPair(&newSeqIdx->compositionTable, blockSize,
+  gt_block2IndexPair(&newSeqIdx->compositionTable, blockSize,
                   blockMapAlphabetSize, block, permCompIdx,
                   &significantPermIdxBits,
                   permCompBSPreAlloc, compositionPreAlloc);
@@ -314,7 +314,7 @@ writeOutputBuffer(struct blockCompositionSeq *newSeqIdx,
   break
 
 extern EISeq *
-newGenBlockEncIdxSeq(unsigned long totalLen, const GtStr *projectName,
+gt_newGenBlockEncIdxSeq(unsigned long totalLen, const GtStr *projectName,
                      MRAEnc *alphabet, const struct seqStats *stats,
                      SeqDataReader BWTGenerator,
                      const struct seqBaseParam *params,
@@ -353,7 +353,7 @@ newGenBlockEncIdxSeq(unsigned long totalLen, const GtStr *projectName,
   {
     size_t range, numAlphabetRanges = newSeqIdx->numModes =
       MRAEncGetNumRanges(alphabet);
-    totalAlphabetSize = MRAEncGetSize(alphabet);
+    totalAlphabetSize = gt_MRAEncGetSize(alphabet);
     blockMapAlphabetSize = 0;
     newSeqIdx->modes = modesCopy = gt_malloc(sizeof (int) * numAlphabetRanges);
     for (range = 0; range < numAlphabetRanges; ++range)
@@ -380,13 +380,13 @@ newGenBlockEncIdxSeq(unsigned long totalLen, const GtStr *projectName,
     }
     newSeqIdx->blockMapAlphabetSize = blockMapAlphabetSize;
     newSeqIdx->blockMapAlphabet = blockMapAlphabet =
-      MRAEncSecondaryMapping(alphabet, BLOCK_COMPOSITION_INCLUDE, modesCopy,
+      gt_MRAEncSecondaryMapping(alphabet, BLOCK_COMPOSITION_INCLUDE, modesCopy,
                              newSeqIdx->blockEncFallback = 0);
     newSeqIdx->rangeMapAlphabet = rangeMapAlphabet =
-      MRAEncSecondaryMapping(alphabet, REGIONS_LIST, modesCopy,
+      gt_MRAEncSecondaryMapping(alphabet, REGIONS_LIST, modesCopy,
                              newSeqIdx->rangeEncFallback = 0);
-    gt_assert(MRAEncGetSize(blockMapAlphabet) == blockMapAlphabetSize);
-    gt_assert(MRAEncGetSize(rangeMapAlphabet)
+    gt_assert(gt_MRAEncGetSize(blockMapAlphabet) == blockMapAlphabetSize);
+    gt_assert(gt_MRAEncGetSize(rangeMapAlphabet)
            == totalAlphabetSize - blockMapAlphabetSize);
   }
   newSeqIdx->partialSymSumBits
@@ -407,7 +407,7 @@ newGenBlockEncIdxSeq(unsigned long totalLen, const GtStr *projectName,
         Symbol eSym, bSym;
         unsigned i;
         for (i = 0; i <= UINT8_MAX; ++i)
-          if (MRAEncSymbolIsInSelectedRanges(
+          if (gt_MRAEncSymbolIsInSelectedRanges(
                 alphabet, eSym = MRAEncMapSymbol(alphabet, i),
                 BLOCK_COMPOSITION_INCLUDE, modesCopy)
               && ((bSym = MRAEncMapSymbol(blockMapAlphabet, eSym))
@@ -453,10 +453,10 @@ newGenBlockEncIdxSeq(unsigned long totalLen, const GtStr *projectName,
         Symbol eSym, rSym;
         unsigned long regionSymCount = 0;
         AlphabetRangeSize rangeMapAlphabetSize
-          = MRAEncGetSize(rangeMapAlphabet);
+          = gt_MRAEncGetSize(rangeMapAlphabet);
         unsigned i;
         for (i = 0; i <= UINT8_MAX; ++i)
-          if (MRAEncSymbolIsInSelectedRanges(
+          if (gt_MRAEncSymbolIsInSelectedRanges(
                alphabet, eSym = MRAEncMapSymbol(alphabet, i),
                REGIONS_LIST, modesCopy)
              && ((rSym = MRAEncMapSymbol(rangeMapAlphabet, eSym))
@@ -482,11 +482,11 @@ newGenBlockEncIdxSeq(unsigned long totalLen, const GtStr *projectName,
     int regionFeatures = SRL_NO_FEATURES;
     if (params->EISFeatureSet & EIS_FEATURE_REGION_SUMS)
       regionFeatures |= SRL_PARTIAL_SYMBOL_SUMS;
-    newSeqIdx->rangeEncs = newSeqRangeList(regionsEstimate, rangeMapAlphabet,
+    newSeqIdx->rangeEncs = gt_newSeqRangeList(regionsEstimate, rangeMapAlphabet,
                                            regionFeatures);
   }
   newSeqIdx->baseClass.classInfo = &blockCompositionSeqClass;
-  if (!initCompositionList(&newSeqIdx->compositionTable, blockSize,
+  if (!gt_initCompositionList(&newSeqIdx->compositionTable, blockSize,
                            blockMapAlphabetSize))
   {
     gt_error_set(err, "Insufficient memory for selected block size %u and "
@@ -557,7 +557,7 @@ newGenBlockEncIdxSeq(unsigned long totalLen, const GtStr *projectName,
               perror("error condition while reading index data");
               break;
             }
-            MRAEncSymbolsTransform(alphabet, block, blockSize);
+            gt_MRAEncSymbolsTransform(alphabet, block, blockSize);
             addBlock2OutputBuffer(newSeqIdx, buck, blockNum,
                                   block, blockSize,
                                   alphabet, modesCopy,
@@ -596,7 +596,7 @@ newGenBlockEncIdxSeq(unsigned long totalLen, const GtStr *projectName,
               }
               else
               {
-                MRAEncSymbolsTransform(alphabet, block, symbolsLeft);
+                gt_MRAEncSymbolsTransform(alphabet, block, symbolsLeft);
                 memset(block + symbolsLeft, 0,
                        sizeof (Symbol) * (blockSize - symbolsLeft));
                 addBlock2OutputBuffer(newSeqIdx, buck, blockNum,
@@ -675,11 +675,11 @@ deleteBlockEncIdxSeq(struct encIdxSeq *seq)
   gt_free(bseq->extHeaderPos);
   gt_free(bseq->partialSymSumBits);
   destructOnDiskBlockCompIdx(&bseq->externalData);
-  destructCompositionList(&bseq->compositionTable);
-  MRAEncDelete(bseq->baseClass.alphabet);
-  MRAEncDelete(bseq->rangeMapAlphabet);
-  MRAEncDelete(bseq->blockMapAlphabet);
-  deleteSeqRangeList(bseq->rangeEncs);
+  gt_destructCompositionList(&bseq->compositionTable);
+  gt_MRAEncDelete(bseq->baseClass.alphabet);
+  gt_MRAEncDelete(bseq->rangeMapAlphabet);
+  gt_MRAEncDelete(bseq->blockMapAlphabet);
+  gt_deleteSeqRangeList(bseq->rangeEncs);
   gt_free(bseq->modes);
   gt_free(bseq);
 }
@@ -1142,7 +1142,7 @@ blockCompSeqGetBlock(struct blockCompositionSeq *seqIdx, unsigned long blockNum,
   unpackBlock(seqIdx, sBlock, cwIdxMemOffset, varDataMemOffset, block,
               blockSize);
   if (queryRangeEnc)
-    SRLApplyRangesToSubString(seqIdx->rangeEncs,
+    gt_SRLApplyRangesToSubString(seqIdx->rangeEncs,
                               block, blockNum * blockSize, blockSize,
                               blockNum * blockSize, &hint->rangeHint);
 #ifndef USE_SBLOCK_CACHE
@@ -1190,10 +1190,10 @@ blockCompSeqRank(struct encIdxSeq *eSeqIdx, Symbol eSym, unsigned long pos,
   unsigned long rankCount;
   gt_assert(eSeqIdx && eSeqIdx->classInfo == &blockCompositionSeqClass);
   seqIdx = encIdxSeq2blockCompositionSeq(eSeqIdx);
-  gt_assert(MRAEncSymbolIsInSelectedRanges(seqIdx->baseClass.alphabet,
+  gt_assert(gt_MRAEncSymbolIsInSelectedRanges(seqIdx->baseClass.alphabet,
                                         eSym, BLOCK_COMPOSITION_INCLUDE,
                                         seqIdx->modes) >= 0);
-  if (MRAEncSymbolIsInSelectedRanges(seqIdx->baseClass.alphabet, eSym,
+  if (gt_MRAEncSymbolIsInSelectedRanges(seqIdx->baseClass.alphabet, eSym,
                                      BLOCK_COMPOSITION_INCLUDE, seqIdx->modes))
   {
     BitOffset varDataMemOffset, cwIdxMemOffset;
@@ -1223,7 +1223,7 @@ blockCompSeqRank(struct encIdxSeq *eSeqIdx, Symbol eSym, unsigned long pos,
     if (bSym == seqIdx->blockEncFallback)
     {
       unsigned long base = bucketBasePos(seqIdx, bucketNum);
-      rankCount -= SRLAllSymbolsCountInSeqRegion(
+      rankCount -= gt_SRLAllSymbolsCountInSeqRegion(
         seqIdx->rangeEncs, base, pos, &hint->bcHint.rangeHint);
     }
 #ifndef USE_SBLOCK_CACHE
@@ -1232,7 +1232,7 @@ blockCompSeqRank(struct encIdxSeq *eSeqIdx, Symbol eSym, unsigned long pos,
   }
   else
   {
-    rankCount = SRLSymbolCountInSeqRegion(seqIdx->rangeEncs, 0, pos, eSym,
+    rankCount = gt_SRLSymbolCountInSeqRegion(seqIdx->rangeEncs, 0, pos, eSym,
                                           &hint->bcHint.rangeHint);
   }
   return rankCount;
@@ -1251,7 +1251,7 @@ blockCompSeqPosPairRank(struct encIdxSeq *eSeqIdx, Symbol eSym,
   gt_assert(eSeqIdx && eSeqIdx->classInfo == &blockCompositionSeqClass);
   gt_assert(posA <= posB);
   seqIdx = encIdxSeq2blockCompositionSeq(eSeqIdx);
-  gt_assert(MRAEncSymbolIsInSelectedRanges(seqIdx->baseClass.alphabet,
+  gt_assert(gt_MRAEncSymbolIsInSelectedRanges(seqIdx->baseClass.alphabet,
                                         eSym, BLOCK_COMPOSITION_INCLUDE,
                                         seqIdx->modes) >= 0);
   /* Only when both positions are in same bucket, special treatment
@@ -1268,7 +1268,7 @@ blockCompSeqPosPairRank(struct encIdxSeq *eSeqIdx, Symbol eSym,
     }
     bucketNum = bucketNumA;
   }
-  if (MRAEncSymbolIsInSelectedRanges(seqIdx->baseClass.alphabet, eSym,
+  if (gt_MRAEncSymbolIsInSelectedRanges(seqIdx->baseClass.alphabet, eSym,
                                      BLOCK_COMPOSITION_INCLUDE, seqIdx->modes))
   {
     BitOffset varDataMemOffset, cwIdxMemOffset;
@@ -1311,9 +1311,9 @@ blockCompSeqPosPairRank(struct encIdxSeq *eSeqIdx, Symbol eSym,
     if (bSym == seqIdx->blockEncFallback)
     {
       unsigned long base = bucketBasePos(seqIdx, bucketNum);
-      rankCounts.a -= SRLAllSymbolsCountInSeqRegion(
+      rankCounts.a -= gt_SRLAllSymbolsCountInSeqRegion(
         seqIdx->rangeEncs, base, posA, &hint->bcHint.rangeHint);
-      rankCounts.b -= SRLAllSymbolsCountInSeqRegion(
+      rankCounts.b -= gt_SRLAllSymbolsCountInSeqRegion(
         seqIdx->rangeEncs, base, posB, &hint->bcHint.rangeHint);
     }
 #ifndef USE_SBLOCK_CACHE
@@ -1322,10 +1322,10 @@ blockCompSeqPosPairRank(struct encIdxSeq *eSeqIdx, Symbol eSym,
   }
   else
   {
-    rankCounts.a = SRLSymbolCountInSeqRegion(seqIdx->rangeEncs, 0, posA, eSym,
-                                             &hint->bcHint.rangeHint);
-    rankCounts.b = SRLSymbolCountInSeqRegion(seqIdx->rangeEncs, 0, posA, eSym,
-                                             &hint->bcHint.rangeHint);
+    rankCounts.a = gt_SRLSymbolCountInSeqRegion(seqIdx->rangeEncs, 0, posA,
+                                                eSym, &hint->bcHint.rangeHint);
+    rankCounts.b = gt_SRLSymbolCountInSeqRegion(seqIdx->rangeEncs, 0, posA,
+                                                eSym, &hint->bcHint.rangeHint);
   }
   return rankCounts;
 }
@@ -1459,7 +1459,7 @@ blockCompSeqRangeRank(struct encIdxSeq *eSeqIdx, AlphabetRangeID range,
         {
           unsigned long base = bucketBasePos(seqIdx, bucketNum);
           rankCounts[seqIdx->blockEncFallback]
-            -= SRLAllSymbolsCountInSeqRegion(
+            -= gt_SRLAllSymbolsCountInSeqRegion(
               seqIdx->rangeEncs, base, pos, &hint->bcHint.rangeHint);
         }
       }
@@ -1471,9 +1471,9 @@ blockCompSeqRangeRank(struct encIdxSeq *eSeqIdx, AlphabetRangeID range,
   case REGIONS_LIST:
     {
       AlphabetRangeSize sym,
-        rangeEncNumSyms = MRAEncGetSize(seqIdx->rangeMapAlphabet);
+        rangeEncNumSyms = gt_MRAEncGetSize(seqIdx->rangeMapAlphabet);
       for (sym = 0; sym < rangeEncNumSyms; ++sym)
-        rankCounts[sym] = SRLSymbolCountInSeqRegion(
+        rankCounts[sym] = gt_SRLSymbolCountInSeqRegion(
           seqIdx->rangeEncs, 0, pos,
           MRAEncRevMapSymbol(seqIdx->rangeMapAlphabet, sym),
           &hint->bcHint.rangeHint);
@@ -1541,10 +1541,10 @@ blockCompSeqPosPairRangeRank(struct encIdxSeq *eSeqIdx, AlphabetRangeID range,
         {
           unsigned long base = bucketBasePos(seqIdx, bucketNum);
           rankCounts[seqIdx->blockEncFallback]
-            -= SRLAllSymbolsCountInSeqRegion(
+            -= gt_SRLAllSymbolsCountInSeqRegion(
               seqIdx->rangeEncs, base, posA, &hint->bcHint.rangeHint);
           rankCounts[rsize + seqIdx->blockEncFallback]
-            -= SRLAllSymbolsCountInSeqRegion(
+            -= gt_SRLAllSymbolsCountInSeqRegion(
               seqIdx->rangeEncs, base, posB, &hint->bcHint.rangeHint);
         }
       }
@@ -1556,15 +1556,15 @@ blockCompSeqPosPairRangeRank(struct encIdxSeq *eSeqIdx, AlphabetRangeID range,
   case REGIONS_LIST:
     {
       AlphabetRangeSize sym,
-        rangeEncNumSyms = MRAEncGetSize(seqIdx->rangeMapAlphabet);
+        rangeEncNumSyms = gt_MRAEncGetSize(seqIdx->rangeMapAlphabet);
       for (sym = 0; sym < rangeEncNumSyms; ++sym)
-        rankCounts[sym] = SRLSymbolCountInSeqRegion(
+        rankCounts[sym] = gt_SRLSymbolCountInSeqRegion(
           seqIdx->rangeEncs, 0, posA,
           MRAEncRevMapSymbol(seqIdx->rangeMapAlphabet, sym),
           &hint->bcHint.rangeHint);
       for (sym = 0; sym < rangeEncNumSyms; ++sym)
         rankCounts[sym + rangeEncNumSyms]
-          = SRLSymbolCountInSeqRegion(
+          = gt_SRLSymbolCountInSeqRegion(
             seqIdx->rangeEncs, 0, posB,
             MRAEncRevMapSymbol(seqIdx->rangeMapAlphabet, sym),
             &hint->bcHint.rangeHint);
@@ -2115,13 +2115,13 @@ writeIdxHeader(struct blockCompositionSeq *seqIdx,
     if (newSeqIdx->externalData.idxFP)                                  \
       destructOnDiskBlockCompIdx(&newSeqIdx->externalData);             \
     if (newSeqIdx->compositionTable.bitsPerCount)                       \
-      destructCompositionList(&newSeqIdx->compositionTable);            \
+      gt_destructCompositionList(&newSeqIdx->compositionTable);            \
     if (newSeqIdx->rangeEncs)                                           \
-      deleteSeqRangeList(newSeqIdx->rangeEncs);                         \
+      gt_deleteSeqRangeList(newSeqIdx->rangeEncs);                         \
     if (newSeqIdx->extHeaderPos)                                        \
       gt_free(newSeqIdx->extHeaderPos);                                 \
     if (buf) gt_free(buf);                                              \
-    if (alphabet) MRAEncDelete(alphabet);                               \
+    if (alphabet) gt_MRAEncDelete(alphabet);                               \
     if (modesCopy)                                                      \
       gt_free(modesCopy);                                               \
     if (blockMapAlphabet) gt_free(blockMapAlphabet);                    \
@@ -2131,7 +2131,7 @@ writeIdxHeader(struct blockCompositionSeq *seqIdx,
   } while (0)
 
 extern struct encIdxSeq *
-loadBlockEncIdxSeqGen(MRAEnc *alphabet, unsigned long totalLen,
+gt_loadBlockEncIdxSeqGen(MRAEnc *alphabet, unsigned long totalLen,
                       const GtStr *projectName, int features, GtError *err)
 {
   struct blockCompositionSeq *newSeqIdx = NULL;
@@ -2295,7 +2295,7 @@ loadBlockEncIdxSeqGen(MRAEnc *alphabet, unsigned long totalLen,
   {
     AlphabetRangeID range, numAlphabetRanges = newSeqIdx->numModes =
       MRAEncGetNumRanges(alphabet);
-    totalAlphabetSize = MRAEncGetSize(alphabet);
+    totalAlphabetSize = gt_MRAEncGetSize(alphabet);
     blockMapAlphabetSize = 0;
     for (range = 0; range < numAlphabetRanges; ++range)
     {
@@ -2317,13 +2317,13 @@ loadBlockEncIdxSeqGen(MRAEnc *alphabet, unsigned long totalLen,
       }
     }
     newSeqIdx->blockMapAlphabet = blockMapAlphabet =
-      MRAEncSecondaryMapping(alphabet, BLOCK_COMPOSITION_INCLUDE, modesCopy,
+      gt_MRAEncSecondaryMapping(alphabet, BLOCK_COMPOSITION_INCLUDE, modesCopy,
                              newSeqIdx->blockEncFallback);
     newSeqIdx->rangeMapAlphabet = rangeMapAlphabet =
-      MRAEncSecondaryMapping(alphabet, REGIONS_LIST, modesCopy,
+      gt_MRAEncSecondaryMapping(alphabet, REGIONS_LIST, modesCopy,
                              newSeqIdx->rangeEncFallback);
     newSeqIdx->blockMapAlphabetSize = blockMapAlphabetSize;
-    gt_assert(MRAEncGetSize(blockMapAlphabet) == blockMapAlphabetSize);
+    gt_assert(gt_MRAEncGetSize(blockMapAlphabet) == blockMapAlphabetSize);
   }
   if (!newSeqIdx->partialSymSumBits && blockMapAlphabetSize)
   {
@@ -2334,8 +2334,9 @@ loadBlockEncIdxSeqGen(MRAEnc *alphabet, unsigned long totalLen,
       = newSeqIdx->partialSymSumBits + blockMapAlphabetSize;
     symSumBitsDefaultSetup(newSeqIdx);
   }
-  if (!initCompositionList(&newSeqIdx->compositionTable, newSeqIdx->blockSize,
-                           blockMapAlphabetSize))
+  if (!gt_initCompositionList(&newSeqIdx->compositionTable,
+                              newSeqIdx->blockSize,
+                              blockMapAlphabetSize))
     loadBlockEncIdxSeqErrRet();
   if (newSeqIdx->bitsPerVarDiskOffset == 0)
     newSeqIdx->bitsPerVarDiskOffset =
@@ -2353,7 +2354,7 @@ loadBlockEncIdxSeqGen(MRAEnc *alphabet, unsigned long totalLen,
     if (features & EIS_FEATURE_REGION_SUMS)
       regionFeatures |= SRL_PARTIAL_SYMBOL_SUMS;
     if (!(newSeqIdx->rangeEncs =
-          SRLReadFromStream(newSeqIdx->externalData.idxFP, rangeMapAlphabet,
+          gt_SRLReadFromStream(newSeqIdx->externalData.idxFP, rangeMapAlphabet,
                             regionFeatures, err)))
       loadBlockEncIdxSeqErrRet();
   }
@@ -2458,12 +2459,12 @@ finalizeIdxOutput(struct blockCompositionSeq *seqIdx,
   seqIdx->externalData.rangeEncPos = rangeEncPos;
   /* insert terminator so every search for a next range will find a
    * range just beyond the sequence end */
-  SRLAppendNewRange(seqIdx->rangeEncs,
+  gt_SRLAppendNewRange(seqIdx->rangeEncs,
                     seqIdx->baseClass.seqLen + seqIdx->blockSize, 1, 0);
-  SRLCompact(seqIdx->rangeEncs);
+  gt_SRLCompact(seqIdx->rangeEncs);
   if (fseeko(seqIdx->externalData.idxFP, rangeEncPos, SEEK_SET))
     return 0;
-  if (!(SRLSaveToStream(seqIdx->rangeEncs, seqIdx->externalData.idxFP)))
+  if (!(gt_SRLSaveToStream(seqIdx->rangeEncs, seqIdx->externalData.idxFP)))
      return 0;
   return 1;
 }
@@ -2476,10 +2477,12 @@ addRangeEncodedSyms(struct seqRangeList *rangeList, const Symbol *block,
   unsigned i;
   for (i = 0; i < blockSize; ++i)
   {
-    gt_assert(MRAEncSymbolIsInSelectedRanges(alphabet, block[i],
+    gt_assert(gt_MRAEncSymbolIsInSelectedRanges(alphabet, block[i],
                                           selection, rangeSel) >= 0);
-    if (MRAEncSymbolIsInSelectedRanges(alphabet, block[i], selection, rangeSel))
-      SRLAddPosition(rangeList, blockNum * blockSize + i, block[i]);
+    if (gt_MRAEncSymbolIsInSelectedRanges(alphabet, block[i], selection,
+                                          rangeSel)) {
+      gt_SRLAddPosition(rangeList, blockNum * blockSize + i, block[i]);
+    }
   }
 }
 
@@ -2491,7 +2494,7 @@ newBlockCompSeqHint(const struct encIdxSeq *seq)
   gt_assert(seq && seq->classInfo == &blockCompositionSeqClass);
   seqIdx = constEncIdxSeq2blockCompositionSeq(seq);
   hintret = gt_malloc(sizeof (union EISHint));
-  SRLInitListSearchHint(seqIdx->rangeEncs, &hintret->bcHint.rangeHint);
+  gt_SRLInitListSearchHint(seqIdx->rangeEncs, &hintret->bcHint.rangeHint);
   /* FIXME: make cache size user-configurable */
   initSuperBlockSeqCache(&hintret->bcHint.sBlockCache, seqIdx, 32);
   return hintret;
@@ -2667,7 +2670,7 @@ printBucket(const struct blockCompositionSeq *seqIdx, unsigned long bucketNum,
     if (flags & BUCKET_PRINT_RANGES_OVERLAY)
     {
       fputs("# overlapping symbol ranges:\n", fp);
-      SRLPrintRangesInfo(seqIdx->rangeEncs, fp, start, end - start,
+      gt_SRLPrintRangesInfo(seqIdx->rangeEncs, fp, start, end - start,
                          &hint->bcHint.rangeHint);
     }
   }
@@ -2675,7 +2678,7 @@ printBucket(const struct blockCompositionSeq *seqIdx, unsigned long bucketNum,
 }
 
 extern unsigned
-blockEncIdxSeqSegmentLen(const struct blockEncParams *params)
+gt_blockEncIdxSeqSegmentLen(const struct blockEncParams *params)
 {
   return params->blockSize * params->bucketBlocks;
 }

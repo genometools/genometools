@@ -30,7 +30,7 @@ typedef struct {
   bool breakforloop;
 } Relaxedcutoffsdata;
 
-void initRelaxedcutoffsTravfunctions(Traversealignmentfunctions*);
-void initRelaxedcutoffsdata(Relaxedcutoffsdata*, Cutoffs*);
+void gt_initRelaxedcutoffsTravfunctions(Traversealignmentfunctions*);
+void gt_initRelaxedcutoffsdata(Relaxedcutoffsdata*, Cutoffs*);
 
 #endif

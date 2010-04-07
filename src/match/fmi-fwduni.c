@@ -24,7 +24,7 @@
 #include "fmi-occ.gen"
 #include "fmi-locate.pr"
 
-unsigned long skfmuniqueforward (const void *genericindex,
+unsigned long gt_skfmuniqueforward (const void *genericindex,
                                  GT_UNUSED unsigned long offset,
                                  GT_UNUSED unsigned long left,
                                  GT_UNUSED unsigned long right,
@@ -66,7 +66,7 @@ unsigned long skfmuniqueforward (const void *genericindex,
   return 0;
 }
 
-unsigned long skfmmstats (const void *genericindex,
+unsigned long gt_skfmmstats (const void *genericindex,
                           GT_UNUSED unsigned long offset,
                           GT_UNUSED unsigned long left,
                           GT_UNUSED unsigned long right,
@@ -115,7 +115,7 @@ unsigned long skfmmstats (const void *genericindex,
   matchlength = (unsigned long) (qptr - qstart);
   if (witnessposition != NULL)
   {
-    unsigned long startpos = fmfindtextpos (fmindex,prevlbound);
+    unsigned long startpos = gt_fmfindtextpos (fmindex,prevlbound);
     gt_assert((fmindex->bwtlength-1) >= (startpos + matchlength));
     *witnessposition = (fmindex->bwtlength-1) - (startpos + matchlength);
   }

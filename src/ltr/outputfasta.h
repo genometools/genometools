@@ -22,7 +22,7 @@
 #include "core/error.h"
 #include "ltrharvest-opt.h"
 
-int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
+int gt_showpredictionsmultiplefasta(const LTRharvestoptions *lo,
                                  const LTRboundaries **bdptrtab,
                                  unsigned long numofboundaries,
                                  bool innerregion,

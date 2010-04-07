@@ -60,21 +60,21 @@ typedef size_t seqRangeListSearchHint;
  * @return newly constructed list
  */
 extern struct seqRangeList *
-newSeqRangeList(size_t rangesStartNum, const MRAEnc *alphabet,
+gt_newSeqRangeList(size_t rangesStartNum, const MRAEnc *alphabet,
                 enum SRLFeatures features);
 /**
  * @brief Shrink the list according to the exact number of ranges stored.
  * @param rangeList
  */
 extern void
-SRLCompact(struct seqRangeList *rangeList);
+gt_SRLCompact(struct seqRangeList *rangeList);
 
 /**
  * @brief Destructor for sequence range lists.
  * @param rangeList
  */
 extern void
-deleteSeqRangeList(struct seqRangeList *rangeList);
+gt_deleteSeqRangeList(struct seqRangeList *rangeList);
 
 /**
  * @brief Add a new range at the end of the current list.
@@ -84,7 +84,7 @@ deleteSeqRangeList(struct seqRangeList *rangeList);
  * @param sym the range is a contiguous sequence of this symbol
  */
 extern void
-SRLAppendNewRange(struct seqRangeList *rangeList,
+gt_SRLAppendNewRange(struct seqRangeList *rangeList,
                   unsigned long pos,
                   unsigned long len,
                   Symbol sym);
@@ -96,7 +96,7 @@ SRLAppendNewRange(struct seqRangeList *rangeList,
  * @param sym this symbol occurs
  */
 extern void
-SRLAddPosition(struct seqRangeList *rangeList, unsigned long pos,
+gt_SRLAddPosition(struct seqRangeList *rangeList, unsigned long pos,
                Symbol sym);
 
 /**
@@ -105,7 +105,7 @@ SRLAddPosition(struct seqRangeList *rangeList, unsigned long pos,
  * @param hint points to storage
  */
 extern void
-SRLInitListSearchHint(struct seqRangeList *rangeList,
+gt_SRLInitListSearchHint(struct seqRangeList *rangeList,
                       seqRangeListSearchHint *hint);
 
 /**
@@ -117,7 +117,7 @@ SRLInitListSearchHint(struct seqRangeList *rangeList,
  * @return NULL if no range overlaps or succeeds pos
  */
 struct seqRange *
-SRLFindPositionNext(struct seqRangeList *rangeList, unsigned long pos,
+gt_SRLFindPositionNext(struct seqRangeList *rangeList, unsigned long pos,
                     seqRangeListSearchHint *hint);
 
 /**
@@ -131,7 +131,7 @@ SRLFindPositionNext(struct seqRangeList *rangeList, unsigned long pos,
  * @return true if an overlap exits, false if not
  */
 extern int
-SRLOverlapsPosition(struct seqRangeList *rangeList, unsigned long pos,
+gt_SRLOverlapsPosition(struct seqRangeList *rangeList, unsigned long pos,
                     seqRangeListSearchHint *hint, Symbol *symAtPos);
 
 /**
@@ -146,7 +146,7 @@ SRLOverlapsPosition(struct seqRangeList *rangeList, unsigned long pos,
  * @param hint
  */
 extern void
-SRLSymbolsInSeqRegion(struct seqRangeList *rangeList, unsigned long start,
+gt_SRLSymbolsInSeqRegion(struct seqRangeList *rangeList, unsigned long start,
                       unsigned long end, unsigned long *occStore,
                       seqRangeListSearchHint *hint);
 
@@ -159,7 +159,7 @@ SRLSymbolsInSeqRegion(struct seqRangeList *rangeList, unsigned long start,
  * @param hint
  */
 extern unsigned long
-SRLSymbolCountInSeqRegion(struct seqRangeList *rangeList,
+gt_SRLSymbolCountInSeqRegion(struct seqRangeList *rangeList,
                           unsigned long start,
                           unsigned long end,
                           Symbol sym,
@@ -173,7 +173,7 @@ SRLSymbolCountInSeqRegion(struct seqRangeList *rangeList,
  * @param hint
  */
 extern unsigned long
-SRLAllSymbolsCountInSeqRegion(struct seqRangeList *rangeList,
+gt_SRLAllSymbolsCountInSeqRegion(struct seqRangeList *rangeList,
                               unsigned long start,
                               unsigned long end,
                               seqRangeListSearchHint *hint);
@@ -191,7 +191,7 @@ SRLAllSymbolsCountInSeqRegion(struct seqRangeList *rangeList,
  * @param hint
  */
 extern void
-SRLApplyRangesToSubString(struct seqRangeList *rangeList,
+gt_SRLApplyRangesToSubString(struct seqRangeList *rangeList,
                           Symbol *subString,
                           unsigned long start,
                           unsigned long len,
@@ -210,7 +210,7 @@ SRLApplyRangesToSubString(struct seqRangeList *rangeList,
  * @return <0 in case of I/O error, >=0 otherwise.
  */
 extern int
-SRLPrintRangesInfo(struct seqRangeList *rangeList,
+gt_SRLPrintRangesInfo(struct seqRangeList *rangeList,
                    FILE *fp,
                    unsigned long start,
                    unsigned long len,
@@ -222,7 +222,7 @@ SRLPrintRangesInfo(struct seqRangeList *rangeList,
  * @return <0 if an error occurred
  */
 extern int
-SRLSaveToStream(struct seqRangeList *rangeList, FILE *fp);
+gt_SRLSaveToStream(struct seqRangeList *rangeList, FILE *fp);
 
 /**
  * @brief Restore a sequence range list from file.
@@ -232,7 +232,7 @@ SRLSaveToStream(struct seqRangeList *rangeList, FILE *fp);
  * @param err
  */
 extern struct seqRangeList *
-SRLReadFromStream(FILE *fp, const MRAEnc *alphabet,
+gt_SRLReadFromStream(FILE *fp, const MRAEnc *alphabet,
                   enum SRLFeatures features, GtError *err);
 
 #endif

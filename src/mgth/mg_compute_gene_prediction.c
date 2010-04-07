@@ -914,7 +914,7 @@ static int check_coding(ParseStruct *parsestruct_ptr,
         contig_seq_tri[2] =
           tolower(contig_seq_ptr[startpoint + 2]);
 
-        found = check_stopcodon(contig_seq_tri);
+        found = gt_check_stopcodon(contig_seq_tri);
 
         /* Startwert um 3 Basen weitersetzen */
         startpoint += 3;
@@ -1145,7 +1145,7 @@ static void sort_realtmp(GtArray * realfrom,
   }
 }
 
-short check_stopcodon(char *contig_seq_ptrfct)
+short gt_check_stopcodon(char *contig_seq_ptrfct)
 {
   unsigned short codon_status = 0;
 

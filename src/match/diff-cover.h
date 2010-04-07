@@ -24,20 +24,20 @@
 
 typedef struct Differencecover Differencecover;
 
-void differencecovers_check(const GtEncodedsequence *encseq,
+void gt_differencecovers_check(const GtEncodedsequence *encseq,
                             GtReadmode readmode);
 
-Differencecover *differencecover_new(unsigned int vparam,
+Differencecover *gt_differencecover_new(unsigned int vparam,
                                      const GtEncodedsequence *encseq,
                                      GtReadmode readmode,
                                      GtLogger *logger);
 
-int differencecover_vparamverify(const Differencecover *dcov,GtError *err);
+int gt_differencecover_vparamverify(const Differencecover *dcov,GtError *err);
 
-void differencecover_sortsample(Differencecover *dcov,bool cmpcharbychar,
+void gt_differencecover_sortsample(Differencecover *dcov,bool cmpcharbychar,
                                 bool withcheck);
 
-void differencecover_delete(Differencecover *dcov);
+void gt_differencecover_delete(Differencecover *dcov);
 
 void dc_sortunsortedbucket(void *data,
                            unsigned long *left,

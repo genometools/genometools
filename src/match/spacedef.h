@@ -76,6 +76,6 @@
 */
 
 #define ASSIGNDYNAMICSTRDUP(V,S)\
-        V = dynamicstrdup(__FILE__,__LINE__,S,err)
+        V = gt_dynamicstrdup(__FILE__,__LINE__,S,err)
 
 #endif

@@ -22,5 +22,5 @@
 int gt_suffixerator(int argc, const char **argv, GtError *err)
 {
   gt_error_check(err);
-  return parseargsandcallsuffixerator(true,argc, argv, err);
+  return gt_parseargsandcallsuffixerator(true,argc, argv, err);
 }

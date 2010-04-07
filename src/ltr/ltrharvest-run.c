@@ -105,7 +105,7 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
 
   gt_error_check(err);
 
-  ssar = newSequentialsuffixarrayreaderfromfile(lo->str_indexname,
+  ssar = gt_newSequentialsuffixarrayreaderfromfile(lo->str_indexname,
                                                 SARR_LCPTAB | SARR_SUFTAB |
                                                 SARR_ESQTAB | SARR_DESTAB |
                                                 SARR_SSPTAB | SARR_SDSTAB,
@@ -115,10 +115,10 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
   {
     return -1;
   }
-  encseq = encseqSequentialsuffixarrayreader(ssar);
+  encseq = gt_encseqSequentialsuffixarrayreader(ssar);
 
   /* test if motif is valid and encode motif */
-  if (testmotifandencodemotif (&lo->motif, encseq, err) != 0)
+  if (gt_testmotifandencodemotif (&lo->motif, encseq, err) != 0)
   {
     had_err = true;
   }
@@ -126,7 +126,7 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
   /* show defined option and values */
   if (!had_err && lo->verbosemode)
   {
-    showuserdefinedoptionsandvalues(lo);
+    gt_showuserdefinedoptionsandvalues(lo);
   }
 
   /* init array for maximal repeats */
@@ -134,14 +134,14 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
   lo->repeatinfo.encseq = encseq;
 
   /* search for maximal repeats */
-  if (!had_err && enumeratemaxpairs(ssar,
-                                    encseq,
-                                    readmodeSequentialsuffixarrayreader(ssar),
-                                    (unsigned int) lo->minseedlength,
-                                    simpleexactselfmatchstore,
-                                    &lo->repeatinfo,
-                                    NULL,
-                                    err) != 0)
+  if (!had_err && gt_enumeratemaxpairs(ssar,
+                                   encseq,
+                                   gt_readmodeSequentialsuffixarrayreader(ssar),
+                                   (unsigned int) lo->minseedlength,
+                                   gt_simpleexactselfmatchstore,
+                                   &lo->repeatinfo,
+                                   NULL,
+                                   err) != 0)
   {
     had_err = true;
   }
@@ -150,7 +150,7 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
   GT_INITARRAY(&arrayLTRboundaries, LTRboundaries);
 
   /* apply the filter algorithms */
-  if (!had_err && searchforLTRs (lo, &arrayLTRboundaries, encseq, err) != 0)
+  if (!had_err && gt_searchforLTRs (lo, &arrayLTRboundaries, encseq, err) != 0)
   {
     had_err = true;
   }
@@ -161,13 +161,14 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
   /* remove exact duplicates */
   if (!had_err)
   {
-    removeduplicates(&arrayLTRboundaries);
+    gt_removeduplicates(&arrayLTRboundaries);
   }
 
   /* remove overlapping predictions if desired */
   if (!had_err && (lo->nooverlapallowed || lo->bestofoverlap))
   {
-    removeoverlapswithlowersimilarity(&arrayLTRboundaries,lo->nooverlapallowed);
+    gt_removeoverlapswithlowersimilarity(&arrayLTRboundaries,
+                                         lo->nooverlapallowed);
   }
 
   if (!had_err)
@@ -178,7 +179,7 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
   /* print multiple FASTA file of predictions */
   if (!had_err && lo->fastaoutput)
   {
-    if (showpredictionsmultiplefasta(lo,
+    if (gt_showpredictionsmultiplefasta(lo,
                                      bdptrtab,
                                      numofboundaries,
                                      false,
@@ -193,7 +194,7 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
   /* print inner region multiple FASTA file of predictions */
   if (!had_err && lo->fastaoutputinnerregion)
   {
-    if (showpredictionsmultiplefasta(lo,
+    if (gt_showpredictionsmultiplefasta(lo,
                                      bdptrtab,
                                      numofboundaries,
                                      true,
@@ -208,7 +209,7 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
   /* print GFF3 format file of predictions */
   if (!had_err && lo->gff3output && numofboundaries > 0)
   {
-    if (printgff3format(lo,bdptrtab,numofboundaries,encseq,err) != 0)
+    if (gt_printgff3format(lo,bdptrtab,numofboundaries,encseq,err) != 0)
     {
       had_err = true;
     }
@@ -217,17 +218,17 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
   /* print predictions to stdout */
   if (!had_err)
   {
-    showinfoiffoundfullLTRs(lo,bdptrtab,numofboundaries,encseq);
+    gt_showinfoiffoundfullLTRs(lo,bdptrtab,numofboundaries,encseq);
   }
 
   GT_FREEARRAY(&arrayLTRboundaries, LTRboundaries);
-  freeSequentialsuffixarrayreader(&ssar);
+  gt_freeSequentialsuffixarrayreader(&ssar);
   gt_free(bdptrtab);
 
   return had_err ? -1 : 0;
 }
 
-int parseargsandcallltrharvest(int argc,const char *argv[],GtError *err)
+int gt_parseargsandcallltrharvest(int argc,const char *argv[],GtError *err)
 {
   LTRharvestoptions lo;
   int had_err = 0;
@@ -237,9 +238,9 @@ int parseargsandcallltrharvest(int argc,const char *argv[],GtError *err)
     had_err = -1;
   } else
   {
-    printargsline(argv,argc);
+    gt_printargsline(argv,argc);
     had_err = runltrharvest(&lo,err);
   }
-  wrapltrharvestoptions(&lo);
+  gt_wrapltrharvestoptions(&lo);
   return had_err;
 }

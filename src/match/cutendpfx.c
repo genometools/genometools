@@ -59,7 +59,7 @@ static inline unsigned int prefixqgram2code(GtCodetype *code,
   return qvalue;
 }
 
-Bucketenumerator *newbucketenumerator(const Bcktab *bcktab,
+Bucketenumerator *gt_newbucketenumerator(const Bcktab *bcktab,
                                       unsigned int prefixlength,
                                       const GtUchar *demandprefix,
                                       unsigned int demandprefixlength)
@@ -72,18 +72,19 @@ Bucketenumerator *newbucketenumerator(const Bcktab *bcktab,
   bucketenumerator->prefixlength = prefixlength;
   bucketenumerator->demandprefixlength = demandprefixlength;
   firstspecial = prefixqgram2code(&bucketenumerator->currentcode,
-                                  bcktab_multimappower(bcktab),
+                                  gt_bcktab_multimappower(bcktab),
                                   prefixlength,
                                   demandprefixlength,
                                   demandprefix);
   gt_assert(firstspecial == prefixlength);
   bucketenumerator->lastcode
     = bucketenumerator->currentcode
-      + bcktab_filltable(bcktab,demandprefixlength);
+      + gt_bcktab_filltable(bcktab,demandprefixlength);
   return bucketenumerator;
 }
 
-bool nextbucketenumerator(Lcpinterval *itv,Bucketenumerator *bucketenumerator)
+bool gt_nextbucketenumerator(Lcpinterval *itv,
+                             Bucketenumerator *bucketenumerator)
 {
   while (true)
   {
@@ -91,7 +92,7 @@ bool nextbucketenumerator(Lcpinterval *itv,Bucketenumerator *bucketenumerator)
     {
       break;
     }
-    calcbucketboundaries(&bucketenumerator->bucketspec,
+    gt_calcbucketboundaries(&bucketenumerator->bucketspec,
                          bucketenumerator->bcktab,
                          bucketenumerator->currentcode);
     bucketenumerator->currentcode++;
@@ -107,7 +108,7 @@ bool nextbucketenumerator(Lcpinterval *itv,Bucketenumerator *bucketenumerator)
   return false;
 }
 
-void freebucketenumerator(Bucketenumerator **bucketenumerator)
+void gt_freebucketenumerator(Bucketenumerator **bucketenumerator)
 {
   FREESPACE(*bucketenumerator);
 }

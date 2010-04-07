@@ -74,7 +74,7 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
                 numofquerysequences;
 
   gt_error_check(err);
-  riktab = gt_array_new(sizeofReadintkeys());
+  riktab = gt_array_new(gt_sizeofReadintkeys());
   SETREADINTKEYS("totallength",&totallength,NULL);
   SETREADINTKEYS("specialcharacters",
                  &specialcharinfo.specialcharacters,NULL);
@@ -88,7 +88,7 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
                  &specialcharinfo.lengthofspecialsuffix,NULL);
   SETREADINTKEYS("numofsequences",&numofsequences,NULL);
   SETREADINTKEYS("numofdbsequences",&numofdbsequences,NULL);
-  setreadintkeys(riktab,"numofquerysequences",&numofquerysequences,0,NULL);
+  gt_setreadintkeys(riktab,"numofquerysequences",&numofquerysequences,0,NULL);
   SETREADINTKEYS("longest",&suffixarray->longest.valueunsignedlong,
                            &suffixarray->longest.defined);
   SETREADINTKEYS("prefixlength",&suffixarray->prefixlength,NULL);
@@ -110,7 +110,7 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
       /* Nothing */
     } else
     {
-      if (analyzeuintline(indexname,
+      if (gt_analyzeuintline(indexname,
                          PROJECTFILESUFFIX,
                          linenum,
                          gt_str_get(currentline),
@@ -125,7 +125,7 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
     gt_str_reset(currentline);
   }
   gt_str_delete(currentline);
-  if (!haserr && allkeysdefined(indexname,PROJECTFILESUFFIX,riktab,
+  if (!haserr && gt_allkeysdefined(indexname,PROJECTFILESUFFIX,riktab,
                                 logger,err) != 0)
   {
     haserr = true;
@@ -222,7 +222,7 @@ static bool scanprjfileuintkeys(Suffixarray *suffixarray,
   return haserr;
 }
 
-void freesuffixarray(Suffixarray *suffixarray)
+void gt_freesuffixarray(Suffixarray *suffixarray)
 {
   gt_fa_xmunmap((void *) suffixarray->suftab);
   suffixarray->suftab = NULL;
@@ -248,7 +248,7 @@ void freesuffixarray(Suffixarray *suffixarray)
   suffixarray->encseq = NULL;
   if (suffixarray->bcktab != NULL)
   {
-    bcktab_delete(&suffixarray->bcktab);
+    gt_bcktab_delete(&suffixarray->bcktab);
   }
 }
 
@@ -390,7 +390,7 @@ static int inputsuffixarray(bool map,
   {
     if (map)
     {
-      suffixarray->bcktab = mapbcktab(indexname,
+      suffixarray->bcktab = gt_mapbcktab(indexname,
                      gt_alphabet_num_of_chars(
                               gt_encodedsequence_alphabet(suffixarray->encseq)),
                      suffixarray->prefixlength,
@@ -407,7 +407,7 @@ static int inputsuffixarray(bool map,
   }
   if (haserr)
   {
-    freesuffixarray(suffixarray);
+    gt_freesuffixarray(suffixarray);
   }
   return haserr ? -1 : 0;
 }
@@ -427,7 +427,7 @@ int streamsuffixarray(Suffixarray *suffixarray,
                           err);
 }
 
-int mapsuffixarray(Suffixarray *suffixarray,
+int gt_mapsuffixarray(Suffixarray *suffixarray,
                    unsigned int demand,
                    const GtStr *indexname,
                    GtLogger *logger,

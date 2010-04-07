@@ -49,7 +49,7 @@ static void assignfmmapspecification(GtArrayGtMapspecification *mapspectable,
              (unsigned long) BFREQSIZE(fmindex->mapsize,fmindex->nofblocks));
 }
 
-int flushfmindex2file(FILE *fp,
+int gt_flushfmindex2file(FILE *fp,
                       Fmindex *fmindex,
                       bool storeindexpos,
                       GtError *err)
@@ -63,7 +63,7 @@ int flushfmindex2file(FILE *fp,
                             (void *) &fmwithoptions,fmindex->sizeofindex,err);
 }
 
-int fillfmmapspecstartptr(Fmindex *fmindex,
+int gt_fillfmmapspecstartptr(Fmindex *fmindex,
                           bool storeindexpos,
                           const GtStr *tmpfilename,
                           GtError *err)

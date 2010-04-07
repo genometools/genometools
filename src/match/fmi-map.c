@@ -31,7 +31,7 @@
 #include "fmi-keyval.pr"
 #include "fmi-mapspec.pr"
 
-bool fmindexexists(const GtStr *indexname)
+bool gt_fmindexexists(const GtStr *indexname)
 {
   if (!gt_exists_filename_with_suffix(indexname,FMASCIIFILESUFFIX))
   {
@@ -57,7 +57,7 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
   unsigned int intstoreindexpos;
 
   gt_error_check(err);
-  riktab = gt_array_new(sizeofReadintkeys());
+  riktab = gt_array_new(gt_sizeofReadintkeys());
   SETREADINTKEYS("bwtlength",&fmindex->bwtlength,NULL);
   SETREADINTKEYS("longest",&fmindex->longestsuffixpos,NULL);
   SETREADINTKEYS("storeindexpos",&intstoreindexpos,NULL);
@@ -83,7 +83,7 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
     for (linenum = 0; gt_str_read_next_line(currentline, fpin) != EOF;
          linenum++)
     {
-      if (analyzeuintline(indexname,
+      if (gt_analyzeuintline(indexname,
                          FMASCIIFILESUFFIX,
                          linenum,
                          gt_str_get(currentline),
@@ -98,7 +98,7 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
     }
     gt_str_delete(currentline);
   }
-  if (!haserr && allkeysdefined(indexname,FMASCIIFILESUFFIX,riktab,
+  if (!haserr && gt_allkeysdefined(indexname,FMASCIIFILESUFFIX,riktab,
                                 logger,err) != 0)
   {
     haserr = true;
@@ -124,7 +124,7 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
   return haserr ? -1 : 0;
 }
 
-void freefmindex(Fmindex *fmindex)
+void gt_freefmindex(Fmindex *fmindex)
 {
   if (fmindex->mappedptr != NULL)
   {
@@ -155,7 +155,7 @@ static GtEncodedsequence *mapbwtencoding(const GtStr *indexname,
   return ret;
 }
 
-int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
+int gt_mapfmindex (Fmindex *fmindex,const GtStr *indexname,
                 GtLogger *logger,GtError *err)
 {
   FILE *fpin = NULL;
@@ -196,7 +196,7 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
   if (!haserr)
   {
     fmindex->specpos.nextfreeGtPairBwtidx
-      = (unsigned long) determinenumberofspecialstostore(&specialcharinfo);
+      = (unsigned long) gt_determinenumberofspecialstostore(&specialcharinfo);
     fmindex->specpos.spaceGtPairBwtidx = NULL;
     fmindex->specpos.allocatedGtPairBwtidx = 0;
     fmindex->alphabet = gt_alphabet_new_from_file(indexname,err);
@@ -209,7 +209,7 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
   {
     GtStr *tmpfilename;
 
-    computefmkeyvalues (fmindex,
+    gt_computefmkeyvalues (fmindex,
                         &specialcharinfo,
                         fmindex->bwtlength,
                         fmindex->log2bsize,
@@ -219,7 +219,7 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
                         storeindexpos);
     tmpfilename = gt_str_clone(indexname);
     gt_str_append_cstr(tmpfilename,FMDATAFILESUFFIX);
-    if (fillfmmapspecstartptr(fmindex,storeindexpos,tmpfilename,err) != 0)
+    if (gt_fillfmmapspecstartptr(fmindex,storeindexpos,tmpfilename,err) != 0)
     {
       haserr = true;
     }
@@ -227,7 +227,7 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
   }
   if (haserr)
   {
-    freefmindex(fmindex);
+    gt_freefmindex(fmindex);
   }
   return haserr ? -1 : 0;
 }

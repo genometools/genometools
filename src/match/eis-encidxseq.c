@@ -28,7 +28,7 @@ enum {
 };
 
 void
-deleteEncIdxSeq(EISeq *seq)
+gt_deleteEncIdxSeq(EISeq *seq)
 {
   seq->classInfo->delete(seq);
 }
@@ -77,9 +77,10 @@ const char *EISIntegrityCheckResultStrings[] =
  * @return -1 on error, 0 on identity, >0 on inconsistency
  */
 extern enum EISIntegrityCheckResults
-EISVerifyIntegrity(EISeq *seqIdx, const GtStr *projectName, unsigned long skip,
-                   unsigned long tickPrint, FILE *fp, int chkFlags,
-                   GtLogger *verbosity, GtError *err)
+gt_EISVerifyIntegrity(EISeq *seqIdx, const GtStr *projectName,
+                      unsigned long skip,
+                      unsigned long tickPrint, FILE *fp, int chkFlags,
+                      GtLogger *verbosity, GtError *err)
 {
   FILE *bwtFP;
   unsigned long pos = 0;
@@ -103,7 +104,7 @@ EISVerifyIntegrity(EISeq *seqIdx, const GtStr *projectName, unsigned long skip,
   bwtFP = suffixArray.bwttabstream.fp;
   hint = newEISHint(seqIdx);
   alphabet = EISGetAlphabet(seqIdx);
-  alphabetSize = MRAEncGetSize(alphabet);
+  alphabetSize = gt_MRAEncGetSize(alphabet);
   numRanges = MRAEncGetNumRanges(alphabet);
   do
   {
@@ -210,19 +211,19 @@ EISVerifyIntegrity(EISeq *seqIdx, const GtStr *projectName, unsigned long skip,
       verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_BWT_READ_ERROR);
   } while (0);
   deleteEISHint(seqIdx, hint);
-  freesuffixarray(&suffixArray);
+  gt_freesuffixarray(&suffixArray);
   return retval;
 }
 
 extern unsigned
-estimateSegmentSize(const struct seqBaseParam *params)
+gt_estimateSegmentSize(const struct seqBaseParam *params)
 {
   unsigned segmentLen = 0;
   switch (params->encType)
   {
   case BWT_ON_BLOCK_ENC:
     segmentLen =
-      blockEncIdxSeqSegmentLen(&params->encParams.blockEnc);
+      gt_blockEncIdxSeqSegmentLen(&params->encParams.blockEnc);
     break;
   default:
     fputs("Illegal/unknown/unimplemented encoding requested!", stderr);

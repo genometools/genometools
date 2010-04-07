@@ -20,7 +20,7 @@
 #include <stdbool.h>
 #include "core/error.h"
 
-int parseargsandcallsuffixerator(bool doesa,int argc,
+int gt_parseargsandcallsuffixerator(bool doesa,int argc,
                                  const char **argv,GtError *err);
 
 #endif

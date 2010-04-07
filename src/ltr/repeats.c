@@ -26,7 +26,7 @@
 #include "ltrharvest-opt.h"
 #include "repeats.h"
 
-void showrepeats (RepeatInfo *repeatinfo,unsigned long seedminlength)
+void gt_showrepeats (RepeatInfo *repeatinfo,unsigned long seedminlength)
 {
   GtArrayRepeat *repeats = &repeatinfo->repeats;
   Repeat *reptab = repeats->spaceRepeat;
@@ -54,7 +54,7 @@ void showrepeats (RepeatInfo *repeatinfo,unsigned long seedminlength)
   printf ("\n");
 }
 
-int simpleexactselfmatchstore (void *info,
+int gt_simpleexactselfmatchstore (void *info,
                                GT_UNUSED const GtEncodedsequence *encseq,
                                unsigned long len,
                                unsigned long pos1,
@@ -121,7 +121,7 @@ int simpleexactselfmatchstore (void *info,
   return 0;
 }
 
-int subsimpleexactselfmatchstore(void *info,
+int gt_subsimpleexactselfmatchstore(void *info,
                                  GT_UNUSED const GtEncodedsequence *encseq,
                                  const Querymatch *querymatch,
                                  GT_UNUSED GtError *err)
@@ -130,10 +130,10 @@ int subsimpleexactselfmatchstore(void *info,
   SubRepeatInfo *sri = (SubRepeatInfo *) info;
 
   GT_GETNEXTFREEINARRAY (nextfreerepeatptr, &sri->repeats, Repeat, 10);
-  nextfreerepeatptr->pos1 = sri->offset1 + querymatch_dbstart(querymatch);
+  nextfreerepeatptr->pos1 = sri->offset1 + gt_querymatch_dbstart(querymatch);
   nextfreerepeatptr->offset = sri->offset2 +
-                              querymatch_querystart(querymatch) -
-                              (sri->offset1 + querymatch_dbstart(querymatch));
-  nextfreerepeatptr->len = querymatch_len(querymatch);
+                             gt_querymatch_querystart(querymatch) -
+                             (sri->offset1 + gt_querymatch_dbstart(querymatch));
+  nextfreerepeatptr->len = gt_querymatch_len(querymatch);
   return 0;
 }

@@ -88,9 +88,9 @@ gt_packedindex_mkctxmap(int argc, const char *argv[], GtError *err)
         }
         len = gt_encodedsequence_totallength(sa.encseq) + 1;
         saInitialized = true;
-        bwtSeq = loadBWTSeqForSA(projectName, BWT_ON_BLOCK_ENC,
+        bwtSeq = gt_loadBWTSeqForSA(projectName, BWT_ON_BLOCK_ENC,
                                  BWTDEFOPT_MULTI_QUERY, &sa, len, err);
-        if (!(src = BWTSeqNewSASeqSrc(bwtSeq, NULL)))
+        if (!(src = gt_BWTSeqNewSASeqSrc(bwtSeq, NULL)))
         {
           gt_error_set(err, "The project %s does not contain sufficient"
                     " information to regenerate the suffix array.",
@@ -103,7 +103,7 @@ gt_packedindex_mkctxmap(int argc, const char *argv[], GtError *err)
       {
         len = gt_encodedsequence_totallength(sa.encseq) + 1;
         saInitialized = true;
-        initSuffixarrayFileInterface(&sai, len, &sa);
+        gt_initSuffixarrayFileInterface(&sai, len, &sa);
         src = SAI2SASS(&sai);
         saiInitialized = true;
       }
@@ -111,29 +111,29 @@ gt_packedindex_mkctxmap(int argc, const char *argv[], GtError *err)
         SeqDataReader readSfxIdx = SASSCreateReader(src, SFX_REQUEST_SUFTAB);
         BWTSeqContextRetriever *bwtSeqCR;
         BWTSeqContextRetrieverFactory *bwtSeqCRF
-          = newBWTSeqContextRetrieverFactory(len, params.mapIntervalLog2);
-        if (BWTSCRFReadAdvance(bwtSeqCRF, len, readSfxIdx)
+          = gt_newBWTSeqContextRetrieverFactory(len, params.mapIntervalLog2);
+        if (gt_BWTSCRFReadAdvance(bwtSeqCRF, len, readSfxIdx)
             != len)
         {
           gt_error_set(err, "Creation of context map unsuccessful: %s",
                     gt_error_get(err));
           had_err = true;
-          deleteBWTSeqContextRetrieverFactory(bwtSeqCRF);
+          gt_deleteBWTSeqContextRetrieverFactory(bwtSeqCRF);
           break;
         }
-        bwtSeqCR = BWTSCRFGet(bwtSeqCRF, bwtSeq, projectName);
-        deleteBWTSeqCR(bwtSeqCR);
-        deleteBWTSeqContextRetrieverFactory(bwtSeqCRF);
+        bwtSeqCR = gt_BWTSCRFGet(bwtSeqCRF, bwtSeq, projectName);
+        gt_deleteBWTSeqCR(bwtSeqCR);
+        gt_deleteBWTSeqContextRetrieverFactory(bwtSeqCRF);
       }
     }
   } while (0);
   if (bwtSeq)
   {
     SASSDelete(src);
-    deleteBWTSeq(bwtSeq);
+    gt_deleteBWTSeq(bwtSeq);
   }
-  if (saiInitialized) destructSuffixarrayFileInterface(&sai);;
-  if (saInitialized) freesuffixarray(&sa);
+  if (saiInitialized) gt_destructSuffixarrayFileInterface(&sai);;
+  if (saInitialized) gt_freesuffixarray(&sa);
   if (logger) gt_logger_delete(logger);
   if (projectName) gt_str_delete(projectName);
   return had_err?-1:0;
@@ -150,7 +150,7 @@ parseMkCtxMapOptions(int *parsed_args, int argc, const char **argv,
   gt_error_check(err);
   op = gt_option_parser_new("indexname",
                          "Build BWT packedindex for project <indexname>.");
-  registerCtxMapOptions(op, &params->mapIntervalLog2);
+  gt_registerCtxMapOptions(op, &params->mapIntervalLog2);
 
   option = gt_option_new_bool("v",
                            "print verbose progress information",

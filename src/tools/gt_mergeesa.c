@@ -82,7 +82,7 @@ int gt_mergeesa(int argc, const char **argv, GtError *err)
       printf("# input=%s\n",gt_str_array_get(indexnametab,i));
     }
     logger = gt_logger_new(false, GT_LOGGER_DEFLT_PREFIX, stdout);
-    if (performtheindexmerging(storeindex,
+    if (gt_performtheindexmerging(storeindex,
                               indexnametab,
                               logger,
                               err) != 0)

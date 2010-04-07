@@ -38,8 +38,8 @@ EVALXDROPARBITSCORES
   int allowedMININFINITYINTgenerations = 0,
       currentMININFINITYINTgeneration = 0;
 
-  calculatedistancesfromscores(arbitscores, &arbitdistances);
-  calculateallowedMININFINITYINTgenerations(
+  gt_calculatedistancesfromscores(arbitscores, &arbitdistances);
+  gt_calculateallowedMININFINITYINTgenerations(
      &allowedMININFINITYINTgenerations,
      &arbitdistances);
 
@@ -224,7 +224,7 @@ EVALXDROPARBITSCORES
     GT_STOREINARRAY (&big_t, Xdropscore, 10, bigt_tmp);
 
     /* fill out of bounds values of MINUSINFINITYINT
-       needed for showmatrix function */
+       needed for gt_showmatrix function */
     for (k = -d; k < lbound - 1; k++)
     {
       tmpfront.dptabrow = MINUSINFINITYINT;

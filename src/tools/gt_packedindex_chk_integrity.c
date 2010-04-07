@@ -70,7 +70,7 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], GtError *err)
 
   logger = gt_logger_new(params.verboseOutput, GT_LOGGER_DEFLT_PREFIX, stdout);
 
-  seq = loadEncIdxSeq(inputProject, params.encType, params.EISFeatureSet,
+  seq = gt_loadEncIdxSeq(inputProject, params.encType, params.EISFeatureSet,
                       logger, err);
   if ((had_err = seq == NULL))
   {
@@ -82,7 +82,7 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], GtError *err)
             " symbols long.\n", EISLength(seq));
     {
       int corrupt
-        = EISVerifyIntegrity(seq, inputProject, params.skipCount,
+        = gt_EISVerifyIntegrity(seq, inputProject, params.skipCount,
                              params.progressInterval, stderr,
                              params.checkFlags, logger, err);
       if ((had_err = corrupt != 0))
@@ -93,7 +93,7 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], GtError *err)
       }
     }
   }
-  if (seq) deleteEncIdxSeq(seq);
+  if (seq) gt_deleteEncIdxSeq(seq);
   if (inputProject) gt_str_delete(inputProject);
   if (logger) gt_logger_delete(logger);
   return had_err?-1:0;

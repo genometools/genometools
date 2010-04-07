@@ -1,12 +1,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-int flushfmindex2file(FILE *fp,
+int gt_flushfmindex2file(FILE *fp,
                       Fmindex *fmindex,
                       bool storeindexpos,
                       GtError *err);
 
-int fillfmmapspecstartptr(Fmindex *fmindex,
+int gt_fillfmmapspecstartptr(Fmindex *fmindex,
                           bool storeindexpos,
                           const GtStr *tmpfilename,
                           GtError *err);

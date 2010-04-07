@@ -196,8 +196,8 @@ void gth_path_walker_next(GthPathWalker *pw)
 {
   gt_assert(pw && gth_path_walker_has_next(pw));
   if (!pw->last_eop_length) {
-    pw->last_eop_type   = editoperation_type(*pw->eopptr, pw->proteineop);
-    pw->last_eop_length = editoperation_length(*pw->eopptr, pw->proteineop);
+    pw->last_eop_type   = gt_editoperation_type(*pw->eopptr, pw->proteineop);
+    pw->last_eop_length = gt_editoperation_length(*pw->eopptr, pw->proteineop);
     if (pw->forward)
       pw->eopptr--;
     else

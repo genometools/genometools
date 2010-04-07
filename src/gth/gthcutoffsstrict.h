@@ -34,8 +34,8 @@ typedef struct {
                 actualexonnumofeops;
 } Strictcutoffsdata;
 
-void initStrictcutoffsTravfunctions(Traversealignmentfunctions*);
-void initStrictcutoffsdata(Strictcutoffsdata*, Cutoffs*,
+void gt_initStrictcutoffsTravfunctions(Traversealignmentfunctions*);
+void gt_initStrictcutoffsdata(Strictcutoffsdata*, Cutoffs*,
                            unsigned long cutoffsminexonlen);
 
 #endif

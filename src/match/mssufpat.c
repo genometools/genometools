@@ -96,7 +96,7 @@ static void pms_initdfsconstinfo(Limdfsconstinfo *mti,
   pattern = va_arg(ap, const GtUchar *);
   mti->patternlength = va_arg(ap, unsigned long);
   va_end(ap);
-  initeqsvector(mti->eqsvector,(unsigned long) alphasize,
+  gt_initeqsvector(mti->eqsvector,(unsigned long) alphasize,
                 pattern,mti->patternlength);
 }
 
@@ -277,7 +277,7 @@ static void pms_inplacenextLimdfsstate(const Limdfsconstinfo *mti,
 #endif
 }
 
-const AbstractDfstransformer *pms_AbstractDfstransformer(void)
+const AbstractDfstransformer *gt_pms_AbstractDfstransformer(void)
 {
   static const AbstractDfstransformer pms_adfst =
   {

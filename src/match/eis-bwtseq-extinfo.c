@@ -270,7 +270,7 @@ initAddLocateInfoState(struct addLocateInfoState *state,
   state->readSeqpos = readSeqpos;
   state->origSeqAccess = origSeqAccess;
   state->featureToggles = params->featureToggles;
-  aggregationExpVal = estimateSegmentSize(&params->seqParams);
+  aggregationExpVal = gt_estimateSegmentSize(&params->seqParams);
   locateInterval = params->locateInterval;
   lastPos = srcLen - 1;
   state->locateInterval = locateInterval;
@@ -305,7 +305,7 @@ initAddLocateInfoState(struct addLocateInfoState *state,
         unsigned i;
         for (i = 0; i <= UINT8_MAX; ++i)
           if (MRAEncSymbolHasValidMapping(alphabet, i)
-              && !MRAEncSymbolIsInSelectedRanges(
+              && !gt_MRAEncSymbolIsInSelectedRanges(
                 alphabet, MRAEncMapSymbol(alphabet, i),
                 SORTMODE_VALUE, (int *)rangeSort))
             nonValSortSyms += stats->symbolDistributionTable[i];
@@ -468,7 +468,7 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
       }
       if (state->ctxFactory)
       {
-        BWTSCRFMapAdvance(state->ctxFactory, &mapVal, 1);
+        gt_BWTSCRFMapAdvance(state->ctxFactory, &mapVal, 1);
       }
     }
     /* 2. copy revMapQueue into output */
@@ -527,11 +527,12 @@ sortModeHeaderNeeded(const MRAEnc *alphabet,
 }
 
 extern EISeq *
-createBWTSeqGeneric(const struct bwtParam *params, indexCreateFunc createIndex,
-                    SASeqSrc *src,
-                    const enum rangeSortMode rangeSort[],
-                    const SpecialsRankLookup *sprTable,
-                    GtError *err)
+gt_createBWTSeqGeneric(const struct bwtParam *params,
+                       indexCreateFunc createIndex,
+                       SASeqSrc *src,
+                       const enum rangeSortMode rangeSort[],
+                       const SpecialsRankLookup *sprTable,
+                       GtError *err)
 {
   struct encIdxSeq *baseSeqIdx = NULL;
   struct addLocateInfoState varState;
@@ -561,7 +562,7 @@ createBWTSeqGeneric(const struct bwtParam *params, indexCreateFunc createIndex,
     /* FIXME: this  has to work also when locateInterval == 0 and
      * sprTable != NULL */
     if (params->ctxMapILog != CTX_MAP_ILOG_NOMAP)
-      buildContextMap = newBWTSeqContextRetrieverFactory(totalLen,
+      buildContextMap = gt_newBWTSeqContextRetrieverFactory(totalLen,
                                                          params->ctxMapILog);
     if (locateInterval)
     {
@@ -571,7 +572,7 @@ createBWTSeqGeneric(const struct bwtParam *params, indexCreateFunc createIndex,
         unsigned long
 #ifndef NDEBUG
           origSeqLen = gt_encodedsequence_totallength(
-                                                   SPRTGetOrigEncseq(sprTable)),
+                                                gt_SPRTGetOrigEncseq(sprTable)),
 #endif
           maxRank;
         gt_assert(origSeqLen == totalLen - 1);
@@ -615,20 +616,20 @@ createBWTSeqGeneric(const struct bwtParam *params, indexCreateFunc createIndex,
       break;
     if (buildContextMap)
     {
-      if (!BWTSCRFFinished(buildContextMap))
+      if (!gt_BWTSCRFFinished(buildContextMap))
       {
         fputs("error: context table construction incomplete!\n", stderr);
       }
       else
       {
         BWTSeqContextRetriever *ctxRetrieve =
-          BWTSCRFGet(buildContextMap, NULL, params->projectName);
-        deleteBWTSeqCR(ctxRetrieve);
+          gt_BWTSCRFGet(buildContextMap, NULL, params->projectName);
+        gt_deleteBWTSeqCR(ctxRetrieve);
       }
     }
   } while (0);
   if (buildContextMap)
-    deleteBWTSeqContextRetrieverFactory(buildContextMap);
+    gt_deleteBWTSeqContextRetrieverFactory(buildContextMap);
   if (varStateIsInitialized)
     destructAddLocateInfoState(&varState);
   return baseSeqIdx;
@@ -670,7 +671,7 @@ searchLocateCountMark(const BWTSeq *bwtSeq, unsigned long pos,
 }
 
 extern int
-BWTSeqPosHasLocateInfo(const BWTSeq *bwtSeq, unsigned long pos,
+gt_BWTSeqPosHasLocateInfo(const BWTSeq *bwtSeq, unsigned long pos,
                        struct extBitsRetrieval *extBits)
 {
   if (bwtSeq->featureToggles & BWTLocateBitmap)
@@ -697,14 +698,14 @@ BWTSeqPosHasLocateInfo(const BWTSeq *bwtSeq, unsigned long pos,
 }
 
 extern unsigned long
-BWTSeqLocateMatch(const BWTSeq *bwtSeq, unsigned long pos,
+gt_BWTSeqLocateMatch(const BWTSeq *bwtSeq, unsigned long pos,
                   struct extBitsRetrieval *extBits)
 {
   if (bwtSeq->featureToggles & BWTLocateBitmap)
   {
     unsigned long nextLocate = pos;
     unsigned locateOffset = 0;
-    while (!BWTSeqPosHasLocateInfo(bwtSeq, nextLocate, extBits))
+    while (!gt_BWTSeqPosHasLocateInfo(bwtSeq, nextLocate, extBits))
       nextLocate = BWTSeqLFMap(bwtSeq, nextLocate, extBits), ++locateOffset;
     EISRetrieveExtraBits(bwtSeq->seqIdx, nextLocate,
                          EBRF_RETRIEVE_CWBITS | EBRF_RETRIEVE_VARBITS,
@@ -796,7 +797,7 @@ locateVarBits(const BWTSeq *bwtSeq, struct extBitsRetrieval *extBits)
 }
 
 extern unsigned long
-BWTSeqGetRankSort(const BWTSeq *bwtSeq, unsigned long pos,
+gt_BWTSeqGetRankSort(const BWTSeq *bwtSeq, unsigned long pos,
                   AlphabetRangeID range, struct extBitsRetrieval *extBits)
 {
   BitOffset locVarBits;
@@ -821,7 +822,7 @@ BWTSeqGetRankSort(const BWTSeq *bwtSeq, unsigned long pos,
 }
 
 extern void
-BWTSeqInitLocateHandling(BWTSeq *bwtSeq,
+gt_BWTSeqInitLocateHandling(BWTSeq *bwtSeq,
                          const enum rangeSortMode *defaultRangeSort)
 {
   struct encIdxSeq *seqIdx;

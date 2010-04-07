@@ -22,7 +22,7 @@
 
 #include "esa-splititv.h"
 
-unsigned long suffixarrayuniqueforward (const void *genericindex,
+unsigned long gt_suffixarrayuniqueforward (const void *genericindex,
                                        unsigned long offset,
                                        unsigned long left,
                                        unsigned long right,
@@ -43,7 +43,7 @@ unsigned long suffixarrayuniqueforward (const void *genericindex,
     if (itv.left < itv.right)
     {
       if (qptr >= qend || ISSPECIAL(*qptr) ||
-          !lcpintervalfindcharchildintv(suffixarray->encseq,
+          !gt_lcpintervalfindcharchildintv(suffixarray->encseq,
                                         suffixarray->readmode,
                                         totallength,
                                         suffixarray->suftab,
@@ -63,7 +63,7 @@ unsigned long suffixarrayuniqueforward (const void *genericindex,
   return 0;
 }
 
-unsigned long suffixarraymstats (const void *genericindex,
+unsigned long gt_suffixarraymstats (const void *genericindex,
                                  unsigned long offset,
                                  unsigned long left,
                                  unsigned long right,
@@ -83,7 +83,7 @@ unsigned long suffixarraymstats (const void *genericindex,
   {
     gt_assert(itv.left <= itv.right);
     if (qptr >= qend || ISSPECIAL(*qptr) ||
-        !lcpintervalfindcharchildintv(suffixarray->encseq,
+        !gt_lcpintervalfindcharchildintv(suffixarray->encseq,
                                       suffixarray->readmode,
                                       totallength,
                                       suffixarray->suftab,

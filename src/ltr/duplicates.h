@@ -21,9 +21,9 @@
 #include <stdbool.h>
 #include "repeattypes.h"
 
-void removeduplicates(GtArrayLTRboundaries *arrayLTRboundaries);
+void gt_removeduplicates(GtArrayLTRboundaries *arrayLTRboundaries);
 
-void removeoverlapswithlowersimilarity(
+void gt_removeoverlapswithlowersimilarity(
                         GtArrayLTRboundaries *arrayLTRboundaries,
                         bool nooverlapallowed);
 

@@ -20,7 +20,7 @@
 #include "match/esa-map.h"
 
 static EISeq *
-createEncIdxSeqFromSASeqSrc(SASeqSrc *src,
+gt_createEncIdxSeqFromSASeqSrc(SASeqSrc *src,
                             const GtStr *projectName,
                             const struct seqBaseParam *params,
                             size_t numExtHeaders, const uint16_t *headerIDs,
@@ -32,7 +32,7 @@ createEncIdxSeqFromSASeqSrc(SASeqSrc *src,
                             GtError *err);
 
 extern EISeq *
-createEncIdxSeq(const GtStr *projectName,
+gt_createEncIdxSeq(const GtStr *projectName,
                 const struct seqBaseParam *params,
                 size_t numExtHeaders, const uint16_t *headerIDs,
                 const uint32_t *extHeaderSizes,
@@ -50,18 +50,18 @@ createEncIdxSeq(const GtStr *projectName,
                        SARR_SUFTAB | SARR_BWTTAB, projectName, verbosity, err))
     return NULL;
   length = gt_encodedsequence_totallength(suffixArray.encseq) + 1;
-  newSeqIdx = createEncIdxSeqFromSA(&suffixArray, length,
+  newSeqIdx = gt_createEncIdxSeqFromSA(&suffixArray, length,
                                       projectName, params,
                                       numExtHeaders, headerIDs,
                                       extHeaderSizes, extHeaderCallbacks,
                                       headerCBData, biFunc, cwExtBitsPerPos,
                                       biVarBits, cbState, err);
-  freesuffixarray(&suffixArray);
+  gt_freesuffixarray(&suffixArray);
   return newSeqIdx;
 }
 
 extern EISeq *
-createEncIdxSeqFromSA(Suffixarray *sa, unsigned long totalLen,
+gt_createEncIdxSeqFromSA(Suffixarray *sa, unsigned long totalLen,
                       const GtStr *projectName,
                       const struct seqBaseParam *params,
                       size_t numExtHeaders, const uint16_t *headerIDs,
@@ -75,17 +75,17 @@ createEncIdxSeqFromSA(Suffixarray *sa, unsigned long totalLen,
   struct encIdxSeq *newSeqIdx;
   SuffixarrayFileInterface sai;
   gt_assert(sa && projectName && err);
-  initSuffixarrayFileInterface(&sai, totalLen, sa);
-  newSeqIdx = createEncIdxSeqFromSAI(
+  gt_initSuffixarrayFileInterface(&sai, totalLen, sa);
+  newSeqIdx = gt_createEncIdxSeqFromSAI(
     &sai, projectName, params, numExtHeaders, headerIDs,
     extHeaderSizes, extHeaderCallbacks, headerCBData, biFunc, cwExtBitsPerPos,
     biVarBits, cbState, err);
-  destructSuffixarrayFileInterface(&sai);
+  gt_destructSuffixarrayFileInterface(&sai);
   return newSeqIdx;
 }
 
 extern EISeq *
-createEncIdxSeqFromSAI(SuffixarrayFileInterface *sai,
+gt_createEncIdxSeqFromSAI(SuffixarrayFileInterface *sai,
                        const GtStr *projectName,
                        const struct seqBaseParam *params,
                        size_t numExtHeaders, const uint16_t *headerIDs,
@@ -97,7 +97,7 @@ createEncIdxSeqFromSAI(SuffixarrayFileInterface *sai,
                        GtError *err)
 {
   gt_assert(sai && projectName && err);
-  return createEncIdxSeqFromSASeqSrc(
+  return gt_createEncIdxSeqFromSASeqSrc(
     SAI2SASS(sai), projectName, params,
     numExtHeaders, headerIDs, extHeaderSizes,
     extHeaderCallbacks, headerCBData, biFunc,
@@ -105,7 +105,7 @@ createEncIdxSeqFromSAI(SuffixarrayFileInterface *sai,
 }
 
 extern EISeq *
-createEncIdxSeqFromSfxI(sfxInterface *sfxi,
+gt_createEncIdxSeqFromSfxI(sfxInterface *sfxi,
                         const GtStr *projectName,
                         const struct seqBaseParam *params,
                         size_t numExtHeaders, const uint16_t *headerIDs,
@@ -117,15 +117,15 @@ createEncIdxSeqFromSfxI(sfxInterface *sfxi,
                         GtError *err)
 {
   gt_assert(sfxi && projectName && err);
-  return createEncIdxSeqFromSASeqSrc(
-    SfxI2SASS(sfxi), projectName, params,
+  return gt_createEncIdxSeqFromSASeqSrc(
+    gt_SfxI2SASS(sfxi), projectName, params,
     numExtHeaders, headerIDs, extHeaderSizes,
     extHeaderCallbacks, headerCBData, biFunc,
     cwExtBitsPerPos, biVarBits, cbState, err);
 }
 
 static EISeq *
-createEncIdxSeqFromSASeqSrc(SASeqSrc *src,
+gt_createEncIdxSeqFromSASeqSrc(SASeqSrc *src,
                             const GtStr *projectName,
                             const struct seqBaseParam *params,
                             size_t numExtHeaders, const uint16_t *headerIDs,
@@ -143,7 +143,7 @@ createEncIdxSeqFromSASeqSrc(SASeqSrc *src,
                   = SASSCreateReader(src, SFX_REQUEST_BWTTAB)))
     return NULL;
   alphabet = SASSNewMRAEnc(src);
-  newSeqIdx = createEncIdxSeqGen(SASSGetLength(src), projectName,
+  newSeqIdx = gt_createEncIdxSeqGen(SASSGetLength(src), projectName,
                                  alphabet, SASSGetSeqStats(src),
                                  readSfxBWTSym, params,
                                  numExtHeaders, headerIDs, extHeaderSizes,
@@ -151,12 +151,12 @@ createEncIdxSeqFromSASeqSrc(SASeqSrc *src,
                                  cwExtBitsPerPos, biVarBits,
                                  cbState, err);
   if (!newSeqIdx)
-    MRAEncDelete(alphabet);
+    gt_MRAEncDelete(alphabet);
   return newSeqIdx;
 }
 
 extern EISeq *
-createEncIdxSeqGen(unsigned long totalLen, const GtStr *projectName,
+gt_createEncIdxSeqGen(unsigned long totalLen, const GtStr *projectName,
                    MRAEnc *alphabet, const struct seqStats *stats,
                    SeqDataReader seqGenerator,
                    const struct seqBaseParam *params,
@@ -171,7 +171,7 @@ createEncIdxSeqGen(unsigned long totalLen, const GtStr *projectName,
   switch (params->encType)
   {
   case BWT_ON_BLOCK_ENC:
-    seqIdx = newGenBlockEncIdxSeq(totalLen, projectName, alphabet, stats,
+    seqIdx = gt_newGenBlockEncIdxSeq(totalLen, projectName, alphabet, stats,
                                   seqGenerator, params, numExtHeaders,
                                   headerIDs, extHeaderSizes, extHeaderCallbacks,
                                   headerCBData, biFunc, cwExtBitsPerPos,
@@ -185,18 +185,18 @@ createEncIdxSeqGen(unsigned long totalLen, const GtStr *projectName,
 }
 
 extern struct encIdxSeq *
-loadEncIdxSeqForSA(const Suffixarray *sa, unsigned long totalLen,
+gt_loadEncIdxSeqForSA(const Suffixarray *sa, unsigned long totalLen,
                    const GtStr *projectName,
                    enum seqBaseEncoding encType, int features, GtError *err)
 {
   MRAEnc *alphabet;
   EISeq *seqIdx = NULL;
   gt_assert(sa);
-  alphabet = SANewMRAEnc(sa);
+  alphabet = gt_SANewMRAEnc(sa);
   switch (encType)
   {
   case BWT_ON_BLOCK_ENC:
-    seqIdx = loadBlockEncIdxSeqGen(alphabet, totalLen, projectName, features,
+    seqIdx = gt_loadBlockEncIdxSeqGen(alphabet, totalLen, projectName, features,
                                    err);
     break;
   default:
@@ -204,12 +204,12 @@ loadEncIdxSeqForSA(const Suffixarray *sa, unsigned long totalLen,
     break;
   }
   if (!seqIdx)
-    MRAEncDelete(alphabet);
+    gt_MRAEncDelete(alphabet);
   return seqIdx;
 }
 
 extern EISeq *
-loadEncIdxSeq(const GtStr *projectName,
+gt_loadEncIdxSeq(const GtStr *projectName,
               enum seqBaseEncoding encType, int features,
               GtLogger *verbosity, GtError *err)
 {
@@ -221,9 +221,9 @@ loadEncIdxSeq(const GtStr *projectName,
     if (streamsuffixarray(&suffixArray, 0, projectName, verbosity, err))
       break;
     len = gt_encodedsequence_totallength(suffixArray.encseq) + 1;
-    newSeqIdx = loadEncIdxSeqForSA(&suffixArray, len, projectName,
+    newSeqIdx = gt_loadEncIdxSeqForSA(&suffixArray, len, projectName,
                                    encType, features, err);
-    freesuffixarray(&suffixArray);
+    gt_freesuffixarray(&suffixArray);
   } while (0);
   return newSeqIdx;
 }

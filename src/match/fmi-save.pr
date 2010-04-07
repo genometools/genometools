@@ -1,7 +1,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-int saveFmindex (const GtStr *indexname,Fmindex *fm,
+int gt_saveFmindex (const GtStr *indexname,Fmindex *fm,
                  const GtSpecialcharinfo *specialcharinfo,
                  bool storeindexpos,GtError *err);
 

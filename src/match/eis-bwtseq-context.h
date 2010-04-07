@@ -38,24 +38,24 @@ typedef struct BWTSeqContextRetrieverFactory BWTSeqContextRetrieverFactory;
  * If equal CTX_MAP_ILOG_AUTOSIZE, uses @f$gt_log_2\mathrm{seqLen}@f$.
  */
 extern BWTSeqContextRetrieverFactory *
-newBWTSeqContextRetrieverFactory(unsigned long seqLen,
+gt_newBWTSeqContextRetrieverFactory(unsigned long seqLen,
                                  short mapIntervalLog2);
 
 extern void
-deleteBWTSeqContextRetrieverFactory(BWTSeqContextRetrieverFactory *factory);
+gt_deleteBWTSeqContextRetrieverFactory(BWTSeqContextRetrieverFactory *factory);
 
 extern unsigned long
-BWTSCRFReadAdvance(BWTSeqContextRetrieverFactory *factory,
+gt_BWTSCRFReadAdvance(BWTSeqContextRetrieverFactory *factory,
                    unsigned long chunkSize,
                    SeqDataReader readSfxIdx);
 
 extern size_t
-BWTSCRFMapAdvance(BWTSeqContextRetrieverFactory *factory,
+gt_BWTSCRFMapAdvance(BWTSeqContextRetrieverFactory *factory,
                   const unsigned long *src,
                   size_t chunkSize);
 
 extern bool
-BWTSCRFFinished(const BWTSeqContextRetrieverFactory *factory);
+gt_BWTSCRFFinished(const BWTSeqContextRetrieverFactory *factory);
 
 /**
  * @param bwtSeq reference to companion BWT sequence object, can be
@@ -63,7 +63,7 @@ BWTSCRFFinished(const BWTSeqContextRetrieverFactory *factory);
  * (i.e. immediately destructed).
  */
 extern BWTSeqContextRetriever *
-BWTSCRFGet(BWTSeqContextRetrieverFactory *factory, const BWTSeq *bwtSeq,
+gt_BWTSCRFGet(BWTSeqContextRetrieverFactory *factory, const BWTSeq *bwtSeq,
            const GtStr *projectName);
 
 /**
@@ -80,11 +80,11 @@ BWTSCRFGet(BWTSeqContextRetrieverFactory *factory, const BWTSeq *bwtSeq,
  * not enought memory for mmap).
  */
 extern BWTSeqContextRetriever *
-BWTSeqCRLoad(const BWTSeq *bwtSeq, const GtStr *projectName,
+gt_BWTSeqCRLoad(const BWTSeq *bwtSeq, const GtStr *projectName,
              short mapIntervalLog2);
 
 extern void
-deleteBWTSeqCR(BWTSeqContextRetriever *bwtSeqCR);
+gt_deleteBWTSeqCR(BWTSeqContextRetriever *bwtSeqCR);
 
 struct SeqMark
 {
@@ -96,7 +96,7 @@ struct SeqMark
  * len or more symbols.
  */
 extern void
-BWTSeqCRAccessSubseq(const BWTSeqContextRetriever *bwtSeqCR,
+gt_BWTSeqCRAccessSubseq(const BWTSeqContextRetriever *bwtSeqCR,
                      unsigned long start, size_t len, Symbol subseq[]);
 
 /**

@@ -43,6 +43,6 @@ typedef struct
        gapextend;
 } IdxlocaliOptions;
 
-int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err);
+int gt_runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err);
 
 #endif

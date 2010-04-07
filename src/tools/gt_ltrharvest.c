@@ -22,5 +22,5 @@
 int gt_ltrharvest(int argc, const char **argv, GtError *err)
 {
   gt_error_check(err);
-  return parseargsandcallltrharvest(argc, argv, err);
+  return gt_parseargsandcallltrharvest(argc, argv, err);
 }

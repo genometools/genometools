@@ -18,7 +18,7 @@
 #include "core/symboldef.h"
 #include "spacedef.h"
 
-static unsigned long squarededistunit2 (const GtUchar *u, unsigned long m,
+static unsigned long gt_squarededistunit2 (const GtUchar *u, unsigned long m,
                                         const GtUchar *v, unsigned long n)
 {
   unsigned long val, we, nw, *ecol, *ecolptr;
@@ -60,12 +60,12 @@ static unsigned long squarededistunit2 (const GtUchar *u, unsigned long m,
   return val;
 }
 
-unsigned long squarededistunit (const GtUchar *u, unsigned long m,
+unsigned long gt_squarededistunit (const GtUchar *u, unsigned long m,
                                 const GtUchar *v, unsigned long n)
 {
   if (m < n)
   {
-    return squarededistunit2(u,m,v,n);
+    return gt_squarededistunit2(u,m,v,n);
   }
-  return squarededistunit2(v,n,u,m);
+  return gt_squarededistunit2(v,n,u,m);
 }

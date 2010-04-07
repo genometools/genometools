@@ -37,7 +37,7 @@ typedef struct
 
 typedef struct SWdpresource SWdpresource;
 
-SWdpresource *newSWdpresource(Scoretype matchscore,
+SWdpresource *gt_newSWdpresource(Scoretype matchscore,
                               Scoretype mismatchscore,
                               Scoretype gapextend,
                               unsigned long scorethreshold,
@@ -45,11 +45,11 @@ SWdpresource *newSWdpresource(Scoretype matchscore,
                               Processmatch processmatch,
                               void *processmatchinfo);
 
-void multiapplysmithwaterman(SWdpresource *dpresource,
+void gt_multiapplysmithwaterman(SWdpresource *dpresource,
                              const GtEncodedsequence *encseq,
                              const GtUchar *query,
                              unsigned long querylen);
 
-void freeSWdpresource(SWdpresource *swdpresource);
+void gt_freeSWdpresource(SWdpresource *swdpresource);
 
 #endif

@@ -1,13 +1,13 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-unsigned long determinenumofcodes(unsigned int numofchars,
+unsigned long gt_determinenumofcodes(unsigned int numofchars,
                                   unsigned int prefixlength);
 
-unsigned long determinenumberofspecialstostore(
+unsigned long gt_determinenumberofspecialstostore(
                                       const GtSpecialcharinfo *specialcharinfo);
 
-void computefmkeyvalues (Fmindex *fm,
+void gt_computefmkeyvalues (Fmindex *fm,
                          const GtSpecialcharinfo *specialcharinfo,
                          unsigned long bwtlength,
                          unsigned int log2bsize,

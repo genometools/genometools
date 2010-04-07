@@ -52,15 +52,15 @@ typedef struct
   unsigned int numofchars;
 } Emissionmergedesa;
 
-int emissionmergedesa_stepdeleteandinsertothersuffixes(
+int gt_emissionmergedesa_stepdeleteandinsertothersuffixes(
                                     Emissionmergedesa *emmesa, GtError *err);
 
-int emissionmergedesa_init(Emissionmergedesa *emmesa,
+int gt_emissionmergedesa_init(Emissionmergedesa *emmesa,
                            const GtStrArray *indexnametab,
                            unsigned int demand,
                            GtLogger *logger,
                            GtError *err);
 
-void emissionmergedesa_wrap(Emissionmergedesa *emmesa);
+void gt_emissionmergedesa_wrap(Emissionmergedesa *emmesa);
 
 #endif

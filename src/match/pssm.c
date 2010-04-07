@@ -42,7 +42,7 @@ typedef struct
             **scoretab;     /* the scores */
 } Profilematrix;
 
-void showProfilematrix(const Profilematrix *prof,
+void gt_showProfilematrix(const Profilematrix *prof,
                               const GtUchar *characters)
 {
   unsigned long d, a;
@@ -71,7 +71,7 @@ void showProfilematrix(const Profilematrix *prof,
   }
 }
 
-void makeitmthresholds(Profilematrix *prof,
+void gt_makeitmthresholds(Profilematrix *prof,
                               ProfScore minscore)
 {
   unsigned long d, a;
@@ -102,7 +102,7 @@ void makeitmthresholds(Profilematrix *prof,
   FREESPACE(maxscore);
 }
 
-void lookaheadsearchPSSM(const GtEncodedsequence *encseq,
+void gt_lookaheadsearchPSSM(const GtEncodedsequence *encseq,
                                 const Profilematrix *prof)
 {
   unsigned long firstpos, bufsize;

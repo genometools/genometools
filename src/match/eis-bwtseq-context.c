@@ -95,7 +95,7 @@ initBWTSeqContextRetrieverFactory(BWTSeqContextRetrieverFactory *newFactory,
 }
 
 extern BWTSeqContextRetrieverFactory *
-newBWTSeqContextRetrieverFactory(unsigned long seqLen, short mapIntervalLog2)
+gt_newBWTSeqContextRetrieverFactory(unsigned long seqLen, short mapIntervalLog2)
 {
   BWTSeqContextRetrieverFactory *newFactory;
   newFactory = gt_malloc(sizeof (*newFactory));
@@ -111,7 +111,7 @@ destructBWTSeqContextRetrieverFactory(BWTSeqContextRetrieverFactory *factory)
 }
 
 extern void
-deleteBWTSeqContextRetrieverFactory(BWTSeqContextRetrieverFactory *factory)
+gt_deleteBWTSeqContextRetrieverFactory(BWTSeqContextRetrieverFactory *factory)
 {
   destructBWTSeqContextRetrieverFactory(factory);
   gt_free(factory);
@@ -135,7 +135,7 @@ addMapVal(BWTSeqContextRetrieverFactory *factory,
  * @return number of not processed suffix indices, i.e. 0 on success
  */
 extern unsigned long
-BWTSCRFReadAdvance(BWTSeqContextRetrieverFactory *factory,
+gt_BWTSCRFReadAdvance(BWTSeqContextRetrieverFactory *factory,
                    unsigned long chunkSize,
                    SeqDataReader readSfxIdx)
 {
@@ -150,14 +150,14 @@ BWTSCRFReadAdvance(BWTSeqContextRetrieverFactory *factory,
       fputs("error: short read when building context retriever!\n", stderr);
       abort();
     }
-    BWTSCRFMapAdvance(factory, buf, len);
+    gt_BWTSCRFMapAdvance(factory, buf, len);
     sfxIdxLeft -= len;
   }
   return chunkSize - sfxIdxLeft;
 }
 
 extern size_t
-BWTSCRFMapAdvance(BWTSeqContextRetrieverFactory *factory,
+gt_BWTSCRFMapAdvance(BWTSeqContextRetrieverFactory *factory,
                   const unsigned long *src,
                   size_t len)
 {
@@ -179,14 +179,14 @@ BWTSCRFMapAdvance(BWTSeqContextRetrieverFactory *factory,
 }
 
 extern bool
-BWTSCRFFinished(const BWTSeqContextRetrieverFactory *factory)
+gt_BWTSCRFFinished(const BWTSeqContextRetrieverFactory *factory)
 {
   return factory->currentSfxPos == factory->seqLen;
 }
 
 static inline void
 readBS2Map(BWTSeqContextRetrieverFactory *factory,
-           BWTSeqContextRetriever *newBWTSeqCR);
+           BWTSeqContextRetriever *gt_newBWTSeqCR);
 
 static inline bool
 BWTSeqCRMapOpen(unsigned short mapIntervalLog2,
@@ -194,31 +194,31 @@ BWTSeqCRMapOpen(unsigned short mapIntervalLog2,
                 unsigned long seqLen,
                 const GtStr *projectName,
                 bool createMapFile,
-                BWTSeqContextRetriever *newBWTSeqCR);
+                BWTSeqContextRetriever *gt_newBWTSeqCR);
 
 extern BWTSeqContextRetriever *
-BWTSCRFGet(BWTSeqContextRetrieverFactory *factory,
+gt_BWTSCRFGet(BWTSeqContextRetrieverFactory *factory,
            const BWTSeq *bwtSeq,
            const GtStr *projectName)
 {
   unsigned short bitsPerSeqpos, mapIntervalLog2;
-  BWTSeqContextRetriever *newBWTSeqCR;
+  BWTSeqContextRetriever *gt_newBWTSeqCR;
   gt_assert(factory && projectName);
   bitsPerSeqpos = requiredSeqposBits(factory->seqLen - 1);
-  newBWTSeqCR = gt_malloc(sizeof (*newBWTSeqCR));
-  newBWTSeqCR->mapIntervalLog2 = mapIntervalLog2 = factory->mapIntervalLog2;
-  newBWTSeqCR->bitsPerSeqpos = bitsPerSeqpos;
-  newBWTSeqCR->bwtSeq = bwtSeq;
-  newBWTSeqCR->mapInterval = 1 << factory->mapIntervalLog2;
-  newBWTSeqCR->mapMask = newBWTSeqCR->mapInterval - 1;
+  gt_newBWTSeqCR = gt_malloc(sizeof (*gt_newBWTSeqCR));
+  gt_newBWTSeqCR->mapIntervalLog2 = mapIntervalLog2 = factory->mapIntervalLog2;
+  gt_newBWTSeqCR->bitsPerSeqpos = bitsPerSeqpos;
+  gt_newBWTSeqCR->bwtSeq = bwtSeq;
+  gt_newBWTSeqCR->mapInterval = 1 << factory->mapIntervalLog2;
+  gt_newBWTSeqCR->mapMask = gt_newBWTSeqCR->mapInterval - 1;
   if (!BWTSeqCRMapOpen(mapIntervalLog2, bitsPerSeqpos, factory->seqLen,
-                       projectName, true, newBWTSeqCR))
+                       projectName, true, gt_newBWTSeqCR))
   {
-    gt_free(newBWTSeqCR);
+    gt_free(gt_newBWTSeqCR);
     return NULL;
   }
-  readBS2Map(factory, newBWTSeqCR);
-  return newBWTSeqCR;
+  readBS2Map(factory, gt_newBWTSeqCR);
+  return gt_newBWTSeqCR;
 }
 
 static inline void
@@ -241,14 +241,14 @@ readBlock2Buf(FILE *fp,
 
 static inline void
 readBS2Map(BWTSeqContextRetrieverFactory *factory,
-           BWTSeqContextRetriever *newBWTSeqCR)
+           BWTSeqContextRetriever *gt_newBWTSeqCR)
 {
   FILE *fp = factory->mapTableDiskBackingStore;
   unsigned long buf[BLOCK_IO_SIZE];
   off_t i, numFullBlocks, lastBlockLen;
-  BitString revMap =  newBWTSeqCR->revMap;
+  BitString revMap =  gt_newBWTSeqCR->revMap;
   BitOffset storePos = 0;
-  unsigned bitsPerSeqpos = newBWTSeqCR->bitsPerSeqpos;
+  unsigned bitsPerSeqpos = gt_newBWTSeqCR->bitsPerSeqpos;
   {
     off_t numEntries  = numMapEntries(factory->seqLen,
                                       factory->mapIntervalLog2);
@@ -275,7 +275,7 @@ BWTSeqCRMapOpen(unsigned short mapIntervalLog2,
                 unsigned long seqLen,
                 const GtStr *projectName,
                 bool createMapFile,
-                BWTSeqContextRetriever *newBWTSeqCR)
+                BWTSeqContextRetriever *gt_newBWTSeqCR)
 {
   FILE *mapFile = NULL;
   BitString mapMap = NULL;
@@ -333,7 +333,7 @@ BWTSeqCRMapOpen(unsigned short mapIntervalLog2,
     }
     mapMap = gt_fa_mmap_generic_fd(fileno(mapFile), mapSize, 0, createMapFile,
                                    false, NULL);
-    newBWTSeqCR->revMap = (newBWTSeqCR->revMapMMap = mapMap) + headerSize;
+    gt_newBWTSeqCR->revMap = (gt_newBWTSeqCR->revMapMMap = mapMap) + headerSize;
   } while (0);
   if (mapName) gt_str_delete(mapName);
   if (mapFile) gt_fa_xfclose(mapFile);
@@ -341,25 +341,25 @@ BWTSeqCRMapOpen(unsigned short mapIntervalLog2,
 }
 
 extern BWTSeqContextRetriever *
-BWTSeqCRLoad(const BWTSeq *bwtSeq,
+gt_BWTSeqCRLoad(const BWTSeq *bwtSeq,
              const GtStr *projectName,
              short mapIntervalLog2)
 {
   unsigned long seqLen;
   unsigned short bitsPerSeqpos;
-  BWTSeqContextRetriever *newBWTSeqCR;
+  BWTSeqContextRetriever *gt_newBWTSeqCR;
   gt_assert(bwtSeq && projectName);
   seqLen = BWTSeqLength(bwtSeq);
   bitsPerSeqpos = requiredSeqposBits(seqLen - 1);
-  newBWTSeqCR = gt_malloc(sizeof (*newBWTSeqCR));
-  newBWTSeqCR->bitsPerSeqpos = bitsPerSeqpos;
-  newBWTSeqCR->bwtSeq = bwtSeq;
+  gt_newBWTSeqCR = gt_malloc(sizeof (*gt_newBWTSeqCR));
+  gt_newBWTSeqCR->bitsPerSeqpos = bitsPerSeqpos;
+  gt_newBWTSeqCR->bwtSeq = bwtSeq;
   if (mapIntervalLog2 != CTX_MAP_ILOG_AUTOSIZE)
   {
     if (!BWTSeqCRMapOpen(mapIntervalLog2, bitsPerSeqpos, seqLen,
-                         projectName, false, newBWTSeqCR))
+                         projectName, false, gt_newBWTSeqCR))
     {
-      gt_free(newBWTSeqCR);
+      gt_free(gt_newBWTSeqCR);
       return NULL;
     }
   }
@@ -368,23 +368,23 @@ BWTSeqCRLoad(const BWTSeq *bwtSeq,
     short mapIntervalLog2Max = bitsPerSeqpos;
     mapIntervalLog2 = 0;
     while (!BWTSeqCRMapOpen(mapIntervalLog2, bitsPerSeqpos, seqLen,
-                            projectName, false, newBWTSeqCR)
+                            projectName, false, gt_newBWTSeqCR)
            && mapIntervalLog2 < mapIntervalLog2Max)
       ++mapIntervalLog2;
-    if (!newBWTSeqCR->revMap)
+    if (!gt_newBWTSeqCR->revMap)
     {
-      gt_free(newBWTSeqCR);
+      gt_free(gt_newBWTSeqCR);
       return NULL;
     }
   }
-  newBWTSeqCR->mapIntervalLog2 = mapIntervalLog2;
-  newBWTSeqCR->mapInterval = 1 << mapIntervalLog2;
-  newBWTSeqCR->mapMask = newBWTSeqCR->mapInterval - 1;
-  return newBWTSeqCR;
+  gt_newBWTSeqCR->mapIntervalLog2 = mapIntervalLog2;
+  gt_newBWTSeqCR->mapInterval = 1 << mapIntervalLog2;
+  gt_newBWTSeqCR->mapMask = gt_newBWTSeqCR->mapInterval - 1;
+  return gt_newBWTSeqCR;
 }
 
 extern void
-deleteBWTSeqCR(BWTSeqContextRetriever *bwtSeqCR)
+gt_deleteBWTSeqCR(BWTSeqContextRetriever *bwtSeqCR)
 {
   gt_assert(bwtSeqCR);
   gt_fa_xmunmap(bwtSeqCR->revMapMMap);
@@ -392,7 +392,7 @@ deleteBWTSeqCR(BWTSeqContextRetriever *bwtSeqCR)
 }
 
 extern void
-BWTSeqCRAccessSubseq(const BWTSeqContextRetriever *bwtSeqCR,
+gt_BWTSeqCRAccessSubseq(const BWTSeqContextRetriever *bwtSeqCR,
                      unsigned long start, size_t len, Symbol subseq[])
 {
   struct SeqMark currentPos;

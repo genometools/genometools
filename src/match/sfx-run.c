@@ -87,7 +87,7 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
   if (so->outlcptab)
   {
     outfileinfo->outlcpinfo
-      = newOutlcpinfo(so->outlcptab ? so->fn2encopt.str_indexname : NULL,
+      = gt_newOutlcpinfo(so->outlcptab ? so->fn2encopt.str_indexname : NULL,
                   prefixlength,
                   gt_alphabet_num_of_chars(gt_encodedsequence_alphabet(encseq)),
                   gt_encodedsequence_totallength(encseq),
@@ -208,7 +208,7 @@ static int suffixeratorwithoutput(const GtStr *str_indexname,
   bool haserr = false, specialsuffixes = false;
   Sfxiterator *sfi = NULL;
 
-  sfi = newSfxiterator(encseq,
+  sfi = gt_newSfxiterator(encseq,
                        readmode,
                        prefixlength,
                        numofparts,
@@ -226,12 +226,12 @@ static int suffixeratorwithoutput(const GtStr *str_indexname,
     {
       unsigned long longest;
 
-      suftabptr = nextSfxiterator(&numberofsuffixes,&specialsuffixes,sfi);
+      suftabptr = gt_nextSfxiterator(&numberofsuffixes,&specialsuffixes,sfi);
       if (suftabptr == NULL)
       {
         break;
       }
-      if (numofparts == 1U && sfi2longestsuffixpos(&longest,sfi))
+      if (numofparts == 1U && gt_sfi2longestsuffixpos(&longest,sfi))
       {
         outfileinfo->longest.defined = true;
         outfileinfo->longest.valueunsignedlong = longest;
@@ -258,21 +258,21 @@ static int suffixeratorwithoutput(const GtStr *str_indexname,
   {
     gt_fa_fclose(outfileinfo->outfpsuftab);
     outfileinfo->outfpsuftab = NULL;
-    if (postsortsuffixesfromstream(sfi,str_indexname,err) != 0)
+    if (gt_postsortsuffixesfromstream(sfi,str_indexname,err) != 0)
     {
       haserr = true;
     }
   }
   if (!haserr && outfileinfo->outfpbcktab != NULL)
   {
-    if (sfibcktab2file(outfileinfo->outfpbcktab,sfi,err) != 0)
+    if (gt_sfibcktab2file(outfileinfo->outfpbcktab,sfi,err) != 0)
     {
       haserr = true;
     }
   }
   if (sfi != NULL)
   {
-    freeSfxiterator(&sfi);
+    gt_freeSfxiterator(&sfi);
   }
   return haserr ? -1 : 0;
 }
@@ -289,7 +289,7 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
 
   if (so->prefixlength == PREFIXLENGTH_AUTOMATIC)
   {
-    *prefixlength = recommendedprefixlength(numofchars,totallength);
+    *prefixlength = gt_recommendedprefixlength(numofchars,totallength);
     gt_logger_log(logger,
                 "automatically determined prefixlength=%u",
                 *prefixlength);
@@ -299,19 +299,19 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
 
     *prefixlength = so->prefixlength;
     maxprefixlen
-      = whatisthemaximalprefixlength(numofchars,
+      = gt_whatisthemaximalprefixlength(numofchars,
                                      totallength,
                                      so->sfxstrategy.storespecialcodes
                                      ? getprefixlenbits()
                                      : 0);
-    if (checkprefixlength(maxprefixlen,*prefixlength,err) != 0)
+    if (gt_checkprefixlength(maxprefixlen,*prefixlength,err) != 0)
     {
       haserr = true;
     } else
     {
-      showmaximalprefixlength(logger,
+      gt_showmaximalprefixlength(logger,
                               maxprefixlen,
-                              recommendedprefixlength(
+                              gt_recommendedprefixlength(
                               numofchars,
                               totallength));
     }
@@ -365,7 +365,7 @@ static int run_packedindexconstruction(GtLogger *logger,
               so->bwtIdxParams.final.seqParams.encParams.blockEnc.blockSize,
               so->bwtIdxParams.final.seqParams.encParams.blockEnc.bucketBlocks,
               so->bwtIdxParams.final.locateInterval);
-  si = newSfxInterface(so->readmode,
+  si = gt_newSfxInterface(so->readmode,
                        prefixlength,
                        so->numofparts,
                        sfxstrategy,
@@ -379,27 +379,27 @@ static int run_packedindexconstruction(GtLogger *logger,
     haserr = true;
   } else
   {
-    bwtSeq = createBWTSeqFromSfxI(&so->bwtIdxParams.final, si, err);
+    bwtSeq = gt_createBWTSeqFromSfxI(&so->bwtIdxParams.final, si, err);
     if (bwtSeq == NULL)
     {
-      deleteSfxInterface(si);
+      gt_deleteSfxInterface(si);
       haserr = true;
     } else
     {
-      deleteBWTSeq(bwtSeq); /**< the actual object is not * used here */
+      gt_deleteBWTSeq(bwtSeq); /**< the actual object is not * used here */
       /*
-        outfileinfo.longest = SfxIGetRot0Pos(si);
+        outfileinfo.longest = gt_SfxIGetRot0Pos(si);
       */
-      sfi = SfxInterface2Sfxiterator(si);
+      sfi = gt_SfxInterface2Sfxiterator(si);
       gt_assert(sfi != NULL);
       if (outfpbcktab != NULL)
       {
-        if (sfibcktab2file(outfpbcktab,sfi,err) != 0)
+        if (gt_sfibcktab2file(outfpbcktab,sfi,err) != 0)
         {
           haserr = true;
         }
       }
-      deleteSfxInterface(si);
+      gt_deleteSfxInterface(si);
     }
   }
   return haserr ? -1 : 0;
@@ -595,7 +595,7 @@ static int runsuffixerator(bool doesa,
       numoflargelcpvalues = getnumoflargelcpvalues(outfileinfo.outlcpinfo);
       maxbranchdepth = getmaxbranchdepth(outfileinfo.outlcpinfo);
     }
-    if (outprjfile(so->fn2encopt.str_indexname,
+    if (gt_outprjfile(so->fn2encopt.str_indexname,
                    so->readmode,
                    encseq,
                    prefixlength,
@@ -610,7 +610,7 @@ static int runsuffixerator(bool doesa,
   }
   if (outfileinfo.outlcpinfo != NULL)
   {
-    freeOutlcptab(&outfileinfo.outlcpinfo);
+    gt_freeOutlcptab(&outfileinfo.outlcpinfo);
   }
   gt_encodedsequence_delete(encseq);
   encseq = NULL;
@@ -630,7 +630,7 @@ static int runsuffixerator(bool doesa,
   return haserr ? -1 : 0;
 }
 
-int parseargsandcallsuffixerator(bool doesa,int argc,
+int gt_parseargsandcallsuffixerator(bool doesa,int argc,
                                  const char **argv,GtError *err)
 {
   Suffixeratoroptions so;
@@ -638,7 +638,7 @@ int parseargsandcallsuffixerator(bool doesa,int argc,
   bool haserr = false;
 
   gt_error_check(err);
-  retval = suffixeratoroptions(&so,doesa,argc,argv,err);
+  retval = gt_suffixeratoroptions(&so,doesa,argc,argv,err);
   if (retval == 0)
   {
     GtLogger *logger = gt_logger_new(so.beverbose,
@@ -660,6 +660,6 @@ int parseargsandcallsuffixerator(bool doesa,int argc,
       haserr = true;
     }
   }
-  wrapsfxoptions(&so);
+  gt_wrapsfxoptions(&so);
   return haserr ? -1 : 0;
 }

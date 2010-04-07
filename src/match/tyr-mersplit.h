@@ -25,16 +25,16 @@
 
 typedef struct Tyrbckinfo Tyrbckinfo;
 
-int constructmerbuckets(const GtStr *inputindex,
+int gt_constructmerbuckets(const GtStr *inputindex,
                         const Definedunsignedint *callprefixlength,
                         GtError *err);
 
-Tyrbckinfo *tyrbckinfo_new(const GtStr *tyrindexname,unsigned int alphasize,
+Tyrbckinfo *gt_tyrbckinfo_new(const GtStr *tyrindexname,unsigned int alphasize,
                            GtError *err);
 
-void tyrbckinfo_delete(Tyrbckinfo **tyrbckinfoptr);
+void gt_tyrbckinfo_delete(Tyrbckinfo **tyrbckinfoptr);
 
-const GtUchar *searchinbuckets(const Tyrindex *tyrindex,
+const GtUchar *gt_searchinbuckets(const Tyrindex *tyrindex,
                              const Tyrbckinfo *tyrbckinfo,
                              const GtUchar *bytecode);
 

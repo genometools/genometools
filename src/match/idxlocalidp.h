@@ -21,17 +21,17 @@
 
 #include "absdfstrans-def.h"
 
-const AbstractDfstransformer *locali_AbstractDfstransformer(void);
+const AbstractDfstransformer *gt_locali_AbstractDfstransformer(void);
 
-void reinitLocalitracebackstate(Limdfsconstinfo *lci,
+void gt_reinitLocalitracebackstate(Limdfsconstinfo *lci,
                                 unsigned long dbprefixlen,
                                 unsigned long pprefixlen);
 
-void processelemLocalitracebackstate(Limdfsconstinfo *lci,
+void gt_processelemLocalitracebackstate(Limdfsconstinfo *lci,
                                      GtUchar currentchar,
                                      const void *aliasstate);
 
-const void *completealignmentfromLocalitracebackstate(
+const void *gt_completealignmentfromLocalitracebackstate(
                                       unsigned long *alignedquerylength,
                                       const Limdfsconstinfo *lci);
 

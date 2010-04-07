@@ -61,7 +61,7 @@ static bool minimalcutoffsbreakcondition(void *data)
   return d->breakforloop;
 }
 
-void initMinimalcutoffsTravfunctions(Traversealignmentfunctions
+void gt_initMinimalcutoffsTravfunctions(Traversealignmentfunctions
                                      *travfunctions)
 {
   travfunctions->processmismatch  = minimalcutoffsprocmatchmismatchordeletion;
@@ -86,7 +86,7 @@ void initMinimalcutoffsTravfunctions(Traversealignmentfunctions
     minimalcutoffsprocmatchmismatchordeletion;
 }
 
-void initMinimalcutoffsdata(Minimalcutoffsdata *minimalcutoffsdata,
+void gt_initMinimalcutoffsdata(Minimalcutoffsdata *minimalcutoffsdata,
                             Cutoffs *cutoffs)
 {
   minimalcutoffsdata->cutoffs      = cutoffs;

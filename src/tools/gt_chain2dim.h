@@ -39,7 +39,7 @@ typedef struct
            *refoptionweightfactor,
            *refoptionglobal,
            *refoptionlocal;
-  GtChainmode *gtchainmode;
+  GtChain2Dimmode *gtchainmode;
 } GtChain2dimoptions;
 
 GtTool* gt_chain2dim(void);

@@ -61,13 +61,13 @@ struct seqReaderSet
  * @return numReaders if all consumers registered otherwise
  */
 extern int
-initSeqReaderSet(SeqReaderSet *readerSet, int initialSuperSet,
+gt_initSeqReaderSet(SeqReaderSet *readerSet, int initialSuperSet,
                  int numConsumers, int *tags, SeqDataTranslator xltors[],
                  SeqDataReader *generatedReaders, size_t seqElemSize,
                  generatorFunc generator, void *generatorState);
 
 extern void
-initEmptySeqReaderSet(SeqReaderSet *readerSet, int initialSuperSet,
+gt_initEmptySeqReaderSet(SeqReaderSet *readerSet, int initialSuperSet,
                       size_t seqElemSize, generatorFunc generator,
                       void *generatorState);
 
@@ -75,7 +75,7 @@ initEmptySeqReaderSet(SeqReaderSet *readerSet, int initialSuperSet,
  * @return readData field will be NULL on error -> test with
  * SDRIsValid */
 extern SeqDataReader
-seqReaderSetRegisterConsumer(SeqReaderSet *readerSet, int tag,
+gt_seqReaderSetRegisterConsumer(SeqReaderSet *readerSet, int tag,
                              SeqDataTranslator xltor);
 
 /**
@@ -85,10 +85,10 @@ seqReaderSetRegisterConsumer(SeqReaderSet *readerSet, int tag,
  * @return false on error, true if successfully registered
  */
 extern bool
-seqReaderSetRegisterAutoConsumer(SeqReaderSet *readerSet, int tag,
+gt_seqReaderSetRegisterAutoConsumer(SeqReaderSet *readerSet, int tag,
                                  SeqDataWriter writer);
 
 extern void
-destructSeqReaderSet(SeqReaderSet *readerSet);
+gt_destructSeqReaderSet(SeqReaderSet *readerSet);
 
 #endif

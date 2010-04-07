@@ -18,7 +18,7 @@
 #include "core/symboldef.h"
 #include "core/readmode.h"
 
-void inplace_reversecomplement(GtUchar *seq,unsigned long len)
+void gt_inplace_reversecomplement(GtUchar *seq,unsigned long len)
 {
   GtUchar tmp, *frontptr, *backptr;
 
@@ -31,7 +31,8 @@ void inplace_reversecomplement(GtUchar *seq,unsigned long len)
   }
 }
 
-void copy_reversecomplement(GtUchar *dest,const GtUchar *src,unsigned long len)
+void gt_copy_reversecomplement(GtUchar *dest,const GtUchar *src,
+                               unsigned long len)
 {
   GtUchar *destptr;
   const GtUchar *srcptr;

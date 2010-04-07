@@ -68,7 +68,7 @@
         Pv = (Mh << 1) | ~ (Xv | Ph);\
         Mv = Ph & Xv
 
-unsigned long distanceofshortstringsbytearray(unsigned long *eqsvector,
+unsigned long gt_distanceofshortstringsbytearray(unsigned long *eqsvector,
                                               unsigned int alphasize,
                                               const GtUchar *useq,
                                               unsigned long ulen,
@@ -78,7 +78,7 @@ unsigned long distanceofshortstringsbytearray(unsigned long *eqsvector,
   DECLARELOCALVARS;
   const GtUchar *vptr;
 
-  initeqsvector(eqsvector,(unsigned long) alphasize,useq,ulen);
+  gt_initeqsvector(eqsvector,(unsigned long) alphasize,useq,ulen);
   for (vptr = vseq; vptr < vseq + vlen; vptr++)
   {
     COMPUTENEWDIST(*vptr);
@@ -86,7 +86,7 @@ unsigned long distanceofshortstringsbytearray(unsigned long *eqsvector,
   return distval;
 }
 
-unsigned long distanceofshortstringsencseq(unsigned long *eqsvector,
+unsigned long gt_distanceofshortstringsencseq(unsigned long *eqsvector,
                                            unsigned int alphasize,
                                            const GtUchar *useq,
                                            unsigned long ulen,
@@ -98,7 +98,7 @@ unsigned long distanceofshortstringsencseq(unsigned long *eqsvector,
   GtUchar cc;
   unsigned long pos;
 
-  initeqsvector(eqsvector,(unsigned long) alphasize,useq,ulen);
+  gt_initeqsvector(eqsvector,(unsigned long) alphasize,useq,ulen);
   for (pos = vstartpos; pos < vstartpos + vlen; pos++)
   {
     cc = gt_encodedsequence_getencodedchar(encseq,pos,GT_READMODE_FORWARD);
@@ -107,7 +107,7 @@ unsigned long distanceofshortstringsencseq(unsigned long *eqsvector,
   return distval;
 }
 
-unsigned long reversesuffixmatch(unsigned long *eqsvector,
+unsigned long gt_reversesuffixmatch(unsigned long *eqsvector,
                                  unsigned int alphasize,
                                  const GtUchar *useq,
                                  unsigned long ulen,
@@ -118,7 +118,7 @@ unsigned long reversesuffixmatch(unsigned long *eqsvector,
   DECLARELOCALVARS;
   const GtUchar *vptr;
 
-  initeqsvectorrev(eqsvector,(unsigned long) alphasize,useq,ulen);
+  gt_initeqsvectorrev(eqsvector,(unsigned long) alphasize,useq,ulen);
   gt_assert(maxdistance > 0);
   for (vptr = vseq + vlen - 1; vptr >= vseq; vptr--)
   {
@@ -132,7 +132,7 @@ unsigned long reversesuffixmatch(unsigned long *eqsvector,
   return (unsigned long) (vseq + vlen - vptr);
 }
 
-Definedunsignedlong forwardprefixmatch(const GtEncodedsequence *encseq,
+Definedunsignedlong gt_forwardprefixmatch(const GtEncodedsequence *encseq,
                                        unsigned int alphasize,
                                        unsigned long startpos,
                                        bool nowildcards,
@@ -146,7 +146,7 @@ Definedunsignedlong forwardprefixmatch(const GtEncodedsequence *encseq,
   GtUchar cc;
   Definedunsignedlong result;
 
-  initeqsvector(eqsvector,(unsigned long) alphasize,useq,ulen);
+  gt_initeqsvector(eqsvector,(unsigned long) alphasize,useq,ulen);
   gt_assert(maxdistance > 0);
   for (pos = startpos; /* Nothing */; pos++)
   {

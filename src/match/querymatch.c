@@ -34,12 +34,12 @@ struct Querymatch
    GtReadmode readmode;
 };
 
-Querymatch *querymatch_new(void)
+Querymatch *gt_querymatch_new(void)
 {
   return gt_malloc(sizeof (Querymatch));
 }
 
-void querymatch_fill(Querymatch *querymatch,
+void gt_querymatch_fill(Querymatch *querymatch,
                      unsigned long len,
                      unsigned long dbstart,
                      GtReadmode readmode,
@@ -57,7 +57,7 @@ void querymatch_fill(Querymatch *querymatch,
   querymatch->querytotallength = querytotallength;
 }
 
-void querymatch_delete(Querymatch *querymatch)
+void gt_querymatch_delete(Querymatch *querymatch)
 {
   if (querymatch != NULL)
   {
@@ -116,7 +116,7 @@ static void verifymatch(const GtEncodedsequence *encseq,
 }
 #endif
 
-int querymatch_output(GT_UNUSED void *info,
+int gt_querymatch_output(GT_UNUSED void *info,
                       const GtEncodedsequence *encseq,
                       const Querymatch *querymatch,
                       GT_UNUSED GtError *err)
@@ -167,22 +167,22 @@ int querymatch_output(GT_UNUSED void *info,
   return 0;
 }
 
-unsigned long querymatch_len(const Querymatch *querymatch)
+unsigned long gt_querymatch_len(const Querymatch *querymatch)
 {
   return querymatch->len;
 }
 
-unsigned long querymatch_dbstart(const Querymatch *querymatch)
+unsigned long gt_querymatch_dbstart(const Querymatch *querymatch)
 {
   return querymatch->dbstart;
 }
 
-unsigned long querymatch_querystart(const Querymatch *querymatch)
+unsigned long gt_querymatch_querystart(const Querymatch *querymatch)
 {
   return querymatch->querystart;
 }
 
-uint64_t querymatch_queryseqnum(const Querymatch *querymatch)
+uint64_t gt_querymatch_queryseqnum(const Querymatch *querymatch)
 {
   return querymatch->queryseqnum;
 }

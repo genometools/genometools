@@ -39,7 +39,7 @@ struct Myersonlineresources
   void *processmatchinfo;
 };
 
-Myersonlineresources *newMyersonlineresources(
+Myersonlineresources *gt_newMyersonlineresources(
                             unsigned int numofchars,
                             bool nowildcards,
                             const GtEncodedsequence *encseq,
@@ -62,7 +62,7 @@ Myersonlineresources *newMyersonlineresources(
   return mor;
 }
 
-void freeMyersonlineresources(Myersonlineresources **ptrmyersonlineresources)
+void gt_freeMyersonlineresources(Myersonlineresources **ptrmyersonlineresources)
 {
   Myersonlineresources *mor = *ptrmyersonlineresources;
 
@@ -72,7 +72,7 @@ void freeMyersonlineresources(Myersonlineresources **ptrmyersonlineresources)
   FREESPACE(*ptrmyersonlineresources);
 }
 
-void edistmyersbitvectorAPM(Myersonlineresources *mor,
+void gt_edistmyersbitvectorAPM(Myersonlineresources *mor,
                             const GtUchar *pattern,
                             unsigned long patternlength,
                             unsigned long maxdistance)
@@ -91,7 +91,7 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
   const GtReadmode readmode = GT_READMODE_REVERSE;
   GtMatch match;
 
-  initeqsvectorrev(mor->eqsvectorrev,
+  gt_initeqsvectorrev(mor->eqsvectorrev,
                    (unsigned long) mor->alphasize,
                    pattern,patternlength);
   score = patternlength;
@@ -152,7 +152,7 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
 
         if (maxdistance > 0)
         {
-          matchlength = forwardprefixmatch(mor->encseq,
+          matchlength = gt_forwardprefixmatch(mor->encseq,
                                            mor->alphasize,
                                            dbstartpos,
                                            mor->nowildcards,

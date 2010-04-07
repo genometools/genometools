@@ -19,7 +19,7 @@
 #include "spacedef.h"
 #include "intcode-def.h"
 
-unsigned int maxbasepower(unsigned int numofchars)
+unsigned int gt_maxbasepower(unsigned int numofchars)
 {
   GtCodetype minfailure, thepower = (GtCodetype) 1;
   unsigned int i;
@@ -32,7 +32,7 @@ unsigned int maxbasepower(unsigned int numofchars)
   return i;
 }
 
-GtCodetype *initbasepower(unsigned int numofchars,unsigned int prefixlength)
+GtCodetype *gt_initbasepower(unsigned int numofchars,unsigned int prefixlength)
 {
   GtCodetype thepower = (GtCodetype) 1, minfailure, *basepower;
   unsigned int i;
@@ -52,7 +52,7 @@ GtCodetype *initbasepower(unsigned int numofchars,unsigned int prefixlength)
   return basepower;
 }
 
-GtCodetype *filllargestchartable(unsigned int numofchars,
+GtCodetype *gt_filllargestchartable(unsigned int numofchars,
                                unsigned int kmersize)
 {
   GtCodetype code, *ptr, *filltable;
@@ -67,12 +67,12 @@ GtCodetype *filllargestchartable(unsigned int numofchars,
   return filltable;
 }
 
-GtCodetype *initfilltable(unsigned int numofchars,unsigned int prefixlength)
+GtCodetype *gt_initfilltable(unsigned int numofchars,unsigned int prefixlength)
 {
   unsigned int i;
   GtCodetype *filltable, *basepower;
 
-  basepower = initbasepower(numofchars,prefixlength);
+  basepower = gt_initbasepower(numofchars,prefixlength);
   ALLOCASSIGNSPACE(filltable,NULL,GtCodetype,prefixlength);
   for (i=0; i<prefixlength; i++)
   {
@@ -93,7 +93,7 @@ GtCodetype *initfilltable(unsigned int numofchars,unsigned int prefixlength)
           }\
         }
 
-GtCodetype **initmultimappower(unsigned int numofchars,unsigned int qvalue)
+GtCodetype **gt_initmultimappower(unsigned int numofchars,unsigned int qvalue)
 {
   int offset;
   unsigned int mapindex;
@@ -113,7 +113,7 @@ GtCodetype **initmultimappower(unsigned int numofchars,unsigned int qvalue)
   return multimappower;
 }
 
-void multimappowerfree(GtCodetype ***multimappower)
+void gt_multimappowerfree(GtCodetype ***multimappower)
 {
   if (*multimappower != NULL)
   {

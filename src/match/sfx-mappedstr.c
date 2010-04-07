@@ -388,7 +388,7 @@ static void shiftrightwithchar(
 static void initstreamstate(Streamstate *spwp,unsigned int numofchars,
                             unsigned int kmersize)
 {
-  spwp->multimappower = initmultimappower(numofchars,kmersize);
+  spwp->multimappower = gt_initmultimappower(numofchars,kmersize);
   spwp->lengthwithoutspecial = 0;
   spwp->codewithoutspecial = 0;
   spwp->kmersize = kmersize;
@@ -397,14 +397,14 @@ static void initstreamstate(Streamstate *spwp,unsigned int numofchars,
   spwp->firstindex = 0;
   ALLOCASSIGNSPACE(spwp->cyclicwindow,NULL,GtUchar,kmersize);
   specialemptyqueue(&spwp->spos,kmersize);
-  spwp->filltable = filllargestchartable(numofchars,kmersize);
+  spwp->filltable = gt_filllargestchartable(numofchars,kmersize);
 }
 
 static void freestreamstate(Streamstate *spwp)
 {
   FREESPACE(spwp->cyclicwindow);
   FREESPACE(spwp->filltable);
-  multimappowerfree(&spwp->multimappower);
+  gt_multimappowerfree(&spwp->multimappower);
   specialwrapqueue(&spwp->spos);
 }
 

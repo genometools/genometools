@@ -347,8 +347,8 @@ static unsigned long construct_genomic_dna_line(GtUchar *genomicdnaline,
        processing_intron_with_2_bases_left = false;
 
   for (eopptr = alignment + lenalg - 1; eopptr >= alignment; eopptr--) {
-    eoptype   = editoperation_type(*eopptr, true);
-    eoplength = editoperation_length(*eopptr, true);
+    eoptype   = gt_editoperation_type(*eopptr, true);
+    eoplength = gt_editoperation_length(*eopptr, true);
 
     /* we are not processing two intron types at the same time */
     gt_assert(!(processing_intron_with_1_base_left &&
@@ -550,8 +550,8 @@ static unsigned long construct_genomic_protein_line(GtUchar *genomicproteinline,
        processing_intron_with_2_bases_left = false;
 
   for (eopptr = alignment + lenalg - 1; eopptr >= alignment; eopptr--) {
-    eoptype   = editoperation_type(*eopptr, true);
-    eoplength = editoperation_length(*eopptr, true);
+    eoptype   = gt_editoperation_type(*eopptr, true);
+    eoplength = gt_editoperation_length(*eopptr, true);
 
     gt_assert(!(processing_intron_with_1_base_left &&
              processing_intron_with_2_bases_left));
@@ -701,8 +701,8 @@ static unsigned long construct_reference_protein_line(GtUchar
        processing_intron_with_2_bases_left = false;
 
   for (eopptr = alignment + lenalg - 1; eopptr >= alignment; eopptr--) {
-    eoptype   = editoperation_type(*eopptr, true);
-    eoplength = editoperation_length(*eopptr, true);
+    eoptype   = gt_editoperation_type(*eopptr, true);
+    eoplength = gt_editoperation_length(*eopptr, true);
 
     gt_assert(!(processing_intron_with_1_base_left &&
              processing_intron_with_2_bases_left));

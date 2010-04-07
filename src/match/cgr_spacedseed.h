@@ -23,7 +23,7 @@
 #include "core/str_array_api.h"
 #include "core/error_api.h"
 
-int matchspacedseed(bool withesa,
+int gt_matchspacedseed(bool withesa,
                     bool docompare,
                     const GtStr *str_inputindex,
                     const GtStrArray *queryfilenames,

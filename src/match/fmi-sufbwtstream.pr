@@ -1,7 +1,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-int sufbwt2fmindex(Fmindex *fmindex,
+int gt_sufbwt2fmindex(Fmindex *fmindex,
                    GtSpecialcharinfo *specialcharinfo,
                    unsigned int log2bsize,
                    unsigned int log2markdist,

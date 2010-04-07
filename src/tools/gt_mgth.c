@@ -21,5 +21,5 @@
 int gt_mgth(int argc, const char **argv, GtError *err)
 {
   gt_error_check(err);
-  return metagenomethreader(argc, argv, err);
+  return gt_metagenomethreader(argc, argv, err);
 }

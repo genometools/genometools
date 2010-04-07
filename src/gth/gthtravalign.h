@@ -66,8 +66,9 @@ typedef struct {
    (sum in terms of reference sequence bases) equals the reference length.
    If alignmentlength is less than 0 it is true returned, no matter what
    referencelength is. */
-bool eops_equal_referencelength(Editoperation *alignment, long alignmentlength,
-                                long referencelength, bool proteineop);
+bool gt_eops_equal_referencelength(Editoperation *alignment,
+                                   long alignmentlength,
+                                   long referencelength, bool proteineop);
 
 /* The following function traverses an alignment given by an
    Traversealignmentstate structure <state> in forward direction, if

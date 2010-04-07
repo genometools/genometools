@@ -25,22 +25,22 @@ typedef void (*Checkcmppairfuntype)(bool,
                                     const GtUchar *,unsigned long,
                                     const GtUchar *,unsigned long);
 
-void runcheckfunctionontwofiles(Checkcmppairfuntype checkfunction,
+void gt_runcheckfunctionontwofiles(Checkcmppairfuntype checkfunction,
                                const char *file1,
                                const char *file2);
 
-unsigned long runcheckfunctionontext(Checkcmppairfuntype checkfunction,
+unsigned long gt_runcheckfunctionontext(Checkcmppairfuntype checkfunction,
                                      const char *text);
 
-unsigned long applycheckfunctiontotext(const GtUchar *text,
+unsigned long gt_applycheckfunctiontotext(const GtUchar *text,
                                        unsigned long textlen,
                                        void *info);
 
-unsigned long runcheckfunctiononalphalen(Checkcmppairfuntype checkfunction,
+unsigned long gt_runcheckfunctiononalphalen(Checkcmppairfuntype checkfunction,
                                          const char *charlist,
                                          unsigned long len);
 
-void checkgreedyunitedist(bool forward,
+void gt_checkgreedyunitedist(bool forward,
                           const GtUchar *useq,
                           unsigned long ulen,
                           const GtUchar *vseq,

@@ -28,7 +28,7 @@ typedef int (*Processquerymatch)(void *,
 
 typedef struct MMsearchiterator MMsearchiterator;
 
-MMsearchiterator *newmmsearchiteratorcomplete_plain(
+MMsearchiterator *gt_newmmsearchiteratorcomplete_plain(
                                     const GtEncodedsequence *dbencseq,
                                     const unsigned long *suftab,
                                     unsigned long leftbound,
@@ -38,16 +38,16 @@ MMsearchiterator *newmmsearchiteratorcomplete_plain(
                                     const GtUchar *pattern,
                                     unsigned long patternlength);
 
-bool nextmmsearchiterator(unsigned long *dbstart,MMsearchiterator *mmsi);
+bool gt_nextmmsearchiterator(unsigned long *dbstart,MMsearchiterator *mmsi);
 
-bool isemptymmsearchiterator(const MMsearchiterator *mmsi);
+bool gt_isemptymmsearchiterator(const MMsearchiterator *mmsi);
 
-bool identicalmmsearchiterators(const MMsearchiterator *mmsi1,
+bool gt_identicalmmsearchiterators(const MMsearchiterator *mmsi1,
                                 const MMsearchiterator *mmsi2);
 
-void freemmsearchiterator(MMsearchiterator **mmsi);
+void gt_freemmsearchiterator(MMsearchiterator **mmsi);
 
-int callenumquerymatches(const GtStr *indexname,
+int gt_callenumquerymatches(const GtStr *indexname,
                          const GtStrArray *queryfiles,
                          bool echoquery,
                          unsigned int userdefinedleastlength,
@@ -56,7 +56,7 @@ int callenumquerymatches(const GtStr *indexname,
                          GtLogger *logger,
                          GtError *err);
 
-int callenumselfmatches(const GtStr *indexname,
+int gt_callenumselfmatches(const GtStr *indexname,
                         GtReadmode queryreadmode,
                         unsigned int userdefinedleastlength,
                         Processquerymatch processquerymatch,
@@ -64,7 +64,7 @@ int callenumselfmatches(const GtStr *indexname,
                         GtLogger *logger,
                         GtError *err);
 
-int sarrquerysubstringmatch(const GtUchar *dbseq,
+int gt_sarrquerysubstringmatch(const GtUchar *dbseq,
                             unsigned long dblen,
                             const GtUchar *query,
                             unsigned long querylen,
@@ -75,6 +75,6 @@ int sarrquerysubstringmatch(const GtUchar *dbseq,
                             GtLogger *logger,
                             GtError *err);
 
-unsigned long countmmsearchiterator(const MMsearchiterator *mmsi);
+unsigned long gt_countmmsearchiterator(const MMsearchiterator *mmsi);
 
 #endif

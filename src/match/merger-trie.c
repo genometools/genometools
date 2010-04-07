@@ -483,7 +483,7 @@ static bool hassuccessor(const Mergertrierep *trierep,
   return false;
 }
 
-void mergertrie_insertsuffix(Mergertrierep *trierep,
+void gt_mergertrie_insertsuffix(Mergertrierep *trierep,
                              Mergertrienode *node,
                              Suffixinfo *suffixinfo)
 {
@@ -594,7 +594,7 @@ void mergertrie_insertsuffix(Mergertrierep *trierep,
   }
 }
 
-Mergertrienode *mergertrie_findsmallestnode(const Mergertrierep *trierep)
+Mergertrienode *gt_mergertrie_findsmallestnode(const Mergertrierep *trierep)
 {
   Mergertrienode *node;
 
@@ -604,7 +604,7 @@ Mergertrienode *mergertrie_findsmallestnode(const Mergertrierep *trierep)
   return node;
 }
 
-void mergertrie_deletesmallestpath(Mergertrienode *smallest,
+void gt_mergertrie_deletesmallestpath(Mergertrienode *smallest,
                                    Mergertrierep *trierep)
 {
   Mergertrienode *father, *son;
@@ -645,7 +645,7 @@ void mergertrie_deletesmallestpath(Mergertrienode *smallest,
   }
 }
 
-void mergertrie_initnodetable(Mergertrierep *trierep,
+void gt_mergertrie_initnodetable(Mergertrierep *trierep,
                               unsigned long numofsuffixes,
                               unsigned int numofindexes)
 {
@@ -661,7 +661,7 @@ void mergertrie_initnodetable(Mergertrierep *trierep,
                    trierep->allocatedMergertrienode);
 }
 
-void mergertrie_delete(Mergertrierep *trierep)
+void gt_mergertrie_delete(Mergertrierep *trierep)
 {
   FREESPACE(trierep->nodetable);
   FREESPACE(trierep->unusedMergertrienodes);

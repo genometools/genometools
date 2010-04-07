@@ -58,7 +58,7 @@ static unsigned int prefixlengthwithmaxspace(unsigned int numofchars,
 #endif
   for (prefixlength = 1U; /* Nothing */; prefixlength++)
   {
-    sizeofrep = sizeofbuckettable(numofchars,prefixlength);
+    sizeofrep = gt_sizeofbuckettable(numofchars,prefixlength);
 #ifdef WITHINFO
     printf("sizeofrep = %lu, after divide %lu\n",(unsigned long) sizeofrep,
                                         (unsigned long) (sizeofrep/factor));
@@ -76,7 +76,7 @@ static unsigned int prefixlengthwithmaxspace(unsigned int numofchars,
   /*@end@*/
 }
 
-unsigned int recommendedprefixlength(unsigned int numofchars,
+unsigned int gt_recommendedprefixlength(unsigned int numofchars,
                                      unsigned long totallength)
 {
   unsigned int prefixlength;
@@ -88,7 +88,7 @@ unsigned int recommendedprefixlength(unsigned int numofchars,
     return 1U;
   } else
   {
-    unsigned int mbp = maxbasepower(numofchars);
+    unsigned int mbp = gt_maxbasepower(numofchars);
     if (mbp >= 1U)
     {
       return MIN(mbp,prefixlength);
@@ -99,7 +99,7 @@ unsigned int recommendedprefixlength(unsigned int numofchars,
   }
 }
 
-unsigned int whatisthemaximalprefixlength(unsigned int numofchars,
+unsigned int gt_whatisthemaximalprefixlength(unsigned int numofchars,
                                           unsigned long totallength,
                                           unsigned int prefixlenbits)
 {
@@ -107,7 +107,7 @@ unsigned int whatisthemaximalprefixlength(unsigned int numofchars,
 
   maxprefixlen = prefixlengthwithmaxspace(numofchars,totallength,
                                           MAXMULTIPLIEROFTOTALLENGTH);
-  mbp = maxbasepower(numofchars);
+  mbp = gt_maxbasepower(numofchars);
   maxprefixlen = MIN(mbp,maxprefixlen);
   if (prefixlenbits > 0)
   {
@@ -134,7 +134,7 @@ unsigned int whatisthemaximalprefixlength(unsigned int numofchars,
   return maxprefixlen;
 }
 
-int checkprefixlength(unsigned int maxprefixlen,
+int gt_checkprefixlength(unsigned int maxprefixlen,
                       unsigned int prefixlength,
                       GtError *err)
 {
@@ -150,7 +150,7 @@ int checkprefixlength(unsigned int maxprefixlen,
   return 0;
 }
 
-void showmaximalprefixlength(GtLogger *logger,
+void gt_showmaximalprefixlength(GtLogger *logger,
                              unsigned int maxprefixlen,
                              unsigned int recommended)
 {

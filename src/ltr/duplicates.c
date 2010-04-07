@@ -25,7 +25,7 @@
  predicted LTR elements. Exact duplicates occur, when
  different seeds are extended to same boundary coordinates.
  */
-void removeduplicates(GtArrayLTRboundaries *arrayLTRboundaries)
+void gt_removeduplicates(GtArrayLTRboundaries *arrayLTRboundaries)
 {
   unsigned long i, j;
   unsigned long startpos_i, endpos_i, startpos_j, endpos_j;
@@ -64,7 +64,7 @@ void removeduplicates(GtArrayLTRboundaries *arrayLTRboundaries)
    a lower similarity value. If "nooverlapallowed" is set, then all
    overlapping predicitions are deleted completely.
  */
-void removeoverlapswithlowersimilarity(
+void gt_removeoverlapswithlowersimilarity(
   GtArrayLTRboundaries *arrayLTRboundaries,
   bool nooverlapallowed
   )

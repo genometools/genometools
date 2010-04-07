@@ -83,7 +83,7 @@ static void showprjinfo(FILE *outprj,
   fprintf(outprj,"readmode=%u\n",(unsigned int) readmode);
 }
 
-int outprjfile(const GtStr *indexname,
+int gt_outprjfile(const GtStr *indexname,
                GtReadmode readmode,
                const GtEncodedsequence *encseq,
                unsigned int prefixlength,

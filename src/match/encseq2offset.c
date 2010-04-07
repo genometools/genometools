@@ -20,7 +20,7 @@
 #include "sarr-def.h"
 #include "core/safecast-gen.h"
 
-unsigned long *encseqtable2sequenceoffsets(unsigned long *totallength,
+unsigned long *gt_encseqtable2sequenceoffsets(unsigned long *totallength,
                                     GtSpecialcharinfo *specialcharinfo,
                                     const Suffixarray *suffixarraytable,
                                     unsigned int numofindexes)

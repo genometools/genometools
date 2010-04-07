@@ -26,19 +26,20 @@
 
 typedef struct Pckbuckettable Pckbuckettable;
 
-void pckbuckettable_free(Pckbuckettable *pckbt);
+void gt_pckbuckettable_free(Pckbuckettable *pckbt);
 
-Pckbuckettable *pckbuckettable_new(const void *voidbwtseq,
+Pckbuckettable *gt_pckbuckettable_new(const void *voidbwtseq,
                                    unsigned int numofchars,
                                    unsigned long totallength,
                                    unsigned int maxdepth);
 
-int pckbucket2file(const GtStr *indexname,const Pckbuckettable *pckbuckettable,
-                   GtError *err);
+int gt_pckbucket2file(const GtStr *indexname,
+                      const Pckbuckettable *pckbuckettable,
+                      GtError *err);
 
-bool pckbuckettableexists(const GtStr *indexname);
+bool gt_pckbuckettableexists(const GtStr *indexname);
 
-Pckbuckettable *mappckbuckettable(const GtStr *indexname,
+Pckbuckettable *gt_mappckbuckettable(const GtStr *indexname,
                                   unsigned int numofchars,
                                   GtError *err);
 
@@ -47,8 +48,8 @@ void enumlowlevelchildintervals(GtArrayBoundswithchar *bwci,
                                 GtCodetype parentcode,
                                 unsigned long childdepth);
 
-unsigned int pcktb2maxdepth(const Pckbuckettable *pckbuckettable);
+unsigned int gt_pcktb2maxdepth(const Pckbuckettable *pckbuckettable);
 
-const void *pcktb2mbtab(const Pckbuckettable *pckbuckettable);
+const void *gt_pcktb2mbtab(const Pckbuckettable *pckbuckettable);
 
 #endif

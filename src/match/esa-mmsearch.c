@@ -234,7 +234,7 @@ static MMsearchiterator *newmmsearchiterator_generic(
   return mmsi;
 }
 
-MMsearchiterator *newmmsearchiteratorcomplete_plain(
+MMsearchiterator *gt_newmmsearchiteratorcomplete_plain(
                                    const GtEncodedsequence *dbencseq,
                                    const unsigned long *suftab,
                                    unsigned long leftbound,
@@ -264,7 +264,7 @@ MMsearchiterator *newmmsearchiteratorcomplete_plain(
                                      patternlength);
 }
 
-unsigned long countmmsearchiterator(const MMsearchiterator *mmsi)
+unsigned long gt_countmmsearchiterator(const MMsearchiterator *mmsi)
 {
   if (mmsi->lcpitv.left > mmsi->lcpitv.right)
   {
@@ -273,7 +273,7 @@ unsigned long countmmsearchiterator(const MMsearchiterator *mmsi)
   return mmsi->lcpitv.right - mmsi->lcpitv.left + 1;
 }
 
-bool nextmmsearchiterator(unsigned long *dbstart,MMsearchiterator *mmsi)
+bool gt_nextmmsearchiterator(unsigned long *dbstart,MMsearchiterator *mmsi)
 {
   if (mmsi->sufindex <= mmsi->lcpitv.right)
   {
@@ -283,12 +283,12 @@ bool nextmmsearchiterator(unsigned long *dbstart,MMsearchiterator *mmsi)
   return false;
 }
 
-bool isemptymmsearchiterator(const MMsearchiterator *mmsi)
+bool gt_isemptymmsearchiterator(const MMsearchiterator *mmsi)
 {
   return mmsi == NULL || mmsi->lcpitv.left > mmsi->lcpitv.right;
 }
 
-bool identicalmmsearchiterators(const MMsearchiterator *mmsi1,
+bool gt_identicalmmsearchiterators(const MMsearchiterator *mmsi1,
                                 const MMsearchiterator *mmsi2)
 {
   gt_assert(mmsi1 != NULL);
@@ -297,7 +297,7 @@ bool identicalmmsearchiterators(const MMsearchiterator *mmsi1,
          mmsi1->lcpitv.right == mmsi2->lcpitv.right;
 }
 
-void freemmsearchiterator(MMsearchiterator **mmsi)
+void gt_freemmsearchiterator(MMsearchiterator **mmsi)
 {
   gt_encodedsequence_scanstate_delete((*mmsi)->esr);
   FREESPACE(*mmsi);
@@ -392,7 +392,7 @@ static int runquerysubstringmatch(bool selfmatch,
                                        readmode,
                                        &querysubstring,
                                        minmatchlength);
-    while (!haserr && nextmmsearchiterator(&dbstart,mmsi))
+    while (!haserr && gt_nextmmsearchiterator(&dbstart,mmsi))
     {
       if (isleftmaximal(dbencseq,
                         readmode,
@@ -406,7 +406,7 @@ static int runquerysubstringmatch(bool selfmatch,
                              dbstart + minmatchlength,
                              &querysubstring,
                              minmatchlength);
-        querymatch_fill(querymatchspaceptr,
+        gt_querymatch_fill(querymatchspaceptr,
                         extend + minmatchlength,
                         dbstart,
                         queryrep->readmode,
@@ -423,7 +423,7 @@ static int runquerysubstringmatch(bool selfmatch,
         }
       }
     }
-    freemmsearchiterator(&mmsi);
+    gt_freemmsearchiterator(&mmsi);
     if (!haserr)
     {
       if (accessquery(__LINE__,queryrep,querysubstring.offset)
@@ -440,7 +440,7 @@ static int runquerysubstringmatch(bool selfmatch,
   return haserr ? -1 : 0;
 }
 
-int callenumquerymatches(const GtStr *indexname,
+int gt_callenumquerymatches(const GtStr *indexname,
                          const GtStrArray *queryfiles,
                          bool echoquery,
                          unsigned int userdefinedleastlength,
@@ -452,9 +452,9 @@ int callenumquerymatches(const GtStr *indexname,
   Suffixarray suffixarray;
   unsigned long totallength = 0;
   bool haserr = false;
-  Querymatch *querymatchspaceptr = querymatch_new();
+  Querymatch *querymatchspaceptr = gt_querymatch_new();
 
-  if (mapsuffixarray(&suffixarray,
+  if (gt_mapsuffixarray(&suffixarray,
                      SARR_ESQTAB | SARR_SUFTAB | SARR_SSPTAB,
                      indexname,
                      logger,
@@ -467,7 +467,7 @@ int callenumquerymatches(const GtStr *indexname,
   }
   if (!haserr && echoquery)
   {
-    if (echodescriptionandsequence(queryfiles,err) != 0)
+    if (gt_echodescriptionandsequence(queryfiles,err) != 0)
     {
       haserr = true;
     }
@@ -538,12 +538,12 @@ int callenumquerymatches(const GtStr *indexname,
       gt_seqiterator_delete(seqit);
     }
   }
-  querymatch_delete(querymatchspaceptr);
-  freesuffixarray(&suffixarray);
+  gt_querymatch_delete(querymatchspaceptr);
+  gt_freesuffixarray(&suffixarray);
   return haserr ? -1 : 0;
 }
 
-int callenumselfmatches(const GtStr *indexname,
+int gt_callenumselfmatches(const GtStr *indexname,
                         GtReadmode queryreadmode,
                         unsigned int userdefinedleastlength,
                         Processquerymatch processquerymatch,
@@ -554,10 +554,10 @@ int callenumselfmatches(const GtStr *indexname,
   Suffixarray suffixarray;
   unsigned long totallength = 0;
   bool haserr = false;
-  Querymatch *querymatchspaceptr = querymatch_new();
+  Querymatch *querymatchspaceptr = gt_querymatch_new();
 
   gt_assert(queryreadmode != GT_READMODE_FORWARD);
-  if (mapsuffixarray(&suffixarray,
+  if (gt_mapsuffixarray(&suffixarray,
                      SARR_ESQTAB | SARR_SUFTAB | SARR_SSPTAB,
                      indexname,
                      logger,
@@ -604,8 +604,8 @@ int callenumselfmatches(const GtStr *indexname,
       }
     }
   }
-  querymatch_delete(querymatchspaceptr);
-  freesuffixarray(&suffixarray);
+  gt_querymatch_delete(querymatchspaceptr);
+  gt_freesuffixarray(&suffixarray);
   return haserr ? -1 : 0;
 }
 
@@ -627,9 +627,9 @@ static int constructsarrandrunmmsearch(
   bool haserr = false, specialsuffixes = false;
   Sfxiterator *sfi;
   Queryrep queryrep;
-  Querymatch *querymatchspaceptr = querymatch_new();
+  Querymatch *querymatchspaceptr = gt_querymatch_new();
 
-  sfi = newSfxiterator(dbencseq,
+  sfi = gt_newSfxiterator(dbencseq,
                        readmode,
                        prefixlength,
                        numofparts,
@@ -650,7 +650,7 @@ static int constructsarrandrunmmsearch(
     queryrep.length = (unsigned long) querylen;
     while (true)
     {
-      suftabptr = nextSfxiterator(&numofsuffixes,&specialsuffixes,sfi);
+      suftabptr = gt_nextSfxiterator(&numofsuffixes,&specialsuffixes,sfi);
       if (suftabptr == NULL)
       {
         break;
@@ -673,15 +673,15 @@ static int constructsarrandrunmmsearch(
       }
     }
   }
-  querymatch_delete(querymatchspaceptr);
+  gt_querymatch_delete(querymatchspaceptr);
   if (sfi != NULL)
   {
-    freeSfxiterator(&sfi);
+    gt_freeSfxiterator(&sfi);
   }
   return haserr ? -1 : 0;
 }
 
-int sarrquerysubstringmatch(const GtUchar *dbseq,
+int gt_sarrquerysubstringmatch(const GtUchar *dbseq,
                             unsigned long dblen,
                             const GtUchar *query,
                             unsigned long querylen,
@@ -706,7 +706,7 @@ int sarrquerysubstringmatch(const GtUchar *dbseq,
   numofchars = gt_alphabet_num_of_chars(alpha);
   if (constructsarrandrunmmsearch(dbencseq,
                                   GT_READMODE_FORWARD,
-                                  recommendedprefixlength(numofchars,dblen),
+                                  gt_recommendedprefixlength(numofchars,dblen),
                                   1U, /* parts */
                                   query,
                                   querylen,

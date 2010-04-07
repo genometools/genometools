@@ -30,7 +30,7 @@ typedef struct {
   bool breakforloop;
 } Minimalcutoffsdata;
 
-void initMinimalcutoffsTravfunctions(Traversealignmentfunctions*);
-void initMinimalcutoffsdata(Minimalcutoffsdata*, Cutoffs*);
+void gt_initMinimalcutoffsTravfunctions(Traversealignmentfunctions*);
+void gt_initMinimalcutoffsdata(Minimalcutoffsdata*, Cutoffs*);
 
 #endif

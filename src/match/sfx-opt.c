@@ -258,7 +258,7 @@ static GtOPrval parse_options(int *parsed_args,
   } else
   {
     optionsuf = optionlcp = optionbwt = NULL;
-    registerPackedIndexOptions(op, &so->bwtIdxParams, BWTDEFOPT_CONSTRUCTION,
+    gt_registerPackedIndexOptions(op, &so->bwtIdxParams, BWTDEFOPT_CONSTRUCTION,
                                so->fn2encopt.str_indexname);
   }
   optionshowtime
@@ -427,7 +427,7 @@ static GtOPrval parse_options(int *parsed_args,
   }
   if (oprval == GT_OPTION_PARSER_OK && !doesa)
   {
-    computePackedIndexDefaults(&so->bwtIdxParams, BWTBaseFeatures);
+    gt_computePackedIndexDefaults(&so->bwtIdxParams, BWTBaseFeatures);
   }
   if (oprval == GT_OPTION_PARSER_OK && gt_option_is_set(optionkys))
   {
@@ -530,7 +530,7 @@ static void showoptions(const Suffixeratoroptions *so)
   gt_logger_delete(logger);
 }
 
-void wrapsfxoptions(Suffixeratoroptions *so)
+void gt_wrapsfxoptions(Suffixeratoroptions *so)
 {
   /* no checking if error occurs, since errors have been output before */
   gt_str_delete(so->fn2encopt.str_indexname);
@@ -557,7 +557,7 @@ void wrapsfxoptions(Suffixeratoroptions *so)
           so->sfxstrategy.COMP = (unsigned long) readint;\
         }
 
-int suffixeratoroptions(Suffixeratoroptions *so,
+int gt_suffixeratoroptions(Suffixeratoroptions *so,
                         bool doesa,
                         int argc,
                         const char **argv,

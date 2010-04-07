@@ -40,7 +40,7 @@
  * @return reference to new BWT sequence object
  */
 extern BWTSeq *
-availBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
+gt_availBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
                   unsigned long totalLen, GtError *err);
 
 /**
@@ -53,7 +53,7 @@ availBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
  * @return reference to new BWT sequence object
  */
 extern BWTSeq *
-loadBWTSeqForSA(const GtStr *projectName, enum seqBaseEncoding encType,
+gt_loadBWTSeqForSA(const GtStr *projectName, enum seqBaseEncoding encType,
                 int BWTOptFlags, const Suffixarray *sa,
                 unsigned long totalLen, GtError *err);
 
@@ -66,7 +66,7 @@ loadBWTSeqForSA(const GtStr *projectName, enum seqBaseEncoding encType,
  * @return reference to new BWT sequence object
  */
 extern BWTSeq *
-createBWTSeqFromSfxI(const struct bwtParam *params, sfxInterface *si,
+gt_createBWTSeqFromSfxI(const struct bwtParam *params, sfxInterface *si,
                      GtError *err);
 
 /**
@@ -79,7 +79,7 @@ createBWTSeqFromSfxI(const struct bwtParam *params, sfxInterface *si,
  * @return reference to new BWT sequence object
  */
 extern BWTSeq *
-createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
+gt_createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
                    unsigned long totalLen, GtError *err);
 
 /**
@@ -92,7 +92,7 @@ createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
  * @return reference to new BWT sequence object
  */
 extern BWTSeq *
-createBWTSeqFromSAI(const struct bwtParam *params,
+gt_createBWTSeqFromSAI(const struct bwtParam *params,
                     SuffixarrayFileInterface *sai,
                     GtError *err);
 

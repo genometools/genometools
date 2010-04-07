@@ -45,7 +45,7 @@ struct Tyrcountinfo
   unsigned long numoflargecounts;
 };
 
-unsigned long decodesingleinteger(const GtUchar *start)
+unsigned long gt_decodesingleinteger(const GtUchar *start)
 {
   unsigned long idx, value;
 
@@ -57,7 +57,7 @@ unsigned long decodesingleinteger(const GtUchar *start)
   return value;
 }
 
-Tyrindex *tyrindex_new(const GtStr *tyrindexname,GtError *err)
+Tyrindex *gt_tyrindex_new(const GtStr *tyrindexname,GtError *err)
 {
   bool haserr = false;
   size_t numofbytes, rest;
@@ -88,9 +88,9 @@ Tyrindex *tyrindex_new(const GtStr *tyrindexname,GtError *err)
   {
     gt_assert(tyrindex->mertable != NULL);
     tyrindex->mersize
-      = decodesingleinteger(tyrindex->mertable + numofbytes - rest);
+      = gt_decodesingleinteger(tyrindex->mertable + numofbytes - rest);
     tyrindex->alphasize
-      = (unsigned int) decodesingleinteger(tyrindex->mertable +
+      = (unsigned int) gt_decodesingleinteger(tyrindex->mertable +
                                            numofbytes - rest +
                                            sizeof (unsigned long));
     tyrindex->merbytes = MERBYTES(tyrindex->mersize);
@@ -127,7 +127,7 @@ Tyrindex *tyrindex_new(const GtStr *tyrindexname,GtError *err)
   return haserr ? NULL : tyrindex;
 }
 
-void tyrindex_show(const Tyrindex *tyrindex)
+void gt_tyrindex_show(const Tyrindex *tyrindex)
 {
   printf("# indexfilename = %s\n",gt_str_get(tyrindex->indexfilename));
   printf("# alphasize = %u\n",tyrindex->alphasize);
@@ -136,43 +136,43 @@ void tyrindex_show(const Tyrindex *tyrindex)
   printf("# merbytes = %lu\n",tyrindex->merbytes);
 }
 
-bool tyrindex_isempty(const Tyrindex *tyrindex)
+bool gt_tyrindex_isempty(const Tyrindex *tyrindex)
 {
   return tyrindex->numofmers == 0 ? true : false;
 }
 
-const GtUchar *tyrindex_mertable(const Tyrindex *tyrindex)
+const GtUchar *gt_tyrindex_mertable(const Tyrindex *tyrindex)
 {
   return tyrindex->mertable;
 }
 
-const GtUchar *tyrindex_lastmer(const Tyrindex *tyrindex)
+const GtUchar *gt_tyrindex_lastmer(const Tyrindex *tyrindex)
 {
   return tyrindex->lastmer;
 }
 
-unsigned long tyrindex_merbytes(const Tyrindex *tyrindex)
+unsigned long gt_tyrindex_merbytes(const Tyrindex *tyrindex)
 {
   return tyrindex->merbytes;
 }
 
-unsigned long tyrindex_mersize(const Tyrindex *tyrindex)
+unsigned long gt_tyrindex_mersize(const Tyrindex *tyrindex)
 {
   return tyrindex->mersize;
 }
 
-unsigned int tyrindex_alphasize(const Tyrindex *tyrindex)
+unsigned int gt_tyrindex_alphasize(const Tyrindex *tyrindex)
 {
   return tyrindex->alphasize;
 }
 
-unsigned long tyrindex_ptr2number(const Tyrindex *tyrindex,
+unsigned long gt_tyrindex_ptr2number(const Tyrindex *tyrindex,
                                   const GtUchar *result)
 {
   return (unsigned long) (result - tyrindex->mertable)/tyrindex->merbytes;
 }
 
-void tyrindex_delete(Tyrindex **tyrindexptr)
+void gt_tyrindex_delete(Tyrindex **tyrindexptr)
 {
   Tyrindex *tyrindex = *tyrindexptr;
 
@@ -182,7 +182,7 @@ void tyrindex_delete(Tyrindex **tyrindexptr)
   *tyrindexptr = NULL;
 }
 
-Tyrcountinfo *tyrcountinfo_new(const Tyrindex *tyrindex,
+Tyrcountinfo *gt_tyrcountinfo_new(const Tyrindex *tyrindex,
                                const GtStr *tyrindexname,
                                GtError *err)
 {
@@ -267,7 +267,7 @@ static /*@null@*/ const Largecount *binsearchLargecount(unsigned long key,
   return NULL;
 }
 
-unsigned long tyrcountinfo_get(const Tyrcountinfo *tyrcountinfo,
+unsigned long gt_tyrcountinfo_get(const Tyrcountinfo *tyrcountinfo,
                                unsigned long mernumber)
 {
   if (tyrcountinfo->smallcounts[mernumber] == 0)
@@ -290,7 +290,7 @@ unsigned long tyrcountinfo_get(const Tyrcountinfo *tyrcountinfo,
   return (unsigned long) tyrcountinfo->smallcounts[mernumber];
 }
 
-void tyrcountinfo_delete(Tyrcountinfo **tyrcountinfoptr)
+void gt_tyrcountinfo_delete(Tyrcountinfo **tyrcountinfoptr)
 {
   Tyrcountinfo *tyrcountinfo = *tyrcountinfoptr;
 
@@ -321,7 +321,7 @@ static int mymemcmp(unsigned long *offset,const GtUchar *s1,const GtUchar *s2,
   return 0;
 }
 
-/*@null@*/ const GtUchar *tyrindex_binmersearch(const Tyrindex *tyrindex,
+/*@null@*/ const GtUchar *gt_tyrindex_binmersearch(const Tyrindex *tyrindex,
                                               unsigned long offset,
                                               const GtUchar *key,
                                               const GtUchar *leftbound,
@@ -365,7 +365,7 @@ static int mymemcmp(unsigned long *offset,const GtUchar *s1,const GtUchar *s2,
   return NULL;
 }
 
-void tyrindex_check(const Tyrindex *tyrindex)
+void gt_tyrindex_check(const Tyrindex *tyrindex)
 {
   GtUchar *mercodeptr;
   const GtUchar *result;
@@ -375,7 +375,7 @@ void tyrindex_check(const Tyrindex *tyrindex)
        mercodeptr <= tyrindex->lastmer;
        mercodeptr += tyrindex->merbytes)
   {
-    result = tyrindex_binmersearch(tyrindex,0,mercodeptr,
+    result = gt_tyrindex_binmersearch(tyrindex,0,mercodeptr,
                                    tyrindex->mertable,
                                    tyrindex->lastmer);
     gt_assert(result != NULL);
@@ -399,7 +399,7 @@ void tyrindex_check(const Tyrindex *tyrindex)
   }
 }
 
-int determinetyrbckpfxlen(unsigned int *prefixlength,
+int gt_determinetyrbckpfxlen(unsigned int *prefixlength,
                           const Tyrindex *tyrindex,
                           const Definedunsignedint *callprefixlength,
                           GtError *err)
@@ -408,14 +408,14 @@ int determinetyrbckpfxlen(unsigned int *prefixlength,
   if (callprefixlength->defined)
   {
     unsigned int maxprefixlen
-      = whatisthemaximalprefixlength(tyrindex->alphasize,
+      = gt_whatisthemaximalprefixlength(tyrindex->alphasize,
                                      (unsigned long) tyrindex->numofmers,
                                      0);
     if (maxprefixlen > (unsigned int) tyrindex->mersize)
     {
       maxprefixlen = (unsigned int) tyrindex->mersize;
     }
-    if (checkprefixlength(maxprefixlen,callprefixlength->valueunsignedint,
+    if (gt_checkprefixlength(maxprefixlen,callprefixlength->valueunsignedint,
                           err) != 0)
     {
       return -1;
@@ -423,7 +423,7 @@ int determinetyrbckpfxlen(unsigned int *prefixlength,
     *prefixlength = callprefixlength->valueunsignedint;
   } else
   {
-    unsigned int recommended = recommendedprefixlength(tyrindex->alphasize,
+    unsigned int recommended = gt_recommendedprefixlength(tyrindex->alphasize,
                                            (unsigned long) tyrindex->numofmers);
     if (recommended > (unsigned int) tyrindex->mersize)
     {

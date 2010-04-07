@@ -105,7 +105,7 @@ static void outkmeroccurrence(void *processinfo,
    The function to collect the code from a stream of fasta files
    can only produce the sequence of code in forward mode.
    Hence we compute the corresponding sequence also in GT_READMODE_FORWARD.
-   Thus we restrict the call for verifymappedstr to the case where
+   Thus we restrict the call for gt_verifymappedstr to the case where
    the suffix array is in readmode = GT_READMODE_FORWARD.
 */
 
@@ -153,12 +153,12 @@ static int comparecodelists(const GtArrayGtCodetype *codeliststream,
     if (codeliststream->spaceGtCodetype[i] !=
           codeliststring->spaceGtCodetype[i])
     {
-      fromkmercode2string(buffer1,
+      gt_fromkmercode2string(buffer1,
                           codeliststream->spaceGtCodetype[i],
                           numofchars,
                           kmersize,
                           characters);
-      fromkmercode2string(buffer2,
+      gt_fromkmercode2string(buffer2,
                           codeliststring->spaceGtCodetype[i],
                           numofchars,
                           kmersize,
@@ -210,8 +210,9 @@ static int verifycodelists(const GtEncodedsequence *encseq,
   return haserr ? -1 : 0;
 }
 
-int verifymappedstr(const GtEncodedsequence *encseq,unsigned int prefixlength,
-                    GtError *err)
+int gt_verifymappedstr(const GtEncodedsequence *encseq,
+                       unsigned int prefixlength,
+                       GtError *err)
 {
   unsigned int numofchars;
   GtArrayGtCodetype codeliststream;

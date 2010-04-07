@@ -144,9 +144,10 @@ struct bwtOptions
  * name (i.e. without extension) of the project once index creation begins
  */
 extern void
-registerPackedIndexOptions(GtOptionParser *op, struct bwtOptions *paramOutput,
-                           int defaultOptimizationFlags,
-                           const GtStr *projectName);
+gt_registerPackedIndexOptions(GtOptionParser *op,
+                              struct bwtOptions *paramOutput,
+                              int defaultOptimizationFlags,
+                              const GtStr *projectName);
 
 /**
  * @brief Compute the options for BWT seqence index construction from
@@ -156,7 +157,7 @@ registerPackedIndexOptions(GtOptionParser *op, struct bwtOptions *paramOutput,
  * after option processing is finished
  */
 extern void
-computePackedIndexDefaults(struct bwtOptions *paramOutput, int extraToggles);
+gt_computePackedIndexDefaults(struct bwtOptions *paramOutput, int extraToggles);
 
 /**
  * @brief Computes feature set of base index of type EISeq from
@@ -165,6 +166,6 @@ computePackedIndexDefaults(struct bwtOptions *paramOutput, int extraToggles);
  * @return set of enum EISFeatureBits toggles
  */
 extern int
-convertBWTOptFlags2EISFeatures(int BWTOptFlags);
+gt_convertBWTOptFlags2EISFeatures(int BWTOptFlags);
 
 #endif

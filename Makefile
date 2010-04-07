@@ -179,21 +179,6 @@ ZLIB_SRC:=$(ZLIB_DIR)/adler32.c $(ZLIB_DIR)/compress.c $(ZLIB_DIR)/crc32.c \
 ZLIB_OBJ:=$(ZLIB_SRC:%.c=obj/%.o)
 ZLIB_DEP:=$(ZLIB_SRC:%.c=obj/%.d)
 
-LTR_DIR:=src/ltr
-LTRDIGEST_SRC:=$(LTR_DIR)/ltr_visitor.c \
-               $(LTR_DIR)/ltrdigest_stream.c \
-               $(LTR_DIR)/ltrelement.c \
-               $(LTR_DIR)/ltrfileout_stream.c \
-               $(LTR_DIR)/pbs.c \
-               $(LTR_DIR)/pdom.c \
-               $(LTR_DIR)/ppt.c
-LTRDIGEST_OBJ:=$(LTRDIGEST_SRC:%.c=obj/%.o)
-LTRDIGEST_DEP:=$(LTRDIGEST_SRC:%.c=obj/%.d)
-
-LTRHARVEST_SRC:=$(filter-out $(LTRDIGEST_SRC),$(wildcard $(LTR_DIR)/*.c))
-LTRHARVEST_OBJ:=$(LTRHARVEST_SRC:%.c=obj/%.o)
-LTRHARVEST_DEP:=$(LTRHARVEST_SRC:%.c=obj/%.d)
-
 # the objects which are included into the single GenomeTools shared library
 GTSHAREDLIB_LIBDEP:=-lbz2 -lz
 
@@ -294,17 +279,16 @@ ifeq ($(m64),yes)
 endif
 
 ifneq ($(sharedlib),no)
-  SHARED_LIBGENOMETOOLS := lib/libgenometools$(SHARED_OBJ_NAME_EXT) \
-                           lib/libgtunstable$(SHARED_OBJ_NAME_EXT)
+  SHARED_LIBGENOMETOOLS := lib/libgenometools$(SHARED_OBJ_NAME_EXT)
 endif
 
 LIBGENOMETOOLS_DIRS:= src/core \
                       src/extended \
-                      src/gtlua
-
-LIBGTUNSTABLE_DIRS:=  src/match \
+                      src/gtlua \
+                      src/match \
                       src/gth \
-                      src/mgth
+                      src/mgth \
+                      src/ltr
 
 ifeq ($(with-hmmer),yes)
   LIBGENOMETOOLS_DIRS := src/external/hmmer-2.3.2  $(LIBGENOMETOOLS_DIRS)
@@ -340,8 +324,7 @@ ifeq ($(threads),yes)
 endif
 
 # the GenomeTools library
-LIBGENOMETOOLS_PRESRC:=$(foreach DIR,$(LIBGENOMETOOLS_DIRS),$(wildcard $(DIR)/*.c)) \
-                       $(LTRDIGEST_SRC)
+LIBGENOMETOOLS_PRESRC:=$(foreach DIR,$(LIBGENOMETOOLS_DIRS),$(wildcard $(DIR)/*.c))
 ifeq ($(amalgamation),yes)
   LIBGENOMETOOLS_SRC:=obj/amalgamation.c
 else
@@ -357,12 +340,6 @@ LIBGENOMETOOLS_DEP:=$(LIBGENOMETOOLS_SRC:%.c=obj/%.d) \
 ifeq ($(with-hmmer),yes)
   LIBGENOMETOOLS_OBJ := lib/libhmmer.a $(LIBGENOMETOOLS_OBJ) lib/libhmmer.a
 endif
-
-# the GenomeTools unstable library
-LIBGTUNSTABLE_SRC:=$(foreach DIR,$(LIBGTUNSTABLE_DIRS),$(wildcard $(DIR)/*.c)) \
-                   $(LTRHARVEST_SRC)
-LIBGTUNSTABLE_OBJ:=$(LIBGTUNSTABLE_SRC:%.c=obj/%.o)
-LIBGTUNSTABLE_DEP:=$(LIBGTUNSTABLE_SRC:%.c=obj/%.d)
 
 # set prefix for install target
 prefix ?= /usr/local
@@ -422,20 +399,6 @@ lib/libgenometools$(SHARED_OBJ_NAME_EXT): obj/gt_config.h \
 	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) $(LIBGENOMETOOLS_OBJ) \
 	-o $@ $(GTSHAREDLIB_LIBDEP)
 
-lib/libgtunstable.a: $(LIBGTUNSTABLE_OBJ)
-	@echo "[link $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@ar ru $@ $(LIBGTUNSTABLE_OBJ)
-ifdef RANLIB
-	@$(RANLIB) $@
-endif
-
-lib/libgtunstable$(SHARED_OBJ_NAME_EXT): $(LIBGTUNSTABLE_OBJ)
-	@echo "[link $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) \
-	$(LIBGTUNSTABLE_OBJ) -o $@ $(GTSHAREDLIB_LIBDEP)
-
 lib/libtecla.a: $(LIBTECLA_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
@@ -473,7 +436,6 @@ $(eval $(call PROGRAM_template, bin/skproto, $(SKPROTO_OBJ) \
                                              $(OVERRIDELIBS)))
 
 $(eval $(call PROGRAM_template, bin/gt, $(GTMAIN_OBJ) $(TOOLS_OBJ) \
-                                        lib/libgtunstable.a \
                                         lib/libgenometools.a \
                                         $(GTLIBS) \
                                         $(OVERRIDELIBS)))
@@ -675,7 +637,6 @@ obj/src/core/versionfunc.o: obj/gt_config.h
          $(HMMER_DEP) \
 	 $(ZLIB_DEP) \
          $(LIBGENOMETOOLS_DEP) \
-         $(LIBGTUNSTABLE_DEP) \
          obj/src/examples/custom_stream.d \
          obj/src/examples/gff3validator.d \
          obj/src/examples/noop.d \

@@ -42,12 +42,12 @@ typedef union
        *readflag;
 };
 
-size_t sizeofReadintkeys(void)
+size_t gt_sizeofReadintkeys(void)
 {
   return sizeof (Readintkeys);
 }
 
-void setreadintkeys(GtArray *riktab,
+void gt_setreadintkeys(GtArray *riktab,
                     const char *keystring,
                     void *valueptr,
                     size_t sizeval,
@@ -132,7 +132,7 @@ static int scanuintintline(uint32_t *lengthofkey,
   return retval;
 }
 
-int allkeysdefined(const GtStr *indexname,const char *suffix,
+int gt_allkeysdefined(const GtStr *indexname,const char *suffix,
                    const GtArray *riktab,GtLogger *logger,
                    GtError *err)
 {
@@ -188,7 +188,7 @@ int allkeysdefined(const GtStr *indexname,const char *suffix,
   return 0;
 }
 
-int analyzeuintline(const GtStr *indexname,
+int gt_analyzeuintline(const GtStr *indexname,
                     const char *suffix,
                     unsigned int linenum,
                     const char *linebuffer,

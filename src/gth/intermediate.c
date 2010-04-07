@@ -479,7 +479,7 @@ static void character_data_handler(void *data, const XML_Char *string, int len)
   gt_str_append_cstr_nt(parseinfo->databuf, string, len);
 }
 
-int parse_intermediate_output(GthInput *input,
+int gt_parse_intermediate_output(GthInput *input,
                               GthSAProcessFunc saprocessfunc, void *data,
                               const char *outputfilename,
                               GtFile *intermediate_fp, GtError *err)
@@ -594,7 +594,7 @@ bool gth_intermediate_output_is_correct(char *outputfilename,
   gt_assert(*outfp);
 
   /* read in the intermediate output */
-  if (parse_intermediate_output(input, store_in_GthGthSACollection,
+  if (gt_parse_intermediate_output(input, store_in_GthGthSACollection,
                                 &sa_collection_data, outputfilename, *outfp,
                                 err)) {
     fprintf(stderr, "error: %s\n", gt_error_get(err));
@@ -656,7 +656,7 @@ int gth_process_intermediate_files(GthInput *input, GtStrArray *consensusfiles,
                                gt_str_array_get(consensusfiles, i));
       }
 
-      had_err = parse_intermediate_output(input, saprocessfunc, data,
+      had_err = gt_parse_intermediate_output(input, saprocessfunc, data,
                                           gt_str_array_get(consensusfiles, i),
                                           fp, err);
 
@@ -666,7 +666,7 @@ int gth_process_intermediate_files(GthInput *input, GtStrArray *consensusfiles,
   }
   else {
     genfile = gt_file_new_from_fileptr(stdin);
-    had_err = parse_intermediate_output(input, saprocessfunc, data,
+    had_err = gt_parse_intermediate_output(input, saprocessfunc, data,
                                         "stdin", genfile, err);
     gt_file_delete_without_handle(genfile);
   }

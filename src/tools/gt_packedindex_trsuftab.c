@@ -74,12 +74,12 @@ gt_packedindex_trsuftab(int argc, const char *argv[], GtError *err)
     gt_str_set(inputProject, argv[parsedArgs]);
     logger = gt_logger_new(params.verboseOutput,
                            GT_LOGGER_DEFLT_PREFIX, stdout);
-    bwtSeq = trSuftab2BWTSeq(&params.idx.final, logger, err);
+    bwtSeq = gt_trSuftab2BWTSeq(&params.idx.final, logger, err);
     had_err = bwtSeq == NULL;
     if (had_err)
       break;
   } while (0);
-  if (bwtSeq) deleteBWTSeq(bwtSeq);
+  if (bwtSeq) gt_deleteBWTSeq(bwtSeq);
   if (logger) gt_logger_delete(logger);
   if (inputProject) gt_str_delete(inputProject);
   return had_err?-1:0;
@@ -98,7 +98,7 @@ parseTrSufTabOptions(int *parsed_args, int argc, const char **argv,
   op = gt_option_parser_new("indexname",
                          "Build BWT packedindex for project <indexname>.");
 
-  registerPackedIndexOptions(op, &params->idx, BWTDEFOPT_MULTI_QUERY,
+  gt_registerPackedIndexOptions(op, &params->idx, BWTDEFOPT_MULTI_QUERY,
                              projectName);
 
   option = gt_option_new_bool("v",
@@ -112,7 +112,7 @@ parseTrSufTabOptions(int *parsed_args, int argc, const char **argv,
                                   err);
   /* compute parameters currently not set from command-line or
    * determined indirectly */
-  computePackedIndexDefaults(&params->idx, BWTBaseFeatures);
+  gt_computePackedIndexDefaults(&params->idx, BWTBaseFeatures);
 
   gt_option_parser_delete(op);
 

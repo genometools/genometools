@@ -70,45 +70,45 @@ typedef struct Sequentialsuffixarrayreader Sequentialsuffixarrayreader;
 
 /* The following only can be used for this case */
 
-Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromRAM(
+Sequentialsuffixarrayreader *gt_newSequentialsuffixarrayreaderfromRAM(
                                         const GtEncodedsequence *encseq,
                                         GtReadmode readmode);
 
 /* The following can only be used for this case */
 
-void updateSequentialsuffixarrayreaderfromRAM(
+void gt_updateSequentialsuffixarrayreaderfromRAM(
                     Sequentialsuffixarrayreader *ssar,
                     const unsigned long *suftab,
                     bool firstpage,
                     unsigned long numberofsuffixes);
 
-int nextSequentiallcpvalue(unsigned long *currentlcp,
+int gt_nextSequentiallcpvalue(unsigned long *currentlcp,
                            Sequentialsuffixarrayreader *ssar,
                            GtError *err);
 
-int nextSequentialsuftabvalue(unsigned long *currentsuffix,
+int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
                               Sequentialsuffixarrayreader *ssar);
 
 #endif
 
-Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
+Sequentialsuffixarrayreader *gt_newSequentialsuffixarrayreaderfromfile(
                                         const GtStr *indexname,
                                         unsigned int demand,
                                         Sequentialaccesstype seqactype,
                                         GtError *err);
 
-void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar);
+void gt_freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar);
 
-const GtEncodedsequence *encseqSequentialsuffixarrayreader(
+const GtEncodedsequence *gt_encseqSequentialsuffixarrayreader(
                           const Sequentialsuffixarrayreader *ssar);
 
-GtReadmode readmodeSequentialsuffixarrayreader(
+GtReadmode gt_readmodeSequentialsuffixarrayreader(
                           const Sequentialsuffixarrayreader *ssar);
 
-const unsigned long *suftabSequentialsuffixarrayreader(
+const unsigned long *gt_suftabSequentialsuffixarrayreader(
               const Sequentialsuffixarrayreader *ssar);
 
-const Suffixarray *suffixarraySequentialsuffixarrayreader(
+const Suffixarray *gt_suffixarraySequentialsuffixarrayreader(
               const Sequentialsuffixarrayreader *ssar);
 
 #endif

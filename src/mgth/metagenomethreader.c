@@ -223,7 +223,8 @@ static GtOPrval parse_options(int *parsed_args,
   return oprval;
 }
 
-DEFINE_HASHMAP(char *, cstr_nofree, unsigned long *, ulp, gt_ht_cstr_elem_hash,
+DEFINE_HASHMAP(char *, gt_cstr_nofree, unsigned long *,
+               ulp, gt_ht_cstr_elem_hash,
                gt_ht_cstr_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR,,)
 
 typedef struct {
@@ -274,7 +275,7 @@ insert_into_outlist(char *key, unsigned long *value, void *data,
   return CONTINUE_ITERATION;
 }
 
-int metagenomethreader(int argc, const char **argv, GtError * err)
+int gt_metagenomethreader(int argc, const char **argv, GtError * err)
 {
   int had_err = 0,
       parsed_args = 0;
@@ -478,7 +479,7 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
     querynum = gt_calloc(nrofseq, sizeof (unsigned long));
     /* Hash erzeugen - Eintraege: Key - Query-FASTA-Def; Value - Zeiger
        auf deren Indices in der GtBioseq - Struktur */
-    parsestruct.queryhash = cstr_nofree_ulp_gt_hashmap_new();
+    parsestruct.queryhash = gt_cstr_nofree_ulp_gt_hashmap_new();
 
     for (loop_index = 0; loop_index < nrofseq; loop_index++)
     {
@@ -491,10 +492,11 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
 
       /* Dem aktuellen Schluessel Zeige auf die Position in der GtBioseq
          zuordnen */
-      if (!cstr_nofree_ulp_gt_hashmap_get(parsestruct.queryhash,
-                                          descr_ptr_query))
-        cstr_nofree_ulp_gt_hashmap_add(parsestruct.queryhash, descr_ptr_query,
-                                   querynum + loop_index);
+      if (!gt_cstr_nofree_ulp_gt_hashmap_get(parsestruct.queryhash,
+                                             descr_ptr_query))
+        gt_cstr_nofree_ulp_gt_hashmap_add(parsestruct.queryhash,
+                                          descr_ptr_query,
+                                          querynum + loop_index);
     }
 
     /* nur wenn die GtOption hitfile_bool auf TRUE gesetzt ist, muss die
@@ -509,7 +511,7 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
       hitnum = gt_calloc(nrofseq, sizeof (unsigned long));
       /* Hash erzeugen - Eintraege: Key - Hit-FASTA-Zeile; Value - Zeiger
          auf deren Indices in der GtBioseq - Struktur */
-      parsestruct.hithash = cstr_nofree_ulp_gt_hashmap_new();
+      parsestruct.hithash = gt_cstr_nofree_ulp_gt_hashmap_new();
 
       /* Hit-Fasta-File zeilenweise abarbeiten */
       for (loop_index = 0; loop_index < nrofseq; loop_index++)
@@ -522,14 +524,15 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
 
         /* Dem aktuellen Schluessel Zeige auf die Position in der GtBioseq
            zuordnen */
-        if (!cstr_nofree_ulp_gt_hashmap_get(parsestruct.hithash, descr_ptr_hit))
-          cstr_nofree_ulp_gt_hashmap_add(parsestruct.hithash, descr_ptr_hit,
+        if (!gt_cstr_nofree_ulp_gt_hashmap_get(parsestruct.hithash,
+                                               descr_ptr_hit))
+          gt_cstr_nofree_ulp_gt_hashmap_add(parsestruct.hithash, descr_ptr_hit,
                                      hitnum + loop_index);
       }
     }
 
     /* Hashtabelle fuer die Statistik anlegen */
-    parsestruct.resulthits = cstr_nofree_ulp_gt_hashmap_new();
+    parsestruct.resulthits = gt_cstr_nofree_ulp_gt_hashmap_new();
 
     /* konstruieren des Output-Filenames aus angegebenen Filename und dem
        angegebenen Format */
@@ -631,7 +634,7 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
             /* Hash erzeugen - Eintraege: Key - Hit-FASTA-Zeile;
                Value - Zeiger
                auf deren Indices in der GtBioseq - Struktur */
-            parsestruct.hithash = cstr_nofree_ulp_gt_hashmap_new();
+            parsestruct.hithash = gt_cstr_nofree_ulp_gt_hashmap_new();
 
             /* Hit-Fasta-File zeilenweise abarbeiten */
             for (loop_index = 0; loop_index < nrofseq; loop_index++)
@@ -645,9 +648,9 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
 
              /* Dem aktuellen Schluessel Zeige auf die Position in der GtBioseq
                 zuordnen */
-              if (!cstr_nofree_ulp_gt_hashmap_get(parsestruct.hithash,
+              if (!gt_cstr_nofree_ulp_gt_hashmap_get(parsestruct.hithash,
                                               descr_ptr_hit))
-                cstr_nofree_ulp_gt_hashmap_add(parsestruct.hithash,
+                gt_cstr_nofree_ulp_gt_hashmap_add(parsestruct.hithash,
                                                descr_ptr_hit,
                                                hitnum + loop_index);
             }
@@ -686,7 +689,7 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
 
       /* Erzeugen einer sortierten Liste, indem die Hashtabelle einmal
          vollstaendig durchlaufen wird */
-      (void) cstr_nofree_ulp_gt_hashmap_foreach(parsestruct.resulthits,
+      (void) gt_cstr_nofree_ulp_gt_hashmap_foreach(parsestruct.resulthits,
                                                 insert_into_outlist,
                                                 &parsestruct, err);
 

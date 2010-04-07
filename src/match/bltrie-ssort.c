@@ -550,7 +550,7 @@ static unsigned long enumeratetrieleaves (unsigned long *suffixtable,
   return nextfree;
 }
 
-Blindtrie *blindtrie_new(unsigned long numofsuffixes,
+Blindtrie *gt_blindtrie_new(unsigned long numofsuffixes,
                          const GtEncodedsequence *encseq,
                          bool cmpcharbychar,
                          GtEncodedsequenceScanstate *esr1,
@@ -581,7 +581,7 @@ Blindtrie *blindtrie_new(unsigned long numofsuffixes,
   return blindtrie;
 }
 
-void blindtrie_delete(Blindtrie **blindtrie)
+void gt_blindtrie_delete(Blindtrie **blindtrie)
 {
   FREESPACE((*blindtrie)->spaceBlindtrienode);
   GT_FREEARRAY(&(*blindtrie)->stack, Nodeptr);
@@ -720,7 +720,7 @@ static void inplace_reverseSeqpos(unsigned long *tab,unsigned long len)
   }
 }
 
-unsigned long blindtrie_suffixsort(Blindtrie *blindtrie,
+unsigned long gt_blindtrie_suffixsort(Blindtrie *blindtrie,
                             unsigned long *suffixtable,
                             unsigned long *lcpsubtab,
                             unsigned long numberofsuffixes,

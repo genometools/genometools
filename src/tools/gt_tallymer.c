@@ -257,7 +257,7 @@ static int gt_tyr_mkindex_runner(GT_UNUSED int argc,
     }
     printf("# inputindex=%s\n",gt_str_get(arguments->str_inputindex));
   }
-  if (merstatistics(arguments->str_inputindex,
+  if (gt_merstatistics(arguments->str_inputindex,
                     arguments->mersize,
                     arguments->userdefinedminocc,
                     arguments->userdefinedmaxocc,
@@ -284,7 +284,7 @@ static int gt_tyr_mkindex_runner(GT_UNUSED int argc,
     {
       callprefixlength.defined = false;
     }
-    if (constructmerbuckets(arguments->str_storeindex,&callprefixlength,err)
+    if (gt_constructmerbuckets(arguments->str_storeindex,&callprefixlength,err)
         != 0)
     {
       haserr = true;
@@ -544,7 +544,7 @@ static int gt_tyr_occratio_arguments_check(int rest_argc,
     unsigned long idx;
     for (idx=0; idx<gt_str_array_size(arguments->outputspec); idx++)
     {
-      if (optionargaddbitmask(outputmodedesctable,
+      if (gt_optionargaddbitmask(outputmodedesctable,
                            sizeof (outputmodedesctable)/
                            sizeof (outputmodedesctable[0]),
                            &arguments->outputmode,
@@ -752,7 +752,7 @@ static int gt_tyr_occratio_runner(GT_UNUSED int argc,
   GT_INITARRAY(&uniquedistribution,uint64_t);
   GT_INITARRAY(&nonuniquedistribution,uint64_t);
   GT_INITARRAY(&nonuniquemultidistribution,uint64_t);
-  if (tyr_occratio(arguments->str_inputindex,
+  if (gt_tyr_occratio_func(arguments->str_inputindex,
                    arguments->scanfile,
                    arguments->minmersize,
                    arguments->maxmersize,
@@ -906,7 +906,7 @@ static int gt_tyr_search_arguments_check(int rest_argc,
   }
   for (idx=0; idx<gt_str_array_size(arguments->showmodespec); idx++)
   {
-    if (optionargaddbitmask(showmodedesctable,
+    if (gt_optionargaddbitmask(showmodedesctable,
                          sizeof (showmodedesctable)/
                          sizeof (showmodedesctable[0]),
                          &arguments->showmode,
@@ -917,7 +917,7 @@ static int gt_tyr_search_arguments_check(int rest_argc,
       return -1;
     }
   }
-  if (optionargaddbitmask(stranddesctable,
+  if (gt_optionargaddbitmask(stranddesctable,
                           sizeof (stranddesctable)/
                           sizeof (stranddesctable[0]),
                           &arguments->strand,
@@ -937,7 +937,7 @@ static int gt_tyr_search_runner(GT_UNUSED int argc,
 {
   Tyr_search_options *arguments = tool_arguments;
 
-  if (tyrsearch(arguments->str_inputindex,
+  if (gt_tyrsearch(arguments->str_inputindex,
                 arguments->queryfilenames,
                 arguments->showmode,
                 arguments->strand,

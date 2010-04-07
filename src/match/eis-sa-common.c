@@ -21,7 +21,7 @@
 #include "core/encodedsequence.h"
 
 extern size_t
-translateSuftab2BWT(struct encSeqTrState *trState,
+gt_translateSuftab2BWT(struct encSeqTrState *trState,
                     GtUchar *dest,
                     unsigned long *src,
                     size_t len)
@@ -63,7 +63,7 @@ writeLCPVal(const GtEncodedsequence *encseq, GtReadmode readmode,
 }
 
 extern size_t
-translateSuftab2LCP(struct encSeqLCPState *lcpState,
+gt_translateSuftab2LCP(struct encSeqLCPState *lcpState,
                     unsigned long *dest,
                     unsigned long *src,
                     size_t len)
@@ -103,14 +103,14 @@ struct saTaggedXltorStateLE
 };
 
 extern void
-initSATaggedXltorStateList(struct saTaggedXltorStateList *saXltorStateList)
+gt_initSATaggedXltorStateList(struct saTaggedXltorStateList *saXltorStateList)
 {
   saXltorStateList->numXltors = 0;
   saXltorStateList->stateList = NULL;
 }
 
 extern void
-destructSATaggedXltorStateList(
+gt_destructSATaggedXltorStateList(
   struct saTaggedXltorStateList *saXltorStateList)
 {
   struct saTaggedXltorStateLE *next;
@@ -125,7 +125,7 @@ destructSATaggedXltorStateList(
 }
 
 extern struct saTaggedXltorState *
-addSuffixarrayXltor(struct saTaggedXltorStateList *saXltorStateList,
+gt_addSuffixarrayXltor(struct saTaggedXltorStateList *saXltorStateList,
                     enum sfxDataRequest request,
                     union saXltorState saXltorState)
 {
@@ -140,8 +140,8 @@ addSuffixarrayXltor(struct saTaggedXltorStateList *saXltorStateList,
 }
 
 extern SeqDataReader
-SASSGenericCreateReader(SASeqSrc *src, enum sfxDataRequest request)
+gt_SASSGenericCreateReader(SASeqSrc *src, enum sfxDataRequest request)
 {
-  return seqReaderSetRegisterConsumer(&src->readerSet, request,
+  return gt_seqReaderSetRegisterConsumer(&src->readerSet, request,
                                       src->createTranslator(src, request));
 }

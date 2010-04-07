@@ -1,7 +1,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-unsigned long suffixarrayuniqueforward (const void *genericindex,
+unsigned long gt_suffixarrayuniqueforward (const void *genericindex,
                                        unsigned long offset,
                                        unsigned long left,
                                        unsigned long right,
@@ -9,7 +9,7 @@ unsigned long suffixarrayuniqueforward (const void *genericindex,
                                        const GtUchar *qstart,
                                        const GtUchar *qend);
 
-unsigned long suffixarraymstats (const void *genericindex,
+unsigned long gt_suffixarraymstats (const void *genericindex,
                                  unsigned long offset,
                                  unsigned long left,
                                  unsigned long right,

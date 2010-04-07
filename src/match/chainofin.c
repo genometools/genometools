@@ -50,16 +50,16 @@ static int numberoflinesinfile(unsigned long *linenum,
   return 0;
 }
 
-GtChainmatchtable *gt_chain_analyzeopenformatfile(double weightfactor,
+GtChain2Dimmatchtable *gt_chain_analyzeopenformatfile(double weightfactor,
                                                   const char *matchfile,
                                                   GtError *err)
 {
-  GtChainmatchtable *matchtable;
+  GtChain2Dimmatchtable *matchtable;
   unsigned long linenum;
   long storeinteger[READNUMS];
   FILE *matchfp;
   bool haserr = false;
-  GtChainmatchvalues fragment;
+  GtChain2Dimmatchvalues fragment;
 
   if (numberoflinesinfile(&linenum,matchfile,err) != 0)
   {
@@ -101,12 +101,12 @@ GtChainmatchtable *gt_chain_analyzeopenformatfile(double weightfactor,
       haserr = true;
       break;
     }
-    fragment.startpos[0] = (GtChainpostype) storeinteger[0];
-    fragment.endpos[0] = (GtChainpostype) storeinteger[1];
-    fragment.startpos[1] = (GtChainpostype) storeinteger[2];
-    fragment.endpos[1] = (GtChainpostype) storeinteger[3];
+    fragment.startpos[0] = (GtChain2Dimpostype) storeinteger[0];
+    fragment.endpos[0] = (GtChain2Dimpostype) storeinteger[1];
+    fragment.startpos[1] = (GtChain2Dimpostype) storeinteger[2];
+    fragment.endpos[1] = (GtChain2Dimpostype) storeinteger[3];
     fragment.weight
-      = (GtChainscoretype) (weightfactor * (double) storeinteger[4]);
+      = (GtChain2Dimscoretype) (weightfactor * (double) storeinteger[4]);
     gt_chain_matchtable_add(matchtable,&fragment);
     /*gt_chain_printchainelem(stdout,&fragment); */
   }

@@ -40,17 +40,17 @@ typedef struct
   GtAlphabet *dnaalpha;
 } Tyrsearchinfo;
 
-static void tyrsearchinfo_init(Tyrsearchinfo *tyrsearchinfo,
+static void gt_tyrsearchinfo_init(Tyrsearchinfo *tyrsearchinfo,
                                const Tyrindex *tyrindex,
                                unsigned int showmode,
                                unsigned int searchstrand)
 {
   unsigned long merbytes;
 
-  merbytes = tyrindex_merbytes(tyrindex);
-  tyrsearchinfo->mersize = tyrindex_mersize(tyrindex);
-  tyrsearchinfo->mertable = tyrindex_mertable(tyrindex);
-  tyrsearchinfo->lastmer = tyrindex_lastmer(tyrindex);
+  merbytes = gt_tyrindex_merbytes(tyrindex);
+  tyrsearchinfo->mersize = gt_tyrindex_mersize(tyrindex);
+  tyrsearchinfo->mertable = gt_tyrindex_mertable(tyrindex);
+  tyrsearchinfo->lastmer = gt_tyrindex_lastmer(tyrindex);
   tyrsearchinfo->showmode = showmode;
   tyrsearchinfo->searchstrand = searchstrand;
   tyrsearchinfo->dnaalpha = gt_alphabet_new(true,false,NULL,NULL,NULL);
@@ -58,14 +58,14 @@ static void tyrsearchinfo_init(Tyrsearchinfo *tyrsearchinfo,
   ALLOCASSIGNSPACE(tyrsearchinfo->rcbuf,NULL,GtUchar,tyrsearchinfo->mersize);
 }
 
-void tyrsearchinfo_delete(Tyrsearchinfo *tyrsearchinfo)
+void gt_tyrsearchinfo_delete(Tyrsearchinfo *tyrsearchinfo)
 {
   gt_alphabet_delete(tyrsearchinfo->dnaalpha);
   FREESPACE(tyrsearchinfo->bytecode);
   FREESPACE(tyrsearchinfo->rcbuf);
 }
 
-/*@null@*/ const GtUchar *searchsinglemer(const GtUchar *qptr,
+/*@null@*/ const GtUchar *gt_searchsinglemer(const GtUchar *qptr,
                                         const Tyrindex *tyrindex,
                                         const Tyrsearchinfo *tyrsearchinfo,
                                         const Tyrbckinfo *tyrbckinfo)
@@ -76,12 +76,12 @@ void tyrsearchinfo_delete(Tyrsearchinfo *tyrsearchinfo)
                                        tyrsearchinfo->mersize);
   if (tyrbckinfo == NULL)
   {
-    result = tyrindex_binmersearch(tyrindex,0,tyrsearchinfo->bytecode,
+    result = gt_tyrindex_binmersearch(tyrindex,0,tyrsearchinfo->bytecode,
                                    tyrsearchinfo->mertable,
                                    tyrsearchinfo->lastmer);
   } else
   {
-    result = searchinbuckets(tyrindex,tyrbckinfo,tyrsearchinfo->bytecode);
+    result = gt_searchinbuckets(tyrindex,tyrbckinfo,tyrsearchinfo->bytecode);
   }
   return result;
 }
@@ -120,9 +120,9 @@ static void mermatchoutput(const Tyrindex *tyrindex,
   }
   if (tyrsearchinfo->showmode & SHOWCOUNTS)
   {
-    unsigned long mernumber = tyrindex_ptr2number(tyrindex,result);
+    unsigned long mernumber = gt_tyrindex_ptr2number(tyrindex,result);
     ADDTABULATOR;
-    printf("%lu",tyrcountinfo_get(tyrcountinfo,mernumber));
+    printf("%lu",gt_tyrcountinfo_get(tyrcountinfo,mernumber));
   }
   if (tyrsearchinfo->showmode & SHOWSEQUENCE)
   {
@@ -164,7 +164,7 @@ static void singleseqtyrsearch(const Tyrindex *tyrindex,
       offset = tyrsearchinfo->mersize-1;
       if (tyrsearchinfo->searchstrand & STRAND_FORWARD)
       {
-        result = searchsinglemer(qptr,tyrindex,tyrsearchinfo,tyrbckinfo);
+        result = gt_searchsinglemer(qptr,tyrindex,tyrsearchinfo,tyrbckinfo);
         if (result != NULL)
         {
           mermatchoutput(tyrindex,
@@ -180,10 +180,10 @@ static void singleseqtyrsearch(const Tyrindex *tyrindex,
       if (tyrsearchinfo->searchstrand & STRAND_REVERSE)
       {
         gt_assert(tyrsearchinfo->rcbuf != NULL);
-        copy_reversecomplement(tyrsearchinfo->rcbuf,qptr,
+        gt_copy_reversecomplement(tyrsearchinfo->rcbuf,qptr,
                                tyrsearchinfo->mersize);
-        result = searchsinglemer(tyrsearchinfo->rcbuf,tyrindex,
-                                 tyrsearchinfo,tyrbckinfo);
+        result = gt_searchsinglemer(tyrsearchinfo->rcbuf,tyrindex,
+                                    tyrsearchinfo,tyrbckinfo);
         if (result != NULL)
         {
           mermatchoutput(tyrindex,
@@ -205,7 +205,7 @@ static void singleseqtyrsearch(const Tyrindex *tyrindex,
   }
 }
 
-int tyrsearch(const GtStr *tyrindexname,
+int gt_tyrsearch(const GtStr *tyrindexname,
               const GtStrArray *queryfilenames,
               unsigned int showmode,
               unsigned int searchstrand,
@@ -219,7 +219,7 @@ int tyrsearch(const GtStr *tyrindexname,
   bool haserr = false;
 
   gt_error_check(err);
-  tyrindex = tyrindex_new(tyrindexname,err);
+  tyrindex = gt_tyrindex_new(tyrindexname,err);
   if (tyrindex == NULL)
   {
     haserr = true;
@@ -227,19 +227,19 @@ int tyrsearch(const GtStr *tyrindexname,
   {
     if (verbose)
     {
-      tyrindex_show(tyrindex);
+      gt_tyrindex_show(tyrindex);
     }
     if (performtest)
     {
-      tyrindex_check(tyrindex);
+      gt_tyrindex_check(tyrindex);
     }
   }
   if (!haserr)
   {
     gt_assert(tyrindex != NULL);
-    if ((showmode & SHOWCOUNTS) && !tyrindex_isempty(tyrindex))
+    if ((showmode & SHOWCOUNTS) && !gt_tyrindex_isempty(tyrindex))
     {
-      tyrcountinfo = tyrcountinfo_new(tyrindex,tyrindexname,err);
+      tyrcountinfo = gt_tyrcountinfo_new(tyrindex,tyrindexname,err);
       if (tyrcountinfo == NULL)
       {
         haserr = true;
@@ -249,10 +249,11 @@ int tyrsearch(const GtStr *tyrindexname,
   if (!haserr)
   {
     gt_assert(tyrindex != NULL);
-    if (!tyrindex_isempty(tyrindex))
+    if (!gt_tyrindex_isempty(tyrindex))
     {
-      tyrbckinfo = tyrbckinfo_new(tyrindexname,tyrindex_alphasize(tyrindex),
-                                  err);
+      tyrbckinfo = gt_tyrbckinfo_new(tyrindexname,
+                                     gt_tyrindex_alphasize(tyrindex),
+                                     err);
       if (tyrbckinfo == NULL)
       {
         haserr = true;
@@ -270,7 +271,7 @@ int tyrsearch(const GtStr *tyrindexname,
     GtSeqIterator *seqit;
 
     gt_assert(tyrindex != NULL);
-    tyrsearchinfo_init(&tyrsearchinfo,tyrindex,showmode,searchstrand);
+    gt_tyrsearchinfo_init(&tyrsearchinfo,tyrindex,showmode,searchstrand);
     seqit = gt_seqiterator_sequence_buffer_new(queryfilenames, err);
     if (!seqit)
       haserr = true;
@@ -306,19 +307,19 @@ int tyrsearch(const GtStr *tyrindexname,
       }
       gt_seqiterator_delete(seqit);
     }
-    tyrsearchinfo_delete(&tyrsearchinfo);
+    gt_tyrsearchinfo_delete(&tyrsearchinfo);
   }
   if (tyrbckinfo != NULL)
   {
-    tyrbckinfo_delete(&tyrbckinfo);
+    gt_tyrbckinfo_delete(&tyrbckinfo);
   }
   if (tyrcountinfo != NULL)
   {
-    tyrcountinfo_delete(&tyrcountinfo);
+    gt_tyrcountinfo_delete(&tyrcountinfo);
   }
   if (tyrindex != NULL)
   {
-    tyrindex_delete(&tyrindex);
+    gt_tyrindex_delete(&tyrindex);
   }
   return haserr ? -1 : 0;
 }

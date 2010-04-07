@@ -22,7 +22,7 @@
 #include "repeattypes.h"
 #include "ltrharvest-opt.h"
 
-void showinfoiffoundfullLTRs(const LTRharvestoptions *lo,
+void gt_showinfoiffoundfullLTRs(const LTRharvestoptions *lo,
                              const LTRboundaries **bdptrtab,
                              unsigned long numofboundaries,
                              const GtEncodedsequence *encseq);

@@ -1,7 +1,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-unsigned long skfmuniqueforward (const void *genericindex,
+unsigned long gt_skfmuniqueforward (const void *genericindex,
                                  GT_UNUSED unsigned long offset,
                                  GT_UNUSED unsigned long left,
                                  GT_UNUSED unsigned long right,
@@ -9,7 +9,7 @@ unsigned long skfmuniqueforward (const void *genericindex,
                                  const GtUchar *qstart,
                                  const GtUchar *qend);
 
-unsigned long skfmmstats (const void *genericindex,
+unsigned long gt_skfmmstats (const void *genericindex,
                           GT_UNUSED unsigned long offset,
                           GT_UNUSED unsigned long left,
                           GT_UNUSED unsigned long right,

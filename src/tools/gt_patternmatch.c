@@ -42,21 +42,21 @@ typedef struct
 static void comparemmsis(const MMsearchiterator *mmsi1,
                          const MMsearchiterator *mmsi2)
 {
-  if (isemptymmsearchiterator(mmsi1))
+  if (gt_isemptymmsearchiterator(mmsi1))
   {
-    if (!isemptymmsearchiterator(mmsi2))
+    if (!gt_isemptymmsearchiterator(mmsi2))
     {
       fprintf(stderr,"mmsi1 is empty but mmsi2 not\n");
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   } else
   {
-    if (isemptymmsearchiterator(mmsi2))
+    if (gt_isemptymmsearchiterator(mmsi2))
     {
       fprintf(stderr,"mmsi2 is empty but mmsi1 not\n");
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
-    if (!identicalmmsearchiterators(mmsi1,mmsi2))
+    if (!gt_identicalmmsearchiterators(mmsi1,mmsi2))
     {
       fprintf(stderr,"mmsi1 and mmsi2 are different\n");
       exit(GT_EXIT_PROGRAMMING_ERROR);
@@ -79,7 +79,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
   {
     demand |= SARR_BCKTAB;
   }
-  if (mapsuffixarray(&suffixarray,
+  if (gt_mapsuffixarray(&suffixarray,
                      demand,
                      pmopt->indexname,
                      NULL,
@@ -110,12 +110,12 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
 
     if (pmopt->usebcktab)
     {
-      multimappower = bcktab_multimappower(suffixarray.bcktab);
+      multimappower = gt_bcktab_multimappower(suffixarray.bcktab);
     } else
     {
       multimappower = NULL;
     }
-    epi = newenumpatterniterator(pmopt->minpatternlen,
+    epi = gt_newenumpatterniterator(pmopt->minpatternlen,
                                  pmopt->maxpatternlen,
                                  suffixarray.encseq,
                                  err);
@@ -124,7 +124,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
     alpha = gt_encodedsequence_alphabet(suffixarray.encseq);
     for (trial = 0; trial < pmopt->numofsamples; trial++)
     {
-      pptr = nextEnumpatterniterator(&patternlen,epi);
+      pptr = gt_nextEnumpatterniterator(&patternlen,epi);
       if (pmopt->showpatt)
       {
         gt_alphabet_decode_seq_to_fp(alpha,stdout,pptr,patternlen);
@@ -136,12 +136,12 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
         {
           mmsibck = NULL;
           bucketenumerator
-            = newbucketenumerator(suffixarray.bcktab,
+            = gt_newbucketenumerator(suffixarray.bcktab,
                                   suffixarray.prefixlength,
                                   pptr,
                                   (unsigned int) patternlen);
           refstart = UNDEFREFSTART;
-          while (nextbucketenumerator(&itv,bucketenumerator))
+          while (gt_nextbucketenumerator(&itv,bucketenumerator))
           {
             if (refstart == UNDEFREFSTART)
             {
@@ -165,7 +165,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
               }
             }
           }
-          freebucketenumerator(&bucketenumerator);
+          gt_freebucketenumerator(&bucketenumerator);
         } else
         {
           firstspecial = qgram2code(&code,
@@ -173,7 +173,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
                                     suffixarray.prefixlength,
                                     pptr);
           gt_assert(firstspecial == suffixarray.prefixlength);
-          calcbucketboundaries(&bucketspec,
+          gt_calcbucketboundaries(&bucketspec,
                                suffixarray.bcktab,
                                code);
           if (bucketspec.nonspecialsinbucket == 0)
@@ -182,7 +182,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
           } else
           {
             mmsibck
-              = newmmsearchiteratorcomplete_plain(
+              = gt_newmmsearchiteratorcomplete_plain(
                                        suffixarray.encseq,
                                        suffixarray.suftab,
                                        bucketspec.left,
@@ -197,7 +197,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
       }
       if (pmopt->immediate)
       {
-        mmsiimm = newmmsearchiteratorcomplete_plain(
+        mmsiimm = gt_newmmsearchiteratorcomplete_plain(
                                             suffixarray.encseq,
                                             suffixarray.suftab,
                                             0,  /* leftbound */
@@ -213,30 +213,30 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
       }
       if (pmopt->usebcktab && mmsibck != NULL)
       {
-        while (nextmmsearchiterator(&dbstart,mmsibck))
+        while (gt_nextmmsearchiterator(&dbstart,mmsibck))
         {
           /* Nothing */;
         }
-        freemmsearchiterator(&mmsibck);
+        gt_freemmsearchiterator(&mmsibck);
       }
       if (pmopt->immediate)
       {
-        while (nextmmsearchiterator(&dbstart,mmsiimm))
+        while (gt_nextmmsearchiterator(&dbstart,mmsiimm))
         {
           /* Nothing */;
         }
-        freemmsearchiterator(&mmsiimm);
+        gt_freemmsearchiterator(&mmsiimm);
       }
     }
     gt_encodedsequence_scanstate_delete(esr1);
     gt_encodedsequence_scanstate_delete(esr2);
     if (pmopt->showpatt)
     {
-      showPatterndistribution(epi);
+      gt_showPatterndistribution(epi);
     }
-    freeEnumpatterniterator(&epi);
+    gt_freeEnumpatterniterator(&epi);
   }
-  freesuffixarray(&suffixarray);
+  gt_freesuffixarray(&suffixarray);
   return haserr ? -1 : 0;
 }
 

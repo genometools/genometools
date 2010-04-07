@@ -62,7 +62,7 @@ static Pckbuckettable *allocandinitpckbuckettable(unsigned int numofchars,
   Pckbuckettable *pckbt;
 
   pckbt = gt_malloc(sizeof (Pckbuckettable));
-  pckbt->basepower = initbasepower(numofchars,maxdepth);
+  pckbt->basepower = gt_initbasepower(numofchars,maxdepth);
   pckbt->numofchars = numofchars;
   pckbt->maxdepth = maxdepth;
   pckbt->maxnumofvalues = pckbt->numofvalues = 0;
@@ -89,7 +89,7 @@ static Pckbuckettable *allocandinitpckbuckettable(unsigned int numofchars,
   return pckbt;
 }
 
-void pckbuckettable_free(Pckbuckettable *pckbt)
+void gt_pckbuckettable_free(Pckbuckettable *pckbt)
 {
   if (pckbt->mapptr == NULL)
   {
@@ -132,11 +132,11 @@ static void followleafedge(Pckbuckettable *pckbt,const void *voidbwtseq,
   bdleaf.code = bd->code;
   bdleaf.depth = bd->depth;
   bdleaf.lowerbound = bd->lowerbound;
-  bsci = newBwtseqcontextiterator(voidbwtseq,bdleaf.lowerbound);
+  bsci = gt_newBwtseqcontextiterator(voidbwtseq,bdleaf.lowerbound);
   while (bdleaf.depth < pckbt->maxdepth)
   {
     bdleaf.depth++;
-    cc = nextBwtseqcontextiterator(&bdleaf.lowerbound,bsci);
+    cc = gt_nextBwtseqcontextiterator(&bdleaf.lowerbound,bsci);
     if (ISSPECIAL(cc))
     {
       break;
@@ -145,10 +145,10 @@ static void followleafedge(Pckbuckettable *pckbt,const void *voidbwtseq,
     bdleaf.upperbound = bdleaf.lowerbound+1;
     storeBoundsatdepth(pckbt,&bdleaf);
   }
-  freeBwtseqcontextiterator(&bsci);
+  gt_freeBwtseqcontextiterator(&bsci);
 }
 
-Pckbuckettable *pckbuckettable_new(const void *voidbwtseq,
+Pckbuckettable *gt_pckbuckettable_new(const void *voidbwtseq,
                                    unsigned int numofchars,
                                    unsigned long totallength,
                                    unsigned int maxdepth)
@@ -173,7 +173,7 @@ Pckbuckettable *pckbuckettable_new(const void *voidbwtseq,
   {
     parent = stack.spaceBoundsatdepth[--stack.nextfreeBoundsatdepth];
     gt_assert(parent.lowerbound < parent.upperbound);
-    rangesize = bwtrangesplitallwithoutspecial(tmpmbtab,
+    rangesize = gt_bwtrangesplitallwithoutspecial(tmpmbtab,
                                                rangeOccs,
                                                voidbwtseq,
                                                parent.lowerbound,
@@ -214,8 +214,9 @@ Pckbuckettable *pckbuckettable_new(const void *voidbwtseq,
 
 #define PCKBUCKETTABLE ".pbt"
 
-int pckbucket2file(const GtStr *indexname,const Pckbuckettable *pckbuckettable,
-                   GtError *err)
+int gt_pckbucket2file(const GtStr *indexname,
+                      const Pckbuckettable *pckbuckettable,
+                      GtError *err)
 {
   FILE *fp;
   unsigned long seqposmaxdepth;
@@ -234,7 +235,7 @@ int pckbucket2file(const GtStr *indexname,const Pckbuckettable *pckbuckettable,
   return 0;
 }
 
-bool pckbuckettableexists(const GtStr *indexname)
+bool gt_pckbuckettableexists(const GtStr *indexname)
 {
   GtStr *tmpfilename;
   bool retval;
@@ -246,7 +247,7 @@ bool pckbuckettableexists(const GtStr *indexname)
   return retval;
 }
 
-Pckbuckettable *mappckbuckettable(const GtStr *indexname,
+Pckbuckettable *gt_mappckbuckettable(const GtStr *indexname,
                                   unsigned int numofchars,
                                   GtError *err)
 {
@@ -272,12 +273,12 @@ Pckbuckettable *mappckbuckettable(const GtStr *indexname,
   return pckbt;
 }
 
-unsigned int pcktb2maxdepth(const Pckbuckettable *pckbuckettable)
+unsigned int gt_pcktb2maxdepth(const Pckbuckettable *pckbuckettable)
 {
   return pckbuckettable->maxdepth;
 }
 
-const void *pcktb2mbtab(const Pckbuckettable *pckbuckettable)
+const void *gt_pcktb2mbtab(const Pckbuckettable *pckbuckettable)
 {
   return (const void *) pckbuckettable->mbtab;
 }

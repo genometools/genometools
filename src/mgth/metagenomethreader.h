@@ -221,19 +221,19 @@ typedef struct
 } ParseStruct;
 
 /* specific access mode of queryhash */
-DECLARE_HASHMAP(char *, cstr_nofree, unsigned long *, ulp,,)
+DECLARE_HASHMAP(char *, gt_cstr_nofree, unsigned long *, ulp,,)
 DECLARE_SAFE_DEREF(unsigned long *, ulp)
 
 /* Funktion, mit der der Metagenomethreader gestartet wird
    Parameter: Anzahl der Kommandozeilenargumente, Zeiger auf die
               Kommandozeilenargumente, GtError-Variable
    Returnwert: Fehlercode */
-int metagenomethreader(int argc, const char **argv, GtError *);
+int gt_metagenomethreader(int argc, const char **argv, GtError *);
 
 /* Funktion zur Ueberpruefung auf ein Stop-Codon
    Parameter:  Zeiger auf ein Triplet von Zeichen
    Returnwert: 0 = kein Stop-Codon, 1 = Stop-Codon */
-short check_stopcodon(char *);
+short gt_check_stopcodon(char *);
 
 /* Funktion zum Auslesen der Query-DNA Sequenz zu einem GI-Def Eintrag des
    XML-Files

@@ -23,23 +23,23 @@
 #include "core/logger.h"
 
 #define SETREADINTKEYS(VALNAME,VAL,FORCEREAD)\
-        setreadintkeys(riktab,VALNAME,VAL,sizeof (*(VAL)),FORCEREAD)
+        gt_setreadintkeys(riktab,VALNAME,VAL,sizeof (*(VAL)),FORCEREAD)
 
 typedef struct Readintkeys Readintkeys;
 
-size_t sizeofReadintkeys(void);
+size_t gt_sizeofReadintkeys(void);
 
-void setreadintkeys(GtArray *riktab,
+void gt_setreadintkeys(GtArray *riktab,
                     const char *keystring,
                     void *valueptr,
                     size_t sizeval,
                     bool *readflag);
 
-int allkeysdefined(const GtStr *indexname,const char *suffix,
+int gt_allkeysdefined(const GtStr *indexname,const char *suffix,
                    const GtArray *riktab,GtLogger *logger,
                    GtError *err);
 
-int analyzeuintline(const GtStr *indexname,
+int gt_analyzeuintline(const GtStr *indexname,
                     const char *suffix,
                     unsigned int linenum,
                     const char *linebuffer,

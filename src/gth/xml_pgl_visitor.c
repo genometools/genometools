@@ -237,7 +237,7 @@ static void xml_show_ags(const GthAGS *ags, unsigned long pglnum,
   xml_outputPGSlines(ags->alignments, indentlevel, out->outfp);
 
   /* output 3-phase translation */
-  outputtranslationandorf(pglnum, ags, agsnum, translationtable, input,
+  gt_outputtranslationandorf(pglnum, ags, agsnum, translationtable, input,
                           indentlevel, out);
 
   indentlevel--;

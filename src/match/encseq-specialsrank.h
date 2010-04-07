@@ -23,17 +23,17 @@
 typedef struct specialsRankLookup SpecialsRankLookup;
 
 extern SpecialsRankLookup *
-newSpecialsRankLookup(const GtEncodedsequence *encseq, GtReadmode readmode,
+gt_newSpecialsRankLookup(const GtEncodedsequence *encseq, GtReadmode readmode,
                      unsigned sampleIntervalLog2);
 
 extern void
-deleteSpecialsRankLookup(SpecialsRankLookup *table);
+gt_deleteSpecialsRankLookup(SpecialsRankLookup *table);
 
 static inline unsigned long
 specialsRank(const SpecialsRankLookup *rankTable, unsigned long pos);
 
 extern const GtEncodedsequence *
-SPRTGetOrigEncseq(const SpecialsRankLookup *rankTable);
+gt_SPRTGetOrigEncseq(const SpecialsRankLookup *rankTable);
 
 #include "match/encseq-specialsrank-priv.h"
 

@@ -20,14 +20,14 @@
 #include "core/symboldef.h"
 #include "core/defined-types.h"
 
-unsigned long distanceofshortstringsbytearray(unsigned long *eqsvector,
+unsigned long gt_distanceofshortstringsbytearray(unsigned long *eqsvector,
                                      unsigned int alphasize,
                                      const GtUchar *useq,
                                      unsigned long ulen,
                                      const GtUchar *vseq,
                                      unsigned long vlen);
 
-unsigned long distanceofshortstringsencseq(unsigned long *eqsvector,
+unsigned long gt_distanceofshortstringsencseq(unsigned long *eqsvector,
                                            unsigned int alphasize,
                                            const GtUchar *useq,
                                            unsigned long ulen,
@@ -35,7 +35,7 @@ unsigned long distanceofshortstringsencseq(unsigned long *eqsvector,
                                            unsigned long vstartpos,
                                            unsigned long vlen);
 
-unsigned long reversesuffixmatch(unsigned long *eqsvector,
+unsigned long gt_reversesuffixmatch(unsigned long *eqsvector,
                                  unsigned int alphasize,
                                  const GtUchar *useq,
                                  unsigned long ulen,
@@ -43,7 +43,7 @@ unsigned long reversesuffixmatch(unsigned long *eqsvector,
                                  unsigned long vlen,
                                  unsigned long maxdistance);
 
-Definedunsignedlong forwardprefixmatch(const GtEncodedsequence *encseq,
+Definedunsignedlong gt_forwardprefixmatch(const GtEncodedsequence *encseq,
                                        unsigned int alphasize,
                                        unsigned long startpos,
                                        bool nowildcards,

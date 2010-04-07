@@ -74,17 +74,17 @@ typedef int Xdropscore;
 
 GT_DECLAREARRAYSTRUCT(Xdropscore);
 
-int showmatrix(GtArrayMyfrontvalue * fronts,
+int gt_showmatrix(GtArrayMyfrontvalue * fronts,
                int distance,
                unsigned char *useq,
                unsigned char *vseq,
                int ulen,
                int vlen);
 
-void calculatedistancesfromscores(Arbitraryscores *arbitscores,
+void gt_calculatedistancesfromscores(Arbitraryscores *arbitscores,
     Arbitrarydistances *arbitdistances);
 
-void calculateallowedMININFINITYINTgenerations(
+void gt_calculateallowedMININFINITYINTgenerations(
    int *allowedMININFINITYINTgenerations,
    Arbitrarydistances *arbitdistances);
 
@@ -98,7 +98,7 @@ void calculateallowedMININFINITYINTgenerations(
    any more.
 */
 
-void evalxdroparbitscoresright(Arbitraryscores *arbitscores,
+void gt_evalxdroparbitscoresright(Arbitraryscores *arbitscores,
                                Myxdropbest * xdropbest,
                                GtArrayMyfrontvalue * fronts,
                                const GtEncodedsequence *str_useq,
@@ -110,7 +110,7 @@ void evalxdroparbitscoresright(Arbitraryscores *arbitscores,
                                Xdropscore xdropbelowscore);
 
 #define EVALXDROPARBITSCORESRIGHT\
-      void evalxdroparbitscoresright(Arbitraryscores *arbitscores,\
+      void gt_evalxdroparbitscoresright(Arbitraryscores *arbitscores,\
                                      Myxdropbest * xdropbest,\
                                      GtArrayMyfrontvalue * fronts,\
                                      const GtEncodedsequence *str_useq,\
@@ -121,7 +121,7 @@ void evalxdroparbitscoresright(Arbitraryscores *arbitscores,
                                      int vlen,\
                                      Xdropscore xdropbelowscore)
 
-void evalxdroparbitscoresleft(Arbitraryscores * arbitscores,
+void gt_evalxdroparbitscoresleft(Arbitraryscores * arbitscores,
                               Myxdropbest * xdropbest,
                               GtArrayMyfrontvalue * fronts,
                               const GtEncodedsequence *str_useq,
@@ -133,7 +133,7 @@ void evalxdroparbitscoresleft(Arbitraryscores * arbitscores,
                               Xdropscore xdropbelowscore);
 
 #define EVALXDROPARBITSCORESLEFT\
-       void evalxdroparbitscoresleft(Arbitraryscores * arbitscores,\
+       void gt_evalxdroparbitscoresleft(Arbitraryscores * arbitscores,\
                                      Myxdropbest * xdropbest,\
                                      GtArrayMyfrontvalue * fronts,\
                                      const GtEncodedsequence *str_useq,\

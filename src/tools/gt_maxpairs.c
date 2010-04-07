@@ -62,7 +62,7 @@ static int simpleexactselfmatchoutput(void *info,
   queryseqnum = gt_encodedsequence_pos2seqnum(encseq,pos2);
   gt_encodedsequence_seqinfo(encseq,&seqinfo,queryseqnum);
   gt_assert(pos2 >= seqinfo.seqstartpos);
-  querymatch_fill(querymatch,
+  gt_querymatch_fill(querymatch,
                   len,
                   pos1,
                   GT_READMODE_FORWARD,
@@ -70,7 +70,7 @@ static int simpleexactselfmatchoutput(void *info,
                   (uint64_t) queryseqnum,
                   pos2 - seqinfo.seqstartpos,
                   seqinfo.seqlength);
-  return querymatch_output(info, encseq, querymatch, err);
+  return gt_querymatch_output(info, encseq, querymatch, err);
 }
 
 static int callenummaxpairs(const GtStr *indexname,
@@ -85,7 +85,7 @@ static int callenummaxpairs(const GtStr *indexname,
   Sequentialsuffixarrayreader *ssar;
 
   gt_error_check(err);
-  ssar = newSequentialsuffixarrayreaderfromfile(indexname,
+  ssar = gt_newSequentialsuffixarrayreaderfromfile(indexname,
                                                 SARR_LCPTAB |
                                                 SARR_SUFTAB |
                                                 SARR_ESQTAB |
@@ -98,9 +98,9 @@ static int callenummaxpairs(const GtStr *indexname,
     haserr = true;
   }
   if (!haserr &&
-      enumeratemaxpairs(ssar,
-                        encseqSequentialsuffixarrayreader(ssar),
-                        readmodeSequentialsuffixarrayreader(ssar),
+      gt_enumeratemaxpairs(ssar,
+                        gt_encseqSequentialsuffixarrayreader(ssar),
+                        gt_readmodeSequentialsuffixarrayreader(ssar),
                         userdefinedleastlength,
                         processmaxpairs,
                         processmaxpairsinfo,
@@ -111,7 +111,7 @@ static int callenummaxpairs(const GtStr *indexname,
   }
   if (ssar != NULL)
   {
-    freeSequentialsuffixarrayreader(&ssar);
+    gt_freeSequentialsuffixarrayreader(&ssar);
   }
   return haserr ? -1 : 0;
 }
@@ -226,7 +226,7 @@ static int gt_repfind_runner(GT_UNUSED int argc,
   bool haserr = false;
   Maxpairsoptions *arguments = tool_arguments;
   GtLogger *logger = NULL;
-  Querymatch *querymatchspaceptr = querymatch_new();
+  Querymatch *querymatchspaceptr = gt_querymatch_new();
 
   gt_error_check(err);
   logger = gt_logger_new(arguments->beverbose, GT_LOGGER_DEFLT_PREFIX, stdout);
@@ -256,10 +256,10 @@ static int gt_repfind_runner(GT_UNUSED int argc,
         }
         if (!haserr && arguments->reverse)
         {
-          if (callenumselfmatches(arguments->indexname,
+          if (gt_callenumselfmatches(arguments->indexname,
                                   GT_READMODE_REVERSE,
                                   arguments->userdefinedleastlength,
-                                  querymatch_output,
+                                  gt_querymatch_output,
                                   NULL,
                                   logger,
                                   err) != 0)
@@ -269,7 +269,7 @@ static int gt_repfind_runner(GT_UNUSED int argc,
         }
       } else
       {
-        if (testmaxpairs(arguments->indexname,
+        if (gt_testmaxpairs(arguments->indexname,
                       arguments->samples,
                       arguments->userdefinedleastlength,
                       (unsigned long) (100 * arguments->userdefinedleastlength),
@@ -281,11 +281,11 @@ static int gt_repfind_runner(GT_UNUSED int argc,
       }
     } else
     {
-      if (callenumquerymatches(arguments->indexname,
+      if (gt_callenumquerymatches(arguments->indexname,
                                arguments->queryfiles,
                                false,
                                arguments->userdefinedleastlength,
-                               querymatch_output,
+                               gt_querymatch_output,
                                NULL,
                                logger,
                                err) != 0)
@@ -294,7 +294,7 @@ static int gt_repfind_runner(GT_UNUSED int argc,
       }
     }
   }
-  querymatch_delete(querymatchspaceptr);
+  gt_querymatch_delete(querymatchspaceptr);
   gt_logger_delete(logger);
   return haserr ? -1 : 0;
 }

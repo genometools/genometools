@@ -39,85 +39,86 @@
 /* the followin type is used for the position values in the matches to be
    chained */
 
-typedef unsigned long GtChainpostype;
+typedef unsigned long GtChain2Dimpostype;
 
 /* the following type is used for scores of chains */
 
-typedef long GtChainscoretype;
+typedef long GtChain2Dimscoretype;
 
 /* the anonymous type for a chain */
 
-typedef struct GtChain GtChain;
+typedef struct GtChain2Dim GtChain2Dim;
 
 /* the anonymous type for a table storing the matches */
 
-typedef struct GtChainmatchtable GtChainmatchtable;
+typedef struct GtChain2Dimmatchtable GtChain2Dimmatchtable;
 
 /* the following type is used for relevant values to output for a chained
    frgament */
 
 typedef struct
 {
-  GtChainpostype startpos[2], /* start of matches in the 2 dimensions,
+  GtChain2Dimpostype startpos[2], /* start of matches in the 2 dimensions,
                                  userdef */
                  endpos[2];  /* end of matches in the 2 dimensions, userdef */
-  GtChainscoretype weight; /* weight of match, user defined */
-} GtChainmatchvalues;
+  GtChain2Dimscoretype weight; /* weight of match, user defined */
+} GtChain2Dimmatchvalues;
 
 /*
   the type of function to report chains.
 */
 
-typedef void (*GtChainprocessor)(void *,
-                                 const GtChainmatchtable *,
-                                 const GtChain *);
+typedef void (*GtChain2Dimprocessor)(void *,
+                                 const GtChain2Dimmatchtable *,
+                                 const GtChain2Dim *);
 
 /* the type of value describing how to chain */
 
-typedef struct GtChainmode GtChainmode;
+typedef struct GtChain2Dimmode GtChain2Dimmode;
 
 /* the constructor for tables of matches */
 
-GtChainmatchtable *gt_chain_matchtable_new(unsigned long numberofmatches);
+GtChain2Dimmatchtable *gt_chain_matchtable_new(unsigned long numberofmatches);
 
 /* the destructor for tables of matches */
 
-void gt_chain_matchtable_delete(GtChainmatchtable *matchtable);
+void gt_chain_matchtable_delete(GtChain2Dimmatchtable *matchtable);
 
 /* the function for emptying a table of matches, without freeing the space */
 
-void gt_chain_matchtable_empty(GtChainmatchtable *matchtable);
+void gt_chain_matchtable_empty(GtChain2Dimmatchtable *matchtable);
 
 /* the following function adds the relevant values describing a match */
 
-void gt_chain_matchtable_add(GtChainmatchtable *matchtable,
-                                    const GtChainmatchvalues *inmatch);
+void gt_chain_matchtable_add(GtChain2Dimmatchtable *matchtable,
+                                    const GtChain2Dimmatchvalues *inmatch);
 
 /* the following functions reads a file describing matches in open format.
    It returns the corresponding table of matches. */
 
-GtChainmatchtable *gt_chain_analyzeopenformatfile(double weightfactor,
+GtChain2Dimmatchtable *gt_chain_analyzeopenformatfile(double weightfactor,
                                                   const char *matchfile,
                                                   GtError *err);
 
 /* the function to fill the gap values for all matches */
 
-void gt_chain_fillthegapvalues(GtChainmatchtable *matchtable);
+void gt_chain_fillthegapvalues(GtChain2Dimmatchtable *matchtable);
 
 /* function to apply an additional weight to the elements to be chained */
 
-void gt_chain_applyweight(double weightfactor,GtChainmatchtable *matchtable);
+void gt_chain_applyweight(double weightfactor,
+                          GtChain2Dimmatchtable *matchtable);
 
 /* the function to sort an array of matches */
 
 void gt_chain_possiblysortmatches(GtLogger *logger,
-                                  GtChainmatchtable *matchtable,
+                                  GtChain2Dimmatchtable *matchtable,
                                   unsigned int presortdim);
 
 /* the constructor for chainmode objects. Use err = NULL to print
    error messages to stderr. */
 
-GtChainmode *gt_chain_chainmode_new(unsigned long maxgap,
+GtChain2Dimmode *gt_chain_chainmode_new(unsigned long maxgap,
                                     bool globalset,
                                     const char *globalargs,
                                     bool localset,
@@ -126,45 +127,45 @@ GtChainmode *gt_chain_chainmode_new(unsigned long maxgap,
 
 /* the destructor for chainmode objects */
 
-void gt_chain_chainmode_delete(GtChainmode *gtchainmode);
+void gt_chain_chainmode_delete(GtChain2Dimmode *GtChain2Dimmode);
 
 /* the constructor for chains */
 
-GtChain *gt_chain_chain_new(void);
+GtChain2Dim *gt_chain_chain_new(void);
 
 /* the descructor for chains */
 
-void gt_chain_chain_delete(GtChain *chain);
+void gt_chain_chain_delete(GtChain2Dim *chain);
 
 /* the function to perform the fast chaining algorithms */
 
-void gt_chain_fastchaining(const GtChainmode *chainmode,
-                           GtChain *chain,
-                           GtChainmatchtable *matchtable,
+void gt_chain_fastchaining(const GtChain2Dimmode *chainmode,
+                           GtChain2Dim *chain,
+                           GtChain2Dimmatchtable *matchtable,
                            bool gapsL1,
                            unsigned int presortdim,
                            bool withequivclasses,
-                           GtChainprocessor chainprocessor,
+                           GtChain2Dimprocessor chainprocessor,
                            void *cpinfo,
                            GtLogger *logger);
 
 /* obtain the score of a chain */
 
-GtChainscoretype gt_chain_chainscore(const GtChain *chain);
+GtChain2Dimscoretype gt_chain_chainscore(const GtChain2Dim *chain);
 
 /* obtain the length of a chain */
 
-unsigned long gt_chain_chainlength(const GtChain *chain);
+unsigned long gt_chain_chainlength(const GtChain2Dim *chain);
 
 /* store the values of element idx in given chain in the first parameter */
 
-void gt_chain_extractchainelem(GtChainmatchvalues *value,
-                               const GtChainmatchtable *matchtable,
-                               const GtChain *chain,
+void gt_chain_extractchainelem(GtChain2Dimmatchvalues *value,
+                               const GtChain2Dimmatchtable *matchtable,
+                               const GtChain2Dim *chain,
                                unsigned long idx);
 
 /* print a chain element to the given file pointer */
 
-void gt_chain_printchainelem(FILE *outfp,const GtChainmatchvalues *value);
+void gt_chain_printchainelem(FILE *outfp,const GtChain2Dimmatchvalues *value);
 
 #endif

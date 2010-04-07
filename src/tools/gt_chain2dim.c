@@ -195,8 +195,8 @@ typedef struct
 static void gt_outputformatchaingeneric(
                                 bool silent,
                                 void *data,
-                                const GtChainmatchtable *matchtable,
-                                const GtChain *chain)
+                                const GtChain2Dimmatchtable *matchtable,
+                                const GtChain2Dim *chain)
 {
   unsigned long idx, chainlength;
   Counter *counter = (Counter *) data;
@@ -206,7 +206,7 @@ static void gt_outputformatchaingeneric(
          counter->chaincounter,chainlength,gt_chain_chainscore(chain));
   if (!silent)
   {
-    GtChainmatchvalues value;
+    GtChain2Dimmatchvalues value;
 
     for (idx=0; idx < chainlength; idx++)
     {
@@ -218,15 +218,15 @@ static void gt_outputformatchaingeneric(
 }
 
 void gt_outputformatchainsilent(void *data,
-                               const GtChainmatchtable *matchtable,
-                               const GtChain *chain)
+                               const GtChain2Dimmatchtable *matchtable,
+                               const GtChain2Dim *chain)
 {
   gt_outputformatchaingeneric(true,data,matchtable,chain);
 }
 
 void gt_outputformatchain(void *data,
-                          const GtChainmatchtable *matchtable,
-                          const GtChain *chain)
+                          const GtChain2Dimmatchtable *matchtable,
+                          const GtChain2Dim *chain)
 {
   gt_outputformatchaingeneric(false,data,matchtable,chain);
 }
@@ -238,7 +238,7 @@ static int gt_chain2dim_runner (GT_UNUSED int argc,
                                 GtError * err)
 {
   GtChain2dimoptions *arguments = tool_arguments;
-  GtChainmatchtable *matchtable;
+  GtChain2Dimmatchtable *matchtable;
   bool haserr = false;
   GtLogger *logger = NULL;
 
@@ -257,7 +257,7 @@ static int gt_chain2dim_runner (GT_UNUSED int argc,
   if (!haserr)
   {
     unsigned int presortdim = 1U;
-    GtChain *chain;
+    GtChain2Dim *chain;
     Counter counter;
 
     logger = gt_logger_new(arguments->verbose, GT_LOGGER_DEFLT_PREFIX, stdout);

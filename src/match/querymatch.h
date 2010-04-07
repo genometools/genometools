@@ -26,9 +26,9 @@
 
 typedef struct Querymatch Querymatch;
 
-Querymatch *querymatch_new(void);
+Querymatch *gt_querymatch_new(void);
 
-void querymatch_fill(Querymatch *querymatch,
+void gt_querymatch_fill(Querymatch *querymatch,
                      unsigned long len,
                      unsigned long dbstart,
                      GtReadmode readmode,
@@ -37,16 +37,16 @@ void querymatch_fill(Querymatch *querymatch,
                      unsigned long querystart,
                      unsigned long querytotallength);
 
-void querymatch_delete(Querymatch *querymatch);
+void gt_querymatch_delete(Querymatch *querymatch);
 
-int querymatch_output(void *info,
+int gt_querymatch_output(void *info,
                       const GtEncodedsequence *encseq,
                       const Querymatch *querymatch,
                       GtError *err);
 
-unsigned long querymatch_len(const Querymatch *querymatch);
-unsigned long querymatch_dbstart(const Querymatch *querymatch);
-unsigned long querymatch_querystart(const Querymatch *querymatch);
-uint64_t querymatch_queryseqnum(const Querymatch *querymatch);
+unsigned long gt_querymatch_len(const Querymatch *querymatch);
+unsigned long gt_querymatch_dbstart(const Querymatch *querymatch);
+unsigned long gt_querymatch_querystart(const Querymatch *querymatch);
+uint64_t gt_querymatch_queryseqnum(const Querymatch *querymatch);
 
 #endif

@@ -70,19 +70,19 @@ void mergertrie_check(Mergertrierep *trierep,unsigned int numberofleaves,
 
 void mergertrie_showallnoderelations(const Mergertrienode *node);
 
-void mergertrie_insertsuffix(Mergertrierep *trierep,
+void gt_mergertrie_insertsuffix(Mergertrierep *trierep,
                              Mergertrienode *node,
                              Suffixinfo *suffixinfo);
 
-Mergertrienode *mergertrie_findsmallestnode(const Mergertrierep *trierep);
+Mergertrienode *gt_mergertrie_findsmallestnode(const Mergertrierep *trierep);
 
-void mergertrie_deletesmallestpath(Mergertrienode *smallest,
+void gt_mergertrie_deletesmallestpath(Mergertrienode *smallest,
                                    Mergertrierep *trierep);
 
-void mergertrie_initnodetable(Mergertrierep *trierep,
+void gt_mergertrie_initnodetable(Mergertrierep *trierep,
                               unsigned long numofsuffixes,
                               unsigned int numofindexes);
 
-void mergertrie_delete(Mergertrierep *trierep);
+void gt_mergertrie_delete(Mergertrierep *trierep);
 
 #endif

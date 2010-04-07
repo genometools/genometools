@@ -621,13 +621,13 @@ static int searchforTSDandorMotifoutside(
     subrepeatinfo.offset1 = startleftLTR;
     subrepeatinfo.offset2 = startrightLTR;
 
-    if (sarrquerysubstringmatch(dbseq,
+    if (gt_sarrquerysubstringmatch(dbseq,
                                 leftlen,
                                 query,
                                 (unsigned long) rightlen,
                                 lo->minlengthTSD,
                                 gt_encodedsequence_alphabet(encseq),
-                                subsimpleexactselfmatchstore,
+                                gt_subsimpleexactselfmatchstore,
                                 &subrepeatinfo,
                                 NULL,
                                 err) != 0)
@@ -667,7 +667,7 @@ static int searchforTSDandorMotifoutside(
  The following function searches for TSD and/or a specified palindromic motif
  at the borders of left LTR and the right LTR, respectively.
  */
-int findcorrectboundaries(LTRharvestoptions *lo,
+int gt_findcorrectboundaries(LTRharvestoptions *lo,
                           LTRboundaries *boundaries,
                           const GtEncodedsequence *encseq,
                           GtError *err)

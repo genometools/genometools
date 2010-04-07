@@ -292,7 +292,7 @@ static void showtranslation(GthSplicedSeq *splicedseq,
   gt_free(frame2_out);
 }
 
-void outputtranslationandorf(unsigned long pglnum, const GthAGS *ags,
+void gt_outputtranslationandorf(unsigned long pglnum, const GthAGS *ags,
                              unsigned long agsnum,
                              unsigned long translationtable,
                              GthInput *input,

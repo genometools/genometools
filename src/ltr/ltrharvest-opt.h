@@ -60,16 +60,16 @@ typedef struct
                                           motif */
 } LTRharvestoptions;
 
-void showuserdefinedoptionsandvalues(const LTRharvestoptions *lo);
+void gt_showuserdefinedoptionsandvalues(const LTRharvestoptions *lo);
 
-void printargsline(const char **argv, int argc);
+void gt_printargsline(const char **argv, int argc);
 
-int testmotifandencodemotif (Motif *motif, const GtEncodedsequence *encseq,
+int gt_testmotifandencodemotif (Motif *motif, const GtEncodedsequence *encseq,
                              GtError *);
 
 int ltrharvestoptions(LTRharvestoptions *lo, int argc,const char **argv,
                       GtError *);
 
-void wrapltrharvestoptions(LTRharvestoptions *lo);
+void gt_wrapltrharvestoptions(LTRharvestoptions *lo);
 
 #endif

@@ -31,7 +31,7 @@
 /* rely on suffixerator for on the fly index construction */
 static int gt_packedindex_make(int argc, const char *argv[], GtError *err)
 {
-  return parseargsandcallsuffixerator(false, argc, argv, err);
+  return gt_parseargsandcallsuffixerator(false, argc, argv, err);
 }
 
 static void* gt_packedindex_arguments_new(void)

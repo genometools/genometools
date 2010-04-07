@@ -20,6 +20,6 @@
 
 #include "core/error_api.h"
 
-int parseargsandcallltrharvest(int argc,const char **argv,GtError *err);
+int gt_parseargsandcallltrharvest(int argc,const char **argv,GtError *err);
 
 #endif

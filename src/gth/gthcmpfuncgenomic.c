@@ -37,7 +37,7 @@ static int compareranges(GtRange *rangeA, GtRange *rangeB)
   genomic positions. Thereby, the positions refering to the forward strand
   are considered.
 */
-int compareaccordingtogenomicposforward(const void *dataA, const void *dataB)
+int gt_compareaccordingtogenomicposforward(const void *dataA, const void *dataB)
 {
   GthSA *saA = (GthSA*) dataA;
   GthSA *saB = (GthSA*) dataB;
@@ -60,7 +60,7 @@ int compareaccordingtogenomicposforward(const void *dataA, const void *dataB)
   their genomic positions. Thereby, the positions refering to the actual strand
   are considered.
 */
-int compareaccordingtogenomicposactual(const void *dataA, const void *dataB)
+int gt_compareaccordingtogenomicposactual(const void *dataA, const void *dataB)
 {
   GthSA *saA= *(GthSA**) dataA;
   GthSA *saB= *(GthSA**) dataB;

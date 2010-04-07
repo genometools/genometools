@@ -1,7 +1,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-unsigned long squarededistunit (const GtUchar *u, unsigned long m,
+unsigned long gt_squarededistunit (const GtUchar *u, unsigned long m,
                                 const GtUchar *v, unsigned long n);
 
 #ifdef __cplusplus

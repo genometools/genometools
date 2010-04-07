@@ -92,7 +92,8 @@ static bool strictcutoffsbreakcondition(void *data)
   return d->breakforloop;
 }
 
-void initStrictcutoffsTravfunctions(Traversealignmentfunctions *travfunctions)
+void gt_initStrictcutoffsTravfunctions(Traversealignmentfunctions
+                                                                 *travfunctions)
 {
   travfunctions->processmismatch  = strictcutoffsprocmatchormismatch;
   travfunctions->processdeletion  = strictcutoffsprocindelorintron;
@@ -116,7 +117,7 @@ void initStrictcutoffsTravfunctions(Traversealignmentfunctions *travfunctions)
     strictcutoffsprocindelorintron;
 }
 
-void initStrictcutoffsdata(Strictcutoffsdata *strictcutoffsdata,
+void gt_initStrictcutoffsdata(Strictcutoffsdata *strictcutoffsdata,
                            Cutoffs *cutoffs, unsigned long cutoffsminexonlen)
 {
   strictcutoffsdata->cutoffs                   = cutoffs;

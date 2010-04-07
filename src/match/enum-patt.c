@@ -35,7 +35,7 @@
   GtEncodedsequenceScanstate *esr;
 };
 
-Enumpatterniterator *newenumpatterniterator(unsigned long minpatternlen,
+Enumpatterniterator *gt_newenumpatterniterator(unsigned long minpatternlen,
                                             unsigned long maxpatternlen,
                                             const GtEncodedsequence *encseq,
                                             GtError *err)
@@ -89,7 +89,7 @@ static void reversesequenceinplace(GtUchar *s,unsigned long len)
   }
 }
 
-const GtUchar *nextEnumpatterniterator(unsigned long *patternlen,
+const GtUchar *gt_nextEnumpatterniterator(unsigned long *patternlen,
                                        Enumpatterniterator *epi)
 {
   unsigned long start;
@@ -134,7 +134,7 @@ const GtUchar *nextEnumpatterniterator(unsigned long *patternlen,
   return epi->patternspace;
 }
 
-void showPatterndistribution(const Enumpatterniterator *epi)
+void gt_showPatterndistribution(const Enumpatterniterator *epi)
 {
   unsigned long i;
   double addprob, probsum = 0.0;
@@ -156,7 +156,7 @@ void showPatterndistribution(const Enumpatterniterator *epi)
   }
 }
 
-void freeEnumpatterniterator(Enumpatterniterator **epi)
+void gt_freeEnumpatterniterator(Enumpatterniterator **epi)
 {
   if (!(*epi)) return;
   FREESPACE((*epi)->patternspace);

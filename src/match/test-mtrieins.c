@@ -37,7 +37,7 @@ static void maketrie(Mergertrierep *trierep,
        suffixinfo.startpos <= len;
        suffixinfo.startpos++)
   {
-    mergertrie_insertsuffix(trierep,trierep->root,&suffixinfo);
+    gt_mergertrie_insertsuffix(trierep,trierep->root,&suffixinfo);
 #ifdef WITHTRIEIDENT
 #ifdef WITHTRIESHOW
     showtrie(trierep,characters);
@@ -60,8 +60,8 @@ static void successivelydeletesmallest(Mergertrierep *trierep,
 
   while (trierep->root != NULL && trierep->root->firstchild != NULL)
   {
-    smallest = mergertrie_findsmallestnode(trierep);
-    mergertrie_deletesmallestpath(smallest,trierep);
+    smallest = gt_mergertrie_findsmallestnode(trierep);
+    gt_mergertrie_deletesmallestpath(smallest,trierep);
 #ifdef WITHTRIEIDENT
 #ifdef WITHTRIESHOW
     showtrie(trierep,characters);
@@ -72,7 +72,7 @@ static void successivelydeletesmallest(Mergertrierep *trierep,
   }
 }
 
-int test_trieins(bool onlyins,const GtStr *indexname,GtError *err)
+int gt_test_trieins(bool onlyins,const GtStr *indexname,GtError *err)
 {
   Suffixarray suffixarray;
   bool haserr = false;
@@ -100,7 +100,7 @@ int test_trieins(bool onlyins,const GtStr *indexname,GtError *err)
     trierep.encseqreadinfo[0].readmode = suffixarray.readmode;
     characters = gt_alphabet_characters(
                                gt_encodedsequence_alphabet(suffixarray.encseq));
-    mergertrie_initnodetable(&trierep,totallength,1U);
+    gt_mergertrie_initnodetable(&trierep,totallength,1U);
     maketrie(&trierep,characters,totallength);
     if (onlyins)
     {
@@ -119,8 +119,8 @@ int test_trieins(bool onlyins,const GtStr *indexname,GtError *err)
 #endif
       successivelydeletesmallest(&trierep,totallength,characters,err);
     }
-    mergertrie_delete(&trierep);
+    gt_mergertrie_delete(&trierep);
   }
-  freesuffixarray(&suffixarray);
+  gt_freesuffixarray(&suffixarray);
   return haserr ? -1 : 0;
 }

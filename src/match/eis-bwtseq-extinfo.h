@@ -45,7 +45,7 @@ typedef EISeq *(*indexCreateFunc)(
 
 /**
  * To enrich a base index with the information required for a BWT
- * index, wrap the base index constructor in a call to createBWTSeqGeneric.
+ * index, wrap the base index constructor in a call to gt_createBWTSeqGeneric.
  * @param params holds all parameters for both, the BWT sequence
  * object and the base index
  * @param createIndex wrapped constructor
@@ -65,22 +65,23 @@ typedef EISeq *(*indexCreateFunc)(
  * @param err
  */
 extern EISeq *
-createBWTSeqGeneric(const struct bwtParam *params, indexCreateFunc createIndex,
-                    SASeqSrc *src,
-                    const enum rangeSortMode rangeSort[],
-                    const SpecialsRankLookup *sprTable,
-                    GtError *err);
+gt_createBWTSeqGeneric(const struct bwtParam *params,
+                       indexCreateFunc createIndex,
+                       SASeqSrc *src,
+                       const enum rangeSortMode rangeSort[],
+                       const SpecialsRankLookup *sprTable,
+                       GtError *err);
 
 extern int
-BWTSeqPosHasLocateInfo(const BWTSeq *bwtSeq, unsigned long pos,
+gt_BWTSeqPosHasLocateInfo(const BWTSeq *bwtSeq, unsigned long pos,
                        struct extBitsRetrieval *extBits);
 
 extern unsigned long
-BWTSeqGetRankSort(const BWTSeq *bwtSeq, unsigned long pos,
+gt_BWTSeqGetRankSort(const BWTSeq *bwtSeq, unsigned long pos,
                   AlphabetRangeID range, struct extBitsRetrieval *extBits);
 
 extern void
-BWTSeqInitLocateHandling(BWTSeq *bwtSeq,
+gt_BWTSeqInitLocateHandling(BWTSeq *bwtSeq,
                          const enum rangeSortMode *defaultRangeSort);
 
 #endif

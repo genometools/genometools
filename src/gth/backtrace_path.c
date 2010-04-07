@@ -119,15 +119,15 @@ void gth_backtrace_path_set_ref_dp_length(GthBacktracePath *bp,
   bp->ref_dp_length = ref_dp_length;
 }
 
-unsigned long compute_indelcount(Editoperation *alignment,
+unsigned long gt_compute_indelcount(Editoperation *alignment,
                                  unsigned long alignmentlength, bool proteineop)
 {
   unsigned long i, eoplength, indelcount = 0;
   Eoptype eoptype;
 
   for (i = 0; i < alignmentlength; i++) {
-    eoptype   = editoperation_type(alignment[i], proteineop);
-    eoplength = editoperation_length(alignment[i], proteineop);
+    eoptype   = gt_editoperation_type(alignment[i], proteineop);
+    eoplength = gt_editoperation_length(alignment[i], proteineop);
 
     switch (eoptype) {
       case EOP_TYPE_MATCH:
@@ -174,7 +174,7 @@ unsigned long gth_backtrace_path_indelcount(const GthBacktracePath *bp)
 {
   gt_assert(bp);
   gt_assert(bp->alphatype == DNA_ALPHA || bp->alphatype == PROTEIN_ALPHA);
-  return compute_indelcount(gt_array_get_space(bp->editoperations),
+  return gt_compute_indelcount(gt_array_get_space(bp->editoperations),
                             gt_array_size(bp->editoperations),
                             bp->alphatype == PROTEIN_ALPHA);
 }
@@ -277,21 +277,21 @@ static void determine_cutoffs(GthBacktracePath *bp,
   /* cutting of leading indels in the sequences */
   switch (leadcutoffsmode) {
     case RELAXED:
-      initRelaxedcutoffsTravfunctions(&travfunctions);
-      initRelaxedcutoffsdata(&relaxedcutoffsdata, &bp->cutoffs.start);
+      gt_initRelaxedcutoffsTravfunctions(&travfunctions);
+      gt_initRelaxedcutoffsdata(&relaxedcutoffsdata, &bp->cutoffs.start);
       gthtraversealignment(true, &travstate, proteineop, &relaxedcutoffsdata,
                            &travfunctions);
       break;
     case STRICT:
-      initStrictcutoffsTravfunctions(&travfunctions);
-      initStrictcutoffsdata(&strictcutoffsdata, &bp->cutoffs.start,
+      gt_initStrictcutoffsTravfunctions(&travfunctions);
+      gt_initStrictcutoffsdata(&strictcutoffsdata, &bp->cutoffs.start,
                             cutoffsminexonlen);
       gthtraversealignment(true , &travstate , proteineop, &strictcutoffsdata,
                            &travfunctions);
       break;
     case MINIMAL:
-      initMinimalcutoffsTravfunctions(&travfunctions);
-      initMinimalcutoffsdata(&minimalcutoffsdata, &bp->cutoffs.start);
+      gt_initMinimalcutoffsTravfunctions(&travfunctions);
+      gt_initMinimalcutoffsdata(&minimalcutoffsdata, &bp->cutoffs.start);
       gthtraversealignment(true, &travstate, proteineop, &minimalcutoffsdata,
                            &travfunctions);
       break;
@@ -308,21 +308,21 @@ static void determine_cutoffs(GthBacktracePath *bp,
   /* cutting of terminal indels in the sequences */
   switch (termcutoffsmode) {
     case RELAXED:
-      initRelaxedcutoffsTravfunctions(&travfunctions);
-      initRelaxedcutoffsdata(&relaxedcutoffsdata, &bp->cutoffs.end);
+      gt_initRelaxedcutoffsTravfunctions(&travfunctions);
+      gt_initRelaxedcutoffsdata(&relaxedcutoffsdata, &bp->cutoffs.end);
       gthtraversealignment(false, &travstate, proteineop, &relaxedcutoffsdata,
                            &travfunctions);
       break;
     case STRICT:
-      initStrictcutoffsTravfunctions(&travfunctions);
-      initStrictcutoffsdata(&strictcutoffsdata, &bp->cutoffs.end,
+      gt_initStrictcutoffsTravfunctions(&travfunctions);
+      gt_initStrictcutoffsdata(&strictcutoffsdata, &bp->cutoffs.end,
                             cutoffsminexonlen);
       gthtraversealignment(false, &travstate, proteineop, &strictcutoffsdata,
                            &travfunctions);
       break;
     case MINIMAL:
-      initMinimalcutoffsTravfunctions(&travfunctions);
-      initMinimalcutoffsdata(&minimalcutoffsdata, &bp->cutoffs.end);
+      gt_initMinimalcutoffsTravfunctions(&travfunctions);
+      gt_initMinimalcutoffsdata(&minimalcutoffsdata, &bp->cutoffs.end);
       gthtraversealignment(false, &travstate, proteineop, &minimalcutoffsdata,
                            &travfunctions);
       break;
@@ -367,7 +367,7 @@ static bool is_intron(Editoperation eop)
    This is necessary for the gthcomputescores() function to work correctly.
    Otherwise one would get exons with borders (i, i-1) which can not be
    processed by the successive functions. */
-void remove_zero_base_exons(Editoperation *alignment, long alignmentlength,
+void gt_remove_zero_base_exons(Editoperation *alignment, long alignmentlength,
                             GthStat *stat)
 {
   long i, j;
@@ -408,7 +408,7 @@ void gth_backtrace_path_remove_zero_base_exons(GthBacktracePath *bp,
                                                GthStat *stat)
 {
   gt_assert(bp);
-  remove_zero_base_exons(gth_backtrace_path_get(bp),
+  gt_remove_zero_base_exons(gth_backtrace_path_get(bp),
                          gth_backtrace_path_length(bp), stat);
 }
 
@@ -464,7 +464,7 @@ static void add_eop_type_to_eop_array(GtArray *bp, Eoptype eoptype,
       if (proteineop && /* this needs only to be checked for protein bp */
           length > 1 &&       /* and when the length is larger 1 */
           gt_array_size(bp)) { /* we have already stored an eop */
-        tmp_eoptype = editoperation_type(*(Editoperation*)
+        tmp_eoptype = gt_editoperation_type(*(Editoperation*)
                                          gt_array_get_last(bp), proteineop);
         if (tmp_eoptype == EOP_TYPE_INTRON_WITH_1_BASE_LEFT ||
             tmp_eoptype == EOP_TYPE_INTRON_WITH_2_BASES_LEFT) {
@@ -753,7 +753,7 @@ bool gth_backtrace_path_last_is_intron(const GthBacktracePath *bp)
     return false;
   }
 
-  eoptype = editoperation_type(*(Editoperation*)
+  eoptype = gt_editoperation_type(*(Editoperation*)
                                gt_array_get_last(bp->editoperations),
                                bp->alphatype == PROTEIN_ALPHA);
   if (eoptype == EOP_TYPE_INTRON ||
@@ -797,7 +797,7 @@ static void ensure_eop_of_len_1_before_introns(GtArray *editoperations)
        eopptr < (Editoperation*) gt_array_get_space(editoperations) +
                                  gt_array_size(editoperations) - 1;
        eopptr++) {
-    if ((eoptype = editoperation_type(*eopptr, true)) ==
+    if ((eoptype = gt_editoperation_type(*eopptr, true)) ==
         EOP_TYPE_INTRON_WITH_1_BASE_LEFT ||
         eoptype == EOP_TYPE_INTRON_WITH_2_BASES_LEFT) {
       processing_necessary = true;
@@ -821,7 +821,7 @@ static void ensure_eop_of_len_1_before_introns(GtArray *editoperations)
                   gt_array_get_space(backup) + gt_array_size(backup);
          eopptr++) {
 
-      if ((eoptype = editoperation_length(*eopptr, true)) ==
+      if ((eoptype = gt_editoperation_length(*eopptr, true)) ==
           EOP_TYPE_INTRON_WITH_1_BASE_LEFT ||
           eoptype == EOP_TYPE_INTRON_WITH_2_BASES_LEFT) {
         split_match = true;
@@ -829,7 +829,7 @@ static void ensure_eop_of_len_1_before_introns(GtArray *editoperations)
       else if (split_match) {
         if (eoptype == EOP_TYPE_MATCH) {
           split_match = false;
-          if ((eoplength = editoperation_length(*eopptr, true)) > 1) {
+          if ((eoplength = gt_editoperation_length(*eopptr, true)) > 1) {
             eop = 1;
             gt_array_add(editoperations, eop);
             eop = eoplength - 1;
@@ -869,9 +869,10 @@ void gth_backtrace_path_show(const GthBacktracePath *bp, bool xmlout,
 {
   gt_assert(bp);
   gt_assert(bp->alphatype == DNA_ALPHA || bp->alphatype == PROTEIN_ALPHA);
-  editoperation_show(gth_backtrace_path_get(bp), gth_backtrace_path_length(bp),
-                     bp->alphatype == PROTEIN_ALPHA, xmlout, indentlevel,
-                     outfp);
+  gt_editoperation_show(gth_backtrace_path_get(bp),
+                        gth_backtrace_path_length(bp),
+                        bp->alphatype == PROTEIN_ALPHA, xmlout, indentlevel,
+                        outfp);
 }
 
 void gth_backtrace_path_show_complete(const GthBacktracePath *bp, bool xmlout,
@@ -880,7 +881,7 @@ void gth_backtrace_path_show_complete(const GthBacktracePath *bp, bool xmlout,
 {
   gt_assert(bp);
   gt_assert(bp->alphatype == DNA_ALPHA || bp->alphatype == PROTEIN_ALPHA);
-  editoperation_show(gt_array_get_space(bp->editoperations),
+  gt_editoperation_show(gt_array_get_space(bp->editoperations),
                      gt_array_size(bp->editoperations),
                      bp->alphatype == PROTEIN_ALPHA, xmlout, indentlevel,
                      outfp);
@@ -994,11 +995,11 @@ void gth_backtrace_path_cutoff_walked_path(GthBacktracePath *bp,
     }
     /* remove part of last eop */
     if (gth_path_walker_steps_in_current_eop(pw)) {
-      length = editoperation_length(*(Editoperation*)
+      length = gt_editoperation_length(*(Editoperation*)
                                     gt_array_get_last(bp->editoperations),
                                     bp->alphatype == PROTEIN_ALPHA);
       gt_assert(length > gth_path_walker_steps_in_current_eop(pw));
-      editoperation_set_length(gt_array_get_last(bp->editoperations),
+      gt_editoperation_set_length(gt_array_get_last(bp->editoperations),
                                length-gth_path_walker_steps_in_current_eop(pw),
                                bp->alphatype == PROTEIN_ALPHA);
     }
@@ -1028,8 +1029,8 @@ static void cutoff_end_refseq(GthBacktracePath *bp, unsigned long reflength)
 
   for (;;) {
     eop = (Editoperation*) gt_array_get(bp->editoperations, i);
-    eoptype   = editoperation_type(*eop, bp->alphatype == PROTEIN_ALPHA);
-    eoplength = editoperation_length(*eop, bp->alphatype == PROTEIN_ALPHA);
+    eoptype   = gt_editoperation_type(*eop, bp->alphatype == PROTEIN_ALPHA);
+    eoplength = gt_editoperation_length(*eop, bp->alphatype == PROTEIN_ALPHA);
     i++;
 
     switch (eoptype) {
@@ -1103,7 +1104,7 @@ bool gth_backtrace_path_is_valid(const GthBacktracePath *bp)
   gt_assert(bp->alphatype == DNA_ALPHA || bp->alphatype == PROTEIN_ALPHA);
   gt_assert(bp->ref_dp_length != GT_UNDEF_ULONG);
   is_valid =
-    eops_equal_referencelength((Editoperation*)
+    gt_eops_equal_referencelength((Editoperation*)
                                gt_array_get_space(bp->editoperations)
                                + bp->cutoffs.end.eopcutoff,
                                gt_safe_cast2long(gt_array_size(bp

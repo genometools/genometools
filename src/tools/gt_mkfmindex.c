@@ -22,5 +22,5 @@
 int gt_mkfmindex(int argc, const char **argv, GtError *err)
 {
   gt_error_check(err);
-  return parseargsandcallmkfmindex(argc, argv, err);
+  return gt_parseargsandcallmkfmindex(argc, argv, err);
 }

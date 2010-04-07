@@ -87,7 +87,7 @@ static void freeItvinfo(Itvinfo *ptr,
   FREESPACE(ptr);
 }
 
-int depthfirstesa(Sequentialsuffixarrayreader *ssar,
+int gt_depthfirstesa(Sequentialsuffixarrayreader *ssar,
                   Dfsinfo *(*allocateDfsinfo)(Dfsstate *),
                   void(*freeDfsinfo)(Dfsinfo *,Dfsstate *),
                   int(*processleafedge)(bool,unsigned long,Dfsinfo *,
@@ -141,7 +141,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
     NEXTSEQUENTIALLCPTABVALUE(currentlcp,ssar);
     NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
 #else
-    retval = nextSequentiallcpvalue(&currentlcp,ssar,err);
+    retval = gt_nextSequentiallcpvalue(&currentlcp,ssar,err);
     if (retval < 0)
     {
       haserr = true;
@@ -151,7 +151,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
     {
       break;
     }
-    retval = nextSequentialsuftabvalue(&previoussuffix,ssar);
+    retval = gt_nextSequentialsuftabvalue(&previoussuffix,ssar);
     if (retval == 0)
     {
       haserr = true;
@@ -289,7 +289,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
 #ifdef INLINEDSequentialsuffixarrayreader
     NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
 #else
-    retval = nextSequentialsuftabvalue(&previoussuffix,ssar);
+    retval = gt_nextSequentialsuftabvalue(&previoussuffix,ssar);
     if (retval == 0)
     {
       haserr = true;

@@ -157,7 +157,7 @@ static void show_ags(const GthAGS *ags, unsigned long pglnum,
   outputPGSlines(ags->alignments, out->outfp);
 
   /* output 3-phase translation */
-  outputtranslationandorf(pglnum, ags, agsnum, translationtable, input,
+  gt_outputtranslationandorf(pglnum, ags, agsnum, translationtable, input,
                           indentlevel, out);
 
   /* output three final newlines */

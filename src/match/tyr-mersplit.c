@@ -182,7 +182,7 @@ static bool remainadvance(Merbounds *merbounds,
   return true;
 }
 
-const GtUchar *searchinbuckets(const Tyrindex *tyrindex,
+const GtUchar *gt_searchinbuckets(const Tyrindex *tyrindex,
                              const Tyrbckinfo *tyrbckinfo,
                              const GtUchar *bytecode)
 {
@@ -190,7 +190,7 @@ const GtUchar *searchinbuckets(const Tyrindex *tyrindex,
   unsigned long prefixcode, leftbound, merbytes;
 
   gt_assert(tyrbckinfo != NULL);
-  merbytes = tyrindex_merbytes(tyrindex);
+  merbytes = gt_tyrindex_merbytes(tyrindex);
   prefixcode = extractprefixbytecode(merbytes,
                                      tyrbckinfo->prefixlength,
                                      bytecode);
@@ -200,11 +200,11 @@ const GtUchar *searchinbuckets(const Tyrindex *tyrindex,
     const GtUchar *mertable;
     unsigned long rightbound;
 
-    mertable = tyrindex_mertable(tyrindex);
+    mertable = gt_tyrindex_mertable(tyrindex);
     rightbound = tyrbckinfo->bounds[prefixcode+1] - merbytes;
     if (GT_MOD4(tyrbckinfo->prefixlength) == 0)
     {
-      result = tyrindex_binmersearch(tyrindex,
+      result = gt_tyrindex_binmersearch(tyrindex,
                                      (unsigned long)
                                      GT_DIV4(tyrbckinfo->prefixlength),
                                      bytecode,
@@ -228,7 +228,7 @@ const GtUchar *searchinbuckets(const Tyrindex *tyrindex,
         result = NULL;
       } else
       {
-        result = tyrindex_binmersearch(tyrindex,
+        result = gt_tyrindex_binmersearch(tyrindex,
                                        1UL + (unsigned long)
                                              GT_DIV4(tyrbckinfo->prefixlength),
                                        bytecode,
@@ -275,9 +275,9 @@ static void splitmerinterval(Tyrbckinfo *tyrbckinfo,
   const GtUchar *rightbound, *leftptr, *rightptr, *mertable, *lastmer;
   unsigned long code, leftcode, rightcode, merbytes;
 
-  mertable = tyrindex_mertable(tyrindex);
-  lastmer = tyrindex_lastmer(tyrindex);
-  merbytes = tyrindex_merbytes(tyrindex);
+  mertable = gt_tyrindex_mertable(tyrindex);
+  lastmer = gt_tyrindex_lastmer(tyrindex);
+  merbytes = gt_tyrindex_merbytes(tyrindex);
   leftptr = mertable;
   rightptr = lastmer;
   rightcode = extractprefixbytecode(merbytes,
@@ -315,7 +315,7 @@ static void splitmerinterval(Tyrbckinfo *tyrbckinfo,
   }
 }
 
-int constructmerbuckets(const GtStr *inputindex,
+int gt_constructmerbuckets(const GtStr *inputindex,
                         const Definedunsignedint *callprefixlength,
                         GtError *err)
 {
@@ -327,14 +327,14 @@ int constructmerbuckets(const GtStr *inputindex,
   gt_error_check(err);
   tyrbckinfo.bounds = NULL;
   tyrbckinfo.boundisdefined = NULL;
-  tyrindex = tyrindex_new(inputindex,err);
+  tyrindex = gt_tyrindex_new(inputindex,err);
   if (tyrindex == NULL)
   {
     haserr = true;
   }
-  if (!haserr && tyrindex != NULL && !tyrindex_isempty(tyrindex))
+  if (!haserr && tyrindex != NULL && !gt_tyrindex_isempty(tyrindex))
   {
-    if (determinetyrbckpfxlen(&tyrbckinfo.prefixlength,
+    if (gt_determinetyrbckpfxlen(&tyrbckinfo.prefixlength,
                               tyrindex,
                               callprefixlength,
                               err) != 0)
@@ -342,16 +342,16 @@ int constructmerbuckets(const GtStr *inputindex,
       haserr = true;
     }
   }
-  if (!haserr && tyrindex != NULL && !tyrindex_isempty(tyrindex))
+  if (!haserr && tyrindex != NULL && !gt_tyrindex_isempty(tyrindex))
   {
     printf("# construct mer buckets for prefixlength %u\n",
             tyrbckinfo.prefixlength);
     tyrbckinfo.numofcodes
-      = (unsigned long) pow((double) tyrindex_alphasize(tyrindex),
+      = (unsigned long) pow((double) gt_tyrindex_alphasize(tyrindex),
                             (double) tyrbckinfo.prefixlength);
     tyrbckinfo.mappedmbdfileptr = NULL;
     printf("# numofcodes = %lu\n",tyrbckinfo.numofcodes);
-    tyrindex_show(tyrindex);
+    gt_tyrindex_show(tyrindex);
     ALLOCASSIGNSPACE(tyrbckinfo.bounds,NULL,unsigned long,
                      tyrbckinfo.numofcodes+1);
     GT_INITBITTAB(tyrbckinfo.boundisdefined,tyrbckinfo.numofcodes+1);
@@ -363,7 +363,7 @@ int constructmerbuckets(const GtStr *inputindex,
       haserr = true;
     }
   }
-  if (!haserr && tyrindex != NULL && !tyrindex_isempty(tyrindex))
+  if (!haserr && tyrindex != NULL && !gt_tyrindex_isempty(tyrindex))
   {
     unsigned long pl_long = (unsigned long) tyrbckinfo.prefixlength;
     gt_assert(bucketfp != NULL);
@@ -378,7 +378,7 @@ int constructmerbuckets(const GtStr *inputindex,
       haserr = true;
     }
   }
-  if (!haserr && tyrindex != NULL && !tyrindex_isempty(tyrindex))
+  if (!haserr && tyrindex != NULL && !gt_tyrindex_isempty(tyrindex))
   {
     gt_assert(bucketfp != NULL);
     if (fwrite(tyrbckinfo.bounds,
@@ -389,7 +389,7 @@ int constructmerbuckets(const GtStr *inputindex,
       haserr = true;
     }
   }
-  if (!haserr && tyrindex != NULL && !tyrindex_isempty(tyrindex))
+  if (!haserr && tyrindex != NULL && !gt_tyrindex_isempty(tyrindex))
   {
     gt_assert(bucketfp != NULL);
     if (fwrite(tyrbckinfo.boundisdefined,
@@ -403,14 +403,14 @@ int constructmerbuckets(const GtStr *inputindex,
   gt_fa_xfclose(bucketfp);
   if (tyrindex != NULL)
   {
-    tyrindex_delete(&tyrindex);
+    gt_tyrindex_delete(&tyrindex);
   }
   FREESPACE(tyrbckinfo.bounds);
   gt_free(tyrbckinfo.boundisdefined);
   return haserr ? -1 : 0;
 }
 
-Tyrbckinfo *tyrbckinfo_new(const GtStr *tyrindexname,unsigned int alphasize,
+Tyrbckinfo *gt_tyrbckinfo_new(const GtStr *tyrindexname,unsigned int alphasize,
                            GtError *err)
 {
   size_t numofbytes, expectedsize;
@@ -459,7 +459,7 @@ Tyrbckinfo *tyrbckinfo_new(const GtStr *tyrindexname,unsigned int alphasize,
   return tyrbckinfo;
 }
 
-void tyrbckinfo_delete(Tyrbckinfo **tyrbckinfoptr)
+void gt_tyrbckinfo_delete(Tyrbckinfo **tyrbckinfoptr)
 {
   Tyrbckinfo *tyrbckinfo = *tyrbckinfoptr;
 

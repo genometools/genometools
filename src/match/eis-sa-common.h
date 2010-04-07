@@ -71,7 +71,7 @@ struct encSeqTrState
  * @param len length of string to read
  */
 extern size_t
-translateSuftab2BWT(struct encSeqTrState *trState,
+gt_translateSuftab2BWT(struct encSeqTrState *trState,
                     GtUchar *dest,
                     unsigned long *src,
                     size_t len);
@@ -84,7 +84,7 @@ struct encSeqLCPState
 };
 
 extern size_t
-translateSuftab2LCP(struct encSeqLCPState *lcpState,
+gt_translateSuftab2LCP(struct encSeqLCPState *lcpState,
                     unsigned long *dest,
                     unsigned long *src,
                     size_t len);
@@ -108,14 +108,14 @@ struct saTaggedXltorStateList
 };
 
 extern void
-initSATaggedXltorStateList(struct saTaggedXltorStateList *saXltorStateList);
+gt_initSATaggedXltorStateList(struct saTaggedXltorStateList *saXltorStateList);
 
 extern void
-destructSATaggedXltorStateList(
+gt_destructSATaggedXltorStateList(
   struct saTaggedXltorStateList *saXltorStateList);
 
 extern struct saTaggedXltorState *
-addSuffixarrayXltor(struct saTaggedXltorStateList *saXltorStateList,
+gt_addSuffixarrayXltor(struct saTaggedXltorStateList *saXltorStateList,
                     enum sfxDataRequest request,
                     union saXltorState saXltorState);
 

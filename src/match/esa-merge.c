@@ -47,7 +47,7 @@ static void fillandinsert(Mergertrierep *trierep,
 #ifdef WITHTRIEIDENT
   sinfo.ident = ident;
 #endif
-  mergertrie_insertsuffix(trierep,node,&sinfo);
+  gt_mergertrie_insertsuffix(trierep,node,&sinfo);
 }
 
 static int inputthesequences(unsigned int *numofchars,
@@ -136,7 +136,7 @@ static int insertfirstsuffixes(Mergertrierep *trierep,
   return NULL;
 }
 
-int emissionmergedesa_stepdeleteandinsertothersuffixes(
+int gt_emissionmergedesa_stepdeleteandinsertothersuffixes(
                                  Emissionmergedesa *emmesa, GtError *err)
 {
   Mergertrienode *tmpsmallestleaf, *tmplcpnode;
@@ -154,7 +154,7 @@ int emissionmergedesa_stepdeleteandinsertothersuffixes(
       emmesa->buf.nextstoreidx < (unsigned int) SIZEOFMERGERESULTBUFFER;
       emmesa->buf.nextstoreidx++)
   {
-    tmpsmallestleaf = mergertrie_findsmallestnode(&emmesa->trierep);
+    tmpsmallestleaf = gt_mergertrie_findsmallestnode(&emmesa->trierep);
     tmplastbranchdepth = tmpsmallestleaf->parent->depth;
     tmpidx = tmpsmallestleaf->suffixinfo.idx;
     emmesa->buf.suftabstore[emmesa->buf.nextstoreidx].idx = tmpidx;
@@ -163,7 +163,7 @@ int emissionmergedesa_stepdeleteandinsertothersuffixes(
     if (emmesa->nextpostable[tmpidx] >
        gt_encodedsequence_totallength(emmesa->suffixarraytable[tmpidx].encseq))
     {
-      mergertrie_deletesmallestpath(tmpsmallestleaf,&emmesa->trierep);
+      gt_mergertrie_deletesmallestpath(tmpsmallestleaf,&emmesa->trierep);
       emmesa->numofentries--;
     } else
     {
@@ -220,8 +220,8 @@ int emissionmergedesa_stepdeleteandinsertothersuffixes(
                     tmpsuftabvalue,
                     tmplcpnode,
                     emmesa->ident++);
-      tmpsmallestleaf = mergertrie_findsmallestnode(&emmesa->trierep);
-      mergertrie_deletesmallestpath(tmpsmallestleaf,&emmesa->trierep);
+      tmpsmallestleaf = gt_mergertrie_findsmallestnode(&emmesa->trierep);
+      gt_mergertrie_deletesmallestpath(tmpsmallestleaf,&emmesa->trierep);
     }
     if (emmesa->numofentries > 0)
     {
@@ -236,7 +236,7 @@ int emissionmergedesa_stepdeleteandinsertothersuffixes(
   return 0;
 }
 
-int emissionmergedesa_init(Emissionmergedesa *emmesa,
+int gt_emissionmergedesa_init(Emissionmergedesa *emmesa,
                            const GtStrArray *indexnametab,
                            unsigned int demand,
                            GtLogger *logger,
@@ -277,7 +277,7 @@ int emissionmergedesa_init(Emissionmergedesa *emmesa,
       emmesa->trierep.encseqreadinfo[idx].readmode
         = emmesa->suffixarraytable[idx].readmode;
     }
-    mergertrie_initnodetable(&emmesa->trierep,(unsigned long) numofindexes,
+    gt_mergertrie_initnodetable(&emmesa->trierep,(unsigned long) numofindexes,
                              numofindexes);
     if (insertfirstsuffixes(&emmesa->trierep,
                            emmesa->nextpostable,
@@ -297,19 +297,19 @@ int emissionmergedesa_init(Emissionmergedesa *emmesa,
   return haserr ? -1 : 0;
 }
 
-void emissionmergedesa_wrap(Emissionmergedesa *emmesa)
+void gt_emissionmergedesa_wrap(Emissionmergedesa *emmesa)
 {
   unsigned int idx;
 
   for (idx = 0; idx < emmesa->numofindexes; idx++)
   {
-    freesuffixarray(emmesa->suffixarraytable + idx);
+    gt_freesuffixarray(emmesa->suffixarraytable + idx);
   }
   FREESPACE(emmesa->suffixarraytable);
   FREESPACE(emmesa->trierep.encseqreadinfo);
   if (emmesa->numofindexes > 1U)
   {
-    mergertrie_delete(&emmesa->trierep);
+    gt_mergertrie_delete(&emmesa->trierep);
   }
   FREESPACE(emmesa->nextpostable);
 }

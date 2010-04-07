@@ -30,14 +30,14 @@ typedef enum
   Noorder
 } Ordertype;
 
-Blindtrie *blindtrie_new(unsigned long numofsuffixes,
+Blindtrie *gt_blindtrie_new(unsigned long numofsuffixes,
                          const GtEncodedsequence *encseq,
                          bool cmpcharbychar,
                          GtEncodedsequenceScanstate *esr1,
                          GtEncodedsequenceScanstate *esr2,
                          GtReadmode readmode);
 
-unsigned long blindtrie_suffixsort(Blindtrie *blindtrie,
+unsigned long gt_blindtrie_suffixsort(Blindtrie *blindtrie,
                             unsigned long *suffixtable,
                             unsigned long *lcpsubtab,
                             unsigned long numberofsuffixes,
@@ -50,6 +50,6 @@ unsigned long blindtrie_suffixsort(Blindtrie *blindtrie,
                                                             unsigned long *,
                                                             unsigned long));
 
-void blindtrie_delete(Blindtrie **blindtrie);
+void gt_blindtrie_delete(Blindtrie **blindtrie);
 
 #endif

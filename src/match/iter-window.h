@@ -22,14 +22,14 @@
 
 typedef struct Windowiterator Windowiterator;
 
-Windowiterator *windowiterator_new(const GtEncodedsequence *encseq,
+Windowiterator *gt_windowiterator_new(const GtEncodedsequence *encseq,
                                    unsigned long windowsize,
                                    unsigned long startpos,
                                    unsigned long endpos);
 
-void windowiterator_delete(Windowiterator *wit);
+void gt_windowiterator_delete(Windowiterator *wit);
 
-const GtUchar *windowiterator_next(unsigned long *currentpos,
+const GtUchar *gt_windowiterator_next(unsigned long *currentpos,
                                    unsigned long *firstpos,
                                    Windowiterator *wit);
 

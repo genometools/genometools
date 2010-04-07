@@ -20,13 +20,13 @@
 #include "fmindex.h"
 #include "core/safecast-gen.h"
 
-unsigned long determinenumofcodes(unsigned int numofchars,
+unsigned long gt_determinenumofcodes(unsigned int numofchars,
                                   unsigned int prefixlength)
 {
   return (unsigned long) pow((double) numofchars,(double) prefixlength);
 }
 
-unsigned long determinenumberofspecialstostore(const GtSpecialcharinfo
+unsigned long gt_determinenumberofspecialstostore(const GtSpecialcharinfo
                                                                *specialcharinfo)
 {
   unsigned long addprefixsuffix = 0;
@@ -66,14 +66,14 @@ static unsigned long determinefmindexsize (const Fmindex *fm,
   if (storeindexpos)
   {
     sumsize += (uint64_t) sizeof (GtPairBwtidx) *
-               (uint64_t) determinenumberofspecialstostore(specialcharinfo);
+               (uint64_t) gt_determinenumberofspecialstostore(specialcharinfo);
   }
   sumsize += (uint64_t) sizeof (GtUchar) *
              (uint64_t) BFREQSIZE(fm->mapsize,fm->nofblocks);
   return CALLCASTFUNC(uint64_t,unsigned_long,sumsize);
 }
 
-void computefmkeyvalues (Fmindex *fm,
+void gt_computefmkeyvalues (Fmindex *fm,
                          const GtSpecialcharinfo *specialcharinfo,
                          unsigned long bwtlength,
                          unsigned int log2bsize,
@@ -101,7 +101,7 @@ void computefmkeyvalues (Fmindex *fm,
   fm->suffixlength = suffixlength;
   if (fm->suffixlength > 0)
   {
-    fm->numofcodes = determinenumofcodes(fm->mapsize-1,fm->suffixlength);
+    fm->numofcodes = gt_determinenumofcodes(fm->mapsize-1,fm->suffixlength);
   } else
   {
     fm->numofcodes = 0;

@@ -173,7 +173,7 @@ static void apme_initdfsconstinfo(Limdfsconstinfo *mti,
   mti->skpp = (bool) va_arg(ap, int);
   va_end(ap);
   gt_assert(mti->maxdistance < mti->patternlength);
-  initeqsvector(mti->eqsvector,(unsigned long) alphasize,
+  gt_initeqsvector(mti->eqsvector,(unsigned long) alphasize,
                 pattern,mti->patternlength);
 }
 
@@ -405,7 +405,7 @@ static void apme_inplacenextLimdfsstate(const Limdfsconstinfo *mti,
   }
 }
 
-const AbstractDfstransformer *apme_AbstractDfstransformer(void)
+const AbstractDfstransformer *gt_apme_AbstractDfstransformer(void)
 {
   static const AbstractDfstransformer apme_adfst =
   {

@@ -58,7 +58,7 @@ int gt_trieins(int argc, const char **argv, GtError *err)
   gt_assert(parsed_args == 1);
 
   indexname = gt_str_new_cstr(argv[parsed_args]);
-  if (test_trieins(onlyins,indexname,err) != 0)
+  if (gt_test_trieins(onlyins,indexname,err) != 0)
   {
     haserr = true;
   }

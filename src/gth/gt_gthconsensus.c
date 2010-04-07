@@ -65,7 +65,7 @@ static int process_consensus_files(GtStrArray *consensusfiles,
 
   /* process the alignments */
   if (!had_err) {
-    proc_sa_collection(sa_collection, call_info, input, stat, indentlevel);
+    gt_proc_sa_collection(sa_collection, call_info, input, stat, indentlevel);
   }
 
   /* show XML trailer */

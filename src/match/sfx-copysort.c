@@ -312,7 +312,7 @@ static void showexpandcode(const GtBucketspec2 *bucketspec2,
     char buffer[100];
 
     ecode = expandtwocharcode(code2,bucketspec2);
-    fromkmercode2string(buffer,
+    gt_fromkmercode2string(buffer,
                         ecode,
                         bucketspec2->numofchars,
                         prefixlength,
@@ -329,10 +329,10 @@ static void fill2subbuckets(GtBucketspec2 *bucketspec2,const Bcktab *bcktab)
   Bucketspecification bucketspec;
   unsigned long accubucketsize = 0;
 
-  maxcode = bcktab_numofallcodes(bcktab) - 1;
+  maxcode = gt_bcktab_numofallcodes(bcktab) - 1;
   for (code = 0; code <= maxcode; code++)
   {
-    rightchar = calcbucketboundsparts(&bucketspec,
+    rightchar = gt_calcbucketboundsparts(&bucketspec,
                                       bcktab,
                                       code,
                                       maxcode,
@@ -365,11 +365,11 @@ static void fillanysubbuckets(GtBucketspec2 *bucketspec2,
   unsigned int rightchar = 0, currentchar = 0;
   unsigned long rightbound, *specialchardist;
 
-  maxcode = bcktab_numofallcodes(bcktab) - 1;
+  maxcode = gt_bcktab_numofallcodes(bcktab) - 1;
   bucketspec2->expandfactor
     = (GtCodetype) pow((double) bucketspec2->numofchars,
                      (double) (bucketspec2->prefixlength-2));
-  bucketspec2->expandfillsum = bcktab_filltable(bcktab,2U);
+  bucketspec2->expandfillsum = gt_bcktab_filltable(bcktab,2U);
 #ifdef SHOWBUCKETSPEC2
   showexpandcode(bucketspec2,bucketspec2->prefixlength);
 #endif
@@ -380,7 +380,7 @@ static void fillanysubbuckets(GtBucketspec2 *bucketspec2,
   {
     GtCodetype ecode = expandtwocharcode(code2,bucketspec2);
     gt_assert(ecode / bucketspec2->expandfactor == code2);
-    rightbound = calcbucketrightbounds(bcktab,
+    rightbound = gt_calcbucketrightbounds(bcktab,
                                        ecode,
                                        maxcode,
                                        bucketspec2->partwidth);
@@ -418,7 +418,7 @@ GtBucketspec2 *gt_bucketspec2_new(const Bcktab *bcktab,
   gt_assert(numofchars > 0);
   bucketspec2 = gt_malloc(sizeof (*bucketspec2));
   bucketspec2->partwidth = partwidth;
-  bucketspec2->prefixlength = bcktab_prefixlength(bcktab);
+  bucketspec2->prefixlength = gt_bcktab_prefixlength(bcktab);
   bucketspec2->numofchars = numofchars;
   bucketspec2->numofcharssquared = numofchars * numofchars;
   bucketspec2->encseq = encseq;

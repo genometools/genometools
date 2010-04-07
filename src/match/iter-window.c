@@ -28,7 +28,7 @@ struct Windowiterator
   GtEncodedsequenceScanstate *esr;
 };
 
-Windowiterator *windowiterator_new(const GtEncodedsequence *encseq,
+Windowiterator *gt_windowiterator_new(const GtEncodedsequence *encseq,
                                    unsigned long windowsize,
                                    unsigned long startpos,
                                    unsigned long endpos)
@@ -52,13 +52,13 @@ Windowiterator *windowiterator_new(const GtEncodedsequence *encseq,
   return wit;
 }
 
-void windowiterator_delete(Windowiterator *wit)
+void gt_windowiterator_delete(Windowiterator *wit)
 {
   gt_free(wit->buffer);
   gt_free(wit);
 }
 
-const GtUchar *windowiterator_next(unsigned long *currentpos,
+const GtUchar *gt_windowiterator_next(unsigned long *currentpos,
                                    unsigned long *firstpos,
                                    Windowiterator *wit)
 {
@@ -191,10 +191,10 @@ static void iteroverallwords2(const GtEncodedsequence *encseq,
   unsigned long currentpos;
   unsigned long firstpos, windowschecked = 0;
 
-  wit = windowiterator_new(encseq,windowsize,startpos,endpos);
+  wit = gt_windowiterator_new(encseq,windowsize,startpos,endpos);
   while (true)
   {
-    buffer = windowiterator_next(&currentpos,&firstpos,wit);
+    buffer = gt_windowiterator_next(&currentpos,&firstpos,wit);
     if (buffer != NULL)
     {
       checkcurrentwindow(encseq,
@@ -208,7 +208,7 @@ static void iteroverallwords2(const GtEncodedsequence *encseq,
       break;
     }
   }
-  windowiterator_delete(wit);
+  gt_windowiterator_delete(wit);
   printf("# %lu windows checked\n",windowschecked);
 }
 #endif

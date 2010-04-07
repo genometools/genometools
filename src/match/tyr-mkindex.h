@@ -23,7 +23,7 @@
 #include "core/error_api.h"
 #include "core/logger.h"
 
-int merstatistics(const GtStr *str_inputindex,
+int gt_merstatistics(const GtStr *str_inputindex,
                   unsigned long mersize,
                   unsigned long minocc,
                   unsigned long maxocc,

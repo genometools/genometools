@@ -63,6 +63,6 @@ static inline void
 destructSASeqSrc(SASeqSrc *src);
 
 extern SeqDataReader
-SASSGenericCreateReader(SASeqSrc *src, enum sfxDataRequest request);
+gt_SASSGenericCreateReader(SASeqSrc *src, enum sfxDataRequest request);
 
 #endif

@@ -24,7 +24,7 @@ static inline MRAEnc *
 MRAEncUInt8New(AlphabetRangeID numRanges, AlphabetRangeSize symbolsPerRange[],
                const uint8_t *mapping)
 {
-  return newMultiRangeAlphabetEncodingUInt8(numRanges, symbolsPerRange,
+  return gt_newMultiRangeAlphabetEncodingUInt8(numRanges, symbolsPerRange,
                                             mapping);
 }
 
@@ -107,7 +107,7 @@ static inline AlphabetRangeID
 MRAEncGetRangeOfSymbol(const MRAEnc *mralpha, Symbol sym)
 {
   AlphabetRangeID range = 0;
-  gt_assert(mralpha && sym < MRAEncGetSize(mralpha));
+  gt_assert(mralpha && sym < gt_MRAEncGetSize(mralpha));
   while (sym >= mralpha->rangeEndIndices[range])
     ++range;
   return range;

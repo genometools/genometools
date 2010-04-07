@@ -22,7 +22,7 @@
 
 #include "core/encodedsequence.h"
 
-Compressedtable *lcp9_manzini(Compressedtable *spacefortab,
+Compressedtable *gt_lcp9_manzini(Compressedtable *spacefortab,
                               const GtEncodedsequence *encseq,
                               GtReadmode readmode,
                               unsigned long partwidth,

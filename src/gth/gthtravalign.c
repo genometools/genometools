@@ -21,7 +21,7 @@
 #include "core/file.h"
 #include "gth/gthtravalign.h"
 
-bool eops_equal_referencelength(Editoperation *alignment,
+bool gt_eops_equal_referencelength(Editoperation *alignment,
                                 long alignmentlength,
                                 long referencelength,
                                 bool proteineop)
@@ -31,8 +31,8 @@ bool eops_equal_referencelength(Editoperation *alignment,
   long i, sumofeops = 0;
 
   for (i = 0; i < alignmentlength; i++) {
-    eoptype   = editoperation_type(alignment[i], proteineop);
-    eoplength = editoperation_length(alignment[i], proteineop);
+    eoptype   = gt_editoperation_type(alignment[i], proteineop);
+    eoplength = gt_editoperation_length(alignment[i], proteineop);
 
     switch (eoptype) {
       case EOP_TYPE_DELETION:
@@ -125,8 +125,8 @@ void gthtraversealignment(bool forward, Traversealignmentstate *state,
                 : state->eopptr <= state->alignment
                                  + state->alignmentlength - 1;
         forward ? state->eopptr-- : state->eopptr++) {
-    eoptype   = editoperation_type(*state->eopptr, proteineop);
-    eoplength = editoperation_length(*state->eopptr, proteineop);
+    eoptype   = gt_editoperation_type(*state->eopptr, proteineop);
+    eoplength = gt_editoperation_length(*state->eopptr, proteineop);
 
     /* we are not processing two intron types at the same time */
     gt_assert(!(state->processing_intron_with_1_base_left &&

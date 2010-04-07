@@ -17,7 +17,7 @@
 
 #include "intcode-def.h"
 
-void fromkmercode2string(char *buffer,
+void gt_fromkmercode2string(char *buffer,
                          GtCodetype code,
                          unsigned int numofchars,
                          unsigned int kmersize,

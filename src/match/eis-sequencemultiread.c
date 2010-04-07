@@ -67,18 +67,18 @@ static size_t
 seqReaderSetRead(void *state, void *dest, size_t len);
 
 extern int
-initSeqReaderSet(SeqReaderSet *readerSet, int initialSuperSet,
+gt_initSeqReaderSet(SeqReaderSet *readerSet, int initialSuperSet,
                  int numConsumers, int *tags, SeqDataTranslator xltors[],
                  SeqDataReader *generatedReaders, size_t seqElemSize,
                  generatorFunc generator, void *generatorState)
 {
   int i;
-  initEmptySeqReaderSet(readerSet, initialSuperSet, seqElemSize,
+  gt_initEmptySeqReaderSet(readerSet, initialSuperSet, seqElemSize,
                         generator, generatorState);
   for (i = 0; i < numConsumers; ++i)
   {
     generatedReaders[i]
-      = seqReaderSetRegisterConsumer(readerSet, tags[i], xltors[i]);
+      = gt_seqReaderSetRegisterConsumer(readerSet, tags[i], xltors[i]);
     if (!generatedReaders[i].readData)
       break;
   }
@@ -86,7 +86,7 @@ initSeqReaderSet(SeqReaderSet *readerSet, int initialSuperSet,
 }
 
 extern void
-initEmptySeqReaderSet(SeqReaderSet *readerSet, int initialSuperSet,
+gt_initEmptySeqReaderSet(SeqReaderSet *readerSet, int initialSuperSet,
                       size_t seqElemSize, generatorFunc generator,
                       void *generatorState)
 {
@@ -104,7 +104,7 @@ initEmptySeqReaderSet(SeqReaderSet *readerSet, int initialSuperSet,
 }
 
 extern void
-destructSeqReaderSet(SeqReaderSet *readerSet)
+gt_destructSeqReaderSet(SeqReaderSet *readerSet)
 {
   gt_assert(readerSet);
   ListDo(struct seqReaderState, readerSet->consumerList, gt_free(p));
@@ -115,7 +115,7 @@ destructSeqReaderSet(SeqReaderSet *readerSet)
 }
 
 extern SeqDataReader
-seqReaderSetRegisterConsumer(SeqReaderSet *readerSet, int tag,
+gt_seqReaderSetRegisterConsumer(SeqReaderSet *readerSet, int tag,
                              SeqDataTranslator xltor)
 {
   int availId = readerSet->numConsumers++;
@@ -139,7 +139,7 @@ seqReaderSetRegisterConsumer(SeqReaderSet *readerSet, int tag,
 }
 
 extern bool
-seqReaderSetRegisterAutoConsumer(SeqReaderSet *readerSet, int tag,
+gt_seqReaderSetRegisterAutoConsumer(SeqReaderSet *readerSet, int tag,
                                  SeqDataWriter writer)
 {
   int availId = readerSet->numConsumers++;

@@ -233,7 +233,7 @@ static int gt_tagerator_arguments_check(GT_UNUSED int rest_argc,
   }
   for (idx=0; idx<gt_str_array_size(arguments->outputspec); idx++)
   {
-    if (optionargaddbitmask(outputmodedesctable,
+    if (gt_optionargaddbitmask(outputmodedesctable,
                             sizeof (outputmodedesctable)/
                             sizeof (outputmodedesctable[0]),
                             &arguments->outputmode,
@@ -302,7 +302,7 @@ static int gt_tagerator_runner(GT_UNUSED int argc,
   {
     printf("# queryfile=%s\n",gt_str_array_get(arguments->tagfiles,idx));
   }
-  if (runtagerator(arguments,err) != 0)
+  if (gt_runtagerator(arguments,err) != 0)
   {
     haserr = true;
   }

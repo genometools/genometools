@@ -66,11 +66,11 @@ static void addSAtoAGS(GthAGS *ags, GthSACluster *sacluster, GtArray *nodes)
       }
       else {
         /* left borders are equal, merge exon and node */
-        mergenodes(gt_array_get(nodes, currentnode), &node);
+        gt_mergenodes(gt_array_get(nodes, currentnode), &node);
         currentnode++;
         currentexon++;
       }
-      freecoreExonnode(&node);
+      gt_freecoreExonnode(&node);
     }
     else {
       /* save this node */
@@ -81,7 +81,8 @@ static void addSAtoAGS(GthAGS *ags, GthSACluster *sacluster, GtArray *nodes)
   }
 }
 
-void buildAGSfromassembly(GthAGS *ags, GtBittab *assembly, GtArray *saclusters)
+void gt_buildAGSfromassembly(GthAGS *ags, GtBittab *assembly,
+                             GtArray *saclusters)
 {
   unsigned long i;
   GtArray *nodes;
@@ -102,7 +103,7 @@ void buildAGSfromassembly(GthAGS *ags, GtBittab *assembly, GtArray *saclusters)
   for (i = 0; i < gt_array_size(nodes); i++) {
     exonnode = gt_array_get(nodes, i);
     exonAGS.range = exonnode->range;
-    exonAGS.score = computeexonscore(exonnode);
+    exonAGS.score = gt_computeexonscore(exonnode);
     gt_array_add(ags->exons, exonAGS);
   }
 
@@ -123,7 +124,7 @@ void buildAGSfromassembly(GthAGS *ags, GtBittab *assembly, GtArray *saclusters)
   /* free space for nodes */
   for (i = 0; i < gt_array_size(nodes); i++) {
     exonnode = gt_array_get(nodes, i);
-    freecoreExonnode(exonnode);
+    gt_freecoreExonnode(exonnode);
   }
   gt_array_delete(nodes);
 }

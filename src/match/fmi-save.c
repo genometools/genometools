@@ -71,7 +71,7 @@ static int writefmdata (const GtStr *indexname,
   {
     return -1;
   }
-  if (flushfmindex2file(fp,fm,storeindexpos,err) != 0)
+  if (gt_flushfmindex2file(fp,fm,storeindexpos,err) != 0)
   {
     return -2;
   }
@@ -79,7 +79,7 @@ static int writefmdata (const GtStr *indexname,
   return 0;
 }
 
-int saveFmindex (const GtStr *indexname,Fmindex *fm,
+int gt_saveFmindex (const GtStr *indexname,Fmindex *fm,
                  const GtSpecialcharinfo *specialcharinfo,
                  bool storeindexpos,GtError *err)
 {

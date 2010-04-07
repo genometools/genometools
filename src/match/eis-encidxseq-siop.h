@@ -63,7 +63,7 @@ static inline unsigned long
 EISSymTransformedRank(EISeq *seq, Symbol tSym, unsigned long pos,
                       union EISHint *hint)
 {
-  gt_assert(tSym < MRAEncGetSize(EISGetAlphabet(seq)));
+  gt_assert(tSym < gt_MRAEncGetSize(EISGetAlphabet(seq)));
   return seq->classInfo->rank(seq, tSym, pos, hint);
 }
 
@@ -95,14 +95,14 @@ static inline struct GtUlongPair
 EISSymTransformedPosPairRank(EISeq *seq, Symbol tSym, unsigned long posA,
                              unsigned long posB, union EISHint *hint)
 {
-  if (tSym >= MRAEncGetSize(EISGetAlphabet(seq)))
+  if (tSym >= gt_MRAEncGetSize(EISGetAlphabet(seq)))
   {
-    fprintf(stderr,"tsym=%lu,MRAEncGetSize(EISGetAlphabet(seq)=%lu\n",
+    fprintf(stderr,"tsym=%lu,gt_MRAEncGetSize(EISGetAlphabet(seq)=%lu\n",
            (unsigned long) tSym,
-           (unsigned long) MRAEncGetSize(EISGetAlphabet(seq)));
+           (unsigned long) gt_MRAEncGetSize(EISGetAlphabet(seq)));
     exit(EXIT_FAILURE);
   }
-  gt_assert(tSym < MRAEncGetSize(EISGetAlphabet(seq)));
+  gt_assert(tSym < gt_MRAEncGetSize(EISGetAlphabet(seq)));
   return seq->classInfo->posPairRank(seq, tSym, posA, posB, hint);
 }
 

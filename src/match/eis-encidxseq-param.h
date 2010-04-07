@@ -99,7 +99,8 @@ struct seqBaseParam
 };
 
 extern void
-registerEncIdxSeqOptions(GtOptionParser *op, struct seqBaseParam *paramOutput);
+gt_registerEncIdxSeqOptions(GtOptionParser *op,
+                            struct seqBaseParam *paramOutput);
 
 /**
  * @brief Given the construction parameters for a sequence index,
@@ -113,6 +114,6 @@ registerEncIdxSeqOptions(GtOptionParser *op, struct seqBaseParam *paramOutput);
  * @return number of symbols stored consecutively
  */
 extern unsigned
-estimateSegmentSize(const struct seqBaseParam *params);
+gt_estimateSegmentSize(const struct seqBaseParam *params);
 
 #endif

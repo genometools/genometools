@@ -109,7 +109,7 @@ initSASeqSrc(SASeqSrc *src, unsigned long seqLen,
   src->createTranslator = createTranslator;
   if (createTranslator && !createReader)
   {
-    src->createReader = SASSGenericCreateReader;
+    src->createReader = gt_SASSGenericCreateReader;
   }
   else
     src->createReader = createReader;
@@ -119,20 +119,20 @@ initSASeqSrc(SASeqSrc *src, unsigned long seqLen,
   src->deleteSASS = deleteSASS;
   src->newMRAEnc = newMRAEnc;
   src->alphabet = NULL;
-  initEmptySeqReaderSet(&src->readerSet,
+  gt_initEmptySeqReaderSet(&src->readerSet,
                         SFX_REQUEST_NONE,
                         sizeof (unsigned long),
                         generator, generatorState);
-  initSATaggedXltorStateList(&src->xltorStates);
+  gt_initSATaggedXltorStateList(&src->xltorStates);
 }
 
 static inline void
 destructSASeqSrc(SASeqSrc *src)
 {
   if (src->alphabet)
-    MRAEncDelete(src->alphabet);
-  destructSATaggedXltorStateList(&src->xltorStates);
-  destructSeqReaderSet(&src->readerSet);
+    gt_MRAEncDelete(src->alphabet);
+  gt_destructSATaggedXltorStateList(&src->xltorStates);
+  gt_destructSeqReaderSet(&src->readerSet);
 }
 
 static inline void

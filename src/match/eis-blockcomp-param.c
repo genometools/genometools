@@ -19,7 +19,8 @@
 #include "match/eis-encidxseq.h"
 
 extern void
-registerBlockEncOptions(GtOptionParser *op, struct blockEncParams *paramOutput)
+gt_registerBlockEncOptions(GtOptionParser *op,
+                           struct blockEncParams *paramOutput)
 {
   GtOption *option;
 

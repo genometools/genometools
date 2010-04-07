@@ -20,16 +20,16 @@
 
 typedef struct Enumpatterniterator Enumpatterniterator;
 
-Enumpatterniterator *newenumpatterniterator(unsigned long minpatternlen,
+Enumpatterniterator *gt_newenumpatterniterator(unsigned long minpatternlen,
                                             unsigned long maxpatternlen,
                                             const GtEncodedsequence *encseq,
                                             GtError *err);
 
-const GtUchar *nextEnumpatterniterator(unsigned long *patternlen,
+const GtUchar *gt_nextEnumpatterniterator(unsigned long *patternlen,
                                      Enumpatterniterator *epi);
 
-void showPatterndistribution(const Enumpatterniterator *epi);
+void gt_showPatterndistribution(const Enumpatterniterator *epi);
 
-void freeEnumpatterniterator(Enumpatterniterator **epi);
+void gt_freeEnumpatterniterator(Enumpatterniterator **epi);
 
 #endif

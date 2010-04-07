@@ -100,7 +100,7 @@ static void adjustboundariesfromXdropextension(Myxdropbest xdropbest_left,
  The following function applies the filter algorithms one after another
  to all candidate pairs.
 */
-int searchforLTRs(LTRharvestoptions *lo,
+int gt_searchforLTRs(LTRharvestoptions *lo,
                   GtArrayLTRboundaries *arrayLTRboundaries,
                   const GtEncodedsequence *encseq,
                   GtError *err)
@@ -145,7 +145,7 @@ int searchforLTRs(LTRharvestoptions *lo,
     GT_INITARRAY (&fronts, Myfrontvalue);
     if (alilen <= repeatptr->pos1)
     {
-      evalxdroparbitscoresleft(&lo->arbitscores,
+      gt_evalxdroparbitscoresleft(&lo->arbitscores,
                                &xdropbest_left,
                                &fronts,
                                encseq,
@@ -158,7 +158,7 @@ int searchforLTRs(LTRharvestoptions *lo,
     }
     else /* do not align over left sequence boundary */
     {
-      evalxdroparbitscoresleft(&lo->arbitscores,
+      gt_evalxdroparbitscoresleft(&lo->arbitscores,
                                &xdropbest_left,
                                &fronts,
                                encseq,
@@ -177,7 +177,7 @@ int searchforLTRs(LTRharvestoptions *lo,
     if (alilen <= totallength - (repeatptr->pos1 + repeatptr->offset +
                                 repeatptr->len) )
     {
-      evalxdroparbitscoresright (&lo->arbitscores,
+      gt_evalxdroparbitscoresright (&lo->arbitscores,
                                  &xdropbest_right,
                                  &fronts,
                                  encseq,
@@ -191,7 +191,7 @@ int searchforLTRs(LTRharvestoptions *lo,
     }
     else /* do not align over right sequence boundary */
     {
-      evalxdroparbitscoresright(&lo->arbitscores,
+      gt_evalxdroparbitscoresright(&lo->arbitscores,
                                 &xdropbest_right,
                                 &fronts,
                                 encseq,
@@ -263,7 +263,7 @@ int searchforLTRs(LTRharvestoptions *lo,
     /* if search for motif and/or TSD */
     if ( lo->motif.allowedmismatches < 4U || lo->minlengthTSD > 1U)
     {
-      if ( findcorrectboundaries(lo, boundaries, encseq, err) != 0 )
+      if ( gt_findcorrectboundaries(lo, boundaries, encseq, err) != 0 )
       {
         haserr = true;
         break;

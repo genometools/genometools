@@ -93,7 +93,7 @@ nextRange(GtRange *range, GtSpecialrangeiterator *sri,
 }
 
 extern SpecialsRankLookup *
-newSpecialsRankLookup(const GtEncodedsequence *encseq, GtReadmode readmode,
+gt_newSpecialsRankLookup(const GtEncodedsequence *encseq, GtReadmode readmode,
                      unsigned sampleIntervalLog2)
 {
   struct specialsRankLookup *ranker;
@@ -147,7 +147,7 @@ newSpecialsRankLookup(const GtEncodedsequence *encseq, GtReadmode readmode,
 }
 
 extern void
-deleteSpecialsRankLookup(SpecialsRankLookup *ranker)
+gt_deleteSpecialsRankLookup(SpecialsRankLookup *ranker)
 {
   if (ranker->rankFunc == specialsRankFromSampleTable)
     gt_encodedsequence_scanstate_delete(
@@ -197,7 +197,7 @@ specialsRankFromTermPos(const SpecialsRankLookup *ranker, unsigned long pos)
 }
 
 extern const GtEncodedsequence *
-SPRTGetOrigEncseq(const SpecialsRankLookup *ranker)
+gt_SPRTGetOrigEncseq(const SpecialsRankLookup *ranker)
 {
   return ranker->encseq;
 }

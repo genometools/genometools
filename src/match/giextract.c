@@ -428,7 +428,7 @@ static int giextract_encodedseq2fasta(FILE *fpout,
       frompos = 0;
       topos = seqinfo.seqlength;
     }
-    encseq2symbolstring(fpout,
+    gt_encseq2symbolstring(fpout,
                         encseq,
                         GT_READMODE_FORWARD,
                         seqinfo.seqstartpos + frompos,

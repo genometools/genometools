@@ -91,7 +91,7 @@ static void singlewindowmatchspacedseed(Limdfsresources *limdfsresources,
                                         const GtUchar *qptr,
                                         const Spacedseed *spse)
 {
-  indexbasedspacedseeds(limdfsresources,
+  gt_indexbasedspacedseeds(limdfsresources,
                         qptr,
                         spse->seedbitvector,
                         spse->seedwidth,
@@ -149,10 +149,10 @@ static void onlinespacedseedsearch(const GtEncodedsequence *encseq,
   bool matched;
 
   totallength = gt_encodedsequence_totallength(encseq);
-  wit = windowiterator_new(encseq,spse->seedwidth,0,totallength);
+  wit = gt_windowiterator_new(encseq,spse->seedwidth,0,totallength);
   while (true)
   {
-    buffer = windowiterator_next(&currentpos,&firstpos,wit);
+    buffer = gt_windowiterator_next(&currentpos,&firstpos,wit);
     if (buffer != NULL)
     {
       bitmask = FIRSTBIT;
@@ -174,11 +174,11 @@ static void onlinespacedseedsearch(const GtEncodedsequence *encseq,
       break;
     }
   }
-  windowiterator_delete(wit);
+  gt_windowiterator_delete(wit);
 }
 #endif
 
-int matchspacedseed(bool withesa,
+int gt_matchspacedseed(bool withesa,
                     bool docompare,
                     const GtStr *str_inputindex,
                     const GtStrArray *queryfilenames,
@@ -233,9 +233,9 @@ int matchspacedseed(bool withesa,
     const AbstractDfstransformer *dfst;
     const GtEncodedsequence *encseq;
 
-    dfst = spse_AbstractDfstransformer();
+    dfst = gt_spse_AbstractDfstransformer();
     gt_assert(genericindex != NULL);
-    limdfsresources = newLimdfsresources(genericindex,
+    limdfsresources = gt_newLimdfsresources(genericindex,
                                          true,
                                          0,
                                          (unsigned long) GT_INTWORDSIZE,
@@ -278,7 +278,7 @@ int matchspacedseed(bool withesa,
       }
       if (limdfsresources != NULL)
       {
-        freeLimdfsresources(&limdfsresources,dfst);
+        gt_freeLimdfsresources(&limdfsresources,dfst);
       }
       gt_seqiterator_delete(seqit);
     }

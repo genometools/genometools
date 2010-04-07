@@ -23,16 +23,17 @@
 
 typedef struct Myersonlineresources Myersonlineresources;
 
-Myersonlineresources *newMyersonlineresources(
+Myersonlineresources *gt_newMyersonlineresources(
                         unsigned int numofchars,
                         bool nowildcards,
                         const GtEncodedsequence *encseq,
                         Processmatch processmatch,
                         void *processmatchinfo);
 
-void freeMyersonlineresources(Myersonlineresources **ptrmyersonlineresources);
+void gt_freeMyersonlineresources(
+                                Myersonlineresources **ptrmyersonlineresources);
 
-void edistmyersbitvectorAPM(Myersonlineresources *mor,
+void gt_edistmyersbitvectorAPM(Myersonlineresources *mor,
                             const GtUchar *pattern,
                             unsigned long patternlength,
                             unsigned long maxdistance);

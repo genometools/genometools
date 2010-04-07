@@ -36,7 +36,7 @@ typedef struct
   unsigned long integervalue;
 } Qualifiedinteger;
 
-Qualifiedinteger *parsequalifiedinteger(const char *option,
+Qualifiedinteger *gt_parsequalifiedinteger(const char *option,
                                         const char *lparam,
                                         GtError *err);
 

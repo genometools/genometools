@@ -19,7 +19,7 @@
 #include "match/eis-bwtseq-context-param.h"
 
 extern void
-registerCtxMapOptions(GtOptionParser *op, int *ilogOut)
+gt_registerCtxMapOptions(GtOptionParser *op, int *ilogOut)
 {
  GtOption *option = gt_option_new_int_min_max(
     "ctxilog", "specify the interval of context sampling as log value\n"

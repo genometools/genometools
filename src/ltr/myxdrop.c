@@ -31,7 +31,7 @@
 /* CAUTION: fronts, that run over the matrix boundaries are not shown in
    the printed matrix.
  */
-int showmatrix(GtArrayMyfrontvalue * fronts,
+int gt_showmatrix(GtArrayMyfrontvalue * fronts,
                int distance,
                unsigned char *useq,
                unsigned char *vseq,
@@ -108,7 +108,7 @@ int showmatrix(GtArrayMyfrontvalue * fronts,
   return 0;
 }
 
-/* If showmatrix funktion = "True", then
+/* If gt_showmatrix funktion = "True", then
     (A)->nextfree##TYPE = POS+1; must be set:
 
  ** The other case, saves more space
@@ -151,7 +151,7 @@ int showmatrix(GtArrayMyfrontvalue * fronts,
 /*
  The following function calculates the distance from the given scores.
  */
-void calculatedistancesfromscores(Arbitraryscores *arbitscores,
+void gt_calculatedistancesfromscores(Arbitraryscores *arbitscores,
     Arbitrarydistances *arbitdistances)
 {
   unsigned int m, n, r;
@@ -194,7 +194,7 @@ void calculatedistancesfromscores(Arbitraryscores *arbitscores,
  The following function calculates the maximal allowed number of
  generations with all front values equal minus infinity.
  */
-void calculateallowedMININFINITYINTgenerations(
+void gt_calculateallowedMININFINITYINTgenerations(
    int *allowedMININFINITYINTgenerations,
    Arbitrarydistances *arbitdistances)
 {

@@ -208,7 +208,7 @@ static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,GtLogger *logger,
                       gt_str_get(mkfmcallinfo->leveldesc));
     haserr = true;
   }
-  if (!haserr && sufbwt2fmindex(&fm,
+  if (!haserr && gt_sufbwt2fmindex(&fm,
                                 &specialcharinfo,
                                 log2bsize,
                                 log2markdist,
@@ -220,7 +220,7 @@ static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,GtLogger *logger,
   {
     haserr = true;
   }
-  if (!haserr && saveFmindex(mkfmcallinfo->outfmindex,
+  if (!haserr && gt_saveFmindex(mkfmcallinfo->outfmindex,
                              &fm,
                              &specialcharinfo,
                              mkfmcallinfo->noindexpos ? false : true,
@@ -232,7 +232,7 @@ static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,GtLogger *logger,
   return haserr ? -1 : 0;
 }
 
-int parseargsandcallmkfmindex(int argc,const char **argv,GtError *err)
+int gt_parseargsandcallmkfmindex(int argc,const char **argv,GtError *err)
 {
   Mkfmcallinfo mkfmcallinfo;
   int retval;

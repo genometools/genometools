@@ -60,6 +60,6 @@ typedef struct
   size_t numberofmodedescentries;
 } TageratorOptions;
 
-int runtagerator(const TageratorOptions *tageratoroptions,GtError *err);
+int gt_runtagerator(const TageratorOptions *tageratoroptions,GtError *err);
 
 #endif

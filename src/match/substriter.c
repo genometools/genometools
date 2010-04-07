@@ -35,17 +35,18 @@ struct Substriter
   GtCodetype **multimappower;
 };
 
-Substriter *substriter_new(const GtAlphabet *alphabet,unsigned int qvalue)
+Substriter *gt_substriter_new(const GtAlphabet *alphabet,unsigned int qvalue)
 {
   Substriter *substriter;
   ALLOCASSIGNSPACE(substriter,NULL,Substriter,1);
   substriter->qvalue = qvalue;
   substriter->numofchars = gt_alphabet_num_of_chars(alphabet);
-  substriter->multimappower = initmultimappower(substriter->numofchars,qvalue);
+  substriter->multimappower = gt_initmultimappower(substriter->numofchars,
+                                                   qvalue);
   return substriter;
 }
 
-void substriter_init(Substriter *substriter,const GtUchar *start,
+void gt_substriter_init(Substriter *substriter,const GtUchar *start,
                     unsigned long len)
 {
   substriter->start = substriter->currentptr = start;
@@ -53,7 +54,7 @@ void substriter_init(Substriter *substriter,const GtUchar *start,
   gt_assert(substriter->remaining > 0);
 }
 
-int substriter_next(Substriter *substriter)
+int gt_substriter_next(Substriter *substriter)
 {
   unsigned int firstspecial;
 
@@ -81,8 +82,8 @@ int substriter_next(Substriter *substriter)
   return 1;
 }
 
-void substriter_delete(Substriter **substriter)
+void gt_substriter_delete(Substriter **substriter)
 {
-  multimappowerfree(&(*substriter)->multimappower);
+  gt_multimappowerfree(&(*substriter)->multimappower);
   FREESPACE(*substriter);
 }

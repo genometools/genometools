@@ -93,7 +93,7 @@ static void removeemptyparts(Suftabparts *suftabparts,
   }
 }
 
-Suftabparts *newsuftabparts(unsigned int numofparts,
+Suftabparts *gt_newsuftabparts(unsigned int numofparts,
                             const unsigned long *leftborder,
                             GtCodetype numofallcodes,
                             unsigned long numofsuffixestoinsert,
@@ -228,7 +228,7 @@ unsigned int stpgetnumofparts(const Suftabparts *suftabparts)
   return suftabparts->numofparts;
 }
 
-void freesuftabparts(Suftabparts *suftabparts)
+void gt_freesuftabparts(Suftabparts *suftabparts)
 {
   if (suftabparts != NULL)
   {

@@ -19,6 +19,6 @@
 #define SPACED_SEEDS_H
 #include "absdfstrans-def.h"
 
-const AbstractDfstransformer *spse_AbstractDfstransformer(void);
+const AbstractDfstransformer *gt_spse_AbstractDfstransformer(void);
 
 #endif

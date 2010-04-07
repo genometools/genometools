@@ -79,6 +79,6 @@ union EISHint
 };
 
 extern unsigned
-blockEncIdxSeqSegmentLen(const struct blockEncParams *params);
+gt_blockEncIdxSeqSegmentLen(const struct blockEncParams *params);
 
 #endif

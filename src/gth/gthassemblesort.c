@@ -21,5 +21,5 @@
 void gthassemblesort(GtArray *alignments)
 {
   qsort(gt_array_get_space(alignments), gt_array_size(alignments),
-        sizeof (GthSA*), compareaccordingtogenomicposactual);
+        sizeof (GthSA*), gt_compareaccordingtogenomicposactual);
 }

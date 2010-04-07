@@ -194,7 +194,7 @@ BWTSeqLFMap(const BWTSeq *bwtSeq, unsigned long LPos,
       break;
     case SORTMODE_RANK:
       FPos = bwtSeq->count[MRAEncGetRangeBase(alphabet, range)]
-        + BWTSeqGetRankSort(bwtSeq, LPos, range, extBits);
+        + gt_BWTSeqGetRankSort(bwtSeq, LPos, range, extBits);
       break;
     case SORTMODE_UNDEFINED:
     default:
@@ -273,7 +273,7 @@ EMIGetNextMatch(struct BWTSeqExactMatchesIterator *iter, unsigned long *pos,
   if (iter->nextMatchBWTPos < iter->bounds.end)
   {
     /*printf("nextMatchBWTPos=%lu\n",(unsigned long) iter->nextMatchBWTPos);*/
-    *pos = BWTSeqLocateMatch(bwtSeq, iter->nextMatchBWTPos, &iter->extBits);
+    *pos = gt_BWTSeqLocateMatch(bwtSeq, iter->nextMatchBWTPos, &iter->extBits);
     iter->nextMatchBWTPos++;
     return true;
   }

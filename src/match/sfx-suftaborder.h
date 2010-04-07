@@ -24,7 +24,7 @@
 
 #include "esa-seqread.h"
 
-void checkifprefixesareidentical(const char *filename,
+void gt_checkifprefixesareidentical(const char *filename,
                                  int line,
                                  const GtEncodedsequence *encseq,
                                  GtReadmode readmode,
@@ -34,12 +34,12 @@ void checkifprefixesareidentical(const char *filename,
                                  unsigned long left,
                                  unsigned long right);
 
-void showentiresuftab(const GtEncodedsequence *encseq,
+void gt_showentiresuftab(const GtEncodedsequence *encseq,
                       GtReadmode readmode,
                       const unsigned long *suftab,
                       unsigned long depth);
 
-void checkentiresuftab(const char *filename,
+void gt_checkentiresuftab(const char *filename,
                        int line,
                        const GtEncodedsequence *encseq,
                        GtReadmode readmode,
@@ -51,7 +51,7 @@ void checkentiresuftab(const char *filename,
                        unsigned long depth,
                        GtError *err);
 
-void checksortedsuffixes(const char *filename,
+void gt_checksortedsuffixes(const char *filename,
                          int line,
                          const GtEncodedsequence *encseq,
                          GtReadmode readmode,

@@ -210,7 +210,7 @@ static void showifinlengthrange(const GtAlphabet *alphabet,
   }
 }
 
-int findsubquerygmatchforward(const GtEncodedsequence *encseq,
+int gt_findsubquerygmatchforward(const GtEncodedsequence *encseq,
                               const void *genericindex,
                               unsigned long totallength,
                               Greedygmatchforwardfunction gmatchforward,
@@ -305,12 +305,12 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
   substriter->seqit = gt_seqiterator_new(filenames,
                                       getsymbolmapAlphabet(alphabet),
                                       true);
-  substriter = substriter_new(queryfilenames,alphabet,prefixlength);
+  substriter = gt_substriter_new(queryfilenames,alphabet,prefixlength);
   numofchars = getnumofcharsAlphabet(alphabet);
   maxcode = ontheflybasepower(numofchars,prefixlength);
   while (true)
   {
-    retval = substriter_next(&substring,substriter,err);
+    retval = gt_substriter_next(&substring,substriter,err);
     if (retval < 0)
     {
       haserr = true;
@@ -330,7 +330,7 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
                                  substring.currentptr + substring.remaining);
     if (leftborder != NULL)
     {
-      calcbucketboundaries(&bucketspec,
+      gt_calcbucketboundaries(&bucketspec,
                            leftborder,
                            countspecialcodes,
                            substring.currentcode,
@@ -366,7 +366,7 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
       }
     }
   }
-  substriter_delete(&substriter);
+  gt_substriter_delete(&substriter);
   return haserr ? -1 : 0;
 }
 

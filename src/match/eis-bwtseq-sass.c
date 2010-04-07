@@ -80,7 +80,7 @@ BWTSASSGetRot0Pos(const struct SASeqSrc *baseClass)
 }
 
 static void
-deleteBWTSeqSASS(struct SASeqSrc *baseClass)
+gt_deleteBWTSeqSASS(struct SASeqSrc *baseClass)
 {
   destructSASeqSrc(baseClass);
   ListDo(BWTSeqReaderState, SASS2BWTSASS(baseClass)->readerStateList,
@@ -96,7 +96,7 @@ BWTSASSAccessOrigSeq(const void *state,
 {
   const BWTSeqContextRetriever *ctxMap = state;
   gt_assert(state);
-  BWTSeqCRAccessSubseq(ctxMap, pos, len, dest);
+  gt_BWTSeqCRAccessSubseq(ctxMap, pos, len, dest);
   return len;
 }
 
@@ -106,14 +106,14 @@ BWTSASSNewMRAEnc(const SASeqSrc *src)
   const BWTSASeqSrc *bwtSASeqSrc;
   gt_assert(src);
   bwtSASeqSrc = constSASS2BWTSASS(src);
-  return MRAEncCopy(EISGetAlphabet(BWTSeqGetEncIdxSeq(bwtSASeqSrc->bwtSeq)));
+  return gt_MRAEncCopy(EISGetAlphabet(BWTSeqGetEncIdxSeq(bwtSASeqSrc->bwtSeq)));
 }
 
 static SeqDataReader
 BWTSASSCreateReader(SASeqSrc *src, enum sfxDataRequest request);
 
 extern SASeqSrc *
-BWTSeqNewSASeqSrc(const BWTSeq *bwtSeq, const BWTSeqContextRetriever *ctxMap)
+gt_BWTSeqNewSASeqSrc(const BWTSeq *bwtSeq, const BWTSeqContextRetriever *ctxMap)
 {
   struct BWTSASeqSrc *newBWTSASeqSrc;
   gt_assert(bwtSeq);
@@ -137,7 +137,7 @@ BWTSeqNewSASeqSrc(const BWTSeq *bwtSeq, const BWTSeqContextRetriever *ctxMap)
                  BWTSASSGetRot0Pos,
                  NULL,
                  origSeqAccess,
-                 deleteBWTSeqSASS,
+                 gt_deleteBWTSeqSASS,
                  BWTSASSNewMRAEnc,
                  NULL, NULL);   /* since BWTSeq can regenerate
                                  * arbitrary portions of all
@@ -163,7 +163,9 @@ BWTSASSReadSufTab(SeqDataSrc src, void *dest, size_t len)
   size_t i;
   unsigned long pos = ((BWTSeqReaderState *)src)->nextReadPos;
   for (i = 0; i < len; ++i)
-    ((unsigned long *)dest)[i] = BWTSeqLocateMatch(bwtSeq, pos + i, &extBits);
+    ((unsigned long *)dest)[i] = gt_BWTSeqLocateMatch(bwtSeq,
+                                                      pos + i,
+                                                      &extBits);
   ((BWTSeqReaderState *)src)->nextReadPos = pos + len;
   destructExtBitsRetrieval(&extBits);
   return len;

@@ -23,7 +23,7 @@
 
 typedef struct Suftabparts Suftabparts;
 
-Suftabparts *newsuftabparts(unsigned int numofparts,
+Suftabparts *gt_newsuftabparts(unsigned int numofparts,
                             const unsigned long *leftborder,
                             GtCodetype numofallcodes,
                             unsigned long numofsuffixestoinsert,
@@ -49,6 +49,6 @@ unsigned long stpgetlargestwidth(const Suftabparts *suftabparts);
 
 unsigned int stpgetnumofparts(const Suftabparts *suftabparts);
 
-void freesuftabparts(Suftabparts *suftabparts);
+void gt_freesuftabparts(Suftabparts *suftabparts);
 
 #endif

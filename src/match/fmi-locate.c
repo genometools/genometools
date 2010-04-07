@@ -54,7 +54,7 @@ static unsigned long searchsmallestgeq(const GtPairBwtidx *left,
   return found->suftabvalue;
 }
 
-unsigned long fmfindtextpos (const Fmindex *fm,unsigned long idx)
+unsigned long gt_fmfindtextpos (const Fmindex *fm,unsigned long idx)
 {
   unsigned long offset = 0;
   GtUchar cc;

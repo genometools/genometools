@@ -878,7 +878,7 @@ int gth_similarity_filter(GthCallInfo *call_info, GthInput *input,
   }
 
   /* process the alignments */
-  proc_sa_collection(sa_collection, call_info, input, stat, indentlevel);
+  gt_proc_sa_collection(sa_collection, call_info, input, stat, indentlevel);
 
   /* show XML trailer */
   if (call_info->out->xmlout) {

@@ -21,7 +21,7 @@
 #include "gth/editoperation.h"
 #include "gth/gthalignment.h"
 
-Eoptype editoperation_type(Editoperation eop, bool proteineop)
+Eoptype gt_editoperation_type(Editoperation eop, bool proteineop)
 {
   Editoperation maxlen = proteineop ? MAXIDENTICALLENGTH_PROTEIN
                                     : MAXIDENTICALLENGTH;
@@ -65,7 +65,7 @@ Eoptype editoperation_type(Editoperation eop, bool proteineop)
   }
 }
 
-unsigned int editoperation_length(Editoperation eop, bool proteineop)
+unsigned int gt_editoperation_length(Editoperation eop, bool proteineop)
 {
   Editoperation maxlen = proteineop ? MAXIDENTICALLENGTH_PROTEIN
                                     : MAXIDENTICALLENGTH;
@@ -74,7 +74,7 @@ unsigned int editoperation_length(Editoperation eop, bool proteineop)
   return 1;
 }
 
-void editoperation_set_length(Editoperation *eop, unsigned int length,
+void gt_editoperation_set_length(Editoperation *eop, unsigned int length,
                               bool proteineop)
 {
   Editoperation maxlen = proteineop ? MAXIDENTICALLENGTH_PROTEIN
@@ -126,25 +126,25 @@ static void showoneeditopgeneric(GtFile *outfp, Editoperation eop,
      type as one edit operation in the XML output */
   if (xmlout) {
     if (nexteopisdefined &&
-        editoperation_type(eop, proteineop) ==
-        editoperation_type(nexteop, proteineop)) {
+        gt_editoperation_type(eop, proteineop) ==
+        gt_editoperation_type(nexteop, proteineop)) {
       /* store length of this eop */
-      *consecutive_eop_length += editoperation_length(eop, proteineop);
+      *consecutive_eop_length += gt_editoperation_length(eop, proteineop);
       /* return, this consecutive eop is shown later */
       return;
     }
     else {
       /* store total length of this consecutive eop for output */
       eop_length = *consecutive_eop_length +
-                   editoperation_length(eop, proteineop);
+                   gt_editoperation_length(eop, proteineop);
       /* reset */
       *consecutive_eop_length = 0;
     }
   }
   else
-    eop_length = editoperation_length(eop, proteineop);
+    eop_length = gt_editoperation_length(eop, proteineop);
 
-  switch (editoperation_type(eop, proteineop)) {
+  switch (gt_editoperation_type(eop, proteineop)) {
     case EOP_TYPE_MATCH:
       if (xmlout)
         showmultieop("match", eop_length, proteineop, indentlevel, outfp);
@@ -231,7 +231,7 @@ static void showoneeditopgeneric(GtFile *outfp, Editoperation eop,
     gt_file_xfputc(' ', outfp);
 }
 
-void editoperation_show(Editoperation *eops, unsigned long num_of_eops,
+void gt_editoperation_show(Editoperation *eops, unsigned long num_of_eops,
                         bool proteineops, bool xmlout, unsigned int indentlevel,
                         GtFile *outfp)
 {

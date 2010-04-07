@@ -33,27 +33,27 @@
 typedef struct suffixarrayFileInterface SuffixarrayFileInterface;
 
 extern void
-initSuffixarrayFileInterface(SuffixarrayFileInterface *sai,
+gt_initSuffixarrayFileInterface(SuffixarrayFileInterface *sai,
                              unsigned long seqLen,
                              Suffixarray *sa);
 
 extern SuffixarrayFileInterface *
-newSuffixarrayFileInterface(Suffixarray *sa, unsigned long seqLen);
+gt_newSuffixarrayFileInterface(Suffixarray *sa, unsigned long seqLen);
 
 extern void
-destructSuffixarrayFileInterface(SuffixarrayFileInterface *sai);
+gt_destructSuffixarrayFileInterface(SuffixarrayFileInterface *sai);
 
 extern void
-deleteSuffixarrayFileInterface(SuffixarrayFileInterface *sai);
+gt_deleteSuffixarrayFileInterface(SuffixarrayFileInterface *sai);
 
 extern SeqDataReader
-SAIMakeReader(SuffixarrayFileInterface *sai, enum sfxDataRequest rtype);
+gt_SAIMakeReader(SuffixarrayFileInterface *sai, enum sfxDataRequest rtype);
 
 extern SeqDataReader
-SAIMakeBWTReader(SuffixarrayFileInterface *sai);
+gt_SAIMakeBWTReader(SuffixarrayFileInterface *sai);
 
 extern SeqDataReader
-SAIMakeSufTabReader(SuffixarrayFileInterface *sai);
+gt_SAIMakeSufTabReader(SuffixarrayFileInterface *sai);
 
 /**
  * @brief Gets symbols of original sequence at given position.
@@ -64,7 +64,8 @@ SAIMakeSufTabReader(SuffixarrayFileInterface *sai);
  * @return actual number of symbols read
  */
 extern size_t
-SAIGetOrigSeq(const void *state, Symbol *dest, unsigned long pos, size_t len);
+gt_SAIGetOrigSeq(const void *state, Symbol *dest, unsigned long pos,
+                 size_t len);
 
 /**
  * @brief Query position of suffix starting at position 0, can be
@@ -74,7 +75,7 @@ SAIGetOrigSeq(const void *state, Symbol *dest, unsigned long pos, size_t len);
  * @return
  */
 extern Definedunsignedlong
-SAIGetRot0Pos(const void *state);
+gt_SAIGetRot0Pos(const void *state);
 
 /**
  * \brief Get reference for original sequence object.
@@ -97,7 +98,7 @@ SAIGetLength(const SuffixarrayFileInterface *sai);
  * @return alphabet
  */
 extern MRAEnc *
-SANewMRAEnc(const Suffixarray *sa);
+gt_SANewMRAEnc(const Suffixarray *sa);
 
 static inline MRAEnc *
 SAINewMRAEnc(const SuffixarrayFileInterface *sai);

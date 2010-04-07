@@ -93,7 +93,7 @@ Exonnode getcoreExonnodefromSA(GthSA *sa, unsigned long exonindex)
   return node;
 }
 
-void freecoreExonnode(Exonnode *node)
+void gt_freecoreExonnode(Exonnode *node)
 {
   if (!node) return;
   gt_array_delete(node->exonscores);
@@ -170,7 +170,7 @@ static bool rightsideismergeable(Exonnode *nodeA, Exonnode *nodeB)
   }
 }
 
-bool nodesaremergeable(Exonnode *nodeA, Exonnode *nodeB)
+bool gt_nodesaremergeable(Exonnode *nodeA, Exonnode *nodeB)
 {
   if (gt_range_overlap(&nodeA->range, &nodeB->range) &&
       leftsideismergeable(nodeA, nodeB) &&
@@ -236,11 +236,11 @@ static void mergerightside(Exonnode *nodeA, Exonnode *nodeB)
   <nodeB> stays the same.
 */
 
-void mergenodes(Exonnode *nodeA, Exonnode *nodeB)
+void gt_mergenodes(Exonnode *nodeA, Exonnode *nodeB)
 {
   unsigned long i;
 
-  gt_assert(nodesaremergeable(nodeA, nodeB));
+  gt_assert(gt_nodesaremergeable(nodeA, nodeB));
 
   /* merge nodes */
   mergeleftside(nodeA, nodeB);
@@ -261,7 +261,7 @@ void mergenodes(Exonnode *nodeA, Exonnode *nodeB)
   }
 }
 
-GthDbl computeexonscore(Exonnode *node)
+GthDbl gt_computeexonscore(Exonnode *node)
 {
   unsigned long i, maxlength = 0;
   GthDbl maxscore = DBL_MIN;

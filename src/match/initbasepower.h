@@ -20,17 +20,17 @@
 
 #include "intcode-def.h"
 
-unsigned int maxbasepower(unsigned int numofchars);
+unsigned int gt_maxbasepower(unsigned int numofchars);
 
-GtCodetype *initbasepower(unsigned int numofchars,unsigned int prefixlength);
+GtCodetype *gt_initbasepower(unsigned int numofchars,unsigned int prefixlength);
 
-GtCodetype *filllargestchartable(unsigned int numofchars,
+GtCodetype *gt_filllargestchartable(unsigned int numofchars,
                                unsigned int kmersize);
 
-GtCodetype *initfilltable(unsigned int numofchars,unsigned int prefixlength);
+GtCodetype *gt_initfilltable(unsigned int numofchars,unsigned int prefixlength);
 
-GtCodetype **initmultimappower(unsigned int numofchars,unsigned int qvalue);
+GtCodetype **gt_initmultimappower(unsigned int numofchars,unsigned int qvalue);
 
-void multimappowerfree(GtCodetype ***multimappower);
+void gt_multimappowerfree(GtCodetype ***multimappower);
 
 #endif

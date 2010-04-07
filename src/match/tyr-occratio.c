@@ -201,15 +201,15 @@ static int computeoccurrenceratio(Sequentialsuffixarrayreader *ssar,
   bool haserr = false;
 
   gt_error_check(err);
-  state.encseq = encseqSequentialsuffixarrayreader(ssar);
-  state.readmode = readmodeSequentialsuffixarrayreader(ssar);
+  state.encseq = gt_encseqSequentialsuffixarrayreader(ssar);
+  state.readmode = gt_readmodeSequentialsuffixarrayreader(ssar);
   state.totallength = gt_encodedsequence_totallength(state.encseq);
   state.minmersize = minmersize;
   state.maxmersize = maxmersize;
   state.uniquedistribution = uniquedistribution;
   state.nonuniquedistribution = nonuniquedistribution;
   state.nonuniquemultidistribution = nonuniquemultidistribution;
-  if (depthfirstesa(ssar,
+  if (gt_depthfirstesa(ssar,
                     allocateDfsinfo,
                     freeDfsinfo,
                     processleafedge,
@@ -226,7 +226,7 @@ static int computeoccurrenceratio(Sequentialsuffixarrayreader *ssar,
   return haserr ? -1 : 0;
 }
 
-int tyr_occratio(const GtStr *str_inputindex,
+int gt_tyr_occratio_func(const GtStr *str_inputindex,
                  bool scanfile,
                  unsigned long minmersize,
                  unsigned long maxmersize,
@@ -240,7 +240,7 @@ int tyr_occratio(const GtStr *str_inputindex,
   Sequentialsuffixarrayreader *ssar;
 
   gt_error_check(err);
-  ssar = newSequentialsuffixarrayreaderfromfile(str_inputindex,
+  ssar = gt_newSequentialsuffixarrayreaderfromfile(str_inputindex,
                                                 SARR_LCPTAB |
                                                 SARR_SUFTAB |
                                                 SARR_ESQTAB,
@@ -267,7 +267,7 @@ int tyr_occratio(const GtStr *str_inputindex,
   }
   if (ssar != NULL)
   {
-    freeSequentialsuffixarrayreader(&ssar);
+    gt_freeSequentialsuffixarrayreader(&ssar);
   }
   return haserr ? -1 : 0;
 }

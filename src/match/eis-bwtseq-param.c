@@ -23,13 +23,14 @@
 #include "match/eis-encidxseq-param.h"
 
 extern void
-registerPackedIndexOptions(GtOptionParser *op, struct bwtOptions *paramOutput,
-                           int defaultOptimizationFlags,
-                           const GtStr *projectName)
+gt_registerPackedIndexOptions(GtOptionParser *op,
+                              struct bwtOptions *paramOutput,
+                              int defaultOptimizationFlags,
+                              const GtStr *projectName)
 {
  GtOption *option;
 
-  registerEncIdxSeqOptions(op, &paramOutput->final.seqParams);
+  gt_registerEncIdxSeqOptions(op, &paramOutput->final.seqParams);
 
   paramOutput->final.featureToggles = BWTBaseFeatures;
 
@@ -61,7 +62,7 @@ registerPackedIndexOptions(GtOptionParser *op, struct bwtOptions *paramOutput,
     sizeof (unsigned long) * CHAR_BIT - 1);
   gt_option_parser_add_option(op, option);
 
-  registerCtxMapOptions(op, &paramOutput->final.ctxMapILog);
+  gt_registerCtxMapOptions(op, &paramOutput->final.ctxMapILog);
 
   paramOutput->final.projectName = projectName;
 
@@ -76,7 +77,7 @@ estimateBestLocateTypeFeature(const struct bwtOptions *paramOutput)
   {
     /* two cases: we store 1 bit per position or log(segmentlen) for
      * each marked position plus one to note the number of marked positions */
-    unsigned segmentLen = estimateSegmentSize(&paramOutput->final.seqParams);
+    unsigned segmentLen = gt_estimateSegmentSize(&paramOutput->final.seqParams);
     if (segmentLen > (segmentLen + 1) * gt_requiredUIntBits(segmentLen)
                      / paramOutput->final.locateInterval)
       return BWTLocateCount;
@@ -86,7 +87,7 @@ estimateBestLocateTypeFeature(const struct bwtOptions *paramOutput)
 }
 
 extern void
-computePackedIndexDefaults(struct bwtOptions *paramOutput, int extraToggles)
+gt_computePackedIndexDefaults(struct bwtOptions *paramOutput, int extraToggles)
 {
   if (gt_option_is_set(paramOutput->useLocateBitmapOption))
     paramOutput->final.featureToggles
@@ -99,11 +100,11 @@ computePackedIndexDefaults(struct bwtOptions *paramOutput, int extraToggles)
     paramOutput->final.featureToggles |= BWTReversiblySorted;
   paramOutput->final.featureToggles |= extraToggles;
   paramOutput->final.seqParams.EISFeatureSet
-    = convertBWTOptFlags2EISFeatures(paramOutput->defaultOptimizationFlags);
+    = gt_convertBWTOptFlags2EISFeatures(paramOutput->defaultOptimizationFlags);
 }
 
 extern int
-convertBWTOptFlags2EISFeatures(int BWTOptFlags)
+gt_convertBWTOptFlags2EISFeatures(int BWTOptFlags)
 {
   int EISFeatureSet = EIS_FEATURE_NONE;
   if (BWTOptFlags & BWTDEFOPT_LOW_RAM_OVERHEAD)

@@ -19,7 +19,7 @@
 
 /**
  * @file eis-blockcomp-param.h
- * @brief Call registerBlockEncOptions to add options for construction
+ * @brief Call gt_registerBlockEncOptions to add options for construction
  * of a block-compressed index to the option parser.
  */
 #include "core/option.h"
@@ -33,6 +33,7 @@
  * @param err
  */
 extern void
-registerBlockEncOptions(GtOptionParser *op, struct blockEncParams *paramOutput);
+gt_registerBlockEncOptions(GtOptionParser *op,
+                           struct blockEncParams *paramOutput);
 
 #endif

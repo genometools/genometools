@@ -23,7 +23,7 @@
 #include "repeattypes.h"
 #include "ltrharvest-opt.h"
 
-int searchforLTRs(LTRharvestoptions *lo,
+int gt_searchforLTRs(LTRharvestoptions *lo,
                   GtArrayLTRboundaries *arrayLTRboundaries,
                   const GtEncodedsequence *encseq,
                   GtError *err);

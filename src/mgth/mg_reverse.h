@@ -20,7 +20,7 @@
   Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 
-  modified for metagenomethreader
+  modified for gt_metagenomethreader
 */
 
 #ifndef MG_REVERSE_H

@@ -667,7 +667,7 @@ static void locali_inplacenextLimdfsstate (const Limdfsconstinfo *lci,
 }
 #endif
 
-void reinitLocalitracebackstate(Limdfsconstinfo *lci,
+void gt_reinitLocalitracebackstate(Limdfsconstinfo *lci,
                                 unsigned long dbprefixlen,
                                 unsigned long pprefixlen)
 {
@@ -683,7 +683,7 @@ void reinitLocalitracebackstate(Limdfsconstinfo *lci,
   gt_alignment_reset(tbs->alignment);
 }
 
-void processelemLocalitracebackstate(Limdfsconstinfo *lci,
+void gt_processelemLocalitracebackstate(Limdfsconstinfo *lci,
                                      GtUchar currentchar,
                                      const void *aliasstate)
 {
@@ -734,7 +734,7 @@ void processelemLocalitracebackstate(Limdfsconstinfo *lci,
   }
 }
 
-const void *completealignmentfromLocalitracebackstate(
+const void *gt_completealignmentfromLocalitracebackstate(
                                         unsigned long *alignedquerylength,
                                         const Limdfsconstinfo *lci)
 {
@@ -769,7 +769,7 @@ const void *completealignmentfromLocalitracebackstate(
   return (const void *) lci->tbs.alignment;
 }
 
-const AbstractDfstransformer *locali_AbstractDfstransformer (void)
+const AbstractDfstransformer *gt_locali_AbstractDfstransformer (void)
 {
   static const AbstractDfstransformer locali_adfst =
   {

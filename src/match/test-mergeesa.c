@@ -183,14 +183,15 @@ static int mergeandstoreindex(const GtStr *storeindex,
   if (!haserr)
   {
     mergeoutinfo.currentlcpindex = (unsigned long) 1;
-    sequenceoffsettable = encseqtable2sequenceoffsets(&totallength,
+    sequenceoffsettable = gt_encseqtable2sequenceoffsets(&totallength,
                                                       &specialcharinfo,
                                                       emmesa->suffixarraytable,
                                                       emmesa->numofindexes);
     gt_assert(sequenceoffsettable != NULL);
     while (emmesa->numofentries > 0)
     {
-      if (emissionmergedesa_stepdeleteandinsertothersuffixes(emmesa,err) != 0)
+      if (gt_emissionmergedesa_stepdeleteandinsertothersuffixes(emmesa,
+                                                                err) != 0)
       {
         haserr = true;
         break;
@@ -212,7 +213,7 @@ static int mergeandstoreindex(const GtStr *storeindex,
   return haserr ? -1 : 0;
 }
 
-int performtheindexmerging(const GtStr *storeindex,
+int gt_performtheindexmerging(const GtStr *storeindex,
                            const GtStrArray *indexnametab,
                            GtLogger *logger,
                            GtError *err)
@@ -222,7 +223,7 @@ int performtheindexmerging(const GtStr *storeindex,
   bool haserr = false;
 
   gt_error_check(err);
-  if (emissionmergedesa_init(&emmesa,
+  if (gt_emissionmergedesa_init(&emmesa,
                              indexnametab,
                              demand,
                              logger,
@@ -244,6 +245,6 @@ int performtheindexmerging(const GtStr *storeindex,
       haserr = true;
     }
   }
-  emissionmergedesa_wrap(&emmesa);
+  gt_emissionmergedesa_wrap(&emmesa);
   return haserr ? -1 : 0;
 }

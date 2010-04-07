@@ -28,7 +28,7 @@
 
 typedef struct Rmnsufinfo Rmnsufinfo;
 
-Rmnsufinfo *newRmnsufinfo(unsigned long *presortedsuffixes,
+Rmnsufinfo *gt_newRmnsufinfo(unsigned long *presortedsuffixes,
                           int mmapfiledesc,
                           const GtEncodedsequence *encseq,
                           Bcktab *bcktab,
@@ -40,13 +40,13 @@ Rmnsufinfo *newRmnsufinfo(unsigned long *presortedsuffixes,
                           bool hashexceptions,
                           bool absoluteinversesuftab);
 
-void rmnsufinfo_addunsortedrange(Rmnsufinfo *rmnsufinfo,
+void gt_rmnsufinfo_addunsortedrange(Rmnsufinfo *rmnsufinfo,
                                  unsigned long left,
                                  unsigned long right,
                                  unsigned long depth);
 
-void bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo );
-Compressedtable *rmnsufinfo_wrap(unsigned long *longest,
+void gt_bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo );
+Compressedtable *gt_rmnsufinfo_wrap(unsigned long *longest,
                                  Rmnsufinfo **rmnsufinfoptr,
                                  bool withlcptab);
 

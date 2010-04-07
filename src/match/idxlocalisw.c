@@ -415,7 +415,7 @@ static void applysmithwaterman(SWdpresource *dpresource,
   }
 }
 
-void multiapplysmithwaterman(SWdpresource *dpresource,
+void gt_multiapplysmithwaterman(SWdpresource *dpresource,
                              const GtEncodedsequence *encseq,
                              const GtUchar *query,
                              unsigned long querylen)
@@ -437,7 +437,7 @@ void multiapplysmithwaterman(SWdpresource *dpresource,
   }
 }
 
-SWdpresource *newSWdpresource(Scoretype matchscore,
+SWdpresource *gt_newSWdpresource(Scoretype matchscore,
                               Scoretype mismatchscore,
                               Scoretype gapextend,
                               unsigned long scorethreshold,
@@ -466,7 +466,7 @@ SWdpresource *newSWdpresource(Scoretype matchscore,
   return swdpresource;
 }
 
-void freeSWdpresource(SWdpresource *swdpresource)
+void gt_freeSWdpresource(SWdpresource *swdpresource)
 {
   gt_alignment_delete(swdpresource->alignment);
   swdpresource->alignment = NULL;

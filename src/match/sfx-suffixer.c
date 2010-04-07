@@ -97,22 +97,22 @@ static unsigned long iterproduceCodeatposition(Codeatposition *codelist,
     unsigned long insertindex;
     Specialcontext specialcontext;
 
-    ecp = newEnumcodeatposition(encseq,
+    ecp = gt_newEnumcodeatposition(encseq,
                                 readmode,
                                 prefixlength,
                                 numofchars);
-    for (insertindex = 0; nextEnumcodeatposition(&specialcontext,ecp);
+    for (insertindex = 0; gt_nextEnumcodeatposition(&specialcontext,ecp);
          insertindex++)
     {
       codelist[insertindex].maxprefixindex = specialcontext.maxprefixindex;
       codelist[insertindex].position = specialcontext.position;
       codelist[insertindex].code
-        = computefilledqgramcode(ecp,
+        = gt_computefilledqgramcode(ecp,
                                  specialcontext.maxprefixindex,
                                  specialcontext.position -
                                  specialcontext.maxprefixindex);
     }
-    freeEnumcodeatposition(&ecp);
+    gt_freeEnumcodeatposition(&ecp);
     return insertindex;
   }
   return 0;
@@ -262,7 +262,7 @@ static void updatekmercount(void *processinfo,
       GtCodetype code2 = getencseqcode(sfi->encseq,
                                    sfi->readmode,
                                    gt_encodedsequence_totallength(sfi->encseq),
-                                   bcktab_multimappower(sfi->bcktab),
+                                   gt_bcktab_multimappower(sfi->bcktab),
                                    sfi->prefixlength,
                                    position);
       if (code2 != 0)
@@ -337,13 +337,13 @@ static void derivespecialcodesfromtable(Sfxiterator *sfi,bool deletevalues)
     {
       if (prefixindex <= sfi->spaceCodeatposition[j].maxprefixindex)
       {
-        code = codedownscale(sfi->bcktab,
+        code = gt_codedownscale(sfi->bcktab,
                              (GtCodetype) sfi->spaceCodeatposition[j].code,
                              prefixindex,
                              sfi->spaceCodeatposition[j].maxprefixindex);
         if (code >= sfi->currentmincode && code <= sfi->currentmaxcode)
         {
-          updatebckspecials(sfi->bcktab,code,sfi->numofchars,prefixindex);
+          gt_updatebckspecials(sfi->bcktab,code,sfi->numofchars,prefixindex);
           stidx = --sfi->leftborder[code];
           /* from right to left */
           setsortspace(&sfi->suftab,stidx,
@@ -381,14 +381,14 @@ static void derivespecialcodesonthefly(Sfxiterator *sfi)
 
   for (prefixindex=1U; prefixindex < sfi->prefixlength; prefixindex++)
   {
-    ecp = newEnumcodeatposition(sfi->encseq,sfi->readmode,
+    ecp = gt_newEnumcodeatposition(sfi->encseq,sfi->readmode,
                                 sfi->prefixlength,
                                 sfi->numofchars);
-    while (nextEnumcodeatposition(&specialcontext,ecp))
+    while (gt_nextEnumcodeatposition(&specialcontext,ecp))
     {
       if (prefixindex <= specialcontext.maxprefixindex)
       {
-        if (computefilledqgramcodestopatmax(&code,
+        if (gt_computefilledqgramcodestopatmax(&code,
                                             ecp,
                                             prefixindex,
                                             specialcontext.position-prefixindex,
@@ -397,7 +397,7 @@ static void derivespecialcodesonthefly(Sfxiterator *sfi)
           gt_assert(code <= sfi->currentmaxcode);
           if (code >= sfi->currentmincode)
           {
-            updatebckspecials(sfi->bcktab,code,sfi->numofchars,prefixindex);
+            gt_updatebckspecials(sfi->bcktab,code,sfi->numofchars,prefixindex);
             gt_assert(code > 0);
             stidx = --sfi->leftborder[code];
             /* from right to left */
@@ -407,11 +407,11 @@ static void derivespecialcodesonthefly(Sfxiterator *sfi)
         }
       }
     }
-    freeEnumcodeatposition(&ecp);
+    gt_freeEnumcodeatposition(&ecp);
   }
 }
 
-void freeSfxiterator(Sfxiterator **sfiptr)
+void gt_freeSfxiterator(Sfxiterator **sfiptr)
 {
   Sfxiterator *sfi = (Sfxiterator *) *sfiptr;
 #ifdef SKDEBUG
@@ -422,7 +422,7 @@ void freeSfxiterator(Sfxiterator **sfiptr)
 #endif
   if (sfi->bcktab != NULL)
   {
-    addfinalbckspecials(sfi->bcktab,sfi->numofchars,sfi->specialcharacters);
+    gt_addfinalbckspecials(sfi->bcktab,sfi->numofchars,sfi->specialcharacters);
   }
   if (sfi->sri != NULL)
   {
@@ -430,14 +430,14 @@ void freeSfxiterator(Sfxiterator **sfiptr)
   }
   FREESPACE(sfi->spaceCodeatposition);
   FREESPACE(sfi->suftab.sortspace);
-  freesuftabparts(sfi->suftabparts);
+  gt_freesuftabparts(sfi->suftabparts);
   if (sfi->bcktab != NULL)
   {
-    bcktab_delete(&sfi->bcktab);
+    gt_bcktab_delete(&sfi->bcktab);
   }
   if (sfi->dcov != NULL)
   {
-    differencecover_delete(sfi->dcov);
+    gt_differencecover_delete(sfi->dcov);
   }
   FREESPACE(*sfiptr);
 }
@@ -456,7 +456,7 @@ static void showleftborder(const unsigned long *leftborder,
 }
 #endif
 
-Sfxiterator *newSfxiterator(const GtEncodedsequence *encseq,
+Sfxiterator *gt_newSfxiterator(const GtEncodedsequence *encseq,
                             GtReadmode readmode,
                             unsigned int prefixlength,
                             unsigned int numofparts,
@@ -562,7 +562,7 @@ Sfxiterator *newSfxiterator(const GtEncodedsequence *encseq,
                                           "sorting difference cover sample",
                                           stdout);
       }
-      sfi->dcov = differencecover_new(sfi->sfxstrategy.differencecover,
+      sfi->dcov = gt_differencecover_new(sfi->sfxstrategy.differencecover,
                                       encseq,readmode,logger);
       if (sfi->dcov == NULL)
       {
@@ -571,18 +571,19 @@ Sfxiterator *newSfxiterator(const GtEncodedsequence *encseq,
         haserr = true;
       } else
       {
-        if (differencecover_vparamverify(sfi->dcov,err) != 0)
+        if (gt_differencecover_vparamverify(sfi->dcov,err) != 0)
         {
           haserr = true;
-          differencecover_delete(sfi->dcov);
+          gt_differencecover_delete(sfi->dcov);
           sfi->dcov = NULL;
         } else
         {
           gt_logger_log(logger,"presorting sample suffixes according to "
                                   "difference cover modulo %u",
                                   sfi->sfxstrategy.differencecover);
-          differencecover_sortsample(sfi->dcov,sfi->sfxstrategy.cmpcharbychar,
-                                     false);
+          gt_differencecover_sortsample(sfi->dcov,
+                                        sfi->sfxstrategy.cmpcharbychar,
+                                        false);
         }
       }
     }
@@ -590,7 +591,7 @@ Sfxiterator *newSfxiterator(const GtEncodedsequence *encseq,
   if (!haserr)
   {
     gt_assert(sfi != NULL);
-    sfi->bcktab = allocBcktab(sfi->numofchars,
+    sfi->bcktab = gt_allocBcktab(sfi->numofchars,
                               prefixlength,
                               sfi->sfxstrategy.storespecialcodes,
                               logger,
@@ -602,8 +603,8 @@ Sfxiterator *newSfxiterator(const GtEncodedsequence *encseq,
       sfi->numofallcodes = 0;
     } else
     {
-      sfi->leftborder = bcktab_leftborder(sfi->bcktab);
-      sfi->numofallcodes = bcktab_numofallcodes(sfi->bcktab);
+      sfi->leftborder = gt_bcktab_leftborder(sfi->bcktab);
+      sfi->numofallcodes = gt_bcktab_numofallcodes(sfi->bcktab);
     }
   }
   if (!haserr)
@@ -640,9 +641,9 @@ Sfxiterator *newSfxiterator(const GtEncodedsequence *encseq,
 #ifdef SKDEBUG
     showleftborder(sfi->leftborder,sfi->numofallcodes);
 #endif
-    bcktab_leftborderpartialsums(sfi->bcktab,
+    gt_bcktab_leftborderpartialsums(sfi->bcktab,
                                  sfi->totallength - specialcharacters);
-    sfi->suftabparts = newsuftabparts(numofparts,
+    sfi->suftabparts = gt_newsuftabparts(numofparts,
                                       sfi->leftborder,
                                       sfi->numofallcodes,
                                       sfi->totallength - specialcharacters,
@@ -670,14 +671,14 @@ Sfxiterator *newSfxiterator(const GtEncodedsequence *encseq,
   {
     if (sfi != NULL)
     {
-      freeSfxiterator(&sfi);
+      gt_freeSfxiterator(&sfi);
     }
     return NULL;
   }
   return sfi;
 }
 
-bool sfi2longestsuffixpos(unsigned long *longest,const Sfxiterator *sfi)
+bool gt_sfi2longestsuffixpos(unsigned long *longest,const Sfxiterator *sfi)
 {
   if (sfi->suftab.longest.defined)
   {
@@ -736,7 +737,7 @@ static void preparethispart(Sfxiterator *sfi)
   {
     if (!sfi->sfxstrategy.streamsuftab)
     {
-      qsufsort(sfi->suftab.sortspace,
+      gt_qsufsort(sfi->suftab.sortspace,
                -1,
                &sfi->suftab.longest.valueunsignedlong,
                sfi->encseq,
@@ -763,7 +764,7 @@ static void preparethispart(Sfxiterator *sfi)
     }
     if (sfi->sfxstrategy.differencecover > 0)
     {
-      sortbucketofsuffixes(sfi->suftab.sortspace - sfi->suftab.offset,
+      gt_sortbucketofsuffixes(sfi->suftab.sortspace - sfi->suftab.offset,
                            bucketspec2,
                            (unsigned long) partwidth,
                            sfi->encseq,
@@ -779,7 +780,7 @@ static void preparethispart(Sfxiterator *sfi)
                            sfi->logger);
     } else
     {
-      sortallbuckets (&sfi->suftab,
+      gt_sortallbuckets (&sfi->suftab,
                       bucketspec2,
                       sfi->encseq,
                       sfi->readmode,
@@ -805,7 +806,7 @@ static void preparethispart(Sfxiterator *sfi)
   sfi->part++;
 }
 
-int postsortsuffixesfromstream(Sfxiterator *sfi, const GtStr *str_indexname,
+int gt_postsortsuffixesfromstream(Sfxiterator *sfi, const GtStr *str_indexname,
                                GtError *err)
 {
   int mmapfiledesc = -1;
@@ -858,7 +859,7 @@ int postsortsuffixesfromstream(Sfxiterator *sfi, const GtStr *str_indexname,
   if (!haserr)
   {
     gt_assert(sfi->totallength >= sfi->specialcharacters);
-    qsufsort(NULL,
+    gt_qsufsort(NULL,
              mmapfiledesc,
              &sfi->suftab.longest.valueunsignedlong,
              sfi->encseq,
@@ -1007,7 +1008,7 @@ static void fillspecialnextpage(Sfxiterator *sfi)
   }
 }
 
-const unsigned long *nextSfxiterator(unsigned long *numberofsuffixes,
+const unsigned long *gt_nextSfxiterator(unsigned long *numberofsuffixes,
                                      bool *specialsuffixes,
                                      Sfxiterator *sfi)
 {
@@ -1034,12 +1035,12 @@ const unsigned long *nextSfxiterator(unsigned long *numberofsuffixes,
   return sfi->suftab.sortspace;
 }
 
-int sfibcktab2file(FILE *fp,
+int gt_sfibcktab2file(FILE *fp,
                    const Sfxiterator *sfi,
                    GtError *err)
 {
   gt_error_check(err);
-  return bcktab2file(fp,sfi->bcktab,err);
+  return gt_bcktab2file(fp,sfi->bcktab,err);
 }
 
 unsigned int getprefixlenbits(void)

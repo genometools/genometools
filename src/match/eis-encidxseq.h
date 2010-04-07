@@ -149,7 +149,7 @@ typedef union EISHint *EISHint;
  * @param seq reference of object to delete
  */
 extern void
-deleteEncIdxSeq(EISeq *seq);
+gt_deleteEncIdxSeq(EISeq *seq);
 
 /**
  * \brief Retrieve alphabet transformation from sequence object
@@ -392,7 +392,7 @@ enum EISIntegrityCheckResults
 };
 
 /** table of error descriptions indexed by return values of
- * EISVerifyIntegrity  */
+ * gt_EISVerifyIntegrity  */
 extern const char *EISIntegrityCheckResultStrings[];
 
 /**
@@ -418,9 +418,10 @@ enum EISIntegrityCheckFlags
  * @param chkFlags select additional tests (see enum EISIntegrityCheckFlags)
  */
 extern enum EISIntegrityCheckResults
-EISVerifyIntegrity(EISeq *seqIdx, const GtStr *projectName, unsigned long skip,
-                   unsigned long tickPrint, FILE *fp, int chkFlags,
-                   GtLogger *verbosity, GtError *err);
+gt_EISVerifyIntegrity(EISeq *seqIdx, const GtStr *projectName,
+                      unsigned long skip,
+                      unsigned long tickPrint, FILE *fp, int chkFlags,
+                      GtLogger *verbosity, GtError *err);
 
 /**
  * @brief Position file pointer at header written by upper layer.

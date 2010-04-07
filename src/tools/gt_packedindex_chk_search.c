@@ -89,13 +89,13 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
     logger = gt_logger_new(params.verboseOutput,
                            GT_LOGGER_DEFLT_PREFIX, stdout);
 
-    bwtSeq = availBWTSeq(&params.idx.final, logger, err);
+    bwtSeq = gt_availBWTSeq(&params.idx.final, logger, err);
     if ((had_err = bwtSeq == NULL))
       break;
 
     {
       enum verifyBWTSeqErrCode retval =
-        BWTSeqVerifyIntegrity(bwtSeq, inputProject, params.flags,
+        gt_BWTSeqVerifyIntegrity(bwtSeq, inputProject, params.flags,
                               params.progressInterval, stderr, logger, err);
       if ((had_err = (retval != VERIFY_BWTSEQ_NO_ERROR)))
       {
@@ -107,7 +107,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
     }
     if (BWTSeqHasLocateInformation(bwtSeq))
     {
-      if ((had_err = !initEmptyEMIterator(&EMIter, bwtSeq)))
+      if ((had_err = !gt_initEmptyEMIterator(&EMIter, bwtSeq)))
       {
         gt_error_set(err, "Cannot create matches iterator for sequence index.");
         break;
@@ -119,7 +119,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
       unsigned long trial, patternLen;
 
       if ((had_err =
-           mapsuffixarray(&suffixarray, SARR_SUFTAB | SARR_ESQTAB,
+           gt_mapsuffixarray(&suffixarray, SARR_SUFTAB | SARR_ESQTAB,
                           inputProject, NULL, err) != 0))
       {
         gt_error_set(err, "Can't load suffix array project with"
@@ -142,11 +142,11 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
           = gt_alphabet_num_of_chars(
                                gt_encodedsequence_alphabet(suffixarray.encseq));
         if (params.minPatLen < 0)
-          params.minPatLen = recommendedprefixlength(numofchars, totalLen);
+          params.minPatLen = gt_recommendedprefixlength(numofchars, totalLen);
         if (params.maxPatLen < 0)
           params.maxPatLen =
             MAX(params.minPatLen,
-                125 * recommendedprefixlength(numofchars, totalLen) / 100);
+                125 * gt_recommendedprefixlength(numofchars, totalLen) / 100);
         else
           params.maxPatLen = MAX(params.maxPatLen, params.minPatLen);
       }
@@ -160,7 +160,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
         break;
       }
       if ((had_err =
-           (epi = newenumpatterniterator(params.minPatLen, params.maxPatLen,
+           (epi = gt_newenumpatterniterator(params.minPatLen, params.maxPatLen,
                                          suffixarray.encseq,
                                          err)) == NULL))
       {
@@ -169,9 +169,9 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
       }
       for (trial = 0; !had_err && trial < params.numOfSamples; ++trial)
       {
-        const GtUchar *pptr = nextEnumpatterniterator(&patternLen, epi);
+        const GtUchar *pptr = gt_nextEnumpatterniterator(&patternLen, epi);
         MMsearchiterator *mmsi =
-          newmmsearchiteratorcomplete_plain(suffixarray.encseq,
+          gt_newmmsearchiteratorcomplete_plain(suffixarray.encseq,
                                             suffixarray.suftab,
                                             0,  /* leftbound */
                                             totalLen, /* rightbound */
@@ -182,23 +182,24 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
         if (BWTSeqHasLocateInformation(bwtSeq))
         {
           unsigned long numMatches;
-          if ((had_err = !reinitEMIterator(&EMIter, bwtSeq, pptr, patternLen,
+          if ((had_err = !gt_reinitEMIterator(&EMIter, bwtSeq, pptr, patternLen,
                                            false)))
           {
             fputs("Internal error: failed to reinitialize pattern match"
                   " iterator", stderr);
             abort();
           }
-          numMatches = EMINumMatchesTotal(&EMIter);
-          gt_assert(numMatches == BWTSeqMatchCount(bwtSeq, pptr, patternLen,
+          numMatches = gt_EMINumMatchesTotal(&EMIter);
+          gt_assert(numMatches == gt_BWTSeqMatchCount(bwtSeq, pptr, patternLen,
                                                 false));
-          gt_assert(EMINumMatchesTotal(&EMIter) == countmmsearchiterator(mmsi));
+          gt_assert(gt_EMINumMatchesTotal(&EMIter)
+                      == gt_countmmsearchiterator(mmsi));
 /*        fprintf(stderr, "trial %lu, "FormatSeqpos" matches\n" */
 /*                "pattern: ", trial, numMatches); */
 /*        fprintfsymbolstring(stderr, suffixarray.alpha, pptr, */
 /*                                patternLen); */
 /*        putc('\n', stderr); */
-          while (nextmmsearchiterator(&dbstart,mmsi))
+          while (gt_nextmmsearchiterator(&dbstart,mmsi))
           {
             unsigned long matchPos = 0;
             bool match = EMIGetNextMatch(&EMIter, &matchPos, bwtSeq);
@@ -228,10 +229,10 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
         }
         else
         {
-          unsigned long numFMIMatches = BWTSeqMatchCount(bwtSeq, pptr,
+          unsigned long numFMIMatches = gt_BWTSeqMatchCount(bwtSeq, pptr,
                                                          patternLen,
                                                          false),
-            numMMSearchMatches = countmmsearchiterator(mmsi);
+            numMMSearchMatches = gt_countmmsearchiterator(mmsi);
           if ((had_err = numFMIMatches != numMMSearchMatches))
           {
             gt_error_set(err, "Number of matches not equal for suffix array ("
@@ -239,7 +240,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
                       numFMIMatches, numMMSearchMatches);
           }
         }
-        freemmsearchiterator(&mmsi);
+        gt_freemmsearchiterator(&mmsi);
         if (params.progressInterval && !((trial + 1) % params.progressInterval))
           putc('.', stderr);
       }
@@ -249,10 +250,10 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
               trial, params.numOfSamples);
     }
   } while (0);
-  if (EMIterInitialized) destructEMIterator(&EMIter);
-  if (saIsLoaded) freesuffixarray(&suffixarray);
-  if (epi) freeEnumpatterniterator(&epi);
-  if (bwtSeq) deleteBWTSeq(bwtSeq);
+  if (EMIterInitialized) gt_destructEMIterator(&EMIter);
+  if (saIsLoaded) gt_freesuffixarray(&suffixarray);
+  if (epi) gt_freeEnumpatterniterator(&epi);
+  if (bwtSeq) gt_deleteBWTSeq(bwtSeq);
   if (logger) gt_logger_delete(logger);
   if (inputProject) gt_str_delete(inputProject);
   return had_err?-1:0;
@@ -274,7 +275,7 @@ parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
                          " <indexname> and perform verification of search"
                          " results.");
 
-  registerPackedIndexOptions(op, &params->idx, BWTDEFOPT_MULTI_QUERY,
+  gt_registerPackedIndexOptions(op, &params->idx, BWTDEFOPT_MULTI_QUERY,
                              projectName);
 
   option = gt_option_new_long("minpatlen",
@@ -331,7 +332,7 @@ parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
     | (tryContextRetrieve?VERIFY_BWTSEQ_CONTEXT:0);
   /* compute parameters currently not set from command-line or
    * determined indirectly */
-  computePackedIndexDefaults(&params->idx, BWTBaseFeatures);
+  gt_computePackedIndexDefaults(&params->idx, BWTBaseFeatures);
 
   gt_option_parser_delete(op);
 

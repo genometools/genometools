@@ -28,7 +28,7 @@
   GtEncodedsequenceScanstate *esr1, *esr2;
 };
 
-Lcpvalueiterator *newLcpvalueiterator(const GtEncodedsequence *encseq,
+Lcpvalueiterator *gt_newLcpvalueiterator(const GtEncodedsequence *encseq,
                                       GtReadmode readmode)
 {
   Lcpvalueiterator *lvi;
@@ -43,7 +43,7 @@ Lcpvalueiterator *newLcpvalueiterator(const GtEncodedsequence *encseq,
   return lvi;
 }
 
-unsigned long nextLcpvalueiterator(Lcpvalueiterator *lvi,
+unsigned long gt_nextLcpvalueiterator(Lcpvalueiterator *lvi,
                             bool firstpage,
                             const unsigned long *suftabptr,
                             unsigned long numberofsuffixes)
@@ -94,7 +94,7 @@ unsigned long nextLcpvalueiterator(Lcpvalueiterator *lvi,
   return lcpvalue;
 }
 
-void freeLcpvalueiterator(Lcpvalueiterator **lvi)
+void gt_freeLcpvalueiterator(Lcpvalueiterator **lvi)
 {
   gt_encodedsequence_scanstate_delete((*lvi)->esr1);
   gt_encodedsequence_scanstate_delete((*lvi)->esr2);

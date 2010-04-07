@@ -26,7 +26,7 @@
 
 GT_DECLAREARRAYSTRUCT(uint64_t);
 
-int tyr_occratio(const GtStr *str_inputindex,
+int gt_tyr_occratio_func(const GtStr *str_inputindex,
                  bool scanfile,
                  unsigned long minmersize,
                  unsigned long maxmersize,

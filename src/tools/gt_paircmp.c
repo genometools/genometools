@@ -214,20 +214,20 @@ static unsigned long applycheckfunctiontosimpleoptions(
   }
   if (gt_str_array_size(opt->files) > 0)
   {
-    runcheckfunctionontwofiles(checkfunction,
+    gt_runcheckfunctionontwofiles(checkfunction,
                                gt_str_array_get(opt->files,0),
                                gt_str_array_get(opt->files,1UL));
     return 2UL;
   }
   if (opt->charlistlen != NULL)
   {
-    return runcheckfunctiononalphalen(checkfunction,
+    return gt_runcheckfunctiononalphalen(checkfunction,
                                       gt_str_get(opt->charlistlen->charlist),
                                       opt->charlistlen->len);
   }
   if (gt_str_length(opt->text) > 0)
   {
-    return runcheckfunctionontext(checkfunction,gt_str_get(opt->text));
+    return gt_runcheckfunctionontext(checkfunction,gt_str_get(opt->text));
   }
   gt_assert(false);
   return 0;
@@ -248,7 +248,7 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
 
     gt_assert(parsed_args == argc);
     showsimpleoptions(&cmppairwise);
-    testcases = applycheckfunctiontosimpleoptions(checkgreedyunitedist,
+    testcases = applycheckfunctiontosimpleoptions(gt_checkgreedyunitedist,
                                                   &cmppairwise);
     printf("# number of testcases: %lu\n",testcases);
   }

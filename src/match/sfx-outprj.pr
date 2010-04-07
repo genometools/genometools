@@ -1,7 +1,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-int outprjfile(const GtStr *indexname,
+int gt_outprjfile(const GtStr *indexname,
                GtReadmode readmode,
                const GtEncodedsequence *encseq,
                unsigned int prefixlength,

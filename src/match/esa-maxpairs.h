@@ -28,7 +28,7 @@ typedef int (*Processmaxpairs)(void *,const GtEncodedsequence *,
                                unsigned long,unsigned long,unsigned long,
                                GtError *);
 
-int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
+int gt_enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
                       const GtEncodedsequence *encseq,
                       GtReadmode readmode,
                       unsigned int searchlength,

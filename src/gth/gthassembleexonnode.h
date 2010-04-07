@@ -41,9 +41,9 @@ typedef struct {
 } Exonnode;
 
 Exonnode         getcoreExonnodefromSA(GthSA *sa, unsigned long exonindex);
-void             freecoreExonnode(Exonnode *node);
-bool             nodesaremergeable(Exonnode *nodeA, Exonnode *nodeB);
-void             mergenodes(Exonnode *nodeA, Exonnode *nodeB);
-GthDbl computeexonscore(Exonnode *node);
+void             gt_freecoreExonnode(Exonnode *node);
+bool             gt_nodesaremergeable(Exonnode *nodeA, Exonnode *nodeB);
+void             gt_mergenodes(Exonnode *nodeA, Exonnode *nodeB);
+GthDbl gt_computeexonscore(Exonnode *node);
 
 #endif

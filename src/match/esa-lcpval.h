@@ -23,14 +23,14 @@
 
 typedef struct Lcpvalueiterator Lcpvalueiterator;
 
-Lcpvalueiterator *newLcpvalueiterator(const GtEncodedsequence *encseq,
+Lcpvalueiterator *gt_newLcpvalueiterator(const GtEncodedsequence *encseq,
                                       GtReadmode readmode);
 
-unsigned long nextLcpvalueiterator(Lcpvalueiterator *lvi,
+unsigned long gt_nextLcpvalueiterator(Lcpvalueiterator *lvi,
                             bool firstpage,
                             const unsigned long *suftabptr,
                             unsigned long numberofsuffixes);
 
-void freeLcpvalueiterator(Lcpvalueiterator **lvi);
+void gt_freeLcpvalueiterator(Lcpvalueiterator **lvi);
 
 #endif

@@ -80,14 +80,14 @@ struct compList
  * @return 0 on error, !0 otherwise
  */
 extern int
-initCompositionList(struct compList *compList, unsigned blockSize,
+gt_initCompositionList(struct compList *compList, unsigned blockSize,
                     unsigned numSyms);
 /**
  * Deallocate resources of composition list object, storage struct is not freed.
  * @param clist
  */
 extern void
-destructCompositionList(struct compList *clist);
+gt_destructCompositionList(struct compList *clist);
 
 /**
  * @brief create new object to map q-words to composition/permutation
@@ -97,14 +97,14 @@ destructCompositionList(struct compList *clist);
  * @return NULL on error
  */
 extern struct compList *
-newCompositionList(unsigned blockSize, unsigned alphabetSize);
+gt_newCompositionList(unsigned blockSize, unsigned alphabetSize);
 
 /**
  * Delete composition list object.
  * @param clist
  */
 extern void
-deleteCompositionList(struct compList *clist);
+gt_deleteCompositionList(struct compList *clist);
 
 /**
  * \brief Transforms a block-sized sequence of symbols to corresponding
@@ -130,7 +130,7 @@ deleteCompositionList(struct compList *clist);
  * otherwise.
  */
 extern int
-block2IndexPair(const struct compList *compositionTable,
+gt_block2IndexPair(const struct compList *compositionTable,
                 unsigned blockSize, unsigned alphabetSize,
                 const Symbol *block, PermCompIndex idxOutput[2],
                 unsigned *bitsOfPermIdx,

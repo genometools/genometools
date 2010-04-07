@@ -24,52 +24,52 @@
 #include "splititv.h"
 #include "procmatch.h"
 
-unsigned long bwtseqfirstmatch(const void *voidbwtseq,unsigned long bound);
+unsigned long gt_bwtseqfirstmatch(const void *voidbwtseq,unsigned long bound);
 
 /** Iterator for positions defined by a lower and upper bound
  */
 
 typedef struct Bwtseqpositioniterator Bwtseqpositioniterator;
 
-Bwtseqpositioniterator *newBwtseqpositioniterator(const void *voidbwtseq,
+Bwtseqpositioniterator *gt_newBwtseqpositioniterator(const void *voidbwtseq,
                                                   unsigned long lowerbound,
                                                   unsigned long upperbound);
 
-bool nextBwtseqpositioniterator(unsigned long *pos,
+bool gt_nextBwtseqpositioniterator(unsigned long *pos,
                                 Bwtseqpositioniterator *bspi);
 
-bool nextBwtseqpositionwithoutSEPiterator(unsigned long *pos,
+bool gt_nextBwtseqpositionwithoutSEPiterator(unsigned long *pos,
                                           Bwtseqpositioniterator *bspi);
 
-GtUchar bwtseqgetsymbol(unsigned long bound,const void *voidbwtseq);
+GtUchar gt_bwtseqgetsymbol(unsigned long bound,const void *voidbwtseq);
 
-void freeBwtseqpositioniterator(Bwtseqpositioniterator **bspi);
+void gt_freeBwtseqpositioniterator(Bwtseqpositioniterator **bspi);
 
 typedef struct Bwtseqcontextiterator Bwtseqcontextiterator;
 
-Bwtseqcontextiterator *newBwtseqcontextiterator(const void *voidbwtseq,
+Bwtseqcontextiterator *gt_newBwtseqcontextiterator(const void *voidbwtseq,
                                                 unsigned long bound);
 
-GtUchar nextBwtseqcontextiterator(unsigned long *bound,
+GtUchar gt_nextBwtseqcontextiterator(unsigned long *bound,
                                   Bwtseqcontextiterator *bsci);
 
-void freeBwtseqcontextiterator(Bwtseqcontextiterator **bsci);
+void gt_freeBwtseqcontextiterator(Bwtseqcontextiterator **bsci);
 
-void bwtrangesplitwithoutspecial(GtArrayBoundswithchar *bwci,
+void gt_bwtrangesplitwithoutspecial(GtArrayBoundswithchar *bwci,
                                  unsigned long *rangeOccs,
                                  const void *voidbwtseq,
                                  unsigned long lbound,
                                  unsigned long ubound);
 
-void *loadvoidBWTSeqForSA(const GtStr *indexname,
+void *gt_loadvoidBWTSeqForSA(const GtStr *indexname,
                           const Suffixarray *suffixarray,
                           unsigned long totallength,
                           bool withpckbt,
                           GtError *err);
 
-void deletevoidBWTSeq(void *packedindex);
+void gt_deletevoidBWTSeq(void *packedindex);
 
-unsigned long voidpackedindexuniqueforward(const void *voidbwtseq,
+unsigned long gt_voidpackedindexuniqueforward(const void *voidbwtseq,
                                        GT_UNUSED unsigned long offset,
                                        GT_UNUSED unsigned long left,
                                        GT_UNUSED unsigned long right,
@@ -77,7 +77,7 @@ unsigned long voidpackedindexuniqueforward(const void *voidbwtseq,
                                        const GtUchar *qstart,
                                        const GtUchar *qend);
 
-unsigned long voidpackedindexmstatsforward(const void *voidbwtseq,
+unsigned long gt_voidpackedindexmstatsforward(const void *voidbwtseq,
                                            GT_UNUSED unsigned long offset,
                                            GT_UNUSED unsigned long left,
                                            GT_UNUSED unsigned long right,
@@ -85,7 +85,7 @@ unsigned long voidpackedindexmstatsforward(const void *voidbwtseq,
                                            const GtUchar *qstart,
                                            const GtUchar *qend);
 
-bool pck_exactpatternmatching(const void *voidbwtseq,
+bool gt_pck_exactpatternmatching(const void *voidbwtseq,
                               const GtUchar *pattern,
                               unsigned long patternlength,
                               unsigned long totallength,
@@ -93,7 +93,7 @@ bool pck_exactpatternmatching(const void *voidbwtseq,
                               Processmatch processmatch,
                               void *processmatchinfo);
 
-unsigned long voidpackedfindfirstmatchconvert(const void *voidbwtseq,
+unsigned long gt_voidpackedfindfirstmatchconvert(const void *voidbwtseq,
                                        unsigned long witnessbound,
                                        unsigned long matchlength);
 
@@ -102,14 +102,14 @@ typedef struct
   unsigned long lowerbound, upperbound;
 } Mbtab;
 
-unsigned long bwtrangesplitallwithoutspecial(Mbtab *mbtab,
+unsigned long gt_bwtrangesplitallwithoutspecial(Mbtab *mbtab,
                                              unsigned long *rangeOccs,
                                              const void *voidbwtseq,
                                              unsigned long lbound,
                                              unsigned long ubound);
 
-unsigned int bwtseq2maxdepth(const void *voidbwtseq);
+unsigned int gt_bwtseq2maxdepth(const void *voidbwtseq);
 
-const Mbtab **bwtseq2mbtab(const void *voidbwtseq);
+const Mbtab **gt_bwtseq2mbtab(const void *voidbwtseq);
 
 #endif

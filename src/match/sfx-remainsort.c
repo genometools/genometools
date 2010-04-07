@@ -210,7 +210,7 @@ static Lowerboundwithrank *filllowerboundwithrank(
   return NULL;
 }
 
-static unsigned long frompos2rank(const Lowerboundwithrank *leftptr,
+static unsigned long gt_frompos2rank(const Lowerboundwithrank *leftptr,
                            const Lowerboundwithrank *rightptr,
                            unsigned long specialpos)
 {
@@ -268,7 +268,7 @@ DEFINE_HASHMAP(unsigned long, seqpos, unsigned long, ul, gt_ht_seqpos_elem_hash,
                gt_ht_seqpos_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR,
                static, inline)
 
-Rmnsufinfo *newRmnsufinfo(unsigned long *presortedsuffixes,
+Rmnsufinfo *gt_newRmnsufinfo(unsigned long *presortedsuffixes,
                           int mmapfiledesc,
                           const GtEncodedsequence *encseq,
                           Bcktab *bcktab,
@@ -318,20 +318,20 @@ Rmnsufinfo *newRmnsufinfo(unsigned long *presortedsuffixes,
     rmnsufinfo->itvrel.hashstore = NULL;
   } else
   {
-    determinemaxbucketsize(bcktab,
+    gt_determinemaxbucketsize(bcktab,
                            0,
                            maxcode,
                            partwidth,
                            numofchars,
                            hashexceptions,
                            hashexceptions ? rmnsufinfo->totallength : 0);
-    rmnsufinfo->allocateditvinfo = bcktab_nonspecialsmaxbucketsize(bcktab);
+    rmnsufinfo->allocateditvinfo = gt_bcktab_nonspecialsmaxbucketsize(bcktab);
     if (hashexceptions)
     {
       unsigned int optimalnumofbits;
       unsigned short logofremaining;
 
-      optimalnumofbits = bcktab_optimalnumofbits(&logofremaining,bcktab);
+      optimalnumofbits = gt_bcktab_optimalnumofbits(&logofremaining,bcktab);
       rmnsufinfo->itvrel.offset
         = compressedtablebits_new(rmnsufinfo->totallength+1,optimalnumofbits);
       rmnsufinfo->itvrel.maxvalue
@@ -363,11 +363,11 @@ Rmnsufinfo *newRmnsufinfo(unsigned long *presortedsuffixes,
   rmnsufinfo->itvinfo = NULL;
   rmnsufinfo->itvfullinfo = NULL;
   rmnsufinfo->rangestobesorted = gt_inl_queue_new(MAX(16UL,GT_DIV2(maxcode)));
-  rmnsufinfo->multimappower = bcktab_multimappower(bcktab);
+  rmnsufinfo->multimappower = gt_bcktab_multimappower(bcktab);
   rmnsufinfo->esr = gt_encodedsequence_scanstate_new();
   GT_INITARRAY(&rmnsufinfo->firstgeneration,Pairsuffixptr);
   rmnsufinfo->realspecialranges = gt_encodedsequence_realspecialranges(encseq);
-  rmnsufinfo->filltable = filllargestchartable(numofchars,prefixlength);
+  rmnsufinfo->filltable = gt_filllargestchartable(numofchars,prefixlength);
 #ifdef Lowerboundwithrank
   rmnsufinfo->lowerboundwithrank = filllowerboundwithrank(encseq,readmode);
 #endif
@@ -503,7 +503,7 @@ static void inversesuftabrel_set(Rmnsufinfo *rmnsufinfo,unsigned long idx,
 }
 
 #ifdef Lowerboundwithrank
-static unsigned long frompos2rank(const Lowerboundwithrank *leftptr,
+static unsigned long gt_frompos2rank(const Lowerboundwithrank *leftptr,
                            const Lowerboundwithrank *rightptr,
                            unsigned long specialpos)
 {
@@ -583,7 +583,7 @@ static void inversesuftabrel_get(Itvfullentry *itvfullentry,
   } else
   {
     gt_assert(code <= rmnsufinfo->maxcode);
-    (void) calcbucketboundsparts(&bucketspec,
+    (void) gt_calcbucketboundsparts(&bucketspec,
                                  rmnsufinfo->bcktab,
                                  (GtCodetype) code,
                                  rmnsufinfo->maxcode,
@@ -686,7 +686,7 @@ static void initinversesuftabnonspecialsadjust(Rmnsufinfo *rmnsufinfo)
   idx = 0;
   for (code = mincode; code <= rmnsufinfo->maxcode; code++)
   {
-    rightchar = calcbucketboundsparts(&bucketspec,
+    rightchar = gt_calcbucketboundsparts(&bucketspec,
                                       rmnsufinfo->bcktab,
                                       code,
                                       rmnsufinfo->maxcode,
@@ -728,7 +728,7 @@ static void initinversesuftabnonspecialsadjuststream(Rmnsufinfo *rmnsufinfo)
   rmnsufinfo->overallspecials = 0;
   for (code = mincode; code <= rmnsufinfo->maxcode; code++)
   {
-    rightchar = calcbucketboundsparts(&bucketspec,
+    rightchar = gt_calcbucketboundsparts(&bucketspec,
                                       rmnsufinfo->bcktab,
                                       code,
                                       rmnsufinfo->maxcode,
@@ -785,7 +785,7 @@ static void initinversesuftabnonspecials(Rmnsufinfo *rmnsufinfo)
   }
 }
 
-void rmnsufinfo_addunsortedrange(Rmnsufinfo *rmnsufinfo,
+void gt_rmnsufinfo_addunsortedrange(Rmnsufinfo *rmnsufinfo,
                                  unsigned long left,
                                  unsigned long right,
                                  unsigned long depth)
@@ -905,7 +905,7 @@ static void processunsortedrange(Rmnsufinfo *rmnsufinfo,
   }
 }
 
-/* access to suftab for qsufsort is restricted to the following two functions
+/* access to suftab for gt_qsufsort is restricted to the following two functions
  * */
 
 static void possiblychangemappedsection(Sortblock *sortblock,unsigned long left,
@@ -1238,7 +1238,7 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
   rmnsufinfo->rangestobesorted = NULL;
 }
 
-void bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo)
+void gt_bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo)
 {
   GtCodetype code;
   unsigned int rightchar;
@@ -1271,7 +1271,7 @@ void bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo)
   rightchar = (unsigned int) (mincode % rmnsufinfo->numofchars);
   for (code = mincode; code <= rmnsufinfo->maxcode; code++)
   {
-    rightchar = calcbucketboundsparts(&bucketspec,
+    rightchar = gt_calcbucketboundsparts(&bucketspec,
                                       rmnsufinfo->bcktab,
                                       code,
                                       rmnsufinfo->maxcode,
@@ -1288,7 +1288,7 @@ void bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo)
   }
 }
 
-Compressedtable *rmnsufinfo_wrap(unsigned long *longest,
+Compressedtable *gt_rmnsufinfo_wrap(unsigned long *longest,
                                  Rmnsufinfo **rmnsufinfoptr,
                                  bool withlcptab)
 {
@@ -1334,12 +1334,12 @@ Compressedtable *rmnsufinfo_wrap(unsigned long *longest,
 #ifdef NOINVERSESUFTAB
     compressedtable_free(rmnsufinfo->inversesuftab,true);
     rmnsufinfo->inversesuftab = NULL;
-    lcptab = lcp9_manzini(NULL,rmnsufinfo->encseq,rmnsufinfo->readmode,
+    lcptab = gt_lcp9_manzini(NULL,rmnsufinfo->encseq,rmnsufinfo->readmode,
                           rmnsufinfo->partwidth,rmnsufinfo->totallength,
                           rmnsufinfo->sortedsuffixes);
 #else
     gt_assert(rmnsufinfo->inversesuftab != NULL);
-    lcptab = lcp9_manzini(rmnsufinfo->inversesuftab,rmnsufinfo->encseq,
+    lcptab = gt_lcp9_manzini(rmnsufinfo->inversesuftab,rmnsufinfo->encseq,
                           rmnsufinfo->readmode,rmnsufinfo->partwidth,
                           rmnsufinfo->totallength,tmnsufinfo->sortedsuffixes);
     rmnsufinfo->inversesuftab = NULL;

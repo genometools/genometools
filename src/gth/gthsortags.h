@@ -23,6 +23,6 @@
 /* The following function sorts the AGSs of every PGL contained in <pgls>
    according to the weighted mean of the average exon score and the average
    splice site probability. */
-void sortAGSs(GtArray *pgls, double sortagswf);
+void gt_sortAGSs(GtArray *pgls, double sortagswf);
 
 #endif

@@ -83,13 +83,15 @@ typedef enum {
   NUM_OF_EOP_TYPES
 } Eoptype;
 
-Eoptype      editoperation_type(Editoperation, bool proteineop);
-unsigned int editoperation_length(Editoperation, bool proteineop);
-void         editoperation_set_length(Editoperation*, unsigned int,
-                                      bool proteineop);
+Eoptype      gt_editoperation_type(Editoperation, bool proteineop);
+unsigned int gt_editoperation_length(Editoperation, bool proteineop);
+void         gt_editoperation_set_length(Editoperation*, unsigned int,
+                                         bool proteineop);
 
-void         editoperation_show(Editoperation *eops, unsigned long num_of_eops,
-                                bool proteineops, bool xmlout, unsigned int
-                                indentlevel, GtFile *outfp);
+void         gt_editoperation_show(Editoperation *eops,
+                                   unsigned long num_of_eops,
+                                   bool proteineops, bool xmlout,
+                                   unsigned int indentlevel,
+                                   GtFile *outfp);
 
 #endif

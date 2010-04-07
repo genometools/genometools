@@ -28,13 +28,14 @@
 
 typedef struct Bucketenumerator Bucketenumerator;
 
-Bucketenumerator *newbucketenumerator(const Bcktab *bcktab,
+Bucketenumerator *gt_newbucketenumerator(const Bcktab *bcktab,
                                       unsigned int prefixlength,
                                       const GtUchar *demandprefix,
                                       unsigned int demandprefixlength);
 
-bool nextbucketenumerator(Lcpinterval *itv,Bucketenumerator *bucketenumerator);
+bool gt_nextbucketenumerator(Lcpinterval *itv,
+                             Bucketenumerator *bucketenumerator);
 
-void freebucketenumerator(Bucketenumerator **bucketenumerator);
+void gt_freebucketenumerator(Bucketenumerator **bucketenumerator);
 
 #endif

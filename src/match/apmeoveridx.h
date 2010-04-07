@@ -19,6 +19,6 @@
 #define APMEOVERIDX_H
 #include "absdfstrans-def.h"
 
-const AbstractDfstransformer *apme_AbstractDfstransformer(void);
+const AbstractDfstransformer *gt_apme_AbstractDfstransformer(void);
 
 #endif

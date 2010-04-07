@@ -23,7 +23,7 @@
 #include "core/str_array_api.h"
 #include "core/error_api.h"
 
-int tyrsearch(const GtStr *tyrindexname,
+int gt_tyrsearch(const GtStr *tyrindexname,
               const GtStrArray *queryfilenames,
               unsigned int showmode,
               unsigned int searchstrand,

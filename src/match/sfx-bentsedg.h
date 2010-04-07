@@ -37,20 +37,20 @@ typedef struct
   Definedunsignedlong longest;
 } Suftab;
 
-Outlcpinfo *newOutlcpinfo(const GtStr *indexname,
+Outlcpinfo *gt_newOutlcpinfo(const GtStr *indexname,
                           unsigned int prefixlength,
                           unsigned int numofchars,
                           unsigned long totallength,
                           bool assideeffect,
                           GtError *err);
 
-void freeOutlcptab(Outlcpinfo **outlcpinfoptr);
+void gt_freeOutlcptab(Outlcpinfo **outlcpinfoptr);
 
 unsigned long getnumoflargelcpvalues(const Outlcpinfo *outlcpinfo);
 
 unsigned long getmaxbranchdepth(const Outlcpinfo *outlcpinfo);
 
-void qsufsort(unsigned long *sortspace,
+void gt_qsufsort(unsigned long *sortspace,
               int mmapfiledesc,
               unsigned long *longest,
               const GtEncodedsequence *encseq,
@@ -65,7 +65,7 @@ void qsufsort(unsigned long *sortspace,
               bool absoluteinversesuftab,
               Outlcpinfo *outlcpinfo);
 
-void sortallbuckets(Suftab *suftab,
+void gt_sortallbuckets(Suftab *suftab,
                     GtBucketspec2 *bucketspec2,
                     const GtEncodedsequence *encseq,
                     GtReadmode readmode,
@@ -80,7 +80,7 @@ void sortallbuckets(Suftab *suftab,
                     unsigned long long *bucketiterstep,
                     GtLogger *logger);
 
-void sortbucketofsuffixes(unsigned long *suffixestobesorted,
+void gt_sortbucketofsuffixes(unsigned long *suffixestobesorted,
                           GtBucketspec2 *bucketspec2,
                           unsigned long numberofsuffixes,
                           const GtEncodedsequence *encseq,

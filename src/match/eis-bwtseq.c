@@ -53,7 +53,7 @@ initBWTSeqFromEncSeqIdx(BWTSeq *bwtSeq, struct encIdxSeq *seqIdx,
   EISHint hint;
   gt_assert(bwtSeq && seqIdx);
   bwtSeq->alphabet = alphabet;
-  alphabetSize = MRAEncGetSize(alphabet);
+  alphabetSize = gt_MRAEncGetSize(alphabet);
   if (!alphabetSize)
     /* weird error, shouldn't happen, but I prefer error return to
      * segfault in case someone tampered with the input */
@@ -61,9 +61,9 @@ initBWTSeqFromEncSeqIdx(BWTSeq *bwtSeq, struct encIdxSeq *seqIdx,
   /* FIXME: this should probably be handled in chardef.h to have a
    * unique mapping */
   /* FIXME: this assumes there is exactly two ranges */
-  MRAEncAddSymbolToRange(alphabet, bwtTerminatorSym, 1);
-  gt_assert(MRAEncGetSize(alphabet) ==  alphabetSize + 1);
-  alphabetSize = MRAEncGetSize(alphabet);
+  gt_MRAEncAddSymbolToRange(alphabet, bwtTerminatorSym, 1);
+  gt_assert(gt_MRAEncGetSize(alphabet) ==  alphabetSize + 1);
+  alphabetSize = gt_MRAEncGetSize(alphabet);
   bwtSeq->bwtTerminatorFallback = bwtTerminatorFlat =
     MRAEncMapSymbol(alphabet, UNDEFBWTCHAR);
   bwtSeq->bwtTerminatorFallbackRange = 1;
@@ -97,7 +97,7 @@ initBWTSeqFromEncSeqIdx(BWTSeq *bwtSeq, struct encIdxSeq *seqIdx,
 #endif
     gt_assert(count[alphabetSize] == len);
   }
-  BWTSeqInitLocateHandling(bwtSeq, defaultRangeSort);
+  gt_BWTSeqInitLocateHandling(bwtSeq, defaultRangeSort);
   return 1;
 }
 
@@ -106,7 +106,7 @@ initBWTSeqFromEncSeqIdx(BWTSeq *bwtSeq, struct encIdxSeq *seqIdx,
  * sequence object if return value is non-NULL
  */
 extern BWTSeq *
-newBWTSeq(EISeq *seqIdx, MRAEnc *alphabet,
+gt_newBWTSeq(EISeq *seqIdx, MRAEnc *alphabet,
           const enum rangeSortMode *defaultRangeSort)
 {
   BWTSeq *bwtSeq;
@@ -117,7 +117,7 @@ newBWTSeq(EISeq *seqIdx, MRAEnc *alphabet,
   gt_assert(seqIdx);
   /* alphabetSize is increased by one to handle the flattened
    * terminator symbol correctly */
-  alphabetSize = MRAEncGetSize(alphabet) + 1;
+  alphabetSize = gt_MRAEncGetSize(alphabet) + 1;
   countsOffset = offsetAlign(sizeof (struct BWTSeq), sizeof (unsigned long));
   rangeSortOffset = offsetAlign(countsOffset
                                 + sizeof (unsigned long) * (alphabetSize + 1),
@@ -137,11 +137,11 @@ newBWTSeq(EISeq *seqIdx, MRAEnc *alphabet,
 }
 
 void
-deleteBWTSeq(BWTSeq *bwtSeq)
+gt_deleteBWTSeq(BWTSeq *bwtSeq)
 {
-  MRAEncDelete(bwtSeq->alphabet);
+  gt_MRAEncDelete(bwtSeq->alphabet);
   deleteEISHint(bwtSeq->seqIdx, bwtSeq->hint);
-  deleteEncIdxSeq(bwtSeq->seqIdx);
+  gt_deleteEncIdxSeq(bwtSeq->seqIdx);
   gt_free(bwtSeq);
 }
 
@@ -166,7 +166,7 @@ getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
     qend = query - 1;
   }
   /*
-  mbtab = pcktb2mbtab(bwtSeq->pckbuckettable);
+  mbtab = gt_pcktb2mbtab(bwtSeq->pckbuckettable);
   if (mbtab != NULL)
   {
   }
@@ -194,7 +194,7 @@ getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
   */
 }
 
-unsigned long packedindexuniqueforward(const BWTSeq *bwtSeq,
+unsigned long gt_packedindexuniqueforward(const BWTSeq *bwtSeq,
                                        const GtUchar *qstart,
                                        const GtUchar *qend)
 {
@@ -258,7 +258,7 @@ unsigned long packedindexuniqueforward(const BWTSeq *bwtSeq,
   return 0;
 }
 
-unsigned long packedindexmstatsforward(const BWTSeq *bwtSeq,
+unsigned long gt_packedindexmstatsforward(const BWTSeq *bwtSeq,
                                        unsigned long *witnessleftbound,
                                        const GtUchar *qstart,
                                        const GtUchar *qend)
@@ -336,7 +336,7 @@ unsigned long packedindexmstatsforward(const BWTSeq *bwtSeq,
 }
 
 extern unsigned long
-BWTSeqMatchCount(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
+gt_BWTSeqMatchCount(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
                  bool forward)
 {
   struct matchBound match;
@@ -349,7 +349,7 @@ BWTSeqMatchCount(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
 }
 
 extern bool
-initEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
+gt_initEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
                const Symbol *query, size_t queryLen, bool forward)
 {
   gt_assert(iter && bwtSeq && query);
@@ -366,7 +366,7 @@ initEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
 }
 
 extern bool
-initEmptyEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq)
+gt_initEmptyEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq)
 {
   gt_assert(iter && bwtSeq);
   if (!bwtSeq->locateSampleInterval)
@@ -381,13 +381,13 @@ initEmptyEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq)
 }
 
 struct BWTSeqExactMatchesIterator *
-newEMIterator(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
+gt_newEMIterator(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
               bool forward)
 {
   struct BWTSeqExactMatchesIterator *iter;
   gt_assert(bwtSeq && query);
   iter = gt_malloc(sizeof (*iter));
-  if (initEMIterator(iter, bwtSeq, query, queryLen,forward))
+  if (gt_initEMIterator(iter, bwtSeq, query, queryLen,forward))
   {
     return iter;
   }
@@ -396,7 +396,7 @@ newEMIterator(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
 }
 
 extern bool
-reinitEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
+gt_reinitEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
                  const Symbol *query, size_t queryLen, bool forward)
 {
   getMatchBound(bwtSeq, query, queryLen, &iter->bounds, forward);
@@ -405,19 +405,19 @@ reinitEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
 }
 
 extern void
-destructEMIterator(struct BWTSeqExactMatchesIterator *iter)
+gt_destructEMIterator(struct BWTSeqExactMatchesIterator *iter)
 {
   destructExtBitsRetrieval(&iter->extBits);
 }
 
 void
-deleteEMIterator(struct BWTSeqExactMatchesIterator *iter)
+gt_deleteEMIterator(struct BWTSeqExactMatchesIterator *iter)
 {
   gt_free(iter);
 }
 
 unsigned long
-EMINumMatchesTotal(const struct BWTSeqExactMatchesIterator *iter)
+gt_EMINumMatchesTotal(const struct BWTSeqExactMatchesIterator *iter)
 {
   gt_assert(iter);
   if (iter->bounds.start > iter->bounds.end)
@@ -427,7 +427,7 @@ EMINumMatchesTotal(const struct BWTSeqExactMatchesIterator *iter)
 }
 
 extern unsigned long
-EMINumMatchesLeft(const struct BWTSeqExactMatchesIterator *iter)
+gt_EMINumMatchesLeft(const struct BWTSeqExactMatchesIterator *iter)
 {
   gt_assert(iter);
   if (iter->nextMatchBWTPos > iter->bounds.end)
@@ -446,7 +446,7 @@ enum
 };
 
 extern int
-BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
+gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
                       int checkFlags,
                       unsigned long tickPrint, FILE *fp,
                       GtLogger *verbosity, GtError *err)
@@ -464,7 +464,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
     initExtBitsRetrieval(&extBits);
     extBitsAreInitialized = true;
 
-    if (mapsuffixarray(&suffixArray,
+    if (gt_mapsuffixarray(&suffixArray,
                        SARR_SUFTAB | SARR_ESQTAB, projectName, verbosity, err))
     {
       gt_error_set(err, "Cannot load reference suffix array project with"
@@ -489,9 +489,10 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
       unsigned long i;
       for (i = 0; i < seqLen && retval == VERIFY_BWTSEQ_NO_ERROR; ++i)
       {
-        if (BWTSeqPosHasLocateInfo(bwtSeq, i, &extBits))
+        if (gt_BWTSeqPosHasLocateInfo(bwtSeq, i, &extBits))
         {
-          unsigned long sfxArrayValue = BWTSeqLocateMatch(bwtSeq, i, &extBits);
+          unsigned long sfxArrayValue = gt_BWTSeqLocateMatch(bwtSeq, i,
+                                                             &extBits);
           if (sfxArrayValue != suffixArray.suftab[i])
           {
             gt_error_set(err, "Failed suffix array value comparison"
@@ -581,7 +582,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
     if (checkFlags & VERIFY_BWTSEQ_CONTEXT)
     {
       BWTSeqContextRetriever *bwtSeqCR =
-        BWTSeqCRLoad(bwtSeq, projectName, CTX_MAP_ILOG_AUTOSIZE);
+        gt_BWTSeqCRLoad(bwtSeq, projectName, CTX_MAP_ILOG_AUTOSIZE);
       if (!bwtSeqCR)
       {
         gt_error_set(err, "cannot load BWT sequence context access table"
@@ -605,7 +606,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
           start = random()%(seqLen - subSeqLen + 1);
           end = start + subSeqLen;
           inSubSeqLen = subSeqLen - ((end==seqLen)?1:0);
-          BWTSeqCRAccessSubseq(bwtSeqCR, start, subSeqLen, contextBuf);
+          gt_BWTSeqCRAccessSubseq(bwtSeqCR, start, subSeqLen, contextBuf);
           gt_encodedsequence_scanstate_init(esr, suffixArray.encseq,
                                        suffixArray.readmode, start);
           for (j = 0; j < inSubSeqLen; ++j)
@@ -644,10 +645,10 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
         gt_encodedsequence_scanstate_delete(esr);
         gt_free(contextBuf);
       }
-      deleteBWTSeqCR(bwtSeqCR);
+      gt_deleteBWTSeqCR(bwtSeqCR);
     }
   } while (0);
-  if (suffixArrayIsInitialized) freesuffixarray(&suffixArray);
+  if (suffixArrayIsInitialized) gt_freesuffixarray(&suffixArray);
   if (extBitsAreInitialized) destructExtBitsRetrieval(&extBits);
   return retval;
 }

@@ -19,6 +19,6 @@
 #define MSSUFPAT_H
 #include "absdfstrans-def.h"
 
-const AbstractDfstransformer *pms_AbstractDfstransformer(void);
+const AbstractDfstransformer *gt_pms_AbstractDfstransformer(void);
 
 #endif

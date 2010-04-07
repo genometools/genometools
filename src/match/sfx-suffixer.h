@@ -26,9 +26,9 @@
 
 typedef struct Sfxiterator Sfxiterator;
 
-void freeSfxiterator(Sfxiterator **sfiptr);
+void gt_freeSfxiterator(Sfxiterator **sfiptr);
 
-Sfxiterator *newSfxiterator(const GtEncodedsequence *encseq,
+Sfxiterator *gt_newSfxiterator(const GtEncodedsequence *encseq,
                             GtReadmode readmode,
                             unsigned int prefixlength,
                             unsigned int numofparts,
@@ -38,16 +38,16 @@ Sfxiterator *newSfxiterator(const GtEncodedsequence *encseq,
                             GtLogger *logger,
                             GtError *err);
 
-const unsigned long *nextSfxiterator(unsigned long *numberofsuffixes,
+const unsigned long *gt_nextSfxiterator(unsigned long *numberofsuffixes,
                               bool *specialsuffixes,
                               Sfxiterator *sfi);
 
-int postsortsuffixesfromstream(Sfxiterator *sfi, const GtStr *str_indexname,
+int gt_postsortsuffixesfromstream(Sfxiterator *sfi, const GtStr *str_indexname,
                                GtError *err);
 
-bool sfi2longestsuffixpos(unsigned long *longest,const Sfxiterator *sfi);
+bool gt_sfi2longestsuffixpos(unsigned long *longest,const Sfxiterator *sfi);
 
-int sfibcktab2file(FILE *fp,const Sfxiterator *sfi,GtError *err);
+int gt_sfibcktab2file(FILE *fp,const Sfxiterator *sfi,GtError *err);
 
 unsigned int getprefixlenbits(void);
 

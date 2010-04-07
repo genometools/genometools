@@ -27,7 +27,7 @@ static bool spliced_alignments_are_sorted(GtArray *alignments)
 {
   unsigned long i;
   for (i = 1; i < gt_array_size(alignments); i++) {
-    if (compareaccordingtogenomicposactual(gt_array_get(alignments, i - 1),
+    if (gt_compareaccordingtogenomicposactual(gt_array_get(alignments, i - 1),
                                            gt_array_get(alignments, i)) == 1) {
       return false;
     }
@@ -52,7 +52,8 @@ void gthassemblecluster(GthPGL *pgl, bool disableclustersas)
   for (i = 1; i < gt_array_size(pgl->alignments); i++) {
     sa = *(GthSA**) gt_array_get(pgl->alignments, i);
     if (disableclustersas ||
-        compareaccordingtogenomicposactual(&sacluster->representative, &sa)) {
+        gt_compareaccordingtogenomicposactual(&sacluster->representative,
+                                              &sa)) {
       /* spliced alignments differ -> create a new cluster */
       gt_array_add(pgl->saclusters, sacluster);
       sacluster = gt_malloc(sizeof (GthSACluster));

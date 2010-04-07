@@ -220,7 +220,7 @@ static GtOPrval parsegfmsub(bool doms,
         {
           if (doms)
           {
-            if (optionargaddbitmask(msgfmsubmodedesctable,
+            if (gt_optionargaddbitmask(msgfmsubmodedesctable,
                                  sizeof (msgfmsubmodedesctable)/
                                  sizeof (msgfmsubmodedesctable[0]),
                                  &gfmsubcallinfo->showmode,
@@ -233,7 +233,7 @@ static GtOPrval parsegfmsub(bool doms,
             }
           } else
           {
-            if (optionargaddbitmask(gfmsubmodedesctable,
+            if (gt_optionargaddbitmask(gfmsubmodedesctable,
                                     sizeof (gfmsubmodedesctable)/
                                     sizeof (gfmsubmodedesctable[0]),
                                     &gfmsubcallinfo->showmode,
@@ -281,7 +281,7 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
   const GtAlphabet *alphabet = NULL;
   unsigned int prefixlength = 0;
   unsigned long totallength;
-  bool mapfmindexfail = false;
+  bool gt_mapfmindexfail = false;
 
   gt_error_check(err);
   switch (parsegfmsub(doms,&gfmsubcallinfo, argc, argv, err)) {
@@ -298,11 +298,11 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
   logger = gt_logger_new(false, GT_LOGGER_DEFLT_PREFIX, stdout);
   if (gfmsubcallinfo.indextype == Fmindextype)
   {
-    if (mapfmindex (&fmindex,gfmsubcallinfo.indexname,
+    if (gt_mapfmindex (&fmindex,gfmsubcallinfo.indexname,
                     logger, err) != 0)
     {
       haserr = true;
-      mapfmindexfail = true;
+      gt_mapfmindexfail = true;
     } else
     {
       alphabet = fmindex.alphabet;
@@ -330,7 +330,7 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
         mappedbits = 0;
       }
     }
-    if (mapsuffixarray(&suffixarray,
+    if (gt_mapsuffixarray(&suffixarray,
                        mappedbits,
                        gfmsubcallinfo.indexname,
                        logger,
@@ -348,7 +348,7 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
     {
       if (gfmsubcallinfo.indextype == Packedindextype)
       {
-        packedindex = loadvoidBWTSeqForSA(gfmsubcallinfo.indexname,
+        packedindex = gt_loadvoidBWTSeqForSA(gfmsubcallinfo.indexname,
                                           &suffixarray,
                                           totallength,
                                           false,
@@ -370,10 +370,10 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
       theindex = (const void *) &fmindex;
       if (doms)
       {
-        gmatchforwardfunction = skfmmstats;
+        gmatchforwardfunction = gt_skfmmstats;
       } else
       {
-        gmatchforwardfunction = skfmuniqueforward;
+        gmatchforwardfunction = gt_skfmuniqueforward;
       }
     } else
     {
@@ -382,10 +382,10 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
         theindex = (const void *) &suffixarray;
         if (doms)
         {
-          gmatchforwardfunction = suffixarraymstats;
+          gmatchforwardfunction = gt_suffixarraymstats;
         } else
         {
-          gmatchforwardfunction = suffixarrayuniqueforward;
+          gmatchforwardfunction = gt_suffixarrayuniqueforward;
         }
       } else
       {
@@ -393,10 +393,10 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
         theindex = (const void *) packedindex;
         if (doms)
         {
-          gmatchforwardfunction = voidpackedindexmstatsforward;
+          gmatchforwardfunction = gt_voidpackedindexmstatsforward;
         } else
         {
-          gmatchforwardfunction = voidpackedindexuniqueforward;
+          gmatchforwardfunction = gt_voidpackedindexuniqueforward;
         }
       }
     }
@@ -420,7 +420,7 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
       }
 #endif
       if (!haserr &&
-          findsubquerygmatchforward(dotestsequence(doms,&gfmsubcallinfo)
+          gt_findsubquerygmatchforward(dotestsequence(doms,&gfmsubcallinfo)
                                       ? suffixarray.encseq
                                       : NULL,
                                     theindex,
@@ -444,17 +444,17 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
   }
   if (gfmsubcallinfo.indextype == Fmindextype)
   {
-    if (!mapfmindexfail)
+    if (!gt_mapfmindexfail)
     {
-      freefmindex(&fmindex);
+      gt_freefmindex(&fmindex);
     }
   } else
   {
     if (gfmsubcallinfo.indextype == Packedindextype && packedindex != NULL)
     {
-      deletevoidBWTSeq(packedindex);
+      gt_deletevoidBWTSeq(packedindex);
     }
-    freesuffixarray(&suffixarray);
+    gt_freesuffixarray(&suffixarray);
   }
   gt_logger_delete(logger);
   gt_str_delete(gfmsubcallinfo.indexname);

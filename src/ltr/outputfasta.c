@@ -71,7 +71,7 @@ static void myencseq2symbolstring(Fastaoutinfo *fastainfo,
                        start - offset + 1,
                        /* increase by one for output */
                        start - offset + wlen);
-  encseq2symbolstring(fastainfo->formatout,
+  gt_encseq2symbolstring(fastainfo->formatout,
                       fastainfo->encseq,
                       readmode,
                       start,
@@ -137,7 +137,7 @@ static void overallpredictionsequences(const LTRboundaries **bdptrtab,
  specified output.
 */
 
-int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
+int gt_showpredictionsmultiplefasta(const LTRharvestoptions *lo,
                                  const LTRboundaries **bdptrtab,
                                  unsigned long numofboundaries,
                                  bool innerregion,

@@ -347,7 +347,7 @@ static int processbranchedge(bool firstsucc,
   return 0;
 }
 
-int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
+int gt_enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
                       const GtEncodedsequence *encseq,
                       GtReadmode readmode,
                       unsigned int searchlength,
@@ -377,7 +377,7 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
     ptr = &state.poslist[base];
     GT_INITARRAY(ptr,GtUlong);
   }
-  if (depthfirstesa(ssar,
+  if (gt_depthfirstesa(ssar,
                     allocateDfsinfo,
                     freeDfsinfo,
                     processleafedge,

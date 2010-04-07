@@ -36,35 +36,35 @@ typedef struct
 
 typedef struct Bcktab Bcktab;
 
-Bcktab *mapbcktab(const GtStr *indexname,
+Bcktab *gt_mapbcktab(const GtStr *indexname,
                   unsigned int numofchars,
                   unsigned int prefixlength,
                   GtError *err);
 
-void bcktab_delete(Bcktab **bcktab);
+void gt_bcktab_delete(Bcktab **bcktab);
 
-Bcktab *allocBcktab(unsigned int numofchars,
+Bcktab *gt_allocBcktab(unsigned int numofchars,
                     unsigned int prefixlength,
                     bool storespecialcodes,
                     GtLogger *logger,
                     GtError *err);
 
-void updatebckspecials(Bcktab *bcktab,
+void gt_updatebckspecials(Bcktab *bcktab,
                        GtCodetype code,
                        unsigned int numofchars,
                        unsigned int prefixindex);
 
-GtCodetype codedownscale(const Bcktab *bcktab,
+GtCodetype gt_codedownscale(const Bcktab *bcktab,
                        GtCodetype code,
                        unsigned int prefixindex,
                        unsigned int maxprefixlen);
 
-void addfinalbckspecials(Bcktab *bcktab,unsigned int numofchars,
+void gt_addfinalbckspecials(Bcktab *bcktab,unsigned int numofchars,
                          unsigned long specialcharacters);
 
-int bcktab2file(FILE *fp,const Bcktab *bcktab,GtError *err);
+int gt_bcktab2file(FILE *fp,const Bcktab *bcktab,GtError *err);
 
-unsigned int calcbucketboundsparts(Bucketspecification *bucketspec,
+unsigned int gt_calcbucketboundsparts(Bucketspecification *bucketspec,
                                    const Bcktab *bcktab,
                                    GtCodetype code,
                                    GtCodetype maxcode,
@@ -72,19 +72,19 @@ unsigned int calcbucketboundsparts(Bucketspecification *bucketspec,
                                    unsigned int rightchar,
                                    unsigned int numofchars);
 
-unsigned long calcbucketrightbounds(const Bcktab *bcktab,
+unsigned long gt_calcbucketrightbounds(const Bcktab *bcktab,
                              GtCodetype code,
                              GtCodetype maxcode,
                              unsigned long totalwidth);
 
-unsigned long distpfxidxpartialsums(const Bcktab *bcktab,GtCodetype code,
+unsigned long gt_distpfxidxpartialsums(const Bcktab *bcktab,GtCodetype code,
                                     unsigned int lowerbound);
 
-void calcbucketboundaries(Bucketspecification *bucketspec,
+void gt_calcbucketboundaries(Bucketspecification *bucketspec,
                           const Bcktab *bcktab,
                           GtCodetype code);
 
-void determinemaxbucketsize(Bcktab *bcktab,
+void gt_determinemaxbucketsize(Bcktab *bcktab,
                             const GtCodetype mincode,
                             const GtCodetype maxcode,
                             unsigned long partwidth,
@@ -93,37 +93,37 @@ void determinemaxbucketsize(Bcktab *bcktab,
                             /* relevant for hashexception */
                             unsigned long totallength);
 
-void bcktab_showlog2info(const Bcktab *bcktab, GtLogger *logger);
+void gt_bcktab_showlog2info(const Bcktab *bcktab, GtLogger *logger);
 
-unsigned int singletonmaxprefixindex(const Bcktab *bcktab,GtCodetype code);
+unsigned int gt_singletonmaxprefixindex(const Bcktab *bcktab,GtCodetype code);
 
-unsigned long bcktab_specialsmaxbucketsize(const Bcktab *bcktab);
+unsigned long gt_bcktab_specialsmaxbucketsize(const Bcktab *bcktab);
 
-unsigned long bcktab_nonspecialsmaxbucketsize(const Bcktab *bcktab);
+unsigned long gt_bcktab_nonspecialsmaxbucketsize(const Bcktab *bcktab);
 
-unsigned int bcktab_optimalnumofbits(unsigned short *logofremaining,
+unsigned int gt_bcktab_optimalnumofbits(unsigned short *logofremaining,
                                      const Bcktab *bcktab);
 
-unsigned int pfxidx2lcpvalues(unsigned int *minprefixindex,
+unsigned int gt_pfxidx2lcpvalues(unsigned int *minprefixindex,
                               uint8_t *lcpsubtab,
                               unsigned long specialsinbucket,
                               const Bcktab *bcktab,
                               GtCodetype code);
 
-const GtCodetype **bcktab_multimappower(const Bcktab *bcktab);
+const GtCodetype **gt_bcktab_multimappower(const Bcktab *bcktab);
 
-GtCodetype bcktab_filltable(const Bcktab *bcktab,unsigned int idx);
+GtCodetype gt_bcktab_filltable(const Bcktab *bcktab,unsigned int idx);
 
-unsigned long *bcktab_leftborder(Bcktab *bcktab);
+unsigned long *gt_bcktab_leftborder(Bcktab *bcktab);
 
-GtCodetype bcktab_numofallcodes(const Bcktab *bcktab);
+GtCodetype gt_bcktab_numofallcodes(const Bcktab *bcktab);
 
-uint64_t sizeofbuckettable(unsigned int numofchars,
+uint64_t gt_sizeofbuckettable(unsigned int numofchars,
                            unsigned int prefixlength);
 
-unsigned int bcktab_prefixlength(const Bcktab *bcktab);
+unsigned int gt_bcktab_prefixlength(const Bcktab *bcktab);
 
-void bcktab_leftborderpartialsums(Bcktab *bcktab,
+void gt_bcktab_leftborderpartialsums(Bcktab *bcktab,
                                   unsigned long numofsuffixestosort);
 
 #ifdef SKDEBUG

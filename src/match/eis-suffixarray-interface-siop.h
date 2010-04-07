@@ -23,7 +23,7 @@
 static inline MRAEnc *
 SAINewMRAEnc(const SuffixarrayFileInterface *sai)
 {
-  return SANewMRAEnc(sai->sa);
+  return gt_SANewMRAEnc(sai->sa);
 }
 
 static inline const GtEncodedsequence *

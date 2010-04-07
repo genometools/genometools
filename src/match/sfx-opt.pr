@@ -1,9 +1,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-void wrapsfxoptions(Suffixeratoroptions *so);
+void gt_wrapsfxoptions(Suffixeratoroptions *so);
 
-int suffixeratoroptions(Suffixeratoroptions *so,
+int gt_suffixeratoroptions(Suffixeratoroptions *so,
                         bool doesa,
                         int argc,
                         const char **argv,

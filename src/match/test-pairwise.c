@@ -27,7 +27,7 @@
 #include "greedyedist.pr"
 #include "squarededist.pr"
 
-void runcheckfunctionontwofiles(Checkcmppairfuntype checkfunction,
+void gt_runcheckfunctionontwofiles(Checkcmppairfuntype checkfunction,
                                 const char *file1,
                                 const char *file2)
 {
@@ -64,7 +64,7 @@ void runcheckfunctionontwofiles(Checkcmppairfuntype checkfunction,
   gt_fa_xmunmap((void *) vseq);
 }
 
-unsigned long runcheckfunctionontext(Checkcmppairfuntype checkfunction,
+unsigned long gt_runcheckfunctionontext(Checkcmppairfuntype checkfunction,
                                      const char *text)
 {
   unsigned long i, len;
@@ -81,7 +81,7 @@ unsigned long runcheckfunctionontext(Checkcmppairfuntype checkfunction,
   return len/2;
 }
 
-unsigned long applycheckfunctiontotext(const GtUchar *text,
+unsigned long gt_applycheckfunctiontotext(const GtUchar *text,
                                        unsigned long textlen,
                                        void *info)
 {
@@ -148,17 +148,17 @@ static unsigned long applyall(const char *alpha,
   return testcases;
 }
 
-unsigned long runcheckfunctiononalphalen(Checkcmppairfuntype checkfunction,
+unsigned long gt_runcheckfunctiononalphalen(Checkcmppairfuntype checkfunction,
                                          const char *charlist,
                                          unsigned long len)
 {
   return applyall(charlist,
                   len,
                   (void *) checkfunction,
-                  applycheckfunctiontotext);
+                  gt_applycheckfunctiontotext);
 }
 
-void checkgreedyunitedist(GT_UNUSED bool forward,
+void gt_checkgreedyunitedist(GT_UNUSED bool forward,
                           const GtUchar *useq,
                           unsigned long ulen,
                           const GtUchar *vseq,
@@ -167,13 +167,13 @@ void checkgreedyunitedist(GT_UNUSED bool forward,
   unsigned long edist1, edist2;
 
   edist1 = greedyunitedist(useq,ulen,vseq,vlen);
-  edist2 = squarededistunit (useq,ulen,vseq,vlen);
+  edist2 = gt_squarededistunit (useq,ulen,vseq,vlen);
 #ifdef SKDEBUG
   printf("edist = %lu\n",edist1);
 #endif
   if (edist1 != edist2)
   {
-    fprintf(stderr,"greedyunitedist = %lu != %lu = squarededistunit\n",
+    fprintf(stderr,"greedyunitedist = %lu != %lu = gt_squarededistunit\n",
                    edist1,edist2);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }

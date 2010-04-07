@@ -21,7 +21,7 @@
 #include "core/str.h"
 #include "core/logger.h"
 
-int testmaxpairs(GT_UNUSED const GtStr *indexname,
+int gt_testmaxpairs(GT_UNUSED const GtStr *indexname,
                  GT_UNUSED unsigned long samples,
                  GT_UNUSED unsigned int minlength,
                  GT_UNUSED unsigned long substringlength,
@@ -74,7 +74,7 @@ static int constructsarrandrunmaxpairs(
   Sfxiterator *sfi;
   bool specialsuffixes = false;
 
-  sfi = newSfxiterator(ssi->encseq,
+  sfi = gt_newSfxiterator(ssi->encseq,
                        readmode,
                        prefixlength,
                        numofparts,
@@ -91,21 +91,21 @@ static int constructsarrandrunmaxpairs(
     Sequentialsuffixarrayreader *ssar = NULL;
     bool firstpage = true;
 
-    ssar = newSequentialsuffixarrayreaderfromRAM(ssi->encseq,
+    ssar = gt_newSequentialsuffixarrayreaderfromRAM(ssi->encseq,
                                                  readmode);
     while (true)
     {
-      suftabptr = nextSfxiterator(&numberofsuffixes,&specialsuffixes,sfi);
+      suftabptr = gt_nextSfxiterator(&numberofsuffixes,&specialsuffixes,sfi);
       if (suftabptr == NULL || specialsuffixes)
       {
         break;
       }
-      updateSequentialsuffixarrayreaderfromRAM(ssar,
+      gt_updateSequentialsuffixarrayreaderfromRAM(ssar,
                                                suftabptr,
                                                firstpage,
                                                numberofsuffixes);
       firstpage = false;
-      if (enumeratemaxpairs(ssar,
+      if (gt_enumeratemaxpairs(ssar,
                             ssi->encseq,
                             readmode,
                             ssi->minlength,
@@ -119,12 +119,12 @@ static int constructsarrandrunmaxpairs(
     }
     if (ssar != NULL)
     {
-      freeSequentialsuffixarrayreader(&ssar);
+      gt_freeSequentialsuffixarrayreader(&ssar);
     }
   }
   if (sfi != NULL)
   {
-    freeSfxiterator(&sfi);
+    gt_freeSfxiterator(&sfi);
   }
   return haserr ? -1 : 0;
 }
@@ -157,7 +157,7 @@ static int sarrselfsubstringmatch(const GtUchar *dbseq,
   numofchars = gt_alphabet_num_of_chars(alpha);
   if (constructsarrandrunmaxpairs(&ssi,
                                   GT_READMODE_FORWARD,
-                                  recommendedprefixlength(numofchars,
+                                  gt_recommendedprefixlength(numofchars,
                                                           dblen+querylen+1),
                                   1U, /* parts */
                                   NULL,
@@ -205,10 +205,10 @@ static int storemaxmatchquery(void *info,
   GtArray *tab = (GtArray *) info;
   Substringmatch subm;
 
-  subm.len = querymatch_len(querymatch);
-  subm.dbstart = querymatch_dbstart(querymatch);
-  subm.querystart = querymatch_querystart(querymatch);
-  subm.queryseqnum = querymatch_queryseqnum(querymatch);
+  subm.len = gt_querymatch_len(querymatch);
+  subm.dbstart = gt_querymatch_dbstart(querymatch);
+  subm.querystart = gt_querymatch_querystart(querymatch);
+  subm.queryseqnum = gt_querymatch_queryseqnum(querymatch);
   gt_array_add(tab,subm);
   return 0;
 }
@@ -362,7 +362,7 @@ static unsigned long *sequence2markpositions(unsigned long *numofsequences,
   return spacemarkpos;
 }
 
-int testmaxpairs(const GtStr *indexname,
+int gt_testmaxpairs(const GtStr *indexname,
                  unsigned long samples,
                  unsigned int minlength,
                  unsigned long substringlength,
@@ -413,7 +413,7 @@ int testmaxpairs(const GtStr *indexname,
                          querylen,
                          minlength);
     tabmaxquerymatches = gt_array_new(sizeof (Substringmatch));
-    if (sarrquerysubstringmatch(dbseq,
+    if (gt_sarrquerysubstringmatch(dbseq,
                                 dblen,
                                 query,
                                 (unsigned long) querylen,
@@ -465,12 +465,12 @@ int testmaxpairs(const GtStr *indexname,
       printf("dbmatches\n");
       (void) gt_array_iterate(maxmatchselfinfo.results,showSubstringmatch,
                            NULL,err);
-      symbolstring2fasta(stdout,"dbseq",
+      gt_symbolstring2fasta(stdout,"dbseq",
                          gt_encodedsequence_alphabet(encseq),
                          dbseq,
                          (unsigned long) dblen,
                          width);
-      symbolstring2fasta(stdout,"queryseq",
+      gt_symbolstring2fasta(stdout,"queryseq",
                          gt_encodedsequence_alphabet(encseq),
                          query,
                          (unsigned long) querylen,

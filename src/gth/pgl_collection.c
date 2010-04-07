@@ -85,7 +85,7 @@ static void process_splice_form_func(GtArray *spliced_alignments_in_form,
                                 gt_array_get(spliced_alignments_in_form, i));
   }
 
-  buildAGSfromassembly(ags, assemblytab, pgl->saclusters);
+  gt_buildAGSfromassembly(ags, assemblytab, pgl->saclusters);
 
   gt_bittab_delete(assemblytab);
 
@@ -149,7 +149,7 @@ void gth_pgl_collection_sortAGSs(GthPGLCollection *pgl_collection,
   gt_assert(pgl_collection && pgl_collection->pgls);
   /* sort AGSs according to the weighted mean of the average exon score and
      the average splice site probability */
-  sortAGSs(pgl_collection->pgls, sortagswf);
+  gt_sortAGSs(pgl_collection->pgls, sortagswf);
 }
 
 static GthPGL* gth_pgl_collection_get(const GthPGLCollection *pgl_collection,

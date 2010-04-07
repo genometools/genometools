@@ -27,13 +27,13 @@
 
 typedef struct Substriter Substriter;
 
-Substriter *substriter_new(const GtAlphabet *alphabet,unsigned int qvalue);
+Substriter *gt_substriter_new(const GtAlphabet *alphabet,unsigned int qvalue);
 
-void substriter_init(Substriter *substriter,const GtUchar *start,
+void gt_substriter_init(Substriter *substriter,const GtUchar *start,
                      unsigned long len);
 
-int substriter_next(Substriter *substriter);
+int gt_substriter_next(Substriter *substriter);
 
-void substriter_delete(Substriter **substriter);
+void gt_substriter_delete(Substriter **substriter);
 
 #endif

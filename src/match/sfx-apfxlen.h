@@ -20,18 +20,18 @@
 
 #include "core/error_api.h"
 
-unsigned int recommendedprefixlength(unsigned int numofchars,
+unsigned int gt_recommendedprefixlength(unsigned int numofchars,
                                      unsigned long totallength);
 
-unsigned int whatisthemaximalprefixlength(unsigned int numofchars,
+unsigned int gt_whatisthemaximalprefixlength(unsigned int numofchars,
                                           unsigned long totallength,
                                           unsigned int prefixlenbits);
 
-int checkprefixlength(unsigned int maxprefixlen,
+int gt_checkprefixlength(unsigned int maxprefixlen,
                       unsigned int prefixlength,
                       GtError *err);
 
-void showmaximalprefixlength(GtLogger *logger,
+void gt_showmaximalprefixlength(GtLogger *logger,
                              unsigned int maxprefixlen,
                              unsigned int recommended);
 

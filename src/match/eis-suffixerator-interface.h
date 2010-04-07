@@ -54,7 +54,7 @@ typedef struct sfxInterface sfxInterface;
  * @return interface object reference
  */
 extern sfxInterface *
-newSfxInterface(GtReadmode readmode,
+gt_newSfxInterface(GtReadmode readmode,
                 unsigned int prefixlength,
                 unsigned int numofparts,
                 const Sfxstrategy *sfxstrategy,
@@ -87,7 +87,7 @@ newSfxInterface(GtReadmode readmode,
  * @return interface object reference
  */
 extern sfxInterface *
-newSfxInterfaceWithReaders(GtReadmode readmode,
+gt_newSfxInterfaceWithReaders(GtReadmode readmode,
                            unsigned int prefixlength,
                            unsigned int numofparts,
                            const Sfxstrategy *sfxstrategy,
@@ -107,7 +107,7 @@ newSfxInterfaceWithReaders(GtReadmode readmode,
  *
  */
 extern const Sfxiterator *
-SfxInterface2Sfxiterator(const sfxInterface *iface);
+gt_SfxInterface2Sfxiterator(const sfxInterface *iface);
 
 /**
  * @brief Deallocate resources of suffixerator interface object.
@@ -115,7 +115,7 @@ SfxInterface2Sfxiterator(const sfxInterface *iface);
  * @param iface object to delete
  */
 extern void
-deleteSfxInterface(sfxInterface *iface);
+gt_deleteSfxInterface(sfxInterface *iface);
 
 /**
  * @brief Dynamically cast to super class.
@@ -124,7 +124,7 @@ deleteSfxInterface(sfxInterface *iface);
  * @return reference of object of base class
  */
 extern SASeqSrc *
-SfxI2SASS(sfxInterface *sfxi);
+gt_SfxI2SASS(sfxInterface *sfxi);
 
 /**
  * \brief Constructs multiple range alphabet for sequence sorted by
@@ -134,7 +134,7 @@ SfxI2SASS(sfxInterface *sfxi);
  * @return reference of newly created alphabet object
  */
 extern MRAEnc *
-SfxINewMRAEnc(const sfxInterface *si);
+gt_SfxINewMRAEnc(const sfxInterface *si);
 
 /**
  * \brief Get reference for alphabet used to encode original sequence
@@ -144,7 +144,7 @@ SfxINewMRAEnc(const sfxInterface *si);
  * @return reference of alphabet object
  */
 extern const GtAlphabet *
-SfxIGetAlphabet(const sfxInterface *si);
+gt_SfxIGetAlphabet(const sfxInterface *si);
 
 /**
  * \brief Get reference for original sequence object.
@@ -153,7 +153,7 @@ SfxIGetAlphabet(const sfxInterface *si);
  * @return reference of sequence object
  */
 extern const GtEncodedsequence *
-SfxIGetEncSeq(const sfxInterface *si);
+gt_SfxIGetEncSeq(const sfxInterface *si);
 
 /**
  * @brief Get read mode used for suffix sorting.
@@ -161,7 +161,7 @@ SfxIGetEncSeq(const sfxInterface *si);
  * @return read mode
  */
 extern GtReadmode
-SfxIGetReadmode(const sfxInterface *si);
+gt_SfxIGetReadmode(const sfxInterface *si);
 
 /**
  * \brief Get original sequence substring.
@@ -173,7 +173,7 @@ SfxIGetReadmode(const sfxInterface *si);
  * @return number of symbols actually read
  */
 extern size_t
-SfxIGetOrigSeq(const void *si, Symbol *dest, unsigned long pos, size_t len);
+gt_SfxIGetOrigSeq(const void *si, Symbol *dest, unsigned long pos, size_t len);
 
 /**
  * \brief Query original sequence for statistics.
@@ -182,7 +182,7 @@ SfxIGetOrigSeq(const void *si, Symbol *dest, unsigned long pos, size_t len);
  * @return reference of struct holding statistics (symbol counts)
  */
 extern const struct seqStats *
-SfxIGetSeqStats(const sfxInterface *si);
+gt_SfxIGetSeqStats(const sfxInterface *si);
 
 /**
  * @brief Query length @f$l@f$ of sequence sorted by suffixerator, including
@@ -194,7 +194,7 @@ SfxIGetSeqStats(const sfxInterface *si);
  * @return length of sequence
  */
 extern unsigned long
-SfxIGetLength(const sfxInterface *si);
+gt_SfxIGetLength(const sfxInterface *si);
 
 /**
  * @brief Query position of suffix starting at position 0, can be
@@ -205,20 +205,20 @@ SfxIGetLength(const sfxInterface *si);
  * known) or undefined value.
  */
 extern Definedunsignedlong
-SfxIGetRot0Pos(const struct sfxInterface *si);
+gt_SfxIGetRot0Pos(const struct sfxInterface *si);
 
 /**
  * @return >0 on success, 0 on error
  */
 extern SeqDataReader
-SfxIRegisterReader(sfxInterface *iface, enum sfxDataRequest request);
+gt_SfxIRegisterReader(sfxInterface *iface, enum sfxDataRequest request);
 
 #if 0
 /**
  * \brief Reads portion of the BWT string produced by suffixerator.
  *
  * @param iface
- * @param id value returned by corresponding SfxIRegisterReader call
+ * @param id value returned by corresponding gt_SfxIRegisterReader call
  * @param len number of symbols to read
  * @param dest store read symbols here
  * @return number of symbols read (less than len implies end of file)
@@ -242,6 +242,6 @@ readSfxISufTabRange(sfxInterface *iface, listenerID id, size_t len,
 #endif
 
 extern SeqDataReader
-SfxIRegisterReader(sfxInterface *iface, enum sfxDataRequest request);
+gt_SfxIRegisterReader(sfxInterface *iface, enum sfxDataRequest request);
 
 #endif

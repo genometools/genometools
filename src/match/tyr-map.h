@@ -25,34 +25,34 @@
 
 typedef struct Tyrindex Tyrindex;
 
-Tyrindex *tyrindex_new(const GtStr *tyrindexname,GtError *err);
-const GtUchar *tyrindex_mertable(const Tyrindex *tyrindex);
-const GtUchar *tyrindex_lastmer(const Tyrindex *tyrindex);
-unsigned long tyrindex_merbytes(const Tyrindex *tyrindex);
-unsigned int tyrindex_alphasize(const Tyrindex *tyrindex);
-unsigned long tyrindex_mersize(const Tyrindex *tyrindex);
-bool tyrindex_isempty(const Tyrindex *tyrindex);
-void tyrindex_show(const Tyrindex *tyrindex);
-void tyrindex_delete(Tyrindex **tyrindexptr);
-/*@null@*/ const GtUchar *tyrindex_binmersearch(const Tyrindex *tyrindex,
+Tyrindex *gt_tyrindex_new(const GtStr *tyrindexname,GtError *err);
+const GtUchar *gt_tyrindex_mertable(const Tyrindex *tyrindex);
+const GtUchar *gt_tyrindex_lastmer(const Tyrindex *tyrindex);
+unsigned long gt_tyrindex_merbytes(const Tyrindex *tyrindex);
+unsigned int gt_tyrindex_alphasize(const Tyrindex *tyrindex);
+unsigned long gt_tyrindex_mersize(const Tyrindex *tyrindex);
+bool gt_tyrindex_isempty(const Tyrindex *tyrindex);
+void gt_tyrindex_show(const Tyrindex *tyrindex);
+void gt_tyrindex_delete(Tyrindex **tyrindexptr);
+/*@null@*/ const GtUchar *gt_tyrindex_binmersearch(const Tyrindex *tyrindex,
                                               unsigned long offset,
                                               const GtUchar *key,
                                               const GtUchar *leftbound,
                                               const GtUchar *rightbound);
-void tyrindex_check(const Tyrindex *tyrindex);
-int determinetyrbckpfxlen(unsigned int *prefixlength,
+void gt_tyrindex_check(const Tyrindex *tyrindex);
+int gt_determinetyrbckpfxlen(unsigned int *prefixlength,
                           const Tyrindex *tyrindex,
                           const Definedunsignedint *callprefixlength,
                           GtError *err);
-unsigned long tyrindex_ptr2number(const Tyrindex *tyrindex,
+unsigned long gt_tyrindex_ptr2number(const Tyrindex *tyrindex,
                                   const GtUchar *result);
 typedef struct Tyrcountinfo Tyrcountinfo;
 
-Tyrcountinfo *tyrcountinfo_new(const Tyrindex *tyrindex,
+Tyrcountinfo *gt_tyrcountinfo_new(const Tyrindex *tyrindex,
                                const GtStr *tyrindexname,
                                GtError *err);
-unsigned long tyrcountinfo_get(const Tyrcountinfo *tyrcountinfo,
+unsigned long gt_tyrcountinfo_get(const Tyrcountinfo *tyrcountinfo,
                                unsigned long mernumber);
-void tyrcountinfo_delete(Tyrcountinfo **tyrcountinfoptr);
+void gt_tyrcountinfo_delete(Tyrcountinfo **tyrcountinfoptr);
 
 #endif

@@ -82,7 +82,7 @@ static int gt_prebwt_runner(GT_UNUSED int argc,
   bool haserr = false;
   Prebwtoptions *prebwtoptions = (Prebwtoptions *) tool_arguments;
 
-  if (mapsuffixarray(&suffixarray,
+  if (gt_mapsuffixarray(&suffixarray,
                      0,
                      prebwtoptions->indexname,
                      NULL,
@@ -95,7 +95,7 @@ static int gt_prebwt_runner(GT_UNUSED int argc,
   }
   if (!haserr)
   {
-    packedindex = loadvoidBWTSeqForSA(prebwtoptions->indexname,
+    packedindex = gt_loadvoidBWTSeqForSA(prebwtoptions->indexname,
                                       &suffixarray,
                                       totallength, false, err);
     if (packedindex == NULL)
@@ -109,20 +109,20 @@ static int gt_prebwt_runner(GT_UNUSED int argc,
                                gt_encodedsequence_alphabet(suffixarray.encseq));
     Pckbuckettable *pckbt;
 
-    pckbt = pckbuckettable_new((const void *) packedindex,
+    pckbt = gt_pckbuckettable_new((const void *) packedindex,
                                numofchars,
                                totallength,
                                prebwtoptions->maxdepth);
-    if (pckbucket2file(prebwtoptions->indexname,pckbt,err) != 0)
+    if (gt_pckbucket2file(prebwtoptions->indexname,pckbt,err) != 0)
     {
       haserr = true;
     }
-    pckbuckettable_free(pckbt);
+    gt_pckbuckettable_free(pckbt);
   }
-  freesuffixarray(&suffixarray);
+  gt_freesuffixarray(&suffixarray);
   if (packedindex != NULL)
   {
-    deletevoidBWTSeq(packedindex);
+    gt_deletevoidBWTSeq(packedindex);
   }
   return haserr ? -1 : 0;
 }

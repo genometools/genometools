@@ -21,7 +21,7 @@
 
 #include "core/logger.h"
 
-void freesuffixarray(Suffixarray *suffixarray);
+void gt_freesuffixarray(Suffixarray *suffixarray);
 
 int streamsuffixarray(Suffixarray *suffixarray,
                       unsigned int demand,
@@ -29,7 +29,7 @@ int streamsuffixarray(Suffixarray *suffixarray,
                       GtLogger *logger,
                       GtError *err);
 
-int mapsuffixarray(Suffixarray *suffixarray,
+int gt_mapsuffixarray(Suffixarray *suffixarray,
                    unsigned int demand,
                    const GtStr *indexname,
                    GtLogger *logger,

@@ -30,7 +30,7 @@
 #include "match/eis-mrangealphabet-priv.h"
 
 MRAEnc *
-newMultiRangeAlphabetEncodingUInt8(AlphabetRangeID numRanges,
+gt_newMultiRangeAlphabetEncodingUInt8(AlphabetRangeID numRanges,
                                    const AlphabetRangeSize symbolsPerRange[],
                                    const uint8_t *mappings)
 {
@@ -85,7 +85,7 @@ newMultiRangeAlphabetEncodingUInt8(AlphabetRangeID numRanges,
 }
 
 MRAEnc *
-MRAEncGTAlphaNew(const GtAlphabet *alpha)
+gt_MRAEncGTAlphaNew(const GtAlphabet *alpha)
 {
   AlphabetRangeSize symsPerRange[2];
   uint8_t *mappings;
@@ -103,13 +103,13 @@ MRAEncGTAlphaNew(const GtAlphabet *alpha)
   /* handle special symbols */
   mappings[WILDCARD] = numofchars;
   symsPerRange[1] = 1;
-  result = newMultiRangeAlphabetEncodingUInt8(2, symsPerRange, mappings);
+  result = gt_newMultiRangeAlphabetEncodingUInt8(2, symsPerRange, mappings);
   gt_free(mappings);
   return result;
 }
 
 extern MRAEnc *
-MRAEncCopy(const MRAEnc *alpha)
+gt_MRAEncCopy(const MRAEnc *alpha)
 {
   gt_assert(alpha);
   switch (alpha->encType)
@@ -161,7 +161,7 @@ MRAEncCopy(const MRAEnc *alpha)
 }
 
 extern AlphabetRangeSize
-MRAEncGetSize(const MRAEnc *mralpha)
+gt_MRAEncGetSize(const MRAEnc *mralpha)
 {
   AlphabetRangeID range, numRanges = mralpha->numRanges, sumRanges = 0;
   for (range = 0; range < numRanges; ++range)
@@ -172,7 +172,7 @@ MRAEncGetSize(const MRAEnc *mralpha)
 }
 
 extern MRAEnc *
-MRAEncSecondaryMapping(const MRAEnc *srcAlpha, int selection,
+gt_MRAEncSecondaryMapping(const MRAEnc *srcAlpha, int selection,
                        const int *rangeSel, Symbol fallback)
 {
   MRAEnc *newAlpha;
@@ -205,7 +205,7 @@ MRAEncSecondaryMapping(const MRAEnc *srcAlpha, int selection,
           newRanges[range] = 0;
         }
       }
-      newAlpha = newMultiRangeAlphabetEncodingUInt8(numRanges, newRanges,
+      newAlpha = gt_newMultiRangeAlphabetEncodingUInt8(numRanges, newRanges,
                                                     mappings);
       gt_free(mappings);
       gt_free(newRanges);
@@ -219,7 +219,7 @@ MRAEncSecondaryMapping(const MRAEnc *srcAlpha, int selection,
 }
 
 MRAEnc *
-MRAEncAddSymbolToRange(MRAEnc *mralpha, Symbol sym, AlphabetRangeID range)
+gt_MRAEncAddSymbolToRange(MRAEnc *mralpha, Symbol sym, AlphabetRangeID range)
 {
   Symbol insertPos, numSyms;
   gt_assert(mralpha && range < mralpha->numRanges);
@@ -267,7 +267,7 @@ MRAEncAddSymbolToRange(MRAEnc *mralpha, Symbol sym, AlphabetRangeID range)
  * @return number of symbols actually read
  */
 size_t
-MRAEncReadAndTransform(const MRAEnc *mralpha, FILE *fp,
+gt_MRAEncReadAndTransform(const MRAEnc *mralpha, FILE *fp,
                        size_t numSyms, Symbol *dest)
 {
   int retval = 0;
@@ -297,7 +297,8 @@ MRAEncReadAndTransform(const MRAEnc *mralpha, FILE *fp,
 }
 
 void
-MRAEncSymbolsTransform(const MRAEnc *mralpha, Symbol *symbols, size_t numSyms)
+gt_MRAEncSymbolsTransform(const MRAEnc *mralpha, Symbol *symbols,
+                          size_t numSyms)
 {
   switch (mralpha->encType)
   {
@@ -319,7 +320,7 @@ MRAEncSymbolsTransform(const MRAEnc *mralpha, Symbol *symbols, size_t numSyms)
 }
 
 void
-MRAEncSymbolsRevTransform(const MRAEnc *mralpha, Symbol *symbols,
+gt_MRAEncSymbolsRevTransform(const MRAEnc *mralpha, Symbol *symbols,
                           size_t numSyms)
 {
   switch (mralpha->encType)
@@ -342,7 +343,7 @@ MRAEncSymbolsRevTransform(const MRAEnc *mralpha, Symbol *symbols,
 }
 
 extern int
-MRAEncSymbolIsInSelectedRanges(const MRAEnc *mralpha, Symbol sym,
+gt_MRAEncSymbolIsInSelectedRanges(const MRAEnc *mralpha, Symbol sym,
                                int selection, const int *rangeSel)
 {
   AlphabetRangeID range = 0;
@@ -365,7 +366,7 @@ MRAEncSymbolIsInSelectedRanges(const MRAEnc *mralpha, Symbol sym,
 }
 
 void
-MRAEncDelete(struct multiRangeAlphabetEncoding *mralpha)
+gt_MRAEncDelete(struct multiRangeAlphabetEncoding *mralpha)
 {
   gt_assert(mralpha);
   switch (mralpha->encType)

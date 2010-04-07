@@ -159,7 +159,7 @@ static void output_close_iteration_xml(const ParseStruct *);
 
 /* Zeitstruktur liefert die Struktur fuer das aktuelle Datum in der Form
    dd.mm.yyyy */
-struct tm *today(void)
+struct tm *gt_today(void)
 {
   static struct tm *tmnow;
 
@@ -277,7 +277,7 @@ static void output_header_txt(const ParseStruct *parsestruct_ptr)
   /* Aktuelle Datum in Variable speichern */
   struct tm *tmstamp;
 
-  tmstamp = today();
+  tmstamp = gt_today();
 
   if (!ARGUMENTSSTRUCT(testmodus_mode))
   {
@@ -329,7 +329,7 @@ static void output_header_html(const ParseStruct *parsestruct_ptr)
   /* Aktuelle Datum in Variable speichern */
   struct tm *tmstamp;
 
-  tmstamp = today();
+  tmstamp = gt_today();
 
   /* Headerbereich schreiben inkl. Auflistung der Parametereinstellugen */
   gt_file_xprintf(FILEPOINTEROUT,
@@ -528,7 +528,7 @@ static void output_header_xml(const ParseStruct *parsestruct_ptr)
   /* Aktuelle Datum in Variable speichern */
   struct tm *tmstamp;
 
-  tmstamp = today();
+  tmstamp = gt_today();
 
   /* Headerbereich schreiben inkl. Auflistung der Parametereinstellugen */
   gt_file_xprintf(FILEPOINTEROUT, "<?xml version=\"1.0\"?>\n");
@@ -814,7 +814,7 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
                 atoi(gt_str_array_get(hit_information->hit_to, seq_index));
 
               /* ueberpruefen, ob der aktuelle Hit bereits erfasst wurde */
-              if (!cstr_nofree_ulp_gt_hashmap_get
+              if (!gt_cstr_nofree_ulp_gt_hashmap_get
                   (parsestruct_ptr->resulthits,
                    gt_str_get(parsestruct_ptr->result_hits)))
               {
@@ -838,7 +838,7 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
                   memory_tmp = HITSTRUCT(memory);
 
                   gt_array_reset(parsestruct_ptr->value_tmp);
-                  (void) cstr_nofree_ulp_gt_hashmap_foreach(
+                  (void) gt_cstr_nofree_ulp_gt_hashmap_foreach(
                     parsestruct_ptr->resulthits,
                     newmemory_hash, parsestruct_ptr, err);
 
@@ -861,7 +861,8 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
                        hash_index < gt_array_size(parsestruct_ptr->value_tmp);
                        hash_index++)
                   {
-                    cstr_nofree_ulp_gt_hashmap_add(parsestruct_ptr->resulthits,
+                    gt_cstr_nofree_ulp_gt_hashmap_add(
+                                   parsestruct_ptr->resulthits,
                                   (char *)
                                   gt_str_array_get(HITSTRUCT(hits_statistic),
                                                *(unsigned long *)
@@ -881,7 +882,7 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
                 *(HITSTRUCT(memory + tmp_var)) = tmp_var;
                 *(HITSTRUCT(hitsnum + tmp_var)) = hit_to - hit_from + 1;
 
-                cstr_nofree_ulp_gt_hashmap_add(parsestruct_ptr->resulthits,
+                gt_cstr_nofree_ulp_gt_hashmap_add(parsestruct_ptr->resulthits,
                               (char *)
                               gt_str_array_get(HITSTRUCT(hits_statistic),
                                            string_number),
@@ -892,7 +893,7 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
                 HITSTRUCT(hitsnumber) =
                   HITSTRUCT(hitsnumber) + hit_to - hit_from + 1;
                 tmp_var =
-                  **cstr_nofree_ulp_gt_hashmap_get(
+                  **gt_cstr_nofree_ulp_gt_hashmap_get(
                     parsestruct_ptr->resulthits,
                     gt_str_get(parsestruct_ptr->result_hits));
 
@@ -1225,7 +1226,7 @@ static int as_coding(const ParseStruct *parsestruct_ptr,
       contig_seq_tri[3] = '\0';
       gt_assert(contig_seq_tri);
 
-      found = check_stopcodon(contig_seq_tri);
+      found = gt_check_stopcodon(contig_seq_tri);
 
       while (startpoint <= contig_len - 3 && !found_end && found)
       {
@@ -1236,7 +1237,7 @@ static int as_coding(const ParseStruct *parsestruct_ptr,
         contig_seq_tri[3] = '\0';
         gt_assert(contig_seq_tri);
 
-        found_end = check_stopcodon(contig_seq_tri);
+        found_end = gt_check_stopcodon(contig_seq_tri);
 
         if (found_end)
         {
@@ -1281,7 +1282,7 @@ static int as_coding(const ParseStruct *parsestruct_ptr,
           contig_seq_tri[3] = '\0';
           gt_assert(contig_seq_tri);
 
-          found = check_stopcodon(contig_seq_tri);
+          found = gt_check_stopcodon(contig_seq_tri);
 
           startpoint_atg = startpoint_start;
 

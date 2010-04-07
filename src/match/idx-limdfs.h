@@ -43,7 +43,7 @@ Genericindex *genericindex_new(const GtStr *indexname,
 
 typedef struct Limdfsresources Limdfsresources;
 
-Limdfsresources *newLimdfsresources(const Genericindex *genericindex,
+Limdfsresources *gt_newLimdfsresources(const Genericindex *genericindex,
                                     bool nowildcards,
                                     unsigned long maxintervalwidth,
                                     unsigned long maxpathlength,
@@ -54,10 +54,10 @@ Limdfsresources *newLimdfsresources(const Genericindex *genericindex,
                                     void *patterninfo,
                                     const AbstractDfstransformer *adfst);
 
-void freeLimdfsresources(Limdfsresources **ptrlimdfsresources,
+void gt_freeLimdfsresources(Limdfsresources **ptrlimdfsresources,
                          const AbstractDfstransformer *adfst);
 
-bool indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
+bool gt_indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
                                      const GtUchar *pattern,
                                      unsigned long patternlength,
                                      unsigned long maxdistance,
@@ -65,18 +65,18 @@ bool indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
                                      bool skpp,
                                      const AbstractDfstransformer *adfst);
 
-void indexbasedmstats(Limdfsresources *limdfsresources,
+void gt_indexbasedmstats(Limdfsresources *limdfsresources,
                       const GtUchar *pattern,
                       unsigned long patternlength,
                       const AbstractDfstransformer *adfst);
 
-void indexbasedspacedseeds(Limdfsresources *limdfsresources,
+void gt_indexbasedspacedseeds(Limdfsresources *limdfsresources,
                            const GtUchar *pattern,
                            GtBitsequence seedbitvector,
                            unsigned long seedweight,
                            const AbstractDfstransformer *adfst);
 
-void indexbasedlocali(Limdfsresources *limdfsresources,
+void gt_indexbasedlocali(Limdfsresources *limdfsresources,
                       long matchscore,
                       long mismatchscore,
                       long gapstart,
@@ -90,18 +90,19 @@ unsigned long genericmstats(const Limdfsresources *limdfsresources,
                             const GtUchar *qstart,
                             const GtUchar *qend);
 
-bool indexbasedexactpatternmatching(const Limdfsresources *limdfsresources,
+bool gt_indexbasedexactpatternmatching(const Limdfsresources *limdfsresources,
                                     const GtUchar *pattern,
                                     unsigned long patternlength);
 
-GtUchar limdfs_getencodedchar(const Limdfsresources *limdfsresources,
+GtUchar gt_limdfs_getencodedchar(const Limdfsresources *limdfsresources,
                               unsigned long pos,
                               GtReadmode readmode);
 
-bool intervalwidthleq(const Limdfsresources *limdfsresources,
+bool gt_intervalwidthleq(const Limdfsresources *limdfsresources,
                       unsigned long leftbound,unsigned long rightbound);
 
-GtArrayGtUlong *fromitv2sortedmatchpositions(Limdfsresources *limdfsresources,
+GtArrayGtUlong *gt_fromitv2sortedmatchpositions(
+                                          Limdfsresources *limdfsresources,
                                           unsigned long leftbound,
                                           unsigned long rightbound,
                                           unsigned long offset);

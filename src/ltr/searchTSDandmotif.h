@@ -25,7 +25,7 @@
 #include "repeattypes.h"
 #include "ltrharvest-opt.h"
 
-int findcorrectboundaries(LTRharvestoptions *lo, LTRboundaries *boundaries,
+int gt_findcorrectboundaries(LTRharvestoptions *lo, LTRboundaries *boundaries,
                           const GtEncodedsequence *encseq, GtError *err);
 
 #endif

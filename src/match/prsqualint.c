@@ -43,7 +43,7 @@
                          PERCENTAWAYCHARACTER);\
         }
 
-Qualifiedinteger *parsequalifiedinteger(const char *option,
+Qualifiedinteger *gt_parsequalifiedinteger(const char *option,
                                         const char *lparam,
                                         GtError *err)
 {

@@ -143,7 +143,7 @@ static int compareaccordingtorefidandgenomicpos(const GtKeytype dataA,
   rval = compareaccordingtoreferenceid(dataA, dataB, NULL);
   EVALRVAL(rval);
 
-  return  compareaccordingtogenomicposforward(dataA, dataB);
+  return  gt_compareaccordingtogenomicposforward(dataA, dataB);
 }
 
 /*

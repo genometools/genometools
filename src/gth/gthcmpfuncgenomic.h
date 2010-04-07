@@ -18,7 +18,9 @@
 #ifndef GTHCMPFUNCGENOMIC_H
 #define GTHCMPFUNCGENOMIC_H
 
-int compareaccordingtogenomicposforward(const void *dataA, const void *dataB);
-int compareaccordingtogenomicposactual(const void *dataA, const void *dataB);
+int gt_compareaccordingtogenomicposforward(const void *dataA,
+                                           const void *dataB);
+int gt_compareaccordingtogenomicposactual(const void *dataA,
+                                          const void *dataB);
 
 #endif

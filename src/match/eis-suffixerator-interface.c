@@ -68,10 +68,10 @@ SfxIRequest2XltorFunc(sfxInterface *sfxi,
   case SFX_REQUEST_BWTTAB:
     readState.encSeqTr.readmode = sfxi->readmode;
     readState.encSeqTr.encseq = sfxi->encseq;
-    stateStore = addSuffixarrayXltor(&sfxi->baseClass.xltorStates,
+    stateStore = gt_addSuffixarrayXltor(&sfxi->baseClass.xltorStates,
                                      rtype, readState);
     tr.state.ref = &stateStore->state.encSeqTr;
-    tr.translateData = (seqDataTranslateFunc)translateSuftab2BWT;
+    tr.translateData = (seqDataTranslateFunc)gt_translateSuftab2BWT;
     break;
   case SFX_REQUEST_SUFTAB:
     tr.state.elemSize = sizeof (unsigned long);
@@ -80,10 +80,10 @@ SfxIRequest2XltorFunc(sfxInterface *sfxi,
     readState.lcpState.readmode = sfxi->readmode;
     readState.lcpState.encseq = sfxi->encseq;
     readState.lcpState.lastSufIdx = -1;
-    stateStore = addSuffixarrayXltor(&sfxi->baseClass.xltorStates,
+    stateStore = gt_addSuffixarrayXltor(&sfxi->baseClass.xltorStates,
                                      rtype, readState);
     tr.state.ref = &stateStore->state.lcpState;
-    tr.translateData = (seqDataTranslateFunc)translateSuftab2LCP;
+    tr.translateData = (seqDataTranslateFunc)gt_translateSuftab2LCP;
     break;
   default:
     fprintf(stderr, "error: unimplemented request!\n");
@@ -101,7 +101,7 @@ SASS2SfxI(SASeqSrc *baseClass)
 }
 
 extern struct SASeqSrc *
-SfxI2SASS(sfxInterface *sfxi)
+gt_SfxI2SASS(sfxInterface *sfxi)
 {
   return &sfxi->baseClass;
 }
@@ -123,25 +123,25 @@ SfxIBaseRequest2XltorFunc(SASeqSrc *baseClass,
 static Definedunsignedlong
 SfxIBaseGetRot0Pos(const SASeqSrc *baseClass)
 {
-  return SfxIGetRot0Pos(constSASS2SfxI(baseClass));
+  return gt_SfxIGetRot0Pos(constSASS2SfxI(baseClass));
 }
 
 static const struct seqStats *
 SfxIBaseGetSeqStats(const SASeqSrc *baseClass)
 {
-  return SfxIGetSeqStats(constSASS2SfxI(baseClass));
+  return gt_SfxIGetSeqStats(constSASS2SfxI(baseClass));
 }
 
 static MRAEnc *
 SfxIBaseNewMRAEnc(const SASeqSrc *baseClass)
 {
-  return SfxINewMRAEnc(constSASS2SfxI(baseClass));
+  return gt_SfxINewMRAEnc(constSASS2SfxI(baseClass));
 }
 
 static void
-deleteSfxInterfaceBase(SASeqSrc *baseClass)
+gt_deleteSfxInterfaceBase(SASeqSrc *baseClass)
 {
-  deleteSfxInterface(SASS2SfxI(baseClass));
+  gt_deleteSfxInterface(SASS2SfxI(baseClass));
 }
 
 static size_t
@@ -154,7 +154,7 @@ SfxIGenerate(void *iface,
              SeqDataTranslator xltor);
 
 extern sfxInterface *
-newSfxInterface(GtReadmode readmode,
+gt_newSfxInterface(GtReadmode readmode,
                 unsigned int prefixlength,
                 unsigned int numofparts,
                 const Sfxstrategy *sfxstrategy,
@@ -164,7 +164,7 @@ newSfxInterface(GtReadmode readmode,
                 GtLogger *verbosity,
                 GtError *err)
 {
-  return newSfxInterfaceWithReaders(readmode,
+  return gt_newSfxInterfaceWithReaders(readmode,
                                     prefixlength,
                                     numofparts,
                                     sfxstrategy,
@@ -216,7 +216,7 @@ deleteSeqStats(struct seqStats *stats)
   gt_free(stats);
 }
 
-#define newSfxInterfaceWithReadersErrRet()        \
+#define gt_newSfxInterfaceWithReadersErrRet()        \
   do {                                            \
     if (sfxi->stats)                             \
       deleteSeqStats(sfxi->stats);               \
@@ -225,7 +225,7 @@ deleteSeqStats(struct seqStats *stats)
   } while (0)
 
 extern sfxInterface *
-newSfxInterfaceWithReaders(GtReadmode readmode,
+gt_newSfxInterfaceWithReaders(GtReadmode readmode,
                            unsigned int prefixlength,
                            unsigned int numofparts,
                            const Sfxstrategy *sfxstrategy,
@@ -242,17 +242,17 @@ newSfxInterfaceWithReaders(GtReadmode readmode,
 
   sfxi = gt_calloc(1, sizeof (*sfxi));
   {
-    RandomSeqAccessor origSeqAccess = { SfxIGetOrigSeq, sfxi };
+    RandomSeqAccessor origSeqAccess = { gt_SfxIGetOrigSeq, sfxi };
     initSASeqSrc(&sfxi->baseClass, length, SfxIBaseRequest2XltorFunc, NULL,
                  SfxIBaseGetRot0Pos, SfxIBaseGetSeqStats,
-                 origSeqAccess, deleteSfxInterfaceBase, SfxIBaseNewMRAEnc,
+                 origSeqAccess, gt_deleteSfxInterfaceBase, SfxIBaseNewMRAEnc,
                  SfxIGenerate, sfxi);
   }
   sfxi->readmode = readmode;
   sfxi->encseq = encseq;
   sfxi->alpha = gt_encodedsequence_alphabet(encseq);
   sfxi->stats = newSeqStatsFromCharDist(encseq,sfxi->alpha, length);
-  if (!(sfxi->sfi = newSfxiterator(encseq,
+  if (!(sfxi->sfi = gt_newSfxiterator(encseq,
                                    readmode,
                                    prefixlength,
                                    numofparts,
@@ -260,7 +260,7 @@ newSfxInterfaceWithReaders(GtReadmode readmode,
                                    sfxstrategy,
                                    sfxprogress,
                                    verbosity, err)))
-    newSfxInterfaceWithReadersErrRet();
+    gt_newSfxInterfaceWithReadersErrRet();
   sfxi->rot0Pos.defined = false;
   sfxi->specialsuffixes = false;
 
@@ -271,84 +271,85 @@ newSfxInterfaceWithReaders(GtReadmode readmode,
     size_t i;
     for (i = 0; i < numReaders; ++i)
     {
-      readers[i] = SfxIRegisterReader(sfxi, readerRequests[i]);
+      readers[i] = gt_SfxIRegisterReader(sfxi, readerRequests[i]);
       if (!readers[i].readData)
-        newSfxInterfaceWithReadersErrRet();
+        gt_newSfxInterfaceWithReadersErrRet();
     }
   }
   return sfxi;
 }
 
-extern const Sfxiterator *SfxInterface2Sfxiterator(const sfxInterface *sfxi)
+extern const Sfxiterator *gt_SfxInterface2Sfxiterator(const sfxInterface *sfxi)
 {
   return sfxi->sfi;
 }
 
 extern void
-deleteSfxInterface(sfxInterface *sfxi)
+gt_deleteSfxInterface(sfxInterface *sfxi)
 {
   destructSASeqSrc(&sfxi->baseClass);
-  freeSfxiterator(&sfxi->sfi);
+  gt_freeSfxiterator(&sfxi->sfi);
   deleteSeqStats(sfxi->stats);
   gt_free(sfxi);
 }
 
 extern const GtAlphabet *
-SfxIGetAlphabet(const sfxInterface *si)
+gt_SfxIGetAlphabet(const sfxInterface *si)
 {
   return si->alpha;
 }
 
 extern MRAEnc *
-SfxINewMRAEnc(const sfxInterface *si)
+gt_SfxINewMRAEnc(const sfxInterface *si)
 {
   MRAEnc *alphabet;
   gt_assert(si);
-  alphabet = MRAEncGTAlphaNew(SfxIGetAlphabet(si));
-  MRAEncAddSymbolToRange(alphabet, SEPARATOR, 1);
+  alphabet = gt_MRAEncGTAlphaNew(gt_SfxIGetAlphabet(si));
+  gt_MRAEncAddSymbolToRange(alphabet, SEPARATOR, 1);
   return alphabet;
 }
 
 unsigned long
-SfxIGetLength(const sfxInterface *si)
+gt_SfxIGetLength(const sfxInterface *si)
 {
   gt_assert(si);
   return si->baseClass.seqLen;
 }
 
 extern const struct seqStats *
-SfxIGetSeqStats(const sfxInterface *si)
+gt_SfxIGetSeqStats(const sfxInterface *si)
 {
   return si->stats;
 }
 
 extern Definedunsignedlong
-SfxIGetRot0Pos(const struct sfxInterface *si)
+gt_SfxIGetRot0Pos(const struct sfxInterface *si)
 {
   return si->rot0Pos;
 }
 
 extern const GtEncodedsequence *
-SfxIGetEncSeq(const sfxInterface *si)
+gt_SfxIGetEncSeq(const sfxInterface *si)
 {
   return si->encseq;
 }
 
 extern GtReadmode
-SfxIGetReadmode(const sfxInterface *si)
+gt_SfxIGetReadmode(const sfxInterface *si)
 {
   return si->readmode;
 }
 
 extern SeqDataReader
-SfxIRegisterReader(sfxInterface *sfxi, enum sfxDataRequest rtype)
+gt_SfxIRegisterReader(sfxInterface *sfxi, enum sfxDataRequest rtype)
 {
-  return seqReaderSetRegisterConsumer(
+  return gt_seqReaderSetRegisterConsumer(
     &sfxi->baseClass.readerSet, rtype, SfxIRequest2XltorFunc(sfxi, rtype));
 }
 
 extern size_t
-SfxIGetOrigSeq(const void *state, Symbol *dest, unsigned long pos, size_t len)
+gt_SfxIGetOrigSeq(const void *state, Symbol *dest, unsigned long pos,
+                  size_t len)
 {
   const struct sfxInterface *sfxi;
   gt_assert(state);
@@ -370,7 +371,7 @@ SfxIGenerate(void *iface,
   sfxInterface *sfxi = iface;
   size_t elemsLeft = len;
   gt_assert(sfxi && backlogState && move2Backlog && output);
-  gt_assert(generateStart + len <= SfxIGetLength(sfxi));
+  gt_assert(generateStart + len <= gt_SfxIGetLength(sfxi));
   do
   {
     if (generateStart < sfxi->lastGeneratedStart + sfxi->lastGeneratedLen)
@@ -391,7 +392,7 @@ SfxIGenerate(void *iface,
                    sfxi->lastGeneratedStart, sfxi->lastGeneratedLen);
       sfxi->lastGeneratedStart += sfxi->lastGeneratedLen;
       if ((sfxi->lastGeneratedSufTabSegment =
-           nextSfxiterator(&sfxi->lastGeneratedLen, &sfxi->specialsuffixes,
+           gt_nextSfxiterator(&sfxi->lastGeneratedLen, &sfxi->specialsuffixes,
                            sfxi->sfi)))
       {
         size_t pos;

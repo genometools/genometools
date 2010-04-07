@@ -502,7 +502,7 @@ static bool containsintronsorinsertions(bool leading,
   for (i = leading ? alignmentlength - 1 : 0;
            leading ? i >= 0 : i < alignmentlength;
            leading ? i-- : i++) {
-    eoptype = editoperation_type(alignment[i], proteineop);
+    eoptype = gt_editoperation_type(alignment[i], proteineop);
 
     /* if match, mismatch, or deletion -> break
        if insertion or intron -> return true */
@@ -624,7 +624,7 @@ void gth_compute_scores(GthSA *sa,
                                                         .alignmentlength,
                                                         proteineop));
   /* sum of edit operations equals referencelength */
-  gt_assert(eops_equal_referencelength(travstate.alignment,
+  gt_assert(gt_eops_equal_referencelength(travstate.alignment,
                                        travstate.alignmentlength,
                                        ref_dp_length
                                        - gth_sa_referencecutoff_start(sa)

@@ -130,7 +130,7 @@ static void checknumberofoccurrences(const Dfsstate *dfsstate,
               gt_encodedsequence_getencodedchar(dfsstate->encseq,position+idx,
                                                 dfsstate->readmode);
   }
-  mmsi = newmmsearchiteratorcomplete_plain(dfsstate->encseq,
+  mmsi = gt_newmmsearchiteratorcomplete_plain(dfsstate->encseq,
                                            dfsstate->suftab,
                                            0,
                                            dfsstate->totallength,
@@ -138,7 +138,7 @@ static void checknumberofoccurrences(const Dfsstate *dfsstate,
                                            dfsstate->readmode,
                                            dfsstate->currentmer,
                                            (unsigned long) dfsstate->mersize);
-  bfcount = countmmsearchiterator(mmsi);
+  bfcount = gt_countmmsearchiterator(mmsi);
   if (bfcount != (unsigned long) countocc)
   {
     fprintf(stderr,"bfcount = %lu != %lu = countocc\n",
@@ -146,7 +146,7 @@ static void checknumberofoccurrences(const Dfsstate *dfsstate,
                    countocc);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
-  freemmsearchiterator(&mmsi);
+  gt_freemmsearchiterator(&mmsi);
 }
 
 static /*@null@*/ ListSeqpos *insertListSeqpos(ListSeqpos *liststart,
@@ -188,7 +188,7 @@ static void showListSeqpos(const GtEncodedsequence *encseq,
 
   for (tmp = node; tmp != NULL; tmp = tmp->nextptr)
   {
-    fprintfencseq(stdout,encseq,tmp->position,mersize);
+    gt_fprintfencseq(stdout,encseq,tmp->position,mersize);
     (void) putchar((int) '\n');
   }
 }
@@ -578,10 +578,10 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   GT_INITARRAY(&state.occdistribution,Countwithpositions);
   state.esrspace = gt_encodedsequence_scanstate_new();
   state.mersize = (unsigned long) mersize;
-  state.encseq = encseqSequentialsuffixarrayreader(ssar);
+  state.encseq = gt_encseqSequentialsuffixarrayreader(ssar);
   alphasize = gt_alphabet_num_of_chars(
                                      gt_encodedsequence_alphabet(state.encseq));
-  state.readmode = readmodeSequentialsuffixarrayreader(ssar);
+  state.readmode = gt_readmodeSequentialsuffixarrayreader(ssar);
   state.storecounts = storecounts;
   state.minocc = minocc;
   state.maxocc = maxocc;
@@ -604,7 +604,7 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   if (performtest)
   {
     ALLOCASSIGNSPACE(state.currentmer,NULL,GtUchar,state.mersize);
-    state.suftab = suftabSequentialsuffixarrayreader(ssar);
+    state.suftab = gt_suftabSequentialsuffixarrayreader(ssar);
   } else
   {
     state.currentmer = NULL;
@@ -647,7 +647,7 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
     }
     if (!haserr)
     {
-      if (depthfirstesa(ssar,
+      if (gt_depthfirstesa(ssar,
                         allocateDfsinfo,
                         freeDfsinfo,
                         processleafedge,
@@ -717,7 +717,7 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   return haserr ? -1 : 0;
 }
 
-int merstatistics(const GtStr *str_inputindex,
+int gt_merstatistics(const GtStr *str_inputindex,
                   unsigned long mersize,
                   unsigned long minocc,
                   unsigned long maxocc,
@@ -732,7 +732,7 @@ int merstatistics(const GtStr *str_inputindex,
   Sequentialsuffixarrayreader *ssar;
 
   gt_error_check(err);
-  ssar = newSequentialsuffixarrayreaderfromfile(str_inputindex,
+  ssar = gt_newSequentialsuffixarrayreaderfromfile(str_inputindex,
                                                 SARR_LCPTAB |
                                                 SARR_SUFTAB |
                                                 SARR_ESQTAB,
@@ -761,7 +761,7 @@ int merstatistics(const GtStr *str_inputindex,
   }
   if (ssar != NULL)
   {
-    freeSequentialsuffixarrayreader(&ssar);
+    gt_freeSequentialsuffixarrayreader(&ssar);
   }
   return haserr ? -1 : 0;
 }

@@ -164,7 +164,7 @@ static void spse_inplacenextLimdfsstate(const Limdfsconstinfo *mti,
                                   currentchar);
 }
 
-const AbstractDfstransformer *spse_AbstractDfstransformer(void)
+const AbstractDfstransformer *gt_spse_AbstractDfstransformer(void)
 {
   static const AbstractDfstransformer spse_adfst =
   {

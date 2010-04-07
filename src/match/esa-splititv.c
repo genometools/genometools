@@ -55,7 +55,7 @@ static unsigned long lcpintervalfindrightbound(const GtEncodedsequence *encseq,
   return left;
 }
 
-bool lcpintervalfindcharchildintv(const GtEncodedsequence *encseq,
+bool gt_lcpintervalfindcharchildintv(const GtEncodedsequence *encseq,
                                   GtReadmode readmode,
                                   unsigned long totallength,
                                   const unsigned long *suftab,
@@ -114,7 +114,7 @@ bool lcpintervalfindcharchildintv(const GtEncodedsequence *encseq,
 #define ADDCURRENTINCHAR(V)\
         bwci->spaceBoundswithchar[bwci->nextfreeBoundswithchar++].inchar = V
 
-void lcpintervalsplitwithoutspecial(GtArrayBoundswithchar *bwci,
+void gt_lcpintervalsplitwithoutspecial(GtArrayBoundswithchar *bwci,
                                     const GtEncodedsequence *encseq,
                                     GtReadmode readmode,
                                     unsigned long totallength,
@@ -126,7 +126,7 @@ void lcpintervalsplitwithoutspecial(GtArrayBoundswithchar *bwci,
   GtUchar leftcc, rightcc;
   unsigned long rightbound = 0, leftbound = parentleft;
 
-  /* call lcpintervalextendlcp and verify if interval can be extended by
+  /* call gt_lcpintervalextendlcp and verify if interval can be extended by
      some character */
   bwci->nextfreeBoundswithchar = 0;
   rightcc = SEQUENCE(encseq,suftab[parentright] + parentoffset);
@@ -157,7 +157,7 @@ void lcpintervalsplitwithoutspecial(GtArrayBoundswithchar *bwci,
   ADDCURRENTLBOUND(parentright+1);
 }
 
-GtUchar lcpintervalextendlcp(const GtEncodedsequence *encseq,
+GtUchar gt_lcpintervalextendlcp(const GtEncodedsequence *encseq,
                            GtReadmode readmode,
                            const unsigned long *suftab,
                            unsigned long totallength,

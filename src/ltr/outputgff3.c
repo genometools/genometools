@@ -152,7 +152,7 @@ static void showboundaries(FILE *fp,
   }
 }
 
-int printgff3format(const LTRharvestoptions *lo,
+int gt_printgff3format(const LTRharvestoptions *lo,
                     const LTRboundaries **bdptrtab,
                     unsigned long numofboundaries,
                     const GtEncodedsequence *encseq,

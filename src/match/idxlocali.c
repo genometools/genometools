@@ -82,7 +82,7 @@ typedef struct
   GtBitsequence *hasmatch;
 } Storematchinfo;
 
-void initstorematch(Storematchinfo *storematch,
+void gt_initstorematch(Storematchinfo *storematch,
                     const GtEncodedsequence *encseq)
 {
   unsigned long numofdbsequences = gt_encodedsequence_num_of_sequences(encseq);
@@ -110,7 +110,7 @@ static void storematch(void *info,const GtMatch *match)
   }
 }
 
-void checkandresetstorematch(GT_UNUSED uint64_t queryunit,
+void gt_checkandresetstorematch(GT_UNUSED uint64_t queryunit,
                              Storematchinfo *storeonline,
                              Storematchinfo *storeoffline)
 {
@@ -147,12 +147,12 @@ void checkandresetstorematch(GT_UNUSED uint64_t queryunit,
   printf("matching sequences: %lu\n",countmatchseq);
 }
 
-void freestorematch(Storematchinfo *storematch)
+void gt_freestorematch(Storematchinfo *storematch)
 {
   gt_free(storematch->hasmatch);
 }
 
-int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
+int gt_runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
 {
   Genericindex *genericindex = NULL;
   bool haserr = false;
@@ -216,8 +216,8 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
     if (idxlocalioptions->docompare)
     {
       processmatch = storematch;
-      initstorematch(&storeonline,encseq);
-      initstorematch(&storeoffline,encseq);
+      gt_initstorematch(&storeonline,encseq);
+      gt_initstorematch(&storeoffline,encseq);
       processmatchinfoonline = &storeonline;
       processmatchinfooffline = &storeoffline;
     } else
@@ -231,7 +231,7 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
     }
     if (idxlocalioptions->doonline || idxlocalioptions->docompare)
     {
-      swdpresource = newSWdpresource(idxlocalioptions->matchscore,
+      swdpresource = gt_newSWdpresource(idxlocalioptions->matchscore,
                                      idxlocalioptions->mismatchscore,
                                      idxlocalioptions->gapextend,
                                      idxlocalioptions->threshold,
@@ -239,11 +239,11 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
                                      processmatch,
                                      processmatchinfoonline);
     }
-    dfst = locali_AbstractDfstransformer();
+    dfst = gt_locali_AbstractDfstransformer();
     if (!idxlocalioptions->doonline || idxlocalioptions->docompare)
     {
       gt_assert(genericindex != NULL);
-      limdfsresources = newLimdfsresources(genericindex,
+      limdfsresources = gt_newLimdfsresources(genericindex,
                                            true,
                                            0,
                                            0,    /* maxpathlength */
@@ -282,11 +282,11 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
                 PRINTuint64_tcast(showmatchinfo.queryunit),querylen);
         if (idxlocalioptions->doonline || idxlocalioptions->docompare)
         {
-          multiapplysmithwaterman(swdpresource,encseq,query,querylen);
+          gt_multiapplysmithwaterman(swdpresource,encseq,query,querylen);
         }
         if (!idxlocalioptions->doonline || idxlocalioptions->docompare)
         {
-          indexbasedlocali(limdfsresources,
+          gt_indexbasedlocali(limdfsresources,
                            idxlocalioptions->matchscore,
                            idxlocalioptions->mismatchscore,
                            idxlocalioptions->gapstart,
@@ -298,26 +298,26 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
         }
         if (idxlocalioptions->docompare)
         {
-          checkandresetstorematch(showmatchinfo.queryunit,
+          gt_checkandresetstorematch(showmatchinfo.queryunit,
                                   &storeonline,&storeoffline);
         }
         gt_free(desc);
       }
       if (limdfsresources != NULL)
       {
-        freeLimdfsresources(&limdfsresources,dfst);
+        gt_freeLimdfsresources(&limdfsresources,dfst);
       }
       if (swdpresource != NULL)
       {
-        freeSWdpresource(swdpresource);
+        gt_freeSWdpresource(swdpresource);
         swdpresource = NULL;
       }
       gt_seqiterator_delete(seqit);
     }
     if (idxlocalioptions->docompare)
     {
-      freestorematch(&storeonline);
-      freestorematch(&storeoffline);
+      gt_freestorematch(&storeonline);
+      gt_freestorematch(&storeoffline);
     }
   }
   if (genericindex == NULL)

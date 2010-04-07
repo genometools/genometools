@@ -26,7 +26,7 @@
 typedef struct Dfsinfo Dfsinfo;
 typedef struct Dfsstate Dfsstate;
 
-int depthfirstesa(Sequentialsuffixarrayreader *ssar,
+int gt_depthfirstesa(Sequentialsuffixarrayreader *ssar,
                   Dfsinfo *(*allocateDfsinfo)(Dfsstate *),
                   void(*freeDfsinfo)(Dfsinfo *,Dfsstate *),
                   int(*processleafedge)(bool,unsigned long,Dfsinfo *,

@@ -25,7 +25,7 @@ typedef struct
                 *positions;
 } Charatpos;
 
-Charatpos *newCharatpos(unsigned long patternlength,unsigned int alphasize)
+Charatpos *gt_newCharatpos(unsigned long patternlength,unsigned int alphasize)
 {
   Charatpos *catpos;
 
@@ -35,7 +35,7 @@ Charatpos *newCharatpos(unsigned long patternlength,unsigned int alphasize)
   return catpos;
 }
 
-Charatpos *reinitCharatpos(Charatpos *catpos,
+Charatpos *gt_reinitCharatpos(Charatpos *catpos,
                            const GtUchar *pattern,unsigned long patternlength,
                            unsigned int alphasize)
 {
@@ -67,7 +67,7 @@ Charatpos *reinitCharatpos(Charatpos *catpos,
   return catpos;
 }
 
-void wrapCharatpos(Charatpos **catposptr)
+void gt_wrapCharatpos(Charatpos **catposptr)
 {
   Charatpos *catpos = *catposptr;
   gt_free(catpos->endindex);
@@ -76,7 +76,7 @@ void wrapCharatpos(Charatpos **catposptr)
   *catposptr = NULL;
 }
 
-void maintainnullcols(const Charatpos *catpos,
+void gt_maintainnullcols(const Charatpos *catpos,
                       unsigned long *front0,GtUchar cc,unsigned long depth)
 {
   unsigned long idx;

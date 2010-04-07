@@ -72,7 +72,7 @@ typedef struct BWTSeqExactMatchesIterator BWTSeqExactMatchesIterator;
  * @return reference to new BWT sequence object
  */
 extern BWTSeq *
-availBWTSeq(const struct bwtParam *params, GtLogger *verbosity, GtError*);
+gt_availBWTSeq(const struct bwtParam *params, GtLogger *verbosity, GtError*);
 
 /**
  * \brief Creates an encoded indexed sequence object of the BWT
@@ -83,7 +83,7 @@ availBWTSeq(const struct bwtParam *params, GtLogger *verbosity, GtError*);
  * @return reference to new BWT sequence object
  */
 extern BWTSeq *
-trSuftab2BWTSeq(const struct bwtParam *params, GtLogger *verbosity,
+gt_trSuftab2BWTSeq(const struct bwtParam *params, GtLogger *verbosity,
                 GtError *err);
 
 /**
@@ -96,7 +96,7 @@ trSuftab2BWTSeq(const struct bwtParam *params, GtLogger *verbosity,
  * @return reference to new BWT sequence object
  */
 extern BWTSeq *
-loadBWTSeq(const GtStr *projectName, int BWTOptFlags, GtLogger *verbosity,
+gt_loadBWTSeq(const GtStr *projectName, int BWTOptFlags, GtLogger *verbosity,
            GtError *err);
 
 /**
@@ -104,7 +104,7 @@ loadBWTSeq(const GtStr *projectName, int BWTOptFlags, GtLogger *verbosity,
  * @param bwtseq reference of object to delete
  */
 extern void
-deleteBWTSeq(BWTSeq *bwtseq);
+gt_deleteBWTSeq(BWTSeq *bwtseq);
 
 /**
  * \brief Query BWT sequence object for availability of added
@@ -298,7 +298,7 @@ BWTSeqAggTransformedCount(const BWTSeq *bwtSeq, Symbol tSym);
  * @return number of matches
  */
 extern unsigned long
-BWTSeqMatchCount(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
+gt_BWTSeqMatchCount(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
                  bool forward);
 
 /**
@@ -374,7 +374,7 @@ enum verifyBWTSeqFlags
  * @param fp dots printed to this file
  */
 extern enum verifyBWTSeqErrCode
-BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
+gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
                       int checkFlags,
                       unsigned long tickPrint, FILE *fp,
                       GtLogger *verbosity, GtError *err);
@@ -396,7 +396,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
  * @return true if successfully initialized, false on error
  */
 extern bool
-initEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
+gt_initEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
                const Symbol *query, size_t queryLen, bool forward);
 
 /**
@@ -412,12 +412,12 @@ initEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
  * @return true if successfully initialized, false on error
  */
 extern bool
-initEmptyEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwt);
+gt_initEmptyEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwt);
 
 /**
  * \brief Set up iterator for new query, iter must have been
  * initialized previously. Everything else is identical to
- * initEMIterator.
+ * gt_initEMIterator.
  *
  * Warning: the iterator object will become invalid once the
  * corresponding bwt sequence object has been deleted.
@@ -429,7 +429,7 @@ initEmptyEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwt);
  * @return true if successfully initialized, false on error
  */
 extern bool
-reinitEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
+gt_reinitEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
                  const Symbol *query, size_t queryLen, bool forward);
 /**
  * \brief Destruct resources of matches iterator. Does not free the
@@ -438,7 +438,7 @@ reinitEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
  * @param iter reference to matches iterator
  */
 extern void
-destructEMIterator(struct BWTSeqExactMatchesIterator *iter);
+gt_destructEMIterator(struct BWTSeqExactMatchesIterator *iter);
 
 /**
  * \brief Given a query string produce iterator for all matches in
@@ -453,7 +453,7 @@ destructEMIterator(struct BWTSeqExactMatchesIterator *iter);
  * @return reference of iterator object, NULL on error
  */
 extern BWTSeqExactMatchesIterator *
-newEMIterator(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
+gt_newEMIterator(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
               bool forward);
 
 /**
@@ -461,7 +461,7 @@ newEMIterator(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
  * @param iter reference of iterator object
  */
 extern void
-deleteEMIterator(BWTSeqExactMatchesIterator *iter);
+gt_deleteEMIterator(BWTSeqExactMatchesIterator *iter);
 
 /**
  * \brief Get position of next match from an iterator.
@@ -481,7 +481,7 @@ EMIGetNextMatch(BWTSeqExactMatchesIterator *iter, unsigned long *pos,
  * @return total number of matches
  */
 extern unsigned long
-EMINumMatchesTotal(const BWTSeqExactMatchesIterator *iter);
+gt_EMINumMatchesTotal(const BWTSeqExactMatchesIterator *iter);
 
 /**
  * \brief Query an iterator for the number of matches not yet
@@ -490,7 +490,7 @@ EMINumMatchesTotal(const BWTSeqExactMatchesIterator *iter);
  * @return number of matches left
  */
 extern unsigned long
-EMINumMatchesLeft(const BWTSeqExactMatchesIterator *iter);
+gt_EMINumMatchesLeft(const BWTSeqExactMatchesIterator *iter);
 
 /**
  * @brief for packed index (given as void pointer), compute the longest
@@ -502,11 +502,11 @@ EMINumMatchesLeft(const BWTSeqExactMatchesIterator *iter);
  * @param err
  * @return 0 if not unique, otherwise length of minmum unique prefix.
  */
-unsigned long packedindexuniqueforward(const BWTSeq *bwtseq,
+unsigned long gt_packedindexuniqueforward(const BWTSeq *bwtseq,
                                        const GtUchar *qstart,
                                        const GtUchar *qend);
 
-unsigned long packedindexmstatsforward(const BWTSeq *bwtseq,
+unsigned long gt_packedindexmstatsforward(const BWTSeq *bwtseq,
                                        unsigned long *witnessposition,
                                        const GtUchar *qstart,
                                        const GtUchar *qend);

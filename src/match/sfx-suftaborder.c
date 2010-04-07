@@ -90,7 +90,7 @@ static void showcomparisonfailure(const char *filename,
               maxlcp);
 }
 
-void checkifprefixesareidentical(const char *filename,
+void gt_checkifprefixesareidentical(const char *filename,
                                  int line,
                                  const GtEncodedsequence *encseq,
                                  GtReadmode readmode,
@@ -142,7 +142,7 @@ void checkifprefixesareidentical(const char *filename,
   }
 }
 
-void showentiresuftab(const GtEncodedsequence *encseq,
+void gt_showentiresuftab(const GtEncodedsequence *encseq,
                       GtReadmode readmode,
                       const unsigned long *suftab,
                       unsigned long depth)
@@ -160,7 +160,7 @@ void showentiresuftab(const GtEncodedsequence *encseq,
   }
 }
 
-void checksortedsuffixes(const char *filename,
+void gt_checksortedsuffixes(const char *filename,
                          int line,
                          const GtEncodedsequence *encseq,
                          GtReadmode readmode,
@@ -222,7 +222,7 @@ void checksortedsuffixes(const char *filename,
   gt_encodedsequence_scanstate_delete(esr2);
 }
 
-void checkentiresuftab(const char *filename,
+void gt_checkentiresuftab(const char *filename,
                        int line,
                        const GtEncodedsequence *encseq,
                        GtReadmode readmode,
@@ -323,7 +323,7 @@ void checkentiresuftab(const char *filename,
 #ifdef INLINEDSequentialsuffixarrayreader
       NEXTSEQUENTIALLCPTABVALUE(currentlcp,ssar);
 #else
-      retval = nextSequentiallcpvalue(&currentlcp,ssar,err);
+      retval = gt_nextSequentiallcpvalue(&currentlcp,ssar,err);
       if (retval < 0)
       {
         haserr = true;
@@ -364,7 +364,7 @@ void checkentiresuftab(const char *filename,
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   /*
-  printf("# checkentiresuftab with mode 'specials are %s'\n",
+  printf("# gt_checkentiresuftab with mode 'specials are %s'\n",
                specialsareequal ? "equal" : "different");
   */
 }

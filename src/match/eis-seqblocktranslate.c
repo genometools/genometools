@@ -135,7 +135,7 @@ compListPermStartOffset(struct compList *list, unsigned numSyms)
   return list->numCompositions * list->bitsPerCount * numSyms;
 }
 
-#define initCompositionListErrRet()                                     \
+#define gt_initCompositionListErrRet()                                     \
   do {                                                                  \
     if (newList->permutations)                                          \
     {                                                                   \
@@ -151,7 +151,7 @@ compListPermStartOffset(struct compList *list, unsigned numSyms)
   } while (0)
 
 extern int
-initCompositionList(struct compList *newList, unsigned blockSize,
+gt_initCompositionList(struct compList *newList, unsigned blockSize,
                     unsigned alphabetSize)
 {
   unsigned *composition = NULL;
@@ -163,7 +163,7 @@ initCompositionList(struct compList *newList, unsigned blockSize,
   newList->permutations = NULL;
   newList->catCompsPerms = NULL;
   if (!(composition = gt_malloc(sizeof (composition[0]) * alphabetSize)))
-    initCompositionListErrRet();
+    gt_initCompositionListErrRet();
   bitsPerComp = alphabetSize * (bitsPerCount = gt_requiredUIntBits(blockSize));
   newList->bitsPerCount = bitsPerCount;
   numCompositions = newList->numCompositions =
@@ -177,7 +177,7 @@ initCompositionList(struct compList *newList, unsigned blockSize,
                                     + numTotalPermutations * bitsPerPerm)
       * sizeof (BitElem);
     if (size == SIZE_MAX)
-      initCompositionListErrRet();
+      gt_initCompositionListErrRet();
     newList->catCompsPerms = gt_malloc(size);
   }
   newList->permutations = gt_calloc(sizeof (struct permList), numCompositions);
@@ -203,7 +203,7 @@ initCompositionList(struct compList *newList, unsigned blockSize,
       if (initPermutationsList(composition, newList->permutations + cmpIdx,
                                newList->catCompsPerms, permOffset, blockSize,
                                alphabetSize, newList->bitsPerSymbol))
-        initCompositionListErrRet();
+        gt_initCompositionListErrRet();
 #if EIS_DEBUG > 1 && !defined(NDEBUG)
       gt_log_log("%lu",
               (unsigned long)newList->permutations[cmpIdx].numPermutations);
@@ -237,7 +237,7 @@ initCompositionList(struct compList *newList, unsigned blockSize,
 }
 
 extern void
-destructCompositionList(struct compList *clist)
+gt_destructCompositionList(struct compList *clist)
 {
   {
     unsigned i;
@@ -249,12 +249,12 @@ destructCompositionList(struct compList *clist)
 }
 
 extern struct compList *
-newCompositionList(unsigned blockSize, unsigned alphabetSize)
+gt_newCompositionList(unsigned blockSize, unsigned alphabetSize)
 {
   struct compList *newList = NULL;
   if (!(newList = gt_calloc(1, sizeof (struct compList))))
     return NULL;
-  if (!initCompositionList(newList, blockSize, alphabetSize))
+  if (!gt_initCompositionList(newList, blockSize, alphabetSize))
   {
     gt_free(newList);
     return NULL;
@@ -263,9 +263,9 @@ newCompositionList(unsigned blockSize, unsigned alphabetSize)
 }
 
 extern void
-deleteCompositionList(struct compList *clist)
+gt_deleteCompositionList(struct compList *clist)
 {
-  destructCompositionList(clist);
+  gt_destructCompositionList(clist);
   gt_free(clist);
 }
 
@@ -436,7 +436,7 @@ printPermutation(FILE *fp, Symbol *permutation, unsigned blockSize)
 #endif /* EIS_DEBUG > 1 */
 
 extern int
-block2IndexPair(const struct compList *compositionTable,
+gt_block2IndexPair(const struct compList *compositionTable,
                 unsigned blockSize, unsigned alphabetSize,
                 const Symbol *block, PermCompIndex idxOutput[2],
                 unsigned *bitsOfPermIdx,

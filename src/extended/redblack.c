@@ -89,7 +89,7 @@
 
  Although the deletion algorithm must walk upwards through the tree,
  we do not store parent pointers in the nodes. Instead, delete allocates
- a small array of parent pointers and fills it while descending the tree.
+ a small array of parent pointers and fills it while GT_RBT_DESCENDING the tree.
  Since we know that the length of a path is O(log n), where n is the
  number of nodes, this is likely to use less memory.
 
@@ -1294,9 +1294,9 @@ int gt_rbt_walkrange(const GtRBTnode *root,
 
 typedef enum
 {
-  Ascending,
-  Descending,
-  Randomorder
+  GT_RBT_ASCENDING,
+  GT_RBT_DESCENDING,
+  GT_RBT_RANDOMORDER
 } SearchOrder;
 
 typedef enum
@@ -1433,7 +1433,7 @@ static bool mangle_tree (SearchOrder how,
   unsigned long i;
   bool nodecreated, haserr = false;
 
-  if (how == Randomorder)
+  if (how == GT_RBT_RANDOMORDER)
   {
     for (i = 0; i < (unsigned long) SIZE; ++i)
     {
@@ -1448,7 +1448,7 @@ static bool mangle_tree (SearchOrder how,
 
     switch (how)
     {
-      case Randomorder:
+      case GT_RBT_RANDOMORDER:
         if (i >= lag)
         {
           k = ytab[i - lag];
@@ -1459,12 +1459,12 @@ static bool mangle_tree (SearchOrder how,
         j = ytab[i];
         break;
 
-      case Ascending:
+      case GT_RBT_ASCENDING:
         k = i - lag;
         j = i;
         break;
 
-      case Descending:
+      case GT_RBT_DESCENDING:
         k = SIZE - i - 1 + lag;
         j = SIZE - i - 1;
         break;
@@ -1555,58 +1555,58 @@ int gt_rbt_unit_test (GtError *err)
   */
   for (i = 0; i < (unsigned long) PASSES; ++i)
   {
-    MANGLECHECK(Ascending, Build, 0);
-    MANGLECHECK(Ascending, Find, 0);
-    MANGLECHECK(Descending, Find, 0);
-    MANGLECHECK(Randomorder, Find, 0);
+    MANGLECHECK(GT_RBT_ASCENDING, Build, 0);
+    MANGLECHECK(GT_RBT_ASCENDING, Find, 0);
+    MANGLECHECK(GT_RBT_DESCENDING, Find, 0);
+    MANGLECHECK(GT_RBT_RANDOMORDER, Find, 0);
     WALKCHECK;
-    MANGLECHECK (Ascending, Delete, 0);
+    MANGLECHECK (GT_RBT_ASCENDING, Delete, 0);
 
-    MANGLECHECK (Ascending, Build, 0);
+    MANGLECHECK (GT_RBT_ASCENDING, Build, 0);
     WALKCHECK;
-    MANGLECHECK (Descending, Delete, 0);
+    MANGLECHECK (GT_RBT_DESCENDING, Delete, 0);
 
-    MANGLECHECK (Ascending, Build, 0);
+    MANGLECHECK (GT_RBT_ASCENDING, Build, 0);
     WALKCHECK;
-    MANGLECHECK (Randomorder, Delete, 0);
+    MANGLECHECK (GT_RBT_RANDOMORDER, Delete, 0);
 
-    MANGLECHECK (Descending, Build, 0);
-    MANGLECHECK (Ascending, Find, 0);
-    MANGLECHECK (Descending, Find, 0);
-    MANGLECHECK (Randomorder, Find, 0);
+    MANGLECHECK (GT_RBT_DESCENDING, Build, 0);
+    MANGLECHECK (GT_RBT_ASCENDING, Find, 0);
+    MANGLECHECK (GT_RBT_DESCENDING, Find, 0);
+    MANGLECHECK (GT_RBT_RANDOMORDER, Find, 0);
     WALKCHECK;
-    MANGLECHECK (Descending, Delete, 0);
+    MANGLECHECK (GT_RBT_DESCENDING, Delete, 0);
 
-    MANGLECHECK (Descending, Build, 0);
+    MANGLECHECK (GT_RBT_DESCENDING, Build, 0);
     WALKCHECK;
-    MANGLECHECK (Descending, Delete, 0);
+    MANGLECHECK (GT_RBT_DESCENDING, Delete, 0);
 
-    MANGLECHECK (Descending, Build, 0);
+    MANGLECHECK (GT_RBT_DESCENDING, Build, 0);
     WALKCHECK;
-    MANGLECHECK (Randomorder, Delete, 0);
+    MANGLECHECK (GT_RBT_RANDOMORDER, Delete, 0);
 
-    MANGLECHECK (Randomorder, Build, 0);
-    MANGLECHECK (Ascending, Find, 0);
-    MANGLECHECK (Descending, Find, 0);
-    MANGLECHECK (Randomorder, Find, 0);
+    MANGLECHECK (GT_RBT_RANDOMORDER, Build, 0);
+    MANGLECHECK (GT_RBT_ASCENDING, Find, 0);
+    MANGLECHECK (GT_RBT_DESCENDING, Find, 0);
+    MANGLECHECK (GT_RBT_RANDOMORDER, Find, 0);
     WALKCHECK;
-    MANGLECHECK (Randomorder, Delete, 0);
+    MANGLECHECK (GT_RBT_RANDOMORDER, Delete, 0);
 
     for (j = 1UL; j < (unsigned long) SIZE; j *= 2)
     {
-      MANGLECHECK (Randomorder, Build_and_del, j);
+      MANGLECHECK (GT_RBT_RANDOMORDER, Build_and_del, j);
     }
   }
   for (i = 1UL; i < (unsigned long) SIZE; i *= 2)
   {
-    MANGLECHECK (Ascending, Build_and_del, i);
-    MANGLECHECK (Descending, Build_and_del, i);
-    MANGLECHECK (Ascending, Build_and_del, i);
-    MANGLECHECK (Descending, Build_and_del, i);
-    MANGLECHECK (Ascending, Build_and_del, i);
-    MANGLECHECK (Descending, Build_and_del, i);
-    MANGLECHECK (Ascending, Build_and_del, i);
-    MANGLECHECK (Descending, Build_and_del, i);
+    MANGLECHECK (GT_RBT_ASCENDING, Build_and_del, i);
+    MANGLECHECK (GT_RBT_DESCENDING, Build_and_del, i);
+    MANGLECHECK (GT_RBT_ASCENDING, Build_and_del, i);
+    MANGLECHECK (GT_RBT_DESCENDING, Build_and_del, i);
+    MANGLECHECK (GT_RBT_ASCENDING, Build_and_del, i);
+    MANGLECHECK (GT_RBT_DESCENDING, Build_and_del, i);
+    MANGLECHECK (GT_RBT_ASCENDING, Build_and_del, i);
+    MANGLECHECK (GT_RBT_DESCENDING, Build_and_del, i);
   }
   return had_err;
 }

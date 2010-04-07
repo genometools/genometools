@@ -26,26 +26,26 @@
 
 #include "core/encodedsequence.h"
 
-void symbolstring2fasta(FILE *fpout,
+void gt_symbolstring2fasta(FILE *fpout,
                         const char *desc,
                         const GtAlphabet *alpha,
                         const GtUchar *w,
                         unsigned long wlen,
                         unsigned long width);
 
-void encseq2symbolstring(FILE *fpout,
+void gt_encseq2symbolstring(FILE *fpout,
                          const GtEncodedsequence *encseq,
                          GtReadmode readmode,
                          unsigned long start,
                          unsigned long wlen,
                          unsigned long width);
 
-void fprintfencseq(FILE *fpout,
+void gt_fprintfencseq(FILE *fpout,
                    const GtEncodedsequence *encseq,
                    unsigned long start,
                    unsigned long wlen);
 
-void encseq2fastaoutput(FILE *fpout,
+void gt_encseq2fastaoutput(FILE *fpout,
                         const char *desc,
                         const GtEncodedsequence *encseq,
                         GtReadmode readmode,
@@ -53,6 +53,6 @@ void encseq2fastaoutput(FILE *fpout,
                         unsigned long wlen,
                         unsigned long width);
 
-int echodescriptionandsequence(const GtStrArray *filenametab,GtError *err);
+int gt_echodescriptionandsequence(const GtStrArray *filenametab,GtError *err);
 
 #endif

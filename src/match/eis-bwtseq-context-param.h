@@ -31,7 +31,7 @@ enum ctxMapSize {
 };
 
 extern void
-registerCtxMapOptions(GtOptionParser *op, int *ilogOut);
+gt_registerCtxMapOptions(GtOptionParser *op, int *ilogOut);
 
 static inline bool
 ctxMapILogIsValid(unsigned long seqLen, short mapIntervalLog2)

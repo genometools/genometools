@@ -38,7 +38,7 @@ struct Enumcodeatposition
   GtCodetype **multimappower, *filltable;
 };
 
-Enumcodeatposition *newEnumcodeatposition(const GtEncodedsequence *encseq,
+Enumcodeatposition *gt_newEnumcodeatposition(const GtEncodedsequence *encseq,
                                           GtReadmode readmode,
                                           unsigned int prefixlength,
                                           unsigned int numofchars)
@@ -48,8 +48,8 @@ Enumcodeatposition *newEnumcodeatposition(const GtEncodedsequence *encseq,
   ALLOCASSIGNSPACE(ecp,NULL,Enumcodeatposition,1);
   ecp->encseq = encseq;
   ecp->readmode = readmode;
-  ecp->multimappower = initmultimappower(numofchars,prefixlength);
-  ecp->filltable = initfilltable(numofchars,prefixlength);
+  ecp->multimappower = gt_initmultimappower(numofchars,prefixlength);
+  ecp->filltable = gt_initfilltable(numofchars,prefixlength);
   ecp->prefixlength = prefixlength;
   ecp->moveforward = GT_ISDIRREVERSE(readmode) ? true : false;
   ecp->totallength = gt_encodedsequence_totallength(encseq);
@@ -99,7 +99,7 @@ static bool newcodelistelem(Specialcontext *specialcontext,
   return false;
 }
 
-bool nextEnumcodeatposition(Specialcontext *specialcontext,
+bool gt_nextEnumcodeatposition(Specialcontext *specialcontext,
                             Enumcodeatposition *ecp)
 {
   GtRange currentrange;
@@ -157,14 +157,14 @@ bool nextEnumcodeatposition(Specialcontext *specialcontext,
   return done;
 }
 
-void freeEnumcodeatposition(Enumcodeatposition **ecp)
+void gt_freeEnumcodeatposition(Enumcodeatposition **ecp)
 {
   FREESPACE((*ecp)->filltable);
-  multimappowerfree(&(*ecp)->multimappower);
+  gt_multimappowerfree(&(*ecp)->multimappower);
   FREESPACE(*ecp);
 }
 
-GtCodetype computefilledqgramcode(const Enumcodeatposition *ecp,
+GtCodetype gt_computefilledqgramcode(const Enumcodeatposition *ecp,
                                 unsigned int prefixindex,
                                 unsigned long pos)
 {
@@ -186,7 +186,7 @@ GtCodetype computefilledqgramcode(const Enumcodeatposition *ecp,
   return code;
 }
 
-bool computefilledqgramcodestopatmax(GtCodetype *code,
+bool gt_computefilledqgramcodestopatmax(GtCodetype *code,
                                      const Enumcodeatposition *ecp,
                                      unsigned int prefixindex,
                                      unsigned long pos,

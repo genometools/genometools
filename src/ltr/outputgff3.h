@@ -23,7 +23,7 @@
 #include "ltrharvest-opt.h"
 #include "repeattypes.h"
 
-int printgff3format(const LTRharvestoptions *lo,
+int gt_printgff3format(const LTRharvestoptions *lo,
                     const LTRboundaries **bdptrtab,
                     unsigned long numofboundaries,
                     const GtEncodedsequence *encseq,

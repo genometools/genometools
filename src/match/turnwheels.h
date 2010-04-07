@@ -20,15 +20,15 @@
 
 typedef struct Turningwheel Turningwheel;
 
-Turningwheel *newTurningwheel(unsigned int numofwheels,
+Turningwheel *gt_newTurningwheel(unsigned int numofwheels,
                               unsigned int asize);
 
-bool nextTurningwheel(Turningwheel *tw);
+bool gt_nextTurningwheel(Turningwheel *tw);
 
-unsigned int minchangedTurningwheel(const Turningwheel *tw);
+unsigned int gt_minchangedTurningwheel(const Turningwheel *tw);
 
-void outputTurningwheel(const Turningwheel *tw);
+void gt_outputTurningwheel(const Turningwheel *tw);
 
-void freeTurningwheel(Turningwheel **tw);
+void gt_freeTurningwheel(Turningwheel **tw);
 
 #endif

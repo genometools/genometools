@@ -27,7 +27,7 @@
 #include "match/eis-seqranges-priv.h"
 
 struct seqRangeList *
-newSeqRangeList(size_t rangesStartNum, const MRAEnc *alphabet,
+gt_newSeqRangeList(size_t rangesStartNum, const MRAEnc *alphabet,
                 enum SRLFeatures features)
 {
   struct seqRangeList *newList;
@@ -37,12 +37,12 @@ newSeqRangeList(size_t rangesStartNum, const MRAEnc *alphabet,
   newList->ranges = gt_malloc(sizeof (newList->ranges[0]) * rangesStartNum);
   if (features & SRL_PARTIAL_SYMBOL_SUMS)
     newList->partialSymSums = gt_malloc(sizeof (unsigned long)
-                                        * MRAEncGetSize(alphabet)
+                                        * gt_MRAEncGetSize(alphabet)
                                         * rangesStartNum);
   else
     newList->partialSymSums = NULL;
   newList->alphabet = alphabet;
-  newList->symBits = requiredSymbolBits(MRAEncGetSize(alphabet) - 1);
+  newList->symBits = requiredSymbolBits(gt_MRAEncGetSize(alphabet) - 1);
   if (newList->symBits)
     newList->maxRangeLen =
       (((unsigned long)1) << (symLenStrBits - newList->symBits)) - 1;
@@ -52,7 +52,7 @@ newSeqRangeList(size_t rangesStartNum, const MRAEnc *alphabet,
 }
 
 void
-SRLCompact(struct seqRangeList *rangeList)
+gt_SRLCompact(struct seqRangeList *rangeList)
 {
   gt_assert(rangeList);
   rangeList->ranges = gt_realloc(rangeList->ranges,
@@ -61,13 +61,13 @@ SRLCompact(struct seqRangeList *rangeList)
   if (rangeList->partialSymSums)
     rangeList->partialSymSums =
       gt_realloc(rangeList->partialSymSums, sizeof (unsigned long)
-                 * MRAEncGetSize(rangeList->alphabet)
+                 * gt_MRAEncGetSize(rangeList->alphabet)
                  * rangeList->numRanges);
   rangeList->numRangesStorable = rangeList->numRanges;
 }
 
 void
-deleteSeqRangeList(struct seqRangeList *rangeList)
+gt_deleteSeqRangeList(struct seqRangeList *rangeList)
 {
   gt_assert(rangeList);
   if (rangeList->ranges)
@@ -78,7 +78,7 @@ deleteSeqRangeList(struct seqRangeList *rangeList)
 }
 
 void
-SRLAppendNewRange(struct seqRangeList *rangeList,
+gt_SRLAppendNewRange(struct seqRangeList *rangeList,
                   unsigned long pos,
                   unsigned long len,
                   Symbol esym)
@@ -90,7 +90,7 @@ SRLAppendNewRange(struct seqRangeList *rangeList,
     struct seqRange *p;
     unsigned long *pSums;
     size_t numRanges = rangeList->numRanges,
-      numSyms = MRAEncGetSize(rangeList->alphabet),
+      numSyms = gt_MRAEncGetSize(rangeList->alphabet),
       numNewRanges = len/rangeList->maxRangeLen
       + ((len%rangeList->maxRangeLen)?1:0);
     unsigned symBits = rangeList->symBits;
@@ -165,7 +165,7 @@ SRLAppendNewRange(struct seqRangeList *rangeList,
 }
 
 void
-SRLinsertNewRange(GT_UNUSED struct seqRangeList *rangeList,
+gt_SRLinsertNewRange(GT_UNUSED struct seqRangeList *rangeList,
                   GT_UNUSED unsigned long pos, GT_UNUSED unsigned long len,
                   GT_UNUSED Symbol esym)
 {
@@ -179,7 +179,8 @@ SRLinsertNewRange(GT_UNUSED struct seqRangeList *rangeList,
 }
 
 void
-SRLAddPosition(struct seqRangeList *rangeList, unsigned long pos, Symbol esym)
+gt_SRLAddPosition(struct seqRangeList *rangeList, unsigned long pos,
+                  Symbol esym)
 {
   size_t numRanges;
   struct seqRange *lastRange;
@@ -197,7 +198,7 @@ SRLAddPosition(struct seqRangeList *rangeList, unsigned long pos, Symbol esym)
   if (numRanges && lastRange->startPos + lastRangeLen > pos)
   {
     /* TODO: search for range */
-    SRLinsertNewRange(rangeList, pos, 1, esym);
+    gt_SRLinsertNewRange(rangeList, pos, 1, esym);
   }
   else if (numRanges
            && (seqRangeSym(lastRange, symBits) == sym)
@@ -205,11 +206,11 @@ SRLAddPosition(struct seqRangeList *rangeList, unsigned long pos, Symbol esym)
            && (lastRangeLen < rangeList->maxRangeLen))
     seqRangeSetLen(lastRange, ++lastRangeLen, symBits);
   else
-    SRLAppendNewRange(rangeList, pos, 1, esym);
+    gt_SRLAppendNewRange(rangeList, pos, 1, esym);
 }
 
 void
-SRLInitListSearchHint(struct seqRangeList *rangeList,
+gt_SRLInitListSearchHint(struct seqRangeList *rangeList,
                       seqRangeListSearchHint *hint)
 {
   gt_assert(rangeList && hint);
@@ -234,7 +235,7 @@ posSeqRangeOverlapCompare(const void *key, const void *elem, void *data)
 }
 
 int
-SRLOverlapsPosition(struct seqRangeList *rangeList, unsigned long pos,
+gt_SRLOverlapsPosition(struct seqRangeList *rangeList, unsigned long pos,
                     seqRangeListSearchHint *hint, Symbol *symAtPos)
 {
   size_t rangeIdx;
@@ -308,7 +309,7 @@ posSeqRangeNextCompare(const void *key, const void *elem, void *data)
  * was found
  */
 struct seqRange *
-SRLFindPositionNext(struct seqRangeList *rangeList, unsigned long pos,
+gt_SRLFindPositionNext(struct seqRangeList *rangeList, unsigned long pos,
                     seqRangeListSearchHint *hint)
 {
   /* no ranges no matches in ranges */
@@ -322,7 +323,7 @@ SRLFindPositionNext(struct seqRangeList *rangeList, unsigned long pos,
   if (hint)
     hintCopy = *hint;
   else
-    SRLInitListSearchHint(rangeList, &hintCopy);
+    gt_SRLInitListSearchHint(rangeList, &hintCopy);
   if ((numRanges = rangeList->numRanges) == 0)
   {
     return NULL;
@@ -394,7 +395,7 @@ posSeqRangeLastCompare(const void *key, const void *elem)
  * was found
  */
 struct seqRange *
-SRLFindPositionLast(struct seqRangeList *rangeList, unsigned long pos,
+gt_SRLFindPositionLast(struct seqRangeList *rangeList, unsigned long pos,
                     seqRangeListSearchHint *hint)
 {
   /* no ranges no matches in ranges */
@@ -408,7 +409,7 @@ SRLFindPositionLast(struct seqRangeList *rangeList, unsigned long pos,
   if (hint)
     hintCopy = *hint;
   else
-    SRLInitListSearchHint(rangeList, &hintCopy);
+    gt_SRLInitListSearchHint(rangeList, &hintCopy);
   if ((numRanges = rangeList->numRanges) == 0)
   {
     return NULL;
@@ -456,7 +457,7 @@ SRLFindPositionLast(struct seqRangeList *rangeList, unsigned long pos,
  */
 /* FIXME: convert to platform-independent variant */
 int
-SRLSaveToStream(struct seqRangeList *rangeList, FILE *fp)
+gt_SRLSaveToStream(struct seqRangeList *rangeList, FILE *fp)
 {
   size_t numRanges;
   gt_assert(rangeList && fp);
@@ -468,7 +469,7 @@ SRLSaveToStream(struct seqRangeList *rangeList, FILE *fp)
 
 /* FIXME: convert to platform-independent variant */
 struct seqRangeList *
-SRLReadFromStream(FILE *fp, const MRAEnc *alphabet,
+gt_SRLReadFromStream(FILE *fp, const MRAEnc *alphabet,
                   enum SRLFeatures features, GT_UNUSED GtError *err)
 {
   struct seqRangeList *newRangeList;
@@ -476,7 +477,7 @@ SRLReadFromStream(FILE *fp, const MRAEnc *alphabet,
   gt_assert(fp && err);
   newRangeList = gt_malloc(sizeof (struct seqRangeList));
   newRangeList->alphabet = alphabet;
-  newRangeList->symBits = requiredSymbolBits(MRAEncGetSize(alphabet) - 1);
+  newRangeList->symBits = requiredSymbolBits(gt_MRAEncGetSize(alphabet) - 1);
   if (newRangeList->symBits)
     newRangeList->maxRangeLen =
       (((unsigned long)1) << (symLenStrBits - newRangeList->symBits)) - 1;
@@ -493,9 +494,9 @@ SRLReadFromStream(FILE *fp, const MRAEnc *alphabet,
   if (features & SRL_PARTIAL_SYMBOL_SUMS)
   {
     unsigned long *partialSymSums;
-    size_t numSyms = MRAEncGetSize(alphabet), i;
+    size_t numSyms = gt_MRAEncGetSize(alphabet), i;
     newRangeList->partialSymSums = partialSymSums =
-      gt_malloc(sizeof (unsigned long) * MRAEncGetSize(alphabet) * numRanges);
+     gt_malloc(sizeof (unsigned long) * gt_MRAEncGetSize(alphabet) * numRanges);
     memset(partialSymSums, 0, sizeof (unsigned long) * numSyms);
     for (i = 1; i < numRanges; ++i)
     {
@@ -517,7 +518,7 @@ SRLReadFromStream(FILE *fp, const MRAEnc *alphabet,
  * rangeList must be a valid memory reference.
  */
 void
-SRLSymbolsInSeqRegion(struct seqRangeList *rangeList, unsigned long start,
+gt_SRLSymbolsInSeqRegion(struct seqRangeList *rangeList, unsigned long start,
                       unsigned long end, unsigned long *occStore,
                       seqRangeListSearchHint *hint)
 {
@@ -529,7 +530,7 @@ SRLSymbolsInSeqRegion(struct seqRangeList *rangeList, unsigned long start,
   /* no ranges => no symbols in ranges */
   if (rangeList->numRanges == 0)
     return;
-  p = SRLFindPositionNext(rangeList, start, hint);
+  p = gt_SRLFindPositionNext(rangeList, start, hint);
   /* no range overlapping or between start and end of sequence? */
   if (!p)
     return;
@@ -541,7 +542,7 @@ SRLSymbolsInSeqRegion(struct seqRangeList *rangeList, unsigned long start,
     {
       unsigned long overlap = MIN(p->startPos + seqRangeLen(p,
                                                             rangeList->symBits),
-                           end + 1) - s;
+                                  end + 1) - s;
       occStore[MRAEncRevMapSymbol(rangeList->alphabet,
                                   seqRangeSym(p, rangeList->symBits))]
                += overlap;
@@ -553,7 +554,7 @@ SRLSymbolsInSeqRegion(struct seqRangeList *rangeList, unsigned long start,
 }
 
 unsigned long
-SRLSymbolCountInSeqRegion(struct seqRangeList *rangeList,
+gt_SRLSymbolCountInSeqRegion(struct seqRangeList *rangeList,
                           unsigned long start,
                           unsigned long end,
                           Symbol esym,
@@ -562,12 +563,12 @@ SRLSymbolCountInSeqRegion(struct seqRangeList *rangeList,
   const struct seqRange *p;
   if (rangeList->numRanges == 0)
     return 0;
-  p = SRLFindPositionNext(rangeList, start, NULL);
+  p = gt_SRLFindPositionNext(rangeList, start, NULL);
   if (p)
   {
     if (rangeList->partialSymSums)
     {
-      const struct seqRange *q = SRLFindPositionLast(rangeList, end, hint);
+      const struct seqRange *q = gt_SRLFindPositionLast(rangeList, end, hint);
       if (!q)
       {
         /* in case
@@ -580,7 +581,7 @@ SRLSymbolCountInSeqRegion(struct seqRangeList *rangeList,
       }
       {
         size_t pOff = p - rangeList->ranges, qOff = q - rangeList->ranges;
-        size_t numSyms = MRAEncGetSize(rangeList->alphabet);
+        size_t numSyms = gt_MRAEncGetSize(rangeList->alphabet);
         unsigned long symCount;
         Symbol sym = MRAEncMapSymbol(rangeList->alphabet, esym);
         unsigned symBits = rangeList->symBits;
@@ -621,7 +622,7 @@ SRLSymbolCountInSeqRegion(struct seqRangeList *rangeList,
 }
 
 unsigned long
-SRLAllSymbolsCountInSeqRegion(struct seqRangeList *rangeList,
+gt_SRLAllSymbolsCountInSeqRegion(struct seqRangeList *rangeList,
                               unsigned long start,
                               unsigned long end,
                               seqRangeListSearchHint *hint)
@@ -629,12 +630,12 @@ SRLAllSymbolsCountInSeqRegion(struct seqRangeList *rangeList,
   const struct seqRange *p;
   if (rangeList->numRanges == 0)
     return 0;
-  p = SRLFindPositionNext(rangeList, start, hint);
+  p = gt_SRLFindPositionNext(rangeList, start, hint);
   if (p)
   {
     if (rangeList->partialSymSums)
     {
-      const struct seqRange *q = SRLFindPositionLast(rangeList, end, hint);
+      const struct seqRange *q = gt_SRLFindPositionLast(rangeList, end, hint);
       if (!q)
       {
         /* in case
@@ -647,7 +648,7 @@ SRLAllSymbolsCountInSeqRegion(struct seqRangeList *rangeList,
       }
       {
         size_t pOff = p - rangeList->ranges, qOff = q - rangeList->ranges;
-        size_t numSyms = MRAEncGetSize(rangeList->alphabet);
+        size_t numSyms = gt_MRAEncGetSize(rangeList->alphabet);
         unsigned long symCount = 0;
         Symbol sym;
         unsigned symBits = rangeList->symBits;
@@ -689,7 +690,7 @@ SRLAllSymbolsCountInSeqRegion(struct seqRangeList *rangeList,
 }
 
 void
-SRLApplyRangesToSubString(struct seqRangeList *rangeList,
+gt_SRLApplyRangesToSubString(struct seqRangeList *rangeList,
                           Symbol *subString,
                           unsigned long start,
                           unsigned long len,
@@ -700,7 +701,7 @@ SRLApplyRangesToSubString(struct seqRangeList *rangeList,
   unsigned long inSeqPos = start;
   unsigned symBits = rangeList->symBits;
   gt_assert(rangeList);
-  nextRange = SRLFindPositionNext(rangeList, inSeqPos, hint);
+  nextRange = gt_SRLFindPositionNext(rangeList, inSeqPos, hint);
   do {
     if (inSeqPos < nextRange->startPos)
     {
@@ -723,7 +724,7 @@ SRLApplyRangesToSubString(struct seqRangeList *rangeList,
 }
 
 extern int
-SRLPrintRangesInfo(struct seqRangeList *rangeList,
+gt_SRLPrintRangesInfo(struct seqRangeList *rangeList,
                    FILE *fp,
                    unsigned long start,
                    unsigned long len,
@@ -734,12 +735,12 @@ SRLPrintRangesInfo(struct seqRangeList *rangeList,
   unsigned symBits = rangeList->symBits;
   int result = 0;
   gt_assert(rangeList);
-  nextRange = SRLFindPositionNext(rangeList, start, hint);
+  nextRange = gt_SRLFindPositionNext(rangeList, start, hint);
   while (nextRange->startPos < end)
   {
     if (rangeList->partialSymSums)
     {
-      size_t numSyms = MRAEncGetSize(rangeList->alphabet);
+      size_t numSyms = gt_MRAEncGetSize(rangeList->alphabet);
       size_t pOff = nextRange - rangeList->ranges;
       Symbol sym;
       fputs("# range partial sums:", fp);

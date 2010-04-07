@@ -33,7 +33,7 @@
  The following function shows all options that are set by default or from
  the user on stdout.
 */
-void showuserdefinedoptionsandvalues(const LTRharvestoptions *lo)
+void gt_showuserdefinedoptionsandvalues(const LTRharvestoptions *lo)
 {
   printf("# user defined options and values:\n");
   if (lo->verbosemode)
@@ -103,7 +103,7 @@ void showuserdefinedoptionsandvalues(const LTRharvestoptions *lo)
 /*
  This function prints the arguments from argv on standard output.
  */
-void printargsline(const char **argv, int argc)
+void gt_printargsline(const char **argv, int argc)
 {
   int i;
 
@@ -122,7 +122,7 @@ void printargsline(const char **argv, int argc)
 }
 
 /* test the motif and encode the characters by using alpha */
-int testmotifandencodemotif (Motif *motif, const GtEncodedsequence *encseq,
+int gt_testmotifandencodemotif (Motif *motif, const GtEncodedsequence *encseq,
                              GtError *err)
 {
   const GtUchar *symbolmap;
@@ -580,7 +580,7 @@ static GtOPrval parse_options(int *parsed_args,
   return oprval;
 }
 
-void wrapltrharvestoptions(LTRharvestoptions *lo)
+void gt_wrapltrharvestoptions(LTRharvestoptions *lo)
 {
   /* no checking if error occurs, since errors have been output before */
   gt_str_delete(lo->str_indexname);

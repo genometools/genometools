@@ -29,7 +29,7 @@ struct Turningwheel
                minchanged;
 };
 
-Turningwheel *newTurningwheel(unsigned int numofwheels,
+Turningwheel *gt_newTurningwheel(unsigned int numofwheels,
                               unsigned int asize)
 {
   unsigned int i;
@@ -50,7 +50,7 @@ Turningwheel *newTurningwheel(unsigned int numofwheels,
   return tw;
 }
 
-bool nextTurningwheel(Turningwheel *tw)
+bool gt_nextTurningwheel(Turningwheel *tw)
 {
   while (true)
   {
@@ -73,12 +73,12 @@ bool nextTurningwheel(Turningwheel *tw)
   return true;
 }
 
-unsigned int minchangedTurningwheel(const Turningwheel *tw)
+unsigned int gt_minchangedTurningwheel(const Turningwheel *tw)
 {
   return tw->minchanged;
 }
 
-void outputTurningwheel(const Turningwheel *tw)
+void gt_outputTurningwheel(const Turningwheel *tw)
 {
   unsigned int i;
 
@@ -88,7 +88,7 @@ void outputTurningwheel(const Turningwheel *tw)
   }
 }
 
-void freeTurningwheel(Turningwheel **tw)
+void gt_freeTurningwheel(Turningwheel **tw)
 {
   FREESPACE(*tw);
 }
