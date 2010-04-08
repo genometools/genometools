@@ -155,7 +155,7 @@ int gt_emissionmergedesa_stepdeleteandinsertothersuffixes(
     emmesa->buf.suftabstore[emmesa->buf.nextstoreidx].startpos
       = tmpsmallestleaf->suffixinfo.startpos;
     if (emmesa->nextpostable[tmpidx] >
-       gt_encodedsequence_totallength(emmesa->suffixarraytable[tmpidx].encseq))
+       gt_encodedsequence_total_length(emmesa->suffixarraytable[tmpidx].encseq))
     {
       gt_mergertrie_deletesmallestpath(tmpsmallestleaf,&emmesa->trierep);
       emmesa->numofentries--;

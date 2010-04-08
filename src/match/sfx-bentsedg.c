@@ -257,8 +257,8 @@ static void checksuffixrange(const GtEncodedsequence *encseq,
       pos2 = *(sufptr+1);
     } else
     {
-      pos1 = GT_REVERSEPOS(gt_encodedsequence_totallength(encseq),*sufptr);
-      pos2 = GT_REVERSEPOS(gt_encodedsequence_totallength(encseq),*(sufptr+1));
+      pos1 = GT_REVERSEPOS(gt_encodedsequence_total_length(encseq),*sufptr);
+      pos2 = GT_REVERSEPOS(gt_encodedsequence_total_length(encseq),*(sufptr+1));
     }
     (void) gt_encodedsequence_comparetwostrings(encseq,
                              fwd,
@@ -1884,7 +1884,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   unsigned long idx;
 
   bsr->readmode = readmode;
-  bsr->totallength = gt_encodedsequence_totallength(encseq);
+  bsr->totallength = gt_encodedsequence_total_length(encseq);
   bsr->sfxstrategy = sfxstrategy;
   bsr->suftab = suftab;
   bsr->encseq = encseq;
@@ -2098,7 +2098,7 @@ void gt_qsufsort(unsigned long *sortspace,
     gt_assert(outlcpinfo->outfpllvtab != NULL);
 
     multioutlcpvalues(&outlcpinfo->lcpsubtab,
-                      gt_encodedsequence_totallength(encseq),
+                      gt_encodedsequence_total_length(encseq),
                       lcptab,(unsigned long) partwidth,
                       outlcpinfo->outfplcptab,outlcpinfo->outfpllvtab);
     compressedtable_free(lcptab,true);

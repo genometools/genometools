@@ -210,7 +210,7 @@ static int computeoccurrenceratio(Sequentialsuffixarrayreader *ssar,
   gt_error_check(err);
   state.encseq = gt_encseqSequentialsuffixarrayreader(ssar);
   state.readmode = gt_readmodeSequentialsuffixarrayreader(ssar);
-  state.totallength = gt_encodedsequence_totallength(state.encseq);
+  state.totallength = gt_encodedsequence_total_length(state.encseq);
   state.minmersize = minmersize;
   state.maxmersize = maxmersize;
   state.uniquedistribution = uniquedistribution;

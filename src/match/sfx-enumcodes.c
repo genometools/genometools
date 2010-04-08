@@ -52,7 +52,7 @@ Enumcodeatposition *gt_newEnumcodeatposition(const GtEncodedsequence *encseq,
   ecp->filltable = gt_initfilltable(numofchars,prefixlength);
   ecp->prefixlength = prefixlength;
   ecp->moveforward = GT_ISDIRREVERSE(readmode) ? true : false;
-  ecp->totallength = gt_encodedsequence_totallength(encseq);
+  ecp->totallength = gt_encodedsequence_total_length(encseq);
   if (ecp->moveforward)
   {
     ecp->previousrange.start = ecp->previousrange.end = 0;

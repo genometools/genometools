@@ -36,7 +36,7 @@ static void showlocalsuffix(FILE *fpout,
   const unsigned long maxshow = (unsigned long) 30;
   const GtUchar *characters;
 
-  totallength = gt_encodedsequence_totallength(encseq);
+  totallength = gt_encodedsequence_total_length(encseq);
   characters = gt_alphabet_characters(gt_encodedsequence_alphabet(encseq));
   if (depth == 0)
   {
@@ -148,7 +148,7 @@ void gt_showentiresuftab(const GtEncodedsequence *encseq,
                       unsigned long depth)
 {
   const unsigned long *ptr;
-  unsigned long totallength = gt_encodedsequence_totallength(encseq);
+  unsigned long totallength = gt_encodedsequence_total_length(encseq);
 
   for (ptr = suftab; ptr <= suftab + totallength; ptr++)
   {
@@ -171,7 +171,7 @@ void gt_checksortedsuffixes(const char *filename,
                          unsigned long depth)
 {
   const unsigned long *ptr;
-  unsigned long maxlcp, totallength = gt_encodedsequence_totallength(encseq);
+  unsigned long maxlcp, totallength = gt_encodedsequence_total_length(encseq);
   GtEncodedsequenceScanstate *esr1, *esr2;
   int cmp;
 
@@ -237,7 +237,7 @@ void gt_checkentiresuftab(const char *filename,
   const unsigned long *ptr;
   unsigned long maxlcp,
          currentlcp = 0,
-         totallength = gt_encodedsequence_totallength(encseq);
+         totallength = gt_encodedsequence_total_length(encseq);
   int cmp;
   GtEncodedsequenceScanstate *esr1, *esr2;
   bool haserr = false;

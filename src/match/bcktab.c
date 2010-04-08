@@ -961,7 +961,7 @@ void consistencyofsuffix(int line,
   unsigned long totallength;
   GtUchar cc = 0;
 
-  totallength = gt_encodedsequence_totallength(encseq);
+  totallength = gt_encodedsequence_total_length(encseq);
   for (idx=0; idx<bcktab->prefixlength; idx++)
   {
     if ((unsigned long) (suffix->startpos + idx) >= totallength)

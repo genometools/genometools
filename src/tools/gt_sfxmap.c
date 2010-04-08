@@ -79,7 +79,7 @@ static void deletethespranges(const GtEncodedsequence *encseq,
       }
     }
   }
-  totallength = gt_encodedsequence_totallength(encseq);
+  totallength = gt_encodedsequence_total_length(encseq);
   if (nextpos < totallength-1)
   {
     gt_encseq2symbolstring(stdout,
@@ -332,7 +332,7 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
                           suffixarray.encseq,
                           suffixarray.readmode,
                           suffixarray.suftab,
-                          gt_encodedsequence_totallength(suffixarray.encseq)+1,
+                          gt_encodedsequence_total_length(suffixarray.encseq)+1,
                           ssar,
                           false, /* specialsareequal  */
                           false,  /* specialsareequalatdepth0 */
@@ -351,7 +351,7 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
         gt_assert(suffixarray.longest.defined);
         longest = suffixarray.longest.valueunsignedlong;
         printf("longest=%lu\n",(unsigned long) longest);
-        totallength = gt_encodedsequence_totallength(suffixarray.encseq);
+        totallength = gt_encodedsequence_total_length(suffixarray.encseq);
         printf("totallength=%lu\n",(unsigned long) totallength);
         if (!sfxmapoptions.usestream)
         {

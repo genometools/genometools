@@ -142,7 +142,7 @@ Definedunsignedlong gt_forwardprefixmatch(const GtEncodedsequence *encseq,
                                        unsigned long maxdistance)
 {
   DECLARELOCALVARS;
-  unsigned long pos, totallength = gt_encodedsequence_totallength(encseq);
+  unsigned long pos, totallength = gt_encodedsequence_total_length(encseq);
   GtUchar cc;
   Definedunsignedlong result;
 

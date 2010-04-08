@@ -126,7 +126,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
                   " demand for encoded sequence and suffix table files\n");
         break;
       }
-      totalLen = gt_encodedsequence_totallength(suffixarray.encseq);
+      totalLen = gt_encodedsequence_total_length(suffixarray.encseq);
       saIsLoaded = true;
       if ((had_err = (params.minPatLen >= 0L && params.maxPatLen >= 0L
                       && params.minPatLen > params.maxPatLen)))

@@ -36,7 +36,7 @@ Windowiterator *gt_windowiterator_new(const GtEncodedsequence *encseq,
   Windowiterator *wit;
 
   gt_assert(encseq != NULL);
-  gt_assert(endpos <= gt_encodedsequence_totallength(encseq));
+  gt_assert(endpos <= gt_encodedsequence_total_length(encseq));
   wit = gt_malloc(sizeof (*wit));
   wit->buffer = gt_malloc(sizeof (GtUchar) * windowsize);
   wit->firstpos = wit->bufsize = 0;
@@ -138,7 +138,7 @@ static void iteroverallwords(const GtEncodedsequence *encseq,
   GtUchar *buffer;
   unsigned long windowschecked = 0;
 
-  gt_assert(endpos <= gt_encodedsequence_totallength(encseq));
+  gt_assert(endpos <= gt_encodedsequence_total_length(encseq));
   esr = gt_encodedsequence_scanstate_new(encseq,GT_READMODE_FORWARD,
                                          startpos);
   buffer = gt_malloc(sizeof (GtUchar) * windowsize);

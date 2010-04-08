@@ -88,7 +88,7 @@ int gt_test_trieins(bool onlyins,const GtStr *indexname,GtError *err)
     haserr = true;
   } else
   {
-    totallength = gt_encodedsequence_totallength(suffixarray.encseq);
+    totallength = gt_encodedsequence_total_length(suffixarray.encseq);
   }
   if (!haserr)
   {

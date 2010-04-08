@@ -283,7 +283,7 @@ static int inputsuffixarray(bool map,
     haserr = true;
   } else
   {
-    totallength = gt_encodedsequence_totallength(suffixarray->encseq);
+    totallength = gt_encodedsequence_total_length(suffixarray->encseq);
   }
   if (!haserr)
   {

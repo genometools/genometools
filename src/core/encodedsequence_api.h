@@ -82,7 +82,7 @@ GtEncodedsequence* gt_encodedsequence_new_from_plain(bool withrange,
 
 /* Returns the total number of characters in all sequences of <encseq>,
    not including separators. */
-unsigned long      gt_encodedsequence_totallength(
+unsigned long      gt_encodedsequence_total_length(
                                                const GtEncodedsequence *encseq);
 
 /* Returns the total number of sequences contained in <encseq>. */

@@ -123,7 +123,7 @@ static bool mmsearch(const GtEncodedsequence *dbencseq,
   int retcode = 0;
   GtUchar currentdbchar, currentquerychar;
 
-  totallength = gt_encodedsequence_totallength(dbencseq);
+  totallength = gt_encodedsequence_total_length(dbencseq);
   leftsave = left = lcpitv->left;
   right = lcpitv->right;
   lcplen = lcpitv->offset;
@@ -378,7 +378,7 @@ static int runquerysubstringmatch(bool selfmatch,
   bool haserr = false;
 
   gt_assert(numberofsuffixes > 0);
-  totallength = gt_encodedsequence_totallength(dbencseq);
+  totallength = gt_encodedsequence_total_length(dbencseq);
   querysubstring.queryrep = queryrep;
   for (querysubstring.offset = 0;
        querysubstring.offset <= queryrep->length - minmatchlength;
@@ -463,7 +463,7 @@ int gt_callenumquerymatches(const GtStr *indexname,
     haserr = true;
   } else
   {
-    totallength = gt_encodedsequence_totallength(suffixarray.encseq);
+    totallength = gt_encodedsequence_total_length(suffixarray.encseq);
   }
   if (!haserr && echoquery)
   {
@@ -566,7 +566,7 @@ int gt_callenumselfmatches(const GtStr *indexname,
     haserr = true;
   } else
   {
-    totallength = gt_encodedsequence_totallength(suffixarray.encseq);
+    totallength = gt_encodedsequence_total_length(suffixarray.encseq);
   }
   if (!haserr)
   {

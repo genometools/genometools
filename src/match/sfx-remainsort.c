@@ -279,7 +279,7 @@ Rmnsufinfo *gt_newRmnsufinfo(unsigned long *presortedsuffixes,
   Rmnsufinfo *rmnsufinfo;
 
   rmnsufinfo = gt_malloc(sizeof (Rmnsufinfo));
-  rmnsufinfo->totallength = gt_encodedsequence_totallength(encseq);
+  rmnsufinfo->totallength = gt_encodedsequence_total_length(encseq);
   rmnsufinfo->partwidth = partwidth;
   rmnsufinfo->encseq = encseq;
   rmnsufinfo->readmode = readmode;

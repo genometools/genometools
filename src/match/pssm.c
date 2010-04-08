@@ -109,7 +109,7 @@ void gt_lookaheadsearchPSSM(const GtEncodedsequence *encseq,
   GtUchar currentchar;
   unsigned long pos;
   GtEncodedsequenceScanstate *esr;
-  unsigned long totallength = gt_encodedsequence_totallength(encseq);
+  unsigned long totallength = gt_encodedsequence_total_length(encseq);
   GtUchar *buffer;
 
   esr = gt_encodedsequence_scanstate_new(encseq,GT_READMODE_FORWARD,0);

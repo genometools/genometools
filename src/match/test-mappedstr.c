@@ -189,7 +189,7 @@ static int verifycodelists(const GtEncodedsequence *encseq,
   unsigned long stringtotallength;
 
   gt_error_check(err);
-  stringtotallength = gt_encodedsequence_totallength(encseq);
+  stringtotallength = gt_encodedsequence_total_length(encseq);
   characters = gt_alphabet_characters(gt_encodedsequence_alphabet(encseq));
   GT_INITARRAY(&codeliststring,GtCodetype);
   collectkmercode(&codeliststring,

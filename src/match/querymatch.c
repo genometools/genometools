@@ -76,7 +76,7 @@ static void verifymatch(const GtEncodedsequence *encseq,
   if (readmode == GT_READMODE_REVERSE)
   {
     GtSeqinfo seqinfo;
-    unsigned long offset, totallength = gt_encodedsequence_totallength(encseq);
+    unsigned long offset, totallength = gt_encodedsequence_total_length(encseq);
     GtUchar cc1, cc2;
 
     gt_encodedsequence_seqinfo(&seqinfo,encseq,(unsigned long) seqnum2);

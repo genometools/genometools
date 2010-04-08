@@ -50,7 +50,7 @@ static void showprjinfo(FILE *outprj,
   unsigned long totallength;
   unsigned long numofsequences;
 
-  totallength = gt_encodedsequence_totallength(encseq);
+  totallength = gt_encodedsequence_total_length(encseq);
   fprintf(outprj,"totallength=%lu\n",totallength);
   PRJSPECIALOUT(specialcharacters);
   PRJSPECIALOUT(specialranges);

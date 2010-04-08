@@ -148,7 +148,7 @@ static void onlinespacedseedsearch(const GtEncodedsequence *encseq,
   Bitsequence bitmask;
   bool matched;
 
-  totallength = gt_encodedsequence_totallength(encseq);
+  totallength = gt_encodedsequence_total_length(encseq);
   wit = gt_windowiterator_new(encseq,spse->seedwidth,0,totallength);
   while (true)
   {
@@ -215,10 +215,10 @@ int gt_matchspacedseed(bool withesa,
     gt_assert(spse != NULL);
     /*
     iteroverallwords(genericindex->suffixarray->encseq,spse->seedwidth,
-          0,gt_encodedsequence_totallength(genericindex->suffixarray->encseq));
+          0,gt_encodedsequence_total_length(genericindex->suffixarray->encseq));
     iteroverallwords2(genericindex->suffixarray->encseq,spse->seedwidth,
             0,
-            gt_encodedsequence_totallength(genericindex->suffixarray->encseq));
+            gt_encodedsequence_total_length(genericindex->suffixarray->encseq));
     */
   }
   if (!haserr)
