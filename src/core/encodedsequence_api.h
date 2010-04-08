@@ -99,7 +99,7 @@ GtUchar            gt_encodedsequence_get_encoded_char(
 /* Returns the encoded representation of the character at position <pos> of
    <encseq> read in the direction as indicated by <readmode>.
    TODO: How is this different from getencodedchar()? */
-GtUchar            gt_encodedsequence_extractencodedchar(
+GtUchar            gt_encodedsequence_extract_encoded_char(
                                                 const GtEncodedsequence *encseq,
                                                 unsigned long pos,
                                                 GtReadmode readmode);

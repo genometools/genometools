@@ -51,7 +51,7 @@ static inline GtUchar gt_encodedsequence_get_encoded_char(
          ;
 }
 
-#define gt_encodedsequence_extractencodedchar(ENCSEQ,POS,RM) \
+#define gt_encodedsequence_extract_encoded_char(ENCSEQ,POS,RM) \
           gt_encodedsequence_get_encoded_char(ENCSEQ,POS,RM)
 
 #define gt_encodedsequence_get_encoded_charnospecial(ENCSEQ,POS,RM) \

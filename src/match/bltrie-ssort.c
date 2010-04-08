@@ -379,7 +379,7 @@ static unsigned long fastgetlcp(GtUchar *mm_oldsuffix,
       gt_assert(commonunits.leftspecial);
     } else
     {
-      GtUchar tmp = gt_encodedsequence_extractencodedchar(blindtrie->encseq,
+      GtUchar tmp = gt_encodedsequence_extract_encoded_char(blindtrie->encseq,
                                                          leafpos +
                                                          commonunits.finaldepth,
                                                          blindtrie->readmode);
@@ -391,7 +391,7 @@ static unsigned long fastgetlcp(GtUchar *mm_oldsuffix,
     }
     */
 #endif
-    *mm_oldsuffix = gt_encodedsequence_extractencodedchar(blindtrie->encseq,
+    *mm_oldsuffix = gt_encodedsequence_extract_encoded_char(blindtrie->encseq,
                                                          leafpos +
                                                          commonunits.finaldepth,
                                                          blindtrie->readmode);
@@ -413,7 +413,7 @@ static unsigned long fastgetlcp(GtUchar *mm_oldsuffix,
     } else
     {
       /* Random access */
-      GtUchar tmp = gt_encodedsequence_extractencodedchar(blindtrie->encseq,
+      GtUchar tmp = gt_encodedsequence_extract_encoded_char(blindtrie->encseq,
                                        currentstartpos + commonunits.finaldepth,
                                        blindtrie->readmode);
       gt_assert(tmp == *mm_newsuffix);
@@ -423,7 +423,7 @@ static unsigned long fastgetlcp(GtUchar *mm_oldsuffix,
       *mm_newsuffix = (GtUchar) SEPARATOR;
     }
 #endif
-    *mm_newsuffix = gt_encodedsequence_extractencodedchar(blindtrie->encseq,
+    *mm_newsuffix = gt_encodedsequence_extract_encoded_char(blindtrie->encseq,
                                        currentstartpos +
                                        commonunits.finaldepth,
                                        blindtrie->readmode);

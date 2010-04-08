@@ -299,7 +299,7 @@ GtUchar gt_encodedsequence_get_encoded_char(const GtEncodedsequence *encseq,
   }
 }
 
-GtUchar gt_encodedsequence_extractencodedchar(const GtEncodedsequence *encseq,
+GtUchar gt_encodedsequence_extract_encoded_char(const GtEncodedsequence *encseq,
                            unsigned long pos,
                            GtReadmode readmode)
 {
@@ -325,7 +325,7 @@ GtUchar gt_encodedsequence_extractencodedchar(const GtEncodedsequence *encseq,
         return ISSPECIAL(cc) ? cc : GT_COMPLEMENTBASE(cc);
       }
     default:
-      fprintf(stderr,"gt_encodedsequence_extractencodedchar: "
+      fprintf(stderr,"gt_encodedsequence_extract_encoded_char: "
                      "readmode %d not implemented\n",
                      (int) readmode);
       exit(GT_EXIT_PROGRAMMING_ERROR);
