@@ -263,15 +263,15 @@ unsigned long gt_encodedsequence_num_of_sequences(
 }
 
 #ifdef WITHshowgetencodedcharcounters
-static uint64_t countgt_encodedsequence_getencodedchar = 0;
+static uint64_t countgt_encodedsequence_get_encoded_char = 0;
 #endif
 
-GtUchar gt_encodedsequence_getencodedchar(const GtEncodedsequence *encseq,
+GtUchar gt_encodedsequence_get_encoded_char(const GtEncodedsequence *encseq,
                      unsigned long pos,
                      GtReadmode readmode)
 {
 #ifdef WITHshowgetencodedcharcounters
-  countgt_encodedsequence_getencodedchar++;
+  countgt_encodedsequence_get_encoded_char++;
 #endif
   gt_assert(pos < encseq->totallength);
   switch (readmode)
@@ -292,7 +292,7 @@ GtUchar gt_encodedsequence_getencodedchar(const GtEncodedsequence *encseq,
         return ISSPECIAL(cc) ? cc : GT_COMPLEMENTBASE(cc);
       }
     default:
-      fprintf(stderr,"gt_encodedsequence_getencodedchar: "
+      fprintf(stderr,"gt_encodedsequence_get_encoded_char: "
                      "readmode %d not implemented\n",
                      (int) readmode);
       exit(GT_EXIT_PROGRAMMING_ERROR);
@@ -332,7 +332,7 @@ GtUchar gt_encodedsequence_extractencodedchar(const GtEncodedsequence *encseq,
   }
 }
 
-GtUchar gt_encodedsequence_getencodedcharnospecial(
+GtUchar gt_encodedsequence_get_encoded_charnospecial(
                                                 const GtEncodedsequence *encseq,
                                                 unsigned long pos,
                                                 GtReadmode readmode)
@@ -359,7 +359,7 @@ GtUchar gt_encodedsequence_getencodedcharnospecial(
         return ISSPECIAL(cc) ? cc : GT_COMPLEMENTBASE(cc);
       }
     default:
-      fprintf(stderr,"gt_encodedsequence_getencodedcharnospecial: "
+      fprintf(stderr,"gt_encodedsequence_get_encoded_charnospecial: "
                      "readmode %d not implemented\n",
                      (int) readmode);
       exit(GT_EXIT_PROGRAMMING_ERROR);
@@ -384,7 +384,7 @@ struct GtEncodedsequenceScanstate
 
 #ifndef INLINEDENCSEQ
 #ifdef WITHshowgetencodedcharcounters
-static uint64_t countgt_encodedsequence_getencodedchar = 0;
+static uint64_t countgt_encodedsequence_get_encoded_char = 0;
 #endif
 
 GtUchar gt_encodedsequence_sequentialgetencodedchar(
@@ -394,7 +394,7 @@ GtUchar gt_encodedsequence_sequentialgetencodedchar(
                                                 GtReadmode readmode)
 {
 #ifdef WITHshowgetencodedcharcounters
-  countgt_encodedsequence_getencodedchar++;
+  countgt_encodedsequence_get_encoded_char++;
 #endif
   gt_assert(pos < encseq->totallength);
   switch (readmode)
@@ -417,7 +417,7 @@ GtUchar gt_encodedsequence_sequentialgetencodedchar(
         return ISSPECIAL(cc) ? cc : GT_COMPLEMENTBASE(cc);
       }
     default:
-      fprintf(stderr,"gt_encodedsequence_getencodedchar: "
+      fprintf(stderr,"gt_encodedsequence_get_encoded_char: "
                      "readmode %d not implemented\n",
                      (int) readmode);
       exit(GT_EXIT_PROGRAMMING_ERROR);
@@ -428,10 +428,10 @@ GtUchar gt_encodedsequence_sequentialgetencodedchar(
 #ifdef WITHshowgetencodedcharcounters
 void showgetencodedcharcounters(void)
 {
-  printf("calls of gt_encodedsequence_getencodedchar = " Formatuint64_t "\n",
-          PRINTuint64_tcast(countgt_encodedsequence_getencodedchar));
-  printf("calls of gt_encodedsequence_getencodedchar = " Formatuint64_t "\n",
-          PRINTuint64_tcast(countgt_encodedsequence_getencodedchar));
+  printf("calls of gt_encodedsequence_get_encoded_char = " Formatuint64_t "\n",
+          PRINTuint64_tcast(countgt_encodedsequence_get_encoded_char));
+  printf("calls of gt_encodedsequence_get_encoded_char = " Formatuint64_t "\n",
+          PRINTuint64_tcast(countgt_encodedsequence_get_encoded_char));
 }
 #endif
 
@@ -4135,7 +4135,7 @@ static unsigned long extractsinglecharacter(const GtEncodedsequence *encseq,
       cc = pos + depth + GT_COMPAREOFFSET;
     } else
     {
-      cc = (unsigned long) gt_encodedsequence_getencodedchar(encseq,
+      cc = (unsigned long) gt_encodedsequence_get_encoded_char(encseq,
                                                            pos + depth,
                                                            GT_READMODE_FORWARD);
       if (ISSPECIAL((GtUchar) cc))
@@ -4156,7 +4156,7 @@ static unsigned long extractsinglecharacter(const GtEncodedsequence *encseq,
       cc = depth - pos + GT_COMPAREOFFSET;
     } else
     {
-      cc = (unsigned long) gt_encodedsequence_getencodedchar(encseq,
+      cc = (unsigned long) gt_encodedsequence_get_encoded_char(encseq,
                                                            pos - depth,
                                                            GT_READMODE_FORWARD);
       if (ISSPECIAL((GtUchar) cc))
@@ -4535,7 +4535,7 @@ static void fwdextract2bitenc_bruteforce(GtEndofTwobitencoding *ptbe,
       ptbe->tbe <<= GT_MULT2(startpos + GT_UNITSIN2BITENC - pos);
       return;
     }
-    cc = gt_encodedsequence_getencodedchar(encseq,pos,GT_READMODE_FORWARD);
+    cc = gt_encodedsequence_get_encoded_char(encseq,pos,GT_READMODE_FORWARD);
     if (ISSPECIAL(cc))
     {
       ptbe->unitsnotspecial = (unsigned int) (pos - startpos);
@@ -4561,7 +4561,7 @@ static void revextract2bitenc_bruteforce(GtEndofTwobitencoding *ptbe,
        unit < (unsigned int) GT_UNITSIN2BITENC;
        unit++)
   {
-    cc = gt_encodedsequence_getencodedchar(encseq,pos,GT_READMODE_FORWARD);
+    cc = gt_encodedsequence_get_encoded_char(encseq,pos,GT_READMODE_FORWARD);
     if (ISSPECIAL(cc))
     {
       ptbe->unitsnotspecial = unit;
@@ -5073,7 +5073,7 @@ int gt_encodedsequence_comparetwosuffixes(const GtEncodedsequence *encseq,
       GT_CHECKENCCHAR(cc1,encseq,pos1,readmode);
     } else
     {
-      cc1 = gt_encodedsequence_getencodedchar(encseq,pos1,readmode);
+      cc1 = gt_encodedsequence_get_encoded_char(encseq,pos1,readmode);
     }
     if (esr2 != NULL)
     {
@@ -5082,7 +5082,7 @@ int gt_encodedsequence_comparetwosuffixes(const GtEncodedsequence *encseq,
       GT_CHECKENCCHAR(cc2,encseq,pos2,readmode);
     } else
     {
-      cc2 = gt_encodedsequence_getencodedchar(encseq,pos2,readmode);
+      cc2 = gt_encodedsequence_get_encoded_char(encseq,pos2,readmode);
     }
     if (ISSPECIAL(cc1))
     {
@@ -5164,7 +5164,7 @@ static unsigned long derefcharboundaries(const GtEncodedsequence *encseq,
   if (currentoffset <= maxoffset)
   {
     GtUchar cc;
-    cc = gt_encodedsequence_getencodedchar(encseq,start,GT_READMODE_FORWARD);
+    cc = gt_encodedsequence_get_encoded_char(encseq,start,GT_READMODE_FORWARD);
     if (ISSPECIAL(cc))
     {
       return start + GT_COMPAREOFFSET;
@@ -5502,7 +5502,7 @@ static void runscanatpostrial(const GtEncodedsequence *encseq,
   for (pos=startpos; pos < totallength; pos++)
   {
     /* Random access */
-    ccra = gt_encodedsequence_getencodedchar(encseq,pos,readmode);
+    ccra = gt_encodedsequence_get_encoded_char(encseq,pos,readmode);
     ccsr = gt_encodedsequence_sequentialgetencodedchar(encseq,esr,pos,readmode);
     if (ccra != ccsr)
     {
@@ -5622,7 +5622,7 @@ static int testfullscan(const GtStrArray *filenametab,
         }
       }
       /* Random access */
-      ccra = gt_encodedsequence_getencodedchar(encseq,pos,readmode);
+      ccra = gt_encodedsequence_get_encoded_char(encseq,pos,readmode);
       if (filenametab != NULL && readmode == GT_READMODE_FORWARD)
       {
         if (ccscan != ccra)

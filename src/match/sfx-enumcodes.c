@@ -177,7 +177,7 @@ GtCodetype gt_computefilledqgramcode(const Enumcodeatposition *ecp,
   for (idx=0; idx<prefixindex; idx++)
   {
     gt_assert((unsigned long) (pos + idx) < ecp->totallength);
-    cc = gt_encodedsequence_getencodedcharnospecial(ecp->encseq,
+    cc = gt_encodedsequence_get_encoded_charnospecial(ecp->encseq,
                                                     pos + idx,
                                                     ecp->readmode);
     gt_assert(ISNOTSPECIAL(cc));
@@ -205,7 +205,7 @@ bool gt_computefilledqgramcodestopatmax(GtCodetype *code,
   for (idx=0; idx<prefixindex; idx++)
   {
     gt_assert((unsigned long) (pos + idx) < ecp->totallength);
-    cc = gt_encodedsequence_getencodedcharnospecial(ecp->encseq,
+    cc = gt_encodedsequence_get_encoded_charnospecial(ecp->encseq,
                                                     pos + idx,
                                                     ecp->readmode);
     gt_assert(ISNOTSPECIAL(cc));

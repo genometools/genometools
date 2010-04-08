@@ -118,7 +118,7 @@ static void checkcurrentwindow(const GtEncodedsequence *encseq,
     */
     gt_assert(bfbufpos == bufpos);
     cc1 = buffer[bfbufpos];
-    cc2 = gt_encodedsequence_getencodedchar(encseq,
+    cc2 = gt_encodedsequence_get_encoded_char(encseq,
                                             currentpos-(windowsize-1)+idx,
                                             GT_READMODE_FORWARD);
     gt_assert(cc1 == cc2);
@@ -145,7 +145,7 @@ static void iteroverallwords(const GtEncodedsequence *encseq,
   firstpos = bufsize = 0;
   for (currentpos=startpos; currentpos < endpos; currentpos++)
   {
-    currentchar = gt_encodedsequence_getencodedchar(encseq,esr,currentpos,
+    currentchar = gt_encodedsequence_get_encoded_char(encseq,esr,currentpos,
                                                     GT_READMODE_FORWARD);
     if (ISSPECIAL(currentchar))
     {

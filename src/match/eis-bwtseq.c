@@ -555,8 +555,10 @@ gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
         }
         while (i > 0)
         {
-          Symbol symRef = gt_encodedsequence_getencodedchar(suffixArray.encseq,
-                                         --i, suffixArray.readmode);
+          Symbol symRef =
+                         gt_encodedsequence_get_encoded_char(suffixArray.encseq,
+                                                          --i,
+                                                          suffixArray.readmode);
           Symbol symCmp = BWTSeqGetSym(bwtSeq, nextLocate);
           if (symCmp != symRef)
           {

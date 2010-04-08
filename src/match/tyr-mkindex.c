@@ -127,7 +127,7 @@ static void checknumberofoccurrences(const TyrDfsstate *dfsstate,
   for (idx = 0; idx < dfsstate->mersize; idx++)
   {
     dfsstate->currentmer[idx] =
-              gt_encodedsequence_getencodedchar(dfsstate->encseq,position+idx,
+              gt_encodedsequence_get_encoded_char(dfsstate->encseq,position+idx,
                                                 dfsstate->readmode);
   }
   mmsi = gt_newmmsearchiteratorcomplete_plain(dfsstate->encseq,
@@ -450,7 +450,7 @@ static bool containsspecial2(const GtEncodedsequence *encseq,
 
   for (pos=startpos; pos<startpos+len; pos++)
   {
-    if (ISSPECIAL(gt_encodedsequence_getencodedchar(encseq,
+    if (ISSPECIAL(gt_encodedsequence_get_encoded_char(encseq,
                                                     pos,
                                                     GT_READMODE_FORWARD)))
     {

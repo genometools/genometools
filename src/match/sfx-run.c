@@ -169,7 +169,7 @@ static int bwttab2file(Outfileinfo *outfileinfo,
         if (outfileinfo->outfpbwttab != NULL)
         {
           /* Random access */
-          cc = gt_encodedsequence_getencodedchar(outfileinfo->encseq,
+          cc = gt_encodedsequence_get_encoded_char(outfileinfo->encseq,
                                                  startpos - 1,
                                                  readmode);
         }

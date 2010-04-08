@@ -128,7 +128,7 @@ void gt_fprintfencseq(FILE *fpout,
   alpha = gt_encodedsequence_alphabet(encseq);
   for (idx = start; idx < start + wlen; idx++)
   {
-    currentchar = gt_encodedsequence_getencodedchar(encseq,
+    currentchar = gt_encodedsequence_get_encoded_char(encseq,
                                                     idx,
                                                     GT_READMODE_FORWARD);
     gt_assert(ISNOTSPECIAL(currentchar));

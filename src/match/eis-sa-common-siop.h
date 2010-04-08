@@ -25,7 +25,7 @@ sfxIdx2BWTSym(unsigned long sufIdx, const GtEncodedsequence *encseq,
               GtReadmode readmode)
 {
   return sufIdx != 0
-    ? gt_encodedsequence_getencodedchar(encseq, sufIdx - 1, readmode)
+    ? gt_encodedsequence_get_encoded_char(encseq, sufIdx - 1, readmode)
     : (GtUchar) UNDEFBWTCHAR;
 }
 
@@ -36,7 +36,7 @@ EncSeqGetSubSeq(const GtEncodedsequence *encseq, GtReadmode readmode,
   size_t i;
   gt_assert(encseq);
   for (i = 0; i < len; ++i)
-    subSeq[i] = gt_encodedsequence_getencodedchar(encseq, pos + i, readmode);
+    subSeq[i] = gt_encodedsequence_get_encoded_char(encseq, pos + i, readmode);
   return len;
 }
 

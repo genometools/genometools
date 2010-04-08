@@ -52,7 +52,7 @@ static void showlocalsuffix(FILE *fpout,
       (void) putc('~',fpout);
       break;
     }
-    cc = gt_encodedsequence_getencodedchar(encseq,i,readmode); /* for testing */
+    cc = gt_encodedsequence_get_encoded_char(encseq,i,readmode);
     if (ISSPECIAL(cc))
     {
       (void) putc('~',fpout);
@@ -340,12 +340,12 @@ void gt_checkentiresuftab(const char *filename,
                 "startpos=%lu,firstchar=%u",
                 (unsigned long) (ptr - suftab),
                 *(ptr-1),
-                (unsigned int) gt_encodedsequence_getencodedchar(encseq,
+                (unsigned int) gt_encodedsequence_get_encoded_char(encseq,
                                                                  *(ptr-1),
                                                                  readmode),
                 *ptr,
                 (*ptr < totallength)
-                ? (unsigned int) gt_encodedsequence_getencodedchar(encseq,
+                ? (unsigned int) gt_encodedsequence_get_encoded_char(encseq,
                                                                    *ptr,
                                                                    readmode)
                 : SEPARATOR);

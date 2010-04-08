@@ -91,7 +91,7 @@ unsigned long      gt_encodedsequence_num_of_sequences(
 
 /* Returns the encoded representation of the character at position <pos> of
    <encseq> read in the direction as indicated by <readmode>. */
-GtUchar            gt_encodedsequence_getencodedchar(
+GtUchar            gt_encodedsequence_get_encoded_char(
                                                 const GtEncodedsequence *encseq,
                                                 unsigned long pos,
                                                 GtReadmode readmode);
@@ -105,7 +105,7 @@ GtUchar            gt_encodedsequence_extractencodedchar(
                                                 GtReadmode readmode);
 
 /* TODO: please document me */
-GtUchar            gt_encodedsequence_getencodedcharnospecial(
+GtUchar            gt_encodedsequence_get_encoded_charnospecial(
                                                 const GtEncodedsequence *encseq,
                                                 unsigned long pos,
                                                 GtReadmode readmode);

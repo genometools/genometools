@@ -66,7 +66,7 @@ static GtUchar getfirstedgechar(const Mergertrierep *trierep,
   {
     return (GtUchar) SEPARATOR;
   }
-  return gt_encodedsequence_getencodedchar(eri->encseqptr, /* Random access */
+  return gt_encodedsequence_get_encoded_char(eri->encseqptr, /* Random access */
                         node->suffixinfo.startpos + prevdepth,
                         eri->readmode);
 }
@@ -139,7 +139,7 @@ static void showmergertrie2(const Mergertrierep *trierep,
     for (pos = current->suffixinfo.startpos + node->depth;
          pos < endpos; pos++)
     {
-      cc = gt_encodedsequence_getencodedchar( /* just for testing */
+      cc = gt_encodedsequence_get_encoded_char( /* just for testing */
               trierep->enseqreadinfo[current->suffixinfo.idx].encseqptr,
               pos,
               trierep->enseqreadinfo[current->suffixinfo.idx].readmode);
@@ -416,7 +416,7 @@ static Mergertrienode *mtrie_makenewbranch(Mergertrierep *trierep,
     cc2 = (GtUchar) SEPARATOR;
   } else
   {
-    cc2 = gt_encodedsequence_getencodedchar(eri->encseqptr, /* Random access */
+    cc2 = gt_encodedsequence_get_encoded_char(eri->encseqptr,
                          suffixinfo->startpos + currentdepth,
                          eri->readmode);
   }
@@ -445,8 +445,8 @@ static unsigned long getlcp(const GtEncodedsequence *encseq1,
 
   for (i1=start1, i2=start2; i1 <= end1 && i2 <= end2; i1++, i2++)
   {
-    cc1 = gt_encodedsequence_getencodedchar(/*XXX*/ encseq1,i1,readmode1);
-    if (cc1 != gt_encodedsequence_getencodedchar(/*XXX*/ encseq2,i2,readmode2)
+    cc1 = gt_encodedsequence_get_encoded_char(/*XXX*/ encseq1,i1,readmode1);
+    if (cc1 != gt_encodedsequence_get_encoded_char(/*XXX*/ encseq2,i2,readmode2)
           || ISSPECIAL(cc1))
     {
       break;
@@ -512,7 +512,7 @@ void gt_mergertrie_insertsuffix(Mergertrierep *trierep,
       } else
       {
         /* Random access */
-        cc = gt_encodedsequence_getencodedchar(eri->encseqptr,
+        cc = gt_encodedsequence_get_encoded_char(eri->encseqptr,
                                             suffixinfo->startpos + currentdepth,
                                             eri->readmode);
       }

@@ -619,7 +619,7 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
   for (pos = startpos + child->offset - 1;
        pos < limdfsresources->genericindex->totallength; pos++)
   {
-    cc = gt_encodedsequence_getencodedchar(
+    cc = gt_encodedsequence_get_encoded_char(
                           limdfsresources->genericindex->suffixarray->encseq,
                           pos,
                           limdfsresources->genericindex->suffixarray->readmode);
@@ -1392,7 +1392,7 @@ GtUchar gt_limdfs_getencodedchar(const Limdfsresources *limdfsresources,
 {
   gt_assert(limdfsresources->encseq != NULL);
 
-  return gt_encodedsequence_getencodedchar(limdfsresources->encseq,
+  return gt_encodedsequence_get_encoded_char(limdfsresources->encseq,
                                            pos,
                                            readmode);
 }

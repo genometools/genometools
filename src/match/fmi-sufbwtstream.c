@@ -227,7 +227,7 @@ static int nextesamergedsufbwttabvalues(Definedunsignedlong *longest,
   } else
   {
     *bwtvalue
-      = gt_encodedsequence_getencodedchar( /* Random access */
+      = gt_encodedsequence_get_encoded_char( /* Random access */
            emmesa->suffixarraytable[indexedsuffix.idx].encseq,
            indexedsuffix.startpos-1,
            emmesa->suffixarraytable[indexedsuffix.idx].readmode);

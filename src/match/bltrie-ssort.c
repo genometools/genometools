@@ -125,7 +125,7 @@ static Nodeptr makeroot(Blindtrie *blindtrie,unsigned long currentstartpos)
   if (isleftofboundary(currentstartpos,0,blindtrie))
   {
     /* Random access */
-    firstchar = gt_encodedsequence_getencodedchar(blindtrie->encseq,
+    firstchar = gt_encodedsequence_get_encoded_char(blindtrie->encseq,
                                                   currentstartpos,
                                                   blindtrie->readmode);
     if (firstchar == (GtUchar) WILDCARD)
@@ -195,7 +195,7 @@ static Nodeptr findcompanion(Blindtrie *blindtrie,unsigned long currentstartpos)
     if (isleftofboundary(currentstartpos,head->depth,blindtrie))
     {
       /* Random access */
-      newchar = gt_encodedsequence_getencodedchar(blindtrie->encseq,
+      newchar = gt_encodedsequence_get_encoded_char(blindtrie->encseq,
                                                   currentstartpos + head->depth,
                                                   blindtrie->readmode);
       if (newchar == (GtUchar) WILDCARD)
@@ -371,7 +371,7 @@ static unsigned long fastgetlcp(GtUchar *mm_oldsuffix,
   {
 #ifdef OLDVERSION
     /*
-    *mm_oldsuffix = gt_encodedsequence_getencodedchar(blindtrie->encseq,
+    *mm_oldsuffix = gt_encodedsequence_get_encoded_char(blindtrie->encseq,
                                    leafpos + commonunits.finaldepth,
                                    blindtrie->readmode);
     if (ISSPECIAL(*mm_oldsuffix))
@@ -404,7 +404,7 @@ static unsigned long fastgetlcp(GtUchar *mm_oldsuffix,
   {
 #ifdef OLDVERSION
     /* Random access */
-    *mm_newsuffix = gt_encodedsequence_getencodedchar(blindtrie->encseq,
+    *mm_newsuffix = gt_encodedsequence_get_encoded_char(blindtrie->encseq,
                                        currentstartpos + commonunits.finaldepth,
                                        blindtrie->readmode);
     if (ISSPECIAL(*mm_newsuffix))

@@ -19,7 +19,7 @@
 #define FMI_OCC_GEN
 
 #define ACCESSBWTTEXT(POS)\
-        gt_encodedsequence_getencodedchar(fm->bwtformatching,POS,\
+        gt_encodedsequence_get_encoded_char(fm->bwtformatching,POS,\
                                           GT_READMODE_FORWARD)
 
 static unsigned long fmoccurrence (const Fmindex *fm,GtUchar cc,

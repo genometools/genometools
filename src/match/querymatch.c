@@ -85,17 +85,17 @@ static void verifymatch(const GtEncodedsequence *encseq,
     {
       gt_assert(pos1 + len - 1 < totallength);
       gt_assert(pos2 + len - 1 < totallength);
-      cc1 = gt_encodedsequence_getencodedchar(encseq,
+      cc1 = gt_encodedsequence_get_encoded_char(encseq,
                                               pos1+offset,
                                               GT_READMODE_FORWARD);
-      cc2 = gt_encodedsequence_getencodedchar(encseq,
+      cc2 = gt_encodedsequence_get_encoded_char(encseq,
                                               pos2+len-1-offset,
                                               GT_READMODE_FORWARD);
       gt_assert(cc1 == cc2 && ISNOTSPECIAL(cc1));
     }
     if (pos1 + len < totallength)
     {
-      cc1 = gt_encodedsequence_getencodedchar(encseq,
+      cc1 = gt_encodedsequence_get_encoded_char(encseq,
                                               pos1+len,
                                               GT_READMODE_FORWARD);
     } else
@@ -104,7 +104,7 @@ static void verifymatch(const GtEncodedsequence *encseq,
     }
     if (pos2 > 0)
     {
-      cc2 = gt_encodedsequence_getencodedchar(encseq,
+      cc2 = gt_encodedsequence_get_encoded_char(encseq,
                                               pos2-1,
                                               GT_READMODE_FORWARD);
     } else

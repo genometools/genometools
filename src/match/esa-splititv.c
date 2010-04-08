@@ -23,7 +23,7 @@
 
 #define SEQUENCE(ENCSEQ,POS) (((POS) == totallength) \
                              ? (GtUchar) SEPARATOR\
-                             : gt_encodedsequence_getencodedchar(ENCSEQ, \
+                             : gt_encodedsequence_get_encoded_char(ENCSEQ, \
                                                                  POS, \
                                                                  readmode))
 

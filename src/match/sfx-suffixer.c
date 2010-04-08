@@ -202,7 +202,8 @@ static GtCodetype getencseqcode(const GtEncodedsequence *encseq,
   for (idx=0; idx<prefixlength; idx++)
   {
     gt_assert((unsigned long) (pos + idx) < totallength);
-    cc = gt_encodedsequence_getencodedcharnospecial(encseq,pos + idx, readmode);
+    cc = gt_encodedsequence_get_encoded_charnospecial(encseq,pos + idx,
+                                                      readmode);
     gt_assert(ISNOTSPECIAL(cc));
     code += multimappower[idx][cc];
   }

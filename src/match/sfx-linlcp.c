@@ -45,8 +45,8 @@ unsigned long *gt_lcp13_manzini(const GtEncodedsequence *encseq,
       {
         GtUchar cc1, cc2;
 
-        cc1 = gt_encodedsequence_getencodedchar(encseq,pos+lcpvalue,readmode);
-        cc2 = gt_encodedsequence_getencodedchar(encseq,previousstart+lcpvalue,
+        cc1 = gt_encodedsequence_get_encoded_char(encseq,pos+lcpvalue,readmode);
+        cc2 = gt_encodedsequence_get_encoded_char(encseq,previousstart+lcpvalue,
                                                 readmode);
         if (cc1 == cc2 && ISNOTSPECIAL(cc1))
         {
@@ -106,7 +106,7 @@ static void setrelevantfrominversetab(Compressedtable *rightposinverse,
       unsigned long pos = sortedsuffixes[idx];
       if (pos > 0)
       {
-        GtUchar cc = gt_encodedsequence_getencodedchar(encseq,pos-1,readmode);
+        GtUchar cc = gt_encodedsequence_get_encoded_char(encseq,pos-1,readmode);
         if (ISSPECIAL(cc))
         {
           compressedtable_update(rightposinverse,pos,idx);
@@ -240,7 +240,7 @@ static unsigned long sa2ranknext(Compressedtable *ranknext,
     unsigned long pos = sortedsuffixes[idx];
     if (pos > 0)
     {
-      GtUchar cc = gt_encodedsequence_getencodedchar(encseq,pos-1, readmode);
+      GtUchar cc = gt_encodedsequence_get_encoded_char(encseq,pos-1, readmode);
       if (ISNOTSPECIAL(cc))
       {
         gt_assert(occless[cc] < (unsigned long) partwidth);
@@ -275,7 +275,7 @@ static unsigned long sa2ranknext(Compressedtable *ranknext,
       {
         if (specialpos > 0)
         {
-          GtUchar cc = gt_encodedsequence_getencodedchar(encseq,specialpos-1,
+          GtUchar cc = gt_encodedsequence_get_encoded_char(encseq,specialpos-1,
                                                          readmode);
           if (ISNOTSPECIAL(cc))
           {

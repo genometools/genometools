@@ -68,7 +68,7 @@ static GtUchar accessquery(int line,const Queryrep *queryrep,
   {
     gt_assert(queryrep->readmode != GT_READMODE_FORWARD);
     gt_assert(queryrep->encseq != NULL);
-    return gt_encodedsequence_getencodedchar(queryrep->encseq,
+    return gt_encodedsequence_get_encoded_char(queryrep->encseq,
                                              abspos,
                                              queryrep->readmode);
   }
@@ -314,7 +314,7 @@ static bool isleftmaximal(const GtEncodedsequence *dbencseq,
   {
     return true;
   }
-  dbleftchar = gt_encodedsequence_getencodedchar(dbencseq, /* Random access */
+  dbleftchar = gt_encodedsequence_get_encoded_char(dbencseq, /* Random access */
                               dbstart-1,
                               readmode);
   if (ISSPECIAL(dbleftchar) ||

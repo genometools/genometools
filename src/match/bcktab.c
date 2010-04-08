@@ -969,7 +969,7 @@ void consistencyofsuffix(int line,
       firstspecial = idx;
       break;
     }
-    cc = gt_encodedsequence_getencodedchar(encseq,suffix->startpos + idx,
+    cc = gt_encodedsequence_get_encoded_char(encseq,suffix->startpos + idx,
                                            readmode);
     if (ISSPECIAL(cc))
     {

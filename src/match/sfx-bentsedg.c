@@ -41,7 +41,7 @@
 #include "stamp.h"
 
 #define UNIQUEINT(P)           ((unsigned long) ((P) + GT_COMPAREOFFSET))
-#define ACCESSCHAR(POS)        gt_encodedsequence_getencodedchar(bsr->encseq, \
+#define ACCESSCHAR(POS)        gt_encodedsequence_get_encoded_char(bsr->encseq,\
                                                              POS,bsr->readmode)
 #define ACCESSCHARSEQ(POS,ESR) gt_encodedsequence_sequentialgetencodedchar( \
                                                         bsr->encseq,ESR,POS,\

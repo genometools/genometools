@@ -221,7 +221,7 @@ static int processleafedge(bool firstsucc,
   } else
   {
     /* Random access */
-    leftchar = gt_encodedsequence_getencodedchar(state->encseq,
+    leftchar = gt_encodedsequence_get_encoded_char(state->encseq,
                                                  leafnumber-1,
                                                  state->readmode);
   }

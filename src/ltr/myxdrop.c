@@ -243,10 +243,10 @@ void gt_calculateallowedMININFINITYINTgenerations(
         (XDROPBELOWSCORE + HALFMATCHSCORE) / GCD + 1
 
 #define EVALXDROPARBITSCORES EVALXDROPARBITSCORESRIGHT
-#define USEQ(A,I) A = gt_encodedsequence_getencodedchar(str_useq, \
+#define USEQ(A,I) A = gt_encodedsequence_get_encoded_char(str_useq, \
                                                        useq+(unsigned long)(I),\
                                                        GT_READMODE_FORWARD)
-#define VSEQ(A,J) A = gt_encodedsequence_getencodedchar(str_vseq, \
+#define VSEQ(A,J) A = gt_encodedsequence_get_encoded_char(str_vseq, \
                                                        vseq+(unsigned long)(J),\
                                                        GT_READMODE_FORWARD)
 
@@ -264,10 +264,10 @@ void gt_calculateallowedMININFINITYINTgenerations(
 */
 
 #define EVALXDROPARBITSCORES EVALXDROPARBITSCORESLEFT
-#define USEQ(A,I) A = gt_encodedsequence_getencodedchar(str_useq, \
+#define USEQ(A,I) A = gt_encodedsequence_get_encoded_char(str_useq, \
                                                      useq-(unsigned long)1-(I),\
                                                      GT_READMODE_FORWARD)
-#define VSEQ(A,J) A = gt_encodedsequence_getencodedchar(str_vseq, \
+#define VSEQ(A,J) A = gt_encodedsequence_get_encoded_char(str_vseq, \
                                                      vseq-(unsigned long)1-(J),\
                                                      GT_READMODE_FORWARD)
 

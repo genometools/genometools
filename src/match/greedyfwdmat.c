@@ -80,7 +80,7 @@ static void checkifsequenceisthere(const GtEncodedsequence *encseq,
 
   for (i=0; i<gmatchlength; i++)
   {
-    cc = gt_encodedsequence_getencodedcharnospecial(encseq,
+    cc = gt_encodedsequence_get_encoded_charnospecial(encseq,
                                                     witnessposition+i,
                                                     GT_READMODE_FORWARD);
     if (qptr[i] != cc)

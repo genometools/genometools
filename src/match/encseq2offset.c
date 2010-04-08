@@ -64,12 +64,12 @@ unsigned long *gt_encseqtable2sequenceoffsets(unsigned long *totallength,
     {
       /* Random access */
       lastofprevious
-        = gt_encodedsequence_getencodedchar(suffixarraytable[idx - 1].encseq,
+        = gt_encodedsequence_get_encoded_char(suffixarraytable[idx - 1].encseq,
                                             tmplength-1,
                                             suffixarraytable[idx - 1].readmode);
       /* Random access */
       firstofcurrent
-        = gt_encodedsequence_getencodedchar(suffixarraytable[idx].encseq,
+        = gt_encodedsequence_get_encoded_char(suffixarraytable[idx].encseq,
                                             0,
                                             suffixarraytable[idx].readmode);
       if (ISSPECIAL(lastofprevious))

@@ -33,7 +33,7 @@
 #define GT_MAKECOMPL(CC) \
           (ISSPECIAL(CC) ? (CC) : (GtUchar) 3 - (CC))
 
-static inline GtUchar gt_encodedsequence_getencodedchar(
+static inline GtUchar gt_encodedsequence_get_encoded_char(
                                               const GtEncodedsequence *encseq,
                                               unsigned long pos,
                                               GtReadmode readmode)
@@ -52,14 +52,14 @@ static inline GtUchar gt_encodedsequence_getencodedchar(
 }
 
 #define gt_encodedsequence_extractencodedchar(ENCSEQ,POS,RM) \
-          gt_encodedsequence_getencodedchar(ENCSEQ,POS,RM)
+          gt_encodedsequence_get_encoded_char(ENCSEQ,POS,RM)
 
-#define gt_encodedsequence_getencodedcharnospecial(ENCSEQ,POS,RM) \
-          gt_encodedsequence_getencodedchar(ENCSEQ,POS,RM)
+#define gt_encodedsequence_get_encoded_charnospecial(ENCSEQ,POS,RM) \
+          gt_encodedsequence_get_encoded_char(ENCSEQ,POS,RM)
 
 #define gt_encodedsequence_sequentialgetencodedchar(ENCSEQ, \
                                                    ENCSEQSTATE,POS,READMODE) \
-          gt_encodedsequence_getencodedchar(ENCSEQ,POS,READMODE)
+          gt_encodedsequence_get_encoded_char(ENCSEQ,POS,READMODE)
                                              GtEncodedsequenceScanstate *esr);
 
 #endif
