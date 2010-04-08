@@ -583,7 +583,7 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
 
   gt_error_check(err);
   GT_INITARRAY(&state.occdistribution,Countwithpositions);
-  state.esrspace = gt_encodedsequence_scanstate_new();
+  state.esrspace = gt_encodedsequence_scanstate_new_empty();
   state.mersize = (unsigned long) mersize;
   state.encseq = gt_encseqSequentialsuffixarrayreader(ssar);
   alphasize = gt_alphabet_num_of_chars(

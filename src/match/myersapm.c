@@ -52,7 +52,7 @@ Myersonlineresources *gt_newMyersonlineresources(
   ALLOCASSIGNSPACE(mor->eqsvectorrev,NULL,unsigned long,numofchars);
   ALLOCASSIGNSPACE(mor->eqsvector,NULL,unsigned long,numofchars);
   mor->encseq = encseq;
-  mor->esr = gt_encodedsequence_scanstate_new();
+  mor->esr = gt_encodedsequence_scanstate_new_empty();
   gt_assert(numofchars <= GT_MAXALPHABETCHARACTER);
   mor->alphasize = numofchars;
   mor->totallength = gt_encodedsequence_totallength(encseq);

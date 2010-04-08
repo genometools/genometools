@@ -119,8 +119,8 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
                                  pmopt->maxpatternlen,
                                  suffixarray.encseq,
                                  err);
-    esr1 = gt_encodedsequence_scanstate_new();
-    esr2 = gt_encodedsequence_scanstate_new();
+    esr1 = gt_encodedsequence_scanstate_new_empty();
+    esr2 = gt_encodedsequence_scanstate_new_empty();
     alpha = gt_encodedsequence_alphabet(suffixarray.encseq);
     for (trial = 0; trial < pmopt->numofsamples; trial++)
     {

@@ -1036,7 +1036,7 @@ void gt_differencecover_sortsample(Differencecover *dcov,bool cmpcharbychar,
                              NULL,
                              NULL);
   dcov->multimappower = gt_bcktab_multimappower(dcov->bcktab);
-  dcov->esr = gt_encodedsequence_scanstate_new();
+  dcov->esr = gt_encodedsequence_scanstate_new_empty();
   dcov->maxcode = gt_bcktab_numofallcodes(dcov->bcktab) - 1;
   dcov->rangestobesorted = gt_inl_queue_new(MAX(16UL,GT_DIV2(dcov->maxcode)));
   gt_assert(dcov->bcktab != NULL);

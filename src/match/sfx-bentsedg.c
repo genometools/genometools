@@ -1906,8 +1906,8 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   if (gt_encodedsequence_has_fast_specialrangeenumerator(encseq)
         && gt_encodedsequence_has_specialranges(encseq))
   {
-    bsr->esr1 = gt_encodedsequence_scanstate_new();
-    bsr->esr2 = gt_encodedsequence_scanstate_new();
+    bsr->esr1 = gt_encodedsequence_scanstate_new_empty();
+    bsr->esr2 = gt_encodedsequence_scanstate_new_empty();
   } else
   {
     bsr->esr1 = bsr->esr2 = NULL;

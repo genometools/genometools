@@ -339,11 +339,10 @@ Compressedtable *gt_lcp9_manzini(Compressedtable *spacefortab,
      ranknext at position fillpos, the same cell is used for storing
      the determined lcp-value */
   /* exploit the fact, that pos + lcpvalue is monotone */
-  esr1 = gt_encodedsequence_scanstate_new();
-  gt_encodedsequence_scanstate_init(esr1,encseq,readmode,0);
+  esr1 = gt_encodedsequence_scanstate_new(encseq,readmode,0);
   cc1 = gt_encodedsequence_sequentialgetencodedchar(encseq,esr1,0,readmode);
   previouscc1pos = 0;
-  esr2 = gt_encodedsequence_scanstate_new();
+  esr2 = gt_encodedsequence_scanstate_new_empty();
   previouscc2pos = totallength;
   cc2 = 0;
   for (pos = 0; pos < totallength; pos++)

@@ -479,8 +479,8 @@ void gt_encodedsequence_extract_substring(const GtEncodedsequence *encseq,
   unsigned long pos;
 
   gt_assert(frompos <= topos && topos < encseq->totallength);
-  esr = gt_encodedsequence_scanstate_new();
-  gt_encodedsequence_scanstate_init(esr,encseq,GT_READMODE_FORWARD,frompos);
+  esr = gt_encodedsequence_scanstate_new(encseq,GT_READMODE_FORWARD,
+                                         frompos);
   for (pos=frompos, idx = 0; pos <= topos; pos++, idx++)
   {
     buffer[idx] = gt_encodedsequence_sequentialgetencodedchar(encseq,esr,pos,
@@ -1910,11 +1910,23 @@ static void binpreparenextrange(const GtEncodedsequence *encseq,
   }
 }
 
-GtEncodedsequenceScanstate *gt_encodedsequence_scanstate_new(void)
+GtEncodedsequenceScanstate *gt_encodedsequence_scanstate_new_empty(void)
 {
   GtEncodedsequenceScanstate *esr;
 
   esr = gt_malloc(sizeof(*esr));
+  return esr;
+}
+
+GtEncodedsequenceScanstate *gt_encodedsequence_scanstate_new(
+                                                const GtEncodedsequence *encseq,
+                                                GtReadmode readmode,
+                                                unsigned long startpos)
+{
+  GtEncodedsequenceScanstate *esr;
+
+  esr = gt_encodedsequence_scanstate_new_empty();
+  gt_encodedsequence_scanstate_init(esr, encseq, readmode, startpos);
   return esr;
 }
 
@@ -2134,7 +2146,7 @@ gt_specialrangeiterator_new(const GtEncodedsequence *encseq,
   } else
   {
     sri->pos = 0;
-    sri->esr = gt_encodedsequence_scanstate_new();
+    sri->esr = gt_encodedsequence_scanstate_new_empty();
     gt_encodedsequence_scanstate_initgeneric(sri->esr,
                                         encseq,
                                         moveforward,
@@ -2394,7 +2406,7 @@ static unsigned long *encseq2markpositions(const GtEncodedsequence *encseq)
   asp.spaceGtUlong =
                    gt_malloc(sizeof (*asp.spaceGtUlong) * asp.allocatedGtUlong);
   sri = gt_specialrangeiterator_new(encseq,true);
-  esr = gt_encodedsequence_scanstate_new();
+  esr = gt_encodedsequence_scanstate_new_empty();
   while (gt_specialrangeiterator_next(sri,&range))
   {
     addmarkpos(&asp,encseq,esr,&range);
@@ -2513,8 +2525,8 @@ void gt_encodedsequence_check_markpos(const GtEncodedsequence *encseq)
 
     markpos = encseq2markpositions(encseq);
     totallength = gt_encodedsequence_totallength(encseq);
-    esr = gt_encodedsequence_scanstate_new();
-    gt_encodedsequence_scanstate_init(esr,encseq,GT_READMODE_FORWARD,0);
+    esr = gt_encodedsequence_scanstate_new(encseq,GT_READMODE_FORWARD,0);
+
     for (pos=0; pos<totallength; pos++)
     {
       currentchar = gt_encodedsequence_sequentialgetencodedchar(encseq,esr,pos,
@@ -4769,7 +4781,7 @@ static void checkextractunitatpos(const GtEncodedsequence *encseq,
   GtEncodedsequenceScanstate *esr;
   unsigned long startpos;
 
-  esr = gt_encodedsequence_scanstate_new();
+  esr = gt_encodedsequence_scanstate_new_empty();
   startpos = fwd ? 0 : (encseq->totallength-1);
   gt_encodedsequence_scanstate_initgeneric(esr,encseq,fwd,startpos);
   while (true)
@@ -5518,7 +5530,7 @@ static void testscanatpos(const GtEncodedsequence *encseq,
   unsigned long trial;
 
   totallength = gt_encodedsequence_totallength(encseq);
-  esr = gt_encodedsequence_scanstate_new();
+  esr = gt_encodedsequence_scanstate_new_empty();
   runscanatpostrial(encseq,esr,readmode,0);
   runscanatpostrial(encseq,esr,readmode,totallength-1);
   for (trial = 0; trial < scantrials; trial++)
@@ -5540,8 +5552,8 @@ static void testmulticharactercompare(const GtEncodedsequence *encseq,
   bool fwd = GT_ISDIRREVERSE(readmode) ? false : true,
        complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
 
-  esr1 = gt_encodedsequence_scanstate_new();
-  esr2 = gt_encodedsequence_scanstate_new();
+  esr1 = gt_encodedsequence_scanstate_new_empty();
+  esr2 = gt_encodedsequence_scanstate_new_empty();
   totallength = gt_encodedsequence_totallength(encseq);
   (void) multicharactercompare_withtest(encseq,fwd,complement,esr1,0,esr2,0);
   (void) multicharactercompare_withtest(encseq,fwd,complement,esr1,0,esr2,
@@ -5587,8 +5599,7 @@ static int testfullscan(const GtStrArray *filenametab,
                                   gt_encodedsequence_alphabetsymbolmap(encseq));
   }
   if (!haserr) {
-    esr = gt_encodedsequence_scanstate_new();
-    gt_encodedsequence_scanstate_init(esr,encseq,readmode,0);
+    esr = gt_encodedsequence_scanstate_new(encseq,readmode,0);
     for (pos=0; /* Nothing */; pos++)
     {
       if (filenametab != NULL && readmode == GT_READMODE_FORWARD)

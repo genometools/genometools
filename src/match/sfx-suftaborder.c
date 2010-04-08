@@ -106,8 +106,8 @@ void gt_checkifprefixesareidentical(const char *filename,
   GtEncodedsequenceScanstate *esr1, *esr2;
   bool haserr = false;
 
-  esr1 = gt_encodedsequence_scanstate_new();
-  esr2 = gt_encodedsequence_scanstate_new();
+  esr1 = gt_encodedsequence_scanstate_new_empty();
+  esr2 = gt_encodedsequence_scanstate_new_empty();
   for (ptr = suftab + left; ptr < suftab + right; ptr++)
   {
     cmp = gt_encodedsequence_comparetwosuffixes(encseq,
@@ -176,8 +176,8 @@ void gt_checksortedsuffixes(const char *filename,
   int cmp;
 
   gt_assert(!specialsareequal || specialsareequalatdepth0);
-  esr1 = gt_encodedsequence_scanstate_new();
-  esr2 = gt_encodedsequence_scanstate_new();
+  esr1 = gt_encodedsequence_scanstate_new_empty();
+  esr2 = gt_encodedsequence_scanstate_new_empty();
   gt_assert(numberofsuffixes > 0);
   gt_assert(*suftab < totallength);
   for (ptr = suftab + 1; ptr < suftab + numberofsuffixes; ptr++)
@@ -275,8 +275,8 @@ void gt_checkentiresuftab(const char *filename,
     }
     gt_free(startposoccurs);
   }
-  esr1 = gt_encodedsequence_scanstate_new();
-  esr2 = gt_encodedsequence_scanstate_new();
+  esr1 = gt_encodedsequence_scanstate_new_empty();
+  esr2 = gt_encodedsequence_scanstate_new_empty();
   gt_assert(numberofsuffixes > 0);
   gt_assert(*suftab < totallength);
   for (ptr = suftab + 1; !haserr && ptr < suftab + numberofsuffixes; ptr++)

@@ -51,7 +51,7 @@ char* gt_ltrelement_get_sequence(unsigned long start, unsigned long end,
   gt_assert(seq && end >= start);
   gt_error_check(err);
 
-  ess = gt_encodedsequence_scanstate_new();
+  ess = gt_encodedsequence_scanstate_new_empty();
   alpha = gt_encodedsequence_alphabet(seq);
   len = end - start + 1;
 

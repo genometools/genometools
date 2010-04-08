@@ -598,7 +598,8 @@ gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
           numTries = MIN(MAX_NUM_CONTEXT_CHECKS,
                          MAX(2, seqLen/CONTEXT_INTERVAL));
         Symbol *contextBuf = gt_malloc(sizeof (Symbol) * MAX_CONTEXT_LEN);
-        GtEncodedsequenceScanstate *esr = gt_encodedsequence_scanstate_new();
+        GtEncodedsequenceScanstate *esr =
+                                       gt_encodedsequence_scanstate_new_empty();
         for (i = 0; i < numTries && retval == VERIFY_BWTSEQ_NO_ERROR; ++i)
         {
           unsigned long j, end, inSubSeqLen;

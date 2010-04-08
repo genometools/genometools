@@ -360,7 +360,7 @@ Rmnsufinfo *gt_newRmnsufinfo(unsigned long *presortedsuffixes,
   rmnsufinfo->itvfullinfo = NULL;
   rmnsufinfo->rangestobesorted = gt_inl_queue_new(MAX(16UL,GT_DIV2(maxcode)));
   rmnsufinfo->multimappower = gt_bcktab_multimappower(bcktab);
-  rmnsufinfo->esr = gt_encodedsequence_scanstate_new();
+  rmnsufinfo->esr = gt_encodedsequence_scanstate_new_empty();
   GT_INITARRAY(&rmnsufinfo->firstgeneration,RmsPairsuffixptr);
   rmnsufinfo->realspecialranges = gt_encodedsequence_realspecialranges(encseq);
   rmnsufinfo->filltable = gt_filllargestchartable(numofchars,prefixlength);

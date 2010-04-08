@@ -112,8 +112,7 @@ void gt_lookaheadsearchPSSM(const GtEncodedsequence *encseq,
   unsigned long totallength = gt_encodedsequence_totallength(encseq);
   GtUchar *buffer;
 
-  esr = gt_encodedsequence_scanstate_new();
-  gt_encodedsequence_scanstate_init(esr,encseq,GT_READMODE_FORWARD,0);
+  esr = gt_encodedsequence_scanstate_new(encseq,GT_READMODE_FORWARD,0);
   ALLOCASSIGNSPACE(buffer,NULL,GtUchar,prof->dimension);
   firstpos = bufsize = 0;
   for (pos=0; pos < totallength; pos++)

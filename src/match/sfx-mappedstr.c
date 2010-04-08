@@ -443,8 +443,7 @@ void getencseqkmers(
   totallength = gt_encodedsequence_totallength(encseq);
   numofchars = gt_alphabet_num_of_chars(gt_encodedsequence_alphabet(encseq));
   initstreamstate(&spwp,numofchars,kmersize);
-  esr = gt_encodedsequence_scanstate_new();
-  gt_encodedsequence_scanstate_init(esr,encseq,readmode,0);
+  esr = gt_encodedsequence_scanstate_new(encseq,readmode,0);
   for (currentposition = 0; currentposition<totallength; currentposition++)
   {
     charcode = gt_encodedsequence_sequentialgetencodedchar(encseq,esr,

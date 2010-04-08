@@ -223,7 +223,7 @@ static MMsearchiterator *newmmsearchiterator_generic(
   mmsi->lcpitv.right = rightbound;
   mmsi->lcpitv.offset = itvoffset;
   mmsi->suftab = suftab;
-  mmsi->esr = gt_encodedsequence_scanstate_new();
+  mmsi->esr = gt_encodedsequence_scanstate_new_empty();
   if (!mmsearch(dbencseq,mmsi->esr,suftab,readmode,&mmsi->lcpitv,
                 querysubstring,minmatchlength))
   {

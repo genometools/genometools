@@ -82,8 +82,7 @@ void gt_encseq2symbolstring(FILE *fpout,
   GtEncodedsequenceScanstate *esr;
   const GtAlphabet *alpha;
 
-  esr = gt_encodedsequence_scanstate_new();
-  gt_encodedsequence_scanstate_init(esr,encseq,readmode,start);
+  esr = gt_encodedsequence_scanstate_new(encseq,readmode,start);
   gt_assert(width > 0);
   lastpos = start + wlen - 1;
   alpha = gt_encodedsequence_alphabet(encseq);

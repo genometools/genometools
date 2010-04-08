@@ -34,8 +34,8 @@ Lcpvalueiterator *gt_newLcpvalueiterator(const GtEncodedsequence *encseq,
   Lcpvalueiterator *lvi;
 
   ALLOCASSIGNSPACE(lvi,NULL,Lcpvalueiterator,1);
-  lvi->esr1 = gt_encodedsequence_scanstate_new();
-  lvi->esr2 = gt_encodedsequence_scanstate_new();
+  lvi->esr1 = gt_encodedsequence_scanstate_new_empty();
+  lvi->esr2 = gt_encodedsequence_scanstate_new_empty();
   lvi->encseq = encseq;
   lvi->relpos = 0;
   lvi->readmode = readmode;

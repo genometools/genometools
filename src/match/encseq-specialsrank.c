@@ -55,7 +55,7 @@ allocSpecialsRankTable(const GtEncodedsequence *encseq,
   rankTable->sampleInterval = ((unsigned long)1) << sampleIntervalLog2;
   rankTable->readmode = readmode;
   rankTable->numSamples = numSamples;
-  rankTable->scanState = gt_encodedsequence_scanstate_new();
+  rankTable->scanState = gt_encodedsequence_scanstate_new_empty();
   ranker->encseq = encseq;
   ranker->rankFunc = specialsRankFromSampleTable;
   return ranker;

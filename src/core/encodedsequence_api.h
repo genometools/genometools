@@ -153,7 +153,13 @@ const GtStrArray*  gt_encodedsequence_filenames(
 void               gt_encodedsequence_delete(GtEncodedsequence *encseq);
 
 /* TODO: please document me */
-GtEncodedsequenceScanstate* gt_encodedsequence_scanstate_new(void);
+GtEncodedsequenceScanstate* gt_encodedsequence_scanstate_new_empty(void);
+
+/* TODO: please document me */
+GtEncodedsequenceScanstate* gt_encodedsequence_scanstate_new(
+                                                const GtEncodedsequence *encseq,
+                                                GtReadmode readmode,
+                                                unsigned long startpos);
 
 /* TODO: please document me */
 void                        gt_encodedsequence_scanstate_init(
