@@ -149,7 +149,8 @@ int gt_sequence_buffer_advance(GtSequenceBuffer *sb, GtError *err)
   return sb->c_class->advance(sb, err);
 }
 
-int gt_sequence_buffer_next(GtSequenceBuffer *sb, GtUchar *val, GtError *err)
+inline int gt_sequence_buffer_next(GtSequenceBuffer *sb, GtUchar *val,
+                                   GtError *err)
 {
   GtSequenceBufferMembers *pvt;
   pvt = sb->pvt;
