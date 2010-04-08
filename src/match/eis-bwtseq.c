@@ -614,7 +614,7 @@ gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
                                        suffixArray.readmode, start);
           for (j = 0; j < inSubSeqLen; ++j)
           {
-            Symbol symRef = gt_encodedsequence_sequentialgetencodedchar(
+            Symbol symRef = gt_encodedsequence_get_encoded_char_sequential(
                                                      suffixArray.encseq, esr,
                                                      start + j,
                                                      suffixArray.readmode);

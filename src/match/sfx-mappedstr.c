@@ -446,7 +446,7 @@ void getencseqkmers(
   esr = gt_encodedsequence_scanstate_new(encseq,readmode,0);
   for (currentposition = 0; currentposition<totallength; currentposition++)
   {
-    charcode = gt_encodedsequence_sequentialgetencodedchar(encseq,esr,
+    charcode = gt_encodedsequence_get_encoded_char_sequential(encseq,esr,
                                                            currentposition,
                                                            readmode);
     GT_CHECKENCCHAR(charcode,encseq,currentposition,readmode);

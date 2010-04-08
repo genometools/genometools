@@ -92,7 +92,8 @@ static GtUchar accessquery(int line,const Queryrep *queryrep,
             retcode = -1;\
             break;\
           }\
-          currentdbchar = gt_encodedsequence_sequentialgetencodedchar(dbencseq,\
+          currentdbchar = gt_encodedsequence_get_encoded_char_sequential(\
+                                                            dbencseq,\
                                                             esr,sidx,readmode);\
           currentquerychar = accessquery(__LINE__,querysubstring->queryrep,\
                                          querysubstring->offset + (LCPLEN));\
@@ -346,7 +347,7 @@ static unsigned long extendright(const GtEncodedsequence *dbencseq,
        querypos < querysubstring->queryrep->length;
        dbpos++, querypos++)
   {
-    dbchar = gt_encodedsequence_sequentialgetencodedchar(dbencseq,esr,dbpos,
+    dbchar = gt_encodedsequence_get_encoded_char_sequential(dbencseq,esr,dbpos,
                                                          readmode);
     if (ISSPECIAL(dbchar) ||
         dbchar != accessquery(__LINE__,querysubstring->queryrep,querypos))

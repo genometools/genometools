@@ -291,7 +291,7 @@ static unsigned long cmpcharbychargetlcp(GtUchar *mm_oldsuffix,
   {
     if (isleftofboundary(leafpos,lcp,blindtrie))
     {
-      cc1 = gt_encodedsequence_sequentialgetencodedchar(blindtrie->encseq,
+      cc1 = gt_encodedsequence_get_encoded_char_sequential(blindtrie->encseq,
                                                         blindtrie->esr1,
                                                         leafpos+lcp,
                                                         blindtrie->readmode);
@@ -305,7 +305,7 @@ static unsigned long cmpcharbychargetlcp(GtUchar *mm_oldsuffix,
     }
     if (isleftofboundary(currentstartpos,lcp,blindtrie))
     {
-      cc2 = gt_encodedsequence_sequentialgetencodedchar(blindtrie->encseq,
+      cc2 = gt_encodedsequence_get_encoded_char_sequential(blindtrie->encseq,
                                                         blindtrie->esr2,
                                                         currentstartpos+lcp,
                                                         blindtrie->readmode);

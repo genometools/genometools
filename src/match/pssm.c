@@ -117,7 +117,7 @@ void gt_lookaheadsearchPSSM(const GtEncodedsequence *encseq,
   firstpos = bufsize = 0;
   for (pos=0; pos < totallength; pos++)
   {
-    currentchar = gt_encodedsequence_sequentialgetencodedchar(encseq,esr,pos,
+    currentchar = gt_encodedsequence_get_encoded_char_sequential(encseq,esr,pos,
                                                            GT_READMODE_FORWARD);
     if (ISSPECIAL(currentchar))
     {

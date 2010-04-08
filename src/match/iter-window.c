@@ -64,7 +64,7 @@ const GtUchar *gt_windowiterator_next(unsigned long *currentpos,
 
   while (wit->currentpos < wit->endpos)
   {
-    currentchar = gt_encodedsequence_sequentialgetencodedchar(wit->encseq,
+    currentchar = gt_encodedsequence_get_encoded_char_sequential(wit->encseq,
                                                            wit->esr,
                                                            wit->currentpos,
                                                            GT_READMODE_FORWARD);

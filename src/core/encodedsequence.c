@@ -387,7 +387,7 @@ struct GtEncodedsequenceScanstate
 static uint64_t countgt_encodedsequence_get_encoded_char = 0;
 #endif
 
-GtUchar gt_encodedsequence_sequentialgetencodedchar(
+GtUchar gt_encodedsequence_get_encoded_char_sequential(
                                                 const GtEncodedsequence *encseq,
                                                 GtEncodedsequenceScanstate *esr,
                                                 unsigned long pos,
@@ -483,7 +483,7 @@ void gt_encodedsequence_extract_substring(const GtEncodedsequence *encseq,
                                          frompos);
   for (pos=frompos, idx = 0; pos <= topos; pos++, idx++)
   {
-    buffer[idx] = gt_encodedsequence_sequentialgetencodedchar(encseq,esr,pos,
+    buffer[idx] = gt_encodedsequence_get_encoded_char_sequential(encseq,esr,pos,
                                                            GT_READMODE_FORWARD);
   }
   gt_encodedsequence_scanstate_delete(esr);
@@ -2382,7 +2382,7 @@ static void addmarkpos(GtArrayGtUlong *asp,
                                     seqrange->start);
   for (pos=seqrange->start; pos<seqrange->end; pos++)
   {
-    currentchar = gt_encodedsequence_sequentialgetencodedchar(encseq,esr,pos,
+    currentchar = gt_encodedsequence_get_encoded_char_sequential(encseq,esr,pos,
                                                            GT_READMODE_FORWARD);
     gt_assert(ISSPECIAL(currentchar));
     if (currentchar == (GtUchar) SEPARATOR)
@@ -2529,7 +2529,9 @@ void gt_encodedsequence_check_markpos(const GtEncodedsequence *encseq)
 
     for (pos=0; pos<totallength; pos++)
     {
-      currentchar = gt_encodedsequence_sequentialgetencodedchar(encseq,esr,pos,
+      currentchar = gt_encodedsequence_get_encoded_char_sequential(encseq,
+                                                           esr,
+                                                           pos,
                                                            GT_READMODE_FORWARD);
       if (currentchar == (GtUchar) SEPARATOR)
       {
@@ -4957,7 +4959,8 @@ GtCodetype gt_encodedsequence_extractprefixcode(unsigned int *unitsnotspecial,
   gt_encodedsequence_scanstate_init(esr,encseq,readmode,frompos);
   for (pos=frompos; pos < stoppos; pos++)
   {
-    cc = gt_encodedsequence_sequentialgetencodedchar(encseq,esr,pos,readmode);
+    cc = gt_encodedsequence_get_encoded_char_sequential(encseq,esr,pos,
+                                                        readmode);
     if (ISNOTSPECIAL(cc))
     {
       code += multimappower[*unitsnotspecial][cc];
@@ -5068,7 +5071,7 @@ int gt_encodedsequence_comparetwosuffixes(const GtEncodedsequence *encseq,
     }
     if (esr1 != NULL)
     {
-      cc1 = gt_encodedsequence_sequentialgetencodedchar(encseq,esr1,pos1,
+      cc1 = gt_encodedsequence_get_encoded_char_sequential(encseq,esr1,pos1,
                                                         readmode);
       GT_CHECKENCCHAR(cc1,encseq,pos1,readmode);
     } else
@@ -5077,7 +5080,7 @@ int gt_encodedsequence_comparetwosuffixes(const GtEncodedsequence *encseq,
     }
     if (esr2 != NULL)
     {
-      cc2 = gt_encodedsequence_sequentialgetencodedchar(encseq,esr2,pos2,
+      cc2 = gt_encodedsequence_get_encoded_char_sequential(encseq,esr2,pos2,
                                                         readmode);
       GT_CHECKENCCHAR(cc2,encseq,pos2,readmode);
     } else
@@ -5503,7 +5506,8 @@ static void runscanatpostrial(const GtEncodedsequence *encseq,
   {
     /* Random access */
     ccra = gt_encodedsequence_get_encoded_char(encseq,pos,readmode);
-    ccsr = gt_encodedsequence_sequentialgetencodedchar(encseq,esr,pos,readmode);
+    ccsr = gt_encodedsequence_get_encoded_char_sequential(encseq,esr,pos,
+                                                          readmode);
     if (ccra != ccsr)
     {
       fprintf(stderr,"startpos = %lu"
@@ -5638,7 +5642,7 @@ static int testfullscan(const GtStrArray *filenametab,
           break;
         }
       }
-      ccsr = gt_encodedsequence_sequentialgetencodedchar(encseq,esr,pos,
+      ccsr = gt_encodedsequence_get_encoded_char_sequential(encseq,esr,pos,
                                                          readmode);
       if (ccra != ccsr)
       {

@@ -88,7 +88,7 @@ void gt_encseq2symbolstring(FILE *fpout,
   alpha = gt_encodedsequence_alphabet(encseq);
   for (idx = start, j = 0; /* Nothing */ ; idx++)
   {
-    currentchar = gt_encodedsequence_sequentialgetencodedchar(encseq,esr,idx,
+    currentchar = gt_encodedsequence_get_encoded_char_sequential(encseq,esr,idx,
                                                               readmode);
     if (currentchar == (GtUchar) SEPARATOR)
     {

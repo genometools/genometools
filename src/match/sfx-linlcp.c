@@ -340,7 +340,7 @@ Compressedtable *gt_lcp9_manzini(Compressedtable *spacefortab,
      the determined lcp-value */
   /* exploit the fact, that pos + lcpvalue is monotone */
   esr1 = gt_encodedsequence_scanstate_new(encseq,readmode,0);
-  cc1 = gt_encodedsequence_sequentialgetencodedchar(encseq,esr1,0,readmode);
+  cc1 = gt_encodedsequence_get_encoded_char_sequential(encseq,esr1,0,readmode);
   previouscc1pos = 0;
   esr2 = gt_encodedsequence_scanstate_new_empty();
   previouscc2pos = totallength;
@@ -361,7 +361,7 @@ Compressedtable *gt_lcp9_manzini(Compressedtable *spacefortab,
         while (previouscc1pos < pos + lcpvalue)
         {
           previouscc1pos++;
-          cc1 = gt_encodedsequence_sequentialgetencodedchar(encseq,
+          cc1 = gt_encodedsequence_get_encoded_char_sequential(encseq,
                                                             esr1,
                                                             previouscc1pos,
                                                             readmode);
@@ -377,7 +377,7 @@ Compressedtable *gt_lcp9_manzini(Compressedtable *spacefortab,
           gt_encodedsequence_scanstate_init(esr2,encseq,
                                        readmode,
                                        previouscc2pos);
-          cc2 = gt_encodedsequence_sequentialgetencodedchar(encseq,
+          cc2 = gt_encodedsequence_get_encoded_char_sequential(encseq,
                                                             esr2,previouscc2pos,
                                                             readmode);
         } else
@@ -385,7 +385,7 @@ Compressedtable *gt_lcp9_manzini(Compressedtable *spacefortab,
           if (previousstart+lcpvalue == previouscc2pos+1)
           {
             previouscc2pos++;
-            cc2 = gt_encodedsequence_sequentialgetencodedchar(encseq,
+            cc2 = gt_encodedsequence_get_encoded_char_sequential(encseq,
                                                               esr2,
                                                               previouscc2pos,
                                                               readmode);

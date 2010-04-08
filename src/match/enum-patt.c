@@ -114,7 +114,7 @@ const GtUchar *gt_nextEnumpatterniterator(unsigned long *patternlen,
                                     start);
   for (j=0; j<*patternlen; j++)
   {
-    cc = gt_encodedsequence_sequentialgetencodedchar(epi->sampleencseq,
+    cc = gt_encodedsequence_get_encoded_char_sequential(epi->sampleencseq,
                                                      epi->esr,
                                                      start+j,
                                                      GT_READMODE_FORWARD);

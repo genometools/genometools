@@ -177,9 +177,9 @@ specialsRankFromSampleTable(const SpecialsRankLookup *ranker, unsigned long pos)
     {
       gt_encodedsequence_scanstate_init(esr, encseq, readmode, samplePos);
       do {
-        if (ISSPECIAL(gt_encodedsequence_sequentialgetencodedchar(encseq, esr,
-                                                                  samplePos++,
-                                                                  readmode)))
+        if (ISSPECIAL(gt_encodedsequence_get_encoded_char_sequential(encseq,esr,
+                                                                    samplePos++,
+                                                                    readmode)))
           ++rankCount;
       } while (samplePos < encseqQueryMax);
     }

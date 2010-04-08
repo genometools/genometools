@@ -62,7 +62,7 @@ char* gt_ltrelement_get_sequence(unsigned long start, unsigned long end,
                                seqinfo->seqstartpos + start);
   for (i=0;i<len;i++)
   {
-    symbolstring[i] = gt_encodedsequence_sequentialgetencodedchar(seq, ess,
+    symbolstring[i] = gt_encodedsequence_get_encoded_char_sequential(seq, ess,
                                                seqinfo->seqstartpos + start + i,
                                                GT_READMODE_FORWARD);
   }

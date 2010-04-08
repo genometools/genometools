@@ -106,7 +106,7 @@ void gt_edistmyersbitvectorAPM(Myersonlineresources *mor,
   match.alignment = NULL;
   for (pos = 0; pos < mor->totallength; pos++)
   {
-    cc = gt_encodedsequence_sequentialgetencodedchar(mor->encseq,
+    cc = gt_encodedsequence_get_encoded_char_sequential(mor->encseq,
                                                      mor->esr,
                                                      pos,
                                                      readmode);
