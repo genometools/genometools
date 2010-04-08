@@ -105,7 +105,7 @@ GtUchar            gt_encodedsequence_extract_encoded_char(
                                                 GtReadmode readmode);
 
 /* TODO: please document me */
-GtUchar            gt_encodedsequence_get_encoded_charnospecial(
+GtUchar            gt_encodedsequence_get_encoded_char_nospecial(
                                                 const GtEncodedsequence *encseq,
                                                 unsigned long pos,
                                                 GtReadmode readmode);
