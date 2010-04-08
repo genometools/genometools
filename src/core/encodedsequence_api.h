@@ -54,7 +54,8 @@ GtEncodedsequence* gt_encodedsequence_new_from_files(
                                                     GtError *err);
 
 /* Returns a new <GtEncodedsequence> created from a set of preprocessed index
-   files as specified in the option object <o>. Returns NULL on error. */
+   files as specified in the option object <o>. Returns NULL on error.
+   TODO Stefan: document 'withrange'. Can this go into the options object? */
 GtEncodedsequence* gt_encodedsequence_new_from_index(bool withrange,
                                                     GtEncodedsequenceOptions *o,
                                                     GtError *err);
@@ -64,7 +65,8 @@ GtEncodedsequence* gt_encodedsequence_new_from_index(bool withrange,
    and <len2>, respectively. Returns NULL on error.
    <alpha> is the <GtAlphabet> used to encode the sequence. The parameter
    <logger> is used to pass a <GtLogger> specifying a log target.
-   TODO: why are there two sequences? document 'withrange'! */
+   TODO: why are there two sequences? can't the concatenation be
+         done on the caller side? document 'withrange'! */
 GtEncodedsequence* gt_encodedsequence_new_from_plain(bool withrange,
                                                      const GtUchar *seq1,
                                                      unsigned long len1,
@@ -152,30 +154,35 @@ const GtStrArray*  gt_encodedsequence_filenames(
 /* Deletes <encseq> and frees all associated space. */
 void               gt_encodedsequence_delete(GtEncodedsequence *encseq);
 
-/* TODO: please document me */
+/* Returns a new object encapsulating the current state of a sequential
+   <GtEncodedsequence> scan. */
 GtEncodedsequenceScanstate* gt_encodedsequence_scanstate_new_empty(void);
 
-/* TODO: please document me */
+/* Returns a new object encapsulating the current state of a sequential
+   <GtEncodedsequence> scan, optimising access to <encseq> starting at position
+   <startpos> in the direction specified in <readmode>. */
 GtEncodedsequenceScanstate* gt_encodedsequence_scanstate_new(
                                                 const GtEncodedsequence *encseq,
                                                 GtReadmode readmode,
                                                 unsigned long startpos);
 
-/* TODO: please document me */
+/* Reinitializes the given <esr> with the values as described in
+   <gt_encodedsequence_scanstate_new()>. */
 void                        gt_encodedsequence_scanstate_init(
                                                 GtEncodedsequenceScanstate *esr,
                                                 const GtEncodedsequence *encseq,
                                                 GtReadmode readmode,
                                                 unsigned long startpos);
 
-/* TODO: please document me */
+/* TODO: is this function really necessary? it is only called in one place
+         and its behaviour is not apparent to the typical user. */
 void                        gt_encodedsequence_scanstate_initgeneric(
                                                 GtEncodedsequenceScanstate *esr,
                                                 const GtEncodedsequence *encseq,
                                                 bool moveforward,
                                                 unsigned long startpos);
 
-/* TODO: please document me */
+/* Deletes <esr>, freeing all associated space. */
 void                        gt_encodedsequence_scanstate_delete(
                                                GtEncodedsequenceScanstate *esr);
 
