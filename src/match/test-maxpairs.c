@@ -20,6 +20,7 @@
 #include "core/error.h"
 #include "core/str.h"
 #include "core/logger.h"
+#include "core/yarandom.h"
 
 int gt_testmaxpairs(GT_UNUSED const GtStr *indexname,
                  GT_UNUSED unsigned long samples,
@@ -178,7 +179,7 @@ static unsigned long samplesubstring(GtUchar *seqspace,
   unsigned long start, totallength;
 
   totallength = gt_encodedsequence_totallength(encseq);
-  start = (unsigned long) (drand48() * (double) totallength);
+  start = (unsigned long) (random() % totallength);
   if (start + substringlength > totallength)
   {
     substringlength = totallength - start;
@@ -395,7 +396,6 @@ int gt_testmaxpairs(const GtStr *indexname,
   }
   if (!haserr)
   {
-    srand48(42349421);
     if (substringlength > totallength/2)
     {
       substringlength = totallength/2;

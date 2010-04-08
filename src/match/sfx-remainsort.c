@@ -26,11 +26,11 @@
 #include "core/qsort_r.h"
 #include "core/hashmap-generic.h"
 #include "core/minmax.h"
-
 #include "core/encodedsequence.h"
 #include "core/intbits.h"
 #include "bcktab.h"
 #include "compressedtab.h"
+#include "queue-inline.h"
 #include "sfx-remainsort.h"
 #include "sfx-linlcp.h"
 #include "stamp.h"
@@ -44,32 +44,28 @@ typedef struct
   unsigned int unitsnotspecial;
   unsigned long rank,
          suffixstart;
-} Itvfullentry;
+} RmsItvfullentry;
 
 typedef struct
 {
   unsigned long key,
          suffixstart;
-} Itventry;
+} RmsItventry;
 
 typedef struct
 {
   unsigned long left,
          right,
          base;
-} Pairsuffixptrwithbase;
-
-typedef Pairsuffixptrwithbase Inl_Queueelem;
-
-#include "queue-inline.h"
+} RmsPairsuffixptrwithbase;
 
 typedef struct
 {
   unsigned long left,
          right;
-} Pairsuffixptr;
+} RmsPairsuffixptr;
 
-GT_DECLAREARRAYSTRUCT(Pairsuffixptr);
+GT_DECLAREARRAYSTRUCT(RmsPairsuffixptr);
 
 typedef struct
 {
@@ -80,7 +76,7 @@ typedef struct
                 totalwidth,
                 maxwidth;
   bool defined;
-} Firstwithnewdepth;
+} RmsFirstwithnewdepth;
 
 typedef struct
 {
@@ -109,7 +105,7 @@ typedef struct
   unsigned long maxvalue;
   GtHashtable *hashstore;
 #ifdef ITVDEBUG
-  Bitsequence *is_inversesuftab_set;
+  Bitsequence *is_rms_inversesuftab_set;
 #endif
 } Inversesuftab_rel;
 
@@ -126,12 +122,12 @@ struct Rmnsufinfo
   unsigned long allocateditvinfo,
                 currentqueuesize,
                 maxqueuesize;
-  Itventry *itvinfo;
-  Itvfullentry *itvfullinfo;
-  GtArrayPairsuffixptr firstgeneration;
+  RmsItventry *itvinfo;
+  RmsItvfullentry *itvfullinfo;
+  GtArrayRmsPairsuffixptr firstgeneration;
   unsigned long firstgenerationtotalwidth,
                 firstgenerationcount;
-  Firstwithnewdepth firstwithnewdepth;
+  RmsFirstwithnewdepth firstwithnewdepth;
   GtEncodedsequenceScanstate *esr;
   unsigned long longestrel;
   unsigned int prefixlength,
@@ -356,7 +352,7 @@ Rmnsufinfo *gt_newRmnsufinfo(unsigned long *presortedsuffixes,
 #ifdef ITVDEBUG
   if (!rmnsufinfo->absoluteinversesuftab)
   {
-    INITBITTAB(rmnsufinfo->itvrel.is_inversesuftab_set,
+    INITBITTAB(rmnsufinfo->itvrel.is_rms_inversesuftab_set,
                rmnsufinfo->totallength+1);
   }
 #endif
@@ -365,7 +361,7 @@ Rmnsufinfo *gt_newRmnsufinfo(unsigned long *presortedsuffixes,
   rmnsufinfo->rangestobesorted = gt_inl_queue_new(MAX(16UL,GT_DIV2(maxcode)));
   rmnsufinfo->multimappower = gt_bcktab_multimappower(bcktab);
   rmnsufinfo->esr = gt_encodedsequence_scanstate_new();
-  GT_INITARRAY(&rmnsufinfo->firstgeneration,Pairsuffixptr);
+  GT_INITARRAY(&rmnsufinfo->firstgeneration,RmsPairsuffixptr);
   rmnsufinfo->realspecialranges = gt_encodedsequence_realspecialranges(encseq);
   rmnsufinfo->filltable = gt_filllargestchartable(numofchars,prefixlength);
 #ifdef Lowerboundwithrank
@@ -419,7 +415,7 @@ static unsigned long nextsuftabentry_get(Sortblock *sortblock)
   return value;
 }
 
-static void inversesuftab_set(Rmnsufinfo *rmnsufinfo,
+static void rms_inversesuftab_set(Rmnsufinfo *rmnsufinfo,
                               unsigned long idx,
                               unsigned long value)
 {
@@ -494,7 +490,7 @@ static void inversesuftabrel_set(Rmnsufinfo *rmnsufinfo,unsigned long idx,
     compressedtable_update(rmnsufinfo->itvrel.offset,idx,basedist);
   }
 #ifdef ITVDEBUG
-  SETIBIT(rmnsufinfo->itvrel.is_inversesuftab_set,idx);
+  SETIBIT(rmnsufinfo->itvrel.is_rms_inversesuftab_set,idx);
 #endif
   if (idx == 0)
   {
@@ -535,7 +531,7 @@ static unsigned long gt_frompos2rank(const Lowerboundwithrank *leftptr,
 }
 #endif
 
-static unsigned long inversesuftab_get(const Rmnsufinfo *rmnsufinfo,
+static unsigned long rms_inversesuftab_get(const Rmnsufinfo *rmnsufinfo,
                                        unsigned long startpos)
 {
   gt_assert(startpos <= rmnsufinfo->totallength);
@@ -548,7 +544,7 @@ static unsigned long inversesuftab_get(const Rmnsufinfo *rmnsufinfo,
   return compressedtable_get(rmnsufinfo->inversesuftab,startpos);
 }
 
-static void inversesuftabrel_get(Itvfullentry *itvfullentry,
+static void inversesuftabrel_get(RmsItvfullentry *itvfullentry,
                                  const Rmnsufinfo *rmnsufinfo,
                                  unsigned long startpos)
 {
@@ -594,7 +590,8 @@ static void inversesuftabrel_get(Itvfullentry *itvfullentry,
     if (itvfullentry->unitsnotspecial == rmnsufinfo->prefixlength)
     {
 #ifdef ITVDEBUG
-      gt_assert(ISIBITSET(rmnsufinfo->itvrel.is_inversesuftab_set,startpos));
+      gt_assert(ISIBITSET(rmnsufinfo->itvrel.is_rms_inversesuftab_set,
+                          startpos));
 #endif
       itvfullentry->rank
         = compressedtable_get(rmnsufinfo->itvrel.offset,startpos);
@@ -622,13 +619,14 @@ static void inversesuftabrel_get(Itvfullentry *itvfullentry,
   }
 }
 
-static void initinversesuftabspecials(Rmnsufinfo *rmnsufinfo)
+static void rms_initinversesuftabspecials(Rmnsufinfo *rmnsufinfo)
 {
   unsigned long idx;
 
   rmnsufinfo->inversesuftab = compressedtable_new(rmnsufinfo->totallength+1,
                                                   rmnsufinfo->totallength);
-  inversesuftab_set(rmnsufinfo,rmnsufinfo->totallength,rmnsufinfo->totallength);
+  rms_inversesuftab_set(rmnsufinfo,rmnsufinfo->totallength,
+                        rmnsufinfo->totallength);
   if (gt_encodedsequence_has_specialranges(rmnsufinfo->encseq))
   {
     GtSpecialrangeiterator *sri;
@@ -643,7 +641,7 @@ static void initinversesuftabspecials(Rmnsufinfo *rmnsufinfo)
     {
       for (idx = range.start; idx < range.end; idx++)
       {
-        inversesuftab_set(rmnsufinfo,idx,specialidx);
+        rms_inversesuftab_set(rmnsufinfo,idx,specialidx);
         specialidx++;
       }
     }
@@ -673,7 +671,7 @@ static void updatewidth (Rmnsufinfo *rmnsufinfo,unsigned long width,
   }
 }
 
-static void initinversesuftabnonspecialsadjust(Rmnsufinfo *rmnsufinfo)
+static void rms_initinversesuftabnonspecialsadjust(Rmnsufinfo *rmnsufinfo)
 {
   GtCodetype code;
   unsigned int rightchar;
@@ -696,7 +694,7 @@ static void initinversesuftabnonspecialsadjust(Rmnsufinfo *rmnsufinfo)
     for (/* Nothing */; idx < bucketspec.left; idx++)
     {
       startpos = rmnsufinfo->sortblock.sortspace[idx];
-      inversesuftab_set(rmnsufinfo,startpos,idx);
+      rms_inversesuftab_set(rmnsufinfo,startpos,idx);
     }
     updatewidth (rmnsufinfo,bucketspec.nonspecialsinbucket,
                  (unsigned long) rmnsufinfo->prefixlength);
@@ -704,17 +702,17 @@ static void initinversesuftabnonspecialsadjust(Rmnsufinfo *rmnsufinfo)
          idx < bucketspec.left+bucketspec.nonspecialsinbucket; idx++)
     {
       startpos = rmnsufinfo->sortblock.sortspace[idx];
-      inversesuftab_set(rmnsufinfo,startpos,bucketspec.left);
+      rms_inversesuftab_set(rmnsufinfo,startpos,bucketspec.left);
     }
   }
   for (/* Nothing */; idx < rmnsufinfo->partwidth; idx++)
   {
     startpos = rmnsufinfo->sortblock.sortspace[idx];
-    inversesuftab_set(rmnsufinfo,startpos,idx);
+    rms_inversesuftab_set(rmnsufinfo,startpos,idx);
   }
 }
 
-static void initinversesuftabnonspecialsadjuststream(Rmnsufinfo *rmnsufinfo)
+static void rms_initinversesuftabnonspecialsadjuststream(Rmnsufinfo *rmnsufinfo)
 {
   GtCodetype code;
   unsigned int rightchar;
@@ -742,7 +740,7 @@ static void initinversesuftabnonspecialsadjuststream(Rmnsufinfo *rmnsufinfo)
       startpos = nextsuftabentry_get(&rmnsufinfo->sortblock);
       if (rmnsufinfo->absoluteinversesuftab)
       {
-        inversesuftab_set(rmnsufinfo,startpos,idx);
+        rms_inversesuftab_set(rmnsufinfo,startpos,idx);
       }
     }
     updatewidth (rmnsufinfo,bucketspec.nonspecialsinbucket,
@@ -753,7 +751,7 @@ static void initinversesuftabnonspecialsadjuststream(Rmnsufinfo *rmnsufinfo)
       startpos = nextsuftabentry_get(&rmnsufinfo->sortblock);
       if (rmnsufinfo->absoluteinversesuftab)
       {
-        inversesuftab_set(rmnsufinfo,startpos,bucketspec.left);
+        rms_inversesuftab_set(rmnsufinfo,startpos,bucketspec.left);
       } else
       {
         inversesuftabrel_set(rmnsufinfo,startpos,bucketspec.left,
@@ -768,20 +766,20 @@ static void initinversesuftabnonspecialsadjuststream(Rmnsufinfo *rmnsufinfo)
     startpos = nextsuftabentry_get(&rmnsufinfo->sortblock);
     if (rmnsufinfo->absoluteinversesuftab)
     {
-      inversesuftab_set(rmnsufinfo,startpos,idx);
+      rms_inversesuftab_set(rmnsufinfo,startpos,idx);
     }
   }
   gt_fa_xmunmap(rmnsufinfo->sortblock.mappedsection);
   rmnsufinfo->sortblock.mappedsection = NULL;
 }
 
-static void initinversesuftabnonspecials(Rmnsufinfo *rmnsufinfo)
+static void rms_initinversesuftabnonspecials(Rmnsufinfo *rmnsufinfo)
 {
   unsigned long idx;
 
   for (idx=0; idx < rmnsufinfo->partwidth; idx++)
   {
-    inversesuftab_set(rmnsufinfo,rmnsufinfo->sortblock.sortspace[idx],idx);
+    rms_inversesuftab_set(rmnsufinfo,rmnsufinfo->sortblock.sortspace[idx],idx);
   }
 }
 
@@ -790,18 +788,18 @@ void gt_rmnsufinfo_addunsortedrange(Rmnsufinfo *rmnsufinfo,
                                  unsigned long right,
                                  unsigned long depth)
 {
-  Pairsuffixptr *ptr;
+  RmsPairsuffixptr *ptr;
 
   updatewidth (rmnsufinfo,(unsigned long) (right - left + 1),depth);
-  GT_GETNEXTFREEINARRAY(ptr,&rmnsufinfo->firstgeneration,Pairsuffixptr,1024);
+  GT_GETNEXTFREEINARRAY(ptr,&rmnsufinfo->firstgeneration,RmsPairsuffixptr,1024);
   ptr->left = left;
   ptr->right = right;
 }
 
-static int compareitvfull(const void *a,const void *b, void *data)
+static int rms_compareitvfull(const void *a,const void *b, void *data)
 {
-  const Itvfullentry *itva = (const Itvfullentry *) a,
-                     *itvb = (const Itvfullentry *) b;
+  const RmsItvfullentry *itva = (const RmsItvfullentry *) a,
+                     *itvb = (const RmsItvfullentry *) b;
   if (itva->rank < itvb->rank)
   {
     return -1;
@@ -823,10 +821,10 @@ static int compareitvfull(const void *a,const void *b, void *data)
   return itva->unitsnotspecial > itvb->unitsnotspecial ? -1 : 1;
 }
 
-static int compareitv(const void *a,const void *b)
+static int rms_compareitv(const void *a,const void *b)
 {
-  const Itventry *itva = (const Itventry *) a,
-                 *itvb = (const Itventry *) b;
+  const RmsItventry *itva = (const RmsItventry *) a,
+                 *itvb = (const RmsItventry *) b;
 
   if (itva->key < itvb->key)
   {
@@ -854,7 +852,7 @@ static void processunsortedrange(Rmnsufinfo *rmnsufinfo,
                                  unsigned long left,unsigned long right,
                                  unsigned long base,unsigned long depth)
 {
-  Pairsuffixptrwithbase pairptrwithbase;
+  RmsPairsuffixptrwithbase *pairptrwithbase;
   unsigned long width;
 
   gt_assert(left < right && depth > 0);
@@ -894,9 +892,10 @@ static void processunsortedrange(Rmnsufinfo *rmnsufinfo,
     rmnsufinfo->firstwithnewdepth.totalwidth = width;
     rmnsufinfo->firstwithnewdepth.maxwidth = width;
   }
-  pairptrwithbase.left = left;
-  pairptrwithbase.right = right;
-  pairptrwithbase.base = base;
+  pairptrwithbase = gt_malloc(sizeof (RmsPairsuffixptrwithbase));
+  pairptrwithbase->left = left;
+  pairptrwithbase->right = right;
+  pairptrwithbase->base = base;
   gt_inl_queue_add(rmnsufinfo->rangestobesorted,pairptrwithbase,false);
   rmnsufinfo->currentqueuesize++;
   if (rmnsufinfo->maxqueuesize < rmnsufinfo->currentqueuesize)
@@ -997,7 +996,7 @@ static void anchorleftmost(Rmnsufinfo *rmnsufinfo,
 
   for (idx = left; idx <= right; idx++)
   {
-    inversesuftab_set(rmnsufinfo,
+    rms_inversesuftab_set(rmnsufinfo,
                       suftabentryfromsection_get(&rmnsufinfo->sortblock,idx),
                       left);
   }
@@ -1031,14 +1030,14 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,unsigned long left,
   {
     if (rmnsufinfo->itvinfo == NULL)
     {
-      rmnsufinfo->itvinfo = gt_malloc(sizeof (Itventry) *
+      rmnsufinfo->itvinfo = gt_malloc(sizeof (RmsItventry) *
                                       rmnsufinfo->allocateditvinfo);
     }
   } else
   {
     if (rmnsufinfo->itvfullinfo == NULL)
     {
-      rmnsufinfo->itvfullinfo = gt_malloc(sizeof (Itvfullentry) *
+      rmnsufinfo->itvfullinfo = gt_malloc(sizeof (RmsItvfullentry) *
                                           rmnsufinfo->allocateditvinfo);
     }
   }
@@ -1060,7 +1059,7 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,unsigned long left,
     {
       rmnsufinfo->itvinfo[idx].suffixstart = startpos;
       rmnsufinfo->itvinfo[idx].key
-        = inversesuftab_get(rmnsufinfo,startpos + rmnsufinfo->currentdepth);
+        = rms_inversesuftab_get(rmnsufinfo,startpos + rmnsufinfo->currentdepth);
     } else
     {
       inversesuftabrel_get(rmnsufinfo->itvfullinfo + idx,rmnsufinfo,startpos);
@@ -1068,7 +1067,8 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,unsigned long left,
   }
   if (rmnsufinfo->absoluteinversesuftab)
   {
-    qsort(rmnsufinfo->itvinfo,(size_t) width,sizeof (Itventry),compareitv);
+    qsort(rmnsufinfo->itvinfo,(size_t) width,sizeof (RmsItventry),
+          rms_compareitv);
     for (idx=0; idx<width; idx++)
     {
       suftabentryfromsection_update(&rmnsufinfo->sortblock,left+idx,
@@ -1076,8 +1076,8 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,unsigned long left,
     }
   } else
   {
-    gt_qsort_r(rmnsufinfo->itvfullinfo,(size_t) width,sizeof (Itvfullentry),
-               rmnsufinfo,compareitvfull);
+    gt_qsort_r(rmnsufinfo->itvfullinfo,(size_t) width,sizeof (RmsItvfullentry),
+               rmnsufinfo,rms_compareitvfull);
     for (idx=0; idx<width; idx++)
     {
       suftabentryfromsection_update(&rmnsufinfo->sortblock,left+idx,
@@ -1095,9 +1095,9 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,unsigned long left,
                    rmnsufinfo->itvinfo[idx].key) ? true : false;
     } else
     {
-      different = (compareitvfull(rmnsufinfo->itvfullinfo + idx - 1,
-                                  rmnsufinfo->itvfullinfo + idx,
-                                  rmnsufinfo) != 0) ? true : false;
+      different = (rms_compareitvfull(rmnsufinfo->itvfullinfo + idx - 1,
+                                      rmnsufinfo->itvfullinfo + idx,
+                                      rmnsufinfo) != 0) ? true : false;
     }
     if (different)
     {
@@ -1126,7 +1126,7 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,unsigned long left,
           = suftabentryfromsection_get(&rmnsufinfo->sortblock,left+rangestart);
         if (rmnsufinfo->absoluteinversesuftab)
         {
-          inversesuftab_set(rmnsufinfo,currentsuftabentry,left+rangestart);
+          rms_inversesuftab_set(rmnsufinfo,currentsuftabentry,left+rangestart);
         } else
         {
           inversesuftabrel_set(rmnsufinfo,currentsuftabentry,left+rangestart,
@@ -1161,7 +1161,7 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,unsigned long left,
       = suftabentryfromsection_get(&rmnsufinfo->sortblock,left+rangestart);
     if (rmnsufinfo->absoluteinversesuftab)
     {
-      inversesuftab_set(rmnsufinfo,currentsuftabentry,left+rangestart);
+      rms_inversesuftab_set(rmnsufinfo,currentsuftabentry,left+rangestart);
     } else
     {
       inversesuftabrel_set(rmnsufinfo,currentsuftabentry,left+rangestart,base);
@@ -1171,8 +1171,7 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,unsigned long left,
 
 static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
 {
-  Pairsuffixptr *pairptr;
-  Pairsuffixptrwithbase pairptrwithbase;
+  RmsPairsuffixptr *pairptr;
 
   if (rmnsufinfo->firstgenerationcount > 0)
   {
@@ -1187,23 +1186,23 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
   { /* now maxdepth > prefixlength */
     if (rmnsufinfo->absoluteinversesuftab)
     {
-      initinversesuftabspecials(rmnsufinfo);
-      initinversesuftabnonspecials(rmnsufinfo);
+      rms_initinversesuftabspecials(rmnsufinfo);
+      rms_initinversesuftabnonspecials(rmnsufinfo);
     }
   } else
   {
-    gt_assert(rmnsufinfo->firstgeneration.nextfreePairsuffixptr == 0);
+    gt_assert(rmnsufinfo->firstgeneration.nextfreeRmsPairsuffixptr == 0);
   }
-  for (pairptr = rmnsufinfo->firstgeneration.spacePairsuffixptr;
-       pairptr < rmnsufinfo->firstgeneration.spacePairsuffixptr +
-                 rmnsufinfo->firstgeneration.nextfreePairsuffixptr;
+  for (pairptr = rmnsufinfo->firstgeneration.spaceRmsPairsuffixptr;
+       pairptr < rmnsufinfo->firstgeneration.spaceRmsPairsuffixptr +
+                 rmnsufinfo->firstgeneration.nextfreeRmsPairsuffixptr;
        pairptr++)
   {
     anchorleftmost(rmnsufinfo,pairptr->left,pairptr->right);
   }
-  for (pairptr = rmnsufinfo->firstgeneration.spacePairsuffixptr;
-       pairptr < rmnsufinfo->firstgeneration.spacePairsuffixptr +
-                 rmnsufinfo->firstgeneration.nextfreePairsuffixptr;
+  for (pairptr = rmnsufinfo->firstgeneration.spaceRmsPairsuffixptr;
+       pairptr < rmnsufinfo->firstgeneration.spaceRmsPairsuffixptr +
+                 rmnsufinfo->firstgeneration.nextfreeRmsPairsuffixptr;
        pairptr++)
   {
     sortsuffixesonthislevel(rmnsufinfo,
@@ -1211,16 +1210,19 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
                             pairptr->right,
                             pairptr->left);
   }
-  GT_FREEARRAY(&rmnsufinfo->firstgeneration,Pairsuffixptr);
+  GT_FREEARRAY(&rmnsufinfo->firstgeneration,RmsPairsuffixptr);
   while (!gt_inl_queue_isempty(rmnsufinfo->rangestobesorted))
   {
-    pairptrwithbase = gt_inl_queue_get(rmnsufinfo->rangestobesorted);
+    RmsPairsuffixptrwithbase *pairptrwithbaseptr;
+    pairptrwithbaseptr = (RmsPairsuffixptrwithbase*)
+                                 gt_inl_queue_get(rmnsufinfo->rangestobesorted);
     gt_assert(rmnsufinfo->currentqueuesize > 0);
     rmnsufinfo->currentqueuesize--;
     sortsuffixesonthislevel(rmnsufinfo,
-                            pairptrwithbase.left,
-                            pairptrwithbase.right,
-                            pairptrwithbase.base);
+                            pairptrwithbaseptr->left,
+                            pairptrwithbaseptr->right,
+                            pairptrwithbaseptr->base);
+    gt_free(pairptrwithbaseptr);
   }
   if (!SUFINMEM(&rmnsufinfo->sortblock))
   {
@@ -1234,6 +1236,7 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
   rmnsufinfo->itvinfo = NULL;
   gt_free(rmnsufinfo->itvfullinfo);
   rmnsufinfo->itvfullinfo = NULL;
+
   gt_inl_queue_delete(rmnsufinfo->rangestobesorted);
   rmnsufinfo->rangestobesorted = NULL;
 }
@@ -1247,17 +1250,17 @@ void gt_bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo)
 
   if (rmnsufinfo->absoluteinversesuftab)
   {
-    initinversesuftabspecials(rmnsufinfo);
+    rms_initinversesuftabspecials(rmnsufinfo);
   }
   if (SUFINMEM(&rmnsufinfo->sortblock))
   {
-    initinversesuftabnonspecialsadjust(rmnsufinfo);
+    rms_initinversesuftabnonspecialsadjust(rmnsufinfo);
     printf("# maxbucketsize=%lu\n",rmnsufinfo->allocateditvinfo);
   } else
   {
     unsigned long pagesize = (unsigned long) PAGESIZE;
 
-    initinversesuftabnonspecialsadjuststream(rmnsufinfo);
+    rms_initinversesuftabnonspecialsadjuststream(rmnsufinfo);
     printf("# maxbucketsize=%lu\n",rmnsufinfo->allocateditvinfo);
     rmnsufinfo->sortblock.sortspace = NULL;
     while (pagesize <= 2UL * rmnsufinfo->allocateditvinfo)
@@ -1305,8 +1308,8 @@ Compressedtable *gt_rmnsufinfo_wrap(unsigned long *longest,
   {
     *longest = rmnsufinfo->longestrel;
 #ifdef ITVDEBUG
-    gt_free(rmnsufinfo->itvrel.is_inversesuftab_set);
-    rmnsufinfo->itvrel.is_inversesuftab_set = NULL;
+    gt_free(rmnsufinfo->itvrel.is_rms_inversesuftab_set);
+    rmnsufinfo->itvrel.is_rms_inversesuftab_set = NULL;
 #endif
     compressedtable_free(rmnsufinfo->itvrel.offset,true);
     rmnsufinfo->itvrel.offset = NULL;

@@ -7,7 +7,7 @@
  * Qsort routine from Bentley & McIlroy's "Engineering a Sort Function".
  */
 
-#define SWAP(A,B)\
+#define GT_QSORT_SWAP(A,B)\
         if ((A) != (B))\
         {\
           tmp = *(A);\
@@ -15,7 +15,7 @@
           *(B) = tmp;\
         }
 
-#define VECSWAP(A,B,N)\
+#define GT_QSORT_VECSWAP(A,B,N)\
         aptr = A;\
         bptr = B;\
         while ((N)-- > 0)\
@@ -25,7 +25,8 @@
           *bptr++ = tmp;\
         }
 
-static inline Sorttype *med3 (Sorttype *a, Sorttype *b, Sorttype *c, void *data)
+static inline Sorttype *gt_inlined_qsort_r_med3 (Sorttype *a, Sorttype *b,
+                                                 Sorttype *c, void *data)
 {
   return qsortcmp (a, b, data) < 0 ?
     (qsortcmp (b, c, data) <
@@ -55,7 +56,7 @@ void gt_inlined_qsort_r (Sorttype *a,unsigned long n,void *data)
              pl > a && qsortcmp (pl - 1, pl, data) > 0;
              pl--)
         {
-          SWAP (pl, pl - 1);
+          GT_QSORT_SWAP (pl, pl - 1);
         }
       }
       return;
@@ -68,13 +69,13 @@ void gt_inlined_qsort_r (Sorttype *a,unsigned long n,void *data)
       if (n > 40UL)
       {
         d = GT_DIV8 (n);
-        pl = med3 (pl, pl + d, pl + GT_MULT2 (d), data);
-        pm = med3 (pm - d, pm, pm + d, data);
-        pn = med3 (pn - GT_MULT2 (d), pn - d, pn, data);
+        pl = gt_inlined_qsort_r_med3 (pl, pl + d, pl + GT_MULT2 (d), data);
+        pm = gt_inlined_qsort_r_med3 (pm - d, pm, pm + d, data);
+        pn = gt_inlined_qsort_r_med3 (pn - GT_MULT2 (d), pn - d, pn, data);
       }
-      pm = med3 (pl, pm, pn, data);
+      pm = gt_inlined_qsort_r_med3 (pl, pm, pn, data);
     }
-    SWAP (a, pm);
+    GT_QSORT_SWAP (a, pm);
     pa = pb = a + 1;
     pc = pd = a + n - 1;
     while (1)
@@ -85,7 +86,7 @@ void gt_inlined_qsort_r (Sorttype *a,unsigned long n,void *data)
         if (r == 0)
         {
           swapped = true;
-          SWAP (pa, pb);
+          GT_QSORT_SWAP (pa, pb);
           pa++;
         }
         pb++;
@@ -96,7 +97,7 @@ void gt_inlined_qsort_r (Sorttype *a,unsigned long n,void *data)
         if (r == 0)
         {
           swapped = true;
-          SWAP (pc, pd);
+          GT_QSORT_SWAP (pc, pd);
           pd--;
         }
         pc--;
@@ -105,7 +106,7 @@ void gt_inlined_qsort_r (Sorttype *a,unsigned long n,void *data)
       {
         break;
       }
-      SWAP (pb, pc);
+      GT_QSORT_SWAP (pb, pc);
       swapped = true;
       pb++;
       pc--;
@@ -118,16 +119,16 @@ void gt_inlined_qsort_r (Sorttype *a,unsigned long n,void *data)
              pl > a && qsortcmp (pl - 1, pl, data) > 0;
              pl--)
         {
-          SWAP (pl, pl - 1);
+          GT_QSORT_SWAP (pl, pl - 1);
         }
       }
       return;
     }
     pn = a + n;
     minval = MIN ((unsigned long) (pa - a), (unsigned long) (pb - pa));
-    VECSWAP (a, pb - minval, minval);
+    GT_QSORT_VECSWAP (a, pb - minval, minval);
     minval = MIN ((unsigned long) (pd - pc), (unsigned long) (pn - pd - 1));
-    VECSWAP (pb, pn - minval, minval);
+    GT_QSORT_VECSWAP (pb, pn - minval, minval);
     if ((minval = (unsigned long) (pb - pa)) > 1UL)
     {
       gt_inlined_qsort_r (a, minval, data);

@@ -30,13 +30,13 @@
 #include "tyr-mkindex.h"
 #include "echoseq.h"
 
-struct Dfsinfo /* information stored for each node of the lcp interval tree */
+typedef struct /* information stored for each node of the lcp interval tree */
 {
   unsigned long leftmostleaf,
                 rightmostleaf,
                 suftabrightmostleaf,
                 lcptabrightmostleafplus1;
-};
+} TyrDfsinfo;
 
 typedef int (*Processoccurrencecount)(unsigned long,
                                       unsigned long,
@@ -57,7 +57,7 @@ typedef struct
 
 GT_DECLAREARRAYSTRUCT(Countwithpositions);
 
-struct Dfsstate /* global information */
+typedef struct /* global information */
 {
   unsigned long mersize,
          totallength;
@@ -79,11 +79,11 @@ struct Dfsstate /* global information */
   unsigned long countoutputmers;
   const unsigned long *suftab; /* only necessary for performtest */
   GtUchar *currentmer;    /* only necessary for performtest */
-};
+} TyrDfsstate;
 
 #include "esa-dfs.h"
 
-static uint64_t bruteforcecountnumofmers(const Dfsstate *state)
+static uint64_t bruteforcecountnumofmers(const TyrDfsstate *state)
 {
   unsigned long idx;
   uint64_t numofmers = 0;
@@ -102,7 +102,7 @@ static uint64_t bruteforcecountnumofmers(const Dfsstate *state)
   return numofmers;
 }
 
-static void checknumofmers(const Dfsstate *state,
+static void checknumofmers(const TyrDfsstate *state,
                            uint64_t dnumofmers)
 {
   uint64_t bfnumofmers = bruteforcecountnumofmers(state);
@@ -117,7 +117,7 @@ static void checknumofmers(const Dfsstate *state,
   }
 }
 
-static void checknumberofoccurrences(const Dfsstate *dfsstate,
+static void checknumberofoccurrences(const TyrDfsstate *dfsstate,
                                      unsigned long countocc,
                                      unsigned long position)
 {
@@ -193,7 +193,7 @@ static void showListSeqpos(const GtEncodedsequence *encseq,
   }
 }
 
-static bool decideifocc(const Dfsstate *state,unsigned long countocc)
+static bool decideifocc(const TyrDfsstate *state,unsigned long countocc)
 {
   if (state->minocc > 0)
   {
@@ -239,7 +239,7 @@ static uint64_t addupdistribution(const GtArrayCountwithpositions *distribution)
   return addcount;
 }
 
-static void showmerdistribution(const Dfsstate *state)
+static void showmerdistribution(const TyrDfsstate *state)
 {
   unsigned long countocc;
 
@@ -265,7 +265,7 @@ static void showmerdistribution(const Dfsstate *state)
   }
 }
 
-static void showfinalstatistics(const Dfsstate *state,
+static void showfinalstatistics(const TyrDfsstate *state,
                                 const GtStr *inputindex,
                                 GtLogger *logger)
 {
@@ -326,7 +326,7 @@ static int adddistpos2distribution(unsigned long countocc,
                                    void *adddistposinfo,
                                    GT_UNUSED GtError *err)
 {
-  Dfsstate *state = (Dfsstate *) adddistposinfo;
+  TyrDfsstate *state = (TyrDfsstate *) adddistposinfo;
 
   incrementdistribcounts(&state->occdistribution,countocc,1UL);
   if (decideifocc(state,countocc))
@@ -401,7 +401,7 @@ static int outputsortedstring2index(unsigned long countocc,
                                     void *adddistposinfo,
                                     GtError *err)
 {
-  Dfsstate *state = (Dfsstate *) adddistposinfo;
+  TyrDfsstate *state = (TyrDfsstate *) adddistposinfo;
 
   if (decideifocc(state,countocc))
   {
@@ -424,16 +424,17 @@ static int outputsortedstring2index(unsigned long countocc,
   return 0;
 }
 
-static Dfsinfo *allocateDfsinfo(GT_UNUSED Dfsstate *state)
+static Dfsinfo* tyr_allocateDfsinfo(GT_UNUSED Dfsstate *state)
 {
-  Dfsinfo *dfsinfo;
+  TyrDfsinfo *dfsinfo;
 
-  ALLOCASSIGNSPACE(dfsinfo,NULL,Dfsinfo,1);
-  return dfsinfo;
+  ALLOCASSIGNSPACE(dfsinfo,NULL,TyrDfsinfo,1);
+  return (Dfsinfo*) dfsinfo;
 }
 
-static void freeDfsinfo(Dfsinfo *dfsinfo, GT_UNUSED Dfsstate *state)
+static void tyr_freeDfsinfo(Dfsinfo *adfsinfo, GT_UNUSED Dfsstate *state)
 {
+  TyrDfsinfo *dfsinfo = (TyrDfsinfo*) adfsinfo;
   FREESPACE(dfsinfo);
 }
 
@@ -474,13 +475,14 @@ static bool containsspecial2(const GtEncodedsequence *encseq,
 }
 #endif
 
-static int processleafedge(GT_UNUSED bool firstsucc,
+static int tyr_processleafedge(GT_UNUSED bool firstsucc,
                            unsigned long fatherdepth,
                            GT_UNUSED Dfsinfo *father,
                            unsigned long leafnumber,
-                           Dfsstate *state,
+                           Dfsstate *astate,
                            GtError *err)
 {
+  TyrDfsstate *state = (TyrDfsstate*) astate;
   gt_error_check(err);
   if (fatherdepth < state->mersize &&
       leafnumber + state->mersize <= state->totallength &&
@@ -498,12 +500,14 @@ static int processleafedge(GT_UNUSED bool firstsucc,
   return 0;
 }
 
-static int processcompletenode(unsigned long nodeptrdepth,
-                               Dfsinfo *nodeptr,
+static int tyr_processcompletenode(unsigned long nodeptrdepth,
+                               Dfsinfo *anodeptr,
                                unsigned long nodeptrminusonedepth,
-                               Dfsstate *state,
+                               Dfsstate *astate,
                                GtError *err)
 {
+  TyrDfsinfo *nodeptr = (TyrDfsinfo*) anodeptr;
+  TyrDfsstate *state = (TyrDfsstate*) astate;
   gt_error_check(err);
   if (state->mersize <= nodeptrdepth)
   {
@@ -530,17 +534,20 @@ static int processcompletenode(unsigned long nodeptrdepth,
   return 0;
 }
 
-static void assignleftmostleaf(Dfsinfo *dfsinfo,unsigned long leftmostleaf,
-                               GT_UNUSED Dfsstate *dfsstate)
+static void tyr_assignleftmostleaf(Dfsinfo *adfsinfo,unsigned long leftmostleaf,
+                                   GT_UNUSED Dfsstate *dfsstate)
 {
+  TyrDfsinfo *dfsinfo = (TyrDfsinfo*) adfsinfo;
   dfsinfo->leftmostleaf = leftmostleaf;
 }
 
-static void assignrightmostleaf(Dfsinfo *dfsinfo,unsigned long currentindex,
-                                unsigned long previoussuffix,
-                                unsigned long currentlcp,
-                                GT_UNUSED Dfsstate *dfsstate)
+static void tyr_assignrightmostleaf(Dfsinfo *adfsinfo,
+                                    unsigned long currentindex,
+                                    unsigned long previoussuffix,
+                                    unsigned long currentlcp,
+                                    GT_UNUSED Dfsstate *dfsstate)
 {
+  TyrDfsinfo *dfsinfo = (TyrDfsinfo*) adfsinfo;
   dfsinfo->rightmostleaf = currentindex;
   dfsinfo->suftabrightmostleaf = previoussuffix;
   dfsinfo->lcptabrightmostleafplus1 = currentlcp;
@@ -570,7 +577,7 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
                                  GtLogger *logger,
                                  GtError *err)
 {
-  Dfsstate state;
+  TyrDfsstate state;
   bool haserr = false;
   unsigned int alphasize;
 
@@ -648,14 +655,14 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
     if (!haserr)
     {
       if (gt_depthfirstesa(ssar,
-                        allocateDfsinfo,
-                        freeDfsinfo,
-                        processleafedge,
+                        tyr_allocateDfsinfo,
+                        tyr_freeDfsinfo,
+                        tyr_processleafedge,
                         NULL,
-                        processcompletenode,
-                        assignleftmostleaf,
-                        assignrightmostleaf,
-                        &state,
+                        tyr_processcompletenode,
+                        tyr_assignleftmostleaf,
+                        tyr_assignrightmostleaf,
+                        (Dfsstate*) &state,
                         logger,
                         err) != 0)
       {

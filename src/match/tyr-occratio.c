@@ -22,15 +22,15 @@
 #include "spacedef.h"
 #include "tyr-occratio.h"
 
-struct Dfsinfo /* information stored for each node of the lcp interval tree */
+typedef struct /* information stored for each node of the lcp interval tree */
 {
   unsigned long leftmostleaf,
          rightmostleaf,
          suftabrightmostleaf,
          lcptabrightmostleafplus1;
-};
+} OccDfsinfo;
 
-struct Dfsstate /* global information */
+typedef struct /* global information */
 {
   const GtEncodedsequence *encseq;
   GtReadmode readmode;
@@ -40,20 +40,21 @@ struct Dfsstate /* global information */
   GtArrayuint64_t *uniquedistribution,
                   *nonuniquedistribution,
                   *nonuniquemultidistribution;
-};
+} OccDfsstate;
 
 #include "esa-dfs.h"
 
-static Dfsinfo *allocateDfsinfo(GT_UNUSED Dfsstate *state)
+static Dfsinfo* occ_allocateDfsinfo(GT_UNUSED Dfsstate *state)
 {
-  Dfsinfo *dfsinfo;
+  OccDfsinfo *dfsinfo;
 
-  ALLOCASSIGNSPACE(dfsinfo,NULL,Dfsinfo,1);
-  return dfsinfo;
+  ALLOCASSIGNSPACE(dfsinfo,NULL,OccDfsinfo,1);
+  return (Dfsinfo*) dfsinfo;
 }
 
-static void freeDfsinfo(Dfsinfo *dfsinfo, GT_UNUSED Dfsstate *state)
+static void occ_freeDfsinfo(Dfsinfo *adfsinfo, GT_UNUSED Dfsstate *state)
 {
+  OccDfsinfo *dfsinfo = (OccDfsinfo*) adfsinfo;
   FREESPACE(dfsinfo);
 }
 
@@ -112,13 +113,14 @@ static void iteritvdistribution(GtArrayuint64_t *distribution,
   }
 }
 
-static int processleafedge(GT_UNUSED bool firstsucc,
+static int occ_processleafedge(GT_UNUSED bool firstsucc,
                            unsigned long fatherdepth,
                            GT_UNUSED Dfsinfo *father,
                            unsigned long leafnumber,
-                           Dfsstate *state,
+                           Dfsstate *astate,
                            GT_UNUSED GtError *err)
 {
+  OccDfsstate *state = (OccDfsstate*) astate;
   iteritvdistribution(state->uniquedistribution,
                       state->encseq,
                       state->readmode,
@@ -130,14 +132,16 @@ static int processleafedge(GT_UNUSED bool firstsucc,
   return 0;
 }
 
-static int processcompletenode(unsigned long nodeptrdepth,
-                               Dfsinfo *nodeptr,
+static int occ_processcompletenode(unsigned long nodeptrdepth,
+                               Dfsinfo *anodeptr,
                                unsigned long nodeptrminusonedepth,
-                               Dfsstate *state,
+                               Dfsstate *astate,
                                GT_UNUSED GtError *err)
 {
   unsigned long fatherdepth;
   unsigned long startlength, endlength;
+  OccDfsinfo *nodeptr = (OccDfsinfo*) anodeptr;
+  OccDfsstate *state = (OccDfsstate*) astate;
 
   fatherdepth = nodeptr->lcptabrightmostleafplus1;
   if (fatherdepth < nodeptrminusonedepth)
@@ -172,17 +176,20 @@ static int processcompletenode(unsigned long nodeptrdepth,
   return 0;
 }
 
-static void assignleftmostleaf(Dfsinfo *dfsinfo,unsigned long leftmostleaf,
-                               GT_UNUSED Dfsstate *dfsstate)
+static void occ_assignleftmostleaf(Dfsinfo *adfsinfo,unsigned long leftmostleaf,
+                                   GT_UNUSED Dfsstate *dfsstate)
 {
+  OccDfsinfo *dfsinfo = (OccDfsinfo*) adfsinfo;
   dfsinfo->leftmostleaf = leftmostleaf;
 }
 
-static void assignrightmostleaf(Dfsinfo *dfsinfo,unsigned long currentindex,
-                                unsigned long previoussuffix,
-                                unsigned long currentlcp,
-                                GT_UNUSED Dfsstate *dfsstate)
+static void occ_assignrightmostleaf(Dfsinfo *adfsinfo,
+                                    unsigned long currentindex,
+                                    unsigned long previoussuffix,
+                                    unsigned long currentlcp,
+                                    GT_UNUSED Dfsstate *dfsstate)
 {
+  OccDfsinfo *dfsinfo = (OccDfsinfo*) adfsinfo;
   dfsinfo->rightmostleaf = currentindex;
   dfsinfo->suftabrightmostleaf = previoussuffix;
   dfsinfo->lcptabrightmostleafplus1 = currentlcp;
@@ -197,7 +204,7 @@ static int computeoccurrenceratio(Sequentialsuffixarrayreader *ssar,
                                   GtLogger *logger,
                                   GtError *err)
 {
-  Dfsstate state;
+  OccDfsstate state;
   bool haserr = false;
 
   gt_error_check(err);
@@ -210,14 +217,14 @@ static int computeoccurrenceratio(Sequentialsuffixarrayreader *ssar,
   state.nonuniquedistribution = nonuniquedistribution;
   state.nonuniquemultidistribution = nonuniquemultidistribution;
   if (gt_depthfirstesa(ssar,
-                    allocateDfsinfo,
-                    freeDfsinfo,
-                    processleafedge,
+                    occ_allocateDfsinfo,
+                    occ_freeDfsinfo,
+                    occ_processleafedge,
                     NULL,
-                    processcompletenode,
-                    assignleftmostleaf,
-                    assignrightmostleaf,
-                    &state,
+                    occ_processcompletenode,
+                    occ_assignleftmostleaf,
+                    occ_assignrightmostleaf,
+                    (Dfsstate*) &state,
                     logger,
                     err) != 0)
   {

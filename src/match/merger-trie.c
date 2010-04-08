@@ -26,7 +26,7 @@
 
 #include "merger-trie.h"
 
-#define ISLEAF(NODE) ((NODE)->firstchild == NULL)
+#define MTRIE_ISLEAF(NODE) ((NODE)->firstchild == NULL)
 #ifdef WITHTRIEIDENT
 #ifdef WITHTRIESHOW
 #define SHOWNODERELATIONS(NODE)\
@@ -60,7 +60,7 @@ static GtUchar getfirstedgechar(const Mergertrierep *trierep,
 {
   Encseqreadinfo *eri = trierep->encseqreadinfo + node->suffixinfo.idx;
 
-  if (ISLEAF(node) &&
+  if (MTRIE_ISLEAF(node) &&
       node->suffixinfo.startpos + prevdepth >=
       gt_encodedsequence_totallength(eri->encseqptr))
   {
@@ -71,8 +71,8 @@ static GtUchar getfirstedgechar(const Mergertrierep *trierep,
                         eri->readmode);
 }
 
-static int comparecharacters(GtUchar cc1,unsigned int idx1,
-                             GtUchar cc2,unsigned int idx2)
+static int mtrie_comparecharacters(GtUchar cc1,unsigned int idx1,
+                                   GtUchar cc2,unsigned int idx2)
 {
   if (ISSPECIAL(cc1))
   {
@@ -128,7 +128,7 @@ static void showmergertrie2(const Mergertrierep *trierep,
        current = current->rightsibling)
   {
     printf("%*.*s",(int) (6 * level),(int) (6 * level)," ");
-    if (ISLEAF(current))
+    if (MTRIE_ISLEAF(current))
     {
       endpos = gt_encodedsequence_totallength(
                                  trierep->encseqtable[current->suffixinfo.idx]);
@@ -150,7 +150,7 @@ static void showmergertrie2(const Mergertrierep *trierep,
       }
       printf("%c",characters[(int) cc]);
     }
-    if (ISLEAF(current))
+    if (MTRIE_ISLEAF(current))
     {
       if (!ISSPECIAL(cc))
       {
@@ -193,7 +193,7 @@ static void checkmergertrie2(Mergertrierep *trierep,
 {
   Mergertrienode *current, *previous;
 
-  if (ISLEAF(node))
+  if (MTRIE_ISLEAF(node))
   {
     unsigned long start = node->suffixinfo.startpos;
 #ifndef NDEBUG
@@ -211,7 +211,7 @@ static void checkmergertrie2(Mergertrierep *trierep,
     gt_assert(node->depth == 0 || node->firstchild->rightsibling != NULL);
     if (father != NULL)
     {
-      gt_assert(!ISLEAF(father));
+      gt_assert(!MTRIE_ISLEAF(father));
 #ifndef NDEBUG
       if (father->depth >= node->depth)
       {
@@ -230,7 +230,7 @@ static void checkmergertrie2(Mergertrierep *trierep,
 #ifndef NDEBUG
       if (previous != NULL)
       {
-        if (comparecharacters(
+        if (mtrie_comparecharacters(
               getfirstedgechar(trierep,previous,node->depth),
               previous->suffixinfo.idx,
               getfirstedgechar(trierep,current,node->depth),
@@ -279,7 +279,7 @@ static void shownode(const Mergertrienode *node)
     printf("NULL");
   } else
   {
-    printf("%s " Formatuint64_t,ISLEAF(node) ? "leaf" : "branch",
+    printf("%s " Formatuint64_t,MTRIE_ISLEAF(node) ? "leaf" : "branch",
                    PRINTuint64_tcast(node->suffixinfo.ident));
   }
 }
@@ -340,7 +340,7 @@ static Mergertrienode *newMergertrienode(Mergertrierep *trierep)
   return trierep->nodetable + trierep->nextfreeMergertrienode++;
 }
 
-static Mergertrienode *makenewleaf(Mergertrierep *trierep,
+static Mergertrienode *mtrie_makenewleaf(Mergertrierep *trierep,
                                    Suffixinfo *suffixinfo)
 {
   Mergertrienode *newleaf;
@@ -359,7 +359,8 @@ static Mergertrienode *makenewleaf(Mergertrierep *trierep,
   return newleaf;
 }
 
-static Mergertrienode *makeroot(Mergertrierep *trierep,Suffixinfo *suffixinfo)
+static Mergertrienode *mtrie_makeroot(Mergertrierep *trierep,
+                                      Suffixinfo *suffixinfo)
 {
   Mergertrienode *root, *newleaf;
 
@@ -373,7 +374,7 @@ static Mergertrienode *makeroot(Mergertrierep *trierep,Suffixinfo *suffixinfo)
   root->suffixinfo = *suffixinfo;
   root->depth = 0;
   root->rightsibling = NULL;
-  newleaf = makenewleaf(trierep,suffixinfo);
+  newleaf = mtrie_makenewleaf(trierep,suffixinfo);
   SETFIRSTCHILD(root,newleaf);
   SHOWNODERELATIONS(root);
   return root;
@@ -390,7 +391,7 @@ static void makesuccs(Mergertrienode *newbranch,Mergertrienode *first,
   SHOWNODERELATIONS(newbranch);
 }
 
-static Mergertrienode *makenewbranch(Mergertrierep *trierep,
+static Mergertrienode *mtrie_makenewbranch(Mergertrierep *trierep,
                                      Suffixinfo *suffixinfo,
                                      unsigned long currentdepth,
                                      Mergertrienode *oldnode)
@@ -419,8 +420,8 @@ static Mergertrienode *makenewbranch(Mergertrierep *trierep,
                          suffixinfo->startpos + currentdepth,
                          eri->readmode);
   }
-  newleaf = makenewleaf(trierep,suffixinfo);
-  if (comparecharacters(cc1,oldnode->suffixinfo.idx,
+  newleaf = mtrie_makenewleaf(trierep,suffixinfo);
+  if (mtrie_comparecharacters(cc1,oldnode->suffixinfo.idx,
                         cc2,suffixinfo->idx) <= 0)
   {
     makesuccs(newbranch,oldnode,newleaf);
@@ -469,7 +470,8 @@ static bool hassuccessor(const Mergertrierep *trierep,
       np->current = np->current->rightsibling)
   {
     cc1 = getfirstedgechar(trierep,np->current,prevdepth);
-    cmpresult = comparecharacters(cc1,np->current->suffixinfo.idx,cc2,idx2);
+    cmpresult = mtrie_comparecharacters(cc1,np->current->suffixinfo.idx,cc2,
+                                        idx2);
     if (cmpresult == 1)
     {
       return false;
@@ -489,7 +491,7 @@ void gt_mergertrie_insertsuffix(Mergertrierep *trierep,
 {
   if (trierep->root == NULL)
   {
-    trierep->root = makeroot(trierep,suffixinfo);
+    trierep->root = mtrie_makeroot(trierep,suffixinfo);
   } else
   {
     unsigned long currentdepth, lcpvalue, totallength;
@@ -498,7 +500,7 @@ void gt_mergertrie_insertsuffix(Mergertrierep *trierep,
     GtUchar cc;
     Encseqreadinfo *eri = trierep->encseqreadinfo + suffixinfo->idx;
 
-    gt_assert(!ISLEAF(node));
+    gt_assert(!MTRIE_ISLEAF(node));
     currentnode = node;
     currentdepth = node->depth;
     totallength = gt_encodedsequence_totallength(eri->encseqptr);
@@ -515,11 +517,11 @@ void gt_mergertrie_insertsuffix(Mergertrierep *trierep,
                                             eri->readmode);
       }
       gt_assert(currentnode != NULL);
-      gt_assert(!ISLEAF(currentnode));
+      gt_assert(!MTRIE_ISLEAF(currentnode));
       if (!hassuccessor(trierep,&np,currentdepth,currentnode,cc,
                         suffixinfo->idx))
       {
-        newleaf = makenewleaf(trierep,suffixinfo);
+        newleaf = mtrie_makenewleaf(trierep,suffixinfo);
         newleaf->rightsibling = np.current;
         SHOWNODERELATIONS(newleaf);
         if (np.previous == NULL)
@@ -534,7 +536,7 @@ void gt_mergertrie_insertsuffix(Mergertrierep *trierep,
         return;
       }
       succ = np.current;
-      if (ISLEAF(succ))
+      if (MTRIE_ISLEAF(succ))
       {
         lcpvalue = getlcp(eri->encseqptr,
                           eri->readmode,
@@ -548,7 +550,7 @@ void gt_mergertrie_insertsuffix(Mergertrierep *trierep,
                           gt_encodedsequence_totallength(
                               trierep->encseqreadinfo[succ->suffixinfo.idx].
                                         encseqptr) - 1);
-        newbranch = makenewbranch(trierep,
+        newbranch = mtrie_makenewbranch(trierep,
                                   suffixinfo,
                                   currentdepth + lcpvalue + 1,
                                   succ);
@@ -573,7 +575,7 @@ void gt_mergertrie_insertsuffix(Mergertrierep *trierep,
                         succ->suffixinfo.startpos + succ->depth - 1);
       if (currentdepth + lcpvalue + 1 < succ->depth)
       {
-        newbranch = makenewbranch(trierep,
+        newbranch = mtrie_makenewbranch(trierep,
                                   suffixinfo,
                                   currentdepth + lcpvalue + 1,
                                   succ);
@@ -632,7 +634,7 @@ void gt_mergertrie_deletesmallestpath(Mergertrienode *smallest,
 #ifdef WITHTRIEIDENT
 #ifdef WITHTRIESHOW
     printf("delete %s " Formatuint64_t "\n",
-             ISLEAF(son) ? "leaf" : "branch",
+             MTRIE_ISLEAF(son) ? "leaf" : "branch",
              PRINTuint64_tcast(son->suffixinfo.ident));
 #endif
 #endif

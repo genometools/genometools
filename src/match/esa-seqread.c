@@ -85,13 +85,7 @@ GtReadmode gt_readmodeSequentialsuffixarrayreader(
 
 #else
 
- DECLAREREADFUNCTION(GtUlong);
-
- DECLAREREADFUNCTION(GtUchar);
-
- DECLAREREADFUNCTION(Largelcpvalue);
-
- struct Sequentialsuffixarrayreader
+struct Sequentialsuffixarrayreader
 {
   Suffixarray *suffixarray;
   unsigned long numberofsuffixes,

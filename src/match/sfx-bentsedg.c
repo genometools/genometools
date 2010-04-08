@@ -57,7 +57,7 @@
 
 #define LCPINDEX(LCPSUBTAB,I)   (unsigned long) ((I) - (LCPSUBTAB)->suftabbase)
 
-#define SWAP(TMP,A,B)\
+#define BS_SWAP(TMP,A,B)\
         if ((A) != (B))\
         {\
           TMP = *(A);\
@@ -65,7 +65,7 @@
           *(B) = TMP;\
         }
 
-#define VECSWAP(A,B,N)\
+#define BS_VECSWAP(A,B,N)\
         aptr = A;\
         bptr = B;\
         while ((N)-- > 0)\
@@ -446,10 +446,10 @@ static void updatelcpvalue(Bentsedgresources *bsr,
   bsr->lcpsubtab->bucketoflcpvalues[idx] = value;
 }
 
-static void insertionsort(Bentsedgresources *bsr,
-                          Suffixptr *leftptr,
-                          Suffixptr *rightptr,
-                          unsigned long offset)
+static void bs_insertionsort(Bentsedgresources *bsr,
+                             Suffixptr *leftptr,
+                             Suffixptr *rightptr,
+                             unsigned long offset)
 {
   Suffixptr *pi, *pj;
   unsigned long lcpindex, lcplen = 0;
@@ -528,7 +528,7 @@ static void insertionsort(Bentsedgresources *bsr,
       {
         break;
       }
-      SWAP(temp,pj,pj-1);
+      BS_SWAP(temp,pj,pj-1);
     }
   }
 }
@@ -642,7 +642,7 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
         bsr->equalwithprevious[idx] = true;
         break;
       }
-      SWAP(temp,pj,pj-1);
+      BS_SWAP(temp,pj,pj-1);
       tempb = bsr->equalwithprevious[idx-1];
       bsr->equalwithprevious[idx-1] = bsr->equalwithprevious[idx];
       bsr->equalwithprevious[idx] = tempb;
@@ -963,7 +963,7 @@ static bool comparisonsort(Bentsedgresources *bsr,
             bsr->sfxstrategy->maxbltriesort);
   if (width <= bsr->sfxstrategy->maxinsertionsort)
   {
-    insertionsort(bsr,left,right,depth);
+    bs_insertionsort(bsr,left,right,depth);
     return true;
   }
   if (width <= bsr->sfxstrategy->maxbltriesort)
@@ -1268,7 +1268,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
                                       right,
                                       depth,
                                       width);
-      SWAP(temp, left, pm);
+      BS_SWAP(temp, left, pm);
       CMPCHARBYCHARPTR2INT(pivotcmpcharbychar,tmpvar,left);
     } else
     {
@@ -1292,7 +1292,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
         /* new values for left, right, depth and parentordertype */
         continue;
       }
-      SWAP(temp, left, pm);
+      BS_SWAP(temp, left, pm);
       PTR2INT(pivotcmpbits,left);
     }
     bsr->countqsort++;
@@ -1318,7 +1318,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
           }
           if (valcmpcharbychar == pivotcmpcharbychar)
           {
-            SWAP(temp, pa, pb);
+            BS_SWAP(temp, pa, pb);
             pa++;
           }
           pb++;
@@ -1332,7 +1332,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
           }
           if (valcmpcharbychar == pivotcmpcharbychar)
           {
-            SWAP(temp, pc, pd); /* exchange equal element and element
+            BS_SWAP(temp, pc, pd); /* exchange equal element and element
                                    at index pd */
             pd--;
           }
@@ -1342,7 +1342,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
         { /* no elements to compare to pivot */
           break;
         }
-        SWAP(temp, pb, pc);
+        BS_SWAP(temp, pb, pc);
         pb++;
         pc--;
       }
@@ -1364,7 +1364,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
           }
           if (SfxcmpEQUAL(val,pivotcmpbits))
           {
-            SWAP(temp, pa, pb); /* exchange equal element and element
+            BS_SWAP(temp, pa, pb); /* exchange equal element and element
                                    at index pa */
             pa++;
           } else /* smaller */
@@ -1385,7 +1385,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
           }
           if (SfxcmpEQUAL(val,pivotcmpbits))
           {
-            SWAP(temp, pc, pd); /* exchange equal element and element at
+            BS_SWAP(temp, pc, pd); /* exchange equal element and element at
                                    index pa */
             pd--;
           } else /* greater */
@@ -1398,7 +1398,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
         { /* interval is empty */
           break;
         }
-        SWAP(temp, pb, pc);
+        BS_SWAP(temp, pb, pc);
         pb++;
         pc--;
       }
@@ -1407,13 +1407,13 @@ static void bentleysedgewick(Bentsedgresources *bsr,
     gt_assert(pb >= pa);
     w = MIN((unsigned long) (pa-left),(unsigned long) (pb-pa));
     /* move w elements at the left to the middle */
-    VECSWAP(left,  pb-w, w);
+    BS_VECSWAP(left,  pb-w, w);
 
     gt_assert(pd >= pc);
     gt_assert(right >= pd);
     w = MIN((unsigned long) (pd-pc), (unsigned long) (right-pd));
     /* move w elements at the right to the middle */
-    VECSWAP(pb, right+1-w, w);
+    BS_VECSWAP(pb, right+1-w, w);
 
     /* all elements equal to the pivot are now in the middle namely in the
        range [left + (pb-pa) and right - (pd-pc)] */

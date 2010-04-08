@@ -324,7 +324,7 @@ static void reversespecialcodes(Codeatposition *spaceCodeatposition,
   }
 }
 
-static void derivespecialcodesfromtable(Sfxiterator *sfi,bool deletevalues)
+static void sfx_derivespecialcodesfromtable(Sfxiterator *sfi,bool deletevalues)
 {
   GtCodetype code;
   unsigned int prefixindex;
@@ -371,7 +371,7 @@ static void derivespecialcodesfromtable(Sfxiterator *sfi,bool deletevalues)
   }
 }
 
-static void derivespecialcodesonthefly(Sfxiterator *sfi)
+static void sfx_derivespecialcodesonthefly(Sfxiterator *sfi)
 {
   GtCodetype code;
   unsigned int prefixindex;
@@ -709,10 +709,10 @@ static void preparethispart(Sfxiterator *sfi)
   sfi->suftab.offset = stpgetcurrentsuftaboffset(sfi->part,sfi->suftabparts);
   if (sfi->sfxstrategy.storespecialcodes)
   {
-    derivespecialcodesfromtable(sfi,(numofparts == 1U) ? true : false);
+    sfx_derivespecialcodesfromtable(sfi,(numofparts == 1U) ? true : false);
   } else
   {
-    derivespecialcodesonthefly(sfi);
+    sfx_derivespecialcodesonthefly(sfi);
   }
   if (sfi->sfxprogress != NULL)
   {

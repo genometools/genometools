@@ -29,14 +29,14 @@
 typedef struct
 {
   bool pathmatches;
-} Limdfsstate;
+} SpseLimdfsstate;
 
-struct Limdfsconstinfo
+typedef struct
 {
   GtBitsequence seedbitvector;
   unsigned long seedweight;
   const GtUchar *pattern;
-};
+} SpseLimdfsconstinfo;
 
 #ifdef SKDEBUG
 
@@ -44,7 +44,7 @@ static void spse_showLimdfsstate(const DECLAREPTRDFSSTATE(aliascol),
                                 unsigned long currentdepth,
                                 GT_UNUSED const Limdfsconstinfo *mti)
 {
-  const Limdfsstate *col = (const Limdfsstate *) aliascol;
+  const SpseLimdfsstate *col = (const SpseLimdfsstate *) aliascol;
 
   printf("at depth %lu (pathmatches=%s)\n",currentdepth,
                                            col->pathmatches ? "true" : "false");
@@ -55,11 +55,11 @@ static void spse_showLimdfsstate(const DECLAREPTRDFSSTATE(aliascol),
 static Limdfsconstinfo *spse_allocatedfsconstinfo(
                                GT_UNUSED unsigned int alphasize)
 {
-  Limdfsconstinfo *mti = gt_malloc(sizeof (Limdfsconstinfo));
-  return mti;
+  SpseLimdfsconstinfo *mti = gt_malloc(sizeof (SpseLimdfsconstinfo));
+  return (Limdfsconstinfo*) mti;
 }
 
-static void spse_initdfsconstinfo(Limdfsconstinfo *mti,
+static void spse_initdfsconstinfo(Limdfsconstinfo *mt,
                                   unsigned int alphasize,
                                   ...)
                                  /* Variable argument list is as follows:
@@ -69,6 +69,7 @@ static void spse_initdfsconstinfo(Limdfsconstinfo *mti,
                                  */
 {
   va_list ap;
+  SpseLimdfsconstinfo *mti = (SpseLimdfsconstinfo*) mt;
 
   va_start(ap,alphasize);
   mti->pattern = va_arg(ap, const GtUchar *);
@@ -86,7 +87,7 @@ static void spse_freedfsconstinfo(Limdfsconstinfo **mtiptr)
 static void spse_initLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
                                  GT_UNUSED Limdfsconstinfo *mti)
 {
-  Limdfsstate *column = (Limdfsstate *) aliascolumn;
+  SpseLimdfsstate *column = (SpseLimdfsstate *) aliascolumn;
 
   column->pathmatches = true;
 }
@@ -97,9 +98,10 @@ static void spse_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
                                       GT_UNUSED unsigned long rightbound,
                                       GT_UNUSED unsigned long width,
                                       unsigned long currentdepth,
-                                      Limdfsconstinfo *mti)
+                                      Limdfsconstinfo *mt)
 {
-  Limdfsstate *limdfsstate = (Limdfsstate *) aliascolumn;
+  SpseLimdfsstate *limdfsstate = (SpseLimdfsstate *) aliascolumn;
+  SpseLimdfsconstinfo *mti = (SpseLimdfsconstinfo*) mt;
 
   if (limdfsstate->pathmatches)
   {
@@ -128,16 +130,17 @@ static bool setpathmatch(GtBitsequence seedbitvector,
           currentchar == pattern[currentdepth-1]) ? true : false;
 }
 
-static void spse_nextLimdfsstate(const Limdfsconstinfo *mti,
+static void spse_nextLimdfsstate(const Limdfsconstinfo *mt,
                                  DECLAREPTRDFSSTATE(aliasoutcol),
                                  unsigned long currentdepth,
                                  GtUchar currentchar,
                                  GT_UNUSED const DECLAREPTRDFSSTATE(aliasincol))
 {
-  Limdfsstate *outcol = (Limdfsstate *) aliasoutcol;
+  SpseLimdfsstate *outcol = (SpseLimdfsstate *) aliasoutcol;
 #ifndef NDEBUG
-  const Limdfsstate *incol = (const Limdfsstate *) aliasincol;
+  const SpseLimdfsstate *incol = (const SpseLimdfsstate *) aliasincol;
 #endif
+  SpseLimdfsconstinfo *mti = (SpseLimdfsconstinfo*) mt;
 
   gt_assert(ISNOTSPECIAL(currentchar));
   gt_assert(currentdepth > 0);
@@ -149,12 +152,13 @@ static void spse_nextLimdfsstate(const Limdfsconstinfo *mti,
                                      currentchar);
 }
 
-static void spse_inplacenextLimdfsstate(const Limdfsconstinfo *mti,
+static void spse_inplacenextLimdfsstate(const Limdfsconstinfo *mt,
                                         DECLAREPTRDFSSTATE(aliascol),
                                         unsigned long currentdepth,
                                         GtUchar currentchar)
 {
-  Limdfsstate *col = (Limdfsstate *) aliascol;
+  SpseLimdfsstate *col = (SpseLimdfsstate *) aliascol;
+  const SpseLimdfsconstinfo *mti = (const SpseLimdfsconstinfo*) mt;
 
   gt_assert(ISNOTSPECIAL(currentchar));
   gt_assert(currentdepth > 0);
@@ -168,7 +172,7 @@ const AbstractDfstransformer *gt_spse_AbstractDfstransformer(void)
 {
   static const AbstractDfstransformer spse_adfst =
   {
-    sizeof (Limdfsstate),
+    sizeof (SpseLimdfsstate),
     spse_allocatedfsconstinfo,
     spse_initdfsconstinfo,
     NULL, /* no extractdfsconstinfo */

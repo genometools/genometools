@@ -146,7 +146,7 @@ void locali_showLimdfsstate(const DECLAREPTRDFSSTATE(aliasstate),
 #define ATADDRESS(S,COL)  /* Nothing */
 #endif
 
-#define UPDATEMAX(EXPR,BIT)\
+#define IDXLOCALIDP_UPDATEMAX(EXPR,BIT)\
         temp = EXPR;\
         if (temp > outcol->colvalues[i].bestcell)\
         {\
@@ -193,12 +193,12 @@ static void secondcolumn (const Limdfsconstinfo *lci,Column *outcol,
     outcol->colvalues[i].tracebit = Notraceback;
     if (outcol->colvalues[i-1].bestcell > 0)
     {
-      UPDATEMAX(outcol->colvalues[i-1].bestcell +
+      IDXLOCALIDP_UPDATEMAX(outcol->colvalues[i-1].bestcell +
                 lci->scorevalues.gapextend,Deletebit);
     }
-    UPDATEMAX(REPLACEMENTSCORE(&lci->scorevalues,
+    IDXLOCALIDP_UPDATEMAX(REPLACEMENTSCORE(&lci->scorevalues,
                                dbchar,lci->query[i-1]),Replacebit);
-    UPDATEMAX(lci->scorevalues.gapextend,Insertbit);
+    IDXLOCALIDP_UPDATEMAX(lci->scorevalues.gapextend,Insertbit);
 #endif
     if (outcol->colvalues[i].bestcell > 0 &&
         outcol->colvalues[i].bestcell > (Scoretype) outcol->maxvalue)
@@ -337,19 +337,21 @@ static void nextcolumn (const Limdfsconstinfo *lci,
     outcol->colvalues[i].tracebit = Notraceback;
     if (outcol->colvalues[i-1].bestcell > 0)
     {
-      UPDATEMAX(outcol->colvalues[i-1].bestcell + lci->scorevalues.gapextend,
-                Deletebit);
+      IDXLOCALIDP_UPDATEMAX(outcol->colvalues[i-1].bestcell
+                              + lci->scorevalues.gapextend,
+                            Deletebit);
     }
     if (incol->colvalues[i-1].bestcell > 0)
     {
-      UPDATEMAX(incol->colvalues[i-1].bestcell +
+      IDXLOCALIDP_UPDATEMAX(incol->colvalues[i-1].bestcell +
                 REPLACEMENTSCORE(&lci->scorevalues,
                                  dbchar,lci->query[i-1]),Replacebit);
     }
     if (incol->colvalues[i].bestcell > 0)
     {
-      UPDATEMAX(incol->colvalues[i].bestcell + lci->scorevalues.gapextend,
-                Insertbit);
+      IDXLOCALIDP_UPDATEMAX(incol->colvalues[i].bestcell
+                              + lci->scorevalues.gapextend,
+                            Insertbit);
     }
 #endif
     if (outcol->colvalues[i].bestcell > 0 &&

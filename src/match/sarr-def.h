@@ -22,6 +22,7 @@
 #include "core/defined-types.h"
 #include "core/encodedsequence.h"
 #include "core/intdef.h"
+#include "core/unused_api.h"
 
 #include "intcode-def.h"
 #include "lcpoverflow.h"
@@ -61,7 +62,7 @@ DECLAREBufferedfiletype(GtUchar);
 DECLAREBufferedfiletype(Largelcpvalue);
 
 #define DECLAREREADFUNCTION(TYPE)\
-        static int readnext ## TYPE ## fromstream(TYPE *val,\
+        GT_UNUSED static int readnext ## TYPE ## fromstream(TYPE *val,\
                                                   TYPE ## Bufferedfile *buf)\
         {\
           if (buf->nextread >= buf->nextfree)\
@@ -84,6 +85,12 @@ DECLAREBufferedfiletype(Largelcpvalue);
           *val = buf->bufferedfilespace[buf->nextread++];\
           return 1;\
         }
+
+DECLAREREADFUNCTION(GtUlong);
+
+DECLAREREADFUNCTION(GtUchar);
+
+DECLAREREADFUNCTION(Largelcpvalue);
 
 typedef struct
 {

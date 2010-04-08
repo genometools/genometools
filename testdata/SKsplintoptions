@@ -48,6 +48,6 @@
 -sysunrecog
 -shiftnegative
 -shiftimplementation
-+posixlib
+#+posixlib
 -duplicatequals
 -exitarg

@@ -15,6 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifndef FMI_OCC_GEN
+#define FMI_OCC_GEN
+
 #define ACCESSBWTTEXT(POS)\
         gt_encodedsequence_getencodedchar(fm->bwtformatching,POS,\
                                           GT_READMODE_FORWARD)
@@ -176,3 +179,5 @@ static unsigned long fmoccurrence (const Fmindex *fm,GtUchar cc,
 #endif
   return numofocc;
 }
+
+#endif

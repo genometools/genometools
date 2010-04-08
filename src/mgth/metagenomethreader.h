@@ -36,13 +36,13 @@
 
 /* jeweils die Anzahl der zu betrachtenden XML-Tags; Definitionen werden auch
  * in Schleifenkoepfen verwendet */
-#define QUERY_SIZE           1
-#define HIT_SIZE             3
-#define HIT_TO_QUERY_SIZE    9
+#define MGTH_QUERY_SIZE           1
+#define MGTH_HIT_SIZE             3
+#define MGTH_HIT_TO_QUERY_SIZE    9
 
-#define SET             1
-#define UNSET           0
-#define MEMORY_SIZE     250
+#define MGTH_SET             1
+#define MGTH_UNSET           0
+#define MGTH_MEMORY_SIZE     250
 
 /* Makros zum Zugriff auf die Parsestruct-Strukturen und Substrukturen */
 #define ARGUMENTS(PATH)\

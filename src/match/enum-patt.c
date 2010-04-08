@@ -73,7 +73,6 @@ Enumpatterniterator *gt_newenumpatterniterator(unsigned long minpatternlen,
   epi->alphasize = gt_alphabet_num_of_chars(
                                            gt_encodedsequence_alphabet(encseq));
   epi->esr = gt_encodedsequence_scanstate_new();
-  srand48(42349421);
   return epi;
 }
 
@@ -102,12 +101,12 @@ const GtUchar *gt_nextEnumpatterniterator(unsigned long *patternlen,
   } else
   {
     *patternlen = (unsigned long) (epi->minpatternlen +
-                                   (drand48() *
-                                   (double) (epi->maxpatternlen -
-                                             epi->minpatternlen+1)));
+                                   (random() %
+                                      (epi->maxpatternlen -
+                                       epi->minpatternlen+1)));
   }
   start =
-        (unsigned long) (drand48() * (double) (epi->totallength - *patternlen));
+        (unsigned long) (random() % (epi->totallength - *patternlen));
   gt_assert(start < (unsigned long) (epi->totallength - *patternlen));
   gt_encodedsequence_scanstate_init(epi->esr,
                                     epi->sampleencseq,
@@ -121,7 +120,7 @@ const GtUchar *gt_nextEnumpatterniterator(unsigned long *patternlen,
                                                      GT_READMODE_FORWARD);
     if (ISSPECIAL(cc))
     {
-      cc = (GtUchar) (drand48() * epi->alphasize);
+      cc = (GtUchar) (random() % epi->alphasize);
     }
     epi->patternspace[j] = cc;
   }

@@ -844,7 +844,7 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
 
                   /* Speichergroesse erhoehen */
                   parsestruct_ptr->hits_memory =
-                    MEMORY_SIZE + parsestruct_ptr->hits_memory;
+                    MGTH_MEMORY_SIZE + parsestruct_ptr->hits_memory;
 
                   HITSTRUCT(hitsnum) =
                     gt_realloc(hitsnum_tmp,

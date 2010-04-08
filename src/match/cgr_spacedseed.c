@@ -129,7 +129,7 @@ static void singlequerymatchspacedseed(Limdfsresources *limdfsresources,
   }
 }
 
-static void showmatch(GT_UNUSED void *processinfo,
+static void cgr_showmatch(GT_UNUSED void *processinfo,
                       const GtMatch *match)
 {
   printf("%lu\t",match->dblen);
@@ -240,7 +240,7 @@ int gt_matchspacedseed(bool withesa,
                                          0,
                                          (unsigned long) GT_INTWORDSIZE,
                                          false, /* keepexpandedonstack */
-                                         showmatch,
+                                         cgr_showmatch,
                                          NULL, /* processmatch info */
                                          NULL, /* processresult */
                                          NULL, /* processresult info */

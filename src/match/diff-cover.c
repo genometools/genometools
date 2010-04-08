@@ -347,7 +347,7 @@ static unsigned long differencecover_packsamplepos(const Differencecover *dcov,
 
 GT_DECLAREARRAYSTRUCT(Codeatposition);
 
-static unsigned long derivespecialcodesonthefly(Differencecover *dcov,
+static unsigned long dcov_derivespecialcodesonthefly(Differencecover *dcov,
                                                 const GtArrayCodeatposition
                                                        *codelist)
 {
@@ -495,7 +495,7 @@ static unsigned long inversesuftab_get(const Differencecover *dcov,
   return dcov->inversesuftab[differencecover_packsamplepos(dcov,pos)];
 }
 
-static void initinversesuftabnonspecials(Differencecover *dcov)
+static void dc_initinversesuftabnonspecials(Differencecover *dcov)
 {
   unsigned long sampleindex;
   unsigned long pos;
@@ -554,7 +554,7 @@ static unsigned long insertfullspecialrangesample(Differencecover *dcov,
   return specialidx;
 }
 
-static void initinversesuftabspecials(Differencecover *dcov)
+static void dc_initinversesuftabspecials(Differencecover *dcov)
 {
   dcov->inversesuftab = gt_malloc(sizeof (*dcov->inversesuftab) *
                                   dcov->maxsamplesize);
@@ -681,7 +681,7 @@ static void dc_processunsortedrange(Differencecover *dcov,
                                     unsigned long *right,
                                     unsigned long depth)
 {
-  Pairsuffixptr pairelem;
+  Pairsuffixptr *pairelem;
   unsigned long width;
 
   gt_assert(left < right && depth > 0);
@@ -721,8 +721,9 @@ static void dc_processunsortedrange(Differencecover *dcov,
     dcov->firstwithnewdepth.totalwidth = width;
     dcov->firstwithnewdepth.maxwidth = width;
   }
-  pairelem.left = left;
-  pairelem.right = right;
+  pairelem = gt_malloc(sizeof (Pairsuffixptr));
+  pairelem->left = left;
+  pairelem->right = right;
   gt_inl_queue_add(dcov->rangestobesorted,pairelem,false);
   dcov->currentqueuesize++;
   if (dcov->maxqueuesize < dcov->currentqueuesize)
@@ -731,7 +732,7 @@ static void dc_processunsortedrange(Differencecover *dcov,
   }
 }
 
-static int compareitv(const void *a,const void *b)
+static int dcov_compareitv(const void *a,const void *b)
 {
   const Itventry *itva = (const Itventry *) a,
                  *itvb = (const Itventry *) b;
@@ -782,7 +783,7 @@ static void dc_sortsuffixesonthislevel(Differencecover *dcov,
                     (unsigned long) dcov->currentdepth);
     */
   }
-  qsort(dcov->itvinfo,(size_t) width,sizeof (*dcov->itvinfo),compareitv);
+  qsort(dcov->itvinfo,(size_t) width,sizeof (*dcov->itvinfo),dcov_compareitv);
   for (idx=0; idx<width; idx++)
   {
     left[idx] = dcov->itvinfo[idx].suffixstart;
@@ -964,7 +965,7 @@ void dc_sortunsortedbucket(void *data,
 
 static void dc_sortremainingsamples(Differencecover *dcov)
 {
-  Pairsuffixptr *pairptr, pair;
+  Pairsuffixptr *pairptr;
 
   if (dcov->firstgenerationcount > 0)
   {
@@ -977,8 +978,8 @@ static void dc_sortremainingsamples(Differencecover *dcov)
   }
   if (dcov->inversesuftab == NULL)
   { /* now maxdepth > prefixlength */
-    initinversesuftabspecials(dcov);
-    initinversesuftabnonspecials(dcov);
+    dc_initinversesuftabspecials(dcov);
+    dc_initinversesuftabnonspecials(dcov);
   } else
   {
     gt_assert(dcov->firstgeneration.nextfreePairsuffixptr == 0);
@@ -1000,10 +1001,12 @@ static void dc_sortremainingsamples(Differencecover *dcov)
   GT_FREEARRAY(&dcov->firstgeneration,Pairsuffixptr);
   while (!gt_inl_queue_isempty(dcov->rangestobesorted))
   {
-    pair = gt_inl_queue_get(dcov->rangestobesorted);
+    Pairsuffixptr *thispairptr;
+    thispairptr = (Pairsuffixptr*) gt_inl_queue_get(dcov->rangestobesorted);
     gt_assert(dcov->currentqueuesize > 0);
     dcov->currentqueuesize--;
-    dc_sortsuffixesonthislevel(dcov,pair.left,pair.right);
+    dc_sortsuffixesonthislevel(dcov,thispairptr->left,thispairptr->right);
+    gt_free(thispairptr);
   }
   gt_logger_log(dcov->logger,"maxqueuesize = %lu",dcov->maxqueuesize);
   gt_free(dcov->itvinfo);
@@ -1114,7 +1117,8 @@ void gt_differencecover_sortsample(Differencecover *dcov,bool cmpcharbychar,
   }
   dcov->sortedsample = gt_malloc(sizeof (*dcov->sortedsample) *
                                  dcov->effectivesamplesize);
-  posinserted = derivespecialcodesonthefly(dcov,withcheck ? &codelist : NULL);
+  posinserted = dcov_derivespecialcodesonthefly(dcov,
+                                                withcheck ? &codelist : NULL);
   GT_FREEARRAY(&codelist,Codeatposition);
   diffptr = dcov->diffvalues;
   afterend = dcov->diffvalues + dcov->size;
@@ -1154,6 +1158,7 @@ void gt_differencecover_sortsample(Differencecover *dcov,bool cmpcharbychar,
   if (dcov->esr != NULL)
   {
     gt_encodedsequence_scanstate_delete(dcov->esr);
+    dcov->esr = NULL;
   }
   gt_assert(posinserted == dcov->effectivesamplesize);
   if (withcheck)
@@ -1170,7 +1175,7 @@ void gt_differencecover_sortsample(Differencecover *dcov,bool cmpcharbychar,
   }
   if (dcov->vparam == dcov->prefixlength)
   {
-    initinversesuftabspecials(dcov);
+    dc_initinversesuftabspecials(dcov);
     dc_initinversesuftabnonspecialsadjust(dcov);
     dc_bcktab2firstlevelintervals(dcov);
   } else

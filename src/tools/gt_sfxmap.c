@@ -45,8 +45,6 @@ typedef struct
                 delspranges;
 } Sfxmapoptions;
 
-DECLAREREADFUNCTION(GtUchar);
-
 static void deletethespranges(const GtEncodedsequence *encseq,
                               unsigned long delspranges)
 {

@@ -47,15 +47,15 @@ typedef struct
                 length;
 } Listtype;
 
-struct Dfsinfo /* information stored for each node of the lcp interval tree */
+typedef struct /* information stored for each node of the lcp interval tree */
 {
   GtUchar commonchar;
   unsigned long uniquecharposstart,
                 uniquecharposlength; /* uniquecharpos[start..start+len-1] */
   Listtype *nodeposlist;
-};
+} MaxpairsDfsinfo;
 
-struct Dfsstate /* global information */
+typedef struct  /* global information */
 {
   bool initialized;
   unsigned int searchlength,
@@ -66,29 +66,33 @@ struct Dfsstate /* global information */
   GtReadmode readmode;
   Processmaxpairs processmaxpairs;
   void *processmaxpairsinfo;
-};
+} MaxpairsDfsstate;
 
 #include "esa-dfs.h"
 
-static Dfsinfo *allocateDfsinfo(Dfsstate *state)
+static Dfsinfo *allocateDfsinfo(Dfsstate *astate)
 {
-  Dfsinfo *dfsinfo;
+  MaxpairsDfsinfo *dfsinfo;
+  MaxpairsDfsstate *state = (MaxpairsDfsstate*) astate;
 
-  ALLOCASSIGNSPACE(dfsinfo,NULL,Dfsinfo,1);
+  ALLOCASSIGNSPACE(dfsinfo,NULL,MaxpairsDfsinfo,1);
   ALLOCASSIGNSPACE(dfsinfo->nodeposlist,NULL,Listtype,state->alphabetsize);
-  return dfsinfo;
+  return (Dfsinfo*) dfsinfo;
 }
 
-static void freeDfsinfo(Dfsinfo *dfsinfo, GT_UNUSED Dfsstate *state)
+static void freeDfsinfo(Dfsinfo *adfsinfo, GT_UNUSED Dfsstate *state)
 {
+  MaxpairsDfsinfo *dfsinfo = (MaxpairsDfsinfo*) adfsinfo;;
   FREESPACE(dfsinfo->nodeposlist);
   FREESPACE(dfsinfo);
 }
 
-static void add2poslist(Dfsstate *state,Dfsinfo *ninfo,unsigned int base,
+static void add2poslist(Dfsstate *astate,Dfsinfo *aninfo,unsigned int base,
                         unsigned long leafnumber)
 {
   GtArrayGtUlong *ptr;
+  MaxpairsDfsstate *state = (MaxpairsDfsstate*) astate;
+  MaxpairsDfsinfo *ninfo = (MaxpairsDfsinfo*) aninfo;
 
   if (base >= state->alphabetsize)
   {
@@ -102,9 +106,12 @@ static void add2poslist(Dfsstate *state,Dfsinfo *ninfo,unsigned int base,
   }
 }
 
-static void concatlists(Dfsstate *state,Dfsinfo *father,Dfsinfo *son)
+static void concatlists(Dfsstate *astate,Dfsinfo *afather,Dfsinfo *ason)
 {
   unsigned int base;
+  MaxpairsDfsstate *state = (MaxpairsDfsstate*) astate;
+  MaxpairsDfsinfo *father = (MaxpairsDfsinfo*) afather;
+  MaxpairsDfsinfo *son = (MaxpairsDfsinfo*) ason;
 
   for (base = 0; base < state->alphabetsize; base++)
   {
@@ -113,12 +120,14 @@ static void concatlists(Dfsstate *state,Dfsinfo *father,Dfsinfo *son)
   father->uniquecharposlength += son->uniquecharposlength;
 }
 
-static int cartproduct1(Dfsstate *state,unsigned long fatherdepth,
-                        const Dfsinfo *ninfo,unsigned int base,
+static int cartproduct1(Dfsstate *astate,unsigned long fatherdepth,
+                        const Dfsinfo *aninfo,unsigned int base,
                         unsigned long leafnumber,GtError *err)
 {
   Listtype *pl;
   unsigned long *spptr, *start;
+  MaxpairsDfsstate *state = (MaxpairsDfsstate*) astate;
+  MaxpairsDfsinfo *ninfo = (MaxpairsDfsinfo*) aninfo;
 
   pl = &NODEPOSLISTENTRY(ninfo,base);
   start = state->poslist[base].spaceGtUlong + pl->start;
@@ -133,16 +142,19 @@ static int cartproduct1(Dfsstate *state,unsigned long fatherdepth,
   return 0;
 }
 
-static int cartproduct2(Dfsstate *state,
+static int cartproduct2(Dfsstate *astate,
                         unsigned long fatherdepth,
-                        const Dfsinfo *ninfo1,
+                        const Dfsinfo *aninfo1,
                         unsigned int base1,
-                        const Dfsinfo *ninfo2,
+                        const Dfsinfo *aninfo2,
                         unsigned int base2,
                         GtError *err)
 {
   Listtype *pl1, *pl2;
   unsigned long *start1, *start2, *spptr1, *spptr2;
+  MaxpairsDfsstate *state = (MaxpairsDfsstate*) astate;
+  MaxpairsDfsinfo *ninfo1 = (MaxpairsDfsinfo*) aninfo1;
+  MaxpairsDfsinfo *ninfo2 = (MaxpairsDfsinfo*) aninfo2;
 
   pl1 = &NODEPOSLISTENTRY(ninfo1,base1);
   start1 = state->poslist[base1].spaceGtUlong + pl1->start;
@@ -162,9 +174,10 @@ static int cartproduct2(Dfsstate *state,
   return 0;
 }
 
-static void setpostabto0(Dfsstate *state)
+static void setpostabto0(Dfsstate *astate)
 {
   unsigned int base;
+  MaxpairsDfsstate *state = (MaxpairsDfsstate*) astate;
 
   if (!state->initialized)
   {
@@ -179,14 +192,16 @@ static void setpostabto0(Dfsstate *state)
 
 static int processleafedge(bool firstsucc,
                            unsigned long fatherdepth,
-                           Dfsinfo *father,
+                           Dfsinfo *afather,
                            unsigned long leafnumber,
-                           Dfsstate *state,
+                           Dfsstate *astate,
                            GtError *err)
 {
   unsigned int base;
   unsigned long *start, *spptr;
   GtUchar leftchar;
+  MaxpairsDfsstate *state = (MaxpairsDfsstate*) astate;
+  MaxpairsDfsinfo *father = (MaxpairsDfsinfo*) afather;
 
 #ifdef SKDEBUG
   printf("processleafedge %lu firstsucc=%s, "
@@ -197,7 +212,7 @@ static int processleafedge(bool firstsucc,
 #endif
   if (fatherdepth < (unsigned long) state->searchlength)
   {
-    setpostabto0(state);
+    setpostabto0(astate);
     return 0;
   }
   if (leafnumber == 0)
@@ -224,7 +239,7 @@ static int processleafedge(bool firstsucc,
       NODEPOSLISTSTART(father,base) = state->poslist[base].nextfreeGtUlong;
       NODEPOSLISTLENGTH(father,base) = 0;
     }
-    add2poslist(state,father,(unsigned int) leftchar,leafnumber);
+    add2poslist(astate,afather,(unsigned int) leftchar,leafnumber);
     return 0;
   }
   if (father->commonchar != ISLEFTDIVERSE)
@@ -237,7 +252,7 @@ static int processleafedge(bool firstsucc,
     {
       if (leftchar != (GtUchar) base)
       {
-        if (cartproduct1(state,fatherdepth,father,base,leafnumber,err) != 0)
+        if (cartproduct1(astate,fatherdepth,afather,base,leafnumber,err) != 0)
         {
           return -1;
         }
@@ -254,19 +269,22 @@ static int processleafedge(bool firstsucc,
       }
     }
   }
-  add2poslist(state,father,(unsigned int) leftchar,leafnumber);
+  add2poslist(astate,afather,(unsigned int) leftchar,leafnumber);
   return 0;
 }
 
 static int processbranchedge(bool firstsucc,
                              unsigned long fatherdepth,
-                             Dfsinfo *father,
-                             Dfsinfo *son,
-                             Dfsstate *state,
+                             Dfsinfo *afather,
+                             Dfsinfo *ason,
+                             Dfsstate *astate,
                              GtError *err)
 {
   unsigned int chfather, chson;
   unsigned long *start, *spptr, *fptr, *fstart;
+  MaxpairsDfsstate *state = (MaxpairsDfsstate*) astate;
+  MaxpairsDfsinfo *son = (MaxpairsDfsinfo*) ason;
+  MaxpairsDfsinfo *father = (MaxpairsDfsinfo*) afather;
 
 #ifdef SKDEBUG
   printf("processbranchedge firstsucc=%s, "
@@ -276,7 +294,7 @@ static int processbranchedge(bool firstsucc,
 #endif
   if (fatherdepth < (unsigned long) state->searchlength)
   {
-    setpostabto0(state);
+    setpostabto0(astate);
     return 0;
   }
   state->initialized = false;
@@ -307,8 +325,8 @@ static int processbranchedge(bool firstsucc,
       {
         if (chson != chfather)
         {
-          if (cartproduct2(state,fatherdepth,father,chfather,
-                           son,chson,err) != 0)
+          if (cartproduct2(astate,fatherdepth,afather,chfather,
+                           ason,chson,err) != 0)
           {
             return -1;
           }
@@ -316,7 +334,7 @@ static int processbranchedge(bool firstsucc,
       }
       for (spptr = start; spptr < start + son->uniquecharposlength; spptr++)
       {
-        if (cartproduct1(state,fatherdepth,father,chfather,*spptr,err) != 0)
+        if (cartproduct1(astate,fatherdepth,afather,chfather,*spptr,err) != 0)
         {
           return -2;
         }
@@ -328,7 +346,7 @@ static int processbranchedge(bool firstsucc,
     {
       for (chson = 0; chson < state->alphabetsize; chson++)
       {
-        if (cartproduct1(state,fatherdepth,son,chson,*fptr,err) != 0)
+        if (cartproduct1(astate,fatherdepth,ason,chson,*fptr,err) != 0)
         {
           return -3;
         }
@@ -343,7 +361,7 @@ static int processbranchedge(bool firstsucc,
       }
     }
   }
-  concatlists(state,father,son);
+  concatlists(astate,afather,ason);
   return 0;
 }
 
@@ -358,7 +376,7 @@ int gt_enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
 {
   unsigned int base;
   GtArrayGtUlong *ptr;
-  Dfsstate state;
+  MaxpairsDfsstate state;
   bool haserr = false;
 
   state.alphabetsize = gt_alphabet_num_of_chars(
@@ -378,16 +396,16 @@ int gt_enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
     GT_INITARRAY(ptr,GtUlong);
   }
   if (gt_depthfirstesa(ssar,
-                    allocateDfsinfo,
-                    freeDfsinfo,
-                    processleafedge,
-                    processbranchedge,
-                    NULL,
-                    NULL,
-                    NULL,
-                    &state,
-                    logger,
-                    err) != 0)
+                       allocateDfsinfo,
+                       freeDfsinfo,
+                       processleafedge,
+                       processbranchedge,
+                       NULL,
+                       NULL,
+                       NULL,
+                       (Dfsstate*) &state,
+                       logger,
+                       err) != 0)
   {
     haserr = true;
   }

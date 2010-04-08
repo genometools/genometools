@@ -33,10 +33,6 @@
 #include "fmi-keyval.pr"
 #include "fmi-mapspec.pr"
 
- DECLAREREADFUNCTION(GtUchar);
-
- DECLAREREADFUNCTION(GtUlong);
-
 static int copytheindexfile(const GtStr *destindex,
                             const GtStr *sourceindex,
                             const char *suffix,

@@ -185,9 +185,9 @@ int gt_testmotifandencodemotif (Motif *motif, const GtEncodedsequence *encseq,
   return 0;
 }
 
-static GtOPrval parse_options(int *parsed_args,
-                              LTRharvestoptions *lo,
-                              int argc, const char **argv, GtError *err)
+static GtOPrval ltrh_parse_options(int *parsed_args,
+                                   LTRharvestoptions *lo,
+                                   int argc, const char **argv, GtError *err)
 {
   GtOptionParser *op;
   GtOption *optionindex,
@@ -600,7 +600,7 @@ int ltrharvestoptions(LTRharvestoptions *lo, int argc, const char **argv,
   gt_error_check(err);
 
   /** init LTRharvestoptions lo **/
-  rval = parse_options(&parsed_args, lo, argc, argv, err);
+  rval = ltrh_parse_options(&parsed_args, lo, argc, argv, err);
   if (rval == GT_OPTION_PARSER_OK)
   {
     if (parsed_args != argc)

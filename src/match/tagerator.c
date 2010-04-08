@@ -49,7 +49,7 @@ typedef struct
   unsigned long dbstartpos,
          matchlength;
   bool rcmatch;
-} Simplematch;
+} TgrSimplematch;
 
 typedef struct
 {
@@ -57,7 +57,7 @@ typedef struct
   GtUchar transformedtag[MAXTAGSIZE],
         rctransformedtag[MAXTAGSIZE];
   unsigned long taglen;
-} Tagwithlength;
+} TgrTagwithlength;
 
 typedef struct
 {
@@ -66,9 +66,9 @@ typedef struct
   const GtUchar *tagptr;
   const GtAlphabet *alpha;
   unsigned long *eqsvector;
-  const Tagwithlength *twlptr;
+  const TgrTagwithlength *twlptr;
   const GtEncodedsequence *encseq;
-} Showmatchinfo;
+} TgrShowmatchinfo;
 
 #define ADDTABULATOR\
         if (firstitem)\
@@ -79,9 +79,9 @@ typedef struct
           (void) putchar('\t');\
         }
 
-static void showmatch(void *processinfo,const GtMatch *match)
+static void tgr_showmatch(void *processinfo,const GtMatch *match)
 {
-  Showmatchinfo *showmatchinfo = (Showmatchinfo *) processinfo;
+  TgrShowmatchinfo *showmatchinfo = (TgrShowmatchinfo *) processinfo;
   bool firstitem = true;
 
   gt_assert(showmatchinfo->tageratoroptions != NULL);
@@ -193,17 +193,17 @@ static void showmatch(void *processinfo,const GtMatch *match)
 
 typedef struct
 {
-  Simplematch *spaceSimplematch;
-  unsigned long nextfreeSimplematch, allocatedSimplematch;
-  const Tagwithlength *twlptr;
-} ArraySimplematch;
+  TgrSimplematch *spaceTgrSimplematch;
+  unsigned long nextfreeTgrSimplematch, allocatedTgrSimplematch;
+  const TgrTagwithlength *twlptr;
+} ArrayTgrSimplematch;
 
-static void storematch(void *processinfo,const GtMatch *match)
+static void tgr_storematch(void *processinfo,const GtMatch *match)
 {
-  ArraySimplematch *storetab = (ArraySimplematch *) processinfo;
-  Simplematch *simplematch;
+  ArrayTgrSimplematch *storetab = (ArrayTgrSimplematch *) processinfo;
+  TgrSimplematch *simplematch;
 
-  GT_GETNEXTFREEINARRAY(simplematch,storetab,Simplematch,32);
+  GT_GETNEXTFREEINARRAY(simplematch,storetab,TgrSimplematch,32);
   simplematch->dbstartpos = match->dbstartpos;
   simplematch->matchlength = match->dblen;
   simplematch->rcmatch = ISRCDIR(storetab->twlptr);
@@ -217,7 +217,7 @@ static void checkmstats(void *processinfo,
                         unsigned long rightbound)
 {
   unsigned long realmstatlength;
-  Tagwithlength *twl = (Tagwithlength *) patterninfo;
+  TgrTagwithlength *twl = (TgrTagwithlength *) patterninfo;
 
   realmstatlength = genericmstats((const Limdfsresources *) processinfo,
                                   twl->tagptr + patternstartpos,
@@ -276,7 +276,7 @@ static void showmstats(void *processinfo,
                        unsigned long leftbound,
                        unsigned long rightbound)
 {
-  Tagwithlength *twl = (Tagwithlength *) patterninfo;
+  TgrTagwithlength *twl = (TgrTagwithlength *) patterninfo;
 
   printf("%lu %c",mstatlength,ISRCDIR(twl) ? '-' : '+');
   if (gt_intervalwidthleq((const Limdfsresources *) processinfo,leftbound,
@@ -298,8 +298,8 @@ static void showmstats(void *processinfo,
 
 static int cmpdescend(const void *a,const void *b)
 {
-  Simplematch *valuea = (Simplematch *) a;
-  Simplematch *valueb = (Simplematch *) b;
+  TgrSimplematch *valuea = (TgrSimplematch *) a;
+  TgrSimplematch *valueb = (TgrSimplematch *) b;
 
   if (!valuea->rcmatch && valueb->rcmatch)
   {
@@ -405,65 +405,66 @@ static bool performpatternsearch(const AbstractDfstransformer *dfst,
   return false;
 }
 
-static void compareresults(const ArraySimplematch *storeonline,
-                           const ArraySimplematch *storeoffline)
+static void compareresults(const ArrayTgrSimplematch *storeonline,
+                           const ArrayTgrSimplematch *storeoffline)
 {
   unsigned long ss;
 
-  if (storeonline->nextfreeSimplematch != storeoffline->nextfreeSimplematch)
+  if (storeonline->nextfreeTgrSimplematch
+        != storeoffline->nextfreeTgrSimplematch)
   {
-    fprintf(stderr,"nextfreeSimplematch: storeonline = %lu != %lu "
+    fprintf(stderr,"nextfreeTgrSimplematch: storeonline = %lu != %lu "
                    "storeoffline\n",
-                   storeonline->nextfreeSimplematch,
-                   storeoffline->nextfreeSimplematch);
+                   storeonline->nextfreeTgrSimplematch,
+                   storeoffline->nextfreeTgrSimplematch);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
-  gt_assert(storeonline->nextfreeSimplematch ==
-            storeoffline->nextfreeSimplematch);
-  if (storeoffline->nextfreeSimplematch > 1UL)
+  gt_assert(storeonline->nextfreeTgrSimplematch ==
+            storeoffline->nextfreeTgrSimplematch);
+  if (storeoffline->nextfreeTgrSimplematch > 1UL)
   {
-    qsort(storeoffline->spaceSimplematch,(size_t)
-          storeoffline->nextfreeSimplematch,
-          sizeof (Simplematch),
+    qsort(storeoffline->spaceTgrSimplematch,(size_t)
+          storeoffline->nextfreeTgrSimplematch,
+          sizeof (TgrSimplematch),
           cmpdescend);
   }
-  for (ss=0; ss < storeoffline->nextfreeSimplematch; ss++)
+  for (ss=0; ss < storeoffline->nextfreeTgrSimplematch; ss++)
   {
-    gt_assert(storeonline->spaceSimplematch != NULL &&
-           storeoffline->spaceSimplematch != NULL);
-    if (storeonline->spaceSimplematch[ss].rcmatch &&
-        !storeoffline->spaceSimplematch[ss].rcmatch)
+    gt_assert(storeonline->spaceTgrSimplematch != NULL &&
+           storeoffline->spaceTgrSimplematch != NULL);
+    if (storeonline->spaceTgrSimplematch[ss].rcmatch &&
+        !storeoffline->spaceTgrSimplematch[ss].rcmatch)
     {
       fprintf(stderr,"rcmatch: storeonline[%lu] = p != d "
                      "= storeoffline[%lu]\n",ss,ss);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
-    if (!storeonline->spaceSimplematch[ss].rcmatch &&
-        storeoffline->spaceSimplematch[ss].rcmatch)
+    if (!storeonline->spaceTgrSimplematch[ss].rcmatch &&
+        storeoffline->spaceTgrSimplematch[ss].rcmatch)
     {
       fprintf(stderr,"rcmatch: storeonline[%lu] = d != p "
                      "= storeoffline[%lu]\n",ss,ss);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
-    if (storeonline->spaceSimplematch[ss].matchlength !=
-        storeoffline->spaceSimplematch[ss].matchlength)
+    if (storeonline->spaceTgrSimplematch[ss].matchlength !=
+        storeoffline->spaceTgrSimplematch[ss].matchlength)
     {
       fprintf(stderr,"matchlength: storeonline[%lu] = %lu"
                      " != %lu = storeoffline[%lu]\n",
                      ss,
-                     storeonline->spaceSimplematch[ss].matchlength,
-                     storeoffline->spaceSimplematch[ss].matchlength,
+                     storeonline->spaceTgrSimplematch[ss].matchlength,
+                     storeoffline->spaceTgrSimplematch[ss].matchlength,
                      ss);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
-    if (storeonline->spaceSimplematch[ss].dbstartpos !=
-        storeoffline->spaceSimplematch[ss].dbstartpos)
+    if (storeonline->spaceTgrSimplematch[ss].dbstartpos !=
+        storeoffline->spaceTgrSimplematch[ss].dbstartpos)
     {
       fprintf(stderr,"dbstartpos: storeonline[%lu] = %lu"
                      " != %lu = storeoffline[%lu]\n",
                      ss,
-                     storeonline->spaceSimplematch[ss].dbstartpos,
-                     storeoffline->spaceSimplematch[ss].dbstartpos,
+                     storeonline->spaceTgrSimplematch[ss].dbstartpos,
+                     storeoffline->spaceTgrSimplematch[ss].dbstartpos,
                      ss);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
@@ -471,13 +472,13 @@ static void compareresults(const ArraySimplematch *storeonline,
 }
 
 static void searchoverstrands(const TageratorOptions *tageratoroptions,
-                              Tagwithlength *twl,
+                              TgrTagwithlength *twl,
                               const AbstractDfstransformer *dfst,
                               Myersonlineresources *mor,
                               Limdfsresources *limdfsresources,
-                              Showmatchinfo *showmatchinfo,
-                              ArraySimplematch *storeonline,
-                              ArraySimplematch *storeoffline)
+                              TgrShowmatchinfo *showmatchinfo,
+                              ArrayTgrSimplematch *storeonline,
+                              ArrayTgrSimplematch *storeoffline)
 {
   int try;
   bool domstats, matchfound;
@@ -587,17 +588,17 @@ int gt_runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
   }
   if (!haserr)
   {
-    Tagwithlength twl;
+    TgrTagwithlength twl;
     uint64_t tagnumber;
     unsigned int numofchars;
     const GtUchar *symbolmap, *currenttag;
     char *desc = NULL;
     Processmatch processmatch;
-    Showmatchinfo showmatchinfo;
+    TgrShowmatchinfo showmatchinfo;
     void *processmatchinfoonline, *processmatchinfooffline;
     Limdfsresources *limdfsresources = NULL;
     const GtAlphabet *alpha;
-    ArraySimplematch storeonline, storeoffline;
+    ArrayTgrSimplematch storeonline, storeoffline;
     const AbstractDfstransformer *dfst;
     GtSeqIterator *seqit = NULL;
 
@@ -608,22 +609,22 @@ int gt_runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     {
       dfst = gt_pms_AbstractDfstransformer();
     }
-    GT_INITARRAY(&storeonline,Simplematch);
-    GT_INITARRAY(&storeoffline,Simplematch);
+    GT_INITARRAY(&storeonline,TgrSimplematch);
+    GT_INITARRAY(&storeoffline,TgrSimplematch);
     storeonline.twlptr = storeoffline.twlptr = &twl;
     alpha = gt_encodedsequence_alphabet(encseq);
     symbolmap = gt_alphabet_symbolmap(alpha);
     numofchars = gt_alphabet_num_of_chars(alpha);
     if (tageratoroptions->docompare)
     {
-      processmatch = storematch;
+      processmatch = tgr_storematch;
       processmatchinfoonline = &storeonline;
       processmatchinfooffline = &storeoffline;
       showmatchinfo.eqsvector = NULL;
       showmatchinfo.encseq = encseq;
     } else
     {
-      processmatch = showmatch;
+      processmatch = tgr_showmatch;
       showmatchinfo.twlptr = &twl;
       showmatchinfo.tageratoroptions = tageratoroptions;
       showmatchinfo.alphasize = (unsigned int) numofchars;
@@ -726,8 +727,8 @@ int gt_runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
                                        twl.taglen);
         }
         printf("\n");
-        storeoffline.nextfreeSimplematch = 0;
-        storeonline.nextfreeSimplematch = 0;
+        storeoffline.nextfreeTgrSimplematch = 0;
+        storeonline.nextfreeTgrSimplematch = 0;
         if (tageratoroptions->userdefinedmaxdistance > 0 &&
             twl.taglen <= (unsigned long)
                           tageratoroptions->userdefinedmaxdistance)
@@ -758,8 +759,8 @@ int gt_runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
       }
       gt_seqiterator_delete(seqit);
     }
-    GT_FREEARRAY(&storeonline,Simplematch);
-    GT_FREEARRAY(&storeoffline,Simplematch);
+    GT_FREEARRAY(&storeonline,TgrSimplematch);
+    GT_FREEARRAY(&storeoffline,TgrSimplematch);
     gt_free(showmatchinfo.eqsvector);
     if (limdfsresources != NULL)
     {

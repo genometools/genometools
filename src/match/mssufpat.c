@@ -30,16 +30,16 @@
 typedef struct
 {
   unsigned long prefixofsuffixbits;
-} Limdfsstate;
+} GtMssufpatLimdfsstate;
 
-struct Limdfsconstinfo
+typedef struct
 {
   unsigned long patternlength,
                 mstatlength[GT_INTWORDSIZE],
                 *eqsvector;
   unsigned long mstatwitnessleftbound[GT_INTWORDSIZE],
          mstatwitnessrightbound[GT_INTWORDSIZE];
-};
+} GtMssufpatLimdfsconstinfo;
 
 #ifdef SKDEBUG
 
@@ -47,7 +47,7 @@ static void pms_showLimdfsstate(const DECLAREPTRDFSSTATE(aliascol),
                                 unsigned long currentdepth,
                                 const Limdfsconstinfo *mti)
 {
-  const Limdfsstate *col = (const Limdfsstate *) aliascol;
+  const GtMssufpatLimdfsstate *col = (const GtMssufpatLimdfsstate *) aliascol;
   bool first = true;
 
   unsigned long idx, backmask;
@@ -74,13 +74,14 @@ static void pms_showLimdfsstate(const DECLAREPTRDFSSTATE(aliascol),
 
 static Limdfsconstinfo *pms_allocatedfsconstinfo(unsigned int alphasize)
 {
-  Limdfsconstinfo *mti = gt_malloc(sizeof (Limdfsconstinfo));
+  GtMssufpatLimdfsconstinfo *mti =
+                                  gt_malloc(sizeof (GtMssufpatLimdfsconstinfo));
 
   mti->eqsvector = gt_malloc(sizeof (*mti->eqsvector) * alphasize);
-  return mti;
+  return (Limdfsconstinfo*) mti;
 }
 
-static void pms_initdfsconstinfo(Limdfsconstinfo *mti,
+static void pms_initdfsconstinfo(Limdfsconstinfo *mt,
                                  unsigned int alphasize,
                                  ...)
                                  /* Variable argument list is as follows:
@@ -90,6 +91,7 @@ static void pms_initdfsconstinfo(Limdfsconstinfo *mti,
                                  */
 {
   va_list ap;
+  GtMssufpatLimdfsconstinfo *mti = (GtMssufpatLimdfsconstinfo*) mt;
   const GtUchar *pattern;
 
   va_start(ap,alphasize);
@@ -103,9 +105,10 @@ static void pms_initdfsconstinfo(Limdfsconstinfo *mti,
 static void pms_extractdfsconstinfo(Processresult processresult,
                                     void *processinfo,
                                     const void *patterninfo,
-                                    Limdfsconstinfo *mti)
+                                    Limdfsconstinfo *mt)
 {
   unsigned long idx;
+  GtMssufpatLimdfsconstinfo *mti = (GtMssufpatLimdfsconstinfo*) mt;
 
   for (idx=0; idx<mti->patternlength; idx++)
   {
@@ -115,8 +118,9 @@ static void pms_extractdfsconstinfo(Processresult processresult,
   }
 }
 
-static void pms_freedfsconstinfo(Limdfsconstinfo **mtiptr)
+static void pms_freedfsconstinfo(Limdfsconstinfo **mtptr)
 {
+  GtMssufpatLimdfsconstinfo **mtiptr = (GtMssufpatLimdfsconstinfo**) mtptr;
   gt_free((*mtiptr)->eqsvector);
   gt_free((*mtiptr));
   *mtiptr = NULL;
@@ -166,9 +170,10 @@ static unsigned long zerosontheright(unsigned long v)
 }
 
 static void pms_initLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
-                                Limdfsconstinfo *mti)
+                                Limdfsconstinfo *mt)
 {
-  Limdfsstate *column = (Limdfsstate *) aliascolumn;
+  GtMssufpatLimdfsstate *column = (GtMssufpatLimdfsstate *) aliascolumn;
+  GtMssufpatLimdfsconstinfo *mti = (GtMssufpatLimdfsconstinfo*) mt;
   unsigned long idx;
 
   column->prefixofsuffixbits = ~0UL;
@@ -187,9 +192,10 @@ static void pms_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
                                      unsigned long rightbound,
                                      GT_UNUSED unsigned long width,
                                      unsigned long currentdepth,
-                                     Limdfsconstinfo *mti)
+                                     Limdfsconstinfo *mt)
 {
-  Limdfsstate *limdfsstate = (Limdfsstate *) aliascolumn;
+  GtMssufpatLimdfsstate *limdfsstate = (GtMssufpatLimdfsstate *) aliascolumn;
+  GtMssufpatLimdfsconstinfo *mti = (GtMssufpatLimdfsconstinfo*) mt;
 
   if (limdfsstate->prefixofsuffixbits > 0)
   {
@@ -221,7 +227,7 @@ static void pms_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
   }
 }
 
-static void pms_nextLimdfsstate(const Limdfsconstinfo *mti,
+static void pms_nextLimdfsstate(const Limdfsconstinfo *mt,
                                 DECLAREPTRDFSSTATE(aliasoutcol),
                                 unsigned long currentdepth,
                                 GtUchar currentchar,
@@ -230,8 +236,10 @@ static void pms_nextLimdfsstate(const Limdfsconstinfo *mti,
 #ifdef SKDEBUG
   char buffer1[GT_INTWORDSIZE+1], buffer2[GT_INTWORDSIZE+1];
 #endif
-  Limdfsstate *outcol = (Limdfsstate *) aliasoutcol;
-  const Limdfsstate *incol = (const Limdfsstate *) aliasincol;
+  GtMssufpatLimdfsstate *outcol = (GtMssufpatLimdfsstate *) aliasoutcol;
+  GtMssufpatLimdfsconstinfo *mti = (GtMssufpatLimdfsconstinfo*) mt;
+  const GtMssufpatLimdfsstate *incol =
+                                     (const GtMssufpatLimdfsstate *) aliasincol;
 
   gt_assert(ISNOTSPECIAL(currentchar));
   gt_assert(currentdepth > 0);
@@ -253,7 +261,7 @@ static void pms_nextLimdfsstate(const Limdfsconstinfo *mti,
 #endif
 }
 
-static void pms_inplacenextLimdfsstate(const Limdfsconstinfo *mti,
+static void pms_inplacenextLimdfsstate(const Limdfsconstinfo *mt,
                                        DECLAREPTRDFSSTATE(aliascol),
                                        unsigned long currentdepth,
                                        GtUchar currentchar)
@@ -262,7 +270,8 @@ static void pms_inplacenextLimdfsstate(const Limdfsconstinfo *mti,
   char buffer1[INTWORDSIZE+1], buffer2[INTWORDSIZE+1];
   unsigned long tmp;
 #endif
-  Limdfsstate *col = (Limdfsstate *) aliascol;
+  GtMssufpatLimdfsstate *col = (GtMssufpatLimdfsstate *) aliascol;
+  GtMssufpatLimdfsconstinfo *mti = (GtMssufpatLimdfsconstinfo*) mt;
 
   gt_assert(ISNOTSPECIAL(currentchar));
 #ifdef SKDEBUG
@@ -281,7 +290,7 @@ const AbstractDfstransformer *gt_pms_AbstractDfstransformer(void)
 {
   static const AbstractDfstransformer pms_adfst =
   {
-    sizeof (Limdfsstate),
+    sizeof (GtMssufpatLimdfsstate),
     pms_allocatedfsconstinfo,
     pms_initdfsconstinfo,
     pms_extractdfsconstinfo,

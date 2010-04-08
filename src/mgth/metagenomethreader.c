@@ -24,7 +24,7 @@
 #include "mg_xmlparser.h"
 #include "metagenomethreader.h"
 
-static GtOPrval parse_options(int *parsed_args,
+static GtOPrval mgth_parse_options(int *parsed_args,
                               MetagenomeThreaderArguments
                               *metagenomethreader_arguments, int argc,
                               const char **argv, GtError * err)
@@ -312,8 +312,9 @@ int gt_metagenomethreader(int argc, const char **argv, GtError * err)
   gt_error_check(err);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &parsestruct.metagenomethreader_arguments,
-                        argc, argv, err)) {
+  switch (mgth_parse_options(&parsed_args,
+                             &parsestruct.metagenomethreader_arguments,
+                             argc, argv, err)) {
     case GT_OPTION_PARSER_OK:
       break;
     case GT_OPTION_PARSER_ERROR:
@@ -416,12 +417,12 @@ int gt_metagenomethreader(int argc, const char **argv, GtError * err)
 
     /* 3 Flags, die bei oeffnenden XML-Tags gesetzt und bei schliessenden
        geloescht werden */
-    parsestruct.def_flag = UNSET;
-    parsestruct.hit_flag = UNSET;
-    parsestruct.hit_hsp_flag = UNSET;
-    parsestruct.xml_tag_flag = UNSET;
-    parsestruct.giexp_flag = UNSET;
-    parsestruct.gi_flag = UNSET;
+    parsestruct.def_flag = MGTH_UNSET;
+    parsestruct.hit_flag = MGTH_UNSET;
+    parsestruct.hit_hsp_flag = MGTH_UNSET;
+    parsestruct.xml_tag_flag = MGTH_UNSET;
+    parsestruct.giexp_flag = MGTH_UNSET;
+    parsestruct.gi_flag = MGTH_UNSET;
 
     /* Variablen (Zeilennummer, Fehlercode) zur Fehlerbehandlung waehrend
        des Parsvorganges des XML-Files */
@@ -456,13 +457,13 @@ int gt_metagenomethreader(int argc, const char **argv, GtError * err)
     parsestruct.hits_statistics.hitsnumber = 0;
 
     /* Speichergroesse fuer die Speicherbereiche der Statistik setzen */
-    parsestruct.hits_memory = MEMORY_SIZE;
+    parsestruct.hits_memory = MGTH_MEMORY_SIZE;
 
     /* Speicher fuer die Statistik reservieren und zuweisen */
     parsestruct.hits_statistics.hitsnum =
-      gt_calloc(MEMORY_SIZE, sizeof (unsigned long));
+      gt_calloc(MGTH_MEMORY_SIZE, sizeof (unsigned long));
     parsestruct.hits_statistics.memory =
-      gt_calloc(MEMORY_SIZE, sizeof (unsigned long));
+      gt_calloc(MGTH_MEMORY_SIZE, sizeof (unsigned long));
 
     /* Variable der Umgebungsvariablen - genometools.org */
     parsestruct.err = err;

@@ -58,9 +58,9 @@ typedef struct {
   unsigned int width;
 } AnnotationSketchArguments;
 
-static GtOPrval parse_options(int *parsed_args,
-                            AnnotationSketchArguments *arguments,
-                            int argc, const char **argv, GtError *err)
+static GtOPrval sketch_parse_options(int *parsed_args,
+                                     AnnotationSketchArguments *arguments,
+                                     int argc, const char **argv, GtError *err)
 {
   GtOptionParser *op;
   GtOption  *option, *option2;
@@ -248,7 +248,7 @@ int gt_sketch(int argc, const char **argv, GtError *err)
   gt_str_delete(prog);
   gt_str_append_cstr(gt_style_file, "/sketch/default.style");
   arguments.stylefile = gt_str_new_cstr(gt_str_get(gt_style_file));
-  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
+  switch (sketch_parse_options(&parsed_args, &arguments, argc, argv, err)) {
     case GT_OPTION_PARSER_OK: break;
     case GT_OPTION_PARSER_ERROR:
       gt_str_delete(arguments.stylefile);

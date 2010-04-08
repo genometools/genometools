@@ -199,18 +199,18 @@ void gt_chain_applyweight(double weightfactor,GtChain2Dimmatchtable *matchtable)
 #define MAKEENDPOINT(FID)       (FID)
 #define FRAGIDENT(FRAG)         ((FRAG)->fpident)
 
-#define UNDEFPREVIOUS           matchtable->nextfree
+#define GT_CHAIN2DIM_UNDEFPREVIOUS           matchtable->nextfree
 
-#define GETSTOREDSTARTPOINT(DIM,IDX)\
+#define GT_CHAIN2DIM_GETSTOREDSTARTPOINT(DIM,IDX)\
         matchtable->matches[IDX].startpos[DIM]
-#define GETSTOREDENDPOINT(DIM,IDX)\
+#define GT_CHAIN2DIM_GETSTOREDENDPOINT(DIM,IDX)\
         matchtable->matches[IDX].endpos[DIM]
-#define INITIALGAP(IDX)\
+#define GT_CHAIN2DIM_INITIALGAP(IDX)\
         matchtable->matches[IDX].initialgap
-#define TERMINALGAP(IDX)\
+#define GT_CHAIN2DIM_TERMINALGAP(IDX)\
         matchtable->matches[IDX].terminalgap
 
-#define CHECKCHAINSPACE\
+#define GT_CHAIN2DIM_CHECKCHAINSPACE\
         if (lengthofchain >= chain->chainedmatches.allocatedGtChain2Dimref)\
         {\
          chain->chainedmatches.spaceGtChain2Dimref = \
@@ -262,18 +262,24 @@ static bool overlappingmatches(const GtChain2Dimmatchtable *matchtable,
                                unsigned long i,
                                unsigned long j)
 {
-  return (GETSTOREDENDPOINT(0,i) >= GETSTOREDSTARTPOINT(0,j) ||
-          GETSTOREDENDPOINT(1,i) >= GETSTOREDSTARTPOINT(1,j)) ? true : false;
+  return (GT_CHAIN2DIM_GETSTOREDENDPOINT(0,i)
+            >= GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0,j) ||
+          GT_CHAIN2DIM_GETSTOREDENDPOINT(1,i)
+            >= GT_CHAIN2DIM_GETSTOREDSTARTPOINT(1,j)) ? true : false;
 }
 
 static bool colinearmatches(const GtChain2Dimmatchtable *matchtable,
                             unsigned long i,
                             unsigned long j)
 {
-  return (GETSTOREDSTARTPOINT(0, i) < GETSTOREDSTARTPOINT(0, j) &&
-          GETSTOREDENDPOINT(0, i)   < GETSTOREDENDPOINT(0, j)   &&
-          GETSTOREDSTARTPOINT(1, i) < GETSTOREDSTARTPOINT(1, j) &&
-          GETSTOREDENDPOINT(1, i)   < GETSTOREDENDPOINT(1, j)) ? true : false;
+  return (GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0, i)
+            < GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0, j) &&
+          GT_CHAIN2DIM_GETSTOREDENDPOINT(0, i)
+            < GT_CHAIN2DIM_GETSTOREDENDPOINT(0, j)   &&
+          GT_CHAIN2DIM_GETSTOREDSTARTPOINT(1, i)
+            < GT_CHAIN2DIM_GETSTOREDSTARTPOINT(1, j) &&
+          GT_CHAIN2DIM_GETSTOREDENDPOINT(1, i)
+            < GT_CHAIN2DIM_GETSTOREDENDPOINT(1, j)) ? true : false;
 }
 
 static GtChain2Dimscoretype gapcostL1(const GtChain2Dimmatchtable *matchtable,
@@ -281,26 +287,33 @@ static GtChain2Dimscoretype gapcostL1(const GtChain2Dimmatchtable *matchtable,
                                   unsigned long j)
 {
   return (GtChain2Dimscoretype)
-         ((GETSTOREDSTARTPOINT(0,j) - GETSTOREDENDPOINT(0,i)) +
-          (GETSTOREDSTARTPOINT(1,j) - GETSTOREDENDPOINT(1,i)));
+         ((GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0,j)
+             - GT_CHAIN2DIM_GETSTOREDENDPOINT(0,i)) +
+          (GT_CHAIN2DIM_GETSTOREDSTARTPOINT(1,j)
+             - GT_CHAIN2DIM_GETSTOREDENDPOINT(1,i)));
 }
 
-static GtChain2Dimscoretype overlapcost(const GtChain2Dimmatchtable *matchtable,
+static GtChain2Dimscoretype gt_chain2dim_overlapcost(
+                                    const GtChain2Dimmatchtable *matchtable,
                                     unsigned long i,
                                     unsigned long j)
 {
   GtChain2Dimpostype overlaplength = 0;
 
   /* add overlap in first dimension */
-  if (GETSTOREDSTARTPOINT(0, j) <= GETSTOREDENDPOINT(0, i))
+  if (GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0, j)
+        <= GT_CHAIN2DIM_GETSTOREDENDPOINT(0, i))
   {
-    overlaplength += GETSTOREDENDPOINT(0, i) - GETSTOREDSTARTPOINT(0, j) + 1;
+    overlaplength += GT_CHAIN2DIM_GETSTOREDENDPOINT(0, i)
+                       - GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0, j) + 1;
   }
 
   /* add overlap in second dimension */
-  if (GETSTOREDSTARTPOINT(1, j) <= GETSTOREDENDPOINT(1, i))
+  if (GT_CHAIN2DIM_GETSTOREDSTARTPOINT(1, j)
+        <= GT_CHAIN2DIM_GETSTOREDENDPOINT(1, i))
   {
-    overlaplength += GETSTOREDENDPOINT(1, i) - GETSTOREDSTARTPOINT(1, j) + 1;
+    overlaplength += GT_CHAIN2DIM_GETSTOREDENDPOINT(1, i)
+                       - GT_CHAIN2DIM_GETSTOREDSTARTPOINT(1, j) + 1;
   }
   return (GtChain2Dimscoretype) overlaplength;
 }
@@ -322,14 +335,18 @@ static GtChain2Dimscoretype gapcostCc(const GtChain2Dimmatchtable *matchtable,
 {
   GtChain2Dimpostype value1, value2;
 
-  gt_assert(GETSTOREDSTARTPOINT(0,j) > GETSTOREDENDPOINT(0,i) &&
-            GETSTOREDSTARTPOINT(1,j) > GETSTOREDENDPOINT(1,i));
-  value1 = GETSTOREDSTARTPOINT(0,j) - GETSTOREDENDPOINT(0,i) - 1,
-  value2 = GETSTOREDSTARTPOINT(1,j) - GETSTOREDENDPOINT(1,i) - 1;
+  gt_assert(GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0,j)
+              > GT_CHAIN2DIM_GETSTOREDENDPOINT(0,i) &&
+            GT_CHAIN2DIM_GETSTOREDSTARTPOINT(1,j)
+              > GT_CHAIN2DIM_GETSTOREDENDPOINT(1,i));
+  value1 = GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0,j)
+             - GT_CHAIN2DIM_GETSTOREDENDPOINT(0,i) - 1,
+  value2 = GT_CHAIN2DIM_GETSTOREDSTARTPOINT(1,j)
+             - GT_CHAIN2DIM_GETSTOREDENDPOINT(1,i) - 1;
   return (GtChain2Dimscoretype) MAX(value1,value2);
 }
 
-static void chainingboundarycases(const GtChain2Dimmode *chainmode,
+static void gt_chain2dim_chainingboundarycases(const GtChain2Dimmode *chainmode,
                                   GtChain2Dim *chain,
                                   const GtChain2Dimmatchtable *matchtable)
 {
@@ -346,31 +363,32 @@ static void chainingboundarycases(const GtChain2Dimmode *chainmode,
       chain->scoreofchain = matchtable->matches[0].weight;
       if (chainmode->chainkind == GLOBALCHAININGWITHGAPCOST)
       {
-        chain->scoreofchain -= (INITIALGAP(0) + TERMINALGAP(0));
+        chain->scoreofchain -= (GT_CHAIN2DIM_INITIALGAP(0)
+                                  + GT_CHAIN2DIM_TERMINALGAP(0));
       }
       lengthofchain = 1UL;
-      CHECKCHAINSPACE;
+      GT_CHAIN2DIM_CHECKCHAINSPACE;
       chain->chainedmatches.spaceGtChain2Dimref[0] = 0;
       chain->chainedmatches.nextfreeGtChain2Dimref = 1UL;
     }
   }
 }
 
-static void retracepreviousinchain(GtChain2Dim *chain,
+static void gt_chain2dim_retracepreviousinchain(GtChain2Dim *chain,
                                    const GtChain2Dimmatchtable *matchtable,
                                    unsigned long retracestart)
 {
   unsigned long matchnum, idx, lengthofchain;
 
   for (lengthofchain = 0, matchnum = retracestart;
-       matchnum != UNDEFPREVIOUS; lengthofchain++)
+       matchnum != GT_CHAIN2DIM_UNDEFPREVIOUS; lengthofchain++)
   {
     matchnum = matchtable->matches[matchnum].previousinchain;
   }
-  CHECKCHAINSPACE
+  GT_CHAIN2DIM_CHECKCHAINSPACE
   matchnum = retracestart;
   idx = lengthofchain;
-  while (matchnum != UNDEFPREVIOUS)
+  while (matchnum != GT_CHAIN2DIM_UNDEFPREVIOUS)
   {
     gt_assert(idx > 0);
     idx--;
@@ -381,15 +399,16 @@ static void retracepreviousinchain(GtChain2Dim *chain,
   chain->chainedmatches.nextfreeGtChain2Dimref = lengthofchain;
 }
 
-static bool checkmaxgapwidth(const GtChain2Dimmatchtable *matchtable,
-                             GtChain2Dimpostype maxgapwidth,
-                             unsigned long leftmatch,
-                             unsigned long rightmatch)
+static bool gt_chain2dim_checkmaxgapwidth(const GtChain2Dimmatchtable
+                                                                    *matchtable,
+                                          GtChain2Dimpostype maxgapwidth,
+                                          unsigned long leftmatch,
+                                          unsigned long rightmatch)
 {
   GtChain2Dimpostype gapwidth, startpoint, endpoint;
 
-  startpoint = GETSTOREDSTARTPOINT(0,rightmatch);
-  endpoint = GETSTOREDENDPOINT(0,leftmatch);
+  startpoint = GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0,rightmatch);
+  endpoint = GT_CHAIN2DIM_GETSTOREDENDPOINT(0,leftmatch);
   if (startpoint <= endpoint)
   {
     gapwidth = 0;
@@ -401,8 +420,8 @@ static bool checkmaxgapwidth(const GtChain2Dimmatchtable *matchtable,
   {
     return false;
   }
-  startpoint = GETSTOREDSTARTPOINT(1,rightmatch);
-  endpoint = GETSTOREDENDPOINT(1,leftmatch);
+  startpoint = GT_CHAIN2DIM_GETSTOREDSTARTPOINT(1,rightmatch);
+  endpoint = GT_CHAIN2DIM_GETSTOREDENDPOINT(1,leftmatch);
   if (startpoint <= endpoint)
   {
     gapwidth = 0;
@@ -417,10 +436,11 @@ static bool checkmaxgapwidth(const GtChain2Dimmatchtable *matchtable,
   return true;
 }
 
-static void bruteforcechainingscores(const GtChain2Dimmode *chainmode,
-                                     GtChain2Dimmatchtable *matchtable,
-                                     GtChain2Dimgapcostfunction
-                                       chaingapcostfunction)
+static void gt_chain2dim_bruteforcechainingscores(const GtChain2Dimmode
+                                                                     *chainmode,
+                                             GtChain2Dimmatchtable *matchtable,
+                                             GtChain2Dimgapcostfunction
+                                               chaingapcostfunction)
 {
   unsigned long previous, leftmatch, rightmatch;
   GtChain2Dimscoretype weightright, score;
@@ -430,12 +450,13 @@ static void bruteforcechainingscores(const GtChain2Dimmode *chainmode,
   if (matchtable->nextfree > 1UL)
   {
     matchtable->matches[0].firstinchain = 0;
-    matchtable->matches[0].previousinchain = UNDEFPREVIOUS;
+    matchtable->matches[0].previousinchain = GT_CHAIN2DIM_UNDEFPREVIOUS;
     matchtable->matches[0].score
       = matchtable->matches[0].weight;
     if (chainmode->chainkind == GLOBALCHAININGWITHGAPCOST)
     {
-      matchtable->matches[0].score -= (INITIALGAP(0) + TERMINALGAP(0));
+      matchtable->matches[0].score -= (GT_CHAIN2DIM_INITIALGAP(0)
+                                         + GT_CHAIN2DIM_TERMINALGAP(0));
     }
     for (rightmatch=1Ul; rightmatch<matchtable->nextfree; rightmatch++)
     {
@@ -446,7 +467,7 @@ static void bruteforcechainingscores(const GtChain2Dimmode *chainmode,
       for (leftmatch=0; leftmatch<rightmatch; leftmatch++)
       {
         if (chainmode->maxgapwidth != 0 &&
-           !checkmaxgapwidth(matchtable,
+           !gt_chain2dim_checkmaxgapwidth(matchtable,
                              chainmode->maxgapwidth,
                              leftmatch,
                              rightmatch))
@@ -482,8 +503,8 @@ static void bruteforcechainingscores(const GtChain2Dimmode *chainmode,
             score -= chaingapcostfunction(matchtable,leftmatch,rightmatch);
             if (chainmode->chainkind == GLOBALCHAININGWITHGAPCOST)
             {
-              score += (weightright + TERMINALGAP(leftmatch)
-                                    - TERMINALGAP(rightmatch));
+              score += (weightright + GT_CHAIN2DIM_TERMINALGAP(leftmatch)
+                                    - GT_CHAIN2DIM_TERMINALGAP(rightmatch));
               previous = leftmatch;
             } else
             {
@@ -494,7 +515,7 @@ static void bruteforcechainingscores(const GtChain2Dimmode *chainmode,
               } else
               {
                 score = weightright;
-                previous = UNDEFPREVIOUS;
+                previous = GT_CHAIN2DIM_UNDEFPREVIOUS;
               }
             }
           }
@@ -510,7 +531,7 @@ static void bruteforcechainingscores(const GtChain2Dimmode *chainmode,
       {
         matchtable->matches[rightmatch].previousinchain
           = localmaxmatch.maxmatchnum;
-        if (localmaxmatch.maxmatchnum == UNDEFPREVIOUS)
+        if (localmaxmatch.maxmatchnum == GT_CHAIN2DIM_UNDEFPREVIOUS)
         {
           matchtable->matches[rightmatch].firstinchain = rightmatch;
         } else
@@ -522,13 +543,15 @@ static void bruteforcechainingscores(const GtChain2Dimmode *chainmode,
         matchtable->matches[rightmatch].score = localmaxmatch.maxscore;
       } else
       {
-        matchtable->matches[rightmatch].previousinchain = UNDEFPREVIOUS;
+        matchtable->matches[rightmatch].previousinchain =
+                                                     GT_CHAIN2DIM_UNDEFPREVIOUS;
         matchtable->matches[rightmatch].firstinchain = rightmatch;
         matchtable->matches[rightmatch].score = weightright;
         if (chainmode->chainkind == GLOBALCHAININGWITHGAPCOST)
         {
           matchtable->matches[rightmatch].score
-            -= (INITIALGAP(rightmatch) + TERMINALGAP(rightmatch));
+            -= (GT_CHAIN2DIM_INITIALGAP(rightmatch)
+                  + GT_CHAIN2DIM_TERMINALGAP(rightmatch));
         }
       }
     }
@@ -541,7 +564,7 @@ static void bruteforcechainingscores(const GtChain2Dimmode *chainmode,
   If the match points are identical, then the order is undefined.
 */
 
-static int cmpendMatchpoint2(const GtKeytype keya,
+static int gt_chain2dim_cmpendMatchpoint2(const GtKeytype keya,
                              const GtKeytype keyb,
                              GT_UNUSED void *info)
 {
@@ -564,18 +587,19 @@ static int cmpendMatchpoint2(const GtKeytype keya,
   return 0;
 }
 
-static GtChain2Dimscoretype evalpriority(bool addterminal,
+static GtChain2Dimscoretype gt_chain2dim_evalpriority(bool addterminal,
                                      const GtChain2Dimmatchtable *matchtable,
                                      unsigned long matchnum)
 {
   if (addterminal)
   {
-    return matchtable->matches[matchnum].score - TERMINALGAP(matchnum);
+    return matchtable->matches[matchnum].score
+             - GT_CHAIN2DIM_TERMINALGAP(matchnum);
   }
   return matchtable->matches[matchnum].score;
 }
 
-static void insertintodict(bool addterminal,
+static void gt_chain2dim_insertintodict(bool addterminal,
                            const GtChain2Dimmatchtable *matchtable,
                            Matchstore *matchstore,
                            Matchpoint *qmatch2)
@@ -586,13 +610,13 @@ static void insertintodict(bool addterminal,
   retval2 = (Matchpoint *) gt_rbt_search ((const GtKeytype) qmatch2,
                                           &nodecreated,
                                           &matchstore->dictroot,
-                                          cmpendMatchpoint2,
+                                          gt_chain2dim_cmpendMatchpoint2,
                                           NULL);
   gt_assert(retval2 != NULL);
   if (!nodecreated)
   {
-    if (evalpriority(addterminal,matchtable,FRAGIDENT(retval2)) <
-        evalpriority(addterminal,matchtable,FRAGIDENT(qmatch2)))
+    if (gt_chain2dim_evalpriority(addterminal,matchtable,FRAGIDENT(retval2)) <
+        gt_chain2dim_evalpriority(addterminal,matchtable,FRAGIDENT(qmatch2)))
     {
       gt_assert(retval2->fpposition == qmatch2->fpposition);
       retval2->fpident = qmatch2->fpident;
@@ -601,7 +625,7 @@ static void insertintodict(bool addterminal,
   }
 }
 
-static void activatematchpoint(bool addterminal,
+static void gt_chain2dim_activatematchpoint(bool addterminal,
                                const GtChain2Dimmatchtable *matchtable,
                                Matchstore *matchstore,
                                Matchpoint *qmatch2)
@@ -609,22 +633,24 @@ static void activatematchpoint(bool addterminal,
   Matchpoint *tmp2;
   GtChain2Dimscoretype qpriority;
 
-  qpriority = evalpriority(addterminal,matchtable,FRAGIDENT(qmatch2));
+  qpriority = gt_chain2dim_evalpriority(addterminal,matchtable,
+                                        FRAGIDENT(qmatch2));
   tmp2 = (Matchpoint *) gt_rbt_previousequalkey ((const GtKeytype) qmatch2,
                                                 matchstore->dictroot,
-                                                cmpendMatchpoint2,
+                                                gt_chain2dim_cmpendMatchpoint2,
                                                 NULL);
   if (tmp2 == NULL ||
-      qpriority > evalpriority(addterminal,matchtable,FRAGIDENT(tmp2)))
+      qpriority > gt_chain2dim_evalpriority(addterminal,matchtable,
+                                            FRAGIDENT(tmp2)))
   {
-    insertintodict(addterminal,matchtable,matchstore,qmatch2);
+    gt_chain2dim_insertintodict(addterminal,matchtable,matchstore,qmatch2);
     while (true)
     {
       tmp2 = (Matchpoint *) gt_rbt_nextkey ((const GtKeytype) qmatch2,
                                            matchstore->dictroot,
-                                           cmpendMatchpoint2,
+                                           gt_chain2dim_cmpendMatchpoint2,
                                            NULL);
-      if (tmp2 == NULL || qpriority <= evalpriority(addterminal,
+      if (tmp2 == NULL || qpriority <= gt_chain2dim_evalpriority(addterminal,
                                                     matchtable,
                                                     FRAGIDENT(tmp2)))
       {
@@ -632,7 +658,7 @@ static void activatematchpoint(bool addterminal,
       }
       if (gt_rbt_delete ((const GtKeytype) tmp2,
                         &matchstore->dictroot,
-                        cmpendMatchpoint2,
+                        gt_chain2dim_cmpendMatchpoint2,
                         NULL) != 0)
       {
         fprintf(stderr,"cannot delete successor node\n");
@@ -646,7 +672,7 @@ static void activatematchpoint(bool addterminal,
   }
 }
 
-static void evalmatchscore(const GtChain2Dimmode *chainmode,
+static void gt_chain2dim_evalmatchscore(const GtChain2Dimmode *chainmode,
                            GtChain2Dimmatchtable *matchtable,
                            Matchstore *matchstore,
                            bool gapsL1,
@@ -658,7 +684,7 @@ static void evalmatchscore(const GtChain2Dimmode *chainmode,
   Matchpoint *qmatch2;
   GtChain2Dimscoretype score;
 
-  startpos2 = GETSTOREDSTARTPOINT(1-presortdim,matchpointident);
+  startpos2 = GT_CHAIN2DIM_GETSTOREDSTARTPOINT(1-presortdim,matchpointident);
   if (startpos2 == 0)
   {
     qmatch2 = NULL;
@@ -672,12 +698,12 @@ static void evalmatchscore(const GtChain2Dimmode *chainmode,
     qmatch2 = (Matchpoint *) gt_rbt_previousequalkey(
                                   (const GtKeytype) &keymatch2,
                                   matchstore->dictroot,
-                                  cmpendMatchpoint2,
+                                  gt_chain2dim_cmpendMatchpoint2,
                                   NULL);
     if (qmatch2 != NULL)
     {
       if (chainmode->maxgapwidth != 0 &&
-         !checkmaxgapwidth(matchtable,
+         !gt_chain2dim_checkmaxgapwidth(matchtable,
                            chainmode->maxgapwidth,
                            FRAGIDENT(qmatch2),
                            matchpointident))
@@ -691,9 +717,9 @@ static void evalmatchscore(const GtChain2Dimmode *chainmode,
     score = matchtable->matches[matchpointident].weight;
     if (chainmode->chainkind == GLOBALCHAININGWITHGAPCOST)
     {
-      score -= INITIALGAP(matchpointident);
+      score -= GT_CHAIN2DIM_INITIALGAP(matchpointident);
     }
-    previous = UNDEFPREVIOUS;
+    previous = GT_CHAIN2DIM_UNDEFPREVIOUS;
   } else
   {
     score = matchtable->matches[FRAGIDENT(qmatch2)].score;
@@ -719,13 +745,13 @@ static void evalmatchscore(const GtChain2Dimmode *chainmode,
       } else
       {
         score = matchtable->matches[matchpointident].weight;
-        previous = UNDEFPREVIOUS;
+        previous = GT_CHAIN2DIM_UNDEFPREVIOUS;
       }
     }
   }
   matchtable->matches[matchpointident].score = score;
   matchtable->matches[matchpointident].previousinchain = previous;
-  if (previous == UNDEFPREVIOUS)
+  if (previous == GT_CHAIN2DIM_UNDEFPREVIOUS)
   {
     matchtable->matches[matchpointident].firstinchain = matchpointident;
   } else
@@ -735,8 +761,9 @@ static void evalmatchscore(const GtChain2Dimmode *chainmode,
   }
 }
 
-static bool isrightmaximallocalchain(const GtChain2Dimmatchtable *matchtable,
-                                     unsigned long currentmatch)
+static bool gt_chain2dim_isrightmaximallocalchain(const GtChain2Dimmatchtable
+                                                                    *matchtable,
+                                                  unsigned long currentmatch)
 {
   if (currentmatch == matchtable->nextfree - 1)
   {
@@ -755,8 +782,10 @@ static bool isrightmaximallocalchain(const GtChain2Dimmatchtable *matchtable,
   return false;
 }
 
-static void determineequivreps(Bestofclass *chainequivalenceclasses,
-                               const GtChain2Dimmatchtable *matchtable)
+static void gt_chain2dim_determineequivreps(Bestofclass
+                                                       *chainequivalenceclasses,
+                                            const GtChain2Dimmatchtable
+                                                                    *matchtable)
 {
   unsigned long matchnum;
   Bestofclass *classptr, *classrep;
@@ -769,7 +798,7 @@ static void determineequivreps(Bestofclass *chainequivalenceclasses,
   }
   for (matchnum=0; matchnum<matchtable->nextfree; matchnum++)
   {
-    if (isrightmaximallocalchain(matchtable,matchnum))
+    if (gt_chain2dim_isrightmaximallocalchain(matchtable,matchnum))
     {
       classrep = chainequivalenceclasses +
                  matchtable->matches[matchnum].firstinchain;
@@ -783,7 +812,7 @@ static void determineequivreps(Bestofclass *chainequivalenceclasses,
   }
 }
 
-static bool retrievemaximalscore(GtChain2Dimscoretype *maxscore,
+static bool gt_chain2dim_retrievemaximalscore(GtChain2Dimscoretype *maxscore,
                                  const GtChain2Dimmode *chainmode,
                                  const GtChain2Dimmatchtable *matchtable)
 {
@@ -794,11 +823,11 @@ static bool retrievemaximalscore(GtChain2Dimscoretype *maxscore,
   *maxscore = 0;
   for (matchnum=0; matchnum<matchtable->nextfree; matchnum++)
   {
-    if (isrightmaximallocalchain(matchtable,matchnum))
+    if (gt_chain2dim_isrightmaximallocalchain(matchtable,matchnum))
     {
       if (chainmode->chainkind == GLOBALCHAININGWITHGAPCOST)
       {
-        tgap = TERMINALGAP(matchnum);
+        tgap = GT_CHAIN2DIM_TERMINALGAP(matchnum);
       } else
       {
         tgap = 0;
@@ -932,7 +961,7 @@ static void retrievechainbestscores(bool *minscoredefined,
   dictbestmatches = dictmaxsize_new(howmanybest);
   for (idx=0; idx<matchtable->nextfree; idx++)
   {
-    if (isrightmaximallocalchain(matchtable,idx))
+    if (gt_chain2dim_isrightmaximallocalchain(matchtable,idx))
     {
       scores[matchnum] = matchtable->matches[idx].score;
       insertDictmaxsize(dictbestmatches,
@@ -956,13 +985,14 @@ static void retrievechainbestscores(bool *minscoredefined,
   gt_free(scores);
 }
 
-static void retrievechainthreshold(const GtChain2Dimmode *chainmode,
-                                   GtChain2Dimmatchtable *matchtable,
-                                   GtChain2Dim *chain,
-                                   GtChain2Dimscoretype minscore,
-                                   Bestofclass *chainequivalenceclasses,
-                                   GtChain2Dimprocessor chainprocessor,
-                                   void *cpinfo)
+static void gt_chain2dim_retrievechainthreshold(const GtChain2Dimmode
+                                                                     *chainmode,
+                                           GtChain2Dimmatchtable *matchtable,
+                                           GtChain2Dim *chain,
+                                           GtChain2Dimscoretype minscore,
+                                           Bestofclass *chainequivalenceclasses,
+                                           GtChain2Dimprocessor chainprocessor,
+                                           void *cpinfo)
 {
   unsigned long matchnum;
   GtChain2Dimscoretype tgap;
@@ -970,11 +1000,11 @@ static void retrievechainthreshold(const GtChain2Dimmode *chainmode,
 
   for (matchnum=0; matchnum < matchtable->nextfree; matchnum++)
   {
-    if (isrightmaximallocalchain(matchtable,matchnum))
+    if (gt_chain2dim_isrightmaximallocalchain(matchtable,matchnum))
     {
       if (chainmode->chainkind == GLOBALCHAININGWITHGAPCOST)
       {
-        tgap = TERMINALGAP(matchnum);
+        tgap = GT_CHAIN2DIM_TERMINALGAP(matchnum);
       } else
       {
         tgap = 0;
@@ -991,13 +1021,13 @@ static void retrievechainthreshold(const GtChain2Dimmode *chainmode,
           {
             chain->scoreofchain = classrep->score;
             classrep->isavailable = false;
-            retracepreviousinchain(chain, matchtable, matchnum);
+            gt_chain2dim_retracepreviousinchain(chain, matchtable, matchnum);
             chainprocessor(cpinfo,matchtable,chain);
           }
         } else
         {
           chain->scoreofchain = matchtable->matches[matchnum].score - tgap;
-          retracepreviousinchain(chain, matchtable, matchnum);
+          gt_chain2dim_retracepreviousinchain(chain, matchtable, matchnum);
           chainprocessor(cpinfo,matchtable,chain);
         }
       }
@@ -1031,7 +1061,7 @@ static Matchpoint *makeactivationpoint(const GtChain2Dimmatchtable *matchtable,
   fpptr = gt_malloc(sizeof (*fpptr));
   gt_assert(fpptr != NULL);
   fpptr->fpident = MAKEENDPOINT(fpident);
-  fpptr->fpposition = GETSTOREDENDPOINT(postsortdim,fpident);
+  fpptr->fpposition = GT_CHAIN2DIM_GETSTOREDENDPOINT(postsortdim,fpident);
   return fpptr;
 }
 
@@ -1057,7 +1087,7 @@ static void mergestartandendpoints(const GtChain2Dimmode *chainmode,
                            matchstore->endpointperm[endcount],
                            presortdim) < 0)
     {
-      evalmatchscore(chainmode,
+      gt_chain2dim_evalmatchscore(chainmode,
                      matchtable,
                      matchstore,
                      gapsL1,
@@ -1066,7 +1096,7 @@ static void mergestartandendpoints(const GtChain2Dimmode *chainmode,
       startcount++;
     } else
     {
-      activatematchpoint(addterminal,matchtable,matchstore,
+      gt_chain2dim_activatematchpoint(addterminal,matchtable,matchstore,
                         makeactivationpoint(matchtable,
                                             matchstore->
                                             endpointperm[endcount],
@@ -1076,7 +1106,7 @@ static void mergestartandendpoints(const GtChain2Dimmode *chainmode,
   }
   while (startcount < matchtable->nextfree)
   {
-    evalmatchscore(chainmode,
+    gt_chain2dim_evalmatchscore(chainmode,
                    matchtable,
                    matchstore,
                    gapsL1,
@@ -1087,7 +1117,7 @@ static void mergestartandendpoints(const GtChain2Dimmode *chainmode,
   }
   while (endcount < matchtable->nextfree)
   {
-    activatematchpoint(addterminal,matchtable,matchstore,
+    gt_chain2dim_activatematchpoint(addterminal,matchtable,matchstore,
                       makeactivationpoint(matchtable,
                                           matchstore->
                                           endpointperm[endcount],
@@ -1097,14 +1127,15 @@ static void mergestartandendpoints(const GtChain2Dimmode *chainmode,
   }
 }
 
-static unsigned int findmaximalscores(const GtChain2Dimmode *chainmode,
-                                      GtChain2Dim *chain,
-                                      GtChain2Dimmatchtable *matchtable,
-                                      Matchstore *matchstore,
-                                      GtChain2Dimprocessor chainprocessor,
-                                      bool withequivclasses,
-                                      void *cpinfo,
-                                      GtLogger *logger)
+static unsigned int gt_chain2dim_findmaximalscores(const GtChain2Dimmode
+                                                                     *chainmode,
+                                            GtChain2Dim *chain,
+                                            GtChain2Dimmatchtable *matchtable,
+                                            Matchstore *matchstore,
+                                            GtChain2Dimprocessor chainprocessor,
+                                            bool withequivclasses,
+                                            void *cpinfo,
+                                            GtLogger *logger)
 {
   unsigned long matchnum;
   GtChain2Dimscoretype minscore = 0;
@@ -1122,7 +1153,7 @@ static unsigned int findmaximalscores(const GtChain2Dimmode *chainmode,
     {
       chainequivalenceclasses = gt_malloc(sizeof (*chainequivalenceclasses) *
                                           matchtable->nextfree);
-      determineequivreps(chainequivalenceclasses, matchtable);
+      gt_chain2dim_determineequivreps(chainequivalenceclasses, matchtable);
     } else
     {
       chainequivalenceclasses = NULL;
@@ -1144,7 +1175,7 @@ static unsigned int findmaximalscores(const GtChain2Dimmode *chainmode,
     case GLOBALCHAININGWITHOVERLAPS:
     case LOCALCHAININGMAX:
       minscoredefined
-        = retrievemaximalscore(&minscore,chainmode,matchtable);
+        = gt_chain2dim_retrievemaximalscore(&minscore,chainmode,matchtable);
       break;
     case LOCALCHAININGTHRESHOLD:
       minscore = chainmode->minimumscore;
@@ -1158,7 +1189,7 @@ static unsigned int findmaximalscores(const GtChain2Dimmode *chainmode,
       break;
     case LOCALCHAININGPERCENTAWAY:
       minscoredefined
-        = retrievemaximalscore(&minscore,chainmode,matchtable);
+        = gt_chain2dim_retrievemaximalscore(&minscore,chainmode,matchtable);
       if (minscoredefined)
       {
         minscore = (GtChain2Dimscoretype)
@@ -1181,7 +1212,7 @@ static unsigned int findmaximalscores(const GtChain2Dimmode *chainmode,
                 ? "global"
                 : "local",
                minscore);
-    retrievechainthreshold(chainmode,
+    gt_chain2dim_retrievechainthreshold(chainmode,
                            matchtable,
                            chain,
                            minscore,
@@ -1214,8 +1245,8 @@ static void makesortedendpointpermutation(unsigned long *perm,
   {
     for (jptr = iptr; jptr > perm; jptr--)
     {
-      if (GETSTOREDENDPOINT(presortdim,*(jptr-1)) <=
-          GETSTOREDENDPOINT(presortdim,*jptr))
+      if (GT_CHAIN2DIM_GETSTOREDENDPOINT(presortdim,*(jptr-1)) <=
+          GT_CHAIN2DIM_GETSTOREDENDPOINT(presortdim,*jptr))
       {
         break;
       }
@@ -1253,7 +1284,7 @@ static GtChain2Dimgapcostfunction assignchaingapcostfunction(
 {
   if (chainkind == GLOBALCHAININGWITHOVERLAPS)
   {
-    return overlapcost;
+    return gt_chain2dim_overlapcost;
   }
   if (chainkind != GLOBALCHAINING)
   {
@@ -1308,7 +1339,7 @@ void gt_chain_fastchaining(const GtChain2Dimmode *chainmode,
     gt_logger_log(logger,"compute chain scores");
     if (chainmode->chainkind == GLOBALCHAININGWITHOVERLAPS)
     {
-      bruteforcechainingscores(chainmode,matchtable,
+      gt_chain2dim_bruteforcechainingscores(chainmode,matchtable,
                                chaingapcostfunction);
     } else
     {
@@ -1319,7 +1350,7 @@ void gt_chain_fastchaining(const GtChain2Dimmode *chainmode,
                          gapsL1);
     }
     gt_logger_log(logger,"retrieve optimal chains");
-    retval = findmaximalscores(chainmode,
+    retval = gt_chain2dim_findmaximalscores(chainmode,
                                chain,
                                matchtable,
                                &matchstore,
@@ -1333,7 +1364,7 @@ void gt_chain_fastchaining(const GtChain2Dimmode *chainmode,
     }
   } else
   {
-    chainingboundarycases(chainmode, chain, matchtable);
+    gt_chain2dim_chainingboundarycases(chainmode, chain, matchtable);
     chainprocessor(cpinfo,matchtable,chain);
     retval = 0;
   }

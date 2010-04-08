@@ -232,8 +232,6 @@ SAIReadBWT(void *state, GtUchar *dest, size_t len, GT_UNUSED GtError *err)
   return fread(dest, sizeof (GtUchar), len, sai->sa->bwttabstream.fp);
 }
 
-DECLAREREADFUNCTION(GtUlong)
-
 extern size_t
 gt_SAIGetOrigSeq(const void *state, Symbol *dest, unsigned long pos, size_t len)
 {

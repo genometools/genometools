@@ -464,7 +464,7 @@ static void XMLCALL endElement(void *data, const char *name)
       gt_str_array_delete(PARSESTRUCT(query_frame_tmp));
       gt_str_array_delete(PARSESTRUCT(hit_frame_tmp));
 
-      PARSESTRUCT(xml_tag_flag) = UNSET;
+      PARSESTRUCT(xml_tag_flag) = MGTH_UNSET;
     }
     /* nur wenn ein Flag gesetzt ist und Text eingelesen wurde, ist eine
        weitere Bearbeitung notwendig */
@@ -501,7 +501,7 @@ static void XMLCALL endElement(void *data, const char *name)
 
         /* Fuer den Fall eines Parse-Fehlers - Das Flag zeigt an, dass die
            Strings angelegt und nicht geloescht wurden */
-        PARSESTRUCT(xml_tag_flag) = SET;
+        PARSESTRUCT(xml_tag_flag) = MGTH_SET;
 
         /* Auslesen der Eintrags-Nr aus der Hashtabelle */
         if ((query_nr_p = gt_cstr_nofree_ulp_gt_hashmap_get(
@@ -853,8 +853,8 @@ static void textElement(void *data, const XML_Char *txt_element, int len)
        wird mit der Bearbeitung der Textpassage begonnen; dazu wird der
        "aktuelle Text" txt_element an den bereits eingelesenen Text angehaengt
      */
-    if (PARSESTRUCT(hit_flag) == SET || PARSESTRUCT(def_flag) == SET
-        || PARSESTRUCT(hit_hsp_flag) == SET)
+    if (PARSESTRUCT(hit_flag) == MGTH_SET || PARSESTRUCT(def_flag) == MGTH_SET
+        || PARSESTRUCT(hit_hsp_flag) == MGTH_SET)
     {
       gt_str_append_cstr_nt(PARSESTRUCT(buf_ptr), txt_element, len);
     }
@@ -866,7 +866,7 @@ static void flag_setting(unsigned short *counter_fct, unsigned short *flag,
 {
   /* das uebergebene Flag wird auf SET gesetzt und der Counter um eine
      Stelle auf den naechsten Tag-Namen in der Struktur weitergesetzt */
-  *flag = SET;
+  *flag = MGTH_SET;
   (*counter_fct)++;
 
   /* ueberpruefen, ob der Counter die Grenzen zur naechsten Kategorie
@@ -879,7 +879,7 @@ static void flag_delete(unsigned short *counter_fct, unsigned short *flag,
 {
   /* das uebergebene Flag wird auf UNSET gesetzt und der Counter um eine
      Stelle auf den naechsten Tag-Namen in der Struktur weitergesetzt */
-  *flag = UNSET;
+  *flag = MGTH_UNSET;
   (*counter_fct)++;
 
   /* ueberpruefen, ob der Counter die Grenzen zur neachsten Kategorie
@@ -893,15 +893,15 @@ static void check_counter(unsigned short *counter_check,
   /* ist das Ende der aktuellen XML-Tag Kategorie erreicht, werden die
      Counter wieder auf den Anfang (0) zurueckgesetzt; das flag_sign zeigt
      an,um welchen counter es sich aktuell handelt */
-  if (*counter_check == QUERY_SIZE && flag_sign_fct == 'q')
+  if (*counter_check == MGTH_QUERY_SIZE && flag_sign_fct == 'q')
   {
     *counter_check = 0;
   }
-  if (*counter_check == HIT_SIZE && flag_sign_fct == 'h')
+  if (*counter_check == MGTH_HIT_SIZE && flag_sign_fct == 'h')
   {
     *counter_check = 0;
   }
-  if (*counter_check == HIT_TO_QUERY_SIZE && flag_sign_fct == 't')
+  if (*counter_check == MGTH_HIT_TO_QUERY_SIZE && flag_sign_fct == 't')
   {
     *counter_check = 0;
   }

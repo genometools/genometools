@@ -28,12 +28,6 @@
 
 #include "esa-map.h"
 
- DECLAREREADFUNCTION(GtUlong);
-
- DECLAREREADFUNCTION(GtUchar);
-
- DECLAREREADFUNCTION(Largelcpvalue);
-
 static void fillandinsert(Mergertrierep *trierep,
                           unsigned int idx,
                           unsigned long suftabvalue,
