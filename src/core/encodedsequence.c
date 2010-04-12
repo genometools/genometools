@@ -5587,7 +5587,7 @@ static int testfullscan(const GtStrArray *filenametab,
   GtSequenceBuffer *fb = NULL;
   int retval;
   bool haserr = false;
-  GtEncodedsequenceScanstate *esr;
+  GtEncodedsequenceScanstate *esr = NULL;
   unsigned long long fullscanpbar = 0;
 
   gt_error_check(err);
