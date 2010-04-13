@@ -21,6 +21,7 @@
 
 #include "core/alphabet.h"
 #include "core/chardef.h"
+#include "core/codetype.h"
 #include "core/str.h"
 #include "core/str_array.h"
 #include "core/symboldef.h"
@@ -31,7 +32,7 @@
 #include "core/logger.h"
 #include "core/range.h"
 #include "core/readmode.h"
-#include "match/intcode-def.h"
+#include "core/codetype.h"
 
 #define GT_REVERSEPOS(TOTALLENGTH,POS) \
           ((TOTALLENGTH) - 1 - (POS))

@@ -1,6 +1,7 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007      Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c)      2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,28 +16,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef INTCODE_DEF_H
-#define INTCODE_DEF_H
+#ifndef CODETYPE_H
+#define CODETYPE_H
 
-#include <stdbool.h>
-#include "core/codetype.h"
-
-#define PREFIXLENBITS   4
-#define CODEBITS        (32-PREFIXLENBITS)
-#define MAXPREFIXLENGTH ((1U << PREFIXLENBITS) - 1)
-#define MAXCODEVALUE    ((1U << CODEBITS) - 1)
-
-typedef struct
-{
-  unsigned int specialpos;
-  bool defined;
-} Firstspecialpos;
-
-typedef struct
-{
-  unsigned int maxprefixindex:PREFIXLENBITS;
-  unsigned int code:CODEBITS;
-  unsigned long position; /* get rid of this by using information from encseq */
-} Codeatposition;
+/* TODO: please document me */
+typedef unsigned long GtCodetype;
+#define FormatGtCodetype "%lu"
 
 #endif
