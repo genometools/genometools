@@ -37,7 +37,11 @@
 #define GT_REVERSEPOS(TOTALLENGTH,POS) \
           ((TOTALLENGTH) - 1 - (POS))
 
-/* TODO: what does this struct contain and how can it be used? */
+/* The following type stores a two bit encoding in <tbe> with information
+   about the number of two bit units which do not store a special 
+   character in <unitsnotspecial>. To allow the comparison of these 
+   structures, the <position> in the sequence at which the encoding was 
+   extracted is also stored */
 typedef struct
 {
   GtTwobitencoding tbe;           /* two bit encoding */
@@ -45,11 +49,19 @@ typedef struct
   unsigned long position;
 } GtEndofTwobitencoding;
 
-/* TODO: what does this struct contain and how can it be used? */
+/* The following type stores the result of comparing a pair of twobit 
+   encodings. <common> stores the number of units which are common 
+   (either from the beginning or from the end. <leftspecial> is true
+   iff the first twobit encoding contains a special character in the units
+   it covers. <rightspecial> is true iff the second twobit encoding contains 
+   a special character in the units it covers. <finaldepth> stores 
+   result of the comparison, i.e. the longest common prefix of the 
+   comparison. */
 typedef struct
 {
   unsigned int common;
-  bool leftspecial, rightspecial;
+  bool leftspecial, 
+       rightspecial;
   unsigned long finaldepth;
 } GtCommonunits;
 
@@ -69,26 +81,40 @@ bool gt_specialrangeiterator_next(GtSpecialrangeiterator *sri,
 /* Delete <sri> and free associated memory. */
 void gt_specialrangeiterator_delete(GtSpecialrangeiterator *sri);
 
-/* TODO: please document me */
+/* The following function extracts a twobit encoding at position <startpos>
+   in the sequence encoded by <encseq>. The <esr> structure stores 
+   information allowing for efficient retrieval of the next special
+   position relative to <startpos>. The scanning is performed in forward or
+   reverse direction depending on the value of <fwd>. The result is stored
+   in <ptbe>. */
 void gt_encodedsequence_extract2bitenc(bool fwd,
                                        GtEndofTwobitencoding *ptbe,
                                        const GtEncodedsequence *encseq,
                                        GtEncodedsequenceScanstate *esr,
                                        unsigned long startpos);
 
-/* TODO: please document me */
-int gt_encodedsequence_compare_twobitencodings(bool fwd,
+/* The following function compares the two bit encodings <ptbe1> and <ptbe2>
+   and stores the result of the comparison in <commonunits>. The direction is
+   done in forward direction iff <fwd> is true. The comparison is
+   is defined by <fwd>. The comparison is done for the complemented characters
+   iff <complement> is true. */
+int gt_encodedsequence_compare_twobitencodings(
+                                            bool fwd,
                                             bool complement,
                                             GtCommonunits *commonunits,
                                             const GtEndofTwobitencoding *ptbe1,
                                             const GtEndofTwobitencoding *ptbe2);
 
-/* TODO: please document me */
+/* The following function extracts from the byte sequence of length <len>
+   pointed to by <seq> the sequence of len/4 bytecodes each 
+   encoding four consecutive characters in one byte. */
 void gt_encodedsequence_plainseq2bytecode(GtUchar *bytecode,
                                           const GtUchar *seq,
                                           unsigned long len);
 
-/* TODO: please document me */
+/* The following function extracts from an encoded sequence a substring of
+   length <len> beginning at position <startindex> and stores the result
+   in the byte sequence encoding four consecutive characters in one byte. */
 void gt_encodedsequence_sequence2bytecode(GtUchar *dest,
                                           const GtEncodedsequence *encseq,
                                           unsigned long startindex,
@@ -103,7 +129,9 @@ void gt_encodedsequence_check_descriptions(const GtEncodedsequence *encseq);
    if <encseq> returns inconsistent marked positions. */
 void gt_encodedsequence_check_markpos(const GtEncodedsequence *encseq);
 
-/* TODO: please document me */
+/* The following function checks the iterators delivering the ranges
+   of special characters in an encoded sequence <encseq> in forward and
+   in reverse directions. */
 int gt_encodedsequence_check_specialranges(const GtEncodedsequence *encseq);
 
 /* TODO: please document me */

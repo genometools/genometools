@@ -157,7 +157,8 @@ typedef struct
   Containsspecialfunc delivercontainsspecial;
 } GtEncodedsequencefunctions;
 
-void gt_encodedsequence_plainseq2bytecode(GtUchar *bytecode,const GtUchar *seq,
+void gt_encodedsequence_plainseq2bytecode(GtUchar *bytecode,
+                                          const GtUchar *seq,
                                           unsigned long len)
 {
   unsigned long j;
@@ -3970,9 +3971,9 @@ static int prefixofdifftbe(bool complement,
 
   gt_assert((tbe1 ^ tbe2) > 0);
   tmplcpvalue = (unsigned int) GT_DIV2(GT_MULT2(GT_UNITSIN2BITENC) -
-                                    requiredUIntBits(tbe1 ^ tbe2));
+                                       requiredUIntBits(tbe1 ^ tbe2));
   gt_assert(tmplcpvalue < (unsigned int) GT_UNITSIN2BITENC);
-   commonunits->common = tmplcpvalue;
+  commonunits->common = tmplcpvalue;
   commonunits->leftspecial = commonunits->rightspecial = false;
   if (complement)
   {
@@ -4019,11 +4020,12 @@ static int endofdifftbe(bool fwd,
          (complement,commonunits,tbe1,tbe2);
 }
 
-int gt_encodedsequence_compare_twobitencodings(bool fwd,
-                           bool complement,
-                           GtCommonunits *commonunits,
-                           const GtEndofTwobitencoding *ptbe1,
-                           const GtEndofTwobitencoding *ptbe2)
+int gt_encodedsequence_compare_twobitencodings(
+                              bool fwd,
+                              bool complement,
+                              GtCommonunits *commonunits,
+                              const GtEndofTwobitencoding *ptbe1,
+                              const GtEndofTwobitencoding *ptbe2)
 {
   GtTwobitencoding mask;
 
@@ -5774,8 +5776,7 @@ int gt_encodedsequence_check_specialranges(const GtEncodedsequence *encseq)
   gt_array_reverse(rangesbackward);
   if (!haserr)
   {
-    if (!gt_array_equal(rangesforward,rangesbackward,
-                      compareGtRange))
+    if (!gt_array_equal(rangesforward,rangesbackward,compareGtRange))
     {
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
