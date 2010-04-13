@@ -183,9 +183,9 @@ static inline void* gt_inl_queue_get(Inl_Queue *q)
   }
 }
 
-static inline int gt_inl_queue_iterate(const Inl_Queue *q,
-                                       Inl_Queueprocessor queueprocessor,
-                                       void *info)
+/*@unused@*/ static inline int gt_inl_queue_iterate(const Inl_Queue *q,
+                                              Inl_Queueprocessor queueprocessor,
+                                              void *info)
 {
   unsigned long idx;
 
