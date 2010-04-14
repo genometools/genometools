@@ -20,11 +20,11 @@
 #include <string.h>
 #include <ctype.h>
 #include <float.h>
-#include <pthread.h>
 #include "core/codon.h"
 #include "core/log.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
+#include "core/thread.h"
 #include "core/translator.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
@@ -46,8 +46,7 @@ struct GtPdomFinder {
   GtArray *models;
   GtLTRElement *elem;
   double glob_eval_cutoff;
-  unsigned int nof_threads,
-               chain_max_gap_length;
+  unsigned int chain_max_gap_length;
 };
 
 struct GtPdomModel {
@@ -88,14 +87,12 @@ typedef struct GtPdomDomainTraverseInfo {
 } GtPdomDomainTraverseInfo;
 
 typedef struct GtPdomSharedMem {
-  pthread_t *thread;
-  int nof_threads;
   GtPdomFinder *gpf;
   unsigned long next_hmm;
   GtArray *hmms;
   GtStr **fwd, **rev;
   GtPdomResults *results;
-  pthread_mutex_t in_lock, out_lock;
+  GtMutex *in_lock, *out_lock;
 } GtPdomSharedMem;
 
 /* --------------- GtPdomSingleHit ---------------------------------- */
@@ -520,13 +517,12 @@ void gt_hmmer_search(struct plan7_s *hmm,
                      struct threshold_s *thresh,
                      struct tophit_s *ghit,
                      struct tophit_s *dhit,
-                     pthread_mutex_t *lock)
+                     GT_UNUSED GtMutex *lock)
 {
   struct dpmatrix_s *mx;
   struct p7trace_s *tr;
   unsigned char *dsq;
   float sc;
-  int retval;
   double pvalue, evalue;
 
   mx = CreatePlan7Matrix(1, hmm->M, 25, 0);
@@ -540,11 +536,7 @@ void gt_hmmer_search(struct plan7_s *hmm,
 
   sc -= TraceScoreCorrection(hmm, tr, dsq);
 
-  if ((retval = pthread_mutex_lock(lock)) != 0)
-  {
-    fprintf(stderr, "pthread_mutex_lock failure: %s\n", strerror(retval));
-    exit(EXIT_FAILURE);
-  }
+  gt_mutex_lock(lock);
   pvalue = PValue(hmm, sc);
   evalue = thresh->Z ? (double) thresh->Z * pvalue : (double) pvalue;
 
@@ -555,11 +547,8 @@ void gt_hmmer_search(struct plan7_s *hmm,
                                    seqdesc, NULL, NULL,
                                    false, sc, true, thresh, FALSE);
   }
-  if ((retval = pthread_mutex_unlock(lock)) != 0)
-  {
-    fprintf(stderr, "pthread_mutex_unlock failure: %s\n", strerror(retval));
-    exit(EXIT_FAILURE);
-  }
+  gt_mutex_unlock(lock);
+
   P7FreeTrace(tr);
   free(dsq);
   FreePlan7Matrix(mx);
@@ -603,7 +592,6 @@ void* gt_pdom_per_domain_worker_thread(void *data)
 {
   GtPdomSharedMem *shared;
   GtPdomModel *hmm;
-  int retval;
   struct tophit_s *ghit = NULL, *hits = NULL;
   bool best_fwd = TRUE;
   unsigned long i;
@@ -615,21 +603,12 @@ void* gt_pdom_per_domain_worker_thread(void *data)
 
   for (;;)
   {
-    /* Lock input */
-    if ((retval = pthread_mutex_lock(&shared->in_lock)) != 0)
-    {
-      fprintf(stderr, "Failed to lock: %s\n", strerror(retval));
-      exit(EXIT_FAILURE);
-    }
+    gt_mutex_lock(shared->in_lock);
     /* Have all HMMs been distributed? If so, we are done here. */
     if (shared->next_hmm == gt_array_size(shared->gpf->models))
     {
-      if ((retval = pthread_mutex_unlock(&shared->in_lock)) != 0)
-      {
-        fprintf(stderr, "Failed to unlock: %s\n", strerror(retval));
-        exit(EXIT_FAILURE);
-      }
-      pthread_exit(NULL);
+      gt_mutex_unlock(shared->in_lock);
+      return NULL;
     }
 
     /* Get work from HMM list */
@@ -638,11 +617,7 @@ void* gt_pdom_per_domain_worker_thread(void *data)
     shared->next_hmm++;
 
     /* work claimed, release input */
-    if ((retval = pthread_mutex_unlock(&shared->in_lock)) != 0)
-    {
-      fprintf(stderr, "pthread_mutex_unlock failure: %s\n", strerror(retval));
-      exit(EXIT_FAILURE);
-    }
+    gt_mutex_unlock(shared->in_lock);
 
     hit = gt_pdom_model_hit_new(shared->gpf->elem);
     ghit = AllocTophits(MAX_TOPHITS);
@@ -655,7 +630,7 @@ void* gt_pdom_per_domain_worker_thread(void *data)
                     thresh,
                     ghit,
                     hit->hits_fwd,
-                    &shared->out_lock);
+                    shared->out_lock);
     gt_hmmer_search(hmm->model,
                     gt_str_get(shared->fwd[1]),
                     gt_str_length(shared->fwd[1]),
@@ -663,7 +638,7 @@ void* gt_pdom_per_domain_worker_thread(void *data)
                     thresh,
                     ghit,
                     hit->hits_fwd,
-                    &shared->out_lock);
+                    shared->out_lock);
     gt_hmmer_search(hmm->model,
                     gt_str_get(shared->fwd[2]),
                     gt_str_length(shared->fwd[2]),
@@ -671,7 +646,7 @@ void* gt_pdom_per_domain_worker_thread(void *data)
                     thresh,
                     ghit,
                     hit->hits_fwd,
-                    &shared->out_lock);
+                    shared->out_lock);
     gt_hmmer_search(hmm->model,
                     gt_str_get(shared->rev[0]),
                     gt_str_length(shared->rev[0]),
@@ -679,7 +654,7 @@ void* gt_pdom_per_domain_worker_thread(void *data)
                     thresh,
                     ghit,
                     hit->hits_rev,
-                    &shared->out_lock);
+                    shared->out_lock);
     gt_hmmer_search(hmm->model,
                     gt_str_get(shared->rev[1]),
                     gt_str_length(shared->rev[1]),
@@ -687,7 +662,7 @@ void* gt_pdom_per_domain_worker_thread(void *data)
                     thresh,
                     ghit,
                     hit->hits_rev,
-                    &shared->out_lock);
+                    shared->out_lock);
     gt_hmmer_search(hmm->model,
                     gt_str_get(shared->rev[2]),
                     gt_str_length(shared->rev[2]),
@@ -695,7 +670,7 @@ void* gt_pdom_per_domain_worker_thread(void *data)
                     thresh,
                     ghit,
                     hit->hits_rev,
-                    &shared->out_lock);
+                    shared->out_lock);
 
     FullSortTophits(hit->hits_fwd);
     FullSortTophits(hit->hits_rev);
@@ -762,11 +737,7 @@ void* gt_pdom_per_domain_worker_thread(void *data)
       }
 
       /* Lock results, we want to write to the result hashtable */
-      if ((retval = pthread_mutex_lock(&(shared->out_lock))) != 0)
-      {
-        fprintf(stderr, "Failed to lock: %s\n", strerror(retval));
-        exit(EXIT_FAILURE);
-      }
+      gt_mutex_lock(shared->out_lock);
 
       /* register results */
       gt_hashmap_add(shared->results->domains,
@@ -786,11 +757,7 @@ void* gt_pdom_per_domain_worker_thread(void *data)
        }
 
       /* unlock results */
-      if ((retval = pthread_mutex_unlock(&(shared->out_lock))) != 0)
-      {
-        fprintf(stderr, "Failed to unlock: %s\n", strerror(retval));
-        exit(EXIT_FAILURE);
-      }
+      gt_mutex_unlock(shared->out_lock);
     }
     else
       gt_pdom_model_hit_delete(hit);
@@ -799,57 +766,29 @@ void* gt_pdom_per_domain_worker_thread(void *data)
   }
 }
 
-static GtPdomSharedMem* gt_pdom_run_threads(GtArray *hmms, int nof_threads,
-                                            GtStr **fwd, GtStr **rev,
-                                            GtPdomResults *results,
-                                            GtPdomFinder *gpf)
+static void gt_pdom_run_threads(GtArray *hmms,
+                                GtStr **fwd, GtStr **rev,
+                                GtPdomResults *results,
+                                GtPdomFinder *gpf)
 {
-  int retval, i;
   GtPdomSharedMem *shared;
-  pthread_attr_t attr;
-
-  gt_assert(hmms && nof_threads > 0 && fwd && rev && results && gpf);
+  gt_assert(hmms && fwd && rev && results && gpf);
 
   shared = gt_calloc(1, sizeof (GtPdomSharedMem));
 
-  shared->nof_threads = nof_threads;
-  shared->thread = gt_calloc(nof_threads, sizeof (pthread_t));
   shared->hmms = hmms;
   shared->fwd = fwd;
   shared->rev = rev;
   shared->next_hmm = 0;
   shared->results = results;
   shared->gpf = gpf;
+  shared->in_lock = gt_mutex_new();
+  shared->out_lock = gt_mutex_new();
 
-  if ((retval = pthread_mutex_init(&shared->in_lock, NULL)) != 0)
-  {
-    fprintf(stderr, "Could not initialize lock! %s\n", strerror(retval));
-    exit(EXIT_FAILURE);
-  }
-  if ((retval = pthread_mutex_init(&shared->out_lock, NULL)) != 0)
-  {
-    fprintf(stderr, "Could not initialize lock! %s\n", strerror(retval));
-    exit(EXIT_FAILURE);
-  }
+  gt_multithread(gt_pdom_per_domain_worker_thread, shared, NULL);
 
-  pthread_attr_init(&attr);
-
-  for (i = 0; i < nof_threads; i++)
-  {
-    if ((retval = pthread_create(&(shared->thread[i]), &attr,
-           gt_pdom_per_domain_worker_thread, (void *) shared)) != 0)
-    {
-      fprintf(stderr,"Failed to create thread %d, return code %d\n", i, retval);
-      exit(EXIT_FAILURE);
-    }
-  }
-  pthread_attr_destroy(&attr);
-  return shared;
-}
-
-static void gt_pdom_free_shared(GtPdomSharedMem *shared)
-{
-  gt_free(shared->thread);
+  gt_mutex_delete(shared->in_lock);
+  gt_mutex_delete(shared->out_lock);
   gt_free(shared);
 }
 
@@ -860,7 +799,6 @@ GtPdomResults* gt_pdom_finder_find(GtPdomFinder *gpf, const char *seq,
   GtStr *fwd[3], *rev[3];
   char translated;
   unsigned long seqlen;
-  GtPdomSharedMem *shared = NULL;
   GtPdomResults *results = NULL;
   GtTranslator *tr;
   int i,
@@ -908,21 +846,7 @@ GtPdomResults* gt_pdom_finder_find(GtPdomFinder *gpf, const char *seq,
     }
 
     /* start worker threads */
-    shared = gt_pdom_run_threads(gpf->models, gpf->nof_threads,
-                                 fwd, rev, results, gpf);
-
-    /* continue when all threads are done */
-    for (i = 0; i < shared->nof_threads; i++)
-    {
-      if (pthread_join(shared->thread[i], NULL) != 0)
-      {
-        fprintf(stderr, "Could not join threads!");
-        exit(EXIT_FAILURE);
-      }
-    }
-
-    /* cleanup */
-    gt_pdom_free_shared(shared);
+    gt_pdom_run_threads(gpf->models, fwd, rev, results, gpf);
   }
 
   SqdClean();
@@ -1012,16 +936,14 @@ static void gt_pdom_clear_hmms(GtArray *hmms)
 }
 
 GtPdomFinder* gt_pdom_finder_new(GtStrArray *hmmfiles, double eval_cutoff,
-                                 unsigned int nof_threads,
                                  unsigned int chain_max_gap_length,
                                  GtPdomCutoff cutoff,
                                  GtError *e)
 {
   int had_err = 0;
   GtPdomFinder *gpf;
-  gt_assert(hmmfiles && e && nof_threads);
+  gt_assert(hmmfiles && e);
   gpf = gt_calloc(1, sizeof (GtPdomFinder));
-  gpf->nof_threads = nof_threads;
   gpf->hmm_files = gt_str_array_ref(hmmfiles);
   gpf->chain_max_gap_length = chain_max_gap_length;
   gpf->models = gt_array_new(sizeof (struct GtPdomModel*));

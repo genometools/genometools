@@ -25,6 +25,7 @@
 #include "core/outputfile.h"
 #include "core/safearith.h"
 #include "core/unused_api.h"
+#include "core/warning_api.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream_api.h"
 #include "ltr/gt_ltrdigest.h"
@@ -43,6 +44,7 @@ typedef struct GtLTRdigestOptions {
   bool verbose;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
+  unsigned long nthreads;
   unsigned int seqnamelen;
 } GtLTRdigestOptions;
 
@@ -278,14 +280,6 @@ static GtOptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
   gt_option_imply(o, oh);
   gt_option_imply(o, oto);
 
-  o = gt_option_new_uint_min("threads",
-                             "number of concurrent worker threads to use in "
-                             "pHMM scanning",
-                             &arguments->pdom_opts.nof_threads,
-                             2, 1);
-  gt_option_parser_add_option(op, o);
-  gt_option_imply(o, oh);
-
   o = gt_option_new_uint("maxgaplen",
                          "maximal allowed gap size between fragments (in amino "
                          "acids) when chaining pHMM hits for a protein domain",
@@ -294,6 +288,14 @@ static GtOptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, o);
   gt_option_is_extended_option(o);
   gt_option_imply(o, oh);
+
+  o = gt_option_new_ulong("threads",
+                          "DEPRECATED, only included for compatibility reasons!"
+                          " Use the -j parameter of the 'gt' call instead.",
+                          &arguments->nthreads,
+                          0);
+  gt_option_parser_add_option(op, o);
+  gt_option_is_extended_option(o);
 #endif
 
   /* Extended PBS options */
@@ -350,9 +352,14 @@ int gt_ltrdigest_arguments_check(GT_UNUSED int rest_argc, void *tool_arguments,
   GtLTRdigestOptions *arguments = tool_arguments;
   int had_err  = 0;
 
+  if (arguments->nthreads > 0) {
+    gt_warning("The '-threads' option is deprecated. Please use the '-j'"
+               "option of the 'gt' call instead, e.g.:\n"
+               "  gt -j %lu ltrdigest ...", arguments->nthreads);
+  }
+
   /* -trnas */
-  if (arguments->trna_lib
-        && gt_str_length(arguments->trna_lib) > 0)
+  if (!had_err && arguments->trna_lib && gt_str_length(arguments->trna_lib) > 0)
   {
     if (!gt_file_exists(gt_str_get(arguments->trna_lib)))
     {

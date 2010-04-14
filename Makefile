@@ -294,7 +294,6 @@ ifeq ($(with-hmmer),yes)
   LIBGENOMETOOLS_DIRS := src/external/hmmer-2.3.2  $(LIBGENOMETOOLS_DIRS)
   EXP_CPPFLAGS += -DHAVE_HMMER
   GT_CPPFLAGS +=  -I$(CURDIR)/$(HMMER_DIR) -I$(CURDIR)/$(SQUID_DIR)
-  EXP_LDLIBS += -lpthread
   OVERRIDELIBS += lib/libhmmer.a
   STEST_FLAGS += -hmmer
 endif
@@ -321,6 +320,9 @@ ifeq ($(threads),yes)
   EXP_CPPFLAGS += -DGT_THREADS_ENABLED
   EXP_LDLIBS += -lpthread
   GTSHAREDLIB_LIBDEP += -lpthread
+  HMMERTHREADS_DEF := #define HMMER_THREADS
+else
+  HMMERTHREADS_DEF := #undef HMMER_THREADS
 endif
 
 # the GenomeTools library
@@ -493,7 +495,7 @@ $(SQUID_DIR)/squid.h:
 $(HMMER_DIR)/config.h: $(HMMER_DIR)/config.h.in
 	@echo '[create $(@F)]'
 	@sed  -e 's/#undef PACKAGE_VERSION/#define PACKAGE_VERSION "2.3.2"/'\
-	      -e 's/#undef HMMER_THREADS/#define HMMER_THREADS/'\
+	      -e 's/#undef HMMER_THREADS/$(HMMERTHREADS_DEF)/'\
 	      -e 's/#undef PACKAGE_NAME/#define PACKAGE_NAME "HMMER"/'\
 	      -e 's/#undef PACKAGE_TARNAME/#define PACKAGE_TARNAME "hmmer"/'\
 	      -e 's/#undef PACKAGE_STRING/#define PACKAGE_STRING "HMMER 2.3.2"/'\

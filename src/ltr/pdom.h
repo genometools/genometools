@@ -36,8 +36,7 @@ typedef enum {
 typedef struct GtPdomOptions {
   double evalue_cutoff;
   GtStrArray *hmm_files;
-  unsigned int nof_threads,
-               chain_max_gap_length;
+  unsigned int chain_max_gap_length;
   bool write_alignments,
        write_aaseqs;
   GtPdomCutoff cutoff;
@@ -55,7 +54,6 @@ typedef int (*GtPdomIteratorFunc)(GtPdomModel *model, GtPdomModelHit *hit,
 /* acts as a factory for GtPdomResults */
 GtPdomFinder*    gt_pdom_finder_new(GtStrArray *hmmfiles,
                                     double eval_cutoff,
-                                    unsigned int nof_threads,
                                     unsigned int chain_max_gap_length,
                                     GtPdomCutoff cutoff,
                                     GtError*);

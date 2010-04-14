@@ -452,7 +452,6 @@ GtNodeStream* gt_ltrdigest_stream_new(GtNodeStream *in_stream,
   ls->pdom_opts = pdom_opts;
   ls->pdf = gt_pdom_finder_new(ls->pdom_opts->hmm_files,
                                ls->pdom_opts->evalue_cutoff,
-                               ls->pdom_opts->nof_threads,
                                ls->pdom_opts->chain_max_gap_length,
                                ls->pdom_opts->cutoff,
                                err);

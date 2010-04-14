@@ -8,7 +8,6 @@
 \usepackage{listings}
 \usepackage{bbm}
 \usepackage{verbatim}
-%\usepackage{hyperref}
 \usepackage{optionman}
 
 \newcommand{\LTRdigest}{\textit{LTRdigest}\xspace}
@@ -199,8 +198,6 @@ All options can be specified only once.
 \Showoption{hmms}& specify a list of pHMMs for domain search in HMMER2 format
 \\
 \Showoption{pdomevalcutoff}& specify an E-value cutoff for pHMM search
-\\
-\Showoption{threads}& specify the number of threads to use in HMMER searching
 \\
 \Showoption{maxgaplen}& maximum allowed chaining gap size between fragments (in amino acids)
 
@@ -423,10 +420,6 @@ Specify the E-value cutoff for HMMER searches. All hits that fail to meet this m
 option is not selected, then \Showoptionarg{$c$} is set to $10^{-6}$.
 }
 
-\Option{threads}{\Showoptionarg{$n$}}{
-Specify how many HMM models to process concurrently when searching with HMMER. This value is typically set to the number of CPUs in the machine running \LTRdigest . No speedup will be achieved if only one HMM model is used or if the number of threads is lower than the actual number of processors in the system.\\
-\Showoptionarg{$n$} has to be a positive integer. If this option is not selected, then \Showoptionarg{$n$} is set to 2.
-}
 \end{Justshowoptions}
 
 \section{Example}
@@ -445,7 +438,7 @@ First, sort the GFF3 output by position:
 \\[0.5cm]
 Then, the \LTRdigest run can be started with the following command line using the parameters above:
 \\[0.5cm]
-\texttt{\GtLTRdigest\ -pptlen 10 30 -pbsoffset 0 3 -trnas tRNA.fas \\-hmms HMM*.hmm -threads 2 -outfileprefix mygenome-ltrs ltrs\_sorted.gff3 genome.fas $>$ ltrs\_after\_ltrdigest.gff3}
+\texttt{gt -j 2 ltrdigest -pptlen 10 30 -pbsoffset 0 3 -trnas tRNA.fas \\-hmms HMM*.hmm -outfileprefix mygenome-ltrs ltrs\_sorted.gff3 genome.fas $>$ ltrs\_after\_ltrdigest.gff3}
 
 No screen output (except possible error messages) is produced since the GFF3 output on stdout is redirected to a file. Additionally, the files \texttt{mygenome\--ltrs\_conditions.csv}, \texttt{mygenome\--ltrs\_3ltr.fas}, \texttt{mygenome\--ltrs\_5ltr.fas}, \texttt{mygenome\--ltrs\_ppt.fas}, \texttt{mygenome\--ltrs\_pbs.fas}, \texttt{mygenome-\-ltrs\_tabout.csv} and one FASTA file for each of the HMM models will be created and updated during the computation. As the files are buffered, it may take a while before first output to these files can be observed.
 
