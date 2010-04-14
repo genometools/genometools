@@ -24,8 +24,9 @@ class StrArray:
 
     def __init__(self, arr=None):
         if not arr:
-            arr = gtlib.gt_str_array_new()
-        self.strarr = arr
+            self.strarr = gtlib.gt_str_array_new()
+        else:
+            self.strarr = gtlib.gt_str_array_ref(arr)
         self._as_parameter_ = self.strarr
 
     def __del__(self):

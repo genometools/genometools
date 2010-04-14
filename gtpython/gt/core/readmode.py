@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-# Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+# Copyright (c) 2010 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -17,21 +17,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-from array import *
-from alphabet import *
-from encseq import *
-from error import *
-from gtrange import *
-from gtstr import *
-from str_array import *
-from warning import *
-
-Alphabet.register(gtlib)
-Array.register(gtlib)
-Encseq.register(gtlib)
-EncseqEncoder.register(gtlib)
-EncseqBuilder.register(gtlib)
-EncseqReader.register(gtlib)
-Error.register(gtlib)
-Str.register(gtlib)
-StrArray.register(gtlib)
+FORWARD  = 0
+REVERSE  = 1
+COMPL    = 2
+REVCOMPL = 3

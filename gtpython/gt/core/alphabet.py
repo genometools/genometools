@@ -110,9 +110,9 @@ class Alphabet:
 
     def decode_seq(self, encoded):
         encstr = (c_ubyte*len(encoded))(*encoded)
-        encstrl = len(encoded)
-        str_p = gtlib.gt_alphabet_decode_seq_to_str(self.alpha, encstr, encstrl)
-        return str(Str(str_p))
+        str_p = gtlib.gt_alphabet_decode_seq_to_str(self.alpha, encstr, len(encstr))
+        s = Str(str_p)
+        return str(s)
 
     def valid_input(self, plainchar):
         if gtlib.gt_alphabet_valid_input(self.alpha, plainchar) == 0:
