@@ -181,7 +181,8 @@ void gt_chain_fillthegapvalues(GtChain2Dimmatchtable *matchtable)
   }
 }
 
-void gt_chain_applyweight(double weightfactor,GtChain2Dimmatchtable *matchtable)
+void gt_chain_applyweight(double weightfactor,
+                          GtChain2Dimmatchtable *matchtable)
 {
   if (!gt_double_equals_double(weightfactor, 1.0))
   {

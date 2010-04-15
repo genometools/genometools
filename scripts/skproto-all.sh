@@ -31,6 +31,8 @@ bcktab.c
 bltrie-ssort.c
 cgr_spacedseed.c
 cutendpfx.c
+chainofin.c
+chain2dim.c
 diff-cover.c
 dist-short.c
 echoseq.c
@@ -83,6 +85,7 @@ optionargmode.c
 pckbucket.c
 pos2seqnum.c
 pssm.c
+prsqualint.c
 querymatch.c
 revcompl.c
 sfx-apfxlen.c

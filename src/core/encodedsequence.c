@@ -300,7 +300,8 @@ GtUchar gt_encodedsequence_get_encoded_char(const GtEncodedsequence *encseq,
   }
 }
 
-GtUchar gt_encodedsequence_extract_encoded_char(const GtEncodedsequence *encseq,
+GtUchar gt_encodedsequence_extract_encoded_char(
+                           const GtEncodedsequence *encseq,
                            unsigned long pos,
                            GtReadmode readmode)
 {
@@ -317,16 +318,16 @@ GtUchar gt_encodedsequence_extract_encoded_char(const GtEncodedsequence *encseq,
     case GT_READMODE_COMPL: /* only works with dna */
       {
         GtUchar cc = (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
-        return ISSPECIAL(cc) ? cc : GT_COMPLEMENTBASE(cc);
+        return GT_COMPLEMENTBASE(cc);
       }
     case GT_READMODE_REVCOMPL: /* only works with dna */
       {
         GtUchar cc = (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,
                                         GT_REVERSEPOS(encseq->totallength,pos));
-        return ISSPECIAL(cc) ? cc : GT_COMPLEMENTBASE(cc);
+        return GT_COMPLEMENTBASE(cc);
       }
     default:
-      fprintf(stderr,"gt_encodedsequence_extract_encoded_char: "
+      fprintf(stderr,"gt_encodedsequence_get_nospecial_encoded_char: "
                      "readmode %d not implemented\n",
                      (int) readmode);
       exit(GT_EXIT_PROGRAMMING_ERROR);

@@ -429,11 +429,11 @@ static int giextract_encodedseq2fasta(FILE *fpout,
       topos = seqinfo.seqlength;
     }
     gt_encseq2symbolstring(fpout,
-                        encseq,
-                        GT_READMODE_FORWARD,
-                        seqinfo.seqstartpos + frompos,
-                        topos,
-                        linewidth);
+                           encseq,
+                           GT_READMODE_FORWARD,
+                           seqinfo.seqstartpos + frompos,
+                           topos,
+                           linewidth);
   }
   return haserr ? -1 : 0;
 }
