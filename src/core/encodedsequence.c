@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007      Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007/2009 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c)      2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2007-2010 Center for Bioinformatics, University of Hamburg
 
@@ -2809,7 +2809,7 @@ static GtEncodedsequencefunctions encodedseqfunctab[] =
         encseq->deliverchar\
           = encodedseqfunctab[(int) (SAT)].deliverchar##NAME.function;\
         encseq->delivercharname\
-          = encodedseqfunctab[(int) (SAT)].deliverchar##NAME.funcname;\
+          = encodedseqfunctab[(int) (SAT)].deliverchar##NAME.funcname
 
 #define SEQASSIGNAPPFUNC(SAT,NAME)\
         encseq->seqdeliverchar\
