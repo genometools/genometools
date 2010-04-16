@@ -92,16 +92,6 @@ GtUchar            gt_encodedsequence_get_encoded_char(
                                                 GtReadmode readmode);
 
 /* Returns the encoded representation of the character at position <pos> of
-   <encseq> read in the direction as indicated by <readmode>.
-   The function only works for the case that encodesequence[pos] does not
-   contain a special character. It is better to not use it and it should
-   therefore not be part of the API. TODO: move to encodedsequence.h */
-GtUchar            gt_encodedsequence_get_encoded_char_nospecial(
-                                                const GtEncodedsequence *encseq,
-                                                unsigned long pos,
-                                                GtReadmode readmode);
-
-/* Returns the encoded representation of the character at position <pos> of
    <encseq> read in the direction as indicated by <readmode>. This function is
    optimized for sequential access to the sequence (e.g. in a for loop). The
    current state of the sequential scan is maintained in <esr>. */

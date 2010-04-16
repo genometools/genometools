@@ -93,6 +93,15 @@ void gt_encodedsequence_extract2bitenc(bool fwd,
                                        GtEncodedsequenceScanstate *esr,
                                        unsigned long startpos);
 
+/* Returns the encoded representation of the character at position <pos> of
+   <encseq> read in the direction as indicated by <readmode>.
+   The function only works for the case that encodesequence[pos] does not
+   contain a special character. */
+GtUchar gt_encodedsequence_get_encoded_char_nospecial(
+                                                const GtEncodedsequence *encseq,
+                                                unsigned long pos,
+                                                GtReadmode readmode);
+
 /* The following function compares the two bit encodings <ptbe1> and <ptbe2>
    and stores the result of the comparison in <commonunits>. The direction is
    done in forward direction iff <fwd> is true. The comparison is
