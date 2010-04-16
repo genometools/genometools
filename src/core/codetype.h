@@ -19,8 +19,12 @@
 #ifndef CODETYPE_H
 #define CODETYPE_H
 
-/* TODO: please document me */
+/* This type is integer codes computed from strings of some fixed length. */
+
 typedef unsigned long GtCodetype;
+
+/* The following is the format character this the GtCodetype. */
+
 #define FormatGtCodetype "%lu"
 
 #endif

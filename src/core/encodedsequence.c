@@ -118,8 +118,6 @@
           *tbeptr = bitwise;\
         }
 
-#define NAMEDFUNCTION(F) {#F,F}
-
 typedef struct
 {
   const char *funcname;
@@ -145,17 +143,6 @@ typedef struct
   bool(*function)(const GtEncodedsequence *,bool,GtEncodedsequenceScanstate *,
                   unsigned long,unsigned long);
 } Containsspecialfunc;
-
-typedef struct
-{
-  Fillencposfunc fillpos;
-  Delivercharfunc delivercharnospecial,
-                  delivercharspecial,
-                  delivercharspecialrange;
-  SeqDelivercharfunc seqdeliverchar,
-                     seqdelivercharspecial;
-  Containsspecialfunc delivercontainsspecial;
-} GtEncodedsequencefunctions;
 
 void gt_encodedsequence_plainseq2bytecode(GtUchar *bytecode,
                                           const GtUchar *seq,
@@ -2743,66 +2730,81 @@ unsigned long gt_encodedsequence_charcount(const GtEncodedsequence *encseq,
   return encseq->characterdistribution[cc];
 }
 
+/* Do not change the order of the following components */
+
+typedef struct
+{
+  Fillencposfunc fillpos;
+  Delivercharfunc delivercharnospecial,
+                  delivercharspecial,
+                  delivercharspecialrange;
+  SeqDelivercharfunc seqdeliverchar,
+                     seqdelivercharspecial;
+  Containsspecialfunc delivercontainsspecial;
+} GtEncodedsequencefunctions;
+
+#define NFCT(S,F) {#F,F}
+
 static GtEncodedsequencefunctions encodedseqfunctab[] =
   {
     { /* Viadirectaccess */
-      NAMEDFUNCTION(fillplainseq),
-      NAMEDFUNCTION(delivercharViadirectaccess),
-      NAMEDFUNCTION(delivercharViadirectaccess),
-      NAMEDFUNCTION(delivercharViadirectaccess),
-      NAMEDFUNCTION(seqdelivercharViadirectaccess),
-      NAMEDFUNCTION(seqdelivercharViadirectaccess),
-      NAMEDFUNCTION(containsspecialViadirectaccess)
+      NFCT(fillpos,fillplainseq),
+      NFCT(delivercharnospecial,delivercharViadirectaccess),
+      NFCT(delivercharspecial,delivercharViadirectaccess),
+      NFCT(delivercharspecialrange,delivercharViadirectaccess),
+      NFCT(seqdeliverchar,seqdelivercharViadirectaccess),
+      NFCT(seqdelivercharspecial,seqdelivercharViadirectaccess),
+      NFCT(delivercontainsspecial,containsspecialViadirectaccess)
     },
 
     { /* Viabytecompress */
-      NAMEDFUNCTION(fillbitpackarray),
-      NAMEDFUNCTION(delivercharViabytecompress),
-      NAMEDFUNCTION(delivercharViabytecompress),
-      NAMEDFUNCTION(delivercharViabytecompress),
-      NAMEDFUNCTION(seqdelivercharViabytecompress),
-      NAMEDFUNCTION(seqdelivercharViabytecompress),
-      NAMEDFUNCTION(containsspecialViabytecompress)
+      NFCT(fillpos,fillbitpackarray),
+      NFCT(delivercharnospecial,delivercharViabytecompress),
+      NFCT(delivercharspecial,delivercharViabytecompress),
+      NFCT(delivercharspecialrange,delivercharViabytecompress),
+      NFCT(seqdeliverchar,seqdelivercharViabytecompress),
+      NFCT(seqdelivercharspecial,seqdelivercharViabytecompress),
+      NFCT(delivercontainsspecial,containsspecialViabytecompress)
     },
 
     { /* Viabitaccess */
-      NAMEDFUNCTION(fillbitaccesstab),
-      NAMEDFUNCTION(deliverfromtwobitencoding),
-      NAMEDFUNCTION(delivercharViabitaccessSpecial),
-      NAMEDFUNCTION(delivercharViabitaccessSpecial),
-      NAMEDFUNCTION(seqdelivercharnoSpecial),
-      NAMEDFUNCTION(seqdelivercharViabitaccessSpecial),
-      NAMEDFUNCTION(containsspecialViabitaccess)
+      NFCT(fillpos,fillbitaccesstab),
+      NFCT(delivercharnospecial,deliverfromtwobitencoding),
+      NFCT(delivercharspecial,delivercharViabitaccessSpecial),
+      NFCT(delivercharspecialrange,delivercharViabitaccessSpecial),
+      NFCT(seqdeliverchar,seqdelivercharnoSpecial),
+      NFCT(seqdelivercharspecial,seqdelivercharViabitaccessSpecial),
+      NFCT(delivercontainsspecial,containsspecialViabitaccess)
     },
 
     { /* Viauchartables */
-      NAMEDFUNCTION(ucharfillspecialtables),
-      NAMEDFUNCTION(deliverfromtwobitencoding),
-      NAMEDFUNCTION(delivercharViauchartablesSpecialfirst),
-      NAMEDFUNCTION(delivercharViauchartablesSpecialrange),
-      NAMEDFUNCTION(seqdelivercharnoSpecial),
-      NAMEDFUNCTION(seqdelivercharSpecial),
-      NAMEDFUNCTION(containsspecialViatables)
+      NFCT(fillpos,ucharfillspecialtables),
+      NFCT(delivercharnospecial,deliverfromtwobitencoding),
+      NFCT(delivercharspecial,delivercharViauchartablesSpecialfirst),
+      NFCT(delivercharspecialrange,delivercharViauchartablesSpecialrange),
+      NFCT(seqdeliverchar,seqdelivercharnoSpecial),
+      NFCT(seqdelivercharspecial,seqdelivercharSpecial),
+      NFCT(delivercontainsspecial,containsspecialViatables)
     },
 
     { /* Viaushorttables */
-      NAMEDFUNCTION(ushortfillspecialtables),
-      NAMEDFUNCTION(deliverfromtwobitencoding),
-      NAMEDFUNCTION(delivercharViaushorttablesSpecialfirst),
-      NAMEDFUNCTION(delivercharViaushorttablesSpecialrange),
-      NAMEDFUNCTION(seqdelivercharnoSpecial),
-      NAMEDFUNCTION(seqdelivercharSpecial),
-      NAMEDFUNCTION(containsspecialViatables)
+      NFCT(fillpos,ushortfillspecialtables),
+      NFCT(delivercharnospecial,deliverfromtwobitencoding),
+      NFCT(delivercharspecial,delivercharViaushorttablesSpecialfirst),
+      NFCT(delivercharspecialrange,delivercharViaushorttablesSpecialrange),
+      NFCT(seqdeliverchar,seqdelivercharnoSpecial),
+      NFCT(seqdelivercharspecial,seqdelivercharSpecial),
+      NFCT(delivercontainsspecial,containsspecialViatables)
     },
 
     { /* Viauint32tables */
-      NAMEDFUNCTION(uint32fillspecialtables),
-      NAMEDFUNCTION(deliverfromtwobitencoding),
-      NAMEDFUNCTION(delivercharViauint32tablesSpecialfirst),
-      NAMEDFUNCTION(delivercharViauint32tablesSpecialrange),
-      NAMEDFUNCTION(seqdelivercharnoSpecial),
-      NAMEDFUNCTION(seqdelivercharSpecial),
-      NAMEDFUNCTION(containsspecialViatables)
+      NFCT(fillpos,uint32fillspecialtables),
+      NFCT(delivercharnospecial,deliverfromtwobitencoding),
+      NFCT(delivercharspecial,delivercharViauint32tablesSpecialfirst),
+      NFCT(delivercharspecialrange,delivercharViauint32tablesSpecialrange),
+      NFCT(seqdeliverchar,seqdelivercharnoSpecial),
+      NFCT(seqdelivercharspecial,seqdelivercharSpecial),
+      NFCT(delivercontainsspecial,containsspecialViatables)
     }
   };
 

@@ -134,7 +134,15 @@ void gt_encodedsequence_check_markpos(const GtEncodedsequence *encseq);
    in reverse directions. */
 int gt_encodedsequence_check_specialranges(const GtEncodedsequence *encseq);
 
-/* TODO: please document me */
+/* The following checks if the encoded sequence <encseq> for consistency.
+   It does so by scanning the files given in <filenametab> and comparing
+   the extracted symbols to those obtained by directly reading the files.
+   Additional, <scantrials> many trials are performed each reading character
+   by character starting at some random position and scanning until 
+   the end of the sequence, while comparing the extraced character 
+   to the characters extracted by random access. Finally <multicharcmptrials>
+   trials are performed each checking the validity of a multicharacter
+   extraction.  */
 int gt_encodedsequence_check_consistency(const GtEncodedsequence *encseq,
                                          const GtStrArray *filenametab,
                                          GtReadmode readmode,
@@ -145,18 +153,21 @@ int gt_encodedsequence_check_consistency(const GtEncodedsequence *encseq,
 /* Returns true is <encseq> has special ranges, false otherwise. */
 bool gt_encodedsequence_has_specialranges(const GtEncodedsequence *encseq);
 
-/* TODO: please document me */
+/* Returns true if the representation of the <encseq> allows for fast
+   enumeration of special ranges. */
 bool gt_encodedsequence_has_fast_specialrangeenumerator(
                                                const GtEncodedsequence *encseq);
 
-/* TODO: please document me */
+/* Return true if the representation of the <encseq> is based on two
+   bit encoding */
 bool gt_encodedsequence_bitwise_cmp_ok(const GtEncodedsequence *encseq);
 
-/* TODO: please document me */
-/*@null@*/
-const char* gt_encodedsequence_accessname(const GtEncodedsequence *encseq);
-
-/* TODO: please document me */
+/* Return the integer code of the sequence of length <prefixlength>
+   beginning at position <frompos> represetned by <encseq>. <esr> is 
+   used for efficiently scanning the sequence of symbols. <filltable> 
+   and <multimappower> are used for completing the integer code
+   in cases where prefix of length <prefixlength> contains a special 
+   character. */
 GtCodetype gt_encodedsequence_extractprefixcode(unsigned int *unitsnotspecial,
                                                const GtEncodedsequence *encseq,
                                                const GtCodetype *filltable,
@@ -166,7 +177,16 @@ GtCodetype gt_encodedsequence_extractprefixcode(unsigned int *unitsnotspecial,
                                                unsigned long frompos,
                                                unsigned int prefixlength);
 
-/* TODO: please document me */
+/* The following function compares two substrings beginning
+   at position <pos1> and <pos2> in <encseq>. <esr1> and <esr2> refer
+   to memory areas for storeing a GtEncodedsequenceScanstate. 
+   The comparison starts at offset <depth>. The information about the length
+   of the longest common prefix is stored in <commonunits>. <fwd> and
+   <complement> specify if the sequence is scanned in forward direction
+   and if the complement of the sequence is to be considered. The
+   return value is -1, 0 or 1 depending on weather the sequence beginning at
+   position <pos1> is smaller than, equal to, or larger than the sequence
+   beginning at position <pos2>. */
 int        gt_encodedsequence_compare(const GtEncodedsequence *encseq,
                                       GtCommonunits *commonunits,
                                       bool fwd,
@@ -177,7 +197,8 @@ int        gt_encodedsequence_compare(const GtEncodedsequence *encseq,
                                       unsigned long pos2,
                                       unsigned long depth);
 
-/* TODO: please document me */
+/* The function is identical to the previous function except that the
+   the comparison is restricted to the prefixes of length <maxdepth>. */
 int        gt_encodedsequence_compare_maxdepth(const GtEncodedsequence *encseq,
                                                GtCommonunits *commonunits,
                                                bool fwd,
@@ -189,8 +210,13 @@ int        gt_encodedsequence_compare_maxdepth(const GtEncodedsequence *encseq,
                                                unsigned long depth,
                                                unsigned long maxdepth);
 
-/* TODO: please document me */
-bool       gt_encodedsequence_contains_special(const GtEncodedsequence *encseq,
+/* Return true if and only if the substring of length <len> starting
+   at position <startpos> in <encseq> contains a special character.
+   <esrspace> refer to a memory areas for storeing a 
+   GtEncodedsequenceScanstate. <moveforward> is true if and only if the
+   scanning is done in forward direction. */
+bool       gt_encodedsequence_contains_special(
+                                           const GtEncodedsequence *encseq,
                                            bool moveforward,
                                            GtEncodedsequenceScanstate *esrspace,
                                            unsigned long startpos,
@@ -218,7 +244,19 @@ void gt_encodedsequence_show_features(const GtEncodedsequence *encseq,
                                       GtLogger *logger,
                                       bool withfilenames);
 
-/* TODO: please document me */
+/* The following function compares the two suffixes
+   at position <start1> and <start2> in <encseq>.  <esr1> and <esr2> refer
+   to memory areas for storeing a GtEncodedsequenceScanstate. If <maxdepth>
+   is 0, then the entire suffixes are compared. If <maxdepth> is larger than
+   0, then only the suffixes up to length <maxdepth> are compared.
+   The length of the longest common prefix is stored in <maxlcp>.
+   <specialsareequal> specifies if special symbols are considered equal
+   during pairwise character comparisons. <specialsareequalatdepth0> specifies
+   if special symbols occurring as first symbols of the suffixes 
+   are considered equal  during pairwise character comparisons.
+   The return value is -1, 0 or 1 depending on whether the sequence beginning at
+   position <start1> is smaller than, equal to, or larger than the sequence
+   beginning at position <start2>. */
 int gt_encodedsequence_comparetwosuffixes(const GtEncodedsequence *encseq,
                                           GtReadmode readmode,
                                           unsigned long *maxlcp,
@@ -230,7 +268,15 @@ int gt_encodedsequence_comparetwosuffixes(const GtEncodedsequence *encseq,
                                           GtEncodedsequenceScanstate *esr1,
                                           GtEncodedsequenceScanstate *esr2);
 
-/* TODO: please document me */
+/* The following function compares the two suffixes
+   at position <pos1> and <pos2> in <encseq>.   If <maxdepth> is 0,
+   then the entire suffixes are compared (until a mismatch occurs).
+   If <maxdepth> is larger than 0, the comparison is restricted to 
+   the prefixes of length <maxdepth>.
+   The length of the longest common prefix is stored in <maxcommon>.
+   The return value is -1, 0 or 1 depending on whether the sequence 
+   beginning at position <pos1> is smaller than, equal to, or larger than the 
+   sequence beginning at position <pos2>. */
 int gt_encodedsequence_comparetwostrings(const GtEncodedsequence *encseq,
                                          bool fwd,
                                          bool complement,
@@ -239,7 +285,8 @@ int gt_encodedsequence_comparetwostrings(const GtEncodedsequence *encseq,
                                          unsigned long pos2,
                                          unsigned long maxdepth);
 
-/* TODO: please document me */
+/* The following generalizes the previous in that the comparison 
+   of the sequences starts at offset <depth>. */
 int gt_encodedsequence_comparetwostringsgeneric(const GtEncodedsequence *encseq,
                                                 bool fwd,
                                                 bool complement,
@@ -249,22 +296,27 @@ int gt_encodedsequence_comparetwostringsgeneric(const GtEncodedsequence *encseq,
                                                 unsigned long depth,
                                                 unsigned long maxdepth);
 
-/* TODO: please document me */
+/* Return the number of positions in <encseq> containing special characters */
 unsigned long gt_encodedsequence_specialcharacters(
                                                const GtEncodedsequence *encseq);
 
-/* TODO: please document me */
+/* Return the number of ranges of consecutive runs of special characters
+   where the length of each range is limited by UCHAR_MAX, USHRT_MAX, and
+   UINT32_MAX, depending on whether the Viauchartables, Viaushorttables.
+   Viauint32tables are used */
 unsigned long gt_encodedsequence_specialranges(const GtEncodedsequence *encseq);
 
-/* TODO: please document me */
+/* Return the number of ranges of consecutive runs of special characters */
 unsigned long gt_encodedsequence_realspecialranges(
                                                const GtEncodedsequence *encseq);
 
-/* TODO: please document me */
+/* Return the length of the longest prefix of <encseq> consisting of
+   special characters only. */
 unsigned long gt_encodedsequence_lengthofspecialprefix(
                                                const GtEncodedsequence *encseq);
 
-/* TODO: please document me */
+/* Return the length of the longest suffix of <encseq> consisting of
+   special characters only. */
 unsigned long gt_encodedsequence_lengthofspecialsuffix(
                                                const GtEncodedsequence *encseq);
 

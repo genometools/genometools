@@ -59,7 +59,8 @@ GtEncodedsequence* gt_encodedsequence_new_from_files(
    ranges. Otherwise it is not possible. 
    TODO for Sascha: withrange can go into the options and be set 
    to true in the default case. */
-GtEncodedsequence* gt_encodedsequence_new_from_index(bool withrange,
+GtEncodedsequence* gt_encodedsequence_new_from_index(
+                                                    bool withrange,
                                                     GtEncodedsequenceOptions *o,
                                                     GtError *err);
 
@@ -103,8 +104,9 @@ GtUchar            gt_encodedsequence_get_encoded_char(
 /* Returns the encoded representation of the character at position <pos> of
    <encseq> read in the direction as indicated by <readmode>. 
    The function only works for sequence representations based on the two bit
-   encoding and for the case that the position does not contain a 
-   special character. */
+   encoding and for the case that encodesequence[pos] does not contain a 
+   special character. It is better to not use it and it should
+   therefore not be part of the API. TODO: move to encodedsequence.h */
 GtUchar            gt_encodedsequence_extract_encoded_char(
                                                 const GtEncodedsequence *encseq,
                                                 unsigned long pos,
@@ -113,8 +115,9 @@ GtUchar            gt_encodedsequence_extract_encoded_char(
 
 /* Returns the encoded representation of the character at position <pos> of
    <encseq> read in the direction as indicated by <readmode>. 
-   The function only works for the case that the position does not contain 
-   a special character. */
+   The function only works for the case that encodesequence[pos] does not
+   contain a special character. It is better to not use it and it should 
+   therefore not be part of the API. TODO: move to encodedsequence.h */
 GtUchar            gt_encodedsequence_get_encoded_char_nospecial(
                                                 const GtEncodedsequence *encseq,
                                                 unsigned long pos,
@@ -123,7 +126,7 @@ GtUchar            gt_encodedsequence_get_encoded_char_nospecial(
 /* Returns the encoded representation of the character at position <pos> of
    <encseq> read in the direction as indicated by <readmode>. This function is
    optimized for sequential access to the sequence (e.g. in a for loop). The
-   current state of the sequential scan is given by <esr>. */
+   current state of the sequential scan is maintained in <esr>. */
 GtUchar            gt_encodedsequence_get_encoded_char_sequential(
                                                 const GtEncodedsequence *encseq,
                                                 GtEncodedsequenceScanstate *esr,

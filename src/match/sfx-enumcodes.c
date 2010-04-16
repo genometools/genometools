@@ -187,10 +187,10 @@ GtCodetype gt_computefilledqgramcode(const Enumcodeatposition *ecp,
 }
 
 bool gt_computefilledqgramcodestopatmax(GtCodetype *code,
-                                     const Enumcodeatposition *ecp,
-                                     unsigned int prefixindex,
-                                     unsigned long pos,
-                                     GtCodetype stopcode)
+                                        const Enumcodeatposition *ecp,
+                                        unsigned int prefixindex,
+                                        unsigned long pos,
+                                        GtCodetype stopcode)
 {
   GtCodetype tmpcode;
   unsigned int idx;
