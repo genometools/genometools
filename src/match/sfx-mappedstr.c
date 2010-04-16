@@ -30,7 +30,6 @@
 #include "core/str_array.h"
 #include "spacedef.h"
 #include "intcode-def.h"
-#include "stamp.h"
 #ifdef SKDEBUG
 #include "sfx-nextchar.h"
 #endif
@@ -175,8 +174,8 @@ typedef struct
                firstindex,
                lengthwithoutspecial;
   GtCodetype codewithoutspecial,
-           *filltable;
-  GtCodetype **multimappower;
+             *filltable,
+             **multimappower;
 } Streamstate;
 
 static void specialemptyqueue(Specialpositions *spos,unsigned int queuesize)
@@ -225,6 +224,21 @@ static void specialenqueue(Specialpositions *spos,Specialitem elem)
 static void specialwrapqueue(Specialpositions *spos)
 {
   FREESPACE(spos->queuespace);
+}
+
+static void initstreamstate(Streamstate *spwp,unsigned int numofchars,
+                            unsigned int kmersize)
+{
+  spwp->multimappower = gt_initmultimappower(numofchars,kmersize);
+  spwp->lengthwithoutspecial = 0;
+  spwp->codewithoutspecial = 0;
+  spwp->kmersize = kmersize;
+  spwp->numofchars = numofchars;
+  spwp->windowwidth = 0;
+  spwp->firstindex = 0;
+  ALLOCASSIGNSPACE(spwp->cyclicwindow,NULL,GtUchar,kmersize);
+  specialemptyqueue(&spwp->spos,kmersize);
+  spwp->filltable = gt_filllargestchartable(numofchars,kmersize);
 }
 
 static void updatespecialpositions(Streamstate *spwp,
@@ -385,29 +399,6 @@ static void shiftrightwithchar(
   }
 }
 
-static void initstreamstate(Streamstate *spwp,unsigned int numofchars,
-                            unsigned int kmersize)
-{
-  spwp->multimappower = gt_initmultimappower(numofchars,kmersize);
-  spwp->lengthwithoutspecial = 0;
-  spwp->codewithoutspecial = 0;
-  spwp->kmersize = kmersize;
-  spwp->numofchars = numofchars;
-  spwp->windowwidth = 0;
-  spwp->firstindex = 0;
-  ALLOCASSIGNSPACE(spwp->cyclicwindow,NULL,GtUchar,kmersize);
-  specialemptyqueue(&spwp->spos,kmersize);
-  spwp->filltable = gt_filllargestchartable(numofchars,kmersize);
-}
-
-static void freestreamstate(Streamstate *spwp)
-{
-  FREESPACE(spwp->cyclicwindow);
-  FREESPACE(spwp->filltable);
-  gt_multimappowerfree(&spwp->multimappower);
-  specialwrapqueue(&spwp->spos);
-}
-
 static void doovershoot(Streamstate *spwp,
                         void(*processkmercode)(void *,GtCodetype,unsigned long,
                                                const Firstspecialpos *),
@@ -422,6 +413,14 @@ static void doovershoot(Streamstate *spwp,
     shiftrightwithchar(processkmercode,processkmercodeinfo,spwp,
                        currentposition + overshoot,(GtUchar) WILDCARD);
   }
+}
+
+static void freestreamstate(Streamstate *spwp)
+{
+  FREESPACE(spwp->cyclicwindow);
+  FREESPACE(spwp->filltable);
+  gt_multimappowerfree(&spwp->multimappower);
+  specialwrapqueue(&spwp->spos);
 }
 
 void getencseqkmers(
@@ -447,16 +446,13 @@ void getencseqkmers(
   for (currentposition = 0; currentposition<totallength; currentposition++)
   {
     charcode = gt_encodedsequence_get_encoded_char_sequential(encseq,esr,
-                                                           currentposition,
-                                                           readmode);
+                                                              currentposition,
+                                                              readmode);
     GT_CHECKENCCHAR(charcode,encseq,currentposition,readmode);
     shiftrightwithchar(processkmercode,processkmercodeinfo,
                        &spwp,currentposition,charcode);
   }
-  if (esr != NULL)
-  {
-    gt_encodedsequence_scanstate_delete(esr);
-  }
+  gt_encodedsequence_scanstate_delete(esr);
   doovershoot(&spwp,
               processkmercode,
               processkmercodeinfo,
@@ -488,12 +484,18 @@ int getfastastreamkmers(
   gt_error_check(err);
   initstreamstate(&spwp,numofchars,kmersize);
   if (plainformat)
+  {
     fb = gt_sequence_buffer_plain_new(filenametab);
-  else
-    fb = gt_sequence_buffer_new_guess_type((GtStrArray*) filenametab, err);
-  if (!fb)
+  } else
+  {
+    fb = gt_sequence_buffer_new_guess_type(filenametab, err);
+  }
+  if (fb == NULL)
+  {
     haserr = true;
-  if (!haserr) {
+  }
+  if (!haserr)
+  {
     gt_sequence_buffer_set_symbolmap(fb, symbolmap);
 
     for (currentposition = 0; /* Nothing */; currentposition++)
