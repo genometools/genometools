@@ -417,9 +417,10 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
   gt_encodedsequence_options_enable_ssp_table_usage(o);
   gt_encodedsequence_options_set_indexname(o, indexname);
   gt_encodedsequence_options_set_logger(o, logger);
+  gt_encodedsequence_options_enable_range_iteration(o);
 
   /* Open sequence file */
-  encseq = gt_encodedsequence_new_from_index(true, o, err);
+  encseq = gt_encodedsequence_new_from_index(o, err);
   if (gt_error_is_set(err))
     had_err = -1;
 

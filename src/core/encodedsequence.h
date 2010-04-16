@@ -28,6 +28,7 @@
 #include "core/filelengthvalues.h"
 #include "core/disc_distri.h"
 #include "core/encodedsequence_api.h"
+#include "core/encodedsequence_options.h"
 #include "core/intbits.h"
 #include "core/logger.h"
 #include "core/range.h"
@@ -38,9 +39,9 @@
           ((TOTALLENGTH) - 1 - (POS))
 
 /* The following type stores a two bit encoding in <tbe> with information
-   about the number of two bit units which do not store a special 
-   character in <unitsnotspecial>. To allow the comparison of these 
-   structures, the <position> in the sequence at which the encoding was 
+   about the number of two bit units which do not store a special
+   character in <unitsnotspecial>. To allow the comparison of these
+   structures, the <position> in the sequence at which the encoding was
    extracted is also stored */
 typedef struct
 {
@@ -49,18 +50,18 @@ typedef struct
   unsigned long position;
 } GtEndofTwobitencoding;
 
-/* The following type stores the result of comparing a pair of twobit 
-   encodings. <common> stores the number of units which are common 
+/* The following type stores the result of comparing a pair of twobit
+   encodings. <common> stores the number of units which are common
    (either from the beginning or from the end. <leftspecial> is true
    iff the first twobit encoding contains a special character in the units
-   it covers. <rightspecial> is true iff the second twobit encoding contains 
-   a special character in the units it covers. <finaldepth> stores 
-   result of the comparison, i.e. the longest common prefix of the 
+   it covers. <rightspecial> is true iff the second twobit encoding contains
+   a special character in the units it covers. <finaldepth> stores
+   result of the comparison, i.e. the longest common prefix of the
    comparison. */
 typedef struct
 {
   unsigned int common;
-  bool leftspecial, 
+  bool leftspecial,
        rightspecial;
   unsigned long finaldepth;
 } GtCommonunits;
@@ -82,7 +83,7 @@ bool gt_specialrangeiterator_next(GtSpecialrangeiterator *sri,
 void gt_specialrangeiterator_delete(GtSpecialrangeiterator *sri);
 
 /* The following function extracts a twobit encoding at position <startpos>
-   in the sequence encoded by <encseq>. The <esr> structure stores 
+   in the sequence encoded by <encseq>. The <esr> structure stores
    information allowing for efficient retrieval of the next special
    position relative to <startpos>. The scanning is performed in forward or
    reverse direction depending on the value of <fwd>. The result is stored
@@ -106,7 +107,7 @@ int gt_encodedsequence_compare_twobitencodings(
                                             const GtEndofTwobitencoding *ptbe2);
 
 /* The following function extracts from the byte sequence of length <len>
-   pointed to by <seq> the sequence of len/4 bytecodes each 
+   pointed to by <seq> the sequence of len/4 bytecodes each
    encoding four consecutive characters in one byte. */
 void gt_encodedsequence_plainseq2bytecode(GtUchar *bytecode,
                                           const GtUchar *seq,
@@ -138,8 +139,8 @@ int gt_encodedsequence_check_specialranges(const GtEncodedsequence *encseq);
    It does so by scanning the files given in <filenametab> and comparing
    the extracted symbols to those obtained by directly reading the files.
    Additional, <scantrials> many trials are performed each reading character
-   by character starting at some random position and scanning until 
-   the end of the sequence, while comparing the extraced character 
+   by character starting at some random position and scanning until
+   the end of the sequence, while comparing the extraced character
    to the characters extracted by random access. Finally <multicharcmptrials>
    trials are performed each checking the validity of a multicharacter
    extraction.  */
@@ -163,10 +164,10 @@ bool gt_encodedsequence_has_fast_specialrangeenumerator(
 bool gt_encodedsequence_bitwise_cmp_ok(const GtEncodedsequence *encseq);
 
 /* Return the integer code of the sequence of length <prefixlength>
-   beginning at position <frompos> represetned by <encseq>. <esr> is 
-   used for efficiently scanning the sequence of symbols. <filltable> 
+   beginning at position <frompos> represetned by <encseq>. <esr> is
+   used for efficiently scanning the sequence of symbols. <filltable>
    and <multimappower> are used for completing the integer code
-   in cases where prefix of length <prefixlength> contains a special 
+   in cases where prefix of length <prefixlength> contains a special
    character. */
 GtCodetype gt_encodedsequence_extractprefixcode(unsigned int *unitsnotspecial,
                                                const GtEncodedsequence *encseq,
@@ -179,7 +180,7 @@ GtCodetype gt_encodedsequence_extractprefixcode(unsigned int *unitsnotspecial,
 
 /* The following function compares two substrings beginning
    at position <pos1> and <pos2> in <encseq>. <esr1> and <esr2> refer
-   to memory areas for storeing a GtEncodedsequenceScanstate. 
+   to memory areas for storeing a GtEncodedsequenceScanstate.
    The comparison starts at offset <depth>. The information about the length
    of the longest common prefix is stored in <commonunits>. <fwd> and
    <complement> specify if the sequence is scanned in forward direction
@@ -212,7 +213,7 @@ int        gt_encodedsequence_compare_maxdepth(const GtEncodedsequence *encseq,
 
 /* Return true if and only if the substring of length <len> starting
    at position <startpos> in <encseq> contains a special character.
-   <esrspace> refer to a memory areas for storeing a 
+   <esrspace> refer to a memory areas for storeing a
    GtEncodedsequenceScanstate. <moveforward> is true if and only if the
    scanning is done in forward direction. */
 bool       gt_encodedsequence_contains_special(
@@ -252,7 +253,7 @@ void gt_encodedsequence_show_features(const GtEncodedsequence *encseq,
    The length of the longest common prefix is stored in <maxlcp>.
    <specialsareequal> specifies if special symbols are considered equal
    during pairwise character comparisons. <specialsareequalatdepth0> specifies
-   if special symbols occurring as first symbols of the suffixes 
+   if special symbols occurring as first symbols of the suffixes
    are considered equal  during pairwise character comparisons.
    The return value is -1, 0 or 1 depending on whether the sequence beginning at
    position <start1> is smaller than, equal to, or larger than the sequence
@@ -271,11 +272,11 @@ int gt_encodedsequence_comparetwosuffixes(const GtEncodedsequence *encseq,
 /* The following function compares the two suffixes
    at position <pos1> and <pos2> in <encseq>.   If <maxdepth> is 0,
    then the entire suffixes are compared (until a mismatch occurs).
-   If <maxdepth> is larger than 0, the comparison is restricted to 
+   If <maxdepth> is larger than 0, the comparison is restricted to
    the prefixes of length <maxdepth>.
    The length of the longest common prefix is stored in <maxcommon>.
-   The return value is -1, 0 or 1 depending on whether the sequence 
-   beginning at position <pos1> is smaller than, equal to, or larger than the 
+   The return value is -1, 0 or 1 depending on whether the sequence
+   beginning at position <pos1> is smaller than, equal to, or larger than the
    sequence beginning at position <pos2>. */
 int gt_encodedsequence_comparetwostrings(const GtEncodedsequence *encseq,
                                          bool fwd,
@@ -285,7 +286,7 @@ int gt_encodedsequence_comparetwostrings(const GtEncodedsequence *encseq,
                                          unsigned long pos2,
                                          unsigned long maxdepth);
 
-/* The following generalizes the previous in that the comparison 
+/* The following generalizes the previous in that the comparison
    of the sequences starts at offset <depth>. */
 int gt_encodedsequence_comparetwostringsgeneric(const GtEncodedsequence *encseq,
                                                 bool fwd,

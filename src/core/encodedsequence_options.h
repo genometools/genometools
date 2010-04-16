@@ -20,4 +20,11 @@
 
 #include "core/encodedsequence_options_api.h"
 
+void gt_encodedsequence_options_enable_range_iteration(
+                                                   GtEncodedsequenceOptions *o);
+void gt_encodedsequence_options_disable_range_iteration(
+                                                   GtEncodedsequenceOptions *o);
+bool gt_encodedsequence_options_get_range_iteration(
+                                                   GtEncodedsequenceOptions *o);
+
 #endif

@@ -30,7 +30,8 @@ struct GtEncodedsequenceOptions {
        tistable,
        sdstable,
        ssptable,
-       destable;
+       destable,
+       withrange;
   GtLogger *logger;
 };
 
@@ -38,6 +39,7 @@ GtEncodedsequenceOptions* gt_encodedsequence_options_new(void)
 {
   GtEncodedsequenceOptions *o = gt_calloc(1, sizeof (GtEncodedsequenceOptions));
   /* init everything to NULL or false */
+  o->withrange = true;
   return o;
 }
 
@@ -243,6 +245,26 @@ bool gt_encodedsequence_options_get_ssp_table_usage(GtEncodedsequenceOptions *o)
 {
   gt_assert(o);
   return o->ssptable;
+}
+
+void gt_encodedsequence_options_enable_range_iteration(
+                                                   GtEncodedsequenceOptions *o)
+{
+  gt_assert(o);
+  o->withrange = true;
+}
+
+void gt_encodedsequence_options_disable_range_iteration(
+                                                   GtEncodedsequenceOptions *o)
+{
+  gt_assert(o);
+  o->withrange = false;
+}
+
+bool gt_encodedsequence_options_get_range_iteration(GtEncodedsequenceOptions *o)
+{
+  gt_assert(o);
+  return o->withrange;
 }
 
 void gt_encodedsequence_options_set_logger(GtEncodedsequenceOptions *o,

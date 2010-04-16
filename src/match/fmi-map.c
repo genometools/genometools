@@ -150,7 +150,8 @@ static GtEncodedsequence *mapbwtencoding(const GtStr *indexname,
   gt_encodedsequence_options_enable_tis_table_usage(o);
   gt_encodedsequence_options_set_indexname(o, (GtStr*) indexname);
   gt_encodedsequence_options_set_logger(o, logger);
-  ret = gt_encodedsequence_new_from_index(true, o, err);
+  gt_encodedsequence_options_enable_range_iteration(o);
+  ret = gt_encodedsequence_new_from_index(o, err);
   gt_encodedsequence_options_delete(o);
   return ret;
 }

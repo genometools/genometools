@@ -56,11 +56,8 @@ GtEncodedsequence* gt_encodedsequence_new_from_files(
 /* Returns a new <GtEncodedsequence> created from a set of preprocessed index
    files as specified in the option object <o>. Returns NULL on error.
    If <withrange> is set to true, then it it possible to iterate over the
-   ranges. Otherwise it is not possible. 
-   TODO for Sascha: withrange can go into the options and be set 
-   to true in the default case. */
+   ranges. Otherwise it is not possible. */
 GtEncodedsequence* gt_encodedsequence_new_from_index(
-                                                    bool withrange,
                                                     GtEncodedsequenceOptions *o,
                                                     GtError *err);
 
@@ -70,7 +67,7 @@ GtEncodedsequence* gt_encodedsequence_new_from_index(
    <alpha> is the <GtAlphabet> used to encode the sequence. The parameter
    <logger> is used to pass a <GtLogger> specifying a log target.
    TODO: why are there two sequences? can't the concatenation be
-         done on the caller side? document 'withrange'! 
+         done on the caller side? document 'withrange'!
          Sascha, we have discussed this. */
 GtEncodedsequence* gt_encodedsequence_new_from_plain(bool withrange,
                                                      const GtUchar *seq1,
@@ -102,9 +99,9 @@ GtUchar            gt_encodedsequence_get_encoded_char(
                                                 GtReadmode readmode);
 
 /* Returns the encoded representation of the character at position <pos> of
-   <encseq> read in the direction as indicated by <readmode>. 
+   <encseq> read in the direction as indicated by <readmode>.
    The function only works for sequence representations based on the two bit
-   encoding and for the case that encodesequence[pos] does not contain a 
+   encoding and for the case that encodesequence[pos] does not contain a
    special character. It is better to not use it and it should
    therefore not be part of the API. TODO: move to encodedsequence.h */
 GtUchar            gt_encodedsequence_extract_encoded_char(
@@ -112,11 +109,10 @@ GtUchar            gt_encodedsequence_extract_encoded_char(
                                                 unsigned long pos,
                                                 GtReadmode readmode);
 
-
 /* Returns the encoded representation of the character at position <pos> of
-   <encseq> read in the direction as indicated by <readmode>. 
+   <encseq> read in the direction as indicated by <readmode>.
    The function only works for the case that encodesequence[pos] does not
-   contain a special character. It is better to not use it and it should 
+   contain a special character. It is better to not use it and it should
    therefore not be part of the API. TODO: move to encodedsequence.h */
 GtUchar            gt_encodedsequence_get_encoded_char_nospecial(
                                                 const GtEncodedsequence *encseq,
@@ -187,9 +183,8 @@ void                        gt_encodedsequence_scanstate_init(
                                                 GtReadmode readmode,
                                                 unsigned long startpos);
 
-
 /* Reinitializes the given <esr> with the values as described in
-   <gt_encodedsequence_scanstate_new()>, except that the 
+   <gt_encodedsequence_scanstate_new()>, except that the
    the direction is defined by <moveforward>. Do not use it. It is just
    for internal purposes. */
 void                        gt_encodedsequence_scanstate_initgeneric(

@@ -34,6 +34,7 @@
 #ifndef GT_INLINEDENCSEQ
 #include "core/encodedsequence_rep.h"
 #endif
+#include "core/encodedsequence_options.h"
 #include "core/error.h"
 #include "core/fa.h"
 #include "core/filelengthvalues.h"
@@ -85,7 +86,7 @@
         GtTwobitencoding *tbeptr;\
         encseq->unitsoftwobitencoding\
           = detunitsoftwobitencoding(encseq->totallength);\
-        TABLE = gt_malloc(sizeof(*(TABLE)) * encseq->unitsoftwobitencoding);\
+        TABLE = gt_malloc(sizeof (*(TABLE)) * encseq->unitsoftwobitencoding);\
         TABLE[encseq->unitsoftwobitencoding-1] = 0;\
         tbeptr = TABLE
 
@@ -582,27 +583,28 @@ static void assignencseqmapspecification(
   {
     unsigned long idx, offset = 0;
 
-    encseq->satcharptr = gt_malloc(sizeof(*encseq->satcharptr));
+    encseq->satcharptr = gt_malloc(sizeof (*encseq->satcharptr));
     encseq->satcharptr[0] = (unsigned long) encseq->sat;
 
-    encseq->totallengthptr = gt_malloc(sizeof(*encseq->totallengthptr));
+    encseq->totallengthptr = gt_malloc(sizeof (*encseq->totallengthptr));
     encseq->totallengthptr[0] = encseq->totallength;
 
     encseq->numofdbsequencesptr
-      = gt_malloc(sizeof(*encseq->numofdbsequencesptr));
+      = gt_malloc(sizeof (*encseq->numofdbsequencesptr));
     encseq->numofdbsequencesptr[0] = encseq->numofdbsequences;
 
-    encseq->numofdbfilesptr = gt_malloc(sizeof(*encseq->numofdbfilesptr));
+    encseq->numofdbfilesptr = gt_malloc(sizeof (*encseq->numofdbfilesptr));
     encseq->numofdbfilesptr[0] = encseq->numofdbfiles;
 
     encseq->lengthofdbfilenamesptr
-      = gt_malloc(sizeof(*encseq->lengthofdbfilenamesptr));
+      = gt_malloc(sizeof (*encseq->lengthofdbfilenamesptr));
     encseq->lengthofdbfilenamesptr[0] = encseq->lengthofdbfilenames;
 
-    encseq->specialcharinfoptr = gt_malloc(sizeof(*encseq->specialcharinfoptr));
+    encseq->specialcharinfoptr =
+                                gt_malloc(sizeof (*encseq->specialcharinfoptr));
     encseq->specialcharinfoptr[0] = encseq->specialcharinfo;
 
-    encseq->firstfilename = gt_malloc(sizeof(*encseq->firstfilename) *
+    encseq->firstfilename = gt_malloc(sizeof (*encseq->firstfilename) *
                                       encseq->lengthofdbfilenames);
     gt_assert(gt_str_array_size(encseq->filenametab) == encseq->numofdbfiles);
     for (idx = 0; idx < encseq->numofdbfiles; idx++)
@@ -1350,7 +1352,8 @@ static int fillplainseq(GtEncodedsequence *encseq,GtSequenceBuffer *fb,
   GtUchar cc;
 
   gt_error_check(err);
-  encseq->plainseq = gt_malloc(sizeof(*encseq->plainseq) * encseq->totallength);
+  encseq->plainseq =
+                    gt_malloc(sizeof (*encseq->plainseq) * encseq->totallength);
   encseq->hasplainseqptr = false;
   for (pos=0; /* Nothing */; pos++)
   {
@@ -1903,7 +1906,7 @@ GtEncodedsequenceScanstate *gt_encodedsequence_scanstate_new_empty(void)
 {
   GtEncodedsequenceScanstate *esr;
 
-  esr = gt_malloc(sizeof(*esr));
+  esr = gt_malloc(sizeof (*esr));
   return esr;
 }
 
@@ -2110,7 +2113,7 @@ gt_specialrangeiterator_new(const GtEncodedsequence *encseq,
   GtSpecialrangeiterator *sri;
 
   gt_assert(encseq->numofspecialstostore > 0);
-  sri = gt_malloc(sizeof(*sri));
+  sri = gt_malloc(sizeof (*sri));
   sri->moveforward = moveforward;
   sri->encseq = encseq;
   sri->exhausted = (encseq->numofspecialstostore == 0) ? true : false;
@@ -2557,7 +2560,7 @@ static GtEncodedsequence *determineencseqkeyvalues(
   double spaceinbitsperchar;
   GtEncodedsequence *encseq;
 
-  encseq = gt_malloc(sizeof(*encseq));
+  encseq = gt_malloc(sizeof (*encseq));
   encseq->sat = sat;
   if (satviautables(sat))
   {
@@ -2949,12 +2952,13 @@ static GtEncodedsequence *files2encodedsequence(
   return haserr ? NULL : encseq;
 }
 
-GtEncodedsequence *gt_encodedsequence_new_from_index(bool withrange,
-                                               GtEncodedsequenceOptions *o,
-                                               GtError *err)
+GtEncodedsequence *gt_encodedsequence_new_from_index(
+                                                    GtEncodedsequenceOptions *o,
+                                                    GtError *err)
 {
   GtEncodedsequence *encseq = NULL;
-  bool haserr = false;
+  bool haserr = false,
+       withrange = true;
   int retcode;
   GtStr *indexname;
   Firstencseqvalues firstencseqvalues;
@@ -2962,6 +2966,7 @@ GtEncodedsequence *gt_encodedsequence_new_from_index(bool withrange,
 
   gt_error_check(err);
   indexname = gt_encodedsequence_options_get_indexname(o);
+  withrange = gt_encodedsequence_options_get_range_iteration(o);
   alpha = gt_alphabet_new_from_file(indexname, err);
   if (alpha == NULL)
   {
@@ -3119,7 +3124,7 @@ void gt_encodedsequence_check_descriptions(const GtEncodedsequence *encseq)
     desptr = gt_encodedsequence_description(encseq,&desclen,seqnum);
     totaldesclength += desclen;
   }
-  copydestab = gt_malloc(sizeof(*copydestab) * totaldesclength);
+  copydestab = gt_malloc(sizeof (*copydestab) * totaldesclength);
   for (seqnum = 0; seqnum < encseq->numofdbsequences; seqnum++)
   {
     desptr = gt_encodedsequence_description(encseq,&desclen,seqnum);
@@ -3563,7 +3568,7 @@ GtEncodedsequence* gt_encodedsequence_new_from_plain(bool withrange,
   } else
   {
     len = len1 + (unsigned long) len2 + 1;
-    seqptr = gt_malloc(sizeof(*seqptr) * len);
+    seqptr = gt_malloc(sizeof (*seqptr) * len);
     memcpy(seqptr,seq1,sizeof (GtUchar) * len1);
     seqptr[len1] = (GtUchar) SEPARATOR;
     memcpy(seqptr + len1 + 1,seq2,sizeof (GtUchar) * len2);

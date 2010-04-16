@@ -541,7 +541,8 @@ int gt_extractkeysfromdesfile(const GtStr *indexname,
         gt_encodedsequence_options_enable_sds_table_usage(o);
         gt_encodedsequence_options_enable_ssp_table_usage(o);
         gt_encodedsequence_options_set_indexname(o, (GtStr*) indexname);
-        encseq = gt_encodedsequence_new_from_index(false, o, err);
+        gt_encodedsequence_options_disable_range_iteration(o);
+        encseq = gt_encodedsequence_new_from_index(o, err);
         gt_encodedsequence_options_delete(o);
         if (encseq == NULL)
         {
@@ -797,7 +798,8 @@ int gt_extractkeysfromfastaindex(const GtStr *indexname,
   gt_encodedsequence_options_enable_sds_table_usage(o);
   gt_encodedsequence_options_enable_ssp_table_usage(o);
   gt_encodedsequence_options_set_indexname(o, (GtStr*) indexname);
-  encseq = gt_encodedsequence_new_from_index(false, o, err);
+  gt_encodedsequence_options_disable_range_iteration(o);
+  encseq = gt_encodedsequence_new_from_index(o, err);
   gt_encodedsequence_options_delete(o);
   if (encseq == NULL)
   {
