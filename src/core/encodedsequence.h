@@ -30,7 +30,6 @@
 #include "core/encodedsequence_api.h"
 #include "core/encodedsequence_options.h"
 #include "core/intbits.h"
-#include "core/logger.h"
 #include "core/range.h"
 #include "core/readmode.h"
 #include "core/codetype.h"
@@ -334,4 +333,13 @@ void gt_encodedsequence_scanstate_initgeneric(GtEncodedsequenceScanstate *esr,
                                               const GtEncodedsequence *encseq,
                                               bool moveforward,
                                               unsigned long startpos);
+
+/* Returns the encoded representation of the character at position <pos> of
+   <encseq> read in the direction as indicated by <readmode>.
+   The function only works for sequence representations based on the two bit
+   encoding and for the case that encodesequence[pos] does not contain a
+   special character. */
+GtUchar gt_encodedsequence_extract_encoded_char(const GtEncodedsequence *encseq,
+                                                unsigned long pos,
+                                                GtReadmode readmode);
 #endif

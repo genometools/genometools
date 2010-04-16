@@ -19,16 +19,14 @@
 #ifndef ENCODEDSEQUENCE_API_H
 #define ENCODEDSEQUENCE_API_H
 
-#include "core/alphabet.h"
-#include "core/chardef.h"
+#include "core/alphabet_api.h"
 #include "core/encodedsequence_options_api.h"
-#include "core/logger.h"
-#include "core/progress_timer.h"
-#include "core/readmode.h"
+#include "core/logger_api.h"
+#include "core/progress_timer_api.h"
+#include "core/readmode_api.h"
 #include "core/seqinfo.h"
 #include "core/str_api.h"
 #include "core/str_array_api.h"
-#include "core/symboldef.h"
 
 /* The <GtEncodedsequence> class represents a collection of sequences from one
    or more input files in a compressed encoding. */
@@ -54,9 +52,7 @@ GtEncodedsequence* gt_encodedsequence_new_from_files(
                                                     GtError *err);
 
 /* Returns a new <GtEncodedsequence> created from a set of preprocessed index
-   files as specified in the option object <o>. Returns NULL on error.
-   If <withrange> is set to true, then it it possible to iterate over the
-   ranges. Otherwise it is not possible. */
+   files as specified in the option object <o>. Returns NULL on error. */
 GtEncodedsequence* gt_encodedsequence_new_from_index(
                                                     GtEncodedsequenceOptions *o,
                                                     GtError *err);
@@ -65,10 +61,7 @@ GtEncodedsequence* gt_encodedsequence_new_from_index(
    memory, given by two sequence pointers <seq1> and <seq2> of lengths <len1>
    and <len2>, respectively. Returns NULL on error.
    <alpha> is the <GtAlphabet> used to encode the sequence. The parameter
-   <logger> is used to pass a <GtLogger> specifying a log target.
-   TODO: why are there two sequences? can't the concatenation be
-         done on the caller side? document 'withrange'!
-         Sascha, we have discussed this. */
+   <logger> is used to pass a <GtLogger> specifying a log target. */
 GtEncodedsequence* gt_encodedsequence_new_from_plain(bool withrange,
                                                      const GtUchar *seq1,
                                                      unsigned long len1,
@@ -94,17 +87,6 @@ unsigned long      gt_encodedsequence_num_of_sequences(
 /* Returns the encoded representation of the character at position <pos> of
    <encseq> read in the direction as indicated by <readmode>. */
 GtUchar            gt_encodedsequence_get_encoded_char(
-                                                const GtEncodedsequence *encseq,
-                                                unsigned long pos,
-                                                GtReadmode readmode);
-
-/* Returns the encoded representation of the character at position <pos> of
-   <encseq> read in the direction as indicated by <readmode>.
-   The function only works for sequence representations based on the two bit
-   encoding and for the case that encodesequence[pos] does not contain a
-   special character. It is better to not use it and it should
-   therefore not be part of the API. TODO: move to encodedsequence.h */
-GtUchar            gt_encodedsequence_extract_encoded_char(
                                                 const GtEncodedsequence *encseq,
                                                 unsigned long pos,
                                                 GtReadmode readmode);

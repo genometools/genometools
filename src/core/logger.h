@@ -21,34 +21,8 @@
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
-
-typedef struct GtLogger GtLogger;
+#include "core/logger_api.h"
 
 #define GT_LOGGER_DEFLT_PREFIX "# "
 
-/* Creates a new <GtLogger>, with logging <enabled> or not,
-   and prefixing all log entries with <prefix> (e.g. "debug").
-   The log output is terminated by a newline. All log output will
-   be written to <target>. */
-GtLogger* gt_logger_new(bool enabled, const char *prefix, FILE *target);
-/* Enable logging on <logger>. */
-void      gt_logger_enable(GtLogger *logger);
-/* Disable logging on <logger>. */
-void      gt_logger_disable(GtLogger *logger);
-/* Returns true if logging is enabled on <logger>, false otherwise. */
-bool      gt_logger_enabled(GtLogger *logger);
-/* Returns logging target of <logger>. */
-FILE*     gt_logger_target(GtLogger *logger);
-/* Set logging target of <logger> to <fp>. */
-void      gt_logger_set_target(GtLogger *logger, FILE *fp);
-/* Log to target regardless of logging status. */
-void      gt_logger_log_force(GtLogger *logger, const char *format, ...)
-          __attribute__ ((format (printf, 2, 3)));
-/* Log to target depending on logging status. */
-void      gt_logger_log(GtLogger *logger, const char *format, ...)
-          __attribute__ ((format (printf, 2, 3)));
-/* Log to target depending on logging status, using a va_list argument. */
-void      gt_logger_log_va(GtLogger *logger, const char *format, va_list);
-
-void      gt_logger_delete(GtLogger *logger);
 #endif

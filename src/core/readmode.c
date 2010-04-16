@@ -29,18 +29,18 @@ const char *gt_readmode_show(GtReadmode readmode)
   return readmodes[(int) readmode];
 }
 
-int gt_readmode_parse(const char *dirargstring, GtError *err)
+GtReadmode gt_readmode_parse(const char *string, GtError *err)
 {
   size_t i;
 
   gt_error_check(err);
   for (i=0; i<sizeof (readmodes)/sizeof (readmodes[0]); i++)
   {
-    if (strcmp(dirargstring,readmodes[i]) == 0)
+    if (strcmp(string,readmodes[i]) == 0)
     {
       return (int) i;
     }
   }
-  gt_error_set(err,"argument to option -dir must be fwd or rev or cpl or rcl");
+  gt_error_set(err,"unknown readmode, must be fwd or rev or cpl or rcl");
   return -1;
 }

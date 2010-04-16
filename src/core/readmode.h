@@ -17,15 +17,7 @@
 
 #ifndef READMODE_H
 #define READMODE_H
-#include "core/error.h"
-
-typedef enum
-{
-  GT_READMODE_FORWARD = 0,
-  GT_READMODE_REVERSE,
-  GT_READMODE_COMPL,
-  GT_READMODE_REVCOMPL
-} GtReadmode;
+#include "core/readmode_api.h"
 
 #define GT_ISDIRREVERSE(R)    ((R) == GT_READMODE_REVERSE ||\
                                (R) == GT_READMODE_REVCOMPL)
@@ -33,8 +25,5 @@ typedef enum
                                (R) == GT_READMODE_REVCOMPL)
 
 #define GT_COMPLEMENTBASE(B) ((GtUchar) 3 - (B))
-
-const char* gt_readmode_show(GtReadmode readmode);
-int         gt_readmode_parse(const char *dirargstring, GtError *err);
 
 #endif

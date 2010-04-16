@@ -1,7 +1,6 @@
 /*
-  Copyright (c) 2007      Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c)      2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2010 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -16,9 +15,23 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef PROGRESS_TIMER_H
-#define PROGRESS_TIMER_H
+#ifndef READMODE_API_H
+#define READMODE_API_H
+#include "core/error_api.h"
 
-#include "core/progress_timer_api.h"
+typedef enum
+{
+  GT_READMODE_FORWARD = 0,
+  GT_READMODE_REVERSE,
+  GT_READMODE_COMPL,
+  GT_READMODE_REVCOMPL
+} GtReadmode;
+
+/* Returns the descriptive string for the readmode <readmode>. */
+const char* gt_readmode_show(GtReadmode readmode);
+/* Returns the <GtReadmode> for the description <string>, which must be one
+   of "fwd","rev","cpl" or "rcl". If <string> does not equal any of them,
+   -1 is returned and <err> is set accordingly. */
+GtReadmode  gt_readmode_parse(const char *string, GtError *err);
 
 #endif
