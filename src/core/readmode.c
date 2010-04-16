@@ -29,7 +29,7 @@ const char *gt_readmode_show(GtReadmode readmode)
   return readmodes[(int) readmode];
 }
 
-GtReadmode gt_readmode_parse(const char *string, GtError *err)
+int gt_readmode_parse(const char *string, GtError *err)
 {
   size_t i;
 

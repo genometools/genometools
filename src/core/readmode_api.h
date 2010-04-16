@@ -32,6 +32,6 @@ const char* gt_readmode_show(GtReadmode readmode);
 /* Returns the <GtReadmode> for the description <string>, which must be one
    of "fwd","rev","cpl" or "rcl". If <string> does not equal any of them,
    -1 is returned and <err> is set accordingly. */
-GtReadmode  gt_readmode_parse(const char *string, GtError *err);
+int         gt_readmode_parse(const char *string, GtError *err);
 
 #endif
