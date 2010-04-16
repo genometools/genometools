@@ -326,4 +326,12 @@ unsigned long gt_encodedsequence_lengthofspecialsuffix(
    Returns 0 on success, -1 otherwise. */
 int gt_specialcharinfo_read(GtSpecialcharinfo *specialcharinfo,
                             const GtStr *indexname, GtError *err);
+
+/* Reinitializes the given <esr> with the values as described in
+   <gt_encodedsequence_scanstate_new()>, except that the
+   the direction is defined by <moveforward>. */
+void gt_encodedsequence_scanstate_initgeneric(GtEncodedsequenceScanstate *esr,
+                                              const GtEncodedsequence *encseq,
+                                              bool moveforward,
+                                              unsigned long startpos);
 #endif

@@ -183,16 +183,6 @@ void                        gt_encodedsequence_scanstate_init(
                                                 GtReadmode readmode,
                                                 unsigned long startpos);
 
-/* Reinitializes the given <esr> with the values as described in
-   <gt_encodedsequence_scanstate_new()>, except that the
-   the direction is defined by <moveforward>. Do not use it. It is just
-   for internal purposes. */
-void                        gt_encodedsequence_scanstate_initgeneric(
-                                                GtEncodedsequenceScanstate *esr,
-                                                const GtEncodedsequence *encseq,
-                                                bool moveforward,
-                                                unsigned long startpos);
-
 /* Deletes <esr>, freeing all associated space. */
 void                        gt_encodedsequence_scanstate_delete(
                                                GtEncodedsequenceScanstate *esr);
