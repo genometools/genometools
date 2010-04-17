@@ -19,7 +19,7 @@
 #include "core/codetype.h"
 
 #include "spacedef.h"
-#include "sfx-partssuf-def.h"
+#include "sfx-partssuf.h"
 
 typedef struct
 {

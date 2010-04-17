@@ -35,7 +35,7 @@
 #include "core/encodedsequence.h"
 #include "core/safecast-gen.h"
 #include "esa-fileend.h"
-#include "sfx-partssuf-def.h"
+#include "sfx-partssuf.h"
 #include "sfx-suffixer.h"
 #include "sfx-bentsedg.h"
 #include "sfx-enumcodes.h"

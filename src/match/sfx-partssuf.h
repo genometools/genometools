@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SFX_PARTSSUF_DEF_H
-#define SFX_PARTSSUF_DEF_H
+#ifndef SFX_PARTSSUF_H
+#define SFX_PARTSSUF_H
 
 #include "core/logger.h"
 #include "core/codetype.h"
