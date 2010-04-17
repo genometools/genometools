@@ -3337,7 +3337,7 @@ static int gt_inputfiles2sequencekeyvalues(const GtStr *indexname,
       fb = gt_sequence_buffer_plain_new(filenametab);
     } else
     {
-      fb = gt_sequence_buffer_new_guess_type((GtStrArray*) filenametab, err);
+      fb = gt_sequence_buffer_new_guess_type(filenametab, err);
     }
     if (!fb)
     {
@@ -5605,7 +5605,7 @@ static int testfullscan(const GtStrArray *filenametab,
   gt_progressbar_start(&fullscanpbar,(unsigned long long) totallength);
   if (filenametab != NULL)
   {
-    fb = gt_sequence_buffer_new_guess_type((GtStrArray*) filenametab, err);
+    fb = gt_sequence_buffer_new_guess_type(filenametab, err);
     if (!fb)
       haserr = true;
     if (!haserr)

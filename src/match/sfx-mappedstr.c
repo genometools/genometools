@@ -23,17 +23,17 @@
 #include "core/assert_api.h"
 #include "core/chardef.h"
 #include "core/checkencchar.h"
-#include "core/encodedsequence.h"
-#include "core/error.h"
+#include "core/encodedsequence_api.h"
+#include "core/error_api.h"
 #include "core/sequence_buffer_fasta.h"
 #include "core/sequence_buffer_plain.h"
 #include "core/str_array.h"
 #include "spacedef.h"
 #include "intcode-def.h"
+#include "initbasepower.h"
 #ifdef SKDEBUG
 #include "sfx-nextchar.h"
 #endif
-#include "initbasepower.h"
 
 #ifdef SPECIALCASE4
 #define SUBTRACTLCHARANDSHIFT(CODE,LCHAR,NUMOFCHARS,MULTIMAPPOWER)\
