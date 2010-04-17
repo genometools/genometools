@@ -16,9 +16,9 @@
 */
 
 #include "core/divmodmul.h"
+#include "core/codetype.h"
 
 #include "spacedef.h"
-#include "intcode-def.h"
 #include "sfx-partssuf-def.h"
 
 typedef struct

@@ -19,7 +19,7 @@
 #define SFX_PARTSSUF_DEF_H
 
 #include "core/logger.h"
-#include "intcode-def.h"
+#include "core/codetype.h"
 
 typedef struct Suftabparts Suftabparts;
 

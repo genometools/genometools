@@ -19,11 +19,11 @@
 #define SFX_REMAINSORT_H
 
 #include "core/error_api.h"
-
+#include "core/codetype.h"
 #include "core/readmode.h"
-#include "bcktab.h"
-#include "intcode-def.h"
 #include "core/defined-types.h"
+
+#include "bcktab.h"
 #include "compressedtab.h"
 
 typedef struct Rmnsufinfo Rmnsufinfo;

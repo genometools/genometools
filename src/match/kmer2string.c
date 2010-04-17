@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "intcode-def.h"
+#include "core/codetype.h"
 
 void gt_fromkmercode2string(char *buffer,
                          GtCodetype code,

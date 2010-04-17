@@ -30,8 +30,7 @@
 #include "core/str_array.h"
 #include "core/symboldef.h"
 #include "core/unused_api.h"
-
-#include "match/intcode-def.h"
+#include "core/codetype.h"
 #include "core/encodedsequence.h"
 
 #include "match/eis-encidxseq.h"

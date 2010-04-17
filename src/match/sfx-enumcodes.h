@@ -18,8 +18,8 @@
 #ifndef SFX_ENUMCODES_H
 #define SFX_ENUMCODES_H
 
-#include "intcode-def.h"
 #include "core/encodedsequence.h"
+#include "core/codetype.h"
 
 typedef struct Enumcodeatposition Enumcodeatposition;
 
@@ -30,18 +30,18 @@ typedef struct
 } Specialcontext;
 
 Enumcodeatposition *gt_newEnumcodeatposition(const GtEncodedsequence *encseq,
-                                          GtReadmode readmode,
-                                          unsigned int prefixlength,
-                                          unsigned int numofchars);
+                                             GtReadmode readmode,
+                                             unsigned int prefixlength,
+                                             unsigned int numofchars);
 
 bool gt_nextEnumcodeatposition(Specialcontext *specialcontext,
-                            Enumcodeatposition *ecp);
+                               Enumcodeatposition *ecp);
 
 void gt_freeEnumcodeatposition(Enumcodeatposition **ecp);
 
 GtCodetype gt_computefilledqgramcode(const Enumcodeatposition *ecp,
-                                unsigned int prefixindex,
-                                unsigned long pos);
+                                     unsigned int prefixindex,
+                                     unsigned long pos);
 
 bool gt_computefilledqgramcodestopatmax(GtCodetype *code,
                                      const Enumcodeatposition *ecp,

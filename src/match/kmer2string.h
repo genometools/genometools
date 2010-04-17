@@ -18,7 +18,7 @@
 #ifndef KMER2STRING_H
 #define KMER2STRING_H
 
-#include "intcode-def.h"
+#include "core/codetype.h"
 
 void gt_fromkmercode2string(char *buffer,
                          GtCodetype code,

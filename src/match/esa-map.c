@@ -25,11 +25,11 @@
 #include "core/error.h"
 #include "core/fa.h"
 #include "core/format64.h"
-#include "sarr-def.h"
 #include "core/encodedsequence.h"
+#include "core/codetype.h"
+#include "sarr-def.h"
 #include "esa-fileend.h"
 #include "sfx-ri-def.h"
-#include "intcode-def.h"
 #include "spacedef.h"
 #include "bcktab.h"
 

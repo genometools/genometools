@@ -20,9 +20,9 @@
 
 #include "core/str.h"
 #include "core/error.h"
+#include "core/codetype.h"
 
 #include "splititv.h"
-#include "intcode-def.h"
 
 typedef struct Pckbuckettable Pckbuckettable;
 

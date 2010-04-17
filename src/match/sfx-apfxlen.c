@@ -20,9 +20,9 @@
 #include <math.h>
 #include "core/error.h"
 #include "core/minmax.h"
-#include "intcode-def.h"
-
+#include "core/codetype.h"
 #include "core/logger.h"
+
 #include "bcktab.h"
 #include "initbasepower.h"
 

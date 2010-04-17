@@ -22,13 +22,13 @@
 #include <stdbool.h>
 #include "core/assert_api.h"
 #include "core/chardef.h"
+#include "core/ma_api.h"
 #include "core/checkencchar.h"
 #include "core/encodedsequence_api.h"
 #include "core/error_api.h"
 #include "core/sequence_buffer_fasta.h"
 #include "core/sequence_buffer_plain.h"
 #include "core/str_array.h"
-#include "spacedef.h"
 #include "intcode-def.h"
 #include "initbasepower.h"
 #ifdef SKDEBUG
@@ -107,10 +107,10 @@ static GtCodetype windowkmer2code(unsigned int numofchars,
 }
 
 static GtCodetype prefixwindowkmer2code(unsigned int firstspecialpos,
-                                      unsigned int kmersize,
-                                      const GtCodetype **multimappower,
-                                      const GtUchar *cyclicwindow,
-                                      unsigned int firstindex)
+                                        unsigned int kmersize,
+                                        const GtCodetype **multimappower,
+                                        const GtUchar *cyclicwindow,
+                                        unsigned int firstindex)
 {
   unsigned int i;
   GtCodetype integercode = 0;
@@ -167,7 +167,7 @@ typedef struct
 typedef struct
 {
   Specialpositions spos;
-  GtUchar *cyclicwindow;
+  GtUchar cyclicwindow[MAXPREFIXLENGTH];
   unsigned int numofchars,
                kmersize,
                windowwidth,
@@ -176,11 +176,11 @@ typedef struct
   GtCodetype codewithoutspecial,
              *filltable,
              **multimappower;
-} Streamstate;
+} Kmerstream;
 
 static void specialemptyqueue(Specialpositions *spos,unsigned int queuesize)
 {
-  ALLOCASSIGNSPACE(spos->queuespace,NULL,Specialitem,queuesize);
+  spos->queuespace = gt_malloc(sizeof(*spos->queuespace) * queuesize);
   spos->noofelements = 0;
   spos->queuesize = queuesize;
   spos->dequeueindex = spos->enqueueindex = queuesize - 1;
@@ -223,12 +223,15 @@ static void specialenqueue(Specialpositions *spos,Specialitem elem)
 
 static void specialwrapqueue(Specialpositions *spos)
 {
-  FREESPACE(spos->queuespace);
+  gt_free(spos->queuespace);
 }
 
-static void initstreamstate(Streamstate *spwp,unsigned int numofchars,
-                            unsigned int kmersize)
+static Kmerstream *kmerstream_new(unsigned int numofchars,unsigned int kmersize)
 {
+  Kmerstream *spwp;
+
+  gt_assert(kmersize <= MAXPREFIXLENGTH);
+  spwp = gt_malloc(sizeof (*spwp));
   spwp->multimappower = gt_initmultimappower(numofchars,kmersize);
   spwp->lengthwithoutspecial = 0;
   spwp->codewithoutspecial = 0;
@@ -236,12 +239,12 @@ static void initstreamstate(Streamstate *spwp,unsigned int numofchars,
   spwp->numofchars = numofchars;
   spwp->windowwidth = 0;
   spwp->firstindex = 0;
-  ALLOCASSIGNSPACE(spwp->cyclicwindow,NULL,GtUchar,kmersize);
   specialemptyqueue(&spwp->spos,kmersize);
   spwp->filltable = gt_filllargestchartable(numofchars,kmersize);
+  return spwp;
 }
 
-static void updatespecialpositions(Streamstate *spwp,
+static void updatespecialpositions(Kmerstream *spwp,
                                    GtUchar charcode,
                                    bool doshift,
                                    GtUchar lchar)
@@ -313,7 +316,7 @@ static void shiftrightwithchar(
                void(*processkmercode)(void *,GtCodetype,unsigned long,
                                       const Firstspecialpos *),
                void *processkmercodeinfo,
-               Streamstate *spwp,
+               Kmerstream *spwp,
                unsigned long currentposition,
                GtUchar charcode)
 {
@@ -399,7 +402,7 @@ static void shiftrightwithchar(
   }
 }
 
-static void doovershoot(Streamstate *spwp,
+static void doovershoot(Kmerstream *spwp,
                         void(*processkmercode)(void *,GtCodetype,unsigned long,
                                                const Firstspecialpos *),
                         void *processkmercodeinfo,
@@ -415,12 +418,12 @@ static void doovershoot(Streamstate *spwp,
   }
 }
 
-static void freestreamstate(Streamstate *spwp)
+static void freestreamstate(Kmerstream *spwp)
 {
-  FREESPACE(spwp->cyclicwindow);
-  FREESPACE(spwp->filltable);
+  gt_free(spwp->filltable);
   gt_multimappowerfree(&spwp->multimappower);
   specialwrapqueue(&spwp->spos);
+  gt_free(spwp);
 }
 
 void getencseqkmers(
@@ -434,14 +437,14 @@ void getencseqkmers(
         unsigned int kmersize)
 {
   unsigned long currentposition = 0, totallength;
-  Streamstate spwp;
+  Kmerstream *spwp;
   GtUchar charcode;
   GtEncodedsequenceScanstate *esr;
   unsigned int numofchars;
 
   totallength = gt_encodedsequence_total_length(encseq);
   numofchars = gt_alphabet_num_of_chars(gt_encodedsequence_alphabet(encseq));
-  initstreamstate(&spwp,numofchars,kmersize);
+  spwp = kmerstream_new(numofchars,kmersize);
   esr = gt_encodedsequence_scanstate_new(encseq,readmode,0);
   for (currentposition = 0; currentposition<totallength; currentposition++)
   {
@@ -450,15 +453,15 @@ void getencseqkmers(
                                                               readmode);
     GT_CHECKENCCHAR(charcode,encseq,currentposition,readmode);
     shiftrightwithchar(processkmercode,processkmercodeinfo,
-                       &spwp,currentposition,charcode);
+                       spwp,currentposition,charcode);
   }
   gt_encodedsequence_scanstate_delete(esr);
-  doovershoot(&spwp,
+  doovershoot(spwp,
               processkmercode,
               processkmercodeinfo,
               currentposition,
               kmersize);
-  freestreamstate(&spwp);
+  freestreamstate(spwp);
 }
 
 int getfastastreamkmers(
@@ -475,14 +478,14 @@ int getfastastreamkmers(
         GtError *err)
 {
   unsigned long currentposition = 0;
-  Streamstate spwp;
+  Kmerstream *spwp;
   GtUchar charcode;
   bool haserr = false;
   GtSequenceBuffer *fb;
   int retval;
 
   gt_error_check(err);
-  initstreamstate(&spwp,numofchars,kmersize);
+  spwp = kmerstream_new(numofchars,kmersize);
   if (plainformat)
   {
     fb = gt_sequence_buffer_plain_new(filenametab);
@@ -511,18 +514,18 @@ int getfastastreamkmers(
         break;
       }
       shiftrightwithchar(processkmercode,processkmercodeinfo,
-                         &spwp,currentposition,charcode);
+                         spwp,currentposition,charcode);
     }
     gt_sequence_buffer_delete(fb);
   }
   if (!haserr)
   {
-    doovershoot(&spwp,
+    doovershoot(spwp,
                 processkmercode,
                 processkmercodeinfo,
                 currentposition,
                 kmersize);
   }
-  freestreamstate(&spwp);
+  freestreamstate(spwp);
   return haserr ? -1 : 0;
 }

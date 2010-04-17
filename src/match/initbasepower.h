@@ -18,14 +18,14 @@
 #ifndef INITBASEPOWER_H
 #define INITBASEPOWER_H
 
-#include "intcode-def.h"
+#include "core/codetype.h"
 
 unsigned int gt_maxbasepower(unsigned int numofchars);
 
 GtCodetype *gt_initbasepower(unsigned int numofchars,unsigned int prefixlength);
 
 GtCodetype *gt_filllargestchartable(unsigned int numofchars,
-                               unsigned int kmersize);
+                                    unsigned int kmersize);
 
 GtCodetype *gt_initfilltable(unsigned int numofchars,unsigned int prefixlength);
 

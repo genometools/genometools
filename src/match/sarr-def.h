@@ -23,8 +23,8 @@
 #include "core/encodedsequence.h"
 #include "core/intdef.h"
 #include "core/unused_api.h"
+#include "core/codetype.h"
 
-#include "intcode-def.h"
 #include "lcpoverflow.h"
 #include "bcktab.h"
 

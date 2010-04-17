@@ -23,7 +23,6 @@
 #include "core/alphabet.h"
 #include "core/str_array.h"
 #include "core/symboldef.h"
-#include "intcode-def.h"
 
 typedef struct Substriter Substriter;
 

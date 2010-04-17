@@ -22,7 +22,7 @@
 #include "core/str.h"
 #include "core/defined-types.h"
 #include "core/encodedsequence.h"
-#include "intcode-def.h"
+#include "core/codetype.h"
 
 #include "sfx-strategy.h"
 #include "sfx-copysort.h"

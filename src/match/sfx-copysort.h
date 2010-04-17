@@ -18,10 +18,10 @@
 #ifndef SFX_COPYSORT_H
 #define SFX_COPYSORT_H
 
-#include "bcktab.h"
-#include "intcode-def.h"
+#include "core/codetype.h"
 #include "core/encodedsequence.h"
 #include "core/logger.h"
+#include "bcktab.h"
 
 typedef struct GtBucketspec2 GtBucketspec2;
 

@@ -18,9 +18,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "core/assert_api.h"
-#include "spacedef.h"
-#include "intcode-def.h"
 #include "core/encodedsequence.h"
+#include "intcode-def.h"
+#include "spacedef.h"
 #include "sfx-enumcodes.h"
 #include "stamp.h"
 #include "initbasepower.h"
@@ -39,9 +39,9 @@ struct Enumcodeatposition
 };
 
 Enumcodeatposition *gt_newEnumcodeatposition(const GtEncodedsequence *encseq,
-                                          GtReadmode readmode,
-                                          unsigned int prefixlength,
-                                          unsigned int numofchars)
+                                             GtReadmode readmode,
+                                             unsigned int prefixlength,
+                                             unsigned int numofchars)
 {
   Enumcodeatposition *ecp;
 

@@ -29,7 +29,7 @@
 #include "esa-fileend.h"
 #include "core/readmode.h"
 #include "core/logger.h"
-#include "intcode-def.h"
+#include "core/codetype.h"
 #include "spacedef.h"
 #include "stamp.h"
 #include "sfx-suffixer.h"

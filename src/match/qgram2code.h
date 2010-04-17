@@ -20,7 +20,7 @@
 
 #include "core/symboldef.h"
 #include "core/chardef.h"
-#include "intcode-def.h"
+#include "core/codetype.h"
 
 static inline unsigned int qgram2code(GtCodetype *code,
                                       const GtCodetype **multimappower,

@@ -23,8 +23,7 @@
 #include "core/str.h"
 #include "core/symboldef.h"
 #include "core/logger.h"
-
-#include "intcode-def.h"
+#include "core/codetype.h"
 
 typedef struct
 {

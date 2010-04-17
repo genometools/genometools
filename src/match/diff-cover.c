@@ -27,15 +27,16 @@
 #include "core/qsort_r.h"
 #include "core/unused_api.h"
 #include "core/intbits.h"
+#include "core/encodedsequence.h"
+#include "core/logger.h"
 #include "diff-cover.h"
 #include "sfx-apfxlen.h"
 #include "sfx-enumcodes.h"
+#include "intcode-def.h"
 #include "bcktab.h"
 #include "initbasepower.h"
-#include "core/encodedsequence.h"
 #include "sfx-suftaborder.h"
 #include "sfx-bentsedg.h"
-#include "core/logger.h"
 #include "stamp.h"
 
 typedef unsigned char Diffrank;

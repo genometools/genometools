@@ -19,8 +19,7 @@
 #include <stdbool.h>
 #include "core/symboldef.h"
 #include "core/chardef.h"
-#include "intcode-def.h"
-
+#include "core/codetype.h"
 #include "spacedef.h"
 #include "bcktab.h"
 #include "cutendpfx.h"

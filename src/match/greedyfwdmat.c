@@ -23,11 +23,11 @@
 #include "core/seqiterator_sequence_buffer.h"
 #include "core/unused_api.h"
 #include "core/defined-types.h"
+#include "core/codetype.h"
 #include "spacedef.h"
 #include "optionargmode.h"
 #include "core/format64.h"
 #include "greedyfwdmat.h"
-#include "intcode-def.h"
 #include "core/encodedsequence.h"
 #include "initbasepower.h"
 
