@@ -42,9 +42,8 @@
 #include "sfx-strategy.h"
 #include "diff-cover.h"
 #include "sfx-copysort.h"
+#include "sfx-mappedstr.h"
 #include "stamp.h"
-
-#include "sfx-mappedstr.pr"
 
 static inline void setsortspace(Suftab *suftab,unsigned long idx,
                                 unsigned long value)

@@ -94,6 +94,7 @@ sfx-copysort.c
 sfx-enumcodes.c
 sfx-input.c
 sfx-linlcp.c
+sfx-mappedstr.c
 sfx-partssuf.c
 sfx-progress.c
 sfx-readint.c

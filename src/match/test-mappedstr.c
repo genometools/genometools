@@ -26,8 +26,7 @@
 #include "intcode-def.h"
 #include "sfx-nextchar.h"
 #include "kmer2string.h"
-
-#include "sfx-mappedstr.pr"
+#include "sfx-mappedstr.h"
 
 static GtCodetype qgram2codefillspecial(unsigned int numofchars,
                                       unsigned int kmersize,

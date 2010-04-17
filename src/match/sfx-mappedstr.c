@@ -31,6 +31,7 @@
 #include "core/str_array.h"
 #include "intcode-def.h"
 #include "initbasepower.h"
+#include "sfx-mappedstr.h"
 #ifdef SKDEBUG
 #include "sfx-nextchar.h"
 #endif
