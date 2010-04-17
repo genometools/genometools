@@ -83,22 +83,27 @@ package is downloaded and compiled along with the \Gt binary. Note that the
 
 \begin{verbatim}
 $ make with-hmmer=yes
-\end{verbatim}
-%$
+\end{verbatim}%$
 
 If the \texttt{with-hmmer} option is not specified or set to \texttt{no}, protein domain finding functionality will be missing from the \LTRdigest program. If the build process reports an error due to an unavailable Cairo library, also append the \texttt{cairo=no} option to build the \Gt binary without Cairo support. This has no influence on the function of \LTRdigest .
+
+To enable multithreading support (that is, to speed up protein domain search by searching for multiple pHMMs at once), please also specify the \texttt{threads=yes} option to the \texttt{make} call:
+
+\begin{verbatim}
+$ make with-hmmer=yes threads=yes
+\end{verbatim}%$
 
 After successful compilation, the \GenomeTools executable containing \LTRdigest can then be installed for system-wide use as follows:
 
 \begin{verbatim}
 $ make install
-\end{verbatim}
+\end{verbatim}%$
 
 If a \texttt{prefix=<path>} option is appended to this line, a custom directory can be specified as the installation target directory, e.g.
 
 \begin{verbatim}
 $ make install prefix=/home/user/gt
-\end{verbatim}
+\end{verbatim}%$
 %$
 
 will install the \Gt binary in the \texttt{/home/user/gt/bin} directory.
@@ -129,6 +134,10 @@ where \emph{GFF3\_file} denotes the GFF3 input file and \emph{indexname} the nam
 An overview of all possible options with a short one-line description of
 each option is given in Table \ref{overviewOpt}. They can also be displayed when invoking \LTRdigest with the option \Showoption{help} or \Showoption{help+}.
 All options can be specified only once.
+
+To run the protein domain search in a parallel fashion, use the \Showoption{j} parameter to \texttt{gt} to specify the number of concurrent threads to use:
+
+\texttt{gt}  \Showoption{j} 3 \texttt{ltrdigest} $[$\emph{options}$]$ \Showoptionarg{GFF3\_file} \Showoptionarg{indexname}
 
 \begin{table}[htbp]
 \caption{Overview of the \LTRdigest options sorted by categories.}
