@@ -21,7 +21,13 @@
 #include "core/error_api.h"
 #include "core/str_array_api.h"
 #include "core/encodedsequence_api.h"
-#include "intcode-def.h"
+#include "core/codetype.h"
+
+typedef struct
+{
+  unsigned int specialpos;
+  bool defined;
+} Firstspecialpos;
 
 void getencseqkmers(
         const GtEncodedsequence *encseq,

@@ -16,7 +16,7 @@
 */
 
 #include "core/assert_api.h"
-#include "intcode-def.h"
+#include "core/codetype.h"
 #include "spacedef.h"
 
 unsigned int gt_maxbasepower(unsigned int numofchars)

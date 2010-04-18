@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include "core/assert_api.h"
 #include "core/encodedsequence.h"
-#include "intcode-def.h"
+#include "core/codetype.h"
 #include "spacedef.h"
 #include "sfx-enumcodes.h"
 #include "stamp.h"
