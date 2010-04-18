@@ -25,22 +25,22 @@
 
 typedef struct
 {
+  bool definedspecialpos;
   unsigned int specialpos;
-  bool defined;
-} Firstspecialpos;
+  GtCodetype code;
+  unsigned long position;
+} GtKmercode;
 
 void getencseqkmers(
         const GtEncodedsequence *encseq,
         GtReadmode readmode,
-        void(*processkmercode)(void *,GtCodetype,unsigned long,
-                               const Firstspecialpos *),
+        void(*processkmercode)(void *,const GtKmercode *),
         void *processkmercodeinfo,
         unsigned int kmersize);
 
 int getfastastreamkmers(
         const GtStrArray *filenametab,
-        void(*processkmercode)(void *,GtCodetype,unsigned long,
-                               const Firstspecialpos *),
+        void(*processkmercode)(void *,const GtKmercode *),
         void *processkmercodeinfo,
         unsigned int numofchars,
         unsigned int kmersize,

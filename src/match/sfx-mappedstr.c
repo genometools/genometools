@@ -32,6 +32,7 @@
 #include "intcode-def.h"
 #include "initbasepower.h"
 #include "sfx-mappedstr.h"
+#undef SKDEBUG
 #ifdef SKDEBUG
 #include "sfx-nextchar.h"
 #endif
@@ -125,27 +126,25 @@ static GtCodetype prefixwindowkmer2code(unsigned int firstspecialpos,
   return integercode;
 }
 
-static Firstspecialpos determinefirstspecialposition(unsigned int windowwidth,
-                                                     unsigned int kmersize,
-                                                     const GtUchar
-                                                     *cyclicwindow,
-                                                     unsigned int firstindex)
+static bool determinefirstspecialposition(unsigned int *firstspecialpos,
+                                          unsigned int windowwidth,
+                                          unsigned int kmersize,
+                                                       const GtUchar
+                                                         *cyclicwindow,
+                                                       unsigned int firstindex)
 {
   unsigned int i;
-  Firstspecialpos fsp;
 
   for (i=0; i < windowwidth; i++)
   {
     if (ISSPECIAL(cyclicwindow[(firstindex+i) % kmersize]))
     {
-      fsp.defined = true;
-      fsp.specialpos = i;
-      return fsp;
+      *firstspecialpos = i;
+      return true;
     }
   }
-  fsp.defined = false;
-  fsp.specialpos = 0; /* Just for satisfying the compiler */
-  return fsp;
+  *firstspecialpos = 0; /* Just for satisfying the compiler */
+  return false;
 }
 #endif
 
@@ -314,15 +313,15 @@ static void updatespecialpositions(Kmerstream *spwp,
 }
 
 static void shiftrightwithchar(
-               void(*processkmercode)(void *,GtCodetype,unsigned long,
-                                      const Firstspecialpos *),
+               void(*processkmercode)(void *,const GtKmercode *),
                void *processkmercodeinfo,
                Kmerstream *spwp,
                unsigned long currentposition,
                GtUchar charcode)
 {
 #ifdef SKDEBUG
-  Firstspecialpos firstspecialposbrute;
+  bool firstspecialbrutedefined;
+  unsigned int firstspecialbrute;
 #endif
 
   if (spwp->windowwidth < spwp->kmersize)
@@ -348,30 +347,32 @@ static void shiftrightwithchar(
   {
     Specialitem *head = specialheadofqueue(&spwp->spos);
     GtCodetype tmpprefixcode = prefixwindowkmer2code(head->distvalue,
-                                                   spwp->kmersize,
-                                                   spwp->multimappower,
-                                                   spwp->cyclicwindow,
-                                                   spwp->firstindex);
+                                                     spwp->kmersize,
+                                                     (const GtCodetype **)
+                                                       spwp->multimappower,
+                                                     spwp->cyclicwindow,
+                                                     spwp->firstindex);
     gt_assert(tmpprefixcode == head->codeforleftcontext);
   }
-  firstspecialposbrute = determinefirstspecialposition(spwp->windowwidth,
-                                                       spwp->kmersize,
-                                                       spwp->cyclicwindow,
-                                                       spwp->firstindex);
+  firstspecialbrutedefined
+    = determinefirstspecialposition(&firstspecialbrute,
+                                    spwp->windowwidth,
+                                    spwp->kmersize,
+                                    spwp->cyclicwindow,
+                                    spwp->firstindex);
   if (specialqueueisempty(&spwp->spos))
   {
-    gt_assert(!firstspecialposbrute.defined);
+    gt_assert(!firstspecialbrutedefined);
   } else
   {
     Specialitem *head = specialheadofqueue(&spwp->spos);
-    gt_assert(firstspecialposbrute.defined ? 1 : 0);
-    gt_assert(head->distvalue == firstspecialposbrute.specialpos);
+    gt_assert(firstspecialbrutedefined ? 1 : 0);
+    gt_assert(head->distvalue == firstspecialbrute);
   }
 #endif
   if (spwp->windowwidth == spwp->kmersize)
   {
-    Firstspecialpos localfirstspecial;
-    GtCodetype code;
+    GtKmercode localkmercode;
 
 #ifdef SKDEBUG
     GtCodetype wcode;
@@ -383,29 +384,27 @@ static void shiftrightwithchar(
 #endif
     if (specialqueueisempty(&spwp->spos))
     {
-      localfirstspecial.defined = false;
-      localfirstspecial.specialpos = 0;
-      code = spwp->codewithoutspecial;
+      localkmercode.definedspecialpos = false;
+      localkmercode.specialpos = 0;
+      localkmercode.code = spwp->codewithoutspecial;
     } else
     {
       Specialitem *head = specialheadofqueue(&spwp->spos);
-      code = head->codeforleftcontext + spwp->filltable[head->distvalue];
-      localfirstspecial.defined = true;
-      localfirstspecial.specialpos = head->distvalue;
+      localkmercode.code = head->codeforleftcontext +
+                               spwp->filltable[head->distvalue];
+      localkmercode.definedspecialpos = true;
+      localkmercode.specialpos = head->distvalue;
     }
 #ifdef SKDEBUG
-    gt_assert(wcode == code);
+    gt_assert(wcode == localkmercode.code);
 #endif
-    processkmercode(processkmercodeinfo,
-                    code,
-                    currentposition + 1 - spwp->kmersize,
-                    &localfirstspecial);
+    localkmercode.position = currentposition + 1 - spwp->kmersize;
+    processkmercode(processkmercodeinfo,&localkmercode);
   }
 }
 
 static void doovershoot(Kmerstream *spwp,
-                        void(*processkmercode)(void *,GtCodetype,unsigned long,
-                                               const Firstspecialpos *),
+                        void(*processkmercode)(void *,const GtKmercode *),
                         void *processkmercodeinfo,
                         unsigned long currentposition,
                         unsigned int kmersize)
@@ -430,10 +429,7 @@ static void freestreamstate(Kmerstream *spwp)
 void getencseqkmers(
         const GtEncodedsequence *encseq,
         GtReadmode readmode,
-        void(*processkmercode)(void *,
-                               GtCodetype,
-                               unsigned long,
-                               const Firstspecialpos *),
+        void(*processkmercode)(void *,const GtKmercode *),
         void *processkmercodeinfo,
         unsigned int kmersize)
 {
@@ -467,10 +463,7 @@ void getencseqkmers(
 
 int getfastastreamkmers(
         const GtStrArray *filenametab,
-        void(*processkmercode)(void *,
-                               GtCodetype,
-                               unsigned long,
-                               const Firstspecialpos *),
+        void(*processkmercode)(void *,const GtKmercode *),
         void *processkmercodeinfo,
         unsigned int numofchars,
         unsigned int kmersize,

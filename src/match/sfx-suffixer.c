@@ -210,45 +210,43 @@ static GtCodetype getencseqcode(const GtEncodedsequence *encseq,
 }
 
 static GtCodetype previouscode = 0;
-static bool previousfirstspecialdefined = false,
+static bool previouskmercodedefined = false,
             previousstorespecials = false;
 unsigned int previousspecialpos = 0;
 #endif
 
 static void updatekmercount(void *processinfo,
-                            GtCodetype code,
-                            unsigned long position,
-                            const Firstspecialpos *firstspecial)
+                            const GtKmercode *kmercode)
 {
   Sfxiterator *sfi = (Sfxiterator *) processinfo;
 
-  if (firstspecial->defined)
+  if (kmercode->definedspecialpos)
   {
     if (sfi->storespecials)
     {
-      if (firstspecial->specialpos > 0)
+      if (kmercode->specialpos > 0)
       {
         if (sfi->sfxstrategy.storespecialcodes)
         {
           Codeatposition *cp;
 
           cp = sfi->spaceCodeatposition + sfi->nextfreeCodeatposition++;
-          gt_assert(code <= (GtCodetype) MAXCODEVALUE);
-          cp->code = (unsigned int) code;
-          gt_assert(firstspecial->specialpos <= MAXPREFIXLENGTH);
-          cp->maxprefixindex = firstspecial->specialpos;
-          cp->position = position + firstspecial->specialpos;
+          gt_assert(kmercode->code <= (GtCodetype) MAXCODEVALUE);
+          cp->code = (unsigned int) kmercode->code;
+          gt_assert(kmercode->specialpos <= MAXPREFIXLENGTH);
+          cp->maxprefixindex = kmercode->specialpos;
+          cp->position = kmercode->position + kmercode->specialpos;
         }
         sfi->storespecials = false;
-        gt_assert(code > 0);
-        sfi->leftborder[code]++;
+        gt_assert(kmercode->code > 0);
+        sfi->leftborder[kmercode->code]++;
       }
     } else
     {
-      if (firstspecial->specialpos > 0)
+      if (kmercode->specialpos > 0)
       {
-        gt_assert(code > 0);
-        sfi->leftborder[code]++;
+        gt_assert(kmercode->code > 0);
+        sfi->leftborder[kmercode->code]++;
       } else
       {
         sfi->storespecials = true;
@@ -257,23 +255,23 @@ static void updatekmercount(void *processinfo,
   } else
   {
 #ifdef SKDEBUG
-    if (code == 0)
+    if (kmercode->code == 0)
     {
       GtCodetype code2 = getencseqcode(sfi->encseq,
                                    sfi->readmode,
                                    gt_encodedsequence_total_length(sfi->encseq),
                                    gt_bcktab_multimappower(sfi->bcktab),
                                    sfi->prefixlength,
-                                   position);
+                                   kmercode->position);
       if (code2 != 0)
       {
         printf("### position " FormatSeqpos ", code2 = %lu != 0\n",
-                        PRINTSeqposcast(position),code2);
+                        PRINTSeqposcast(kmercode->position),code2);
         printf("previouscode = " FormatGtCodetype "\n",
                         previouscode);
-        if (previousfirstspecialdefined)
+        if (previouskmercodedefined)
         {
-          printf("previousfirstspecialdefined = true\n");
+          printf("previouskmercodedefined = true\n");
           printf("previousstorespecials = %s\n",
                   previousstorespecials ? "true" : "false");
           printf("previousspecialpos = %u\n",previousspecialpos);
@@ -282,28 +280,28 @@ static void updatekmercount(void *processinfo,
       }
     }
 #endif
-    sfi->leftborder[code]++;
+    sfi->leftborder[kmercode->code]++;
   }
 #ifdef SKDEBUG
-  previouscode = code;
-  previousfirstspecialdefined = firstspecial->defined;
+  previouscode = kmercode->code;
+  previouskmercodedefined = kmercode->defined;
   previousstorespecials = sfi->storespecials;
-  previousspecialpos = firstspecial->specialpos;
+  previousspecialpos = kmercode->specialpos;
 #endif
 }
 
 static void insertwithoutspecial(void *processinfo,
-                                 GtCodetype code,
-                                 unsigned long position,
-                                 const Firstspecialpos *firstspecial)
+                                 const GtKmercode *kmercode)
 {
-  if (!firstspecial->defined)
+  if (!kmercode->definedspecialpos)
   {
     Sfxiterator *sfi = (Sfxiterator *) processinfo;
 
-    if (code >= sfi->currentmincode && code <= sfi->currentmaxcode)
+    if (kmercode->code >= sfi->currentmincode &&
+        kmercode->code <= sfi->currentmaxcode)
     {
-      setsortspace(&sfi->suftab,--sfi->leftborder[code],position);
+      setsortspace(&sfi->suftab,--sfi->leftborder[kmercode->code],
+                   kmercode->position);
       /* from right to left */
     }
   }

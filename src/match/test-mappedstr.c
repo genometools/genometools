@@ -89,14 +89,11 @@ static GtCodetype qgram2codefillspecial(unsigned int numofchars,
 GT_DECLAREARRAYSTRUCT(GtCodetype);
 
 static void outkmeroccurrence(void *processinfo,
-                              GtCodetype code,
-                              GT_UNUSED unsigned long position,
-                              GT_UNUSED const Firstspecialpos
-                                           *firstspecialposition)
+                              const GtKmercode *kmercode)
 {
   GtArrayGtCodetype *codelist = (GtArrayGtCodetype *) processinfo;
 
-  GT_STOREINARRAY(codelist,GtCodetype,1024,code);
+  GT_STOREINARRAY(codelist,GtCodetype,1024,kmercode->code);
 }
 
 /*
