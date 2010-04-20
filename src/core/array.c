@@ -239,8 +239,7 @@ bool gt_array_equal(const GtArray *a, const GtArray *b, GtCompare cmpfunc)
     return false;
   if (size_a > size_b)
     return false;
-  for (idx=0; idx < size_a; idx++)
-  {
+  for (idx = 0; idx < size_a; idx++) {
     cmp = cmpfunc(gt_array_get(a,idx),gt_array_get(b,idx));
     if (cmp != 0)
       return false;

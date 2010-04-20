@@ -17,6 +17,7 @@
 
 #ifndef READMODE_H
 #define READMODE_H
+
 #include "core/readmode_api.h"
 
 #define GT_ISDIRREVERSE(R)    ((R) == GT_READMODE_REVERSE ||\

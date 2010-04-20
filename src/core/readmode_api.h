@@ -17,6 +17,7 @@
 
 #ifndef READMODE_API_H
 #define READMODE_API_H
+
 #include "core/error_api.h"
 
 typedef enum
