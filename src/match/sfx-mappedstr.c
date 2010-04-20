@@ -312,12 +312,10 @@ static void updatespecialpositions(Kmerstream *spwp,
   }
 }
 
-static void shiftrightwithchar(
-               void(*processkmercode)(void *,const GtKmercode *),
-               void *processkmercodeinfo,
-               Kmerstream *spwp,
-               unsigned long currentposition,
-               GtUchar charcode)
+static bool shiftrightwithchar(GtKmercode *kmercode,
+                               Kmerstream *spwp,
+                               unsigned long currentposition,
+                               GtUchar charcode)
 {
 #ifdef SKDEBUG
   bool firstspecialbrutedefined;
@@ -372,8 +370,6 @@ static void shiftrightwithchar(
 #endif
   if (spwp->windowwidth == spwp->kmersize)
   {
-    GtKmercode localkmercode;
-
 #ifdef SKDEBUG
     GtCodetype wcode;
 
@@ -384,23 +380,24 @@ static void shiftrightwithchar(
 #endif
     if (specialqueueisempty(&spwp->spos))
     {
-      localkmercode.definedspecialpos = false;
-      localkmercode.specialpos = 0;
-      localkmercode.code = spwp->codewithoutspecial;
+      kmercode->definedspecialpos = false;
+      kmercode->specialpos = 0;
+      kmercode->code = spwp->codewithoutspecial;
     } else
     {
       Specialitem *head = specialheadofqueue(&spwp->spos);
-      localkmercode.code = head->codeforleftcontext +
-                               spwp->filltable[head->distvalue];
-      localkmercode.definedspecialpos = true;
-      localkmercode.specialpos = head->distvalue;
+      kmercode->code = head->codeforleftcontext +
+                       spwp->filltable[head->distvalue];
+      kmercode->definedspecialpos = true;
+      kmercode->specialpos = head->distvalue;
     }
 #ifdef SKDEBUG
-    gt_assert(wcode == localkmercode.code);
+    gt_assert(wcode == kmercode->code);
 #endif
-    localkmercode.position = currentposition + 1 - spwp->kmersize;
-    processkmercode(processkmercodeinfo,&localkmercode);
+    kmercode->position = currentposition + 1 - spwp->kmersize;
+    return true;
   }
+  return false;
 }
 
 static void doovershoot(Kmerstream *spwp,
@@ -410,11 +407,15 @@ static void doovershoot(Kmerstream *spwp,
                         unsigned int kmersize)
 {
   unsigned int overshoot;
+  GtKmercode kmercode;
 
   for (overshoot=0; overshoot<kmersize; overshoot++)
   {
-    shiftrightwithchar(processkmercode,processkmercodeinfo,spwp,
-                       currentposition + overshoot,(GtUchar) WILDCARD);
+    if (shiftrightwithchar(&kmercode,spwp,currentposition + overshoot,
+                           (GtUchar) WILDCARD))
+    {
+      processkmercode(processkmercodeinfo,&kmercode);
+    }
   }
 }
 
@@ -436,6 +437,7 @@ void getencseqkmers(
   unsigned long currentposition = 0, totallength;
   Kmerstream *spwp;
   GtUchar charcode;
+  GtKmercode kmercode;
   GtEncodedsequenceScanstate *esr;
   unsigned int numofchars;
 
@@ -449,8 +451,10 @@ void getencseqkmers(
                                                               currentposition,
                                                               readmode);
     GT_CHECKENCCHAR(charcode,encseq,currentposition,readmode);
-    shiftrightwithchar(processkmercode,processkmercodeinfo,
-                       spwp,currentposition,charcode);
+    if (shiftrightwithchar(&kmercode,spwp,currentposition,charcode))
+    {
+      processkmercode(processkmercodeinfo,&kmercode);
+    }
   }
   gt_encodedsequence_scanstate_delete(esr);
   doovershoot(spwp,
@@ -459,6 +463,51 @@ void getencseqkmers(
               currentposition,
               kmersize);
   freestreamstate(spwp);
+}
+
+typedef struct
+{
+  unsigned long totallength;
+  const GtEncodedsequence *encseq;
+  GtEncodedsequenceScanstate *esr;
+  GtReadmode readmode;
+  Kmerstream *spwp;
+  unsigned long currentposition;
+  unsigned int kmersize;
+  GtKmercode kmercode;
+} GtKmercodeiterator;
+
+GtKmercodeiterator *gt_kmercodeiterator_new(const GtEncodedsequence *encseq,
+                                            GtReadmode readmode,
+                                            unsigned int kmersize)
+{
+  GtKmercodeiterator *kmercodeiterator = gt_malloc(sizeof(*kmercodeiterator));
+  unsigned int pos, numofchars;
+  GtUchar charcode;
+
+  kmercodeiterator->totallength = gt_encodedsequence_total_length(encseq);
+  if (kmercodeiterator->totallength < (unsigned long) kmersize)
+  {
+    gt_free(kmercodeiterator);
+    return NULL;
+  }
+  kmercodeiterator->encseq = encseq;
+  kmercodeiterator->readmode = readmode;
+  kmercodeiterator->esr = gt_encodedsequence_scanstate_new(encseq,readmode,0);
+  numofchars = gt_alphabet_num_of_chars(gt_encodedsequence_alphabet(encseq));
+  kmercodeiterator->spwp = kmerstream_new(numofchars,kmersize);
+  kmercodeiterator->currentposition = (unsigned long) kmersize;
+  kmercodeiterator->kmersize = kmersize;
+  for (pos = 0; pos<kmersize; pos++)
+  {
+    charcode = gt_encodedsequence_get_encoded_char_sequential(encseq,
+                                                        kmercodeiterator->esr,
+                                                        (unsigned long) pos,
+                                                        readmode);
+    kmercodeiterator->spwp->windowwidth++;
+    updatespecialpositions(kmercodeiterator->spwp,charcode,false,0);
+  }
+  return kmercodeiterator;
 }
 
 int getfastastreamkmers(
@@ -493,8 +542,9 @@ int getfastastreamkmers(
   }
   if (!haserr)
   {
-    gt_sequence_buffer_set_symbolmap(fb, symbolmap);
+    GtKmercode kmercode;
 
+    gt_sequence_buffer_set_symbolmap(fb, symbolmap);
     for (currentposition = 0; /* Nothing */; currentposition++)
     {
       retval = gt_sequence_buffer_next(fb,&charcode,err);
@@ -507,8 +557,10 @@ int getfastastreamkmers(
       {
         break;
       }
-      shiftrightwithchar(processkmercode,processkmercodeinfo,
-                         spwp,currentposition,charcode);
+      if (shiftrightwithchar(&kmercode,spwp,currentposition,charcode))
+      {
+        processkmercode(processkmercodeinfo,&kmercode);
+      }
     }
     gt_sequence_buffer_delete(fb);
   }
