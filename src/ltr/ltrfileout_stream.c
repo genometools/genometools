@@ -34,7 +34,7 @@
 #include "ltr/ltr_visitor.h"
 
 #define GT_FSWIDTH         60
-#define GT_MAXFILENAMELEN 128
+#define GT_MAXFILENAMELEN 256
 #define GT_MAXFASTAHEADER 256
 
 struct GtLTRFileOutStream {
