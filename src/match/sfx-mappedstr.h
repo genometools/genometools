@@ -31,6 +31,8 @@ typedef struct
   unsigned long position;
 } GtKmercode;
 
+typedef struct GtKmercodeiterator GtKmercodeiterator;
+
 void getencseqkmers(
         const GtEncodedsequence *encseq,
         GtReadmode readmode,
@@ -47,5 +49,14 @@ int getfastastreamkmers(
         const GtUchar *symbolmap,
         bool plainformat,
         GtError *err);
+
+GtKmercodeiterator *gt_kmercodeiterator_new(const GtEncodedsequence *encseq,
+                                            GtReadmode readmode,
+                                            unsigned int kmersize);
+
+const GtKmercode *gt_kmercodeiterator_next(
+                       GtKmercodeiterator *kmercodeiterator);
+
+void gt_kmercodeiterator_delete(GtKmercodeiterator *kmercodeiterator);
 
 #endif

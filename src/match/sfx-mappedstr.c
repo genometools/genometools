@@ -543,7 +543,7 @@ void getencseqkmers(
   freestreamstate(spwp);
 }
 
-typedef struct
+struct GtKmercodeiterator
 {
   unsigned long totallength;
   const GtEncodedsequence *encseq;
@@ -553,7 +553,7 @@ typedef struct
   unsigned long currentposition;
   unsigned int kmersize;
   GtKmercode kmercode;
-} GtKmercodeiterator;
+};
 
 GtKmercodeiterator *gt_kmercodeiterator_new(const GtEncodedsequence *encseq,
                                             GtReadmode readmode,
@@ -623,6 +623,24 @@ void gt_kmercodeiterator_delete(GtKmercodeiterator *kmercodeiterator)
   }
   freestreamstate(kmercodeiterator->spwp);
   gt_free(kmercodeiterator);
+}
+
+void getencseqkmers2(
+        const GtEncodedsequence *encseq,
+        GtReadmode readmode,
+        void(*processkmercode)(void *,const GtKmercode *),
+        void *processkmercodeinfo,
+        unsigned int kmersize)
+{
+  GtKmercodeiterator *kmercodeiterator;
+  const GtKmercode *kmercodeptr;
+
+  kmercodeiterator = gt_kmercodeiterator_new(encseq,readmode,kmersize);
+  while ((kmercodeptr = gt_kmercodeiterator_next(kmercodeiterator)) != NULL)
+  {
+    processkmercode(processkmercodeinfo,kmercodeptr);
+  }
+  gt_kmercodeiterator_delete(kmercodeiterator);
 }
 
 int getfastastreamkmers(
