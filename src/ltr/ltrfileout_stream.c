@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -129,7 +129,7 @@ static int write_pdom(GtLTRFileOutStream *ls, GtArray *pdoms,
       int rval;
       rval = gt_genome_node_cmp(*(GtGenomeNode**)gt_array_get(pdoms, i),
                                 *(GtGenomeNode**)gt_array_get(pdoms, i-1));
-      gt_assert(rval > 0);
+      gt_assert(rval >= 0);
     }
     if (gt_feature_node_get_strand(*(GtFeatureNode**)
                                         gt_array_get(pdoms, 0))
