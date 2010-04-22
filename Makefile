@@ -709,6 +709,7 @@ docs: bin/gt bin/examples/sketch_parsed bin/examples/sketch_constructed
 	> doc/manuals/api_reference.tex
 	bin/gt gtscripts/gtdoc.lua -lua -tex $(CURDIR) \
 	> doc/manuals/gtscript_reference.tex
+	$(MAKE) -C $(CURDIR)/doc/devguide
 
 doc/manuals/annotationsketch.pdf: docs
 	$(MAKE) -C $(CURDIR)/doc/manuals annotationsketch
@@ -877,6 +878,7 @@ clean:
 	rm -rf $(HMMER_DIR)/config.h $(SQUID_DIR)/squidconf.h $(SQUID_DIR)/squid.h
 	rm -rf obj
 	rm -rf testsuite/stest_testsuite testsuite/stest_stest_tests
+	$(MAKE) -C $(CURDIR)/doc/devguide clean
 
 gtkviewer:
 	$(CC) -o bin/examples/gtkviewer $(GT_CPPFLAGS) $(GT_LDFLAGS) `pkg-config --cflags --libs gtk+-2.0` -lgenometools src/examples/gtkviewer.c
