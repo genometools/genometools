@@ -61,6 +61,18 @@ bool gt_kmercodeiterator_inputexhausted(
 const GtKmercode *gt_kmercodeiterator_encseq_next(
                        GtKmercodeiterator *kmercodeiterator);
 
+GtKmercodeiterator *gt_kmercodeiterator_filetab_new(
+        const GtStrArray *filenametab,
+        unsigned int numofchars,
+        unsigned int kmersize,
+        const GtUchar *symbolmap,
+        bool plainformat,
+        GtError *err);
+
+int gt_kmercodeiterator_filetab_next(const GtKmercode **kmercodeptr,
+                                     GtKmercodeiterator *kmercodeiterator,
+                                     GtError *err);
+
 void gt_kmercodeiterator_delete(GtKmercodeiterator *kmercodeiterator);
 
 #endif

@@ -706,9 +706,9 @@ GtKmercodeiterator *gt_kmercodeiterator_filetab_new(
   return kmercodeiterator;
 }
 
-const GtKmercode *gt_kmercodeiterator_filetab_next(
-                             GtKmercodeiterator *kmercodeiterator,
-                             GtError *err)
+int gt_kmercodeiterator_filetab_next(const GtKmercode **kmercodeptr,
+                                     GtKmercodeiterator *kmercodeiterator,
+                                     GtError *err)
 {
   bool haserr = false;
 
@@ -743,18 +743,29 @@ const GtKmercode *gt_kmercodeiterator_filetab_next(
                      kmercodeiterator->currentposition-1);
       kmercodeiterator->hasprocessedfirst = true;
     }
-    return &kmercodeiterator->kmercode;
-  }
-  if (kmercodeiterator->currentposition < kmercodeiterator->totallength +
-                                          kmercodeiterator->spwp->kmersize)
+    if (haserr)
+    {
+      *kmercodeptr = NULL;
+    } else
+    {
+      *kmercodeptr = &kmercodeiterator->kmercode;
+    }
+  } else
   {
-    shiftrightwithchar2(&kmercodeiterator->kmercode,
-                        kmercodeiterator->spwp,
-                        kmercodeiterator->currentposition++,
-                        (GtUchar) WILDCARD);
-    return &kmercodeiterator->kmercode;
+    if (kmercodeiterator->currentposition < kmercodeiterator->totallength +
+                                            kmercodeiterator->spwp->kmersize)
+    {
+      shiftrightwithchar2(&kmercodeiterator->kmercode,
+                          kmercodeiterator->spwp,
+                          kmercodeiterator->currentposition++,
+                          (GtUchar) WILDCARD);
+      *kmercodeptr = &kmercodeiterator->kmercode;
+    } else
+    {
+      *kmercodeptr = NULL;
+    }
   }
-  return NULL;
+  return haserr ? -1 : 0;
 }
 
 bool gt_kmercodeiterator_inputexhausted(

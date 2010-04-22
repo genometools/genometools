@@ -172,6 +172,52 @@ static int comparecodelists(const GtArrayGtCodetype *codeliststream,
   return 0;
 }
 
+int getfastastreamkmers2(
+        const GtStrArray *filenametab,
+        unsigned int numofchars,
+        unsigned int kmersize,
+        const GtUchar *symbolmap,
+        bool plainformat,
+        GtArrayGtCodetype *codeliststream,
+        GtError *err)
+{
+  GtKmercodeiterator *kmercodeiterator;
+  const GtKmercode *kmercodeptr;
+  bool haserr = false;
+
+  kmercodeiterator = gt_kmercodeiterator_filetab_new(
+                                filenametab,
+                                numofchars,
+                                kmersize,
+                                symbolmap,
+                                plainformat,
+                                err);
+  if (!gt_kmercodeiterator_inputexhausted(kmercodeiterator))
+  {
+    while (!haserr)
+    {
+      int retval = gt_kmercodeiterator_filetab_next(&kmercodeptr,
+                                                    kmercodeiterator,
+                                                    err);
+      if (retval < 0)
+      {
+        haserr = true;
+      } else
+      {
+        if (kmercodeptr != NULL)
+        {
+          outkmeroccurrence(codeliststream,kmercodeptr);
+        } else
+        {
+          break;
+        }
+      }
+    }
+    gt_kmercodeiterator_delete(kmercodeiterator);
+  }
+  return haserr ? -1 : 0;
+}
+
 static int verifycodelists(const GtEncodedsequence *encseq,
                            unsigned int kmersize,
                            unsigned int numofchars,
