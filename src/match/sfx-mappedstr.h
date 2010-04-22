@@ -53,7 +53,7 @@ int getfastastreamkmers(
 bool gt_kmercodeiterator_inputexhausted(
                        const GtKmercodeiterator *kmercodeiterator);
 
-GtKmercodeiterator *gt_kmercodeiterator_encseq_new(
+/*@notnull@*/ GtKmercodeiterator *gt_kmercodeiterator_encseq_new(
                                             const GtEncodedsequence *encseq,
                                             GtReadmode readmode,
                                             unsigned int kmersize);
