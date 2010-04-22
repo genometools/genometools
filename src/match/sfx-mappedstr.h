@@ -50,11 +50,15 @@ int getfastastreamkmers(
         bool plainformat,
         GtError *err);
 
-GtKmercodeiterator *gt_kmercodeiterator_new(const GtEncodedsequence *encseq,
+bool gt_kmercodeiterator_inputexhausted(
+                       const GtKmercodeiterator *kmercodeiterator);
+
+GtKmercodeiterator *gt_kmercodeiterator_encseq_new(
+                                            const GtEncodedsequence *encseq,
                                             GtReadmode readmode,
                                             unsigned int kmersize);
 
-const GtKmercode *gt_kmercodeiterator_next(
+const GtKmercode *gt_kmercodeiterator_encseq_next(
                        GtKmercodeiterator *kmercodeiterator);
 
 void gt_kmercodeiterator_delete(GtKmercodeiterator *kmercodeiterator);

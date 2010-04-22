@@ -462,10 +462,11 @@ void getencseqkmersinsertwithoutspecial(const GtEncodedsequence *encseq,
   GtKmercodeiterator *kmercodeiterator;
   const GtKmercode *kmercodeptr;
 
-  kmercodeiterator = gt_kmercodeiterator_new(encseq,readmode,kmersize);
-  if (kmercodeiterator != NULL)
+  kmercodeiterator = gt_kmercodeiterator_encseq_new(encseq,readmode,kmersize);
+  if (!gt_kmercodeiterator_inputexhausted(kmercodeiterator))
   {
-    while ((kmercodeptr = gt_kmercodeiterator_next(kmercodeiterator)) != NULL)
+    while ((kmercodeptr = gt_kmercodeiterator_encseq_next(kmercodeiterator))
+                          != NULL)
     {
       insertwithoutspecial(sfi,kmercodeptr);
     }
@@ -481,10 +482,11 @@ static void getencseqkmersupdatekmercount(const GtEncodedsequence *encseq,
   GtKmercodeiterator *kmercodeiterator;
   const GtKmercode *kmercodeptr;
 
-  kmercodeiterator = gt_kmercodeiterator_new(encseq,readmode,kmersize);
-  if (kmercodeiterator != NULL)
+  kmercodeiterator = gt_kmercodeiterator_encseq_new(encseq,readmode,kmersize);
+  if (!gt_kmercodeiterator_inputexhausted(kmercodeiterator))
   {
-    while ((kmercodeptr = gt_kmercodeiterator_next(kmercodeiterator)) != NULL)
+    while ((kmercodeptr = gt_kmercodeiterator_encseq_next(kmercodeiterator))
+                          != NULL)
     {
       updatekmercount(sfi,kmercodeptr);
     }
