@@ -40,16 +40,6 @@ void getencseqkmers(
         void *processkmercodeinfo,
         unsigned int kmersize);
 
-int getfastastreamkmers(
-        const GtStrArray *filenametab,
-        void(*processkmercode)(void *,const GtKmercode *),
-        void *processkmercodeinfo,
-        unsigned int numofchars,
-        unsigned int kmersize,
-        const GtUchar *symbolmap,
-        bool plainformat,
-        GtError *err);
-
 bool gt_kmercodeiterator_inputexhausted(
                        const GtKmercodeiterator *kmercodeiterator);
 

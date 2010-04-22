@@ -172,14 +172,13 @@ static int comparecodelists(const GtArrayGtCodetype *codeliststream,
   return 0;
 }
 
-int getfastastreamkmers2(
-        const GtStrArray *filenametab,
-        unsigned int numofchars,
-        unsigned int kmersize,
-        const GtUchar *symbolmap,
-        bool plainformat,
-        GtArrayGtCodetype *codeliststream,
-        GtError *err)
+static int getfastastreamkmers(const GtStrArray *filenametab,
+                               unsigned int numofchars,
+                               unsigned int kmersize,
+                               const GtUchar *symbolmap,
+                               bool plainformat,
+                               GtArrayGtCodetype *codeliststream,
+                               GtError *err)
 {
   GtKmercodeiterator *kmercodeiterator;
   const GtKmercode *kmercodeptr;
@@ -213,8 +212,8 @@ int getfastastreamkmers2(
         }
       }
     }
-    gt_kmercodeiterator_delete(kmercodeiterator);
   }
+  gt_kmercodeiterator_delete(kmercodeiterator);
   return haserr ? -1 : 0;
 }
 
@@ -263,13 +262,13 @@ int gt_verifymappedstr(const GtEncodedsequence *encseq,
   numofchars = gt_alphabet_num_of_chars(gt_encodedsequence_alphabet(encseq));
   GT_INITARRAY(&codeliststream,GtCodetype);
   if (getfastastreamkmers(gt_encodedsequence_filenames(encseq),
-                     outkmeroccurrence,
-                     &codeliststream,
-                     numofchars,
-                     prefixlength,
-                     gt_alphabet_symbolmap(gt_encodedsequence_alphabet(encseq)),
-                     false,
-                     err) != 0)
+                          numofchars,
+                          prefixlength,
+                          gt_alphabet_symbolmap(
+                                gt_encodedsequence_alphabet(encseq)),
+                          false,
+                          &codeliststream,
+                          err) != 0)
   {
     haserr = true;
   }
