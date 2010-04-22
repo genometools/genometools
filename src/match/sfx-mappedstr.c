@@ -400,28 +400,14 @@ static bool shiftrightwithchar(GtKmercode *kmercode,
   return false;
 }
 
-static void shiftrightwithchar2(GtKmercode *kmercode,
-                                Kmerstream *spwp,
-                                unsigned long currentposition,
-                                GtUchar charcode)
+static void computenewcode(GtKmercode *kmercode,
+                           Kmerstream *spwp,
+                           unsigned long currentposition)
 {
 #ifdef SKDEBUG
   bool firstspecialbrutedefined;
   unsigned int firstspecialbrute;
-#endif
 
-  gt_assert(spwp->windowwidth == spwp->kmersize);
-  updatespecialpositions(spwp,charcode,true,
-                         spwp->cyclicwindow[spwp->firstindex]);
-  spwp->cyclicwindow[spwp->firstindex] = charcode;
-  if (spwp->firstindex == spwp->kmersize-1)
-  {
-    spwp->firstindex = 0;
-  } else
-  {
-    spwp->firstindex++;
-  }
-#ifdef SKDEBUG
   if (!specialqueueisempty(&spwp->spos))
   {
     Specialitem *head = specialheadofqueue(&spwp->spos);
@@ -476,6 +462,25 @@ static void shiftrightwithchar2(GtKmercode *kmercode,
 #endif
     kmercode->position = currentposition + 1 - spwp->kmersize;
   }
+}
+
+static void shiftrightwithchar2(GtKmercode *kmercode,
+                                Kmerstream *spwp,
+                                unsigned long currentposition,
+                                GtUchar charcode)
+{
+  gt_assert(spwp->windowwidth == spwp->kmersize);
+  updatespecialpositions(spwp,charcode,true,
+                         spwp->cyclicwindow[spwp->firstindex]);
+  spwp->cyclicwindow[spwp->firstindex] = charcode;
+  if (spwp->firstindex == spwp->kmersize-1)
+  {
+    spwp->firstindex = 0;
+  } else
+  {
+    spwp->firstindex++;
+  }
+  computenewcode(kmercode, spwp, currentposition);
 }
 
 static void doovershoot(Kmerstream *spwp,
@@ -551,7 +556,7 @@ struct GtKmercodeiterator
   GtReadmode readmode;
   Kmerstream *spwp;
   unsigned long currentposition;
-  unsigned int kmersize;
+  bool hasprocessedfirst;
   GtKmercode kmercode;
 };
 
@@ -559,10 +564,11 @@ GtKmercodeiterator *gt_kmercodeiterator_new(const GtEncodedsequence *encseq,
                                             GtReadmode readmode,
                                             unsigned int kmersize)
 {
-  GtKmercodeiterator *kmercodeiterator = gt_malloc(sizeof(*kmercodeiterator));
-  unsigned int pos, numofchars;
+  GtKmercodeiterator *kmercodeiterator;
+  unsigned int numofchars;
   GtUchar charcode;
 
+  kmercodeiterator = gt_malloc(sizeof(*kmercodeiterator));
   kmercodeiterator->totallength = gt_encodedsequence_total_length(encseq);
   if (kmercodeiterator->totallength < (unsigned long) kmersize)
   {
@@ -574,16 +580,19 @@ GtKmercodeiterator *gt_kmercodeiterator_new(const GtEncodedsequence *encseq,
   kmercodeiterator->esr = gt_encodedsequence_scanstate_new(encseq,readmode,0);
   numofchars = gt_alphabet_num_of_chars(gt_encodedsequence_alphabet(encseq));
   kmercodeiterator->spwp = kmerstream_new(numofchars,kmersize);
-  kmercodeiterator->currentposition = (unsigned long) kmersize;
-  kmercodeiterator->kmersize = kmersize;
-  for (pos = 0; pos<kmersize; pos++)
+  kmercodeiterator->hasprocessedfirst = false;
+  for (kmercodeiterator->currentposition = 0;
+       kmercodeiterator->currentposition < (unsigned long) kmersize;
+       kmercodeiterator->currentposition++)
   {
     charcode = gt_encodedsequence_get_encoded_char_sequential(encseq,
-                                                        kmercodeiterator->esr,
-                                                        (unsigned long) pos,
-                                                        readmode);
+                                              kmercodeiterator->esr,
+                                              kmercodeiterator->currentposition,
+                                              readmode);
     kmercodeiterator->spwp->windowwidth++;
     updatespecialpositions(kmercodeiterator->spwp,charcode,false,0);
+    kmercodeiterator->spwp->cyclicwindow[kmercodeiterator->
+                                         spwp->windowwidth-1] = charcode;
   }
   return kmercodeiterator;
 }
@@ -592,19 +601,29 @@ const GtKmercode *gt_kmercodeiterator_next(GtKmercodeiterator *kmercodeiterator)
 {
   if (kmercodeiterator->currentposition < kmercodeiterator->totallength)
   {
-    GtUchar charcode = gt_encodedsequence_get_encoded_char_sequential(
-                                            kmercodeiterator->encseq,
-                                            kmercodeiterator->esr,
-                                            kmercodeiterator->currentposition,
-                                            kmercodeiterator->readmode);
-    shiftrightwithchar2(&kmercodeiterator->kmercode,
-                        kmercodeiterator->spwp,
-                        kmercodeiterator->currentposition++,
-                        charcode);
+    if (kmercodeiterator->hasprocessedfirst)
+    {
+      GtUchar charcode = gt_encodedsequence_get_encoded_char_sequential(
+                                              kmercodeiterator->encseq,
+                                              kmercodeiterator->esr,
+                                              kmercodeiterator->currentposition,
+                                              kmercodeiterator->readmode);
+      shiftrightwithchar2(&kmercodeiterator->kmercode,
+                          kmercodeiterator->spwp,
+                          kmercodeiterator->currentposition++,
+                          charcode);
+    } else
+    {
+      gt_assert(kmercodeiterator->currentposition
+                == (unsigned long) kmercodeiterator->spwp->kmersize);
+      computenewcode(&kmercodeiterator->kmercode, kmercodeiterator->spwp,
+                     kmercodeiterator->currentposition-1);
+      kmercodeiterator->hasprocessedfirst = true;
+    }
     return &kmercodeiterator->kmercode;
   }
   if (kmercodeiterator->currentposition < kmercodeiterator->totallength +
-                                          kmercodeiterator->kmersize)
+                                          kmercodeiterator->spwp->kmersize)
   {
     shiftrightwithchar2(&kmercodeiterator->kmercode,
                         kmercodeiterator->spwp,
@@ -621,27 +640,48 @@ void gt_kmercodeiterator_delete(GtKmercodeiterator *kmercodeiterator)
   {
     return;
   }
+  gt_encodedsequence_scanstate_delete(kmercodeiterator->esr);
   freestreamstate(kmercodeiterator->spwp);
   gt_free(kmercodeiterator);
 }
 
-void getencseqkmers2(
-        const GtEncodedsequence *encseq,
-        GtReadmode readmode,
-        void(*processkmercode)(void *,const GtKmercode *),
-        void *processkmercodeinfo,
-        unsigned int kmersize)
-{
-  GtKmercodeiterator *kmercodeiterator;
-  const GtKmercode *kmercodeptr;
+typedef struct GtKmercodeiteratorfromfile GtKmercodeiteratorfromfile;
 
-  kmercodeiterator = gt_kmercodeiterator_new(encseq,readmode,kmersize);
-  while ((kmercodeptr = gt_kmercodeiterator_next(kmercodeiterator)) != NULL)
+struct GtKmercodeiteratorfromfile
+{
+  Kmerstream *spwp;
+  unsigned long currentposition;
+  bool hasprocessedfirst;
+  GtKmercode kmercode;
+};
+
+/*
+GtKmercodeiteratorfromfile *gt_kmercodeiterator_fromfile_new(
+        const GtStrArray *filenametab,
+        unsigned int numofchars,
+        unsigned int kmersize,
+        const GtUchar *symbolmap,
+        bool plainformat,
+        GtError *err)
+{
+  GtKmercodeiteratorfromfile *kmercodeiterator;
+  GtUchar charcode;
+
+  kmercodeiterator = gt_malloc(sizeof(*kmercodeiterator));
+  kmercodeiterator->spwp = kmerstream_new(numofchars,kmersize);
+  kmercodeiterator->hasprocessedfirst = false;
+  for (kmercodeiterator->currentposition = 0;
+       kmercodeiterator->currentposition < (unsigned long) kmersize;
+       kmercodeiterator->currentposition++)
   {
-    processkmercode(processkmercodeinfo,kmercodeptr);
+    kmercodeiterator->spwp->windowwidth++;
+    updatespecialpositions(kmercodeiterator->spwp,charcode,false,0);
+    kmercodeiterator->spwp->cyclicwindow[kmercodeiterator->
+                                         spwp->windowwidth-1] = charcode;
   }
-  gt_kmercodeiterator_delete(kmercodeiterator);
+  return kmercodeiterator;
 }
+*/
 
 int getfastastreamkmers(
         const GtStrArray *filenametab,

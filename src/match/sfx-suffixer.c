@@ -188,11 +188,11 @@ static void verifycodelistcomputation(
 
 #ifdef SKDEBUG
 static GtCodetype getencseqcode(const GtEncodedsequence *encseq,
-                              GtReadmode readmode,
-                              unsigned long totallength,
-                              const GtCodetype **multimappower,
-                              unsigned int prefixlength,
-                              unsigned long pos)
+                                GtReadmode readmode,
+                                unsigned long totallength,
+                                const GtCodetype **multimappower,
+                                unsigned int prefixlength,
+                                unsigned long pos)
 {
   GtCodetype code = 0;
   unsigned int idx;
@@ -454,6 +454,44 @@ static void showleftborder(const unsigned long *leftborder,
 }
 #endif
 
+void getencseqkmersinsertwithoutspecial(const GtEncodedsequence *encseq,
+                                        GtReadmode readmode,
+                                        unsigned int kmersize,
+                                        Sfxiterator *sfi)
+{
+  GtKmercodeiterator *kmercodeiterator;
+  const GtKmercode *kmercodeptr;
+
+  kmercodeiterator = gt_kmercodeiterator_new(encseq,readmode,kmersize);
+  if (kmercodeiterator != NULL)
+  {
+    while ((kmercodeptr = gt_kmercodeiterator_next(kmercodeiterator)) != NULL)
+    {
+      insertwithoutspecial(sfi,kmercodeptr);
+    }
+    gt_kmercodeiterator_delete(kmercodeiterator);
+  }
+}
+
+static void getencseqkmersupdatekmercount(const GtEncodedsequence *encseq,
+                                          GtReadmode readmode,
+                                          unsigned int kmersize,
+                                          Sfxiterator *sfi)
+{
+  GtKmercodeiterator *kmercodeiterator;
+  const GtKmercode *kmercodeptr;
+
+  kmercodeiterator = gt_kmercodeiterator_new(encseq,readmode,kmersize);
+  if (kmercodeiterator != NULL)
+  {
+    while ((kmercodeptr = gt_kmercodeiterator_next(kmercodeiterator)) != NULL)
+    {
+      updatekmercount(sfi,kmercodeptr);
+    }
+    gt_kmercodeiterator_delete(kmercodeiterator);
+  }
+}
+
 Sfxiterator *gt_newSfxiterator(const GtEncodedsequence *encseq,
                             GtReadmode readmode,
                             unsigned int prefixlength,
@@ -615,11 +653,7 @@ Sfxiterator *gt_newSfxiterator(const GtEncodedsequence *encseq,
                                         "counting prefix distribution",
                                         stdout);
     }
-    getencseqkmers(encseq,
-                   readmode,
-                   updatekmercount,
-                   sfi,
-                   prefixlength);
+    getencseqkmersupdatekmercount(encseq, readmode, prefixlength, sfi);
     if (sfi->sfxstrategy.storespecialcodes)
     {
       gt_assert(realspecialranges+1
@@ -718,11 +752,10 @@ static void preparethispart(Sfxiterator *sfi)
                                       "inserting suffixes into buckets",
                                       stdout);
   }
-  getencseqkmers(sfi->encseq,
-                 sfi->readmode,
-                 insertwithoutspecial,
-                 sfi,
-                 sfi->prefixlength);
+  getencseqkmersinsertwithoutspecial(sfi->encseq,
+                                     sfi->readmode,
+                                     sfi->prefixlength,
+                                     sfi);
   if (sfi->sfxprogress != NULL)
   {
     gt_progress_timer_start_new_state(sfi->sfxprogress,
