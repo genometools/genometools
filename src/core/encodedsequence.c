@@ -102,14 +102,14 @@
             bitwise |= (GtTwobitencoding) 1;\
           }\
         }\
-        if (widthbuffer == (unsigned long) (GT_UNITSIN2BITENC - 1))\
+        if (widthbuffer < (unsigned long) (GT_UNITSIN2BITENC - 1))\
+        {\
+          widthbuffer++;\
+        } else\
         {\
           *tbeptr++ = bitwise;\
           widthbuffer = 0;\
           bitwise = 0;\
-        } else\
-        {\
-          widthbuffer++;\
         }
 
 #define UPDATESEQBUFFERFINAL\
@@ -1260,89 +1260,40 @@ static GtUchar delivercharViabitaccessSpecial(const GtEncodedsequence *encseq,
                : (GtUchar) WILDCARD;
 }
 
+#define DECLAREFUNCTIONGENERIC(FCTNAME,CHECKFUN)\
+static GtUchar FCTNAME(const GtEncodedsequence *encseq,unsigned long pos)\
+{\
+  unsigned long twobits = EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);\
+  if (twobits > 1UL || CHECKFUN(encseq,pos))\
+  {\
+    return (GtUchar) twobits;\
+  }\
+  return twobits ? (GtUchar) SEPARATOR : (GtUchar) WILDCARD;\
+}
+
 /* Viauchartables */
 
-static GtUchar delivercharViauchartablesSpecialfirst(
-                                              const GtEncodedsequence *encseq,
-                                              unsigned long pos)
-{
-  if (ucharchecknospecial(encseq,pos))
-  {
-    return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
-  }
-  return EXTRACTENCODEDCHAR(encseq->twobitencoding,pos)
-                          ? (GtUchar) SEPARATOR
-                          : (GtUchar) WILDCARD;
-}
+DECLAREFUNCTIONGENERIC(delivercharViauchartablesSpecialfirst,
+                       ucharchecknospecial)
 
-static GtUchar delivercharViauchartablesSpecialrange(
-                                              const GtEncodedsequence *encseq,
-                                              unsigned long pos)
-{
-  if (ucharchecknospecialrange(encseq,pos))
-  {
-    return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
-  }
-  return EXTRACTENCODEDCHAR(encseq->twobitencoding,pos)
-                  ? (GtUchar) SEPARATOR
-                  : (GtUchar) WILDCARD;
-}
+DECLAREFUNCTIONGENERIC(delivercharViauchartablesSpecialrange,
+                       ucharchecknospecialrange)
 
 /* Viaushorttables */
 
-static GtUchar delivercharViaushorttablesSpecialfirst(
-                                               const GtEncodedsequence *encseq,
-                                               unsigned long pos)
-{
-  if (ushortchecknospecial(encseq,pos))
-  {
-    return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
-  }
-  return EXTRACTENCODEDCHAR(encseq->twobitencoding,pos)
-                          ? (GtUchar) SEPARATOR
-                          : (GtUchar) WILDCARD;
-}
+DECLAREFUNCTIONGENERIC(delivercharViaushorttablesSpecialfirst,
+                       ushortchecknospecial)
 
-static GtUchar delivercharViaushorttablesSpecialrange(
-                                               const GtEncodedsequence *encseq,
-                                               unsigned long pos)
-{
-  if (ushortchecknospecialrange(encseq,pos))
-  {
-    return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
-  }
-  return EXTRACTENCODEDCHAR(encseq->twobitencoding,pos)
-                ? (GtUchar) SEPARATOR
-                : (GtUchar) WILDCARD;
-}
+DECLAREFUNCTIONGENERIC(delivercharViaushorttablesSpecialrange,
+                       ushortchecknospecialrange)
 
 /* Viauint32tables */
 
-static GtUchar delivercharViauint32tablesSpecialfirst(
-                                                const GtEncodedsequence *encseq,
-                                                unsigned long pos)
-{
-  if (uint32checknospecial(encseq,pos))
-  {
-    return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
-  }
-  return EXTRACTENCODEDCHAR(encseq->twobitencoding,pos)
-           ? (GtUchar) SEPARATOR
-           : (GtUchar) WILDCARD;
-}
+DECLAREFUNCTIONGENERIC(delivercharViauint32tablesSpecialfirst,
+                       uint32checknospecial)
 
-static GtUchar delivercharViauint32tablesSpecialrange(
-                                                const GtEncodedsequence *encseq,
-                                                unsigned long pos)
-{
-  if (uint32checknospecialrange(encseq,pos))
-  {
-    return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
-  }
-  return EXTRACTENCODEDCHAR(encseq->twobitencoding,pos)
-             ? (GtUchar) SEPARATOR
-             : (GtUchar) WILDCARD;
-}
+DECLAREFUNCTIONGENERIC(delivercharViauint32tablesSpecialrange,
+                       uint32checknospecialrange)
 
 static int fillplainseq(GtEncodedsequence *encseq,GtSequenceBuffer *fb,
                         GtError *err)

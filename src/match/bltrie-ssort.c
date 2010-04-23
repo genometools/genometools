@@ -369,28 +369,6 @@ static unsigned long fastgetlcp(GtUchar *mm_oldsuffix,
   if (isleftofboundary(leafpos,commonunits.finaldepth,blindtrie) &&
       !commonunits.leftspecial)
   {
-#ifdef OLDVERSION
-    /*
-    *mm_oldsuffix = gt_encodedsequence_get_encoded_char(blindtrie->encseq,
-                                   leafpos + commonunits.finaldepth,
-                                   blindtrie->readmode);
-    if (ISSPECIAL(*mm_oldsuffix))
-    {
-      gt_assert(commonunits.leftspecial);
-    } else
-    {
-      GtUchar tmp = gt_encodedsequence_extract_encoded_char(blindtrie->encseq,
-                                                         leafpos +
-                                                         commonunits.finaldepth,
-                                                         blindtrie->readmode);
-      gt_assert(tmp == *mm_oldsuffix);
-    }
-    if (*mm_oldsuffix == (GtUchar) WILDCARD)
-    {
-      *mm_oldsuffix = (GtUchar) SEPARATOR;
-    }
-    */
-#endif
     *mm_oldsuffix = gt_encodedsequence_extract_encoded_char(blindtrie->encseq,
                                                          leafpos +
                                                          commonunits.finaldepth,
@@ -402,27 +380,6 @@ static unsigned long fastgetlcp(GtUchar *mm_oldsuffix,
   if (isleftofboundary(currentstartpos,commonunits.finaldepth,blindtrie) &&
       !commonunits.rightspecial)
   {
-#ifdef OLDVERSION
-    /* Random access */
-    *mm_newsuffix = gt_encodedsequence_get_encoded_char(blindtrie->encseq,
-                                       currentstartpos + commonunits.finaldepth,
-                                       blindtrie->readmode);
-    if (ISSPECIAL(*mm_newsuffix))
-    {
-      gt_assert(commonunits.rightspecial);
-    } else
-    {
-      /* Random access */
-      GtUchar tmp = gt_encodedsequence_extract_encoded_char(blindtrie->encseq,
-                                       currentstartpos + commonunits.finaldepth,
-                                       blindtrie->readmode);
-      gt_assert(tmp == *mm_newsuffix);
-    }
-    if (*mm_newsuffix == (GtUchar) WILDCARD)
-    {
-      *mm_newsuffix = (GtUchar) SEPARATOR;
-    }
-#endif
     *mm_newsuffix = gt_encodedsequence_extract_encoded_char(blindtrie->encseq,
                                        currentstartpos +
                                        commonunits.finaldepth,
