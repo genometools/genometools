@@ -20,7 +20,6 @@
 #define ENCODEDSEQUENCE_API_H
 
 #include "core/alphabet_api.h"
-#include "core/encodedsequence_options_api.h"
 #include "core/logger_api.h"
 #include "core/progress_timer_api.h"
 #include "core/readmode_api.h"

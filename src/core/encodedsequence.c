@@ -35,7 +35,6 @@
 #ifndef GT_INLINEDENCSEQ
 #include "core/encodedsequence_rep.h"
 #endif
-#include "core/encodedsequence_options.h"
 #include "core/ensure.h"
 #include "core/error.h"
 #include "core/fa.h"

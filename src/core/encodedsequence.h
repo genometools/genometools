@@ -28,7 +28,6 @@
 #include "core/filelengthvalues.h"
 #include "core/disc_distri.h"
 #include "core/encodedsequence_api.h"
-#include "core/encodedsequence_options.h"
 #include "core/intbits.h"
 #include "core/range.h"
 #include "core/readmode.h"
