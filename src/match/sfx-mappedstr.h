@@ -28,20 +28,9 @@ typedef struct
   bool definedspecialpos;
   unsigned int specialpos;
   GtCodetype code;
-  unsigned long position;
 } GtKmercode;
 
 typedef struct GtKmercodeiterator GtKmercodeiterator;
-
-void getencseqkmers(
-        const GtEncodedsequence *encseq,
-        GtReadmode readmode,
-        void(*processkmercode)(void *,const GtKmercode *),
-        void *processkmercodeinfo,
-        unsigned int kmersize);
-
-bool gt_kmercodeiterator_inputexhausted(
-                       const GtKmercodeiterator *kmercodeiterator);
 
 /*@notnull@*/ GtKmercodeiterator *gt_kmercodeiterator_encseq_new(
                                             const GtEncodedsequence *encseq,
@@ -62,6 +51,9 @@ GtKmercodeiterator *gt_kmercodeiterator_filetab_new(
 int gt_kmercodeiterator_filetab_next(const GtKmercode **kmercodeptr,
                                      GtKmercodeiterator *kmercodeiterator,
                                      GtError *err);
+
+bool gt_kmercodeiterator_inputexhausted(
+                       const GtKmercodeiterator *kmercodeiterator);
 
 void gt_kmercodeiterator_delete(GtKmercodeiterator *kmercodeiterator);
 

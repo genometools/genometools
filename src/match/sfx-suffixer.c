@@ -216,6 +216,7 @@ unsigned int previousspecialpos = 0;
 #endif
 
 static void updatekmercount(void *processinfo,
+                            unsigned long position,
                             const GtKmercode *kmercode)
 {
   Sfxiterator *sfi = (Sfxiterator *) processinfo;
@@ -235,7 +236,7 @@ static void updatekmercount(void *processinfo,
           cp->code = (unsigned int) kmercode->code;
           gt_assert(kmercode->specialpos <= MAXPREFIXLENGTH);
           cp->maxprefixindex = kmercode->specialpos;
-          cp->position = kmercode->position + kmercode->specialpos;
+          cp->position = position + kmercode->specialpos;
         }
         sfi->storespecials = false;
         gt_assert(kmercode->code > 0);
@@ -262,11 +263,11 @@ static void updatekmercount(void *processinfo,
                                    gt_encodedsequence_total_length(sfi->encseq),
                                    gt_bcktab_multimappower(sfi->bcktab),
                                    sfi->prefixlength,
-                                   kmercode->position);
+                                   position);
       if (code2 != 0)
       {
         printf("### position " FormatSeqpos ", code2 = %lu != 0\n",
-                        PRINTSeqposcast(kmercode->position),code2);
+                        PRINTSeqposcast(position),code2);
         printf("previouscode = " FormatGtCodetype "\n",
                         previouscode);
         if (previouskmercodedefined)
@@ -291,6 +292,7 @@ static void updatekmercount(void *processinfo,
 }
 
 static void insertwithoutspecial(void *processinfo,
+                                 unsigned long position,
                                  const GtKmercode *kmercode)
 {
   if (!kmercode->definedspecialpos)
@@ -300,8 +302,7 @@ static void insertwithoutspecial(void *processinfo,
     if (kmercode->code >= sfi->currentmincode &&
         kmercode->code <= sfi->currentmaxcode)
     {
-      setsortspace(&sfi->suftab,--sfi->leftborder[kmercode->code],
-                   kmercode->position);
+      setsortspace(&sfi->suftab,--sfi->leftborder[kmercode->code],position);
       /* from right to left */
     }
   }
@@ -465,10 +466,12 @@ void getencseqkmersinsertwithoutspecial(const GtEncodedsequence *encseq,
   kmercodeiterator = gt_kmercodeiterator_encseq_new(encseq,readmode,kmersize);
   if (!gt_kmercodeiterator_inputexhausted(kmercodeiterator))
   {
+    unsigned long position = 0;
+
     while ((kmercodeptr = gt_kmercodeiterator_encseq_next(kmercodeiterator))
                           != NULL)
     {
-      insertwithoutspecial(sfi,kmercodeptr);
+      insertwithoutspecial(sfi,position++,kmercodeptr);
     }
     gt_kmercodeiterator_delete(kmercodeiterator);
   }
@@ -485,10 +488,12 @@ static void getencseqkmersupdatekmercount(const GtEncodedsequence *encseq,
   kmercodeiterator = gt_kmercodeiterator_encseq_new(encseq,readmode,kmersize);
   if (!gt_kmercodeiterator_inputexhausted(kmercodeiterator))
   {
+    unsigned long position = 0;
+
     while ((kmercodeptr = gt_kmercodeiterator_encseq_next(kmercodeiterator))
                           != NULL)
     {
-      updatekmercount(sfi,kmercodeptr);
+      updatekmercount(sfi,position++,kmercodeptr);
     }
     gt_kmercodeiterator_delete(kmercodeiterator);
   }
