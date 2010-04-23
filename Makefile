@@ -424,13 +424,6 @@ $(1): $(2)
 	@$$(CC) $$(EXP_LDFLAGS) $$(GT_LDFLAGS) $$(filter-out $$(OVERRIDELIBS),$$^) \
 	  $$(filter-out $$(patsubst lib%.a,-l%,$$(notdir $$(OVERRIDELIBS))),\
 	  $$(EXP_LDLIBS)) $$(OVERRIDELIBS) -o $$@
-
-$(1)_static: $(2)
-	@echo "[link $$(@F)]"
-	@test -d $$(@D) || mkdir -p $$(@D)
-	@$$(CC) $$(EXP_LDFLAGS) $$(GT_LDFLAGS) $$(filter-out $$(OVERRIDELIBS),$$^) \
-	  $$(filter-out $$(patsubst lib%.a,-l%,$$(notdir $$(OVERRIDELIBS))),\
-	  $$(EXP_LDLIBS)) $$(OVERRIDELIBS) -static -o $$@
 endef
 
 $(eval $(call PROGRAM_template, bin/skproto, $(SKPROTO_OBJ) \
