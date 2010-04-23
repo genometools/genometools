@@ -260,25 +260,23 @@ static int inputsuffixarray(bool map,
                             GtError *err)
 {
   bool haserr = false;
-  GtEncodedsequenceOptions *o;
+  GtEncseqLoader *el;
   unsigned long totallength = 0;
 
   gt_error_check(err);
   initsuffixarray(suffixarray);
-  o = gt_encodedsequence_options_new();
-  if (demand & SARR_ESQTAB)
-    gt_encodedsequence_options_enable_tis_table_usage(o);
-  if (demand & SARR_DESTAB)
-    gt_encodedsequence_options_enable_des_table_usage(o);
-  if (demand & SARR_SDSTAB)
-    gt_encodedsequence_options_enable_sds_table_usage(o);
-  if (demand & SARR_SSPTAB)
-    gt_encodedsequence_options_enable_ssp_table_usage(o);
-  gt_encodedsequence_options_set_indexname(o, (GtStr*) indexname);
-  gt_encodedsequence_options_set_logger(o, logger);
-  gt_encodedsequence_options_enable_range_iteration(o);
-  suffixarray->encseq = gt_encodedsequence_new_from_index(o, err);
-  gt_encodedsequence_options_delete(o);
+  el = gt_encseq_loader_new();
+  if (!(demand & SARR_ESQTAB))
+    gt_encseq_loader_do_not_require_tis_tab(el);
+  if (!(demand & SARR_DESTAB))
+    gt_encseq_loader_do_not_require_des_tab(el);
+  if (!(demand & SARR_SDSTAB))
+    gt_encseq_loader_do_not_require_sds_tab(el);
+  if (!(demand & SARR_SSPTAB))
+    gt_encseq_loader_do_not_require_ssp_tab(el);
+  gt_encseq_loader_set_logger(el, logger);
+  suffixarray->encseq = gt_encseq_loader_load(el, (GtStr*) indexname, err);
+  gt_encseq_loader_delete(el);
   if (suffixarray->encseq == NULL)
   {
     haserr = true;

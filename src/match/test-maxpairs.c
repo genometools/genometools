@@ -143,15 +143,18 @@ static int sarrselfsubstringmatch(const GtUchar *dbseq,
 {
   Substringmatchinfo ssi;
   unsigned int numofchars;
+  GtEncseqBuilder *eb;
   bool haserr = false;
 
-  ssi.encseq = gt_encodedsequence_new_from_plain(true,
-                                                 dbseq,
-                                                 dblen,
-                                                 query,
-                                                 querylen,
-                                                 alpha,
-                                                 logger);
+  eb = gt_encseq_builder_new(alpha);
+  gt_encseq_builder_disable_multiseq_support(eb);
+  gt_encseq_builder_disable_description_support(eb);
+  gt_encseq_builder_set_logger(eb, logger);
+  gt_encseq_builder_add_encoded(eb, dbseq, dblen, NULL);
+  gt_encseq_builder_add_encoded(eb, query, querylen, NULL);
+  ssi.encseq = gt_encseq_builder_build(eb, err);
+  gt_encseq_builder_delete(eb);
+
   ssi.minlength = minlength;
   ssi.processmaxpairs = processmaxpairs;
   ssi.processmaxpairsinfo = processmaxpairsinfo;
@@ -377,17 +380,18 @@ int gt_testmaxpairs(const GtStr *indexname,
   unsigned long s;
   GtArray *tabmaxquerymatches;
   Maxmatchselfinfo maxmatchselfinfo;
-  GtEncodedsequenceOptions *o;
+  GtEncseqLoader *el;
 
   gt_logger_log(logger,"draw %lu samples",samples);
 
-  o = gt_encodedsequence_options_new();
-  gt_encodedsequence_options_enable_tis_table_usage(o);
-  gt_encodedsequence_options_set_indexname(o, (GtStr*) indexname);
-  gt_encodedsequence_options_set_logger(o, logger);
-  gt_encodedsequence_options_enable_range_iteration(o);
-  encseq = gt_encodedsequence_new_from_index(o, err);
-  gt_encodedsequence_options_delete(o);
+  el = gt_encseq_loader_new();
+  gt_encseq_loader_do_not_require_des_tab(el);
+  gt_encseq_loader_do_not_require_ssp_tab(el);
+  gt_encseq_loader_do_not_require_sds_tab(el);
+  gt_encseq_loader_set_logger(el, logger);
+  encseq = gt_encseq_loader_load(el, (GtStr*) indexname, err);
+  gt_encseq_loader_delete(el);
+
   if (encseq == NULL)
   {
     haserr = true;

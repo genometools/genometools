@@ -351,4 +351,6 @@ void gt_encodedsequence_scanstate_initgeneric(GtEncodedsequenceScanstate *esr,
 GtUchar gt_encodedsequence_extract_encoded_char(const GtEncodedsequence *encseq,
                                                 unsigned long pos,
                                                 GtReadmode readmode);
+
+int gt_encseq_builder_unit_test(GtError *err);
 #endif

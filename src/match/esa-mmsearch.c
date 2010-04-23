@@ -696,14 +696,16 @@ int gt_sarrquerysubstringmatch(const GtUchar *dbseq,
   unsigned int numofchars;
   bool haserr = false;
   GtEncodedsequence *dbencseq;
+  GtEncseqBuilder *eb;
 
-  dbencseq = gt_encodedsequence_new_from_plain(true,
-                                               dbseq,
-                                               dblen,
-                                               NULL,
-                                               0,
-                                               alpha,
-                                               logger);
+  eb = gt_encseq_builder_new(alpha);
+  gt_encseq_builder_disable_multiseq_support(eb);
+  gt_encseq_builder_disable_description_support(eb);
+  gt_encseq_builder_set_logger(eb, logger);
+  gt_encseq_builder_add_encoded(eb, dbseq, dblen, NULL);
+  dbencseq = gt_encseq_builder_build(eb, err);
+  gt_encseq_builder_delete(eb);
+
   numofchars = gt_alphabet_num_of_chars(alpha);
   if (constructsarrandrunmmsearch(dbencseq,
                                   GT_READMODE_FORWARD,

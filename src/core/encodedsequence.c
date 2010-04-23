@@ -29,15 +29,18 @@
 #include "core/chardef.h"
 #include "core/checkencchar.h"
 #include "core/codetype.h"
+#include "core/cstr_api.h"
 #include "core/divmodmul.h"
 #include "core/encodedsequence.h"
 #ifndef GT_INLINEDENCSEQ
 #include "core/encodedsequence_rep.h"
 #endif
 #include "core/encodedsequence_options.h"
+#include "core/ensure.h"
 #include "core/error.h"
 #include "core/fa.h"
 #include "core/filelengthvalues.h"
+#include "core/fileutils_api.h"
 #include "core/format64.h"
 #include "core/intbits.h"
 #include "core/intdef.h"
@@ -1049,17 +1052,29 @@ void gt_encodedsequence_delete(GtEncodedsequence *encseq)
   encseq->uint32specialrangelength = NULL;
   if (encseq->destab != NULL)
   {
-    gt_fa_xmunmap((void *) encseq->destab);
+    if (encseq->hasallocateddestab) {
+      gt_free(encseq->destab);
+    } else {
+      gt_fa_xmunmap((void *) encseq->destab);
+    }
     encseq->destab = NULL;
   }
   if (encseq->sdstab != NULL)
   {
-    gt_fa_xmunmap((void *) encseq->sdstab);
+    if (encseq->hasallocatedsdstab) {
+      gt_free(encseq->sdstab);
+    } else {
+      gt_fa_xmunmap((void *) encseq->sdstab);
+    }
     encseq->sdstab = NULL;
   }
   if (encseq->ssptab != NULL)
   {
-    gt_fa_xmunmap((void *) encseq->ssptab);
+    if (encseq->hasallocatedssptab) {
+      gt_free(encseq->ssptab);
+    } else {
+      gt_fa_xmunmap((void *) encseq->ssptab);
+    }
     encseq->ssptab = NULL;
   }
   gt_alphabet_delete((GtAlphabet*) encseq->alpha);
@@ -2527,9 +2542,12 @@ static GtEncodedsequence *determineencseqkeyvalues(
   encseq->firstfilename = NULL;
   encseq->specialcharinfoptr = NULL;
   encseq->destab = NULL;
+  encseq->hasallocateddestab = false;
   encseq->sdstab = NULL;
+  encseq->hasallocatedsdstab = false;
   encseq->destablength = 0;
   encseq->ssptab = NULL;
+  encseq->hasallocatedssptab = false;
   encseq->alpha = alpha;
   encseq->numofspecialstostore = specialranges;
   encseq->totallength = totallength;
@@ -2903,21 +2921,23 @@ static GtEncodedsequence *files2encodedsequence(
   return haserr ? NULL : encseq;
 }
 
-GtEncodedsequence *gt_encodedsequence_new_from_index(
-                                                    GtEncodedsequenceOptions *o,
-                                                    GtError *err)
+static GtEncodedsequence*
+gt_encodedsequence_new_from_index(bool withrange,
+                                  const GtStr *indexname,
+                                  bool withtistab,
+                                  bool withdestab,
+                                  bool withsdstab,
+                                  bool withssptab,
+                                  GtLogger *logger,
+                                  GtError *err)
 {
   GtEncodedsequence *encseq = NULL;
-  bool haserr = false,
-       withrange = true;
+  bool haserr = false;
   int retcode;
-  GtStr *indexname;
   Firstencseqvalues firstencseqvalues;
   GtAlphabet *alpha;
 
   gt_error_check(err);
-  indexname = gt_encodedsequence_options_get_indexname(o);
-  withrange = gt_encodedsequence_options_get_range_iteration(o);
   alpha = gt_alphabet_new_from_file(indexname, err);
   if (alpha == NULL)
   {
@@ -2941,28 +2961,25 @@ GtEncodedsequence *gt_encodedsequence_new_from_index(
                                       firstencseqvalues.specialcharinfo
                                                        .specialranges,
                                       alpha,
-                                      gt_encodedsequence_options_get_logger(o));
+                                      logger);
     alpha = NULL;
     ALLASSIGNAPPENDFUNC(firstencseqvalues.sat);
-    gt_logger_log(gt_encodedsequence_options_get_logger(o),
-                  "deliverchar=%s",encseq->delivercharname);
-    if (gt_encodedsequence_options_get_tis_table_usage(o))
+    gt_logger_log(logger, "deliverchar=%s",encseq->delivercharname);
+    if (withtistab)
     {
-      if (fillencseqmapspecstartptr(encseq,indexname,
-                                    gt_encodedsequence_options_get_logger(o),
-                                    err) != 0)
+      if (fillencseqmapspecstartptr(encseq,indexname,logger,err) != 0)
       {
         haserr = true;
       }
     }
   }
 #ifdef RANGEDEBUG
-  if (!haserr && gt_encodedsequence_options_get_tis_table_usage(o))
+  if (!haserr && withtistab)
   {
     showallspecialpositions(encseq);
   }
 #endif
-  if (!haserr && gt_encodedsequence_options_get_des_table_usage(o))
+  if (!haserr && withdestab)
   {
     size_t numofbytes;
 
@@ -2977,7 +2994,7 @@ GtEncodedsequence *gt_encodedsequence_new_from_index(
       haserr = true;
     }
   }
-  if (!haserr && gt_encodedsequence_options_get_sds_table_usage(o))
+  if (!haserr && withsdstab)
   {
     gt_assert(encseq != NULL);
     if (encseq->numofdbsequences > 1UL)
@@ -2997,7 +3014,7 @@ GtEncodedsequence *gt_encodedsequence_new_from_index(
       encseq->sdstab = NULL;
     }
   }
-  if (!haserr && gt_encodedsequence_options_get_ssp_table_usage(o))
+  if (!haserr && withssptab)
   {
     gt_assert(encseq != NULL);
     if (encseq->numofdbsequences > 1UL)
@@ -3490,55 +3507,6 @@ static void sequence2specialcharinfo(GtSpecialcharinfo *specialcharinfo,
     = calcspecialranges(NULL,distspralen,logger);
   specialcharinfo->specialranges = specialcharinfo->realspecialranges;
   gt_disc_distri_delete(distspralen);
-}
-
-GtEncodedsequence* gt_encodedsequence_new_from_plain(bool withrange,
-                                                     const GtUchar *seq1,
-                                                     unsigned long len1,
-                                                     const GtUchar *seq2,
-                                                     unsigned long len2,
-                                                     GtAlphabet *alpha,
-                                                     GtLogger *logger)
-{
-  GtEncodedsequence *encseq;
-  GtUchar *seqptr;
-  unsigned long len;
-  const GtPositionaccesstype sat = Viadirectaccess;
-  GtSpecialcharinfo samplespecialcharinfo;
-
-  gt_assert(seq1 != NULL);
-  gt_assert(len1 > 0);
-
-  /* Ref alphabet as it comes from outside. */
-  alpha = gt_alphabet_ref(alpha);
-
-  if (seq2 == NULL)
-  {
-    seqptr = (GtUchar *) seq1;
-    len = len1;
-  } else
-  {
-    len = len1 + (unsigned long) len2 + 1;
-    seqptr = gt_malloc(sizeof (*seqptr) * len);
-    memcpy(seqptr,seq1,sizeof (GtUchar) * len1);
-    seqptr[len1] = (GtUchar) SEPARATOR;
-    memcpy(seqptr + len1 + 1,seq2,sizeof (GtUchar) * len2);
-  }
-  sequence2specialcharinfo(&samplespecialcharinfo,seqptr,len,logger);
-  encseq = determineencseqkeyvalues(sat,
-                                    len,
-                                    2UL,
-                                    0,
-                                    0,
-                                    samplespecialcharinfo.specialranges,
-                                    alpha,
-                                    logger);
-  encseq->specialcharinfo = samplespecialcharinfo;
-  encseq->plainseq = seqptr;
-  encseq->hasplainseqptr = (seq2 == NULL) ? true : false;
-  ALLASSIGNAPPENDFUNC(sat);
-  encseq->mappedptr = NULL;
-  return encseq;
 }
 
 static unsigned long fwdgetnextstoppos(const GtEncodedsequence *encseq,
@@ -5289,8 +5257,20 @@ static unsigned long *initcharacterdistribution(const GtAlphabet *alpha)
   return characterdistribution;
 }
 
-GtEncodedsequence*
-gt_encodedsequence_new_from_files(GtEncodedsequenceOptions *o,
+static GtEncodedsequence*
+gt_encodedsequence_new_from_files(GtProgressTimer *sfxprogress,
+                                  const GtStr *str_indexname,
+                                  const GtStr *str_smap,
+                                  const GtStr *str_sat,
+                                  GtStrArray *filenametab,
+                                  bool isdna,
+                                  bool isprotein,
+                                  bool isplain,
+                                  bool outtistab,
+                                  bool outdestab,
+                                  bool outsdstab,
+                                  bool outssptab,
+                                  GtLogger *logger,
                                   GtError *err)
 {
   unsigned long totallength;
@@ -5299,9 +5279,7 @@ gt_encodedsequence_new_from_files(GtEncodedsequenceOptions *o,
   GtSpecialcharinfo specialcharinfo = {0,0,0,0,0};
   GtAlphabet *alpha = NULL;
   bool alphaisbound = false;
-  GtStrArray *filenametab;
-  GtStr *indexname,
-        *accesstype;
+  const GtStr *indexname;
   GtFilelengthvalues *filelengthtab = NULL;
   unsigned long specialrangestab[3];
   unsigned long *characterdistribution = NULL;
@@ -5309,16 +5287,13 @@ gt_encodedsequence_new_from_files(GtEncodedsequenceOptions *o,
   GtArrayGtUlong sequenceseppos;
 
   gt_error_check(err);
-  filenametab =
-            gt_str_array_ref(gt_encodedsequence_options_get_input_sequences(o));
-  indexname = gt_encodedsequence_options_get_indexname(o);
-  accesstype = gt_encodedsequence_options_get_access_type(o);
+  filenametab = gt_str_array_ref(filenametab);
+  indexname = str_indexname;
   encseq = NULL;
   GT_INITARRAY(&sequenceseppos, GtUlong);
-  if (gt_str_length(gt_encodedsequence_options_get_access_type(o)) > 0)
+  if (gt_str_length(str_sat) > 0)
   {
-    int retval = getsatforcevalue(
-                 gt_str_get(gt_encodedsequence_options_get_access_type(o)),err);
+    int retval = getsatforcevalue(gt_str_get(str_sat), err);
     if (retval < 0)
     {
       haserr = true;
@@ -5332,9 +5307,9 @@ gt_encodedsequence_new_from_files(GtEncodedsequenceOptions *o,
   }
   if (!haserr)
   {
-    alpha = gt_alphabet_new(gt_encodedsequence_options_get_input_dna(o),
-                            gt_encodedsequence_options_get_input_protein(o),
-                            gt_encodedsequence_options_get_symbolmap_file(o),
+    alpha = gt_alphabet_new(isdna,
+                            isprotein,
+                            str_smap,
                             filenametab, err);
     if (alpha == NULL)
     {
@@ -5359,13 +5334,13 @@ gt_encodedsequence_new_from_files(GtEncodedsequenceOptions *o,
                               filenametab,
                               &filelengthtab,
                               alpha,
-                              gt_encodedsequence_options_get_input_plain(o),
-                              gt_encodedsequence_options_get_des_table_usage(o),
-                              gt_encodedsequence_options_get_sds_table_usage(o),
+                              isplain,
+                              outdestab,
+                              outsdstab,
                               characterdistribution,
-                              gt_encodedsequence_options_get_ssp_table_usage(o),
+                              outssptab,
                               &sequenceseppos,
-                              gt_encodedsequence_options_get_logger(o),
+                              logger,
                               err) != 0)
     {
       haserr = true;
@@ -5373,27 +5348,26 @@ gt_encodedsequence_new_from_files(GtEncodedsequenceOptions *o,
   }
   if (!haserr)
   {
-    if (gt_encodedsequence_options_get_progress_timer(o) != NULL)
+    if (sfxprogress != NULL)
     {
-      gt_progress_timer_start_new_state(
-                               gt_encodedsequence_options_get_progress_timer(o),
-                               "computing sequence encoding",
-                               stdout);
+      gt_progress_timer_start_new_state(sfxprogress,
+                                        "computing sequence encoding",
+                                        stdout);
     }
     encseq = files2encodedsequence(true,
                                    filenametab,
                                    filelengthtab,
-                                  gt_encodedsequence_options_get_input_plain(o),
+                                   isplain,
                                    totallength,
                                    sequenceseppos.nextfreeGtUlong+1,
                                    specialrangestab,
                                    alpha,
-                                   gt_str_length(accesstype) > 0
-                                     ? gt_str_get(accesstype)
+                                   gt_str_length(str_sat) > 0
+                                     ? gt_str_get(str_sat)
                                      : NULL,
                                    characterdistribution,
                                    &specialcharinfo,
-                                   gt_encodedsequence_options_get_logger(o),
+                                   logger,
                                    err);
     if (encseq == NULL)
     {
@@ -5401,14 +5375,14 @@ gt_encodedsequence_new_from_files(GtEncodedsequenceOptions *o,
     } else
     {
       alphaisbound = true;
-      if (gt_encodedsequence_options_get_tis_table_usage(o))
+      if (outtistab)
       {
         if (flushencseqfile(indexname,encseq,err) != 0)
         {
           haserr = true;
         }
       }
-      if (!haserr && gt_encodedsequence_options_get_ssp_table_usage(o))
+      if (!haserr && outssptab)
       {
         FILE *outfp;
         outfp = gt_fa_fopen_filename_with_suffix(indexname,
@@ -5447,7 +5421,6 @@ gt_encodedsequence_new_from_files(GtEncodedsequenceOptions *o,
     if (alpha != NULL && !alphaisbound)
     {
       gt_alphabet_delete((GtAlphabet*) alpha);
-
     }
   }
   GT_FREEARRAY(&sequenceseppos, GtUlong);
@@ -5743,4 +5716,744 @@ int gt_encodedsequence_check_specialranges(const GtEncodedsequence *encseq)
   gt_array_delete(rangesforward);
   gt_array_delete(rangesbackward);
   return haserr ? - 1 : 0;
+}
+
+struct GtEncseqEncoder {
+  bool destab,
+       tistab,
+       ssptab,
+       sdstab,
+       isdna,
+       isprotein,
+       isplain;
+  GtStr *sat,
+        *smapfile;
+  GtLogger *logger;
+  GtProgressTimer *pt;
+};
+
+GtEncseqEncoder* gt_encseq_encoder_new()
+{
+  GtEncseqEncoder *ee = gt_calloc((size_t) 1, sizeof (GtEncseqEncoder));
+  gt_encseq_encoder_create_tis_tab(ee);
+  gt_encseq_encoder_enable_multiseq_support(ee);
+  gt_encseq_encoder_enable_description_support(ee);
+  ee->isdna = ee->isprotein = ee->isplain = false;
+  ee->sat = gt_str_new();
+  ee->smapfile = gt_str_new();
+  return ee;
+}
+
+void gt_encseq_encoder_set_progresstimer(GtEncseqEncoder *ee,
+                                         GtProgressTimer *pt)
+{
+  gt_assert(ee);
+  ee->pt = pt;
+}
+
+void gt_encseq_encoder_create_tis_tab(GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  ee->tistab = true;
+}
+
+void gt_encseq_encoder_do_not_create_tis_tab(GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  ee->tistab = false;
+}
+
+void gt_encseq_encoder_create_des_tab(GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  ee->destab = true;
+}
+
+void gt_encseq_encoder_do_not_create_des_tab(GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  ee->destab = false;
+}
+
+void gt_encseq_encoder_create_ssp_tab(GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  ee->ssptab = true;
+}
+
+void gt_encseq_encoder_do_not_create_ssp_tab(GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  ee->ssptab = false;
+}
+
+void gt_encseq_encoder_create_sds_tab(GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  ee->sdstab = true;
+}
+
+void gt_encseq_encoder_do_not_create_sds_tab(GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  ee->sdstab = false;
+}
+
+void gt_encseq_encoder_enable_description_support(GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  gt_encseq_encoder_create_des_tab(ee);
+  gt_encseq_encoder_create_sds_tab(ee);
+}
+
+void gt_encseq_encoder_disable_description_support(GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  gt_encseq_encoder_do_not_create_des_tab(ee);
+  gt_encseq_encoder_do_not_create_sds_tab(ee);
+}
+
+void gt_encseq_encoder_enable_multiseq_support(GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  gt_encseq_encoder_create_ssp_tab(ee);
+}
+
+void gt_encseq_encoder_disable_multiseq_support(GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  gt_encseq_encoder_do_not_create_ssp_tab(ee);
+}
+
+void gt_encseq_encoder_set_input_dna(GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  ee->isdna = true;
+  ee->isprotein = false;
+  ee->isplain = false;
+}
+
+void gt_encseq_encoder_set_input_protein(GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  ee->isdna = false;
+  ee->isprotein = true;
+  ee->isplain = false;
+}
+
+void gt_encseq_encoder_set_input_preencoded(GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  ee->isdna = false;
+  ee->isprotein = false;
+  ee->isplain = true;
+}
+
+int gt_encseq_encoder_use_representation(GtEncseqEncoder *ee, GtStr *sat,
+                                         GtError *err)
+{
+  gt_assert(ee && sat);
+  if (gt_str_length(sat) > 0
+        && str2positionaccesstype(gt_str_get(sat)) == Undefpositionaccesstype) {
+    gt_error_set(err, "undefined access type: '%s'", gt_str_get(sat));
+    return -1;
+  }
+  if (ee->sat != NULL)
+    gt_str_delete(ee->sat);
+  ee->sat = gt_str_ref(sat);
+  return 0;
+}
+
+int gt_encseq_encoder_use_symbolmap_file(GtEncseqEncoder *ee, GtStr *smap,
+                                         GT_UNUSED GtError *err)
+{
+  gt_assert(ee && smap);
+  if (ee->smapfile != NULL)
+    gt_str_delete(ee->smapfile);
+  ee->smapfile = gt_str_ref(smap);
+  return 0;
+}
+
+void gt_encseq_encoder_set_logger(GtEncseqEncoder *ee, GtLogger *l)
+{
+  gt_assert(ee);
+  ee->logger = l;
+}
+
+int gt_encseq_encoder_encode(GtEncseqEncoder *ee, GtStrArray *seqfiles,
+                             GtStr *indexname, GtError *err)
+{
+  GtEncodedsequence *encseq = NULL;
+  gt_assert(ee && seqfiles && indexname);
+  encseq = gt_encodedsequence_new_from_files(ee->pt,
+                                             indexname,
+                                             ee->smapfile,
+                                             ee->sat,
+                                             seqfiles,
+                                             ee->isdna,
+                                             ee->isprotein,
+                                             ee->isplain,
+                                             ee->tistab,
+                                             ee->destab,
+                                             ee->sdstab,
+                                             ee->ssptab,
+                                             ee->logger,
+                                             err);
+  if (!encseq)
+    return -1;
+  gt_encodedsequence_delete(encseq);
+  return 0;
+}
+
+void gt_encseq_encoder_delete(GtEncseqEncoder *ee)
+{
+  if (!ee) return;
+  gt_str_delete(ee->sat);
+  gt_str_delete(ee->smapfile);
+  gt_free(ee);
+}
+
+struct GtEncseqLoader {
+  bool tistab,
+       destab,
+       ssptab,
+       sdstab,
+       withrange;
+  GtLogger *logger;
+};
+
+GtEncseqLoader* gt_encseq_loader_new()
+{
+  GtEncseqLoader *el = gt_calloc((size_t) 1, sizeof (GtEncseqLoader));
+  gt_encseq_loader_require_multiseq_support(el);
+  gt_encseq_loader_require_description_support(el);
+  gt_encseq_loader_require_tis_tab(el);
+  gt_encseq_loader_enable_range_iterator(el);
+  return el;
+}
+
+void gt_encseq_loader_require_tis_tab(GtEncseqLoader *el)
+{
+  gt_assert(el);
+  el->tistab = true;
+}
+
+void gt_encseq_loader_do_not_require_tis_tab(GtEncseqLoader *el)
+{
+  gt_assert(el);
+  el->tistab = false;
+}
+
+void gt_encseq_loader_require_des_tab(GtEncseqLoader *el)
+{
+  gt_assert(el);
+  el->destab = true;
+}
+
+void gt_encseq_loader_do_not_require_des_tab(GtEncseqLoader *el)
+{
+  gt_assert(el);
+  el->destab = false;
+}
+
+void gt_encseq_loader_require_ssp_tab(GtEncseqLoader *el)
+{
+  gt_assert(el);
+  el->ssptab = true;
+}
+
+void gt_encseq_loader_do_not_require_ssp_tab(GtEncseqLoader *el)
+{
+  gt_assert(el);
+  el->ssptab = false;
+}
+
+void gt_encseq_loader_require_sds_tab(GtEncseqLoader *el)
+{
+  gt_assert(el);
+  el->sdstab = true;
+}
+
+void gt_encseq_loader_do_not_require_sds_tab(GtEncseqLoader *el)
+{
+  gt_assert(el);
+  el->sdstab = false;
+}
+
+void gt_encseq_loader_require_description_support(GtEncseqLoader *el)
+{
+  gt_encseq_loader_require_des_tab(el);
+  gt_encseq_loader_require_sds_tab(el);
+}
+
+void gt_encseq_loader_drop_description_support(GtEncseqLoader *el)
+{
+  gt_encseq_loader_do_not_require_des_tab(el);
+  gt_encseq_loader_do_not_require_sds_tab(el);
+}
+
+void gt_encseq_loader_require_multiseq_support(GtEncseqLoader *el)
+{
+  gt_encseq_loader_require_ssp_tab(el);
+}
+
+void gt_encseq_loader_drop_multiseq_support(GtEncseqLoader *el)
+{
+  gt_encseq_loader_do_not_require_ssp_tab(el);
+}
+
+void gt_encseq_loader_enable_range_iterator(GtEncseqLoader *el)
+{
+  gt_assert(el);
+  el->withrange = true;
+}
+
+void gt_encseq_loader_disable_range_iterator(GtEncseqLoader *el)
+{
+  gt_assert(el);
+  el->withrange = false;
+}
+
+void gt_encseq_loader_set_logger(GtEncseqLoader *el, GtLogger *l)
+{
+  gt_assert(el);
+  el->logger = l;
+}
+
+GtEncodedsequence* gt_encseq_loader_load(GtEncseqLoader *el, GtStr *indexname,
+                                         GtError *err)
+{
+  GtEncodedsequence *encseq = NULL;
+  gt_assert(el && indexname);
+  encseq = gt_encodedsequence_new_from_index(el->withrange,
+                                             indexname,
+                                             el->tistab,
+                                             el->destab,
+                                             el->sdstab,
+                                             el->ssptab,
+                                             el->logger,
+                                             err);
+  return encseq;
+}
+
+void gt_encseq_loader_delete(GtEncseqLoader *el)
+{
+  if (!el) return;
+  gt_free(el);
+}
+
+struct GtEncseqBuilder {
+  GtUchar *plainseq;
+  unsigned long seqlen,
+                nof_seqs;
+  GtArrayGtUlong sdstab,
+                 ssptab;
+  GtStr *destab;
+  size_t allocated;
+  bool own,
+       created_encseq,
+       withrange,
+       wdestab,
+       wssptab,
+       wsdstab,
+       firstdesc,
+       firstseq;
+  GtAlphabet *alpha;
+  GtLogger *logger;
+};
+
+GtEncseqBuilder* gt_encseq_builder_new(GtAlphabet *alpha)
+{
+  GtEncseqBuilder *eb;
+  gt_assert(alpha);
+  eb = gt_calloc((size_t) 1, sizeof (GtEncseqBuilder));
+  eb->own = false;
+  eb->alpha = gt_alphabet_ref(alpha);
+  eb->withrange = true;
+  GT_INITARRAY(&eb->ssptab, GtUlong);
+  GT_INITARRAY(&eb->sdstab, GtUlong);
+  eb->destab = gt_str_new();
+  eb->firstdesc = true;
+  eb->firstseq = true;
+  return eb;
+}
+
+void gt_encseq_builder_enable_range_iterator(GtEncseqBuilder *eb)
+{
+  gt_assert(eb);
+  eb->withrange = true;
+}
+
+void gt_encseq_builder_disable_range_iterator(GtEncseqBuilder *eb)
+{
+  gt_assert(eb);
+  eb->withrange = false;
+}
+
+void gt_encseq_builder_create_des_tab(GtEncseqBuilder *eb)
+{
+  gt_assert(eb);
+  eb->wdestab = true;
+}
+
+void gt_encseq_builder_do_not_create_des_tab(GtEncseqBuilder *eb)
+{
+  gt_assert(eb);
+  eb->wdestab = false;
+}
+
+void gt_encseq_builder_create_ssp_tab(GtEncseqBuilder *eb)
+{
+  gt_assert(eb);
+  eb->wssptab = true;
+}
+
+void gt_encseq_builder_do_not_create_ssp_tab(GtEncseqBuilder *eb)
+{
+  gt_assert(eb);
+  eb->wssptab = false;
+}
+
+void gt_encseq_builder_create_sds_tab(GtEncseqBuilder *eb)
+{
+  gt_assert(eb);
+  eb->wsdstab = true;
+}
+
+void gt_encseq_builder_do_not_create_sds_tab(GtEncseqBuilder *eb)
+{
+  gt_assert(eb);
+  eb->wsdstab = false;
+}
+
+void gt_encseq_builder_enable_description_support(GtEncseqBuilder *eb)
+{
+  gt_assert(eb);
+  gt_encseq_builder_create_des_tab(eb);
+  gt_encseq_builder_create_sds_tab(eb);
+}
+
+void gt_encseq_builder_disable_description_support(GtEncseqBuilder *eb)
+{
+  gt_assert(eb);
+  gt_encseq_builder_do_not_create_des_tab(eb);
+  gt_encseq_builder_do_not_create_sds_tab(eb);
+}
+
+void gt_encseq_builder_enable_multiseq_support(GtEncseqBuilder *eb)
+{
+  gt_assert(eb);
+  gt_encseq_builder_create_ssp_tab(eb);
+}
+
+void gt_encseq_builder_disable_multiseq_support(GtEncseqBuilder *eb)
+{
+  gt_assert(eb);
+  gt_encseq_builder_do_not_create_ssp_tab(eb);
+}
+
+void gt_encseq_builder_add_cstr(GtEncseqBuilder *eb, const char *str,
+                                unsigned long strlen, const char *desc)
+{
+  unsigned long i, offset;
+  gt_assert(eb && str);
+  if (eb->plainseq && !eb->own) {
+    GtUchar *theirseq = eb->plainseq;
+    eb->plainseq = gt_malloc((size_t) eb->seqlen * sizeof (GtUchar));
+    eb->allocated = (size_t) (eb->seqlen * sizeof (GtUchar));
+    memcpy(eb->plainseq, theirseq, (size_t) eb->seqlen);
+  }
+  /* store separator position if needed */
+  if (eb->wssptab && !eb->firstseq) {
+    GT_STOREINARRAY(&eb->ssptab, GtUlong, 128, eb->seqlen);
+  }
+  /* from the second sequence on, add a separator before adding symbols */
+  if (!eb->firstseq) {
+    eb->plainseq = gt_dynalloc(eb->plainseq, &eb->allocated,
+                               (eb->seqlen + strlen+1) * sizeof (GtUchar));
+    eb->plainseq[eb->seqlen] = (GtUchar) SEPARATOR;
+    offset = eb->seqlen+1;
+    eb->seqlen += strlen+1;
+  } else {
+    eb->plainseq = gt_dynalloc(eb->plainseq, &eb->allocated,
+                               strlen * sizeof (GtUchar));
+    offset = 0;
+    eb->seqlen = strlen;
+    eb->firstseq = false;
+  }
+  /* store description separator position, if not first description */
+  if (eb->wsdstab && !eb->firstdesc) {
+    GT_STOREINARRAY(&eb->sdstab, GtUlong, 128, gt_str_length(eb->destab)-1);
+  }
+  /* append description to in-memory description table */
+  if (eb->wdestab) {
+    gt_assert(desc);
+    gt_str_append_cstr(eb->destab, desc);
+    gt_str_append_char(eb->destab, '\0');
+    eb->firstdesc = false;
+  }
+  /* copy sequence, encode on the fly */
+  for (i=0;i < strlen; i++) {
+    gt_assert(gt_alphabet_valid_input(eb->alpha, str[i]));
+    eb->plainseq[offset+i] = gt_alphabet_encode(eb->alpha, str[i]);
+  }
+  eb->nof_seqs++;
+  eb->own = true;
+}
+
+void gt_encseq_builder_add_str(GtEncseqBuilder *eb, GtStr *str,
+                               const char *desc)
+{
+  gt_assert(eb && str);
+  gt_encseq_builder_add_cstr(eb, gt_str_get(str), gt_str_length(str), desc);
+}
+
+void gt_encseq_builder_add_encoded(GtEncseqBuilder *eb,
+                                   const GtUchar *str,
+                                   unsigned long strlen,
+                                   const char *desc)
+{
+  unsigned long i, offset;
+  gt_assert(eb && str);
+  if (eb->plainseq == NULL) {
+    eb->plainseq = (GtUchar*) str;
+    eb->seqlen = strlen;
+    eb->own = false;
+    eb->firstseq = false;
+    eb->nof_seqs++;
+  } else {
+    if (!eb->own) {
+      GtUchar *theirseq = eb->plainseq;
+      eb->plainseq = gt_malloc((size_t) eb->seqlen * sizeof (GtUchar));
+      eb->allocated = (size_t) (eb->seqlen * sizeof (GtUchar));
+      memcpy(eb->plainseq, theirseq, (size_t) eb->seqlen);
+    }
+    /* store separator position if needed */
+    if (eb->wssptab && !eb->firstseq) {
+      GT_STOREINARRAY(&eb->ssptab, GtUlong, 128, eb->seqlen);
+    }
+    /* from the second sequence on, add a separator before adding symbols */
+    if (!eb->firstseq) {
+      eb->plainseq = gt_dynalloc(eb->plainseq, &eb->allocated,
+                                 (eb->seqlen + strlen+1) * sizeof (GtUchar));
+      eb->plainseq[eb->seqlen] = (GtUchar) SEPARATOR;
+      offset = eb->seqlen+1;
+      eb->seqlen += strlen+1;
+    } else {
+      eb->plainseq = gt_dynalloc(eb->plainseq, &eb->allocated,
+                                 strlen * sizeof (GtUchar));
+      offset = 0;
+      eb->seqlen = strlen;
+      eb->firstseq = false;
+    }
+    /* store description separator position, if not first description */
+    if (eb->wsdstab && !eb->firstdesc) {
+      GT_STOREINARRAY(&eb->sdstab, GtUlong, 128, gt_str_length(eb->destab)-1);
+    }
+    /* append description to in-memory description table */
+    if (eb->wdestab) {
+      gt_assert(desc);
+      gt_str_append_cstr(eb->destab, desc);
+      gt_str_append_char(eb->destab, '\0');
+      eb->firstdesc = false;
+    }
+    for (i=0;i < strlen; i++) {
+      eb->plainseq[offset+i] = str[i];
+    }
+    eb->nof_seqs++;
+    eb->own = true;
+  }
+}
+
+void gt_encseq_builder_set_logger(GtEncseqBuilder *eb, GtLogger *l)
+{
+  gt_assert(eb);
+  eb->logger = l;
+}
+
+void gt_encseq_builder_reset(GtEncseqBuilder *eb)
+{
+  gt_assert(eb);
+  /* if ownership was not transferred to new encoded sequence, clean up
+     intermediate buffer */
+  if (!eb->created_encseq && eb->own) {
+    gt_free(eb->plainseq);
+  }
+  GT_INITARRAY(&eb->sdstab, GtUlong);
+  GT_INITARRAY(&eb->ssptab, GtUlong);
+  gt_str_reset(eb->destab);
+  eb->own = false;
+  eb->withrange = true;
+  eb->nof_seqs = 0;
+  eb->seqlen = 0;
+  eb->allocated = 0;
+  eb->firstdesc = true;
+  eb->firstseq = true;
+  eb->created_encseq = false;
+  eb->plainseq = NULL;
+}
+
+GtEncodedsequence* gt_encseq_builder_build(GtEncseqBuilder *eb,
+                                           GT_UNUSED GtError *err)
+{
+  GtEncodedsequence *encseq = NULL;
+  const GtPositionaccesstype sat = Viadirectaccess;
+  GtSpecialcharinfo samplespecialcharinfo;
+  bool withrange = eb->withrange;
+  gt_assert(eb->plainseq);
+
+  sequence2specialcharinfo(&samplespecialcharinfo,eb->plainseq,
+                           eb->seqlen,eb->logger);
+  encseq = determineencseqkeyvalues(sat,
+                                    eb->seqlen,
+                                    eb->nof_seqs,
+                                    0,
+                                    0,
+                                    samplespecialcharinfo.specialranges,
+                                    gt_alphabet_ref(eb->alpha),
+                                    eb->logger);
+  encseq->specialcharinfo = samplespecialcharinfo;
+  encseq->plainseq = eb->plainseq;
+  encseq->hasplainseqptr = !(eb->own);
+  if (eb->wdestab) {
+    encseq->hasallocateddestab = true;
+    encseq->destab =
+                  gt_malloc((size_t) gt_str_length(eb->destab) * sizeof (char));
+    memcpy(encseq->destab,
+           gt_str_get_mem(eb->destab),
+           (size_t)  gt_str_length(eb->destab) * sizeof (char));
+  }
+  if (eb->wssptab) {
+    encseq->hasallocatedssptab = true;
+    encseq->ssptab = eb->ssptab.spaceGtUlong;
+  }
+  if (eb->wsdstab) {
+    encseq->hasallocatedsdstab = true;
+    encseq->sdstab = eb->sdstab.spaceGtUlong;
+  }
+  ALLASSIGNAPPENDFUNC(sat);
+  encseq->mappedptr = NULL;
+  eb->created_encseq = true;
+  gt_encseq_builder_reset(eb);
+  return encseq;
+}
+
+int gt_encseq_builder_unit_test(GtError *err)
+{
+  int had_err = 0;
+  GtEncseqBuilder *eb;
+  GtAlphabet *alpha;
+  GtUchar preenc[11];
+  const char testseq[] = "agctttttgca",
+             *desc;
+  GtUchar buffer[65];
+  unsigned long desclen;
+  GtSeqinfo seqinfo;
+  GtEncodedsequence *encseq;
+  gt_error_check(err);
+
+  alpha = gt_alphabet_new_dna();
+  gt_alphabet_encode_seq(alpha, preenc, testseq, 11UL);
+
+  /* builder must not leak memory when no encoded sequence is created */
+  eb = gt_encseq_builder_new(alpha);
+  gt_encseq_builder_create_ssp_tab(eb);
+  gt_encseq_builder_create_des_tab(eb);
+  gt_encseq_builder_create_sds_tab(eb);
+  gt_encseq_builder_add_cstr(eb, testseq, 11UL, "foo");
+  gt_encseq_builder_delete(eb);
+
+  /* builder must not leak memory when no encoded sequence is created */
+  eb = gt_encseq_builder_new(alpha);
+  gt_encseq_builder_create_ssp_tab(eb);
+  gt_encseq_builder_create_des_tab(eb);
+  gt_encseq_builder_create_sds_tab(eb);
+  gt_encseq_builder_add_encoded(eb, preenc, 11UL, "foo");
+  gt_encseq_builder_delete(eb);
+
+  eb = gt_encseq_builder_new(alpha);
+  gt_encseq_builder_create_ssp_tab(eb);
+  gt_encseq_builder_add_cstr(eb, testseq, 11UL, NULL);
+  ensure(had_err, eb->own);
+  encseq = gt_encseq_builder_build(eb, err);
+  ensure(had_err, gt_encodedsequence_total_length(encseq) == 11UL);
+  ensure(had_err, gt_encodedsequence_num_of_sequences(encseq) == 1UL);
+  gt_encodedsequence_extract_substring(encseq,
+                                     buffer,
+                                     0,
+                                     gt_encodedsequence_total_length(encseq)-1);
+  ensure(had_err, memcmp(preenc, buffer, 11 * sizeof (char)) == 0);
+  gt_encodedsequence_seqinfo(encseq, &seqinfo, 0UL);
+  ensure(had_err, seqinfo.seqstartpos == 0UL);
+  ensure(had_err, seqinfo.seqlength == 11UL);
+  gt_encodedsequence_delete(encseq);
+
+  gt_encseq_builder_add_cstr(eb, testseq, 11UL, NULL);
+  gt_encseq_builder_add_cstr(eb, testseq, 11UL, NULL);
+  ensure(had_err, eb->own);
+  encseq = gt_encseq_builder_build(eb, err);
+  ensure(had_err, gt_encodedsequence_total_length(encseq) == 23UL);
+  ensure(had_err, gt_encodedsequence_num_of_sequences(encseq) == 2UL);
+  gt_encodedsequence_delete(encseq);
+
+  ensure(had_err, eb->plainseq == NULL);
+  gt_encseq_builder_add_encoded(eb, preenc, 11UL, NULL);
+  ensure(had_err, !eb->own);
+  encseq = gt_encseq_builder_build(eb, err);
+  ensure(had_err, gt_encodedsequence_total_length(encseq) == 11UL);
+  ensure(had_err, gt_encodedsequence_num_of_sequences(encseq) == 1UL);
+  gt_encodedsequence_delete(encseq);
+
+  gt_encseq_builder_add_cstr(eb, testseq, 4UL, NULL);
+  gt_encseq_builder_add_encoded(eb, preenc, 11UL, NULL);
+  ensure(had_err, eb->own);
+  encseq = gt_encseq_builder_build(eb, err);
+  ensure(had_err, gt_encodedsequence_total_length(encseq) == 16UL);
+  ensure(had_err, gt_encodedsequence_num_of_sequences(encseq) == 2UL);
+  gt_encodedsequence_delete(encseq);
+
+  gt_encseq_builder_add_encoded(eb, preenc, 11UL, NULL);
+  gt_encseq_builder_add_cstr(eb, testseq, 4UL, NULL);
+  ensure(had_err, eb->own);
+  encseq = gt_encseq_builder_build(eb, err);
+  ensure(had_err, gt_encodedsequence_total_length(encseq) == 16UL);
+  ensure(had_err, gt_encodedsequence_num_of_sequences(encseq) == 2UL);
+  gt_encodedsequence_seqinfo(encseq, &seqinfo, 0);
+  ensure(had_err, seqinfo.seqstartpos == 0UL);
+  ensure(had_err, seqinfo.seqlength == 11UL);
+  gt_encodedsequence_seqinfo(encseq, &seqinfo, 1UL);
+  ensure(had_err, seqinfo.seqstartpos == 12UL);
+  ensure(had_err, seqinfo.seqlength == 4UL);
+  gt_encodedsequence_delete(encseq);
+
+  gt_encseq_builder_create_des_tab(eb);
+  gt_encseq_builder_create_sds_tab(eb);
+  gt_encseq_builder_add_cstr(eb, testseq, 4UL, "foo");
+  gt_encseq_builder_add_encoded(eb, preenc, 11UL, "bar");
+  gt_encseq_builder_add_encoded(eb, preenc, 11UL, "baz");
+  ensure(had_err, eb->destab);
+  encseq = gt_encseq_builder_build(eb, err);
+  ensure(had_err, encseq->sdstab);
+  ensure(had_err, gt_encodedsequence_total_length(encseq) == 28UL);
+  ensure(had_err, gt_encodedsequence_num_of_sequences(encseq) == 3UL);
+  desc = gt_encodedsequence_description(encseq, &desclen, 0UL);
+  ensure(had_err, strcmp(desc, "foo") == 0);
+  desc = gt_encodedsequence_description(encseq, &desclen, 1UL);
+  ensure(had_err, strcmp(desc, "bar") == 0);
+  desc = gt_encodedsequence_description(encseq, &desclen, 2UL);
+  ensure(had_err, strcmp(desc, "baz") == 0);
+  gt_encodedsequence_delete(encseq);
+
+  gt_encseq_builder_delete(eb);
+  gt_alphabet_delete(alpha);
+  return had_err;
+}
+
+void gt_encseq_builder_delete(GtEncseqBuilder *eb)
+{
+  if (!eb) return;
+  gt_encseq_builder_reset(eb);
+  gt_alphabet_delete(eb->alpha);
+  gt_str_delete(eb->destab);
+  gt_free(eb);
 }

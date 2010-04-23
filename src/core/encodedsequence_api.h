@@ -32,6 +32,18 @@
    or more input files in a compressed encoding. */
 typedef struct GtEncodedsequence GtEncodedsequence;
 
+/* The <GtEncseqEncoder> class creates objects encapsulating a parameter
+   set for conversion from sequence files into encoded sequence files. */
+typedef struct GtEncseqEncoder GtEncseqEncoder;
+
+/* The <GtEncseqLoader> class creates <GtEncodedsequence> objects
+   by mapping index files from disk into memory. */
+typedef struct GtEncseqLoader GtEncseqLoader;
+
+/* The <GtEncseqBuilder> class creates <GtEncodedsequence> objects
+   by constructing uncompressed, encoded images in memory. */
+typedef struct GtEncseqBuilder GtEncseqBuilder;
+
 /* The <GtEncodedsequenceScanstate> class represents the current state of a
    sequential scan of a <GtEncodedsequence> region. */
 typedef struct GtEncodedsequenceScanstate GtEncodedsequenceScanstate;
@@ -44,31 +56,6 @@ typedef struct GtEncodedsequenceScanstate GtEncodedsequenceScanstate;
 #define GT_DESTABFILESUFFIX ".des"
 /* The file suffix used for sequence description separator position tables. */
 #define GT_SDSTABFILESUFFIX ".sds"
-
-/* Returns a new <GtEncodedsequence> created from a set of sequence input files
-   as specified in the option object <o>. Returns NULL on error. */
-GtEncodedsequence* gt_encodedsequence_new_from_files(
-                                                    GtEncodedsequenceOptions *o,
-                                                    GtError *err);
-
-/* Returns a new <GtEncodedsequence> created from a set of preprocessed index
-   files as specified in the option object <o>. Returns NULL on error. */
-GtEncodedsequence* gt_encodedsequence_new_from_index(
-                                                    GtEncodedsequenceOptions *o,
-                                                    GtError *err);
-
-/* Returns a new <GtEncodedsequence> created from a pre-encoded sequence in
-   memory, given by two sequence pointers <seq1> and <seq2> of lengths <len1>
-   and <len2>, respectively. Returns NULL on error.
-   <alpha> is the <GtAlphabet> used to encode the sequence. The parameter
-   <logger> is used to pass a <GtLogger> specifying a log target. */
-GtEncodedsequence* gt_encodedsequence_new_from_plain(bool withrange,
-                                                     const GtUchar *seq1,
-                                                     unsigned long len1,
-                                                     const GtUchar *seq2,
-                                                     unsigned long len2,
-                                                     GtAlphabet *alpha,
-                                                     GtLogger *logger);
 
 #undef GT_INLINEDENCSEQ
 #ifdef GT_INLINEDENCSEQ
@@ -159,4 +146,147 @@ void                        gt_encodedsequence_scanstate_init(
 void                        gt_encodedsequence_scanstate_delete(
                                                GtEncodedsequenceScanstate *esr);
 
+GtEncseqEncoder* gt_encseq_encoder_new(void);
+
+void             gt_encseq_encoder_set_progresstimer(GtEncseqEncoder *ee,
+                                                     GtProgressTimer *pt);
+int              gt_encseq_encoder_use_representation(GtEncseqEncoder *ee,
+                                                      GtStr *sat,
+                                                      GtError *err);
+int              gt_encseq_encoder_use_symbolmap_file(GtEncseqEncoder *ee,
+                                                      GtStr *smap,
+                                                      GtError *err);
+void             gt_encseq_encoder_set_logger(GtEncseqEncoder *ee,
+                                              GtLogger *l);
+
+void             gt_encseq_encoder_enable_description_support(
+                                                           GtEncseqEncoder *ee);
+void             gt_encseq_encoder_disable_description_support(
+                                                           GtEncseqEncoder *ee);
+
+void             gt_encseq_encoder_enable_multiseq_support(GtEncseqEncoder *ee);
+void             gt_encseq_encoder_disable_multiseq_support(
+                                                           GtEncseqEncoder *ee);
+
+void             gt_encseq_encoder_create_tis_tab(GtEncseqEncoder *ee);
+void             gt_encseq_encoder_do_not_create_tis_tab(GtEncseqEncoder *ee);
+
+void             gt_encseq_encoder_create_des_tab(GtEncseqEncoder *ee);
+void             gt_encseq_encoder_do_not_create_des_tab(GtEncseqEncoder *ee);
+
+void             gt_encseq_encoder_create_ssp_tab(GtEncseqEncoder *ee);
+void             gt_encseq_encoder_do_not_create_ssp_tab(GtEncseqEncoder *ee);
+
+void             gt_encseq_encoder_create_sds_tab(GtEncseqEncoder *ee);
+void             gt_encseq_encoder_do_not_create_sds_tab(GtEncseqEncoder *ee);
+
+void             gt_encseq_encoder_set_input_dna(GtEncseqEncoder *ee);
+void             gt_encseq_encoder_set_input_protein(GtEncseqEncoder *ee);
+void             gt_encseq_encoder_set_input_preencoded(GtEncseqEncoder *ee);
+
+int              gt_encseq_encoder_encode(GtEncseqEncoder *ee,
+                                          GtStrArray *seqfiles,
+                                          GtStr *indexname,
+                                          GtError *err);
+
+void             gt_encseq_encoder_delete(GtEncseqEncoder *ee);
+
+GtEncseqLoader*       gt_encseq_loader_new(void);
+
+void                  gt_encseq_loader_require_description_support(
+                                                            GtEncseqLoader *el);
+void                  gt_encseq_loader_drop_description_support(
+                                                            GtEncseqLoader *el);
+
+void                  gt_encseq_loader_require_multiseq_support(
+                                                            GtEncseqLoader *el);
+void                  gt_encseq_loader_drop_multiseq_support(
+                                                            GtEncseqLoader *el);
+
+void                  gt_encseq_loader_require_tis_tab(GtEncseqLoader *el);
+void                  gt_encseq_loader_do_not_require_tis_tab(
+                                                            GtEncseqLoader *el);
+
+void                  gt_encseq_loader_require_des_tab(GtEncseqLoader *el);
+void                  gt_encseq_loader_do_not_require_des_tab(
+                                                            GtEncseqLoader *el);
+
+void                  gt_encseq_loader_require_ssp_tab(GtEncseqLoader *el);
+void                  gt_encseq_loader_do_not_require_ssp_tab(
+                                                            GtEncseqLoader *el);
+
+void                  gt_encseq_loader_require_sds_tab(GtEncseqLoader *el);
+void                  gt_encseq_loader_do_not_require_sds_tab(
+                                                            GtEncseqLoader *el);
+
+void                  gt_encseq_loader_enable_range_iterator(
+                                                            GtEncseqLoader *el);
+void                  gt_encseq_loader_disable_range_iterator(
+                                                            GtEncseqLoader *el);
+
+void                  gt_encseq_loader_set_logger(GtEncseqLoader *el,
+                                                  GtLogger *l);
+
+GtEncodedsequence*    gt_encseq_loader_load(GtEncseqLoader *el,
+                                            GtStr *indexname,
+                                            GtError *err);
+
+void                  gt_encseq_loader_delete(GtEncseqLoader *el);
+
+GtEncseqBuilder*      gt_encseq_builder_new(GtAlphabet *alpha);
+
+void                  gt_encseq_builder_enable_range_iterator(
+                                                           GtEncseqBuilder *eb);
+void                  gt_encseq_builder_disable_range_iterator(
+                                                           GtEncseqBuilder *eb);
+
+void                  gt_encseq_builder_enable_description_support(
+                                                           GtEncseqBuilder *eb);
+void                  gt_encseq_builder_disable_description_support(
+                                                           GtEncseqBuilder *eb);
+
+void                  gt_encseq_builder_enable_multiseq_support(
+                                                           GtEncseqBuilder *eb);
+void                  gt_encseq_builder_disable_multiseq_support(
+                                                           GtEncseqBuilder *eb);
+
+void                  gt_encseq_builder_create_tis_tab(GtEncseqBuilder *eb);
+void                  gt_encseq_builder_do_not_create_tis_tab(
+                                                           GtEncseqBuilder *eb);
+
+void                  gt_encseq_builder_create_des_tab(GtEncseqBuilder *eb);
+void                  gt_encseq_builder_do_not_create_des_tab(
+                                                           GtEncseqBuilder *eb);
+
+void                  gt_encseq_builder_create_ssp_tab(GtEncseqBuilder *eb);
+void                  gt_encseq_builder_do_not_create_ssp_tab(
+                                                           GtEncseqBuilder *eb);
+
+void                  gt_encseq_builder_create_sds_tab(GtEncseqBuilder *eb);
+void                  gt_encseq_builder_do_not_create_sds_tab(
+                                                           GtEncseqBuilder *eb);
+
+void                  gt_encseq_builder_add_cstr(GtEncseqBuilder *eb,
+                                                 const char *str,
+                                                 unsigned long strlen,
+                                                 const char *desc);
+
+void                  gt_encseq_builder_add_str(GtEncseqBuilder *eb,
+                                                GtStr *str,
+                                                const char *desc);
+
+void                  gt_encseq_builder_add_encoded(GtEncseqBuilder *eb,
+                                                    const GtUchar *str,
+                                                    unsigned long strlen,
+                                                    const char *desc);
+/* default: NULL */
+void                  gt_encseq_builder_set_logger(GtEncseqBuilder*,
+                                                   GtLogger *l);
+
+GtEncodedsequence*    gt_encseq_builder_build(GtEncseqBuilder *eb,
+                                              GtError *err);
+
+void                  gt_encseq_builder_reset(GtEncseqBuilder *eb);
+
+void                  gt_encseq_builder_delete(GtEncseqBuilder *eb);
 #endif

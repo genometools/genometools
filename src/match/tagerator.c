@@ -554,15 +554,16 @@ int gt_runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
                          GT_LOGGER_DEFLT_PREFIX, stdout);
   if (tageratoroptions->doonline)
   {
-    GtEncodedsequenceOptions *o;
-    o = gt_encodedsequence_options_new();
-    gt_encodedsequence_options_enable_tis_table_usage(o);
-    gt_encodedsequence_options_set_indexname(o,
-                                      (GtStr*) tageratoroptions->indexname);
-    gt_encodedsequence_options_set_logger(o, logger);
-    gt_encodedsequence_options_enable_range_iteration(o);
-    encseq = gt_encodedsequence_new_from_index(o, err);
-    gt_encodedsequence_options_delete(o);
+    GtEncseqLoader *el;
+    el = gt_encseq_loader_new();
+    gt_encseq_loader_do_not_require_des_tab(el);
+    gt_encseq_loader_do_not_require_ssp_tab(el);
+    gt_encseq_loader_do_not_require_sds_tab(el);
+    gt_encseq_loader_set_logger(el, logger);
+    encseq = gt_encseq_loader_load(el,
+                                   (GtStr*) tageratoroptions->indexname,
+                                   err);
+    gt_encseq_loader_delete(el);
     if (encseq == NULL)
     {
       haserr = true;

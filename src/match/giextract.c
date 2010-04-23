@@ -525,7 +525,7 @@ int gt_extractkeysfromdesfile(const GtStr *indexname,
         (void) putc((char) constantkeylen,fpout);
       } else
       {
-        GtEncodedsequenceOptions *o;
+        GtEncseqLoader *el;
         if (constantkeylen > (unsigned long) MAXFIXEDKEYSIZE)
         {
           gt_error_set(err,"key \"%*.*s\" of length %lu not allowed; "
@@ -535,15 +535,11 @@ int gt_extractkeysfromdesfile(const GtStr *indexname,
           haserr = true;
           break;
         }
-        o = gt_encodedsequence_options_new();
-        gt_encodedsequence_options_enable_tis_table_usage(o);
-        gt_encodedsequence_options_enable_des_table_usage(o);
-        gt_encodedsequence_options_enable_sds_table_usage(o);
-        gt_encodedsequence_options_enable_ssp_table_usage(o);
-        gt_encodedsequence_options_set_indexname(o, (GtStr*) indexname);
-        gt_encodedsequence_options_disable_range_iteration(o);
-        encseq = gt_encodedsequence_new_from_index(o, err);
-        gt_encodedsequence_options_delete(o);
+        el = gt_encseq_loader_new();
+        gt_encseq_loader_set_logger(el, logger);
+        gt_encseq_loader_disable_range_iterator(el);
+        encseq = gt_encseq_loader_load(el, (GtStr*) indexname, err);
+        gt_encseq_loader_delete(el);
         if (encseq == NULL)
         {
           haserr = true;
@@ -788,19 +784,14 @@ int gt_extractkeysfromfastaindex(const GtStr *indexname,
                                  unsigned long linewidth,GtError *err)
 {
   GtEncodedsequence *encseq = NULL;
-  GtEncodedsequenceOptions *o;
+  GtEncseqLoader *el = NULL;
   bool haserr = false;
   unsigned long numofdbsequences = 0, keysize = 0;
 
-  o = gt_encodedsequence_options_new();
-  gt_encodedsequence_options_enable_tis_table_usage(o);
-  gt_encodedsequence_options_enable_des_table_usage(o);
-  gt_encodedsequence_options_enable_sds_table_usage(o);
-  gt_encodedsequence_options_enable_ssp_table_usage(o);
-  gt_encodedsequence_options_set_indexname(o, (GtStr*) indexname);
-  gt_encodedsequence_options_disable_range_iteration(o);
-  encseq = gt_encodedsequence_new_from_index(o, err);
-  gt_encodedsequence_options_delete(o);
+  el = gt_encseq_loader_new();
+  gt_encseq_loader_disable_range_iterator(el);
+  encseq = gt_encseq_loader_load(el, (GtStr*) indexname, err);
+  gt_encseq_loader_delete(el);
   if (encseq == NULL)
   {
     haserr = true;

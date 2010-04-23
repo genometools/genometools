@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -404,24 +404,18 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
   GtStr *indexname = gt_str_new_cstr(argv[arg+1]);
   GtLogger *logger = gt_logger_new(arguments->verbose,
                                    GT_LOGGER_DEFLT_PREFIX, stdout);
-  GtEncodedsequenceOptions *o;
+  GtEncseqLoader *el;
   GtEncodedsequence *encseq;
   gt_error_check(err);
   gt_assert(arguments);
 
-  /* Set sequence encoder options */
-  o = gt_encodedsequence_options_new();
-  gt_encodedsequence_options_enable_tis_table_usage(o);
-  gt_encodedsequence_options_enable_des_table_usage(o);
-  gt_encodedsequence_options_enable_sds_table_usage(o);
-  gt_encodedsequence_options_enable_ssp_table_usage(o);
-  gt_encodedsequence_options_set_indexname(o, indexname);
-  gt_encodedsequence_options_set_logger(o, logger);
-  gt_encodedsequence_options_enable_range_iteration(o);
+  /* Set sequence encoder options. Defaults are ok. */
+  el = gt_encseq_loader_new();
+  gt_encseq_loader_set_logger(el, logger);
 
   /* Open sequence file */
-  encseq = gt_encodedsequence_new_from_index(o, err);
-  if (gt_error_is_set(err))
+  encseq = gt_encseq_loader_load(el, (GtStr*) indexname, err);
+  if (!encseq)
     had_err = -1;
 
   /* Always search for PPT. */
@@ -516,7 +510,7 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
   gt_node_stream_delete(gff3_in_stream);
 
   gt_str_delete(indexname);
-  gt_encodedsequence_options_delete(o);
+  gt_encseq_loader_delete(el);
   gt_encodedsequence_delete(encseq);
   encseq = NULL;
   gt_bioseq_delete(arguments->pbs_opts.trna_lib);

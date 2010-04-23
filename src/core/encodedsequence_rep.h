@@ -85,14 +85,17 @@ struct GtEncodedsequence
   char *firstfilename;
   GtFilelengthvalues *filelengthtab;  /* table of length of files */
 
-  const char *destab;
+  char *destab;
+  bool hasallocateddestab,
+       hasallocatedssptab,
+       hasallocatedsdstab;
   unsigned long destablength, *sdstab;
 
   GtAlphabet *alpha;   /* alphabet representation */
 
-  const unsigned long *ssptab; /* (if numofdbsequences = 1 then NULL  else
-                                                         numofdbsequences  -1)
-                           entries */
+  unsigned long *ssptab; /* (if numofdbsequences = 1 then NULL  else
+                                                           numofdbsequences  -1)
+                                                           entries */
 
   /* only for Viabitaccess,
               Viauchartables,

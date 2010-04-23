@@ -416,9 +416,11 @@ static int runsuffixerator(bool doesa,
   unsigned int prefixlength;
   Sfxstrategy sfxstrategy;
   GtEncodedsequence *encseq;
-  GtEncodedsequenceOptions *o;
+  GtEncseqEncoder *ee;
 
   gt_error_check(err);
+
+  ee = gt_encseq_encoder_new();
   if (so->showtime)
   {
     sfxprogress = gt_progress_timer_new("determining sequence length and "
@@ -435,45 +437,64 @@ static int runsuffixerator(bool doesa,
   }
   if (gt_str_length(so->str_inputindex) > 0)
   {
-    o = gt_encodedsequence_options_new();
-    gt_encodedsequence_options_enable_tis_table_usage(o);
-    gt_encodedsequence_options_set_indexname(o, (GtStr*) so->str_inputindex);
-    gt_encodedsequence_options_set_logger(o, logger);
-    gt_encodedsequence_options_enable_range_iteration(o);
-    encseq = gt_encodedsequence_new_from_index(o, err);
-    gt_encodedsequence_options_delete(o);
+    GtEncseqLoader *el;
+    el = gt_encseq_loader_new();
+    gt_encseq_loader_do_not_require_des_tab(el);
+    gt_encseq_loader_do_not_require_ssp_tab(el);
+    gt_encseq_loader_do_not_require_sds_tab(el);
+    gt_encseq_loader_set_logger(el, logger);
+    encseq = gt_encseq_loader_load(el, (GtStr*) so->str_inputindex, err);
+    gt_encseq_loader_delete(el);
     if (encseq == NULL)
     {
       haserr = true;
     }
   } else
   {
-    o = gt_encodedsequence_options_new();
-    if (so->fn2encopt.outtistab)
-      gt_encodedsequence_options_enable_tis_table_usage(o);
-    if (so->fn2encopt.outdestab)
-      gt_encodedsequence_options_enable_des_table_usage(o);
-    if (so->fn2encopt.outsdstab)
-      gt_encodedsequence_options_enable_sds_table_usage(o);
-    if (so->fn2encopt.outssptab)
-      gt_encodedsequence_options_enable_ssp_table_usage(o);
+    if (!so->fn2encopt.outtistab)
+      gt_encseq_encoder_do_not_create_tis_tab(ee);
+    if (!so->fn2encopt.outdestab)
+      gt_encseq_encoder_do_not_create_des_tab(ee);
+    if (!so->fn2encopt.outsdstab)
+      gt_encseq_encoder_do_not_create_sds_tab(ee);
+    if (!so->fn2encopt.outssptab)
+      gt_encseq_encoder_do_not_create_ssp_tab(ee);
     if (so->fn2encopt.isdna)
-      gt_encodedsequence_options_set_input_dna(o);
+      gt_encseq_encoder_set_input_dna(ee);
     if (so->fn2encopt.isprotein)
-      gt_encodedsequence_options_set_input_protein(o);
+      gt_encseq_encoder_set_input_protein(ee);
     if (so->fn2encopt.isplain)
-      gt_encodedsequence_options_set_input_plain(o);
-    gt_encodedsequence_options_set_progress_timer(o, sfxprogress);
-    gt_encodedsequence_options_set_indexname(o,
-                                          (GtStr*) so->fn2encopt.str_indexname);
-    gt_encodedsequence_options_set_symbolmap_file(o,
-                                               (GtStr*) so->fn2encopt.str_smap);
-    gt_encodedsequence_options_set_access_type(o, so->fn2encopt.str_sat);
-    gt_encodedsequence_options_set_input_sequences(o,
-                                                     so->fn2encopt.filenametab);
-    gt_encodedsequence_options_set_logger(o, logger);
-    encseq = gt_encodedsequence_new_from_files(o,  err);
-    gt_encodedsequence_options_delete(o);
+      gt_encseq_encoder_set_input_preencoded(ee);
+    gt_encseq_encoder_set_progresstimer(ee, sfxprogress);
+    haserr = gt_encseq_encoder_use_symbolmap_file(ee, so->fn2encopt.str_smap,
+                                                  err);
+    if (!haserr) {
+      haserr = gt_encseq_encoder_use_representation(ee, so->fn2encopt.str_sat,
+                                                    err);
+    }
+    if (!haserr) {
+      int rval;
+      gt_encseq_encoder_set_logger(ee, logger);
+      rval = gt_encseq_encoder_encode(ee, so->fn2encopt.filenametab,
+                                      so->fn2encopt.str_indexname, err);
+      if (rval != 0)
+        haserr = -1;
+      if (!haserr) {
+        GtEncseqLoader *el = gt_encseq_loader_new();
+        if (!so->fn2encopt.outtistab)
+          gt_encseq_loader_do_not_require_tis_tab(el);
+        if (!so->fn2encopt.outdestab)
+          gt_encseq_loader_do_not_require_des_tab(el);
+        if (!so->fn2encopt.outsdstab)
+          gt_encseq_loader_do_not_require_sds_tab(el);
+        if (!so->fn2encopt.outssptab)
+          gt_encseq_loader_do_not_require_ssp_tab(el);
+        encseq = gt_encseq_loader_load(el, so->fn2encopt.str_indexname, err);
+        if (!encseq)
+          haserr = -1;
+        gt_encseq_loader_delete(el);
+      }
+    }
     if (encseq == NULL)
     {
       haserr = true;
@@ -629,6 +650,7 @@ static int runsuffixerator(bool doesa,
     gt_progress_timer_start_new_state(sfxprogress,NULL,stdout);
     gt_progress_timer_delete(sfxprogress);
   }
+  gt_encseq_encoder_delete(ee);
   return haserr ? -1 : 0;
 }
 
