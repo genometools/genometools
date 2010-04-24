@@ -351,5 +351,9 @@ GtUchar gt_encodedsequence_extract_encoded_char(const GtEncodedsequence *encseq,
                                                 unsigned long pos,
                                                 GtReadmode readmode);
 
+/* Sets the sequence input type for <ee> to be pre-encoded. Only for internal
+   use. */
+void             gt_encseq_encoder_set_input_preencoded(GtEncseqEncoder *ee);
+
 int gt_encseq_builder_unit_test(GtError *err);
 #endif

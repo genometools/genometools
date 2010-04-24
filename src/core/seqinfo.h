@@ -18,14 +18,6 @@
 #ifndef SEQINFO_H
 #define SEQINFO_H
 
-/* Holds information about one sequence in a <GtEncodedsequence>.
-   The field <seqstartpos> contains the position of the first character
-   in the encoded sequence while <seqlength> contains the length of the
-   sequence. */
-typedef struct
-{
-  unsigned long seqstartpos;
-  unsigned long seqlength;
-} GtSeqinfo;
+#include "core/seqinfo_api.h"
 
 #endif

@@ -32,7 +32,8 @@
 typedef struct GtEncodedsequence GtEncodedsequence;
 
 /* The <GtEncseqEncoder> class creates objects encapsulating a parameter
-   set for conversion from sequence files into encoded sequence files. */
+   set for conversion from sequence files into encoded sequence files on disk.
+   */
 typedef struct GtEncseqEncoder GtEncseqEncoder;
 
 /* The <GtEncseqLoader> class creates <GtEncodedsequence> objects
@@ -60,23 +61,19 @@ typedef struct GtEncodedsequenceScanstate GtEncodedsequenceScanstate;
 #ifdef GT_INLINEDENCSEQ
   #include "core/encodedsequence_inline.h"
 #else
-
 /* Returns the total number of characters in all sequences of <encseq>,
    not including separators. */
 unsigned long      gt_encodedsequence_total_length(
                                                const GtEncodedsequence *encseq);
-
 /* Returns the total number of sequences contained in <encseq>. */
 unsigned long      gt_encodedsequence_num_of_sequences(
                                                const GtEncodedsequence *encseq);
-
 /* Returns the encoded representation of the character at position <pos> of
    <encseq> read in the direction as indicated by <readmode>. */
 GtUchar            gt_encodedsequence_get_encoded_char(
                                                 const GtEncodedsequence *encseq,
                                                 unsigned long pos,
                                                 GtReadmode readmode);
-
 /* Returns the encoded representation of the character at position <pos> of
    <encseq> read in the direction as indicated by <readmode>. This function is
    optimized for sequential access to the sequence (e.g. in a for loop). The
@@ -87,7 +84,6 @@ GtUchar            gt_encodedsequence_get_encoded_char_sequential(
                                                 unsigned long pos,
                                                 GtReadmode readmode);
 #endif
-
 /* Returns the encoded representation of the substring from position <frompos>
    to position <topos> of <encseq>. The result is written to the location
    pointed to by <buffer>, which must be large enough to hold the result. */
@@ -96,12 +92,10 @@ void               gt_encodedsequence_extract_substring(
                                                 GtUchar *buffer,
                                                 unsigned long frompos,
                                                 unsigned long topos);
-
 /* Fills the <seqinfo> struct for the <seqnum>-th sequence in the <encseq>. */
 void               gt_encodedsequence_seqinfo(const GtEncodedsequence *encseq,
                                               GtSeqinfo *seqinfo,
                                               unsigned long seqnum);
-
 /* Returns a pointer to the description of the <seqnum>-th sequence in the
    <encseq>. The length of the returned string is written to the
    location pointed at by <desclen>. */
@@ -109,15 +103,12 @@ const char*        gt_encodedsequence_description(
                                                 const GtEncodedsequence *encseq,
                                                 unsigned long *desclen,
                                                 unsigned long seqnum);
-
 /* Returns the <GtAlphabet> associated with <encseq>. */
 GtAlphabet*        gt_encodedsequence_alphabet(const GtEncodedsequence *encseq);
-
 /* Returns a <GtStrArray> of the names of the original sequence files
    contained in <encseq>. */
 const GtStrArray*  gt_encodedsequence_filenames(
                                                const GtEncodedsequence *encseq);
-
 /* Deletes <encseq> and frees all associated space. */
 void               gt_encodedsequence_delete(GtEncodedsequence *encseq);
 
@@ -132,7 +123,6 @@ GtEncodedsequenceScanstate* gt_encodedsequence_scanstate_new(
                                                 const GtEncodedsequence *encseq,
                                                 GtReadmode readmode,
                                                 unsigned long startpos);
-
 /* Reinitializes the given <esr> with the values as described in
    <gt_encodedsequence_scanstate_new()>. */
 void                        gt_encodedsequence_scanstate_init(
@@ -140,152 +130,274 @@ void                        gt_encodedsequence_scanstate_init(
                                                 const GtEncodedsequence *encseq,
                                                 GtReadmode readmode,
                                                 unsigned long startpos);
-
 /* Deletes <esr>, freeing all associated space. */
 void                        gt_encodedsequence_scanstate_delete(
                                                GtEncodedsequenceScanstate *esr);
 
+/* Creates a new <GtEncseqEncoder>. */
 GtEncseqEncoder* gt_encseq_encoder_new(void);
-
+/* Sets <pt> to be the progress timer for <ee>. Default is NULL (no progress
+   reporting). */
 void             gt_encseq_encoder_set_progresstimer(GtEncseqEncoder *ee,
                                                      GtProgressTimer *pt);
+/* Sets the representation of <ee> to <sat> which must be one of 'direct',
+   'bytecompress', 'bit', 'uchar', 'ushort' or 'uint32'. Returns 0 on success,
+   and a negative value on error (<err> is set accordingly). */
 int              gt_encseq_encoder_use_representation(GtEncseqEncoder *ee,
                                                       GtStr *sat,
                                                       GtError *err);
+/* Sets the symbol map file to use in <ee> to <smap> which must a valid
+   alphabet description file. Returns 0 on success, and a negative value on
+   error (<err> is set accordingly). Default is NULL (no alphabet
+   transformation). */
 int              gt_encseq_encoder_use_symbolmap_file(GtEncseqEncoder *ee,
                                                       GtStr *smap,
                                                       GtError *err);
+/* Sets the logger to use by <ee> during encoding to <l>. Default is NULL (no
+   logging). */
 void             gt_encseq_encoder_set_logger(GtEncseqEncoder *ee,
                                               GtLogger *l);
-
+/* Enables support for retrieving descriptions from the encoded sequence
+   encoded by <ee>. That is, the .des and .sds tables are created.
+   This is a prerequisite for being able to activate description support in
+   <gt_encseq_loader_require_description_support()>. Activated by default. */
 void             gt_encseq_encoder_enable_description_support(
                                                            GtEncseqEncoder *ee);
+/* Disables support for retrieving descriptions from the encoded sequence
+   encoded by <ee>. That is, the .des and .sds tables are not created.
+   Encoded sequences created without this support will not be able to be
+   loaded via a <GtEncseqLoader> with
+   <gt_encseq_loader_require_description_support()> enabled. */
 void             gt_encseq_encoder_disable_description_support(
                                                            GtEncseqEncoder *ee);
-
+/* Enables support for random access to multiple sequences in the encoded
+   sequence encoded by <ee>. That is, the .ssp table is created.
+   This is a prerequisite for being able to activate description support in
+   <gt_encseq_loader_require_multiseq_support()>. Activated by default. */
 void             gt_encseq_encoder_enable_multiseq_support(GtEncseqEncoder *ee);
+/* Disables support for random access to multiple sequences in the encoded
+   sequence encoded by <ee>. That is, the .ssp table is not created.
+   Encoded sequences created without this support will not be able to be
+   loaded via a <GtEncseqLoader> with
+   <gt_encseq_loader_require_multiseq_support()> enabled. */
 void             gt_encseq_encoder_disable_multiseq_support(
                                                            GtEncseqEncoder *ee);
-
+/* Enables creation of the .esq table containing the encoded sequence itself.
+   Naturally, enabled by default. */
 void             gt_encseq_encoder_create_tis_tab(GtEncseqEncoder *ee);
+/* Disables creation of the .esq table. */
 void             gt_encseq_encoder_do_not_create_tis_tab(GtEncseqEncoder *ee);
-
+/* Enables creation of the .des table containing sequence descriptions.
+   Enabled by default. */
 void             gt_encseq_encoder_create_des_tab(GtEncseqEncoder *ee);
+/* Disables creation of the .des table. */
 void             gt_encseq_encoder_do_not_create_des_tab(GtEncseqEncoder *ee);
-
+/* Enables creation of the .ssp table containing indexes for multiple sequences.
+   Enabled by default. */
 void             gt_encseq_encoder_create_ssp_tab(GtEncseqEncoder *ee);
+/* Disables creation of the .ssp table. */
 void             gt_encseq_encoder_do_not_create_ssp_tab(GtEncseqEncoder *ee);
-
+/* Enables creation of the .sds table containing indexes for sequence
+   descriptions. Enabled by default. */
 void             gt_encseq_encoder_create_sds_tab(GtEncseqEncoder *ee);
+/* Disables creation of the .sds table. */
 void             gt_encseq_encoder_do_not_create_sds_tab(GtEncseqEncoder *ee);
-
+/* Sets the sequence input type for <ee> to DNA. */
 void             gt_encseq_encoder_set_input_dna(GtEncseqEncoder *ee);
+/* Sets the sequence input type for <ee> to protein/amino acids. */
 void             gt_encseq_encoder_set_input_protein(GtEncseqEncoder *ee);
-void             gt_encseq_encoder_set_input_preencoded(GtEncseqEncoder *ee);
-
+/* Encodes the sequence files given in <seqfiles> using the settings in <ee>
+   and <indexname> as the prefix for the index tables. Returns 0 on success, or
+   a negative value on error (<err> is set accordingly). */
 int              gt_encseq_encoder_encode(GtEncseqEncoder *ee,
                                           GtStrArray *seqfiles,
                                           GtStr *indexname,
                                           GtError *err);
-
+/* Deletes <ee>. */
 void             gt_encseq_encoder_delete(GtEncseqEncoder *ee);
 
+/* Creates a new <GtEncseqLoader>. */
 GtEncseqLoader*       gt_encseq_loader_new(void);
-
+/* Enables support for retrieving descriptions from the encoded sequence
+   to be loaded by <el>. That is, the .des and .sds tables must be present.
+   For example, these tables are created by having enabled the
+   <gt_encseq_encoder_enable_description_support()> option when encoding.
+   Activated by default. */
 void                  gt_encseq_loader_require_description_support(
                                                             GtEncseqLoader *el);
+/* Disables support for retrieving descriptions from the encoded sequence
+   to be loaded by <el>. That is, the .des and .sds tables need not be present.
+   However, disabling this support will result in an error when trying to call
+   the method <gt_encodedsequence_description()> on the <GtEncodedsequence>
+   object created by <el>. */
 void                  gt_encseq_loader_drop_description_support(
                                                             GtEncseqLoader *el);
-
+/* Enables support for random access to multiple sequences in the encoded
+   sequence to be loaded by <el>. That is, the .ssp table must be present.
+   For example, this table is created by having enabled the
+   <gt_encseq_encoder_enable_multiseq_support()> option when encoding.
+   Activated by default. */
 void                  gt_encseq_loader_require_multiseq_support(
                                                             GtEncseqLoader *el);
+/* Disables support for random access to multiple sequences in the encoded
+   sequence to be loaded by <el>. That is, the .ssp table needs not be present.
+   However, disabling this support will result in an error when trying to call
+   the method <gt_encodedsequence_seqinfo()> on the <GtEncodedsequence>
+   object created by <el>. */
 void                  gt_encseq_loader_drop_multiseq_support(
                                                             GtEncseqLoader *el);
-
+/* Requires presence of the .esq table containing the encoded sequence itself.
+   Naturally, enabled by default. */
 void                  gt_encseq_loader_require_tis_tab(GtEncseqLoader *el);
+/* Disables requirement of the .esq table for loading a <GtEncodedsequence>
+   using <el>. */
 void                  gt_encseq_loader_do_not_require_tis_tab(
                                                             GtEncseqLoader *el);
-
+/* Requires presence of the .des table containing sequence descriptions.
+   Enabled by default. */
 void                  gt_encseq_loader_require_des_tab(GtEncseqLoader *el);
+/* Disables requirement of the .des table for loading a <GtEncodedsequence>
+   using <el>. */
 void                  gt_encseq_loader_do_not_require_des_tab(
                                                             GtEncseqLoader *el);
-
+/* Requires presence of the .ssp table containing indexes for multiple
+   sequences. Enabled by default. */
 void                  gt_encseq_loader_require_ssp_tab(GtEncseqLoader *el);
+/* Disables requirement of the .ssp table for loading a <GtEncodedsequence>
+   using <el>. */
 void                  gt_encseq_loader_do_not_require_ssp_tab(
                                                             GtEncseqLoader *el);
-
+/* Requires presence of the .sds table containing indexes for sequence
+   descriptions. Enabled by default. */
 void                  gt_encseq_loader_require_sds_tab(GtEncseqLoader *el);
+/* Disables requirement of the .sds table for loading a <GtEncodedsequence>
+   using <el>. */
 void                  gt_encseq_loader_do_not_require_sds_tab(
                                                             GtEncseqLoader *el);
-
+/* Enables support for faster access to special ranges in the
+   <GtEncodedsequence> loaded by <el>. Enabled by default. */
 void                  gt_encseq_loader_enable_range_iterator(
                                                             GtEncseqLoader *el);
+/* Disables support for faster access to special ranges in the
+   <GtEncodedsequence> loaded by <el>. */
 void                  gt_encseq_loader_disable_range_iterator(
                                                             GtEncseqLoader *el);
-
+/* Sets the logger to use by <ee> during encoding to <l>. Default is NULL (no
+   logging). */
 void                  gt_encseq_loader_set_logger(GtEncseqLoader *el,
                                                   GtLogger *l);
-
+/* Attempts to map the index files as specified by <indexname> using the options
+   set in <el> using this interface. Returns a <GtEncodedsequence> instance
+   on success, or NULL on error. If an error occurred, <err> is set
+   accordingly. */
 GtEncodedsequence*    gt_encseq_loader_load(GtEncseqLoader *el,
                                             GtStr *indexname,
                                             GtError *err);
-
+/* Deletes <el>. */
 void                  gt_encseq_loader_delete(GtEncseqLoader *el);
 
+/* Creates a new <GtEncseqBuilder> using the alphabet <alpha> as a basis for
+   on-the-fly encoding of sequences in memory. */
 GtEncseqBuilder*      gt_encseq_builder_new(GtAlphabet *alpha);
-
+/* Enables support for faster access to special ranges in the
+   <GtEncodedsequence> created by <eb>. Enabled by default. */
 void                  gt_encseq_builder_enable_range_iterator(
                                                            GtEncseqBuilder *eb);
+/* Disables support for faster access to special ranges in the
+   <GtEncodedsequence> created by <eb>. */
 void                  gt_encseq_builder_disable_range_iterator(
                                                            GtEncseqBuilder *eb);
-
+/* Enables support for retrieving descriptions from the encoded sequence
+   to be built by <eb>. Requires additional memory to hold the descriptions and
+   a position index.
+   Activated by default. */
 void                  gt_encseq_builder_enable_description_support(
                                                            GtEncseqBuilder *eb);
+/* Disables support for retrieving descriptions from the encoded sequence
+   to be built by <eb>. Disabling this support will result in an error when
+   trying to call the method <gt_encodedsequence_description()> on the
+   <GtEncodedsequence> object created by <eb>. */
 void                  gt_encseq_builder_disable_description_support(
                                                            GtEncseqBuilder *eb);
-
+/* Enables support for random access to multiple sequences in the encoded
+   sequence to be built by <eb>. Requires additional memory for an index of
+   starting positions. Activated by default. */
 void                  gt_encseq_builder_enable_multiseq_support(
                                                            GtEncseqBuilder *eb);
+/* Disables support for random access to multiple sequences in the encoded
+   sequence to be built by <eb>. Disabling this support will result in an
+   error when trying to call the method <gt_encodedsequence_seqinfo()> on
+   the <GtEncodedsequence> object created by <eb> */
 void                  gt_encseq_builder_disable_multiseq_support(
                                                            GtEncseqBuilder *eb);
-
+/* Enables creation of the .esq table containing the encoded sequence itself.
+   Naturally, enabled by default. */
 void                  gt_encseq_builder_create_tis_tab(GtEncseqBuilder *eb);
+/* Disables creation of the .esq table. */
 void                  gt_encseq_builder_do_not_create_tis_tab(
                                                            GtEncseqBuilder *eb);
-
+/* Enables creation of the .des table containing sequence descriptions.
+   Enabled by default. */
 void                  gt_encseq_builder_create_des_tab(GtEncseqBuilder *eb);
+/* Disables creation of the .des table. */
 void                  gt_encseq_builder_do_not_create_des_tab(
                                                            GtEncseqBuilder *eb);
-
+/* Enables creation of the .ssp table containing indexes for multiple sequences.
+   Enabled by default. */
 void                  gt_encseq_builder_create_ssp_tab(GtEncseqBuilder *eb);
+/* Disables creation of the .ssp table. */
 void                  gt_encseq_builder_do_not_create_ssp_tab(
                                                            GtEncseqBuilder *eb);
-
+/* Enables creation of the .sds table containing indexes for sequence
+   descriptions. Enabled by default. */
 void                  gt_encseq_builder_create_sds_tab(GtEncseqBuilder *eb);
+/* Disables creation of the .sds table. */
 void                  gt_encseq_builder_do_not_create_sds_tab(
                                                            GtEncseqBuilder *eb);
-
+/* Adds a sequence given as a C string <str> of length <strlen> to the
+   encoded sequence to be built by <eb>. Additionally, a description can be
+   given (<desc>). If description support is enabled, this must not be NULL.
+   A copy will be made during the addition process and the sequence will
+   be encoded using the alphabet set at the construction time of <eb>. Thus it
+   must only contain symbols compatible with the alphabet. */
 void                  gt_encseq_builder_add_cstr(GtEncseqBuilder *eb,
                                                  const char *str,
                                                  unsigned long strlen,
                                                  const char *desc);
-
+/* Adds a sequence given as a GtStr <str> to the encoded sequence to be built
+   by <eb>. Additionally, a description can be given. If description support
+   is enabled, <desc> must not be NULL.
+   A copy will be made during the addition process and the sequence will
+   be encoded using the alphabet set at the construction time of <eb>. Thus it
+   must only contain symbols compatible with the alphabet. */
 void                  gt_encseq_builder_add_str(GtEncseqBuilder *eb,
                                                 GtStr *str,
                                                 const char *desc);
-
+/* Adds a sequence given as a pre-encoded string  <str> of length <strlen> to
+   the encoded sequence to be built by <eb>. <str> must be encoded using the
+   alphabet set at the construction time of <eb>.
+   Does not take ownership of <str>.
+   Additionally, a description <desc> can be given. If description support
+   is enabled, this must not be NULL. */
 void                  gt_encseq_builder_add_encoded(GtEncseqBuilder *eb,
                                                     const GtUchar *str,
                                                     unsigned long strlen,
                                                     const char *desc);
-/* default: NULL */
+/* Sets the logger to use by <ee> during encoding to <l>. Default is NULL (no
+   logging). */
 void                  gt_encseq_builder_set_logger(GtEncseqBuilder*,
                                                    GtLogger *l);
-
+/* Creates a new <GtEncodedsequence> from the sequences added to <eb>.
+   Returns a <GtEncodedsequence> instance on success, or NULL on error.
+   If an error occurred, <err> is set accordingly.
+   The state of <eb> is reset to empty after successful creation of a new
+   <GtEncodedsequence> (like having called <gt_encseq_builder_reset()>). */
 GtEncodedsequence*    gt_encseq_builder_build(GtEncseqBuilder *eb,
                                               GtError *err);
-
+/* Clears all added sequences and descriptions, resetting <eb> to a state
+   similar to the state immediately after its initial creation.  */
 void                  gt_encseq_builder_reset(GtEncseqBuilder *eb);
-
+/* Deletes <eb>. */
 void                  gt_encseq_builder_delete(GtEncseqBuilder *eb);
+
 #endif
