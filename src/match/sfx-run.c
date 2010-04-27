@@ -24,7 +24,7 @@
 #include "core/fa.h"
 #include "core/unused_api.h"
 #include "sfx-optdef.h"
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 #include "core/progress_timer.h"
 #include "esa-fileend.h"
 #include "core/readmode.h"
@@ -65,14 +65,14 @@ typedef struct
        *outfpbwttab,
        *outfpbcktab;
   unsigned long pageoffset;
-  const GtEncodedsequence *encseq;
+  const GtEncseq *encseq;
   Definedunsignedlong longest;
   Outlcpinfo *outlcpinfo;
 } Outfileinfo;
 
 static int initoutfileinfo(Outfileinfo *outfileinfo,
                            unsigned int prefixlength,
-                           const GtEncodedsequence *encseq,
+                           const GtEncseq *encseq,
                            const Suffixeratoroptions *so,
                            GtError *err)
 {
@@ -89,8 +89,8 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
     outfileinfo->outlcpinfo
       = gt_newOutlcpinfo(so->outlcptab ? so->fn2encopt.str_indexname : NULL,
                   prefixlength,
-                  gt_alphabet_num_of_chars(gt_encodedsequence_alphabet(encseq)),
-                  gt_encodedsequence_total_length(encseq),
+                  gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq)),
+                  gt_encseq_total_length(encseq),
                   so->sfxstrategy.ssortmaxdepth.defined ? false : true,
                   err);
     if (outfileinfo->outlcpinfo == NULL)
@@ -169,7 +169,7 @@ static int bwttab2file(Outfileinfo *outfileinfo,
         if (outfileinfo->outfpbwttab != NULL)
         {
           /* Random access */
-          cc = gt_encodedsequence_get_encoded_char(outfileinfo->encseq,
+          cc = gt_encseq_get_encoded_char(outfileinfo->encseq,
                                                  startpos - 1,
                                                  readmode);
         }
@@ -194,7 +194,7 @@ static int bwttab2file(Outfileinfo *outfileinfo,
 
 static int suffixeratorwithoutput(const GtStr *str_indexname,
                                   Outfileinfo *outfileinfo,
-                                  const GtEncodedsequence *encseq,
+                                  const GtEncseq *encseq,
                                   GtReadmode readmode,
                                   unsigned int prefixlength,
                                   unsigned int numofparts,
@@ -351,7 +351,7 @@ static int run_packedindexconstruction(GtLogger *logger,
                                        FILE *outfpbcktab,
                                        const Suffixeratoroptions *so,
                                        unsigned int prefixlength,
-                                       const GtEncodedsequence *encseq,
+                                       const GtEncseq *encseq,
                                        const Sfxstrategy *sfxstrategy,
                                        GtError *err)
 {
@@ -371,7 +371,7 @@ static int run_packedindexconstruction(GtLogger *logger,
                        sfxstrategy,
                        encseq,
                        sfxprogress,
-                       gt_encodedsequence_total_length(encseq) + 1,
+                       gt_encseq_total_length(encseq) + 1,
                        logger,
                        err);
   if (si == NULL)
@@ -415,7 +415,7 @@ static int runsuffixerator(bool doesa,
   bool haserr = false;
   unsigned int prefixlength;
   Sfxstrategy sfxstrategy;
-  GtEncodedsequence *encseq;
+  GtEncseq *encseq;
   GtEncseqEncoder *ee;
 
   gt_error_check(err);
@@ -502,11 +502,11 @@ static int runsuffixerator(bool doesa,
   }
   if (!haserr)
   {
-    gt_encodedsequence_show_features(encseq,logger,false);
+    gt_encseq_show_features(encseq,logger,false);
     if (so->readmode == GT_READMODE_COMPL ||
         so->readmode == GT_READMODE_REVCOMPL)
     {
-      if (!gt_alphabet_is_dna(gt_encodedsequence_alphabet(encseq)))
+      if (!gt_alphabet_is_dna(gt_encseq_alphabet(encseq)))
       {
         gt_error_set(err,"option -%s only can be used for DNA alphabets",
                           so->readmode == GT_READMODE_COMPL ? "cpl" : "rcl");
@@ -532,13 +532,13 @@ static int runsuffixerator(bool doesa,
         !doesa)
     {
       unsigned int numofchars = gt_alphabet_num_of_chars(
-                                           gt_encodedsequence_alphabet(encseq));
+                                           gt_encseq_alphabet(encseq));
 
       if (detpfxlenandmaxdepth(&prefixlength,
                                &sfxstrategy.ssortmaxdepth,
                                so,
                                numofchars,
-                               gt_encodedsequence_total_length(encseq),
+                               gt_encseq_total_length(encseq),
                                logger,
                                err) != 0)
       {
@@ -635,7 +635,7 @@ static int runsuffixerator(bool doesa,
   {
     gt_freeOutlcptab(&outfileinfo.outlcpinfo);
   }
-  gt_encodedsequence_delete(encseq);
+  gt_encseq_delete(encseq);
   encseq = NULL;
   if (!haserr && so->outkystab && so->outkyssort)
   {

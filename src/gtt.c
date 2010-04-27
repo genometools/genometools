@@ -29,7 +29,7 @@
 #include "core/disc_distri.h"
 #include "core/dlist.h"
 #include "core/dynbittab.h"
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 #include "core/grep_api.h"
 #include "core/hashmap.h"
 #include "core/hashtable.h"
@@ -198,7 +198,7 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "dlist example", gt_dlist_example);
   gt_hashmap_add(unit_tests, "dynamic bittab class", gt_dynbittab_unit_test);
   gt_hashmap_add(unit_tests, "evaluator class", gt_evaluator_unit_test);
-  gt_hashmap_add(unit_tests, "encodedsequence builder class",
+  gt_hashmap_add(unit_tests, "encseq builder class",
                 gt_encseq_builder_unit_test);
   gt_hashmap_add(unit_tests, "feature node iterator example",
                  gt_feature_node_iterator_example);

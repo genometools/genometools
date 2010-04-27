@@ -18,7 +18,7 @@
 #ifndef BLTRIE_SSORT_H
 #define BLTRIE_SSORT_H
 
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 #include "core/readmode.h"
 
 typedef struct Blindtrie Blindtrie;
@@ -31,10 +31,10 @@ typedef enum
 } Ordertype;
 
 Blindtrie *gt_blindtrie_new(unsigned long numofsuffixes,
-                         const GtEncodedsequence *encseq,
+                         const GtEncseq *encseq,
                          bool cmpcharbychar,
-                         GtEncodedsequenceScanstate *esr1,
-                         GtEncodedsequenceScanstate *esr2,
+                         GtEncseqScanstate *esr1,
+                         GtEncseqScanstate *esr2,
                          GtReadmode readmode);
 
 unsigned long gt_blindtrie_suffixsort(Blindtrie *blindtrie,

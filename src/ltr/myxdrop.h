@@ -21,7 +21,7 @@
 #include "core/arraydef.h"
 #include "core/unused_api.h"
 
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 
 typedef struct
 {
@@ -101,8 +101,8 @@ void gt_calculateallowedMININFINITYINTgenerations(
 void gt_evalxdroparbitscoresright(Arbitraryscores *arbitscores,
                                Myxdropbest * xdropbest,
                                GtArrayMyfrontvalue * fronts,
-                               const GtEncodedsequence *str_useq,
-                               const GtEncodedsequence *str_vseq,
+                               const GtEncseq *str_useq,
+                               const GtEncseq *str_vseq,
                                unsigned long useq,
                                unsigned long vseq,
                                int ulen,
@@ -113,8 +113,8 @@ void gt_evalxdroparbitscoresright(Arbitraryscores *arbitscores,
       void gt_evalxdroparbitscoresright(Arbitraryscores *arbitscores,\
                                      Myxdropbest * xdropbest,\
                                      GtArrayMyfrontvalue * fronts,\
-                                     const GtEncodedsequence *str_useq,\
-                                     const GtEncodedsequence *str_vseq,\
+                                     const GtEncseq *str_useq,\
+                                     const GtEncseq *str_vseq,\
                                      unsigned long useq,\
                                      unsigned long vseq,\
                                      int ulen,\
@@ -124,8 +124,8 @@ void gt_evalxdroparbitscoresright(Arbitraryscores *arbitscores,
 void gt_evalxdroparbitscoresleft(Arbitraryscores * arbitscores,
                               Myxdropbest * xdropbest,
                               GtArrayMyfrontvalue * fronts,
-                              const GtEncodedsequence *str_useq,
-                              const GtEncodedsequence *str_vseq,
+                              const GtEncseq *str_useq,
+                              const GtEncseq *str_vseq,
                               unsigned long useq,
                               unsigned long vseq,
                               int ulen,
@@ -136,8 +136,8 @@ void gt_evalxdroparbitscoresleft(Arbitraryscores * arbitscores,
        void gt_evalxdroparbitscoresleft(Arbitraryscores * arbitscores,\
                                      Myxdropbest * xdropbest,\
                                      GtArrayMyfrontvalue * fronts,\
-                                     const GtEncodedsequence *str_useq,\
-                                     const GtEncodedsequence *str_vseq,\
+                                     const GtEncseq *str_useq,\
+                                     const GtEncseq *str_vseq,\
                                      unsigned long useq,\
                                      unsigned long vseq,\
                                      int ulen,\

@@ -137,7 +137,7 @@ static void cgr_showmatch(GT_UNUSED void *processinfo,
 }
 
 #ifdef WITHONLINE
-static void onlinespacedseedsearch(const GtEncodedsequence *encseq,
+static void onlinespacedseedsearch(const GtEncseq *encseq,
                                    const Spacedseed *spse,
                                    const GtUchar *qptr,qp)
 {
@@ -148,7 +148,7 @@ static void onlinespacedseedsearch(const GtEncodedsequence *encseq,
   Bitsequence bitmask;
   bool matched;
 
-  totallength = gt_encodedsequence_total_length(encseq);
+  totallength = gt_encseq_total_length(encseq);
   wit = gt_windowiterator_new(encseq,spse->seedwidth,0,totallength);
   while (true)
   {
@@ -215,10 +215,10 @@ int gt_matchspacedseed(bool withesa,
     gt_assert(spse != NULL);
     /*
     iteroverallwords(genericindex->suffixarray->encseq,spse->seedwidth,
-          0,gt_encodedsequence_total_length(genericindex->suffixarray->encseq));
+          0,gt_encseq_total_length(genericindex->suffixarray->encseq));
     iteroverallwords2(genericindex->suffixarray->encseq,spse->seedwidth,
             0,
-            gt_encodedsequence_total_length(genericindex->suffixarray->encseq));
+            gt_encseq_total_length(genericindex->suffixarray->encseq));
     */
   }
   if (!haserr)
@@ -231,7 +231,7 @@ int gt_matchspacedseed(bool withesa,
     int retval;
     Limdfsresources *limdfsresources = NULL;
     const AbstractDfstransformer *dfst;
-    const GtEncodedsequence *encseq;
+    const GtEncseq *encseq;
 
     dfst = gt_spse_AbstractDfstransformer();
     gt_assert(genericindex != NULL);
@@ -251,7 +251,7 @@ int gt_matchspacedseed(bool withesa,
       haserr = true;
     if (!haserr)
     {
-      GtAlphabet *a = gt_encodedsequence_alphabet(encseq);
+      GtAlphabet *a = gt_encseq_alphabet(encseq);
       gt_seqiterator_set_symbolmap(seqit, gt_alphabet_symbolmap(a));
       for (unitnum = 0; /* Nothing */; unitnum++)
       {

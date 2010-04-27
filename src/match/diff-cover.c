@@ -27,7 +27,7 @@
 #include "core/qsort_r.h"
 #include "core/unused_api.h"
 #include "core/intbits.h"
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 #include "core/logger.h"
 #include "diff-cover.h"
 #include "sfx-apfxlen.h"
@@ -35,6 +35,7 @@
 #include "intcode-def.h"
 #include "bcktab.h"
 #include "initbasepower.h"
+#include "core/encseq.h"
 #include "sfx-suftaborder.h"
 #include "sfx-bentsedg.h"
 #include "stamp.h"
@@ -87,12 +88,12 @@ struct Differencecover
   unsigned long totallength, *sortedsample,
          *leftborder; /* points to bcktab->leftborder */
   Bcktab *bcktab;
-  const GtEncodedsequence *encseq;
+  const GtEncseq *encseq;
   GtReadmode readmode;
   unsigned long samplesize, effectivesamplesize, maxsamplesize;
   const GtCodetype **multimappower;
   GtCodetype *filltable;
-  GtEncodedsequenceScanstate *esr;
+  GtEncseqScanstate *esr;
   unsigned long *inversesuftab;
   unsigned long allocateditvinfo,
                 currentqueuesize,
@@ -238,7 +239,7 @@ int gt_differencecover_vparamverify(const Differencecover *dcov,GtError *err)
 }
 
 Differencecover *gt_differencecover_new(unsigned int vparam,
-                                     const GtEncodedsequence *encseq,
+                                     const GtEncseq *encseq,
                                      GtReadmode readmode,
                                      GtLogger *logger)
 {
@@ -251,8 +252,8 @@ Differencecover *gt_differencecover_new(unsigned int vparam,
 #endif
   dcov = gt_malloc(sizeof (*dcov));
   dcov->numofchars = gt_alphabet_num_of_chars(
-                                           gt_encodedsequence_alphabet(encseq));
-  dcov->totallength = gt_encodedsequence_total_length(encseq);
+                                           gt_encseq_alphabet(encseq));
+  dcov->totallength = gt_encseq_total_length(encseq);
   dcov->logger = logger;
   for (dcov->logmod = 0;
        dcov->logmod < (unsigned int) (sizeof (differencecoversizes)/
@@ -381,7 +382,7 @@ static unsigned long dcov_derivespecialcodesonthefly(Differencecover *dcov,
             gt_assert(codelist->spaceCodeatposition[countderived].position
                       == pos);
           }
-          code = gt_encodedsequence_extractprefixcode(&unitsnotspecial,
+          code = gt_encseq_extractprefixcode(&unitsnotspecial,
                                    dcov->encseq,
                                    dcov->filltable,
                                    dcov->readmode,
@@ -559,7 +560,7 @@ static void dc_initinversesuftabspecials(Differencecover *dcov)
 {
   dcov->inversesuftab = gt_malloc(sizeof (*dcov->inversesuftab) *
                                   dcov->maxsamplesize);
-  if (gt_encodedsequence_has_specialranges(dcov->encseq))
+  if (gt_encseq_has_specialranges(dcov->encseq))
   {
     GtSpecialrangeiterator *sri;
     GtRange range;
@@ -1037,7 +1038,7 @@ void gt_differencecover_sortsample(Differencecover *dcov,bool cmpcharbychar,
                              NULL,
                              NULL);
   dcov->multimappower = gt_bcktab_multimappower(dcov->bcktab);
-  dcov->esr = gt_encodedsequence_scanstate_new_empty();
+  dcov->esr = gt_encseq_scanstate_new_empty();
   dcov->maxcode = gt_bcktab_numofallcodes(dcov->bcktab) - 1;
   dcov->rangestobesorted = gt_inl_queue_new(MAX(16UL,GT_DIV2(dcov->maxcode)));
   gt_assert(dcov->bcktab != NULL);
@@ -1054,7 +1055,7 @@ void gt_differencecover_sortsample(Differencecover *dcov,bool cmpcharbychar,
       /* printf("pos mod %u in difference cover\n",dcov->vparam); */
       if (pos < dcov->totallength)
       {
-        code = gt_encodedsequence_extractprefixcode(&unitsnotspecial,
+        code = gt_encseq_extractprefixcode(&unitsnotspecial,
                                  dcov->encseq,
                                  dcov->filltable,
                                  dcov->readmode,
@@ -1127,7 +1128,7 @@ void gt_differencecover_sortsample(Differencecover *dcov,bool cmpcharbychar,
   {
     if (diffptr < afterend && (Diffvalue) modvalue == *diffptr)
     {
-      code = gt_encodedsequence_extractprefixcode(&unitsnotspecial,
+      code = gt_encseq_extractprefixcode(&unitsnotspecial,
                                dcov->encseq,
                                dcov->filltable,
                                dcov->readmode,
@@ -1158,7 +1159,7 @@ void gt_differencecover_sortsample(Differencecover *dcov,bool cmpcharbychar,
   dcov->filltable = NULL;
   if (dcov->esr != NULL)
   {
-    gt_encodedsequence_scanstate_delete(dcov->esr);
+    gt_encseq_scanstate_delete(dcov->esr);
     dcov->esr = NULL;
   }
   gt_assert(posinserted == dcov->effectivesamplesize);
@@ -1190,7 +1191,7 @@ void gt_differencecover_sortsample(Differencecover *dcov,bool cmpcharbychar,
     } else
     {
       defaultsfxstrategy(&sfxstrategy,
-                gt_encodedsequence_bitwise_cmp_ok(dcov->encseq) ? false : true);
+                gt_encseq_bitwise_cmp_ok(dcov->encseq) ? false : true);
     }
     sfxstrategy.differencecover = dcov->vparam;
     gt_sortbucketofsuffixes(dcov->sortedsample,
@@ -1254,7 +1255,7 @@ void gt_differencecover_sortsample(Differencecover *dcov,bool cmpcharbychar,
   filldiff2pos(dcov);
 }
 
-void gt_differencecovers_check(const GtEncodedsequence *encseq,
+void gt_differencecovers_check(const GtEncseq *encseq,
                                GtReadmode readmode)
 {
   Differencecover *dcov;

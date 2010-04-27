@@ -49,7 +49,7 @@ gt_availBWTSeq(const struct bwtParam *params, GtLogger *verbosity,
         return NULL;
     }
   }
-  len = gt_encodedsequence_total_length(suffixArray.encseq) + 1;
+  len = gt_encseq_total_length(suffixArray.encseq) + 1;
   bwtSeq = gt_availBWTSeqFromSA(params, &suffixArray, len, err);
   gt_freesuffixarray(&suffixArray);
   return bwtSeq;
@@ -80,7 +80,7 @@ gt_trSuftab2BWTSeq(const struct bwtParam *params, GtLogger *verbosity,
         break;
       }
     }
-    len = gt_encodedsequence_total_length(suffixArray.encseq) + 1;
+    len = gt_encseq_total_length(suffixArray.encseq) + 1;
     bwtSeq = gt_createBWTSeqFromSA(params, &suffixArray, len, err);
     gt_freesuffixarray(&suffixArray);
   } while (0);
@@ -133,7 +133,7 @@ gt_loadBWTSeq(const GtStr *projectName, int BWTOptFlags, GtLogger *verbosity,
   gt_error_check(err);
   if (gt_mapsuffixarray(&suffixArray, 0, projectName, verbosity, err))
     return NULL;
-  len = gt_encodedsequence_total_length(suffixArray.encseq) + 1;
+  len = gt_encseq_total_length(suffixArray.encseq) + 1;
   bwtSeq = gt_loadBWTSeqForSA(projectName, BWT_ON_BLOCK_ENC, BWTOptFlags,
                            &suffixArray, len, err);
   gt_freesuffixarray(&suffixArray);
@@ -187,7 +187,7 @@ gt_createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
 static inline void
 buildSpRTable(const struct bwtParam *params,
               unsigned long totalLen,
-              const GtEncodedsequence *encseq,
+              const GtEncseq *encseq,
               GtReadmode readmode,
               SpecialsRankLookup **sprTable,
               const enum rangeSortMode **rangeSort)

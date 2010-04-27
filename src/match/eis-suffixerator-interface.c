@@ -31,7 +31,7 @@
 #include "core/symboldef.h"
 #include "core/unused_api.h"
 #include "core/codetype.h"
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 
 #include "match/eis-encidxseq.h"
 #include "match/eis-sa-common.h"
@@ -45,7 +45,7 @@ struct sfxInterface
   unsigned int prefixlength, numofparts;
   const Sfxstrategy *sfxstrategy;
   const GtAlphabet *alpha;
-  const GtEncodedsequence *encseq;
+  const GtEncseq *encseq;
   struct seqStats *stats;
   Sfxiterator *sfi;
   Definedunsignedlong rot0Pos;
@@ -157,7 +157,7 @@ gt_newSfxInterface(GtReadmode readmode,
                 unsigned int prefixlength,
                 unsigned int numofparts,
                 const Sfxstrategy *sfxstrategy,
-                const GtEncodedsequence *encseq,
+                const GtEncseq *encseq,
                 GtProgressTimer *sfxprogress,
                 unsigned long length,
                 GtLogger *verbosity,
@@ -178,7 +178,7 @@ gt_newSfxInterface(GtReadmode readmode,
 }
 
 static struct seqStats *
-newSeqStatsFromCharDist(const GtEncodedsequence *encseq,
+newSeqStatsFromCharDist(const GtEncseq *encseq,
                         const GtAlphabet *alpha, unsigned long len)
 {
   struct seqStats *stats = NULL;
@@ -188,7 +188,7 @@ newSeqStatsFromCharDist(const GtEncodedsequence *encseq,
                     + (UINT8_MAX + 1) * sizeof (unsigned long));
   unsigned int numOfSeqs;
 
-  numOfSeqs = gt_encodedsequence_num_of_sequences(encseq);
+  numOfSeqs = gt_encseq_num_of_sequences(encseq);
   stats->sourceAlphaType = sourceUInt8;
   stats->symbolDistributionTable =
     (unsigned long *)((char *)stats + offsetAlign(sizeof (*stats),
@@ -200,7 +200,7 @@ newSeqStatsFromCharDist(const GtEncodedsequence *encseq,
   for (i = 0; i < numofchars; ++i)
   {
     stats->symbolDistributionTable[i]
-      = (unsigned long) gt_encodedsequence_charcount(encseq,(GtUchar) i);
+      = (unsigned long) gt_encseq_charcount(encseq,(GtUchar) i);
     regularSymsSum += stats->symbolDistributionTable[i];
   }
   stats->symbolDistributionTable[WILDCARD] = len - regularSymsSum - numOfSeqs;
@@ -231,7 +231,7 @@ gt_newSfxInterfaceWithReaders(GtReadmode readmode,
                            size_t numReaders,
                            enum sfxDataRequest readerRequests[],
                            SeqDataReader readers[],
-                           const GtEncodedsequence *encseq,
+                           const GtEncseq *encseq,
                            GtProgressTimer *sfxprogress,
                            unsigned long length,
                            GtLogger *verbosity, GtError *err)
@@ -249,7 +249,7 @@ gt_newSfxInterfaceWithReaders(GtReadmode readmode,
   }
   sfxi->readmode = readmode;
   sfxi->encseq = encseq;
-  sfxi->alpha = gt_encodedsequence_alphabet(encseq);
+  sfxi->alpha = gt_encseq_alphabet(encseq);
   sfxi->stats = newSeqStatsFromCharDist(encseq,sfxi->alpha, length);
   if (!(sfxi->sfi = gt_newSfxiterator(encseq,
                                    readmode,
@@ -327,7 +327,7 @@ gt_SfxIGetRot0Pos(const struct sfxInterface *si)
   return si->rot0Pos;
 }
 
-extern const GtEncodedsequence *
+extern const GtEncseq *
 gt_SfxIGetEncSeq(const sfxInterface *si)
 {
   return si->encseq;

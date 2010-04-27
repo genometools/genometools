@@ -21,7 +21,7 @@
 #include "sarr-def.h"
 #include "spacedef.h"
 #include "emimergeesa.h"
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 #include "merger-trie.h"
 #include "lcpoverflow.h"
 #include "core/logger.h"
@@ -72,7 +72,7 @@ static int inputthesequences(unsigned int *numofchars,
     {
       *numofchars =
             gt_alphabet_num_of_chars(
-                     gt_encodedsequence_alphabet(suffixarraytable[idx].encseq));
+                     gt_encseq_alphabet(suffixarraytable[idx].encseq));
     }
     nextpostable[idx] = 0;
   }
@@ -155,7 +155,7 @@ int gt_emissionmergedesa_stepdeleteandinsertothersuffixes(
     emmesa->buf.suftabstore[emmesa->buf.nextstoreidx].startpos
       = tmpsmallestleaf->suffixinfo.startpos;
     if (emmesa->nextpostable[tmpidx] >
-       gt_encodedsequence_total_length(emmesa->suffixarraytable[tmpidx].encseq))
+       gt_encseq_total_length(emmesa->suffixarraytable[tmpidx].encseq))
     {
       gt_mergertrie_deletesmallestpath(tmpsmallestleaf,&emmesa->trierep);
       emmesa->numofentries--;

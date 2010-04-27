@@ -21,7 +21,7 @@
 #include "core/unused_api.h"
 #include "core/ma_api.h"
 
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 #include "core/defined-types.h"
 #include "apmeoveridx.h"
 #include "absdfstrans-imp.h"

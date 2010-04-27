@@ -30,7 +30,7 @@ typedef struct Rmnsufinfo Rmnsufinfo;
 
 Rmnsufinfo *gt_newRmnsufinfo(unsigned long *presortedsuffixes,
                           int mmapfiledesc,
-                          const GtEncodedsequence *encseq,
+                          const GtEncseq *encseq,
                           Bcktab *bcktab,
                           GtCodetype maxcode,
                           unsigned int numofchars,

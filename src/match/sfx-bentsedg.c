@@ -26,8 +26,8 @@
 #include "core/arraydef.h"
 #include "core/unused_api.h"
 #include "core/symboldef.h"
-#include "core/encodedsequence.h"
 #include "spacedef.h"
+#include "core/encseq.h"
 #include "turnwheels.h"
 #include "esa-fileend.h"
 #include "sfx-bentsedg.h"
@@ -41,9 +41,9 @@
 #include "stamp.h"
 
 #define UNIQUEINT(P)           ((unsigned long) ((P) + GT_COMPAREOFFSET))
-#define ACCESSCHAR(POS)        gt_encodedsequence_get_encoded_char(bsr->encseq,\
+#define ACCESSCHAR(POS)        gt_encseq_get_encoded_char(bsr->encseq,\
                                                              POS,bsr->readmode)
-#define ACCESSCHARSEQ(POS,ESR) gt_encodedsequence_get_encoded_char_sequential( \
+#define ACCESSCHARSEQ(POS,ESR) gt_encseq_get_encoded_char_sequential( \
                                                         bsr->encseq,ESR,POS,\
                                                         bsr->readmode)
 #define ISNOTEND(POS)          ((POS) < bsr->totallength &&\
@@ -150,9 +150,9 @@ typedef GtEndofTwobitencoding Sfxcmp;
             if (pos + depth < bsr->totallength)\
             {\
               pos += depth;\
-              gt_encodedsequence_scanstate_initgeneric(bsr->esr1,bsr->encseq,\
+              gt_encseq_scanstate_initgeneric(bsr->esr1,bsr->encseq,\
                                                   true,pos);\
-              gt_encodedsequence_extract2bitenc(true,&(VAR),bsr->encseq,\
+              gt_encseq_extract2bitenc(true,&(VAR),bsr->encseq,\
                                                 bsr->esr1,pos);\
             } else\
             {\
@@ -166,9 +166,9 @@ typedef GtEndofTwobitencoding Sfxcmp;
             if (pos >= depth)\
             {\
               pos -= depth;\
-              gt_encodedsequence_scanstate_initgeneric(bsr->esr1,bsr->encseq,\
+              gt_encseq_scanstate_initgeneric(bsr->esr1,bsr->encseq,\
                                                   false,pos);\
-              gt_encodedsequence_extract2bitenc(false,&(VAR),bsr->encseq,\
+              gt_encseq_extract2bitenc(false,&(VAR),bsr->encseq,\
                                                 bsr->esr1,pos);\
             } else\
             {\
@@ -180,7 +180,7 @@ typedef GtEndofTwobitencoding Sfxcmp;
         }
 
 #define Sfxdocompare(COMMONUNITS,X,Y)\
-        ret##X##Y = gt_encodedsequence_compare_twobitencodings(bsr->fwd,\
+        ret##X##Y = gt_encseq_compare_twobitencodings(bsr->fwd,\
                                                               bsr->complement,\
                                                               COMMONUNITS,&X,&Y)
 
@@ -191,7 +191,7 @@ typedef GtEndofTwobitencoding Sfxcmp;
 #ifdef SKDEBUG
 static unsigned long baseptr;
 
-static void showsuffixrange(const GtEncodedsequence *encseq,
+static void showsuffixrange(const GtEncseq *encseq,
                             bool fwd,
                             bool complement,
                             const Lcpsubtab *lcpsubtab,
@@ -228,7 +228,7 @@ static void showsuffixrange(const GtEncodedsequence *encseq,
 
 #undef CHECKSUFFIXRANGE
 #ifdef CHECKSUFFIXRANGE
-static void checksuffixrange(const GtEncodedsequence *encseq,
+static void checksuffixrange(const GtEncseq *encseq,
                              bool fwd,
                              bool complement,
                              const Lcpsubtab *lcpsubtab,
@@ -257,10 +257,10 @@ static void checksuffixrange(const GtEncodedsequence *encseq,
       pos2 = *(sufptr+1);
     } else
     {
-      pos1 = GT_REVERSEPOS(gt_encodedsequence_total_length(encseq),*sufptr);
-      pos2 = GT_REVERSEPOS(gt_encodedsequence_total_length(encseq),*(sufptr+1));
+      pos1 = GT_REVERSEPOS(gt_encseq_total_length(encseq),*sufptr);
+      pos2 = GT_REVERSEPOS(gt_encseq_total_length(encseq),*(sufptr+1));
     }
-    (void) gt_encodedsequence_comparetwostrings(encseq,
+    (void) gt_encseq_comparetwostrings(encseq,
                              fwd,
                              complement,
                              &newdepth,
@@ -345,8 +345,8 @@ GT_DECLAREARRAYSTRUCT(MKVstack);
 
 typedef struct
 {
-  const GtEncodedsequence *encseq;
-  GtEncodedsequenceScanstate *esr1, /* XXX be carefull with threads */
+  const GtEncseq *encseq;
+  GtEncseqScanstate *esr1, /* XXX be carefull with threads */
                            *esr2;
   GtReadmode readmode;
   bool fwd, complement, assideeffect;
@@ -470,10 +470,10 @@ static void bs_insertionsort(Bentsedgresources *bsr,
       if (bsr->sfxstrategy->cmpcharbychar)
       {
         ptr1 = (*(pj-1))+offset;
-        gt_encodedsequence_scanstate_init(bsr->esr1,bsr->encseq,bsr->readmode,
+        gt_encseq_scanstate_init(bsr->esr1,bsr->encseq,bsr->readmode,
                                           ptr1);
         ptr2 = (*pj)+offset;
-        gt_encodedsequence_scanstate_init(bsr->esr2,bsr->encseq,bsr->readmode,
+        gt_encseq_scanstate_init(bsr->esr2,bsr->encseq,bsr->readmode,
                                           ptr2);
         for (;;)
         {
@@ -494,7 +494,7 @@ static void bs_insertionsort(Bentsedgresources *bsr,
       } else
       {
 #ifdef SKDEBUG
-        printf("gt_encodedsequence_compare[%d,%d] at offset %d\n",
+        printf("gt_encseq_compare[%d,%d] at offset %d\n",
                        (int) *(pj-1),(int) *pj,(int) offset);
         showsequenceatstartpos(stdout,
                                bsr->fwd,
@@ -507,7 +507,7 @@ static void bs_insertionsort(Bentsedgresources *bsr,
                                bsr->encseq,
                                *pj);
 #endif
-        retval = gt_encodedsequence_compare(bsr->encseq,&commonunits,bsr->fwd,
+        retval = gt_encseq_compare(bsr->encseq,&commonunits,bsr->fwd,
                                             bsr->complement,
                                             bsr->esr1,bsr->esr2,*(pj-1),*pj,
                                             offset);
@@ -567,13 +567,13 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
         ptr1 = (*(pj-1))+offset;
         if (ptr1 < bsr->totallength)
         {
-          gt_encodedsequence_scanstate_init(bsr->esr1,bsr->encseq,bsr->readmode,
+          gt_encseq_scanstate_init(bsr->esr1,bsr->encseq,bsr->readmode,
                                        ptr1);
         }
         ptr2 = (*pj)+offset;
         if (ptr2 < bsr->totallength)
         {
-          gt_encodedsequence_scanstate_init(bsr->esr2,bsr->encseq,bsr->readmode,
+          gt_encseq_scanstate_init(bsr->esr2,bsr->encseq,bsr->readmode,
                                        ptr2);
         }
         for (;;)
@@ -601,7 +601,7 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
       } else
       {
         gt_assert(offset < maxdepth);
-        retval = gt_encodedsequence_compare_maxdepth(bsr->encseq,&commonunits,
+        retval = gt_encseq_compare_maxdepth(bsr->encseq,&commonunits,
                                                      bsr->fwd,
                                                      bsr->complement,
                                                      bsr->esr1,bsr->esr2,
@@ -695,7 +695,7 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
 }
 
 #define DOMEDIANCOMPARE(A,B)\
-        gt_encodedsequence_compare_twobitencodings(fwd,complement,&commonunits,\
+        gt_encseq_compare_twobitencodings(fwd,complement,&commonunits,\
                                &((A)->etbe),&((B)->etbe))
 
 #define MedianElemGREATER(A,B)  (DOMEDIANCOMPARE(A,B) > 0)
@@ -1101,7 +1101,7 @@ static void sarrcountingsort(Bentsedgresources *bsr,
     if (idx != pivotidx)
     {
       PTR2INT(etbecurrent,left+idx);
-      cmp = gt_encodedsequence_compare_twobitencodings(bsr->fwd,
+      cmp = gt_encseq_compare_twobitencodings(bsr->fwd,
                                                        bsr->complement,
                                                        &commonunits,
                                                        &etbecurrent,
@@ -1488,19 +1488,19 @@ static void showSuffixwithcode(FILE *fp,const Suffixwithcode *suffix)
               buffer);
 }
 
-static unsigned long bruteforcelcpvalue(const GtEncodedsequence *encseq,
+static unsigned long bruteforcelcpvalue(const GtEncseq *encseq,
                                  GtReadmode readmode,
                                  const Suffixwithcode *previoussuffix,
                                  const Suffixwithcode *currentsuffix,
                                  unsigned int minchanged,
-                                 GtEncodedsequenceScanstate *esr1,
-                                 GtEncodedsequenceScanstate *esr2)
+                                 GtEncseqScanstate *esr1,
+                                 GtEncseqScanstate *esr2)
 {
   unsigned long lcpvalue;
   unsigned int lcpvalue2;
   int cmp;
 
-  cmp = gt_encodedsequence_comparetwosuffixes(encseq,
+  cmp = gt_encseq_comparetwosuffixes(encseq,
                            readmode,
                            &lcpvalue,
                            false,
@@ -1870,7 +1870,7 @@ unsigned long getmaxbranchdepth(const Outlcpinfo *outlcpinfo)
 static void initBentsedgresources(Bentsedgresources *bsr,
                                   Suftab *suftab,
                                   Definedunsignedlong *longest,
-                                  const GtEncodedsequence *encseq,
+                                  const GtEncseq *encseq,
                                   GtReadmode readmode,
                                   Bcktab *bcktab,
                                   GtCodetype mincode,
@@ -1884,7 +1884,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   unsigned long idx;
 
   bsr->readmode = readmode;
-  bsr->totallength = gt_encodedsequence_total_length(encseq);
+  bsr->totallength = gt_encseq_total_length(encseq);
   bsr->sfxstrategy = sfxstrategy;
   bsr->suftab = suftab;
   bsr->encseq = encseq;
@@ -1903,11 +1903,11 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   {
     bsr->lcpsubtab = NULL;
   }
-  if (gt_encodedsequence_has_fast_specialrangeenumerator(encseq)
-        && gt_encodedsequence_has_specialranges(encseq))
+  if (gt_encseq_has_fast_specialrangeenumerator(encseq)
+        && gt_encseq_has_specialranges(encseq))
   {
-    bsr->esr1 = gt_encodedsequence_scanstate_new_empty();
-    bsr->esr2 = gt_encodedsequence_scanstate_new_empty();
+    bsr->esr1 = gt_encseq_scanstate_new_empty();
+    bsr->esr2 = gt_encseq_scanstate_new_empty();
   } else
   {
     bsr->esr1 = bsr->esr2 = NULL;
@@ -2044,11 +2044,11 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
   }
   if (bsr->esr1 != NULL)
   {
-    gt_encodedsequence_scanstate_delete(bsr->esr1);
+    gt_encseq_scanstate_delete(bsr->esr1);
   }
   if (bsr->esr2 != NULL)
   {
-    gt_encodedsequence_scanstate_delete(bsr->esr2);
+    gt_encseq_scanstate_delete(bsr->esr2);
   }
   gt_free(bsr->equalwithprevious);
   GT_FREEARRAY(&bsr->mkvauxstack,MKVstack);
@@ -2061,7 +2061,7 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
 void gt_qsufsort(unsigned long *sortspace,
               int mmapfiledesc,
               unsigned long *longest,
-              const GtEncodedsequence *encseq,
+              const GtEncseq *encseq,
               GtReadmode readmode,
               GT_UNUSED GtCodetype mincode,
               GtCodetype maxcode,
@@ -2098,7 +2098,7 @@ void gt_qsufsort(unsigned long *sortspace,
     gt_assert(outlcpinfo->outfpllvtab != NULL);
 
     multioutlcpvalues(&outlcpinfo->lcpsubtab,
-                      gt_encodedsequence_total_length(encseq),
+                      gt_encseq_total_length(encseq),
                       lcptab,(unsigned long) partwidth,
                       outlcpinfo->outfplcptab,outlcpinfo->outfpllvtab);
     compressedtable_free(lcptab,true);
@@ -2107,7 +2107,7 @@ void gt_qsufsort(unsigned long *sortspace,
 
 void gt_sortallbuckets(Suftab *suftab,
                     GtBucketspec2 *bucketspec2,
-                    const GtEncodedsequence *encseq,
+                    const GtEncseq *encseq,
                     GtReadmode readmode,
                     GtCodetype mincode,
                     GtCodetype maxcode,
@@ -2311,7 +2311,7 @@ void gt_sortallbuckets(Suftab *suftab,
 void gt_sortbucketofsuffixes(unsigned long *suffixestobesorted,
                           GtBucketspec2 *bucketspec2,
                           unsigned long numberofsuffixes,
-                          const GtEncodedsequence *encseq,
+                          const GtEncseq *encseq,
                           GtReadmode readmode,
                           GtCodetype mincode,
                           GtCodetype maxcode,

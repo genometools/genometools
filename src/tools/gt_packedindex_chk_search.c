@@ -24,7 +24,7 @@
 #include "core/versionfunc.h"
 #include "match/eis-bwtseq.h"
 #include "match/eis-bwtseq-param.h"
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 #include "match/enum-patt-def.h"
 #include "match/esa-mmsearch.h"
 #include "match/sarr-def.h"
@@ -126,7 +126,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
                   " demand for encoded sequence and suffix table files\n");
         break;
       }
-      totalLen = gt_encodedsequence_total_length(suffixarray.encseq);
+      totalLen = gt_encseq_total_length(suffixarray.encseq);
       saIsLoaded = true;
       if ((had_err = (params.minPatLen >= 0L && params.maxPatLen >= 0L
                       && params.minPatLen > params.maxPatLen)))
@@ -140,7 +140,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
       {
         unsigned int numofchars
           = gt_alphabet_num_of_chars(
-                               gt_encodedsequence_alphabet(suffixarray.encseq));
+                               gt_encseq_alphabet(suffixarray.encseq));
         if (params.minPatLen < 0)
           params.minPatLen = gt_recommendedprefixlength(numofchars, totalLen);
         if (params.maxPatLen < 0)

@@ -62,7 +62,7 @@ void genericindex_delete(Genericindex *genericindex)
   gt_free(genericindex);
 }
 
-const GtEncodedsequence *genericindex_getencseq(
+const GtEncseq *genericindex_getencseq(
                                                const Genericindex *genericindex)
 {
   gt_assert(genericindex->suffixarray->encseq != NULL);
@@ -112,7 +112,7 @@ Genericindex *genericindex_new(const GtStr *indexname,
   } else
   {
     genericindex->totallength =
-             gt_encodedsequence_total_length(genericindex->suffixarray->encseq);
+             gt_encseq_total_length(genericindex->suffixarray->encseq);
   }
   if (!haserr)
   {
@@ -200,7 +200,7 @@ struct Limdfsresources
   bool nowildcards;
   unsigned long maxintervalwidth;
   unsigned long *rangeOccs;
-  const GtEncodedsequence *encseq;
+  const GtEncseq *encseq;
   GtArrayGtUlong mstatspos;
   GtUchar *currentpathspace;
   unsigned long allocatedpathspace;
@@ -223,10 +223,10 @@ Limdfsresources *gt_newLimdfsresources(const Genericindex *genericindex,
 {
   Limdfsresources *limdfsresources;
   unsigned int numofchars;
-  const GtEncodedsequence *encseq;
+  const GtEncseq *encseq;
 
   encseq = genericindex->suffixarray->encseq;
-  numofchars = gt_alphabet_num_of_chars(gt_encodedsequence_alphabet(encseq));
+  numofchars = gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq));
   ALLOCASSIGNSPACE(limdfsresources,NULL,Limdfsresources,1);
   ALLOCASSIGNSPACE(limdfsresources->bwci.spaceBoundswithchar,NULL,
                    Boundswithchar,numofchars+1);
@@ -619,7 +619,7 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
   for (pos = startpos + child->offset - 1;
        pos < limdfsresources->genericindex->totallength; pos++)
   {
-    cc = gt_encodedsequence_get_encoded_char(
+    cc = gt_encseq_get_encoded_char(
                           limdfsresources->genericindex->suffixarray->encseq,
                           pos,
                           limdfsresources->genericindex->suffixarray->readmode);
@@ -1331,7 +1331,7 @@ static bool esa_exactpatternmatching(const Suffixarray *suffixarray,
 {
   MMsearchiterator *mmsi;
   unsigned long dbstartpos,
-         totallength = gt_encodedsequence_total_length(suffixarray->encseq);
+         totallength = gt_encseq_total_length(suffixarray->encseq);
   bool nomatches;
   GtMatch match;
 
@@ -1392,7 +1392,7 @@ GtUchar gt_limdfs_getencodedchar(const Limdfsresources *limdfsresources,
 {
   gt_assert(limdfsresources->encseq != NULL);
 
-  return gt_encodedsequence_get_encoded_char(limdfsresources->encseq,
+  return gt_encseq_get_encoded_char(limdfsresources->encseq,
                                            pos,
                                            readmode);
 }

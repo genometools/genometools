@@ -16,8 +16,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ENCODEDSEQUENCE_REP_H
-#define ENCODEDSEQUENCE_REP_H
+#ifndef ENCSEQ_REP_H
+#define ENCSEQ_REP_H
 
 /*
   The contents of this file is to be considered private
@@ -25,7 +25,7 @@
   GT_INLINEDENCSEQ, is exposed to the compiler solely for performance
   optimization. So we can compare the time overhead of a bytearray
   implementation of strings to all other representations implemented in
-  encodedsequence.c.
+  encseq.c.
 */
 
 #include "core/alphabet.h"
@@ -49,7 +49,7 @@ typedef enum
 
 typedef uint32_t Uint32;
 
-struct GtEncodedsequence
+struct GtEncseq
 {
   /* Common part */
   unsigned long *satcharptr; /* need for writing char */
@@ -64,16 +64,16 @@ struct GtEncodedsequence
   unsigned long lengthofdbfilenames, *lengthofdbfilenamesptr;
   unsigned long sizeofrep;
   const char *name;
-  GtUchar(*deliverchar)(const GtEncodedsequence *,unsigned long);
+  GtUchar(*deliverchar)(const GtEncseq *,unsigned long);
   const char *delivercharname;
-  GtUchar(*delivercharnospecial)(const GtEncodedsequence *,unsigned long);
+  GtUchar(*delivercharnospecial)(const GtEncseq *,unsigned long);
   const char *delivercharnospecialname;
-  GtUchar(*seqdeliverchar)(const GtEncodedsequence *,
-                         GtEncodedsequenceScanstate *,unsigned long);
+  GtUchar(*seqdeliverchar)(const GtEncseq *,
+                         GtEncseqScanstate *,unsigned long);
   const char *seqdelivercharname;
-  bool(*delivercontainsspecial)(const GtEncodedsequence *,
+  bool(*delivercontainsspecial)(const GtEncseq *,
                                 bool,
-                                GtEncodedsequenceScanstate *,
+                                GtEncseqScanstate *,
                                 unsigned long,
                                 unsigned long);
   const char *delivercontainsspecialname;

@@ -21,12 +21,12 @@
 #include "core/error_api.h"
 #include "core/minmax.h"
 #include "core/intbits.h"
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 #include "esa-seqread.h"
 #include "sfx-suftaborder.h"
 
 static void showlocalsuffix(FILE *fpout,
-                            const GtEncodedsequence *encseq,
+                            const GtEncseq *encseq,
                             GtReadmode readmode,
                             unsigned long start,
                             unsigned long depth)
@@ -36,8 +36,8 @@ static void showlocalsuffix(FILE *fpout,
   const unsigned long maxshow = (unsigned long) 30;
   const GtUchar *characters;
 
-  totallength = gt_encodedsequence_total_length(encseq);
-  characters = gt_alphabet_characters(gt_encodedsequence_alphabet(encseq));
+  totallength = gt_encseq_total_length(encseq);
+  characters = gt_alphabet_characters(gt_encseq_alphabet(encseq));
   if (depth == 0)
   {
     end = MIN(start + maxshow,totallength);
@@ -52,7 +52,7 @@ static void showlocalsuffix(FILE *fpout,
       (void) putc('~',fpout);
       break;
     }
-    cc = gt_encodedsequence_get_encoded_char(encseq,i,readmode);
+    cc = gt_encseq_get_encoded_char(encseq,i,readmode);
     if (ISSPECIAL(cc))
     {
       (void) putc('~',fpout);
@@ -65,7 +65,7 @@ static void showlocalsuffix(FILE *fpout,
 static void showcomparisonfailure(const char *filename,
                                   int line,
                                   const char *where,
-                                  const GtEncodedsequence *encseq,
+                                  const GtEncseq *encseq,
                                   GtReadmode readmode,
                                   const unsigned long *suftab,
                                   unsigned long depth,
@@ -92,7 +92,7 @@ static void showcomparisonfailure(const char *filename,
 
 void gt_checkifprefixesareidentical(const char *filename,
                                  int line,
-                                 const GtEncodedsequence *encseq,
+                                 const GtEncseq *encseq,
                                  GtReadmode readmode,
                                  const unsigned long *suftab,
                                  unsigned int prefixlength,
@@ -103,14 +103,14 @@ void gt_checkifprefixesareidentical(const char *filename,
   const unsigned long *ptr;
   unsigned long maxlcp;
   int cmp;
-  GtEncodedsequenceScanstate *esr1, *esr2;
+  GtEncseqScanstate *esr1, *esr2;
   bool haserr = false;
 
-  esr1 = gt_encodedsequence_scanstate_new_empty();
-  esr2 = gt_encodedsequence_scanstate_new_empty();
+  esr1 = gt_encseq_scanstate_new_empty();
+  esr2 = gt_encseq_scanstate_new_empty();
   for (ptr = suftab + left; ptr < suftab + right; ptr++)
   {
-    cmp = gt_encodedsequence_comparetwosuffixes(encseq,
+    cmp = gt_encseq_comparetwosuffixes(encseq,
                              readmode,
                              &maxlcp,
                              false,
@@ -134,21 +134,21 @@ void gt_checkifprefixesareidentical(const char *filename,
       break;
     }
   }
-  gt_encodedsequence_scanstate_delete(esr1);
-  gt_encodedsequence_scanstate_delete(esr2);
+  gt_encseq_scanstate_delete(esr1);
+  gt_encseq_scanstate_delete(esr2);
   if (haserr)
   {
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
 
-void gt_showentiresuftab(const GtEncodedsequence *encseq,
+void gt_showentiresuftab(const GtEncseq *encseq,
                       GtReadmode readmode,
                       const unsigned long *suftab,
                       unsigned long depth)
 {
   const unsigned long *ptr;
-  unsigned long totallength = gt_encodedsequence_total_length(encseq);
+  unsigned long totallength = gt_encseq_total_length(encseq);
 
   for (ptr = suftab; ptr <= suftab + totallength; ptr++)
   {
@@ -162,7 +162,7 @@ void gt_showentiresuftab(const GtEncodedsequence *encseq,
 
 void gt_checksortedsuffixes(const char *filename,
                          int line,
-                         const GtEncodedsequence *encseq,
+                         const GtEncseq *encseq,
                          GtReadmode readmode,
                          const unsigned long *suftab,
                          unsigned long numberofsuffixes,
@@ -171,13 +171,13 @@ void gt_checksortedsuffixes(const char *filename,
                          unsigned long depth)
 {
   const unsigned long *ptr;
-  unsigned long maxlcp, totallength = gt_encodedsequence_total_length(encseq);
-  GtEncodedsequenceScanstate *esr1, *esr2;
+  unsigned long maxlcp, totallength = gt_encseq_total_length(encseq);
+  GtEncseqScanstate *esr1, *esr2;
   int cmp;
 
   gt_assert(!specialsareequal || specialsareequalatdepth0);
-  esr1 = gt_encodedsequence_scanstate_new_empty();
-  esr2 = gt_encodedsequence_scanstate_new_empty();
+  esr1 = gt_encseq_scanstate_new_empty();
+  esr2 = gt_encseq_scanstate_new_empty();
   gt_assert(numberofsuffixes > 0);
   gt_assert(*suftab < totallength);
   for (ptr = suftab + 1; ptr < suftab + numberofsuffixes; ptr++)
@@ -185,7 +185,7 @@ void gt_checksortedsuffixes(const char *filename,
     if (ptr < suftab + numberofsuffixes - 1)
     {
       gt_assert(*ptr < totallength);
-      cmp = gt_encodedsequence_comparetwosuffixes(encseq,
+      cmp = gt_encseq_comparetwosuffixes(encseq,
                                readmode,
                                &maxlcp,
                                specialsareequal,
@@ -218,13 +218,13 @@ void gt_checksortedsuffixes(const char *filename,
       }
     }
   }
-  gt_encodedsequence_scanstate_delete(esr1);
-  gt_encodedsequence_scanstate_delete(esr2);
+  gt_encseq_scanstate_delete(esr1);
+  gt_encseq_scanstate_delete(esr2);
 }
 
 void gt_checkentiresuftab(const char *filename,
                        int line,
-                       const GtEncodedsequence *encseq,
+                       const GtEncseq *encseq,
                        GtReadmode readmode,
                        const unsigned long *suftab,
                        unsigned long numberofsuffixes,
@@ -237,9 +237,9 @@ void gt_checkentiresuftab(const char *filename,
   const unsigned long *ptr;
   unsigned long maxlcp,
          currentlcp = 0,
-         totallength = gt_encodedsequence_total_length(encseq);
+         totallength = gt_encseq_total_length(encseq);
   int cmp;
-  GtEncodedsequenceScanstate *esr1, *esr2;
+  GtEncseqScanstate *esr1, *esr2;
   bool haserr = false;
 
 #ifdef INLINEDSequentialsuffixarrayreader
@@ -275,8 +275,8 @@ void gt_checkentiresuftab(const char *filename,
     }
     gt_free(startposoccurs);
   }
-  esr1 = gt_encodedsequence_scanstate_new_empty();
-  esr2 = gt_encodedsequence_scanstate_new_empty();
+  esr1 = gt_encseq_scanstate_new_empty();
+  esr2 = gt_encseq_scanstate_new_empty();
   gt_assert(numberofsuffixes > 0);
   gt_assert(*suftab < totallength);
   for (ptr = suftab + 1; !haserr && ptr < suftab + numberofsuffixes; ptr++)
@@ -284,7 +284,7 @@ void gt_checkentiresuftab(const char *filename,
     if (ptr < suftab + numberofsuffixes - 1)
     {
       gt_assert(*ptr < totallength);
-      cmp = gt_encodedsequence_comparetwosuffixes(encseq,
+      cmp = gt_encseq_comparetwosuffixes(encseq,
                                readmode,
                                &maxlcp,
                                specialsareequal,
@@ -340,12 +340,12 @@ void gt_checkentiresuftab(const char *filename,
                 "startpos=%lu,firstchar=%u",
                 (unsigned long) (ptr - suftab),
                 *(ptr-1),
-                (unsigned int) gt_encodedsequence_get_encoded_char(encseq,
+                (unsigned int) gt_encseq_get_encoded_char(encseq,
                                                                  *(ptr-1),
                                                                  readmode),
                 *ptr,
                 (*ptr < totallength)
-                ? (unsigned int) gt_encodedsequence_get_encoded_char(encseq,
+                ? (unsigned int) gt_encseq_get_encoded_char(encseq,
                                                                    *ptr,
                                                                    readmode)
                 : SEPARATOR);
@@ -357,8 +357,8 @@ void gt_checkentiresuftab(const char *filename,
       }
     }
   }
-  gt_encodedsequence_scanstate_delete(esr1);
-  gt_encodedsequence_scanstate_delete(esr2);
+  gt_encseq_scanstate_delete(esr1);
+  gt_encseq_scanstate_delete(esr2);
   if (haserr)
   {
     exit(GT_EXIT_PROGRAMMING_ERROR);

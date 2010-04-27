@@ -18,7 +18,7 @@
 #ifndef IDXLOCALISW_H
 #define IDXLOCALISW_H
 #include <inttypes.h>
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 #include "procmatch.h"
 
 typedef long Scoretype;
@@ -46,7 +46,7 @@ SWdpresource *gt_newSWdpresource(Scoretype matchscore,
                               void *processmatchinfo);
 
 void gt_multiapplysmithwaterman(SWdpresource *dpresource,
-                             const GtEncodedsequence *encseq,
+                             const GtEncseq *encseq,
                              const GtUchar *query,
                              unsigned long querylen);
 

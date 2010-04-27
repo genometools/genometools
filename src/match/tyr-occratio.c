@@ -32,7 +32,7 @@ typedef struct /* information stored for each node of the lcp interval tree */
 
 typedef struct /* global information */
 {
-  const GtEncodedsequence *encseq;
+  const GtEncseq *encseq;
   GtReadmode readmode;
   unsigned long totallength;
   unsigned long minmersize,
@@ -85,7 +85,7 @@ static void adddistributionuint64_t(GtArrayuint64_t *occdistribution,
 }
 
 static void iteritvdistribution(GtArrayuint64_t *distribution,
-                                const GtEncodedsequence *encseq,
+                                const GtEncseq *encseq,
                                 GtReadmode readmode,
                                 unsigned long totallength,
                                 unsigned long minmersize,
@@ -102,7 +102,7 @@ static void iteritvdistribution(GtArrayuint64_t *distribution,
          pos = startpos + length - 1;
          ulen <= (unsigned long) maxmersize &&
          pos < totallength &&
-         ISNOTSPECIAL(gt_encodedsequence_get_encoded_char(encseq,pos,readmode));
+         ISNOTSPECIAL(gt_encseq_get_encoded_char(encseq,pos,readmode));
          pos++, ulen++)
     {
       if (ulen >= (unsigned long) minmersize)
@@ -210,7 +210,7 @@ static int computeoccurrenceratio(Sequentialsuffixarrayreader *ssar,
   gt_error_check(err);
   state.encseq = gt_encseqSequentialsuffixarrayreader(ssar);
   state.readmode = gt_readmodeSequentialsuffixarrayreader(ssar);
-  state.totallength = gt_encodedsequence_total_length(state.encseq);
+  state.totallength = gt_encseq_total_length(state.encseq);
   state.minmersize = minmersize;
   state.maxmersize = maxmersize;
   state.uniquedistribution = uniquedistribution;

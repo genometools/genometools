@@ -20,10 +20,10 @@
 
 #include "compressedtab.h"
 
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 
 Compressedtable *gt_lcp9_manzini(Compressedtable *spacefortab,
-                              const GtEncodedsequence *encseq,
+                              const GtEncseq *encseq,
                               GtReadmode readmode,
                               unsigned long partwidth,
                               unsigned long totallength,

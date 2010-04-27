@@ -34,7 +34,7 @@ typedef struct
 struct GtBucketspec2
 {
   unsigned long partwidth;
-  const GtEncodedsequence *encseq;
+  const GtEncseq *encseq;
   GtReadmode readmode;
   unsigned int numofchars, numofcharssquared, prefixlength, *order;
   GtCodetype expandfactor, expandfillsum;
@@ -150,20 +150,20 @@ static GtCodetype expandtwocharcode(GtCodetype twocharcode,
 
 /*
 static unsigned long *leftcontextofspecialchardist(unsigned int numofchars,
-                                            const GtEncodedsequence *encseq,
+                                            const GtEncseq *encseq,
                                             GtReadmode readmode)
 {
   GtUchar cc;
   unsigned int idx;
   unsigned long *specialchardist,
-         totallength = gt_encodedsequence_total_length(encseq);
+         totallength = gt_encseq_total_length(encseq);
 
   specialchardist = gt_malloc(sizeof (*specialchardist) * numofchars);
   for (idx = 0; idx<numofchars; idx++)
   {
     specialchardist[idx] = 0;
   }
-  if (gt_encodedsequence_has_specialranges(encseq))
+  if (gt_encseq_has_specialranges(encseq))
   {
     GtSpecialrangeiterator *sri;
     GtRange range;
@@ -179,7 +179,7 @@ static unsigned long *leftcontextofspecialchardist(unsigned int numofchars,
       {
         if (range.rightpos < totallength)
         {
-          cc = gt_encodedsequence_get_encoded_char(encseq,range.rightpos,
+          cc = gt_encseq_get_encoded_char(encseq,range.rightpos,
                            readmode == GT_READMODE_REVERSE ? GT_READMODE_FORWARD
                                                    : GT_READMODE_COMPL);
           if (ISNOTSPECIAL(cc))
@@ -191,7 +191,7 @@ static unsigned long *leftcontextofspecialchardist(unsigned int numofchars,
       {
         if (range.leftpos > 0)
         {
-        cc = gt_encodedsequence_get_encoded_char(encseq,range.leftpos-1,
+        cc = gt_encseq_get_encoded_char(encseq,range.leftpos-1,
         *                                        readmode);
           if (ISNOTSPECIAL(cc))
           {
@@ -202,9 +202,9 @@ static unsigned long *leftcontextofspecialchardist(unsigned int numofchars,
     }
     gt_specialrangeiterator_delete(&sri);
   }
-  if (gt_encodedsequence_lengthofspecialsuffix(encseq) == 0)
+  if (gt_encseq_lengthofspecialsuffix(encseq) == 0)
   {
-    cc = gt_encodedsequence_get_encoded_char(encseq,totallength-1,readmode);
+    cc = gt_encseq_get_encoded_char(encseq,totallength-1,readmode);
     gt_assert(ISNOTSPECIAL(cc));
     specialchardist[cc]++;
   }
@@ -213,20 +213,20 @@ static unsigned long *leftcontextofspecialchardist(unsigned int numofchars,
 */
 
 static unsigned long *leftcontextofspecialchardist(unsigned int numofchars,
-                                            const GtEncodedsequence *encseq,
+                                            const GtEncseq *encseq,
                                             GtReadmode readmode)
 {
   GtUchar cc;
   unsigned int idx;
   unsigned long *specialchardist,
-         totallength = gt_encodedsequence_total_length(encseq);
+         totallength = gt_encseq_total_length(encseq);
 
   specialchardist = gt_malloc(sizeof (*specialchardist) * numofchars);
   for (idx = 0; idx<numofchars; idx++)
   {
     specialchardist[idx] = 0;
   }
-  if (gt_encodedsequence_has_specialranges(encseq))
+  if (gt_encseq_has_specialranges(encseq))
   {
     GtSpecialrangeiterator *sri;
     GtRange range;
@@ -241,7 +241,7 @@ static unsigned long *leftcontextofspecialchardist(unsigned int numofchars,
       {
         if (range.end < totallength)
         {
-          cc = gt_encodedsequence_get_encoded_char(encseq,range.end,
+          cc = gt_encseq_get_encoded_char(encseq,range.end,
                                                  thismode);
           if (ISNOTSPECIAL(cc))
           {
@@ -256,7 +256,7 @@ static unsigned long *leftcontextofspecialchardist(unsigned int numofchars,
         gt_assert(range.start < totallength);
         if (range.start > 0)
         {
-          cc = gt_encodedsequence_get_encoded_char(encseq,range.start-1,
+          cc = gt_encseq_get_encoded_char(encseq,range.start-1,
                                                  readmode);
           if (ISNOTSPECIAL(cc))
           {
@@ -267,9 +267,9 @@ static unsigned long *leftcontextofspecialchardist(unsigned int numofchars,
     }
     gt_specialrangeiterator_delete(sri);
   }
-  if (gt_encodedsequence_lengthofspecialsuffix(encseq) == 0)
+  if (gt_encseq_lengthofspecialsuffix(encseq) == 0)
   {
-    cc = gt_encodedsequence_get_encoded_char(encseq,totallength-1,readmode);
+    cc = gt_encseq_get_encoded_char(encseq,totallength-1,readmode);
     gt_assert(ISNOTSPECIAL(cc));
     specialchardist[cc]++;
   }
@@ -306,7 +306,7 @@ static void showexpandcode(const GtBucketspec2 *bucketspec2,
 {
   GtCodetype ecode, code2;
   const GtUchar *characters =
-                     gt_encodedsequence_alphabetcharacters(bucketspec2->encseq);
+                     gt_encseq_alphabetcharacters(bucketspec2->encseq);
 
   for (code2 = 0; code2 < (GtCodetype) bucketspec2->numofcharssquared; code2++)
   {
@@ -408,7 +408,7 @@ static void fillanysubbuckets(GtBucketspec2 *bucketspec2,
 }
 
 GtBucketspec2 *gt_bucketspec2_new(const Bcktab *bcktab,
-                                  const GtEncodedsequence *encseq,
+                                  const GtEncseq *encseq,
                                   GtReadmode readmode,
                                   unsigned long partwidth,
                                   unsigned int numofchars)
@@ -466,7 +466,7 @@ static void forwardderive(const GtBucketspec2 *bucketspec2,
     startpos = *idx;
     if (startpos > 0)
     {
-      cc = gt_encodedsequence_get_encoded_char(bucketspec2->encseq,
+      cc = gt_encseq_get_encoded_char(bucketspec2->encseq,
                                              startpos-1,
                                              bucketspec2->readmode);
       /*printf("fwd: superbucket[%u].sorted = %s\n",(unsigned int) cc,
@@ -495,7 +495,7 @@ static void backwardderive(const GtBucketspec2 *bucketspec2,
     startpos = *idx;
     if (startpos > 0)
     {
-      cc = gt_encodedsequence_get_encoded_char(bucketspec2->encseq,
+      cc = gt_encseq_get_encoded_char(bucketspec2->encseq,
                                              startpos-1,
                                              bucketspec2->readmode);
       /*printf("back: superbucket[%u].sorted = %s\n",(unsigned int) cc,
@@ -607,7 +607,7 @@ void gt_copysortsuffixes(const GtBucketspec2 *bucketspec2,
   gt_free(targetptr);
   gt_logger_log(logger,"hardwork = %lu (%.2f)",
         hardwork,
-        (double) hardwork/gt_encodedsequence_total_length(bucketspec2->encseq));
+        (double) hardwork/gt_encseq_total_length(bucketspec2->encseq));
 }
 
 void gt_bucketspec2_delete(GtBucketspec2 *bucketspec2)

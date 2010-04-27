@@ -25,7 +25,7 @@
 
 #include <stdlib.h>
 #include "core/defined-types.h"
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 #include "core/symboldef.h"
 #include "match/eis-mrangealphabet.h"
 #include "match/eis-random-seqaccess.h"
@@ -48,16 +48,16 @@ enum sfxDataRequest {
  * @return Symbol at position sufIdx or UNDEFBWTCHAR i.e. the terminator
  */
 static inline GtUchar
-sfxIdx2BWTSym(unsigned long sufIdx, const GtEncodedsequence *encseq,
+sfxIdx2BWTSym(unsigned long sufIdx, const GtEncseq *encseq,
               GtReadmode readmode);
 
 static inline size_t
-EncSeqGetSubSeq(const GtEncodedsequence *encseq, GtReadmode readmode,
+EncSeqGetSubSeq(const GtEncseq *encseq, GtReadmode readmode,
                 unsigned long pos, size_t len, GtUchar *subStr);
 
 struct encSeqTrState
 {
-  const GtEncodedsequence *encseq;
+  const GtEncseq *encseq;
   GtReadmode readmode;
 };
 
@@ -79,7 +79,7 @@ gt_translateSuftab2BWT(struct encSeqTrState *trState,
 struct encSeqLCPState
 {
   unsigned long lastSufIdx;
-  const GtEncodedsequence *encseq;
+  const GtEncseq *encseq;
   GtReadmode readmode;
 };
 

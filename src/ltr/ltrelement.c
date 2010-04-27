@@ -38,37 +38,37 @@ unsigned long gt_ltrelement_leftltrlen(GtLTRElement *e)
 }
 
 char* gt_ltrelement_get_sequence(unsigned long start, unsigned long end,
-                                 GtStrand strand, GtEncodedsequence *seq,
+                                 GtStrand strand, GtEncseq *seq,
                                  GtSeqinfo *seqinfo, GtError *err)
 {
   char *out;
   int had_err = 0;
   GtUchar *symbolstring;
   const GtAlphabet *alpha;
-  GtEncodedsequenceScanstate *ess;
+  GtEncseqScanstate *ess;
   unsigned long len, i;
 
   gt_assert(seq && end >= start);
   gt_error_check(err);
 
-  ess = gt_encodedsequence_scanstate_new_empty();
-  alpha = gt_encodedsequence_alphabet(seq);
+  ess = gt_encseq_scanstate_new_empty();
+  alpha = gt_encseq_alphabet(seq);
   len = end - start + 1;
 
   out          = gt_malloc((len + 1) * sizeof (char));
   symbolstring = gt_malloc((len + 1) * sizeof (GtUchar));
 
-  gt_encodedsequence_scanstate_init(ess, seq, GT_READMODE_FORWARD,
+  gt_encseq_scanstate_init(ess, seq, GT_READMODE_FORWARD,
                                seqinfo->seqstartpos + start);
   for (i=0;i<len;i++)
   {
-    symbolstring[i] = gt_encodedsequence_get_encoded_char_sequential(seq, ess,
+    symbolstring[i] = gt_encseq_get_encoded_char_sequential(seq, ess,
                                                seqinfo->seqstartpos + start + i,
                                                GT_READMODE_FORWARD);
   }
   gt_alphabet_decode_seq_to_cstr(alpha, out, symbolstring, len);
   gt_free(symbolstring);
-  gt_encodedsequence_scanstate_delete(ess);
+  gt_encseq_scanstate_delete(ess);
 
   if (strand == GT_STRAND_REVERSE)
     had_err = gt_reverse_complement(out, len, err);

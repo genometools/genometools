@@ -32,7 +32,7 @@
 #include "ltr/ltrdigest_def.h"
 #include "ltr/ltrdigest_stream.h"
 #include "ltr/ltrfileout_stream.h"
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 
 typedef struct GtLTRdigestOptions {
   GtPBSOptions  pbs_opts;
@@ -405,7 +405,7 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
   GtLogger *logger = gt_logger_new(arguments->verbose,
                                    GT_LOGGER_DEFLT_PREFIX, stdout);
   GtEncseqLoader *el;
-  GtEncodedsequence *encseq;
+  GtEncseq *encseq;
   gt_error_check(err);
   gt_assert(arguments);
 
@@ -511,7 +511,7 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
 
   gt_str_delete(indexname);
   gt_encseq_loader_delete(el);
-  gt_encodedsequence_delete(encseq);
+  gt_encseq_delete(encseq);
   encseq = NULL;
   gt_bioseq_delete(arguments->pbs_opts.trna_lib);
   gt_logger_delete(logger);

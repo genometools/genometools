@@ -20,7 +20,7 @@
 #include "core/minmax.h"
 
 #include "spacedef.h"
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 #include "lcpoverflow.h"
 #include "bltrie-ssort.h"
 
@@ -55,8 +55,8 @@ GT_DECLAREARRAYSTRUCT(Nodeptr);
 
 struct Blindtrie
 {
-  const GtEncodedsequence *encseq;
-  GtEncodedsequenceScanstate *esr1, *esr2;
+  const GtEncseq *encseq;
+  GtEncseqScanstate *esr1, *esr2;
   GtReadmode readmode;
   unsigned long totallength,
          offset,
@@ -125,7 +125,7 @@ static Nodeptr makeroot(Blindtrie *blindtrie,unsigned long currentstartpos)
   if (isleftofboundary(currentstartpos,0,blindtrie))
   {
     /* Random access */
-    firstchar = gt_encodedsequence_get_encoded_char(blindtrie->encseq,
+    firstchar = gt_encseq_get_encoded_char(blindtrie->encseq,
                                                   currentstartpos,
                                                   blindtrie->readmode);
     if (firstchar == (GtUchar) WILDCARD)
@@ -195,7 +195,7 @@ static Nodeptr findcompanion(Blindtrie *blindtrie,unsigned long currentstartpos)
     if (isleftofboundary(currentstartpos,head->depth,blindtrie))
     {
       /* Random access */
-      newchar = gt_encodedsequence_get_encoded_char(blindtrie->encseq,
+      newchar = gt_encseq_get_encoded_char(blindtrie->encseq,
                                                   currentstartpos + head->depth,
                                                   blindtrie->readmode);
       if (newchar == (GtUchar) WILDCARD)
@@ -283,15 +283,15 @@ static unsigned long cmpcharbychargetlcp(GtUchar *mm_oldsuffix,
   unsigned long lcp;
   GtUchar cc1, cc2;
 
-  gt_encodedsequence_scanstate_init(blindtrie->esr1,blindtrie->encseq,
+  gt_encseq_scanstate_init(blindtrie->esr1,blindtrie->encseq,
                                blindtrie->readmode,leafpos);
-  gt_encodedsequence_scanstate_init(blindtrie->esr2,blindtrie->encseq,
+  gt_encseq_scanstate_init(blindtrie->esr2,blindtrie->encseq,
                                blindtrie->readmode,currentstartpos);
   for (lcp = 0; /* Nothing */; lcp++)
   {
     if (isleftofboundary(leafpos,lcp,blindtrie))
     {
-      cc1 = gt_encodedsequence_get_encoded_char_sequential(blindtrie->encseq,
+      cc1 = gt_encseq_get_encoded_char_sequential(blindtrie->encseq,
                                                         blindtrie->esr1,
                                                         leafpos+lcp,
                                                         blindtrie->readmode);
@@ -305,7 +305,7 @@ static unsigned long cmpcharbychargetlcp(GtUchar *mm_oldsuffix,
     }
     if (isleftofboundary(currentstartpos,lcp,blindtrie))
     {
-      cc2 = gt_encodedsequence_get_encoded_char_sequential(blindtrie->encseq,
+      cc2 = gt_encseq_get_encoded_char_sequential(blindtrie->encseq,
                                                         blindtrie->esr2,
                                                         currentstartpos+lcp,
                                                         blindtrie->readmode);
@@ -338,7 +338,7 @@ static unsigned long fastgetlcp(GtUchar *mm_oldsuffix,
 
   if (blindtrie->maxdepth == 0)
   {
-    (void) gt_encodedsequence_compare(blindtrie->encseq,
+    (void) gt_encseq_compare(blindtrie->encseq,
                                       &commonunits,
                                       GT_ISDIRREVERSE(blindtrie->readmode)
                                       ? false : true,
@@ -351,7 +351,7 @@ static unsigned long fastgetlcp(GtUchar *mm_oldsuffix,
                                       0);
   } else
   {
-    (void) gt_encodedsequence_compare_maxdepth(blindtrie->encseq,
+    (void) gt_encseq_compare_maxdepth(blindtrie->encseq,
                                                &commonunits,
                                                GT_ISDIRREVERSE(
                                                             blindtrie->readmode)
@@ -369,10 +369,10 @@ static unsigned long fastgetlcp(GtUchar *mm_oldsuffix,
   if (isleftofboundary(leafpos,commonunits.finaldepth,blindtrie) &&
       !commonunits.leftspecial)
   {
-    *mm_oldsuffix = gt_encodedsequence_extract_encoded_char(blindtrie->encseq,
-                                                         leafpos +
-                                                         commonunits.finaldepth,
-                                                         blindtrie->readmode);
+    *mm_oldsuffix = gt_encseq_extract_encoded_char(blindtrie->encseq,
+                                                   leafpos +
+                                                     commonunits.finaldepth,
+                                                   blindtrie->readmode);
   } else
   {
     *mm_oldsuffix = (GtUchar) SEPARATOR;
@@ -380,10 +380,10 @@ static unsigned long fastgetlcp(GtUchar *mm_oldsuffix,
   if (isleftofboundary(currentstartpos,commonunits.finaldepth,blindtrie) &&
       !commonunits.rightspecial)
   {
-    *mm_newsuffix = gt_encodedsequence_extract_encoded_char(blindtrie->encseq,
-                                       currentstartpos +
-                                       commonunits.finaldepth,
-                                       blindtrie->readmode);
+    *mm_newsuffix = gt_encseq_extract_encoded_char(blindtrie->encseq,
+                                                   currentstartpos +
+                                                   commonunits.finaldepth,
+                                                   blindtrie->readmode);
   } else
   {
     *mm_newsuffix = (GtUchar) SEPARATOR;
@@ -508,10 +508,10 @@ static unsigned long enumeratetrieleaves (unsigned long *suffixtable,
 }
 
 Blindtrie *gt_blindtrie_new(unsigned long numofsuffixes,
-                         const GtEncodedsequence *encseq,
+                         const GtEncseq *encseq,
                          bool cmpcharbychar,
-                         GtEncodedsequenceScanstate *esr1,
-                         GtEncodedsequenceScanstate *esr2,
+                         GtEncseqScanstate *esr1,
+                         GtEncseqScanstate *esr2,
                          GtReadmode readmode)
 {
   Blindtrie *blindtrie;
@@ -532,7 +532,7 @@ Blindtrie *gt_blindtrie_new(unsigned long numofsuffixes,
   blindtrie->root = NULL;
   blindtrie->esr1 = esr1;
   blindtrie->esr2 = esr2;
-  blindtrie->totallength = gt_encodedsequence_total_length(encseq);
+  blindtrie->totallength = gt_encseq_total_length(encseq);
   blindtrie->cmpcharbychar = cmpcharbychar;
   GT_INITARRAY (&blindtrie->stack, Nodeptr);
   return blindtrie;
@@ -557,7 +557,7 @@ static void checkcurrentblindtrie(Blindtrie *blindtrie)
   for (idx=1UL; idx < numofsuffixes; idx++)
   {
     maxcommon = 0;
-    retval = gt_encodedsequence_comparetwostringsgeneric(blindtrie->encseq,
+    retval = gt_encseq_comparetwostringsgeneric(blindtrie->encseq,
                                       GT_ISDIRREVERSE(blindtrie->readmode)
                                         ? false : true,
                                       GT_ISDIRCOMPLEMENT(blindtrie->readmode)

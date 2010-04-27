@@ -21,7 +21,7 @@
 #include <stdbool.h>
 #include "core/alphabet.h"
 #include "core/arraydef.h"
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 #include "core/pairbwtidx.h"
 #include "core/ulongbound.h"
 
@@ -82,7 +82,7 @@ typedef int(*FMprocessqhit)(void *,unsigned long,unsigned long);
 typedef struct
 {
   /* Note: do not use specialcharinfo of bwtformatching */
-  GtEncodedsequence *bwtformatching;
+  GtEncseq *bwtformatching;
   GtUchar *bfreq;            /* bfreq[c][i] = #c in block i */
   unsigned long bwtlength,        /* also totallength + 1 */
          *tfreq,           /* tfreq[c] = #characters < c in text */

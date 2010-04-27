@@ -18,18 +18,18 @@
 #ifndef ESA_MMSEARCH_H
 #define ESA_MMSEARCH_H
 #include "core/error.h"
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 #include "querymatch.h"
 
 typedef int (*Processquerymatch)(void *,
-                                 const GtEncodedsequence *,
+                                 const GtEncseq *,
                                  const Querymatch *,
                                  GtError *);
 
 typedef struct MMsearchiterator MMsearchiterator;
 
 MMsearchiterator *gt_newmmsearchiteratorcomplete_plain(
-                                    const GtEncodedsequence *dbencseq,
+                                    const GtEncseq *dbencseq,
                                     const unsigned long *suftab,
                                     unsigned long leftbound,
                                     unsigned long rightbound,

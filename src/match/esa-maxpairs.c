@@ -62,7 +62,7 @@ typedef struct  /* global information */
                alphabetsize;
   GtArrayGtUlong uniquechar,
               *poslist;
-  const GtEncodedsequence *encseq;
+  const GtEncseq *encseq;
   GtReadmode readmode;
   Processmaxpairs processmaxpairs;
   void *processmaxpairsinfo;
@@ -221,7 +221,7 @@ static int processleafedge(bool firstsucc,
   } else
   {
     /* Random access */
-    leftchar = gt_encodedsequence_get_encoded_char(state->encseq,
+    leftchar = gt_encseq_get_encoded_char(state->encseq,
                                                  leafnumber-1,
                                                  state->readmode);
   }
@@ -366,7 +366,7 @@ static int processbranchedge(bool firstsucc,
 }
 
 int gt_enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
-                      const GtEncodedsequence *encseq,
+                      const GtEncseq *encseq,
                       GtReadmode readmode,
                       unsigned int searchlength,
                       Processmaxpairs processmaxpairs,
@@ -380,7 +380,7 @@ int gt_enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
   bool haserr = false;
 
   state.alphabetsize = gt_alphabet_num_of_chars(
-                                           gt_encodedsequence_alphabet(encseq));
+                                           gt_encseq_alphabet(encseq));
   state.searchlength = searchlength;
   state.processmaxpairs = processmaxpairs;
   state.processmaxpairsinfo = processmaxpairsinfo;

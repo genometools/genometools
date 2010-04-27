@@ -19,14 +19,14 @@
 #define SFX_COPYSORT_H
 
 #include "core/codetype.h"
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 #include "core/logger.h"
 #include "bcktab.h"
 
 typedef struct GtBucketspec2 GtBucketspec2;
 
 GtBucketspec2 *gt_bucketspec2_new(const Bcktab *bcktab,
-                                  const GtEncodedsequence *encseq,
+                                  const GtEncseq *encseq,
                                   GtReadmode readmode,
                                   unsigned long partwidth,
                                   unsigned int numofchars);

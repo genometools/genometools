@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 #include "spacedef.h"
 #include "esa-lcpval.h"
 
@@ -24,18 +24,18 @@
   unsigned long relpos,
          lastsuftabentry;
   GtReadmode readmode;
-  const GtEncodedsequence *encseq;
-  GtEncodedsequenceScanstate *esr1, *esr2;
+  const GtEncseq *encseq;
+  GtEncseqScanstate *esr1, *esr2;
 };
 
-Lcpvalueiterator *gt_newLcpvalueiterator(const GtEncodedsequence *encseq,
+Lcpvalueiterator *gt_newLcpvalueiterator(const GtEncseq *encseq,
                                       GtReadmode readmode)
 {
   Lcpvalueiterator *lvi;
 
   ALLOCASSIGNSPACE(lvi,NULL,Lcpvalueiterator,1);
-  lvi->esr1 = gt_encodedsequence_scanstate_new_empty();
-  lvi->esr2 = gt_encodedsequence_scanstate_new_empty();
+  lvi->esr1 = gt_encseq_scanstate_new_empty();
+  lvi->esr2 = gt_encseq_scanstate_new_empty();
   lvi->encseq = encseq;
   lvi->relpos = 0;
   lvi->readmode = readmode;
@@ -58,7 +58,7 @@ unsigned long gt_nextLcpvalueiterator(Lcpvalueiterator *lvi,
   {
     int cmp;
 
-    cmp = gt_encodedsequence_comparetwosuffixes(lvi->encseq,
+    cmp = gt_encseq_comparetwosuffixes(lvi->encseq,
                              lvi->readmode,
                              &lcpvalue,
                              false,
@@ -96,7 +96,7 @@ unsigned long gt_nextLcpvalueiterator(Lcpvalueiterator *lvi,
 
 void gt_freeLcpvalueiterator(Lcpvalueiterator **lvi)
 {
-  gt_encodedsequence_scanstate_delete((*lvi)->esr1);
-  gt_encodedsequence_scanstate_delete((*lvi)->esr2);
+  gt_encseq_scanstate_delete((*lvi)->esr1);
+  gt_encseq_scanstate_delete((*lvi)->esr2);
   FREESPACE(*lvi);
 }

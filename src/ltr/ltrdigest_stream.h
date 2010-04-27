@@ -25,7 +25,7 @@
 #ifdef HAVE_HMMER
 #include "ltr/pdom.h"
 #endif
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 
 /* implements the ``node stream'' interface */
 typedef struct GtLTRdigestStream GtLTRdigestStream;
@@ -34,7 +34,7 @@ const GtNodeStreamClass* gt_ltrdigest_stream_class(void);
 
 GtNodeStream* gt_ltrdigest_stream_new(GtNodeStream *in_stream,
                                       int tests_to_run,
-                                      GtEncodedsequence *encseq,
+                                      GtEncseq *encseq,
                                       GtPBSOptions *pbs_opts,
                                       GtPPTOptions *ppt_opts,
 #ifdef HAVE_HMMER

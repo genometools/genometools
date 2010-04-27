@@ -24,7 +24,7 @@
 #include "core/str_array_api.h"
 #include "core/readmode.h"
 
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 
 void gt_symbolstring2fasta(FILE *fpout,
                         const char *desc,
@@ -34,20 +34,20 @@ void gt_symbolstring2fasta(FILE *fpout,
                         unsigned long width);
 
 void gt_encseq2symbolstring(FILE *fpout,
-                         const GtEncodedsequence *encseq,
+                         const GtEncseq *encseq,
                          GtReadmode readmode,
                          unsigned long start,
                          unsigned long wlen,
                          unsigned long width);
 
 void gt_fprintfencseq(FILE *fpout,
-                   const GtEncodedsequence *encseq,
+                   const GtEncseq *encseq,
                    unsigned long start,
                    unsigned long wlen);
 
 void gt_encseq2fastaoutput(FILE *fpout,
                         const char *desc,
-                        const GtEncodedsequence *encseq,
+                        const GtEncseq *encseq,
                         GtReadmode readmode,
                         unsigned long start,
                         unsigned long wlen,

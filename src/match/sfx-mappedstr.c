@@ -26,7 +26,6 @@
 #include "core/checkencchar.h"
 #include "core/divmodmul.h"
 #include "core/alphabet.h"
-#include "core/encodedsequence_api.h"
 #include "core/error_api.h"
 #include "core/sequence_buffer_fasta.h"
 #include "core/sequence_buffer_plain.h"
@@ -405,8 +404,8 @@ static void kmerstream_delete(Kmerstream *spwp)
 struct GtKmercodeiterator
 {
   unsigned long totallength;
-  const GtEncodedsequence *encseq;
-  GtEncodedsequenceScanstate *esr;
+  const GtEncseq *encseq;
+  GtEncseqScanstate *esr;
   GtReadmode readmode;
   Kmerstream *spwp;
   unsigned long currentposition;
@@ -416,7 +415,7 @@ struct GtKmercodeiterator
 };
 
 /*@notnull@*/ GtKmercodeiterator *gt_kmercodeiterator_encseq_new(
-                                            const GtEncodedsequence *encseq,
+                                            const GtEncseq *encseq,
                                             GtReadmode readmode,
                                             unsigned int kmersize)
 {
@@ -425,7 +424,7 @@ struct GtKmercodeiterator
   GtUchar charcode;
 
   kmercodeiterator = gt_malloc(sizeof(*kmercodeiterator));
-  kmercodeiterator->totallength = gt_encodedsequence_total_length(encseq);
+  kmercodeiterator->totallength = gt_encseq_total_length(encseq);
   if (kmercodeiterator->totallength < (unsigned long) kmersize)
   {
     kmercodeiterator->inputexhausted = true;
@@ -439,15 +438,15 @@ struct GtKmercodeiterator
     kmercodeiterator->fb = NULL;
     kmercodeiterator->encseq = encseq;
     kmercodeiterator->readmode = readmode;
-    kmercodeiterator->esr = gt_encodedsequence_scanstate_new(encseq,readmode,0);
-    numofchars = gt_alphabet_num_of_chars(gt_encodedsequence_alphabet(encseq));
+    kmercodeiterator->esr = gt_encseq_scanstate_new(encseq,readmode,0);
+    numofchars = gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq));
     kmercodeiterator->spwp = kmerstream_new(numofchars,kmersize);
     kmercodeiterator->hasprocessedfirst = false;
     for (kmercodeiterator->currentposition = 0;
          kmercodeiterator->currentposition < (unsigned long) kmersize;
          kmercodeiterator->currentposition++)
     {
-      charcode = gt_encodedsequence_get_encoded_char_sequential(encseq,
+      charcode = gt_encseq_get_encoded_char_sequential(encseq,
                                             kmercodeiterator->esr,
                                             kmercodeiterator->currentposition,
                                             readmode);
@@ -467,7 +466,7 @@ const GtKmercode *gt_kmercodeiterator_encseq_next(
   {
     if (kmercodeiterator->hasprocessedfirst)
     {
-      GtUchar charcode = gt_encodedsequence_get_encoded_char_sequential(
+      GtUchar charcode = gt_encseq_get_encoded_char_sequential(
                                               kmercodeiterator->encseq,
                                               kmercodeiterator->esr,
                                               kmercodeiterator->currentposition,
@@ -619,13 +618,13 @@ void gt_kmercodeiterator_delete(GtKmercodeiterator *kmercodeiterator)
   {
     return;
   }
-  gt_encodedsequence_scanstate_delete(kmercodeiterator->esr);
+  gt_encseq_scanstate_delete(kmercodeiterator->esr);
   kmerstream_delete(kmercodeiterator->spwp);
   gt_sequence_buffer_delete(kmercodeiterator->fb);
   gt_free(kmercodeiterator);
 }
 
-void getencseqkmers(const GtEncodedsequence *encseq,
+void getencseqkmers(const GtEncseq *encseq,
                     GtReadmode readmode,
                     unsigned int kmersize,
                     void(*processkmercode)(void *,
@@ -636,23 +635,23 @@ void getencseqkmers(const GtEncodedsequence *encseq,
   unsigned long currentposition = 0, totallength;
   Kmerstream *spwp;
   GtUchar charcode;
-  GtEncodedsequenceScanstate *esr;
+  GtEncseqScanstate *esr;
   unsigned int numofchars, overshoot;
 
-  totallength = gt_encodedsequence_total_length(encseq);
+  totallength = gt_encseq_total_length(encseq);
   if (totallength < (unsigned long) kmersize)
   {
     return;
   }
-  numofchars = gt_alphabet_num_of_chars(gt_encodedsequence_alphabet(encseq));
+  numofchars = gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq));
   spwp = kmerstream_new(numofchars,kmersize);
-  esr = gt_encodedsequence_scanstate_new(encseq,readmode,0);
+  esr = gt_encseq_scanstate_new(encseq,readmode,0);
   for (currentposition = 0; currentposition<(unsigned long) kmersize;
        currentposition++)
   {
-    charcode = gt_encodedsequence_get_encoded_char_sequential(encseq,esr,
-                                                              currentposition,
-                                                              readmode);
+    charcode = gt_encseq_get_encoded_char_sequential(encseq,esr,
+                                                     currentposition,
+                                                     readmode);
     GT_CHECKENCCHAR(charcode,encseq,currentposition,readmode);
     spwp->windowwidth++;
     updatespecialpositions(spwp,charcode,false,0);
@@ -663,9 +662,8 @@ void getencseqkmers(const GtEncodedsequence *encseq,
   for (currentposition = (unsigned long) kmersize; currentposition<totallength;
        currentposition++)
   {
-    charcode = gt_encodedsequence_get_encoded_char_sequential(encseq,esr,
-                                                              currentposition,
-                                                              readmode);
+    charcode = gt_encseq_get_encoded_char_sequential(encseq,esr,currentposition,
+                                                     readmode);
     GT_CHECKENCCHAR(charcode,encseq,currentposition,readmode);
     shiftrightwithchar(spwp,charcode);
     newcode(&spwp->currentkmercode,spwp);
@@ -674,7 +672,7 @@ void getencseqkmers(const GtEncodedsequence *encseq,
   }
   if (esr != NULL)
   {
-    gt_encodedsequence_scanstate_delete(esr);
+    gt_encseq_scanstate_delete(esr);
   }
   for (overshoot=0; overshoot<kmersize; overshoot++)
   {

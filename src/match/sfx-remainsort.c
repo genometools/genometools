@@ -26,7 +26,7 @@
 #include "core/qsort_r.h"
 #include "core/hashmap-generic.h"
 #include "core/minmax.h"
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 #include "core/intbits.h"
 #include "bcktab.h"
 #include "compressedtab.h"
@@ -128,7 +128,7 @@ struct Rmnsufinfo
   unsigned long firstgenerationtotalwidth,
                 firstgenerationcount;
   RmsFirstwithnewdepth firstwithnewdepth;
-  GtEncodedsequenceScanstate *esr;
+  GtEncseqScanstate *esr;
   unsigned long longestrel;
   unsigned int prefixlength,
                numofchars;
@@ -143,7 +143,7 @@ struct Rmnsufinfo
   unsigned long partwidth,
          totallength;
   GtReadmode readmode;
-  const GtEncodedsequence *encseq;
+  const GtEncseq *encseq;
   const GtCodetype **multimappower;
   unsigned long *sortedsuffixes;
 };
@@ -172,17 +172,17 @@ static void initsortblock(Sortblock *sortblock,
 
 #ifdef Lowerboundwithrank
 static Lowerboundwithrank *filllowerboundwithrank(
-                                                const GtEncodedsequence *encseq,
+                                                const GtEncseq *encseq,
                                                 GtReadmode readmode)
 {
-  if (gt_encodedsequence_has_specialranges(encseq))
+  if (gt_encseq_has_specialranges(encseq))
   {
     GtSpecialrangeiterator *sri;
     GtRange range;
     unsigned long currentrank = 0, realspecialranges;
     Lowerboundwithrank *lowerboundwithrank, *lbptr;
 
-    realspecialranges = gt_encodedsequence_realspecialranges(encseq);
+    realspecialranges = gt_encseq_realspecialranges(encseq);
     lowerboundwithrank = gt_malloc(sizeof (*lowerboundwithrank) *
                                    realspecialranges);
     printf("lowerboundwithrank requires %lu bytes\n",
@@ -266,7 +266,7 @@ DEFINE_HASHMAP(unsigned long, seqpos, unsigned long, ul, gt_ht_seqpos_elem_hash,
 
 Rmnsufinfo *gt_newRmnsufinfo(unsigned long *presortedsuffixes,
                           int mmapfiledesc,
-                          const GtEncodedsequence *encseq,
+                          const GtEncseq *encseq,
                           Bcktab *bcktab,
                           GtCodetype maxcode,
                           unsigned int numofchars,
@@ -279,7 +279,7 @@ Rmnsufinfo *gt_newRmnsufinfo(unsigned long *presortedsuffixes,
   Rmnsufinfo *rmnsufinfo;
 
   rmnsufinfo = gt_malloc(sizeof (Rmnsufinfo));
-  rmnsufinfo->totallength = gt_encodedsequence_total_length(encseq);
+  rmnsufinfo->totallength = gt_encseq_total_length(encseq);
   rmnsufinfo->partwidth = partwidth;
   rmnsufinfo->encseq = encseq;
   rmnsufinfo->readmode = readmode;
@@ -360,9 +360,9 @@ Rmnsufinfo *gt_newRmnsufinfo(unsigned long *presortedsuffixes,
   rmnsufinfo->itvfullinfo = NULL;
   rmnsufinfo->rangestobesorted = gt_inl_queue_new(MAX(16UL,GT_DIV2(maxcode)));
   rmnsufinfo->multimappower = gt_bcktab_multimappower(bcktab);
-  rmnsufinfo->esr = gt_encodedsequence_scanstate_new_empty();
+  rmnsufinfo->esr = gt_encseq_scanstate_new_empty();
   GT_INITARRAY(&rmnsufinfo->firstgeneration,RmsPairsuffixptr);
-  rmnsufinfo->realspecialranges = gt_encodedsequence_realspecialranges(encseq);
+  rmnsufinfo->realspecialranges = gt_encseq_realspecialranges(encseq);
   rmnsufinfo->filltable = gt_filllargestchartable(numofchars,prefixlength);
 #ifdef Lowerboundwithrank
   rmnsufinfo->lowerboundwithrank = filllowerboundwithrank(encseq,readmode);
@@ -559,7 +559,7 @@ static void inversesuftabrel_get(RmsItvfullentry *itvfullentry,
     itvfullentry->rank = rmnsufinfo->totallength;
     return;
   }
-  code = gt_encodedsequence_extractprefixcode(&itvfullentry->unitsnotspecial,
+  code = gt_encseq_extractprefixcode(&itvfullentry->unitsnotspecial,
                            rmnsufinfo->encseq,
                            rmnsufinfo->filltable,
                            rmnsufinfo->readmode,
@@ -627,7 +627,7 @@ static void rms_initinversesuftabspecials(Rmnsufinfo *rmnsufinfo)
                                                   rmnsufinfo->totallength);
   rms_inversesuftab_set(rmnsufinfo,rmnsufinfo->totallength,
                         rmnsufinfo->totallength);
-  if (gt_encodedsequence_has_specialranges(rmnsufinfo->encseq))
+  if (gt_encseq_has_specialranges(rmnsufinfo->encseq))
   {
     GtSpecialrangeiterator *sri;
     GtRange range;
@@ -1363,7 +1363,7 @@ Compressedtable *gt_rmnsufinfo_wrap(unsigned long *longest,
   rmnsufinfo->lowerboundwithrank = NULL;
 #endif
   gt_assert(rmnsufinfo->esr != NULL);
-  gt_encodedsequence_scanstate_delete(rmnsufinfo->esr);
+  gt_encseq_scanstate_delete(rmnsufinfo->esr);
   gt_free(rmnsufinfo);
   rmnsufinfoptr = NULL;
   return lcptab;

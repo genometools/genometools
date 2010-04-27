@@ -91,7 +91,7 @@ static int gt_prebwt_runner(GT_UNUSED int argc,
     haserr = true;
   } else
   {
-    totallength = gt_encodedsequence_total_length(suffixarray.encseq);
+    totallength = gt_encseq_total_length(suffixarray.encseq);
   }
   if (!haserr)
   {
@@ -106,7 +106,7 @@ static int gt_prebwt_runner(GT_UNUSED int argc,
   if (!haserr)
   {
     unsigned int numofchars = gt_alphabet_num_of_chars(
-                               gt_encodedsequence_alphabet(suffixarray.encseq));
+                               gt_encseq_alphabet(suffixarray.encseq));
     Pckbuckettable *pckbt;
 
     pckbt = gt_pckbuckettable_new((const void *) packedindex,

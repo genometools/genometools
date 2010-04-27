@@ -63,14 +63,14 @@ typedef struct /* global information */
          totallength;
   unsigned long minocc,
                 maxocc;
-  const GtEncodedsequence *encseq;
+  const GtEncseq *encseq;
   GtReadmode readmode;
   Processoccurrencecount processoccurrencecount;
   GtArrayCountwithpositions occdistribution;
   FILE *merindexfpout,
        *countsfilefpout;
   bool moveforward;
-  GtEncodedsequenceScanstate *esrspace;
+  GtEncseqScanstate *esrspace;
   bool performtest;
   bool storecounts;
   GtUchar *bytebuffer;
@@ -90,7 +90,7 @@ static uint64_t bruteforcecountnumofmers(const TyrDfsstate *state)
 
   for (idx=0; idx <= state->totallength - state->mersize; idx++)
   {
-    if (!gt_encodedsequence_contains_special(state->encseq,
+    if (!gt_encseq_contains_special(state->encseq,
                                              state->moveforward,
                                              state->esrspace,
                                              idx,
@@ -127,7 +127,7 @@ static void checknumberofoccurrences(const TyrDfsstate *dfsstate,
   for (idx = 0; idx < dfsstate->mersize; idx++)
   {
     dfsstate->currentmer[idx] =
-              gt_encodedsequence_get_encoded_char(dfsstate->encseq,position+idx,
+              gt_encseq_get_encoded_char(dfsstate->encseq,position+idx,
                                                 dfsstate->readmode);
   }
   mmsi = gt_newmmsearchiteratorcomplete_plain(dfsstate->encseq,
@@ -180,7 +180,7 @@ static void wrapListSeqpos(ListSeqpos *node)
   }
 }
 
-static void showListSeqpos(const GtEncodedsequence *encseq,
+static void showListSeqpos(const GtEncseq *encseq,
                            unsigned long mersize,
                            const ListSeqpos *node)
 {
@@ -345,7 +345,7 @@ static int adddistpos2distribution(unsigned long countocc,
 
 #define MAXSMALLMERCOUNT UCHAR_MAX
 
-static int outputsortedstring2indexviafileptr(const GtEncodedsequence *encseq,
+static int outputsortedstring2indexviafileptr(const GtEncseq *encseq,
                                               unsigned long mersize,
                                               GtUchar *bytebuffer,
                                               unsigned long sizeofbuffer,
@@ -357,7 +357,7 @@ static int outputsortedstring2indexviafileptr(const GtEncodedsequence *encseq,
                                               unsigned long countoutputmers,
                                               GtError *err)
 {
-  gt_encodedsequence_sequence2bytecode(bytebuffer,encseq,position,mersize);
+  gt_encseq_sequence2bytecode(bytebuffer,encseq,position,mersize);
   if (fwrite(bytebuffer, sizeof (*bytebuffer),
              (size_t) sizeofbuffer,merindexfpout)
             != (size_t) sizeofbuffer)
@@ -439,9 +439,9 @@ static void tyr_freeDfsinfo(Dfsinfo *adfsinfo, GT_UNUSED Dfsstate *state)
 }
 
 #ifdef WITHcontainsspecial2
-static bool containsspecial2(const GtEncodedsequence *encseq,
+static bool containsspecial2(const GtEncseq *encseq,
                      GT_UNUSED bool moveforward,
-                     GT_UNUSED GtEncodedsequenceScanstate *esrspace,
+                     GT_UNUSED GtEncseqScanstate *esrspace,
                      unsigned long startpos,
                      unsigned long len)
 {
@@ -450,7 +450,7 @@ static bool containsspecial2(const GtEncodedsequence *encseq,
 
   for (pos=startpos; pos<startpos+len; pos++)
   {
-    if (ISSPECIAL(gt_encodedsequence_get_encoded_char(encseq,
+    if (ISSPECIAL(gt_encseq_get_encoded_char(encseq,
                                                     pos,
                                                     GT_READMODE_FORWARD)))
     {
@@ -486,7 +486,7 @@ static int tyr_processleafedge(GT_UNUSED bool firstsucc,
   gt_error_check(err);
   if (fatherdepth < state->mersize &&
       leafnumber + state->mersize <= state->totallength &&
-      !gt_encodedsequence_contains_special(state->encseq,
+      !gt_encseq_contains_special(state->encseq,
                                            state->moveforward,
                                            state->esrspace,
                                            leafnumber + fatherdepth,
@@ -583,17 +583,17 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
 
   gt_error_check(err);
   GT_INITARRAY(&state.occdistribution,Countwithpositions);
-  state.esrspace = gt_encodedsequence_scanstate_new_empty();
+  state.esrspace = gt_encseq_scanstate_new_empty();
   state.mersize = (unsigned long) mersize;
   state.encseq = gt_encseqSequentialsuffixarrayreader(ssar);
   alphasize = gt_alphabet_num_of_chars(
-                                     gt_encodedsequence_alphabet(state.encseq));
+                                     gt_encseq_alphabet(state.encseq));
   state.readmode = gt_readmodeSequentialsuffixarrayreader(ssar);
   state.storecounts = storecounts;
   state.minocc = minocc;
   state.maxocc = maxocc;
   state.moveforward = GT_ISDIRREVERSE(state.readmode) ? false : true;
-  state.totallength = gt_encodedsequence_total_length(state.encseq);
+  state.totallength = gt_encseq_total_length(state.encseq);
   state.performtest = performtest;
   state.countoutputmers = 0;
   state.merindexfpout = NULL;
@@ -720,7 +720,7 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   FREESPACE(state.currentmer);
   FREESPACE(state.bytebuffer);
   GT_FREEARRAY(&state.largecounts,Largecount);
-  gt_encodedsequence_scanstate_delete(state.esrspace);
+  gt_encseq_scanstate_delete(state.esrspace);
   return haserr ? -1 : 0;
 }
 

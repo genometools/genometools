@@ -227,7 +227,7 @@ static int nextesamergedsufbwttabvalues(Definedunsignedlong *longest,
   } else
   {
     *bwtvalue
-      = gt_encodedsequence_get_encoded_char( /* Random access */
+      = gt_encseq_get_encoded_char( /* Random access */
            emmesa->suffixarraytable[indexedsuffix.idx].encseq,
            indexedsuffix.startpos-1,
            emmesa->suffixarraytable[indexedsuffix.idx].readmode);
@@ -286,7 +286,7 @@ int gt_sufbwt2fmindex(Fmindex *fmindex,
       haserr = true;
     } else
     {
-      totallength = gt_encodedsequence_total_length(suffixarray.encseq);
+      totallength = gt_encseq_total_length(suffixarray.encseq);
     }
     if (!haserr && gt_specialcharinfo_read(specialcharinfo,indexname,err) != 0)
     {
@@ -295,7 +295,7 @@ int gt_sufbwt2fmindex(Fmindex *fmindex,
     if (!haserr)
     {
       numofchars = gt_alphabet_num_of_chars(
-                               gt_encodedsequence_alphabet(suffixarray.encseq));
+                               gt_encseq_alphabet(suffixarray.encseq));
       firstignorespecial = totallength - specialcharinfo->specialcharacters;
       if (copytheindexfile(outfmindex,indexname,GT_ALPHABETFILESUFFIX,
                            0,err) != 0)

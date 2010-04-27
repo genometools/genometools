@@ -19,11 +19,11 @@
 #define ESA_LCPVAL_H
 
 #include "core/readmode.h"
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 
 typedef struct Lcpvalueiterator Lcpvalueiterator;
 
-Lcpvalueiterator *gt_newLcpvalueiterator(const GtEncodedsequence *encseq,
+Lcpvalueiterator *gt_newLcpvalueiterator(const GtEncseq *encseq,
                                       GtReadmode readmode);
 
 unsigned long gt_nextLcpvalueiterator(Lcpvalueiterator *lvi,

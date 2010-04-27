@@ -26,7 +26,7 @@ SAINewMRAEnc(const SuffixarrayFileInterface *sai)
   return gt_SANewMRAEnc(sai->sa);
 }
 
-static inline const GtEncodedsequence *
+static inline const GtEncseq *
 SAIGetEncSeq(const SuffixarrayFileInterface *sai)
 {
   return sai->sa->encseq;

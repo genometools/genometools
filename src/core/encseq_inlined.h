@@ -16,15 +16,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ENCODEDSEQUENCE_INLINED_H
-#define ENCODEDSEQUENCE_INLINED_H
+#ifndef ENCSEQ_INLINED_H
+#define ENCSEQ_INLINED_H
 
-#include "core/encodedsequence_rep.h"
+#include "core/encseq_rep.h"
 
-#define gt_encodedsequence_total_length(ENCSEQ) \
+#define gt_encseq_total_length(ENCSEQ) \
           ((ENCSEQ)->totallength)
 
-#define gt_encodedsequence_num_of_sequences(ENCSEQ) \
+#define gt_encseq_num_of_sequences(ENCSEQ) \
           ((ENCSEQ)->numofdbsequences)
 
 #define GT_REVERSEPOS(TOTALLENGTH,POS) \
@@ -33,8 +33,8 @@
 #define GT_MAKECOMPL(CC) \
           (ISSPECIAL(CC) ? (CC) : (GtUchar) 3 - (CC))
 
-static inline GtUchar gt_encodedsequence_get_encoded_char(
-                                              const GtEncodedsequence *encseq,
+static inline GtUchar gt_encseq_get_encoded_char(
+                                              const GtEncseq *encseq,
                                               unsigned long pos,
                                               GtReadmode readmode)
 {
@@ -51,15 +51,15 @@ static inline GtUchar gt_encodedsequence_get_encoded_char(
          ;
 }
 
-#define gt_encodedsequence_extract_nospecial_encoded_char(ENCSEQ,POS,RM) \
-          gt_encodedsequence_get_encoded_char(ENCSEQ,POS,RM)
+#define gt_encseq_extract_nospecial_encoded_char(ENCSEQ,POS,RM) \
+          gt_encseq_get_encoded_char(ENCSEQ,POS,RM)
 
-#define gt_encodedsequence_get_encoded_char_nospecial(ENCSEQ,POS,RM) \
-          gt_encodedsequence_get_encoded_char(ENCSEQ,POS,RM)
+#define gt_encseq_get_encoded_char_nospecial(ENCSEQ,POS,RM) \
+          gt_encseq_get_encoded_char(ENCSEQ,POS,RM)
 
-#define gt_encodedsequence_get_encoded_char_sequential(ENCSEQ, \
+#define gt_encseq_get_encoded_char_sequential(ENCSEQ, \
                                                    ENCSEQSTATE,POS,READMODE) \
-          gt_encodedsequence_get_encoded_char(ENCSEQ,POS,READMODE)
-                                             GtEncodedsequenceScanstate *esr);
+          gt_encseq_get_encoded_char(ENCSEQ,POS,READMODE)
+                                             GtEncseqScanstate *esr);
 
 #endif

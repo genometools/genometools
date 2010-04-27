@@ -20,7 +20,7 @@
 #include "core/error.h"
 #include "core/log.h"
 #include "core/unused_api.h"
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 
 #include "repeattypes.h"
 #include "ltrharvest-opt.h"
@@ -55,7 +55,7 @@ void gt_showrepeats (RepeatInfo *repeatinfo,unsigned long seedminlength)
 }
 
 int gt_simpleexactselfmatchstore (void *info,
-                               GT_UNUSED const GtEncodedsequence *encseq,
+                               GT_UNUSED const GtEncseq *encseq,
                                unsigned long len,
                                unsigned long pos1,
                                unsigned long pos2,
@@ -86,8 +86,8 @@ int gt_simpleexactselfmatchstore (void *info,
   }
 
   tmp = pos2 - pos1;
-  seqnum1 = gt_encodedsequence_pos2seqnum(repeatinfo->encseq,pos1);
-  seqnum2 = gt_encodedsequence_pos2seqnum(repeatinfo->encseq,pos2);
+  seqnum1 = gt_encseq_pos2seqnum(repeatinfo->encseq,pos1);
+  seqnum2 = gt_encseq_pos2seqnum(repeatinfo->encseq,pos2);
   if (seqnum1 == seqnum2)
   {
     gt_log_log("accepted:\n");
@@ -122,7 +122,7 @@ int gt_simpleexactselfmatchstore (void *info,
 }
 
 int gt_subsimpleexactselfmatchstore(void *info,
-                                 GT_UNUSED const GtEncodedsequence *encseq,
+                                 GT_UNUSED const GtEncseq *encseq,
                                  const Querymatch *querymatch,
                                  GT_UNUSED GtError *err)
 {

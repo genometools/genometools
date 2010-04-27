@@ -19,7 +19,7 @@
 #include "core/assert_api.h"
 #include "core/symboldef.h"
 #include "core/chardef.h"
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 #include "core/defined-types.h"
 #include "initeqsvec.h"
 #include "dist-short.h"
@@ -90,7 +90,7 @@ unsigned long gt_distanceofshortstringsencseq(unsigned long *eqsvector,
                                            unsigned int alphasize,
                                            const GtUchar *useq,
                                            unsigned long ulen,
-                                           const GtEncodedsequence *encseq,
+                                           const GtEncseq *encseq,
                                            unsigned long vstartpos,
                                            unsigned long vlen)
 {
@@ -101,7 +101,7 @@ unsigned long gt_distanceofshortstringsencseq(unsigned long *eqsvector,
   gt_initeqsvector(eqsvector,(unsigned long) alphasize,useq,ulen);
   for (pos = vstartpos; pos < vstartpos + vlen; pos++)
   {
-    cc = gt_encodedsequence_get_encoded_char(encseq,pos,GT_READMODE_FORWARD);
+    cc = gt_encseq_get_encoded_char(encseq,pos,GT_READMODE_FORWARD);
     COMPUTENEWDIST(cc);
   }
   return distval;
@@ -132,7 +132,7 @@ unsigned long gt_reversesuffixmatch(unsigned long *eqsvector,
   return (unsigned long) (vseq + vlen - vptr);
 }
 
-Definedunsignedlong gt_forwardprefixmatch(const GtEncodedsequence *encseq,
+Definedunsignedlong gt_forwardprefixmatch(const GtEncseq *encseq,
                                        unsigned int alphasize,
                                        unsigned long startpos,
                                        bool nowildcards,
@@ -142,7 +142,7 @@ Definedunsignedlong gt_forwardprefixmatch(const GtEncodedsequence *encseq,
                                        unsigned long maxdistance)
 {
   DECLARELOCALVARS;
-  unsigned long pos, totallength = gt_encodedsequence_total_length(encseq);
+  unsigned long pos, totallength = gt_encseq_total_length(encseq);
   GtUchar cc;
   Definedunsignedlong result;
 
@@ -151,7 +151,7 @@ Definedunsignedlong gt_forwardprefixmatch(const GtEncodedsequence *encseq,
   for (pos = startpos; /* Nothing */; pos++)
   {
     gt_assert(pos - startpos <= (unsigned long) (ulen + maxdistance));
-    cc = gt_encodedsequence_get_encoded_char(encseq,pos,GT_READMODE_FORWARD);
+    cc = gt_encseq_get_encoded_char(encseq,pos,GT_READMODE_FORWARD);
     if (nowildcards && cc == (GtUchar) WILDCARD)
     {
       result.defined = false;

@@ -22,7 +22,7 @@
 #include "core/chardef.h"
 #include "revcompl.h"
 #include "core/format64.h"
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 #include "tyr-map.h"
 #include "tyr-search.h"
 #include "tyr-show.h"
@@ -72,7 +72,7 @@ void gt_tyrsearchinfo_delete(Tyrsearchinfo *tyrsearchinfo)
 {
   const GtUchar *result;
 
-  gt_encodedsequence_plainseq2bytecode(tyrsearchinfo->bytecode,qptr,
+  gt_encseq_plainseq2bytecode(tyrsearchinfo->bytecode,qptr,
                                        tyrsearchinfo->mersize);
   if (tyrbckinfo == NULL)
   {

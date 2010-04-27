@@ -36,7 +36,7 @@ typedef struct
   uint64_t queryunit;
   GtUchar wildcardshow;
   bool showalignment;
-  const GtEncodedsequence *encseq;
+  const GtEncseq *encseq;
 } Showmatchinfo;
 
 static void showmatch(void *processinfo,const GtMatch *match)
@@ -49,9 +49,9 @@ static void showmatch(void *processinfo,const GtMatch *match)
   {
     GtSeqinfo seqinfo;
 
-    seqnum = gt_encodedsequence_pos2seqnum(showmatchinfo->encseq,
+    seqnum = gt_encseq_pos2seqnum(showmatchinfo->encseq,
                                            match->dbstartpos);
-    gt_encodedsequence_seqinfo(showmatchinfo->encseq,&seqinfo,seqnum);
+    gt_encseq_seqinfo(showmatchinfo->encseq,&seqinfo,seqnum);
     gt_assert(seqinfo.seqstartpos <= match->dbstartpos);
     relpos = match->dbstartpos - seqinfo.seqstartpos;
   } else
@@ -78,14 +78,14 @@ static void showmatch(void *processinfo,const GtMatch *match)
 
 typedef struct
 {
-  const GtEncodedsequence *encseq;
+  const GtEncseq *encseq;
   GtBitsequence *hasmatch;
 } Storematchinfo;
 
 void gt_initstorematch(Storematchinfo *storematch,
-                    const GtEncodedsequence *encseq)
+                    const GtEncseq *encseq)
 {
-  unsigned long numofdbsequences = gt_encodedsequence_num_of_sequences(encseq);
+  unsigned long numofdbsequences = gt_encseq_num_of_sequences(encseq);
 
   storematch->encseq = encseq;
   GT_INITBITTAB(storematch->hasmatch,numofdbsequences);
@@ -98,7 +98,7 @@ static void storematch(void *info,const GtMatch *match)
 
   if (match->dbabsolute)
   {
-    seqnum = gt_encodedsequence_pos2seqnum(storematch->encseq,
+    seqnum = gt_encseq_pos2seqnum(storematch->encseq,
                                            match->dbstartpos);
   } else
   {
@@ -115,7 +115,7 @@ void gt_checkandresetstorematch(GT_UNUSED uint64_t queryunit,
                              Storematchinfo *storeoffline)
 {
   unsigned long seqnum, countmatchseq = 0,
-    numofdbsequences = gt_encodedsequence_num_of_sequences(storeonline->encseq);
+    numofdbsequences = gt_encseq_num_of_sequences(storeonline->encseq);
 
   for (seqnum = 0; seqnum < numofdbsequences; seqnum++)
   {
@@ -157,7 +157,7 @@ int gt_runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
   Genericindex *genericindex = NULL;
   bool haserr = false;
   GtLogger *logger;
-  const GtEncodedsequence *encseq = NULL;
+  const GtEncseq *encseq = NULL;
 
   logger = gt_logger_new(idxlocalioptions->verbose,
                          GT_LOGGER_DEFLT_PREFIX, stdout);
@@ -211,7 +211,7 @@ int gt_runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
     void *processmatchinfoonline, *processmatchinfooffline;
     Storematchinfo storeonline, storeoffline;
 
-    a = gt_encodedsequence_alphabet(encseq);
+    a = gt_encseq_alphabet(encseq);
     if (idxlocalioptions->docompare)
     {
       processmatch = storematch;
@@ -322,7 +322,7 @@ int gt_runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
   if (genericindex == NULL)
   {
     gt_assert(encseq != NULL);
-    gt_encodedsequence_delete((GtEncodedsequence *) encseq);
+    gt_encseq_delete((GtEncseq *) encseq);
     encseq = NULL;
   } else
   {

@@ -31,7 +31,7 @@ unsigned long gt_distanceofshortstringsencseq(unsigned long *eqsvector,
                                            unsigned int alphasize,
                                            const GtUchar *useq,
                                            unsigned long ulen,
-                                           const GtEncodedsequence *encseq,
+                                           const GtEncseq *encseq,
                                            unsigned long vstartpos,
                                            unsigned long vlen);
 
@@ -43,7 +43,7 @@ unsigned long gt_reversesuffixmatch(unsigned long *eqsvector,
                                  unsigned long vlen,
                                  unsigned long maxdistance);
 
-Definedunsignedlong gt_forwardprefixmatch(const GtEncodedsequence *encseq,
+Definedunsignedlong gt_forwardprefixmatch(const GtEncseq *encseq,
                                        unsigned int alphasize,
                                        unsigned long startpos,
                                        bool nowildcards,

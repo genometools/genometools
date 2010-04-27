@@ -101,7 +101,7 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
   const LTRboundaries **bdptrtab = NULL;
   GtArrayLTRboundaries arrayLTRboundaries;  /* stores all predicted */
                                             /*   LTR elements */
-  const GtEncodedsequence *encseq;
+  const GtEncseq *encseq;
 
   gt_error_check(err);
 

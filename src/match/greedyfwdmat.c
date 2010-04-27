@@ -28,7 +28,7 @@
 #include "optionargmode.h"
 #include "core/format64.h"
 #include "greedyfwdmat.h"
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 #include "initbasepower.h"
 
 typedef struct
@@ -66,11 +66,11 @@ typedef struct
   Processgmatchlength processgmatchlength;
   Postprocessgmatchlength postprocessgmatchlength;
   void *processinfo;
-  const GtEncodedsequence *encseq;
+  const GtEncseq *encseq;
 } Substringinfo;
 
 #ifndef NDEBUG
-static void checkifsequenceisthere(const GtEncodedsequence *encseq,
+static void checkifsequenceisthere(const GtEncseq *encseq,
                                    unsigned long witnessposition,
                                    unsigned long gmatchlength,
                                    const GtUchar *qptr)
@@ -80,7 +80,7 @@ static void checkifsequenceisthere(const GtEncodedsequence *encseq,
 
   for (i=0; i<gmatchlength; i++)
   {
-    cc = gt_encodedsequence_get_encoded_char_nospecial(encseq,
+    cc = gt_encseq_get_encoded_char_nospecial(encseq,
                                                     witnessposition+i,
                                                     GT_READMODE_FORWARD);
     if (qptr[i] != cc)
@@ -210,7 +210,7 @@ static void showifinlengthrange(const GtAlphabet *alphabet,
   }
 }
 
-int gt_findsubquerygmatchforward(const GtEncodedsequence *encseq,
+int gt_findsubquerygmatchforward(const GtEncseq *encseq,
                               const void *genericindex,
                               unsigned long totallength,
                               Greedygmatchforwardfunction gmatchforward,

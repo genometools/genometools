@@ -129,7 +129,7 @@ void gt_bcktab_leftborderpartialsums(Bcktab *bcktab,
 void checkcountspecialcodes(const Bcktab *bcktab);
 
 void consistencyofsuffix(int line,
-                         const GtEncodedsequence *encseq,
+                         const GtEncseq *encseq,
                          GtReadmode readmode,
                          const Bcktab *bcktab,
                          unsigned int numofchars,

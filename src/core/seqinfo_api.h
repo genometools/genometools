@@ -18,7 +18,7 @@
 #ifndef SEQINFO_API_H
 #define SEQINFO_API_H
 
-/* Holds information about one sequence in a <GtEncodedsequence>.
+/* Holds information about one sequence in a <GtEncseq>.
    The field <seqstartpos> contains the position of the first character
    in the encoded sequence while <seqlength> contains the length of the
    sequence. */

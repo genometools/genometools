@@ -474,7 +474,7 @@ gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
       break;
     }
     suffixArrayIsInitialized = true;
-    seqLen = gt_encodedsequence_total_length(suffixArray.encseq) + 1;
+    seqLen = gt_encseq_total_length(suffixArray.encseq) + 1;
     if (BWTSeqLength(bwtSeq) != seqLen)
     {
       gt_error_set(err, "length mismatch for suffix array project %s and "
@@ -538,7 +538,7 @@ gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
           && (bwtSeq->featureToggles & BWTReversiblySorted))
       {
         unsigned long i = seqLen;
-        /* handle first symbol specially because the encodedsequence
+        /* handle first symbol specially because the encseq
          * will not return the terminator symbol */
         {
           Symbol sym = BWTSeqGetSym(bwtSeq, nextLocate);
@@ -556,7 +556,7 @@ gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
         while (i > 0)
         {
           Symbol symRef =
-                         gt_encodedsequence_get_encoded_char(suffixArray.encseq,
+                         gt_encseq_get_encoded_char(suffixArray.encseq,
                                                           --i,
                                                           suffixArray.readmode);
           Symbol symCmp = BWTSeqGetSym(bwtSeq, nextLocate);
@@ -600,8 +600,8 @@ gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
           numTries = MIN(MAX_NUM_CONTEXT_CHECKS,
                          MAX(2, seqLen/CONTEXT_INTERVAL));
         Symbol *contextBuf = gt_malloc(sizeof (Symbol) * MAX_CONTEXT_LEN);
-        GtEncodedsequenceScanstate *esr =
-                                       gt_encodedsequence_scanstate_new_empty();
+        GtEncseqScanstate *esr =
+                                       gt_encseq_scanstate_new_empty();
         for (i = 0; i < numTries && retval == VERIFY_BWTSEQ_NO_ERROR; ++i)
         {
           unsigned long j, end, inSubSeqLen;
@@ -610,11 +610,11 @@ gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
           end = start + subSeqLen;
           inSubSeqLen = subSeqLen - ((end==seqLen)?1:0);
           gt_BWTSeqCRAccessSubseq(bwtSeqCR, start, subSeqLen, contextBuf);
-          gt_encodedsequence_scanstate_init(esr, suffixArray.encseq,
+          gt_encseq_scanstate_init(esr, suffixArray.encseq,
                                        suffixArray.readmode, start);
           for (j = 0; j < inSubSeqLen; ++j)
           {
-            Symbol symRef = gt_encodedsequence_get_encoded_char_sequential(
+            Symbol symRef = gt_encseq_get_encoded_char_sequential(
                                                      suffixArray.encseq, esr,
                                                      start + j,
                                                      suffixArray.readmode);
@@ -645,7 +645,7 @@ gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
         }
         if (retval == VERIFY_BWTSEQ_NO_ERROR)
           fputs("Context regeneration completed successfully.\n", stderr);
-        gt_encodedsequence_scanstate_delete(esr);
+        gt_encseq_scanstate_delete(esr);
         gt_free(contextBuf);
       }
       gt_deleteBWTSeqCR(bwtSeqCR);

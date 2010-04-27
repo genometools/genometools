@@ -21,7 +21,7 @@
 #include "core/error.h"
 #include "core/seqiterator_sequence_buffer.h"
 #include "spacedef.h"
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 
 void gt_symbolstring2fasta(FILE *fpout,
                         const char *desc,
@@ -70,7 +70,7 @@ void gt_symbolstring2fasta(FILE *fpout,
 }
 
 void gt_encseq2symbolstring(FILE *fpout,
-                         const GtEncodedsequence *encseq,
+                         const GtEncseq *encseq,
                          GtReadmode readmode,
                          unsigned long start,
                          unsigned long wlen,
@@ -79,16 +79,16 @@ void gt_encseq2symbolstring(FILE *fpout,
   unsigned long j;
   unsigned long idx, lastpos;
   GtUchar currentchar;
-  GtEncodedsequenceScanstate *esr;
+  GtEncseqScanstate *esr;
   const GtAlphabet *alpha;
 
-  esr = gt_encodedsequence_scanstate_new(encseq,readmode,start);
+  esr = gt_encseq_scanstate_new(encseq,readmode,start);
   gt_assert(width > 0);
   lastpos = start + wlen - 1;
-  alpha = gt_encodedsequence_alphabet(encseq);
+  alpha = gt_encseq_alphabet(encseq);
   for (idx = start, j = 0; /* Nothing */ ; idx++)
   {
-    currentchar = gt_encodedsequence_get_encoded_char_sequential(encseq,esr,idx,
+    currentchar = gt_encseq_get_encoded_char_sequential(encseq,esr,idx,
                                                               readmode);
     if (currentchar == (GtUchar) SEPARATOR)
     {
@@ -113,11 +113,11 @@ void gt_encseq2symbolstring(FILE *fpout,
       }
     }
   }
-  gt_encodedsequence_scanstate_delete(esr);
+  gt_encseq_scanstate_delete(esr);
 }
 
 void gt_fprintfencseq(FILE *fpout,
-                   const GtEncodedsequence *encseq,
+                   const GtEncseq *encseq,
                    unsigned long start,
                    unsigned long wlen)
 {
@@ -125,10 +125,10 @@ void gt_fprintfencseq(FILE *fpout,
   GtUchar currentchar;
   const GtAlphabet *alpha;
 
-  alpha = gt_encodedsequence_alphabet(encseq);
+  alpha = gt_encseq_alphabet(encseq);
   for (idx = start; idx < start + wlen; idx++)
   {
-    currentchar = gt_encodedsequence_get_encoded_char(encseq,
+    currentchar = gt_encseq_get_encoded_char(encseq,
                                                     idx,
                                                     GT_READMODE_FORWARD);
     gt_assert(ISNOTSPECIAL(currentchar));
@@ -138,7 +138,7 @@ void gt_fprintfencseq(FILE *fpout,
 
 void gt_encseq2fastaoutput(FILE *fpout,
                         const char *desc,
-                        const GtEncodedsequence *encseq,
+                        const GtEncseq *encseq,
                         GtReadmode readmode,
                         unsigned long start,
                         unsigned long wlen,

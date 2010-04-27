@@ -18,7 +18,7 @@
 
 #include "core/ma_api.h"
 #include "match/eis-sa-common.h"
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 
 extern size_t
 gt_translateSuftab2BWT(struct encSeqTrState *trState,
@@ -36,13 +36,13 @@ gt_translateSuftab2BWT(struct encSeqTrState *trState,
 }
 
 static inline void
-writeLCPVal(const GtEncodedsequence *encseq, GtReadmode readmode,
+writeLCPVal(const GtEncseq *encseq, GtReadmode readmode,
             unsigned long *dest, unsigned long a, unsigned long b)
 {
 #ifndef NDEBUG
   int cmp =
 #endif /* NDEBUG */
-    gt_encodedsequence_comparetwosuffixes(encseq,
+    gt_encseq_comparetwosuffixes(encseq,
                        readmode,
                        dest,
                        false,

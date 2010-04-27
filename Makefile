@@ -802,7 +802,7 @@ SKTOOLS=${shell grep -l Kurtz src/tools/*.c}
 
 MOVEDENCSEQFILES = ${CURDIR}/src/core/mapspec-gen.c\
                    ${CURDIR}/src/core/readmode.c\
-                   ${CURDIR}/src/core/encodedsequence.c
+                   ${CURDIR}/src/core/encseq.c
 
 ALLSPLINT=${addprefix obj/,${notdir ${subst .c,.splint,\
 	             ${filter-out ${EISFILES},${wildcard ${CURDIR}/src/match/*.c}}\

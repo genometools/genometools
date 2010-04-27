@@ -20,7 +20,7 @@
 
 #include <stdio.h>
 #include "core/defined-types.h"
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 #include "core/intdef.h"
 #include "core/unused_api.h"
 #include "core/codetype.h"
@@ -94,7 +94,7 @@ DECLAREREADFUNCTION(Largelcpvalue);
 
 typedef struct
 {
-  GtEncodedsequence *encseq;
+  GtEncseq *encseq;
   Definedunsignedlong numoflargelcpvalues; /* only in esa-map.c */
   Definedunsignedlong longest; /* for BWT */
   GtReadmode readmode; /* relevant when reading the encoded sequence */
@@ -153,7 +153,7 @@ typedef struct
   GtUchar smalllcpvalue;
   const Largelcpvalue *largelcpvalue;
 
-  gt_assert(pos <= gt_encodedsequence_total_length(suffixarray->encseq));
+  gt_assert(pos <= gt_encseq_total_length(suffixarray->encseq));
   smalllcpvalue = suffixarray->lcptab[pos];
   if (smalllcpvalue != LCPOVERFLOW)
   {

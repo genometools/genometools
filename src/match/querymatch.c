@@ -66,7 +66,7 @@ void gt_querymatch_delete(Querymatch *querymatch)
 }
 
 #ifdef VERIFY
-static void verifymatch(const GtEncodedsequence *encseq,
+static void verifymatch(const GtEncseq *encseq,
                         unsigned long len,
                         unsigned long pos1,
                         uint64_t seqnum2,
@@ -76,26 +76,26 @@ static void verifymatch(const GtEncodedsequence *encseq,
   if (readmode == GT_READMODE_REVERSE)
   {
     GtSeqinfo seqinfo;
-    unsigned long offset, totallength = gt_encodedsequence_total_length(encseq);
+    unsigned long offset, totallength = gt_encseq_total_length(encseq);
     GtUchar cc1, cc2;
 
-    gt_encodedsequence_seqinfo(&seqinfo,encseq,(unsigned long) seqnum2);
+    gt_encseq_seqinfo(&seqinfo,encseq,(unsigned long) seqnum2);
     pos2 += seqinfo.seqstartpos;
     for (offset = 0; offset < len; offset++)
     {
       gt_assert(pos1 + len - 1 < totallength);
       gt_assert(pos2 + len - 1 < totallength);
-      cc1 = gt_encodedsequence_get_encoded_char(encseq,
+      cc1 = gt_encseq_get_encoded_char(encseq,
                                               pos1+offset,
                                               GT_READMODE_FORWARD);
-      cc2 = gt_encodedsequence_get_encoded_char(encseq,
+      cc2 = gt_encseq_get_encoded_char(encseq,
                                               pos2+len-1-offset,
                                               GT_READMODE_FORWARD);
       gt_assert(cc1 == cc2 && ISNOTSPECIAL(cc1));
     }
     if (pos1 + len < totallength)
     {
-      cc1 = gt_encodedsequence_get_encoded_char(encseq,
+      cc1 = gt_encseq_get_encoded_char(encseq,
                                               pos1+len,
                                               GT_READMODE_FORWARD);
     } else
@@ -104,7 +104,7 @@ static void verifymatch(const GtEncodedsequence *encseq,
     }
     if (pos2 > 0)
     {
-      cc2 = gt_encodedsequence_get_encoded_char(encseq,
+      cc2 = gt_encseq_get_encoded_char(encseq,
                                               pos2-1,
                                               GT_READMODE_FORWARD);
     } else
@@ -117,7 +117,7 @@ static void verifymatch(const GtEncodedsequence *encseq,
 #endif
 
 int gt_querymatch_output(GT_UNUSED void *info,
-                      const GtEncodedsequence *encseq,
+                      const GtEncseq *encseq,
                       const Querymatch *querymatch,
                       GT_UNUSED GtError *err)
 {
@@ -127,8 +127,8 @@ int gt_querymatch_output(GT_UNUSED void *info,
   unsigned long querystart, dbstart_relative;
 
   gt_assert(encseq != NULL);
-  dbseqnum = gt_encodedsequence_pos2seqnum(encseq,querymatch->dbstart);
-  gt_encodedsequence_seqinfo(encseq,&seqinfo,dbseqnum);
+  dbseqnum = gt_encseq_pos2seqnum(encseq,querymatch->dbstart);
+  gt_encseq_seqinfo(encseq,&seqinfo,dbseqnum);
   gt_assert((int) querymatch->readmode < 4);
   if (querymatch->readmode == GT_READMODE_REVERSE ||
       querymatch->readmode == GT_READMODE_REVCOMPL)

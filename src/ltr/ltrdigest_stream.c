@@ -33,7 +33,7 @@
 struct GtLTRdigestStream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
-  GtEncodedsequence *encseq;
+  GtEncseq *encseq;
   GtPBSOptions *pbs_opts;
   GtPPTOptions *ppt_opts;
 #ifdef HAVE_HMMER
@@ -356,7 +356,7 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
     }
     if (!had_err)
     {
-      if (seqid > gt_encodedsequence_num_of_sequences(ls->encseq)-1) {
+      if (seqid > gt_encseq_num_of_sequences(ls->encseq)-1) {
         gt_error_set(e, "Sequence region number exceeds number of sequences in "
                         "encoded sequence file: 'seq%lu'!", seqid);
         had_err = -1;
@@ -369,15 +369,15 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
       unsigned long length;
       const GtAlphabet *alpha;
 
-      gt_encodedsequence_seqinfo(ls->encseq, &seqinfo, seqid);
+      gt_encseq_seqinfo(ls->encseq, &seqinfo, seqid);
 
       if (ls->element.rightLTR_3 <= seqinfo.seqlength)
       {
-        alpha        = gt_encodedsequence_alphabet(ls->encseq);
+        alpha        = gt_encseq_alphabet(ls->encseq);
         length       = gt_ltrelement_length(&ls->element);
         seq          = gt_malloc((length+1) * sizeof (char));
         symbolstring = gt_malloc((length+1) * sizeof (GtUchar));
-        gt_encodedsequence_extract_substring(ls->encseq,
+        gt_encseq_extract_substring(ls->encseq,
                                   symbolstring,
                                   seqinfo.seqstartpos + (ls->element.leftLTR_5),
                                   seqinfo.seqstartpos + (ls->element.leftLTR_5)
@@ -431,7 +431,7 @@ const GtNodeStreamClass* gt_ltrdigest_stream_class(void)
 
 GtNodeStream* gt_ltrdigest_stream_new(GtNodeStream *in_stream,
                                       int tests_to_run,
-                                      GtEncodedsequence *encseq,
+                                      GtEncseq *encseq,
                                       GtPBSOptions *pbs_opts,
                                       GtPPTOptions *ppt_opts,
 #ifdef HAVE_HMMER

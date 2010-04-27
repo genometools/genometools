@@ -1,7 +1,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-Lcpvalueiterator *gt_newLcpvalueiterator(const GtEncodedsequence *encseq,
+Lcpvalueiterator *gt_newLcpvalueiterator(const GtEncseq *encseq,
                                       GtReadmode readmode);
 
 unsigned long gt_nextLcpvalueiterator(Lcpvalueiterator *lvi,

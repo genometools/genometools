@@ -25,7 +25,7 @@
 #include "core/str_array.h"
 #include "core/defined-types.h"
 
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 
 typedef unsigned long (*Greedygmatchforwardfunction) (const void *,
                                                       unsigned long offset,
@@ -35,7 +35,7 @@ typedef unsigned long (*Greedygmatchforwardfunction) (const void *,
                                                       const GtUchar *,
                                                       const GtUchar *);
 
-int gt_findsubquerygmatchforward(const GtEncodedsequence *encseq,
+int gt_findsubquerygmatchforward(const GtEncseq *encseq,
                               const void *genericindex,
                               unsigned long totallength,
                               Greedygmatchforwardfunction gmatchforward,

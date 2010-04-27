@@ -19,13 +19,13 @@
 #define SEARCHFORLTRS_H
 
 #include "core/error.h"
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 #include "repeattypes.h"
 #include "ltrharvest-opt.h"
 
 int gt_searchforLTRs(LTRharvestoptions *lo,
                   GtArrayLTRboundaries *arrayLTRboundaries,
-                  const GtEncodedsequence *encseq,
+                  const GtEncseq *encseq,
                   GtError *err);
 
 #endif

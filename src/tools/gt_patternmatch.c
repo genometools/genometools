@@ -20,7 +20,7 @@
 #include "core/str.h"
 #include "core/option.h"
 #include "core/versionfunc.h"
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 #include "match/sarr-def.h"
 #include "match/stamp.h"
 #include "match/enum-patt-def.h"
@@ -88,7 +88,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
     haserr = true;
   } else
   {
-    totallength = gt_encodedsequence_total_length(suffixarray.encseq);
+    totallength = gt_encseq_total_length(suffixarray.encseq);
   }
   if (!haserr)
   {
@@ -101,7 +101,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
     Bucketenumerator *bucketenumerator;
     Lcpinterval itv;
     unsigned long refstart;
-    GtEncodedsequenceScanstate *esr1, *esr2;
+    GtEncseqScanstate *esr1, *esr2;
     int retval;
     unsigned long idx, maxlcp;
     GtCodetype code = 0;
@@ -119,9 +119,9 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
                                  pmopt->maxpatternlen,
                                  suffixarray.encseq,
                                  err);
-    esr1 = gt_encodedsequence_scanstate_new_empty();
-    esr2 = gt_encodedsequence_scanstate_new_empty();
-    alpha = gt_encodedsequence_alphabet(suffixarray.encseq);
+    esr1 = gt_encseq_scanstate_new_empty();
+    esr2 = gt_encseq_scanstate_new_empty();
+    alpha = gt_encseq_alphabet(suffixarray.encseq);
     for (trial = 0; trial < pmopt->numofsamples; trial++)
     {
       pptr = gt_nextEnumpatterniterator(&patternlen,epi);
@@ -150,7 +150,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
             {
               for (idx=itv.left; idx<=itv.right; idx++)
               {
-                retval = gt_encodedsequence_comparetwosuffixes(
+                retval = gt_encseq_comparetwosuffixes(
                                             suffixarray.encseq,
                                             suffixarray.readmode,
                                             &maxlcp,
@@ -228,8 +228,8 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
         gt_freemmsearchiterator(&mmsiimm);
       }
     }
-    gt_encodedsequence_scanstate_delete(esr1);
-    gt_encodedsequence_scanstate_delete(esr2);
+    gt_encseq_scanstate_delete(esr1);
+    gt_encseq_scanstate_delete(esr2);
     if (pmopt->showpatt)
     {
       gt_showPatterndistribution(epi);

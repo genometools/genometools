@@ -26,12 +26,12 @@ typedef unsigned long (*RankReportFunc)(const SpecialsRankLookup *ranker,
 struct specialsRankLookup
 {
   RankReportFunc rankFunc;
-  const GtEncodedsequence *encseq;
+  const GtEncseq *encseq;
   union
   {
     struct specialsRankTable
     {
-      GtEncodedsequenceScanstate *scanState;
+      GtEncseqScanstate *scanState;
       unsigned long *rankSumSamples, numSamples, sampleInterval;
       GtReadmode readmode;
       unsigned sampleIntervalLog2;

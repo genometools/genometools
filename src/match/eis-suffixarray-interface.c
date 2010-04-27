@@ -254,7 +254,7 @@ gt_SANewMRAEnc(const Suffixarray *sa)
 {
   MRAEnc *alphabet;
   gt_assert(sa);
-  alphabet = gt_MRAEncGTAlphaNew(gt_encodedsequence_alphabet(sa->encseq));
+  alphabet = gt_MRAEncGTAlphaNew(gt_encseq_alphabet(sa->encseq));
   gt_MRAEncAddSymbolToRange(alphabet, SEPARATOR, 1);
   return alphabet;
 }

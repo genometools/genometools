@@ -18,12 +18,12 @@
 #ifndef ENCSEQ_SPECIALSRANK_H
 #define ENCSEQ_SPECIALSRANK_H
 
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 
 typedef struct specialsRankLookup SpecialsRankLookup;
 
 extern SpecialsRankLookup *
-gt_newSpecialsRankLookup(const GtEncodedsequence *encseq, GtReadmode readmode,
+gt_newSpecialsRankLookup(const GtEncseq *encseq, GtReadmode readmode,
                      unsigned sampleIntervalLog2);
 
 extern void
@@ -32,7 +32,7 @@ gt_deleteSpecialsRankLookup(SpecialsRankLookup *table);
 static inline unsigned long
 specialsRank(const SpecialsRankLookup *rankTable, unsigned long pos);
 
-extern const GtEncodedsequence *
+extern const GtEncseq *
 gt_SPRTGetOrigEncseq(const SpecialsRankLookup *rankTable);
 
 #include "match/encseq-specialsrank-priv.h"

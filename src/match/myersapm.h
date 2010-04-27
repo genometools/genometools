@@ -18,7 +18,7 @@
 #ifndef MYERSAPM_H
 #define MYERSAPM_H
 
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 #include "procmatch.h"
 
 typedef struct Myersonlineresources Myersonlineresources;
@@ -26,7 +26,7 @@ typedef struct Myersonlineresources Myersonlineresources;
 Myersonlineresources *gt_newMyersonlineresources(
                         unsigned int numofchars,
                         bool nowildcards,
-                        const GtEncodedsequence *encseq,
+                        const GtEncseq *encseq,
                         Processmatch processmatch,
                         void *processmatchinfo);
 

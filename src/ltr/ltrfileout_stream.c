@@ -40,7 +40,7 @@
 struct GtLTRFileOutStream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
-  GtEncodedsequence *encseq;
+  GtEncseq *encseq;
   const char *fileprefix;
   GtFile *metadata_file,
             *tabout_file,
@@ -64,7 +64,7 @@ struct GtLTRFileOutStream {
         gt_node_stream_cast(gt_ltr_fileout_stream_class(), GS)
 
 static int write_pdom(GtLTRFileOutStream *ls, GtArray *pdoms,
-                      const char *pdomname, GtEncodedsequence *seq,
+                      const char *pdomname, GtEncseq *seq,
                       GtSeqinfo *seqinfo, char *desc, GtError *e)
 {
   int had_err = 0;
@@ -252,19 +252,19 @@ int gt_ltrfileout_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
     GtRange ltr3_rng, ltr5_rng, elemrng;
     GtSeqinfo seqinfo;
 
-    /* find sequence in GtEncodedsequence */
+    /* find sequence in GtEncseq */
     const char *sreg = gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*)
                                                         ls->element.mainnode));
     (void) sscanf(sreg,"seq%lu", &seqnr);
 
     elemrng = gt_genome_node_get_range((GtGenomeNode*) ls->element.mainnode);
-    gt_encodedsequence_seqinfo(ls->encseq, &seqinfo, seqnr);
+    gt_encseq_seqinfo(ls->encseq, &seqinfo, seqnr);
 
     ls->element.seqid = gt_calloc(ls->seqnamelen+1, sizeof (char));
     snprintf(ls->element.seqid,
              MIN(seqid_len, ls->seqnamelen)+1,
              "%s",
-             gt_encodedsequence_description(ls->encseq, &seqid_len, seqnr));
+             gt_encseq_description(ls->encseq, &seqid_len, seqnr));
     gt_cstr_rep(ls->element.seqid, ' ', '_');
     if (seqid_len > ls->seqnamelen)
       ls->element.seqid[ls->seqnamelen] = '\0';
@@ -614,7 +614,7 @@ void gt_ltr_fileout_stream_enable_aa_sequence_output(GtNodeStream *gs)
 
 GtNodeStream* gt_ltr_fileout_stream_new(GtNodeStream *in_stream,
                                      int tests_to_run,
-                                     GtEncodedsequence *encseq,
+                                     GtEncseq *encseq,
                                      char *file_prefix,
                                      GtPPTOptions *ppt_opts,
                                      GtPBSOptions *pbs_opts,

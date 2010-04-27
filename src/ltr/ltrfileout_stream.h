@@ -21,7 +21,7 @@
 #include "core/bioseq.h"
 #include "extended/node_stream_api.h"
 #include "ltr/ltrdigest_def.h"
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 
 /* implements the ``node_stream'' interface */
 typedef struct GtLTRFileOutStream GtLTRFileOutStream;
@@ -30,7 +30,7 @@ const GtNodeStreamClass* gt_ltr_fileout_stream_class(void);
 
 GtNodeStream* gt_ltr_fileout_stream_new(GtNodeStream *in_stream,
                                         int tests_to_run,
-                                        GtEncodedsequence *encseq,
+                                        GtEncseq *encseq,
                                         char *file_prefix,
                                         GtPPTOptions *ppt_opts,
                                         GtPBSOptions *pbs_opts,

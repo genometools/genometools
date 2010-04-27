@@ -36,7 +36,7 @@ specialsRankFromTermPos(const SpecialsRankLookup *rankTable,
                         unsigned long pos);
 
 static inline struct specialsRankLookup *
-allocSpecialsRankTable(const GtEncodedsequence *encseq,
+allocSpecialsRankTable(const GtEncseq *encseq,
                        unsigned long lastSeqPos,
                        unsigned sampleIntervalLog2,
                        GtReadmode readmode)
@@ -55,14 +55,14 @@ allocSpecialsRankTable(const GtEncodedsequence *encseq,
   rankTable->sampleInterval = ((unsigned long)1) << sampleIntervalLog2;
   rankTable->readmode = readmode;
   rankTable->numSamples = numSamples;
-  rankTable->scanState = gt_encodedsequence_scanstate_new_empty();
+  rankTable->scanState = gt_encseq_scanstate_new_empty();
   ranker->encseq = encseq;
   ranker->rankFunc = specialsRankFromSampleTable;
   return ranker;
 }
 
 static inline struct specialsRankLookup *
-allocEmptySpecialsRankLookup(const GtEncodedsequence *encseq,
+allocEmptySpecialsRankLookup(const GtEncseq *encseq,
                              unsigned long lastSeqPos)
 {
   struct specialsRankLookup *ranker;
@@ -93,7 +93,7 @@ nextRange(GtRange *range, GtSpecialrangeiterator *sri,
 }
 
 extern SpecialsRankLookup *
-gt_newSpecialsRankLookup(const GtEncodedsequence *encseq, GtReadmode readmode,
+gt_newSpecialsRankLookup(const GtEncseq *encseq, GtReadmode readmode,
                      unsigned sampleIntervalLog2)
 {
   struct specialsRankLookup *ranker;
@@ -101,9 +101,9 @@ gt_newSpecialsRankLookup(const GtEncodedsequence *encseq, GtReadmode readmode,
   unsigned long sampleInterval = ((unsigned long)1) << sampleIntervalLog2;
   gt_assert(encseq);
   gt_assert(sampleIntervalLog2 < sizeof (unsigned long) * CHAR_BIT);
-  seqLastPos = gt_encodedsequence_total_length(encseq);
+  seqLastPos = gt_encseq_total_length(encseq);
   seqLen = seqLastPos + 1;
-  if (gt_encodedsequence_has_specialranges(encseq))
+  if (gt_encseq_has_specialranges(encseq))
   {
     /* this sequence has some special characters */
     struct specialsRankTable *rankTable;
@@ -150,7 +150,7 @@ extern void
 gt_deleteSpecialsRankLookup(SpecialsRankLookup *ranker)
 {
   if (ranker->rankFunc == specialsRankFromSampleTable)
-    gt_encodedsequence_scanstate_delete(
+    gt_encseq_scanstate_delete(
       ranker->implementationData.sampleTable.scanState);
   gt_free(ranker);
 }
@@ -161,7 +161,7 @@ specialsRankFromSampleTable(const SpecialsRankLookup *ranker, unsigned long pos)
   const SpecialsRankTable *rankTable = &ranker->implementationData.sampleTable;
   unsigned long rankCount, samplePos, encSeqLen;
   gt_assert(ranker);
-  encSeqLen = gt_encodedsequence_total_length(ranker->encseq);
+  encSeqLen = gt_encseq_total_length(ranker->encseq);
   gt_assert(pos <= encSeqLen + 1);
   samplePos = pos & ~(rankTable->sampleInterval - 1);
   {
@@ -169,15 +169,15 @@ specialsRankFromSampleTable(const SpecialsRankLookup *ranker, unsigned long pos)
     rankCount = rankTable->rankSumSamples[sampleIdx];
   }
   {
-    const GtEncodedsequence *encseq = ranker->encseq;
-    GtEncodedsequenceScanstate *esr = rankTable->scanState;
+    const GtEncseq *encseq = ranker->encseq;
+    GtEncseqScanstate *esr = rankTable->scanState;
     GtReadmode readmode = rankTable->readmode;
     unsigned long encseqQueryMax = MIN(pos, encSeqLen);
     if (samplePos < encseqQueryMax)
     {
-      gt_encodedsequence_scanstate_init(esr, encseq, readmode, samplePos);
+      gt_encseq_scanstate_init(esr, encseq, readmode, samplePos);
       do {
-        if (ISSPECIAL(gt_encodedsequence_get_encoded_char_sequential(encseq,esr,
+        if (ISSPECIAL(gt_encseq_get_encoded_char_sequential(encseq,esr,
                                                                     samplePos++,
                                                                     readmode)))
           ++rankCount;
@@ -196,7 +196,7 @@ specialsRankFromTermPos(const SpecialsRankLookup *ranker, unsigned long pos)
   return ((pos == ranker->implementationData.lastSeqPos + 1)?1:0);
 }
 
-extern const GtEncodedsequence *
+extern const GtEncseq *
 gt_SPRTGetOrigEncseq(const SpecialsRankLookup *ranker)
 {
   return ranker->encseq;

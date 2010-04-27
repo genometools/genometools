@@ -571,7 +571,7 @@ gt_createBWTSeqGeneric(const struct bwtParam *params,
       {
         unsigned long
 #ifndef NDEBUG
-          origSeqLen = gt_encodedsequence_total_length(
+          origSeqLen = gt_encseq_total_length(
                                                 gt_SPRTGetOrigEncseq(sprTable)),
 #endif
           maxRank;

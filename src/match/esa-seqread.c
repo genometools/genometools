@@ -71,7 +71,7 @@ int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
   return 1;
 }
 
-const GtEncodedsequence *gt_encseqSequentialsuffixarrayreader(
+const GtEncseq *gt_encseqSequentialsuffixarrayreader(
                           const Sequentialsuffixarrayreader *ssar)
 {
   return ssar->suffixarray->encseq;
@@ -95,7 +95,7 @@ struct Sequentialsuffixarrayreader
   Sequentialaccesstype seqactype;
   Lcpvalueiterator *lvi;
   const unsigned long *suftab;
-  const GtEncodedsequence *encseq;
+  const GtEncseq *encseq;
   GtReadmode readmode;
 };
 
@@ -128,13 +128,13 @@ Sequentialsuffixarrayreader *gt_newSequentialsuffixarrayreaderfromfile(
   ssar->suftab = NULL;
   ssar->encseq = ssar->suffixarray->encseq;
   ssar->readmode = ssar->suffixarray->readmode;
-  ssar->numberofsuffixes = gt_encodedsequence_total_length(ssar->encseq) + 1;
+  ssar->numberofsuffixes = gt_encseq_total_length(ssar->encseq) + 1;
   ssar->lvi = NULL;
   return ssar;
 }
 
 Sequentialsuffixarrayreader *gt_newSequentialsuffixarrayreaderfromRAM(
-                                        const GtEncodedsequence *encseq,
+                                        const GtEncseq *encseq,
                                         GtReadmode readmode)
 {
   Sequentialsuffixarrayreader *ssar;
@@ -265,7 +265,7 @@ int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
   return 1;
 }
 
-const GtEncodedsequence *gt_encseqSequentialsuffixarrayreader(
+const GtEncseq *gt_encseqSequentialsuffixarrayreader(
                           const Sequentialsuffixarrayreader *ssar)
 {
   return ssar->encseq;

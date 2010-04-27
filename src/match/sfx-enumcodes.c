@@ -18,8 +18,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "core/assert_api.h"
-#include "core/encodedsequence.h"
 #include "core/codetype.h"
+#include "core/encseq.h"
 #include "spacedef.h"
 #include "sfx-enumcodes.h"
 #include "stamp.h"
@@ -32,13 +32,13 @@ struct Enumcodeatposition
   bool moveforward;
   unsigned long totallength;
   bool exhausted;
-  const GtEncodedsequence *encseq;
+  const GtEncseq *encseq;
   GtReadmode readmode;
   unsigned int prefixlength;
   GtCodetype **multimappower, *filltable;
 };
 
-Enumcodeatposition *gt_newEnumcodeatposition(const GtEncodedsequence *encseq,
+Enumcodeatposition *gt_newEnumcodeatposition(const GtEncseq *encseq,
                                              GtReadmode readmode,
                                              unsigned int prefixlength,
                                              unsigned int numofchars)
@@ -52,7 +52,7 @@ Enumcodeatposition *gt_newEnumcodeatposition(const GtEncodedsequence *encseq,
   ecp->filltable = gt_initfilltable(numofchars,prefixlength);
   ecp->prefixlength = prefixlength;
   ecp->moveforward = GT_ISDIRREVERSE(readmode) ? true : false;
-  ecp->totallength = gt_encodedsequence_total_length(encseq);
+  ecp->totallength = gt_encseq_total_length(encseq);
   if (ecp->moveforward)
   {
     ecp->previousrange.start = ecp->previousrange.end = 0;
@@ -61,7 +61,7 @@ Enumcodeatposition *gt_newEnumcodeatposition(const GtEncodedsequence *encseq,
     ecp->previousrange.start = ecp->previousrange.end = ecp->totallength;
   }
   ecp->exhausted = false;
-  if (gt_encodedsequence_has_specialranges(encseq))
+  if (gt_encseq_has_specialranges(encseq))
   {
     ecp->sri = gt_specialrangeiterator_new(encseq,ecp->moveforward);
   } else
@@ -177,7 +177,7 @@ GtCodetype gt_computefilledqgramcode(const Enumcodeatposition *ecp,
   for (idx=0; idx<prefixindex; idx++)
   {
     gt_assert((unsigned long) (pos + idx) < ecp->totallength);
-    cc = gt_encodedsequence_get_encoded_char_nospecial(ecp->encseq,
+    cc = gt_encseq_get_encoded_char_nospecial(ecp->encseq,
                                                     pos + idx,
                                                     ecp->readmode);
     gt_assert(ISNOTSPECIAL(cc));
@@ -205,7 +205,7 @@ bool gt_computefilledqgramcodestopatmax(GtCodetype *code,
   for (idx=0; idx<prefixindex; idx++)
   {
     gt_assert((unsigned long) (pos + idx) < ecp->totallength);
-    cc = gt_encodedsequence_get_encoded_char_nospecial(ecp->encseq,
+    cc = gt_encseq_get_encoded_char_nospecial(ecp->encseq,
                                                     pos + idx,
                                                     ecp->readmode);
     gt_assert(ISNOTSPECIAL(cc));

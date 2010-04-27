@@ -58,7 +58,7 @@ gt_newSfxInterface(GtReadmode readmode,
                 unsigned int prefixlength,
                 unsigned int numofparts,
                 const Sfxstrategy *sfxstrategy,
-                const GtEncodedsequence *encseq,
+                const GtEncseq *encseq,
                 GtProgressTimer *sfxprogress,
                 unsigned long length,
                 GtLogger *verbosity,
@@ -94,7 +94,7 @@ gt_newSfxInterfaceWithReaders(GtReadmode readmode,
                            size_t numReaders,
                            enum sfxDataRequest readerRequests[],
                            SeqDataReader readers[],
-                           const GtEncodedsequence *encseq,
+                           const GtEncseq *encseq,
                            GtProgressTimer *sfxprogress,
                            unsigned long length,
                            GtLogger *verbosity,
@@ -152,7 +152,7 @@ gt_SfxIGetAlphabet(const sfxInterface *si);
  * @param si reference of interface to suffixerator
  * @return reference of sequence object
  */
-extern const GtEncodedsequence *
+extern const GtEncseq *
 gt_SfxIGetEncSeq(const sfxInterface *si);
 
 /**

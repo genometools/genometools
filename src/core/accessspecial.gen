@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-static int ADDTYPE(fillspecialtables)(GtEncodedsequence *encseq,
+static int ADDTYPE(fillspecialtables)(GtEncseq *encseq,
                                       GtSequenceBuffer *fb,
                                       GtError *err)
 {
@@ -189,7 +189,7 @@ static bool ADDTYPE(binarysearchpage)(const SPECIALTYPE *leftptr,
 
 #ifdef POS2PAGENUM
 
-static bool ADDTYPE(checknospecial)(const GtEncodedsequence *encseq,
+static bool ADDTYPE(checknospecial)(const GtEncseq *encseq,
                                     unsigned long pos)
 {
   unsigned long pagenumber = (unsigned long) POS2PAGENUM(pos);
@@ -226,7 +226,7 @@ static bool ADDTYPE(checknospecial)(const GtEncodedsequence *encseq,
   return true;
 }
 
-static bool ADDTYPE(checknospecialrange)(const GtEncodedsequence *encseq,
+static bool ADDTYPE(checknospecialrange)(const GtEncseq *encseq,
                                          unsigned long pos)
 {
   unsigned long pagenumber = (unsigned long) POS2PAGENUM(pos);
@@ -321,7 +321,7 @@ static bool ADDTYPE(checknospecialrange)(const GtEncodedsequence *encseq,
 
 #else
 
-static bool ADDTYPE(checknospecial)(const GtEncodedsequence *encseq,
+static bool ADDTYPE(checknospecial)(const GtEncseq *encseq,
                                     unsigned long pos)
 {
   return ADDTYPE(binarysearchpage)(ACCESSENCSEQ(encseq,specialpositions),
@@ -330,7 +330,7 @@ static bool ADDTYPE(checknospecial)(const GtEncodedsequence *encseq,
                                    (SPECIALTYPE) pos) ? false : true;
 }
 
-static bool ADDTYPE(checknospecialrange)(const GtEncodedsequence *encseq,
+static bool ADDTYPE(checknospecialrange)(const GtEncseq *encseq,
                                        unsigned long pos)
 {
   const SPECIALTYPE *found, *start;

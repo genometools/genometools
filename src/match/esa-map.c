@@ -25,8 +25,8 @@
 #include "core/error.h"
 #include "core/fa.h"
 #include "core/format64.h"
-#include "core/encodedsequence.h"
 #include "core/codetype.h"
+#include "core/encseq.h"
 #include "sarr-def.h"
 #include "esa-fileend.h"
 #include "sfx-ri-def.h"
@@ -66,7 +66,7 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
   GtArray *riktab;
   GtStr *currentline;
   /* the following five variables are local as the parsed values are
-     not required: they are determined by reading the encodedsequence */
+     not required: they are determined by reading the encseq */
   unsigned long totallength;
   GtSpecialcharinfo specialcharinfo;
   unsigned long numofsequences,
@@ -244,7 +244,7 @@ void gt_freesuffixarray(Suffixarray *suffixarray)
   gt_fa_xfclose(suffixarray->bwttabstream.fp);
   suffixarray->bwttabstream.fp = NULL;
   FREESPACE(suffixarray->bwttabstream.bufferedfilespace);
-  gt_encodedsequence_delete(suffixarray->encseq);
+  gt_encseq_delete(suffixarray->encseq);
   suffixarray->encseq = NULL;
   if (suffixarray->bcktab != NULL)
   {
@@ -282,7 +282,7 @@ static int inputsuffixarray(bool map,
     haserr = true;
   } else
   {
-    totallength = gt_encodedsequence_total_length(suffixarray->encseq);
+    totallength = gt_encseq_total_length(suffixarray->encseq);
   }
   if (!haserr)
   {
@@ -391,7 +391,7 @@ static int inputsuffixarray(bool map,
     {
       suffixarray->bcktab = gt_mapbcktab(indexname,
                      gt_alphabet_num_of_chars(
-                              gt_encodedsequence_alphabet(suffixarray->encseq)),
+                              gt_encseq_alphabet(suffixarray->encseq)),
                      suffixarray->prefixlength,
                      err);
       if (suffixarray->bcktab == NULL)

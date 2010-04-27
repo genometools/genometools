@@ -31,7 +31,7 @@
 #include "core/fasta.h"
 #include "giextract.h"
 #include "core/format64.h"
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 #include "echoseq.h"
 
 #define COMPLETE(VALUE)\
@@ -389,7 +389,7 @@ static const char *desc2key(unsigned long *keylen,const char *desc,
 }
 
 static int giextract_encodedseq2fasta(FILE *fpout,
-                                      const GtEncodedsequence *encseq,
+                                      const GtEncseq *encseq,
                                       unsigned long seqnum,
                                       const Fastakeyquery *fastakeyquery,
                                       unsigned long linewidth,
@@ -399,7 +399,7 @@ static int giextract_encodedseq2fasta(FILE *fpout,
   unsigned long desclen;
   bool haserr = false;
 
-  desc = gt_encodedsequence_description(encseq, &desclen, seqnum);
+  desc = gt_encseq_description(encseq, &desclen, seqnum);
   (void) putc('>',fpout);
   if (fastakeyquery != NULL && !COMPLETE(fastakeyquery))
   {
@@ -418,7 +418,7 @@ static int giextract_encodedseq2fasta(FILE *fpout,
     unsigned long frompos, topos;
 
     (void) putc('\n',fpout);
-    gt_encodedsequence_seqinfo(encseq,&seqinfo,seqnum);
+    gt_encseq_seqinfo(encseq,&seqinfo,seqnum);
     if (fastakeyquery != NULL && !COMPLETE(fastakeyquery))
     {
       frompos = fastakeyquery->frompos-1;
@@ -468,7 +468,7 @@ int gt_extractkeysfromdesfile(const GtStr *indexname,
   bool haserr = false, firstdesc = true;
   char *previouskey = NULL;
   Fixedsizekey *keytab = NULL, *keytabptr = NULL;
-  GtEncodedsequence *encseq = NULL;
+  GtEncseq *encseq = NULL;
   unsigned long numofentries = 0;
   const unsigned long linewidth = 60UL;
 
@@ -545,7 +545,7 @@ int gt_extractkeysfromdesfile(const GtStr *indexname,
           haserr = true;
           break;
         }
-        numofentries = gt_encodedsequence_num_of_sequences(encseq);
+        numofentries = gt_encseq_num_of_sequences(encseq);
         gt_assert(numofentries > 0);
         keytab = gt_malloc(sizeof (*keytab) * numofentries);
         keytabptr = keytab;
@@ -637,7 +637,7 @@ int gt_extractkeysfromdesfile(const GtStr *indexname,
   }
   if (encseq != NULL)
   {
-    gt_encodedsequence_delete(encseq);
+    gt_encseq_delete(encseq);
     encseq = NULL;
   }
   gt_free(keytab);
@@ -680,7 +680,7 @@ static unsigned long searchfastaqueryindes(const char *extractkey,
   return numofkeys;
 }
 
-static int itersearchoverallkeys(const GtEncodedsequence *encseq,
+static int itersearchoverallkeys(const GtEncseq *encseq,
                                  const char *keytab,
                                  unsigned long numofkeys,
                                  unsigned long keysize,
@@ -783,7 +783,7 @@ int gt_extractkeysfromfastaindex(const GtStr *indexname,
                                  const GtStr *fileofkeystoextract,
                                  unsigned long linewidth,GtError *err)
 {
-  GtEncodedsequence *encseq = NULL;
+  GtEncseq *encseq = NULL;
   GtEncseqLoader *el = NULL;
   bool haserr = false;
   unsigned long numofdbsequences = 0, keysize = 0;
@@ -800,7 +800,7 @@ int gt_extractkeysfromfastaindex(const GtStr *indexname,
   {
     int retval;
 
-    numofdbsequences = gt_encodedsequence_num_of_sequences(encseq);
+    numofdbsequences = gt_encseq_num_of_sequences(encseq);
     retval = readkeysize(indexname,err);
     if (retval < 0)
     {
@@ -835,7 +835,7 @@ int gt_extractkeysfromfastaindex(const GtStr *indexname,
   }
   if (encseq != NULL)
   {
-    gt_encodedsequence_delete(encseq);
+    gt_encseq_delete(encseq);
     encseq = NULL;
   }
   return haserr ? -1 : 0;

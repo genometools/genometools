@@ -21,7 +21,7 @@
 #ifdef SKDEBUG
 #define GT_CHECKENCCHAR(CC,ENCSEQ,POS,READMODE)\
         {\
-          GtUchar cctmp = gt_encodedsequence_get_encoded_char(ENCSEQ,POS, \
+          GtUchar cctmp = gt_encseq_get_encoded_char(ENCSEQ,POS, \
                                                             READMODE);\
           if ((CC) != cctmp)\
           {\

@@ -67,7 +67,7 @@ typedef struct
   const GtAlphabet *alpha;
   unsigned long *eqsvector;
   const TgrTagwithlength *twlptr;
-  const GtEncodedsequence *encseq;
+  const GtEncseq *encseq;
 } TgrShowmatchinfo;
 
 #define ADDTABULATOR\
@@ -100,9 +100,9 @@ static void tgr_showmatch(void *processinfo,const GtMatch *match)
     {
       GtSeqinfo seqinfo;
       unsigned long seqnum =
-                       gt_encodedsequence_pos2seqnum(showmatchinfo->encseq,
+                       gt_encseq_pos2seqnum(showmatchinfo->encseq,
                                                      match->dbstartpos);
-      gt_encodedsequence_seqinfo(showmatchinfo->encseq,&seqinfo,seqnum);
+      gt_encseq_seqinfo(showmatchinfo->encseq,&seqinfo,seqnum);
       gt_assert(seqinfo.seqstartpos <= match->dbstartpos);
       printf("%lu\t%lu",seqnum,
                         match->dbstartpos - seqinfo.seqstartpos);
@@ -547,7 +547,7 @@ int gt_runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
   int retval;
   Myersonlineresources *mor = NULL;
   Genericindex *genericindex = NULL;
-  const GtEncodedsequence *encseq = NULL;
+  const GtEncseq *encseq = NULL;
   GtLogger *logger;
 
   logger = gt_logger_new(tageratoroptions->verbose,
@@ -614,7 +614,7 @@ int gt_runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     GT_INITARRAY(&storeonline,TgrSimplematch);
     GT_INITARRAY(&storeoffline,TgrSimplematch);
     storeonline.twlptr = storeoffline.twlptr = &twl;
-    alpha = gt_encodedsequence_alphabet(encseq);
+    alpha = gt_encseq_alphabet(encseq);
     symbolmap = gt_alphabet_symbolmap(alpha);
     numofchars = gt_alphabet_num_of_chars(alpha);
     if (tageratoroptions->docompare)
@@ -777,7 +777,7 @@ int gt_runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
   {
     if (encseq != NULL)
     {
-      gt_encodedsequence_delete((GtEncodedsequence *) encseq);
+      gt_encseq_delete((GtEncseq *) encseq);
       encseq = NULL;
     }
   } else

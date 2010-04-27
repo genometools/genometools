@@ -22,7 +22,7 @@
 #include "core/format64.h"
 #include "core/intbits.h"
 #include "spacedef.h"
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 
 #include "merger-trie.h"
 
@@ -62,11 +62,11 @@ static GtUchar getfirstedgechar(const Mergertrierep *trierep,
 
   if (MTRIE_ISLEAF(node) &&
       node->suffixinfo.startpos + prevdepth >=
-      gt_encodedsequence_total_length(eri->encseqptr))
+      gt_encseq_total_length(eri->encseqptr))
   {
     return (GtUchar) SEPARATOR;
   }
-  return gt_encodedsequence_get_encoded_char(eri->encseqptr, /* Random access */
+  return gt_encseq_get_encoded_char(eri->encseqptr, /* Random access */
                         node->suffixinfo.startpos + prevdepth,
                         eri->readmode);
 }
@@ -130,7 +130,7 @@ static void showmergertrie2(const Mergertrierep *trierep,
     printf("%*.*s",(int) (6 * level),(int) (6 * level)," ");
     if (MTRIE_ISLEAF(current))
     {
-      endpos = gt_encodedsequence_total_length(
+      endpos = gt_encseq_total_length(
                                  trierep->encseqtable[current->suffixinfo.idx]);
     } else
     {
@@ -139,7 +139,7 @@ static void showmergertrie2(const Mergertrierep *trierep,
     for (pos = current->suffixinfo.startpos + node->depth;
          pos < endpos; pos++)
     {
-      cc = gt_encodedsequence_get_encoded_char( /* just for testing */
+      cc = gt_encseq_get_encoded_char( /* just for testing */
               trierep->enseqreadinfo[current->suffixinfo.idx].encseqptr,
               pos,
               trierep->enseqreadinfo[current->suffixinfo.idx].readmode);
@@ -411,12 +411,12 @@ static Mergertrienode *mtrie_makenewbranch(Mergertrierep *trierep,
   newbranch->rightsibling = oldnode->rightsibling;
   cc1 = getfirstedgechar(trierep,oldnode,currentdepth);
   if (suffixinfo->startpos + currentdepth >=
-      gt_encodedsequence_total_length(eri->encseqptr))
+      gt_encseq_total_length(eri->encseqptr))
   {
     cc2 = (GtUchar) SEPARATOR;
   } else
   {
-    cc2 = gt_encodedsequence_get_encoded_char(eri->encseqptr,
+    cc2 = gt_encseq_get_encoded_char(eri->encseqptr,
                          suffixinfo->startpos + currentdepth,
                          eri->readmode);
   }
@@ -433,10 +433,10 @@ static Mergertrienode *mtrie_makenewbranch(Mergertrierep *trierep,
   return newbranch;
 }
 
-static unsigned long getlcp(const GtEncodedsequence *encseq1,
+static unsigned long getlcp(const GtEncseq *encseq1,
                             GtReadmode readmode1,
                             unsigned long start1, unsigned long end1,
-                            const GtEncodedsequence *encseq2,
+                            const GtEncseq *encseq2,
                             GtReadmode readmode2,
                             unsigned long start2, unsigned long end2)
 {
@@ -445,8 +445,8 @@ static unsigned long getlcp(const GtEncodedsequence *encseq1,
 
   for (i1=start1, i2=start2; i1 <= end1 && i2 <= end2; i1++, i2++)
   {
-    cc1 = gt_encodedsequence_get_encoded_char(/*XXX*/ encseq1,i1,readmode1);
-    if (cc1 != gt_encodedsequence_get_encoded_char(/*XXX*/ encseq2,i2,readmode2)
+    cc1 = gt_encseq_get_encoded_char(/*XXX*/ encseq1,i1,readmode1);
+    if (cc1 != gt_encseq_get_encoded_char(/*XXX*/ encseq2,i2,readmode2)
           || ISSPECIAL(cc1))
     {
       break;
@@ -503,7 +503,7 @@ void gt_mergertrie_insertsuffix(Mergertrierep *trierep,
     gt_assert(!MTRIE_ISLEAF(node));
     currentnode = node;
     currentdepth = node->depth;
-    totallength = gt_encodedsequence_total_length(eri->encseqptr);
+    totallength = gt_encseq_total_length(eri->encseqptr);
     while (true)
     {
       if (suffixinfo->startpos + currentdepth >= totallength)
@@ -512,7 +512,7 @@ void gt_mergertrie_insertsuffix(Mergertrierep *trierep,
       } else
       {
         /* Random access */
-        cc = gt_encodedsequence_get_encoded_char(eri->encseqptr,
+        cc = gt_encseq_get_encoded_char(eri->encseqptr,
                                             suffixinfo->startpos + currentdepth,
                                             eri->readmode);
       }
@@ -541,13 +541,13 @@ void gt_mergertrie_insertsuffix(Mergertrierep *trierep,
         lcpvalue = getlcp(eri->encseqptr,
                           eri->readmode,
                           suffixinfo->startpos + currentdepth + 1,
-                          gt_encodedsequence_total_length(eri->encseqptr) - 1,
+                          gt_encseq_total_length(eri->encseqptr) - 1,
                           trierep->encseqreadinfo[succ->suffixinfo.idx].
                                 encseqptr,
                           trierep->encseqreadinfo[succ->suffixinfo.idx].
                                 readmode,
                           succ->suffixinfo.startpos + currentdepth + 1,
-                          gt_encodedsequence_total_length(
+                          gt_encseq_total_length(
                               trierep->encseqreadinfo[succ->suffixinfo.idx].
                                         encseqptr) - 1);
         newbranch = mtrie_makenewbranch(trierep,
@@ -568,7 +568,7 @@ void gt_mergertrie_insertsuffix(Mergertrierep *trierep,
       lcpvalue = getlcp(eri->encseqptr,
                         eri->readmode,
                         suffixinfo->startpos + currentdepth + 1,
-                        gt_encodedsequence_total_length(eri->encseqptr) - 1,
+                        gt_encseq_total_length(eri->encseqptr) - 1,
                         trierep->encseqreadinfo[succ->suffixinfo.idx].encseqptr,
                         trierep->encseqreadinfo[succ->suffixinfo.idx].readmode,
                         succ->suffixinfo.startpos + currentdepth + 1,

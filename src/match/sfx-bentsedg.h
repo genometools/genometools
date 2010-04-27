@@ -21,9 +21,8 @@
 #include "core/error_api.h"
 #include "core/str.h"
 #include "core/defined-types.h"
-#include "core/encodedsequence.h"
 #include "core/codetype.h"
-
+#include "core/encseq.h"
 #include "sfx-strategy.h"
 #include "sfx-copysort.h"
 #include "bcktab.h"
@@ -53,7 +52,7 @@ unsigned long getmaxbranchdepth(const Outlcpinfo *outlcpinfo);
 void gt_qsufsort(unsigned long *sortspace,
               int mmapfiledesc,
               unsigned long *longest,
-              const GtEncodedsequence *encseq,
+              const GtEncseq *encseq,
               GtReadmode readmode,
               GtCodetype mincode,
               GtCodetype maxcode,
@@ -67,7 +66,7 @@ void gt_qsufsort(unsigned long *sortspace,
 
 void gt_sortallbuckets(Suftab *suftab,
                     GtBucketspec2 *bucketspec2,
-                    const GtEncodedsequence *encseq,
+                    const GtEncseq *encseq,
                     GtReadmode readmode,
                     GtCodetype mincode,
                     GtCodetype maxcode,
@@ -83,7 +82,7 @@ void gt_sortallbuckets(Suftab *suftab,
 void gt_sortbucketofsuffixes(unsigned long *suffixestobesorted,
                           GtBucketspec2 *bucketspec2,
                           unsigned long numberofsuffixes,
-                          const GtEncodedsequence *encseq,
+                          const GtEncseq *encseq,
                           GtReadmode readmode,
                           GtCodetype mincode,
                           GtCodetype maxcode,

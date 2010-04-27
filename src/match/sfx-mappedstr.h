@@ -20,7 +20,7 @@
 
 #include "core/error_api.h"
 #include "core/str_array_api.h"
-#include "core/encodedsequence_api.h"
+#include "core/encseq_api.h"
 #include "core/codetype.h"
 
 typedef struct
@@ -33,7 +33,7 @@ typedef struct
 typedef struct GtKmercodeiterator GtKmercodeiterator;
 
 /*@notnull@*/ GtKmercodeiterator *gt_kmercodeiterator_encseq_new(
-                                            const GtEncodedsequence *encseq,
+                                            const GtEncseq *encseq,
                                             GtReadmode readmode,
                                             unsigned int kmersize);
 
@@ -57,7 +57,7 @@ bool gt_kmercodeiterator_inputexhausted(
 
 void gt_kmercodeiterator_delete(GtKmercodeiterator *kmercodeiterator);
 
-void getencseqkmers(const GtEncodedsequence *encseq,
+void getencseqkmers(const GtEncseq *encseq,
                     GtReadmode readmode,
                     unsigned int kmersize,
                     void(*processkmercode)(void *,

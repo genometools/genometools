@@ -31,16 +31,16 @@
 #include "spacedef.h"
 #include "esa-fileend.h"
 #include "core/readmode.h"
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 #include "stamp.h"
 
 #define PRJSPECIALOUT(VAL)\
         fprintf(outprj,"%s=%lu\n",#VAL,\
-                gt_encodedsequence_##VAL(encseq))
+                gt_encseq_##VAL(encseq))
 
 static void showprjinfo(FILE *outprj,
                         GtReadmode readmode,
-                        const GtEncodedsequence *encseq,
+                        const GtEncseq *encseq,
                         unsigned int prefixlength,
                         GT_UNUSED const Definedunsignedint *maxdepth,
                         unsigned long numoflargelcpvalues,
@@ -50,14 +50,14 @@ static void showprjinfo(FILE *outprj,
   unsigned long totallength;
   unsigned long numofsequences;
 
-  totallength = gt_encodedsequence_total_length(encseq);
+  totallength = gt_encseq_total_length(encseq);
   fprintf(outprj,"totallength=%lu\n",totallength);
   PRJSPECIALOUT(specialcharacters);
   PRJSPECIALOUT(specialranges);
   PRJSPECIALOUT(realspecialranges);
   PRJSPECIALOUT(lengthofspecialprefix);
   PRJSPECIALOUT(lengthofspecialsuffix);
-  numofsequences = gt_encodedsequence_num_of_sequences(encseq);
+  numofsequences = gt_encseq_num_of_sequences(encseq);
   fprintf(outprj,"numofsequences=%lu\n",numofsequences);
   fprintf(outprj,"numofdbsequences=%lu\n",numofsequences);
   fprintf(outprj,"numofquerysequences=0\n");
@@ -85,7 +85,7 @@ static void showprjinfo(FILE *outprj,
 
 int gt_outprjfile(const GtStr *indexname,
                GtReadmode readmode,
-               const GtEncodedsequence *encseq,
+               const GtEncseq *encseq,
                unsigned int prefixlength,
                const Definedunsignedint *maxdepth,
                unsigned long numoflargelcpvalues,

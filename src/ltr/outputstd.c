@@ -16,7 +16,7 @@
 */
 
 #include "core/symboldef.h"
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 #include "ltrharvest-opt.h"
 #include "outputstd.h"
 
@@ -75,11 +75,11 @@ static void printlongheader(const LTRharvestoptions *lo)
 
 static void producelongutput(const LTRharvestoptions *lo,
                              const LTRboundaries *boundaries,
-                             const GtEncodedsequence *encseq,
+                             const GtEncseq *encseq,
                              unsigned long offset)
 {
   const GtUchar *characters = gt_alphabet_characters(
-                                           gt_encodedsequence_alphabet(encseq));
+                                           gt_encseq_alphabet(encseq));
 
   printf("%lu  ",
       boundaries->leftLTR_5 -offset + 1);
@@ -99,7 +99,7 @@ static void producelongutput(const LTRharvestoptions *lo,
 
     for (j = 0; j < boundaries->lenleftTSD; j++)
     {
-      printf("%c",(char) characters[gt_encodedsequence_get_encoded_char(encseq,
+      printf("%c",(char) characters[gt_encseq_get_encoded_char(encseq,
                                                    boundaries->leftLTR_5 -
                                                    boundaries->lenleftTSD + j,
                                                    GT_READMODE_FORWARD)]);
@@ -111,19 +111,19 @@ static void producelongutput(const LTRharvestoptions *lo,
   {
     printf("%c%c..%c%c  ",
         /* Random access */
-        (char) characters[gt_encodedsequence_get_encoded_char(encseq,
+        (char) characters[gt_encseq_get_encoded_char(encseq,
                        boundaries->leftLTR_5,
                        GT_READMODE_FORWARD)],
         /* Random access */
-        (char) characters[gt_encodedsequence_get_encoded_char(encseq,
+        (char) characters[gt_encseq_get_encoded_char(encseq,
                        boundaries->leftLTR_5+1,
                        GT_READMODE_FORWARD)],
         /* Random access */
-        (char) characters[gt_encodedsequence_get_encoded_char(encseq,
+        (char) characters[gt_encseq_get_encoded_char(encseq,
                        boundaries->leftLTR_3-1,
                        GT_READMODE_FORWARD)],
         /* Random access */
-        (char) characters[gt_encodedsequence_get_encoded_char(encseq,
+        (char) characters[gt_encseq_get_encoded_char(encseq,
                        boundaries->leftLTR_3,
                        GT_READMODE_FORWARD)] );
   }
@@ -140,7 +140,7 @@ static void producelongutput(const LTRharvestoptions *lo,
 
     for (j = 0; j < boundaries->lenrightTSD; j++)
     {
-      printf("%c", (char) characters[gt_encodedsequence_get_encoded_char(encseq,
+      printf("%c", (char) characters[gt_encseq_get_encoded_char(encseq,
                                                     boundaries->rightLTR_3+j+1,
                                                     GT_READMODE_FORWARD)]);
     }
@@ -150,19 +150,19 @@ static void producelongutput(const LTRharvestoptions *lo,
   {
     printf("%c%c..%c%c",
         /* Random access */
-        (char) characters[gt_encodedsequence_get_encoded_char(encseq,
+        (char) characters[gt_encseq_get_encoded_char(encseq,
                        boundaries->rightLTR_5,
                        GT_READMODE_FORWARD)],
         /* Random access */
-        (char) characters[gt_encodedsequence_get_encoded_char(encseq,
+        (char) characters[gt_encseq_get_encoded_char(encseq,
                        boundaries->rightLTR_5+1,
                        GT_READMODE_FORWARD)],
         /* Random access */
-        (char) characters[gt_encodedsequence_get_encoded_char(encseq,
+        (char) characters[gt_encseq_get_encoded_char(encseq,
                        boundaries->rightLTR_3-1,
                        GT_READMODE_FORWARD)],
         /* Random access */
-        (char) characters[gt_encodedsequence_get_encoded_char(encseq,
+        (char) characters[gt_encseq_get_encoded_char(encseq,
                        boundaries->rightLTR_3,
                        GT_READMODE_FORWARD)] );
   }
@@ -223,7 +223,7 @@ static void produceshortoutput(const LTRboundaries *boundaries,
 void gt_showinfoiffoundfullLTRs(const LTRharvestoptions *lo,
                              const LTRboundaries **bdptrtab,
                              unsigned long numofboundaries,
-                             const GtEncodedsequence *encseq)
+                             const GtEncseq *encseq)
 {
   GtSeqinfo seqinfo;
   unsigned long i;
@@ -239,7 +239,7 @@ void gt_showinfoiffoundfullLTRs(const LTRharvestoptions *lo,
       /* print output sorted by contignumber*/
       for (i = 0; i<numofboundaries; i++)
       {
-        gt_encodedsequence_seqinfo(encseq,&seqinfo,bdptrtab[i]->contignumber);
+        gt_encseq_seqinfo(encseq,&seqinfo,bdptrtab[i]->contignumber);
         producelongutput(lo,
                          bdptrtab[i],
                          encseq,
@@ -254,7 +254,7 @@ void gt_showinfoiffoundfullLTRs(const LTRharvestoptions *lo,
       /* print output sorted by contignumber*/
       for (i = 0; i<numofboundaries; i++)
       {
-        gt_encodedsequence_seqinfo(encseq,&seqinfo,bdptrtab[i]->contignumber);
+        gt_encseq_seqinfo(encseq,&seqinfo,bdptrtab[i]->contignumber);
         produceshortoutput(bdptrtab[i],seqinfo.seqstartpos);
       }
     }

@@ -29,7 +29,7 @@ typedef struct Genericindex Genericindex;
 
 void genericindex_delete(Genericindex *genericindex);
 
-const GtEncodedsequence *genericindex_getencseq(const Genericindex
+const GtEncseq *genericindex_getencseq(const Genericindex
                                                 *genericindex);
 
 Genericindex *genericindex_new(const GtStr *indexname,

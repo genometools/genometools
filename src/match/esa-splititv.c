@@ -23,11 +23,11 @@
 
 #define SEQUENCE(ENCSEQ,POS) (((POS) == totallength) \
                              ? (GtUchar) SEPARATOR\
-                             : gt_encodedsequence_get_encoded_char(ENCSEQ, \
+                             : gt_encseq_get_encoded_char(ENCSEQ, \
                                                                  POS, \
                                                                  readmode))
 
-static unsigned long lcpintervalfindrightbound(const GtEncodedsequence *encseq,
+static unsigned long lcpintervalfindrightbound(const GtEncseq *encseq,
                                         GtReadmode readmode,
                                         unsigned long totallength,
                                         const unsigned long *suftab,
@@ -55,7 +55,7 @@ static unsigned long lcpintervalfindrightbound(const GtEncodedsequence *encseq,
   return left;
 }
 
-bool gt_lcpintervalfindcharchildintv(const GtEncodedsequence *encseq,
+bool gt_lcpintervalfindcharchildintv(const GtEncseq *encseq,
                                   GtReadmode readmode,
                                   unsigned long totallength,
                                   const unsigned long *suftab,
@@ -115,7 +115,7 @@ bool gt_lcpintervalfindcharchildintv(const GtEncodedsequence *encseq,
         bwci->spaceBoundswithchar[bwci->nextfreeBoundswithchar++].inchar = V
 
 void gt_lcpintervalsplitwithoutspecial(GtArrayBoundswithchar *bwci,
-                                    const GtEncodedsequence *encseq,
+                                    const GtEncseq *encseq,
                                     GtReadmode readmode,
                                     unsigned long totallength,
                                     const unsigned long *suftab,
@@ -157,7 +157,7 @@ void gt_lcpintervalsplitwithoutspecial(GtArrayBoundswithchar *bwci,
   ADDCURRENTLBOUND(parentright+1);
 }
 
-GtUchar gt_lcpintervalextendlcp(const GtEncodedsequence *encseq,
+GtUchar gt_lcpintervalextendlcp(const GtEncseq *encseq,
                            GtReadmode readmode,
                            const unsigned long *suftab,
                            unsigned long totallength,

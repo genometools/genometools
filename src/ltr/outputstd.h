@@ -18,13 +18,13 @@
 #ifndef OUTPUTSTD_H
 #define OUTPUTSTD_H
 
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 #include "repeattypes.h"
 #include "ltrharvest-opt.h"
 
 void gt_showinfoiffoundfullLTRs(const LTRharvestoptions *lo,
                              const LTRboundaries **bdptrtab,
                              unsigned long numofboundaries,
-                             const GtEncodedsequence *encseq);
+                             const GtEncseq *encseq);
 
 #endif

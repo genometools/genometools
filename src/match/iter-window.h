@@ -18,11 +18,11 @@
 #ifndef ITER_WINDOW_H
 #define ITER_WINDOW_H
 
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 
 typedef struct Windowiterator Windowiterator;
 
-Windowiterator *gt_windowiterator_new(const GtEncodedsequence *encseq,
+Windowiterator *gt_windowiterator_new(const GtEncseq *encseq,
                                    unsigned long windowsize,
                                    unsigned long startpos,
                                    unsigned long endpos);

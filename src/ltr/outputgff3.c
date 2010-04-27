@@ -18,7 +18,7 @@
 #include "core/fa.h"
 #include "core/str.h"
 #include "match/echoseq.h"
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 #include "core/defined-types.h"
 #include "ltrharvest-opt.h"
 #include "repeattypes.h"
@@ -155,7 +155,7 @@ static void showboundaries(FILE *fp,
 int gt_printgff3format(const LTRharvestoptions *lo,
                     const LTRboundaries **bdptrtab,
                     unsigned long numofboundaries,
-                    const GtEncodedsequence *encseq,
+                    const GtEncseq *encseq,
                     GtError *err)
 {
   bool haserr = false;
@@ -186,12 +186,12 @@ int gt_printgff3format(const LTRharvestoptions *lo,
       {
         previouscontignum.defined = true;
         previouscontignum.valueunsignedlong = seqnum;
-        gt_encodedsequence_seqinfo(encseq,&seqinfo,seqnum);
+        gt_encseq_seqinfo(encseq,&seqinfo,seqnum);
         fprintf(fp, "##sequence-region seq%lu %lu %lu\n",
                     seqnum,
                     1 + (unsigned long) lo->offset,
                     seqinfo.seqlength + (unsigned long) lo->offset);
-        desptr = gt_encodedsequence_description(encseq, &desclen, seqnum);
+        desptr = gt_encseq_description(encseq, &desclen, seqnum);
         fprintf(fp,"# %*.*s\n",(int) desclen,(int) desclen,desptr);
       }
       showboundaries(fp,

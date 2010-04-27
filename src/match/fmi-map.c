@@ -132,18 +132,18 @@ void gt_freefmindex(Fmindex *fmindex)
   }
   if (fmindex->bwtformatching != NULL)
   {
-    gt_encodedsequence_delete(fmindex->bwtformatching);
+    gt_encseq_delete(fmindex->bwtformatching);
     fmindex->bwtformatching = NULL;
   }
   gt_alphabet_delete((GtAlphabet *) fmindex->alphabet);
 }
 
-static GtEncodedsequence *mapbwtencoding(const GtStr *indexname,
+static GtEncseq *mapbwtencoding(const GtStr *indexname,
                                        GtLogger *logger,
                                        GtError *err)
 {
   GtEncseqLoader *el;
-  GtEncodedsequence *ret;
+  GtEncseq *ret;
   gt_error_check(err);
 
   el = gt_encseq_loader_new();

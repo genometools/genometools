@@ -21,7 +21,7 @@
 #include "core/divmodmul.h"
 #include "core/ma_api.h"
 
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 
 typedef struct
 {
@@ -30,17 +30,17 @@ typedef struct
          rank;
 } Rankedbounds;
 
-Rankedbounds *gt_fillrankbounds(const GtEncodedsequence *encseq,
+Rankedbounds *gt_fillrankbounds(const GtEncseq *encseq,
                              GtReadmode readmode)
 {
-  if (gt_encodedsequence_has_specialranges(encseq))
+  if (gt_encseq_has_specialranges(encseq))
   {
     GtSpecialrangeiterator *sri;
     GtRange range;
     unsigned long currentrank = 0, realspecialranges;
     Rankedbounds *rankedbounds, *rbptr;
 
-    realspecialranges = gt_encodedsequence_realspecialranges(encseq);
+    realspecialranges = gt_encseq_realspecialranges(encseq);
     rankedbounds = gt_malloc(sizeof (Rankedbounds) * realspecialranges);
     sri = gt_specialrangeiterator_new(encseq,
                                       GT_ISDIRREVERSE(readmode)
@@ -146,19 +146,19 @@ static int compareSpecialrank(const void *a,const void *b)
   return 0;
 }
 
-Specialrank *gt_fillspecialranklist(const GtEncodedsequence *encseq,
+Specialrank *gt_fillspecialranklist(const GtEncseq *encseq,
                                  GtReadmode readmode,
                                  const unsigned long *inversesuftab)
 {
-  if (gt_encodedsequence_has_specialranges(encseq))
+  if (gt_encseq_has_specialranges(encseq))
   {
     GtSpecialrangeiterator *sri;
     GtRange range;
     unsigned long realspecialranges, specialrank, totallength;
     Specialrank *specialranklist, *rbptr;
 
-    totallength = gt_encodedsequence_total_length(encseq);
-    realspecialranges = gt_encodedsequence_realspecialranges(encseq);
+    totallength = gt_encseq_total_length(encseq);
+    realspecialranges = gt_encseq_realspecialranges(encseq);
     specialranklist = gt_malloc(sizeof (Specialrank) * realspecialranges);
     sri = gt_specialrangeiterator_new(encseq,
                                   GT_ISDIRREVERSE(readmode)

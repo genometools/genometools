@@ -18,8 +18,8 @@
 #ifndef SFX_ENUMCODES_H
 #define SFX_ENUMCODES_H
 
-#include "core/encodedsequence.h"
 #include "core/codetype.h"
+#include "core/encseq.h"
 
 typedef struct Enumcodeatposition Enumcodeatposition;
 
@@ -29,7 +29,7 @@ typedef struct
   unsigned long position;
 } Specialcontext;
 
-Enumcodeatposition *gt_newEnumcodeatposition(const GtEncodedsequence *encseq,
+Enumcodeatposition *gt_newEnumcodeatposition(const GtEncseq *encseq,
                                              GtReadmode readmode,
                                              unsigned int prefixlength,
                                              unsigned int numofchars);

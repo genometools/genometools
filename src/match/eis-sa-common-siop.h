@@ -21,22 +21,22 @@
 #include "match/eis-sa-common-priv.h"
 
 static inline GtUchar
-sfxIdx2BWTSym(unsigned long sufIdx, const GtEncodedsequence *encseq,
+sfxIdx2BWTSym(unsigned long sufIdx, const GtEncseq *encseq,
               GtReadmode readmode)
 {
   return sufIdx != 0
-    ? gt_encodedsequence_get_encoded_char(encseq, sufIdx - 1, readmode)
+    ? gt_encseq_get_encoded_char(encseq, sufIdx - 1, readmode)
     : (GtUchar) UNDEFBWTCHAR;
 }
 
 static inline size_t
-EncSeqGetSubSeq(const GtEncodedsequence *encseq, GtReadmode readmode,
+EncSeqGetSubSeq(const GtEncseq *encseq, GtReadmode readmode,
                 unsigned long pos, size_t len, GtUchar *subSeq)
 {
   size_t i;
   gt_assert(encseq);
   for (i = 0; i < len; ++i)
-    subSeq[i] = gt_encodedsequence_get_encoded_char(encseq, pos + i, readmode);
+    subSeq[i] = gt_encseq_get_encoded_char(encseq, pos + i, readmode);
   return len;
 }
 

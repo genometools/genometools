@@ -22,14 +22,14 @@
 #include "core/chardef.h"
 #include "core/error.h"
 #include "core/unused_api.h"
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 #include "sfx-nextchar.h"
 #include "kmer2string.h"
 #include "sfx-mappedstr.h"
 
 static GtCodetype qgram2codefillspecial(unsigned int numofchars,
                                       unsigned int kmersize,
-                                      const GtEncodedsequence *encseq,
+                                      const GtEncseq *encseq,
                                       GtReadmode readmode,
                                       unsigned long startpos,
                                       unsigned long totallength)
@@ -46,7 +46,7 @@ static GtCodetype qgram2codefillspecial(unsigned int numofchars,
   } else
   {
     /* for testing */
-    cc = gt_encodedsequence_get_encoded_char(encseq,startpos,readmode);
+    cc = gt_encseq_get_encoded_char(encseq,startpos,readmode);
     if (ISSPECIAL(cc))
     {
       integercode = (GtCodetype) (numofchars - 1);
@@ -71,7 +71,7 @@ static GtCodetype qgram2codefillspecial(unsigned int numofchars,
       } else
       {
         /* for testing */
-        cc = gt_encodedsequence_get_encoded_char(encseq,pos,readmode);
+        cc = gt_encseq_get_encoded_char(encseq,pos,readmode);
         if (ISSPECIAL(cc))
         {
           ADDNEXTCHAR(integercode,numofchars-1,numofchars);
@@ -105,7 +105,7 @@ static void outkmeroccurrence(void *processinfo,
 */
 
 static void collectkmercode(GtArrayGtCodetype *codelist,
-                            const GtEncodedsequence *encseq,
+                            const GtEncseq *encseq,
                             unsigned int kmersize,
                             unsigned int numofchars,
                             unsigned long stringtotallength)
@@ -217,7 +217,7 @@ static int getfastastreamkmers(const GtStrArray *filenametab,
   return haserr ? -1 : 0;
 }
 
-static int verifycodelists(const GtEncodedsequence *encseq,
+static int verifycodelists(const GtEncseq *encseq,
                            unsigned int kmersize,
                            unsigned int numofchars,
                            const GtArrayGtCodetype *codeliststream,
@@ -229,8 +229,8 @@ static int verifycodelists(const GtEncodedsequence *encseq,
   unsigned long stringtotallength;
 
   gt_error_check(err);
-  stringtotallength = gt_encodedsequence_total_length(encseq);
-  characters = gt_alphabet_characters(gt_encodedsequence_alphabet(encseq));
+  stringtotallength = gt_encseq_total_length(encseq);
+  characters = gt_alphabet_characters(gt_encseq_alphabet(encseq));
   GT_INITARRAY(&codeliststring,GtCodetype);
   collectkmercode(&codeliststring,
                   encseq,
@@ -250,7 +250,7 @@ static int verifycodelists(const GtEncodedsequence *encseq,
   return haserr ? -1 : 0;
 }
 
-int gt_verifymappedstr(const GtEncodedsequence *encseq,
+int gt_verifymappedstr(const GtEncseq *encseq,
                        unsigned int prefixlength,
                        GtError *err)
 {
@@ -259,13 +259,13 @@ int gt_verifymappedstr(const GtEncodedsequence *encseq,
   bool haserr = false;
 
   gt_error_check(err);
-  numofchars = gt_alphabet_num_of_chars(gt_encodedsequence_alphabet(encseq));
+  numofchars = gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq));
   GT_INITARRAY(&codeliststream,GtCodetype);
-  if (getfastastreamkmers(gt_encodedsequence_filenames(encseq),
+  if (getfastastreamkmers(gt_encseq_filenames(encseq),
                           numofchars,
                           prefixlength,
                           gt_alphabet_symbolmap(
-                                gt_encodedsequence_alphabet(encseq)),
+                                gt_encseq_alphabet(encseq)),
                           false,
                           &codeliststream,
                           err) != 0)

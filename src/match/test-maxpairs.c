@@ -39,7 +39,7 @@ int gt_testmaxpairs(GT_UNUSED const GtStr *indexname,
 #include "core/array.h"
 #include "core/arraydef.h"
 #include "core/divmodmul.h"
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 #include "core/format64.h"
 #include "core/logger.h"
 #include "core/progress_timer.h"
@@ -55,7 +55,7 @@ int gt_testmaxpairs(GT_UNUSED const GtStr *indexname,
 typedef struct
 {
   unsigned int minlength;
-  GtEncodedsequence *encseq;
+  GtEncseq *encseq;
   Processmaxpairs processmaxpairs;
   void *processmaxpairsinfo;
 } Substringmatchinfo;
@@ -170,25 +170,25 @@ static int sarrselfsubstringmatch(const GtUchar *dbseq,
   {
     haserr = true;
   }
-  gt_encodedsequence_delete(ssi.encseq);
+  gt_encseq_delete(ssi.encseq);
   ssi.encseq = NULL;
   return haserr ? -1 : 0;
 }
 
 static unsigned long samplesubstring(GtUchar *seqspace,
-                              const GtEncodedsequence *encseq,
+                              const GtEncseq *encseq,
                               unsigned long substringlength)
 {
   unsigned long start, totallength;
 
-  totallength = gt_encodedsequence_total_length(encseq);
+  totallength = gt_encseq_total_length(encseq);
   start = (unsigned long) (random() % totallength);
   if (start + substringlength > totallength)
   {
     substringlength = totallength - start;
   }
   gt_assert(substringlength > 0);
-  gt_encodedsequence_extract_substring(encseq,seqspace,start,
+  gt_encseq_extract_substring(encseq,seqspace,start,
                                        start+substringlength-1);
   return substringlength;
 }
@@ -202,7 +202,7 @@ typedef struct
 } Substringmatch;
 
 static int storemaxmatchquery(void *info,
-                              GT_UNUSED const GtEncodedsequence *encseq,
+                              GT_UNUSED const GtEncseq *encseq,
                               const Querymatch *querymatch,
                               GT_UNUSED GtError *err)
 {
@@ -225,7 +225,7 @@ typedef struct
 } Maxmatchselfinfo;
 
 static int storemaxmatchself(void *info,
-                             GT_UNUSED const GtEncodedsequence *encseq,
+                             GT_UNUSED const GtEncseq *encseq,
                              unsigned long len,
                              unsigned long pos1,
                              unsigned long pos2,
@@ -259,7 +259,7 @@ static int storemaxmatchself(void *info,
     } else
     {
       unsigned long queryseqnum
-        = gt_encodedsequence_sep2seqnum(maxmatchselfinfo->querymarkpos,
+        = gt_encseq_sep2seqnum(maxmatchselfinfo->querymarkpos,
                                         maxmatchselfinfo->numofquerysequences,
                                         maxmatchselfinfo->querylen,
                                         pos);
@@ -373,7 +373,7 @@ int gt_testmaxpairs(const GtStr *indexname,
                  GtLogger *logger,
                  GtError *err)
 {
-  GtEncodedsequence *encseq;
+  GtEncseq *encseq;
   unsigned long totallength = 0, dblen, querylen;
   GtUchar *dbseq = NULL, *query = NULL;
   bool haserr = false;
@@ -397,7 +397,7 @@ int gt_testmaxpairs(const GtStr *indexname,
     haserr = true;
   } else
   {
-    totallength = gt_encodedsequence_total_length(encseq);
+    totallength = gt_encseq_total_length(encseq);
   }
   if (!haserr)
   {
@@ -423,7 +423,7 @@ int gt_testmaxpairs(const GtStr *indexname,
                                 query,
                                 (unsigned long) querylen,
                                 minlength,
-                                gt_encodedsequence_alphabet(encseq),
+                                gt_encseq_alphabet(encseq),
                                 storemaxmatchquery,
                                 tabmaxquerymatches,
                                 logger,
@@ -448,7 +448,7 @@ int gt_testmaxpairs(const GtStr *indexname,
                                query,
                                (unsigned long) querylen,
                                minlength,
-                               gt_encodedsequence_alphabet(encseq),
+                               gt_encseq_alphabet(encseq),
                                storemaxmatchself,
                                &maxmatchselfinfo,
                                logger,
@@ -471,12 +471,12 @@ int gt_testmaxpairs(const GtStr *indexname,
       (void) gt_array_iterate(maxmatchselfinfo.results,showSubstringmatch,
                            NULL,err);
       gt_symbolstring2fasta(stdout,"dbseq",
-                         gt_encodedsequence_alphabet(encseq),
+                         gt_encseq_alphabet(encseq),
                          dbseq,
                          (unsigned long) dblen,
                          width);
       gt_symbolstring2fasta(stdout,"queryseq",
-                         gt_encodedsequence_alphabet(encseq),
+                         gt_encseq_alphabet(encseq),
                          query,
                          (unsigned long) querylen,
                          width);
@@ -489,7 +489,7 @@ int gt_testmaxpairs(const GtStr *indexname,
   }
   FREESPACE(dbseq);
   FREESPACE(query);
-  gt_encodedsequence_delete(encseq);
+  gt_encseq_delete(encseq);
   encseq = NULL;
   return haserr ? -1 : 0;
 }

@@ -31,9 +31,9 @@
 #include "core/codetype.h"
 #include "core/cstr_api.h"
 #include "core/divmodmul.h"
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 #ifndef GT_INLINEDENCSEQ
-#include "core/encodedsequence_rep.h"
+#include "core/encseq_rep.h"
 #endif
 #include "core/ensure.h"
 #include "core/error.h"
@@ -124,30 +124,30 @@
 typedef struct
 {
   const char *funcname;
-  int(*function)(GtEncodedsequence *,GtSequenceBuffer *,GtError *);
+  int(*function)(GtEncseq *,GtSequenceBuffer *,GtError *);
 } Fillencposfunc;
 
 typedef struct
 {
   const char *funcname;
-  GtUchar(*function)(const GtEncodedsequence *,unsigned long);
+  GtUchar(*function)(const GtEncseq *,unsigned long);
 } Delivercharfunc;
 
 typedef struct
 {
   const char *funcname;
-  GtUchar(*function)(const GtEncodedsequence *,GtEncodedsequenceScanstate *,
+  GtUchar(*function)(const GtEncseq *,GtEncseqScanstate *,
                      unsigned long);
 } SeqDelivercharfunc;
 
 typedef struct
 {
   const char *funcname;
-  bool(*function)(const GtEncodedsequence *,bool,GtEncodedsequenceScanstate *,
+  bool(*function)(const GtEncseq *,bool,GtEncseqScanstate *,
                   unsigned long,unsigned long);
 } Containsspecialfunc;
 
-void gt_encodedsequence_plainseq2bytecode(GtUchar *bytecode,
+void gt_encseq_plainseq2bytecode(GtUchar *bytecode,
                                           const GtUchar *seq,
                                           unsigned long len)
 {
@@ -177,7 +177,7 @@ void gt_encodedsequence_plainseq2bytecode(GtUchar *bytecode,
 
 #ifndef INLINEDENCSEQ
 static void encseq2bytecode(GtUchar *dest,
-                            const GtEncodedsequence *encseq,
+                            const GtEncseq *encseq,
                             const unsigned long startindex,
                             const unsigned long len)
 {
@@ -213,15 +213,15 @@ static void encseq2bytecode(GtUchar *dest,
   }
 }
 
-void gt_encodedsequence_sequence2bytecode(GtUchar *dest,
-                                          const GtEncodedsequence *encseq,
+void gt_encseq_sequence2bytecode(GtUchar *dest,
+                                          const GtEncseq *encseq,
                                           unsigned long startindex,
                                           unsigned long len)
 {
   gt_assert(encseq->sat != Viabytecompress);
   if (encseq->sat == Viadirectaccess)
   {
-    gt_encodedsequence_plainseq2bytecode(dest,
+    gt_encseq_plainseq2bytecode(dest,
                                          encseq->plainseq + startindex,
                                          len);
   } else
@@ -230,39 +230,39 @@ void gt_encodedsequence_sequence2bytecode(GtUchar *dest,
   }
 }
 #else
-void gt_encodedsequence_sequence2bytecode(GtUchar *dest,
-                                          const GtEncodedsequence *encseq,
+void gt_encseq_sequence2bytecode(GtUchar *dest,
+                                          const GtEncseq *encseq,
                                           unsigned long startindex,
                                           unsigned long len)
 {
   gt_assert(encseq->sat == Viadirectaccess);
-  gt_encodedsequence_plainseq2bytecode(dest,encseq->plainseq + startindex,
+  gt_encseq_plainseq2bytecode(dest,encseq->plainseq + startindex,
                                        len);
 }
 #endif
 
 #ifndef INLINEDENCSEQ
-unsigned long gt_encodedsequence_total_length(const GtEncodedsequence *encseq)
+unsigned long gt_encseq_total_length(const GtEncseq *encseq)
 {
   return encseq->totallength;
 }
 
-unsigned long gt_encodedsequence_num_of_sequences(
-                                                const GtEncodedsequence *encseq)
+unsigned long gt_encseq_num_of_sequences(
+                                                const GtEncseq *encseq)
 {
   return encseq->numofdbsequences;
 }
 
 #ifdef WITHshowgetencodedcharcounters
-static uint64_t countgt_encodedsequence_get_encoded_char = 0;
+static uint64_t countgt_encseq_get_encoded_char = 0;
 #endif
 
-GtUchar gt_encodedsequence_get_encoded_char(const GtEncodedsequence *encseq,
+GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
                      unsigned long pos,
                      GtReadmode readmode)
 {
 #ifdef WITHshowgetencodedcharcounters
-  countgt_encodedsequence_get_encoded_char++;
+  countgt_encseq_get_encoded_char++;
 #endif
   gt_assert(pos < encseq->totallength);
   switch (readmode)
@@ -283,20 +283,20 @@ GtUchar gt_encodedsequence_get_encoded_char(const GtEncodedsequence *encseq,
         return ISSPECIAL(cc) ? cc : GT_COMPLEMENTBASE(cc);
       }
     default:
-      fprintf(stderr,"gt_encodedsequence_get_encoded_char: "
+      fprintf(stderr,"gt_encseq_get_encoded_char: "
                      "readmode %d not implemented\n",
                      (int) readmode);
       exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
 
-GtUchar gt_encodedsequence_extract_encoded_char(
-                           const GtEncodedsequence *encseq,
+GtUchar gt_encseq_extract_encoded_char(
+                           const GtEncseq *encseq,
                            unsigned long pos,
                            GtReadmode readmode)
 {
   gt_assert(pos < encseq->totallength);
-  gt_assert(gt_encodedsequence_bitwise_cmp_ok(encseq));
+  gt_assert(gt_encseq_bitwise_cmp_ok(encseq));
   switch (readmode)
   {
     case GT_READMODE_FORWARD:
@@ -317,15 +317,15 @@ GtUchar gt_encodedsequence_extract_encoded_char(
         return GT_COMPLEMENTBASE(cc);
       }
     default:
-      fprintf(stderr,"gt_encodedsequence_get_nospecial_encoded_char: "
+      fprintf(stderr,"gt_encseq_get_nospecial_encoded_char: "
                      "readmode %d not implemented\n",
                      (int) readmode);
       exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
 
-GtUchar gt_encodedsequence_get_encoded_char_nospecial(
-                                                const GtEncodedsequence *encseq,
+GtUchar gt_encseq_get_encoded_char_nospecial(
+                                                const GtEncseq *encseq,
                                                 unsigned long pos,
                                                 GtReadmode readmode)
 {
@@ -351,7 +351,7 @@ GtUchar gt_encodedsequence_get_encoded_char_nospecial(
         return ISSPECIAL(cc) ? cc : GT_COMPLEMENTBASE(cc);
       }
     default:
-      fprintf(stderr,"gt_encodedsequence_get_encoded_char_nospecial: "
+      fprintf(stderr,"gt_encseq_get_encoded_char_nospecial: "
                      "readmode %d not implemented\n",
                      (int) readmode);
       exit(GT_EXIT_PROGRAMMING_ERROR);
@@ -359,7 +359,7 @@ GtUchar gt_encodedsequence_get_encoded_char_nospecial(
 }
 #endif
 
-struct GtEncodedsequenceScanstate
+struct GtEncseqScanstate
 {
   unsigned long firstcell, /* first index of tables with startpos and length */
                 lastcell,  /* last index of tables with startpos and length */
@@ -376,17 +376,17 @@ struct GtEncodedsequenceScanstate
 
 #ifndef INLINEDENCSEQ
 #ifdef WITHshowgetencodedcharcounters
-static uint64_t countgt_encodedsequence_get_encoded_char = 0;
+static uint64_t countgt_encseq_get_encoded_char = 0;
 #endif
 
-GtUchar gt_encodedsequence_get_encoded_char_sequential(
-                                                const GtEncodedsequence *encseq,
-                                                GtEncodedsequenceScanstate *esr,
+GtUchar gt_encseq_get_encoded_char_sequential(
+                                                const GtEncseq *encseq,
+                                                GtEncseqScanstate *esr,
                                                 unsigned long pos,
                                                 GtReadmode readmode)
 {
 #ifdef WITHshowgetencodedcharcounters
-  countgt_encodedsequence_get_encoded_char++;
+  countgt_encseq_get_encoded_char++;
 #endif
   gt_assert(pos < encseq->totallength);
   switch (readmode)
@@ -409,7 +409,7 @@ GtUchar gt_encodedsequence_get_encoded_char_sequential(
         return ISSPECIAL(cc) ? cc : GT_COMPLEMENTBASE(cc);
       }
     default:
-      fprintf(stderr,"gt_encodedsequence_get_encoded_char: "
+      fprintf(stderr,"gt_encseq_get_encoded_char: "
                      "readmode %d not implemented\n",
                      (int) readmode);
       exit(GT_EXIT_PROGRAMMING_ERROR);
@@ -420,18 +420,18 @@ GtUchar gt_encodedsequence_get_encoded_char_sequential(
 #ifdef WITHshowgetencodedcharcounters
 void showgetencodedcharcounters(void)
 {
-  printf("calls of gt_encodedsequence_get_encoded_char = " Formatuint64_t "\n",
-          PRINTuint64_tcast(countgt_encodedsequence_get_encoded_char));
-  printf("calls of gt_encodedsequence_get_encoded_char = " Formatuint64_t "\n",
-          PRINTuint64_tcast(countgt_encodedsequence_get_encoded_char));
+  printf("calls of gt_encseq_get_encoded_char = " Formatuint64_t "\n",
+          PRINTuint64_tcast(countgt_encseq_get_encoded_char));
+  printf("calls of gt_encseq_get_encoded_char = " Formatuint64_t "\n",
+          PRINTuint64_tcast(countgt_encseq_get_encoded_char));
 }
 #endif
 
 /* The following function is only used in tyr-mkindex.c */
 
-bool gt_encodedsequence_contains_special(const GtEncodedsequence *encseq,
+bool gt_encseq_contains_special(const GtEncseq *encseq,
                                          bool moveforward,
-                                         GtEncodedsequenceScanstate *esrspace,
+                                         GtEncseqScanstate *esrspace,
                                          unsigned long startpos,
                                          unsigned long len)
 {
@@ -461,24 +461,24 @@ static void showsequencerange(const GtRange *range)
 }
 #endif
 
-void gt_encodedsequence_extract_substring(const GtEncodedsequence *encseq,
+void gt_encseq_extract_substring(const GtEncseq *encseq,
                                           GtUchar *buffer,
                                           unsigned long frompos,
                                           unsigned long topos)
 {
-  GtEncodedsequenceScanstate *esr;
+  GtEncseqScanstate *esr;
   unsigned long idx;
   unsigned long pos;
 
   gt_assert(frompos <= topos && topos < encseq->totallength);
-  esr = gt_encodedsequence_scanstate_new(encseq,GT_READMODE_FORWARD,
+  esr = gt_encseq_scanstate_new(encseq,GT_READMODE_FORWARD,
                                          frompos);
   for (pos=frompos, idx = 0; pos <= topos; pos++, idx++)
   {
-    buffer[idx] = gt_encodedsequence_get_encoded_char_sequential(encseq,esr,pos,
+    buffer[idx] = gt_encseq_get_encoded_char_sequential(encseq,esr,pos,
                                                            GT_READMODE_FORWARD);
   }
-  gt_encodedsequence_scanstate_delete(esr);
+  gt_encseq_scanstate_delete(esr);
 }
 
 typedef struct
@@ -506,7 +506,7 @@ static const char *accesstype2name(GtPositionaccesstype sat)
 }
 
 /*@null@*/
-const char *gt_encodedsequence_accessname(const GtEncodedsequence *encseq)
+const char *gt_encseq_accessname(const GtEncseq *encseq)
 {
   return accesstype2name(encseq->sat);
 }
@@ -552,8 +552,8 @@ static bool satviautables(GtPositionaccesstype sat)
           sat == Viauint32tables) ? true : false;
 }
 
-bool gt_encodedsequence_has_fast_specialrangeenumerator(
-                                                const GtEncodedsequence *encseq)
+bool gt_encseq_has_fast_specialrangeenumerator(
+                                                const GtEncseq *encseq)
 {
   return satviautables(encseq->sat);
 }
@@ -576,7 +576,7 @@ static void assignencseqmapspecification(
                                         void *voidinfo,
                                         bool writemode)
 {
-  GtEncodedsequence *encseq = (GtEncodedsequence *) voidinfo;
+  GtEncseq *encseq = (GtEncseq *) voidinfo;
   GtMapspecification *mapspecptr;
   unsigned long numofunits;
   unsigned int numofchars, bitspersymbol;
@@ -701,7 +701,7 @@ static void assignencseqmapspecification(
   }
 }
 
-static int flushencseqfile(const GtStr *indexname,GtEncodedsequence *encseq,
+static int flushencseqfile(const GtStr *indexname,GtEncseq *encseq,
                            GtError *err)
 {
   FILE *fp;
@@ -742,7 +742,7 @@ static int flushencseqfile(const GtStr *indexname,GtEncodedsequence *encseq,
   return haserr ? -1 : 0;
 }
 
-static int fillencseqmapspecstartptr(GtEncodedsequence *encseq,
+static int fillencseqmapspecstartptr(GtEncseq *encseq,
                                      const GtStr *indexname,
                                      GtLogger *logger,
                                      GtError *err)
@@ -779,7 +779,7 @@ static int fillencseqmapspecstartptr(GtEncodedsequence *encseq,
     nextstart++;
   }
   gt_assert(encseq->characterdistribution != NULL);
-  gt_logger_log(logger,"sat=%s",gt_encodedsequence_accessname(encseq));
+  gt_logger_log(logger,"sat=%s",gt_encseq_accessname(encseq));
   gt_str_delete(tmpfilename);
   return haserr ? -1 : 0;
 }
@@ -975,10 +975,10 @@ static int determinesattype(unsigned long *specialranges,
 }
 #endif
 
-static unsigned long countgt_encodedsequence_compare_maxdepth = 0;
-static unsigned long countgt_encodedsequence_compare = 0;
+static unsigned long countgt_encseq_compare_maxdepth = 0;
+static unsigned long countgt_encseq_compare = 0;
 
-void gt_encodedsequence_delete(GtEncodedsequence *encseq)
+void gt_encseq_delete(GtEncseq *encseq)
 {
   if (encseq == NULL)
   {
@@ -1133,16 +1133,16 @@ void gt_encodedsequence_delete(GtEncodedsequence *encseq)
 
 /* Viadirectaccess */
 
-static GtUchar delivercharViadirectaccess(const GtEncodedsequence *encseq,
+static GtUchar delivercharViadirectaccess(const GtEncseq *encseq,
                                         unsigned long pos)
 {
   return encseq->plainseq[pos];
 }
 
-static bool containsspecialViabitaccess(const GtEncodedsequence *encseq,
+static bool containsspecialViabitaccess(const GtEncseq *encseq,
                                         bool moveforward,
                                         GT_UNUSED
-                                        GtEncodedsequenceScanstate *esrspace,
+                                        GtEncseqScanstate *esrspace,
                                         unsigned long startpos,
                                         unsigned long len)
 {
@@ -1180,10 +1180,10 @@ static bool containsspecialViabitaccess(const GtEncodedsequence *encseq,
   return false;
 }
 
-static bool containsspecialViadirectaccess(const GtEncodedsequence *encseq,
+static bool containsspecialViadirectaccess(const GtEncseq *encseq,
                                            bool moveforward,
                                            GT_UNUSED
-                                           GtEncodedsequenceScanstate *esrspace,
+                                           GtEncseqScanstate *esrspace,
                                            unsigned long startpos,
                                            unsigned long len)
 {
@@ -1218,10 +1218,10 @@ static bool containsspecialViadirectaccess(const GtEncodedsequence *encseq,
 }
 
 static bool containsspecialViabytecompress(GT_UNUSED
-                                           const GtEncodedsequence *encseq,
+                                           const GtEncseq *encseq,
                                            GT_UNUSED bool moveforward,
                                            GT_UNUSED
-                                           GtEncodedsequenceScanstate *esrspace,
+                                           GtEncseqScanstate *esrspace,
                                            GT_UNUSED unsigned long startpos,
                                            GT_UNUSED unsigned long len)
 {
@@ -1229,7 +1229,7 @@ static bool containsspecialViabytecompress(GT_UNUSED
   return false;
 }
 
-static GtUchar delivercharViabytecompress(const GtEncodedsequence *encseq,
+static GtUchar delivercharViabytecompress(const GtEncseq *encseq,
                                         unsigned long pos)
 {
   uint32_t cc;
@@ -1254,7 +1254,7 @@ static GtUchar delivercharViabytecompress(const GtEncodedsequence *encseq,
 
 /* generic for the case that there are no specialsymbols */
 
-static GtUchar deliverfromtwobitencoding(const GtEncodedsequence *encseq,
+static GtUchar deliverfromtwobitencoding(const GtEncseq *encseq,
                                        unsigned long pos)
 {
   return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
@@ -1262,7 +1262,7 @@ static GtUchar deliverfromtwobitencoding(const GtEncodedsequence *encseq,
 
 /* Viabitaccess */
 
-static GtUchar delivercharViabitaccessSpecial(const GtEncodedsequence *encseq,
+static GtUchar delivercharViabitaccessSpecial(const GtEncseq *encseq,
                                             unsigned long pos)
 {
   if (!GT_ISIBITSET(encseq->specialbits,pos))
@@ -1275,7 +1275,7 @@ static GtUchar delivercharViabitaccessSpecial(const GtEncodedsequence *encseq,
 }
 
 #define DECLAREFUNCTIONGENERIC(FCTNAME,CHECKFUN)\
-static GtUchar FCTNAME(const GtEncodedsequence *encseq,unsigned long pos)\
+static GtUchar FCTNAME(const GtEncseq *encseq,unsigned long pos)\
 {\
   unsigned long twobits = EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);\
   if (twobits > 1UL || CHECKFUN(encseq,pos))\
@@ -1309,7 +1309,7 @@ DECLAREFUNCTIONGENERIC(delivercharViauint32tablesSpecialfirst,
 DECLAREFUNCTIONGENERIC(delivercharViauint32tablesSpecialrange,
                        uint32checknospecialrange)
 
-static int fillplainseq(GtEncodedsequence *encseq,GtSequenceBuffer *fb,
+static int fillplainseq(GtEncseq *encseq,GtSequenceBuffer *fb,
                         GtError *err)
 {
   unsigned long pos;
@@ -1338,7 +1338,7 @@ static int fillplainseq(GtEncodedsequence *encseq,GtSequenceBuffer *fb,
   return 0;
 }
 
-static int fillbitpackarray(GtEncodedsequence *encseq,
+static int fillbitpackarray(GtEncseq *encseq,
                             GtSequenceBuffer *fb,
                             GtError *err)
 {
@@ -1385,7 +1385,7 @@ static int fillbitpackarray(GtEncodedsequence *encseq,
   return 0;
 }
 
-static int fillbitaccesstab(GtEncodedsequence *encseq,
+static int fillbitaccesstab(GtEncseq *encseq,
                             GtSequenceBuffer *fb,
                             GtError *err)
 {
@@ -1423,7 +1423,7 @@ static int fillbitaccesstab(GtEncodedsequence *encseq,
   return 0;
 }
 
-static unsigned long accessspecialpositions(const GtEncodedsequence *encseq,
+static unsigned long accessspecialpositions(const GtEncseq *encseq,
                                      unsigned long idx)
 {
   switch (encseq->sat)
@@ -1440,7 +1440,7 @@ static unsigned long accessspecialpositions(const GtEncodedsequence *encseq,
   }
 }
 
-static unsigned long accessspecialrangelength(const GtEncodedsequence *encseq,
+static unsigned long accessspecialrangelength(const GtEncseq *encseq,
                                        unsigned long idx)
 {
   switch (encseq->sat)
@@ -1457,7 +1457,7 @@ static unsigned long accessspecialrangelength(const GtEncodedsequence *encseq,
   }
 }
 
-static unsigned long accessendspecialsubsUint(const GtEncodedsequence *encseq,
+static unsigned long accessendspecialsubsUint(const GtEncseq *encseq,
                                               unsigned long pgnum)
 {
   switch (encseq->sat)
@@ -1473,7 +1473,7 @@ static unsigned long accessendspecialsubsUint(const GtEncodedsequence *encseq,
 
 #ifdef RANGEDEBUG
 
-static void showspecialpositionswithpages(const GtEncodedsequence *encseq,
+static void showspecialpositionswithpages(const GtEncseq *encseq,
                                           unsigned long pgnum,
                                           unsigned long offset,
                                           unsigned long first,
@@ -1498,7 +1498,7 @@ static void showspecialpositionswithpages(const GtEncodedsequence *encseq,
   }
 }
 
-static void showallspecialpositionswithpages(const GtEncodedsequence *encseq)
+static void showallspecialpositionswithpages(const GtEncseq *encseq)
 {
   unsigned long endpos0, endpos1, endspecialcells, pgnum;
   unsigned long offset = 0;
@@ -1524,10 +1524,10 @@ static void showallspecialpositionswithpages(const GtEncodedsequence *encseq)
   }
 }
 
-static void showallspecialpositions(const GtEncodedsequence *encseq)
+static void showallspecialpositions(const GtEncseq *encseq)
 {
   if (encseq->numofspecialstostore > 0
-        && gt_encodedsequence_has_fast_specialrangeenumerator(encseq))
+        && gt_encseq_has_fast_specialrangeenumerator(encseq))
   {
     showallspecialpositionswithpages(encseq);
   }
@@ -1540,8 +1540,8 @@ static void showallspecialpositions(const GtEncodedsequence *encseq)
    page and lastcell to the last plus 1 index of the page.
 */
 
-static bool nextnonemptypage(const GtEncodedsequence *encseq,
-                             GtEncodedsequenceScanstate *esr,
+static bool nextnonemptypage(const GtEncseq *encseq,
+                             GtEncseqScanstate *esr,
                              bool moveforward)
 {
   unsigned long endpos0, endpos1, pagenum;
@@ -1587,7 +1587,7 @@ static bool nextnonemptypage(const GtEncodedsequence *encseq,
 }
 
 static void determinerange(GtRange *range,
-                           const GtEncodedsequence *encseq,
+                           const GtEncseq *encseq,
                            unsigned long transpagenum,
                            unsigned long cellnum)
 {
@@ -1598,8 +1598,8 @@ static void determinerange(GtRange *range,
                     accessspecialrangelength(encseq,cellnum) + 1;
 }
 
-static void advanceEncodedseqstate(const GtEncodedsequence *encseq,
-                                   GtEncodedsequenceScanstate *esr,
+static void advanceEncodedseqstate(const GtEncseq *encseq,
+                                   GtEncseqScanstate *esr,
                                    bool moveforward)
 {
   unsigned long cellnum;
@@ -1696,8 +1696,8 @@ static unsigned long startpos2pagenum(GtPositionaccesstype sat,
   }
 }
 
-static void binpreparenextrange(const GtEncodedsequence *encseq,
-                                GtEncodedsequenceScanstate *esr,
+static void binpreparenextrange(const GtEncseq *encseq,
+                                GtEncseqScanstate *esr,
                                 bool moveforward,
                                 unsigned long startpos)
 {
@@ -1867,32 +1867,32 @@ static void binpreparenextrange(const GtEncodedsequence *encseq,
   }
 }
 
-GtEncodedsequenceScanstate *gt_encodedsequence_scanstate_new_empty(void)
+GtEncseqScanstate *gt_encseq_scanstate_new_empty(void)
 {
-  GtEncodedsequenceScanstate *esr;
+  GtEncseqScanstate *esr;
 
   esr = gt_malloc(sizeof (*esr));
   return esr;
 }
 
-GtEncodedsequenceScanstate *gt_encodedsequence_scanstate_new(
-                                                const GtEncodedsequence *encseq,
+GtEncseqScanstate *gt_encseq_scanstate_new(
+                                                const GtEncseq *encseq,
                                                 GtReadmode readmode,
                                                 unsigned long startpos)
 {
-  GtEncodedsequenceScanstate *esr;
+  GtEncseqScanstate *esr;
 
-  esr = gt_encodedsequence_scanstate_new_empty();
-  gt_encodedsequence_scanstate_init(esr, encseq, readmode, startpos);
+  esr = gt_encseq_scanstate_new_empty();
+  gt_encseq_scanstate_init(esr, encseq, readmode, startpos);
   return esr;
 }
 
-void gt_encodedsequence_scanstate_initgeneric(GtEncodedsequenceScanstate *esr,
-                                         const GtEncodedsequence *encseq,
+void gt_encseq_scanstate_initgeneric(GtEncseqScanstate *esr,
+                                         const GtEncseq *encseq,
                                          bool moveforward,
                                          unsigned long startpos)
 {
-  if (gt_encodedsequence_has_fast_specialrangeenumerator(encseq))
+  if (gt_encseq_has_fast_specialrangeenumerator(encseq))
   {
     gt_assert(startpos < encseq->totallength);
     gt_assert(esr != NULL);
@@ -1909,59 +1909,59 @@ void gt_encodedsequence_scanstate_initgeneric(GtEncodedsequenceScanstate *esr,
   }
 }
 
-void gt_encodedsequence_scanstate_init(GtEncodedsequenceScanstate *esr,
-                                  const GtEncodedsequence *encseq,
+void gt_encseq_scanstate_init(GtEncseqScanstate *esr,
+                                  const GtEncseq *encseq,
                                   GtReadmode readmode,
                                   unsigned long startpos)
 {
   if (GT_ISDIRREVERSE(readmode))
   {
-    gt_encodedsequence_scanstate_initgeneric(esr,
+    gt_encseq_scanstate_initgeneric(esr,
                                         encseq,
                                         false,
                                         GT_REVERSEPOS(encseq->totallength,
                                                    startpos));
   } else
   {
-    gt_encodedsequence_scanstate_initgeneric(esr,
+    gt_encseq_scanstate_initgeneric(esr,
                                         encseq,
                                         true,
                                         startpos);
   }
 }
 
-void gt_encodedsequence_scanstate_delete(GtEncodedsequenceScanstate *esr)
+void gt_encseq_scanstate_delete(GtEncseqScanstate *esr)
 {
   gt_free(esr);
 }
 
 static GtUchar seqdelivercharViadirectaccess(
-                        const GtEncodedsequence *encseq,
-                        GT_UNUSED GtEncodedsequenceScanstate *esr,
+                        const GtEncseq *encseq,
+                        GT_UNUSED GtEncseqScanstate *esr,
                         unsigned long pos)
 {
   return encseq->plainseq[pos];
 }
 
 static GtUchar seqdelivercharViabytecompress(
-                        const GtEncodedsequence *encseq,
-                        GT_UNUSED GtEncodedsequenceScanstate *esr,
+                        const GtEncseq *encseq,
+                        GT_UNUSED GtEncseqScanstate *esr,
                         unsigned long pos)
 {
   return delivercharViabytecompress(encseq,pos);
 }
 
 static GtUchar seqdelivercharnoSpecial(
-                        const GtEncodedsequence *encseq,
-                        GT_UNUSED GtEncodedsequenceScanstate *esr,
+                        const GtEncseq *encseq,
+                        GT_UNUSED GtEncseqScanstate *esr,
                         unsigned long pos)
 {
   return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
 static GtUchar seqdelivercharViabitaccessSpecial(
-                            const GtEncodedsequence *encseq,
-                            GT_UNUSED GtEncodedsequenceScanstate *esr,
+                            const GtEncseq *encseq,
+                            GT_UNUSED GtEncseqScanstate *esr,
                             unsigned long pos)
 {
   if (!GT_ISIBITSET(encseq->specialbits,pos))
@@ -1973,8 +1973,8 @@ static GtUchar seqdelivercharViabitaccessSpecial(
              : (GtUchar) WILDCARD;
 }
 
-static GtUchar seqdelivercharSpecial(const GtEncodedsequence *encseq,
-                                   GtEncodedsequenceScanstate *esr,
+static GtUchar seqdelivercharSpecial(const GtEncseq *encseq,
+                                   GtEncseqScanstate *esr,
                                    unsigned long pos)
 {
 #ifdef RANGEDEBUG
@@ -2020,13 +2020,13 @@ static GtUchar seqdelivercharSpecial(const GtEncodedsequence *encseq,
   return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
-static bool containsspecialViatables(const GtEncodedsequence *encseq,
+static bool containsspecialViatables(const GtEncseq *encseq,
                                       bool moveforward,
-                                      GtEncodedsequenceScanstate *esrspace,
+                                      GtEncseqScanstate *esrspace,
                                       unsigned long startpos,
                                       unsigned long len)
 {
-  gt_encodedsequence_scanstate_initgeneric(esrspace,encseq,moveforward,
+  gt_encseq_scanstate_initgeneric(esrspace,encseq,moveforward,
                                            startpos);
   if (esrspace->hasprevious)
   {
@@ -2051,12 +2051,12 @@ static bool containsspecialViatables(const GtEncodedsequence *encseq,
   return false;
 }
 
-bool gt_encodedsequence_has_specialranges(const GtEncodedsequence *encseq)
+bool gt_encseq_has_specialranges(const GtEncseq *encseq)
 {
   return (encseq->numofspecialstostore > 0) ? true : false;
 }
 
-bool gt_encodedsequence_bitwise_cmp_ok(const GtEncodedsequence *encseq)
+bool gt_encseq_bitwise_cmp_ok(const GtEncseq *encseq)
 {
   return (encseq->sat == Viadirectaccess ||
           encseq->sat == Viabytecompress) ? false : true;
@@ -2065,14 +2065,14 @@ bool gt_encodedsequence_bitwise_cmp_ok(const GtEncodedsequence *encseq)
 struct GtSpecialrangeiterator
 {
   bool moveforward, exhausted;
-  const GtEncodedsequence *encseq;
-  GtEncodedsequenceScanstate *esr;
+  const GtEncseq *encseq;
+  GtEncseqScanstate *esr;
   unsigned long pos,
          lengthofspecialrange;
 };
 
 GtSpecialrangeiterator*
-gt_specialrangeiterator_new(const GtEncodedsequence *encseq,
+gt_specialrangeiterator_new(const GtEncseq *encseq,
                             bool moveforward)
 {
   GtSpecialrangeiterator *sri;
@@ -2103,8 +2103,8 @@ gt_specialrangeiterator_new(const GtEncodedsequence *encseq,
   } else
   {
     sri->pos = 0;
-    sri->esr = gt_encodedsequence_scanstate_new_empty();
-    gt_encodedsequence_scanstate_initgeneric(sri->esr,
+    sri->esr = gt_encseq_scanstate_new_empty();
+    gt_encseq_scanstate_initgeneric(sri->esr,
                                         encseq,
                                         moveforward,
                                         moveforward ? 0
@@ -2303,7 +2303,7 @@ void gt_specialrangeiterator_delete(GtSpecialrangeiterator *sri)
   if (!sri) return;
   if (sri->esr != NULL)
   {
-    gt_encodedsequence_scanstate_delete(sri->esr);
+    gt_encseq_scanstate_delete(sri->esr);
   }
   gt_free(sri);
 }
@@ -2328,18 +2328,18 @@ static unsigned int sat2maxspecialtype(GtPositionaccesstype sat)
 }
 
 static void addmarkpos(GtArrayGtUlong *asp,
-                      const GtEncodedsequence *encseq,
-                      GtEncodedsequenceScanstate *esr,
+                      const GtEncseq *encseq,
+                      GtEncseqScanstate *esr,
                       const GtRange *seqrange)
 {
   unsigned long pos;
   GtUchar currentchar;
 
-  gt_encodedsequence_scanstate_init(esr,encseq,GT_READMODE_FORWARD,
+  gt_encseq_scanstate_init(esr,encseq,GT_READMODE_FORWARD,
                                     seqrange->start);
   for (pos=seqrange->start; pos<seqrange->end; pos++)
   {
-    currentchar = gt_encodedsequence_get_encoded_char_sequential(encseq,esr,pos,
+    currentchar = gt_encseq_get_encoded_char_sequential(encseq,esr,pos,
                                                            GT_READMODE_FORWARD);
     gt_assert(ISSPECIAL(currentchar));
     if (currentchar == (GtUchar) SEPARATOR)
@@ -2350,12 +2350,12 @@ static void addmarkpos(GtArrayGtUlong *asp,
   }
 }
 
-static unsigned long *encseq2markpositions(const GtEncodedsequence *encseq)
+static unsigned long *encseq2markpositions(const GtEncseq *encseq)
 {
   GtArrayGtUlong asp;
   GtSpecialrangeiterator *sri;
   GtRange range;
-  GtEncodedsequenceScanstate *esr;
+  GtEncseqScanstate *esr;
 
   gt_assert (encseq->numofdbsequences > 1UL);
   asp.allocatedGtUlong = encseq->numofdbsequences-1;
@@ -2363,17 +2363,17 @@ static unsigned long *encseq2markpositions(const GtEncodedsequence *encseq)
   asp.spaceGtUlong =
                    gt_malloc(sizeof (*asp.spaceGtUlong) * asp.allocatedGtUlong);
   sri = gt_specialrangeiterator_new(encseq,true);
-  esr = gt_encodedsequence_scanstate_new_empty();
+  esr = gt_encseq_scanstate_new_empty();
   while (gt_specialrangeiterator_next(sri,&range))
   {
     addmarkpos(&asp,encseq,esr,&range);
   }
   gt_specialrangeiterator_delete(sri);
-  gt_encodedsequence_scanstate_delete(esr);
+  gt_encseq_scanstate_delete(esr);
   return asp.spaceGtUlong;
 }
 
-unsigned long gt_encodedsequence_sep2seqnum(const unsigned long *recordseps,
+unsigned long gt_encseq_sep2seqnum(const unsigned long *recordseps,
                                             unsigned long numofrecords,
                                             unsigned long totalwidth,
                                             unsigned long position)
@@ -2420,11 +2420,11 @@ unsigned long gt_encodedsequence_sep2seqnum(const unsigned long *recordseps,
   exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 
-unsigned long gt_encodedsequence_pos2seqnum(const GtEncodedsequence *encseq,
+unsigned long gt_encseq_pos2seqnum(const GtEncseq *encseq,
                                              unsigned long position)
 {
   gt_assert(encseq->numofdbsequences == 1UL || encseq->ssptab != NULL);
-  return gt_encodedsequence_sep2seqnum(encseq->ssptab,
+  return gt_encseq_sep2seqnum(encseq->ssptab,
                                        encseq->numofdbsequences,
                                        encseq->totallength,
                                        position);
@@ -2459,7 +2459,7 @@ static void getunitGtSeqinfo(GtSeqinfo *seqinfo,
   }
 }
 
-void gt_encodedsequence_seqinfo(const GtEncodedsequence *encseq,
+void gt_encseq_seqinfo(const GtEncseq *encseq,
                                 GtSeqinfo *seqinfo,
                                 unsigned long seqnum)
 {
@@ -2471,22 +2471,22 @@ void gt_encodedsequence_seqinfo(const GtEncodedsequence *encseq,
                  seqnum);
 }
 
-void gt_encodedsequence_check_markpos(const GtEncodedsequence *encseq)
+void gt_encseq_check_markpos(const GtEncseq *encseq)
 {
   if (encseq->numofdbsequences > 1UL)
   {
     unsigned long *markpos, totallength, pos;
     unsigned long currentseqnum = 0, seqnum;
     GtUchar currentchar;
-    GtEncodedsequenceScanstate *esr;
+    GtEncseqScanstate *esr;
 
     markpos = encseq2markpositions(encseq);
-    totallength = gt_encodedsequence_total_length(encseq);
-    esr = gt_encodedsequence_scanstate_new(encseq,GT_READMODE_FORWARD,0);
+    totallength = gt_encseq_total_length(encseq);
+    esr = gt_encseq_scanstate_new(encseq,GT_READMODE_FORWARD,0);
 
     for (pos=0; pos<totallength; pos++)
     {
-      currentchar = gt_encodedsequence_get_encoded_char_sequential(encseq,
+      currentchar = gt_encseq_get_encoded_char_sequential(encseq,
                                                            esr,
                                                            pos,
                                                            GT_READMODE_FORWARD);
@@ -2495,7 +2495,7 @@ void gt_encodedsequence_check_markpos(const GtEncodedsequence *encseq)
         currentseqnum++;
       } else
       {
-        seqnum = gt_encodedsequence_sep2seqnum(markpos,
+        seqnum = gt_encseq_sep2seqnum(markpos,
                                                encseq->numofdbsequences,
                                                totallength,
                                                pos);
@@ -2507,12 +2507,12 @@ void gt_encodedsequence_check_markpos(const GtEncodedsequence *encseq)
         }
       }
     }
-    gt_encodedsequence_scanstate_delete(esr);
+    gt_encseq_scanstate_delete(esr);
     gt_free(markpos);
   }
 }
 
-static GtEncodedsequence *determineencseqkeyvalues(
+static GtEncseq *determineencseqkeyvalues(
                                           GtPositionaccesstype sat,
                                           unsigned long totallength,
                                           unsigned long numofsequences,
@@ -2523,7 +2523,7 @@ static GtEncodedsequence *determineencseqkeyvalues(
                                           GtLogger *logger)
 {
   double spaceinbitsperchar;
-  GtEncodedsequence *encseq;
+  GtEncseq *encseq;
 
   encseq = gt_malloc(sizeof (*encseq));
   encseq->sat = sat;
@@ -2665,35 +2665,35 @@ int gt_specialcharinfo_read(GtSpecialcharinfo *specialcharinfo,
   return 0;
 }
 
-unsigned int gt_encodedsequence_alphabetnumofchars(
-                                                const GtEncodedsequence *encseq)
+unsigned int gt_encseq_alphabetnumofchars(
+                                                const GtEncseq *encseq)
 {
   return gt_alphabet_num_of_chars(encseq->alpha);
 }
 
-const GtUchar *gt_encodedsequence_alphabetsymbolmap(
-                                                const GtEncodedsequence *encseq)
+const GtUchar *gt_encseq_alphabetsymbolmap(
+                                                const GtEncseq *encseq)
 {
   return gt_alphabet_symbolmap(encseq->alpha);
 }
 
-GtAlphabet *gt_encodedsequence_alphabet(const GtEncodedsequence *encseq)
+GtAlphabet *gt_encseq_alphabet(const GtEncseq *encseq)
 {
   return encseq->alpha;
 }
 
-const GtUchar *gt_encodedsequence_alphabetcharacters(
-                                                const GtEncodedsequence *encseq)
+const GtUchar *gt_encseq_alphabetcharacters(
+                                                const GtEncseq *encseq)
 {
   return gt_alphabet_characters(encseq->alpha);
 }
 
-GtUchar gt_encodedsequence_alphabetwildcardshow(const GtEncodedsequence *encseq)
+GtUchar gt_encseq_alphabetwildcardshow(const GtEncseq *encseq)
 {
   return gt_alphabet_wildcard_show(encseq->alpha);
 }
 
-unsigned long gt_encodedsequence_charcount(const GtEncodedsequence *encseq,
+unsigned long gt_encseq_charcount(const GtEncseq *encseq,
                                            GtUchar cc)
 {
   gt_assert(encseq != NULL &&
@@ -2712,11 +2712,11 @@ typedef struct
   SeqDelivercharfunc seqdeliverchar,
                      seqdelivercharspecial;
   Containsspecialfunc delivercontainsspecial;
-} GtEncodedsequencefunctions;
+} GtEncseqfunctions;
 
 #define NFCT(S,F) {#F,F}
 
-static GtEncodedsequencefunctions encodedseqfunctab[] =
+static GtEncseqfunctions encodedseqfunctab[] =
   {
     { /* Viadirectaccess */
       NFCT(fillpos,fillplainseq),
@@ -2828,7 +2828,7 @@ static unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab)
   return lengthofdbfilenames;
 }
 
-static GtEncodedsequence *files2encodedsequence(
+static GtEncseq *files2encodedsequence(
                                 bool withrange,
                                 const GtStrArray *filenametab,
                                 const GtFilelengthvalues *filelengthtab,
@@ -2843,7 +2843,7 @@ static GtEncodedsequence *files2encodedsequence(
                                 GtLogger *logger,
                                 GtError *err)
 {
-  GtEncodedsequence *encseq = NULL;
+  GtEncseq *encseq = NULL;
   GtPositionaccesstype sat = Undefpositionaccesstype;
   bool haserr = false;
   int retcode;
@@ -2913,15 +2913,15 @@ static GtEncodedsequence *files2encodedsequence(
 #endif
   if (haserr && encseq != NULL)
   {
-    gt_encodedsequence_delete(encseq);
+    gt_encseq_delete(encseq);
     encseq = NULL;
   }
   gt_sequence_buffer_delete(fb);
   return haserr ? NULL : encseq;
 }
 
-static GtEncodedsequence*
-gt_encodedsequence_new_from_index(bool withrange,
+static GtEncseq*
+gt_encseq_new_from_index(bool withrange,
                                   const GtStr *indexname,
                                   bool withtistab,
                                   bool withdestab,
@@ -2930,7 +2930,7 @@ gt_encodedsequence_new_from_index(bool withrange,
                                   GtLogger *logger,
                                   GtError *err)
 {
-  GtEncodedsequence *encseq = NULL;
+  GtEncseq *encseq = NULL;
   bool haserr = false;
   int retcode;
   Firstencseqvalues firstencseqvalues;
@@ -3035,7 +3035,7 @@ gt_encodedsequence_new_from_index(bool withrange,
     gt_alphabet_delete((GtAlphabet*) alpha);
     if (encseq != NULL)
     {
-      gt_encodedsequence_delete(encseq);
+      gt_encseq_delete(encseq);
       encseq = NULL;
     }
     return NULL;
@@ -3043,7 +3043,7 @@ gt_encodedsequence_new_from_index(bool withrange,
   return encseq;
 }
 
-const char *gt_encodedsequence_description(const GtEncodedsequence *encseq,
+const char *gt_encseq_description(const GtEncseq *encseq,
                                            unsigned long *desclen,
                                            unsigned long seqnum)
 {
@@ -3073,13 +3073,13 @@ const char *gt_encodedsequence_description(const GtEncodedsequence *encseq,
   return encseq->destab;
 }
 
-const GtStrArray *gt_encodedsequence_filenames(const GtEncodedsequence *encseq)
+const GtStrArray *gt_encseq_filenames(const GtEncseq *encseq)
 {
   gt_assert(encseq);
   return encseq->filenametab;
 }
 
-void gt_encodedsequence_check_descriptions(const GtEncodedsequence *encseq)
+void gt_encseq_check_descriptions(const GtEncseq *encseq)
 {
   unsigned long desclen, seqnum, totaldesclength, offset = 0;
   const char *desptr;
@@ -3088,13 +3088,13 @@ void gt_encodedsequence_check_descriptions(const GtEncodedsequence *encseq)
   totaldesclength = encseq->numofdbsequences; /* for each new line */
   for (seqnum = 0; seqnum < encseq->numofdbsequences; seqnum++)
   {
-    desptr = gt_encodedsequence_description(encseq,&desclen,seqnum);
+    desptr = gt_encseq_description(encseq,&desclen,seqnum);
     totaldesclength += desclen;
   }
   copydestab = gt_malloc(sizeof (*copydestab) * totaldesclength);
   for (seqnum = 0; seqnum < encseq->numofdbsequences; seqnum++)
   {
-    desptr = gt_encodedsequence_description(encseq,&desclen,seqnum);
+    desptr = gt_encseq_description(encseq,&desclen,seqnum);
     strncpy(copydestab + offset,desptr,(size_t) desclen);
     copydestab[offset+desclen] = '\n';
     offset += (desclen+1);
@@ -3107,31 +3107,31 @@ void gt_encodedsequence_check_descriptions(const GtEncodedsequence *encseq)
   gt_free(copydestab);
 }
 
-unsigned long gt_encodedsequence_specialcharacters(
-                                                const GtEncodedsequence *encseq)
+unsigned long gt_encseq_specialcharacters(
+                                                const GtEncseq *encseq)
 {
   return encseq->specialcharinfo.specialcharacters;
 }
 
-unsigned long gt_encodedsequence_specialranges(const GtEncodedsequence *encseq)
+unsigned long gt_encseq_specialranges(const GtEncseq *encseq)
 {
   return encseq->specialcharinfo.specialranges;
 }
 
-unsigned long gt_encodedsequence_realspecialranges(
-                                                const GtEncodedsequence *encseq)
+unsigned long gt_encseq_realspecialranges(
+                                                const GtEncseq *encseq)
 {
   return encseq->specialcharinfo.realspecialranges;
 }
 
-unsigned long gt_encodedsequence_lengthofspecialprefix(
-                                                const GtEncodedsequence *encseq)
+unsigned long gt_encseq_lengthofspecialprefix(
+                                                const GtEncseq *encseq)
 {
   return encseq->specialcharinfo.lengthofspecialprefix;
 }
 
-unsigned long gt_encodedsequence_lengthofspecialsuffix(
-                                                const GtEncodedsequence *encseq)
+unsigned long gt_encseq_lengthofspecialsuffix(
+                                                const GtEncseq *encseq)
 {
   return encseq->specialcharinfo.lengthofspecialsuffix;
 }
@@ -3508,8 +3508,8 @@ static void sequence2specialcharinfo(GtSpecialcharinfo *specialcharinfo,
   gt_disc_distri_delete(distspralen);
 }
 
-static unsigned long fwdgetnextstoppos(const GtEncodedsequence *encseq,
-                                GtEncodedsequenceScanstate *esr,
+static unsigned long fwdgetnextstoppos(const GtEncseq *encseq,
+                                GtEncseqScanstate *esr,
                                 unsigned long pos)
 {
   gt_assert(encseq->sat != Viadirectaccess &&
@@ -3540,8 +3540,8 @@ static unsigned long fwdgetnextstoppos(const GtEncodedsequence *encseq,
   return encseq->totallength;
 }
 
-static unsigned long revgetnextstoppos(const GtEncodedsequence *encseq,
-                                GtEncodedsequenceScanstate *esr,
+static unsigned long revgetnextstoppos(const GtEncseq *encseq,
+                                GtEncseqScanstate *esr,
                                 unsigned long pos)
 {
   gt_assert(encseq->sat != Viadirectaccess &&
@@ -3720,7 +3720,7 @@ static inline int requiredUIntBits(GtBitsequence v)
 
 #endif
 
-static inline unsigned fwdbitaccessunitsnotspecial0(const GtEncodedsequence
+static inline unsigned fwdbitaccessunitsnotspecial0(const GtEncseq
                                                     *encseq,
                                                     unsigned long startpos)
 {
@@ -3733,7 +3733,7 @@ static inline unsigned fwdbitaccessunitsnotspecial0(const GtEncodedsequence
 }
 
 static inline unsigned int fwdbitaccessunitsnotspecial(GtBitsequence spbits,
-                                                       const GtEncodedsequence
+                                                       const GtEncseq
                                                          *encseq,
                                                        unsigned long startpos)
 {
@@ -3759,8 +3759,8 @@ static inline unsigned int revbitaccessunitsnotspecial(GtBitsequence spbits,
 }
 
 static void fwdextract2bitenc(GtEndofTwobitencoding *ptbe,
-                              const GtEncodedsequence *encseq,
-                              GtEncodedsequenceScanstate *esr,
+                              const GtEncseq *encseq,
+                              GtEncseqScanstate *esr,
                               unsigned long startpos)
 {
   gt_assert(startpos < encseq->totallength);
@@ -3769,7 +3769,7 @@ static void fwdextract2bitenc(GtEndofTwobitencoding *ptbe,
   {
     unsigned long stoppos;
 
-    if (gt_encodedsequence_has_specialranges(encseq))
+    if (gt_encseq_has_specialranges(encseq))
     {
       stoppos = fwdgetnextstoppos(encseq,esr,startpos);
     } else
@@ -3793,7 +3793,7 @@ static void fwdextract2bitenc(GtEndofTwobitencoding *ptbe,
     }
   } else
   {
-    if (gt_encodedsequence_has_specialranges(encseq))
+    if (gt_encseq_has_specialranges(encseq))
     {
       GtBitsequence spbits;
 
@@ -3815,8 +3815,8 @@ static void fwdextract2bitenc(GtEndofTwobitencoding *ptbe,
 }
 
 static void revextract2bitenc(GtEndofTwobitencoding *ptbe,
-                              const GtEncodedsequence *encseq,
-                              GtEncodedsequenceScanstate *esr,
+                              const GtEncseq *encseq,
+                              GtEncseqScanstate *esr,
                               unsigned long startpos)
 {
   gt_assert(startpos < encseq->totallength);
@@ -3825,7 +3825,7 @@ static void revextract2bitenc(GtEndofTwobitencoding *ptbe,
   {
     unsigned long stoppos;
 
-    if (gt_encodedsequence_has_specialranges(encseq))
+    if (gt_encseq_has_specialranges(encseq))
     {
       stoppos = revgetnextstoppos(encseq,esr,startpos);
     } else
@@ -3849,7 +3849,7 @@ static void revextract2bitenc(GtEndofTwobitencoding *ptbe,
     }
   } else
   {
-    if (gt_encodedsequence_has_specialranges(encseq))
+    if (gt_encseq_has_specialranges(encseq))
     {
       GtBitsequence spbits;
 
@@ -3869,10 +3869,10 @@ static void revextract2bitenc(GtEndofTwobitencoding *ptbe,
   }
 }
 
-void gt_encodedsequence_extract2bitenc(bool fwd,
+void gt_encseq_extract2bitenc(bool fwd,
                     GtEndofTwobitencoding *ptbe,
-                    const GtEncodedsequence *encseq,
-                    GtEncodedsequenceScanstate *esr,
+                    const GtEncseq *encseq,
+                    GtEncseqScanstate *esr,
                     unsigned long startpos)
 {
   (fwd ? fwdextract2bitenc : revextract2bitenc) (ptbe,encseq,esr,startpos);
@@ -3946,7 +3946,7 @@ static int endofdifftbe(bool fwd,
          (complement,commonunits,tbe1,tbe2);
 }
 
-int gt_encodedsequence_compare_twobitencodings(
+int gt_encseq_compare_twobitencodings(
                               bool fwd,
                               bool complement,
                               GtCommonunits *commonunits,
@@ -4035,7 +4035,7 @@ int gt_encodedsequence_compare_twobitencodings(
   return 0;
 }
 
-static unsigned long extractsinglecharacter(const GtEncodedsequence *encseq,
+static unsigned long extractsinglecharacter(const GtEncseq *encseq,
                                      bool fwd,
                                      bool complement,
                                      unsigned long pos,
@@ -4065,7 +4065,7 @@ static unsigned long extractsinglecharacter(const GtEncodedsequence *encseq,
       cc = pos + depth + GT_COMPAREOFFSET;
     } else
     {
-      cc = (unsigned long) gt_encodedsequence_get_encoded_char(encseq,
+      cc = (unsigned long) gt_encseq_get_encoded_char(encseq,
                                                            pos + depth,
                                                            GT_READMODE_FORWARD);
       if (ISSPECIAL((GtUchar) cc))
@@ -4086,7 +4086,7 @@ static unsigned long extractsinglecharacter(const GtEncodedsequence *encseq,
       cc = depth - pos + GT_COMPAREOFFSET;
     } else
     {
-      cc = (unsigned long) gt_encodedsequence_get_encoded_char(encseq,
+      cc = (unsigned long) gt_encseq_get_encoded_char(encseq,
                                                            pos - depth,
                                                            GT_READMODE_FORWARD);
       if (ISSPECIAL((GtUchar) cc))
@@ -4106,7 +4106,7 @@ static unsigned long extractsinglecharacter(const GtEncodedsequence *encseq,
 
 static int comparewithonespecial(bool *leftspecial,
                                  bool *rightspecial,
-                                 const GtEncodedsequence *encseq,
+                                 const GtEncseq *encseq,
                                  bool fwd,
                                  bool complement,
                                  unsigned long pos1,
@@ -4114,7 +4114,7 @@ static int comparewithonespecial(bool *leftspecial,
                                  unsigned long depth,
                                  unsigned long maxdepth)
 {
-  unsigned long cc1, cc2, totallength = gt_encodedsequence_total_length(encseq);
+  unsigned long cc1, cc2, totallength = gt_encseq_total_length(encseq);
 
   cc1 = extractsinglecharacter(encseq,
                                fwd,
@@ -4141,12 +4141,12 @@ static int comparewithonespecial(bool *leftspecial,
   return cc1 < cc2 ? -1 : 1;
 }
 
-int gt_encodedsequence_compare(const GtEncodedsequence *encseq,
+int gt_encseq_compare(const GtEncseq *encseq,
                                GtCommonunits *commonunits,
                                bool fwd,
                                bool complement,
-                               GtEncodedsequenceScanstate *esr1,
-                               GtEncodedsequenceScanstate *esr2,
+                               GtEncseqScanstate *esr1,
+                               GtEncseqScanstate *esr2,
                                unsigned long pos1,
                                unsigned long pos2,
                                unsigned long depth)
@@ -4154,7 +4154,7 @@ int gt_encodedsequence_compare(const GtEncodedsequence *encseq,
   GtEndofTwobitencoding ptbe1, ptbe2;
   int retval;
 
-  countgt_encodedsequence_compare++;
+  countgt_encseq_compare++;
   gt_assert(pos1 != pos2);
   if (!fwd)
   {
@@ -4168,16 +4168,16 @@ int gt_encodedsequence_compare(const GtEncodedsequence *encseq,
       if (pos1 + depth < encseq->totallength &&
           pos2 + depth < encseq->totallength)
       {
-        gt_encodedsequence_scanstate_initgeneric(esr1,encseq,true,pos1 + depth);
-        gt_encodedsequence_scanstate_initgeneric(esr2,encseq,true,pos2 + depth);
+        gt_encseq_scanstate_initgeneric(esr1,encseq,true,pos1 + depth);
+        gt_encseq_scanstate_initgeneric(esr2,encseq,true,pos2 + depth);
       }
     } else
     {
       if (pos1 >= depth && pos2 >= depth)
       {
-        gt_encodedsequence_scanstate_initgeneric(esr1,encseq,false,
+        gt_encseq_scanstate_initgeneric(esr1,encseq,false,
                                                  pos1 - depth);
-        gt_encodedsequence_scanstate_initgeneric(esr2,encseq,false,
+        gt_encseq_scanstate_initgeneric(esr2,encseq,false,
                                                  pos2 - depth);
       }
     }
@@ -4191,7 +4191,7 @@ int gt_encodedsequence_compare(const GtEncodedsequence *encseq,
       {
         fwdextract2bitenc(&ptbe1,encseq,esr1,pos1 + depth);
         fwdextract2bitenc(&ptbe2,encseq,esr2,pos2 + depth);
-        retval = gt_encodedsequence_compare_twobitencodings(true,complement,
+        retval = gt_encseq_compare_twobitencodings(true,complement,
                                                             commonunits,
                                                             &ptbe1,&ptbe2);
         depth += commonunits->common;
@@ -4213,7 +4213,7 @@ int gt_encodedsequence_compare(const GtEncodedsequence *encseq,
       {
         revextract2bitenc(&ptbe1,encseq,esr1,pos1 - depth);
         revextract2bitenc(&ptbe2,encseq,esr2,pos2 - depth);
-        retval = gt_encodedsequence_compare_twobitencodings(false,complement,
+        retval = gt_encseq_compare_twobitencodings(false,complement,
                                                             commonunits,
                                                             &ptbe1,&ptbe2);
         depth += commonunits->common;
@@ -4238,7 +4238,7 @@ int gt_encodedsequence_compare(const GtEncodedsequence *encseq,
     unsigned long lcp2 = 0;
     int retval2;
 
-    retval2 = gt_encodedsequence_comparetwostringsgeneric(encseq,
+    retval2 = gt_encseq_comparetwostringsgeneric(encseq,
                                        fwd,
                                        complement,
                                        &lcp2,
@@ -4264,12 +4264,12 @@ int gt_encodedsequence_compare(const GtEncodedsequence *encseq,
   return retval;
 }
 
-int gt_encodedsequence_compare_maxdepth(const GtEncodedsequence *encseq,
+int gt_encseq_compare_maxdepth(const GtEncseq *encseq,
                                         GtCommonunits *commonunits,
                                         bool fwd,
                                         bool complement,
-                                        GtEncodedsequenceScanstate *esr1,
-                                        GtEncodedsequenceScanstate *esr2,
+                                        GtEncseqScanstate *esr1,
+                                        GtEncseqScanstate *esr2,
                                         unsigned long pos1,
                                         unsigned long pos2,
                                         unsigned long depth,
@@ -4279,7 +4279,7 @@ int gt_encodedsequence_compare_maxdepth(const GtEncodedsequence *encseq,
   int retval;
   unsigned long endpos1, endpos2;
 
-  countgt_encodedsequence_compare_maxdepth++;
+  countgt_encseq_compare_maxdepth++;
   gt_assert(pos1 != pos2);
   gt_assert(depth < maxdepth);
   if (fwd)
@@ -4306,16 +4306,16 @@ int gt_encodedsequence_compare_maxdepth(const GtEncodedsequence *encseq,
     {
       if (pos1 + depth < endpos1 && pos2 + depth < endpos2)
       {
-        gt_encodedsequence_scanstate_initgeneric(esr1,encseq,true,pos1 + depth);
-        gt_encodedsequence_scanstate_initgeneric(esr2,encseq,true,pos2 + depth);
+        gt_encseq_scanstate_initgeneric(esr1,encseq,true,pos1 + depth);
+        gt_encseq_scanstate_initgeneric(esr2,encseq,true,pos2 + depth);
       }
     } else
     {
       if (pos1 >= depth && pos2 >= depth)
       {
-        gt_encodedsequence_scanstate_initgeneric(esr1,encseq,false,
+        gt_encseq_scanstate_initgeneric(esr1,encseq,false,
                                                  pos1 - depth);
-        gt_encodedsequence_scanstate_initgeneric(esr2,encseq,false,
+        gt_encseq_scanstate_initgeneric(esr2,encseq,false,
                                                  pos2 - depth);
       }
     }
@@ -4328,7 +4328,7 @@ int gt_encodedsequence_compare_maxdepth(const GtEncodedsequence *encseq,
       {
         fwdextract2bitenc(&ptbe1,encseq,esr1,pos1 + depth);
         fwdextract2bitenc(&ptbe2,encseq,esr2,pos2 + depth);
-        retval = gt_encodedsequence_compare_twobitencodings(true,complement,
+        retval = gt_encseq_compare_twobitencodings(true,complement,
                                                             commonunits,
                                                             &ptbe1,&ptbe2);
         if (depth + commonunits->common < maxdepth)
@@ -4358,7 +4358,7 @@ int gt_encodedsequence_compare_maxdepth(const GtEncodedsequence *encseq,
       {
         revextract2bitenc(&ptbe1,encseq,esr1,pos1 - depth);
         revextract2bitenc(&ptbe2,encseq,esr2,pos2 - depth);
-        retval = gt_encodedsequence_compare_twobitencodings(false,complement,
+        retval = gt_encseq_compare_twobitencodings(false,complement,
                                                             commonunits,
                                                             &ptbe1,&ptbe2);
         if (depth + commonunits->common < maxdepth)
@@ -4391,7 +4391,7 @@ int gt_encodedsequence_compare_maxdepth(const GtEncodedsequence *encseq,
     unsigned long lcp2 = 0;
     int retval2;
 
-    retval2 = gt_encodedsequence_comparetwostringsgeneric(encseq,
+    retval2 = gt_encseq_comparetwostringsgeneric(encseq,
                                        fwd,
                                        complement,
                                        &lcp2,
@@ -4418,23 +4418,23 @@ int gt_encodedsequence_compare_maxdepth(const GtEncodedsequence *encseq,
   return retval;
 }
 
-GT_UNUSED static int multicharactercompare(const GtEncodedsequence *encseq,
+GT_UNUSED static int multicharactercompare(const GtEncseq *encseq,
                                            bool fwd,
                                            bool complement,
-                                           GtEncodedsequenceScanstate *esr1,
+                                           GtEncseqScanstate *esr1,
                                            unsigned long pos1,
-                                           GtEncodedsequenceScanstate *esr2,
+                                           GtEncseqScanstate *esr2,
                                            unsigned long pos2)
 {
   GtEndofTwobitencoding ptbe1, ptbe2;
   int retval;
   GtCommonunits commonunits;
 
-  gt_encodedsequence_scanstate_initgeneric(esr1,encseq,fwd,pos1);
-  gt_encodedsequence_scanstate_initgeneric(esr2,encseq,fwd,pos2);
-  gt_encodedsequence_extract2bitenc(fwd,&ptbe1,encseq,esr1,pos1);
-  gt_encodedsequence_extract2bitenc(fwd,&ptbe2,encseq,esr2,pos2);
-  retval = gt_encodedsequence_compare_twobitencodings(fwd,complement,
+  gt_encseq_scanstate_initgeneric(esr1,encseq,fwd,pos1);
+  gt_encseq_scanstate_initgeneric(esr2,encseq,fwd,pos2);
+  gt_encseq_extract2bitenc(fwd,&ptbe1,encseq,esr1,pos1);
+  gt_encseq_extract2bitenc(fwd,&ptbe2,encseq,esr2,pos2);
+  retval = gt_encseq_compare_twobitencodings(fwd,complement,
                                                       &commonunits,
                                                       &ptbe1,&ptbe2);
   if (retval == 0)
@@ -4450,7 +4450,7 @@ GT_UNUSED static int multicharactercompare(const GtEncodedsequence *encseq,
 /* now some functions for testing the different functions follow */
 
 static void fwdextract2bitenc_bruteforce(GtEndofTwobitencoding *ptbe,
-                                         const GtEncodedsequence *encseq,
+                                         const GtEncseq *encseq,
                                          unsigned long startpos)
 {
   GtUchar cc;
@@ -4465,7 +4465,7 @@ static void fwdextract2bitenc_bruteforce(GtEndofTwobitencoding *ptbe,
       ptbe->tbe <<= GT_MULT2(startpos + GT_UNITSIN2BITENC - pos);
       return;
     }
-    cc = gt_encodedsequence_get_encoded_char(encseq,pos,GT_READMODE_FORWARD);
+    cc = gt_encseq_get_encoded_char(encseq,pos,GT_READMODE_FORWARD);
     if (ISSPECIAL(cc))
     {
       ptbe->unitsnotspecial = (unsigned int) (pos - startpos);
@@ -4479,7 +4479,7 @@ static void fwdextract2bitenc_bruteforce(GtEndofTwobitencoding *ptbe,
 }
 
 static void revextract2bitenc_bruteforce(GtEndofTwobitencoding *ptbe,
-                                         const GtEncodedsequence *encseq,
+                                         const GtEncseq *encseq,
                                          unsigned long startpos)
 {
   GtUchar cc;
@@ -4491,7 +4491,7 @@ static void revextract2bitenc_bruteforce(GtEndofTwobitencoding *ptbe,
        unit < (unsigned int) GT_UNITSIN2BITENC;
        unit++)
   {
-    cc = gt_encodedsequence_get_encoded_char(encseq,pos,GT_READMODE_FORWARD);
+    cc = gt_encseq_get_encoded_char(encseq,pos,GT_READMODE_FORWARD);
     if (ISSPECIAL(cc))
     {
       ptbe->unitsnotspecial = unit;
@@ -4511,7 +4511,7 @@ static void revextract2bitenc_bruteforce(GtEndofTwobitencoding *ptbe,
 
 static void extract2bitenc_bruteforce(bool fwd,
                                       GtEndofTwobitencoding *ptbe,
-                                      const GtEncodedsequence *encseq,
+                                      const GtEncseq *encseq,
                                       unsigned long startpos)
 {
   if (fwd)
@@ -4549,7 +4549,7 @@ static void showbufchar(FILE *fp,bool complement,GtUchar cc)
 static void showsequenceatstartpos(FILE *fp,
                                    bool fwd,
                                    bool complement,
-                                   const GtEncodedsequence *encseq,
+                                   const GtEncseq *encseq,
                                    unsigned long startpos)
 {
   unsigned long pos, endpos;
@@ -4564,7 +4564,7 @@ static void showsequenceatstartpos(FILE *fp,
   if (fwd)
   {
     endpos = MIN(startpos + GT_UNITSIN2BITENC - 1,encseq->totallength-1);
-    gt_encodedsequence_extract_substring(encseq,buffer,startpos,endpos);
+    gt_encseq_extract_substring(encseq,buffer,startpos,endpos);
     for (pos=0; pos<endpos - startpos + 1; pos++)
     {
       showbufchar(fp,complement,buffer[pos]);
@@ -4578,7 +4578,7 @@ static void showsequenceatstartpos(FILE *fp,
     {
       endpos = 0;
     }
-    gt_encodedsequence_extract_substring(encseq,buffer,endpos,startpos);
+    gt_encseq_extract_substring(encseq,buffer,endpos,startpos);
     for (pos=0; pos < startpos - endpos + 1; pos++)
     {
       showbufchar(fp,complement,buffer[pos]);
@@ -4704,19 +4704,19 @@ static inline GtBitsequence revextractspecialbits_bruteforce(
   return result;
 }
 
-static void checkextractunitatpos(const GtEncodedsequence *encseq,
+static void checkextractunitatpos(const GtEncseq *encseq,
                                   bool fwd,bool complement)
 {
   GtEndofTwobitencoding ptbe1, ptbe2;
-  GtEncodedsequenceScanstate *esr;
+  GtEncseqScanstate *esr;
   unsigned long startpos;
 
-  esr = gt_encodedsequence_scanstate_new_empty();
+  esr = gt_encseq_scanstate_new_empty();
   startpos = fwd ? 0 : (encseq->totallength-1);
-  gt_encodedsequence_scanstate_initgeneric(esr,encseq,fwd,startpos);
+  gt_encseq_scanstate_initgeneric(esr,encseq,fwd,startpos);
   while (true)
   {
-    gt_encodedsequence_extract2bitenc(fwd,&ptbe1,encseq,esr,startpos);
+    gt_encseq_extract2bitenc(fwd,&ptbe1,encseq,esr,startpos);
     extract2bitenc_bruteforce(fwd,&ptbe2,encseq,startpos);
     if (ptbe1.unitsnotspecial != ptbe2.unitsnotspecial)
     {
@@ -4755,17 +4755,17 @@ static void checkextractunitatpos(const GtEncodedsequence *encseq,
       startpos--;
     }
   }
-  gt_encodedsequence_scanstate_delete(esr);
+  gt_encseq_scanstate_delete(esr);
 }
 
-static void checkextractspecialbits(const GtEncodedsequence *encseq,bool fwd)
+static void checkextractspecialbits(const GtEncseq *encseq,bool fwd)
 {
   unsigned long startpos;
   GtBitsequence spbits1, spbits2;
   unsigned int unitsnotspecial_bruteforce, unitsnotspecial;
 
   if (encseq->sat != Viabitaccess
-        || !gt_encodedsequence_has_specialranges(encseq))
+        || !gt_encseq_has_specialranges(encseq))
   {
     return;
   }
@@ -4817,12 +4817,12 @@ static void checkextractspecialbits(const GtEncodedsequence *encseq,bool fwd)
   }
 }
 
-static void multicharactercompare_withtest(const GtEncodedsequence *encseq,
+static void multicharactercompare_withtest(const GtEncseq *encseq,
                                     bool fwd,
                                     bool complement,
-                                    GtEncodedsequenceScanstate *esr1,
+                                    GtEncseqScanstate *esr1,
                                     unsigned long pos1,
-                                    GtEncodedsequenceScanstate *esr2,
+                                    GtEncseqScanstate *esr2,
                                     unsigned long pos2)
 {
   GtEndofTwobitencoding ptbe1, ptbe2;
@@ -4830,15 +4830,15 @@ static void multicharactercompare_withtest(const GtEncodedsequence *encseq,
   unsigned long commonunits2;
   int ret1, ret2;
 
-  gt_encodedsequence_scanstate_initgeneric(esr1,encseq,fwd,pos1);
-  gt_encodedsequence_scanstate_initgeneric(esr2,encseq,fwd,pos2);
-  gt_encodedsequence_extract2bitenc(fwd,&ptbe1,encseq,esr1,pos1);
-  gt_encodedsequence_extract2bitenc(fwd,&ptbe2,encseq,esr2,pos2);
-  ret1 = gt_encodedsequence_compare_twobitencodings(fwd,complement,
+  gt_encseq_scanstate_initgeneric(esr1,encseq,fwd,pos1);
+  gt_encseq_scanstate_initgeneric(esr2,encseq,fwd,pos2);
+  gt_encseq_extract2bitenc(fwd,&ptbe1,encseq,esr1,pos1);
+  gt_encseq_extract2bitenc(fwd,&ptbe2,encseq,esr2,pos2);
+  ret1 = gt_encseq_compare_twobitencodings(fwd,complement,
                                                     &commonunits1,&ptbe1,
                                                     &ptbe2);
   commonunits2 = (unsigned long) GT_UNITSIN2BITENC;
-  ret2 = gt_encodedsequence_comparetwostrings(encseq,fwd,complement,
+  ret2 = gt_encseq_comparetwostrings(encseq,fwd,complement,
                                               &commonunits2,pos1,pos2,0);
   if (ret1 != ret2 || (unsigned long) commonunits1.common != commonunits2)
   {
@@ -4862,11 +4862,11 @@ static void multicharactercompare_withtest(const GtEncodedsequence *encseq,
   }
 }
 
-GtCodetype gt_encodedsequence_extractprefixcode(unsigned int *unitsnotspecial,
-                           const GtEncodedsequence *encseq,
+GtCodetype gt_encseq_extractprefixcode(unsigned int *unitsnotspecial,
+                           const GtEncseq *encseq,
                            const GtCodetype *filltable,
                            GtReadmode readmode,
-                           GtEncodedsequenceScanstate *esr,
+                           GtEncseqScanstate *esr,
                            const GtCodetype **multimappower,
                            unsigned long frompos,
                            unsigned int prefixlength)
@@ -4884,10 +4884,10 @@ GtCodetype gt_encodedsequence_extractprefixcode(unsigned int *unitsnotspecial,
   {
     stoppos = encseq->totallength;
   }
-  gt_encodedsequence_scanstate_init(esr,encseq,readmode,frompos);
+  gt_encseq_scanstate_init(esr,encseq,readmode,frompos);
   for (pos=frompos; pos < stoppos; pos++)
   {
-    cc = gt_encodedsequence_get_encoded_char_sequential(encseq,esr,pos,
+    cc = gt_encseq_get_encoded_char_sequential(encseq,esr,pos,
                                                         readmode);
     if (ISNOTSPECIAL(cc))
     {
@@ -4922,11 +4922,11 @@ static void showcharacterdistribution(
   }
 }
 
-void gt_encodedsequence_show_features(const GtEncodedsequence *encseq,
+void gt_encseq_show_features(const GtEncseq *encseq,
                                       GtLogger *logger,
                                       bool withfilenames)
 {
-  const GtAlphabet *alpha = gt_encodedsequence_alphabet(encseq);
+  const GtAlphabet *alpha = gt_encseq_alphabet(encseq);
   unsigned long idx;
 
   if (withfilenames)
@@ -4945,16 +4945,16 @@ void gt_encodedsequence_show_features(const GtEncodedsequence *encseq,
                        encseq->totallength);
   gt_logger_log(logger,"numofsequences=%lu",encseq->numofdbsequences);
   gt_logger_log(logger,"specialcharacters=%lu",
-                       gt_encodedsequence_specialcharacters(encseq));
+                       gt_encseq_specialcharacters(encseq));
   gt_logger_log(logger,"specialranges=%lu",
-                       gt_encodedsequence_specialranges(encseq));
+                       gt_encseq_specialranges(encseq));
   gt_logger_log(logger,"realspecialranges=%lu",
-                       gt_encodedsequence_realspecialranges(encseq));
+                       gt_encseq_realspecialranges(encseq));
   gt_assert(encseq->characterdistribution != NULL);
   showcharacterdistribution(alpha,encseq->characterdistribution,logger);
 }
 
-int gt_encodedsequence_comparetwosuffixes(const GtEncodedsequence *encseq,
+int gt_encseq_comparetwosuffixes(const GtEncseq *encseq,
                                           GtReadmode readmode,
                                           unsigned long *maxlcp,
                                           bool specialsareequal,
@@ -4962,14 +4962,14 @@ int gt_encodedsequence_comparetwosuffixes(const GtEncodedsequence *encseq,
                                           unsigned long maxdepth,
                                           unsigned long start1,
                                           unsigned long start2,
-                                          GtEncodedsequenceScanstate *esr1,
-                                          GtEncodedsequenceScanstate *esr2)
+                                          GtEncseqScanstate *esr1,
+                                          GtEncseqScanstate *esr2)
 {
   GtUchar cc1, cc2;
   unsigned long pos1, pos2, end1, end2;
   int retval;
 
-  end1 = end2 = gt_encodedsequence_total_length(encseq);
+  end1 = end2 = gt_encseq_total_length(encseq);
   if (maxdepth > 0)
   {
     if (end1 > start1 + maxdepth)
@@ -4983,8 +4983,8 @@ int gt_encodedsequence_comparetwosuffixes(const GtEncodedsequence *encseq,
   }
   if (esr1 != NULL && esr2 != NULL)
   {
-    gt_encodedsequence_scanstate_init(esr1,encseq,readmode,start1);
-    gt_encodedsequence_scanstate_init(esr2,encseq,readmode,start2);
+    gt_encseq_scanstate_init(esr1,encseq,readmode,start1);
+    gt_encseq_scanstate_init(esr2,encseq,readmode,start2);
   } else
   {
     gt_assert(esr1 == NULL && esr2 == NULL);
@@ -4999,21 +4999,21 @@ int gt_encodedsequence_comparetwosuffixes(const GtEncodedsequence *encseq,
     }
     if (esr1 != NULL)
     {
-      cc1 = gt_encodedsequence_get_encoded_char_sequential(encseq,esr1,pos1,
+      cc1 = gt_encseq_get_encoded_char_sequential(encseq,esr1,pos1,
                                                         readmode);
       GT_CHECKENCCHAR(cc1,encseq,pos1,readmode);
     } else
     {
-      cc1 = gt_encodedsequence_get_encoded_char(encseq,pos1,readmode);
+      cc1 = gt_encseq_get_encoded_char(encseq,pos1,readmode);
     }
     if (esr2 != NULL)
     {
-      cc2 = gt_encodedsequence_get_encoded_char_sequential(encseq,esr2,pos2,
+      cc2 = gt_encseq_get_encoded_char_sequential(encseq,esr2,pos2,
                                                         readmode);
       GT_CHECKENCCHAR(cc2,encseq,pos2,readmode);
     } else
     {
-      cc2 = gt_encodedsequence_get_encoded_char(encseq,pos2,readmode);
+      cc2 = gt_encseq_get_encoded_char(encseq,pos2,readmode);
     }
     if (ISSPECIAL(cc1))
     {
@@ -5069,7 +5069,7 @@ int gt_encodedsequence_comparetwosuffixes(const GtEncodedsequence *encseq,
   return retval;
 }
 
-static unsigned long derefcharboundaries(const GtEncodedsequence *encseq,
+static unsigned long derefcharboundaries(const GtEncseq *encseq,
                                          bool fwd,
                                          bool complement,
                                          unsigned long start,
@@ -5095,7 +5095,7 @@ static unsigned long derefcharboundaries(const GtEncodedsequence *encseq,
   if (currentoffset <= maxoffset)
   {
     GtUchar cc;
-    cc = gt_encodedsequence_get_encoded_char(encseq,start,GT_READMODE_FORWARD);
+    cc = gt_encseq_get_encoded_char(encseq,start,GT_READMODE_FORWARD);
     if (ISSPECIAL(cc))
     {
       return start + GT_COMPAREOFFSET;
@@ -5109,7 +5109,7 @@ static unsigned long derefcharboundaries(const GtEncodedsequence *encseq,
   return  start + GT_COMPAREOFFSET;
 }
 
-int gt_encodedsequence_comparetwostrings(const GtEncodedsequence *encseq,
+int gt_encseq_comparetwostrings(const GtEncseq *encseq,
                                          bool fwd,
                                          bool complement,
                                          unsigned long *maxcommon,
@@ -5118,7 +5118,7 @@ int gt_encodedsequence_comparetwostrings(const GtEncodedsequence *encseq,
                                          unsigned long maxdepth)
 {
   unsigned long currentoffset, maxoffset, cc1, cc2,
-         totallength = gt_encodedsequence_total_length(encseq);
+         totallength = gt_encseq_total_length(encseq);
 
   if (fwd)
   {
@@ -5162,7 +5162,7 @@ int gt_encodedsequence_comparetwostrings(const GtEncodedsequence *encseq,
   return 0;
 }
 
-int gt_encodedsequence_comparetwostringsgeneric(const GtEncodedsequence *encseq,
+int gt_encseq_comparetwostringsgeneric(const GtEncseq *encseq,
                                                 bool fwd,
                                                 bool complement,
                                                 unsigned long *maxcommon,
@@ -5171,7 +5171,7 @@ int gt_encodedsequence_comparetwostringsgeneric(const GtEncodedsequence *encseq,
                                                 unsigned long depth,
                                                 unsigned long maxdepth)
 {
-  unsigned long totallength = gt_encodedsequence_total_length(encseq);
+  unsigned long totallength = gt_encseq_total_length(encseq);
   int retval;
   bool leftspecial, rightspecial;
 
@@ -5190,7 +5190,7 @@ int gt_encodedsequence_comparetwostringsgeneric(const GtEncodedsequence *encseq,
     }
     if (pos1 + depth < endpos1 && pos2 + depth < endpos2)
     {
-      retval = gt_encodedsequence_comparetwostrings(encseq,
+      retval = gt_encseq_comparetwostrings(encseq,
                                  fwd,
                                  complement,
                                  maxcommon,
@@ -5217,7 +5217,7 @@ int gt_encodedsequence_comparetwostringsgeneric(const GtEncodedsequence *encseq,
     }
     if (pos1 >= depth && pos2 >= depth)
     {
-      retval = gt_encodedsequence_comparetwostrings(encseq,
+      retval = gt_encseq_comparetwostrings(encseq,
                                  fwd,
                                  complement,
                                  maxcommon,
@@ -5256,8 +5256,8 @@ static unsigned long *initcharacterdistribution(const GtAlphabet *alpha)
   return characterdistribution;
 }
 
-static GtEncodedsequence*
-gt_encodedsequence_new_from_files(GtProgressTimer *sfxprogress,
+static GtEncseq*
+gt_encseq_new_from_files(GtProgressTimer *sfxprogress,
                                   const GtStr *str_indexname,
                                   const GtStr *str_smap,
                                   const GtStr *str_sat,
@@ -5282,7 +5282,7 @@ gt_encodedsequence_new_from_files(GtProgressTimer *sfxprogress,
   GtFilelengthvalues *filelengthtab = NULL;
   unsigned long specialrangestab[3];
   unsigned long *characterdistribution = NULL;
-  GtEncodedsequence *encseq = NULL;
+  GtEncseq *encseq = NULL;
   GtArrayGtUlong sequenceseppos;
 
   gt_error_check(err);
@@ -5426,20 +5426,20 @@ gt_encodedsequence_new_from_files(GtProgressTimer *sfxprogress,
   return haserr ? NULL : encseq;
 }
 
-static void runscanatpostrial(const GtEncodedsequence *encseq,
-                              GtEncodedsequenceScanstate *esr,
+static void runscanatpostrial(const GtEncseq *encseq,
+                              GtEncseqScanstate *esr,
                               GtReadmode readmode,unsigned long startpos)
 {
   unsigned long pos, totallength;
   GtUchar ccra, ccsr;
 
-  totallength = gt_encodedsequence_total_length(encseq);
-  gt_encodedsequence_scanstate_init(esr,encseq,readmode,startpos);
+  totallength = gt_encseq_total_length(encseq);
+  gt_encseq_scanstate_init(esr,encseq,readmode,startpos);
   for (pos=startpos; pos < totallength; pos++)
   {
     /* Random access */
-    ccra = gt_encodedsequence_get_encoded_char(encseq,pos,readmode);
-    ccsr = gt_encodedsequence_get_encoded_char_sequential(encseq,esr,pos,
+    ccra = gt_encseq_get_encoded_char(encseq,pos,readmode);
+    ccsr = gt_encseq_get_encoded_char_sequential(encseq,esr,pos,
                                                           readmode);
     if (ccra != ccsr)
     {
@@ -5448,7 +5448,7 @@ static void runscanatpostrial(const GtEncodedsequence *encseq,
                      ": random access (correct) = %u != %u = "
                      " sequential read (wrong)\n",
                      startpos,
-                     gt_encodedsequence_accessname(encseq),
+                     gt_encseq_accessname(encseq),
                      gt_readmode_show(readmode),
                      pos,
                      (unsigned int) ccra,
@@ -5458,16 +5458,16 @@ static void runscanatpostrial(const GtEncodedsequence *encseq,
   }
 }
 
-static void testscanatpos(const GtEncodedsequence *encseq,
+static void testscanatpos(const GtEncseq *encseq,
                           GtReadmode readmode,
                           unsigned long scantrials)
 {
-  GtEncodedsequenceScanstate *esr = NULL;
+  GtEncseqScanstate *esr = NULL;
   unsigned long startpos, totallength;
   unsigned long trial;
 
-  totallength = gt_encodedsequence_total_length(encseq);
-  esr = gt_encodedsequence_scanstate_new_empty();
+  totallength = gt_encseq_total_length(encseq);
+  esr = gt_encseq_scanstate_new_empty();
   runscanatpostrial(encseq,esr,readmode,0);
   runscanatpostrial(encseq,esr,readmode,totallength-1);
   for (trial = 0; trial < scantrials; trial++)
@@ -5476,22 +5476,22 @@ static void testscanatpos(const GtEncodedsequence *encseq,
     printf("trial %lu at %lu\n",trial,startpos);
     runscanatpostrial(encseq,esr,readmode,startpos);
   }
-  gt_encodedsequence_scanstate_delete(esr);
+  gt_encseq_scanstate_delete(esr);
 }
 
-static void testmulticharactercompare(const GtEncodedsequence *encseq,
+static void testmulticharactercompare(const GtEncseq *encseq,
                                       GtReadmode readmode,
                                       unsigned long multicharcmptrials)
 {
-  GtEncodedsequenceScanstate *esr1, *esr2;
+  GtEncseqScanstate *esr1, *esr2;
   unsigned long pos1, pos2, totallength;
   unsigned long trial;
   bool fwd = GT_ISDIRREVERSE(readmode) ? false : true,
        complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
 
-  esr1 = gt_encodedsequence_scanstate_new_empty();
-  esr2 = gt_encodedsequence_scanstate_new_empty();
-  totallength = gt_encodedsequence_total_length(encseq);
+  esr1 = gt_encseq_scanstate_new_empty();
+  esr2 = gt_encseq_scanstate_new_empty();
+  totallength = gt_encseq_total_length(encseq);
   (void) multicharactercompare_withtest(encseq,fwd,complement,esr1,0,esr2,0);
   (void) multicharactercompare_withtest(encseq,fwd,complement,esr1,0,esr2,
                                         totallength-1);
@@ -5506,12 +5506,12 @@ static void testmulticharactercompare(const GtEncodedsequence *encseq,
     (void) multicharactercompare_withtest(encseq,fwd,complement,
                                           esr1,pos1,esr2,pos2);
   }
-  gt_encodedsequence_scanstate_delete(esr1);
-  gt_encodedsequence_scanstate_delete(esr2);
+  gt_encseq_scanstate_delete(esr1);
+  gt_encseq_scanstate_delete(esr2);
 }
 
 static int testfullscan(const GtStrArray *filenametab,
-                        const GtEncodedsequence *encseq,
+                        const GtEncseq *encseq,
                         GtReadmode readmode,
                         GtError *err)
 {
@@ -5520,11 +5520,11 @@ static int testfullscan(const GtStrArray *filenametab,
   GtSequenceBuffer *fb = NULL;
   int retval;
   bool haserr = false;
-  GtEncodedsequenceScanstate *esr = NULL;
+  GtEncseqScanstate *esr = NULL;
   unsigned long long fullscanpbar = 0;
 
   gt_error_check(err);
-  totallength = gt_encodedsequence_total_length(encseq);
+  totallength = gt_encseq_total_length(encseq);
   gt_progressbar_start(&fullscanpbar,(unsigned long long) totallength);
   if (filenametab != NULL)
   {
@@ -5533,10 +5533,10 @@ static int testfullscan(const GtStrArray *filenametab,
       haserr = true;
     if (!haserr)
       gt_sequence_buffer_set_symbolmap(fb,
-                                  gt_encodedsequence_alphabetsymbolmap(encseq));
+                                  gt_encseq_alphabetsymbolmap(encseq));
   }
   if (!haserr) {
-    esr = gt_encodedsequence_scanstate_new(encseq,readmode,0);
+    esr = gt_encseq_scanstate_new(encseq,readmode,0);
     for (pos=0; /* Nothing */; pos++)
     {
       if (filenametab != NULL && readmode == GT_READMODE_FORWARD)
@@ -5559,7 +5559,7 @@ static int testfullscan(const GtStrArray *filenametab,
         }
       }
       /* Random access */
-      ccra = gt_encodedsequence_get_encoded_char(encseq,pos,readmode);
+      ccra = gt_encseq_get_encoded_char(encseq,pos,readmode);
       if (filenametab != NULL && readmode == GT_READMODE_FORWARD)
       {
         if (ccscan != ccra)
@@ -5567,7 +5567,7 @@ static int testfullscan(const GtStrArray *filenametab,
           gt_error_set(err,"access=%s, position=%lu"
                             ": scan (readnextchar) = %u != "
                             "%u = random access",
-                            gt_encodedsequence_accessname(encseq),
+                            gt_encseq_accessname(encseq),
                             pos,
                             (unsigned int) ccscan,
                             (unsigned int) ccra);
@@ -5575,13 +5575,13 @@ static int testfullscan(const GtStrArray *filenametab,
           break;
         }
       }
-      ccsr = gt_encodedsequence_get_encoded_char_sequential(encseq,esr,pos,
+      ccsr = gt_encseq_get_encoded_char_sequential(encseq,esr,pos,
                                                          readmode);
       if (ccra != ccsr)
       {
         gt_error_set(err,"access=%s, mode=%s: position=%lu"
                           ": random access = %u != %u = sequential read",
-                          gt_encodedsequence_accessname(encseq),
+                          gt_encseq_accessname(encseq),
                           gt_readmode_show(readmode),
                           pos,
                           (unsigned int) ccra,
@@ -5602,12 +5602,12 @@ static int testfullscan(const GtStrArray *filenametab,
       haserr = true;
     }
   }
-  gt_encodedsequence_scanstate_delete(esr);
+  gt_encseq_scanstate_delete(esr);
   gt_sequence_buffer_delete(fb);
   return haserr ? -1 : 0;
 }
 
-int gt_encodedsequence_check_consistency(const GtEncodedsequence *encseq,
+int gt_encseq_check_consistency(const GtEncseq *encseq,
                                          const GtStrArray *filenametab,
                                          GtReadmode readmode,
                                          unsigned long scantrials,
@@ -5617,7 +5617,7 @@ int gt_encodedsequence_check_consistency(const GtEncodedsequence *encseq,
   bool fwd = GT_ISDIRREVERSE(readmode) ? false : true,
        complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
 
-  if (gt_encodedsequence_has_fast_specialrangeenumerator(encseq))
+  if (gt_encseq_has_fast_specialrangeenumerator(encseq))
   {
     checkextractunitatpos(encseq,fwd,complement);
     if (multicharcmptrials > 0)
@@ -5678,14 +5678,14 @@ static int compareGtRange(const void *a,const void *b)
   return 0;
 }
 
-int gt_encodedsequence_check_specialranges(const GtEncodedsequence *encseq)
+int gt_encseq_check_specialranges(const GtEncseq *encseq)
 {
   GtArray *rangesforward, *rangesbackward;
   bool haserr = false;
   GtSpecialrangeiterator *sri;
   GtRange range;
 
-  if (!gt_encodedsequence_has_specialranges(encseq))
+  if (!gt_encseq_has_specialranges(encseq))
   {
     return 0;
   }
@@ -5882,9 +5882,9 @@ void gt_encseq_encoder_set_logger(GtEncseqEncoder *ee, GtLogger *l)
 int gt_encseq_encoder_encode(GtEncseqEncoder *ee, GtStrArray *seqfiles,
                              GtStr *indexname, GtError *err)
 {
-  GtEncodedsequence *encseq = NULL;
+  GtEncseq *encseq = NULL;
   gt_assert(ee && seqfiles && indexname);
-  encseq = gt_encodedsequence_new_from_files(ee->pt,
+  encseq = gt_encseq_new_from_files(ee->pt,
                                              indexname,
                                              ee->smapfile,
                                              ee->sat,
@@ -5900,7 +5900,7 @@ int gt_encseq_encoder_encode(GtEncseqEncoder *ee, GtStrArray *seqfiles,
                                              err);
   if (!encseq)
     return -1;
-  gt_encodedsequence_delete(encseq);
+  gt_encseq_delete(encseq);
   return 0;
 }
 
@@ -6019,12 +6019,12 @@ void gt_encseq_loader_set_logger(GtEncseqLoader *el, GtLogger *l)
   el->logger = l;
 }
 
-GtEncodedsequence* gt_encseq_loader_load(GtEncseqLoader *el, GtStr *indexname,
+GtEncseq* gt_encseq_loader_load(GtEncseqLoader *el, GtStr *indexname,
                                          GtError *err)
 {
-  GtEncodedsequence *encseq = NULL;
+  GtEncseq *encseq = NULL;
   gt_assert(el && indexname);
-  encseq = gt_encodedsequence_new_from_index(el->withrange,
+  encseq = gt_encseq_new_from_index(el->withrange,
                                              indexname,
                                              el->tistab,
                                              el->destab,
@@ -6292,10 +6292,10 @@ void gt_encseq_builder_reset(GtEncseqBuilder *eb)
   eb->plainseq = NULL;
 }
 
-GtEncodedsequence* gt_encseq_builder_build(GtEncseqBuilder *eb,
+GtEncseq* gt_encseq_builder_build(GtEncseqBuilder *eb,
                                            GT_UNUSED GtError *err)
 {
-  GtEncodedsequence *encseq = NULL;
+  GtEncseq *encseq = NULL;
   const GtPositionaccesstype sat = Viadirectaccess;
   GtSpecialcharinfo samplespecialcharinfo;
   bool withrange = eb->withrange;
@@ -6348,7 +6348,7 @@ int gt_encseq_builder_unit_test(GtError *err)
   GtUchar buffer[65];
   unsigned long desclen;
   GtSeqinfo seqinfo;
-  GtEncodedsequence *encseq;
+  GtEncseq *encseq;
   gt_error_check(err);
 
   alpha = gt_alphabet_new_dna();
@@ -6375,55 +6375,55 @@ int gt_encseq_builder_unit_test(GtError *err)
   gt_encseq_builder_add_cstr(eb, testseq, 11UL, NULL);
   ensure(had_err, eb->own);
   encseq = gt_encseq_builder_build(eb, err);
-  ensure(had_err, gt_encodedsequence_total_length(encseq) == 11UL);
-  ensure(had_err, gt_encodedsequence_num_of_sequences(encseq) == 1UL);
-  gt_encodedsequence_extract_substring(encseq,
+  ensure(had_err, gt_encseq_total_length(encseq) == 11UL);
+  ensure(had_err, gt_encseq_num_of_sequences(encseq) == 1UL);
+  gt_encseq_extract_substring(encseq,
                                      buffer,
                                      0,
-                                     gt_encodedsequence_total_length(encseq)-1);
+                                     gt_encseq_total_length(encseq)-1);
   ensure(had_err, memcmp(preenc, buffer, 11 * sizeof (char)) == 0);
-  gt_encodedsequence_seqinfo(encseq, &seqinfo, 0UL);
+  gt_encseq_seqinfo(encseq, &seqinfo, 0UL);
   ensure(had_err, seqinfo.seqstartpos == 0UL);
   ensure(had_err, seqinfo.seqlength == 11UL);
-  gt_encodedsequence_delete(encseq);
+  gt_encseq_delete(encseq);
 
   gt_encseq_builder_add_cstr(eb, testseq, 11UL, NULL);
   gt_encseq_builder_add_cstr(eb, testseq, 11UL, NULL);
   ensure(had_err, eb->own);
   encseq = gt_encseq_builder_build(eb, err);
-  ensure(had_err, gt_encodedsequence_total_length(encseq) == 23UL);
-  ensure(had_err, gt_encodedsequence_num_of_sequences(encseq) == 2UL);
-  gt_encodedsequence_delete(encseq);
+  ensure(had_err, gt_encseq_total_length(encseq) == 23UL);
+  ensure(had_err, gt_encseq_num_of_sequences(encseq) == 2UL);
+  gt_encseq_delete(encseq);
 
   ensure(had_err, eb->plainseq == NULL);
   gt_encseq_builder_add_encoded(eb, preenc, 11UL, NULL);
   ensure(had_err, !eb->own);
   encseq = gt_encseq_builder_build(eb, err);
-  ensure(had_err, gt_encodedsequence_total_length(encseq) == 11UL);
-  ensure(had_err, gt_encodedsequence_num_of_sequences(encseq) == 1UL);
-  gt_encodedsequence_delete(encseq);
+  ensure(had_err, gt_encseq_total_length(encseq) == 11UL);
+  ensure(had_err, gt_encseq_num_of_sequences(encseq) == 1UL);
+  gt_encseq_delete(encseq);
 
   gt_encseq_builder_add_cstr(eb, testseq, 4UL, NULL);
   gt_encseq_builder_add_encoded(eb, preenc, 11UL, NULL);
   ensure(had_err, eb->own);
   encseq = gt_encseq_builder_build(eb, err);
-  ensure(had_err, gt_encodedsequence_total_length(encseq) == 16UL);
-  ensure(had_err, gt_encodedsequence_num_of_sequences(encseq) == 2UL);
-  gt_encodedsequence_delete(encseq);
+  ensure(had_err, gt_encseq_total_length(encseq) == 16UL);
+  ensure(had_err, gt_encseq_num_of_sequences(encseq) == 2UL);
+  gt_encseq_delete(encseq);
 
   gt_encseq_builder_add_encoded(eb, preenc, 11UL, NULL);
   gt_encseq_builder_add_cstr(eb, testseq, 4UL, NULL);
   ensure(had_err, eb->own);
   encseq = gt_encseq_builder_build(eb, err);
-  ensure(had_err, gt_encodedsequence_total_length(encseq) == 16UL);
-  ensure(had_err, gt_encodedsequence_num_of_sequences(encseq) == 2UL);
-  gt_encodedsequence_seqinfo(encseq, &seqinfo, 0);
+  ensure(had_err, gt_encseq_total_length(encseq) == 16UL);
+  ensure(had_err, gt_encseq_num_of_sequences(encseq) == 2UL);
+  gt_encseq_seqinfo(encseq, &seqinfo, 0);
   ensure(had_err, seqinfo.seqstartpos == 0UL);
   ensure(had_err, seqinfo.seqlength == 11UL);
-  gt_encodedsequence_seqinfo(encseq, &seqinfo, 1UL);
+  gt_encseq_seqinfo(encseq, &seqinfo, 1UL);
   ensure(had_err, seqinfo.seqstartpos == 12UL);
   ensure(had_err, seqinfo.seqlength == 4UL);
-  gt_encodedsequence_delete(encseq);
+  gt_encseq_delete(encseq);
 
   gt_encseq_builder_create_des_tab(eb);
   gt_encseq_builder_create_sds_tab(eb);
@@ -6433,15 +6433,15 @@ int gt_encseq_builder_unit_test(GtError *err)
   ensure(had_err, eb->destab);
   encseq = gt_encseq_builder_build(eb, err);
   ensure(had_err, encseq->sdstab);
-  ensure(had_err, gt_encodedsequence_total_length(encseq) == 28UL);
-  ensure(had_err, gt_encodedsequence_num_of_sequences(encseq) == 3UL);
-  desc = gt_encodedsequence_description(encseq, &desclen, 0UL);
+  ensure(had_err, gt_encseq_total_length(encseq) == 28UL);
+  ensure(had_err, gt_encseq_num_of_sequences(encseq) == 3UL);
+  desc = gt_encseq_description(encseq, &desclen, 0UL);
   ensure(had_err, strcmp(desc, "foo") == 0);
-  desc = gt_encodedsequence_description(encseq, &desclen, 1UL);
+  desc = gt_encseq_description(encseq, &desclen, 1UL);
   ensure(had_err, strcmp(desc, "bar") == 0);
-  desc = gt_encodedsequence_description(encseq, &desclen, 2UL);
+  desc = gt_encseq_description(encseq, &desclen, 2UL);
   ensure(had_err, strcmp(desc, "baz") == 0);
-  gt_encodedsequence_delete(encseq);
+  gt_encseq_delete(encseq);
 
   gt_encseq_builder_delete(eb);
   gt_alphabet_delete(alpha);

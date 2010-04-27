@@ -19,14 +19,14 @@
 #define SFX_SUFTABORDER_H
 
 #include "core/error_api.h"
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 #include "core/readmode.h"
 
 #include "esa-seqread.h"
 
 void gt_checkifprefixesareidentical(const char *filename,
                                  int line,
-                                 const GtEncodedsequence *encseq,
+                                 const GtEncseq *encseq,
                                  GtReadmode readmode,
                                  const unsigned long *suftab,
                                  unsigned int prefixlength,
@@ -34,14 +34,14 @@ void gt_checkifprefixesareidentical(const char *filename,
                                  unsigned long left,
                                  unsigned long right);
 
-void gt_showentiresuftab(const GtEncodedsequence *encseq,
+void gt_showentiresuftab(const GtEncseq *encseq,
                       GtReadmode readmode,
                       const unsigned long *suftab,
                       unsigned long depth);
 
 void gt_checkentiresuftab(const char *filename,
                        int line,
-                       const GtEncodedsequence *encseq,
+                       const GtEncseq *encseq,
                        GtReadmode readmode,
                        const unsigned long *suftab,
                        unsigned long numberofsuffixes,
@@ -53,7 +53,7 @@ void gt_checkentiresuftab(const char *filename,
 
 void gt_checksortedsuffixes(const char *filename,
                          int line,
-                         const GtEncodedsequence *encseq,
+                         const GtEncseq *encseq,
                          GtReadmode readmode,
                          const unsigned long *suftab,
                          unsigned long numberofsuffixes,

@@ -21,11 +21,11 @@
 #include <stdbool.h>
 #include "core/error.h"
 
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 #include "repeattypes.h"
 #include "ltrharvest-opt.h"
 
 int gt_findcorrectboundaries(LTRharvestoptions *lo, LTRboundaries *boundaries,
-                          const GtEncodedsequence *encseq, GtError *err);
+                          const GtEncseq *encseq, GtError *err);
 
 #endif

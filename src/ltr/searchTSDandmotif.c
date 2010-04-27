@@ -21,7 +21,7 @@
 #include "core/log.h"
 #include "core/minmax.h"
 #include "core/symboldef.h"
-#include "core/encodedsequence.h"
+#include "core/encseq.h"
 #include "match/spacedef.h"
 #include "match/esa-mmsearch.h"
 
@@ -41,7 +41,7 @@
 
 static void searchforbestTSDandormotifatborders(SubRepeatInfo *info,
                                                 LTRharvestoptions *lo,
-                                                const GtEncodedsequence *encseq,
+                                                const GtEncseq *encseq,
                                                 LTRboundaries *boundaries,
                                                 unsigned int
                                                 *motifmismatchesleftLTR,
@@ -85,27 +85,27 @@ static void searchforbestTSDandormotifatborders(SubRepeatInfo *info,
            forward++)
       {
         tmp_motifmismatchesleftLTR = tmp_motifmismatchesrightLTR = 0;
-        if (gt_encodedsequence_get_encoded_char(/* Random access */ encseq,
+        if (gt_encseq_get_encoded_char(/* Random access */ encseq,
                             motifpos1 - back, GT_READMODE_FORWARD)
             != lo->motif.firstleft)
         {
           tmp_motifmismatchesleftLTR++;
         }
-        if (gt_encodedsequence_get_encoded_char(/* Random access */ encseq,
+        if (gt_encseq_get_encoded_char(/* Random access */ encseq,
                                               motifpos1 + 1 - back,
                                               GT_READMODE_FORWARD)
             != lo->motif.secondleft)
         {
           tmp_motifmismatchesleftLTR++;
         }
-        if (gt_encodedsequence_get_encoded_char(/* Random access */ encseq,
+        if (gt_encseq_get_encoded_char(/* Random access */ encseq,
                                               motifpos2 + forward,
                                               GT_READMODE_FORWARD)
             != lo->motif.firstright)
         {
           tmp_motifmismatchesrightLTR++;
         }
-        if (gt_encodedsequence_get_encoded_char(/* Random access */ encseq,
+        if (gt_encseq_get_encoded_char(/* Random access */ encseq,
                                               motifpos2 + 1 + forward,
                                               GT_READMODE_FORWARD)
             != lo->motif.secondright)
@@ -195,7 +195,7 @@ static void searchforbestTSDandormotifatborders(SubRepeatInfo *info,
 
 static void searchformotifonlyborders(LTRharvestoptions *lo,
     LTRboundaries *boundaries,
-    const GtEncodedsequence *encseq,
+    const GtEncseq *encseq,
     unsigned long startleftLTR,
     unsigned long endleftLTR,
     unsigned long startrightLTR,
@@ -219,13 +219,13 @@ static void searchformotifonlyborders(LTRharvestoptions *lo,
   for (idx = startleftLTR; idx < endleftLTR; idx++)
   {
     tmp_motifmismatchesleftLTR = 0;
-    if (gt_encodedsequence_get_encoded_char(/* XXX */ encseq, idx,
+    if (gt_encseq_get_encoded_char(/* XXX */ encseq, idx,
                                           GT_READMODE_FORWARD)
         != lo->motif.firstleft)
     {
       tmp_motifmismatchesleftLTR++;
     }
-    if (gt_encodedsequence_get_encoded_char(/* XXX */ encseq,
+    if (gt_encseq_get_encoded_char(/* XXX */ encseq,
                                           idx+1,
                                           GT_READMODE_FORWARD) !=
         lo->motif.secondleft)
@@ -272,13 +272,13 @@ static void searchformotifonlyborders(LTRharvestoptions *lo,
   for (idx = startrightLTR + 1; idx <= endrightLTR; idx++)
   {
     tmp_motifmismatchesrightLTR = 0;
-    if (gt_encodedsequence_get_encoded_char(/* XXX */ encseq, idx,
+    if (gt_encseq_get_encoded_char(/* XXX */ encseq, idx,
                                           GT_READMODE_FORWARD) !=
                        lo->motif.secondright)
     {
       tmp_motifmismatchesrightLTR++;
     }
-    if (gt_encodedsequence_get_encoded_char(/* XXX */ encseq,
+    if (gt_encseq_get_encoded_char(/* XXX */ encseq,
                                           idx-1,
                                           GT_READMODE_FORWARD) !=
                        lo->motif.firstright)
@@ -342,7 +342,7 @@ static void searchformotifonlyborders(LTRharvestoptions *lo,
 
 static void searchformotifonlyinside(LTRharvestoptions *lo,
                                      LTRboundaries *boundaries,
-                                     const GtEncodedsequence *encseq,
+                                     const GtEncseq *encseq,
                                      unsigned int *motifmismatchesleftLTR,
                                      unsigned int *motifmismatchesrightLTR)
 {
@@ -397,13 +397,13 @@ static void searchformotifonlyinside(LTRharvestoptions *lo,
   for (idx = startleftLTR + 1; idx <= endleftLTR; idx++)
   {
     tmp_motifmismatchesleftLTR = (unsigned int)0;
-    if (gt_encodedsequence_get_encoded_char(/* XXX */ encseq, idx,
+    if (gt_encseq_get_encoded_char(/* XXX */ encseq, idx,
                                           GT_READMODE_FORWARD)
                        != lo->motif.secondright)
     {
       tmp_motifmismatchesleftLTR++;
     }
-    if (gt_encodedsequence_get_encoded_char(/* XXX */ encseq,
+    if (gt_encseq_get_encoded_char(/* XXX */ encseq,
                                           idx-1,
                                           GT_READMODE_FORWARD) !=
                        lo->motif.firstright)
@@ -452,13 +452,13 @@ static void searchformotifonlyinside(LTRharvestoptions *lo,
   for (idx = startrightLTR ; idx < endrightLTR; idx++)
   {
     tmp_motifmismatchesrightLTR = 0;
-    if (gt_encodedsequence_get_encoded_char(/* XXX */ encseq, idx,
+    if (gt_encseq_get_encoded_char(/* XXX */ encseq, idx,
                                           GT_READMODE_FORWARD)
                        != lo->motif.firstleft)
     {
       tmp_motifmismatchesrightLTR++;
     }
-    if (gt_encodedsequence_get_encoded_char(/* XXX */ encseq, idx+1,
+    if (gt_encseq_get_encoded_char(/* XXX */ encseq, idx+1,
                                           GT_READMODE_FORWARD)
                        != lo->motif.secondleft)
     {
@@ -517,7 +517,7 @@ static void searchformotifonlyinside(LTRharvestoptions *lo,
 static int searchforTSDandorMotifoutside(
   LTRharvestoptions *lo,
   LTRboundaries *boundaries,
-  const GtEncodedsequence *encseq,
+  const GtEncseq *encseq,
   unsigned int *motifmismatchesleftLTR,
   unsigned int *motifmismatchesrightLTR,
   GtError *err)
@@ -539,7 +539,7 @@ static int searchforTSDandorMotifoutside(
   /* check border cases */
 
   /* vicinity of 5'-border of left LTR */
-  gt_encodedsequence_seqinfo(encseq,&seqinfo,contignumber);
+  gt_encseq_seqinfo(encseq,&seqinfo,contignumber);
   if (contignumber == 0)
   {
     /* do not align over left sequence boundary,
@@ -611,8 +611,8 @@ static int searchforTSDandorMotifoutside(
     ALLOCASSIGNSPACE(dbseq,NULL,GtUchar,leftlen);
     ALLOCASSIGNSPACE(query,NULL,GtUchar,rightlen);
 
-    gt_encodedsequence_extract_substring(encseq,dbseq,startleftLTR,endleftLTR);
-    gt_encodedsequence_extract_substring(encseq,query,startrightLTR,
+    gt_encseq_extract_substring(encseq,dbseq,startleftLTR,endleftLTR);
+    gt_encseq_extract_substring(encseq,query,startrightLTR,
                                          endrightLTR);
     GT_INITARRAY(&subrepeatinfo.repeats, Repeat);
     subrepeatinfo.lmin = (unsigned long) lo->minlengthTSD;
@@ -626,7 +626,7 @@ static int searchforTSDandorMotifoutside(
                                 query,
                                 (unsigned long) rightlen,
                                 lo->minlengthTSD,
-                                gt_encodedsequence_alphabet(encseq),
+                                gt_encseq_alphabet(encseq),
                                 gt_subsimpleexactselfmatchstore,
                                 &subrepeatinfo,
                                 NULL,
@@ -669,7 +669,7 @@ static int searchforTSDandorMotifoutside(
  */
 int gt_findcorrectboundaries(LTRharvestoptions *lo,
                           LTRboundaries *boundaries,
-                          const GtEncodedsequence *encseq,
+                          const GtEncseq *encseq,
                           GtError *err)
 {
   unsigned int motifmismatchesleftLTR = 0,

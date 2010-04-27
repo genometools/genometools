@@ -28,7 +28,7 @@ typedef struct Sfxiterator Sfxiterator;
 
 void gt_freeSfxiterator(Sfxiterator **sfiptr);
 
-Sfxiterator *gt_newSfxiterator(const GtEncodedsequence *encseq,
+Sfxiterator *gt_newSfxiterator(const GtEncseq *encseq,
                             GtReadmode readmode,
                             unsigned int prefixlength,
                             unsigned int numofparts,
