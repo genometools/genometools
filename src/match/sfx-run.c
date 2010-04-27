@@ -52,7 +52,7 @@
         if (!haserr && (FLAG))\
         {\
           PTR = gt_fa_fopen_filename_with_suffix(so->fn2encopt.str_indexname,\
-                                                 SUFFIX,"wb",err);\
+                                                SUFFIX,"wb",err);\
           if ((PTR) == NULL)\
           {\
             haserr = true;\
@@ -62,8 +62,8 @@
 typedef struct
 {
   FILE *outfpsuftab,
-       *outfpbwttab,
-       *outfpbcktab;
+      *outfpbwttab,
+      *outfpbcktab;
   unsigned long pageoffset;
   const GtEncseq *encseq;
   Definedunsignedlong longest;
@@ -71,10 +71,10 @@ typedef struct
 } Outfileinfo;
 
 static int initoutfileinfo(Outfileinfo *outfileinfo,
-                           unsigned int prefixlength,
-                           const GtEncseq *encseq,
-                           const Suffixeratoroptions *so,
-                           GtError *err)
+                          unsigned int prefixlength,
+                          const GtEncseq *encseq,
+                          const Suffixeratoroptions *so,
+                          GtError *err)
 {
   bool haserr = false;
 
@@ -115,33 +115,33 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
 }
 
 static int suftab2file(FILE *outfpsuftab,
-                       const unsigned long *suftab,
-                       unsigned long numberofsuffixes,
-                       GtError *err)
+                      const unsigned long *suftab,
+                      unsigned long numberofsuffixes,
+                      GtError *err)
 {
   bool haserr = false;
 
   if (fwrite(suftab,
-             sizeof (*suftab),
-             (size_t) numberofsuffixes,
-             outfpsuftab)
-             != (size_t) numberofsuffixes)
+            sizeof (*suftab),
+            (size_t) numberofsuffixes,
+            outfpsuftab)
+            != (size_t) numberofsuffixes)
   {
     gt_error_set(err,"cannot write %lu items of size %u: "
-                     "errormsg=\"%s\"",
-         numberofsuffixes,
-         (unsigned int) sizeof (*suftab),
-         strerror(errno));
+                    "errormsg=\"%s\"",
+        numberofsuffixes,
+        (unsigned int) sizeof (*suftab),
+        strerror(errno));
     haserr = true;
   }
   return haserr ? -1 : 0;
 }
 
 static int bwttab2file(Outfileinfo *outfileinfo,
-                       const unsigned long *suftab,
-                       GtReadmode readmode,
-                       unsigned long numberofsuffixes,
-                       GtError *err)
+                      const unsigned long *suftab,
+                      GtReadmode readmode,
+                      unsigned long numberofsuffixes,
+                      GtError *err)
 {
   bool haserr = false;
 
@@ -170,8 +170,8 @@ static int bwttab2file(Outfileinfo *outfileinfo,
         {
           /* Random access */
           cc = gt_encseq_get_encoded_char(outfileinfo->encseq,
-                                                 startpos - 1,
-                                                 readmode);
+                                                startpos - 1,
+                                                readmode);
         }
       }
       if (outfileinfo->outfpbwttab != NULL)
@@ -180,7 +180,7 @@ static int bwttab2file(Outfileinfo *outfileinfo,
                     != (size_t) 1)
         {
           gt_error_set(err,"cannot write 1 item of size %u: "
-                           "errormsg=\"%s\"",
+                          "errormsg=\"%s\"",
                           (unsigned int) sizeof (GtUchar),
                           strerror(errno));
           haserr = true;
@@ -209,14 +209,14 @@ static int suffixeratorwithoutput(const GtStr *str_indexname,
   Sfxiterator *sfi = NULL;
 
   sfi = gt_newSfxiterator(encseq,
-                       readmode,
-                       prefixlength,
-                       numofparts,
-                       outfileinfo->outlcpinfo,
-                       sfxstrategy,
-                       sfxprogress,
-                       logger,
-                       err);
+                      readmode,
+                      prefixlength,
+                      numofparts,
+                      outfileinfo->outlcpinfo,
+                      sfxstrategy,
+                      sfxprogress,
+                      logger,
+                      err);
   if (sfi == NULL)
   {
     haserr = true;
@@ -300,10 +300,10 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
     *prefixlength = so->prefixlength;
     maxprefixlen
       = gt_whatisthemaximalprefixlength(numofchars,
-                                     totallength,
-                                     so->sfxstrategy.storespecialcodes
-                                     ? getprefixlenbits()
-                                     : 0);
+                                    totallength,
+                                    so->sfxstrategy.storespecialcodes
+                                    ? getprefixlenbits()
+                                    : 0);
     if (gt_checkprefixlength(maxprefixlen,*prefixlength,err) != 0)
     {
       haserr = true;
@@ -347,13 +347,13 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
 }
 
 static int run_packedindexconstruction(GtLogger *logger,
-                                       GtProgressTimer *sfxprogress,
-                                       FILE *outfpbcktab,
-                                       const Suffixeratoroptions *so,
-                                       unsigned int prefixlength,
-                                       const GtEncseq *encseq,
-                                       const Sfxstrategy *sfxstrategy,
-                                       GtError *err)
+                                      GtProgressTimer *sfxprogress,
+                                      FILE *outfpbcktab,
+                                      const Suffixeratoroptions *so,
+                                      unsigned int prefixlength,
+                                      const GtEncseq *encseq,
+                                      const Sfxstrategy *sfxstrategy,
+                                      GtError *err)
 {
   sfxInterface *si;
   BWTSeq *bwtSeq;
@@ -366,14 +366,14 @@ static int run_packedindexconstruction(GtLogger *logger,
               so->bwtIdxParams.final.seqParams.encParams.blockEnc.bucketBlocks,
               so->bwtIdxParams.final.locateInterval);
   si = gt_newSfxInterface(so->readmode,
-                       prefixlength,
-                       so->numofparts,
-                       sfxstrategy,
-                       encseq,
-                       sfxprogress,
-                       gt_encseq_total_length(encseq) + 1,
-                       logger,
-                       err);
+                      prefixlength,
+                      so->numofparts,
+                      sfxstrategy,
+                      encseq,
+                      sfxprogress,
+                      gt_encseq_total_length(encseq) + 1,
+                      logger,
+                      err);
   if (si == NULL)
   {
     haserr = true;
@@ -406,17 +406,17 @@ static int run_packedindexconstruction(GtLogger *logger,
 }
 
 static int runsuffixerator(bool doesa,
-                           const Suffixeratoroptions *so,
-                           GtLogger *logger,
-                           GtError *err)
+                          const Suffixeratoroptions *so,
+                          GtLogger *logger,
+                          GtError *err)
 {
   GtProgressTimer *sfxprogress;
   Outfileinfo outfileinfo;
   bool haserr = false;
   unsigned int prefixlength;
   Sfxstrategy sfxstrategy;
-  GtEncseq *encseq;
-  GtEncseqEncoder *ee;
+  GtEncseq *encseq = NULL;
+  GtEncseqEncoder *ee = NULL;
 
   gt_error_check(err);
 
@@ -439,9 +439,12 @@ static int runsuffixerator(bool doesa,
   {
     GtEncseqLoader *el;
     el = gt_encseq_loader_new();
-    gt_encseq_loader_do_not_require_des_tab(el);
-    gt_encseq_loader_do_not_require_ssp_tab(el);
-    gt_encseq_loader_do_not_require_sds_tab(el);
+    if (!so->fn2encopt.outdestab)
+      gt_encseq_loader_do_not_require_des_tab(el);
+    if (!so->fn2encopt.outsdstab)
+      gt_encseq_loader_do_not_require_sds_tab(el);
+    if (!so->fn2encopt.outssptab)
+      gt_encseq_loader_do_not_require_ssp_tab(el);
     gt_encseq_loader_set_logger(el, logger);
     encseq = gt_encseq_loader_load(el, (GtStr*) so->str_inputindex, err);
     gt_encseq_loader_delete(el);
@@ -451,8 +454,7 @@ static int runsuffixerator(bool doesa,
     }
   } else
   {
-    if (!so->fn2encopt.outtistab)
-      gt_encseq_encoder_do_not_create_tis_tab(ee);
+    /* -tis is always implied */
     if (!so->fn2encopt.outdestab)
       gt_encseq_encoder_do_not_create_des_tab(ee);
     if (!so->fn2encopt.outsdstab)
@@ -481,8 +483,7 @@ static int runsuffixerator(bool doesa,
         haserr = -1;
       if (!haserr) {
         GtEncseqLoader *el = gt_encseq_loader_new();
-        if (!so->fn2encopt.outtistab)
-          gt_encseq_loader_do_not_require_tis_tab(el);
+        /* -tis is always implied */
         if (!so->fn2encopt.outdestab)
           gt_encseq_loader_do_not_require_des_tab(el);
         if (!so->fn2encopt.outsdstab)
@@ -532,15 +533,15 @@ static int runsuffixerator(bool doesa,
         !doesa)
     {
       unsigned int numofchars = gt_alphabet_num_of_chars(
-                                           gt_encseq_alphabet(encseq));
+                                          gt_encseq_alphabet(encseq));
 
       if (detpfxlenandmaxdepth(&prefixlength,
-                               &sfxstrategy.ssortmaxdepth,
-                               so,
-                               numofchars,
-                               gt_encseq_total_length(encseq),
-                               logger,
-                               err) != 0)
+                              &sfxstrategy.ssortmaxdepth,
+                              so,
+                              numofchars,
+                              gt_encseq_total_length(encseq),
+                              logger,
+                              err) != 0)
       {
         haserr = true;
       }
@@ -574,15 +575,15 @@ static int runsuffixerator(bool doesa,
       if (doesa)
       {
         if (suffixeratorwithoutput(so->fn2encopt.str_indexname,
-                                   &outfileinfo,
-                                   encseq,
-                                   so->readmode,
-                                   prefixlength,
-                                   so->numofparts,
-                                   &sfxstrategy,
-                                   sfxprogress,
-                                   logger,
-                                   err) != 0)
+                                  &outfileinfo,
+                                  encseq,
+                                  so->readmode,
+                                  prefixlength,
+                                  so->numofparts,
+                                  &sfxstrategy,
+                                  sfxprogress,
+                                  logger,
+                                  err) != 0)
         {
           haserr = true;
         }
@@ -608,7 +609,7 @@ static int runsuffixerator(bool doesa,
   if (!haserr)
   {
     unsigned long numoflargelcpvalues,
-           maxbranchdepth;
+          maxbranchdepth;
 
     if (outfileinfo.outlcpinfo == NULL)
     {
@@ -619,14 +620,14 @@ static int runsuffixerator(bool doesa,
       maxbranchdepth = getmaxbranchdepth(outfileinfo.outlcpinfo);
     }
     if (gt_outprjfile(so->fn2encopt.str_indexname,
-                   so->readmode,
-                   encseq,
-                   prefixlength,
-                   &sfxstrategy.ssortmaxdepth,
-                   numoflargelcpvalues,
-                   maxbranchdepth,
-                   &outfileinfo.longest,
-                   err) != 0)
+                  so->readmode,
+                  encseq,
+                  prefixlength,
+                  &sfxstrategy.ssortmaxdepth,
+                  numoflargelcpvalues,
+                  maxbranchdepth,
+                  &outfileinfo.longest,
+                  err) != 0)
     {
       haserr = true;
     }
@@ -655,7 +656,7 @@ static int runsuffixerator(bool doesa,
 }
 
 int gt_parseargsandcallsuffixerator(bool doesa,int argc,
-                                 const char **argv,GtError *err)
+                                const char **argv,GtError *err)
 {
   Suffixeratoroptions so;
   int retval;
@@ -666,7 +667,7 @@ int gt_parseargsandcallsuffixerator(bool doesa,int argc,
   if (retval == 0)
   {
     GtLogger *logger = gt_logger_new(so.beverbose,
-                                     GT_LOGGER_DEFLT_PREFIX, stdout);
+                                    GT_LOGGER_DEFLT_PREFIX, stdout);
 
     gt_logger_log(logger,"sizeof (unsigned long)=%lu",
                   (unsigned long) (sizeof (unsigned long) * CHAR_BIT));

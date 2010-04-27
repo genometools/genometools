@@ -197,10 +197,12 @@ static GtOPrval parse_options(int *parsed_args,
 
   option = gt_option_new_bool("tis",
                               "output transformed and encoded input "
-                              "sequence to file",
+                              "sequence to file (deprecated, kept for "
+                              "compatibility reasons)",
                               &so->fn2encopt.outtistab,
                               false);
   gt_option_parser_add_option(op, option);
+  gt_option_is_development_option(option);
 
   option = gt_option_new_bool("ssp",
                               "output sequence separator positions to file",
