@@ -311,17 +311,17 @@ void             gt_encseq_builder_create_tis_tab(GtEncseqBuilder *eb);
 /* Disables creation of the .esq table. */
 void             gt_encseq_builder_do_not_create_tis_tab(GtEncseqBuilder *eb);
 /* Enables creation of the .des table containing sequence descriptions.
-   Enabled by default. */
+   Not enabled by default. */
 void             gt_encseq_builder_create_des_tab(GtEncseqBuilder *eb);
 /* Disables creation of the .des table. */
 void             gt_encseq_builder_do_not_create_des_tab(GtEncseqBuilder *eb);
 /* Enables creation of the .ssp table containing indexes for multiple sequences.
-   Enabled by default. */
+   Not enabled by default. */
 void             gt_encseq_builder_create_ssp_tab(GtEncseqBuilder *eb);
 /* Disables creation of the .ssp table. */
 void             gt_encseq_builder_do_not_create_ssp_tab(GtEncseqBuilder *eb);
 /* Enables creation of the .sds table containing indexes for sequence
-   descriptions. Enabled by default. */
+   descriptions. Not enabled by default. */
 void             gt_encseq_builder_create_sds_tab(GtEncseqBuilder *eb);
 /* Disables creation of the .sds table. */
 void             gt_encseq_builder_do_not_create_sds_tab(GtEncseqBuilder *eb);

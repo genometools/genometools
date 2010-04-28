@@ -6180,15 +6180,16 @@ void gt_encseq_builder_add_cstr(GtEncseqBuilder *eb, const char *str,
     eb->seqlen = strlen;
     eb->firstseq = false;
   }
-  /* store description separator position, if not first description */
-  if (eb->wsdstab && !eb->firstdesc) {
-    GT_STOREINARRAY(&eb->sdstab, GtUlong, 128, gt_str_length(eb->destab)-1);
-  }
   /* append description to in-memory description table */
   if (eb->wdestab) {
     gt_assert(desc);
     gt_str_append_cstr(eb->destab, desc);
-    gt_str_append_char(eb->destab, '\0');
+    gt_str_append_char(eb->destab, '\n');
+    /* store description separator position */
+    if (eb->wsdstab) {
+      GT_STOREINARRAY(&eb->sdstab, GtUlong, 128,
+                      gt_str_length(eb->destab)-1);
+    }
     eb->firstdesc = false;
   }
   /* copy sequence, encode on the fly */
@@ -6220,6 +6221,17 @@ void gt_encseq_builder_add_encoded(GtEncseqBuilder *eb,
     eb->own = false;
     eb->firstseq = false;
     eb->nof_seqs++;
+    if (eb->wdestab) {
+      gt_assert(desc);
+      gt_str_append_cstr(eb->destab, desc);
+      gt_str_append_char(eb->destab, '\n');
+      /* store description separator position, if not first description */
+      if (eb->wsdstab) {
+        GT_STOREINARRAY(&eb->sdstab, GtUlong, 128,
+                        gt_str_length(eb->destab)-1);
+      }
+      eb->firstdesc = false;
+    }
   } else {
     if (!eb->own) {
       GtUchar *theirseq = eb->plainseq;
@@ -6245,16 +6257,18 @@ void gt_encseq_builder_add_encoded(GtEncseqBuilder *eb,
       eb->seqlen = strlen;
       eb->firstseq = false;
     }
-    /* store description separator position, if not first description */
-    if (eb->wsdstab && !eb->firstdesc) {
-      GT_STOREINARRAY(&eb->sdstab, GtUlong, 128, gt_str_length(eb->destab)-1);
-    }
     /* append description to in-memory description table */
     if (eb->wdestab) {
       gt_assert(desc);
       gt_str_append_cstr(eb->destab, desc);
-      gt_str_append_char(eb->destab, '\0');
+      gt_str_append_char(eb->destab, '\n');
       eb->firstdesc = false;
+      /* store description separator position, if not first description */
+      if (eb->wsdstab) {
+        GT_STOREINARRAY(&eb->sdstab, GtUlong, 128,
+                        gt_str_length(eb->destab)-1);
+      }
+
     }
     for (i=0;i < strlen; i++) {
       eb->plainseq[offset+i] = str[i];
@@ -6277,6 +6291,10 @@ void gt_encseq_builder_reset(GtEncseqBuilder *eb)
      intermediate buffer */
   if (!eb->created_encseq && eb->own) {
     gt_free(eb->plainseq);
+  }
+  if (!eb->created_encseq) {
+    GT_FREEARRAY(&eb->sdstab, GtUlong);
+    GT_FREEARRAY(&eb->ssptab, GtUlong);
   }
   GT_INITARRAY(&eb->sdstab, GtUlong);
   GT_INITARRAY(&eb->ssptab, GtUlong);
@@ -6321,6 +6339,7 @@ GtEncseq* gt_encseq_builder_build(GtEncseqBuilder *eb,
     memcpy(encseq->destab,
            gt_str_get_mem(eb->destab),
            (size_t)  gt_str_length(eb->destab) * sizeof (char));
+    encseq->destablength = gt_str_length(eb->destab);
   }
   if (eb->wssptab) {
     encseq->hasallocatedssptab = true;
@@ -6432,15 +6451,16 @@ int gt_encseq_builder_unit_test(GtError *err)
   gt_encseq_builder_add_encoded(eb, preenc, 11UL, "baz");
   ensure(had_err, eb->destab);
   encseq = gt_encseq_builder_build(eb, err);
+  gt_encseq_check_descriptions(encseq);
   ensure(had_err, encseq->sdstab);
   ensure(had_err, gt_encseq_total_length(encseq) == 28UL);
   ensure(had_err, gt_encseq_num_of_sequences(encseq) == 3UL);
   desc = gt_encseq_description(encseq, &desclen, 0UL);
-  ensure(had_err, strcmp(desc, "foo") == 0);
+  ensure(had_err, strncmp(desc, "foo", desclen * sizeof (char)) == 0);
   desc = gt_encseq_description(encseq, &desclen, 1UL);
-  ensure(had_err, strcmp(desc, "bar") == 0);
+  ensure(had_err, strncmp(desc, "bar", desclen * sizeof (char)) == 0);
   desc = gt_encseq_description(encseq, &desclen, 2UL);
-  ensure(had_err, strcmp(desc, "baz") == 0);
+  ensure(had_err, strncmp(desc, "baz", desclen * sizeof (char)) == 0);
   gt_encseq_delete(encseq);
 
   gt_encseq_builder_delete(eb);
