@@ -16,4 +16,11 @@
 #
 
 require 'core/allocators'
+require 'core/alphabet'
+require 'core/array'
+require 'core/encseq'
 require 'core/error'
+require 'core/range'
+require 'core/readmode'
+require 'core/str'
+require 'core/str_array'
