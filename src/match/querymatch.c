@@ -75,12 +75,12 @@ static void verifymatch(const GtEncseq *encseq,
 {
   if (readmode == GT_READMODE_REVERSE)
   {
-    GtSeqinfo seqinfo;
-    unsigned long offset, totallength = gt_encseq_total_length(encseq);
+    unsigned long offset,
+                  seqstartpos,
+                  totallength = gt_encseq_total_length(encseq);
     GtUchar cc1, cc2;
-
-    gt_encseq_seqinfo(&seqinfo,encseq,(unsigned long) seqnum2);
-    pos2 += seqinfo.seqstartpos;
+    seqstartpos = gt_encseq_seqstartpos(encseq, seqnum2);
+    pos2 += seqstartpos;
     for (offset = 0; offset < len; offset++)
     {
       gt_assert(pos1 + len - 1 < totallength);
@@ -122,13 +122,11 @@ int gt_querymatch_output(GT_UNUSED void *info,
                       GT_UNUSED GtError *err)
 {
   const char *outflag = "FRCP";
-  GtSeqinfo seqinfo;
-  unsigned long dbseqnum;
-  unsigned long querystart, dbstart_relative;
+  unsigned long dbseqnum, querystart, dbstart_relative, seqstartpos;
 
   gt_assert(encseq != NULL);
   dbseqnum = gt_encseq_pos2seqnum(encseq,querymatch->dbstart);
-  gt_encseq_seqinfo(encseq,&seqinfo,dbseqnum);
+  seqstartpos = gt_encseq_seqstartpos(encseq, dbseqnum);
   gt_assert((int) querymatch->readmode < 4);
   if (querymatch->readmode == GT_READMODE_REVERSE ||
       querymatch->readmode == GT_READMODE_REVCOMPL)
@@ -141,8 +139,8 @@ int gt_querymatch_output(GT_UNUSED void *info,
   {
     querystart = querymatch->querystart;
   }
-  gt_assert(querymatch->dbstart >= seqinfo.seqstartpos);
-  dbstart_relative = querymatch->dbstart - seqinfo.seqstartpos;
+  gt_assert(querymatch->dbstart >= seqstartpos);
+  dbstart_relative = querymatch->dbstart - seqstartpos;
   if (!querymatch->selfmatch ||
       (uint64_t) dbseqnum != querymatch->queryseqnum ||
       dbstart_relative <= querystart)

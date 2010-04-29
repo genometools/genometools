@@ -225,7 +225,6 @@ void gt_showinfoiffoundfullLTRs(const LTRharvestoptions *lo,
                              unsigned long numofboundaries,
                              const GtEncseq *encseq)
 {
-  GtSeqinfo seqinfo;
   unsigned long i;
 
   if (lo->longoutput)
@@ -239,11 +238,12 @@ void gt_showinfoiffoundfullLTRs(const LTRharvestoptions *lo,
       /* print output sorted by contignumber*/
       for (i = 0; i<numofboundaries; i++)
       {
-        gt_encseq_seqinfo(encseq,&seqinfo,bdptrtab[i]->contignumber);
+        unsigned long seqstartpos = gt_encseq_seqstartpos(encseq,
+                                                     bdptrtab[i]->contignumber);
         producelongutput(lo,
                          bdptrtab[i],
                          encseq,
-                         seqinfo.seqstartpos);
+                         seqstartpos);
       }
     }
   } else
@@ -254,8 +254,9 @@ void gt_showinfoiffoundfullLTRs(const LTRharvestoptions *lo,
       /* print output sorted by contignumber*/
       for (i = 0; i<numofboundaries; i++)
       {
-        gt_encseq_seqinfo(encseq,&seqinfo,bdptrtab[i]->contignumber);
-        produceshortoutput(bdptrtab[i],seqinfo.seqstartpos);
+        unsigned long seqstartpos = gt_encseq_seqstartpos(encseq,
+                                                     bdptrtab[i]->contignumber);
+        produceshortoutput(bdptrtab[i], seqstartpos);
       }
     }
   }

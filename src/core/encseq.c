@@ -2430,36 +2430,43 @@ unsigned long gt_encseq_pos2seqnum(const GtEncseq *encseq,
                                        position);
 }
 
-static void getunitGtSeqinfo(GtSeqinfo *seqinfo,
-                           const unsigned long *unitseps,
-                           unsigned long numofunits,
-                           unsigned long totalwidth,
-                           unsigned long unitnum)
+unsigned long gt_encseq_seqstartpos(const GtEncseq *encseq,
+                                    unsigned long seqnum)
 {
-  if (unitnum == 0)
+  gt_assert(encseq->numofdbsequences == 1UL || encseq->ssptab != NULL);
+  if (seqnum == 0)
   {
-    seqinfo->seqstartpos = 0;
-    if (numofunits == 1UL)
+    return 0;
+  } else {
+    return encseq->ssptab[seqnum-1] + 1;
+  }
+}
+
+unsigned long gt_encseq_seqlength(const GtEncseq *encseq, unsigned long seqnum)
+{
+  unsigned long startpos;
+  gt_assert(encseq->numofdbsequences == 1UL || encseq->ssptab != NULL);
+  startpos = (seqnum == 0 ? 0 : encseq->ssptab[seqnum-1] + 1);
+  if (seqnum == 0)
+  {
+    if (encseq->numofdbsequences == 1UL)
     {
-      seqinfo->seqlength = totalwidth;
-    } else
-    {
-      seqinfo->seqlength = unitseps[0];
+      return encseq->totallength;
+    } else {
+      return encseq->ssptab[0];
     }
   } else
   {
-    seqinfo->seqstartpos = unitseps[unitnum-1] + 1;
-    if (unitnum == numofunits - 1)
+    if (seqnum == encseq->numofdbsequences - 1)
     {
-      seqinfo->seqlength = totalwidth - seqinfo->seqstartpos;
-    } else
-    {
-      seqinfo->seqlength = unitseps[unitnum] - seqinfo->seqstartpos;
+      return encseq->totallength - startpos;
+    } else {
+      return encseq->ssptab[seqnum] - startpos;
     }
   }
 }
 
-void gt_encseq_seqinfo(const GtEncseq *encseq,
+/* void gt_encseq_seqinfo(const GtEncseq *encseq,
                                 GtSeqinfo *seqinfo,
                                 unsigned long seqnum)
 {
@@ -2469,7 +2476,7 @@ void gt_encseq_seqinfo(const GtEncseq *encseq,
                  encseq->numofdbsequences,
                  encseq->totallength,
                  seqnum);
-}
+} */
 
 void gt_encseq_check_markpos(const GtEncseq *encseq)
 {
@@ -6366,7 +6373,6 @@ int gt_encseq_builder_unit_test(GtError *err)
              *desc;
   GtUchar buffer[65];
   unsigned long desclen;
-  GtSeqinfo seqinfo;
   GtEncseq *encseq;
   gt_error_check(err);
 
@@ -6401,9 +6407,8 @@ int gt_encseq_builder_unit_test(GtError *err)
                                      0,
                                      gt_encseq_total_length(encseq)-1);
   ensure(had_err, memcmp(preenc, buffer, 11 * sizeof (char)) == 0);
-  gt_encseq_seqinfo(encseq, &seqinfo, 0UL);
-  ensure(had_err, seqinfo.seqstartpos == 0UL);
-  ensure(had_err, seqinfo.seqlength == 11UL);
+  ensure(had_err, gt_encseq_seqstartpos(encseq, 0UL) == 0UL);
+  ensure(had_err, gt_encseq_seqlength(encseq, 0UL) == 11UL);
   gt_encseq_delete(encseq);
 
   gt_encseq_builder_add_cstr(eb, testseq, 11UL, NULL);
@@ -6436,12 +6441,10 @@ int gt_encseq_builder_unit_test(GtError *err)
   encseq = gt_encseq_builder_build(eb, err);
   ensure(had_err, gt_encseq_total_length(encseq) == 16UL);
   ensure(had_err, gt_encseq_num_of_sequences(encseq) == 2UL);
-  gt_encseq_seqinfo(encseq, &seqinfo, 0);
-  ensure(had_err, seqinfo.seqstartpos == 0UL);
-  ensure(had_err, seqinfo.seqlength == 11UL);
-  gt_encseq_seqinfo(encseq, &seqinfo, 1UL);
-  ensure(had_err, seqinfo.seqstartpos == 12UL);
-  ensure(had_err, seqinfo.seqlength == 4UL);
+  ensure(had_err, gt_encseq_seqstartpos(encseq, 0UL) == 0UL);
+  ensure(had_err, gt_encseq_seqlength(encseq, 0UL) == 11UL);
+  ensure(had_err, gt_encseq_seqstartpos(encseq, 1UL) == 12UL);
+  ensure(had_err, gt_encseq_seqlength(encseq, 1UL) == 4UL);
   gt_encseq_delete(encseq);
 
   gt_encseq_builder_create_des_tab(eb);
@@ -6456,11 +6459,11 @@ int gt_encseq_builder_unit_test(GtError *err)
   ensure(had_err, gt_encseq_total_length(encseq) == 28UL);
   ensure(had_err, gt_encseq_num_of_sequences(encseq) == 3UL);
   desc = gt_encseq_description(encseq, &desclen, 0UL);
-  ensure(had_err, strncmp(desc, "foo", desclen * sizeof (char)) == 0);
+  ensure(had_err, strncmp(desc, "foo", (size_t) desclen * sizeof (char)) == 0);
   desc = gt_encseq_description(encseq, &desclen, 1UL);
-  ensure(had_err, strncmp(desc, "bar", desclen * sizeof (char)) == 0);
+  ensure(had_err, strncmp(desc, "bar", (size_t) desclen * sizeof (char)) == 0);
   desc = gt_encseq_description(encseq, &desclen, 2UL);
-  ensure(had_err, strncmp(desc, "baz", desclen * sizeof (char)) == 0);
+  ensure(had_err, strncmp(desc, "baz", (size_t) desclen * sizeof (char)) == 0);
   gt_encseq_delete(encseq);
 
   gt_encseq_builder_delete(eb);

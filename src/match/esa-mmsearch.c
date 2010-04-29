@@ -571,9 +571,8 @@ int gt_callenumselfmatches(const GtStr *indexname,
   }
   if (!haserr)
   {
-    unsigned long seqnum, numofsequences;
+    unsigned long seqnum, numofsequences, seqlength, seqstartpos;
     Queryrep queryrep;
-    GtSeqinfo seqinfo;
 
     numofsequences = gt_encseq_num_of_sequences(suffixarray.encseq);
     queryrep.sequence = NULL;
@@ -581,11 +580,12 @@ int gt_callenumselfmatches(const GtStr *indexname,
     queryrep.readmode = queryreadmode;
     for (seqnum = 0; seqnum < numofsequences; seqnum++)
     {
-      gt_encseq_seqinfo(suffixarray.encseq,&seqinfo,seqnum);
-      if (seqinfo.seqlength >= (unsigned long) userdefinedleastlength)
+      seqstartpos = gt_encseq_seqstartpos(suffixarray.encseq, seqnum);
+      seqlength = gt_encseq_seqlength(suffixarray.encseq, seqnum);
+      if (seqlength >= (unsigned long) userdefinedleastlength)
       {
-        queryrep.startpos = seqinfo.seqstartpos;
-        queryrep.length = seqinfo.seqlength;
+        queryrep.startpos = seqstartpos;
+        queryrep.length = seqlength;
         if (runquerysubstringmatch(true,
                                    suffixarray.encseq,
                                    suffixarray.suftab,

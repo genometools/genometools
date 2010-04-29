@@ -528,10 +528,11 @@ static int searchforTSDandorMotifoutside(
          endrightLTR,
          leftlen,
          rightlen,
-         sequenceendpos;
+         sequenceendpos,
+         seqstartpos,
+         seqlength;
   unsigned long contignumber = boundaries->contignumber;
   SubRepeatInfo subrepeatinfo;
-  GtSeqinfo seqinfo;
   bool haserr = false;
 
   gt_error_check(err);
@@ -539,14 +540,15 @@ static int searchforTSDandorMotifoutside(
   /* check border cases */
 
   /* vicinity of 5'-border of left LTR */
-  gt_encseq_seqinfo(encseq,&seqinfo,contignumber);
+  seqstartpos = gt_encseq_seqstartpos(encseq, contignumber);
+  seqlength = gt_encseq_seqlength(encseq, contignumber);
   if (contignumber == 0)
   {
     /* do not align over left sequence boundary,
        in case of need decrease alignment length */
     if ( boundaries->leftLTR_5 < lo->vicinityforcorrectboundaries)
     {
-      startleftLTR = seqinfo.seqstartpos;
+      startleftLTR = seqstartpos;
     } else
     {
       startleftLTR = boundaries->leftLTR_5 - lo->vicinityforcorrectboundaries;
@@ -558,18 +560,18 @@ static int searchforTSDandorMotifoutside(
        in case of need decrease alignment length */
     if ( boundaries->leftLTR_5 < lo->vicinityforcorrectboundaries )
     {
-      startleftLTR = seqinfo.seqstartpos;
+      startleftLTR = seqstartpos;
     }
     else
     {
       if ( ((startleftLTR =
               boundaries->leftLTR_5 - lo->vicinityforcorrectboundaries) <
-                seqinfo.seqstartpos)
+                seqstartpos)
             &&
-          (boundaries->leftLTR_5 >= seqinfo.seqstartpos)
+          (boundaries->leftLTR_5 >= seqstartpos)
         )
       {
-        startleftLTR = seqinfo.seqstartpos;
+        startleftLTR = seqstartpos;
       }
     }
   }
@@ -591,7 +593,7 @@ static int searchforTSDandorMotifoutside(
   {
     startrightLTR = boundaries->rightLTR_5 + 2;
   }
-  sequenceendpos = seqinfo.seqstartpos + seqinfo.seqlength - 1;
+  sequenceendpos = seqstartpos + seqlength - 1;
   /* do not align into next sequence in case of need decrease alignment
      length */
   endrightLTR = boundaries->rightLTR_3 + lo->vicinityforcorrectboundaries;

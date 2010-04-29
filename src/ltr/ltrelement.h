@@ -55,7 +55,8 @@ char*         gt_ltrelement_get_sequence(unsigned long start,
                                          unsigned long end,
                                          GtStrand strand,
                                          GtEncseq *seq,
-                                         GtSeqinfo *seqinfo, GtError *err);
+                                         unsigned long seqstartpos,
+                                         GtError *err);
 unsigned long gt_ltrelement_leftltrlen(GtLTRElement *e);
 unsigned long gt_ltrelement_rightltrlen(GtLTRElement *e);
 int           gt_ltrelement_format_description(GtLTRElement *e,

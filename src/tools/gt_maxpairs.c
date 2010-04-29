@@ -49,8 +49,7 @@ static int simpleexactselfmatchoutput(void *info,
                                       unsigned long pos2,
                                       GT_UNUSED GtError *err)
 {
-  GtSeqinfo seqinfo;
-  unsigned long queryseqnum;
+  unsigned long queryseqnum, seqstartpos, seqlength;
   Querymatch *querymatch = (Querymatch *) info;
 
   if (pos1 > pos2)
@@ -60,16 +59,17 @@ static int simpleexactselfmatchoutput(void *info,
     pos2 = tmp;
   }
   queryseqnum = gt_encseq_pos2seqnum(encseq,pos2);
-  gt_encseq_seqinfo(encseq,&seqinfo,queryseqnum);
-  gt_assert(pos2 >= seqinfo.seqstartpos);
+  seqstartpos = gt_encseq_seqstartpos(encseq, queryseqnum);
+  seqlength = gt_encseq_seqlength(encseq, queryseqnum);
+  gt_assert(pos2 >= seqstartpos);
   gt_querymatch_fill(querymatch,
                   len,
                   pos1,
                   GT_READMODE_FORWARD,
                   true,
                   (uint64_t) queryseqnum,
-                  pos2 - seqinfo.seqstartpos,
-                  seqinfo.seqlength);
+                  pos2 - seqstartpos,
+                  seqlength);
   return gt_querymatch_output(info, encseq, querymatch, err);
 }
 

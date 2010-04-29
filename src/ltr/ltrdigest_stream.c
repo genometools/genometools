@@ -365,13 +365,13 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
     if (!had_err)
     {
       GtUchar *symbolstring;
-      GtSeqinfo seqinfo;
-      unsigned long length;
+      unsigned long length, seqstartpos, seqlength;
       const GtAlphabet *alpha;
 
-      gt_encseq_seqinfo(ls->encseq, &seqinfo, seqid);
+      seqstartpos = gt_encseq_seqstartpos(ls->encseq, seqid);
+      seqlength = gt_encseq_seqlength(ls->encseq, seqid);
 
-      if (ls->element.rightLTR_3 <= seqinfo.seqlength)
+      if (ls->element.rightLTR_3 <= seqlength)
       {
         alpha        = gt_encseq_alphabet(ls->encseq);
         length       = gt_ltrelement_length(&ls->element);
@@ -379,8 +379,8 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
         symbolstring = gt_malloc((length+1) * sizeof (GtUchar));
         gt_encseq_extract_substring(ls->encseq,
                                   symbolstring,
-                                  seqinfo.seqstartpos + (ls->element.leftLTR_5),
-                                  seqinfo.seqstartpos + (ls->element.leftLTR_5)
+                                  seqstartpos + (ls->element.leftLTR_5),
+                                  seqstartpos + (ls->element.leftLTR_5)
                                     + length - 1);
         gt_alphabet_decode_seq_to_cstr(alpha, seq, symbolstring, length);
         gt_free(symbolstring);
@@ -396,7 +396,7 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
          (obviously annotation and sequence do not match!) */
         gt_error_set(e, "Element '%s' exceeds sequence boundaries! (%lu > %lu)",
           gt_feature_node_get_attribute(ls->element.mainnode, "ID"),
-          ls->element.rightLTR_3, (unsigned long) seqinfo.seqlength);
+          ls->element.rightLTR_3, seqlength);
         had_err = -1;
       }
     }

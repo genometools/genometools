@@ -47,13 +47,11 @@ static void showmatch(void *processinfo,const GtMatch *match)
 
   if (match->dbabsolute)
   {
-    GtSeqinfo seqinfo;
-
-    seqnum = gt_encseq_pos2seqnum(showmatchinfo->encseq,
-                                           match->dbstartpos);
-    gt_encseq_seqinfo(showmatchinfo->encseq,&seqinfo,seqnum);
-    gt_assert(seqinfo.seqstartpos <= match->dbstartpos);
-    relpos = match->dbstartpos - seqinfo.seqstartpos;
+    unsigned long seqstartpos;
+    seqnum = gt_encseq_pos2seqnum(showmatchinfo->encseq, match->dbstartpos);
+    seqstartpos = gt_encseq_seqstartpos(showmatchinfo->encseq, seqnum);
+    gt_assert(seqstartpos <= match->dbstartpos);
+    relpos = match->dbstartpos - seqstartpos;
   } else
   {
     relpos = match->dbstartpos;

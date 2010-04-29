@@ -168,10 +168,9 @@ int gt_printgff3format(const LTRharvestoptions *lo,
   } else
   {
     LTRcounter ltrc;
-    GtSeqinfo seqinfo;
     const char *desptr = NULL;
     Definedunsignedlong previouscontignum = {false, 0};
-    unsigned long seqnum, i, desclen;
+    unsigned long seqnum, i, desclen, seqstartpos = 0, seqlength = 0;
 
     ltrc.idcounterRepregion = ltrc.idcounterRetrotrans
                             = ltrc.idcounterLTR
@@ -186,18 +185,19 @@ int gt_printgff3format(const LTRharvestoptions *lo,
       {
         previouscontignum.defined = true;
         previouscontignum.valueunsignedlong = seqnum;
-        gt_encseq_seqinfo(encseq,&seqinfo,seqnum);
+        seqstartpos = gt_encseq_seqstartpos(encseq, seqnum);
+        seqlength = gt_encseq_seqlength(encseq, seqnum);
         fprintf(fp, "##sequence-region seq%lu %lu %lu\n",
                     seqnum,
                     1 + (unsigned long) lo->offset,
-                    seqinfo.seqlength + (unsigned long) lo->offset);
+                    seqlength + (unsigned long) lo->offset);
         desptr = gt_encseq_description(encseq, &desclen, seqnum);
         fprintf(fp,"# %*.*s\n",(int) desclen,(int) desclen,desptr);
       }
       showboundaries(fp,
                      lo,
                      bdptrtab[i],
-                     seqinfo.seqstartpos,
+                     seqstartpos,
                      &ltrc);
     }
   }

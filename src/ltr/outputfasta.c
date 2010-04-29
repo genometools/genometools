@@ -85,15 +85,15 @@ static void showpredictionfastasequence(Fastaoutinfo *fastainfo,
 {
   unsigned long desclen;
   const char *desptr;
-  GtSeqinfo seqinfo;
-  unsigned long seqnum = gt_encseq_pos2seqnum(fastainfo->encseq,
-                                                       startpos);
+  unsigned long seqstartpos,
+                seqnum = gt_encseq_pos2seqnum(fastainfo->encseq,
+                                              startpos);
 
   desptr = gt_encseq_description(fastainfo->encseq,&desclen,seqnum);
-  gt_encseq_seqinfo(fastainfo->encseq,&seqinfo,seqnum);
+  seqstartpos = gt_encseq_seqstartpos(fastainfo->encseq, seqnum);
   myencseq2symbolstring(fastainfo,
                         seqnum,
-                        seqinfo.seqstartpos,
+                        seqstartpos,
                         desptr,
                         desclen,
                         GT_READMODE_FORWARD,

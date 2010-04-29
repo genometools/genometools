@@ -98,14 +98,12 @@ static void tgr_showmatch(void *processinfo,const GtMatch *match)
       printf("%lu",match->dbstartpos);
     } else
     {
-      GtSeqinfo seqinfo;
-      unsigned long seqnum =
-                       gt_encseq_pos2seqnum(showmatchinfo->encseq,
-                                                     match->dbstartpos);
-      gt_encseq_seqinfo(showmatchinfo->encseq,&seqinfo,seqnum);
-      gt_assert(seqinfo.seqstartpos <= match->dbstartpos);
-      printf("%lu\t%lu",seqnum,
-                        match->dbstartpos - seqinfo.seqstartpos);
+      unsigned long seqstartpos,
+                    seqnum = gt_encseq_pos2seqnum(showmatchinfo->encseq,
+                                                  match->dbstartpos);
+      seqstartpos = gt_encseq_seqstartpos(showmatchinfo->encseq, seqnum);
+      gt_assert(seqstartpos <= match->dbstartpos);
+      printf("%lu\t%lu",seqnum, match->dbstartpos - seqstartpos);
     }
   }
   if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_DBSEQUENCE)

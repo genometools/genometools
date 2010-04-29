@@ -23,7 +23,6 @@
 #include "core/logger_api.h"
 #include "core/progress_timer_api.h"
 #include "core/readmode_api.h"
-#include "core/seqinfo.h"
 #include "core/str_api.h"
 #include "core/str_array_api.h"
 
@@ -87,9 +86,12 @@ void              gt_encseq_extract_substring(const GtEncseq *encseq,
                                               GtUchar *buffer,
                                               unsigned long frompos,
                                               unsigned long topos);
-/* Fills the <seqinfo> struct for the <seqnum>-th sequence in the <encseq>. */
-void              gt_encseq_seqinfo(const GtEncseq *encseq, GtSeqinfo *seqinfo,
-                                     unsigned long seqnum);
+/* Returns the length of the <seqnum>-th sequence in the <encseq>. */
+unsigned long     gt_encseq_seqlength(const GtEncseq *encseq,
+                                      unsigned long seqnum);
+/* Returns the start position of the <seqnum>-th sequence in the <encseq>. */
+unsigned long     gt_encseq_seqstartpos(const GtEncseq *encseq,
+                                        unsigned long seqnum);
 /* Returns a pointer to the description of the <seqnum>-th sequence in the
    <encseq>. The length of the returned string is written to the
    location pointed at by <desclen>. */

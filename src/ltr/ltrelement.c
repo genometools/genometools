@@ -39,7 +39,7 @@ unsigned long gt_ltrelement_leftltrlen(GtLTRElement *e)
 
 char* gt_ltrelement_get_sequence(unsigned long start, unsigned long end,
                                  GtStrand strand, GtEncseq *seq,
-                                 GtSeqinfo *seqinfo, GtError *err)
+                                 unsigned long seqstartpos, GtError *err)
 {
   char *out;
   int had_err = 0;
@@ -58,13 +58,12 @@ char* gt_ltrelement_get_sequence(unsigned long start, unsigned long end,
   out          = gt_malloc((len + 1) * sizeof (char));
   symbolstring = gt_malloc((len + 1) * sizeof (GtUchar));
 
-  gt_encseq_scanstate_init(ess, seq, GT_READMODE_FORWARD,
-                               seqinfo->seqstartpos + start);
+  gt_encseq_scanstate_init(ess, seq, GT_READMODE_FORWARD, seqstartpos + start);
   for (i=0;i<len;i++)
   {
     symbolstring[i] = gt_encseq_get_encoded_char_sequential(seq, ess,
-                                               seqinfo->seqstartpos + start + i,
-                                               GT_READMODE_FORWARD);
+                                                        seqstartpos + start + i,
+                                                        GT_READMODE_FORWARD);
   }
   gt_alphabet_decode_seq_to_cstr(alpha, out, symbolstring, len);
   gt_free(symbolstring);

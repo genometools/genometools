@@ -423,18 +423,20 @@ void gt_multiapplysmithwaterman(SWdpresource *dpresource,
                              const GtUchar *query,
                              unsigned long querylen)
 {
-  GtSeqinfo seqinfo;
   unsigned long seqnum,
+                seqstartpos,
+                seqlength,
                 numofdbsequences = gt_encseq_num_of_sequences(encseq);
 
   for (seqnum = 0; seqnum < numofdbsequences; seqnum++)
   {
-    gt_encseq_seqinfo(encseq,&seqinfo,seqnum);
+    seqstartpos = gt_encseq_seqstartpos(encseq, seqnum);
+    seqlength = gt_encseq_seqlength(encseq, seqnum);
     applysmithwaterman(dpresource,
                        encseq,
                        seqnum,
-                       seqinfo.seqstartpos,
-                       seqinfo.seqstartpos + seqinfo.seqlength,
+                       seqstartpos,
+                       seqstartpos + seqlength,
                        query,
                        querylen);
   }

@@ -414,11 +414,11 @@ static int giextract_encodedseq2fasta(FILE *fpout,
   }
   if (!haserr)
   {
-    GtSeqinfo seqinfo;
-    unsigned long frompos, topos;
+    unsigned long frompos, topos, seqstartpos, seqlength ;
 
     (void) putc('\n',fpout);
-    gt_encseq_seqinfo(encseq,&seqinfo,seqnum);
+    seqstartpos = gt_encseq_seqstartpos(encseq, seqnum);
+    seqlength = gt_encseq_seqlength(encseq, seqnum);
     if (fastakeyquery != NULL && !COMPLETE(fastakeyquery))
     {
       frompos = fastakeyquery->frompos-1;
@@ -426,12 +426,12 @@ static int giextract_encodedseq2fasta(FILE *fpout,
     } else
     {
       frompos = 0;
-      topos = seqinfo.seqlength;
+      topos = seqlength;
     }
     gt_encseq2symbolstring(fpout,
                            encseq,
                            GT_READMODE_FORWARD,
-                           seqinfo.seqstartpos + frompos,
+                           seqstartpos + frompos,
                            topos,
                            linewidth);
   }
