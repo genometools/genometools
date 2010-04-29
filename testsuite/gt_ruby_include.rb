@@ -93,6 +93,12 @@ if not $arguments["nocairo"] then
     run_ruby "#{$testdata}gtruby/feature_node.rb"
   end
 
+  Name "gtruby: Encseq bindings"
+  Keywords "gt_ruby"
+  Test do
+    run_ruby "#{$testdata}gtruby/encseq.rb"
+  end
+
   Name "gtruby: show_seqids"
   Keywords "gt_ruby"
   Test do

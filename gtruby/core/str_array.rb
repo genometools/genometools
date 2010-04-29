@@ -34,7 +34,11 @@ module GT
     end
 
     def add_list(list)
-      list.each { |cstr| GT.gt_str_array_add_cstr(@str_array, cstr) }
+      list.each { |cstr| GT.gt_str_array_add_cstr(@str_array, cstr.to_s) }
+    end
+
+    def add(string)
+      GT.gt_str_array_add_cstr(@str_array, string.to_s)
     end
 
     def to_a

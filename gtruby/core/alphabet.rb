@@ -78,7 +78,7 @@ module GT
         if (!File.exists?(fn))
           GT.gterror("file not found: #{fn}")
         end
-        sa.add_string(fn)
+        sa.add(fn)
       end
       err = Error.new
       aptr = GT.gt_alphabet_new(0, 0, Str.new, sa, err)
