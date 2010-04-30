@@ -14,7 +14,7 @@ if $gttestdata then
   run_test("#{$bin}gt gtf_to_gff3 " +
            "#{$gttestdata}gtf/Drosophila_melanogaster.BDGP5.4.50.gtf " +
            "| #{$bin}gt gff3 -sort ",
-           :maxtime => 120)
+           :maxtime => 360)
   run "diff #{$last_stdout} " +
       "ref_sorted.gff3"
   end

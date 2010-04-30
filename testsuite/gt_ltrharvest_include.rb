@@ -68,7 +68,7 @@ if $gttestdata then
     Keywords "gt_ltrharvest"
     Test do
       run_test "#{$bin}gt suffixerator -db #{$gttestdata}ltrharvest/s_cer/#{v}"\
-             + " -dna -suf -lcp -tis -des -sds -ssp", :maxtime => 300
+             + " -dna -suf -lcp -tis -des -sds -ssp", :maxtime => 720
       run_test "#{$bin}gt ltrharvest -index #{v} -seed 100 -minlenltr 100"\
              + " -maxlenltr 1000 -mindistltr 1500 -maxdistltr 15000 -similar 80"\
              + " -mintsd 5 -maxtsd 20 -motif tgca -motifmis 0 -vic 60"\
@@ -92,14 +92,14 @@ if $gttestdata then
     Keywords "gt_ltrharvest"
     Test do
       run_test "#{$bin}gt suffixerator -db #{$gttestdata}ltrharvest/s_cer/#{v}"\
-             + " -dna -suf -lcp -tis -des -sds -ssp", :maxtime => 300
+             + " -dna -suf -lcp -tis -des -sds -ssp", :maxtime => 540
       run_test "#{$bin}gt ltrharvest -longoutput -index #{v} -seed 100 "\
              + " -minlenltr 100 -maxlenltr 1000 -mindistltr 1500"\
              + " -maxdistltr 15000 -similar 80"\
              + " -mintsd 5 -maxtsd 20 -motif tgca -motifmis 0 -vic 60"\
              + " -overlaps best -xdrop 5 -mat 2 -mis -2 -ins -3 -del -3 -v"\
              + " -gff3 #{k}.gff3 -out #{k}.fas -outinner #{k}_inner.fas", \
-             :maxtime => 15000
+             :maxtime => 7200
       run "diff #{$last_stdout} #{$gttestdata}ltrharvest/s_cer/#{k}_longoutput.out"
       if k != "chr11" then
         run "#{$bin}gt gff3 #{k}.gff3"
@@ -125,8 +125,8 @@ if $gttestdata then
     Name "gt ltrharvest test on #{k} Dmel"
     Keywords "gt_ltrharvest"
     Test do
-      run_test "#{$bin}gt suffixerator -db #{$gttestdata}ltrharvest/d_mel/#{v} -dna -suf -sds -lcp -tis -des -ssp", :maxtime => 32000
-      run_test "#{$bin}gt ltrharvest -index #{v} -seed 76 -minlenltr 116 -maxlenltr 800 -mindistltr 2280 -maxdistltr 8773 -similar 91 -mintsd 4 -maxtsd 20 -vic 60 -overlaps best -xdrop 7 -mat 2 -mis -2 -ins -3 -del -3 -v -gff3 #{k}.gff3", :maxtime => 1500
+      run_test "#{$bin}gt suffixerator -db #{$gttestdata}ltrharvest/d_mel/#{v} -dna -suf -sds -lcp -tis -des -ssp", :maxtime => 36000
+      run_test "#{$bin}gt ltrharvest -index #{v} -seed 76 -minlenltr 116 -maxlenltr 800 -mindistltr 2280 -maxdistltr 8773 -similar 91 -mintsd 4 -maxtsd 20 -vic 60 -overlaps best -xdrop 7 -mat 2 -mis -2 -ins -3 -del -3 -v -gff3 #{k}.gff3", :maxtime => 3600
       run "diff #{$last_stdout} #{$gttestdata}ltrharvest/d_mel/#{k}.out"
       run "#{$bin}gt gff3 #{k}.gff3"
       run "diff #{k}.gff3 #{$gttestdata}ltrharvest/d_mel/#{k}.gff3"
