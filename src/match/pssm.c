@@ -103,22 +103,21 @@ void gt_makeitmthresholds(Profilematrix *prof,
 }
 
 void gt_lookaheadsearchPSSM(const GtEncseq *encseq,
-                                const Profilematrix *prof)
+                            const Profilematrix *prof)
 {
   unsigned long firstpos, bufsize;
   GtUchar currentchar;
   unsigned long pos;
-  GtEncseqScanstate *esr;
+  GtEncseqReader *esr;
   unsigned long totallength = gt_encseq_total_length(encseq);
   GtUchar *buffer;
 
-  esr = gt_encseq_scanstate_new(encseq,GT_READMODE_FORWARD,0);
+  esr = gt_encseq_create_reader_with_readmode(encseq,GT_READMODE_FORWARD,0);
   ALLOCASSIGNSPACE(buffer,NULL,GtUchar,prof->dimension);
   firstpos = bufsize = 0;
   for (pos=0; pos < totallength; pos++)
   {
-    currentchar = gt_encseq_get_encoded_char_sequential(encseq,esr,pos,
-                                                           GT_READMODE_FORWARD);
+    currentchar = gt_encseq_reader_next_encoded_char(esr);
     if (ISSPECIAL(currentchar))
     {
       bufsize = firstpos = 0;
@@ -137,6 +136,6 @@ void gt_lookaheadsearchPSSM(const GtEncseq *encseq,
       }
     }
   }
-  gt_encseq_scanstate_delete(esr);
+  gt_encseq_reader_delete(esr);
   FREESPACE(buffer);
 }

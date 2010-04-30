@@ -93,7 +93,7 @@ struct Differencecover
   unsigned long samplesize, effectivesamplesize, maxsamplesize;
   const GtCodetype **multimappower;
   GtCodetype *filltable;
-  GtEncseqScanstate *esr;
+  GtEncseqReader *esr;
   unsigned long *inversesuftab;
   unsigned long allocateditvinfo,
                 currentqueuesize,
@@ -1017,8 +1017,8 @@ static void dc_sortremainingsamples(Differencecover *dcov)
   dcov->rangestobesorted = NULL;
 }
 
-void gt_differencecover_sortsample(Differencecover *dcov,bool cmpcharbychar,
-                                bool withcheck)
+void gt_differencecover_sortsample(Differencecover *dcov, bool cmpcharbychar,
+                                   bool withcheck)
 {
   unsigned long pos;
   unsigned int modvalue;
@@ -1038,7 +1038,9 @@ void gt_differencecover_sortsample(Differencecover *dcov,bool cmpcharbychar,
                              NULL,
                              NULL);
   dcov->multimappower = gt_bcktab_multimappower(dcov->bcktab);
-  dcov->esr = gt_encseq_scanstate_new_empty();
+  dcov->esr = gt_encseq_create_reader_with_readmode(dcov->encseq,
+                                                    dcov->readmode,
+                                                    0);
   dcov->maxcode = gt_bcktab_numofallcodes(dcov->bcktab) - 1;
   dcov->rangestobesorted = gt_inl_queue_new(MAX(16UL,GT_DIV2(dcov->maxcode)));
   gt_assert(dcov->bcktab != NULL);
@@ -1056,13 +1058,13 @@ void gt_differencecover_sortsample(Differencecover *dcov,bool cmpcharbychar,
       if (pos < dcov->totallength)
       {
         code = gt_encseq_extractprefixcode(&unitsnotspecial,
-                                 dcov->encseq,
-                                 dcov->filltable,
-                                 dcov->readmode,
-                                 dcov->esr,
-                                 dcov->multimappower,
-                                 pos,
-                                 dcov->prefixlength);
+                                           dcov->encseq,
+                                           dcov->filltable,
+                                           dcov->readmode,
+                                           dcov->esr,
+                                           dcov->multimappower,
+                                           pos,
+                                           dcov->prefixlength);
       } else
       {
         code = 0;
@@ -1159,7 +1161,7 @@ void gt_differencecover_sortsample(Differencecover *dcov,bool cmpcharbychar,
   dcov->filltable = NULL;
   if (dcov->esr != NULL)
   {
-    gt_encseq_scanstate_delete(dcov->esr);
+    gt_encseq_reader_delete(dcov->esr);
     dcov->esr = NULL;
   }
   gt_assert(posinserted == dcov->effectivesamplesize);

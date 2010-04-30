@@ -103,11 +103,11 @@ void gt_checkifprefixesareidentical(const char *filename,
   const unsigned long *ptr;
   unsigned long maxlcp;
   int cmp;
-  GtEncseqScanstate *esr1, *esr2;
+  GtEncseqReader *esr1, *esr2;
   bool haserr = false;
 
-  esr1 = gt_encseq_scanstate_new_empty();
-  esr2 = gt_encseq_scanstate_new_empty();
+  esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
+  esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   for (ptr = suftab + left; ptr < suftab + right; ptr++)
   {
     cmp = gt_encseq_comparetwosuffixes(encseq,
@@ -134,8 +134,8 @@ void gt_checkifprefixesareidentical(const char *filename,
       break;
     }
   }
-  gt_encseq_scanstate_delete(esr1);
-  gt_encseq_scanstate_delete(esr2);
+  gt_encseq_reader_delete(esr1);
+  gt_encseq_reader_delete(esr2);
   if (haserr)
   {
     exit(GT_EXIT_PROGRAMMING_ERROR);
@@ -172,12 +172,12 @@ void gt_checksortedsuffixes(const char *filename,
 {
   const unsigned long *ptr;
   unsigned long maxlcp, totallength = gt_encseq_total_length(encseq);
-  GtEncseqScanstate *esr1, *esr2;
+  GtEncseqReader *esr1, *esr2;
   int cmp;
 
   gt_assert(!specialsareequal || specialsareequalatdepth0);
-  esr1 = gt_encseq_scanstate_new_empty();
-  esr2 = gt_encseq_scanstate_new_empty();
+  esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
+  esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   gt_assert(numberofsuffixes > 0);
   gt_assert(*suftab < totallength);
   for (ptr = suftab + 1; ptr < suftab + numberofsuffixes; ptr++)
@@ -218,8 +218,8 @@ void gt_checksortedsuffixes(const char *filename,
       }
     }
   }
-  gt_encseq_scanstate_delete(esr1);
-  gt_encseq_scanstate_delete(esr2);
+  gt_encseq_reader_delete(esr1);
+  gt_encseq_reader_delete(esr2);
 }
 
 void gt_checkentiresuftab(const char *filename,
@@ -239,7 +239,7 @@ void gt_checkentiresuftab(const char *filename,
          currentlcp = 0,
          totallength = gt_encseq_total_length(encseq);
   int cmp;
-  GtEncseqScanstate *esr1, *esr2;
+  GtEncseqReader *esr1, *esr2;
   bool haserr = false;
 
 #ifdef INLINEDSequentialsuffixarrayreader
@@ -275,8 +275,8 @@ void gt_checkentiresuftab(const char *filename,
     }
     gt_free(startposoccurs);
   }
-  esr1 = gt_encseq_scanstate_new_empty();
-  esr2 = gt_encseq_scanstate_new_empty();
+  esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
+  esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   gt_assert(numberofsuffixes > 0);
   gt_assert(*suftab < totallength);
   for (ptr = suftab + 1; !haserr && ptr < suftab + numberofsuffixes; ptr++)
@@ -357,8 +357,8 @@ void gt_checkentiresuftab(const char *filename,
       }
     }
   }
-  gt_encseq_scanstate_delete(esr1);
-  gt_encseq_scanstate_delete(esr2);
+  gt_encseq_reader_delete(esr1);
+  gt_encseq_reader_delete(esr2);
   if (haserr)
   {
     exit(GT_EXIT_PROGRAMMING_ERROR);

@@ -89,7 +89,7 @@ void gt_specialrangeiterator_delete(GtSpecialrangeiterator *sri);
 void gt_encseq_extract2bitenc(bool fwd,
                               GtEndofTwobitencoding *ptbe,
                               const GtEncseq *encseq,
-                              GtEncseqScanstate *esr,
+                              GtEncseqReader *esr,
                               unsigned long startpos);
 
 /* Returns the encoded representation of the character at position <pos> of
@@ -177,14 +177,14 @@ GtCodetype gt_encseq_extractprefixcode(unsigned int *unitsnotspecial,
                                        const GtEncseq *encseq,
                                        const GtCodetype *filltable,
                                        GtReadmode readmode,
-                                       GtEncseqScanstate *esr,
+                                       GtEncseqReader *esr,
                                        const GtCodetype **multimappower,
                                        unsigned long frompos,
                                        unsigned int prefixlength);
 
 /* The following function compares two substrings beginning
   at position <pos1> and <pos2> in <encseq>. <esr1> and <esr2> refer
-  to memory areas for storeing a GtEncseqScanstate.
+  to memory areas for storeing a GtEncseqReader.
   The comparison starts at offset <depth>. The information about the length
   of the longest common prefix is stored in <commonunits>. <fwd> and
   <complement> specify if the sequence is scanned in forward direction
@@ -196,8 +196,8 @@ int gt_encseq_compare(const GtEncseq *encseq,
                       GtCommonunits *commonunits,
                       bool fwd,
                       bool complement,
-                      GtEncseqScanstate *esr1,
-                      GtEncseqScanstate *esr2,
+                      GtEncseqReader *esr1,
+                      GtEncseqReader *esr2,
                       unsigned long pos1,
                       unsigned long pos2,
                       unsigned long depth);
@@ -208,8 +208,8 @@ int gt_encseq_compare_maxdepth(const GtEncseq *encseq,
                                GtCommonunits *commonunits,
                                bool fwd,
                                bool complement,
-                               GtEncseqScanstate *esr1,
-                               GtEncseqScanstate *esr2,
+                               GtEncseqReader *esr1,
+                               GtEncseqReader *esr2,
                                unsigned long pos1,
                                unsigned long pos2,
                                unsigned long depth,
@@ -218,11 +218,11 @@ int gt_encseq_compare_maxdepth(const GtEncseq *encseq,
 /* Return true if and only if the substring of length <len> starting
   at position <startpos> in <encseq> contains a special character.
   <esrspace> refer to a memory areas for storeing a
-  GtEncseqScanstate. <moveforward> is true if and only if the
+  GtEncseqReader. <moveforward> is true if and only if the
   scanning is done in forward direction. */
 bool gt_encseq_contains_special(const GtEncseq *encseq,
                                 bool moveforward,
-                                GtEncseqScanstate *esrspace,
+                                GtEncseqReader *esrspace,
                                 unsigned long startpos,
                                 unsigned long len);
 
@@ -250,7 +250,7 @@ void gt_encseq_show_features(const GtEncseq *encseq,
 
 /* The following function compares the two suffixes
   at position <start1> and <start2> in <encseq>.  <esr1> and <esr2> refer
-  to memory areas for storeing a GtEncseqScanstate. If <maxdepth>
+  to memory areas for storeing a GtEncseqReader. If <maxdepth>
   is 0, then the entire suffixes are compared. If <maxdepth> is larger than
   0, then only the suffixes up to length <maxdepth> are compared.
   The length of the longest common prefix is stored in <maxlcp>.
@@ -269,8 +269,8 @@ int gt_encseq_comparetwosuffixes(const GtEncseq *encseq,
                                  unsigned long maxdepth,
                                  unsigned long start1,
                                  unsigned long start2,
-                                 GtEncseqScanstate *esr1,
-                                 GtEncseqScanstate *esr2);
+                                 GtEncseqReader *esr1,
+                                 GtEncseqReader *esr2);
 
 /* The following function compares the two suffixes
   at position <pos1> and <pos2> in <encseq>.   If <maxdepth> is 0,
@@ -325,14 +325,6 @@ unsigned long gt_encseq_lengthofspecialsuffix(const GtEncseq *encseq);
   Returns 0 on success, -1 otherwise. */
 int gt_specialcharinfo_read(GtSpecialcharinfo *specialcharinfo,
                             const GtStr *indexname, GtError *err);
-
-/* Reinitializes the given <esr> with the values as described in
-  <gt_encseq_scanstate_new()>, except that the
-  the direction is defined by <moveforward>. */
-void gt_encseq_scanstate_initgeneric(GtEncseqScanstate *esr,
-                                     const GtEncseq *encseq,
-                                     bool moveforward,
-                                     unsigned long startpos);
 
 /* Returns the encoded representation of the character at position <pos> of
   <encseq> read in the direction as indicated by <readmode>.

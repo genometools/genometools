@@ -56,7 +56,7 @@ GT_DECLAREARRAYSTRUCT(Nodeptr);
 struct Blindtrie
 {
   const GtEncseq *encseq;
-  GtEncseqScanstate *esr1, *esr2;
+  GtEncseqReader *esr1, *esr2;
   GtReadmode readmode;
   unsigned long totallength,
          offset,
@@ -283,18 +283,15 @@ static unsigned long cmpcharbychargetlcp(GtUchar *mm_oldsuffix,
   unsigned long lcp;
   GtUchar cc1, cc2;
 
-  gt_encseq_scanstate_init(blindtrie->esr1,blindtrie->encseq,
-                               blindtrie->readmode,leafpos);
-  gt_encseq_scanstate_init(blindtrie->esr2,blindtrie->encseq,
-                               blindtrie->readmode,currentstartpos);
+  gt_encseq_reader_reinit_with_readmode(blindtrie->esr1,blindtrie->encseq,
+                                        blindtrie->readmode,leafpos);
+  gt_encseq_reader_reinit_with_readmode(blindtrie->esr2,blindtrie->encseq,
+                                        blindtrie->readmode,currentstartpos);
   for (lcp = 0; /* Nothing */; lcp++)
   {
     if (isleftofboundary(leafpos,lcp,blindtrie))
     {
-      cc1 = gt_encseq_get_encoded_char_sequential(blindtrie->encseq,
-                                                        blindtrie->esr1,
-                                                        leafpos+lcp,
-                                                        blindtrie->readmode);
+      cc1 = gt_encseq_reader_next_encoded_char(blindtrie->esr1);
       if (cc1 == (GtUchar) WILDCARD)
       {
         cc1 = (GtUchar) SEPARATOR;
@@ -305,10 +302,7 @@ static unsigned long cmpcharbychargetlcp(GtUchar *mm_oldsuffix,
     }
     if (isleftofboundary(currentstartpos,lcp,blindtrie))
     {
-      cc2 = gt_encseq_get_encoded_char_sequential(blindtrie->encseq,
-                                                        blindtrie->esr2,
-                                                        currentstartpos+lcp,
-                                                        blindtrie->readmode);
+      cc2 = gt_encseq_reader_next_encoded_char(blindtrie->esr2);
       if (cc2 == (GtUchar) WILDCARD)
       {
         cc2 = (GtUchar) SEPARATOR;
@@ -510,8 +504,8 @@ static unsigned long enumeratetrieleaves (unsigned long *suffixtable,
 Blindtrie *gt_blindtrie_new(unsigned long numofsuffixes,
                          const GtEncseq *encseq,
                          bool cmpcharbychar,
-                         GtEncseqScanstate *esr1,
-                         GtEncseqScanstate *esr2,
+                         GtEncseqReader *esr1,
+                         GtEncseqReader *esr2,
                          GtReadmode readmode)
 {
   Blindtrie *blindtrie;

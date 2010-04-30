@@ -55,7 +55,8 @@ allocSpecialsRankTable(const GtEncseq *encseq,
   rankTable->sampleInterval = ((unsigned long)1) << sampleIntervalLog2;
   rankTable->readmode = readmode;
   rankTable->numSamples = numSamples;
-  rankTable->scanState = gt_encseq_scanstate_new_empty();
+  rankTable->scanState = gt_encseq_create_reader_with_readmode(encseq,
+                                                               readmode, 0);
   ranker->encseq = encseq;
   ranker->rankFunc = specialsRankFromSampleTable;
   return ranker;
@@ -94,7 +95,7 @@ nextRange(GtRange *range, GtSpecialrangeiterator *sri,
 
 extern SpecialsRankLookup *
 gt_newSpecialsRankLookup(const GtEncseq *encseq, GtReadmode readmode,
-                     unsigned sampleIntervalLog2)
+                         unsigned sampleIntervalLog2)
 {
   struct specialsRankLookup *ranker;
   unsigned long seqLastPos, seqLen;
@@ -150,8 +151,7 @@ extern void
 gt_deleteSpecialsRankLookup(SpecialsRankLookup *ranker)
 {
   if (ranker->rankFunc == specialsRankFromSampleTable)
-    gt_encseq_scanstate_delete(
-      ranker->implementationData.sampleTable.scanState);
+    gt_encseq_reader_delete(ranker->implementationData.sampleTable.scanState);
   gt_free(ranker);
 }
 
@@ -170,16 +170,15 @@ specialsRankFromSampleTable(const SpecialsRankLookup *ranker, unsigned long pos)
   }
   {
     const GtEncseq *encseq = ranker->encseq;
-    GtEncseqScanstate *esr = rankTable->scanState;
+    GtEncseqReader *esr = rankTable->scanState;
     GtReadmode readmode = rankTable->readmode;
     unsigned long encseqQueryMax = MIN(pos, encSeqLen);
     if (samplePos < encseqQueryMax)
     {
-      gt_encseq_scanstate_init(esr, encseq, readmode, samplePos);
+      gt_encseq_reader_reinit_with_readmode(esr, encseq, readmode, samplePos);
       do {
-        if (ISSPECIAL(gt_encseq_get_encoded_char_sequential(encseq,esr,
-                                                                    samplePos++,
-                                                                    readmode)))
+        samplePos++;
+        if (ISSPECIAL(gt_encseq_reader_next_encoded_char(esr)))
           ++rankCount;
       } while (samplePos < encseqQueryMax);
     }

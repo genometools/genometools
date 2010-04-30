@@ -45,29 +45,27 @@ char* gt_ltrelement_get_sequence(unsigned long start, unsigned long end,
   int had_err = 0;
   GtUchar *symbolstring;
   const GtAlphabet *alpha;
-  GtEncseqScanstate *ess;
+  GtEncseqReader *esr;
   unsigned long len, i;
 
   gt_assert(seq && end >= start);
   gt_error_check(err);
 
-  ess = gt_encseq_scanstate_new_empty();
   alpha = gt_encseq_alphabet(seq);
   len = end - start + 1;
 
   out          = gt_malloc((len + 1) * sizeof (char));
   symbolstring = gt_malloc((len + 1) * sizeof (GtUchar));
 
-  gt_encseq_scanstate_init(ess, seq, GT_READMODE_FORWARD, seqstartpos + start);
+  esr = gt_encseq_create_reader_with_readmode(seq, GT_READMODE_FORWARD,
+                                              seqstartpos + start);
   for (i=0;i<len;i++)
   {
-    symbolstring[i] = gt_encseq_get_encoded_char_sequential(seq, ess,
-                                                        seqstartpos + start + i,
-                                                        GT_READMODE_FORWARD);
+    symbolstring[i] = gt_encseq_reader_next_encoded_char(esr);
   }
   gt_alphabet_decode_seq_to_cstr(alpha, out, symbolstring, len);
   gt_free(symbolstring);
-  gt_encseq_scanstate_delete(ess);
+  gt_encseq_reader_delete(esr);
 
   if (strand == GT_STRAND_REVERSE)
     had_err = gt_reverse_complement(out, len, err);

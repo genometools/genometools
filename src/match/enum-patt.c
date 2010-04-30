@@ -32,13 +32,13 @@
   const GtEncseq *sampleencseq;
   unsigned int alphasize;
   unsigned long totallength;
-  GtEncseqScanstate *esr;
+  GtEncseqReader *esr;
 };
 
 Enumpatterniterator *gt_newenumpatterniterator(unsigned long minpatternlen,
-                                            unsigned long maxpatternlen,
-                                            const GtEncseq *encseq,
-                                            GtError *err)
+                                               unsigned long maxpatternlen,
+                                               const GtEncseq *encseq,
+                                               GtError *err)
 {
   Enumpatterniterator *epi = NULL;
   unsigned long i;
@@ -72,7 +72,7 @@ Enumpatterniterator *gt_newenumpatterniterator(unsigned long minpatternlen,
   epi->samplecount = 0;
   epi->alphasize = gt_alphabet_num_of_chars(
                                            gt_encseq_alphabet(encseq));
-  epi->esr = gt_encseq_scanstate_new_empty();
+  epi->esr = NULL;
   return epi;
 }
 
@@ -108,16 +108,19 @@ const GtUchar *gt_nextEnumpatterniterator(unsigned long *patternlen,
   start =
         (unsigned long) (random() % (epi->totallength - *patternlen));
   gt_assert(start < (unsigned long) (epi->totallength - *patternlen));
-  gt_encseq_scanstate_init(epi->esr,
-                                    epi->sampleencseq,
-                                    GT_READMODE_FORWARD,
-                                    start);
+  if (epi->esr == NULL) {
+    epi->esr = gt_encseq_create_reader_with_readmode(epi->sampleencseq,
+                                          GT_READMODE_FORWARD,
+                                          start);
+  } else {
+    gt_encseq_reader_reinit_with_readmode(epi->esr, epi->sampleencseq,
+                                          GT_READMODE_FORWARD,
+                                          start);
+  }
+
   for (j=0; j<*patternlen; j++)
   {
-    cc = gt_encseq_get_encoded_char_sequential(epi->sampleencseq,
-                                                     epi->esr,
-                                                     start+j,
-                                                     GT_READMODE_FORWARD);
+    cc = gt_encseq_reader_next_encoded_char(epi->esr);
     if (ISSPECIAL(cc))
     {
       cc = (GtUchar) (random() % epi->alphasize);
@@ -160,6 +163,6 @@ void gt_freeEnumpatterniterator(Enumpatterniterator **epi)
   if (!(*epi)) return;
   FREESPACE((*epi)->patternspace);
   FREESPACE((*epi)->patternstat);
-  gt_encseq_scanstate_delete(((*epi)->esr));
+  gt_encseq_reader_delete(((*epi)->esr));
   FREESPACE(*epi);
 }

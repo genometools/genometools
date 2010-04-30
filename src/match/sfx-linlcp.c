@@ -313,7 +313,7 @@ Compressedtable *gt_lcp9_manzini(Compressedtable *spacefortab,
   Compressedtable *lcptab, *ranknext, *rightposinverse;
   unsigned long previouscc1pos, previouscc2pos;
   GtUchar cc1, cc2;
-  GtEncseqScanstate *esr1, *esr2;
+  GtEncseqReader *esr1, *esr2;
 
   if (spacefortab == NULL)
   {
@@ -339,10 +339,10 @@ Compressedtable *gt_lcp9_manzini(Compressedtable *spacefortab,
      ranknext at position fillpos, the same cell is used for storing
      the determined lcp-value */
   /* exploit the fact, that pos + lcpvalue is monotone */
-  esr1 = gt_encseq_scanstate_new(encseq,readmode,0);
-  cc1 = gt_encseq_get_encoded_char_sequential(encseq,esr1,0,readmode);
+  esr1 = gt_encseq_create_reader_with_readmode(encseq,readmode,0);
+  cc1 = gt_encseq_reader_next_encoded_char(esr1);
   previouscc1pos = 0;
-  esr2 = gt_encseq_scanstate_new_empty();
+  esr2 = gt_encseq_create_reader_with_readmode(encseq,readmode, totallength);
   previouscc2pos = totallength;
   cc2 = 0;
   for (pos = 0; pos < totallength; pos++)
@@ -361,10 +361,7 @@ Compressedtable *gt_lcp9_manzini(Compressedtable *spacefortab,
         while (previouscc1pos < pos + lcpvalue)
         {
           previouscc1pos++;
-          cc1 = gt_encseq_get_encoded_char_sequential(encseq,
-                                                            esr1,
-                                                            previouscc1pos,
-                                                            readmode);
+          cc1 = gt_encseq_reader_next_encoded_char(esr1);
         }
         if (ISSPECIAL(cc1))
         {
@@ -374,21 +371,15 @@ Compressedtable *gt_lcp9_manzini(Compressedtable *spacefortab,
             previousstart+lcpvalue > previouscc2pos+1)
         {
           previouscc2pos = previousstart+lcpvalue;
-          gt_encseq_scanstate_init(esr2,encseq,
-                                       readmode,
-                                       previouscc2pos);
-          cc2 = gt_encseq_get_encoded_char_sequential(encseq,
-                                                            esr2,previouscc2pos,
-                                                            readmode);
+          gt_encseq_reader_reinit_with_readmode(esr2,encseq, readmode,
+                                                previouscc2pos);
+          cc2 = gt_encseq_reader_next_encoded_char(esr2);
         } else
         {
           if (previousstart+lcpvalue == previouscc2pos+1)
           {
             previouscc2pos++;
-            cc2 = gt_encseq_get_encoded_char_sequential(encseq,
-                                                              esr2,
-                                                              previouscc2pos,
-                                                              readmode);
+            cc2 = gt_encseq_reader_next_encoded_char(esr2);
           } else
           {
             gt_assert(previousstart+lcpvalue == previouscc2pos);
@@ -408,7 +399,7 @@ Compressedtable *gt_lcp9_manzini(Compressedtable *spacefortab,
     }
     fillpos = nextfillpos;
   }
-  gt_encseq_scanstate_delete(esr1);
-  gt_encseq_scanstate_delete(esr2);
+  gt_encseq_reader_delete(esr1);
+  gt_encseq_reader_delete(esr2);
   return lcptab;
 }

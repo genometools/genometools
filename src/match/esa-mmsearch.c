@@ -78,7 +78,7 @@ static GtUchar accessquery(int line,const Queryrep *queryrep,
         sidx = (OFFSET) + (LCPLEN);\
         if (sidx < totallength)\
         {\
-          gt_encseq_scanstate_init(esr,dbencseq,readmode,sidx);\
+          gt_encseq_reader_reinit_with_readmode(esr,dbencseq,readmode,sidx);\
         }\
         for (/* Nothing */ ; /* Nothing */; sidx++, (LCPLEN)++)\
         {\
@@ -92,9 +92,7 @@ static GtUchar accessquery(int line,const Queryrep *queryrep,
             retcode = -1;\
             break;\
           }\
-          currentdbchar = gt_encseq_get_encoded_char_sequential(\
-                                                            dbencseq,\
-                                                            esr,sidx,readmode);\
+          currentdbchar = gt_encseq_reader_next_encoded_char(esr);\
           currentquerychar = accessquery(__LINE__,querysubstring->queryrep,\
                                          querysubstring->offset + (LCPLEN));\
           retcode = (int) (currentquerychar - currentdbchar);\
@@ -112,7 +110,7 @@ static GtUchar accessquery(int line,const Queryrep *queryrep,
         }
 
 static bool mmsearch(const GtEncseq *dbencseq,
-                     GtEncseqScanstate *esr,
+                     GtEncseqReader *esr,
                      const unsigned long *suftab,
                      GtReadmode readmode,
                      Lcpinterval *lcpitv,
@@ -203,7 +201,7 @@ static bool mmsearch(const GtEncseq *dbencseq,
   Lcpinterval lcpitv;
   unsigned long sufindex;
   const unsigned long *suftab;
-  GtEncseqScanstate *esr;
+  GtEncseqReader *esr;
 };
 
 static MMsearchiterator *newmmsearchiterator_generic(
@@ -224,7 +222,7 @@ static MMsearchiterator *newmmsearchiterator_generic(
   mmsi->lcpitv.right = rightbound;
   mmsi->lcpitv.offset = itvoffset;
   mmsi->suftab = suftab;
-  mmsi->esr = gt_encseq_scanstate_new_empty();
+  mmsi->esr = gt_encseq_create_reader_with_readmode(dbencseq, readmode, 0);
   if (!mmsearch(dbencseq,mmsi->esr,suftab,readmode,&mmsi->lcpitv,
                 querysubstring,minmatchlength))
   {
@@ -300,7 +298,7 @@ bool gt_identicalmmsearchiterators(const MMsearchiterator *mmsi1,
 
 void gt_freemmsearchiterator(MMsearchiterator **mmsi)
 {
-  gt_encseq_scanstate_delete((*mmsi)->esr);
+  gt_encseq_reader_delete((*mmsi)->esr);
   FREESPACE(*mmsi);
 }
 
@@ -328,7 +326,7 @@ static bool isleftmaximal(const GtEncseq *dbencseq,
 }
 
 static unsigned long extendright(const GtEncseq *dbencseq,
-                          GtEncseqScanstate *esr,
+                          GtEncseqReader *esr,
                           GtReadmode readmode,
                           unsigned long totallength,
                           unsigned long dbend,
@@ -340,15 +338,14 @@ static unsigned long extendright(const GtEncseq *dbencseq,
 
   if (dbend < totallength)
   {
-    gt_encseq_scanstate_init(esr,dbencseq,readmode,dbend);
+    gt_encseq_reader_reinit_with_readmode(esr,dbencseq,readmode,dbend);
   }
   for (dbpos = dbend, querypos = querysubstring->offset + matchlength;
        dbpos < totallength &&
        querypos < querysubstring->queryrep->length;
        dbpos++, querypos++)
   {
-    dbchar = gt_encseq_get_encoded_char_sequential(dbencseq,esr,dbpos,
-                                                         readmode);
+    dbchar = gt_encseq_reader_next_encoded_char(esr);
     if (ISSPECIAL(dbchar) ||
         dbchar != accessquery(__LINE__,querysubstring->queryrep,querypos))
     {

@@ -43,9 +43,9 @@ typedef struct GtEncseqLoader GtEncseqLoader;
    uncompressed, encoded string copies in memory. */
 typedef struct GtEncseqBuilder GtEncseqBuilder;
 
-/* The <GtEncseqScanstate> class represents the current state of a
-   sequential scan of a <GtEncseq> region. */
-typedef struct GtEncseqScanstate GtEncseqScanstate;
+/* The <GtEncseqReader> class represents the current state of a
+   sequential scan of a <GtEncseq> region as an iterator. */
+typedef struct GtEncseqReader GtEncseqReader;
 
 /* The file suffix used for encoded sequence files. */
 #define GT_ENCSEQFILESUFFIX ".esq"
@@ -70,15 +70,24 @@ unsigned long     gt_encseq_num_of_sequences(const GtEncseq *encseq);
 GtUchar           gt_encseq_get_encoded_char(const GtEncseq *encseq,
                                              unsigned long pos,
                                              GtReadmode readmode);
-/* Returns the encoded representation of the character at position <pos> of
-   <encseq> read in the direction as indicated by <readmode>. This function is
-   optimized for sequential access to the sequence (e.g. in a for loop). The
-   current state of the sequential scan is maintained in <esr>. */
-GtUchar           gt_encseq_get_encoded_char_sequential(const GtEncseq *encseq,
-                                                        GtEncseqScanstate *esr,
-                                                        unsigned long pos,
-                                                        GtReadmode readmode);
 #endif
+
+/* Increases the reference count of <encseq>. */
+GtEncseq*         gt_encseq_ref(GtEncseq *encseq);
+/* Returns a new <GtEncseqReader> for <encseq>, starting from position
+   <startpos>. If <moveforward> is true, the iterator will move forward in the
+   sequence, if false, it will move backwards. */
+GtEncseqReader*   gt_encseq_create_reader_with_direction(const GtEncseq *encseq,
+                                                        bool moveforward,
+                                                        unsigned long startpos);
+/* Returns a new <GtEncseqReader> for <encseq>, starting from position
+   <startpos>. Also supports reading the sequence from the reverse and
+   delivering (reverse) complement characters on DNA alphabets using the
+   <readmode> option. Please make sure that the <GT_READMODE_COMPL> and
+   <GT_READMODE_REVCOMPL> readmodes are only used on DNA alphabets. */
+GtEncseqReader*   gt_encseq_create_reader_with_readmode(const GtEncseq *encseq,
+                                                        GtReadmode readmode,
+                                                        unsigned long startpos);
 /* Returns the encoded representation of the substring from position <frompos>
    to position <topos> of <encseq>. The result is written to the location
    pointed to by <buffer>, which must be large enough to hold the result. */
@@ -106,24 +115,23 @@ const GtStrArray* gt_encseq_filenames(const GtEncseq *encseq);
 /* Deletes <encseq> and frees all associated space. */
 void              gt_encseq_delete(GtEncseq *encseq);
 
-/* Returns a new object encapsulating the current state of a sequential
-   <GtEncseq> scan. */
-GtEncseqScanstate* gt_encseq_scanstate_new_empty(void);
-
-/* Returns a new object encapsulating the current state of a sequential
-   <GtEncseq> scan, optimising access to <encseq> starting at position
-   <startpos> in the direction specified in <readmode>. */
-GtEncseqScanstate* gt_encseq_scanstate_new(const GtEncseq *encseq,
-                                           GtReadmode readmode,
-                                           unsigned long startpos);
 /* Reinitializes the given <esr> with the values as described in
-   <gt_encseq_scanstate_new()>. */
-void               gt_encseq_scanstate_init(GtEncseqScanstate *esr,
-                                            const GtEncseq *encseq,
-                                            GtReadmode readmode,
-                                            unsigned long startpos);
+   <gt_encseq_create_reader_with_readmode()>. */
+void            gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
+                                                      const GtEncseq *encseq,
+                                                      GtReadmode readmode,
+                                                      unsigned long startpos);
+/* Reinitializes the given <esr> with the values as described in
+   <gt_encseq_create_reader_with_direction()>. */
+void            gt_encseq_reader_reinit_with_direction(GtEncseqReader *esr,
+                                                       const GtEncseq *encseq,
+                                                       bool moveforward,
+                                                       unsigned long startpos);
+/* Returns the next character from current position of <esr>, advancing the
+   iterator by one position. */
+GtUchar         gt_encseq_reader_next_encoded_char(GtEncseqReader *esr);
 /* Deletes <esr>, freeing all associated space. */
-void               gt_encseq_scanstate_delete(GtEncseqScanstate *esr);
+void            gt_encseq_reader_delete(GtEncseqReader *esr);
 
 /* Creates a new <GtEncseqEncoder>. */
 GtEncseqEncoder* gt_encseq_encoder_new(void);

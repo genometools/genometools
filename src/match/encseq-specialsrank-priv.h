@@ -31,7 +31,7 @@ struct specialsRankLookup
   {
     struct specialsRankTable
     {
-      GtEncseqScanstate *scanState;
+      GtEncseqReader *scanState;
       unsigned long *rankSumSamples, numSamples, sampleInterval;
       GtReadmode readmode;
       unsigned sampleIntervalLog2;

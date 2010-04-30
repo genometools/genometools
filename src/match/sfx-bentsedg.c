@@ -43,9 +43,7 @@
 #define UNIQUEINT(P)           ((unsigned long) ((P) + GT_COMPAREOFFSET))
 #define ACCESSCHAR(POS)        gt_encseq_get_encoded_char(bsr->encseq,\
                                                              POS,bsr->readmode)
-#define ACCESSCHARSEQ(POS,ESR) gt_encseq_get_encoded_char_sequential( \
-                                                        bsr->encseq,ESR,POS,\
-                                                        bsr->readmode)
+#define ACCESSCHARSEQ(POS,ESR) gt_encseq_reader_next_encoded_char(ESR)
 #define ISNOTEND(POS)          ((POS) < bsr->totallength &&\
                                 ISNOTSPECIAL(ACCESSCHAR(POS)))
 
@@ -150,10 +148,10 @@ typedef GtEndofTwobitencoding Sfxcmp;
             if (pos + depth < bsr->totallength)\
             {\
               pos += depth;\
-              gt_encseq_scanstate_initgeneric(bsr->esr1,bsr->encseq,\
-                                                  true,pos);\
+              gt_encseq_reader_reinit_with_direction(bsr->esr1,bsr->encseq,\
+                                                     true,pos);\
               gt_encseq_extract2bitenc(true,&(VAR),bsr->encseq,\
-                                                bsr->esr1,pos);\
+                                       bsr->esr1,pos);\
             } else\
             {\
               VAR.tbe = 0;\
@@ -166,10 +164,10 @@ typedef GtEndofTwobitencoding Sfxcmp;
             if (pos >= depth)\
             {\
               pos -= depth;\
-              gt_encseq_scanstate_initgeneric(bsr->esr1,bsr->encseq,\
-                                                  false,pos);\
+              gt_encseq_reader_reinit_with_direction(bsr->esr1,bsr->encseq,\
+                                                    false,pos);\
               gt_encseq_extract2bitenc(false,&(VAR),bsr->encseq,\
-                                                bsr->esr1,pos);\
+                                       bsr->esr1,pos);\
             } else\
             {\
               VAR.tbe = 0;\
@@ -346,8 +344,8 @@ GT_DECLAREARRAYSTRUCT(MKVstack);
 typedef struct
 {
   const GtEncseq *encseq;
-  GtEncseqScanstate *esr1, /* XXX be carefull with threads */
-                           *esr2;
+  GtEncseqReader *esr1, /* XXX be carefull with threads */
+                 *esr2;
   GtReadmode readmode;
   bool fwd, complement, assideeffect;
   unsigned long totallength;
@@ -470,11 +468,11 @@ static void bs_insertionsort(Bentsedgresources *bsr,
       if (bsr->sfxstrategy->cmpcharbychar)
       {
         ptr1 = (*(pj-1))+offset;
-        gt_encseq_scanstate_init(bsr->esr1,bsr->encseq,bsr->readmode,
-                                          ptr1);
+        gt_encseq_reader_reinit_with_readmode(bsr->esr1, bsr->encseq,
+                                              bsr->readmode, ptr1);
         ptr2 = (*pj)+offset;
-        gt_encseq_scanstate_init(bsr->esr2,bsr->encseq,bsr->readmode,
-                                          ptr2);
+        gt_encseq_reader_reinit_with_readmode(bsr->esr2, bsr->encseq,
+                                              bsr->readmode, ptr2);
         for (;;)
         {
           unsigned long ccs, cct;
@@ -567,14 +565,14 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
         ptr1 = (*(pj-1))+offset;
         if (ptr1 < bsr->totallength)
         {
-          gt_encseq_scanstate_init(bsr->esr1,bsr->encseq,bsr->readmode,
-                                       ptr1);
+          gt_encseq_reader_reinit_with_readmode(bsr->esr1, bsr->encseq,
+                                                bsr->readmode, ptr1);
         }
         ptr2 = (*pj)+offset;
         if (ptr2 < bsr->totallength)
         {
-          gt_encseq_scanstate_init(bsr->esr2,bsr->encseq,bsr->readmode,
-                                       ptr2);
+          gt_encseq_reader_reinit_with_readmode(bsr->esr2, bsr->encseq,
+                                                bsr->readmode, ptr2);
         }
         for (;;)
         {
@@ -1493,8 +1491,8 @@ static unsigned long bruteforcelcpvalue(const GtEncseq *encseq,
                                  const Suffixwithcode *previoussuffix,
                                  const Suffixwithcode *currentsuffix,
                                  unsigned int minchanged,
-                                 GtEncseqScanstate *esr1,
-                                 GtEncseqScanstate *esr2)
+                                 GtEncseqReader *esr1,
+                                 GtEncseqReader *esr2)
 {
   unsigned long lcpvalue;
   unsigned int lcpvalue2;
@@ -1903,24 +1901,17 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   {
     bsr->lcpsubtab = NULL;
   }
-  if (gt_encseq_has_fast_specialrangeenumerator(encseq)
-        && gt_encseq_has_specialranges(encseq))
-  {
-    bsr->esr1 = gt_encseq_scanstate_new_empty();
-    bsr->esr2 = gt_encseq_scanstate_new_empty();
-  } else
-  {
-    bsr->esr1 = bsr->esr2 = NULL;
-  }
+  bsr->esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
+  bsr->esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   if (bcktab != NULL)
   {
     gt_determinemaxbucketsize(bcktab,
-                           mincode,
-                           maxcode,
-                           partwidth,
-                           numofchars,
-                           false,
-                           0); /* not necesarry as hashexceptions = false */
+                              mincode,
+                              maxcode,
+                              partwidth,
+                              numofchars,
+                              false,
+                              0); /* not necesarry as hashexceptions = false */
     /* gt_bcktab_showlog2info(bcktab,logger); */
     if (outlcpinfo != NULL && outlcpinfo->assideeffect)
     {
@@ -2044,11 +2035,11 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
   }
   if (bsr->esr1 != NULL)
   {
-    gt_encseq_scanstate_delete(bsr->esr1);
+    gt_encseq_reader_delete(bsr->esr1);
   }
   if (bsr->esr2 != NULL)
   {
-    gt_encseq_scanstate_delete(bsr->esr2);
+    gt_encseq_reader_delete(bsr->esr2);
   }
   gt_free(bsr->equalwithprevious);
   GT_FREEARRAY(&bsr->mkvauxstack,MKVstack);

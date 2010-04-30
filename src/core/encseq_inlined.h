@@ -56,10 +56,4 @@ static inline GtUchar gt_encseq_get_encoded_char(
 
 #define gt_encseq_get_encoded_char_nospecial(ENCSEQ,POS,RM) \
           gt_encseq_get_encoded_char(ENCSEQ,POS,RM)
-
-#define gt_encseq_get_encoded_char_sequential(ENCSEQ, \
-                                                   ENCSEQSTATE,POS,READMODE) \
-          gt_encseq_get_encoded_char(ENCSEQ,POS,READMODE)
-                                             GtEncseqScanstate *esr);
-
 #endif

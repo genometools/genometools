@@ -128,7 +128,7 @@ struct Rmnsufinfo
   unsigned long firstgenerationtotalwidth,
                 firstgenerationcount;
   RmsFirstwithnewdepth firstwithnewdepth;
-  GtEncseqScanstate *esr;
+  GtEncseqReader *esr;
   unsigned long longestrel;
   unsigned int prefixlength,
                numofchars;
@@ -360,7 +360,7 @@ Rmnsufinfo *gt_newRmnsufinfo(unsigned long *presortedsuffixes,
   rmnsufinfo->itvfullinfo = NULL;
   rmnsufinfo->rangestobesorted = gt_inl_queue_new(MAX(16UL,GT_DIV2(maxcode)));
   rmnsufinfo->multimappower = gt_bcktab_multimappower(bcktab);
-  rmnsufinfo->esr = gt_encseq_scanstate_new_empty();
+  rmnsufinfo->esr = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   GT_INITARRAY(&rmnsufinfo->firstgeneration,RmsPairsuffixptr);
   rmnsufinfo->realspecialranges = gt_encseq_realspecialranges(encseq);
   rmnsufinfo->filltable = gt_filllargestchartable(numofchars,prefixlength);
@@ -1363,7 +1363,7 @@ Compressedtable *gt_rmnsufinfo_wrap(unsigned long *longest,
   rmnsufinfo->lowerboundwithrank = NULL;
 #endif
   gt_assert(rmnsufinfo->esr != NULL);
-  gt_encseq_scanstate_delete(rmnsufinfo->esr);
+  gt_encseq_reader_delete(rmnsufinfo->esr);
   gt_free(rmnsufinfo);
   rmnsufinfoptr = NULL;
   return lcptab;

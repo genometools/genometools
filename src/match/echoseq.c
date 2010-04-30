@@ -79,17 +79,16 @@ void gt_encseq2symbolstring(FILE *fpout,
   unsigned long j;
   unsigned long idx, lastpos;
   GtUchar currentchar;
-  GtEncseqScanstate *esr;
+  GtEncseqReader *esr;
   const GtAlphabet *alpha;
 
-  esr = gt_encseq_scanstate_new(encseq,readmode,start);
+  esr = gt_encseq_create_reader_with_readmode(encseq, readmode, start);
   gt_assert(width > 0);
   lastpos = start + wlen - 1;
   alpha = gt_encseq_alphabet(encseq);
   for (idx = start, j = 0; /* Nothing */ ; idx++)
   {
-    currentchar = gt_encseq_get_encoded_char_sequential(encseq,esr,idx,
-                                                              readmode);
+    currentchar = gt_encseq_reader_next_encoded_char(esr);
     if (currentchar == (GtUchar) SEPARATOR)
     {
       fprintf(fpout,"\n>\n");
@@ -113,7 +112,7 @@ void gt_encseq2symbolstring(FILE *fpout,
       }
     }
   }
-  gt_encseq_scanstate_delete(esr);
+  gt_encseq_reader_delete(esr);
 }
 
 void gt_fprintfencseq(FILE *fpout,

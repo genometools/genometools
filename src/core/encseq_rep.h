@@ -35,6 +35,7 @@
 #include "core/intdef.h"
 #include "core/str_array_api.h"
 #include "core/symboldef.h"
+#include "core/thread.h"
 
 typedef enum
 {
@@ -69,11 +70,11 @@ struct GtEncseq
   GtUchar(*delivercharnospecial)(const GtEncseq *,unsigned long);
   const char *delivercharnospecialname;
   GtUchar(*seqdeliverchar)(const GtEncseq *,
-                         GtEncseqScanstate *,unsigned long);
+                           GtEncseqReader *,unsigned long);
   const char *seqdelivercharname;
   bool(*delivercontainsspecial)(const GtEncseq *,
                                 bool,
-                                GtEncseqScanstate *,
+                                GtEncseqReader *,
                                 unsigned long,
                                 unsigned long);
   const char *delivercontainsspecialname;
@@ -134,5 +135,8 @@ struct GtEncseq
   Uint32 *uint32specialpositions,
          *uint32specialrangelength;
   unsigned long *uint32endspecialsubsUint;
+
+  unsigned long reference_count;
+  GtMutex *refcount_lock;
 };
 #endif

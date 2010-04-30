@@ -600,8 +600,10 @@ gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
           numTries = MIN(MAX_NUM_CONTEXT_CHECKS,
                          MAX(2, seqLen/CONTEXT_INTERVAL));
         Symbol *contextBuf = gt_malloc(sizeof (Symbol) * MAX_CONTEXT_LEN);
-        GtEncseqScanstate *esr =
-                                       gt_encseq_scanstate_new_empty();
+        GtEncseqReader *esr =
+           gt_encseq_create_reader_with_readmode(suffixArray.encseq,
+                                                 suffixArray.readmode,
+                                                 0);
         for (i = 0; i < numTries && retval == VERIFY_BWTSEQ_NO_ERROR; ++i)
         {
           unsigned long j, end, inSubSeqLen;
@@ -610,14 +612,11 @@ gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
           end = start + subSeqLen;
           inSubSeqLen = subSeqLen - ((end==seqLen)?1:0);
           gt_BWTSeqCRAccessSubseq(bwtSeqCR, start, subSeqLen, contextBuf);
-          gt_encseq_scanstate_init(esr, suffixArray.encseq,
-                                       suffixArray.readmode, start);
+          gt_encseq_reader_reinit_with_readmode(esr, suffixArray.encseq,
+                                                suffixArray.readmode, start);
           for (j = 0; j < inSubSeqLen; ++j)
           {
-            Symbol symRef = gt_encseq_get_encoded_char_sequential(
-                                                     suffixArray.encseq, esr,
-                                                     start + j,
-                                                     suffixArray.readmode);
+            Symbol symRef = gt_encseq_reader_next_encoded_char(esr);
             Symbol symCmp = contextBuf[j];
             if (symCmp != symRef)
             {
@@ -645,7 +644,7 @@ gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
         }
         if (retval == VERIFY_BWTSEQ_NO_ERROR)
           fputs("Context regeneration completed successfully.\n", stderr);
-        gt_encseq_scanstate_delete(esr);
+        gt_encseq_reader_delete(esr);
         gt_free(contextBuf);
       }
       gt_deleteBWTSeqCR(bwtSeqCR);

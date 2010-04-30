@@ -25,17 +25,17 @@
          lastsuftabentry;
   GtReadmode readmode;
   const GtEncseq *encseq;
-  GtEncseqScanstate *esr1, *esr2;
+  GtEncseqReader *esr1, *esr2;
 };
 
 Lcpvalueiterator *gt_newLcpvalueiterator(const GtEncseq *encseq,
-                                      GtReadmode readmode)
+                                         GtReadmode readmode)
 {
   Lcpvalueiterator *lvi;
 
   ALLOCASSIGNSPACE(lvi,NULL,Lcpvalueiterator,1);
-  lvi->esr1 = gt_encseq_scanstate_new_empty();
-  lvi->esr2 = gt_encseq_scanstate_new_empty();
+  lvi->esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
+  lvi->esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   lvi->encseq = encseq;
   lvi->relpos = 0;
   lvi->readmode = readmode;
@@ -44,9 +44,9 @@ Lcpvalueiterator *gt_newLcpvalueiterator(const GtEncseq *encseq,
 }
 
 unsigned long gt_nextLcpvalueiterator(Lcpvalueiterator *lvi,
-                            bool firstpage,
-                            const unsigned long *suftabptr,
-                            unsigned long numberofsuffixes)
+                                      bool firstpage,
+                                      const unsigned long *suftabptr,
+                                      unsigned long numberofsuffixes)
 {
   unsigned long lcpvalue;
 
@@ -59,15 +59,15 @@ unsigned long gt_nextLcpvalueiterator(Lcpvalueiterator *lvi,
     int cmp;
 
     cmp = gt_encseq_comparetwosuffixes(lvi->encseq,
-                             lvi->readmode,
-                             &lcpvalue,
-                             false,
-                             false,
-                             0,
-                             lvi->lastsuftabentry,
-                             suftabptr[lvi->relpos],
-                             lvi->esr1,
-                             lvi->esr2);
+                                       lvi->readmode,
+                                       &lcpvalue,
+                                       false,
+                                       false,
+                                       0,
+                                       lvi->lastsuftabentry,
+                                       suftabptr[lvi->relpos],
+                                       lvi->esr1,
+                                       lvi->esr2);
 #ifndef NDEBUG
     if (cmp > 0)
     {
@@ -96,7 +96,7 @@ unsigned long gt_nextLcpvalueiterator(Lcpvalueiterator *lvi,
 
 void gt_freeLcpvalueiterator(Lcpvalueiterator **lvi)
 {
-  gt_encseq_scanstate_delete((*lvi)->esr1);
-  gt_encseq_scanstate_delete((*lvi)->esr2);
+  gt_encseq_reader_delete((*lvi)->esr1);
+  gt_encseq_reader_delete((*lvi)->esr2);
   FREESPACE(*lvi);
 }

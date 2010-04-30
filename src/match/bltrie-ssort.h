@@ -33,8 +33,8 @@ typedef enum
 Blindtrie *gt_blindtrie_new(unsigned long numofsuffixes,
                          const GtEncseq *encseq,
                          bool cmpcharbychar,
-                         GtEncseqScanstate *esr1,
-                         GtEncseqScanstate *esr2,
+                         GtEncseqReader *esr1,
+                         GtEncseqReader *esr2,
                          GtReadmode readmode);
 
 unsigned long gt_blindtrie_suffixsort(Blindtrie *blindtrie,

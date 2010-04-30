@@ -25,7 +25,7 @@ struct Windowiterator
   unsigned long firstpos, bufsize, windowsize;
   unsigned long currentpos, endpos;
   const GtEncseq *encseq;
-  GtEncseqScanstate *esr;
+  GtEncseqReader *esr;
 };
 
 Windowiterator *gt_windowiterator_new(const GtEncseq *encseq,
@@ -43,9 +43,9 @@ Windowiterator *gt_windowiterator_new(const GtEncseq *encseq,
   wit->windowsize = windowsize;
   wit->currentpos = startpos;
   wit->endpos = endpos;
-  wit->esr = gt_encseq_scanstate_new(encseq,
-                                              GT_READMODE_FORWARD,
-                                              startpos);
+  wit->esr = gt_encseq_create_reader_with_readmode(encseq,
+                                                   GT_READMODE_FORWARD,
+                                                   startpos);
   wit->encseq = encseq;
   return wit;
 }
@@ -57,17 +57,14 @@ void gt_windowiterator_delete(Windowiterator *wit)
 }
 
 const GtUchar *gt_windowiterator_next(unsigned long *currentpos,
-                                   unsigned long *firstpos,
-                                   Windowiterator *wit)
+                                      unsigned long *firstpos,
+                                      Windowiterator *wit)
 {
   GtUchar currentchar;
 
   while (wit->currentpos < wit->endpos)
   {
-    currentchar = gt_encseq_get_encoded_char_sequential(wit->encseq,
-                                                           wit->esr,
-                                                           wit->currentpos,
-                                                           GT_READMODE_FORWARD);
+    currentchar = gt_encseq_reader_next_encoded_char(wit->esr);
     if (ISSPECIAL(currentchar))
     {
       wit->bufsize = wit->firstpos = 0;
@@ -118,9 +115,8 @@ static void checkcurrentwindow(const GtEncseq *encseq,
     */
     gt_assert(bfbufpos == bufpos);
     cc1 = buffer[bfbufpos];
-    cc2 = gt_encseq_get_encoded_char(encseq,
-                                            currentpos-(windowsize-1)+idx,
-                                            GT_READMODE_FORWARD);
+    cc2 = gt_encseq_get_encoded_char(encseq, currentpos-(windowsize-1)+idx,
+                                     GT_READMODE_FORWARD);
     gt_assert(cc1 == cc2);
     bufpos = (bufpos == windowsize-1) ? 0 : (bufpos + 1);
   }
@@ -134,19 +130,19 @@ static void iteroverallwords(const GtEncseq *encseq,
   unsigned long firstpos, bufsize;
   GtUchar currentchar;
   unsigned long currentpos;
-  GtEncseqScanstate *esr;
+  GtEncseqReader *esr;
   GtUchar *buffer;
   unsigned long windowschecked = 0;
 
   gt_assert(endpos <= gt_encseq_total_length(encseq));
-  esr = gt_encseq_scanstate_new(encseq,GT_READMODE_FORWARD,
-                                         startpos);
+  esr = gt_encseq_create_reader_with_readmode(encseq, GT_READMODE_FORWARD,
+                                              startpos);
   buffer = gt_malloc(sizeof (GtUchar) * windowsize);
   firstpos = bufsize = 0;
   for (currentpos=startpos; currentpos < endpos; currentpos++)
   {
-    currentchar = gt_encseq_get_encoded_char(encseq,esr,currentpos,
-                                                    GT_READMODE_FORWARD);
+    currentchar = gt_encseq_get_encoded_char(encseq, esr, currentpos,
+                                             GT_READMODE_FORWARD);
     if (ISSPECIAL(currentchar))
     {
       bufsize = firstpos = 0;
@@ -174,7 +170,7 @@ static void iteroverallwords(const GtEncseq *encseq,
       windowschecked++;
     }
   }
-  gt_encseq_scanstate_delete(esr);
+  gt_encseq_reader_delete(esr);
   gt_free(buffer);
   printf("# %lu windows checked\n",windowschecked);
 }

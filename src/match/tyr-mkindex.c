@@ -70,7 +70,7 @@ typedef struct /* global information */
   FILE *merindexfpout,
        *countsfilefpout;
   bool moveforward;
-  GtEncseqScanstate *esrspace;
+  GtEncseqReader *esrspace;
   bool performtest;
   bool storecounts;
   GtUchar *bytebuffer;
@@ -441,7 +441,7 @@ static void tyr_freeDfsinfo(Dfsinfo *adfsinfo, GT_UNUSED Dfsstate *state)
 #ifdef WITHcontainsspecial2
 static bool containsspecial2(const GtEncseq *encseq,
                      GT_UNUSED bool moveforward,
-                     GT_UNUSED GtEncseqScanstate *esrspace,
+                     GT_UNUSED GtEncseqReader *esrspace,
                      unsigned long startpos,
                      unsigned long len)
 {
@@ -450,9 +450,7 @@ static bool containsspecial2(const GtEncseq *encseq,
 
   for (pos=startpos; pos<startpos+len; pos++)
   {
-    if (ISSPECIAL(gt_encseq_get_encoded_char(encseq,
-                                                    pos,
-                                                    GT_READMODE_FORWARD)))
+    if (ISSPECIAL(gt_encseq_get_encoded_char(encseq,pos, GT_READMODE_FORWARD)))
     {
       result = true;
       break;
@@ -583,11 +581,13 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
 
   gt_error_check(err);
   GT_INITARRAY(&state.occdistribution,Countwithpositions);
-  state.esrspace = gt_encseq_scanstate_new_empty();
+  state.esrspace = gt_encseq_create_reader_with_readmode(
+                                   gt_encseqSequentialsuffixarrayreader(ssar),
+                                   gt_readmodeSequentialsuffixarrayreader(ssar),
+                                   0);
   state.mersize = (unsigned long) mersize;
   state.encseq = gt_encseqSequentialsuffixarrayreader(ssar);
-  alphasize = gt_alphabet_num_of_chars(
-                                     gt_encseq_alphabet(state.encseq));
+  alphasize = gt_alphabet_num_of_chars(gt_encseq_alphabet(state.encseq));
   state.readmode = gt_readmodeSequentialsuffixarrayreader(ssar);
   state.storecounts = storecounts;
   state.minocc = minocc;
@@ -655,16 +655,16 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
     if (!haserr)
     {
       if (gt_depthfirstesa(ssar,
-                        tyr_allocateDfsinfo,
-                        tyr_freeDfsinfo,
-                        tyr_processleafedge,
-                        NULL,
-                        tyr_processcompletenode,
-                        tyr_assignleftmostleaf,
-                        tyr_assignrightmostleaf,
-                        (Dfsstate*) &state,
-                        logger,
-                        err) != 0)
+                          tyr_allocateDfsinfo,
+                          tyr_freeDfsinfo,
+                          tyr_processleafedge,
+                          NULL,
+                          tyr_processcompletenode,
+                          tyr_assignleftmostleaf,
+                          tyr_assignrightmostleaf,
+                          (Dfsstate*) &state,
+                          logger,
+                          err) != 0)
       {
         haserr = true;
       }
@@ -720,7 +720,7 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   FREESPACE(state.currentmer);
   FREESPACE(state.bytebuffer);
   GT_FREEARRAY(&state.largecounts,Largecount);
-  gt_encseq_scanstate_delete(state.esrspace);
+  gt_encseq_reader_delete(state.esrspace);
   return haserr ? -1 : 0;
 }
 

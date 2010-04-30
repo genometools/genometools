@@ -28,7 +28,7 @@
 
 struct Myersonlineresources
 {
-  GtEncseqScanstate *esr;
+  GtEncseqReader *esr;
   const GtEncseq *encseq;
   unsigned long totallength;
   unsigned long *eqsvectorrev,
@@ -39,12 +39,11 @@ struct Myersonlineresources
   void *processmatchinfo;
 };
 
-Myersonlineresources *gt_newMyersonlineresources(
-                            unsigned int numofchars,
-                            bool nowildcards,
-                            const GtEncseq *encseq,
-                            Processmatch processmatch,
-                            void *processmatchinfo)
+Myersonlineresources *gt_newMyersonlineresources(unsigned int numofchars,
+                                                 bool nowildcards,
+                                                 const GtEncseq *encseq,
+                                                 Processmatch processmatch,
+                                                 void *processmatchinfo)
 {
   Myersonlineresources *mor;
 
@@ -52,7 +51,8 @@ Myersonlineresources *gt_newMyersonlineresources(
   ALLOCASSIGNSPACE(mor->eqsvectorrev,NULL,unsigned long,numofchars);
   ALLOCASSIGNSPACE(mor->eqsvector,NULL,unsigned long,numofchars);
   mor->encseq = encseq;
-  mor->esr = gt_encseq_scanstate_new_empty();
+  mor->esr = gt_encseq_create_reader_with_readmode(encseq, GT_READMODE_REVERSE,
+                                                   0);
   gt_assert(numofchars <= GT_MAXALPHABETCHARACTER);
   mor->alphasize = numofchars;
   mor->totallength = gt_encseq_total_length(encseq);
@@ -68,14 +68,14 @@ void gt_freeMyersonlineresources(Myersonlineresources **ptrmyersonlineresources)
 
   FREESPACE(mor->eqsvectorrev);
   FREESPACE(mor->eqsvector);
-  gt_encseq_scanstate_delete(mor->esr);
+  gt_encseq_reader_delete(mor->esr);
   FREESPACE(*ptrmyersonlineresources);
 }
 
 void gt_edistmyersbitvectorAPM(Myersonlineresources *mor,
-                            const GtUchar *pattern,
-                            unsigned long patternlength,
-                            unsigned long maxdistance)
+                               const GtUchar *pattern,
+                               unsigned long patternlength,
+                               unsigned long maxdistance)
 {
   unsigned long Pv = ~0UL,
                 Mv = 0UL,
@@ -95,10 +95,7 @@ void gt_edistmyersbitvectorAPM(Myersonlineresources *mor,
                    (unsigned long) mor->alphasize,
                    pattern,patternlength);
   score = patternlength;
-  gt_encseq_scanstate_init(mor->esr,
-                               mor->encseq,
-                               readmode,
-                               0);
+  gt_encseq_reader_reinit_with_readmode(mor->esr, mor->encseq, readmode, 0);
   match.dbabsolute = NULL;
   match.dbsubstring = NULL;
   match.querystartpos = 0;
@@ -106,10 +103,7 @@ void gt_edistmyersbitvectorAPM(Myersonlineresources *mor,
   match.alignment = NULL;
   for (pos = 0; pos < mor->totallength; pos++)
   {
-    cc = gt_encseq_get_encoded_char_sequential(mor->encseq,
-                                                     mor->esr,
-                                                     pos,
-                                                     readmode);
+    cc = gt_encseq_reader_next_encoded_char(mor->esr);
     if (cc == (GtUchar) SEPARATOR)
     {
       Pv = ~0UL;

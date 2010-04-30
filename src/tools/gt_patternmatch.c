@@ -101,7 +101,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
     Bucketenumerator *bucketenumerator;
     Lcpinterval itv;
     unsigned long refstart;
-    GtEncseqScanstate *esr1, *esr2;
+    GtEncseqReader *esr1, *esr2;
     int retval;
     unsigned long idx, maxlcp;
     GtCodetype code = 0;
@@ -116,11 +116,13 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
       multimappower = NULL;
     }
     epi = gt_newenumpatterniterator(pmopt->minpatternlen,
-                                 pmopt->maxpatternlen,
-                                 suffixarray.encseq,
-                                 err);
-    esr1 = gt_encseq_scanstate_new_empty();
-    esr2 = gt_encseq_scanstate_new_empty();
+                                    pmopt->maxpatternlen,
+                                    suffixarray.encseq,
+                                    err);
+    esr1 = gt_encseq_create_reader_with_readmode(suffixarray.encseq,
+                                                 suffixarray.readmode, 0);
+    esr2 = gt_encseq_create_reader_with_readmode(suffixarray.encseq,
+                                                 suffixarray.readmode, 0);
     alpha = gt_encseq_alphabet(suffixarray.encseq);
     for (trial = 0; trial < pmopt->numofsamples; trial++)
     {
@@ -228,8 +230,8 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
         gt_freemmsearchiterator(&mmsiimm);
       }
     }
-    gt_encseq_scanstate_delete(esr1);
-    gt_encseq_scanstate_delete(esr2);
+    gt_encseq_reader_delete(esr1);
+    gt_encseq_reader_delete(esr2);
     if (pmopt->showpatt)
     {
       gt_showPatterndistribution(epi);
