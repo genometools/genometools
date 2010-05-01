@@ -39,7 +39,8 @@ typedef struct
        storespecialcodes,
        streamsuftab,
        absoluteinversesuftab,
-       hashexceptions;
+       hashexceptions,
+       iteratorbasedkmerscanning;
 } Sfxstrategy;
 
  /*@unused@*/ static inline void defaultsfxstrategy(Sfxstrategy *sfxstrategy,
@@ -56,6 +57,7 @@ typedef struct
   sfxstrategy->streamsuftab = false;
   sfxstrategy->absoluteinversesuftab = false;
   sfxstrategy->hashexceptions = false;
+  sfxstrategy->iteratorbasedkmerscanning = false;
 }
 
 #endif

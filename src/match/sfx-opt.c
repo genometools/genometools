@@ -277,10 +277,14 @@ static GtOPrval parse_options(int *parsed_args,
   gt_option_parser_add_option(op, optionshowprogress);
   gt_option_exclude(optionshowprogress, optionshowtime);
 
-  option = gt_option_new_bool("v",
-                              "be verbose ",
-                              &so->beverbose,
+  option = gt_option_new_bool("iterscan",
+                              "use iteratorbased-kmer scanning",
+                              &so->iteratorbasedkmerscanning,
                               false);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
+  option = gt_option_new_verbose(&so->beverbose);
   gt_option_parser_add_option(op, option);
 
   gt_option_exclude(optionii, optiondb);

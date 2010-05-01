@@ -500,14 +500,14 @@ static void getencseqkmersupdatekmercount(const GtEncodedsequence *encseq,
 }
 
 Sfxiterator *gt_newSfxiterator(const GtEncodedsequence *encseq,
-                            GtReadmode readmode,
-                            unsigned int prefixlength,
-                            unsigned int numofparts,
-                            Outlcpinfo *outlcpinfo,
-                            const Sfxstrategy *sfxstrategy,
-                            GtProgressTimer *sfxprogress,
-                            GtLogger *logger,
-                            GtError *err)
+                               GtReadmode readmode,
+                               unsigned int prefixlength,
+                               unsigned int numofparts,
+                               Outlcpinfo *outlcpinfo,
+                               const Sfxstrategy *sfxstrategy,
+                               GtProgressTimer *sfxprogress,
+                               GtLogger *logger,
+                               GtError *err)
 {
   Sfxiterator *sfi = NULL;
   unsigned long realspecialranges, specialcharacters;
@@ -545,8 +545,8 @@ Sfxiterator *gt_newSfxiterator(const GtEncodedsequence *encseq,
     sfi->suftabparts = NULL;
     sfi->encseq = encseq;
     sfi->readmode = readmode;
-    sfi->numofchars = gt_alphabet_num_of_chars(
-                                           gt_encodedsequence_alphabet(encseq));
+    sfi->numofchars
+      = gt_alphabet_num_of_chars(gt_encodedsequence_alphabet(encseq));
     sfi->prefixlength = prefixlength;
     sfi->dcov = NULL;
     if (sfxstrategy != NULL)
@@ -563,7 +563,8 @@ Sfxiterator *gt_newSfxiterator(const GtEncodedsequence *encseq,
     } else
     {
       defaultsfxstrategy(&sfi->sfxstrategy,
-                      gt_encodedsequence_bitwise_cmp_ok(encseq) ? false : true);
+                         gt_encodedsequence_bitwise_cmp_ok(encseq)
+                                                          ? false : true);
     }
     gt_logger_log(logger,"maxinsertionsort=%lu",
                 sfi->sfxstrategy.maxinsertionsort);
@@ -660,7 +661,13 @@ Sfxiterator *gt_newSfxiterator(const GtEncodedsequence *encseq,
                                         "counting prefix distribution",
                                         stdout);
     }
-    getencseqkmersupdatekmercount(encseq, readmode, prefixlength, sfi);
+    if (sfi->sfxstrategy.iteratorbasedkmerscanning)
+    {
+      getencseqkmersupdatekmercount(encseq, readmode, prefixlength, sfi);
+    } else
+    {
+      getencseqkmers(encseq,readmode,prefixlength,updatekmercount,sfi);
+    }
     if (sfi->sfxstrategy.storespecialcodes)
     {
       gt_assert(realspecialranges+1
@@ -741,10 +748,6 @@ static void preparethispart(Sfxiterator *sfi)
   sfi->currentmincode = stpgetcurrentmincode(sfi->part,sfi->suftabparts);
   sfi->currentmaxcode = stpgetcurrentmaxcode(sfi->part,sfi->suftabparts);
   sfi->widthofpart = stpgetcurrentwidthofpart(sfi->part,sfi->suftabparts);
-  /*
-  sfi->suftabptr = sfi->suftab -
-                   stpgetcurrentsuftaboffset(sfi->part,sfi->suftabparts);
-  */
   sfi->suftab.offset = stpgetcurrentsuftaboffset(sfi->part,sfi->suftabparts);
   if (sfi->sfxstrategy.storespecialcodes)
   {
@@ -759,10 +762,17 @@ static void preparethispart(Sfxiterator *sfi)
                                       "inserting suffixes into buckets",
                                       stdout);
   }
-  getencseqkmersinsertwithoutspecial(sfi->encseq,
-                                     sfi->readmode,
-                                     sfi->prefixlength,
-                                     sfi);
+  if (sfi->sfxstrategy.iteratorbasedkmerscanning)
+  {
+    getencseqkmersinsertwithoutspecial(sfi->encseq,
+                                       sfi->readmode,
+                                       sfi->prefixlength,
+                                       sfi);
+  } else
+  {
+    getencseqkmers(sfi->encseq,sfi->readmode,sfi->prefixlength,
+                   insertwithoutspecial,sfi);
+  }
   if (sfi->sfxprogress != NULL)
   {
     gt_progress_timer_start_new_state(sfi->sfxprogress,
@@ -776,19 +786,19 @@ static void preparethispart(Sfxiterator *sfi)
     if (!sfi->sfxstrategy.streamsuftab)
     {
       gt_qsufsort(sfi->suftab.sortspace,
-               -1,
-               &sfi->suftab.longest.valueunsignedlong,
-               sfi->encseq,
-               sfi->readmode,
-               sfi->currentmincode,
-               sfi->currentmaxcode,
-               partwidth,
-               sfi->bcktab,
-               sfi->numofchars,
-               sfi->prefixlength,
-               false,
-               true,
-               sfi->outlcpinfo);
+                  -1,
+                  &sfi->suftab.longest.valueunsignedlong,
+                  sfi->encseq,
+                  sfi->readmode,
+                  sfi->currentmincode,
+                  sfi->currentmaxcode,
+                  partwidth,
+                  sfi->bcktab,
+                  sfi->numofchars,
+                  sfi->prefixlength,
+                  false,
+                  true,
+                  sfi->outlcpinfo);
       sfi->suftab.longest.defined = true;
     }
   } else
@@ -803,35 +813,35 @@ static void preparethispart(Sfxiterator *sfi)
     if (sfi->sfxstrategy.differencecover > 0)
     {
       gt_sortbucketofsuffixes(sfi->suftab.sortspace - sfi->suftab.offset,
-                           bucketspec2,
-                           (unsigned long) partwidth,
-                           sfi->encseq,
-                           sfi->readmode,
-                           sfi->currentmincode,
-                           sfi->currentmaxcode,
-                           sfi->bcktab,
-                           sfi->numofchars,
-                           sfi->prefixlength,
-                           &sfi->sfxstrategy,
-                           (void *) sfi->dcov,
-                           dc_sortunsortedbucket,
-                           sfi->logger);
+                              bucketspec2,
+                              (unsigned long) partwidth,
+                              sfi->encseq,
+                              sfi->readmode,
+                              sfi->currentmincode,
+                              sfi->currentmaxcode,
+                              sfi->bcktab,
+                              sfi->numofchars,
+                              sfi->prefixlength,
+                              &sfi->sfxstrategy,
+                              (void *) sfi->dcov,
+                              dc_sortunsortedbucket,
+                              sfi->logger);
     } else
     {
       gt_sortallbuckets (&sfi->suftab,
-                      bucketspec2,
-                      sfi->encseq,
-                      sfi->readmode,
-                      sfi->currentmincode,
-                      sfi->currentmaxcode,
-                      partwidth,
-                      sfi->bcktab,
-                      sfi->numofchars,
-                      sfi->prefixlength,
-                      sfi->outlcpinfo,
-                      &sfi->sfxstrategy,
-                      &sfi->bucketiterstep,
-                      sfi->logger);
+                         bucketspec2,
+                         sfi->encseq,
+                         sfi->readmode,
+                         sfi->currentmincode,
+                         sfi->currentmaxcode,
+                         partwidth,
+                         sfi->bcktab,
+                         sfi->numofchars,
+                         sfi->prefixlength,
+                         sfi->outlcpinfo,
+                         &sfi->sfxstrategy,
+                         &sfi->bucketiterstep,
+                         sfi->logger);
     }
     if (bucketspec2 != NULL)
     {

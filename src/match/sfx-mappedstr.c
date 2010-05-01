@@ -691,7 +691,7 @@ static void newcode(Kmerstream *spwp,
     gt_assert(wcode == kmercode->code);
 #endif
     processkmercode(processkmercodeinfo,
-                    currentposition - 1 - spwp->kmersize,
+                    currentposition + 1 - spwp->kmersize,
                     &kmercode);
   }
 }
@@ -704,18 +704,28 @@ static void shiftrightwithchar(Kmerstream *spwp,
                                unsigned long currentposition,
                                GtUchar charcode)
 {
-  gt_assert(spwp->windowwidth == spwp->kmersize);
-  updatespecialpositions(spwp,charcode,true,
-                         spwp->cyclicwindow[spwp->firstindex]);
-  spwp->cyclicwindow[spwp->firstindex] = charcode;
-  if (spwp->firstindex == spwp->kmersize-1)
+  if (spwp->windowwidth < spwp->kmersize)
   {
-    spwp->firstindex = 0;
+    spwp->windowwidth++;
+    updatespecialpositions(spwp,charcode,false,0);
+    spwp->cyclicwindow[spwp->windowwidth-1] = charcode;
   } else
   {
-    spwp->firstindex++;
+    updatespecialpositions(spwp,charcode,true,
+                           spwp->cyclicwindow[spwp->firstindex]);
+    spwp->cyclicwindow[spwp->firstindex] = charcode;
+    if (spwp->firstindex == spwp->kmersize-1)
+    {
+      spwp->firstindex = 0;
+    } else
+    {
+      spwp->firstindex++;
+    }
   }
-  newcode(spwp,processkmercode,processkmercodeinfo,currentposition);
+  if (spwp->windowwidth == spwp->kmersize)
+  {
+    newcode(spwp,processkmercode,processkmercodeinfo,currentposition);
+  }
 }
 
 static void doovershoot(Kmerstream *spwp,
@@ -735,14 +745,13 @@ static void doovershoot(Kmerstream *spwp,
   }
 }
 
-void getencseqkmers(
-        const GtEncodedsequence *encseq,
-        GtReadmode readmode,
-        void(*processkmercode)(void *,
-                               unsigned long,
-                               const GtKmercode *),
-        void *processkmercodeinfo,
-        unsigned int kmersize)
+void getencseqkmers(const GtEncodedsequence *encseq,
+                    GtReadmode readmode,
+                    unsigned int kmersize,
+                    void(*processkmercode)(void *,
+                                           unsigned long,
+                                           const GtKmercode *),
+                    void *processkmercodeinfo)
 {
   unsigned long currentposition = 0, totallength;
   Kmerstream *spwp;

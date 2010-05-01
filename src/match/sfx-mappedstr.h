@@ -57,4 +57,11 @@ bool gt_kmercodeiterator_inputexhausted(
 
 void gt_kmercodeiterator_delete(GtKmercodeiterator *kmercodeiterator);
 
+void getencseqkmers(const GtEncodedsequence *encseq,
+                    GtReadmode readmode,
+                    unsigned int kmersize,
+                    void(*processkmercode)(void *,
+                                           unsigned long,
+                                           const GtKmercode *),
+                    void *processkmercodeinfo);
 #endif

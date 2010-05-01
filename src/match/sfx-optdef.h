@@ -60,7 +60,8 @@ typedef struct
        outbwttab,
        outbcktab,
        outkystab,
-       outkyssort;
+       outkyssort,
+       iteratorbasedkmerscanning;
   GtStr *optionkysargumentstring;
   Sfxstrategy sfxstrategy;
   Filenames2encseqoptions fn2encopt;
