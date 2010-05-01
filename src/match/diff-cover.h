@@ -24,18 +24,20 @@
 
 typedef struct Differencecover Differencecover;
 
+/* The following function is used for test purposes only */
+
 void gt_differencecovers_check(const GtEncodedsequence *encseq,
-                            GtReadmode readmode);
+                               GtReadmode readmode);
 
 Differencecover *gt_differencecover_new(unsigned int vparam,
-                                     const GtEncodedsequence *encseq,
-                                     GtReadmode readmode,
-                                     GtLogger *logger);
+                                        const GtEncodedsequence *encseq,
+                                        GtReadmode readmode,
+                                        GtLogger *logger);
 
 int gt_differencecover_vparamverify(const Differencecover *dcov,GtError *err);
 
 void gt_differencecover_sortsample(Differencecover *dcov,bool cmpcharbychar,
-                                bool withcheck);
+                                   bool withcheck);
 
 void gt_differencecover_delete(Differencecover *dcov);
 
