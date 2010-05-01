@@ -19,6 +19,7 @@
 icc=0
 do64=0
 big=0
+speed=0
 
 if test $# -ge 1
 then
@@ -29,6 +30,8 @@ then
             shift;;
    "-big")  big=1
             shift;;
+   "-speed") speed=1
+             shift;;
   esac
 fi
 
@@ -38,7 +41,11 @@ fi
 
 makecompilerflags()
 {
-  printf "all:\n\t\${MAKE} curses=no cairo=no opt=no"
+  printf "all:\n\t\${MAKE} curses=no cairo=no opt=yes "
+  if test $4 -eq 1
+  then
+    printf " assert=no amalgamation=yes"
+  fi
   if test $3 -eq 1
   then
     printf " CC='ccache icc'"
@@ -77,13 +84,13 @@ fi
 
 if test $icc -eq 1
 then
-  makecompilerflags 32 $big $icc > LocalMakefile
+  makecompilerflags 32 $big $icc $speed > LocalMakefile
 else
   if test $do64 -eq 1
   then
-    makecompilerflags 64 0 $icc > LocalMakefile
+    makecompilerflags 64 0 $icc $speed > LocalMakefile
   else
-    makecompilerflags 32 $big $icc > LocalMakefile
+    makecompilerflags 32 $big $icc $speed > LocalMakefile
   fi
 fi
 

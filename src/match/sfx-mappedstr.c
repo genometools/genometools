@@ -24,6 +24,8 @@
 #include "core/chardef.h"
 #include "core/ma_api.h"
 #include "core/checkencchar.h"
+#include "core/divmodmul.h"
+#include "core/alphabet.h"
 #include "core/encodedsequence_api.h"
 #include "core/error_api.h"
 #include "core/sequence_buffer_fasta.h"
@@ -37,11 +39,12 @@
 #include "sfx-nextchar.h"
 #endif
 
+#undef SPECIALCASE4
 #ifdef SPECIALCASE4
 #define SUBTRACTLCHARANDSHIFT(CODE,LCHAR,NUMOFCHARS,MULTIMAPPOWER)\
         if ((NUMOFCHARS) == GT_DNAALPHASIZE)\
         {\
-          CODE = MULT4((CODE) - MULTIMAPPOWER[(unsigned int) (LCHAR)]);\
+          CODE = GT_MULT4((CODE) - MULTIMAPPOWER[(unsigned int) (LCHAR)]);\
         } else\
         {\
           CODE = ((CODE) - MULTIMAPPOWER[(unsigned int) (LCHAR)])\
@@ -51,7 +54,8 @@
 #define SUBTRACTLCHARSHIFTADDNEXT(CODE,LCHAR,NUMOFCHARS,MULTIMAPPOWER,CC)\
         if ((NUMOFCHARS) == GT_DNAALPHASIZE)\
         {\
-          CODE = MULT4((CODE) - MULTIMAPPOWER[(unsigned int) (LCHAR)]) | (CC);\
+          CODE = GT_MULT4((CODE) - MULTIMAPPOWER[(unsigned int) (LCHAR)]) |\
+                 (CC);\
         } else\
         {\
           CODE = (GtCodetype) ((CODE) - MULTIMAPPOWER[(unsigned int) (LCHAR)])*\
@@ -176,6 +180,7 @@ typedef struct
   GtCodetype codewithoutspecial,
              *filltable,
              **multimappower;
+  GtKmercode currentkmercode;
 } Kmerstream;
 
 static void specialemptyqueue(Specialpositions *spos,unsigned int queuesize)
@@ -257,7 +262,12 @@ static void updatespecialpositions(Kmerstream *spwp,
 
       /* only here we add some element to the queue */
       head = specialheadofqueue(&spwp->spos);
-      if (head->distvalue == 0)
+      if (head->distvalue > 0)
+      {
+        SUBTRACTLCHARANDSHIFT(head->codeforleftcontext,lchar,spwp->numofchars,
+                              spwp->multimappower[0]);
+        head->distvalue--;
+      } else
       {
         specialdeleteheadofqueue(&spwp->spos);
         if (!specialqueueisempty(&spwp->spos))
@@ -265,15 +275,25 @@ static void updatespecialpositions(Kmerstream *spwp,
           head = specialheadofqueue(&spwp->spos);
           head->distvalue--;
         }
-      } else
-      {
-        SUBTRACTLCHARANDSHIFT(head->codeforleftcontext,lchar,spwp->numofchars,
-                              spwp->multimappower[0]);
-        head->distvalue--;
       }
     }
   }
-  if (ISSPECIAL(charcode))
+  if (ISNOTSPECIAL(charcode))
+  {
+    if (spwp->lengthwithoutspecial == spwp->kmersize)
+    {
+      SUBTRACTLCHARSHIFTADDNEXT(spwp->codewithoutspecial,
+                                lchar,
+                                spwp->numofchars,
+                                spwp->multimappower[0],
+                                charcode);
+    } else
+    {
+      spwp->codewithoutspecial +=
+        spwp->multimappower[spwp->lengthwithoutspecial][charcode];
+      spwp->lengthwithoutspecial++;
+    }
+  } else
   {
     /* only here we add some element to the queue */
     Specialitem newelem;
@@ -294,25 +314,10 @@ static void updatespecialpositions(Kmerstream *spwp,
     specialenqueue(&spwp->spos,newelem);
     spwp->lengthwithoutspecial = 0;
     spwp->codewithoutspecial = 0;
-  } else
-  {
-    if (spwp->lengthwithoutspecial == spwp->kmersize)
-    {
-      SUBTRACTLCHARSHIFTADDNEXT(spwp->codewithoutspecial,
-                                lchar,
-                                spwp->numofchars,
-                                spwp->multimappower[0],
-                                charcode);
-    } else
-    {
-      spwp->codewithoutspecial +=
-        spwp->multimappower[spwp->lengthwithoutspecial][charcode];
-      spwp->lengthwithoutspecial++;
-    }
   }
 }
 
-static void iteratenewcode(GtKmercode *kmercode, Kmerstream *spwp)
+static void newcode(GtKmercode *kmercode, Kmerstream *spwp)
 {
 #ifdef SKDEBUG
   bool firstspecialbrutedefined;
@@ -373,22 +378,20 @@ static void iteratenewcode(GtKmercode *kmercode, Kmerstream *spwp)
   }
 }
 
-static void iterateshiftrightwithchar(GtKmercode *kmercode,
-                                      Kmerstream *spwp,
+static void shiftrightwithchar(Kmerstream *spwp,
                                       GtUchar charcode)
 {
   gt_assert(spwp->windowwidth == spwp->kmersize);
   updatespecialpositions(spwp,charcode,true,
                          spwp->cyclicwindow[spwp->firstindex]);
   spwp->cyclicwindow[spwp->firstindex] = charcode;
-  if (spwp->firstindex == spwp->kmersize-1)
-  {
-    spwp->firstindex = 0;
-  } else
+  if (spwp->firstindex < spwp->kmersize-1)
   {
     spwp->firstindex++;
+  } else
+  {
+    spwp->firstindex = 0;
   }
-  iteratenewcode(kmercode, spwp);
 }
 
 static void kmerstream_delete(Kmerstream *spwp)
@@ -469,15 +472,14 @@ const GtKmercode *gt_kmercodeiterator_encseq_next(
                                               kmercodeiterator->esr,
                                               kmercodeiterator->currentposition,
                                               kmercodeiterator->readmode);
-      iterateshiftrightwithchar(&kmercodeiterator->kmercode,
-                                kmercodeiterator->spwp,
-                                charcode);
+      shiftrightwithchar(kmercodeiterator->spwp,charcode);
+      newcode(&kmercodeiterator->kmercode, kmercodeiterator->spwp);
       kmercodeiterator->currentposition++;
     } else
     {
       gt_assert(kmercodeiterator->currentposition
                 == (unsigned long) kmercodeiterator->spwp->kmersize);
-      iteratenewcode(&kmercodeiterator->kmercode, kmercodeiterator->spwp);
+      newcode(&kmercodeiterator->kmercode, kmercodeiterator->spwp);
       kmercodeiterator->hasprocessedfirst = true;
     }
     return &kmercodeiterator->kmercode;
@@ -485,9 +487,8 @@ const GtKmercode *gt_kmercodeiterator_encseq_next(
   if (kmercodeiterator->currentposition < kmercodeiterator->totallength +
                                           kmercodeiterator->spwp->kmersize)
   {
-    iterateshiftrightwithchar(&kmercodeiterator->kmercode,
-                              kmercodeiterator->spwp,
-                              (GtUchar) WILDCARD);
+    shiftrightwithchar(kmercodeiterator->spwp,(GtUchar) WILDCARD);
+    newcode(&kmercodeiterator->kmercode, kmercodeiterator->spwp);
     kmercodeiterator->currentposition++;
     return &kmercodeiterator->kmercode;
   }
@@ -576,9 +577,8 @@ int gt_kmercodeiterator_filetab_next(const GtKmercode **kmercodeptr,
       }
       if (retval != 0)
       {
-        iterateshiftrightwithchar(&kmercodeiterator->kmercode,
-                                  kmercodeiterator->spwp,
-                                  charcode);
+        shiftrightwithchar(kmercodeiterator->spwp,charcode);
+        newcode(&kmercodeiterator->kmercode, kmercodeiterator->spwp);
         kmercodeiterator->currentposition++,
         *kmercodeptr = &kmercodeiterator->kmercode;
         return 0;
@@ -587,7 +587,7 @@ int gt_kmercodeiterator_filetab_next(const GtKmercode **kmercodeptr,
       kmercodeiterator->totallength = kmercodeiterator->currentposition;
     } else
     {
-      iteratenewcode(&kmercodeiterator->kmercode, kmercodeiterator->spwp);
+      newcode(&kmercodeiterator->kmercode, kmercodeiterator->spwp);
       kmercodeiterator->hasprocessedfirst = true;
       *kmercodeptr = &kmercodeiterator->kmercode;
       return 0;
@@ -596,9 +596,8 @@ int gt_kmercodeiterator_filetab_next(const GtKmercode **kmercodeptr,
   if (kmercodeiterator->currentposition < kmercodeiterator->totallength +
                                           kmercodeiterator->spwp->kmersize)
   {
-    iterateshiftrightwithchar(&kmercodeiterator->kmercode,
-                              kmercodeiterator->spwp,
-                              (GtUchar) WILDCARD);
+    shiftrightwithchar(kmercodeiterator->spwp,(GtUchar) WILDCARD);
+    newcode(&kmercodeiterator->kmercode, kmercodeiterator->spwp);
     kmercodeiterator->currentposition++,
     *kmercodeptr = &kmercodeiterator->kmercode;
   } else
@@ -626,125 +625,6 @@ void gt_kmercodeiterator_delete(GtKmercodeiterator *kmercodeiterator)
   gt_free(kmercodeiterator);
 }
 
-static void newcode(Kmerstream *spwp,
-                    void(*processkmercode)(void *,
-                                           unsigned long position,
-                                           const GtKmercode *kmercode),
-                    void *processkmercodeinfo,
-                    unsigned long currentposition)
-{
-#ifdef SKDEBUG
-  bool firstspecialbrutedefined;
-  unsigned int firstspecialbrute;
-
-  if (!specialqueueisempty(&spwp->spos))
-  {
-    Specialitem *head = specialheadofqueue(&spwp->spos);
-    GtCodetype tmpprefixcode = prefixwindowkmer2code(head->distvalue,
-                                                     spwp->kmersize,
-                                                     (const GtCodetype **)
-                                                       spwp->multimappower,
-                                                     spwp->cyclicwindow,
-                                                     spwp->firstindex);
-    gt_assert(tmpprefixcode == head->codeforleftcontext);
-  }
-  firstspecialbrutedefined
-    = determinefirstspecialposition(&firstspecialbrute,
-                                    spwp->windowwidth,
-                                    spwp->kmersize,
-                                    spwp->cyclicwindow,
-                                    spwp->firstindex);
-  if (specialqueueisempty(&spwp->spos))
-  {
-    gt_assert(!firstspecialbrutedefined);
-  } else
-  {
-    Specialitem *head = specialheadofqueue(&spwp->spos);
-    gt_assert(firstspecialbrutedefined ? 1 : 0);
-    gt_assert(head->distvalue == firstspecialbrute);
-  }
-#endif
-  {
-    GtKmercode kmercode;
-#ifdef SKDEBUG
-    GtCodetype wcode;
-
-    wcode = windowkmer2code(spwp->numofchars,
-                            spwp->kmersize,
-                            spwp->cyclicwindow,
-                            spwp->firstindex);
-#endif
-    if (specialqueueisempty(&spwp->spos))
-    {
-      kmercode.definedspecialpos = false;
-      kmercode.specialpos = 0;
-      kmercode.code = spwp->codewithoutspecial;
-    } else
-    {
-      Specialitem *head = specialheadofqueue(&spwp->spos);
-      kmercode.code = head->codeforleftcontext +
-                      spwp->filltable[head->distvalue];
-      kmercode.definedspecialpos = true;
-      kmercode.specialpos = head->distvalue;
-    }
-#ifdef SKDEBUG
-    gt_assert(wcode == kmercode->code);
-#endif
-    processkmercode(processkmercodeinfo,
-                    currentposition + 1 - spwp->kmersize,
-                    &kmercode);
-  }
-}
-
-static void shiftrightwithchar(Kmerstream *spwp,
-                               void(*processkmercode)(void *,
-                                               unsigned long position,
-                                               const GtKmercode *kmercode),
-                               void *processkmercodeinfo,
-                               unsigned long currentposition,
-                               GtUchar charcode)
-{
-  if (spwp->windowwidth < spwp->kmersize)
-  {
-    spwp->windowwidth++;
-    updatespecialpositions(spwp,charcode,false,0);
-    spwp->cyclicwindow[spwp->windowwidth-1] = charcode;
-  } else
-  {
-    updatespecialpositions(spwp,charcode,true,
-                           spwp->cyclicwindow[spwp->firstindex]);
-    spwp->cyclicwindow[spwp->firstindex] = charcode;
-    if (spwp->firstindex == spwp->kmersize-1)
-    {
-      spwp->firstindex = 0;
-    } else
-    {
-      spwp->firstindex++;
-    }
-  }
-  if (spwp->windowwidth == spwp->kmersize)
-  {
-    newcode(spwp,processkmercode,processkmercodeinfo,currentposition);
-  }
-}
-
-static void doovershoot(Kmerstream *spwp,
-                        void(*processkmercode)(void *,
-                                               unsigned long position,
-                                               const GtKmercode *kmercode),
-                        void *processkmercodeinfo,
-                        unsigned long currentposition,
-                        unsigned int kmersize)
-{
-  unsigned int overshoot;
-
-  for (overshoot=0; overshoot<kmersize; overshoot++)
-  {
-    shiftrightwithchar(spwp,processkmercode,processkmercodeinfo,
-                       currentposition + overshoot,(GtUchar) WILDCARD);
-  }
-}
-
 void getencseqkmers(const GtEncodedsequence *encseq,
                     GtReadmode readmode,
                     unsigned int kmersize,
@@ -757,29 +637,51 @@ void getencseqkmers(const GtEncodedsequence *encseq,
   Kmerstream *spwp;
   GtUchar charcode;
   GtEncodedsequenceScanstate *esr;
-  unsigned int numofchars;
+  unsigned int numofchars, overshoot;
 
   totallength = gt_encodedsequence_total_length(encseq);
+  if (totallength < (unsigned long) kmersize)
+  {
+    return;
+  }
   numofchars = gt_alphabet_num_of_chars(gt_encodedsequence_alphabet(encseq));
   spwp = kmerstream_new(numofchars,kmersize);
   esr = gt_encodedsequence_scanstate_new(encseq,readmode,0);
-  for (currentposition = 0; currentposition<totallength; currentposition++)
+  for (currentposition = 0; currentposition<(unsigned long) kmersize;
+       currentposition++)
   {
     charcode = gt_encodedsequence_get_encoded_char_sequential(encseq,esr,
-                                                           currentposition,
-                                                           readmode);
+                                                              currentposition,
+                                                              readmode);
     GT_CHECKENCCHAR(charcode,encseq,currentposition,readmode);
-    shiftrightwithchar(spwp,processkmercode,processkmercodeinfo,
-                       currentposition,charcode);
+    spwp->windowwidth++;
+    updatespecialpositions(spwp,charcode,false,0);
+    spwp->cyclicwindow[spwp->windowwidth-1] = charcode;
+  }
+  newcode(&spwp->currentkmercode,spwp);
+  processkmercode(processkmercodeinfo,0,&spwp->currentkmercode);
+  for (currentposition = (unsigned long) kmersize; currentposition<totallength;
+       currentposition++)
+  {
+    charcode = gt_encodedsequence_get_encoded_char_sequential(encseq,esr,
+                                                              currentposition,
+                                                              readmode);
+    GT_CHECKENCCHAR(charcode,encseq,currentposition,readmode);
+    shiftrightwithchar(spwp,charcode);
+    newcode(&spwp->currentkmercode,spwp);
+    processkmercode(processkmercodeinfo,currentposition + 1 - spwp->kmersize,
+                    &spwp->currentkmercode);
   }
   if (esr != NULL)
   {
     gt_encodedsequence_scanstate_delete(esr);
   }
-  doovershoot(spwp,
-              processkmercode,
-              processkmercodeinfo,
-              currentposition,
-              kmersize);
+  for (overshoot=0; overshoot<kmersize; overshoot++)
+  {
+    shiftrightwithchar(spwp,(GtUchar) WILDCARD);
+    newcode(&spwp->currentkmercode,spwp);
+    processkmercode(processkmercodeinfo,currentposition + 1 - spwp->kmersize,
+                    &spwp->currentkmercode);
+  }
   kmerstream_delete(spwp);
 }

@@ -455,28 +455,6 @@ static void showleftborder(const unsigned long *leftborder,
 }
 #endif
 
-void getencseqkmersinsertwithoutspecial(const GtEncodedsequence *encseq,
-                                        GtReadmode readmode,
-                                        unsigned int kmersize,
-                                        Sfxiterator *sfi)
-{
-  GtKmercodeiterator *kmercodeiterator;
-  const GtKmercode *kmercodeptr;
-
-  kmercodeiterator = gt_kmercodeiterator_encseq_new(encseq,readmode,kmersize);
-  if (!gt_kmercodeiterator_inputexhausted(kmercodeiterator))
-  {
-    unsigned long position = 0;
-
-    while ((kmercodeptr = gt_kmercodeiterator_encseq_next(kmercodeiterator))
-                          != NULL)
-    {
-      insertwithoutspecial(sfi,position++,kmercodeptr);
-    }
-    gt_kmercodeiterator_delete(kmercodeiterator);
-  }
-}
-
 static void getencseqkmersupdatekmercount(const GtEncodedsequence *encseq,
                                           GtReadmode readmode,
                                           unsigned int kmersize,
@@ -494,6 +472,28 @@ static void getencseqkmersupdatekmercount(const GtEncodedsequence *encseq,
                           != NULL)
     {
       updatekmercount(sfi,position++,kmercodeptr);
+    }
+    gt_kmercodeiterator_delete(kmercodeiterator);
+  }
+}
+
+void getencseqkmersinsertwithoutspecial(const GtEncodedsequence *encseq,
+                                        GtReadmode readmode,
+                                        unsigned int kmersize,
+                                        Sfxiterator *sfi)
+{
+  GtKmercodeiterator *kmercodeiterator;
+  const GtKmercode *kmercodeptr;
+
+  kmercodeiterator = gt_kmercodeiterator_encseq_new(encseq,readmode,kmersize);
+  if (!gt_kmercodeiterator_inputexhausted(kmercodeiterator))
+  {
+    unsigned long position = 0;
+
+    while ((kmercodeptr = gt_kmercodeiterator_encseq_next(kmercodeiterator))
+                          != NULL)
+    {
+      insertwithoutspecial(sfi,position++,kmercodeptr);
     }
     gt_kmercodeiterator_delete(kmercodeiterator);
   }
@@ -779,6 +779,7 @@ static void preparethispart(Sfxiterator *sfi)
                                       "sorting the buckets",
                                       stdout);
   }
+  /* exit(0); just for testing */
   partwidth = stpgetcurrentsumofwdith(sfi->part,sfi->suftabparts);
   if (sfi->sfxstrategy.ssortmaxdepth.defined &&
       sfi->prefixlength == sfi->sfxstrategy.ssortmaxdepth.valueunsignedint)
