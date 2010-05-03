@@ -339,10 +339,10 @@ Compressedtable *gt_lcp9_manzini(Compressedtable *spacefortab,
      ranknext at position fillpos, the same cell is used for storing
      the determined lcp-value */
   /* exploit the fact, that pos + lcpvalue is monotone */
-  esr1 = gt_encseq_create_reader_with_readmode(encseq,readmode,0);
+  esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode,0);
   cc1 = gt_encseq_reader_next_encoded_char(esr1);
   previouscc1pos = 0;
-  esr2 = gt_encseq_create_reader_with_readmode(encseq,readmode, totallength);
+  esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   previouscc2pos = totallength;
   cc2 = 0;
   for (pos = 0; pos < totallength; pos++)
@@ -371,7 +371,7 @@ Compressedtable *gt_lcp9_manzini(Compressedtable *spacefortab,
             previousstart+lcpvalue > previouscc2pos+1)
         {
           previouscc2pos = previousstart+lcpvalue;
-          gt_encseq_reader_reinit_with_readmode(esr2,encseq, readmode,
+          gt_encseq_reader_reinit_with_readmode(esr2, encseq, readmode,
                                                 previouscc2pos);
           cc2 = gt_encseq_reader_next_encoded_char(esr2);
         } else
