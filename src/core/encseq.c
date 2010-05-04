@@ -384,7 +384,7 @@ GtUchar gt_encseq_reader_next_encoded_char(GtEncseqReader *esr)
 #ifdef WITHshowgetencodedcharcounters
   countgt_encseq_get_encoded_char++;
 #endif
-  gt_assert(esr->currentpos >= 0 && esr->currentpos < esr->encseq->totallength);
+  gt_assert(esr->currentpos < esr->encseq->totallength);
   switch (esr->readmode)
   {
     case GT_READMODE_FORWARD:
@@ -1872,7 +1872,8 @@ void gt_encseq_reader_reinit_with_direction(GtEncseqReader *esr,
                                             bool moveforward,
                                             unsigned long startpos)
 {
-  if (esr != NULL && encseq != esr->encseq) {
+  gt_assert(esr != NULL);
+  if (encseq != esr->encseq) {
     if (esr->encseq != NULL)
       gt_encseq_delete(esr->encseq);
     esr->encseq = gt_encseq_ref((GtEncseq*) encseq);
