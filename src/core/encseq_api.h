@@ -95,6 +95,13 @@ void              gt_encseq_extract_substring(const GtEncseq *encseq,
                                               GtUchar *buffer,
                                               unsigned long frompos,
                                               unsigned long topos);
+/* Returns the decoded version of the substring from position <frompos>
+   to position <topos> of <encseq>. The result is written to the location
+   pointed to by <buffer>, which must be large enough to hold the result. */
+void              gt_encseq_extract_decoded(const GtEncseq *encseq,
+                                            char *buffer,
+                                            unsigned long frompos,
+                                            unsigned long topos);
 /* Returns the length of the <seqnum>-th sequence in the <encseq>. */
 unsigned long     gt_encseq_seqlength(const GtEncseq *encseq,
                                       unsigned long seqnum);

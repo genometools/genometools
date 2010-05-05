@@ -26,7 +26,7 @@ from gt.core.gtstr import Str
 import os
 from ctypes import Structure, c_ulong, c_uint, c_int, c_char_p, c_void_p, \
                    POINTER, byref, c_uint32, c_uint64, string_at, \
-                   create_string_buffer, c_ubyte
+                   create_string_buffer, c_ubyte, c_char
 
 def int2bool(val):
     if  val == 0:
@@ -372,17 +372,6 @@ class Encseq:
             gterror("invalid sequence number %d" % num)
         return gtlib.gt_encseq_seqlength(self.encseq, num)
 
-    def seq_substr(self, num, start, end):
-        seqstartpos = self.seq_startpos(num)
-        seqlength = self.seq_length(num)
-        if start < 0 or end >= seqlength:
-            gterror("invalid coordinates: %d-%d (allowed: %d-%d)" % (start, end,
-                                                                0, seqlength-1))
-        buf = (c_ubyte * (end-start+1))()
-        gtlib.gt_encseq_extract_substring(self.encseq, buf, seqstartpos+start,
-                                          seqstartpos+end)
-        return buf
-
     def create_reader(self, readmode, startpos):
         if readmode < 0 or readmode > 3:
             gterror("invalid readmode!")
@@ -395,10 +384,26 @@ class Encseq:
         return EncseqReader(er, True)
 
     def seq_encoded(self, num, start, end):
-        return self.seq_substr(num, start, end)
+        seqstartpos = self.seq_startpos(num)
+        seqlength = self.seq_length(num)
+        if start < 0 or end >= seqlength:
+            gterror("invalid coordinates: %d-%d (allowed: %d-%d)" % (start, end,
+                                                                0, seqlength-1))
+        buf = (c_ubyte * (end-start+1))()
+        gtlib.gt_encseq_extract_substring(self.encseq, buf, seqstartpos+start,
+                                          seqstartpos+end)
+        return buf
 
     def seq_plain(self, num, start, end):
-        return self.alphabet().decode_seq(self.seq_substr(num, start, end))
+        seqstartpos = self.seq_startpos(num)
+        seqlength = self.seq_length(num)
+        if start < 0 or end >= seqlength:
+            gterror("invalid coordinates: %d-%d (allowed: %d-%d)" % (start, end,
+                                                                0, seqlength-1))
+        buf = (c_char * (end-start+1))()
+        gtlib.gt_encseq_extract_decoded(self.encseq, buf, seqstartpos+start,
+                                        seqstartpos+end)
+        return string_at(buf, end-start+1)
 
     def register(cls, gtlib):
         gtlib.gt_encseq_num_of_sequences.restype = c_ulong
@@ -416,6 +421,7 @@ class Encseq:
         gtlib.gt_encseq_seqlength.restype = c_ulong
         gtlib.gt_encseq_seqlength.argtypes = [c_void_p, c_ulong]
         gtlib.gt_encseq_extract_substring.argtypes = [c_void_p, POINTER(c_ubyte), c_ulong, c_ulong]
+        gtlib.gt_encseq_extract_decoded.argtypes = [c_void_p, c_char_p, c_ulong, c_ulong]
 
     register = classmethod(register)
 

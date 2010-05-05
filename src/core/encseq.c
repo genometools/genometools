@@ -474,6 +474,27 @@ void gt_encseq_extract_substring(const GtEncseq *encseq,
   gt_encseq_reader_delete(esr);
 }
 
+void gt_encseq_extract_decoded(const GtEncseq *encseq,
+                               char *buffer,
+                               unsigned long frompos,
+                               unsigned long topos)
+{
+  GtEncseqReader *esr;
+  unsigned long idx;
+  unsigned long pos;
+
+  gt_assert(frompos <= topos && topos < encseq->totallength);
+  esr = gt_encseq_create_reader_with_readmode((GtEncseq*) encseq,
+                                              GT_READMODE_FORWARD,
+                                              frompos);
+  for (pos=frompos, idx = 0; pos <= topos; pos++, idx++)
+  {
+    buffer[idx] = gt_alphabet_decode(encseq->alpha,
+                                     gt_encseq_reader_next_encoded_char(esr));
+  }
+  gt_encseq_reader_delete(esr);
+}
+
 typedef struct
 {
   GtPositionaccesstype sat;

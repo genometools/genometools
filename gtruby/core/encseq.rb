@@ -97,6 +97,8 @@ module GT
                                              GtReadmode)"
   extern "void gt_encseq_extract_substring(const GtEncseq*, GtUchar*,
                                            unsigned long, unsigned long)"
+  extern "void gt_encseq_extract_decoded(const GtEncseq*, void*,
+                                         unsigned long, unsigned long)"
   extern "unsigned long gt_encseq_seqlength(const GtEncseq*, unsigned long)"
   extern "unsigned long gt_encseq_seqstartpos(const GtEncseq *, unsigned long)"
   extern "void* gt_encseq_description(const GtEncseq*, unsigned long*,
@@ -526,7 +528,19 @@ module GT
     end
 
     def seq_plain(num, start, stop)
-      self.alphabet.decode_seq(self.seq_encoded(num, start, stop))
+      if num >= self.num_of_sequences then
+        GT.gterror("invalid sequence number #{num}")
+      end
+      seqlength = self.seq_length(num)
+      seqstartpos = self.seq_startpos(num)
+      if start < 0 or stop >= seqlength then
+        gterror("invalid coordinates: #{start}-#{stop} " + \
+                "(allowed: #{0}-#{seqlength-1})")
+      end
+      buf = DL.malloc(DL::sizeof('C') * (stop-start+1))
+      GT.gt_encseq_extract_decoded(@encseq, buf, seqstartpos+start, \
+                                   seqstartpos+stop)
+      buf.to_s(stop-start+1)
     end
   end
 
