@@ -28,21 +28,20 @@
 #include "core/types_api.h"
 #include "spacedef.h"
 #include "core/encseq.h"
+#include "spacedef.h"
 #include "turnwheels.h"
 #include "esa-fileend.h"
-#include "sfx-bentsedg.h"
-
 #include "bcktab.h"
+#include "kmer2string.h"
 #include "bltrie-ssort.h"
 #include "lcpoverflow.h"
 #include "sfx-remainsort.h"
 #include "sfx-copysort.h"
-#include "kmer2string.h"
-#include "stamp.h"
+#include "sfx-bentsedg.h"
 
 #define UNIQUEINT(P)           ((unsigned long) ((P) + GT_COMPAREOFFSET))
 #define ACCESSCHAR(POS)        gt_encseq_get_encoded_char(bsr->encseq,\
-                                                             POS,bsr->readmode)
+                                                          POS,bsr->readmode)
 #define ACCESSCHARSEQ(POS,ESR) gt_encseq_reader_next_encoded_char(ESR)
 #define ISNOTEND(POS)          ((POS) < bsr->totallength &&\
                                 ISNOTSPECIAL(ACCESSCHAR(POS)))
@@ -1229,13 +1228,14 @@ static void sarrcountingsort(Bentsedgresources *bsr,
 }
 
 static void bentleysedgewick(Bentsedgresources *bsr,
-                             Suffixptr *left,
-                             Suffixptr *right,
+                             Suffixptr *suftabptrleft,
+                             Suffixptr *suftabptrright,
                              unsigned long depth)
 {
   bsr->mkvauxstack.nextfreeMKVstack = 0;
-  subsort_bentleysedgewick(bsr, (unsigned long) (right - left + 1),
-                           left,right,depth,Descending);
+  subsort_bentleysedgewick(bsr,
+                           (unsigned long) (suftabptrright - suftabptrleft + 1),
+                           suftabptrleft,suftabptrright,depth,Descending);
   while (bsr->mkvauxstack.nextfreeMKVstack > 0)
   {
     Suffixptr *leftplusw, *pa, *pb, *pc, *pd, *pm, *aptr, *bptr, cptr, temp;
@@ -1253,26 +1253,26 @@ static void bentleysedgewick(Bentsedgresources *bsr,
 
     /* pop */
     bsr->mkvauxstack.nextfreeMKVstack--;
-    left = STACKTOP.left;
-    right = STACKTOP.right;
+    suftabptrleft = STACKTOP.left;
+    suftabptrright = STACKTOP.right;
     depth = STACKTOP.depth;
     parentordertype = STACKTOP.ordertype;
-    width = (unsigned long) (right - left + 1);
+    width = (unsigned long) (suftabptrright - suftabptrleft + 1);
 
     if (bsr->sfxstrategy->cmpcharbychar)
     {
       pm = cmpcharbychardelivermedian(bsr,
-                                      left,
-                                      right,
+                                      suftabptrleft,
+                                      suftabptrright,
                                       depth,
                                       width);
-      BS_SWAP(temp, left, pm);
-      CMPCHARBYCHARPTR2INT(pivotcmpcharbychar,tmpvar,left);
+      BS_SWAP(temp, suftabptrleft, pm);
+      CMPCHARBYCHARPTR2INT(pivotcmpcharbychar,tmpvar,suftabptrleft);
     } else
     {
       pm = blockcmpdelivermedian(bsr,
-                                 left,
-                                 right,
+                                 suftabptrleft,
+                                 suftabptrright,
                                  depth,
                                  width,
                                  bsr->sfxstrategy->maxwidthrealmedian);
@@ -1281,27 +1281,28 @@ static void bentleysedgewick(Bentsedgresources *bsr,
       {
         PTR2INT(pivotcmpbits,pm);
         sarrcountingsort(bsr,
-                         left,
+                         suftabptrleft,
                          &pivotcmpbits,
-                         (unsigned long) (pm - left),
+                         (unsigned long) (pm - suftabptrleft),
                          parentordertype,
                          depth,
                          width);
-        /* new values for left, right, depth and parentordertype */
+        /* new values for suftabptrleft, suftabptrright, depth and
+           parentordertype */
         continue;
       }
-      BS_SWAP(temp, left, pm);
-      PTR2INT(pivotcmpbits,left);
+      BS_SWAP(temp, suftabptrleft, pm);
+      PTR2INT(pivotcmpbits,suftabptrleft);
     }
     bsr->countqsort++;
-    /* now pivot element is at index left */
+    /* now pivot element is at index suftabptrleft */
     /* all elements to be compared are between pb and pc */
     /* pa is the position at which the next element smaller than the
        pivot element is inserted at */
     /* pd is the position at which the next element greater than the
        pivot element is inserted at */
-    pa = pb = left + 1;
-    pc = pd = right;
+    pa = pb = suftabptrleft + 1;
+    pc = pd = suftabptrright;
     if (bsr->sfxstrategy->cmpcharbychar)
     {
       smallerminlcp = greaterminlcp = smallermaxlcp = greatermaxlcp = 0;
@@ -1401,28 +1402,28 @@ static void bentleysedgewick(Bentsedgresources *bsr,
         pc--;
       }
     }
-    gt_assert(pa >= left);
+    gt_assert(pa >= suftabptrleft);
     gt_assert(pb >= pa);
-    w = MIN((unsigned long) (pa-left),(unsigned long) (pb-pa));
+    w = MIN((unsigned long) (pa-suftabptrleft),(unsigned long) (pb-pa));
     /* move w elements at the left to the middle */
-    BS_VECSWAP(left,  pb-w, w);
+    BS_VECSWAP(suftabptrleft,  pb-w, w);
 
     gt_assert(pd >= pc);
-    gt_assert(right >= pd);
-    w = MIN((unsigned long) (pd-pc), (unsigned long) (right-pd));
+    gt_assert(suftabptrright >= pd);
+    w = MIN((unsigned long) (pd-pc), (unsigned long) (suftabptrright-pd));
     /* move w elements at the right to the middle */
-    BS_VECSWAP(pb, right+1-w, w);
+    BS_VECSWAP(pb, suftabptrright+1-w, w);
 
     /* all elements equal to the pivot are now in the middle namely in the
-       range [left + (pb-pa) and right - (pd-pc)] */
+       range [suftabptrleft + (pb-pa) and suftabptrright - (pd-pc)] */
     /* hence we have to sort the elements in the intervals
-       [left..left+(pb-pa)-1] and
-       [right-(pd-pc)+1..right] */
+       [suftabptrleft..suftabptrleft+(pb-pa)-1] and
+       [suftabptrright-(pd-pc)+1..suftabptrright] */
 
     gt_assert(pb >= pa);
     if ((w = (unsigned long) (pb-pa)) > 0)
     {
-      leftplusw = left + w;
+      leftplusw = suftabptrleft + w;
       if (bsr->lcpsubtab != NULL && bsr->assideeffect)
       {
         /*
@@ -1434,18 +1435,19 @@ static void bentleysedgewick(Bentsedgresources *bsr,
         updatelcpvalue(bsr,LCPINDEX(bsr->lcpsubtab,leftplusw),
                        depth + smallermaxlcp);
       }
-      subsort_bentleysedgewick(bsr,w,left,leftplusw-1,depth + smallerminlcp,
+      subsort_bentleysedgewick(bsr,w,suftabptrleft,leftplusw-1,
+                               depth + smallerminlcp,
                                Noorder);
     } else
     {
-      leftplusw = left;
+      leftplusw = suftabptrleft;
     }
 
     cptr = *leftplusw + depth;
     if (ISNOTEND(cptr))
     {
-      width = (unsigned long) (right-(pd-pb)-leftplusw);
-      subsort_bentleysedgewick(bsr,width,leftplusw,right-(pd-pb)-1,
+      width = (unsigned long) (suftabptrright-(pd-pb)-leftplusw);
+      subsort_bentleysedgewick(bsr,width,leftplusw,suftabptrright-(pd-pb)-1,
                                depth+commonunitsequal,Noorder);
     }
 
@@ -1460,11 +1462,11 @@ static void bentleysedgewick(Bentsedgresources *bsr,
           which is at a minimum distance to the pivot and thus to an
           element in the first part of the right side.
         */
-        updatelcpvalue(bsr,LCPINDEX(bsr->lcpsubtab,right-w+1),
+        updatelcpvalue(bsr,LCPINDEX(bsr->lcpsubtab,suftabptrright-w+1),
                        depth + greatermaxlcp);
       }
-      subsort_bentleysedgewick(bsr,w,right-w+1,right,depth + greaterminlcp,
-                               Noorder);
+      subsort_bentleysedgewick(bsr,w,suftabptrright-w+1,suftabptrright,
+                               depth + greaterminlcp,Noorder);
     }
   }
 }
