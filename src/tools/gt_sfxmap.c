@@ -319,7 +319,8 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
         if (sfxmapoptions.inputlcp)
         {
           ssar = gt_newSequentialsuffixarrayreaderfromfile(indexname,
-                                                        SARR_LCPTAB,
+                                                        SARR_LCPTAB |
+                                                        SARR_ESQTAB,
                                                         SEQ_scan,
                                                         err);
         } else

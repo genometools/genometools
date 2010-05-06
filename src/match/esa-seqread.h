@@ -89,7 +89,7 @@ int gt_nextSequentiallcpvalue(unsigned long *currentlcp,
 int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
                               Sequentialsuffixarrayreader *ssar);
 
-#endif
+#endif /* INLINEDSequentialsuffixarrayreader */
 
 Sequentialsuffixarrayreader *gt_newSequentialsuffixarrayreaderfromfile(
                                         const GtStr *indexname,

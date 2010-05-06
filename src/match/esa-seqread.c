@@ -34,6 +34,7 @@ Sequentialsuffixarrayreader *gt_newSequentialsuffixarrayreaderfromfile(
 {
   Sequentialsuffixarrayreader *ssar;
 
+  /* printf("INLINEDSequentialsuffixarrayreader=true\n"); */
   ALLOCASSIGNSPACE(ssar,NULL,Sequentialsuffixarrayreader,1);
   ALLOCASSIGNSPACE(ssar->suffixarray,NULL,Suffixarray,1);
   if (gt_mapsuffixarray (ssar->suffixarray,
@@ -49,7 +50,8 @@ Sequentialsuffixarrayreader *gt_newSequentialsuffixarrayreaderfromfile(
   ssar->nextsuftabindex = 0;
   ssar->nextlcptabindex = (unsigned long) 1;
   ssar->largelcpindex = 0;
-  ssar->numberofsuffixes = totallength+1;
+  ssar->numberofsuffixes
+    = gt_encseq_total_length(ssar->suffixarray->encseq) + 1;
   return ssar;
 }
 
@@ -81,6 +83,12 @@ GtReadmode gt_readmodeSequentialsuffixarrayreader(
                           const Sequentialsuffixarrayreader *ssar)
 {
   return ssar->suffixarray->readmode;
+}
+
+const unsigned long *gt_suftabSequentialsuffixarrayreader(
+              const Sequentialsuffixarrayreader *ssar)
+{
+  return ssar->suffixarray->suftab;
 }
 
 #else
@@ -142,7 +150,7 @@ Sequentialsuffixarrayreader *gt_newSequentialsuffixarrayreaderfromRAM(
   ALLOCASSIGNSPACE(ssar,NULL,Sequentialsuffixarrayreader,1);
   ssar->lvi = gt_newLcpvalueiterator(encseq,readmode);
   ssar->suffixarray = NULL;
-  ssar->nextlcptabindex = (unsigned long) 1; /* not required here */
+  ssar->nextlcptabindex = 1UL; /* not required here */
   ssar->largelcpindex = 0; /* not required here */
   ssar->seqactype = SEQ_suftabfrommemory;
   ssar->readmode = readmode;
@@ -162,9 +170,9 @@ void gt_updateSequentialsuffixarrayreaderfromRAM(
   if (firstpage)
   {
     (void) gt_nextLcpvalueiterator(ssar->lvi,
-                                true,
-                                suftab,
-                                numberofsuffixes);
+                                   true,
+                                   suftab,
+                                   numberofsuffixes);
   }
 }
 
@@ -276,7 +284,6 @@ GtReadmode gt_readmodeSequentialsuffixarrayreader(
 {
   return ssar->readmode;
 }
-#endif /* ifdef INLINEDSequentialsuffixarrayreader */
 
 const unsigned long *gt_suftabSequentialsuffixarrayreader(
               const Sequentialsuffixarrayreader *ssar)
@@ -288,6 +295,7 @@ const unsigned long *gt_suftabSequentialsuffixarrayreader(
   }
   return ssar->suftab;
 }
+#endif /* ifdef INLINEDSequentialsuffixarrayreader */
 
 const Suffixarray *gt_suffixarraySequentialsuffixarrayreader(
               const Sequentialsuffixarrayreader *ssar)

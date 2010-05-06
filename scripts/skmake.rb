@@ -49,7 +49,8 @@ def parseargs(argv)
 end
 
 def makecompilerflags(fp,options)
-  fp.print "all:\n\t\${MAKE} curses=no cairo=no opt=yes "
+  fp.print "all:\n\t\${MAKE} curses=no cairo=no opt=yes"
+  # fp.print " CFLAGS+=-DINLINEDSequentialsuffixarrayreader"
   if options.speed
     fp.print " assert=no amalgamation=yes"
   end

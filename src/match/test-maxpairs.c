@@ -21,6 +21,7 @@
 #include "core/str.h"
 #include "core/logger.h"
 #include "core/yarandom.h"
+#include "core/unused_api.h"
 
 int gt_testmaxpairs(GT_UNUSED const GtStr *indexname,
                  GT_UNUSED unsigned long samples,
