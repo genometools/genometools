@@ -29,4 +29,7 @@ module GT
       dlload basename + ".so"
     end
   end
+
+  # a NULL pointer
+  NULL = DL::PtrData.new(0)
 end

@@ -38,9 +38,6 @@ module GT
     "bool val"
   ]
 
-  # a NULL pointer
-  NULL = DL::PtrData.new(0)
-
   extern "GtStyle* gt_style_new(GtError*)"
   extern "int gt_style_load_file(GtStyle*, const char*, GtError*)"
   extern "int gt_style_load_str(GtStyle*, GtStr*, GtError*)"

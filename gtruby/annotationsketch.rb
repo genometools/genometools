@@ -15,14 +15,19 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-require 'annotationsketch/block'
-require 'annotationsketch/canvas'
-require 'annotationsketch/custom_track'
-require 'annotationsketch/style'
-require 'annotationsketch/diagram'
-require 'annotationsketch/feature_index'
-require 'annotationsketch/feature_stream'
-require 'annotationsketch/graphics'
-require 'annotationsketch/image_info'
-require 'annotationsketch/layout'
-require 'annotationsketch/rec_map'
+begin
+  require 'annotationsketch/block'
+  require 'annotationsketch/canvas'
+  require 'annotationsketch/custom_track'
+  require 'annotationsketch/style'
+  require 'annotationsketch/diagram'
+  require 'annotationsketch/feature_index'
+  require 'annotationsketch/feature_stream'
+  require 'annotationsketch/graphics'
+  require 'annotationsketch/image_info'
+  require 'annotationsketch/layout'
+  require 'annotationsketch/rec_map'
+rescue RuntimeError
+  # fail gracefully when AnnotationSketch symbols are not present
+  raise unless $!.to_s.match(/can't find the symbol/)
+end
