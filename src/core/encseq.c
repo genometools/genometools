@@ -5289,7 +5289,7 @@ gt_encseq_new_from_files(GtProgressTimer *sfxprogress,
                                   GtLogger *logger,
                                   GtError *err)
 {
-  unsigned long totallength;
+  unsigned long totallength = 0;
   bool haserr = false;
   unsigned int forcetable;
   GtSpecialcharinfo specialcharinfo = {0,0,0,0,0};
