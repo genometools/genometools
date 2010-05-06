@@ -65,6 +65,11 @@ ifeq ($(SYSTEM),Darwin)
     GT_CFLAGS+=-arch i386 -arch ppc -arch_errors_fatal
     GT_LDFLAGS+=-arch i386 -arch ppc -arch_errors_fatal
   endif
+  ifeq ($(ppc),yes)
+    MACHINE:="Power_Macintosh"
+    GT_CFLAGS+=-arch ppc -arch_errors_fatal
+    GT_LDFLAGS+=-arch ppc -arch_errors_fatal
+  endif
 else
   SHARED_OBJ_NAME_EXT:=.so
   SHARED:=-shared
