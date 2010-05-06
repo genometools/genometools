@@ -26,6 +26,10 @@ except ImportError:
     sys.stderr.write("Please make sure it can be imported by Python.")
     sys.exit(1)
 
-from annotationsketch import *
+try:
+    from annotationsketch import *
+except AttributeError:
+    # fail gracefully when AnnotationSketch symbols are not present
+    pass
 from core import *
 from extended import *

@@ -30,16 +30,18 @@ from layout import *
 from rec_map import *
 from style import *
 
-Block.register(gtlib)
-CanvasCairoFile.register(gtlib)
-CustomTrack.register(gtlib)
-Diagram.register(gtlib)
-
-#DiagramFromArray.register(gtlib)
-
-FeatureIndex.register(gtlib)
-Graphics.register(gtlib)
-ImageInfo.register(gtlib)
-Layout.register(gtlib)
-RecMap.register(gtlib)
-Style.register(gtlib)
+try:
+    Block.register(gtlib)
+    CanvasCairoFile.register(gtlib)
+    CustomTrack.register(gtlib)
+    Diagram.register(gtlib)
+    #DiagramFromArray.register(gtlib)
+    FeatureIndex.register(gtlib)
+    Graphics.register(gtlib)
+    ImageInfo.register(gtlib)
+    Layout.register(gtlib)
+    RecMap.register(gtlib)
+    Style.register(gtlib)
+except AttributeError:
+    # fail gracefully when AnnotationSketch symbols are not present
+    pass
