@@ -52,6 +52,7 @@
 #include "core/phase_api.h"
 #include "core/qsort_r_api.h"
 #include "core/range_api.h"
+#include "core/splitter_api.h"
 #include "core/str_api.h"
 #include "core/str_array_api.h"
 #include "core/strand_api.h"

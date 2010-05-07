@@ -18,30 +18,8 @@
 #ifndef SPLITTER_H
 #define SPLITTER_H
 
-#include "core/error.h"
-
-typedef struct GtSplitter GtSplitter;
-
-GtSplitter*   gt_splitter_new(void);
-
-/* split <string> of given <length> into tokens delimited by 'delimiter'.
-   <string> is modified in the splitting process! */
-void          gt_splitter_split(GtSplitter*, char *string, unsigned long length,
-                                char delimiter);
-
-/* get all tokens */
-char**        gt_splitter_get_tokens(GtSplitter*);
-
-/* get token with number <token_num> */
-char*         gt_splitter_get_token(GtSplitter*, unsigned long token_num);
-
-/* reset the splitter */
-void          gt_splitter_reset(GtSplitter*);
-
-/* returns the number of tokens */
-unsigned long gt_splitter_size(GtSplitter*);
+#include "core/splitter_api.h"
 
 int           gt_splitter_unit_test(GtError*);
-void          gt_splitter_delete(GtSplitter*);
 
 #endif
