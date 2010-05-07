@@ -42,7 +42,7 @@
 #include "core/fileutils_api.h"
 #include "core/format64.h"
 #include "core/intbits.h"
-#include "core/intdef.h"
+#include "core/types_api.h"
 #include "core/logger.h"
 #include "core/ma_api.h"
 #include "core/mapspec-gen.h"

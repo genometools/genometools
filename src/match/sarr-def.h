@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include "core/defined-types.h"
 #include "core/encseq.h"
-#include "core/intdef.h"
+#include "core/types_api.h"
 #include "core/unused_api.h"
 #include "core/codetype.h"
 

@@ -20,7 +20,7 @@
 
 #include "core/str_api.h"
 #include "core/error_api.h"
-#include "core/symboldef.h"
+#include "core/types_api.h"
 #include "core/defined-types.h"
 
 typedef struct Tyrindex Tyrindex;

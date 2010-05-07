@@ -19,7 +19,7 @@
 #define ESA_SPLITITV_H
 
 #include "core/arraydef.h"
-#include "core/symboldef.h"
+#include "core/types_api.h"
 
 #include "core/encseq.h"
 #include "splititv.h"

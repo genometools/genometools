@@ -18,7 +18,7 @@
 #ifndef PROCMATCH_H
 #define PROCMATCH_H
 
-#include "core/symboldef.h"
+#include "core/types_api.h"
 
 typedef struct
 {

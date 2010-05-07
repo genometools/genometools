@@ -16,7 +16,7 @@
 */
 
 #include <stdlib.h>
-#include "core/symboldef.h"
+#include "core/types_api.h"
 #include "core/ma_api.h"
 
 typedef struct

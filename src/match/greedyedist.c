@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include "core/chardef.h"
 #include "core/minmax.h"
-#include "core/symboldef.h"
+#include "core/types_api.h"
 #include "spacedef.h"
 
 #define COMPARESYMBOLS(A,B)\

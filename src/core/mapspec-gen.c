@@ -24,7 +24,7 @@
 #include "core/filelengthvalues.h"
 #include "core/format64.h"
 #include "core/intbits.h"
-#include "core/intdef.h"
+#include "core/types_api.h"
 #include "core/mapspec-gen.h"
 #include "core/pairbwtidx.h"
 #include "core/safecast-gen.h"

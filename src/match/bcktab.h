@@ -21,7 +21,7 @@
 #include "core/assert_api.h"
 #include "core/error.h"
 #include "core/str.h"
-#include "core/symboldef.h"
+#include "core/types_api.h"
 #include "core/logger.h"
 #include "core/codetype.h"
 

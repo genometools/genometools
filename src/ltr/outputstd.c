@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/symboldef.h"
+#include "core/types_api.h"
 #include "core/encseq.h"
 #include "ltrharvest-opt.h"
 #include "outputstd.h"

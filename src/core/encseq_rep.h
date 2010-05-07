@@ -32,9 +32,9 @@
 #include "core/bitpackarray.h"
 #include "core/filelengthvalues.h"
 #include "core/intbits.h"
-#include "core/intdef.h"
+#include "core/types_api.h"
 #include "core/str_array_api.h"
-#include "core/symboldef.h"
+#include "core/types_api.h"
 #include "core/thread.h"
 
 typedef enum

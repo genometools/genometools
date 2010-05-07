@@ -31,7 +31,7 @@
 #include "gtdatapath.h"
 #include "str.h"
 #include "str_array.h"
-#include "symboldef.h"
+#include "types_api.h"
 #include "mathsupport.h"
 #include "fa.h"
 #include "alphabet.h"

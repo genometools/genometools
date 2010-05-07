@@ -19,7 +19,7 @@
 #define TEST_PAIRWISE_H
 
 #include <stdbool.h>
-#include "core/symboldef.h"
+#include "core/types_api.h"
 
 typedef void (*Checkcmppairfuntype)(bool,
                                     const GtUchar *,unsigned long,

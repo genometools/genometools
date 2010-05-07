@@ -15,10 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef INTDEF_H
-#define INTDEF_H
+#ifndef TYPES_API_H
+#define TYPES_API_H
+
 #include <inttypes.h>
 
+typedef uint8_t       GtUchar;
+typedef char          GtChar;
 typedef uint16_t      GtUshort;
 typedef unsigned long GtUlong;
 

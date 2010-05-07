@@ -16,7 +16,7 @@
 */
 
 #include "core/chardef.h"
-#include "core/symboldef.h"
+#include "core/types_api.h"
 #include "core/unused_api.h"
 #include "sarr-def.h"
 

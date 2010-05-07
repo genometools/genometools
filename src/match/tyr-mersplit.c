@@ -20,7 +20,7 @@
 #include "core/divmodmul.h"
 #include "core/str_api.h"
 #include "core/minmax.h"
-#include "core/symboldef.h"
+#include "core/types_api.h"
 #include "core/fa.h"
 #include "core/defined-types.h"
 #include "core/intbits.h"

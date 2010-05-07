@@ -21,7 +21,7 @@
 #include "core/error.h"
 #include "core/str.h"
 #include "core/array.h"
-#include "core/symboldef.h"
+#include "core/types_api.h"
 #include "core/logger.h"
 #include "core/format64.h"
 #include "sfx-ri-def.h"

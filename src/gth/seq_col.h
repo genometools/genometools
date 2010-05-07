@@ -21,7 +21,7 @@
 #include "core/file.h"
 #include "core/range.h"
 #include "core/str_api.h"
-#include "core/symboldef.h"
+#include "core/types_api.h"
 
 typedef struct GthSeqColClass GthSeqColClass;
 typedef struct GthSeqCol GthSeqCol;

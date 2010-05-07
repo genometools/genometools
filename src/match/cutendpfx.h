@@ -22,7 +22,7 @@
 #include <errno.h>
 #include <stdbool.h>
 #include "core/lcpinterval.h"
-#include "core/symboldef.h"
+#include "core/types_api.h"
 
 #include "bcktab.h"
 

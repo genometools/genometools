@@ -23,7 +23,7 @@
 #include <limits.h>
 #include "core/str_api.h"
 #include "core/str_array_api.h"
-#include "core/symboldef.h"
+#include "core/types_api.h"
 #include "core/error_api.h"
 
 /* The following type is for storing alphabets.*/

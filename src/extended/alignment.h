@@ -20,7 +20,7 @@
 
 #include <stdio.h>
 #include "core/range.h"
-#include "core/symboldef.h"
+#include "core/types_api.h"
 #include "core/error_api.h"
 
 /* the GtAlignment class (an object has to be constructed backwards) */

@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include "core/defined-types.h"
 #include "core/encseq.h"
-#include "core/symboldef.h"
+#include "core/types_api.h"
 #include "match/eis-mrangealphabet.h"
 #include "match/eis-random-seqaccess.h"
 #include "match/eis-seqdatasrc.h"

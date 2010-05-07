@@ -28,7 +28,7 @@
 #include "core/seqiterator.h"
 #include "core/str.h"
 #include "core/str_array.h"
-#include "core/symboldef.h"
+#include "core/types_api.h"
 #include "core/unused_api.h"
 #include "core/codetype.h"
 #include "core/encseq.h"

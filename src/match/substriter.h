@@ -22,7 +22,7 @@
 #include <stdbool.h>
 #include "core/alphabet.h"
 #include "core/str_array.h"
-#include "core/symboldef.h"
+#include "core/types_api.h"
 
 typedef struct Substriter Substriter;
 

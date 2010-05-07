@@ -21,7 +21,7 @@
 #include <stdbool.h>
 #include "core/alphabet.h"
 #include "core/error.h"
-#include "core/intdef.h"
+#include "core/types_api.h"
 #include "core/str_array.h"
 #include "core/defined-types.h"
 

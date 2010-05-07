@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/symboldef.h"
+#include "core/types_api.h"
 #include "core/readmode.h"
 
 void gt_inplace_reversecomplement(GtUchar *seq,unsigned long len)

@@ -24,7 +24,7 @@
 #include "core/dataalign.h"
 #include "core/ma_api.h"
 #include "core/str.h"
-#include "core/symboldef.h"
+#include "core/types_api.h"
 #include "core/str_array.h"
 #include "match/eis-mrangealphabet.h"
 #include "match/eis-mrangealphabet-priv.h"

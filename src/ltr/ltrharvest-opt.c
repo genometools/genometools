@@ -25,7 +25,7 @@
 #include "core/option.h"
 #include "core/undef.h"
 #include "core/versionfunc.h"
-#include "core/symboldef.h"
+#include "core/types_api.h"
 #include "ltrharvest-opt.h"
 #include "repeattypes.h"
 

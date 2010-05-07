@@ -18,7 +18,7 @@
 #ifndef QGRAM2CODE_H
 #define QGRAM2CODE_H
 
-#include "core/symboldef.h"
+#include "core/types_api.h"
 #include "core/chardef.h"
 #include "core/codetype.h"
 

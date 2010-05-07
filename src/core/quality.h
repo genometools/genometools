@@ -18,7 +18,7 @@
 #ifndef QUALITY_H
 #define QUALITY_H
 
-#include "core/symboldef.h"
+#include "core/types_api.h"
 
 /* Converts a FASTQ quality character in PHRED scale to PHRED quality score */
 unsigned int gt_quality_fastq_to_phred(const GtUchar c);

@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/symboldef.h"
+#include "core/types_api.h"
 #include "spacedef.h"
 
 static unsigned long gt_squarededistunit2 (const GtUchar *u, unsigned long m,

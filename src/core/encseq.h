@@ -24,7 +24,7 @@
 #include "core/codetype.h"
 #include "core/str.h"
 #include "core/str_array.h"
-#include "core/symboldef.h"
+#include "core/types_api.h"
 #include "core/filelengthvalues.h"
 #include "core/disc_distri.h"
 #include "core/encseq_api.h"

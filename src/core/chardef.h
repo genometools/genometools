@@ -18,7 +18,7 @@
 #ifndef CHARDEF_H
 #define CHARDEF_H
 
-#include "core/symboldef.h"
+#include "core/types_api.h"
 #include "core/assert_api.h"
 #include <limits.h>
 

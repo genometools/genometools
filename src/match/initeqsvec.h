@@ -18,7 +18,7 @@
 #ifndef INITEQSVEC_H
 #define INITEQSVEC_H
 
-#include "core/symboldef.h"
+#include "core/types_api.h"
 
 void gt_initeqsvector(unsigned long *eqsvector,
                    unsigned long eqslen,

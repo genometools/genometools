@@ -26,7 +26,7 @@
 #include "core/ma.h"
 #include "core/sequence_buffer.h"
 #include "core/splitter.h"
-#include "core/symboldef.h"
+#include "core/types_api.h"
 #include "core/xansi.h"
 #include "core/xposix.h"
 

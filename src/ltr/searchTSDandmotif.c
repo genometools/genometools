@@ -20,7 +20,7 @@
 #include "core/error.h"
 #include "core/log.h"
 #include "core/minmax.h"
-#include "core/symboldef.h"
+#include "core/types_api.h"
 #include "core/encseq.h"
 #include "match/spacedef.h"
 #include "match/esa-mmsearch.h"

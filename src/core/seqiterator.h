@@ -23,7 +23,7 @@
 #include "core/queue.h"
 #include "core/str_array.h"
 #include "core/sequence_buffer.h"
-#include "core/symboldef.h"
+#include "core/types_api.h"
 
 typedef struct GtSeqIterator GtSeqIterator;
 typedef struct GtSeqIteratorClass GtSeqIteratorClass;

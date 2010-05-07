@@ -19,9 +19,9 @@
 #define MAPSPEC_GEN_H
 
 #include "core/arraydef.h"
-#include "core/intdef.h"
+#include "core/types_api.h"
 #include "core/str_api.h"
-#include "core/symboldef.h"
+#include "core/types_api.h"
 #include "core/error.h"
 
 #define NEWMAPSPEC(PTR,TYPE,ELEMS)\

@@ -21,7 +21,7 @@
 #include "core/error.h"
 #include "core/str.h"
 #include "core/fa.h"
-#include "core/symboldef.h"
+#include "core/types_api.h"
 #include "core/chardef.h"
 #include "core/mathsupport.h"
 #include "core/unused_api.h"

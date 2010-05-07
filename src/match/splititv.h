@@ -18,7 +18,7 @@
 #ifndef SPLITITV_H
 #define SPLITITV_H
 
-#include "core/symboldef.h"
+#include "core/types_api.h"
 #include "core/arraydef.h"
 
 typedef struct

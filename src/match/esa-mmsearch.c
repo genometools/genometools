@@ -20,7 +20,7 @@
 #include "core/lcpinterval.h"
 #include "core/minmax.h"
 #include "core/seqiterator_sequence_buffer.h"
-#include "core/symboldef.h"
+#include "core/types_api.h"
 #include "sarr-def.h"
 
 #include "spacedef.h"

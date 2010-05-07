@@ -18,7 +18,7 @@
 #ifndef REVCOMPL_H
 #define REVCOMPL_H
 
-#include "core/symboldef.h"
+#include "core/types_api.h"
 
 void gt_inplace_reversecomplement(GtUchar *seq,unsigned long len);
 void gt_copy_reversecomplement(GtUchar *dest,const GtUchar *src,

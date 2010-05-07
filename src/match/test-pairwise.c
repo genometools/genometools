@@ -19,7 +19,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include "core/fa.h"
-#include "core/symboldef.h"
+#include "core/types_api.h"
 #include "core/unused_api.h"
 #include "spacedef.h"
 #include "test-pairwise.h"
