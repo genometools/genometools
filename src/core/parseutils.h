@@ -18,39 +18,7 @@
 #ifndef PARSEUTILS_H
 #define PARSEUTILS_H
 
-#include "core/error.h"
-#include "core/range.h"
-#include "core/phase_api.h"
-#include "core/strand_api.h"
-
-/* Parse integer from <nptr> and store result in <out>.
-   Returns 0 upon success and -1 upon failure. */
-int gt_parse_int(int *out, const char *nptr);
-
-/* Parse unsigned integer from <nptr> and store result in <out>.
-   Returns 0 upon success and -1 upon failure. */
-int gt_parse_uint(unsigned int *out, const char *nptr);
-
-/* Parse long from <nptr> and store result in <out>.
-   Returns 0 upon success and -1 upon failure. */
-int gt_parse_long(long *out, const char *nptr);
-
-/* Parse unsigned long from <nptr> and store result in <out>.
-   Returns 0 upon success and -1 upon failure. */
-int gt_parse_ulong(unsigned long *out, const char *nptr);
-
-/* Parse double from <nptr> and store result in <out>.
-   Returns 0 upon success and -1 upon failure. */
-int gt_parse_double(double *out, const char *nptr);
-
-/* Enforces that <start> <= <end>. */
-int gt_parse_range(GtRange*, const char *start, const char *end,
-                   unsigned int line_number, const char *filename, GtError*);
-
-/* Issues a warning if <start> is larger then <end> and swaps them. */
-int gt_parse_range_tidy(GtRange*, const char *start, const char *end,
-                        unsigned int line_number, const char *filename,
-                        GtError*);
+#include "core/parseutils_api.h"
 
 /* Sets <score_is_defined> to false if !strcmp(score, ".").
    Otherwise <score_is_defined> is set to true and the parsed score is stored
