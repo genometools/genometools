@@ -21,8 +21,8 @@
 #define ALPHABET_API_H
 
 #include <limits.h>
-#include "core/str.h"
-#include "core/str_array.h"
+#include "core/str_api.h"
+#include "core/str_array_api.h"
 #include "core/symboldef.h"
 #include "core/error_api.h"
 
