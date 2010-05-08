@@ -2355,7 +2355,7 @@ void gt_sortbucketofsuffixes(unsigned long *suffixestobesorted,
       bentleysedgewick(&bsr,
                        suffixestobesorted + bucketspec.left,
                        suffixestobesorted + bucketspec.left +
-                                      bucketspec.nonspecialsinbucket - 1,
+                                            bucketspec.nonspecialsinbucket - 1,
                        (unsigned long) prefixlength);
     }
   }
