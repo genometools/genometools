@@ -20,9 +20,9 @@ def checktallymer(reffile,mersize)
   reftestdir="#{$gttestdata}/tallymer"
   outoptions="-counts -pl -mersize #{mersize} -minocc 2 -maxocc 30"
   run_test "#{$bin}gt suffixerator -db #{reffilepath} -pl -dna " +
-           "-tis -suf -lcp -indexname sfxidx", :maxtime => 120
+           "-tis -suf -lcp -indexname sfxidx", :maxtime => 360
   run_test("#{$bin}gt tallymer mkindex -test -mersize #{mersize} -esa sfxidx",
-           :maxtime => 120)
+           :maxtime => 360)
   suffix="tyrmkiout"
   run "mv #{$last_stdout} #{reffile}.gt#{suffix}"
   #run "#{vstreebin}/mkvtree.x -indexname mkvidx -allout -pl -dna " +
@@ -34,11 +34,11 @@ def checktallymer(reffile,mersize)
   #run "#{vstreebin}/tallymer-mkindex #{outoptions} " +
       #"-indexname mkv-tyr-index mkvidx"
   run_test "#{$bin}gt tallymer mkindex #{outoptions} " + 
-           "-indexname tyr-index -esa sfxidx", :maxtime => 120
+           "-indexname tyr-index -esa sfxidx", :maxtime => 360
   if not File.zero?("tyr-index.mct")
     suffix="tyrseaout"
     run_test "#{$bin}gt tallymer search -strand fp -output qseqnum qpos " + 
-             "counts sequence -test -tyr tyr-index -q #{query}", :maxtime => 120
+             "counts sequence -test -tyr tyr-index -q #{query}", :maxtime => 360
     run "mv #{$last_stdout} #{reffile}.gt#{suffix}"
     #run "#{vstreebin}/tallymer-search -strand fp " +
         #"-output qseqnum qpos counts sequence mkv-tyr-index #{query}"
