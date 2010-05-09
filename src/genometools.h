@@ -27,6 +27,7 @@
 
 /* the core module */
 #include "core/init_api.h"
+#include "core/alphabet_api.h"
 #include "core/array_api.h"
 #include "core/array2dim_api.h"
 #include "core/assert_api.h"
@@ -37,6 +38,7 @@
 #include "core/cstr_api.h"
 #include "core/cstr_table_api.h"
 #include "core/dlist_api.h"
+#include "core/encseq_api.h"
 #include "core/endianess_api.h"
 #include "core/error_api.h"
 #include "core/file_api.h"
