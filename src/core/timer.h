@@ -18,22 +18,6 @@
 #ifndef TIMER_H
 #define TIMER_H
 
-#include <sys/time.h>
-#include <sys/resource.h>
-#include <stdio.h>
-#include "core/error.h"
-
-/* the timer class */
-typedef struct GtTimer GtTimer;
-
-GtTimer* gt_timer_new(void);
-void     gt_timer_start(GtTimer*);
-void     gt_timer_stop(GtTimer*);
-void     gt_timer_show(GtTimer*, FILE*);
-/* <fmt> must be a format string for four %ld numbers, which are filled with:
-   elapsed seconds, elapsed microseconds, used usertime in seconds,
-   systemtime in seconds. */
-void     gt_timer_show_formatted(GtTimer*, const char *fmt, FILE*);
-void     gt_timer_delete(GtTimer*);
+#include "core/timer_api.h"
 
 #endif
