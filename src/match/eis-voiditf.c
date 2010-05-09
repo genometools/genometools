@@ -26,7 +26,8 @@
 /* XXX make use of the types declared by the EIS-tools, similar to
   the module core/bitpackarray.h */
 
-unsigned long gt_bwtseqfirstmatch(const void *voidbwtseq,unsigned long bound)
+unsigned long gt_bwtseqfirstmatch(const FMindex *voidbwtseq,
+                                  unsigned long bound)
 {
   struct extBitsRetrieval extBits;
   unsigned long pos;
@@ -44,9 +45,9 @@ struct Bwtseqpositioniterator
   unsigned long currentbound, upperbound;
 };
 
-Bwtseqpositioniterator *gt_newBwtseqpositioniterator(const void *voidbwtseq,
-                                                  unsigned long lowerbound,
-                                                  unsigned long upperbound)
+Bwtseqpositioniterator *gt_newBwtseqpositioniterator(const FMindex *voidbwtseq,
+                                                     unsigned long lowerbound,
+                                                     unsigned long upperbound)
 {
   Bwtseqpositioniterator *bspi;
 
@@ -111,8 +112,8 @@ struct Bwtseqcontextiterator
   unsigned long bound;
 };
 
-Bwtseqcontextiterator *gt_newBwtseqcontextiterator(const void *voidbwtseq,
-                                                unsigned long bound)
+Bwtseqcontextiterator *gt_newBwtseqcontextiterator(const FMindex *voidbwtseq,
+                                                   unsigned long bound)
 {
   Bwtseqcontextiterator *bsci;
 
@@ -123,11 +124,11 @@ Bwtseqcontextiterator *gt_newBwtseqcontextiterator(const void *voidbwtseq,
   return bsci;
 }
 
-GtUchar gt_bwtseqgetsymbol(unsigned long bound,const void *voidbwtseq)
+GtUchar gt_bwtseqgetsymbol(unsigned long bound,const FMindex *voidbwtseq)
 {
-  if (bound != BWTSeqTerminatorPos(voidbwtseq))
+  if (bound != BWTSeqTerminatorPos((const BWTSeq *) voidbwtseq))
   {
-    return BWTSeqGetSym(voidbwtseq, bound);
+    return BWTSeqGetSym((const BWTSeq *) voidbwtseq, bound);
   }
   return SEPARATOR;
 }
@@ -155,11 +156,11 @@ void gt_freeBwtseqcontextiterator(Bwtseqcontextiterator **bsci)
   *bsci = NULL;
 }
 
-void *gt_loadvoidBWTSeqForSA(const GtStr *indexname,
-                          const Suffixarray *suffixarray,
-                          unsigned long totallength,
-                          bool withpckbt,
-                          GtError *err)
+FMindex *gt_loadvoidBWTSeqForSA(const GtStr *indexname,
+                                const Suffixarray *suffixarray,
+                                unsigned long totallength,
+                                bool withpckbt,
+                                GtError *err)
 {
   BWTSeq *bwtseq;
   bool haserr = false;
@@ -192,17 +193,17 @@ void *gt_loadvoidBWTSeqForSA(const GtStr *indexname,
   }
   if (haserr && bwtseq != NULL)
   {
-    gt_deletevoidBWTSeq(bwtseq);
+    gt_deletevoidBWTSeq((FMindex *) bwtseq);
     bwtseq = NULL;
   }
-  return haserr ? NULL : bwtseq;
+  return haserr ? NULL : (FMindex *) bwtseq;
 }
 
 void gt_bwtrangesplitwithoutspecial(GtArrayBoundswithchar *bwci,
-                                 unsigned long *rangeOccs,
-                                 const void *voidBwtSeq,
-                                 unsigned long lbound,
-                                 unsigned long ubound)
+                                    unsigned long *rangeOccs,
+                                    const FMindex *voidBwtSeq,
+                                    unsigned long lbound,
+                                    unsigned long ubound)
 {
   unsigned long idx;
   const BWTSeq *bwtseq = (const BWTSeq *) voidBwtSeq;
@@ -224,7 +225,7 @@ void gt_bwtrangesplitwithoutspecial(GtArrayBoundswithchar *bwci,
   }
 }
 
-const Mbtab **gt_bwtseq2mbtab(const void *voidbwtseq)
+const Mbtab **gt_bwtseq2mbtab(const FMindex *voidbwtseq)
 {
   if (((const BWTSeq *) voidbwtseq)->pckbuckettable == NULL)
   {
@@ -234,7 +235,7 @@ const Mbtab **gt_bwtseq2mbtab(const void *voidbwtseq)
          gt_pcktb2mbtab(((const BWTSeq *) voidbwtseq)->pckbuckettable);
 }
 
-unsigned int gt_bwtseq2maxdepth(const void *voidbwtseq)
+unsigned int gt_bwtseq2maxdepth(const FMindex *voidbwtseq)
 {
   if (((const BWTSeq *) voidbwtseq)->pckbuckettable == NULL)
   {
@@ -245,7 +246,7 @@ unsigned int gt_bwtseq2maxdepth(const void *voidbwtseq)
 
 unsigned long gt_bwtrangesplitallwithoutspecial(Mbtab *mbtab,
                                              unsigned long *rangeOccs,
-                                             const void *voidBwtSeq,
+                                             const FMindex *voidBwtSeq,
                                              unsigned long lbound,
                                              unsigned long ubound)
 {
@@ -293,7 +294,7 @@ void bwtrangewithspecial(GT_UNUSED GtArrayBoundswithchar *bwci,
 }
 */
 
-void gt_deletevoidBWTSeq(void *voidbwtseq)
+void gt_deletevoidBWTSeq(FMindex *voidbwtseq)
 {
   BWTSeq *bwtseq = (BWTSeq *) voidbwtseq;
 
@@ -306,21 +307,21 @@ void gt_deletevoidBWTSeq(void *voidbwtseq)
 }
 
 unsigned long gt_voidpackedindexuniqueforward(const void *voidbwtseq,
-                                       GT_UNUSED unsigned long offset,
-                                       GT_UNUSED unsigned long left,
-                                       GT_UNUSED unsigned long right,
-                                       GT_UNUSED unsigned long *witnessposition,
-                                       const GtUchar *qstart,
-                                       const GtUchar *qend)
+                                              GT_UNUSED unsigned long offset,
+                                              GT_UNUSED unsigned long left,
+                                              GT_UNUSED unsigned long right,
+                                              GT_UNUSED unsigned long
+                                                        *witnessposition,
+                                              const GtUchar *qstart,
+                                              const GtUchar *qend)
 {
-  return gt_packedindexuniqueforward((const BWTSeq *) voidbwtseq,
-                                  qstart,
-                                  qend);
+  return gt_packedindexuniqueforward((const BWTSeq *) voidbwtseq,qstart,
+                                     qend);
 }
 
-unsigned long gt_voidpackedfindfirstmatchconvert(const void *voidbwtseq,
-                                       unsigned long witnessbound,
-                                       unsigned long matchlength)
+unsigned long gt_voidpackedfindfirstmatchconvert(const FMindex *voidbwtseq,
+                                                 unsigned long witnessbound,
+                                                 unsigned long matchlength)
 {
   const BWTSeq *bwtseq = (const BWTSeq *) voidbwtseq;
   unsigned long startpos;
@@ -331,12 +332,12 @@ unsigned long gt_voidpackedfindfirstmatchconvert(const void *voidbwtseq,
 }
 
 unsigned long gt_voidpackedindexmstatsforward(const void *voidbwtseq,
-                                           GT_UNUSED unsigned long offset,
-                                           GT_UNUSED unsigned long left,
-                                           GT_UNUSED unsigned long right,
-                                           unsigned long *witnessposition,
-                                           const GtUchar *qstart,
-                                           const GtUchar *qend)
+                                              GT_UNUSED unsigned long offset,
+                                              GT_UNUSED unsigned long left,
+                                              GT_UNUSED unsigned long right,
+                                              unsigned long *witnessposition,
+                                              const GtUchar *qstart,
+                                              const GtUchar *qend)
 {
   const BWTSeq *bwtseq = (const BWTSeq *) voidbwtseq;
   unsigned long matchlength;
@@ -351,7 +352,7 @@ unsigned long gt_voidpackedindexmstatsforward(const void *voidbwtseq,
   return matchlength;
 }
 
-bool gt_pck_exactpatternmatching(const void *voidbwtseq,
+bool gt_pck_exactpatternmatching(const FMindex *voidbwtseq,
                               const GtUchar *pattern,
                               unsigned long patternlength,
                               unsigned long totallength,

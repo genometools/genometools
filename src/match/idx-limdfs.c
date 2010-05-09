@@ -41,7 +41,7 @@ struct Genericindex
 {
   Suffixarray *suffixarray;
   unsigned long totallength;
-  void *packedindex;
+  FMindex *packedindex;
   bool withesa;
   const Mbtab **mbtab;      /* only relevant for packedindex */
   unsigned int maxdepth;    /* maximaldepth of boundaries */
@@ -1120,7 +1120,8 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
     for (bound = parent->leftbound + sumwidth;
          bound < parent->rightbound; bound++)
     {
-      GtUchar cc = gt_bwtseqgetsymbol(bound,limdfsresources->genericindex);
+      GtUchar cc = gt_bwtseqgetsymbol(bound,
+                                   limdfsresources->genericindex->packedindex);
 
       child.offset = parent->offset+1;
       child.code = 0;  /* not used, but we better define it */

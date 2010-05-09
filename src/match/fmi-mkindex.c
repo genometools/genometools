@@ -66,10 +66,10 @@ static GtOPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
   mkfmcallinfo->outfmindex = gt_str_new();
   mkfmcallinfo->leveldesc = gt_str_new();
   op = gt_option_parser_new("[option ...] -ii indexfile [...]",
-                         "Compute FMindex.");
+                         "Compute FM-index.");
   gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
   optionfmout = gt_option_new_string("fmout",
-                             "specify name of FMindex to be generated\n"
+                             "specify name of FM-index to be generated\n"
                              "(mandatory if more than one input index "
                              "is specified)",
                              mkfmcallinfo->outfmindex, NULL);
