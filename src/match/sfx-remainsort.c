@@ -403,10 +403,10 @@ static unsigned long nextsuftabentry_get(Sortblock *sortblock)
     }
     gt_assert(!SUFINMEM(sortblock));
     sortblock->mappedsection
-      = gt_fa_mmap_generic_fd_func(sortblock->mmapfiledesc,
+      = gt_fa_mmap_generic_fd(sortblock->mmapfiledesc,
                         (size_t) entries2map * sizeof (unsigned long),
                         (size_t) sortblock->pageoffset * sizeof (unsigned long),
-                        false,false,__FILE__,__LINE__,NULL);
+                        false,false,NULL);
     gt_assert(sortblock->mappedsection != NULL);
   }
   value = sortblock->mappedsection[sortblock->currentindex -
@@ -952,10 +952,10 @@ static void possiblychangemappedsection(Sortblock *sortblock,unsigned long left,
     }
     gt_assert(!SUFINMEM(sortblock));
     sortblock->mappedsection
-      = gt_fa_mmap_generic_fd_func(sortblock->mmapfiledesc,
+      = gt_fa_mmap_generic_fd(sortblock->mmapfiledesc,
                         (size_t) entries2map * sizeof (unsigned long),
                         (size_t) sortblock->pageoffset * sizeof (unsigned long),
-                        true,false,__FILE__,__LINE__,NULL);
+                        true,false,NULL);
     gt_assert(sortblock->mappedsection != NULL);
     sortblock->pagechanges++;
   }
@@ -1327,11 +1327,11 @@ Compressedtable *gt_rmnsufinfo_wrap(unsigned long *longest,
     } else
     {
       rmnsufinfo->sortedsuffixes
-        = gt_fa_mmap_generic_fd_func(rmnsufinfo->sortblock.mmapfiledesc,
+        = gt_fa_mmap_generic_fd(rmnsufinfo->sortblock.mmapfiledesc,
                                    (size_t) rmnsufinfo->sortblock.mapableentries
                                      * sizeof (unsigned long),
                                    (size_t) 0,
-                                   false,false,__FILE__,__LINE__,NULL);
+                                   false,false,NULL);
     }
 #define NOINVERSESUFTAB
 #ifdef NOINVERSESUFTAB

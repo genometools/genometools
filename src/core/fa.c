@@ -510,7 +510,7 @@ void gt_fa_clean(void)
 /* Gordon, please think about whether the following functions should
    remain here */
 
-FILE *gt_fa_fopen_filename_with_suffix(const GtStr *filenameprefix,
+FILE* gt_fa_fopen_filename_with_suffix(const GtStr *filenameprefix,
                                        const char *suffix,
                                        const char *mode,
                                        GtError *err)
@@ -526,25 +526,8 @@ FILE *gt_fa_fopen_filename_with_suffix(const GtStr *filenameprefix,
   return fp;
 }
 
-bool gt_exists_filename_with_suffix(const GtStr *indexname,const char *suffix)
-{
-  struct stat statbuf;
-  GtStr *tmpfilename;
-
-  tmpfilename = gt_str_clone(indexname);
-  gt_str_append_cstr(tmpfilename,suffix);
-
-  if (stat(gt_str_get(tmpfilename),&statbuf) == 0)
-  {
-    gt_str_delete(tmpfilename);
-    return true;
-  }
-  gt_str_delete(tmpfilename);
-  return false;
-}
-
-void *gt_mmap_filename_with_suffix(const GtStr *indexname,const char *suffix,
-                                   size_t *numofbytes,GtError *err)
+void* gt_mmap_filename_with_suffix(const GtStr *indexname,const char *suffix,
+                                   size_t *numofbytes, GtError *err)
 {
   GtStr *tmpfilename;
   void *ptr;
@@ -584,7 +567,7 @@ static int checkmappedfilesize(const GtStr *indexname,
   return 0;
 }
 
-void *gt_mmap_check_filename_with_suffix(const GtStr *indexname,
+void* gt_mmap_check_filename_with_suffix(const GtStr *indexname,
                                          const char *suffix,
                                          unsigned long expectedunits,
                                          size_t sizeofunit,

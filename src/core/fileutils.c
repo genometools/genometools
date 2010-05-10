@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c)      2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
@@ -37,6 +37,24 @@ bool gt_file_exists(const char *path)
     return false;
   gt_xfclose(file);
   return true;
+}
+
+bool gt_file_with_suffix_exists(const GtStr *path, const char *suffix)
+{
+  struct stat statbuf;
+  GtStr *tmpfilename;
+
+  gt_assert(path && suffix);
+
+  tmpfilename = gt_str_clone(path);
+  gt_str_append_cstr(tmpfilename, suffix);
+
+  if (stat(gt_str_get(tmpfilename), &statbuf) == 0) {
+    gt_str_delete(tmpfilename);
+    return true;
+  }
+  gt_str_delete(tmpfilename);
+  return false;
 }
 
 bool gt_file_is_newer(const char *a, const char *b)
