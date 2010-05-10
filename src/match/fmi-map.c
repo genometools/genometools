@@ -33,11 +33,11 @@
 
 bool gt_fmindexexists(const GtStr *indexname)
 {
-  if (!gt_exists_filename_with_suffix(indexname,FMASCIIFILESUFFIX))
+  if (!gt_file_with_suffix_exists(indexname,FMASCIIFILESUFFIX))
   {
     return false;
   }
-  if (!gt_exists_filename_with_suffix(indexname,FMDATAFILESUFFIX))
+  if (!gt_file_with_suffix_exists(indexname,FMDATAFILESUFFIX))
   {
     return false;
   }

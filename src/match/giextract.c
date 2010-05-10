@@ -646,7 +646,7 @@ int gt_extractkeysfromdesfile(const GtStr *indexname,
 
 bool gt_deskeysfileexists(const GtStr *indexname)
 {
-  return gt_exists_filename_with_suffix(indexname,GT_KEYSTABFILESUFFIX);
+  return gt_file_with_suffix_exists(indexname,GT_KEYSTABFILESUFFIX);
 }
 
 static unsigned long searchfastaqueryindes(const char *extractkey,

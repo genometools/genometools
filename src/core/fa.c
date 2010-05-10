@@ -526,12 +526,12 @@ FILE* gt_fa_fopen_filename_with_suffix(const GtStr *filenameprefix,
   return fp;
 }
 
-bool gt_exists_filename_with_suffix(const GtStr *indexname,const char *suffix)
+bool gt_file_with_suffix_exists(const GtStr *path, const char *suffix)
 {
   struct stat statbuf;
   GtStr *tmpfilename;
 
-  tmpfilename = gt_str_clone(indexname);
+  tmpfilename = gt_str_clone(path);
   gt_str_append_cstr(tmpfilename,suffix);
 
   if (stat(gt_str_get(tmpfilename),&statbuf) == 0)
