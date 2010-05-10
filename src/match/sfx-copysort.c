@@ -547,11 +547,11 @@ void gt_copysortsuffixes(const GtBucketspec2 *bucketspec2,
     const unsigned long *ptr;
     for (ptr = suftab; ptr < suftab + bucketspec2->partwidth; ptr++)
     {
-      showsequenceatstartpos(stdout,
-                             GT_ISDIRREVERSE(readmode) ? false : true,
-                             GT_ISDIRCOMPLEMENT(readmode) ? true : false,
-                             encseq,
-                             *ptr);
+      gt_encseq_showatstartpos(stdout,
+                               GT_ISDIRREVERSE(readmode) ? false : true,
+                               GT_ISDIRCOMPLEMENT(readmode) ? true : false,
+                               encseq,
+                               *ptr);
     }
   }
 #endif

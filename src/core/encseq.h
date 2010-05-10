@@ -335,4 +335,16 @@ void             gt_encseq_encoder_set_input_preencoded(GtEncseqEncoder *ee);
 
 int gt_encseq_builder_unit_test(GtError *err);
 
+/* The following function shows the encoded sequence at position <startpos>.
+   The output goes to the file pointer <fp>. The parameters <fwd> and
+   <complement> define whether the sequence is read in forward direction or
+   the complement of the sequence is shown.
+*/
+
+void gt_encseq_showatstartpos(FILE *fp,
+                              bool fwd,
+                              bool complement,
+                              const GtEncseq *encseq,
+                              unsigned long startpos);
+
 #endif

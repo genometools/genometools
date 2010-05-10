@@ -26,8 +26,8 @@
 #include "core/arraydef.h"
 #include "core/unused_api.h"
 #include "core/types_api.h"
-#include "spacedef.h"
 #include "core/encseq.h"
+#include "spacedef.h"
 #include "spacedef.h"
 #include "turnwheels.h"
 #include "esa-fileend.h"
@@ -52,7 +52,10 @@
 
 #define DEREFSEQ(VAR,PTR,ESR) DEREFSTOPPOSSEQ(VAR,PTR,bsr->totallength,ESR)
 
-#define LCPINDEX(LCPSUBTAB,I)   (unsigned long) ((I) - (LCPSUBTAB)->suftabbase)
+#define LCPINDEX(LCPSUBTAB,I)\
+        (unsigned long) ((I) - (LCPSUBTAB)->suftabbase)
+#define LCPINDEXLONG(LCPSUBTAB,I)\
+        (unsigned long) ((I) - (LCPSUBTAB)->suftabbaselong)
 
 #define BS_SWAP(TMP,A,B)\
         if ((A) != (B))\
@@ -106,6 +109,7 @@ typedef struct
   const Compressedtable *completelcpvalues;
   GtArrayLargelcpvalue largelcpvalues;
   const unsigned long *suftabbase;
+  unsigned long suftabbaselong;
 } Lcpsubtab;
 
 typedef struct
@@ -193,32 +197,26 @@ static void showsuffixrange(const GtEncseq *encseq,
                             bool complement,
                             const Lcpsubtab *lcpsubtab,
                             const Suffixptr *leftptr,
-                            const Suffixptr *rightptr,
+                            unsigned long width,
                             unsigned long depth)
 {
-  const Suffixptr *pi;
+  unsigned long pi;
 
   if (lcpsubtab == NULL)
   {
-    printf("of %d suffixes at depth %d:\n",
-           (int) ((rightptr) - (leftptr) + 1),
-           (int) depth);
+    printf("of %lu suffixes at depth %lu:\n",width,depth);
   } else
   {
-    printf("of %d suffixes [%d,%d] at depth %d:\n",
-           (int) ((rightptr) - (leftptr) + 1),
-           (int) baseptr + LCPINDEX(lcpsubtab,leftptr),
-           (int) baseptr + LCPINDEX(lcpsubtab,rightptr),
-           (int) depth);
+    printf("of %lu suffixes [%lu,%lu] at depth %lu:\n",
+           width,
+           baseptr + LCPINDEX(lcpsubtab,leftptr),
+           baseptr + LCPINDEX(lcpsubtab,leftptr + width),
+           depth);
   }
-  for (pi = leftptr; pi <= rightptr; pi++)
+  for (pi = 0; pi <= width; pi++)
   {
-    printf("suffix %d:",*pi);
-    showsequenceatstartpos(stdout,
-                           fwd,
-                           complement,
-                           encseq,
-                           *pi);
+    printf("suffix %lu:",leftptr[pi]);
+    gt_encseq_showatstartpos(stdout,fwd,complement,encseq,leftptr[pi]);
   }
 }
 #endif
@@ -457,7 +455,7 @@ static void bs_insertionsort(Bentsedgresources *bsr,
 #ifdef SKDEBUG
   printf("insertion sort ");
   showsuffixrange(bsr->encseq,bsr->fwd,bsr->complement,bsr->lcpsubtab,
-                  leftptr,rightptr,offset);
+                  leftptr,(unsigned long) (rightptr - leftptr + 1),offset);
 #endif
   bsr->countinsertionsort++;
   for (pi = leftptr + 1; pi <= rightptr; pi++)
@@ -493,16 +491,16 @@ static void bs_insertionsort(Bentsedgresources *bsr,
 #ifdef SKDEBUG
         printf("gt_encseq_compare[%d,%d] at offset %d\n",
                        (int) *(pj-1),(int) *pj,(int) offset);
-        showsequenceatstartpos(stdout,
-                               bsr->fwd,
-                               bsr->complement,
-                               bsr->encseq,
-                               *(pj-1));
-        showsequenceatstartpos(stdout,
-                               bsr->fwd,
-                               bsr->complement,
-                               bsr->encseq,
-                               *pj);
+        gt_encseq_showatstartpos(stdout,
+                                 bsr->fwd,
+                                 bsr->complement,
+                                 bsr->encseq,
+                                 *(pj-1));
+        gt_encseq_showatstartpos(stdout,
+                                 bsr->fwd,
+                                 bsr->complement,
+                                 bsr->encseq,
+                                 *pj);
 #endif
         retval = gt_encseq_compare(bsr->encseq,&commonunits,bsr->fwd,
                                             bsr->complement,
@@ -546,7 +544,7 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
 #ifdef SKDEBUG
   printf("insertion sort (offset=%lu,maxdepth=%lu)\n",offset,maxdepth);
   showsuffixrange(bsr->encseq,bsr->fwd,bsr->complement,bsr->lcpsubtab,
-                  leftptr,rightptr,offset);
+                  leftptr,(unsigned long) (rightptr - leftptr + 1),offset);
 #endif
   bsr->countinsertionsort++;
   for (pi = leftptr + 1; pi <= rightptr; pi++)
@@ -1003,7 +1001,7 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
                    depth,
                    __LINE__);
   */
-  gt_assert((right - left + 1) == width);
+  gt_assert(width = (unsigned long) (right - left + 1));
   if (width > 1UL)
   {
     if (bsr->sfxstrategy->ssortmaxdepth.defined)
@@ -2174,6 +2172,7 @@ void gt_sortallbuckets(Suftab *suftab,
         {
           gt_assert(bsr.lcpsubtab != NULL);
           bsr.lcpsubtab->suftabbase = suftabptr + bucketspec.left;
+          bsr.lcpsubtab->suftabbaselong = bucketspec.left;
         }
         bentleysedgewick(&bsr,
                          suftabptr + bucketspec.left,

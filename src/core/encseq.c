@@ -4470,7 +4470,6 @@ GT_UNUSED static int multicharactercompare(const GtEncseq *encseq,
 
   gt_encseq_reader_reinit_with_direction(esr1,encseq,fwd,pos1);
   gt_encseq_reader_reinit_with_direction(esr2,encseq,fwd,pos2);
-  gt_encseq_extract2bitenc(fwd,&ptbe1,encseq,esr1,pos1);
   gt_encseq_extract2bitenc(fwd,&ptbe2,encseq,esr2,pos2);
   retval = gt_encseq_compare_twobitencodings(fwd,complement,
                                                       &commonunits,
@@ -4583,12 +4582,11 @@ static void showbufchar(FILE *fp,bool complement,GtUchar cc)
   }
 }
 
-/* remove this from the interface */
-static void showsequenceatstartpos(FILE *fp,
-                                   bool fwd,
-                                   bool complement,
-                                   const GtEncseq *encseq,
-                                   unsigned long startpos)
+void gt_encseq_showatstartpos(FILE *fp,
+                              bool fwd,
+                              bool complement,
+                              const GtEncseq *encseq,
+                              unsigned long startpos)
 {
   unsigned long pos, endpos;
   GtUchar buffer[GT_UNITSIN2BITENC];
@@ -4764,7 +4762,7 @@ static void checkextractunitatpos(const GtEncseq *encseq,
               complement ? "true" : "false",
               startpos,
               ptbe1.unitsnotspecial,ptbe2.unitsnotspecial);
-      showsequenceatstartpos(stderr,fwd,complement,encseq,startpos);
+      gt_encseq_showatstartpos(stderr,fwd,complement,encseq,startpos);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     if (!checktbe(fwd,ptbe1.tbe,ptbe2.tbe,ptbe1.unitsnotspecial))
@@ -4773,7 +4771,7 @@ static void checkextractunitatpos(const GtEncseq *encseq,
                       fwd ? "true" : "false",
                       complement ? "true" : "false",
                       startpos);
-      showsequenceatstartpos(stderr,fwd,complement,encseq,startpos);
+      gt_encseq_showatstartpos(stderr,fwd,complement,encseq,startpos);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     if (fwd)
@@ -4888,10 +4886,10 @@ static void multicharactercompare_withtest(const GtEncseq *encseq,
     fprintf(stderr,"ret1=%d, ret2=%d\n",ret1,ret2);
     fprintf(stderr,"commonunits1=%u, commonunits2=%lu\n",
             commonunits1.common,commonunits2);
-    showsequenceatstartpos(stderr,fwd,complement,encseq,pos1);
+    gt_encseq_showatstartpos(stderr,fwd,complement,encseq,pos1);
     gt_bitsequence_tostring(buf1,ptbe1.tbe);
     fprintf(stderr,"v1=%s(unitsnotspecial=%u)\n",buf1,ptbe1.unitsnotspecial);
-    showsequenceatstartpos(stderr,fwd,complement,encseq,pos2);
+    gt_encseq_showatstartpos(stderr,fwd,complement,encseq,pos2);
     gt_bitsequence_tostring(buf2,ptbe2.tbe);
     fprintf(stderr,"v2=%s(unitsnotspecial=%u)\n",buf2,ptbe2.unitsnotspecial);
     exit(GT_EXIT_PROGRAMMING_ERROR);
