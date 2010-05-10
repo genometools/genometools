@@ -531,6 +531,8 @@ bool gt_file_with_suffix_exists(const GtStr *path, const char *suffix)
   struct stat statbuf;
   GtStr *tmpfilename;
 
+  gt_assert(path && suffix);
+
   tmpfilename = gt_str_clone(path);
   gt_str_append_cstr(tmpfilename,suffix);
 
