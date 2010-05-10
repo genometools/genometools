@@ -103,30 +103,27 @@ void    gt_fa_xmunmap(void *addr);
 #define gt_fa_mmap_generic_fd(fd, len, offset, mapwritable, hard_fail, err) \
         gt_fa_mmap_generic_fd_func(fd, len, offset, mapwritable, hard_fail, \
                                    __FILE__, __LINE__, err)
-void*   gt_fa_mmap_generic_fd_func(int fd, size_t len,
-                                   size_t offset,
+void*   gt_fa_mmap_generic_fd_func(int fd, size_t len, size_t offset,
                                    bool mapwritable, bool hard_fail,
-                                   const char *filename, int line, GtError*);
+                                   const char *filename, int line,
+                                   GtError *err);
 /* check if all allocated file pointer have been released, prints to stderr */
 int     gt_fa_check_fptr_leak(void);
 /* check if all allocated memory maps have been freed, prints to stderr */
 int     gt_fa_check_mmap_leak(void);
 void    gt_fa_show_space_peak(FILE*);
 void    gt_fa_clean(void);
-FILE *gt_fa_fopen_filename_with_suffix(const GtStr *filenameprefix,
-                                       const char *suffix,
-                                       const char *mode,
-                                       GtError *err);
 
-bool gt_exists_filename_with_suffix(const GtStr *indexname,const char *suffix);
-
-void *gt_mmap_filename_with_suffix(const GtStr *indexname,const char *suffix,
-                                   size_t *numofbytes,GtError *err);
-
-void *gt_mmap_check_filename_with_suffix(const GtStr *indexname,
-                                         const char *suffix,
-                                         unsigned long expectedunits,
-                                         size_t sizeofunit,
+FILE*   gt_fa_fopen_filename_with_suffix(const GtStr *filenameprefix,
+                                         const char *suffix, const char *mode,
                                          GtError *err);
+bool    gt_exists_filename_with_suffix(const GtStr *indexname,
+                                       const char *suffix);
+void*   gt_mmap_filename_with_suffix(const GtStr *indexname, const char *suffix,
+                                     size_t *numofbytes, GtError *err);
+void*   gt_mmap_check_filename_with_suffix(const GtStr *indexname,
+                                           const char *suffix,
+                                           unsigned long expectedunits,
+                                           size_t sizeofunit, GtError *err);
 
 #endif
