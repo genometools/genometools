@@ -1003,6 +1003,7 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
                    depth,
                    __LINE__);
   */
+  gt_assert((right - left + 1) == width);
   if (width > 1UL)
   {
     if (bsr->sfxstrategy->ssortmaxdepth.defined)
@@ -1011,7 +1012,7 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
                (unsigned long) bsr->sfxstrategy->ssortmaxdepth.valueunsignedint)
       {
         gt_rmnsufinfo_addunsortedrange(bsr->rmnsufinfo,SUFTABINDEX(left),
-                                    SUFTABINDEX(right),depth);
+                                       SUFTABINDEX(right),depth);
         return;
       }
     } else
@@ -1026,8 +1027,8 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
         if (width <= bsr->sfxstrategy->maxinsertionsort)
         {
           insertionsortmaxdepth(bsr,left,right,depth,
-                                (unsigned long) bsr->sfxstrategy->
-                                              differencecover);
+                                (unsigned long) 
+                                bsr->sfxstrategy->differencecover);
           return;
         }
         if (width <= bsr->sfxstrategy->maxbltriesort)
@@ -1036,17 +1037,18 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
 
           numoflargelcpvalues
             = gt_blindtrie_suffixsort(bsr->blindtrie,
-                              left,
-                              bsr->lcpsubtab == NULL
-                                ? NULL
-                                : bsr->lcpsubtab->bucketoflcpvalues +
-                                  LCPINDEX(bsr->lcpsubtab,left),
-                              width,
-                              depth,
-                              (unsigned long) bsr->sfxstrategy->differencecover,
-                              ordertype,
-                              bsr->voiddcov,
-                              bsr->dc_processunsortedrange);
+                                      left,
+                                      bsr->lcpsubtab == NULL
+                                        ? NULL
+                                        : bsr->lcpsubtab->bucketoflcpvalues +
+                                          LCPINDEX(bsr->lcpsubtab,left),
+                                      width,
+                                      depth,
+                                      (unsigned long) 
+                                        bsr->sfxstrategy->differencecover,
+                                      ordertype,
+                                      bsr->voiddcov,
+                                      bsr->dc_processunsortedrange);
           if (bsr->lcpsubtab != NULL)
           {
             bsr->lcpsubtab->numoflargelcpvalues += numoflargelcpvalues;
