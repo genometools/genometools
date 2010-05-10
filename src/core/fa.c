@@ -526,24 +526,6 @@ FILE* gt_fa_fopen_filename_with_suffix(const GtStr *filenameprefix,
   return fp;
 }
 
-bool gt_file_with_suffix_exists(const GtStr *path, const char *suffix)
-{
-  struct stat statbuf;
-  GtStr *tmpfilename;
-
-  gt_assert(path && suffix);
-
-  tmpfilename = gt_str_clone(path);
-  gt_str_append_cstr(tmpfilename, suffix);
-
-  if (stat(gt_str_get(tmpfilename), &statbuf) == 0) {
-    gt_str_delete(tmpfilename);
-    return true;
-  }
-  gt_str_delete(tmpfilename);
-  return false;
-}
-
 void* gt_mmap_filename_with_suffix(const GtStr *indexname,const char *suffix,
                                    size_t *numofbytes, GtError *err)
 {

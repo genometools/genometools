@@ -117,7 +117,6 @@ void    gt_fa_clean(void);
 FILE*   gt_fa_fopen_filename_with_suffix(const GtStr *filenameprefix,
                                          const char *suffix, const char *mode,
                                          GtError *err);
-bool    gt_file_with_suffix_exists(const GtStr *path, const char *suffix);
 void*   gt_mmap_filename_with_suffix(const GtStr *indexname, const char *suffix,
                                      size_t *numofbytes, GtError *err);
 void*   gt_mmap_check_filename_with_suffix(const GtStr *indexname,
