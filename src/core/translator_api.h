@@ -25,7 +25,7 @@
 /* Implements a translator class supporting all translation schemes from
    __http://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi__.
    The <GtTranslator> can be used to generate single-frame translations of
-   a DNA string to a <GtStr> or to produce 3-frame translations via an interator
+   a DNA string to a <GtStr> or to produce 3-frame translations via an iterator
    interface. */
 typedef struct GtTranslator GtTranslator;
 

@@ -29,25 +29,27 @@
 typedef struct Rmnsufinfo Rmnsufinfo;
 
 Rmnsufinfo *gt_newRmnsufinfo(unsigned long *presortedsuffixes,
-                          int mmapfiledesc,
-                          const GtEncseq *encseq,
-                          Bcktab *bcktab,
-                          GtCodetype maxcode,
-                          unsigned int numofchars,
-                          unsigned int prefixlength,
-                          GtReadmode readmode,
-                          unsigned long partwidth,
-                          bool hashexceptions,
-                          bool absoluteinversesuftab);
+                             int mmapfiledesc,
+                             GtStr *mmapfilename,
+                             const GtEncseq *encseq,
+                             Bcktab *bcktab,
+                             GtCodetype maxcode,
+                             unsigned int numofchars,
+                             unsigned int prefixlength,
+                             GtReadmode readmode,
+                             unsigned long partwidth,
+                             bool hashexceptions,
+                             bool absoluteinversesuftab);
 
 void gt_rmnsufinfo_addunsortedrange(Rmnsufinfo *rmnsufinfo,
-                                 unsigned long left,
-                                 unsigned long right,
-                                 unsigned long depth);
+                                    unsigned long left,
+                                    unsigned long right,
+                                    unsigned long depth);
 
 void gt_bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo );
+
 Compressedtable *gt_rmnsufinfo_wrap(unsigned long *longest,
-                                 Rmnsufinfo **rmnsufinfoptr,
-                                 bool withlcptab);
+                                    Rmnsufinfo **rmnsufinfoptr,
+                                    bool withlcptab);
 
 #endif

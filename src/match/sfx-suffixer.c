@@ -786,6 +786,7 @@ static void preparethispart(Sfxiterator *sfi)
     {
       gt_qsufsort(sfi->suftab.sortspace,
                   -1,
+                  NULL,
                   &sfi->suftab.longest.valueunsignedlong,
                   sfi->encseq,
                   sfi->readmode,
@@ -908,6 +909,7 @@ int gt_postsortsuffixesfromstream(Sfxiterator *sfi, const GtStr *str_indexname,
     gt_assert(sfi->totallength >= sfi->specialcharacters);
     gt_qsufsort(NULL,
              mmapfiledesc,
+             tmpfilename,
              &sfi->suftab.longest.valueunsignedlong,
              sfi->encseq,
              sfi->readmode,

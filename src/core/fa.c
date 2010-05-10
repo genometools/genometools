@@ -309,7 +309,8 @@ FILE* gt_xtmpfp_generic_func(GtStr *template_arg, int flags,
   return fp;
 }
 
-void* gt_fa_mmap_generic_fd_func(int fd, size_t len, size_t offset,
+void* gt_fa_mmap_generic_fd_func(int fd, const char *filename_to_map,
+                                 size_t len, size_t offset,
                                  bool mapwritable, bool hard_fail,
                                  const char *filename, int line, GtError *err)
 {
@@ -330,8 +331,8 @@ void* gt_fa_mmap_generic_fd_func(int fd, size_t len, size_t offset,
   {
     if ((map = mmap(0, len, PROT_READ | (mapwritable ? PROT_WRITE : 0),
                     MAP_SHARED, fd, offset)) == MAP_FAILED) {
-      gt_error_set(err,"cannot map file \"%s\": %s","unknown filename",/* XXX */
-                                                    strerror(errno));
+      gt_error_set(err,"cannot map file \"%s\": %s", filename_to_map,
+                                                     strerror(errno));
       map = NULL;
     }
   }
@@ -375,7 +376,7 @@ static void* mmap_generic_path_func(const char *path, size_t *len,
                  path, (unsigned long long) sb.st_size);
     return NULL;
   }
-  map = gt_fa_mmap_generic_fd_func(fd, sb.st_size, 0,
+  map = gt_fa_mmap_generic_fd_func(fd, path, sb.st_size, 0,
                                    mapwritable, hard_fail,
                                    filename, line, err);
   if (map && len)

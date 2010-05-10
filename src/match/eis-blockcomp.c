@@ -52,6 +52,7 @@ struct onDiskBlockCompIdx
   FILE *idxFP;                 /**< used for writing the index and
                                 * if an mmap of the whole index
                                 * isn't possible also for reading */
+  GtStr *idxFN;                /**< stores the filename of idxFP */
   char *idxMMap;               /**< if mmapping of the constant- and
                                 * variable-width strings succeeded,
                                 * stores the base of the
@@ -1719,6 +1720,7 @@ openOnDiskData(const GtStr *projectName, struct onDiskBlockCompIdx *idx,
   GtStr *bdxName = gt_str_clone(projectName);
   gt_str_append_cstr(bdxName, ".bdx");
   idx->idxFP = gt_fa_fopen(gt_str_get(bdxName), mode, NULL);
+  idx->idxFN = gt_str_ref(bdxName);
   gt_str_delete(bdxName);
   if (!idx->idxFP)
     return 0;
@@ -1748,6 +1750,8 @@ destructOnDiskBlockCompIdx(struct onDiskBlockCompIdx *idx)
     gt_fa_xmunmap(idx->idxMMap);
   if (idx->idxFP)
     gt_fa_xfclose(idx->idxFP);
+  if (idx->idxFN)
+    gt_str_delete(idx->idxFN);
 }
 
 static inline void
@@ -2368,7 +2372,8 @@ tryMMapOfIndex(struct onDiskBlockCompIdx *idxData)
 {
   size_t len = idxData->rangeEncPos - idxData->cwDataPos;
   gt_assert(idxData && idxData->idxFP && idxData->idxMMap == NULL);
-  idxData->idxMMap = gt_fa_mmap_generic_fd(fileno(idxData->idxFP), len,
+  idxData->idxMMap = gt_fa_mmap_generic_fd(fileno(idxData->idxFP),
+                                           gt_str_get(idxData->idxFN),len,
                                            idxData->cwDataPos, false, false,
                                            NULL);
   return idxData->idxMMap != NULL;

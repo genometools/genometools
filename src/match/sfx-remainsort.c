@@ -81,6 +81,7 @@ typedef struct
 typedef struct
 {
   int mmapfiledesc;
+  GtStr *mmapfilename;
   unsigned long *sortspace,
          *mappedsection,
          currentindex,
@@ -151,9 +152,14 @@ struct Rmnsufinfo
 static void initsortblock(Sortblock *sortblock,
                           unsigned long *presortedsuffixes,
                           int mmapfiledesc,
+                          GtStr *mmapfilename,
                           unsigned long partwidth)
 {
   sortblock->mmapfiledesc = mmapfiledesc;
+  if (mmapfilename != NULL)
+    sortblock->mmapfilename = gt_str_ref(mmapfilename);
+  else
+    sortblock->mmapfilename = mmapfilename;
   if (presortedsuffixes != NULL)
   {
     gt_assert(SUFINMEM(sortblock));
@@ -266,6 +272,7 @@ DEFINE_HASHMAP(unsigned long, seqpos, unsigned long, ul, gt_ht_seqpos_elem_hash,
 
 Rmnsufinfo *gt_newRmnsufinfo(unsigned long *presortedsuffixes,
                           int mmapfiledesc,
+                          GtStr *mmapfilename,
                           const GtEncseq *encseq,
                           Bcktab *bcktab,
                           GtCodetype maxcode,
@@ -368,7 +375,7 @@ Rmnsufinfo *gt_newRmnsufinfo(unsigned long *presortedsuffixes,
   rmnsufinfo->lowerboundwithrank = filllowerboundwithrank(encseq,readmode);
 #endif
   initsortblock(&rmnsufinfo->sortblock,presortedsuffixes,mmapfiledesc,
-                partwidth);
+                mmapfilename,partwidth);
   return rmnsufinfo;
 }
 
@@ -404,6 +411,7 @@ static unsigned long nextsuftabentry_get(Sortblock *sortblock)
     gt_assert(!SUFINMEM(sortblock));
     sortblock->mappedsection
       = gt_fa_mmap_generic_fd(sortblock->mmapfiledesc,
+                        gt_str_get(sortblock->mmapfilename),
                         (size_t) entries2map * sizeof (unsigned long),
                         (size_t) sortblock->pageoffset * sizeof (unsigned long),
                         false,false,NULL);
@@ -953,6 +961,7 @@ static void possiblychangemappedsection(Sortblock *sortblock,unsigned long left,
     gt_assert(!SUFINMEM(sortblock));
     sortblock->mappedsection
       = gt_fa_mmap_generic_fd(sortblock->mmapfiledesc,
+                        gt_str_get(sortblock->mmapfilename),
                         (size_t) entries2map * sizeof (unsigned long),
                         (size_t) sortblock->pageoffset * sizeof (unsigned long),
                         true,false,NULL);
@@ -1328,10 +1337,11 @@ Compressedtable *gt_rmnsufinfo_wrap(unsigned long *longest,
     {
       rmnsufinfo->sortedsuffixes
         = gt_fa_mmap_generic_fd(rmnsufinfo->sortblock.mmapfiledesc,
-                                   (size_t) rmnsufinfo->sortblock.mapableentries
-                                     * sizeof (unsigned long),
-                                   (size_t) 0,
-                                   false,false,NULL);
+                                gt_str_get(rmnsufinfo->sortblock.mmapfilename),
+                                (size_t) rmnsufinfo->sortblock.mapableentries
+                                  * sizeof (unsigned long),
+                                (size_t) 0,
+                                false,false,NULL);
     }
 #define NOINVERSESUFTAB
 #ifdef NOINVERSESUFTAB
@@ -1359,11 +1369,14 @@ Compressedtable *gt_rmnsufinfo_wrap(unsigned long *longest,
     rmnsufinfo->sortedsuffixes = NULL;
   }
 #ifdef Lowerboundwithrank
-  gt_free(rmnsufinfo->lowerboundwithrank);
+  gt_freefree(rmnsufinfo->lowerboundwithrank);
   rmnsufinfo->lowerboundwithrank = NULL;
 #endif
   gt_assert(rmnsufinfo->esr != NULL);
   gt_encseq_reader_delete(rmnsufinfo->esr);
+  if (rmnsufinfo->sortblock.mmapfilename != NULL) {
+    gt_str_delete(rmnsufinfo->sortblock.mmapfilename);
+  }
   gt_free(rmnsufinfo);
   rmnsufinfoptr = NULL;
   return lcptab;

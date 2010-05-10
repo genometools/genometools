@@ -100,10 +100,13 @@ void*   gt_fa_xmmap_read_func(const char *path, size_t *len, const char*, int);
         gt_fa_xmmap_write_func(path, len, __FILE__, __LINE__)
 void*   gt_fa_xmmap_write_func(const char *path, size_t *len, const char*, int);
 void    gt_fa_xmunmap(void *addr);
-#define gt_fa_mmap_generic_fd(fd, len, offset, mapwritable, hard_fail, err) \
-        gt_fa_mmap_generic_fd_func(fd, len, offset, mapwritable, hard_fail, \
-                                   __FILE__, __LINE__, err)
-void*   gt_fa_mmap_generic_fd_func(int fd, size_t len, size_t offset,
+#define gt_fa_mmap_generic_fd(fd, filename_to_map, len, offset, mapwritable, \
+                              hard_fail, err) \
+        gt_fa_mmap_generic_fd_func(fd, filename_to_map, len, offset, \
+                                   mapwritable, hard_fail, __FILE__, __LINE__, \
+                                   err)
+void*   gt_fa_mmap_generic_fd_func(int fd, const char *filename_to_map,
+                                   size_t len, size_t offset,
                                    bool mapwritable, bool hard_fail,
                                    const char *filename, int line,
                                    GtError *err);
