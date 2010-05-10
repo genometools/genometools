@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c)      2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
@@ -27,8 +27,8 @@
 
 /* Fileutils module */
 
-/* Returns true if the file with the given path exists, false otherwise. */
-bool           gt_file_exists(const char*);
+/* Returns true if the file with the given <path> exists, false otherwise. */
+bool           gt_file_exists(const char *path);
 
 /* Returns true if the file with path <a> has a later modification time than the
    file with path <b>, false otherwise. */
