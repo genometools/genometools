@@ -1,4 +1,5 @@
 require 'set'
+require 'digest/md5'
 
 testdatafiles = Set.new
 
@@ -79,6 +80,13 @@ Keywords "gt_checkprjfiles"
 Test do
   callargs.each do |args|
     indexfileprefix=fromoptions2indexname(args)
+    # long filenames can cause problems on encrypted file systems
+    # this will produce a prefix of exactly 100 chars (resulting in 104 byte
+    # filenames)
+    if indexfileprefix.length >= 100
+            indexfileprefix = indexfileprefix[0..67] + 
+              Digest::MD5.hexdigest(indexfileprefix)[0..31]
+    end
     indexname="#{indexfileprefix}"
     run_test "#{$bin}gt suffixerator -indexname #{indexname} " +
              "-pl -des #{fileargs(testdatafiles,args)}"
