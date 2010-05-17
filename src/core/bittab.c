@@ -300,15 +300,15 @@ void gt_bittab_show(const GtBittab *b, FILE *outfp)
   /* header line */
   for (i = 0; i < b->num_of_bits; i++)
     fprintf(outfp, "%lu", i % 10);
-  (void) putc('\n', outfp);
+  gt_xfputc('\n', outfp);
   /* actual bits */
   for (i = 0; i < b->num_of_bits; i++) {
     if (gt_bittab_bit_is_set(b, i))
-      (void) putc('1', outfp);
+      gt_xfputc('1', outfp);
     else
-      (void) putc('0', outfp);
+      gt_xfputc('0', outfp);
   }
-  (void) putc('\n', outfp);
+  gt_xfputc('\n', outfp);
 }
 
 int gt_bittab_example(GT_UNUSED GtError *err)

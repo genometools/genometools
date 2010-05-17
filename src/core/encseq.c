@@ -3414,7 +3414,7 @@ static int gt_inputfiles2sequencekeyvalues(const GtStr *indexname,
               desoffset = (unsigned long) ftello(desfp);
               gt_xfwrite(&desoffset,sizeof desoffset,(size_t) 1,sdsfp);
             }
-            (void) putc((int) '\n',desfp);
+            gt_xfputc((int) '\n',desfp);
           }
           if (specialprefix)
           {
@@ -3460,7 +3460,7 @@ static int gt_inputfiles2sequencekeyvalues(const GtStr *indexname,
     {
       desc = gt_queue_get(descqueue);
       gt_xfputs(desc,desfp);
-      (void) putc((int) '\n',desfp);
+      gt_xfputc((int) '\n',desfp);
       gt_free(desc);
       desc = NULL;
     }

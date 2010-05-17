@@ -35,6 +35,7 @@
 #include "mathsupport.h"
 #include "fa.h"
 #include "alphabet.h"
+#include "core/xansi.h"
 
 #define ALPHABET_GUESS_MAX_LENGTH       5000
 #define ALPHABET_GUESS_PROTEIN_CHARS    "LIFEQPlifeqpXZ*-"
@@ -689,7 +690,7 @@ void gt_alphabet_output(const GtAlphabet *alphabet, FILE *fpout)
         {
           fprintf(fpout," %c",(int) chartoshow);
         }
-        (void) putc('\n',fpout);
+        gt_xfputc('\n',fpout);
         afternewline = true;
         linenum++;
       } else
@@ -697,7 +698,7 @@ void gt_alphabet_output(const GtAlphabet *alphabet, FILE *fpout)
         afternewline = false;
       }
     }
-    (void) putc((int) currentcc,fpout);
+    gt_xfputc((int) currentcc,fpout);
     if (afternewline)
     {
       firstinline = currentcc;
@@ -715,7 +716,7 @@ void gt_alphabet_output(const GtAlphabet *alphabet, FILE *fpout)
   {
     fprintf(fpout," %c",(int) chartoshow);
   }
-  (void) putc((int) '\n',fpout);
+  gt_xfputc((int) '\n',fpout);
 }
 
 void gt_alphabet_decode_seq_to_fp(const GtAlphabet *alphabet, FILE *fpout,
@@ -733,7 +734,7 @@ void gt_alphabet_decode_seq_to_fp(const GtAlphabet *alphabet, FILE *fpout,
   }
   for (i = 0; i < wlen; i++)
   {
-    (void) putc((int) characters[(int) w[i]],fpout);
+    gt_xfputc((int) characters[(int) w[i]],fpout);
   }
 }
 
@@ -798,7 +799,7 @@ GtStr* gt_alphabet_decode_seq_to_str(const GtAlphabet *alphabet,
 void gt_alphabet_echo_pretty_symbol(const GtAlphabet *alphabet, FILE *fpout,
                                     GtUchar currentchar)
 {
-  (void) putc((int) converttoprettysymbol(alphabet, currentchar), fpout);
+  gt_xfputc((int) converttoprettysymbol(alphabet, currentchar), fpout);
 }
 
 GtUchar gt_alphabet_pretty_symbol(const GtAlphabet *alphabet,
