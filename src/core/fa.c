@@ -459,7 +459,7 @@ void* gt_mmap_read_with_suffix(const GtStr *path, const char *suffix,
   return ptr;
 }
 
-static int check_mapped_file_size(const GtStr *indexname,
+static int check_mapped_file_size(const GtStr *path,
                                   const char *suffix,
                                   size_t numofbytes,
                                   unsigned long expectedunits,
@@ -471,7 +471,7 @@ static int check_mapped_file_size(const GtStr *indexname,
   {
     gt_error_set(err,"mapping file %s%s: number of mapped units (of size %u) "
                      " = %lu != %lu = expected number of mapped units",
-                      gt_str_get(indexname),
+                      gt_str_get(path),
                       suffix,
                       (unsigned int) sizeofunit,
                       (unsigned long) (numofbytes/sizeofunit),
@@ -481,7 +481,7 @@ static int check_mapped_file_size(const GtStr *indexname,
   return 0;
 }
 
-void* gt_mmap_check_filename_with_suffix(const GtStr *indexname,
+void* gt_mmap_check_filename_with_suffix(const GtStr *path,
                                          const char *suffix,
                                          unsigned long expectedunits,
                                          size_t sizeofunit,
@@ -489,9 +489,9 @@ void* gt_mmap_check_filename_with_suffix(const GtStr *indexname,
 {
   size_t numofbytes;
   void *ptr;
-  if (!(ptr = gt_mmap_read_with_suffix(indexname,suffix,&numofbytes,err)))
+  if (!(ptr = gt_mmap_read_with_suffix(path, suffix, &numofbytes, err)))
     return NULL;
-  if (check_mapped_file_size(indexname, suffix, numofbytes, expectedunits,
+  if (check_mapped_file_size(path, suffix, numofbytes, expectedunits,
                              sizeofunit, err)) {
     gt_fa_xmunmap(ptr);
     return NULL;
