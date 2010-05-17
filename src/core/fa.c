@@ -532,18 +532,13 @@ void* gt_mmap_filename_with_suffix(const GtStr *indexname,const char *suffix,
 {
   GtStr *tmpfilename;
   void *ptr;
-  bool haserr = false;
 
   gt_error_check(err);
   tmpfilename = gt_str_clone(indexname);
   gt_str_append_cstr(tmpfilename,suffix);
   ptr = gt_fa_mmap_read(gt_str_get(tmpfilename),numofbytes,err);
-  if (ptr == NULL)
-  {
-    haserr = true;
-  }
   gt_str_delete(tmpfilename);
-  return haserr ? NULL : ptr;
+  return ptr;
 }
 
 static int checkmappedfilesize(const GtStr *indexname,
