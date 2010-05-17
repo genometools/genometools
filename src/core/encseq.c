@@ -54,6 +54,7 @@
 #include "core/sequence_buffer_plain.h"
 #include "core/str.h"
 #include "core/unused_api.h"
+#include "core/xansi.h"
 
 #define CHECKANDUPDATE(VAL,IDX)\
         tmp = localdetsizeencseq(VAL,totallength,numofdbfiles,\
@@ -3417,15 +3418,7 @@ static int gt_inputfiles2sequencekeyvalues(const GtStr *indexname,
               unsigned long desoffset;
 
               desoffset = (unsigned long) ftello(desfp);
-              if (fwrite(&desoffset,sizeof desoffset,(size_t) 1,sdsfp)
-                  != (size_t) 1)
-              {
-                gt_error_set(err,"cannot write description separator to file "
-                                 "%s.%s",gt_str_get(indexname),
-                                 GT_SDSTABFILESUFFIX);
-                haserr = true;
-                break;
-              }
+              gt_xfwrite(&desoffset,sizeof desoffset,(size_t) 1,sdsfp);
             }
             (void) putc((int) '\n',desfp);
           }
@@ -5430,20 +5423,10 @@ gt_encseq_new_from_files(GtProgressTimer *sfxprogress,
           haserr = true;
         } else
         {
-          if (fwrite(sequenceseppos.spaceGtUlong,
+          gt_xfwrite(sequenceseppos.spaceGtUlong,
                      sizeof (*sequenceseppos.spaceGtUlong),
                      (size_t) sequenceseppos.nextfreeGtUlong,
-                     outfp)
-                     != (size_t) sequenceseppos.nextfreeGtUlong)
-          {
-            gt_error_set(err,"cannot write %lu items of size %u: "
-                             "errormsg=\"%s\"",
-                              sequenceseppos.nextfreeGtUlong,
-                              (unsigned int)
-                              sizeof (*sequenceseppos.spaceGtUlong),
-                              strerror(errno));
-            haserr = true;
-          }
+                     outfp);
         }
         gt_fa_fclose(outfp);
       }
