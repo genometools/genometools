@@ -23,18 +23,18 @@
 #include <stdbool.h>
 #include <limits.h>
 #include <errno.h>
-#include "chardef.h"
-#include "cstr_api.h"
-#include "error.h"
-#include "fileutils_api.h"
-#include "ma_api.h"
-#include "gtdatapath.h"
-#include "str.h"
-#include "str_array.h"
-#include "types_api.h"
-#include "mathsupport.h"
-#include "fa.h"
-#include "alphabet.h"
+#include "core/alphabet.h"
+#include "core/chardef.h"
+#include "core/cstr_api.h"
+#include "core/error.h"
+#include "core/fileutils_api.h"
+#include "core/fa.h"
+#include "core/gtdatapath.h"
+#include "core/ma_api.h"
+#include "core/mathsupport.h"
+#include "core/str.h"
+#include "core/str_array.h"
+#include "core/types_api.h"
 #include "core/xansi.h"
 
 #define ALPHABET_GUESS_MAX_LENGTH       5000
