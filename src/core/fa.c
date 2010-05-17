@@ -179,18 +179,15 @@ FILE* gt_fa_xfopen_func(const char *path, const char *mode,
                           line, NULL);
 }
 
-FILE* gt_fa_fopen_filename_with_suffix(const GtStr *filenameprefix,
-                                       const char *suffix,
-                                       const char *mode,
-                                       GtError *err)
+FILE* gt_fa_fopen_filename_with_suffix(const GtStr *path, const char *suffix,
+                                       const char *mode, GtError *err)
 {
   GtStr *tmpfilename;
   FILE *fp;
-
   gt_error_check(err);
-  tmpfilename = gt_str_clone(filenameprefix);
-  gt_str_append_cstr(tmpfilename,suffix);
-  fp = gt_fa_fopen(gt_str_get(tmpfilename),mode,err);
+  tmpfilename = gt_str_clone(path);
+  gt_str_append_cstr(tmpfilename, suffix);
+  fp = gt_fa_fopen(gt_str_get(tmpfilename), mode, err);
   gt_str_delete(tmpfilename);
   return fp;
 }

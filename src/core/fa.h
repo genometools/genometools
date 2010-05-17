@@ -37,9 +37,8 @@ FILE*   gt_fa_fopen_func(const char *path, const char *mode, const char*, int,
 #define gt_fa_xfopen(path, mode)\
         gt_fa_xfopen_func(path, mode, __FILE__, __LINE__)
 FILE*   gt_fa_xfopen_func(const char *path, const char *mode, const char*, int);
-FILE*   gt_fa_fopen_filename_with_suffix(const GtStr *filenameprefix,
-                                         const char *suffix, const char *mode,
-                                         GtError *err);
+FILE*   gt_fa_fopen_filename_with_suffix(const GtStr *path, const char *suffix,
+                                         const char *mode, GtError *err);
 void    gt_fa_fclose(FILE *stream);
 void    gt_fa_xfclose(FILE *stream);
 
