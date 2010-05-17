@@ -481,11 +481,9 @@ static int check_mapped_file_size(const GtStr *path,
   return 0;
 }
 
-void* gt_mmap_check_filename_with_suffix(const GtStr *path,
-                                         const char *suffix,
-                                         unsigned long expectedunits,
-                                         size_t sizeofunit,
-                                         GtError *err)
+void* gt_mmap_check_size_with_suffix(const GtStr *path, const char *suffix,
+                                     unsigned long expectedunits,
+                                     size_t sizeofunit, GtError *err)
 {
   size_t numofbytes;
   void *ptr;

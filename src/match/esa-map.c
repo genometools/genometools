@@ -292,11 +292,11 @@ static int inputsuffixarray(bool map,
     if (map)
     {
       suffixarray->suftab
-        = gt_mmap_check_filename_with_suffix(indexname,
-                                             SUFTABSUFFIX,
-                                             (unsigned long) (totallength+1),
-                                             sizeof (unsigned long),
-                                             err);
+        = gt_mmap_check_size_with_suffix(indexname,
+                                         SUFTABSUFFIX,
+                                         (unsigned long) (totallength+1),
+                                         sizeof (unsigned long),
+                                         err);
       if (suffixarray->suftab == NULL)
       {
         haserr = true;
@@ -316,7 +316,7 @@ static int inputsuffixarray(bool map,
   {
     if (map)
     {
-      suffixarray->lcptab = gt_mmap_check_filename_with_suffix(indexname,
+      suffixarray->lcptab = gt_mmap_check_size_with_suffix(indexname,
                                             LCPTABSUFFIX,
                                             (unsigned long) (totallength+1),
                                             sizeof (GtUchar),
@@ -346,13 +346,13 @@ static int inputsuffixarray(bool map,
       if (map)
       {
         suffixarray->llvtab
-          = gt_mmap_check_filename_with_suffix(indexname,
-                                               LARGELCPTABSUFFIX,
-                                               (unsigned long)
-                                               suffixarray->numoflargelcpvalues.
-                                                            valueunsignedlong,
-                                               sizeof (Largelcpvalue),
-                                               err);
+          = gt_mmap_check_size_with_suffix(indexname,
+                                           LARGELCPTABSUFFIX,
+                                           (unsigned long)
+                                           suffixarray->numoflargelcpvalues.
+                                           valueunsignedlong,
+                                           sizeof (Largelcpvalue),
+                                           err);
         if (suffixarray->llvtab == NULL)
         {
           haserr = true;
@@ -369,11 +369,11 @@ static int inputsuffixarray(bool map,
     if (map)
     {
       suffixarray->bwttab
-        = gt_mmap_check_filename_with_suffix(indexname,
-                                             BWTTABSUFFIX,
-                                             (unsigned long) (totallength+1),
-                                             sizeof (GtUchar),
-                                             err);
+        = gt_mmap_check_size_with_suffix(indexname,
+                                         BWTTABSUFFIX,
+                                         (unsigned long) (totallength+1),
+                                         sizeof (GtUchar),
+                                         err);
       if (suffixarray->bwttab == NULL)
       {
         haserr = true;

@@ -3048,11 +3048,11 @@ gt_encseq_new_from_index(bool withrange,
     if (encseq->numofdbsequences > 1UL)
     {
       encseq->sdstab
-        = gt_mmap_check_filename_with_suffix(indexname,
-                                             GT_SDSTABFILESUFFIX,
-                                             encseq->numofdbsequences - 1,
-                                             sizeof (*encseq->sdstab),
-                                             err);
+        = gt_mmap_check_size_with_suffix(indexname,
+                                         GT_SDSTABFILESUFFIX,
+                                         encseq->numofdbsequences - 1,
+                                         sizeof (*encseq->sdstab),
+                                         err);
       if (encseq->sdstab == NULL)
       {
         haserr = true;
@@ -3068,11 +3068,11 @@ gt_encseq_new_from_index(bool withrange,
     if (encseq->numofdbsequences > 1UL)
     {
       encseq->ssptab
-        = gt_mmap_check_filename_with_suffix(indexname,
-                                             GT_SSPTABFILESUFFIX,
-                                             encseq->numofdbsequences - 1,
-                                             sizeof (unsigned long),
-                                             err);
+        = gt_mmap_check_size_with_suffix(indexname,
+                                         GT_SSPTABFILESUFFIX,
+                                         encseq->numofdbsequences - 1,
+                                         sizeof (unsigned long),
+                                         err);
       if (encseq->ssptab == NULL)
       {
         haserr = true;

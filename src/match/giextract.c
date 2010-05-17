@@ -811,11 +811,11 @@ int gt_extractkeysfromfastaindex(const GtStr *indexname,
     unsigned long keytablength;
 
     keytablength = 1UL + numofdbsequences * (keysize+1);
-    keytab = gt_mmap_check_filename_with_suffix(indexname,
-                                                GT_KEYSTABFILESUFFIX,
-                                                keytablength,
-                                                sizeof (GtUchar),
-                                                err);
+    keytab = gt_mmap_check_size_with_suffix(indexname,
+                                            GT_KEYSTABFILESUFFIX,
+                                            keytablength,
+                                            sizeof (GtUchar),
+                                            err);
     if (keytab == NULL)
     {
       haserr = true;
