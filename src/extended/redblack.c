@@ -116,6 +116,7 @@
 #include "core/mathsupport.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
+#include "core/xansi.h"
 #include "extended/redblack.h"
 
 #define RBT_CHECK_RETURN_CODE\
@@ -1384,8 +1385,8 @@ static int walk_action (const GtKeytype nodekey,
   {
     if (depths[key] != depth)
     {
-      (void) fputs ("Depth for one element is not constant during tree walk.\n",
-                    stdout);
+      gt_xfputs("Depth for one element is not constant during tree walk.\n",
+                stdout);
       return -1;
     }
   }
@@ -1402,14 +1403,14 @@ static int walk_tree (const void *root,unsigned long expected_count)
 
   if (gt_rbt_walk (root, walk_action, NULL) != 0)
   {
-    (void) fputs ("walk failed\n", stdout);
+    gt_xfputs("walk failed\n", stdout);
     error = 1;
   }
   for (i = 0; i < expected_count; ++i)
   {
     if (ztab[i] != 1UL)
     {
-      (void) fputs ("Node was not visited.\n", stdout);
+      gt_xfputs("Node was not visited.\n", stdout);
       error = 1;
     }
   }
@@ -1417,7 +1418,7 @@ static int walk_tree (const void *root,unsigned long expected_count)
       (unsigned long) (log ((double) expected_count) * 2.0 +
                        2.0))
   {
-    (void) fputs ("Depth too large during tree walk.\n", stdout);
+    gt_xfputs("Depth too large during tree walk.\n", stdout);
     error = 1;
   }
   return error;
