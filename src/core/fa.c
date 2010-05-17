@@ -446,14 +446,13 @@ void gt_fa_xmunmap(void *addr)
   gt_mutex_unlock(fa->mmap_mutex);
 }
 
-void* gt_mmap_filename_with_suffix(const GtStr *indexname,const char *suffix,
-                                   size_t *numofbytes, GtError *err)
+void* gt_mmap_read_with_suffix(const GtStr *path, const char *suffix,
+                               size_t *numofbytes, GtError *err)
 {
   GtStr *tmpfilename;
   void *ptr;
-
   gt_error_check(err);
-  tmpfilename = gt_str_clone(indexname);
+  tmpfilename = gt_str_clone(path);
   gt_str_append_cstr(tmpfilename,suffix);
   ptr = gt_fa_mmap_read(gt_str_get(tmpfilename),numofbytes,err);
   gt_str_delete(tmpfilename);
@@ -490,7 +489,7 @@ void* gt_mmap_check_filename_with_suffix(const GtStr *indexname,
 {
   size_t numofbytes;
   void *ptr;
-  if (!(ptr = gt_mmap_filename_with_suffix(indexname,suffix,&numofbytes,err)))
+  if (!(ptr = gt_mmap_read_with_suffix(indexname,suffix,&numofbytes,err)))
     return NULL;
   if (check_mapped_file_size(indexname, suffix, numofbytes, expectedunits,
                              sizeofunit, err)) {

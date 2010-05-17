@@ -257,8 +257,7 @@ Pckbuckettable *gt_mappckbuckettable(const GtStr *indexname,
   Pckbuckettable *pckbt;
 
   gt_error_check(err);
-  mapptr = gt_mmap_filename_with_suffix(indexname,PCKBUCKETTABLE,
-                                        &numofbytes,err);
+  mapptr = gt_mmap_read_with_suffix(indexname,PCKBUCKETTABLE,&numofbytes,err);
   if (mapptr == NULL)
   {
     return NULL;

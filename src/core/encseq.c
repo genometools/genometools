@@ -3032,10 +3032,10 @@ gt_encseq_new_from_index(bool withrange,
     size_t numofbytes;
 
     gt_assert(encseq != NULL);
-    encseq->destab = gt_mmap_filename_with_suffix(indexname,
-                                                  GT_DESTABFILESUFFIX,
-                                                  &numofbytes,
-                                                  err);
+    encseq->destab = gt_mmap_read_with_suffix(indexname,
+                                              GT_DESTABFILESUFFIX,
+                                              &numofbytes,
+                                              err);
     encseq->destablength = (unsigned long) numofbytes;
     if (encseq->destab == NULL)
     {

@@ -113,8 +113,8 @@ void*   gt_fa_mmap_generic_fd_func(int fd, const char *filename_to_map,
                                    const char *filename, int line,
                                    GtError *err);
 
-void*   gt_mmap_filename_with_suffix(const GtStr *indexname, const char *suffix,
-                                     size_t *numofbytes, GtError *err);
+void*   gt_mmap_read_with_suffix(const GtStr *path, const char *suffix,
+                                 size_t *numofbytes, GtError *err);
 void*   gt_mmap_check_filename_with_suffix(const GtStr *indexname,
                                            const char *suffix,
                                            unsigned long expectedunits,

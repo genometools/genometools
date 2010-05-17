@@ -66,9 +66,8 @@ Tyrindex *gt_tyrindex_new(const GtStr *tyrindexname,GtError *err)
   gt_error_check(err);
   ALLOCASSIGNSPACE(tyrindex,NULL,Tyrindex,1);
   tyrindex->indexfilename = tyrindexname;
-  tyrindex->mappedfileptr = gt_mmap_filename_with_suffix(tyrindexname,
-                                                         MERSUFFIX,&numofbytes,
-                                                         err);
+  tyrindex->mappedfileptr = gt_mmap_read_with_suffix(tyrindexname,MERSUFFIX,
+                                                     &numofbytes,err);
   if (tyrindex->mappedfileptr == NULL)
   {
     haserr = true;
@@ -195,7 +194,7 @@ Tyrcountinfo *gt_tyrcountinfo_new(const Tyrindex *tyrindex,
   ALLOCASSIGNSPACE(tyrcountinfo,NULL,Tyrcountinfo,1);
   tyrcountinfo->indexfilename = tyrindexname;
   tyrcountinfo->mappedmctfileptr
-    = gt_mmap_filename_with_suffix(tyrindexname,COUNTSSUFFIX,&numofbytes,err);
+    = gt_mmap_read_with_suffix(tyrindexname,COUNTSSUFFIX,&numofbytes,err);
   if (tyrcountinfo->mappedmctfileptr == NULL)
   {
     tyrcountinfo->smallcounts = NULL;
