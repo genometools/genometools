@@ -112,12 +112,6 @@ void*   gt_fa_mmap_generic_fd_func(int fd, const char *filename_to_map,
                                    bool mapwritable, bool hard_fail,
                                    const char *filename, int line,
                                    GtError *err);
-/* check if all allocated file pointer have been released, prints to stderr */
-int     gt_fa_check_fptr_leak(void);
-/* check if all allocated memory maps have been freed, prints to stderr */
-int     gt_fa_check_mmap_leak(void);
-void    gt_fa_show_space_peak(FILE*);
-void    gt_fa_clean(void);
 
 void*   gt_mmap_filename_with_suffix(const GtStr *indexname, const char *suffix,
                                      size_t *numofbytes, GtError *err);
@@ -125,5 +119,12 @@ void*   gt_mmap_check_filename_with_suffix(const GtStr *indexname,
                                            const char *suffix,
                                            unsigned long expectedunits,
                                            size_t sizeofunit, GtError *err);
+
+/* check if all allocated file pointer have been released, prints to stderr */
+int     gt_fa_check_fptr_leak(void);
+/* check if all allocated memory maps have been freed, prints to stderr */
+int     gt_fa_check_mmap_leak(void);
+void    gt_fa_show_space_peak(FILE*);
+void    gt_fa_clean(void);
 
 #endif

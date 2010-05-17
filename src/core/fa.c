@@ -446,6 +446,60 @@ void gt_fa_xmunmap(void *addr)
   gt_mutex_unlock(fa->mmap_mutex);
 }
 
+void* gt_mmap_filename_with_suffix(const GtStr *indexname,const char *suffix,
+                                   size_t *numofbytes, GtError *err)
+{
+  GtStr *tmpfilename;
+  void *ptr;
+
+  gt_error_check(err);
+  tmpfilename = gt_str_clone(indexname);
+  gt_str_append_cstr(tmpfilename,suffix);
+  ptr = gt_fa_mmap_read(gt_str_get(tmpfilename),numofbytes,err);
+  gt_str_delete(tmpfilename);
+  return ptr;
+}
+
+static int check_mapped_file_size(const GtStr *indexname,
+                                  const char *suffix,
+                                  size_t numofbytes,
+                                  unsigned long expectedunits,
+                                  size_t sizeofunit,
+                                  GtError *err)
+{
+  gt_error_check(err);
+  if (expectedunits != (unsigned long) (numofbytes/sizeofunit))
+  {
+    gt_error_set(err,"mapping file %s%s: number of mapped units (of size %u) "
+                     " = %lu != %lu = expected number of mapped units",
+                      gt_str_get(indexname),
+                      suffix,
+                      (unsigned int) sizeofunit,
+                      (unsigned long) (numofbytes/sizeofunit),
+                      expectedunits);
+    return -1;
+  }
+  return 0;
+}
+
+void* gt_mmap_check_filename_with_suffix(const GtStr *indexname,
+                                         const char *suffix,
+                                         unsigned long expectedunits,
+                                         size_t sizeofunit,
+                                         GtError *err)
+{
+  size_t numofbytes;
+  void *ptr;
+  if (!(ptr = gt_mmap_filename_with_suffix(indexname,suffix,&numofbytes,err)))
+    return NULL;
+  if (check_mapped_file_size(indexname, suffix, numofbytes, expectedunits,
+                             sizeofunit, err)) {
+    gt_fa_xmunmap(ptr);
+    return NULL;
+  }
+  return ptr;
+}
+
 static int check_fptr_leak(GT_UNUSED void *key, void *value, void *data,
                            GT_UNUSED GtError *err)
 {
@@ -519,61 +573,4 @@ void gt_fa_clean(void)
   gt_hashmap_delete(fa->memory_maps);
   gt_free(fa);
   fa = NULL;
-}
-
-/* Gordon, please think about whether the following functions should
-   remain here */
-
-void* gt_mmap_filename_with_suffix(const GtStr *indexname,const char *suffix,
-                                   size_t *numofbytes, GtError *err)
-{
-  GtStr *tmpfilename;
-  void *ptr;
-
-  gt_error_check(err);
-  tmpfilename = gt_str_clone(indexname);
-  gt_str_append_cstr(tmpfilename,suffix);
-  ptr = gt_fa_mmap_read(gt_str_get(tmpfilename),numofbytes,err);
-  gt_str_delete(tmpfilename);
-  return ptr;
-}
-
-static int check_mapped_file_size(const GtStr *indexname,
-                                  const char *suffix,
-                                  size_t numofbytes,
-                                  unsigned long expectedunits,
-                                  size_t sizeofunit,
-                                  GtError *err)
-{
-  gt_error_check(err);
-  if (expectedunits != (unsigned long) (numofbytes/sizeofunit))
-  {
-    gt_error_set(err,"mapping file %s%s: number of mapped units (of size %u) "
-                     " = %lu != %lu = expected number of mapped units",
-                      gt_str_get(indexname),
-                      suffix,
-                      (unsigned int) sizeofunit,
-                      (unsigned long) (numofbytes/sizeofunit),
-                      expectedunits);
-    return -1;
-  }
-  return 0;
-}
-
-void* gt_mmap_check_filename_with_suffix(const GtStr *indexname,
-                                         const char *suffix,
-                                         unsigned long expectedunits,
-                                         size_t sizeofunit,
-                                         GtError *err)
-{
-  size_t numofbytes;
-  void *ptr;
-  if (!(ptr = gt_mmap_filename_with_suffix(indexname,suffix,&numofbytes,err)))
-    return NULL;
-  if (check_mapped_file_size(indexname, suffix, numofbytes, expectedunits,
-                             sizeofunit, err)) {
-    gt_fa_xmunmap(ptr);
-    return NULL;
-  }
-  return ptr;
 }
