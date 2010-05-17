@@ -222,7 +222,7 @@ int gt_pckbucket2file(const GtStr *indexname,
   unsigned long seqposmaxdepth;
 
   gt_error_check(err);
-  fp = gt_fa_fopen_filename_with_suffix(indexname,PCKBUCKETTABLE,"wb",err);
+  fp = gt_fa_fopen_with_suffix(indexname,PCKBUCKETTABLE,"wb",err);
   if (fp == NULL)
   {
     return -1;

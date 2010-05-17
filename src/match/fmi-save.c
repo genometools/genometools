@@ -30,8 +30,7 @@ static int writefmascii (const GtStr *indexname,
   FILE *fmafp;
 
   gt_error_check(err);
-  fmafp = gt_fa_fopen_filename_with_suffix (indexname,FMASCIIFILESUFFIX,"wb",
-                                            err);
+  fmafp = gt_fa_fopen_with_suffix(indexname,FMASCIIFILESUFFIX,"wb",err);
   if (fmafp == NULL)
   {
     return -1;
@@ -66,7 +65,7 @@ static int writefmdata (const GtStr *indexname,
   FILE *fp;
 
   gt_error_check(err);
-  fp = gt_fa_fopen_filename_with_suffix (indexname, FMDATAFILESUFFIX,"wb",err);
+  fp = gt_fa_fopen_with_suffix(indexname,FMDATAFILESUFFIX,"wb",err);
   if (fp == NULL)
   {
     return -1;

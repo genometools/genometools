@@ -51,8 +51,8 @@
 #define INITOUTFILEPTR(PTR,FLAG,SUFFIX)\
         if (!haserr && (FLAG))\
         {\
-          PTR = gt_fa_fopen_filename_with_suffix(so->fn2encopt.str_indexname,\
-                                                SUFFIX,"wb",err);\
+          PTR = gt_fa_fopen_with_suffix(so->fn2encopt.str_indexname,SUFFIX,\
+                                        "wb",err);\
           if ((PTR) == NULL)\
           {\
             haserr = true;\

@@ -44,14 +44,14 @@ static int copytheindexfile(const GtStr *destindex,
   bool haserr = false;
 
   gt_error_check(err);
-  fpdest = gt_fa_fopen_filename_with_suffix(destindex,suffix,"wb",err);
+  fpdest = gt_fa_fopen_with_suffix(destindex,suffix,"wb",err);
   if (fpdest == NULL)
   {
     haserr = true;
   }
   if (!haserr)
   {
-    fpsource = gt_fa_fopen_filename_with_suffix(sourceindex,suffix,"rb",err);
+    fpsource = gt_fa_fopen_with_suffix(sourceindex,suffix,"rb",err);
     if (fpsource == NULL)
     {
       haserr = true;
@@ -349,8 +349,7 @@ int gt_sufbwt2fmindex(Fmindex *fmindex,
     {
       longest.defined = false;
       longest.valueunsignedlong = 0;
-      outbwt = gt_fa_fopen_filename_with_suffix(outfmindex,BWTTABSUFFIX,"wb",
-                                                err);
+      outbwt = gt_fa_fopen_with_suffix(outfmindex,BWTTABSUFFIX,"wb",err);
       if (outbwt == NULL)
       {
         haserr = true;

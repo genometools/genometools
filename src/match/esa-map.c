@@ -36,8 +36,7 @@
 #define DBFILEKEY "dbfile="
 
 #define INITBufferedfile(INDEXNAME,STREAM,TYPE,SUFFIX)\
-        (STREAM)->fp = gt_fa_fopen_filename_with_suffix(INDEXNAME,SUFFIX,\
-                                                        "rb",err);\
+        (STREAM)->fp = gt_fa_fopen_with_suffix(INDEXNAME,SUFFIX,"rb",err);\
         if ((STREAM)->fp == NULL)\
         {\
           haserr = true;\
@@ -207,7 +206,7 @@ static bool scanprjfileuintkeys(Suffixarray *suffixarray,
   FILE *fp;
 
   gt_error_check(err);
-  fp = gt_fa_fopen_filename_with_suffix(indexname,PROJECTFILESUFFIX,"rb",err);
+  fp = gt_fa_fopen_with_suffix(indexname,PROJECTFILESUFFIX,"rb",err);
   if (fp == NULL)
   {
     haserr = true;

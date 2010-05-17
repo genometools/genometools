@@ -722,7 +722,7 @@ static int flushencseqfile(const GtStr *indexname,GtEncseq *encseq,
   bool haserr = false;
 
   gt_error_check(err);
-  fp = gt_fa_fopen_filename_with_suffix(indexname,GT_ENCSEQFILESUFFIX,"wb",err);
+  fp = gt_fa_fopen_with_suffix(indexname,GT_ENCSEQFILESUFFIX,"wb",err);
   if (fp == NULL)
   {
     haserr = true;
@@ -2675,7 +2675,7 @@ static int readfirstvaluesfromfile(Firstencseqvalues *firstencseqvalues,
   unsigned long cc;
 
   gt_error_check(err);
-  fp = gt_fa_fopen_filename_with_suffix(indexname,GT_ENCSEQFILESUFFIX,"rb",err);
+  fp = gt_fa_fopen_with_suffix(indexname,GT_ENCSEQFILESUFFIX,"rb",err);
   if (fp == NULL)
   {
     haserr = true;
@@ -3330,8 +3330,7 @@ static int gt_inputfiles2sequencekeyvalues(const GtStr *indexname,
   if (outdestab)
   {
     descqueue = gt_queue_new();
-    desfp = gt_fa_fopen_filename_with_suffix(indexname,GT_DESTABFILESUFFIX,
-                                             "wb",err);
+    desfp = gt_fa_fopen_with_suffix(indexname,GT_DESTABFILESUFFIX,"wb",err);
     if (desfp == NULL)
     {
       haserr = true;
@@ -3339,8 +3338,7 @@ static int gt_inputfiles2sequencekeyvalues(const GtStr *indexname,
   }
   if (outsdstab)
   {
-    sdsfp = gt_fa_fopen_filename_with_suffix(indexname,GT_SDSTABFILESUFFIX,
-                                             "wb",err);
+    sdsfp = gt_fa_fopen_with_suffix(indexname,GT_SDSTABFILESUFFIX,"wb",err);
     if (sdsfp == NULL)
     {
       haserr = true;
@@ -5404,9 +5402,7 @@ gt_encseq_new_from_files(GtProgressTimer *sfxprogress,
       if (!haserr && outssptab)
       {
         FILE *outfp;
-        outfp = gt_fa_fopen_filename_with_suffix(indexname,
-                                                 GT_SSPTABFILESUFFIX,
-                                                 "wb",err);
+        outfp = gt_fa_fopen_with_suffix(indexname,GT_SSPTABFILESUFFIX,"wb",err);
         if (outfp == NULL)
         {
           haserr = true;

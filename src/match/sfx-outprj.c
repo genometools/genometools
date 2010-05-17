@@ -97,8 +97,7 @@ int gt_outprjfile(const GtStr *indexname,
   bool haserr = false;
 
   gt_error_check(err);
-  prjfp = gt_fa_fopen_filename_with_suffix(indexname,PROJECTFILESUFFIX,
-                                           "wb",err);
+  prjfp = gt_fa_fopen_with_suffix(indexname,PROJECTFILESUFFIX,"wb",err);
   if (prjfp == NULL)
   {
     haserr = true;

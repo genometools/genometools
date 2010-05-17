@@ -168,7 +168,7 @@ int gt_mapfmindex (Fmindex *fmindex,const GtStr *indexname,
   fmindex->mappedptr = NULL;
   fmindex->bwtformatching = NULL;
   fmindex->alphabet = NULL;
-  fpin = gt_fa_fopen_filename_with_suffix(indexname,FMASCIIFILESUFFIX,"rb",err);
+  fpin = gt_fa_fopen_with_suffix(indexname,FMASCIIFILESUFFIX,"rb",err);
   if (fpin == NULL)
   {
     haserr = true;

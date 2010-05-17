@@ -356,8 +356,7 @@ int gt_constructmerbuckets(const GtStr *inputindex,
                      tyrbckinfo.numofcodes+1);
     GT_INITBITTAB(tyrbckinfo.boundisdefined,tyrbckinfo.numofcodes+1);
     splitmerinterval(&tyrbckinfo,tyrindex);
-    bucketfp = gt_fa_fopen_filename_with_suffix(inputindex,BUCKETSUFFIX,
-                                                "wb",err);
+    bucketfp = gt_fa_fopen_with_suffix(inputindex,BUCKETSUFFIX,"wb",err);
     if (bucketfp == NULL)
     {
       haserr = true;

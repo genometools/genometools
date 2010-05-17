@@ -179,8 +179,8 @@ FILE* gt_fa_xfopen_func(const char *path, const char *mode,
                           line, NULL);
 }
 
-FILE* gt_fa_fopen_filename_with_suffix(const GtStr *path, const char *suffix,
-                                       const char *mode, GtError *err)
+FILE* gt_fa_fopen_with_suffix(const GtStr *path, const char *suffix,
+                              const char *mode, GtError *err)
 {
   GtStr *tmpfilename;
   FILE *fp;

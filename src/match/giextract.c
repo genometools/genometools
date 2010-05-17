@@ -472,16 +472,14 @@ int gt_extractkeysfromdesfile(const GtStr *indexname,
   unsigned long numofentries = 0;
   const unsigned long linewidth = 60UL;
 
-  fpin = gt_fa_fopen_filename_with_suffix(indexname,GT_DESTABFILESUFFIX,"rb",
-                                          err);
+  fpin = gt_fa_fopen_with_suffix(indexname,GT_DESTABFILESUFFIX,"rb",err);
   if (fpin == NULL)
   {
     return -1;
   }
   if (!sortkeys)
   {
-    fpout = gt_fa_fopen_filename_with_suffix(indexname,GT_KEYSTABFILESUFFIX,
-                                             "wb",err);
+    fpout = gt_fa_fopen_with_suffix(indexname,GT_KEYSTABFILESUFFIX,"wb",err);
     if (fpout == NULL)
     {
       haserr = true;
@@ -756,8 +754,7 @@ static int readkeysize(const GtStr *indexname,GtError *err)
   char cc;
 
   gt_error_check(err);
-  fp = gt_fa_fopen_filename_with_suffix(indexname,GT_KEYSTABFILESUFFIX,"rb",
-                                        err);
+  fp = gt_fa_fopen_with_suffix(indexname,GT_KEYSTABFILESUFFIX,"rb",err);
   if (fp == NULL)
   {
     haserr = true;

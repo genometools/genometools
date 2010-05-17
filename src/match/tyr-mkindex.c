@@ -630,10 +630,8 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
       state.processoccurrencecount = adddistpos2distribution;
     } else
     {
-      state.merindexfpout = gt_fa_fopen_filename_with_suffix(str_storeindex,
-                                                             MERSUFFIX,
-                                                             "wb",
-                                                             err);
+      state.merindexfpout = gt_fa_fopen_with_suffix(str_storeindex,MERSUFFIX,
+                                                    "wb",err);
       if (state.merindexfpout == NULL)
       {
         haserr = true;
@@ -642,8 +640,7 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
         if (state.storecounts)
         {
           state.countsfilefpout
-            = gt_fa_fopen_filename_with_suffix(str_storeindex,
-                                               COUNTSSUFFIX,"wb",err);
+            = gt_fa_fopen_with_suffix(str_storeindex,COUNTSSUFFIX,"wb",err);
           if (state.countsfilefpout == NULL)
           {
             haserr = true;

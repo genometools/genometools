@@ -983,8 +983,7 @@ int gt_alphabet_to_file(const GtAlphabet *alpha, const GtStr *indexname,
   bool haserr = false;
 
   gt_error_check(err);
-  al1fp = gt_fa_fopen_filename_with_suffix(indexname,GT_ALPHABETFILESUFFIX,
-                                           "wb",err);
+  al1fp = gt_fa_fopen_with_suffix(indexname,GT_ALPHABETFILESUFFIX,"wb",err);
   if (al1fp == NULL)
   {
     haserr = true;

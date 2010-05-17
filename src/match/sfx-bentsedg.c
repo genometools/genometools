@@ -1635,9 +1635,8 @@ Outlcpinfo *gt_newOutlcpinfo(const GtStr *indexname,
     outlcpinfo->outfpllvtab = NULL;
   } else
   {
-    outlcpinfo->outfplcptab = gt_fa_fopen_filename_with_suffix(indexname,
-                                                               LCPTABSUFFIX,
-                                                               "wb",err);
+    outlcpinfo->outfplcptab = gt_fa_fopen_with_suffix(indexname,LCPTABSUFFIX,
+                                                      "wb",err);
     if (outlcpinfo->outfplcptab == NULL)
     {
       haserr = true;
@@ -1645,8 +1644,7 @@ Outlcpinfo *gt_newOutlcpinfo(const GtStr *indexname,
     if (!haserr)
     {
       outlcpinfo->outfpllvtab
-        = gt_fa_fopen_filename_with_suffix(indexname,LARGELCPTABSUFFIX,"wb",
-                                           err);
+        = gt_fa_fopen_with_suffix(indexname,LARGELCPTABSUFFIX,"wb",err);
       if (outlcpinfo->outfpllvtab == NULL)
       {
         haserr = true;
