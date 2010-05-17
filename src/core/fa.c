@@ -538,12 +538,12 @@ void* gt_mmap_filename_with_suffix(const GtStr *indexname,const char *suffix,
   return ptr;
 }
 
-static int checkmappedfilesize(const GtStr *indexname,
-                               const char *suffix,
-                               size_t numofbytes,
-                               unsigned long expectedunits,
-                               size_t sizeofunit,
-                               GtError *err)
+static int check_mapped_file_size(const GtStr *indexname,
+                                  const char *suffix,
+                                  size_t numofbytes,
+                                  unsigned long expectedunits,
+                                  size_t sizeofunit,
+                                  GtError *err)
 {
   gt_error_check(err);
   if (expectedunits != (unsigned long) (numofbytes/sizeofunit))
@@ -567,15 +567,11 @@ void* gt_mmap_check_filename_with_suffix(const GtStr *indexname,
                                          GtError *err)
 {
   size_t numofbytes;
-
-  void *ptr = gt_mmap_filename_with_suffix(indexname,suffix,&numofbytes,err);
-  if (ptr == NULL)
-  {
+  void *ptr;
+  if (!(ptr = gt_mmap_filename_with_suffix(indexname,suffix,&numofbytes,err)))
     return NULL;
-  }
-  if (checkmappedfilesize(indexname,suffix,
-                          numofbytes,expectedunits,sizeofunit,err) != 0)
-  {
+  if (check_mapped_file_size(indexname, suffix, numofbytes, expectedunits,
+                             sizeofunit, err)) {
     gt_fa_xmunmap(ptr);
     return NULL;
   }
