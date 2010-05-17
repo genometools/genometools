@@ -3404,13 +3404,7 @@ static int gt_inputfiles2sequencekeyvalues(const GtStr *indexname,
           if (desfp != NULL && charcode == (GtUchar) SEPARATOR)
           {
             desc = gt_queue_get(descqueue);
-            if (fputs(desc,desfp) == EOF)
-            {
-              gt_error_set(err,"cannot write description to file %s.%s",
-                                gt_str_get(indexname),GT_DESTABFILESUFFIX);
-              haserr = true;
-              break;
-            }
+            gt_xfputs(desc,desfp);
             gt_free(desc);
             desc = NULL;
             if (sdsfp != NULL)
@@ -3465,12 +3459,7 @@ static int gt_inputfiles2sequencekeyvalues(const GtStr *indexname,
     if (desfp != NULL)
     {
       desc = gt_queue_get(descqueue);
-      if (fputs(desc,desfp) == EOF)
-      {
-        gt_error_set(err,"cannot write description to file %s.%s",
-                          gt_str_get(indexname),GT_DESTABFILESUFFIX);
-        haserr = true;
-      }
+      gt_xfputs(desc,desfp);
       (void) putc((int) '\n',desfp);
       gt_free(desc);
       desc = NULL;
