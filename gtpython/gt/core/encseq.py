@@ -119,7 +119,8 @@ class EncseqEncoder:
             gterror(err)
 
     def register(cls, gtlib):
-        gtlib.gt_encseq_encoder_encode.argtypes = [c_void_p, StrArray, Str, Error]
+        gtlib.gt_encseq_encoder_encode.argtypes = [c_void_p, StrArray, \
+                                                   c_char_p, Error]
 
     register = classmethod(register)
 
@@ -281,7 +282,8 @@ class EncseqBuilder:
 
     def register(cls, gtlib):
         gtlib.gt_encseq_builder_new.argtypes = [Alphabet]
-        gtlib.gt_encseq_builder_add_cstr.argtypes = [c_void_p, c_char_p, c_ulong, c_char_p]
+        gtlib.gt_encseq_builder_add_cstr.argtypes = [c_void_p, c_char_p, \
+                                                     c_ulong, c_char_p]
 
     register = classmethod(register)
 
