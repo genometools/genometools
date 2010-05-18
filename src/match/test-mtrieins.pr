@@ -1,7 +1,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-int gt_test_trieins(bool onlyins,const GtStr *indexname,GtError *err);
+int gt_test_trieins(bool onlyins,const char *indexname,GtError *err);
 
 #ifdef __cplusplus
 }

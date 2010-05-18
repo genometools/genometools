@@ -269,12 +269,13 @@ static int gt_repfind_runner(GT_UNUSED int argc,
         }
       } else
       {
-        if (gt_testmaxpairs(arguments->indexname,
-                      arguments->samples,
-                      arguments->userdefinedleastlength,
-                      (unsigned long) (100 * arguments->userdefinedleastlength),
-                      logger,
-                      err) != 0)
+        if (gt_testmaxpairs(gt_str_get(arguments->indexname),
+                            arguments->samples,
+                            arguments->userdefinedleastlength,
+                            (unsigned long)
+                            (100 * arguments->userdefinedleastlength),
+                            logger,
+                            err) != 0)
         {
           haserr = true;
         }

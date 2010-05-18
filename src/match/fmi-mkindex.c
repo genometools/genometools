@@ -209,22 +209,22 @@ static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,GtLogger *logger,
     haserr = true;
   }
   if (!haserr && gt_sufbwt2fmindex(&fm,
-                                &specialcharinfo,
-                                log2bsize,
-                                log2markdist,
-                                mkfmcallinfo->outfmindex,
-                                mkfmcallinfo->indexnametab,
-                                mkfmcallinfo->noindexpos ? false : true,
-                                logger,
-                                err) != 0)
+                                   &specialcharinfo,
+                                   log2bsize,
+                                   log2markdist,
+                                   gt_str_get(mkfmcallinfo->outfmindex),
+                                   mkfmcallinfo->indexnametab,
+                                   mkfmcallinfo->noindexpos ? false : true,
+                                   logger,
+                                   err) != 0)
   {
     haserr = true;
   }
-  if (!haserr && gt_saveFmindex(mkfmcallinfo->outfmindex,
-                             &fm,
-                             &specialcharinfo,
-                             mkfmcallinfo->noindexpos ? false : true,
-                             err) < 0)
+  if (!haserr && gt_saveFmindex(gt_str_get(mkfmcallinfo->outfmindex),
+                                &fm,
+                                &specialcharinfo,
+                                mkfmcallinfo->noindexpos ? false : true,
+                                err) < 0)
   {
     haserr = true;
   }

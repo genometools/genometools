@@ -298,8 +298,8 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
   logger = gt_logger_new(false, GT_LOGGER_DEFLT_PREFIX, stdout);
   if (gfmsubcallinfo.indextype == Fmindextype)
   {
-    if (gt_mapfmindex (&fmindex,gfmsubcallinfo.indexname,
-                    logger, err) != 0)
+    if (gt_mapfmindex(&fmindex,gt_str_get(gfmsubcallinfo.indexname),
+                      logger, err) != 0)
     {
       haserr = true;
       gt_mapfmindexfail = true;

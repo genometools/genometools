@@ -621,7 +621,7 @@ static int runsuffixerator(bool doesa,
       numoflargelcpvalues = getnumoflargelcpvalues(outfileinfo.outlcpinfo);
       maxbranchdepth = getmaxbranchdepth(outfileinfo.outlcpinfo);
     }
-    if (gt_outprjfile(so->fn2encopt.indexname,
+    if (gt_outprjfile(gt_str_get(so->fn2encopt.indexname),
                       so->readmode,
                       encseq,
                       prefixlength,

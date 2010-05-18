@@ -23,12 +23,12 @@
 #include "core/yarandom.h"
 #include "core/unused_api.h"
 
-int gt_testmaxpairs(GT_UNUSED const GtStr *indexname,
-                 GT_UNUSED unsigned long samples,
-                 GT_UNUSED unsigned int minlength,
-                 GT_UNUSED unsigned long substringlength,
-                 GT_UNUSED GtLogger *logger,
-                 GT_UNUSED GtError *err)
+int gt_testmaxpairs(GT_UNUSED const char *indexname,
+                    GT_UNUSED unsigned long samples,
+                    GT_UNUSED unsigned int minlength,
+                    GT_UNUSED unsigned long substringlength,
+                    GT_UNUSED GtLogger *logger,
+                    GT_UNUSED GtError *err)
 {
   return 0;
 }

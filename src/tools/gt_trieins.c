@@ -43,7 +43,6 @@ static GtOPrval parse_options(bool *onlyins,int *parsed_args,
 
 int gt_trieins(int argc, const char **argv, GtError *err)
 {
-  GtStr *indexname;
   bool haserr = false;
   int parsed_args;
   bool onlyins = false;
@@ -57,11 +56,9 @@ int gt_trieins(int argc, const char **argv, GtError *err)
   }
   gt_assert(parsed_args == 1);
 
-  indexname = gt_str_new_cstr(argv[parsed_args]);
-  if (gt_test_trieins(onlyins,indexname,err) != 0)
+  if (gt_test_trieins(onlyins,argv[parsed_args],err) != 0)
   {
     haserr = true;
   }
-  gt_str_delete(indexname);
   return haserr ? -1 : 0;
 }
