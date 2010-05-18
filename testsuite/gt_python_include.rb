@@ -126,7 +126,7 @@ if not $arguments["nocairo"] then
   Name "gtpython: unittests"
   Keywords "gt_python unittests"
   Test do
-    run_python "#{$gtpython}/tests/__init__.py " 
+    run_python "#{$gtpython}/tests/__init__.py "
     grep $last_stderr, "OK"
   end
 

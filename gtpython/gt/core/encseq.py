@@ -75,25 +75,25 @@ class EncseqEncoder:
 
     def create_tis_tab(self):
         gtlib.gt_encseq_encoder_create_tis_tab(self.ee)
-        
+
     def do_not_create_tis_tab(self):
         gtlib.gt_encseq_encoder_do_not_create_tis_tab(self.ee)
 
     def create_des_tab(self):
         gtlib.gt_encseq_encoder_create_des_tab(self.ee)
-        
+
     def do_not_create_des_tab(self):
         gtlib.gt_encseq_encoder_do_not_create_des_tab(self.ee)
 
     def create_ssp_tab(self):
         gtlib.gt_encseq_encoder_create_ssp_tab(self.ee)
-        
+
     def do_not_create_ssp_tab(self):
         gtlib.gt_encseq_encoder_do_not_create_ssp_tab(self.ee)
 
     def create_sds_tab(self):
         gtlib.gt_encseq_encoder_create_sds_tab(self.ee)
-        
+
     def do_not_create_sds_tab(self):
         gtlib.gt_encseq_encoder_do_not_create_sds_tab(self.ee)
 
@@ -166,14 +166,14 @@ class EncseqLoader:
 
     def require_tis_tab(self):
         gtlib.gt_encseq_loader_require_tis_tab(self.el)
-        
+
     def do_not_require_tis_tab(self):
         gtlib.gt_encseq_loader_do_not_require_tis_tab(self.el)
 
     def require_des_tab(self):
         self.destab = True
         gtlib.gt_encseq_loader_require_des_tab(self.el)
-        
+
     def do_not_require_des_tab(self):
         self.destab = False
         gtlib.gt_encseq_loader_do_not_require_des_tab(self.el)
@@ -181,7 +181,7 @@ class EncseqLoader:
     def require_ssp_tab(self):
         self.ssptab = True
         gtlib.gt_encseq_loader_require_ssp_tab(self.el)
-        
+
     def do_not_require_ssp_tab(self):
         self.ssptab = False
         gtlib.gt_encseq_encoder_do_not_require_ssp_tab(self.el)
@@ -189,7 +189,7 @@ class EncseqLoader:
     def require_sds_tab(self):
         self.sdstab = True
         gtlib.gt_encseq_loader_require_sds_tab(self.el)
-        
+
     def do_not_require_sds_tab(self):
         self.sdstab = False
         gtlib.gt_encseq_loader_do_not_require_sds_tab(self.el)
@@ -248,19 +248,19 @@ class EncseqBuilder:
 
     def create_des_tab(self):
         gtlib.gt_encseq_builder_create_des_tab(self.eb)
-        
+
     def do_not_create_des_tab(self):
         gtlib.gt_encseq_builder_do_not_create_des_tab(self.eb)
 
     def create_ssp_tab(self):
         gtlib.gt_encseq_builder_create_ssp_tab(self.eb)
-        
+
     def do_not_create_ssp_tab(self):
         gtlib.gt_encseq_builder_do_not_create_ssp_tab(self.eb)
 
     def create_sds_tab(self):
         gtlib.gt_encseq_builder_create_sds_tab(self.eb)
-        
+
     def do_not_create_sds_tab(self):
         gtlib.gt_encseq_builder_do_not_create_sds_tab(self.eb)
 
@@ -366,7 +366,7 @@ class Encseq:
         if not num < self.num_of_sequences():
             gterror("invalid sequence number %d" % num)
         return gtlib.gt_encseq_seqstartpos(self.encseq, num)
-  
+
     def seq_length(self, num):
         if not num < self.num_of_sequences():
             gterror("invalid sequence number %d" % num)

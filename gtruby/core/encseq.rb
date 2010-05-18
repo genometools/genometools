@@ -119,7 +119,7 @@ module GT
       if eenc.nil? then
         @eenc = GT.gt_encseq_encoder_new()
       else
-        @eenc = eenc 
+        @eenc = eenc
       end
       if own then
         @eenc.free = GT::symbol("gt_encseq_encoder_delete", "0P")
@@ -218,7 +218,7 @@ module GT
         GT.gterror(err)
       end
     end
-    
+
     def to_ptr
       @eenc
     end
@@ -229,7 +229,7 @@ module GT
       if eldr.nil? then
         @eldr = GT.gt_encseq_loader_new()
       else
-        @eldr = eldr 
+        @eldr = eldr
       end
       if own then
         @eldr.free = GT::symbol("gt_encseq_loader_delete", "0P")
@@ -302,7 +302,7 @@ module GT
     def enable_range_iterator
       GT.gt_encseq_loader_enable_range_iterator(@eldr)
     end
-    
+
     def disable_range_iterator
       GT.gt_encseq_loader_disable_range_iterator(@eldr)
     end
@@ -327,7 +327,7 @@ module GT
       end
       Encseq.new(rval, true)
     end
-    
+
     def to_ptr
       @eldr
     end
@@ -341,7 +341,7 @@ module GT
       end
       EncseqBuilder.new(GT.gt_encseq_builder_new(alphabet.to_ptr))
     end
-  
+
     def initialize(ebld, own = true)
       @ebld = ebld
       if own then
@@ -400,7 +400,7 @@ module GT
     def enable_range_iterator
       GT.gt_encseq_builder_enable_range_iterator(@eldr)
     end
-    
+
     def disable_range_iterator
       GT.gt_encseq_builder_disable_range_iterator(@eldr)
     end
@@ -418,7 +418,7 @@ module GT
       end
       Encseq.new(rval, true)
     end
-    
+
     def to_ptr
       @ebld
     end
@@ -469,7 +469,7 @@ module GT
       end
       return GT.gt_encseq_get_encoded_char(@encseq, pos, readmode)
     end
-   
+
     def total_length
       GT.gt_encseq_total_length(@encseq)
     end
