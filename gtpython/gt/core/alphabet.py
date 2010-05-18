@@ -46,8 +46,7 @@ class Alphabet:
         if not os.path.exists(indexname + ".al1"):
             raise IOError, ("file not found: %s" % (indexname + ".al1"))
         e = Error()
-        s = Str(str(indexname))
-        a_ptr = gtlib.gt_alphabet_new_from_file(s, e)
+        a_ptr = gtlib.gt_alphabet_new_from_file(str(indexname), e)
         a = Alphabet(a_ptr, True)
         if a == None:
           gterror(e)
@@ -131,7 +130,7 @@ class Alphabet:
         gtlib.gt_alphabet_new_empty.restype = c_void_p
         gtlib.gt_alphabet_new_empty.argtypes = []
         gtlib.gt_alphabet_new_from_file.restype = c_void_p
-        gtlib.gt_alphabet_new_from_file.argtypes = [Str, Error]
+        gtlib.gt_alphabet_new_from_file.argtypes = [c_char_p, Error]
         gtlib.gt_alphabet_ref.restype = c_void_p
         gtlib.gt_alphabet_ref.argtypes = [c_void_p]
         gtlib.gt_alphabet_size.restype = c_uint

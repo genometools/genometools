@@ -113,9 +113,8 @@ class EncseqEncoder:
             if not os.path.exists(str(f)):
                 raise IOError, ("file not found: %s" % str(f))
             sa.add(str(f))
-        si = Str(str(indexname)) 
         err = Error()
-        esptr = gtlib.gt_encseq_encoder_encode(self.ee, sa, si, err)
+        esptr = gtlib.gt_encseq_encoder_encode(self.ee, sa, str(indexname), err)
         if esptr != 0:
             gterror(err)
 
@@ -209,9 +208,8 @@ class EncseqLoader:
             raise IOError, ("file not found: %s" % indexname+".ssp")
         if self.sdstab and not os.path.exists(indexname+".sds"):
             raise IOError, ("file not found: %s" % indexname+".sds")
-        si = Str(str(indexname)) 
         err = Error()
-        esptr = gtlib.gt_encseq_loader_load(self.el, si, err)
+        esptr = gtlib.gt_encseq_loader_load(self.el, str(indexname), err)
         if not esptr:
             gterror(err)
         return Encseq(esptr, True)
