@@ -42,7 +42,7 @@ const unsigned long *gt_nextSfxiterator(unsigned long *numberofsuffixes,
                               bool *specialsuffixes,
                               Sfxiterator *sfi);
 
-int gt_postsortsuffixesfromstream(Sfxiterator *sfi, const GtStr *str_indexname,
+int gt_postsortsuffixesfromstream(Sfxiterator *sfi, const GtStr *indexname,
                                GtError *err);
 
 bool gt_sfi2longestsuffixpos(unsigned long *longest,const Sfxiterator *sfi);
