@@ -32,41 +32,42 @@ void    gt_fa_init(void);
 /* functions for normal file pointer */
 #define gt_fa_fopen(path, mode, err)\
         gt_fa_fopen_func(path, mode, __FILE__, __LINE__, err)
-FILE*   gt_fa_fopen_func(const char *path, const char *mode, const char*, int,
-                         GtError*);
+FILE*   gt_fa_fopen_func(const char *path, const char *mode,
+                         const char *src_file, int src_line, GtError *err);
 #define gt_fa_xfopen(path, mode)\
         gt_fa_xfopen_func(path, mode, __FILE__, __LINE__)
-FILE*   gt_fa_xfopen_func(const char *path, const char *mode, const char*, int);
+FILE*   gt_fa_xfopen_func(const char *path, const char *mode,
+                          const char *src_file, int src_line);
 #define gt_fa_fopen_with_suffix(path, suffix, mode, err)\
         gt_fa_fopen_with_suffix_func(path, suffix, mode, __FILE__, __LINE__, \
                                      err)
 FILE*   gt_fa_fopen_with_suffix_func(const char *path, const char *suffix,
-                                     const char *mode, const char*, int,
-                                     GtError *err);
+                                     const char *mode, const char *src_file,
+                                     int src_line, GtError *err);
 void    gt_fa_fclose(FILE *stream);
 void    gt_fa_xfclose(FILE *stream);
 
 /* functions for gzip file pointer */
 #define gt_fa_gzopen(path, mode, err)\
         gt_fa_gzopen_func(path, mode, __FILE__, __LINE__, err)
-gzFile  gt_fa_gzopen_func(const char *path, const char *mode, const char*, int,
-                          GtError*);
+gzFile  gt_fa_gzopen_func(const char *path, const char *mode,
+                          const char *src_file, int src_line, GtError *err);
 #define gt_fa_xgzopen(path, mode)\
         gt_fa_xgzopen_func(path, mode, __FILE__, __LINE__)
-gzFile  gt_fa_xgzopen_func(const char *path, const char *mode, const char*,
-                           int);
+gzFile  gt_fa_xgzopen_func(const char *path, const char *mode,
+                           const char *src_file, int src_line);
 void    gt_fa_gzclose(gzFile stream);
 void    gt_fa_xgzclose(gzFile stream);
 
 /* functions for bzip2 file pointer */
 #define gt_fa_bzopen(path, mode, err)\
         gt_fa_bzopen_func(path, mode, __FILE__, __LINE__, err)
-BZFILE* gt_fa_bzopen_func(const char *path, const char *mode, const char*, int,
-                          GtError*);
+BZFILE* gt_fa_bzopen_func(const char *path, const char *mode,
+                          const char *src_file, int src_line, GtError *err);
 #define gt_fa_xbzopen(path, mode)\
         gt_fa_xbzopen_func(path, mode, __FILE__, __LINE__)
-BZFILE* gt_fa_xbzopen_func(const char *path, const char *mode, const char*,
-                           int);
+BZFILE* gt_fa_xbzopen_func(const char *path, const char *mode,
+                           const char *src_file, int src_line);
 void    gt_fa_bzclose(BZFILE *stream);
 void    gt_fa_xbzclose(BZFILE *stream);
 
@@ -93,36 +94,37 @@ FILE*   gt_xtmpfp_generic_func(GtStr *template, int flags, const char*, int);
 /* memory map functions */
 #define gt_fa_mmap_read(path, len, err)\
         gt_fa_mmap_read_func(path, len, __FILE__, __LINE__, err)
-void*   gt_fa_mmap_read_func(const char *path, size_t *len, const char*, int,
-                             GtError*);
+void*   gt_fa_mmap_read_func(const char *path, size_t *len,
+                             const char *src_file, int src_line, GtError *err);
 #define gt_fa_mmap_write(path, len, err)\
         gt_fa_mmap_write_func(path, len, __FILE__, __LINE__, err)
-void*   gt_fa_mmap_write_func(const char *path, size_t *len, const char*, int,
-                              GtError*);
+void*   gt_fa_mmap_write_func(const char *path, size_t *len,
+                              const char *src_file, int src_line, GtError *err);
 #define gt_fa_xmmap_read(path, len)\
         gt_fa_xmmap_read_func(path, len, __FILE__, __LINE__)
-void*   gt_fa_xmmap_read_func(const char *path, size_t *len, const char*, int);
+void*   gt_fa_xmmap_read_func(const char *path, size_t *len,
+                              const char *src_file, int src_line);
 #define gt_fa_xmmap_write(path, len)\
         gt_fa_xmmap_write_func(path, len, __FILE__, __LINE__)
-void*   gt_fa_xmmap_write_func(const char *path, size_t *len, const char*, int);
+void*   gt_fa_xmmap_write_func(const char *path, size_t *len,
+                               const char *src_file, int src_line);
 void    gt_fa_xmunmap(void *addr);
 #define gt_fa_mmap_generic_fd(fd, filename_to_map, len, offset, mapwritable, \
                               hard_fail, err) \
         gt_fa_mmap_generic_fd_func(fd, filename_to_map, len, offset, \
                                    mapwritable, hard_fail, __FILE__, __LINE__, \
                                    err)
-void*   gt_fa_mmap_generic_fd_func(int fd, const char *filename_to_map,
-                                   size_t len, size_t offset,
-                                   bool mapwritable, bool hard_fail,
-                                   const char *filename, int line,
-                                   GtError *err);
+void*   gt_fa_mmap_generic_fd_func(int fd, const char *filename, size_t len,
+                                   size_t offset, bool mapwritable,
+                                   bool hard_fail, const char *src_file,
+                                   int src_line, GtError *err);
 
 #define gt_mmap_read_with_suffix(path, suffix, len, err)\
         gt_mmap_read_with_suffix_func(path, suffix, len, __FILE__, __LINE__, \
                                       err)
 void*   gt_mmap_read_with_suffix_func(const char *path, const char *suffix,
-                                      size_t *len, const char*, int,
-                                      GtError *err);
+                                      size_t *len, const char *src_file,
+                                      int src_line, GtError *err);
 void*   gt_mmap_check_size_with_suffix(const char *path, const char *suffix,
                                        unsigned long expectedunits,
                                        size_t sizeofunit, GtError *err);

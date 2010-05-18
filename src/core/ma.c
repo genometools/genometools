@@ -36,8 +36,8 @@ static MA *ma = NULL;
 
 typedef struct {
   size_t size;
-  const char *filename;
-  int line;
+  const char *src_file;
+  int src_line;
 } MAInfo;
 
 typedef struct {
@@ -45,13 +45,14 @@ typedef struct {
 } CheckSpaceLeakInfo;
 
 static void* xcalloc(size_t nmemb, size_t size, unsigned long current_size,
-                     const char *filename, int line)
+                     const char *src_file, int src_line)
 {
   void *p;
   if ((p = calloc(nmemb, size)) == NULL) {
     fprintf(stderr, "cannot calloc(%zu, %zu) memory: %s\n", nmemb, size,
             strerror(errno));
-    fprintf(stderr, "attempted on line %d in file \"%s\"\n", line, filename);
+    fprintf(stderr, "attempted on line %d in file \"%s\"\n", src_line,
+           src_file);
     if (current_size)
       fprintf(stderr, "%lu bytes were allocated altogether\n", current_size);
     exit(EXIT_FAILURE);
@@ -60,12 +61,13 @@ static void* xcalloc(size_t nmemb, size_t size, unsigned long current_size,
 }
 
 static void* xmalloc(size_t size, unsigned long current_size,
-                     const char *filename, int line)
+                     const char *src_file, int src_line)
 {
   void *p;
   if ((p = malloc(size)) == NULL) {
     fprintf(stderr, "cannot malloc(%zu) memory: %s\n", size, strerror(errno));
-    fprintf(stderr, "attempted on line %d in file \"%s\"\n", line, filename);
+    fprintf(stderr, "attempted on line %d in file \"%s\"\n", src_line,
+            src_file);
     if (current_size)
       fprintf(stderr, "%lu bytes were allocated altogether\n", current_size);
     exit(EXIT_FAILURE);
@@ -74,12 +76,13 @@ static void* xmalloc(size_t size, unsigned long current_size,
 }
 
 static void* xrealloc(void *ptr, size_t size, unsigned long current_size,
-                      const char *filename, int line)
+                      const char *src_file, int src_line)
 {
   void *p;
   if ((p = realloc(ptr, size)) == NULL) {
     fprintf(stderr, "cannot realloc(%zu) memory: %s\n", size, strerror(errno));
-    fprintf(stderr, "attempted on line %d in file \"%s\"\n", line, filename);
+    fprintf(stderr, "attempted on line %d in file \"%s\"\n", src_line,
+            src_file);
     if (current_size)
       fprintf(stderr, "%lu bytes were allocated altogether\n", current_size);
     exit(EXIT_FAILURE);
@@ -118,7 +121,7 @@ static void subtract_size(MA *ma, unsigned long size)
   ma->current_size -= size;
 }
 
-void* gt_malloc_mem(size_t size, const char *filename, int line)
+void* gt_malloc_mem(size_t size, const char *src_file, int src_line)
 {
   MAInfo *mainfo;
   void *mem;
@@ -126,20 +129,21 @@ void* gt_malloc_mem(size_t size, const char *filename, int line)
   if (ma->bookkeeping) {
     ma->bookkeeping = false;
     ma->mallocevents++;
-    mainfo = xmalloc(sizeof *mainfo, ma->current_size, filename, line);
+    mainfo = xmalloc(sizeof *mainfo, ma->current_size, src_file, src_line);
     mainfo->size = size;
-    mainfo->filename = filename;
-    mainfo->line = line;
-    mem = xmalloc(size, ma->current_size, filename, line);
+    mainfo->src_file = src_file;
+    mainfo->src_line = src_line;
+    mem = xmalloc(size, ma->current_size, src_file, src_line);
     gt_hashmap_add(ma->allocated_pointer, mem, mainfo);
     add_size(ma, size);
     ma->bookkeeping = true;
     return mem;
   }
-  return xmalloc(size, ma->current_size, filename, line);
+  return xmalloc(size, ma->current_size, src_file, src_line);
 }
 
-void* gt_calloc_mem(size_t nmemb, size_t size, const char *filename, int line)
+void* gt_calloc_mem(size_t nmemb, size_t size, const char *src_file,
+                    int src_line)
 {
   MAInfo *mainfo;
   void *mem;
@@ -147,20 +151,20 @@ void* gt_calloc_mem(size_t nmemb, size_t size, const char *filename, int line)
   if (ma->bookkeeping) {
     ma->bookkeeping = false;
     ma->mallocevents++;
-    mainfo = xmalloc(sizeof *mainfo, ma->current_size, filename, line);
+    mainfo = xmalloc(sizeof *mainfo, ma->current_size, src_file, src_line);
     mainfo->size = nmemb * size;
-    mainfo->filename = filename;
-    mainfo->line = line;
-    mem = xcalloc(nmemb, size, ma->current_size, filename, line);
+    mainfo->src_file = src_file;
+    mainfo->src_line = src_line;
+    mem = xcalloc(nmemb, size, ma->current_size, src_file, src_line);
     gt_hashmap_add(ma->allocated_pointer, mem, mainfo);
     add_size(ma, nmemb * size);
     ma->bookkeeping = true;
     return mem;
   }
-  return xcalloc(nmemb, size, ma->current_size, filename, line);
+  return xcalloc(nmemb, size, ma->current_size, src_file, src_line);
 }
 
-void* gt_realloc_mem(void *ptr, size_t size, const char *filename, int line)
+void* gt_realloc_mem(void *ptr, size_t size, const char *src_file, int src_line)
 {
   MAInfo *mainfo;
   void *mem;
@@ -174,20 +178,21 @@ void* gt_realloc_mem(void *ptr, size_t size, const char *filename, int line)
       subtract_size(ma, mainfo->size);
       gt_hashmap_remove(ma->allocated_pointer, ptr);
     }
-    mainfo = xmalloc(sizeof *mainfo, ma->current_size, filename, line);
+    mainfo = xmalloc(sizeof *mainfo, ma->current_size, src_file, src_line);
     mainfo->size = size;
-    mainfo->filename = filename;
-    mainfo->line = line;
-    mem = xrealloc(ptr, size, ma->current_size, filename, line);
+    mainfo->src_file = src_file;
+    mainfo->src_line = src_line;
+    mem = xrealloc(ptr, size, ma->current_size, src_file, src_line);
     gt_hashmap_add(ma->allocated_pointer, mem, mainfo);
     add_size(ma, size);
     ma->bookkeeping = true;
     return mem;
   }
-  return xrealloc(ptr, size, ma->current_size, filename, line);
+  return xrealloc(ptr, size, ma->current_size, src_file, src_line);
 }
 
-void gt_free_mem(void *ptr, GT_UNUSED const char *filename, GT_UNUSED int line)
+void gt_free_mem(void *ptr, GT_UNUSED const char *src_file,
+                 GT_UNUSED int src_line)
 {
   MAInfo *mainfo;
   gt_assert(ma);
@@ -197,7 +202,7 @@ void gt_free_mem(void *ptr, GT_UNUSED const char *filename, GT_UNUSED int line)
 #ifndef NDEBUG
     if (!gt_hashmap_get(ma->allocated_pointer, ptr)) {
       fprintf(stderr, "bug: double free() attempted on line %d in file "
-              "\"%s\"\n", line, filename);
+              "\"%s\"\n", src_line, src_file);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
 #endif
@@ -229,7 +234,7 @@ static int check_space_leak(GT_UNUSED void *key, void *value, void *data,
   /* report only the first leak */
   if (!info->has_leak) {
     fprintf(stderr, "bug: %zu bytes memory leaked (allocated on line %d in "
-            "file \"%s\")\n", mainfo->size, mainfo->line, mainfo->filename);
+            "file \"%s\")\n", mainfo->size, mainfo->src_line, mainfo->src_file);
     info->has_leak = true;
   }
   return 0;
