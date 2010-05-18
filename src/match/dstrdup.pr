@@ -1,8 +1,0 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-char *gt_dynamicstrdup(const char *file,int linenum,const char *source);
-
-#ifdef __cplusplus
-}
-#endif

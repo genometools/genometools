@@ -69,13 +69,4 @@
 
 #endif /* NOSPACEBOOKKEEPING */
 
-/*
-  The remaining macros call the corresponding function with
-  the filename and the line number where the function call
-  appears.
-*/
-
-#define ASSIGNDYNAMICSTRDUP(V,S)\
-        V = gt_dynamicstrdup(__FILE__,__LINE__,S,err)
-
 #endif
