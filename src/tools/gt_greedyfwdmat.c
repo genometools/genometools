@@ -332,7 +332,7 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
     }
     if (gt_mapsuffixarray(&suffixarray,
                        mappedbits,
-                       gfmsubcallinfo.indexname,
+                       gt_str_get(gfmsubcallinfo.indexname),
                        logger,
                        err) != 0)
     {
@@ -348,11 +348,12 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
     {
       if (gfmsubcallinfo.indextype == Packedindextype)
       {
-        packedindex = gt_loadvoidBWTSeqForSA(gfmsubcallinfo.indexname,
-                                          &suffixarray,
-                                          totallength,
-                                          false,
-                                          err);
+        packedindex =
+          gt_loadvoidBWTSeqForSA(gt_str_get(gfmsubcallinfo.indexname),
+                                            &suffixarray,
+                                            totallength,
+                                            false,
+                                            err);
         if (packedindex == NULL)
         {
           haserr = true;

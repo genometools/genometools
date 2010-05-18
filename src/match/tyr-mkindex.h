@@ -23,15 +23,15 @@
 #include "core/error_api.h"
 #include "core/logger.h"
 
-int gt_merstatistics(const GtStr *str_inputindex,
-                  unsigned long mersize,
-                  unsigned long minocc,
-                  unsigned long maxocc,
-                  const GtStr *str_storeindex,
-                  bool storecounts,
-                  bool scanfile,
-                  bool performtest,
-                  GtLogger *logger,
-                  GtError *err);
+int gt_merstatistics(const char *str_inputindex,
+                     unsigned long mersize,
+                     unsigned long minocc,
+                     unsigned long maxocc,
+                     const char *str_storeindex,
+                     bool storecounts,
+                     bool scanfile,
+                     bool performtest,
+                     GtLogger *logger,
+                     GtError *err);
 
 #endif

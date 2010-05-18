@@ -81,7 +81,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
   }
   if (gt_mapsuffixarray(&suffixarray,
                      demand,
-                     pmopt->indexname,
+                     gt_str_get(pmopt->indexname),
                      NULL,
                      err) != 0)
   {

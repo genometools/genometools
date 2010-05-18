@@ -62,14 +62,13 @@ void genericindex_delete(Genericindex *genericindex)
   gt_free(genericindex);
 }
 
-const GtEncseq *genericindex_getencseq(
-                                               const Genericindex *genericindex)
+const GtEncseq *genericindex_getencseq(const Genericindex *genericindex)
 {
   gt_assert(genericindex->suffixarray->encseq != NULL);
   return genericindex->suffixarray->encseq;
 }
 
-Genericindex *genericindex_new(const GtStr *indexname,
+Genericindex *genericindex_new(const char *indexname,
                                bool withesa,
                                bool withencseq,
                                bool withdestab,

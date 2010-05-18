@@ -1618,12 +1618,12 @@ static unsigned int bucketends(Outlcpinfo *outlcpinfo,
   return minprefixindex;
 }
 
-Outlcpinfo *gt_newOutlcpinfo(const GtStr *indexname,
-                          unsigned int prefixlength,
-                          unsigned int numofchars,
-                          unsigned long totallength,
-                          bool assideeffect,
-                          GtError *err)
+Outlcpinfo *gt_newOutlcpinfo(const char *indexname,
+                             unsigned int prefixlength,
+                             unsigned int numofchars,
+                             unsigned long totallength,
+                             bool assideeffect,
+                             GtError *err)
 {
   bool haserr = false;
   Outlcpinfo *outlcpinfo;

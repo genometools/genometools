@@ -21,11 +21,11 @@
 
 #include "fmi-mapspec.pr"
 
-static int writefmascii (const GtStr *indexname,
-                         const Fmindex *fm,
-                         const GtSpecialcharinfo *specialcharinfo,
-                         bool storeindexpos,
-                         GtError *err)
+static int writefmascii(const char *indexname,
+                        const Fmindex *fm,
+                        const GtSpecialcharinfo *specialcharinfo,
+                        bool storeindexpos,
+                        GtError *err)
 {
   FILE *fmafp;
 
@@ -57,10 +57,10 @@ static int writefmascii (const GtStr *indexname,
   return 0;
 }
 
-static int writefmdata (const GtStr *indexname,
-                        Fmindex *fm,
-                        bool storeindexpos,
-                        GtError *err)
+static int writefmdata(const char *indexname,
+                       Fmindex *fm,
+                       bool storeindexpos,
+                       GtError *err)
 {
   FILE *fp;
 
@@ -78,12 +78,12 @@ static int writefmdata (const GtStr *indexname,
   return 0;
 }
 
-int gt_saveFmindex (const GtStr *indexname,Fmindex *fm,
-                 const GtSpecialcharinfo *specialcharinfo,
-                 bool storeindexpos,GtError *err)
+int gt_saveFmindex(const char *indexname,Fmindex *fm,
+                   const GtSpecialcharinfo *specialcharinfo,
+                   bool storeindexpos,GtError *err)
 {
   gt_error_check(err);
-  if (writefmascii (indexname, fm, specialcharinfo,storeindexpos,err) != 0)
+  if (writefmascii(indexname, fm, specialcharinfo,storeindexpos,err) != 0)
   {
     return -1;
   }

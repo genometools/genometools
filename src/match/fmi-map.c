@@ -32,7 +32,7 @@
 #include "fmi-keyval.pr"
 #include "fmi-mapspec.pr"
 
-bool gt_fmindexexists(const GtStr *indexname)
+bool gt_fmindexexists(const char *indexname)
 {
   if (!gt_file_with_suffix_exists(indexname,FMASCIIFILESUFFIX))
   {
@@ -48,7 +48,7 @@ bool gt_fmindexexists(const GtStr *indexname)
 static int scanfmafileviafileptr(Fmindex *fmindex,
                                  GtSpecialcharinfo *specialcharinfo,
                                  bool *storeindexpos,
-                                 const GtStr *indexname,
+                                 const char *indexname,
                                  FILE *fpin,
                                  GtLogger *logger,
                                  GtError *err)
@@ -139,9 +139,9 @@ void gt_freefmindex(Fmindex *fmindex)
   gt_alphabet_delete((GtAlphabet *) fmindex->alphabet);
 }
 
-static GtEncseq *mapbwtencoding(const GtStr *indexname,
-                                       GtLogger *logger,
-                                       GtError *err)
+static GtEncseq *mapbwtencoding(const char *indexname,
+                                GtLogger *logger,
+                                GtError *err)
 {
   GtEncseqLoader *el;
   GtEncseq *ret;
@@ -152,12 +152,12 @@ static GtEncseq *mapbwtencoding(const GtStr *indexname,
   gt_encseq_loader_do_not_require_ssp_tab(el);
   gt_encseq_loader_do_not_require_sds_tab(el);
   gt_encseq_loader_set_logger(el, logger);
-  ret = gt_encseq_loader_load(el, (GtStr*) indexname, err);
+  ret = gt_encseq_loader_load(el, indexname, err);
   gt_encseq_loader_delete(el);
   return ret;
 }
 
-int gt_mapfmindex (Fmindex *fmindex,const GtStr *indexname,
+int gt_mapfmindex (Fmindex *fmindex,const char *indexname,
                 GtLogger *logger,GtError *err)
 {
   FILE *fpin = NULL;
@@ -219,7 +219,7 @@ int gt_mapfmindex (Fmindex *fmindex,const GtStr *indexname,
                         gt_alphabet_num_of_chars(fmindex->alphabet),
                         fmindex->suffixlength,
                         storeindexpos);
-    tmpfilename = gt_str_clone(indexname);
+    tmpfilename = gt_str_new_cstr(indexname);
     gt_str_append_cstr(tmpfilename,FMDATAFILESUFFIX);
     if (gt_fillfmmapspecstartptr(fmindex,storeindexpos,tmpfilename,err) != 0)
     {

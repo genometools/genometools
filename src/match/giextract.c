@@ -456,7 +456,7 @@ static int compareFixedkeys(const void *a,const void *b)
 
 #define GT_KEYSTABFILESUFFIX ".kys"
 
-int gt_extractkeysfromdesfile(const GtStr *indexname,
+int gt_extractkeysfromdesfile(const char *indexname,
                               bool sortkeys,
                               GtLogger *logger,
                               GtError *err)
@@ -536,7 +536,7 @@ int gt_extractkeysfromdesfile(const GtStr *indexname,
         el = gt_encseq_loader_new();
         gt_encseq_loader_set_logger(el, logger);
         gt_encseq_loader_disable_range_iterator(el);
-        encseq = gt_encseq_loader_load(el, (GtStr*) indexname, err);
+        encseq = gt_encseq_loader_load(el, indexname, err);
         gt_encseq_loader_delete(el);
         if (encseq == NULL)
         {
@@ -642,7 +642,7 @@ int gt_extractkeysfromdesfile(const GtStr *indexname,
   return haserr ? -1 : 0;
 }
 
-bool gt_deskeysfileexists(const GtStr *indexname)
+bool gt_deskeysfileexists(const char *indexname)
 {
   return gt_file_with_suffix_exists(indexname,GT_KEYSTABFILESUFFIX);
 }
@@ -747,7 +747,7 @@ static int itersearchoverallkeys(const GtEncseq *encseq,
   return haserr ? - 1 : 0;
 }
 
-static int readkeysize(const GtStr *indexname,GtError *err)
+static int readkeysize(const char *indexname,GtError *err)
 {
   FILE *fp;
   bool haserr = false;
@@ -767,7 +767,7 @@ static int readkeysize(const GtStr *indexname,GtError *err)
     if (ferror(fp))
     {
       gt_error_set(err,"error when trying to read first byte of file %s%s: %s",
-                   gt_str_get(indexname),GT_KEYSTABFILESUFFIX,strerror(errno));
+                   indexname,GT_KEYSTABFILESUFFIX,strerror(errno));
       haserr = true;
     }
   }
@@ -776,7 +776,7 @@ static int readkeysize(const GtStr *indexname,GtError *err)
   return haserr ? -1 : (int) cc;
 }
 
-int gt_extractkeysfromfastaindex(const GtStr *indexname,
+int gt_extractkeysfromfastaindex(const char *indexname,
                                  const GtStr *fileofkeystoextract,
                                  unsigned long linewidth,GtError *err)
 {
@@ -787,7 +787,7 @@ int gt_extractkeysfromfastaindex(const GtStr *indexname,
 
   el = gt_encseq_loader_new();
   gt_encseq_loader_disable_range_iterator(el);
-  encseq = gt_encseq_loader_load(el, (GtStr*) indexname, err);
+  encseq = gt_encseq_loader_load(el, indexname, err);
   gt_encseq_loader_delete(el);
   if (encseq == NULL)
   {

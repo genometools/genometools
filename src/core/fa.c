@@ -179,13 +179,13 @@ FILE* gt_fa_xfopen_func(const char *path, const char *mode,
                           line, NULL);
 }
 
-FILE* gt_fa_fopen_with_suffix(const GtStr *path, const char *suffix,
+FILE* gt_fa_fopen_with_suffix(const char *path, const char *suffix,
                               const char *mode, GtError *err)
 {
   GtStr *tmpfilename;
   FILE *fp;
   gt_error_check(err);
-  tmpfilename = gt_str_clone(path);
+  tmpfilename = gt_str_new_cstr(path);
   gt_str_append_cstr(tmpfilename, suffix);
   fp = gt_fa_fopen(gt_str_get(tmpfilename), mode, err);
   gt_str_delete(tmpfilename);
@@ -446,20 +446,20 @@ void gt_fa_xmunmap(void *addr)
   gt_mutex_unlock(fa->mmap_mutex);
 }
 
-void* gt_mmap_read_with_suffix(const GtStr *path, const char *suffix,
+void* gt_mmap_read_with_suffix(const char *path, const char *suffix,
                                size_t *numofbytes, GtError *err)
 {
   GtStr *tmpfilename;
   void *ptr;
   gt_error_check(err);
-  tmpfilename = gt_str_clone(path);
+  tmpfilename = gt_str_new_cstr(path);
   gt_str_append_cstr(tmpfilename,suffix);
   ptr = gt_fa_mmap_read(gt_str_get(tmpfilename),numofbytes,err);
   gt_str_delete(tmpfilename);
   return ptr;
 }
 
-static int check_mapped_file_size(const GtStr *path,
+static int check_mapped_file_size(const char *path,
                                   const char *suffix,
                                   size_t numofbytes,
                                   unsigned long expectedunits,
@@ -471,7 +471,7 @@ static int check_mapped_file_size(const GtStr *path,
   {
     gt_error_set(err,"mapping file %s%s: number of mapped units (of size %u) "
                      " = %lu != %lu = expected number of mapped units",
-                      gt_str_get(path),
+                      path,
                       suffix,
                       (unsigned int) sizeofunit,
                       (unsigned long) (numofbytes/sizeofunit),
@@ -481,7 +481,7 @@ static int check_mapped_file_size(const GtStr *path,
   return 0;
 }
 
-void* gt_mmap_check_size_with_suffix(const GtStr *path, const char *suffix,
+void* gt_mmap_check_size_with_suffix(const char *path, const char *suffix,
                                      unsigned long expectedunits,
                                      size_t sizeofunit, GtError *err)
 {

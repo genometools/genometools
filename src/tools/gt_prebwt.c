@@ -83,10 +83,10 @@ static int gt_prebwt_runner(GT_UNUSED int argc,
   Prebwtoptions *prebwtoptions = (Prebwtoptions *) tool_arguments;
 
   if (gt_mapsuffixarray(&suffixarray,
-                     0,
-                     prebwtoptions->indexname,
-                     NULL,
-                     err) != 0)
+                        0,
+                        gt_str_get(prebwtoptions->indexname),
+                        NULL,
+                        err) != 0)
   {
     haserr = true;
   } else
@@ -95,9 +95,9 @@ static int gt_prebwt_runner(GT_UNUSED int argc,
   }
   if (!haserr)
   {
-    packedindex = gt_loadvoidBWTSeqForSA(prebwtoptions->indexname,
-                                      &suffixarray,
-                                      totallength, false, err);
+    packedindex = gt_loadvoidBWTSeqForSA(gt_str_get(prebwtoptions->indexname),
+                                         &suffixarray,
+                                         totallength, false, err);
     if (packedindex == NULL)
     {
       haserr = true;
@@ -113,7 +113,7 @@ static int gt_prebwt_runner(GT_UNUSED int argc,
                                numofchars,
                                totallength,
                                prebwtoptions->maxdepth);
-    if (gt_pckbucket2file(prebwtoptions->indexname,pckbt,err) != 0)
+    if (gt_pckbucket2file(gt_str_get(prebwtoptions->indexname),pckbt,err) != 0)
     {
       haserr = true;
     }

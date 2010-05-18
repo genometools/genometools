@@ -35,7 +35,7 @@
 /** The constructor for the base index must conform to this
  * signature. */
 typedef EISeq *(*indexCreateFunc)(
-  unsigned long totalLen, const GtStr *projectName, MRAEnc *alphabet,
+  unsigned long totalLen, const char *projectName, MRAEnc *alphabet,
   const struct seqStats *stats, SeqDataReader BWTGenerator,
   const struct seqBaseParam *params, size_t numExtHeaders,
   const uint16_t *headerIDs, const uint32_t *extHeaderSizes,

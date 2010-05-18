@@ -23,12 +23,12 @@
 #include "core/str_array_api.h"
 #include "core/error_api.h"
 
-int gt_tyrsearch(const GtStr *tyrindexname,
-              const GtStrArray *queryfilenames,
-              unsigned int showmode,
-              unsigned int searchstrand,
-              bool verbose,
-              bool performtest,
-              GtError *err);
+int gt_tyrsearch(const char *tyrindexname,
+                 const GtStrArray *queryfilenames,
+                 unsigned int showmode,
+                 unsigned int searchstrand,
+                 bool verbose,
+                 bool performtest,
+                 GtError *err);
 
 #endif

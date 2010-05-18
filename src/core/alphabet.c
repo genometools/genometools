@@ -953,14 +953,14 @@ void gt_alphabet_encode_seq(const GtAlphabet *alphabet, GtUchar *out,
   }
 }
 
-GtAlphabet *gt_alphabet_new_from_file(const GtStr *indexname,GtError *err)
+GtAlphabet *gt_alphabet_new_from_file(const char *indexname, GtError *err)
 {
   GtStr *tmpfilename;
   bool haserr = false;
   GtAlphabet *alpha;
 
   gt_error_check(err);
-  tmpfilename = gt_str_clone(indexname);
+  tmpfilename = gt_str_new_cstr(indexname);
   gt_str_append_cstr(tmpfilename,GT_ALPHABETFILESUFFIX);
   alpha = gt_alphabet_new(false,false,tmpfilename,NULL,err);
   if (alpha == NULL)
@@ -976,7 +976,7 @@ GtAlphabet *gt_alphabet_new_from_file(const GtStr *indexname,GtError *err)
   return alpha;
 }
 
-int gt_alphabet_to_file(const GtAlphabet *alpha, const GtStr *indexname,
+int gt_alphabet_to_file(const GtAlphabet *alpha, const char *indexname,
                         GtError *err)
 {
   FILE *al1fp;

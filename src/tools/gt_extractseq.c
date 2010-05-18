@@ -202,7 +202,7 @@ static int process_fastakeyfile(GtStr *fastakeyfile, int argc,
 
   if (!had_err)
   {
-    GtStr *indexname = gt_str_new_cstr(argv[0]);
+    const char *indexname = argv[0];
 
     if (argc == 1 && gt_deskeysfileexists(indexname))
     {
@@ -227,7 +227,6 @@ static int process_fastakeyfile(GtStr *fastakeyfile, int argc,
       }
       gt_str_array_delete(referencefiletab);
     }
-    gt_str_delete(indexname);
   }
   return had_err;
 }

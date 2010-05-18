@@ -167,7 +167,7 @@ int gt_runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
     gt_encseq_loader_require_multiseq_support(el);
     gt_encseq_loader_drop_description_support(el);
     gt_encseq_loader_set_logger(el, logger);
-    encseq = gt_encseq_loader_load(el, (GtStr*) idxlocalioptions->indexname,
+    encseq = gt_encseq_loader_load(el, gt_str_get(idxlocalioptions->indexname),
                                    err);
     gt_encseq_loader_delete(el);
     if (encseq == NULL)
@@ -176,7 +176,7 @@ int gt_runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
     }
   } else
   {
-    genericindex = genericindex_new(idxlocalioptions->indexname,
+    genericindex = genericindex_new(gt_str_get(idxlocalioptions->indexname),
                                     idxlocalioptions->withesa,
                                     idxlocalioptions->withesa ||
                                     idxlocalioptions->docompare,

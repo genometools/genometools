@@ -39,14 +39,14 @@ bool gt_file_exists(const char *path)
   return true;
 }
 
-bool gt_file_with_suffix_exists(const GtStr *path, const char *suffix)
+bool gt_file_with_suffix_exists(const char *path, const char *suffix)
 {
   struct stat statbuf;
   GtStr *tmpfilename;
 
   gt_assert(path && suffix);
 
-  tmpfilename = gt_str_clone(path);
+  tmpfilename = gt_str_new_cstr(path);
   gt_str_append_cstr(tmpfilename, suffix);
 
   if (stat(gt_str_get(tmpfilename), &statbuf) == 0) {

@@ -217,7 +217,7 @@ void             gt_encseq_encoder_set_input_protein(GtEncseqEncoder *ee);
    a negative value on error (<err> is set accordingly). */
 int              gt_encseq_encoder_encode(GtEncseqEncoder *ee,
                                           GtStrArray *seqfiles,
-                                          GtStr *indexname,
+                                          const char *indexname,
                                           GtError *err);
 /* Deletes <ee>. */
 void             gt_encseq_encoder_delete(GtEncseqEncoder *ee);
@@ -286,7 +286,8 @@ void             gt_encseq_loader_set_logger(GtEncseqLoader *el, GtLogger *l);
    set in <el> using this interface. Returns a <GtEncseq> instance
    on success, or NULL on error. If an error occurred, <err> is set
    accordingly. */
-GtEncseq*        gt_encseq_loader_load(GtEncseqLoader *el, GtStr *indexname,
+GtEncseq*        gt_encseq_loader_load(GtEncseqLoader *el,
+                                       const char *indexname,
                                        GtError *err);
 /* Deletes <el>. */
 void             gt_encseq_loader_delete(GtEncseqLoader *el);

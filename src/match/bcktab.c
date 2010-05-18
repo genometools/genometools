@@ -271,14 +271,14 @@ int gt_bcktab2file(FILE *fp,const Bcktab *bcktab,GtError *err)
 }
 
 static int fillbcktabmapspecstartptr(Bcktab *bcktab,
-                                     const GtStr *indexname,
+                                     const char *indexname,
                                      GtError *err)
 {
   bool haserr = false;
   GtStr *tmpfilename;
 
   gt_error_check(err);
-  tmpfilename = gt_str_clone(indexname);
+  tmpfilename = gt_str_new_cstr(indexname);
   gt_str_append_cstr(tmpfilename,BCKTABSUFFIX);
   if (gt_mapspec_fillmapspecstartptr(assignbcktabmapspecification,
                           &bcktab->mappedptr,
@@ -293,7 +293,7 @@ static int fillbcktabmapspecstartptr(Bcktab *bcktab,
   return haserr ? -1 : 0;
 }
 
-Bcktab *gt_mapbcktab(const GtStr *indexname,
+Bcktab *gt_mapbcktab(const char *indexname,
                   unsigned int numofchars,
                   unsigned int prefixlength,
                   GtError *err)

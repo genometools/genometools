@@ -33,13 +33,13 @@ Pckbuckettable *gt_pckbuckettable_new(const void *voidbwtseq,
                                    unsigned long totallength,
                                    unsigned int maxdepth);
 
-int gt_pckbucket2file(const GtStr *indexname,
+int gt_pckbucket2file(const char *indexname,
                       const Pckbuckettable *pckbuckettable,
                       GtError *err);
 
-bool gt_pckbuckettableexists(const GtStr *indexname);
+bool gt_pckbuckettableexists(const char *indexname);
 
-Pckbuckettable *gt_mappckbuckettable(const GtStr *indexname,
+Pckbuckettable *gt_mappckbuckettable(const char *indexname,
                                   unsigned int numofchars,
                                   GtError *err);
 

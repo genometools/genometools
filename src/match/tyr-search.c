@@ -205,13 +205,13 @@ static void singleseqtyrsearch(const Tyrindex *tyrindex,
   }
 }
 
-int gt_tyrsearch(const GtStr *tyrindexname,
-              const GtStrArray *queryfilenames,
-              unsigned int showmode,
-              unsigned int searchstrand,
-              bool verbose,
-              bool performtest,
-              GtError *err)
+int gt_tyrsearch(const char *tyrindexname,
+                 const GtStrArray *queryfilenames,
+                 unsigned int showmode,
+                 unsigned int searchstrand,
+                 bool verbose,
+                 bool performtest,
+                 GtError *err)
 {
   Tyrindex *tyrindex;
   Tyrcountinfo *tyrcountinfo = NULL;

@@ -27,7 +27,7 @@
 struct Tyrindex
 {
   void *mappedfileptr;
-  const GtStr *indexfilename;
+  const char *indexfilename;
   unsigned int alphasize;
   size_t numofmers;
   unsigned long mersize,
@@ -39,7 +39,7 @@ struct Tyrindex
 struct Tyrcountinfo
 {
   void *mappedmctfileptr;
-  const GtStr *indexfilename;
+  const char *indexfilename;
   GtUchar *smallcounts;
   Largecount *largecounts;
   unsigned long numoflargecounts;
@@ -57,7 +57,7 @@ unsigned long gt_decodesingleinteger(const GtUchar *start)
   return value;
 }
 
-Tyrindex *gt_tyrindex_new(const GtStr *tyrindexname,GtError *err)
+Tyrindex *gt_tyrindex_new(const char *tyrindexname,GtError *err)
 {
   bool haserr = false;
   size_t numofbytes, rest;
@@ -128,7 +128,7 @@ Tyrindex *gt_tyrindex_new(const GtStr *tyrindexname,GtError *err)
 
 void gt_tyrindex_show(const Tyrindex *tyrindex)
 {
-  printf("# indexfilename = %s\n",gt_str_get(tyrindex->indexfilename));
+  printf("# indexfilename = %s\n",tyrindex->indexfilename);
   printf("# alphasize = %u\n",tyrindex->alphasize);
   printf("# mersize = %lu\n",tyrindex->mersize);
   printf("# numofmers = %lu\n",(unsigned long) tyrindex->numofmers);
@@ -182,8 +182,8 @@ void gt_tyrindex_delete(Tyrindex **tyrindexptr)
 }
 
 Tyrcountinfo *gt_tyrcountinfo_new(const Tyrindex *tyrindex,
-                               const GtStr *tyrindexname,
-                               GtError *err)
+                                  const char *tyrindexname,
+                                  GtError *err)
 {
   size_t numofbytes;
   void *tmp;
@@ -208,7 +208,7 @@ Tyrcountinfo *gt_tyrcountinfo_new(const Tyrindex *tyrindex,
     if (numofbytes < tyrindex->numofmers)
     {
       gt_error_set(err,"size of file \"%s.%s\" is smaller than minimum size "
-                       "%lu",gt_str_get(tyrindexname),COUNTSSUFFIX,
+                       "%lu",tyrindexname,COUNTSSUFFIX,
                        (unsigned long) tyrindex->numofmers);
       haserr = true;
     }

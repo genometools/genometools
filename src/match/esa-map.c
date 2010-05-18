@@ -50,7 +50,7 @@
         }
 
 static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
-                                         const GtStr *indexname,
+                                         const char *indexname,
                                          GtLogger *logger,
                                          FILE *fpin,
                                          GtError *err)
@@ -134,7 +134,7 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
       integersize != (uint32_t) 64)
   {
     gt_error_set(err,"%s%s contains illegal line defining the integer size",
-                  gt_str_get(indexname),PROJECTFILESUFFIX);
+                 indexname,PROJECTFILESUFFIX);
     haserr = true;
   }
   if (!haserr && integersize != (uint32_t) (sizeof (unsigned long) * CHAR_BIT))
@@ -198,7 +198,7 @@ static void initsuffixarray(Suffixarray *suffixarray)
 }
 
 static bool scanprjfileuintkeys(Suffixarray *suffixarray,
-                                const GtStr *indexname,
+                                const char *indexname,
                                 GtLogger *logger,
                                 GtError *err)
 {
@@ -254,7 +254,7 @@ void gt_freesuffixarray(Suffixarray *suffixarray)
 static int inputsuffixarray(bool map,
                             Suffixarray *suffixarray,
                             unsigned int demand,
-                            const GtStr *indexname,
+                            const char *indexname,
                             GtLogger *logger,
                             GtError *err)
 {
@@ -274,7 +274,7 @@ static int inputsuffixarray(bool map,
   if (!(demand & SARR_SSPTAB))
     gt_encseq_loader_do_not_require_ssp_tab(el);
   gt_encseq_loader_set_logger(el, logger);
-  suffixarray->encseq = gt_encseq_loader_load(el, (GtStr*) indexname, err);
+  suffixarray->encseq = gt_encseq_loader_load(el, indexname, err);
   gt_encseq_loader_delete(el);
   if (suffixarray->encseq == NULL)
   {
@@ -412,7 +412,7 @@ static int inputsuffixarray(bool map,
 
 int streamsuffixarray(Suffixarray *suffixarray,
                       unsigned int demand,
-                      const GtStr *indexname,
+                      const char *indexname,
                       GtLogger *logger,
                       GtError *err)
 {
@@ -427,7 +427,7 @@ int streamsuffixarray(Suffixarray *suffixarray,
 
 int gt_mapsuffixarray(Suffixarray *suffixarray,
                    unsigned int demand,
-                   const GtStr *indexname,
+                   const char *indexname,
                    GtLogger *logger,
                    GtError *err)
 {

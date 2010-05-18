@@ -83,15 +83,15 @@ static void showprjinfo(FILE *outprj,
   fprintf(outprj,"readmode=%u\n",(unsigned int) readmode);
 }
 
-int gt_outprjfile(const GtStr *indexname,
-               GtReadmode readmode,
-               const GtEncseq *encseq,
-               unsigned int prefixlength,
-               const Definedunsignedint *maxdepth,
-               unsigned long numoflargelcpvalues,
-               unsigned long maxbranchdepth,
-               const Definedunsignedlong *longest,
-               GtError *err)
+int gt_outprjfile(const char *indexname,
+                  GtReadmode readmode,
+                  const GtEncseq *encseq,
+                  unsigned int prefixlength,
+                  const Definedunsignedint *maxdepth,
+                  unsigned long numoflargelcpvalues,
+                  unsigned long maxbranchdepth,
+                  const Definedunsignedlong *longest,
+                  GtError *err)
 {
   FILE *prjfp;
   bool haserr = false;

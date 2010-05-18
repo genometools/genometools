@@ -35,11 +35,11 @@ void gt_setreadintkeys(GtArray *riktab,
                     size_t sizeval,
                     bool *readflag);
 
-int gt_allkeysdefined(const GtStr *indexname,const char *suffix,
+int gt_allkeysdefined(const char *indexname,const char *suffix,
                    const GtArray *riktab,GtLogger *logger,
                    GtError *err);
 
-int gt_analyzeuintline(const GtStr *indexname,
+int gt_analyzeuintline(const char *indexname,
                     const char *suffix,
                     unsigned int linenum,
                     const char *linebuffer,

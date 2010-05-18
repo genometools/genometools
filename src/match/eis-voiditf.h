@@ -67,7 +67,7 @@ void gt_bwtrangesplitwithoutspecial(GtArrayBoundswithchar *bwci,
                                  unsigned long lbound,
                                  unsigned long ubound);
 
-FMindex *gt_loadvoidBWTSeqForSA(const GtStr *indexname,
+FMindex *gt_loadvoidBWTSeqForSA(const char *indexname,
                                 const Suffixarray *suffixarray,
                                 unsigned long totallength,
                                 bool withpckbt,

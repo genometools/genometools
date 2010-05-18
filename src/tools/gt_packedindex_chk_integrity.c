@@ -50,7 +50,7 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], GtError *err)
 {
   struct encIdxSeq *seq;
   struct chkIndexOptions params;
-  GtStr *inputProject;
+  const char *inputProject;
   int parsedArgs;
   int had_err = 0;
   GtLogger *logger = NULL;
@@ -66,7 +66,7 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], GtError *err)
       return 0;
   }
 
-  inputProject = gt_str_new_cstr(argv[parsedArgs]);
+  inputProject = argv[parsedArgs];
 
   logger = gt_logger_new(params.verboseOutput, GT_LOGGER_DEFLT_PREFIX, stdout);
 
@@ -74,7 +74,7 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], GtError *err)
                       logger, err);
   if ((had_err = seq == NULL))
   {
-    gt_error_set(err, "Failed to load index: %s", gt_str_get(inputProject));
+    gt_error_set(err, "Failed to load index: %s", inputProject);
   }
   else
   {
@@ -94,7 +94,6 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], GtError *err)
     }
   }
   if (seq) gt_deleteEncIdxSeq(seq);
-  if (inputProject) gt_str_delete(inputProject);
   if (logger) gt_logger_delete(logger);
   return had_err?-1:0;
 }

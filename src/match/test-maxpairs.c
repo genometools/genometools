@@ -367,12 +367,12 @@ static unsigned long *sequence2markpositions(unsigned long *numofsequences,
   return spacemarkpos;
 }
 
-int gt_testmaxpairs(const GtStr *indexname,
-                 unsigned long samples,
-                 unsigned int minlength,
-                 unsigned long substringlength,
-                 GtLogger *logger,
-                 GtError *err)
+int gt_testmaxpairs(const char *indexname,
+                    unsigned long samples,
+                    unsigned int minlength,
+                    unsigned long substringlength,
+                    GtLogger *logger,
+                    GtError *err)
 {
   GtEncseq *encseq;
   unsigned long totallength = 0, dblen, querylen;
@@ -390,7 +390,7 @@ int gt_testmaxpairs(const GtStr *indexname,
   gt_encseq_loader_do_not_require_ssp_tab(el);
   gt_encseq_loader_do_not_require_sds_tab(el);
   gt_encseq_loader_set_logger(el, logger);
-  encseq = gt_encseq_loader_load(el, (GtStr*) indexname, err);
+  encseq = gt_encseq_loader_load(el, indexname, err);
   gt_encseq_loader_delete(el);
 
   if (encseq == NULL)

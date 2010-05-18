@@ -25,7 +25,7 @@
 
 typedef struct Tyrindex Tyrindex;
 
-Tyrindex *gt_tyrindex_new(const GtStr *tyrindexname,GtError *err);
+Tyrindex *gt_tyrindex_new(const char *tyrindexname,GtError *err);
 const GtUchar *gt_tyrindex_mertable(const Tyrindex *tyrindex);
 const GtUchar *gt_tyrindex_lastmer(const Tyrindex *tyrindex);
 unsigned long gt_tyrindex_merbytes(const Tyrindex *tyrindex);
@@ -49,8 +49,8 @@ unsigned long gt_tyrindex_ptr2number(const Tyrindex *tyrindex,
 typedef struct Tyrcountinfo Tyrcountinfo;
 
 Tyrcountinfo *gt_tyrcountinfo_new(const Tyrindex *tyrindex,
-                               const GtStr *tyrindexname,
-                               GtError *err);
+                                  const char *tyrindexname,
+                                  GtError *err);
 unsigned long gt_tyrcountinfo_get(const Tyrcountinfo *tyrcountinfo,
                                unsigned long mernumber);
 void gt_tyrcountinfo_delete(Tyrcountinfo **tyrcountinfoptr);

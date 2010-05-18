@@ -598,12 +598,12 @@ gt_createBWTSeqGeneric(const struct bwtParam *params,
         else
         {
           gt_error_set(err, "error: locate sampling requested but not available"
-                    " for project %s\n", gt_str_get(params->projectName));
+                       " for project %s\n", gt_str_get(params->projectName));
         }
       }
     }
     if (!(baseSeqIdx
-          = createIndex(totalLen, params->projectName, baseAlphabet,
+          = createIndex(totalLen, gt_str_get(params->projectName), baseAlphabet,
                         SASSGetSeqStats(src),
                         SASSCreateReader(src, SFX_REQUEST_BWTTAB),
                         &params->seqParams, numHeaders,
@@ -623,7 +623,7 @@ gt_createBWTSeqGeneric(const struct bwtParam *params,
       else
       {
         BWTSeqContextRetriever *ctxRetrieve =
-          gt_BWTSCRFGet(buildContextMap, NULL, params->projectName);
+          gt_BWTSCRFGet(buildContextMap, NULL, gt_str_get(params->projectName));
         gt_deleteBWTSeqCR(ctxRetrieve);
       }
     }

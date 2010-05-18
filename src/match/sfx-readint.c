@@ -132,9 +132,9 @@ static int scanuintintline(uint32_t *lengthofkey,
   return retval;
 }
 
-int gt_allkeysdefined(const GtStr *indexname,const char *suffix,
-                   const GtArray *riktab,GtLogger *logger,
-                   GtError *err)
+int gt_allkeysdefined(const char *indexname,const char *suffix,
+                      const GtArray *riktab,GtLogger *logger,
+                      GtError *err)
 {
   unsigned long i;
   Readintkeys *rikptr;
@@ -177,7 +177,7 @@ int gt_allkeysdefined(const GtStr *indexname,const char *suffix,
       if (rikptr->readflag == NULL)
       {
         gt_error_set(err,"file %s%s: missing line beginning with \"%s=\"",
-                           gt_str_get(indexname),
+                     indexname,
                            suffix,
                            rikptr->keystring);
         return -1;
@@ -188,7 +188,7 @@ int gt_allkeysdefined(const GtStr *indexname,const char *suffix,
   return 0;
 }
 
-int gt_analyzeuintline(const GtStr *indexname,
+int gt_analyzeuintline(const char *indexname,
                     const char *suffix,
                     unsigned int linenum,
                     const char *linebuffer,
@@ -254,7 +254,7 @@ int gt_analyzeuintline(const GtStr *indexname,
     if (!found)
     {
       gt_error_set(err,"file %s%s, line %u: cannot find key for \"%*.*s\"",
-                    gt_str_get(indexname),
+                    indexname,
                     suffix,
                     linenum,
                     (int) lengthofkey,

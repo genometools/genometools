@@ -25,7 +25,7 @@
 
 int gt_matchspacedseed(bool withesa,
                     bool docompare,
-                    const GtStr *str_inputindex,
+                    const char *inputindex,
                     const GtStrArray *queryfilenames,
                     bool verbose,
                     GtError *err);

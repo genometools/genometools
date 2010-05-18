@@ -51,7 +51,7 @@ GtAlphabet*    gt_alphabet_new_protein(void);
 GtAlphabet*    gt_alphabet_new_empty(void);
 /* Return a <GtAlphabet> object, as read from an .al1 file specified by
    <indexname> (i.e. no al1 suffix necessary). */
-GtAlphabet*    gt_alphabet_new_from_file(const GtStr *indexname,GtError *err);
+GtAlphabet*    gt_alphabet_new_from_file(const char *indexname, GtError *err);
 /* Try to guess which type the given <sequence> with <length> has (DNA or
    protein) and return an according <GtAlphabet*> object. */
 GtAlphabet*    gt_alphabet_guess(const char *sequence, unsigned long seqlen);
@@ -87,7 +87,7 @@ void           gt_alphabet_output(const GtAlphabet *alphabet, FILE *fpout);
 /* Writes a representation of <alphabet> to the .al1 output file as specified
    by <indexname> (i.e. without the .al1 suffix). */
 int            gt_alphabet_to_file(const GtAlphabet *alpha,
-                                   const GtStr *indexname,
+                                   const char *indexname,
                                    GtError *err);
 /* Returns the printable character specified in <alphabet> for <currentchar>. */
 GtUchar        gt_alphabet_pretty_symbol(const GtAlphabet *alphabet,

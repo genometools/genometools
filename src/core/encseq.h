@@ -324,7 +324,7 @@ unsigned long gt_encseq_lengthofspecialsuffix(const GtEncseq *encseq);
   files specified by <indexname>, even if the encoded sequence is not mapped.
   Returns 0 on success, -1 otherwise. */
 int gt_specialcharinfo_read(GtSpecialcharinfo *specialcharinfo,
-                            const GtStr *indexname, GtError *err);
+                            const char *indexname, GtError *err);
 
 /* Returns the encoded representation of the character at position <pos> of
   <encseq> read in the direction as indicated by <readmode>.

@@ -51,8 +51,9 @@
 #define INITOUTFILEPTR(PTR,FLAG,SUFFIX)\
         if (!haserr && (FLAG))\
         {\
-          PTR = gt_fa_fopen_with_suffix(so->fn2encopt.str_indexname,SUFFIX,\
-                                        "wb",err);\
+          PTR = gt_fa_fopen_with_suffix(gt_str_get(so->fn2encopt\
+                                                   .str_indexname),SUFFIX,"wb",\
+                                        err);\
           if ((PTR) == NULL)\
           {\
             haserr = true;\
@@ -87,12 +88,14 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
   if (so->outlcptab)
   {
     outfileinfo->outlcpinfo
-      = gt_newOutlcpinfo(so->outlcptab ? so->fn2encopt.str_indexname : NULL,
-                  prefixlength,
-                  gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq)),
-                  gt_encseq_total_length(encseq),
-                  so->sfxstrategy.ssortmaxdepth.defined ? false : true,
-                  err);
+      = gt_newOutlcpinfo(so->outlcptab
+                         ? gt_str_get(so->fn2encopt.str_indexname)
+                         : NULL,
+                         prefixlength,
+                         gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq)),
+                         gt_encseq_total_length(encseq),
+                         so->sfxstrategy.ssortmaxdepth.defined ? false : true,
+                         err);
     if (outfileinfo->outlcpinfo == NULL)
     {
       haserr = true;
@@ -446,7 +449,7 @@ static int runsuffixerator(bool doesa,
     if (!so->fn2encopt.outssptab)
       gt_encseq_loader_do_not_require_ssp_tab(el);
     gt_encseq_loader_set_logger(el, logger);
-    encseq = gt_encseq_loader_load(el, (GtStr*) so->str_inputindex, err);
+    encseq = gt_encseq_loader_load(el, gt_str_get(so->str_inputindex), err);
     gt_encseq_loader_delete(el);
     if (encseq == NULL)
     {
@@ -478,7 +481,8 @@ static int runsuffixerator(bool doesa,
       int rval;
       gt_encseq_encoder_set_logger(ee, logger);
       rval = gt_encseq_encoder_encode(ee, so->fn2encopt.filenametab,
-                                      so->fn2encopt.str_indexname, err);
+                                      gt_str_get(so->fn2encopt.str_indexname),
+                                      err);
       if (rval != 0)
         haserr = -1;
       if (!haserr) {
@@ -490,7 +494,9 @@ static int runsuffixerator(bool doesa,
           gt_encseq_loader_do_not_require_sds_tab(el);
         if (!so->fn2encopt.outssptab)
           gt_encseq_loader_do_not_require_ssp_tab(el);
-        encseq = gt_encseq_loader_load(el, so->fn2encopt.str_indexname, err);
+        encseq = gt_encseq_loader_load(el,
+                                       gt_str_get(so->fn2encopt.str_indexname),
+                                       err);
         if (!encseq)
           haserr = -1;
         gt_encseq_loader_delete(el);
@@ -517,8 +523,8 @@ static int runsuffixerator(bool doesa,
   }
   if (!haserr && so->outkystab && !so->outkyssort)
   {
-    if (gt_extractkeysfromdesfile(so->fn2encopt.str_indexname, false,
-                                  logger, err) != 0)
+    if (gt_extractkeysfromdesfile(gt_str_get(so->fn2encopt.str_indexname),
+                                  false, logger, err) != 0)
     {
       haserr = true;
     }
@@ -640,7 +646,7 @@ static int runsuffixerator(bool doesa,
   encseq = NULL;
   if (!haserr && so->outkystab && so->outkyssort)
   {
-    if (gt_extractkeysfromdesfile(so->fn2encopt.str_indexname, true,
+    if (gt_extractkeysfromdesfile(gt_str_get(so->fn2encopt.str_indexname), true,
                                   logger, err) != 0)
     {
       haserr = true;

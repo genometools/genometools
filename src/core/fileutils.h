@@ -21,7 +21,6 @@
 
 /* Returns true if the file with the name composed of the concatenation of
    <path> and <suffix> exists, false otherwise. */
-bool           gt_file_with_suffix_exists(const GtStr *path,
-                                          const char *suffix);
+bool           gt_file_with_suffix_exists(const char *path, const char *suffix);
 
 #endif

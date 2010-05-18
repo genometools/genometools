@@ -26,14 +26,14 @@
 
 GT_DECLAREARRAYSTRUCT(uint64_t);
 
-int gt_tyr_occratio_func(const GtStr *str_inputindex,
-                 bool scanfile,
-                 unsigned long minmersize,
-                 unsigned long maxmersize,
-                 GtArrayuint64_t *uniquedistribution,
-                 GtArrayuint64_t *nonuniquedistribution,
-                 GtArrayuint64_t *nonuniquemultidistribution,
-                 GtLogger *logger,
-                 GtError *err);
+int gt_tyr_occratio_func(const char *str_inputindex,
+                         bool scanfile,
+                         unsigned long minmersize,
+                         unsigned long maxmersize,
+                         GtArrayuint64_t *uniquedistribution,
+                         GtArrayuint64_t *nonuniquedistribution,
+                         GtArrayuint64_t *nonuniquemultidistribution,
+                         GtLogger *logger,
+                         GtError *err);
 
 #endif

@@ -257,11 +257,11 @@ static int gt_tyr_mkindex_runner(GT_UNUSED int argc,
     }
     printf("# inputindex=%s\n",gt_str_get(arguments->str_inputindex));
   }
-  if (gt_merstatistics(arguments->str_inputindex,
+  if (gt_merstatistics(gt_str_get(arguments->str_inputindex),
                     arguments->mersize,
                     arguments->userdefinedminocc,
                     arguments->userdefinedmaxocc,
-                    arguments->str_storeindex,
+                    gt_str_get(arguments->str_storeindex),
                     arguments->storecounts,
                     arguments->scanfile,
                     arguments->performtest,
@@ -284,8 +284,8 @@ static int gt_tyr_mkindex_runner(GT_UNUSED int argc,
     {
       callprefixlength.defined = false;
     }
-    if (gt_constructmerbuckets(arguments->str_storeindex,&callprefixlength,err)
-        != 0)
+    if (gt_constructmerbuckets(gt_str_get(arguments->str_storeindex),
+                               &callprefixlength,err) != 0)
     {
       haserr = true;
     }
@@ -752,15 +752,15 @@ static int gt_tyr_occratio_runner(GT_UNUSED int argc,
   GT_INITARRAY(&uniquedistribution,uint64_t);
   GT_INITARRAY(&nonuniquedistribution,uint64_t);
   GT_INITARRAY(&nonuniquemultidistribution,uint64_t);
-  if (gt_tyr_occratio_func(arguments->str_inputindex,
-                   arguments->scanfile,
-                   arguments->minmersize,
-                   arguments->maxmersize,
-                   &uniquedistribution,
-                   &nonuniquedistribution,
-                   &nonuniquemultidistribution,
-                   logger,
-                   err) != 0)
+  if (gt_tyr_occratio_func(gt_str_get(arguments->str_inputindex),
+                           arguments->scanfile,
+                           arguments->minmersize,
+                           arguments->maxmersize,
+                           &uniquedistribution,
+                           &nonuniquedistribution,
+                           &nonuniquemultidistribution,
+                           logger,
+                           err) != 0)
   {
     haserr = true;
   }
@@ -937,13 +937,13 @@ static int gt_tyr_search_runner(GT_UNUSED int argc,
 {
   Tyr_search_options *arguments = tool_arguments;
 
-  if (gt_tyrsearch(arguments->str_inputindex,
-                arguments->queryfilenames,
-                arguments->showmode,
-                arguments->strand,
-                arguments->verbose,
-                arguments->performtest,
-                err) != 0)
+  if (gt_tyrsearch(gt_str_get(arguments->str_inputindex),
+                   arguments->queryfilenames,
+                   arguments->showmode,
+                   arguments->strand,
+                   arguments->verbose,
+                   arguments->performtest,
+                   err) != 0)
   {
     return -1;
   }

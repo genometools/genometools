@@ -192,14 +192,14 @@ static inline bool
 BWTSeqCRMapOpen(unsigned short mapIntervalLog2,
                 unsigned short bitsPerSeqpos,
                 unsigned long seqLen,
-                const GtStr *projectName,
+                const char *projectName,
                 bool createMapFile,
                 BWTSeqContextRetriever *gt_newBWTSeqCR);
 
 extern BWTSeqContextRetriever *
 gt_BWTSCRFGet(BWTSeqContextRetrieverFactory *factory,
-           const BWTSeq *bwtSeq,
-           const GtStr *projectName)
+              const BWTSeq *bwtSeq,
+              const char *projectName)
 {
   unsigned short bitsPerSeqpos, mapIntervalLog2;
   BWTSeqContextRetriever *gt_newBWTSeqCR;
@@ -273,7 +273,7 @@ static inline bool
 BWTSeqCRMapOpen(unsigned short mapIntervalLog2,
                 unsigned short bitsPerSeqpos,
                 unsigned long seqLen,
-                const GtStr *projectName,
+                const char *projectName,
                 bool createMapFile,
                 BWTSeqContextRetriever *gt_newBWTSeqCR)
 {
@@ -287,7 +287,7 @@ BWTSeqCRMapOpen(unsigned short mapIntervalLog2,
       mapSize = headerSize + sizeof (BitElem)
       * bitElemsAllocSize(bitsPerSeqpos * numMapEntries(
                             seqLen, mapIntervalLog2));
-    mapName = gt_str_clone(projectName);
+    mapName = gt_str_new_cstr(projectName);
     {
       char buf[1 + 4 + 3];
       snprintf(buf, sizeof (buf), ".%ucxm", (unsigned)mapIntervalLog2);
@@ -342,7 +342,7 @@ BWTSeqCRMapOpen(unsigned short mapIntervalLog2,
 
 extern BWTSeqContextRetriever *
 gt_BWTSeqCRLoad(const BWTSeq *bwtSeq,
-             const GtStr *projectName,
+             const char *projectName,
              short mapIntervalLog2)
 {
   unsigned long seqLen;

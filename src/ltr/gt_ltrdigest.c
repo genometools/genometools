@@ -401,7 +401,7 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
   int had_err      = 0,
       tests_to_run = 0,
       arg = parsed_args;
-  GtStr *indexname = gt_str_new_cstr(argv[arg+1]);
+  const char *indexname = argv[arg+1];
   GtLogger *logger = gt_logger_new(arguments->verbose,
                                    GT_LOGGER_DEFLT_PREFIX, stdout);
   GtEncseqLoader *el;
@@ -414,7 +414,7 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
   gt_encseq_loader_set_logger(el, logger);
 
   /* Open sequence file */
-  encseq = gt_encseq_loader_load(el, (GtStr*) indexname, err);
+  encseq = gt_encseq_loader_load(el, indexname, err);
   if (!encseq)
     had_err = -1;
 
@@ -509,7 +509,6 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
     gt_node_stream_delete(tab_out_stream);
   gt_node_stream_delete(gff3_in_stream);
 
-  gt_str_delete(indexname);
   gt_encseq_loader_delete(el);
   gt_encseq_delete(encseq);
   encseq = NULL;

@@ -25,13 +25,13 @@ void gt_freesuffixarray(Suffixarray *suffixarray);
 
 int streamsuffixarray(Suffixarray *suffixarray,
                       unsigned int demand,
-                      const GtStr *indexname,
+                      const char *indexname,
                       GtLogger *logger,
                       GtError *err);
 
 int gt_mapsuffixarray(Suffixarray *suffixarray,
                    unsigned int demand,
-                   const GtStr *indexname,
+                   const char *indexname,
                    GtLogger *logger,
                    GtError *err);
 

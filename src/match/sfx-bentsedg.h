@@ -36,7 +36,7 @@ typedef struct
   Definedunsignedlong longest;
 } Suftab;
 
-Outlcpinfo *gt_newOutlcpinfo(const GtStr *indexname,
+Outlcpinfo *gt_newOutlcpinfo(const char *indexname,
                           unsigned int prefixlength,
                           unsigned int numofchars,
                           unsigned long totallength,

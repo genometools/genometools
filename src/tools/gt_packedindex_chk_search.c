@@ -95,7 +95,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
 
     {
       enum verifyBWTSeqErrCode retval =
-        gt_BWTSeqVerifyIntegrity(bwtSeq, inputProject, params.flags,
+        gt_BWTSeqVerifyIntegrity(bwtSeq, gt_str_get(inputProject), params.flags,
                               params.progressInterval, stderr, logger, err);
       if ((had_err = (retval != VERIFY_BWTSEQ_NO_ERROR)))
       {
@@ -120,7 +120,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
 
       if ((had_err =
            gt_mapsuffixarray(&suffixarray, SARR_SUFTAB | SARR_ESQTAB,
-                          inputProject, NULL, err) != 0))
+                             gt_str_get(inputProject), NULL, err) != 0))
       {
         gt_error_set(err, "Can't load suffix array project with"
                   " demand for encoded sequence and suffix table files\n");

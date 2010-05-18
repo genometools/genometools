@@ -32,7 +32,7 @@ void genericindex_delete(Genericindex *genericindex);
 const GtEncseq *genericindex_getencseq(const Genericindex
                                                 *genericindex);
 
-Genericindex *genericindex_new(const GtStr *indexname,
+Genericindex *genericindex_new(const char *indexname,
                                bool withesa,
                                bool withencseq,
                                bool withdestab,

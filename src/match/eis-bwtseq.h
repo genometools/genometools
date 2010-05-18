@@ -96,8 +96,8 @@ gt_trSuftab2BWTSeq(const struct bwtParam *params, GtLogger *verbosity,
  * @return reference to new BWT sequence object
  */
 extern BWTSeq *
-gt_loadBWTSeq(const GtStr *projectName, int BWTOptFlags, GtLogger *verbosity,
-           GtError *err);
+gt_loadBWTSeq(const char *projectName, int BWTOptFlags, GtLogger *verbosity,
+              GtError *err);
 
 /**
  * \brief Deallocate a previously loaded/created BWT sequence object.
@@ -374,7 +374,7 @@ enum verifyBWTSeqFlags
  * @param fp dots printed to this file
  */
 extern enum verifyBWTSeqErrCode
-gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
+gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const char *projectName,
                       int checkFlags,
                       unsigned long tickPrint, FILE *fp,
                       GtLogger *verbosity, GtError *err);

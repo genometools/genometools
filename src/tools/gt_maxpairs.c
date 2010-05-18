@@ -73,7 +73,7 @@ static int simpleexactselfmatchoutput(void *info,
   return gt_querymatch_output(info, encseq, querymatch, err);
 }
 
-static int callenummaxpairs(const GtStr *indexname,
+static int callenummaxpairs(const char *indexname,
                             unsigned int userdefinedleastlength,
                             bool scanfile,
                             Processmaxpairs processmaxpairs,
@@ -243,7 +243,7 @@ static int gt_repfind_runner(GT_UNUSED int argc,
       {
         if (arguments->forward)
         {
-          if (callenummaxpairs(arguments->indexname,
+          if (callenummaxpairs(gt_str_get(arguments->indexname),
                                arguments->userdefinedleastlength,
                                arguments->scanfile,
                                simpleexactselfmatchoutput,
@@ -256,13 +256,13 @@ static int gt_repfind_runner(GT_UNUSED int argc,
         }
         if (!haserr && arguments->reverse)
         {
-          if (gt_callenumselfmatches(arguments->indexname,
-                                  GT_READMODE_REVERSE,
-                                  arguments->userdefinedleastlength,
-                                  gt_querymatch_output,
-                                  NULL,
-                                  logger,
-                                  err) != 0)
+          if (gt_callenumselfmatches(gt_str_get(arguments->indexname),
+                                     GT_READMODE_REVERSE,
+                                     arguments->userdefinedleastlength,
+                                     gt_querymatch_output,
+                                     NULL,
+                                     logger,
+                                     err) != 0)
           {
             haserr = true;
           }
@@ -281,14 +281,14 @@ static int gt_repfind_runner(GT_UNUSED int argc,
       }
     } else
     {
-      if (gt_callenumquerymatches(arguments->indexname,
-                               arguments->queryfiles,
-                               false,
-                               arguments->userdefinedleastlength,
-                               gt_querymatch_output,
-                               NULL,
-                               logger,
-                               err) != 0)
+      if (gt_callenumquerymatches(gt_str_get(arguments->indexname),
+                                  arguments->queryfiles,
+                                  false,
+                                  arguments->userdefinedleastlength,
+                                  gt_querymatch_output,
+                                  NULL,
+                                  logger,
+                                  err) != 0)
       {
         haserr = true;
       }

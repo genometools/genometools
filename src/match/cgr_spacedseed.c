@@ -180,7 +180,7 @@ static void onlinespacedseedsearch(const GtEncseq *encseq,
 
 int gt_matchspacedseed(bool withesa,
                     bool docompare,
-                    const GtStr *str_inputindex,
+                    const char *inputindex,
                     const GtStrArray *queryfilenames,
                     bool verbose,
                     GtError *err)
@@ -201,7 +201,7 @@ int gt_matchspacedseed(bool withesa,
   }
   if (!haserr)
   {
-    genericindex = genericindex_new(str_inputindex,withesa,
+    genericindex = genericindex_new(inputindex,withesa,
                                     withesa && docompare,false,false,
                                     0,logger,err);
     if (genericindex == NULL)

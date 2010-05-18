@@ -315,9 +315,9 @@ static void splitmerinterval(Tyrbckinfo *tyrbckinfo,
   }
 }
 
-int gt_constructmerbuckets(const GtStr *inputindex,
-                        const Definedunsignedint *callprefixlength,
-                        GtError *err)
+int gt_constructmerbuckets(const char *inputindex,
+                           const Definedunsignedint *callprefixlength,
+                           GtError *err)
 {
   Tyrindex *tyrindex;
   Tyrbckinfo tyrbckinfo;
@@ -409,8 +409,8 @@ int gt_constructmerbuckets(const GtStr *inputindex,
   return haserr ? -1 : 0;
 }
 
-Tyrbckinfo *gt_tyrbckinfo_new(const GtStr *tyrindexname,unsigned int alphasize,
-                           GtError *err)
+Tyrbckinfo *gt_tyrbckinfo_new(const char *tyrindexname,unsigned int alphasize,
+                              GtError *err)
 {
   size_t numofbytes, expectedsize;
   Tyrbckinfo *tyrbckinfo;

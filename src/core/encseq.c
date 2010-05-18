@@ -715,7 +715,7 @@ static void assignencseqmapspecification(
   }
 }
 
-static int flushencseqfile(const GtStr *indexname,GtEncseq *encseq,
+static int flushencseqfile(const char *indexname,GtEncseq *encseq,
                            GtError *err)
 {
   FILE *fp;
@@ -757,7 +757,7 @@ static int flushencseqfile(const GtStr *indexname,GtEncseq *encseq,
 }
 
 static int fillencseqmapspecstartptr(GtEncseq *encseq,
-                                     const GtStr *indexname,
+                                     const char *indexname,
                                      GtLogger *logger,
                                      GtError *err)
 {
@@ -767,7 +767,7 @@ static int fillencseqmapspecstartptr(GtEncseq *encseq,
   unsigned long idx;
 
   gt_error_check(err);
-  tmpfilename = gt_str_clone(indexname);
+  tmpfilename = gt_str_new_cstr(indexname);
   gt_str_append_cstr(tmpfilename,GT_ENCSEQFILESUFFIX);
   if (gt_mapspec_fillmapspecstartptr(assignencseqmapspecification,
                           &encseq->mappedptr,
@@ -2668,7 +2668,7 @@ typedef struct
         }
 
 static int readfirstvaluesfromfile(Firstencseqvalues *firstencseqvalues,
-                                   const GtStr *indexname,GtError *err)
+                                   const char *indexname,GtError *err)
 {
   FILE *fp;
   bool haserr = false;
@@ -2686,7 +2686,7 @@ static int readfirstvaluesfromfile(Firstencseqvalues *firstencseqvalues,
     if (cc >= (unsigned long) Undefpositionaccesstype)
     {
       gt_error_set(err,"illegal type %lu in \"%s%s\"",cc,
-                    gt_str_get(indexname),GT_ENCSEQFILESUFFIX);
+                   indexname,GT_ENCSEQFILESUFFIX);
       haserr = true;
     }
   }
@@ -2701,7 +2701,7 @@ static int readfirstvaluesfromfile(Firstencseqvalues *firstencseqvalues,
 }
 
 int gt_specialcharinfo_read(GtSpecialcharinfo *specialcharinfo,
-                            const GtStr *indexname, GtError *err)
+                            const char *indexname, GtError *err)
 {
   Firstencseqvalues firstencseqvalues;
 
@@ -2971,13 +2971,13 @@ static GtEncseq *files2encodedsequence(
 
 static GtEncseq*
 gt_encseq_new_from_index(bool withrange,
-                                  const GtStr *indexname,
-                                  bool withtistab,
-                                  bool withdestab,
-                                  bool withsdstab,
-                                  bool withssptab,
-                                  GtLogger *logger,
-                                  GtError *err)
+                         const char *indexname,
+                         bool withtistab,
+                         bool withdestab,
+                         bool withsdstab,
+                         bool withssptab,
+                         GtLogger *logger,
+                         GtError *err)
 {
   GtEncseq *encseq = NULL;
   bool haserr = false;
@@ -3293,7 +3293,7 @@ static void doupdatesumranges(GtSpecialcharinfo *specialcharinfo,
   }
 }
 
-static int gt_inputfiles2sequencekeyvalues(const GtStr *indexname,
+static int gt_inputfiles2sequencekeyvalues(const char *indexname,
                                            unsigned long *totallength,
                                            GtSpecialcharinfo *specialcharinfo,
                                            unsigned int forcetable,
@@ -5276,7 +5276,7 @@ static unsigned long *initcharacterdistribution(const GtAlphabet *alpha)
 
 static GtEncseq*
 gt_encseq_new_from_files(GtProgressTimer *sfxprogress,
-                                  const GtStr *str_indexname,
+                                  const char *indexname,
                                   const GtStr *str_smap,
                                   const GtStr *str_sat,
                                   GtStrArray *filenametab,
@@ -5296,7 +5296,6 @@ gt_encseq_new_from_files(GtProgressTimer *sfxprogress,
   GtSpecialcharinfo specialcharinfo = {0,0,0,0,0};
   GtAlphabet *alpha = NULL;
   bool alphaisbound = false;
-  const GtStr *indexname;
   GtFilelengthvalues *filelengthtab = NULL;
   unsigned long specialrangestab[3];
   unsigned long *characterdistribution = NULL;
@@ -5305,7 +5304,6 @@ gt_encseq_new_from_files(GtProgressTimer *sfxprogress,
 
   gt_error_check(err);
   filenametab = gt_str_array_ref(filenametab);
-  indexname = str_indexname;
   encseq = NULL;
   GT_INITARRAY(&sequenceseppos, GtUlong);
   if (gt_str_length(str_sat) > 0)
@@ -5884,24 +5882,24 @@ void gt_encseq_encoder_set_logger(GtEncseqEncoder *ee, GtLogger *l)
 }
 
 int gt_encseq_encoder_encode(GtEncseqEncoder *ee, GtStrArray *seqfiles,
-                             GtStr *indexname, GtError *err)
+                             const char *indexname, GtError *err)
 {
   GtEncseq *encseq = NULL;
   gt_assert(ee && seqfiles && indexname);
   encseq = gt_encseq_new_from_files(ee->pt,
-                                             indexname,
-                                             ee->smapfile,
-                                             ee->sat,
-                                             seqfiles,
-                                             ee->isdna,
-                                             ee->isprotein,
-                                             ee->isplain,
-                                             ee->tistab,
-                                             ee->destab,
-                                             ee->sdstab,
-                                             ee->ssptab,
-                                             ee->logger,
-                                             err);
+                                    indexname,
+                                    ee->smapfile,
+                                    ee->sat,
+                                    seqfiles,
+                                    ee->isdna,
+                                    ee->isprotein,
+                                    ee->isplain,
+                                    ee->tistab,
+                                    ee->destab,
+                                    ee->sdstab,
+                                    ee->ssptab,
+                                    ee->logger,
+                                    err);
   if (!encseq)
     return -1;
   gt_encseq_delete(encseq);
@@ -6023,19 +6021,19 @@ void gt_encseq_loader_set_logger(GtEncseqLoader *el, GtLogger *l)
   el->logger = l;
 }
 
-GtEncseq* gt_encseq_loader_load(GtEncseqLoader *el, GtStr *indexname,
-                                         GtError *err)
+GtEncseq* gt_encseq_loader_load(GtEncseqLoader *el, const char *indexname,
+                                GtError *err)
 {
   GtEncseq *encseq = NULL;
   gt_assert(el && indexname);
   encseq = gt_encseq_new_from_index(el->withrange,
-                                             indexname,
-                                             el->tistab,
-                                             el->destab,
-                                             el->sdstab,
-                                             el->ssptab,
-                                             el->logger,
-                                             err);
+                                    indexname,
+                                    el->tistab,
+                                    el->destab,
+                                    el->sdstab,
+                                    el->ssptab,
+                                    el->logger,
+                                    err);
   return encseq;
 }
 

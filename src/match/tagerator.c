@@ -558,8 +558,7 @@ int gt_runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     gt_encseq_loader_do_not_require_ssp_tab(el);
     gt_encseq_loader_do_not_require_sds_tab(el);
     gt_encseq_loader_set_logger(el, logger);
-    encseq = gt_encseq_loader_load(el,
-                                   (GtStr*) tageratoroptions->indexname,
+    encseq = gt_encseq_loader_load(el, gt_str_get(tageratoroptions->indexname),
                                    err);
     gt_encseq_loader_delete(el);
     if (encseq == NULL)
@@ -568,7 +567,7 @@ int gt_runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     }
   } else
   {
-    genericindex = genericindex_new(tageratoroptions->indexname,
+    genericindex = genericindex_new(gt_str_get(tageratoroptions->indexname),
                                     tageratoroptions->withesa,
                                     tageratoroptions->withesa ||
                                     tageratoroptions->docompare,

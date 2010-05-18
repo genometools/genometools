@@ -105,7 +105,8 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
 
   gt_error_check(err);
 
-  ssar = gt_newSequentialsuffixarrayreaderfromfile(lo->str_indexname,
+  ssar =
+    gt_newSequentialsuffixarrayreaderfromfile(gt_str_get(lo->str_indexname),
                                                 SARR_LCPTAB | SARR_SUFTAB |
                                                 SARR_ESQTAB | SARR_DESTAB |
                                                 SARR_SSPTAB | SARR_SDSTAB,

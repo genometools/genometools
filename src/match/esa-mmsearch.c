@@ -438,7 +438,7 @@ static int runquerysubstringmatch(bool selfmatch,
   return haserr ? -1 : 0;
 }
 
-int gt_callenumquerymatches(const GtStr *indexname,
+int gt_callenumquerymatches(const char *indexname,
                          const GtStrArray *queryfiles,
                          bool echoquery,
                          unsigned int userdefinedleastlength,
@@ -541,7 +541,7 @@ int gt_callenumquerymatches(const GtStr *indexname,
   return haserr ? -1 : 0;
 }
 
-int gt_callenumselfmatches(const GtStr *indexname,
+int gt_callenumselfmatches(const char *indexname,
                         GtReadmode queryreadmode,
                         unsigned int userdefinedleastlength,
                         Processquerymatch processquerymatch,

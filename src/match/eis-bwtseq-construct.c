@@ -37,15 +37,16 @@ gt_availBWTSeq(const struct bwtParam *params, GtLogger *verbosity,
   gt_assert(params && err);
   gt_error_check(err);
   if (streamsuffixarray(&suffixArray, SARR_SUFTAB | SARR_BWTTAB
-                        | SARR_ESQTAB, params->projectName, verbosity, err))
+                        | SARR_ESQTAB, gt_str_get(params->projectName),
+                        verbosity, err))
   {
     gt_error_unset(err);
     if (streamsuffixarray(&suffixArray, SARR_SUFTAB | SARR_ESQTAB,
-                          params->projectName, verbosity, err))
+                          gt_str_get(params->projectName), verbosity, err))
     {
       gt_error_unset(err);
       if (streamsuffixarray(&suffixArray, 0,
-                            params->projectName, verbosity, err))
+                            gt_str_get(params->projectName), verbosity, err))
         return NULL;
     }
   }
@@ -68,11 +69,11 @@ gt_trSuftab2BWTSeq(const struct bwtParam *params, GtLogger *verbosity,
   {
     if (streamsuffixarray(&suffixArray,
                           SARR_SUFTAB | SARR_BWTTAB | SARR_ESQTAB,
-                          params->projectName, verbosity, err))
+                          gt_str_get(params->projectName), verbosity, err))
     {
       gt_error_unset(err);
       if (streamsuffixarray(&suffixArray, SARR_SUFTAB | SARR_ESQTAB,
-                            params->projectName, verbosity, err))
+                            gt_str_get(params->projectName), verbosity, err))
       {
         gt_error_set(err, "suffix array project %s does not hold required "
                      "suffix array (.suf) and encoded sequence (.esq) "
@@ -95,9 +96,10 @@ gt_availBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
   gt_assert(sa && params && err);
   gt_error_check(err);
   /* try loading index */
-  bwtSeq = gt_loadBWTSeqForSA(params->projectName, params->seqParams.encType,
-                           params->seqParams.EISFeatureSet,
-                           sa, totalLen, err);
+  bwtSeq = gt_loadBWTSeqForSA(gt_str_get(params->projectName),
+                              params->seqParams.encType,
+                              params->seqParams.EISFeatureSet,
+                              sa, totalLen, err);
   /* if loading didn't work try on-demand creation */
   if (!bwtSeq)
   {
@@ -123,7 +125,7 @@ static const enum rangeSortMode GTAlphabetRangeSort[][2] =
 };
 
 extern BWTSeq *
-gt_loadBWTSeq(const GtStr *projectName, int BWTOptFlags, GtLogger *verbosity,
+gt_loadBWTSeq(const char *projectName, int BWTOptFlags, GtLogger *verbosity,
            GtError *err)
 {
   struct BWTSeq *bwtSeq = NULL;
@@ -141,7 +143,7 @@ gt_loadBWTSeq(const GtStr *projectName, int BWTOptFlags, GtLogger *verbosity,
 }
 
 extern BWTSeq *
-gt_loadBWTSeqForSA(const GtStr *projectName, enum seqBaseEncoding encType,
+gt_loadBWTSeqForSA(const char *projectName, enum seqBaseEncoding encType,
                 int BWTOptFlags, const Suffixarray *sa,
                 unsigned long totalLen, GtError *err)
 {
@@ -172,7 +174,7 @@ gt_createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
   if (!sa->longest.defined)
   {
     gt_log_log("error: position of null-rotation/longest suffix not available"
-            " for project %s\n", gt_str_get(params->projectName));
+               " for project %s\n", gt_str_get(params->projectName));
   }
   else
   {

@@ -92,7 +92,7 @@ int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
 #endif /* INLINEDSequentialsuffixarrayreader */
 
 Sequentialsuffixarrayreader *gt_newSequentialsuffixarrayreaderfromfile(
-                                        const GtStr *indexname,
+                                        const char *indexname,
                                         unsigned int demand,
                                         Sequentialaccesstype seqactype,
                                         GtError *err);

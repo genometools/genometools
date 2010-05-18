@@ -42,7 +42,7 @@ extern int
 gt_packedindex_mkctxmap(int argc, const char *argv[], GtError *err)
 {
   struct mkCtxMapOptions params;
-  GtStr *projectName = NULL;
+  const char *projectName;
   GtLogger *logger = NULL;
   BWTSeq *bwtSeq = NULL;
   SASeqSrc *src;
@@ -51,7 +51,6 @@ gt_packedindex_mkctxmap(int argc, const char *argv[], GtError *err)
   bool saInitialized = false, saiInitialized = false;
   Suffixarray sa;
   SuffixarrayFileInterface sai;
-  projectName = gt_str_new();
 
   do {
     gt_error_check(err);
@@ -72,7 +71,7 @@ gt_packedindex_mkctxmap(int argc, const char *argv[], GtError *err)
       if (exitNow)
         break;
     }
-    gt_str_set(projectName, argv[parsedArgs]);
+    projectName = argv[parsedArgs];
     logger = gt_logger_new(params.verboseOutput,
                            GT_LOGGER_DEFLT_PREFIX, stdout);
     /* try to find appropriate suffix source */
@@ -93,8 +92,8 @@ gt_packedindex_mkctxmap(int argc, const char *argv[], GtError *err)
         if (!(src = gt_BWTSeqNewSASeqSrc(bwtSeq, NULL)))
         {
           gt_error_set(err, "The project %s does not contain sufficient"
-                    " information to regenerate the suffix array.",
-                    gt_str_get(projectName));
+                       " information to regenerate the suffix array.",
+                       projectName);
           had_err = true;
           break;
         }
@@ -135,7 +134,6 @@ gt_packedindex_mkctxmap(int argc, const char *argv[], GtError *err)
   if (saiInitialized) gt_destructSuffixarrayFileInterface(&sai);;
   if (saInitialized) gt_freesuffixarray(&sa);
   if (logger) gt_logger_delete(logger);
-  if (projectName) gt_str_delete(projectName);
   return had_err?-1:0;
 }
 

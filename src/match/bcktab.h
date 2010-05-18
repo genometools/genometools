@@ -35,7 +35,7 @@ typedef struct
 
 typedef struct Bcktab Bcktab;
 
-Bcktab *gt_mapbcktab(const GtStr *indexname,
+Bcktab *gt_mapbcktab(const char *indexname,
                   unsigned int numofchars,
                   unsigned int prefixlength,
                   GtError *err);

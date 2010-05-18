@@ -185,7 +185,7 @@ static GtOPrval parse_options(Sfxmapoptions *sfxmapoptions,
 
 int gt_sfxmap(int argc, const char **argv, GtError *err)
 {
-  GtStr *indexname = NULL;
+  const char *indexname;
   bool haserr = false;
   Suffixarray suffixarray;
   int parsed_args;
@@ -211,7 +211,7 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
     gt_error_set(err,"last argument must be indexname");
     return -1;
   }
-  indexname = gt_str_new_cstr(argv[parsed_args]);
+  indexname = argv[parsed_args];
   logger = gt_logger_new(sfxmapoptions.verbose, GT_LOGGER_DEFLT_PREFIX, stdout);
   if (sfxmapoptions.inputtis || sfxmapoptions.delspranges > 0 ||
       sfxmapoptions.inputsuf)
@@ -248,10 +248,10 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
   }
   if ((sfxmapoptions.usestream ? streamsuffixarray
                                : gt_mapsuffixarray)(&suffixarray,
-                                                 demand,
-                                                 indexname,
-                                                 logger,
-                                                 err) != 0)
+                                                   demand,
+                                                   indexname,
+                                                   logger,
+                                                   err) != 0)
   {
     haserr = true;
   }
@@ -392,7 +392,6 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
     gt_logger_log(logger, "checkallsequencedescriptions");
     gt_encseq_check_descriptions(suffixarray.encseq);
   }
-  gt_str_delete(indexname);
   gt_freesuffixarray(&suffixarray);
   gt_logger_delete(logger);
   return haserr ? -1 : 0;

@@ -53,19 +53,18 @@ static int inputthesequences(unsigned int *numofchars,
                              GtError *err)
 {
   unsigned long idx;
-  GtStr *indexname;
+  const char *indexname;
 
   gt_error_check(err);
   for (idx=0; idx<gt_str_array_size(indexnametab); idx++)
   {
-    indexname = gt_str_array_get_str(indexnametab,idx);
+    indexname = gt_str_array_get(indexnametab,idx);
     if (streamsuffixarray(&suffixarraytable[idx],
                           demand,
                           indexname,
                           logger,
                           err) != 0)
     {
-      gt_str_delete(indexname);
       return -1;
     }
     if (idx == 0)

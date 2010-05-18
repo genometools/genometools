@@ -33,8 +33,8 @@
 #include "fmi-keyval.pr"
 #include "fmi-mapspec.pr"
 
-static int copytheindexfile(const GtStr *destindex,
-                            const GtStr *sourceindex,
+static int copytheindexfile(const char *destindex,
+                            const char *sourceindex,
                             const char *suffix,
                             uint64_t maxlength,
                             GtError *err)
@@ -57,8 +57,7 @@ static int copytheindexfile(const GtStr *destindex,
       haserr = true;
     }
   }
-  printf("# cp %s%s %s%s\n",
-           gt_str_get(sourceindex),suffix,gt_str_get(destindex),suffix);
+  printf("# cp %s%s %s%s\n",sourceindex,suffix,destindex,suffix);
   if (!haserr)
   {
     if (maxlength == 0)
@@ -158,7 +157,7 @@ static void finalizefmfrequencies(Fmindex *fm)
   }
 }
 
-static void showconstructionmessage(const GtStr *indexname,
+static void showconstructionmessage(const char *indexname,
                                     unsigned long totallength,
                                     unsigned long fmsize,
                                     unsigned int log2bsize,
@@ -166,7 +165,7 @@ static void showconstructionmessage(const GtStr *indexname,
                                     unsigned int numofchars)
 {
   printf("# construct fmindex \"%s\" for bsize=%lu, superbsize=%lu,",
-          gt_str_get(indexname),
+          indexname,
           (unsigned long) GT_POW2(log2bsize),
           (unsigned long) GT_POW2(log2markdist));
   printf(" len=%lu, alphasize=%u: size ",
@@ -240,7 +239,7 @@ int gt_sufbwt2fmindex(Fmindex *fmindex,
                    GtSpecialcharinfo *specialcharinfo,
                    unsigned int log2bsize,
                    unsigned int log2markdist,
-                   const GtStr *outfmindex,
+                   const char *outfmindex,
                    const GtStrArray *indexnametab,
                    bool storeindexpos,
                    GtLogger *logger,
@@ -275,7 +274,7 @@ int gt_sufbwt2fmindex(Fmindex *fmindex,
   numofindexes = (unsigned int) gt_str_array_size(indexnametab);
   if (numofindexes == 1U)
   {
-    GtStr *indexname = gt_str_array_get_str(indexnametab,0);
+    const char *indexname = gt_str_array_get(indexnametab,0);
 
     if (streamsuffixarray(&suffixarray,
                           SARR_BWTTAB | (storeindexpos ? SARR_SUFTAB : 0),
@@ -326,7 +325,7 @@ int gt_sufbwt2fmindex(Fmindex *fmindex,
     }
     if (!haserr)
     {
-      GtStr *indexname = gt_str_array_get_str(indexnametab,0);
+      const char *indexname = gt_str_array_get(indexnametab,0);
       suffixlength = 0;
       if (copytheindexfile(outfmindex,indexname,GT_ALPHABETFILESUFFIX,
                            0,err) != 0)

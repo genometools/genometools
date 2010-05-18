@@ -266,7 +266,7 @@ static void showmerdistribution(const TyrDfsstate *state)
 }
 
 static void showfinalstatistics(const TyrDfsstate *state,
-                                const GtStr *inputindex,
+                                const char *inputindex,
                                 GtLogger *logger)
 {
   uint64_t dnumofmers = addupdistribution(&state->occdistribution);
@@ -278,7 +278,7 @@ static void showfinalstatistics(const TyrDfsstate *state,
   gt_logger_log(logger,
               "the following output refers to the set of all sequences");
   gt_logger_log(logger,
-              "represented by the index \"%s\"",gt_str_get(inputindex));
+              "represented by the index \"%s\"",inputindex);
   gt_logger_log(logger,
               "number of %lu-mers in the sequences not containing a "
               "wildcard: " Formatuint64_t,
@@ -564,9 +564,9 @@ static void outputbytewiseUlongvalue(FILE *fpout,unsigned long value)
   }
 }
 
-static int enumeratelcpintervals(const GtStr *str_inputindex,
+static int enumeratelcpintervals(const char *inputindex,
                                  Sequentialsuffixarrayreader *ssar,
-                                 const GtStr *str_storeindex,
+                                 const char *storeindex,
                                  bool storecounts,
                                  unsigned long mersize,
                                  unsigned long minocc,
@@ -599,7 +599,7 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   state.merindexfpout = NULL;
   state.countsfilefpout = NULL;
   GT_INITARRAY(&state.largecounts,Largecount);
-  if (gt_str_length(str_storeindex) == 0)
+  if (strlen(storeindex) == 0)
   {
     state.sizeofbuffer = 0;
     state.bytebuffer = NULL;
@@ -625,12 +625,12 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
     haserr = true;
   } else
   {
-    if (gt_str_length(str_storeindex) == 0)
+    if (strlen(storeindex) == 0)
     {
       state.processoccurrencecount = adddistpos2distribution;
     } else
     {
-      state.merindexfpout = gt_fa_fopen_with_suffix(str_storeindex,MERSUFFIX,
+      state.merindexfpout = gt_fa_fopen_with_suffix(storeindex,MERSUFFIX,
                                                     "wb",err);
       if (state.merindexfpout == NULL)
       {
@@ -640,7 +640,7 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
         if (state.storecounts)
         {
           state.countsfilefpout
-            = gt_fa_fopen_with_suffix(str_storeindex,COUNTSSUFFIX,"wb",err);
+            = gt_fa_fopen_with_suffix(storeindex,COUNTSSUFFIX,"wb",err);
           if (state.countsfilefpout == NULL)
           {
             haserr = true;
@@ -665,9 +665,9 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
       {
         haserr = true;
       }
-      if (gt_str_length(str_storeindex) == 0)
+      if (strlen(storeindex) == 0)
       {
-        showfinalstatistics(&state,str_inputindex,logger);
+        showfinalstatistics(&state,inputindex,logger);
       }
     }
     if (!haserr)
@@ -677,7 +677,7 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
         gt_logger_log(logger,"write %lu mercounts > %lu to file \"%s%s\"",
                     state.largecounts.nextfreeLargecount,
                     (unsigned long) MAXSMALLMERCOUNT,
-                    gt_str_get(str_storeindex),
+                    storeindex,
                     COUNTSSUFFIX);
         if (fwrite(state.largecounts.spaceLargecount,
                   sizeof (Largecount),
@@ -721,11 +721,11 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   return haserr ? -1 : 0;
 }
 
-int gt_merstatistics(const GtStr *str_inputindex,
+int gt_merstatistics(const char *str_inputindex,
                   unsigned long mersize,
                   unsigned long minocc,
                   unsigned long maxocc,
-                  const GtStr *str_storeindex,
+                  const char *str_storeindex,
                   bool storecounts,
                   bool scanfile,
                   bool performtest,
