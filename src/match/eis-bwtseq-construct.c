@@ -27,7 +27,7 @@
 #include "match/eis-encidxseq.h"
 #include "match/eis-encidxseq-construct.h"
 
-extern BWTSeq *
+BWTSeq *
 gt_availBWTSeq(const struct bwtParam *params, GtLogger *verbosity,
             GtError *err)
 {
@@ -56,7 +56,7 @@ gt_availBWTSeq(const struct bwtParam *params, GtLogger *verbosity,
   return bwtSeq;
 }
 
-extern BWTSeq *
+BWTSeq *
 gt_trSuftab2BWTSeq(const struct bwtParam *params, GtLogger *verbosity,
                 GtError *err)
 {
@@ -88,7 +88,7 @@ gt_trSuftab2BWTSeq(const struct bwtParam *params, GtLogger *verbosity,
   return bwtSeq;
 }
 
-extern BWTSeq *
+BWTSeq *
 gt_availBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
                   unsigned long totalLen, GtError *err)
 {
@@ -124,7 +124,7 @@ static const enum rangeSortMode GTAlphabetRangeSort[][2] =
   { SORTMODE_VALUE, SORTMODE_RANK }
 };
 
-extern BWTSeq *
+BWTSeq *
 gt_loadBWTSeq(const char *projectName, int BWTOptFlags, GtLogger *verbosity,
            GtError *err)
 {
@@ -142,7 +142,7 @@ gt_loadBWTSeq(const char *projectName, int BWTOptFlags, GtLogger *verbosity,
   return bwtSeq;
 }
 
-extern BWTSeq *
+BWTSeq *
 gt_loadBWTSeqForSA(const char *projectName, enum seqBaseEncoding encType,
                 int BWTOptFlags, const Suffixarray *sa,
                 unsigned long totalLen, GtError *err)
@@ -166,7 +166,7 @@ gt_loadBWTSeqForSA(const char *projectName, enum seqBaseEncoding encType,
   return bwtSeq;
 }
 
-extern BWTSeq *
+BWTSeq *
 gt_createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
                    unsigned long totalLen, GtError *err)
 {
@@ -215,7 +215,7 @@ gt_createBWTSeqFromSASS(const struct bwtParam *params, SASeqSrc *src,
                      const enum rangeSortMode *rangeSort,
                      GtError *err);
 
-extern BWTSeq *
+BWTSeq *
 gt_createBWTSeqFromSAI(const struct bwtParam *params,
                     SuffixarrayFileInterface *sai,
                     GtError *err)
@@ -233,7 +233,7 @@ gt_createBWTSeqFromSAI(const struct bwtParam *params,
   return bwtSeq;
 }
 
-extern BWTSeq *
+BWTSeq *
 gt_createBWTSeqFromSfxI(const struct bwtParam *params, sfxInterface *sfxi,
                      GtError *err)
 {

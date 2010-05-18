@@ -53,7 +53,7 @@ typedef struct sfxInterface sfxInterface;
  * @param err
  * @return interface object reference
  */
-extern sfxInterface *
+sfxInterface *
 gt_newSfxInterface(GtReadmode readmode,
                 unsigned int prefixlength,
                 unsigned int numofparts,
@@ -86,7 +86,7 @@ gt_newSfxInterface(GtReadmode readmode,
  * @param err
  * @return interface object reference
  */
-extern sfxInterface *
+sfxInterface *
 gt_newSfxInterfaceWithReaders(GtReadmode readmode,
                            unsigned int prefixlength,
                            unsigned int numofparts,
@@ -106,7 +106,7 @@ gt_newSfxInterfaceWithReaders(GtReadmode readmode,
  * @param iface to take Sfxiterator from
  *
  */
-extern const Sfxiterator *
+const Sfxiterator *
 gt_SfxInterface2Sfxiterator(const sfxInterface *iface);
 
 /**
@@ -114,7 +114,7 @@ gt_SfxInterface2Sfxiterator(const sfxInterface *iface);
  *
  * @param iface object to delete
  */
-extern void
+void
 gt_deleteSfxInterface(sfxInterface *iface);
 
 /**
@@ -123,7 +123,7 @@ gt_deleteSfxInterface(sfxInterface *iface);
  * @param sfxi reference to suffixerator interface object
  * @return reference of object of base class
  */
-extern SASeqSrc *
+SASeqSrc *
 gt_SfxI2SASS(sfxInterface *sfxi);
 
 /**
@@ -133,7 +133,7 @@ gt_SfxI2SASS(sfxInterface *sfxi);
  * @param si reference of interface to suffixerator
  * @return reference of newly created alphabet object
  */
-extern MRAEnc *
+MRAEnc *
 gt_SfxINewMRAEnc(const sfxInterface *si);
 
 /**
@@ -143,7 +143,7 @@ gt_SfxINewMRAEnc(const sfxInterface *si);
  * @param si reference of interface to suffixerator
  * @return reference of alphabet object
  */
-extern const GtAlphabet *
+const GtAlphabet *
 gt_SfxIGetAlphabet(const sfxInterface *si);
 
 /**
@@ -152,7 +152,7 @@ gt_SfxIGetAlphabet(const sfxInterface *si);
  * @param si reference of interface to suffixerator
  * @return reference of sequence object
  */
-extern const GtEncseq *
+const GtEncseq *
 gt_SfxIGetEncSeq(const sfxInterface *si);
 
 /**
@@ -160,7 +160,7 @@ gt_SfxIGetEncSeq(const sfxInterface *si);
  * @param si suffixerator interface object reference
  * @return read mode
  */
-extern GtReadmode
+GtReadmode
 gt_SfxIGetReadmode(const sfxInterface *si);
 
 /**
@@ -172,7 +172,7 @@ gt_SfxIGetReadmode(const sfxInterface *si);
  * @param len number of symbols to read
  * @return number of symbols actually read
  */
-extern size_t
+size_t
 gt_SfxIGetOrigSeq(const void *si, Symbol *dest, unsigned long pos, size_t len);
 
 /**
@@ -181,7 +181,7 @@ gt_SfxIGetOrigSeq(const void *si, Symbol *dest, unsigned long pos, size_t len);
  * @param si reference of interface to suffixerator
  * @return reference of struct holding statistics (symbol counts)
  */
-extern const struct seqStats *
+const struct seqStats *
 gt_SfxIGetSeqStats(const sfxInterface *si);
 
 /**
@@ -193,7 +193,7 @@ gt_SfxIGetSeqStats(const sfxInterface *si);
  * @param si reference of interface to suffixerator
  * @return length of sequence
  */
-extern unsigned long
+unsigned long
 gt_SfxIGetLength(const sfxInterface *si);
 
 /**
@@ -204,13 +204,13 @@ gt_SfxIGetLength(const sfxInterface *si);
  * @return tuple of boolean (position is known) and position (if
  * known) or undefined value.
  */
-extern Definedunsignedlong
+Definedunsignedlong
 gt_SfxIGetRot0Pos(const struct sfxInterface *si);
 
 /**
  * @return >0 on success, 0 on error
  */
-extern SeqDataReader
+SeqDataReader
 gt_SfxIRegisterReader(sfxInterface *iface, enum sfxDataRequest request);
 
 #if 0
@@ -223,25 +223,25 @@ gt_SfxIRegisterReader(sfxInterface *iface, enum sfxDataRequest request);
  * @param dest store read symbols here
  * @return number of symbols read (less than len implies end of file)
  */
-extern size_t
+size_t
 readSfxIBWTRange(sfxInterface *iface, listenerID id, size_t len, GtUchar *dest);
 
 /**
  * @return actual number of symbols read
  */
-extern size_t
+size_t
 readSfxILCPRange(sfxInterface *iface, listenerID id, size_t len,
                  unsigned long *dest, GtError *err);
 
 /**
  * @return actual number of symbols read
  */
-extern size_t
+size_t
 readSfxISufTabRange(sfxInterface *iface, listenerID id, size_t len,
                     unsigned long *dest);
 #endif
 
-extern SeqDataReader
+SeqDataReader
 gt_SfxIRegisterReader(sfxInterface *iface, enum sfxDataRequest request);
 
 #endif

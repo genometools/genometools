@@ -99,7 +99,7 @@ SASS2SfxI(SASeqSrc *baseClass)
                           - offsetof(sfxInterface, baseClass));
 }
 
-extern struct SASeqSrc *
+struct SASeqSrc *
 gt_SfxI2SASS(sfxInterface *sfxi)
 {
   return &sfxi->baseClass;
@@ -152,7 +152,7 @@ SfxIGenerate(void *iface,
              size_t len,
              SeqDataTranslator xltor);
 
-extern sfxInterface *
+sfxInterface *
 gt_newSfxInterface(GtReadmode readmode,
                 unsigned int prefixlength,
                 unsigned int numofparts,
@@ -223,7 +223,7 @@ deleteSeqStats(struct seqStats *stats)
     sfxi = NULL;                                 \
   } while (0)
 
-extern sfxInterface *
+sfxInterface *
 gt_newSfxInterfaceWithReaders(GtReadmode readmode,
                            unsigned int prefixlength,
                            unsigned int numofparts,
@@ -278,12 +278,12 @@ gt_newSfxInterfaceWithReaders(GtReadmode readmode,
   return sfxi;
 }
 
-extern const Sfxiterator *gt_SfxInterface2Sfxiterator(const sfxInterface *sfxi)
+const Sfxiterator *gt_SfxInterface2Sfxiterator(const sfxInterface *sfxi)
 {
   return sfxi->sfi;
 }
 
-extern void
+void
 gt_deleteSfxInterface(sfxInterface *sfxi)
 {
   destructSASeqSrc(&sfxi->baseClass);
@@ -292,13 +292,13 @@ gt_deleteSfxInterface(sfxInterface *sfxi)
   gt_free(sfxi);
 }
 
-extern const GtAlphabet *
+const GtAlphabet *
 gt_SfxIGetAlphabet(const sfxInterface *si)
 {
   return si->alpha;
 }
 
-extern MRAEnc *
+MRAEnc *
 gt_SfxINewMRAEnc(const sfxInterface *si)
 {
   MRAEnc *alphabet;
@@ -315,38 +315,38 @@ gt_SfxIGetLength(const sfxInterface *si)
   return si->baseClass.seqLen;
 }
 
-extern const struct seqStats *
+const struct seqStats *
 gt_SfxIGetSeqStats(const sfxInterface *si)
 {
   return si->stats;
 }
 
-extern Definedunsignedlong
+Definedunsignedlong
 gt_SfxIGetRot0Pos(const struct sfxInterface *si)
 {
   return si->rot0Pos;
 }
 
-extern const GtEncseq *
+const GtEncseq *
 gt_SfxIGetEncSeq(const sfxInterface *si)
 {
   return si->encseq;
 }
 
-extern GtReadmode
+GtReadmode
 gt_SfxIGetReadmode(const sfxInterface *si)
 {
   return si->readmode;
 }
 
-extern SeqDataReader
+SeqDataReader
 gt_SfxIRegisterReader(sfxInterface *sfxi, enum sfxDataRequest rtype)
 {
   return gt_seqReaderSetRegisterConsumer(
     &sfxi->baseClass.readerSet, rtype, SfxIRequest2XltorFunc(sfxi, rtype));
 }
 
-extern size_t
+size_t
 gt_SfxIGetOrigSeq(const void *state, Symbol *dest, unsigned long pos,
                   size_t len)
 {

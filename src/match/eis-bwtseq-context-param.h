@@ -30,7 +30,7 @@ enum ctxMapSize {
   CTX_MAP_ILOG_AUTOSIZE = -1,
 };
 
-extern void
+void
 gt_registerCtxMapOptions(GtOptionParser *op, int *ilogOut);
 
 static inline bool

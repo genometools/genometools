@@ -315,7 +315,7 @@ writeOutputBuffer(struct blockCompositionSeq *newSeqIdx,
   gt_free(block);                                       \
   break
 
-extern EISeq *
+EISeq *
 gt_newGenBlockEncIdxSeq(unsigned long totalLen, const char *projectName,
                         MRAEnc *alphabet, const struct seqStats *stats,
                         SeqDataReader BWTGenerator,
@@ -2135,7 +2135,7 @@ writeIdxHeader(struct blockCompositionSeq *seqIdx,
     return NULL;                                                        \
   } while (0)
 
-extern struct encIdxSeq *
+struct encIdxSeq *
 gt_loadBlockEncIdxSeqGen(MRAEnc *alphabet, unsigned long totalLen,
                          const char *projectName, int features, GtError *err)
 {
@@ -2683,7 +2683,7 @@ printBucket(const struct blockCompositionSeq *seqIdx, unsigned long bucketNum,
   return outCount;
 }
 
-extern unsigned
+unsigned
 gt_blockEncIdxSeqSegmentLen(const struct blockEncParams *params)
 {
   return params->blockSize * params->bucketBlocks;

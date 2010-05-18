@@ -59,7 +59,7 @@
  * @param cbState will be passed on each call of biFunc
  * @param err genometools reference for core functions
  */
-extern EISeq *
+EISeq *
 gt_createEncIdxSeqFromSfxI(sfxInterface *si,
                         const char *projectName,
                         const struct seqBaseParam *params,
@@ -99,7 +99,7 @@ gt_createEncIdxSeqFromSfxI(sfxInterface *si,
  * @param cbState will be passed on each call of biFunc
  * @param err genometools reference for core functions
  */
-extern EISeq *
+EISeq *
 gt_createEncIdxSeqFromSA(Suffixarray *sa,
                       unsigned long totalLen, const char *projectName,
                       const struct seqBaseParam *params,
@@ -142,7 +142,7 @@ gt_createEncIdxSeqFromSA(Suffixarray *sa,
  * @param cbState will be passed on each call of biFunc
  * @param err genometools reference for core functions
  */
-extern EISeq *
+EISeq *
 gt_createEncIdxSeqFromSAI(SuffixarrayFileInterface *sai,
                        const char *projectName,
                        const struct seqBaseParam *params,
@@ -178,7 +178,7 @@ gt_createEncIdxSeqFromSAI(SuffixarrayFileInterface *sai,
  * @param err genometools error object reference
  * @return new encoded indexed sequence object reference
  */
-extern EISeq *
+EISeq *
 gt_createEncIdxSeq(const char *projectName,
                 const struct seqBaseParam *params,
                 size_t numExtHeaders, const uint16_t *headerIDs,
@@ -200,7 +200,7 @@ gt_createEncIdxSeq(const char *projectName,
  * @param features select optional in-memory structures
  * @param err genometools reference for core functions
  */
-extern EISeq *
+EISeq *
 gt_loadEncIdxSeqForSA(const Suffixarray *sa, unsigned long totalLen,
                       const char *projectName,
                       enum seqBaseEncoding encType, int features, GtError *err);
@@ -213,12 +213,12 @@ gt_loadEncIdxSeqForSA(const Suffixarray *sa, unsigned long totalLen,
  * @param err genometools error object reference
  * @return new encoded indexed sequence object reference
  */
-extern EISeq *
+EISeq *
 gt_loadEncIdxSeq(const char *projectName,
               enum seqBaseEncoding encType, int features,
               GtLogger *verbosity, GtError *err);
 
-extern EISeq *
+EISeq *
 gt_createEncIdxSeqGen(unsigned long totalLen, const char *projectName,
                    MRAEnc *alphabet, const struct seqStats *stats,
                    SeqDataReader seqGenerator,

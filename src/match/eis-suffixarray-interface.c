@@ -52,7 +52,7 @@ SAIBaseGetOrigSeq(const SASeqSrc *baseClass, Symbol *dest, unsigned long pos,
   return gt_SAIGetOrigSeq(constSASS2SAI(baseClass), dest, pos, len);
 }
 
-extern MRAEnc *
+MRAEnc *
 gt_SAIBaseNewMRAEnc(const SASeqSrc *baseClass)
 {
   return SAINewMRAEnc(constSASS2SAI(baseClass));
@@ -64,7 +64,7 @@ SAIGenerate(void *generatorState, void *backlogState,
             unsigned long generateStart, size_t len,
             SeqDataTranslator xltor);
 
-extern void
+void
 gt_initSuffixarrayFileInterface(SuffixarrayFileInterface *sai,
                              unsigned long seqLen, Suffixarray *sa)
 {
@@ -81,7 +81,7 @@ gt_initSuffixarrayFileInterface(SuffixarrayFileInterface *sai,
   gt_initSATaggedXltorStateList(&sai->xltorStates);
 }
 
-extern SuffixarrayFileInterface *
+SuffixarrayFileInterface *
 gt_newSuffixarrayFileInterface(Suffixarray *sa, unsigned long seqLen)
 {
   SuffixarrayFileInterface *sai = gt_malloc(sizeof (*sai));
@@ -89,14 +89,14 @@ gt_newSuffixarrayFileInterface(Suffixarray *sa, unsigned long seqLen)
   return sai;
 }
 
-extern void
+void
 gt_destructSuffixarrayFileInterface(SuffixarrayFileInterface *sai)
 {
   destructSASeqSrc(&sai->baseClass);
   gt_destructSATaggedXltorStateList(&sai->xltorStates);
 }
 
-extern void
+void
 gt_deleteSuffixarrayFileInterface(SuffixarrayFileInterface *sai)
 {
   gt_destructSuffixarrayFileInterface(sai);
@@ -106,7 +106,7 @@ gt_deleteSuffixarrayFileInterface(SuffixarrayFileInterface *sai)
 static size_t
 SAIReadBWT(void *state, Symbol *dest, size_t len, GtError *err);
 
-extern struct seqDataReader
+struct seqDataReader
 gt_SAIMakeBWTReader(SuffixarrayFileInterface *sai)
 {
   struct seqDataReader reader = { NULL, NULL};
@@ -144,7 +144,7 @@ gt_SAIMakeBWTReader(SuffixarrayFileInterface *sai)
   return reader;
 }
 
-extern struct seqDataReader
+struct seqDataReader
 gt_SAIMakeSufTabReader(SuffixarrayFileInterface *sai)
 {
   struct seqDataReader reader = { NULL, NULL};
@@ -164,7 +164,7 @@ gt_SAIMakeSufTabReader(SuffixarrayFileInterface *sai)
   return reader;
 }
 
-extern struct seqDataReader
+struct seqDataReader
 gt_SAIMakeLCPTabReader(SuffixarrayFileInterface *sai)
 {
   struct seqDataReader reader = { NULL, NULL};
@@ -193,7 +193,7 @@ gt_SAIMakeLCPTabReader(SuffixarrayFileInterface *sai)
   return reader;
 }
 
-extern struct seqDataReader
+struct seqDataReader
 gt_SAIMakeReader(SuffixarrayFileInterface *sai, enum sfxDataRequest rtype)
 {
   struct seqDataReader reader = { NULL, NULL};
@@ -232,7 +232,7 @@ SAIReadBWT(void *state, GtUchar *dest, size_t len, GT_UNUSED GtError *err)
   return fread(dest, sizeof (GtUchar), len, sai->sa->bwttabstream.fp);
 }
 
-extern size_t
+size_t
 gt_SAIGetOrigSeq(const void *state, Symbol *dest, unsigned long pos, size_t len)
 {
   const SuffixarrayFileInterface *sai;
@@ -241,7 +241,7 @@ gt_SAIGetOrigSeq(const void *state, Symbol *dest, unsigned long pos, size_t len)
   return EncSeqGetSubSeq(sai->sa->encseq, sai->sa->readmode, pos, len, dest);
 }
 
-extern Definedunsignedlong
+Definedunsignedlong
 gt_SAIGetRot0Pos(const void *state)
 {
   const SuffixarrayFileInterface *sai = state;
@@ -249,7 +249,7 @@ gt_SAIGetRot0Pos(const void *state)
   return sai->sa->longest;
 }
 
-extern MRAEnc *
+MRAEnc *
 gt_SANewMRAEnc(const Suffixarray *sa)
 {
   MRAEnc *alphabet;

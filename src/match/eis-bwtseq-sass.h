@@ -21,7 +21,7 @@
 #include "match/eis-bwtseq-context.h"
 #include "match/eis-sa-common.h"
 
-extern SASeqSrc *
+SASeqSrc *
 gt_BWTSeqNewSASeqSrc(const BWTSeq *bwtSeq,
                      const BWTSeqContextRetriever *ctxMap);
 

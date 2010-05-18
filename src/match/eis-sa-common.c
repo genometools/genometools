@@ -20,7 +20,7 @@
 #include "match/eis-sa-common.h"
 #include "core/encseq.h"
 
-extern size_t
+size_t
 gt_translateSuftab2BWT(struct encSeqTrState *trState,
                     GtUchar *dest,
                     unsigned long *src,
@@ -62,7 +62,7 @@ writeLCPVal(const GtEncseq *encseq, GtReadmode readmode,
 #endif /* NDEBUG */
 }
 
-extern size_t
+size_t
 gt_translateSuftab2LCP(struct encSeqLCPState *lcpState,
                     unsigned long *dest,
                     unsigned long *src,
@@ -102,14 +102,14 @@ struct saTaggedXltorStateLE
   struct saTaggedXltorState state;
 };
 
-extern void
+void
 gt_initSATaggedXltorStateList(struct saTaggedXltorStateList *saXltorStateList)
 {
   saXltorStateList->numXltors = 0;
   saXltorStateList->stateList = NULL;
 }
 
-extern void
+void
 gt_destructSATaggedXltorStateList(
   struct saTaggedXltorStateList *saXltorStateList)
 {
@@ -124,7 +124,7 @@ gt_destructSATaggedXltorStateList(
   }
 }
 
-extern struct saTaggedXltorState *
+struct saTaggedXltorState *
 gt_addSuffixarrayXltor(struct saTaggedXltorStateList *saXltorStateList,
                     enum sfxDataRequest request,
                     union saXltorState saXltorState)
@@ -139,7 +139,7 @@ gt_addSuffixarrayXltor(struct saTaggedXltorStateList *saXltorStateList,
   return &newSAXltorState->state;
 }
 
-extern SeqDataReader
+SeqDataReader
 gt_SASSGenericCreateReader(SASeqSrc *src, enum sfxDataRequest request)
 {
   return gt_seqReaderSetRegisterConsumer(&src->readerSet, request,

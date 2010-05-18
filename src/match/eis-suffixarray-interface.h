@@ -32,27 +32,27 @@
 
 typedef struct suffixarrayFileInterface SuffixarrayFileInterface;
 
-extern void
+void
 gt_initSuffixarrayFileInterface(SuffixarrayFileInterface *sai,
                              unsigned long seqLen,
                              Suffixarray *sa);
 
-extern SuffixarrayFileInterface *
+SuffixarrayFileInterface *
 gt_newSuffixarrayFileInterface(Suffixarray *sa, unsigned long seqLen);
 
-extern void
+void
 gt_destructSuffixarrayFileInterface(SuffixarrayFileInterface *sai);
 
-extern void
+void
 gt_deleteSuffixarrayFileInterface(SuffixarrayFileInterface *sai);
 
-extern SeqDataReader
+SeqDataReader
 gt_SAIMakeReader(SuffixarrayFileInterface *sai, enum sfxDataRequest rtype);
 
-extern SeqDataReader
+SeqDataReader
 gt_SAIMakeBWTReader(SuffixarrayFileInterface *sai);
 
-extern SeqDataReader
+SeqDataReader
 gt_SAIMakeSufTabReader(SuffixarrayFileInterface *sai);
 
 /**
@@ -63,7 +63,7 @@ gt_SAIMakeSufTabReader(SuffixarrayFileInterface *sai);
  * @param len length of string to read
  * @return actual number of symbols read
  */
-extern size_t
+size_t
 gt_SAIGetOrigSeq(const void *state, Symbol *dest, unsigned long pos,
                  size_t len);
 
@@ -74,7 +74,7 @@ gt_SAIGetOrigSeq(const void *state, Symbol *dest, unsigned long pos,
  * @param state reference of Suffixarray object
  * @return
  */
-extern Definedunsignedlong
+Definedunsignedlong
 gt_SAIGetRot0Pos(const void *state);
 
 /**
@@ -97,7 +97,7 @@ SAIGetLength(const SuffixarrayFileInterface *sai);
  * @param state reference of Suffixarray object
  * @return alphabet
  */
-extern MRAEnc *
+MRAEnc *
 gt_SANewMRAEnc(const Suffixarray *sa);
 
 static inline MRAEnc *

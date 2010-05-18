@@ -143,7 +143,7 @@ struct bwtOptions
  * @param projectName reference to string which will hold the base
  * name (i.e. without extension) of the project once index creation begins
  */
-extern void
+void
 gt_registerPackedIndexOptions(GtOptionParser *op,
                               struct bwtOptions *paramOutput,
                               int defaultOptimizationFlags,
@@ -156,7 +156,7 @@ gt_registerPackedIndexOptions(GtOptionParser *op,
  * @param extraToggles add flags here which only become apparent at
  * after option processing is finished
  */
-extern void
+void
 gt_computePackedIndexDefaults(struct bwtOptions *paramOutput, int extraToggles);
 
 /**
@@ -165,7 +165,7 @@ gt_computePackedIndexDefaults(struct bwtOptions *paramOutput, int extraToggles);
  * @param BWTOptFlags
  * @return set of enum EISFeatureBits toggles
  */
-extern int
+int
 gt_convertBWTOptFlags2EISFeatures(int BWTOptFlags);
 
 #endif

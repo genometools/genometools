@@ -23,7 +23,7 @@
  * @param alphabet ownership of alphabet is transferred to the sequence
  * index produced unless NULL is returned
  */
-extern EISeq *
+EISeq *
 gt_newGenBlockEncIdxSeq(unsigned long totalLen, const char *projectName,
                      MRAEnc *alphabet, const struct seqStats *stats,
                      SeqDataReader BWTGenerator,
@@ -47,7 +47,7 @@ gt_newGenBlockEncIdxSeq(unsigned long totalLen, const char *projectName,
  * @param err genometools error object reference
  * @return new encoded indexed sequence object reference
  */
-extern EISeq *
+EISeq *
 gt_loadBlockEncIdxSeqGen(MRAEnc *alphabet, unsigned long totalLen,
                       const char *projectName, int features, GtError *err);
 

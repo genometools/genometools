@@ -112,7 +112,7 @@ BWTSASSNewMRAEnc(const SASeqSrc *src)
 static SeqDataReader
 BWTSASSCreateReader(SASeqSrc *src, enum sfxDataRequest request);
 
-extern SASeqSrc *
+SASeqSrc *
 gt_BWTSeqNewSASeqSrc(const BWTSeq *bwtSeq, const BWTSeqContextRetriever *ctxMap)
 {
   struct BWTSASeqSrc *newBWTSASeqSrc;

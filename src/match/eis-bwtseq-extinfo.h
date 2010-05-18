@@ -64,7 +64,7 @@ typedef EISeq *(*indexCreateFunc)(
  * @param lrepState passed to lrepFunc
  * @param err
  */
-extern EISeq *
+EISeq *
 gt_createBWTSeqGeneric(const struct bwtParam *params,
                        indexCreateFunc createIndex,
                        SASeqSrc *src,
@@ -72,15 +72,15 @@ gt_createBWTSeqGeneric(const struct bwtParam *params,
                        const SpecialsRankLookup *sprTable,
                        GtError *err);
 
-extern int
+int
 gt_BWTSeqPosHasLocateInfo(const BWTSeq *bwtSeq, unsigned long pos,
                        struct extBitsRetrieval *extBits);
 
-extern unsigned long
+unsigned long
 gt_BWTSeqGetRankSort(const BWTSeq *bwtSeq, unsigned long pos,
                   AlphabetRangeID range, struct extBitsRetrieval *extBits);
 
-extern void
+void
 gt_BWTSeqInitLocateHandling(BWTSeq *bwtSeq,
                          const enum rangeSortMode *defaultRangeSort);
 

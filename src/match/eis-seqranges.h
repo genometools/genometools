@@ -59,21 +59,21 @@ typedef size_t seqRangeListSearchHint;
  * @param features see enum SRLFeatures for a description
  * @return newly constructed list
  */
-extern struct seqRangeList *
+struct seqRangeList *
 gt_newSeqRangeList(size_t rangesStartNum, const MRAEnc *alphabet,
                 enum SRLFeatures features);
 /**
  * @brief Shrink the list according to the exact number of ranges stored.
  * @param rangeList
  */
-extern void
+void
 gt_SRLCompact(struct seqRangeList *rangeList);
 
 /**
  * @brief Destructor for sequence range lists.
  * @param rangeList
  */
-extern void
+void
 gt_deleteSeqRangeList(struct seqRangeList *rangeList);
 
 /**
@@ -83,7 +83,7 @@ gt_deleteSeqRangeList(struct seqRangeList *rangeList);
  * @param len length of new range
  * @param sym the range is a contiguous sequence of this symbol
  */
-extern void
+void
 gt_SRLAppendNewRange(struct seqRangeList *rangeList,
                   unsigned long pos,
                   unsigned long len,
@@ -95,7 +95,7 @@ gt_SRLAppendNewRange(struct seqRangeList *rangeList,
  * @param pos at this position
  * @param sym this symbol occurs
  */
-extern void
+void
 gt_SRLAddPosition(struct seqRangeList *rangeList, unsigned long pos,
                Symbol sym);
 
@@ -104,7 +104,7 @@ gt_SRLAddPosition(struct seqRangeList *rangeList, unsigned long pos,
  * @param rangeList
  * @param hint points to storage
  */
-extern void
+void
 gt_SRLInitListSearchHint(struct seqRangeList *rangeList,
                       seqRangeListSearchHint *hint);
 
@@ -130,7 +130,7 @@ gt_SRLFindPositionNext(struct seqRangeList *rangeList, unsigned long pos,
  * pos is written to this address, if such a range exists
  * @return true if an overlap exits, false if not
  */
-extern int
+int
 gt_SRLOverlapsPosition(struct seqRangeList *rangeList, unsigned long pos,
                     seqRangeListSearchHint *hint, Symbol *symAtPos);
 
@@ -145,7 +145,7 @@ gt_SRLOverlapsPosition(struct seqRangeList *rangeList, unsigned long pos,
  * the alphabet originally used in the constructor
  * @param hint
  */
-extern void
+void
 gt_SRLSymbolsInSeqRegion(struct seqRangeList *rangeList, unsigned long start,
                       unsigned long end, unsigned long *occStore,
                       seqRangeListSearchHint *hint);
@@ -158,7 +158,7 @@ gt_SRLSymbolsInSeqRegion(struct seqRangeList *rangeList, unsigned long start,
  * @param sym only account for ranges matching this symbol
  * @param hint
  */
-extern unsigned long
+unsigned long
 gt_SRLSymbolCountInSeqRegion(struct seqRangeList *rangeList,
                           unsigned long start,
                           unsigned long end,
@@ -172,7 +172,7 @@ gt_SRLSymbolCountInSeqRegion(struct seqRangeList *rangeList,
  * @param end
  * @param hint
  */
-extern unsigned long
+unsigned long
 gt_SRLAllSymbolsCountInSeqRegion(struct seqRangeList *rangeList,
                               unsigned long start,
                               unsigned long end,
@@ -190,7 +190,7 @@ gt_SRLAllSymbolsCountInSeqRegion(struct seqRangeList *rangeList,
  * underlying sequence
  * @param hint
  */
-extern void
+void
 gt_SRLApplyRangesToSubString(struct seqRangeList *rangeList,
                           Symbol *subString,
                           unsigned long start,
@@ -209,7 +209,7 @@ gt_SRLApplyRangesToSubString(struct seqRangeList *rangeList,
  * @param hint
  * @return <0 in case of I/O error, >=0 otherwise.
  */
-extern int
+int
 gt_SRLPrintRangesInfo(struct seqRangeList *rangeList,
                    FILE *fp,
                    unsigned long start,
@@ -221,7 +221,7 @@ gt_SRLPrintRangesInfo(struct seqRangeList *rangeList,
  * @param fp file to save rangeList to
  * @return <0 if an error occurred
  */
-extern int
+int
 gt_SRLSaveToStream(struct seqRangeList *rangeList, FILE *fp);
 
 /**
@@ -231,7 +231,7 @@ gt_SRLSaveToStream(struct seqRangeList *rangeList, FILE *fp);
  * @param features see enum SRLFeatures
  * @param err
  */
-extern struct seqRangeList *
+struct seqRangeList *
 gt_SRLReadFromStream(FILE *fp, const MRAEnc *alphabet,
                   enum SRLFeatures features, GtError *err);
 

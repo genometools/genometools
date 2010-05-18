@@ -93,7 +93,7 @@ nextRange(GtRange *range, GtSpecialrangeiterator *sri,
   return hasNextRange;
 }
 
-extern SpecialsRankLookup *
+SpecialsRankLookup *
 gt_newSpecialsRankLookup(const GtEncseq *encseq, GtReadmode readmode,
                          unsigned sampleIntervalLog2)
 {
@@ -147,7 +147,7 @@ gt_newSpecialsRankLookup(const GtEncseq *encseq, GtReadmode readmode,
   return ranker;
 }
 
-extern void
+void
 gt_deleteSpecialsRankLookup(SpecialsRankLookup *ranker)
 {
   if (ranker->rankFunc == specialsRankFromSampleTable)
@@ -195,7 +195,7 @@ specialsRankFromTermPos(const SpecialsRankLookup *ranker, unsigned long pos)
   return ((pos == ranker->implementationData.lastSeqPos + 1)?1:0);
 }
 
-extern const GtEncseq *
+const GtEncseq *
 gt_SPRTGetOrigEncseq(const SpecialsRankLookup *ranker)
 {
   return ranker->encseq;

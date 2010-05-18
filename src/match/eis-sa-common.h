@@ -70,7 +70,7 @@ struct encSeqTrState
  * @param src read suffix indices from here
  * @param len length of string to read
  */
-extern size_t
+size_t
 gt_translateSuftab2BWT(struct encSeqTrState *trState,
                     GtUchar *dest,
                     unsigned long *src,
@@ -83,7 +83,7 @@ struct encSeqLCPState
   GtReadmode readmode;
 };
 
-extern size_t
+size_t
 gt_translateSuftab2LCP(struct encSeqLCPState *lcpState,
                     unsigned long *dest,
                     unsigned long *src,
@@ -107,14 +107,14 @@ struct saTaggedXltorStateList
   struct saTaggedXltorStateLE *stateList;
 };
 
-extern void
+void
 gt_initSATaggedXltorStateList(struct saTaggedXltorStateList *saXltorStateList);
 
-extern void
+void
 gt_destructSATaggedXltorStateList(
   struct saTaggedXltorStateList *saXltorStateList);
 
-extern struct saTaggedXltorState *
+struct saTaggedXltorState *
 gt_addSuffixarrayXltor(struct saTaggedXltorStateList *saXltorStateList,
                     enum sfxDataRequest request,
                     union saXltorState saXltorState);

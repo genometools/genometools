@@ -76,7 +76,7 @@ const char *EISIntegrityCheckResultStrings[] =
  * @param fp descriptor to write progress marks to.
  * @return -1 on error, 0 on identity, >0 on inconsistency
  */
-extern enum EISIntegrityCheckResults
+enum EISIntegrityCheckResults
 gt_EISVerifyIntegrity(EISeq *seqIdx, const char *projectName,
                       unsigned long skip,
                       unsigned long tickPrint, FILE *fp, int chkFlags,
@@ -215,7 +215,7 @@ gt_EISVerifyIntegrity(EISeq *seqIdx, const char *projectName,
   return retval;
 }
 
-extern unsigned
+unsigned
 gt_estimateSegmentSize(const struct seqBaseParam *params)
 {
   unsigned segmentLen = 0;

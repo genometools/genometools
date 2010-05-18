@@ -79,14 +79,14 @@ struct compList
  * @param numSyms size of alphabet
  * @return 0 on error, !0 otherwise
  */
-extern int
+int
 gt_initCompositionList(struct compList *compList, unsigned blockSize,
                     unsigned numSyms);
 /**
  * Deallocate resources of composition list object, storage struct is not freed.
  * @param clist
  */
-extern void
+void
 gt_destructCompositionList(struct compList *clist);
 
 /**
@@ -96,14 +96,14 @@ gt_destructCompositionList(struct compList *clist);
  * @param alphabetSize
  * @return NULL on error
  */
-extern struct compList *
+struct compList *
 gt_newCompositionList(unsigned blockSize, unsigned alphabetSize);
 
 /**
  * Delete composition list object.
  * @param clist
  */
-extern void
+void
 gt_deleteCompositionList(struct compList *clist);
 
 /**
@@ -129,7 +129,7 @@ gt_deleteCompositionList(struct compList *clist);
  * permCompPA and compPA are valid preallocated memory regions, 0
  * otherwise.
  */
-extern int
+int
 gt_block2IndexPair(const struct compList *compositionTable,
                 unsigned blockSize, unsigned alphabetSize,
                 const Symbol *block, PermCompIndex idxOutput[2],

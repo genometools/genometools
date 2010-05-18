@@ -105,7 +105,7 @@ initBWTSeqFromEncSeqIdx(BWTSeq *bwtSeq, struct encIdxSeq *seqIdx,
  * @param alphabet ownership of alphabet is with the newly produced
  * sequence object if return value is non-NULL
  */
-extern BWTSeq *
+BWTSeq *
 gt_newBWTSeq(EISeq *seqIdx, MRAEnc *alphabet,
           const enum rangeSortMode *defaultRangeSort)
 {
@@ -335,7 +335,7 @@ unsigned long gt_packedindexmstatsforward(const BWTSeq *bwtSeq,
   return matchlength;
 }
 
-extern unsigned long
+unsigned long
 gt_BWTSeqMatchCount(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
                  bool forward)
 {
@@ -348,7 +348,7 @@ gt_BWTSeqMatchCount(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
     return match.end - match.start;
 }
 
-extern bool
+bool
 gt_initEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
                const Symbol *query, size_t queryLen, bool forward)
 {
@@ -365,7 +365,7 @@ gt_initEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
   return true;
 }
 
-extern bool
+bool
 gt_initEmptyEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq)
 {
   gt_assert(iter && bwtSeq);
@@ -395,7 +395,7 @@ gt_newEMIterator(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
   return NULL;
 }
 
-extern bool
+bool
 gt_reinitEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
                  const Symbol *query, size_t queryLen, bool forward)
 {
@@ -404,7 +404,7 @@ gt_reinitEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
   return true;
 }
 
-extern void
+void
 gt_destructEMIterator(struct BWTSeqExactMatchesIterator *iter)
 {
   destructExtBitsRetrieval(&iter->extBits);
@@ -426,7 +426,7 @@ gt_EMINumMatchesTotal(const struct BWTSeqExactMatchesIterator *iter)
     return iter->bounds.end - iter->bounds.start;
 }
 
-extern unsigned long
+unsigned long
 gt_EMINumMatchesLeft(const struct BWTSeqExactMatchesIterator *iter)
 {
   gt_assert(iter);
@@ -445,7 +445,7 @@ enum
   CONTEXT_INTERVAL = 128,
 };
 
-extern int
+int
 gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const char *projectName,
                       int checkFlags,
                       unsigned long tickPrint, FILE *fp,

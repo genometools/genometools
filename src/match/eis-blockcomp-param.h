@@ -32,7 +32,7 @@
  * @param paramOutput user provided values will be stored here
  * @param err
  */
-extern void
+void
 gt_registerBlockEncOptions(GtOptionParser *op,
                            struct blockEncParams *paramOutput);
 

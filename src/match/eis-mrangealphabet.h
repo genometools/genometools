@@ -86,13 +86,13 @@ MRAEncUInt8New(AlphabetRangeID numRanges, AlphabetRangeSize symbolsPerRange[],
  * symbols) from a given genometools alphabet.
  * @param alpha original alphabet
  */
-extern MRAEnc *
+MRAEnc *
 gt_MRAEncGTAlphaNew(const GtAlphabet *alpha);
 
 /**
  * \brief alias of MRAEncUInt8New
  */
-extern MRAEnc *
+MRAEnc *
 gt_newMultiRangeAlphabetEncodingUInt8(AlphabetRangeID numRanges,
                                    const AlphabetRangeSize symbolsPerRange[],
                                    const uint8_t *mappings);
@@ -102,7 +102,7 @@ gt_newMultiRangeAlphabetEncodingUInt8(AlphabetRangeID numRanges,
  * @param alpha alphabet to copy
  * @return new alphabet object
  */
-extern MRAEnc *
+MRAEnc *
 gt_MRAEncCopy(const MRAEnc *alpha);
 
 /**
@@ -118,7 +118,7 @@ gt_MRAEncCopy(const MRAEnc *alpha);
  * already mapped symbols
  * @param fallback symbol to map not-included ranges to
  */
-extern MRAEnc *
+MRAEnc *
 gt_MRAEncSecondaryMapping(const MRAEnc *srcAlpha, int selection,
                        const int *rangeSel, Symbol fallback);
 
@@ -132,7 +132,7 @@ gt_MRAEncSecondaryMapping(const MRAEnc *srcAlpha, int selection,
  * @param range number of range to insert new symbol into
  * @return same reference as mralpha but after destructive change
  */
-extern MRAEnc *
+MRAEnc *
 gt_MRAEncAddSymbolToRange(MRAEnc *mralpha, Symbol sym, AlphabetRangeID range);
 
 /**
@@ -165,7 +165,7 @@ MRAEncGetRangeBase(const MRAEnc *mralpha, AlphabetRangeID range);
  * @param mralpha
  * @return number of symbols in alphabet
  */
-extern AlphabetRangeSize
+AlphabetRangeSize
 gt_MRAEncGetSize(const MRAEnc *mralpha);
 
 /**
@@ -210,7 +210,7 @@ MRAEncRevMapSymbol(const MRAEnc *mralpha, Symbol sym);
  * @param symbols symbols to convert
  * @param numSyms length of symbols string
  */
-extern void
+void
 gt_MRAEncSymbolsTransform(const MRAEnc *mralpha,
                           Symbol *symbols,
                           size_t numSyms);
@@ -221,7 +221,7 @@ gt_MRAEncSymbolsTransform(const MRAEnc *mralpha,
  * @param symbols symbols to convert
  * @param numSyms length of symbols string
  */
-extern void
+void
 gt_MRAEncSymbolsRevTransform(const MRAEnc *mralpha, Symbol *symbols,
                           size_t numSyms);
 /**
@@ -235,7 +235,7 @@ gt_MRAEncSymbolsRevTransform(const MRAEnc *mralpha, Symbol *symbols,
  * == selection, 0 if sym is not in any selected range, and <0 if sym
  * is out of the alphabets range of symbols
  */
-extern int
+int
 gt_MRAEncSymbolIsInSelectedRanges(const MRAEnc *mralpha, Symbol sym,
                                int selection, const int *rangeSel);
 
@@ -258,7 +258,7 @@ MRAEncGetRangeOfSymbol(const MRAEnc *mralpha, Symbol sym);
  * @param dest write converted symbols here
  * @return number of symbols actually read
  */
-extern size_t
+size_t
 gt_MRAEncReadAndTransform(const MRAEnc *mralpha, FILE *fp,
                        size_t numSyms, Symbol *dest);
 
@@ -266,7 +266,7 @@ gt_MRAEncReadAndTransform(const MRAEnc *mralpha, FILE *fp,
  * @brief Delete alphabet object.
  * @param mralpha
  */
-extern void
+void
 gt_MRAEncDelete(struct multiRangeAlphabetEncoding *mralpha);
 
 #include "match/eis-mrangealphabet-siop.h"

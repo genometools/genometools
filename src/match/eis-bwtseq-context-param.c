@@ -18,7 +18,7 @@
 #include "core/option.h"
 #include "match/eis-bwtseq-context-param.h"
 
-extern void
+void
 gt_registerCtxMapOptions(GtOptionParser *op, int *ilogOut)
 {
  GtOption *option = gt_option_new_int_min_max(

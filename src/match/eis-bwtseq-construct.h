@@ -39,7 +39,7 @@
  * @param err genometools error object reference
  * @return reference to new BWT sequence object
  */
-extern BWTSeq *
+BWTSeq *
 gt_availBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
                   unsigned long totalLen, GtError *err);
 
@@ -52,7 +52,7 @@ gt_availBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
  * @param err genometools error object reference
  * @return reference to new BWT sequence object
  */
-extern BWTSeq *
+BWTSeq *
 gt_loadBWTSeqForSA(const char *projectName, enum seqBaseEncoding encType,
                 int BWTOptFlags, const Suffixarray *sa,
                 unsigned long totalLen, GtError *err);
@@ -65,7 +65,7 @@ gt_loadBWTSeqForSA(const char *projectName, enum seqBaseEncoding encType,
  * @param err genometools reference for core functions
  * @return reference to new BWT sequence object
  */
-extern BWTSeq *
+BWTSeq *
 gt_createBWTSeqFromSfxI(const struct bwtParam *params, sfxInterface *si,
                      GtError *err);
 
@@ -78,7 +78,7 @@ gt_createBWTSeqFromSfxI(const struct bwtParam *params, sfxInterface *si,
  * @param err genometools reference for core functions
  * @return reference to new BWT sequence object
  */
-extern BWTSeq *
+BWTSeq *
 gt_createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
                    unsigned long totalLen, GtError *err);
 
@@ -91,7 +91,7 @@ gt_createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
  * @param err genometools reference for core functions
  * @return reference to new BWT sequence object
  */
-extern BWTSeq *
+BWTSeq *
 gt_createBWTSeqFromSAI(const struct bwtParam *params,
                     SuffixarrayFileInterface *sai,
                     GtError *err);

@@ -526,7 +526,7 @@ sortModeHeaderNeeded(const MRAEnc *alphabet,
   return (hasRankSortedRanges && sprTable);
 }
 
-extern EISeq *
+EISeq *
 gt_createBWTSeqGeneric(const struct bwtParam *params,
                        indexCreateFunc createIndex,
                        SASeqSrc *src,
@@ -670,7 +670,7 @@ searchLocateCountMark(const BWTSeq *bwtSeq, unsigned long pos,
   return 0;
 }
 
-extern int
+int
 gt_BWTSeqPosHasLocateInfo(const BWTSeq *bwtSeq, unsigned long pos,
                        struct extBitsRetrieval *extBits)
 {
@@ -697,7 +697,7 @@ gt_BWTSeqPosHasLocateInfo(const BWTSeq *bwtSeq, unsigned long pos,
   return 0;
 }
 
-extern unsigned long
+unsigned long
 gt_BWTSeqLocateMatch(const BWTSeq *bwtSeq, unsigned long pos,
                   struct extBitsRetrieval *extBits)
 {
@@ -796,7 +796,7 @@ locateVarBits(const BWTSeq *bwtSeq, struct extBitsRetrieval *extBits)
   return numLocBits;
 }
 
-extern unsigned long
+unsigned long
 gt_BWTSeqGetRankSort(const BWTSeq *bwtSeq, unsigned long pos,
                   AlphabetRangeID range, struct extBitsRetrieval *extBits)
 {
@@ -821,7 +821,7 @@ gt_BWTSeqGetRankSort(const BWTSeq *bwtSeq, unsigned long pos,
   }
 }
 
-extern void
+void
 gt_BWTSeqInitLocateHandling(BWTSeq *bwtSeq,
                          const enum rangeSortMode *defaultRangeSort)
 {

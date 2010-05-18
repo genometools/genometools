@@ -62,7 +62,7 @@ initSASeqSrc(SASeqSrc *src, unsigned long seqLen,
 static inline void
 destructSASeqSrc(SASeqSrc *src);
 
-extern SeqDataReader
+SeqDataReader
 gt_SASSGenericCreateReader(SASeqSrc *src, enum sfxDataRequest request);
 
 #endif

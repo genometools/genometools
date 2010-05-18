@@ -94,7 +94,7 @@ initBWTSeqContextRetrieverFactory(BWTSeqContextRetrieverFactory *newFactory,
   }
 }
 
-extern BWTSeqContextRetrieverFactory *
+BWTSeqContextRetrieverFactory *
 gt_newBWTSeqContextRetrieverFactory(unsigned long seqLen, short mapIntervalLog2)
 {
   BWTSeqContextRetrieverFactory *newFactory;
@@ -110,7 +110,7 @@ destructBWTSeqContextRetrieverFactory(BWTSeqContextRetrieverFactory *factory)
   gt_str_delete(factory->mapTableDBSPath);
 }
 
-extern void
+void
 gt_deleteBWTSeqContextRetrieverFactory(BWTSeqContextRetrieverFactory *factory)
 {
   destructBWTSeqContextRetrieverFactory(factory);
@@ -134,7 +134,7 @@ addMapVal(BWTSeqContextRetrieverFactory *factory,
 /**
  * @return number of not processed suffix indices, i.e. 0 on success
  */
-extern unsigned long
+unsigned long
 gt_BWTSCRFReadAdvance(BWTSeqContextRetrieverFactory *factory,
                    unsigned long chunkSize,
                    SeqDataReader readSfxIdx)
@@ -156,7 +156,7 @@ gt_BWTSCRFReadAdvance(BWTSeqContextRetrieverFactory *factory,
   return chunkSize - sfxIdxLeft;
 }
 
-extern size_t
+size_t
 gt_BWTSCRFMapAdvance(BWTSeqContextRetrieverFactory *factory,
                   const unsigned long *src,
                   size_t len)
@@ -178,7 +178,7 @@ gt_BWTSCRFMapAdvance(BWTSeqContextRetrieverFactory *factory,
   return len;
 }
 
-extern bool
+bool
 gt_BWTSCRFFinished(const BWTSeqContextRetrieverFactory *factory)
 {
   return factory->currentSfxPos == factory->seqLen;
@@ -196,7 +196,7 @@ BWTSeqCRMapOpen(unsigned short mapIntervalLog2,
                 bool createMapFile,
                 BWTSeqContextRetriever *gt_newBWTSeqCR);
 
-extern BWTSeqContextRetriever *
+BWTSeqContextRetriever *
 gt_BWTSCRFGet(BWTSeqContextRetrieverFactory *factory,
               const BWTSeq *bwtSeq,
               const char *projectName)
@@ -340,7 +340,7 @@ BWTSeqCRMapOpen(unsigned short mapIntervalLog2,
   return mapMap != NULL;
 }
 
-extern BWTSeqContextRetriever *
+BWTSeqContextRetriever *
 gt_BWTSeqCRLoad(const BWTSeq *bwtSeq,
              const char *projectName,
              short mapIntervalLog2)
@@ -383,7 +383,7 @@ gt_BWTSeqCRLoad(const BWTSeq *bwtSeq,
   return gt_newBWTSeqCR;
 }
 
-extern void
+void
 gt_deleteBWTSeqCR(BWTSeqContextRetriever *bwtSeqCR)
 {
   gt_assert(bwtSeqCR);
@@ -391,7 +391,7 @@ gt_deleteBWTSeqCR(BWTSeqContextRetriever *bwtSeqCR)
   gt_free(bwtSeqCR);
 }
 
-extern void
+void
 gt_BWTSeqCRAccessSubseq(const BWTSeqContextRetriever *bwtSeqCR,
                      unsigned long start, size_t len, Symbol subseq[])
 {

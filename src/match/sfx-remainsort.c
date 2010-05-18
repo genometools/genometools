@@ -245,7 +245,7 @@ static unsigned long gt_frompos2rank(const Lowerboundwithrank *leftptr,
 
 #endif
 
-extern uint32_t
+uint32_t
 gt_ht_seqpos_elem_hash(const void *elem)
 {
 #ifndef _LP64

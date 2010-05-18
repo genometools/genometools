@@ -148,7 +148,7 @@ typedef union EISHint *EISHint;
  * \brief Deallocate a previously loaded/created sequence object.
  * @param seq reference of object to delete
  */
-extern void
+void
 gt_deleteEncIdxSeq(EISeq *seq);
 
 /**
@@ -317,7 +317,7 @@ deleteExtBitsRetrieval(struct extBitsRetrieval *r);
 /**
  * \brief Find positions of nth symbol occurrence. TODO: NOT IMPLEMENTED
  */
-extern unsigned long
+unsigned long
 EISSelect(EISeq *seq, Symbol sym, unsigned long count);
 
 /**
@@ -417,7 +417,7 @@ enum EISIntegrityCheckFlags
  * @param fp print dots to this file pointer
  * @param chkFlags select additional tests (see enum EISIntegrityCheckFlags)
  */
-extern enum EISIntegrityCheckResults
+enum EISIntegrityCheckResults
 gt_EISVerifyIntegrity(EISeq *seqIdx, const char *projectName,
                       unsigned long skip,
                       unsigned long tickPrint, FILE *fp, int chkFlags,

@@ -37,24 +37,24 @@ typedef struct BWTSeqContextRetrieverFactory BWTSeqContextRetrieverFactory;
  * CTX_MAP_ILOG_AUTOSIZE compute map with interval 1<<mapIntervalLog2.
  * If equal CTX_MAP_ILOG_AUTOSIZE, uses @f$gt_log_2\mathrm{seqLen}@f$.
  */
-extern BWTSeqContextRetrieverFactory *
+BWTSeqContextRetrieverFactory *
 gt_newBWTSeqContextRetrieverFactory(unsigned long seqLen,
                                  short mapIntervalLog2);
 
-extern void
+void
 gt_deleteBWTSeqContextRetrieverFactory(BWTSeqContextRetrieverFactory *factory);
 
-extern unsigned long
+unsigned long
 gt_BWTSCRFReadAdvance(BWTSeqContextRetrieverFactory *factory,
                    unsigned long chunkSize,
                    SeqDataReader readSfxIdx);
 
-extern size_t
+size_t
 gt_BWTSCRFMapAdvance(BWTSeqContextRetrieverFactory *factory,
                   const unsigned long *src,
                   size_t chunkSize);
 
-extern bool
+bool
 gt_BWTSCRFFinished(const BWTSeqContextRetrieverFactory *factory);
 
 /**
@@ -62,7 +62,7 @@ gt_BWTSCRFFinished(const BWTSeqContextRetrieverFactory *factory);
  * NULL if the retriever object is not used for queries
  * (i.e. immediately destructed).
  */
-extern BWTSeqContextRetriever *
+BWTSeqContextRetriever *
 gt_BWTSCRFGet(BWTSeqContextRetrieverFactory *factory, const BWTSeq *bwtSeq,
            const char *projectName);
 
@@ -79,11 +79,11 @@ gt_BWTSCRFGet(BWTSeqContextRetrieverFactory *factory, const BWTSeq *bwtSeq,
  * @return NULL in case of error (e.g. no corresponding table file or
  * not enought memory for mmap).
  */
-extern BWTSeqContextRetriever *
+BWTSeqContextRetriever *
 gt_BWTSeqCRLoad(const BWTSeq *bwtSeq, const char *projectName,
              short mapIntervalLog2);
 
-extern void
+void
 gt_deleteBWTSeqCR(BWTSeqContextRetriever *bwtSeqCR);
 
 struct SeqMark
@@ -95,7 +95,7 @@ struct SeqMark
  * Writes the retrieved symbols to subseq which must accomodate for
  * len or more symbols.
  */
-extern void
+void
 gt_BWTSeqCRAccessSubseq(const BWTSeqContextRetriever *bwtSeqCR,
                      unsigned long start, size_t len, Symbol subseq[]);
 

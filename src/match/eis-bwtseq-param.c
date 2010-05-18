@@ -22,7 +22,7 @@
 #include "match/eis-bwtseq-context-param.h"
 #include "match/eis-encidxseq-param.h"
 
-extern void
+void
 gt_registerPackedIndexOptions(GtOptionParser *op,
                               struct bwtOptions *paramOutput,
                               int defaultOptimizationFlags,
@@ -86,7 +86,7 @@ estimateBestLocateTypeFeature(const struct bwtOptions *paramOutput)
   }
 }
 
-extern void
+void
 gt_computePackedIndexDefaults(struct bwtOptions *paramOutput, int extraToggles)
 {
   if (gt_option_is_set(paramOutput->useLocateBitmapOption))
@@ -103,7 +103,7 @@ gt_computePackedIndexDefaults(struct bwtOptions *paramOutput, int extraToggles)
     = gt_convertBWTOptFlags2EISFeatures(paramOutput->defaultOptimizationFlags);
 }
 
-extern int
+int
 gt_convertBWTOptFlags2EISFeatures(int BWTOptFlags)
 {
   int EISFeatureSet = EIS_FEATURE_NONE;

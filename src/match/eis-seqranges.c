@@ -723,7 +723,7 @@ gt_SRLApplyRangesToSubString(struct seqRangeList *rangeList,
   } while (inSeqPos < start + len);
 }
 
-extern int
+int
 gt_SRLPrintRangesInfo(struct seqRangeList *rangeList,
                    FILE *fp,
                    unsigned long start,

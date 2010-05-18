@@ -150,7 +150,7 @@ compListPermStartOffset(struct compList *list, unsigned numSyms)
     return 0;                                                           \
   } while (0)
 
-extern int
+int
 gt_initCompositionList(struct compList *newList, unsigned blockSize,
                     unsigned alphabetSize)
 {
@@ -236,7 +236,7 @@ gt_initCompositionList(struct compList *newList, unsigned blockSize,
   return 1;
 }
 
-extern void
+void
 gt_destructCompositionList(struct compList *clist)
 {
   {
@@ -248,7 +248,7 @@ gt_destructCompositionList(struct compList *clist)
   gt_free(clist->catCompsPerms);
 }
 
-extern struct compList *
+struct compList *
 gt_newCompositionList(unsigned blockSize, unsigned alphabetSize)
 {
   struct compList *newList = NULL;
@@ -262,7 +262,7 @@ gt_newCompositionList(unsigned blockSize, unsigned alphabetSize)
   return newList;
 }
 
-extern void
+void
 gt_deleteCompositionList(struct compList *clist)
 {
   gt_destructCompositionList(clist);
@@ -435,7 +435,7 @@ printPermutation(FILE *fp, Symbol *permutation, unsigned blockSize)
 }
 #endif /* EIS_DEBUG > 1 */
 
-extern int
+int
 gt_block2IndexPair(const struct compList *compositionTable,
                 unsigned blockSize, unsigned alphabetSize,
                 const Symbol *block, PermCompIndex idxOutput[2],

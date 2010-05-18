@@ -108,7 +108,7 @@ gt_MRAEncGTAlphaNew(const GtAlphabet *alpha)
   return result;
 }
 
-extern MRAEnc *
+MRAEnc *
 gt_MRAEncCopy(const MRAEnc *alpha)
 {
   gt_assert(alpha);
@@ -160,7 +160,7 @@ gt_MRAEncCopy(const MRAEnc *alpha)
   }
 }
 
-extern AlphabetRangeSize
+AlphabetRangeSize
 gt_MRAEncGetSize(const MRAEnc *mralpha)
 {
   AlphabetRangeID range, numRanges = mralpha->numRanges, sumRanges = 0;
@@ -171,7 +171,7 @@ gt_MRAEncGetSize(const MRAEnc *mralpha)
   return sumRanges;
 }
 
-extern MRAEnc *
+MRAEnc *
 gt_MRAEncSecondaryMapping(const MRAEnc *srcAlpha, int selection,
                        const int *rangeSel, Symbol fallback)
 {
@@ -342,7 +342,7 @@ gt_MRAEncSymbolsRevTransform(const MRAEnc *mralpha, Symbol *symbols,
   }
 }
 
-extern int
+int
 gt_MRAEncSymbolIsInSelectedRanges(const MRAEnc *mralpha, Symbol sym,
                                int selection, const int *rangeSel)
 {

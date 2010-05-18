@@ -18,7 +18,7 @@
 #include "match/eis-encidxseq-param.h"
 #include "match/eis-blockcomp-param.h"
 
-extern void
+void
 gt_registerEncIdxSeqOptions(GtOptionParser *op,
                             struct seqBaseParam *paramOutput)
 {
