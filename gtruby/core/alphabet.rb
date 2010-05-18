@@ -30,7 +30,7 @@ module GT
   extern "GtAlphabet* gt_alphabet_new_dna()"
   extern "GtAlphabet* gt_alphabet_new_protein()"
   extern "GtAlphabet* gt_alphabet_new_empty()"
-  extern "GtAlphabet* gt_alphabet_new_from_file(const GtStr*, GtError*)"
+  extern "GtAlphabet* gt_alphabet_new_from_file(const char*, GtError*)"
   extern "GtAlphabet* gt_alphabet_guess(const char*, unsigned long)"
   extern "GtAlphabet* gt_alphabet_ref(GtAlphabet*)"
   extern "void gt_alphabet_delete(GtAlphabet*)"
@@ -58,8 +58,7 @@ module GT
 
     def self.create_from_file(filename)
       err = Error.new
-      filestr = Str.new(filename)
-      aptr = GT.gt_alphabet_new_from_file(filestr.to_ptr, err.to_ptr)
+      aptr = GT.gt_alphabet_new_from_file(filename.to_str, err.to_ptr)
       if aptr == GT::NULL
         GT.gterror(err)
       else
@@ -88,7 +87,7 @@ module GT
         return Alphabet.new(aptr)
       end
     end
-    
+
     def initialize(aptr, own = true)
       if own then
         @alpha = aptr

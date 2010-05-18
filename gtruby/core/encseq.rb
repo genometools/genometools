@@ -46,7 +46,7 @@ module GT
   extern "void gt_encseq_encoder_set_input_dna(GtEncseqEncoder*)"
   extern "void gt_encseq_encoder_set_input_protein(GtEncseqEncoder*)"
   extern "int  gt_encseq_encoder_encode(GtEncseqEncoder*, GtStrArray*,
-                                        GtStr*, GtError*)"
+                                        const char*, GtError*)"
   extern "void gt_encseq_encoder_delete(GtEncseqEncoder*)"
 
   extern "GtEncseqLoader* gt_encseq_loader_new()"
@@ -64,7 +64,8 @@ module GT
   extern "void gt_encseq_loader_do_not_require_sds_tab(GtEncseqLoader*)"
   extern "void gt_encseq_loader_enable_range_iterator(GtEncseqLoader*)"
   extern "void gt_encseq_loader_disable_range_iterator(GtEncseqLoader*)"
-  extern "GtEncseq* gt_encseq_loader_load(GtEncseqLoader*, GtStr*, GtError*)"
+  extern "GtEncseq* gt_encseq_loader_load(GtEncseqLoader*, const char*,
+                                          GtError*)"
   extern "void gt_encseq_loader_delete(GtEncseqLoader*)"
 
   extern "GtEncseqBuilder* gt_encseq_builder_new(GtAlphabet*)"
@@ -210,9 +211,8 @@ module GT
         end
         sa.add(fn)
       end
-      idxname = Str.new(indexname.to_s)
       err = Error.new
-      rval = GT.gt_encseq_encoder_encode(@eenc, sa.to_ptr, idxname.to_ptr, \
+      rval = GT.gt_encseq_encoder_encode(@eenc, sa.to_ptr, indexname.to_s, \
                                          err.to_ptr)
       if rval != 0 then
         GT.gterror(err)
@@ -320,9 +320,8 @@ module GT
       if @sdstab and !File.exists?("#{indexname}.sds") then
         GT.gterror("file not found: #{indexname}.sds")
       end
-      idxname = Str.new(indexname.to_s)
       err = Error.new
-      rval = GT.gt_encseq_loader_load(@eldr, idxname.to_ptr, err.to_ptr)
+      rval = GT.gt_encseq_loader_load(@eldr, indexname.to_s, err.to_ptr)
       if rval == GT::NULL then
         GT.gterror(err)
       end
