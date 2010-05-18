@@ -179,15 +179,16 @@ FILE* gt_fa_xfopen_func(const char *path, const char *mode,
                           line, NULL);
 }
 
-FILE* gt_fa_fopen_with_suffix(const char *path, const char *suffix,
-                              const char *mode, GtError *err)
+FILE* gt_fa_fopen_with_suffix_func(const char *path, const char *suffix,
+                                   const char *mode, const char *filename,
+                                   int line, GtError *err)
 {
   GtStr *tmpfilename;
   FILE *fp;
   gt_error_check(err);
   tmpfilename = gt_str_new_cstr(path);
   gt_str_append_cstr(tmpfilename, suffix);
-  fp = gt_fa_fopen(gt_str_get(tmpfilename), mode, err);
+  fp = gt_fa_fopen_func(gt_str_get(tmpfilename), mode, filename, line, err);
   gt_str_delete(tmpfilename);
   return fp;
 }
@@ -446,15 +447,17 @@ void gt_fa_xmunmap(void *addr)
   gt_mutex_unlock(fa->mmap_mutex);
 }
 
-void* gt_mmap_read_with_suffix(const char *path, const char *suffix,
-                               size_t *numofbytes, GtError *err)
+void* gt_mmap_read_with_suffix_func(const char *path, const char *suffix,
+                                    size_t *numofbytes, const char *filename,
+                                    int line, GtError *err)
 {
   GtStr *tmpfilename;
   void *ptr;
   gt_error_check(err);
   tmpfilename = gt_str_new_cstr(path);
   gt_str_append_cstr(tmpfilename,suffix);
-  ptr = gt_fa_mmap_read(gt_str_get(tmpfilename),numofbytes,err);
+  ptr = gt_fa_mmap_read_func(gt_str_get(tmpfilename), numofbytes, filename,
+                             line, err);
   gt_str_delete(tmpfilename);
   return ptr;
 }

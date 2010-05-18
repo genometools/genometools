@@ -37,8 +37,12 @@ FILE*   gt_fa_fopen_func(const char *path, const char *mode, const char*, int,
 #define gt_fa_xfopen(path, mode)\
         gt_fa_xfopen_func(path, mode, __FILE__, __LINE__)
 FILE*   gt_fa_xfopen_func(const char *path, const char *mode, const char*, int);
-FILE*   gt_fa_fopen_with_suffix(const char *path, const char *suffix,
-                                const char *mode, GtError *err);
+#define gt_fa_fopen_with_suffix(path, suffix, mode, err)\
+        gt_fa_fopen_with_suffix_func(path, suffix, mode, __FILE__, __LINE__, \
+                                     err)
+FILE*   gt_fa_fopen_with_suffix_func(const char *path, const char *suffix,
+                                     const char *mode, const char*, int,
+                                     GtError *err);
 void    gt_fa_fclose(FILE *stream);
 void    gt_fa_xfclose(FILE *stream);
 
@@ -113,8 +117,12 @@ void*   gt_fa_mmap_generic_fd_func(int fd, const char *filename_to_map,
                                    const char *filename, int line,
                                    GtError *err);
 
-void*   gt_mmap_read_with_suffix(const char *path, const char *suffix,
-                                 size_t *numofbytes, GtError *err);
+#define gt_mmap_read_with_suffix(path, suffix, len, err)\
+        gt_mmap_read_with_suffix_func(path, suffix, len, __FILE__, __LINE__, \
+                                      err)
+void*   gt_mmap_read_with_suffix_func(const char *path, const char *suffix,
+                                      size_t *numofbytes, const char*, int,
+                                      GtError *err);
 void*   gt_mmap_check_size_with_suffix(const char *path, const char *suffix,
                                        unsigned long expectedunits,
                                        size_t sizeofunit, GtError *err);
