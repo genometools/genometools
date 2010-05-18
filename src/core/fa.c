@@ -448,16 +448,15 @@ void gt_fa_xmunmap(void *addr)
 }
 
 void* gt_mmap_read_with_suffix_func(const char *path, const char *suffix,
-                                    size_t *numofbytes, const char *filename,
-                                    int line, GtError *err)
+                                    size_t *len, const char *filename, int line,
+                                    GtError *err)
 {
   GtStr *tmpfilename;
   void *ptr;
   gt_error_check(err);
   tmpfilename = gt_str_new_cstr(path);
   gt_str_append_cstr(tmpfilename,suffix);
-  ptr = gt_fa_mmap_read_func(gt_str_get(tmpfilename), numofbytes, filename,
-                             line, err);
+  ptr = gt_fa_mmap_read_func(gt_str_get(tmpfilename), len, filename, line, err);
   gt_str_delete(tmpfilename);
   return ptr;
 }
