@@ -77,13 +77,13 @@ static GtOPrval parse_options(int *parsed_args,
 
   optionii = gt_option_new_filename("ii","specify sequence index created "
                                     "previously by -tis option",
-                                    so->str_inputindex);
+                                    so->inputindex);
   gt_option_is_mandatory_either(optiondb,optionii);
   gt_option_parser_add_option(op, optionii);
 
   optionsmap = gt_option_new_string("smap",
                                     "specify file containing a symbol mapping",
-                                    so->fn2encopt.str_smap, NULL);
+                                    so->fn2encopt.smap, NULL);
   gt_option_parser_add_option(op, optionsmap);
 
   optiondna = gt_option_new_bool("dna","input is DNA sequence",
@@ -107,7 +107,7 @@ static GtOPrval parse_options(int *parsed_args,
   optionindexname = gt_option_new_string("indexname",
                                          "specify name for index to "
                                          "be generated",
-                                         so->fn2encopt.str_indexname, NULL);
+                                         so->fn2encopt.indexname, NULL);
   gt_option_parser_add_option(op, optionindexname);
 
   optionpl = gt_option_new_uint_min("pl",
@@ -134,7 +134,7 @@ static GtOPrval parse_options(int *parsed_args,
     optionmaxdepth = gt_option_new_string("maxdepth",
                                           "stop shallow suffix sorting "
                                           "at prefixes of the given length",
-                                          so->str_maxdepth,
+                                          so->maxdepth,
                                           NULL);
     gt_option_is_development_option(optionmaxdepth);
     gt_option_argument_is_optional(optionmaxdepth);
@@ -192,7 +192,7 @@ static GtOPrval parse_options(int *parsed_args,
 
   optionsat = gt_option_new_string("sat",
                                    "specify kind of sequence representation",
-                                   so->fn2encopt.str_sat, NULL);
+                                   so->fn2encopt.sat, NULL);
   gt_option_parser_add_option(op, optionsat);
 
   option = gt_option_new_bool("tis",
@@ -261,7 +261,7 @@ static GtOPrval parse_options(int *parsed_args,
   {
     optionsuf = optionlcp = optionbwt = NULL;
     gt_registerPackedIndexOptions(op, &so->bwtIdxParams, BWTDEFOPT_CONSTRUCTION,
-                               so->fn2encopt.str_indexname);
+                                  so->fn2encopt.indexname);
   }
   optionshowtime
     = gt_option_new_bool("showtime",
@@ -334,15 +334,15 @@ static GtOPrval parse_options(int *parsed_args,
 
             basenameptr
               = gt_basename(gt_str_array_get(so->fn2encopt.filenametab,0));
-            gt_str_set(so->fn2encopt.str_indexname,basenameptr);
+            gt_str_set(so->fn2encopt.indexname,basenameptr);
             gt_free(basenameptr);
           }
         } else
         {
           char *basenameptr;
 
-          basenameptr = gt_basename(gt_str_get(so->str_inputindex));
-          gt_str_set(so->fn2encopt.str_indexname,basenameptr);
+          basenameptr = gt_basename(gt_str_get(so->inputindex));
+          gt_str_set(so->fn2encopt.indexname,basenameptr);
           gt_free(basenameptr);
         }
       }
@@ -368,14 +368,14 @@ static GtOPrval parse_options(int *parsed_args,
     gt_assert(optionmaxdepth != NULL);
     if (gt_option_is_set(optionmaxdepth))
     {
-      if (gt_str_length(so->str_maxdepth) > 0)
+      if (gt_str_length(so->maxdepth) > 0)
       {
-        if (strcmp(gt_str_get(so->str_maxdepth),"abs") == 0)
+        if (strcmp(gt_str_get(so->maxdepth),"abs") == 0)
         {
           so->sfxstrategy.absoluteinversesuftab = true;
         } else
         {
-          if (strcmp(gt_str_get(so->str_maxdepth),"he") == 0)
+          if (strcmp(gt_str_get(so->maxdepth),"he") == 0)
           {
             so->sfxstrategy.hashexceptions = true;
           } else
@@ -383,7 +383,7 @@ static GtOPrval parse_options(int *parsed_args,
             long readint;
 
             so->sfxstrategy.hashexceptions = true;
-            if (sscanf(gt_str_get(so->str_maxdepth),"%ld",&readint) == 1 &&
+            if (sscanf(gt_str_get(so->maxdepth),"%ld",&readint) == 1 &&
                 readint >= 1L)
             {
               so->sfxstrategy.ssortmaxdepth.defined = true;
@@ -478,10 +478,9 @@ static void showoptions(const Suffixeratoroptions *so)
   unsigned long i;
   GtLogger *logger = gt_logger_new(true, GT_LOGGER_DEFLT_PREFIX, stdout);
 
-  if (gt_str_length(so->fn2encopt.str_smap) > 0)
+  if (gt_str_length(so->fn2encopt.smap) > 0)
   {
-    gt_logger_log_force(logger, "smap=\"%s\"",
-                                gt_str_get(so->fn2encopt.str_smap));
+    gt_logger_log_force(logger, "smap=\"%s\"", gt_str_get(so->fn2encopt.smap));
   }
   if (so->fn2encopt.isdna)
   {
@@ -496,7 +495,7 @@ static void showoptions(const Suffixeratoroptions *so)
     gt_logger_log_force(logger, "plain=yes");
   }
   gt_logger_log_force(logger, "indexname=\"%s\"",
-                        gt_str_get(so->fn2encopt.str_indexname));
+                      gt_str_get(so->fn2encopt.indexname));
   if (so->prefixlength == PREFIXLENGTH_AUTOMATIC)
   {
     gt_logger_log_force(logger, "prefixlength=automatic");
@@ -512,13 +511,13 @@ static void showoptions(const Suffixeratoroptions *so)
     gt_logger_log_force(logger, "inputfile[%lu]=%s",i,
                           gt_str_array_get(so->fn2encopt.filenametab,i));
   }
-  if (gt_str_length(so->str_inputindex) > 0)
+  if (gt_str_length(so->inputindex) > 0)
   {
-    gt_logger_log_force(logger, "inputindex=%s",gt_str_get(so->str_inputindex));
+    gt_logger_log_force(logger, "inputindex=%s",gt_str_get(so->inputindex));
   }
-  gt_assert(gt_str_length(so->fn2encopt.str_indexname) > 0);
+  gt_assert(gt_str_length(so->fn2encopt.indexname) > 0);
   gt_logger_log_force(logger, "indexname=%s",
-                              gt_str_get(so->fn2encopt.str_indexname));
+                              gt_str_get(so->fn2encopt.indexname));
   gt_logger_log_force(logger, "outtistab=%s,outsuftab=%s,outlcptab=%s,"
                         "outbwttab=%s,outbcktab=%s,outdestab=%s,"
                         "outsdstab=%s,outssptab=%s,outkystab=%s",
@@ -539,12 +538,12 @@ static void showoptions(const Suffixeratoroptions *so)
 void gt_wrapsfxoptions(Suffixeratoroptions *so)
 {
   /* no checking if error occurs, since errors have been output before */
-  gt_str_delete(so->fn2encopt.str_indexname);
-  gt_str_delete(so->str_inputindex);
-  gt_str_delete(so->fn2encopt.str_smap);
-  gt_str_delete(so->fn2encopt.str_sat);
+  gt_str_delete(so->fn2encopt.indexname);
+  gt_str_delete(so->inputindex);
+  gt_str_delete(so->fn2encopt.smap);
+  gt_str_delete(so->fn2encopt.sat);
   gt_str_delete(so->optionkysargumentstring);
-  gt_str_delete(so->str_maxdepth);
+  gt_str_delete(so->maxdepth);
   gt_str_array_delete(so->fn2encopt.filenametab);
   gt_str_array_delete(so->algbounds);
   gt_option_delete(so->optionalgboundsref);
@@ -576,11 +575,11 @@ int gt_suffixeratoroptions(Suffixeratoroptions *so,
   gt_error_check(err);
   so->fn2encopt.isdna = false;
   so->fn2encopt.isprotein = false;
-  so->str_inputindex = gt_str_new();
-  so->fn2encopt.str_indexname = gt_str_new();
-  so->fn2encopt.str_smap = gt_str_new();
-  so->fn2encopt.str_sat = gt_str_new();
-  so->str_maxdepth = gt_str_new();
+  so->inputindex = gt_str_new();
+  so->fn2encopt.indexname = gt_str_new();
+  so->fn2encopt.smap = gt_str_new();
+  so->fn2encopt.sat = gt_str_new();
+  so->maxdepth = gt_str_new();
   so->outkystab = false;
   so->outkyssort = false;
   so->optionkysargumentstring = gt_str_new();

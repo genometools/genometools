@@ -233,21 +233,21 @@ static int computeoccurrenceratio(Sequentialsuffixarrayreader *ssar,
   return haserr ? -1 : 0;
 }
 
-int gt_tyr_occratio_func(const char *str_inputindex,
-                 bool scanfile,
-                 unsigned long minmersize,
-                 unsigned long maxmersize,
-                 GtArrayuint64_t *uniquedistribution,
-                 GtArrayuint64_t *nonuniquedistribution,
-                 GtArrayuint64_t *nonuniquemultidistribution,
-                 GtLogger *logger,
-                 GtError *err)
+int gt_tyr_occratio_func(const char *inputindex,
+                         bool scanfile,
+                         unsigned long minmersize,
+                         unsigned long maxmersize,
+                         GtArrayuint64_t *uniquedistribution,
+                         GtArrayuint64_t *nonuniquedistribution,
+                         GtArrayuint64_t *nonuniquemultidistribution,
+                         GtLogger *logger,
+                         GtError *err)
 {
   bool haserr = false;
   Sequentialsuffixarrayreader *ssar;
 
   gt_error_check(err);
-  ssar = gt_newSequentialsuffixarrayreaderfromfile(str_inputindex,
+  ssar = gt_newSequentialsuffixarrayreaderfromfile(inputindex,
                                                 SARR_LCPTAB |
                                                 SARR_SUFTAB |
                                                 SARR_ESQTAB,

@@ -854,8 +854,8 @@ static void preparethispart(Sfxiterator *sfi)
   sfi->part++;
 }
 
-int gt_postsortsuffixesfromstream(Sfxiterator *sfi, const GtStr *str_indexname,
-                               GtError *err)
+int gt_postsortsuffixesfromstream(Sfxiterator *sfi, const GtStr *indexname,
+                                  GtError *err)
 {
   int mmapfiledesc = -1;
   GtStr *tmpfilename;
@@ -873,7 +873,7 @@ int gt_postsortsuffixesfromstream(Sfxiterator *sfi, const GtStr *str_indexname,
               sfi->prefixlength ==
               sfi->sfxstrategy.ssortmaxdepth.valueunsignedint);
   }
-  tmpfilename = gt_str_clone(str_indexname);
+  tmpfilename = gt_str_clone(indexname);
   gt_str_append_cstr(tmpfilename,SUFTABSUFFIX);
   mmapfiledesc = open(gt_str_get(tmpfilename), O_RDWR, 0);
   if (mmapfiledesc == -1)

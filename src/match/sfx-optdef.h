@@ -30,9 +30,9 @@
 
 typedef struct
 {
-  GtStr *str_indexname,
-        *str_smap,
-        *str_sat;
+  GtStr *indexname,
+        *smap,
+        *sat;
   GtStrArray *filenametab;
   bool isdna,
        isprotein,
@@ -47,8 +47,8 @@ typedef struct
 {
   unsigned int numofparts,
                prefixlength;
-  GtStr *str_inputindex,
-        *str_maxdepth;
+  GtStr *inputindex,
+        *maxdepth;
   GtOption *optionalgboundsref;
   GtStrArray *algbounds;
   GtReadmode readmode;

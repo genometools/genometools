@@ -721,11 +721,11 @@ static int enumeratelcpintervals(const char *inputindex,
   return haserr ? -1 : 0;
 }
 
-int gt_merstatistics(const char *str_inputindex,
+int gt_merstatistics(const char *inputindex,
                   unsigned long mersize,
                   unsigned long minocc,
                   unsigned long maxocc,
-                  const char *str_storeindex,
+                  const char *storeindex,
                   bool storecounts,
                   bool scanfile,
                   bool performtest,
@@ -736,7 +736,7 @@ int gt_merstatistics(const char *str_inputindex,
   Sequentialsuffixarrayreader *ssar;
 
   gt_error_check(err);
-  ssar = gt_newSequentialsuffixarrayreaderfromfile(str_inputindex,
+  ssar = gt_newSequentialsuffixarrayreaderfromfile(inputindex,
                                                 SARR_LCPTAB |
                                                 SARR_SUFTAB |
                                                 SARR_ESQTAB,
@@ -749,9 +749,9 @@ int gt_merstatistics(const char *str_inputindex,
   }
   if (!haserr)
   {
-    if (enumeratelcpintervals(str_inputindex,
+    if (enumeratelcpintervals(inputindex,
                               ssar,
-                              str_storeindex,
+                              storeindex,
                               storecounts,
                               mersize,
                               minocc,
