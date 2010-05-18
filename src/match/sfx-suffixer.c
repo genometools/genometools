@@ -37,7 +37,7 @@
 #include "esa-fileend.h"
 #include "sfx-partssuf.h"
 #include "sfx-suffixer.h"
-#include "sfx-bentsedg.h"
+#include "suffixptr.h"
 #include "sfx-enumcodes.h"
 #include "sfx-strategy.h"
 #include "diff-cover.h"
@@ -816,7 +816,7 @@ static void preparethispart(Sfxiterator *sfi)
     {
       gt_sortbucketofsuffixes(sfi->suftab.sortspace - sfi->suftab.offset,
                               bucketspec2,
-                              (unsigned long) partwidth,
+                              partwidth,
                               sfi->encseq,
                               sfi->readmode,
                               sfi->currentmincode,

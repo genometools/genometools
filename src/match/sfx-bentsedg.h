@@ -26,22 +26,23 @@
 #include "sfx-strategy.h"
 #include "sfx-copysort.h"
 #include "bcktab.h"
+#include "suffixptr.h"
 
 typedef struct Outlcpinfo Outlcpinfo;
 
 typedef struct
 {
-  unsigned long *sortspace,
-         offset;    /* negative offset */
+  Suffixptr *sortspace;
+  unsigned long offset;
   Definedunsignedlong longest;
 } Suftab;
 
-Outlcpinfo *gt_newOutlcpinfo(const char *indexname,
-                          unsigned int prefixlength,
-                          unsigned int numofchars,
-                          unsigned long totallength,
-                          bool assideeffect,
-                          GtError *err);
+Outlcpinfo *gt_newOutlcpinfo(const GtStr *indexname,
+                             unsigned int numofchars,
+                             unsigned int prefixlength,
+                             unsigned long totallength,
+                             bool assideeffect,
+                             GtError *err);
 
 void gt_freeOutlcptab(Outlcpinfo **outlcpinfoptr);
 
@@ -49,9 +50,14 @@ unsigned long getnumoflargelcpvalues(const Outlcpinfo *outlcpinfo);
 
 unsigned long getmaxbranchdepth(const Outlcpinfo *outlcpinfo);
 
+<<<<<<< HEAD:src/match/sfx-bentsedg.h
 void gt_qsufsort(unsigned long *sortspace,
                  int mmapfiledesc,
                  GtStr *mmapfilename,
+=======
+void gt_qsufsort(Suffixptr *sortspace,
+                 int mmapfiledesc,
+>>>>>>> Started to introduce abstraction Suffixptr where necessary.:src/match/sfx-bentsedg.h
                  unsigned long *longest,
                  const GtEncseq *encseq,
                  GtReadmode readmode,
@@ -80,7 +86,11 @@ void gt_sortallbuckets(Suftab *suftab,
                        unsigned long long *bucketiterstep,
                        GtLogger *logger);
 
+<<<<<<< HEAD:src/match/sfx-bentsedg.h
 void gt_sortbucketofsuffixes(unsigned long *suffixestobesorted,
+=======
+void gt_sortbucketofsuffixes(Suffixptr *suffixestobesorted,
+>>>>>>> Started to introduce abstraction Suffixptr where necessary.:src/match/sfx-bentsedg.h
                              GtBucketspec2 *bucketspec2,
                              unsigned long numberofsuffixes,
                              const GtEncseq *encseq,
@@ -93,8 +103,13 @@ void gt_sortbucketofsuffixes(unsigned long *suffixestobesorted,
                              const Sfxstrategy *sfxstrategy,
                              void *voiddcov,
                              void (*dc_processunsortedrange)(void *,
+<<<<<<< HEAD:src/match/sfx-bentsedg.h
                                                              unsigned long *,
                                                              unsigned long *,
+=======
+                                                             Suffixptr *,
+                                                             Suffixptr *,
+>>>>>>> Started to introduce abstraction Suffixptr where necessary.:src/match/sfx-bentsedg.h
                                                              unsigned long),
                              GtLogger *logger);
 

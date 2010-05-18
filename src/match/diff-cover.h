@@ -19,8 +19,10 @@
 #define DIFF_COVER_H
 
 #include "core/encseq.h"
+#include "core/unused_api.h"
 #include "core/readmode.h"
 #include "core/logger.h"
+#include "suffixptr.h"
 
 typedef struct Differencecover Differencecover;
 
@@ -36,14 +38,15 @@ Differencecover *gt_differencecover_new(unsigned int vparam,
 
 int gt_differencecover_vparamverify(const Differencecover *dcov,GtError *err);
 
-void gt_differencecover_sortsample(Differencecover *dcov,bool cmpcharbychar,
+void gt_differencecover_sortsample(Differencecover *dcov,
+                                   bool cmpcharbychar,
                                    bool withcheck);
 
 void gt_differencecover_delete(Differencecover *dcov);
 
 void dc_sortunsortedbucket(void *data,
-                           unsigned long *left,
-                           unsigned long *right,
-                           unsigned long depth);
+                           Suffixptr *leftptr,
+                           Suffixptr *rightptr,
+                           GT_UNUSED unsigned long depth);
 
 #endif

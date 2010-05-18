@@ -20,6 +20,7 @@
 
 #include "core/encseq.h"
 #include "core/readmode.h"
+#include "suffixptr.h"
 
 typedef struct Blindtrie Blindtrie;
 
@@ -37,8 +38,9 @@ Blindtrie *gt_blindtrie_new(unsigned long numofsuffixes,
                          GtEncseqReader *esr2,
                          GtReadmode readmode);
 
-unsigned long gt_blindtrie_suffixsort(Blindtrie *blindtrie,
-                            unsigned long *suffixtable,
+unsigned long gt_blindtrie_suffixsort(
+                            Blindtrie *blindtrie,
+                            Suffixptr *suffixtable,
                             unsigned long *lcpsubtab,
                             unsigned long numberofsuffixes,
                             unsigned long offset,
@@ -46,8 +48,8 @@ unsigned long gt_blindtrie_suffixsort(Blindtrie *blindtrie,
                             Ordertype ordertype,
                             void *voiddcov,
                             void (*dc_processunsortedrange)(void *,
-                                                            unsigned long *,
-                                                            unsigned long *,
+                                                            Suffixptr *,
+                                                            Suffixptr *,
                                                             unsigned long));
 
 void gt_blindtrie_delete(Blindtrie **blindtrie);

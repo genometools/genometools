@@ -34,7 +34,7 @@
 #include "spacedef.h"
 #include "stamp.h"
 #include "sfx-suffixer.h"
-#include "sfx-bentsedg.h"
+#include "suffixptr.h"
 #include "sfx-run.h"
 #include "giextract.h"
 #include "stamp.h"
@@ -88,11 +88,9 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
   if (so->outlcptab)
   {
     outfileinfo->outlcpinfo
-      = gt_newOutlcpinfo(so->outlcptab
-                         ? gt_str_get(so->fn2encopt.indexname)
-                         : NULL,
-                         prefixlength,
+      = gt_newOutlcpinfo(so->outlcptab ? so->fn2encopt.str_indexname : NULL,
                          gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq)),
+                         prefixlength,
                          gt_encseq_total_length(encseq),
                          so->sfxstrategy.ssortmaxdepth.defined ? false : true,
                          err);

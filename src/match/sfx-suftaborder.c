@@ -24,6 +24,7 @@
 #include "core/encseq.h"
 #include "esa-seqread.h"
 #include "sfx-suftaborder.h"
+#include "suffixptr.h"
 
 static void showlocalsuffix(FILE *fpout,
                             const GtEncseq *encseq,
@@ -94,13 +95,13 @@ void gt_checkifprefixesareidentical(const char *filename,
                                  int line,
                                  const GtEncseq *encseq,
                                  GtReadmode readmode,
-                                 const unsigned long *suftab,
+                                 const Suffixptr *suftab,
                                  unsigned int prefixlength,
                                  unsigned long depth,
                                  unsigned long left,
                                  unsigned long right)
 {
-  const unsigned long *ptr;
+  const Suffixptr *ptr;
   unsigned long maxlcp;
   int cmp;
   GtEncseqReader *esr1, *esr2;
@@ -111,15 +112,15 @@ void gt_checkifprefixesareidentical(const char *filename,
   for (ptr = suftab + left; ptr < suftab + right; ptr++)
   {
     cmp = gt_encseq_comparetwosuffixes(encseq,
-                             readmode,
-                             &maxlcp,
-                             false,
-                             true,
-                             depth,
-                             *ptr,
-                             *(ptr+1),
-                             esr1,
-                             esr2);
+                                       readmode,
+                                       &maxlcp,
+                                       false,
+                                       true,
+                                       depth,
+                                       SUFFIXPTRDEREF(ptr),
+                                       SUFFIXPTRDEREF(ptr+1),
+                                       esr1,
+                                       esr2);
     if (cmp != 0 || maxlcp != (unsigned long) prefixlength)
     {
       showcomparisonfailure(filename,
@@ -161,14 +162,14 @@ void gt_showentiresuftab(const GtEncseq *encseq,
 }
 
 void gt_checksortedsuffixes(const char *filename,
-                         int line,
-                         const GtEncseq *encseq,
-                         GtReadmode readmode,
-                         const unsigned long *suftab,
-                         unsigned long numberofsuffixes,
-                         bool specialsareequal,
-                         bool specialsareequalatdepth0,
-                         unsigned long depth)
+                            int line,
+                            const GtEncseq *encseq,
+                            GtReadmode readmode,
+                            const Suffixptr *suftab,
+                            unsigned long numberofsuffixes,
+                            bool specialsareequal,
+                            bool specialsareequalatdepth0,
+                            unsigned long depth)
 {
   const unsigned long *ptr;
   unsigned long maxlcp, totallength = gt_encseq_total_length(encseq);
@@ -223,16 +224,16 @@ void gt_checksortedsuffixes(const char *filename,
 }
 
 void gt_checkentiresuftab(const char *filename,
-                       int line,
-                       const GtEncseq *encseq,
-                       GtReadmode readmode,
-                       const unsigned long *suftab,
-                       unsigned long numberofsuffixes,
-                       Sequentialsuffixarrayreader *ssar,
-                       bool specialsareequal,
-                       bool specialsareequalatdepth0,
-                       unsigned long depth,
-                       GtError *err)
+                          int line,
+                          const GtEncseq *encseq,
+                          GtReadmode readmode,
+                          const unsigned long *suftab,
+                          unsigned long numberofsuffixes,
+                          Sequentialsuffixarrayreader *ssar,
+                          bool specialsareequal,
+                          bool specialsareequalatdepth0,
+                          unsigned long depth,
+                          GtError *err)
 {
   const unsigned long *ptr;
   unsigned long maxlcp,

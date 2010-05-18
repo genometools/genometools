@@ -389,7 +389,7 @@ static unsigned long fastgetlcp(GtUchar *mm_oldsuffix,
         currentnodeisleaf = ISLEAF(VAL) ? true : false;\
         currentnode = VAL
 
-static unsigned long enumeratetrieleaves (unsigned long *suffixtable,
+static unsigned long enumeratetrieleaves (Suffixptr *suffixtable,
                                           unsigned long *lcpsubtab,
                                           unsigned long *numoflargelcpvalues,
                                           Blindtrie *blindtrie,
@@ -636,7 +636,7 @@ static int suffixcompare(const void *a, const void *b)
 #ifndef NDEBUG
 
 static void checksorting(bool ascending,
-                         const unsigned long *suffixtable,
+                         const Suffixptr *suffixtable,
                          unsigned long numberofsuffixes)
 {
   unsigned long idx;
@@ -644,13 +644,15 @@ static void checksorting(bool ascending,
   gt_assert(numberofsuffixes > 1UL);
   for (idx = 0; idx < numberofsuffixes - 1; idx++)
   {
-    if ((ascending && suffixtable[idx] >= suffixtable[idx+1]) ||
-        (!ascending && suffixtable[idx] <= suffixtable[idx+1]))
+    if ((ascending && SUFFIXPTRGET(suffixtable,idx) >=
+                      SUFFIXPTRGET(suffixtable,idx+1)) ||
+        (!ascending && SUFFIXPTRGET(suffixtable,idx) <=
+                       SUFFIXPTRGET(suffixtable,idx+1)))
     {
       fprintf(stderr,"not %s: ",ascending ? "ascending" : "descending");
       fprintf(stderr,"suffixtable[%lu]=%lu vs %lu=suffixtable[%lu]\n",
-                      idx,(unsigned long) suffixtable[idx],
-                          (unsigned long) suffixtable[idx+1],idx+1);
+                      idx,SUFFIXPTRGET(suffixtable,idx),
+                      SUFFIXPTRGET(suffixtable,idx+1),idx+1);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   }
@@ -658,21 +660,23 @@ static void checksorting(bool ascending,
 
 #endif
 
-static void inplace_reverseSeqpos(unsigned long *tab,unsigned long len)
+static void inplace_reverseSuffixptr(Suffixptr *tab,unsigned long len)
 {
-  unsigned long tmp, *frontptr, *backptr;
+  unsigned long tmp;
+  Suffixptr *frontptr, *backptr;
 
   for (frontptr = tab, backptr = tab + len - 1;
        frontptr < backptr; frontptr++, backptr--)
   {
-    tmp = *frontptr;
-    *frontptr = *backptr;
-    *backptr = tmp;
+    tmp = SUFFIXPTRDEREF(frontptr);
+    SUFFIXPTRDEREFSET(frontptr,SUFFIXPTRDEREF(backptr));
+    SUFFIXPTRDEREFSET(backptr,tmp);
   }
 }
 
-unsigned long gt_blindtrie_suffixsort(Blindtrie *blindtrie,
-                            unsigned long *suffixtable,
+unsigned long gt_blindtrie_suffixsort(
+                            Blindtrie *blindtrie,
+                            Suffixptr *suffixtable,
                             unsigned long *lcpsubtab,
                             unsigned long numberofsuffixes,
                             unsigned long offset,
@@ -680,8 +684,8 @@ unsigned long gt_blindtrie_suffixsort(Blindtrie *blindtrie,
                             Ordertype ordertype,
                             void *voiddcov,
                             void (*dc_processunsortedrange)(void *,
-                                                            unsigned long *,
-                                                            unsigned long *,
+                                                            Suffixptr *,
+                                                            Suffixptr *,
                                                             unsigned long))
 {
   unsigned long idx, stackidx;
@@ -702,7 +706,7 @@ unsigned long gt_blindtrie_suffixsort(Blindtrie *blindtrie,
 #ifndef NDEBUG
       checksorting(false,suffixtable,numberofsuffixes);
 #endif
-      inplace_reverseSeqpos(suffixtable,numberofsuffixes);
+      inplace_reverseSuffixptr(suffixtable,numberofsuffixes);
     } else
     {
 #ifndef NDEBUG
@@ -721,29 +725,31 @@ unsigned long gt_blindtrie_suffixsort(Blindtrie *blindtrie,
     blindtrie->maxdepthminusoffset = 0;
   }
   blindtrie->nextfreeBlindtrienode = 0;
-  blindtrie->root = makeroot(blindtrie,suffixtable[0] + offset);
+  blindtrie->root = makeroot(blindtrie,SUFFIXPTRGET(suffixtable,0) + offset);
 #ifdef SKDEBUG
   printf("insert suffixes at offset " FormatSeqpos ":\n",
           PRINTSeqposcast(offset));
   for (i=0; i < numberofsuffixes; i++)
   {
-    printf(FormatSeqpos " ",PRINTSeqposcast(suffixtable[i] + offset));
+    printf(FormatSeqpos " ",
+           PRINTSeqposcast(SUFFIXTABLEGET(suffixtable,i) + offset));
   }
   printf("\nstep 0\n");
   showblindtrie(blindtrie);
 #endif
   for (idx=1UL; idx < numberofsuffixes; idx++)
   {
-    if (isleftofboundary(suffixtable[idx] + offset,0,blindtrie))
+    if (isleftofboundary(SUFFIXPTRGET(suffixtable,idx) + offset,0,blindtrie))
     {
-      leafinsubtree = findcompanion(blindtrie,suffixtable[idx] + offset);
+      leafinsubtree = findcompanion(blindtrie,
+                                    SUFFIXPTRGET(suffixtable,idx) + offset);
       gt_assert(ISLEAF(leafinsubtree));
       lcp = (blindtrie->cmpcharbychar ? cmpcharbychargetlcp : fastgetlcp)
                                (&mm_oldsuffix,
                                 &mm_newsuffix,
                                 blindtrie,
                                 leafinsubtree->either.nodestartpos,
-                                suffixtable[idx] + offset);
+                                SUFFIXPTRGET(suffixtable,idx) + offset);
       currentnode = blindtrie->root;
       for (stackidx=0;stackidx<blindtrie->stack.nextfreeNodeptr;stackidx++)
       {
@@ -758,7 +764,7 @@ unsigned long gt_blindtrie_suffixsort(Blindtrie *blindtrie,
                                 mm_oldsuffix,
                                 lcp,
                                 mm_newsuffix,
-                                suffixtable[idx] + offset);
+                                SUFFIXPTRGET(suffixtable,idx) + offset);
 #ifdef SKDEBUG
       printf("step %lu\n",i);
       showblindtrie(blindtrie);

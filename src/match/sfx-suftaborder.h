@@ -21,44 +21,44 @@
 #include "core/error_api.h"
 #include "core/encseq.h"
 #include "core/readmode.h"
-
 #include "esa-seqread.h"
+#include "suffixptr.h"
 
 void gt_checkifprefixesareidentical(const char *filename,
-                                 int line,
-                                 const GtEncseq *encseq,
-                                 GtReadmode readmode,
-                                 const unsigned long *suftab,
-                                 unsigned int prefixlength,
-                                 unsigned long depth,
-                                 unsigned long left,
-                                 unsigned long right);
+                                    int line,
+                                    const GtEncseq *encseq,
+                                    GtReadmode readmode,
+                                    const Suffixptr *suftab,
+                                    unsigned int prefixlength,
+                                    unsigned long depth,
+                                    unsigned long left,
+                                    unsigned long right);
 
 void gt_showentiresuftab(const GtEncseq *encseq,
-                      GtReadmode readmode,
-                      const unsigned long *suftab,
-                      unsigned long depth);
+                         GtReadmode readmode,
+                         const Suffixptr *suftab,
+                         unsigned long depth);
 
 void gt_checkentiresuftab(const char *filename,
-                       int line,
-                       const GtEncseq *encseq,
-                       GtReadmode readmode,
-                       const unsigned long *suftab,
-                       unsigned long numberofsuffixes,
-                       Sequentialsuffixarrayreader *ssar,
-                       bool specialsareequal,
-                       bool specialsareequalatdepth0,
-                       unsigned long depth,
-                       GtError *err);
+                          int line,
+                          const GtEncseq *encseq,
+                          GtReadmode readmode,
+                          const Suffixptr *suftab,
+                          unsigned long numberofsuffixes,
+                          Sequentialsuffixarrayreader *ssar,
+                          bool specialsareequal,
+                          bool specialsareequalatdepth0,
+                          unsigned long depth,
+                          GtError *err);
 
 void gt_checksortedsuffixes(const char *filename,
-                         int line,
-                         const GtEncseq *encseq,
-                         GtReadmode readmode,
-                         const unsigned long *suftab,
-                         unsigned long numberofsuffixes,
-                         bool specialsareequal,
-                         bool specialsareequalatdepth0,
-                         unsigned long depth);
+                            int line,
+                            const GtEncseq *encseq,
+                            GtReadmode readmode,
+                            const Suffixptr *suftab,
+                            unsigned long numberofsuffixes,
+                            bool specialsareequal,
+                            bool specialsareequalatdepth0,
+                            unsigned long depth);
 
 #endif

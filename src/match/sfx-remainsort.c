@@ -792,9 +792,9 @@ static void rms_initinversesuftabnonspecials(Rmnsufinfo *rmnsufinfo)
 }
 
 void gt_rmnsufinfo_addunsortedrange(Rmnsufinfo *rmnsufinfo,
-                                 unsigned long left,
-                                 unsigned long right,
-                                 unsigned long depth)
+                                    unsigned long left,
+                                    unsigned long right,
+                                    unsigned long depth)
 {
   RmsPairsuffixptr *ptr;
 
@@ -807,7 +807,7 @@ void gt_rmnsufinfo_addunsortedrange(Rmnsufinfo *rmnsufinfo,
 static int rms_compareitvfull(const void *a,const void *b, void *data)
 {
   const RmsItvfullentry *itva = (const RmsItvfullentry *) a,
-                     *itvb = (const RmsItvfullentry *) b;
+                        *itvb = (const RmsItvfullentry *) b;
   if (itva->rank < itvb->rank)
   {
     return -1;
