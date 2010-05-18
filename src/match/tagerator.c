@@ -99,7 +99,7 @@ static void tgr_showmatch(void *processinfo,const GtMatch *match)
     } else
     {
       unsigned long seqstartpos,
-                    seqnum = gt_encseq_pos2seqnum(showmatchinfo->encseq,
+                    seqnum = gt_encseq_seqnum(showmatchinfo->encseq,
                                                   match->dbstartpos);
       seqstartpos = gt_encseq_seqstartpos(showmatchinfo->encseq, seqnum);
       gt_assert(seqstartpos <= match->dbstartpos);

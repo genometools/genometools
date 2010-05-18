@@ -2457,7 +2457,7 @@ unsigned long gt_encseq_sep2seqnum(const unsigned long *recordseps,
   exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 
-unsigned long gt_encseq_pos2seqnum(const GtEncseq *encseq,
+unsigned long gt_encseq_seqnum(const GtEncseq *encseq,
                                              unsigned long position)
 {
   gt_assert(encseq->numofdbsequences == 1UL || encseq->ssptab != NULL);

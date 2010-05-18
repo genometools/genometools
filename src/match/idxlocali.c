@@ -48,7 +48,7 @@ static void showmatch(void *processinfo,const GtMatch *match)
   if (match->dbabsolute)
   {
     unsigned long seqstartpos;
-    seqnum = gt_encseq_pos2seqnum(showmatchinfo->encseq, match->dbstartpos);
+    seqnum = gt_encseq_seqnum(showmatchinfo->encseq, match->dbstartpos);
     seqstartpos = gt_encseq_seqstartpos(showmatchinfo->encseq, seqnum);
     gt_assert(seqstartpos <= match->dbstartpos);
     relpos = match->dbstartpos - seqstartpos;
@@ -96,7 +96,7 @@ static void storematch(void *info,const GtMatch *match)
 
   if (match->dbabsolute)
   {
-    seqnum = gt_encseq_pos2seqnum(storematch->encseq,
+    seqnum = gt_encseq_seqnum(storematch->encseq,
                                            match->dbstartpos);
   } else
   {

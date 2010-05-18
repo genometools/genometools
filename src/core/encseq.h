@@ -233,11 +233,6 @@ unsigned long gt_encseq_sep2seqnum(const unsigned long *recordseps,
                                    unsigned long totalwidth,
                                    unsigned long position);
 
-/* Returns the sequence number from the given <position> for a given
-  GtEncseq <encseq> mapped with withssptab=true. */
-unsigned long gt_encseq_pos2seqnum(const GtEncseq *encseq,
-                                   unsigned long position);
-
 /* Returns the number of times that <cc> occurs in the sequences in <encseq>. */
 unsigned long gt_encseq_charcount(const GtEncseq *encseq,
                                   GtUchar cc);

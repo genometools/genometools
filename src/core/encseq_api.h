@@ -108,6 +108,10 @@ unsigned long     gt_encseq_seqlength(const GtEncseq *encseq,
 /* Returns the start position of the <seqnum>-th sequence in the <encseq>. */
 unsigned long     gt_encseq_seqstartpos(const GtEncseq *encseq,
                                         unsigned long seqnum);
+/* Returns the sequence number from the given <position> for a given
+  GtEncseq <encseq>. */
+unsigned long     gt_encseq_seqnum(const GtEncseq *encseq,
+                                   unsigned long position);
 /* Returns a pointer to the description of the <seqnum>-th sequence in the
    <encseq>. The length of the returned string is written to the
    location pointed at by <desclen>. */
