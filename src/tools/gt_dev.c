@@ -30,6 +30,7 @@
 #include "tools/gt_idxlocali.h"
 #include "tools/gt_patternmatch.h"
 #include "tools/gt_regioncov.h"
+#include "tools/gt_seqdecode.h"
 #include "tools/gt_seqencode.h"
 #include "tools/gt_seqiterator.h"
 #include "tools/gt_sfxmap.h"
@@ -53,6 +54,7 @@ static void* gt_dev_arguments_new(void)
   gt_toolbox_add(dev_toolbox, "patternmatch", gt_patternmatch);
   gt_toolbox_add_tool(dev_toolbox, "readreads", gt_readreads());
   gt_toolbox_add(dev_toolbox, "regioncov", gt_regioncov);
+  gt_toolbox_add_tool(dev_toolbox, "seqdecode", gt_seqdecode());
   gt_toolbox_add_tool(dev_toolbox, "seqencode", gt_seqencode());
   gt_toolbox_add(dev_toolbox, "seqiterator", gt_seqiterator);
   gt_toolbox_add(dev_toolbox, "sfxmap", gt_sfxmap);
