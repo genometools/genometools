@@ -33,7 +33,7 @@ void gt_fasta_show_entry_generic(const char *description, const char *sequence,
 {
   unsigned long i, current_length;
   gt_assert(sequence);
-  gt_file_xfputc(FASTA_SEPARATOR, outfp);
+  gt_file_xfputc(GT_FASTA_SEPARATOR, outfp);
   if (description)
     gt_file_xfputs(description, outfp);
   gt_file_xfputc('\n', outfp);

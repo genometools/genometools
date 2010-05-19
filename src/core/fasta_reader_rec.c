@@ -39,9 +39,9 @@ static int parse_fasta_description(GtStr *description, GtIO *seqio,
   rval = gt_io_get_char(seqio, &cc);
   gt_assert(!rval); /* was checked earlier */
   /* make sure we got a proper fasta description */
-  if (cc != FASTA_SEPARATOR) {
+  if (cc != GT_FASTA_SEPARATOR) {
     gt_error_set(err, "the first character of fasta file \"%s\" has to be '%c'",
-                 gt_io_get_filename(seqio), FASTA_SEPARATOR);
+                 gt_io_get_filename(seqio), GT_FASTA_SEPARATOR);
     return -1;
   }
   /* read description */
@@ -57,7 +57,7 @@ static int parse_fasta_sequence(GtStr *sequence, GtIO *seqio, GtError *err)
   gt_assert(sequence && seqio);
   gt_assert(!gt_str_length(sequence));
   /* read sequence */
-  while (!gt_io_get_char(seqio, &cc) && cc != FASTA_SEPARATOR) {
+  while (!gt_io_get_char(seqio, &cc) && cc != GT_FASTA_SEPARATOR) {
     if (cc != '\n' && cc != ' ')
       gt_str_append_char(sequence, cc);
   }
@@ -66,8 +66,8 @@ static int parse_fasta_sequence(GtStr *sequence, GtIO *seqio, GtError *err)
               gt_io_get_line_number(seqio));
     return -1;
   }
-  if (cc == FASTA_SEPARATOR)
-    gt_io_unget_char(seqio, FASTA_SEPARATOR);
+  if (cc == GT_FASTA_SEPARATOR)
+    gt_io_unget_char(seqio, GT_FASTA_SEPARATOR);
   return 0;
 }
 

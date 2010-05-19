@@ -18,6 +18,6 @@
 #ifndef FASTA_SEPARATOR_H
 #define FASTA_SEPARATOR_H
 
-#define FASTA_SEPARATOR '>'
+#define GT_FASTA_SEPARATOR '>'
 
 #endif

@@ -69,10 +69,10 @@ static int gt_fasta_reader_fsm_run(GtFastaReader *fasta_reader,
   while (!had_err && gt_file_xread(fr->sequence_file, &cc, 1) != 0) {
     switch (state) {
       case EXPECTING_SEPARATOR:
-        if (cc != FASTA_SEPARATOR) {
+        if (cc != GT_FASTA_SEPARATOR) {
           gt_error_set(err,
                     "the first character of fasta file \"%s\" has to be '%c'",
-                    gt_str_get(fr->sequence_filename), FASTA_SEPARATOR);
+                    gt_str_get(fr->sequence_filename), GT_FASTA_SEPARATOR);
           had_err = -1;
         }
         else
@@ -96,7 +96,7 @@ static int gt_fasta_reader_fsm_run(GtFastaReader *fasta_reader,
           gt_str_append_char(description, cc);
         break;
       case READING_SEQUENCE_AFTER_NEWLINE:
-        if (cc == FASTA_SEPARATOR) {
+        if (cc == GT_FASTA_SEPARATOR) {
           if (!sequence_length) {
             gt_assert(line_counter);
             gt_error_set(err, "empty sequence after description given in line "

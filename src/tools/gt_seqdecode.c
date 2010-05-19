@@ -46,7 +46,7 @@ static void output_sequence(GtEncseq *encseq)
     unsigned long desclen;
     const char *desc;
     /* output description */
-    gt_xfputc(FASTA_SEPARATOR, stdout);
+    gt_xfputc(GT_FASTA_SEPARATOR, stdout);
     desc = gt_encseq_description(encseq, &desclen, i);
     gt_xfwrite(desc, 1, desclen, stdout);
     gt_xfputc('\n', stdout);
