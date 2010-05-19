@@ -37,10 +37,8 @@ static GtOptionParser* gt_seqdecode_option_parser_new(GT_UNUSED
 
 static void output_sequence(GtEncseq *encseq)
 {
-  GtAlphabet *alphabet;
   unsigned long i, j;
   gt_assert(encseq);
-  alphabet = gt_encseq_alphabet(encseq);
   for (i = 0; i < gt_encseq_num_of_sequences(encseq); i++) {
     GtEncseqReader *encseq_reader;
     unsigned long desclen;
@@ -56,8 +54,7 @@ static void output_sequence(GtEncseq *encseq)
     /* XXX: make this more efficient by writing in a buffer first and the
        showing the result */
     for (j = 0; j < gt_encseq_seqlength(encseq, i);  j++) {
-      GtUchar encchar = gt_encseq_reader_next_encoded_char(encseq_reader);
-      gt_xfputc(gt_alphabet_decode(alphabet, encchar), stdout);
+      gt_xfputc(gt_encseq_reader_next_decoded_char(encseq_reader), stdout);
     }
     gt_xfputc('\n', stdout);
     gt_encseq_reader_delete(encseq_reader);
