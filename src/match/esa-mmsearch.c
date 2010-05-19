@@ -26,7 +26,7 @@
 #include "spacedef.h"
 #include "esa-mmsearch.h"
 #include "sfx-suffixer.h"
-#include "core/progress_timer.h"
+#include "core/progress_timer_api.h"
 #include "core/format64.h"
 #include "stamp.h"
 #include "esa-map.h"

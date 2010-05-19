@@ -25,7 +25,7 @@
 #include "core/unused_api.h"
 #include "sfx-optdef.h"
 #include "core/encseq.h"
-#include "core/progress_timer.h"
+#include "core/progress_timer_api.h"
 #include "esa-fileend.h"
 #include "core/readmode.h"
 #include "core/logger.h"

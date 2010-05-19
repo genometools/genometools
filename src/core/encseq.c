@@ -47,7 +47,7 @@
 #include "core/ma_api.h"
 #include "core/mapspec-gen.h"
 #include "core/minmax.h"
-#include "core/progress_timer.h"
+#include "core/progress_timer_api.h"
 #include "core/progressbar.h"
 #include "core/safecast-gen.h"
 #include "core/sequence_buffer_fasta.h"

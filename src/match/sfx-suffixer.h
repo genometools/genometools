@@ -17,9 +17,10 @@
 
 #ifndef SFX_SUFFIXER_H
 #define SFX_SUFFIXER_H
+
 #include "core/error.h"
 #include "core/readmode.h"
-#include "core/progress_timer.h"
+#include "core/progress_timer_api.h"
 #include "core/logger.h"
 #include "sfx-strategy.h"
 #include "sfx-bentsedg.h"

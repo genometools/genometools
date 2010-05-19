@@ -29,7 +29,7 @@
 #include "core/progressbar.h"
 #include "core/minmax.h"
 #include "core/fa.h"
-#include "core/progress_timer.h"
+#include "core/progress_timer_api.h"
 #include "core/encseq.h"
 #include "core/safecast-gen.h"
 #include "intcode-def.h"

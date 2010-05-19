@@ -20,7 +20,7 @@
 #include <time.h>
 #include "core/assert_api.h"
 #include "core/ma_api.h"
-#include "core/progress_timer.h"
+#include "core/progress_timer_api.h"
 
 struct GtProgressTimer
 {
