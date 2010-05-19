@@ -191,6 +191,17 @@ off_t gt_file_estimate_size(const char *filename)
   return size;
 }
 
+off_t gt_file_size(const char *filename)
+{
+  struct stat sb;
+  int fd;
+  gt_assert(filename);
+  fd = gt_xopen(filename, O_RDONLY, 0);
+  gt_xfstat(fd, &sb);
+  gt_xclose(fd);
+  return sb.st_size;
+}
+
 off_t gt_files_estimate_total_size(const GtStrArray *filenames)
 {
   unsigned long filenum;
