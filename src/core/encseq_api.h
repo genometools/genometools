@@ -114,7 +114,8 @@ unsigned long     gt_encseq_seqnum(const GtEncseq *encseq,
                                    unsigned long position);
 /* Returns a pointer to the description of the <seqnum>-th sequence in the
    <encseq>. The length of the returned string is written to the
-   location pointed at by <desclen>. */
+   location pointed at by <desclen>.
+   The returned description pointer is not <\0>-terminated! */
 const char*       gt_encseq_description(const GtEncseq *encseq,
                                         unsigned long *desclen,
                                         unsigned long seqnum);
