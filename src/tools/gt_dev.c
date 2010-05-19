@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -30,6 +30,7 @@
 #include "tools/gt_idxlocali.h"
 #include "tools/gt_patternmatch.h"
 #include "tools/gt_regioncov.h"
+#include "tools/gt_seqencode.h"
 #include "tools/gt_seqiterator.h"
 #include "tools/gt_sfxmap.h"
 #include "tools/gt_skproto.h"
@@ -52,6 +53,7 @@ static void* gt_dev_arguments_new(void)
   gt_toolbox_add(dev_toolbox, "patternmatch", gt_patternmatch);
   gt_toolbox_add_tool(dev_toolbox, "readreads", gt_readreads());
   gt_toolbox_add(dev_toolbox, "regioncov", gt_regioncov);
+  gt_toolbox_add_tool(dev_toolbox, "seqencode", gt_seqencode());
   gt_toolbox_add(dev_toolbox, "seqiterator", gt_seqiterator);
   gt_toolbox_add(dev_toolbox, "sfxmap", gt_sfxmap);
   gt_toolbox_add_tool(dev_toolbox, "skproto", gt_skproto());
