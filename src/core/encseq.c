@@ -385,7 +385,7 @@ GtUchar gt_encseq_reader_next_encoded_char(GtEncseqReader *esr)
 #ifdef WITHshowgetencodedcharcounters
   countgt_encseq_get_encoded_char++;
 #endif
-  gt_assert(esr->currentpos < esr->encseq->totallength);
+  gt_assert(esr && esr->currentpos < esr->encseq->totallength);
   switch (esr->readmode)
   {
     case GT_READMODE_FORWARD:
@@ -420,6 +420,13 @@ void showgetencodedcharcounters(void)
           PRINTuint64_tcast(countgt_encseq_get_encoded_char));
 }
 #endif
+
+char gt_encseq_reader_next_decoded_char(GtEncseqReader *esr)
+{
+  gt_assert(esr && esr->encseq && esr->encseq->alpha);
+  return gt_alphabet_decode(esr->encseq->alpha,
+                            gt_encseq_reader_next_encoded_char(esr));
+}
 
 /* The following function is only used in tyr-mkindex.c */
 

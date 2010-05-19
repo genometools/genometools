@@ -139,9 +139,12 @@ void            gt_encseq_reader_reinit_with_direction(GtEncseqReader *esr,
                                                        const GtEncseq *encseq,
                                                        bool moveforward,
                                                        unsigned long startpos);
-/* Returns the next character from current position of <esr>, advancing the
-   iterator by one position. */
+/* Returns the next encoded character from current position of <esr>, advancing
+   the iterator by one position. */
 GtUchar         gt_encseq_reader_next_encoded_char(GtEncseqReader *esr);
+/* Returns the next decoded character from current position of <esr>, advancing
+   the iterator by one position. */
+char            gt_encseq_reader_next_decoded_char(GtEncseqReader *esr);
 /* Deletes <esr>, freeing all associated space. */
 void            gt_encseq_reader_delete(GtEncseqReader *esr);
 
