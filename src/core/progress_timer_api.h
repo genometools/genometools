@@ -25,8 +25,8 @@
 typedef struct GtProgressTimer GtProgressTimer;
 
 /* Creates a new <GtProgressTimer> with the intitial state <desc>.
-   Optionally, a flag <with_bar>can be set describing the use of a progress bar,
-   so the progress timer will not interfere in that case. */
+   Optionally, a flag <with_bar> can be set describing the use of a progress
+   bar, so the progress timer will not interfere in that case. */
 GtProgressTimer* gt_progress_timer_new(const char *desc, bool with_bar);
 /* Announce the end of the current state and the beginning of the new state
    to <pt>. The new state will be described by <newevent>. The time needed for
