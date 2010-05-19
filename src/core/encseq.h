@@ -60,7 +60,7 @@ typedef struct
 {
   unsigned int common;
   bool leftspecial,
-      rightspecial;
+       rightspecial;
   unsigned long finaldepth;
 } GtCommonunits;
 
@@ -68,9 +68,8 @@ typedef struct
 typedef struct GtSpecialrangeiterator GtSpecialrangeiterator;
 
 /* Create a new <GtSpecialrangeiterator> for <encseq>. */
-GtSpecialrangeiterator *
-    gt_specialrangeiterator_new(const GtEncseq *encseq,
-                                bool moveforward);
+GtSpecialrangeiterator* gt_specialrangeiterator_new(const GtEncseq *encseq,
+                                                    bool moveforward);
 
 /* Make <sri> supply the next special range <range>. Returns true if another
   range was returned, false otherwise. */

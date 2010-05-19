@@ -33,10 +33,9 @@
 #define GT_MAKECOMPL(CC) \
           (ISSPECIAL(CC) ? (CC) : (GtUchar) 3 - (CC))
 
-static inline GtUchar gt_encseq_get_encoded_char(
-                                              const GtEncseq *encseq,
-                                              unsigned long pos,
-                                              GtReadmode readmode)
+static inline GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
+                                                 unsigned long pos,
+                                                 GtReadmode readmode)
 {
   return (readmode == GT_READMODE_FORWARD)
           ? encseq->plainseq[pos]

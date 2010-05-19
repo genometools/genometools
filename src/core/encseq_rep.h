@@ -58,7 +58,7 @@ struct GtEncseq
   void *mappedptr; /* NULL or pointer to the mapped space block */
   unsigned long numofspecialstostore;
   unsigned long *totallengthptr,
-         totallength;
+                totallength;
   unsigned long numofdbsequences,
                 *numofdbsequencesptr; /* need for writing numofdbsequences */
   unsigned long numofdbfiles, *numofdbfilesptr;
@@ -123,12 +123,12 @@ struct GtEncseq
 
   /* only for Viauchartables */
   GtUchar *ucharspecialpositions,
-        *ucharspecialrangelength;
+          *ucharspecialrangelength;
   unsigned long *ucharendspecialsubsUint;
 
   /* only for Viaushorttables */
   GtUshort *ushortspecialpositions,
-         *ushortspecialrangelength;
+           *ushortspecialrangelength;
   unsigned long *ushortendspecialsubsUint;
 
   /* only for Viauint32tables */
