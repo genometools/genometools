@@ -453,9 +453,9 @@ GtBucketspec2 *gt_bucketspec2_new(const Bcktab *bcktab,
 }
 
 static void forwardderive(const GtBucketspec2 *bucketspec2,
-                          unsigned long **targetptr,
+                          Suffixptr **targetptr,
                           unsigned int source,
-                          unsigned long *idx)
+                          Suffixptr *idx)
 {
   unsigned long startpos;
   GtUchar cc;
@@ -463,7 +463,7 @@ static void forwardderive(const GtBucketspec2 *bucketspec2,
   gt_assert (idx < targetptr[source]);
   for (; idx < targetptr[source]; idx++)
   {
-    startpos = *idx;
+    startpos = SUFFIXPTRDEREF(idx);
     if (startpos > 0)
     {
       cc = gt_encseq_get_encoded_char(bucketspec2->encseq,
@@ -474,7 +474,7 @@ static void forwardderive(const GtBucketspec2 *bucketspec2,
                                                                  "false"); */
       if (ISNOTSPECIAL(cc) && !bucketspec2->superbuckettab[cc].sorted)
       {
-        *(targetptr[cc]) = startpos - 1;
+        SUFFIXPTRDEREFSET(targetptr[cc],startpos - 1);
         targetptr[cc]++;
       }
     }
@@ -482,9 +482,9 @@ static void forwardderive(const GtBucketspec2 *bucketspec2,
 }
 
 static void backwardderive(const GtBucketspec2 *bucketspec2,
-                           unsigned long **targetptr,
+                           Suffixptr **targetptr,
                            unsigned int source,
-                           unsigned long *idx)
+                           Suffixptr *idx)
 {
   unsigned long startpos;
   GtUchar cc;
@@ -492,12 +492,12 @@ static void backwardderive(const GtBucketspec2 *bucketspec2,
   gt_assert (idx > targetptr[source]);
   for (; idx > targetptr[source]; idx--)
   {
-    startpos = *idx;
+    startpos = SUFFIXPTRDEREF(idx);
     if (startpos > 0)
     {
       cc = gt_encseq_get_encoded_char(bucketspec2->encseq,
-                                             startpos-1,
-                                             bucketspec2->readmode);
+                                      startpos-1,
+                                      bucketspec2->readmode);
       /*printf("back: superbucket[%u].sorted = %s\n",(unsigned int) cc,
                         bucketspec2->superbuckettab[cc].sorted ? "true" :
                                                                  "false");*/
@@ -515,7 +515,7 @@ static void backwardderive(const GtBucketspec2 *bucketspec2,
           exit(EXIT_FAILURE);
         }
         */
-        *(targetptr[cc]) = startpos - 1;
+        SUFFIXPTRDEREFSET(targetptr[cc],startpos - 1);
         targetptr[cc]--;
       }
     }
@@ -536,15 +536,16 @@ bool gt_hardworkbeforecopysort(const GtBucketspec2 *bucketspec2,
 }
 
 void gt_copysortsuffixes(const GtBucketspec2 *bucketspec2,
-                         unsigned long *suftab,
+                         Suffixptr *suftab,
                          GtLogger *logger)
 {
-  unsigned long hardwork = 0, **targetptr;
+  unsigned long hardwork = 0;
+  Suffixptr **targetptr;
   unsigned int idx, idxsource, source, second;
 
 #ifdef WITHSUFFIXES
   {
-    const unsigned long *ptr;
+    const Suffixptr *ptr;
     for (ptr = suftab; ptr < suftab + bucketspec2->partwidth; ptr++)
     {
       gt_encseq_showatstartpos(stdout,

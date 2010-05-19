@@ -52,7 +52,7 @@ struct sfxInterface
   bool specialsuffixes;
   /* data relevant to holding portions of the suffix array */
   unsigned long lastGeneratedLen, lastGeneratedStart;
-  const unsigned long *lastGeneratedSufTabSegment;
+  const Suffixptr *lastGeneratedSufTabSegment;
 };
 
 static SeqDataTranslator
@@ -402,11 +402,11 @@ SfxIGenerate(void *iface,
         /* size_t because the current approach cannot generate more
          * than memory will hold anyway */
         size_t lastGeneratedLen = sfxi->lastGeneratedLen;
-        const unsigned long *suftab = sfxi->lastGeneratedSufTabSegment;
+        const Suffixptr *suftab = sfxi->lastGeneratedSufTabSegment;
         if (!sfxi->rot0Pos.defined)
           for (pos=0; pos < lastGeneratedLen; pos++)
           {
-            if (suftab[pos] == 0)
+            if (SUFFIXPTRGET(suftab,pos) == 0)
             {
               sfxi->rot0Pos.defined = true;
               sfxi->rot0Pos.valueunsignedlong = sfxi->lastGeneratedStart + pos;

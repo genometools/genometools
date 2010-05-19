@@ -1105,7 +1105,7 @@ static void sarrcountingsort(Bentsedgresources *bsr,
                                               &commonunits,
                                               &etbecurrent,
                                               pivotcmpbits);
-      bsr->countingsortinfo[idx].suffix = leftptr[idx];
+      bsr->countingsortinfo[idx].suffix = SUFFIXPTRGET(leftptr,idx);
       gt_assert(commonunits.common <= (unsigned int) GT_UNITSIN2BITENC);
       bsr->countingsortinfo[idx].lcpwithpivot = commonunits.common;
       if (cmp > 0)
@@ -1138,7 +1138,7 @@ static void sarrcountingsort(Bentsedgresources *bsr,
       }
     } else
     {
-      bsr->countingsortinfo[idx].suffix = leftptr[idx];
+      bsr->countingsortinfo[idx].suffix = SUFFIXPTRGET(leftptr,idx);
       bsr->countingsortinfo[idx].lcpwithpivot =
                                               (unsigned char) GT_UNITSIN2BITENC;
       bsr->countingsortinfo[idx].cmpresult = (char) 0;
@@ -1161,14 +1161,14 @@ static void sarrcountingsort(Bentsedgresources *bsr,
     {
       case -1:
         insertindex = --(bsr->leftlcpdist[csiptr->lcpwithpivot]);
-        leftptr[insertindex] = csiptr->suffix;
+        SUFFIXPTRSET(leftptr,insertindex,csiptr->suffix);
         break;
       case 0:
-        leftptr[--equaloffset] = csiptr->suffix;
+        SUFFIXPTRSET(leftptr,--equaloffset,csiptr->suffix);
         break;
       case 1:
         insertindex = --(bsr->rightlcpdist[csiptr->lcpwithpivot]);
-        leftptr[width - 1 - insertindex] = csiptr->suffix;
+        SUFFIXPTRSET(leftptr,width - 1 - insertindex,csiptr->suffix);
         break;
     }
   }
@@ -1448,7 +1448,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
       leftplusw = suftabptrleft;
     }
 
-    cptr = *leftplusw + depth;
+    cptr = SUFFIXPTRDEREF(leftplusw) + depth;
     if (ISNOTEND(cptr))
     {
       width = (unsigned long) (suftabptrright-(pd-pb)-leftplusw);
@@ -1958,17 +1958,17 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   if (bcktab != NULL && sfxstrategy->ssortmaxdepth.defined)
   {
     bsr->rmnsufinfo = gt_newRmnsufinfo(suftab->sortspace - suftab->offset,
-                                    -1,
-                                    NULL,
-                                    bsr->encseq,
-                                    bcktab,
-                                    maxcode,
-                                    numofchars,
-                                    prefixlength,
-                                    readmode,
-                                    partwidth,
-                                    false,
-                                    true);
+                                       -1,
+                                       NULL,
+                                       bsr->encseq,
+                                       bcktab,
+                                       maxcode,
+                                       numofchars,
+                                       prefixlength,
+                                       readmode,
+                                       partwidth,
+                                       false,
+                                       true);
     gt_assert(bsr->rmnsufinfo != NULL);
   } else
   {

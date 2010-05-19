@@ -45,10 +45,12 @@
 #include "sfx-mappedstr.h"
 #include "stamp.h"
 
+GT_DECLAREARRAYSTRUCT(Suffixptr);
+
 static inline void setsortspace(Suftab *suftab,unsigned long idx,
                                 unsigned long value)
 {
-  suftab->sortspace[idx - suftab->offset] = value;
+  SUFFIXPTRSET(suftab->sortspace,idx - suftab->offset,value);
 }
 
 struct Sfxiterator
@@ -69,7 +71,7 @@ struct Sfxiterator
   unsigned int part,
                numofchars,
                prefixlength;
-  GtArrayGtUlong fusp;
+  GtArraySuffixptr fusp;
   GtSpecialrangeiterator *sri;
   GtRange overhang;
   bool exhausted;
@@ -710,8 +712,8 @@ Sfxiterator *gt_newSfxiterator(const GtEncseq *encseq,
     {
       sfi->sri = NULL;
     }
-    sfi->fusp.spaceGtUlong = sfi->suftab.sortspace;
-    sfi->fusp.allocatedGtUlong = stpgetlargestwidth(sfi->suftabparts);
+    sfi->fusp.spaceSuffixptr = sfi->suftab.sortspace;
+    sfi->fusp.allocatedSuffixptr = stpgetlargestwidth(sfi->suftabparts);
     sfi->overhang.start = sfi->overhang.end = 0;
   }
   if (haserr)
@@ -847,7 +849,7 @@ static void preparethispart(Sfxiterator *sfi)
     }
     if (bucketspec2 != NULL)
     {
-      unsigned long *suftabptr = sfi->suftab.sortspace - sfi->suftab.offset;
+      Suffixptr *suftabptr = sfi->suftab.sortspace - sfi->suftab.offset;
       gt_copysortsuffixes(bucketspec2,suftabptr,sfi->logger);
       gt_bucketspec2_delete(bucketspec2);
       bucketspec2 = NULL;
@@ -954,8 +956,8 @@ static void insertfullspecialrange(Sfxiterator *sfi,
   {
     if (GT_ISDIRREVERSE(sfi->readmode))
     {
-      sfi->fusp.spaceGtUlong[sfi->fusp.nextfreeGtUlong++]
-        = GT_REVERSEPOS(sfi->totallength,pos);
+      SUFFIXPTRSET(sfi->fusp.spaceSuffixptr,sfi->fusp.nextfreeSuffixptr++,
+                   GT_REVERSEPOS(sfi->totallength,pos));
       if (pos == leftpos)
       {
         break;
@@ -963,7 +965,7 @@ static void insertfullspecialrange(Sfxiterator *sfi,
       pos--;
     } else
     {
-      sfi->fusp.spaceGtUlong[sfi->fusp.nextfreeGtUlong++] = pos;
+      SUFFIXPTRSET(sfi->fusp.spaceSuffixptr,sfi->fusp.nextfreeSuffixptr++,pos);
       if (pos == rightpos-1)
       {
         break;
@@ -983,11 +985,11 @@ static void fillspecialnextpage(Sfxiterator *sfi)
     if (sfi->overhang.start < sfi->overhang.end)
     {
       width = sfi->overhang.end - sfi->overhang.start;
-      if (sfi->fusp.nextfreeGtUlong + width > sfi->fusp.allocatedGtUlong)
+      if (sfi->fusp.nextfreeSuffixptr + width > sfi->fusp.allocatedSuffixptr)
       {
         /* does not fit into the buffer, so only output a part */
-        unsigned long rest = sfi->fusp.nextfreeGtUlong +
-                             width - sfi->fusp.allocatedGtUlong;
+        unsigned long rest = sfi->fusp.nextfreeSuffixptr +
+                             width - sfi->fusp.allocatedSuffixptr;
         gt_assert(rest > 0);
         if (GT_ISDIRREVERSE(sfi->readmode))
         {
@@ -1002,7 +1004,7 @@ static void fillspecialnextpage(Sfxiterator *sfi)
         }
         break;
       }
-      if (sfi->fusp.nextfreeGtUlong + width == sfi->fusp.allocatedGtUlong)
+      if (sfi->fusp.nextfreeSuffixptr + width == sfi->fusp.allocatedSuffixptr)
       { /* overhang fits into the buffer and buffer is full */
         insertfullspecialrange(sfi,sfi->overhang.start,
                                sfi->overhang.end);
@@ -1019,10 +1021,10 @@ static void fillspecialnextpage(Sfxiterator *sfi)
       {
         width = range.end - range.start;
         gt_assert(width > 0);
-        if (sfi->fusp.nextfreeGtUlong + width > sfi->fusp.allocatedGtUlong)
+        if (sfi->fusp.nextfreeSuffixptr + width > sfi->fusp.allocatedSuffixptr)
         { /* does not fit into the buffer, so only output a part */
-          unsigned long rest = sfi->fusp.nextfreeGtUlong +
-                               width - sfi->fusp.allocatedGtUlong;
+          unsigned long rest = sfi->fusp.nextfreeSuffixptr +
+                               width - sfi->fusp.allocatedSuffixptr;
           if (GT_ISDIRREVERSE(sfi->readmode))
           {
             insertfullspecialrange(sfi,range.start + rest,
@@ -1037,7 +1039,7 @@ static void fillspecialnextpage(Sfxiterator *sfi)
           }
           break;
         }
-        if (sfi->fusp.nextfreeGtUlong + width == sfi->fusp.allocatedGtUlong)
+        if (sfi->fusp.nextfreeSuffixptr + width == sfi->fusp.allocatedSuffixptr)
         { /* overhang fits into the buffer and buffer is full */
           insertfullspecialrange(sfi,range.start,range.end);
           sfi->overhang.start = sfi->overhang.end = 0;
@@ -1047,10 +1049,10 @@ static void fillspecialnextpage(Sfxiterator *sfi)
         sfi->overhang.start = sfi->overhang.end = 0;
       } else
       {
-        if (sfi->fusp.nextfreeGtUlong < sfi->fusp.allocatedGtUlong)
+        if (sfi->fusp.nextfreeSuffixptr < sfi->fusp.allocatedSuffixptr)
         {
-          sfi->fusp.spaceGtUlong[sfi->fusp.nextfreeGtUlong++]
-                                                             = sfi->totallength;
+          SUFFIXPTRSET(sfi->fusp.spaceSuffixptr,sfi->fusp.nextfreeSuffixptr++,
+                       sfi->totallength);
           sfi->exhausted = true;
         }
         break;
@@ -1059,9 +1061,9 @@ static void fillspecialnextpage(Sfxiterator *sfi)
   }
 }
 
-const unsigned long *gt_nextSfxiterator(unsigned long *numberofsuffixes,
-                                     bool *specialsuffixes,
-                                     Sfxiterator *sfi)
+const Suffixptr *gt_nextSfxiterator(unsigned long *numberofsuffixes,
+                                    bool *specialsuffixes,
+                                    Sfxiterator *sfi)
 {
   if (sfi->part < stpgetnumofparts(sfi->suftabparts))
   {
@@ -1078,10 +1080,10 @@ const unsigned long *gt_nextSfxiterator(unsigned long *numberofsuffixes,
     }
     return NULL;
   }
-  sfi->fusp.nextfreeGtUlong = 0;
+  sfi->fusp.nextfreeSuffixptr = 0;
   fillspecialnextpage(sfi);
-  gt_assert(sfi->fusp.nextfreeGtUlong > 0);
-  *numberofsuffixes = (unsigned long) sfi->fusp.nextfreeGtUlong;
+  gt_assert(sfi->fusp.nextfreeSuffixptr > 0);
+  *numberofsuffixes = sfi->fusp.nextfreeSuffixptr;
   *specialsuffixes = true;
   return sfi->suftab.sortspace;
 }

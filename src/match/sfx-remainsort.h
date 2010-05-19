@@ -23,12 +23,13 @@
 #include "core/readmode.h"
 #include "core/defined-types.h"
 
+#include "suffixptr.h"
 #include "bcktab.h"
 #include "compressedtab.h"
 
 typedef struct Rmnsufinfo Rmnsufinfo;
 
-Rmnsufinfo *gt_newRmnsufinfo(unsigned long *presortedsuffixes,
+Rmnsufinfo *gt_newRmnsufinfo(Suffixptr *presortedsuffixes,
                              int mmapfiledesc,
                              GtStr *mmapfilename,
                              const GtEncseq *encseq,

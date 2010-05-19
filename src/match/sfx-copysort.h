@@ -21,6 +21,7 @@
 #include "core/codetype.h"
 #include "core/encseq.h"
 #include "core/logger.h"
+#include "suffixptr.h"
 #include "bcktab.h"
 
 typedef struct GtBucketspec2 GtBucketspec2;
@@ -32,7 +33,7 @@ GtBucketspec2 *gt_bucketspec2_new(const Bcktab *bcktab,
                                   unsigned int numofchars);
 
 void gt_copysortsuffixes(const GtBucketspec2 *bucketspec2,
-                         unsigned long *suftab,
+                         Suffixptr *suftab,
                          GtLogger *logger);
 
 bool gt_hardworkbeforecopysort(const GtBucketspec2 *bucketspec2,

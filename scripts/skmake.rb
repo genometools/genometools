@@ -80,4 +80,4 @@ if File.exists?('LocalMakefile.previous') and
   exit 1
 end
 
-system("make -j 4 -f LocalMakefile")
+system("make -f LocalMakefile")

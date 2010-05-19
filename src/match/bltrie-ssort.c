@@ -396,8 +396,8 @@ static unsigned long enumeratetrieleaves (Suffixptr *suffixtable,
                                           void *voiddcov,
                                           void (*dc_processunsortedrange)(
                                                    void *,
-                                                   unsigned long *,
-                                                   unsigned long *,
+                                                   Suffixptr *,
+                                                   Suffixptr *,
                                                    unsigned long))
 {
   bool readyforpop = false, currentnodeisleaf;
@@ -452,8 +452,8 @@ static unsigned long enumeratetrieleaves (Suffixptr *suffixtable,
           }
         }
       }
-      suffixtable[nextfree++]
-        = currentnode->either.nodestartpos - blindtrie->offset;
+      SUFFIXPTRSET(suffixtable,nextfree++,
+                   currentnode->either.nodestartpos - blindtrie->offset);
       siblval = currentnode->rightsibling;
       if (siblval == NULL)
       {
