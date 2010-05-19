@@ -88,7 +88,8 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
   if (so->outlcptab)
   {
     outfileinfo->outlcpinfo
-      = gt_newOutlcpinfo(so->outlcptab ? so->fn2encopt.str_indexname : NULL,
+      = gt_newOutlcpinfo(so->outlcptab ? 
+                         gt_str_get(so->fn2encopt.indexname) : NULL,
                          gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq)),
                          prefixlength,
                          gt_encseq_total_length(encseq),
