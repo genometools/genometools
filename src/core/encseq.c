@@ -5743,7 +5743,7 @@ struct GtEncseqEncoder {
 GtEncseqEncoder* gt_encseq_encoder_new()
 {
   GtEncseqEncoder *ee = gt_calloc((size_t) 1, sizeof (GtEncseqEncoder));
-  gt_encseq_encoder_create_tis_tab(ee);
+  gt_encseq_encoder_create_esq_tab(ee);
   gt_encseq_encoder_enable_multiseq_support(ee);
   gt_encseq_encoder_enable_description_support(ee);
   ee->isdna = ee->isprotein = ee->isplain = false;
@@ -5759,13 +5759,13 @@ void gt_encseq_encoder_set_progresstimer(GtEncseqEncoder *ee,
   ee->pt = pt;
 }
 
-void gt_encseq_encoder_create_tis_tab(GtEncseqEncoder *ee)
+void gt_encseq_encoder_create_esq_tab(GtEncseqEncoder *ee)
 {
   gt_assert(ee);
   ee->tistab = true;
 }
 
-void gt_encseq_encoder_do_not_create_tis_tab(GtEncseqEncoder *ee)
+void gt_encseq_encoder_do_not_create_esq_tab(GtEncseqEncoder *ee)
 {
   gt_assert(ee);
   ee->tistab = false;
@@ -5935,18 +5935,18 @@ GtEncseqLoader* gt_encseq_loader_new()
   GtEncseqLoader *el = gt_calloc((size_t) 1, sizeof (GtEncseqLoader));
   gt_encseq_loader_require_multiseq_support(el);
   gt_encseq_loader_require_description_support(el);
-  gt_encseq_loader_require_tis_tab(el);
+  gt_encseq_loader_require_esq_tab(el);
   gt_encseq_loader_enable_range_iterator(el);
   return el;
 }
 
-void gt_encseq_loader_require_tis_tab(GtEncseqLoader *el)
+void gt_encseq_loader_require_esq_tab(GtEncseqLoader *el)
 {
   gt_assert(el);
   el->tistab = true;
 }
 
-void gt_encseq_loader_do_not_require_tis_tab(GtEncseqLoader *el)
+void gt_encseq_loader_do_not_require_esq_tab(GtEncseqLoader *el)
 {
   gt_assert(el);
   el->tistab = false;

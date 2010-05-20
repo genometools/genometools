@@ -35,8 +35,8 @@ module GT
   extern "void gt_encseq_encoder_disable_description_support(GtEncseqEncoder*)"
   extern "void gt_encseq_encoder_enable_multiseq_support(GtEncseqEncoder*)"
   extern "void gt_encseq_encoder_disable_multiseq_support(GtEncseqEncoder*)"
-  extern "void gt_encseq_encoder_create_tis_tab(GtEncseqEncoder*)"
-  extern "void gt_encseq_encoder_do_not_create_tis_tab(GtEncseqEncoder*)"
+  extern "void gt_encseq_encoder_create_esq_tab(GtEncseqEncoder*)"
+  extern "void gt_encseq_encoder_do_not_create_esq_tab(GtEncseqEncoder*)"
   extern "void gt_encseq_encoder_create_des_tab(GtEncseqEncoder*)"
   extern "void gt_encseq_encoder_do_not_create_des_tab(GtEncseqEncoder*)"
   extern "void gt_encseq_encoder_create_ssp_tab(GtEncseqEncoder*)"
@@ -54,8 +54,8 @@ module GT
   extern "void gt_encseq_loader_drop_description_support(GtEncseqLoader*)"
   extern "void gt_encseq_loader_require_multiseq_support(GtEncseqLoader*)"
   extern "void gt_encseq_loader_drop_multiseq_support(GtEncseqLoader*)"
-  extern "void gt_encseq_loader_require_tis_tab(GtEncseqLoader*)"
-  extern "void gt_encseq_loader_do_not_require_tis_tab(GtEncseqLoader*)"
+  extern "void gt_encseq_loader_require_esq_tab(GtEncseqLoader*)"
+  extern "void gt_encseq_loader_do_not_require_esq_tab(GtEncseqLoader*)"
   extern "void gt_encseq_loader_require_des_tab(GtEncseqLoader*)"
   extern "void gt_encseq_loader_do_not_require_des_tab(GtEncseqLoader*)"
   extern "void gt_encseq_loader_require_ssp_tab(GtEncseqLoader*)"
@@ -158,12 +158,12 @@ module GT
       GT.gt_encseq_encoder_disable_multiseq_support(@eenc)
     end
 
-    def create_tis_tab
-      GT.gt_encseq_encoder_create_tis_tab(@eenc)
+    def create_esq_tab
+      GT.gt_encseq_encoder_create_esq_tab(@eenc)
     end
 
-    def do_not_create_tis_tab
-      GT.gt_encseq_encoder_do_not_create_tis_tab(@eenc)
+    def do_not_create_esq_tab
+      GT.gt_encseq_encoder_do_not_create_esq_tab(@eenc)
     end
 
     def create_des_tab
@@ -261,12 +261,12 @@ module GT
       GT.gt_encseq_loader_drop_multiseq_support(@eldr)
     end
 
-    def require_tis_tab
-      GT.gt_encseq_loader_require_tis_tab(@eldr)
+    def require_esq_tab
+      GT.gt_encseq_loader_require_esq_tab(@eldr)
     end
 
-    def do_not_require_tis_tab
-      GT.gt_encseq_loader_do_not_require_tis_tab(@eldr)
+    def do_not_require_esq_tab
+      GT.gt_encseq_loader_do_not_require_esq_tab(@eldr)
     end
 
     def require_des_tab
@@ -365,12 +365,12 @@ module GT
       GT.gt_encseq_builder_disable_multiseq_support(@ebld)
     end
 
-    def create_tis_tab
-      GT.gt_encseq_builder_create_tis_tab(@ebld)
+    def create_esq_tab
+      GT.gt_encseq_builder_create_esq_tab(@ebld)
     end
 
-    def do_not_create_tis_tab
-      GT.gt_encseq_builder_do_not_create_tis_tab(@ebld)
+    def do_not_create_esq_tab
+      GT.gt_encseq_builder_do_not_create_esq_tab(@ebld)
     end
 
     def create_des_tab

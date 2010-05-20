@@ -198,9 +198,9 @@ void             gt_encseq_encoder_disable_multiseq_support(
                                                            GtEncseqEncoder *ee);
 /* Enables creation of the .esq table containing the encoded sequence itself.
    Naturally, enabled by default. */
-void             gt_encseq_encoder_create_tis_tab(GtEncseqEncoder *ee);
+void             gt_encseq_encoder_create_esq_tab(GtEncseqEncoder *ee);
 /* Disables creation of the .esq table. */
-void             gt_encseq_encoder_do_not_create_tis_tab(GtEncseqEncoder *ee);
+void             gt_encseq_encoder_do_not_create_esq_tab(GtEncseqEncoder *ee);
 /* Enables creation of the .des table containing sequence descriptions.
    Enabled by default. */
 void             gt_encseq_encoder_create_des_tab(GtEncseqEncoder *ee);
@@ -259,10 +259,10 @@ void             gt_encseq_loader_require_multiseq_support(GtEncseqLoader *el);
 void             gt_encseq_loader_drop_multiseq_support(GtEncseqLoader *el);
 /* Requires presence of the .esq table containing the encoded sequence itself.
    Naturally, enabled by default. */
-void             gt_encseq_loader_require_tis_tab(GtEncseqLoader *el);
+void             gt_encseq_loader_require_esq_tab(GtEncseqLoader *el);
 /* Disables requirement of the .esq table for loading a <GtEncseq>
    using <el>. */
-void             gt_encseq_loader_do_not_require_tis_tab(GtEncseqLoader *el);
+void             gt_encseq_loader_do_not_require_esq_tab(GtEncseqLoader *el);
 /* Requires presence of the .des table containing sequence descriptions.
    Enabled by default. */
 void             gt_encseq_loader_require_des_tab(GtEncseqLoader *el);
@@ -333,9 +333,9 @@ void             gt_encseq_builder_disable_multiseq_support(
                                                            GtEncseqBuilder *eb);
 /* Enables creation of the .esq table containing the encoded sequence itself.
    Naturally, enabled by default. */
-void             gt_encseq_builder_create_tis_tab(GtEncseqBuilder *eb);
+void             gt_encseq_builder_create_esq_tab(GtEncseqBuilder *eb);
 /* Disables creation of the .esq table. */
-void             gt_encseq_builder_do_not_create_tis_tab(GtEncseqBuilder *eb);
+void             gt_encseq_builder_do_not_create_esq_tab(GtEncseqBuilder *eb);
 /* Enables creation of the .des table containing sequence descriptions.
    Not enabled by default. */
 void             gt_encseq_builder_create_des_tab(GtEncseqBuilder *eb);

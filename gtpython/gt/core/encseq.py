@@ -73,11 +73,11 @@ class EncseqEncoder:
     def disable_multiseq_support(self):
         gtlib.gt_encseq_encoder_disable_multiseq_support(self.ee)
 
-    def create_tis_tab(self):
-        gtlib.gt_encseq_encoder_create_tis_tab(self.ee)
+    def create_esq_tab(self):
+        gtlib.gt_encseq_encoder_create_esq_tab(self.ee)
 
-    def do_not_create_tis_tab(self):
-        gtlib.gt_encseq_encoder_do_not_create_tis_tab(self.ee)
+    def do_not_create_esq_tab(self):
+        gtlib.gt_encseq_encoder_do_not_create_esq_tab(self.ee)
 
     def create_des_tab(self):
         gtlib.gt_encseq_encoder_create_des_tab(self.ee)
@@ -164,11 +164,11 @@ class EncseqLoader:
         self.ssptab = False
         gtlib.gt_encseq_loader_drop_multiseq_support(self.el)
 
-    def require_tis_tab(self):
-        gtlib.gt_encseq_loader_require_tis_tab(self.el)
+    def require_esq_tab(self):
+        gtlib.gt_encseq_loader_require_esq_tab(self.el)
 
-    def do_not_require_tis_tab(self):
-        gtlib.gt_encseq_loader_do_not_require_tis_tab(self.el)
+    def do_not_require_esq_tab(self):
+        gtlib.gt_encseq_loader_do_not_require_esq_tab(self.el)
 
     def require_des_tab(self):
         self.destab = True
