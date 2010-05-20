@@ -20,6 +20,7 @@
 
 #include "core/readmode.h"
 #include "core/encseq.h"
+#include "suffixptr.h"
 
 typedef struct Lcpvalueiterator Lcpvalueiterator;
 
@@ -28,7 +29,7 @@ Lcpvalueiterator *gt_newLcpvalueiterator(const GtEncseq *encseq,
 
 unsigned long gt_nextLcpvalueiterator(Lcpvalueiterator *lvi,
                             bool firstpage,
-                            const unsigned long *suftabptr,
+                            const Suffixptr *suftabptr,
                             unsigned long numberofsuffixes);
 
 void gt_freeLcpvalueiterator(Lcpvalueiterator **lvi);

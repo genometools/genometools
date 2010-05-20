@@ -409,7 +409,7 @@ static void gen_esa_overinterval(const Genericindex *genericindex,
 
   for (idx = itv->leftbound; idx <= itv->rightbound; idx++)
   {
-    match->dbstartpos = genericindex->suffixarray->suftab[idx];
+    match->dbstartpos = SUFFIXPTRGET(genericindex->suffixarray->suftab,idx);
     /* call processmatch */
     processmatch(processmatchinfo,match);
   }
@@ -610,8 +610,8 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
   GtMatch match;
 
   initparentcopy(limdfsresources,adfst);
-  startpos = limdfsresources->genericindex->suffixarray->
-                                            suftab[child->leftbound];
+  startpos = SUFFIXPTRGET(limdfsresources->genericindex->suffixarray->suftab,
+                          child->leftbound);
 #ifdef SKDEBUG
   printf("retrieve context of startpos=%lu\n",(unsigned long) startpos);
 #endif

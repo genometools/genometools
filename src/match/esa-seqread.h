@@ -78,7 +78,7 @@ Sequentialsuffixarrayreader *gt_newSequentialsuffixarrayreaderfromRAM(
 
 void gt_updateSequentialsuffixarrayreaderfromRAM(
                     Sequentialsuffixarrayreader *ssar,
-                    const unsigned long *suftab,
+                    const Suffixptr *suftab,
                     bool firstpage,
                     unsigned long numberofsuffixes);
 
@@ -105,8 +105,8 @@ const GtEncseq *gt_encseqSequentialsuffixarrayreader(
 GtReadmode gt_readmodeSequentialsuffixarrayreader(
                           const Sequentialsuffixarrayreader *ssar);
 
-const unsigned long *gt_suftabSequentialsuffixarrayreader(
-              const Sequentialsuffixarrayreader *ssar);
+const Suffixptr *gt_suftabSequentialsuffixarrayreader(
+                        const Sequentialsuffixarrayreader *ssar);
 
 const Suffixarray *gt_suffixarraySequentialsuffixarrayreader(
               const Sequentialsuffixarrayreader *ssar);

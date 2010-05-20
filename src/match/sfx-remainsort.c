@@ -82,8 +82,8 @@ typedef struct
 {
   int mmapfiledesc;
   GtStr *mmapfilename;
-  unsigned long *sortspace,
-         *mappedsection,
+  Suffixptr *sortspace;
+  unsigned long *mappedsection,
          currentindex,
          mapableentries,
          pagesize,
@@ -150,7 +150,7 @@ struct Rmnsufinfo
 };
 
 static void initsortblock(Sortblock *sortblock,
-                          unsigned long *presortedsuffixes,
+                          Suffixptr *presortedsuffixes,
                           int mmapfiledesc,
                           GtStr *mmapfilename,
                           unsigned long partwidth)
@@ -701,7 +701,7 @@ static void rms_initinversesuftabnonspecialsadjust(Rmnsufinfo *rmnsufinfo)
                                       rmnsufinfo->numofchars);
     for (/* Nothing */; idx < bucketspec.left; idx++)
     {
-      startpos = rmnsufinfo->sortblock.sortspace[idx];
+      startpos = SUFFIXPTRGET(rmnsufinfo->sortblock.sortspace,idx);
       rms_inversesuftab_set(rmnsufinfo,startpos,idx);
     }
     updatewidth (rmnsufinfo,bucketspec.nonspecialsinbucket,
@@ -709,13 +709,13 @@ static void rms_initinversesuftabnonspecialsadjust(Rmnsufinfo *rmnsufinfo)
     for (/* Nothing */;
          idx < bucketspec.left+bucketspec.nonspecialsinbucket; idx++)
     {
-      startpos = rmnsufinfo->sortblock.sortspace[idx];
+      startpos = SUFFIXPTRGET(rmnsufinfo->sortblock.sortspace,idx);
       rms_inversesuftab_set(rmnsufinfo,startpos,bucketspec.left);
     }
   }
   for (/* Nothing */; idx < rmnsufinfo->partwidth; idx++)
   {
-    startpos = rmnsufinfo->sortblock.sortspace[idx];
+    startpos = SUFFIXPTRGET(rmnsufinfo->sortblock.sortspace,idx);
     rms_inversesuftab_set(rmnsufinfo,startpos,idx);
   }
 }
@@ -787,7 +787,9 @@ static void rms_initinversesuftabnonspecials(Rmnsufinfo *rmnsufinfo)
 
   for (idx=0; idx < rmnsufinfo->partwidth; idx++)
   {
-    rms_inversesuftab_set(rmnsufinfo,rmnsufinfo->sortblock.sortspace[idx],idx);
+    rms_inversesuftab_set(rmnsufinfo,
+                          SUFFIXPTRGET(rmnsufinfo->sortblock.sortspace,idx),
+                          idx);
   }
 }
 
@@ -975,7 +977,7 @@ static unsigned long suftabentryfromsection_get(const Sortblock *sortblock,
 {
   if (SUFINMEM(sortblock))
   {
-    return sortblock->sortspace[idx];
+    return SUFFIXPTRGET(sortblock->sortspace,idx);
   }
   gt_assert(idx >= sortblock->pageoffset &&
             idx < sortblock->pageoffset + sortblock->mappedwidth);
@@ -988,7 +990,7 @@ static void suftabentryfromsection_update(Sortblock *sortblock,
 {
   if (SUFINMEM(sortblock))
   {
-    sortblock->sortspace[idx] = value;
+    SUFFIXPTRSET(sortblock->sortspace,idx,value);
   } else
   {
     gt_assert(idx >= sortblock->pageoffset &&

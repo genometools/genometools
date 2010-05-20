@@ -44,14 +44,14 @@ unsigned long gt_suffixarrayuniqueforward (const void *genericindex,
     {
       if (qptr >= qend || ISSPECIAL(*qptr) ||
           !gt_lcpintervalfindcharchildintv(suffixarray->encseq,
-                                        suffixarray->readmode,
-                                        totallength,
-                                        suffixarray->suftab,
-                                        &itv,
-                                        *qptr,
-                                        (unsigned long) offset,
-                                        itv.left,
-                                        itv.right))
+                                           suffixarray->readmode,
+                                           totallength,
+                                           suffixarray->suftab,
+                                           &itv,
+                                           *qptr,
+                                           offset,
+                                           itv.left,
+                                           itv.right))
       {
         break;
       }
@@ -64,12 +64,12 @@ unsigned long gt_suffixarrayuniqueforward (const void *genericindex,
 }
 
 unsigned long gt_suffixarraymstats (const void *genericindex,
-                                 unsigned long offset,
-                                 unsigned long left,
-                                 unsigned long right,
-                                 unsigned long *witnessposition,
-                                 const GtUchar *qstart,
-                                 const GtUchar *qend)
+                                    unsigned long offset,
+                                    unsigned long left,
+                                    unsigned long right,
+                                    unsigned long *witnessposition,
+                                    const GtUchar *qstart,
+                                    const GtUchar *qend)
 {
   Simplelcpinterval itv;
   const GtUchar *qptr;
@@ -94,7 +94,7 @@ unsigned long gt_suffixarraymstats (const void *genericindex,
     {
       if (witnessposition != NULL)
       {
-        *witnessposition = suffixarray->suftab[itv.left];
+        *witnessposition = SUFFIXPTRGET(suffixarray->suftab,itv.left);
       }
       break;
     }

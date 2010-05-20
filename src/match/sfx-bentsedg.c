@@ -2197,7 +2197,8 @@ void gt_sortallbuckets(Suftab *suftab,
           firstsuffixofbucket.code = code;
           firstsuffixofbucket.prefixindex = prefixlength;
 #ifdef SKDEBUG
-          firstsuffixofbucket.startpos = suftabptr[bucketspec.left];
+          firstsuffixofbucket.startpos
+            = SUFFIXPTRGET(suftabptr,bucketspec.left);
           /*
           consistencyofsuffix(__LINE__,
                               encseq,readmode,bcktab,numofchars,
@@ -2229,7 +2230,8 @@ void gt_sortallbuckets(Suftab *suftab,
         outlcpinfo->previoussuffix.prefixindex = prefixlength;
 #ifdef SKDEBUG
         outlcpinfo->previoussuffix.startpos
-          = suftabptr[bucketspec.left + bucketspec.nonspecialsinbucket - 1];
+          = SUFFIXPTRGET(suftabptr,
+                         bucketspec.left + bucketspec.nonspecialsinbucket - 1);
         /*
         consistencyofsuffix(__LINE__,
                             encseq,readmode,bcktab,numofchars,
@@ -2245,8 +2247,9 @@ void gt_sortallbuckets(Suftab *suftab,
         minprefixindex = bucketends(outlcpinfo,
                                     &outlcpinfo->previoussuffix,
                                     /* first special element in bucket */
-                                    suftabptr[bucketspec.left +
-                                              bucketspec.nonspecialsinbucket],
+                                    SUFFIXPTRGET(suftabptr,
+                                                bucketspec.left +
+                                                bucketspec.nonspecialsinbucket),
                                     outlcpinfo->minchanged,
                                     bucketspec.specialsinbucket,
                                     code,
@@ -2258,8 +2261,9 @@ void gt_sortallbuckets(Suftab *suftab,
         outlcpinfo->previoussuffix.prefixindex = minprefixindex;
 #ifdef SKDEBUG
         outlcpinfo->previoussuffix.startpos
-          = suftabptr[bucketspec.left + bucketspec.nonspecialsinbucket +
-                                        bucketspec.specialsinbucket - 1];
+          = SUFFIXPTRGET(suftabptr,bucketspec.left + 
+                                   bucketspec.nonspecialsinbucket +
+                                   bucketspec.specialsinbucket - 1);
         /*
          consistencyofsuffix(__LINE__,
                              encseq,readmode,bcktab,numofchars,
@@ -2277,7 +2281,8 @@ void gt_sortallbuckets(Suftab *suftab,
           outlcpinfo->previoussuffix.prefixindex = prefixlength;
 #ifdef SKDEBUG
           outlcpinfo->previoussuffix.startpos
-            = suftabptr[bucketspec.left + bucketspec.nonspecialsinbucket - 1];
+            = SUFFIXPTRGET(suftabptr,bucketspec.left + 
+                                     bucketspec.nonspecialsinbucket - 1);
           /*
           consistencyofsuffix(__LINE__,
                               encseq,readmode,bcktab,numofchars,

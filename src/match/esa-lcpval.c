@@ -45,7 +45,7 @@ Lcpvalueiterator *gt_newLcpvalueiterator(const GtEncseq *encseq,
 
 unsigned long gt_nextLcpvalueiterator(Lcpvalueiterator *lvi,
                                       bool firstpage,
-                                      const unsigned long *suftabptr,
+                                      const Suffixptr *suftabptr,
                                       unsigned long numberofsuffixes)
 {
   unsigned long lcpvalue;
@@ -65,7 +65,7 @@ unsigned long gt_nextLcpvalueiterator(Lcpvalueiterator *lvi,
                                        false,
                                        0,
                                        lvi->lastsuftabentry,
-                                       suftabptr[lvi->relpos],
+                                       SUFFIXPTRGET(suftabptr,lvi->relpos),
                                        lvi->esr1,
                                        lvi->esr2);
 #ifndef NDEBUG
@@ -76,14 +76,14 @@ unsigned long gt_nextLcpvalueiterator(Lcpvalueiterator *lvi,
               " %lu = %d, lcpval=%lu\n",
               lvi->relpos,
               lvi->lastsuftabentry,
-              suftabptr[lvi->relpos],
+              SUFFIXPTRGET(suftabptr,lvi->relpos),
               cmp,
               lcpvalue);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
 #endif
   }
-  lvi->lastsuftabentry = suftabptr[lvi->relpos];
+  lvi->lastsuftabentry = SUFFIXPTRGET(suftabptr,lvi->relpos);
   if (lvi->relpos + 1 == numberofsuffixes)
   {
     lvi->relpos = 0;

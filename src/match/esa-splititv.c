@@ -30,7 +30,7 @@
 static unsigned long lcpintervalfindrightbound(const GtEncseq *encseq,
                                         GtReadmode readmode,
                                         unsigned long totallength,
-                                        const unsigned long *suftab,
+                                        const Suffixptr *suftab,
                                         GtUchar cc,
                                         unsigned long offset,
                                         unsigned long left,
@@ -42,7 +42,7 @@ static unsigned long lcpintervalfindrightbound(const GtEncseq *encseq,
   while (right > left+1)
   {
     mid = GT_DIV2(left+right);
-    pos = suftab[mid] + offset;
+    pos = SUFFIXPTRGET(suftab,mid) + offset;
     midcc = SEQUENCE(encseq,pos);
     if (cc < midcc)
     {
@@ -58,7 +58,7 @@ static unsigned long lcpintervalfindrightbound(const GtEncseq *encseq,
 bool gt_lcpintervalfindcharchildintv(const GtEncseq *encseq,
                                   GtReadmode readmode,
                                   unsigned long totallength,
-                                  const unsigned long *suftab,
+                                  const Suffixptr *suftab,
                                   Simplelcpinterval *itv,
                                   GtUchar cc,
                                   unsigned long offset,
@@ -68,11 +68,11 @@ bool gt_lcpintervalfindcharchildintv(const GtEncseq *encseq,
   GtUchar leftcc, rightcc;
   unsigned long pos, rightbound, leftbound = left;
 
-  pos = suftab[right] + offset;
+  pos = SUFFIXPTRGET(suftab,right) + offset;
   rightcc = SEQUENCE(encseq,pos);
   while (true)
   {
-    pos = suftab[leftbound] + offset;
+    pos = SUFFIXPTRGET(suftab,leftbound) + offset;
     leftcc = SEQUENCE(encseq,pos);
     if (leftcc == rightcc)
     {
@@ -118,7 +118,7 @@ void gt_lcpintervalsplitwithoutspecial(GtArrayBoundswithchar *bwci,
                                     const GtEncseq *encseq,
                                     GtReadmode readmode,
                                     unsigned long totallength,
-                                    const unsigned long *suftab,
+                                    const Suffixptr *suftab,
                                     unsigned long parentoffset,
                                     unsigned long parentleft,
                                     unsigned long parentright)
@@ -129,10 +129,10 @@ void gt_lcpintervalsplitwithoutspecial(GtArrayBoundswithchar *bwci,
   /* call gt_lcpintervalextendlcp and verify if interval can be extended by
      some character */
   bwci->nextfreeBoundswithchar = 0;
-  rightcc = SEQUENCE(encseq,suftab[parentright] + parentoffset);
+  rightcc = SEQUENCE(encseq,SUFFIXPTRGET(suftab,parentright) + parentoffset);
   while (true)
   {
-    leftcc = SEQUENCE(encseq,suftab[leftbound] + parentoffset);
+    leftcc = SEQUENCE(encseq,SUFFIXPTRGET(suftab,leftbound) + parentoffset);
     gt_assert(bwci->nextfreeBoundswithchar < bwci->allocatedBoundswithchar);
     if (ISSPECIAL(leftcc))
     {
@@ -159,7 +159,7 @@ void gt_lcpintervalsplitwithoutspecial(GtArrayBoundswithchar *bwci,
 
 GtUchar gt_lcpintervalextendlcp(const GtEncseq *encseq,
                            GtReadmode readmode,
-                           const unsigned long *suftab,
+                           const Suffixptr *suftab,
                            unsigned long totallength,
                            GtUchar alphasize,
                            unsigned long parentoffset,
@@ -168,8 +168,8 @@ GtUchar gt_lcpintervalextendlcp(const GtEncseq *encseq,
 {
   GtUchar ccl, ccr;
 
-  ccl = SEQUENCE(encseq,suftab[parentleft] + parentoffset);
-  ccr = SEQUENCE(encseq,suftab[parentright] + parentoffset);
+  ccl = SEQUENCE(encseq,SUFFIXPTRGET(suftab,parentleft) + parentoffset);
+  ccr = SEQUENCE(encseq,SUFFIXPTRGET(suftab,parentright) + parentoffset);
   if (ccl != ccr || ISSPECIAL(ccl))
   {
     return alphasize;

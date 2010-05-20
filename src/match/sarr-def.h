@@ -25,6 +25,7 @@
 #include "core/unused_api.h"
 #include "core/codetype.h"
 
+#include "suffixptr.h"
 #include "lcpoverflow.h"
 #include "bcktab.h"
 
@@ -99,7 +100,7 @@ typedef struct
   Definedunsignedlong longest; /* for BWT */
   GtReadmode readmode; /* relevant when reading the encoded sequence */
   /* either with mapped input */
-  const unsigned long *suftab;
+  const Suffixptr *suftab;
   const GtUchar *lcptab;
   const Largelcpvalue *llvtab;
   const GtUchar *bwttab;
