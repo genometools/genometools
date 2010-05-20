@@ -147,23 +147,23 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
           {
             if (refstart == UNDEFREFSTART)
             {
-              refstart = suffixarray.suftab[itv.left];
+              refstart = SUFFIXPTRGET(suffixarray.suftab,itv.left);
             } else
             {
               for (idx=itv.left; idx<=itv.right; idx++)
               {
                 retval = gt_encseq_comparetwosuffixes(
-                                            suffixarray.encseq,
-                                            suffixarray.readmode,
-                                            &maxlcp,
-                                            false,
-                                            false,
-                                            (unsigned long) patternlen,
-                                            refstart,
-                                            suffixarray.suftab[idx],
-                                            esr1,
-                                            esr2);
-                gt_assert(retval == 0 && maxlcp == (unsigned long) patternlen);
+                                        suffixarray.encseq,
+                                        suffixarray.readmode,
+                                        &maxlcp,
+                                        false,
+                                        false,
+                                        patternlen,
+                                        refstart,
+                                        SUFFIXPTRGET(suffixarray.suftab,idx),
+                                        esr1,
+                                        esr2);
+                gt_assert(retval == 0 && maxlcp == patternlen);
               }
             }
           }

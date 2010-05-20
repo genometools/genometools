@@ -17,7 +17,7 @@
 #ifndef SUFFIXPTR_H
 #define SUFFIXPTR_H
 
-#undef SUFFIXPTRNEWVERSION
+#define SUFFIXPTRNEWVERSION
 #ifdef SUFFIXPTRNEWVERSION
 typedef struct
 {

@@ -29,6 +29,17 @@ def checksfx(parts,pl,withsmap,sat,cmp,doubling,filelist)
            :maxtime => 600
 end
 
+def checkdc(filelist)
+  filearg=""
+  filelist.each do |filename|
+    filearg += "#{$testdata}#{filename} "
+  end
+  run_test "#{$bin}gt suffixerator -v -pl -dc 64 #{outoptions} " +
+           "-indexname sfx -db " + filearg
+  run_test "#{$bin}gt dev sfxmap #{trials()} #{outoptions} -v sfx",
+           :maxtime => 600
+end
+
 def flattenfilelist(filelist)
   s=""
   filelist.each do |f|
@@ -171,6 +182,14 @@ Test do
   checkbwt(all_fastafiles)
 end
 
+all_fastafiles.each do |filename|
+  Name "gt suffixerator -dc 64 #{filename}"
+  Keywords "gt_suffixerator"
+  Test do
+    checkdc([filename])
+  end
+end
+
 allfiles.each do |filename|
   Name "gt suffixerator uint32 #{filename}"
   Keywords "gt_suffixerator"
@@ -282,6 +301,7 @@ end
 def grumbach()
   return "#{$gttestdata}DNA-mix/Grumbach.fna/"
 end
+
 
 if $gttestdata then
   checkmapped("-db " +

@@ -146,7 +146,7 @@ struct Rmnsufinfo
   GtReadmode readmode;
   const GtEncseq *encseq;
   const GtCodetype **multimappower;
-  unsigned long *sortedsuffixes;
+  Suffixptr *sortedsuffixes;
 };
 
 static void initsortblock(Sortblock *sortblock,

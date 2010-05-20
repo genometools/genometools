@@ -60,8 +60,8 @@ GT_DECLAREARRAYSTRUCT(Countwithpositions);
 typedef struct /* global information */
 {
   unsigned long mersize,
-         totallength;
-  unsigned long minocc,
+                totallength,
+                minocc,
                 maxocc;
   const GtEncseq *encseq;
   GtReadmode readmode;
@@ -77,7 +77,7 @@ typedef struct /* global information */
   unsigned long sizeofbuffer;
   GtArrayLargecount largecounts;
   unsigned long countoutputmers;
-  const unsigned long *suftab; /* only necessary for performtest */
+  const Suffixptr *suftab; /* only necessary for performtest */
   GtUchar *currentmer;    /* only necessary for performtest */
 } TyrDfsstate;
 
@@ -91,10 +91,10 @@ static uint64_t bruteforcecountnumofmers(const TyrDfsstate *state)
   for (idx=0; idx <= state->totallength - state->mersize; idx++)
   {
     if (!gt_encseq_contains_special(state->encseq,
-                                             state->moveforward,
-                                             state->esrspace,
-                                             idx,
-                                             state->mersize))
+                                    state->moveforward,
+                                    state->esrspace,
+                                    idx,
+                                    state->mersize))
     {
       numofmers++;
     }
@@ -131,19 +131,17 @@ static void checknumberofoccurrences(const TyrDfsstate *dfsstate,
                                                 dfsstate->readmode);
   }
   mmsi = gt_newmmsearchiteratorcomplete_plain(dfsstate->encseq,
-                                           dfsstate->suftab,
-                                           0,
-                                           dfsstate->totallength,
-                                           0,
-                                           dfsstate->readmode,
-                                           dfsstate->currentmer,
-                                           (unsigned long) dfsstate->mersize);
+                                              dfsstate->suftab,
+                                              0,
+                                              dfsstate->totallength,
+                                              0,
+                                              dfsstate->readmode,
+                                              dfsstate->currentmer,
+                                              dfsstate->mersize);
   bfcount = gt_countmmsearchiterator(mmsi);
-  if (bfcount != (unsigned long) countocc)
+  if (bfcount != countocc)
   {
-    fprintf(stderr,"bfcount = %lu != %lu = countocc\n",
-                   bfcount,
-                   countocc);
+    fprintf(stderr,"bfcount = %lu != %lu = countocc\n",bfcount,countocc);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   gt_freemmsearchiterator(&mmsi);

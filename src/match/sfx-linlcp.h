@@ -18,15 +18,15 @@
 #ifndef SFX_LINLCP_H
 #define SFX_LINLCP_H
 
-#include "compressedtab.h"
-
 #include "core/encseq.h"
+#include "suffixptr.h"
+#include "compressedtab.h"
 
 Compressedtable *gt_lcp9_manzini(Compressedtable *spacefortab,
                               const GtEncseq *encseq,
                               GtReadmode readmode,
                               unsigned long partwidth,
                               unsigned long totallength,
-                              const unsigned long *sortedsuffixes);
+                              const Suffixptr *sortedsuffixes);
 
 #endif

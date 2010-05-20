@@ -117,33 +117,52 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
 }
 
 static int suftab2file(FILE *outfpsuftab,
-                      const unsigned long *suftab,
-                      unsigned long numberofsuffixes,
-                      GtError *err)
+                       const Suffixptr *suftab,
+                       unsigned long numberofsuffixes,
+                       GtError *err)
 {
   bool haserr = false;
 
-  if (fwrite(suftab,
-            sizeof (*suftab),
-            (size_t) numberofsuffixes,
-            outfpsuftab)
-            != (size_t) numberofsuffixes)
+#ifdef SUFFIXPTRNEWVERSION
+  unsigned long idx;
+
+  for (idx = 0; !haserr && idx < numberofsuffixes; idx++)
   {
-    gt_error_set(err,"cannot write %lu items of size %u: "
-                    "errormsg=\"%s\"",
-        numberofsuffixes,
-        (unsigned int) sizeof (*suftab),
-        strerror(errno));
+    unsigned long value = SUFFIXPTRGET(suftab,idx);
+    if (fwrite(&value,
+               sizeof (value),
+               (size_t) 1,
+               outfpsuftab)
+               != (size_t) 1)
+    {
+      gt_error_set(err,"cannot write one  item of size %u: errormsg=\"%s\"",
+                   (unsigned int) sizeof (*suftab),
+                   strerror(errno));
+      haserr = true;
+    }
+  }
+#else
+  if (fwrite(suftab,
+             sizeof (*suftab),
+             (size_t) numberofsuffixes,
+             outfpsuftab)
+             != (size_t) numberofsuffixes)
+  {
+    gt_error_set(err,"cannot write %lu items of size %u: errormsg=\"%s\"",
+                 numberofsuffixes,
+                 (unsigned int) sizeof (*suftab),
+                 strerror(errno));
     haserr = true;
   }
+#endif
   return haserr ? -1 : 0;
 }
 
 static int bwttab2file(Outfileinfo *outfileinfo,
-                      const unsigned long *suftab,
-                      GtReadmode readmode,
-                      unsigned long numberofsuffixes,
-                      GtError *err)
+                       const Suffixptr *suftab,
+                       GtReadmode readmode,
+                       unsigned long numberofsuffixes,
+                       GtError *err)
 {
   bool haserr = false;
 
@@ -156,7 +175,7 @@ static int bwttab2file(Outfileinfo *outfileinfo,
 
     for (pos=0; pos < numberofsuffixes; pos++)
     {
-      startpos = suftab[pos];
+      startpos = SUFFIXPTRGET(suftab,pos);
       if (startpos == 0)
       {
         cc = (GtUchar) UNDEFBWTCHAR;
@@ -206,7 +225,7 @@ static int suffixeratorwithoutput(const GtStr *indexname,
                                   GtLogger *logger,
                                   GtError *err)
 {
-  const unsigned long *suftabptr;
+  const Suffixptr *suftabptr;
   unsigned long numberofsuffixes;
   bool haserr = false, specialsuffixes = false;
   Sfxiterator *sfi = NULL;
