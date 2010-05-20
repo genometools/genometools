@@ -158,14 +158,14 @@ void             gt_encseq_encoder_set_progresstimer(GtEncseqEncoder *ee,
    'bytecompress', 'bit', 'uchar', 'ushort' or 'uint32'. Returns 0 on success,
    and a negative value on error (<err> is set accordingly). */
 int              gt_encseq_encoder_use_representation(GtEncseqEncoder *ee,
-                                                      GtStr *sat,
+                                                      const char *sat,
                                                       GtError *err);
 /* Sets the symbol map file to use in <ee> to <smap> which must a valid
    alphabet description file. Returns 0 on success, and a negative value on
    error (<err> is set accordingly). Default is NULL (no alphabet
    transformation). */
 int              gt_encseq_encoder_use_symbolmap_file(GtEncseqEncoder *ee,
-                                                      GtStr *smap,
+                                                      const char *smap,
                                                       GtError *err);
 /* Sets the logger to use by <ee> during encoding to <l>. Default is NULL (no
    logging). */

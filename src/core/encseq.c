@@ -5857,28 +5857,28 @@ void gt_encseq_encoder_set_input_preencoded(GtEncseqEncoder *ee)
   ee->isplain = true;
 }
 
-int gt_encseq_encoder_use_representation(GtEncseqEncoder *ee, GtStr *sat,
+int gt_encseq_encoder_use_representation(GtEncseqEncoder *ee, const char *sat,
                                          GtError *err)
 {
   gt_assert(ee && sat);
-  if (gt_str_length(sat) > 0
-        && str2positionaccesstype(gt_str_get(sat)) == Undefpositionaccesstype) {
-    gt_error_set(err, "undefined access type: '%s'", gt_str_get(sat));
+  if (sat && strlen(sat) > 0
+        && str2positionaccesstype(sat) == Undefpositionaccesstype) {
+    gt_error_set(err, "undefined access type: '%s'", sat);
     return -1;
   }
   if (ee->sat != NULL)
     gt_str_delete(ee->sat);
-  ee->sat = gt_str_ref(sat);
+  ee->sat = gt_str_new_cstr(sat);
   return 0;
 }
 
-int gt_encseq_encoder_use_symbolmap_file(GtEncseqEncoder *ee, GtStr *smap,
+int gt_encseq_encoder_use_symbolmap_file(GtEncseqEncoder *ee, const char *smap,
                                          GT_UNUSED GtError *err)
 {
   gt_assert(ee && smap);
   if (ee->smapfile != NULL)
     gt_str_delete(ee->smapfile);
-  ee->smapfile = gt_str_ref(smap);
+  ee->smapfile = gt_str_new_cstr(smap);
   return 0;
 }
 

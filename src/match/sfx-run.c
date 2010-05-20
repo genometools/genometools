@@ -470,9 +470,13 @@ static int runsuffixerator(bool doesa,
     if (so->fn2encopt.isplain)
       gt_encseq_encoder_set_input_preencoded(ee);
     gt_encseq_encoder_set_progresstimer(ee, sfxprogress);
-    haserr = gt_encseq_encoder_use_symbolmap_file(ee, so->fn2encopt.smap, err);
+    haserr = gt_encseq_encoder_use_symbolmap_file(ee,
+                                                 gt_str_get(so->fn2encopt.smap),
+                                                 err);
     if (!haserr) {
-      haserr = gt_encseq_encoder_use_representation(ee, so->fn2encopt.sat, err);
+      haserr = gt_encseq_encoder_use_representation(ee,
+                                                  gt_str_get(so->fn2encopt.sat),
+                                                  err);
     }
     if (!haserr) {
       int rval;
