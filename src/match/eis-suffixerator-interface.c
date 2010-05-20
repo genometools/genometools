@@ -159,6 +159,7 @@ gt_newSfxInterface(GtReadmode readmode,
                 const Sfxstrategy *sfxstrategy,
                 const GtEncseq *encseq,
                 GtProgressTimer *sfxprogress,
+                bool withprogressbar,
                 unsigned long length,
                 GtLogger *verbosity,
                 GtError *err)
@@ -172,6 +173,7 @@ gt_newSfxInterface(GtReadmode readmode,
                                     NULL,
                                     encseq,
                                     sfxprogress,
+                                    withprogressbar,
                                     length,
                                     verbosity,
                                     err);
@@ -225,16 +227,17 @@ deleteSeqStats(struct seqStats *stats)
 
 sfxInterface *
 gt_newSfxInterfaceWithReaders(GtReadmode readmode,
-                           unsigned int prefixlength,
-                           unsigned int numofparts,
-                           const Sfxstrategy *sfxstrategy,
-                           size_t numReaders,
-                           enum sfxDataRequest readerRequests[],
-                           SeqDataReader readers[],
-                           const GtEncseq *encseq,
-                           GtProgressTimer *sfxprogress,
-                           unsigned long length,
-                           GtLogger *verbosity, GtError *err)
+                              unsigned int prefixlength,
+                              unsigned int numofparts,
+                              const Sfxstrategy *sfxstrategy,
+                              size_t numReaders,
+                              enum sfxDataRequest readerRequests[],
+                              SeqDataReader readers[],
+                              const GtEncseq *encseq,
+                              GtProgressTimer *sfxprogress,
+                              bool withprogressbar,
+                              unsigned long length,
+                              GtLogger *verbosity, GtError *err)
 {
   sfxInterface *sfxi = NULL;
   gt_error_check(err);
@@ -258,6 +261,7 @@ gt_newSfxInterfaceWithReaders(GtReadmode readmode,
                                    NULL,
                                    sfxstrategy,
                                    sfxprogress,
+                                   withprogressbar,
                                    verbosity, err)))
     gt_newSfxInterfaceWithReadersErrRet();
   sfxi->rot0Pos.defined = false;

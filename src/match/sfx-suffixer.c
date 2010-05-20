@@ -80,6 +80,7 @@ struct Sfxiterator
   Sfxstrategy sfxstrategy;
   GtLogger *logger;
   GtProgressTimer *sfxprogress;
+  bool withprogressbar;
   Differencecover *dcov;
 };
 
@@ -506,6 +507,7 @@ Sfxiterator *gt_newSfxiterator(const GtEncseq *encseq,
                                Outlcpinfo *outlcpinfo,
                                const Sfxstrategy *sfxstrategy,
                                GtProgressTimer *sfxprogress,
+                               bool withprogressbar,
                                GtLogger *logger,
                                GtError *err)
 {
@@ -548,6 +550,7 @@ Sfxiterator *gt_newSfxiterator(const GtEncseq *encseq,
     sfi->numofchars = gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq));
     sfi->prefixlength = prefixlength;
     sfi->dcov = NULL;
+    sfi->withprogressbar = withprogressbar;
     if (sfxstrategy != NULL)
     {
        sfi->sfxstrategy = *sfxstrategy;
@@ -737,8 +740,7 @@ static void preparethispart(Sfxiterator *sfi)
   unsigned long partwidth;
   unsigned int numofparts = stpgetnumofparts(sfi->suftabparts);
 
-  if (sfi->part == 0 &&
-      sfi->sfxprogress != NULL && gt_progress_timer_use_bar(sfi->sfxprogress))
+  if (sfi->part == 0 && sfi->withprogressbar)
   {
     gt_progressbar_start(&sfi->bucketiterstep,
                          (unsigned long long) sfi->numofallcodes);
@@ -1070,7 +1072,7 @@ const unsigned long *gt_nextSfxiterator(unsigned long *numberofsuffixes,
   }
   if (sfi->exhausted)
   {
-    if (sfi->sfxprogress != NULL && gt_progress_timer_use_bar(sfi->sfxprogress))
+    if (sfi->withprogressbar)
     {
       gt_progressbar_stop();
     }

@@ -202,6 +202,7 @@ static int suffixeratorwithoutput(const GtStr *indexname,
                                   unsigned int numofparts,
                                   const Sfxstrategy *sfxstrategy,
                                   GtProgressTimer *sfxprogress,
+                                  bool withprogressbar,
                                   GtLogger *logger,
                                   GtError *err)
 {
@@ -217,6 +218,7 @@ static int suffixeratorwithoutput(const GtStr *indexname,
                       outfileinfo->outlcpinfo,
                       sfxstrategy,
                       sfxprogress,
+                      withprogressbar,
                       logger,
                       err);
   if (sfi == NULL)
@@ -350,6 +352,7 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
 
 static int run_packedindexconstruction(GtLogger *logger,
                                       GtProgressTimer *sfxprogress,
+                                      bool withprogressbar,
                                       FILE *outfpbcktab,
                                       const Suffixeratoroptions *so,
                                       unsigned int prefixlength,
@@ -373,6 +376,7 @@ static int run_packedindexconstruction(GtLogger *logger,
                       sfxstrategy,
                       encseq,
                       sfxprogress,
+                      withprogressbar,
                       gt_encseq_total_length(encseq) + 1,
                       logger,
                       err);
@@ -412,7 +416,7 @@ static int runsuffixerator(bool doesa,
                           GtLogger *logger,
                           GtError *err)
 {
-  GtProgressTimer *sfxprogress;
+  GtProgressTimer *sfxprogress = NULL;
   Outfileinfo outfileinfo;
   bool haserr = false;
   unsigned int prefixlength;
@@ -426,16 +430,7 @@ static int runsuffixerator(bool doesa,
   if (so->showtime)
   {
     sfxprogress = gt_progress_timer_new("determining sequence length and "
-                                        "number of special symbols", false);
-  } else
-  {
-    if (so->showprogress)
-    {
-      sfxprogress = gt_progress_timer_new(NULL, true);
-    } else
-    {
-      sfxprogress = NULL;
-    }
+                                        "number of special symbols");
   }
   if (gt_str_length(so->inputindex) > 0)
   {
@@ -588,6 +583,7 @@ static int runsuffixerator(bool doesa,
                                   so->numofparts,
                                   &sfxstrategy,
                                   sfxprogress,
+                                  so->showprogress,
                                   logger,
                                   err) != 0)
         {
@@ -597,6 +593,7 @@ static int runsuffixerator(bool doesa,
       {
         if (run_packedindexconstruction(logger,
                                         sfxprogress,
+                                        so->showprogress,
                                         outfileinfo.outfpbcktab,
                                         so,
                                         prefixlength,

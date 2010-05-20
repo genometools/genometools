@@ -67,6 +67,7 @@ static int constructsarrandrunmaxpairs(
                  unsigned int prefixlength,
                  unsigned int numofparts,
                  GtProgressTimer *sfxprogress,
+                 bool withprogressbar,
                  GtLogger *logger,
                  GtError *err)
 {
@@ -83,6 +84,7 @@ static int constructsarrandrunmaxpairs(
                        NULL, /* oulcpinfo */
                        NULL, /* sfxstrategy */
                        sfxprogress,
+                       withprogressbar,
                        NULL, /* verbosinfo */
                        err);
   if (sfi == NULL)
@@ -166,6 +168,7 @@ static int sarrselfsubstringmatch(const GtUchar *dbseq,
                                                           dblen+querylen+1),
                                   1U, /* parts */
                                   NULL,
+                                  false,
                                   logger,
                                   err) != 0)
   {

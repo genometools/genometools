@@ -618,6 +618,7 @@ static int constructsarrandrunmmsearch(
                  Processquerymatch processquerymatch,
                  void *processquerymatchinfo,
                  GtProgressTimer *sfxprogress,
+                 bool withprogressbar,
                  GtError *err)
 {
   const unsigned long *suftabptr;
@@ -634,6 +635,7 @@ static int constructsarrandrunmmsearch(
                        NULL, /* outlcpinfo */
                        NULL, /* sfxstrategy */
                        sfxprogress,
+                       withprogressbar,
                        NULL, /* logger */
                        err);
   if (sfi == NULL)
@@ -714,6 +716,7 @@ int gt_sarrquerysubstringmatch(const GtUchar *dbseq,
                                   processquerymatch,
                                   processquerymatchinfo,
                                   NULL,
+                                  false,
                                   err) != 0)
   {
     haserr = true;

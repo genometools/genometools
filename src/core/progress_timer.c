@@ -24,12 +24,11 @@
 
 struct GtProgressTimer
 {
-  bool showprogressbar;
   clock_t startclock, overalltime;
   const char *eventdescription;
 };
 
-GtProgressTimer* gt_progress_timer_new(const char *event, bool use_bar)
+GtProgressTimer* gt_progress_timer_new(const char *event)
 {
   GtProgressTimer *pt;
 
@@ -44,7 +43,6 @@ GtProgressTimer* gt_progress_timer_new(const char *event, bool use_bar)
     pt->overalltime = 0;
     pt->eventdescription = event;
   }
-  pt->showprogressbar = use_bar;
   return pt;
 }
 
@@ -53,36 +51,24 @@ void gt_progress_timer_start_new_state(GtProgressTimer *pt,
                                        FILE *fp)
 {
   gt_assert(pt);
-  if (pt->showprogressbar)
+  clock_t stopclock;
+
+  stopclock = clock();
+  fprintf(fp,"# TIME %s %.2f\n",pt->eventdescription,
+           (double) (stopclock-pt->startclock)/
+           (double) CLOCKS_PER_SEC);
+  (void) fflush(fp);
+  pt->overalltime += (stopclock - pt->startclock);
+  if (newstate == NULL)
   {
-    return;
+    fprintf(fp,"# TIME overall %.2f\n",
+                (double) pt->overalltime/(double) CLOCKS_PER_SEC);
+    (void) fflush(fp);
   } else
   {
-    clock_t stopclock;
-
-    stopclock = clock();
-    fprintf(fp,"# TIME %s %.2f\n",pt->eventdescription,
-             (double) (stopclock-pt->startclock)/
-             (double) CLOCKS_PER_SEC);
-    (void) fflush(fp);
-    pt->overalltime += (stopclock - pt->startclock);
-    if (newstate == NULL)
-    {
-      fprintf(fp,"# TIME overall %.2f\n",
-                  (double) pt->overalltime/(double) CLOCKS_PER_SEC);
-      (void) fflush(fp);
-    } else
-    {
-      pt->startclock = stopclock;
-      pt->eventdescription = newstate;
-    }
+    pt->startclock = stopclock;
+    pt->eventdescription = newstate;
   }
-}
-
-bool gt_progress_timer_use_bar(const GtProgressTimer *pt)
-{
-  gt_assert(pt);
-  return pt->showprogressbar;
 }
 
 void gt_progress_timer_delete(GtProgressTimer *pt)

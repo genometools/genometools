@@ -30,21 +30,22 @@ typedef struct Sfxiterator Sfxiterator;
 void gt_freeSfxiterator(Sfxiterator **sfiptr);
 
 Sfxiterator *gt_newSfxiterator(const GtEncseq *encseq,
-                            GtReadmode readmode,
-                            unsigned int prefixlength,
-                            unsigned int numofparts,
-                            Outlcpinfo *outlcpinfo,
-                            const Sfxstrategy *sfxstrategy,
-                            GtProgressTimer *sfxprogress,
-                            GtLogger *logger,
-                            GtError *err);
+                               GtReadmode readmode,
+                               unsigned int prefixlength,
+                               unsigned int numofparts,
+                               Outlcpinfo *outlcpinfo,
+                               const Sfxstrategy *sfxstrategy,
+                               GtProgressTimer *sfxprogress,
+                               bool withprogressbar,
+                               GtLogger *logger,
+                               GtError *err);
 
 const unsigned long *gt_nextSfxiterator(unsigned long *numberofsuffixes,
-                              bool *specialsuffixes,
-                              Sfxiterator *sfi);
+                                        bool *specialsuffixes,
+                                        Sfxiterator *sfi);
 
 int gt_postsortsuffixesfromstream(Sfxiterator *sfi, const GtStr *indexname,
-                               GtError *err);
+                                  GtError *err);
 
 bool gt_sfi2longestsuffixpos(unsigned long *longest,const Sfxiterator *sfi);
 
