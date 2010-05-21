@@ -17,6 +17,7 @@
 
 require 'dl/import'
 require 'gthelper'
+require 'annotationsketch/graphics'
 require 'core/str'
 
 module GT
@@ -28,7 +29,7 @@ module GT
                                            "GtError*)"
   extern "int gt_canvas_cairo_file_to_stream(GtCanvasCairoFile*, GtStr*)"
   extern "void gt_canvas_delete(GtCanvas*)"
-
+  
   class Canvas
     def initialize(*)
       raise(NotImplementedError, "Please call the constructor of a " +
@@ -36,18 +37,12 @@ module GT
     end
   end
 
-  class CanvasCairoFile < Canvas
-    def initialize(style, width, height, ii = nil)
-      if ii.nil? then
-        @canvas = GT.gt_canvas_cairo_file_new(style.style, 1, width, height, \
-                                              GT::NULL)
-      else
-        @canvas = GT.gt_canvas_cairo_file_new(style.style, 1, width, height, \
-                                              ii.to_ptr)
-      end
-      @canvas.free = GT::symbol("gt_canvas_delete", "0P")
+  class CanvasCairoFileBase < Canvas
+    def initialize(*)
+      raise(NotImplementedError, "Please call the constructor of a " +
+                                 "#{self.class} implementation.")
     end
-
+  
     def to_file(filename)
       err = GT::Error.new()
       rval = GT.gt_canvas_cairo_file_to_file(@canvas, filename, err.to_ptr)
@@ -62,6 +57,71 @@ module GT
 
     def to_ptr
       @canvas
+    end
+  end
+
+  class CanvasCairoFile < CanvasCairoFileBase
+    def initialize(style, width, height, ii = nil)
+      if ii.nil? then
+        @canvas = GT.gt_canvas_cairo_file_new(style.style, GT::GRAPHICS_PNG, \
+                                              width, height, GT::NULL)
+      else
+        @canvas = GT.gt_canvas_cairo_file_new(style.style, 1, width, height, \
+                                              ii.to_ptr)
+      end
+      @canvas.free = GT::symbol("gt_canvas_delete", "0P")
+    end
+  end
+
+  class CanvasCairoFilePNG < CanvasCairoFileBase
+    def initialize(style, width, height, ii = nil)
+      if ii.nil? then
+        @canvas = GT.gt_canvas_cairo_file_new(style.style, GT::GRAPHICS_PNG, \
+                                              width, height, GT::NULL)
+      else
+        @canvas = GT.gt_canvas_cairo_file_new(style.style, 1, width, height, \
+                                              ii.to_ptr)
+      end
+      @canvas.free = GT::symbol("gt_canvas_delete", "0P")
+    end
+  end
+
+  class CanvasCairoFilePS < CanvasCairoFileBase
+    def initialize(style, width, height, ii = nil)
+      if ii.nil? then
+        @canvas = GT.gt_canvas_cairo_file_new(style.style, GT::GRAPHICS_PS, \
+                                              width, height, GT::NULL)
+      else
+        @canvas = GT.gt_canvas_cairo_file_new(style.style, 1, width, height, \
+                                              ii.to_ptr)
+      end
+      @canvas.free = GT::symbol("gt_canvas_delete", "0P")
+    end
+  end
+
+  class CanvasCairoFileSVG < CanvasCairoFileBase
+    def initialize(style, width, height, ii = nil)
+      if ii.nil? then
+        @canvas = GT.gt_canvas_cairo_file_new(style.style, GT::GRAPHICS_SVG, \
+                                              width, height, GT::NULL)
+      else
+        @canvas = GT.gt_canvas_cairo_file_new(style.style, 1, width, height, \
+                                              ii.to_ptr)
+      end
+      @canvas.free = GT::symbol("gt_canvas_delete", "0P")
+    end
+  end
+
+  class CanvasCairoFilePDF < CanvasCairoFileBase
+    def initialize(style, width, height, ii = nil)
+      if ii.nil? then
+        @canvas = GT.gt_canvas_cairo_file_new(style.style, GT::GRAPHICS_PDF, \
+                                              width, height, GT::NULL)
+      else
+        @canvas = GT.gt_canvas_cairo_file_new(style.style, 1, width, height, \
+                                              ii.to_ptr)
+      end
+      @canvas.free = GT::symbol("gt_canvas_delete", "0P")
     end
   end
 end
