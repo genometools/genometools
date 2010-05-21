@@ -68,11 +68,9 @@ module GT
     def get_features_for_range(start, stop, seqid)
       a = Array.create()
       err = Error.new()
-      rng = Range.malloc
-      rng.start = start
-      rng.end = stop
+      rng = Range.new(start, stop)
       rval = GT::gt_feature_index_get_features_for_range(@feature_index, a, \
-                                                         seqid, rng, err)
+                                                         seqid, rng.to_ptr, err)
       if rval != 0 then
           GT.gterror(err)
       end
@@ -103,9 +101,10 @@ module GT
       if not GT.gt_feature_index_has_seqid(@feature_index, seqid)
         GT.gterror("feature_index does not contain seqid")
       end
-      range = GT::Range.malloc
+      range = DL::malloc(DL::sizeof("LL"))
       GT.gt_feature_index_get_range_for_seqid(@feature_index, range, seqid)
-      range
+      range.struct!("LL", :start, :stop)
+      Range.new(range[:start],range[:stop])
     end
 
     def to_ptr

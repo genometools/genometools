@@ -48,7 +48,7 @@ module GT
       if !style.is_a?(GT::Style) then
         GT.gterror("'style' parameter must be a Style object!")
       end
-      diagram = GT.gt_diagram_new(feature_index, seqid, range,
+      diagram = GT.gt_diagram_new(feature_index, seqid, range.to_ptr,
                                   style, err)
       if diagram.nil? then
         GT::gterror(err)
@@ -67,7 +67,7 @@ module GT
         end
         gtarr.add(i)
       end
-      diagram = GT.gt_diagram_new_from_array(gtarr, range, style)
+      diagram = GT.gt_diagram_new_from_array(gtarr, range.to_ptr, style)
       return GT::Diagram.new(diagram)
     end
 

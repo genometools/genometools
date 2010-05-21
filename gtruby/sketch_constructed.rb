@@ -27,9 +27,7 @@ pngfile = ARGV[1]
 style = GT::Style.new()
 style.load_file(ARGV[0])
 
-rng = GT::Range.malloc()
-rng.start = 1
-rng.end   = 1000
+rng = GT::Range.new(1, 1000)
 
 diagram = GT::Diagram.from_array([gene, reverse_gene], rng, style)
 

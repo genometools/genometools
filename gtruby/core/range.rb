@@ -15,11 +15,45 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-require 'dl/struct'
-
 module GT
-  Range = struct [
-    "ulong start",
-    "ulong end"
-  ]
+  class Range
+    def initialize(start = 0, stop = 0)
+      if start > stop or start < 0 or stop < 0 then
+        GT.gterror("range error: start > end!")
+      end
+      @start = start
+      # 'end' is a reserved token in Ruby and cannot be used as an identifier
+      @stop = stop
+    end
+
+    def start
+      @start
+    end
+
+    def start=(val)
+      if val > @stop or not val >= 0 then
+        GT.gterror("Invalid range start component: %d" % val)
+      end
+      @start = val
+    end
+
+    def Range.malloc
+      Range.new()
+    end
+
+    def end
+      @stop
+    end
+    
+    def end=(val)
+      if val < @start or not val >= 0 then
+        GT.gterror("Invalid range end component: %d" % val)
+      end
+      @stop = val
+    end
+
+    def to_ptr
+      (@mem = [@start, @stop].pack("L_L_")).to_ptr
+    end
+  end
 end
