@@ -23,6 +23,10 @@ from gt.annotationsketch.image_info import ImageInfo
 from gt.core.error import Error, gterror
 from gt.core.gtstr import Str
 
+GRAPHICS_PDF = 0
+GRAPHICS_PNG = 1
+GRAPHICS_PS  = 2
+GRAPHICS_SVG = 3
 
 class Canvas:
 
@@ -44,12 +48,7 @@ class Canvas:
     from_param = classmethod(from_param)
 
 
-class CanvasCairoFile(Canvas):
-
-    def __init__(self, style, width, height, ii=None):
-        self.canvas = gtlib.gt_canvas_cairo_file_new(style, 1, width,
-                height, ii)
-        self._as_parameter_ = self.canvas
+class CanvasCairoFileBase(Canvas):
 
     def from_param(cls, obj):
         if not isinstance(obj, CanvasCairoFile):
@@ -85,3 +84,41 @@ class CanvasCairoFile(Canvas):
     register = classmethod(register)
 
 
+class CanvasCairoFile(CanvasCairoFileBase):
+  
+    def __init__(self, style, width, height, ii=None):
+        self.canvas = gtlib.gt_canvas_cairo_file_new(style, GRAPHICS_PNG, width,
+                height, ii)
+        self._as_parameter_ = self.canvas
+
+
+class CanvasCairoFilePNG(CanvasCairoFileBase):
+  
+    def __init__(self, style, width, height, ii=None):
+        self.canvas = gtlib.gt_canvas_cairo_file_new(style, GRAPHICS_PNG, width,
+                height, ii)
+        self._as_parameter_ = self.canvas
+
+
+class CanvasCairoFilePDF(CanvasCairoFileBase):
+  
+    def __init__(self, style, width, height, ii=None):
+        self.canvas = gtlib.gt_canvas_cairo_file_new(style, GRAPHICS_PDF, width,
+                height, ii)
+        self._as_parameter_ = self.canvas
+
+
+class CanvasCairoFilePS(CanvasCairoFileBase):
+  
+    def __init__(self, style, width, height, ii=None):
+        self.canvas = gtlib.gt_canvas_cairo_file_new(style, GRAPHICS_PS, width,
+                height, ii)
+        self._as_parameter_ = self.canvas
+
+
+class CanvasCairoFileSVG(CanvasCairoFileBase):
+  
+    def __init__(self, style, width, height, ii=None):
+        self.canvas = gtlib.gt_canvas_cairo_file_new(style, GRAPHICS_SVG, width,
+                height, ii)
+        self._as_parameter_ = self.canvas

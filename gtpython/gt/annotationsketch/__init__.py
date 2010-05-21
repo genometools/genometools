@@ -32,7 +32,7 @@ from style import *
 
 try:
     Block.register(gtlib)
-    CanvasCairoFile.register(gtlib)
+    CanvasCairoFileBase.register(gtlib)
     CustomTrack.register(gtlib)
     Diagram.register(gtlib)
     #DiagramFromArray.register(gtlib)
