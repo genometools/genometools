@@ -34,9 +34,9 @@ def checkdc(filelist)
   filelist.each do |filename|
     filearg += "#{$testdata}#{filename} "
   end
-  run_test "#{$bin}gt suffixerator -v -pl -dc 64 #{outoptions} " +
+  run_test "#{$bin}gt suffixerator -v -pl -dc 64 -suf -tis " +
            "-indexname sfx -db " + filearg
-  run_test "#{$bin}gt dev sfxmap #{trials()} #{outoptions} -v sfx",
+  run_test "#{$bin}gt dev sfxmap #{trials()} -suf -tis -v sfx",
            :maxtime => 600
 end
 
@@ -188,6 +188,12 @@ all_fastafiles.each do |filename|
   Test do
     checkdc([filename])
   end
+end
+
+Name "gt suffixerator -dc 64 all-fastafiles"
+Keywords "gt_suffixerator"
+Test do
+  checkdc(all_fastafiles)
 end
 
 allfiles.each do |filename|

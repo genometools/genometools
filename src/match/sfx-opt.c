@@ -418,8 +418,7 @@ static GtOPrval parse_options(int *parsed_args,
   if (so->sfxstrategy.differencecover > 0 && optionlcp != NULL &&
       gt_option_is_set(optionlcp))
   {
-    gt_error_set(err,"option -maxdepth with argument dc can not be combined "
-                     "with option lcp");
+    gt_error_set(err,"option -dc cannot be combined with option -lcp");
     oprval = GT_OPTION_PARSER_ERROR;
   }
   if (oprval == GT_OPTION_PARSER_OK && !doesa)
