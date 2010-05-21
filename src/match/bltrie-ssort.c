@@ -397,7 +397,7 @@ static unsigned long enumeratetrieleaves (Suffixptr *suffixtable,
                                           void (*dc_processunsortedrange)(
                                                    void *,
                                                    Suffixptr *,
-                                                   Suffixptr *,
+                                                   unsigned long,
                                                    unsigned long))
 {
   bool readyforpop = false, currentnodeisleaf;
@@ -445,7 +445,7 @@ static unsigned long enumeratetrieleaves (Suffixptr *suffixtable,
               dc_processunsortedrange(voiddcov,
                                       suffixtable + nextfree - 1
                                                   - equalsrangewidth,
-                                      suffixtable + nextfree - 1,
+                                      equalsrangewidth + 1,
                                       blindtrie->maxdepth);
               equalsrangewidth = 0;
             }
@@ -494,7 +494,7 @@ static unsigned long enumeratetrieleaves (Suffixptr *suffixtable,
   {
     dc_processunsortedrange(voiddcov,
                             suffixtable + nextfree - 1 - equalsrangewidth,
-                            suffixtable + nextfree - 1,
+                            equalsrangewidth + 1,
                             blindtrie->maxdepth);
     equalsrangewidth = 0;
   }
@@ -685,7 +685,7 @@ unsigned long gt_blindtrie_suffixsort(
                             void *voiddcov,
                             void (*dc_processunsortedrange)(void *,
                                                             Suffixptr *,
-                                                            Suffixptr *,
+                                                            unsigned long,
                                                             unsigned long))
 {
   unsigned long idx, stackidx;

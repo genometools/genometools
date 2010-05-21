@@ -49,7 +49,7 @@ unsigned long gt_blindtrie_suffixsort(
                             void *voiddcov,
                             void (*dc_processunsortedrange)(void *,
                                                             Suffixptr *,
-                                                            Suffixptr *,
+                                                            unsigned long,
                                                             unsigned long));
 
 void gt_blindtrie_delete(Blindtrie **blindtrie);

@@ -357,7 +357,7 @@ typedef struct
   Suftab *suftab;
   void (*dc_processunsortedrange)(void *,
                                   Suffixptr *,
-                                  Suffixptr *,
+                                  unsigned long,
                                   unsigned long);
   void *voiddcov;
   bool *equalwithprevious;
@@ -669,7 +669,7 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
 #endif
           bsr->dc_processunsortedrange(bsr->voiddcov,
                                        leftptr + idx - 1 - equalsrangewidth,
-                                       leftptr + idx - 1,maxdepth);
+                                       equalsrangewidth+1, maxdepth);
           equalsrangewidth = 0;
         }
       }
@@ -682,7 +682,7 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
 #endif
       bsr->dc_processunsortedrange(bsr->voiddcov,
                                    leftptr + width - 1 - equalsrangewidth,
-                                   leftptr + width - 1,maxdepth);
+                                   equalsrangewidth, maxdepth);
     }
   }
 }
@@ -1024,7 +1024,9 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
       {
         if (depth >= (unsigned long) bsr->sfxstrategy->differencecover)
         {
-          bsr->dc_processunsortedrange(bsr->voiddcov,leftptr,rightptr,depth);
+          bsr->dc_processunsortedrange(bsr->voiddcov,leftptr,
+                                       (unsigned long) (rightptr - leftptr + 1),
+                                       depth);
           return;
         }
         if (width <= bsr->sfxstrategy->maxinsertionsort)
@@ -2322,7 +2324,7 @@ void gt_sortbucketofsuffixes(Suffixptr *suffixestobesorted,
                              void *voiddcov,
                              void (*dc_processunsortedrange)(void *,
                                                              Suffixptr *,
-                                                             Suffixptr *,
+                                                             unsigned long,
                                                              unsigned long),
                              GtLogger *logger)
 {

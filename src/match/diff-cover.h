@@ -46,7 +46,7 @@ void gt_differencecover_delete(Differencecover *dcov);
 
 void dc_sortunsortedbucket(void *data,
                            Suffixptr *leftptr,
-                           Suffixptr *rightptr,
+                           unsigned long width,
                            GT_UNUSED unsigned long depth);
 
 #endif

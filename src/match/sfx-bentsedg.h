@@ -95,7 +95,7 @@ void gt_sortbucketofsuffixes(Suffixptr *suffixestobesorted,
                              void *voiddcov,
                              void (*dc_processunsortedrange)(void *,
                                                              Suffixptr *,
-                                                             Suffixptr *,
+                                                             unsigned long,
                                                              unsigned long),
                              GtLogger *logger);
 

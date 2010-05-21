@@ -126,11 +126,11 @@ typedef Suffixptr Sorttype;
 static int qsortcmp (const Sorttype *a,const Sorttype *b,
                      const GT_UNUSED void *data)
 {
-  if ((*a) < (*b))
+  if (SUFFIXPTRDEREF(a) < SUFFIXPTRDEREF(b))
   {
     return -1;
   }
-  if ((*a) > (*b))
+  if (SUFFIXPTRDEREF(a) > SUFFIXPTRDEREF(b))
   {
     return 1;
   }
@@ -652,14 +652,13 @@ static void dc_initinversesuftabnonspecialsadjust(Differencecover *dcov)
 
 static void dc_anchorleftmost(Differencecover *dcov,
                               Suffixptr *leftptr,
-                              Suffixptr *rightptr)
+                              unsigned long width)
 {
-  Suffixptr *ptr;
-  unsigned long baseindex = (unsigned long) (leftptr - dcov->sortedsample);
+  unsigned long idx, baseindex = (unsigned long) (leftptr - dcov->sortedsample);
 
-  for (ptr = leftptr; ptr <= rightptr; ptr++)
+  for (idx = 0; idx < width; idx++)
   {
-    inversesuftab_set(dcov,SUFFIXPTRDEREF(ptr),baseindex);
+    inversesuftab_set(dcov,SUFFIXPTRGET(leftptr,idx),baseindex);
   }
 }
 
@@ -804,7 +803,7 @@ static void dc_sortsuffixesonthislevel(Differencecover *dcov,
                                 GT_MULT2(dcov->currentdepth));
         dc_anchorleftmost(dcov,
                           leftptr + rangestart,
-                          leftptr + idx - 1);
+                          idx - rangestart);
       } else
       {
         unsigned long currentsuftabentry = SUFFIXPTRGET(leftptr,rangestart);
@@ -823,7 +822,7 @@ static void dc_sortsuffixesonthislevel(Differencecover *dcov,
                             GT_MULT2(dcov->currentdepth));
     dc_anchorleftmost(dcov,
                       leftptr + rangestart,
-                      leftptr + width - 1);
+                      width - rangestart);
   } else
   {
     unsigned long currentsuftabentry = SUFFIXPTRGET(leftptr,rangestart);
@@ -863,17 +862,17 @@ static void dc_bcktab2firstlevelintervals(Differencecover *dcov)
 
 static void dc_addunsortedrange(void *voiddcov,
                                 Suffixptr *leftptr,
-                                Suffixptr *rightptr,
+                                unsigned long width,
                                 GT_UNUSED unsigned long depth)
 {
   Differencecover *dcov = (Differencecover *) voiddcov;
   Pairsuffixptr *ptr;
 
   gt_assert(depth >= (unsigned long) dcov->vparam);
-  dc_updatewidth (dcov,(unsigned long) (rightptr - leftptr + 1),dcov->vparam);
+  dc_updatewidth (dcov,width,dcov->vparam);
   GT_GETNEXTFREEINARRAY(ptr,&dcov->firstgeneration,Pairsuffixptr,1024);
   ptr->leftptr = leftptr;
-  ptr->rightptr = rightptr;
+  ptr->rightptr = leftptr + width - 1;
 }
 
 #ifdef QSORT_INTEGER
@@ -907,8 +906,7 @@ static int comparedcov_presortedsuffixes(const void *a,const void *b,
 
 typedef Suffixptr Sorttype;
 
-static int qsortcmp (const Sorttype *a,const Sorttype *b,
-                     const void *data)
+static int qsortcmp (const Sorttype *a,const Sorttype *b,const void *data)
 {
   const Differencecover *dcov = (const Differencecover *) data;
   const unsigned long suffixpos1 = SUFFIXPTRDEREF(a);
@@ -938,7 +936,7 @@ static int qsortcmp (const Sorttype *a,const Sorttype *b,
 
 void dc_sortunsortedbucket(void *data,
                            Suffixptr *leftptr,
-                           Suffixptr *rightptr,
+                           unsigned long width,
                            GT_UNUSED unsigned long depth)
 {
 #ifdef WITHCHECK
@@ -947,23 +945,23 @@ void dc_sortunsortedbucket(void *data,
   gt_assert(depth >= (unsigned long) dcov->vparam);
   gt_assert(dcov->diff2pos != NULL);
 #endif
-  gt_assert(leftptr < rightptr);
+  gt_assert(width >= 2UL);
 #ifdef WITHCHECK
   gt_checksortedsuffixes(__FILE__,
                          __LINE__,
                          dcov->encseq,
                          dcov->readmode,
                          leftptr,
-                         (unsigned long) (rightptr - leftptr + 1),
+                         width,
                          false, /* specialsareequal  */
                          false,  /* specialsareequalatdepth0 */
                          (unsigned long) dcov->vparam);
 #endif
 #ifdef QSORT_INTEGER
-  gt_qsort_r(leftptr,(size_t) (rightptr - leftptr + 1),sizeof (*leftptr),data,
+  gt_qsort_r(leftptr,(size_t) width,sizeof (*leftptr),data,
              comparedcov_presortedsuffixes);
 #else
-  gt_inlined_qsort_r (leftptr,(unsigned long) (rightptr - leftptr + 1),data);
+  gt_inlined_qsort_r (leftptr,width,data);
 #endif
 }
 
@@ -993,7 +991,8 @@ static void dc_sortremainingsamples(Differencecover *dcov)
                  dcov->firstgeneration.nextfreePairsuffixptr;
        pairptr++)
   {
-    dc_anchorleftmost(dcov,pairptr->leftptr,pairptr->rightptr);
+    dc_anchorleftmost(dcov,pairptr->leftptr,
+                      (unsigned long) (pairptr->rightptr-pairptr->leftptr+1));
   }
   for (pairptr = dcov->firstgeneration.spacePairsuffixptr;
        pairptr < dcov->firstgeneration.spacePairsuffixptr +
