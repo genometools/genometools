@@ -24,11 +24,17 @@
 /* The prototype of a tool function. */
 typedef int (*GtToolFunc)(int argc, const char **argv, GtError *err);
 
+typedef void* (*GtLicenseConstructor)(const char *argv0);
+typedef void  (*GtLicenseDestructor)(void*);
+
 /* The tool driver module allows to compile a tool into a separate binary. This
    is mostly useful for legacy applications like GenomeThreader.
    The tool driver creates an GtError object, calls <tool>, and reports errors.
 */
 int gt_tooldriver(GtToolFunc tool, int argc, char *argv[]);
+
+int gt_tooldriver_with_license(GtToolFunc tool, int argc, char *argv[],
+                               GtLicenseConstructor, GtLicenseDestructor);
 
 int gt_toolobjdriver(GtToolConstructor, int argc, char *argv[]);
 
