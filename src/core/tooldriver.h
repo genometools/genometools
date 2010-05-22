@@ -27,23 +27,9 @@ typedef int (*GtToolFunc)(int argc, const char **argv, GtError *err);
 /* The tool driver module allows to compile a tool into a separate binary. This
    is mostly useful for legacy applications like GenomeThreader.
    The tool driver creates an GtError object, calls <tool>, and reports errors.
-   See below for example code to create a separate binary for the eval tool.
-   XXX: change example to reflect the real gth application
 */
-int gt_tooldriver(GtToolFunc, int argc, char *argv[]);
+int gt_tooldriver(GtToolFunc tool, int argc, char *argv[]);
 
 int gt_toolobjdriver(GtToolConstructor, int argc, char *argv[]);
-
-#if 0
-
-#include "core/tooldriver.h"
-#include "tools/gt_gff3.h"
-
-int main(int argc, char *argv[])
-{
-  return gt_tooldriver(gt_gff3, argc, argv);
-}
-
-#endif
 
 #endif
