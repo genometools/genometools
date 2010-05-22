@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2005-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -61,12 +61,12 @@ GtFile*    gt_file_new_from_fileptr(FILE*);
 
 GtFileMode gt_file_mode(const GtFile*);
 
-/* Return next character from <genfile> of EOF, if end-of-file is reached. */
-int         gt_file_xfgetc(GtFile *genfile);
+/* Return next character from <file> of EOF, if end-of-file is reached. */
+int         gt_file_xfgetc(GtFile *file);
 
-/* Unget character <c> to <genfile> (which obviously cannot be NULL).
+/* Unget character <c> to <file> (which obviously cannot be NULL).
    Can only be used once at a time. */
-void        gt_file_unget_char(GtFile *genfile, char c);
+void        gt_file_unget_char(GtFile *file, char c);
 
 /* printf(3) for generic files */
 void        gt_file_xprintf(GtFile*, const char *format, ...)

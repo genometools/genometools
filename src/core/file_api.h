@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2005-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -32,8 +32,8 @@ typedef struct GtFile GtFile;
    and uncompressed otherwise). */
 GtFile* gt_file_new(const char *path, const char *mode, GtError *err);
 
-/* Close the underlying file handle and destroy the object. */
-void    gt_file_delete(GtFile*);
+/* Close the underlying file handle and destroy the <file> object. */
+void    gt_file_delete(GtFile *file);
 
 /* Write <\0>-terminated string <str> to <file>. Similar to <fputs(3)>, but
    terminates on error. */
