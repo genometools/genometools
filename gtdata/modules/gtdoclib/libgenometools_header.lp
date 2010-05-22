@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<title>gtscript documentation</title>
+<title>GenomeTools C API</title>
 <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
