@@ -23,7 +23,7 @@
 #include "core/ma.h"
 #include "core/unused_api.h"
 #include "core/warning_api.h"
-#include "core/xansi.h"
+#include "core/xansi_api.h"
 #include "extended/evaluator.h"
 #include "extended/gff3_output.h"
 #include "extended/stream_evaluator.h"

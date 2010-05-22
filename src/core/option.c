@@ -30,7 +30,7 @@
 #include "core/parseutils.h"
 #include "core/str.h"
 #include "core/undef.h"
-#include "core/xansi.h"
+#include "core/xansi_api.h"
 
 typedef enum {
   OPTION_BOOL,

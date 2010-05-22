@@ -17,7 +17,7 @@
 
 #include "core/ma.h"
 #include "core/timer.h"
-#include "core/xansi.h"
+#include "core/xansi_api.h"
 #include "core/xposix.h"
 
 typedef enum {

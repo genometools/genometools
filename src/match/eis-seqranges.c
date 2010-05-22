@@ -21,7 +21,7 @@
 #include "core/ma_api.h"
 #include "core/minmax.h"
 #include "core/unused_api.h"
-#include "core/xansi.h"
+#include "core/xansi_api.h"
 
 #include "match/eis-seqranges.h"
 #include "match/eis-seqranges-priv.h"

@@ -32,7 +32,7 @@
 #include "core/chardef.h"
 #include "core/ensure.h"
 #include "core/mathsupport.h"
-#include "core/xansi.h"
+#include "core/xansi_api.h"
 #include "extended/coin_hmm.h"
 #include "extended/dice_hmm.h"
 #include "extended/hmm.h"

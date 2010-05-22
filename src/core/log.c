@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include "core/log.h"
 #include "core/logger.h"
-#include "core/xansi.h"
+#include "core/xansi_api.h"
 
 static GtLogger *gt_global_logger;
 

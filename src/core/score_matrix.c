@@ -24,7 +24,7 @@
 #include "core/str.h"
 #include "core/tokenizer.h"
 #include "core/undef.h"
-#include "core/xansi.h"
+#include "core/xansi_api.h"
 
 struct GtScoreMatrix {
   GtAlphabet *alphabet;

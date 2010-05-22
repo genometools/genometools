@@ -20,7 +20,7 @@
 #include "core/ma.h"
 #include "core/mathsupport.h"
 #include "core/minmax.h"
-#include "core/xansi.h"
+#include "core/xansi_api.h"
 #include "core/array.h"
 #include "extended/reverse.h"
 #include "ltr/ppt.h"

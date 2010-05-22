@@ -31,7 +31,7 @@
 #include "core/symbol.h"
 #include "core/versionfunc.h"
 #include "core/warning_api.h"
-#include "core/xansi.h"
+#include "core/xansi_api.h"
 #include "core/yarandom.h"
 
 static bool spacepeak = false;

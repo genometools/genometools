@@ -21,7 +21,7 @@
 #include "core/chardef.h"
 #include "core/divmodmul.h"
 #include "core/minmax.h"
-#include "core/xansi.h"
+#include "core/xansi_api.h"
 #include "core/fa.h"
 #include "core/arraydef.h"
 #include "core/unused_api.h"

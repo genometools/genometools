@@ -23,7 +23,7 @@
 #include "core/option.h"
 #include "core/string_distri.h"
 #include "core/unused_api.h"
-#include "core/xansi.h"
+#include "core/xansi_api.h"
 #include "extended/gtdatahelp.h"
 #include "tools/gt_fingerprint.h"
 

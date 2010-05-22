@@ -54,7 +54,7 @@
 #include "core/sequence_buffer_plain.h"
 #include "core/str.h"
 #include "core/unused_api.h"
-#include "core/xansi.h"
+#include "core/xansi_api.h"
 
 #define CHECKANDUPDATE(VAL,IDX)\
         tmp = localdetsizeencseq(VAL,totallength,numofdbfiles,\

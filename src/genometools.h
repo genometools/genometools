@@ -63,6 +63,7 @@
 #include "core/unused_api.h"
 #include "core/version_api.h"
 #include "core/warning_api.h"
+#include "core/xansi_api.h"
 
 /* the extended module */
 #include "extended/bed_in_stream_api.h"

@@ -22,7 +22,7 @@
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/str.h"
-#include "core/xansi.h"
+#include "core/xansi_api.h"
 
 struct GtStr {
   char *cstr;           /* the actual string (always '\0' terminated) */

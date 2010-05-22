@@ -20,7 +20,7 @@
 #include "core/array.h"
 #include "core/ensure.h"
 #include "core/ma.h"
-#include "core/xansi.h"
+#include "core/xansi_api.h"
 #include "core/types_api.h"
 #include "core/chardef.h"
 #include "extended/alignment.h"

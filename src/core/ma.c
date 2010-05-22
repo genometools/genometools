@@ -21,7 +21,7 @@
 #include "core/ma.h"
 #include "core/thread.h"
 #include "core/unused_api.h"
-#include "core/xansi.h"
+#include "core/xansi_api.h"
 
 /* the memory allocator class */
 typedef struct {

@@ -19,7 +19,7 @@
 #include "core/hashmap.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
-#include "core/xansi.h"
+#include "core/xansi_api.h"
 #include "extended/toolbox.h"
 
 struct GtToolbox {

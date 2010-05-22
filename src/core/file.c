@@ -22,7 +22,7 @@
 #include "core/fa.h"
 #include "core/file.h"
 #include "core/ma.h"
-#include "core/xansi.h"
+#include "core/xansi_api.h"
 #include "core/xbzlib.h"
 #include "core/xzlib.h"
 

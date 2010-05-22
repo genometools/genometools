@@ -22,7 +22,7 @@
 #include "core/string_distri.h"
 #include "core/unused_api.h"
 #include "core/warning_api.h"
-#include "core/xansi.h"
+#include "core/xansi_api.h"
 #include "extended/feature_node_iterator_api.h"
 #include "extended/node_visitor_rep.h"
 #include "extended/splice_site_info_visitor.h"

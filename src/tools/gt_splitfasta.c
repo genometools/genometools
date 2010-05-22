@@ -23,7 +23,7 @@
 #include "core/option.h"
 #include "core/outputfile.h"
 #include "core/unused_api.h"
-#include "core/xansi.h"
+#include "core/xansi_api.h"
 #include "tools/gt_splitfasta.h"
 
 typedef struct {

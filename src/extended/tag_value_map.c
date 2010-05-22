@@ -20,7 +20,7 @@
 #include "core/ma.h"
 #include "core/ensure.h"
 #include "core/unused_api.h"
-#include "core/xansi.h"
+#include "core/xansi_api.h"
 #include "extended/tag_value_map.h"
 
 /* The GtTagValueMap is implemented as a simple char* which points to a memory

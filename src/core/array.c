@@ -27,7 +27,7 @@
 #include "core/qsort_r.h"
 #include "core/range.h"
 #include "core/unused_api.h"
-#include "core/xansi.h"
+#include "core/xansi_api.h"
 
 #define ARRAY_NUM_OF_TESTS  100
 #define ARRAY_MAX_SIZE      1024

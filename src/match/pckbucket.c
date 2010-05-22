@@ -17,7 +17,7 @@
 
 #include "core/divmodmul.h"
 #include "core/fa.h"
-#include "core/xansi.h"
+#include "core/xansi_api.h"
 #include "core/fileutils_api.h"
 #include "eis-voiditf.h"
 #include "pckbucket.h"

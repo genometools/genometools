@@ -35,7 +35,7 @@
 #include "core/str.h"
 #include "core/str_array.h"
 #include "core/types_api.h"
-#include "core/xansi.h"
+#include "core/xansi_api.h"
 
 #define ALPHABET_GUESS_MAX_LENGTH       5000
 #define ALPHABET_GUESS_PROTEIN_CHARS    "LIFEQPlifeqpXZ*-"

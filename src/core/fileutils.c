@@ -27,7 +27,7 @@
 #include "core/sequence_buffer.h"
 #include "core/splitter.h"
 #include "core/types_api.h"
-#include "core/xansi.h"
+#include "core/xansi_api.h"
 #include "core/xposix.h"
 
 bool gt_file_exists(const char *path)

@@ -22,7 +22,7 @@
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/splitter.h"
-#include "core/xansi.h"
+#include "core/xansi_api.h"
 
 struct GtSplitter {
   char **tokens;

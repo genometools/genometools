@@ -23,7 +23,7 @@
 #include "core/mathsupport.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
-#include "core/xansi.h"
+#include "core/xansi_api.h"
 
 #define BITTAB_NUM_OF_TESTS  50
 #define BITTAB_MAX_SIZE      1024

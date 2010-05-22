@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/xansi.h"
+#include "core/xansi_api.h"
 
 void gt_xatexit(void (*function)(void))
 {
@@ -51,6 +51,18 @@ int gt_xfgetc(FILE *stream)
     }
   }
   return cc;
+}
+
+char* gt_xfgets(char *s, int size, FILE *stream)
+{
+  char *str;
+  if ((str = fgets(s, size, stream)) == NULL) {
+    if (ferror(stream)) {
+      perror("cannot read string");
+      exit(EXIT_FAILURE);
+    }
+  }
+  return str;
 }
 
 void gt_xfgetpos(FILE *stream, fpos_t *pos)

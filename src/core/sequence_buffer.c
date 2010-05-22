@@ -26,7 +26,7 @@
 #include "core/sequence_buffer_gb.h"
 #include "core/sequence_buffer_inline.h"
 #include "core/unused_api.h"
-#include "core/xansi.h"
+#include "core/xansi_api.h"
 
 GtSequenceBuffer*
 gt_sequence_buffer_create(const GtSequenceBufferClass *sic)

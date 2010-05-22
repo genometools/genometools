@@ -19,7 +19,7 @@
 #include "core/cstr_api.h"
 #include "core/error.h"
 #include "core/ma.h"
-#include "core/xansi.h"
+#include "core/xansi_api.h"
 
 struct GtError {
   char error_string[BUFSIZ],

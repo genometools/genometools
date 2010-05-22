@@ -21,7 +21,7 @@
 #include "core/fileutils_api.h"
 #include "core/ma_api.h"
 #include "core/unused_api.h"
-#include "core/xansi.h"
+#include "core/xansi_api.h"
 #include "gth/gtherror.h"
 #include "gth/gthoutput.h"
 #include "gth/gthprobdef.h"

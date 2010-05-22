@@ -22,7 +22,7 @@
 #include "core/ma.h"
 #include "core/mathsupport.h"
 #include "core/unused_api.h"
-#include "core/xansi.h"
+#include "core/xansi_api.h"
 
 #define NUM_OF_TESTS  100
 #define MAX_SIZE      1024

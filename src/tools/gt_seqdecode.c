@@ -19,7 +19,7 @@
 #include "core/fasta_separator.h"
 #include "core/str_array_api.h"
 #include "core/unused_api.h"
-#include "core/xansi.h"
+#include "core/xansi_api.h"
 #include "tools/gt_seqdecode.h"
 
 static GtOptionParser* gt_seqdecode_option_parser_new(GT_UNUSED
