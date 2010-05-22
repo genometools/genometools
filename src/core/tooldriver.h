@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -21,14 +21,16 @@
 #include "core/error.h"
 #include "core/tool.h"
 
+/* The prototype of a tool function. */
+typedef int (*GtToolFunc)(int argc, const char **argv, GtError *err);
+
 /* The tool driver module allows to compile a tool into a separate binary. This
    is mostly useful for legacy applications like GenomeThreader.
    The tool driver creates an GtError object, calls <tool>, and reports errors.
    See below for example code to create a separate binary for the eval tool.
    XXX: change example to reflect the real gth application
 */
-int gt_tooldriver(int(*tool)(int argc, const char **argv, GtError*),
-               int argc, char *argv[]);
+int gt_tooldriver(GtToolFunc, int argc, char *argv[]);
 
 int gt_toolobjdriver(GtToolConstructor, int argc, char *argv[]);
 

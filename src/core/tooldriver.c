@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -21,15 +21,14 @@
 #include "core/error.h"
 #include "core/tooldriver.h"
 
-int gt_tooldriver(int(*tool)(int argc, const char **argv, GtError*),
-               int argc, char *argv[])
+int gt_tooldriver(GtToolFunc tool_func, int argc, char *argv[])
 {
   GtError *err;
   int had_err;
   gt_lib_init();
   err = gt_error_new();
   gt_error_set_progname(err, argv[0]);
-  had_err = tool(argc, (const char**) argv, err);
+  had_err = tool_func(argc, (const char**) argv, err);
   if (gt_error_is_set(err)) {
     fprintf(stderr, "%s: error: %s\n", gt_error_get_progname(err),
             gt_error_get(err));
