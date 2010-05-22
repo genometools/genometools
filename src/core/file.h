@@ -73,7 +73,6 @@ void        gt_file_xprintf(GtFile*, const char *format, ...)
   __attribute__ ((format (printf, 2, 3)));
 
 void        gt_file_xfputc(int c, GtFile*);
-void        gt_file_xfputs(const char *str, GtFile*);
 
 /* Read up to <nbytes> and store result in <buf>, returns bytes read. */
 int         gt_file_xread(GtFile*, void *buf, size_t nbytes);

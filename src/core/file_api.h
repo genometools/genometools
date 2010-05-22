@@ -35,4 +35,8 @@ GtFile* gt_file_new(const char *path, const char *mode, GtError *err);
 /* Close the underlying file handle and destroy the object. */
 void    gt_file_delete(GtFile*);
 
+/* Write <\0>-terminated string <str> to <file>. Similar to <fputs(3)>, but
+   terminates on error. */
+void    gt_file_xfputs(const char *str, GtFile *file);
+
 #endif
