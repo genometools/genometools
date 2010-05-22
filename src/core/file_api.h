@@ -30,9 +30,9 @@ typedef struct GtFile GtFile;
    be opened. The compression mode is determined by the ending of <path> (gzip
    compression if it ends with '.gz', bzip2 compression if it ends with '.bz2',
    and uncompressed otherwise). */
-GtFile*    gt_file_new(const char *path, const char *mode, GtError *err);
+GtFile* gt_file_new(const char *path, const char *mode, GtError *err);
 
 /* Close the underlying file handle and destroy the object. */
-void        gt_file_delete(GtFile*);
+void    gt_file_delete(GtFile*);
 
 #endif
