@@ -213,8 +213,8 @@ static Lowerboundwithrank *filllowerboundwithrank(
 }
 
 static unsigned long gt_frompos2rank(const Lowerboundwithrank *leftptr,
-                           const Lowerboundwithrank *rightptr,
-                           unsigned long specialpos)
+                                     const Lowerboundwithrank *rightptr,
+                                     unsigned long specialpos)
 {
   const Lowerboundwithrank *midptr;
 
@@ -508,8 +508,8 @@ static void inversesuftabrel_set(Rmnsufinfo *rmnsufinfo,unsigned long idx,
 
 #ifdef Lowerboundwithrank
 static unsigned long gt_frompos2rank(const Lowerboundwithrank *leftptr,
-                           const Lowerboundwithrank *rightptr,
-                           unsigned long specialpos)
+                                     const Lowerboundwithrank *rightptr,
+                                     unsigned long specialpos)
 {
   const Lowerboundwithrank *midptr;
 
@@ -902,7 +902,7 @@ static void processunsortedrange(Rmnsufinfo *rmnsufinfo,
     rmnsufinfo->firstwithnewdepth.totalwidth = width;
     rmnsufinfo->firstwithnewdepth.maxwidth = width;
   }
-  pairptrwithbase = gt_malloc(sizeof (RmsPairsuffixptrwithbase));
+  pairptrwithbase = gt_malloc(sizeof (*pairptrwithbase));
   pairptrwithbase->left = left;
   pairptrwithbase->right = right;
   pairptrwithbase->base = base;

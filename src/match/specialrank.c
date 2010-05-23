@@ -62,8 +62,8 @@ Rankedbounds *gt_fillrankbounds(const GtEncseq *encseq,
 }
 
 unsigned long gt_frompos2rank(const Rankedbounds *leftptr,
-                           const Rankedbounds *rightptr,
-                           unsigned long specialpos)
+                              const Rankedbounds *rightptr,
+                              unsigned long specialpos)
 {
   const Rankedbounds *midptr;
 
@@ -93,8 +93,8 @@ unsigned long gt_frompos2rank(const Rankedbounds *leftptr,
 }
 
 unsigned long gt_fromrank2pos(const Rankedbounds *leftptr,
-                           const Rankedbounds *rightptr,
-                           unsigned long rank)
+                              const Rankedbounds *rightptr,
+                              unsigned long rank)
 {
   const Rankedbounds *midptr;
 

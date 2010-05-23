@@ -111,12 +111,25 @@ alldir = ["fwd","cpl","rev","rcl"]
 
 # put the tests with paircmp, maxpair, patternmatch, into a file gt_idxmatch
 
+all_fastafiles.each do |filename|
+  Name "gt suffixerator -dc 64 #{filename}"
+  Keywords "gt_suffixerator"
+  Test do
+    checkdc([filename])
+  end
+end
+
+Name "gt suffixerator -dc 64 all-fastafiles"
+Keywords "gt_suffixerator"
+Test do
+  checkdc(all_fastafiles)
+end
+
 Name "gt suffixerator paircmp"
 Keywords "gt_suffixerator"
 Test do
   run_test "#{$bin}gt dev paircmp -a ac 11"
 end
-
 
 Name "gt suffixerator patternmatch"
 Keywords "gt_suffixerator"
@@ -180,20 +193,6 @@ Name "gt suffixerator bwt"
 Keywords "gt_suffixerator"
 Test do
   checkbwt(all_fastafiles)
-end
-
-all_fastafiles.each do |filename|
-  Name "gt suffixerator -dc 64 #{filename}"
-  Keywords "gt_suffixerator"
-  Test do
-    checkdc([filename])
-  end
-end
-
-Name "gt suffixerator -dc 64 all-fastafiles"
-Keywords "gt_suffixerator"
-Test do
-  checkdc(all_fastafiles)
 end
 
 allfiles.each do |filename|

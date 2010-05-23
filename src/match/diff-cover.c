@@ -58,8 +58,8 @@ typedef struct
 
 typedef struct
 {
-  Suffixptr *leftptr,
-            *rightptr;
+  Suffixptr *leftptr;
+  unsigned long width;
 } Pairsuffixptr;
 
 GT_DECLAREARRAYSTRUCT(Pairsuffixptr);
@@ -70,9 +70,9 @@ typedef Pairsuffixptr Inl_Queueelem;
 
 typedef struct
 {
-  Suffixptr *leftptr,
-            *rightptr;
-  unsigned long count,
+  Suffixptr *leftptr;
+  unsigned long width,
+                count,
                 totalwidth,
                 maxwidth,
                 depth;
@@ -81,7 +81,10 @@ typedef struct
 
 struct Differencecover
 {
-  unsigned int vparam, logmod, size, vmodmask,
+  unsigned int vparam,
+               logmod,
+               size,
+               vmodmask,
                hvalue,  /* not necessary */
                numofchars,
                prefixlength;
@@ -304,7 +307,7 @@ Differencecover *gt_differencecover_new(unsigned int vparam,
   dcov->firstwithnewdepth.totalwidth = 0;
   dcov->firstwithnewdepth.count = 0;
   dcov->firstwithnewdepth.leftptr = NULL;
-  dcov->firstwithnewdepth.rightptr = NULL;
+  dcov->firstwithnewdepth.width = 0;
   dcov->firstwithnewdepth.maxwidth = 0;
   dcov->currentqueuesize = 0;
   dcov->maxqueuesize = 0;
@@ -682,17 +685,15 @@ static void dc_showintervalsizes(unsigned long count,
 
 static void dc_processunsortedrange(Differencecover *dcov,
                                     Suffixptr *leftptr,
-                                    Suffixptr *rightptr,
+                                    unsigned long width,
                                     unsigned long depth)
 {
   Pairsuffixptr *pairelem;
-  unsigned long width;
 
-  gt_assert(leftptr < rightptr && depth > 0);
+  gt_assert(width >= 2UL && depth > 0);
   gt_assert(!dcov->firstwithnewdepth.defined ||
             (dcov->firstwithnewdepth.depth > 0 &&
              dcov->firstwithnewdepth.depth <= depth));
-  width = (unsigned long) (rightptr - leftptr + 1);
   if (dcov->firstwithnewdepth.defined &&
       dcov->firstwithnewdepth.depth == depth)
   {
@@ -718,7 +719,7 @@ static void dc_processunsortedrange(Differencecover *dcov,
     }
     gt_logger_log(dcov->logger,"enter new level %lu",depth);
     dcov->firstwithnewdepth.leftptr = leftptr;
-    dcov->firstwithnewdepth.rightptr = rightptr;
+    dcov->firstwithnewdepth.width = width;
     dcov->firstwithnewdepth.depth = depth;
     dcov->firstwithnewdepth.count = 1UL;
     dcov->firstwithnewdepth.totalwidth = width;
@@ -726,7 +727,7 @@ static void dc_processunsortedrange(Differencecover *dcov,
   }
   pairelem = gt_malloc(sizeof (*pairelem));
   pairelem->leftptr = leftptr;
-  pairelem->rightptr = rightptr;
+  pairelem->width = width;
   gt_inl_queue_add(dcov->rangestobesorted,pairelem,false);
   dcov->currentqueuesize++;
   if (dcov->maxqueuesize < dcov->currentqueuesize)
@@ -753,10 +754,9 @@ static int dcov_compareitv(const void *a,const void *b)
 
 static void dc_sortsuffixesonthislevel(Differencecover *dcov,
                                        Suffixptr *leftptr,
-                                       Suffixptr *rightptr)
+                                       unsigned long width)
 {
   unsigned long idx, rangestart, startpos;
-  const unsigned long width = (unsigned long) (rightptr - leftptr + 1);
 
   if (dcov->itvinfo == NULL)
   {
@@ -764,7 +764,7 @@ static void dc_sortsuffixesonthislevel(Differencecover *dcov,
                               dcov->allocateditvinfo);
   }
   if (dcov->firstwithnewdepth.leftptr == leftptr &&
-      dcov->firstwithnewdepth.rightptr == rightptr)
+      dcov->firstwithnewdepth.width == width)
   {
     dcov->currentdepth = dcov->firstwithnewdepth.depth;
   }
@@ -799,7 +799,7 @@ static void dc_sortsuffixesonthislevel(Differencecover *dcov,
       {
         dc_processunsortedrange(dcov,
                                 leftptr + rangestart,
-                                leftptr + idx - 1,
+                                idx - rangestart,
                                 GT_MULT2(dcov->currentdepth));
         dc_anchorleftmost(dcov,
                           leftptr + rangestart,
@@ -818,7 +818,7 @@ static void dc_sortsuffixesonthislevel(Differencecover *dcov,
   {
     dc_processunsortedrange(dcov,
                             leftptr + rangestart,
-                            leftptr + width - 1,
+                            width - rangestart,
                             GT_MULT2(dcov->currentdepth));
     dc_anchorleftmost(dcov,
                       leftptr + rangestart,
@@ -853,9 +853,7 @@ static void dc_bcktab2firstlevelintervals(Differencecover *dcov)
     {
       dc_sortsuffixesonthislevel(dcov,
                                  dcov->sortedsample + bucketspec.left,
-                                 dcov->sortedsample + bucketspec.left +
-                                                      bucketspec.
-                                                      nonspecialsinbucket-1);
+                                 bucketspec.nonspecialsinbucket);
     }
   }
 }
@@ -872,7 +870,7 @@ static void dc_addunsortedrange(void *voiddcov,
   dc_updatewidth (dcov,width,dcov->vparam);
   GT_GETNEXTFREEINARRAY(ptr,&dcov->firstgeneration,Pairsuffixptr,1024);
   ptr->leftptr = leftptr;
-  ptr->rightptr = leftptr + width - 1;
+  ptr->width = width;
 }
 
 #ifdef QSORT_INTEGER
@@ -991,15 +989,14 @@ static void dc_sortremainingsamples(Differencecover *dcov)
                  dcov->firstgeneration.nextfreePairsuffixptr;
        pairptr++)
   {
-    dc_anchorleftmost(dcov,pairptr->leftptr,
-                      (unsigned long) (pairptr->rightptr-pairptr->leftptr+1));
+    dc_anchorleftmost(dcov,pairptr->leftptr,pairptr->width);
   }
   for (pairptr = dcov->firstgeneration.spacePairsuffixptr;
        pairptr < dcov->firstgeneration.spacePairsuffixptr +
                  dcov->firstgeneration.nextfreePairsuffixptr;
        pairptr++)
   {
-    dc_sortsuffixesonthislevel(dcov,pairptr->leftptr, pairptr->rightptr);
+    dc_sortsuffixesonthislevel(dcov,pairptr->leftptr,pairptr->width);
   }
   GT_FREEARRAY(&dcov->firstgeneration,Pairsuffixptr);
   while (!gt_inl_queue_isempty(dcov->rangestobesorted))
@@ -1008,7 +1005,7 @@ static void dc_sortremainingsamples(Differencecover *dcov)
     thispairptr = (Pairsuffixptr*) gt_inl_queue_get(dcov->rangestobesorted);
     gt_assert(dcov->currentqueuesize > 0);
     dcov->currentqueuesize--;
-    dc_sortsuffixesonthislevel(dcov,thispairptr->leftptr,thispairptr->rightptr);
+    dc_sortsuffixesonthislevel(dcov,thispairptr->leftptr,thispairptr->width);
     gt_free(thispairptr);
   }
   gt_logger_log(dcov->logger,"maxqueuesize = %lu",dcov->maxqueuesize);
