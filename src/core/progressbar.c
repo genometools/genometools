@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -43,7 +43,7 @@ static time_t computation_start,
               computed_eta_time,
               eta;
 
-static int output_is_possible(void)
+static bool process_is_foreground(void)
 {
   return getpgrp() == tcgetpgrp(STDOUT_FILENO);
 }
@@ -181,7 +181,7 @@ static void update_progressbar(GT_UNUSED int sigraised)
     set_window_size();
     window_resized = 0;
   }
-  if (output_is_possible())
+  if (process_is_foreground())
     refresh_progressbar();
   (void) gt_xsignal(SIGALRM, update_progressbar); /* set signal handler again
                                                      (for systems which switch
@@ -205,7 +205,7 @@ void gt_progressbar_start(const unsigned long long *current_computation,
   gt_assert(*current_computation == 0);
   computation_start = gt_xtime(NULL);
   set_window_size();
-  if (output_is_possible())
+  if (process_is_foreground())
     refresh_progressbar();
   /* register signal handlers */
   (void) gt_xsignal(SIGALRM, update_progressbar); /* the timer */
@@ -216,7 +216,7 @@ void gt_progressbar_start(const unsigned long long *current_computation,
 void gt_progressbar_stop(void)
 {
   (void) alarm(0); /* reset alarm */
-  if (!output_is_possible())
+  if (!process_is_foreground())
     return;
   /* ensure the complete bar has been shown */
   if (processed_counter != last_computation) {
