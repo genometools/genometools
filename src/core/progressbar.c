@@ -19,10 +19,10 @@
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 #include <sys/ioctl.h>
 #include <sys/termios.h>
 #include "core/assert_api.h"
+#include "core/process.h"
 #include "core/unused_api.h"
 #include "core/xposix.h"
 
@@ -42,11 +42,6 @@ static volatile sig_atomic_t window_resized;
 static time_t computation_start,
               computed_eta_time,
               eta;
-
-static bool process_is_foreground(void)
-{
-  return getpgrp() == tcgetpgrp(STDOUT_FILENO);
-}
 
 static void set_window_size(void)
 {
@@ -181,7 +176,7 @@ static void update_progressbar(GT_UNUSED int sigraised)
     set_window_size();
     window_resized = 0;
   }
-  if (process_is_foreground())
+  if (gt_process_is_foreground())
     refresh_progressbar();
   (void) gt_xsignal(SIGALRM, update_progressbar); /* set signal handler again
                                                      (for systems which switch
@@ -205,7 +200,7 @@ void gt_progressbar_start(const unsigned long long *current_computation,
   gt_assert(*current_computation == 0);
   computation_start = gt_xtime(NULL);
   set_window_size();
-  if (process_is_foreground())
+  if (gt_process_is_foreground())
     refresh_progressbar();
   /* register signal handlers */
   (void) gt_xsignal(SIGALRM, update_progressbar); /* the timer */
@@ -216,7 +211,7 @@ void gt_progressbar_start(const unsigned long long *current_computation,
 void gt_progressbar_stop(void)
 {
   (void) alarm(0); /* reset alarm */
-  if (!process_is_foreground())
+  if (!gt_process_is_foreground())
     return;
   /* ensure the complete bar has been shown */
   if (processed_counter != last_computation) {
