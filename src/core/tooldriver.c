@@ -50,7 +50,7 @@ int gt_tooldriver_with_license(GtToolFunc tool, int argc, char *argv[],
   if (license_destructor)
     license_destructor(license);
   if (gt_lib_clean())
-    return 2; /* programmer error */
+    return GT_EXIT_PROGRAMMING_ERROR; /* programmer error */
   if (had_err)
     return EXIT_FAILURE;
   return EXIT_SUCCESS;
@@ -74,7 +74,7 @@ int gt_toolobjdriver(GtToolConstructor tool_constructor, int argc, char *argv[])
   }
   gt_error_delete(err);
   if (gt_lib_clean())
-    return 2; /* programmer error */
+    return GT_EXIT_PROGRAMMING_ERROR; /* programmer error */
   if (had_err)
     return EXIT_FAILURE;
   return EXIT_SUCCESS;
