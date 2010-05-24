@@ -28,7 +28,6 @@
 #include "core/types_api.h"
 #include "core/encseq.h"
 #include "spacedef.h"
-#include "spacedef.h"
 #include "turnwheels.h"
 #include "esa-fileend.h"
 #include "bcktab.h"
@@ -2112,19 +2111,19 @@ void gt_qsufsort(Suffixptr *sortspace,
 }
 
 void gt_sortallbuckets(Suftab *suftab,
-                    GtBucketspec2 *bucketspec2,
-                    const GtEncseq *encseq,
-                    GtReadmode readmode,
-                    GtCodetype mincode,
-                    GtCodetype maxcode,
-                    unsigned long partwidth,
-                    Bcktab *bcktab,
-                    unsigned int numofchars,
-                    unsigned int prefixlength,
-                    Outlcpinfo *outlcpinfo,
-                    const Sfxstrategy *sfxstrategy,
-                    unsigned long long *bucketiterstep,
-                    GtLogger *logger)
+                       GtBucketspec2 *bucketspec2,
+                       const GtEncseq *encseq,
+                       GtReadmode readmode,
+                       GtCodetype mincode,
+                       GtCodetype maxcode,
+                       unsigned long partwidth,
+                       Bcktab *bcktab,
+                       unsigned int numofchars,
+                       unsigned int prefixlength,
+                       Outlcpinfo *outlcpinfo,
+                       const Sfxstrategy *sfxstrategy,
+                       unsigned long long *bucketiterstep,
+                       GtLogger *logger)
 {
   GtCodetype code;
   unsigned int rightchar = (unsigned int) (mincode % numofchars),
