@@ -50,7 +50,7 @@ GT_DECLAREARRAYSTRUCT(Suffixptr);
 static inline void setsortspace(Suftab *suftab,unsigned long idx,
                                 unsigned long value)
 {
-  SUFFIXPTRSET(suftab->sortspace,idx - suftab->offset,value);
+  SUFFIXPTRSET(suftab->sortspace,idx - suftab->partoffset,value);
 }
 
 struct Sfxiterator
@@ -750,7 +750,8 @@ static void preparethispart(Sfxiterator *sfi)
   sfi->currentmincode = stpgetcurrentmincode(sfi->part,sfi->suftabparts);
   sfi->currentmaxcode = stpgetcurrentmaxcode(sfi->part,sfi->suftabparts);
   sfi->widthofpart = stpgetcurrentwidthofpart(sfi->part,sfi->suftabparts);
-  sfi->suftab.offset = stpgetcurrentsuftaboffset(sfi->part,sfi->suftabparts);
+  sfi->suftab.partoffset
+    = stpgetcurrentsuftaboffset(sfi->part,sfi->suftabparts);
   if (sfi->sfxstrategy.storespecialcodes)
   {
     sfx_derivespecialcodesfromtable(sfi,(numofparts == 1U) ? true : false);
@@ -816,7 +817,7 @@ static void preparethispart(Sfxiterator *sfi)
     }
     if (sfi->sfxstrategy.differencecover > 0)
     {
-      gt_sortbucketofsuffixes(sfi->suftab.sortspace - sfi->suftab.offset,
+      gt_sortbucketofsuffixes(sfi->suftab.sortspace - sfi->suftab.partoffset,
                               bucketspec2,
                               partwidth,
                               sfi->encseq,
@@ -849,7 +850,7 @@ static void preparethispart(Sfxiterator *sfi)
     }
     if (bucketspec2 != NULL)
     {
-      Suffixptr *suftabptr = sfi->suftab.sortspace - sfi->suftab.offset;
+      Suffixptr *suftabptr = sfi->suftab.sortspace - sfi->suftab.partoffset;
       gt_copysortsuffixes(bucketspec2,suftabptr,sfi->logger);
       gt_bucketspec2_delete(bucketspec2);
       bucketspec2 = NULL;

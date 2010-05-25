@@ -33,7 +33,7 @@ typedef struct Outlcpinfo Outlcpinfo;
 typedef struct
 {
   Suffixptr *sortspace;
-  unsigned long offset;
+  unsigned long partoffset;
   Definedunsignedlong longest;
 } Suftab;
 

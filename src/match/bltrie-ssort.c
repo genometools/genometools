@@ -662,15 +662,14 @@ static void checksorting(bool ascending,
 
 static void inplace_reverseSuffixptr(Suffixptr *tab,unsigned long len)
 {
-  unsigned long tmp;
-  Suffixptr *frontptr, *backptr;
+  unsigned long tmp, i, j;
 
-  for (frontptr = tab, backptr = tab + len - 1;
-       frontptr < backptr; frontptr++, backptr--)
+  gt_assert(len > 0);
+  for (i = 0, j = len - 1; i < j; i++, j--)
   {
-    tmp = SUFFIXPTRDEREF(frontptr);
-    SUFFIXPTRDEREFSET(frontptr,SUFFIXPTRDEREF(backptr));
-    SUFFIXPTRDEREFSET(backptr,tmp);
+    tmp = SUFFIXPTRGET(tab,i);
+    SUFFIXPTRSET(tab,i,SUFFIXPTRGET(tab,j));
+    SUFFIXPTRSET(tab,j,tmp);
   }
 }
 

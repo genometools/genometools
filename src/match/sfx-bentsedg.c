@@ -64,19 +64,6 @@
           SUFFIXPTRDEREFSET(B,TMP);\
         }
 
-#define BS_VECSWAP(A,B,N)\
-        aptr = A;\
-        bptr = B;\
-        while ((N)-- > 0)\
-        {\
-          temp = SUFFIXPTRDEREF(aptr);\
-          SUFFIXPTRDEREFSET(aptr++,SUFFIXPTRDEREF(bptr));\
-          SUFFIXPTRDEREFSET(bptr++,temp);\
-        }
-
-#define SUFTABINDEX(PTR) (unsigned long) ((PTR) + bsr->suftab->offset -\
-                                           bsr->suftab->sortspace)
-
 #define STACKTOP\
         bsr->mkvauxstack.spaceMKVstack[bsr->mkvauxstack.nextfreeMKVstack]
 
@@ -1012,6 +999,9 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
       if (depth >=
                (unsigned long) bsr->sfxstrategy->ssortmaxdepth.valueunsignedint)
       {
+#define SUFTABINDEX(PTR) (unsigned long) ((PTR) + bsr->suftab->partoffset -\
+                                           bsr->suftab->sortspace)
+
         unsigned long leftindex = SUFTABINDEX(leftptr);
         gt_rmnsufinfo_addunsortedrange(bsr->rmnsufinfo,
                                        leftindex,
@@ -1235,6 +1225,24 @@ static void sarrcountingsort(Bentsedgresources *bsr,
   }
 }
 
+#define SUFFIXPTRSWAP(TMP,A,B)\
+        TMP = A;\
+        A = B;\
+        B = TMP
+
+static inline void vectorswap(Suffixptr *tab1,Suffixptr *tab2,unsigned long len)
+{
+  unsigned long idx;
+  Suffixptr tmp;
+
+  for (idx = 0; idx < len; idx++)
+  {
+    tmp = tab1[idx];
+    tab1[idx] = tab2[idx];
+    tab2[idx] = tmp;
+  }
+}
+
 static void bentleysedgewick(Bentsedgresources *bsr,
                              Suffixptr *suftabptrleft,
                              unsigned long suftabptrwidth,
@@ -1247,8 +1255,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
                            depth,Descending);
   while (bsr->mkvauxstack.nextfreeMKVstack > 0)
   {
-    Suffixptr *leftplusw, *pa, *pb, *pc, *pd, *pm, *aptr,
-              *bptr, *suftabptrright;
+    Suffixptr *leftplusw, *pa, *pb, *pc, *pd, *pm, *suftabptrright;
     unsigned long cptr, temp, pivotcmpcharbychar = 0, valcmpcharbychar;
     Sfxcmp pivotcmpbits, val;
     int retvalpivotcmpbits;
@@ -1414,13 +1421,13 @@ static void bentleysedgewick(Bentsedgresources *bsr,
     gt_assert(pb >= pa);
     w = MIN((unsigned long) (pa-suftabptrleft),(unsigned long) (pb-pa));
     /* move w elements at the left to the middle */
-    BS_VECSWAP(suftabptrleft,  pb-w, w);
+    vectorswap(suftabptrleft,  pb-w, w);
 
     gt_assert(pd >= pc);
     gt_assert(suftabptrright >= pd);
     w = MIN((unsigned long) (pd-pc), (unsigned long) (suftabptrright-pd));
     /* move w elements at the right to the middle */
-    BS_VECSWAP(pb, suftabptrright+1-w, w);
+    vectorswap(pb, suftabptrright+1-w, w);
 
     /* all elements equal to the pivot are now in the middle namely in the
        range [suftabptrleft + (pb-pa) and suftabptrright - (pd-pc)] */
@@ -1968,7 +1975,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   }
   if (bcktab != NULL && sfxstrategy->ssortmaxdepth.defined)
   {
-    bsr->rmnsufinfo = gt_newRmnsufinfo(suftab->sortspace - suftab->offset,
+    bsr->rmnsufinfo = gt_newRmnsufinfo(suftab->sortspace - suftab->partoffset,
                                        -1,
                                        NULL,
                                        bsr->encseq,
@@ -2132,7 +2139,7 @@ void gt_sortallbuckets(Suftab *suftab,
   unsigned long lcpvalue;
   Suffixwithcode firstsuffixofbucket;
   Bentsedgresources bsr;
-  Suffixptr *suftabptr = suftab->sortspace - suftab->offset;
+  Suffixptr *suftabptr = suftab->sortspace - suftab->partoffset;
 
   initBentsedgresources(&bsr,
                         suftab,
