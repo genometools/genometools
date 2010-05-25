@@ -1426,3 +1426,10 @@ bool gt_intervalwidthleq(const Limdfsresources *limdfsresources,
   }
   return false;
 }
+
+const FMindex *genericindex_get_packedindex(const Genericindex *genericindex)
+{
+  gt_assert(genericindex->packedindex != NULL);
+  return genericindex->packedindex;
+}
+

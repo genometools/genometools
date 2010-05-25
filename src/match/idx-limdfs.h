@@ -25,6 +25,7 @@
 #include "core/logger.h"
 #include "absdfstrans-def.h"
 #include "core/intbits.h"
+#include "match/eis-voiditf.h"
 
 typedef struct Genericindex Genericindex;
 
@@ -107,5 +108,7 @@ GtArrayGtUlong *gt_fromitv2sortedmatchpositions(
                                           unsigned long leftbound,
                                           unsigned long rightbound,
                                           unsigned long offset);
+
+const FMindex *genericindex_get_packedindex(const Genericindex *genericindex);
 
 #endif
