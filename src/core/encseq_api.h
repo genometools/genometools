@@ -26,8 +26,24 @@
 #include "core/str_api.h"
 #include "core/str_array_api.h"
 
-/* The <GtEncseq> class represents a  concatenated collection of sequences from
-   one or more input files in a compressed encoding. */
+/* The <GtEncseq> class represents a concatenated collection of sequences from
+   one or more input files in a bit-compressed encoding. It is stored in a
+   number of <mmap()>able files, depending on which features it is meant to
+   support.
+   The main compressed sequence information is stored in an __encoded sequence__
+   table, with the file suffix '.esq'. This table is the minimum requirement
+   for the <GtEncseq> structure and must always be present. In addition, if
+   support for multiple sequences is desired, a __sequence separator position__
+   table with the '.ssp' suffix is required. If support for sequence
+   descriptions is required, two additional tables are needed: a __description__
+   table with the suffix '.des' and a __description separator__ table with the
+   file suffix '.sds.'. Creation and requirement of these tables can be switched
+   on and off using API functions as outlined below.
+   The <GtEncseq> represents the stored sequences as one concatenated string.
+   It allows access to the sequences by providing start positions and lengths
+   for each sequence, making it possible to extract encoded substrings into a
+   given buffer, as well as accessing single characters both in a random and a
+   sequential fashion. */
 typedef struct GtEncseq GtEncseq;
 
 /* The <GtEncseqEncoder> class creates objects encapsulating a parameter
@@ -102,10 +118,12 @@ void              gt_encseq_extract_decoded(const GtEncseq *encseq,
                                             char *buffer,
                                             unsigned long frompos,
                                             unsigned long topos);
-/* Returns the length of the <seqnum>-th sequence in the <encseq>. */
+/* Returns the length of the <seqnum>-th sequence in the <encseq>.
+   Requires multiple sequence support enabled in <encseq>. */
 unsigned long     gt_encseq_seqlength(const GtEncseq *encseq,
                                       unsigned long seqnum);
-/* Returns the start position of the <seqnum>-th sequence in the <encseq>. */
+/* Returns the start position of the <seqnum>-th sequence in the <encseq>.
+   Requires multiple sequence support enabled in <encseq>. */
 unsigned long     gt_encseq_seqstartpos(const GtEncseq *encseq,
                                         unsigned long seqnum);
 /* Returns the sequence number from the given <position> for a given
@@ -115,7 +133,8 @@ unsigned long     gt_encseq_seqnum(const GtEncseq *encseq,
 /* Returns a pointer to the description of the <seqnum>-th sequence in the
    <encseq>. The length of the returned string is written to the
    location pointed at by <desclen>.
-   The returned description pointer is not <\0>-terminated! */
+   The returned description pointer is not <\0>-terminated!
+   Requires description support enabled in <encseq>. */
 const char*       gt_encseq_description(const GtEncseq *encseq,
                                         unsigned long *desclen,
                                         unsigned long seqnum);
