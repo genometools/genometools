@@ -824,11 +824,13 @@ EISFILES=${shell ls ${CURDIR}/src/match/*.c | grep eis-}
 
 SKTOOLS=${shell grep -l Kurtz src/tools/*.c}
 SKCORE=${shell grep -l 'Stefan Kurtz' src/core/*.c}
+DWTOOLS=${shell grep -l Willrodt src/tools/*.c}
+
 
 ALLSPLINT=${addprefix obj/,${notdir ${subst .c,.splint,\
 	             ${filter-out ${EISFILES},${wildcard ${CURDIR}/src/match/*.c}}\
                      ${wildcard ${CURDIR}/src/ltr/*.c}\
-                                ${SKTOOLS} ${SKCORE}}}}\
+                                ${SKTOOLS} ${SKCORE} ${DWTOOLS}}}}\
      obj/redblack.splint
 
 spgt:${ALLSPLINT}
