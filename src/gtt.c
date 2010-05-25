@@ -76,6 +76,7 @@
 #include "tools/gt_extractseq.h"
 #include "tools/gt_filter.h"
 #include "tools/gt_fingerprint.h"
+#include "tools/gt_genomediff.h"
 #include "tools/gt_gff3.h"
 #include "tools/gt_gff3validator.h"
 #include "tools/gt_gff3_to_gtf.h"
@@ -141,6 +142,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "extractseq", gt_extractseq());
   gt_toolbox_add_tool(tools, "filter", gt_filter());
   gt_toolbox_add_tool(tools, "fingerprint", gt_fingerprint());
+  gt_toolbox_add_tool(tools, "genomediff", gt_genomediff());
   gt_toolbox_add_tool(tools, "gff3", gt_gff3());
   gt_toolbox_add_tool(tools, "gff3validator", gt_gff3validator());
   gt_toolbox_add(tools, "gff3_to_gtf", gt_gff3_to_gtf);
