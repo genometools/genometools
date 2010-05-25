@@ -23,10 +23,12 @@
 
 int gt_tooldriver(GtToolFunc tool, int argc, char *argv[])
 {
-  return gt_tooldriver_with_license(tool, argc, argv, NULL, NULL);
+  return gt_tooldriver_with_license(tool, argc, argv, NULL, NULL, NULL, NULL);
 }
 
 int gt_tooldriver_with_license(GtToolFunc tool, int argc, char *argv[],
+                               const char *major_version,
+                               const char *minor_version,
                                GtLicenseConstructor license_constructor,
                                GtLicenseDestructor license_destructor)
 {
@@ -34,8 +36,10 @@ int gt_tooldriver_with_license(GtToolFunc tool, int argc, char *argv[],
   GtError *err;
   int had_err;
   gt_lib_init();
+  gt_assert(tool && argv);
   if (license_constructor) {
-    if (!(license = license_constructor(argv[0])))
+    gt_assert(major_version && minor_version);
+    if (!(license = license_constructor(argv[0], major_version, minor_version)))
       return EXIT_FAILURE;
   }
   err = gt_error_new();
