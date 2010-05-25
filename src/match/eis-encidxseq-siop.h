@@ -67,7 +67,7 @@ EISSymTransformedRank(EISeq *seq, Symbol tSym, unsigned long pos,
   return seq->classInfo->rank(seq, tSym, pos, hint);
 }
 
-static inline struct GtUlongPair
+static inline GtUlongPair
 EISPosPairRank(EISeq *seq, Symbol sym, unsigned long posA, unsigned long posB,
                union EISHint *hint)
 {
@@ -91,7 +91,7 @@ EISPosPairRangeRank(EISeq *seq, AlphabetRangeID range, unsigned long posA,
   seq->classInfo->posPairRangeRank(seq, range, posA, posB, rankCounts, hint);
 }
 
-static inline struct GtUlongPair
+static inline GtUlongPair
 EISSymTransformedPosPairRank(EISeq *seq, Symbol tSym, unsigned long posA,
                              unsigned long posB, union EISHint *hint)
 {

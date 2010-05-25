@@ -28,7 +28,7 @@ struct encIdxSeqClass
   void (*delete)(EISeq *seq);
   unsigned long (*rank)(EISeq *seq, Symbol sym, unsigned long pos,
                  union EISHint *hint);
-  struct GtUlongPair (*posPairRank)(EISeq *seq, Symbol tSym, unsigned long posA,
+  GtUlongPair (*posPairRank)(EISeq *seq, Symbol tSym, unsigned long posA,
                                    unsigned long posB, union EISHint *hint);
   void (*rangeRank)(struct encIdxSeq *eSeqIdx, unsigned range,
                     unsigned long pos, unsigned long *rankCounts,

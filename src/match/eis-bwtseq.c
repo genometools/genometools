@@ -179,7 +179,7 @@ getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
   match->end   = bwtSeq->count[curSym + 1];
   while (match->start <= match->end && qptr != qend)
   {
-    struct GtUlongPair occPair;
+    GtUlongPair occPair;
     curSym = MRAEncMapSymbol(alphabet, *qptr);
     /*printf("query[%lu]=%d\n",(unsigned long) (qptr-query),(int) *qptr); */
     occPair = BWTSeqTransformedPosPairOcc(bwtSeq, curSym, match->start,
@@ -201,7 +201,7 @@ unsigned long gt_packedindexuniqueforward(const BWTSeq *bwtSeq,
   GtUchar cc;
   const GtUchar *qptr;
   struct matchBound bwtbound;
-  struct GtUlongPair seqpospair;
+  GtUlongPair seqpospair;
   Symbol curSym;
   const MRAEnc *alphabet;
 
@@ -267,7 +267,7 @@ unsigned long gt_packedindexmstatsforward(const BWTSeq *bwtSeq,
   const GtUchar *qptr;
   unsigned long prevlbound;
   struct matchBound bwtbound;
-  struct GtUlongPair seqpospair;
+  GtUlongPair seqpospair;
   Symbol curSym;
   unsigned long matchlength;
   const MRAEnc *alphabet;

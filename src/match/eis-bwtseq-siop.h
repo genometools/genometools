@@ -69,7 +69,7 @@ BWTSeqTransformedOcc(const BWTSeq *bwtSeq, Symbol tsym, unsigned long pos)
   }
 }
 
-static inline struct GtUlongPair
+static inline GtUlongPair
 BWTSeqTransformedPosPairOcc(const BWTSeq *bwtSeq, Symbol tSym,
                             unsigned long posA, unsigned long posB)
 {
@@ -90,7 +90,7 @@ BWTSeqTransformedPosPairOcc(const BWTSeq *bwtSeq, Symbol tSym,
 /*       - ((pos > BWTSeqTerminatorPos(bwtSeq))?1:0); */
   else /* tSym == not flattened terminator == alphabetSize - 1 */
   {
-    struct GtUlongPair occ;
+    GtUlongPair occ;
     gt_assert(tSym == bwtSeq->alphabetSize - 1);
     occ.a = (posA > BWTSeqTerminatorPos(bwtSeq))?1:0;
     occ.b = (posB > BWTSeqTerminatorPos(bwtSeq))?1:0;
@@ -106,7 +106,7 @@ BWTSeqOcc(const BWTSeq *bwtSeq, Symbol sym, unsigned long pos)
   return BWTSeqTransformedOcc(bwtSeq, tSym, pos);
 }
 
-static inline struct GtUlongPair
+static inline GtUlongPair
 BWTSeqPosPairOcc(const BWTSeq *bwtSeq, Symbol sym, unsigned long posA,
                  unsigned long posB)
 {

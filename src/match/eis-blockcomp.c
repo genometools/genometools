@@ -1242,13 +1242,13 @@ blockCompSeqRank(struct encIdxSeq *eSeqIdx, Symbol eSym, unsigned long pos,
 
 /* Note: pos is meant exclusively, i.e. returns 0
    for any query where pos==0 because that corresponds to the empty prefix */
-static struct GtUlongPair
+static GtUlongPair
 blockCompSeqPosPairRank(struct encIdxSeq *eSeqIdx, Symbol eSym,
                         unsigned long posA, unsigned long posB,
                         union EISHint *hint)
 {
   struct blockCompositionSeq *seqIdx;
-  struct GtUlongPair rankCounts;
+  GtUlongPair rankCounts;
   unsigned long bucketNum;
   gt_assert(eSeqIdx && eSeqIdx->classInfo == &blockCompositionSeqClass);
   gt_assert(posA <= posB);

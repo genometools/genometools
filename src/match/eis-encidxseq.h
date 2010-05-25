@@ -185,10 +185,10 @@ static inline unsigned long
 EISSymTransformedRank(EISeq *seq, Symbol tSym, unsigned long pos,
                       union EISHint *hint);
 
-struct GtUlongPair
+typedef struct
 {
   unsigned long a,b;
-};
+}GtUlongPair;
 
 /**
  * \brief Return number of occurrences of symbol sym in index up to
@@ -204,7 +204,7 @@ struct GtUlongPair
  * @return members a and b of returned struct contain Occ results for
  * posA and posB respectively
  */
-static inline struct GtUlongPair
+static inline GtUlongPair
 EISPosPairRank(EISeq *seq, Symbol sym, unsigned long posA, unsigned long posB,
                union EISHint *hint);
 
@@ -223,7 +223,7 @@ EISPosPairRank(EISeq *seq, Symbol sym, unsigned long posA, unsigned long posB,
  * @return members a and b of returned struct contain Occ results for
  * posA and posB respectively
  */
-static inline struct GtUlongPair
+static inline GtUlongPair
 EISSymTransformedPosPairRank(EISeq *seq, Symbol tSym, unsigned long posA,
                              unsigned long posB, union EISHint *hint);
 
