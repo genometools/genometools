@@ -32,13 +32,13 @@ def parseargs(argv)
   options.prof = false
   opts = OptionParser.new
   opts.on("--m64","compile 64 bit binary") do |x|
-    options.m64 = true
+    options.m64 = false
   end
   opts.on("--speed","optimize for speed") do |x|
-    options.speed = true
+    options.speed = false
   end
   opts.on("--prof","compile for profiling") do |x|
-    options.prof = true
+    options.prof = false
   end
   rest = opts.parse(argv)
   if not rest.empty?

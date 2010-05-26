@@ -1,5 +1,6 @@
 /*
   Copyright (c) 2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2010 Dirk Willrodt <dwillrodt@zbh.uni-hamburg.de>
   Copyright (c) 2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -45,6 +46,8 @@ void      gt_logger_log_force(GtLogger *logger, const char *format, ...)
 /* Log to target depending on logging status. */
 void      gt_logger_log(GtLogger *logger, const char *format, ...)
           __attribute__ ((format (printf, 2, 3)));
+/* Log to target regardless of logging status, using a va_list argument. */
+void      gt_logger_log_va_force(GtLogger *logger, const char *format, va_list);
 /* Log to target depending on logging status, using a va_list argument. */
 void      gt_logger_log_va(GtLogger *logger, const char *format, va_list);
 
