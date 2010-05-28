@@ -38,6 +38,7 @@ typedef void       (*GtLicenseDestructor)(GtLicense*);
 int gt_tooldriver(GtToolFunc tool, int argc, char *argv[]);
 
 int gt_tooldriver_with_license(GtToolFunc tool, int argc, char *argv[],
+                               GtLicense **license_out,
                                unsigned int major_version,
                                unsigned int minor_version,
                                GtLicenseConstructor, GtLicenseDestructor);
