@@ -32,7 +32,7 @@ int gt_tooldriver_with_license(GtToolFunc tool, int argc, char *argv[],
                                GtLicenseConstructor license_constructor,
                                GtLicenseDestructor license_destructor)
 {
-  void *license = NULL;
+  GtLicense *license = NULL;
   GtError *err;
   int had_err;
   gt_lib_init();
