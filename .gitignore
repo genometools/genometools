@@ -52,6 +52,10 @@ cscope.*
 /doc/manuals/*.blg
 /doc/manuals/*.bbl
 /doc/manuals/auto
+/doc/devguide/*.aux
+/doc/devguide/*.toc
+/doc/devguide/*.log
+/doc/devguide/*.out
 .gdb_history
 src/external/hmmer-2.3.2/squid/squid.h
 src/external/hmmer-2.3.2/squid/squidconf.h
