@@ -130,7 +130,7 @@ typedef GtBitsequence GtTwobitencoding;
 */
 
 #define GT_UNSETIBIT(TAB,I)  (TAB)[GT_DIVWORDSIZE(I)] &= \
-                                     ~(IGT_THBIT(GT_MODWORDSIZE(I)))
+                                     ~(GT_ITHBIT(GT_MODWORDSIZE(I)))
 
 /*
   \texttt{ISIBITSET(TAB,I)} checks if the \texttt{I}-th bit in bitarray
