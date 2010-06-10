@@ -27,6 +27,7 @@
 #include "core/log.h"
 #include "core/ma.h"
 #include "core/option.h"
+#include "core/showtime.h"
 #include "core/splitter.h"
 #include "core/symbol.h"
 #include "core/versionfunc.h"
@@ -35,6 +36,7 @@
 #include "core/yarandom.h"
 
 static bool spacepeak = false;
+static bool showtime = false;
 
 static GtOPrval parse_env_options(int argc, const char **argv, GtError *err)
 {
@@ -45,7 +47,10 @@ static GtOPrval parse_env_options(int argc, const char **argv, GtError *err)
                          "Parse the options contained in the "
                          "environment variable GT_ENV_OPTIONS.");
   o = gt_option_new_bool("spacepeak", "show space peak on stdout upon deletion",
-                      &spacepeak, false);
+                         &spacepeak, false);
+  gt_option_parser_add_option(op, o);
+  o = gt_option_new_bool("showtime", "enable output for run-time statistics",
+                         &showtime, false);
   gt_option_parser_add_option(op, o);
   gt_option_parser_set_max_args(op, 0);
   oprval = gt_option_parser_parse(op, NULL, argc, argv, gt_versionfunc, err);
@@ -96,6 +101,7 @@ void gt_lib_init(void)
     gt_warning("GT_ENV_OPTIONS=-spacepeak used without GT_MEM_BOOKKEEPING=on");
   gt_fa_init();
   gt_log_init();
+  if (showtime) gt_showtime_enable();
   gt_symbol_init();
   gt_class_prealloc_run();
   gt_ya_rand_init(0);
