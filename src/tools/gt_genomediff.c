@@ -16,7 +16,9 @@
 */
 
 #include <stdio.h>
+#include <float.h>
 
+#include "core/array2dim_api.h"
 #include "core/encseq_api.h"
 #include "core/intbits.h"
 #include "core/log_api.h"
@@ -36,7 +38,8 @@ typedef struct {
            *ref_pckindex_genomediff;
   bool verbose_genomediff,
        withesa_genomediff;
-  int user_max_depth_genomediff;
+  int user_max_depth_genomediff,
+      nchoose;
   GtStrArray *queryname_genomediff;
   GtStr *indexname_genomediff;
 } GtGenomediffArguments;
@@ -75,6 +78,12 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
   /* -maxdepth */
   option =  gt_option_new_int("maxdepth", "max depth of .pbi-file",
                               &arguments->user_max_depth_genomediff, -1);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
+  /* -nchoose */
+  option = gt_option_new_int("nchoose", "Number of precalculated values",
+                             &arguments->nchoose, 1000);
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
@@ -176,15 +185,19 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
     GtSeqIterator *queries;
     const GtUchar *symbolmap, *currentQuery;
     const GtAlphabet *alphabet;
+    GtUchar c_sym, g_sym;
     uint64_t queryNo;
     char *description = NULL;
     unsigned long queryLength,
+                  subjectLength,
                   currentSuffix;
     double avgShuLength,
            currentShuLength = 0.0,
-           gc_subject;
+           /*gc_subject,*/
+           gc_query /*, gc*/;
     const FMindex *subjectindex;
 
+    subjectLength = genericindex_get_totallength(genericindexSubject) - 1;
     subjectindex = genericindex_get_packedindex(genericindexSubject);
 
     queries = gt_seqiterator_sequence_buffer_new(
@@ -194,6 +207,8 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
     alphabet = gt_encseq_alphabet(encseq);
     symbolmap = gt_alphabet_symbolmap(alphabet);
     gt_seqiterator_set_symbolmap(queries, symbolmap);
+    c_sym = gt_alphabet_encode(alphabet, 'c');
+    g_sym = gt_alphabet_encode(alphabet, 'g');
 
     for (queryNo = 0; !had_err; queryNo++)
     {
@@ -212,30 +227,66 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
                     "found query of length: %lu",
                     queryLength);
       avgShuLength = 0;
+      gc_query = 0;
       for (currentSuffix = 0; currentSuffix < queryLength; currentSuffix++)
       {
-        gt_log_log("suffix: %lu", currentSuffix);
+        /*gt_log_log("suffix: %lu", currentSuffix);*/
         currentShuLength = gt_pck_getShuStringLength(
                       (const BWTSeq *) subjectindex,
                       currentQuery + (size_t) currentSuffix,
                       (size_t) queryLength - currentSuffix);
-        gt_log_log("current ShuStringLength = %5.1f",
-                   currentShuLength);
+        /*gt_log_log("current ShuStringLength = %5.1f",*/
+                   /*currentShuLength);*/
         avgShuLength += currentShuLength;
-        if (currentSuffix > 0)
-          avgShuLength = avgShuLength / 2;
+        if (currentQuery[currentSuffix] == c_sym ||
+            currentQuery[currentSuffix] == g_sym)
+          gc_query += 1;
       }
-      printf("Query %d has an average SHUstring length "
-             "of %5.2f\n", (int) queryNo, avgShuLength);
-      printf("Query description:\t%s\n", description);
+      avgShuLength /= (double) queryLength;
+      gc_query /= (double) queryLength;
+
+      gt_logger_log(logger, "Query %d has an average SHUstring length "
+                            "of\n# shulength: %f",
+                            (int) queryNo, avgShuLength);
+      gt_logger_log(logger, "Query description: %s", description);
+      gt_log_log("Query (i): %s", description);
+
+/* XXX Fehlerabfragen einbauen */
+     /* gc_subject = gt_pck_getGCcontent((const BWTSeq *) subjectindex,
+                                       alphabet);*/
+      /* gc = (gc_subject + gc_query) / 2; */
+
+      if ( !had_err )
+      {
+        double *ln_n_fac;
+        double div, kr;
+
+        /*definitely change this to a user defined variable*/
+        ln_n_fac = gt_get_ln_n_fac(arguments->nchoose);
+        gt_log_log("ln(nchoose!) = %f\n", ln_n_fac[arguments->nchoose]);
+
+        gt_logger_log(logger, "# shulen:\n%f", avgShuLength);
+        gt_log_log("shu: %f, gc: %f, len: %lu",
+            avgShuLength, gc_query, subjectLength);
+        div =  gt_divergence(DEFAULT_E,
+                   DEFAULT_T,
+                   DEFAULT_M,
+                   avgShuLength,
+                   subjectLength,
+                   gc_query,
+                   ln_n_fac,
+                   arguments->nchoose);
+        gt_logger_log(logger, "# divergence:\n%f", div);
+
+        kr = gt_calculateKr(div);
+
+        printf("# Kr:\n%f\n", kr);
+
+        gt_free(ln_n_fac);
+      }
 
       gt_free(description);
     }
-/* XXX Fehlerabfragen einbauen */
-    gc_subject = gt_pck_getGCcontent((const BWTSeq *) subjectindex,
-                                     alphabet);
-    gt_log_log("subject gc: %2.2f\n", gc_subject);
-
     gt_seqiterator_delete(queries);
   }
   genericindex_delete(genericindexSubject);

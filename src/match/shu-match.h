@@ -25,8 +25,6 @@
 #define DEFAULT_E 1e-3
 #define DEFAULT_T 1e-5
 #define DEFAULT_M DBL_MIN
-#define N_CHOOSE 1000
-#define N_S 1000    /* at the moment - number of elements in the s1 array */
 
 /* returns the length of the matching prefix +1, that is it returns the
  * length of the shortest absent prefix */
@@ -39,22 +37,20 @@ double gt_pck_getGCcontent(const BWTSeq *bwtSubject,
                            const GtAlphabet *alphabet);
 
 /* calculates the divergence from the shulength */
-double divergence (double E, /* relative error for shulen length */
+double gt_divergence (double E, /* relative error for shulen length */
                    double T, /* absolute error */
                    double M,
                    double shulen, /*avg shulength*/
-                   unsigned long seqLen, /*querylength*/
+                   unsigned long seqLen, /*subjectlength*/
                    double gc, /*combined gc-content*/
-                   int n_choose,
-                   double **lnChoose);
+                   double *ln_n_fac,
+                   unsigned int n_s /*length of s-array*/);
 
 /* Jukes-Cantor transform of divergence: Kr */
-double calculateKr(double d);
+double gt_calculateKr(double d);
 
-/* gives a 2-dim array used for precalculations, just for speed */
-double **initializeLnChoose(unsigned long dim);
+/*calculates the n choose k table for given max n and k
+ * use free from core/array2dim_api.h to free this*/
+double *gt_get_ln_n_fac(int n);
 
-/* frees the precalc-matrix */
-void freeLnChoose(double **matrix,
-                  unsigned long dim);
 #endif
