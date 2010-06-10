@@ -59,7 +59,6 @@ static GtOPrval parse_options(int *parsed_args,
          *optiondes,
          *optionsds,
          *optionkys,
-         *optionshowtime,
          *optionshowprogress;
   GtOPrval oprval;
   const char *maxdepthmsg = "option of -maxdepth must the keyword abs, the "
@@ -263,13 +262,6 @@ static GtOPrval parse_options(int *parsed_args,
     gt_registerPackedIndexOptions(op, &so->bwtIdxParams, BWTDEFOPT_CONSTRUCTION,
                                   so->fn2encopt.indexname);
   }
-  optionshowtime
-    = gt_option_new_bool("showtime",
-                         "show the time of the different computation "
-                         "phases",
-                         &so->showtime,
-                         false);
-  gt_option_parser_add_option(op, optionshowtime);
 
   optionshowprogress
     = gt_option_new_bool("showprogress",
@@ -277,7 +269,6 @@ static GtOPrval parse_options(int *parsed_args,
                          &so->showprogress,
                          false);
   gt_option_parser_add_option(op, optionshowprogress);
-  gt_option_exclude(optionshowprogress, optionshowtime);
 
   option = gt_option_new_bool("iterscan",
                               "use iteratorbased-kmer scanning",

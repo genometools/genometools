@@ -21,15 +21,16 @@
 #include <errno.h>
 #include "core/alphabet.h"
 #include "core/chardef.h"
+#include "core/codetype.h"
+#include "core/encseq.h"
 #include "core/fa.h"
+#include "core/logger.h"
+#include "core/progress_timer_api.h"
+#include "core/readmode.h"
+#include "core/showtime.h"
 #include "core/unused_api.h"
 #include "sfx-optdef.h"
-#include "core/encseq.h"
-#include "core/progress_timer_api.h"
 #include "esa-fileend.h"
-#include "core/readmode.h"
-#include "core/logger.h"
-#include "core/codetype.h"
 #include "spacedef.h"
 #include "stamp.h"
 #include "sfx-suffixer.h"
@@ -427,7 +428,7 @@ static int runsuffixerator(bool doesa,
   gt_error_check(err);
 
   ee = gt_encseq_encoder_new();
-  if (so->showtime)
+  if (gt_showtime_enabled())
   {
     sfxprogress = gt_progress_timer_new("determining sequence length and "
                                         "number of special symbols");
