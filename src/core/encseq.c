@@ -242,7 +242,7 @@ void gt_encseq_sequence2bytecode(GtUchar *dest,
 }
 #endif
 
-#ifndef INLINEDENCSEQ
+#ifndef GT_INLINEDENCSEQ
 unsigned long gt_encseq_total_length(const GtEncseq *encseq)
 {
   return encseq->totallength;
@@ -288,6 +288,14 @@ GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
                      (int) readmode);
       exit(GT_EXIT_PROGRAMMING_ERROR);
   }
+}
+
+char gt_encseq_get_decoded_char(const GtEncseq *encseq, unsigned long pos,
+                                GtReadmode readmode)
+{
+  gt_assert(encseq && encseq->alpha);
+  return gt_alphabet_decode(encseq->alpha,
+                            gt_encseq_get_encoded_char(encseq, pos, readmode));
 }
 
 GtUchar gt_encseq_extract_encoded_char(const GtEncseq *encseq,

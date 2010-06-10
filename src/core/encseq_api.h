@@ -72,9 +72,8 @@ typedef struct GtEncseqReader GtEncseqReader;
 /* The file suffix used for sequence description separator position tables. */
 #define GT_SDSTABFILESUFFIX ".sds"
 
-#undef GT_INLINEDENCSEQ
 #ifdef GT_INLINEDENCSEQ
-  #include "core/encseq_inline.h"
+  #include "core/encseq_inlined.h"
 #else
 /* Returns the total number of characters in all sequences of <encseq>,
    not including separators. */
@@ -84,6 +83,11 @@ unsigned long     gt_encseq_num_of_sequences(const GtEncseq *encseq);
 /* Returns the encoded representation of the character at position <pos> of
    <encseq> read in the direction as indicated by <readmode>. */
 GtUchar           gt_encseq_get_encoded_char(const GtEncseq *encseq,
+                                             unsigned long pos,
+                                             GtReadmode readmode);
+/* Returns the decoded representation of the character at position <pos> of
+   <encseq> read in the direction as indicated by <readmode>. */
+char              gt_encseq_get_decoded_char(const GtEncseq *encseq,
                                              unsigned long pos,
                                              GtReadmode readmode);
 #endif

@@ -30,6 +30,7 @@
 
 #include "core/alphabet.h"
 #include "core/bitpackarray.h"
+#include "core/chardef.h"
 #include "core/filelengthvalues.h"
 #include "core/intbits.h"
 #include "core/types_api.h"

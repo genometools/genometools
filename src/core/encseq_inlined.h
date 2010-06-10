@@ -50,9 +50,20 @@ static inline GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
          ;
 }
 
+static inline char gt_encseq_get_decoded_char(const GtEncseq *encseq,
+                                              unsigned long pos,
+                                              GtReadmode readmode)
+{
+  return gt_alphabet_decode(encseq->alpha,
+                            gt_encseq_get_encoded_char(encseq, pos, readmode));
+}
+
 #define gt_encseq_extract_nospecial_encoded_char(ENCSEQ,POS,RM) \
           gt_encseq_get_encoded_char(ENCSEQ,POS,RM)
 
 #define gt_encseq_get_encoded_char_nospecial(ENCSEQ,POS,RM) \
+          gt_encseq_get_encoded_char(ENCSEQ,POS,RM)
+
+#define gt_encseq_extract_encoded_char(ENCSEQ,POS,RM) \
           gt_encseq_get_encoded_char(ENCSEQ,POS,RM)
 #endif
