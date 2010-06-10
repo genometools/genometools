@@ -309,11 +309,16 @@ class EncseqReader:
     def next_encoded_char(self):
         return gtlib.gt_encseq_reader_next_encoded_char(self.er)
 
+    def next_decoded_char(self):
+        return gtlib.gt_encseq_reader_next_decoded_char(self.er)
+
     from_param = classmethod(from_param)
 
     def register(cls, gtlib):
         gtlib.gt_encseq_reader_next_encoded_char.restype = c_ubyte
         gtlib.gt_encseq_reader_next_encoded_char.argtypes = [c_void_p]
+        gtlib.gt_encseq_reader_next_decoded_char.restype = c_char
+        gtlib.gt_encseq_reader_next_decoded_char.argtypes = [c_void_p]
 
     register = classmethod(register)
 
@@ -355,6 +360,11 @@ class Encseq:
         if readmode < 0 or readmode > 3:
             gterror("invalid readmode!")
         return gtlib.gt_encseq_get_encoded_char(self.encseq, pos, readmode)
+
+    def get_decoded_char(self, pos, readmode=0):
+        if readmode < 0 or readmode > 3:
+            gterror("invalid readmode!")
+        return gtlib.gt_encseq_get_decoded_char(self.encseq, pos, readmode)
 
     def alphabet(self):
         a = gtlib.gt_encseq_alphabet(self.encseq)
@@ -414,6 +424,8 @@ class Encseq:
         gtlib.gt_encseq_description.argtypes = [c_void_p, POINTER(c_ulong), c_ulong]
         gtlib.gt_encseq_get_encoded_char.restype = c_ubyte
         gtlib.gt_encseq_get_encoded_char.argtypes = [c_void_p, c_ulong, c_int]
+        gtlib.gt_encseq_get_decoded_char.restype = c_char
+        gtlib.gt_encseq_get_decoded_char.argtypes = [c_void_p, c_ulong, c_int]
         gtlib.gt_encseq_alphabet.restype = c_void_p
         gtlib.gt_encseq_alphabet.argtypes = [c_void_p]
         gtlib.gt_encseq_seqstartpos.restype = c_ulong
