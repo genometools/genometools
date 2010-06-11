@@ -96,6 +96,8 @@ module GT
   extern "unsigned long gt_encseq_num_of_sequences(const GtEncseq*)"
   extern "GtUchar gt_encseq_get_encoded_char(const GtEncseq*, unsigned long,
                                              GtReadmode)"
+  extern "char gt_encseq_get_decoded_char(const GtEncseq*, unsigned long,
+                                          GtReadmode)"
   extern "void gt_encseq_extract_substring(const GtEncseq*, GtUchar*,
                                            unsigned long, unsigned long)"
   extern "void gt_encseq_extract_decoded(const GtEncseq*, void*,
@@ -112,6 +114,7 @@ module GT
   extern "void gt_encseq_delete(GtEncseq*)"
 
   extern "GtUchar gt_encseq_reader_next_encoded_char(GtEncseqReader*)"
+  extern "char gt_encseq_reader_next_decoded_char(GtEncseqReader*)"
   extern "void gt_encseq_reader_delete(GtEncseqReader*)"
 
   class EncseqEncoder
@@ -470,6 +473,13 @@ module GT
       return GT.gt_encseq_get_encoded_char(@encseq, pos, readmode)
     end
 
+    def get_decoded_char(pos, readmode = GT::READMODE_FORWARD)
+      if readmode < 0 or readmode > 3 then
+          GT.gterror("invalid readmode!")
+      end
+      return GT.gt_encseq_get_decoded_char(@encseq, pos, readmode)
+    end
+
     def total_length
       GT.gt_encseq_total_length(@encseq)
     end
@@ -553,6 +563,10 @@ module GT
 
     def next_encoded_char
       return GT.gt_encseq_reader_next_encoded_char(@er)
+    end
+
+    def next_decoded_char
+      return GT.gt_encseq_reader_next_decoded_char(@er)
     end
 
     def to_ptr
