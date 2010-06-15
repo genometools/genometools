@@ -198,6 +198,8 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
     const FMindex *subjectindex;
 
     subjectLength = genericindex_get_totallength(genericindexSubject) - 1;
+    /*subjectLength /= 2;*/
+    gt_log_log("subject length: %lu", subjectLength);
     subjectindex = genericindex_get_packedindex(genericindexSubject);
 
     queries = gt_seqiterator_sequence_buffer_new(
