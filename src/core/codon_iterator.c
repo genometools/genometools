@@ -61,7 +61,7 @@ GtCodonIterator* gt_codon_iterator_create(const GtCodonIteratorClass *cic)
   return ci;
 }
 
-void* gt_codon_iterator_cast(const GtCodonIteratorClass *cic,
+void* gt_codon_iterator_cast(GT_UNUSED const GtCodonIteratorClass *cic,
                              GtCodonIterator *ci)
 {
   gt_assert(cic && ci && ci->c_class == cic);
