@@ -58,7 +58,7 @@ GT_DECLAREARRAYSTRUCT(Intervaltobesorted);
   GT_QSORT_STACKTOP.len = LEN;\
   stack.nextfreeIntervaltobesorted++
 
-void gt_inlined_qsort_r (Sorttype *a,unsigned long n,void *data)
+static void gt_inlined_qsort_r (Sorttype *a,unsigned long n,void *data)
 {
   Sorttype tmp, *pa, *pb, *pc, *pd, *pl, *pm, *pn, *aptr, *bptr;
   unsigned long d, minval;
