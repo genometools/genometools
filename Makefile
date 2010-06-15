@@ -36,14 +36,14 @@ EXP_CFLAGS:=$(CFLAGS)
 EXP_LDFLAGS:=$(LDFLAGS)
 EXP_CXXFLAGS:=$(CXXFLAGS)
 EXP_CPPFLAGS:=$(CPPFLAGS)
-EXP_LDLIBS:=$(LIBS) -lm
+EXP_LDLIBS:=$(LIBS) -lm -ldl
 # ...while those starting with GT_ are for internal purposes only
 GT_CFLAGS:=-g -Wall -Wunused-parameter -pipe -fPIC -Wpointer-arith
 # expat needs -DHAVE_MEMMOVE
 # lua needs -DLUA_USE_POSIX
 # rnv needs -DUNISTD_H="<unistd.h>" -DEXPAT_H="<expat.h>" -DRNV_VERSION="\"1.7.8\""
 # tecla needs -DHAVE_CURSES_H -DHAVE_TERM_H -DUSE_TERMINFO
-EXT_FLAGS:= -DHAVE_MEMMOVE -DLUA_USE_POSIX -DUNISTD_H="<unistd.h>" \
+EXT_FLAGS:= -DHAVE_MEMMOVE -DLUA_USE_POSIX -DLUA_DL_DLOPEN -DUNISTD_H="<unistd.h>" \
             -DEXPAT_H="<expat.h>" -DRNV_VERSION=\"1.7.8\" \
             -DHAVE_CURSES_H -DHAVE_TERM_H -DUSE_TERMINFO
 EXP_CPPFLAGS+=-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 $(EXT_FLAGS)
@@ -328,6 +328,13 @@ ifeq ($(SYSTEM),Darwin)
   endif
 endif
 
+ifeq ($(SYSTEM),Darwin)
+  EXT_FLAGS += -DLUA_DL_DYLD
+else
+  EXT_FLAGS += -DLUA_DL_DLOPEN
+  LUA_LDLIB := -ldl
+endif
+
 ifeq ($(64bit),yes)
   ifneq ($(MACHINE),x86_64)
     m64=yes
@@ -582,7 +589,7 @@ $(eval $(call PROGRAM_template, bin/examples/sketch_parsed_with_ordering, \
 bin/lua: $(LUAMAIN_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $^ -lm -o $@
+	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $^ -lm -ldl -o $@
 
 bin/rnv: $(RNVMAIN_OBJ) lib/librnv.a lib/libexpat.a
 	@echo "[link $(@F)]"

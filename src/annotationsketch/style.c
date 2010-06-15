@@ -70,6 +70,7 @@ static const luaL_Reg luainsecurelibs[] = {
      is not a security issue! */
   {LUA_OSLIBNAME, luaopen_os},
   {LUA_IOLIBNAME, luaopen_io},
+  {LUA_LOADLIBNAME, luaopen_package},
   {NULL, NULL}
 };
 
