@@ -24,6 +24,8 @@
 #include "core/bitpackstring.h"
 #include "core/bittab.h"
 #include "core/bsearch.h"
+#include "core/codon_iterator_simple.h"
+#include "core/codon_iterator_encseq.h"
 #include "core/countingsort.h"
 #include "core/cstr_table.h"
 #include "core/disc_distri.h"
@@ -193,6 +195,10 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "bittab class", gt_bittab_unit_test);
   gt_hashmap_add(unit_tests, "bittab example", gt_bittab_example);
   gt_hashmap_add(unit_tests, "bsearch module", gt_bsearch_unit_test);
+  gt_hashmap_add(unit_tests, "codon iterator class, simple",
+                                            gt_codon_iterator_simple_unit_test);
+  gt_hashmap_add(unit_tests, "codon iterator class, encoded",
+                                            gt_codon_iterator_encseq_unit_test);
   gt_hashmap_add(unit_tests, "countingsort module", gt_countingsort_unit_test);
   gt_hashmap_add(unit_tests, "cstr table class", gt_cstr_table_unit_test);
   gt_hashmap_add(unit_tests, "disc distri class", gt_disc_distri_unit_test);
