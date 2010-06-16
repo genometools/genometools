@@ -2,6 +2,7 @@
 #include "core/unused_api.h"
 #include "core/minmax.h"
 #include "core/divmodmul.h"
+#include "core/arraydef.h"
 
 /*
  * Qsort routine from Bentley & McIlroy's "Engineering a Sort Function".
@@ -28,15 +29,34 @@
 static inline Sorttype *gt_inlined_qsort_r_med3 (Sorttype *a, Sorttype *b,
                                                  Sorttype *c, void *data)
 {
-  return qsortcmp (a, b, data) < 0 ?
-    (qsortcmp (b, c, data) <
-     0 ? b : (qsortcmp (a, c, data) <
-              0 ? c : a)) : (qsortcmp (b, c,
-                                              data) >
-                             0 ? b
-                             : (qsortcmp (a, c, data) <
-                                0 ? a : c));
+  return qsortcmp (a, b, data) < 0
+           ? (qsortcmp (b, c, data) < 0
+                ? b
+                : (qsortcmp (a, c, data) < 0
+                     ? c : a))
+           : (qsortcmp (b, c, data) > 0
+                ? b
+                : (qsortcmp (a, c, data) < 0
+                     ? a
+                     : c));
 }
+
+typedef struct
+{
+  Sorttype *startptr;
+  unsigned long len;
+} Intervaltobesorted;
+
+GT_DECLAREARRAYSTRUCT(Intervaltobesorted);
+
+#define STACKTOP\
+        stack.spaceIntervaltobesorted[stack.nextfreeIntervaltobesorted]
+
+#define PUSHSTACK(START,LEN)\
+  GT_CHECKARRAYSPACE(&stack,Intervaltobesorted,32);\
+  STACKTOP.startptr = START;\
+  STACKTOP.len = LEN;\
+  stack.nextfreeIntervaltobesorted++
 
 void gt_inlined_qsort_r (Sorttype *a,unsigned long n,void *data)
 {
@@ -44,22 +64,28 @@ void gt_inlined_qsort_r (Sorttype *a,unsigned long n,void *data)
   unsigned long d, minval;
   int r;
   bool swapped;
+  GtArrayIntervaltobesorted stack;
 
-  while (1)
+  GT_INITARRAY(&stack,Intervaltobesorted);
+  PUSHSTACK(a,n);
+  while (stack.nextfreeIntervaltobesorted > 0)
   {
+    stack.nextfreeIntervaltobesorted--;
+    a = STACKTOP.startptr;
+    n = STACKTOP.len;
     swapped = false;
     if (n < 7UL)
     {
       for (pm = a + 1; pm < a + n; pm++)
       {
-        for (pl = pm;
-             pl > a && qsortcmp (pl - 1, pl, data) > 0;
+       for (pl = pm;
+	 pl > a && qsortcmp (pl - 1, pl, data) > 0;
              pl--)
         {
           GT_QSORT_SWAP (pl, pl - 1);
         }
       }
-      return;
+      break;
     }
     pm = a + GT_DIV2 (n);
     if (n > 7UL)
@@ -122,7 +148,7 @@ void gt_inlined_qsort_r (Sorttype *a,unsigned long n,void *data)
           GT_QSORT_SWAP (pl, pl - 1);
         }
       }
-      return;
+      break;
     }
     pn = a + n;
     minval = MIN ((unsigned long) (pa - a), (unsigned long) (pb - pa));
@@ -131,18 +157,15 @@ void gt_inlined_qsort_r (Sorttype *a,unsigned long n,void *data)
     GT_QSORT_VECSWAP (pb, pn - minval, minval);
     if ((minval = (unsigned long) (pb - pa)) > 1UL)
     {
-      gt_inlined_qsort_r (a, minval, data);
+      PUSHSTACK(a,minval);
     }
     if ((minval = (unsigned long) (pd - pc)) > 1UL)
     {
-      /*
-         Iterate rather than recurse to save stack space
-       */
-      a = pn - minval;
-      n = minval;
+      PUSHSTACK(pn - minval,minval);
     } else
     {
       break;
     }
   }
+  GT_FREEARRAY(&stack,Intervaltobesorted);
 }
