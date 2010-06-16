@@ -17,7 +17,6 @@
 
 #ifndef STACK_INLINED_H
 #define STACK_INLINED_H
-<<<<<<< HEAD:src/core/stack-inlined.h
 #include <stdbool.h>
 
 /*
@@ -42,7 +41,6 @@
   static memory area.
 */
 
-=======
 #define GT_STACK_DECLARESTRUCT(TYPE,STATICSIZE)\
         typedef struct\
         {\
@@ -146,4 +144,12 @@
 
 #define GT_STACK_TOP(S)\
         ((S)->space[(S)->nextfree - 1])
+
+/*
+  reduce the stack such that it only contains one element.
+*/
+
+#define GT_STACK_MAKEALMOSTEMPTY(S)\
+        (S)->nextfree = 1UL
+
 #endif
