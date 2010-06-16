@@ -117,6 +117,7 @@
 #include "core/ma.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
+#include "core/stack-inlined.h"
 #include "extended/redblack.h"
 
 #define RBT_CHECK_RETURN_CODE\
@@ -429,51 +430,9 @@ GtKeytype gt_rbt_find(const GtKeytype key,
   return GtKeytypeerror;
 }
 
-#define STATICSTACKSPACE    32UL
-#define STACKSPACEINCREMENT 16UL
+typedef GtRBTnode ** GtRBTnodeptrptr;
 
-#define PUSHSTACK(VALUE)\
-        if (nextfreestack == allocatedstack)\
-        {\
-          size_t allocsize = sizeof (*spaceforstack) * \
-                            (allocatedstack + STACKSPACEINCREMENT);\
-          spaceforstack = gt_realloc((allocatedstack == STATICSTACKSPACE)\
-                                     ? NULL \
-                                     : spaceforstack,\
-                                     allocsize);\
-          if (allocatedstack == STATICSTACKSPACE)\
-          {\
-            memcpy(spaceforstack,&staticstack[0],\
-                   sizeof (*spaceforstack) * STATICSTACKSPACE);\
-          }\
-          allocatedstack += STACKSPACEINCREMENT;\
-        }\
-        spaceforstack[nextfreestack++] = VALUE
-
-#define DELETENODESTACKSPACE\
-        if (allocatedstack > STATICSTACKSPACE)\
-        {\
-          gt_free(spaceforstack);\
-        }
-
-#define DECLARESTACK(TYPE)\
-        TYPE *spaceforstack;\
-        TYPE  staticstack[STATICSTACKSPACE];\
-        unsigned long allocatedstack = STATICSTACKSPACE,\
-                      nextfreestack = 0;\
-        spaceforstack = &staticstack[0]
-
-#define STACKISEMPTY\
-        ((nextfreestack == 0) ? true : false)
-
-#define MAKESTACKALMOSTEMPTY\
-        nextfreestack = 1UL
-
-#define DECREMENTSTACKTOP\
-        nextfreestack--
-
-#define GETSTACKTOP\
-        (spaceforstack[nextfreestack - 1])
+GT_STACK_DECLARESTRUCT(GtRBTnodeptrptr,32UL);
 
 /**
  * Delete node with given key. rootp is the
@@ -490,8 +449,9 @@ int gt_rbt_delete(const GtKeytype key,
             *root,
             *unchained;
   int cmp;
-  DECLARESTACK(GtRBTnode **);
-
+  GtStackGtRBTnodeptrptr nodestack;
+  
+  GT_STACK_INIT(&nodestack,16UL);
   p = *rootp;
   if (p == NULL)
   {
@@ -500,7 +460,7 @@ int gt_rbt_delete(const GtKeytype key,
   CHECK_TREE(p);
   while ((cmp = cmpfun (key, (*rootp)->key, cmpinfo)) != 0)
   {
-    PUSHSTACK(rootp);
+    GT_STACK_PUSH(&nodestack,rootp);
     p = *rootp;
     if (cmp < 0)
     {
@@ -512,7 +472,7 @@ int gt_rbt_delete(const GtKeytype key,
     }
     if (*rootp == NULL)
     {
-      DELETENODESTACKSPACE;
+      GT_STACK_DELETE(&nodestack);
       return -1;
     }
   }
@@ -540,7 +500,7 @@ int gt_rbt_delete(const GtKeytype key,
 
     for (;;)
     {
-      PUSHSTACK(parent);
+      GT_STACK_PUSH(&nodestack,parent);
       parent = up;
       if ((*up)->left == NULL)
       {
@@ -560,13 +520,13 @@ int gt_rbt_delete(const GtKeytype key,
   {
     r = unchained->right;
   }
-  if (STACKISEMPTY)
+  if (GT_STACK_ISEMPTY(&nodestack))
   {
     *rootp = r;
   }
   else
   {
-    q = *GETSTACKTOP;
+    q = *(GT_STACK_TOP(&nodestack));
     if (unchained == q->right)
     {
       q->right = r;
@@ -588,16 +548,16 @@ int gt_rbt_delete(const GtKeytype key,
        black edges on every path is no longer constant.
        We must balance the tree.
 
-       NODESTACK now contains all parents of R.
+       nodestack now contains all parents of R.
        R is likely to be NULL in the
        first iteration.
 
        NULL nodes are considered black throughout - this is necessary for
        correctness.
      */
-    while (!STACKISEMPTY && (r == NULL || !r->red))
+    while (!GT_STACK_ISEMPTY(&nodestack) && (r == NULL || !r->red))
     {
-      GtRBTnode **pp = GETSTACKTOP;
+      GtRBTnode **pp = GT_STACK_TOP(&nodestack);
 
       p = *pp;
       /*
@@ -632,7 +592,7 @@ int gt_rbt_delete(const GtKeytype key,
            * Make sure pp is right if the case below tries to use it.
            */
           pp = &q->left;
-          PUSHSTACK(pp);         /* this has been added by S.K. */
+          GT_STACK_PUSH(&nodestack,pp); /* this has been added by S.K. */
           q = p->right;
         }
         gt_assert(q != NULL);
@@ -707,7 +667,7 @@ int gt_rbt_delete(const GtKeytype key,
           /*
              We're done.
            */
-          MAKESTACKALMOSTEMPTY;
+          GT_STACK_MAKEALMOSTEMPTY(&nodestack);
           r = NULL;
         }
       }
@@ -725,7 +685,7 @@ int gt_rbt_delete(const GtKeytype key,
           q->right = p;
           *pp = q;
           pp = &q->right;
-          PUSHSTACK(pp);         /* this has been added by S.K. */
+          GT_STACK_PUSH(&nodestack,pp);   /* this has been added by S.K. */
           q = p->left;
         }
         gt_assert(q != NULL);
@@ -758,11 +718,11 @@ int gt_rbt_delete(const GtKeytype key,
             q->right = p;
             *pp = q;
           }
-          MAKESTACKALMOSTEMPTY;
+          GT_STACK_MAKEALMOSTEMPTY(&nodestack);
           r = NULL;
         }
       }
-      DECREMENTSTACKTOP;
+      GT_STACK_DECREMENTTOP(&nodestack);
     }
     if (r != NULL)
     {
@@ -770,7 +730,7 @@ int gt_rbt_delete(const GtKeytype key,
     }
   }
   gt_free (unchained);
-  DELETENODESTACKSPACE;
+  GT_STACK_DELETE(&nodestack);
   return 0;
 }
 

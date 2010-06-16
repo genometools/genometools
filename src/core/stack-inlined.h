@@ -17,6 +17,7 @@
 
 #ifndef STACK_INLINED_H
 #define STACK_INLINED_H
+<<<<<<< HEAD:src/core/stack-inlined.h
 #include <stdbool.h>
 
 /*
@@ -41,6 +42,7 @@
   static memory area.
 */
 
+=======
 #define GT_STACK_DECLARESTRUCT(TYPE,STATICSIZE)\
         typedef struct\
         {\
@@ -103,6 +105,11 @@
 /*
   check if the stack is empty.
 */
+#define GT_STACK_DELETE(S)\
+        if ((S)->allocated > (S)->staticsize)\
+        {\
+          gt_free((S)->space);\
+        }
 
 #define GT_STACK_ISEMPTY(S)\
         (((S)->nextfree == 0) ? true : false)
@@ -110,6 +117,8 @@
 /*
   reduce the stack size by one
 */
+#define GT_STACK_MAKEALMOSTEMPTY(S)\
+        (S)->nextfree = 1UL
 
 #define GT_STACK_DECREMENTTOP(S)\
         (S)->nextfree--
@@ -135,4 +144,6 @@
 #define GT_STACK_MAKEALMOSTEMPTY(S)\
         (S)->nextfree = 1UL
 
+#define GT_STACK_TOP(S)\
+        ((S)->space[(S)->nextfree - 1])
 #endif
