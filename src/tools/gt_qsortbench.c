@@ -15,16 +15,24 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <stdlib.h>
 #include <string.h>
+#include "core/assert_api.h"
 #include "core/qsort_r.h"
 #include "core/ma.h"
 #include "core/str.h"
+#include "core/timer.h"
 #include "core/mathsupport.h"
 #include "core/unused_api.h"
 #include "tools/gt_qsortbench.h"
 
 typedef struct {
   GtStr *impl;
+  unsigned long num_values,
+                maxvalue;
+  bool use_aqsort,
+       use_permute,
+       verbose;
 } QSortBenchArguments;
 
 static void* gt_qsortbench_arguments_new(void)
@@ -64,6 +72,27 @@ static GtOptionParser* gt_qsortbench_option_parser_new(void *tool_arguments)
                              arguments->impl, inputs[0], inputs);
   gt_option_parser_add_option(op, option);
 
+  option = gt_option_new_ulong("size", "size of array to sort",
+                               &arguments->num_values, 1000000);
+  gt_option_parser_add_option(op, option);
+
+  option = gt_option_new_ulong("maxval", "maximal value of an item to sort",
+                               &arguments->maxvalue, 10000);
+  gt_option_parser_add_option(op, option);
+
+  option = gt_option_new_bool("aqsort", "prepare bad input array using the "
+                                        "'aqsort' anti-quicksort algorithm",
+                               &arguments->use_aqsort, false);
+  gt_option_parser_add_option(op, option);
+
+  option = gt_option_new_bool("permute", "prepare bad input array by "
+                                         "permutation of unique items",
+                               &arguments->use_permute, false);
+  gt_option_parser_add_option(op, option);
+
+  option = gt_option_new_verbose(&arguments->verbose);
+  gt_option_parser_add_option(op, option);
+
   return op;
 }
 
@@ -79,10 +108,68 @@ static int gt_qsortbench_arguments_check(GT_UNUSED int rest_argc,
   return had_err;
 }
 
+static void gt_qbenchsort_permute_ulong_array (unsigned long *arr,
+                                               unsigned long size)
+{
+  unsigned long i, j, c;
+
+  for (i = 0; i < (unsigned long) size; ++i)
+  {
+    j = (unsigned long) (random () % size);
+    c = arr[i];
+    arr[i] = arr[j];
+    arr[j] = c;
+  }
+}
+
+unsigned long *val;         /* array, solidified on the fly */
+unsigned long ncmp;         /* number of comparisons */
+unsigned long nsolid;       /* number of solid items */
+unsigned long candidate;    /* pivot candidate */
+unsigned long gas;          /* gas value = highest sorted value */
+#define freeze(x) val[x] = nsolid++
+
+static int gt_qsortbench_cmp(const void *px, const void *py)
+{
+  const unsigned long x = *(const unsigned long*)px;
+  const unsigned long y = *(const unsigned long*)py;
+  ncmp++;
+  if (val[x]==gas && val[y]==gas) {
+    if (x == candidate) {
+      freeze(x);
+    } else {
+      freeze(y);
+    }
+  }
+  if (val[x] == gas)
+    candidate = x;
+  else if (val[y] == gas)
+    candidate = y;
+  return val[x] - val[y];
+}
+
+static int gt_qsortbench_aqsort(unsigned long n, unsigned long *a)
+{
+  unsigned long i;
+  unsigned long *ptr = malloc(n*sizeof (*ptr));
+  val = a;
+  gas = n-1;
+  nsolid = ncmp = candidate = 0;
+  for (i=0; i<n; i++) {
+    ptr[i] = i;
+    val[i] = gas;
+  }
+  qsort(ptr, n, sizeof (*ptr), gt_qsortbench_cmp);
+  for (i=1;i<n;i++)
+    gt_assert(val[ptr[i]]==val[ptr[i-1]]+1);
+  free(ptr);
+  return ncmp;
+}
+
 typedef unsigned long Sorttype;
 
-static int qsortcmp (const Sorttype *a,const Sorttype *b,
-                     const GT_UNUSED void *data)
+static int qsortcmp(const Sorttype *a,const Sorttype *b,
+                    const GT_UNUSED void *data)
 {
   if ((*a) < (*b))
   {
@@ -95,7 +182,7 @@ static int qsortcmp (const Sorttype *a,const Sorttype *b,
   return 0;
 }
 
-static int qsortcmpnodata (const void *a,const void *b)
+static int qsortcmpnodata(const void *a,const void *b)
 {
   if (*(Sorttype*)a < *((Sorttype*)b))
   {
@@ -108,7 +195,7 @@ static int qsortcmpnodata (const void *a,const void *b)
   return 0;
 }
 
-static int qsortcmpwithdata (const void *a,const void *b, GT_UNUSED void *data)
+static int qsortcmpwithdata(const void *a,const void *b, GT_UNUSED void *data)
 {
   if (*(Sorttype*)a < *((Sorttype*)b))
   {
@@ -124,60 +211,30 @@ static int qsortcmpwithdata (const void *a,const void *b, GT_UNUSED void *data)
 #include "match/qsort-inplace.gen"
 #define MAXSIZE 1000000
 
-static void check_inlined_qsort(void)
+static void check_inlined_qsort(unsigned long *a, unsigned long n)
 {
-  int times;
-  unsigned long idx, n = (unsigned long) MAXSIZE, a[MAXSIZE];
-
-  for (times = 0; times < 100; times++)
-  {
-    for (idx = 0; idx < n; idx++)
-    {
-      a[idx] = gt_rand_max(1000UL);
-    }
-    gt_inlined_qsort_r (a,n,NULL);
-    for (idx = 1UL; idx < n; idx++)
-    {
-      gt_assert(a[idx-1] <= a[idx]);
-    }
+  unsigned long idx;
+  gt_inlined_qsort_r(a, n, NULL);
+  for (idx = 1UL; idx < n; idx++) {
+    gt_assert(a[idx-1] <= a[idx]);
   }
 }
 
-static void check_thomas_qsort(void)
+static void check_thomas_qsort(unsigned long *a, unsigned long n)
 {
-  int times;
-  unsigned long idx, n = (unsigned long) MAXSIZE, a[MAXSIZE];
-
-  for (times = 0; times < 100; times++)
-  {
-    for (idx = 0; idx < n; idx++)
-    {
-      a[idx] = gt_rand_max(1000UL);
-    }
-    gt_qsort_r(a,n,sizeof (Sorttype),NULL, qsortcmpwithdata);
-    for (idx = 1UL; idx < n; idx++)
-    {
-      gt_assert(a[idx-1] <= a[idx]);
-    }
+  unsigned long idx;
+  gt_qsort_r(a,n,sizeof (Sorttype),NULL, qsortcmpwithdata);
+  for (idx = 1UL; idx < n; idx++) {
+    gt_assert(a[idx-1] <= a[idx]);
   }
 }
 
-static void check_gnu_qsort(void)
+static void check_gnu_qsort(unsigned long *a, unsigned long n)
 {
-  int times;
-  unsigned long idx, n = (unsigned long) MAXSIZE, a[MAXSIZE];
-
-  for (times = 0; times < 100; times++)
-  {
-    for (idx = 0; idx < n; idx++)
-    {
-      a[idx] = gt_rand_max(1000UL);
-    }
-    qsort (a,n, sizeof (Sorttype), qsortcmpnodata);
-    for (idx = 1UL; idx < n; idx++)
-    {
-      gt_assert(a[idx-1] <= a[idx]);
-    }
+  unsigned long idx;
+  qsort(a,n, sizeof (Sorttype), qsortcmpnodata);
+  for (idx = 1UL; idx < n; idx++) {
+    gt_assert(a[idx-1] <= a[idx]);
   }
 }
 
@@ -187,20 +244,52 @@ static int gt_qsortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
 {
   QSortBenchArguments *arguments = tool_arguments;
   int had_err = 0;
+  GtTimer *timer;
+  unsigned long *array, i;
 
   gt_error_check(err);
   gt_assert(arguments);
 
-  if (strcmp(gt_str_get(arguments->impl), "thomas") == 0) {
-    check_thomas_qsort();
-  }
-  if (strcmp(gt_str_get(arguments->impl), "system") == 0) {
-    check_gnu_qsort();
-  }
-  if (strcmp(gt_str_get(arguments->impl), "inlined") == 0) {
-    check_inlined_qsort();
+  if (arguments->verbose) {
+    printf("# number of items = %lu\n", arguments->num_values);
+    printf("# max value items = %lu\n", arguments->maxvalue);
+    printf("# implementation = %s\n", gt_str_get(arguments->impl));
   }
 
+  /* prepare benchmark input data */
+  array = gt_malloc(arguments->num_values * sizeof (unsigned long));
+  if (arguments->use_aqsort) {
+    if (arguments->verbose)
+      printf("# using aqsort\n");
+    gt_qsortbench_aqsort(arguments->num_values, array);
+  } else if (arguments->use_permute) {
+    if (arguments->verbose)
+      printf("# using permuted array\n");
+    for (i = 0; i < arguments->num_values; ++i) {
+      array[i] = i;
+    }
+    gt_qbenchsort_permute_ulong_array(array, arguments->num_values);
+  } else {
+    if (arguments->verbose)
+      printf("# using simple array of random numbers\n");
+    for (i = 0; i < arguments->num_values; ++i) {
+      array[i] = gt_rand_max(arguments->num_values);
+    }
+  }
+
+  timer = gt_timer_new();
+  gt_timer_start(timer);
+  /* run implementation */
+  if (strcmp(gt_str_get(arguments->impl), "thomas") == 0) {
+    check_thomas_qsort(array, arguments->num_values);
+  } else if (strcmp(gt_str_get(arguments->impl), "system") == 0) {
+    check_gnu_qsort(array, arguments->num_values);
+  } else if (strcmp(gt_str_get(arguments->impl), "inlined") == 0) {
+    check_inlined_qsort(array, arguments->num_values);
+  }
+  gt_timer_show(timer, stdout);
+  gt_timer_delete(timer);
+  gt_free(array);
   return had_err;
 }
 
