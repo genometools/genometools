@@ -1,7 +1,8 @@
 /*
   Copyright (c) 2007      Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2010      Giorgio Gonnella <gonnella@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -55,8 +56,7 @@ static GtOPrval parse_options(GtSeqstatArguments *arguments,
   gt_error_check(err);
 
   op = gt_option_parser_new("[options] file [...]",
-                         "Parse the supplied Fasta files.");
-  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+                            "Calculate statistics for fasta file(s).");
 
   optionverbose = gt_option_new_bool("v","be verbose",
                                   &arguments->verbose,false);
@@ -67,14 +67,14 @@ static GtOPrval parse_options(GtSeqstatArguments *arguments,
                                   &arguments->dodistlen,false);
   gt_option_parser_add_option(op, optiondistlen);
 
-  optionbucketsize = gt_option_new_uint_min("bucketsize",
+  optionbucketsize = gt_option_new_uint_min("b",
                                 "bucket size for distlen option",
                                 &arguments->bucketsize,100, 1);
   gt_option_imply(optionbucketsize, optiondistlen);
   gt_option_parser_add_option(op, optionbucketsize);
 
   optioncstats = gt_option_new_bool("contigs",
-                                   "show statistics of a contigs set",
+                                   "summary of contigs set statistics",
                                    &arguments->docstats,false);
   gt_option_parser_add_option(op, optioncstats);
 
@@ -83,11 +83,13 @@ static GtOPrval parse_options(GtSeqstatArguments *arguments,
                                    &arguments->doastretch,false);
   gt_option_exclude(optiondistlen, optionastretch);
   gt_option_parser_add_option(op, optionastretch);
+  gt_option_is_extended_option(optionastretch);
 
   optionestimsize = gt_option_new_bool("estimsize",
                                    "show estimated size",
                                    &arguments->showestimsize,false);
   gt_option_parser_add_option(op, optionestimsize);
+  gt_option_is_development_option(optionestimsize);
 
   gt_option_parser_set_min_args(op, 1U);
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
@@ -204,8 +206,8 @@ typedef struct
 {
   unsigned long       nvalue[NOF_NSTATS];
   unsigned long long  min[NOF_NSTATS];
-  bool                 done[NOF_NSTATS];
-  char                 *name[NOF_NSTATS];
+  bool                done[NOF_NSTATS];
+  char                *name[NOF_NSTATS];
   unsigned long long  current;
 } Nstats;
 
@@ -369,6 +371,8 @@ int gt_seqstat(int argc, const char **argv, GtError *err)
   {
     printf("# " Formatuint64_t " sequences of average length %.2f\n",
              PRINTuint64_tcast(numofseq),(double) sumlength/numofseq);
+    printf("# total length " Formatuint64_t "\n",
+             PRINTuint64_tcast(sumlength));
     printf("# minimum length %lu\n",minlength);
     printf("# maximum length %lu\n",maxlength);
     printf("# distribution of sequence length in buckets of size %u\n",
