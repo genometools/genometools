@@ -137,8 +137,11 @@ disc_distri_foreach_iterfunc(unsigned long key, unsigned long long occurrences,
   return CONTINUE_ITERATION;
 }
 
-void gt_disc_distri_foreach(const GtDiscDistri *d, GtDiscDistriIterFunc func,
-                        void *data)
+static
+void gt_disc_distri_foreach_generic(const GtDiscDistri *d,
+                                    GtDiscDistriIterFunc func,
+                                    void *data,
+                                    ul_ull_gt_hashmap_KeyCmp cmp)
 {
   DiscDistriForeachInfo info;
   int rval;
@@ -146,17 +149,66 @@ void gt_disc_distri_foreach(const GtDiscDistri *d, GtDiscDistriIterFunc func,
   if (d->hashdist) {
     info.func = func;
     info.data = data;
-    rval = ul_ull_gt_hashmap_foreach_in_default_order(d->hashdist,
-                                                   disc_distri_foreach_iterfunc,
-                                                   &info, NULL);
+    if (cmp)
+      rval = ul_ull_gt_hashmap_foreach_ordered(d->hashdist,
+                                               disc_distri_foreach_iterfunc,
+                                               &info, cmp, NULL);
+    else
+      rval = ul_ull_gt_hashmap_foreach_in_default_order(d->hashdist,
+                                               disc_distri_foreach_iterfunc,
+                                               &info, NULL);
     gt_assert(!rval); /* disc_distri_foreach_iterfunc() is sane */
   }
+}
+
+void gt_disc_distri_foreach(const GtDiscDistri *d, GtDiscDistriIterFunc func,
+                        void *data)
+{
+  gt_disc_distri_foreach_generic(d,func,data,NULL);
+}
+
+static int
+rev_key_cmp(const unsigned long a, const unsigned long b)
+{
+  return -gt_ht_ul_elem_cmp(&a,&b);
+}
+
+void gt_disc_distri_foreach_in_reverse_order(const GtDiscDistri *d,
+                                             GtDiscDistriIterFunc func,
+                                             void *data)
+{
+  gt_disc_distri_foreach_generic(d,func,data, rev_key_cmp);
+}
+
+#define DISC_DISTRI_FOREACHTESTSIZE 3
+
+/* data for foreach unit test */
+struct ForeachTesterData
+{
+  int counter;
+  int expkeys[DISC_DISTRI_FOREACHTESTSIZE];
+  int expvalues[DISC_DISTRI_FOREACHTESTSIZE];
+  int *had_err;
+  GtError *err;
+};
+
+/* helper function for unit test of foreach */
+static void foreachtester(unsigned long key,
+                           unsigned long long value, void *data)
+{
+  struct ForeachTesterData *tdata = data;
+  GtError *err = tdata->err;
+  tdata->counter++;
+  ensure(*(tdata->had_err), tdata->counter < DISC_DISTRI_FOREACHTESTSIZE);
+  ensure(*(tdata->had_err), tdata->expkeys[tdata->counter] == key);
+  ensure(*(tdata->had_err), tdata->expvalues[tdata->counter] == value);
 }
 
 int gt_disc_distri_unit_test(GtError *err)
 {
   GtDiscDistri *d;
   int had_err = 0;
+  struct ForeachTesterData tdata;
 
   gt_error_check(err);
 
@@ -170,6 +222,33 @@ int gt_disc_distri_unit_test(GtError *err)
   }
   ensure(had_err, gt_disc_distri_get(d, 0) == 1);
   ensure(had_err, gt_disc_distri_get(d, 100) == 256);
+
+  /* test foreach and foreach_in_reverse_order: */
+  gt_disc_distri_add(d, 2);
+  if (!had_err) {
+    tdata.counter = -1;
+    tdata.expkeys[0] = 0;
+    tdata.expvalues[0] = 1;
+    tdata.expkeys[1] = 2;
+    tdata.expvalues[1] = 1;
+    tdata.expkeys[2] = 100;
+    tdata.expvalues[2] = 256;
+    tdata.had_err = &had_err;
+    tdata.err = err;
+    gt_disc_distri_foreach(d, foreachtester, &tdata);
+  }
+  if (!had_err) {
+    tdata.counter = -1;
+    tdata.expkeys[0] = 100;
+    tdata.expvalues[0] = 256;
+    tdata.expkeys[1] = 2;
+    tdata.expvalues[1] = 1;
+    tdata.expkeys[2] = 0;
+    tdata.expvalues[2] = 1;
+    tdata.had_err = &had_err;
+    tdata.err = err;
+    gt_disc_distri_foreach_in_reverse_order(d, foreachtester, &tdata);
+  }
 
   gt_disc_distri_delete(d);
 

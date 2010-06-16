@@ -1,7 +1,8 @@
 /*
   Copyright (c) 2007      Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2010      Giorgio Gonnella <gonnella@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -31,45 +32,64 @@
 #include "core/disc_distri.h"
 #include "core/format64.h"
 #include "match/stamp.h"
-#include "tools/gt_seqiterator.h"
-
-#define BUCKETSIZE 100
+#include "tools/gt_seqstat.h"
 
 typedef struct
 {
   bool verbose,
        dodistlen,
-       doastretch;
-} Seqiteroptions;
+       doastretch,
+       docstats,
+       showestimsize;
+  unsigned int bucketsize;
+} GtSeqstatArguments;
 
-static GtOPrval parse_options(Seqiteroptions *seqiteroptions,
+static GtOPrval parse_options(GtSeqstatArguments *arguments,
                               int *parsed_args,int argc,
                               const char **argv, GtError *err)
 {
   GtOptionParser *op;
-  GtOption *optionverbose, *optiondistlen, *optionastretch;
+  GtOption *optionverbose, *optiondistlen, *optionbucketsize,
+           *optioncstats, *optionastretch, *optionestimsize;
   GtOPrval oprval;
 
   gt_error_check(err);
 
   op = gt_option_parser_new("[options] file [...]",
-                         "Parse the supplied Fasta files.");
-  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+                            "Calculate statistics for fasta file(s).");
 
   optionverbose = gt_option_new_bool("v","be verbose",
-                                  &seqiteroptions->verbose,false);
+                                  &arguments->verbose,false);
   gt_option_parser_add_option(op, optionverbose);
 
   optiondistlen = gt_option_new_bool("distlen",
                                   "show distribution of sequence length",
-                                  &seqiteroptions->dodistlen,false);
+                                  &arguments->dodistlen,false);
   gt_option_parser_add_option(op, optiondistlen);
+
+  optionbucketsize = gt_option_new_uint_min("b",
+                                "bucket size for distlen option",
+                                &arguments->bucketsize,100, 1);
+  gt_option_imply(optionbucketsize, optiondistlen);
+  gt_option_parser_add_option(op, optionbucketsize);
+
+  optioncstats = gt_option_new_bool("contigs",
+                                   "summary of contigs set statistics",
+                                   &arguments->docstats,false);
+  gt_option_parser_add_option(op, optioncstats);
 
   optionastretch = gt_option_new_bool("astretch",
                                    "show distribution of A-substrings",
-                                   &seqiteroptions->doastretch,false);
+                                   &arguments->doastretch,false);
   gt_option_exclude(optiondistlen, optionastretch);
   gt_option_parser_add_option(op, optionastretch);
+  gt_option_is_extended_option(optionastretch);
+
+  optionestimsize = gt_option_new_bool("estimsize",
+                                   "show estimated size",
+                                   &arguments->showestimsize,false);
+  gt_option_parser_add_option(op, optionestimsize);
+  gt_option_is_development_option(optionestimsize);
 
   gt_option_parser_set_min_args(op, 1U);
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
@@ -79,15 +99,16 @@ static GtOPrval parse_options(Seqiteroptions *seqiteroptions,
 }
 
 static void showdistseqlen(unsigned long key, unsigned long long value,
-                           GT_UNUSED void *data)
+                            void *data)
 {
   unsigned long distvalue;
+  unsigned int *bucketsize = data;
 
   gt_assert(value <= (unsigned long long) ULONG_MAX);
   distvalue = (unsigned long) value;
   printf("%lu--%lu %lu\n",
-         BUCKETSIZE * key,
-         BUCKETSIZE * (key+1) - 1,
+         (*bucketsize) * key,
+         (*bucketsize) * (key+1) - 1,
          distvalue);
 }
 
@@ -179,7 +200,67 @@ static void processastretches(const GtDiscDistri *distastretch,
   gt_free(astretchinfo.mmercount);
 }
 
-int gt_seqiterator(int argc, const char **argv, GtError *err)
+#define NOF_NSTATS 2 /* N50, N80 */
+
+typedef struct
+{
+  unsigned long       nvalue[NOF_NSTATS];
+  unsigned long long  min[NOF_NSTATS];
+  bool                done[NOF_NSTATS];
+  char                *name[NOF_NSTATS];
+  unsigned long long  current;
+} Nstats;
+
+static void calcNstats(unsigned long key, unsigned long long value,
+                        void *data)
+{
+  Nstats *nstats = data;
+  int i;
+  nstats->current += (key*value);
+  for (i = 0; i < NOF_NSTATS; i++)
+  {
+    if (!nstats->done[i])
+    {
+      if (nstats->current >= nstats->min[i])
+      {
+        nstats->done[i] = true;
+        nstats->nvalue[i] = key;
+      }
+    }
+  }
+}
+
+#define initNstat(INDEX, NAME, PORTION)\
+    nstats.name[INDEX] = (NAME);\
+    nstats.min[INDEX] = (double)sumlength * (PORTION);\
+    nstats.nvalue[INDEX] = 0;\
+    nstats.done[INDEX] = false
+
+static void showcstats(uint64_t numofseq, uint64_t sumlength,
+                        unsigned long minlength, unsigned long maxlength,
+                        GtDiscDistri *distctglen)
+{
+  Nstats nstats;
+  int i;
+
+  initNstat(0, "N50", 0.50);
+  initNstat(1, "N80", 0.80);
+  nstats.current = 0;
+
+  gt_disc_distri_foreach_in_reverse_order(distctglen, calcNstats,
+                                          &nstats);
+  printf("# number of contigs: "Formatuint64_t"\n",
+         PRINTuint64_tcast(numofseq));
+  printf("# total length:      "Formatuint64_t"\n",
+         PRINTuint64_tcast(sumlength));
+  printf("# average size:      %.2f\n", (double) sumlength/numofseq);
+  printf("# longest contig:    %lu\n", maxlength);
+  for (i = 0; i < NOF_NSTATS ; i++)
+    printf("# %s:               %lu\n", nstats.name[i], nstats.nvalue[i]);
+  printf("# smallest contig:   %lu\n", minlength);
+}
+
+int gt_seqstat(int argc, const char **argv, GtError *err)
 {
   GtStrArray *files;
   GtSeqIterator *seqit;
@@ -189,17 +270,18 @@ int gt_seqiterator(int argc, const char **argv, GtError *err)
   int i, parsed_args, had_err = 0;
   off_t totalsize;
   GtDiscDistri *distseqlen = NULL;
+  GtDiscDistri *distctglen = NULL;
   GtDiscDistri *distastretch = NULL;
   uint64_t numofseq = 0, sumlength = 0;
   unsigned long minlength = 0, maxlength = 0;
   unsigned long long countA = 0;
   bool minlengthdefined = false;
-  Seqiteroptions seqiteroptions;
+  GtSeqstatArguments arguments;
 
   gt_error_check(err);
 
   /* option parsing */
-  switch (parse_options(&seqiteroptions,&parsed_args, argc, argv, err)) {
+  switch (parse_options(&arguments,&parsed_args, argc, argv, err)) {
     case GT_OPTION_PARSER_OK: break;
     case GT_OPTION_PARSER_ERROR:
         return -1;
@@ -213,8 +295,11 @@ int gt_seqiterator(int argc, const char **argv, GtError *err)
     gt_str_array_add_cstr(files, argv[i]);
   }
   totalsize = gt_files_estimate_total_size(files);
-  printf("# estimated total size is " Formatuint64_t "\n",
-            PRINTuint64_tcast(totalsize));
+  if (arguments.showestimsize)
+  {
+    printf("# estimated total size is " Formatuint64_t "\n",
+              PRINTuint64_tcast(totalsize));
+  }
   if (!had_err) {
     /* read input using seqiterator */
     seqit = gt_seqiterator_sequence_buffer_new(files, err);
@@ -222,15 +307,19 @@ int gt_seqiterator(int argc, const char **argv, GtError *err)
       had_err = -1;
     if (!had_err)
     {
-      if (seqiteroptions.dodistlen)
+      if (arguments.dodistlen)
       {
         distseqlen = gt_disc_distri_new();
       }
-      if (seqiteroptions.doastretch)
+      if (arguments.docstats)
+      {
+        distctglen = gt_disc_distri_new();
+      }
+      if (arguments.doastretch)
       {
         distastretch = gt_disc_distri_new();
       }
-      if (seqiteroptions.verbose)
+      if (arguments.verbose)
       {
         gt_progressbar_start(gt_seqiterator_getcurrentcounter(seqit,
                                                             (unsigned long long)
@@ -241,7 +330,9 @@ int gt_seqiterator(int argc, const char **argv, GtError *err)
       {
         desc = NULL;
         had_err = gt_seqiterator_next(seqit, &sequence, &len, &desc, err);
-        if (seqiteroptions.dodistlen)
+        gt_free(desc);
+        if (had_err != 1) break; /* 0: finished; 1: error */
+        if (arguments.dodistlen || arguments.docstats)
         {
           if (!minlengthdefined || minlength > len)
           {
@@ -254,19 +345,21 @@ int gt_seqiterator(int argc, const char **argv, GtError *err)
           }
           sumlength += (uint64_t) len;
           numofseq++;
-          gt_disc_distri_add(distseqlen,len/BUCKETSIZE);
+          if (arguments.dodistlen)
+          {
+            gt_disc_distri_add(distseqlen,len/arguments.bucketsize);
+          }
+          if (arguments.docstats)
+          {
+            gt_disc_distri_add(distctglen,len);
+          }
         }
-        if (seqiteroptions.doastretch)
+        if (arguments.doastretch)
         {
           countA += accumulateastretch(distastretch,sequence,len);
         }
-        gt_free(desc);
-        if (had_err != 1)
-        {
-          break;
-        }
       }
-      if (seqiteroptions.verbose)
+      if (arguments.verbose)
       {
         gt_progressbar_stop();
       }
@@ -274,18 +367,27 @@ int gt_seqiterator(int argc, const char **argv, GtError *err)
     }
   }
   gt_str_array_delete(files);
-  if (!had_err && seqiteroptions.dodistlen)
+  if (!had_err && arguments.dodistlen)
   {
     printf("# " Formatuint64_t " sequences of average length %.2f\n",
              PRINTuint64_tcast(numofseq),(double) sumlength/numofseq);
+    printf("# total length " Formatuint64_t "\n",
+             PRINTuint64_tcast(sumlength));
     printf("# minimum length %lu\n",minlength);
     printf("# maximum length %lu\n",maxlength);
-    printf("# distribution of sequence length in buckets of size %d\n",
-           BUCKETSIZE);
-    gt_disc_distri_foreach(distseqlen,showdistseqlen,NULL);
+    printf("# distribution of sequence length in buckets of size %u\n",
+           arguments.bucketsize);
+    gt_disc_distri_foreach(distseqlen, showdistseqlen,
+                           &(arguments.bucketsize));
     gt_disc_distri_delete(distseqlen);
   }
-  if (!had_err && seqiteroptions.doastretch)
+  if (!had_err && arguments.docstats)
+  {
+    showcstats(numofseq, sumlength, minlength,
+               maxlength, distctglen);
+  }
+  if (distctglen) gt_disc_distri_delete(distctglen);
+  if (!had_err && arguments.doastretch)
   {
     processastretches(distastretch,countA);
     gt_disc_distri_delete(distastretch);

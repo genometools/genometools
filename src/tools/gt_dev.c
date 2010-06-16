@@ -32,7 +32,6 @@
 #include "tools/gt_regioncov.h"
 #include "tools/gt_seqdecode.h"
 #include "tools/gt_seqencode.h"
-#include "tools/gt_seqiterator.h"
 #include "tools/gt_sfxmap.h"
 #include "tools/gt_skproto.h"
 #include "tools/gt_readreads.h"
@@ -56,7 +55,6 @@ static void* gt_dev_arguments_new(void)
   gt_toolbox_add(dev_toolbox, "regioncov", gt_regioncov);
   gt_toolbox_add_tool(dev_toolbox, "seqdecode", gt_seqdecode());
   gt_toolbox_add_tool(dev_toolbox, "seqencode", gt_seqencode());
-  gt_toolbox_add(dev_toolbox, "seqiterator", gt_seqiterator);
   gt_toolbox_add(dev_toolbox, "sfxmap", gt_sfxmap);
   gt_toolbox_add_tool(dev_toolbox, "skproto", gt_skproto());
   gt_toolbox_add(dev_toolbox, "trieins", gt_trieins);

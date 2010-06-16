@@ -15,10 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GT_SEQITERATOR_H
-#define GT_SEQITERATOR_H
+#ifndef GT_SEQSTAT_H
+#define GT_SEQSTAT_H
 
-/* the sequence iterator tool */
-int gt_seqiterator(int argc, const char **argv, GtError*);
+/* the sequence statistics tool */
+int gt_seqstat(int argc, const char **argv, GtError*);
 
 #endif
