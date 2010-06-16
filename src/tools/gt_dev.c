@@ -29,6 +29,7 @@
 #include "tools/gt_paircmp.h"
 #include "tools/gt_idxlocali.h"
 #include "tools/gt_patternmatch.h"
+#include "tools/gt_qsortbench.h"
 #include "tools/gt_regioncov.h"
 #include "tools/gt_seqdecode.h"
 #include "tools/gt_seqencode.h"
@@ -51,6 +52,7 @@ static void* gt_dev_arguments_new(void)
   gt_toolbox_add(dev_toolbox, "mergeesa", gt_mergeesa);
   gt_toolbox_add(dev_toolbox, "paircmp", gt_paircmp);
   gt_toolbox_add(dev_toolbox, "patternmatch", gt_patternmatch);
+  gt_toolbox_add_tool(dev_toolbox, "qsortbench", gt_qsortbench());
   gt_toolbox_add_tool(dev_toolbox, "readreads", gt_readreads());
   gt_toolbox_add(dev_toolbox, "regioncov", gt_regioncov);
   gt_toolbox_add_tool(dev_toolbox, "seqdecode", gt_seqdecode());

@@ -92,7 +92,6 @@
 #include "tools/gt_mutate.h"
 #include "tools/gt_packedindex.h"
 #include "tools/gt_prebwt.h"
-#include "tools/gt_qsortbench.h"
 #include "tools/gt_seqfilter.h"
 #include "tools/gt_sequniq.h"
 #include "tools/gt_seqstat.h"
@@ -159,7 +158,6 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add(tools, "mkfmindex", gt_mkfmindex);
   gt_toolbox_add_tool(tools, "packedindex", gt_packedindex());
   gt_toolbox_add_tool(tools, "prebwt", gt_prebwt());
-  gt_toolbox_add_tool(tools, "qsortbench", gt_qsortbench());
   gt_toolbox_add_tool(tools, "seqfilter", gt_seqfilter());
   gt_toolbox_add_tool(tools, "sequniq", gt_sequniq());
   gt_toolbox_add(tools, "seqstat", gt_seqstat);
