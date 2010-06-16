@@ -1025,7 +1025,7 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
         if (width <= bsr->sfxstrategy->maxinsertionsort)
         {
           insertionsortmaxdepth(bsr,left,right,depth,
-                                (unsigned long) 
+                                (unsigned long)
                                 bsr->sfxstrategy->differencecover);
           return;
         }
@@ -1042,7 +1042,7 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
                                           LCPINDEX(bsr->lcpsubtab,left),
                                       width,
                                       depth,
-                                      (unsigned long) 
+                                      (unsigned long)
                                         bsr->sfxstrategy->differencecover,
                                       ordertype,
                                       bsr->voiddcov,

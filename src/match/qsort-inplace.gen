@@ -49,13 +49,13 @@ typedef struct
 
 GT_DECLAREARRAYSTRUCT(Intervaltobesorted);
 
-#define STACKTOP\
+#define GT_QSORT_STACKTOP\
         stack.spaceIntervaltobesorted[stack.nextfreeIntervaltobesorted]
 
-#define PUSHSTACK(START,LEN)\
+#define GT_QSORT_PUSHSTACK(START,LEN)\
   GT_CHECKARRAYSPACE(&stack,Intervaltobesorted,32);\
-  STACKTOP.startptr = START;\
-  STACKTOP.len = LEN;\
+  GT_QSORT_STACKTOP.startptr = START;\
+  GT_QSORT_STACKTOP.len = LEN;\
   stack.nextfreeIntervaltobesorted++
 
 void gt_inlined_qsort_r (Sorttype *a,unsigned long n,void *data)
@@ -67,12 +67,12 @@ void gt_inlined_qsort_r (Sorttype *a,unsigned long n,void *data)
   GtArrayIntervaltobesorted stack;
 
   GT_INITARRAY(&stack,Intervaltobesorted);
-  PUSHSTACK(a,n);
+  GT_QSORT_PUSHSTACK(a,n);
   while (stack.nextfreeIntervaltobesorted > 0)
   {
     stack.nextfreeIntervaltobesorted--;
-    a = STACKTOP.startptr;
-    n = STACKTOP.len;
+    a = GT_QSORT_STACKTOP.startptr;
+    n = GT_QSORT_STACKTOP.len;
     swapped = false;
     if (n < 7UL)
     {
@@ -157,11 +157,11 @@ void gt_inlined_qsort_r (Sorttype *a,unsigned long n,void *data)
     GT_QSORT_VECSWAP (pb, pn - minval, minval);
     if ((minval = (unsigned long) (pb - pa)) > 1UL)
     {
-      PUSHSTACK(a,minval);
+      GT_QSORT_PUSHSTACK(a,minval);
     }
     if ((minval = (unsigned long) (pd - pc)) > 1UL)
     {
-      PUSHSTACK(pn - minval,minval);
+      GT_QSORT_PUSHSTACK(pn - minval,minval);
     } else
     {
       break;
