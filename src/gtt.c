@@ -94,6 +94,7 @@
 #include "tools/gt_prebwt.h"
 #include "tools/gt_seqfilter.h"
 #include "tools/gt_sequniq.h"
+#include "tools/gt_seqstat.h"
 #include "tools/gt_shredder.h"
 #include "tools/gt_simreads.h"
 #include "tools/gt_splitfasta.h"
@@ -159,6 +160,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "prebwt", gt_prebwt());
   gt_toolbox_add_tool(tools, "seqfilter", gt_seqfilter());
   gt_toolbox_add_tool(tools, "sequniq", gt_sequniq());
+  gt_toolbox_add(tools, "seqstat", gt_seqstat);
   gt_toolbox_add_tool(tools, "shredder", gt_shredder());
   gt_toolbox_add_tool(tools, "simreads", gt_simreads());
   gt_toolbox_add_tool(tools, "splitfasta", gt_splitfasta());
