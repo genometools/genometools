@@ -432,27 +432,48 @@ GtKeytype gt_rbt_find(const GtKeytype key,
 #define STATICSTACKSPACE    32UL
 #define STACKSPACEINCREMENT 16UL
 
-#define CHECKNODESTACKSPACE\
-        if (nextfreestack == stacksize)\
+#define PUSHSTACK(VALUE)\
+        if (nextfreestack == allocatedstack)\
         {\
-          allocsize = sizeof (GtRBTnode **) * \
-                      (stacksize + STACKSPACEINCREMENT);\
-          nodestack = gt_realloc((stacksize == STATICSTACKSPACE) ? NULL :\
-                                                                nodestack,\
-                                 allocsize);\
-          if (stacksize == STATICSTACKSPACE)\
+          size_t allocsize = sizeof (*spaceforstack) * \
+                            (allocatedstack + STACKSPACEINCREMENT);\
+          spaceforstack = gt_realloc((allocatedstack == STATICSTACKSPACE)\
+                                     ? NULL \
+                                     : spaceforstack,\
+                                     allocsize);\
+          if (allocatedstack == STATICSTACKSPACE)\
           {\
-            memcpy(nodestack,&staticstack[0],\
-                   sizeof (GtRBTnode **) * STATICSTACKSPACE);\
+            memcpy(spaceforstack,&staticstack[0],\
+                   sizeof (*spaceforstack) * STATICSTACKSPACE);\
           }\
-          stacksize += STACKSPACEINCREMENT;\
-        }
+          allocatedstack += STACKSPACEINCREMENT;\
+        }\
+        spaceforstack[nextfreestack++] = VALUE
 
 #define DELETENODESTACKSPACE\
-        if (stacksize > STATICSTACKSPACE)\
+        if (allocatedstack > STATICSTACKSPACE)\
         {\
-          gt_free(nodestack);\
+          gt_free(spaceforstack);\
         }
+
+#define DECLARESTACK(TYPE)\
+        TYPE *spaceforstack;\
+        TYPE  staticstack[STATICSTACKSPACE];\
+        unsigned long allocatedstack = STATICSTACKSPACE,\
+                      nextfreestack = 0;\
+        spaceforstack = &staticstack[0]
+
+#define STACKISEMPTY\
+        ((nextfreestack == 0) ? true : false)
+
+#define MAKESTACKALMOSTEMPTY\
+        nextfreestack = 1UL
+
+#define DECREMENTSTACKTOP\
+        nextfreestack--
+
+#define GETSTACKTOP\
+        (spaceforstack[nextfreestack - 1])
 
 /**
  * Delete node with given key. rootp is the
@@ -464,16 +485,12 @@ int gt_rbt_delete(const GtKeytype key,
                   void *cmpinfo)
 {
   GtRBTnode *p,
-          *q,
-          *r,
-          *root,
-          *unchained,
-          ***nodestack,
-          **staticstack[STATICSTACKSPACE];
-  size_t allocsize;
+            *q,
+            *r,
+            *root,
+            *unchained;
   int cmp;
-  unsigned long stacksize = STATICSTACKSPACE,
-                nextfreestack = 0;
+  DECLARESTACK(GtRBTnode **);
 
   p = *rootp;
   if (p == NULL)
@@ -481,11 +498,9 @@ int gt_rbt_delete(const GtKeytype key,
     return -1;
   }
   CHECK_TREE(p);
-  nodestack = &staticstack[0];
   while ((cmp = cmpfun (key, (*rootp)->key, cmpinfo)) != 0)
   {
-    CHECKNODESTACKSPACE;
-    nodestack[nextfreestack++] = rootp;
+    PUSHSTACK(rootp);
     p = *rootp;
     if (cmp < 0)
     {
@@ -525,8 +540,7 @@ int gt_rbt_delete(const GtKeytype key,
 
     for (;;)
     {
-      CHECKNODESTACKSPACE;
-      nodestack[nextfreestack++] = parent;
+      PUSHSTACK(parent);
       parent = up;
       if ((*up)->left == NULL)
       {
@@ -546,13 +560,13 @@ int gt_rbt_delete(const GtKeytype key,
   {
     r = unchained->right;
   }
-  if (nextfreestack == 0)
+  if (STACKISEMPTY)
   {
     *rootp = r;
   }
   else
   {
-    q = *nodestack[nextfreestack - 1];
+    q = *GETSTACKTOP;
     if (unchained == q->right)
     {
       q->right = r;
@@ -581,9 +595,9 @@ int gt_rbt_delete(const GtKeytype key,
        NULL nodes are considered black throughout - this is necessary for
        correctness.
      */
-    while (nextfreestack > 0 && (r == NULL || !r->red))
+    while (!STACKISEMPTY && (r == NULL || !r->red))
     {
-      GtRBTnode **pp = nodestack[nextfreestack - 1];
+      GtRBTnode **pp = GETSTACKTOP;
 
       p = *pp;
       /*
@@ -617,8 +631,8 @@ int gt_rbt_delete(const GtKeytype key,
           /*
            * Make sure pp is right if the case below tries to use it.
            */
-          CHECKNODESTACKSPACE;         /* this has been added by S.K. */
-          nodestack[nextfreestack++] = pp = &q->left;
+          pp = &q->left;
+          PUSHSTACK(pp);         /* this has been added by S.K. */
           q = p->right;
         }
         gt_assert(q != NULL);
@@ -693,7 +707,7 @@ int gt_rbt_delete(const GtKeytype key,
           /*
              We're done.
            */
-          nextfreestack = 1UL;
+          MAKESTACKALMOSTEMPTY;
           r = NULL;
         }
       }
@@ -710,8 +724,8 @@ int gt_rbt_delete(const GtKeytype key,
           p->left = q->right;
           q->right = p;
           *pp = q;
-          CHECKNODESTACKSPACE;         /* this has been added by S.K. */
-          nodestack[nextfreestack++] = pp = &q->right;
+          pp = &q->right;
+          PUSHSTACK(pp);         /* this has been added by S.K. */
           q = p->left;
         }
         gt_assert(q != NULL);
@@ -744,11 +758,11 @@ int gt_rbt_delete(const GtKeytype key,
             q->right = p;
             *pp = q;
           }
-          nextfreestack = 1UL;
+          MAKESTACKALMOSTEMPTY;
           r = NULL;
         }
       }
-      --nextfreestack;
+      DECREMENTSTACKTOP;
     }
     if (r != NULL)
     {
