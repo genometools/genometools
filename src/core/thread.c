@@ -88,11 +88,23 @@ void gt_thread_join(GtThread *thread)
   gt_assert(!rval); /* XXX */
 }
 
+static void* thread_xmalloc(size_t size, const char *filename, int line)
+{
+  void *p;
+  if ((p = malloc(size)) == NULL) {
+    fprintf(stderr, "cannot malloc(%zu) memory: %s\n", size, strerror(errno));
+    fprintf(stderr, "attempted on line %d in file \"%s\"\n", line, filename);
+    exit(EXIT_FAILURE);
+  }
+  return p;
+}
+
 GtRWLock* gt_rwlock_new(void)
 {
   GtRWLock *rwlock;
   int rval;
-  rwlock = gt_malloc(sizeof (pthread_rwlock_t));
+  /* XXX: can we use gt_malloc() here? */
+  rwlock = thread_xmalloc(sizeof (pthread_rwlock_t), __FILE__, __LINE__);
   /* initialize read/write lock with default attributes */
   rval = pthread_rwlock_init((pthread_rwlock_t*) rwlock, NULL);
   gt_assert(!rval);
@@ -136,7 +148,8 @@ GtMutex* gt_mutex_new(void)
 {
   GtMutex *mutex;
   int rval;
-  mutex = gt_malloc(sizeof (pthread_mutex_t));
+  /* XXX: can we use gt_malloc() here? */
+  mutex = thread_xmalloc(sizeof (pthread_mutex_t), __FILE__, __LINE__);
   /* initialize mutex with default attributes */
   rval = pthread_mutex_init((pthread_mutex_t*) mutex, NULL);
   gt_assert(!rval);
