@@ -18,7 +18,7 @@
 #ifndef ALIGN_PROTEIN_H
 #define ALIGN_PROTEIN_H
 
-#include "core/translator_api.h"
+#include "core/trans_table_api.h"
 #include "gth/dp_options_core.h"
 #include "gth/dp_options_postpro.h"
 #include "gth/spliced_seq.h"
@@ -41,7 +41,7 @@ unsigned char gthgetcodon(unsigned char genomicchar1,
                           unsigned char genomicchar2,
                           unsigned char genomicchar3,
                           const GtUchar *gen_alphabet_characters,
-                          const GtTranslator *translator);
+                          const GtTransTable *transtable);
 
 /* The following function implements the Spliced Alignment of Genomic DNA with
    protein, as described by Usuka and Brendel. */

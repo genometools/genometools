@@ -30,25 +30,26 @@ struct GtCodonIteratorSimple {
 #define gt_codon_iterator_simple_cast(CI)\
         gt_codon_iterator_cast(gt_codon_iterator_simple_class(), CI)
 
-static int gt_codon_iterator_simple_next(GtCodonIterator *ci,
-                                         char *n1,
-                                         char *n2,
-                                         char *n3,
-                                         unsigned int *frame,
-                                         GT_UNUSED GtError *err)
+static GtCodonIteratorStatus gt_codon_iterator_simple_next(GtCodonIterator *ci,
+                                                           char *n1,
+                                                           char *n2,
+                                                           char *n3,
+                                                           unsigned int *frame,
+                                                           GT_UNUSED GtError
+                                                                           *err)
 {
   GtCodonIteratorSimple *cis;
   gt_assert(n1 && n2 && n3 && frame);
   gt_error_check(err);
   if (ci->pvt->curpos+2 >= ci->pvt->length)
-    return -1;
+    return GT_CODON_ITERATOR_END;
   cis = gt_codon_iterator_simple_cast(ci);
   *n1 = *(cis->dnaseq+ci->pvt->curpos);
   *n2 = *(cis->dnaseq+ci->pvt->curpos+1);
   *n3 = *(cis->dnaseq+ci->pvt->curpos+2);
   *frame = ci->pvt->curpos % GT_CODON_LENGTH;
   ci->pvt->curpos++;
-  return 0;
+  return GT_CODON_ITERATOR_OK;
 }
 
 static unsigned long gt_codon_iterator_simple_current_position(GtCodonIterator

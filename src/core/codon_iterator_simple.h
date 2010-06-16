@@ -18,7 +18,7 @@
 #ifndef CODON_ITERATOR_SIMPLE_H
 #define CODON_ITERATOR_SIMPLE_H
 
-#include "core/codon_iterator.h"
+#include "core/codon_iterator_api.h"
 
 typedef struct GtCodonIteratorSimple GtCodonIteratorSimple;
 

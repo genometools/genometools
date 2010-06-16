@@ -17,6 +17,7 @@
 
 #include "core/assert_api.h"
 #include "core/codon.h"
+#include "core/codon_iterator_simple.h"
 #include "core/ma.h"
 #include "core/translator_api.h"
 #include "core/unused_api.h"
@@ -293,16 +294,20 @@ static void showtranslation(GthSplicedSeq *splicedseq,
 }
 
 void gt_outputtranslationandorf(unsigned long pglnum, const GthAGS *ags,
-                             unsigned long agsnum,
-                             unsigned long translationtable,
-                             GthInput *input,
-                             unsigned int indentlevel,
-                             GthOutput *out)
+                                unsigned long agsnum,
+                                unsigned long translationtable,
+                                GthInput *input,
+                                unsigned int indentlevel,
+                                GthOutput *out)
 {
   unsigned long i;
+  unsigned int nframe;
   const unsigned char *gen_seq_orig;
-  GtStr *frame0, *frame1, *frame2;
+  GtStr *frame[3];
+  char translated;
   GtTranslator *translator;
+  GtTransTable *transtable;
+  GtCodonIterator *ci;
   GthSplicedSeq *spliced_seq;
   GtArray *ranges;
   GtFile *outfp = out->outfp;
@@ -339,44 +344,37 @@ void gt_outputtranslationandorf(unsigned long pglnum, const GthAGS *ags,
 
   spliced_seq = gth_spliced_seq_new(gen_seq_orig, ranges);
 
-  frame0 = gt_str_new();
-  frame1 = gt_str_new();
-  frame2 = gt_str_new();
+  frame[0] = gt_str_new();
+  frame[1] = gt_str_new();
+  frame[2] = gt_str_new();
+
+  /* prepare for translation */
+  ci = gt_codon_iterator_simple_new((const char*) spliced_seq->splicedseq,
+                                    spliced_seq->splicedseqlen, NULL);
+  gt_assert(ci);
+  transtable = gt_trans_table_new(translationtable, NULL);
+  gt_assert(transtable);
 
   /* translate the template in all three frames */
-  translator = gt_translator_new();
-  rval = gt_translator_set_translation_scheme(translator, translationtable,
-                                              NULL);
-  /* XXX: the validity of the translation table has to be checked before */
-  gt_assert(!rval);
-
-  rval = gt_translator_translate_string(translator, frame0,
-                                        (const char*) spliced_seq->splicedseq,
-                                        spliced_seq->splicedseqlen, 0, NULL);
-  gt_assert(!rval); /* should not fail, sequence has been preprocessed */
-
-  rval = gt_translator_translate_string(translator, frame1,
-                                        (const char*) spliced_seq->splicedseq,
-                                        spliced_seq->splicedseqlen, 1, NULL);
-  gt_assert(!rval); /* should not fail, sequence has been preprocessed */
-
-  rval = gt_translator_translate_string(translator, frame2,
-                                        (const char*) spliced_seq->splicedseq,
-                                        spliced_seq->splicedseqlen, 2, NULL);
-  gt_assert(!rval); /* should not fail, sequence has been preprocessed */
-
+  translator = gt_translator_new_with_table(transtable, ci);
+  rval = gt_translator_next(translator, &translated, &nframe, NULL);
+  while (!rval && translated) {
+    gt_str_append_char(frame[nframe], translated);
+    rval = gt_translator_next(translator, &translated, &nframe, NULL);
+  }
   gt_translator_delete(translator);
+  gt_trans_table_delete(transtable);
 
   /* show the translation */
-  showtranslation(spliced_seq, gt_str_get(frame0), gt_str_get(frame1),
-                  gt_str_get(frame2), ags->exons, gth_ags_is_forward(ags),
+  showtranslation(spliced_seq, gt_str_get(frame[0]), gt_str_get(frame[1]),
+                  gt_str_get(frame[2]), ags->exons, gth_ags_is_forward(ags),
                   gth_ags_total_length(ags), gth_ags_genomic_offset(ags),
                   indentlevel, out);
 
   /* show the (consolidated) ORFs */
-  gthshowORFs(gt_str_get(frame0), gt_str_get(frame1), gt_str_get(frame2),
-              gt_str_length(frame0), gt_str_length(frame1),
-              gt_str_length(frame2), gth_ags_is_forward(ags),
+  gthshowORFs(gt_str_get(frame[0]), gt_str_get(frame[1]), gt_str_get(frame[2]),
+              gt_str_length(frame[0]), gt_str_length(frame[1]),
+              gt_str_length(frame[2]), gth_ags_is_forward(ags),
               gth_ags_total_length(ags), gth_ags_genomic_offset(ags),
               gt_str_get(ags->gen_id), pglnum, agsnum, spliced_seq,
               indentlevel, out);
@@ -389,7 +387,7 @@ void gt_outputtranslationandorf(unsigned long pglnum, const GthAGS *ags,
 
   gth_spliced_seq_delete(spliced_seq);
   gt_array_delete(ranges);
-  gt_str_delete(frame0);
-  gt_str_delete(frame1);
-  gt_str_delete(frame2);
+  gt_str_delete(frame[0]);
+  gt_str_delete(frame[1]);
+  gt_str_delete(frame[2]);
 }

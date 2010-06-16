@@ -27,8 +27,8 @@ typedef struct {
 } GthDPScoresProtein;
 
 static inline GthFlt GTHGETSCORE(GthDPScoresProtein *scores,
-                                          GtUchar n1, GtUchar n2, GtUchar n3,
-                                          GtUchar aa)
+                                 GtUchar n1, GtUchar n2, GtUchar n3,
+                                 GtUchar aa)
 {
   if (n1 == DASH || n2 == DASH || n3 == DASH)
     return scores->score[DASH][aa];

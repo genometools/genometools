@@ -16,6 +16,7 @@
 */
 
 #include "core/assert_api.h"
+#include "core/codon_iterator_simple.h"
 #include "core/orf.h"
 #include "core/translator.h"
 #include "core/undef.h"
@@ -91,34 +92,39 @@ static int extract_spliced_seq(GtGenomeNode *gn, GtCDSVisitor *visitor,
 
 static GtArray* determine_ORFs_for_all_three_frames(Splicedseq *ss)
 {
-  GtStr *pr_0, *pr_1, *pr_2;
+  GtStr *pr[3];
   GtArray *orfs;
   GtTranslator *tr;
+  char translated;
+  int rval;
+  unsigned int frame;
+  GtCodonIterator *ci;
   gt_assert(ss);
+  ci = gt_codon_iterator_simple_new(gt_splicedseq_get(ss),
+                                    gt_splicedseq_length(ss),
+                                    NULL);
 
-  pr_0 = gt_str_new();
-  pr_1 = gt_str_new();
-  pr_2 = gt_str_new();
+  pr[0] = gt_str_new();
+  pr[1]= gt_str_new();
+  pr[2] = gt_str_new();
   orfs = gt_array_new(sizeof (GtRange));
-  tr = gt_translator_new();
 
-  gt_translator_translate_string(tr, pr_0,
-                                 gt_splicedseq_get(ss),
-                                 gt_splicedseq_length(ss), 0, NULL);
-  gt_translator_translate_string(tr, pr_1,
-                                 gt_splicedseq_get(ss),
-                                 gt_splicedseq_length(ss), 1, NULL);
-  gt_translator_translate_string(tr, pr_2,
-                                 gt_splicedseq_get(ss),
-                                 gt_splicedseq_length(ss), 2, NULL);
-  gt_determine_ORFs(orfs, 0, gt_str_get(pr_0), gt_str_length(pr_0));
-  gt_determine_ORFs(orfs, 1, gt_str_get(pr_1), gt_str_length(pr_1));
-  gt_determine_ORFs(orfs, 2, gt_str_get(pr_2), gt_str_length(pr_2));
+  gt_assert(ci);
+  tr = gt_translator_new(ci);
+  rval = gt_translator_next(tr, &translated, &frame, NULL);
+  while (!rval && translated) {
+    gt_str_append_char(pr[frame], translated);
+    rval = gt_translator_next(tr, &translated, &frame, NULL);
+  }
+  gt_determine_ORFs(orfs, 0, gt_str_get(pr[0]), gt_str_length(pr[0]));
+  gt_determine_ORFs(orfs, 1, gt_str_get(pr[1]), gt_str_length(pr[1]));
+  gt_determine_ORFs(orfs, 2, gt_str_get(pr[2]), gt_str_length(pr[2]));
 
-  gt_str_delete(pr_2);
-  gt_str_delete(pr_1);
-  gt_str_delete(pr_0);
+  gt_str_delete(pr[2]);
+  gt_str_delete(pr[1]);
+  gt_str_delete(pr[0]);
   gt_translator_delete(tr);
+  gt_codon_iterator_delete(ci);
 
   return orfs;
 }

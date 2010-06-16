@@ -100,10 +100,10 @@ void gt_codon_iterator_rewind(GtCodonIterator *ci)
     ci->c_class->rewind(ci);
 }
 
-int gt_codon_iterator_next(GtCodonIterator *ci,
-                           char *n1, char *n2, char *n3,
-                           unsigned int *frame,
-                           GtError *err)
+GtCodonIteratorStatus gt_codon_iterator_next(GtCodonIterator *ci,
+                                             char *n1, char *n2, char *n3,
+                                             unsigned int *frame,
+                                             GtError *err)
 {
   gt_assert(ci && ci->c_class);
   if (ci->c_class->current_pos)

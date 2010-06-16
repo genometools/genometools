@@ -27,9 +27,9 @@
 #define SCALEFACTOR     0.4
 
 static GthFlt get_score(GtScoreMatrix *score_matrix,
-                                 GtAlphabet *score_matrix_alphabet,
-                                 unsigned char amino,
-                                 unsigned char origreferencechar)
+                        GtAlphabet *score_matrix_alphabet,
+                        unsigned char amino,
+                        unsigned char origreferencechar)
 {
   GthFlt rval = 0.0,
                   scalefactor   = SCALEFACTOR,
@@ -79,17 +79,15 @@ static GthFlt get_score(GtScoreMatrix *score_matrix,
 static GtUchar*** precompute_codon2amino(unsigned long translationtable)
 {
   GtUchar ***codon2amino;
-  GtTranslator *translator;
+  GtTransTable *transtable;
   GtAlphabet *dna_alpha;
   int x, y, z, rval;
   char amino;
   gt_array3dim_malloc(codon2amino, 4, 4, 4);
   dna_alpha = gt_alphabet_new_dna();
-  translator = gt_translator_new();
-  rval = gt_translator_set_translation_scheme(translator, translationtable,
-                                              NULL);
+  transtable = gt_trans_table_new(translationtable, NULL);
   /* XXX: the validity of the translation table has to be checked before */
-  gt_assert(!rval);
+  gt_assert(transtable);
   for (x = 0; x <= 3; x++) {
     for (y = 0; y <= 3; y++) {
       for (z = 0; z <= 3; z++) {
@@ -97,13 +95,14 @@ static GtUchar*** precompute_codon2amino(unsigned long translationtable)
         n1 = gt_alphabet_decode(dna_alpha, x);
         n2 = gt_alphabet_decode(dna_alpha, y);
         n3 = gt_alphabet_decode(dna_alpha, z);
-        rval = gt_translator_codon2amino(translator, n1, n2, n3, &amino, NULL);
+        rval = gt_trans_table_translate_codon(transtable, n1, n2, n3, &amino,
+                                              NULL);
         gt_assert(!rval);
         codon2amino[x][y][z] = amino;
       }
     }
   }
-  gt_translator_delete(translator);
+  gt_trans_table_delete(transtable);
   gt_alphabet_delete(dna_alpha);
   return codon2amino;
 }

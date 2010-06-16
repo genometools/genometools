@@ -19,92 +19,95 @@
 #ifndef TRANSLATOR_API_H
 #define TRANSLATOR_API_H
 
+#include "core/codon_iterator_api.h"
+#include "core/error_api.h"
 #include "core/str_api.h"
 #include "core/str_array_api.h"
+#include "core/trans_table_api.h"
 
-/* Implements a translator class supporting all translation schemes from
-   __http://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi__.
-   The <GtTranslator> can be used to generate single-frame translations of
-   a DNA string to a <GtStr> or to produce 3-frame translations via an iterator
-   interface. */
+typedef enum {
+  GT_TRANSLATOR_OK    =  0,
+  GT_TRANSLATOR_END   = -1,
+  GT_TRANSLATOR_ERROR = -2
+} GtTranslatorStatus;
+
+/* The <GtTranslator> can be used to  produce 3-frame translations of DNA
+   sequences via an iterator interface. */
 typedef struct GtTranslator GtTranslator;
 
-/* The number of the standard translation scheme. */
-#define GT_TRANSLATOR_STANDARD_SCHEME \
-        1
+/* Creates a new <GtTranslator>, starting its translation at the current
+   position of <ci>. The current reading frame is also taken from the state of
+   <ci>. The translation table <tt> is used. */
+GtTranslator*      gt_translator_new_with_table(GtTransTable *tt,
+                                                GtCodonIterator *ci);
 
-/* Creates a new <GtTranslator> with the standard genetic code translation
-   scheme preselected. */
-GtTranslator* gt_translator_new();
+/* Creates a new <GtTranslator>, starting its translation at the current
+   position of <ci>. The current reading frame is also taken from the state of
+   <ci>. The standard translation table is used. */
+GtTranslator*      gt_translator_new(GtCodonIterator *ci);
+
+/* Reinitializes <translator> with the position and frame status as given in
+   <ci>. */
+void               gt_translator_set_codon_iterator(GtTranslator *translator,
+                                                    GtCodonIterator *ci);
 
 /* Selects the translation scheme in <translator> to the one identified by
-   <transnum>.  <transnum> refers to the numbers as reported by
+   <transnum>. <transnum> refers to the numbers as reported by
    <gt_translator_get_translation_table_descriptions()> or the list given
    at the NCBI web site.
    Returns a negative value if an error occurred, see <err> for details. */
-int           gt_translator_set_translation_scheme(GtTranslator *translator,
-                                                   unsigned int transnum,
-                                                   GtError *err);
+void               gt_translator_set_translation_table(GtTranslator *tr,
+                                                       GtTransTable *tt);
 
-/* Returns a <GtStrArray> of translation scheme descriptions, each of the
-   format "%d: %s" where the number is the translation scheme number (usable in
-   <gt_translator_set_translation_scheme()> and the string is the scheme
-   name. */
-GtStrArray*   gt_translator_get_translation_table_descriptions();
+/* Returns the translation of the next codon. The currently translated
+   character is put in <translated> while the current reading frame is put in
+   <frame>.
+   Returns GT_TRANSLATOR_ERROR if an error occurred, see <err> for details.
+   If the end of the sequence region to translate has been reached,
+   GT_TRANSLATOR_END is returned.
+   Otherwise, GT_TRANSLATOR_OK (equal to 0) is returned. */
+GtTranslatorStatus gt_translator_next(GtTranslator *translator,
+                                      char *translated,
+                                      unsigned int *frame,
+                                      GtError *err);
 
-/* Starts a translation iteration process at the string position pointed to by
-   <dnaseq>, intended to go on for <dnalen> bases. The current translation
-   scheme set in <translator> will be used. The currently translated character
-   is put in <translated> while the current reading frame (in reference to
-   <dnaseq> position) is put in <frame>.
-   Returns a negative value if an error occurred, see <err> for details. */
-int           gt_translator_start(GtTranslator *translator,
-                                  const char *dnaseq,
-                                  unsigned long dnalen,
-                                  char *translated,
-                                  unsigned int *frame,
-                                  GtError *err);
-
-/* Continues a translation iteration process started by gt_translator_start().
-   The currently translated character is put in <translated> while the current
-   reading frame is put in <frame>.
-   Returns a negative value if an error occurred, see <err> for details. */
-int           gt_translator_next(GtTranslator *translator,
-                                 char *translated,
-                                 unsigned int *frame,
-                                 GtError *err);
-
-/* Translates <dnaseq> of length <dnalen> in reading frame <frame> using the
-   settings currently active in <translator>. The resulting amino acid sequence
-   is appended to <protein>.
-   Returns a negative value if an error occurred, see <err> for details. */
-int           gt_translator_translate_string(GtTranslator *translator,
-                                             GtStr *protein,
-                                             const char *dnaseq,
-                                             unsigned long dnalen,
-                                             unsigned int frame,
-                                             GtError *err);
-
-/* Determines the offset of the beginning of the first codon in <dnaseq> (of
-   length <dnalen>) which is a start codon according to the current translation
+/* Moves the <translator> to the beginning of the first codon in <dnaseq> (of
+   length <dnalen>) which is a start codon according to the selected translation
    scheme in <translator>.
    The offset is written to the location pointed to by <pos>.
-   Returns a negative value if an error occurred, see <err> for details. */
-int           gt_translator_find_startcodon(GtTranslator *translator,
-                                            const char *dnaseq,
-                                            unsigned long dnalen,
+   Returns GT_TRANSLATOR_ERROR if an error occurred, see <err> for details.
+   If the end of the sequence region to scan has been reached without finding a
+   start codon, GT_TRANSLATOR_END is returned.
+   Otherwise, GT_TRANSLATOR_OK (equal to 0) is returned. */
+GtTranslatorStatus gt_translator_find_startcodon(GtTranslator *translator,
+                                                 unsigned long *pos,
+                                                 GtError *err);
+
+/* Moves the <translator> to the beginning of the first codon in <dnaseq> (of
+   length <dnalen>) which is a stop codon according to the selected translation
+   scheme in <translator>.
+   The offset is written to the location pointed to by <pos>.
+   Returns GT_TRANSLATOR_ERROR if an error occurred, see <err> for details.
+   If the end of the sequence region to scan has been reached without finding a
+   stop codon, GT_TRANSLATOR_END is returned.
+   Otherwise, GT_TRANSLATOR_OK (equal to 0) is returned. */
+GtTranslatorStatus gt_translator_find_stopcodon(GtTranslator *translator,
+                                                unsigned long *pos,
+                                                GtError *err);
+
+/* Moves the <translator> to the beginning of the first codon in <dnaseq> (of
+   length <dnalen>) which belongs to the set of codons specified in <codons>.
+   The offset is written to the location pointed to by <pos>.
+   Returns GT_TRANSLATOR_ERROR if an error occurred, see <err> for details.
+   If the end of the sequence region to scan has been reached without finding
+   one of the codons, GT_TRANSLATOR_END is returned.
+   Otherwise, GT_TRANSLATOR_OK (equal to 0) is returned. */
+GtTranslatorStatus gt_translator_find_codon(GtTranslator *translator,
+                                            GtStrArray *codons,
                                             unsigned long *pos,
                                             GtError *err);
 
-/* Writes the translation for the codon <c1>,<c2>,<c3> to the position pointed
-   to by <amino>. The current translation scheme set in <translator> is used.
-   Returns a negative value if an error occurred, see <err> for details. */
-int           gt_translator_codon2amino(const GtTranslator *translator,
-                                        char c1, char c2, char c3,
-                                        char *amino,
-                                        GtError *err);
-
 /* Deletes <translator> and frees all associated memory. */
-void          gt_translator_delete(GtTranslator *translator);
+void               gt_translator_delete(GtTranslator *translator);
 
 #endif

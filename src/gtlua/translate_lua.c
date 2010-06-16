@@ -17,6 +17,7 @@
 
 #include <string.h>
 #include "lauxlib.h"
+#include "core/codon_iterator_simple.h"
 #include "core/translator.h"
 #include "gtlua/translate_lua.h"
 
@@ -24,13 +25,25 @@ static int translate_dna_lua(lua_State *L)
 {
   GtStr *protein;
   GtTranslator *tr;
+  int rval;
+  char translated;
+  unsigned int frame;
   const char *dna = luaL_checkstring(L, 1);
-  tr = gt_translator_new();
   protein = gt_str_new();
-  gt_translator_translate_string(tr, protein, dna, strlen(dna), 0, NULL);
+
+  GtCodonIterator *ci = gt_codon_iterator_simple_new(dna,
+                                                     strlen(dna),
+                                                     NULL);
+  tr = gt_translator_new(ci);
+  rval = gt_translator_next(tr, &translated, &frame, NULL);
+  while (!rval && translated) {
+    gt_str_append_char(protein, translated);
+    rval = gt_translator_next(tr, &translated, &frame, NULL);
+  }
   lua_pushstring(L, gt_str_get(protein));
   gt_str_delete(protein);
   gt_translator_delete(tr);
+  gt_codon_iterator_delete(ci);
   return 1;
 }
 

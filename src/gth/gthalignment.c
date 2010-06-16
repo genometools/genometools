@@ -457,15 +457,13 @@ static void match_mismatch_genomicproteinline(GtUchar **genomicproteinptr,
                                           unsigned long translationschemenumber)
 {
   GtUchar dna[GT_CODON_LENGTH];
-  GtTranslator *translator;
+  GtTransTable *transtable;
   char codon;
   int rval;
 
-  translator = gt_translator_new();
-  rval = gt_translator_set_translation_scheme(translator,
-                                              translationschemenumber, NULL);
+  transtable = gt_trans_table_new(translationschemenumber, NULL);
   /* XXX: the validity of the translation table has to be checked before */
-  gt_assert(!rval);
+  gt_assert(transtable);
 
   if (*processing_intron_with_2_bases_left) {
     *processing_intron_with_2_bases_left = false;
@@ -478,8 +476,8 @@ static void match_mismatch_genomicproteinline(GtUchar **genomicproteinptr,
     *first_base_left  = (GtUchar) UNDEFCHAR;
     *second_base_left = (GtUchar) UNDEFCHAR;
 
-    rval = gt_translator_codon2amino(translator, dna[0], dna[1], dna[2], &codon,
-                                     NULL);
+    rval = gt_trans_table_translate_codon(transtable, dna[0], dna[1], dna[2],
+                                          &codon, NULL);
     /* since the sequence has been preprocessed before, the codon translation
        should not fail */
     gt_assert(!rval);
@@ -503,8 +501,8 @@ static void match_mismatch_genomicproteinline(GtUchar **genomicproteinptr,
     dna[1] = genseqorig[(*genseqindex)++];
     dna[2] = genseqorig[(*genseqindex)++];
 
-    rval = gt_translator_codon2amino(translator, dna[0], dna[1], dna[2], &codon,
-                                     NULL);
+    rval = gt_trans_table_translate_codon(transtable, dna[0], dna[1], dna[2],
+                                          &codon, NULL);
     /* since the sequence has been preprocessed before, the codon translation
        should not fail */
     gt_assert(!rval);
@@ -517,7 +515,7 @@ static void match_mismatch_genomicproteinline(GtUchar **genomicproteinptr,
     (*genomicproteinptr)++;
   }
 
-  gt_translator_delete(translator);
+  gt_trans_table_delete(transtable);
 }
 
 /*

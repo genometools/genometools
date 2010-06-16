@@ -20,16 +20,16 @@
 
 #include <stdio.h>
 #include "core/error_api.h"
-#include "core/codon_iterator.h"
+#include "core/codon_iterator_api.h"
 
-typedef int           (*CodonIteratorNextFunc)(GtCodonIterator*,
-                                               char*, char*, char*,
-                                               unsigned int*,
-                                               GtError*);
-typedef void          (*CodonIteratorFreeFunc)(GtCodonIterator*);
-typedef void          (*CodonIteratorRewindFunc)(GtCodonIterator*);
-typedef unsigned long (*CodonIteratorCurrentPosFunc)(GtCodonIterator*);
-typedef unsigned long (*CodonIteratorLengthFunc)(GtCodonIterator*);
+typedef GtCodonIteratorStatus (*CodonIteratorNextFunc)(GtCodonIterator*,
+                                                       char*, char*, char*,
+                                                       unsigned int*,
+                                                       GtError*);
+typedef void                  (*CodonIteratorFreeFunc)(GtCodonIterator*);
+typedef void                  (*CodonIteratorRewindFunc)(GtCodonIterator*);
+typedef unsigned long         (*CodonIteratorCurrentPosFunc)(GtCodonIterator*);
+typedef unsigned long         (*CodonIteratorLengthFunc)(GtCodonIterator*);
 
 typedef struct GtCodonIteratorMembers GtCodonIteratorMembers;
 

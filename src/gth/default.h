@@ -18,7 +18,7 @@
 #ifndef DEFAULT_H
 #define DEFAULT_H
 
-#include "core/translator_api.h"
+#include "core/trans_table_api.h"
 
 /*
   This file contains all default values of GenomeThreader.
@@ -32,7 +32,7 @@
 #define DEFAULT_PROTEINSMAP                     "protein"
 
 /* default translation table */
-#define DEFAULT_TRANSLATIONTABLE                GT_TRANSLATOR_STANDARD_SCHEME
+#define DEFAULT_TRANSLATIONTABLE                GT_STANDARD_TRANSLATION_SCHEME
 
 /* default minimum match length for (new) similarity filter */
 #define DEFAULT_MINMATCHLENGTH                  20

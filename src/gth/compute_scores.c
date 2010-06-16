@@ -211,7 +211,7 @@ typedef struct
   const unsigned char *gen_seq_tran,
                       *ref_seq_tran,
                       *ref_seq_orig;
-  const GtTranslator *translator;
+  const GtTransTable *transtable;
   unsigned long gen_dp_start,
                 scoreminexonlen,
                 ref_dp_length;
@@ -266,7 +266,7 @@ static void computescoresprocmismatchordeletion(Traversealignmentstate *state,
       genomicchar3 = d->gen_seq_tran[state->genomicptr + 2];
     }
     codon = gthgetcodon(genomicchar1, genomicchar2, genomicchar3,
-                        d->gen_alphabet_characters, d->translator);
+                        d->gen_alphabet_characters, d->transtable);
 
 #ifndef NDEBUG
     if (d->process_mismatch) {
@@ -445,7 +445,7 @@ static void computebordersandscoresprocmatch(Traversealignmentstate *state,
     gt_assert(origreferencechar == gthgetcodon(genomicchar1, genomicchar2,
                                                genomicchar3,
                                                d->gen_alphabet_characters,
-                                               d->translator));
+                                               d->transtable));
 
     genomicinterimvalue  = GTHGETSCORE(d->dp_scores_protein, genomicchar1,
                                        genomicchar2, genomicchar3,
@@ -560,7 +560,7 @@ void gth_compute_scores(GthSA *sa,
                         const unsigned char *gen_seq_tran,
                         const unsigned char *ref_seq_tran,
                         const unsigned char *ref_seq_orig,
-                        const GtTranslator *translator,
+                        const GtTransTable *transtable,
                         unsigned long gen_dp_start,
                         unsigned long scoreminexonlen,
                         bool introncutout,
@@ -661,7 +661,7 @@ void gth_compute_scores(GthSA *sa,
   data.gen_seq_tran                   = gen_seq_tran;
   data.ref_seq_tran                   = ref_seq_tran;
   data.ref_seq_orig                   = ref_seq_orig;
-  data.translator                     = translator;
+  data.transtable                     = transtable;
   data.gen_dp_start                   = gen_dp_start;
   data.scoreminexonlen                = scoreminexonlen;
   data.ref_dp_length                  = ref_dp_length;

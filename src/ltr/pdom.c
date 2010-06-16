@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -21,6 +21,7 @@
 #include <ctype.h>
 #include <float.h>
 #include "core/codon.h"
+#include "core/codon_iterator_simple.h"
 #include "core/log.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
@@ -799,6 +800,7 @@ GtPdomResults* gt_pdom_finder_find(GtPdomFinder *gpf, const char *seq,
   GtStr *fwd[3], *rev[3];
   char translated;
   unsigned long seqlen;
+  GtCodonIterator *ci;
   GtPdomResults *results = NULL;
   GtTranslator *tr;
   int i,
@@ -810,7 +812,6 @@ GtPdomResults* gt_pdom_finder_find(GtPdomFinder *gpf, const char *seq,
   seqlen = gt_ltrelement_length(element);
   gpf->elem = element;
   results = gt_pdom_results_new();
-  tr = gt_translator_new();
 
   for (i=0;i<3;i++)
   {
@@ -818,9 +819,11 @@ GtPdomResults* gt_pdom_finder_find(GtPdomFinder *gpf, const char *seq,
     rev[i] = gt_str_new();
   }
 
+  ci = gt_codon_iterator_simple_new(seq, seqlen, NULL);
+  gt_assert(ci);
+  tr = gt_translator_new(ci);
   /* create translations */
-  had_err = gt_translator_start(tr, seq, seqlen, &translated,
-                                &frame, err);
+  had_err = gt_translator_next(tr, &translated, &frame, err);
   while (!had_err && translated)
   {
     gt_str_append_char(fwd[frame], translated);
@@ -828,8 +831,9 @@ GtPdomResults* gt_pdom_finder_find(GtPdomFinder *gpf, const char *seq,
   }
   if (!had_err)
   {
-    had_err = gt_translator_start(tr, rev_seq, seqlen, &translated,
-                                  &frame, err);
+    gt_codon_iterator_delete(ci);
+    ci = gt_codon_iterator_simple_new(rev_seq, seqlen, NULL);
+    had_err = gt_translator_next(tr, &translated, &frame, err);
     while (!had_err && translated)
     {
       gt_str_append_char(rev[frame], translated);
@@ -856,6 +860,7 @@ GtPdomResults* gt_pdom_finder_find(GtPdomFinder *gpf, const char *seq,
     gt_str_delete(rev[i]);
   }
 
+  gt_codon_iterator_delete(ci);
   gt_translator_delete(tr);
   return results;
 }

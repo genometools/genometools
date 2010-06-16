@@ -330,17 +330,17 @@ unsigned char gthgetcodon(unsigned char genomicchar1,
                           unsigned char genomicchar2,
                           unsigned char genomicchar3,
                           const GtUchar *gen_alphabet_characters,
-                          const GtTranslator *translator)
+                          const GtTransTable *transtable)
 {
   char codon;
   int rval;
 
   /* translate dna into codon */
-  rval = gt_translator_codon2amino(translator,
-                                   gen_alphabet_characters[genomicchar1],
-                                   gen_alphabet_characters[genomicchar2],
-                                   gen_alphabet_characters[genomicchar3],
-                                   &codon, NULL);
+  rval = gt_trans_table_translate_codon(transtable,
+                                        gen_alphabet_characters[genomicchar1],
+                                        gen_alphabet_characters[genomicchar2],
+                                        gen_alphabet_characters[genomicchar3],
+                                        &codon, NULL);
   /* since the genomic sequence has been preprocessed before, the codon
      translation should not fail */
   gt_assert(!rval);
@@ -704,7 +704,7 @@ static int evaltracepath(GthBacktracePath *backtrace_path, DPtables *dpm,
                          const unsigned char *gen_seq_tran,
                          unsigned long gen_dp_length, States actualstate,
                          bool introncutout, GthSplicedSeq *spliced_seq,
-                         const GtTranslator *translator, bool comments,
+                         const GtTransTable *transtable, bool comments,
                          bool noicinintroncheck, GtAlphabet *gen_alphabet,
                          const unsigned char *ref_seq_orig,
                          GtFile *outfp)
@@ -811,7 +811,7 @@ static int evaltracepath(GthBacktracePath *backtrace_path, DPtables *dpm,
                                 gen_seq_tran[genptr - 2],
                                 gen_seq_tran[genptr - 1],
                                 gen_alphabet_characters,
-                                translator);
+                                transtable);
 
             if (codon == ref_seq_orig[refptr - 1]) {
               gth_backtrace_path_add_match(backtrace_path,
@@ -863,7 +863,7 @@ static int evaltracepath(GthBacktracePath *backtrace_path, DPtables *dpm,
                                 gen_seq_tran[genptr - 2],
                                 gen_seq_tran[genptr - 1],
                                 gen_alphabet_characters,
-                                translator);
+                                transtable);
             if (codon == ref_seq_orig[refptr - 1]) {
               gth_backtrace_path_add_match(backtrace_path,
                                        dummystatus == ENSURE_SINGLE_MATCH);
@@ -939,7 +939,7 @@ static int evaltracepath(GthBacktracePath *backtrace_path, DPtables *dpm,
               codon = gthgetcodon(gen_seq_tran[genptr - 2],
                                   gen_seq_tran[dummy_b2_genptr],
                                   gen_seq_tran[dummy_b3_genptr],
-                                  gen_alphabet_characters, translator);
+                                  gen_alphabet_characters, transtable);
               gth_backtrace_path_set_dummy(backtrace_path, codon
                                        == ref_seq_orig[refptr]);
               dummystatus     = DUMMY_JUST_SET;
@@ -972,7 +972,7 @@ static int evaltracepath(GthBacktracePath *backtrace_path, DPtables *dpm,
               codon = gthgetcodon(gen_seq_tran[genptr - 3],
                                   gen_seq_tran[genptr - 2],
                                   gen_seq_tran[dummy_c3_genptr],
-                                  gen_alphabet_characters, translator);
+                                  gen_alphabet_characters, transtable);
               gth_backtrace_path_set_dummy(backtrace_path, codon
                                        == ref_seq_orig[refptr]);
               dummystatus     = DUMMY_JUST_SET;
@@ -1008,7 +1008,7 @@ static int find_optimal_path(GthBacktracePath *backtrace_path, DPtables *dpm,
                              const unsigned char *gen_seq_tran,
                              unsigned long gen_dp_length, bool introncutout,
                              GthSplicedSeq *spliced_seq,
-                             const GtTranslator *translator, bool comments,
+                             const GtTransTable *transtable, bool comments,
                              bool noicintroncheck, GtAlphabet *gen_alphabet,
                              const unsigned char *ref_seq_orig,
                              GtFile *outfp)
@@ -1028,7 +1028,7 @@ static int find_optimal_path(GthBacktracePath *backtrace_path, DPtables *dpm,
 
   if ((rval = evaltracepath(backtrace_path, dpm, ref_dp_length,
                             gen_seq_tran, gen_dp_length, (States) retrace,
-                            introncutout, spliced_seq, translator,
+                            introncutout, spliced_seq, transtable,
                             comments, noicintroncheck, gen_alphabet,
                             ref_seq_orig, outfp))) {
     return rval;
@@ -1089,7 +1089,7 @@ int gth_align_protein(GthSA *sa,
   GthDPParam *dp_param;
   GthSplicedSeq *spliced_seq = NULL;
   GthAlignInputProtein input;
-  GtTranslator *translator;
+  GtTransTable *transtable;
   DPtables dpm;
   int rval;
 
@@ -1126,9 +1126,7 @@ int gth_align_protein(GthSA *sa,
   initDPtables(&dpm, proteinexonpenal, ref_dp_length);
   gth_sa_set(sa, PROTEIN_ALPHA, gen_dp_start, gen_dp_length);
 
-  translator = gt_translator_new();
-  rval = gt_translator_set_translation_scheme(translator, translationtable,
-                                              NULL);
+  transtable = gt_trans_table_new(translationtable, NULL);
   /* XXX: the validity of the translation table has to be checked before */
   gt_assert(!rval);
 
@@ -1147,11 +1145,11 @@ int gth_align_protein(GthSA *sa,
                                              : gen_seq_tran + gen_dp_start,
                                 introncutout ? spliced_seq->splicedseqlen
                                              : gen_dp_length,
-                                introncutout, spliced_seq, translator,
+                                introncutout, spliced_seq, transtable,
                                 comments, dp_options_core->noicinintroncheck,
                                 gen_alphabet, input.ref_seq_orig, outfp))) {
     if (rval == GTH_ERROR_CUTOUT_NOT_IN_INTRON) {
-      gt_translator_delete(translator);
+      gt_trans_table_delete(transtable);
       freeDPtables(&dpm, proteinexonpenal);
       gth_dp_param_delete(dp_param);
       gth_spliced_seq_delete(spliced_seq);
@@ -1176,13 +1174,13 @@ int gth_align_protein(GthSA *sa,
 
   /* compute borders and scores */
   gth_compute_scores(sa, true, dp_param, NULL, gen_seq_tran + gen_dp_start,
-                     ref_seq_tran, ref_seq_orig, translator, gen_dp_start,
+                     ref_seq_tran, ref_seq_orig, transtable, gen_dp_start,
                      dp_options_postpro->scoreminexonlen, introncutout, gs2out,
                      spliced_seq, ref_dp_length, gen_alphabet, ref_alphabet,
                      dp_scores_protein);
 
   /* free */
-  gt_translator_delete(translator);
+  gt_trans_table_delete(transtable);
   freeDPtables(&dpm, proteinexonpenal);
   gth_dp_param_delete(dp_param);
   gth_spliced_seq_delete(spliced_seq);

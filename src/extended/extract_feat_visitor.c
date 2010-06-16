@@ -16,6 +16,7 @@
 */
 
 #include "core/assert_api.h"
+#include "core/codon_iterator_simple.h"
 #include "core/fasta.h"
 #include "core/symbol.h"
 #include "core/translator.h"
@@ -62,15 +63,25 @@ static void show_entry(GtStr *description, GtStr *sequence, bool translate,
                        GtFile *outfp)
 {
   if (translate) {
+    char translated;
+    int rval;
+    unsigned int frame;
     GtStr *protein = gt_str_new();
-    GtTranslator* tr = gt_translator_new();
-    gt_translator_translate_string(tr, protein,
-                                   gt_str_get(sequence),
-                                   gt_str_length(sequence), 0, NULL);
+
+    GtCodonIterator *ci = gt_codon_iterator_simple_new(gt_str_get(sequence),
+                                                       gt_str_length(sequence),
+                                                       NULL);
+    GtTranslator* tr = gt_translator_new(ci);
+    rval = gt_translator_next(tr, &translated, &frame, NULL);
+    while (!rval && translated) {
+      gt_str_append_char(protein, translated);
+      rval = gt_translator_next(tr, &translated, &frame, NULL);
+    }
     gt_fasta_show_entry_generic(gt_str_get(description), gt_str_get(protein),
                                 gt_str_length(protein), 0, outfp);
     gt_str_delete(protein);
     gt_translator_delete(tr);
+    gt_codon_iterator_delete(ci);
   }
   else {
     gt_fasta_show_entry_generic(gt_str_get(description), gt_str_get(sequence),

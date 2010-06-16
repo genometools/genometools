@@ -19,7 +19,7 @@
 #define COMPUTE_SCORES_H
 
 #include <stdbool.h>
-#include "core/translator_api.h"
+#include "core/trans_table_api.h"
 #include "gth/align_common.h"
 #include "gth/dp_scores_protein.h"
 #include "gth/sa.h"
@@ -32,7 +32,7 @@ void gth_compute_scores(GthSA *sa,
                         const unsigned char *gen_seq_tran,
                         const unsigned char *ref_seq_tran,
                         const unsigned char *ref_seq_orig,
-                        const GtTranslator *translator,
+                        const GtTransTable *transtable,
                         unsigned long gen_dp_start,
                         unsigned long scoreminexonlen,
                         bool introncutout,

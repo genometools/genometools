@@ -19,7 +19,7 @@
 #define CODON_ITERATOR_ENCSEQ_H
 
 #include "core/encseq.h"
-#include "core/codon_iterator.h"
+#include "core/codon_iterator_api.h"
 
 typedef struct GtCodonIteratorEncseq GtCodonIteratorEncseq;
 

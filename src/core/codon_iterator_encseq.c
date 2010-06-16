@@ -31,18 +31,19 @@ struct GtCodonIteratorEncseq {
 #define gt_codon_iterator_encseq_cast(CI)\
         gt_codon_iterator_cast(gt_codon_iterator_encseq_class(), CI)
 
-static int gt_codon_iterator_encseq_next(GtCodonIterator *ci,
-                                         char *n1,
-                                         char *n2,
-                                         char *n3,
-                                         unsigned int *frame,
-                                         GT_UNUSED GtError *err)
+static GtCodonIteratorStatus gt_codon_iterator_encseq_next(GtCodonIterator *ci,
+                                                           char *n1,
+                                                           char *n2,
+                                                           char *n3,
+                                                           unsigned int *frame,
+                                                           GT_UNUSED GtError
+                                                                           *err)
 {
   GtCodonIteratorEncseq *cie;
   gt_assert(n1 && n2 && n3 && frame);
   gt_error_check(err);
   if (ci->pvt->curpos+2 >= ci->pvt->length)
-    return -1;
+    return GT_CODON_ITERATOR_END;
   cie = gt_codon_iterator_encseq_cast(ci);
   *n1 = gt_encseq_get_decoded_char(cie->encseq,
                                    ci->pvt->startpos+ci->pvt->curpos,
@@ -55,7 +56,7 @@ static int gt_codon_iterator_encseq_next(GtCodonIterator *ci,
                                    GT_READMODE_FORWARD);
   *frame = ci->pvt->curpos % GT_CODON_LENGTH;
   ci->pvt->curpos++;
-  return 0;
+  return GT_CODON_ITERATOR_OK;
 }
 
 static unsigned long gt_codon_iterator_encseq_current_position(GtCodonIterator
@@ -63,14 +64,12 @@ static unsigned long gt_codon_iterator_encseq_current_position(GtCodonIterator
 {
   gt_assert(ci);
   return ci->pvt->curpos;
-  return 0;
 }
 
 static unsigned long gt_codon_iterator_encseq_length(GtCodonIterator *ci)
 {
   gt_assert(ci);
   return ci->pvt->length;
-  return 0;
 }
 
 static void gt_codon_iterator_encseq_rewind(GtCodonIterator *ci)

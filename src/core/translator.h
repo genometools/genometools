@@ -20,7 +20,8 @@
 #define TRANSLATOR_H
 
 #include "core/translator_api.h"
+#include "core/error_api.h"
 
-int           gt_translator_unit_test(GtError *err);
+int gt_translator_unit_test(GtError *err);
 
 #endif
