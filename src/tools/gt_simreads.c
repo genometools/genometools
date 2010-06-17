@@ -16,9 +16,11 @@
 */
 
 #include "core/str.h"
+#include "core/disc_distri.h"
 #include "core/encseq.h"
 #include "core/fasta.h"
 #include "core/file_api.h"
+#include "core/logger.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
 #include "core/option.h"
@@ -30,15 +32,18 @@
 
 typedef struct {
   unsigned long num, minlen, maxlen, coverage;
-  bool show_progressbar;
+  bool show_progressbar, verbose, ds, dl;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
+  GtStr *dsfilename, *dlfilename;
 } GtSimReadsArguments;
 
 static void* gt_simreads_arguments_new(void)
 {
   GtSimReadsArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->ofi = gt_outputfileinfo_new();
+  arguments->dsfilename = gt_str_new();
+  arguments->dlfilename = gt_str_new();
   return arguments;
 }
 
@@ -48,6 +53,8 @@ static void gt_simreads_arguments_delete(void *tool_arguments)
   if (!arguments) return;
   gt_file_delete(arguments->outfp);
   gt_outputfileinfo_delete(arguments->ofi);
+  gt_str_delete(arguments->dsfilename);
+  gt_str_delete(arguments->dlfilename);
   gt_free(arguments);
 }
 
@@ -56,7 +63,8 @@ static GtOptionParser* gt_simreads_option_parser_new(void *tool_arguments)
   GtSimReadsArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *num_option, *coverage_option, *len_option,
-           *minlen_option, *maxlen_option, *p_option;
+           *minlen_option, *maxlen_option, *p_option, *v_option,
+           *dl_option, *ds_option;
 
   gt_assert(arguments);
 
@@ -105,6 +113,25 @@ static GtOptionParser* gt_simreads_option_parser_new(void *tool_arguments)
                                 &arguments->show_progressbar, false);
   gt_option_parser_add_option(op, p_option);
 
+  /* -v */
+  v_option = gt_option_new_bool("v", "be verbose",
+                                &arguments->verbose, false);
+  gt_option_parser_add_option(op, v_option);
+
+  /* -ds */
+  ds_option = gt_option_new_string("ds", "output distribution of starting"
+                                       " positions to specified file",
+                                   arguments->dsfilename, NULL);
+  gt_option_parser_add_option(op, ds_option);
+  gt_option_is_extended_option(ds_option);
+
+  /* -dl */
+  dl_option = gt_option_new_string("dl", "output distribution of read lengths"
+                                       " to specified file",
+                                   arguments->dlfilename, NULL);
+  gt_option_parser_add_option(op, dl_option);
+  gt_option_is_extended_option(dl_option);
+
   gt_option_is_mandatory_either(num_option, coverage_option);
   gt_option_is_mandatory_either(len_option, minlen_option);
   gt_option_imply(minlen_option, maxlen_option);
@@ -113,6 +140,7 @@ static GtOptionParser* gt_simreads_option_parser_new(void *tool_arguments)
   gt_option_exclude(minlen_option, len_option);
   gt_option_exclude(len_option, minlen_option);
   gt_option_exclude(len_option, maxlen_option);
+  gt_option_exclude(len_option, dl_option);
 
   gt_option_parser_set_min_max_args(op, 1, 1);
 
@@ -145,6 +173,42 @@ static int gt_simreads_arguments_check(GT_UNUSED int rest_argc,
     had_err = -1;
   }
 
+  arguments->dl = (gt_str_length(arguments->dlfilename) > 0);
+  arguments->ds = (gt_str_length(arguments->dsfilename) > 0);
+
+  return had_err;
+}
+
+static int gt_simreads_plot_disc_distri(unsigned long key,
+                                        unsigned long long value,
+                                        GtFile *outfile)
+{
+  gt_file_xprintf(outfile, "%lu %llu\n", key, value);
+  return 0;
+}
+
+static int gt_simreads_write_dist_file(const char *title, GtDiscDistri *dist,
+                                       GtStr *filename, GtError *err)
+{
+  int had_err = 0;
+
+  gt_assert(filename);
+  gt_assert(dist);
+  gt_error_check(err);
+
+  GtFile *dfile;
+  dfile = gt_file_new(gt_str_get(filename), "w", err);
+  if (!dfile)
+  {
+    had_err = -1;
+  }
+  else
+  {
+    gt_file_xprintf(dfile,title);
+    gt_disc_distri_foreach(dist,
+     (GtDiscDistriIterFunc) gt_simreads_plot_disc_distri, dfile);
+    gt_file_delete(dfile);
+  }
   return had_err;
 }
 
@@ -159,6 +223,7 @@ static int gt_simreads_runner(GT_UNUSED int argc,
   GtReadmode readmode;
   GtStr *read = NULL, *description = NULL;
   unsigned long output_bases = 0, output_reads = 0,
+                output_rcmode_reads = 0,
                 required_output_bases = 0,
                 target_total_length,
                 startpos, readlen, i;
@@ -166,11 +231,18 @@ static int gt_simreads_runner(GT_UNUSED int argc,
   bool fixed_readlen;
   int had_err = 0;
   GtUchar ch;
+  GtLogger *logger = NULL;
+  GtDiscDistri *lengths = NULL, *starts = NULL;
 
   gt_error_check(err);
   gt_assert(arguments);
 
+  logger = gt_logger_new(arguments->verbose, GT_LOGGER_DEFLT_PREFIX, stderr);
   fixed_readlen = (arguments->maxlen == GT_UNDEF_ULONG);
+  if (arguments->ds)
+    starts = gt_disc_distri_new();
+  if (arguments->dl)
+    lengths = gt_disc_distri_new();
   readlen = arguments->minlen;
 
   /* load encseq */
@@ -183,8 +255,14 @@ static int gt_simreads_runner(GT_UNUSED int argc,
   if (!had_err)
   {
     target_total_length = gt_encseq_total_length(target);
+    gt_logger_log(logger, "number of templates: %lu",
+                  gt_encseq_num_of_sequences(target));
+    gt_logger_log(logger, "total template length: %lu",
+                  target_total_length);
     if (arguments->coverage != GT_UNDEF_ULONG)
     {
+      gt_logger_log(logger, "required coverage: %lu",
+                            arguments->coverage);
       required_output_bases = arguments->coverage * target_total_length;
       if (arguments->show_progressbar)
         gt_progressbar_start(&progress, required_output_bases);
@@ -192,11 +270,19 @@ static int gt_simreads_runner(GT_UNUSED int argc,
     else
     {
       gt_assert(arguments->num != GT_UNDEF_ULONG);
+      gt_logger_log(logger, "required number of reads: %lu",
+                            arguments->num);
       if (arguments->show_progressbar)
         gt_progressbar_start(&progress, arguments->num);
     }
     read = gt_str_new();
     description = gt_str_new();
+    if (fixed_readlen)
+      gt_logger_log(logger, "required read length (fixed): %lu",
+                    arguments->minlen);
+    else
+      gt_logger_log(logger, "required read length range: %lu-%lu",
+                    arguments->minlen, arguments->maxlen);
   }
 
   while (!had_err)
@@ -206,6 +292,8 @@ static int gt_simreads_runner(GT_UNUSED int argc,
     {
        readlen = gt_rand_max(arguments->maxlen -
                     arguments->minlen) + arguments->minlen;
+       if (arguments->dl)
+         gt_disc_distri_add(lengths, readlen);
     }
     gt_assert(target_total_length > readlen);
     startpos = gt_rand_max(target_total_length-readlen);
@@ -242,6 +330,15 @@ static int gt_simreads_runner(GT_UNUSED int argc,
                                   arguments->outfp);
       output_bases += gt_str_length(read);
       output_reads++;
+      if (arguments->verbose && readmode == GT_READMODE_FORWARD)
+        output_rcmode_reads++;
+      if (arguments->ds)
+      {
+        if (readmode == GT_READMODE_FORWARD)
+          gt_disc_distri_add(starts, startpos);
+        else
+          gt_disc_distri_add(starts, target_total_length - 1 - startpos);
+      }
     }
 
     /* test break conditions and update progressbar */
@@ -262,6 +359,28 @@ static int gt_simreads_runner(GT_UNUSED int argc,
     }
   }
 
+  if (!had_err)
+  {
+    gt_logger_log(logger, "coverage: %.3f",
+                  (float) output_bases / target_total_length);
+    gt_logger_log(logger, "total reads length: %lu", output_bases);
+    if (!fixed_readlen)
+      gt_logger_log(logger, "average reads length: %.1f",
+                    (float) output_bases / output_reads);
+    gt_logger_log(logger, "number of reads: %lu", output_reads);
+    gt_logger_log(logger, "- forward: %lu", output_reads-output_rcmode_reads);
+    gt_logger_log(logger, "- revcompl: %lu", output_rcmode_reads);
+  }
+
+  if (!had_err && arguments->dl)
+    had_err = gt_simreads_write_dist_file(
+                   "# distribution of read lengths:\n", lengths,
+                   arguments->dlfilename, err);
+  if (!had_err && arguments->ds)
+    had_err = gt_simreads_write_dist_file(
+                   "# distribution of start positions:\n", starts,
+                   arguments->dsfilename, err);
+
   if (arguments->show_progressbar)
     gt_progressbar_stop();
   gt_str_delete(read);
@@ -269,6 +388,11 @@ static int gt_simreads_runner(GT_UNUSED int argc,
   gt_encseq_reader_delete(target_reader);
   gt_encseq_loader_delete(target_loader);
   gt_encseq_delete(target);
+  gt_logger_delete(logger);
+  if (arguments->dl)
+    gt_disc_distri_delete(lengths);
+  if (arguments->ds)
+    gt_disc_distri_delete(starts);
   return had_err;
 }
 

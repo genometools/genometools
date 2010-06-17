@@ -104,3 +104,40 @@ Test do
     i+=1
   end  
 end
+
+def test_distfile_format(filename)
+  f = File.open(filename)
+  f.each do |line|
+    if (line !~ /^#/ && line.chomp !~ /^\d+ \d+$/)
+      failtest("distribution output file format error: #{line}")
+    end
+  end
+  f.close
+end
+
+Name "gt simreads -ds test"
+Keywords "gt_simreads"
+Test do
+  fas = "#{$testdata}U89959_genomic.fas"
+  run_test "#{$bin}gt dev seqencode #{fas}"
+
+  cov = 10
+  len = 10
+  run_test "#{$bin}gt simreads -coverage #{cov} -len #{len} "+
+                  "-ds starts -force -o reads #{fas}"
+  test_distfile_format("starts")
+end
+
+Name "gt simreads -dl test"
+Keywords "gt_simreads"
+Test do
+  fas = "#{$testdata}U89959_genomic.fas"
+  run_test "#{$bin}gt dev seqencode #{fas}"
+
+  cov = 10
+  minlen = 10
+  maxlen = 100
+  run_test "#{$bin}gt simreads -coverage #{cov} -minlen #{minlen} "+
+                  "-maxlen #{maxlen} -dl lengths -force -o reads #{fas}"
+  test_distfile_format("lengths")
+end
