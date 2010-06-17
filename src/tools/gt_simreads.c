@@ -204,7 +204,7 @@ static int gt_simreads_write_dist_file(const char *title, GtDiscDistri *dist,
   }
   else
   {
-    gt_file_xprintf(dfile,title);
+    gt_file_xprintf(dfile, "%s", title);
     gt_disc_distri_foreach(dist,
      (GtDiscDistriIterFunc) gt_simreads_plot_disc_distri, dfile);
     gt_file_delete(dfile);
