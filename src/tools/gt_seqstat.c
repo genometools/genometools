@@ -69,7 +69,7 @@ static GtOPrval parse_options(GtSeqstatArguments *arguments,
 
   optionbucketsize = gt_option_new_uint_min("b",
                                 "bucket size for distlen option",
-                                &arguments->bucketsize,100, 1);
+                                &arguments->bucketsize, 100U, 1U);
   gt_option_imply(optionbucketsize, optiondistlen);
   gt_option_parser_add_option(op, optionbucketsize);
 
@@ -232,7 +232,7 @@ static void calcNstats(unsigned long key, unsigned long long value,
 
 #define initNstat(INDEX, NAME, PORTION)\
     nstats.name[INDEX] = (NAME);\
-    nstats.min[INDEX] = (sumlength * (PORTION) / 100);\
+    nstats.min[INDEX] = (unsigned long long) (sumlength * (PORTION) / 100);\
     nstats.nvalue[INDEX] = 0;\
     nstats.done[INDEX] = false
 
@@ -386,7 +386,8 @@ int gt_seqstat(int argc, const char **argv, GtError *err)
     showcstats(numofseq, sumlength, minlength,
                maxlength, distctglen);
   }
-  if (distctglen) gt_disc_distri_delete(distctglen);
+  if (distctglen != NULL)
+    gt_disc_distri_delete(distctglen);
   if (!had_err && arguments.doastretch)
   {
     processastretches(distastretch,countA);
