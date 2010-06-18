@@ -1,8 +1,7 @@
 #include <stdbool.h>
-#include "core/unused_api.h"
 #include "core/minmax.h"
 #include "core/divmodmul.h"
-#include "core/arraydef.h"
+#include "core/stack-inlined.h"
 
 /*
  * Qsort routine from Bentley & McIlroy's "Engineering a Sort Function".
@@ -41,105 +40,64 @@ static inline Sorttype *gt_inlined_qsort_r_med3 (Sorttype *a, Sorttype *b,
                      : c));
 }
 
-static Sorttype *anchor = NULL;
-
 typedef struct
 {
   Sorttype *startptr;
   unsigned long len;
 } Intervaltobesorted;
 
-GT_DECLAREARRAYSTRUCT(Intervaltobesorted);
+GT_STACK_DECLARESTRUCT(Intervaltobesorted,32UL);
 
-#define GT_QSORT_STACKTOP\
-        stack.spaceIntervaltobesorted[stack.nextfreeIntervaltobesorted]
-
-#define GT_QSORT_PUSHSTACK(START,LEN)\
-  /*printf("push(%lu,%lu)\n",(unsigned long) ((START) - anchor),LEN);*/\
-  GT_CHECKARRAYSPACE(&stack,Intervaltobesorted,32);\
-  GT_QSORT_STACKTOP.startptr = START;\
-  GT_QSORT_STACKTOP.len = LEN;\
-  stack.nextfreeIntervaltobesorted++
-
-#ifdef SKDEBUG
-static void showstack(const GtArrayIntervaltobesorted *stack)
-{
-  unsigned long idx;
-  Intervaltobesorted *ptr;
-
-  for (idx=0; idx < stack->nextfreeIntervaltobesorted; idx++)
-  {
-    ptr = stack->spaceIntervaltobesorted + idx;
-    printf("stack[%lu]=(%lu,%lu)\n",idx,
-            (unsigned long) (ptr->startptr - anchor),ptr->len);
-  }
-}
-#endif 
-
-/*
-static unsigned long maxstackdepth = 0;
-*/
-
-static void gt_inlined_qsort_r (Sorttype *a,unsigned long n, void *data)
+static void gt_inlined_qsort_r (Sorttype *arr,unsigned long len,void *data)
 {
   Sorttype tmp, *pa, *pb, *pc, *pd, *pl, *pm, *pn, *aptr, *bptr;
   unsigned long d, minval;
   int r;
   bool swapped;
-  GtArrayIntervaltobesorted stack;
+  GtStackIntervaltobesorted intervalstack;
+  Intervaltobesorted current;
 
-  if (anchor == NULL)
+  GT_STACK_INIT(&intervalstack,16UL);
+  current.startptr = arr;
+  current.len = len;
+  GT_STACK_PUSH(&intervalstack,current);
+  while (!GT_STACK_ISEMPTY(&intervalstack))
   {
-    anchor = a;
-  }
-  GT_INITARRAY(&stack,Intervaltobesorted);
-  GT_QSORT_PUSHSTACK(a,n);
-  while (stack.nextfreeIntervaltobesorted > 0)
-  {
-#ifdef SKDEBUG
-    showstack(&stack);
-#endif
-    stack.nextfreeIntervaltobesorted--;
-    a = GT_QSORT_STACKTOP.startptr;
-    n = GT_QSORT_STACKTOP.len;
-#ifdef SKDEBUG
-    printf("sort: offset=%lu, len=%lu\n",(unsigned long) (a - anchor),n);
-#endif
+    current = GT_STACK_POP(&intervalstack);
+    arr = current.startptr;
+    len = current.len;
     swapped = false;
-    if (n < 7UL)
+    if (len < 7UL)
     {
-      for (pm = a + 1; pm < a + n; pm++)
+      for (pm = arr + 1; pm < arr + len; pm++)
       {
-       for (pl = pm;
-	 pl > a && qsortcmp (pl - 1, pl, data) > 0;
-             pl--)
+        for (pl = pm; pl > arr && qsortcmp (pl - 1, pl, data) > 0; pl--)
         {
           GT_QSORT_SWAP (pl, pl - 1);
         }
       }
       continue;
     }
-    pm = a + GT_DIV2 (n);
-    if (n > 7UL)
+    pm = arr + GT_DIV2 (len);
+    if (len > 7UL)
     {
-      pl = a;
-      pn = a + n - 1;
-      if (n > 40UL)
+      pl = arr;
+      pn = arr + len - 1;
+      if (len > 40UL)
       {
-        d = GT_DIV8 (n);
+        d = GT_DIV8 (len);
         pl = gt_inlined_qsort_r_med3 (pl, pl + d, pl + GT_MULT2 (d), data);
         pm = gt_inlined_qsort_r_med3 (pm - d, pm, pm + d, data);
         pn = gt_inlined_qsort_r_med3 (pn - GT_MULT2 (d), pn - d, pn, data);
       }
       pm = gt_inlined_qsort_r_med3 (pl, pm, pn, data);
     }
-    GT_QSORT_SWAP (a, pm);
-    pa = pb = a + 1;
-    pc = pd = a + n - 1;
+    GT_QSORT_SWAP (arr, pm);
+    pa = pb = arr + 1;
+    pc = pd = arr + len - 1;
     while (1)
     {
-      while (pb <= pc
-             && (r = qsortcmp (pb, a, data)) <= 0)
+      while (pb <= pc && (r = qsortcmp (pb, arr, data)) <= 0)
       {
         if (r == 0)
         {
@@ -149,8 +107,7 @@ static void gt_inlined_qsort_r (Sorttype *a,unsigned long n, void *data)
         }
         pb++;
       }
-      while (pb <= pc
-             && (r = qsortcmp (pc, a, data)) >= 0)
+      while (pb <= pc && (r = qsortcmp (pc, arr, data)) >= 0)
       {
         if (r == 0)
         {
@@ -171,30 +128,32 @@ static void gt_inlined_qsort_r (Sorttype *a,unsigned long n, void *data)
     }
     if (!swapped)
     {                                  /* Switch to insertion sort */
-      for (pm = a + 1; pm < a + n; pm++)
+      for (pm = arr + 1; pm < arr + len; pm++)
       {
-        for (pl = pm;
-             pl > a && qsortcmp (pl - 1, pl, data) > 0;
-             pl--)
+        for (pl = pm; pl > arr && qsortcmp (pl - 1, pl, data) > 0; pl--)
         {
           GT_QSORT_SWAP (pl, pl - 1);
         }
       }
       continue;
     }
-    pn = a + n;
-    minval = MIN ((unsigned long) (pa - a), (unsigned long) (pb - pa));
-    GT_QSORT_VECSWAP (a, pb - minval, minval);
+    pn = arr + len;
+    minval = MIN ((unsigned long) (pa - arr), (unsigned long) (pb - pa));
+    GT_QSORT_VECSWAP (arr, pb - minval, minval);
     minval = MIN ((unsigned long) (pd - pc), (unsigned long) (pn - pd - 1));
     GT_QSORT_VECSWAP (pb, pn - minval, minval);
     if ((minval = (unsigned long) (pb - pa)) > 1UL)
     {
-      GT_QSORT_PUSHSTACK(a,minval);
+      current.startptr = arr;
+      current.len = minval;
+      GT_STACK_PUSH(&intervalstack,current);
     }
     if ((minval = (unsigned long) (pd - pc)) > 1UL)
     {
-      GT_QSORT_PUSHSTACK(pn - minval,minval);
+      current.startptr = pn - minval;
+      current.len = minval;
+      GT_STACK_PUSH(&intervalstack,current);
     }
   }
-  GT_FREEARRAY(&stack,Intervaltobesorted);
+  GT_STACK_DELETE(&intervalstack);
 }
