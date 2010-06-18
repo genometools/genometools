@@ -232,7 +232,7 @@ static void calcNstats(unsigned long key, unsigned long long value,
 
 #define initNstat(INDEX, NAME, PORTION)\
     nstats.name[INDEX] = (NAME);\
-    nstats.min[INDEX] = (double)sumlength * (PORTION);\
+    nstats.min[INDEX] = (sumlength * (PORTION) / 100);\
     nstats.nvalue[INDEX] = 0;\
     nstats.done[INDEX] = false
 
@@ -243,8 +243,8 @@ static void showcstats(uint64_t numofseq, uint64_t sumlength,
   Nstats nstats;
   int i;
 
-  initNstat(0, "N50", 0.50);
-  initNstat(1, "N80", 0.80);
+  initNstat(0, "N50", 50);
+  initNstat(1, "N80", 80);
   nstats.current = 0;
 
   gt_disc_distri_foreach_in_reverse_order(distctglen, calcNstats,
