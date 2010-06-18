@@ -113,9 +113,9 @@ static void gt_qbenchsort_permute_ulong_array (unsigned long *arr,
 {
   unsigned long i, j, c;
 
-  for (i = 0; i < (unsigned long) size; ++i)
+  for (i = 0; i < size; ++i)
   {
-    j = (unsigned long) (random () % size);
+    j = gt_rand_max(size-1);
     c = arr[i];
     arr[i] = arr[j];
     arr[j] = c;
@@ -168,9 +168,12 @@ static int gt_qsortbench_aqsort(unsigned long n, unsigned long *a)
 
 typedef unsigned long Sorttype;
 
+static unsigned long cmpcount = 0;
+
 static int qsortcmp(const Sorttype *a,const Sorttype *b,
                     const GT_UNUSED void *data)
 {
+  cmpcount++;
   if ((*a) < (*b))
   {
     return -1;
@@ -184,6 +187,7 @@ static int qsortcmp(const Sorttype *a,const Sorttype *b,
 
 static int qsortcmpnodata(const void *a,const void *b)
 {
+  cmpcount++;
   if (*(Sorttype*)a < *((Sorttype*)b))
   {
     return -1;
@@ -197,6 +201,7 @@ static int qsortcmpnodata(const void *a,const void *b)
 
 static int qsortcmpwithdata(const void *a,const void *b, GT_UNUSED void *data)
 {
+  cmpcount++;
   if (*(Sorttype*)a < *((Sorttype*)b))
   {
     return -1;
@@ -272,8 +277,10 @@ static int gt_qsortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
   } else {
     if (arguments->verbose)
       printf("# using simple array of random numbers\n");
+    /* use seed initialization to make array deterministic */
+    srand48(366292341);
     for (i = 0; i < arguments->num_values; ++i) {
-      array[i] = gt_rand_max(arguments->num_values);
+      array[i] = drand48() * arguments->num_values;
     }
   }
 
@@ -290,6 +297,7 @@ static int gt_qsortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
   gt_timer_show(timer, stdout);
   gt_timer_delete(timer);
   gt_free(array);
+  printf("cmpcount = %lu\n",cmpcount);
   return had_err;
 }
 
