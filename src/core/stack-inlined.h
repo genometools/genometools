@@ -62,7 +62,11 @@
 
 /*
 <<<<<<< HEAD
+<<<<<<< HEAD
   Delete the memory allocated for stack contents
+=======
+  Delete the stack.
+>>>>>>> Added inlined implementation of stacks.
 =======
   Delete the stack.
 >>>>>>> Added inlined implementation of stacks.
