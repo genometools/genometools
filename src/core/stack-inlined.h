@@ -61,7 +61,11 @@
         (S)->space = &(S)->staticspace[0]
 
 /*
+<<<<<<< HEAD
   Delete the memory allocated for stack contents
+=======
+  Delete the stack.
+>>>>>>> Added inlined implementation of stacks.
 */
 
 #define GT_STACK_DELETE(S)\
@@ -71,7 +75,7 @@
         }
 
 /*
-  Push a value
+  Push a value.
 */
 
 #define GT_STACK_PUSH(S,VALUE)\
@@ -93,7 +97,7 @@
         (S)->space[(S)->nextfree++] = VALUE
 
 /*
-  check if the stack is empty
+  check if the stack is empty.
 */
 
 #define GT_STACK_ISEMPTY(S)\
