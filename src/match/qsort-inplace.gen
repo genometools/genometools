@@ -63,41 +63,40 @@ static void gt_inlined_qsort_r (Sorttype *arr,unsigned long len,void *data)
   GT_STACK_PUSH(&intervalstack,current);
   while (!GT_STACK_ISEMPTY(&intervalstack))
   {
-    current = GT_STACK_POP(&intervalstack);
-    arr = current.startptr;
-    len = current.len;
     swapped = false;
-    if (len < 7UL)
+    current = GT_STACK_POP(&intervalstack);
+    if (current.len < 7UL)
     {
-      for (pm = arr + 1; pm < arr + len; pm++)
+      for (pm = current.startptr + 1; pm < current.startptr + current.len; pm++)
       {
-        for (pl = pm; pl > arr && qsortcmp (pl - 1, pl, data) > 0; pl--)
+        for (pl = pm; pl > current.startptr && qsortcmp (pl - 1, pl, data) > 0;
+             pl--)
         {
           GT_QSORT_SWAP (pl, pl - 1);
         }
       }
       continue;
     }
-    pm = arr + GT_DIV2 (len);
-    if (len > 7UL)
+    pm = current.startptr + GT_DIV2 (current.len);
+    if (current.len > 7UL)
     {
-      pl = arr;
-      pn = arr + len - 1;
-      if (len > 40UL)
+      pl = current.startptr;
+      pn = current.startptr + current.len - 1;
+      if (current.len > 40UL)
       {
-        d = GT_DIV8 (len);
+        d = GT_DIV8 (current.len);
         pl = gt_inlined_qsort_r_med3 (pl, pl + d, pl + GT_MULT2 (d), data);
         pm = gt_inlined_qsort_r_med3 (pm - d, pm, pm + d, data);
         pn = gt_inlined_qsort_r_med3 (pn - GT_MULT2 (d), pn - d, pn, data);
       }
       pm = gt_inlined_qsort_r_med3 (pl, pm, pn, data);
     }
-    GT_QSORT_SWAP (arr, pm);
-    pa = pb = arr + 1;
-    pc = pd = arr + len - 1;
+    GT_QSORT_SWAP (current.startptr, pm);
+    pa = pb = current.startptr + 1;
+    pc = pd = current.startptr + current.len - 1;
     while (1)
     {
-      while (pb <= pc && (r = qsortcmp (pb, arr, data)) <= 0)
+      while (pb <= pc && (r = qsortcmp (pb, current.startptr, data)) <= 0)
       {
         if (r == 0)
         {
@@ -107,7 +106,7 @@ static void gt_inlined_qsort_r (Sorttype *arr,unsigned long len,void *data)
         }
         pb++;
       }
-      while (pb <= pc && (r = qsortcmp (pc, arr, data)) >= 0)
+      while (pb <= pc && (r = qsortcmp (pc, current.startptr, data)) >= 0)
       {
         if (r == 0)
         {
@@ -128,23 +127,24 @@ static void gt_inlined_qsort_r (Sorttype *arr,unsigned long len,void *data)
     }
     if (!swapped)
     {                                  /* Switch to insertion sort */
-      for (pm = arr + 1; pm < arr + len; pm++)
+      for (pm = current.startptr + 1; pm < current.startptr + current.len; pm++)
       {
-        for (pl = pm; pl > arr && qsortcmp (pl - 1, pl, data) > 0; pl--)
+        for (pl = pm; pl > current.startptr && qsortcmp (pl - 1, pl, data) > 0;
+             pl--)
         {
           GT_QSORT_SWAP (pl, pl - 1);
         }
       }
       continue;
     }
-    pn = arr + len;
-    minval = MIN ((unsigned long) (pa - arr), (unsigned long) (pb - pa));
-    GT_QSORT_VECSWAP (arr, pb - minval, minval);
+    pn = current.startptr + current.len;
+    minval = MIN ((unsigned long) (pa - current.startptr),
+                  (unsigned long) (pb - pa));
+    GT_QSORT_VECSWAP (current.startptr, pb - minval, minval);
     minval = MIN ((unsigned long) (pd - pc), (unsigned long) (pn - pd - 1));
     GT_QSORT_VECSWAP (pb, pn - minval, minval);
     if ((minval = (unsigned long) (pb - pa)) > 1UL)
     {
-      current.startptr = arr;
       current.len = minval;
       GT_STACK_PUSH(&intervalstack,current);
     }
