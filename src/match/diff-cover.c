@@ -122,48 +122,6 @@ struct Differencecover
 
 #include "tab-diffcover.h"
 
-#undef QSORT_INTEGER
-#ifdef QSORT_INTEGER
-typedef Suffixptr Sorttype;
-
-static int qsortcmp (const Sorttype *a,const Sorttype *b,
-                     const GT_UNUSED void *data)
-{
-  if (SUFFIXPTRDEREF(a) < SUFFIXPTRDEREF(b))
-  {
-    return -1;
-  }
-  if (SUFFIXPTRDEREF(a) > SUFFIXPTRDEREF(b))
-  {
-    return 1;
-  }
-  return 0;
-}
-
-#include "qsort-inplace.gen"
-
-static void checkqsort(void)
-{
-#define MAXSIZE 100000
-
-  int times;
-  unsigned long idx, n = (unsigned long) MAXSIZE, a[MAXSIZE];
-
-  for (times = 0; times < 100; times++)
-  {
-    for (idx = 0; idx < n; idx++)
-    {
-      a[idx] = gt_rand_max(1000UL);
-    }
-    gt_inlined_qsort_r (a,n,NULL);
-    for (idx = 1UL; idx < n; idx++)
-    {
-      gt_assert(a[idx-1] <= a[idx]);
-    }
-  }
-}
-#endif
-
 static void fillcoverrank(Differencecover *dcov)
 {
   unsigned int i;
@@ -253,9 +211,6 @@ Differencecover *gt_differencecover_new(unsigned int vparam,
   Differencecover *dcov;
   bool found = false;
 
-#ifdef QSORT_INTEGER
-  checkqsort();
-#endif
   dcov = gt_malloc(sizeof (*dcov));
   dcov->numofchars = gt_alphabet_num_of_chars(
                                            gt_encseq_alphabet(encseq));
@@ -873,42 +828,14 @@ static void dc_addunsortedrange(void *voiddcov,
   ptr->width = width;
 }
 
-#ifdef QSORT_INTEGER
-static int comparedcov_presortedsuffixes(const void *a,const void *b,
-                                         void *data)
-{
-  const Differencecover *dcov = (const Differencecover *) data;
-  const unsigned long suffixpos1 = *(const unsigned long *) a;
-  const unsigned long suffixpos2 = *(const unsigned long *) b;
-  unsigned long idx1, idx2;
-  unsigned int offset;
-
-  gt_assert(suffixpos1 < dcov->totallength);
-  gt_assert(suffixpos2 < dcov->totallength);
-  offset = differencecover_offset(dcov,suffixpos1,suffixpos2);
-  idx1 = inversesuftab_get(dcov,suffixpos1 + offset);
-  idx2 = inversesuftab_get(dcov,suffixpos2 + offset);
-  if (idx1 < idx2)
-  {
-    return -1;
-  }
-  if (idx1 > idx2)
-  {
-    return 1;
-  }
-  gt_assert(false);
-  return 0;
-}
-
-#else
-
 typedef Suffixptr Sorttype;
 
-static int qsortcmp (const Sorttype *a,const Sorttype *b,const void *data)
+static int qsortcmparr (const Sorttype *suftab,unsigned long a,
+                        unsigned long b,const void *data)
 {
   const Differencecover *dcov = (const Differencecover *) data;
-  const unsigned long suffixpos1 = SUFFIXPTRDEREF(a);
-  const unsigned long suffixpos2 = SUFFIXPTRDEREF(b);
+  const unsigned long suffixpos1 = SUFFIXPTRGET(suftab,a);
+  const unsigned long suffixpos2 = SUFFIXPTRGET(suftab,b);
   unsigned long idx1, idx2;
   unsigned int offset;
 
@@ -929,8 +856,7 @@ static int qsortcmp (const Sorttype *a,const Sorttype *b,const void *data)
   return 0;
 }
 
-#include "qsort-inplace.gen"
-#endif
+#include "qsort-array.gen"
 
 void dc_sortunsortedbucket(void *data,
                            Suffixptr *leftptr,
@@ -955,12 +881,7 @@ void dc_sortunsortedbucket(void *data,
                          false,  /* specialsareequalatdepth0 */
                          (unsigned long) dcov->vparam);
 #endif
-#ifdef QSORT_INTEGER
-  gt_qsort_r(leftptr,(size_t) width,sizeof (*leftptr),data,
-             comparedcov_presortedsuffixes);
-#else
-  gt_inlined_qsort_r (leftptr,width,data);
-#endif
+  gt_inlinedarr_qsort_r (leftptr,width,data);
 }
 
 static void dc_sortremainingsamples(Differencecover *dcov)
