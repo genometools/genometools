@@ -56,7 +56,8 @@ static GtOptionParser* gt_qsortbench_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   static const char *inputs[] = {
     "thomas",
-    "inlined",
+    "inlinedptr",
+    "inlinedarr",
     "system",
     NULL
   };
@@ -68,7 +69,8 @@ static GtOptionParser* gt_qsortbench_option_parser_new(void *tool_arguments)
                             "Benchmarks quicksort implementations."); /* XXX */
 
   option = gt_option_new_choice("impl", "implementation\n"
-                                       "choose from thomas|system|inlined",
+                                       "choose from thomas|system|"
+                                       "inlinedptr|inlinedarr",
                              arguments->impl, inputs[0], inputs);
   gt_option_parser_add_option(op, option);
 
@@ -185,6 +187,21 @@ static int qsortcmp(const Sorttype *a,const Sorttype *b,
   return 0;
 }
 
+static int qsortcmparr(const Sorttype *arr,unsigned long a,unsigned long b,
+                       const GT_UNUSED void *data)
+{
+  cmpcount++;
+  if (arr[a] < arr[b])
+  {
+    return -1;
+  }
+  if (arr[a] > arr[b])
+  {
+    return 1;
+  }
+  return 0;
+}
+
 static int qsortcmpnodata(const void *a,const void *b)
 {
   cmpcount++;
@@ -214,12 +231,21 @@ static int qsortcmpwithdata(const void *a,const void *b, GT_UNUSED void *data)
 }
 
 #include "match/qsort-inplace.gen"
-#define MAXSIZE 1000000
+#include "match/qsort-array.gen"
 
-static void check_inlined_qsort(unsigned long *a, unsigned long n)
+static void check_inlinedptr_qsort(unsigned long *a, unsigned long n)
 {
   unsigned long idx;
   gt_inlined_qsort_r(a, n, NULL);
+  for (idx = 1UL; idx < n; idx++) {
+    gt_assert(a[idx-1] <= a[idx]);
+  }
+}
+
+static void check_inlinedarr_qsort(unsigned long *a, unsigned long n)
+{
+  unsigned long idx;
+  gt_inlinedarr_qsort_r(a, n, NULL);
   for (idx = 1UL; idx < n; idx++) {
     gt_assert(a[idx-1] <= a[idx]);
   }
@@ -291,8 +317,10 @@ static int gt_qsortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
     check_thomas_qsort(array, arguments->num_values);
   } else if (strcmp(gt_str_get(arguments->impl), "system") == 0) {
     check_gnu_qsort(array, arguments->num_values);
-  } else if (strcmp(gt_str_get(arguments->impl), "inlined") == 0) {
-    check_inlined_qsort(array, arguments->num_values);
+  } else if (strcmp(gt_str_get(arguments->impl), "inlinedptr") == 0) {
+    check_inlinedptr_qsort(array, arguments->num_values);
+  } else if (strcmp(gt_str_get(arguments->impl), "inlinedarr") == 0) {
+    check_inlinedarr_qsort(array, arguments->num_values);
   }
   gt_timer_show(timer, stdout);
   gt_timer_delete(timer);

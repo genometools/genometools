@@ -1,0 +1,178 @@
+#include <stdbool.h>
+#include "core/minmax.h"
+#include "core/divmodmul.h"
+#include "core/stack-inlined.h"
+
+/*
+ * Qsort routine from Bentley & McIlroy's "Engineering a Sort Function".
+ */
+
+#define GT_QSORT_ARR_SWAP(A,B)\
+        if ((A) != (B))\
+        {\
+          tmp = arr[A];\
+          arr[A] = arr[B];\
+          arr[B] = tmp;\
+        }
+
+#define GT_QSORT_ARR_VECSWAP(A,B,N)\
+        aptr = A;\
+        bptr = B;\
+        while ((N)-- > 0)\
+        {\
+          tmp = arr[aptr];\
+          arr[aptr++] = arr[bptr];\
+          arr[bptr++] = tmp;\
+        }
+
+static inline unsigned long gt_inlined_qsort_arr_r_med3
+                     (const Sorttype *arr,unsigned long a, 
+                      unsigned long b, unsigned long c, void *data)
+{
+  return qsortcmparr (arr, a, b, data) < 0
+           ? (qsortcmparr (arr, b, c, data) < 0
+                ? b
+                : (qsortcmparr (arr, a, c, data) < 0
+                     ? c : a))
+           : (qsortcmparr (arr, b, c, data) > 0
+                ? b
+                : (qsortcmparr (arr, a, c, data) < 0
+                     ? a
+                     : c));
+}
+
+typedef struct
+{
+  unsigned long startindex, 
+                len;
+} Intervalarrtobesorted;
+
+GT_STACK_DECLARESTRUCT(Intervalarrtobesorted,32UL);
+
+static void gt_inlinedarr_qsort_r (Sorttype *arr,unsigned long len,void *data)
+{
+  Sorttype tmp;
+  unsigned long pa, pb, pc, pd, pl, pm, pn, aptr, bptr, d, minval;
+  int r;
+  bool swapped;
+  GtStackIntervalarrtobesorted intervalstack;
+  Intervalarrtobesorted current;
+
+  GT_STACK_INIT(&intervalstack,16UL);
+  current.startindex = 0;
+  current.len = len;
+  GT_STACK_PUSH(&intervalstack,current);
+  while (!GT_STACK_ISEMPTY(&intervalstack))
+  {
+    swapped = false;
+    current = GT_STACK_POP(&intervalstack);
+    if (current.len < 7UL)
+    {
+      for (pm = current.startindex + 1; 
+           pm < current.startindex + current.len; pm++)
+      {
+        for (pl = pm; pl > current.startindex && 
+                      qsortcmparr (arr, pl - 1, pl, data) > 0; pl--)
+        {
+          GT_QSORT_ARR_SWAP (pl, pl - 1);
+        }
+      }
+      continue;
+    }
+    pm = current.startindex + GT_DIV2 (current.len);
+    if (current.len > 7UL)
+    {
+      pl = current.startindex;
+      pn = current.startindex + current.len - 1;
+      if (current.len > 40UL)
+      {
+        d = GT_DIV8 (current.len);
+        pl = gt_inlined_qsort_arr_r_med3 (arr, pl, pl + d, pl + GT_MULT2 (d), data);
+        gt_assert(pm >= d);
+        pm = gt_inlined_qsort_arr_r_med3 (arr, pm - d, pm, pm + d, data);
+        gt_assert(pn >= GT_MULT2(d));
+        pn = gt_inlined_qsort_arr_r_med3 (arr, pn - GT_MULT2 (d), pn - d, pn, data);
+      }
+      pm = gt_inlined_qsort_arr_r_med3 (arr, pl, pm, pn, data);
+    }
+    GT_QSORT_ARR_SWAP (current.startindex, pm);
+    pa = pb = current.startindex + 1;
+    pc = pd = current.startindex + current.len - 1;
+    while (1)
+    {
+      while (pb <= pc && 
+             (r = qsortcmparr (arr, pb, current.startindex, data)) <= 0)
+      {
+        if (r == 0)
+        {
+          swapped = true;
+          GT_QSORT_ARR_SWAP (pa, pb);
+          pa++;
+        }
+        pb++;
+      }
+      while (pb <= pc && 
+             (r = qsortcmparr (arr, pc, current.startindex, data)) >= 0)
+      {
+        if (r == 0)
+        {
+          swapped = true;
+          GT_QSORT_ARR_SWAP (pc, pd);
+          gt_assert(pd > 0);
+          pd--;
+        }
+        gt_assert(pc > 0);
+        pc--;
+      }
+      if (pb > pc)
+      {
+        break;
+      }
+      GT_QSORT_ARR_SWAP (pb, pc);
+      swapped = true;
+      pb++;
+      gt_assert(pc > 0);
+      pc--;
+    }
+    if (!swapped)
+    {                                  /* Switch to insertion sort */
+      for (pm = current.startindex + 1; 
+           pm < current.startindex + current.len; pm++)
+      {
+        for (pl = pm; pl > current.startindex && 
+                      qsortcmparr (arr, pl - 1, pl, data) > 0; pl--)
+        {
+          GT_QSORT_ARR_SWAP (pl, pl - 1);
+        }
+      }
+      continue;
+    }
+    pn = current.startindex + current.len;
+    gt_assert(pa >= current.startindex);
+    gt_assert(pb >= pa);
+    minval = MIN ((unsigned long) (pa - current.startindex),
+                  (unsigned long) (pb - pa));
+    gt_assert(pb >= minval);
+    GT_QSORT_ARR_VECSWAP (current.startindex, pb - minval, minval);
+    gt_assert(pd >= pc);
+    gt_assert(pn > pd);
+    minval = MIN ((unsigned long) (pd - pc), (unsigned long) (pn - pd - 1));
+    gt_assert(pn > minval);
+    GT_QSORT_ARR_VECSWAP (pb, pn - minval, minval);
+    gt_assert(pb >= pa);
+    if ((minval = (unsigned long) (pb - pa)) > 1UL)
+    {
+      current.len = minval;
+      GT_STACK_PUSH(&intervalstack,current);
+    }
+    gt_assert(pd >= pc);
+    if ((minval = (unsigned long) (pd - pc)) > 1UL)
+    {
+      gt_assert(pn >= minval);
+      current.startindex = pn - minval;
+      current.len = minval;
+      GT_STACK_PUSH(&intervalstack,current);
+    }
+  }
+  GT_STACK_DELETE(&intervalstack);
+}
