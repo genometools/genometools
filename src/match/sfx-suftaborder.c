@@ -70,8 +70,8 @@ static void showcomparisonfailure(const char *filename,
                                   GtReadmode readmode,
                                   const Suffixptr *suftab,
                                   unsigned long depth,
-                                  const Suffixptr *ptr1,
-                                  const Suffixptr *ptr2,
+                                  unsigned long idx1,
+                                  unsigned long idx2,
                                   int cmp,
                                   unsigned long maxlcp)
 {
@@ -79,13 +79,13 @@ static void showcomparisonfailure(const char *filename,
   fprintf(stderr,"%s(%lu vs %lu"
                  " %lu=\"",
                        where,
-                       (unsigned long) (ptr1 - suftab),
-                       (unsigned long) (ptr2 - suftab),
-                       SUFFIXPTRDEREF(ptr1));
-  showlocalsuffix(stderr,encseq,readmode,SUFFIXPTRDEREF(ptr1),depth);
+                       idx1,
+                       idx2,
+                       SUFFIXPTRGET(suftab,idx1));
+  showlocalsuffix(stderr,encseq,readmode,SUFFIXPTRGET(suftab,idx1),depth);
   fprintf(stderr,"\",\"");
-  showlocalsuffix(stderr,encseq,readmode,SUFFIXPTRDEREF(ptr2),depth);
-  fprintf(stderr,"\"=%lu)=%d with maxlcp %lu\n",SUFFIXPTRDEREF(ptr2),
+  showlocalsuffix(stderr,encseq,readmode,SUFFIXPTRGET(suftab,idx2),depth);
+  fprintf(stderr,"\"=%lu)=%d with maxlcp %lu\n",SUFFIXPTRGET(suftab,idx2),
                                                 cmp,
                                                 maxlcp);
 }
@@ -100,15 +100,14 @@ void gt_checkifprefixesareidentical(const char *filename,
                                  unsigned long left,
                                  unsigned long right)
 {
-  const Suffixptr *ptr;
-  unsigned long maxlcp;
+  unsigned long idx, maxlcp;
   int cmp;
   GtEncseqReader *esr1, *esr2;
   bool haserr = false;
 
   esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
-  for (ptr = suftab + left; ptr < suftab + right; ptr++)
+  for (idx = left; idx < right; idx++)
   {
     cmp = gt_encseq_comparetwosuffixes(encseq,
                                        readmode,
@@ -116,8 +115,8 @@ void gt_checkifprefixesareidentical(const char *filename,
                                        false,
                                        true,
                                        depth,
-                                       SUFFIXPTRDEREF(ptr),
-                                       SUFFIXPTRDEREF(ptr+1),
+                                       SUFFIXPTRGET(suftab,idx),
+                                       SUFFIXPTRGET(suftab,idx+1),
                                        esr1,
                                        esr2);
     if (cmp != 0 || maxlcp != (unsigned long) prefixlength)
@@ -129,7 +128,7 @@ void gt_checkifprefixesareidentical(const char *filename,
                             readmode,
                             suftab,
                             depth,
-                            ptr,ptr+1,cmp,maxlcp);
+                            idx,idx+1,cmp,maxlcp);
       haserr = true;
       break;
     }
@@ -147,15 +146,13 @@ void gt_showentiresuftab(const GtEncseq *encseq,
                          const Suffixptr *suftab,
                          unsigned long depth)
 {
-  const Suffixptr *ptr;
-  unsigned long totallength = gt_encseq_total_length(encseq);
+  unsigned long idx, totallength = gt_encseq_total_length(encseq);
 
-  for (ptr = suftab; ptr <= suftab + totallength; ptr++)
+  for (idx = 0; idx <= totallength; idx++)
   {
     printf("suftab[%lu]=%lu ",
-            (unsigned long) (ptr-suftab),
-            SUFFIXPTRDEREF(ptr));
-    showlocalsuffix(stdout,encseq,readmode,SUFFIXPTRDEREF(ptr),depth);
+            idx,SUFFIXPTRGET(suftab,idx));
+    showlocalsuffix(stdout,encseq,readmode,SUFFIXPTRGET(suftab,idx),depth);
     printf("\n");
   }
 }
@@ -170,8 +167,7 @@ void gt_checksortedsuffixes(const char *filename,
                             bool specialsareequalatdepth0,
                             unsigned long depth)
 {
-  const Suffixptr *ptr;
-  unsigned long maxlcp, totallength = gt_encseq_total_length(encseq);
+  unsigned long idx, maxlcp, totallength = gt_encseq_total_length(encseq);
   GtEncseqReader *esr1, *esr2;
   int cmp;
 
@@ -179,20 +175,20 @@ void gt_checksortedsuffixes(const char *filename,
   esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   gt_assert(numberofsuffixes > 0);
-  gt_assert(SUFFIXPTRDEREF(suftab) < totallength);
-  for (ptr = suftab + 1; ptr < suftab + numberofsuffixes; ptr++)
+  gt_assert(SUFFIXPTRGET(suftab,0) < totallength);
+  for (idx = 1UL; idx < numberofsuffixes; idx++)
   {
-    if (ptr < suftab + numberofsuffixes - 1)
+    if (idx < numberofsuffixes - 1)
     {
-      gt_assert(SUFFIXPTRDEREF(ptr) < totallength);
+      gt_assert(SUFFIXPTRGET(suftab,idx) < totallength);
       cmp = gt_encseq_comparetwosuffixes(encseq,
                                          readmode,
                                          &maxlcp,
                                          specialsareequal,
                                          specialsareequalatdepth0,
                                          depth,
-                                         SUFFIXPTRDEREF(ptr-1),
-                                         SUFFIXPTRDEREF(ptr),
+                                         SUFFIXPTRGET(suftab,idx-1),
+                                         SUFFIXPTRGET(suftab,idx),
                                          esr1,
                                          esr2);
       if (cmp > 0)
@@ -204,8 +200,8 @@ void gt_checksortedsuffixes(const char *filename,
                               readmode,
                               suftab,
                               depth,
-                              ptr-1,
-                              ptr,
+                              idx-1,
+                              idx,
                               cmp,
                               maxlcp);
         exit(GT_EXIT_PROGRAMMING_ERROR);
@@ -214,7 +210,7 @@ void gt_checksortedsuffixes(const char *filename,
     {
       if (numberofsuffixes == totallength+1)
       {
-        gt_assert(SUFFIXPTRDEREF(ptr) == totallength);
+        gt_assert(SUFFIXPTRGET(suftab,idx) == totallength);
       }
     }
   }
@@ -234,8 +230,7 @@ void gt_checkentiresuftab(const char *filename,
                           unsigned long depth,
                           GtError *err)
 {
-  const Suffixptr *ptr;
-  unsigned long maxlcp,
+  unsigned long idx, maxlcp,
                 currentlcp = 0,
                 totallength = gt_encseq_total_length(encseq);
   int cmp;
@@ -256,16 +251,16 @@ void gt_checkentiresuftab(const char *filename,
     unsigned long countbitsset = 0;
 
     GT_INITBITTAB(startposoccurs,totallength+1);
-    for (ptr = suftab; ptr <= suftab + totallength; ptr++)
+    for (idx = 0; idx <= totallength; idx++)
     {
-      if (GT_ISIBITSET(startposoccurs,SUFFIXPTRDEREF(ptr)))
+      if (GT_ISIBITSET(startposoccurs,SUFFIXPTRGET(suftab,idx)))
       {
         fprintf(stderr,"ERROR: suffix with startpos %lu"
                        " already occurs\n",
-                        SUFFIXPTRDEREF(ptr));
+                        SUFFIXPTRGET(suftab,idx));
         exit(GT_EXIT_PROGRAMMING_ERROR);
       }
-      GT_SETIBIT(startposoccurs,SUFFIXPTRDEREF(ptr));
+      GT_SETIBIT(startposoccurs,SUFFIXPTRGET(suftab,idx));
       countbitsset++;
     }
     if (countbitsset != totallength+1)
@@ -278,20 +273,20 @@ void gt_checkentiresuftab(const char *filename,
   esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   gt_assert(numberofsuffixes > 0);
-  gt_assert(SUFFIXPTRDEREF(suftab) < totallength);
-  for (ptr = suftab + 1; !haserr && ptr < suftab + numberofsuffixes; ptr++)
+  gt_assert(SUFFIXPTRGET(suftab,0) < totallength);
+  for (idx = 1UL; !haserr && idx < numberofsuffixes; idx++)
   {
-    if (ptr < suftab + numberofsuffixes - 1)
+    if (idx < numberofsuffixes - 1)
     {
-      gt_assert(SUFFIXPTRDEREF(ptr) < totallength);
+      gt_assert(SUFFIXPTRGET(suftab,idx) < totallength);
       cmp = gt_encseq_comparetwosuffixes(encseq,
                                          readmode,
                                          &maxlcp,
                                          specialsareequal,
                                          specialsareequalatdepth0,
                                          depth,
-                                         SUFFIXPTRDEREF(ptr-1),
-                                         SUFFIXPTRDEREF(ptr),
+                                         SUFFIXPTRGET(suftab,idx-1),
+                                         SUFFIXPTRGET(suftab,idx),
                                          esr1,
                                          esr2);
       if (cmp > 0)
@@ -303,8 +298,8 @@ void gt_checkentiresuftab(const char *filename,
                               readmode,
                               suftab,
                               depth,
-                              ptr-1,
-                              ptr,
+                              idx-1,
+                              idx,
                               cmp,
                               maxlcp);
         haserr = true;
@@ -315,7 +310,7 @@ void gt_checkentiresuftab(const char *filename,
       maxlcp = 0;
       if (numberofsuffixes == totallength+1)
       {
-        gt_assert(SUFFIXPTRDEREF(ptr) == totallength);
+        gt_assert(SUFFIXPTRGET(suftab,idx) == totallength);
       }
     }
     if (ssar != NULL)
@@ -338,16 +333,18 @@ void gt_checkentiresuftab(const char *filename,
       {
         fprintf(stderr,"%lu: startpos=%lu, firstchar=%u, "
                 "startpos=%lu,firstchar=%u",
-                (unsigned long) (ptr - suftab),
-                SUFFIXPTRDEREF(ptr-1),
+                idx,
+                SUFFIXPTRGET(suftab,idx-1),
                 (unsigned int) gt_encseq_get_encoded_char(encseq,
-                                                          SUFFIXPTRDEREF(ptr-1),
+                                                          SUFFIXPTRGET(suftab,
+                                                                       idx-1),
                                                           readmode),
-                SUFFIXPTRDEREF(ptr),
-                (SUFFIXPTRDEREF(ptr) < totallength)
+                SUFFIXPTRGET(suftab,idx),
+                (SUFFIXPTRGET(suftab,idx) < totallength)
                    ? (unsigned int) gt_encseq_get_encoded_char(encseq,
-                                                            SUFFIXPTRDEREF(ptr),
-                                                            readmode)
+                                                          SUFFIXPTRGET(suftab,
+                                                                       idx),
+                                                          readmode)
                    : SEPARATOR);
         fprintf(stderr,", maxlcp(bruteforce) = %lu != %lu(fast)\n",
                           maxlcp, currentlcp);
