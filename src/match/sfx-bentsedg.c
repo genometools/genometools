@@ -51,10 +51,10 @@
 
 #define DEREFSEQ(VAR,PTR,ESR) DEREFSTOPPOSSEQ(VAR,PTR,bsr->totallength,ESR)
 
-#define LCPINDEX(LCPSUBTAB,I)\
-        (unsigned long) ((I) - (LCPSUBTAB)->suftabbase)
-#define LCPINDEXLONG(LCPSUBTAB,I)\
-        ((I) - (LCPSUBTAB)->suftabbaselong)
+#define LCPINDEX(LCPSUBTAB,PTR)\
+        (unsigned long) ((PTR) - (LCPSUBTAB)->suftabbase)
+#define LCPINDEXLONG(LCPSUBTAB,IDX)\
+        ((IDX) - (LCPSUBTAB)->suftabbaselong)
 
 #define BS_SWAP(TMP,A,B)\
         if ((A) != (B))\
@@ -520,8 +520,7 @@ static void insertionsortmaxdepth(Bentsedgresources *bsr,
                                   unsigned long maxdepth)
 {
   Suffixptr *pi, *pj;
-  unsigned long startpos1, startpos2, temp, lcpindex, lcplen = 0,
-                idx = 0;
+  unsigned long startpos1, startpos2, temp, lcpindex, lcplen = 0, idx = 0;
   int retval;
   bool tempb;
   GtCommonunits commonunits;
@@ -834,17 +833,17 @@ static void checkmedian(bool fwd,
 #endif
 
 static Suffixptr *realmedian(const Bentsedgresources *bsr,
-                             Suffixptr *left,
-                             unsigned long depth,
-                             unsigned long width)
+                             Suffixptr *leftptr,
+                             unsigned long width,
+                             unsigned long depth)
 {
   Medianinfo *medianptr;
   unsigned long idx;
 
   for (idx = 0; idx < width; idx++)
   {
-    bsr->medianinfospace[idx].suffixptr = left + idx;
-    PTR2INT(bsr->medianinfospace[idx].etbe,left+idx);
+    bsr->medianinfospace[idx].suffixptr = leftptr + idx;
+    PTR2INT(bsr->medianinfospace[idx].etbe,leftptr+idx);
   }
   medianptr = quickmedian(bsr->fwd,bsr->complement,bsr->medianinfospace,width);
 /*
@@ -900,7 +899,7 @@ static Suffixptr *blockcmpdelivermedian(const Bentsedgresources *bsr,
       pm = medianof3(bsr,depth,pl,pm,pr);
     } else /* width <= maxwidthrealmedian */
     {
-      pm = realmedian(bsr, left, depth, width);
+      pm = realmedian(bsr, left, width, depth);
     }
   } else
   {
@@ -1070,11 +1069,11 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
 
 static void sarrcountingsort(Bentsedgresources *bsr,
                              Suffixptr *leftptr,
+                             unsigned long width,
                              const Sfxcmp *pivotcmpbits,
                              unsigned long pivotidx,
                              Ordertype parentordertype,
-                             unsigned long depth,
-                             unsigned long width)
+                             unsigned long depth)
 {
   int cmp;
   unsigned int maxsmallerwithlcp = 0, maxlargerwithlcp = 0;
@@ -1225,21 +1224,16 @@ static void sarrcountingsort(Bentsedgresources *bsr,
   }
 }
 
-#define SUFFIXPTRSWAP(TMP,A,B)\
-        TMP = A;\
-        A = B;\
-        B = TMP
-
-static inline void vectorswap(Suffixptr *tab1,Suffixptr *tab2,unsigned long len)
+static inline void vectorswap(Suffixptr *tab1,Suffixptr *tab2,
+                              unsigned long len)
 {
-  unsigned long idx;
-  Suffixptr tmp;
+  unsigned long idx, tmp;
 
   for (idx = 0; idx < len; idx++)
   {
-    tmp = tab1[idx];
-    tab1[idx] = tab2[idx];
-    tab2[idx] = tmp;
+    tmp = SUFFIXPTRGET(tab1,idx);
+    SUFFIXPTRSET(tab1,idx,SUFFIXPTRGET(tab2,idx));
+    SUFFIXPTRSET(tab2,idx,tmp);
   }
 }
 
@@ -1297,11 +1291,11 @@ static void bentleysedgewick(Bentsedgresources *bsr,
         PTR2INT(pivotcmpbits,pm);
         sarrcountingsort(bsr,
                          suftabptrleft,
+                         suftabptrwidth,
                          &pivotcmpbits,
                          (unsigned long) (pm - suftabptrleft),
                          parentordertype,
-                         depth,
-                         suftabptrwidth);
+                         depth);
         /* new values for suftabptrleft, suftabptrright, depth and
            parentordertype */
         continue;
@@ -2070,6 +2064,7 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
 }
 
 void gt_qsufsort(Suffixptr *sortspace,
+                 unsigned long partwidth,
                  int mmapfiledesc,
                  GtStr *mmapfilename,
                  unsigned long *longest,
@@ -2077,7 +2072,6 @@ void gt_qsufsort(Suffixptr *sortspace,
                  GtReadmode readmode,
                  GT_UNUSED GtCodetype mincode,
                  GtCodetype maxcode,
-                 unsigned long partwidth,
                  Bcktab *bcktab,
                  unsigned int numofchars,
                  unsigned int prefixlength,
@@ -2326,8 +2320,8 @@ void gt_sortallbuckets(Suftab *suftab,
 }
 
 void gt_sortbucketofsuffixes(Suffixptr *suffixestobesorted,
-                             GtBucketspec2 *bucketspec2,
                              unsigned long numberofsuffixes,
+                             GtBucketspec2 *bucketspec2,
                              const GtEncseq *encseq,
                              GtReadmode readmode,
                              GtCodetype mincode,

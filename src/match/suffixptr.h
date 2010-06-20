@@ -18,7 +18,7 @@
 #define SUFFIXPTR_H
 
 #define SUFFIXPTRNEWVERSION
-#ifdef SUFFIXPTRNEWVERSION
+#ifdef  SUFFIXPTRNEWVERSION
 typedef struct
 {
   unsigned long value;

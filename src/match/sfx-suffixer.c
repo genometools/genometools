@@ -790,6 +790,7 @@ static void preparethispart(Sfxiterator *sfi)
     if (!sfi->sfxstrategy.streamsuftab)
     {
       gt_qsufsort(sfi->suftab.sortspace,
+                  partwidth,
                   -1,
                   NULL,
                   &sfi->suftab.longest.valueunsignedlong,
@@ -797,7 +798,6 @@ static void preparethispart(Sfxiterator *sfi)
                   sfi->readmode,
                   sfi->currentmincode,
                   sfi->currentmaxcode,
-                  partwidth,
                   sfi->bcktab,
                   sfi->numofchars,
                   sfi->prefixlength,
@@ -818,8 +818,8 @@ static void preparethispart(Sfxiterator *sfi)
     if (sfi->sfxstrategy.differencecover > 0)
     {
       gt_sortbucketofsuffixes(sfi->suftab.sortspace - sfi->suftab.partoffset,
-                              bucketspec2,
                               partwidth,
+                              bucketspec2,
                               sfi->encseq,
                               sfi->readmode,
                               sfi->currentmincode,
@@ -913,20 +913,20 @@ int gt_postsortsuffixesfromstream(Sfxiterator *sfi, const GtStr *indexname,
   {
     gt_assert(sfi->totallength >= sfi->specialcharacters);
     gt_qsufsort(NULL,
-             mmapfiledesc,
-             tmpfilename,
-             &sfi->suftab.longest.valueunsignedlong,
-             sfi->encseq,
-             sfi->readmode,
-             0,
-             sfi->currentmaxcode,
-             sfi->totallength - sfi->specialcharacters,
-             sfi->bcktab,
-             sfi->numofchars,
-             sfi->prefixlength,
-             sfi->sfxstrategy.hashexceptions,
-             sfi->sfxstrategy.absoluteinversesuftab,
-             sfi->outlcpinfo);
+                sfi->totallength - sfi->specialcharacters,
+                mmapfiledesc,
+                tmpfilename,
+                &sfi->suftab.longest.valueunsignedlong,
+                sfi->encseq,
+                sfi->readmode,
+                0,
+                sfi->currentmaxcode,
+                sfi->bcktab,
+                sfi->numofchars,
+                sfi->prefixlength,
+                sfi->sfxstrategy.hashexceptions,
+                sfi->sfxstrategy.absoluteinversesuftab,
+                sfi->outlcpinfo);
     sfi->suftab.longest.defined = true;
   }
   gt_str_delete(tmpfilename);

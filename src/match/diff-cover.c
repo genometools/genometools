@@ -1115,8 +1115,8 @@ void gt_differencecover_sortsample(Differencecover *dcov, bool cmpcharbychar,
     }
     sfxstrategy.differencecover = dcov->vparam;
     gt_sortbucketofsuffixes(dcov->sortedsample,
-                            NULL,
                             dcov->effectivesamplesize,
+                            NULL,
                             dcov->encseq,
                             dcov->readmode,
                             0, /* mincode */
