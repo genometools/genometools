@@ -64,6 +64,14 @@
           SUFFIXPTRDEREFSET(B,TMP);\
         }
 
+#define BS_SWAPARRAY(TMP,ARR,A,B)\
+        if ((A) != (B))\
+        {\
+          TMP = SUFFIXPTRGET(ARR,A);\
+          SUFFIXPTRSET(ARR,A,SUFFIXPTRGET(ARR,B));\
+          SUFFIXPTRSET(ARR,B,TMP);\
+        }
+
 #define STACKTOP\
         bsr->mkvauxstack.spaceMKVstack[bsr->mkvauxstack.nextfreeMKVstack]
 
@@ -426,12 +434,12 @@ static void updatelcpvalue(Bentsedgresources *bsr,
 }
 
 static void bs_insertionsort(Bentsedgresources *bsr,
-                             Suffixptr *leftptr,
+                             Suffixptr *suftab,
+                             unsigned long leftidx,
                              unsigned long width,
                              unsigned long offset)
 {
-  Suffixptr *pi, *pj;
-  unsigned long startpos1, startpos2, temp, lcpindex, lcplen = 0;
+  unsigned long pi, pj, startpos1, startpos2, temp, lcpindex, lcplen = 0;
   int retval;
   GtCommonunits commonunits;
 
@@ -441,16 +449,16 @@ static void bs_insertionsort(Bentsedgresources *bsr,
                   leftptr,width,offset);
 #endif
   bsr->countinsertionsort++;
-  for (pi = leftptr + 1; pi < leftptr + width; pi++)
+  for (pi = leftidx + 1; pi < leftidx + width; pi++)
   {
-    for (pj = pi; pj > leftptr; pj--)
+    for (pj = pi; pj > leftidx; pj--)
     {
       if (bsr->sfxstrategy->cmpcharbychar)
       {
-        startpos1 = (SUFFIXPTRDEREF(pj-1))+offset;
+        startpos1 = SUFFIXPTRGET(suftab,pj-1) + offset;
         gt_encseq_reader_reinit_with_readmode(bsr->esr1, bsr->encseq,
                                               bsr->readmode, startpos1);
-        startpos2 = (SUFFIXPTRDEREF(pj))+offset;
+        startpos2 = SUFFIXPTRGET(suftab,pj) + offset;
         gt_encseq_reader_reinit_with_readmode(bsr->esr2, bsr->encseq,
                                               bsr->readmode, startpos2);
         for (;;)
@@ -462,7 +470,7 @@ static void bs_insertionsort(Bentsedgresources *bsr,
           cct = DEREFSEQ(tmp2,startpos2,bsr->esr2);
           if (ccs != cct)
           {
-            lcplen = startpos2 - SUFFIXPTRDEREF(pj);
+            lcplen = startpos2 - SUFFIXPTRGET(suftab,pj);
             retval = (ccs < cct) ? -1 : 1;
             break;
           }
@@ -478,25 +486,26 @@ static void bs_insertionsort(Bentsedgresources *bsr,
                                  bsr->fwd,
                                  bsr->complement,
                                  bsr->encseq,
-                                 SUFFIXPTRDEREF(pj-1));
+                                 SUFFIXPTRGET(suftab,pj-1));
         gt_encseq_showatstartpos(stdout,
                                  bsr->fwd,
                                  bsr->complement,
                                  bsr->encseq,
-                                 SUFFIXPTRDEREF(pj));
+                                 SUFFIXPTRGET(suftab,pj));
 #endif
         retval = gt_encseq_compare(bsr->encseq,&commonunits,bsr->fwd,
-                                            bsr->complement,
-                                            bsr->esr1,bsr->esr2,
-                                            SUFFIXPTRDEREF(pj-1),
-                                            SUFFIXPTRDEREF(pj),
-                                            offset);
+                                   bsr->complement,
+                                   bsr->esr1,bsr->esr2,
+                                   SUFFIXPTRGET(suftab,pj-1),
+                                   SUFFIXPTRGET(suftab,pj),
+                                   offset);
         lcplen = commonunits.finaldepth;
       }
       gt_assert(retval != 0);
       if (bsr->lcpsubtab != NULL && bsr->assideeffect)
       {
-        lcpindex = LCPINDEX(bsr->lcpsubtab,pj);
+        lcpindex = LCPINDEX(bsr->lcpsubtab,suftab + pj); /* XXX do not use
+                                                            suftab */
         if (pj < pi && retval > 0)
         {
           updatelcpvalue(bsr,lcpindex+1,
@@ -508,7 +517,7 @@ static void bs_insertionsort(Bentsedgresources *bsr,
       {
         break;
       }
-      BS_SWAP(temp,pj,pj-1);
+      BS_SWAPARRAY(temp,suftab,pj,pj-1);
     }
   }
 }
@@ -943,7 +952,7 @@ static bool comparisonsort(Bentsedgresources *bsr,
             bsr->sfxstrategy->maxbltriesort);
   if (width <= bsr->sfxstrategy->maxinsertionsort)
   {
-    bs_insertionsort(bsr,leftptr,width,depth);
+    bs_insertionsort(bsr,leftptr,0,width,depth);
     return true;
   }
   if (width <= bsr->sfxstrategy->maxbltriesort)
@@ -1238,14 +1247,14 @@ static inline void vectorswap(Suffixptr *tab1,Suffixptr *tab2,
 }
 
 static void bentleysedgewick(Bentsedgresources *bsr,
-                             Suffixptr *suftabptrleft,
-                             unsigned long suftabptrwidth,
+                             Suffixptr *leftptr,
+                             unsigned long width,
                              unsigned long depth)
 {
   bsr->mkvauxstack.nextfreeMKVstack = 0;
   subsort_bentleysedgewick(bsr,
-                           suftabptrleft,
-                           suftabptrwidth,
+                           leftptr,
+                           width,
                            depth,Descending);
   while (bsr->mkvauxstack.nextfreeMKVstack > 0)
   {
@@ -1255,7 +1264,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
     int retvalpivotcmpbits;
     GtUchar tmpvar;
     Ordertype parentordertype;
-    unsigned long w, width;
+    unsigned long w;
     GtCommonunits commonunits;
     unsigned int smallermaxlcp, greatermaxlcp, smallerminlcp, greaterminlcp;
     const int commonunitsequal = bsr->sfxstrategy->cmpcharbychar
@@ -1264,53 +1273,53 @@ static void bentleysedgewick(Bentsedgresources *bsr,
 
     /* pop */
     bsr->mkvauxstack.nextfreeMKVstack--;
-    suftabptrleft = STACKTOP.leftptr;
-    suftabptrwidth = STACKTOP.width;
+    leftptr = STACKTOP.leftptr;
+    width = STACKTOP.width;
     depth = STACKTOP.depth;
     parentordertype = STACKTOP.ordertype;
-    suftabptrright = suftabptrleft + suftabptrwidth - 1;
+    suftabptrright = leftptr + width - 1;
 
     if (bsr->sfxstrategy->cmpcharbychar)
     {
       pm = cmpcharbychardelivermedian(bsr,
-                                      suftabptrleft,
-                                      suftabptrwidth,
+                                      leftptr,
+                                      width,
                                       depth);
-      BS_SWAP(temp, suftabptrleft, pm);
-      CMPCHARBYCHARPTR2INT(pivotcmpcharbychar,tmpvar,suftabptrleft);
+      BS_SWAP(temp, leftptr, pm);
+      CMPCHARBYCHARPTR2INT(pivotcmpcharbychar,tmpvar,leftptr);
     } else
     {
       pm = blockcmpdelivermedian(bsr,
-                                 suftabptrleft,
-                                 suftabptrwidth,
+                                 leftptr,
+                                 width,
                                  depth,
                                  bsr->sfxstrategy->maxwidthrealmedian);
-      if (suftabptrwidth <= bsr->sfxstrategy->maxcountingsort &&
-          suftabptrwidth >= MINMEDIANOF9WIDTH)
+      if (width <= bsr->sfxstrategy->maxcountingsort &&
+          width >= MINMEDIANOF9WIDTH)
       {
         PTR2INT(pivotcmpbits,pm);
         sarrcountingsort(bsr,
-                         suftabptrleft,
-                         suftabptrwidth,
+                         leftptr,
+                         width,
                          &pivotcmpbits,
-                         (unsigned long) (pm - suftabptrleft),
+                         (unsigned long) (pm - leftptr),
                          parentordertype,
                          depth);
-        /* new values for suftabptrleft, suftabptrright, depth and
+        /* new values for leftptr, suftabptrright, depth and
            parentordertype */
         continue;
       }
-      BS_SWAP(temp, suftabptrleft, pm);
-      PTR2INT(pivotcmpbits,suftabptrleft);
+      BS_SWAP(temp, leftptr, pm);
+      PTR2INT(pivotcmpbits,leftptr);
     }
     bsr->countqsort++;
-    /* now pivot element is at index suftabptrleft */
+    /* now pivot element is at index leftptr */
     /* all elements to be compared are between pb and pc */
     /* pa is the position at which the next element smaller than the
        pivot element is inserted at */
     /* pd is the position at which the next element greater than the
        pivot element is inserted at */
-    pa = pb = suftabptrleft + 1;
+    pa = pb = leftptr + 1;
     pc = pd = suftabptrright;
     if (bsr->sfxstrategy->cmpcharbychar)
     {
@@ -1411,11 +1420,11 @@ static void bentleysedgewick(Bentsedgresources *bsr,
         pc--;
       }
     }
-    gt_assert(pa >= suftabptrleft);
+    gt_assert(pa >= leftptr);
     gt_assert(pb >= pa);
-    w = MIN((unsigned long) (pa-suftabptrleft),(unsigned long) (pb-pa));
+    w = MIN((unsigned long) (pa-leftptr),(unsigned long) (pb-pa));
     /* move w elements at the left to the middle */
-    vectorswap(suftabptrleft,  pb-w, w);
+    vectorswap(leftptr,  pb-w, w);
 
     gt_assert(pd >= pc);
     gt_assert(suftabptrright >= pd);
@@ -1424,15 +1433,15 @@ static void bentleysedgewick(Bentsedgresources *bsr,
     vectorswap(pb, suftabptrright+1-w, w);
 
     /* all elements equal to the pivot are now in the middle namely in the
-       range [suftabptrleft + (pb-pa) and suftabptrright - (pd-pc)] */
+       range [leftptr + (pb-pa) and suftabptrright - (pd-pc)] */
     /* hence we have to sort the elements in the intervals
-       [suftabptrleft..suftabptrleft+(pb-pa)-1] and
+       [leftptr..leftptr+(pb-pa)-1] and
        [suftabptrright-(pd-pc)+1..suftabptrright] */
 
     gt_assert(pb >= pa);
     if ((w = (unsigned long) (pb-pa)) > 0)
     {
-      leftplusw = suftabptrleft + w;
+      leftplusw = leftptr + w;
       if (bsr->lcpsubtab != NULL && bsr->assideeffect)
       {
         /*
@@ -1445,22 +1454,22 @@ static void bentleysedgewick(Bentsedgresources *bsr,
                        depth + smallermaxlcp);
       }
       subsort_bentleysedgewick(bsr,
-                               suftabptrleft,
+                               leftptr,
                                w,
                                depth + smallerminlcp,
                                Noorder);
     } else
     {
-      leftplusw = suftabptrleft;
+      leftplusw = leftptr;
     }
 
     cptr = SUFFIXPTRDEREF(leftplusw) + depth;
     if (ISNOTEND(cptr))
     {
-      width = (unsigned long) (suftabptrright-(pd-pb)-leftplusw);
       subsort_bentleysedgewick(bsr,
                                leftplusw,
-                               width,
+                               (unsigned long)
+                                (suftabptrright-(pd-pb)-leftplusw),
                                depth+commonunitsequal,
                                Noorder);
     }
@@ -2063,7 +2072,7 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
   gt_logger_log(logger,"countqsort=%lu",bsr->countqsort);
 }
 
-void gt_qsufsort(Suffixptr *sortspace,
+void gt_qsufsort(Suffixptr *leftptr,
                  unsigned long partwidth,
                  int mmapfiledesc,
                  GtStr *mmapfilename,
@@ -2083,21 +2092,21 @@ void gt_qsufsort(Suffixptr *sortspace,
   Compressedtable *lcptab;
 
   gt_assert(mincode == 0);
-  rmnsufinfo = gt_newRmnsufinfo(sortspace,
-                             mmapfiledesc,
-                             mmapfilename,
-                             encseq,
-                             bcktab,
-                             maxcode,
-                             numofchars,
-                             prefixlength,
-                             readmode,
-                             partwidth,
-                             hashexceptions,
-                             absoluteinversesuftab);
+  rmnsufinfo = gt_newRmnsufinfo(leftptr,
+                                mmapfiledesc,
+                                mmapfilename,
+                                encseq,
+                                bcktab,
+                                maxcode,
+                                numofchars,
+                                prefixlength,
+                                readmode,
+                                partwidth,
+                                hashexceptions,
+                                absoluteinversesuftab);
   gt_bcktab2firstlevelintervals(rmnsufinfo);
   lcptab = gt_rmnsufinfo_wrap(longest,&rmnsufinfo,
-                           outlcpinfo == NULL ? false : true);
+                              outlcpinfo == NULL ? false : true);
   if (lcptab != NULL)
   {
     gt_assert(outlcpinfo != NULL);
