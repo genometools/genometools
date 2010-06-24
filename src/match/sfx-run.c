@@ -123,7 +123,7 @@ static int suftab2file(FILE *outfpsuftab,
 {
   bool haserr = false;
 
-#ifdef SUFFIXPTRNEWVERSION
+#ifdef SUFFIXPTRNEWVERSION /* XXX try to write the entire table at once */
   unsigned long idx;
 
   for (idx = 0; !haserr && idx < numberofsuffixes; idx++)

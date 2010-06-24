@@ -93,6 +93,13 @@ DECLAREREADFUNCTION(GtUchar);
 
 DECLAREREADFUNCTION(Largelcpvalue);
 
+/*
+typedef unsigned long ESASuffixptr;
+
+#define ESASUFFIXPTRGET(TAB,IDX)     TAB[IDX]
+#define ESASUFFIXPTRSET(TAB,IDX,VAL) TAB[IDX] = VAL
+*/
+
 typedef struct
 {
   GtEncseq *encseq;

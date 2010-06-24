@@ -26,16 +26,12 @@ typedef struct
 
 #define SUFFIXPTRGET(TAB,IDX)     TAB[IDX].value
 #define SUFFIXPTRSET(TAB,IDX,VAL) TAB[IDX].value = VAL
-#define SUFFIXPTRDEREF(X)         (X)->value
-#define SUFFIXPTRDEREFSET(X,VAL)  (X)->value = VAL
 
 #else
 typedef unsigned long Suffixptr;
 
 #define SUFFIXPTRGET(TAB,IDX)     TAB[IDX]
 #define SUFFIXPTRSET(TAB,IDX,VAL) TAB[IDX] = VAL
-#define SUFFIXPTRDEREF(X)         *(X)
-#define SUFFIXPTRDEREFSET(X,VAL)  *(X) = VAL
 #endif
 
 #endif
