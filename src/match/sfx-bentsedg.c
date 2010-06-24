@@ -527,7 +527,7 @@ static void bs_insertionsortmaxdepth(Bentsedgresources *bsr,
                                      unsigned long offset,
                                      unsigned long maxdepth)
 {
-  unsigned long sval1, sval2, pi, pj, startpos1, startpos2, temp, 
+  unsigned long sval1, sval2, pi, pj, startpos1, startpos2, temp,
                 lcpindex, lcplen = 0, idx = 0;
   int retval;
   bool tempb;
