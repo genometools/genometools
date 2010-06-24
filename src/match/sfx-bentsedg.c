@@ -533,7 +533,7 @@ static void bs_insertionsortmaxdepth(Bentsedgresources *bsr,
                                      unsigned long offset,
                                      unsigned long maxdepth)
 {
-  unsigned long pi, pj, startpos1, startpos2, temp, lcpindex, lcplen = 0, 
+  unsigned long pi, pj, startpos1, startpos2, temp, lcpindex, lcplen = 0,
                 idx = 0;
   int retval;
   bool tempb;
@@ -1264,14 +1264,14 @@ static void bentleysedgewick(Bentsedgresources *bsr,
   while (bsr->mkvauxstack.nextfreeMKVstack > 0)
   {
     Suffixptr *leftplusw, *pa, *pb, *pc, *pd, *pm, *suftabptrright;
-    unsigned long cptr, temp, pivotcmpcharbychar = 0, valcmpcharbychar;
+    unsigned long cptr, temp, pivotcmpcharbychar = 0, valcmpcharbychar,
+                  wtmp;
+    unsigned int smallermaxlcp, greatermaxlcp, smallerminlcp, greaterminlcp;
     Sfxcmp pivotcmpbits, val;
     int retvalpivotcmpbits;
     GtUchar tmpvar;
     Ordertype parentordertype;
-    unsigned long w;
     GtCommonunits commonunits;
-    unsigned int smallermaxlcp, greatermaxlcp, smallerminlcp, greaterminlcp;
     const int commonunitsequal = bsr->sfxstrategy->cmpcharbychar
                                  ? 1
                                  : GT_UNITSIN2BITENC;
@@ -1427,15 +1427,15 @@ static void bentleysedgewick(Bentsedgresources *bsr,
     }
     gt_assert(pa >= leftptr);
     gt_assert(pb >= pa);
-    w = MIN((unsigned long) (pa-leftptr),(unsigned long) (pb-pa));
+    wtmp = MIN((unsigned long) (pa-leftptr),(unsigned long) (pb-pa));
     /* move w elements at the left to the middle */
-    vectorswap(leftptr,  pb-w, w);
+    vectorswap(leftptr,  pb-wtmp, wtmp);
 
     gt_assert(pd >= pc);
     gt_assert(suftabptrright >= pd);
-    w = MIN((unsigned long) (pd-pc), (unsigned long) (suftabptrright-pd));
+    wtmp = MIN((unsigned long) (pd-pc), (unsigned long) (suftabptrright-pd));
     /* move w elements at the right to the middle */
-    vectorswap(pb, suftabptrright+1-w, w);
+    vectorswap(pb, suftabptrright+1-wtmp, wtmp);
 
     /* all elements equal to the pivot are now in the middle namely in the
        range [leftptr + (pb-pa) and suftabptrright - (pd-pc)] */
@@ -1444,9 +1444,9 @@ static void bentleysedgewick(Bentsedgresources *bsr,
        [suftabptrright-(pd-pc)+1..suftabptrright] */
 
     gt_assert(pb >= pa);
-    if ((w = (unsigned long) (pb-pa)) > 0)
+    if ((wtmp = (unsigned long) (pb-pa)) > 0)
     {
-      leftplusw = leftptr + w;
+      leftplusw = leftptr + wtmp;
       if (bsr->lcpsubtab != NULL && bsr->assideeffect)
       {
         /*
@@ -1460,7 +1460,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
       }
       subsort_bentleysedgewick(bsr,
                                leftptr,
-                               w,
+                               wtmp,
                                depth + smallerminlcp,
                                Noorder);
     } else
@@ -1480,7 +1480,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
     }
 
     gt_assert(pd >= pc);
-    if ((w = (unsigned long) (pd-pc)) > 0)
+    if ((wtmp = (unsigned long) (pd-pc)) > 0)
     {
       if (bsr->lcpsubtab != NULL && bsr->assideeffect)
       {
@@ -1490,12 +1490,12 @@ static void bentleysedgewick(Bentsedgresources *bsr,
           which is at a minimum distance to the pivot and thus to an
           element in the first part of the right side.
         */
-        updatelcpvalue(bsr,LCPINDEX(bsr->lcpsubtab,suftabptrright-w+1),
+        updatelcpvalue(bsr,LCPINDEX(bsr->lcpsubtab,suftabptrright-wtmp+1),
                        depth + greatermaxlcp);
       }
       subsort_bentleysedgewick(bsr,
-                               suftabptrright-w+1,
-                               w,
+                               suftabptrright-wtmp+1,
+                               wtmp,
                                depth + greaterminlcp,
                                Noorder);
     }
