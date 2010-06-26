@@ -22,8 +22,8 @@
 #include "core/readmode.h"
 #include "core/progress_timer_api.h"
 #include "core/logger.h"
+#include "core/encseq_api.h"
 #include "sfx-strategy.h"
-#include "sfx-bentsedg.h"
 
 typedef struct Sfxiterator Sfxiterator;
 
@@ -33,16 +33,16 @@ Sfxiterator *gt_newSfxiterator(const GtEncseq *encseq,
                                GtReadmode readmode,
                                unsigned int prefixlength,
                                unsigned int numofparts,
-                               Outlcpinfo *outlcpinfo,
+                               void *voidoutlcpinfo,
                                const Sfxstrategy *sfxstrategy,
                                GtProgressTimer *sfxprogress,
                                bool withprogressbar,
                                GtLogger *logger,
                                GtError *err);
 
-const Suffixptr *gt_nextSfxiterator(unsigned long *numberofsuffixes,
-                                    bool *specialsuffixes,
-                                    Sfxiterator *sfi);
+const void *gt_nextSfxiterator(unsigned long *numberofsuffixes,
+                               bool *specialsuffixes,
+                               Sfxiterator *sfi);
 
 int gt_postsortsuffixesfromstream(Sfxiterator *sfi, const GtStr *indexname,
                                   GtError *err);

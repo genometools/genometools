@@ -94,7 +94,7 @@ unsigned long gt_suffixarraymstats (const void *genericindex,
     {
       if (witnessposition != NULL)
       {
-        *witnessposition = SUFFIXPTRGET(suffixarray->suftab,itv.left);
+        *witnessposition = ESASUFFIXPTRGET(suffixarray->suftab,itv.left);
       }
       break;
     }

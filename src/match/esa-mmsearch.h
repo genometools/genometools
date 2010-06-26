@@ -20,7 +20,6 @@
 #include "core/error.h"
 #include "core/encseq.h"
 #include "querymatch.h"
-#include "suffixptr.h"
 
 typedef int (*Processquerymatch)(void *,
                                  const GtEncseq *,
@@ -31,7 +30,7 @@ typedef struct MMsearchiterator MMsearchiterator;
 
 MMsearchiterator *gt_newmmsearchiteratorcomplete_plain(
                                     const GtEncseq *dbencseq,
-                                    const Suffixptr *suftab,
+                                    const void *voidsuftab, /* XXX */
                                     unsigned long leftbound,
                                     unsigned long rightbound,
                                     unsigned long itvoffset,

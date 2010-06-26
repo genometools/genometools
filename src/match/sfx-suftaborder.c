@@ -91,14 +91,14 @@ static void showcomparisonfailure(const char *filename,
 }
 
 void gt_checkifprefixesareidentical(const char *filename,
-                                 int line,
-                                 const GtEncseq *encseq,
-                                 GtReadmode readmode,
-                                 const Suffixptr *suftab,
-                                 unsigned int prefixlength,
-                                 unsigned long depth,
-                                 unsigned long left,
-                                 unsigned long right)
+                                    int line,
+                                    const GtEncseq *encseq,
+                                    GtReadmode readmode,
+                                    const Suffixptr *suftab,
+                                    unsigned int prefixlength,
+                                    unsigned long depth,
+                                    unsigned long left,
+                                    unsigned long right)
 {
   unsigned long idx, maxlcp;
   int cmp;
@@ -161,13 +161,14 @@ void gt_checksortedsuffixes(const char *filename,
                             int line,
                             const GtEncseq *encseq,
                             GtReadmode readmode,
-                            const Suffixptr *suftab,
+                            const void *voidsuftab, /* XXX */
                             unsigned long numberofsuffixes,
                             bool specialsareequal,
                             bool specialsareequalatdepth0,
                             unsigned long depth)
 {
   unsigned long idx, maxlcp, totallength = gt_encseq_total_length(encseq);
+  const Suffixptr *suftab = (const Suffixptr *) voidsuftab;
   GtEncseqReader *esr1, *esr2;
   int cmp;
 
@@ -222,7 +223,7 @@ void gt_checkentiresuftab(const char *filename,
                           int line,
                           const GtEncseq *encseq,
                           GtReadmode readmode,
-                          const Suffixptr *suftab,
+                          const void *voidsuftab, /* XXX */
                           unsigned long numberofsuffixes,
                           Sequentialsuffixarrayreader *ssar,
                           bool specialsareequal,
@@ -236,6 +237,7 @@ void gt_checkentiresuftab(const char *filename,
   int cmp;
   GtEncseqReader *esr1, *esr2;
   bool haserr = false;
+  const Suffixptr *suftab = (const Suffixptr *) voidsuftab; /* XXX */
 
 #ifdef INLINEDSequentialsuffixarrayreader
   GtUchar tmpsmalllcpvalue;

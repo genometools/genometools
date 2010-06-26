@@ -22,7 +22,7 @@
 #include "core/types_api.h"
 
 #include "core/encseq.h"
-#include "suffixptr.h"
+#include "match/sarr-def.h"
 #include "splititv.h"
 
 typedef struct
@@ -34,7 +34,7 @@ typedef struct
 bool gt_lcpintervalfindcharchildintv(const GtEncseq *encseq,
                                   GtReadmode readmode,
                                   unsigned long totallength,
-                                  const Suffixptr *suftab,
+                                  const ESASuffixptr *suftab,
                                   Simplelcpinterval *itv,
                                   GtUchar cc,
                                   unsigned long offset,
@@ -45,14 +45,14 @@ void gt_lcpintervalsplitwithoutspecial(GtArrayBoundswithchar *bwci,
                                     const GtEncseq *encseq,
                                     GtReadmode readmode,
                                     unsigned long totallength,
-                                    const Suffixptr *suftab,
+                                    const ESASuffixptr *suftab,
                                     unsigned long parentoffset,
                                     unsigned long parentleft,
                                     unsigned long parentright);
 
 GtUchar gt_lcpintervalextendlcp(const GtEncseq *encseq,
                            GtReadmode readmode,
-                           const Suffixptr *suftab,
+                           const ESASuffixptr *suftab,
                            unsigned long totallength,
                            GtUchar alphasize,
                            unsigned long parentoffset,

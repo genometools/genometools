@@ -102,7 +102,7 @@ struct Sequentialsuffixarrayreader
          largelcpindex;   /* SEQ_mappedboth */
   Sequentialaccesstype seqactype;
   Lcpvalueiterator *lvi;
-  const Suffixptr *suftab;
+  const ESASuffixptr *suftab;
   const GtEncseq *encseq;
   GtReadmode readmode;
 };
@@ -160,7 +160,7 @@ Sequentialsuffixarrayreader *gt_newSequentialsuffixarrayreaderfromRAM(
 
 void gt_updateSequentialsuffixarrayreaderfromRAM(
                     Sequentialsuffixarrayreader *ssar,
-                    const Suffixptr *suftab,
+                    const ESASuffixptr *suftab,
                     bool firstpage,
                     unsigned long numberofsuffixes)
 {
@@ -266,11 +266,11 @@ int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
   }
   if (ssar->seqactype == SEQ_mappedboth)
   {
-    *currentsuffix = SUFFIXPTRGET(ssar->suffixarray->suftab,
-                                  ssar->nextsuftabindex++);
+    *currentsuffix = ESASUFFIXPTRGET(ssar->suffixarray->suftab,
+                                     ssar->nextsuftabindex++);
     return 1;
   }
-  *currentsuffix = SUFFIXPTRGET(ssar->suftab,ssar->nextsuftabindex++);
+  *currentsuffix = ESASUFFIXPTRGET(ssar->suftab,ssar->nextsuftabindex++);
   return 1;
 }
 
@@ -286,7 +286,7 @@ GtReadmode gt_readmodeSequentialsuffixarrayreader(
   return ssar->readmode;
 }
 
-const Suffixptr *gt_suftabSequentialsuffixarrayreader(
+const ESASuffixptr *gt_suftabSequentialsuffixarrayreader(
                         const Sequentialsuffixarrayreader *ssar)
 {
   gt_assert(ssar->seqactype != SEQ_scan);

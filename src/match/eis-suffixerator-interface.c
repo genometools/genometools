@@ -33,6 +33,7 @@
 #include "core/codetype.h"
 #include "core/encseq.h"
 
+#include "match/sarr-def.h"
 #include "match/eis-encidxseq.h"
 #include "match/eis-sa-common.h"
 #include "match/eis-sequencemultiread.h"
@@ -52,7 +53,7 @@ struct sfxInterface
   bool specialsuffixes;
   /* data relevant to holding portions of the suffix array */
   unsigned long lastGeneratedLen, lastGeneratedStart;
-  const Suffixptr *lastGeneratedSufTabSegment;
+  const ESASuffixptr *lastGeneratedSufTabSegment;
 };
 
 static SeqDataTranslator
@@ -395,18 +396,19 @@ SfxIGenerate(void *iface,
                    sfxi->lastGeneratedStart, sfxi->lastGeneratedLen);
       sfxi->lastGeneratedStart += sfxi->lastGeneratedLen;
       if ((sfxi->lastGeneratedSufTabSegment =
+           (ESASuffixptr *)
            gt_nextSfxiterator(&sfxi->lastGeneratedLen, &sfxi->specialsuffixes,
-                           sfxi->sfi)))
+                              sfxi->sfi)))
       {
         size_t pos;
         /* size_t because the current approach cannot generate more
          * than memory will hold anyway */
         size_t lastGeneratedLen = sfxi->lastGeneratedLen;
-        const Suffixptr *suftab = sfxi->lastGeneratedSufTabSegment;
+        const ESASuffixptr *suftab = sfxi->lastGeneratedSufTabSegment;
         if (!sfxi->rot0Pos.defined)
           for (pos=0; pos < lastGeneratedLen; pos++)
           {
-            if (SUFFIXPTRGET(suftab,pos) == 0)
+            if (ESASUFFIXPTRGET(suftab,pos) == 0)
             {
               sfxi->rot0Pos.defined = true;
               sfxi->rot0Pos.valueunsignedlong = sfxi->lastGeneratedStart + pos;

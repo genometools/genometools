@@ -25,13 +25,13 @@
 
 #include "spacedef.h"
 #include "esa-mmsearch.h"
-#include "sfx-suffixer.h"
 #include "core/progress_timer_api.h"
 #include "core/format64.h"
 #include "stamp.h"
 #include "esa-map.h"
 #include "echoseq.h"
 #include "sfx-apfxlen.h"
+#include "sfx-suffixer.h"
 
 typedef struct
 {
@@ -111,7 +111,7 @@ static GtUchar accessquery(int line,const Queryrep *queryrep,
 
 static bool mmsearch(const GtEncseq *dbencseq,
                      GtEncseqReader *esr,
-                     const Suffixptr *suftab,
+                     const ESASuffixptr *suftab,
                      GtReadmode readmode,
                      Lcpinterval *lcpitv,
                      const Querysubstring *querysubstring,
@@ -126,12 +126,12 @@ static bool mmsearch(const GtEncseq *dbencseq,
   leftsave = left = lcpitv->left;
   right = lcpitv->right;
   lcplen = lcpitv->offset;
-  COMPARE(SUFFIXPTRGET(suftab,left),lcplen);
+  COMPARE(ESASUFFIXPTRGET(suftab,left),lcplen);
   if (retcode > 0)
   {
     lpref = lcplen;
     lcplen = lcpitv->offset;
-    COMPARE(SUFFIXPTRGET(suftab,right),lcplen);
+    COMPARE(ESASUFFIXPTRGET(suftab,right),lcplen);
     if (retcode > 0)
     {
       return false;
@@ -142,7 +142,7 @@ static bool mmsearch(const GtEncseq *dbencseq,
       {
         mid = GT_DIV2(left+right);
         lcplen = MIN(lpref,rpref);
-        COMPARE(SUFFIXPTRGET(suftab,mid),lcplen);
+        COMPARE(ESASUFFIXPTRGET(suftab,mid),lcplen);
         if (retcode <= 0)
         {
           right = mid;
@@ -160,7 +160,7 @@ static bool mmsearch(const GtEncseq *dbencseq,
   left = leftsave;
   right = lcpitv->right;
   lcplen = lcpitv->offset;
-  COMPARE(SUFFIXPTRGET(suftab,left),lcplen);
+  COMPARE(ESASUFFIXPTRGET(suftab,left),lcplen);
   if (retcode < 0)
   {
     return false;
@@ -168,7 +168,7 @@ static bool mmsearch(const GtEncseq *dbencseq,
   {
     lpref = lcplen;
     lcplen = lcpitv->offset;
-    COMPARE(SUFFIXPTRGET(suftab,right),lcplen);
+    COMPARE(ESASUFFIXPTRGET(suftab,right),lcplen);
     if (retcode >= 0)
     {
       lcpitv->right = right;
@@ -179,7 +179,7 @@ static bool mmsearch(const GtEncseq *dbencseq,
       {
         mid = GT_DIV2(left+right);
         lcplen = MIN(lpref,rpref);
-        COMPARE(SUFFIXPTRGET(suftab,mid),lcplen);
+        COMPARE(ESASUFFIXPTRGET(suftab,mid),lcplen);
         if (retcode >= 0)
         {
           left = mid;
@@ -200,13 +200,13 @@ static bool mmsearch(const GtEncseq *dbencseq,
 {
   Lcpinterval lcpitv;
   unsigned long sufindex;
-  const Suffixptr *suftab;
+  const ESASuffixptr *suftab;
   GtEncseqReader *esr;
 };
 
 static MMsearchiterator *newmmsearchiterator_generic(
                                        const GtEncseq *dbencseq,
-                                       const Suffixptr *suftab,
+                                       const ESASuffixptr *suftab,
                                        unsigned long leftbound,
                                        unsigned long rightbound,
                                        unsigned long itvoffset,
@@ -235,7 +235,7 @@ static MMsearchiterator *newmmsearchiterator_generic(
 
 MMsearchiterator *gt_newmmsearchiteratorcomplete_plain(
                                    const GtEncseq *dbencseq,
-                                   const Suffixptr *suftab,
+                                   const void *voidsuftab, /* XXX */
                                    unsigned long leftbound,
                                    unsigned long rightbound,
                                    unsigned long itvoffset,
@@ -245,6 +245,7 @@ MMsearchiterator *gt_newmmsearchiteratorcomplete_plain(
 {
   Queryrep queryrep;
   Querysubstring querysubstring;
+  const ESASuffixptr *suftab = (const ESASuffixptr *) voidsuftab; /* XXX */
 
   queryrep.sequence = pattern;
   queryrep.encseq = NULL;
@@ -276,7 +277,7 @@ bool gt_nextmmsearchiterator(unsigned long *dbstart,MMsearchiterator *mmsi)
 {
   if (mmsi->sufindex <= mmsi->lcpitv.right)
   {
-    *dbstart = SUFFIXPTRGET(mmsi->suftab,mmsi->sufindex++);
+    *dbstart = ESASUFFIXPTRGET(mmsi->suftab,mmsi->sufindex++);
     return true;
   }
   return false;
@@ -357,7 +358,7 @@ static unsigned long extendright(const GtEncseq *dbencseq,
 
 static int runquerysubstringmatch(bool selfmatch,
                                   const GtEncseq *dbencseq,
-                                  const Suffixptr *suftabpart,
+                                  const ESASuffixptr *suftabpart,
                                   GtReadmode readmode,
                                   unsigned long numberofsuffixes,
                                   uint64_t queryunitnum,
@@ -621,7 +622,7 @@ static int constructsarrandrunmmsearch(
                  bool withprogressbar,
                  GtError *err)
 {
-  const Suffixptr *suftabptr;
+  const ESASuffixptr *suftabptr;
   unsigned long numofsuffixes;
   bool haserr = false, specialsuffixes = false;
   Sfxiterator *sfi;
@@ -650,7 +651,8 @@ static int constructsarrandrunmmsearch(
     queryrep.length = (unsigned long) querylen;
     while (true)
     {
-      suftabptr = gt_nextSfxiterator(&numofsuffixes,&specialsuffixes,sfi);
+      suftabptr = (ESASuffixptr *)
+                  gt_nextSfxiterator(&numofsuffixes,&specialsuffixes,sfi);
       if (suftabptr == NULL)
       {
         break;

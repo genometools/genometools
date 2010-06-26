@@ -42,6 +42,7 @@
 #include "sfx-opt.pr"
 #include "sfx-outprj.pr"
 #include "sfx-apfxlen.h"
+#include "sfx-bentsedg.h"
 #include "giextract.h"
 
 #include "eis-encidxseq.h"

@@ -71,7 +71,7 @@ static int constructsarrandrunmaxpairs(
                  GtLogger *logger,
                  GtError *err)
 {
-  const Suffixptr *suftabptr;
+  const void *suftabptr;
   unsigned long numberofsuffixes;
   bool haserr = false;
   Sfxiterator *sfi;
@@ -105,7 +105,8 @@ static int constructsarrandrunmaxpairs(
         break;
       }
       gt_updateSequentialsuffixarrayreaderfromRAM(ssar,
-                                                  suftabptr,
+                                                  (const ESASuffixptr *)
+                                                    suftabptr,
                                                   firstpage,
                                                   numberofsuffixes);
       firstpage = false;

@@ -493,11 +493,12 @@ gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const char *projectName,
         {
           unsigned long sfxArrayValue = gt_BWTSeqLocateMatch(bwtSeq, i,
                                                              &extBits);
-          if (sfxArrayValue != SUFFIXPTRGET(suffixArray.suftab,i))
+          if (sfxArrayValue != ESASUFFIXPTRGET(suffixArray.suftab,i))
           {
             gt_error_set(err, "Failed suffix array value comparison"
                           " at position %lu: %lu != %lu",
-                          i, sfxArrayValue, SUFFIXPTRGET(suffixArray.suftab,i));
+                          i, sfxArrayValue,
+                          ESASUFFIXPTRGET(suffixArray.suftab,i));
             retval = VERIFY_BWTSEQ_SUFVAL_ERROR;
             break;
           }

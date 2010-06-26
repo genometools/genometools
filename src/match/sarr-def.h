@@ -25,7 +25,6 @@
 #include "core/unused_api.h"
 #include "core/codetype.h"
 
-#include "suffixptr.h"
 #include "lcpoverflow.h"
 #include "bcktab.h"
 
@@ -93,12 +92,10 @@ DECLAREREADFUNCTION(GtUchar);
 
 DECLAREREADFUNCTION(Largelcpvalue);
 
-/*
 typedef unsigned long ESASuffixptr;
 
 #define ESASUFFIXPTRGET(TAB,IDX)     TAB[IDX]
 #define ESASUFFIXPTRSET(TAB,IDX,VAL) TAB[IDX] = VAL
-*/
 
 typedef struct
 {
@@ -107,7 +104,7 @@ typedef struct
   Definedunsignedlong longest; /* for BWT */
   GtReadmode readmode; /* relevant when reading the encoded sequence */
   /* either with mapped input */
-  const Suffixptr *suftab;
+  const ESASuffixptr *suftab;
   const GtUchar *lcptab;
   const Largelcpvalue *llvtab;
   const GtUchar *bwttab;

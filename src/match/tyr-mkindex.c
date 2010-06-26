@@ -77,7 +77,7 @@ typedef struct /* global information */
   unsigned long sizeofbuffer;
   GtArrayLargecount largecounts;
   unsigned long countoutputmers;
-  const Suffixptr *suftab; /* only necessary for performtest */
+  const ESASuffixptr *suftab; /* only necessary for performtest */
   GtUchar *currentmer;    /* only necessary for performtest */
 } TyrDfsstate;
 

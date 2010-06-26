@@ -35,14 +35,15 @@
 #include "intcode-def.h"
 #include "spacedef.h"
 #include "esa-fileend.h"
+#include "suffixptr.h"
+#include "diff-cover.h"
 #include "sfx-partssuf.h"
 #include "sfx-suffixer.h"
-#include "suffixptr.h"
 #include "sfx-enumcodes.h"
 #include "sfx-strategy.h"
-#include "diff-cover.h"
 #include "sfx-copysort.h"
 #include "sfx-mappedstr.h"
+#include "sfx-bentsedg.h"
 #include "stamp.h"
 
 GT_DECLAREARRAYSTRUCT(Suffixptr);
@@ -506,7 +507,7 @@ Sfxiterator *gt_newSfxiterator(const GtEncseq *encseq,
                                GtReadmode readmode,
                                unsigned int prefixlength,
                                unsigned int numofparts,
-                               Outlcpinfo *outlcpinfo,
+                               void *voidoutlcpinfo,
                                const Sfxstrategy *sfxstrategy,
                                GtProgressTimer *sfxprogress,
                                bool withprogressbar,
@@ -591,7 +592,7 @@ Sfxiterator *gt_newSfxiterator(const GtEncseq *encseq,
     gt_logger_log(logger,"totallength=%lu",
                         sfi->totallength);
     sfi->specialcharacters = specialcharacters;
-    sfi->outlcpinfo = outlcpinfo;
+    sfi->outlcpinfo = (Outlcpinfo *) voidoutlcpinfo;
     sfi->sri = NULL;
     sfi->part = 0;
     sfi->exhausted = false;
@@ -1062,9 +1063,9 @@ static void fillspecialnextpage(Sfxiterator *sfi)
   }
 }
 
-const Suffixptr *gt_nextSfxiterator(unsigned long *numberofsuffixes,
-                                    bool *specialsuffixes,
-                                    Sfxiterator *sfi)
+const void *gt_nextSfxiterator(unsigned long *numberofsuffixes,
+                               bool *specialsuffixes,
+                               Sfxiterator *sfi)
 {
   if (sfi->part < stpgetnumofparts(sfi->suftabparts))
   {
@@ -1086,7 +1087,7 @@ const Suffixptr *gt_nextSfxiterator(unsigned long *numberofsuffixes,
   gt_assert(sfi->fusp.nextfreeSuffixptr > 0);
   *numberofsuffixes = sfi->fusp.nextfreeSuffixptr;
   *specialsuffixes = true;
-  return sfi->suftab.sortspace;
+  return (void *) sfi->suftab.sortspace;
 }
 
 int gt_sfibcktab2file(FILE *fp,

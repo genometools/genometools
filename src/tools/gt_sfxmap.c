@@ -329,16 +329,16 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
         }
         gt_logger_log(logger, "checkentiresuftab");
         gt_checkentiresuftab(__FILE__,
-                          __LINE__,
-                          suffixarray.encseq,
-                          suffixarray.readmode,
-                          suffixarray.suftab,
-                          gt_encseq_total_length(suffixarray.encseq)+1,
-                          ssar,
-                          false, /* specialsareequal  */
-                          false,  /* specialsareequalatdepth0 */
-                          0,
-                          err);
+                             __LINE__,
+                             suffixarray.encseq,
+                             suffixarray.readmode,
+                             suffixarray.suftab,
+                             gt_encseq_total_length(suffixarray.encseq)+1,
+                             ssar,
+                             false, /* specialsareequal  */
+                             false,  /* specialsareequalatdepth0 */
+                             0,
+                             err);
         if (ssar != NULL)
         {
           gt_freeSequentialsuffixarrayreader(&ssar);

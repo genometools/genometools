@@ -147,7 +147,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
           {
             if (refstart == UNDEFREFSTART)
             {
-              refstart = SUFFIXPTRGET(suffixarray.suftab,itv.left);
+              refstart = ESASUFFIXPTRGET(suffixarray.suftab,itv.left);
             } else
             {
               for (idx=itv.left; idx<=itv.right; idx++)
@@ -160,7 +160,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
                                         false,
                                         patternlen,
                                         refstart,
-                                        SUFFIXPTRGET(suffixarray.suftab,idx),
+                                        ESASUFFIXPTRGET(suffixarray.suftab,idx),
                                         esr1,
                                         esr2);
                 gt_assert(retval == 0 && maxlcp == patternlen);
