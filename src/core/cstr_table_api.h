@@ -25,7 +25,7 @@
 typedef struct GtCstrTable GtCstrTable;
 
 /* Creates a new <GtCstrTable> object. */
-GtCstrTable*  gt_cstr_table_new();
+GtCstrTable*  gt_cstr_table_new(void);
 /* Deletes <table>. */
 void          gt_cstr_table_delete(GtCstrTable *table);
 /* Add <cstr> to <table>. */

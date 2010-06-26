@@ -22,7 +22,7 @@
 
 typedef struct GtFeatureInfo GtFeatureInfo;
 
-GtFeatureInfo* gt_feature_info_new();
+GtFeatureInfo* gt_feature_info_new(void);
 void           gt_feature_info_delete(GtFeatureInfo*);
 void           gt_feature_info_reset(GtFeatureInfo*);
 GtFeatureNode* gt_feature_info_get(const GtFeatureInfo*, const char *id);

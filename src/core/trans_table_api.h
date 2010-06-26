@@ -29,7 +29,7 @@ typedef struct GtTransTable GtTransTable;
    format "%d: %s" where the number is the translation scheme number (usable in
    <gt_translator_set_translation_scheme()> and the string is the scheme
    name. */
-GtStrArray*   gt_trans_table_get_scheme_descriptions();
+GtStrArray*   gt_trans_table_get_scheme_descriptions(void);
 
 /* Returns a translation table as given by <scheme> which refers to the numbers
    as reported by <gt_translator_get_translation_table_descriptions()> or the
