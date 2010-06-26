@@ -93,7 +93,7 @@
         (S)->space[(S)->nextfree++] = VALUE
 
 /*
-  check if the stack is emty
+  check if the stack is empty
 */
 
 #define GT_STACK_ISEMPTY(S)\
