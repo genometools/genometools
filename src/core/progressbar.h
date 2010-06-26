@@ -29,11 +29,11 @@ void gt_progressbar_stop(void);
   a typical use of the progressbar:
 
   i = 0;
-  progressbar_start(&i, number_of_computations);
+  gt_progressbar_start(&i, number_of_computations);
   for (; i < number_of_computations; i++) {
     /* perform the ith computation */
   }
-  progressbar_stop();
+  gt_progressbar_stop();
 
 #endif
 
