@@ -107,12 +107,12 @@ The major advantage of simple classes over simple C <code>struct</code>s is
 <p>
 We describe now how to implement a simple classes using the string class <code>str.[ch]</code>
 of <i>GenomeTools</i> as an example. The interface to a class is always given in
-the <code>.h</code> header file
+the <code>.h</code> or <code>_api.h</code> header file
 (<a
-  href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgtcore/str.h;hb=HEAD"><code>str.h</code></a> in our example). To achieve information hiding the header file
+  href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/core/str_api.h;hb=HEAD"><code>str_api.h</code></a> in our example). To achieve information hiding the header file
 cannot contain implementation details of the class. The implementation can
 always be found in the corresponding <code>.c</code> file (<a
-href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgtcore/str.c;hb=HEAD"><code>str.c</code></a> in our example).
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/core/str.c;hb=HEAD"><code>str.c</code></a> in our example).
 Therefore, we start with the following C construct to define our <code>Str</code>
 class in <code>str.h</code>:
 </p>
@@ -159,7 +159,7 @@ void          str_free(Str*);
 <p>
 Now we look at the implementation side of the story, which can be found in the
 <a
-href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgtcore/str.c;hb=HEAD"><code>str.c</code></a> file. At first, we include the <code>str.h</code> header file to make
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/core/str.c;hb=HEAD"><code>str.c</code></a> file. At first, we include the <code>str.h</code> header file to make
 sure that the newly defined data type is known:
 </p>
 <pre>
@@ -234,7 +234,7 @@ Since this string objects are pretty much useless so far, we define a couple
 more
 (object) <a href="http://en.wikipedia.org/wiki/Method_%28computer_science%29">
 methods</a> in the header file <a
-href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgtcore/str.h;hb=HEAD"><code>str.h</code></a>.
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/core/str_api.h;hb=HEAD"><code>str_api.h</code></a>.
 </p>
 <p>
 Because C does not allow the traditional
@@ -247,7 +247,7 @@ method name with <code>classname_</code>. That is, we get
 names in C. The constructor is always called <code>classname_new()</code> and
 the destructor <code>classname_free()</code>.
 See <a
-  href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgtcore/str.c;hb=HEAD"><code>str.c</code></a>
+  href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/core/str.c;hb=HEAD"><code>str.c</code></a>
 for examples.
 </p>
 
@@ -311,19 +311,19 @@ Modules bundle related functions which do not belong to a class. Examples:
 </p>
 <ul>
 <li> <a
-href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgtcore/dynalloc.h;hb=HEAD"><code>dynalloc.h</code></a>,
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/core/dynalloc.h;hb=HEAD"><code>dynalloc.h</code></a>,
 the low level module for dynamic allocation, e.g., used to implement arrays in <a
-href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgtcore/array.c;hb=HEAD"><code>array.c</code></a>
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/core/array.c;hb=HEAD"><code>array.c</code></a>
 and the above-mentioned strings
 <li> <a
-href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgtcore/sig.h;hb=HEAD"><code>sig.h</code></a>,
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/core/sig.h;hb=HEAD"><code>sig.h</code></a>,
 bundles signal related functions (high level)
 <li> <a
-href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgtcore/xansi.h;hb=HEAD"><code>xansi.h</code></a>,
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/core/xansi_api.h;hb=HEAD"><code>xansi_api.h</code></a>,
 contains wrappers for the standard ANSI C library
 
 <li> <a
-href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgtcore/xposix.h;hb=HEAD"><code>xposix.h</code></a>,
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/core/xposix.h;hb=HEAD"><code>xposix.h</code></a>,
 contains wrappers for POSIX functions we use
 </ul>
 <p>
@@ -331,13 +331,13 @@ When designing new code, it is not very often the case that one has to introduce
 new modules. Usually defining a new class is the better approach.
 </p>
 
-<h2>The <code>gt.h</code> header file</h2>
+<h2>The <code>genometools.h</code> header file</h2>
 <p>
 The <a
-href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/gt.h;hb=HEAD"><code>gt.h</code></a>
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/genometools.h;hb=HEAD"><code>genometools.h</code></a>
 header file includes all other header files of the <i>GenomeTools</i> library.
 That is, to write programs employing the library, it suffices to include the
-<code>gt.h</code> header file.
+<code>genometools.h</code> header file.
 </p>
 
 <h2>Unit tests</h2>
@@ -365,10 +365,10 @@ A ``tool'' is the most high-level type of component <i>GenomeTools</i> has to
  offer. We consider the ``eval'' tool here as an example. It evaluates a gene
 prediction against a given annotation.
 In principle a tool could be compiled as a single binary linking against the
-``libgt''. Therefore the header files <code>gt_*.h</code> for tools only contain
+``libgenometools''. Therefore the header files <code>gt_*.h</code> for tools only contain
  a single function which resemble a <code>main()</code> function (see <a
 href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/tools/gt_eval.h;hb=HEAD"><code>gt_eval.h</code></a>)
-and the <code>gt_*.c</code> files include only the <code>gt.h</code> header file
+and the <code>gt_*.c</code> files include only the <code>genometools.h</code> header file
 (see <a
 href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/tools/gt_eval.c;hb=HEAD"><code>gt_eval.c</code></a>).
 All tools are linked into the single <code>gt</code> binary,
