@@ -66,9 +66,9 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
   GtStr *currentline;
   /* the following five variables are local as the parsed values are
      not required: they are determined by reading the encseq */
-  unsigned long totallength;
   GtSpecialcharinfo specialcharinfo;
-  unsigned long numofsequences,
+  unsigned long totallength,
+                numofsequences,
                 numofdbsequences,
                 numofquerysequences;
 
@@ -294,8 +294,8 @@ static int inputsuffixarray(bool map,
       suffixarray->suftab
         = gt_mmap_check_size_with_suffix(indexname,
                                          SUFTABSUFFIX,
-                                         (unsigned long) (totallength+1),
-                                         sizeof (unsigned long),
+                                         totallength+1,
+                                         sizeof (*suffixarray->suftab),
                                          err);
       if (suffixarray->suftab == NULL)
       {
@@ -318,8 +318,8 @@ static int inputsuffixarray(bool map,
     {
       suffixarray->lcptab = gt_mmap_check_size_with_suffix(indexname,
                                             LCPTABSUFFIX,
-                                            (unsigned long) (totallength+1),
-                                            sizeof (GtUchar),
+                                            totallength+1,
+                                            sizeof (*suffixarray->lcptab),
                                             err);
       if (suffixarray->lcptab == NULL)
       {
@@ -351,7 +351,7 @@ static int inputsuffixarray(bool map,
                                            (unsigned long)
                                            suffixarray->numoflargelcpvalues.
                                            valueunsignedlong,
-                                           sizeof (Largelcpvalue),
+                                           sizeof (*suffixarray->llvtab),
                                            err);
         if (suffixarray->llvtab == NULL)
         {
@@ -371,8 +371,8 @@ static int inputsuffixarray(bool map,
       suffixarray->bwttab
         = gt_mmap_check_size_with_suffix(indexname,
                                          BWTTABSUFFIX,
-                                         (unsigned long) (totallength+1),
-                                         sizeof (GtUchar),
+                                         totallength+1,
+                                         sizeof (*suffixarray->bwttab),
                                          err);
       if (suffixarray->bwttab == NULL)
       {
@@ -426,10 +426,10 @@ int streamsuffixarray(Suffixarray *suffixarray,
 }
 
 int gt_mapsuffixarray(Suffixarray *suffixarray,
-                   unsigned int demand,
-                   const char *indexname,
-                   GtLogger *logger,
-                   GtError *err)
+                      unsigned int demand,
+                      const char *indexname,
+                      GtLogger *logger,
+                      GtError *err)
 {
   gt_error_check(err);
   /* printf("sizeof (Suffixarray)=%lu\n",sizeof (Suffixarray)); */
