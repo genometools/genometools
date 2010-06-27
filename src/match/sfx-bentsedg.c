@@ -1013,7 +1013,7 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
       if (depth >=
                (unsigned long) bsr->sfxstrategy->ssortmaxdepth.valueunsignedint)
       {
-#define SUFTABINDEX(PTR) (unsigned long) ((PTR) + bsr->suftab->partoffset -\
+#define SUFTABINDEX(PTR) (unsigned long) ((PTR) + bsr->suftab->suftaboffset -\
                                            bsr->suftab->sortspace)
 
         unsigned long leftindex = SUFTABINDEX(leftptr);
@@ -1979,7 +1979,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   }
   if (bcktab != NULL && sfxstrategy->ssortmaxdepth.defined)
   {
-    bsr->rmnsufinfo = gt_newRmnsufinfo(suftab->sortspace - suftab->partoffset,
+    bsr->rmnsufinfo = gt_newRmnsufinfo(suftab->sortspace - suftab->suftaboffset,
                                        -1,
                                        NULL,
                                        bsr->encseq,
@@ -2047,8 +2047,8 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
     Compressedtable *lcptab;
 
     lcptab = gt_rmnsufinfo_wrap(&bsr->longest->valueunsignedlong,
-                             &bsr->rmnsufinfo,
-                             bsr->lcpsubtab == NULL ? false : true);
+                                &bsr->rmnsufinfo,
+                                bsr->lcpsubtab == NULL ? false : true);
     bsr->longest->defined = true;
     if (lcptab != NULL)
     {
@@ -2122,6 +2122,7 @@ void gt_qsufsort(Suffixptr *leftptr,
 }
 
 void gt_sortallbuckets(Suftab *suftab,
+                       Definedunsignedlong *longest,
                        GtBucketspec2 *bucketspec2,
                        const GtEncseq *encseq,
                        GtReadmode readmode,
@@ -2143,11 +2144,11 @@ void gt_sortallbuckets(Suftab *suftab,
   unsigned long lcpvalue;
   Suffixwithcode firstsuffixofbucket;
   Bentsedgresources bsr;
-  Suffixptr *suftabptr = suftab->sortspace - suftab->partoffset;
+  Suffixptr *suftabptr = suftab->sortspace - suftab->suftaboffset;
 
   initBentsedgresources(&bsr,
                         suftab,
-                        &suftab->longest,
+                        longest,
                         encseq,
                         readmode,
                         bcktab,

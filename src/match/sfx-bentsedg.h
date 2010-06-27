@@ -33,8 +33,7 @@ typedef struct Outlcpinfo Outlcpinfo;
 typedef struct
 {
   Suffixptr *sortspace;
-  unsigned long partoffset;
-  Definedunsignedlong longest;
+  unsigned long suftaboffset;
 } Suftab;
 
 Outlcpinfo *gt_newOutlcpinfo(const char *indexname,
@@ -67,6 +66,7 @@ void gt_qsufsort(Suffixptr *leftptr,
                  Outlcpinfo *outlcpinfo);
 
 void gt_sortallbuckets(Suftab *suftab,
+                       Definedunsignedlong *longest,
                        GtBucketspec2 *bucketspec2,
                        const GtEncseq *encseq,
                        GtReadmode readmode,
