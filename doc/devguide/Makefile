@@ -2,7 +2,7 @@ latexfile = devguide
 
 TEX = pdflatex
 
-$(latexfile).pdf :
+$(latexfile).pdf : $(latexfile).tex
 	while ($(TEX) --shell-escape $(latexfile) ; \
 	grep -q "Rerun to get cross" $(latexfile).log ) do true ; \
 	done

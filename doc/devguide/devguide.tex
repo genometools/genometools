@@ -1209,14 +1209,16 @@ To add reference counting to a class, perform the following steps:
 \item Add an \keyword{unsigned int} counter variable called
 \keyword{reference_count} to the private member variables of the class; this
 variable must be initialized to 0 in the constructor.
-\item Add a \keyword{gt_<classname>_ref()} method to the interface of the class:
+\item Consider a class \emph{GtFoo} to which we want to add reference counting
+capabilities. Then add a method \keyword{gt_<classname>_ref()}, in this case
+\keyword{gt_foo_ref()} to the interface of the class:
 
 \begin{lstlisting}
-GtClass* gt_class_ref(GtClass *c)
+GtFoo* gt_foo_ref(GtFoo *f)
 {
-  gt_assert(c);
-  c->reference_count++;
-  return c;
+  gt_assert(f);
+  f->reference_count++;
+  return f;
 }
 \end{lstlisting}
 
@@ -1225,41 +1227,41 @@ In the destructor, check the reference count and only free the memory when
 necessary:
 
 \begin{lstlisting}
-void gt_class_delete(GtClass *c)
+void gt_foo_delete(GtFoo *f)
 {
-  if (!c) return;
-  if (c->reference_count) {
-    c->reference_count--;
+  if (!f) return;
+  if (f->reference_count) {
+    f->reference_count--;
     return;
   }
-  gt_free(c);
+  gt_free(f);
 }
 \end{lstlisting}
 
 \end{itemize}
 
-With reference counted classes, always use the \keyword{_ref()} method when
+With reference counted classes, always use the \keyword{ref()} method when
 storing a reference to an object. That is, instead of writing
 
 \begin{lstlisting}
-void gt_myclass_set_value(GtMyclass *myclass, GtClass *c)
+void gt_bar_set_foo(GtBar *b, GtFoo *f)
 {
-  myclass->value = c;
+  b->value = f;
 }
 \end{lstlisting}
 
 use
 
 \begin{lstlisting}
-void gt_myclass_set_value(GtMyclass *myclass, GtClass *c)
+void gt_bar_set_foo(GtBar *b, GtFoo *f)
 {
-  myclass->value = gt_class_ref(c);
+  b->value = gt_foo_ref(f);
 }
 \end{lstlisting}
 
-Always remember to call \keyword{gt_<classname>_delete()} when the reference is
+Always remember to call \keyword{gt_foo_delete()} when the reference is
 no longer needed! For example, in the assignment above, a good place to do this
-is the destructor of the \keyword{GtMyclass} class.
+is the destructor of the \keyword{GtBar} class.
 
 \subsection{Library initialization/finalization}
 Within the \Gt code, there are a number of global or static data which must be
