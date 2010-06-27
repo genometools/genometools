@@ -1063,7 +1063,7 @@ static void fillspecialnextpage(Sfxiterator *sfi)
   }
 }
 
-const void *gt_nextSfxiterator(unsigned long *numberofsuffixes,
+const void *gt_nextSfxiterator(unsigned long *numberofsuffixes, /* XXX */
                                bool *specialsuffixes,
                                Sfxiterator *sfi)
 {

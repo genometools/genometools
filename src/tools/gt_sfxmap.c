@@ -24,7 +24,6 @@
 #include "match/esa-seqread.h"
 #include "match/esa-map.h"
 #include "match/echoseq.h"
-#include "match/sfx-suftaborder.h"
 #include "match/test-mappedstr.pr"
 #include "tools/gt_sfxmap.h"
 
@@ -181,6 +180,181 @@ static GtOPrval parse_options(Sfxmapoptions *sfxmapoptions,
                                   err);
   gt_option_parser_delete(op);
   return oprval;
+}
+
+static void showcomparisonfailureESA(const char *filename,
+                                     int line,
+                                     const char *where,
+                                     const GtEncseq *encseq,
+                                     GtReadmode readmode,
+                                     const ESASuffixptr *suftab,
+                                     unsigned long depth,
+                                     unsigned long idx1,
+                                     unsigned long idx2,
+                                     int cmp,
+                                     unsigned long maxlcp)
+{
+  fprintf(stderr,"ERROR: file \"%s\", line %d: ",filename,line);
+  fprintf(stderr,"%s(%lu vs %lu"
+                 " %lu=\"",
+                       where,
+                       idx1,
+                       idx2,
+                       ESASUFFIXPTRGET(suftab,idx1));
+  gt_encseq_showatstartposwithdepth(stderr,encseq,readmode,
+                                    ESASUFFIXPTRGET(suftab,idx1),depth);
+  fprintf(stderr,"\",\"");
+  gt_encseq_showatstartposwithdepth(stderr,encseq,readmode,
+                                    ESASUFFIXPTRGET(suftab,idx2),depth);
+  fprintf(stderr,"\"=%lu)=%d with maxlcp %lu\n",ESASUFFIXPTRGET(suftab,idx2),
+                                                cmp,
+                                                maxlcp);
+}
+
+static void gt_checkentiresuftab(const char *filename,
+                                 int line,
+                                 const GtEncseq *encseq,
+                                 GtReadmode readmode,
+                                 const ESASuffixptr *suftab,
+                                 unsigned long numberofsuffixes,
+                                 Sequentialsuffixarrayreader *ssar,
+                                 bool specialsareequal,
+                                 bool specialsareequalatdepth0,
+                                 unsigned long depth,
+                                 GtError *err)
+{
+  unsigned long idx, maxlcp,
+                currentlcp = 0,
+                totallength = gt_encseq_total_length(encseq);
+  int cmp;
+  GtEncseqReader *esr1, *esr2;
+  bool haserr = false;
+
+#ifdef INLINEDSequentialsuffixarrayreader
+  GtUchar tmpsmalllcpvalue;
+#else
+  int retval;
+#endif
+
+  gt_error_check(err);
+  gt_assert(!specialsareequal || specialsareequalatdepth0);
+  if (numberofsuffixes == totallength+1)
+  {
+    GtBitsequence *startposoccurs;
+    unsigned long countbitsset = 0;
+
+    GT_INITBITTAB(startposoccurs,totallength+1);
+    for (idx = 0; idx <= totallength; idx++)
+    {
+      if (GT_ISIBITSET(startposoccurs,ESASUFFIXPTRGET(suftab,idx)))
+      {
+        fprintf(stderr,"ERROR: suffix with startpos %lu"
+                       " already occurs\n",
+                        ESASUFFIXPTRGET(suftab,idx));
+        exit(GT_EXIT_PROGRAMMING_ERROR);
+      }
+      GT_SETIBIT(startposoccurs,ESASUFFIXPTRGET(suftab,idx));
+      countbitsset++;
+    }
+    if (countbitsset != totallength+1)
+    {
+      fprintf(stderr,"ERROR: not all bits are set\n");
+      exit(GT_EXIT_PROGRAMMING_ERROR);
+    }
+    gt_free(startposoccurs);
+  }
+  esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
+  esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
+  gt_assert(numberofsuffixes > 0);
+  gt_assert(ESASUFFIXPTRGET(suftab,0) < totallength);
+  for (idx = 1UL; !haserr && idx < numberofsuffixes; idx++)
+  {
+    if (idx < numberofsuffixes - 1)
+    {
+      gt_assert(ESASUFFIXPTRGET(suftab,idx) < totallength);
+      cmp = gt_encseq_comparetwosuffixes(encseq,
+                                         readmode,
+                                         &maxlcp,
+                                         specialsareequal,
+                                         specialsareequalatdepth0,
+                                         depth,
+                                         ESASUFFIXPTRGET(suftab,idx-1),
+                                         ESASUFFIXPTRGET(suftab,idx),
+                                         esr1,
+                                         esr2);
+      if (cmp > 0)
+      {
+        showcomparisonfailureESA(filename,
+                              line,
+                              "checkentiresuftab",
+                              encseq,
+                              readmode,
+                              suftab,
+                              depth,
+                              idx-1,
+                              idx,
+                              cmp,
+                              maxlcp);
+        haserr = true;
+        break;
+      }
+    } else
+    {
+      maxlcp = 0;
+      if (numberofsuffixes == totallength+1)
+      {
+        gt_assert(ESASUFFIXPTRGET(suftab,idx) == totallength);
+      }
+    }
+    if (ssar != NULL)
+    {
+#ifdef INLINEDSequentialsuffixarrayreader
+      NEXTSEQUENTIALLCPTABVALUE(currentlcp,ssar);
+#else
+      retval = gt_nextSequentiallcpvalue(&currentlcp,ssar,err);
+      if (retval < 0)
+      {
+        haserr = true;
+        break;
+      }
+      if (retval == 0)
+      {
+        break;
+      }
+#endif
+      if (maxlcp != currentlcp)
+      {
+        fprintf(stderr,"%lu: startpos=%lu, firstchar=%u, "
+                "startpos=%lu,firstchar=%u",
+                idx,
+                ESASUFFIXPTRGET(suftab,idx-1),
+                (unsigned int)
+                gt_encseq_get_encoded_char(encseq,
+                                           ESASUFFIXPTRGET(suftab,idx-1),
+                                           readmode),
+                ESASUFFIXPTRGET(suftab,idx),
+                (ESASUFFIXPTRGET(suftab,idx) < totallength)
+                   ? (unsigned int) gt_encseq_get_encoded_char(encseq,
+                                                     ESASUFFIXPTRGET(suftab,
+                                                                     idx),
+                                                     readmode)
+                   : SEPARATOR);
+        fprintf(stderr,", maxlcp(bruteforce) = %lu != %lu(fast)\n",
+                          maxlcp, currentlcp);
+        exit(GT_EXIT_PROGRAMMING_ERROR);
+      }
+    }
+  }
+  gt_encseq_reader_delete(esr1);
+  gt_encseq_reader_delete(esr2);
+  if (haserr)
+  {
+    exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
+  /*
+  printf("# gt_checkentiresuftab with mode 'specials are %s'\n",
+               specialsareequal ? "equal" : "different");
+  */
 }
 
 int gt_sfxmap(int argc, const char **argv, GtError *err)

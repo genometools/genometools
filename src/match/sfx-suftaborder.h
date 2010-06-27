@@ -21,25 +21,13 @@
 #include "core/error_api.h"
 #include "core/encseq.h"
 #include "core/readmode.h"
-#include "esa-seqread.h"
-
-void gt_checkentiresuftab(const char *filename,
-                          int line,
-                          const GtEncseq *encseq,
-                          GtReadmode readmode,
-                          const void *voidsuftab, /* XXX */
-                          unsigned long numberofsuffixes,
-                          Sequentialsuffixarrayreader *ssar,
-                          bool specialsareequal,
-                          bool specialsareequalatdepth0,
-                          unsigned long depth,
-                          GtError *err);
+#include "suffixptr.h"
 
 void gt_checksortedsuffixes(const char *filename,
                             int line,
                             const GtEncseq *encseq,
                             GtReadmode readmode,
-                            const void *voidsuftab, /* XXX */
+                            const Suffixptr *suftab,
                             unsigned long numberofsuffixes,
                             bool specialsareequal,
                             bool specialsareequalatdepth0,

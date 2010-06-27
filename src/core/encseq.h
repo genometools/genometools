@@ -354,4 +354,17 @@ void gt_encseq_effective_filelength_ptr(const GtEncseq *encseq,
                                         uint64_t *result,
                                         unsigned long filenum);
 
+/* The following function shows the encoded sequence at position <startpos> up
+   to the first <depth> characters or 30 positions, whichever is the minimum.
+   If <depth> is 0, then the entire suffix is shown.
+   The output goes to the file pointer <fp>. The parameter readmode and
+   define whether the mode in which the sequence is read.
+*/
+
+void gt_encseq_showatstartposwithdepth(FILE *fp,
+                                       const GtEncseq *encseq,
+                                       GtReadmode readmode,
+                                       unsigned long start,
+                                       unsigned long depth);
+
 #endif

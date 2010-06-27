@@ -4648,6 +4648,43 @@ void gt_encseq_showatstartpos(FILE *fp,
   fprintf(fp,"\"\n");
 }
 
+void gt_encseq_showatstartposwithdepth(FILE *fp,
+                                       const GtEncseq *encseq,
+                                       GtReadmode readmode,
+                                       unsigned long start,
+                                       unsigned long depth)
+{
+  unsigned long i, end, totallength;
+  const unsigned long maxshow = 30UL;
+  GtUchar cc;
+  const GtUchar *characters;
+
+  totallength = gt_encseq_total_length(encseq);
+  characters = gt_alphabet_characters(gt_encseq_alphabet(encseq));
+  if (depth == 0)
+  {
+    end = MIN(start + maxshow,totallength);
+  } else
+  {
+    end = MIN(start + maxshow,MIN(totallength,start+depth));
+  }
+  for (i = start; i <= end; i++)
+  {
+    if (i == totallength)
+    {
+      (void) putc('~',fp);
+      break;
+    }
+    cc = gt_encseq_get_encoded_char(encseq,i,readmode);
+    if (ISSPECIAL(cc))
+    {
+      (void) putc('~',fp);
+      break;
+    }
+    (void) putc((int) characters[(int) cc],fp);
+  }
+}
+
 static bool checktbe(bool fwd,GtTwobitencoding tbe1,GtTwobitencoding tbe2,
                      unsigned int unitsnotspecial)
 {

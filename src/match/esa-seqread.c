@@ -27,7 +27,7 @@
 #ifdef INLINEDSequentialsuffixarrayreader
 
 Sequentialsuffixarrayreader *gt_newSequentialsuffixarrayreaderfromfile(
-                                  const GtStr *indexname,
+                                  const char *indexname,
                                   unsigned int demand,
                                   GT_UNUSED Sequentialaccesstype seqactype,
                                   GtError *err)
@@ -38,17 +38,17 @@ Sequentialsuffixarrayreader *gt_newSequentialsuffixarrayreaderfromfile(
   ALLOCASSIGNSPACE(ssar,NULL,Sequentialsuffixarrayreader,1);
   ALLOCASSIGNSPACE(ssar->suffixarray,NULL,Suffixarray,1);
   if (gt_mapsuffixarray (ssar->suffixarray,
-                      demand,
-                      indexname,
-                      NULL,
-                      err) != 0)
+                         demand,
+                         indexname,
+                         NULL,
+                         err) != 0)
   {
     FREESPACE(ssar->suffixarray);
     FREESPACE(ssar);
     return NULL;
   }
   ssar->nextsuftabindex = 0;
-  ssar->nextlcptabindex = (unsigned long) 1;
+  ssar->nextlcptabindex = 1UL;
   ssar->largelcpindex = 0;
   ssar->numberofsuffixes
     = gt_encseq_total_length(ssar->suffixarray->encseq) + 1;
@@ -85,8 +85,8 @@ GtReadmode gt_readmodeSequentialsuffixarrayreader(
   return ssar->suffixarray->readmode;
 }
 
-const Suffixptr *gt_suftabSequentialsuffixarrayreader(
-              const Sequentialsuffixarrayreader *ssar)
+const ESASuffixptr *gt_suftabSequentialsuffixarrayreader(
+                          const Sequentialsuffixarrayreader *ssar)
 {
   return ssar->suffixarray->suftab;
 }
@@ -130,7 +130,7 @@ Sequentialsuffixarrayreader *gt_newSequentialsuffixarrayreaderfromfile(
     return NULL;
   }
   ssar->nextsuftabindex = 0;
-  ssar->nextlcptabindex = (unsigned long) 1;
+  ssar->nextlcptabindex = 1UL;
   ssar->largelcpindex = 0;
   ssar->seqactype = seqactype;
   ssar->suftab = NULL;
