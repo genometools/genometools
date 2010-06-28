@@ -94,19 +94,26 @@ const GtCanvasClass* gt_canvas_cairo_file_class(void)
 GtCanvas* gt_canvas_cairo_file_new(GtStyle *style,
                                    GtGraphicsOutType output_type,
                                    unsigned long width, unsigned long height,
-                                   GtImageInfo *image_info)
+                                   GtImageInfo *image_info,
+                                   GtError *err)
 {
   GtCanvas *canvas;
   GtColor bgcolor = {1.0, 1.0, 1.0, 1.0};
   GtCanvasCairoFile *ccf;
   double margins = 10.0;
   gt_assert(style && width > 0 && height > 0);
+  if (gt_style_get_color(style, "format", "background_color", &bgcolor,
+                         NULL, err)  == GT_STYLE_QUERY_ERROR) {
+    return NULL;
+  }
+  if (gt_style_get_num(style,
+                       "format", "margins", &margins,
+                       NULL, err) == GT_STYLE_QUERY_ERROR) {
+    return NULL;
+  }
   canvas = gt_canvas_create(gt_canvas_cairo_file_class());
   canvas->pvt->g = gt_graphics_cairo_new(output_type, width, height);
-  (void) gt_style_get_color(style, "format", "background_color", &bgcolor,
-                            NULL);
   (void) gt_graphics_set_background_color(canvas->pvt->g, bgcolor);
-  (void) gt_style_get_num(style, "format", "margins", &margins, NULL);
   (void) gt_graphics_set_margins(canvas->pvt->g, margins, 0);
   canvas->pvt->margins = margins;
   if (image_info)

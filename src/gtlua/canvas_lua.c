@@ -31,6 +31,7 @@ static int canvas_cairo_file_lua_new_generic(lua_State *L, GtGraphicsOutType t)
   GtImageInfo **ii;
   unsigned int width,
                height;
+  GtError *err;
   GtStyle *style;
   width = luaL_checkint(L, 1);
   height = luaL_checkint(L, 2);
@@ -38,14 +39,18 @@ static int canvas_cairo_file_lua_new_generic(lua_State *L, GtGraphicsOutType t)
   style = gt_lua_get_style_from_registry(L);
   canvas = lua_newuserdata(L, sizeof (GtCanvas*));
   gt_assert(canvas);
+  err = gt_error_new();
   /* if a imageinfo object is passed, it must be correct type */
   if (lua_isnil(L, 3))
-    *canvas = gt_canvas_cairo_file_new(style, t, width, height, NULL);
+    *canvas = gt_canvas_cairo_file_new(style, t, width, height, NULL, err);
   else
   {
     ii = check_imageinfo(L, 3);
-   *canvas = gt_canvas_cairo_file_new(style, t, width, height, *ii);
+   *canvas = gt_canvas_cairo_file_new(style, t, width, height, *ii, err);
   }
+  if (gt_error_is_set(err))
+    return gt_lua_error(L, err);
+  gt_error_delete(err);
   luaL_getmetatable(L, CANVAS_METATABLE);
   lua_setmetatable(L, -2);
   return 1;

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -63,18 +63,23 @@ GtCanvas* gt_canvas_cairo_context_new(GtStyle *style, cairo_t *context,
                                       double offsetpos,
                                       unsigned long width,
                                       unsigned long height,
-                                      GtImageInfo *image_info)
+                                      GtImageInfo *image_info,
+                                      GtError *err)
 {
   GtCanvas *canvas;
   GtCanvasCairoContext *ccc;
   double margins = 10.0;
   gt_assert(style && width > 0 && height > 0);
+  if (gt_style_get_num(style,
+                       "format", "margins", &margins,
+                       NULL, err) == GT_STYLE_QUERY_ERROR) {
+    return NULL;
+  }
   canvas = gt_canvas_create(gt_canvas_cairo_context_class());
   canvas->pvt->y += offsetpos;
   canvas->pvt->g = gt_graphics_cairo_new_from_context(context,
                                                       width,
                                                       height+offsetpos);
-  (void) gt_style_get_num(style, "format", "margins", &margins, NULL);
   gt_graphics_set_margins(canvas->pvt->g, margins, 0);
   canvas->pvt->margins = margins;
   if (image_info)

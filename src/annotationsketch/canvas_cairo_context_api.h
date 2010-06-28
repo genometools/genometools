@@ -38,5 +38,6 @@ GtCanvas* gt_canvas_cairo_context_new(GtStyle *style, cairo_t *context,
                                       double offsetpos,
                                       unsigned long width,
                                       unsigned long height,
-                                      GtImageInfo *image_info);
+                                      GtImageInfo *image_info,
+                                      GtError *err);
 #endif

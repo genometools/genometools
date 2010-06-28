@@ -21,15 +21,21 @@ require 'gthelper'
 module GT
   extend DL::Importable
   gtdlload "libgenometools"
-  extern "GtLayout*     gt_layout_new(GtDiagram*, unsigned int, GtStyle*, " + \
-                                     "GtError*)"
-  extern "unsigned long gt_layout_get_height(GtLayout*)"
-  extern "int           gt_layout_sketch(GtLayout*, GtCanvas*, GtError*)"
-  extern "void          gt_layout_set_track_ordering_func(GtLayout*, " + \
-                                                          "void*, void*)"
-  extern "void          gt_layout_delete(GtCanvas*)"
+  extern "GtLayout* gt_layout_new(GtDiagram*, unsigned int, GtStyle*, " + \
+                                 "GtError*)"
+  extern "int       gt_layout_get_height(GtLayout*, unsigned long*, " + \
+                                        "GtError*)"
+  extern "int       gt_layout_sketch(GtLayout*, GtCanvas*, GtError*)"
+  extern "void      gt_layout_set_track_ordering_func(GtLayout*, " + \
+                                                      "void*, void*)"
+  extern "void      gt_layout_delete(GtCanvas*)"
 
   class Layout
+
+    UlongParam = GT.struct [
+      "GtUlong val"
+    ]
+    
     def initialize(diagram, width, style)
       err = GT::Error.new()
       @layout = GT.gt_layout_new(diagram, width, style, err)
@@ -40,13 +46,19 @@ module GT
     end
 
     def get_height()
-      return GT.gt_layout_get_height(@layout)
+      err = GT::Error.new()
+      height = UlongParam.malloc
+      had_err = GT.gt_layout_get_height(@layout, height, err)
+      if had_err < 0 then
+        GT::gterror(err)
+      end
+      return height.val
     end
 
     def sketch(canvas)
       err = GT::Error.new()
-      had_err = GT.gt_layout_sketch(@layout, canvas, err)
-      if had_err < 0 then
+      had_err = GT.gt_layout_sketch(@layout, canvas, err.to_ptr)
+      if had_err < 0 or err.is_set? then
         GT::gterror(err)
       end
     end

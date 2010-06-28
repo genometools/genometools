@@ -33,7 +33,8 @@ void      gt_line_insert_block(GtLine*, GtBlock*); /* takes ownership */
 bool      gt_line_has_captions(const GtLine*);
 GtArray*  gt_line_get_blocks(GtLine*);
 int       gt_line_sketch(GtLine*, GtCanvas*, GtError*);
-double    gt_line_get_height(GtLine *line, const GtStyle *sty);
+int       gt_line_get_height(GtLine *line, double *height, const GtStyle *sty,
+                             GtError *err);
 
 int       gt_line_unit_test(GtError*);
 void      gt_line_delete(GtLine*);

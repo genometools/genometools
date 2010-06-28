@@ -336,7 +336,6 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
       bioseq = gt_bioseq_new(gt_str_get(arguments->seqfile), err);
     }
 
-    /* do it! */
     cr = cairo_create(surf);
     cairo_set_font_size(cr, 8);
     twc = gt_text_width_calculator_cairo_new(cr, sty);
@@ -349,7 +348,14 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
       single_range.start = start;
       single_range.end = start + arguments->width;
 
+      if (had_err)
+        break;
+
       d = gt_diagram_new(features, seqid, &single_range, sty, err);
+      if (!d) {
+        had_err = -1;
+        break;
+      }
       if (bioseq) {
         seq = gt_bioseq_get_sequence(bioseq, 0);
         ct = gt_custom_track_gc_content_new(seq,
@@ -358,30 +364,33 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
         gt_diagram_add_custom_track(d, ct);
       }
 
-      gt_error_check(err);
       l = gt_layout_new_with_twc(d, mm_to_pt(arguments->width), sty, twc, err);
-      gt_error_check(err);
-      height = gt_layout_get_height(l);
-      if (gt_double_smaller_double(usable_height - 10 - 2*TEXT_SPACER
-            - arguments->theight, offsetpos + height))
-      {
-          draw_header(cr, gt_str_get(arguments->text), argv[parsed_args+1],
-                      seqid, num_pages, mm_to_pt(arguments->pwidth),
-                      mm_to_pt(arguments->pheight),
-                      arguments->theight);
-        cairo_show_page(cr);
-        offsetpos = TEXT_SPACER + arguments->theight + TEXT_SPACER;
-        num_pages++;
+      had_err = gt_layout_get_height(l, &height, err);
+      if (!had_err) {
+        if (gt_double_smaller_double(usable_height - 10 - 2*TEXT_SPACER
+              - arguments->theight, offsetpos + height))
+        {
+            draw_header(cr, gt_str_get(arguments->text), argv[parsed_args+1],
+                        seqid, num_pages, mm_to_pt(arguments->pwidth),
+                        mm_to_pt(arguments->pheight),
+                        arguments->theight);
+          cairo_show_page(cr);
+          offsetpos = TEXT_SPACER + arguments->theight + TEXT_SPACER;
+          num_pages++;
+        }
+        canvas = gt_canvas_cairo_context_new(sty,
+                                             cr,
+                                             offsetpos,
+                                             mm_to_pt(arguments->pwidth),
+                                             height,
+                                             NULL,
+                                             err);
+        if (!canvas)
+          had_err = -1;
+        offsetpos += height;
+        if (!had_err)
+          had_err = gt_layout_sketch(l, canvas, err);
       }
-      canvas = gt_canvas_cairo_context_new(sty,
-                                           cr,
-                                           offsetpos,
-                                           mm_to_pt(arguments->pwidth),
-                                           height,
-                                           NULL);
-      offsetpos += height;
-      (void) gt_layout_sketch(l, canvas, err);
-      gt_error_check(err);
       gt_canvas_delete(canvas);
       gt_layout_delete(l);
       gt_diagram_delete(d);

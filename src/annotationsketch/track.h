@@ -28,11 +28,12 @@ typedef struct GtTrack GtTrack;
 
 GtTrack*      gt_track_new(GtStr *title, unsigned long max_num_lines,
                            bool split_lines, GtLineBreaker *lb);
-void          gt_track_insert_block(GtTrack*, GtBlock*);
+int           gt_track_insert_block(GtTrack*, GtBlock*, GtError*);
 GtStr*        gt_track_get_title(const GtTrack*);
 unsigned long gt_track_get_number_of_discarded_blocks(GtTrack *track);
 int           gt_track_sketch(GtTrack*, GtCanvas*, GtError*);
-double        gt_track_get_height(const GtTrack *track, const GtStyle *sty);
+int           gt_track_get_height(const GtTrack *track, double *height,
+                                  const GtStyle *sty, GtError *err);
 unsigned long gt_track_get_y_index(const GtTrack *track);
 void          gt_track_set_y_index(GtTrack *track, unsigned long y_index);
 void          gt_track_delete(GtTrack*);

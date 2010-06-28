@@ -62,8 +62,13 @@ void          gt_layout_set_track_ordering_func(GtLayout *layout,
                                                 GtTrackOrderingFunc func,
                                                 void *data);
 void          gt_layout_unset_track_ordering_func(GtLayout *layout);
-/* Returns the height of <layout> in pixels. */
-unsigned long gt_layout_get_height(const GtLayout *layout);
+/* Calculates the height of <layout> in pixels. The height value is written to
+   the location pointed to by <result>. If an error occurs during the
+   calculation, this function returns -1 and <err> is set accordingly.
+   Returns 0 on success. */
+int           gt_layout_get_height(const GtLayout *layout,
+                                   unsigned long *result,
+                                   GtError *err);
 /* Renders <layout> on the <target_canvas>. */
 int           gt_layout_sketch(GtLayout *layout, GtCanvas *target_canvas,
                                GtError*);

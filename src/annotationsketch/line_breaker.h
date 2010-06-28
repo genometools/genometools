@@ -26,10 +26,11 @@ typedef struct GtLineBreaker GtLineBreaker;
 #include "annotationsketch/line.h"
 
 GtLineBreaker* gt_line_breaker_ref(GtLineBreaker*);
-bool           gt_line_breaker_line_is_occupied(GtLineBreaker *lb, GtLine *line,
-                                                GtBlock *block);
-void           gt_line_breaker_register_block(GtLineBreaker *lb, GtLine *line,
-                                              GtBlock *block);
+int            gt_line_breaker_line_is_occupied(GtLineBreaker *lb, bool *result,
+                                                GtLine *line, GtBlock *block,
+                                                GtError *err);
+int            gt_line_breaker_register_block(GtLineBreaker *lb, GtLine *line,
+                                              GtBlock *block, GtError *err);
 void           gt_line_breaker_delete(GtLineBreaker*);
 
 #endif

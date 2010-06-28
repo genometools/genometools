@@ -87,38 +87,58 @@ class CanvasCairoFileBase(Canvas):
 class CanvasCairoFile(CanvasCairoFileBase):
   
     def __init__(self, style, width, height, ii=None):
-        self.canvas = gtlib.gt_canvas_cairo_file_new(style, GRAPHICS_PNG, width,
-                height, ii)
+        err = Error()
+        canvas = gtlib.gt_canvas_cairo_file_new(style, GRAPHICS_PNG, width,
+                height, ii, err)
+        if canvas == None:
+            gterror(err)
+        self.canvas = canvas
         self._as_parameter_ = self.canvas
 
 
 class CanvasCairoFilePNG(CanvasCairoFileBase):
   
     def __init__(self, style, width, height, ii=None):
-        self.canvas = gtlib.gt_canvas_cairo_file_new(style, GRAPHICS_PNG, width,
-                height, ii)
+        err = Error()
+        canvas = gtlib.gt_canvas_cairo_file_new(style, GRAPHICS_PNG, width,
+                height, ii, err)
+        if canvas == None:
+            gterror(err)
+        self.canvas = canvas
         self._as_parameter_ = self.canvas
 
 
 class CanvasCairoFilePDF(CanvasCairoFileBase):
   
     def __init__(self, style, width, height, ii=None):
-        self.canvas = gtlib.gt_canvas_cairo_file_new(style, GRAPHICS_PDF, width,
-                height, ii)
+        err = Error()
+        canvas = gtlib.gt_canvas_cairo_file_new(style, GRAPHICS_PDF, width,
+                height, ii, err)
+        if canvas == None:
+            gterror(err)
+        self.canvas = canvas
         self._as_parameter_ = self.canvas
 
 
 class CanvasCairoFilePS(CanvasCairoFileBase):
   
     def __init__(self, style, width, height, ii=None):
-        self.canvas = gtlib.gt_canvas_cairo_file_new(style, GRAPHICS_PS, width,
-                height, ii)
+        err = Error()
+        canvas = gtlib.gt_canvas_cairo_file_new(style, GRAPHICS_PS, width,
+                height, ii, err)
+        if canvas == None:
+            gterror(err)
+        self.canvas = canvas
         self._as_parameter_ = self.canvas
 
 
 class CanvasCairoFileSVG(CanvasCairoFileBase):
   
     def __init__(self, style, width, height, ii=None):
-        self.canvas = gtlib.gt_canvas_cairo_file_new(style, GRAPHICS_SVG, width,
-                height, ii)
+        err = Error()
+        canvas = gtlib.gt_canvas_cairo_file_new(style, GRAPHICS_SVG, width,
+                height, ii, err)
+        if canvas == None:
+            gterror(err)
+        self.canvas = canvas
         self._as_parameter_ = self.canvas

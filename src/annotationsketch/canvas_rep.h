@@ -33,7 +33,7 @@ typedef int  (*GtCanvasVisitBlockFunc)(GtCanvas*, GtBlock*, GtError*);
 typedef int  (*GtCanvasVisitElementFunc)(GtCanvas*, GtElement*, GtError*);
 typedef int  (*GtCanvasVisitCustomTrackFunc)(GtCanvas*, GtCustomTrack*,
                                              GtError*);
-typedef void (*GtCanvasDrawRulerFunc)(GtCanvas*, GtRange);
+typedef int  (*GtCanvasDrawRulerFunc)(GtCanvas*, GtRange, GtError*);
 typedef void (*GtCanvasFreeFunc)(GtCanvas*);
 
 typedef struct GtCanvasMembers GtCanvasMembers;

@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-# Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2008-2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+# Copyright (c) 2008-2010 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -24,6 +24,9 @@ from gt.core.gtstr import Str
 from gt.core.str_array import StrArray
 from gt.extended.genome_node import GenomeNode
 
+STYLE_OK      = 0
+STYLE_NOT_SET = 1
+STYLE_ERROR   = 2
 
 class Style:
 
@@ -83,11 +86,15 @@ class Style:
     def get_color(self, section, key, gn=None):
         from ctypes import byref
         color = Color()
-        if gtlib.gt_style_get_color(self.style, section, key, byref(color),
-                                    gn) == 1:
+        err = Error()
+        rval = gtlib.gt_style_get_color(self.style, section, key, byref(color),\
+                                        gn, err)
+        if rval == STYLE_OK:
             return color
-        else:
+        elif rval == STYLE_NOT_SET:
             return None
+        elif rval == STYLE_ERROR:
+            gterror(err)
 
     def set_color(self, section, key, color):
         from ctypes import byref
@@ -95,11 +102,14 @@ class Style:
 
     def get_cstr(self, section, key, gn=None):
         string = Str()
-        if gtlib.gt_style_get_str(self.style, section, key, string, gn) == \
-            1:
+        err = Error()
+        rval = gtlib.gt_style_get_str(self.style, section, key, string, gn, err)
+        if rval == STYLE_OK:
             return str(string)
-        else:
+        elif rval == STYLE_NOT_SET:
             return None
+        elif rval == STYLE_ERROR:
+            gterror(err)
 
     def set_cstr(self, section, key, value):
         string = Str(value)
@@ -108,11 +118,15 @@ class Style:
     def get_num(self, section, key, gn=None):
         from ctypes import c_double, byref
         double = c_double()
-        if gtlib.gt_style_get_num(self.style, section, key, byref(double),
-                                  gn) == 1:
+        err = Error()
+        rval = gtlib.gt_style_get_num(self.style, section, key, byref(double), \
+                                      gn, err)
+        if rval == STYLE_OK:
             return double.value
-        else:
+        elif rval == STYLE_NOT_SET:
             return None
+        elif rval == STYLE_ERROR:
+            gterror(err)
 
     def set_num(self, section, key, number):
         from ctypes import c_double
@@ -122,14 +136,18 @@ class Style:
     def get_bool(self, section, key, gn=None):
         from ctypes import byref, c_int
         bool = c_int()
-        if gtlib.gt_style_get_bool(self.style, section, key, byref(bool),
-                                   gn) == 1:
+        err = Error()
+        rval = gtlib.gt_style_get_bool(self.style, section, key, byref(bool), \
+                                       gn, err)
+        if rval == STYLE_OK:
             if bool.value == 1:
                 return True
             else:
                 return False
-        else:
+        elif rval == STYLE_NOT_SET:
             return None
+        elif rval == STYLE_ERROR:
+            gterror(err)
 
     def set_bool(self, section, key, val):
         if val == True:

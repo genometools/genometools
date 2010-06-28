@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -76,18 +76,18 @@ void gt_line_breaker_delete(GtLineBreaker *lb)
   gt_free(lb);
 }
 
-bool gt_line_breaker_line_is_occupied(GtLineBreaker *lb, GtLine *line,
-                                      GtBlock *block)
+int gt_line_breaker_line_is_occupied(GtLineBreaker *lb, bool *result,
+                                     GtLine *line, GtBlock *block, GtError *err)
 {
-  gt_assert(lb && lb->c_class && line && block);
-  return lb->c_class->is_occupied(lb, line, block);
+  gt_assert(lb && lb->c_class && result && line && block);
+  return lb->c_class->is_occupied(lb, result, line, block, err);
 }
 
-void gt_line_breaker_register_block(GtLineBreaker *lb, GtLine *line,
-                                    GtBlock *block)
+int gt_line_breaker_register_block(GtLineBreaker *lb, GtLine *line,
+                                    GtBlock *block, GtError *err)
 {
   gt_assert(lb && lb->c_class && line && block);
-  lb->c_class->register_block(lb, line, block);
+  return lb->c_class->register_block(lb, line, block, err);
 }
 
 void* gt_line_breaker_cast(GT_UNUSED const GtLineBreakerClass *lbc,

@@ -70,10 +70,14 @@ int main(int argc, char *argv[])
   layout = gt_layout_new(diagram, 600, style, err);
   if (!layout)
     handle_error(err);
-  height = gt_layout_get_height(layout);
+  if (gt_layout_get_height(layout, &height, err))
+    handle_error(err);
 
   /* create PNG canvas */
-  canvas = gt_canvas_cairo_file_new(style, GT_GRAPHICS_PNG, 600, height, NULL);
+  canvas = gt_canvas_cairo_file_new(style, GT_GRAPHICS_PNG, 600, height,
+                                    NULL, err);
+  if (!canvas)
+    handle_error(err);
 
   /*  */
   gt_layout_set_track_ordering_func(layout, rev_order_func, "foooo");

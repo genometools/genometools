@@ -37,7 +37,8 @@ GtCanvas* gt_canvas_cairo_file_new(GtStyle *style,
                                    GtGraphicsOutType output_type,
                                    unsigned long width,
                                    unsigned long height,
-                                   GtImageInfo *image_info);
+                                   GtImageInfo *image_info,
+                                   GtError *err);
 /* Write rendered <canvas> to the file with name <filename>. If this
    method returns a value other than 0, check <err> for an error message. */
 int     gt_canvas_cairo_file_to_file(GtCanvasCairoFile *canvas,

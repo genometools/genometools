@@ -35,6 +35,6 @@ int  gt_canvas_cairo_visit_block(GtCanvas*, GtBlock*, GtError*);
 int  gt_canvas_cairo_visit_element(GtCanvas*, GtElement*, GtError*);
 int  gt_canvas_cairo_visit_custom_track(GtCanvas*, GtCustomTrack*, GtError*);
 /* Renders a ruler with dynamic scale labeling and optional grid. */
-void gt_canvas_cairo_draw_ruler(GtCanvas*, GtRange);
+int  gt_canvas_cairo_draw_ruler(GtCanvas*, GtRange, GtError*);
 
 #endif

@@ -21,9 +21,10 @@
 #include <stdio.h>
 #include "annotationsketch/line_breaker.h"
 
-typedef bool (*GtLineBreakerIsOccupiedFunc)(GtLineBreaker*, GtLine*, GtBlock*);
-typedef void (*GtLineBreakerRegisterBlockFunc)(GtLineBreaker*, GtLine*,
-                                               GtBlock*);
+typedef int (*GtLineBreakerIsOccupiedFunc)(GtLineBreaker*, bool*, GtLine*,
+                                           GtBlock*, GtError*);
+typedef int (*GtLineBreakerRegisterBlockFunc)(GtLineBreaker*, GtLine*,
+                                              GtBlock*, GtError*);
 typedef void (*GtLineBreakerFreeFunc)(GtLineBreaker*);
 
 typedef struct GtLineBreakerMembers GtLineBreakerMembers;

@@ -1,7 +1,7 @@
 #
 # Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-# Copyright (c)      2008 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
-# Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2008-2010 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
+# Copyright (c) 2007-2010 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -25,6 +25,10 @@ module GT
   extend DL::Importable
   gtdlload "libgenometools"
 
+  STYLE_OK      = 0
+  STYLE_NOT_SET = 1
+  STYLE_ERROR   = 2
+
   # looks weird, but apparently the way to pass proper pointers to external
   # functions
   DoubleArg = struct [
@@ -42,17 +46,17 @@ module GT
   extern "int gt_style_load_file(GtStyle*, const char*, GtError*)"
   extern "int gt_style_load_str(GtStyle*, GtStr*, GtError*)"
   extern "int gt_style_to_str(const GtStyle*, GtStr*, GtError*)"
-  extern "bool gt_style_get_color(GtStyle*, const char*, const char*, GtColor*, " +
-                                 "GenomeNode*)"
+  extern "int gt_style_get_color(GtStyle*, const char*, const char*, GtColor*, " +
+                                 "GenomeNode*, GtError*)"
   extern "void gt_style_set_color(GtStyle*, const char*, const char*, GtColor*)"
-  extern "bool gt_style_get_str(const GtStyle*, const char*, " +
-                               "const char*, GtStr*, GtGenomeNode*)"
+  extern "int  gt_style_get_str(const GtStyle*, const char*, " +
+                               "const char*, GtStr*, GtGenomeNode*, GtError*)"
   extern "void gt_style_set_str(GtStyle*, const char*, const char*, GtStr*)"
-  extern "bool gt_style_get_num(const GtStyle*, const char*, " +
-                               "const char*, double*, GtGenomeNode*)"
+  extern "int  gt_style_get_num(const GtStyle*, const char*, " +
+                               "const char*, double*, GtGenomeNode*, GtError*)"
   extern "void gt_style_set_num(GtStyle*, const char*, const char*, double)"
-  extern "bool gt_style_get_bool(const GtStyle*, const char*, " +
-                                "const char*, bool*, GtGenomeNode*)"
+  extern "int  gt_style_get_bool(const GtStyle*, const char*, " +
+                                "const char*, bool*, GtGenomeNode*, GtError*)"
   extern "void gt_style_set_bool(GtStyle*, const char*, const char*, bool)"
   extern "void gt_style_unset(GtStyle*, const char*, const char*)"
   extern "void gt_style_delete(GtStyle*)"
@@ -82,7 +86,9 @@ module GT
       err = GT::Error.new()
       str = GT::Str.new(str)
       rval = GT.gt_style_load_str(@style, str.to_ptr, err.to_ptr)
-      if rval != 0 then GT.gterror(err) end
+      if rval != 0 then
+        GT.gterror(err)
+      end
     end
 
     def to_str()
@@ -104,10 +110,14 @@ module GT
 
     def get_color(section, key, gn = GT::NULL)
       color = GT::Color.malloc
-      if GT.gt_style_get_color(@style, section, key, color, gn)
-        color
-      else
-        nil
+      err = GT::Error.new
+      case GT.gt_style_get_color(@style, section, key, color, gn, err.to_ptr)
+        when STYLE_OK then
+          color
+        when STYLE_NOT_SET then
+          nil
+        when STYLE_ERROR then
+          GT.gterror(err)
       end
     end
 
@@ -117,10 +127,14 @@ module GT
 
     def get_cstr(section, key, gn = GT::NULL)
       str = GT::Str.new(nil)
-      if GT.gt_style_get_str(@style, section, key, str, gn)
-        str.to_s
-      else
-        nil
+      err = GT::Error.new
+      case GT.gt_style_get_str(@style, section, key, str, gn, err.to_ptr)
+        when STYLE_OK then
+          str.to_s
+        when STYLE_NOT_SET then
+          nil
+        when STYLE_ERROR then
+          GT.gterror(err)
       end
     end
 
@@ -131,10 +145,14 @@ module GT
 
     def get_num(section, key, gn = GT::NULL)
       double = DoubleArg.malloc
-      if GT.gt_style_get_num(@style, section, key, double, gn)
-        double.val
-      else
-        nil
+      err = GT::Error.new
+      case GT.gt_style_get_num(@style, section, key, double, gn, err.to_ptr)
+        when STYLE_OK then
+          double.val
+        when STYLE_NOT_SET then
+          nil
+        when STYLE_ERROR then
+          GT.gterror(err)
       end
     end
 
@@ -145,10 +163,14 @@ module GT
 
     def get_bool(section, key, gn = GT::NULL)
       bool = BoolArg.malloc
-      if GT.gt_style_get_bool(@style, section, key, bool, gn)
-        bool.val
-      else
-        nil
+      err = GT::Error.new
+      case GT.gt_style_get_bool(@style, section, key, bool, gn, err.to_ptr)
+        when STYLE_OK then
+          bool.val
+        when STYLE_NOT_SET then
+          nil
+        when STYLE_ERROR then
+          GT.gterror(err)
       end
     end
 

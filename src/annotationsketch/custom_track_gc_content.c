@@ -77,7 +77,7 @@ int gt_custom_track_gc_content_sketch(GtCustomTrack *ct, GtGraphics *graphics,
 
   ctgc = gt_custom_track_gc_content_cast(ct);
 
-  (void) gt_style_get_color(style, "GC_content", "stroke", &color, NULL);
+  (void) gt_style_get_color(style, "GC_content", "stroke", &color, NULL, NULL);
   grey.red = grey.blue = grey.green = 0.8;
   grey.alpha = 0.9;
   black.red = black.blue = black.green = 0.0;

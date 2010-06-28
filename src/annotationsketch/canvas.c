@@ -140,10 +140,10 @@ void gt_format_ruler_label(char *txt,  unsigned long pos,
   gt_str_delete(formatstring);
 }
 
-void gt_canvas_draw_ruler(GtCanvas *canvas, GtRange rng)
+int gt_canvas_draw_ruler(GtCanvas *canvas, GtRange rng, GtError *err)
 {
   gt_assert(canvas);
-  return canvas->c_class->draw_ruler_func(canvas, rng);
+  return canvas->c_class->draw_ruler_func(canvas, rng, err);
 }
 
 GtCanvas* gt_canvas_create(const GtCanvasClass *cc)

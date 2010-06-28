@@ -22,7 +22,8 @@ from gt.annotationsketch.canvas import Canvas
 from gt.annotationsketch.diagram import Diagram
 from gt.annotationsketch.style import Style
 from gt.core.error import Error, gterror
-from ctypes import c_ulong, c_void_p, c_int, c_char_p, CFUNCTYPE
+from ctypes import c_ulong, c_void_p, c_int, c_char_p, CFUNCTYPE, byref, \
+                   POINTER, c_double
 
 TrackOrderingFunc = CFUNCTYPE(c_int, c_char_p, c_char_p, c_void_p)
 
@@ -51,11 +52,16 @@ class Layout:
     def sketch(self, canvas):
         err = Error()
         had_err = gtlib.gt_layout_sketch(self.layout, canvas, err)
-        if had_err < 0:
+        if err.is_set():
             gterror(err)
 
     def get_height(self):
-        return gtlib.gt_layout_get_height(self.layout)
+        err = Error()
+        height = c_ulong()
+        gtlib.gt_layout_get_height(self.layout, byref(height), err)
+        if err.is_set():
+            gterror(err)
+        return height
 
     def set_track_ordering_func(self, func):
 
@@ -81,8 +87,9 @@ class Layout:
         gtlib.gt_layout_sketch.argtypes = [c_void_p, Canvas, Error]
         gtlib.gt_layout_set_track_ordering_func.argtypes = [c_void_p,
                 TrackOrderingFunc]
-        gtlib.gt_layout_get_height.restype = c_ulong
-        gtlib.gt_layout_get_height.argtypes = [c_void_p]
+        gtlib.gt_layout_get_height.restype = c_int
+        gtlib.gt_layout_get_height.argtypes = [c_void_p, POINTER(c_ulong),
+                                               Error]
 
     register = classmethod(register)
 

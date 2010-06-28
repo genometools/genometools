@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -77,26 +77,31 @@ static int blocklist_block_compare(const void *item1, const void *item2)
 }
 
 static int add_tracklines(GT_UNUSED void *key, void *value,
-                          void *data, GT_UNUSED GtError *err)
+                          void *data, GtError *err)
 {
   GtTracklineInfo *add = (GtTracklineInfo*) data;
-  add->height += gt_track_get_height((GtTrack*) value, add->style);
+  double height;
+  if (gt_track_get_height((GtTrack*) value, &height, add->style, err) < 0) {
+    return 1;
+  }
+  add->height += height;
   return 0;
 }
 
 static int layout_tracks(void *key, void *value, void *data,
-                         GT_UNUSED GtError *err)
+                         GtError *err)
 {
-  unsigned long i, max;
-  GtTrack *track;
+  unsigned long i,
+                max = 50;
+  GtTrack *track = NULL;
   GtLayoutTraverseInfo *lti = (GtLayoutTraverseInfo*) data;
   GtArray *list = (GtArray*) value;
   GtStr *gt_track_key;
-  const char *type = key;
   GtBlock *block;
-  bool split;
-  double tmp;
-  gt_assert(type && list);
+  int had_err = 0;
+  bool split = true;
+  double tmp = 50;
+  gt_assert(list);
 
   /* to get a deterministic layout, we sort the GtBlocks for each type */
   gt_array_sort_stable(list, blocklist_block_compare);
@@ -104,31 +109,40 @@ static int layout_tracks(void *key, void *value, void *data,
   block = *(GtBlock**) gt_array_get(list, 0);
   gt_track_key = gt_str_new_cstr((char*) key);
 
-  if (!gt_style_get_bool(lti->layout->style, "format", "split_lines", &split,
-                         NULL))
-    split = true;
-  if (split)
-    if (!gt_style_get_bool(lti->layout->style, type, "split_lines", &split,
-                           NULL))
-      split = true;
-  if (gt_style_get_num(lti->layout->style, type, "max_num_lines", &tmp, NULL))
-    max = tmp;
-  else
-    max = 50;
-
-  track = gt_track_new(gt_track_key, max, split,
-                       gt_line_breaker_captions_new(lti->layout,
-                                                    lti->layout->width,
-                                                    lti->layout->style));
-  lti->layout->nof_tracks++;
-  for (i = 0; i < gt_array_size(list); i++) {
-    block = *(GtBlock**) gt_array_get(list, i);
-    gt_track_insert_block(track, block);
+  if (gt_style_get_bool(lti->layout->style, "format", "split_lines", &split,
+                         NULL, err) == GT_STYLE_QUERY_ERROR) {
+    had_err = 1;
   }
-  gt_hashmap_add(lti->layout->tracks, gt_cstr_dup(gt_str_get(gt_track_key)),
-                 track);
+  if (!had_err) {
+    if (gt_style_get_num(lti->layout->style,
+                         "format", "max_num_lines",
+                         &tmp, NULL, err) == GT_STYLE_QUERY_ERROR) {
+      had_err = 1;
+    }
+  }
+  if (!had_err) {
+    max = (unsigned long) tmp;
+    track = gt_track_new(gt_track_key, max, split,
+                         gt_line_breaker_captions_new(lti->layout,
+                                                      lti->layout->width,
+                                                      lti->layout->style));
+    lti->layout->nof_tracks++;
+    for (i = 0; !had_err && i < gt_array_size(list); i++) {
+      block = *(GtBlock**) gt_array_get(list, i);
+      had_err = gt_track_insert_block(track, block, err);
+    }
+  }
+  if (!had_err) {
+    gt_hashmap_add(lti->layout->tracks, gt_cstr_dup(gt_str_get(gt_track_key)),
+                   track);
+  }
+  else
+  {
+    gt_track_delete(track);
+  }
+
   gt_str_delete(gt_track_key);
-  return 0;
+  return had_err;
 }
 
 static int render_tracks(GT_UNUSED void *key, void *value, void *data,
@@ -153,14 +167,18 @@ static int render_custom_tracks(GT_UNUSED void *key, void *value, void *data,
   return had_err;
 }
 
-static int check_width(unsigned int width,
+static inline int check_width(unsigned int width,
                        GtStyle *style,
                        GtError *err)
 {
   int had_err = 0;
   double margins = MARGINS_DEFAULT;
-  (void) gt_style_get_num(style, "format", "margins", &margins, NULL);
-  if (gt_double_smaller_double(width - 2*margins, 0))
+  if (gt_style_get_num(style,
+                       "format", "margins",
+                       &margins, NULL, err) == GT_STYLE_QUERY_ERROR) {
+    had_err = -1;
+  }
+  if (!had_err && gt_double_smaller_double(width - 2*margins, 0))
   {
     gt_error_set(err, "layout width must at least be twice the x-margin size "
                       "(2*%.1f=%.1f) but was %u",
@@ -184,7 +202,10 @@ GtLayout* gt_layout_new(GtDiagram *diagram,
     return NULL;
   twc = gt_text_width_calculator_cairo_new(NULL, style);
   layout = gt_layout_new_with_twc(diagram, width, style, twc, err);
-  layout->own_twc = true;
+  if (layout)
+    layout->own_twc = true;
+  else
+    gt_text_width_calculator_delete(twc);
   return layout;
 }
 
@@ -195,6 +216,7 @@ GtLayout* gt_layout_new_with_twc(GtDiagram *diagram,
                                  GtError *err)
 {
   GtLayout *layout;
+  GtHashmap *blocks;
   GtLayoutTraverseInfo lti;
   gt_assert(diagram && style && twc && err);
   if (check_width(width, style, err) < 0)
@@ -215,10 +237,22 @@ GtLayout* gt_layout_new_with_twc(GtDiagram *diagram,
   /* XXX: use other container type here! */
   layout->tracks = gt_hashmap_new(GT_HASH_STRING, gt_free_func,
                                   (GtFree) gt_track_delete);
-  (void) gt_hashmap_foreach(gt_diagram_get_blocks(diagram),
-                            layout_tracks,
-                            &lti,
-                            NULL);
+  blocks = gt_diagram_get_blocks(diagram, err);
+  if (!blocks) {
+    gt_array_delete(layout->custom_tracks);
+    gt_rwlock_unlock(layout->lock);
+    gt_hashmap_delete(layout->tracks);
+    gt_free(layout);
+    return NULL;
+  }
+  gt_hashmap_foreach(blocks, layout_tracks, &lti, err);
+  if (gt_error_is_set(err)) {
+    gt_array_delete(layout->custom_tracks);
+    gt_rwlock_unlock(layout->lock);
+    gt_hashmap_delete(layout->tracks);
+    gt_free(layout);
+    return NULL;
+  }
   return layout;
 }
 
@@ -271,7 +305,7 @@ int gt_layout_sketch(GtLayout *layout, GtCanvas *target_canvas, GtError *err)
                                                         i);
     had_err = render_custom_tracks(NULL, ct, &rti, err);
   }
-  return had_err;
+  return had_err ? -1 : 0;
 }
 
 void gt_layout_set_track_ordering_func(GtLayout *layout,
@@ -314,45 +348,64 @@ GtTextWidthCalculator* gt_layout_get_twc(const GtLayout *layout)
   return layout->twc;
 }
 
-unsigned long gt_layout_get_height(const GtLayout *layout)
+int gt_layout_get_height(const GtLayout *layout, unsigned long *result,
+                         GtError *err)
 {
   GtTracklineInfo lines;
   double tmp, head_track_space = HEAD_TRACK_SPACE_DEFAULT;
-  bool show_track_captions;
+  bool show_track_captions = true;
   unsigned long height,
                 line_height,
                 i;
   gt_assert(layout);
 
   /* get dynamic heights from tracks */
-  lines.style = layout->style; lines.height = 0;
-  (void) gt_hashmap_foreach(layout->tracks, add_tracklines,
-                            &lines, NULL);
+  lines.style = layout->style;
+  lines.height = 0;
+  if (gt_hashmap_foreach(layout->tracks, add_tracklines, &lines, NULL) < 0) {
+    return -1;
+  }
   height = lines.height;
 
   /* obtain line height and spacer from style */
-  if (gt_style_get_num(layout->style, "format", "bar_height", &tmp, NULL))
-    line_height = tmp;
-  else
-    line_height = BAR_HEIGHT_DEFAULT;
-  if (gt_style_get_num(layout->style, "format", "bar_vspace", &tmp, NULL))
-    line_height += tmp;
-  else
-    line_height += BAR_VSPACE_DEFAULT;
+  tmp = BAR_HEIGHT_DEFAULT;
+  if (gt_style_get_num(layout->style,
+                       "format", "bar_height",
+                       &tmp, NULL, err) == GT_STYLE_QUERY_ERROR) {
+    return -1;
+  }
+  line_height = tmp;
 
-  if (!(gt_style_get_bool(layout->style, "format","show_track_captions",
-                          &show_track_captions, NULL)))
-    show_track_captions = true;
+  tmp = BAR_VSPACE_DEFAULT;
+  if (gt_style_get_num(layout->style,
+                       "format", "bar_vspace",
+                       &tmp, NULL, err) == GT_STYLE_QUERY_ERROR) {
+    return -1;
+  }
+  line_height += tmp;
+
+  if (gt_style_get_bool(layout->style,
+                        "format","show_track_captions",
+                        &show_track_captions,
+                        NULL, err) == GT_STYLE_QUERY_ERROR) {
+    return -1;
+  }
 
   /* add custom track space allotment */
   if (show_track_captions)
   {
     double theight = TOY_TEXT_HEIGHT,
            captionspace = CAPTION_BAR_SPACE_DEFAULT;
-    (void) gt_style_get_num(layout->style, "format", "track_caption_font_size",
-                            &theight, NULL);
-    (void) gt_style_get_num(layout->style, "format", "track_caption_space",
-                            &captionspace, NULL);
+    if (gt_style_get_num(layout->style,
+                         "format", "track_caption_font_size",
+                         &theight, NULL, err) == GT_STYLE_QUERY_ERROR) {
+      return -1;
+    }
+    if (gt_style_get_num(layout->style,
+                         "format", "track_caption_space",
+                         &captionspace, NULL, err) == GT_STYLE_QUERY_ERROR) {
+      return -1;
+    }
     height += gt_array_size(layout->custom_tracks)
                   * (theight + captionspace);
   }
@@ -362,15 +415,20 @@ unsigned long gt_layout_get_height(const GtLayout *layout)
     GtCustomTrack *ct = *(GtCustomTrack**) gt_array_get(layout->custom_tracks,
                                                         i);
     height += gt_custom_track_get_height(ct);
-    (void) gt_style_get_num(layout->style, "format", "track_vspace", &tmp,
-                            NULL);
+    if (gt_style_get_num(layout->style, "format", "track_vspace", &tmp,
+                         NULL, err) == GT_STYLE_QUERY_ERROR) {
+      return -1;
+    }
     height += tmp;
-
   }
 
   /* add header space and footer */
-  (void) gt_style_get_num(layout->style, "format", "ruler_space",
-                          &head_track_space, NULL);
+  if (gt_style_get_num(layout->style, "format", "ruler_space",
+                       &head_track_space, NULL, err) == GT_STYLE_QUERY_ERROR) {
+    return -1;
+  }
   height += HEADER_SPACE + head_track_space + FOOTER_SPACE;
-  return height;
+
+  *result = height;
+  return 0;
 }

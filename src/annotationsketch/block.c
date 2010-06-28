@@ -1,7 +1,7 @@
 /*
   Copyright (c) 2007      Christin Schaerfer <schaerfer@zbh.uni-hamburg.de>
-  Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2009 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -60,8 +60,8 @@ static int elemcmp(const void *a, const void *b, void *data)
   /* if not, then get z-index from style */
   if (sty)
   {
-    (void) gt_style_get_num(sty, type_a, "z_index", &zindex_a, NULL);
-    (void) gt_style_get_num(sty, type_b, "z_index", &zindex_b, NULL);
+    (void) gt_style_get_num(sty, type_a, "z_index", &zindex_a, NULL, NULL);
+    (void) gt_style_get_num(sty, type_b, "z_index", &zindex_b, NULL, NULL);
   }
   /* only one is set -> put types with set z-indices always on top of others*/
   if (zindex_a == GT_UNDEF_DOUBLE && zindex_b != GT_UNDEF_DOUBLE)
@@ -303,24 +303,42 @@ const char* gt_block_get_type(const GtBlock *block)
   return block->type;
 }
 
-double gt_block_get_max_height(const GtBlock *block, const GtStyle *sty)
+int gt_block_get_max_height(const GtBlock *block, double *result,
+                            const GtStyle *sty, GtError *err)
 {
-  double max_height = 0;
+  unsigned long max_height = 0;
+  GtStyleQueryStatus rval = GT_STYLE_QUERY_OK;
   unsigned long i;
   gt_assert(block && sty);
   for (i=0;i<gt_array_size(block->elements);i++) {
-    GtElement *elem = *(GtElement**) gt_array_get(block->elements, i);
+    GtElement *elem;
     double height = 0;
+    elem = *(GtElement**) gt_array_get(block->elements, i);
     /* get default or image-wide bar height */
-    if (!gt_style_get_num(sty, "format", "bar_height", &height, NULL))
+    rval = gt_style_get_num(sty, "format", "bar_height", &height, NULL, err);
+    switch (rval) {
+    case GT_STYLE_QUERY_ERROR:
+      return -1;
+      break; /* should never reach this */
+    case GT_STYLE_QUERY_NOT_SET:
       height = BAR_HEIGHT_DEFAULT;
+      break;
+    default:
+      /* do nothing */
+      break;
+    }
     /* try to get type-specific bar height */
-    (void) gt_style_get_num(sty, gt_element_get_type(elem), "bar_height",
-                            &height, gt_element_get_node_ref(elem));
+    rval = gt_style_get_num(sty, gt_element_get_type(elem), "bar_height",
+                            &height, gt_element_get_node_ref(elem),
+                            err);
+    if (rval == GT_STYLE_QUERY_ERROR) {
+      return -1;
+    }
     if (gt_double_smaller_double(max_height, height))
       max_height = height;
   }
-  return max_height;
+  *result = max_height;
+  return 0;
 }
 
 unsigned long gt_block_get_size(const GtBlock *block)
@@ -339,7 +357,7 @@ int gt_block_sketch(GtBlock *block, GtCanvas *canvas, GtError *err)
   had_err = gt_canvas_visit_block(canvas, block, err);
   if (had_err)
   {
-    if (had_err == -1)
+    if (had_err == 1)  /* 'magic' value */
       return 0;
     else
       return had_err;
@@ -365,15 +383,18 @@ int gt_block_unit_test(GtError *err)
   GtStrand s;
   GtGenomeNode *gn1, *gn2;
   GtElement *e1, *e2;
-  GtBlock * b;
+  double height;
+  GtBlock *b;
   GtStr *seqid, *caption1, *caption2;
   int had_err = 0;
   GtStyle *sty;
+  GtError *testerr;
   gt_error_check(err);
 
   seqid = gt_str_new_cstr("seqid");
   caption1 = gt_str_new_cstr("foo");
   caption2 = gt_str_new_cstr("bar");
+  testerr = gt_error_new();
 
   r1.start = 10UL;
   r1.end = 50UL;
@@ -419,13 +440,21 @@ int gt_block_unit_test(GtError *err)
 
   /* test gt_block_get_max_height() */
   sty = gt_style_new(err);
-  ensure(had_err, gt_block_get_max_height(b, sty) == BAR_HEIGHT_DEFAULT);
+  ensure(had_err, gt_block_get_max_height(b, &height, sty, err) == 0);
+  ensure(had_err, !gt_error_is_set(testerr));
+  ensure(had_err, height == BAR_HEIGHT_DEFAULT);
   gt_style_set_num(sty, "exon", "bar_height", 42);
-  ensure(had_err, gt_block_get_max_height(b, sty) == 42);
+  ensure(had_err, gt_block_get_max_height(b, &height, sty, err) == 0);
+  ensure(had_err, !gt_error_is_set(testerr));
+  ensure(had_err, height == 42);
   gt_style_set_num(sty, "gene", "bar_height", 23);
-  ensure(had_err, gt_block_get_max_height(b, sty) == 42);
+  ensure(had_err, gt_block_get_max_height(b, &height, sty, err) == 0);
+  ensure(had_err, !gt_error_is_set(testerr));
+  ensure(had_err, height == 42);
   gt_style_unset(sty, "exon", "bar_height");
-  ensure(had_err, gt_block_get_max_height(b, sty) == 23);
+  ensure(had_err, gt_block_get_max_height(b, &height, sty, err) == 0);
+  ensure(had_err, !gt_error_is_set(testerr));
+  ensure(had_err, height == 23);
 
   gt_str_delete(caption2);
   gt_str_delete(seqid);
@@ -433,6 +462,7 @@ int gt_block_unit_test(GtError *err)
   gt_element_delete(e2);
   gt_block_delete(b);
   gt_style_delete(sty);
+  gt_error_delete(testerr);
   gt_genome_node_delete(gn1);
   gt_genome_node_delete(gn2);
 

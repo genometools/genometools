@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -65,6 +65,7 @@ static int format_scalar(lua_State *L, GtStr *out, int index, bool table_key,
       gt_str_append_cstr(out, "]");
   }
   else {
+    lua_pop(L, 2);
     gt_error_set(err, "expected boolean, number, or string");
     had_err = -1;
   }

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2010 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -69,10 +69,16 @@ static int layout_lua_sketch(lua_State *L)
 static int layout_lua_get_height(lua_State *L)
 {
   GtLayout **layout;
-  unsigned int height;
+  GtError *err;
+  int had_err = 0;
+  unsigned long height;
   layout = check_layout(L, 1);
-  height = gt_layout_get_height(*layout);
+  err = gt_error_new();
+  had_err = gt_layout_get_height(*layout, &height, err);
   lua_pushnumber(L, height);
+  if (had_err < 0)
+    return gt_lua_error(L, err);
+  gt_error_delete(err);
   return 1;
 }
 

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,6 +18,7 @@
 #include <cairo.h>
 #include "core/ensure.h"
 #include "core/ma.h"
+#include "core/mathsupport.h"
 #include "core/unused_api.h"
 #include "annotationsketch/default_formats.h"
 #include "annotationsketch/style.h"
@@ -42,7 +43,8 @@ struct GtTextWidthCalculatorCairo {
                                       TWC)
 
 double gt_text_width_calculator_cairo_get_text_width(GtTextWidthCalculator *twc,
-                                                     const char *text)
+                                                     const char *text,
+                                                     GtError *err)
 {
   GtTextWidthCalculatorCairo *twcc;
   double theight = TOY_TEXT_HEIGHT;
@@ -51,8 +53,11 @@ double gt_text_width_calculator_cairo_get_text_width(GtTextWidthCalculator *twc,
   twcc = gt_text_width_calculator_cairo_cast(twc);
   if (twcc->style)
   {
-    (void) gt_style_get_num(twcc->style, "format", "block_caption_font_size",
-                            &theight, NULL);
+    if (gt_style_get_num(twcc->style,
+                         "format", "block_caption_font_size",
+                         &theight, NULL, err) == GT_STYLE_QUERY_ERROR) {
+      return -1.0;
+    }
     cairo_save(twcc->context);
     cairo_set_font_size(twcc->context, theight);
   }
@@ -60,6 +65,7 @@ double gt_text_width_calculator_cairo_get_text_width(GtTextWidthCalculator *twc,
   cairo_text_extents(twcc->context, text, &ext);
   if (twcc->style)
     cairo_restore(twcc->context);
+  gt_assert(gt_double_smaller_double(0, ext.width));
   return ext.width;
 }
 

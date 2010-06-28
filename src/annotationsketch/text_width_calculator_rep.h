@@ -22,7 +22,8 @@
 #include "annotationsketch/text_width_calculator.h"
 
 typedef double (*TextWidthCalculatorGetTextWidth)(GtTextWidthCalculator*,
-                                                  const char*);
+                                                  const char*,
+                                                  GtError *err);
 typedef void (*TextWidthCalculatorFreeFunc)(GtTextWidthCalculator*);
 
 typedef struct GtTextWidthCalculatorMembers GtTextWidthCalculatorMembers;

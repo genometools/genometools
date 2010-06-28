@@ -1,7 +1,7 @@
 /*
   Copyright (c) 2007      Christin Schaerfer <schaerfer@zbh.uni-hamburg.de>
-  Copyright (c)      2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -21,6 +21,7 @@
 #include "core/ma.h"
 #include "core/mathsupport.h"
 #include "core/range.h"
+#include "core/undef.h"
 #include "annotationsketch/block.h"
 #include "annotationsketch/default_formats.h"
 #include "annotationsketch/line.h"
@@ -77,23 +78,29 @@ int gt_line_sketch(GtLine *line, GtCanvas *canvas, GtError *err)
   return had_err;
 }
 
-double gt_line_get_height(GtLine *line, const GtStyle *sty)
+int gt_line_get_height(GtLine *line, double *height, const GtStyle *sty,
+                       GtError *err)
 {
   double line_height = 0;
   unsigned long i;
   gt_assert(line && sty);
   for (i = 0; i < gt_array_size(line->blocks); i++) {
     GtBlock *block;
-    double height;
+    double myheight = BAR_HEIGHT_DEFAULT;
     block = *(GtBlock**) gt_array_get(line->blocks, i);
     /* check again for caption presence, may have changed in the meantime */
-    if (!line->has_captions && gt_block_get_caption(block) != NULL)
+    if (!line->has_captions && gt_block_get_caption(block) != NULL) {
       line->has_captions = true;
-    height = gt_block_get_max_height(block, sty);
-    if (gt_double_smaller_double(line_height, height))
-      line_height = height;
+    }
+    if (gt_block_get_max_height(block, &myheight, sty, err) < 0) {
+      return -1;
+    }
+    if (gt_double_smaller_double(line_height, myheight)) {
+      line_height = myheight;
+    }
   }
-  return line_height;
+  *height = line_height;
+  return 0;
 }
 
 int gt_line_unit_test(GtError *err)
@@ -103,6 +110,7 @@ int gt_line_unit_test(GtError *err)
   GtStr *seqid1;
   int had_err = 0;
   GtGenomeNode *parent, *gn1, *gn2, *gn3;
+  double height;
   GtLine *l1;
   GtBlock *b1, *b2;
   GtStyle *sty = NULL;
@@ -164,16 +172,27 @@ int gt_line_unit_test(GtError *err)
   if (!had_err)
   {
     sty = gt_style_new(err);
-    ensure(had_err, gt_line_get_height(l1, sty) == BAR_HEIGHT_DEFAULT);
+    ensure(had_err, sty && !gt_error_is_set(err));
+    ensure(had_err, gt_line_get_height(l1, &height, sty, err) == 0);
+    ensure(had_err, height == BAR_HEIGHT_DEFAULT);
+    ensure(had_err, !gt_error_is_set(err));
     gt_style_set_num(sty, "exon", "bar_height", 42);
-    ensure(had_err, gt_line_get_height(l1, sty) == 42);
+    ensure(had_err, gt_line_get_height(l1, &height, sty, err) == 0);
+    ensure(had_err, height == 42);
+    ensure(had_err, !gt_error_is_set(err));
     gt_style_set_num(sty, "gene", "bar_height", 23);
-    ensure(had_err, gt_line_get_height(l1, sty) == 42);
+    ensure(had_err, gt_line_get_height(l1, &height, sty, err) == 0);
+    ensure(had_err, height == 42);
+    ensure(had_err, !gt_error_is_set(err));
     gt_style_unset(sty, "exon", "bar_height");
-    ensure(had_err, gt_line_get_height(l1, sty) == 23);
+    ensure(had_err, gt_line_get_height(l1, &height, sty, err) == 0);
+    ensure(had_err, height == 23);
+    ensure(had_err, !gt_error_is_set(err));
     gt_style_unset(sty, "gene", "bar_height");
     gt_style_set_num(sty, "format", "bar_height", 99);
-    ensure(had_err, gt_line_get_height(l1, sty) == 99);
+    ensure(had_err, gt_line_get_height(l1, &height, sty, err) == 0);
+    ensure(had_err, height == 99);
+    ensure(had_err, !gt_error_is_set(err));
   }
 
   gt_str_delete(seqid1);

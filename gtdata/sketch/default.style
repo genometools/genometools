@@ -34,8 +34,6 @@ style =
     -- Display this track only if the viewport is not wider than this
     -- number of nucleotides. Set to 0 to disable type track.
     max_show_width     = nil,
-    -- Limit the number of tracks
-    -- max_num_lines      = 10,
   },
 --------------------------------------
   mRNA = {
@@ -52,8 +50,6 @@ style =
     -- Display this track only if the viewport is not wider than this
     -- number of nucleotides. Set to 0 to disable type track.
     max_show_width     = nil,
-    -- Limit the number of tracks
-    max_num_lines      = 10,
   },
 --------------------------------------
   exon = {
@@ -70,8 +66,6 @@ style =
     -- Display this track only if the viewport is not wider than this
     -- number of nucleotides. Set to 0 to disable type track.
     max_show_width     = nil,
-    -- Limit the number of tracks
-    max_num_lines      = 10,
   },
 --------------------------------------
   CDS = {
@@ -88,8 +82,6 @@ style =
     -- Display this track only if the viewport is not wider than this
     -- number of nucleotides. Set to 0 to disable type track.
     max_show_width     = nil,
-    -- Limit the number of tracks
-    max_num_lines      = 10,
   },
 --------------------------------------
   TF_binding_site = {
@@ -106,8 +98,6 @@ style =
     -- Display this track only if the viewport is not wider than this
     -- number of nucleotides. Set to 0 to disable type track.
     max_show_width     = nil,
-    -- Limit the number of tracks
-    max_num_lines      = 10,
   },
 --------------------------------------
   intron = {
@@ -124,8 +114,6 @@ style =
     -- Display this track only if the viewport is not wider than this
     -- number of nucleotides. Set to 0 to disable type track.
     max_show_width     = nil,
-    -- Limit the number of tracks
-    max_num_lines      = 10,
   },
 --------------------------------------
   repeat_region = {
@@ -142,8 +130,6 @@ style =
     -- Display this track only if the viewport is not wider than this
     -- number of nucleotides. Set to 0 to disable type track.
     max_show_width     = 0,
-    -- Limit the number of tracks
-    max_num_lines      = 10,
   },
 --------------------------------------
   LTR_retrotransposon = {
@@ -160,8 +146,6 @@ style =
     -- Display this track only if the viewport is not wider than this
     -- number of nucleotides. Set to 0 to disable type track.
     max_show_width     = nil,
-    -- Limit the number of tracks
-    max_num_lines      = 10,
   },
 --------------------------------------
   long_terminal_repeat = {
@@ -178,8 +162,6 @@ style =
     -- Display this track only if the viewport is not wider than this
     -- number of nucleotides. Set to 0 to disable type track.
     max_show_width     = nil,
-    -- Limit the number of tracks
-    max_num_lines      = 10,
   },
   target_site_duplication = {
     max_show_width = 0,
@@ -199,8 +181,6 @@ style =
     -- Display this track only if the viewport is not wider than this
     -- number of nucleotides. Set to 0 to disable type track.
     max_show_width     = nil,
-    -- Limit the number of tracks
-    max_num_lines      = 10,
   },
 --------------------------------------
   five_prime_splice_site = {
@@ -291,8 +271,6 @@ style =
     block_caption_space = 7, -- space between blocks and their captions
     track_caption_font_size = 10, -- size of track captions
     track_caption_space = 7, -- space between tracks and their captions
-    scale_arrow_width = 6,     -- width of scale arrowheads, in pixels
-    scale_arrow_height = 10,   -- height of scale arrowheads, in pixels
     arrow_width = 6,   -- width of feature arrowheads, in pixels
     stroke_width = .5, -- width of outlines, in pixels
     unit = "bp",       -- basepair unit, e.g. "bp"

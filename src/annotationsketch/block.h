@@ -24,16 +24,18 @@
 #include "annotationsketch/style.h"
 #include "core/error.h"
 
-void                  gt_block_insert_element(GtBlock*, GtFeatureNode *node);
-void                  gt_block_set_range(GtBlock*, GtRange r);
-void                  gt_block_set_type(GtBlock*, const char *type);
-const char*           gt_block_get_type(const GtBlock*);
-int                   gt_block_compare(const GtBlock*, const GtBlock*);
-int                   gt_block_sketch(GtBlock*, GtCanvas*, GtError*);
-double                gt_block_get_max_height(const GtBlock *block,
-                                              const GtStyle *sty);
-void                  gt_block_print(const GtBlock* block);
+void        gt_block_insert_element(GtBlock*, GtFeatureNode *node);
+void        gt_block_set_range(GtBlock*, GtRange r);
+void        gt_block_set_type(GtBlock*, const char *type);
+const char* gt_block_get_type(const GtBlock*);
+int         gt_block_compare(const GtBlock*, const GtBlock*);
+int         gt_block_sketch(GtBlock*, GtCanvas*, GtError*);
+int         gt_block_get_max_height(const GtBlock *block,
+                                    double *result,
+                                    const GtStyle *sty,
+                                    GtError *err);
+void        gt_block_print(const GtBlock* block);
 
-int                   gt_block_unit_test(GtError*);
+int         gt_block_unit_test(GtError*);
 
 #endif

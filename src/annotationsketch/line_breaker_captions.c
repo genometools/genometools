@@ -37,8 +37,8 @@ struct GtLineBreakerCaptions {
 #define gt_line_breaker_captions_cast(LB)\
         gt_line_breaker_cast(gt_line_breaker_captions_class(), LB)
 
-static GtDrawingRange calculate_drawing_range(GtLineBreakerCaptions *lbc,
-                                              GtBlock* block)
+int calculate_drawing_range(GtLineBreakerCaptions *lbc, GtDrawingRange *rng,
+                            GtBlock* block, GtError *err)
 {
   double textwidth = 0.0;
   GtDrawingRange drange;
@@ -51,34 +51,46 @@ static GtDrawingRange calculate_drawing_range(GtLineBreakerCaptions *lbc,
   {
     textwidth = gt_text_width_calculator_get_text_width(
                                       gt_layout_get_twc(lbc->layout),
-                                      gt_str_get(gt_block_get_caption(block)));
-  if (gt_double_smaller_double(gt_drawing_range_length(drange), textwidth))
-    drange.end = drange.start + textwidth;
+                                      gt_str_get(gt_block_get_caption(block)),
+                                      err);
+    if (gt_double_smaller_double(textwidth, 0))
+      return -1;
+    if (gt_double_smaller_double(gt_drawing_range_length(drange), textwidth))
+      drange.end = drange.start + textwidth;
   }
-  return drange;
+  rng->start = drange.start;
+  rng->end = drange.end;
+  return 0;
 }
 
-bool gt_line_breaker_captions_is_line_occupied(GtLineBreaker* lb, GtLine *line,
-                                               GtBlock *block)
+int gt_line_breaker_captions_is_line_occupied(GtLineBreaker* lb, bool *result,
+                                              GtLine *line, GtBlock *block,
+                                              GtError *err)
 {
   GtDrawingRange dr;
   GtLineBreakerCaptions *lbcap;
+  int had_err = 0;
   double *num;
   gt_assert(lb && block && line);
   lbcap = gt_line_breaker_captions_cast(lb);
-  dr = calculate_drawing_range(lbcap, block);
-  if (!(num = gt_hashmap_get(lbcap->linepositions, line)))
-    return false;
-  else
-    return (dr.start <= *num);
+  had_err = calculate_drawing_range(lbcap, &dr, block, err);
+  if (!had_err) {
+    if (!(num = gt_hashmap_get(lbcap->linepositions, line)))
+      *result = false;
+    else
+      *result = (dr.start <= *num);
+  }
+  return had_err;
 }
 
-void gt_line_breaker_captions_register_block(GtLineBreaker *lb,
-                                             GtLine *line,
-                                             GtBlock *block)
+int gt_line_breaker_captions_register_block(GtLineBreaker *lb,
+                                            GtLine *line,
+                                            GtBlock *block,
+                                            GtError *err)
 {
   GtDrawingRange dr;
   GtLineBreakerCaptions *lbcap;
+  int had_err = 0;
   double *num;
   gt_assert(lb && block && line);
   lbcap = gt_line_breaker_captions_cast(lb);
@@ -87,8 +99,10 @@ void gt_line_breaker_captions_register_block(GtLineBreaker *lb,
     num = gt_calloc(1, sizeof (double));
     gt_hashmap_add(lbcap->linepositions, line, num);
   }
-  dr = calculate_drawing_range(lbcap, block);
-  *num = floor(dr.end);
+  had_err = calculate_drawing_range(lbcap, &dr, block, err);
+  if (!had_err)
+    *num = floor(dr.end);
+  return had_err;
 }
 
 void gt_line_breaker_captions_delete(GtLineBreaker *lb)
@@ -123,8 +137,10 @@ GtLineBreaker* gt_line_breaker_captions_new(GtLayout *layout,
   lbcap = gt_line_breaker_captions_cast(lb);
   lbcap->layout = layout;
   lbcap->width = width;
-  if (!gt_style_get_num(style, "format", "margins", &lbcap->margins, NULL))
+  if (!gt_style_get_num(style, "format", "margins", &lbcap->margins,
+                        NULL, NULL)) {
     lbcap->margins = MARGINS_DEFAULT;
+  }
   lbcap->linepositions = gt_hashmap_new(GT_HASH_DIRECT, NULL, gt_free_func);
   return lb;
 }

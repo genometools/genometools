@@ -19,21 +19,22 @@
 #define CANVAS_H
 
 #include <stdio.h>
+#include "core/error_api.h"
 #include "annotationsketch/canvas_api.h"
 #include "annotationsketch/block.h"
 #include "annotationsketch/custom_track.h"
-#include "annotationsketch/layout.h"
-#include "annotationsketch/line.h"
 #include "annotationsketch/diagram.h"
 #include "annotationsketch/drawing_range.h"
 #include "annotationsketch/element.h"
+#include "annotationsketch/layout.h"
+#include "annotationsketch/line.h"
 #include "annotationsketch/style.h"
 #include "annotationsketch/track.h"
 
 typedef struct GtCanvasClass GtCanvasClass;
 
 unsigned long   gt_canvas_calculate_height(GtCanvas*, GtDiagram*);
-void            gt_canvas_draw_ruler(GtCanvas*, GtRange);
+int             gt_canvas_draw_ruler(GtCanvas*, GtRange, GtError *err);
 
 void*           gt_canvas_cast(const GtCanvasClass *cc, GtCanvas *c);
 void*           gt_canvas_try_cast(const GtCanvasClass *cc, GtCanvas *c);
