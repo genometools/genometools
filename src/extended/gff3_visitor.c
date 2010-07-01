@@ -89,7 +89,7 @@ static int gff3_visitor_comment_node(GtNodeVisitor *gv, GtCommentNode *cn,
   gt_assert(gv && cn);
   gff3_version_string(gv);
   gt_file_xprintf(gff3_visitor->outfp, "#%s\n",
-                     gt_comment_node_get_comment(cn));
+                  gt_comment_node_get_comment(cn));
   return 0;
 }
 
@@ -155,7 +155,7 @@ static int gff3_show_feature_node(GtGenomeNode *gn, void *data,
       if (i)
         gt_file_xfputc(',', gff3_visitor->outfp);
       gt_file_xprintf(gff3_visitor->outfp, "%s",
-                         *(char**) gt_array_get(parent_features, i));
+                      *(char**) gt_array_get(parent_features, i));
     }
     part_shown = true;
   }
