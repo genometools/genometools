@@ -150,23 +150,6 @@ which would scale the transparency of the red element with the score value of  t
       This property can be used to recursively collapse feature trees by setting it in the parent type to true as well.
     </div>
   </li>
-  <li class="item">
-    <div class="line">
-      split_lines = <em>true/false</em>
-    </div>
-    <div class="desc">
-      If this option set to false, all blocks for this type track are drawn in one line, instead of breaking lines if blocks overlap.
-    </div>
-  </li>
-  <li class="item">
-    <div class="line">
-      max_num_lines = <em>value</em>
-    </div>
-    <div class="desc">
-      This value limits the number of lines per track. If the line breaker tries to create more tracks that set here (e.g. if many blocks overlap or if the displayed range is extremely wide), no more tracks are created. If the existing lines fill up, no more blocks will be drawn and the number of discarded blocks will be displayed next to the track title. This can be used to prevent the layouter from generating images of extreme height if a lot of features is packed at a very far zoom level.
-    </div>
-  </li>
-
 </ul>
 
 <h2>Caption options</h2>
@@ -207,6 +190,26 @@ block_caption = function(gn)
   </li>
 </ul>
 <h1>Per-image settings</h1>
+
+<h2>Layout options</h2>
+<ul>
+ <li class="item">
+    <div class="line">
+      split_lines = <em>true/false</em>
+    </div>
+    <div class="desc">
+      If this option set to false, all blocks per track are drawn in one line, instead of breaking lines if blocks overlap.
+    </div>
+  </li>
+  <li class="item">
+    <div class="line">
+      max_num_lines = <em>value</em>
+    </div>
+    <div class="desc">
+      This value limits the number of lines per track. If the line breaker tries to create more tracks that set here (e.g. if many blocks overlap or if the displayed range is extremely wide), no more tracks are created. If the existing lines fill up, no more blocks will be drawn and the number of discarded blocks will be displayed next to the track title. This can be used to prevent the layouter from generating images of extreme height if a lot of features is packed at a very far zoom level.
+    </div>
+  </li>
+</ul>
 <h2>Ruler options</h2>
 <ul>
   <li class="item">
