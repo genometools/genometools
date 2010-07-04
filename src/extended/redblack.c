@@ -132,7 +132,7 @@ struct GtRBTnode
   struct GtRBTnode *left, *right;
 };
 
-#ifndef NDEBUG
+#ifdef GT_RBT_DEBUG
 
 /*
  Routines to check tree invariants.
