@@ -51,11 +51,6 @@
 
 #define DEREFSEQ(VAR,PTR,ESR) DEREFSTOPPOSSEQ(VAR,PTR,bsr->totallength,ESR)
 
-#define LCPINDEX(LCPSUBTAB,PTR)\
-        (unsigned long) ((PTR) - (LCPSUBTAB)->suftabbase)
-#define LCPINDEXLONG(LCPSUBTAB,IDX)\
-        ((IDX) - (LCPSUBTAB)->suftabbaselong)
-
 #define BS_SWAPARRAY(TMP,ARR,A,B)\
         if ((A) != (B))\
         {\
@@ -173,6 +168,24 @@ typedef GtEndofTwobitencoding Sfxcmp;
 #define SfxcmpSMALLER(X,Y)    (ret##X##Y < 0)
 #define SfxcmpGREATER(X,Y)    (ret##X##Y > 0)
 
+static inline unsigned long evallcpindex(const Lcpsubtab *lcpsubtab,
+                                         GT_UNUSED int line,
+                                         GT_UNUSED unsigned long offset,
+                                         const Suffixptr *ptr)
+{
+  unsigned long val1 = (unsigned long) (ptr - lcpsubtab->suftabbase);
+  /*
+  if (offset < lcpsubtab->suftabbaselong)
+  {
+    fprintf(stderr,"line %d: offset = %lu < %lu = lcpsubtab->suftabbaselong\n",
+                    line,offset,lcpsubtab->suftabbaselong);
+    exit(EXIT_FAILURE);
+  }
+  gt_assert(offset - lcpsubtab->suftabbaselong == val1);
+  */
+  return val1;
+}
+
 #ifdef SKDEBUG
 static unsigned long baseptr;
 
@@ -194,15 +207,15 @@ static void showsuffixrange(const GtEncseq *encseq,
   {
     printf("of %lu suffixes [%lu,%lu] at depth %lu:\n",
            width,
-           baseptr + LCPINDEX(lcpsubtab,leftptr),
-           baseptr + LCPINDEX(lcpsubtab,leftptr + width),
+           baseptr + evallcpindex(lcpsubtab,suftab),
+           baseptr + evallcpindex(lcpsubtab,suftab + width),
            depth);
   }
   for (pi = leftidx; pi <= leftidx + width; pi++)
   {
-    printf("suffix %lu:",SUFFIXPTRGET(leftptr,pi));
+    printf("suffix %lu:",SUFFIXPTRGET(suftab,pi));
     gt_encseq_showatstartpos(stdout,fwd,complement,encseq,
-                             SUFFIXPTRGET(leftptr,pi));
+                             SUFFIXPTRGET(suftab,pi));
   }
 }
 #endif
@@ -213,7 +226,7 @@ static void checksuffixrange(const GtEncseq *encseq,
                              bool fwd,
                              bool complement,
                              const Lcpsubtab *lcpsubtab,
-                             Suffixptr *suftab,
+                             const Suffixptr *suftab,
                              unsigned long leftidx,
                              unsigned long width,
                              unsigned long depth,
@@ -345,7 +358,7 @@ typedef struct
   unsigned long leftlcpdist[GT_UNITSIN2BITENC],
                 rightlcpdist[GT_UNITSIN2BITENC];
   Definedunsignedlong *longest;
-  Suftab *suftab;
+  Suffixsortspace *suffixsortspace;
   void (*dc_processunsortedrange)(void *,
                                   Suffixptr *,
                                   unsigned long,
@@ -502,8 +515,9 @@ static void bs_insertionsort(Bentsedgresources *bsr,
       gt_assert(retval != 0);
       if (bsr->lcpsubtab != NULL && bsr->assideeffect)
       {
-        lcpindex = LCPINDEX(bsr->lcpsubtab,suftab + pj); /* XXX do not use
-                                                            suftab */
+        lcpindex = evallcpindex(bsr->lcpsubtab,__LINE__,
+                                pj,suftab + pj); /* XXX do not use
+                                                                suftab */
         if (pj < pi && retval > 0)
         {
           updatelcpvalue(bsr,lcpindex+1,
@@ -618,7 +632,8 @@ static void bs_insertionsortmaxdepth(Bentsedgresources *bsr,
 #endif
       if (retval != 0 && bsr->lcpsubtab != NULL && bsr->assideeffect)
       {
-        lcpindex = LCPINDEX(bsr->lcpsubtab,suftab + pj); /* XXX */
+        lcpindex = evallcpindex(bsr->lcpsubtab,__LINE__,pj,
+                                suftab + pj); /* XXX */
         if (pj < pi && retval > 0)
         {
           updatelcpvalue(bsr,lcpindex+1,
@@ -972,7 +987,8 @@ static bool comparisonsort(Bentsedgresources *bsr,
                                 bsr->lcpsubtab == NULL
                                   ? NULL
                                   : bsr->lcpsubtab->bucketoflcpvalues +
-                                    LCPINDEX(bsr->lcpsubtab,leftptr),
+                                    evallcpindex(bsr->lcpsubtab,__LINE__,
+                                                 0,leftptr),
                                 width,
                                 depth,
                                 (unsigned long)
@@ -1013,8 +1029,9 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
       if (depth >=
                (unsigned long) bsr->sfxstrategy->ssortmaxdepth.valueunsignedint)
       {
-#define SUFTABINDEX(PTR) (unsigned long) ((PTR) + bsr->suftab->suftaboffset -\
-                                           bsr->suftab->sortspace)
+#define SUFTABINDEX(PTR) (unsigned long)\
+                         ((PTR) + bsr->suffixsortspace->sortspaceoffset -\
+                                  bsr->suffixsortspace->sortspace)
 
         unsigned long leftindex = SUFTABINDEX(leftptr);
         gt_rmnsufinfo_addunsortedrange(bsr->rmnsufinfo,
@@ -1049,7 +1066,9 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
                                       bsr->lcpsubtab == NULL
                                         ? NULL
                                         : bsr->lcpsubtab->bucketoflcpvalues +
-                                          LCPINDEX(bsr->lcpsubtab,leftptr),
+                                          evallcpindex(bsr->lcpsubtab,
+                                                       __LINE__,0,
+                                                       leftptr),
                                       width,
                                       depth,
                                       (unsigned long)
@@ -1198,7 +1217,8 @@ static void sarrcountingsort(Bentsedgresources *bsr,
     if (bsr->lcpsubtab != NULL && bsr->assideeffect &&
         bsr->leftlcpdist[idx] < end)
     { /* at least one element */
-      updatelcpvalue(bsr,LCPINDEX(bsr->lcpsubtab,leftptr + end),depth + idx);
+      updatelcpvalue(bsr,evallcpindex(bsr->lcpsubtab,__LINE__,end,leftptr+end),
+                     depth + idx);
     }
     bsr->leftlcpdist[idx] = 0;
   }
@@ -1232,7 +1252,8 @@ static void sarrcountingsort(Bentsedgresources *bsr,
     if (bsr->lcpsubtab != NULL && bsr->assideeffect &&
         bsr->rightlcpdist[idx] < end)
     { /* at least one element */
-      updatelcpvalue(bsr,LCPINDEX(bsr->lcpsubtab,leftptr + width - end),
+      updatelcpvalue(bsr,evallcpindex(bsr->lcpsubtab,__LINE__,width - end,
+                     leftptr + width - end),
                      depth + idx);
     }
     bsr->rightlcpdist[idx] = 0;
@@ -1451,7 +1472,8 @@ static void bentleysedgewick(Bentsedgresources *bsr,
           which is at a minimum distance to the pivot and thus to an
           element in the final part of the left side.
         */
-        updatelcpvalue(bsr,LCPINDEX(bsr->lcpsubtab,leftptr + leftplusw),
+        updatelcpvalue(bsr,evallcpindex(bsr->lcpsubtab,__LINE__,leftplusw,
+                                        leftptr + leftplusw),
                        depth + smallermaxlcp);
       }
       subsort_bentleysedgewick(bsr,
@@ -1485,8 +1507,9 @@ static void bentleysedgewick(Bentsedgresources *bsr,
           which is at a minimum distance to the pivot and thus to an
           element in the first part of the right side.
         */
-        updatelcpvalue(bsr,LCPINDEX(bsr->lcpsubtab,
-                       leftptr+suftabptrright-wtmp+1),
+        updatelcpvalue(bsr,evallcpindex(bsr->lcpsubtab,__LINE__,
+                                        suftabptrright-wtmp+1,
+                                        leftptr+suftabptrright-wtmp+1),
                        depth + greatermaxlcp);
       }
       subsort_bentleysedgewick(bsr,
@@ -1890,7 +1913,7 @@ unsigned long getmaxbranchdepth(const Outlcpinfo *outlcpinfo)
 }
 
 static void initBentsedgresources(Bentsedgresources *bsr,
-                                  Suftab *suftab,
+                                  Suffixsortspace *suffixsortspace,
                                   Definedunsignedlong *longest,
                                   const GtEncseq *encseq,
                                   GtReadmode readmode,
@@ -1908,7 +1931,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   bsr->readmode = readmode;
   bsr->totallength = gt_encseq_total_length(encseq);
   bsr->sfxstrategy = sfxstrategy;
-  bsr->suftab = suftab;
+  bsr->suffixsortspace = suffixsortspace;
   bsr->encseq = encseq;
   bsr->longest = longest;
   bsr->fwd = GT_ISDIRREVERSE(bsr->readmode) ? false : true;
@@ -1979,18 +2002,20 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   }
   if (bcktab != NULL && sfxstrategy->ssortmaxdepth.defined)
   {
-    bsr->rmnsufinfo = gt_newRmnsufinfo(suftab->sortspace - suftab->suftaboffset,
-                                       -1,
-                                       NULL,
-                                       bsr->encseq,
-                                       bcktab,
-                                       maxcode,
-                                       numofchars,
-                                       prefixlength,
-                                       readmode,
-                                       partwidth,
-                                       false,
-                                       true);
+    bsr->rmnsufinfo
+      = gt_newRmnsufinfo(suffixsortspace->sortspace -
+                          suffixsortspace->sortspaceoffset,
+                         -1,
+                         NULL,
+                         bsr->encseq,
+                         bcktab,
+                         maxcode,
+                         numofchars,
+                         prefixlength,
+                         readmode,
+                         partwidth,
+                         false,
+                         true);
     gt_assert(bsr->rmnsufinfo != NULL);
   } else
   {
@@ -2121,7 +2146,14 @@ void gt_qsufsort(Suffixptr *leftptr,
   }
 }
 
-void gt_sortallbuckets(Suftab *suftab,
+/*
+  The following function is called  in sfxsuffixer.c sorts all buckets by
+  different suffix comparison methods without the help of other sorting
+  information. Suffixsortspace contains the sortspace which is accessed by some
+  negative offset.
+*/
+
+void gt_sortallbuckets(Suffixsortspace *suffixsortspace,
                        Definedunsignedlong *longest,
                        GtBucketspec2 *bucketspec2,
                        const GtEncseq *encseq,
@@ -2144,10 +2176,11 @@ void gt_sortallbuckets(Suftab *suftab,
   unsigned long lcpvalue;
   Suffixwithcode firstsuffixofbucket;
   Bentsedgresources bsr;
-  Suffixptr *suftabptr = suftab->sortspace - suftab->suftaboffset;
+  Suffixptr *suftabptr = suffixsortspace->sortspace -
+                         suffixsortspace->sortspaceoffset;
 
   initBentsedgresources(&bsr,
-                        suftab,
+                        suffixsortspace,
                         longest,
                         encseq,
                         readmode,
@@ -2173,12 +2206,12 @@ void gt_sortallbuckets(Suftab *suftab,
     }
     (*bucketiterstep)++;
     rightchar = gt_calcbucketboundsparts(&bucketspec,
-                                      bcktab,
-                                      code,
-                                      maxcode,
-                                      partwidth,
-                                      rightchar,
-                                      numofchars);
+                                         bcktab,
+                                         code,
+                                         maxcode,
+                                         partwidth,
+                                         rightchar,
+                                         numofchars);
     if (outlcpinfo != NULL && outlcpinfo->assideeffect)
     {
       bsr.lcpsubtab->numoflargelcpvalues = 0;
@@ -2329,6 +2362,11 @@ void gt_sortallbuckets(Suftab *suftab,
                         outlcpinfo == NULL ? NULL : outlcpinfo->outfpllvtab,
                         logger);
 }
+
+/*
+   The following function is used for sorting the sample making up the
+   difference cover and for sorting with the difference cover.
+*/
 
 void gt_sortbucketofsuffixes(Suffixptr *suffixestobesorted,
                              unsigned long numberofsuffixes,
