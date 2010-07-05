@@ -58,6 +58,7 @@ SYSTEM:=$(shell uname -s)
 MACHINE:=$(shell uname -m)
 ifeq ($(SYSTEM),Darwin)
   RANLIB:=ranlib
+  NO_STATIC_LINKING:=defined
   SHARED:=-dynamiclib -undefined dynamic_lookup
   SHARED_OBJ_NAME_EXT:=.dylib
   ifeq ($(universal),yes)
@@ -358,6 +359,13 @@ all: lib/libgenometools.a $(SHARED_LIBGENOMETOOLS) \
      bin/skproto bin/gt bin/lua bin/rnv bin/examples/custom_stream \
      bin/examples/gff3validator bin/examples/noop $(ANNOTATIONSKETCH_EXAMPLES)
 
+ifdef NO_STATIC_LINKING
+static:
+else
+static: bin/gt_static
+endif
+
+
 lib/libexpat.a: $(LIBEXPAT_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
@@ -429,6 +437,13 @@ $(1): $(2)
 	@$$(CC) $$(EXP_LDFLAGS) $$(GT_LDFLAGS) $$(filter-out $$(OVERRIDELIBS),$$^) \
 	  $$(filter-out $$(patsubst lib%.a,-l%,$$(notdir $$(OVERRIDELIBS))),\
 	  $$(EXP_LDLIBS)) $$(OVERRIDELIBS) -o $$@
+
+$(1)_static: $(2)
+	@echo "[link $$(@F)]"
+	@test -d $$(@D) || mkdir -p $$(@D)
+	@$$(CC) $$(EXP_LDFLAGS) $$(GT_LDFLAGS) $$(filter-out $$(OVERRIDELIBS),$$^) \
+	  $$(filter-out $$(patsubst lib%.a,-l%,$$(notdir $$(OVERRIDELIBS))),\
+	  $$(EXP_LDLIBS)) $$(OVERRIDELIBS) -static -o $$@
 endef
 
 $(eval $(call PROGRAM_template, bin/skproto, $(SKPROTO_OBJ) \
@@ -658,7 +673,7 @@ GTDISTBASENAME:="gt-$(VERSION)-$(SYSTEMNAME)-${BIT}"
 DISTDIR:="$(CURDIR)/dist/$(SYSTEMNAME)"
 GTDISTDIR:="$(DISTDIR)/$(GTDISTBASENAME)"
 
-dist: all manuals
+dist: all manuals static
 	@echo "[build distribution]"
 	@rm -rf $(GTDISTDIR)
 	@rm -rf $(DISTDIR)/$(GTDISTBASENAME).tar.gz
@@ -669,6 +684,11 @@ dist: all manuals
 	@cp $(CURDIR)/CHANGELOG $(GTDISTDIR)
 	@cp $(CURDIR)/bin/gt $(GTDISTDIR)/bin
 	@strip $(GTDISTDIR)/bin/gt
+ifndef NO_STATIC_LINKING
+	@mkdir -p $(GTDISTDIR)/bin/static
+	@cp bin/gt_static $(GTDISTDIR)/bin/static/gt
+	@strip $(GTDISTDIR)/bin/static/gt
+endif
 	@cp $(CURDIR)/doc/manuals/*.pdf $(GTDISTDIR)/doc
 	@cp -r $(CURDIR)/gtdata $(GTDISTDIR)
 	@cp -r $(CURDIR)/gtpython $(GTDISTDIR)

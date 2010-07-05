@@ -17,3 +17,6 @@ gtpython/  contains GenomeTools Python bindings (-> gtpython/README)
 lib/       contains the libgenometools (as static and shared library)
 
 The GenomeTools source code can be downloaded from http://genometools.org
+
+For the ``gt'' binary an additional statically linked binary with the same name is contained in the directory bin/static/ (except for Mac OS X).
+Please try it, if the dynamically linked binary does not work on your system.
