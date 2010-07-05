@@ -16,20 +16,25 @@ static gboolean on_expose_event(GtkWidget *widget,
 {
   cairo_t *cr;
   GtCanvas *canvas = NULL;
+  unsigned long height;
+  int rval;
   if (!d || widget->allocation.width <= 30) return FALSE;
 
   /* render image */
   l = gt_layout_new(d, widget->allocation.width, sty, err);
   if (!l) return FALSE;
+  rval = gt_layout_get_height(l, &height, err);
+  gt_assert(rval == 0);
   gtk_layout_set_size(GTK_LAYOUT(widget),
                       widget->allocation.width,
-                      gt_layout_get_height(l));
+                      height);
   cr = gdk_cairo_create(GTK_LAYOUT(widget)->bin_window);
   cairo_rectangle(cr, event->area.x, event->area.y, event->area.width,
                   event->area.height);
   cairo_clip(cr);
   canvas = gt_canvas_cairo_context_new(sty, cr, 0, widget->allocation.width,
-                                       gt_layout_get_height(l), NULL);
+                                       height, NULL, err);
+  gt_assert(canvas);
   gt_layout_sketch(l, canvas, err);
   gt_layout_delete(l);
   gt_canvas_delete(canvas);
