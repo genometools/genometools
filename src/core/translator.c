@@ -49,8 +49,7 @@ GtTranslator* gt_translator_new(GtCodonIterator *ci)
 {
   GtTranslator *tr;
   gt_assert(ci);
-  tr = gt_translator_new_with_table(gt_trans_table_new_standard(NULL),
-                                    ci);
+  tr = gt_translator_new_with_table(gt_trans_table_new_standard(NULL), ci);
   tr->owntable = true;
   return tr;
 }
