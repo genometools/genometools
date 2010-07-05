@@ -61,7 +61,7 @@ static bool relaxedcutoffsbreakcondition(void *data)
 }
 
 void gt_initRelaxedcutoffsTravfunctions(Traversealignmentfunctions
-                                                                 *travfunctions)
+                                        *travfunctions)
 {
   travfunctions->processmismatch  = relaxedcutoffsprocmatchormismatch;
   travfunctions->processdeletion  = relaxedcutoffsprocindelorintron;
@@ -86,7 +86,7 @@ void gt_initRelaxedcutoffsTravfunctions(Traversealignmentfunctions
 }
 
 void gt_initRelaxedcutoffsdata(Relaxedcutoffsdata *relaxedcutoffsdata,
-                            Cutoffs *cutoffs)
+                               Cutoffs *cutoffs)
 {
   relaxedcutoffsdata->cutoffs      = cutoffs;
   relaxedcutoffsdata->breakforloop = false;
