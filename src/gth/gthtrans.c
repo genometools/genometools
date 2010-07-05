@@ -364,6 +364,7 @@ void gt_outputtranslationandorf(unsigned long pglnum, const GthAGS *ags,
   }
   gt_translator_delete(translator);
   gt_trans_table_delete(transtable);
+  gt_codon_iterator_delete(ci);
 
   /* show the translation */
   showtranslation(spliced_seq, gt_str_get(frame[0]), gt_str_get(frame[1]),
