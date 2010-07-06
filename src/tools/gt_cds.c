@@ -30,6 +30,7 @@
 #define GT_CDS_SOURCE_TAG "gt cds"
 
 typedef struct {
+  unsigned int minorflen;
   bool verbose,
        usedesc;
   GtStr *seqfile,
@@ -68,6 +69,13 @@ static GtOptionParser* gt_cds_option_parser_new(void *tool_arguments)
   op = gt_option_parser_new("[option ...] GFF3_file",
                             "Add CDS features to exon "
                             "features given in GFF3_file.");
+
+  /* -minorflen */
+  option = gt_option_new_uint_min("minorflen", "set the minimum length an open "
+                                  "reading frame (ORF) must have to be added "
+                                  "as a CDS feature (measured in amino acids)",
+                                  &arguments->minorflen, 1, 1);
+  gt_option_parser_add_option(op, option);
 
   /* -seqfile, -usedesc and -regionmapping */
   gt_seqid2file_options(op, arguments->seqfile, &arguments->usedesc,
@@ -113,7 +121,7 @@ static int gt_cds_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
   if (!had_err) {
     /* create CDS stream */
     cds_stream = gt_cds_stream_new(gff3_in_stream, regionmapping,
-                                   GT_CDS_SOURCE_TAG);
+                                   arguments->minorflen, GT_CDS_SOURCE_TAG);
 
     /* create gff3 output stream */
     gff3_out_stream = gt_gff3_out_stream_new(cds_stream, arguments->outfp);

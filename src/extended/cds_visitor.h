@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -25,6 +25,8 @@ typedef struct GtCDSVisitor GtCDSVisitor;
 #include "extended/region_mapping.h"
 
 const GtNodeVisitorClass* gt_cds_visitor_class(void);
-GtNodeVisitor*            gt_cds_visitor_new(GtRegionMapping*, GtStr *source);
+GtNodeVisitor*            gt_cds_visitor_new(GtRegionMapping*,
+                                             unsigned int minorflen,
+                                             GtStr *source);
 
 #endif

@@ -16,6 +16,7 @@
 */
 
 #include "core/assert_api.h"
+#include "core/codon.h"
 #include "core/codon_iterator_simple.h"
 #include "core/orf.h"
 #include "core/translator.h"
@@ -26,6 +27,7 @@
 
 struct GtCDSVisitor {
   const GtNodeVisitor parent_instance;
+  unsigned minorflen;
   GtStr *source;
   Splicedseq *splicedseq; /* the (spliced) sequence of the currently considered
                              gene */
@@ -191,7 +193,10 @@ static void create_CDS_features_for_longest_ORF(GtArray *orfs, GtCDSVisitor *v,
     gt_ranges_sort_by_length_stable(orfs);
 
     /* create CDS features from the longest ORF */
-    create_CDS_features_for_ORF(*(GtRange*) gt_array_get_first(orfs), v, gn);
+    if (gt_range_length(gt_array_get_first(orfs)) >=
+        v->minorflen * GT_CODON_LENGTH) {
+      create_CDS_features_for_ORF(*(GtRange*) gt_array_get_first(orfs), v, gn);
+    }
   }
 }
 
@@ -247,13 +252,14 @@ const GtNodeVisitorClass* gt_cds_visitor_class()
 }
 
 GtNodeVisitor* gt_cds_visitor_new(GtRegionMapping *region_mapping,
-                                  GtStr *source)
+                                  unsigned int minorflen, GtStr *source)
 {
   GtNodeVisitor *gv;
   GtCDSVisitor *cds_visitor;
   gt_assert(region_mapping);
   gv = gt_node_visitor_create(gt_cds_visitor_class());
   cds_visitor = cds_visitor_cast(gv);
+  cds_visitor->minorflen = minorflen;
   cds_visitor->source = gt_str_ref(source);
   cds_visitor->splicedseq = gt_splicedseq_new();
   cds_visitor->region_mapping = region_mapping;

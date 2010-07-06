@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -32,6 +32,7 @@ static int cds_stream_lua_new(lua_State *L)
   gt_assert(cds_stream);
   *cds_stream = gt_cds_stream_new(*in_stream,
                                   gt_region_mapping_ref(*region_mapping),
+                                  1, /* XXX */
                                   "gtscript");
   luaL_getmetatable(L, GENOME_STREAM_METATABLE);
   lua_setmetatable(L, -2);

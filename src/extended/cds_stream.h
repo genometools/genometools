@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -29,6 +29,7 @@ const GtNodeStreamClass* gt_cds_stream_class(void);
 
 /* create a CDSSTream, takes ownership of GtRegionMapping */
 GtNodeStream*            gt_cds_stream_new(GtNodeStream*, GtRegionMapping*,
+                                           unsigned int minorflen,
                                            const char *source);
 
 #endif
