@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -23,7 +23,7 @@
 #include "core/str.h"
 #include "core/str_array.h"
 
-#define TERMINAL_WIDTH  80
+#define GT_TERMINAL_WIDTH  80
 
 /* The option parser class. */
 typedef struct GtOptionParser GtOptionParser;
@@ -77,8 +77,8 @@ void            gt_option_parser_delete(GtOptionParser*);
 
 /* The options:
 
-   Option descriptions are automatically formatted to TERMINAL_WIDTH, but it is
-   possible to embed newlines into the descriptions to manually affect the
+   Option descriptions are automatically formatted to GT_TERMINAL_WIDTH, but it
+   is possible to embed newlines into the descriptions to manually affect the
    formating. */
 GtOption*       gt_option_new_outputfile(FILE**);
 GtOption*       gt_option_new_verbose(bool *value);

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -239,13 +239,13 @@ void gt_option_parser_set_mailaddress(GtOptionParser *op, const char *address)
 static void show_description(unsigned long initial_space, const char *desc,
                              unsigned long len)
 {
-  const unsigned long width = TERMINAL_WIDTH - initial_space;
+  const unsigned long width = GT_TERMINAL_WIDTH - initial_space;
   const char *tmp_ptr, *desc_ptr = desc;
   unsigned long i;
   bool continue_while = false;
 
   /* got space to show option */
-  gt_assert(initial_space < TERMINAL_WIDTH);
+  gt_assert(initial_space < GT_TERMINAL_WIDTH);
 
   while (desc_ptr < desc + len) {
     /* break, if the rest of the description fits on one line */
