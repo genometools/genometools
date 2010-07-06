@@ -21,10 +21,10 @@
 
 struct GtTranscriptExons {
   GtArray *exon_array_all,
-        *exon_array_single,
-        *exon_array_initial,
-        *exon_array_internal,
-        *exon_array_terminal;
+          *exon_array_single,
+          *exon_array_initial,
+          *exon_array_internal,
+          *exon_array_terminal;
 };
 
 GtTranscriptExons* gt_transcript_exons_new(void)
@@ -114,10 +114,10 @@ GtTranscriptBittabs* gt_transcript_exons_create_bittabs(const
 {
   gt_assert(te);
   return gt_transcript_bittabs_new(gt_array_size(te->exon_array_all),
-                                gt_array_size(te->exon_array_single),
-                                gt_array_size(te->exon_array_initial),
-                                gt_array_size(te->exon_array_internal),
-                                gt_array_size(te->exon_array_terminal));
+                                   gt_array_size(te->exon_array_single),
+                                   gt_array_size(te->exon_array_initial),
+                                   gt_array_size(te->exon_array_internal),
+                                   gt_array_size(te->exon_array_terminal));
 }
 
 void gt_transcript_exons_delete(GtTranscriptExons *te)

@@ -42,12 +42,12 @@ struct GtStreamEvaluator {
   unsigned long LTRdelta;
   GtHashmap *slots; /* sequence id -> slot */
   GtEvaluator *gene_evaluator,
-            *mRNA_evaluator,
-            *LTR_evaluator;
+              *mRNA_evaluator,
+              *LTR_evaluator;
   GtTranscriptEvaluators *mRNA_exon_evaluators,
-                       *mRNA_exon_evaluators_collapsed,
-                       *CDS_exon_evaluators,
-                       *CDS_exon_evaluators_collapsed;
+                         *mRNA_exon_evaluators_collapsed,
+                         *CDS_exon_evaluators,
+                         *CDS_exon_evaluators_collapsed;
   unsigned long missing_genes,
                 wrong_genes,
                 missing_mRNAs,
@@ -60,18 +60,18 @@ struct GtStreamEvaluator {
 
 typedef struct {
   GtArray *genes_forward,
-        *genes_reverse,
-        *mRNAs_forward,
-        *mRNAs_reverse,
-        *LTRs;
+          *genes_reverse,
+          *mRNAs_forward,
+          *mRNAs_reverse,
+          *LTRs;
   GtTranscriptExons *mRNA_exons_forward,
-                  *mRNA_exons_reverse,
-                  *CDS_exons_forward,
-                  *CDS_exons_reverse;
+                    *mRNA_exons_reverse,
+                    *CDS_exons_forward,
+                    *CDS_exons_reverse;
   GtTranscriptCounts *mRNA_counts_forward,
-                   *mRNA_counts_reverse,
-                   *CDS_counts_forward,
-                   *CDS_counts_reverse;
+                     *mRNA_counts_reverse,
+                     *CDS_counts_forward,
+                     *CDS_counts_reverse;
   GtRange real_range;
   unsigned long FP_mRNA_nucleotides_forward,
                 FP_mRNA_nucleotides_reverse,
@@ -119,12 +119,12 @@ typedef struct {
        exondiff;
   unsigned long LTRdelta;
   GtEvaluator *gene_evaluator,
-            *mRNA_evaluator,
-            *LTR_evaluator;
+              *mRNA_evaluator,
+              *LTR_evaluator;
   GtTranscriptEvaluators *mRNA_exon_evaluators,
-                       *mRNA_exon_evaluators_collapsed,
-                       *CDS_exon_evaluators,
-                       *CDS_exon_evaluators_collapsed;
+                         *mRNA_exon_evaluators_collapsed,
+                         *CDS_exon_evaluators,
+                         *CDS_exon_evaluators_collapsed;
   unsigned long *wrong_genes,
                 *wrong_mRNAs,
                 *wrong_LTRs;
@@ -270,13 +270,13 @@ static int set_actuals_and_sort_them(GT_UNUSED void *key, void *value,
 
   /* set actual exons (before uniq!) */
   gt_transcript_evaluators_add_actuals(se->mRNA_exon_evaluators,
-                                    s->mRNA_exons_forward);
+                                       s->mRNA_exons_forward);
   gt_transcript_evaluators_add_actuals(se->mRNA_exon_evaluators,
-                                    s->mRNA_exons_reverse);
+                                       s->mRNA_exons_reverse);
   gt_transcript_evaluators_add_actuals(se->CDS_exon_evaluators,
-                                    s->CDS_exons_forward);
+                                       s->CDS_exons_forward);
   gt_transcript_evaluators_add_actuals(se->CDS_exon_evaluators,
-                                    s->CDS_exons_reverse);
+                                       s->CDS_exons_reverse);
 
   /* sort genes */
   gt_genome_nodes_sort(s->genes_forward);
@@ -1301,12 +1301,12 @@ int gt_stream_evaluator_evaluate(GtStreamEvaluator *se, bool verbose,
     if (gt_region_node_try_cast(gn)) {
       /* each sequence region gets its own ``slot'' */
       if (!(slot = gt_hashmap_get(se->slots,
-                               gt_str_get(gt_genome_node_get_seqid(gn)))))
+                                  gt_str_get(gt_genome_node_get_seqid(gn)))))
       {
         slot = slot_new(se->nuceval, gt_genome_node_get_range(gn));
         gt_hashmap_add(se->slots,
-                    gt_cstr_dup(gt_str_get(gt_genome_node_get_seqid(gn))),
-                    slot);
+                       gt_cstr_dup(gt_str_get(gt_genome_node_get_seqid(gn))),
+                       slot);
       }
       gt_assert(slot);
     }
@@ -1320,8 +1320,8 @@ int gt_stream_evaluator_evaluate(GtStreamEvaluator *se, bool verbose,
       real_info.slot = slot;
       gt_feature_node_determine_transcripttypes(gf);
       had_err = gt_genome_node_traverse_children(gn, &real_info,
-                                              process_real_feature, false,
-                                              NULL);
+                                                 process_real_feature, false,
+                                                 NULL);
       gt_assert(!had_err); /* cannot happen, process_real_feature() is sane */
     }
     if (gv)

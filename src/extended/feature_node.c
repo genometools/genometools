@@ -518,16 +518,16 @@ void gt_feature_node_determine_transcripttypes(GtFeatureNode *fn)
   info.exon_features = gt_array_new(sizeof (GtFeatureNode*));
   info.cds_features = gt_array_new(sizeof (GtFeatureNode*));
   had_err = gt_genome_node_traverse_children((GtGenomeNode*) fn, &info,
-                                          determine_transcripttypes, false,
-                                          NULL);
+                                             determine_transcripttypes, false,
+                                             NULL);
   gt_assert(!had_err); /* cannot happen, because determine_transcripttypes() is
-                       sane */
+                          sane */
   gt_array_delete(info.exon_features);
   gt_array_delete(info.cds_features);
 }
 
 GtTranscriptFeatureType gt_feature_node_get_transcriptfeaturetype(GtFeatureNode
-                                                                *fn)
+                                                                  *fn)
 {
   gt_assert(fn);
   return (fn->bit_field >> TRANSCRIPT_FEATURE_TYPE_OFFSET) &
