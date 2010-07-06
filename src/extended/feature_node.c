@@ -473,18 +473,17 @@ static void set_transcript_types(GtArray *features)
   gt_assert(features);
   if (gt_array_size(features)) {
     if (gt_array_size(features) == 1) {
-      fn = *(GtFeatureNode**) gt_array_get(features, 0);
+      fn = *(GtFeatureNode**) gt_array_get_first(features);
       set_transcriptfeaturetype(fn, TRANSCRIPT_FEATURE_TYPE_SINGLE);
     }
     else {
-      fn = *(GtFeatureNode**) gt_array_get(features, 0);
+      fn = *(GtFeatureNode**) gt_array_get_first(features);
       set_transcriptfeaturetype(fn, TRANSCRIPT_FEATURE_TYPE_INITIAL);
       for (i = 1; i < gt_array_size(features) - 1; i++) {
         fn = *(GtFeatureNode**) gt_array_get(features, i);
         set_transcriptfeaturetype(fn, TRANSCRIPT_FEATURE_TYPE_INTERNAL);
       }
-      fn = *(GtFeatureNode**)
-           gt_array_get(features, gt_array_size(features) - 1);
+      fn = *(GtFeatureNode**) gt_array_get_last(features);
       set_transcriptfeaturetype(fn, TRANSCRIPT_FEATURE_TYPE_TERMINAL);
     }
   }
