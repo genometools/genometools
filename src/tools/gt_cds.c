@@ -119,11 +119,12 @@ static int gt_cds_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
   }
 
   /* create gff3 output stream */
-  if (!had_err)
+  if (!had_err) {
     gff3_out_stream = gt_gff3_out_stream_new(cds_stream, arguments->outfp);
 
-  /* pull the features through the stream and free them afterwards */
-  had_err = gt_node_stream_pull(gff3_out_stream, err);
+    /* pull the features through the stream and free them afterwards */
+    had_err = gt_node_stream_pull(gff3_out_stream, err);
+  }
 
   /* free */
   gt_node_stream_delete(gff3_out_stream);
