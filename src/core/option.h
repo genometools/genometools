@@ -25,38 +25,39 @@
 
 #define TERMINAL_WIDTH  80
 
-/* the option parser class */
+/* The option parser class. */
 typedef struct GtOptionParser GtOptionParser;
-/* the option class */
+/* The option class. */
 typedef struct GtOption GtOption;
 
-/* possible option parser return values */
+/* Possible option parser return values. */
 typedef enum {
-  GT_OPTION_PARSER_OK,           /* everything went fine */
-  GT_OPTION_PARSER_ERROR,        /* an error occured during option parsing */
-  GT_OPTION_PARSER_REQUESTS_EXIT /* the option parser requests an exit, because
-                                option -help, -helpdev, or -version was used */
+  GT_OPTION_PARSER_OK,           /* Everything went fine. */
+  GT_OPTION_PARSER_ERROR,        /* An error occured during option parsing. */
+  GT_OPTION_PARSER_REQUESTS_EXIT /* The option parser requests an exit, because
+                                    option -help, -helpdev, or -version was
+                                    used. */
 } GtOPrval;
 
 typedef void (*GtShowVersionFunc)(const char *progname);
 typedef int  (*GtShowCommentFunc)(const char *progname, void *data, GtError*);
 typedef int  (*GtOptionParserHookFunc)(void *data, GtError*);
 
-/* the option parser */
+/* The option parser. */
 GtOptionParser* gt_option_parser_new(const char *synopsis,
                                      const char *one_liner);
-/* takes ownership */
-void            gt_option_parser_add_option(GtOptionParser*, GtOption*);
-/* refer to manual at the end of help output */
+/* Takes ownership of <option>. */
+void            gt_option_parser_add_option(GtOptionParser*, GtOption *option);
+/* Refer to manual at the end of help output. */
 void            gt_option_parser_refer_to_manual(GtOptionParser*);
 void            gt_option_parser_set_comment_func(GtOptionParser*,
                                                   GtShowCommentFunc,
                                                   void* data);
-/* set the mailadress used in the final ``Report bugs to'' line of the -help
-   output to <address>. It should be of the form "<bill@microsoft.com>" */
+/* Set the mailadress used in the final ``Report bugs to'' line of the -help
+   output to <address>. It should be of the form "<bill@microsoft.com>". */
 void            gt_option_parser_set_mailaddress(GtOptionParser*,
                                                  const char *address);
-/* register a hook function. All registered hook functions are called at the end
+/* Register a hook function. All registered hook functions are called at the end
    of gt_option_parser_parse().
    This allows to have a module which registers a bunch of options in the option
    parser and automatically performs necessary postprocessing after the option
@@ -74,11 +75,11 @@ GtOPrval        gt_option_parser_parse(GtOptionParser*, int *parsed_args,
                                        GtShowVersionFunc, GtError*);
 void            gt_option_parser_delete(GtOptionParser*);
 
-/* the options
+/* The options:
 
-   option descriptions are automatically formatted to TERMINAL_WIDTH, but it is
+   Option descriptions are automatically formatted to TERMINAL_WIDTH, but it is
    possible to embed newlines into the descriptions to manually affect the
-   formating */
+   formating. */
 GtOption*       gt_option_new_outputfile(FILE**);
 GtOption*       gt_option_new_verbose(bool *value);
 GtOption*       gt_option_new_debug(bool *value);
@@ -98,7 +99,7 @@ GtOption*       gt_option_new_double_min_max(const char *option_str,
                                              double default_value,
                                              double min_value,
                                              double max_value);
-/* enforces that the given argument is >= 0.0 and <= 1.0 */
+/* Enforces that the given argument is >= 0.0 and <= 1.0. */
 GtOption*       gt_option_new_probability(const char *option_str,
                                           const char *description,
                                           double *value,
@@ -154,8 +155,8 @@ GtOption*       gt_option_new_ulong_min_max(const char *option_str,
                                             unsigned long default_value,
                                             unsigned long min_value,
                                             unsigned long max_value);
-/* if <default_value> equals NULL, GT_UNDEF_LONG will be used as default for
-   range->start and range->end */
+/* If <default_value> equals <NULL>, <GT_UNDEF_LONG> will be used as default for
+   range->start and range->end. */
 GtOption*       gt_option_new_range(const char *option_str,
                                     const char *description,
                                     GtRange *value, GtRange *default_value);
@@ -170,8 +171,8 @@ GtOption*       gt_option_new_string(const char *option_str,
                                      GtStr *value, const char *default_value);
 GtOption*       gt_option_new_stringarray(const char *option_str,
                                           const char *description, GtStrArray*);
-/* add an option which allows only arguments given in the NULL terminated
-   <domain> (<default_value> must be an entry of <domain> or NULL) */
+/* Add an option which allows only arguments given in the <NULL> terminated
+   <domain> (<default_value> must be an entry of <domain> or <NULL>) */
 GtOption*       gt_option_new_choice(const char *option_str,
                                      const char *description, GtStr *value,
                                      const char *default_value,
@@ -185,10 +186,10 @@ GtOption*       gt_option_ref(GtOption*);
 const char*     gt_option_get_name(const GtOption *o);
 void            gt_option_is_mandatory(GtOption*);
 void            gt_option_is_mandatory_either(GtOption*, const GtOption*);
-/* if this function was called, <o> is only shown in the output of -help+ */
-void            gt_option_is_extended_option(GtOption *o);
-/* if this function was called, <o> is only shown in the output of -helpdev */
-void            gt_option_is_development_option(GtOption *o);
+/* Set that <option> is only shown in the output of -help+. */
+void            gt_option_is_extended_option(GtOption *option);
+/* Set that <option> is only shown in the output of -helpdev. */
+void            gt_option_is_development_option(GtOption *option);
 void            gt_option_imply(GtOption*, const GtOption*);
 void            gt_option_imply_either_2(GtOption*, const GtOption*,
                                          const GtOption*);
