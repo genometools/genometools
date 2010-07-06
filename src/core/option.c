@@ -65,6 +65,7 @@ struct GtOptionParser {
        refer_to_manual;
   GtShowCommentFunc comment_func;
   void *comment_func_data;
+  GtShowVersionFunc version_func;
   const char *mailaddress;
   unsigned int min_additional_arguments,
                max_additional_arguments;
@@ -176,21 +177,15 @@ GtOption* gt_option_ref(GtOption *o)
 GtOptionParser* gt_option_parser_new(const char *synopsis,
                                      const char *one_liner)
 {
-  GtOptionParser *op = gt_malloc(sizeof (GtOptionParser));
+  GtOptionParser *op;
   gt_assert(synopsis && one_liner);
   gt_assert("one_liner must have upper case letter at start and '.' at end" &&
-         strlen(one_liner) && isupper((int) one_liner[0]));
+            strlen(one_liner) && isupper((int) one_liner[0]));
   gt_assert(one_liner[strlen(one_liner)-1] == '.');
-  op->progname = NULL;
+  op = gt_calloc(1, sizeof *op);
   op->synopsis = gt_cstr_dup(synopsis);
   op->one_liner = gt_cstr_dup(one_liner);
   op->options = gt_array_new(sizeof (GtOption*));
-  op->hooks = NULL;
-  op->parser_called = false;
-  op->refer_to_manual = false;
-  op->comment_func = NULL;
-  op->comment_func_data = NULL;
-  op->mailaddress = NULL;
   op->min_additional_arguments = GT_UNDEF_UINT;
   op->max_additional_arguments = GT_UNDEF_UINT;
   return op;
@@ -215,6 +210,13 @@ void gt_option_parser_set_comment_func(GtOptionParser *op,
   gt_assert(op);
   op->comment_func = comment_func;
   op->comment_func_data = data;
+}
+
+void gt_option_parser_set_version_func(GtOptionParser *op,
+                                       GtShowVersionFunc version_func)
+{
+  gt_assert(op && version_func);
+  op->version_func = version_func;
 }
 
 void gt_option_parser_register_hook(GtOptionParser *op,
@@ -602,7 +604,7 @@ void gt_option_parser_set_min_max_args(GtOptionParser *op,
 
 GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                                 const char **argv,
-                                GtShowVersionFunc versionfunc, GtError *err)
+                                GtShowVersionFunc version_func, GtError *err)
 {
   int argnum, int_value;
   unsigned int uint_value;
@@ -632,7 +634,8 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
   }
   option = gt_option_new_helpdev();
   gt_option_parser_add_option(op, option);
-  option = gt_option_new_version(versionfunc);
+  option = gt_option_new_version(op->version_func ? op->version_func
+                                                  : version_func);
   gt_option_parser_add_option(op, option);
 
   for (argnum = 1; argnum < argc; argnum++) {

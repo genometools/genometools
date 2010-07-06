@@ -53,6 +53,12 @@ void            gt_option_parser_refer_to_manual(GtOptionParser*);
 void            gt_option_parser_set_comment_func(GtOptionParser*,
                                                   GtShowCommentFunc,
                                                   void* data);
+/* Set the version function used by <option_parser> to <version_func>.
+   This version function takes precedens to the one supplied to
+   <gt_option_parser_parse()>. */
+void            gt_option_parser_set_version_func(GtOptionParser *option_parser,
+                                                  GtShowVersionFunc
+                                                  version_func);
 /* Set the mailadress used in the final ``Report bugs to'' line of the -help
    output to <address>. It should be of the form "<bill@microsoft.com>". */
 void            gt_option_parser_set_mailaddress(GtOptionParser*,
@@ -72,7 +78,8 @@ void            gt_option_parser_set_min_max_args(GtOptionParser*, unsigned int,
                                                   unsigned int);
 GtOPrval        gt_option_parser_parse(GtOptionParser*, int *parsed_args,
                                        int argc, const char **argv,
-                                       GtShowVersionFunc, GtError*);
+                                       GtShowVersionFunc version_func,
+                                       GtError*);
 void            gt_option_parser_delete(GtOptionParser*);
 
 /* The options:
