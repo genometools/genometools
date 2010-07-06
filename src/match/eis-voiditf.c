@@ -19,6 +19,7 @@
 #include "core/encseq_metadata.h"
 #include "core/log_api.h"
 #include "eis-bwtseq-construct.h"
+#include "eis-bwtseq-priv.h"
 #include "eis-bwtseq.h"
 #include "eis-voiditf.h"
 #include "procmatch.h"
@@ -494,4 +495,67 @@ unsigned long gt_voidpackedindex_totallength_get(const FMindex *fmindex)
 
   gt_assert(bwtlen > 0);
   return bwtlen - 1;
+}
+
+unsigned long gt_pck_getShuStringLength(const FMindex *bwtSubject,
+                                       const GtUchar *query,
+                                       unsigned long queryLength)
+{
+  const GtUchar *qptr, *qend;
+  Symbol curChar;
+  const MRAEnc *alphabet;
+  unsigned long start, end, retval;
+
+  gt_assert(bwtSubject && query);
+  alphabet = BWTSeqGetAlphabet((const BWTSeq *) bwtSubject);
+
+  qptr = query;
+  qend = query + queryLength;
+
+  curChar = MRAEncMapSymbol(alphabet, *qptr);
+  /*gt_log_log("query[%lu]=%d",(unsigned long) (qptr-query),(int) *qptr);*/
+
+  qptr++;
+  start = ((const BWTSeq *) bwtSubject)->count[curChar];
+  end = ((const BWTSeq *) bwtSubject)->count[curChar + 1];
+  /*gt_log_log("start=%lu, end=%lu", start, end);*/
+  for (/* Nothing */; start < end && qptr < qend; qptr++)
+  {
+    /*gt_log_log("query[%lu]=%d",(unsigned long) (qptr-query),(int) *qptr);*/
+    GtUlongPair occPair;
+    curChar = MRAEncMapSymbol(alphabet, *qptr);
+    occPair = BWTSeqTransformedPosPairOcc((const BWTSeq *) bwtSubject,
+                                          curChar,
+                                          start,
+                                          end);
+    start = ((const BWTSeq *) bwtSubject)->count[curChar] + occPair.a;
+    end = ((const BWTSeq *) bwtSubject)->count[curChar] + occPair.b;
+    /*gt_log_log("start=%lu, end=%lu", start, end);*/
+  }
+  if (qptr == qend && start < end)
+    retval = queryLength + 1;
+  else
+    retval = qptr - query;
+  return retval;
+}
+
+double gt_pck_getGCcontent(const FMindex *bwtSubject,
+                           const GtAlphabet *alphabet)
+{
+  unsigned long  c, length;
+  double gc;
+  const MRAEnc *FM_alphabet;
+  GtUchar c_sym;
+
+  FM_alphabet = BWTSeqGetAlphabet((const BWTSeq *) bwtSubject);
+
+  c_sym = MRAEncMapSymbol(FM_alphabet,
+                          gt_alphabet_encode(alphabet, 'c'));
+  length = ((const BWTSeq *) bwtSubject)->seqIdx->seqLen;
+
+  c = ((const BWTSeq *) bwtSubject)->count[c_sym+1] -
+    ((const BWTSeq *) bwtSubject)->count[c_sym];
+
+  gc = c * 2 / (double) (length - 2);
+  return gc;
 }

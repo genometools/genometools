@@ -27,28 +27,28 @@
 #include "core/seqiterator.h"
 #include "core/seqiterator_sequence_buffer.h"
 #include "core/unused_api.h"
-#include "match/eis-bwtseq.h"
+#include "match/eis-voiditf.h"
 #include "match/idx-limdfs.h"
-#include "match/shu-match.h"
+#include "match/shu-divergence.h"
 
 #include "tools/gt_genomediff.h"
 
 typedef struct {
-  GtOption *ref_esaindex_genomediff,
-           *ref_pckindex_genomediff;
-  bool verbose_genomediff,
-       withesa_genomediff;
-  int user_max_depth_genomediff,
-      nchoose;
-  GtStrArray *queryname_genomediff;
-  GtStr *indexname_genomediff;
+  GtOption *ref_esaindex,
+           *ref_pckindex;
+  bool verbose,
+       withesa;
+  int user_max_depth;
+  unsigned long max_ln_n_fac;
+  GtStrArray *queryname;
+  GtStr *indexname;
 } GtGenomediffArguments;
 
 static void* gt_genomediff_arguments_new(void)
 {
-  GtGenomediffArguments *arguments = gt_calloc(1, sizeof *arguments);
-  arguments->indexname_genomediff = gt_str_new();
-  arguments->queryname_genomediff = gt_str_array_new();
+  GtGenomediffArguments *arguments = gt_calloc((size_t) 1, sizeof *arguments);
+  arguments->indexname = gt_str_new();
+  arguments->queryname = gt_str_array_new();
   return arguments;
 }
 
@@ -56,10 +56,10 @@ static void gt_genomediff_arguments_delete(void *tool_arguments)
 {
   GtGenomediffArguments *arguments = tool_arguments;
   if (!arguments) return;
-  gt_str_delete(arguments->indexname_genomediff);
-  gt_str_array_delete(arguments->queryname_genomediff);
-  gt_option_delete(arguments->ref_esaindex_genomediff);
-  gt_option_delete(arguments->ref_pckindex_genomediff);
+  gt_str_delete(arguments->indexname);
+  gt_str_array_delete(arguments->queryname);
+  gt_option_delete(arguments->ref_esaindex);
+  gt_option_delete(arguments->ref_pckindex);
   gt_free(arguments);
 }
 
@@ -77,45 +77,46 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
 
   /* -maxdepth */
   option =  gt_option_new_int("maxdepth", "max depth of .pbi-file",
-                              &arguments->user_max_depth_genomediff, -1);
+                              &arguments->user_max_depth, -1);
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
-  /* -nchoose */
-  option = gt_option_new_int("nchoose", "Number of precalculated values",
-                             &arguments->nchoose, 1000);
+  /* -max_n */
+  option = gt_option_new_ulong("max_n", "Number of precalculated valuesi "
+                             "for ln(n!) and pmax(x)",
+                             &arguments->max_ln_n_fac, 1000UL);
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
   /* -v */
-  option = gt_option_new_verbose(&arguments->verbose_genomediff);
+  option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
 
   /* -esa */
   optionesaindex = gt_option_new_string("esa",
                                      "Specify index (enhanced suffix array)",
-                                     arguments->indexname_genomediff, NULL);
+                                     arguments->indexname, NULL);
   gt_option_parser_add_option(op, optionesaindex);
 
   /* -pck */
   optionpckindex = gt_option_new_string("pck",
                                         "Specify index (packed index)",
-                                        arguments->indexname_genomediff, NULL);
+                                        arguments->indexname, NULL);
   gt_option_parser_add_option(op, optionpckindex);
 
   gt_option_exclude(optionesaindex,optionpckindex);
   gt_option_is_mandatory_either(optionesaindex,optionpckindex);
 
   /* ref esa */
-  arguments->ref_esaindex_genomediff = gt_option_ref(optionesaindex);
+  arguments->ref_esaindex = gt_option_ref(optionesaindex);
 
   /* ref pck */
-  arguments->ref_pckindex_genomediff = gt_option_ref(optionpckindex);
+  arguments->ref_pckindex = gt_option_ref(optionpckindex);
 
   /* -query */
   option = gt_option_new_filenamearray("query",
                                        "File containing the query sequence",
-                                       arguments->queryname_genomediff);
+                                       arguments->queryname);
   gt_option_is_mandatory(option);
   gt_option_parser_add_option(op, option);
 
@@ -135,13 +136,13 @@ static int gt_genomediff_arguments_check(GT_UNUSED int rest_argc,
 
   /* XXX: do some checking after the option have been parsed (usally this is not
      necessary and this function can be removed completely). */
-  if (gt_option_is_set(arguments->ref_esaindex_genomediff))
+  if (gt_option_is_set(arguments->ref_esaindex))
   {
-    arguments->withesa_genomediff = true;
+    arguments->withesa = true;
   } else
   {
-    gt_assert(gt_option_is_set(arguments->ref_pckindex_genomediff));
-    arguments->withesa_genomediff = false;
+    gt_assert(gt_option_is_set(arguments->ref_pckindex));
+    arguments->withesa = false;
   }
   return had_err;
 }
@@ -161,18 +162,18 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
   gt_error_check(err);
   gt_assert(arguments);
 
-  logger = gt_logger_new(arguments->verbose_genomediff,
+  logger = gt_logger_new(arguments->verbose,
                          GT_LOGGER_DEFLT_PREFIX,
                          stdout);
   gt_assert(logger);
 
   genericindexSubject = genericindex_new(gt_str_get(
-                                           arguments->indexname_genomediff),
-                                         arguments->withesa_genomediff,
+                                           arguments->indexname),
+                                         arguments->withesa,
                                          true,
                                          false,
                                          false,
-                                         arguments->user_max_depth_genomediff,
+                                         arguments->user_max_depth,
                                          logger,
                                          err);
   if (genericindexSubject == NULL)
@@ -203,7 +204,7 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
     subjectindex = genericindex_get_packedindex(genericindexSubject);
 
     queries = gt_seqiterator_sequence_buffer_new(
-                                          arguments->queryname_genomediff,
+                                          arguments->queryname,
                                           err);
     gt_assert(queries);
     alphabet = gt_encseq_alphabet(encseq);
@@ -228,15 +229,15 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
       gt_logger_log(logger,
                     "found query of length: %lu",
                     queryLength);
-      avgShuLength = 0;
-      gc_query = 0;
+      avgShuLength = 0.0;
+      gc_query = 0.0;
       for (currentSuffix = 0; currentSuffix < queryLength; currentSuffix++)
       {
         /*gt_log_log("suffix: %lu", currentSuffix);*/
-        currentShuLength = gt_pck_getShuStringLength(
-                      (const BWTSeq *) subjectindex,
-                      currentQuery + (size_t) currentSuffix,
-                      (size_t) queryLength - currentSuffix);
+        currentShuLength = (double) gt_pck_getShuStringLength(
+                      subjectindex,
+                      &currentQuery[currentSuffix],
+                      queryLength - currentSuffix);
         /*gt_log_log("current ShuStringLength = %5.1f",*/
                    /*currentShuLength);*/
         avgShuLength += currentShuLength;
@@ -264,8 +265,9 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
         double div, kr;
 
         /*definitely change this to a user defined variable*/
-        ln_n_fac = gt_get_ln_n_fac(arguments->nchoose);
-        gt_log_log("ln(nchoose!) = %f\n", ln_n_fac[arguments->nchoose]);
+        ln_n_fac = gt_get_ln_n_fac(arguments->max_ln_n_fac);
+        gt_log_log("ln(max_ln_n_fac!) = %f\n",
+                   ln_n_fac[arguments->max_ln_n_fac]);
 
         gt_logger_log(logger, "# shulen:\n%f", avgShuLength);
         gt_log_log("shu: %f, gc: %f, len: %lu",
@@ -277,7 +279,7 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
                    subjectLength,
                    gc_query,
                    ln_n_fac,
-                   arguments->nchoose);
+                   arguments->max_ln_n_fac);
         gt_logger_log(logger, "# divergence:\n%f", div);
 
         kr = gt_calculateKr(div);

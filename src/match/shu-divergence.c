@@ -16,18 +16,13 @@
 */
 
 #include <math.h>
+#include <float.h>
 
 #include "core/array2dim_api.h"
 #include "core/assert_api.h"
 #include "core/log_api.h"
-#include "match/eis-bwtseq-siop.h"
-#include "match/eis-bwtseq.h"
-#include "match/eis-encidxseq.h"
-#include "match/eis-mrangealphabet-siop.h"
-#include "match/eis-mrangealphabet.h"
-#include "match/sarr-def.h"
 
-#include "match/shu-match.h"
+#include "match/shu-divergence.h"
 
 static double pmax(double M, /* M value should be explored by simulation ??? */
             unsigned long x,
@@ -36,11 +31,11 @@ static double pmax(double M, /* M value should be explored by simulation ??? */
             int *thresholdReached,
             double *ln_n_fac,
             double *s1,
-            unsigned int n_s)
+            unsigned long n_s)
 {
 
   unsigned long k;
-  double s = 0, ln_x_choose_k;
+  double s = 0.0, ln_x_choose_k;
   double ln, ln1, m1, m, delta;
   double pS = p;
 
@@ -52,13 +47,14 @@ static double pmax(double M, /* M value should be explored by simulation ??? */
            " s1 should be increased!\n", x);
   }
   gt_assert(x <= n_s);
-  if (s1[x] != 0)
+  if (s1[x] != 0.0)
   {
     return s1[x];
   }
 
   for (k = 0; k <= x; k++)
   {
+    double m_a, m_b, m_c, m_d, m_e;
     if (x == k)
       ln_x_choose_k = 0.0;
     else
@@ -66,35 +62,40 @@ static double pmax(double M, /* M value should be explored by simulation ??? */
     gt_log_log("x = %lu, k = %lu", x, k);
     gt_log_log("ln_x_choose_k = %8.32f", ln_x_choose_k);
 
-    m = (pow (2.0, (double) x) *
-         pow (p, (double) k) *
-         pow (0.5 - p, (double) x - k) *
-         pow (1.0 - pow (pS, (double) k) * pow (0.5 - pS, (double) x - k),
-              (double) subjectLength));
+    m_a = pow (2.0, (double) x);
+    m_b = pow (p, (double) k);
+    m_c = pow (0.5 - p, (double) x - k);
+    m_d = pow (pS, (double) k);
+    m_e = pow (0.5 - pS, (double) x -k);
+    m = (m_a * m_b * m_c * pow (1.0 - m_d * m_e, (double) subjectLength));
     /*gt_log_log("m: %f", m);*/
-    if (m == 0)
+    /* this is ok even with double, because of next if!*/
+    if (m == 0.0)
     {
-      delta = 0;
+      delta = 0.0;
     } else if (m >= M)
     {
       ln = log(m);
       if (ln == -HUGE_VAL)
       {
         gt_log_log("huge!");
-        delta = 0;
+        delta = 0.0;
       } else
         delta = exp (ln + ln_x_choose_k);
     } else
     {
+      double delta_a, delta_b;
       gt_log_log("m kleiner als M");
       m1 = 1 + m;  /* for small values of m - to avoid overflow (-INF) */
       ln1 = log(m1);
-      delta = exp (ln1 + ln_x_choose_k) - exp (ln_x_choose_k);
+      delta_a = exp (ln1 + ln_x_choose_k);
+      delta_b = exp (ln_x_choose_k);
+      delta = delta_a - delta_b;
     }
     s += delta;
     if (s >= 1.0)
     {
-      s = 1;
+      s = 1.0;
       *thresholdReached = 1;
       break;
     }
@@ -111,7 +112,7 @@ static double expShulen(double T, /* absolute error */
                  unsigned long subjectLength,
                  double *ln_n_fac,
                  double *s1,
-                 unsigned int n_s)
+                 unsigned long n_s)
 {
   unsigned long i;
   int thresholdReached = 0;
@@ -122,10 +123,10 @@ static double expShulen(double T, /* absolute error */
   double t = 1.0 - d;
   double p_t = t;
 
-  probOld  = 0;
+  probOld  = 0.0;
 
   /*since for i = 0, the whole expression is 0*/
-  for (i = 1; i < subjectLength; i++)
+  for (i = 1LU; i < subjectLength; i++)
   {
     factor = 1.0 - p_t;
     if (!thresholdReached)
@@ -145,7 +146,7 @@ static double expShulen(double T, /* absolute error */
     delta = (prob_i - probOld) * i;  /* delta should always be positive */
     e += delta;    /* expectation of avg shulen length(Q, S) */
     /* check error */
-    if (e >= 1 && delta / e <= T)
+    if (e >= 1.0 && delta / e <= T)
     {
       break;
     }
@@ -156,69 +157,6 @@ static double expShulen(double T, /* absolute error */
   return e;
 }
 
-unsigned int gt_pck_getShuStringLength(const BWTSeq *bwtSubject,
-                                       const GtUchar *query,
-                                       size_t queryLength)
-{
-  const GtUchar *qptr, *qend;
-  Symbol curChar;
-  const MRAEnc *alphabet;
-  unsigned long start, end;
-  size_t retval;
-
-  gt_assert(bwtSubject && query);
-  alphabet = BWTSeqGetAlphabet(bwtSubject);
-
-  qptr = query;
-  qend = query + queryLength;
-
-  curChar = MRAEncMapSymbol(alphabet, *qptr);
-  /*gt_log_log("query[%lu]=%d",(unsigned long) (qptr-query),(int) *qptr);*/
-
-  qptr++;
-  start = bwtSubject->count[curChar];
-  end = bwtSubject->count[curChar + 1];
-  /*gt_log_log("start=%lu, end=%lu", start, end);*/
-  for (/* Nothing */; start < end && qptr < qend; qptr++)
-  {
-    /*gt_log_log("query[%lu]=%d",(unsigned long) (qptr-query),(int) *qptr);*/
-    GtUlongPair occPair;
-    curChar = MRAEncMapSymbol(alphabet, *qptr);
-    occPair = BWTSeqTransformedPosPairOcc(bwtSubject,
-                                          curChar,
-                                          start,
-                                          end);
-    start = bwtSubject->count[curChar] + occPair.a;
-    end = bwtSubject->count[curChar] + occPair.b;
-    /*gt_log_log("start=%lu, end=%lu", start, end);*/
-  }
-  if (qptr == qend && start < end)
-    retval = queryLength + 1;
-  else
-    retval = (size_t) (qptr - query);
-  return (unsigned int) retval;
-}
-
-double gt_pck_getGCcontent(const BWTSeq *bwtSubject,
-                           const GtAlphabet *alphabet)
-{
-  unsigned long  c, length;
-  double gc;
-  const MRAEnc *FM_alphabet;
-  GtUchar c_sym;
-
-  FM_alphabet = BWTSeqGetAlphabet(bwtSubject);
-
-  c_sym = MRAEncMapSymbol(FM_alphabet,
-                          gt_alphabet_encode(alphabet, 'c'));
-  length = bwtSubject->seqIdx->seqLen;
-
-  c = bwtSubject->count[c_sym+1] - bwtSubject->count[c_sym];
-
-  gc = c * 2 / (double) (length - 2);
-  return gc;
-}
-
 /* calculate divergence */
 double gt_divergence(double E, /* relative error for shulen length */
                    double T, /* absolute error */
@@ -227,24 +165,26 @@ double gt_divergence(double E, /* relative error for shulen length */
                    unsigned long subjectLength,
                    double gc,
                    double *ln_n_fac,
-                   unsigned int n_s)
+                   unsigned long n_s)
 {
   double p, q;
   double du, dl, dm, t, d;
   double *s1;
-  s1 = gt_calloc(n_s + 1, sizeof (double));
+  s1 = gt_calloc((size_t) n_s + 1, sizeof (double));
 
   p = gc / 2;
   q = (1.0 - gc) / 2.0;
-  du = 0;
+  du = 0.0;
   dl = 1.0 - (2 * p * p + 2 * q * q);  /* dl < 0.75 */
   /*this should become user definable*/
   t = THRESHOLD;
 
-  while ((dl - du) / 2.0 > t)
+  while (fabs(((dl - du) / 2.0) - t) > DBL_EPSILON)
   {
     dm = (du + dl) / 2.0;
-    if (shulen < expShulen (T, M, dm, p, subjectLength, ln_n_fac, s1, n_s))
+    if (fabs(shulen -
+             expShulen (T, M, dm, p, subjectLength, ln_n_fac, s1, n_s))
+        > DBL_EPSILON)
     {
       du = dm;
     } else
@@ -264,20 +204,20 @@ double gt_divergence(double E, /* relative error for shulen length */
   return d;
 }
 
-double *gt_get_ln_n_fac(int n)
+double *gt_get_ln_n_fac(unsigned long n)
 {
-  int i;
+  unsigned long i;
   double *ln_n_fac;
 
-  ln_n_fac = gt_calloc(n + 1, sizeof (double));
+  ln_n_fac = gt_calloc((size_t) n + 1, sizeof (double));
   gt_assert(ln_n_fac != NULL);
 
-  for (i = 0; i <= n; i++)
+  for (i = 0UL; i <= n; i++)
   {
     if (i == 0)
-      ln_n_fac[i] = log(1);
+      ln_n_fac[i] = log(1.0);
     else
-      ln_n_fac[i] = log(i) + ln_n_fac[i-1];
+      ln_n_fac[i] = log((double) i) + ln_n_fac[i-1];
   }
   return ln_n_fac;
 }

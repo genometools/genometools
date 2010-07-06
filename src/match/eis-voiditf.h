@@ -143,4 +143,15 @@ unsigned int gt_bwtseq2maxdepth(const FMindex *voidbwtseq);
 
 unsigned long gt_voidpackedindex_totallength_get(const FMindex *fmindex);
 
+/* returns the length of the matching prefix +1, that is it returns the
+ * length of the shortest absent prefix */
+unsigned long gt_pck_getShuStringLength(const FMindex* bwtSubject,
+                                       const GtUchar* query,
+                                       unsigned long queryLength);
+
+/* returns the ½gc-content of the subject assuming fwd and rev sequence in the
+ * index so that |g| == |c| */
+double gt_pck_getGCcontent(const FMindex *bwtSubject,
+                           const GtAlphabet *alphabet);
+
 #endif

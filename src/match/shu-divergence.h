@@ -15,42 +15,30 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SHU_MATCH_H
-#define SHU_MATCH_H
-
-#include "match/eis-bwtseq.h"
+#ifndef SHU_DIVERGENCE_H
+#define SHU_DIVERGENCE_H
 
 /* threshold used for calculation of divergence */
-#define THRESHOLD pow(10, -9)
+#define THRESHOLD pow(10.0, -9.0)
 #define DEFAULT_E 1e-3
 #define DEFAULT_T 1e-5
 #define DEFAULT_M DBL_MIN
-
-/* returns the length of the matching prefix +1, that is it returns the
- * length of the shortest absent prefix */
-unsigned int gt_pck_getShuStringLength(const BWTSeq* bwtSubject,
-                                       const GtUchar* query,
-                                       size_t queryLength);
-
-/* returns the ½gc-content of the subject */
-double gt_pck_getGCcontent(const BWTSeq *bwtSubject,
-                           const GtAlphabet *alphabet);
 
 /* calculates the divergence from the shulength */
 double gt_divergence (double E, /* relative error for shulen length */
                    double T, /* absolute error */
                    double M,
                    double shulen, /*avg shulength*/
-                   unsigned long seqLen, /*subjectlength*/
+                   unsigned long subjectLength, /*subjectlength*/
                    double gc, /*combined gc-content*/
                    double *ln_n_fac,
-                   unsigned int n_s /*length of s-array*/);
+                   unsigned long n_s /*length of s-array*/);
 
 /* Jukes-Cantor transform of divergence: Kr */
 double gt_calculateKr(double d);
 
-/*calculates the n choose k table for given max n and k
+/*calculates the ln n choose k table for given max n and k
  * use free from core/array2dim_api.h to free this*/
-double *gt_get_ln_n_fac(int n);
+double *gt_get_ln_n_fac(unsigned long n);
 
 #endif
