@@ -82,18 +82,20 @@ static GtOPrval gthbssmbuild_parse_options(int *parsed_args,
   gt_option_parser_add_option(op, optbssmfile);
 
   optdatapath = gt_option_new_string("datapath", "specify root of "
-                                  "species-specific training data directory "
-                                  "tree", commandlineopts->datapath, NULL);
+                                     "species-specific training data directory "
+                                     "tree", commandlineopts->datapath, NULL);
   gt_option_parser_add_option(op, optdatapath);
 
   optgtdonormodel = gt_option_new_bool(GTDONORMODEL_OPT_CSTR, "train GT donor "
-                                    "model", &commandlineopts->calcGTdonormodel,
-                                    false);
+                                       "model",
+                                       &commandlineopts->calcGTdonormodel,
+                                       false);
   gt_option_parser_add_option(op, optgtdonormodel);
 
   optgcdonormodel = gt_option_new_bool(GCDONORMODEL_OPT_CSTR, "train GC donor "
-                                    "model", &commandlineopts->calcGCdonormodel,
-                                    false);
+                                       "model",
+                                       &commandlineopts->calcGCdonormodel,
+                                       false);
   gt_option_parser_add_option(op, optgcdonormodel);
 
   optagacceptormodel = gt_option_new_bool(AGACCEPTORMODEL_OPT_CSTR, "train AG "
@@ -103,7 +105,7 @@ static GtOPrval gthbssmbuild_parse_options(int *parsed_args,
   gt_option_parser_add_option(op, optagacceptormodel);
 
   optgzip = gt_option_new_bool("gzip", "use gzip'ed input files",
-                            &commandlineopts->gzip, false);
+                               &commandlineopts->gzip, false);
   gt_option_parser_add_option(op, optgzip);
 
   /* mandatory options */
@@ -121,7 +123,7 @@ static GtOPrval gthbssmbuild_parse_options(int *parsed_args,
       !gt_option_is_set(optgcdonormodel) &&
       !gt_option_is_set(optagacceptormodel)) {
     gt_error_set(err, "at least one of the options -%s, -%s, or -%s have to "
-                   "be used", GTDONORMODEL_OPT_CSTR, GCDONORMODEL_OPT_CSTR,
+                      "be used", GTDONORMODEL_OPT_CSTR, GCDONORMODEL_OPT_CSTR,
               AGACCEPTORMODEL_OPT_CSTR);
     oprval = GT_OPTION_PARSER_ERROR;
   }
