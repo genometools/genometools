@@ -466,7 +466,7 @@ static int save_exons_and_cds(GtGenomeNode *gn, void *data,
   return 0;
 }
 
-static void set_transcript_types(GtArray *features)
+static void set_transcript_types(GtArray *features, GtStrand parent_strand)
 {
   GtFeatureNode *fn;
   unsigned long i;
@@ -478,13 +478,17 @@ static void set_transcript_types(GtArray *features)
     }
     else {
       fn = *(GtFeatureNode**) gt_array_get_first(features);
-      set_transcriptfeaturetype(fn, TRANSCRIPT_FEATURE_TYPE_INITIAL);
+      set_transcriptfeaturetype(fn, parent_strand != GT_STRAND_REVERSE
+                                    ? TRANSCRIPT_FEATURE_TYPE_INITIAL
+                                    : TRANSCRIPT_FEATURE_TYPE_TERMINAL);
       for (i = 1; i < gt_array_size(features) - 1; i++) {
         fn = *(GtFeatureNode**) gt_array_get(features, i);
         set_transcriptfeaturetype(fn, TRANSCRIPT_FEATURE_TYPE_INTERNAL);
       }
       fn = *(GtFeatureNode**) gt_array_get_last(features);
-      set_transcriptfeaturetype(fn, TRANSCRIPT_FEATURE_TYPE_TERMINAL);
+      set_transcriptfeaturetype(fn, parent_strand != GT_STRAND_REVERSE
+                                    ? TRANSCRIPT_FEATURE_TYPE_TERMINAL
+                                    : TRANSCRIPT_FEATURE_TYPE_INITIAL);
     }
   }
 }
@@ -493,6 +497,7 @@ static int determine_transcripttypes(GtGenomeNode *gn, void *data,
                                      GT_UNUSED GtError *err)
 {
   SaveExonAndCDSInfo *info = (SaveExonAndCDSInfo*) data;
+  GtFeatureNode *fn = gt_feature_node_cast(gn);
   int had_err;
   gt_error_check(err);
   gt_assert(gn && info);
@@ -504,8 +509,8 @@ static int determine_transcripttypes(GtGenomeNode *gn, void *data,
                                                     save_exons_and_cds, NULL);
   gt_assert(!had_err); /* cannot happen, because save_exons_and_cds() is sane */
   /* set transcript feature type, if necessary */
-  set_transcript_types(info->exon_features);
-  set_transcript_types(info->cds_features);
+  set_transcript_types(info->exon_features, gt_feature_node_get_strand(fn));
+  set_transcript_types(info->cds_features, gt_feature_node_get_strand(fn));
   return 0;
 }
 
