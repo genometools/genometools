@@ -191,8 +191,7 @@ static void create_CDS_features_for_longest_ORF(GtArray *orfs, GtCDSVisitor *v,
     gt_ranges_sort_by_length_stable(orfs);
 
     /* create CDS features from the longest ORF */
-    if (gt_range_length(gt_array_get_first(orfs)) > 100)
-      create_CDS_features_for_ORF(*(GtRange*) gt_array_get_first(orfs), v, gn);
+    create_CDS_features_for_ORF(*(GtRange*) gt_array_get_first(orfs), v, gn);
   }
 }
 
