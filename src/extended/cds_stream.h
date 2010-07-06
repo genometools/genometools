@@ -27,9 +27,9 @@ typedef struct GtCDSStream GtCDSStream;
 
 const GtNodeStreamClass* gt_cds_stream_class(void);
 
-/* Create a GtCDSStream, takes ownership of <in_stream>. */
+/* Create a GtCDSStream, takes ownership of <region_mapping>. */
 GtNodeStream*            gt_cds_stream_new(GtNodeStream *in_stream,
-                                           GtRegionMapping*,
+                                           GtRegionMapping *region_mapping,
                                            unsigned int minorflen,
                                            const char *source);
 
