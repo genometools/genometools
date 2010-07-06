@@ -110,16 +110,12 @@ static int gt_cds_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
   if (!regionmapping)
     had_err = -1;
 
-  /* create CDS stream */
   if (!had_err) {
+    /* create CDS stream */
     cds_stream = gt_cds_stream_new(gff3_in_stream, regionmapping,
                                    GT_CDS_SOURCE_TAG);
-    if (!cds_stream)
-      had_err = -1;
-  }
 
-  /* create gff3 output stream */
-  if (!had_err) {
+    /* create gff3 output stream */
     gff3_out_stream = gt_gff3_out_stream_new(cds_stream, arguments->outfp);
 
     /* pull the features through the stream and free them afterwards */
