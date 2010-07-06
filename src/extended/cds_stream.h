@@ -22,13 +22,14 @@
 #include "extended/node_stream_api.h"
 #include "extended/region_mapping.h"
 
-/* implements the ``genome_stream'' interface */
+/* Implements the ``genome_stream'' interface. */
 typedef struct GtCDSStream GtCDSStream;
 
 const GtNodeStreamClass* gt_cds_stream_class(void);
 
-/* create a GtCDSStream, takes ownership of GtRegionMapping */
-GtNodeStream*            gt_cds_stream_new(GtNodeStream*, GtRegionMapping*,
+/* Create a GtCDSStream, takes ownership of <in_stream>. */
+GtNodeStream*            gt_cds_stream_new(GtNodeStream *in_stream,
+                                           GtRegionMapping*,
                                            unsigned int minorflen,
                                            const char *source);
 
