@@ -28,12 +28,12 @@ struct GtCDSStream {
 #define cds_stream_cast(GS)\
         gt_node_stream_cast(gt_cds_stream_class(), GS)
 
-static int cds_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
+static int cds_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
 {
   GtCDSStream *cds_stream;
   int had_err;
   gt_error_check(err);
-  cds_stream = cds_stream_cast(gs);
+  cds_stream = cds_stream_cast(ns);
   had_err = gt_node_stream_next(cds_stream->in_stream, gn, err);
   if (!had_err && *gn)
     had_err = gt_genome_node_accept(*gn, cds_stream->cds_visitor, err);
@@ -45,9 +45,9 @@ static int cds_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
   return had_err;
 }
 
-static void cds_stream_free(GtNodeStream *gs)
+static void cds_stream_free(GtNodeStream *ns)
 {
-  GtCDSStream *cds_stream = cds_stream_cast(gs);
+  GtCDSStream *cds_stream = cds_stream_cast(ns);
   gt_node_visitor_delete(cds_stream->cds_visitor);
   gt_node_stream_delete(cds_stream->in_stream);
 }
@@ -66,14 +66,14 @@ const GtNodeStreamClass* gt_cds_stream_class(void)
 GtNodeStream* gt_cds_stream_new(GtNodeStream *in_stream, GtRegionMapping *rm,
                                 unsigned int minorflen, const char *source)
 {
-  GtNodeStream *gs;
+  GtNodeStream *ns;
   GtCDSStream *cds_stream;
   GtStr *source_str;
-  gs = gt_node_stream_create(gt_cds_stream_class(), true);
-  cds_stream = cds_stream_cast(gs);
+  ns = gt_node_stream_create(gt_cds_stream_class(), true);
+  cds_stream = cds_stream_cast(ns);
   source_str = gt_str_new_cstr(source);
   cds_stream->in_stream = gt_node_stream_ref(in_stream);
   cds_stream->cds_visitor = gt_cds_visitor_new(rm, minorflen, source_str);
   gt_str_delete(source_str);
-  return gs;
+  return ns;
 }

@@ -51,19 +51,19 @@ static int extract_cds_if_necessary(GtGenomeNode *gn, void *data,
                                     GtError *err)
 {
   GtCDSVisitor *v = (GtCDSVisitor*) data;
-  GtFeatureNode *gf;
+  GtFeatureNode *fn;
   GtRange range;
   const char *raw_sequence;
   unsigned long raw_sequence_length;
   int had_err = 0;
 
   gt_error_check(err);
-  gf = gt_genome_node_cast(gt_feature_node_class(), gn);
-  gt_assert(gf);
+  fn = gt_genome_node_cast(gt_feature_node_class(), gn);
+  gt_assert(fn);
 
-  if (gt_feature_node_has_type(gf, gt_ft_exon) &&
-      (gt_feature_node_get_strand(gf) == GT_STRAND_FORWARD ||
-       gt_feature_node_get_strand(gf) == GT_STRAND_REVERSE)) {
+  if (gt_feature_node_has_type(fn, gt_ft_exon) &&
+      (gt_feature_node_get_strand(fn) == GT_STRAND_FORWARD ||
+       gt_feature_node_get_strand(fn) == GT_STRAND_REVERSE)) {
     range = gt_genome_node_get_range(gn);
     had_err = gt_region_mapping_get_raw_sequence(v->region_mapping,
                                                  &raw_sequence,
@@ -203,18 +203,18 @@ static void create_CDS_features_for_longest_ORF(GtArray *orfs, GtCDSVisitor *v,
 static int add_cds_if_necessary(GtGenomeNode *gn, void *data, GtError *err)
 {
   GtCDSVisitor *v = (GtCDSVisitor*) data;
-  GtFeatureNode *gf;
+  GtFeatureNode *fn;
   int had_err;
 
   gt_error_check(err);
-  gf = gt_genome_node_cast(gt_feature_node_class(), gn);
-  gt_assert(gf);
+  fn = gt_genome_node_cast(gt_feature_node_class(), gn);
+  gt_assert(fn);
 
   had_err = extract_spliced_seq(gn, v, err);
   if (!had_err && gt_splicedseq_length(v->splicedseq) > 2) {
     GtArray *orfs;
 
-    if (gt_feature_node_get_strand(gf) == GT_STRAND_REVERSE) {
+    if (gt_feature_node_get_strand(fn) == GT_STRAND_REVERSE) {
       if (gt_splicedseq_reverse(v->splicedseq, err))
         return -1;
     }
@@ -227,12 +227,12 @@ static int add_cds_if_necessary(GtGenomeNode *gn, void *data, GtError *err)
   return had_err;
 }
 
-static int cds_visitor_genome_feature(GtNodeVisitor *gv, GtFeatureNode *gf,
+static int cds_visitor_genome_feature(GtNodeVisitor *gv, GtFeatureNode *fn,
                                       GtError *err)
 {
   GtCDSVisitor *v = cds_visitor_cast(gv);
   gt_error_check(err);
-  return gt_genome_node_traverse_children((GtGenomeNode*) gf, v,
+  return gt_genome_node_traverse_children((GtGenomeNode*) fn, v,
                                        add_cds_if_necessary, false, err);
 
 }
