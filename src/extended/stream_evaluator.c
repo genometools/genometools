@@ -431,15 +431,15 @@ static int process_real_feature(GtGenomeNode *gn, void *data,
 {
   ProcessRealFeatureInfo *info = (ProcessRealFeatureInfo*) data;
   GtGenomeNode *gn_ref;
-  GtFeatureNode *gf;
+  GtFeatureNode *fn;
   GtRange range;
 
   gt_error_check(err);
   gt_assert(gn && data);
-  gf = (GtFeatureNode*) gn;
+  fn = (GtFeatureNode*) gn;
 
-  if (gt_feature_node_has_type(gf, gt_ft_gene)) {
-    switch (gt_feature_node_get_strand(gf)) {
+  if (gt_feature_node_has_type(fn, gt_ft_gene)) {
+    switch (gt_feature_node_get_strand(fn)) {
       case GT_STRAND_FORWARD:
         gn_ref = gt_genome_node_ref(gn);
         gt_array_add(info->slot->genes_forward, gn_ref);
@@ -455,8 +455,8 @@ static int process_real_feature(GtGenomeNode *gn, void *data,
         }
     }
   }
-  else if (gt_feature_node_has_type(gf, gt_ft_mRNA)) {
-    switch (gt_feature_node_get_strand(gf)) {
+  else if (gt_feature_node_has_type(fn, gt_ft_mRNA)) {
+    switch (gt_feature_node_get_strand(fn)) {
       case GT_STRAND_FORWARD:
         gn_ref = gt_genome_node_ref(gn);
         gt_array_add(info->slot->mRNAs_forward, gn_ref);
@@ -472,13 +472,13 @@ static int process_real_feature(GtGenomeNode *gn, void *data,
         }
     }
   }
-  else if (gt_feature_node_has_type(gf, gt_ft_LTR_retrotransposon)) {
+  else if (gt_feature_node_has_type(fn, gt_ft_LTR_retrotransposon)) {
     gn_ref = gt_genome_node_ref(gn);
     gt_array_add(info->slot->LTRs, gn_ref);
   }
-  else if (gt_feature_node_has_type(gf, gt_ft_CDS)) {
+  else if (gt_feature_node_has_type(fn, gt_ft_CDS)) {
     range = gt_genome_node_get_range(gn);
-    switch (gt_feature_node_get_strand(gf)) {
+    switch (gt_feature_node_get_strand(fn)) {
       case GT_STRAND_FORWARD:
         add_real_exon(info->slot->CDS_exons_forward, range, gn);
         /* nucleotide level */
@@ -502,9 +502,9 @@ static int process_real_feature(GtGenomeNode *gn, void *data,
         }
     }
   }
-  else if (gt_feature_node_has_type(gf, gt_ft_exon)) {
+  else if (gt_feature_node_has_type(fn, gt_ft_exon)) {
     range = gt_genome_node_get_range(gn);
-    switch (gt_feature_node_get_strand(gf)) {
+    switch (gt_feature_node_get_strand(fn)) {
       case GT_STRAND_FORWARD:
         add_real_exon(info->slot->mRNA_exons_forward, range, gn);
         /* nucleotide level */
@@ -535,11 +535,11 @@ static int store_exon(GtGenomeNode *gn, void *data, GT_UNUSED GtError *err)
 {
   GtArray *exons = (GtArray*) data;
   GtRange range;
-  GtFeatureNode *gf;
+  GtFeatureNode *fn;
   gt_error_check(err);
-  gf = gt_genome_node_cast(gt_feature_node_class(), gn);
-  gt_assert(gf && exons);
-  if (gt_feature_node_has_type(gf, gt_ft_exon)) {
+  fn = gt_genome_node_cast(gt_feature_node_class(), gn);
+  gt_assert(fn && exons);
+  if (gt_feature_node_has_type(fn, gt_ft_exon)) {
     range = gt_genome_node_get_range(gn);
     gt_array_add(exons, range);
   }
@@ -588,16 +588,16 @@ typedef struct {
 static int store_gene_feature(GtGenomeNode *gn, void *data,
                               GT_UNUSED GtError *err)
 {
-  GtFeatureNode *gf;
+  GtFeatureNode *fn;
   Store_gene_feature_info *info = (Store_gene_feature_info*) data;
   GtRange range;
   gt_error_check(err);
-  gf = gt_genome_node_cast(gt_feature_node_class(), gn);
-  gt_assert(gf && info);
-  if (gt_feature_node_has_type(gf, gt_ft_mRNA)) {
-    gt_array_add(info->mRNAs, gf);
+  fn = gt_genome_node_cast(gt_feature_node_class(), gn);
+  gt_assert(fn && info);
+  if (gt_feature_node_has_type(fn, gt_ft_mRNA)) {
+    gt_array_add(info->mRNAs, fn);
   }
-  else if (gt_feature_node_has_type(gf, gt_ft_exon)) {
+  else if (gt_feature_node_has_type(fn, gt_ft_exon)) {
     range = gt_genome_node_get_range(gn);
     gt_array_add(info->exons, range);
   }
@@ -1264,10 +1264,10 @@ static int compute_nucleotides_values(GT_UNUSED void *key, void *value,
 }
 
 int gt_stream_evaluator_evaluate(GtStreamEvaluator *se, bool verbose,
-                                 bool exondiff, GtNodeVisitor *gv, GtError *err)
+                                 bool exondiff, GtNodeVisitor *nv, GtError *err)
 {
   GtGenomeNode *gn;
-  GtFeatureNode *gf;
+  GtFeatureNode *fn;
   Slot *slot;
   ProcessRealFeatureInfo real_info;
   ProcessPredictedFeatureInfo predicted_info;
@@ -1311,21 +1311,21 @@ int gt_stream_evaluator_evaluate(GtStreamEvaluator *se, bool verbose,
       gt_assert(slot);
     }
     /* we consider only genome features */
-    if ((gf = gt_feature_node_try_cast(gn))) {
+    if ((fn = gt_feature_node_try_cast(gn))) {
       /* each sequence must have its own ``slot'' at this point */
       slot = gt_hashmap_get(se->slots,
                             gt_str_get(gt_genome_node_get_seqid(gn)));
       gt_assert(slot);
       /* store the exons */
       real_info.slot = slot;
-      gt_feature_node_determine_transcripttypes(gf);
+      gt_feature_node_determine_transcripttypes(fn);
       had_err = gt_genome_node_traverse_children(gn, &real_info,
                                                  process_real_feature, false,
                                                  NULL);
       gt_assert(!had_err); /* cannot happen, process_real_feature() is sane */
     }
-    if (gv)
-      gt_genome_node_accept(gn, gv, err);
+    if (nv)
+      gt_genome_node_accept(gn, nv, err);
     gt_genome_node_delete(gn);
   }
 
@@ -1341,13 +1341,13 @@ int gt_stream_evaluator_evaluate(GtStreamEvaluator *se, bool verbose,
     while (!(had_err = gt_node_stream_next(se->prediction, &gn, err)) &&
            gn) {
       /* we consider only genome features */
-      if ((gf = gt_feature_node_try_cast(gn))) {
+      if ((fn = gt_feature_node_try_cast(gn))) {
         /* get (real) slot */
         slot = gt_hashmap_get(se->slots,
                               gt_str_get(gt_genome_node_get_seqid(gn)));
         if (slot) {
           predicted_info.slot = slot;
-          gt_feature_node_determine_transcripttypes(gf);
+          gt_feature_node_determine_transcripttypes(fn);
           had_err = gt_genome_node_traverse_children(gn, &predicted_info,
                                                   process_predicted_feature,
                                                   false, NULL);
@@ -1360,8 +1360,8 @@ int gt_stream_evaluator_evaluate(GtStreamEvaluator *se, bool verbose,
                      "``reality''", gt_str_get(gt_genome_node_get_seqid(gn)));
         }
       }
-      if (gv)
-        had_err = gt_genome_node_accept(gn, gv, err);
+      if (nv)
+        had_err = gt_genome_node_accept(gn, nv, err);
       gt_genome_node_delete(gn);
     }
   }

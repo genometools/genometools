@@ -60,12 +60,12 @@ static void region_node_change_seqid(GtGenomeNode *gn, GtStr *seqid)
   rn->seqid = gt_str_ref(seqid);
 }
 
-static int region_node_accept(GtGenomeNode *gn, GtNodeVisitor *gv, GtError *err)
+static int region_node_accept(GtGenomeNode *gn, GtNodeVisitor *nv, GtError *err)
 {
   GtRegionNode *rn;
   gt_error_check(err);
   rn = gt_region_node_cast(gn);
-  return gt_node_visitor_visit_region_node(gv, rn, err);
+  return gt_node_visitor_visit_region_node(nv, rn, err);
 }
 
 const GtGenomeNodeClass* gt_region_node_class()

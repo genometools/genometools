@@ -54,13 +54,13 @@ static void sequence_node_change_seqid(GtGenomeNode *gn, GtStr *seqid)
   sn->description = gt_str_ref(seqid);
 }
 
-static int sequence_node_accept(GtGenomeNode *gn, GtNodeVisitor *gv,
+static int sequence_node_accept(GtGenomeNode *gn, GtNodeVisitor *nv,
                                 GtError *err)
 {
   GtSequenceNode *sn;
   gt_error_check(err);
   sn = gt_sequence_node_cast(gn);
-  return gt_node_visitor_visit_sequence_node(gv, sn, err);
+  return gt_node_visitor_visit_sequence_node(nv, sn, err);
 }
 
 const GtGenomeNodeClass* gt_sequence_node_class()

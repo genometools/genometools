@@ -34,6 +34,6 @@ int  gt_node_visitor_visit_feature_node(GtNodeVisitor*, GtFeatureNode*,
 int  gt_node_visitor_visit_region_node(GtNodeVisitor*, GtRegionNode*, GtError*);
 int  gt_node_visitor_visit_sequence_node(GtNodeVisitor*, GtSequenceNode*,
                                          GtError*);
-void gt_node_visitor_delete(GtNodeVisitor *gv);
+void gt_node_visitor_delete(GtNodeVisitor *nv);
 
 #endif

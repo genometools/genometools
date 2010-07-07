@@ -24,12 +24,13 @@
 typedef struct GtStreamEvaluator GtStreamEvaluator;
 
 GtStreamEvaluator* gt_stream_evaluator_new(GtNodeStream *reality,
-                                      GtNodeStream *prediction, bool nuceval,
-                                      bool evalLTR, unsigned long LTRdelta);
-/* if <gv> is not NULL, it visits all nodes from reality and the prediction */
+                                           GtNodeStream *prediction,
+                                           bool nuceval, bool evalLTR,
+                                           unsigned long LTRdelta);
+/* if <nv> is not NULL, it visits all nodes from reality and the prediction */
 int              gt_stream_evaluator_evaluate(GtStreamEvaluator*, bool verbose,
-                                           bool exondiff, GtNodeVisitor *gv,
-                                           GtError*);
+                                              bool exondiff, GtNodeVisitor *nv,
+                                              GtError*);
 void             gt_stream_evaluator_show(GtStreamEvaluator*, FILE*);
 void             gt_stream_evaluator_delete(GtStreamEvaluator*);
 

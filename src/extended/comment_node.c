@@ -57,13 +57,13 @@ static GtRange comment_node_get_range(GT_UNUSED GtGenomeNode *gn)
   return range;
 }
 
-static int comment_node_accept(GtGenomeNode *gn, GtNodeVisitor *gv,
+static int comment_node_accept(GtGenomeNode *gn, GtNodeVisitor *nv,
                                GtError *err)
 {
   GtCommentNode *c;
   gt_error_check(err);
   c = gt_comment_node_cast(gn);
-  return gt_node_visitor_visit_comment_node(gv, c, err);
+  return gt_node_visitor_visit_comment_node(nv, c, err);
 }
 
 const GtGenomeNodeClass* gt_comment_node_class()

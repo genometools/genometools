@@ -261,11 +261,11 @@ void gt_genome_node_change_seqid(GtGenomeNode *gn, GtStr *seqid)
   gn->c_class->change_seqid(gn, seqid);
 }
 
-int gt_genome_node_accept(GtGenomeNode *gn, GtNodeVisitor *gv, GtError *err)
+int gt_genome_node_accept(GtGenomeNode *gn, GtNodeVisitor *nv, GtError *err)
 {
   gt_error_check(err);
-  gt_assert(gn && gv && gn->c_class && gn->c_class->accept);
-  return gn->c_class->accept(gn, gv, err);
+  gt_assert(gn && nv && gn->c_class && gn->c_class->accept);
+  return gn->c_class->accept(gn, nv, err);
 }
 
 int gt_genome_node_compare(GtGenomeNode **gn_a, GtGenomeNode **gn_b)

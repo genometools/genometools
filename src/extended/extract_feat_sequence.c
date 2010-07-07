@@ -27,15 +27,15 @@ static int extract_join_feature(GtGenomeNode *gn, const char *type,
 {
   const char *raw_sequence;
   unsigned long raw_sequence_length, offset;
-  GtFeatureNode *gf;
+  GtFeatureNode *fn;
   GtRange range;
   int had_err = 0;
 
   gt_error_check(err);
-  gf = gt_genome_node_cast(gt_feature_node_class(), gn);
-  gt_assert(gf);
+  fn = gt_genome_node_cast(gt_feature_node_class(), gn);
+  gt_assert(fn);
 
-  if (gt_feature_node_has_type(gf, type)) {
+  if (gt_feature_node_has_type(fn, type)) {
     range = gt_genome_node_get_range(gn);
     had_err = gt_region_mapping_get_raw_sequence(region_mapping, &raw_sequence,
                                                  &raw_sequence_length, &offset,
@@ -46,7 +46,7 @@ static int extract_join_feature(GtGenomeNode *gn, const char *type,
       raw_sequence += range.start - offset;
       gt_assert(range.end - offset < raw_sequence_length);
       gt_str_append_cstr_nt(sequence, raw_sequence, gt_range_length(&range));
-      if (gt_feature_node_get_strand(gf) == GT_STRAND_REVERSE)
+      if (gt_feature_node_get_strand(fn) == GT_STRAND_REVERSE)
         *reverse_strand = true;
     }
   }
@@ -58,15 +58,15 @@ int gt_extract_feat_sequence(GtStr *sequence, GtGenomeNode *gn,
                              bool join, GtRegionMapping *region_mapping,
                              GtError *err)
 {
-  GtFeatureNode *gf;
+  GtFeatureNode *fn;
   GtRange range;
   const char *raw_sequence;
   unsigned long raw_sequence_length, offset;
   int had_err = 0;
 
   gt_error_check(err);
-  gf = gt_genome_node_cast(gt_feature_node_class(), gn);
-  gt_assert(gf);
+  fn = gt_genome_node_cast(gt_feature_node_class(), gn);
+  gt_assert(fn);
 
   if (join) {
     GtFeatureNodeIterator *fni;
@@ -88,7 +88,7 @@ int gt_extract_feat_sequence(GtStr *sequence, GtGenomeNode *gn,
       }
     }
   }
-  else if (gt_feature_node_get_type(gf) == type) {
+  else if (gt_feature_node_get_type(fn) == type) {
     gt_assert(!had_err);
     /* otherwise we only have to look this feature */
     range = gt_genome_node_get_range(gn);
@@ -103,7 +103,7 @@ int gt_extract_feat_sequence(GtStr *sequence, GtGenomeNode *gn,
       gt_assert(range.end <= raw_sequence_length);
       gt_str_append_cstr_nt(sequence, raw_sequence + range.start - offset,
                             gt_range_length(&range));
-      if (gt_feature_node_get_strand(gf) == GT_STRAND_REVERSE) {
+      if (gt_feature_node_get_strand(fn) == GT_STRAND_REVERSE) {
         had_err = gt_reverse_complement(gt_str_get(sequence),
                                      gt_str_length(sequence), err);
       }

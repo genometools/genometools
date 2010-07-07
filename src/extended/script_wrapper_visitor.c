@@ -31,11 +31,11 @@ struct GtScriptWrapperVisitor {
 #define gt_script_wrapper_visitor_cast(GV)\
         gt_node_visitor_cast(gt_script_wrapper_visitor_class(), GV)
 
-static void script_wrapper_visitor_free(GtNodeVisitor *gv)
+static void script_wrapper_visitor_free(GtNodeVisitor *nv)
 {
   GtScriptWrapperVisitor *swv;
-  gt_assert(gv);
-  swv  = gt_script_wrapper_visitor_cast(gv);
+  gt_assert(nv);
+  swv  = gt_script_wrapper_visitor_cast(nv);
   if (swv->free_func)
     swv->free_func(NULL);
 }

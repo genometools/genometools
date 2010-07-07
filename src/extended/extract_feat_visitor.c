@@ -38,9 +38,9 @@ struct GtExtractFeatVisitor {
 #define gt_extract_feat_visitor_cast(GV)\
         gt_node_visitor_cast(gt_extract_feat_visitor_class(), GV)
 
-static void extract_feat_visitor_free(GtNodeVisitor *gv)
+static void extract_feat_visitor_free(GtNodeVisitor *nv)
 {
-  GtExtractFeatVisitor *extract_feat_visitor = gt_extract_feat_visitor_cast(gv);
+  GtExtractFeatVisitor *extract_feat_visitor = gt_extract_feat_visitor_cast(nv);
   gt_assert(extract_feat_visitor);
   gt_region_mapping_delete(extract_feat_visitor->region_mapping);
 }
@@ -127,32 +127,32 @@ static int extract_feat_visitor_feature_node(GtNodeVisitor *nv,
 
 const GtNodeVisitorClass* gt_extract_feat_visitor_class()
 {
-  static const GtNodeVisitorClass *gvc = NULL;
-  if (!gvc) {
-    gvc = gt_node_visitor_class_new(sizeof (GtExtractFeatVisitor),
+  static const GtNodeVisitorClass *nvc = NULL;
+  if (!nvc) {
+    nvc = gt_node_visitor_class_new(sizeof (GtExtractFeatVisitor),
                                     extract_feat_visitor_free,
                                     NULL,
                                     extract_feat_visitor_feature_node,
                                     NULL,
                                     NULL);
   }
-  return gvc;
+  return nvc;
 }
 
 GtNodeVisitor* gt_extract_feat_visitor_new(GtRegionMapping *rm,
                                            const char *type, bool join,
                                            bool translate, GtFile *outfp)
 {
-  GtNodeVisitor *gv;
+  GtNodeVisitor *nv;
   GtExtractFeatVisitor *efv;
   gt_assert(rm);
-  gv = gt_node_visitor_create(gt_extract_feat_visitor_class());
-  efv= gt_extract_feat_visitor_cast(gv);
+  nv = gt_node_visitor_create(gt_extract_feat_visitor_class());
+  efv= gt_extract_feat_visitor_cast(nv);
   efv->type = gt_symbol(type);
   efv->join = join;
   efv->translate = translate;
   efv->fastaseq_counter = 0;
   efv->region_mapping = rm;
   efv->outfp = outfp;
-  return gv;
+  return nv;
 }

@@ -33,26 +33,26 @@ struct GtRegionCovVisitor {
 #define gt_regioncov_visitor_cast(GV)\
         gt_node_visitor_cast(gt_regioncov_visitor_class(), GV)
 
-static void gt_regioncov_visitor_free(GtNodeVisitor *gv)
+static void gt_regioncov_visitor_free(GtNodeVisitor *nv)
 {
-  GtRegionCovVisitor *regioncov_visitor = gt_regioncov_visitor_cast(gv);
+  GtRegionCovVisitor *regioncov_visitor = gt_regioncov_visitor_cast(nv);
   gt_hashmap_delete(regioncov_visitor->region2rangelist);
 }
 
-static int gt_regioncov_visitor_feature_node(GtNodeVisitor *gv,
-                                             GtFeatureNode *gf,
+static int gt_regioncov_visitor_feature_node(GtNodeVisitor *nv,
+                                             GtFeatureNode *fn,
                                              GT_UNUSED GtError *err)
 {
   GtRange *old_range_ptr, old_range, new_range;
   GtArray *ranges;
   GtRegionCovVisitor *regioncov_visitor;
   gt_error_check(err);
-  regioncov_visitor = gt_regioncov_visitor_cast(gv);
+  regioncov_visitor = gt_regioncov_visitor_cast(nv);
   ranges = gt_hashmap_get(regioncov_visitor->region2rangelist,
                        gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*)
-                                                           gf)));
+                                                           fn)));
   gt_assert(ranges);
-  new_range = gt_genome_node_get_range((GtGenomeNode*) gf);
+  new_range = gt_genome_node_get_range((GtGenomeNode*) fn);
   if (!gt_array_size(ranges))
     gt_array_add(ranges, new_range);
   else {
@@ -68,13 +68,13 @@ static int gt_regioncov_visitor_feature_node(GtNodeVisitor *gv,
   return 0;
 }
 
-static int gt_regioncov_visitor_region_node(GtNodeVisitor *gv, GtRegionNode *rn,
+static int gt_regioncov_visitor_region_node(GtNodeVisitor *nv, GtRegionNode *rn,
                                          GT_UNUSED GtError *err)
 {
   GtRegionCovVisitor *regioncov_visitor;
   GtArray *rangelist;
   gt_error_check(err);
-  regioncov_visitor = gt_regioncov_visitor_cast(gv);
+  regioncov_visitor = gt_regioncov_visitor_cast(nv);
   rangelist = gt_array_new(sizeof (GtRange));
   gt_hashmap_add(regioncov_visitor->region2rangelist,
               gt_cstr_dup(gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*)
@@ -85,26 +85,26 @@ static int gt_regioncov_visitor_region_node(GtNodeVisitor *gv, GtRegionNode *rn,
 
 const GtNodeVisitorClass* gt_regioncov_visitor_class()
 {
-  static const GtNodeVisitorClass *gvc = NULL;
-  if (!gvc) {
-    gvc = gt_node_visitor_class_new(sizeof (GtRegionCovVisitor),
+  static const GtNodeVisitorClass *nvc = NULL;
+  if (!nvc) {
+    nvc = gt_node_visitor_class_new(sizeof (GtRegionCovVisitor),
                                     gt_regioncov_visitor_free,
                                     NULL,
                                     gt_regioncov_visitor_feature_node,
                                     gt_regioncov_visitor_region_node,
                                     NULL);
   }
-  return gvc;
+  return nvc;
 }
 
 GtNodeVisitor* gt_regioncov_visitor_new(unsigned long max_feature_dist)
 {
-  GtNodeVisitor *gv = gt_node_visitor_create(gt_regioncov_visitor_class());
-  GtRegionCovVisitor *regioncov_visitor = gt_regioncov_visitor_cast(gv);
+  GtNodeVisitor *nv = gt_node_visitor_create(gt_regioncov_visitor_class());
+  GtRegionCovVisitor *regioncov_visitor = gt_regioncov_visitor_cast(nv);
   regioncov_visitor->max_feature_dist = max_feature_dist;
   regioncov_visitor->region2rangelist =
     gt_hashmap_new(GT_HASH_STRING, gt_free_func, (GtFree) gt_array_delete);
-  return gv;
+  return nv;
 }
 
 static int show_rangelist(void *key, void *value, GT_UNUSED void *data,
@@ -127,9 +127,9 @@ static int show_rangelist(void *key, void *value, GT_UNUSED void *data,
   return 0;
 }
 
-void gt_regioncov_visitor_show_coverage(GtNodeVisitor *gv)
+void gt_regioncov_visitor_show_coverage(GtNodeVisitor *nv)
 {
-  GtRegionCovVisitor *regioncov_visitor = gt_regioncov_visitor_cast(gv);
+  GtRegionCovVisitor *regioncov_visitor = gt_regioncov_visitor_cast(nv);
   int had_err;
   had_err = gt_hashmap_foreach_in_key_order(regioncov_visitor->region2rangelist,
                                          show_rangelist, NULL, NULL);

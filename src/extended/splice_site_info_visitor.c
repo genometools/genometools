@@ -41,11 +41,11 @@ struct GtSpliceSiteInfoVisitor {
 #define splice_site_info_visitor_cast(GV)\
         gt_node_visitor_cast(gt_splice_site_info_visitor_class(), GV)
 
-static void splice_site_info_visitor_free(GtNodeVisitor *gv)
+static void splice_site_info_visitor_free(GtNodeVisitor *nv)
 {
   GtSpliceSiteInfoVisitor *splice_site_info_visitor;
-  gt_assert(gv);
-  splice_site_info_visitor = splice_site_info_visitor_cast(gv);
+  gt_assert(nv);
+  splice_site_info_visitor = splice_site_info_visitor_cast(nv);
   gt_region_mapping_delete(splice_site_info_visitor->region_mapping);
   gt_string_distri_delete(splice_site_info_visitor->splicesites);
   gt_string_distri_delete(splice_site_info_visitor->donorsites);
@@ -103,7 +103,7 @@ static int process_intron(GtSpliceSiteInfoVisitor *ssiv, GtGenomeNode *intron,
   return had_err;
 }
 
-static int splice_site_info_visitor_feature_node(GtNodeVisitor *gv,
+static int splice_site_info_visitor_feature_node(GtNodeVisitor *nv,
                                                  GtFeatureNode *fn,
                                                  GtError *err)
 {
@@ -112,7 +112,7 @@ static int splice_site_info_visitor_feature_node(GtNodeVisitor *gv,
   GtFeatureNode *node;
   int had_err = 0;
   gt_error_check(err);
-  ssiv = splice_site_info_visitor_cast(gv);
+  ssiv = splice_site_info_visitor_cast(nv);
   gt_assert(ssiv->region_mapping);
   fni = gt_feature_node_iterator_new(fn);
   while (!had_err && (node = gt_feature_node_iterator_next(fni))) {
@@ -125,30 +125,30 @@ static int splice_site_info_visitor_feature_node(GtNodeVisitor *gv,
 
 const GtNodeVisitorClass* gt_splice_site_info_visitor_class()
 {
-  static const GtNodeVisitorClass *gvc = NULL;
-  if (!gvc) {
-   gvc = gt_node_visitor_class_new(sizeof (GtSpliceSiteInfoVisitor),
+  static const GtNodeVisitorClass *nvc = NULL;
+  if (!nvc) {
+   nvc = gt_node_visitor_class_new(sizeof (GtSpliceSiteInfoVisitor),
                                    splice_site_info_visitor_free,
                                    NULL,
                                    splice_site_info_visitor_feature_node,
                                    NULL,
                                    NULL);
   }
-  return gvc;
+  return nvc;
 }
 
 GtNodeVisitor* gt_splice_site_info_visitor_new(GtRegionMapping *rm)
 {
-  GtNodeVisitor *gv;
+  GtNodeVisitor *nv;
   GtSpliceSiteInfoVisitor *ssiv;
   gt_assert(rm);
-  gv = gt_node_visitor_create(gt_splice_site_info_visitor_class());
-  ssiv = splice_site_info_visitor_cast(gv);
+  nv = gt_node_visitor_create(gt_splice_site_info_visitor_class());
+  ssiv = splice_site_info_visitor_cast(nv);
   ssiv->region_mapping = rm;
   ssiv->splicesites = gt_string_distri_new();
   ssiv->acceptorsites = gt_string_distri_new();
   ssiv->donorsites = gt_string_distri_new();
-  return gv;
+  return nv;
 }
 
 static void showsplicesite(const char *string, unsigned long occurrences,
@@ -170,11 +170,11 @@ static void showsinglesite(const char *string, unsigned long occurrences,
   printf("%s: %6.2f%% (n=%lu)\n", string, probability * 100.0, occurrences);
 }
 
-bool gt_splice_site_info_visitor_show(GtNodeVisitor *gv)
+bool gt_splice_site_info_visitor_show(GtNodeVisitor *nv)
 {
   GtSpliceSiteInfoVisitor *ssiv;
-  gt_assert(gv);
-  ssiv = splice_site_info_visitor_cast(gv);
+  gt_assert(nv);
+  ssiv = splice_site_info_visitor_cast(nv);
 
   if (ssiv->show) {
     /* show splice sites */

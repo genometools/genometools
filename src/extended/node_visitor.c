@@ -52,65 +52,65 @@ gt_node_visitor_class_new(size_t size,
   return c_class;
 }
 
-GtNodeVisitor* gt_node_visitor_create(const GtNodeVisitorClass *gvc)
+GtNodeVisitor* gt_node_visitor_create(const GtNodeVisitorClass *nvc)
 {
-  GtNodeVisitor *gv;
-  gt_assert(gvc && gvc->size);
-  gv = gt_calloc(1, gvc->size);
-  gv->c_class = gvc;
-  return gv;
+  GtNodeVisitor *nv;
+  gt_assert(nvc && nvc->size);
+  nv = gt_calloc(1, nvc->size);
+  nv->c_class = nvc;
+  return nv;
 }
 
-void* gt_node_visitor_cast(GT_UNUSED const GtNodeVisitorClass *gvc,
-                          GtNodeVisitor *gv)
+void* gt_node_visitor_cast(GT_UNUSED const GtNodeVisitorClass *nvc,
+                           GtNodeVisitor *nv)
 {
-  gt_assert(gvc && gv && gv->c_class == gvc);
-  return gv;
+  gt_assert(nvc && nv && nv->c_class == nvc);
+  return nv;
 }
 
-int gt_node_visitor_visit_comment_node(GtNodeVisitor *gv, GtCommentNode *cn,
-                                      GtError *err)
-{
-  gt_error_check(err);
-  gt_assert(gv && cn && gv->c_class);
-  if (gv->c_class->comment_node)
-    return gv->c_class->comment_node(gv, cn, err);
-  return 0;
-}
-
-int gt_node_visitor_visit_feature_node(GtNodeVisitor *gv, GtFeatureNode *gf,
-                                      GtError *err)
-{
-  gt_error_check(err);
-  gt_assert(gv && gf && gv->c_class && gv->c_class->feature_node);
-  return gv->c_class->feature_node(gv, gf, err);
-}
-
-int gt_node_visitor_visit_region_node(GtNodeVisitor *gv, GtRegionNode *rn,
-                                     GtError *err)
-{
-  gt_error_check(err);
-  gt_assert(gv && rn && gv->c_class);
-  if (gv->c_class->region_node)
-    return gv->c_class->region_node(gv, rn, err);
-  return 0;
-}
-
-int gt_node_visitor_visit_sequence_node(GtNodeVisitor *gv, GtSequenceNode *sn,
+int gt_node_visitor_visit_comment_node(GtNodeVisitor *nv, GtCommentNode *cn,
                                        GtError *err)
 {
   gt_error_check(err);
-  gt_assert(gv && sn && gv->c_class);
-  if (gv->c_class->sequence_node)
-    return gv->c_class->sequence_node(gv, sn, err);
+  gt_assert(nv && cn && nv->c_class);
+  if (nv->c_class->comment_node)
+    return nv->c_class->comment_node(nv, cn, err);
   return 0;
 }
 
-void gt_node_visitor_delete(GtNodeVisitor *gv)
+int gt_node_visitor_visit_feature_node(GtNodeVisitor *nv, GtFeatureNode *gf,
+                                       GtError *err)
 {
-  if (!gv) return;
-  gt_assert(gv->c_class);
-  if (gv->c_class->free)
-    gv->c_class->free(gv);
-  gt_free(gv);
+  gt_error_check(err);
+  gt_assert(nv && gf && nv->c_class && nv->c_class->feature_node);
+  return nv->c_class->feature_node(nv, gf, err);
+}
+
+int gt_node_visitor_visit_region_node(GtNodeVisitor *nv, GtRegionNode *rn,
+                                      GtError *err)
+{
+  gt_error_check(err);
+  gt_assert(nv && rn && nv->c_class);
+  if (nv->c_class->region_node)
+    return nv->c_class->region_node(nv, rn, err);
+  return 0;
+}
+
+int gt_node_visitor_visit_sequence_node(GtNodeVisitor *nv, GtSequenceNode *sn,
+                                       GtError *err)
+{
+  gt_error_check(err);
+  gt_assert(nv && sn && nv->c_class);
+  if (nv->c_class->sequence_node)
+    return nv->c_class->sequence_node(nv, sn, err);
+  return 0;
+}
+
+void gt_node_visitor_delete(GtNodeVisitor *nv)
+{
+  if (!nv) return;
+  gt_assert(nv->c_class);
+  if (nv->c_class->free)
+    nv->c_class->free(nv);
+  gt_free(nv);
 }
