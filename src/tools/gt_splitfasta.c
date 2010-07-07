@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -99,17 +99,6 @@ static unsigned long buf_contains_separator(char *buf, int offset,
   return 0;
 }
 
-static GtFile* genfile_xopen_forcecheck(const char *path, const char *mode,
-                                        bool force, GtError *err)
-{
-  if (!force && gt_file_exists(path)) {
-    gt_error_set(err, "file \"%s\" exists already, use option -%s to overwrite",
-                 path, GT_FORCE_OPT_CSTR);
-    return NULL;
-  }
-  return gt_file_xopen(path, mode);
-}
-
 static int split_description(const char *filename, GtStr *splitdesc,
                              bool force, GtError *err)
 {
@@ -131,8 +120,8 @@ static int split_description(const char *filename, GtStr *splitdesc,
     gt_str_append_char(descname, '/');
     gt_str_append_cstr(descname, gt_bioseq_get_description(bioseq, i));
     gt_str_append_cstr(descname, gt_file_suffix(filename));
-    if (!(outfp = genfile_xopen_forcecheck(gt_str_get(descname), "w", force,
-                                           err))) {
+    if (!(outfp = gt_outputfile_xopen_forcecheck(gt_str_get(descname), "w",
+                                                 force, err))) {
       had_err = -1;
       break;
     }
@@ -187,8 +176,8 @@ static int split_fasta_file(const char *filename, unsigned long max_filesize,
     gt_str_append_ulong(destfilename, ++filenum);
     gt_str_append_cstr(destfilename,
                        gt_file_mode_suffix(gt_file_mode(srcfp)));
-    if (!(destfp = genfile_xopen_forcecheck(gt_str_get(destfilename), "w",
-                                            force, err))) {
+    if (!(destfp = gt_outputfile_xopen_forcecheck(gt_str_get(destfilename), "w",
+                                                  force, err))) {
       had_err = -1;
     }
     if (!had_err)
@@ -213,8 +202,9 @@ static int split_fasta_file(const char *filename, unsigned long max_filesize,
           gt_str_append_ulong(destfilename, ++filenum);
           gt_str_append_cstr(destfilename,
                              gt_file_mode_suffix(gt_file_mode(srcfp)));
-          if (!(destfp = genfile_xopen_forcecheck(gt_str_get(destfilename), "w",
-                                                  force, err))) {
+          if (!(destfp =
+                  gt_outputfile_xopen_forcecheck(gt_str_get(destfilename), "w",
+                                                 force, err))) {
             had_err = -1;
             break;
           }

@@ -120,3 +120,16 @@ void gt_outputfileinfo_delete(GtOutputFileInfo *ofi)
   gt_str_delete(ofi->output_filename);
   gt_free(ofi);
 }
+
+GtFile* gt_outputfile_xopen_forcecheck(const char *path, const char *mode,
+                                       bool force, GtError *err)
+{
+  gt_error_check(err);
+  gt_assert(path && mode);
+  if (!force && gt_file_exists(path)) {
+    gt_error_set(err, "file \"%s\" exists already, use option -%s to overwrite",
+                 path, GT_FORCE_OPT_CSTR);
+    return NULL;
+  }
+  return gt_file_xopen(path, mode);
+}
