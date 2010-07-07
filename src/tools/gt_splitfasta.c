@@ -100,11 +100,11 @@ static unsigned long buf_contains_separator(char *buf, int offset,
 }
 
 static GtFile* genfile_xopen_forcecheck(const char *path, const char *mode,
-                                            bool force, GtError *err)
+                                        bool force, GtError *err)
 {
   if (!force && gt_file_exists(path)) {
     gt_error_set(err, "file \"%s\" exists already, use option -%s to overwrite",
-              path, FORCE_OPT_CSTR);
+                 path, FORCE_OPT_CSTR);
     return NULL;
   }
   return gt_file_xopen(path, mode);
@@ -182,7 +182,7 @@ static int split_fasta_file(const char *filename, unsigned long max_filesize,
     /* open destination file */
     destfilename = gt_str_new();
     gt_str_append_cstr_nt(destfilename, filename,
-                       gt_file_basename_length(filename));
+                          gt_file_basename_length(filename));
     gt_str_append_char(destfilename, '.');
     gt_str_append_ulong(destfilename, ++filenum);
     gt_str_append_cstr(destfilename,
@@ -221,7 +221,7 @@ static int split_fasta_file(const char *filename, unsigned long max_filesize,
           bytecount = read_bytes - separator_pos; /* reset */
           gt_assert(buf[separator_pos] == '>');
           gt_file_xwrite(destfp, buf + separator_pos,
-                            read_bytes - separator_pos);
+                         read_bytes - separator_pos);
           continue;
         }
       }
@@ -279,8 +279,8 @@ static int gt_splitfasta_runner(GT_UNUSED int argc, const char **argv,
 GtTool* gt_splitfasta(void)
 {
   return gt_tool_new(gt_splitfasta_arguments_new,
-                  gt_splitfasta_arguments_delete,
-                  gt_splitfasta_option_parser_new,
-                  NULL,
-                  gt_splitfasta_runner);
+                     gt_splitfasta_arguments_delete,
+                     gt_splitfasta_option_parser_new,
+                     NULL,
+                     gt_splitfasta_runner);
 }
