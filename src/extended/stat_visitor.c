@@ -137,8 +137,8 @@ static int compute_statistics(GtGenomeNode *gn, void *data, GtError *err)
   return 0;
 }
 
-static int stat_visitor_genome_feature(GtNodeVisitor *gv, GtFeatureNode *fn,
-                                       GtError *err)
+static int stat_visitor_feature_node(GtNodeVisitor *gv, GtFeatureNode *fn,
+                                     GtError *err)
 {
   GtStatVisitor *stat_visitor;
   gt_error_check(err);
@@ -167,7 +167,7 @@ const GtNodeVisitorClass* gt_stat_visitor_class()
     gvc = gt_node_visitor_class_new(sizeof (GtStatVisitor),
                                     stat_visitor_free,
                                     NULL,
-                                    stat_visitor_genome_feature,
+                                    stat_visitor_feature_node,
                                     stat_visitor_region_node,
                                     NULL);
   }

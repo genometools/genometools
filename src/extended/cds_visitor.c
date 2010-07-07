@@ -227,8 +227,8 @@ static int add_cds_if_necessary(GtGenomeNode *gn, void *data, GtError *err)
   return had_err;
 }
 
-static int cds_visitor_genome_feature(GtNodeVisitor *nv, GtFeatureNode *fn,
-                                      GtError *err)
+static int cds_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
+                                    GtError *err)
 {
   GtCDSVisitor *v = cds_visitor_cast(nv);
   gt_error_check(err);
@@ -244,7 +244,7 @@ const GtNodeVisitorClass* gt_cds_visitor_class()
     nvc = gt_node_visitor_class_new(sizeof (GtCDSVisitor),
                                     cds_visitor_free,
                                     NULL,
-                                    cds_visitor_genome_feature,
+                                    cds_visitor_feature_node,
                                     NULL,
                                     NULL);
   }

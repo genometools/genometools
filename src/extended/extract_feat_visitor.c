@@ -89,9 +89,8 @@ static void show_entry(GtStr *description, GtStr *sequence, bool translate,
   }
 }
 
-static int extract_feat_visitor_genome_feature(GtNodeVisitor *nv,
-                                               GtFeatureNode *fn,
-                                               GtError *err)
+static int extract_feat_visitor_feature_node(GtNodeVisitor *nv,
+                                             GtFeatureNode *fn, GtError *err)
 {
   GtExtractFeatVisitor *efv;
   GtFeatureNodeIterator *fni;
@@ -133,7 +132,7 @@ const GtNodeVisitorClass* gt_extract_feat_visitor_class()
     gvc = gt_node_visitor_class_new(sizeof (GtExtractFeatVisitor),
                                     extract_feat_visitor_free,
                                     NULL,
-                                    extract_feat_visitor_genome_feature,
+                                    extract_feat_visitor_feature_node,
                                     NULL,
                                     NULL);
   }

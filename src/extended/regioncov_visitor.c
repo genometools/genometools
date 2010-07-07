@@ -39,9 +39,9 @@ static void gt_regioncov_visitor_free(GtNodeVisitor *gv)
   gt_hashmap_delete(regioncov_visitor->region2rangelist);
 }
 
-static int gt_regioncov_visitor_genome_feature(GtNodeVisitor *gv,
-                                            GtFeatureNode *gf,
-                                            GT_UNUSED GtError *err)
+static int gt_regioncov_visitor_feature_node(GtNodeVisitor *gv,
+                                             GtFeatureNode *gf,
+                                             GT_UNUSED GtError *err)
 {
   GtRange *old_range_ptr, old_range, new_range;
   GtArray *ranges;
@@ -90,7 +90,7 @@ const GtNodeVisitorClass* gt_regioncov_visitor_class()
     gvc = gt_node_visitor_class_new(sizeof (GtRegionCovVisitor),
                                     gt_regioncov_visitor_free,
                                     NULL,
-                                    gt_regioncov_visitor_genome_feature,
+                                    gt_regioncov_visitor_feature_node,
                                     gt_regioncov_visitor_region_node,
                                     NULL);
   }

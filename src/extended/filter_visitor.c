@@ -56,8 +56,8 @@ static void filter_visitor_free(GtNodeVisitor *nv)
   gt_str_delete(filter_visitor->typefilter);
 }
 
-static int filter_visitor_comment(GtNodeVisitor *nv, GtCommentNode *c,
-                                  GT_UNUSED GtError *err)
+static int filter_visitor_comment_node(GtNodeVisitor *nv, GtCommentNode *c,
+                                       GT_UNUSED GtError *err)
 {
   GtFilterVisitor *filter_visitor;
   gt_error_check(err);
@@ -138,9 +138,9 @@ static bool filter_min_average_ssp(GtFeatureNode *fn, double minaveragessp)
   return false;
 }
 
-static int filter_visitor_genome_feature(GtNodeVisitor *nv,
-                                         GtFeatureNode *fn,
-                                         GT_UNUSED GtError *err)
+static int filter_visitor_feature_node(GtNodeVisitor *nv,
+                                       GtFeatureNode *fn,
+                                       GT_UNUSED GtError *err)
 {
   GtFilterVisitor *fv;
   bool filter_node = false;
@@ -258,8 +258,8 @@ const GtNodeVisitorClass* gt_filter_visitor_class()
   if (!nvc) {
     nvc = gt_node_visitor_class_new(sizeof (GtFilterVisitor),
                                     filter_visitor_free,
-                                    filter_visitor_comment,
-                                    filter_visitor_genome_feature,
+                                    filter_visitor_comment_node,
+                                    filter_visitor_feature_node,
                                     filter_visitor_region_node,
                                     filter_visitor_sequence_node);
   }

@@ -46,7 +46,7 @@ static void gtf_visitor_free(GtNodeVisitor *gv)
   gt_array_delete(gtf_visitor->CDS_features);
 }
 
-static int gtf_visitor_comment(GtNodeVisitor *gv, GtCommentNode *c,
+static int gtf_visitor_comment_node(GtNodeVisitor *gv, GtCommentNode *c,
                                GT_UNUSED GtError *err)
 {
   GtGTFVisitor *gtf_visitor;
@@ -120,7 +120,7 @@ static int gtf_show_transcript(GtGenomeNode *gn, GtGTFVisitor *gtf_visitor,
   return had_err;
 }
 
-static int gtf_show_genome_feature(GtGenomeNode *gn, void *data, GtError *err)
+static int gtf_show_feature_node(GtGenomeNode *gn, void *data, GtError *err)
 {
   GtGTFVisitor *gtf_visitor = (GtGTFVisitor*) data;
   GtFeatureNode *gf = (GtFeatureNode*) gn;
@@ -144,15 +144,15 @@ static int gtf_show_genome_feature(GtGenomeNode *gn, void *data, GtError *err)
   return had_err;
 }
 
-static int gtf_visitor_genome_feature(GtNodeVisitor *gv, GtFeatureNode *gf,
-                                      GtError *err)
+static int gtf_visitor_feature_node(GtNodeVisitor *gv, GtFeatureNode *gf,
+                                    GtError *err)
 {
   GtGTFVisitor *gtf_visitor;
   int had_err;
   gt_error_check(err);
   gtf_visitor = gtf_visitor_cast(gv);
   had_err = gt_genome_node_traverse_children((GtGenomeNode*) gf, gtf_visitor,
-                                          gtf_show_genome_feature, false, err);
+                                             gtf_show_feature_node, false, err);
   return had_err;
 }
 
@@ -162,8 +162,8 @@ const GtNodeVisitorClass* gt_gtf_visitor_class()
   if (!gvc) {
     gvc = gt_node_visitor_class_new(sizeof (GtGTFVisitor),
                                     gtf_visitor_free,
-                                    gtf_visitor_comment,
-                                    gtf_visitor_genome_feature,
+                                    gtf_visitor_comment_node,
+                                    gtf_visitor_feature_node,
                                     NULL,
                                     NULL);
   }

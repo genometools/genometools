@@ -103,9 +103,9 @@ static int process_intron(GtSpliceSiteInfoVisitor *ssiv, GtGenomeNode *intron,
   return had_err;
 }
 
-static int splice_site_info_visitor_genome_feature(GtNodeVisitor *gv,
-                                                   GtFeatureNode *fn,
-                                                   GtError *err)
+static int splice_site_info_visitor_feature_node(GtNodeVisitor *gv,
+                                                 GtFeatureNode *fn,
+                                                 GtError *err)
 {
   GtSpliceSiteInfoVisitor *ssiv;
   GtFeatureNodeIterator *fni;
@@ -130,7 +130,7 @@ const GtNodeVisitorClass* gt_splice_site_info_visitor_class()
    gvc = gt_node_visitor_class_new(sizeof (GtSpliceSiteInfoVisitor),
                                    splice_site_info_visitor_free,
                                    NULL,
-                                   splice_site_info_visitor_genome_feature,
+                                   splice_site_info_visitor_feature_node,
                                    NULL,
                                    NULL);
   }
