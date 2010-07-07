@@ -73,8 +73,8 @@ static int determine_outfp(void *data, GtError *err)
     }
     if (!had_err) {
       *ofi->outfp = gt_file_xopen_w_gfmode(genfilemode,
-                                              gt_str_get(ofi->output_filename),
-                                              "w");
+                                           gt_str_get(ofi->output_filename),
+                                           "w");
       gt_assert(*ofi->outfp);
     }
   }
@@ -89,19 +89,19 @@ void gt_outputfile_register_options(GtOptionParser *op, GtFile **outfp,
   ofi->outfp = outfp;
   /* register option -o */
   opto = gt_option_new_string("o", "redirect output to specified file",
-                           ofi->output_filename, NULL);
+                              ofi->output_filename, NULL);
   gt_option_parser_add_option(op, opto);
   /* register option -gzip */
   optgzip = gt_option_new_bool("gzip", "write gzip compressed output file",
-                            &ofi->gzip, false);
+                               &ofi->gzip, false);
   gt_option_parser_add_option(op, optgzip);
   /* register option -bzip2 */
   optbzip2 = gt_option_new_bool("bzip2", "write bzip2 compressed output file",
-                             &ofi->bzip2, false);
+                                &ofi->bzip2, false);
   gt_option_parser_add_option(op, optbzip2);
   /* register option -force */
   optforce = gt_option_new_bool(FORCE_OPT_CSTR, "force writing to output file",
-                             &ofi->force, false);
+                                &ofi->force, false);
   gt_option_parser_add_option(op, optforce);
   /* options -gzip and -bzip2 exclude each other */
   gt_option_exclude(optgzip, optbzip2);

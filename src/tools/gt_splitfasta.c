@@ -65,23 +65,23 @@ static GtOptionParser* gt_splitfasta_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, numfiles_option);
 
   targetsize_option = gt_option_new_ulong_min("targetsize",
-                                           "set the target file "
-                                           "size in MB",
-                                           &arguments->max_filesize_in_MB, 50,
-                                           1);
+                                              "set the target file "
+                                              "size in MB",
+                                              &arguments->max_filesize_in_MB,
+                                              50, 1);
   gt_option_parser_add_option(op, targetsize_option);
   splitdesc_option = gt_option_new_string("splitdesc",
-                                       "put every fasta entry in "
-                                       "a separate file named by its "
-                                       "description in the given directory",
-                                       arguments->splitdesc, NULL);
+                                          "put every fasta entry in "
+                                          "a separate file named by its "
+                                          "description in the given directory",
+                                          arguments->splitdesc, NULL);
   gt_option_parser_add_option(op, splitdesc_option);
   gt_option_exclude(targetsize_option, splitdesc_option);
   gt_option_exclude(numfiles_option, splitdesc_option);
   gt_option_exclude(numfiles_option, targetsize_option);
 
   o = gt_option_new_bool(FORCE_OPT_CSTR, "force writing to output file",
-                      &arguments->force, false);
+                         &arguments->force, false);
   gt_option_parser_add_option(op, o);
   gt_option_parser_set_min_max_args(op, 1, 1);
   return op;
