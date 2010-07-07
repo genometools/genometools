@@ -335,10 +335,9 @@ static void* gt_feature_index_unit_test_query(void *data)
     for (i=0;i<gt_array_size(arr);i++) {
       if (had_err)
         break;
-      if (!gt_genome_features_are_similar(*(GtFeatureNode**)
-                                            gt_array_get(arr, i),
-                                          *(GtFeatureNode**)
-                                            gt_array_get(arr_ref, i))) {
+      if (!gt_feature_nodes_are_similar(*(GtFeatureNode**) gt_array_get(arr, i),
+                                        *(GtFeatureNode**)
+                                        gt_array_get(arr_ref, i))) {
         had_err = -1;
       }
     }

@@ -652,7 +652,7 @@ double gt_feature_node_average_splice_site_prob(const GtFeatureNode *fn)
   return averagessp;
 }
 
-bool gt_genome_features_are_similar(GtFeatureNode *fn_a,
+bool gt_feature_nodes_are_similar(GtFeatureNode *fn_a,
                                     GtFeatureNode *fn_b)
 {
   GtRange range_a, range_b;

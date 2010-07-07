@@ -48,7 +48,7 @@ static bool nodes_are_equal_feature_trees(GtGenomeNode *first_node,
          fn_a && fn_b;
          fn_a = gt_feature_node_iterator_next(fni_a),
          fn_b = gt_feature_node_iterator_next(fni_b)) {
-      if (!fn_b || !gt_genome_features_are_similar(fn_a, fn_b))
+      if (!fn_b || !gt_feature_nodes_are_similar(fn_a, fn_b))
         break;
     }
     fn_b = (GtFeatureNode*) gt_feature_node_iterator_next(fni_b);
