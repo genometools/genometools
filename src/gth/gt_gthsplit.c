@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2005-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -19,6 +19,7 @@
 #include "core/cstr_api.h"
 #include "core/ma.h"
 #include "core/option.h"
+#include "core/outputfile.h"
 #include "gth/gthxml.h"
 #include "gth/gthverbosefunc.h"
 #include "gth/intermediate.h"
@@ -54,8 +55,8 @@ typedef struct {
   char *current_outputfilename;
   GtFile **subset_files;
   GtStr **subset_file_names;
-  unsigned long *subset_file_sa_counter;
-  unsigned long num_of_subset_files;
+  unsigned long *subset_file_sa_counter,
+                num_of_subset_files;
   GthSAFilter *sa_filter; /* reference only */
   GthSAVisitor *sa_visitor;
 } Store_in_subset_file_data;
@@ -176,10 +177,10 @@ static int store_in_subset_file(void *data, GthSA *sa,
                      gt_str_get(store_in_subset_file_data
                              ->subset_file_names[filenum]), "r", NULL);
       if (store_in_subset_file_data->subset_files[filenum]) {
-        gt_error_set(err, "file \"%s\" exists already. use option -force to "
-                       "overwrite",
-                  gt_str_get(store_in_subset_file_data
-                  ->subset_file_names[filenum]));
+        gt_error_set(err, "file \"%s\" exists already. use option -%s to "
+                     "overwrite", gt_str_get(store_in_subset_file_data
+                                             ->subset_file_names[filenum]),
+                     GT_FORCE_OPT_CSTR);
         had_err = -1;
       }
     }
@@ -272,15 +273,15 @@ static GtOPrval gthsplit_parse_options(int *parsed_args,
   gt_option_parser_add_option(op, optverbose);
 
   optgzip = gt_option_new_bool("gzip", "write gzip compressed output file(s)",
-                            &gzip, false);
+                               &gzip, false);
   gt_option_parser_add_option(op, optgzip);
 
   optbzip2 = gt_option_new_bool("bzip2", "write bzip2 compressed output "
                                 "file(s)", &bzip2, false);
   gt_option_parser_add_option(op, optbzip2);
 
-  optforce = gt_option_new_bool("force", "force writing to split files",
-                             &gthsplitinfo->force, false);
+  optforce = gt_option_new_bool(GT_FORCE_OPT_CSTR,"force writing to split "
+                                "files", &gthsplitinfo->force, false);
   gt_option_parser_add_option(op, optforce);
 
   gt_option_exclude(optalignmentscore, optcoverage);

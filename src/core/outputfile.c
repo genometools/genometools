@@ -68,7 +68,7 @@ static int determine_outfp(void *data, GtError *err)
     if (!ofi->force && gt_file_exists(gt_str_get(ofi->output_filename))) {
         gt_error_set(err, "file \"%s\" exists already, use option -%s to "
                      "overwrite", gt_str_get(ofi->output_filename),
-                     FORCE_OPT_CSTR);
+                     GT_FORCE_OPT_CSTR);
         had_err = -1;
     }
     if (!had_err) {
@@ -100,7 +100,8 @@ void gt_outputfile_register_options(GtOptionParser *op, GtFile **outfp,
                                 &ofi->bzip2, false);
   gt_option_parser_add_option(op, optbzip2);
   /* register option -force */
-  optforce = gt_option_new_bool(FORCE_OPT_CSTR, "force writing to output file",
+  optforce = gt_option_new_bool(GT_FORCE_OPT_CSTR,
+                                "force writing to output file",
                                 &ofi->force, false);
   gt_option_parser_add_option(op, optforce);
   /* options -gzip and -bzip2 exclude each other */

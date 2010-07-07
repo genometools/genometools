@@ -80,7 +80,7 @@ static GtOptionParser* gt_splitfasta_option_parser_new(void *tool_arguments)
   gt_option_exclude(numfiles_option, splitdesc_option);
   gt_option_exclude(numfiles_option, targetsize_option);
 
-  o = gt_option_new_bool(FORCE_OPT_CSTR, "force writing to output file",
+  o = gt_option_new_bool(GT_FORCE_OPT_CSTR, "force writing to output file",
                          &arguments->force, false);
   gt_option_parser_add_option(op, o);
   gt_option_parser_set_min_max_args(op, 1, 1);
@@ -104,7 +104,7 @@ static GtFile* genfile_xopen_forcecheck(const char *path, const char *mode,
 {
   if (!force && gt_file_exists(path)) {
     gt_error_set(err, "file \"%s\" exists already, use option -%s to overwrite",
-                 path, FORCE_OPT_CSTR);
+                 path, GT_FORCE_OPT_CSTR);
     return NULL;
   }
   return gt_file_xopen(path, mode);

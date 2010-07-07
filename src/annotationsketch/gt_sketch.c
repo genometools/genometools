@@ -23,6 +23,7 @@
 #include "core/fileutils_api.h"
 #include "core/gtdatapath.h"
 #include "core/option.h"
+#include "core/outputfile.h"
 #include "core/splitter.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
@@ -107,8 +108,8 @@ static GtOPrval sketch_parse_options(int *parsed_args,
   gt_option_parser_add_option(op, option);
 
   /* -force */
-  option = gt_option_new_bool("force", "force writing to output file", &force,
-                           false);
+  option = gt_option_new_bool(GT_FORCE_OPT_CSTR, "force writing to output file",
+                              &force, false);
   gt_option_parser_add_option(op, option);
 
   /* -seqid */
@@ -192,8 +193,8 @@ static GtOPrval sketch_parse_options(int *parsed_args,
 
   if (oprval == GT_OPTION_PARSER_OK && !force &&
       gt_file_exists(argv[*parsed_args])) {
-    gt_error_set(err, "file \"%s\" exists already. use option -force to "
-                   "overwrite", argv[*parsed_args]);
+    gt_error_set(err, "file \"%s\" exists already. use option -%s to "
+                      "overwrite", argv[*parsed_args], GT_FORCE_OPT_CSTR);
     oprval = GT_OPTION_PARSER_ERROR;
   }
 

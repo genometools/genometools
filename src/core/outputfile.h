@@ -20,7 +20,7 @@
 
 #include "core/option.h"
 
-#define FORCE_OPT_CSTR  "force"
+#define GT_FORCE_OPT_CSTR  "force"
 
 typedef struct GtOutputFileInfo GtOutputFileInfo;
 
