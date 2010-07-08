@@ -32,7 +32,7 @@ typedef GtLicense* (*GtLicenseConstructor)(const char *argv0,
 typedef void       (*GtLicenseDestructor)(GtLicense*);
 
 /* The tool driver module allows to compile a tool into a separate binary. This
-   is mostly useful for legacy applications like GenomeThreader.
+   is mostly useful for stand-alone applications like GenomeThreader.
    The tool driver creates an GtError object, calls <tool>, and reports errors.
 */
 int gt_tooldriver(GtToolFunc tool, int argc, char *argv[]);
@@ -44,5 +44,11 @@ int gt_tooldriver_with_license(GtToolFunc tool, int argc, char *argv[],
                                GtLicenseConstructor, GtLicenseDestructor);
 
 int gt_toolobjdriver(GtToolConstructor, int argc, char *argv[]);
+
+int gt_toolobjdriver_with_license(GtToolConstructor tool_constructor, int argc,
+                                  char *argv[], GtLicense **license_out,
+                                  unsigned int major_version,
+                                  unsigned int minor_version,
+                                  GtLicenseConstructor, GtLicenseDestructor);
 
 #endif
