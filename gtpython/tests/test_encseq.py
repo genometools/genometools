@@ -84,6 +84,7 @@ class EncodedsequenceTest(unittest.TestCase):
         self.run_test_descriptions(es)
         self.run_test_get_encoded_char(es, self.dseq1, self.dseq2)
         self.run_test_num_seqs(es)
+        self.run_test_num_files(es)
         self.run_test_seq_length(es)
         self.run_test_seq_startpos(es)
         self.run_test_seq_substr_encoded(es, self.dseq1, self.dseq2)
@@ -95,6 +96,7 @@ class EncodedsequenceTest(unittest.TestCase):
         self.run_test_descriptions(es)
         self.run_test_get_encoded_char(es, self.dseq1, self.dseq2)
         self.run_test_num_seqs(es)
+        self.run_test_num_files_mem(es)
         self.run_test_seq_length(es)
         self.run_test_seq_substr_encoded(es, self.dseq1, self.dseq2)
         self.run_test_seq_substr_plain(es, self.dseq1, self.dseq2)
@@ -108,8 +110,10 @@ class EncodedsequenceTest(unittest.TestCase):
         self.run_test_descriptions(es)
         self.run_test_get_encoded_char(es, self.aaseq1, self.aaseq2)
         self.run_test_num_seqs(es)
+        self.run_test_num_files(es)
         self.run_test_seq_startpos_protein(es)
         self.run_test_seq_length_protein(es)
+        self.run_test_file_length_protein(es)
         self.run_test_seq_substr_encoded(es, self.aaseq1, self.aaseq2)
         self.run_test_seq_substr_plain(es, self.aaseq1, self.aaseq2)
         self.run_test_seq_substr_sequential(es, self.aaseq1, self.aaseq2)
@@ -119,6 +123,7 @@ class EncodedsequenceTest(unittest.TestCase):
         self.run_test_descriptions(es)
         self.run_test_get_encoded_char(es, self.aaseq1, self.aaseq2)
         self.run_test_num_seqs(es)
+        self.run_test_num_files_mem(es)
         self.run_test_seq_length_protein(es)
         self.run_test_seq_substr_encoded(es, self.aaseq1, self.aaseq2)
         self.run_test_seq_substr_plain(es, self.aaseq1, self.aaseq2)
@@ -127,6 +132,12 @@ class EncodedsequenceTest(unittest.TestCase):
 
     def run_test_num_seqs(self, es):
         self.assertEquals(es.num_of_sequences(), 2)
+
+    def run_test_num_files(self, es):
+        self.assertEquals(es.num_of_files(), 1)
+
+    def run_test_num_files_mem(self, es):
+        self.assertEquals(es.num_of_files(), 0)
 
     def run_test_descriptions(self, es):
         self.assertRaises(GTError, es.description, 2)
@@ -160,9 +171,15 @@ class EncodedsequenceTest(unittest.TestCase):
         self.assertEquals(es.seq_length(0), 36)
         self.assertEquals(es.seq_length(1), 9)
 
+    def run_test_file_length(self, es):
+        self.assertEquals(es.file_effective_length(0), 46)
+
     def run_test_seq_length_protein(self, es):
         self.assertEquals(es.seq_length(0), 30)
         self.assertEquals(es.seq_length(1), 6)
+
+    def run_test_file_length_protein(self, es):
+        self.assertEquals(es.file_effective_length(0), 37)
         
     def run_test_seq_substr_encoded(self, es, seq1, seq2):
         start = 3

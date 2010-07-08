@@ -346,6 +346,9 @@ class Encseq:
     def num_of_sequences(self):
         return gtlib.gt_encseq_num_of_sequences(self.encseq)
 
+    def num_of_files(self):
+        return gtlib.gt_encseq_num_of_files(self.encseq)
+
     def description(self, num):
         if not num < self.num_of_sequences():
             gterror("invalid sequence number %d" % num)
@@ -381,6 +384,15 @@ class Encseq:
         if not num < self.num_of_sequences():
             gterror("invalid sequence number %d" % num)
         return gtlib.gt_encseq_seqlength(self.encseq, num)
+
+    def file_effective_length(self, num):
+        if not num < self.num_of_files():
+            gterror("invalid file number %d" % num)
+        return gtlib.gt_encseq_effective_filelength(self.encseq, num)
+
+    def filenames(self, num):
+        arr = StrArray(gtlib.gt_encseq_filenames(seld.encseq))
+        return arr.to_list()
 
     def create_reader(self, readmode, startpos):
         if readmode < 0 or readmode > 3:
@@ -418,6 +430,8 @@ class Encseq:
     def register(cls, gtlib):
         gtlib.gt_encseq_num_of_sequences.restype = c_ulong
         gtlib.gt_encseq_num_of_sequences.argtypes = [c_void_p]
+        gtlib.gt_encseq_num_of_files.restype = c_ulong
+        gtlib.gt_encseq_num_of_files.argtypes = [c_void_p]
         gtlib.gt_encseq_total_length.restype = c_ulong
         gtlib.gt_encseq_total_length.argtypes = [c_void_p]
         gtlib.gt_encseq_description.restype = c_char_p
@@ -432,6 +446,8 @@ class Encseq:
         gtlib.gt_encseq_seqstartpos.argtypes = [c_void_p, c_ulong]
         gtlib.gt_encseq_seqlength.restype = c_ulong
         gtlib.gt_encseq_seqlength.argtypes = [c_void_p, c_ulong]
+        gtlib.gt_encseq_effective_filelength.restype = c_uint64
+        gtlib.gt_encseq_effective_filelength.argtypes = [c_void_p, c_ulong]
         gtlib.gt_encseq_extract_substring.argtypes = [c_void_p, POINTER(c_ubyte), c_ulong, c_ulong]
         gtlib.gt_encseq_extract_decoded.argtypes = [c_void_p, c_char_p, c_ulong, c_ulong]
 
