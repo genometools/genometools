@@ -1,6 +1,7 @@
 /*
   Copyright (c) 2007      Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c)      2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c)      2010 Dirk Willrodt <dwillrodt@zbh.uni-hamburg.de>
   Copyright (c) 2007-2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -147,6 +148,12 @@ GtAlphabet*       gt_encseq_alphabet(const GtEncseq *encseq);
 /* Returns a <GtStrArray> of the names of the original sequence files
    contained in <encseq>. */
 const GtStrArray* gt_encseq_filenames(const GtEncseq *encseq);
+/* gives the number of files contained in <encseq> */
+unsigned long     gt_encseq_num_files(const GtEncseq *encseq);
+/* Returns the effective lengths of file with <filenum>
+ * contained in <encseq>. */
+uint64_t          gt_encseq_effective_filelength(const GtEncseq *encseq,
+                                                 unsigned long filenum);
 /* Deletes <encseq> and frees all associated space. */
 void              gt_encseq_delete(GtEncseq *encseq);
 

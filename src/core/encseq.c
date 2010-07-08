@@ -1,6 +1,7 @@
 /*
   Copyright (c) 2007/2009 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c)      2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c)      2010 Dirk Willrodt <dwillrodt@zbh.uni-hamburg.de>
   Copyright (c) 2007-2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -6484,4 +6485,22 @@ void gt_encseq_builder_delete(GtEncseqBuilder *eb)
   gt_alphabet_delete(eb->alpha);
   gt_str_delete(eb->destab);
   gt_free(eb);
+}
+
+unsigned long gt_encseq_num_files(const GtEncseq *encseq)
+{
+  gt_assert(encseq->filenametab);
+  return gt_str_array_size(encseq->filenametab);
+}
+
+uint64_t gt_encseq_effective_filelength(const GtEncseq *encseq,
+                                        unsigned long filenum)
+{
+  unsigned long num_files;
+
+  gt_assert(encseq->filenametab);
+  num_files = gt_str_array_size(encseq->filenametab);
+  gt_assert(num_files > filenum);
+
+  return encseq->filelengthtab[filenum].effectivelength;
 }
