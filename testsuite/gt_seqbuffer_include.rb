@@ -74,6 +74,28 @@ allfiles.each do |file|
              "| grep -v '>' > #{file}_out2"
     run "diff -i #{file}_out1 #{file}_out2"
   end
+
+  Name "sequence buffer: check EMBL effectivelength #{file}"
+  Keywords "gt_convertseq sequencebuffer filelengthvalues"
+  Test do
+    run_test "#{$bin}gt convertseq -noseq -showfilelengthvalues " + \
+             "#{$testdata}#{file}.embl"
+    efflength1 = File.open($last_stderr).read.match(/ \d+\/(\d+)$/)[1].to_i
+    run_test "#{$bin}gt convertseq -noseq -showfilelengthvalues " + \
+             "#{$testdata}#{file}.fna"
+    efflength2 = File.open($last_stderr).read.match(/ \d+\/(\d+)$/)[1].to_i
+    raise if efflength1 != efflength2
+  end
+
+  Name "sequence buffer: check EMBL rawfilelength #{file}"
+  Keywords "gt_convertseq sequencebuffer filelengthvalues"
+  Test do
+    run_test "#{$bin}gt convertseq -noseq -showfilelengthvalues " + \
+             "#{$testdata}#{file}.embl"
+    rawlength = File.open($last_stderr).read.match(/ (\d+)\/\d+$/)[1].to_i
+    realsize = File.size("#{$testdata}#{file}.embl")
+    raise if rawlength != realsize
+  end
 end
 
 Name "sequence buffer: GenBank empty sequence"
@@ -170,6 +192,28 @@ gbfiles.each do |file|
     run_test "#{$bin}gt convertseq #{$testdata}#{file}.gbk " + \
              "| grep -v '>' > #{file}_out2"
     run "diff -i #{file}_out1 #{file}_out2"
+  end
+
+  Name "sequence buffer: check GenBank effectivelength #{file}"
+  Keywords "gt_convertseq sequencebuffer filelengthvalues"
+  Test do
+    run_test "#{$bin}gt convertseq -noseq -showfilelengthvalues " + \
+             "#{$testdata}#{file}.gbk"
+    efflength1 = File.open($last_stderr).read.match(/ \d+\/(\d+)$/)[1].to_i
+    run_test "#{$bin}gt convertseq -noseq -showfilelengthvalues " + \
+             "#{$testdata}#{file}.fna"
+    efflength2 = File.open($last_stderr).read.match(/ \d+\/(\d+)$/)[1].to_i
+    raise if efflength1 != efflength2
+  end
+
+  Name "sequence buffer: check GenBank rawfilelength #{file}"
+  Keywords "gt_convertseq sequencebuffer filelengthvalues"
+  Test do
+    run_test "#{$bin}gt convertseq -noseq -showfilelengthvalues " + \
+             "#{$testdata}#{file}.gbk"
+    rawlength = File.open($last_stderr).read.match(/ (\d+)\/\d+$/)[1].to_i
+    realsize = File.size("#{$testdata}#{file}.gbk")
+    raise if rawlength != realsize
   end
 end
 
