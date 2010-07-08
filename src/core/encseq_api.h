@@ -148,10 +148,10 @@ GtAlphabet*       gt_encseq_alphabet(const GtEncseq *encseq);
 /* Returns a <GtStrArray> of the names of the original sequence files
    contained in <encseq>. */
 const GtStrArray* gt_encseq_filenames(const GtEncseq *encseq);
-/* gives the number of files contained in <encseq> */
-unsigned long     gt_encseq_num_files(const GtEncseq *encseq);
-/* Returns the effective lengths of file with <filenum>
- * contained in <encseq>. */
+/* Returns the number of files contained in <encseq>. */
+unsigned long     gt_encseq_num_of_files(const GtEncseq *encseq);
+/* Returns the effective length (sum of sequence lengths) of the <filenum>-th
+   file contained in <encseq>. */
 uint64_t          gt_encseq_effective_filelength(const GtEncseq *encseq,
                                                  unsigned long filenum);
 /* Deletes <encseq> and frees all associated space. */
