@@ -6347,6 +6347,7 @@ GtEncseq* gt_encseq_builder_build(GtEncseqBuilder *eb,
                                     eb->logger);
   encseq->specialcharinfo = samplespecialcharinfo;
   encseq->plainseq = eb->plainseq;
+  encseq->filenametab = gt_str_array_new();
   encseq->hasplainseqptr = !(eb->own);
   if (eb->wdestab) {
     encseq->hasallocateddestab = true;
