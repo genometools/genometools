@@ -6417,6 +6417,7 @@ int gt_encseq_builder_unit_test(GtError *err)
   ensure(had_err, memcmp(preenc, buffer, 11 * sizeof (char)) == 0);
   ensure(had_err, gt_encseq_seqstartpos(encseq, 0UL) == 0UL);
   ensure(had_err, gt_encseq_seqlength(encseq, 0UL) == 11UL);
+  ensure(had_err, gt_encseq_num_files(encseq) == 0);
   gt_encseq_delete(encseq);
 
   gt_encseq_builder_add_cstr(eb, testseq, 11UL, NULL);
@@ -6425,6 +6426,7 @@ int gt_encseq_builder_unit_test(GtError *err)
   encseq = gt_encseq_builder_build(eb, err);
   ensure(had_err, gt_encseq_total_length(encseq) == 23UL);
   ensure(had_err, gt_encseq_num_of_sequences(encseq) == 2UL);
+  ensure(had_err, gt_encseq_num_files(encseq) == 0);
   gt_encseq_delete(encseq);
 
   ensure(had_err, eb->plainseq == NULL);
@@ -6433,6 +6435,7 @@ int gt_encseq_builder_unit_test(GtError *err)
   encseq = gt_encseq_builder_build(eb, err);
   ensure(had_err, gt_encseq_total_length(encseq) == 11UL);
   ensure(had_err, gt_encseq_num_of_sequences(encseq) == 1UL);
+  ensure(had_err, gt_encseq_num_files(encseq) == 0);
   gt_encseq_delete(encseq);
 
   gt_encseq_builder_add_cstr(eb, testseq, 4UL, NULL);
@@ -6441,6 +6444,7 @@ int gt_encseq_builder_unit_test(GtError *err)
   encseq = gt_encseq_builder_build(eb, err);
   ensure(had_err, gt_encseq_total_length(encseq) == 16UL);
   ensure(had_err, gt_encseq_num_of_sequences(encseq) == 2UL);
+  ensure(had_err, gt_encseq_num_files(encseq) == 0);
   gt_encseq_delete(encseq);
 
   gt_encseq_builder_add_encoded(eb, preenc, 11UL, NULL);
@@ -6453,6 +6457,7 @@ int gt_encseq_builder_unit_test(GtError *err)
   ensure(had_err, gt_encseq_seqlength(encseq, 0UL) == 11UL);
   ensure(had_err, gt_encseq_seqstartpos(encseq, 1UL) == 12UL);
   ensure(had_err, gt_encseq_seqlength(encseq, 1UL) == 4UL);
+  ensure(had_err, gt_encseq_num_files(encseq) == 0);
   gt_encseq_delete(encseq);
 
   gt_encseq_builder_create_des_tab(eb);
@@ -6472,6 +6477,7 @@ int gt_encseq_builder_unit_test(GtError *err)
   ensure(had_err, strncmp(desc, "bar", (size_t) desclen * sizeof (char)) == 0);
   desc = gt_encseq_description(encseq, &desclen, 2UL);
   ensure(had_err, strncmp(desc, "baz", (size_t) desclen * sizeof (char)) == 0);
+  ensure(had_err, gt_encseq_num_files(encseq) == 0);
   gt_encseq_delete(encseq);
 
   gt_encseq_builder_delete(eb);
