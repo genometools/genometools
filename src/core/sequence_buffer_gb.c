@@ -76,6 +76,7 @@ static inline int eat_whitespace(GtSequenceBuffer *sb,
     (*currentfileread)++;
   } while (currentchar != NEWLINESYMBOL && isspace(currentchar));
   inlinebuf_ungetchar(sb);
+  (*currentfileread)--;
   return 0;
 }
 
@@ -266,6 +267,7 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
     if (!had_err && strcmp(gt_str_get(sbe->keywordbuffer),
                            GB_ENTRY_TERMINATOR) == 0) {
       pvt->outbuf[currentoutpos++] = (GtUchar) SEPARATOR;
+      currentfileadd++;
       pvt->lastspeciallength++;
       if (!sbe->description_set && pvt->descptr)
           gt_queue_add(pvt->descptr, gt_cstr_dup(""));
@@ -401,6 +403,9 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
         pvt->complete = true;
         /* remove last separator */
         pvt->outbuf[--currentoutpos] = (GtUchar) '\0';
+        if (pvt->filelengthtab) {
+          pvt->filelengthtab[pvt->filenum].effectivelength--;
+        }
         had_err = 0;
         break;
       }

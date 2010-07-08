@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2009 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2009-2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2009-2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -81,9 +81,9 @@ parse_next_line(GtSequenceBuffer *sb, GtEMBLParserLineCode *lc,
   currentchar = inlinebuf_getchar(sb, pvt->inputstream);
   if (currentchar == EOF)
     return EOF;
+  (*currentfileread)++;
   if (currentchar == NEWLINESYMBOL)
     return 0;
-  (*currentfileread)++;
   linecode[0] = currentchar;
   currentchar = inlinebuf_getchar(sb, pvt->inputstream);
   if (currentchar == EOF)
@@ -112,9 +112,9 @@ parse_next_line(GtSequenceBuffer *sb, GtEMBLParserLineCode *lc,
       currentchar = inlinebuf_getchar(sb, pvt->inputstream);
       if (currentchar == EOF)
         return EOF;
+      (*currentfileread)++;
       if (currentchar == NEWLINESYMBOL)
         return 0;
-      (*currentfileread)++;
       if (!isspace(currentchar)) {
         gt_error_set(err, "3 blanks expected between line code and content "
                           "in line %lu",
@@ -228,6 +228,7 @@ static int gt_sequence_buffer_embl_advance(GtSequenceBuffer *sb, GtError *err)
     }
     if (lc == TERMINATOR) {
       pvt->outbuf[currentoutpos++] = (GtUchar) SEPARATOR;
+      currentfileadd++;
       pvt->lastspeciallength++;
       sbe->state = EMBL_UNDEFINED;
       if (!sbe->description_set && pvt->descptr)
@@ -281,13 +282,14 @@ static int gt_sequence_buffer_embl_advance(GtSequenceBuffer *sb, GtError *err)
         pvt->filelengthtab[pvt->filenum].effectivelength
           += (uint64_t) currentfileadd;
       }
-      if (++pvt->filenum < gt_str_array_size(pvt->filenametab)) {
+      if (pvt->filenum+1 < gt_str_array_size(pvt->filenametab)) {
+        pvt->filenum++;
         /* still files left, open next one */
         gt_file_delete(pvt->inputstream);
         sbe->state = EMBL_UNDEFINED;
         pvt->linenum = (uint64_t) 1;
         pvt->inputstream = gt_file_xopen(gt_str_array_get(pvt->filenametab,
-                                                  (unsigned long) pvt->filenum),
+                                                (unsigned long) pvt->filenum),
                                             "rb");
         if (pvt->filelengthtab) {
           pvt->filelengthtab[pvt->filenum].length = 0;
@@ -300,7 +302,11 @@ static int gt_sequence_buffer_embl_advance(GtSequenceBuffer *sb, GtError *err)
         /* all files exhausted */
         pvt->complete = true;
         /* remove last separator */
+        gt_assert(pvt->outbuf[currentoutpos-1] == SEPARATOR);
         pvt->outbuf[--currentoutpos] = (GtUchar) '\0';
+        if (pvt->filelengthtab) {
+          pvt->filelengthtab[pvt->filenum].effectivelength--;
+        }
         had_err = 0;
         break;
       }

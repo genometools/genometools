@@ -66,6 +66,7 @@ static int gt_sequence_buffer_fastq_advance(GtSequenceBuffer *sb, GtError *err)
      if so, we need to provide an additional separator! */
   if (sbfq->carryseparator) {
     pvt->outbuf[currentoutpos++] = (GtUchar) SEPARATOR;
+    currentfileread++;
     pvt->lastspeciallength++;
     currentfileadd++;
     sbfq->carryseparator = false;
@@ -83,8 +84,8 @@ static int gt_sequence_buffer_fastq_advance(GtSequenceBuffer *sb, GtError *err)
       currentfileadd++;
       currentfileread++;
     }
-    pvt->outbuf[currentoutpos++]
-     = (GtUchar) SEPARATOR;
+    pvt->outbuf[currentoutpos++] = (GtUchar) SEPARATOR;
+    currentfileread++;
     pvt->lastspeciallength++;
     gt_str_reset(sbfq->overflowbuffer);
     gt_assert(gt_str_length(sbfq->overflowbuffer) == 0);
