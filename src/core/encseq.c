@@ -6511,3 +6511,10 @@ uint64_t gt_encseq_effective_filelength(const GtEncseq *encseq,
 
   return encseq->filelengthtab[filenum].effectivelength;
 }
+
+void gt_encseq_effective_filelength_ptr(const GtEncseq *encseq,
+                                        uint64_t *result,
+                                        unsigned long filenum)
+{
+  *result = gt_encseq_effective_filelength(encseq, filenum);
+}

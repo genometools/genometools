@@ -347,4 +347,10 @@ void gt_encseq_showatstartpos(FILE *fp,
                               const GtEncseq *encseq,
                               unsigned long startpos);
 
+/* Writes the result of gt_encseq_effective_filelength() into the
+   location pointed to by <result>. Needed for the Ruby bindings. */
+void gt_encseq_effective_filelength_ptr(const GtEncseq *encseq,
+                                        uint64_t *result,
+                                        unsigned long filenum);
+
 #endif
