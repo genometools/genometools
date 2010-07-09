@@ -6496,7 +6496,7 @@ void gt_encseq_builder_delete(GtEncseqBuilder *eb)
 
 unsigned long gt_encseq_num_of_files(const GtEncseq *encseq)
 {
-  gt_assert(encseq->filenametab);
+  gt_assert(encseq && encseq->filenametab);
   return gt_str_array_size(encseq->filenametab);
 }
 
@@ -6504,11 +6504,9 @@ uint64_t gt_encseq_effective_filelength(const GtEncseq *encseq,
                                         unsigned long filenum)
 {
   unsigned long num_files;
-
-  gt_assert(encseq->filenametab);
+  gt_assert(encseq && encseq->filenametab);
   num_files = gt_str_array_size(encseq->filenametab);
-  gt_assert(num_files > filenum);
-
+  gt_assert(filenum < num_files);
   return encseq->filelengthtab[filenum].effectivelength;
 }
 
