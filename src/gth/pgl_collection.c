@@ -85,7 +85,7 @@ static void process_splice_form_func(GtArray *spliced_alignments_in_form,
                                 gt_array_get(spliced_alignments_in_form, i));
   }
 
-  gt_buildAGSfromassembly(ags, assemblytab, pgl->saclusters);
+  gth_build_AGS_from_assembly(ags, assemblytab, pgl->saclusters);
 
   gt_bittab_delete(assemblytab);
 

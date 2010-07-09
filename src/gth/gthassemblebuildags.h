@@ -22,6 +22,7 @@
 #include "gth/ags.h"
 #include "gth/pgl.h"
 
-void gt_buildAGSfromassembly(GthAGS*, GtBittab *assembly, GtArray *saclusters);
+void gth_build_AGS_from_assembly(GthAGS*, GtBittab *assembly,
+                                 GtArray *saclusters);
 
 #endif

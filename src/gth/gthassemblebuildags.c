@@ -81,8 +81,8 @@ static void addSAtoAGS(GthAGS *ags, GthSACluster *sacluster, GtArray *nodes)
   }
 }
 
-void gt_buildAGSfromassembly(GthAGS *ags, GtBittab *assembly,
-                             GtArray *saclusters)
+void gth_build_AGS_from_assembly(GthAGS *ags, GtBittab *assembly,
+                                 GtArray *saclusters)
 {
   unsigned long i;
   GtArray *nodes;
