@@ -41,10 +41,10 @@ static void calc_sa_distributions(GthStat *stat, GthSACollection *sa_collection)
   }
 }
 
-void gt_proc_sa_collection(GthSACollection *sa_collection,
-                           GthCallInfo *call_info,
-                           GthInput *input, GthStat *stat,
-                           unsigned int indentlevel)
+void gth_proc_sa_collection(GthSACollection *sa_collection,
+                            GthCallInfo *call_info,
+                            GthInput *input, GthStat *stat,
+                            unsigned int indentlevel)
 {
   if (call_info->out->showverbose)
     call_info->out->showverbose("output spliced alignments");

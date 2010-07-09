@@ -20,7 +20,7 @@
 
 #include "gth/sa_collection.h"
 
-void  gt_proc_sa_collection(GthSACollection*, GthCallInfo*, GthInput*, GthStat*,
-                         unsigned int indentlevel);
+void  gth_proc_sa_collection(GthSACollection*, GthCallInfo*, GthInput*,
+                             GthStat*, unsigned int indentlevel);
 
 #endif
