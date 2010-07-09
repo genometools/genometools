@@ -33,6 +33,8 @@ struct GtCDSVisitor {
                              gene */
   GtRegionMapping *region_mapping;
   unsigned long offset;
+  bool start_codon,
+       final_stop_codon;
 };
 
 #define cds_visitor_cast(GV)\
@@ -92,7 +94,9 @@ static int extract_spliced_seq(GtGenomeNode *gn, GtCDSVisitor *visitor,
                                                  extract_cds_if_necessary, err);
 }
 
-static GtArray* determine_ORFs_for_all_three_frames(Splicedseq *ss)
+static GtArray* determine_ORFs_for_all_three_frames(Splicedseq *ss,
+                                                    bool start_codon,
+                                                    bool final_stop_codon)
 {
   GtStr *pr[3];
   GtArray *orfs;
@@ -118,9 +122,12 @@ static GtArray* determine_ORFs_for_all_three_frames(Splicedseq *ss)
     gt_str_append_char(pr[frame], translated);
     rval = gt_translator_next(tr, &translated, &frame, NULL);
   }
-  gt_determine_ORFs(orfs, 0, gt_str_get(pr[0]), gt_str_length(pr[0]));
-  gt_determine_ORFs(orfs, 1, gt_str_get(pr[1]), gt_str_length(pr[1]));
-  gt_determine_ORFs(orfs, 2, gt_str_get(pr[2]), gt_str_length(pr[2]));
+  gt_determine_ORFs(orfs, 0, gt_str_get(pr[0]), gt_str_length(pr[0]),
+                    start_codon, final_stop_codon);
+  gt_determine_ORFs(orfs, 1, gt_str_get(pr[1]), gt_str_length(pr[1]),
+                    start_codon, final_stop_codon);
+  gt_determine_ORFs(orfs, 2, gt_str_get(pr[2]), gt_str_length(pr[2]),
+                    start_codon, final_stop_codon);
 
   gt_str_delete(pr[2]);
   gt_str_delete(pr[1]);
@@ -219,7 +226,8 @@ static int add_cds_if_necessary(GtGenomeNode *gn, void *data, GtError *err)
         return -1;
     }
 
-    orfs = determine_ORFs_for_all_three_frames(v->splicedseq);
+    orfs = determine_ORFs_for_all_three_frames(v->splicedseq, v->start_codon,
+                                               v->final_stop_codon);
     create_CDS_features_for_longest_ORF(orfs, v, gn);
 
     gt_array_delete(orfs);
@@ -251,7 +259,8 @@ const GtNodeVisitorClass* gt_cds_visitor_class()
 }
 
 GtNodeVisitor* gt_cds_visitor_new(GtRegionMapping *region_mapping,
-                                  unsigned int minorflen, GtStr *source)
+                                  unsigned int minorflen, GtStr *source,
+                                  bool start_codon, bool final_stop_codon)
 {
   GtNodeVisitor *nv;
   GtCDSVisitor *cds_visitor;
@@ -262,5 +271,7 @@ GtNodeVisitor* gt_cds_visitor_new(GtRegionMapping *region_mapping,
   cds_visitor->source = gt_str_ref(source);
   cds_visitor->splicedseq = gt_splicedseq_new();
   cds_visitor->region_mapping = region_mapping;
+  cds_visitor->start_codon = start_codon;
+  cds_visitor->final_stop_codon = final_stop_codon;
   return nv;
 }

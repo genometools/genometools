@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006, 2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006       Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -22,6 +22,7 @@
 
 /* the determined ORFs include the start and the stop codon */
 void gt_determine_ORFs(GtArray *ranges, unsigned int framenum,
-                       const char *frame, unsigned long framelen);
+                       const char *frame, unsigned long framelen,
+                       bool start_codon, bool final_stop_codon);
 
 #endif

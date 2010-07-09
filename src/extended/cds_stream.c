@@ -64,7 +64,8 @@ const GtNodeStreamClass* gt_cds_stream_class(void)
 }
 
 GtNodeStream* gt_cds_stream_new(GtNodeStream *in_stream, GtRegionMapping *rm,
-                                unsigned int minorflen, const char *source)
+                                unsigned int minorflen, const char *source,
+                                bool start_codon, bool final_stop_codon)
 {
   GtNodeStream *ns;
   GtCDSStream *cds_stream;
@@ -73,7 +74,8 @@ GtNodeStream* gt_cds_stream_new(GtNodeStream *in_stream, GtRegionMapping *rm,
   cds_stream = cds_stream_cast(ns);
   source_str = gt_str_new_cstr(source);
   cds_stream->in_stream = gt_node_stream_ref(in_stream);
-  cds_stream->cds_visitor = gt_cds_visitor_new(rm, minorflen, source_str);
+  cds_stream->cds_visitor = gt_cds_visitor_new(rm, minorflen, source_str,
+                                               start_codon, final_stop_codon);
   gt_str_delete(source_str);
   return ns;
 }

@@ -1,0 +1,23 @@
+##gff-version   3
+##sequence-region   1877523 1 106973
+1877523	gth	gene	30278	31355	.	+	.	ID=gene1
+1877523	gth	mRNA	30278	31355	.	+	.	ID=mRNA1;Parent=gene1;Target=8690080 1 524 +
+1877523	gth	exon	30278	30391	1	+	.	Parent=mRNA1
+1877523	gt cds	CDS	30278	30391	.	+	0	Parent=mRNA1
+1877523	1877523	five_prime_splice_site	30392	30393	0.985	+	.	Parent=mRNA1
+1877523	1877523	three_prime_splice_site	30475	30476	0.918	+	.	Parent=mRNA1
+1877523	gth	exon	30477	30562	1	+	.	Parent=mRNA1
+1877523	gt cds	CDS	30477	30562	.	+	2	Parent=mRNA1
+1877523	1877523	five_prime_splice_site	30563	30564	0.938	+	.	Parent=mRNA1
+1877523	1877523	three_prime_splice_site	30656	30657	0.973	+	.	Parent=mRNA1
+1877523	gth	exon	30658	30763	1	+	.	Parent=mRNA1
+1877523	gt cds	CDS	30658	30763	.	+	0	Parent=mRNA1
+1877523	1877523	five_prime_splice_site	30764	30765	0.996	+	.	Parent=mRNA1
+1877523	1877523	three_prime_splice_site	30988	30989	1	+	.	Parent=mRNA1
+1877523	gth	exon	30990	31085	1	+	.	Parent=mRNA1
+1877523	gt cds	CDS	30990	31085	.	+	2	Parent=mRNA1
+1877523	1877523	five_prime_splice_site	31086	31087	0.644	+	.	Parent=mRNA1
+1877523	1877523	three_prime_splice_site	31232	31233	0.987	+	.	Parent=mRNA1
+1877523	gt cds	CDS	31234	31353	.	+	0	Parent=mRNA1
+1877523	gth	exon	31234	31355	1	+	.	Parent=mRNA1
+###

@@ -27,6 +27,7 @@ typedef struct GtCDSVisitor GtCDSVisitor;
 const GtNodeVisitorClass* gt_cds_visitor_class(void);
 GtNodeVisitor*            gt_cds_visitor_new(GtRegionMapping*,
                                              unsigned int minorflen,
-                                             GtStr *source);
+                                             GtStr *source, bool start_codon,
+                                             bool final_stop_codon);
 
 #endif

@@ -1,9 +1,9 @@
-changes in version 1.3.5 (2010-06-02)
+changes in version 1.3.5 (2010-06-09)
 
 - `gt gff3 -tidy` cleans up multi-features with different parents
 - `gt stat` shows number of multi-features
 - `gt gff3 -sort` joins sequence regions with the same ID
-- `gt cds` has new option -minorflen
+- `gt cds` has new options -minorflen, -startcodon, and -finalstopcodon
 
 
 changes in version 1.3.4 (2009-11-19)

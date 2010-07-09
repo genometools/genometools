@@ -31,6 +31,7 @@ const GtNodeStreamClass* gt_cds_stream_class(void);
 GtNodeStream*            gt_cds_stream_new(GtNodeStream *in_stream,
                                            GtRegionMapping *region_mapping,
                                            unsigned int minorflen,
-                                           const char *source);
+                                           const char *source, bool start_codon,
+                                           bool final_stop_codon);
 
 #endif

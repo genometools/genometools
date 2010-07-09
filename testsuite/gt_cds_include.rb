@@ -70,6 +70,16 @@ Test do
   grep $last_stderr, "cannot find sequence ID"
 end
 
+Name "gt cds test (-startcodon no -finalstopcodon no)"
+Keywords "gt_cds"
+Test do
+  run_test "#{$bin}gt cds -startcodon no -finalstopcodon no -seqfile " +
+           "#{$testdata}U89959_genomic.fas " +
+           "#{$testdata}gt_cds_nostartcodon_nofinalstopcodon.in"
+  run "diff #{$last_stdout} " +
+      "#{$testdata}/gt_cds_nostartcodon_nofinalstopcodon.out"
+end
+
 if $gttestdata then
   Name "gt cds bug"
   Keywords "gt_cds"
