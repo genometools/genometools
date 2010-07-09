@@ -71,7 +71,7 @@ static void determineAGSscore(GthAGS *ags, double sortagswf)
   }
 }
 
-static void gt_sortAGSsinsinglePGL(GthPGL *pgl, double sortagswf)
+static void sortAGSsinsinglePGL(GthPGL *pgl, double sortagswf)
 {
   unsigned long i;
 
@@ -84,9 +84,9 @@ static void gt_sortAGSsinsinglePGL(GthPGL *pgl, double sortagswf)
         sizeof (GthAGS*), compareAGSs);
 }
 
-void gt_sortAGSs(GtArray *pgls, double sortagswf)
+void gth_sortAGSs(GtArray *pgls, double sortagswf)
 {
   unsigned long i;
   for (i = 0; i < gt_array_size(pgls); i++)
-    gt_sortAGSsinsinglePGL(*(GthPGL**) gt_array_get(pgls, i), sortagswf);
+    sortAGSsinsinglePGL(*(GthPGL**) gt_array_get(pgls, i), sortagswf);
 }

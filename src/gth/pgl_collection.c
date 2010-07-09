@@ -150,7 +150,7 @@ void gth_pgl_collection_sortAGSs(GthPGLCollection *pgl_collection,
   gt_assert(pgl_collection && pgl_collection->pgls);
   /* sort AGSs according to the weighted mean of the average exon score and
      the average splice site probability */
-  gt_sortAGSs(pgl_collection->pgls, sortagswf);
+  gth_sortAGSs(pgl_collection->pgls, sortagswf);
 }
 
 void gth_pgl_collection_set_max_ags(GthPGLCollection *pgl_collection,
