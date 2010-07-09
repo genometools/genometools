@@ -122,7 +122,7 @@ writeIdxHeader(struct blockCompositionSeq *seqIdx,
                void **headerCBData,
                GtError *err);
 
-static inline void
+static inline int
 tryMMapOfIndex(struct onDiskBlockCompIdx *idxData);
 
 static const struct encIdxSeqClass blockCompositionSeqClass;
@@ -644,7 +644,7 @@ gt_newGenBlockEncIdxSeq(unsigned long totalLen, const char *projectName,
                      " index header");
               newBlockEncIdxSeqLoopErr();
             }
-            tryMMapOfIndex(&newSeqIdx->externalData);
+            hadGtError = tryMMapOfIndex(&newSeqIdx->externalData);
           }
           if (hadGtError)
           {
@@ -2368,7 +2368,7 @@ gt_loadBlockEncIdxSeqGen(MRAEnc *alphabet, unsigned long totalLen,
   return &newSeqIdx->baseClass;
 }
 
-static inline void
+static inline int
 tryMMapOfIndex(struct onDiskBlockCompIdx *idxData)
 {
   size_t len = idxData->rangeEncPos - idxData->cwDataPos;
@@ -2377,7 +2377,7 @@ tryMMapOfIndex(struct onDiskBlockCompIdx *idxData)
                                            gt_str_get(idxData->idxFN),len,
                                            idxData->cwDataPos, false, false,
                                            NULL);
-  gt_assert(idxData->idxMMap != NULL);
+  return (idxData->idxMMap != NULL ? 0 : 1);
 }
 
 static FILE *
