@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -120,6 +120,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
          *optskipalignmentout = NULL,     /* output */
          *optmincutoffs = NULL,           /* output */
          *optshowintronmaxlen = NULL,     /* output */
+         *optmaxagsnum = NULL,            /* output */
          *optminorflength = NULL,         /* output */
          *optshowseqnums = NULL,          /* output */
          *optgs2out = NULL,               /* output */
@@ -415,6 +416,14 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
                                             DEFAULT_SHOWINTRONMAXLEN);
   gt_option_is_extended_option(optshowintronmaxlen);
   gt_option_parser_add_option(op, optshowintronmaxlen);
+
+  /* -maxagsnum */
+  optmaxagsnum = gt_option_new_uint_min("maxagsnum", "set the maximum number "
+                                        "of AGSs shown per PGL",
+                                        &call_info->out->maxagsnum,
+                                        GT_UNDEF_UINT, 1);
+  gt_option_is_development_option(optmaxagsnum);
+  gt_option_parser_add_option(op, optmaxagsnum);
 
   /* -minorflen */
   optminorflength = gt_option_new_ulong_min("minorflen", "set the minimum "

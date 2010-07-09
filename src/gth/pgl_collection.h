@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2009 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -32,6 +32,9 @@ void              gth_pgl_collection_delete(GthPGLCollection*);
    weight factor <sortagswf>. */
 void              gth_pgl_collection_sortAGSs(GthPGLCollection*,
                                               double sortagswf);
+/* Set the maximum number of AGSs (<maxagsnum>) which are allowed per PGL. */
+void              gth_pgl_collection_set_max_ags(GthPGLCollection*,
+                                                 unsigned int maxagsnum);
 /* Returns the number of consensus spliced alignments in <pgl_collection>. */
 unsigned long     gth_pgl_collection_size(const GthPGLCollection*);
 void              gth_pgl_collection_traverse(const GthPGLCollection*,

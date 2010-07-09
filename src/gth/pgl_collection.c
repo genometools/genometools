@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -15,9 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert_api.h"
 #include <math.h>
+#include "core/assert_api.h"
 #include "core/ma.h"
+#include "core/undef.h"
 #include "core/unused_api.h"
 #include "extended/consensus_sa.h"
 #include "extended/gff3_visitor.h"
@@ -150,6 +151,17 @@ void gth_pgl_collection_sortAGSs(GthPGLCollection *pgl_collection,
   /* sort AGSs according to the weighted mean of the average exon score and
      the average splice site probability */
   gt_sortAGSs(pgl_collection->pgls, sortagswf);
+}
+
+void gth_pgl_collection_set_max_ags(GthPGLCollection *pgl_collection,
+                                    unsigned int maxagsnum)
+{
+  unsigned long i;
+  gt_assert(pgl_collection && maxagsnum && maxagsnum != GT_UNDEF_UINT);
+  for (i = 0; i < gt_array_size(pgl_collection->pgls); i++) {
+    gth_pgl_set_max_ags(*(GthPGL**) gt_array_get(pgl_collection->pgls, i),
+                        maxagsnum);
+  }
 }
 
 static GthPGL* gth_pgl_collection_get(const GthPGLCollection *pgl_collection,

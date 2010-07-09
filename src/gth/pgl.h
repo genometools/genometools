@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2004-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2004-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -51,6 +51,8 @@ void           gth_pgl_add_sa(GthPGL*, GthSA*);
 struct GthAGS* gth_pgl_get_ags(const GthPGL*, unsigned long i);
 /* Returns the number of alternative gene structures in <pgl>. */
 unsigned long  gth_pgl_num_of_ags(const GthPGL*);
+/* Set the maximum number of AGSs (<maxagsnum>) which are allowed for <pgl>. */
+void           gth_pgl_set_max_ags(GthPGL *pgl, unsigned int maxagsnum);
 bool           gth_pgl_is_forward(const GthPGL*);
 unsigned long  gth_pgl_filenum(const GthPGL*);
 unsigned long  gth_pgl_seqnum(const GthPGL*);

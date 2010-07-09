@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -121,6 +121,17 @@ unsigned long gth_pgl_num_of_ags(const GthPGL *pgl)
 {
   gt_assert(pgl && pgl->assemblies);
   return gt_array_size(pgl->assemblies);
+}
+
+void gth_pgl_set_max_ags(GthPGL *pgl, unsigned int maxagsnum)
+{
+  unsigned long i;
+  gt_assert(pgl && maxagsnum && maxagsnum != GT_UNDEF_UINT);
+  if (maxagsnum < gt_array_size(pgl->assemblies)) {
+    for (i = maxagsnum; i < gt_array_size(pgl->assemblies); i++)
+      gth_ags_delete(*(GthAGS**) gt_array_get(pgl->assemblies, i));
+    gt_array_set_size(pgl->assemblies, maxagsnum);
+  }
 }
 
 bool gth_pgl_is_forward(const GthPGL *pgl)

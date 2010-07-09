@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -74,6 +74,7 @@ typedef struct
                                      */
        sortags;                     /* sort AGSs */
   double sortagswf;                 /* weight factor for the sorting of AGSs */
+  unsigned int maxagsnum;           /* the maximum number of AGSs per PGL */
   unsigned long minORFlength,       /* minimum ORF length shown in assembly */
                 showintronmaxlen;   /* up to  length an intron is shown
                                        completly, otherwise a part in the middle

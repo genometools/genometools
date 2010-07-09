@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/undef.h"
 #include "extended/gff3_visitor.h"
 #include "gth/indent.h"
 #include "gth/proc_sa_collection.h"
@@ -97,6 +98,9 @@ void gth_proc_sa_collection(GthSACollection *sa_collection,
                                             call_info->disableclustersas);
     if (call_info->out->sortags)
       gth_pgl_collection_sortAGSs(pgl_collection, call_info->out->sortagswf);
+
+    if (call_info->out->maxagsnum != GT_UNDEF_UINT)
+      gth_pgl_collection_set_max_ags(pgl_collection, call_info->out->maxagsnum);
 
     if (call_info->out->showverbose)
       call_info->out->showverbose("output predicted gene locations");
