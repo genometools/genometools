@@ -91,6 +91,14 @@ def run_test_num_seqs(es)
   raise unless es.num_of_sequences == 2
 end
 
+def run_test_num_files(es)
+  raise unless es.num_of_files == 1
+end
+
+def run_test_num_files_mem(es)
+  raise unless es.num_of_files == 0
+end
+
 def run_test_descriptions(es)
   begin
     es.description(2)
@@ -137,9 +145,17 @@ def run_test_seq_length(es)
   raise unless es.seq_length(1) == 9
 end
 
+def run_test_file_length(es)
+  raise "#{es.file_effective_length(0)} != 46" unless es.file_effective_length(0) == 46
+end
+
 def run_test_seq_length_protein(es)
   raise unless es.seq_length(0) == 30
   raise unless es.seq_length(1) == 6
+end
+
+def run_test_file_length_protein(es)
+  raise "#{es.file_effective_length(0)} != 37" unless es.file_effective_length(0) == 37
 end
   
 def run_test_seq_substr_encoded(es, seq1, seq2)
@@ -191,8 +207,10 @@ es = el.load("foo")
 run_test_descriptions(es)
 run_test_get_encoded_char(es, @dseq1, @dseq2)
 run_test_num_seqs(es)
+run_test_num_files(es)
 run_test_seq_length(es)
 run_test_seq_startpos(es)
+run_test_file_length(es)
 run_test_seq_substr_encoded(es, @dseq1, @dseq2)
 run_test_seq_substr_plain(es, @dseq1, @dseq2)
 run_test_seq_substr_sequential(es, @dseq1, @dseq2)
@@ -202,6 +220,7 @@ es = create_mem
 run_test_descriptions(es)
 run_test_get_encoded_char(es, @dseq1, @dseq2)
 run_test_num_seqs(es)
+run_test_num_files_mem(es)
 run_test_seq_length(es)
 run_test_seq_substr_encoded(es, @dseq1, @dseq2)
 run_test_seq_substr_plain(es, @dseq1, @dseq2)
@@ -214,7 +233,9 @@ es = el.load("foo")
 run_test_descriptions(es)
 run_test_get_encoded_char(es,@aaseq1,@aaseq2)
 run_test_num_seqs(es)
+run_test_num_files(es)
 run_test_seq_startpos_protein(es)
+run_test_file_length_protein(es)
 run_test_seq_length_protein(es)
 run_test_seq_substr_encoded(es,@aaseq1,@aaseq2)
 run_test_seq_substr_plain(es,@aaseq1,@aaseq2)
@@ -225,6 +246,7 @@ es = create_mem_protein
 run_test_descriptions(es)
 run_test_get_encoded_char(es,@aaseq1,@aaseq2)
 run_test_num_seqs(es)
+run_test_num_files_mem(es)
 run_test_seq_length_protein(es)
 run_test_seq_substr_encoded(es,@aaseq1,@aaseq2)
 run_test_seq_substr_plain(es,@aaseq1,@aaseq2)

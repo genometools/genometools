@@ -111,6 +111,10 @@ module GT
                                                                 unsigned long)"
   extern "GtAlphabet* gt_encseq_alphabet(const GtEncseq*)"
   extern "const GtStrArray* gt_encseq_filenames(const GtEncseq*)"
+  extern "unsigned long gt_encseq_num_of_files(const GtEncseq*)"
+  extern "void gt_encseq_effective_filelength_ptr(const GtEncseq*,
+                                                  void*,
+                                                  unsigned long)"
   extern "void gt_encseq_delete(GtEncseq*)"
 
   extern "GtUchar gt_encseq_reader_next_encoded_char(GtEncseqReader*)"
@@ -452,6 +456,10 @@ module GT
       return GT.gt_encseq_num_of_sequences(@encseq)
     end
 
+    def num_of_files
+      return GT.gt_encseq_num_of_files(@encseq)
+    end
+
     def description(num)
       num = num.to_i
       if num >= self.num_of_sequences then
@@ -498,6 +506,17 @@ module GT
         GT.gterror("invalid sequence number #{num}")
       end
       GT.gt_encseq_seqlength(@encseq, num)
+    end
+
+    def file_effective_length(num)
+      if num >= self.num_of_files then
+        GT.gterror("invalid file number #{num}")
+      end
+      # 64-bit size hardcoded
+      res = DL::malloc(8)
+      GT.gt_encseq_effective_filelength_ptr(@encseq, res, num)
+      # 64-bit size hardcoded
+      res[0, 8].unpack("Q")[0]
     end
 
     def seq_startpos(num)
