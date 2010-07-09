@@ -39,7 +39,7 @@ Splicedseq* gt_splicedseq_new(void)
 }
 
 void gt_splicedseq_add(Splicedseq *ss, unsigned long start, unsigned long end,
-                    const char *original_sequence)
+                       const char *original_sequence)
 {
   unsigned long i;
   gt_assert(ss && start <= end && original_sequence);
@@ -47,7 +47,7 @@ void gt_splicedseq_add(Splicedseq *ss, unsigned long start, unsigned long end,
                         end - start + 1);
   /* make sure elemnts are added in ascending order */
   gt_assert(!gt_array_size(ss->positionmapping) ||
-         start > *(unsigned long*) gt_array_get_last(ss->positionmapping));
+            start > *(unsigned long*) gt_array_get_last(ss->positionmapping));
   for (i = start; i <= end; i++)
     gt_array_add(ss->positionmapping, i);
 }

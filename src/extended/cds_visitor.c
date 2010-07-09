@@ -89,7 +89,7 @@ static int extract_spliced_seq(GtGenomeNode *gn, GtCDSVisitor *visitor,
   /* traverse the direct children */
   gt_splicedseq_reset(visitor->splicedseq);
   return gt_genome_node_traverse_direct_children(gn, visitor,
-                                              extract_cds_if_necessary, err);
+                                                 extract_cds_if_necessary, err);
 }
 
 static GtArray* determine_ORFs_for_all_three_frames(Splicedseq *ss)
@@ -107,7 +107,7 @@ static GtArray* determine_ORFs_for_all_three_frames(Splicedseq *ss)
                                     NULL);
 
   pr[0] = gt_str_new();
-  pr[1]= gt_str_new();
+  pr[1] = gt_str_new();
   pr[2] = gt_str_new();
   orfs = gt_array_new(sizeof (GtRange));
 
@@ -233,8 +233,7 @@ static int cds_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
   GtCDSVisitor *v = cds_visitor_cast(nv);
   gt_error_check(err);
   return gt_genome_node_traverse_children((GtGenomeNode*) fn, v,
-                                       add_cds_if_necessary, false, err);
-
+                                          add_cds_if_necessary, false, err);
 }
 
 const GtNodeVisitorClass* gt_cds_visitor_class()
