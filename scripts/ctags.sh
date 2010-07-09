@@ -23,6 +23,7 @@ ctags -w src/*.[ch]                   \
          src/examples/*.[ch]          \
          src/extended/*.[ch]          \
          src/gtlua/*.[ch]             \
+         src/gth/*.[ch]               \
          src/ltr/*.[ch]               \
          src/match/*.[ch]             \
          src/mgth/*.[ch]              \
