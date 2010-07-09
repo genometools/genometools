@@ -31,6 +31,10 @@
 
 #define PGLS_DELIMITERCHAR  '-'
 
+struct GthPGLCollection {
+  GtArray *pgls;
+};
+
 /* necessary to call consensus_sa() */
 static GtRange pgl_get_genomic_range(const void *sa)
 {
@@ -91,10 +95,6 @@ static void process_splice_form_func(GtArray *spliced_alignments_in_form,
 
   gt_array_add(pgl->assemblies, ags);
 }
-
-struct GthPGLCollection {
-  GtArray *pgls;
-};
 
 GthPGLCollection* gth_pgl_collection_new(GthSACollection *sacollection,
                                   bool disableclustersas)
