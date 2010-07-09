@@ -269,7 +269,7 @@ static void xml_show_pgl(GthPGL *pgl, unsigned long pglnum,
                                 gth_pgl_genomic_offset(pgl),
                                 pgl->maxrange.end));
 
-  for (i = 0; i < gt_array_size(pgl->assemblies); i++) {
+  for (i = 0; i < gth_pgl_num_of_ags(pgl); i++) {
     xml_show_ags(gth_pgl_get_ags(pgl, i), pglnum, i, translationtable, input,
                  indentlevel, out);
   }
