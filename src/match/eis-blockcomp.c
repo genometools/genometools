@@ -644,7 +644,7 @@ gt_newGenBlockEncIdxSeq(unsigned long totalLen, const char *projectName,
                      " index header");
               newBlockEncIdxSeqLoopErr();
             }
-            hadGtError = tryMMapOfIndex(&newSeqIdx->externalData);
+            tryMMapOfIndex(&newSeqIdx->externalData);
           }
           if (hadGtError)
           {
