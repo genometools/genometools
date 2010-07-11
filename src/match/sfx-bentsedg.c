@@ -74,12 +74,9 @@
           MAXVAL = commonunits.common;\
         }
 
-#define CHECKSUBBUCKET /* Nothing */
-/*
-#define CHECKSUBBUCKET gt_assert(subbucketleft == \
-                                 (unsigned long) (subbucket -\
-                                                  bsr->lcpsubtab->suftabbase))
-*/
+#define CHECKSUBBUCKET\
+        gt_assert(subbucketleft ==\
+                  (unsigned long) (subbucket - bsr->suftabbaseptr))
 
 GT_DECLAREARRAYSTRUCT(Largelcpvalue);
 
@@ -95,8 +92,6 @@ typedef struct
   uint8_t *smalllcpvalues; /* pointer into reservoir */
   const Compressedtable *completelcpvalues;
   GtArrayLargelcpvalue largelcpvalues;
-  const Suffixptr *suftabbase;
-  unsigned long suftabbaselong;
 } Lcpsubtab;
 
 typedef struct
@@ -176,24 +171,6 @@ typedef GtEndofTwobitencoding Sfxcmp;
 #define SfxcmpSMALLER(X,Y)    (ret##X##Y < 0)
 #define SfxcmpGREATER(X,Y)    (ret##X##Y > 0)
 
-static inline unsigned long evallcpindex(const Lcpsubtab *lcpsubtab,
-                                         GT_UNUSED int line,
-                                         GT_UNUSED unsigned long offset,
-                                         const Suffixptr *ptr)
-{
-  unsigned long val1 = (unsigned long) (ptr - lcpsubtab->suftabbase);
-  /*
-  if (offset < lcpsubtab->suftabbaselong)
-  {
-    fprintf(stderr,"line %d: offset = %lu < %lu = lcpsubtab->suftabbaselong\n",
-                    line,offset,lcpsubtab->suftabbaselong);
-    exit(EXIT_FAILURE);
-  }
-  gt_assert(offset - lcpsubtab->suftabbaselong == val1);
-  */
-  return val1;
-}
-
 #ifdef SKDEBUG
 static unsigned long baseptr;
 
@@ -215,8 +192,8 @@ static void showsuffixrange(const GtEncseq *encseq,
   {
     printf("of %lu suffixes [%lu,%lu] at depth %lu:\n",
            width,
-           baseptr + evallcpindex(lcpsubtab,suftab),
-           baseptr + evallcpindex(lcpsubtab,suftab + width),
+           baseptr + subbucketleft,
+           baseptr + subbucketleft + width,
            depth);
   }
   for (pi = 0; pi <= width; pi++)
@@ -379,6 +356,7 @@ typedef struct
                 countqsort,
                 countcountingsort,
                 countbltriesort;
+  Suffixptr *suftabbaseptr;
 } Bentsedgresources;
 
 static unsigned long medianof3cmpcharbychar(const Bentsedgresources *bsr,
@@ -530,9 +508,7 @@ static void bs_insertionsort(Bentsedgresources *bsr,
       gt_assert(retval != 0);
       if (bsr->lcpsubtab != NULL && bsr->assideeffect)
       {
-        lcpindex = evallcpindex(bsr->lcpsubtab,__LINE__,
-                                pj,subbucket + pj); /* XXX do not use
-                                                       subbucket */
+        lcpindex = subbucketleft+pj;
         if (pj < pi && retval > 0)
         {
           updatelcpvalue(bsr,lcpindex+1,
@@ -648,8 +624,7 @@ static void bs_insertionsortmaxdepth(Bentsedgresources *bsr,
 #endif
       if (retval != 0 && bsr->lcpsubtab != NULL && bsr->assideeffect)
       {
-        lcpindex = evallcpindex(bsr->lcpsubtab,__LINE__,pj,
-                                subbucket + pj); /* XXX */
+        lcpindex = subbucketleft + pj;
         if (pj < pi && retval > 0)
         {
           updatelcpvalue(bsr,lcpindex+1,
@@ -1017,8 +992,7 @@ static bool comparisonsort(Bentsedgresources *bsr,
                                 bsr->lcpsubtab == NULL
                                   ? NULL
                                   : bsr->lcpsubtab->bucketoflcpvalues +
-                                    evallcpindex(bsr->lcpsubtab,__LINE__,
-                                                 0,subbucket),
+                                    subbucketleft,
                                 width,
                                 depth,
                                 (unsigned long)
@@ -1097,9 +1071,7 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
                                       bsr->lcpsubtab == NULL
                                         ? NULL
                                         : bsr->lcpsubtab->bucketoflcpvalues +
-                                          evallcpindex(bsr->lcpsubtab,
-                                                       __LINE__,0,
-                                                       subbucket),
+                                          subbucketleft,
                                       width,
                                       depth,
                                       (unsigned long)
@@ -1251,9 +1223,7 @@ static void sarrcountingsort(Bentsedgresources *bsr,
     if (bsr->lcpsubtab != NULL && bsr->assideeffect &&
         bsr->leftlcpdist[idx] < end)
     { /* at least one element */
-      updatelcpvalue(bsr,evallcpindex(bsr->lcpsubtab,__LINE__,end,
-                     subbucket+end),
-                     depth + idx);
+      updatelcpvalue(bsr,subbucketleft+end,depth + idx);
     }
     bsr->leftlcpdist[idx] = 0;
   }
@@ -1289,9 +1259,7 @@ static void sarrcountingsort(Bentsedgresources *bsr,
     if (bsr->lcpsubtab != NULL && bsr->assideeffect &&
         bsr->rightlcpdist[idx] < end)
     { /* at least one element */
-      updatelcpvalue(bsr,evallcpindex(bsr->lcpsubtab,__LINE__,width - end,
-                     subbucket + width - end),
-                     depth + idx);
+      updatelcpvalue(bsr,subbucketleft + width - end,depth + idx);
     }
     bsr->rightlcpdist[idx] = 0;
   }
@@ -1514,9 +1482,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
           which is at a minimum distance to the pivot and thus to an
           element in the final part of the left side.
         */
-        updatelcpvalue(bsr,evallcpindex(bsr->lcpsubtab,__LINE__,leftplusw,
-                                        subbucket + leftplusw),
-                       depth + smallermaxlcp);
+        updatelcpvalue(bsr,subbucketleft + leftplusw,depth + smallermaxlcp);
       }
       subsort_bentleysedgewick(bsr,
                                subbucket,
@@ -1551,9 +1517,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
           which is at a minimum distance to the pivot and thus to an
           element in the first part of the right side.
         */
-        updatelcpvalue(bsr,evallcpindex(bsr->lcpsubtab,__LINE__,
-                                        bucketright-wtmp+1,
-                                        subbucket+bucketright-wtmp+1),
+        updatelcpvalue(bsr,subbucketleft + bucketright - wtmp + 1,
                        depth + greatermaxlcp);
       }
       subsort_bentleysedgewick(bsr,
@@ -2280,10 +2244,9 @@ void gt_sortallbuckets(Suffixsortspace *suffixsortspace,
         if (outlcpinfo != NULL && outlcpinfo->assideeffect)
         {
           gt_assert(bsr.lcpsubtab != NULL);
-          bsr.lcpsubtab->suftabbase = suftabptr + bucketspec.left;
-          bsr.lcpsubtab->suftabbaselong = bucketspec.left;
         }
         bsr.bucketleftidx = bucketspec.left,
+        bsr.suftabbaseptr = suftabptr + bucketspec.left;
         bentleysedgewick(&bsr,
                          suftabptr + bucketspec.left,
                          bucketspec.nonspecialsinbucket,
@@ -2474,6 +2437,7 @@ void gt_sortbucketofsuffixes(Suffixptr *suffixestobesorted,
     if (bucketspec.nonspecialsinbucket > 1UL)
     {
       bsr.bucketleftidx = bucketspec.left,
+      bsr.suftabbaseptr = suffixestobesorted + bucketspec.left;
       bentleysedgewick(&bsr,
                        suffixestobesorted + bucketspec.left,
                        bucketspec.nonspecialsinbucket,
