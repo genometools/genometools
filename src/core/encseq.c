@@ -223,9 +223,7 @@ void gt_encseq_sequence2bytecode(GtUchar *dest,
   gt_assert(encseq->sat != Viabytecompress);
   if (encseq->sat == Viadirectaccess)
   {
-    gt_encseq_plainseq2bytecode(dest,
-                                         encseq->plainseq + startindex,
-                                         len);
+    gt_encseq_plainseq2bytecode(dest,encseq->plainseq + startindex,len);
   } else
   {
     encseq2bytecode(dest,encseq,startindex,len);
@@ -5203,12 +5201,12 @@ static unsigned long derefcharboundaries(const GtEncseq *encseq,
 }
 
 int gt_encseq_comparetwostrings(const GtEncseq *encseq,
-                                         bool fwd,
-                                         bool complement,
-                                         unsigned long *maxcommon,
-                                         unsigned long pos1,
-                                         unsigned long pos2,
-                                         unsigned long maxdepth)
+                                bool fwd,
+                                bool complement,
+                                unsigned long *maxcommon,
+                                unsigned long pos1,
+                                unsigned long pos2,
+                                unsigned long maxdepth)
 {
   unsigned long currentoffset, maxoffset, cc1, cc2,
          totallength = gt_encseq_total_length(encseq);
@@ -5289,7 +5287,7 @@ int gt_encseq_comparetwostringsgeneric(const GtEncseq *encseq,
                                  maxcommon,
                                  pos1+depth,
                                  pos2+depth,
-                                 maxdepth > 0 ? (maxdepth - depth) : 0);
+                                 maxdepth == 0 ? 0 : (maxdepth - depth));
     } else
     {
       retval = comparewithonespecial(&leftspecial,
@@ -5316,7 +5314,7 @@ int gt_encseq_comparetwostringsgeneric(const GtEncseq *encseq,
                                  maxcommon,
                                  pos1-depth,
                                  pos2-depth,
-                                 maxdepth > 0 ? (maxdepth - depth) : 0);
+                                 maxdepth == 0 ? 0 : (maxdepth - depth));
     } else
     {
       retval = comparewithonespecial(&leftspecial,
