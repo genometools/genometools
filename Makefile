@@ -316,6 +316,7 @@ ifneq ($(cairo),no)
                                bin/examples/sketch_parsed
   ANNOTATIONSKETCH_MANUAL := doc/manuals/annotationsketch.pdf
   LIBGENOMETOOLS_DIRS:=$(LIBGENOMETOOLS_DIRS) src/annotationsketch
+  STATIC_CAIRO_LIBS := -pthread -lfreetype -lpixman-1 -lpng -static -o $$@
 else
   OVERRIDELIBS += lib/libz.a # using own zlib together with cairo doesn't work
   EXP_CPPFLAGS += -DWITHOUT_CAIRO
@@ -443,7 +444,7 @@ $(1)_static: $(2)
 	@test -d $$(@D) || mkdir -p $$(@D)
 	@$$(CC) $$(EXP_LDFLAGS) $$(GT_LDFLAGS) $$(filter-out $$(OVERRIDELIBS),$$^) \
 	  $$(filter-out $$(patsubst lib%.a,-l%,$$(notdir $$(OVERRIDELIBS))),\
-	  $$(EXP_LDLIBS)) $$(OVERRIDELIBS) -pthread -lfreetype -lpixman-1 -lpng -static -o $$@
+	  $$(EXP_LDLIBS)) $$(OVERRIDELIBS) $$(STATIC_CAIRO_LIBS) -static -o $$@
 endef
 
 $(eval $(call PROGRAM_template, bin/skproto, $(SKPROTO_OBJ) \
