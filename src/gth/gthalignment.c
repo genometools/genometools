@@ -115,12 +115,11 @@ static unsigned long calctotallengthofintron(unsigned long *numofeopsinintron,
 */
 
 static unsigned long fillthelines(GtUchar *firstline,GtUchar *secondline,
-                         const GtUchar *useq,
-                         const GtUchar *vseq,
-                         Editoperation *alignment, unsigned long lenalg,
-                         unsigned long linewidth,
-                         unsigned long showintronmaxlen,
-                         GtArrayShortIntronInfo *shortintroninfo)
+                                  const GtUchar *useq, const GtUchar *vseq,
+                                  Editoperation *alignment,
+                                  unsigned long lenalg, unsigned long linewidth,
+                                  unsigned long showintronmaxlen,
+                                  GtArrayShortIntronInfo *shortintroninfo)
 {
   Editoperation *eopptr;
   unsigned long l, intronlength, totalintronlength, numofeopsinintron,
@@ -932,7 +931,7 @@ static void showeditopline(GtFile *outfp,
     acompare = firstlinecompare[i];
     bcompare = secondlinecompare[i];
     if (acompare == bcompare && acompare != (GtUchar) ABSTRACTGAPSYMBOL
-                            && acompare != (GtUchar) WILDCARD)
+                             && acompare != (GtUchar) WILDCARD)
     {
       charinline = true;
       break;
@@ -958,7 +957,7 @@ static void showeditopline(GtFile *outfp,
       acompare = firstlinecompare[i];
       bcompare = secondlinecompare[i];
       if (acompare == bcompare && acompare != (GtUchar) ABSTRACTGAPSYMBOL
-                              && acompare != (GtUchar) WILDCARD)
+                               && acompare != (GtUchar) WILDCARD)
       {
         OUTCHAR('|');
       } else
@@ -1187,10 +1186,10 @@ static void formatproteinalignment(GtFile *outfp,
                                    bool wildcardimplosion)
 {
   unsigned long len, codon_remainder, i = 0,
-       tennerblocksadjustment = 0,
-       genomicdnainsertioncount = 0,
-       referenceproteininsertioncount = 0,
-       completeshortintronlen = 0;
+                tennerblocksadjustment = 0,
+                genomicdnainsertioncount = 0,
+                referenceproteininsertioncount = 0,
+                completeshortintronlen = 0;
 
   for (;;)
   {
@@ -1263,8 +1262,8 @@ unsigned long gthfillthethreealignmentlines(GtUchar **firstline,
                                    unsigned long translationschemenumber)
 {
   unsigned long lengthofgenomicdnaline,
-       lengthofgenomicproteinline,
-       lengthofreferenceproteinline;
+                lengthofgenomicproteinline,
+                lengthofreferenceproteinline;
 
   /* set the lenght of the three output lines */
   lengthofgenomicdnaline       = genseqlen
@@ -1315,8 +1314,8 @@ void gthshowalignmentprotein(GtFile *outfp,
 {
   unsigned long numofcols;
   GtUchar *genomicdnaline,
-        *genomicproteinline,
-        *referenceproteinline;
+          *genomicproteinline,
+          *referenceproteinline;
   GtArrayShortIntronInfo shortintroninfo;
 
   /* init */
@@ -1349,17 +1348,18 @@ void gthshowalignmentprotein(GtFile *outfp,
 }
 
 unsigned long gthfillthetwoalignmentlines(GtUchar **firstline,
-                                 GtUchar **secondline,
-                                 const GtUchar *useq,
-                                 unsigned long ulen,
-                                 const GtUchar *vseq,
-                                 unsigned long vlen,
-                                 Editoperation *alignment,
-                                 unsigned long lenalg,
-                                 unsigned long linewidth,
-                                 unsigned long showintronmaxlen,
-                                 GtArrayShortIntronInfo *shortintroninfo,
-                                 unsigned long indelcount)
+                                          GtUchar **secondline,
+                                          const GtUchar *useq,
+                                          unsigned long ulen,
+                                          const GtUchar *vseq,
+                                          unsigned long vlen,
+                                          Editoperation *alignment,
+                                          unsigned long lenalg,
+                                          unsigned long linewidth,
+                                          unsigned long showintronmaxlen,
+                                          GtArrayShortIntronInfo
+                                          *shortintroninfo,
+                                          unsigned long indelcount)
 {
   *firstline = gt_malloc(ulen + MIN(indelcount, vlen) * sizeof (GtUchar));
   *secondline = gt_malloc(vlen + MIN(indelcount, ulen) * sizeof (GtUchar));
