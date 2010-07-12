@@ -37,7 +37,6 @@
 #include "sfx-remainsort.h"
 #include "sfx-copysort.h"
 #include "sfx-bentsedg.h"
-#include "stamp.h"
 
 #define UNIQUEINT(P)           ((unsigned long) ((P) + GT_COMPAREOFFSET))
 #define ACCESSCHAR(POS)        gt_encseq_get_encoded_char(bsr->encseq,\
@@ -238,13 +237,14 @@ static void suffixptrassert(const Suffixsortspace *sssp,
                             unsigned long subbucketleft,
                             unsigned long idx)
 {
+  unsigned long tmp = sssp->bucketleftidx - sssp->sortspaceoffset;
   gt_assert(sssp != NULL);
-  gt_assert(subbucket - sssp->sortspace + sssp->sortspaceoffset ==
-            sssp->bucketleftidx + subbucketleft);
   gt_assert(sssp->sortspaceoffset <= sssp->bucketleftidx + subbucketleft + idx);
   gt_assert(subbucket + idx ==
             sssp->sortspace + (sssp->bucketleftidx+subbucketleft+idx-
                                sssp->sortspaceoffset));
+  gt_assert(subbucket + idx ==
+            sssp->sortspace + (subbucketleft + idx + tmp));
 }
 
 static unsigned long suffixptrget(const Suffixsortspace *sssp,
@@ -1067,8 +1067,7 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
       if (depth >=
                (unsigned long) bsr->sfxstrategy->ssortmaxdepth.valueunsignedint)
       {
-        unsigned long leftindex = bsr->sssp->bucketleftidx +
-                                  subbucketleft;
+        unsigned long leftindex = bsr->sssp->bucketleftidx + subbucketleft;
         gt_rmnsufinfo_addunsortedrange(bsr->rmnsufinfo,
                                        leftindex,
                                        leftindex + width - 1,
@@ -2057,20 +2056,20 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   }
   if (bcktab != NULL && sfxstrategy->ssortmaxdepth.defined)
   {
-    bsr->rmnsufinfo
-      = gt_newRmnsufinfo(suffixsortspace->sortspace -
-                          suffixsortspace->sortspaceoffset,
-                         -1,
-                         NULL,
-                         bsr->encseq,
-                         bcktab,
-                         maxcode,
-                         numofchars,
-                         prefixlength,
-                         readmode,
-                         partwidth,
-                         false,
-                         true);
+    Suffixptr *suftabptr = suffixsortspace->sortspace -
+                           suffixsortspace->sortspaceoffset;
+    bsr->rmnsufinfo = gt_newRmnsufinfo(suftabptr,
+                                       -1,
+                                       NULL,
+                                       bsr->encseq,
+                                       bcktab,
+                                       maxcode,
+                                       numofchars,
+                                       prefixlength,
+                                       readmode,
+                                       partwidth,
+                                       false,
+                                       true);
     gt_assert(bsr->rmnsufinfo != NULL);
   } else
   {
