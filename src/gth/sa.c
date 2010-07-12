@@ -1073,8 +1073,7 @@ void gth_sa_echo_alignment(const GthSA *sa, unsigned long showintronmaxlen,
   unsigned long genomicstartcutoff, genomicendcutoff, genomictotalcutoff,
                 referencestartcutoff, referenceendcutoff, referencetotalcutoff;
   bool reverse_subject_pos = false;
-  const unsigned char *gen_seq_tran, *gen_seq_orig,
-                      *ref_seq_tran, *ref_seq_orig;
+  const unsigned char *gen_seq_orig, *ref_seq_orig;
   GthSeqCol *ref_seq_col;
   GtAlphabet *ref_alphabet;
 
@@ -1100,9 +1099,6 @@ void gth_sa_echo_alignment(const GthSA *sa, unsigned long showintronmaxlen,
     reverse_subject_pos = true;
 
   /* get genomic sequence */
-  gen_seq_tran = gth_input_genomic_sequence(input, sa->gen_file_num,
-                                               sa->gen_strand_forward)
-                    + gth_sa_gen_dp_start(sa);
   gen_seq_orig =
     gth_input_original_genomic_sequence(input, sa->gen_file_num,
                                         sa->gen_strand_forward)
@@ -1110,14 +1106,10 @@ void gth_sa_echo_alignment(const GthSA *sa, unsigned long showintronmaxlen,
 
   /* get reference sequence */
   if (gth_sa_ref_strand_forward(sa)) {
-    ref_seq_tran =
-      gth_seq_col_get_tran_seq(ref_seq_col, gth_sa_ref_seq_num(sa));
     ref_seq_orig =
       gth_seq_col_get_orig_seq(ref_seq_col, gth_sa_ref_seq_num(sa));
   }
   else {
-    ref_seq_tran =
-      gth_seq_col_get_tran_seq_rc(ref_seq_col, gth_sa_ref_seq_num(sa));
     ref_seq_orig =
       gth_seq_col_get_orig_seq_rc(ref_seq_col, gth_sa_ref_seq_num(sa));
   }
@@ -1183,8 +1175,7 @@ unsigned long gth_sa_get_alignment_lines(const GthSA *sa,
   referencetotalcutoff = referencestartcutoff + referenceendcutoff;
 
   /* sequences */
-  unsigned char *gen_seq_orig, *ref_seq_tran,
-                *ref_seq_orig;
+  unsigned char *gen_seq_orig, *ref_seq_orig;
   unsigned long cols = 0;
   GthSeqCol *ref_seq_col;
 
@@ -1206,14 +1197,10 @@ unsigned long gth_sa_get_alignment_lines(const GthSA *sa,
 
   /* get reference sequence */
   if (gth_sa_ref_strand_forward(sa)) {
-    ref_seq_tran =
-      gth_seq_col_get_tran_seq(ref_seq_col, gth_sa_ref_seq_num(sa));
     ref_seq_orig =
       gth_seq_col_get_orig_seq(ref_seq_col, gth_sa_ref_seq_num(sa));
   }
   else {
-    ref_seq_tran =
-      gth_seq_col_get_tran_seq_rc(ref_seq_col, gth_sa_ref_seq_num(sa));
     ref_seq_orig =
       gth_seq_col_get_orig_seq_rc(ref_seq_col, gth_sa_ref_seq_num(sa));
   }

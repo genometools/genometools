@@ -167,20 +167,6 @@ bool gth_input_ref_file_is_dna(const GthInput *input,
   return false;
 }
 
-const unsigned char* gth_input_genomic_sequence(GthInput *input,
-                                                unsigned long filenum,
-                                                bool forward)
-{
-  gt_assert(input);
-  gth_input_load_genomic_file(input, filenum);
-  if (forward)
-    return gth_seq_col_get_tran_seq(input->genomic_seq_col, 0);
-  else {
-    gt_assert(input->searchmode & GTHREVERSE);
-    return gth_seq_col_get_tran_seq_rc(input->genomic_seq_col, 0);
-  }
-}
-
 const unsigned char* gth_input_original_genomic_sequence(GthInput *input,
                                                          unsigned long filenum,
                                                          bool forward)

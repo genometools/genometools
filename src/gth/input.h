@@ -64,9 +64,6 @@ const char*    gth_input_get_reference_filename(const GthInput*,
 GthAlphatype   gth_input_get_alphatype(const GthInput*, unsigned long);
 bool           gth_input_ref_file_is_dna(const GthInput*, unsigned long);
 const
-unsigned char* gth_input_genomic_sequence(GthInput*, unsigned long filenum,
-                                          bool forward);
-const
 unsigned char* gth_input_original_genomic_sequence(GthInput*,
                                                    unsigned long filenum,
                                                    bool forward);
