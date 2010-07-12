@@ -105,9 +105,11 @@ GtRange        gth_input_get_reference_range(GthInput*,
                                              unsigned long filenum,
                                              unsigned long seqnum);
 void           gth_input_load_genomic_file(GthInput*,
-                                           unsigned long gen_file_num);
+                                           unsigned long gen_file_num,
+                                           bool translate);
 void           gth_input_load_reference_file(GthInput*,
-                                             unsigned long ref_file_num);
+                                             unsigned long ref_file_num,
+                                             bool translate);
 int            gth_input_load_scorematrix(GthInput*, char *scorematrixfile,
                                           GthOutput *out, GtError *err);
 GtStr*         gth_input_proteinsmap(const GthInput*);

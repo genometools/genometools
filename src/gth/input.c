@@ -56,7 +56,9 @@ struct GthInput {
   GtAlphabet *score_matrix_alpha; /* the alphabet used for the scoring matrix */
 
   unsigned int searchmode;        /* stores bits GTHFORWARD and GTHREVERSE */
-  bool use_substring_spec;
+  bool use_substring_spec,
+       genomic_translate,
+       reference_translate;
   unsigned long genomicfrompos,   /* analyse genomic seq. from this position */
                 genomicwidth,     /* analyse only this width of genomic seq. */
                 genomictopos;     /* = genomicfrompos + genomicwidth - 1 */
@@ -78,6 +80,8 @@ GthInput *gth_input_new(GthInputFilePreprocessor file_preprocessor,
   input->proteinsmap = gt_str_new_cstr(DEFAULT_PROTEINSMAP);
   input->bssmfile = gt_str_new();
   input->searchmode = GTHFORWARD | GTHREVERSE;
+  input->genomic_translate = GT_UNDEF_BOOL;
+  input->reference_translate = GT_UNDEF_BOOL;
   return input;
 }
 
@@ -172,7 +176,7 @@ const unsigned char* gth_input_original_genomic_sequence(GthInput *input,
                                                          bool forward)
 {
   gt_assert(input);
-  gth_input_load_genomic_file(input, filenum);
+  gth_input_load_genomic_file(input, filenum, false);
   if (forward)
     return gth_seq_col_get_orig_seq(input->genomic_seq_col, 0);
   else {
@@ -185,7 +189,7 @@ void gth_input_echo_genomic_description(GthInput *input, unsigned long filenum,
                                         unsigned long seqnum, GtFile *outfp)
 {
   gt_assert(input);
-  gth_input_load_genomic_file(input, filenum);
+  gth_input_load_genomic_file(input, filenum, false);
   gth_seq_col_echo_description(input->genomic_seq_col, seqnum, outfp);
 }
 
@@ -195,7 +199,7 @@ void gth_input_echo_reference_description(GthInput *input,
                                           GtFile *outfp)
 {
   gt_assert(input);
-  gth_input_load_reference_file(input, filenum);
+  gth_input_load_reference_file(input, filenum, false);
   gth_seq_col_echo_description(input->reference_seq_col, seqnum, outfp);
 }
 
@@ -250,7 +254,7 @@ void gth_input_echo_reference_sequence(GthInput *input, bool format,
   unsigned char *refseq;
   unsigned long i, reflength;
   gt_assert(input);
-  gth_input_load_reference_file(input, filenum);
+  gth_input_load_reference_file(input, filenum, false);
 
   /* get reference sequence */
   if (forward)
@@ -273,7 +277,7 @@ void gth_input_get_genomic_description(GthInput *input, GtStr *description,
                                        unsigned long seqnum)
 {
   gt_assert(input && description);
-  gth_input_load_genomic_file(input, filenum);
+  gth_input_load_genomic_file(input, filenum, false);
   gth_seq_col_get_description(input->genomic_seq_col, seqnum, description);
 }
 
@@ -332,7 +336,7 @@ void gth_input_save_gen_id(GthInput *input, GtStr *id, unsigned long file_num,
                            unsigned long seq_num)
 {
   gt_assert(input && id);
-  gth_input_load_genomic_file(input, file_num);
+  gt_assert(input->gen_file_num == file_num);
   save_sequenceid(id, input->genomic_seq_col, seq_num);
 }
 
@@ -340,7 +344,7 @@ void gth_input_save_ref_id(GthInput *input, GtStr *id, unsigned long file_num,
                            unsigned long seq_num)
 {
   gt_assert(input && id);
-  gth_input_load_reference_file(input, file_num);
+  gt_assert(input->ref_file_num == file_num);
   save_sequenceid(id, input->reference_seq_col, seq_num);
 }
 
@@ -360,21 +364,21 @@ unsigned long gth_input_genomic_file_total_length(GthInput *input,
                                                   unsigned long filenum)
 {
   gt_assert(input);
-  gth_input_load_genomic_file(input, filenum);
+  gth_input_load_genomic_file(input, filenum, true);
   return gth_seq_col_total_length(input->genomic_seq_col);
 }
 
 unsigned long gth_input_num_of_gen_seqs(GthInput *input, unsigned long filenum)
 {
   gt_assert(input);
-  gth_input_load_genomic_file(input, filenum);
+  gt_assert(input->gen_file_num == filenum);
   return gth_seq_col_num_of_seqs(input->genomic_seq_col);
 }
 
 unsigned long gth_input_num_of_ref_seqs(GthInput *input, unsigned long filenum)
 {
   gt_assert(input);
-  gth_input_load_reference_file(input, filenum);
+  gt_assert(input->ref_file_num == filenum);
   return gth_seq_col_num_of_seqs(input->reference_seq_col);
 }
 
@@ -383,7 +387,7 @@ GtRange gth_input_get_relative_genomic_range(GthInput *input,
                                              unsigned long seqnum)
 {
   gt_assert(input);
-  gth_input_load_genomic_file(input, filenum);
+  gt_assert(input->gen_file_num == filenum);
   return gth_seq_col_get_relative_range(input->genomic_seq_col, seqnum);
 }
 
@@ -392,7 +396,7 @@ GtRange gth_input_get_genomic_range(GthInput *input,
                                     unsigned long seqnum)
 {
   gt_assert(input);
-  gth_input_load_genomic_file(input, filenum);
+  gt_assert(input->gen_file_num == filenum);
   return gth_seq_col_get_range(input->genomic_seq_col, seqnum);
 }
 
@@ -401,11 +405,12 @@ GtRange gth_input_get_reference_range(GthInput *input,
                                       unsigned long seqnum)
 {
   gt_assert(input);
-  gth_input_load_reference_file(input, filenum);
+  gt_assert(input->ref_file_num == filenum);
   return gth_seq_col_get_range(input->reference_seq_col, seqnum);
 }
 
-void gth_input_load_genomic_file(GthInput *input, unsigned long gen_file_num)
+void gth_input_load_genomic_file(GthInput *input, unsigned long gen_file_num,
+                                 bool translate)
 {
   char indexname[PATH_MAX+MAXSUFFIXLEN+1];
 
@@ -423,7 +428,9 @@ void gth_input_load_genomic_file(GthInput *input, unsigned long gen_file_num)
     sprintf(indexname, "%s.%s",
             gth_input_get_genomic_filename(input, gen_file_num), DNASUFFIX);
     input->genomic_seq_col =
-      input->seq_col_constructor(indexname, input->searchmode & GTHREVERSE);
+      input->seq_col_constructor(indexname, input->searchmode & GTHREVERSE,
+                                 translate);
+    input->genomic_translate = translate;
 
     /* at least one sequence in genomic virtual tree  */
     gt_assert(gth_seq_col_num_of_seqs(input->genomic_seq_col) > 0);
@@ -432,10 +439,11 @@ void gth_input_load_genomic_file(GthInput *input, unsigned long gen_file_num)
     input->gen_file_num = gen_file_num;
   }
   /* else: necessary file already mapped */
+  gt_assert(input->genomic_translate == translate);
 }
 
-void gth_input_load_reference_file(GthInput *input,
-                                      unsigned long ref_file_num)
+void gth_input_load_reference_file(GthInput *input, unsigned long ref_file_num,
+                                   bool translate)
 {
   char indexname[PATH_MAX+MAXSUFFIXLEN+1];
   GthAlphatype alphatype;
@@ -463,7 +471,8 @@ void gth_input_load_reference_file(GthInput *input,
             alphatype == DNA_ALPHA ? DNASUFFIX
                                    : gt_str_get(input->proteinsmap));
     input->reference_seq_col =
-      input->seq_col_constructor(indexname, alphatype == DNA_ALPHA);
+      input->seq_col_constructor(indexname, alphatype == DNA_ALPHA, translate);
+    input->reference_translate = translate;
 
     /* at least on reference sequence in virtual tree */
     gt_assert(gth_seq_col_num_of_seqs(input->reference_seq_col) > 0);
@@ -471,6 +480,8 @@ void gth_input_load_reference_file(GthInput *input,
     /* set reference file number to new value */
     input->ref_file_num = ref_file_num;
   }
+  /* else: necessary file already mapped */
+  gt_assert(input->reference_translate == translate);
 }
 
 /* We use a ``special'' protein alphabet which has some characters which are
@@ -829,6 +840,9 @@ void gth_input_delete_current(GthInput *input)
   /* set the filenumbers to undefined values */
   input->gen_file_num = GT_UNDEF_ULONG;
   input->ref_file_num = GT_UNDEF_ULONG;
+
+  input->genomic_translate = GT_UNDEF_BOOL;
+  input->reference_translate = GT_UNDEF_BOOL;
 }
 
 void gth_input_delete_complete(GthInput *input)

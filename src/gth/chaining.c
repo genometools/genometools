@@ -722,10 +722,10 @@ void gth_chaining(GthChainCollection *chain_collection,
   }
 
   /* load genomic file back into memory */
-  gth_input_load_genomic_file(input, gen_file_num);
+  gth_input_load_genomic_file(input, gen_file_num, true);
 
   /* load reference file back into memory */
-  gth_input_load_reference_file(input, ref_file_num);
+  gth_input_load_reference_file(input, ref_file_num, true);
 
   /* compute chains from matches */
   calc_chains_from_matches(chain_collection, matches, &chaining_info,

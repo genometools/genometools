@@ -663,12 +663,12 @@ static int calc_spliced_alignments(GthSACollection *sa_collection,
     }
 
     /* load genomic file corresponding to this DP range */
-    gth_input_load_genomic_file(input, chain->gen_file_num);
+    gth_input_load_genomic_file(input, chain->gen_file_num, true);
 
     /* XXX: is this loading really necessary?
        (already loaded after vmatch call)? */
     /* load reference file corresponding to this DP range */
-    gth_input_load_reference_file(input, chain->ref_file_num);
+    gth_input_load_reference_file(input, chain->ref_file_num, true);
 
     /* compute considered genomic regions if not set by -frompos */
     if (!gth_input_use_substring_spec(input)) {

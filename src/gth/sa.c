@@ -1088,7 +1088,7 @@ void gth_sa_echo_alignment(const GthSA *sa, unsigned long showintronmaxlen,
   referencetotalcutoff = referencestartcutoff + referenceendcutoff;
 
   /* make sure that the correct files are loaded */
-  gth_input_load_reference_file(input, gth_sa_ref_file_num(sa));
+  gth_input_load_reference_file(input, gth_sa_ref_file_num(sa), false);
   ref_seq_col = gth_input_current_ref_seq_col(input);
   ref_alphabet = gth_input_current_ref_alphabet(input);
 
@@ -1180,7 +1180,7 @@ unsigned long gth_sa_get_alignment_lines(const GthSA *sa,
   GthSeqCol *ref_seq_col;
 
   /* make sure that the correct files are loaded */
-  gth_input_load_reference_file(input, gth_sa_ref_file_num(sa));
+  gth_input_load_reference_file(input, gth_sa_ref_file_num(sa), false);
   ref_seq_col = gth_input_current_ref_seq_col(input);
 
   /* If the reverse complement of the genomic DNA is considered, this

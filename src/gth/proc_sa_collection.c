@@ -50,6 +50,8 @@ void gth_proc_sa_collection(GthSACollection *sa_collection,
   if (call_info->out->showverbose)
     call_info->out->showverbose("output spliced alignments");
 
+  gth_input_delete_current(input);
+
   /* output alignments */
   if (!call_info->out->skipalignmentout) {
     GthSAVisitor *sa_visitor;
