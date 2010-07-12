@@ -31,13 +31,15 @@ struct GtStatVisitor {
                 number_of_exons,
                 number_of_CDSs,
                 number_of_LTR_retrotransposons,
-                exon_number_for_distri;
+                exon_number_for_distri,
+                cds_length_for_distri;
   unsigned long long total_length_of_sequence_regions;
   GtDiscDistri *gene_length_distribution,
                *gene_score_distribution,
                *exon_length_distribution,
                *exon_number_distribution,
-               *intron_length_distribution;
+               *intron_length_distribution,
+               *cds_length_distribution;
 };
 
 #define stat_visitor_cast(GV)\
@@ -46,15 +48,16 @@ struct GtStatVisitor {
 static void stat_visitor_free(GtNodeVisitor *nv)
 {
   GtStatVisitor *stat_visitor = stat_visitor_cast(nv);
-  gt_disc_distri_delete(stat_visitor->gene_length_distribution);
-  gt_disc_distri_delete(stat_visitor->gene_score_distribution);
-  gt_disc_distri_delete(stat_visitor->exon_length_distribution);
-  gt_disc_distri_delete(stat_visitor->exon_number_distribution);
+  gt_disc_distri_delete(stat_visitor->cds_length_distribution);
   gt_disc_distri_delete(stat_visitor->intron_length_distribution);
+  gt_disc_distri_delete(stat_visitor->exon_number_distribution);
+  gt_disc_distri_delete(stat_visitor->exon_length_distribution);
+  gt_disc_distri_delete(stat_visitor->gene_score_distribution);
+  gt_disc_distri_delete(stat_visitor->gene_length_distribution);
 }
 
-static int add_exon_number(GtGenomeNode *gn, void *data,
-                           GT_UNUSED GtError *err)
+static int add_exon_or_cds_number(GtGenomeNode *gn, void *data,
+                                  GT_UNUSED GtError *err)
 {
   GtStatVisitor *stat_visitor = (GtStatVisitor*) data;
   GtFeatureNode *fn = (GtFeatureNode*) gn;
@@ -62,6 +65,10 @@ static int add_exon_number(GtGenomeNode *gn, void *data,
   gt_assert(stat_visitor && fn);
   if (gt_feature_node_has_type(fn, gt_ft_exon))
     stat_visitor->exon_number_for_distri++;
+  else if (gt_feature_node_has_type(fn, gt_ft_CDS)) {
+    GtRange range = gt_genome_node_get_range(gn);
+    stat_visitor->cds_length_for_distri += gt_range_length(&range);
+  }
   return 0;
 }
 
@@ -81,7 +88,7 @@ static void compute_type_statistics(GtFeatureNode *fn,
     }
     if (stat_visitor->gene_score_distribution) {
       gt_disc_distri_add(stat_visitor->gene_score_distribution,
-                     gt_feature_node_get_score(fn) * 100.0);
+                         gt_feature_node_get_score(fn) * 100.0);
     }
   }
   else if (gt_feature_node_has_type(fn, gt_ft_mRNA)) {
@@ -124,14 +131,22 @@ static int compute_statistics(GtGenomeNode *gn, void *data, GtError *err)
     stat_visitor->number_of_multi_features++;
   }
   compute_type_statistics(fn, stat_visitor);
-  if (stat_visitor->exon_number_distribution) {
+  if (stat_visitor->exon_number_distribution ||
+      stat_visitor->cds_length_distribution) {
     stat_visitor->exon_number_for_distri = 0;
+    stat_visitor->cds_length_for_distri = 0;
     rval = gt_genome_node_traverse_direct_children(gn, stat_visitor,
-                                                add_exon_number, err);
-    gt_assert(!rval); /* add_exon_number() is sane */
-    if (stat_visitor->exon_number_for_distri) {
+                                                   add_exon_or_cds_number, err);
+    gt_assert(!rval); /* add_exon_or_cds_number() is sane */
+    if (stat_visitor->exon_number_distribution &&
+        stat_visitor->exon_number_for_distri) {
       gt_disc_distri_add(stat_visitor->exon_number_distribution,
-                     stat_visitor->exon_number_for_distri);
+                         stat_visitor->exon_number_for_distri);
+    }
+    if (stat_visitor->cds_length_distribution &&
+        stat_visitor->cds_length_for_distri) {
+      gt_disc_distri_add(stat_visitor->cds_length_distribution,
+                         stat_visitor->cds_length_for_distri);
     }
   }
   return 0;
@@ -178,7 +193,8 @@ GtNodeVisitor* gt_stat_visitor_new(bool gene_length_distri,
                                    bool gene_score_distri,
                                    bool exon_length_distri,
                                    bool exon_number_distri,
-                                   bool intron_length_distri)
+                                   bool intron_length_distri,
+                                   bool cds_length_distri)
 {
   GtNodeVisitor *nv = gt_node_visitor_create(gt_stat_visitor_class());
   GtStatVisitor *stat_visitor = stat_visitor_cast(nv);
@@ -192,6 +208,8 @@ GtNodeVisitor* gt_stat_visitor_new(bool gene_length_distri,
     stat_visitor->exon_number_distribution = gt_disc_distri_new();
   if (intron_length_distri)
     stat_visitor->intron_length_distribution = gt_disc_distri_new();
+  if (cds_length_distri)
+    stat_visitor->cds_length_distribution = gt_disc_distri_new();
   return nv;
 }
 
@@ -242,5 +260,9 @@ void gt_stat_visitor_show_stats(GtNodeVisitor *nv)
   if (stat_visitor->intron_length_distribution) {
     printf("intron length distribution:\n");
     gt_disc_distri_show(stat_visitor->intron_length_distribution);
+  }
+  if (stat_visitor->cds_length_distribution) {
+    printf("CDS length distribution:\n");
+    gt_disc_distri_show(stat_visitor->cds_length_distribution);
   }
 }

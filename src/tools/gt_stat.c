@@ -30,6 +30,7 @@ typedef struct {
        exon_number_distribution,
        exon_length_distribution,
        intron_length_distribution,
+       cds_length_distribution,
        addintrons,
        verbose;
 } StatArguments;
@@ -72,6 +73,12 @@ static GtOPrval parse_options(int *parsed_args, StatArguments *arguments,
   option = gt_option_new_bool("intronlengthdistri",
                               "show intron length distribution",
                               &arguments->intron_length_distribution, false);
+  gt_option_parser_add_option(op, option);
+
+  /* cdslengthdistri */
+  option = gt_option_new_bool("cdslengthdistri", "show CDS length distribution "
+                              "(measured in amino acids)",
+                              &arguments->cds_length_distribution, false);
   gt_option_parser_add_option(op, option);
 
   /* -addintrons */
@@ -124,7 +131,8 @@ int gt_stat(int argc, const char **argv, GtError *err)
                                    arguments.gene_score_distribution,
                                    arguments.exon_length_distribution,
                                    arguments.exon_number_distribution,
-                                   arguments.intron_length_distribution);
+                                   arguments.intron_length_distribution,
+                                   arguments.cds_length_distribution);
 
   /* pull the features through the stream , compute the statistics, and free
      them afterwards */

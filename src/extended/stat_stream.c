@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -72,14 +72,16 @@ GtNodeStream* gt_stat_stream_new(GtNodeStream *in_stream,
                                  bool gene_score_distri,
                                  bool exon_length_distri,
                                  bool exon_number_distri,
-                                 bool intron_length_distri)
+                                 bool intron_length_distri,
+                                 bool cds_length_distri)
 {
   GtNodeStream *gs = gt_node_stream_create(gt_stat_stream_class(), false);
   GtStatStream *ss = stat_stream_cast(gs);
   ss->in_stream = gt_node_stream_ref(in_stream);
   ss->stat_visitor = gt_stat_visitor_new(gene_length_distri, gene_score_distri,
                                          exon_length_distri, exon_number_distri,
-                                         intron_length_distri);
+                                         intron_length_distri,
+                                         cds_length_distri);
   return gs;
 }
 

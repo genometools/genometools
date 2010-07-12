@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -31,7 +31,8 @@ GtNodeStream*            gt_stat_stream_new(GtNodeStream*,
                                             bool gene_score_distri,
                                             bool exon_length_distri,
                                             bool exon_number_distri,
-                                            bool intron_length_distri);
+                                            bool intron_length_distri,
+                                            bool cds_length_distri);
 void                     gt_stat_stream_show_stats(GtNodeStream*);
 
 #endif
