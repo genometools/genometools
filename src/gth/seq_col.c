@@ -34,12 +34,6 @@ struct GthSeqColClass {
   GthSeqColFreeFunc free;
 };
 
-/*
-struct GthSeqColMembers {
-  unsigned int reference_count;
-}
-*/
-
 const GthSeqColClass* gth_seq_col_class_new(size_t size,
                                             GthSeqColGetOrigSeqFunc
                                             get_orig_seq,
