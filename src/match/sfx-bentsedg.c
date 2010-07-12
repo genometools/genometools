@@ -32,8 +32,8 @@
 #include "esa-fileend.h"
 #include "bcktab.h"
 #include "kmer2string.h"
-#include "bltrie-ssort.h"
 #include "lcpoverflow.h"
+#include "sfx-bltrie.h"
 #include "sfx-remainsort.h"
 #include "sfx-copysort.h"
 #include "sfx-bentsedg.h"
@@ -178,8 +178,8 @@ typedef GtEndofTwobitencoding Sfxcmp;
 typedef struct
 {
   Suffixptr *subbucket;
-  unsigned long subbucketleft;
-  unsigned long width,
+  unsigned long subbucketleft,
+                width,
                 depth;
   Ordertype ordertype;
 } MKVstack;
@@ -995,6 +995,7 @@ static bool comparisonsort(Bentsedgresources *bsr,
     numoflargelcpvalues
       = gt_blindtrie_suffixsort(bsr->blindtrie,
                                 subbucket,
+                                subbucketleft,
                                 bsr->lcpsubtab == NULL
                                   ? NULL
                                   : bsr->lcpsubtab->bucketoflcpvalues +
@@ -1064,6 +1065,7 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
           numoflargelcpvalues
             = gt_blindtrie_suffixsort(bsr->blindtrie,
                                       subbucket,
+                                      subbucketleft,
                                       bsr->lcpsubtab == NULL
                                         ? NULL
                                         : bsr->lcpsubtab->bucketoflcpvalues +
@@ -2047,12 +2049,13 @@ static void initBentsedgresources(Bentsedgresources *bsr,
     bsr->blindtrie = NULL;
   } else
   {
-    bsr->blindtrie = gt_blindtrie_new(sfxstrategy->maxbltriesort,
-                                   encseq,
-                                   sfxstrategy->cmpcharbychar,
-                                   bsr->esr1,
-                                   bsr->esr2,
-                                   readmode);
+    bsr->blindtrie = gt_blindtrie_new(bsr->sssp,
+                                      sfxstrategy->maxbltriesort,
+                                      encseq,
+                                      sfxstrategy->cmpcharbychar,
+                                      bsr->esr1,
+                                      bsr->esr2,
+                                      readmode);
   }
   bsr->voiddcov = NULL;
   bsr->dc_processunsortedrange = NULL;

@@ -28,7 +28,6 @@ cat << END_OF_TEXT > ${TMPFILE}
 alphabet.c
 apmeoveridx.c
 bcktab.c
-bltrie-ssort.c
 cgr_spacedseed.c
 cutendpfx.c
 chainofin.c
@@ -90,6 +89,7 @@ querymatch.c
 revcompl.c
 sfx-apfxlen.c
 sfx-bentsedg.c
+sfx-bltrie.c
 sfx-copysort.c
 sfx-enumcodes.c
 sfx-input.c

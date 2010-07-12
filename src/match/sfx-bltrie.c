@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/unused_api.h"
 #include "core/arraydef.h"
 #include "core/divmodmul.h"
 #include "core/minmax.h"
@@ -22,7 +23,8 @@
 #include "spacedef.h"
 #include "core/encseq.h"
 #include "lcpoverflow.h"
-#include "bltrie-ssort.h"
+#include "sfx-bltrie.h"
+#include "sfx-suffixgetset.h"
 
 #undef SKDEBUG
 #ifdef SKDEBUG
@@ -68,6 +70,7 @@ struct Blindtrie
                 nextfreeBlindtrienode;
   Blindtrienode *spaceBlindtrienode;
   GtArrayNodeptr stack;
+  Suffixsortspace *sssp;
 };
 
 static bool isleftofboundary(unsigned long currentstartpos,unsigned long add,
@@ -501,17 +504,19 @@ static unsigned long enumeratetrieleaves (Suffixptr *subbucket,
   return nextfree;
 }
 
-Blindtrie *gt_blindtrie_new(unsigned long numofsuffixes,
-                         const GtEncseq *encseq,
-                         bool cmpcharbychar,
-                         GtEncseqReader *esr1,
-                         GtEncseqReader *esr2,
-                         GtReadmode readmode)
+Blindtrie *gt_blindtrie_new(Suffixsortspace *suffixsortspace,
+                            unsigned long numofsuffixes,
+                            const GtEncseq *encseq,
+                            bool cmpcharbychar,
+                            GtEncseqReader *esr1,
+                            GtEncseqReader *esr2,
+                            GtReadmode readmode)
 {
   Blindtrie *blindtrie;
 
   ALLOCASSIGNSPACE(blindtrie,NULL,Blindtrie,1);
   blindtrie->allocatedBlindtrienode = GT_MULT2(numofsuffixes + 1) + 1;
+  printf("allocatedBlindtrienode = %lu\n",blindtrie->allocatedBlindtrienode);
   ALLOCASSIGNSPACE(blindtrie->spaceBlindtrienode,NULL,Blindtrienode,
                    blindtrie->allocatedBlindtrienode);
   /*
@@ -523,6 +528,7 @@ Blindtrie *gt_blindtrie_new(unsigned long numofsuffixes,
   blindtrie->nextfreeBlindtrienode = 0;
   blindtrie->encseq = encseq;
   blindtrie->readmode = readmode;
+  blindtrie->sssp = suffixsortspace;
   blindtrie->root = NULL;
   blindtrie->esr1 = esr1;
   blindtrie->esr2 = esr2;
@@ -675,6 +681,7 @@ static void inplace_reverseSuffixptr(Suffixptr *tab,unsigned long len)
 unsigned long gt_blindtrie_suffixsort(
                             Blindtrie *blindtrie,
                             Suffixptr *subbucket,
+                            unsigned long subbucketleft,
                             unsigned long *lcpsubtab,
                             unsigned long numberofsuffixes,
                             unsigned long offset,
@@ -688,7 +695,7 @@ unsigned long gt_blindtrie_suffixsort(
 {
   unsigned long idx, stackidx;
   Nodeptr leafinsubtree, currentnode;
-  unsigned long lcp, numoflargelcpvalues = 0;
+  unsigned long pos, lcp, numoflargelcpvalues = 0;
   GtUchar mm_oldsuffix, mm_newsuffix;
 
   if (ordertype == Noorder)
@@ -723,7 +730,8 @@ unsigned long gt_blindtrie_suffixsort(
     blindtrie->maxdepthminusoffset = 0;
   }
   blindtrie->nextfreeBlindtrienode = 0;
-  blindtrie->root = makeroot(blindtrie,SUFFIXPTRGET(subbucket,0) + offset);
+  pos = suffixptrget(blindtrie->sssp,subbucket,subbucketleft,0) + offset;
+  blindtrie->root = makeroot(blindtrie,pos);
 #ifdef SKDEBUG
   printf("insert suffixes at offset " FormatSeqpos ":\n",
           PRINTSeqposcast(offset));

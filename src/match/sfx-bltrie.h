@@ -15,12 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef BLTRIE_SSORT_H
-#define BLTRIE_SSORT_H
+#ifndef SFX_BLTRIE_H
+#define SFX_BLTRIE_H
 
 #include "core/encseq.h"
 #include "core/readmode.h"
 #include "suffixptr.h"
+#include "sfx-suffixgetset.h"
 
 typedef struct Blindtrie Blindtrie;
 
@@ -31,16 +32,18 @@ typedef enum
   Noorder
 } Ordertype;
 
-Blindtrie *gt_blindtrie_new(unsigned long numofsuffixes,
-                         const GtEncseq *encseq,
-                         bool cmpcharbychar,
-                         GtEncseqReader *esr1,
-                         GtEncseqReader *esr2,
-                         GtReadmode readmode);
+Blindtrie *gt_blindtrie_new(Suffixsortspace *suffixsortspace,
+                            unsigned long numofsuffixes,
+                            const GtEncseq *encseq,
+                            bool cmpcharbychar,
+                            GtEncseqReader *esr1,
+                            GtEncseqReader *esr2,
+                            GtReadmode readmode);
 
 unsigned long gt_blindtrie_suffixsort(
                             Blindtrie *blindtrie,
                             Suffixptr *subbucket,
+                            unsigned long subbucketleft,
                             unsigned long *lcpsubtab,
                             unsigned long numberofsuffixes,
                             unsigned long offset,

@@ -28,10 +28,10 @@ typedef struct
                 bucketleftidx;
 } Suffixsortspace;
 
-static inline void suffixptrassert(const Suffixsortspace *sssp,
-                                   const Suffixptr *subbucket,
-                                   unsigned long subbucketleft,
-                                   unsigned long idx)
+/*@unused@*/ static inline void suffixptrassert(const Suffixsortspace *sssp,
+                                                const Suffixptr *subbucket,
+                                                unsigned long subbucketleft,
+                                                unsigned long idx)
 {
   unsigned long tmp = sssp->bucketleftidx - sssp->sortspaceoffset;
   gt_assert(sssp != NULL);
@@ -43,7 +43,8 @@ static inline void suffixptrassert(const Suffixsortspace *sssp,
             sssp->sortspace + (subbucketleft + idx + tmp));
 }
 
-static inline unsigned long suffixptrget(const Suffixsortspace *sssp,
+/*@unused@*/ static inline unsigned long suffixptrget(
+                                         const Suffixsortspace *sssp,
                                          const Suffixptr *subbucket,
                                          unsigned long subbucketleft,
                                          unsigned long idx)
@@ -52,11 +53,11 @@ static inline unsigned long suffixptrget(const Suffixsortspace *sssp,
   return SUFFIXPTRGET(subbucket,idx);
 }
 
-static inline void suffixptrset(Suffixsortspace *sssp,
-                                Suffixptr *subbucket,
-                                unsigned long subbucketleft,
-                                unsigned long idx,
-                                unsigned long value)
+/*@unused@*/ static inline void suffixptrset(Suffixsortspace *sssp,
+                                             Suffixptr *subbucket,
+                                             unsigned long subbucketleft,
+                                             unsigned long idx,
+                                             unsigned long value)
 {
   suffixptrassert(sssp,subbucket,subbucketleft,idx);
   SUFFIXPTRSET(subbucket,idx,value);
