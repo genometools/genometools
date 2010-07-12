@@ -33,7 +33,8 @@ typedef struct Outlcpinfo Outlcpinfo;
 typedef struct
 {
   Suffixptr *sortspace;
-  unsigned long sortspaceoffset;
+  unsigned long sortspaceoffset,
+                bucketleftidx;
 } Suffixsortspace;
 
 Outlcpinfo *gt_newOutlcpinfo(const char *indexname,

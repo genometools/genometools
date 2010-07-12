@@ -40,7 +40,7 @@ Blindtrie *gt_blindtrie_new(unsigned long numofsuffixes,
 
 unsigned long gt_blindtrie_suffixsort(
                             Blindtrie *blindtrie,
-                            Suffixptr *suffixtable,
+                            Suffixptr *subbucket,
                             unsigned long *lcpsubtab,
                             unsigned long numberofsuffixes,
                             unsigned long offset,

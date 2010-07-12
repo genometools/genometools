@@ -55,10 +55,10 @@
 #define BS_SWAPARRAY(TMP,SUBBUCKET,SUBBUCKETLEFT,IDX1,IDX2)\
         if ((IDX1) != (IDX2))\
         {\
-          TMP = suffixptrget(bsr,SUBBUCKET,SUBBUCKETLEFT,IDX1);\
-          suffixptrset(bsr,SUBBUCKET,SUBBUCKETLEFT,IDX1,\
-                       suffixptrget(bsr,SUBBUCKET,SUBBUCKETLEFT,IDX2));\
-          suffixptrset(bsr,SUBBUCKET,SUBBUCKETLEFT,IDX2,TMP);\
+          TMP = suffixptrget(bsr->sssp,SUBBUCKET,SUBBUCKETLEFT,IDX1);\
+          suffixptrset(bsr->sssp,SUBBUCKET,SUBBUCKETLEFT,IDX1,\
+                       suffixptrget(bsr->sssp,SUBBUCKET,SUBBUCKETLEFT,IDX2));\
+          suffixptrset(bsr->sssp,SUBBUCKET,SUBBUCKETLEFT,IDX2,TMP);\
         }
 
 #define STACKTOP\
@@ -120,7 +120,8 @@ struct Outlcpinfo
 };
 
 #define CMPCHARBYCHARPTR2INT(VAR,SUBBUCKET,SUBBUCKETLEFT,TMPVAR,IDX)\
-        VAR = (((cptr = suffixptrget(bsr,SUBBUCKET,SUBBUCKETLEFT,IDX)+depth)\
+        VAR = (((cptr = suffixptrget(bsr->sssp,SUBBUCKET,SUBBUCKETLEFT,IDX)+\
+                        depth)\
                 < bsr->totallength &&\
                 ISNOTSPECIAL(TMPVAR = ACCESSCHAR(cptr)))\
                     ? ((unsigned long) TMPVAR) : UNIQUEINT(cptr))
@@ -129,7 +130,8 @@ typedef GtEndofTwobitencoding Sfxcmp;
 
 #define PTR2INT(VAR,SUBBUCKET,SUBBUCKETLEFT,IDX)\
         {\
-          unsigned long pos = suffixptrget(bsr,SUBBUCKET,SUBBUCKETLEFT,IDX);\
+          unsigned long pos\
+            = suffixptrget(bsr->sssp,SUBBUCKET,SUBBUCKETLEFT,IDX);\
           if (bsr->fwd)\
           {\
             if (pos + depth < bsr->totallength)\
@@ -214,11 +216,10 @@ typedef struct
   const Sfxstrategy *sfxstrategy;
   Blindtrie *blindtrie;
   Rmnsufinfo *rmnsufinfo;
-  unsigned long bucketleftidx,
-                leftlcpdist[GT_UNITSIN2BITENC],
+  unsigned long leftlcpdist[GT_UNITSIN2BITENC],
                 rightlcpdist[GT_UNITSIN2BITENC];
   Definedunsignedlong *longest;
-  Suffixsortspace *suffixsortspace;
+  Suffixsortspace *sssp;
   void (*dc_processunsortedrange)(void *,
                                   Suffixptr *,
                                   unsigned long,
@@ -229,69 +230,39 @@ typedef struct
                 countqsort,
                 countcountingsort,
                 countbltriesort;
-  Suffixptr *suftabbaseptr;
+  Suffixptr *suftabbaseptr; /* XXX to be removed later */
 } Bentsedgresources;
 
-static unsigned long suffixptrgetraw(const Suffixptr *subbucket,
-                                     unsigned long idx,
-                                     const Suffixptr *sortspace,
-                                     unsigned long sortspaceoffset,
-                                     unsigned long bucketleftidx,
-                                     unsigned long subbucketleft)
+static void suffixptrassert(const Suffixsortspace *sssp,
+                            const Suffixptr *subbucket,
+                            unsigned long subbucketleft,
+                            unsigned long idx)
 {
-  gt_assert(subbucket - sortspace + sortspaceoffset ==
-            bucketleftidx + subbucketleft);
-  gt_assert(sortspaceoffset <= bucketleftidx + subbucketleft + idx);
+  gt_assert(sssp != NULL);
+  gt_assert(subbucket - sssp->sortspace + sssp->sortspaceoffset ==
+            sssp->bucketleftidx + subbucketleft);
+  gt_assert(sssp->sortspaceoffset <= sssp->bucketleftidx + subbucketleft + idx);
   gt_assert(subbucket + idx ==
-            sortspace + (bucketleftidx+subbucketleft+idx-sortspaceoffset));
-  return SUFFIXPTRGET(subbucket,idx);
+            sssp->sortspace + (sssp->bucketleftidx+subbucketleft+idx-
+                               sssp->sortspaceoffset));
 }
 
-static unsigned long suffixptrget(const Bentsedgresources *bsr,
+static unsigned long suffixptrget(const Suffixsortspace *sssp,
                                   const Suffixptr *subbucket,
                                   unsigned long subbucketleft,
                                   unsigned long idx)
 {
-  if (bsr->suffixsortspace !=  NULL)
-  {
-    return suffixptrgetraw(subbucket,idx,
-                           bsr->suffixsortspace->sortspace,
-                           bsr->suffixsortspace->sortspaceoffset,
-                           bsr->bucketleftidx,subbucketleft);
-  }
+  suffixptrassert(sssp,subbucket,subbucketleft,idx);
   return SUFFIXPTRGET(subbucket,idx);
 }
 
-static void suffixptrsetraw(Suffixptr *subbucket,
-                            unsigned long idx,
-                            unsigned long value,
-                            const Suffixptr *sortspace,
-                            unsigned long sortspaceoffset,
-                            unsigned long bucketleftidx,
-                            unsigned long subbucketleft)
-{
-  gt_assert(subbucket - sortspace + sortspaceoffset ==
-            bucketleftidx + subbucketleft);
-  gt_assert(sortspaceoffset <= bucketleftidx + subbucketleft + idx);
-  gt_assert(subbucket + idx ==
-            sortspace + (bucketleftidx+subbucketleft+idx-sortspaceoffset));
-  SUFFIXPTRSET(subbucket,idx,value);
-}
-
-static void suffixptrset(Bentsedgresources *bsr,
+static void suffixptrset(Suffixsortspace *sssp,
                          Suffixptr *subbucket,
                          unsigned long subbucketleft,
                          unsigned long idx,
                          unsigned long value)
 {
-  if (bsr->suffixsortspace !=  NULL)
-  {
-    suffixptrsetraw(subbucket,idx,value,
-                    bsr->suffixsortspace->sortspace,
-                    bsr->suffixsortspace->sortspaceoffset,
-                    bsr->bucketleftidx,subbucketleft);
-    return;
-  }
+  suffixptrassert(sssp,subbucket,subbucketleft,idx);
   SUFFIXPTRSET(subbucket,idx,value);
 }
 
@@ -313,13 +284,14 @@ static void showsuffixrange(const Bentsedgresources *bsr,
   {
     printf("of %lu suffixes [%lu,%lu] at depth %lu:\n",
            width,
-           bsr->bucketleftidx + subbucketleft,
-           bsr->bucketleftidx + subbucketleft + width,
+           bsr->sssp->bucketleftidx + subbucketleft,
+           bsr->sssp->bucketleftidx + subbucketleft + width,
            depth);
   }
   for (pi = 0; pi <= width; pi++)
   {
-    unsigned long pos = suffixptrget(bsr,subbucket,subbucketleft,pi);
+    unsigned long pos = suffixptrget(bsr->sssp,subbucket,
+                                     subbucketleft,pi);
     printf("suffix %lu:",pos);
     gt_encseq_showatstartpos(stdout,bsr->fwd,bsr->complement,bsr->encseq,pos);
   }
@@ -345,14 +317,16 @@ static void checksuffixrange(const Bentsedgresources *bsr,
   {
     if (bsr->fwd)
     {
-      pos1 = suffixptrget(bsr,subbucket,subbucketleft,idx);
-      pos2 = suffixptrget(bsr,subbucket,subbucketleft,idx+1);
+      pos1 = suffixptrget(bsr->sssp,subbucket,subbucketleft,idx);
+      pos2 = suffixptrget(bsr->sssp,subbucket,subbucketleft,idx+1);
     } else
     {
       pos1 = GT_REVERSEPOS(gt_encseq_total_length(bsr->encseq),
-                           suffixptrget(bsr,subbucket,subbucketleft,idx));
+                           suffixptrget(bsr->sssp,subbucket,
+                                        subbucketleft,idx));
       pos2 = GT_REVERSEPOS(gt_encseq_total_length(bsr->encseq),
-                           suffixptrget(bsr,subbucket,subbucketleft,idx+1));
+                           suffixptrget(bsr->sssp,subbucket,
+                                        subbucketleft,idx+1));
     }
     (void) gt_encseq_comparetwostrings(bsr->encseq,
                                        bsr->fwd,
@@ -369,8 +343,10 @@ static void checksuffixrange(const Bentsedgresources *bsr,
                      depth,
                      newdepth);
       fprintf(stderr,"suffix %lu vs %lu\n",
-                     suffixptrget(bsr,subbucket,subbucketleft,idx),
-                     suffixptrget(bsr,subbucket,subbucketleft,idx+1));
+                     suffixptrget(bsr->sssp,subbucket,
+                                  subbucketleft,idx),
+                     suffixptrget(bsr->sssp,subbucket,
+                                  subbucketleft,idx+1));
       fprintf(stderr,"in range of length %lu\n",width);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
@@ -510,10 +486,12 @@ static void bs_insertionsort(Bentsedgresources *bsr,
     {
       if (bsr->sfxstrategy->cmpcharbychar)
       {
-        startpos1 = suffixptrget(bsr,subbucket,subbucketleft,pj-1) + offset;
+        startpos1 = suffixptrget(bsr->sssp,subbucket,
+                                 subbucketleft,pj-1) + offset;
         gt_encseq_reader_reinit_with_readmode(bsr->esr1, bsr->encseq,
                                               bsr->readmode, startpos1);
-        startpos2 = suffixptrget(bsr,subbucket,subbucketleft,pj) + offset;
+        startpos2 = suffixptrget(bsr->sssp,subbucket,
+                                 subbucketleft,pj) + offset;
         gt_encseq_reader_reinit_with_readmode(bsr->esr2, bsr->encseq,
                                               bsr->readmode, startpos2);
         for (;;)
@@ -525,7 +503,8 @@ static void bs_insertionsort(Bentsedgresources *bsr,
           cct = DEREFSEQ(tmp2,startpos2,bsr->esr2);
           if (ccs != cct)
           {
-            lcplen = startpos2 - suffixptrget(bsr,subbucket,subbucketleft,pj);
+            lcplen = startpos2 - suffixptrget(bsr->sssp,subbucket,
+                                              subbucketleft,pj);
             retval = (ccs < cct) ? -1 : 1;
             break;
           }
@@ -536,26 +515,32 @@ static void bs_insertionsort(Bentsedgresources *bsr,
       {
 #ifdef SKDEBUG
         printf("gt_encseq_compare[%lu,%lu] at offset %lu\n",
-                suffixptrget(bsr,subbucket,subbucketleft,pj-1),
-                suffixptrget(bsr,subbucket,subbucketleft,pj),offset);
+                suffixptrget(bsr->sssp,subbucket,subbucketleft,
+                             pj-1),
+                suffixptrget(bsr->sssp,subbucket,
+                             subbucketleft,pj),offset);
         gt_encseq_showatstartpos(stdout,
                                  bsr->fwd,
                                  bsr->complement,
                                  bsr->encseq,
-                                 suffixptrget(bsr,subbucket,subbucketleft,
+                                 suffixptrget(bsr->sssp,subbucket,
+                                              subbucketleft,
                                               pj-1));
         gt_encseq_showatstartpos(stdout,
                                  bsr->fwd,
                                  bsr->complement,
                                  bsr->encseq,
-                                 suffixptrget(bsr,subbucket,subbucketleft,pj));
+                                 suffixptrget(bsr->sssp,subbucket,
+                                              subbucketleft,pj));
 #endif
         retval = gt_encseq_compare(bsr->encseq,&commonunits,bsr->fwd,
                                    bsr->complement,
                                    bsr->esr1,bsr->esr2,
-                                   suffixptrget(bsr,subbucket,subbucketleft,
+                                   suffixptrget(bsr->sssp,subbucket,
+                                                subbucketleft,
                                                 pj-1),
-                                   suffixptrget(bsr,subbucket,subbucketleft,pj),
+                                   suffixptrget(bsr->sssp,subbucket,
+                                                subbucketleft,pj),
                                    offset);
         lcplen = commonunits.finaldepth;
       }
@@ -602,8 +587,8 @@ static void bs_insertionsortmaxdepth(Bentsedgresources *bsr,
   {
     for (pj = pi; pj > 0; pj--)
     {
-      sval1 = suffixptrget(bsr,subbucket,subbucketleft,pj-1);
-      sval2 = suffixptrget(bsr,subbucket,subbucketleft,pj);
+      sval1 = suffixptrget(bsr->sssp,subbucket,subbucketleft,pj-1);
+      sval2 = suffixptrget(bsr->sssp,subbucket,subbucketleft,pj);
       if (bsr->sfxstrategy->cmpcharbychar)
       {
         unsigned long endpos1, endpos2;
@@ -706,13 +691,14 @@ static void bs_insertionsortmaxdepth(Bentsedgresources *bsr,
   {
     unsigned long equalsrangewidth = 0;
 #ifdef SKDEBUG
-    printf("ordered suffix %lu\n",suffixptrget(bsr,subbucket,subbucketleft,0));
+    printf("ordered suffix %lu\n",suffixptrget(bsr->sssp,subbucket,
+                                               subbucketleft,0));
 #endif
     for (idx = 1UL; idx < width; idx++)
     {
 #ifdef SKDEBUG
       printf("ordered suffix %lu, equalwithprevious=%s\n",
-              suffixptrget(bsr,subbucket,subbucketleft,idx),
+              suffixptrget(bsr->sssp,subbucket,subbucketleft,idx),
               bsr->equalwithprevious[idx] ? "true" : "false");
 #endif
       if (bsr->equalwithprevious[idx])
@@ -1081,7 +1067,8 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
       if (depth >=
                (unsigned long) bsr->sfxstrategy->ssortmaxdepth.valueunsignedint)
       {
-        unsigned long leftindex = bsr->bucketleftidx + subbucketleft;
+        unsigned long leftindex = bsr->sssp->bucketleftidx +
+                                  subbucketleft;
         gt_rmnsufinfo_addunsortedrange(bsr->rmnsufinfo,
                                        leftindex,
                                        leftindex + width - 1,
@@ -1177,8 +1164,9 @@ static void sarrcountingsort(Bentsedgresources *bsr,
                                               &commonunits,
                                               &etbecurrent,
                                               pivotcmpbits);
-      bsr->countingsortinfo[idx].suffix = suffixptrget(bsr,subbucket,
-                                                       subbucketleft,idx);
+      bsr->countingsortinfo[idx].suffix = suffixptrget(bsr->sssp,
+                                                       subbucket,subbucketleft,
+                                                       idx);
       gt_assert(commonunits.common <= (unsigned int) GT_UNITSIN2BITENC);
       bsr->countingsortinfo[idx].lcpwithpivot = commonunits.common;
       if (cmp > 0)
@@ -1212,7 +1200,7 @@ static void sarrcountingsort(Bentsedgresources *bsr,
     } else
     {
       bsr->countingsortinfo[idx].suffix
-        = suffixptrget(bsr,subbucket,subbucketleft,idx);
+        = suffixptrget(bsr->sssp,subbucket,subbucketleft,idx);
       bsr->countingsortinfo[idx].lcpwithpivot = (unsigned char)
                                                 GT_UNITSIN2BITENC;
       bsr->countingsortinfo[idx].cmpresult = (char) 0;
@@ -1235,14 +1223,16 @@ static void sarrcountingsort(Bentsedgresources *bsr,
     {
       case -1:
         insertindex = --(bsr->leftlcpdist[csiptr->lcpwithpivot]);
-        suffixptrset(bsr,subbucket,subbucketleft,insertindex,csiptr->suffix);
+        suffixptrset(bsr->sssp,subbucket,subbucketleft,insertindex,
+                     csiptr->suffix);
         break;
       case 0:
-        suffixptrset(bsr,subbucket,subbucketleft,--equaloffset,csiptr->suffix);
+        suffixptrset(bsr->sssp,subbucket,subbucketleft,--equaloffset,
+                     csiptr->suffix);
         break;
       case 1:
         insertindex = --(bsr->rightlcpdist[csiptr->lcpwithpivot]);
-        suffixptrset(bsr,subbucket,subbucketleft,width - 1 - insertindex,
+        suffixptrset(bsr->sssp,subbucket,subbucketleft,width - 1 - insertindex,
                      csiptr->suffix);
         break;
     }
@@ -1311,21 +1301,21 @@ static void sarrcountingsort(Bentsedgresources *bsr,
   }
 }
 
-static inline void vectorswap(Bentsedgresources *bsr,
+static inline void vectorswap(Suffixsortspace *sssp,
                               Suffixptr *subbucket1,
                               unsigned long subbucketleft1,
                               Suffixptr *subbucket2,
                               unsigned long subbucketleft2,
-                              unsigned long len)
+                              unsigned long width)
 {
   unsigned long idx, tmp;
 
-  for (idx = 0; idx < len; idx++)
+  for (idx = 0; idx < width; idx++)
   {
-    tmp = suffixptrget(bsr,subbucket1,subbucketleft1,idx);
-    suffixptrset(bsr,subbucket1,subbucketleft1,idx,
-                 suffixptrget(bsr,subbucket2,subbucketleft2,idx));
-    suffixptrset(bsr,subbucket2,subbucketleft2,idx,tmp);
+    tmp = suffixptrget(sssp,subbucket1,subbucketleft1,idx);
+    suffixptrset(sssp,subbucket1,subbucketleft1,idx,
+                 suffixptrget(sssp,subbucket2,subbucketleft2,idx));
+    suffixptrset(sssp,subbucket2,subbucketleft2,idx,tmp);
   }
 }
 
@@ -1367,7 +1357,8 @@ static void bentleysedgewick(Bentsedgresources *bsr,
       pm = cmpcharbychardelivermedian(bsr, subbucket, subbucketleft, width,
                                       depth);
       BS_SWAPARRAY(temp, subbucket, subbucketleft, 0, pm);
-      CMPCHARBYCHARPTR2INT(pivotcmpcharbychar,subbucket,subbucketleft,tmpvar,0);
+      CMPCHARBYCHARPTR2INT(pivotcmpcharbychar,subbucket,
+                           subbucketleft,tmpvar,0);
     } else
     {
       pm = blockcmpdelivermedian(bsr,
@@ -1411,8 +1402,8 @@ static void bentleysedgewick(Bentsedgresources *bsr,
       {
         while (pb <= pc)
         {
-          CMPCHARBYCHARPTR2INT(valcmpcharbychar,subbucket,subbucketleft,
-                               tmpvar,pb);
+          CMPCHARBYCHARPTR2INT(valcmpcharbychar,subbucket,
+                               subbucketleft,tmpvar,pb);
           if (valcmpcharbychar > pivotcmpcharbychar)
           {
             break;
@@ -1426,8 +1417,8 @@ static void bentleysedgewick(Bentsedgresources *bsr,
         }
         while (pb <= pc)
         {
-          CMPCHARBYCHARPTR2INT(valcmpcharbychar,subbucket,subbucketleft,
-                               tmpvar,pc);
+          CMPCHARBYCHARPTR2INT(valcmpcharbychar,subbucket,
+                               subbucketleft,tmpvar,pc);
           if (valcmpcharbychar < pivotcmpcharbychar)
           { /* stop for elements < pivot */
             break;
@@ -1508,13 +1499,13 @@ static void bentleysedgewick(Bentsedgresources *bsr,
     gt_assert(pb >= pa);
     wtmp = MIN(pa,pb-pa);
     /* move w elements at the left to the middle */
-    vectorswap(bsr, subbucket, subbucketleft,
+    vectorswap(bsr->sssp, subbucket, subbucketleft,
                subbucket+pb-wtmp, subbucketleft+pb-wtmp, wtmp);
     gt_assert(pd >= pc);
     gt_assert(bucketright >= pd);
     wtmp = MIN(pd-pc, bucketright-pd);
     /* move w elements at the right to the middle */
-    vectorswap(bsr, subbucket+pb, subbucketleft+pb,
+    vectorswap(bsr->sssp, subbucket+pb, subbucketleft+pb,
                subbucket+bucketright+1-wtmp, subbucketleft+bucketright+1-wtmp,
                wtmp);
 
@@ -1549,7 +1540,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
       leftplusw = 0;
     }
 
-    cptr = suffixptrget(bsr,subbucket,subbucketleft,leftplusw) + depth;
+    cptr = suffixptrget(bsr->sssp,subbucket,subbucketleft,leftplusw) + depth;
     if (ISNOTEND(cptr))
     {
       subsort_bentleysedgewick(bsr,
@@ -1994,7 +1985,8 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   bsr->readmode = readmode;
   bsr->totallength = gt_encseq_total_length(encseq);
   bsr->sfxstrategy = sfxstrategy;
-  bsr->suffixsortspace = suffixsortspace;
+  bsr->sssp = suffixsortspace;
+  bsr->sssp->bucketleftidx = 0;
   bsr->encseq = encseq;
   bsr->longest = longest;
   bsr->fwd = GT_ISDIRREVERSE(bsr->readmode) ? false : true;
@@ -2299,12 +2291,13 @@ void gt_sortallbuckets(Suffixsortspace *suffixsortspace,
         {
           gt_assert(bsr.lcpsubtab != NULL);
         }
-        bsr.bucketleftidx = bucketspec.left,
+        bsr.sssp->bucketleftidx = bucketspec.left,
         bsr.suftabbaseptr = suftabptr + bucketspec.left;
         bentleysedgewick(&bsr,
                          suftabptr + bucketspec.left,
                          bucketspec.nonspecialsinbucket,
                          (unsigned long) prefixlength);
+        bsr.sssp->bucketleftidx = 0;
       }
       if (outlcpinfo != NULL && outlcpinfo->assideeffect)
       {
@@ -2316,7 +2309,7 @@ void gt_sortallbuckets(Suffixsortspace *suffixsortspace,
           firstsuffixofbucket.prefixindex = prefixlength;
 #ifdef SKDEBUG
           firstsuffixofbucket.startpos
-            = suffixptrget(&bsr,suftabptr,0,bucketspec.left);
+            = suffixptrget(bsr.sssp,suftabptr,0,bucketspec.left);
           /*
           consistencyofsuffix(__LINE__,
                               encseq,readmode,bcktab,numofchars,
@@ -2348,7 +2341,7 @@ void gt_sortallbuckets(Suffixsortspace *suffixsortspace,
         outlcpinfo->previoussuffix.prefixindex = prefixlength;
 #ifdef SKDEBUG
         outlcpinfo->previoussuffix.startpos
-          = suffixptrget(&bsr,suftabptr,0,
+          = suffixptrget(bsr.sssp,suftabptr,0,
                          bucketspec.left + bucketspec.nonspecialsinbucket - 1);
         /*
         consistencyofsuffix(__LINE__,
@@ -2363,11 +2356,10 @@ void gt_sortallbuckets(Suffixsortspace *suffixsortspace,
       if (bucketspec.specialsinbucket > 0)
       {
         unsigned long suffixvalue
-          = suffixptrgetraw(suftabptr,
-                            bucketspec.left + bucketspec.nonspecialsinbucket,
-                            suffixsortspace->sortspace,
-                            suffixsortspace->sortspaceoffset,
-                            0,0);
+          = suffixptrget(suffixsortspace,
+                         suftabptr,
+                         0,
+                         bucketspec.left + bucketspec.nonspecialsinbucket);
         minprefixindex = bucketends(outlcpinfo,
                                     &outlcpinfo->previoussuffix,
                                     /* first special element in bucket */
@@ -2383,11 +2375,10 @@ void gt_sortallbuckets(Suffixsortspace *suffixsortspace,
         outlcpinfo->previoussuffix.prefixindex = minprefixindex;
 #ifdef SKDEBUG
         outlcpinfo->previoussuffix.startpos
-          = suffixptrgetraw(suftabptr,bucketspec.left +
-                                      bucketspec.nonspecialsinbucket +
-                                      bucketspec.specialsinbucket - 1,
-                            suffixsortspace->sortspace,
-                            suffixsortspace->sortspaceoffset,0,0);
+          = suffixptrget(suffixsortspace,
+                         suftabptr,0,
+                         bucketspec.left + bucketspec.nonspecialsinbucket +
+                                           bucketspec.specialsinbucket - 1);
         /*
          consistencyofsuffix(__LINE__,
                              encseq,readmode,bcktab,numofchars,
@@ -2405,10 +2396,10 @@ void gt_sortallbuckets(Suffixsortspace *suffixsortspace,
           outlcpinfo->previoussuffix.prefixindex = prefixlength;
 #ifdef SKDEBUG
           outlcpinfo->previoussuffix.startpos
-            = suffixptrgetraw(suftabptr,
-                              bucketspec.left+bucketspec.nonspecialsinbucket-1,
-                              suffixsortspace->sortspace,
-                              suffixsortspace->sortspaceoffset,0,0);
+            = suffixptrget(suffixsortspace,
+                           suftabptr,
+                           0,
+                           bucketspec.left+bucketspec.nonspecialsinbucket-1);
           /*
           consistencyofsuffix(__LINE__,
                               encseq,readmode,bcktab,numofchars,
@@ -2460,10 +2451,13 @@ void gt_sortbucketofsuffixes(Suffixptr *suffixestobesorted,
   Bentsedgresources bsr;
   Bucketspecification bucketspec;
   unsigned int rightchar = (unsigned int) (mincode % numofchars);
+  Suffixsortspace suffixsortspace;
   GtCodetype code;
 
+  suffixsortspace.sortspace = suffixestobesorted;
+  suffixsortspace.sortspaceoffset = 0;
   initBentsedgresources(&bsr,
-                        NULL,
+                        &suffixsortspace,
                         NULL,
                         encseq,
                         readmode,
@@ -2498,12 +2492,13 @@ void gt_sortbucketofsuffixes(Suffixptr *suffixestobesorted,
                                          numofchars);
     if (bucketspec.nonspecialsinbucket > 1UL)
     {
-      bsr.bucketleftidx = bucketspec.left,
+      bsr.sssp->bucketleftidx = bucketspec.left,
       bsr.suftabbaseptr = suffixestobesorted + bucketspec.left;
       bentleysedgewick(&bsr,
                        suffixestobesorted + bucketspec.left,
                        bucketspec.nonspecialsinbucket,
                        (unsigned long) prefixlength);
+      bsr.sssp->bucketleftidx = 0;
     }
   }
   wrapBentsedgresources(&bsr,
