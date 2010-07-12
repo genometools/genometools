@@ -916,11 +916,10 @@ static void formatseqwithgaps(GtFile *outfp, GtUchar *sorig, unsigned long len,
         }
 
 static void showeditopline(GtFile *outfp,
-                           GtUchar *firstlinecompare,
-                           GtUchar *secondlinecompare,
                            GtUchar *firstlineorig,
                            GtUchar *secondlineorig,
-                           unsigned long len)
+                           unsigned long len,
+                           GtAlphabet *alphabet)
 {
   unsigned long i;
   GtUchar acompare, bcompare, aorig, borig;
@@ -928,10 +927,10 @@ static void showeditopline(GtFile *outfp,
 
   for (i=0; i<len; i++)
   {
-    acompare = firstlinecompare[i];
-    bcompare = secondlinecompare[i];
-    if (acompare == bcompare && acompare != (GtUchar) ABSTRACTGAPSYMBOL
-                             && acompare != (GtUchar) WILDCARD)
+    acompare = tolower(firstlineorig[i]);
+    bcompare = tolower(secondlineorig[i]);
+    if (acompare == bcompare && acompare != (GtUchar) CONCRETEGAPSYMBOL &&
+        gt_alphabet_encode(alphabet, acompare) != (GtUchar) WILDCARD)
     {
       charinline = true;
       break;
@@ -954,10 +953,10 @@ static void showeditopline(GtFile *outfp,
         OUTCHAR(' ');
       }
 
-      acompare = firstlinecompare[i];
-      bcompare = secondlinecompare[i];
-      if (acompare == bcompare && acompare != (GtUchar) ABSTRACTGAPSYMBOL
-                               && acompare != (GtUchar) WILDCARD)
+      acompare = tolower(firstlineorig[i]);
+      bcompare = tolower(secondlineorig[i]);
+      if (acompare == bcompare && acompare != (GtUchar) CONCRETEGAPSYMBOL &&
+          gt_alphabet_encode(alphabet, acompare) != (GtUchar) WILDCARD)
       {
         OUTCHAR('|');
       } else
@@ -1049,12 +1048,11 @@ static void showeditoplineprotein(GtFile *outfp,
   The output goes to the file pointer \texttt{outfp}.
 */
 
-static void formatalignment(GtFile *outfp, GtUchar *firstlinecompare,
-                            GtUchar *secondlinecompare,
-                            GtUchar *firstlineorig,GtUchar *secondlineorig,
-                            unsigned long numofcols,unsigned long linewidth,
-                            unsigned long startfirst, unsigned long startsecond,
-                            unsigned long totalulen, GtAlphabet *alphabet,
+static void formatalignment(GtFile *outfp, GtUchar *firstlineorig,
+                            GtUchar *secondlineorig, unsigned long numofcols,
+                            unsigned long linewidth, unsigned long startfirst,
+                            unsigned long startsecond, unsigned long totalulen,
+                            GtAlphabet *alphabet,
                             GtArrayShortIntronInfo *shortintroninfo,
                             bool reverse_subject_pos, bool wildcardimplosion)
 {
@@ -1093,8 +1091,7 @@ static void formatalignment(GtFile *outfp, GtUchar *firstlinecompare,
                    i+startfirst+len-firstinsertioncount+completeshortintronlen);
     }
     OUTCHAR('\n');
-    showeditopline(outfp,firstlinecompare+i,secondlinecompare+i,
-                   firstlineorig+i,secondlineorig+i,len);
+    showeditopline(outfp, firstlineorig+i,secondlineorig+i,len, alphabet);
     formatseqwithgaps(outfp, secondlineorig + i, len, &secondinsertioncount,
                       false, alphabet, wildcardimplosion);
 
@@ -1391,10 +1388,8 @@ void gthshowalignmentdna(GtFile *outfp,
                          Editoperation *alignment,
                          unsigned long lenalg,
                          unsigned long indelcount,
-                         const GtUchar *useqcompare,
                          const GtUchar *useqorig,
                          unsigned long ulen,
-                         const GtUchar *vseqcompare,
                          const GtUchar *vseqorig,
                          unsigned long vlen,
                          unsigned long startfirst,
@@ -1405,35 +1400,21 @@ void gthshowalignmentdna(GtFile *outfp,
                          bool reverse_subject_pos,
                          bool wildcardimplosion)
 {
-  GtUchar *firstlinecompare, *secondlinecompare, *firstlineorig,
-          *secondlineorig;
-  unsigned long numofcolscompare, numofcolsorig;
+  GtUchar *firstlineorig, *secondlineorig;
+  unsigned long numofcolsorig;
   GtArrayShortIntronInfo shortintroninfo;
 
   GT_INITARRAY(&shortintroninfo, ShortIntronInfo);
 
-  numofcolscompare = gthfillthetwoalignmentlines(&firstlinecompare,
-                                                 &secondlinecompare,
-                                                 useqcompare, ulen,
-                                                 vseqcompare, vlen,
-                                                 alignment, lenalg,
-                                                 linewidth, showintronmaxlen,
-                                                 &shortintroninfo, indelcount);
-  numofcolsorig    = gthfillthetwoalignmentlines(&firstlineorig,
-                                                 &secondlineorig,
-                                                 useqorig, ulen,
-                                                 vseqorig, vlen,
-                                                 alignment, lenalg,
-                                                 linewidth, showintronmaxlen,
-                                                 NULL, indelcount);
-  gt_assert(numofcolscompare == numofcolsorig);
+  numofcolsorig = gthfillthetwoalignmentlines(&firstlineorig, &secondlineorig,
+                                              useqorig, ulen, vseqorig, vlen,
+                                              alignment, lenalg, linewidth,
+                                              showintronmaxlen, NULL,
+                                              indelcount);
 
-  formatalignment(outfp, firstlinecompare, secondlinecompare,
-                  firstlineorig, secondlineorig, numofcolscompare, linewidth,
-                  startfirst, startsecond, totalulen, alphabet,
+  formatalignment(outfp, firstlineorig, secondlineorig, numofcolsorig,
+                  linewidth, startfirst, startsecond, totalulen, alphabet,
                   &shortintroninfo, reverse_subject_pos, wildcardimplosion);
-  gt_free(firstlinecompare);
-  gt_free(secondlinecompare);
   gt_free(firstlineorig);
   gt_free(secondlineorig);
   GT_FREEARRAY(&shortintroninfo, ShortIntronInfo);
