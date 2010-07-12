@@ -27,15 +27,9 @@
 #include "sfx-copysort.h"
 #include "bcktab.h"
 #include "suffixptr.h"
+#include "sfx-suffixgetset.h"
 
 typedef struct Outlcpinfo Outlcpinfo;
-
-typedef struct
-{
-  Suffixptr *sortspace;
-  unsigned long sortspaceoffset,
-                bucketleftidx;
-} Suffixsortspace;
 
 Outlcpinfo *gt_newOutlcpinfo(const char *indexname,
                              unsigned int numofchars,

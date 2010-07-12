@@ -37,6 +37,7 @@
 #include "sfx-remainsort.h"
 #include "sfx-copysort.h"
 #include "sfx-bentsedg.h"
+#include "sfx-suffixgetset.h"
 
 #define UNIQUEINT(P)           ((unsigned long) ((P) + GT_COMPAREOFFSET))
 #define ACCESSCHAR(POS)        gt_encseq_get_encoded_char(bsr->encseq,\
@@ -231,40 +232,6 @@ typedef struct
                 countbltriesort;
   Suffixptr *suftabbaseptr; /* XXX to be removed later */
 } Bentsedgresources;
-
-static void suffixptrassert(const Suffixsortspace *sssp,
-                            const Suffixptr *subbucket,
-                            unsigned long subbucketleft,
-                            unsigned long idx)
-{
-  unsigned long tmp = sssp->bucketleftidx - sssp->sortspaceoffset;
-  gt_assert(sssp != NULL);
-  gt_assert(sssp->sortspaceoffset <= sssp->bucketleftidx + subbucketleft + idx);
-  gt_assert(subbucket + idx ==
-            sssp->sortspace + (sssp->bucketleftidx+subbucketleft+idx-
-                               sssp->sortspaceoffset));
-  gt_assert(subbucket + idx ==
-            sssp->sortspace + (subbucketleft + idx + tmp));
-}
-
-static unsigned long suffixptrget(const Suffixsortspace *sssp,
-                                  const Suffixptr *subbucket,
-                                  unsigned long subbucketleft,
-                                  unsigned long idx)
-{
-  suffixptrassert(sssp,subbucket,subbucketleft,idx);
-  return SUFFIXPTRGET(subbucket,idx);
-}
-
-static void suffixptrset(Suffixsortspace *sssp,
-                         Suffixptr *subbucket,
-                         unsigned long subbucketleft,
-                         unsigned long idx,
-                         unsigned long value)
-{
-  suffixptrassert(sssp,subbucket,subbucketleft,idx);
-  SUFFIXPTRSET(subbucket,idx,value);
-}
 
 #ifdef SKDEBUG
 static unsigned long baseptr;

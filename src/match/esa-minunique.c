@@ -26,7 +26,8 @@ unsigned long gt_suffixarrayuniqueforward (const void *genericindex,
                                        unsigned long offset,
                                        unsigned long left,
                                        unsigned long right,
-                                       GT_UNUSED unsigned long *witnessposition,
+                                       GT_UNUSED unsigned long
+                                          *witnessposition,
                                        const GtUchar *qstart,
                                        const GtUchar *qend)
 {
