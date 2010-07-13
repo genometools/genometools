@@ -27,7 +27,8 @@ typedef struct GthSeqColClass GthSeqColClass;
 typedef struct GthSeqCol GthSeqCol;
 
 typedef GthSeqCol* (*GthSeqColConstructor)(const char *indexname,
-                                           bool assign_rc, bool translate);
+                                           bool assign_rc, bool orig_seq,
+                                           bool tran_seq);
 
 void          gth_seq_col_delete(GthSeqCol*);
 GtUchar*      gth_seq_col_get_orig_seq(GthSeqCol *seq_col,

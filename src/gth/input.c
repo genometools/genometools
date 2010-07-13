@@ -425,7 +425,7 @@ void gth_input_load_genomic_file(GthInput *input, unsigned long gen_file_num,
             gth_input_get_genomic_filename(input, gen_file_num), DNASUFFIX);
     input->genomic_seq_col =
       input->seq_col_constructor(indexname, input->searchmode & GTHREVERSE,
-                                 translate);
+                                 !translate, translate);
     input->genomic_translate = translate;
 
     /* at least one sequence in genomic virtual tree  */
@@ -466,8 +466,15 @@ void gth_input_load_reference_file(GthInput *input, unsigned long ref_file_num,
             gth_input_get_reference_filename(input, ref_file_num),
             alphatype == DNA_ALPHA ? DNASUFFIX
                                    : gt_str_get(input->proteinsmap));
-    input->reference_seq_col =
-      input->seq_col_constructor(indexname, alphatype == DNA_ALPHA, translate);
+    if (alphatype == DNA_ALPHA) {
+      input->reference_seq_col = input->seq_col_constructor(indexname, true,
+                                                            !translate,
+                                                            translate);
+    }
+    else {
+      input->reference_seq_col = input->seq_col_constructor(indexname, false,
+                                                            true, true);
+    }
     input->reference_translate = translate;
 
     /* at least on reference sequence in virtual tree */
