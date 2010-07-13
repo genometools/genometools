@@ -38,6 +38,6 @@ void              gth_pgl_collection_set_max_ags(GthPGLCollection*,
 /* Returns the number of consensus spliced alignments in <pgl_collection>. */
 unsigned long     gth_pgl_collection_size(const GthPGLCollection*);
 void              gth_pgl_collection_traverse(const GthPGLCollection*,
-                                              GthPGLVisitor*);
+                                              GthPGLVisitor*, GthInput*);
 
 #endif

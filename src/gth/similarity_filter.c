@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -661,12 +661,6 @@ static int calc_spliced_alignments(GthSACollection *sa_collection,
       match_info->max_call_number_reached = true;
       break; /* break out of loop */
     }
-
-    /* load genomic file corresponding to this DP range */
-    gth_input_load_genomic_file(input, chain->gen_file_num, true);
-
-    /* load reference file corresponding to this DP range */
-    gth_input_load_reference_file(input, chain->ref_file_num, true);
 
     /* compute considered genomic regions if not set by -frompos */
     if (!gth_input_use_substring_spec(input)) {

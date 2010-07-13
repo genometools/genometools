@@ -125,7 +125,7 @@ void gth_proc_sa_collection(GthSACollection *sa_collection,
       pgl_visitor = gth_txt_pgl_visitor_new(input, call_info->translationtable,
                                             indentlevel + 1, call_info->out);
     }
-    gth_pgl_collection_traverse(pgl_collection, pgl_visitor);
+    gth_pgl_collection_traverse(pgl_collection, pgl_visitor, input);
     gth_pgl_visitor_delete(pgl_visitor);
 
     /* free*/

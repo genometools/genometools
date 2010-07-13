@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -23,6 +23,7 @@
 #include "core/safearith.h"
 #include "core/str.h"
 #include "core/undef.h"
+#include "core/unused_api.h"
 #include "gth/default.h"
 #include "gth/gthdef.h"
 #include "gth/input.h"
@@ -176,7 +177,7 @@ const unsigned char* gth_input_original_genomic_sequence(GthInput *input,
                                                          bool forward)
 {
   gt_assert(input);
-  gth_input_load_genomic_file(input, filenum, false);
+  gt_assert(input->gen_file_num == filenum);
   if (forward)
     return gth_seq_col_get_orig_seq(input->genomic_seq_col, 0);
   else {
@@ -189,7 +190,7 @@ void gth_input_echo_genomic_description(GthInput *input, unsigned long filenum,
                                         unsigned long seqnum, GtFile *outfp)
 {
   gt_assert(input);
-  gth_input_load_genomic_file(input, filenum, false);
+  gt_assert(input->gen_file_num == filenum);
   gth_seq_col_echo_description(input->genomic_seq_col, seqnum, outfp);
 }
 
@@ -199,7 +200,7 @@ void gth_input_echo_reference_description(GthInput *input,
                                           GtFile *outfp)
 {
   gt_assert(input);
-  gth_input_load_reference_file(input, filenum, false);
+  gt_assert(input->ref_file_num == filenum);
   gth_seq_col_echo_description(input->reference_seq_col, seqnum, outfp);
 }
 
@@ -254,7 +255,7 @@ void gth_input_echo_reference_sequence(GthInput *input, bool format,
   unsigned char *refseq;
   unsigned long i, reflength;
   gt_assert(input);
-  gth_input_load_reference_file(input, filenum, false);
+  gt_assert(input->ref_file_num == filenum);
 
   /* get reference sequence */
   if (forward)
@@ -277,7 +278,7 @@ void gth_input_get_genomic_description(GthInput *input, GtStr *description,
                                        unsigned long seqnum)
 {
   gt_assert(input && description);
-  gth_input_load_genomic_file(input, filenum, false);
+  gt_assert(input->gen_file_num == filenum);
   gth_seq_col_get_description(input->genomic_seq_col, seqnum, description);
 }
 
@@ -360,7 +361,7 @@ unsigned long gth_input_genomic_file_total_length(GthInput *input,
                                                   unsigned long filenum)
 {
   gt_assert(input);
-  gth_input_load_genomic_file(input, filenum, true);
+  gt_assert(input->gen_file_num == filenum);
   return gth_seq_col_total_length(input->genomic_seq_col);
 }
 
@@ -405,13 +406,23 @@ GtRange gth_input_get_reference_range(GthInput *input,
   return gth_seq_col_get_range(input->reference_seq_col, seqnum);
 }
 
-void gth_input_load_genomic_file(GthInput *input, unsigned long gen_file_num,
-                                 bool translate)
+#define INPUT_DEBUG 0
+
+void gth_input_load_genomic_file_func(GthInput *input,
+                                      unsigned long gen_file_num,
+                                      bool translate,
+                                      GT_UNUSED const char *src_file,
+                                      GT_UNUSED int src_line)
 {
   char indexname[PATH_MAX+MAXSUFFIXLEN+1];
 
   /* valid genomic file number */
   gt_assert(input && gen_file_num < gt_str_array_size(input->genomicfiles));
+
+#if INPUT_DEBUG
+  printf("load genomic   (file %s, line %d): gen_file_num: %lu, translate=%s\n",
+         src_file, src_line, gen_file_num, translate ? "true" : "false");
+#endif
 
   if (input->gen_file_num != gen_file_num) {
     /* free old genomic file */
@@ -438,8 +449,11 @@ void gth_input_load_genomic_file(GthInput *input, unsigned long gen_file_num,
   gt_assert(input->genomic_translate == translate);
 }
 
-void gth_input_load_reference_file(GthInput *input, unsigned long ref_file_num,
-                                   bool translate)
+void gth_input_load_reference_file_func(GthInput *input,
+                                        unsigned long ref_file_num,
+                                        bool translate,
+                                        GT_UNUSED const char *src_file,
+                                        GT_UNUSED int src_line)
 {
   char indexname[PATH_MAX+MAXSUFFIXLEN+1];
   GthAlphatype alphatype;
@@ -447,6 +461,11 @@ void gth_input_load_reference_file(GthInput *input, unsigned long ref_file_num,
   /* valid reference file number */
   gt_assert(input &&
             ref_file_num < gt_str_array_size(input->referencefiles));
+
+#if INPUT_DEBUG
+  printf("load reference (file %s, line %d): ref_file_num: %lu, translate=%s\n",
+         src_file, src_line, ref_file_num, translate ? "true" : "false");
+#endif
 
   if (input->ref_file_num != ref_file_num) {
     /* free old reference file */
@@ -695,16 +714,18 @@ int gth_input_set_and_check_substring_spec(GthInput *input, GtError *err)
   gt_error_check(err);
   gt_assert(input);
 
-  if (!had_err) {
+  if (input->genomicfrompos) {
+    /* load genomic file first */
+    /* XXX: we do not need the reverse complement here */
+    gth_input_load_genomic_file(input, 0, true);
+
     /* now we can set numofsequences and gen_total_length */
     numofsequences   = gth_input_num_of_gen_seqs(input, 0);
     gen_total_length = gth_input_genomic_file_total_length(input, 0);
 
     /* at least one genomic sequence in multiseq */
     gt_assert(numofsequences > 0);
-  }
 
-  if (!had_err && input->genomicfrompos) {
     /* position setting options have been used, check if only one genomic
        sequence is given */
 

@@ -179,14 +179,15 @@ unsigned long gth_pgl_collection_size(const GthPGLCollection *pgl_collection)
 }
 
 void gth_pgl_collection_traverse(const GthPGLCollection *pgl_collection,
-                                 GthPGLVisitor *pgl_visitor)
+                                 GthPGLVisitor *pgl_visitor, GthInput *input)
 {
   unsigned long i;
-  gt_assert(pgl_collection && pgl_visitor);
+  gt_assert(pgl_collection && pgl_visitor && input);
   gth_pgl_visitor_preface(pgl_visitor, gth_pgl_collection_size(pgl_collection));
   for (i = 0; i < gth_pgl_collection_size(pgl_collection); i++) {
-    gth_pgl_visitor_visit_pgl(pgl_visitor,
-                              gth_pgl_collection_get(pgl_collection, i), i);
+    GthPGL *pgl = gth_pgl_collection_get(pgl_collection, i);
+    gth_input_load_genomic_file(input, gth_pgl_filenum(pgl), false);
+    gth_pgl_visitor_visit_pgl(pgl_visitor, pgl, i);
   }
   gth_pgl_visitor_trailer(pgl_visitor);
 }

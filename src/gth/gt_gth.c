@@ -92,7 +92,6 @@ int gt_gth(int argc, const char **argv, const GthPlugins *plugins, GtError *err)
     }
     else {
       /* set and check position values */
-      gth_input_load_genomic_file(input, 0, true);
       had_err = gth_input_set_and_check_substring_spec(input, err);
 
       if (!had_err && call_info->out->showverbose)

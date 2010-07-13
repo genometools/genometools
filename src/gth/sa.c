@@ -1260,6 +1260,8 @@ void gth_sa_show(GthSA *sa, GthInput *input, GtFile *outfp)
 {
   GthSAVisitor *sa_visitor;
   gt_assert(sa && input);
+  gth_input_load_genomic_file(input, sa->gen_file_num, false);
+  gth_input_load_reference_file(input, sa->ref_file_num, false);
   sa_visitor = gth_txt_sa_visitor_new(input,
                                       DEFAULT_GS2OUT,
                                       GTH_DEFAULT_DPMININTRONLENGTH,
