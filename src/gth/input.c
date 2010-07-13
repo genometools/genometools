@@ -293,12 +293,8 @@ static void save_sequenceid(GtStr *sequenceid, GthSeqCol *seqcol,
 
   description = gt_str_new();
   gth_seq_col_get_description(seqcol, seqnum, description);
-  len  = gt_str_length(description)-1; /* -1 to ignore '\n' */
+  len  = gt_str_length(description);
   desc = (GtUchar*) gt_str_get(description);
-
-  /* if the description ends with "\r\n" we ignore the '\r', too */
-  if (len > 0 && desc[len-1] == '\r')
-    len--;
 
   i = 0;
 
