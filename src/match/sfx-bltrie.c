@@ -516,7 +516,6 @@ Blindtrie *gt_blindtrie_new(Suffixsortspace *suffixsortspace,
 
   ALLOCASSIGNSPACE(blindtrie,NULL,Blindtrie,1);
   blindtrie->allocatedBlindtrienode = GT_MULT2(numofsuffixes + 1) + 1;
-  printf("allocatedBlindtrienode = %lu\n",blindtrie->allocatedBlindtrienode);
   ALLOCASSIGNSPACE(blindtrie->spaceBlindtrienode,NULL,Blindtrienode,
                    blindtrie->allocatedBlindtrienode);
   /*
