@@ -31,13 +31,13 @@ typedef GthSeqCol* (*GthSeqColConstructor)(const char *indexname,
 
 void          gth_seq_col_delete(GthSeqCol*);
 GtUchar*      gth_seq_col_get_orig_seq(GthSeqCol *seq_col,
-                                      unsigned long seq_num);
+                                       unsigned long seq_num);
 GtUchar*      gth_seq_col_get_tran_seq(GthSeqCol *seq_col,
-                                      unsigned long seq_num);
+                                       unsigned long seq_num);
 GtUchar*      gth_seq_col_get_orig_seq_rc(GthSeqCol *seq_col,
-                                         unsigned long seq_num);
+                                          unsigned long seq_num);
 GtUchar*      gth_seq_col_get_tran_seq_rc(GthSeqCol *seq_col,
-                                         unsigned long seq_num);
+                                          unsigned long seq_num);
 void          gth_seq_col_get_description(GthSeqCol *seq_col,
                                           unsigned long seq_num, GtStr *desc);
 void          gth_seq_col_echo_description(GthSeqCol *seq_col,
