@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -476,15 +476,17 @@ static void sa_free(void *sa, GT_UNUSED void *unused)
 }
 
 void gth_sa_collection_traverse(const GthSACollection *sa_collection,
-                                GthSAVisitor *sa_visitor)
+                                GthSAVisitor *sa_visitor, GthInput *input)
 {
   GthSACollectionIterator *iterator;
   unsigned long num_of_sas = 0;
   GthSA *sa;
-  gt_assert(sa_collection && sa_visitor);
+  gt_assert(sa_collection && sa_visitor && input);
   gth_sa_visitor_preface(sa_visitor);
   iterator = gth_sa_collection_iterator_new(sa_collection);
   while ((sa = gth_sa_collection_iterator_next(iterator))) {
+    gth_input_load_genomic_file(input, gth_sa_gen_file_num(sa), false);
+    gth_input_load_reference_file(input, gth_sa_ref_file_num(sa), false);
     gth_sa_visitor_visit_sa(sa_visitor, sa);
     num_of_sas++;
   }

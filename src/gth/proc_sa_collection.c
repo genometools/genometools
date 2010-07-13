@@ -84,7 +84,7 @@ void gth_proc_sa_collection(GthSACollection *sa_collection,
                                       call_info->out->showseqnums,
                                       call_info->out->outfp);
     }
-    gth_sa_collection_traverse(sa_collection, sa_visitor);
+    gth_sa_collection_traverse(sa_collection, sa_visitor, input);
     gth_sa_visitor_delete(sa_visitor);
   }
 

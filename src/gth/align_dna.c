@@ -1403,8 +1403,9 @@ GthSA* gth_align_dna_simple(GthInput *input,
                                                gen_seq_num);
   gt_assert(gen_range->start >= gen_seq_bounds.start);
   gt_assert(gen_range->end <= gen_seq_bounds.end);
+  gth_input_load_reference_file(input, ref_file_num, true);
   ref_seq_bounds = gth_input_get_reference_range(input, ref_file_num,
-                                                  ref_seq_num);
+                                                 ref_seq_num);
   sa = gth_sa_new_and_set(gen_strand_forward, true, input, gen_file_num,
                           gen_seq_num, ref_file_num, ref_seq_num, 1,
                           gt_range_length(&gen_seq_bounds),

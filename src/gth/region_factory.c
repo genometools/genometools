@@ -43,6 +43,7 @@ static SeqidStore* seqid_store_new(GthInput *input)
   /* allocate room for store */
   ss->store = gt_calloc(ss->num_of_files, sizeof *ss->store);
   for (i = 0; i < ss->num_of_files; i++) {
+    gth_input_load_genomic_file(input, i, false);
     ss->num_of_sequences[i] = gth_input_num_of_gen_seqs(input, i);
     ss->store[i] = gt_calloc(ss->num_of_sequences[i], sizeof **ss->store);
   }
@@ -245,6 +246,7 @@ void gth_region_factory_make(GthRegionFactory *srf, GtNodeVisitor *visitor,
                                     (GtFree) gt_genome_node_delete);
   sequenceid = gt_str_new();
   for (i = 0; i < gth_input_num_of_gen_files(input); i++) {
+    gth_input_load_genomic_file(input, i, false);
     for (j = 0; j < gth_input_num_of_gen_seqs(input, i); j++) {
       gt_str_reset(sequenceid);
       gth_input_save_gen_id(input, sequenceid, i, j);

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -38,7 +38,8 @@ bool          gth_sa_collections_are_equal(const GthSACollection*,
 /* Returns true if <sa_collection> contains at least on spliced alignment,
    false otherwise. */
 bool          gth_sa_collection_contains_sa(const GthSACollection*);
-void          gth_sa_collection_traverse(const GthSACollection*, GthSAVisitor*);
+void          gth_sa_collection_traverse(const GthSACollection*, GthSAVisitor*,
+                                         GthInput*);
 void          gth_sa_collection_delete(GthSACollection*);
 
 typedef struct GthSACollectionIterator GthSACollectionIterator;

@@ -1409,8 +1409,8 @@ void gthshowalignmentdna(GtFile *outfp,
   numofcolsorig = gthfillthetwoalignmentlines(&firstlineorig, &secondlineorig,
                                               useqorig, ulen, vseqorig, vlen,
                                               alignment, lenalg, linewidth,
-                                              showintronmaxlen, NULL,
-                                              indelcount);
+                                              showintronmaxlen,
+                                              &shortintroninfo, indelcount);
 
   formatalignment(outfp, firstlineorig, secondlineorig, numofcolsorig,
                   linewidth, startfirst, startsecond, totalulen, alphabet,
