@@ -145,7 +145,7 @@ static bool check_max_gap_width(GtFragment *fragments,
                                 unsigned long leftfrag,
                                 unsigned long rightfrag)
 {
-  unsigned long gapwidth = 0, startpoint, endpoint;
+  unsigned long gapwidth, startpoint, endpoint;
 
   startpoint = GETSTOREDSTARTPOINT(1,rightfrag);
   endpoint = GETSTOREDENDPOINT(1,leftfrag);
@@ -199,13 +199,8 @@ static void bruteforcechainingscores(GtChaininfo *chaininfo,
           combinable = colinearfragments(fragments, leftfrag, rightfrag);
         }
         if (combinable) {
-          score  = chaininfo[leftfrag].score;
-          gt_log_log("try to combined fragments #%lu and #%lu", leftfrag,
-                  rightfrag);
-          gt_log_log("score (before overlap subtraction)=%lu", score);
-          score -= overlapcost(fragments, leftfrag, rightfrag);
-          gt_log_log("score (after overlap subtraction)=%lu", score);
-
+          score = chaininfo[leftfrag].score
+                  - overlapcost(fragments, leftfrag, rightfrag);
           if (score > 0) {
             score += weightright;
             previous = leftfrag;
@@ -214,12 +209,10 @@ static void bruteforcechainingscores(GtChaininfo *chaininfo,
             score = weightright;
             previous = UNDEFPREVIOUS;
           }
-          gt_log_log("score (after using weightright)=%lu", score);
           if (!localmaxfrag.defined || localmaxfrag.maxscore < score) {
             localmaxfrag.maxscore = score;
             localmaxfrag.maxfragnum = previous;
             localmaxfrag.defined = true;
-            gt_log_log("localmaxfrag defined");
           }
         }
       }
@@ -386,8 +379,7 @@ static void findmaximalscores_withoverlaps(GtChain *chain,
   gt_array_delete(startfragments);
 }
 
-static void gt_log_fragments(GtFragment *fragments,
-                             unsigned long num_of_fragments)
+static void log_fragments(GtFragment *fragments, unsigned long num_of_fragments)
 {
   unsigned long i;
   gt_log_log("show chaining fragments");
@@ -413,7 +405,7 @@ static void globalchaining_generic(bool maxscore_chains,
   chain = gt_chain_new();
   chaininfo = gt_malloc(sizeof (GtChaininfo) * num_of_fragments);
   if (gt_log_enabled())
-    gt_log_fragments(fragments, num_of_fragments);
+    log_fragments(fragments, num_of_fragments);
   if (num_of_fragments > 1) {
     /* compute chains */
     if (!maxscore_chains) {
