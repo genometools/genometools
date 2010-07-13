@@ -710,23 +710,84 @@ $ gt example -bool true -string foo bar baz
 \end{lstlisting}%$
 
 \section{Directory structure}
-
+All of these directories are given as subdirectories of the root directory of
+the \Gt source distribution. 
 \begin{itemize}
-\item bin/
-\item examples/
-\item doc/
-\item manuals/
-\item gtdata/
-\item gtpython/
-\item gtruby/
-\item gtscripts/
-\item lib.
-\item obj/
-\item scripts/
-\item src/
-\item testdata/
-\item testsuite/
-\item www/
+\item[\texttt{bin/}] This subdirectory contains the \Gt binary executable \texttt{gt}
+     as dynamic and static variants as well as the example executables built
+     from \texttt{src/examples}. This directory is only populated after a
+     make run. Running \texttt{make cleanup} will remove its contents.
+\item[\texttt{doc/}] This subdirectory contains documentation such as this
+     developer's guide, license information, format specifications, and the
+     user manuals for the software tools included with the \Gt .
+\item[\texttt{gtdata/}]
+     This subdirectory contains data needed for the \Gt to run which are not
+     compiled into the \Gt binary itself, such as
+     \begin{itemize}
+       \item texts for the tool on-line help (in \texttt{gtdata/doc}),
+       \item Lua code for documentation generation (in \texttt{gtdata/modules}),
+       \item ontology definition files (in \texttt{gtdata/obo\_files}),
+       \item \emph{AnnotationSketch} default (e.g.\ a default style file, in
+              \texttt{gtdata/sketch}), and
+       \item alphabet definition files for character mappings
+             (in \texttt{gtdata/trans}).
+     \end{itemize}     
+\item[\texttt{gtpython/}]
+     This subdirectory contains the Python bindings to selected parts of the \Gt
+     library, as well as the Python test suite. See the \texttt{README} file in
+     this directory for installation instructions.
+\item[\texttt{gtruby/}]
+     This subdirectory contains the Ruby bindings to selected parts of the \Gt
+     library. See the \texttt{README} file in this directory for installation
+     instructions.
+\item[\texttt{gtscripts/}]
+     This subdirectory contains a number of Lua scripts written using the \Gt
+     Lua bindings; most prominently the \texttt{gtdoc.lua} script to generate
+     the documentation. These scripts can be run using the \texttt{gt}
+     executable, which is a Lua interpreter as well, by giving the script name
+     instead of a tool name.
+\item[\texttt{lib/}]
+     This subdirectory contains the \Gt static and dynamic libraries when built.
+\item[\texttt{obj/}]
+     This subdirectory contains object files as they are created during \Gt
+     compilation.
+\item[\texttt{scripts/}]
+     This subdirectory contains useful scripts for \Gt developers.
+\item[\texttt{src/}]
+     This subdirectory contains the main \Gt source tree. In particular, there
+     is a number of subdirectories:
+     \begin{itemize}
+       \item the \texttt{src/annotationsketch} subdir contains
+             \emph{AnnotationSketch} code for genome annotation drawing,
+       \item the \texttt{src/core} subdir contains general code, i.e.\
+             basic data structures, memory management, file access, encoded
+             sequences, sequence parsers, tool runtime, option parser,
+             multithreading, etc.,
+       \item the \texttt{src/examples} subdir contains simple example
+             applications built on \Gt (streams, or a GUI app),
+       \item the \texttt{src/extended} subdir contain code for annotation
+             handling and parsing, stream processing, alignment, chaining, etc.,
+       \item the \texttt{src/external} subdir contains third-party source code
+             which is distributed with the \Gt source and built alongside the
+             \Gt ,
+       \item the \texttt{src/gth} subdir with \emph{GenomeThreader} code,
+       \item the \texttt{src/gtlua} subdir with Lua bindings for some of the \Gt
+             classes and modules,
+       \item the \texttt{src/ltr} subdir with LTR retrotransposon prediction and
+             annotation code,
+       \item the \texttt{src/match} subdir with code for index structure
+             construction and access, short read mapping, matching algorithms
+             etc.,
+       \item the \texttt{src/mgth} subdir contains \emph{MetaGenomeThreader}
+             code,
+       \item the \texttt{src/patches} subdirectory with platform-specific
+             patches, and
+       \item the \texttt{tools} subdir with code for all the tools included with
+             \Gt .
+     \end{itemize}     
+\item[\texttt{testdata/}]
+\item[\texttt{testsuite/}]
+\item[\texttt{www/}]
 \end{itemize}
 
 (TODO: To be done.)
@@ -783,7 +844,7 @@ The openning braces (\keyword{\{}) after the keywords \keyword{if},
 the same line.
 \item
 The curly braces following an \keyword{if} or \keyword{else} expression should
-be ommitted, if the expression and the (single) following statement both fit on
+be omitted if the expression and the (single) following statement both fit on
 a single line.
 \item
 The keyword \keyword{else} should be placed on a separate line.
@@ -1469,8 +1530,8 @@ given as a regular expression.
 external Ruby and Python scripts.
 \item
 Any Ruby code, such as custom functions, can be run inside the \keyword{Test}
-environment. To fail the test manually, use the \keyword{failtest(msg)} command,
-where \keyword{msg} is the error message to fail with.
+environment. To fail a test case manually, use the \keyword{failtest(msg)}
+command, where \keyword{msg} is the error message to fail with.
 \end{itemize}
 Inside test suite definitions, some useful paths are predefined to be
 conveniently used in test runs (like \keyword{$bin} and \keyword{$testdata} in
