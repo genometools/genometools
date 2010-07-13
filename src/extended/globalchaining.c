@@ -151,10 +151,8 @@ static bool check_max_gap_width(GtFragment *fragments,
   endpoint = GETSTOREDENDPOINT(1,leftfrag);
   if (startpoint <= endpoint)
     gapwidth = 0;
-  else {
-    gt_safe_sub(gapwidth, startpoint, endpoint);
-    gt_safe_sub(gapwidth, gapwidth, 1);
-  }
+  else
+    gapwidth = startpoint - endpoint - 1;
   if (gapwidth > max_gap_width)
     return false;
 
@@ -162,10 +160,8 @@ static bool check_max_gap_width(GtFragment *fragments,
   endpoint = GETSTOREDENDPOINT(2,leftfrag);
   if (startpoint <= endpoint)
     gapwidth = 0;
-  else {
-    gt_safe_sub(gapwidth, startpoint, endpoint);
-    gt_safe_sub(gapwidth, gapwidth, 1);
-  }
+  else
+    gapwidth = startpoint - endpoint - 1;
   if (gapwidth > max_gap_width)
     return false;
 
