@@ -443,11 +443,12 @@ static unsigned long enumeratetrieleaves (Blindtrie *blindtrie,
             gt_assert(lcpnode->depth + blindtrie->offset < blindtrie->maxdepth);
             if (equalsrangewidth > 0)
             {
-              dc_processunsortedrange(voiddcov,
-                                      subbucket + nextfree - 1
-                                                - equalsrangewidth,
-                                      equalsrangewidth + 1,
-                                      blindtrie->maxdepth);
+              dc_processunsortedrange(
+                               voiddcov,
+                               subbucket + nextfree - 1 - equalsrangewidth,
+                               subbucketleft + nextfree - 1 - equalsrangewidth,
+                               equalsrangewidth + 1,
+                               blindtrie->maxdepth);
               equalsrangewidth = 0;
             }
           }
@@ -496,6 +497,7 @@ static unsigned long enumeratetrieleaves (Blindtrie *blindtrie,
   {
     dc_processunsortedrange(voiddcov,
                             subbucket + nextfree - 1 - equalsrangewidth,
+                            subbucketleft + nextfree - 1 - equalsrangewidth,
                             equalsrangewidth + 1,
                             blindtrie->maxdepth);
     equalsrangewidth = 0;
@@ -691,10 +693,7 @@ unsigned long gt_blindtrie_suffixsort(
                             unsigned long maxdepth,
                             Ordertype ordertype,
                             void *voiddcov,
-                            void (*dc_processunsortedrange)(void *,
-                                                            Suffixptr *,
-                                                            unsigned long,
-                                                            unsigned long))
+                            Dc_processunsortedrange dc_processunsortedrange)
 {
   unsigned long idx, stackidx;
   Nodeptr leafinsubtree, currentnode;

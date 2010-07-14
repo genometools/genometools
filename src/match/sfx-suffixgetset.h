@@ -31,6 +31,7 @@ typedef struct
 typedef void (*Dc_processunsortedrange)(void *,
                                         Suffixptr *,
                                         unsigned long,
+                                        unsigned long,
                                         unsigned long);
 
 /*@unused@*/ static inline void suffixptrassert(const Suffixsortspace *sssp,

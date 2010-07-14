@@ -677,9 +677,11 @@ static void bs_insertionsortmaxdepth(Bentsedgresources *bsr,
           printf("process interval of width %lu\n",
                  equalsrangewidth + 1);
 #endif
-          bsr->dc_processunsortedrange(bsr->voiddcov,
-                                       subbucket + idx - 1 - equalsrangewidth,
-                                       equalsrangewidth + 1, maxdepth);
+          bsr->dc_processunsortedrange(
+                              bsr->voiddcov,
+                              subbucket + idx - 1 - equalsrangewidth,
+                              subbucketleft + idx - 1 - equalsrangewidth,
+                              equalsrangewidth + 1, maxdepth);
           equalsrangewidth = 0;
         }
       }
@@ -692,6 +694,7 @@ static void bs_insertionsortmaxdepth(Bentsedgresources *bsr,
 #endif
       bsr->dc_processunsortedrange(bsr->voiddcov,
                                    subbucket + width - 1 - equalsrangewidth,
+                                   subbucketleft + width - 1 - equalsrangewidth,
                                    equalsrangewidth + 1, maxdepth);
     }
   }
@@ -1045,7 +1048,8 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
       {
         if (depth >= (unsigned long) bsr->sfxstrategy->differencecover)
         {
-          bsr->dc_processunsortedrange(bsr->voiddcov,subbucket, width, depth);
+          bsr->dc_processunsortedrange(bsr->voiddcov,subbucket,subbucketleft,
+                                       width, depth);
           return;
         }
         if (width <= bsr->sfxstrategy->maxinsertionsort)

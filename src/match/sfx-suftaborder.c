@@ -17,6 +17,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "core/unused_api.h"
 #include "core/chardef.h"
 #include "core/minmax.h"
 #include "core/encseq.h"
@@ -124,7 +125,8 @@ void gt_checksortedsuffixes(const char *filename,
                             int line,
                             const GtEncseq *encseq,
                             GtReadmode readmode,
-                            const Suffixptr *suftab,
+                            const Suffixptr *subbucket,
+                            GT_UNUSED unsigned long subbucketleft,
                             unsigned long numberofsuffixes,
                             bool specialsareequal,
                             bool specialsareequalatdepth0,
@@ -138,20 +140,20 @@ void gt_checksortedsuffixes(const char *filename,
   esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   gt_assert(numberofsuffixes > 0);
-  gt_assert(SUFFIXPTRGET(suftab,0) < totallength);
+  gt_assert(SUFFIXPTRGET(subbucket,0) < totallength);
   for (idx = 1UL; idx < numberofsuffixes; idx++)
   {
     if (idx < numberofsuffixes - 1)
     {
-      gt_assert(SUFFIXPTRGET(suftab,idx) < totallength);
+      gt_assert(SUFFIXPTRGET(subbucket,idx) < totallength);
       cmp = gt_encseq_comparetwosuffixes(encseq,
                                          readmode,
                                          &maxlcp,
                                          specialsareequal,
                                          specialsareequalatdepth0,
                                          depth,
-                                         SUFFIXPTRGET(suftab,idx-1),
-                                         SUFFIXPTRGET(suftab,idx),
+                                         SUFFIXPTRGET(subbucket,idx-1),
+                                         SUFFIXPTRGET(subbucket,idx),
                                          esr1,
                                          esr2);
       if (cmp > 0)
@@ -161,7 +163,7 @@ void gt_checksortedsuffixes(const char *filename,
                               "checksortedsuffixes",
                               encseq,
                               readmode,
-                              suftab,
+                              subbucket,
                               depth,
                               idx-1,
                               idx,
@@ -173,7 +175,7 @@ void gt_checksortedsuffixes(const char *filename,
     {
       if (numberofsuffixes == totallength+1)
       {
-        gt_assert(SUFFIXPTRGET(suftab,idx) == totallength);
+        gt_assert(SUFFIXPTRGET(subbucket,idx) == totallength);
       }
     }
   }
