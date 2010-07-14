@@ -398,11 +398,8 @@ static unsigned long enumeratetrieleaves (Blindtrie *blindtrie,
                                           unsigned long *lcpsubtab,
                                           unsigned long *numoflargelcpvalues,
                                           void *voiddcov,
-                                          void (*dc_processunsortedrange)(
-                                                   void *,
-                                                   Suffixptr *,
-                                                   unsigned long,
-                                                   unsigned long))
+                                          Dc_processunsortedrange
+                                            dc_processunsortedrange)
 {
   bool readyforpop = false, currentnodeisleaf;
   Nodeptr currentnode, siblval, lcpnode = blindtrie->root;

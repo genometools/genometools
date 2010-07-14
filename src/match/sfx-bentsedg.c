@@ -220,10 +220,7 @@ typedef struct
                 rightlcpdist[GT_UNITSIN2BITENC];
   Definedunsignedlong *longest;
   Suffixsortspace *sssp;
-  void (*dc_processunsortedrange)(void *,
-                                  Suffixptr *,
-                                  unsigned long,
-                                  unsigned long);
+  Dc_processunsortedrange dc_processunsortedrange;
   void *voiddcov;
   bool *equalwithprevious;
   unsigned long countinsertionsort,
@@ -2411,10 +2408,7 @@ void gt_sortbucketofsuffixes(Suffixptr *suffixestobesorted,
                              unsigned int prefixlength,
                              const Sfxstrategy *sfxstrategy,
                              void *voiddcov,
-                             void (*dc_processunsortedrange)(void *,
-                                                             Suffixptr *,
-                                                             unsigned long,
-                                                             unsigned long),
+                             Dc_processunsortedrange dc_processunsortedrange,
                              GtLogger *logger)
 {
   Bentsedgresources bsr;

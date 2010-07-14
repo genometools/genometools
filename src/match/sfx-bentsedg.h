@@ -88,10 +88,7 @@ void gt_sortbucketofsuffixes(Suffixptr *suffixestobesorted,
                              unsigned int prefixlength,
                              const Sfxstrategy *sfxstrategy,
                              void *voiddcov,
-                             void (*dc_processunsortedrange)(void *,
-                                                             Suffixptr *,
-                                                             unsigned long,
-                                                             unsigned long),
+                             Dc_processunsortedrange dc_processunsortedrange,
                              GtLogger *logger);
 
 #endif

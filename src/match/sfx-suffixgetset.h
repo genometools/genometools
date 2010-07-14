@@ -28,6 +28,11 @@ typedef struct
                 bucketleftidx;
 } Suffixsortspace;
 
+typedef void (*Dc_processunsortedrange)(void *,
+                                        Suffixptr *,
+                                        unsigned long,
+                                        unsigned long);
+
 /*@unused@*/ static inline void suffixptrassert(const Suffixsortspace *sssp,
                                                 const Suffixptr *subbucket,
                                                 unsigned long subbucketleft,

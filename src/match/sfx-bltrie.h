@@ -50,10 +50,7 @@ unsigned long gt_blindtrie_suffixsort(
                             unsigned long maxdepth,
                             Ordertype ordertype,
                             void *voiddcov,
-                            void (*dc_processunsortedrange)(void *,
-                                                            Suffixptr *,
-                                                            unsigned long,
-                                                            unsigned long));
+                            Dc_processunsortedrange dc_processunsortedrange);
 
 void gt_blindtrie_delete(Blindtrie **blindtrie);
 
