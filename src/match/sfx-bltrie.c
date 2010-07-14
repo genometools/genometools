@@ -639,24 +639,25 @@ static int suffixcompare(const void *a, const void *b)
 
 #ifndef NDEBUG
 
-static void checksorting(bool ascending,
+static void checksorting(const Blindtrie *blindtrie,
                          const Suffixptr *subbucket,
-                         unsigned long numberofsuffixes)
+                         unsigned long subbucketleft,
+                         unsigned long numberofsuffixes,
+                         bool ascending)
 {
-  unsigned long idx;
+  unsigned long idx, pos1, pos2;
 
   gt_assert(numberofsuffixes > 1UL);
   for (idx = 0; idx < numberofsuffixes - 1; idx++)
   {
-    if ((ascending && SUFFIXPTRGET(subbucket,idx) >=
-                      SUFFIXPTRGET(subbucket,idx+1)) ||
-        (!ascending && SUFFIXPTRGET(subbucket,idx) <=
-                       SUFFIXPTRGET(subbucket,idx+1)))
+    pos1 = suffixptrget(blindtrie->sssp,subbucket,subbucketleft,idx);
+    pos2 = suffixptrget(blindtrie->sssp,subbucket,subbucketleft,idx+1);
+    if ((ascending && pos1 >= pos2) ||
+        (!ascending && pos1 <= pos2))
     {
       fprintf(stderr,"not %s: ",ascending ? "ascending" : "descending");
       fprintf(stderr,"subbucket[%lu]=%lu vs %lu=subbucket[%lu]\n",
-                      idx,SUFFIXPTRGET(subbucket,idx),
-                      SUFFIXPTRGET(subbucket,idx+1),idx+1);
+                      idx,pos1,pos2,idx+1);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   }
@@ -708,13 +709,13 @@ unsigned long gt_blindtrie_suffixsort(
     if (ordertype == Descending)
     {
 #ifndef NDEBUG
-      checksorting(false,subbucket,numberofsuffixes);
+      checksorting(blindtrie,subbucket,subbucketleft,numberofsuffixes,false);
 #endif
       inplace_reverseSuffixptr(subbucket,numberofsuffixes);
     } else
     {
 #ifndef NDEBUG
-      checksorting(true,subbucket,numberofsuffixes);
+      checksorting(blindtrie,subbucket,subbucketleft,numberofsuffixes,true);
 #endif
     }
   }
