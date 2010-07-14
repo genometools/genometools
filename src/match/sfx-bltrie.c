@@ -665,16 +665,20 @@ static void checksorting(const Blindtrie *blindtrie,
 
 #endif
 
-static void inplace_reverseSuffixptr(Suffixptr *tab,unsigned long len)
+static void inplace_reverseSuffixptr(const Blindtrie *blindtrie,
+                                     Suffixptr *subbucket,
+                                     unsigned long subbucketleft,
+                                     unsigned long len)
 {
   unsigned long tmp, i, j;
 
   gt_assert(len > 0);
   for (i = 0, j = len - 1; i < j; i++, j--)
   {
-    tmp = SUFFIXPTRGET(tab,i);
-    SUFFIXPTRSET(tab,i,SUFFIXPTRGET(tab,j));
-    SUFFIXPTRSET(tab,j,tmp);
+    tmp = suffixptrget(blindtrie->sssp,subbucket,subbucketleft,i);
+    SUFFIXPTRSET(subbucket,i,suffixptrget(blindtrie->sssp,subbucket,
+                                          subbucketleft,j));
+    SUFFIXPTRSET(subbucket,j,tmp);
   }
 }
 
@@ -711,7 +715,8 @@ unsigned long gt_blindtrie_suffixsort(
 #ifndef NDEBUG
       checksorting(blindtrie,subbucket,subbucketleft,numberofsuffixes,false);
 #endif
-      inplace_reverseSuffixptr(subbucket,numberofsuffixes);
+      inplace_reverseSuffixptr(blindtrie,subbucket,subbucketleft,
+                               numberofsuffixes);
     } else
     {
 #ifndef NDEBUG
