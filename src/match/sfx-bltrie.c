@@ -19,9 +19,9 @@
 #include "core/arraydef.h"
 #include "core/divmodmul.h"
 #include "core/minmax.h"
+#include "core/encseq.h"
 
 #include "spacedef.h"
-#include "core/encseq.h"
 #include "lcpoverflow.h"
 #include "sfx-bltrie.h"
 #include "sfx-suffixgetset.h"
@@ -392,10 +392,11 @@ static unsigned long fastgetlcp(GtUchar *mm_oldsuffix,
         currentnodeisleaf = ISLEAF(VAL) ? true : false;\
         currentnode = VAL
 
-static unsigned long enumeratetrieleaves (Suffixptr *subbucket,
+static unsigned long enumeratetrieleaves (Blindtrie *blindtrie,
+                                          Suffixptr *subbucket,
+                                          unsigned long subbucketleft,
                                           unsigned long *lcpsubtab,
                                           unsigned long *numoflargelcpvalues,
-                                          Blindtrie *blindtrie,
                                           void *voiddcov,
                                           void (*dc_processunsortedrange)(
                                                    void *,
@@ -455,8 +456,9 @@ static unsigned long enumeratetrieleaves (Suffixptr *subbucket,
           }
         }
       }
-      SUFFIXPTRSET(subbucket,nextfree++,
+      suffixptrset(blindtrie->sssp,subbucket,subbucketleft,nextfree,
                    currentnode->either.nodestartpos - blindtrie->offset);
+      nextfree++;
       siblval = currentnode->rightsibling;
       if (siblval == NULL)
       {
@@ -551,7 +553,7 @@ static void checkcurrentblindtrie(Blindtrie *blindtrie)
                 idx, numofsuffixes, maxcommon;
   int retval;
 
-  numofsuffixes = enumeratetrieleaves (&suffixtable[0], NULL, NULL, blindtrie);
+  numofsuffixes = enumeratetrieleaves (blindtrie,&suffixtable[0], NULL, NULL);
   for (idx=1UL; idx < numofsuffixes; idx++)
   {
     maxcommon = 0;
@@ -676,9 +678,9 @@ static void inplace_reverseSuffixptr(const Blindtrie *blindtrie,
   for (i = 0, j = len - 1; i < j; i++, j--)
   {
     tmp = suffixptrget(blindtrie->sssp,subbucket,subbucketleft,i);
-    SUFFIXPTRSET(subbucket,i,suffixptrget(blindtrie->sssp,subbucket,
-                                          subbucketleft,j));
-    SUFFIXPTRSET(subbucket,j,tmp);
+    suffixptrset(blindtrie->sssp,subbucket,subbucketleft,i,
+                 suffixptrget(blindtrie->sssp,subbucket,subbucketleft,j));
+    suffixptrset(blindtrie->sssp,subbucket,subbucketleft,j,tmp);
   }
 }
 
@@ -738,29 +740,27 @@ unsigned long gt_blindtrie_suffixsort(
   pos = suffixptrget(blindtrie->sssp,subbucket,subbucketleft,0) + offset;
   blindtrie->root = makeroot(blindtrie,pos);
 #ifdef SKDEBUG
-  printf("insert suffixes at offset " FormatSeqpos ":\n",
-          PRINTSeqposcast(offset));
-  for (i=0; i < numberofsuffixes; i++)
+  printf("insert suffixes at offset %lu:\n",offset);
+  for (idx=0; idx < numberofsuffixes; idx++)
   {
-    printf(FormatSeqpos " ",
-           PRINTSeqposcast(SUFFIXTABLEGET(subbucket,i) + offset));
+    printf("%lu ",suffixptrget(blindtrie->sssp,subbucket,subbucketleft,idx) +
+                   offset);
   }
   printf("\nstep 0\n");
   showblindtrie(blindtrie);
 #endif
   for (idx=1UL; idx < numberofsuffixes; idx++)
   {
-    if (isleftofboundary(SUFFIXPTRGET(subbucket,idx) + offset,0,blindtrie))
+    pos = suffixptrget(blindtrie->sssp,subbucket,subbucketleft,idx) + offset;
+    if (isleftofboundary(pos,0,blindtrie))
     {
-      leafinsubtree = findcompanion(blindtrie,
-                                    SUFFIXPTRGET(subbucket,idx) + offset);
+      leafinsubtree = findcompanion(blindtrie,pos);
       gt_assert(ISLEAF(leafinsubtree));
       lcp = (blindtrie->cmpcharbychar ? cmpcharbychargetlcp : fastgetlcp)
                                (&mm_oldsuffix,
                                 &mm_newsuffix,
                                 blindtrie,
-                                leafinsubtree->either.nodestartpos,
-                                SUFFIXPTRGET(subbucket,idx) + offset);
+                                leafinsubtree->either.nodestartpos,pos);
       currentnode = blindtrie->root;
       for (stackidx=0;stackidx<blindtrie->stack.nextfreeNodeptr;stackidx++)
       {
@@ -775,7 +775,7 @@ unsigned long gt_blindtrie_suffixsort(
                                 mm_oldsuffix,
                                 lcp,
                                 mm_newsuffix,
-                                SUFFIXPTRGET(subbucket,idx) + offset);
+                                pos);
 #ifdef SKDEBUG
       printf("step %lu\n",i);
       showblindtrie(blindtrie);
@@ -786,8 +786,9 @@ unsigned long gt_blindtrie_suffixsort(
       break;
     }
   }
-  (void) enumeratetrieleaves (subbucket, lcpsubtab, &numoflargelcpvalues,
-                              blindtrie,voiddcov,dc_processunsortedrange);
+  (void) enumeratetrieleaves (blindtrie, subbucket, subbucketleft,lcpsubtab,
+                              &numoflargelcpvalues,
+                              voiddcov,dc_processunsortedrange);
   if (lcpsubtab != NULL)
   {
     if (idx < numberofsuffixes && offset >= (unsigned long) LCPOVERFLOW)
