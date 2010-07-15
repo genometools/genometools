@@ -35,4 +35,8 @@
 #define MIN3(a, b, c) (((a)<(b))?((a)<(c)?(a):(c)):((b)<(c)?(b):(c)))
 #endif
 
+#ifndef MAX3
+#define MAX3(a, b, c) (((a)>(b))?((a)>(c)?(a):(c)):((b)>(c)?(b):(c)))
+#endif
+
 #endif
