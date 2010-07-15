@@ -70,10 +70,10 @@ void          gt_bittab_show(const GtBittab *b, FILE *fp);
 /* Fills <a> with the indices of all set bits in <b>. */
 void          gt_bittab_get_all_bitnums(const GtBittab *b, GtArray *a);
 
-/* Returns TRUE if bit <i> is set in <b>. */
+/* Returns <true> if bit <i> is set in <b>. */
 bool          gt_bittab_bit_is_set(const GtBittab *b, unsigned long i);
 
-/* Returns TRUE if bittabs <a> and <b> are identical. */
+/* Returns <true> if bittabs <a> and <b> are identical. */
 bool          gt_bittab_cmp(const GtBittab *a, const GtBittab *b);
 
 /* Returns the index of the first set bit in <b>. */
