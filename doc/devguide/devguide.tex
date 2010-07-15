@@ -790,12 +790,24 @@ the \Gt source distribution.
 \item[\texttt{www/}]
 \end{itemize}
 
-(TODO: To be done.)
 
 \section{Public APIs}
-(TODO: To be done.)
+
+In \Gt , we distinguish between \emph{public} and \emph{non-public} application
+programming interfaces (APIs). The API describes the classes and modules
+belonging to the \Gt and their methods and functions, in particular their
+signatures; that is, their name, return value, and number and types of their
+parameters.
+
+The public API is a subset of the \Gt library which is intended to be used by
+developers which do not belong to the \Gt core development team, and is fairly
+high-level at this point. To ensure compatibility with future versions of the
+\Gt library, the public API is supposed to be subject to as little change as
+possible. That is, interface changes should be made very sparsely, and interface
+design should `look forward' to make such changes unneccessary.
 
 \section{Coding style}
+
 \subsection{General rules}
 \begin{itemize}
 \item
@@ -839,9 +851,9 @@ There must be a space between the keywords \keyword{for}, \keyword{if},
 \keyword{sizeof}, \keyword{switch}, \keyword{while} and \keyword{do} and the
 following parenthesis.
 \item
-The openning braces (\keyword{\{}) after the keywords \keyword{if},
+The opening braces (\keyword{\{}) after the keywords \keyword{if},
 \keyword{else}, \keyword{for}, \keyword{do}, and \keyword{while} should be on
-the same line.
+the same line as the keyword.
 \item
 The curly braces following an \keyword{if} or \keyword{else} expression should
 be omitted if the expression and the (single) following statement both fit on
@@ -989,8 +1001,8 @@ features, refactoring, or fixing bugs which require large rewrites) should
 give his/her name and email address, updating the given year ranges in the
 process.
 \item The "Center for Bioinformatics" copyright line is only required for
-develpers employed by it, because only in this cases the University gains any
-copyrights.
+developers employed by it, because only in this cases the University gains any
+copyright .
 \end{itemize}
 
 \subsection{Header files}
@@ -1648,12 +1660,14 @@ also creates manuals for some published tools in \Gt (see
 \keyword{install}, which installs the compiled \Gt binaries, libraries and
 headers into the directory specified by the \keyword{prefix=<path>} option,
 \item
-\keyword{dist}, which creates a tarball with a binary \Gt distribution,
+\keyword{dist}, which creates a tarball with a binary \Gt distribution, which will
+then reside in the \keyword{dist/} subdirectory of the \Gt root,
 \item
-\keyword{srcdist}, which creates a tarball with a source \Gt distribution,
+\keyword{srcdist}, which creates a tarball with a source \Gt distribution, which will
+then reside in the working directory,
 \item
 \keyword{clean}, which removes all files created during the build and test
-processes, except the \keyword{lib} and \keyword{bin} contents, and
+processes, except the \keyword{lib} and \keyword{bin} directories, and
 \item
 \keyword{cleanup}, which even removes these.
 \end{itemize}
@@ -1693,11 +1707,13 @@ ncurses library on the target system. This option is enabled by default.
 
 \section{Contributing code}
 
-For \Gt development, we use the Git distributed versioning system\footnote{For
+For \Gt development, we use the distributed versioning system Git\footnote{For
 a good introduction to the use of the Git software itself, see the Git web site
 (\url{http://git-scm.com}) or read the following guide:
 Travis Swicegood. \emph{Pragmatic Version Control Using Git}.
-Pragmatic Bookshelf, ISBN 1934356158.} to track changes and
+Pragmatic Bookshelf, ISBN 1934356158. We \emph{strongly} encourage future \Gt
+developers to familiarize themselves with Git before developing with the intent
+of submission!} to track changes and
 exchange new code. Thus a Git repository is necessary to both:
 
 \begin{itemize}
@@ -1730,22 +1746,125 @@ $ git checkout -b my_feature_branch_name
 \end{enumerate}
 
 \subsection{Basic Git configuration}
-Please set your username and email address correctly. If unconfigured, they are
-often based on the workstation's hostname, which may not be correct in many
-cases.
 
-Use the \keyword{git config} commands within your \Gt repository to set them
+Please set your username and email address correctly. If unconfigured, they are
+often based on the hostname of the workstation where a commit is done. This may
+not be -- and almost never is --  correct in typical development environments
+(i.e.\ \keyword{user@workstation.zbh.uni-hamburg.de} instead of
+\keyword{user@maildomain.org}).
+
+Use the \keyword{git config} commands while in your \Gt Git repository to set them
 to a correct value:
 
 \begin{lstlisting}
 $ git config user.name "Hans Mustermann"
-$ git config user.email "mustermann@zbh.uni-hamburg.de"
+$ git config user.email "mustermann@maildomain.org"
 \end{lstlisting}
 
-\subsection{Code submission}
+\subsection{Tips for successful source management}
+
+\begin{itemize}
+\item
+Develop each major feature or try out bigger changes in a separate branch
+(the so-called \emph{feature branch})
+dedicated only to that aspect. That makes it easier to combine or discard
+branches later on, without having to meddle with individual commits too much
+if something goes wrong. Creating, merging and deleting branches is cheap in
+Git!
+\item
+Always leave your \emph{master} branch untouched so code pulled from upstream
+(e.g.\ the official \Gt repository) does not get merged by accident.
+\item
+Branch off new feature branches from the \emph{master} branch only. That makes
+it easy to chain branches later via \keyword{git rebase} in any order.
+\item
+Try to keep commits atomic. Every commit should either add a single feature or
+fix a single bug. That makes two things easier:
+  \begin{enumerate}
+  \item
+  Locating the exact commit which introduces a bug, e.g.\ using
+  \keyword{git bisect}. If there are too many changes in one commit, bugs
+  become more tedious to track down.
+  \item
+  Reverting single commits if new features introduce bugs.
+  \end{enumerate}
+If you made several incomplete commits and want to reorder or combine them into one afterwards,
+use interactive rebasing via \keyword{git rebase -i}\footnote{See \url{http://book.git-scm.com/4_interactive_rebasing.html} for an explanation.}.
+\item
+Needless to say, every commit should compile cleanly. Again, bisecting can become
+very tedious if the code has to be fixed at each stop to get it to even compile.
+\item
+Try to avoid merges with upstream as much as possible to keep the history linear.
+Instead of merging, rebase your feature branches regularly against an updated
+\emph{master}:
+    \begin{lstlisting}[language=sh]
+$ git branch
+* mybranch
+  master
+$ git checkout master
+$ git pull origin
+<...>
+$ git checkout mybranch
+$ git rebase master
+<...>
+    \end{lstlisting}%$
+\item
+In the first line of the commit message, give a short description of the
+change contained in the commit.  Please use active, present tense,
+e.g.\ ``add feature X'' or ``allow X to do Y''.
+Commit messages for commits that touch scripting
+language bindings should be prefixed with the language in question,
+e.g.\ ``gtpython: add bindings for GtFoo class''.
+\item
+For bugfixes for bugs also listed in the \Gt Lighthouse bug tracking web app
+(\url{http://genometools.lighthouseapp.com}), commit messages can be used to
+update the ticket status. See \url{http://help.lighthouseapp.com/faqs/ticket-workflow/ticket-keyword-updates}
+for details.
+\end{itemize}
+
+\subsection{Submission of contributions}
+
 This section describes how to get your contributions noticed, reviewed and
 integrated into the main \Gt codebase.
 
-(TODO: To be done.)
+\subsubsection{Source code submission}
+
+To get your source code to be considered for inclusion into the \Gt official
+source tree, first you need a Git repository in a publicly accessible location.
+That may be a free public account on github (\url{http://www.github.com},
+Gitorious (\url{http://gitorious.org}), etc., or a directory on a filesystem
+accessible by one of the core developers.
+
+Typically the \Gt maintainers pull from a branch provided in this location and
+specified by you (in a so-called \emph{pull request}. Please specify the exact
+location to the repository as well as the branch name. A pull request can be
+sent to
+
+\centerline{\texttt{steinbiss@zbh.uni-hamburg.de}}
+
+or
+
+\centerline{\texttt{gremme@gmail.com}.}
+
+\textbf{Important:} Always rebase your feature branch against the current
+official \Gt master before requesting a pull (see above). Also, please check
+whether your code compiles cleanly, even with the \keyword{amalgamation=yes}
+and \keyword{assert=no} parameters enabled which may influence compilation
+success.
+
+Small changes can also be submitted as patches which must be applicable using
+\keyword{git apply}. You will then be credited in the commit message. Such
+patches can be created conveniently -- ready to be sent via mail -- via git
+only using \keyword{git format-patch} or \keyword{git diff}.
+
+\subsubsection{Test data submission}
+
+For submissions to the \keyword{gttestdata} repository, the same rules apply
+as for source code. Please provide a repository from which to pull a branch
+which has been rebased against the current \keyword{gttestdata} master before.
+Before adding any more test data to the repository, please make sure that
+the new data is absolutely necessary. That is, existing large sequence should be
+reused, for example when testing a sequence parser or the like.
+
 
 \end{document}
