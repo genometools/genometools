@@ -804,7 +804,22 @@ developers which do not belong to the \Gt core development team, and is fairly
 high-level at this point. To ensure compatibility with future versions of the
 \Gt library, the public API is supposed to be subject to as little change as
 possible. That is, interface changes should be made very sparsely, and interface
-design should `look forward' to make such changes unneccessary.
+design should `look forward' to make such changes unneccessary. For example,
+interface functions which could fail in theory should receive error handling facilities
+in their signature (such as a return code and a \keyword{GtError} object), even
+if their current (and maybe only) implementation cannot fail. This leaves room
+for implementations that \emph{may} fail without having to break the API when
+the new implementation finds its way into the \Gt .
+
+All public API functions for a given class must be declared in a prototype
+header file named \keyword{<class>_api.h}. This header file must only include
+other public API headers. All of the public API header files are packaged to be
+distributed with the \Gt tarball and are installed into the given include path.
+That is, the functions defined in them are later accessible by including
+\keyword{genometools.h} only.
+
+It is important to note that all functions in the public header files must be
+properly documented (see section~\ref{documentation}).
 
 \section{Coding style}
 
@@ -1028,6 +1043,7 @@ file in uppercase with all non-alphanumeric characters replaced by underscores.
 \end{itemize}
 
 \subsection{Comments and documentation}
+\label{documentation}
 \begin{itemize}
 \item
 Comments are written in plain C style (\keyword{/* ... */}). C++-style
@@ -1816,9 +1832,10 @@ Commit messages for commits that touch scripting
 language bindings should be prefixed with the language in question,
 e.g.\ ``gtpython: add bindings for GtFoo class''.
 \item
-For bugfixes for bugs also listed in the \Gt Lighthouse bug tracking web app
-(\url{http://genometools.lighthouseapp.com}), commit messages can be used to
-update the ticket status. See \url{http://help.lighthouseapp.com/faqs/ticket-workflow/ticket-keyword-updates}
+For bugfixes for bugs also listed in the \Gt Lighthouse bug tracking web
+app\footnote{\url{http://genometools.lighthouseapp.com}}, commit messages can
+be used to update the ticket status. See the Lighthouse
+documentation\footnote{\url{http://help.lighthouseapp.com/faqs/ticket-workflow/ticket-keyword-updates}} 
 for details.
 \end{itemize}
 
@@ -1856,6 +1873,8 @@ Small changes can also be submitted as patches which must be applicable using
 \keyword{git apply}. You will then be credited in the commit message. Such
 patches can be created conveniently -- ready to be sent via mail -- via git
 only using \keyword{git format-patch} or \keyword{git diff}.
+
+A web-based pipeline for code submission and review is being prepared. 
 
 \subsubsection{Test data submission}
 
