@@ -1,6 +1,7 @@
 /*
   Copyright (c) 2009      Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c)      2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c)      2010 Dirk Willrodt <dwillrodt@zbh.uni-hamburg.de>
   Copyright (c) 2009-2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -98,6 +99,9 @@ struct GtEncseq
   unsigned long *ssptab; /* (if numofdbsequences = 1 then NULL  else
                                                            numofdbsequences  -1)
                                                            entries */
+  unsigned long *fsptab; /* (if numofdbfiles = 1 then NULL  else
+                                                      numofdbfiles  -1
+                                                      entries */
 
   /* only for Viabitaccess,
               Viauchartables,
