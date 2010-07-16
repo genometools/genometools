@@ -238,7 +238,8 @@ without problems.
 
 Let's imagine we want an interface called \keyword{GtExample} which has a
 method \keyword{gt_example_run(GtExample*)}. This corresponds to the following
-header file \keyword{example.h}:
+header file \keyword{example.h} (source files are also available in the \Gt
+source distribution):
 
 \begin{lstlisting}
 #ifndef EXAMPLE_H
@@ -246,29 +247,34 @@ header file \keyword{example.h}:
 
 typedef struct GtExample GtExample;
 
-void gt_example_run(GtExample*);
+int  gt_example_run(GtExample*);
+void gt_example_delete(GtExample*);
 
 #endif
 \end{lstlisting}
 
-This is not much different from the header files for a simple class. To make
-the method implementable by more than one class, we need a \emph{class object}
-describing the interface-to-implementation mappings, that is, the specific
-functions to be called in the implementing class. This class definition is given
-in a \keyword{example_rep.h} header file, where ``rep'' stands for
-``representation'':
+Note that there is no \keyword{gt_example_new()} constructor function, as the
+constructors will be specific to the implementing classes.
+Otherwise, this header is not much different to the header files for a simple
+class. To make the methods implementable by more than one class,
+we need a \emph{class object} describing the interface-to-implementation
+mappings, that is, the specific functions to be called in the implementing
+class. This class definition is given in a \keyword{example_rep.h} header file,
+where ``rep'' stands for ``representation'':
 
 \begin{lstlisting}
 #ifndef EXAMPLE_REP_H
 #define EXAMPLE_REP_H
 
+#include <string.h>
 #include "core/example.h"
 
 typedef struct GtExampleClass GtExampleClass;
 
 struct GtExampleClass {
   size_t size;
-  void (*run)(GtExample*);
+  int  (*run)(GtExample*);
+  void (*delete)(GtExample*);
 };
 
 struct GtExample {
@@ -282,9 +288,11 @@ void*      gt_example_cast(const GtExampleClass*, GtExample*);
 \end{lstlisting}
 
 The \keyword{GtExampleClass} stores a function pointer to the specific function
-implementing the \keyword{gt_example_run()} interface method. Given a
-\keyword{GtExampleClass} filled with an appropriate function pointer which
-matches the signature, the \keyword{gt_example_create()} function then creates
+implementing the \keyword{gt_example_run()} interface method. We also define a
+\keyword{delete} function which is called when the implementing class needs to
+do additional cleanup when an object of it is deleted. Given a
+\keyword{GtExampleClass} filled with appropriate function pointers which
+match the signatures, the \keyword{gt_example_create()} function then creates
 an object which can be cast to both the interface type \keyword{GtExample*} as
 well as the implementing type. To accomplish this, the size of the
 implementing class is needed. The reason behind this will be explained below.
@@ -319,6 +327,17 @@ int gt_example_run(GtExample *e)
   return e->c_class->run(e);               /* call implementation-specific
                                               function */
 }
+
+void gt_example_delete(GtExample *e)
+{
+  if (!e) return;
+  gt_assert(e && e->c_class);
+  if (e->c_class->delete != NULL) {
+    e->c_class->delete(e);                 /* delete implementation-specific
+                                              members */
+  }
+  gt_free(e);                              /* delete interface */
+}
 \end{lstlisting}
 
 Now, let us have a look at how the implementing classes are written. Let's
@@ -333,8 +352,7 @@ section~\ref{simpleclasses}:
 
 typedef struct GtExampleA GtExampleA;
 
-GtExampleA* gt_example_a_new();
-void        gt_example_a_delete(GtExampleA*);
+GtExample*  gt_example_a_new();
 
 #endif
 \end{lstlisting}
@@ -389,7 +407,7 @@ In the rest of \keyword{example_a.c}, we then code our implementation of the
 static int gt_example_a_run(GtExample *e) /* hidden from outside  */
 {
   GtExampleA *ea = (GtExampleA*) e;       /* downcast to specific type */
-  printf("%ul", ea->my_property);         /* run functionality */
+  printf("%lu", ea->my_property);         /* run functionality */
   return 0;
 }
 \end{lstlisting}
@@ -401,15 +419,22 @@ this function has been called on an object of the \keyword{GtExampleA} class.
 We can be sure because we have registered this method as an implementation of
 the \keyword{run} interface method by assigning it to the function pointer
 variable in the \keyword{GtExampleClass} structure:
+
 \begin{lstlisting}
 /* map static local method to interface */
 const GtExampleClass* gt_example_a_class(void)
 {
   static const GtExampleClass ec = { sizeof (GtExampleA),
-                                     gt_example_a_run };
+                                     gt_example_a_run,
+                                     NULL };
   return &ec;
 }
 \end{lstlisting}
+
+Note that we assign NULL to the \keyword{delete} function slot, because we do
+not allocate any memory inside the implementing class we need to free later.
+Have a look at the \keyword{example_b.*} files in the \Gt source distribution
+for an alternative implementation which allocates additional memory.
 
 We can then use the \keyword{GtExampleClass} returned by this function to write
 the \keyword{GtExampleA} constructor, which uses \keyword{gt_example_create()}
@@ -417,7 +442,7 @@ to allocate the needed space, initializes the private members and returns the
 object:
 
 \begin{lstlisting}
-GtExample* gt_example_a_new()
+GtExample* gt_example_a_new(void)
 {
   GtExample *e = gt_example_create(gt_example_a_class());
   GtExampleA *ea = (GtExampleA*) e;       /* downcast to specific type */
@@ -427,31 +452,37 @@ GtExample* gt_example_a_new()
 }
 \end{lstlisting}
 
-The destructor is written analogously to section~\ref{simpleclasses}.
+Now consider another implementation, \keyword{GtExampleB} which also implements
+this interface by creating a \keyword{GtExampleClass} with different implementation-
+specific function pointers (see the \keyword{example_b.*} files in the
+distribution).
 
-\begin{lstlisting}
-void gt_example_a_delete(GtExampleA *e)
-{
-  if (!e) return;
-  gt_free(ea);
-}
-\end{lstlisting}
-
-This implementation allows us to do the following:
+Combining these implementation with the interface headers now allows us to do
+the following:
 
 \begin{lstlisting}
 #include "example.h"       /* include the interface header */
 #include "example_a.h"     /* include the implementation header */
+#include "example_b.h"     /* include another implementation header */
 
 int main(int argc, char *argv[])
 {
   GtExample *my_e = gt_example_a_new();       /* create GtExampleA object, but
                                                  with interface type */
   gt_example_run(my_e);                       /* call an interface method */
-  gt_example_a_delete((GtExampleA*) my_e);
+  gt_example_delete(my_e);
+
+  GtExample *my_e = gt_example_b_new();       /* create GtExampleB object, but
+                                                 with interface type */
+  gt_example_run(my_e);                       /* call an interface method */
+  gt_example_delete(my_e);
+  
   return 0;
 }
 \end{lstlisting}
+
+That is, we can access two implementations via a common set of interface
+methods.
 
 \subsection{Modules}
 
