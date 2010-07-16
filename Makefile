@@ -150,32 +150,62 @@ LIBBZ2_SRC:=$(BZ2_DIR)/blocksort.c $(BZ2_DIR)/huffman.c $(BZ2_DIR)/crctable.c \
 LIBBZ2_OBJ:=$(LIBBZ2_SRC:%.c=obj/%.o)
 LIBBZ2_DEP:=$(LIBBZ2_SRC:%.c=obj/%.d)
 
-HMMER_BASE:=src/external/hmmer-2.3.2
+HMMER_BASE:=src/external/hmmer-3.0
 HMMER_DIR:=$(HMMER_BASE)/src
-SQUID_DIR:=$(HMMER_BASE)/squid
-HMMER_SRC:=$(HMMER_DIR)/alphabet.c \
-           $(HMMER_DIR)/core_algorithms.c $(HMMER_DIR)/debug.c \
-           $(HMMER_DIR)/display.c $(HMMER_DIR)/emit.c \
-           $(HMMER_DIR)/fast_algorithms.c $(HMMER_DIR)/histogram.c \
-           $(HMMER_DIR)/hmmio.c $(HMMER_DIR)/mathsupport.c $(HMMER_DIR)/masks.c \
-           $(HMMER_DIR)/misc.c $(HMMER_DIR)/plan7.c $(HMMER_DIR)/plan9.c \
-           $(HMMER_DIR)/postprob.c $(HMMER_DIR)/prior.c $(HMMER_DIR)/pvm.c \
-           $(HMMER_DIR)/threads.c $(HMMER_DIR)/tophits.c $(HMMER_DIR)/trace.c \
-           $(SQUID_DIR)/a2m.c $(SQUID_DIR)/aligneval.c $(SQUID_DIR)/alignio.c \
-           $(SQUID_DIR)/clustal.c $(SQUID_DIR)/cluster.c $(SQUID_DIR)/dayhoff.c \
-           $(SQUID_DIR)/eps.c $(SQUID_DIR)/file.c $(SQUID_DIR)/getopt.c \
-           $(SQUID_DIR)/gki.c $(SQUID_DIR)/hsregex.c \
-           $(SQUID_DIR)/iupac.c $(SQUID_DIR)/msa.c $(SQUID_DIR)/msf.c \
-           $(SQUID_DIR)/phylip.c $(SQUID_DIR)/revcomp.c $(SQUID_DIR)/rk.c \
-           $(SQUID_DIR)/selex.c $(SQUID_DIR)/seqencode.c $(SQUID_DIR)/shuffle.c \
-           $(SQUID_DIR)/sqerror.c $(SQUID_DIR)/sqio.c $(SQUID_DIR)/squidcore.c \
-           $(SQUID_DIR)/sre_ctype.c $(SQUID_DIR)/sre_math.c $(SQUID_DIR)/sre_random.c \
-           $(SQUID_DIR)/sre_string.c $(SQUID_DIR)/ssi.c $(SQUID_DIR)/stack.c \
-           $(SQUID_DIR)/stockholm.c $(SQUID_DIR)/stopwatch.c \
-           $(SQUID_DIR)/translate.c $(SQUID_DIR)/types.c \
-           $(SQUID_DIR)/vectorops.c $(SQUID_DIR)/weight.c
-HMMER_OBJ:=$(HMMER_SRC:%.c=obj/%.o)
-HMMER_DEP:=$(HMMER_SRC:%.c=obj/%.d)
+HMMER_SRC:=$(HMMER_DIR)/emit.c $(HMMER_DIR)/build.c \
+           $(HMMER_DIR)/errors.c $(HMMER_DIR)/evalues.c \
+           $(HMMER_DIR)/eweight.c \
+           $(HMMER_DIR)/generic_decoding.c $(HMMER_DIR)/modelconfig.c \
+           $(HMMER_DIR)/generic_fwdback.c $(HMMER_DIR)/modelstats.c \
+           $(HMMER_DIR)/generic_msv.c $(HMMER_DIR)/mpisupport.c \
+           $(HMMER_DIR)/generic_null2.c $(HMMER_DIR)/p7_alidisplay.c \
+           $(HMMER_DIR)/generic_optacc.c $(HMMER_DIR)/p7_bg.c \
+           $(HMMER_DIR)/generic_stotrace.c $(HMMER_DIR)/p7_builder.c \
+           $(HMMER_DIR)/generic_viterbi.c $(HMMER_DIR)/p7_domaindef.c \
+           $(HMMER_DIR)/generic_vtrace.c $(HMMER_DIR)/p7_gmx.c \
+           $(HMMER_DIR)/h2_io.c $(HMMER_DIR)/p7_hmm.c \
+           $(HMMER_DIR)/heatmap.c $(HMMER_DIR)/p7_hmmfile.c \
+           $(HMMER_DIR)/p7_pipeline.c $(HMMER_DIR)/p7_prior.c \
+           $(HMMER_DIR)/p7_profile.c $(HMMER_DIR)/p7_spensemble.c \
+           $(HMMER_DIR)/hmmer.c $(HMMER_DIR)/p7_tophits.c \
+           $(HMMER_DIR)/p7_trace.c $(HMMER_DIR)/phmmer.c \
+           $(HMMER_DIR)/seqmodel.c $(HMMER_DIR)/tracealign.c \
+           $(HMMER_DIR)/logsum.c src/external/hmmer-3.0/src/impl/decoding.c \
+           $(HMMER_DIR)/impl/optacc.c \
+           $(HMMER_DIR)/impl/fwdback.c $(HMMER_DIR)/impl/p7_omx.c \
+           $(HMMER_DIR)/impl/io.c $(HMMER_DIR)/impl/p7_oprofile.c \
+           $(HMMER_DIR)/impl/mpi.c $(HMMER_DIR)/impl/stotrace.c \
+           $(HMMER_DIR)/impl/msvfilter.c $(HMMER_DIR)/impl/vitfilter.c \
+           $(HMMER_DIR)/impl/null2.c
+HMMER_OBJ:=$(HMMER_SRC:%.c=%.o)
+
+EASEL_DIR:=$(HMMER_BASE)/easel
+EASEL_SRC:=$(EASEL_DIR)/easel.c $(EASEL_DIR)/esl_randomseq.c \
+           $(EASEL_DIR)/esl_alphabet.c $(EASEL_DIR)/esl_ratematrix.c \
+           $(EASEL_DIR)/esl_cluster.c $(EASEL_DIR)/esl_regexp.c \
+           $(EASEL_DIR)/esl_dirichlet.c $(EASEL_DIR)/esl_rootfinder.c \
+           $(EASEL_DIR)/esl_distance.c $(EASEL_DIR)/esl_scorematrix.c \
+           $(EASEL_DIR)/esl_dmatrix.c $(EASEL_DIR)/esl_sq.c \
+           $(EASEL_DIR)/esl_exponential.c $(EASEL_DIR)/esl_sqio_ascii.c \
+           $(EASEL_DIR)/esl_fileparser.c $(EASEL_DIR)/esl_sqio.c \
+           $(EASEL_DIR)/esl_gamma.c $(EASEL_DIR)/esl_sqio_ncbi.c \
+           $(EASEL_DIR)/esl_getopts.c $(EASEL_DIR)/esl_sse.c \
+           $(EASEL_DIR)/esl_gev.c $(EASEL_DIR)/esl_ssi.c \
+           $(EASEL_DIR)/esl_gumbel.c $(EASEL_DIR)/esl_stack.c \
+           $(EASEL_DIR)/esl_histogram.c $(EASEL_DIR)/esl_stats.c \
+           $(EASEL_DIR)/esl_hmm.c $(EASEL_DIR)/esl_stopwatch.c \
+           $(EASEL_DIR)/esl_hyperexp.c $(EASEL_DIR)/esl_stretchexp.c \
+           $(EASEL_DIR)/esl_keyhash.c \
+           $(EASEL_DIR)/esl_minimizer.c $(EASEL_DIR)/esl_threads.c \
+           $(EASEL_DIR)/esl_mixgev.c $(EASEL_DIR)/esl_tree.c \
+           $(EASEL_DIR)/esl_mpi.c $(EASEL_DIR)/esl_vectorops.c \
+           $(EASEL_DIR)/esl_msa.c $(EASEL_DIR)/esl_vmx.c \
+           $(EASEL_DIR)/esl_msacluster.c $(EASEL_DIR)/esl_weibull.c \
+           $(EASEL_DIR)/esl_msashuffle.c $(EASEL_DIR)/esl_workqueue.c \
+           $(EASEL_DIR)/esl_msaweight.c $(EASEL_DIR)/esl_wuss.c \
+           $(EASEL_DIR)/esl_normal.c $(EASEL_DIR)/esl_paml.c \
+           $(EASEL_DIR)/esl_random.c
+EASEL_OBJ:=$(EASEL_SRC:%.c=%.o)
 
 ZLIB_DIR:=src/external/zlib-1.2.3
 ZLIB_SRC:=$(ZLIB_DIR)/adler32.c $(ZLIB_DIR)/compress.c $(ZLIB_DIR)/crc32.c \
@@ -297,11 +327,11 @@ LIBGENOMETOOLS_DIRS:= src/core \
                       src/ltr
 
 ifeq ($(with-hmmer),yes)
-  LIBGENOMETOOLS_DIRS := src/external/hmmer-2.3.2  $(LIBGENOMETOOLS_DIRS)
+  LIBGENOMETOOLS_DIRS := src/external/hmmer-3.0  $(LIBGENOMETOOLS_DIRS)
   EXP_CPPFLAGS += -DHAVE_HMMER
-  GT_CPPFLAGS +=  -I$(CURDIR)/$(HMMER_DIR) -I$(CURDIR)/$(SQUID_DIR)
-  OVERRIDELIBS += lib/libhmmer.a
+  GT_CPPFLAGS +=  -I$(CURDIR)/$(HMMER_DIR) -I$(CURDIR)/$(EASEL_DIR)
   STEST_FLAGS += -hmmer
+  HMMERADDTARGET = hmmerlibs
 endif
 
 ifneq ($(cairo),no)
@@ -337,7 +367,8 @@ endif
 # the GenomeTools library
 LIBGENOMETOOLS_PRESRC:=$(foreach DIR,$(LIBGENOMETOOLS_DIRS),$(wildcard $(DIR)/*.c))
 ifeq ($(amalgamation),yes)
-  LIBGENOMETOOLS_SRC:=obj/amalgamation.c
+  LIBGENOMETOOLS_SRC:=obj/amalgamation.c src/ltr/pdom.c
+  LIBGENOMETOOLS_PRESRC:=$(filter-out src/ltr/pdom.c,$(LIBGENOMETOOLS_PRESRC))
 else
   LIBGENOMETOOLS_SRC:=$(LIBGENOMETOOLS_PRESRC)
 endif
@@ -349,7 +380,7 @@ LIBGENOMETOOLS_DEP:=$(LIBGENOMETOOLS_SRC:%.c=obj/%.d) \
                     $(LIBEXPAT_DEP)
 
 ifeq ($(with-hmmer),yes)
-  LIBGENOMETOOLS_OBJ := lib/libhmmer.a $(LIBGENOMETOOLS_OBJ) lib/libhmmer.a
+  LIBGENOMETOOLS_OBJ += $(HMMER_OBJ) $(EASEL_OBJ)
 endif
 
 # set prefix for install target
@@ -368,7 +399,6 @@ else
 static: bin/gt_static
 endif
 
-
 lib/libexpat.a: $(LIBEXPAT_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
@@ -385,13 +415,13 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
-lib/libhmmer.a: hmmer_get $(HMMER_DIR)/config.h.in $(HMMER_DIR)/config.h $(SQUID_DIR)/squidconf.h $(SQUID_DIR)/squid.h $(HMMER_OBJ)
-	@echo "[link $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@ar ru $@ $(HMMER_OBJ)
-ifdef RANLIB
-	@$(RANLIB) $@
-endif
+$(HMMER_OBJ) $(EASEL_OBJ): hmmerlibs
+
+# HMMER libs must be built with -fPIC to support shared libs on AMD64
+hmmerlibs: hmmer_get
+	@echo "[build HMMER3]"
+	@(cd $(HMMER_BASE) && CFLAGS=$(EXP_CFLAGS)\ -fPIC ./configure -q --enable-threads > /dev/null)
+	@$(MAKE) -s -C $(HMMER_BASE) > /dev/null
 
 lib/libz.a: $(ZLIB_OBJ)
 	@echo "[link $(@F)]"
@@ -489,7 +519,6 @@ $(eval $(call PROGRAM_template, bin/examples/sketch_parsed_with_ordering, \
                                 obj/src/examples/sketch_parsed_with_ordering.o \
                                 lib/libgenometools.a $(OVERRIDELIBS)))
 
-
 bin/lua: $(LUAMAIN_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
@@ -499,25 +528,6 @@ bin/rnv: $(RNVMAIN_OBJ) lib/librnv.a lib/libexpat.a
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $^ -o $@
-
-$(SQUID_DIR)/squidconf.h:
-	@echo '[create $(@F)]'
-	@scripts/generate_hmmer_squidconf_h $(SQUID_DIR)/squidconf.h.in > $@
-
-$(SQUID_DIR)/squid.h:
-	@echo '[create $(@F)]'
-	@scripts/generate_hmmer_squid_h  $(SQUID_DIR)/squid.h.in > $@
-
-$(HMMER_DIR)/config.h: $(HMMER_DIR)/config.h.in
-	@echo '[create $(@F)]'
-	@sed  -e 's/#undef PACKAGE_VERSION/#define PACKAGE_VERSION "2.3.2"/'\
-	      -e 's/#undef HMMER_THREADS/$(HMMERTHREADS_DEF)/'\
-	      -e 's/#undef PACKAGE_NAME/#define PACKAGE_NAME "HMMER"/'\
-	      -e 's/#undef PACKAGE_TARNAME/#define PACKAGE_TARNAME "hmmer"/'\
-	      -e 's/#undef PACKAGE_STRING/#define PACKAGE_STRING "HMMER 2.3.2"/'\
-	      -e 's/#undef PACKAGE_DATE/#define PACKAGE_DATE "Oct 2003"/'\
-	      -e 's/#undef PACKAGE_COPYRIGHT/#define PACKAGE_COPYRIGHT "Copyright (C) 1992-2003 HHMI\/Washington University School of Medicine"/'\
-	      -e 's/#undef PACKAGE_LICENSE/#define PACKAGE_LICENSE "Freely distributed under the GNU General Public License (GPL)"/' $(HMMER_DIR)/config.h.in  > $@
 
 obj/gt_config.h: VERSION
 	@echo '[create $@]'
@@ -590,34 +600,27 @@ src/core/checkbitpackstring-int.c: \
 	@echo '[rebuild $@]'
 	@scripts/template2c.pl '-int' $<
 
-$(SQUID_DIR)/%.c: $(HMMER_DIR)/config.h
-	@true
-
-$(HMMER_DIR)/%.c: $(HMMER_DIR)/config.h
-	@true
-
-obj/$(SQUID_DIR)/%.o: $(SQUID_DIR)/%.c
+# If HMMER3 SIMD support is enabled, pdom.o must be compiled with additional
+# compiler flags. Get these from the HMMER3 Makefile so we don't
+# have to repeat what autoconf did.
+obj/src/ltr/pdom.o: src/ltr/pdom.c $(HMMERADDTARGET)
 	@echo "[compile $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CC) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(EXP_CFLAGS) \
-	  $(GT_CFLAGS_NO_WERROR) $(3)
-	@$(CC) -c $< -o $(@:.o=.d) $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(3) -MM -MP \
-	  -MT $@
-
-obj/$(HMMER_DIR)/%.o: $(HMMER_DIR)/%.c
-	@echo "[compile $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(EXP_CFLAGS) \
-	  $(GT_CFLAGS_NO_WERROR) $(3)
-	@$(CC) -c $< -o $(@:.o=.d) $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(3) -MM -MP \
-	  -MT $@
+	  ${shell grep -s "CFLAGS   " $(HMMER_BASE)/Makefile | cut -f 2- -d "=" } \
+	  ${shell grep -s "SIMDFLAGS " $(HMMER_BASE)/Makefile | cut -f 2- -d "=" } \
+	  $(GT_CFLAGS) $(3)
+	@$(CC) -c $< -o $(@:.o=.d) $(EXP_CPPFLAGS) $(GT_CPPFLAGS) \
+	  ${shell grep -s "CFLAGS   " $(HMMER_BASE)/Makefile | cut -f 2- -d "=" } \
+	  ${shell grep -s "SIMDFLAGS " $(HMMER_BASE)/Makefile | cut -f 2- -d "=" } \
+    $(3) -MM -MP -MT $@
 
 define COMPILE_template
 $(1): $(2)
 	@echo "[compile $$(@F)]"
 	@test -d $$(@D) || mkdir -p $$(@D)
 	@$$(CC) -c $$< -o $$@ $$(EXP_CPPFLAGS) $$(GT_CPPFLAGS) $$(EXP_CFLAGS) \
-	  $$(GT_CFLAGS) $(3)
+	  $$(GT_CFLAGS) $(3) 
 	@$$(CC) -c $$< -o $$(@:.o=.d) $$(EXP_CPPFLAGS) $$(GT_CPPFLAGS) \
         $(3) -MM -MP -MT $$@
 endef
@@ -661,11 +664,7 @@ obj/src/core/versionfunc.o: obj/gt_config.h
          obj/src/examples/sketch_constructed.d \
          obj/src/examples/sketch_parsed.d
 
-ifeq ($(libannotationsketch),yes)
--include $(LIBANNOTATIONSKETCH_C_DEP) $(LIBANNOTATIONSKETCH_CXX_DEP)
-endif
-
-.PRECIOUS: $(HMMER_DIR)/%.c $(SQUID_DIR)/%.c $(HMMER_DIR)/%.h.in $(SQUID_DIR)/%.h.in
+.PRECIOUS: $(HMMER_DIR)/%.c
 .SUFFIXES:
 .PHONY: dist srcdist release gt install docs manuals installwww push \
         splint test clean cleanup hmmer_get
@@ -938,10 +937,10 @@ test: all
           -gtruby $(CURDIR)/gtruby $(STEST_FLAGS)
 
 clean:
-	rm -rf $(HMMER_DIR)/config.h $(SQUID_DIR)/squidconf.h $(SQUID_DIR)/squid.h
 	rm -rf obj
 	rm -rf testsuite/stest_testsuite testsuite/stest_stest_tests
-	$(MAKE) -C $(CURDIR)/doc/devguide clean
+	$(MAKE) -s -C $(CURDIR)/doc/devguide clean
+	test -d "$(HMMER_BASE)" && $(MAKE) -s -C $(HMMER_BASE) clean || true
 
 gtkviewer:
 	$(CC) -o bin/examples/gtkviewer $(GT_CPPFLAGS) $(GT_LDFLAGS) `pkg-config --cflags --libs gtk+-2.0` -lgenometools src/examples/gtkviewer.c
@@ -950,10 +949,12 @@ cleanup: clean
 	rm -rf lib bin
 
 hmmer_get:
-	@echo "[check for HMMER source distribution]"
-	@test ! -f "$(HMMER_DIR)/config.h.in" && \
+	@echo "[check for HMMER3]"
+	@test ! -f "src/external/hmmer-3.0.tar.gz" && \
 	  cd src/external && \
-	  echo "[retrieve HMMER source distribution]" && \
-	  wget -q ftp://selab.janelia.org/pub/software/hmmer/CURRENT/hmmer-2.3.2.tar.gz && \
-	  tar -xzf hmmer-2.3.2.tar.gz && \
-	  rm hmmer-2.3.2.tar.gz || true
+	  echo "[retrieve HMMER3]" && \
+	  wget -q ftp://selab.janelia.org/pub/software/hmmer3/3.0/hmmer-3.0.tar.gz || true
+	@test ! -d "$(HMMER_BASE)" && \
+	  cd src/external && \
+	  echo "[decompress HMMER3]" && \
+	  tar -xzf hmmer-3.0.tar.gz || true
