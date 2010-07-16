@@ -68,6 +68,8 @@ typedef struct GtEncseqReader GtEncseqReader;
 #define GT_ENCSEQFILESUFFIX ".esq"
 /* The file suffix used for encoded sequence separator position tables. */
 #define GT_SSPTABFILESUFFIX ".ssp"
+/* The file suffix used for encoded file separator position tables. */
+#define GT_FSPTABFILESUFFIX ".fsp"
 /* The file suffix used for sequence description tables. */
 #define GT_DESTABFILESUFFIX ".des"
 /* The file suffix used for sequence description separator position tables. */
