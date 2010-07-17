@@ -22,6 +22,7 @@
 #include "core/unused_api.h"
 #include "core/readmode.h"
 #include "core/logger.h"
+#include "sfx-suffixgetset.h"
 #include "suffixptr.h"
 
 typedef struct Differencecover Differencecover;
@@ -30,6 +31,10 @@ typedef struct Differencecover Differencecover;
 
 void gt_differencecovers_check(const GtEncseq *encseq,
                                GtReadmode readmode);
+
+void setdcline(void *voiddcov,int line);
+
+void dc_setsuffixsortspace(Differencecover *dcov,Suffixsortspace *sssp);
 
 Differencecover *gt_differencecover_new(unsigned int vparam,
                                         const GtEncseq *encseq,

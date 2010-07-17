@@ -680,7 +680,8 @@ static void bs_insertionsortmaxdepth(Bentsedgresources *bsr,
           bsr->dc_processunsortedrange(
                               bsr->voiddcov,
                               subbucket + idx - 1 - equalsrangewidth,
-                              subbucketleft + idx - 1 - equalsrangewidth,
+                              subbucketleft + idx - 1 - equalsrangewidth +
+                              bsr->sssp->bucketleftidx,
                               equalsrangewidth + 1, maxdepth);
           equalsrangewidth = 0;
         }
@@ -694,7 +695,8 @@ static void bs_insertionsortmaxdepth(Bentsedgresources *bsr,
 #endif
       bsr->dc_processunsortedrange(bsr->voiddcov,
                                    subbucket + width - 1 - equalsrangewidth,
-                                   subbucketleft + width - 1 - equalsrangewidth,
+                                   subbucketleft + width - 1 - equalsrangewidth+
+                                   bsr->sssp->bucketleftidx,
                                    equalsrangewidth + 1, maxdepth);
     }
   }

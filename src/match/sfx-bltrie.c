@@ -446,7 +446,8 @@ static unsigned long enumeratetrieleaves (Blindtrie *blindtrie,
               dc_processunsortedrange(
                                voiddcov,
                                subbucket + nextfree - 1 - equalsrangewidth,
-                               subbucketleft + nextfree - 1 - equalsrangewidth,
+                               subbucketleft + nextfree - 1 - equalsrangewidth
+                               + blindtrie->sssp->bucketleftidx,
                                equalsrangewidth + 1,
                                blindtrie->maxdepth);
               equalsrangewidth = 0;
@@ -497,7 +498,8 @@ static unsigned long enumeratetrieleaves (Blindtrie *blindtrie,
   {
     dc_processunsortedrange(voiddcov,
                             subbucket + nextfree - 1 - equalsrangewidth,
-                            subbucketleft + nextfree - 1 - equalsrangewidth,
+                            subbucketleft + nextfree - 1 - equalsrangewidth
+                            + blindtrie->sssp->bucketleftidx,
                             equalsrangewidth + 1,
                             blindtrie->maxdepth);
     equalsrangewidth = 0;

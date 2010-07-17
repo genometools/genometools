@@ -42,6 +42,22 @@
 #include "sfx-bentsedg.h"
 #include "stamp.h"
 
+#define CHECKSUBBUCKET(SUBBUCKETLEFT,BASE)\
+        {\
+          unsigned long baseindex\
+            = (unsigned long) (subbucket - (BASE));\
+          if ((SUBBUCKETLEFT) != baseindex)\
+          {\
+            fprintf(stderr,"%d: subbucketleft=%lu!=%lu= " \
+                           "baseindex\n",\
+                            __LINE__,\
+                            SUBBUCKETLEFT,\
+                            baseindex);\
+            fprintf(stderr,"reference at %lu\n",(unsigned long) (BASE));\
+            exit(EXIT_FAILURE);\
+          }\
+        }
+
 typedef unsigned char Diffrank;
 #define Diffrankmax ((Diffrank) 255)
 typedef unsigned short Diffvalue;
@@ -115,6 +131,8 @@ struct Differencecover
   unsigned long firstgenerationtotalwidth,
                 firstgenerationcount;
   GtLogger *logger;
+  int line;
+  Suffixsortspace *sssp;
 };
 
 /* Compute difference cover on the fly */
@@ -193,6 +211,11 @@ static unsigned int computehvalue(const Differencecover *dcov,
 }
 #endif
 
+void dc_setsuffixsortspace(Differencecover *dcov,Suffixsortspace *sssp)
+{
+  dcov->sssp = sssp;
+}
+
 int gt_differencecover_vparamverify(const Differencecover *dcov,GtError *err)
 {
   if (dcov->vparam < dcov->prefixlength)
@@ -214,10 +237,10 @@ Differencecover *gt_differencecover_new(unsigned int vparam,
   bool found = false;
 
   dcov = gt_malloc(sizeof (*dcov));
-  dcov->numofchars = gt_alphabet_num_of_chars(
-                                           gt_encseq_alphabet(encseq));
+  dcov->numofchars = gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq));
   dcov->totallength = gt_encseq_total_length(encseq);
   dcov->logger = logger;
+  dcov->sssp = NULL;
   for (dcov->logmod = 0;
        dcov->logmod < (unsigned int) (sizeof (differencecoversizes)/
                                      sizeof (differencecoversizes[0]));
@@ -613,14 +636,14 @@ static void dc_initinversesuftabnonspecialsadjust(Differencecover *dcov)
 
 static void dc_anchorleftmost(Differencecover *dcov,
                               Suffixptr *subbucket,
-                              GT_UNUSED unsigned long subbucketleft,
+                              unsigned long subbucketleft,
                               unsigned long width)
 {
   unsigned long idx,
                 baseindex = (unsigned long) (subbucket - dcov->sortedsample);
                 /* XXX ptr-arithmetic with subbucket */
 
-  /*gt_assert(baseindex == subbucketleft);*/
+  gt_assert(baseindex == subbucketleft);
   for (idx = 0; idx < width; idx++)
   {
     inversesuftab_set(dcov,SUFFIXPTRGET(subbucket,idx),baseindex);
@@ -653,6 +676,7 @@ static void dc_processunsortedrange(Differencecover *dcov,
 {
   Pairsuffixptr *pairelem;
 
+  CHECKSUBBUCKET(subbucketleft,dcov->sortedsample);
   gt_assert(width >= 2UL && depth > 0);
   gt_assert(!dcov->firstwithnewdepth.defined ||
             (dcov->firstwithnewdepth.depth > 0 &&
@@ -724,6 +748,7 @@ static void dc_sortsuffixesonthislevel(Differencecover *dcov,
 {
   unsigned long idx, rangestart, startpos;
 
+  CHECKSUBBUCKET(subbucketleft,dcov->sortedsample);
   if (dcov->itvinfo == NULL)
   {
     dcov->itvinfo = gt_malloc(sizeof (*dcov->itvinfo) *
@@ -832,6 +857,15 @@ static void dc_bcktab2firstlevelintervals(Differencecover *dcov)
   }
 }
 
+void setdcline(void *voiddcov,int line)
+{
+  if (voiddcov != NULL)
+  {
+    Differencecover *dcov = (Differencecover *) voiddcov;
+    dcov->line = line+1;
+  }
+}
+
 static void dc_addunsortedrange(void *voiddcov,
                                 Suffixptr *subbucket,
                                 unsigned long subbucketleft,
@@ -841,6 +875,8 @@ static void dc_addunsortedrange(void *voiddcov,
   Differencecover *dcov = (Differencecover *) voiddcov;
   Pairsuffixptr *ptr;
 
+  gt_assert(dcov->sssp == NULL);
+  CHECKSUBBUCKET(subbucketleft,dcov->sortedsample);
   gt_assert(depth >= (unsigned long) dcov->vparam);
   dc_updatewidth (dcov,width,dcov->vparam);
   GT_GETNEXTFREEINARRAY(ptr,&dcov->firstgeneration,Pairsuffixptr,1024);
@@ -885,13 +921,17 @@ void dc_sortunsortedbucket(void *data,
                            unsigned long width,
                            GT_UNUSED unsigned long depth)
 {
-#ifdef WITHCHECK
   const Differencecover *dcov = (const Differencecover *) data;
+#ifdef WITHCHECK
 
   gt_assert(depth >= (unsigned long) dcov->vparam);
   gt_assert(dcov->diff2pos != NULL);
 #endif
   gt_assert(width >= 2UL);
+  gt_assert(dcov->sssp != NULL);
+  gt_assert(subbucketleft >= dcov->sssp->sortspaceoffset);
+  CHECKSUBBUCKET(subbucketleft - dcov->sssp->sortspaceoffset,
+                 dcov->sssp->sortspace);
 #ifdef WITHCHECK
   gt_checksortedsuffixes(__FILE__,
                          __LINE__,
