@@ -6611,3 +6611,25 @@ void gt_encseq_effective_filelength_ptr(const GtEncseq *encseq,
 {
   *result = gt_encseq_effective_filelength(encseq, filenum);
 }
+
+unsigned long gt_encseq_filenum(const GtEncseq *encseq,
+                                unsigned long position)
+{
+  gt_assert(encseq->numofdbfiles == 1UL || encseq->fsptab != NULL);
+  return gt_encseq_sep2seqnum(encseq->fsptab,
+                                      encseq->numofdbfiles,
+                                      encseq->totallength,
+                                      position);
+}
+
+unsigned long gt_encseq_filestartpos(const GtEncseq *encseq,
+                                     unsigned long filenum)
+{
+  gt_assert(encseq->numofdbfiles == 1UL || encseq->fsptab != NULL);
+  if (filenum == 0)
+  {
+    return 0;
+  } else {
+    return encseq->fsptab[filenum-1] + 1;
+  }
+}
