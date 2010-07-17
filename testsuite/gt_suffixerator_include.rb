@@ -38,6 +38,9 @@ def checkdc(filelist)
            "-indexname sfx -db " + filearg
   run_test "#{$bin}gt dev sfxmap #{trials()} -suf -tis -v sfx",
            :maxtime => 600
+  run_test "#{$bin}gt suffixerator -v -pl -parts 3 -dc 64 -suf -tis " +
+           "-indexname sfx3 -db " + filearg
+  run "diff sfx3.suf sfx.suf"
 end
 
 def flattenfilelist(filelist)
@@ -112,14 +115,14 @@ alldir = ["fwd","cpl","rev","rcl"]
 # put the tests with paircmp, maxpair, patternmatch, into a file gt_idxmatch
 
 all_fastafiles.each do |filename|
-  Name "gt suffixerator -dc 64 #{filename}"
+  Name "gt suffixerator -dc 64 -parts 1+3 #{filename}"
   Keywords "gt_suffixerator"
   Test do
     checkdc([filename])
   end
 end
 
-Name "gt suffixerator -dc 64 all-fastafiles"
+Name "gt suffixerator -dc 64 -parts 1+3 all-fastafiles"
 Keywords "gt_suffixerator"
 Test do
   checkdc(all_fastafiles)
@@ -128,7 +131,7 @@ end
 Name "gt suffixerator paircmp"
 Keywords "gt_suffixerator"
 Test do
-  run_test "#{$bin}gt dev paircmp -a ac 11"
+  run_test "#{$bin}gt dev paircmp -a ac 11" # mv to idx 
 end
 
 Name "gt suffixerator patternmatch"
