@@ -221,6 +221,11 @@ void             gt_encseq_encoder_disable_description_support(
    This is a prerequisite for being able to activate description support in
    <gt_encseq_loader_require_multiseq_support()>. Activated by default. */
 void             gt_encseq_encoder_enable_multiseq_support(GtEncseqEncoder *ee);
+/* Enables support for random access to multiple files in the encoded
+   sequence encoded by <ee>. That is, the .fsp table is created.
+   Activated by default. */
+void             gt_encseq_encoder_enable_multifile_support(
+                                                           GtEncseqEncoder *ee);
 /* Disables support for random access to multiple sequences in the encoded
    sequence encoded by <ee>. That is, the .ssp table is not created.
    Encoded sequences created without this support will not be able to be
@@ -283,6 +288,12 @@ void             gt_encseq_loader_drop_description_support(GtEncseqLoader *el);
    <gt_encseq_encoder_enable_multiseq_support()> option when encoding.
    Activated by default. */
 void             gt_encseq_loader_require_multiseq_support(GtEncseqLoader *el);
+/* Enables support for random access to multiple files in the encoded
+   sequence to be loaded by <el>. That is, the .fsp table must be present.
+   For example, this table is created by having enabled the
+   <gt_encseq_encoder_enable_multifile_support()> option when encoding.
+   Activated by default. */
+void             gt_encseq_loader_require_multifile_support(GtEncseqLoader *el);
 /* Disables support for random access to multiple sequences in the encoded
    sequence to be loaded by <el>. That is, the .ssp table needs not be present.
    However, disabling this support will result in an error when trying to call
@@ -307,6 +318,12 @@ void             gt_encseq_loader_require_ssp_tab(GtEncseqLoader *el);
 /* Disables requirement of the .ssp table for loading a <GtEncseq>
    using <el>. */
 void             gt_encseq_loader_do_not_require_ssp_tab(GtEncseqLoader *el);
+/* Requires presence of the .fsp table containing indexes for multiple
+   files. Enabled by default. */
+void             gt_encseq_loader_require_fsp_tab(GtEncseqLoader *el);
+/* Disables requirement of the .fsp table for loading a <GtEncseq>
+   using <el>. */
+void             gt_encseq_loader_do_not_require_fsp_tab(GtEncseqLoader *el);
 /* Requires presence of the .sds table containing indexes for sequence
    descriptions. Enabled by default. */
 void             gt_encseq_loader_require_sds_tab(GtEncseqLoader *el);
