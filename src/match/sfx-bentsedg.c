@@ -2031,7 +2031,6 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   {
     gt_assert(suffixsortspace->sortspaceoffset == 0);
     bsr->rmnsufinfo = gt_rmnsufinfo_new(suffixsortspace,
-                                        suffixsortspace->sortspace,
                                         -1,
                                         NULL,
                                         bsr->encseq,
@@ -2158,7 +2157,6 @@ void gt_qsufsort(Suffixptr *sortspace,
     suffixsortspace->bucketleftidx = 0;
   }
   rmnsufinfo = gt_rmnsufinfo_new(suffixsortspace,
-                                 sortspace,
                                  mmapfiledesc,
                                  mmapfilename,
                                  encseq,

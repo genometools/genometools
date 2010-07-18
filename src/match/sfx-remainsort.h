@@ -31,7 +31,6 @@
 typedef struct Rmnsufinfo Rmnsufinfo;
 
 Rmnsufinfo *gt_rmnsufinfo_new(Suffixsortspace *suffixsortspace,
-                              Suffixptr *presortedsuffixes,
                               int mmapfiledesc,
                               GtStr *mmapfilename,
                               const GtEncseq *encseq,
