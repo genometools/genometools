@@ -270,18 +270,18 @@ DEFINE_HASHMAP(unsigned long, seqpos, unsigned long, ul, gt_ht_seqpos_elem_hash,
                gt_ht_seqpos_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR,
                static, inline)
 
-Rmnsufinfo *gt_newRmnsufinfo(Suffixptr *presortedsuffixes,
-                             int mmapfiledesc,
-                             GtStr *mmapfilename,
-                             const GtEncseq *encseq,
-                             Bcktab *bcktab,
-                             GtCodetype maxcode,
-                             unsigned int numofchars,
-                             unsigned int prefixlength,
-                             GtReadmode readmode,
-                             unsigned long partwidth,
-                             bool hashexceptions,
-                             bool absoluteinversesuftab)
+Rmnsufinfo *gt_rmnsufinfo_new(Suffixptr *presortedsuffixes,
+                              int mmapfiledesc,
+                              GtStr *mmapfilename,
+                              const GtEncseq *encseq,
+                              Bcktab *bcktab,
+                              GtCodetype maxcode,
+                              unsigned int numofchars,
+                              unsigned int prefixlength,
+                              GtReadmode readmode,
+                              unsigned long partwidth,
+                              bool hashexceptions,
+                              bool absoluteinversesuftab)
 {
   Rmnsufinfo *rmnsufinfo;
 
@@ -1252,7 +1252,7 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
   rmnsufinfo->rangestobesorted = NULL;
 }
 
-void gt_bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo)
+void gt_rmnsufinfo_bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo)
 {
   GtCodetype code;
   unsigned int rightchar;
@@ -1302,9 +1302,9 @@ void gt_bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo)
   }
 }
 
-Compressedtable *gt_rmnsufinfo_wrap(unsigned long *longest,
-                                 Rmnsufinfo **rmnsufinfoptr,
-                                 bool withlcptab)
+Compressedtable *gt_rmnsufinfo_delete(unsigned long *longest,
+                                      Rmnsufinfo **rmnsufinfoptr,
+                                      bool withlcptab)
 {
   Rmnsufinfo *rmnsufinfo = *rmnsufinfoptr;
   Compressedtable *lcptab;

@@ -2030,18 +2030,18 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   {
     Suffixptr *suftabptr = suffixsortspace->sortspace -
                            suffixsortspace->sortspaceoffset;
-    bsr->rmnsufinfo = gt_newRmnsufinfo(suftabptr,
-                                       -1,
-                                       NULL,
-                                       bsr->encseq,
-                                       bcktab,
-                                       maxcode,
-                                       numofchars,
-                                       prefixlength,
-                                       readmode,
-                                       partwidth,
-                                       false,
-                                       true);
+    bsr->rmnsufinfo = gt_rmnsufinfo_new(suftabptr,
+                                        -1,
+                                        NULL,
+                                        bsr->encseq,
+                                        bcktab,
+                                        maxcode,
+                                        numofchars,
+                                        prefixlength,
+                                        readmode,
+                                        partwidth,
+                                        false,
+                                        true);
     gt_assert(bsr->rmnsufinfo != NULL);
   } else
   {
@@ -2098,9 +2098,9 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
   {
     Compressedtable *lcptab;
 
-    lcptab = gt_rmnsufinfo_wrap(&bsr->longest->valueunsignedlong,
-                                &bsr->rmnsufinfo,
-                                bsr->lcpsubtab == NULL ? false : true);
+    lcptab = gt_rmnsufinfo_delete(&bsr->longest->valueunsignedlong,
+                                  &bsr->rmnsufinfo,
+                                  bsr->lcpsubtab == NULL ? false : true);
     bsr->longest->defined = true;
     if (lcptab != NULL)
     {
@@ -2145,21 +2145,21 @@ void gt_qsufsort(Suffixptr *sortspace,
   Compressedtable *lcptab;
 
   gt_assert(mincode == 0);
-  rmnsufinfo = gt_newRmnsufinfo(sortspace,
-                                mmapfiledesc,
-                                mmapfilename,
-                                encseq,
-                                bcktab,
-                                maxcode,
-                                numofchars,
-                                prefixlength,
-                                readmode,
-                                partwidth,
-                                hashexceptions,
-                                absoluteinversesuftab);
-  gt_bcktab2firstlevelintervals(rmnsufinfo);
-  lcptab = gt_rmnsufinfo_wrap(longest,&rmnsufinfo,
-                              outlcpinfo == NULL ? false : true);
+  rmnsufinfo = gt_rmnsufinfo_new(sortspace,
+                                 mmapfiledesc,
+                                 mmapfilename,
+                                 encseq,
+                                 bcktab,
+                                 maxcode,
+                                 numofchars,
+                                 prefixlength,
+                                 readmode,
+                                 partwidth,
+                                 hashexceptions,
+                                 absoluteinversesuftab);
+  gt_rmnsufinfo_bcktab2firstlevelintervals(rmnsufinfo);
+  lcptab = gt_rmnsufinfo_delete(longest,&rmnsufinfo,
+                                outlcpinfo == NULL ? false : true);
   if (lcptab != NULL)
   {
     gt_assert(outlcpinfo != NULL);

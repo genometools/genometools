@@ -23,10 +23,10 @@
 #include "compressedtab.h"
 
 Compressedtable *gt_lcp9_manzini(Compressedtable *spacefortab,
-                              const GtEncseq *encseq,
-                              GtReadmode readmode,
-                              unsigned long partwidth,
-                              unsigned long totallength,
-                              const Suffixptr *sortedsuffixes);
+                                 const GtEncseq *encseq,
+                                 GtReadmode readmode,
+                                 unsigned long partwidth,
+                                 unsigned long totallength,
+                                 const Suffixptr *sortedsuffixes);
 
 #endif

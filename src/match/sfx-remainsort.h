@@ -29,28 +29,28 @@
 
 typedef struct Rmnsufinfo Rmnsufinfo;
 
-Rmnsufinfo *gt_newRmnsufinfo(Suffixptr *presortedsuffixes,
-                             int mmapfiledesc,
-                             GtStr *mmapfilename,
-                             const GtEncseq *encseq,
-                             Bcktab *bcktab,
-                             GtCodetype maxcode,
-                             unsigned int numofchars,
-                             unsigned int prefixlength,
-                             GtReadmode readmode,
-                             unsigned long partwidth,
-                             bool hashexceptions,
-                             bool absoluteinversesuftab);
+Rmnsufinfo *gt_rmnsufinfo_new(Suffixptr *presortedsuffixes,
+                              int mmapfiledesc,
+                              GtStr *mmapfilename,
+                              const GtEncseq *encseq,
+                              Bcktab *bcktab,
+                              GtCodetype maxcode,
+                              unsigned int numofchars,
+                              unsigned int prefixlength,
+                              GtReadmode readmode,
+                              unsigned long partwidth,
+                              bool hashexceptions,
+                              bool absoluteinversesuftab);
 
 void gt_rmnsufinfo_addunsortedrange(Rmnsufinfo *rmnsufinfo,
                                     unsigned long left,
                                     unsigned long right,
                                     unsigned long depth);
 
-void gt_bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo );
+void gt_rmnsufinfo_bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo );
 
-Compressedtable *gt_rmnsufinfo_wrap(unsigned long *longest,
-                                    Rmnsufinfo **rmnsufinfoptr,
-                                    bool withlcptab);
+Compressedtable *gt_rmnsufinfo_delete(unsigned long *longest,
+                                      Rmnsufinfo **rmnsufinfoptr,
+                                      bool withlcptab);
 
 #endif
