@@ -42,6 +42,12 @@ typedef void (*Dc_processunsortedrange)(void *,
   unsigned long tmp = sssp->bucketleftidx - sssp->sortspaceoffset;
   gt_assert(sssp != NULL);
   gt_assert(sssp->sortspaceoffset <= sssp->bucketleftidx + subbucketleft + idx);
+  /*
+  fprintf(stderr,"idx=%lu,bucketleftidx=%lu,subbucketleft=%lu,"
+                 "sortspaceoffset=%lu\n",
+          idx,sssp->bucketleftidx,subbucketleft,sssp->sortspaceoffset);
+  fprintf(stderr,"diff=%lu\n",(unsigned long) (subbucket-sssp->sortspace));
+  */
   gt_assert(subbucket + idx ==
             sssp->sortspace + (sssp->bucketleftidx+subbucketleft+idx-
                                sssp->sortspaceoffset));

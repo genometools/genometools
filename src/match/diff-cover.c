@@ -133,6 +133,7 @@ struct Differencecover
   GtLogger *logger;
   int line;
   Suffixsortspace *sssp;
+  unsigned long sortoffset;
 };
 
 /* Compute difference cover on the fly */
@@ -644,6 +645,7 @@ static void dc_anchorleftmost(Differencecover *dcov,
                 /* XXX ptr-arithmetic with subbucket */
 
   gt_assert(baseindex == subbucketleft);
+  gt_assert(subbucket = dcov->sortedsample + subbucketleft);
   for (idx = 0; idx < width; idx++)
   {
     inversesuftab_set(dcov,SUFFIXPTRGET(subbucket,idx),baseindex);
@@ -763,6 +765,7 @@ static void dc_sortsuffixesonthislevel(Differencecover *dcov,
   /*
   printf("new interval of width %lu\n",width);
   */
+  gt_assert(subbucket = dcov->sortedsample + subbucketleft);
   for (idx=0; idx<width; idx++)
   {
     startpos = SUFFIXPTRGET(subbucket,idx);
@@ -891,11 +894,15 @@ static int qsortcmparr (const Sorttype *suftab,unsigned long a,
                         unsigned long b,const void *data)
 {
   const Differencecover *dcov = (const Differencecover *) data;
-  const unsigned long suffixpos1 = SUFFIXPTRGET(suftab,a);
-  const unsigned long suffixpos2 = SUFFIXPTRGET(suftab,b);
-  unsigned long idx1, idx2;
+  unsigned long suffixpos1, suffixpos2, idx1, idx2;
   unsigned int offset;
 
+  gt_assert(dcov->sssp != NULL);
+  suffixpos1 = SUFFIXPTRGET(suftab,a);
+  /*
+  gt_assert(suffixpos1 = suffixptrget(dcov->sssp,suftab,dcov->sortoffset,a));
+  */
+  suffixpos2 = SUFFIXPTRGET(suftab,b);
   gt_assert(suffixpos1 < dcov->totallength);
   gt_assert(suffixpos2 < dcov->totallength);
   offset = differencecover_offset(dcov,suffixpos1,suffixpos2);
@@ -916,12 +923,12 @@ static int qsortcmparr (const Sorttype *suftab,unsigned long a,
 #include "qsort-array.gen"
 
 void dc_sortunsortedbucket(void *data,
-                           Suffixptr *subbucket,
-                           GT_UNUSED unsigned long subbucketleft,
+                           Suffixptr *subbucket, /* refers to suftab */
+                           unsigned long subbucketleft,
                            unsigned long width,
                            GT_UNUSED unsigned long depth)
 {
-  const Differencecover *dcov = (const Differencecover *) data;
+  Differencecover *dcov = (Differencecover *) data;
 #ifdef WITHCHECK
 
   gt_assert(depth >= (unsigned long) dcov->vparam);
@@ -932,6 +939,10 @@ void dc_sortunsortedbucket(void *data,
   gt_assert(subbucketleft >= dcov->sssp->sortspaceoffset);
   CHECKSUBBUCKET(subbucketleft - dcov->sssp->sortspaceoffset,
                  dcov->sssp->sortspace);
+  gt_assert(subbucketleft - dcov->sssp->sortspaceoffset ==
+            (unsigned long) (subbucket - dcov->sssp->sortspace));
+  gt_assert(dcov->sssp->sortspace + subbucketleft -
+            dcov->sssp->sortspaceoffset == subbucket);
 #ifdef WITHCHECK
   gt_checksortedsuffixes(__FILE__,
                          __LINE__,
@@ -944,6 +955,7 @@ void dc_sortunsortedbucket(void *data,
                          false,  /* specialsareequalatdepth0 */
                          (unsigned long) dcov->vparam);
 #endif
+  dcov->sortoffset = subbucketleft - dcov->sssp->sortspaceoffset;
   gt_inlinedarr_qsort_r (subbucket,width,data); /* XXX array is sorted */
 }
 

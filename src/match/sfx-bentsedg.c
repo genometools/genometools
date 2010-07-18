@@ -2461,6 +2461,7 @@ void gt_sortbucketofsuffixes(Suffixptr *suffixestobesorted,
                                          numofchars);
     if (bucketspec.nonspecialsinbucket > 1UL)
     {
+      /*fprintf(stderr,"set bucketleftidx = %lu\n",bsr.sssp->bucketleftidx);*/
       bsr.sssp->bucketleftidx = bucketspec.left,
       bsr.suftabbaseptr = suffixestobesorted + bucketspec.left;
       bentleysedgewick(&bsr,
