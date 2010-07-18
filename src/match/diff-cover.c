@@ -899,11 +899,8 @@ static int qsortcmparr (const Sorttype *suftab,unsigned long a,
   unsigned int offset;
 
   gt_assert(dcov->sssp != NULL);
-  suffixpos1 = SUFFIXPTRGET(suftab,a);
-  /*
-  gt_assert(suffixpos1 = suffixptrget(dcov->sssp,suftab,dcov->sortoffset,a));
-  */
-  suffixpos2 = SUFFIXPTRGET(suftab,b);
+  suffixpos1 = suffixptrget2(dcov->sssp,suftab,dcov->sortoffset,a);
+  suffixpos2 = suffixptrget2(dcov->sssp,suftab,dcov->sortoffset,b);
   gt_assert(suffixpos1 < dcov->totallength);
   gt_assert(suffixpos2 < dcov->totallength);
   offset = differencecover_offset(dcov,suffixpos1,suffixpos2);
