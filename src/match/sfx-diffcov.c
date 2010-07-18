@@ -131,7 +131,6 @@ struct Differencecover
   unsigned long firstgenerationtotalwidth,
                 firstgenerationcount;
   GtLogger *logger;
-  int line;
   Suffixsortspace *sssp;
   unsigned long sortoffset;
 };
@@ -862,15 +861,6 @@ static void dc_bcktab2firstlevelintervals(Differencecover *dcov)
                                  bucketspec.left,
                                  bucketspec.nonspecialsinbucket);
     }
-  }
-}
-
-void setdcline(void *voiddcov,int line)
-{
-  if (voiddcov != NULL)
-  {
-    Differencecover *dcov = (Differencecover *) voiddcov;
-    dcov->line = line+1;
   }
 }
 

@@ -32,8 +32,6 @@ typedef struct Differencecover Differencecover;
 void gt_differencecovers_check(const GtEncseq *encseq,
                                GtReadmode readmode);
 
-void setdcline(void *voiddcov,int line);
-
 Differencecover *gt_differencecover_new(unsigned int vparam,
                                         const GtEncseq *encseq,
                                         GtReadmode readmode,
