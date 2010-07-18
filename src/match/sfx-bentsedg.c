@@ -47,6 +47,7 @@
   sfx-diffcov.c DONE
   sfx-remainsort.c DONE
   sfx-linlcp.c DONE
+  sfx-copysort.c DONE
 */
 
 #define UNIQUEINT(P)           ((unsigned long) ((P) + GT_COMPAREOFFSET))

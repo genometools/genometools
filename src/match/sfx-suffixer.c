@@ -861,8 +861,7 @@ static void preparethispart(Sfxiterator *sfi)
     if (bucketspec2 != NULL)
     {
       gt_assert(sfi->suffixsortspace.sortspaceoffset == 0);
-      gt_copysort_derivesorting(bucketspec2,sfi->suffixsortspace.sortspace,
-                                sfi->logger);
+      gt_copysort_derivesorting(bucketspec2,&sfi->suffixsortspace,sfi->logger);
       gt_copysort_delete(bucketspec2);
       bucketspec2 = NULL;
     }

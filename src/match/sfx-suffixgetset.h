@@ -19,6 +19,7 @@
 #define SFX_SUFFIXGETSET_H
 
 #include "core/assert_api.h"
+#include "core/unused_api.h"
 #include "suffixptr.h"
 
 typedef struct

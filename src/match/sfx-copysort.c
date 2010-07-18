@@ -21,8 +21,8 @@
 #include "core/array2dim_api.h"
 #include "bcktab.h"
 #include "kmer2string.h"
-#include "sfx-copysort.h"
 #include "core/logger.h"
+#include "sfx-copysort.h"
 
 typedef struct
 {
@@ -453,7 +453,7 @@ GtBucketspec2 *gt_copysort_new(const Bcktab *bcktab,
 }
 
 static void forwardderive(const GtBucketspec2 *bucketspec2,
-                          Suffixptr *suftabptr,
+                          Suffixsortspace *suffixsortspace,
                           unsigned long *targetoffset,
                           unsigned int source,
                           unsigned long idx)
@@ -464,7 +464,7 @@ static void forwardderive(const GtBucketspec2 *bucketspec2,
   gt_assert (idx < targetoffset[source]);
   for (; idx < targetoffset[source]; idx++)
   {
-    startpos = SUFFIXPTRGET(suftabptr,idx);
+    startpos = suffixptrget3(suffixsortspace,idx);
     if (startpos > 0)
     {
       cc = gt_encseq_get_encoded_char(bucketspec2->encseq,
@@ -472,7 +472,7 @@ static void forwardderive(const GtBucketspec2 *bucketspec2,
                                       bucketspec2->readmode);
       if (ISNOTSPECIAL(cc) && !bucketspec2->superbuckettab[cc].sorted)
       {
-        SUFFIXPTRSET(suftabptr,targetoffset[cc],startpos - 1);
+        suffixptrset3(suffixsortspace,targetoffset[cc],startpos - 1);
         targetoffset[cc]++;
       }
     }
@@ -480,7 +480,7 @@ static void forwardderive(const GtBucketspec2 *bucketspec2,
 }
 
 static void backwardderive(const GtBucketspec2 *bucketspec2,
-                           Suffixptr *suftabptr,
+                           Suffixsortspace *suffixsortspace,
                            unsigned long *targetoffset,
                            unsigned int source,
                            unsigned long idx)
@@ -491,7 +491,7 @@ static void backwardderive(const GtBucketspec2 *bucketspec2,
   gt_assert (idx > targetoffset[source]);
   for (; idx + 1 > targetoffset[source] + 1; idx--)
   {
-    startpos = SUFFIXPTRGET(suftabptr,idx);
+    startpos = suffixptrget3(suffixsortspace,idx);
     if (startpos > 0)
     {
       cc = gt_encseq_get_encoded_char(bucketspec2->encseq,
@@ -499,7 +499,7 @@ static void backwardderive(const GtBucketspec2 *bucketspec2,
                                       bucketspec2->readmode);
       if (ISNOTSPECIAL(cc) && !bucketspec2->superbuckettab[cc].sorted)
       {
-        SUFFIXPTRSET(suftabptr,targetoffset[cc],startpos - 1);
+        suffixptrset3(suffixsortspace,targetoffset[cc],startpos - 1);
         targetoffset[cc]--;
       }
     }
@@ -520,7 +520,7 @@ bool gt_copysort_checkhardwork(const GtBucketspec2 *bucketspec2,
 }
 
 void gt_copysort_derivesorting(const GtBucketspec2 *bucketspec2,
-                               Suffixptr *suftab,
+                               Suffixsortspace *suffixsortspace,
                                GtLogger *logger)
 {
   unsigned long hardwork = 0,
@@ -529,14 +529,14 @@ void gt_copysort_derivesorting(const GtBucketspec2 *bucketspec2,
 
 #ifdef WITHSUFFIXES
   {
-    const Suffixptr *ptr;
-    for (ptr = suftab; ptr < suftab + bucketspec2->partwidth; ptr++)
+    unsigned long idx;
+    for (idx = 0; idx < bucketspec2->partwidth; idx++)
     {
       gt_encseq_showatstartpos(stdout,
                                GT_ISDIRREVERSE(readmode) ? false : true,
                                GT_ISDIRCOMPLEMENT(readmode) ? true : false,
                                encseq,
-                               *ptr);
+                               suffixptrget3(suffixsortspace,idx));
     }
   }
 #endif
@@ -566,7 +566,7 @@ void gt_copysort_derivesorting(const GtBucketspec2 *bucketspec2,
         targetoffset[idx] = getstartidx(bucketspec2,idx,source);
       }
       forwardderive(bucketspec2,
-                    suftab,
+                    suffixsortspace,
                     targetoffset,
                     source,
                     getstartidx(bucketspec2,source,0));
@@ -582,7 +582,7 @@ void gt_copysort_derivesorting(const GtBucketspec2 *bucketspec2,
       }
       gt_assert(getendidx(bucketspec2,source,bucketspec2->numofchars) > 0);
       backwardderive(bucketspec2,
-                     suftab,
+                     suffixsortspace,
                      targetoffset,
                      source,
                      getendidx(bucketspec2,source,bucketspec2->numofchars) - 1);
