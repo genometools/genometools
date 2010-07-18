@@ -2244,7 +2244,7 @@ void gt_sortallbuckets(Suffixsortspace *suffixsortspace,
   {
     if (bucketspec2 != NULL)
     {
-      if (gt_hardworkbeforecopysort(bucketspec2,code))
+      if (gt_copysort_checkhardwork(bucketspec2,code))
       {
         rightchar = (unsigned int) (code % numofchars);
       } else
@@ -2472,7 +2472,7 @@ void gt_sortbucketofsuffixes(bool setdcovsuffixsortspace,
   {
     if (bucketspec2 != NULL)
     {
-      if (gt_hardworkbeforecopysort(bucketspec2,code))
+      if (gt_copysort_checkhardwork(bucketspec2,code))
       {
         rightchar = (unsigned int) (code % numofchars);
       } else

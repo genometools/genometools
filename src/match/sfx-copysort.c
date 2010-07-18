@@ -407,11 +407,11 @@ static void fillanysubbuckets(GtBucketspec2 *bucketspec2,
   gt_free(specialchardist);
 }
 
-GtBucketspec2 *gt_bucketspec2_new(const Bcktab *bcktab,
-                                  const GtEncseq *encseq,
-                                  GtReadmode readmode,
-                                  unsigned long partwidth,
-                                  unsigned int numofchars)
+GtBucketspec2 *gt_copysort_new(const Bcktab *bcktab,
+                               const GtEncseq *encseq,
+                               GtReadmode readmode,
+                               unsigned long partwidth,
+                               unsigned int numofchars)
 {
   GtBucketspec2 *bucketspec2;
   unsigned int idx;
@@ -506,7 +506,7 @@ static void backwardderive(const GtBucketspec2 *bucketspec2,
   }
 }
 
-bool gt_hardworkbeforecopysort(const GtBucketspec2 *bucketspec2,
+bool gt_copysort_checkhardwork(const GtBucketspec2 *bucketspec2,
                                GtCodetype code)
 {
   if (bucketspec2->prefixlength > 2U)
@@ -519,9 +519,9 @@ bool gt_hardworkbeforecopysort(const GtBucketspec2 *bucketspec2,
   }
 }
 
-void gt_copysortsuffixes(const GtBucketspec2 *bucketspec2,
-                         Suffixptr *suftab,
-                         GtLogger *logger)
+void gt_copysort_derivesorting(const GtBucketspec2 *bucketspec2,
+                               Suffixptr *suftab,
+                               GtLogger *logger)
 {
   unsigned long hardwork = 0,
                 *targetoffset;
@@ -599,7 +599,7 @@ void gt_copysortsuffixes(const GtBucketspec2 *bucketspec2,
                 (double) hardwork/gt_encseq_total_length(bucketspec2->encseq));
 }
 
-void gt_bucketspec2_delete(GtBucketspec2 *bucketspec2)
+void gt_copysort_delete(GtBucketspec2 *bucketspec2)
 {
   gt_assert(bucketspec2 != NULL);
   gt_array2dim_delete(bucketspec2->subbuckettab);

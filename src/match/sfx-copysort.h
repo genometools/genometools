@@ -26,19 +26,19 @@
 
 typedef struct GtBucketspec2 GtBucketspec2;
 
-GtBucketspec2 *gt_bucketspec2_new(const Bcktab *bcktab,
+GtBucketspec2 *gt_copysort_new(const Bcktab *bcktab,
                                   const GtEncseq *encseq,
                                   GtReadmode readmode,
                                   unsigned long partwidth,
                                   unsigned int numofchars);
 
-void gt_copysortsuffixes(const GtBucketspec2 *bucketspec2,
-                         Suffixptr *suftab,
-                         GtLogger *logger);
+void gt_copysort_derivesorting(const GtBucketspec2 *bucketspec2,
+                               Suffixptr *suftab,
+                               GtLogger *logger);
 
-bool gt_hardworkbeforecopysort(const GtBucketspec2 *bucketspec2,
+bool gt_copysort_checkhardwork(const GtBucketspec2 *bucketspec2,
                                GtCodetype code);
 
-void gt_bucketspec2_delete(GtBucketspec2 *bucketspec2);
+void gt_copysort_delete(GtBucketspec2 *bucketspec2);
 
 #endif

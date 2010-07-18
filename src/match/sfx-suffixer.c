@@ -819,8 +819,8 @@ static void preparethispart(Sfxiterator *sfi)
     gt_assert(!sfi->sfxstrategy.streamsuftab);
     if (numofparts == 1U && sfi->outlcpinfo == NULL && sfi->prefixlength >= 2U)
     {
-      bucketspec2 = gt_bucketspec2_new(sfi->bcktab,sfi->encseq,sfi->readmode,
-                                       partwidth,sfi->numofchars);
+      bucketspec2 = gt_copysort_new(sfi->bcktab,sfi->encseq,sfi->readmode,
+                                    partwidth,sfi->numofchars);
     }
     if (sfi->sfxstrategy.differencecover > 0)
     {
@@ -860,10 +860,10 @@ static void preparethispart(Sfxiterator *sfi)
     }
     if (bucketspec2 != NULL)
     {
-      Suffixptr *suftabptr = sfi->suffixsortspace.sortspace -
-                             sfi->suffixsortspace.sortspaceoffset;
-      gt_copysortsuffixes(bucketspec2,suftabptr,sfi->logger);
-      gt_bucketspec2_delete(bucketspec2);
+      gt_assert(sfi->suffixsortspace.sortspaceoffset == 0);
+      gt_copysort_derivesorting(bucketspec2,sfi->suffixsortspace.sortspace,
+                                sfi->logger);
+      gt_copysort_delete(bucketspec2);
       bucketspec2 = NULL;
     }
   }
