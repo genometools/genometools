@@ -23,10 +23,10 @@
 #include "core/defined-types.h"
 #include "core/codetype.h"
 #include "core/encseq.h"
-#include "sfx-strategy.h"
-#include "sfx-copysort.h"
 #include "bcktab.h"
 #include "suffixptr.h"
+#include "sfx-strategy.h"
+#include "sfx-copysort.h"
 #include "sfx-suffixgetset.h"
 
 typedef struct Outlcpinfo Outlcpinfo;
