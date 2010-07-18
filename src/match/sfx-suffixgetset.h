@@ -92,4 +92,11 @@ typedef void (*Dc_processunsortedrange)(void *,
   return SUFFIXPTRGET(sssp->sortspace,subbucketleft+idx);
 }
 
+/*@unused@*/ static inline unsigned long suffixptrget3(
+                                         const Suffixsortspace *sssp,
+                                         unsigned long idx)
+{
+  return SUFFIXPTRGET(sssp->sortspace,idx - sssp->sortspaceoffset);
+}
+
 #endif

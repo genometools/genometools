@@ -26,10 +26,12 @@
 #include "suffixptr.h"
 #include "bcktab.h"
 #include "compressedtab.h"
+#include "sfx-suffixgetset.h"
 
 typedef struct Rmnsufinfo Rmnsufinfo;
 
-Rmnsufinfo *gt_rmnsufinfo_new(Suffixptr *presortedsuffixes,
+Rmnsufinfo *gt_rmnsufinfo_new(Suffixsortspace *suffixsortspace,
+                              Suffixptr *presortedsuffixes,
                               int mmapfiledesc,
                               GtStr *mmapfilename,
                               const GtEncseq *encseq,

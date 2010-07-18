@@ -38,6 +38,7 @@
 #include "sfx-copysort.h"
 #include "sfx-bentsedg.h"
 #include "sfx-suffixgetset.h"
+#include "stamp.h"
 
 #define UNIQUEINT(P)           ((unsigned long) ((P) + GT_COMPAREOFFSET))
 #define ACCESSCHAR(POS)        gt_encseq_get_encoded_char(bsr->encseq,\
@@ -2030,7 +2031,9 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   {
     Suffixptr *suftabptr = suffixsortspace->sortspace -
                            suffixsortspace->sortspaceoffset;
-    bsr->rmnsufinfo = gt_rmnsufinfo_new(suftabptr,
+    gt_assert(suffixsortspace->sortspaceoffset == 0);
+    bsr->rmnsufinfo = gt_rmnsufinfo_new(suffixsortspace,
+                                        suftabptr,
                                         -1,
                                         NULL,
                                         bsr->encseq,
@@ -2143,9 +2146,14 @@ void gt_qsufsort(Suffixptr *sortspace,
 {
   Rmnsufinfo *rmnsufinfo;
   Compressedtable *lcptab;
+  Suffixsortspace suffixsortspace;
 
   gt_assert(mincode == 0);
-  rmnsufinfo = gt_rmnsufinfo_new(sortspace,
+  suffixsortspace.sortspace = sortspace;
+  suffixsortspace.sortspaceoffset = 0;
+  suffixsortspace.bucketleftidx = 0;
+  rmnsufinfo = gt_rmnsufinfo_new(&suffixsortspace,
+                                 sortspace,
                                  mmapfiledesc,
                                  mmapfilename,
                                  encseq,

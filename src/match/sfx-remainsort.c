@@ -147,6 +147,7 @@ struct Rmnsufinfo
   const GtEncseq *encseq;
   const GtCodetype **multimappower;
   Suffixptr *sortedsuffixes;
+  Suffixsortspace *sssp;
 };
 
 static void initsortblock(Sortblock *sortblock,
@@ -270,7 +271,8 @@ DEFINE_HASHMAP(unsigned long, seqpos, unsigned long, ul, gt_ht_seqpos_elem_hash,
                gt_ht_seqpos_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR,
                static, inline)
 
-Rmnsufinfo *gt_rmnsufinfo_new(Suffixptr *presortedsuffixes,
+Rmnsufinfo *gt_rmnsufinfo_new(Suffixsortspace *suffixsortspace,
+                              Suffixptr *presortedsuffixes,
                               int mmapfiledesc,
                               GtStr *mmapfilename,
                               const GtEncseq *encseq,
@@ -286,6 +288,7 @@ Rmnsufinfo *gt_rmnsufinfo_new(Suffixptr *presortedsuffixes,
   Rmnsufinfo *rmnsufinfo;
 
   rmnsufinfo = gt_malloc(sizeof (*rmnsufinfo));
+  rmnsufinfo->sssp = suffixsortspace;
   rmnsufinfo->totallength = gt_encseq_total_length(encseq);
   rmnsufinfo->partwidth = partwidth;
   rmnsufinfo->encseq = encseq;
