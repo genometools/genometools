@@ -2029,11 +2029,9 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   }
   if (bcktab != NULL && sfxstrategy->ssortmaxdepth.defined)
   {
-    Suffixptr *suftabptr = suffixsortspace->sortspace -
-                           suffixsortspace->sortspaceoffset;
     gt_assert(suffixsortspace->sortspaceoffset == 0);
     bsr->rmnsufinfo = gt_rmnsufinfo_new(suffixsortspace,
-                                        suftabptr,
+                                        suffixsortspace->sortspace,
                                         -1,
                                         NULL,
                                         bsr->encseq,
@@ -2146,13 +2144,20 @@ void gt_qsufsort(Suffixptr *sortspace,
 {
   Rmnsufinfo *rmnsufinfo;
   Compressedtable *lcptab;
-  Suffixsortspace suffixsortspace;
+  Suffixsortspace *suffixsortspace;
 
   gt_assert(mincode == 0);
-  suffixsortspace.sortspace = sortspace;
-  suffixsortspace.sortspaceoffset = 0;
-  suffixsortspace.bucketleftidx = 0;
-  rmnsufinfo = gt_rmnsufinfo_new(&suffixsortspace,
+  if (sortspace == NULL)
+  {
+    suffixsortspace = NULL;
+  } else
+  {
+    suffixsortspace = gt_malloc(sizeof(*suffixsortspace));
+    suffixsortspace->sortspace = sortspace;
+    suffixsortspace->sortspaceoffset = 0;
+    suffixsortspace->bucketleftidx = 0;
+  }
+  rmnsufinfo = gt_rmnsufinfo_new(suffixsortspace,
                                  sortspace,
                                  mmapfiledesc,
                                  mmapfilename,
@@ -2179,6 +2184,7 @@ void gt_qsufsort(Suffixptr *sortspace,
                       outlcpinfo->outfpllvtab);
     compressedtable_free(lcptab,true);
   }
+  gt_free(suffixsortspace);
 }
 
 /*

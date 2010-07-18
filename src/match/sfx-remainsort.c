@@ -84,11 +84,11 @@ typedef struct
   GtStr *mmapfilename;
   Suffixptr *sortspace;
   unsigned long *mappedsection,
-         currentindex,
-         mapableentries,
-         pagesize,
-         pageoffset,
-         mappedwidth;
+                currentindex,
+                mapableentries,
+                pagesize,
+                pageoffset,
+                mappedwidth;
   unsigned long pagechanges;
 } Sortblock;
 
@@ -682,6 +682,9 @@ static void updatewidth (Rmnsufinfo *rmnsufinfo,unsigned long width,
   }
 }
 
+#define CHECKSORTSPACEPTR(PTR)\
+        gt_assert((PTR) == rmnsufinfo->sssp->sortspace)
+
 static void rms_initinversesuftabnonspecialsadjust(Rmnsufinfo *rmnsufinfo)
 {
   GtCodetype code;
@@ -693,18 +696,19 @@ static void rms_initinversesuftabnonspecialsadjust(Rmnsufinfo *rmnsufinfo)
   gt_assert(SUFINMEM(&rmnsufinfo->sortblock));
   rightchar = (unsigned int) (mincode % rmnsufinfo->numofchars);
   idx = 0;
+  CHECKSORTSPACEPTR(rmnsufinfo->sortblock.sortspace);
   for (code = mincode; code <= rmnsufinfo->maxcode; code++)
   {
     rightchar = gt_calcbucketboundsparts(&bucketspec,
-                                      rmnsufinfo->bcktab,
-                                      code,
-                                      rmnsufinfo->maxcode,
-                                      rmnsufinfo->partwidth,
-                                      rightchar,
-                                      rmnsufinfo->numofchars);
+                                         rmnsufinfo->bcktab,
+                                         code,
+                                         rmnsufinfo->maxcode,
+                                         rmnsufinfo->partwidth,
+                                         rightchar,
+                                         rmnsufinfo->numofchars);
     for (/* Nothing */; idx < bucketspec.left; idx++)
     {
-      startpos = SUFFIXPTRGET(rmnsufinfo->sortblock.sortspace,idx);
+      startpos = suffixptrget3(rmnsufinfo->sssp,idx);
       rms_inversesuftab_set(rmnsufinfo,startpos,idx);
     }
     updatewidth (rmnsufinfo,bucketspec.nonspecialsinbucket,
@@ -712,13 +716,13 @@ static void rms_initinversesuftabnonspecialsadjust(Rmnsufinfo *rmnsufinfo)
     for (/* Nothing */;
          idx < bucketspec.left+bucketspec.nonspecialsinbucket; idx++)
     {
-      startpos = SUFFIXPTRGET(rmnsufinfo->sortblock.sortspace,idx);
+      startpos = suffixptrget3(rmnsufinfo->sssp,idx);
       rms_inversesuftab_set(rmnsufinfo,startpos,bucketspec.left);
     }
   }
   for (/* Nothing */; idx < rmnsufinfo->partwidth; idx++)
   {
-    startpos = SUFFIXPTRGET(rmnsufinfo->sortblock.sortspace,idx);
+    startpos = suffixptrget3(rmnsufinfo->sssp,idx);
     rms_inversesuftab_set(rmnsufinfo,startpos,idx);
   }
 }
@@ -788,11 +792,10 @@ static void rms_initinversesuftabnonspecials(Rmnsufinfo *rmnsufinfo)
 {
   unsigned long idx;
 
+  CHECKSORTSPACEPTR(rmnsufinfo->sortblock.sortspace);
   for (idx=0; idx < rmnsufinfo->partwidth; idx++)
   {
-    rms_inversesuftab_set(rmnsufinfo,
-                          SUFFIXPTRGET(rmnsufinfo->sortblock.sortspace,idx),
-                          idx);
+    rms_inversesuftab_set(rmnsufinfo,suffixptrget3(rmnsufinfo->sssp,idx),idx);
   }
 }
 
@@ -975,30 +978,36 @@ static void possiblychangemappedsection(Sortblock *sortblock,unsigned long left,
   }
 }
 
-static unsigned long suftabentryfromsection_get(const Sortblock *sortblock,
+static unsigned long suftabentryfromsection_get(const Rmnsufinfo *rmnsufinfo,
                                                 unsigned long idx)
 {
-  if (SUFINMEM(sortblock))
+  CHECKSORTSPACEPTR(rmnsufinfo->sortblock.sortspace);
+  if (SUFINMEM(&rmnsufinfo->sortblock))
   {
-    return SUFFIXPTRGET(sortblock->sortspace,idx);
+    return suffixptrget3(rmnsufinfo->sssp,idx);
   }
-  gt_assert(idx >= sortblock->pageoffset &&
-            idx < sortblock->pageoffset + sortblock->mappedwidth);
-  return sortblock->mappedsection[idx - sortblock->pageoffset];
+  gt_assert(idx >= rmnsufinfo->sortblock.pageoffset &&
+            idx < rmnsufinfo->sortblock.pageoffset +
+                  rmnsufinfo->sortblock.mappedwidth);
+  return rmnsufinfo->sortblock.mappedsection[idx - rmnsufinfo->sortblock.
+                                                   pageoffset];
 }
 
-static void suftabentryfromsection_update(Sortblock *sortblock,
+static void suftabentryfromsection_update(Rmnsufinfo *rmnsufinfo,
                                           unsigned long idx,
                                           unsigned long value)
 {
-  if (SUFINMEM(sortblock))
+  CHECKSORTSPACEPTR(rmnsufinfo->sortblock.sortspace);
+  if (SUFINMEM(&rmnsufinfo->sortblock))
   {
-    SUFFIXPTRSET(sortblock->sortspace,idx,value);
+    suffixptrset3(rmnsufinfo->sssp,idx,value);
   } else
   {
-    gt_assert(idx >= sortblock->pageoffset &&
-              idx < sortblock->pageoffset + sortblock->mappedwidth);
-    sortblock->mappedsection[idx - sortblock->pageoffset] = value;
+    gt_assert(idx >= rmnsufinfo->sortblock.pageoffset &&
+              idx < rmnsufinfo->sortblock.pageoffset +
+                    rmnsufinfo->sortblock.mappedwidth);
+    rmnsufinfo->sortblock.mappedsection[idx - rmnsufinfo->sortblock.pageoffset]
+      = value;
   }
 }
 
@@ -1011,8 +1020,8 @@ static void anchorleftmost(Rmnsufinfo *rmnsufinfo,
   for (idx = left; idx <= right; idx++)
   {
     rms_inversesuftab_set(rmnsufinfo,
-                      suftabentryfromsection_get(&rmnsufinfo->sortblock,idx),
-                      left);
+                          suftabentryfromsection_get(rmnsufinfo,idx),
+                          left);
   }
 }
 
@@ -1026,7 +1035,7 @@ static void anchorleftmostrel(Rmnsufinfo *rmnsufinfo,
   for (idx = left; idx <= right; idx++)
   {
     inversesuftabrel_set(rmnsufinfo,
-                         suftabentryfromsection_get(&rmnsufinfo->sortblock,idx),
+                         suftabentryfromsection_get(rmnsufinfo,idx),
                          left,base);
   }
 }
@@ -1067,7 +1076,7 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,unsigned long left,
   gt_assert(rmnsufinfo->allocateditvinfo >= width);
   for (idx=0; idx<width; idx++)
   {
-    startpos = suftabentryfromsection_get(&rmnsufinfo->sortblock,left+idx);
+    startpos = suftabentryfromsection_get(rmnsufinfo,left+idx);
 
     if (rmnsufinfo->absoluteinversesuftab)
     {
@@ -1085,7 +1094,7 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,unsigned long left,
           rms_compareitv);
     for (idx=0; idx<width; idx++)
     {
-      suftabentryfromsection_update(&rmnsufinfo->sortblock,left+idx,
+      suftabentryfromsection_update(rmnsufinfo,left+idx,
                                     rmnsufinfo->itvinfo[idx].suffixstart);
     }
   } else
@@ -1094,7 +1103,7 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,unsigned long left,
                rmnsufinfo,rms_compareitvfull);
     for (idx=0; idx<width; idx++)
     {
-      suftabentryfromsection_update(&rmnsufinfo->sortblock,left+idx,
+      suftabentryfromsection_update(rmnsufinfo,left+idx,
                                     rmnsufinfo->itvfullinfo[idx].suffixstart);
     }
   }
@@ -1137,7 +1146,7 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,unsigned long left,
       } else
       {
         unsigned long currentsuftabentry
-          = suftabentryfromsection_get(&rmnsufinfo->sortblock,left+rangestart);
+          = suftabentryfromsection_get(rmnsufinfo,left+rangestart);
         if (rmnsufinfo->absoluteinversesuftab)
         {
           rms_inversesuftab_set(rmnsufinfo,currentsuftabentry,left+rangestart);
@@ -1172,7 +1181,7 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,unsigned long left,
   } else
   {
     unsigned long currentsuftabentry
-      = suftabentryfromsection_get(&rmnsufinfo->sortblock,left+rangestart);
+      = suftabentryfromsection_get(rmnsufinfo,left+rangestart);
     if (rmnsufinfo->absoluteinversesuftab)
     {
       rms_inversesuftab_set(rmnsufinfo,currentsuftabentry,left+rangestart);
