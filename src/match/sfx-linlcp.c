@@ -227,8 +227,7 @@ static unsigned long sa2ranknext(Compressedtable *ranknext,
                                  unsigned long totallength,
                                  const Suffixptr *sortedsuffixes)
 {
-  unsigned long idx, pos, longest = 0;
-  unsigned long *occless;
+  unsigned long idx, pos, longest = 0, *occless;
 
   gt_assert(partwidth > 0);
 
@@ -309,9 +308,9 @@ Compressedtable *gt_lcp9_manzini(Compressedtable *spacefortab,
                                  unsigned long totallength,
                                  const Suffixptr *sortedsuffixes)
 {
-  unsigned long pos, previousstart, nextfillpos = 0, fillpos, lcpvalue = 0;
+  unsigned long pos, previousstart, nextfillpos = 0, fillpos, lcpvalue = 0,
+                previouscc1pos, previouscc2pos;
   Compressedtable *lcptab, *ranknext, *rightposinverse;
-  unsigned long previouscc1pos, previouscc2pos;
   GtUchar cc1, cc2;
   GtEncseqReader *esr1, *esr2;
 
