@@ -2397,12 +2397,15 @@ void gt_sortallbuckets(Suffixsortspace *suffixsortspace,
                         logger);
 }
 
+void dc_setsuffixsortspace(void *voiddcov,Suffixsortspace *sssp);
+
 /*
    The following function is used for sorting the sample making up the
    difference cover and for sorting with the difference cover.
 */
 
-void gt_sortbucketofsuffixes(Suffixptr *suffixestobesorted,
+void gt_sortbucketofsuffixes(bool setdcovsuffixsortspace,
+                             Suffixptr *suffixestobesorted,
                              unsigned long numberofsuffixes,
                              GtBucketspec2 *bucketspec2,
                              const GtEncseq *encseq,
@@ -2425,6 +2428,10 @@ void gt_sortbucketofsuffixes(Suffixptr *suffixestobesorted,
 
   suffixsortspace.sortspace = suffixestobesorted;
   suffixsortspace.sortspaceoffset = 0;
+  if (setdcovsuffixsortspace)
+  {
+    dc_setsuffixsortspace(voiddcov,&suffixsortspace);
+  }
   initBentsedgresources(&bsr,
                         &suffixsortspace,
                         NULL,

@@ -76,7 +76,8 @@ void gt_sortallbuckets(Suffixsortspace *suffixsortspace,
                        unsigned long long *bucketiterstep,
                        GtLogger *logger);
 
-void gt_sortbucketofsuffixes(Suffixptr *suffixestobesorted,
+void gt_sortbucketofsuffixes(bool setdcovsuffixsortspace,
+                             Suffixptr *suffixestobesorted,
                              unsigned long numberofsuffixes,
                              GtBucketspec2 *bucketspec2,
                              const GtEncseq *encseq,

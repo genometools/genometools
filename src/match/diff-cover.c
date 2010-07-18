@@ -212,8 +212,9 @@ static unsigned int computehvalue(const Differencecover *dcov,
 }
 #endif
 
-void dc_setsuffixsortspace(Differencecover *dcov,Suffixsortspace *sssp)
+void dc_setsuffixsortspace(void *voiddcov,Suffixsortspace *sssp)
 {
+  Differencecover *dcov = (Differencecover *) voiddcov;
   dcov->sssp = sssp;
 }
 
@@ -1194,7 +1195,8 @@ void gt_differencecover_sortsample(Differencecover *dcov,
                 gt_encseq_bitwise_cmp_ok(dcov->encseq) ? false : true);
     }
     sfxstrategy.differencecover = dcov->vparam;
-    gt_sortbucketofsuffixes(dcov->sortedsample,
+    gt_sortbucketofsuffixes(false,
+                            dcov->sortedsample,
                             dcov->effectivesamplesize,
                             NULL,
                             dcov->encseq,

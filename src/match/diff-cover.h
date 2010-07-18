@@ -34,8 +34,6 @@ void gt_differencecovers_check(const GtEncseq *encseq,
 
 void setdcline(void *voiddcov,int line);
 
-void dc_setsuffixsortspace(Differencecover *dcov,Suffixsortspace *sssp);
-
 Differencecover *gt_differencecover_new(unsigned int vparam,
                                         const GtEncseq *encseq,
                                         GtReadmode readmode,
