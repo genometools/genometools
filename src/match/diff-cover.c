@@ -149,10 +149,10 @@ static unsigned long suffixptrgetdcov(const Differencecover *dcov,
   return SUFFIXPTRGET(dcov->sortedsample,idx);
 }
 
-static unsigned long suffixptrsetdcov(const Differencecover *dcov,
-                                      unsigned long idx,unsigned long value)
+static void suffixptrsetdcov(const Differencecover *dcov,
+                             unsigned long idx,unsigned long value)
 {
-  return SUFFIXPTRSET(dcov->sortedsample,idx,value);
+  SUFFIXPTRSET(dcov->sortedsample,idx,value);
 }
 
 static void fillcoverrank(Differencecover *dcov)
@@ -765,7 +765,7 @@ static void dc_sortsuffixesonthislevel(Differencecover *dcov,
     dcov->itvinfo = gt_malloc(sizeof (*dcov->itvinfo) *
                               dcov->allocateditvinfo);
   }
-  if (dcov->firstwithnewdepth.subbucket == subbucket && /* ptr arithmetic */
+  if (dcov->firstwithnewdepth.subbucketleft == subbucketleft &&
       dcov->firstwithnewdepth.width == width)
   {
     dcov->currentdepth = dcov->firstwithnewdepth.depth;
@@ -813,10 +813,7 @@ static void dc_sortsuffixesonthislevel(Differencecover *dcov,
       {
         unsigned long currentsuftabentry
           = suffixptrgetdcov(dcov,subbucketleft+rangestart);
-        inversesuftab_set(dcov,currentsuftabentry,
-                          (unsigned long)
-                             (subbucket + rangestart - dcov->sortedsample));
-                             /* XXX Pointer arithmetic on subbucket */
+        inversesuftab_set(dcov,currentsuftabentry,subbucketleft+rangestart);
       }
       rangestart = idx;
     }
@@ -836,10 +833,7 @@ static void dc_sortsuffixesonthislevel(Differencecover *dcov,
   {
     unsigned long currentsuftabentry
       = suffixptrgetdcov(dcov,subbucketleft+rangestart);
-    inversesuftab_set(dcov,currentsuftabentry,
-                      (unsigned long)
-                      (subbucket + rangestart - dcov->sortedsample));
-                      /* XXX Pointer arithmetic on subbucket */
+    inversesuftab_set(dcov,currentsuftabentry,subbucketleft+rangestart);
   }
 }
 
