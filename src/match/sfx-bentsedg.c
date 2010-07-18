@@ -40,6 +40,15 @@
 #include "sfx-suffixgetset.h"
 #include "stamp.h"
 
+/*
+  Work on modules which are part of the suffix array construction:
+  sfx-bentsedg.c DONE
+  sfx-bltrie.c DONE
+  diff-cover.c DONE
+  sfx-remainsort.c DONE
+  sfx-linlcp.c DONE
+*/
+
 #define UNIQUEINT(P)           ((unsigned long) ((P) + GT_COMPAREOFFSET))
 #define ACCESSCHAR(POS)        gt_encseq_get_encoded_char(bsr->encseq,\
                                                           POS,bsr->readmode)

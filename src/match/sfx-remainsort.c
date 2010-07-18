@@ -1305,7 +1305,7 @@ Compressedtable *gt_rmnsufinfo_delete(unsigned long *longest,
 {
   Rmnsufinfo *rmnsufinfo = *rmnsufinfoptr;
   Compressedtable *lcptab;
-  Suffixptr *sortedsuffixes = NULL;
+  Suffixsortspace *suffixsortspace = NULL;
 
   sortremainingsuffixes(rmnsufinfo);
   gt_free(rmnsufinfo->filltable);
@@ -1334,16 +1334,19 @@ Compressedtable *gt_rmnsufinfo_delete(unsigned long *longest,
     {
       gt_assert(rmnsufinfo->sssp != NULL &&
                 rmnsufinfo->sssp->sortspace != NULL);
-      sortedsuffixes = rmnsufinfo->sssp->sortspace;
+      suffixsortspace = rmnsufinfo->sssp;
     } else
     {
-      sortedsuffixes
+      suffixsortspace = gt_malloc(sizeof(*suffixsortspace));
+      suffixsortspace->sortspace
         = gt_fa_mmap_generic_fd(rmnsufinfo->sortblock.mmapfiledesc,
                                 gt_str_get(rmnsufinfo->sortblock.mmapfilename),
                                 (size_t) rmnsufinfo->sortblock.mapableentries
                                   * sizeof (unsigned long),
                                 (size_t) 0,
                                 false,false,NULL);
+      suffixsortspace->sortspaceoffset = 0;
+      suffixsortspace->bucketleftidx = 0;
     }
 #define NOINVERSESUFTAB
 #ifdef NOINVERSESUFTAB
@@ -1351,13 +1354,13 @@ Compressedtable *gt_rmnsufinfo_delete(unsigned long *longest,
     rmnsufinfo->inversesuftab = NULL;
     lcptab = gt_lcp9_manzini(NULL,rmnsufinfo->encseq,rmnsufinfo->readmode,
                              rmnsufinfo->partwidth,rmnsufinfo->totallength,
-                             sortedsuffixes);
+                             suffixsortspace);
 #else
     gt_assert(rmnsufinfo->inversesuftab != NULL);
     lcptab = gt_lcp9_manzini(rmnsufinfo->inversesuftab,rmnsufinfo->encseq,
                              rmnsufinfo->readmode,rmnsufinfo->partwidth,
                              rmnsufinfo->totallength,
-                             sortedsuffixes);
+                             suffixsortspace);
     rmnsufinfo->inversesuftab = NULL;
 #endif
   } else
@@ -1368,8 +1371,10 @@ Compressedtable *gt_rmnsufinfo_delete(unsigned long *longest,
   }
   if (!SUFINMEM(&rmnsufinfo->sortblock) && withlcptab)
   {
-    gt_fa_xmunmap(sortedsuffixes);
-    sortedsuffixes = NULL;
+    gt_assert(suffixsortspace != NULL);
+    gt_fa_xmunmap(suffixsortspace->sortspace);
+    gt_free(suffixsortspace);
+    suffixsortspace = NULL;
   }
 #ifdef Lowerboundwithrank
   gt_freefree(rmnsufinfo->lowerboundwithrank);
