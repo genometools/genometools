@@ -44,7 +44,7 @@
   Work on modules which are part of the suffix array construction:
   sfx-bentsedg.c DONE
   sfx-bltrie.c DONE
-  diff-cover.c DONE
+  sfx-diffcov.c DONE
   sfx-remainsort.c DONE
   sfx-linlcp.c DONE
 */

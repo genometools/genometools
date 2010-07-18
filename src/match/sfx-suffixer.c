@@ -36,7 +36,7 @@
 #include "spacedef.h"
 #include "esa-fileend.h"
 #include "suffixptr.h"
-#include "diff-cover.h"
+#include "sfx-diffcov.h"
 #include "sfx-partssuf.h"
 #include "sfx-suffixer.h"
 #include "sfx-enumcodes.h"

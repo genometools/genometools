@@ -32,7 +32,6 @@ cgr_spacedseed.c
 cutendpfx.c
 chainofin.c
 chain2dim.c
-diff-cover.c
 dist-short.c
 echoseq.c
 eis-blockcomp.c
@@ -90,6 +89,7 @@ revcompl.c
 sfx-apfxlen.c
 sfx-bentsedg.c
 sfx-bltrie.c
+sfx-diffcov.c
 sfx-copysort.c
 sfx-enumcodes.c
 sfx-input.c

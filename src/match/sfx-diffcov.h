@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef DIFF_COVER_H
-#define DIFF_COVER_H
+#ifndef SFX_DIFFCOV_H
+#define SFX_DIFFCOV_H
 
 #include "core/encseq.h"
 #include "core/unused_api.h"
