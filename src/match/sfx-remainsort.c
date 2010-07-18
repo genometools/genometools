@@ -285,7 +285,7 @@ Rmnsufinfo *gt_rmnsufinfo_new(Suffixptr *presortedsuffixes,
 {
   Rmnsufinfo *rmnsufinfo;
 
-  rmnsufinfo = gt_malloc(sizeof (Rmnsufinfo));
+  rmnsufinfo = gt_malloc(sizeof (*rmnsufinfo));
   rmnsufinfo->totallength = gt_encseq_total_length(encseq);
   rmnsufinfo->partwidth = partwidth;
   rmnsufinfo->encseq = encseq;
@@ -322,12 +322,12 @@ Rmnsufinfo *gt_rmnsufinfo_new(Suffixptr *presortedsuffixes,
   } else
   {
     gt_determinemaxbucketsize(bcktab,
-                           0,
-                           maxcode,
-                           partwidth,
-                           numofchars,
-                           hashexceptions,
-                           hashexceptions ? rmnsufinfo->totallength : 0);
+                              0,
+                              maxcode,
+                              partwidth,
+                              numofchars,
+                              hashexceptions,
+                              hashexceptions ? rmnsufinfo->totallength : 0);
     rmnsufinfo->allocateditvinfo = gt_bcktab_nonspecialsmaxbucketsize(bcktab);
     if (hashexceptions)
     {

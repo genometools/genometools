@@ -794,6 +794,7 @@ static void preparethispart(Sfxiterator *sfi)
   {
     if (!sfi->sfxstrategy.streamsuftab)
     {
+      /* option -maxdepth without argument */
       gt_qsufsort(sfi->suffixsortspace.sortspace,
                   partwidth,
                   -1,

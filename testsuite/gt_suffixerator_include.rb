@@ -254,12 +254,8 @@ end
           doubling=false
         else
           cmp=true
-          if parts == 1
-            doubling=true
-            doublingname=" doubling "
-          else
-            doubling=false
-          end
+          doubling=true
+          doublingname=" doubling "
         end
         Name "gt suffixerator+sfxmap dna #{extraname} #{sat} " +
              "#{parts} parts #{doubling}"
