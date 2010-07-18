@@ -647,9 +647,9 @@ static void dc_anchorleftmost(Differencecover *dcov,
 
   gt_assert(baseindex == subbucketleft);
   gt_assert(subbucket = dcov->sortedsample + subbucketleft);
-  for (idx = 0; idx < width; idx++)
+  for (idx = subbucketleft; idx < subbucketleft + width; idx++)
   {
-    inversesuftab_set(dcov,SUFFIXPTRGET(subbucket,idx),baseindex);
+    inversesuftab_set(dcov,SUFFIXPTRGET(dcov->sortedsample,idx),baseindex);
   }
 }
 
