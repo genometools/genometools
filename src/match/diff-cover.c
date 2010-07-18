@@ -108,7 +108,7 @@ struct Differencecover
                prefixlength;
   Diffrank *coverrank;
   Diffvalue *diffvalues, *diff2pos;
-  Suffixptr *sortedsample; /* XXX do not use this in this code */
+  Suffixptr *sortedsample;
   unsigned long totallength,
                 *leftborder; /* points to bcktab->leftborder */
   Bcktab *bcktab;
@@ -142,6 +142,18 @@ struct Differencecover
 #define UCcast(X) ((Diffrank) X)
 
 #include "tab-diffcover.h"
+
+static unsigned long suffixptrgetdcov(const Differencecover *dcov,
+                                      unsigned long idx)
+{
+  return SUFFIXPTRGET(dcov->sortedsample,idx);
+}
+
+static unsigned long suffixptrsetdcov(const Differencecover *dcov,
+                                      unsigned long idx,unsigned long value)
+{
+  return SUFFIXPTRSET(dcov->sortedsample,idx,value);
+}
 
 static void fillcoverrank(Differencecover *dcov)
 {
@@ -394,7 +406,7 @@ static unsigned long dcov_derivespecialcodesonthefly(Differencecover *dcov,
           gt_assert(code > 0);
           sampleindex = --dcov->leftborder[code];
           gt_assert(sampleindex < dcov->effectivesamplesize);
-          SUFFIXPTRSET(dcov->sortedsample,sampleindex,pos);
+          suffixptrsetdcov(dcov,sampleindex,pos);
         }
       }
     }
@@ -492,7 +504,7 @@ static void dc_initinversesuftabnonspecials(Differencecover *dcov)
 
   for (sampleindex=0; sampleindex < dcov->effectivesamplesize; sampleindex++)
   {
-    pos = SUFFIXPTRGET(dcov->sortedsample,sampleindex);
+    pos = suffixptrgetdcov(dcov,sampleindex);
     inversesuftab_set(dcov,pos,sampleindex);
   }
 }
@@ -619,20 +631,19 @@ static void dc_initinversesuftabnonspecialsadjust(Differencecover *dcov)
                                          dcov->numofchars);
     for (/* Nothing */; idx < bucketspec.left; idx++)
     {
-      inversesuftab_set(dcov,SUFFIXPTRGET(dcov->sortedsample,idx),idx);
+      inversesuftab_set(dcov,suffixptrgetdcov(dcov,idx),idx);
     }
     dc_updatewidth (dcov,bucketspec.nonspecialsinbucket,dcov->prefixlength);
     for (/* Nothing */;
          idx < bucketspec.left + bucketspec.nonspecialsinbucket;
          idx++)
     {
-      inversesuftab_set(dcov,SUFFIXPTRGET(dcov->sortedsample,idx),
-                        bucketspec.left);
+      inversesuftab_set(dcov,suffixptrgetdcov(dcov,idx),bucketspec.left);
     }
   }
   for (/* Nothing */; idx < dcov->effectivesamplesize; idx++)
   {
-    inversesuftab_set(dcov,SUFFIXPTRGET(dcov->sortedsample,idx),idx);
+    inversesuftab_set(dcov,suffixptrgetdcov(dcov,idx),idx);
   }
 }
 
@@ -641,15 +652,12 @@ static void dc_anchorleftmost(Differencecover *dcov,
                               unsigned long subbucketleft,
                               unsigned long width)
 {
-  unsigned long idx,
-                baseindex = (unsigned long) (subbucket - dcov->sortedsample);
-                /* XXX ptr-arithmetic with subbucket */
+  unsigned long idx;
 
-  gt_assert(baseindex == subbucketleft);
   gt_assert(subbucket = dcov->sortedsample + subbucketleft);
   for (idx = subbucketleft; idx < subbucketleft + width; idx++)
   {
-    inversesuftab_set(dcov,SUFFIXPTRGET(dcov->sortedsample,idx),baseindex);
+    inversesuftab_set(dcov,suffixptrgetdcov(dcov,idx),subbucketleft);
   }
 }
 
@@ -769,7 +777,7 @@ static void dc_sortsuffixesonthislevel(Differencecover *dcov,
   gt_assert(subbucket = dcov->sortedsample + subbucketleft);
   for (idx=0; idx<width; idx++)
   {
-    startpos = SUFFIXPTRGET(subbucket,idx);
+    startpos = suffixptrgetdcov(dcov,subbucketleft+idx);
     dcov->itvinfo[idx].suffixstart = startpos;
     dcov->itvinfo[idx].key
       = inversesuftab_get(dcov,startpos + dcov->currentdepth);
@@ -783,7 +791,7 @@ static void dc_sortsuffixesonthislevel(Differencecover *dcov,
   qsort(dcov->itvinfo,(size_t) width,sizeof (*dcov->itvinfo),dcov_compareitv);
   for (idx=0; idx<width; idx++)
   {
-    SUFFIXPTRSET(subbucket,idx,dcov->itvinfo[idx].suffixstart);
+    suffixptrsetdcov(dcov,subbucketleft+idx,dcov->itvinfo[idx].suffixstart);
   }
   rangestart = 0;
   for (idx=1UL; idx<width; idx++)
@@ -803,7 +811,8 @@ static void dc_sortsuffixesonthislevel(Differencecover *dcov,
                           idx - rangestart);
       } else
       {
-        unsigned long currentsuftabentry = SUFFIXPTRGET(subbucket,rangestart);
+        unsigned long currentsuftabentry
+          = suffixptrgetdcov(dcov,subbucketleft+rangestart);
         inversesuftab_set(dcov,currentsuftabentry,
                           (unsigned long)
                              (subbucket + rangestart - dcov->sortedsample));
@@ -825,7 +834,8 @@ static void dc_sortsuffixesonthislevel(Differencecover *dcov,
                       width - rangestart);
   } else
   {
-    unsigned long currentsuftabentry = SUFFIXPTRGET(subbucket,rangestart);
+    unsigned long currentsuftabentry
+      = suffixptrgetdcov(dcov,subbucketleft+rangestart);
     inversesuftab_set(dcov,currentsuftabentry,
                       (unsigned long)
                       (subbucket + rangestart - dcov->sortedsample));
@@ -954,7 +964,8 @@ void dc_sortunsortedbucket(void *data,
                          (unsigned long) dcov->vparam);
 #endif
   dcov->sortoffset = subbucketleft - dcov->sssp->sortspaceoffset;
-  gt_inlinedarr_qsort_r (subbucket,width,data); /* XXX array is sorted */
+  /* subbucket is only used for assertions */
+  gt_inlinedarr_qsort_r (subbucket,width,data);
 }
 
 static void dc_sortremainingsamples(Differencecover *dcov)
@@ -1137,7 +1148,7 @@ void gt_differencecover_sortsample(Differencecover *dcov,
       {
         sampleindex = --dcov->leftborder[code];
         gt_assert(sampleindex < dcov->effectivesamplesize);
-        SUFFIXPTRSET(dcov->sortedsample,sampleindex,pos);
+        suffixptrsetdcov(dcov,sampleindex,pos);
         posinserted++;
       }
       diffptr++;
@@ -1231,7 +1242,6 @@ void gt_differencecover_sortsample(Differencecover *dcov,
 #ifndef NDEBUG
     unsigned long idx;
 #endif
-
     gt_checksortedsuffixes(__FILE__,
                            __LINE__,
                            dcov->encseq,
@@ -1245,9 +1255,7 @@ void gt_differencecover_sortsample(Differencecover *dcov,
 #ifndef NDEBUG
     for (idx=0; idx < dcov->effectivesamplesize; idx++)
     {
-      unsigned long idx2 = inversesuftab_get(dcov,
-                                             SUFFIXPTRGET(dcov->sortedsample,
-                                                          idx));
+      unsigned long idx2 = inversesuftab_get(dcov,suffixptrgetdcov(dcov,idx));
       gt_assert(idx == idx2);
     }
 #endif
