@@ -48,14 +48,6 @@
 
 GT_DECLAREARRAYSTRUCT(Suffixptr);
 
-static inline void setsortspace(Suffixsortspace *suffixsortspace,
-                                unsigned long idx,
-                                unsigned long value)
-{
-  SUFFIXPTRSET(suffixsortspace->sortspace,
-               idx - suffixsortspace->sortspaceoffset,value);
-}
-
 struct Sfxiterator
 {
   bool storespecials;
@@ -309,8 +301,8 @@ static void insertwithoutspecial(void *processinfo,
     if (kmercode->code >= sfi->currentmincode &&
         kmercode->code <= sfi->currentmaxcode)
     {
-      setsortspace(&sfi->suffixsortspace,
-                   --sfi->leftborder[kmercode->code],position);
+      unsigned long stidx = --sfi->leftborder[kmercode->code];
+      suffixptrset2(&sfi->suffixsortspace,stidx,position);
       /* from right to left */
     }
   }
@@ -335,8 +327,7 @@ static void sfx_derivespecialcodesfromtable(Sfxiterator *sfi,bool deletevalues)
 {
   GtCodetype code;
   unsigned int prefixindex;
-  unsigned long insertindex, j;
-  unsigned long stidx;
+  unsigned long insertindex, j, stidx;
 
   for (prefixindex=1U; prefixindex < sfi->prefixlength; prefixindex++)
   {
@@ -353,8 +344,8 @@ static void sfx_derivespecialcodesfromtable(Sfxiterator *sfi,bool deletevalues)
           gt_updatebckspecials(sfi->bcktab,code,sfi->numofchars,prefixindex);
           stidx = --sfi->leftborder[code];
           /* from right to left */
-          setsortspace(&sfi->suffixsortspace,stidx,
-                       sfi->spaceCodeatposition[j].position - prefixindex);
+          suffixptrset2(&sfi->suffixsortspace,stidx,
+                        sfi->spaceCodeatposition[j].position - prefixindex);
         }
       }
       if (deletevalues)
@@ -408,8 +399,8 @@ static void sfx_derivespecialcodesonthefly(Sfxiterator *sfi)
             gt_assert(code > 0);
             stidx = --sfi->leftborder[code];
             /* from right to left */
-            setsortspace(&sfi->suffixsortspace,stidx,
-                         specialcontext.position - prefixindex);
+            suffixptrset2(&sfi->suffixsortspace,stidx,
+                          specialcontext.position - prefixindex);
           }
         }
       }

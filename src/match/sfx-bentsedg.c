@@ -49,6 +49,8 @@
   sfx-linlcp.c DONE
   sfx-copysort.c DONE
   sfx-run.c: contains functions to write suftab/bwttab. Needs to be DONE later
+  sfx-suffixer.c: contains occurrences of SUFFIXPTRSET to memory 
+                  area, which may point to anywhere. Needs to be done later.
 */
 
 #define UNIQUEINT(P)           ((unsigned long) ((P) + GT_COMPAREOFFSET))

@@ -76,21 +76,11 @@ typedef void (*Dc_processunsortedrange)(void *,
   SUFFIXPTRSET(subbucket,idx,value);
 }
 
-/*@unused@*/ static inline unsigned long suffixptrget2(
-                                         const Suffixsortspace *sssp,
-                                         GT_UNUSED const Suffixptr *subbucket,
-                                         unsigned long subbucketleft,
-                                         unsigned long idx)
+/*@unused@*/ static inline void suffixptrset2(const Suffixsortspace *sssp,
+                                              unsigned long idx,
+                                              unsigned long value)
 {
-  gt_assert(sssp->sortspace + subbucketleft == subbucket);
-  /*
-  fprintf(stderr,"(2) idx=%lu,subbucketleft=%lu,sortspaceoffset=%lu\n",
-          idx,subbucketleft,sssp->sortspaceoffset);
-  fprintf(stderr,"diff=%lu\n",(unsigned long) (subbucket-sssp->sortspace));
-  printf("in suffixptr2: access %lu\n",
-           (unsigned long) (sssp->sortspace + subbucketleft+idx));
-  */
-  return SUFFIXPTRGET(sssp->sortspace,subbucketleft+idx);
+  SUFFIXPTRSET(sssp->sortspace,idx - sssp->sortspaceoffset,value);
 }
 
 /*@unused@*/ static inline unsigned long suffixptrget3(

@@ -888,16 +888,16 @@ static void dc_addunsortedrange(void *voiddcov,
 
 typedef Suffixptr Sorttype;
 
-static int qsortcmparr (const Sorttype *suftab,unsigned long a,
-                        unsigned long b,const void *data)
+static int qsortcmparr (GT_UNUSED const Sorttype *subbucket,
+                        unsigned long a, unsigned long b,const void *data)
 {
   const Differencecover *dcov = (const Differencecover *) data;
   unsigned long suffixpos1, suffixpos2, idx1, idx2;
   unsigned int offset;
 
   gt_assert(dcov->sssp != NULL);
-  suffixpos1 = suffixptrget2(dcov->sssp,suftab,dcov->sortoffset,a);
-  suffixpos2 = suffixptrget2(dcov->sssp,suftab,dcov->sortoffset,b);
+  suffixpos1 = suffixptrget3(dcov->sssp,dcov->sortoffset+a);
+  suffixpos2 = suffixptrget3(dcov->sssp,dcov->sortoffset+b);
   gt_assert(suffixpos1 < dcov->totallength);
   gt_assert(suffixpos2 < dcov->totallength);
   offset = differencecover_offset(dcov,suffixpos1,suffixpos2);
