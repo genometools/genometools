@@ -24,11 +24,11 @@
 #include "sfx-linlcp.h"
 
 unsigned long *gt_lcp13_manzini(const GtEncseq *encseq,
-                      GtReadmode readmode,
-                      unsigned long partwidth,
-                      unsigned long totallength,
-                      const Suffixptr *sortedsuffixes,
-                      Compressedtable *inversesuftab)
+                                GtReadmode readmode,
+                                unsigned long partwidth,
+                                unsigned long totallength,
+                                const Suffixptr *sortedsuffixes,
+                                Compressedtable *inversesuftab)
 {
   unsigned long pos, lcpvalue = 0, *lcptab;
 
@@ -221,11 +221,11 @@ static void inversesuffixarray2specialranknext(
 }
 
 static unsigned long sa2ranknext(Compressedtable *ranknext,
-                          const GtEncseq *encseq,
-                          GtReadmode readmode,
-                          unsigned long partwidth,
-                          unsigned long totallength,
-                          const Suffixptr *sortedsuffixes)
+                                 const GtEncseq *encseq,
+                                 GtReadmode readmode,
+                                 unsigned long partwidth,
+                                 unsigned long totallength,
+                                 const Suffixptr *sortedsuffixes)
 {
   unsigned long idx, longest = 0;
   unsigned long *occless;
@@ -303,11 +303,11 @@ static unsigned long sa2ranknext(Compressedtable *ranknext,
 }
 
 Compressedtable *gt_lcp9_manzini(Compressedtable *spacefortab,
-                              const GtEncseq *encseq,
-                              GtReadmode readmode,
-                              unsigned long partwidth,
-                              unsigned long totallength,
-                              const Suffixptr *sortedsuffixes)
+                                 const GtEncseq *encseq,
+                                 GtReadmode readmode,
+                                 unsigned long partwidth,
+                                 unsigned long totallength,
+                                 const Suffixptr *sortedsuffixes)
 {
   unsigned long pos, previousstart, nextfillpos = 0, fillpos, lcpvalue = 0;
   Compressedtable *lcptab, *ranknext, *rightposinverse;

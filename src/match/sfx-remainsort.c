@@ -1302,7 +1302,7 @@ Compressedtable *gt_rmnsufinfo_delete(unsigned long *longest,
 {
   Rmnsufinfo *rmnsufinfo = *rmnsufinfoptr;
   Compressedtable *lcptab;
-  Suffixptr *sortedsuffixes;
+  Suffixptr *sortedsuffixes = NULL;
 
   sortremainingsuffixes(rmnsufinfo);
   gt_free(rmnsufinfo->filltable);
@@ -1329,7 +1329,7 @@ Compressedtable *gt_rmnsufinfo_delete(unsigned long *longest,
   {
     if (SUFINMEM(&rmnsufinfo->sortblock))
     {
-      gt_assert(rmnsufinfo->sssp->sortspace);
+      gt_assert(rmnsufinfo->sssp->sortspace != NULL);
       sortedsuffixes = rmnsufinfo->sssp->sortspace;
     } else
     {
