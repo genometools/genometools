@@ -99,11 +99,11 @@ static void setrelevantfrominversetab(Compressedtable *rightposinverse,
 {
   if (gt_encseq_has_specialranges(encseq))
   {
-    unsigned long idx;
+    unsigned long idx, pos;
 
     for (idx = 0; idx < partwidth; idx++)
     {
-      unsigned long pos = SUFFIXPTRGET(sortedsuffixes,idx);
+      pos = SUFFIXPTRGET(sortedsuffixes,idx);
       if (pos > 0)
       {
         GtUchar cc = gt_encseq_get_encoded_char(encseq,pos-1,readmode);
@@ -227,7 +227,7 @@ static unsigned long sa2ranknext(Compressedtable *ranknext,
                                  unsigned long totallength,
                                  const Suffixptr *sortedsuffixes)
 {
-  unsigned long idx, longest = 0;
+  unsigned long idx, pos, longest = 0;
   unsigned long *occless;
 
   gt_assert(partwidth > 0);
@@ -237,7 +237,7 @@ static unsigned long sa2ranknext(Compressedtable *ranknext,
      ranknext array (which points to ranknext can savely be stored */
   for (idx=0; idx < partwidth; idx++)
   {
-    unsigned long pos = SUFFIXPTRGET(sortedsuffixes,idx);
+    pos = SUFFIXPTRGET(sortedsuffixes,idx);
     if (pos > 0)
     {
       GtUchar cc = gt_encseq_get_encoded_char(encseq,pos-1, readmode);
