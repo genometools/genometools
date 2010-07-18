@@ -48,6 +48,7 @@
   sfx-remainsort.c DONE
   sfx-linlcp.c DONE
   sfx-copysort.c DONE
+  sfx-run.c: contains functions to write suftab/bwttab. Needs to be DONE later
 */
 
 #define UNIQUEINT(P)           ((unsigned long) ((P) + GT_COMPAREOFFSET))

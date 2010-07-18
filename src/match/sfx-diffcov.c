@@ -34,11 +34,14 @@
 #include "bcktab.h"
 #include "initbasepower.h"
 #include "suffixptr.h"
-#include "sfx-suftaborder.h"
 #include "sfx-strategy.h"
 #include "sfx-diffcov.h"
 #include "sfx-bentsedg.h"
 #include "sfx-apfxlen.h"
+#undef WITHCHECK
+#ifdef WITHCHECK
+#include "sfx-suftaborder.h"
+#endif
 #include "sfx-enumcodes.h"
 #include "stamp.h"
 
@@ -915,7 +918,7 @@ static int qsortcmparr (const Sorttype *suftab,unsigned long a,
 #include "qsort-array.gen"
 
 void dc_sortunsortedbucket(void *data,
-                           Suffixptr *subbucket, /* refers to suftab */
+                           Suffixptr *subbucket, /* refers into suftab range */
                            unsigned long subbucketleft,
                            unsigned long width,
                            GT_UNUSED unsigned long depth)
@@ -1155,6 +1158,7 @@ void gt_differencecover_sortsample(Differencecover *dcov,
     dcov->esr = NULL;
   }
   gt_assert(posinserted == dcov->effectivesamplesize);
+#ifdef WITHCHECK
   if (withcheck)
   {
     gt_checksortedsuffixes(__FILE__,
@@ -1168,6 +1172,7 @@ void gt_differencecover_sortsample(Differencecover *dcov,
                            false,  /* specialsareequalatdepth0 */
                            (unsigned long) dcov->prefixlength);
   }
+#endif
   if (dcov->vparam == dcov->prefixlength)
   {
     dc_initinversesuftabspecials(dcov);
@@ -1202,6 +1207,7 @@ void gt_differencecover_sortsample(Differencecover *dcov,
                             (void *) dcov,
                             dc_addunsortedrange,
                             NULL);
+#ifdef WITHCHECK
     if (withcheck)
     {
       gt_checksortedsuffixes(__FILE__,
@@ -1215,6 +1221,7 @@ void gt_differencecover_sortsample(Differencecover *dcov,
                              false,  /* specialsareequalatdepth0 */
                              (unsigned long) dcov->vparam);
     }
+#endif
   }
   if (dcov->bcktab != NULL)
   {
@@ -1226,6 +1233,7 @@ void gt_differencecover_sortsample(Differencecover *dcov,
 #ifndef NDEBUG
     unsigned long idx;
 #endif
+#ifdef WITHCHECK
     gt_checksortedsuffixes(__FILE__,
                            __LINE__,
                            dcov->encseq,
@@ -1236,6 +1244,7 @@ void gt_differencecover_sortsample(Differencecover *dcov,
                            false, /* specialsareequal  */
                            false,  /* specialsareequalatdepth0 */
                            0);
+#endif
 #ifndef NDEBUG
     for (idx=0; idx < dcov->effectivesamplesize; idx++)
     {

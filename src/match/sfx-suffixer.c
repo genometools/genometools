@@ -967,8 +967,9 @@ static void insertfullspecialrange(Sfxiterator *sfi,
   {
     if (GT_ISDIRREVERSE(sfi->readmode))
     {
-      SUFFIXPTRSET(sfi->fusp.spaceSuffixptr,sfi->fusp.nextfreeSuffixptr++,
+      SUFFIXPTRSET(sfi->fusp.spaceSuffixptr,sfi->fusp.nextfreeSuffixptr,
                    GT_REVERSEPOS(sfi->totallength,pos));
+      sfi->fusp.nextfreeSuffixptr++;
       if (pos == leftpos)
       {
         break;
@@ -976,7 +977,8 @@ static void insertfullspecialrange(Sfxiterator *sfi,
       pos--;
     } else
     {
-      SUFFIXPTRSET(sfi->fusp.spaceSuffixptr,sfi->fusp.nextfreeSuffixptr++,pos);
+      SUFFIXPTRSET(sfi->fusp.spaceSuffixptr,sfi->fusp.nextfreeSuffixptr,pos);
+      sfi->fusp.nextfreeSuffixptr++;
       if (pos == rightpos-1)
       {
         break;
@@ -1062,8 +1064,9 @@ static void fillspecialnextpage(Sfxiterator *sfi)
       {
         if (sfi->fusp.nextfreeSuffixptr < sfi->fusp.allocatedSuffixptr)
         {
-          SUFFIXPTRSET(sfi->fusp.spaceSuffixptr,sfi->fusp.nextfreeSuffixptr++,
+          SUFFIXPTRSET(sfi->fusp.spaceSuffixptr,sfi->fusp.nextfreeSuffixptr,
                        sfi->totallength);
+          sfi->fusp.nextfreeSuffixptr++;
           sfi->exhausted = true;
         }
         break;
