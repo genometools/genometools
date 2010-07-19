@@ -102,6 +102,42 @@ void gt_Bwtseqpositioniterator_delete(Bwtseqpositioniterator *bspi)
   gt_free(bspi);
 }
 
+struct BwtSeqpositionextractor
+{
+  struct extBitsRetrieval extBits;
+  const BWTSeq *bwtseq;
+  unsigned long upperbound;
+};
+
+BwtSeqpositionextractor *gt_newBwtSeqpositionextractor(
+                                                     const FMindex *voidbwtseq,
+                                                     unsigned long upperbound)
+{
+  BwtSeqpositionextractor *bspex;
+
+  bspex = gt_malloc(sizeof (*bspex));
+  initExtBitsRetrieval(&bspex->extBits);
+  bspex->bwtseq = (const BWTSeq *) voidbwtseq;
+  bspex->upperbound = upperbound;
+  return bspex;
+}
+
+unsigned long gt_BwtSeqpositionextractor_extract(BwtSeqpositionextractor *bspex,
+                                                 unsigned long lowerbound)
+{
+  unsigned long pos;
+
+  gt_assert(lowerbound < bspex->upperbound);
+  pos = gt_BWTSeqLocateMatch(bspex->bwtseq,lowerbound,&bspex->extBits);
+  return pos;
+}
+
+void gt_freeBwtSeqpositionextractor(BwtSeqpositionextractor *bspex)
+{
+  destructExtBitsRetrieval(&(bspex->extBits));
+  gt_free(bspex);
+}
+
 struct Bwtseqcontextiterator
 {
   struct extBitsRetrieval extBits;
@@ -288,6 +324,48 @@ unsigned long gt_bwtrangesplitallwithoutspecial(Mbtab *mbtab,
     }
   }
   return (unsigned long) rangesize;
+}
+
+unsigned long gt_bwtrangesplitallwithspecial(Mbtab *mbtab,
+                                             unsigned long *rangeOccs,
+                                             const FMindex *voidBwtSeq,
+                                             unsigned long lbound,
+                                             unsigned long ubound)
+{
+  unsigned long char_idx, range_idx, rangebase;
+  const BWTSeq *bwtseq = (const BWTSeq *) voidBwtSeq;
+  const MRAEnc *alphabet = BWTSeqGetAlphabet(bwtseq);
+  AlphabetRangeID numofranges = MRAEncGetNumRanges(alphabet);
+  AlphabetRangeSize rangesize = 0, totalrange = 0;
+
+  gt_log_log("numofranges=%lu",(unsigned long) numofranges);
+
+  for (range_idx = 0; range_idx < (unsigned long) numofranges; range_idx++)
+  {
+    unsigned long rangeOcc_idx = 0;
+    rangesize = MRAEncGetRangeSize(alphabet, range_idx);
+    totalrange += rangesize;
+    gt_log_log("rangesize=%lu", (unsigned long) rangesize);
+    BWTSeqPosPairRangeOcc(bwtseq, range_idx, lbound, ubound,rangeOccs);
+    rangebase = (unsigned long) MRAEncGetRangeBase(alphabet, range_idx);
+    gt_log_log("rangebase=%lu", rangebase);
+    for (char_idx = rangebase;
+         char_idx < rangebase + rangesize; char_idx++)
+    {
+      if (rangeOccs[rangeOcc_idx] < rangeOccs[rangesize+rangeOcc_idx])
+      {
+        mbtab[char_idx].lowerbound = bwtseq->count[char_idx] +
+                                     rangeOccs[rangeOcc_idx];
+        mbtab[char_idx].upperbound = bwtseq->count[char_idx] +
+                                     rangeOccs[rangesize+rangeOcc_idx];
+      } else
+      {
+        mbtab[char_idx].lowerbound = mbtab[char_idx].upperbound = 0;
+      }
+      rangeOcc_idx++;
+    }
+  }
+  return totalrange;
 }
 
 /*

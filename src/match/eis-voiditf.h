@@ -50,6 +50,17 @@ GtUchar gt_bwtseqgetsymbol(unsigned long bound,const FMindex *fmindex);
 
 void gt_Bwtseqpositioniterator_delete(Bwtseqpositioniterator *bspi);
 
+typedef struct BwtSeqpositionextractor BwtSeqpositionextractor;
+
+BwtSeqpositionextractor *gt_newBwtSeqpositionextractor(
+                                                     const FMindex *voidbwtseq,
+                                                     unsigned long upperbound);
+
+unsigned long gt_BwtSeqpositionextractor_extract(BwtSeqpositionextractor *bspex,
+                                                 unsigned long lowerbound);
+
+void gt_freeBwtSeqpositionextractor(BwtSeqpositionextractor *bspex);
+
 typedef struct Bwtseqcontextiterator Bwtseqcontextiterator;
 
 Bwtseqcontextiterator *gt_Bwtseqcontextiterator_new(const FMindex *fmindex,
