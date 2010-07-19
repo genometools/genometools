@@ -46,7 +46,11 @@
 #include "sfx-bentsedg.h"
 #include "stamp.h"
 
-GT_DECLAREARRAYSTRUCT(Suffixptr);
+typedef struct
+{
+  unsigned long allocatedSuffixptr, nextfreeSuffixptr; 
+  Suffixsortspace *sssp;
+} GtSuffixposbuffer;
 
 struct Sfxiterator
 {
@@ -67,7 +71,7 @@ struct Sfxiterator
   unsigned int part,
                numofchars,
                prefixlength;
-  GtArraySuffixptr fusp;
+  GtSuffixposbuffer fusp;
   GtSpecialrangeiterator *sri;
   GtRange overhang;
   bool exhausted;
@@ -708,7 +712,7 @@ Sfxiterator *gt_newSfxiterator(const GtEncseq *encseq,
     {
       sfi->sri = NULL;
     }
-    sfi->fusp.spaceSuffixptr = sfi->suffixsortspace.sortspace;
+    sfi->fusp.sssp = &sfi->suffixsortspace;
     sfi->fusp.allocatedSuffixptr = stpgetlargestwidth(sfi->suftabparts);
     sfi->overhang.start = sfi->overhang.end = 0;
   }
@@ -958,8 +962,8 @@ static void insertfullspecialrange(Sfxiterator *sfi,
   {
     if (GT_ISDIRREVERSE(sfi->readmode))
     {
-      SUFFIXPTRSET(sfi->fusp.spaceSuffixptr,sfi->fusp.nextfreeSuffixptr,
-                   GT_REVERSEPOS(sfi->totallength,pos));
+      suffixptrset3(sfi->fusp.sssp,sfi->fusp.nextfreeSuffixptr,
+                    GT_REVERSEPOS(sfi->totallength,pos));
       sfi->fusp.nextfreeSuffixptr++;
       if (pos == leftpos)
       {
@@ -968,7 +972,7 @@ static void insertfullspecialrange(Sfxiterator *sfi,
       pos--;
     } else
     {
-      SUFFIXPTRSET(sfi->fusp.spaceSuffixptr,sfi->fusp.nextfreeSuffixptr,pos);
+      suffixptrset3(sfi->fusp.sssp,sfi->fusp.nextfreeSuffixptr,pos);
       sfi->fusp.nextfreeSuffixptr++;
       if (pos == rightpos-1)
       {
@@ -1055,8 +1059,8 @@ static void fillspecialnextpage(Sfxiterator *sfi)
       {
         if (sfi->fusp.nextfreeSuffixptr < sfi->fusp.allocatedSuffixptr)
         {
-          SUFFIXPTRSET(sfi->fusp.spaceSuffixptr,sfi->fusp.nextfreeSuffixptr,
-                       sfi->totallength);
+          suffixptrset3(sfi->fusp.sssp,sfi->fusp.nextfreeSuffixptr,
+                        sfi->totallength);
           sfi->fusp.nextfreeSuffixptr++;
           sfi->exhausted = true;
         }
