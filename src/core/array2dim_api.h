@@ -45,7 +45,8 @@
         {                                                                     \
           unsigned long gt_a2d_i;                                             \
           ARRAY2DIM = gt_malloc(sizeof *ARRAY2DIM * (ROWS));                  \
-          (ARRAY2DIM)[0] = gt_calloc((ROWS) * (COLUMNS), sizeof **ARRAY2DIM); \
+          (ARRAY2DIM)[0] = gt_calloc((size_t) ((ROWS) * (COLUMNS)),           \
+            sizeof **ARRAY2DIM);                                              \
           for (gt_a2d_i = 1UL; gt_a2d_i < (ROWS); gt_a2d_i++)                 \
             (ARRAY2DIM)[gt_a2d_i] = (ARRAY2DIM)[gt_a2d_i-1] + (COLUMNS);      \
         }
