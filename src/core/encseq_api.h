@@ -306,8 +306,8 @@ void             gt_encseq_loader_require_multiseq_support(GtEncseqLoader *el);
 /* Disables support for random access to multiple sequences in the encoded
    sequence to be loaded by <el>. That is, the .ssp table needs not be present.
    However, disabling this support will result in an error when trying to call
-   the method <gt_encseq_seqinfo()> on the <GtEncseq>
-   object created by <el>. */
+   the method <gt_encseq_seqlength()> and <gt_encseq_seqstartpos()> on
+   the <GtEncseq> object created by <el>. */
 void             gt_encseq_loader_drop_multiseq_support(GtEncseqLoader *el);
 /* Enables support for random access to multiple files in the encoded
    sequence to be loaded by <el>. That is, the .fsp table must be present.
@@ -396,8 +396,8 @@ void             gt_encseq_builder_disable_description_support(
 void             gt_encseq_builder_enable_multiseq_support(GtEncseqBuilder *eb);
 /* Disables support for random access to multiple sequences in the encoded
    sequence to be built by <eb>. Disabling this support will result in an
-   error when trying to call the method <gt_encseq_seqinfo()> on
-   the <GtEncseq> object created by <eb> */
+   error when trying to call the method <gt_encseq_seqlength()> or
+   <gt_encseq_seqstartpos()> on the <GtEncseq> object created by <eb>. */
 void             gt_encseq_builder_disable_multiseq_support(
                                                            GtEncseqBuilder *eb);
 /* Enables creation of the .esq table containing the encoded sequence itself.
