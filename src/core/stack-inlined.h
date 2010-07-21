@@ -61,7 +61,7 @@
         (S)->space = &(S)->staticspace[0]
 
 /*
-  Push a value
+  Delete the memory allocated for stack contents
 */
 
 #define GT_STACK_DELETE(S)\
@@ -100,14 +100,14 @@
         (((S)->nextfree == 0) ? true : false)
 
 /*
-  reduce the stack such that it only contains one element.
+  reduce the stack size by one
 */
 
 #define GT_STACK_DECREMENTTOP(S)\
         (S)->nextfree--
 
 /*
-  get the top of the stack
+  get the top of the stack without changing stack size
 */
 
 #define GT_STACK_TOP(S)\
