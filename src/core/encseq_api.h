@@ -229,17 +229,24 @@ void             gt_encseq_encoder_disable_description_support(
    This is a prerequisite for being able to activate description support in
    <gt_encseq_loader_require_multiseq_support()>. Activated by default. */
 void             gt_encseq_encoder_enable_multiseq_support(GtEncseqEncoder *ee);
-/* Enables support for random access to multiple files in the encoded
-   sequence encoded by <ee>. That is, the .fsp table is created.
-   Activated by default. */
-void             gt_encseq_encoder_enable_multifile_support(
-                                                           GtEncseqEncoder *ee);
 /* Disables support for random access to multiple sequences in the encoded
    sequence encoded by <ee>. That is, the .ssp table is not created.
    Encoded sequences created without this support will not be able to be
    loaded via a <GtEncseqLoader> with
    <gt_encseq_loader_require_multiseq_support()> enabled. */
 void             gt_encseq_encoder_disable_multiseq_support(
+                                                           GtEncseqEncoder *ee);
+/* Enables support for multiple files in the encoded
+   sequence encoded by <ee>. That is, the .fsp table is created.
+   Activated by default. */
+void             gt_encseq_encoder_enable_multifile_support(
+                                                           GtEncseqEncoder *ee);
+/* Disables support for multiple files in the encoded
+   sequence encoded by <ee>. That is, the .fsp table is not created.
+   Encoded sequences created without this support will not be able to be
+   loaded via a <GtEncseqLoader> with
+   <gt_encseq_loader_require_multifile_support()> enabled. */
+void             gt_encseq_encoder_disable_multifile_support(
                                                            GtEncseqEncoder *ee);
 /* Enables creation of the .esq table containing the encoded sequence itself.
    Naturally, enabled by default. */
@@ -296,18 +303,23 @@ void             gt_encseq_loader_drop_description_support(GtEncseqLoader *el);
    <gt_encseq_encoder_enable_multiseq_support()> option when encoding.
    Activated by default. */
 void             gt_encseq_loader_require_multiseq_support(GtEncseqLoader *el);
-/* Enables support for random access to multiple files in the encoded
-   sequence to be loaded by <el>. That is, the .fsp table must be present.
-   For example, this table is created by having enabled the
-   <gt_encseq_encoder_enable_multifile_support()> option when encoding.
-   Activated by default. */
-void             gt_encseq_loader_require_multifile_support(GtEncseqLoader *el);
 /* Disables support for random access to multiple sequences in the encoded
    sequence to be loaded by <el>. That is, the .ssp table needs not be present.
    However, disabling this support will result in an error when trying to call
    the method <gt_encseq_seqinfo()> on the <GtEncseq>
    object created by <el>. */
 void             gt_encseq_loader_drop_multiseq_support(GtEncseqLoader *el);
+/* Enables support for random access to multiple files in the encoded
+   sequence to be loaded by <el>. That is, the .fsp table must be present.
+   For example, this table is created by having enabled the
+   <gt_encseq_encoder_enable_multifile_support()> option when encoding.
+   Activated by default. */
+void             gt_encseq_loader_require_multifile_support(GtEncseqLoader *el);
+/* Disables support for multiple sequences in the encoded
+   sequence to be loaded by <el>. That is, the .fsp table needs not be present.
+   However, disabling this support will result in an error when trying to call
+   the <gt_encseq_file*()> methods on the <GtEncseq> object created by <el>. */
+void             gt_encseq_loader_drop_multifile_support(GtEncseqLoader *el);
 /* Requires presence of the .esq table containing the encoded sequence itself.
    Naturally, enabled by default. */
 void             gt_encseq_loader_require_esq_tab(GtEncseqLoader *el);

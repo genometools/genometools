@@ -5901,16 +5901,22 @@ void gt_encseq_encoder_enable_multiseq_support(GtEncseqEncoder *ee)
   gt_encseq_encoder_create_ssp_tab(ee);
 }
 
+void gt_encseq_encoder_disable_multiseq_support(GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  gt_encseq_encoder_do_not_create_ssp_tab(ee);
+}
+
 void gt_encseq_encoder_enable_multifile_support(GtEncseqEncoder *ee)
 {
   gt_assert(ee);
   gt_encseq_encoder_create_fsp_tab(ee);
 }
 
-void gt_encseq_encoder_disable_multiseq_support(GtEncseqEncoder *ee)
+void gt_encseq_encoder_disable_multifile_support(GtEncseqEncoder *ee)
 {
   gt_assert(ee);
-  gt_encseq_encoder_do_not_create_ssp_tab(ee);
+  gt_encseq_encoder_do_not_create_fsp_tab(ee);
 }
 
 void gt_encseq_encoder_set_input_dna(GtEncseqEncoder *ee)
@@ -6100,14 +6106,19 @@ void gt_encseq_loader_require_multiseq_support(GtEncseqLoader *el)
   gt_encseq_loader_require_ssp_tab(el);
 }
 
+void gt_encseq_loader_drop_multiseq_support(GtEncseqLoader *el)
+{
+  gt_encseq_loader_do_not_require_ssp_tab(el);
+}
+
 void gt_encseq_loader_require_multifile_support(GtEncseqLoader *el)
 {
   gt_encseq_loader_require_fsp_tab(el);
 }
 
-void gt_encseq_loader_drop_multiseq_support(GtEncseqLoader *el)
+void gt_encseq_loader_drop_multifile_support(GtEncseqLoader *el)
 {
-  gt_encseq_loader_do_not_require_ssp_tab(el);
+  gt_encseq_loader_do_not_require_fsp_tab(el);
 }
 
 void gt_encseq_loader_enable_range_iterator(GtEncseqLoader *el)
