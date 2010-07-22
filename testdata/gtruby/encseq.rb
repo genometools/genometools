@@ -96,7 +96,7 @@ def run_test_num_files(es)
 end
 
 def run_test_num_files_mem(es)
-  raise unless es.num_of_files == 0
+  raise unless es.num_of_files == 1
 end
 
 def run_test_descriptions(es)

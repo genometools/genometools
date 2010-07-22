@@ -137,7 +137,7 @@ class EncodedsequenceTest(unittest.TestCase):
         self.assertEquals(es.num_of_files(), 1)
 
     def run_test_num_files_mem(self, es):
-        self.assertEquals(es.num_of_files(), 0)
+        self.assertEquals(es.num_of_files(), 1)
 
     def run_test_descriptions(self, es):
         self.assertRaises(GTError, es.description, 2)
