@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2005-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -36,10 +36,10 @@ GthSAFilter* gth_sa_filter_new(void)
 {
   GthSAFilter *sa_filter;
   sa_filter = gt_malloc(sizeof (GthSAFilter));
-  sa_filter->min_alignmentscore = DEFAULT_MIN_ALIGNMENTSCORE;
-  sa_filter->max_alignmentscore = DEFAULT_MAX_ALIGNMENTSCORE;
-  sa_filter->min_coverage       = DEFAULT_MIN_COVERAGE;
-  sa_filter->max_coverage       = DEFAULT_MAX_COVERAGE;
+  sa_filter->min_alignmentscore = GTH_DEFAULT_MIN_ALIGNMENTSCORE;
+  sa_filter->max_alignmentscore = GTH_DEFAULT_MAX_ALIGNMENTSCORE;
+  sa_filter->min_coverage       = GTH_DEFAULT_MIN_COVERAGE;
+  sa_filter->max_coverage       = GTH_DEFAULT_MAX_COVERAGE;
   return sa_filter;
 }
 
@@ -82,9 +82,9 @@ void gth_sa_filter_register_options(GtOptionParser *op, GthSAFilter *sa_filter,
                                    "alignments to be included into the set of "
                                    "spliced alignments",
                                    &sa_filter->min_alignmentscore,
-                                   DEFAULT_MIN_ALIGNMENTSCORE,
-                                   DEFAULT_MIN_ALIGNMENTSCORE,
-                                   DEFAULT_MAX_ALIGNMENTSCORE);
+                                   GTH_DEFAULT_MIN_ALIGNMENTSCORE,
+                                   GTH_DEFAULT_MIN_ALIGNMENTSCORE,
+                                   GTH_DEFAULT_MAX_ALIGNMENTSCORE);
   if (extended_options)
     gt_option_is_extended_option(o);
   gt_option_parser_add_option(op, o);
@@ -95,29 +95,35 @@ void gth_sa_filter_register_options(GtOptionParser *op, GthSAFilter *sa_filter,
                                    "alignments to be included into the set of "
                                    "spliced alignments",
                                    &sa_filter->max_alignmentscore,
-                                   DEFAULT_MAX_ALIGNMENTSCORE,
-                                   DEFAULT_MIN_ALIGNMENTSCORE,
-                                   DEFAULT_MAX_ALIGNMENTSCORE);
+                                   GTH_DEFAULT_MAX_ALIGNMENTSCORE,
+                                   GTH_DEFAULT_MIN_ALIGNMENTSCORE,
+                                   GTH_DEFAULT_MAX_ALIGNMENTSCORE);
   if (extended_options)
     gt_option_is_extended_option(o);
   gt_option_parser_add_option(op, o);
 
   /* -mincoverage */
   o = gt_option_new_double_min_max(MINCOVERAGE_OPT_CSTR, "set the minimum "
-                                "coverage for spliced alignments to be "
-                                "included into the set of spliced alignments",
-                                &sa_filter->min_coverage, DEFAULT_MIN_COVERAGE,
-                                DEFAULT_MIN_COVERAGE, DEFAULT_MAX_COVERAGE);
+                                   "coverage for spliced alignments to be "
+                                   "included into the set of spliced "
+                                   "alignments",
+                                   &sa_filter->min_coverage,
+                                   GTH_DEFAULT_MIN_COVERAGE,
+                                   GTH_DEFAULT_MIN_COVERAGE,
+                                   GTH_DEFAULT_MAX_COVERAGE);
   if (extended_options)
     gt_option_is_extended_option(o);
   gt_option_parser_add_option(op, o);
 
   /* -maxcoverage */
   o = gt_option_new_double_min_max(MAXCOVERAGE_OPT_CSTR, "set the maximum "
-                                "coverage for spliced alignments to be "
-                                "included into the set of spliced alignments",
-                                &sa_filter->max_coverage, DEFAULT_MAX_COVERAGE,
-                                DEFAULT_MIN_COVERAGE, DEFAULT_MAX_COVERAGE);
+                                   "coverage for spliced alignments to be "
+                                   "included into the set of spliced "
+                                   "alignments",
+                                   &sa_filter->max_coverage,
+                                   GTH_DEFAULT_MAX_COVERAGE,
+                                   GTH_DEFAULT_MIN_COVERAGE,
+                                   GTH_DEFAULT_MAX_COVERAGE);
   if (extended_options)
     gt_option_is_extended_option(o);
   gt_option_parser_add_option(op, o);
@@ -180,13 +186,13 @@ bool gth_sa_filter_filter_sa(const GthSAFilter *sa_filter, GthSA *sa)
 {
   gt_assert(sa_filter && sa);
   /* alignment score is larger or equal then default min value */
-  gt_assert(gth_sa_score(sa) >= DEFAULT_MIN_ALIGNMENTSCORE);
+  gt_assert(gth_sa_score(sa) >= GTH_DEFAULT_MIN_ALIGNMENTSCORE);
   /* alignment score is smaller or equal then default max value */
-  gt_assert(gth_sa_score(sa) <= DEFAULT_MAX_ALIGNMENTSCORE);
+  gt_assert(gth_sa_score(sa) <= GTH_DEFAULT_MAX_ALIGNMENTSCORE);
   /* coverage is larger or equal then default min value */
-  gt_assert(gth_sa_coverage(sa) >= DEFAULT_MIN_COVERAGE);
+  gt_assert(gth_sa_coverage(sa) >= GTH_DEFAULT_MIN_COVERAGE);
   /* coverage score is smaller or equal then default max value */
-  gt_assert(gth_sa_coverage(sa) <= DEFAULT_MAX_COVERAGE);
+  gt_assert(gth_sa_coverage(sa) <= GTH_DEFAULT_MAX_COVERAGE);
 
   /* filter */
   if (gth_sa_score(sa)    < sa_filter->min_alignmentscore ||

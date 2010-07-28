@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2005-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -31,24 +31,28 @@ GthSpliceSiteModel* gth_splice_site_model_new(void)
 {
   GthSpliceSiteModel *ssm = gt_malloc(sizeof *ssm);
 
-  ssm->useU12intronmodel = !DEFAULT_DISABLEU12INTRONMODEL;
+  ssm->useU12intronmodel = !GTH_DEFAULT_DISABLEU12INTRONMODEL;
 
-  SET_PROB_VALUE(genericGTdonorprob, DEFAULT_GENERIC_GT_DONORPROB);
-  SET_PROB_VALUE(nongenericGTdonorprob, DEFAULT_NONGENERIC_GT_DONORPROB);
-  SET_PROB_VALUE(genericGCdonorprob, DEFAULT_GENERIC_GC_DONORPROB);
-  SET_PROB_VALUE(nongenericGCdonorprob, DEFAULT_NONGENERIC_GC_DONORPROB);
-  SET_PROB_VALUE(genericATdonorprob, DEFAULT_GENERIC_AT_DONORPROB);
-  SET_PROB_VALUE(nongenericATdonorprob, DEFAULT_NONGENERIC_AT_DONORPROB);
-  SET_PROB_VALUE(genericAGacceptorprob, DEFAULT_GENERIC_AG_ACCEPTORPROB);
-  SET_PROB_VALUE(nongenericAGacceptorprob, DEFAULT_NONGENERIC_AG_ACCEPTORPROB);
-  SET_PROB_VALUE(genericACacceptorprob, DEFAULT_GENERIC_AC_ACCEPTORPROB);
-  SET_PROB_VALUE(nongenericACacceptorprob, DEFAULT_NONGENERIC_AC_ACCEPTORPROB);
-  SET_PROB_VALUE(genericothersplicesitep, DEFAULT_GENERIC_OTHERSPLICESITEPROB);
+  SET_PROB_VALUE(genericGTdonorprob, GTH_DEFAULT_GENERIC_GT_DONORPROB);
+  SET_PROB_VALUE(nongenericGTdonorprob, GTH_DEFAULT_NONGENERIC_GT_DONORPROB);
+  SET_PROB_VALUE(genericGCdonorprob, GTH_DEFAULT_GENERIC_GC_DONORPROB);
+  SET_PROB_VALUE(nongenericGCdonorprob, GTH_DEFAULT_NONGENERIC_GC_DONORPROB);
+  SET_PROB_VALUE(genericATdonorprob, GTH_DEFAULT_GENERIC_AT_DONORPROB);
+  SET_PROB_VALUE(nongenericATdonorprob, GTH_DEFAULT_NONGENERIC_AT_DONORPROB);
+  SET_PROB_VALUE(genericAGacceptorprob, GTH_DEFAULT_GENERIC_AG_ACCEPTORPROB);
+  SET_PROB_VALUE(nongenericAGacceptorprob,
+                 GTH_DEFAULT_NONGENERIC_AG_ACCEPTORPROB);
+  SET_PROB_VALUE(genericACacceptorprob, GTH_DEFAULT_GENERIC_AC_ACCEPTORPROB);
+  SET_PROB_VALUE(nongenericACacceptorprob,
+                 GTH_DEFAULT_NONGENERIC_AC_ACCEPTORPROB);
+  SET_PROB_VALUE(genericothersplicesitep,
+                 GTH_DEFAULT_GENERIC_OTHERSPLICESITEPROB);
   SET_PROB_VALUE(nongenericothersplicesitep,
-                 DEFAULT_NONGENERIC_OTHERSPLICESITEPROB);
-  gth_splice_site_model_set_U12typedonorprob(ssm, DEFAULT_U12_TYPEDONORPROB);
+                 GTH_DEFAULT_NONGENERIC_OTHERSPLICESITEPROB);
+  gth_splice_site_model_set_U12typedonorprob(ssm,
+                                             GTH_DEFAULT_U12_TYPEDONORPROB);
   gth_splice_site_model_set_U12typedonorprob_one_mismatch(ssm,
-                                          DEFAULT_U12_TYPEDONORPROBONEMISMATCH);
+                                      GTH_DEFAULT_U12_TYPEDONORPROBONEMISMATCH);
 
   ssm->bssm_param = NULL;
 

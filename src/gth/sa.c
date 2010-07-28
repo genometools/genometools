@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -1263,12 +1263,12 @@ void gth_sa_show(GthSA *sa, GthInput *input, GtFile *outfp)
   gth_input_load_genomic_file(input, sa->gen_file_num, false);
   gth_input_load_reference_file(input, sa->ref_file_num, false);
   sa_visitor = gth_txt_sa_visitor_new(input,
-                                      DEFAULT_GS2OUT,
+                                      GTH_DEFAULT_GS2OUT,
                                       GTH_DEFAULT_DPMININTRONLENGTH,
                                       6, /* XXX */
-                                      DEFAULT_SHOWINTRONMAXLEN,
-                                      DEFAULT_TRANSLATIONTABLE,
-                                      DEFAULT_SHOWSEQNUMS,
+                                      GTH_DEFAULT_SHOWINTRONMAXLEN,
+                                      GTH_DEFAULT_TRANSLATIONTABLE,
+                                      GTH_DEFAULT_SHOWSEQNUMS,
                                       outfp);
   gth_sa_visitor_visit_sa(sa_visitor, sa);
   gth_sa_visitor_delete(sa_visitor);

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2004-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2004-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -80,10 +80,10 @@ GthStat *gth_stat_new(void)
 
   stat = gt_malloc(sizeof (GthStat));
 
-  stat->exondistri       = DEFAULT_EXONDISTRI;
-  stat->introndistri     = DEFAULT_INTRONDISTRI;
-  stat->matchnumdistri   = DEFAULT_MATCHNUMDISTRI;
-  stat->refseqcovdistri  = DEFAULT_REFSEQCOVDISTRI;
+  stat->exondistri       = GTH_DEFAULT_EXONDISTRI;
+  stat->introndistri     = GTH_DEFAULT_INTRONDISTRI;
+  stat->matchnumdistri   = GTH_DEFAULT_MATCHNUMDISTRI;
+  stat->refseqcovdistri  = GTH_DEFAULT_REFSEQCOVDISTRI;
   stat->sa_stats         = false;
   stat->gthfilestat_mode = false;
 

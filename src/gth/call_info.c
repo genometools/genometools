@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -32,17 +32,17 @@ GthCallInfo* gth_call_info_new(const char *progname)
   call_info->dp_options_core          = gth_dp_options_core_new();
   call_info->dp_options_est           = gth_dp_options_est_new();
   call_info->dp_options_postpro       = gth_dp_options_postpro_new();
-  call_info->translationtable         = DEFAULT_TRANSLATIONTABLE;
-  call_info->out->skipalignmentout    = DEFAULT_SKIPALIGNMENTOUT;
+  call_info->translationtable         = GTH_DEFAULT_TRANSLATIONTABLE;
+  call_info->out->skipalignmentout    = GTH_DEFAULT_SKIPALIGNMENTOUT;
   call_info->speciesnum               = NUMOFSPECIES;
 
   /* set the DP options to default values */
   call_info->out->showverbose         = NULL;
   call_info->out->showverboseVM       = NULL;
 
-  call_info->out->comments            = DEFAULT_COMMENTS;
-  call_info->out->verboseseqs         = DEFAULT_VERBOSESEQS;
-  call_info->out->xmlout              = DEFAULT_XMLOUT;
+  call_info->out->comments            = GTH_DEFAULT_COMMENTS;
+  call_info->out->verboseseqs         = GTH_DEFAULT_VERBOSESEQS;
+  call_info->out->xmlout              = GTH_DEFAULT_XMLOUT;
   call_info->out->gff3out             = false;
 
   /* init the spliced alignment filter */

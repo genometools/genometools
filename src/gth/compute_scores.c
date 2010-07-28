@@ -719,7 +719,7 @@ void gth_compute_scores(GthSA *sa,
   }
 
   /* test the assumption that the coverage is never larger then the default */
-  gt_assert(gth_sa_coverage(sa) <= DEFAULT_MAX_COVERAGE);
+  gt_assert(gth_sa_coverage(sa) <= GTH_DEFAULT_MAX_COVERAGE);
 
   /* compute poly(A) tail position */
   gth_sa_calc_polyAtailpos(sa, ref_seq_tran, ref_alphabet);

@@ -78,7 +78,7 @@ GthInput *gth_input_new(GthInputFilePreprocessor file_preprocessor,
   input->gen_file_num = GT_UNDEF_ULONG;
   input->ref_file_num = GT_UNDEF_ULONG;
   input->seq_col_constructor = seq_col_constructor;
-  input->proteinsmap = gt_str_new_cstr(DEFAULT_PROTEINSMAP);
+  input->proteinsmap = gt_str_new_cstr(GTH_DEFAULT_PROTEINSMAP);
   input->bssmfile = gt_str_new();
   input->searchmode = GTHFORWARD | GTHREVERSE;
   input->genomic_translate = GT_UNDEF_BOOL;
@@ -846,10 +846,12 @@ int gth_input_make_indices(GthInput *input, const char *progname, GtError *err)
   gt_assert(input);
   out = gthoutput_new();
   had_err = input->file_preprocessor(input, true, false, false, false, false,
-                                     false, progname, DEFAULT_TRANSLATIONTABLE,
-                                     out, err);
-  if (!had_err)
-    had_err = gth_input_load_scorematrix(input, DEFAULT_SCOREMATRIX, out, err);
+                                     false, progname,
+                                     GTH_DEFAULT_TRANSLATIONTABLE, out, err);
+  if (!had_err) {
+    had_err = gth_input_load_scorematrix(input, GTH_DEFAULT_SCOREMATRIX, out,
+                                         err);
+  }
   gthoutput_delete(out);
   return had_err;
 }
