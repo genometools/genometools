@@ -28,6 +28,8 @@ GtRegionMapping* gt_region_mapping_new_mapping(GtStr *mapping_filename,
                                                GtError*);
 GtRegionMapping* gt_region_mapping_new_seqfile(GtStr *sequence_filename,
                                                bool usedesc);
+GtRegionMapping* gt_region_mapping_new_rawseq(const char *rawseq,
+                                              unsigned long length);
 GtRegionMapping* gt_region_mapping_ref(GtRegionMapping*);
 int              gt_region_mapping_get_raw_sequence(GtRegionMapping*,
                                                     const char **rawseq,

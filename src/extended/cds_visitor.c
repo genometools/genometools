@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
+  copyright (c) 2006-2010 gordon gremme <gremme@zbh.uni-hamburg.de>
+  copyright (c) 2006-2008 center for bioinformatics, university of hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -37,12 +37,9 @@ struct GtCDSVisitor {
        final_stop_codon;
 };
 
-#define cds_visitor_cast(GV)\
-        gt_node_visitor_cast(gt_cds_visitor_class(), GV)
-
 static void cds_visitor_free(GtNodeVisitor *nv)
 {
-  GtCDSVisitor *cds_visitor = cds_visitor_cast(nv);
+  GtCDSVisitor *cds_visitor = gt_cds_visitor_cast(nv);
   gt_assert(cds_visitor);
   gt_str_delete(cds_visitor->source);
   gt_splicedseq_delete(cds_visitor->splicedseq);
@@ -67,6 +64,7 @@ static int extract_cds_if_necessary(GtGenomeNode *gn, void *data,
       (gt_feature_node_get_strand(fn) == GT_STRAND_FORWARD ||
        gt_feature_node_get_strand(fn) == GT_STRAND_REVERSE)) {
     range = gt_genome_node_get_range(gn);
+    gt_assert(v->region_mapping);
     had_err = gt_region_mapping_get_raw_sequence(v->region_mapping,
                                                  &raw_sequence,
                                                  &raw_sequence_length,
@@ -238,7 +236,7 @@ static int add_cds_if_necessary(GtGenomeNode *gn, void *data, GtError *err)
 static int cds_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
                                     GtError *err)
 {
-  GtCDSVisitor *v = cds_visitor_cast(nv);
+  GtCDSVisitor *v = gt_cds_visitor_cast(nv);
   gt_error_check(err);
   return gt_genome_node_traverse_children((GtGenomeNode*) fn, v,
                                           add_cds_if_necessary, false, err);
@@ -264,9 +262,8 @@ GtNodeVisitor* gt_cds_visitor_new(GtRegionMapping *region_mapping,
 {
   GtNodeVisitor *nv;
   GtCDSVisitor *cds_visitor;
-  gt_assert(region_mapping);
   nv = gt_node_visitor_create(gt_cds_visitor_class());
-  cds_visitor = cds_visitor_cast(nv);
+  cds_visitor = gt_cds_visitor_cast(nv);
   cds_visitor->minorflen = minorflen;
   cds_visitor->source = gt_str_ref(source);
   cds_visitor->splicedseq = gt_splicedseq_new();
@@ -274,4 +271,12 @@ GtNodeVisitor* gt_cds_visitor_new(GtRegionMapping *region_mapping,
   cds_visitor->start_codon = start_codon;
   cds_visitor->final_stop_codon = final_stop_codon;
   return nv;
+}
+
+void gt_cds_visitor_set_region_mapping(GtCDSVisitor *cds_visitor,
+                                       GtRegionMapping *region_mapping)
+{
+  gt_assert(cds_visitor && region_mapping);
+  gt_region_mapping_delete(cds_visitor->region_mapping);
+  cds_visitor->region_mapping = gt_region_mapping_ref(region_mapping);
 }

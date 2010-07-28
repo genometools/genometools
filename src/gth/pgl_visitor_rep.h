@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2008-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -25,6 +25,7 @@ struct GthPGLVisitorClass {
   size_t size;
   void (*free)(GthPGLVisitor*);
   void (*preface)(GthPGLVisitor*, unsigned long num_of_pgls);
+  void (*set_region_mapping)(GthPGLVisitor*, GtRegionMapping*);
   void (*visit_pgl)(GthPGLVisitor*, GthPGL*, unsigned long pglnum);
   void (*trailer)(GthPGLVisitor*);
 };

@@ -16,6 +16,7 @@
 */
 
 #include "core/unused_api.h"
+#include "extended/cds_visitor.h"
 #include "extended/gff3_visitor.h"
 #include "gth/indent.h"
 #include "gth/ags.h"
@@ -28,7 +29,8 @@ struct GthGFF3PGLVisitor {
   GthInput *input;
   GthRegionFactory *region_factory;
   GtStr *gthsourcetag;
-  GtNodeVisitor *gff3_visitor;
+  GtNodeVisitor *cds_visitor,
+                *gff3_visitor;
 };
 
 #define gff3_pgl_visitor_cast(GV)\
@@ -38,6 +40,7 @@ static void gff3_pgl_visitor_free(GthPGLVisitor *pgl_visitor)
 {
   GthGFF3PGLVisitor *visitor = gff3_pgl_visitor_cast(pgl_visitor);
   gt_node_visitor_delete(visitor->gff3_visitor);
+  gt_node_visitor_delete(visitor->cds_visitor);
   gt_str_delete(visitor->gthsourcetag);
   gth_region_factory_delete(visitor->region_factory);
 }
@@ -48,6 +51,16 @@ static void gff3_pgl_visitor_preface(GthPGLVisitor *pgl_visitor,
   GthGFF3PGLVisitor *visitor = gff3_pgl_visitor_cast(pgl_visitor);
   gth_region_factory_make(visitor->region_factory, visitor->gff3_visitor,
                           visitor->input);
+}
+
+static void gff3_pgl_visitor_set_region_mapping(GthPGLVisitor *pgl_visitor,
+                                                GtRegionMapping *region_mapping)
+{
+  GthGFF3PGLVisitor *visitor;
+  gt_assert(pgl_visitor && region_mapping);
+  visitor = gff3_pgl_visitor_cast(pgl_visitor);
+  gt_cds_visitor_set_region_mapping(gt_cds_visitor_cast(visitor->cds_visitor),
+                                    region_mapping);
 }
 
 static void add_target_attributes(GtFeatureNode *mrna_feature, GthAGS *ags)
@@ -74,6 +87,7 @@ static void add_target_attributes(GtFeatureNode *mrna_feature, GthAGS *ags)
 }
 
 static void showPGLinGFF3(GthPGL *pgl, GthRegionFactory *region_factory,
+                          GtNodeVisitor *cds_visitor,
                           GtNodeVisitor *gff3_visitor, GtStr *gthsourcetag)
 {
   GthExonAGS *exon, *first_exon, *last_exon;
@@ -85,7 +99,7 @@ static void showPGLinGFF3(GthPGL *pgl, GthRegionFactory *region_factory,
   struct GthAGS *ags;
   long offset;
 
-  gt_assert(pgl && region_factory && gff3_visitor);
+  gt_assert(pgl && region_factory && cds_visitor && gff3_visitor);
 
   seqid = gth_region_factory_get_seqid(region_factory, gth_pgl_filenum(pgl),
                                        gth_pgl_seqnum(pgl));
@@ -166,6 +180,9 @@ static void showPGLinGFF3(GthPGL *pgl, GthRegionFactory *region_factory,
       gt_feature_node_add_child(mrna_feature, exon_feature);
     }
   }
+  had_err = gt_genome_node_accept((GtGenomeNode*) gene_feature, cds_visitor,
+                                  NULL);
+  gt_assert(!had_err); /* should not happen */
   had_err = gt_genome_node_accept((GtGenomeNode*) gene_feature, gff3_visitor,
                                   NULL);
   gt_assert(!had_err); /* should not happen */
@@ -178,8 +195,8 @@ static void gff3_pgl_visitor_visit_pgl(GthPGLVisitor *pgl_visitor,
 {
   GthGFF3PGLVisitor *visitor = gff3_pgl_visitor_cast(pgl_visitor);
   gt_assert(pgl);
-  showPGLinGFF3(pgl, visitor->region_factory, visitor->gff3_visitor,
-                visitor->gthsourcetag);
+  showPGLinGFF3(pgl, visitor->region_factory, visitor->cds_visitor,
+                visitor->gff3_visitor, visitor->gthsourcetag);
 }
 
 const GthPGLVisitorClass* gth_gff3_pgl_visitor_class()
@@ -187,12 +204,14 @@ const GthPGLVisitorClass* gth_gff3_pgl_visitor_class()
   static const GthPGLVisitorClass pglvc = { sizeof (GthGFF3PGLVisitor),
                                             gff3_pgl_visitor_free,
                                             gff3_pgl_visitor_preface,
+                                            gff3_pgl_visitor_set_region_mapping,
                                             gff3_pgl_visitor_visit_pgl,
                                             NULL };
   return &pglvc;
 }
 
 GthPGLVisitor* gth_gff3_pgl_visitor_new(GthInput *input, bool use_desc_ranges,
+                                        unsigned long minORFlength,
                                         GtFile *outfp)
 {
   GthPGLVisitor *pgl_visitor =
@@ -201,6 +220,9 @@ GthPGLVisitor* gth_gff3_pgl_visitor_new(GthInput *input, bool use_desc_ranges,
   visitor->input = input;
   visitor->region_factory = gth_region_factory_new(use_desc_ranges);
   visitor->gthsourcetag = gt_str_new_cstr(GTHSOURCETAG);
+  visitor->cds_visitor = gt_cds_visitor_new(NULL, minORFlength,
+                                            visitor->gthsourcetag, false,
+                                            false);
   visitor->gff3_visitor = gt_gff3_visitor_new(outfp);
   return pgl_visitor;
 }

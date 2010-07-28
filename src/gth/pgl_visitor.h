@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2008-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2008      Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -18,6 +18,7 @@
 #ifndef PGL_VISITOR_H
 #define PGL_VISITOR_H
 
+#include "extended/region_mapping.h"
 #include "gth/pgl.h"
 
 /* the ``predicted gene location visitor'' interface */
@@ -25,6 +26,7 @@ typedef struct GthPGLVisitorClass GthPGLVisitorClass;
 typedef struct GthPGLVisitor GthPGLVisitor;
 
 void gth_pgl_visitor_preface(GthPGLVisitor*, unsigned long num_of_pgls);
+void gth_pgl_visitor_set_region_mapping(GthPGLVisitor*, GtRegionMapping*);
 void gth_pgl_visitor_visit_pgl(GthPGLVisitor*, GthPGL*, unsigned long pglnum);
 void gth_pgl_visitor_trailer(GthPGLVisitor*);
 void gth_pgl_visitor_delete(GthPGLVisitor*);

@@ -25,9 +25,18 @@ typedef struct GtCDSVisitor GtCDSVisitor;
 #include "extended/region_mapping.h"
 
 const GtNodeVisitorClass* gt_cds_visitor_class(void);
-GtNodeVisitor*            gt_cds_visitor_new(GtRegionMapping*,
+/* Takes ownership of <region_mapping>. */
+GtNodeVisitor*            gt_cds_visitor_new(GtRegionMapping *region_mapping,
                                              unsigned int minorflen,
                                              GtStr *source, bool start_codon,
                                              bool final_stop_codon);
+/* Does not take ownership of <region_mapping>. */
+void                      gt_cds_visitor_set_region_mapping(GtCDSVisitor
+                                                            *cds_visitor,
+                                                            GtRegionMapping
+                                                            *region_mapping);
+
+#define                   gt_cds_visitor_cast(GV)\
+                          gt_node_visitor_cast(gt_cds_visitor_class(), GV)
 
 #endif

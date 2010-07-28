@@ -310,6 +310,7 @@ const GthPGLVisitorClass* gth_xml_pgl_visitor_class()
   static const GthPGLVisitorClass pglvc = { sizeof (GthXMLPGLVisitor),
                                             NULL,
                                             xml_pgl_visitor_preface,
+                                            NULL,
                                             xml_pgl_visitor_visit_pgl,
                                             xml_pgl_visitor_trailer };
   return &pglvc;

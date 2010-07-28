@@ -119,6 +119,7 @@ void gth_proc_sa_collection(GthSACollection *sa_collection,
     else if (call_info->out->gff3out) {
       pgl_visitor = gth_gff3_pgl_visitor_new(input,
                                              call_info->out->gff3descranges,
+                                             call_info->out->minORFlength,
                                              call_info->out->outfp);
     }
     else {

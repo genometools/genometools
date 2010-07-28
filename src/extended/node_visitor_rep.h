@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -46,7 +46,5 @@ GtNodeVisitorClass* gt_node_visitor_class_new(size_t size,
                                               GtNodeVisitorRegionNodeFunc,
                                               GtNodeVisitorSequenceNodeFunc);
 GtNodeVisitor*      gt_node_visitor_create(const GtNodeVisitorClass*);
-void*               gt_node_visitor_cast(const GtNodeVisitorClass*,
-                                         GtNodeVisitor*);
 
 #endif

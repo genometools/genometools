@@ -29,10 +29,13 @@ struct GtRegionMapping {
   GtStr *sequence_filename,
         *sequence_file, /* the (current) sequence file */
         *sequence_name; /* the (current) sequence name */
-  bool usedesc;
+  bool usedesc,
+       userawseq;
   GtMapping *mapping;
   GtBioseq *bioseq; /* the current bioseq */
   GtSeqid2SeqnumMapping *seqid2seqnum_mapping;
+  const char *rawseq;
+  unsigned long rawlength;
   unsigned int reference_count;
 };
 
@@ -60,6 +63,18 @@ GtRegionMapping* gt_region_mapping_new_seqfile(GtStr *sequence_filename,
   rm = gt_calloc(1, sizeof (GtRegionMapping));
   rm->sequence_filename = gt_str_ref(sequence_filename);
   rm->usedesc = usedesc;
+  return rm;
+}
+
+GtRegionMapping* gt_region_mapping_new_rawseq(const char *rawseq,
+                                              unsigned long length)
+{
+  GtRegionMapping *rm;
+  gt_assert(rawseq);
+  rm = gt_calloc(1, sizeof (GtRegionMapping));
+  rm->userawseq = true;
+  rm->rawseq = rawseq;
+  rm->rawlength = length;
   return rm;
 }
 
@@ -122,7 +137,8 @@ int gt_region_mapping_get_raw_sequence(GtRegionMapping *rm, const char **rawseq,
   int had_err = 0;
   gt_error_check(err);
   gt_assert(rm && rawseq && length && seqid);
-  had_err = update_bioseq_if_necessary(rm, seqid, err);
+  if (!rm->userawseq)
+    had_err = update_bioseq_if_necessary(rm, seqid, err);
   if (!had_err) {
     if (rm->usedesc) {
       unsigned long seqnum;
@@ -134,6 +150,12 @@ int gt_region_mapping_get_raw_sequence(GtRegionMapping *rm, const char **rawseq,
       *rawseq = gt_bioseq_get_sequence(rm->bioseq, seqnum);
       *length = gt_bioseq_get_sequence_length(rm->bioseq, seqnum);
       }
+    }
+    else if (rm->userawseq) {
+      gt_assert(!rm->seqid2seqnum_mapping);
+      *rawseq = rm->rawseq;
+      *length = rm->rawlength;
+      *offset = 1;
     }
     else {
       gt_assert(!rm->seqid2seqnum_mapping);

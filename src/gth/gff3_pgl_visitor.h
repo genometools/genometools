@@ -27,6 +27,7 @@ typedef struct GthGFF3PGLVisitor GthGFF3PGLVisitor;
 const GthPGLVisitorClass* gth_gff3_pgl_visitor_class(void);
 GthPGLVisitor*            gth_gff3_pgl_visitor_new(GthInput*,
                                                    bool use_desc_ranges,
+                                                   unsigned long minORFlength,
                                                    GtFile*);
 
 #endif

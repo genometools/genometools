@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2008-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2008      Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -40,6 +40,14 @@ void gth_pgl_visitor_preface(GthPGLVisitor *pglv, unsigned long num_of_pgls)
   gt_assert(pglv && pglv->c_class);
   if (pglv->c_class->preface)
     pglv->c_class->preface(pglv, num_of_pgls);
+}
+
+void gth_pgl_visitor_set_region_mapping(GthPGLVisitor *pglv,
+                                        GtRegionMapping *region_mapping)
+{
+  gt_assert(pglv && region_mapping && pglv->c_class);
+  if (pglv->c_class->set_region_mapping)
+    pglv->c_class->set_region_mapping(pglv, region_mapping);
 }
 
 void gth_pgl_visitor_visit_pgl(GthPGLVisitor *pglv, GthPGL *pgl,
