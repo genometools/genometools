@@ -171,9 +171,9 @@ static int gff3_in_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
       GtGenomeNode *last_node = NULL;
       /* a sorted stream can have at most one input file */
       gt_assert(gt_str_array_size(is->files) == 0 ||
-             gt_str_array_size(is->files) == 1);
+                gt_str_array_size(is->files) == 1);
       had_err = gt_queue_iterate(is->genome_node_buffer, buffer_is_sorted,
-                              &last_node, err);
+                                 &last_node, err);
     }
     if (!had_err) {
       *gn = gt_queue_get(is->genome_node_buffer);
