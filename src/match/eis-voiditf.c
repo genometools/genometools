@@ -15,9 +15,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/divmodmul.h"
 #include "core/encseq_metadata.h"
-#include "eis-bwtseq.h"
+#include "core/log_api.h"
 #include "eis-bwtseq-construct.h"
+#include "eis-bwtseq.h"
 #include "eis-voiditf.h"
 #include "procmatch.h"
 

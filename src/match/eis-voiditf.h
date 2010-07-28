@@ -133,6 +133,14 @@ unsigned int gt_bwtseq2maxdepth(const FMindex *fmindex);
 
 const Mbtab **gt_bwtseq2mbtab(const FMindex *fmindex);
 
+unsigned long gt_bwtrangesplitallwithspecial(Mbtab *mbtab,
+                                             unsigned long *rangeOccs,
+                                             const FMindex *voidBwtSeq,
+                                             unsigned long lbound,
+                                             unsigned long ubound);
+
+unsigned int gt_bwtseq2maxdepth(const FMindex *voidbwtseq);
+
 unsigned long gt_voidpackedindex_totallength_get(const FMindex *fmindex);
 
 #endif
