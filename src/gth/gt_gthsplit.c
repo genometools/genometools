@@ -43,7 +43,7 @@ typedef enum {
 typedef struct {
   Splitmode splitmode;
   unsigned int range;
-  GtFileMode genfilemode;
+  GtFileMode file_mode;
   GtStrArray *consensusfiles;
   bool force;
   GthSAFilter *sa_filter; /* owned */
@@ -168,12 +168,12 @@ static int store_in_subset_file(void *data, GthSA *sa,
                      store_in_subset_file_data->gthsplitinfo->range);
     gt_str_append_cstr(store_in_subset_file_data->subset_file_names[filenum],
                        gt_file_mode_suffix(store_in_subset_file_data
-                                             ->gthsplitinfo->genfilemode));
+                                             ->gthsplitinfo->file_mode));
 
     /* if not disabled by -force, check if file already exists */
     if (!store_in_subset_file_data->gthsplitinfo->force) {
       store_in_subset_file_data->subset_files[filenum] =
-        gt_file_open(store_in_subset_file_data->gthsplitinfo->genfilemode,
+        gt_file_open(store_in_subset_file_data->gthsplitinfo->file_mode,
                      gt_str_get(store_in_subset_file_data
                              ->subset_file_names[filenum]), "r", NULL);
       if (store_in_subset_file_data->subset_files[filenum]) {
@@ -188,7 +188,7 @@ static int store_in_subset_file(void *data, GthSA *sa,
       /* open split file for writing */
       store_in_subset_file_data->subset_files[filenum] =
           gt_file_xopen_w_gfmode(store_in_subset_file_data->gthsplitinfo
-                                 ->genfilemode,
+                                 ->file_mode,
                                  gt_str_get(store_in_subset_file_data
                                          ->subset_file_names[filenum]), "w");
       /* store XML header in file */
@@ -219,7 +219,7 @@ static void initGthsplitinfo(Gthsplitinfo *gthsplitinfo)
 {
   gthsplitinfo->splitmode      = UNDEF_SPLIT;
   gthsplitinfo->range          = DEFAULT_RANGE;
-  gthsplitinfo->genfilemode    = GT_FILE_MODE_UNCOMPRESSED;
+  gthsplitinfo->file_mode      = GT_FILE_MODE_UNCOMPRESSED;
   gthsplitinfo->showverbose    = NULL;
   gthsplitinfo->force          = false;
   gthsplitinfo->sa_filter      = gth_sa_filter_new();
@@ -304,9 +304,9 @@ static GtOPrval gthsplit_parse_options(int *parsed_args,
   if (oprval == GT_OPTION_PARSER_OK && verbose)
     gthsplitinfo->showverbose = gth_show_on_stdout;
   if (oprval == GT_OPTION_PARSER_OK && gzip)
-    gthsplitinfo->genfilemode = GT_FILE_MODE_GZIP;
+    gthsplitinfo->file_mode = GT_FILE_MODE_GZIP;
   if (oprval == GT_OPTION_PARSER_OK && bzip2)
-    gthsplitinfo->genfilemode = GT_FILE_MODE_BZIP2;
+    gthsplitinfo->file_mode = GT_FILE_MODE_BZIP2;
 
   /* save consensus files */
   if (oprval == GT_OPTION_PARSER_OK) {

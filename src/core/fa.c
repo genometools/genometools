@@ -82,7 +82,7 @@ void gt_fa_init(void)
 }
 
 static void* fileopen_generic(FA *fa, const char *path, const char *mode,
-                              GtFileMode genfilemode, bool x,
+                              GtFileMode file_mode, bool x,
                               const char *src_file, int src_line, GtError *err)
 {
   void  *fp = NULL;
@@ -92,7 +92,7 @@ static void* fileopen_generic(FA *fa, const char *path, const char *mode,
   fileinfo = gt_malloc(sizeof (FAFileInfo));
   fileinfo->src_file = src_file;
   fileinfo->src_line = src_line;
-  switch (genfilemode) {
+  switch (file_mode) {
     case GT_FILE_MODE_UNCOMPRESSED:
       fp = x ? gt_xfopen(path, mode) : gt_efopen(path, mode, err);
       break;
@@ -114,7 +114,7 @@ static void* fileopen_generic(FA *fa, const char *path, const char *mode,
   return fp;
 }
 
-static void fclose_generic(void *stream, GtFileMode genfilemode, FA *fa)
+static void fclose_generic(void *stream, GtFileMode file_mode, FA *fa)
 {
   FAFileInfo *fileinfo;
   gt_assert(stream && fa);
@@ -123,7 +123,7 @@ static void fclose_generic(void *stream, GtFileMode genfilemode, FA *fa)
   gt_assert(fileinfo);
   gt_hashmap_remove(fa->file_pointer, stream);
   gt_mutex_unlock(fa->file_mutex);
-  switch (genfilemode) {
+  switch (file_mode) {
     case GT_FILE_MODE_UNCOMPRESSED:
       fclose(stream);
       break;
@@ -137,7 +137,7 @@ static void fclose_generic(void *stream, GtFileMode genfilemode, FA *fa)
   }
 }
 
-static void xfclose_generic(void *stream, GtFileMode genfilemode, FA *fa)
+static void xfclose_generic(void *stream, GtFileMode file_mode, FA *fa)
 {
   FAFileInfo *fileinfo;
   gt_assert(stream && fa);
@@ -146,7 +146,7 @@ static void xfclose_generic(void *stream, GtFileMode genfilemode, FA *fa)
   gt_assert(fileinfo);
   gt_hashmap_remove(fa->file_pointer, stream);
   gt_mutex_unlock(fa->file_mutex);
-  switch (genfilemode) {
+  switch (file_mode) {
     case GT_FILE_MODE_UNCOMPRESSED:
       gt_xfclose(stream);
       break;

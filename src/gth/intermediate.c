@@ -563,7 +563,7 @@ bool gth_intermediate_output_is_correct(char *outputfilename,
 {
   SACollectionData sa_collection_data;
   GthSACollection *read_sa_collection;
-  GtFileMode genfilemode;
+  GtFileMode file_mode;
   bool rval;
 #ifndef NDEBUG
   unsigned long numofgenomicfiles, numofreferencefiles;
@@ -583,14 +583,14 @@ bool gth_intermediate_output_is_correct(char *outputfilename,
   sa_collection_data.sa_filter = NULL;
   sa_collection_data.stat = NULL;
 
-  /* store genfilemode */
-  genfilemode = gt_file_mode(*outfp);
+  /* store file mode */
+  file_mode = gt_file_mode(*outfp);
 
   /* close output file */
   gt_file_delete(*outfp);
 
   /* open intermediate file again for reading */
-  *outfp = gt_file_xopen_w_gfmode(genfilemode, outputfilename, "r");
+  *outfp = gt_file_xopen_w_gfmode(file_mode, outputfilename, "r");
   gt_assert(*outfp);
 
   /* read in the intermediate output */

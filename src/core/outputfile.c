@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -40,7 +40,7 @@ GtOutputFileInfo* gt_outputfileinfo_new(void)
 static int determine_outfp(void *data, GtError *err)
 {
   GtOutputFileInfo *ofi = (GtOutputFileInfo*) data;
-  GtFileMode genfilemode;
+  GtFileMode file_mode;
   int had_err = 0;
   gt_error_check(err);
   gt_assert(ofi);
@@ -49,21 +49,20 @@ static int determine_outfp(void *data, GtError *err)
   else { /* outputfile given -> create generic file pointer */
     gt_assert(!(ofi->gzip && ofi->bzip2));
     if (ofi->gzip)
-      genfilemode = GT_FILE_MODE_GZIP;
+      file_mode = GT_FILE_MODE_GZIP;
     else if (ofi->bzip2)
-      genfilemode = GT_FILE_MODE_BZIP2;
+      file_mode = GT_FILE_MODE_BZIP2;
     else
-      genfilemode = GT_FILE_MODE_UNCOMPRESSED;
-    if (genfilemode != GT_FILE_MODE_UNCOMPRESSED &&
+      file_mode = GT_FILE_MODE_UNCOMPRESSED;
+    if (file_mode != GT_FILE_MODE_UNCOMPRESSED &&
         strcmp(gt_str_get(ofi->output_filename) +
                gt_str_length(ofi->output_filename) -
-               strlen(gt_file_mode_suffix(genfilemode)),
-               gt_file_mode_suffix(genfilemode))) {
+               strlen(gt_file_mode_suffix(file_mode)),
+               gt_file_mode_suffix(file_mode))) {
       gt_warning("output file '%s' doesn't have correct suffix '%s', appending "
                  "it", gt_str_get(ofi->output_filename),
-                 gt_file_mode_suffix(genfilemode));
-      gt_str_append_cstr(ofi->output_filename,
-                         gt_file_mode_suffix(genfilemode));
+                 gt_file_mode_suffix(file_mode));
+      gt_str_append_cstr(ofi->output_filename, gt_file_mode_suffix(file_mode));
     }
     if (!ofi->force && gt_file_exists(gt_str_get(ofi->output_filename))) {
         gt_error_set(err, "file \"%s\" exists already, use option -%s to "
@@ -72,7 +71,7 @@ static int determine_outfp(void *data, GtError *err)
         had_err = -1;
     }
     if (!had_err) {
-      *ofi->outfp = gt_file_xopen_w_gfmode(genfilemode,
+      *ofi->outfp = gt_file_xopen_w_gfmode(file_mode,
                                            gt_str_get(ofi->output_filename),
                                            "w");
       gt_assert(*ofi->outfp);
@@ -82,7 +81,7 @@ static int determine_outfp(void *data, GtError *err)
 }
 
 void gt_outputfile_register_options(GtOptionParser *op, GtFile **outfp,
-                                 GtOutputFileInfo *ofi)
+                                    GtOutputFileInfo *ofi)
 {
   GtOption *opto, *optgzip, *optbzip2, *optforce;
   gt_assert(outfp && ofi);
