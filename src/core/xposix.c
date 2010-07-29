@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2005-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -89,6 +89,14 @@ int gt_xopen(const char *path, int flags, mode_t mode)
   }
 
   return fd;
+}
+
+void gt_xmkdir(const char *path)
+{
+  if (mkdir(path, S_IRWXU | S_IRWXG | S_IRWXO)) {
+    perror("cannot mkdir");
+    exit(EXIT_FAILURE);
+  }
 }
 
 int gt_xmkstemp(char *temp)

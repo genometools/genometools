@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2005-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -47,6 +47,7 @@ void   gt_xgetrusage(int who, struct rusage *rusage);
 void   gt_xglob(const char *pattern, int flags,
                 int (*errfunc)(const char*, int), glob_t *pglob);
 int    gt_xopen(const char *path, int flags, mode_t mode);
+void   gt_xmkdir(const char *path);
 int    gt_xmkstemp(char *temp);
 /* low-level wrapper for the mmap() routine */
 void*  gt_xmmap(void *addr, size_t len, int prot, int flags, int fd,
