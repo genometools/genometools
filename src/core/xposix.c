@@ -94,7 +94,8 @@ int gt_xopen(const char *path, int flags, mode_t mode)
 void gt_xmkdir(const char *path)
 {
   if (mkdir(path, S_IRWXU | S_IRWXG | S_IRWXO)) {
-    perror("cannot mkdir");
+    fprintf(stderr, "mkdir(): cannot make directory '%s': %s\n", path,
+            strerror(errno));
     exit(EXIT_FAILURE);
   }
 }
