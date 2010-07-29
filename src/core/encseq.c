@@ -6443,6 +6443,7 @@ GtEncseq* gt_encseq_builder_build(GtEncseqBuilder *eb,
   encseq->plainseq = eb->plainseq;
   encseq->filenametab = gt_str_array_new();
   gt_str_array_add_cstr(encseq->filenametab, "generated");
+  encseq->numofdbfiles = 1UL;
   encseq->hasplainseqptr = !(eb->own);
   if (eb->wdestab) {
     encseq->hasallocateddestab = true;
@@ -6592,7 +6593,7 @@ void gt_encseq_builder_delete(GtEncseqBuilder *eb)
 unsigned long gt_encseq_num_of_files(const GtEncseq *encseq)
 {
   gt_assert(encseq && encseq->filenametab);
-  return gt_str_array_size(encseq->filenametab);
+  return encseq->numofdbfiles;
 }
 
 uint64_t gt_encseq_effective_filelength(const GtEncseq *encseq,
@@ -6600,7 +6601,7 @@ uint64_t gt_encseq_effective_filelength(const GtEncseq *encseq,
 {
   unsigned long num_files;
   gt_assert(encseq && encseq->filenametab);
-  num_files = gt_str_array_size(encseq->filenametab);
+  num_files = encseq->numofdbfiles;
   gt_assert(filenum < num_files);
   return encseq->filelengthtab[filenum].effectivelength;
 }
