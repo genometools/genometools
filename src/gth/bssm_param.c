@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2005 Michael E Sparks <mespar1@iastate.edu>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
@@ -430,11 +430,30 @@ int gth_bssm_param_save(GthBssmParam *bssm_param, const char *filename,
   return had_err;
 }
 
+static bool bssm_model_is_seven_class(const GthBssmModel *bssm_model)
+{
+  gt_assert(bssm_model);
+  return bssm_model->hypothesisnum == HYPOTHESIS7;
+}
+
+bool gth_bssm_param_is_seven_class(const GthBssmParam  *bssm_param)
+{
+  gt_assert(bssm_param);
+  return (!bssm_param->gt_donor_model_set ||
+          bssm_model_is_seven_class(&bssm_param->gt_donor_model)) &&
+         (!bssm_param->gc_donor_model_set ||
+          bssm_model_is_seven_class(&bssm_param->gc_donor_model)) &&
+         (!bssm_param->ag_acceptor_model_set ||
+          bssm_model_is_seven_class(&bssm_param->ag_acceptor_model));
+}
+
 /* The following function outouts <bssm_model>.
    It is assumed that the Hypo7table is used. */
 static void bssm_model_echo(const GthBssmModel *bssm_model, FILE *outfp)
 {
   unsigned long i, j, k, l;
+
+  gt_assert(bssm_model_is_seven_class(bssm_model));
 
   for (i = 0; i < HYPOTHESIS7; i++) {
     fprintf(outfp,"\n\nHypothesis: %lu", i);

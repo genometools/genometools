@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2005 Michael E Sparks <mespar1@iastate.edu>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
@@ -52,6 +52,8 @@ void          gth_bssm_param_delete(GthBssmParam*);
 /* Save the data contained in <bssm_param> to a file named <filename>. */
 int           gth_bssm_param_save(GthBssmParam*, const char *filename,
                                   GtError*);
+/* Returns <true>, if <bssm_param> is a seven-class model. <false> otherwise. */
+bool          gth_bssm_param_is_seven_class(const GthBssmParam *bssm_param);
 /* Prints the contents of the bssm parameterization <bssm_param> to <outfp>. */
 void          gth_bssm_param_echo(const GthBssmParam *bssm_param, FILE *outfp);
 void          gth_bssm_param_show_info(const GthBssmParam*, GtFile *outfp);
