@@ -240,7 +240,7 @@ static GtOPrval gthsplit_parse_options(int *parsed_args,
 {
   GtOptionParser *op;
   GtOption *optalignmentscore, *optcoverage, *optrange, *optverbose, *optgzip,
-         *optbzip2, *optforce;
+           *optbzip2, *optforce;
   bool alignmentscore, coverage, verbose, gzip, bzip2;
   GtOPrval oprval;
 
@@ -320,7 +320,7 @@ static GtOPrval gthsplit_parse_options(int *parsed_args,
       !gt_str_array_size(gthsplitinfo->consensusfiles) &&
       (gt_option_is_set(optgzip) || gt_option_is_set(optbzip2))) {
     gt_error_set(err, "to use compression, at least on input file has to be "
-                   "supplied");
+                      "supplied");
     oprval = GT_OPTION_PARSER_ERROR;
   }
 
