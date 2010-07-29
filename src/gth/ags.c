@@ -42,7 +42,7 @@ GthAGS* gth_ags_new(const GthPGL *pgl)
   ags->alignments = gt_array_new(sizeof (GthSA*));
 
   ags->numofstoredsaclusters = 0;
-  ags->overallscore = UNDEF_GTHDBL;
+  ags->overallscore = GTH_UNDEF_GTHDBL;
 
   return ags;
 }

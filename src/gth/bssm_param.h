@@ -39,8 +39,8 @@ typedef enum {
   NUMOFTYPES
 } Termtype;
 
-#define UNDEF_GTHFLT  FLT_MAX
-#define UNDEF_GTHDBL  DBL_MAX
+#define GTH_UNDEF_GTHFLT  FLT_MAX
+#define GTH_UNDEF_GTHDBL  DBL_MAX
 
 #define BSSMFILEENDING          "bssm"
 

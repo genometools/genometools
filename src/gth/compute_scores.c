@@ -648,12 +648,12 @@ void gth_compute_scores(GthSA *sa,
   data.exon.rightgenomicexonborder    = GT_UNDEF_ULONG;
   data.exon.leftreferenceexonborder   = GT_UNDEF_ULONG;
   data.exon.rightreferenceexonborder  = GT_UNDEF_ULONG;
-  data.exon.exonscore                 = UNDEF_GTHDBL;
+  data.exon.exonscore                 = GTH_UNDEF_GTHDBL;
 
-  data.intron.donorsiteprobability    = UNDEF_GTHFLT;
-  data.intron.acceptorsiteprobability = UNDEF_GTHFLT;
-  data.intron.donorsitescore          = UNDEF_GTHDBL;
-  data.intron.acceptorsitescore       = UNDEF_GTHDBL;
+  data.intron.donorsiteprobability    = GTH_UNDEF_GTHFLT;
+  data.intron.acceptorsiteprobability = GTH_UNDEF_GTHFLT;
+  data.intron.donorsitescore          = GTH_UNDEF_GTHDBL;
+  data.intron.acceptorsitescore       = GTH_UNDEF_GTHDBL;
 
   data.sa                             = sa;
   data.dp_param                       = dp_param;

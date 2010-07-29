@@ -25,8 +25,8 @@ static int compareAGSs(const void *dataA, const void *dataB)
 {
   GthAGS *agsA = *(GthAGS**) dataA;
   GthAGS *agsB = *(GthAGS**) dataB;
-  gt_assert(agsA->overallscore != UNDEF_GTHDBL);
-  gt_assert(agsB->overallscore != UNDEF_GTHDBL);
+  gt_assert(agsA->overallscore != GTH_UNDEF_GTHDBL);
+  gt_assert(agsB->overallscore != GTH_UNDEF_GTHDBL);
   if (agsA->overallscore < agsB->overallscore)
     return 1;
   if (agsA->overallscore > agsB->overallscore)
