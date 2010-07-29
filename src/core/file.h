@@ -30,7 +30,7 @@ typedef enum {
 
 /* Returns GFM_GZIP if file with <path> ends with '.gz', GFM_BZIP2 if it ends
    with '.bz2', and GFM_UNCOMPRESSED otherwise. */
-GtFileMode gt_file_mode_determine(const char *path);
+GtFileMode  gt_file_mode_determine(const char *path);
 
 /* Returns ".gz" if <mode> is GFM_GZIP, ".bz2" if <mode> is GFM_BZIP2, and ""
    otherwise. */
@@ -42,24 +42,24 @@ size_t      gt_file_basename_length(const char *path);
 
 /* Create a new GtFile object and open the underlying file handle, returns
    NULL and sets <err> if the file <path> could not be opened. */
-GtFile*    gt_file_open(GtFileMode, const char *path,
-                               const char *mode, GtError*);
+GtFile*     gt_file_open(GtFileMode, const char *path, const char *mode,
+                         GtError*);
 
 /* Create a new GtFile object and open the underlying file handle, abort if
    the file <path> does not exist. The GtFileMode has to be given
    explicitly. */
-GtFile*    gt_file_xopen_w_gfmode(GtFileMode, const char *path,
-                                         const char *mode);
+GtFile*     gt_file_xopen_w_gfmode(GtFileMode, const char *path,
+                                   const char *mode);
 
 /* Create a new GtFile object and open the underlying file handle. Aborts if
    the file <path> could not be opened. The GtFileMode is determined
    automatically via gt_file_mode_determine(path). */
-GtFile*    gt_file_xopen(const char *path, const char *mode);
+GtFile*     gt_file_xopen(const char *path, const char *mode);
 
 /* Create a new GtFile object from a normal file pointer. */
-GtFile*    gt_file_new_from_fileptr(FILE*);
+GtFile*     gt_file_new_from_fileptr(FILE*);
 
-GtFileMode gt_file_mode(const GtFile*);
+GtFileMode  gt_file_mode(const GtFile*);
 
 /* Return next character from <file> of EOF, if end-of-file is reached. */
 int         gt_file_xfgetc(GtFile *file);
