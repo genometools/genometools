@@ -51,7 +51,7 @@ static GtOPrval gthbssmprint_parse_options(int *parsed_args, int argc,
 int gt_gthbssmprint(int argc, const char **argv,
                     GtShowVersionFunc gth_version_func, GtError *err)
 {
-  GthBssmParam *bssm_param; /* stores model parameterization */
+  GthBSSMParam *bssm_param; /* stores model parameterization */
   int parsed_args, had_err = 0;
 
   /* verify command line specification of a parameter file to inspect */

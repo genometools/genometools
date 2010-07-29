@@ -58,7 +58,7 @@ int gt_gthmkbssmfiles(int argc, const char **argv, GtError *err)
   filename = gt_str_new();
 
   for (i = 0; !had_err && i <= LASTSPECIESNUM; i++) {
-    GthBssmParam *bssm_param;
+    GthBSSMParam *bssm_param;
     gt_str_append_cstr(filename, argv[parsed_args]);
     gt_str_append_char(filename, '/');
     gt_str_append_cstr(filename, speciestab[i]);

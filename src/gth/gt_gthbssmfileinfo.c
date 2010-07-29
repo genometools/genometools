@@ -40,7 +40,7 @@ static GtOPrval gthbssmfileinfo_parse_options(int *parsed_args, int argc,
 int gt_gthbssmfileinfo(int argc, const char **argv,
                        GtShowVersionFunc gth_version_func, GtError *err)
 {
-  GthBssmParam *bssm_param;
+  GthBSSMParam *bssm_param;
   GtStr *bssm_param_filename;
   int parsed_args, had_err = 0;
 

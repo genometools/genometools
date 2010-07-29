@@ -69,7 +69,7 @@ struct GthSpliceSiteModel {
          log_U12typedonorprobonemismatch,
          log1minus_U12typedonorprobonemismatch;
 
-  GthBssmParam *bssm_param; /* contains bssm parameters or is NULL,
+  GthBSSMParam *bssm_param; /* contains bssm parameters or is NULL,
                               if generic parameters are used. */
 };
 

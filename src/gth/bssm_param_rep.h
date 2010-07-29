@@ -41,15 +41,15 @@ typedef struct {
     Hypo2table hypo2table;
     Hypo7table hypo7table;
   } hypotables;
-} GthBssmModel;
+} GthBSSMModel;
 
-struct GthBssmParam{
+struct GthBSSMParam{
   unsigned char versionnum;   /* contains version number of the BSSM parameter
                                  structure */
   bool gt_donor_model_set,    /* use GT donor site model */
        gc_donor_model_set,    /* use GC donor site model */
        ag_acceptor_model_set; /* use AG acceptor site model */
-  GthBssmModel gt_donor_model,
+  GthBSSMModel gt_donor_model,
                gc_donor_model,
                ag_acceptor_model;
 };

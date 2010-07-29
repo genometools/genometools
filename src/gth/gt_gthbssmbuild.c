@@ -142,7 +142,7 @@ static void freecommandlineopts(Commandlineopts *commandlineopts)
 int gt_gthbssmbuild(int argc, const char **argv,
                     GtShowVersionFunc gth_version_func, GtError *err)
 {
-  GthBssmParam *bssm_param; /* stores model parameterization  */
+  GthBSSMParam *bssm_param; /* stores model parameterization  */
   Commandlineopts commandlineopts;
   int parsed_args, had_err = 0;
 
