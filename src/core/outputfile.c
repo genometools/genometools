@@ -71,9 +71,9 @@ static int determine_outfp(void *data, GtError *err)
         had_err = -1;
     }
     if (!had_err) {
-      *ofi->outfp = gt_file_xopen_w_gfmode(file_mode,
-                                           gt_str_get(ofi->output_filename),
-                                           "w");
+      *ofi->outfp = gt_file_xopen_file_mode(file_mode,
+                                            gt_str_get(ofi->output_filename),
+                                            "w");
       gt_assert(*ofi->outfp);
     }
   }

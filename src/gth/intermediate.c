@@ -590,7 +590,7 @@ bool gth_intermediate_output_is_correct(char *outputfilename,
   gt_file_delete(*outfp);
 
   /* open intermediate file again for reading */
-  *outfp = gt_file_xopen_w_gfmode(file_mode, outputfilename, "r");
+  *outfp = gt_file_xopen_file_mode(file_mode, outputfilename, "r");
   gt_assert(*outfp);
 
   /* read in the intermediate output */

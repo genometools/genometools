@@ -187,10 +187,11 @@ static int store_in_subset_file(void *data, GthSA *sa,
     if (!had_err) {
       /* open split file for writing */
       store_in_subset_file_data->subset_files[filenum] =
-          gt_file_xopen_w_gfmode(store_in_subset_file_data->gthsplitinfo
-                                 ->file_mode,
-                                 gt_str_get(store_in_subset_file_data
-                                         ->subset_file_names[filenum]), "w");
+          gt_file_xopen_file_mode(store_in_subset_file_data->gthsplitinfo
+                                  ->file_mode,
+                                  gt_str_get(store_in_subset_file_data
+                                             ->subset_file_names[filenum]),
+                                  "w");
       /* store XML header in file */
       gth_xml_show_leader(true,
                           store_in_subset_file_data->subset_files[filenum]);

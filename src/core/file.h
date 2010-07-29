@@ -48,8 +48,8 @@ GtFile*     gt_file_open(GtFileMode, const char *path, const char *mode,
 /* Create a new GtFile object and open the underlying file handle, abort if
    the file <path> does not exist. The <file_mode> has to be given
    explicitly. */
-GtFile*     gt_file_xopen_w_gfmode(GtFileMode file_mode, const char *path,
-                                   const char *mode);
+GtFile*     gt_file_xopen_file_mode(GtFileMode file_mode, const char *path,
+                                    const char *mode);
 
 /* Create a new GtFile object and open the underlying file handle. Aborts if
    the file <path> could not be opened. The GtFileMode is determined

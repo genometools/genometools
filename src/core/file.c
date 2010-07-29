@@ -136,8 +136,8 @@ GtFile* gt_file_open(GtFileMode file_mode, const char *path, const char *mode,
   return file;
 }
 
-GtFile* gt_file_xopen_w_gfmode(GtFileMode file_mode, const char *path,
-                               const char *mode)
+GtFile* gt_file_xopen_file_mode(GtFileMode file_mode, const char *path,
+                                const char *mode)
 {
   GtFile *file;
   gt_assert(mode);
@@ -170,7 +170,7 @@ GtFile* gt_file_xopen_w_gfmode(GtFileMode file_mode, const char *path,
 GtFile* gt_file_xopen(const char *path, const char *mode)
 {
   gt_assert(mode);
-  return gt_file_xopen_w_gfmode(gt_file_mode_determine(path), path, mode);
+  return gt_file_xopen_file_mode(gt_file_mode_determine(path), path, mode);
 }
 
 GtFile* gt_file_new_from_fileptr(FILE *fp)
