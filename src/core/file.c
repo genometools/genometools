@@ -92,16 +92,16 @@ GtFile* gt_file_new(const char *path, const char *mode, GtError *err)
   return gt_file_open(gt_file_mode_determine(path), path, mode, err);
 }
 
-GtFile* gt_file_open(GtFileMode filemode, const char *path, const char *mode,
+GtFile* gt_file_open(GtFileMode file_mode, const char *path, const char *mode,
                      GtError *err)
 {
   GtFile *file;
   gt_error_check(err);
   gt_assert(mode);
   file = gt_calloc(1, sizeof (GtFile));
-  file->mode = filemode;
+  file->mode = file_mode;
   if (path) {
-    switch (filemode) {
+    switch (file_mode) {
       case GT_FILE_MODE_UNCOMPRESSED:
         file->fileptr.file = gt_fa_fopen(path, mode, err);
         if (!file->fileptr.file) {
@@ -129,22 +129,22 @@ GtFile* gt_file_open(GtFileMode filemode, const char *path, const char *mode,
     }
   }
   else {
-    gt_assert(filemode == GT_FILE_MODE_UNCOMPRESSED);
+    gt_assert(file_mode == GT_FILE_MODE_UNCOMPRESSED);
     file->fileptr.file = stdin;
     file->is_stdin = true;
   }
   return file;
 }
 
-GtFile* gt_file_xopen_w_gfmode(GtFileMode filemode, const char *path,
+GtFile* gt_file_xopen_w_gfmode(GtFileMode file_mode, const char *path,
                                const char *mode)
 {
   GtFile *file;
   gt_assert(mode);
   file = gt_calloc(1, sizeof (GtFile));
-  file->mode = filemode;
+  file->mode = file_mode;
   if (path) {
-    switch (filemode) {
+    switch (file_mode) {
       case GT_FILE_MODE_UNCOMPRESSED:
         file->fileptr.file = gt_fa_xfopen(path, mode);
         break;
@@ -160,7 +160,7 @@ GtFile* gt_file_xopen_w_gfmode(GtFileMode filemode, const char *path,
     }
   }
   else {
-    gt_assert(filemode == GT_FILE_MODE_UNCOMPRESSED);
+    gt_assert(file_mode == GT_FILE_MODE_UNCOMPRESSED);
     file->fileptr.file = stdin;
     file->is_stdin = true;
   }
