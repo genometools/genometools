@@ -35,7 +35,7 @@ typedef struct {
 
 static void gth_file_stat_info_new(GthFileStatInfo *file_stat_info)
 {
-  file_stat_info->genfilemode = GFM_UNCOMPRESSED;
+  file_stat_info->genfilemode = GT_FILE_MODE_UNCOMPRESSED;
   file_stat_info->consensusfiles = gt_str_array_new();
   file_stat_info->sa_filter = gth_sa_filter_new();
   file_stat_info->showverbose = NULL;

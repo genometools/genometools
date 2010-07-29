@@ -44,23 +44,23 @@ GtFileMode gt_file_mode_determine(const char *path)
 {
   size_t path_length;
   if (!path)
-    return GFM_UNCOMPRESSED;
+    return GT_FILE_MODE_UNCOMPRESSED;
   path_length = strlen(path);
   if (path_length >= 4 && strcmp(".gz", path + path_length - 3) == 0)
-    return GFM_GZIP;
+    return GT_FILE_MODE_GZIP;
   if (path_length >= 5 && strcmp(".bz2", path + path_length - 4) == 0)
-    return GFM_BZIP2;
-  return GFM_UNCOMPRESSED;
+    return GT_FILE_MODE_BZIP2;
+  return GT_FILE_MODE_UNCOMPRESSED;
 }
 
 const char* gt_file_mode_suffix(GtFileMode mode)
 {
   switch (mode) {
-    case GFM_UNCOMPRESSED:
+    case GT_FILE_MODE_UNCOMPRESSED:
       return "";
-    case GFM_GZIP:
+    case GT_FILE_MODE_GZIP:
       return ".gz";
-    case GFM_BZIP2:
+    case GT_FILE_MODE_BZIP2:
       return ".bz2";
     default:
       gt_assert(0);
@@ -102,21 +102,21 @@ GtFile* gt_file_open(GtFileMode filemode, const char *path, const char *mode,
   file->mode = filemode;
   if (path) {
     switch (filemode) {
-      case GFM_UNCOMPRESSED:
+      case GT_FILE_MODE_UNCOMPRESSED:
         file->fileptr.file = gt_fa_fopen(path, mode, err);
         if (!file->fileptr.file) {
           gt_file_delete_without_handle(file);
           return NULL;
         }
         break;
-      case GFM_GZIP:
+      case GT_FILE_MODE_GZIP:
         file->fileptr.gzfile = gt_fa_gzopen(path, mode, err);
         if (!file->fileptr.gzfile) {
           gt_file_delete_without_handle(file);
           return NULL;
         }
         break;
-      case GFM_BZIP2:
+      case GT_FILE_MODE_BZIP2:
         file->fileptr.bzfile = gt_fa_bzopen(path, mode, err);
         if (!file->fileptr.bzfile) {
           gt_file_delete_without_handle(file);
@@ -129,7 +129,7 @@ GtFile* gt_file_open(GtFileMode filemode, const char *path, const char *mode,
     }
   }
   else {
-    gt_assert(filemode == GFM_UNCOMPRESSED);
+    gt_assert(filemode == GT_FILE_MODE_UNCOMPRESSED);
     file->fileptr.file = stdin;
     file->is_stdin = true;
   }
@@ -145,13 +145,13 @@ GtFile* gt_file_xopen_w_gfmode(GtFileMode filemode, const char *path,
   file->mode = filemode;
   if (path) {
     switch (filemode) {
-      case GFM_UNCOMPRESSED:
+      case GT_FILE_MODE_UNCOMPRESSED:
         file->fileptr.file = gt_fa_xfopen(path, mode);
         break;
-      case GFM_GZIP:
+      case GT_FILE_MODE_GZIP:
         file->fileptr.gzfile = gt_fa_xgzopen(path, mode);
         break;
-      case GFM_BZIP2:
+      case GT_FILE_MODE_BZIP2:
         file->fileptr.bzfile = gt_fa_xbzopen(path, mode);
         file->orig_path = gt_cstr_dup(path);
         file->orig_mode = gt_cstr_dup(path);
@@ -160,7 +160,7 @@ GtFile* gt_file_xopen_w_gfmode(GtFileMode filemode, const char *path,
     }
   }
   else {
-    gt_assert(filemode == GFM_UNCOMPRESSED);
+    gt_assert(filemode == GT_FILE_MODE_UNCOMPRESSED);
     file->fileptr.file = stdin;
     file->is_stdin = true;
   }
@@ -178,7 +178,7 @@ GtFile* gt_file_new_from_fileptr(FILE *fp)
   GtFile *file;
   gt_assert(fp);
   file = gt_calloc(1, sizeof (GtFile));
-  file->mode = GFM_UNCOMPRESSED;
+  file->mode = GT_FILE_MODE_UNCOMPRESSED;
   file->fileptr.file = fp;
   return file;
 }
@@ -199,13 +199,13 @@ int gt_file_xfgetc(GtFile *file)
     }
     else {
       switch (file->mode) {
-        case GFM_UNCOMPRESSED:
+        case GT_FILE_MODE_UNCOMPRESSED:
           c = gt_xfgetc(file->fileptr.file);
           break;
-        case GFM_GZIP:
+        case GT_FILE_MODE_GZIP:
           c = gt_xgzfgetc(file->fileptr.gzfile);
           break;
-        case GFM_BZIP2:
+        case GT_FILE_MODE_BZIP2:
           c = gt_xbzfgetc(file->fileptr.bzfile);
           break;
         default: gt_assert(0);
@@ -280,13 +280,13 @@ static int xvprintf(GtFile *file, const char *format, va_list va, int buflen)
     gt_xvfprintf(stdout, format, va);
   else {
     switch (file->mode) {
-      case GFM_UNCOMPRESSED:
+      case GT_FILE_MODE_UNCOMPRESSED:
         gt_xvfprintf(file->fileptr.file, format, va);
         break;
-      case GFM_GZIP:
+      case GT_FILE_MODE_GZIP:
         rval = vgzprintf(file->fileptr.gzfile, format, va, buflen);
         break;
-      case GFM_BZIP2:
+      case GT_FILE_MODE_BZIP2:
         rval = vbzprintf(file->fileptr.bzfile, format, va, buflen);
         break;
       default: gt_assert(0);
@@ -318,13 +318,13 @@ void gt_file_xfputc(int c, GtFile *file)
   if (!file)
     return gt_xfputc(c, stdout);
   switch (file->mode) {
-    case GFM_UNCOMPRESSED:
+    case GT_FILE_MODE_UNCOMPRESSED:
       gt_xfputc(c, file->fileptr.file);
       break;
-    case GFM_GZIP:
+    case GT_FILE_MODE_GZIP:
       gt_xgzfputc(c, file->fileptr.gzfile);
       break;
-    case GFM_BZIP2:
+    case GT_FILE_MODE_BZIP2:
       gt_xbzfputc(c, file->fileptr.bzfile);
       break;
     default: gt_assert(0);
@@ -336,13 +336,13 @@ void gt_file_xfputs(const char *str, GtFile *file)
   if (!file)
     return gt_xfputs(str, stdout);
   switch (file->mode) {
-    case GFM_UNCOMPRESSED:
+    case GT_FILE_MODE_UNCOMPRESSED:
       gt_xfputs(str, file->fileptr.file);
       break;
-    case GFM_GZIP:
+    case GT_FILE_MODE_GZIP:
       gt_xgzfputs(str, file->fileptr.gzfile);
       break;
-    case GFM_BZIP2:
+    case GT_FILE_MODE_BZIP2:
       gt_xbzfputs(str, file->fileptr.bzfile);
       break;
     default: gt_assert(0);
@@ -354,13 +354,13 @@ int gt_file_xread(GtFile *file, void *buf, size_t nbytes)
   int rval = -1;
   if (file) {
     switch (file->mode) {
-      case GFM_UNCOMPRESSED:
+      case GT_FILE_MODE_UNCOMPRESSED:
         rval = gt_xfread(buf, 1, nbytes, file->fileptr.file);
         break;
-      case GFM_GZIP:
+      case GT_FILE_MODE_GZIP:
         rval = gt_xgzread(file->fileptr.gzfile, buf, nbytes);
         break;
-      case GFM_BZIP2:
+      case GT_FILE_MODE_BZIP2:
         rval = gt_xbzread(file->fileptr.bzfile, buf, nbytes);
         break;
       default: gt_assert(0);
@@ -378,13 +378,13 @@ void gt_file_xwrite(GtFile *file, void *buf, size_t nbytes)
     return;
   }
   switch (file->mode) {
-    case GFM_UNCOMPRESSED:
+    case GT_FILE_MODE_UNCOMPRESSED:
       gt_xfwrite(buf, 1, nbytes, file->fileptr.file);
       break;
-    case GFM_GZIP:
+    case GT_FILE_MODE_GZIP:
       gt_xgzwrite(file->fileptr.gzfile, buf, nbytes);
       break;
-    case GFM_BZIP2:
+    case GT_FILE_MODE_BZIP2:
       gt_xbzwrite(file->fileptr.bzfile, buf, nbytes);
       break;
     default: gt_assert(0);
@@ -395,13 +395,13 @@ void gt_file_xrewind(GtFile *file)
 {
   gt_assert(file);
   switch (file->mode) {
-    case GFM_UNCOMPRESSED:
+    case GT_FILE_MODE_UNCOMPRESSED:
       rewind(file->fileptr.file);
       break;
-    case GFM_GZIP:
+    case GT_FILE_MODE_GZIP:
       gt_xgzrewind(file->fileptr.gzfile);
       break;
-    case GFM_BZIP2:
+    case GT_FILE_MODE_BZIP2:
       gt_xbzrewind(&file->fileptr.bzfile, file->orig_path, file->orig_mode);
       break;
     default: gt_assert(0);
@@ -420,14 +420,14 @@ void gt_file_delete(GtFile *file)
 {
   if (!file) return;
   switch (file->mode) {
-    case GFM_UNCOMPRESSED:
+    case GT_FILE_MODE_UNCOMPRESSED:
         if (!file->is_stdin)
           gt_fa_fclose(file->fileptr.file);
       break;
-    case GFM_GZIP:
+    case GT_FILE_MODE_GZIP:
         gt_fa_gzclose(file->fileptr.gzfile);
       break;
-    case GFM_BZIP2:
+    case GT_FILE_MODE_BZIP2:
         gt_fa_bzclose(file->fileptr.bzfile);
       break;
     default: gt_assert(0);

@@ -23,9 +23,9 @@
 #include "core/file_api.h"
 
 typedef enum {
-  GFM_UNCOMPRESSED,
-  GFM_GZIP,
-  GFM_BZIP2
+  GT_FILE_MODE_UNCOMPRESSED,
+  GT_FILE_MODE_GZIP,
+  GT_FILE_MODE_BZIP2
 } GtFileMode;
 
 /* Returns GFM_GZIP if file with <path> ends with '.gz', GFM_BZIP2 if it ends

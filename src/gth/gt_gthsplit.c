@@ -219,7 +219,7 @@ static void initGthsplitinfo(Gthsplitinfo *gthsplitinfo)
 {
   gthsplitinfo->splitmode      = UNDEF_SPLIT;
   gthsplitinfo->range          = DEFAULT_RANGE;
-  gthsplitinfo->genfilemode    = GFM_UNCOMPRESSED;
+  gthsplitinfo->genfilemode    = GT_FILE_MODE_UNCOMPRESSED;
   gthsplitinfo->showverbose    = NULL;
   gthsplitinfo->force          = false;
   gthsplitinfo->sa_filter      = gth_sa_filter_new();
@@ -304,9 +304,9 @@ static GtOPrval gthsplit_parse_options(int *parsed_args,
   if (oprval == GT_OPTION_PARSER_OK && verbose)
     gthsplitinfo->showverbose = gth_show_on_stdout;
   if (oprval == GT_OPTION_PARSER_OK && gzip)
-    gthsplitinfo->genfilemode = GFM_GZIP;
+    gthsplitinfo->genfilemode = GT_FILE_MODE_GZIP;
   if (oprval == GT_OPTION_PARSER_OK && bzip2)
-    gthsplitinfo->genfilemode = GFM_BZIP2;
+    gthsplitinfo->genfilemode = GT_FILE_MODE_BZIP2;
 
   /* save consensus files */
   if (oprval == GT_OPTION_PARSER_OK) {

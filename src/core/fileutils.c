@@ -182,7 +182,7 @@ off_t gt_file_estimate_size(const char *filename)
   fd = gt_xopen(filename, O_RDONLY, 0);
   gt_xfstat(fd, &sb);
   gfm = gt_file_mode_determine(filename);
-  if (gfm == GFM_UNCOMPRESSED)
+  if (gfm == GT_FILE_MODE_UNCOMPRESSED)
     size = sb.st_size;
   else
     size = sb.st_size  * 4; /* expected compression rate for sequence is 0.25 */

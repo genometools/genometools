@@ -49,12 +49,12 @@ static int determine_outfp(void *data, GtError *err)
   else { /* outputfile given -> create generic file pointer */
     gt_assert(!(ofi->gzip && ofi->bzip2));
     if (ofi->gzip)
-      genfilemode = GFM_GZIP;
+      genfilemode = GT_FILE_MODE_GZIP;
     else if (ofi->bzip2)
-      genfilemode = GFM_BZIP2;
+      genfilemode = GT_FILE_MODE_BZIP2;
     else
-      genfilemode = GFM_UNCOMPRESSED;
-    if (genfilemode != GFM_UNCOMPRESSED &&
+      genfilemode = GT_FILE_MODE_UNCOMPRESSED;
+    if (genfilemode != GT_FILE_MODE_UNCOMPRESSED &&
         strcmp(gt_str_get(ofi->output_filename) +
                gt_str_length(ofi->output_filename) -
                strlen(gt_file_mode_suffix(genfilemode)),
