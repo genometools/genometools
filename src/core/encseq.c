@@ -1112,6 +1112,11 @@ void gt_encseq_delete(GtEncseq *encseq)
     }
     encseq->ssptab = NULL;
   }
+  if (encseq->fsptab != NULL)
+  {
+    gt_fa_xmunmap((void *) encseq->fsptab);
+    encseq->fsptab = NULL;
+  }
   gt_alphabet_delete((GtAlphabet*) encseq->alpha);
   gt_str_array_delete(encseq->filenametab);
   encseq->filenametab = NULL;
@@ -2611,6 +2616,7 @@ static GtEncseq *determineencseqkeyvalues(GtPositionaccesstype sat,
   encseq->hasallocatedsdstab = false;
   encseq->destablength = 0;
   encseq->ssptab = NULL;
+  encseq->fsptab = NULL;
   encseq->hasallocatedssptab = false;
   encseq->alpha = alpha;
   encseq->numofspecialstostore = specialranges;
@@ -2992,6 +2998,7 @@ gt_encseq_new_from_index(bool withrange,
                          bool withdestab,
                          bool withsdstab,
                          bool withssptab,
+                         bool withfsptab,
                          GtLogger *logger,
                          GtError *err)
 {
@@ -3090,6 +3097,23 @@ gt_encseq_new_from_index(bool withrange,
                                          sizeof (unsigned long),
                                          err);
       if (encseq->ssptab == NULL)
+      {
+        haserr = true;
+      }
+    }
+  }
+  if (!haserr && withfsptab)
+  {
+    gt_assert(encseq != NULL);
+    if (encseq->numofdbfiles > 1UL)
+    {
+      encseq->fsptab
+        = gt_mmap_check_size_with_suffix(indexname,
+                                         GT_FSPTABFILESUFFIX,
+                                         encseq->numofdbfiles - 1,
+                                         sizeof (unsigned long),
+                                         err);
+      if (encseq->fsptab == NULL)
       {
         haserr = true;
       }
@@ -5301,6 +5325,7 @@ gt_encseq_new_from_files(GtProgressTimer *sfxprogress,
                                   bool outdestab,
                                   bool outsdstab,
                                   bool outssptab,
+                                  bool outfsptab,
                                   GtLogger *logger,
                                   GtError *err)
 {
@@ -5424,6 +5449,34 @@ gt_encseq_new_from_files(GtProgressTimer *sfxprogress,
                      sizeof (*sequenceseppos.spaceGtUlong),
                      (size_t) sequenceseppos.nextfreeGtUlong,
                      outfp);
+        }
+        gt_fa_fclose(outfp);
+      }
+      if (!haserr && outfsptab)
+      {
+        unsigned long idx, numoffiles;
+        GtUlong nextsep = 0;
+        FILE *outfp;
+
+        numoffiles = gt_str_array_size(filenametab);
+        outfp = gt_fa_fopen_with_suffix(indexname,GT_FSPTABFILESUFFIX,"wb",err);
+
+        if (outfp == NULL)
+        {
+          haserr = true;
+        } else
+        {
+          for (idx = 0UL; idx < numoffiles - 1; idx++)
+          {
+            gt_assert(filelengthtab != NULL);
+            nextsep = nextsep + filelengthtab[idx].effectivelength;
+            if (idx != 0)
+              nextsep += 1;
+            gt_xfwrite(&nextsep,
+                       sizeof (GtUlong),
+                       (size_t) 1,
+                       outfp);
+          }
         }
         gt_fa_fclose(outfp);
       }
@@ -5737,6 +5790,7 @@ struct GtEncseqEncoder {
   bool destab,
        tistab,
        ssptab,
+       fsptab,
        sdstab,
        isdna,
        isprotein,
@@ -5752,6 +5806,7 @@ GtEncseqEncoder* gt_encseq_encoder_new()
   GtEncseqEncoder *ee = gt_calloc((size_t) 1, sizeof (GtEncseqEncoder));
   gt_encseq_encoder_create_esq_tab(ee);
   gt_encseq_encoder_enable_multiseq_support(ee);
+  gt_encseq_encoder_enable_multifile_support(ee);
   gt_encseq_encoder_enable_description_support(ee);
   ee->isdna = ee->isprotein = ee->isplain = false;
   ee->sat = gt_str_new();
@@ -5802,6 +5857,18 @@ void gt_encseq_encoder_do_not_create_ssp_tab(GtEncseqEncoder *ee)
   ee->ssptab = false;
 }
 
+void gt_encseq_encoder_create_fsp_tab(GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  ee->fsptab = true;
+}
+
+void gt_encseq_encoder_do_not_create_fsp_tab(GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  ee->fsptab = false;
+}
+
 void gt_encseq_encoder_create_sds_tab(GtEncseqEncoder *ee)
 {
   gt_assert(ee);
@@ -5832,6 +5899,12 @@ void gt_encseq_encoder_enable_multiseq_support(GtEncseqEncoder *ee)
 {
   gt_assert(ee);
   gt_encseq_encoder_create_ssp_tab(ee);
+}
+
+void gt_encseq_encoder_enable_multifile_support(GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  gt_encseq_encoder_create_fsp_tab(ee);
 }
 
 void gt_encseq_encoder_disable_multiseq_support(GtEncseqEncoder *ee)
@@ -5912,6 +5985,7 @@ int gt_encseq_encoder_encode(GtEncseqEncoder *ee, GtStrArray *seqfiles,
                                     ee->destab,
                                     ee->sdstab,
                                     ee->ssptab,
+                                    ee->fsptab,
                                     ee->logger,
                                     err);
   if (!encseq)
@@ -5932,6 +6006,7 @@ struct GtEncseqLoader {
   bool tistab,
        destab,
        ssptab,
+       fsptab,
        sdstab,
        withrange;
   GtLogger *logger;
@@ -5941,6 +6016,7 @@ GtEncseqLoader* gt_encseq_loader_new()
 {
   GtEncseqLoader *el = gt_calloc((size_t) 1, sizeof (GtEncseqLoader));
   gt_encseq_loader_require_multiseq_support(el);
+  gt_encseq_loader_require_multifile_support(el);
   gt_encseq_loader_require_description_support(el);
   gt_encseq_loader_require_esq_tab(el);
   gt_encseq_loader_enable_range_iterator(el);
@@ -5983,6 +6059,18 @@ void gt_encseq_loader_do_not_require_ssp_tab(GtEncseqLoader *el)
   el->ssptab = false;
 }
 
+void gt_encseq_loader_require_fsp_tab(GtEncseqLoader *el)
+{
+  gt_assert(el);
+  el->fsptab = true;
+}
+
+void gt_encseq_loader_do_not_require_fsp_tab(GtEncseqLoader *el)
+{
+  gt_assert(el);
+  el->fsptab = false;
+}
+
 void gt_encseq_loader_require_sds_tab(GtEncseqLoader *el)
 {
   gt_assert(el);
@@ -6010,6 +6098,11 @@ void gt_encseq_loader_drop_description_support(GtEncseqLoader *el)
 void gt_encseq_loader_require_multiseq_support(GtEncseqLoader *el)
 {
   gt_encseq_loader_require_ssp_tab(el);
+}
+
+void gt_encseq_loader_require_multifile_support(GtEncseqLoader *el)
+{
+  gt_encseq_loader_require_fsp_tab(el);
 }
 
 void gt_encseq_loader_drop_multiseq_support(GtEncseqLoader *el)
@@ -6046,6 +6139,7 @@ GtEncseq* gt_encseq_loader_load(GtEncseqLoader *el, const char *indexname,
                                     el->destab,
                                     el->sdstab,
                                     el->ssptab,
+                                    el->fsptab,
                                     el->logger,
                                     err);
   return encseq;
@@ -6348,6 +6442,8 @@ GtEncseq* gt_encseq_builder_build(GtEncseqBuilder *eb,
   encseq->specialcharinfo = samplespecialcharinfo;
   encseq->plainseq = eb->plainseq;
   encseq->filenametab = gt_str_array_new();
+  gt_str_array_add_cstr(encseq->filenametab, "generated");
+  encseq->numofdbfiles = 1UL;
   encseq->hasplainseqptr = !(eb->own);
   if (eb->wdestab) {
     encseq->hasallocateddestab = true;
@@ -6417,7 +6513,7 @@ int gt_encseq_builder_unit_test(GtError *err)
   ensure(had_err, memcmp(preenc, buffer, 11 * sizeof (char)) == 0);
   ensure(had_err, gt_encseq_seqstartpos(encseq, 0UL) == 0UL);
   ensure(had_err, gt_encseq_seqlength(encseq, 0UL) == 11UL);
-  ensure(had_err, gt_encseq_num_of_files(encseq) == 0);
+  ensure(had_err, gt_encseq_num_of_files(encseq) == 1UL);
   gt_encseq_delete(encseq);
 
   gt_encseq_builder_add_cstr(eb, testseq, 11UL, NULL);
@@ -6426,7 +6522,7 @@ int gt_encseq_builder_unit_test(GtError *err)
   encseq = gt_encseq_builder_build(eb, err);
   ensure(had_err, gt_encseq_total_length(encseq) == 23UL);
   ensure(had_err, gt_encseq_num_of_sequences(encseq) == 2UL);
-  ensure(had_err, gt_encseq_num_of_files(encseq) == 0);
+  ensure(had_err, gt_encseq_num_of_files(encseq) == 1UL);
   gt_encseq_delete(encseq);
 
   ensure(had_err, eb->plainseq == NULL);
@@ -6435,7 +6531,7 @@ int gt_encseq_builder_unit_test(GtError *err)
   encseq = gt_encseq_builder_build(eb, err);
   ensure(had_err, gt_encseq_total_length(encseq) == 11UL);
   ensure(had_err, gt_encseq_num_of_sequences(encseq) == 1UL);
-  ensure(had_err, gt_encseq_num_of_files(encseq) == 0);
+  ensure(had_err, gt_encseq_num_of_files(encseq) == 1UL);
   gt_encseq_delete(encseq);
 
   gt_encseq_builder_add_cstr(eb, testseq, 4UL, NULL);
@@ -6444,7 +6540,7 @@ int gt_encseq_builder_unit_test(GtError *err)
   encseq = gt_encseq_builder_build(eb, err);
   ensure(had_err, gt_encseq_total_length(encseq) == 16UL);
   ensure(had_err, gt_encseq_num_of_sequences(encseq) == 2UL);
-  ensure(had_err, gt_encseq_num_of_files(encseq) == 0);
+  ensure(had_err, gt_encseq_num_of_files(encseq) == 1UL);
   gt_encseq_delete(encseq);
 
   gt_encseq_builder_add_encoded(eb, preenc, 11UL, NULL);
@@ -6457,7 +6553,7 @@ int gt_encseq_builder_unit_test(GtError *err)
   ensure(had_err, gt_encseq_seqlength(encseq, 0UL) == 11UL);
   ensure(had_err, gt_encseq_seqstartpos(encseq, 1UL) == 12UL);
   ensure(had_err, gt_encseq_seqlength(encseq, 1UL) == 4UL);
-  ensure(had_err, gt_encseq_num_of_files(encseq) == 0);
+  ensure(had_err, gt_encseq_num_of_files(encseq) == 1UL);
   gt_encseq_delete(encseq);
 
   gt_encseq_builder_create_des_tab(eb);
@@ -6477,7 +6573,7 @@ int gt_encseq_builder_unit_test(GtError *err)
   ensure(had_err, strncmp(desc, "bar", (size_t) desclen * sizeof (char)) == 0);
   desc = gt_encseq_description(encseq, &desclen, 2UL);
   ensure(had_err, strncmp(desc, "baz", (size_t) desclen * sizeof (char)) == 0);
-  ensure(had_err, gt_encseq_num_of_files(encseq) == 0);
+  ensure(had_err, gt_encseq_num_of_files(encseq) == 1UL);
   gt_encseq_delete(encseq);
 
   gt_encseq_builder_delete(eb);
@@ -6497,7 +6593,7 @@ void gt_encseq_builder_delete(GtEncseqBuilder *eb)
 unsigned long gt_encseq_num_of_files(const GtEncseq *encseq)
 {
   gt_assert(encseq && encseq->filenametab);
-  return gt_str_array_size(encseq->filenametab);
+  return encseq->numofdbfiles;
 }
 
 uint64_t gt_encseq_effective_filelength(const GtEncseq *encseq,
@@ -6505,7 +6601,7 @@ uint64_t gt_encseq_effective_filelength(const GtEncseq *encseq,
 {
   unsigned long num_files;
   gt_assert(encseq && encseq->filenametab);
-  num_files = gt_str_array_size(encseq->filenametab);
+  num_files = encseq->numofdbfiles;
   gt_assert(filenum < num_files);
   return encseq->filelengthtab[filenum].effectivelength;
 }
@@ -6515,4 +6611,26 @@ void gt_encseq_effective_filelength_ptr(const GtEncseq *encseq,
                                         unsigned long filenum)
 {
   *result = gt_encseq_effective_filelength(encseq, filenum);
+}
+
+unsigned long gt_encseq_filenum(const GtEncseq *encseq,
+                                unsigned long position)
+{
+  gt_assert(encseq->numofdbfiles == 1UL || encseq->fsptab != NULL);
+  return gt_encseq_sep2seqnum(encseq->fsptab,
+                                      encseq->numofdbfiles,
+                                      encseq->totallength,
+                                      position);
+}
+
+unsigned long gt_encseq_filestartpos(const GtEncseq *encseq,
+                                     unsigned long filenum)
+{
+  gt_assert(encseq->numofdbfiles == 1UL || encseq->fsptab != NULL);
+  if (filenum == 0)
+  {
+    return 0;
+  } else {
+    return encseq->fsptab[filenum-1] + 1;
+  }
 }
