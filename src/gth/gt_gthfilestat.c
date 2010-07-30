@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2005-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -27,7 +27,7 @@
 #include "gth/gt_gthfilestat.h"
 
 typedef struct {
-  GtFileMode genfilemode;
+  GtFileMode file_mode;
   GtStrArray *consensusfiles;
   GthSAFilter *sa_filter;
   void (*showverbose)(const char*);
@@ -35,7 +35,7 @@ typedef struct {
 
 static void gth_file_stat_info_new(GthFileStatInfo *file_stat_info)
 {
-  file_stat_info->genfilemode = GFM_UNCOMPRESSED;
+  file_stat_info->file_mode = GT_FILE_MODE_UNCOMPRESSED;
   file_stat_info->consensusfiles = gt_str_array_new();
   file_stat_info->sa_filter = gth_sa_filter_new();
   file_stat_info->showverbose = NULL;

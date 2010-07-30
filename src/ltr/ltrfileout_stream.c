@@ -656,25 +656,25 @@ GtNodeStream* gt_ltr_fileout_stream_new(GtNodeStream *in_stream,
   /* open outfiles */
   ls->fileprefix = file_prefix;
   (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_tabout.csv", file_prefix);
-  ls->tabout_file = gt_file_open(GFM_UNCOMPRESSED, fn, "w+", e);
+  ls->tabout_file = gt_file_open(GT_FILE_MODE_UNCOMPRESSED, fn, "w+", e);
   if (tests_to_run & GT_LTRDIGEST_RUN_PPT)
   {
     (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_ppt.fas", file_prefix);
-    ls->pptout_file = gt_file_open(GFM_UNCOMPRESSED, fn, "w+", e);
+    ls->pptout_file = gt_file_open(GT_FILE_MODE_UNCOMPRESSED, fn, "w+", e);
   }
   if (tests_to_run & GT_LTRDIGEST_RUN_PBS)
   {
     (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_pbs.fas", file_prefix);
-    ls->pbsout_file = gt_file_open(GFM_UNCOMPRESSED, fn, "w+", e);
+    ls->pbsout_file = gt_file_open(GT_FILE_MODE_UNCOMPRESSED, fn, "w+", e);
   }
   (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_5ltr.fas", file_prefix);
-  ls->ltr5out_file = gt_file_open(GFM_UNCOMPRESSED, fn, "w+", e);
+  ls->ltr5out_file = gt_file_open(GT_FILE_MODE_UNCOMPRESSED, fn, "w+", e);
   (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_3ltr.fas", file_prefix);
-  ls->ltr3out_file = gt_file_open(GFM_UNCOMPRESSED, fn, "w+", e);
+  ls->ltr3out_file = gt_file_open(GT_FILE_MODE_UNCOMPRESSED, fn, "w+", e);
   (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_complete.fas", file_prefix);
-  ls->elemout_file = gt_file_open(GFM_UNCOMPRESSED, fn, "w+", e);
+  ls->elemout_file = gt_file_open(GT_FILE_MODE_UNCOMPRESSED, fn, "w+", e);
   (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_conditions.csv", file_prefix);
-  ls->metadata_file = gt_file_open(GFM_UNCOMPRESSED, fn, "w+", e);
+  ls->metadata_file = gt_file_open(GT_FILE_MODE_UNCOMPRESSED, fn, "w+", e);
 
   /* create hashmaps to hold protein domain output files */
   ls->pdomout_files = gt_hashmap_new(GT_HASH_STRING, gt_free_func,

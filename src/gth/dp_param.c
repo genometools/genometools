@@ -47,7 +47,7 @@ static void evalsplicesiteprobformodel(GthFlt *prob, bool donorsite,
                                        const GtRange *gen_seq_bounds,
                                        unsigned long genpos,
                                        const GtUchar *gen_alphabet_symbolmap,
-                                       GthBssmModel *bssmmodel)
+                                       GthBSSMModel *bssmmodel)
 {
   unsigned long pc, /* previous char */
                 cc, /* current char */
@@ -125,7 +125,7 @@ static void evalsplicesiteprobformodel(GthFlt *prob, bool donorsite,
 static void evaldonorprob(GthFlt *prob, const unsigned char *gen_seq_tran,
                           const GtRange *gen_seq_bounds, unsigned long genpos,
                           const GtUchar *gen_alphabet_symbolmap,
-                          GthBssmParam *bssm_param)
+                          GthBSSMParam *bssm_param)
 {
   *prob = (GthFlt) 0.0;
   gt_assert(bssm_param);
@@ -152,7 +152,7 @@ static void evalacceptorprob(GthFlt *prob, const unsigned char *gen_seq_tran,
                              const GtRange *gen_seq_bounds,
                              unsigned long genpos,
                              const GtUchar *gen_alphabet_symbolmap,
-                             GthBssmParam *bssm_param)
+                             GthBSSMParam *bssm_param)
 {
   *prob = (GthFlt) 0.0;
   gt_assert(bssm_param);

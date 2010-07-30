@@ -82,7 +82,7 @@ void gt_fa_init(void)
 }
 
 static void* fileopen_generic(FA *fa, const char *path, const char *mode,
-                              GtFileMode genfilemode, bool x,
+                              GtFileMode file_mode, bool x,
                               const char *src_file, int src_line, GtError *err)
 {
   void  *fp = NULL;
@@ -92,14 +92,14 @@ static void* fileopen_generic(FA *fa, const char *path, const char *mode,
   fileinfo = gt_malloc(sizeof (FAFileInfo));
   fileinfo->src_file = src_file;
   fileinfo->src_line = src_line;
-  switch (genfilemode) {
-    case GFM_UNCOMPRESSED:
+  switch (file_mode) {
+    case GT_FILE_MODE_UNCOMPRESSED:
       fp = x ? gt_xfopen(path, mode) : gt_efopen(path, mode, err);
       break;
-    case GFM_GZIP:
+    case GT_FILE_MODE_GZIP:
       fp = x ? gt_xgzopen(path, mode) : gt_egzopen(path, mode, err);
       break;
-    case GFM_BZIP2:
+    case GT_FILE_MODE_BZIP2:
       fp = x ? gt_xbzopen(path, mode) : gt_ebzopen(path, mode, err);
       break;
     default: gt_assert(0);
@@ -114,7 +114,7 @@ static void* fileopen_generic(FA *fa, const char *path, const char *mode,
   return fp;
 }
 
-static void fclose_generic(void *stream, GtFileMode genfilemode, FA *fa)
+static void fclose_generic(void *stream, GtFileMode file_mode, FA *fa)
 {
   FAFileInfo *fileinfo;
   gt_assert(stream && fa);
@@ -123,21 +123,21 @@ static void fclose_generic(void *stream, GtFileMode genfilemode, FA *fa)
   gt_assert(fileinfo);
   gt_hashmap_remove(fa->file_pointer, stream);
   gt_mutex_unlock(fa->file_mutex);
-  switch (genfilemode) {
-    case GFM_UNCOMPRESSED:
+  switch (file_mode) {
+    case GT_FILE_MODE_UNCOMPRESSED:
       fclose(stream);
       break;
-    case GFM_GZIP:
+    case GT_FILE_MODE_GZIP:
       gzclose(stream);
       break;
-    case GFM_BZIP2:
+    case GT_FILE_MODE_BZIP2:
       BZ2_bzclose(stream);
       break;
     default: gt_assert(0);
   }
 }
 
-static void xfclose_generic(void *stream, GtFileMode genfilemode, FA *fa)
+static void xfclose_generic(void *stream, GtFileMode file_mode, FA *fa)
 {
   FAFileInfo *fileinfo;
   gt_assert(stream && fa);
@@ -146,14 +146,14 @@ static void xfclose_generic(void *stream, GtFileMode genfilemode, FA *fa)
   gt_assert(fileinfo);
   gt_hashmap_remove(fa->file_pointer, stream);
   gt_mutex_unlock(fa->file_mutex);
-  switch (genfilemode) {
-    case GFM_UNCOMPRESSED:
+  switch (file_mode) {
+    case GT_FILE_MODE_UNCOMPRESSED:
       gt_xfclose(stream);
       break;
-    case GFM_GZIP:
+    case GT_FILE_MODE_GZIP:
       gt_xgzclose(stream);
       break;
-    case GFM_BZIP2:
+    case GT_FILE_MODE_BZIP2:
       BZ2_bzclose(stream);
       break;
     default: gt_assert(0);
@@ -166,8 +166,8 @@ FILE* gt_fa_fopen_func(const char *path, const char *mode,
   gt_error_check(err);
   gt_assert(path && mode);
   gt_assert(fa);
-  return fileopen_generic(fa, path, mode, GFM_UNCOMPRESSED, false, src_file,
-                          src_line, err);
+  return fileopen_generic(fa, path, mode, GT_FILE_MODE_UNCOMPRESSED, false,
+                          src_file, src_line, err);
 }
 
 FILE* gt_fa_xfopen_func(const char *path, const char *mode,
@@ -175,8 +175,8 @@ FILE* gt_fa_xfopen_func(const char *path, const char *mode,
 {
   gt_assert(path && mode);
   gt_assert(fa);
-  return fileopen_generic(fa, path, mode, GFM_UNCOMPRESSED, true, src_file,
-                          src_line, NULL);
+  return fileopen_generic(fa, path, mode, GT_FILE_MODE_UNCOMPRESSED, true,
+                          src_file, src_line, NULL);
 }
 
 FILE* gt_fa_fopen_with_suffix_func(const char *path, const char *suffix,
@@ -197,14 +197,14 @@ void gt_fa_fclose(FILE *stream)
 {
   gt_assert(fa);
   if (!stream) return;
-  fclose_generic(stream, GFM_UNCOMPRESSED, fa);
+  fclose_generic(stream, GT_FILE_MODE_UNCOMPRESSED, fa);
 }
 
 void gt_fa_xfclose(FILE *stream)
 {
   gt_assert(fa);
   if (!stream) return;
-  xfclose_generic(stream, GFM_UNCOMPRESSED, fa);
+  xfclose_generic(stream, GT_FILE_MODE_UNCOMPRESSED, fa);
 }
 
 gzFile gt_fa_gzopen_func(const char *path, const char *mode,
@@ -213,8 +213,8 @@ gzFile gt_fa_gzopen_func(const char *path, const char *mode,
   gt_error_check(err);
   gt_assert(path && mode);
   gt_assert(fa);
-  return fileopen_generic(fa, path, mode, GFM_GZIP, false, src_file, src_line,
-                          err);
+  return fileopen_generic(fa, path, mode, GT_FILE_MODE_GZIP, false, src_file,
+                          src_line, err);
 }
 
 gzFile gt_fa_xgzopen_func(const char *path, const char *mode,
@@ -222,22 +222,22 @@ gzFile gt_fa_xgzopen_func(const char *path, const char *mode,
 {
   gt_assert(path && mode);
   gt_assert(fa);
-  return fileopen_generic(fa, path, mode, GFM_GZIP, true, src_file, src_line,
-                          NULL);
+  return fileopen_generic(fa, path, mode, GT_FILE_MODE_GZIP, true, src_file,
+                          src_line, NULL);
 }
 
 void gt_fa_gzclose(gzFile stream)
 {
   gt_assert(fa);
   if (!stream) return;
-  fclose_generic(stream, GFM_GZIP, fa);
+  fclose_generic(stream, GT_FILE_MODE_GZIP, fa);
 }
 
 void gt_fa_xgzclose(gzFile stream)
 {
   gt_assert(fa);
   if (!stream) return;
-  xfclose_generic(stream, GFM_GZIP, fa);
+  xfclose_generic(stream, GT_FILE_MODE_GZIP, fa);
 }
 
 BZFILE* gt_fa_bzopen_func(const char *path, const char *mode,
@@ -246,8 +246,8 @@ BZFILE* gt_fa_bzopen_func(const char *path, const char *mode,
   gt_error_check(err);
   gt_assert(path && mode);
   gt_assert(fa);
-  return fileopen_generic(fa, path, mode, GFM_BZIP2, false, src_file, src_line,
-                          err);
+  return fileopen_generic(fa, path, mode, GT_FILE_MODE_BZIP2, false, src_file,
+                          src_line, err);
 
 }
 
@@ -256,22 +256,22 @@ BZFILE* gt_fa_xbzopen_func(const char *path, const char *mode,
 {
   gt_assert(path && mode);
   gt_assert(fa);
-  return fileopen_generic(fa, path, mode, GFM_BZIP2, true, src_file, src_line,
-                          NULL);
+  return fileopen_generic(fa, path, mode, GT_FILE_MODE_BZIP2, true, src_file,
+                          src_line, NULL);
 }
 
 void gt_fa_bzclose(BZFILE *stream)
 {
   gt_assert(fa);
   if (!stream) return;
-  fclose_generic(stream, GFM_BZIP2, fa);
+  fclose_generic(stream, GT_FILE_MODE_BZIP2, fa);
 }
 
 void gt_fa_xbzclose(BZFILE *stream)
 {
   gt_assert(fa);
   if (!stream) return;
-  xfclose_generic(stream, GFM_BZIP2, fa);
+  xfclose_generic(stream, GT_FILE_MODE_BZIP2, fa);
 }
 
 static const char genometools_tmptemplate[] = "/genometools.XXXXXXXXXX";

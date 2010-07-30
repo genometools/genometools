@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2005 Michael E Sparks <mespar1@iastate.edu>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
@@ -65,7 +65,7 @@ static char *filenames[] =
   "Fi"
 };
 
-static int bssm_model_read(GthBssmModel *bssm_model, FILE *file, GtError *err)
+static int bssm_model_read(GthBSSMModel *bssm_model, FILE *file, GtError *err)
 {
   int had_err = 0;
   gt_error_check(err);
@@ -93,14 +93,14 @@ static int bssm_model_read(GthBssmModel *bssm_model, FILE *file, GtError *err)
   return had_err;
 }
 
-GthBssmParam* gth_bssm_param_new(void)
+GthBSSMParam* gth_bssm_param_new(void)
 {
-  return gt_calloc(1, sizeof (GthBssmParam));
+  return gt_calloc(1, sizeof (GthBSSMParam));
 }
 
-GthBssmParam* gth_bssm_param_load(const char *filename, GtError *err)
+GthBSSMParam* gth_bssm_param_load(const char *filename, GtError *err)
 {
-  GthBssmParam *bssm_param = NULL;
+  GthBSSMParam *bssm_param = NULL;
   FILE *file = NULL;
   int had_err = 0;
 
@@ -180,9 +180,9 @@ GthBssmParam* gth_bssm_param_load(const char *filename, GtError *err)
   return bssm_param;
 }
 
-GthBssmParam* gth_bssm_param_extract(unsigned long speciesnum, GtError *err)
+GthBSSMParam* gth_bssm_param_extract(unsigned long speciesnum, GtError *err)
 {
-  GthBssmParam *bssm_param;
+  GthBSSMParam *bssm_param;
   unsigned long i, j, k, l;
 
   gt_error_check(err);
@@ -242,15 +242,15 @@ GthBssmParam* gth_bssm_param_extract(unsigned long speciesnum, GtError *err)
   return bssm_param;
 }
 
-void gth_bssm_param_delete(GthBssmParam *bssm_param)
+void gth_bssm_param_delete(GthBSSMParam *bssm_param)
 {
   if (!bssm_param) return;
   gt_free(bssm_param);
 }
 
 #ifndef NDEBUG
-static bool bssm_models_are_equal(GthBssmModel *checkmodel,
-                                 GthBssmModel *testmodel)
+static bool bssm_models_are_equal(GthBSSMModel *checkmodel,
+                                 GthBSSMModel *testmodel)
 {
   unsigned long i, j, k, l;
 
@@ -298,9 +298,9 @@ static bool bssm_models_are_equal(GthBssmModel *checkmodel,
 
 #ifndef NDEBUG
 static bool bssmfile_equals_param(const char *filename,
-                                  GthBssmParam *checkparam)
+                                  GthBSSMParam *checkparam)
 {
-  GthBssmParam *testparam;
+  GthBSSMParam *testparam;
 
   /* reading test parameters from file */
   testparam = gth_bssm_param_load(filename, NULL);
@@ -350,7 +350,7 @@ static bool bssmfile_equals_param(const char *filename,
 }
 #endif
 
-static int writeBssmmodeltofile(FILE *file, GthBssmModel *bssm_model,
+static int writeBssmmodeltofile(FILE *file, GthBSSMModel *bssm_model,
                                 GtError *err)
 {
   int had_err = 0;
@@ -379,7 +379,7 @@ static int writeBssmmodeltofile(FILE *file, GthBssmModel *bssm_model,
   return had_err;
 }
 
-int gth_bssm_param_save(GthBssmParam *bssm_param, const char *filename,
+int gth_bssm_param_save(GthBSSMParam *bssm_param, const char *filename,
                         GtError *err)
 {
   FILE *file;
@@ -430,11 +430,30 @@ int gth_bssm_param_save(GthBssmParam *bssm_param, const char *filename,
   return had_err;
 }
 
+static bool bssm_model_is_seven_class(const GthBSSMModel *bssm_model)
+{
+  gt_assert(bssm_model);
+  return bssm_model->hypothesisnum == HYPOTHESIS7;
+}
+
+bool gth_bssm_param_is_seven_class(const GthBSSMParam  *bssm_param)
+{
+  gt_assert(bssm_param);
+  return (!bssm_param->gt_donor_model_set ||
+          bssm_model_is_seven_class(&bssm_param->gt_donor_model)) &&
+         (!bssm_param->gc_donor_model_set ||
+          bssm_model_is_seven_class(&bssm_param->gc_donor_model)) &&
+         (!bssm_param->ag_acceptor_model_set ||
+          bssm_model_is_seven_class(&bssm_param->ag_acceptor_model));
+}
+
 /* The following function outouts <bssm_model>.
    It is assumed that the Hypo7table is used. */
-static void bssm_model_echo(const GthBssmModel *bssm_model, FILE *outfp)
+static void bssm_model_echo(const GthBSSMModel *bssm_model, FILE *outfp)
 {
   unsigned long i, j, k, l;
+
+  gt_assert(bssm_model_is_seven_class(bssm_model));
 
   for (i = 0; i < HYPOTHESIS7; i++) {
     fprintf(outfp,"\n\nHypothesis: %lu", i);
@@ -451,7 +470,7 @@ static void bssm_model_echo(const GthBssmModel *bssm_model, FILE *outfp)
   fprintf(outfp,"\n\n");
 }
 
-void gth_bssm_param_echo(const GthBssmParam *bssm_param, FILE *outfp)
+void gth_bssm_param_echo(const GthBSSMParam *bssm_param, FILE *outfp)
 {
   gt_assert(bssm_param && outfp);
   fprintf(outfp,"BSSMPARAMVERSION is %u\n\n", bssm_param->versionnum);
@@ -478,7 +497,7 @@ void gth_bssm_param_echo(const GthBssmParam *bssm_param, FILE *outfp)
   }
 }
 
-void gth_bssm_param_show_info(const GthBssmParam *bssm_param, GtFile *outfp)
+void gth_bssm_param_show_info(const GthBSSMParam *bssm_param, GtFile *outfp)
 {
 #define SEVENCLASSSTRING        "seven-class"
 #define TWOCLASSSTRING          "two-class"
@@ -508,7 +527,7 @@ void gth_bssm_param_show_info(const GthBssmParam *bssm_param, GtFile *outfp)
   PRINT_CLASS_STRING(ag_acceptor);
 }
 
-static void set_window_sizes_in_Bssmmodel(GthBssmModel *bssm_model)
+static void set_window_sizes_in_Bssmmodel(GthBSSMModel *bssm_model)
 {
   bssm_model->hypothesisnum      = HYPOTHESIS7;
 
@@ -519,7 +538,7 @@ static void set_window_sizes_in_Bssmmodel(GthBssmModel *bssm_model)
 }
 
 /* updates the BSSM parameterization file */
-static void build_bssm(GtBioseq *bioseq, GthBssmModel *bssm_model,
+static void build_bssm(GtBioseq *bioseq, GthBSSMModel *bssm_model,
                        unsigned int hypothesisnum)
 {
   unsigned long mono_ct[STRINGSIZE-1][ALPHSIZE],         /* Mononuc freq */
@@ -616,7 +635,7 @@ static void build_bssm(GtBioseq *bioseq, GthBssmModel *bssm_model,
   }
 }
 
-int gth_bssm_param_parameterize(GthBssmParam *bssm_param, const char *path,
+int gth_bssm_param_parameterize(GthBSSMParam *bssm_param, const char *path,
                                 Termtype termtype, bool gzip, GtError *err)
 {
   GtAlphabet *alphabet = NULL;

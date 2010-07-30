@@ -642,7 +642,7 @@ int gt_graphics_cairo_save_to_file(const GtGraphics *gg, const char *filename,
       cairo_show_page(g->cr);
       cairo_surface_flush(g->surf);
       cairo_surface_finish(g->surf);
-      outfile = gt_file_open(GFM_UNCOMPRESSED, filename, "w+", err);
+      outfile = gt_file_open(GT_FILE_MODE_UNCOMPRESSED, filename, "w+", err);
       if (outfile)
       {
         gt_file_xwrite(outfile, gt_str_get_mem(g->outbuf),
