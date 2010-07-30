@@ -35,7 +35,8 @@ struct GtRegionMapping {
   GtBioseq *bioseq; /* the current bioseq */
   GtSeqid2SeqnumMapping *seqid2seqnum_mapping;
   const char *rawseq;
-  unsigned long rawlength;
+  unsigned long rawlength,
+                rawoffset;
   unsigned int reference_count;
 };
 
@@ -67,7 +68,8 @@ GtRegionMapping* gt_region_mapping_new_seqfile(GtStr *sequence_filename,
 }
 
 GtRegionMapping* gt_region_mapping_new_rawseq(const char *rawseq,
-                                              unsigned long length)
+                                              unsigned long length,
+                                              unsigned long offset)
 {
   GtRegionMapping *rm;
   gt_assert(rawseq);
@@ -75,6 +77,7 @@ GtRegionMapping* gt_region_mapping_new_rawseq(const char *rawseq,
   rm->userawseq = true;
   rm->rawseq = rawseq;
   rm->rawlength = length;
+  rm->rawoffset = offset;
   return rm;
 }
 
@@ -155,7 +158,7 @@ int gt_region_mapping_get_raw_sequence(GtRegionMapping *rm, const char **rawseq,
       gt_assert(!rm->seqid2seqnum_mapping);
       *rawseq = rm->rawseq;
       *length = rm->rawlength;
-      *offset = 1;
+      *offset = rm->rawoffset;
     }
     else {
       gt_assert(!rm->seqid2seqnum_mapping);
