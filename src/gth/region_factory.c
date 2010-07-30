@@ -201,7 +201,7 @@ static void make_sequence_region(GtHashmap *sequence_regions,
                                               seqnum), range.start, range.end);
       gt_hashmap_add(sequence_regions,
                      (void*) gt_cstr_table_get(srf->used_seqids,
-                                              gt_str_get(sequenceid)),
+                                               gt_str_get(sequenceid)),
                      sr);
     }
     else {
