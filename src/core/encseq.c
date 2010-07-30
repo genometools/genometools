@@ -6600,7 +6600,9 @@ uint64_t gt_encseq_effective_filelength(const GtEncseq *encseq,
                                         unsigned long filenum)
 {
   unsigned long num_files;
-  gt_assert(encseq && encseq->filenametab);
+  if (encseq->numofdbfiles == 1UL)
+    return encseq->totallength;
+  gt_assert(encseq && encseq->filelengthtab);
   num_files = encseq->numofdbfiles;
   gt_assert(filenum < num_files);
   return encseq->filelengthtab[filenum].effectivelength;
