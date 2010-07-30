@@ -48,16 +48,16 @@ void          gt_str_append_cstr_nt(GtStr *str,
 /* Append character <c> to <str>. */
 void          gt_str_append_char(GtStr *str, char c);
 /* Append double <d> to <str> with given <precision>. */
-void          gt_str_append_double(GtStr*, double d, int precision);
+void          gt_str_append_double(GtStr *str, double d, int precision);
 /* Append <ulong> to <str>. */
-void          gt_str_append_ulong(GtStr*, unsigned long ulong);
+void          gt_str_append_ulong(GtStr *str, unsigned long ulong);
 /* Append <intval> to <str>. */
-void          gt_str_append_int(GtStr*, int intval);
+void          gt_str_append_int(GtStr *str, int intval);
 /* Append <uint> to <str>. */
-void          gt_str_append_uint(GtStr*, unsigned int uint);
+void          gt_str_append_uint(GtStr *str, unsigned int uint);
 /* Set length of <str> to <length>. <length> must be smaller or equal than
    <gt_str_length(str)>. */
-void          gt_str_set_length(GtStr*, unsigned long length);
+void          gt_str_set_length(GtStr *str, unsigned long length);
 /* Reset <str> to length 0. */
 void          gt_str_reset(GtStr *str);
 /* Compare <str1> and <str2> and return the result (similar to <strcmp(3)>). */
