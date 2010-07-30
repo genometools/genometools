@@ -58,34 +58,34 @@ static GtOptionParser* gt_fingerprint_option_parser_new(GT_UNUSED
   GtOption *check_option, *duplicates_option, *extract_option;
   gt_assert(arguments);
   op = gt_option_parser_new("[option ...] sequence_file [...] ",
-                         "Compute MD5 fingerprints for each sequence given "
-                         "in sequence_file(s).");
+                            "Compute MD5 fingerprints for each sequence given "
+                            "in sequence_file(s).");
 
   /* -check */
-  check_option = gt_option_new_filename("check", "GtCompare all fingerprints "
-                                     "contained in the given checklist file "
-                                     "with checksums in given "
-                                     "sequence_files(s). The comparison is "
-                                     "successful, if all fingerprints given in "
-                                     "checkfile can be found in the "
-                                     "sequence_file(s) in the exact same "
-                                     "quantity and vice versa.",
-                                     arguments->checklist);
+  check_option = gt_option_new_filename("check", "compare all fingerprints "
+                                        "contained in the given checklist file "
+                                        "with checksums in given "
+                                        "sequence_files(s). The comparison is "
+                                        "successful, if all fingerprints given "
+                                        "in checkfile can be found in the "
+                                        "sequence_file(s) in the exact same "
+                                        "quantity and vice versa.",
+                                        arguments->checklist);
   gt_option_parser_add_option(op, check_option);
 
   /* -duplicates */
-  duplicates_option = gt_option_new_bool("duplicates", "Show duplicate "
-                                      "fingerprints from given "
-                                      "sequence_file(s).",
-                                      &arguments->show_duplicates, false);
+  duplicates_option = gt_option_new_bool("duplicates", "show duplicate "
+                                         "fingerprints from given "
+                                         "sequence_file(s).",
+                                         &arguments->show_duplicates, false);
   gt_option_parser_add_option(op, duplicates_option);
 
   /* -extract */
   extract_option = gt_option_new_string("extract",
-                                     "Extract the sequence(s) with "
-                                     "the given fingerprint from "
-                                     "sequence_file(s) and show them on "
-                                     "stdout.", arguments->extract, NULL);
+                                        "extract the sequence(s) with "
+                                        "the given fingerprint from "
+                                        "sequence_file(s) and show them on "
+                                        "stdout.", arguments->extract, NULL);
   gt_option_parser_add_option(op, extract_option);
 
   /* option exclusions */
