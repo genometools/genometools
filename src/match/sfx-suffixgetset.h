@@ -35,25 +35,43 @@ typedef void (*Dc_processunsortedrange)(void *,
                                         unsigned long,
                                         unsigned long);
 
+/*@unused@*/ static inline Suffixsortspace
+              *suffixsortspace_new(unsigned long numofentries)
+{
+  Suffixsortspace *suffixsortspace;
+
+  suffixsortspace = gt_malloc(sizeof(*suffixsortspace));
+  if (numofentries == 0)
+  {
+    suffixsortspace->sortspace = NULL;
+  } else
+  {
+    suffixsortspace->sortspace = gt_malloc(sizeof(*suffixsortspace->sortspace) *
+                                           numofentries);
+  }
+  suffixsortspace->sortspaceoffset = 0;
+  suffixsortspace->bucketleftidx = 0;
+  return suffixsortspace;
+}
+
+/*@unused@*/ static inline void
+             suffixsortspace_delete(Suffixsortspace *suffixsortspace)
+{
+  gt_free(suffixsortspace->sortspace);
+  gt_free(suffixsortspace);
+}
+
 /*@unused@*/ static inline void suffixptrassert(const Suffixsortspace *sssp,
-                                                const Suffixptr *subbucket,
                                                 unsigned long subbucketleft,
                                                 unsigned long idx)
 {
-  unsigned long tmp = sssp->bucketleftidx - sssp->sortspaceoffset;
   gt_assert(sssp != NULL);
   gt_assert(sssp->sortspaceoffset <= sssp->bucketleftidx + subbucketleft + idx);
   /*
   fprintf(stderr,"idx=%lu,bucketleftidx=%lu,subbucketleft=%lu,"
                  "sortspaceoffset=%lu\n",
           idx,sssp->bucketleftidx,subbucketleft,sssp->sortspaceoffset);
-  fprintf(stderr,"diff=%lu\n",(unsigned long) (subbucket-sssp->sortspace));
   */
-  gt_assert(subbucket + idx ==
-            sssp->sortspace + (sssp->bucketleftidx+subbucketleft+idx-
-                               sssp->sortspaceoffset));
-  gt_assert(subbucket + idx ==
-            sssp->sortspace + (subbucketleft + idx + tmp));
 }
 
 /*@unused@*/ static inline unsigned long suffixptrget(
@@ -62,7 +80,7 @@ typedef void (*Dc_processunsortedrange)(void *,
                                          unsigned long subbucketleft,
                                          unsigned long idx)
 {
-  suffixptrassert(sssp,subbucket,subbucketleft,idx);
+  suffixptrassert(sssp,subbucketleft,idx);
   return SUFFIXPTRGET(subbucket,idx);
 }
 
@@ -72,7 +90,7 @@ typedef void (*Dc_processunsortedrange)(void *,
                                              unsigned long idx,
                                              unsigned long value)
 {
-  suffixptrassert(sssp,subbucket,subbucketleft,idx);
+  suffixptrassert(sssp,subbucketleft,idx);
   SUFFIXPTRSET(subbucket,idx,value);
 }
 
