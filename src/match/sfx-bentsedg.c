@@ -52,7 +52,7 @@
   The following needs to be done.
 
   eis-suffixerator-interface.c
-  sfx-run.c: contains functions to write suftab/bwttab. 
+  sfx-run.c: contains functions to write suftab/bwttab.
 */
 
 #define UNIQUEINT(P)           ((unsigned long) ((P) + GT_COMPAREOFFSET))

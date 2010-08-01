@@ -7,22 +7,24 @@
  * Qsort routine from Bentley & McIlroy's "Engineering a Sort Function".
  */
 
-#define GT_QSORT_ARR_SWAP(A,B)\
+#define GT_QSORT_ARR_SWAP(ARR,A,B)\
         if ((A) != (B))\
         {\
-          tmp = arr[A];\
-          arr[A] = arr[B];\
-          arr[B] = tmp;\
+          tmp = QSORT_ARRAY_GET(ARR,A);\
+          QSORT_ARRAY_SET(ARR,A,QSORT_ARRAY_GET(ARR,B));\
+          QSORT_ARRAY_SET(ARR,B,tmp);\
         }
 
-#define GT_QSORT_ARR_VECSWAP(A,B,N)\
-        aptr = A;\
-        bptr = B;\
+#define GT_QSORT_ARR_VECSWAP(ARR,A,B,N)\
+        aidx = A;\
+        bidx = B;\
         while ((N)-- > 0)\
         {\
-          tmp = arr[aptr];\
-          arr[aptr++] = arr[bptr];\
-          arr[bptr++] = tmp;\
+          tmp = QSORT_ARRAY_GET(ARR,aidx);\
+          QSORT_ARRAY_SET(ARR,aidx,QSORT_ARRAY_GET(ARR,bidx));\
+          QSORT_ARRAY_SET(ARR,bidx,tmp);\
+          aidx++;\
+          bidx++;\
         }
 
 static inline unsigned long gt_inlined_qsort_arr_r_med3
@@ -51,12 +53,12 @@ GT_STACK_DECLARESTRUCT(Intervalarrtobesorted,32UL);
 
 static void gt_inlinedarr_qsort_r (Sorttype *arr,unsigned long len,void *data)
 {
-  Sorttype tmp;
-  unsigned long pa, pb, pc, pd, pl, pm, pn, aptr, bptr, d, minval;
+  unsigned long tmp, pa, pb, pc, pd, pl, pm, pn, aidx, bidx, d, minval;
   int r;
   bool swapped;
   GtStackIntervalarrtobesorted intervalstack;
   Intervalarrtobesorted current;
+  QSORT_ARRAY_DECLARE;
 
   GT_STACK_INIT(&intervalstack,16UL);
   current.startindex = 0;
@@ -74,7 +76,7 @@ static void gt_inlinedarr_qsort_r (Sorttype *arr,unsigned long len,void *data)
         for (pl = pm; pl > current.startindex &&
                       qsortcmparr (arr, pl - 1, pl, data) > 0; pl--)
         {
-          GT_QSORT_ARR_SWAP (pl, pl - 1);
+          GT_QSORT_ARR_SWAP (arr, pl, pl - 1);
         }
       }
       continue;
@@ -97,7 +99,7 @@ static void gt_inlinedarr_qsort_r (Sorttype *arr,unsigned long len,void *data)
       }
       pm = gt_inlined_qsort_arr_r_med3 (arr, pl, pm, pn, data);
     }
-    GT_QSORT_ARR_SWAP (current.startindex, pm);
+    GT_QSORT_ARR_SWAP (arr, current.startindex, pm);
     pa = pb = current.startindex + 1;
     pc = pd = current.startindex + current.len - 1;
     while (1)
@@ -108,7 +110,7 @@ static void gt_inlinedarr_qsort_r (Sorttype *arr,unsigned long len,void *data)
         if (r == 0)
         {
           swapped = true;
-          GT_QSORT_ARR_SWAP (pa, pb);
+          GT_QSORT_ARR_SWAP (arr, pa, pb);
           pa++;
         }
         pb++;
@@ -119,7 +121,7 @@ static void gt_inlinedarr_qsort_r (Sorttype *arr,unsigned long len,void *data)
         if (r == 0)
         {
           swapped = true;
-          GT_QSORT_ARR_SWAP (pc, pd);
+          GT_QSORT_ARR_SWAP (arr, pc, pd);
           gt_assert(pd > 0);
           pd--;
         }
@@ -130,7 +132,7 @@ static void gt_inlinedarr_qsort_r (Sorttype *arr,unsigned long len,void *data)
       {
         break;
       }
-      GT_QSORT_ARR_SWAP (pb, pc);
+      GT_QSORT_ARR_SWAP (arr, pb, pc);
       swapped = true;
       pb++;
       gt_assert(pc > 0);
@@ -144,7 +146,7 @@ static void gt_inlinedarr_qsort_r (Sorttype *arr,unsigned long len,void *data)
         for (pl = pm; pl > current.startindex &&
                       qsortcmparr (arr, pl - 1, pl, data) > 0; pl--)
         {
-          GT_QSORT_ARR_SWAP (pl, pl - 1);
+          GT_QSORT_ARR_SWAP (arr, pl, pl - 1);
         }
       }
       continue;
@@ -155,12 +157,12 @@ static void gt_inlinedarr_qsort_r (Sorttype *arr,unsigned long len,void *data)
     minval = MIN ((unsigned long) (pa - current.startindex),
                   (unsigned long) (pb - pa));
     gt_assert(pb >= minval);
-    GT_QSORT_ARR_VECSWAP (current.startindex, pb - minval, minval);
+    GT_QSORT_ARR_VECSWAP (arr, current.startindex, pb - minval, minval);
     gt_assert(pd >= pc);
     gt_assert(pn > pd);
     minval = MIN ((unsigned long) (pd - pc), (unsigned long) (pn - pd - 1));
     gt_assert(pn > minval);
-    GT_QSORT_ARR_VECSWAP (pb, pn - minval, minval);
+    GT_QSORT_ARR_VECSWAP (arr, pb, pn - minval, minval);
     gt_assert(pb >= pa);
     if ((minval = (unsigned long) (pb - pa)) > 1UL)
     {

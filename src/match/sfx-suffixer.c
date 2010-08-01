@@ -48,7 +48,7 @@
 
 typedef struct
 {
-  unsigned long allocatedSuffixptr, nextfreeSuffixptr; 
+  unsigned long allocatedSuffixptr, nextfreeSuffixptr;
   Suffixsortspace *sssp;
 } GtSuffixposbuffer;
 

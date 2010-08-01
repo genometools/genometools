@@ -231,7 +231,6 @@ static int qsortcmpwithdata(const void *a,const void *b, GT_UNUSED void *data)
 }
 
 #include "match/qsort-inplace.gen"
-#include "match/qsort-array.gen"
 
 static void check_inlinedptr_qsort(unsigned long *a, unsigned long n)
 {
@@ -241,6 +240,16 @@ static void check_inlinedptr_qsort(unsigned long *a, unsigned long n)
     gt_assert(a[idx-1] <= a[idx]);
   }
 }
+
+#define QSORT_ARRAY_DECLARE /* Nothing */
+
+#define QSORT_ARRAY_GET(ARR,RELIDX)\
+        ARR[RELIDX]
+
+#define QSORT_ARRAY_SET(ARR,RELIDX,VALUE)\
+        ARR[RELIDX] = VALUE
+
+#include "match/qsort-array.gen"
 
 static void check_inlinedarr_qsort(unsigned long *a, unsigned long n)
 {
@@ -319,7 +328,8 @@ static int gt_qsortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
     check_gnu_qsort(array, arguments->num_values);
   } else if (strcmp(gt_str_get(arguments->impl), "inlinedptr") == 0) {
     check_inlinedptr_qsort(array, arguments->num_values);
-  } else if (strcmp(gt_str_get(arguments->impl), "inlinedarr") == 0) {
+  }
+    else if (strcmp(gt_str_get(arguments->impl), "inlinedarr") == 0) {
     check_inlinedarr_qsort(array, arguments->num_values);
   }
   gt_timer_show(timer, stdout);

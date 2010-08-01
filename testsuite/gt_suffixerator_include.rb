@@ -114,6 +114,16 @@ alldir = ["fwd","cpl","rev","rcl"]
 
 # put the tests with paircmp, maxpair, patternmatch, into a file gt_idxmatch
 
+Name "gt qsortbench"
+Keywords "gt_qsortbench"
+Test do
+  ["thomas","system","inlinedptr","inlinedarr"].each do |impl|
+    ["-aqsort","-permute",""].each do |option|
+      run_test "#{$bin}gt dev qsortbench -size 10000 -maxval 1000 -impl #{impl} #{option}"
+    end
+  end
+end
+
 all_fastafiles.each do |filename|
   Name "gt suffixerator -dc 64 -parts 1+3 #{filename}"
   Keywords "gt_suffixerator"

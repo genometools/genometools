@@ -43,16 +43,16 @@ fi
 
 cd testsuite
 
-env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb  ${MC} -keywords 'gt_extractseq' \
-       -gttestdata ${GTTESTDATA}
-
 env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_suffixerator'
 
 env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb \
        ${MC} -keywords 'gt_suffixerator and gttestdata' \
        -gttestdata ${GTTESTDATA}
 
-env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_uniquesub'
+env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_qsortbench'
+
+env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb  ${MC} -keywords 'gt_extractseq' \
+       -gttestdata ${GTTESTDATA}
 
 env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_checkprjfiles' \
        -gttestdata ${GTTESTDATA}

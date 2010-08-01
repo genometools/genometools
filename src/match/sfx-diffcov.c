@@ -24,7 +24,6 @@
 #include "core/ma_api.h"
 #include "core/minmax.h"
 #include "core/mathsupport.h"
-#include "core/qsort_r.h"
 #include "core/unused_api.h"
 #include "core/intbits.h"
 #include "core/encseq.h"
@@ -888,6 +887,15 @@ static void dc_addunsortedrange(void *voiddcov,
 
 typedef Suffixptr Sorttype;
 
+#define QSORT_ARRAY_DECLARE\
+        Differencecover *dcov = (Differencecover *) data
+
+#define QSORT_ARRAY_GET(ARR,RELIDX)\
+        suffixptrget3(dcov->sssp,dcov->sortoffset+(RELIDX))
+
+#define QSORT_ARRAY_SET(ARR,RELIDX,VALUE)\
+        suffixptrset3(dcov->sssp,dcov->sortoffset+(RELIDX),VALUE)
+
 static int qsortcmparr (GT_UNUSED const Sorttype *subbucket,
                         unsigned long a, unsigned long b,const void *data)
 {
@@ -896,8 +904,8 @@ static int qsortcmparr (GT_UNUSED const Sorttype *subbucket,
   unsigned int offset;
 
   gt_assert(dcov->sssp != NULL);
-  suffixpos1 = suffixptrget3(dcov->sssp,dcov->sortoffset+a);
-  suffixpos2 = suffixptrget3(dcov->sssp,dcov->sortoffset+b);
+  suffixpos1 = QSORT_ARRAY_GET(NULL,a);
+  suffixpos2 = QSORT_ARRAY_GET(NULL,b);
   gt_assert(suffixpos1 < dcov->totallength);
   gt_assert(suffixpos2 < dcov->totallength);
   offset = differencecover_offset(dcov,suffixpos1,suffixpos2);
@@ -934,10 +942,12 @@ void dc_sortunsortedbucket(void *data,
   gt_assert(subbucketleft >= dcov->sssp->sortspaceoffset);
   CHECKSUBBUCKET(subbucketleft - dcov->sssp->sortspaceoffset,
                  dcov->sssp->sortspace);
+  /*
   gt_assert(subbucketleft - dcov->sssp->sortspaceoffset ==
             (unsigned long) (subbucket - dcov->sssp->sortspace));
   gt_assert(dcov->sssp->sortspace + subbucketleft -
             dcov->sssp->sortspaceoffset == subbucket);
+  */
 #ifdef WITHCHECK
   gt_checksortedsuffixes(__FILE__,
                          __LINE__,
@@ -952,7 +962,7 @@ void dc_sortunsortedbucket(void *data,
 #endif
   dcov->sortoffset = subbucketleft - dcov->sssp->sortspaceoffset;
   /* subbucket is only used for assertions */
-  gt_inlinedarr_qsort_r (subbucket,width,data);
+  gt_inlinedarr_qsort_r (NULL,width,data);
 }
 
 static void dc_sortremainingsamples(Differencecover *dcov)
@@ -1014,23 +1024,19 @@ void gt_differencecover_sortsample(Differencecover *dcov,
                                    bool cmpcharbychar,
                                    bool withcheck)
 {
-  unsigned long pos;
-  unsigned int modvalue;
+  unsigned long pos, sampleindex, posinserted, fullspecials = 0, specials = 0;
+  unsigned int modvalue, unitsnotspecial;
   Diffvalue *diffptr, *afterend;
-  unsigned long fullspecials = 0, specials = 0;
-  unsigned int unitsnotspecial;
   GtCodetype code;
   GtArrayCodeatposition codelist;
   Codeatposition *codeptr;
-  unsigned long sampleindex;
-  unsigned long posinserted;
 
   dcov->samplesize = 0;
   dcov->bcktab = gt_allocBcktab(dcov->numofchars,
-                             dcov->prefixlength,
-                             true,
-                             NULL,
-                             NULL);
+                                dcov->prefixlength,
+                                true,
+                                NULL,
+                                NULL);
   dcov->multimappower = gt_bcktab_multimappower(dcov->bcktab);
   dcov->esr = gt_encseq_create_reader_with_readmode(dcov->encseq,
                                                     dcov->readmode,

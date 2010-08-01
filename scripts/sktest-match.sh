@@ -44,6 +44,8 @@ then
   env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb \
        ${MC} -keywords 'gt_repfind' \
        -gttestdata ${GTTESTDATA}
+  env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb \
+       ${MC} -keywords 'gt_uniquesub'
   env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ./testsuite.rb \
        ${MC} -keywords 'gt_repfind and gttestdata' \
        -gttestdata ${GTTESTDATA}
