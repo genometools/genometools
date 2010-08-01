@@ -44,22 +44,6 @@
 #include "sfx-enumcodes.h"
 #include "stamp.h"
 
-#define CHECKSUBBUCKET(SUBBUCKETLEFT,BASE)\
-        {\
-          unsigned long baseindex\
-            = (unsigned long) (subbucket - (BASE));\
-          if ((SUBBUCKETLEFT) != baseindex)\
-          {\
-            fprintf(stderr,"%d: subbucketleft=%lu!=%lu= " \
-                           "baseindex\n",\
-                            __LINE__,\
-                            SUBBUCKETLEFT,\
-                            baseindex);\
-            fprintf(stderr,"reference at %lu\n",(unsigned long) (BASE));\
-            exit(EXIT_FAILURE);\
-          }\
-        }
-
 typedef unsigned char Diffrank;
 #define Diffrankmax ((Diffrank) 255)
 typedef unsigned short Diffvalue;
@@ -688,7 +672,6 @@ static void dc_processunsortedrange(Differencecover *dcov,
 {
   Pairsuffixptr *pairelem;
 
-  CHECKSUBBUCKET(subbucketleft,dcov->sortedsample);
   gt_assert(width >= 2UL && depth > 0);
   gt_assert(!dcov->firstwithnewdepth.defined ||
             (dcov->firstwithnewdepth.depth > 0 &&
@@ -760,7 +743,6 @@ static void dc_sortsuffixesonthislevel(Differencecover *dcov,
 {
   unsigned long idx, rangestart, startpos;
 
-  CHECKSUBBUCKET(subbucketleft,dcov->sortedsample);
   if (dcov->itvinfo == NULL)
   {
     dcov->itvinfo = gt_malloc(sizeof (*dcov->itvinfo) *
@@ -876,7 +858,6 @@ static void dc_addunsortedrange(void *voiddcov,
   Pairsuffixptr *ptr;
 
   gt_assert(dcov->sssp == NULL);
-  CHECKSUBBUCKET(subbucketleft,dcov->sortedsample);
   gt_assert(depth >= (unsigned long) dcov->vparam);
   dc_updatewidth (dcov,width,dcov->vparam);
   GT_GETNEXTFREEINARRAY(ptr,&dcov->firstgeneration,Pairsuffixptr,1024);
@@ -926,7 +907,7 @@ static int qsortcmparr (GT_UNUSED const Sorttype *subbucket,
 #include "qsort-array.gen"
 
 void dc_sortunsortedbucket(void *data,
-                           Suffixptr *subbucket, /* refers into suftab range */
+                           GT_UNUSED Suffixptr *subbucket,
                            unsigned long subbucketleft,
                            unsigned long width,
                            GT_UNUSED unsigned long depth)
@@ -940,8 +921,6 @@ void dc_sortunsortedbucket(void *data,
   gt_assert(width >= 2UL);
   gt_assert(dcov->sssp != NULL);
   gt_assert(subbucketleft >= dcov->sssp->sortspaceoffset);
-  CHECKSUBBUCKET(subbucketleft - dcov->sssp->sortspaceoffset,
-                 dcov->sssp->sortspace);
   /*
   gt_assert(subbucketleft - dcov->sssp->sortspaceoffset ==
             (unsigned long) (subbucket - dcov->sssp->sortspace));
