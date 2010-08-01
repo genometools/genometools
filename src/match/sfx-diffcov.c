@@ -633,13 +633,11 @@ static void dc_initinversesuftabnonspecialsadjust(Differencecover *dcov)
 }
 
 static void dc_anchorleftmost(Differencecover *dcov,
-                              Suffixptr *subbucket,
                               unsigned long subbucketleft,
                               unsigned long width)
 {
   unsigned long idx;
 
-  gt_assert(subbucket = dcov->sortedsample + subbucketleft);
   for (idx = subbucketleft; idx < subbucketleft + width; idx++)
   {
     inversesuftab_set(dcov,suffixptrgetdcov(dcov,idx),subbucketleft);
@@ -788,10 +786,7 @@ static void dc_sortsuffixesonthislevel(Differencecover *dcov,
                                 subbucketleft + rangestart,
                                 idx - rangestart,
                                 GT_MULT2(dcov->currentdepth));
-        dc_anchorleftmost(dcov,
-                          subbucket + rangestart,
-                          subbucketleft + rangestart,
-                          idx - rangestart);
+        dc_anchorleftmost(dcov, subbucketleft + rangestart, idx - rangestart);
       } else
       {
         unsigned long currentsuftabentry
@@ -808,10 +803,7 @@ static void dc_sortsuffixesonthislevel(Differencecover *dcov,
                             subbucketleft + rangestart,
                             width - rangestart,
                             GT_MULT2(dcov->currentdepth));
-    dc_anchorleftmost(dcov,
-                      subbucket + rangestart,
-                      subbucketleft + rangestart,
-                      width - rangestart);
+    dc_anchorleftmost(dcov, subbucketleft + rangestart, width - rangestart);
   } else
   {
     unsigned long currentsuftabentry
@@ -970,8 +962,7 @@ static void dc_sortremainingsamples(Differencecover *dcov)
                  dcov->firstgeneration.nextfreePairsuffixptr;
        pairptr++)
   {
-    dc_anchorleftmost(dcov,pairptr->subbucket,pairptr->subbucketleft,
-                      pairptr->width);
+    dc_anchorleftmost(dcov,pairptr->subbucketleft,pairptr->width);
   }
   for (pairptr = dcov->firstgeneration.spacePairsuffixptr;
        pairptr < dcov->firstgeneration.spacePairsuffixptr +
