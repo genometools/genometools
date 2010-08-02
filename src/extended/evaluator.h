@@ -24,15 +24,15 @@
 typedef struct GtEvaluator GtEvaluator;
 
 GtEvaluator* gt_evaluator_new(void);
-void       gt_evaluator_add_true(GtEvaluator*);
-void       gt_evaluator_add_actual(GtEvaluator*, unsigned long);
-void       gt_evaluator_add_predicted(GtEvaluator*, unsigned long);
-double     gt_evaluator_get_sensitivity(const GtEvaluator*);
-double     gt_evaluator_get_specificity(const GtEvaluator*);
-void       gt_evaluator_show_sensitivity(const GtEvaluator*, FILE*);
-void       gt_evaluator_show_specificity(const GtEvaluator*, FILE*);
-void       gt_evaluator_reset(GtEvaluator*);
-int        gt_evaluator_unit_test(GtError*);
-void       gt_evaluator_delete(GtEvaluator*);
+void         gt_evaluator_add_true(GtEvaluator*);
+void         gt_evaluator_add_actual(GtEvaluator*, unsigned long);
+void         gt_evaluator_add_predicted(GtEvaluator*, unsigned long);
+double       gt_evaluator_get_sensitivity(const GtEvaluator*);
+double       gt_evaluator_get_specificity(const GtEvaluator*);
+void         gt_evaluator_show_sensitivity(const GtEvaluator*, FILE*);
+void         gt_evaluator_show_specificity(const GtEvaluator*, FILE*);
+void         gt_evaluator_reset(GtEvaluator*);
+int          gt_evaluator_unit_test(GtError*);
+void         gt_evaluator_delete(GtEvaluator*);
 
 #endif
