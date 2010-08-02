@@ -936,6 +936,48 @@ static void store_true_exon(GtGenomeNode *gn, GtStrand predicted_strand,
   }
 }
 
+typedef bool (*FeaturesAreEqualFunc)(GtGenomeNode *gn_1, GtGenomeNode *gn_2,
+                                     const char *feature_type);
+
+static void compare_features(GtArray *real_genome_nodes, GtGenomeNode *gn,
+                             GtArray *genes_forward, GtArray *genes_reverse,
+                             GtBittab *true_genes_forward,
+                             GtBittab *true_genes_reverse,
+                             GtEvaluator *gene_evaluator,
+                             FeaturesAreEqualFunc features_are_equal,
+                             const char *feature_type)
+{
+  GtStrand predicted_strand;
+  GtGenomeNode **real_gn;
+  unsigned long i, num;
+  gt_assert(real_genome_nodes && gn && genes_forward && genes_reverse);
+  gt_assert(gene_evaluator && features_are_equal && feature_type);
+  predicted_strand = gt_feature_node_get_strand((GtFeatureNode*) gn);
+  for (i = 0; i < gt_array_size(real_genome_nodes); i++) {
+    real_gn = *(GtGenomeNode***) gt_array_get(real_genome_nodes, i);
+    if (features_are_equal(gn, *real_gn, feature_type)) {
+      if (predicted_strand == GT_STRAND_FORWARD) {
+        num = real_gn - (GtGenomeNode**) gt_array_get_space(genes_forward);
+        if (!gt_bittab_bit_is_set(true_genes_forward, num)) {
+          gt_bittab_set_bit(true_genes_forward, num);
+          gt_evaluator_add_true(gene_evaluator);
+          /*@loopbreak@*/
+          break;
+        }
+      }
+      else {
+        num = real_gn - (GtGenomeNode**) gt_array_get_space(genes_reverse);
+        if (!gt_bittab_bit_is_set(true_genes_reverse, num)) {
+          gt_bittab_set_bit(true_genes_reverse, num);
+          gt_evaluator_add_true(gene_evaluator);
+          /*@loopbreak@*/
+          break;
+        }
+      }
+    }
+  }
+}
+
 static int process_predicted_feature(GtGenomeNode *gn, void *data,
                                      GT_UNUSED GtError *err)
 {
@@ -977,33 +1019,18 @@ static int process_predicted_feature(GtGenomeNode *gn, void *data,
                             : info->slot->overlapped_genes_reverse);
         if (gt_array_size(real_genome_nodes)) {
           /* gene(s) with the same range found -> check if they are equal */
-          for (i = 0; i < gt_array_size(real_genome_nodes); i++) {
-            real_gn = *(GtGenomeNode***) gt_array_get(real_genome_nodes, i);
-            if (genes_are_equal(gn, *real_gn, gt_ft_exon)) {
-              if (predicted_strand == GT_STRAND_FORWARD) {
-                num = real_gn - (GtGenomeNode**)
-                      gt_array_get_space(info->slot->genes_forward);
-                if (!gt_bittab_bit_is_set(info->slot->true_mRNA_genes_forward,
-                                          num)) {
-                  gt_bittab_set_bit(info->slot->true_mRNA_genes_forward, num);
-                  gt_evaluator_add_true(info->mRNA_gene_evaluator);
-                  /*@loopbreak@*/
-                  break;
-                }
-              }
-              else {
-                num = real_gn - (GtGenomeNode**)
-                      gt_array_get_space(info->slot->genes_reverse);
-                if (!gt_bittab_bit_is_set(info->slot->true_mRNA_genes_reverse,
-                                          num)) {
-                  gt_bittab_set_bit(info->slot->true_mRNA_genes_reverse, num);
-                  gt_evaluator_add_true(info->mRNA_gene_evaluator);
-                  /*@loopbreak@*/
-                  break;
-                }
-              }
-            }
-          }
+          compare_features(real_genome_nodes, gn, info->slot->genes_forward,
+                           info->slot->genes_reverse,
+                           info->slot->true_mRNA_genes_forward,
+                           info->slot->true_mRNA_genes_reverse,
+                           info->mRNA_gene_evaluator, genes_are_equal,
+                           gt_ft_exon);
+          compare_features(real_genome_nodes, gn, info->slot->genes_forward,
+                           info->slot->genes_reverse,
+                           info->slot->true_CDS_genes_forward,
+                           info->slot->true_CDS_genes_reverse,
+                           info->CDS_gene_evaluator, genes_are_equal,
+                           gt_ft_CDS);
         }
         else {
           /* no gene with the same range found -> check if this is a wrong
@@ -1050,33 +1077,18 @@ static int process_predicted_feature(GtGenomeNode *gn, void *data,
                             : info->slot->overlapped_mRNAs_reverse);
         if (gt_array_size(real_genome_nodes)) {
           /* mRNA(s) with the same range found -> check if they are equal */
-          for (i = 0; i < gt_array_size(real_genome_nodes); i++) {
-            real_gn = *(GtGenomeNode***) gt_array_get(real_genome_nodes, i);
-            if (mRNAs_are_equal(gn, *real_gn, gt_ft_exon)) {
-              if (predicted_strand == GT_STRAND_FORWARD) {
-                num = real_gn - (GtGenomeNode**)
-                      gt_array_get_space(info->slot->mRNAs_forward);
-                if (!gt_bittab_bit_is_set(info->slot->true_mRNA_mRNAs_forward,
-                                          num)) {
-                  gt_bittab_set_bit(info->slot->true_mRNA_mRNAs_forward, num);
-                  gt_evaluator_add_true(info->mRNA_mRNA_evaluator);
-                  /*@loopbreak@*/
-                  break;
-                }
-              }
-              else {
-                num = real_gn - (GtGenomeNode**)
-                      gt_array_get_space(info->slot->mRNAs_reverse);
-                if (!gt_bittab_bit_is_set(info->slot->true_mRNA_mRNAs_reverse,
-                                          num)) {
-                  gt_bittab_set_bit(info->slot->true_mRNA_mRNAs_reverse, num);
-                  gt_evaluator_add_true(info->mRNA_mRNA_evaluator);
-                  /*@loopbreak@*/
-                  break;
-                }
-              }
-            }
-          }
+          compare_features(real_genome_nodes, gn, info->slot->mRNAs_forward,
+                           info->slot->mRNAs_reverse,
+                           info->slot->true_mRNA_mRNAs_forward,
+                           info->slot->true_mRNA_mRNAs_reverse,
+                           info->mRNA_mRNA_evaluator, mRNAs_are_equal,
+                           gt_ft_exon);
+          compare_features(real_genome_nodes, gn, info->slot->mRNAs_forward,
+                           info->slot->mRNAs_reverse,
+                           info->slot->true_CDS_mRNAs_forward,
+                           info->slot->true_CDS_mRNAs_reverse,
+                           info->CDS_mRNA_evaluator, mRNAs_are_equal,
+                           gt_ft_CDS);
         }
         else {
           /* no mRNA with the same range found -> check if this is a wrong
