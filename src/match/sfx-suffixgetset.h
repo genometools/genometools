@@ -60,11 +60,14 @@ typedef void (*Dc_processunsortedrange)(void *,
 /*@unused@*/ static inline void
              suffixsortspace_delete(Suffixsortspace *suffixsortspace)
 {
-  if (suffixsortspace->freesortspace)
+  if (suffixsortspace != NULL)
   {
-    gt_free(suffixsortspace->sortspace);
+    if (suffixsortspace->freesortspace)
+    {
+      gt_free(suffixsortspace->sortspace);
+    }
+    gt_free(suffixsortspace);
   }
-  gt_free(suffixsortspace);
 }
 
 /*@unused@*/ static inline void suffixptrassert(const Suffixsortspace *sssp,

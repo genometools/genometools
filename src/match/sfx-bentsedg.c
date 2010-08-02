@@ -2166,10 +2166,8 @@ void gt_qsufsort(Suffixptr *sortspace,
     suffixsortspace = NULL;
   } else
   {
-    suffixsortspace = gt_malloc(sizeof(*suffixsortspace));
+    suffixsortspace = suffixsortspace_new(0);
     suffixsortspace->sortspace = sortspace;
-    suffixsortspace->sortspaceoffset = 0;
-    suffixsortspace->bucketleftidx = 0;
   }
   rmnsufinfo = gt_rmnsufinfo_new(suffixsortspace,
                                  mmapfiledesc,
@@ -2197,7 +2195,8 @@ void gt_qsufsort(Suffixptr *sortspace,
                       outlcpinfo->outfpllvtab);
     compressedtable_free(lcptab,true);
   }
-  gt_free(suffixsortspace);
+  suffixsortspace_delete(suffixsortspace);
+  suffixsortspace = NULL;
 }
 
 /*
