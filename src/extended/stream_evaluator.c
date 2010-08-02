@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -582,14 +582,14 @@ static bool mRNAs_are_equal(GtGenomeNode *gn_1, GtGenomeNode *gn_2)
 
 typedef struct {
   GtArray *exons,
-        *mRNAs;
-} Store_gene_feature_info;
+          *mRNAs;
+} StoreGeneFeatureInfo;
 
 static int store_gene_feature(GtGenomeNode *gn, void *data,
                               GT_UNUSED GtError *err)
 {
   GtFeatureNode *fn;
-  Store_gene_feature_info *info = (Store_gene_feature_info*) data;
+  StoreGeneFeatureInfo *info = (StoreGeneFeatureInfo*) data;
   GtRange range;
   gt_error_check(err);
   fn = gt_genome_node_cast(gt_feature_node_class(), gn);
@@ -607,7 +607,7 @@ static int store_gene_feature(GtGenomeNode *gn, void *data,
 static bool genes_are_equal(GtGenomeNode *gn_1, GtGenomeNode *gn_2)
 {
   GtArray *exons_1, *exons_2, *mRNAs_1, *mRNAs_2;
-  Store_gene_feature_info info;
+  StoreGeneFeatureInfo info;
   unsigned long i;
   bool equal;
   int had_err;
