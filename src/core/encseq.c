@@ -1922,7 +1922,7 @@ unsigned long gt_encseq_sep2seqnum(const unsigned long *recordseps,
   unsigned long left, mid, right, len;
 
   gt_assert(numofrecords > 0);
-  if (numofrecords == 1UL || position < recordseps[0])
+  if (numofrecords == 1UL || position <= recordseps[0])
   {
     return 0;
   }
@@ -1943,7 +1943,7 @@ unsigned long gt_encseq_sep2seqnum(const unsigned long *recordseps,
     mid = left + GT_DIV2(len);
     if (recordseps[mid] < position)
     {
-      if (position < recordseps[mid+1])
+      if (position <= recordseps[mid+1])
       {
         return mid + 1;
       }
