@@ -2432,7 +2432,7 @@ void dc_setsuffixsortspace(void *voiddcov,Suffixsortspace *sssp);
 */
 
 void gt_sortbucketofsuffixes(bool setdcovsuffixsortspace,
-                             Suffixptr *suffixestobesorted,
+                             Suffixsortspace *suffixsortspace,
                              unsigned long numberofsuffixes,
                              GtBucketspec2 *bucketspec2,
                              const GtEncseq *encseq,
@@ -2450,17 +2450,14 @@ void gt_sortbucketofsuffixes(bool setdcovsuffixsortspace,
   Bentsedgresources bsr;
   Bucketspecification bucketspec;
   unsigned int rightchar = (unsigned int) (mincode % numofchars);
-  Suffixsortspace suffixsortspace;
   GtCodetype code;
 
-  suffixsortspace.sortspace = suffixestobesorted;
-  suffixsortspace.sortspaceoffset = 0;
   if (setdcovsuffixsortspace)
   {
-    dc_setsuffixsortspace(voiddcov,&suffixsortspace);
+    dc_setsuffixsortspace(voiddcov,suffixsortspace);
   }
   initBentsedgresources(&bsr,
-                        &suffixsortspace,
+                        suffixsortspace,
                         NULL,
                         encseq,
                         readmode,
@@ -2497,9 +2494,9 @@ void gt_sortbucketofsuffixes(bool setdcovsuffixsortspace,
     {
       /*fprintf(stderr,"set bucketleftidx = %lu\n",bsr.sssp->bucketleftidx);*/
       bsr.sssp->bucketleftidx = bucketspec.left,
-      bsr.suftabbaseptr = suffixestobesorted + bucketspec.left;
+      bsr.suftabbaseptr = suffixsortspace->sortspace + bucketspec.left;
       bentleysedgewick(&bsr,
-                       suffixestobesorted + bucketspec.left,
+                       suffixsortspace->sortspace + bucketspec.left,
                        bucketspec.nonspecialsinbucket,
                        (unsigned long) prefixlength);
       bsr.sssp->bucketleftidx = 0;

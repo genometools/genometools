@@ -27,6 +27,7 @@ typedef struct
   Suffixptr *sortspace;
   unsigned long sortspaceoffset,
                 bucketleftidx;
+  bool freesortspace;
 } Suffixsortspace;
 
 typedef void (*Dc_processunsortedrange)(void *,
@@ -44,10 +45,12 @@ typedef void (*Dc_processunsortedrange)(void *,
   if (numofentries == 0)
   {
     suffixsortspace->sortspace = NULL;
+    suffixsortspace->freesortspace = false;
   } else
   {
     suffixsortspace->sortspace = gt_malloc(sizeof(*suffixsortspace->sortspace) *
                                            numofentries);
+    suffixsortspace->freesortspace = true;
   }
   suffixsortspace->sortspaceoffset = 0;
   suffixsortspace->bucketleftidx = 0;
@@ -57,7 +60,10 @@ typedef void (*Dc_processunsortedrange)(void *,
 /*@unused@*/ static inline void
              suffixsortspace_delete(Suffixsortspace *suffixsortspace)
 {
-  gt_free(suffixsortspace->sortspace);
+  if (suffixsortspace->freesortspace)
+  {
+    gt_free(suffixsortspace->sortspace);
+  }
   gt_free(suffixsortspace);
 }
 

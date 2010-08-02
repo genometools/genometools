@@ -819,9 +819,11 @@ static void preparethispart(Sfxiterator *sfi)
     }
     if (sfi->sfxstrategy.differencecover > 0)
     {
+      Suffixsortspace *suffixsortspace = suffixsortspace_new(0);
+      suffixsortspace->sortspace = sfi->suffixsortspace.sortspace -
+                                   sfi->suffixsortspace.sortspaceoffset;
       gt_sortbucketofsuffixes(true,
-                              sfi->suffixsortspace.sortspace -
-                              sfi->suffixsortspace.sortspaceoffset,
+                              suffixsortspace,
                               partwidth,
                               bucketspec2,
                               sfi->encseq,
@@ -835,6 +837,7 @@ static void preparethispart(Sfxiterator *sfi)
                               (void *) sfi->dcov,
                               dc_sortunsortedbucket,
                               sfi->logger);
+      suffixsortspace_delete(suffixsortspace);
     } else
     {
       gt_sortallbuckets (&sfi->suffixsortspace,

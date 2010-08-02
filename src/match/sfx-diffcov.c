@@ -92,7 +92,6 @@ struct Differencecover
                prefixlength;
   Diffrank *coverrank;
   Diffvalue *diffvalues, *diff2pos;
-  Suffixptr *sortedsample;
   unsigned long totallength,
                 *leftborder; /* points to bcktab->leftborder */
   Bcktab *bcktab;
@@ -115,7 +114,8 @@ struct Differencecover
   unsigned long firstgenerationtotalwidth,
                 firstgenerationcount;
   GtLogger *logger;
-  Suffixsortspace *sssp;
+  Suffixsortspace *sssp,
+                  *sortedsample;
   unsigned long sortoffset;
 };
 
@@ -129,13 +129,13 @@ struct Differencecover
 static unsigned long suffixptrgetdcov(const Differencecover *dcov,
                                       unsigned long idx)
 {
-  return SUFFIXPTRGET(dcov->sortedsample,idx);
+  return suffixptrget3(dcov->sortedsample,idx);
 }
 
 static void suffixptrsetdcov(const Differencecover *dcov,
                              unsigned long idx,unsigned long value)
 {
-  SUFFIXPTRSET(dcov->sortedsample,idx,value);
+  suffixptrset3(dcov->sortedsample,idx,value);
 }
 
 static void fillcoverrank(Differencecover *dcov)
@@ -1056,8 +1056,7 @@ void gt_differencecover_sortsample(Differencecover *dcov,
           (size_t) codelist.nextfreeCodeatposition,
           sizeof (*codelist.spaceCodeatposition),compareCodeatpositon);
   }
-  dcov->sortedsample = gt_malloc(sizeof (*dcov->sortedsample) *
-                                 dcov->effectivesamplesize);
+  dcov->sortedsample = suffixsortspace_new(dcov->effectivesamplesize);
   posinserted = dcov_derivespecialcodesonthefly(dcov,
                                                 withcheck ? &codelist : NULL);
   GT_FREEARRAY(&codelist,Codeatposition);
@@ -1197,7 +1196,7 @@ void gt_differencecover_sortsample(Differencecover *dcov,
     }
 #endif
   }
-  gt_free(dcov->sortedsample);
+  suffixsortspace_delete(dcov->sortedsample);
   dcov->sortedsample = NULL;
   gt_assert(dcov->diff2pos == NULL);
   filldiff2pos(dcov);
