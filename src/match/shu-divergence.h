@@ -18,6 +18,8 @@
 #ifndef SHU_DIVERGENCE_H
 #define SHU_DIVERGENCE_H
 
+#include <float.h>
+
 /* threshold used for calculation of divergence */
 #define THRESHOLD pow(10.0, -9.0)
 #define DEFAULT_E 1e-3

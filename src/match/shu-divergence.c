@@ -59,8 +59,6 @@ static double pmax(double M, /* M value should be explored by simulation ??? */
       ln_x_choose_k = 0.0;
     else
       ln_x_choose_k =  ln_n_fac[x] - ln_n_fac[k] - ln_n_fac[x-k];
-    gt_log_log("x = %lu, k = %lu", x, k);
-    gt_log_log("ln_x_choose_k = %8.32f", ln_x_choose_k);
 
     m_a = pow (2.0, (double) x);
     m_b = pow (p, (double) k);
@@ -68,7 +66,6 @@ static double pmax(double M, /* M value should be explored by simulation ??? */
     m_d = pow (pS, (double) k);
     m_e = pow (0.5 - pS, (double) x -k);
     m = (m_a * m_b * m_c * pow (1.0 - m_d * m_e, (double) subjectLength));
-    /*gt_log_log("m: %f", m);*/
     /* this is ok even with double, because of next if!*/
     if (m == 0.0)
     {
@@ -78,14 +75,12 @@ static double pmax(double M, /* M value should be explored by simulation ??? */
       ln = log(m);
       if (ln == -HUGE_VAL)
       {
-        gt_log_log("huge!");
         delta = 0.0;
       } else
         delta = exp (ln + ln_x_choose_k);
     } else
     {
       double delta_a, delta_b;
-      gt_log_log("m kleiner als M");
       m1 = 1 + m;  /* for small values of m - to avoid overflow (-INF) */
       ln1 = log(m1);
       delta_a = exp (ln1 + ln_x_choose_k);
@@ -101,7 +96,6 @@ static double pmax(double M, /* M value should be explored by simulation ??? */
     }
   }  /* end for */
   s1[x] = s;
-  /*gt_log_log("pmax: %f", s);*/
   return s;
 }
 
@@ -153,7 +147,6 @@ static double expShulen(double T, /* absolute error */
     p_t *= t;
     probOld = prob_i;
   }
-  /*gt_log_log("expected shulength: %f", e);*/
   return e;
 }
 
@@ -199,7 +192,6 @@ double gt_divergence(double E, /* relative error for shulen length */
     }
   }
   d = (du + dl) / 2.0;
-  /*gt_log_log("divergence: %2f", d);*/
   gt_free(s1);
   return d;
 }

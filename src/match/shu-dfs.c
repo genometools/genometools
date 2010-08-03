@@ -255,7 +255,7 @@ static int process_shu_node(ShuNode *node,
         node->countTermSubtree[0][i];
     }
   }
-  gt_log_log("tiefe: %lu", node->depth);
+  /*gt_log_log("tiefe: %lu", node->depth);
   if (gt_log_enabled())
   {
     for (i = 0; i < numoffiles; i++)
@@ -267,7 +267,7 @@ static int process_shu_node(ShuNode *node,
         }
         printf("\n");
       }
-  }
+  }*/
   return 0;
 }
 
