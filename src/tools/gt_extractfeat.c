@@ -33,7 +33,7 @@ typedef struct {
        usedesc;
   GtStr *type,
         *seqfile,
-        *regionmapping;
+        *region_mapping;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
 } GtExtractFeatArguments;
@@ -43,7 +43,7 @@ static void* gt_extractfeat_arguments_new(void)
   GtExtractFeatArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->type = gt_str_new();
   arguments->seqfile = gt_str_new();
-  arguments->regionmapping = gt_str_new();
+  arguments->region_mapping = gt_str_new();
   arguments->ofi = gt_outputfileinfo_new();
   return arguments;
 }
@@ -54,7 +54,7 @@ static void gt_extractfeat_arguments_delete(void *tool_arguments)
   if (!arguments) return;
   gt_file_delete(arguments->outfp);
   gt_outputfileinfo_delete(arguments->ofi);
-  gt_str_delete(arguments->regionmapping);
+  gt_str_delete(arguments->region_mapping);
   gt_str_delete(arguments->seqfile);
   gt_str_delete(arguments->type);
   gt_free(arguments);
@@ -91,7 +91,7 @@ static GtOptionParser* gt_extractfeat_option_parser_new(void *tool_arguments)
 
   /* -seqfile, -usedesc and -regionmapping */
   gt_seqid2file_options(op, arguments->seqfile, &arguments->usedesc,
-                        arguments->regionmapping);
+                        arguments->region_mapping);
 
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
@@ -112,7 +112,7 @@ static int gt_extractfeat_runner(GT_UNUSED int argc, const char **argv,
 {
   GtNodeStream *gff3_in_stream = NULL, *extract_feat_stream = NULL;
   GtExtractFeatArguments *arguments = tool_arguments;
-  GtRegionMapping *regionmapping;
+  GtRegionMapping *region_mapping;
   int had_err = 0;
 
   gt_error_check(err);
@@ -125,18 +125,18 @@ static int gt_extractfeat_runner(GT_UNUSED int argc, const char **argv,
       gt_gff3_in_stream_show_progress_bar((GtGFF3InStream*) gff3_in_stream);
 
     /* create region mapping */
-    regionmapping = gt_seqid2file_regionmapping_new(arguments->seqfile,
-                                                    arguments->usedesc,
-                                                    arguments->regionmapping,
-                                                    err);
-    if (!regionmapping)
+    region_mapping = gt_seqid2file_regionmapping_new(arguments->seqfile,
+                                                     arguments->usedesc,
+                                                     arguments->region_mapping,
+                                                     err);
+    if (!region_mapping)
       had_err = -1;
   }
 
   if (!had_err) {
     /* create extract feature stream */
     extract_feat_stream = gt_extract_feat_stream_new(gff3_in_stream,
-                                                     regionmapping,
+                                                     region_mapping,
                                                     gt_str_get(arguments->type),
                                                      arguments->join,
                                                      arguments->translate,

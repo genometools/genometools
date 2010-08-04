@@ -28,7 +28,7 @@
 
 typedef struct {
   GtStr *seqfile,
-        *regionmapping;
+        *region_mapping;
   bool addintrons,
        usedesc;
 } SpliceSiteInfoArguments;
@@ -46,7 +46,7 @@ static GtOPrval parse_options(int *parsed_args,
 
   /* -seqfile, -usedesc and -regionmapping */
   gt_seqid2file_options(op, arguments->seqfile, &arguments->usedesc,
-                        arguments->regionmapping);
+                        arguments->region_mapping);
 
   /* -addintrons */
   option = gt_option_new_bool("addintrons",
@@ -69,21 +69,21 @@ int gt_splicesiteinfo(int argc, const char **argv, GtError *err)
                *add_introns_stream = NULL,
                *splice_site_info_stream = NULL;
   SpliceSiteInfoArguments arguments;
-  GtRegionMapping *regionmapping;
+  GtRegionMapping *region_mapping;
   int parsed_args, had_err = 0;
   gt_error_check(err);
 
   /* option parsing */
   arguments.seqfile = gt_str_new();
-  arguments.regionmapping = gt_str_new();
+  arguments.region_mapping = gt_str_new();
   switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
     case GT_OPTION_PARSER_OK: break;
     case GT_OPTION_PARSER_ERROR:
-      gt_str_delete(arguments.regionmapping);
+      gt_str_delete(arguments.region_mapping);
       gt_str_delete(arguments.seqfile);
       return -1;
     case GT_OPTION_PARSER_REQUESTS_EXIT:
-      gt_str_delete(arguments.regionmapping);
+      gt_str_delete(arguments.region_mapping);
       gt_str_delete(arguments.seqfile);
       return 0;
   }
@@ -94,11 +94,11 @@ int gt_splicesiteinfo(int argc, const char **argv, GtError *err)
                                                     argv + parsed_args);
 
     /* create region mapping */
-    regionmapping = gt_seqid2file_regionmapping_new(arguments.seqfile,
-                                                    arguments.usedesc,
-                                                    arguments.regionmapping,
-                                                    err);
-    if (!regionmapping)
+    region_mapping = gt_seqid2file_regionmapping_new(arguments.seqfile,
+                                                     arguments.usedesc,
+                                                     arguments.region_mapping,
+                                                     err);
+    if (!region_mapping)
       had_err = -1;
   }
 
@@ -112,7 +112,7 @@ int gt_splicesiteinfo(int argc, const char **argv, GtError *err)
                                                           arguments.addintrons
                                                           ? add_introns_stream
                                                           : gff3_in_stream,
-                                                          regionmapping);
+                                                          region_mapping);
 
     /* pull the features through the stream and free them afterwards */
     had_err = gt_node_stream_pull(splice_site_info_stream, err);
@@ -129,7 +129,7 @@ int gt_splicesiteinfo(int argc, const char **argv, GtError *err)
   gt_node_stream_delete(splice_site_info_stream);
   gt_node_stream_delete(add_introns_stream);
   gt_node_stream_delete(gff3_in_stream);
-  gt_str_delete(arguments.regionmapping);
+  gt_str_delete(arguments.region_mapping);
   gt_str_delete(arguments.seqfile);
 
   return had_err;

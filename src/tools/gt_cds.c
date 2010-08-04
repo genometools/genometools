@@ -36,7 +36,7 @@ typedef struct {
        start_codon,
        final_stop_codon;
   GtStr *seqfile,
-        *regionmapping;
+        *region_mapping;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
 } CDSArguments;
@@ -45,7 +45,7 @@ static void *gt_cds_arguments_new(void)
 {
   CDSArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->seqfile = gt_str_new();
-  arguments->regionmapping = gt_str_new();
+  arguments->region_mapping = gt_str_new();
   arguments->ofi = gt_outputfileinfo_new();
   return arguments;
 }
@@ -56,7 +56,7 @@ static void gt_cds_arguments_delete(void *tool_arguments)
   if (!arguments) return;
   gt_file_delete(arguments->outfp);
   gt_outputfileinfo_delete(arguments->ofi);
-  gt_str_delete(arguments->regionmapping);
+  gt_str_delete(arguments->region_mapping);
   gt_str_delete(arguments->seqfile);
   gt_free(arguments);
 }
@@ -93,7 +93,7 @@ static GtOptionParser* gt_cds_option_parser_new(void *tool_arguments)
 
   /* -seqfile, -usedesc and -regionmapping */
   gt_seqid2file_options(op, arguments->seqfile, &arguments->usedesc,
-                        arguments->regionmapping);
+                        arguments->region_mapping);
 
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
@@ -113,7 +113,7 @@ static int gt_cds_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
 {
   GtNodeStream *gff3_in_stream, *cds_stream = NULL, *gff3_out_stream = NULL;
   CDSArguments *arguments = tool_arguments;
-  GtRegionMapping *regionmapping;
+  GtRegionMapping *region_mapping;
   int had_err = 0;
 
   gt_error_check(err);
@@ -125,16 +125,16 @@ static int gt_cds_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
     gt_gff3_in_stream_show_progress_bar((GtGFF3InStream*) gff3_in_stream);
 
   /* create region mapping */
-  regionmapping = gt_seqid2file_regionmapping_new(arguments->seqfile,
-                                                  arguments->usedesc,
-                                                  arguments->regionmapping,
-                                                  err);
-  if (!regionmapping)
+  region_mapping = gt_seqid2file_regionmapping_new(arguments->seqfile,
+                                                   arguments->usedesc,
+                                                   arguments->region_mapping,
+                                                   err);
+  if (!region_mapping)
     had_err = -1;
 
   if (!had_err) {
     /* create CDS stream */
-    cds_stream = gt_cds_stream_new(gff3_in_stream, regionmapping,
+    cds_stream = gt_cds_stream_new(gff3_in_stream, region_mapping,
                                    arguments->minorflen, GT_CDS_SOURCE_TAG,
                                    arguments->start_codon,
                                    arguments->final_stop_codon);

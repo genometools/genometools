@@ -30,7 +30,7 @@ typedef struct {
   bool verbose,
        usedesc;
   GtStr *seqfile,
-        *regionmapping;
+        *region_mapping;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
 } SeqidsToMD5Arguments;
@@ -39,7 +39,7 @@ static void *gt_seqids_to_md5_arguments_new(void)
 {
   SeqidsToMD5Arguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->seqfile = gt_str_new();
-  arguments->regionmapping = gt_str_new();
+  arguments->region_mapping = gt_str_new();
   arguments->ofi = gt_outputfileinfo_new();
   return arguments;
 }
@@ -50,7 +50,7 @@ static void gt_seqids_to_md5_arguments_delete(void *tool_arguments)
   if (!arguments) return;
   gt_file_delete(arguments->outfp);
   gt_outputfileinfo_delete(arguments->ofi);
-  gt_str_delete(arguments->regionmapping);
+  gt_str_delete(arguments->region_mapping);
   gt_str_delete(arguments->seqfile);
   gt_free(arguments);
 }
@@ -68,7 +68,7 @@ static GtOptionParser* gt_seqids_to_md5_option_parser_new(void *tool_arguments)
 
   /* -seqfile, -usedesc and -regionmapping */
   gt_seqid2file_options(op, arguments->seqfile, &arguments->usedesc,
-                        arguments->regionmapping);
+                        arguments->region_mapping);
 
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
@@ -102,7 +102,7 @@ static int gt_seqids_to_md5_runner(GT_UNUSED int argc, const char **argv,
   /* create region mapping */
   region_mapping = gt_seqid2file_regionmapping_new(arguments->seqfile,
                                                    arguments->usedesc,
-                                                   arguments->regionmapping,
+                                                   arguments->region_mapping,
                                                    err);
   if (!region_mapping)
     had_err = -1;
