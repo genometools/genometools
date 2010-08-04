@@ -75,13 +75,12 @@ static void add_target_attributes(GtFeatureNode *mrna_feature, GthAGS *ags)
     if (strlen(gth_sa_gff3_target_attribute(sa))) {
       if (gt_str_length(target_attribute))
         gt_str_append_char(target_attribute, ',');
-      gt_str_append_cstr(target_attribute,
-                      gth_sa_gff3_target_attribute(sa));
+      gt_str_append_cstr(target_attribute, gth_sa_gff3_target_attribute(sa));
     }
   }
   if (gt_str_length(target_attribute)) {
     gt_feature_node_add_attribute(mrna_feature, "Target",
-                                 gt_str_get(target_attribute));
+                                  gt_str_get(target_attribute));
   }
   gt_str_delete(target_attribute);
 }

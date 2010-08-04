@@ -311,10 +311,10 @@ static int get_seqid_str(GtStr **seqid_str, const char *seqid, GtRange range,
     /* perform range check */
     if (!gt_range_contains(&ssr->range, &range)) {
       gt_error_set(err, "range (%lu,%lu) of feature on line %u in file \"%s\" "
-                "is not contained in range (%lu,%lu) of corresponding "
-                "sequence region on line %u", range.start, range.end,
-                line_number, filename, ssr->range.start, ssr->range.end,
-                ssr->line_number);
+                   "is not contained in range (%lu,%lu) of corresponding "
+                   "sequence region on line %u", range.start, range.end,
+                   line_number, filename, ssr->range.start, ssr->range.end,
+                   ssr->line_number);
       had_err = -1;
     }
     else
