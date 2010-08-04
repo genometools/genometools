@@ -70,7 +70,7 @@ static GtOptionParser* gt_cds_option_parser_new(void *tool_arguments)
 
   op = gt_option_parser_new("[option ...] GFF3_file",
                             "Add CDS features to exon "
-                            "features given in GFF3_file.");
+                            "features given in GFF3 file.");
 
   /* -minorflen */
   option = gt_option_new_uint_min("minorflen", "set the minimum length an open "
