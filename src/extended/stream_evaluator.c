@@ -327,13 +327,13 @@ static int set_actuals_and_sort_them(GT_UNUSED void *key, void *value,
 
   /* set actual exons for the collapsed case (after uniq!) */
   gt_transcript_evaluators_add_actuals(se->mRNA_exon_evaluators_collapsed,
-                                    s->mRNA_exons_forward);
+                                       s->mRNA_exons_forward);
   gt_transcript_evaluators_add_actuals(se->mRNA_exon_evaluators_collapsed,
-                                    s->mRNA_exons_reverse);
+                                       s->mRNA_exons_reverse);
   gt_transcript_evaluators_add_actuals(se->CDS_exon_evaluators_collapsed,
-                                    s->CDS_exons_forward);
+                                       s->CDS_exons_forward);
   gt_transcript_evaluators_add_actuals(se->CDS_exon_evaluators_collapsed,
-                                    s->CDS_exons_reverse);
+                                       s->CDS_exons_reverse);
 
   /* make sure that the genes are sorted */
   gt_assert(gt_genome_nodes_are_sorted(s->genes_forward));
