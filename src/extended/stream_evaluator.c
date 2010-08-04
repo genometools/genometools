@@ -122,7 +122,8 @@ typedef struct {
   Slot *slot;
   bool nuceval,
        verbose,
-       exondiff;
+       exondiff,
+       exondiffcollapsed;
   unsigned long LTRdelta;
   GtEvaluator *mRNA_gene_evaluator,
               *CDS_gene_evaluator,
@@ -795,7 +796,8 @@ static void mark_and_show_false_exon(GtGenomeNode *gn, bool exondiff)
 }
 
 static void determine_true_exon(GtGenomeNode *gn, GtStrand predicted_strand,
-                                bool exondiff, GtRange *predicted_range,
+                                bool exondiff, bool exondiffcollapsed,
+                                GtRange *predicted_range,
                                 GtArray *exons_forward,
                                 GtArray *exons_reverse,
                                 GtArray *true_exons_forward,
@@ -847,12 +849,18 @@ static void determine_true_exon(GtGenomeNode *gn, GtStrand predicted_strand,
       }
     }
   }
-  else
+  else {
     mark_and_show_false_exon(gn, exondiff);
+    if (exondiffcollapsed) {
+      gt_gff3_output_leading((GtFeatureNode*) gn, NULL);
+      printf(".\n");
+    }
+  }
 }
 
 static void store_true_exon(GtGenomeNode *gn, GtStrand predicted_strand,
                             GtRange *predicted_range, bool exondiff,
+                            bool exondiffcollapsed,
                             GtTranscriptExons *exons_forward,
                             GtTranscriptExons *exons_reverse,
                             GtTranscriptCounts *counts_forward,
@@ -863,7 +871,8 @@ static void store_true_exon(GtGenomeNode *gn, GtStrand predicted_strand,
                             GtTranscriptEvaluators *exon_evaluators_collapsed)
 {
   gt_assert(gn && predicted_range && exons_forward && exons_reverse);
-  determine_true_exon(gn, predicted_strand, exondiff, predicted_range,
+  determine_true_exon(gn, predicted_strand, exondiff, exondiffcollapsed,
+                      predicted_range,
                       gt_transcript_exons_get_all(exons_forward),
                       gt_transcript_exons_get_all(exons_reverse),
                       gt_transcript_counts_get_all(counts_forward),
@@ -876,7 +885,8 @@ static void store_true_exon(GtGenomeNode *gn, GtStrand predicted_strand,
   switch (gt_feature_node_get_transcriptfeaturetype((GtFeatureNode*) gn)) {
     case TRANSCRIPT_FEATURE_TYPE_UNDETERMINED:
     case TRANSCRIPT_FEATURE_TYPE_SINGLE:
-      determine_true_exon(gn, predicted_strand, exondiff, predicted_range,
+      determine_true_exon(gn, predicted_strand, exondiff, exondiffcollapsed,
+                          predicted_range,
                           gt_transcript_exons_get_single(exons_forward),
                           gt_transcript_exons_get_single(exons_reverse),
                           gt_transcript_counts_get_single(counts_forward),
@@ -890,7 +900,8 @@ static void store_true_exon(GtGenomeNode *gn, GtStrand predicted_strand,
                             exon_evaluators_collapsed));
       break;
     case TRANSCRIPT_FEATURE_TYPE_INITIAL:
-      determine_true_exon(gn, predicted_strand, exondiff, predicted_range,
+      determine_true_exon(gn, predicted_strand, exondiff, exondiffcollapsed,
+                          predicted_range,
                           gt_transcript_exons_get_initial(exons_forward),
                           gt_transcript_exons_get_initial(exons_reverse),
                           gt_transcript_counts_get_initial(counts_forward),
@@ -904,7 +915,8 @@ static void store_true_exon(GtGenomeNode *gn, GtStrand predicted_strand,
                             exon_evaluators_collapsed));
       break;
     case TRANSCRIPT_FEATURE_TYPE_INTERNAL:
-      determine_true_exon(gn, predicted_strand, exondiff, predicted_range,
+      determine_true_exon(gn, predicted_strand, exondiff, exondiffcollapsed,
+                          predicted_range,
                           gt_transcript_exons_get_internal(exons_forward),
                           gt_transcript_exons_get_internal(exons_reverse),
                           gt_transcript_counts_get_internal(counts_forward),
@@ -919,7 +931,8 @@ static void store_true_exon(GtGenomeNode *gn, GtStrand predicted_strand,
                             exon_evaluators_collapsed));
       break;
     case TRANSCRIPT_FEATURE_TYPE_TERMINAL:
-      determine_true_exon(gn, predicted_strand, exondiff, predicted_range,
+      determine_true_exon(gn, predicted_strand, exondiff, exondiffcollapsed,
+                          predicted_range,
                           gt_transcript_exons_get_terminal(exons_forward),
                           gt_transcript_exons_get_terminal(exons_reverse),
                           gt_transcript_counts_get_terminal(counts_forward),
@@ -1158,7 +1171,7 @@ static int process_predicted_feature(GtGenomeNode *gn, void *data,
       case GT_STRAND_FORWARD:
       case GT_STRAND_REVERSE:
         store_true_exon(gn, predicted_strand, &predicted_range,
-                        info->exondiff,
+                        info->exondiff, info->exondiffcollapsed,
                         info->slot->mRNA_exons_forward,
                         info->slot->mRNA_exons_reverse,
                         info->slot->mRNA_counts_forward,
@@ -1201,7 +1214,7 @@ static int process_predicted_feature(GtGenomeNode *gn, void *data,
       case GT_STRAND_FORWARD:
       case GT_STRAND_REVERSE:
         store_true_exon(gn, predicted_strand, &predicted_range,
-                        info->exondiff,
+                        info->exondiff, info->exondiffcollapsed,
                         info->slot->CDS_exons_forward,
                         info->slot->CDS_exons_reverse,
                         info->slot->CDS_counts_forward,
@@ -1327,7 +1340,8 @@ static int compute_nucleotides_values(GT_UNUSED void *key, void *value,
 }
 
 int gt_stream_evaluator_evaluate(GtStreamEvaluator *se, bool verbose,
-                                 bool exondiff, GtNodeVisitor *nv, GtError *err)
+                                 bool exondiff, bool exondiffcollapsed,
+                                 GtNodeVisitor *nv, GtError *err)
 {
   GtGenomeNode *gn;
   GtFeatureNode *fn;
@@ -1345,6 +1359,7 @@ int gt_stream_evaluator_evaluate(GtStreamEvaluator *se, bool verbose,
   predicted_info.nuceval = se->nuceval;
   predicted_info.verbose = verbose;
   predicted_info.exondiff = exondiff;
+  predicted_info.exondiffcollapsed = exondiffcollapsed;
   predicted_info.LTRdelta = se->LTRdelta;
   predicted_info.mRNA_gene_evaluator = se->mRNA_gene_evaluator;
   predicted_info.CDS_gene_evaluator = se->CDS_gene_evaluator;

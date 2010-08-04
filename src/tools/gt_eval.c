@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -25,6 +25,7 @@
 typedef struct {
   bool verbose,
        exondiff,
+       exondiffcollapsed,
        nuceval,
        evalLTR;
   unsigned long LTRdelta;
@@ -38,8 +39,8 @@ static GtOPrval parse_options(int *parsed_args, EvalArguments *arguments,
   GtOPrval oprval;
   gt_error_check(err);
   op = gt_option_parser_new("reality_file prediction_file ",
-                         "Evaluate a gene prediction against a given "
-                         "``reality'' file (both in GFF3).");
+                            "Evaluate a gene prediction against a given "
+                            "``reality'' file (both in GFF3).");
 
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
@@ -47,7 +48,14 @@ static GtOPrval parse_options(int *parsed_args, EvalArguments *arguments,
 
   /* -exondiff */
   option = gt_option_new_bool("exondiff", "show a diff for the exons",
-                           &arguments->exondiff, false);
+                              &arguments->exondiff, false);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
+  /* -exondiffcollapsed */
+  option = gt_option_new_bool("exondiffcollapsed", "show a diff for the "
+                              "collapsed exons", &arguments->exondiffcollapsed,
+                              false);
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
@@ -59,16 +67,16 @@ static GtOPrval parse_options(int *parsed_args, EvalArguments *arguments,
 
   /* -ltr */
   ltroption = gt_option_new_bool("ltr", "evaluate a LTR retrotransposon "
-                              "prediction instead of a gene prediction\n"
-                              "(all LTR_retrotransposon elements are "
-                              "considered to have an undetermined strand)",
-                              &arguments->evalLTR, false);
+                                 "prediction instead of a gene prediction\n"
+                                 "(all LTR_retrotransposon elements are "
+                                 "considered to have an undetermined strand)",
+                                 &arguments->evalLTR, false);
   gt_option_parser_add_option(op, ltroption);
 
   /* -ltrdelta */
   ltrdeltaoption = gt_option_new_ulong("ltrdelta", "set allowed delta for LTR "
-                                    "borders to be considered equal",
-                                    &arguments->LTRdelta, 20);
+                                       "borders to be considered equal",
+                                       &arguments->LTRdelta, 20);
   gt_option_parser_add_option(op, ltrdeltaoption);
 
   /* option implications */
@@ -111,12 +119,14 @@ int gt_eval(int argc, const char **argv, GtError *err)
 
   /* create the stream evaluator */
   evaluator = gt_stream_evaluator_new(reality_stream, prediction_stream,
-                                   arguments.nuceval, arguments.evalLTR,
-                                   arguments.LTRdelta);
+                                      arguments.nuceval, arguments.evalLTR,
+                                      arguments.LTRdelta);
 
   /* compute the evaluation */
   had_err = gt_stream_evaluator_evaluate(evaluator, arguments.verbose,
-                                      arguments.exondiff, NULL, err);
+                                         arguments.exondiff,
+                                         arguments.exondiffcollapsed, NULL,
+                                         err);
 
   /* show the evaluation */
   if (!had_err)

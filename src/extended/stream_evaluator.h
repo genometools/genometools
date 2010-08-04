@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -28,10 +28,11 @@ GtStreamEvaluator* gt_stream_evaluator_new(GtNodeStream *reality,
                                            bool nuceval, bool evalLTR,
                                            unsigned long LTRdelta);
 /* if <nv> is not NULL, it visits all nodes from reality and the prediction */
-int              gt_stream_evaluator_evaluate(GtStreamEvaluator*, bool verbose,
-                                              bool exondiff, GtNodeVisitor *nv,
-                                              GtError*);
-void             gt_stream_evaluator_show(GtStreamEvaluator*, FILE*);
-void             gt_stream_evaluator_delete(GtStreamEvaluator*);
+int                gt_stream_evaluator_evaluate(GtStreamEvaluator*,
+                                                bool verbose, bool exondiff,
+                                                bool exondiffcollapsed,
+                                                GtNodeVisitor *nv, GtError*);
+void               gt_stream_evaluator_show(GtStreamEvaluator*, FILE*);
+void               gt_stream_evaluator_delete(GtStreamEvaluator*);
 
 #endif
