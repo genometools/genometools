@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -94,6 +94,15 @@ GtStr* gt_str_array_get_str(const GtStrArray *sa, unsigned long strnum)
 {
   gt_assert(sa && strnum < gt_array_size(sa->strings));
   return *(GtStr**) gt_array_get(sa->strings, strnum);
+}
+
+void gt_str_array_set_cstr(GtStrArray *sa, unsigned long strnum,
+                           const char *cstr)
+{
+  GtStr *str;
+  gt_assert(sa && strnum < gt_array_size(sa->strings) && cstr);
+  str = *(GtStr**) gt_array_get(sa->strings, strnum);
+  gt_str_set(str, cstr);
 }
 
 void gt_str_array_set_size(GtStrArray *sa, unsigned long size)

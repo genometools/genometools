@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -39,6 +39,9 @@ void          gt_str_array_add(GtStrArray *str_array, const GtStr *str);
    <strnum> must be smaller than <gt_str_array_size(str_array)>. */
 const char*   gt_str_array_get(const GtStrArray *str_array,
                                unsigned long strnum);
+/* Set the string with number <strnum> in <str_array> to <cstr>. */
+void          gt_str_array_set_cstr(GtStrArray *str_array, unsigned long strnum,
+                                    const char *cstr);
 /* Set the size of <str_array> to <size>. <size> must be smaller or equal than
    <gt_str_array_size(str_array)>. */
 void          gt_str_array_set_size(GtStrArray *str_array, unsigned long size);
