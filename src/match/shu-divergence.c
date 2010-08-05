@@ -21,6 +21,7 @@
 #include "core/array2dim_api.h"
 #include "core/assert_api.h"
 #include "core/log_api.h"
+#include "core/mathsupport.h"
 
 #include "match/shu-divergence.h"
 
@@ -172,12 +173,11 @@ double gt_divergence(double E, /* relative error for shulen length */
   /*this should become user definable*/
   t = THRESHOLD;
 
-  while (fabs(((dl - du) / 2.0) - t) > DBL_EPSILON)
+  while (gt_double_smaller_double(t, (dl - du) / 2.0))
   {
     dm = (du + dl) / 2.0;
-    if (fabs(shulen -
-             expShulen (T, M, dm, p, subjectLength, ln_n_fac, s1, n_s))
-        > DBL_EPSILON)
+    if (gt_double_smaller_double(shulen,
+          expShulen (T, M, dm, p, subjectLength, ln_n_fac, s1, n_s)))
     {
       du = dm;
     } else
