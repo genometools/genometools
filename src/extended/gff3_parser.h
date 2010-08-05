@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -52,6 +52,11 @@ int           gt_gff3_parser_parse_target_attributes(const char *values,
                                                      const char *filename,
                                                      unsigned int line_number,
                                                      GtError*);
+void          gt_gff3_parser_parse_all_target_attributes(const char *values,
+                                                         GtStrArray *target_ids,
+                                                         GtArray *target_ranges,
+                                                         GtArray
+                                                         *target_strands);
 int           gt_gff3_parser_parse_genome_nodes(GtGFF3Parser*,
                                                 int *status_code,
                                                 GtQueue *genome_nodes,

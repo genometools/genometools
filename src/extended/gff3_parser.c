@@ -181,6 +181,9 @@ static int add_offset_if_necessary(GtRange *range, GtGFF3Parser *parser,
 static int parse_target_attribute(const char *value, GtStr *target_id,
                                   GtRange *target_range,
                                   GtStrand *target_strand,
+                                  GtStrArray *target_ids,
+                                  GtArray *target_ranges,
+                                  GtArray *target_strands,
                                   const char *filename,
                                   unsigned int line_number, GtError *err)
 {
@@ -210,25 +213,39 @@ static int parse_target_attribute(const char *value, GtStr *target_id,
                                gt_splitter_get_token(splitter, 0),
                                strlen(gt_splitter_get_token(splitter, 0)), err);
   }
-  if (!had_err && target_id) gt_str_append_str(target_id, unescaped_target);
+  if (!had_err && target_id)
+    gt_str_append_str(target_id, unescaped_target);
+  if (!had_err && target_ids)
+    gt_str_array_add(target_ids, unescaped_target);
   /* parse target range */
   if (!had_err) {
     had_err = gt_parse_range(&parsed_range, gt_splitter_get_token(splitter, 1),
                           gt_splitter_get_token(splitter, 2), line_number,
                           filename, err);
   }
-  if (!had_err && target_range) *target_range = parsed_range;
+  if (!had_err && target_range)
+    *target_range = parsed_range;
+  if (!had_err && target_ranges)
+    gt_array_add(target_ranges, parsed_range);
   /* parse target strand (if given) */
   if (!had_err) {
     if (gt_splitter_size(splitter) == 4) {
-      had_err = gt_parse_strand(&parsed_strand, gt_splitter_get_token(splitter,
-                                                                      3),
-                             line_number, filename, err);
+      had_err = gt_parse_strand(&parsed_strand,
+                                gt_splitter_get_token(splitter, 3),
+                                line_number, filename, err);
       if (!had_err && target_strand)
         *target_strand = parsed_strand;
+      if (!had_err && target_strands)
+        gt_array_add(target_strands, parsed_strand);
     }
-    else if (target_strand)
-      *target_strand = GT_NUM_OF_STRAND_TYPES; /* undefined */
+    else {
+      if (target_strand)
+        *target_strand = GT_NUM_OF_STRAND_TYPES; /* undefined */
+      if (target_strands) {
+        parsed_strand = GT_NUM_OF_STRAND_TYPES; /* undefined */
+        gt_array_add(target_strands, parsed_strand);
+      }
+    }
   }
   gt_free(escaped_target);
   gt_str_delete(unescaped_target);
@@ -236,14 +253,17 @@ static int parse_target_attribute(const char *value, GtStr *target_id,
   return had_err;
 }
 
-int gt_gff3_parser_parse_target_attributes(const char *values,
-                                           unsigned long *num_of_targets,
-                                           GtStr *first_target_id,
-                                           GtRange *first_target_range,
-                                           GtStrand *first_target_strand,
-                                           const char *filename,
-                                           unsigned int line_number,
-                                           GtError *err)
+static int parse_target_attributes(const char *values,
+                                   unsigned long *num_of_targets,
+                                   GtStr *first_target_id,
+                                   GtRange *first_target_range,
+                                   GtStrand *first_target_strand,
+                                   GtStrArray *target_ids,
+                                   GtArray *target_ranges,
+                                   GtArray *target_strands,
+                                   const char *filename,
+                                   unsigned int line_number,
+                                   GtError *err)
 {
   GtSplitter *splitter;
   unsigned long i;
@@ -260,12 +280,39 @@ int gt_gff3_parser_parse_target_attributes(const char *values,
     had_err = parse_target_attribute(gt_splitter_get_token(splitter, i),
                                      i ? NULL : first_target_id,
                                      i ? NULL : first_target_range,
-                                     i ? NULL : first_target_strand, filename,
-                                     line_number, err);
+                                     i ? NULL : first_target_strand,
+                                     target_ids, target_ranges, target_strands,
+                                     filename, line_number, err);
   }
   gt_free(targets);
   gt_splitter_delete(splitter);
   return had_err;
+}
+
+int gt_gff3_parser_parse_target_attributes(const char *values,
+                                           unsigned long *num_of_targets,
+                                           GtStr *first_target_id,
+                                           GtRange *first_target_range,
+                                           GtStrand *first_target_strand,
+                                           const char *filename,
+                                           unsigned int line_number,
+                                           GtError *err)
+{
+  return parse_target_attributes(values, num_of_targets, first_target_id,
+                                 first_target_range, first_target_strand, NULL,
+                                 NULL, NULL, filename, line_number, err);
+}
+
+void gt_gff3_parser_parse_all_target_attributes(const char *values,
+                                                GtStrArray *target_ids,
+                                                GtArray *target_ranges,
+                                                GtArray *target_strands)
+{
+  int had_err;
+  had_err = parse_target_attributes(values, NULL, NULL, NULL, NULL, target_ids,
+                                    target_ranges, target_strands, NULL, 0,
+                                    NULL);
+  gt_assert(!had_err); /* has to be parsed already */
 }
 
 static int get_seqid_str(GtStr **seqid_str, const char *seqid, GtRange range,

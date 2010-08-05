@@ -64,7 +64,7 @@ static GtOptionParser* gt_seqids_to_md5_option_parser_new(void *tool_arguments)
 
   op = gt_option_parser_new("[option ...] [GFF3_file ...]",
                             "Change sequence IDs in given GFF3 files to MD5 "
-                            "fingerprints of the corresponding sequences");
+                            "fingerprints of the corresponding sequences.");
 
   /* -seqfile, -usedesc and -regionmapping */
   gt_seqid2file_options(op, arguments->seqfile, &arguments->usedesc,

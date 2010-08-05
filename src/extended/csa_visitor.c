@@ -22,6 +22,7 @@
 #include "core/unused_api.h"
 #include "extended/csa_variable_strands.h"
 #include "extended/csa_visitor.h"
+#include "extended/gff3_parser.h"
 #include "extended/node_visitor_rep.h"
 
 #define GT_CSA_SOURCE_TAG "gt csa"
@@ -349,15 +350,15 @@ static void mRNA_set_target_attribute(GtFeatureNode *mRNA_feature,
   for (i = 0; i < gt_csa_splice_form_num_of_sas(csa_splice_form); i++) {
     GtFeatureNode *sa = *(GtFeatureNode**)
                         gt_csa_splice_form_get_sa(csa_splice_form, i);
-    if (gt_feature_node_get_attribute(sa, "Target")) {
+    if (gt_feature_node_get_attribute(sa, TARGET_STRING)) {
       if (gt_str_length(targets))
         gt_str_append_char(targets, ',');
       gt_str_append_cstr(targets,
-                         gt_feature_node_get_attribute(sa, "Target"));
+                         gt_feature_node_get_attribute(sa, TARGET_STRING));
     }
   }
   if (gt_str_length(targets)) {
-    gt_feature_node_add_attribute(mRNA_feature, "Target",
+    gt_feature_node_add_attribute(mRNA_feature, TARGET_STRING,
                                     gt_str_get(targets));
   }
   gt_str_delete(targets);

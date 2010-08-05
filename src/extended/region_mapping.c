@@ -170,6 +170,35 @@ int gt_region_mapping_get_raw_sequence(GtRegionMapping *rm, const char **rawseq,
   return had_err;
 }
 
+const char* gt_region_mapping_get_md5_fingerprint(GtRegionMapping *rm,
+                                                  GtStr *seqid,
+                                                  const GtRange *range,
+                                                  GtError *err)
+{
+  const char *md5 = NULL;
+  int had_err;
+  gt_error_check(err);
+  gt_assert(rm && seqid);
+  gt_assert(!rm->userawseq); /* not implemented */
+  had_err = update_bioseq_if_necessary(rm, seqid, err);
+  if (!had_err) {
+    if (rm->usedesc) {
+      unsigned long seqnum, offset;
+      gt_assert(rm->seqid2seqnum_mapping);
+      had_err = gt_seqid2seqnum_mapping_map(rm->seqid2seqnum_mapping,
+                                            gt_str_get(seqid), range, &seqnum,
+                                            &offset, err);
+      if (!had_err)
+        md5 = gt_bioseq_get_md5_fingerprint(rm->bioseq, seqnum);
+    }
+    else {
+      gt_assert(!rm->seqid2seqnum_mapping);
+      md5 = gt_bioseq_get_md5_fingerprint(rm->bioseq, 0);
+    }
+  }
+  return md5;
+}
+
 void gt_region_mapping_delete(GtRegionMapping *rm)
 {
   if (!rm) return;

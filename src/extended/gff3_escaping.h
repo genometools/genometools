@@ -23,7 +23,7 @@
 /* Escape <unescaped_seq> of given <length> for GFF3 format and append the
    result to <escaped_seq>. */
 void gt_gff3_escape(GtStr *escaped_seq, const char *unescaped_seq,
-                 unsigned long length);
+                    unsigned long length);
 
 /* Unescape GFF3 format <escaped_seq> of given <length> and append the result to
    <unescaped_seq>. */
