@@ -57,9 +57,9 @@ env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb  ${MC} -keywords 'gt_extractseq' \
 env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_checkprjfiles' \
        -gttestdata ${GTTESTDATA}
 
-env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_mergeesa'
-
 env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_trieins'
+
+env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_mergeesa'
 
 env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_packedindex' \
        -gttestdata ${GTTESTDATA}

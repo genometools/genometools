@@ -22,42 +22,46 @@
 #include "core/minmax.h"
 #include "core/encseq.h"
 #include "sfx-suftaborder.h"
-#include "suffixptr.h"
+#include "sfx-suffixgetset.h"
 
 static void showcomparisonfailure(const char *filename,
                                   int line,
                                   const char *where,
                                   const GtEncseq *encseq,
                                   GtReadmode readmode,
-                                  const Suffixptr *suftab,
+                                  const Suffixsortspace *suffixsortspace,
+                                  const Suffixptr *subbucket,
+                                  unsigned long subbucketleft,
                                   unsigned long depth,
                                   unsigned long idx1,
                                   unsigned long idx2,
                                   int cmp,
                                   unsigned long maxlcp)
 {
+  unsigned long pos1, pos2;
+
+  pos1 = suffixptrget(suffixsortspace,subbucket,subbucketleft,idx1);
+  pos2 = suffixptrget(suffixsortspace,subbucket,subbucketleft,idx2);
   fprintf(stderr,"ERROR: file \"%s\", line %d: ",filename,line);
   fprintf(stderr,"%s(%lu vs %lu"
                  " %lu=\"",
                        where,
                        idx1,
                        idx2,
-                       SUFFIXPTRGET(suftab,idx1));
-  gt_encseq_showatstartposwithdepth(stderr,encseq,readmode,
-                                    SUFFIXPTRGET(suftab,idx1),depth);
+                       pos1);
+  gt_encseq_showatstartposwithdepth(stderr,encseq,readmode,pos1,depth);
   fprintf(stderr,"\",\"");
-  gt_encseq_showatstartposwithdepth(stderr,encseq,readmode,
-                                    SUFFIXPTRGET(suftab,idx2),depth);
-  fprintf(stderr,"\"=%lu)=%d with maxlcp %lu\n",SUFFIXPTRGET(suftab,idx2),
-                                                cmp,
-                                                maxlcp);
+  gt_encseq_showatstartposwithdepth(stderr,encseq,readmode,pos2,depth);
+  fprintf(stderr,"\"=%lu)=%d with maxlcp %lu\n",pos2,cmp,maxlcp);
 }
 
 void gt_checkifprefixesareidentical(const char *filename,
                                     int line,
                                     const GtEncseq *encseq,
                                     GtReadmode readmode,
-                                    const Suffixptr *suftab,
+                                    const Suffixsortspace *suffixsortspace,
+                                    const Suffixptr *subbucket,
+                                    unsigned long subbucketleft,
                                     unsigned int prefixlength,
                                     unsigned long depth,
                                     unsigned long left,
@@ -78,8 +82,10 @@ void gt_checkifprefixesareidentical(const char *filename,
                                        false,
                                        true,
                                        depth,
-                                       SUFFIXPTRGET(suftab,idx),
-                                       SUFFIXPTRGET(suftab,idx+1),
+                                       suffixptrget(suffixsortspace,subbucket,
+                                                    subbucketleft,idx),
+                                       suffixptrget(suffixsortspace,subbucket,
+                                                    subbucketleft,idx+1),
                                        esr1,
                                        esr2);
     if (cmp != 0 || maxlcp != (unsigned long) prefixlength)
@@ -89,7 +95,9 @@ void gt_checkifprefixesareidentical(const char *filename,
                             "checkifprefixesareidentical",
                             encseq,
                             readmode,
-                            suftab,
+                            suffixsortspace,
+                            subbucket,
+                            subbucketleft,
                             depth,
                             idx,idx+1,cmp,maxlcp);
       haserr = true;
@@ -106,17 +114,18 @@ void gt_checkifprefixesareidentical(const char *filename,
 
 void gt_showentiresuftab(const GtEncseq *encseq,
                          GtReadmode readmode,
-                         const Suffixptr *suftab,
+                         const Suffixsortspace *suffixsortspace,
+                         const Suffixptr *subbucket,
+                         unsigned long subbucketleft,
                          unsigned long depth)
 {
-  unsigned long idx, totallength = gt_encseq_total_length(encseq);
+  unsigned long idx, pos, totallength = gt_encseq_total_length(encseq);
 
   for (idx = 0; idx <= totallength; idx++)
   {
-    printf("suftab[%lu]=%lu ",
-            idx,SUFFIXPTRGET(suftab,idx));
-    gt_encseq_showatstartposwithdepth(stdout,encseq,readmode,
-                                      SUFFIXPTRGET(suftab,idx),depth);
+    pos = suffixptrget(suffixsortspace,subbucket,subbucketleft,idx);
+    printf("suftab[%lu]=%lu ",idx,pos);
+    gt_encseq_showatstartposwithdepth(stdout,encseq,readmode,pos,depth);
     printf("\n");
   }
 }
@@ -125,14 +134,16 @@ void gt_checksortedsuffixes(const char *filename,
                             int line,
                             const GtEncseq *encseq,
                             GtReadmode readmode,
+                            const Suffixsortspace *suffixsortspace,
                             const Suffixptr *subbucket,
-                            GT_UNUSED unsigned long subbucketleft,
+                            unsigned long subbucketleft,
                             unsigned long numberofsuffixes,
                             bool specialsareequal,
                             bool specialsareequalatdepth0,
                             unsigned long depth)
 {
-  unsigned long idx, maxlcp, totallength = gt_encseq_total_length(encseq);
+  unsigned long idx, pos1, pos2, maxlcp,
+                totallength = gt_encseq_total_length(encseq);
   GtEncseqReader *esr1, *esr2;
   int cmp;
 
@@ -140,20 +151,23 @@ void gt_checksortedsuffixes(const char *filename,
   esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   gt_assert(numberofsuffixes > 0);
-  gt_assert(SUFFIXPTRGET(subbucket,0) < totallength);
+  pos1 = suffixptrget(suffixsortspace,subbucket,subbucketleft,0);
+  gt_assert(pos1 < totallength);
   for (idx = 1UL; idx < numberofsuffixes; idx++)
   {
+    pos2 = suffixptrget(suffixsortspace,subbucket,subbucketleft,idx);
     if (idx < numberofsuffixes - 1)
     {
-      gt_assert(SUFFIXPTRGET(subbucket,idx) < totallength);
+      gt_assert(suffixptrget(suffixsortspace,subbucket,subbucketleft,idx)
+                < totallength);
       cmp = gt_encseq_comparetwosuffixes(encseq,
                                          readmode,
                                          &maxlcp,
                                          specialsareequal,
                                          specialsareequalatdepth0,
                                          depth,
-                                         SUFFIXPTRGET(subbucket,idx-1),
-                                         SUFFIXPTRGET(subbucket,idx),
+                                         pos1,
+                                         pos2,
                                          esr1,
                                          esr2);
       if (cmp > 0)
@@ -163,7 +177,9 @@ void gt_checksortedsuffixes(const char *filename,
                               "checksortedsuffixes",
                               encseq,
                               readmode,
+                              suffixsortspace,
                               subbucket,
+                              subbucketleft,
                               depth,
                               idx-1,
                               idx,
@@ -175,9 +191,10 @@ void gt_checksortedsuffixes(const char *filename,
     {
       if (numberofsuffixes == totallength+1)
       {
-        gt_assert(SUFFIXPTRGET(subbucket,idx) == totallength);
+        gt_assert(pos2 == totallength);
       }
     }
+    pos1 = pos2;
   }
   gt_encseq_reader_delete(esr1);
   gt_encseq_reader_delete(esr2);

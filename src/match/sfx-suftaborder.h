@@ -22,11 +22,13 @@
 #include "core/encseq.h"
 #include "core/readmode.h"
 #include "suffixptr.h"
+#include "sfx-suffixgetset.h"
 
 void gt_checksortedsuffixes(const char *filename,
                             int line,
                             const GtEncseq *encseq,
                             GtReadmode readmode,
+                            const Suffixsortspace *suffixsortspace,
                             const Suffixptr *subbucket,
                             unsigned long subbucketleft,
                             unsigned long numberofsuffixes,
