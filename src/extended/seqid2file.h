@@ -27,10 +27,10 @@ GtSeqid2FileInfo* gt_seqid2file_info_new(void);
 void              gt_seqid2file_info_delete(GtSeqid2FileInfo*);
 
 /* add the options -seqfile and -regionmapping to the given option parser */
-void             gt_seqid2file_register_options(GtOptionParser*,
-                                                GtSeqid2FileInfo*);
+void              gt_seqid2file_register_options(GtOptionParser*,
+                                                 GtSeqid2FileInfo*);
 
-GtRegionMapping* gt_seqid2file_region_mapping_new(GtSeqid2FileInfo*,
-                                                  GtError*);
+GtRegionMapping*  gt_seqid2file_region_mapping_new(GtSeqid2FileInfo*,
+                                                   GtError*);
 
 #endif

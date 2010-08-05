@@ -28,7 +28,7 @@ struct GtBioseqIterator {
 };
 
 GtBioseqIterator* gt_bioseq_iterator_new(int seqfile_counter,
-                                    const char **sequence_files)
+                                         const char **sequence_files)
 {
   GtBioseqIterator *bsi;
   gt_assert(sequence_files);

@@ -310,7 +310,7 @@ void gt_gff3_parser_parse_all_target_attributes(const char *values,
 {
   int had_err;
   had_err = parse_target_attributes(values, NULL, NULL, NULL, NULL, target_ids,
-                                    target_ranges, target_strands, NULL, 0,
+                                    target_ranges, target_strands, "", 0,
                                     NULL);
   gt_assert(!had_err); /* has to be parsed already */
 }

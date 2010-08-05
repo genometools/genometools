@@ -84,7 +84,7 @@ static int change_target_seqids(GtGenomeNode *gn, const char *target,
     GtStr *seqid;
     const GtRange *range;
     const char *md5;
-    seqid = gt_genome_node_get_seqid(gn);
+    seqid = gt_str_array_get_str(target_ids, i);
     range = gt_array_get(target_ranges, i);
     if (!(md5 = gt_region_mapping_get_md5_fingerprint(region_mapping, seqid,
                                                       range, err))) {
@@ -103,7 +103,7 @@ static int change_target_seqids(GtGenomeNode *gn, const char *target,
   gt_array_delete(target_strands);
   gt_array_delete(target_ranges);
   gt_str_array_delete(target_ids);
-  return 0;
+  return had_err;
 }
 
 static int change_seqid(GtGenomeNode *gn, void *data, GtError *err)
