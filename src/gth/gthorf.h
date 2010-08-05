@@ -27,9 +27,9 @@ typedef struct {
   GtRange splseqrange;   /* genomic positions refering to spliced seq.
                             (without stopcodon) */
   unsigned long framenum,
-       startpos,              /* start position refering to frame */
-       lengthwithstopcodon,
-       lengthwithoutstopcodon;
+                startpos,              /* start position refering to frame */
+                lengthwithstopcodon,
+                lengthwithoutstopcodon;
   char *frame;
   bool stopcodon;
 } MaximalORF;
