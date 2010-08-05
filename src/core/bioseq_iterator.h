@@ -24,8 +24,8 @@ typedef struct GtBioseqIterator GtBioseqIterator;
 
 /* Create a new GtBioseqIterator for <seqfile_counter> many <sequence_files>.
    If <seqfile_counter> is 0 use stdin as the only sequence file. */
-GtBioseqIterator* gt_bioseq_iterator_new(int seqfile_counter,
-                                    const char **sequence_files);
+GtBioseqIterator*  gt_bioseq_iterator_new(int seqfile_counter,
+                                          const char **sequence_files);
 void               gt_bioseq_iterator_delete(GtBioseqIterator*);
 /* Assign the next <bioseq> if it is available or NULL otherwise.
    Returns -1 in case of failure or 0 otherwise. */
