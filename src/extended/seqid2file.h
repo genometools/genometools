@@ -21,12 +21,16 @@
 #include "core/option.h"
 #include "extended/region_mapping.h"
 
-/* add the options -seqfile and -regionmapping to the given option parser */
-void             gt_seqid2file_options(GtOptionParser*, GtStr *seqfile,
-                                       bool *usedesc, GtStr *region_mapping);
+typedef struct GtSeqid2FileInfo GtSeqid2FileInfo;
 
-GtRegionMapping* gt_seqid2file_regionmapping_new(GtStr *seqfile, bool usedesc,
-                                                 GtStr *region_mapping,
-                                                 GtError*);
+GtSeqid2FileInfo* gt_seqid2file_info_new(void);
+void              gt_seqid2file_info_delete(GtSeqid2FileInfo*);
+
+/* add the options -seqfile and -regionmapping to the given option parser */
+void             gt_seqid2file_register_options(GtOptionParser*,
+                                                GtSeqid2FileInfo*);
+
+GtRegionMapping* gt_seqid2file_region_mapping_new(GtSeqid2FileInfo*,
+                                                  GtError*);
 
 #endif

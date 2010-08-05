@@ -31,8 +31,7 @@ struct GtOutputFileInfo {
 
 GtOutputFileInfo* gt_outputfileinfo_new(void)
 {
-  GtOutputFileInfo *ofi;
-  ofi = gt_malloc(sizeof (GtOutputFileInfo));
+  GtOutputFileInfo *ofi = gt_malloc(sizeof *ofi);
   ofi->output_filename = gt_str_new();
   return ofi;
 }

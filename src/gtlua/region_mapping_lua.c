@@ -24,16 +24,17 @@
 static int region_mapping_lua_new_seqfile(lua_State *L)
 {
   const char *seqfilename;
-  GtStr *seqfile;
+  GtStrArray *seqfile;
   GtRegionMapping **region_mapping;
   gt_assert(L);
   seqfilename = luaL_checkstring(L, 1);
   region_mapping = lua_newuserdata(L, sizeof (GtRegionMapping*));
   gt_assert(region_mapping);
-  seqfile = gt_str_new_cstr(seqfilename);
+  seqfile = gt_str_array_new();
+  gt_str_array_add_cstr(seqfile, seqfilename);
   /* XXX: make second parameter available */
-  *region_mapping = gt_region_mapping_new_seqfile(seqfile, false);
-  gt_str_delete(seqfile);
+  *region_mapping = gt_region_mapping_new_seqfile(seqfile, false, false);
+  gt_str_array_delete(seqfile);
   luaL_getmetatable(L, REGION_MAPPING_METATABLE);
   lua_setmetatable(L, -2);
   return 1;

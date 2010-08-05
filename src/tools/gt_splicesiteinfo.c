@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/ma.h"
 #include "core/option.h"
 #include "core/versionfunc.h"
 #include "core/warning_api.h"
@@ -27,26 +28,36 @@
 #include "tools/gt_splicesiteinfo.h"
 
 typedef struct {
-  GtStr *seqfile,
-        *region_mapping;
-  bool addintrons,
-       usedesc;
+  bool addintrons;
+  GtSeqid2FileInfo *s2fi;
 } SpliceSiteInfoArguments;
 
-static GtOPrval parse_options(int *parsed_args,
-                              SpliceSiteInfoArguments *arguments, int argc,
-                              const char **argv, GtError *err)
+static void* gt_splicesiteinfo_arguments_new(void)
 {
+  SpliceSiteInfoArguments *arguments = gt_calloc(1, sizeof *arguments);
+  arguments->s2fi = gt_seqid2file_info_new();
+  return arguments;
+}
+
+static void gt_splicesiteinfo_arguments_delete(void *tool_arguments)
+{
+  SpliceSiteInfoArguments *arguments = tool_arguments;
+  if (!arguments) return;
+  gt_seqid2file_info_delete(arguments->s2fi);
+  gt_free(arguments);
+}
+
+static GtOptionParser* gt_splicesiteinfo_option_parser_new(void *tool_arguments)
+{
+  SpliceSiteInfoArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *option;
-  GtOPrval oprval;
-  gt_error_check(err);
+
   op = gt_option_parser_new("[option ...] [GFF3_file ...]", "Show information "
                          "about splice sites given in GFF3 files.");
 
-  /* -seqfile, -usedesc and -regionmapping */
-  gt_seqid2file_options(op, arguments->seqfile, &arguments->usedesc,
-                        arguments->region_mapping);
+  /* -seqfile, -matchdesc, -usedesc and -regionmapping */
+  gt_seqid2file_register_options(op, arguments->s2fi);
 
   /* -addintrons */
   option = gt_option_new_bool("addintrons",
@@ -55,38 +66,22 @@ static GtOPrval parse_options(int *parsed_args,
                            "to be shown)", &arguments->addintrons, false);
   gt_option_parser_add_option(op, option);
 
-  /* parse */
   gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
-  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
-                                  err);
-  gt_option_parser_delete(op);
-  return oprval;
+
+  return op;
 }
 
-int gt_splicesiteinfo(int argc, const char **argv, GtError *err)
+static int gt_splicesiteinfo_runner(int argc, const char **argv,
+                                    int parsed_args, void *tool_arguments,
+                                    GtError *err)
 {
+  SpliceSiteInfoArguments *arguments = tool_arguments;
   GtNodeStream *gff3_in_stream = NULL,
                *add_introns_stream = NULL,
                *splice_site_info_stream = NULL;
-  SpliceSiteInfoArguments arguments;
   GtRegionMapping *region_mapping;
-  int parsed_args, had_err = 0;
+  int had_err = 0;
   gt_error_check(err);
-
-  /* option parsing */
-  arguments.seqfile = gt_str_new();
-  arguments.region_mapping = gt_str_new();
-  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
-    case GT_OPTION_PARSER_OK: break;
-    case GT_OPTION_PARSER_ERROR:
-      gt_str_delete(arguments.region_mapping);
-      gt_str_delete(arguments.seqfile);
-      return -1;
-    case GT_OPTION_PARSER_REQUESTS_EXIT:
-      gt_str_delete(arguments.region_mapping);
-      gt_str_delete(arguments.seqfile);
-      return 0;
-  }
 
   if (!had_err) {
     /* create gff3 input stream */
@@ -94,22 +89,19 @@ int gt_splicesiteinfo(int argc, const char **argv, GtError *err)
                                                     argv + parsed_args);
 
     /* create region mapping */
-    region_mapping = gt_seqid2file_regionmapping_new(arguments.seqfile,
-                                                     arguments.usedesc,
-                                                     arguments.region_mapping,
-                                                     err);
+    region_mapping = gt_seqid2file_region_mapping_new(arguments->s2fi, err);
     if (!region_mapping)
       had_err = -1;
   }
 
   if (!had_err) {
     /* create addintrons stream (if necessary) */
-    if (arguments.addintrons)
+    if (arguments->addintrons)
       add_introns_stream = gt_add_introns_stream_new(gff3_in_stream);
 
     /* create extract feature stream */
     splice_site_info_stream = gt_splice_site_info_stream_new(
-                                                          arguments.addintrons
+                                                          arguments->addintrons
                                                           ? add_introns_stream
                                                           : gff3_in_stream,
                                                           region_mapping);
@@ -129,8 +121,15 @@ int gt_splicesiteinfo(int argc, const char **argv, GtError *err)
   gt_node_stream_delete(splice_site_info_stream);
   gt_node_stream_delete(add_introns_stream);
   gt_node_stream_delete(gff3_in_stream);
-  gt_str_delete(arguments.region_mapping);
-  gt_str_delete(arguments.seqfile);
 
   return had_err;
+}
+
+GtTool* gt_splicesiteinfo(void)
+{
+  return gt_tool_new(gt_splicesiteinfo_arguments_new,
+                     gt_splicesiteinfo_arguments_delete,
+                     gt_splicesiteinfo_option_parser_new,
+                     NULL,
+                     gt_splicesiteinfo_runner);
 }

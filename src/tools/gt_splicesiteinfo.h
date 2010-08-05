@@ -18,7 +18,9 @@
 #ifndef GT_SPLICESITEINFO_H
 #define GT_SPLICESITEINFO_H
 
+#include "core/tool.h"
+
 /* the splice site info tool */
-int gt_splicesiteinfo(int argc, const char **argv, GtError*);
+GtTool* gt_splicesiteinfo(void);
 
 #endif

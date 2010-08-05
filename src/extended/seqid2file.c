@@ -15,19 +15,58 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/ma.h"
 #include "extended/seqid2file.h"
 
-void gt_seqid2file_options(GtOptionParser *op, GtStr *seqfile, bool *usedesc,
-                           GtStr *region_mapping)
+struct GtSeqid2FileInfo {
+  GtStrArray *seqfile;
+  bool matchdesc,
+       usedesc;
+  GtStr *region_mapping;
+};
+
+GtSeqid2FileInfo* gt_seqid2file_info_new(void)
 {
-  GtOption *seqfile_option, *usedesc_option, *region_mapping_option;
-  gt_assert(op && seqfile && usedesc && region_mapping);
+  GtSeqid2FileInfo *s2fi = gt_calloc(1, sizeof *s2fi);
+  s2fi->seqfile = gt_str_array_new();
+  s2fi->region_mapping = gt_str_new();
+  return s2fi;
+}
+
+void gt_seqid2file_info_delete(GtSeqid2FileInfo *s2fi)
+{
+  if (!s2fi) return;
+  gt_str_delete(s2fi->region_mapping);
+  gt_str_array_delete(s2fi->seqfile);
+  gt_free(s2fi);
+}
+
+static int seqid2file_check(void *data, GtError *err)
+{
+  GtSeqid2FileInfo *info = (GtSeqid2FileInfo*) data;
+  gt_error_check(err);
+  gt_assert(info);
+  /* XXX */
+  return 0;
+}
+
+void gt_seqid2file_register_options(GtOptionParser *op, GtSeqid2FileInfo *s2fi)
+{
+  GtOption *seqfile_option, *matchdesc_option, *usedesc_option,
+           *region_mapping_option;
+  gt_assert(op && s2fi);
 
   /* -seqfile */
-  seqfile_option = gt_option_new_string("seqfile", "set the sequence file from "
-                                        "which to extract the features",
-                                        seqfile, NULL);
+  seqfile_option = gt_option_new_stringarray("seqfile", "set the sequence "
+                                             "file(s) from which to extract "
+                                             "the features", s2fi->seqfile);
   gt_option_parser_add_option(op, seqfile_option);
+
+  /* -matchdesc */
+  /* XXX */
+  matchdesc_option = gt_option_new_bool("matchdesc", "XXX", &s2fi->matchdesc,
+                                        false);
+  gt_option_parser_add_option(op, matchdesc_option);
 
   /* -usedesc */
   usedesc_option = gt_option_new_bool("usedesc", "use sequence descriptions to "
@@ -37,7 +76,7 @@ void gt_seqid2file_options(GtOptionParser *op, GtStr *seqfile, bool *usedesc,
                                       "(e.g., III:1000001..2000000), the first "
                                       " part is used as sequence ID ('III') "
                                       "and the first range as offset "
-                                      "('1000001')", usedesc, false);
+                                      "('1000001')", &s2fi->usedesc, false);
   gt_option_is_development_option(usedesc_option);
   gt_option_parser_add_option(op, usedesc_option);
 
@@ -45,7 +84,7 @@ void gt_seqid2file_options(GtOptionParser *op, GtStr *seqfile, bool *usedesc,
   region_mapping_option = gt_option_new_string("regionmapping", "set file "
                                                "containing sequence-region to "
                                                "sequence file mapping",
-                                               region_mapping, NULL);
+                                               s2fi->region_mapping, NULL);
   gt_option_parser_add_option(op, region_mapping_option);
 
   /* either option -seqfile or -regionmapping is mandatory */
@@ -54,21 +93,26 @@ void gt_seqid2file_options(GtOptionParser *op, GtStr *seqfile, bool *usedesc,
   /* the options -seqfile and -regionmapping exclude each other */
   gt_option_exclude(seqfile_option, region_mapping_option);
 
+  /* the options -matchdesc and -usedesc exclude each other */
+  gt_option_exclude(matchdesc_option, usedesc_option);
+
   /* option -usedesc implies option -seqfile */
   gt_option_imply(usedesc_option, seqfile_option);
+
+  /* set hook function */
+  gt_option_parser_register_hook(op, seqid2file_check, s2fi);
 }
 
-GtRegionMapping* gt_seqid2file_regionmapping_new(GtStr *seqfile, bool usedesc,
-                                                 GtStr *region_mapping,
-                                                 GtError *err)
+GtRegionMapping* gt_seqid2file_region_mapping_new(GtSeqid2FileInfo *s2fi,
+                                                  GtError *err)
 {
   gt_error_check(err);
-  gt_assert(seqfile && region_mapping);
-  gt_assert(gt_str_length(seqfile) || gt_str_length(region_mapping));
-  gt_assert(!(gt_str_length(seqfile) && gt_str_length(region_mapping)));
+  gt_assert(s2fi);
   /* create region mapping */
-  if (gt_str_length(seqfile))
-    return gt_region_mapping_new_seqfile(seqfile, usedesc);
+  if (gt_str_array_size(s2fi->seqfile)) {
+    return gt_region_mapping_new_seqfile(s2fi->seqfile, s2fi->matchdesc,
+                                         s2fi->usedesc);
+  }
   else
-    return gt_region_mapping_new_mapping(region_mapping, err);
+    return gt_region_mapping_new_mapping(s2fi->region_mapping, err);
 }

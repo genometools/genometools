@@ -27,10 +27,8 @@
 #include "tools/gt_seqids_to_md5.h"
 
 typedef struct {
-  bool verbose,
-       usedesc;
-  GtStr *seqfile,
-        *region_mapping;
+  bool verbose;
+  GtSeqid2FileInfo *s2fi;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
 } SeqidsToMD5Arguments;
@@ -38,8 +36,7 @@ typedef struct {
 static void *gt_seqids_to_md5_arguments_new(void)
 {
   SeqidsToMD5Arguments *arguments = gt_calloc(1, sizeof *arguments);
-  arguments->seqfile = gt_str_new();
-  arguments->region_mapping = gt_str_new();
+  arguments->s2fi = gt_seqid2file_info_new();
   arguments->ofi = gt_outputfileinfo_new();
   return arguments;
 }
@@ -50,8 +47,7 @@ static void gt_seqids_to_md5_arguments_delete(void *tool_arguments)
   if (!arguments) return;
   gt_file_delete(arguments->outfp);
   gt_outputfileinfo_delete(arguments->ofi);
-  gt_str_delete(arguments->region_mapping);
-  gt_str_delete(arguments->seqfile);
+  gt_seqid2file_info_delete(arguments->s2fi);
   gt_free(arguments);
 }
 
@@ -66,9 +62,8 @@ static GtOptionParser* gt_seqids_to_md5_option_parser_new(void *tool_arguments)
                             "Change sequence IDs in given GFF3 files to MD5 "
                             "fingerprints of the corresponding sequences.");
 
-  /* -seqfile, -usedesc and -regionmapping */
-  gt_seqid2file_options(op, arguments->seqfile, &arguments->usedesc,
-                        arguments->region_mapping);
+  /* -seqfile, -matchdesc, -usedesc and -regionmapping */
+  gt_seqid2file_register_options(op, arguments->s2fi);
 
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
@@ -100,10 +95,7 @@ static int gt_seqids_to_md5_runner(GT_UNUSED int argc, const char **argv,
     gt_gff3_in_stream_show_progress_bar((GtGFF3InStream*) gff3_in_stream);
 
   /* create region mapping */
-  region_mapping = gt_seqid2file_regionmapping_new(arguments->seqfile,
-                                                   arguments->usedesc,
-                                                   arguments->region_mapping,
-                                                   err);
+  region_mapping = gt_seqid2file_region_mapping_new(arguments->s2fi, err);
   if (!region_mapping)
     had_err = -1;
 

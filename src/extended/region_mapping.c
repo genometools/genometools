@@ -21,15 +21,17 @@
 #include "core/assert_api.h"
 #include "core/bioseq.h"
 #include "core/ma.h"
+#include "core/str_array.h"
 #include "extended/mapping.h"
 #include "extended/region_mapping.h"
 #include "extended/seqid2seqnum_mapping.h"
 
 struct GtRegionMapping {
-  GtStr *sequence_filename,
-        *sequence_file, /* the (current) sequence file */
+  GtStrArray *sequence_filenames;
+  GtStr *sequence_file, /* the (current) sequence file */
         *sequence_name; /* the (current) sequence name */
-  bool usedesc,
+  bool matchdesc,
+       usedesc,
        userawseq;
   GtMapping *mapping;
   GtBioseq *bioseq; /* the current bioseq */
@@ -56,13 +58,14 @@ GtRegionMapping* gt_region_mapping_new_mapping(GtStr *mapping_filename,
   return rm;
 }
 
-GtRegionMapping* gt_region_mapping_new_seqfile(GtStr *sequence_filename,
-                                               bool usedesc)
+GtRegionMapping* gt_region_mapping_new_seqfile(GtStrArray *sequence_filenames,
+                                               bool matchdesc, bool usedesc)
 {
   GtRegionMapping *rm;
-  gt_assert(sequence_filename);
+  gt_assert(sequence_filenames);
   rm = gt_calloc(1, sizeof (GtRegionMapping));
-  rm->sequence_filename = gt_str_ref(sequence_filename);
+  rm->sequence_filenames = gt_str_array_ref(sequence_filenames);
+  rm->matchdesc = matchdesc;
   rm->usedesc = usedesc;
   return rm;
 }
@@ -93,8 +96,8 @@ static GtStr* region_mapping_map(GtRegionMapping *rm,
 {
   gt_error_check(err);
   gt_assert(rm && sequence_region);
-  if (rm->sequence_filename)
-    return gt_str_ref(rm->sequence_filename);
+  if (rm->sequence_filenames)
+    return gt_str_ref(gt_str_array_get_str(rm->sequence_filenames, 0)); /*XXX*/
   else
     return gt_mapping_map_string(rm->mapping, sequence_region, err);
 }
@@ -206,7 +209,7 @@ void gt_region_mapping_delete(GtRegionMapping *rm)
     rm->reference_count--;
     return;
   }
-  gt_str_delete(rm->sequence_filename);
+  gt_str_array_delete(rm->sequence_filenames);
   gt_str_delete(rm->sequence_file);
   gt_str_delete(rm->sequence_name);
   gt_mapping_delete(rm->mapping);

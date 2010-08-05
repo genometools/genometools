@@ -164,7 +164,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "shredder", gt_shredder());
   gt_toolbox_add_tool(tools, "simreads", gt_simreads());
   gt_toolbox_add_tool(tools, "splitfasta", gt_splitfasta());
-  gt_toolbox_add(tools, "splicesiteinfo", gt_splicesiteinfo);
+  gt_toolbox_add_tool(tools, "splicesiteinfo", gt_splicesiteinfo());
   gt_toolbox_add(tools, "stat", gt_stat);
   gt_toolbox_add(tools, "suffixerator", gt_suffixerator);
   gt_toolbox_add_tool(tools, "tallymer", gt_tallymer());

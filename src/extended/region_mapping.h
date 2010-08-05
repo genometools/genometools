@@ -20,14 +20,15 @@
 
 #include "core/range_api.h"
 #include "core/str.h"
+#include "core/str_array_api.h"
 
 /* maps a sequence-region to a sequence file */
 typedef struct GtRegionMapping GtRegionMapping;
 
 GtRegionMapping* gt_region_mapping_new_mapping(GtStr *mapping_filename,
                                                GtError*);
-GtRegionMapping* gt_region_mapping_new_seqfile(GtStr *sequence_filename,
-                                               bool usedesc);
+GtRegionMapping* gt_region_mapping_new_seqfile(GtStrArray *sequence_filenames,
+                                               bool matchdesc, bool usedesc);
 GtRegionMapping* gt_region_mapping_new_rawseq(const char *rawseq,
                                               unsigned long length,
                                               unsigned long offset);

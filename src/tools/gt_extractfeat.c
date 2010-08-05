@@ -29,11 +29,9 @@
 typedef struct {
   bool join,
        translate,
-       verbose,
-       usedesc;
-  GtStr *type,
-        *seqfile,
-        *region_mapping;
+       verbose;
+  GtStr *type;
+  GtSeqid2FileInfo *s2fi;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
 } GtExtractFeatArguments;
@@ -42,8 +40,7 @@ static void* gt_extractfeat_arguments_new(void)
 {
   GtExtractFeatArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->type = gt_str_new();
-  arguments->seqfile = gt_str_new();
-  arguments->region_mapping = gt_str_new();
+  arguments->s2fi = gt_seqid2file_info_new();
   arguments->ofi = gt_outputfileinfo_new();
   return arguments;
 }
@@ -54,8 +51,7 @@ static void gt_extractfeat_arguments_delete(void *tool_arguments)
   if (!arguments) return;
   gt_file_delete(arguments->outfp);
   gt_outputfileinfo_delete(arguments->ofi);
-  gt_str_delete(arguments->region_mapping);
-  gt_str_delete(arguments->seqfile);
+  gt_seqid2file_info_delete(arguments->s2fi);
   gt_str_delete(arguments->type);
   gt_free(arguments);
 }
@@ -89,9 +85,8 @@ static GtOptionParser* gt_extractfeat_option_parser_new(void *tool_arguments)
                            false);
   gt_option_parser_add_option(op, option);
 
-  /* -seqfile, -usedesc and -regionmapping */
-  gt_seqid2file_options(op, arguments->seqfile, &arguments->usedesc,
-                        arguments->region_mapping);
+  /* -seqfile, -matchdesc, -usedesc and -regionmapping */
+  gt_seqid2file_register_options(op, arguments->s2fi);
 
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
@@ -125,10 +120,7 @@ static int gt_extractfeat_runner(GT_UNUSED int argc, const char **argv,
       gt_gff3_in_stream_show_progress_bar((GtGFF3InStream*) gff3_in_stream);
 
     /* create region mapping */
-    region_mapping = gt_seqid2file_regionmapping_new(arguments->seqfile,
-                                                     arguments->usedesc,
-                                                     arguments->region_mapping,
-                                                     err);
+    region_mapping = gt_seqid2file_region_mapping_new(arguments->s2fi, err);
     if (!region_mapping)
       had_err = -1;
   }
