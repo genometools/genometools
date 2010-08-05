@@ -109,9 +109,9 @@ struct GtOption {
        is_development_option,
        argument_is_optional;
   GtArray *implications, /* contains option arrays, from each array at least
-                             one option needs to be set */
-        *exclusions;
-  const GtOption *mandatory_either_option;
+                            one option needs to be set */
+          *exclusions,
+          *mandatory_either_options;
   unsigned int reference_count;
 };
 
@@ -121,7 +121,7 @@ static GtOption *gt_option_new(const char *option_str, const char *description,
   GtOption *o = gt_calloc(1, sizeof (GtOption));
   gt_assert(option_str && strlen(option_str));
   gt_assert("an option string should not start with '-', this is added "
-         "automatically"  && option_str[0] != '-');
+            "automatically"  && option_str[0] != '-');
   o->option_str = gt_str_new_cstr(option_str);
   o->description = gt_str_new_cstr(description);
   o->value = value;
@@ -549,17 +549,34 @@ static int check_option_exclusions(GtOptionParser *op, GtError *err)
 static int check_mandatory_either_options(GtOptionParser *op, GtError *err)
 {
   unsigned long i;
-  GtOption *o;
+  GtOption *o, *meo_a, *meo_b;
   gt_error_check(err);
 
   for (i = 0; i < gt_array_size(op->options); i++) {
     o = *(GtOption**) gt_array_get(op->options, i);
-    if (o->mandatory_either_option) {
-      if (!o->is_set && !o->mandatory_either_option->is_set) {
-        gt_error_set(err, "either option \"-%s\" or option \"-%s\" is "
-                     "mandatory", gt_str_get(o->option_str),
-                     gt_str_get(o->mandatory_either_option->option_str));
-        return -1;
+    if (o->mandatory_either_options) {
+      if (gt_array_size(o->mandatory_either_options) == 1) {
+        meo_a = *(GtOption**) gt_array_get_first(o->mandatory_either_options);
+        if (!o->is_set && !meo_a->is_set) {
+          gt_error_set(err, "either option \"-%s\" or option \"-%s\" is "
+                       "mandatory", gt_str_get(o->option_str),
+                       gt_str_get(meo_a->option_str));
+          return -1;
+        }
+      }
+      else {
+        /* XXX: this code needs to be generalized fo more than 2 mandatory
+           options (if the corresponding methods are added) */
+        if (gt_array_size(o->mandatory_either_options) == 2);
+        meo_a = *(GtOption**) gt_array_get(o->mandatory_either_options, 0);
+        meo_b = *(GtOption**) gt_array_get(o->mandatory_either_options, 1);
+        if (!o->is_set && !meo_a->is_set && !meo_b->is_set) {
+          gt_error_set(err, "either option \"-%s\", option \"-%s\" or option "
+                       "\"-%s\" is mandatory", gt_str_get(o->option_str),
+                       gt_str_get(meo_a->option_str),
+                       gt_str_get(meo_b->option_str));
+          return -1;
+        }
       }
     }
   }
@@ -1444,8 +1461,19 @@ void gt_option_is_mandatory(GtOption *o)
 void gt_option_is_mandatory_either(GtOption *o, const GtOption *meo)
 {
   gt_assert(o && meo);
-  gt_assert(!o->mandatory_either_option);
-  o->mandatory_either_option = meo;
+  gt_assert(!o->mandatory_either_options);
+  o->mandatory_either_options = gt_array_new(sizeof (GtOption*));
+  gt_array_add(o->mandatory_either_options, meo);
+}
+
+void gt_option_is_mandatory_either_3(GtOption *o, const GtOption *meo_a,
+                                     const GtOption *meo_b)
+{
+  gt_assert(o && meo_a && meo_b);
+  gt_assert(!o->mandatory_either_options);
+  o->mandatory_either_options = gt_array_new(sizeof (GtOption*));
+  gt_array_add(o->mandatory_either_options, meo_a);
+  gt_array_add(o->mandatory_either_options, meo_b);
 }
 
 void gt_option_is_extended_option(GtOption *o)
@@ -1527,5 +1555,6 @@ void gt_option_delete(GtOption *o)
     gt_array_delete(*(GtArray**) gt_array_get(o->implications, i));
   gt_array_delete(o->implications);
   gt_array_delete(o->exclusions);
+  gt_array_delete(o->mandatory_either_options);
   gt_free(o);
 }

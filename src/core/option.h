@@ -193,6 +193,8 @@ GtOption*       gt_option_ref(GtOption*);
 const char*     gt_option_get_name(const GtOption *o);
 void            gt_option_is_mandatory(GtOption*);
 void            gt_option_is_mandatory_either(GtOption*, const GtOption*);
+void            gt_option_is_mandatory_either_3(GtOption*, const GtOption*,
+                                                const GtOption*);
 /* Set that <option> is only shown in the output of -help+. */
 void            gt_option_is_extended_option(GtOption *option);
 /* Set that <option> is only shown in the output of -helpdev. */
