@@ -24,13 +24,14 @@
 #define START_AMINO  'M'
 #define STOP_AMINO   '*'
 
-void gt_determine_ORFs(GtArray *ranges, unsigned int framenum,
-                       const char *frame, unsigned long framelen,
-                       bool start_codon, bool final_stop_codon)
+void gt_determine_ORFs(GtORFProcessor orf_processor, void *data,
+                       unsigned int framenum, const char *frame,
+                       unsigned long framelen, bool start_codon,
+                       bool final_stop_codon)
 {
   unsigned long i;
   GtRange orf;
-  gt_assert(ranges && framenum <= 2 && frame);
+  gt_assert(orf_processor && framenum <= 2 && frame);
   orf.start = GT_UNDEF_ULONG;
   for (i = 0; i < framelen; i++) {
     if (orf.start == GT_UNDEF_ULONG) {
@@ -52,7 +53,7 @@ void gt_determine_ORFs(GtArray *ranges, unsigned int framenum,
     else {
       if (frame[i] == STOP_AMINO) {
         orf.end = i * GT_CODON_LENGTH + framenum + 2;
-        gt_array_add(ranges, orf);
+        orf_processor(data, &orf);
         orf.start = GT_UNDEF_ULONG;
       }
     }
@@ -60,7 +61,7 @@ void gt_determine_ORFs(GtArray *ranges, unsigned int framenum,
   if (!final_stop_codon) {
     if (orf.start != GT_UNDEF_ULONG) {
       orf.end = (framelen - 1) * GT_CODON_LENGTH + framenum + 2;
-      gt_array_add(ranges, orf);
+      orf_processor(data, &orf);
     }
   }
 }

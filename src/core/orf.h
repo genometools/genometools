@@ -18,11 +18,13 @@
 #ifndef ORF_H
 #define ORF_H
 
-#include "core/array.h"
+#include "core/range_api.h"
 
-/* the determined ORFs include the start and the stop codon */
-void gt_determine_ORFs(GtArray *ranges, unsigned int framenum,
-                       const char *frame, unsigned long framelen,
-                       bool start_codon, bool final_stop_codon);
+typedef void (*GtORFProcessor)(void *data, GtRange *orf);
+
+void gt_determine_ORFs(GtORFProcessor orf_processor, void *data,
+                       unsigned int framenum, const char *frame,
+                       unsigned long framelen, bool start_codon,
+                       bool final_stop_codon);
 
 #endif

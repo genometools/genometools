@@ -92,6 +92,13 @@ static int extract_spliced_seq(GtGenomeNode *gn, GtCDSVisitor *visitor,
                                                  extract_cds_if_necessary, err);
 }
 
+static void save_orf(void *data, GtRange *orf)
+{
+  GtArray *ranges = data;
+  gt_assert(ranges && orf);
+  gt_array_add(ranges, *orf);
+}
+
 static GtArray* determine_ORFs_for_all_three_frames(Splicedseq *ss,
                                                     bool start_codon,
                                                     bool final_stop_codon)
@@ -120,11 +127,11 @@ static GtArray* determine_ORFs_for_all_three_frames(Splicedseq *ss,
     gt_str_append_char(pr[frame], translated);
     rval = gt_translator_next(tr, &translated, &frame, NULL);
   }
-  gt_determine_ORFs(orfs, 0, gt_str_get(pr[0]), gt_str_length(pr[0]),
+  gt_determine_ORFs(save_orf, orfs, 0, gt_str_get(pr[0]), gt_str_length(pr[0]),
                     start_codon, final_stop_codon);
-  gt_determine_ORFs(orfs, 1, gt_str_get(pr[1]), gt_str_length(pr[1]),
+  gt_determine_ORFs(save_orf, orfs, 1, gt_str_get(pr[1]), gt_str_length(pr[1]),
                     start_codon, final_stop_codon);
-  gt_determine_ORFs(orfs, 2, gt_str_get(pr[2]), gt_str_length(pr[2]),
+  gt_determine_ORFs(save_orf, orfs, 2, gt_str_get(pr[2]), gt_str_length(pr[2]),
                     start_codon, final_stop_codon);
 
   gt_str_delete(pr[2]);
