@@ -153,7 +153,8 @@ static void create_CDS_features_for_ORF(GtRange orf, GtCDSVisitor *v,
   cds_feature = (GtFeatureNode*)
                 gt_feature_node_new(gt_genome_node_get_seqid(gn), gt_ft_CDS,
                                     cds.start, cds.end,
-                          gt_feature_node_get_strand((GtFeatureNode*) gn));
+                                    gt_feature_node_get_strand((GtFeatureNode*)
+                                                               gn));
   gt_feature_node_set_source(cds_feature, v->source);
   gt_feature_node_set_phase(cds_feature, GT_PHASE_ZERO);
   /* all CDS features in between */
@@ -162,7 +163,7 @@ static void create_CDS_features_for_ORF(GtRange orf, GtCDSVisitor *v,
        strand == GT_STRAND_FORWARD ? i++ : i--) {
     if (gt_splicedseq_pos_is_border(v->splicedseq, i)) {
       gt_feature_node_set_end((GtFeatureNode*) cds_feature,
-                             gt_splicedseq_map(v->splicedseq, i) + v->offset);
+                              gt_splicedseq_map(v->splicedseq, i) + v->offset);
       gt_feature_node_add_child(gt_feature_node_cast(gn), cds_feature);
       if (strand == GT_STRAND_FORWARD)
         orf.start = i + 1;
@@ -184,9 +185,9 @@ static void create_CDS_features_for_ORF(GtRange orf, GtCDSVisitor *v,
   }
   /* set the end of the last CDS feature and store it */
   gt_feature_node_set_end((GtFeatureNode*) cds_feature,
-                         gt_splicedseq_map(v->splicedseq,
-                                        strand == GT_STRAND_FORWARD
-                                        ? orf.end : orf.start) + v->offset);
+                          gt_splicedseq_map(v->splicedseq,
+                                            strand == GT_STRAND_FORWARD
+                                            ? orf.end : orf.start) + v->offset);
   gt_feature_node_add_child(gt_feature_node_cast(gn), cds_feature);
 }
 

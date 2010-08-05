@@ -383,8 +383,7 @@ static void consolidateORFs(GtArray *consolidatedORFs, GtArray *maximalORFs)
   maxlength = orf->lengthwithoutstopcodon;
 
   /* save the other ORFs if they fit the criteria */
-  for (i = 1; i < gt_array_size(maximalORFs); i++)
-  {
+  for (i = 1; i < gt_array_size(maximalORFs); i++) {
     orf = gt_array_get(maximalORFs, i);
     if (!overlapwithotherranges(orf->splseqrange, ranges,
                                 CONSOLIDATE_ORFS_MAX_OVERLAP)
@@ -393,7 +392,6 @@ static void consolidateORFs(GtArray *consolidatedORFs, GtArray *maximalORFs)
       /* save actual ORF and its genomic range */
       gt_array_add(consolidatedORFs, *orf);
       gt_array_add(ranges, orf->splseqrange);
-
     }
   }
 
