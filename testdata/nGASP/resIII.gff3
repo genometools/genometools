@@ -1,0 +1,1706 @@
+##gff-version   3
+##sequence-region   III 1000001 2000000
+III	gt csa	gene	1001124	1001929	.	+	.	ID=gene1
+III	gt csa	mRNA	1001124	1001415	.	+	.	ID=mRNA1;Parent=gene1;Target=CESAC87R 1 276 +,CEESA72R 1 286 +
+III	gt csa	exon	1001124	1001415	0.961	+	.	Parent=mRNA1
+III	gt csa	mRNA	1001583	1001929	.	+	.	ID=mRNA2;Parent=gene1;Target=yk1113e09.3 16 235 -,yk1113e09.5 16 273 +
+III	gt csa	exon	1001583	1001711	1	+	.	Parent=mRNA2
+III	gt csa	exon	1001801	1001929	0.961	+	.	Parent=mRNA2
+###
+III	gt csa	gene	1002693	1006177	.	+	.	ID=gene2
+III	gt csa	mRNA	1002693	1006177	.	+	.	ID=mRNA3;Parent=gene2;Target=yk1191d02.5 1 502 +,yk741d1.5 1 337 +,yk119f11.5 1 360 +,yk263f3.5 1 360 +,yk1191d02.3 1 625 -,yk263f3.3 1 300 -,yk741d1.3 1 300 -,yk735g1.3 1 197 -
+III	gt csa	exon	1002693	1002823	0.985	+	.	Parent=mRNA3
+III	gt csa	exon	1003572	1003690	1	+	.	Parent=mRNA3
+III	gt csa	exon	1003754	1003876	1	+	.	Parent=mRNA3
+III	gt csa	exon	1003923	1004051	1	+	.	Parent=mRNA3
+III	gt csa	exon	1004874	1004992	1	+	.	Parent=mRNA3
+III	gt csa	exon	1005039	1005141	1	+	.	Parent=mRNA3
+III	gt csa	exon	1005251	1005368	1	+	.	Parent=mRNA3
+III	gt csa	exon	1005890	1006050	1	+	.	Parent=mRNA3
+III	gt csa	exon	1006097	1006177	0.975	+	.	Parent=mRNA3
+###
+III	gt csa	gene	1010540	1011351	.	+	.	ID=gene3
+III	gt csa	mRNA	1010540	1011351	.	+	.	ID=mRNA4;Parent=gene3;Target=yk708f5.5 1 316 +,WP 1 199 +,yk708f5.3 1 212 -
+III	gt csa	exon	1010540	1010705	0.994	+	.	Parent=mRNA4
+III	gt csa	exon	1010749	1010997	1	+	.	Parent=mRNA4
+III	gt csa	exon	1011163	1011351	1	+	.	Parent=mRNA4
+###
+III	gt csa	gene	1020968	1021291	.	+	.	ID=gene4
+III	gt csa	mRNA	1020968	1021291	.	+	.	ID=mRNA5;Parent=gene4;Target=WP 1 87 +
+III	gt csa	exon	1020968	1021129	1	+	.	Parent=mRNA5
+III	gt csa	exon	1021193	1021291	1	+	.	Parent=mRNA5
+###
+III	gt csa	gene	1023281	1023580	.	+	.	ID=gene5
+III	gt csa	mRNA	1023281	1023580	.	+	.	ID=mRNA6;Parent=gene5;Target=yk720d6.3 1 300 +
+III	gt csa	exon	1023281	1023580	0.997	+	.	Parent=mRNA6
+###
+III	gt csa	gene	1023729	1024566	.	-	.	ID=gene6
+III	gt csa	mRNA	1023729	1024566	.	-	.	ID=mRNA7;Parent=gene6;Target=yk720d6.5 1 335 +
+III	gt csa	exon	1023729	1023771	1	-	.	Parent=mRNA7
+III	gt csa	exon	1023816	1023910	0.953	-	.	Parent=mRNA7
+III	gt csa	exon	1024370	1024566	0.964	-	.	Parent=mRNA7
+###
+III	gt csa	gene	1026929	1028347	.	-	.	ID=gene7
+III	gt csa	mRNA	1026929	1028347	.	-	.	ID=mRNA8;Parent=gene7;Target=WP 1 192 +,yk1105f03.3 41 639 -,yk1105f03.5 41 543 +
+III	gt csa	exon	1026929	1027102	1	-	.	Parent=mRNA8
+III	gt csa	exon	1027314	1027467	1	-	.	Parent=mRNA8
+III	gt csa	exon	1027515	1027609	1	-	.	Parent=mRNA8
+III	gt csa	exon	1028167	1028347	1	-	.	Parent=mRNA8
+###
+III	gt csa	gene	1028790	1037200	.	-	.	ID=gene8
+III	gt csa	mRNA	1028790	1031062	.	-	.	ID=mRNA9;Parent=gene8;Target=WP 1 227 +
+III	gt csa	exon	1028790	1028969	1	-	.	Parent=mRNA9
+III	gt csa	exon	1029692	1029845	1	-	.	Parent=mRNA9
+III	gt csa	exon	1029891	1029985	1	-	.	Parent=mRNA9
+III	gt csa	exon	1030811	1031062	0.933	-	.	Parent=mRNA9
+III	gt csa	mRNA	1031337	1037200	.	-	.	ID=mRNA10;Parent=gene8;Target=yk1677a04.3 1 666 -,yk1707c12.3 1 704 -,RP 1 422 +,yk1677a04.5 1 607 +,yk1707c12.5 23 589 +,yk623f3.5 1 360 +
+III	gt csa	exon	1031337	1031862	0.994	-	.	Parent=mRNA10
+III	gt csa	exon	1032740	1032809	1	-	.	Parent=mRNA10
+III	gt csa	exon	1033111	1033262	1	-	.	Parent=mRNA10
+III	gt csa	exon	1034167	1034457	1	-	.	Parent=mRNA10
+III	gt csa	exon	1034874	1035024	0.898	-	.	Parent=mRNA10
+III	gt csa	exon	1036294	1036442	1	-	.	Parent=mRNA10
+III	gt csa	exon	1036772	1036888	1	-	.	Parent=mRNA10
+III	gt csa	exon	1036937	1037082	1	-	.	Parent=mRNA10
+III	gt csa	exon	1037168	1037200	1	-	.	Parent=mRNA10
+III	gt csa	mRNA	1031337	1037200	.	-	.	ID=mRNA11;Parent=gene8;Target=yk1677a04.3 1 666 -,yk1707c12.3 1 704 -,BP 1 433 +,yk1707c12.5 23 589 +,yk623f3.5 1 360 +
+III	gt csa	exon	1031337	1031862	0.994	-	.	Parent=mRNA11
+III	gt csa	exon	1032740	1032809	1	-	.	Parent=mRNA11
+III	gt csa	exon	1033111	1033262	0.924	-	.	Parent=mRNA11
+III	gt csa	exon	1034167	1034457	0.894	-	.	Parent=mRNA11
+III	gt csa	exon	1034642	1034679	0.215	-	.	Parent=mRNA11
+III	gt csa	exon	1034874	1035024	0.985	-	.	Parent=mRNA11
+III	gt csa	exon	1036294	1036442	1	-	.	Parent=mRNA11
+III	gt csa	exon	1036772	1036888	1	-	.	Parent=mRNA11
+III	gt csa	exon	1036937	1037082	1	-	.	Parent=mRNA11
+III	gt csa	exon	1037168	1037200	1	-	.	Parent=mRNA11
+###
+III	gt csa	gene	1031495	1031674	.	+	.	ID=gene9
+III	gt csa	mRNA	1031495	1031674	.	+	.	ID=mRNA12;Parent=gene9;Target=yk623f3.3 1 180 +
+III	gt csa	exon	1031495	1031674	1	+	.	Parent=mRNA12
+###
+III	gt csa	gene	1040341	1043441	.	+	.	ID=gene10
+III	gt csa	mRNA	1040341	1041938	.	+	.	ID=mRNA13;Parent=gene10;Target=yk645b4.5 36 382 +
+III	gt csa	exon	1040341	1040503	0.939	+	.	Parent=mRNA13
+III	gt csa	exon	1041759	1041938	1	+	.	Parent=mRNA13
+III	gt csa	mRNA	1042042	1043441	.	+	.	ID=mRNA14;Parent=gene10;Target=yk64a11.5 1 360 +
+III	gt csa	exon	1042042	1042093	1	+	.	Parent=mRNA14
+III	gt csa	exon	1043134	1043441	0.984	+	.	Parent=mRNA14
+###
+III	gt csa	gene	1046267	1046555	.	+	.	ID=gene11
+III	gt csa	mRNA	1046267	1046555	.	+	.	ID=mRNA15;Parent=gene11;Target=yk1391c06.3 1 287 +
+III	gt csa	exon	1046267	1046555	0.955	+	.	Parent=mRNA15
+###
+III	gt csa	gene	1046557	1059998	.	-	.	ID=gene12
+III	gt csa	mRNA	1046557	1059998	.	-	.	ID=mRNA16;Parent=gene12;Target=WP 1 1158 +
+III	gt csa	exon	1046557	1046617	1	-	.	Parent=mRNA16
+III	gt csa	exon	1046663	1046761	1	-	.	Parent=mRNA16
+III	gt csa	exon	1047490	1047637	1	-	.	Parent=mRNA16
+III	gt csa	exon	1048507	1048990	1	-	.	Parent=mRNA16
+III	gt csa	exon	1049960	1050356	1	-	.	Parent=mRNA16
+III	gt csa	exon	1051280	1051470	1	-	.	Parent=mRNA16
+III	gt csa	exon	1051832	1052354	1	-	.	Parent=mRNA16
+III	gt csa	exon	1052641	1052770	1	-	.	Parent=mRNA16
+III	gt csa	exon	1053104	1053230	1	-	.	Parent=mRNA16
+III	gt csa	exon	1053750	1053789	1	-	.	Parent=mRNA16
+III	gt csa	exon	1054974	1055025	1	-	.	Parent=mRNA16
+III	gt csa	exon	1055100	1055216	1	-	.	Parent=mRNA16
+III	gt csa	exon	1056330	1056534	1	-	.	Parent=mRNA16
+III	gt csa	exon	1057718	1058011	1	-	.	Parent=mRNA16
+III	gt csa	exon	1058066	1058194	1	-	.	Parent=mRNA16
+III	gt csa	exon	1058517	1058636	1	-	.	Parent=mRNA16
+III	gt csa	exon	1058794	1058967	1	-	.	Parent=mRNA16
+III	gt csa	exon	1059816	1059998	1	-	.	Parent=mRNA16
+III	gt csa	mRNA	1052040	1052771	.	-	.	ID=mRNA17;Parent=gene12;Target=CK580775 1 445 +,CK575409 1 430 +,CK575411 1 416 +,CK583013 1 411 +,CK575408 1 354 +,CK575413 1 347 +,CK583019 1 334 +
+III	gt csa	exon	1052040	1052354	0.997	-	.	Parent=mRNA17
+III	gt csa	exon	1052641	1052771	1	-	.	Parent=mRNA17
+III	gt csa	mRNA	1052047	1053234	.	-	.	ID=mRNA18;Parent=gene12;Target=yk1391c06.5 1 569 +
+III	gt csa	exon	1052047	1052354	1	-	.	Parent=mRNA18
+III	gt csa	exon	1052641	1052770	0.992	-	.	Parent=mRNA18
+III	gt csa	exon	1053104	1053234	1	-	.	Parent=mRNA18
+III	gt csa	mRNA	1056259	1059192	.	-	.	ID=mRNA19;Parent=gene12;Target=BP 75 367 +
+III	gt csa	exon	1056259	1056534	0.894	-	.	Parent=mRNA19
+III	gt csa	exon	1057718	1058011	0.954	-	.	Parent=mRNA19
+III	gt csa	exon	1058517	1058636	0.856	-	.	Parent=mRNA19
+III	gt csa	exon	1058794	1058967	0.818	-	.	Parent=mRNA19
+III	gt csa	exon	1059181	1059192	0.273	-	.	Parent=mRNA19
+III	gt csa	mRNA	1056259	1059224	.	-	.	ID=mRNA20;Parent=gene12;Target=RP 72 369 +
+III	gt csa	exon	1056259	1056534	0.853	-	.	Parent=mRNA20
+III	gt csa	exon	1057718	1058011	0.969	-	.	Parent=mRNA20
+III	gt csa	exon	1058517	1058636	0.927	-	.	Parent=mRNA20
+III	gt csa	exon	1058794	1058967	0.833	-	.	Parent=mRNA20
+III	gt csa	exon	1059198	1059224	0.22	-	.	Parent=mRNA20
+###
+III	gt csa	gene	1062769	1063139	.	+	.	ID=gene13
+III	gt csa	mRNA	1062769	1063139	.	+	.	ID=mRNA21;Parent=gene13;Target=yk681f11.5 1 370 +,CEESV83F 1 359 +,yk117f1.3 1 332 +,yk1170b11.3 1 181 +,yk1376a02.3 1 215 +,yk1704g11.3 1 255 +,yk117c1.3 1 323 +,yk617a4.3 1 300 +,yk621h1.3 1 299 +,yk659c10.3 1 297 +,yk602e8.3 1 297 +,yk652b11.3 1 297 +,yk675h9.3 1 296 +,yk337c2.3 1 295 +,yk658b12.3 1 294 +,yk393b4.3 1 180 +,yk394b5.3 1 295 +,yk363h2.3 1 292 +,yk525g8.3 1 291 +,yk656g8.3 1 291 +,yk255h9.3 1 289 +,yk572f4.3 1 288 +,yk592b8.3 1 286 +
+III	gt csa	exon	1062769	1063139	0.978	+	.	Parent=mRNA21
+###
+III	gt csa	gene	1062771	1076543	.	-	.	ID=gene14
+III	gt csa	mRNA	1062771	1076543	.	-	.	ID=mRNA22;Parent=gene14;Target=U79157 1 1736 +,yk1101a09.3 26 698 -,yk1169g11.3 1 752 -,yk1339g04.3 1 746 -,yk804f05.3 1 665 -,yk899h02.3 1 614 -,yk1120g02.3 24 690 -,yk1213f07.3 9 673 -,yk1120d08.3 1 686 -,yk1061h02.3 1 616 -,yk1053h12.3 1 685 -,yk1058c11.3 1 734 -,yk1401h02.3 28 684 -,yk1369c04.3 1 639 -,yk1652g01.3 23 678 -,yk1741a10.3 10 665 -,yk1722g08.3 1 733 -,yk1516e02.3 1 732 -,yk1141g04.3 1 677 -,yk1286b11.3 1 677 -,yk1199c10.3 1 546 -,yk820f07.3 1 586 -,yk778d02.3 1 652 -,yk1096a09.3 11 661 -,yk1254h08.3 1 704 -,yk1351e07.3 1 623 -,yk1093g01.3 1 570 -,WP 1 497 +,yk1034a11.3 1 259 -,yk65a10.5 1 360 +,yk255h9.5 5 379 +,yk652b11.5 1 360 +,yk117f1.5 1 360 +,CK579359 1 613 +,yk1101a09.5 23 632 +,yk1034a11.5 23 628 +,yk363h2.5 1 360 +,yk1172f12.5 23 612 +,yk1053h12.5 22 598 +,yk1339g04.5 24 597 +,yk1169g11.5 23 596 +,yk1170b11.5 23 594 +,yk1120d08.5 23 590 +,yk1286b11.5 23 589 +,yk1120g02.5 23 587 +,yk1058c11.5 23 586 +,yk1254h08.5 23 584 +,yk1722g08.5 23 543 +,yk804f05.5 23 542 +,yk1096a09.5 23 539 +,yk1516e02.5 23 528 +,yk1652g01.5 23 510 +,yk1401h02.5 23 497 +,yk1061h02.5 23 497 +,yk1369c04.5 23 488 +,yk505f9.5 1 368 +,yk1141g04.5 23 448 +,yk820f07.5 23 446 +,yk1741a10.5 24 446 +,yk1026h07.5 1 370 +,yk656g8.5 1 360 +,yk216b5.5 1 360 +,yk568d7.5 1 360 +,yk659c10.5 1 379 +,yk592b8.5 1 360 +,yk658b12.5 1 360 +,yk269b4.5 1 376 +,yk525g8.5 1 377 +,yk482b6.5 1 360 +,yk569b4.5 1 360 +,yk675h9.5 1 360 +,yk456c8.5 1 377 +,yk393b4.5 1 373 +,yk626a1.5 1 360 +,yk602e8.5 1 360 +,yk617a4.5 1 360 +,yk332b1.5 1 378 +,yk337c2.5 1 374 +,yk61b9.5 1 360 +,yk434f11.5 1 360 +,yk117c1.5 1 360 +,yk621h1.5 1 218 +,yk1376a02.5 23 252 +,yk106d3.5 1 181 +,yk768a10.5 23 200 +
+III	gt csa	exon	1062771	1063137	0.858	-	.	Parent=mRNA22
+III	gt csa	exon	1064630	1064950	1	-	.	Parent=mRNA22
+III	gt csa	exon	1067821	1067940	1	-	.	Parent=mRNA22
+III	gt csa	exon	1070411	1070643	1	-	.	Parent=mRNA22
+III	gt csa	exon	1072375	1072533	1	-	.	Parent=mRNA22
+III	gt csa	exon	1074168	1074463	1	-	.	Parent=mRNA22
+III	gt csa	exon	1076314	1076543	1	-	.	Parent=mRNA22
+III	gt csa	mRNA	1062781	1068054	.	-	.	ID=mRNA23;Parent=gene14;Target=yk1101a09.3 26 698 -,yk804f05.3 1 665 -,yk899h02.3 1 614 -,yk1120g02.3 24 690 -,yk1213f07.3 9 673 -,yk1061h02.3 1 616 -,yk1401h02.3 28 684 -,yk1369c04.3 1 639 -,yk1652g01.3 23 678 -,yk1741a10.3 10 665 -,yk1199c10.3 1 546 -,yk820f07.3 1 586 -,yk778d02.3 1 652 -,yk1096a09.3 11 661 -,yk1276g05.3 1 729 -,yk1351e07.3 1 623 -,yk1093g01.3 1 570 -,yk1034a11.3 1 259 -
+III	gt csa	exon	1062781	1063137	0.983	-	.	Parent=mRNA23
+III	gt csa	exon	1064630	1064950	1	-	.	Parent=mRNA23
+III	gt csa	exon	1067821	1067837	1	-	.	Parent=mRNA23
+III	gt csa	exon	1067912	1067940	1	-	.	Parent=mRNA23
+III	gt csa	exon	1068024	1068054	1	-	.	Parent=mRNA23
+III	gt csa	mRNA	1062781	1074608	.	-	.	ID=mRNA24;Parent=gene14;Target=yk1101a09.3 26 698 -,yk1169g11.3 1 752 -,yk1339g04.3 1 746 -,yk804f05.3 1 665 -,yk899h02.3 1 614 -,yk1120g02.3 24 690 -,yk1213f07.3 9 673 -,yk1120d08.3 1 686 -,yk1061h02.3 1 616 -,yk1053h12.3 1 685 -,yk1058c11.3 1 734 -,yk1401h02.3 28 684 -,yk1369c04.3 1 639 -,yk1652g01.3 23 678 -,yk1741a10.3 10 665 -,yk1722g08.3 1 733 -,yk1516e02.3 1 732 -,yk1141g04.3 1 677 -,yk1286b11.3 1 677 -,yk1199c10.3 1 546 -,yk820f07.3 1 586 -,yk778d02.3 1 652 -,yk1096a09.3 11 661 -,yk1254h08.3 1 704 -,yk1351e07.3 1 623 -,yk1093g01.3 1 570 -,BP 66 487 +,yk1034a11.3 1 259 -,yk65a10.5 1 360 +,yk255h9.5 5 379 +,yk652b11.5 1 360 +,yk117f1.5 1 360 +,yk363h2.5 1 360 +
+III	gt csa	exon	1062781	1063137	0.983	-	.	Parent=mRNA24
+III	gt csa	exon	1064630	1064950	1	-	.	Parent=mRNA24
+III	gt csa	exon	1067821	1067940	1	-	.	Parent=mRNA24
+III	gt csa	exon	1070411	1070643	0.976	-	.	Parent=mRNA24
+III	gt csa	exon	1072375	1072533	1	-	.	Parent=mRNA24
+III	gt csa	exon	1074168	1074463	0.645	-	.	Parent=mRNA24
+III	gt csa	exon	1074601	1074608	0	-	.	Parent=mRNA24
+III	gt csa	mRNA	1062781	1074628	.	-	.	ID=mRNA25;Parent=gene14;Target=yk1101a09.3 26 698 -,yk1169g11.3 1 752 -,yk1339g04.3 1 746 -,yk804f05.3 1 665 -,yk899h02.3 1 614 -,yk1120g02.3 24 690 -,yk1213f07.3 9 673 -,yk1120d08.3 1 686 -,yk1061h02.3 1 616 -,yk1053h12.3 1 685 -,yk1058c11.3 1 734 -,yk1401h02.3 28 684 -,yk1369c04.3 1 639 -,yk1652g01.3 23 678 -,yk1741a10.3 10 665 -,yk1722g08.3 1 733 -,yk1516e02.3 1 732 -,yk1141g04.3 1 677 -,yk1286b11.3 1 677 -,yk1199c10.3 1 546 -,yk820f07.3 1 586 -,yk778d02.3 1 652 -,yk1096a09.3 11 661 -,yk1254h08.3 1 704 -,yk1351e07.3 1 623 -,yk1093g01.3 1 570 -,RP 81 497 +,yk1034a11.3 1 259 -,yk65a10.5 1 360 +,yk255h9.5 5 379 +,yk652b11.5 1 360 +,yk117f1.5 1 360 +,yk363h2.5 1 360 +
+III	gt csa	exon	1062781	1063137	0.983	-	.	Parent=mRNA25
+III	gt csa	exon	1064630	1064950	1	-	.	Parent=mRNA25
+III	gt csa	exon	1067821	1067940	0.983	-	.	Parent=mRNA25
+III	gt csa	exon	1070411	1070643	0.968	-	.	Parent=mRNA25
+III	gt csa	exon	1072375	1072533	1	-	.	Parent=mRNA25
+III	gt csa	exon	1074168	1074463	0.683	-	.	Parent=mRNA25
+III	gt csa	exon	1074624	1074628	0	-	.	Parent=mRNA25
+III	gt csa	mRNA	1062781	1076543	.	-	.	ID=mRNA26;Parent=gene14;Target=yk1101a09.3 26 698 -,yk1169g11.3 1 752 -,yk1339g04.3 1 746 -,yk804f05.3 1 665 -,yk899h02.3 1 614 -,yk1120g02.3 24 690 -,yk1213f07.3 9 673 -,yk1120d08.3 1 686 -,yk1061h02.3 1 616 -,yk1053h12.3 1 685 -,yk1058c11.3 1 734 -,yk1401h02.3 28 684 -,yk1369c04.3 1 639 -,yk1652g01.3 23 678 -,yk1741a10.3 10 665 -,yk1722g08.3 1 733 -,yk1516e02.3 1 732 -,yk1141g04.3 1 677 -,yk1286b11.3 1 677 -,yk1199c10.3 1 546 -,yk820f07.3 1 586 -,yk778d02.3 1 652 -,yk1096a09.3 11 661 -,yk1254h08.3 1 704 -,yk1351e07.3 1 623 -,yk1093g01.3 1 570 -,yk1034a11.3 1 259 -,yk65a10.5 1 360 +,yk255h9.5 5 379 +,yk652b11.5 1 360 +,yk1213f07.5 23 619 +,yk1199c10.5 16 513 +,yk621h1.5 1 218 +,yk1376a02.5 23 252 +,yk106d3.5 1 181 +,yk768a10.5 23 200 +
+III	gt csa	exon	1062781	1063137	0.983	-	.	Parent=mRNA26
+III	gt csa	exon	1064630	1064950	1	-	.	Parent=mRNA26
+III	gt csa	exon	1067821	1067940	0.983	-	.	Parent=mRNA26
+III	gt csa	exon	1070411	1070643	1	-	.	Parent=mRNA26
+III	gt csa	exon	1072375	1072533	1	-	.	Parent=mRNA26
+III	gt csa	exon	1074168	1074350	1	-	.	Parent=mRNA26
+III	gt csa	exon	1074426	1074463	1	-	.	Parent=mRNA26
+III	gt csa	exon	1076314	1076543	1	-	.	Parent=mRNA26
+III	gt csa	mRNA	1062781	1076543	.	-	.	ID=mRNA27;Parent=gene14;Target=yk1101a09.3 26 698 -,yk1169g11.3 1 752 -,yk1339g04.3 1 746 -,yk804f05.3 1 665 -,yk899h02.3 1 614 -,yk1120g02.3 24 690 -,yk1213f07.3 9 673 -,yk1120d08.3 1 686 -,yk1061h02.3 1 616 -,yk1053h12.3 1 685 -,yk1058c11.3 1 734 -,yk1401h02.3 28 684 -,yk1369c04.3 1 639 -,yk1652g01.3 23 678 -,yk1741a10.3 10 665 -,yk1722g08.3 1 733 -,yk1516e02.3 1 732 -,yk1141g04.3 1 677 -,yk1286b11.3 1 677 -,yk1199c10.3 1 546 -,yk820f07.3 1 586 -,yk778d02.3 1 652 -,yk1096a09.3 11 661 -,yk1254h08.3 1 704 -,yk1351e07.3 1 623 -,yk1093g01.3 1 570 -,yk1034a11.3 1 259 -,yk65a10.5 1 360 +,yk255h9.5 5 379 +,yk652b11.5 1 360 +,yk899h02.5 21 464 +,yk621h1.5 1 218 +,yk1376a02.5 23 252 +,yk106d3.5 1 181 +,yk768a10.5 23 200 +
+III	gt csa	exon	1062781	1063137	0.983	-	.	Parent=mRNA27
+III	gt csa	exon	1064630	1064950	1	-	.	Parent=mRNA27
+III	gt csa	exon	1067821	1067940	0.983	-	.	Parent=mRNA27
+III	gt csa	exon	1070411	1070643	1	-	.	Parent=mRNA27
+III	gt csa	exon	1072375	1072533	1	-	.	Parent=mRNA27
+III	gt csa	exon	1074168	1074350	0.973	-	.	Parent=mRNA27
+III	gt csa	exon	1074432	1074463	1	-	.	Parent=mRNA27
+III	gt csa	exon	1076314	1076543	1	-	.	Parent=mRNA27
+III	gt csa	mRNA	1062781	1076543	.	-	.	ID=mRNA28;Parent=gene14;Target=yk1101a09.3 26 698 -,yk1169g11.3 1 752 -,yk1339g04.3 1 746 -,yk804f05.3 1 665 -,yk899h02.3 1 614 -,yk1120g02.3 24 690 -,yk1213f07.3 9 673 -,yk1120d08.3 1 686 -,yk1061h02.3 1 616 -,yk1053h12.3 1 685 -,yk1058c11.3 1 734 -,yk1401h02.3 28 684 -,yk1369c04.3 1 639 -,yk1652g01.3 23 678 -,yk1741a10.3 10 665 -,yk1722g08.3 1 733 -,yk1516e02.3 1 732 -,yk1141g04.3 1 677 -,yk1286b11.3 1 677 -,yk1199c10.3 1 546 -,yk820f07.3 1 586 -,yk778d02.3 1 652 -,yk1096a09.3 11 661 -,yk1254h08.3 1 704 -,yk1351e07.3 1 623 -,yk1093g01.3 1 570 -,yk1034a11.3 1 259 -,yk65a10.5 1 360 +,yk255h9.5 5 379 +,yk652b11.5 1 360 +,yk778d02.5 21 613 +,yk117f1.5 1 360 +,yk363h2.5 1 360 +
+III	gt csa	exon	1062781	1063137	0.983	-	.	Parent=mRNA28
+III	gt csa	exon	1064630	1064950	1	-	.	Parent=mRNA28
+III	gt csa	exon	1067821	1067940	0.983	-	.	Parent=mRNA28
+III	gt csa	exon	1070411	1070643	1	-	.	Parent=mRNA28
+III	gt csa	exon	1072375	1072533	1	-	.	Parent=mRNA28
+III	gt csa	exon	1074168	1074463	0.993	-	.	Parent=mRNA28
+III	gt csa	exon	1076380	1076543	1	-	.	Parent=mRNA28
+III	gt csa	mRNA	1062781	1076543	.	-	.	ID=mRNA29;Parent=gene14;Target=yk1101a09.3 26 698 -,yk1169g11.3 1 752 -,yk1339g04.3 1 746 -,yk804f05.3 1 665 -,yk899h02.3 1 614 -,yk1120g02.3 24 690 -,yk1213f07.3 9 673 -,yk1120d08.3 1 686 -,yk1061h02.3 1 616 -,yk1053h12.3 1 685 -,yk1058c11.3 1 734 -,yk1401h02.3 28 684 -,yk1369c04.3 1 639 -,yk1652g01.3 23 678 -,yk1741a10.3 10 665 -,yk1722g08.3 1 733 -,yk1516e02.3 1 732 -,yk1141g04.3 1 677 -,yk1286b11.3 1 677 -,yk1199c10.3 1 546 -,yk820f07.3 1 586 -,yk778d02.3 1 652 -,yk1096a09.3 11 661 -,yk1254h08.3 1 704 -,yk1351e07.3 1 623 -,yk1093g01.3 1 570 -,yk1034a11.3 1 259 -,yk65a10.5 1 360 +,yk255h9.5 5 379 +,yk652b11.5 1 360 +,yk1351e07.5 23 549 +
+III	gt csa	exon	1062781	1063137	0.983	-	.	Parent=mRNA29
+III	gt csa	exon	1064630	1064950	1	-	.	Parent=mRNA29
+III	gt csa	exon	1067821	1067940	0.983	-	.	Parent=mRNA29
+III	gt csa	exon	1070411	1070643	1	-	.	Parent=mRNA29
+III	gt csa	exon	1072375	1072533	1	-	.	Parent=mRNA29
+III	gt csa	exon	1074168	1074374	0.995	-	.	Parent=mRNA29
+III	gt csa	exon	1076372	1076543	0.994	-	.	Parent=mRNA29
+III	gt csa	mRNA	1062794	1064950	.	-	.	ID=mRNA30;Parent=gene14;Target=yk1172f12.3 68 589 -
+III	gt csa	exon	1062794	1063137	1	-	.	Parent=mRNA30
+III	gt csa	exon	1064630	1064798	0.932	-	.	Parent=mRNA30
+III	gt csa	exon	1064945	1064950	0.833	-	.	Parent=mRNA30
+III	gt csa	mRNA	1067962	1068321	.	-	.	ID=mRNA31;Parent=gene14;Target=yk394b5.5 1 360 +
+III	gt csa	exon	1067962	1068321	1	-	.	Parent=mRNA31
+III	gt csa	mRNA	1072370	1076543	.	-	.	ID=mRNA32;Parent=gene14;Target=yk572f4.5 1 360 +,yk117f1.5 1 360 +,CK579359 1 613 +,yk1101a09.5 23 632 +,yk1034a11.5 23 628 +,yk363h2.5 1 360 +,yk1172f12.5 23 612 +,yk1053h12.5 22 598 +,yk1339g04.5 24 597 +,yk1169g11.5 23 596 +,yk1170b11.5 23 594 +,yk1120d08.5 23 590 +,yk1286b11.5 23 589 +,yk1120g02.5 23 587 +,yk1058c11.5 23 586 +,yk1254h08.5 23 584 +,yk1722g08.5 23 543 +,yk804f05.5 23 542 +,yk1096a09.5 23 539 +,yk1516e02.5 23 528 +,yk1652g01.5 23 510 +,yk1401h02.5 23 497 +,yk1061h02.5 23 497 +,yk1369c04.5 23 488 +,yk505f9.5 1 368 +,yk1141g04.5 23 448 +,yk820f07.5 23 446 +,yk1741a10.5 24 446 +,yk1026h07.5 1 370 +,yk656g8.5 1 360 +,yk216b5.5 1 360 +,yk568d7.5 1 360 +,yk659c10.5 1 379 +,yk592b8.5 1 360 +,yk658b12.5 1 360 +,yk269b4.5 1 376 +,yk525g8.5 1 377 +,yk482b6.5 1 360 +,yk569b4.5 1 360 +,yk675h9.5 1 360 +,yk456c8.5 1 377 +,yk393b4.5 1 373 +,yk626a1.5 1 360 +,yk602e8.5 1 360 +,yk617a4.5 1 360 +,yk332b1.5 1 378 +,yk337c2.5 1 374 +,yk61b9.5 1 360 +,yk434f11.5 1 360 +,yk117c1.5 1 360 +,yk621h1.5 1 218 +,yk1376a02.5 23 252 +,yk106d3.5 1 181 +,yk768a10.5 23 200 +
+III	gt csa	exon	1072370	1072533	0.976	-	.	Parent=mRNA32
+III	gt csa	exon	1074168	1074463	1	-	.	Parent=mRNA32
+III	gt csa	exon	1076314	1076543	1	-	.	Parent=mRNA32
+###
+III	gt csa	gene	1078138	1080469	.	-	.	ID=gene15
+III	gt csa	mRNA	1078138	1079228	.	-	.	ID=mRNA33;Parent=gene15;Target=yk1340e12.3 1 864 -,yk616a3.5 1 360 +
+III	gt csa	exon	1078138	1078930	0.996	-	.	Parent=mRNA33
+III	gt csa	exon	1079155	1079228	0.932	-	.	Parent=mRNA33
+III	gt csa	mRNA	1079466	1080469	.	-	.	ID=mRNA34;Parent=gene15;Target=yk1243e09.3 1 706 -,BP 1 203 +,RP 1 203 +,yk1243e09.5 24 582 +,yk1340e12.5 23 491 +,yk493c1.5 1 375 +,yk291g7.5 1 240 +,U23938 1 107 +
+III	gt csa	exon	1079466	1079894	1	-	.	Parent=mRNA34
+III	gt csa	exon	1079946	1080199	1	-	.	Parent=mRNA34
+III	gt csa	exon	1080275	1080330	1	-	.	Parent=mRNA34
+III	gt csa	exon	1080393	1080469	1	-	.	Parent=mRNA34
+III	gt csa	mRNA	1079821	1080352	.	-	.	ID=mRNA35;Parent=gene15;Target=yk1013b10.5 1 457 +
+III	gt csa	exon	1079821	1080199	0.995	-	.	Parent=mRNA35
+III	gt csa	exon	1080275	1080352	0.885	-	.	Parent=mRNA35
+###
+III	gt csa	gene	1078143	1079828	.	+	.	ID=gene16
+III	gt csa	mRNA	1078143	1078790	.	+	.	ID=mRNA36;Parent=gene16;Target=yk1013b10.3 1 651 +,yk616a3.3 1 300 +
+III	gt csa	exon	1078143	1078790	0.979	+	.	Parent=mRNA36
+III	gt csa	mRNA	1079525	1079828	.	+	.	ID=mRNA37;Parent=gene16;Target=yk291g7.3 1 300 +,yk493c1.3 1 300 +
+III	gt csa	exon	1079525	1079828	0.992	+	.	Parent=mRNA37
+###
+III	gt csa	gene	1080895	1095067	.	+	.	ID=gene17
+III	gt csa	mRNA	1080895	1081298	.	+	.	ID=mRNA38;Parent=gene17;Target=yk628f9.3 1 285 -,CESAC24R 12 322 +,yk628f9.5 1 320 +
+III	gt csa	exon	1080895	1081097	0.97	+	.	Parent=mRNA38
+III	gt csa	exon	1081143	1081298	0.936	+	.	Parent=mRNA38
+III	gt csa	mRNA	1081386	1095067	.	+	.	ID=mRNA39;Parent=gene17;Target=L26987 1 2172 +,yk96h7.5 1 360 +,yk628a12.5 1 378 +,yk375g6.5 1 240 +
+III	gt csa	exon	1081386	1081507	0.984	+	.	Parent=mRNA39
+III	gt csa	exon	1081621	1081704	1	+	.	Parent=mRNA39
+III	gt csa	exon	1082982	1083119	1	+	.	Parent=mRNA39
+III	gt csa	exon	1084050	1084121	1	+	.	Parent=mRNA39
+III	gt csa	exon	1084325	1084449	1	+	.	Parent=mRNA39
+III	gt csa	exon	1087773	1088553	0.996	+	.	Parent=mRNA39
+III	gt csa	exon	1091545	1091685	0.986	+	.	Parent=mRNA39
+III	gt csa	exon	1092617	1092679	0.984	+	.	Parent=mRNA39
+III	gt csa	exon	1092734	1092865	1	+	.	Parent=mRNA39
+III	gt csa	exon	1094216	1094362	0.973	+	.	Parent=mRNA39
+III	gt csa	exon	1094697	1095067	0.997	+	.	Parent=mRNA39
+III	gt csa	mRNA	1081392	1094789	.	+	.	ID=mRNA40;Parent=gene17;Target=yk325e4.5 1 374 +,WP 1 583 +
+III	gt csa	exon	1081392	1081507	1	+	.	Parent=mRNA40
+III	gt csa	exon	1081621	1081704	1	+	.	Parent=mRNA40
+III	gt csa	exon	1084050	1084121	1	+	.	Parent=mRNA40
+III	gt csa	exon	1084325	1084449	1	+	.	Parent=mRNA40
+III	gt csa	exon	1087773	1088553	1	+	.	Parent=mRNA40
+III	gt csa	exon	1091545	1091685	1	+	.	Parent=mRNA40
+III	gt csa	exon	1092617	1092679	1	+	.	Parent=mRNA40
+III	gt csa	exon	1092734	1092865	1	+	.	Parent=mRNA40
+III	gt csa	exon	1094216	1094362	1	+	.	Parent=mRNA40
+III	gt csa	exon	1094697	1094789	1	+	.	Parent=mRNA40
+III	gt csa	mRNA	1086135	1086598	.	+	.	ID=mRNA41;Parent=gene17;Target=yk64a7.5 1 360 +,yk774d01.5 23 484 +,yk168e1.5 1 360 +
+III	gt csa	exon	1086135	1086598	0.998	+	.	Parent=mRNA41
+###
+III	gt csa	gene	1086142	1095035	.	-	.	ID=gene18
+III	gt csa	mRNA	1086142	1086645	.	-	.	ID=mRNA42;Parent=gene18;Target=yk774d01.3 1 496 +,yk168e1.3 1 300 +,yk64a7.3 1 340 +
+III	gt csa	exon	1086142	1086645	0.968	-	.	Parent=mRNA42
+III	gt csa	mRNA	1092456	1092592	.	-	.	ID=mRNA43;Parent=gene18;Target=yk623f3.3 45 180 +
+III	gt csa	exon	1092456	1092592	0.883	-	.	Parent=mRNA43
+III	gt csa	mRNA	1094701	1095035	.	-	.	ID=mRNA44;Parent=gene18;Target=yk628a12.3 1 300 +,yk325e4.3 1 300 +,yk96h7.3 1 317 +
+III	gt csa	exon	1094701	1095035	0.97	-	.	Parent=mRNA44
+###
+III	gt csa	gene	1103215	1104223	.	+	.	ID=gene19
+III	gt csa	mRNA	1103215	1104223	.	+	.	ID=mRNA45;Parent=gene19;Target=yk509d9.5 1 240 +
+III	gt csa	exon	1103215	1103340	0.917	+	.	Parent=mRNA45
+III	gt csa	exon	1104113	1104223	0.973	+	.	Parent=mRNA45
+###
+III	gt csa	gene	1105166	1108112	.	+	.	ID=gene20
+III	gt csa	mRNA	1105166	1108112	.	+	.	ID=mRNA46;Parent=gene20;Target=yk1464f04.5 1 530 +
+III	gt csa	exon	1105166	1105213	1	+	.	Parent=mRNA46
+III	gt csa	exon	1105382	1105479	1	+	.	Parent=mRNA46
+III	gt csa	exon	1106989	1107077	1	+	.	Parent=mRNA46
+III	gt csa	exon	1107132	1107310	1	+	.	Parent=mRNA46
+III	gt csa	exon	1107997	1108112	1	+	.	Parent=mRNA46
+###
+III	gt csa	gene	1108452	1111917	.	+	.	ID=gene21
+III	gt csa	mRNA	1108452	1110379	.	+	.	ID=mRNA47;Parent=gene21;Target=yk387g5.5 1 374 +,yk73h4.5 1 360 +
+III	gt csa	exon	1108452	1108493	0.976	+	.	Parent=mRNA47
+III	gt csa	exon	1109102	1109194	1	+	.	Parent=mRNA47
+III	gt csa	exon	1109306	1109456	1	+	.	Parent=mRNA47
+III	gt csa	exon	1110211	1110379	0.95	+	.	Parent=mRNA47
+III	gt csa	mRNA	1110444	1111917	.	+	.	ID=mRNA48;Parent=gene21;Target=yk654h1.5 1 379 +,yk1464f04.3 1 511 -,yk654h1.3 1 300 -,yk73h4.3 1 339 -
+III	gt csa	exon	1110444	1110660	1	+	.	Parent=mRNA48
+III	gt csa	exon	1111612	1111917	0.997	+	.	Parent=mRNA48
+###
+III	gt csa	gene	1113142	1113501	.	+	.	ID=gene22
+III	gt csa	mRNA	1113142	1113501	.	+	.	ID=mRNA49;Parent=gene22;Target=yk540h4.5 1 360 +
+III	gt csa	exon	1113142	1113501	0.962	+	.	Parent=mRNA49
+###
+III	gt csa	gene	1116479	1145189	.	+	.	ID=gene23
+III	gt csa	mRNA	1116479	1142875	.	+	.	ID=mRNA50;Parent=gene23;Target=yk476e8.5 1 375 +,yk413d2.5 1 378 +,yk115h9.5 1 360 +,AB071420 1 1206 +,CEESU89F 1 378 +,yk476e8.3 1 300 -,yk115h9.3 1 316 -
+III	gt csa	exon	1116479	1116537	1	+	.	Parent=mRNA50
+III	gt csa	exon	1116980	1117047	1	+	.	Parent=mRNA50
+III	gt csa	exon	1117143	1117225	1	+	.	Parent=mRNA50
+III	gt csa	exon	1117275	1117383	1	+	.	Parent=mRNA50
+III	gt csa	exon	1122635	1122766	1	+	.	Parent=mRNA50
+III	gt csa	exon	1139058	1139117	1	+	.	Parent=mRNA50
+III	gt csa	exon	1139983	1140084	1	+	.	Parent=mRNA50
+III	gt csa	exon	1140353	1140439	1	+	.	Parent=mRNA50
+III	gt csa	exon	1141806	1142171	1	+	.	Parent=mRNA50
+III	gt csa	exon	1142665	1142875	0.981	+	.	Parent=mRNA50
+III	gt csa	mRNA	1116738	1142838	.	+	.	ID=mRNA51;Parent=gene23;Target=BP 1 356 +,CEESU89F 1 378 +
+III	gt csa	exon	1116738	1116762	0.381	+	.	Parent=mRNA51
+III	gt csa	exon	1116980	1117047	0.868	+	.	Parent=mRNA51
+III	gt csa	exon	1117143	1117225	1	+	.	Parent=mRNA51
+III	gt csa	exon	1117275	1117383	1	+	.	Parent=mRNA51
+III	gt csa	exon	1122635	1122766	0.914	+	.	Parent=mRNA51
+III	gt csa	exon	1139983	1140084	0.767	+	.	Parent=mRNA51
+III	gt csa	exon	1141806	1142171	0.882	+	.	Parent=mRNA51
+III	gt csa	exon	1142656	1142838	0.85	+	.	Parent=mRNA51
+III	gt csa	mRNA	1125293	1125473	.	+	.	ID=mRNA52;Parent=gene23;Target=yk553h3.3 1 180 +
+III	gt csa	exon	1125293	1125473	0.95	+	.	Parent=mRNA52
+III	gt csa	mRNA	1133548	1142889	.	+	.	ID=mRNA53;Parent=gene23;Target=yk1661g06.3 1 722 -,yk476e8.3 1 300 -,yk115h9.3 1 316 -
+III	gt csa	exon	1133548	1133558	0.727	+	.	Parent=mRNA53
+III	gt csa	exon	1135590	1135608	0.737	+	.	Parent=mRNA53
+III	gt csa	exon	1139983	1140084	1	+	.	Parent=mRNA53
+III	gt csa	exon	1141806	1142171	1	+	.	Parent=mRNA53
+III	gt csa	exon	1142665	1142889	0.991	+	.	Parent=mRNA53
+III	gt csa	mRNA	1143062	1145189	.	+	.	ID=mRNA54;Parent=gene23;Target=yk343a3.5 1 372 +,yk187d1.5 1 120 +,yk123d7.5 1 360 +,yk438f8.5 1 383 +,yk1158b07.3 1 574 -,yk550b4.5 1 360 +,yk543h10.5 11 360 +
+III	gt csa	exon	1143062	1143459	1	+	.	Parent=mRNA54
+III	gt csa	exon	1143525	1143621	1	+	.	Parent=mRNA54
+III	gt csa	exon	1143690	1143814	1	+	.	Parent=mRNA54
+III	gt csa	exon	1144839	1145189	0.997	+	.	Parent=mRNA54
+III	gt csa	mRNA	1143154	1145132	.	+	.	ID=mRNA55;Parent=gene23;Target=yk60d1.5 1 360 +,yk142e6.5 1 373 +,yk657a9.5 2 379 +,yk103e11.5 1 330 +,yk604a1.5 1 360 +,yk470d12.5 1 360 +,yk647g1.5 1 360 +,RP 1 235 +,yk187d1.5 1 120 +,yk312d12.5 1 360 +,yk561h2.5 1 360 +,yk473b11.5 1 360 +,yk328f10.5 1 360 +,yk123d7.5 1 360 +,yk438f8.5 1 383 +
+III	gt csa	exon	1143154	1143303	0.993	+	.	Parent=mRNA55
+III	gt csa	exon	1143382	1143459	1	+	.	Parent=mRNA55
+III	gt csa	exon	1143525	1143621	1	+	.	Parent=mRNA55
+III	gt csa	exon	1143690	1143814	1	+	.	Parent=mRNA55
+III	gt csa	exon	1144839	1145034	0.95	+	.	Parent=mRNA55
+III	gt csa	exon	1145050	1145132	0.868	+	.	Parent=mRNA55
+III	gt csa	mRNA	1143154	1145189	.	+	.	ID=mRNA56;Parent=gene23;Target=yk60d1.5 1 360 +,yk142e6.5 1 373 +,yk657a9.5 2 379 +,yk103e11.5 1 330 +,yk604a1.5 1 360 +,yk470d12.5 1 360 +,yk647g1.5 1 360 +,BP 1 234 +,yk187d1.5 1 120 +,yk312d12.5 1 360 +,yk561h2.5 1 360 +,yk473b11.5 1 360 +,yk328f10.5 1 360 +,yk123d7.5 1 360 +,yk438f8.5 1 383 +,yk1158b07.3 1 574 -,yk550b4.5 1 360 +,yk543h10.5 11 360 +
+III	gt csa	exon	1143154	1143303	0.993	+	.	Parent=mRNA56
+III	gt csa	exon	1143382	1143459	1	+	.	Parent=mRNA56
+III	gt csa	exon	1143525	1143621	1	+	.	Parent=mRNA56
+III	gt csa	exon	1143690	1143814	1	+	.	Parent=mRNA56
+III	gt csa	exon	1144839	1145189	0.997	+	.	Parent=mRNA56
+###
+III	gt csa	gene	1125231	1145193	.	-	.	ID=gene24
+III	gt csa	mRNA	1125231	1135544	.	-	.	ID=mRNA57;Parent=gene24;Target=yk1034b01.3 1 771 -,yk1181b08.3 1 560 -,yk863a05.3 1 746 -,BP 1 507 +,RP 1 507 +,WP 1 509 +,yk553h3.5 1 360 +
+III	gt csa	exon	1125231	1125670	0.981	-	.	Parent=mRNA57
+III	gt csa	exon	1125798	1125884	1	-	.	Parent=mRNA57
+III	gt csa	exon	1126918	1127243	1	-	.	Parent=mRNA57
+III	gt csa	exon	1127709	1127839	1	-	.	Parent=mRNA57
+III	gt csa	exon	1128867	1128978	1	-	.	Parent=mRNA57
+III	gt csa	exon	1129237	1129354	1	-	.	Parent=mRNA57
+III	gt csa	exon	1129814	1129916	1	-	.	Parent=mRNA57
+III	gt csa	exon	1134086	1134290	1	-	.	Parent=mRNA57
+III	gt csa	exon	1134380	1134448	1	-	.	Parent=mRNA57
+III	gt csa	exon	1135196	1135288	1	-	.	Parent=mRNA57
+III	gt csa	exon	1135380	1135544	0.687	-	.	Parent=mRNA57
+III	gt csa	mRNA	1129245	1136013	.	-	.	ID=mRNA58;Parent=gene24;Target=yk553h3.5 1 360 +,yk1034b01.5 24 613 +,yk863a05.5 17 604 +
+III	gt csa	exon	1129245	1129354	0.991	-	.	Parent=mRNA58
+III	gt csa	exon	1129814	1129916	1	-	.	Parent=mRNA58
+III	gt csa	exon	1134086	1134290	1	-	.	Parent=mRNA58
+III	gt csa	exon	1134380	1134448	1	-	.	Parent=mRNA58
+III	gt csa	exon	1135196	1135288	1	-	.	Parent=mRNA58
+III	gt csa	exon	1135380	1135488	1	-	.	Parent=mRNA58
+III	gt csa	exon	1135900	1136013	1	-	.	Parent=mRNA58
+III	gt csa	mRNA	1144830	1145193	.	-	.	ID=mRNA59;Parent=gene24;Target=yk470d12.3 1 300 +,yk604a1.3 1 300 +,yk473b11.3 1 300 +,yk312d12.3 1 300 +,yk343a3.3 1 300 +,yk530f6.3 1 300 +,yk438f8.3 1 285 +,yk561h2.3 1 292 +,yk543h10.3 1 300 +,yk647g1.3 1 300 +,yk142e6.3 1 300 +,yk60d1.3 1 343 +,yk103e11.3 1 334 +,yk123d7.3 1 180 +
+III	gt csa	exon	1144830	1145193	0.971	-	.	Parent=mRNA59
+###
+III	gt csa	gene	1172435	1172612	.	+	.	ID=gene25
+III	gt csa	mRNA	1172435	1172612	.	+	.	ID=mRNA60;Parent=gene25;Target=yk511h7.5 1 180 +
+III	gt csa	exon	1172435	1172612	0.933	+	.	Parent=mRNA60
+###
+III	gt csa	gene	1180689	1181054	.	+	.	ID=gene26
+III	gt csa	mRNA	1180689	1181054	.	+	.	ID=mRNA61;Parent=gene26;Target=yk511h7.3 1 300 -
+III	gt csa	exon	1180689	1180787	0.929	+	.	Parent=mRNA61
+III	gt csa	exon	1180855	1181054	0.942	+	.	Parent=mRNA61
+###
+III	gt csa	gene	1182067	1184916	.	+	.	ID=gene27
+III	gt csa	mRNA	1182067	1184916	.	+	.	ID=mRNA62;Parent=gene27;Target=yk94h5.5 1 248 +,yk101e7.5 1 360 +,yk409f1.5 1 377 +,yk362f12.5 1 380 +,yk308d11.5 1 360 +,yk191a10.5 1 360 +,yk409a1.5 1 360 +,yk263d8.5 1 360 +,yk440h2.5 1 360 +,yk440h2.3 1 300 -,yk545f3.5 1 360 -,yk191a10.3 1 300 -,yk362f12.3 1 300 -,yk190e9.3 1 300 -,yk409f1.3 1 300 -,yk308d11.3 1 300 -,yk409a1.3 1 300 -
+III	gt csa	exon	1182067	1182083	1	+	.	Parent=mRNA62
+III	gt csa	exon	1182151	1182302	1	+	.	Parent=mRNA62
+III	gt csa	exon	1183141	1183324	1	+	.	Parent=mRNA62
+III	gt csa	exon	1183376	1183473	0.974	+	.	Parent=mRNA62
+III	gt csa	exon	1184629	1184916	0.993	+	.	Parent=mRNA62
+###
+III	gt csa	gene	1184691	1184913	.	-	.	ID=gene28
+III	gt csa	mRNA	1184691	1184913	.	-	.	ID=mRNA63;Parent=gene28;Target=yk388g7.3 1 176 +,yk94h5.3 1 180 +
+III	gt csa	exon	1184691	1184913	0.944	-	.	Parent=mRNA63
+###
+III	gt csa	gene	1185272	1189478	.	-	.	ID=gene29
+III	gt csa	mRNA	1185272	1189478	.	-	.	ID=mRNA64;Parent=gene29;Target=yk1481a08.3 1 678 -,yk1392d03.3 1 601 -
+III	gt csa	exon	1185272	1185683	0.998	-	.	Parent=mRNA64
+III	gt csa	exon	1187296	1187356	0.984	-	.	Parent=mRNA64
+III	gt csa	exon	1187434	1187550	0.991	-	.	Parent=mRNA64
+III	gt csa	exon	1187601	1187741	0.992	-	.	Parent=mRNA64
+III	gt csa	exon	1189002	1189478	1	-	.	Parent=mRNA64
+###
+III	gt csa	gene	1191338	1193802	.	-	.	ID=gene30
+III	gt csa	mRNA	1191338	1193802	.	-	.	ID=mRNA65;Parent=gene30;Target=yk1392d03.5 23 588 +,yk1481a08.5 23 461 +
+III	gt csa	exon	1191338	1191568	0.996	-	.	Parent=mRNA65
+III	gt csa	exon	1191631	1191720	1	-	.	Parent=mRNA65
+III	gt csa	exon	1193558	1193802	1	-	.	Parent=mRNA65
+###
+III	gt csa	gene	1194399	1196282	.	-	.	ID=gene31
+III	gt csa	mRNA	1194399	1196282	.	-	.	ID=mRNA66;Parent=gene31;Target=CB103439 99 622 +,CB103483 90 610 +,CB103504 61 572 +,yk1752b03.3 242 747 -,CB103472 81 584 +,yk1160g10.3 24 520 -,yk1160g10.5 24 516 +,CB103430 73 559 +,CK583320 1 435 +,yk368b4.5 1 374 +,CB103451 106 494 +,yk115f10.5 12 360 +
+III	gt csa	exon	1194399	1194795	1	-	.	Parent=mRNA66
+III	gt csa	exon	1196156	1196282	1	-	.	Parent=mRNA66
+###
+III	gt csa	gene	1194424	1194755	.	+	.	ID=gene32
+III	gt csa	mRNA	1194424	1194755	.	+	.	ID=mRNA67;Parent=gene32;Target=yk115f10.3 1 332 +
+III	gt csa	exon	1194424	1194755	0.997	+	.	Parent=mRNA67
+###
+III	gt csa	gene	1200240	1201998	.	-	.	ID=gene33
+III	gt csa	mRNA	1200240	1201998	.	-	.	ID=mRNA68;Parent=gene33;Target=yk1488e08.5 23 608 +
+III	gt csa	exon	1200240	1200461	0.995	-	.	Parent=mRNA68
+III	gt csa	exon	1201465	1201639	1	-	.	Parent=mRNA68
+III	gt csa	exon	1201810	1201998	0.995	-	.	Parent=mRNA68
+###
+III	gt csa	gene	1202535	1207288	.	+	.	ID=gene34
+III	gt csa	mRNA	1202535	1207255	.	+	.	ID=mRNA69;Parent=gene34;Target=yk531a4.5 1 376 +,yk1387f11.5 23 512 +,WP 1 337 +,yk172c10.5 1 377 +,yk342c4.5 1 373 +,yk550b8.5 1 360 +,yk409b7.5 1 376 +,yk342c4.3 1 300 -,yk409b7.3 1 300 -,yk172c10.3 1 300 -
+III	gt csa	exon	1202535	1202609	0.987	+	.	Parent=mRNA69
+III	gt csa	exon	1202655	1202765	1	+	.	Parent=mRNA69
+III	gt csa	exon	1202829	1203135	1	+	.	Parent=mRNA69
+III	gt csa	exon	1203589	1203699	1	+	.	Parent=mRNA69
+III	gt csa	exon	1205327	1205739	1	+	.	Parent=mRNA69
+III	gt csa	exon	1206843	1206957	1	+	.	Parent=mRNA69
+III	gt csa	exon	1207184	1207255	0.972	+	.	Parent=mRNA69
+III	gt csa	mRNA	1202535	1207260	.	+	.	ID=mRNA70;Parent=gene34;Target=yk531a4.5 1 376 +,yk1387f11.5 23 512 +,WP 1 337 +,yk172c10.5 1 377 +,yk342c4.5 1 373 +,yk550b8.5 1 360 +,yk550b8.3 1 300 -
+III	gt csa	exon	1202535	1202609	0.987	+	.	Parent=mRNA70
+III	gt csa	exon	1202655	1202765	1	+	.	Parent=mRNA70
+III	gt csa	exon	1202829	1203135	1	+	.	Parent=mRNA70
+III	gt csa	exon	1203589	1203699	1	+	.	Parent=mRNA70
+III	gt csa	exon	1205327	1205739	1	+	.	Parent=mRNA70
+III	gt csa	exon	1206843	1206932	0.878	+	.	Parent=mRNA70
+III	gt csa	exon	1207184	1207260	0.961	+	.	Parent=mRNA70
+III	gt csa	mRNA	1202535	1207288	.	+	.	ID=mRNA71;Parent=gene34;Target=yk531a4.5 1 376 +,yk1387f11.5 23 512 +,WP 1 337 +,yk172c10.5 1 377 +,yk342c4.5 1 373 +,yk550b8.5 1 360 +,yk409b7.5 1 376 +,yk1387f11.3 1 649 -
+III	gt csa	exon	1202535	1202609	0.987	+	.	Parent=mRNA71
+III	gt csa	exon	1202655	1202765	1	+	.	Parent=mRNA71
+III	gt csa	exon	1202829	1203135	1	+	.	Parent=mRNA71
+III	gt csa	exon	1203589	1203699	1	+	.	Parent=mRNA71
+III	gt csa	exon	1205327	1205739	1	+	.	Parent=mRNA71
+III	gt csa	exon	1206843	1207288	1	+	.	Parent=mRNA71
+III	gt csa	mRNA	1203589	1207248	.	+	.	ID=mRNA72;Parent=gene34;Target=yk531a4.3 10 300 -
+III	gt csa	exon	1203589	1203699	1	+	.	Parent=mRNA72
+III	gt csa	exon	1206843	1206957	0.983	+	.	Parent=mRNA72
+III	gt csa	exon	1207184	1207248	0.969	+	.	Parent=mRNA72
+###
+III	gt csa	gene	1208120	1209321	.	+	.	ID=gene35
+III	gt csa	mRNA	1208120	1209321	.	+	.	ID=mRNA73;Parent=gene35;Target=yk681h11.5 1 360 +,yk1103g05.5 41 657 +,cm13d11.5 1 287 +,yk660b11.5 1 378 +,yk669g11.5 1 360 +,yk210b6.5 1 376 +,yk608g3.5 1 360 +,yk506a7.5 1 360 +
+III	gt csa	exon	1208120	1208251	1	+	.	Parent=mRNA73
+III	gt csa	exon	1208372	1208714	0.997	+	.	Parent=mRNA73
+III	gt csa	exon	1209177	1209321	1	+	.	Parent=mRNA73
+###
+III	gt csa	gene	1211225	1213642	.	+	.	ID=gene36
+III	gt csa	mRNA	1211225	1213642	.	+	.	ID=mRNA74;Parent=gene36;Target=yk93h2.5 1 265 +,yk1535b11.3 1 614 -,CEEST24F 1 422 -,yk669g11.3 1 300 -,yk506a7.3 1 300 -,yk210b6.3 1 300 -,yk660b11.3 1 300 -,yk681h11.3 1 300 -,yk1624b11.3 1 340 -,yk93h2.3 1 331 -,CEESE53F 1 342 -
+III	gt csa	exon	1211225	1211488	0.964	+	.	Parent=mRNA74
+III	gt csa	exon	1212576	1212824	0.992	+	.	Parent=mRNA74
+III	gt csa	exon	1213437	1213642	0.981	+	.	Parent=mRNA74
+###
+III	gt csa	gene	1214935	1215287	.	+	.	ID=gene37
+III	gt csa	mRNA	1214935	1215287	.	+	.	ID=mRNA75;Parent=gene37;Target=yk726c5.5 1 340 +,yk843g10.5 1 341 +,yk726h9.5 1 330 +,yk1454b03.5 1 335 +,yk1693g03.5 1 335 +,yk1613b06.5 1 335 +,yk1376c06.5 1 345 +,yk1619d03.5 1 345 +,yk1657e01.5 1 343 +,yk151f9.5 1 240 +,yk70e6.5 1 317 +,yk309g3.5 1 308 +,yk367e7.5 1 311 +,yk275e11.5 1 298 +,yk383a12.5 1 290 +,yk1313b02.5 1 156 +
+III	gt csa	exon	1214935	1215287	0.977	+	.	Parent=mRNA75
+###
+III	gt csa	gene	1214942	1215266	.	-	.	ID=gene38
+III	gt csa	mRNA	1214942	1215266	.	-	.	ID=mRNA76;Parent=gene38;Target=yk726c5.3 1 267 +,yk726h9.3 1 270 +,yk734c7.3 1 275 +,yk1613b06.3 1 309 +,yk1641g01.3 1 312 +,yk1693g03.3 1 323 +,yk275e11.3 1 278 +,yk367e7.3 1 249 +,yk383a12.3 1 248 +,yk151f9.3 1 240 +,yk70e6.3 1 299 +,yk309g3.3 1 245 +
+III	gt csa	exon	1214942	1215266	0.957	-	.	Parent=mRNA76
+###
+III	gt csa	gene	1216021	1216795	.	+	.	ID=gene39
+III	gt csa	mRNA	1216021	1216795	.	+	.	ID=mRNA77;Parent=gene39;Target=yk808h01.3 1 641 +,yk831f01.3 1 241 +,yk1315b01.3 1 501 +,yk754f09.3 1 350 +,yk781a01.3 1 267 +,yk1358a10.3 1 302 +,yk413h8.5 1 120 +
+III	gt csa	exon	1216021	1216795	0.881	+	.	Parent=mRNA77
+###
+III	gt csa	gene	1216578	1216806	.	-	.	ID=gene40
+III	gt csa	mRNA	1216578	1216806	.	-	.	ID=mRNA78;Parent=gene40;Target=yk264h7.5 12 240 +
+III	gt csa	exon	1216578	1216806	0.983	-	.	Parent=mRNA78
+###
+III	gt csa	gene	1220307	1222062	.	-	.	ID=gene41
+III	gt csa	mRNA	1220307	1222062	.	-	.	ID=mRNA79;Parent=gene41;Target=yk1221d02.5 22 628 +,yk754f09.5 23 562 +,yk1358a10.5 23 547 +,yk808h01.5 26 550 +,yk781a01.5 23 546 +,yk236b4.5 1 360 +,yk629h11.5 1 356 +,yk831f01.5 23 175 +
+III	gt csa	exon	1220307	1220373	1	-	.	Parent=mRNA79
+III	gt csa	exon	1221160	1221571	1	-	.	Parent=mRNA79
+III	gt csa	exon	1221935	1222062	1	-	.	Parent=mRNA79
+###
+III	gt csa	gene	1225449	1225807	.	+	.	ID=gene42
+III	gt csa	mRNA	1225449	1225807	.	+	.	ID=mRNA80;Parent=gene42;Target=yk549c5.5 1 360 +
+III	gt csa	exon	1225449	1225807	0.976	+	.	Parent=mRNA80
+###
+III	gt csa	gene	1225754	1226053	.	-	.	ID=gene43
+III	gt csa	mRNA	1225754	1226053	.	-	.	ID=mRNA81;Parent=gene43;Target=yk549c5.3 1 300 +
+III	gt csa	exon	1225754	1226053	1	-	.	Parent=mRNA81
+###
+III	gt csa	gene	1236005	1237038	.	+	.	ID=gene44
+III	gt csa	mRNA	1236005	1237038	.	+	.	ID=mRNA82;Parent=gene44;Target=WP 1 254 +
+III	gt csa	exon	1236005	1236093	1	+	.	Parent=mRNA82
+III	gt csa	exon	1236319	1236772	1	+	.	Parent=mRNA82
+III	gt csa	exon	1236820	1237038	1	+	.	Parent=mRNA82
+###
+III	gt csa	gene	1239313	1242728	.	+	.	ID=gene45
+III	gt csa	mRNA	1239313	1242728	.	+	.	ID=mRNA83;Parent=gene45;Target=WP 1 307 +
+III	gt csa	exon	1239313	1239401	1	+	.	Parent=mRNA83
+III	gt csa	exon	1241115	1241739	1	+	.	Parent=mRNA83
+III	gt csa	exon	1242522	1242728	1	+	.	Parent=mRNA83
+###
+III	gt csa	gene	1243521	1245273	.	+	.	ID=gene46
+III	gt csa	mRNA	1243521	1245273	.	+	.	ID=mRNA84;Parent=gene46;Target=WP 1 306 +
+III	gt csa	exon	1243521	1243636	1	+	.	Parent=mRNA84
+III	gt csa	exon	1244420	1245014	1	+	.	Parent=mRNA84
+III	gt csa	exon	1245067	1245273	1	+	.	Parent=mRNA84
+###
+III	gt csa	gene	1247626	1249143	.	-	.	ID=gene47
+III	gt csa	mRNA	1247626	1249143	.	-	.	ID=mRNA85;Parent=gene47;Target=WP 1 270 +
+III	gt csa	exon	1247626	1247808	1	-	.	Parent=mRNA85
+III	gt csa	exon	1247862	1248417	1	-	.	Parent=mRNA85
+III	gt csa	exon	1249073	1249143	1	-	.	Parent=mRNA85
+###
+III	gt csa	gene	1249509	1251814	.	+	.	ID=gene48
+III	gt csa	mRNA	1249509	1251814	.	+	.	ID=mRNA86;Parent=gene48;Target=WP 1 265 +,yk252g1.5 1 376 +
+III	gt csa	exon	1249509	1249579	1	+	.	Parent=mRNA86
+III	gt csa	exon	1250603	1251143	1	+	.	Parent=mRNA86
+III	gt csa	exon	1251632	1251814	1	+	.	Parent=mRNA86
+###
+III	gt csa	gene	1253374	1254391	.	-	.	ID=gene49
+III	gt csa	mRNA	1253374	1254391	.	-	.	ID=mRNA87;Parent=gene49;Target=WP 1 252 +
+III	gt csa	exon	1253374	1253548	1	-	.	Parent=mRNA87
+III	gt csa	exon	1253764	1254273	1	-	.	Parent=mRNA87
+III	gt csa	exon	1254321	1254391	1	-	.	Parent=mRNA87
+###
+III	gt csa	gene	1255541	1256919	.	+	.	ID=gene50
+III	gt csa	mRNA	1255541	1256919	.	+	.	ID=mRNA88;Parent=gene50;Target=WP 1 282 +
+III	gt csa	exon	1255541	1256020	1	+	.	Parent=mRNA88
+III	gt csa	exon	1256067	1256195	1	+	.	Parent=mRNA88
+III	gt csa	exon	1256630	1256677	1	+	.	Parent=mRNA88
+III	gt csa	exon	1256731	1256919	1	+	.	Parent=mRNA88
+###
+III	gt csa	gene	1257203	1258404	.	-	.	ID=gene51
+III	gt csa	mRNA	1257203	1258404	.	-	.	ID=mRNA89;Parent=gene51;Target=yk1419f09.3 1 775 -,WP 1 278 +
+III	gt csa	exon	1257203	1257419	0.995	-	.	Parent=mRNA89
+III	gt csa	exon	1257724	1258291	1	-	.	Parent=mRNA89
+III	gt csa	exon	1258337	1258404	1	-	.	Parent=mRNA89
+###
+III	gt csa	gene	1259414	1260174	.	+	.	ID=gene52
+III	gt csa	mRNA	1259414	1260174	.	+	.	ID=mRNA90;Parent=gene52;Target=WP 1 91 +
+III	gt csa	exon	1259414	1259503	1	+	.	Parent=mRNA90
+III	gt csa	exon	1259992	1260174	1	+	.	Parent=mRNA90
+###
+III	gt csa	gene	1261815	1262832	.	-	.	ID=gene53
+III	gt csa	mRNA	1261815	1262832	.	-	.	ID=mRNA91;Parent=gene53;Target=WP 1 252 +
+III	gt csa	exon	1261815	1261989	1	-	.	Parent=mRNA91
+III	gt csa	exon	1262205	1262714	1	-	.	Parent=mRNA91
+III	gt csa	exon	1262762	1262832	1	-	.	Parent=mRNA91
+###
+III	gt csa	gene	1265663	1266845	.	-	.	ID=gene54
+III	gt csa	mRNA	1265663	1266845	.	-	.	ID=mRNA92;Parent=gene54;Target=WP 1 278 +
+III	gt csa	exon	1265663	1265860	1	-	.	Parent=mRNA92
+III	gt csa	exon	1266165	1266732	1	-	.	Parent=mRNA92
+III	gt csa	exon	1266778	1266845	1	-	.	Parent=mRNA92
+###
+III	gt csa	gene	1267393	1269234	.	-	.	ID=gene55
+III	gt csa	mRNA	1267393	1269234	.	-	.	ID=mRNA93;Parent=gene55;Target=WP 1 306 +
+III	gt csa	exon	1267393	1267608	1	-	.	Parent=mRNA93
+III	gt csa	exon	1268344	1268962	1	-	.	Parent=mRNA93
+III	gt csa	exon	1269152	1269234	1	-	.	Parent=mRNA93
+###
+III	gt csa	gene	1269569	1271418	.	-	.	ID=gene56
+III	gt csa	mRNA	1269569	1271418	.	-	.	ID=mRNA94;Parent=gene56;Target=yk1217b07.3 1 777 -,WP 1 307 +,yk1217b07.5 23 624 +
+III	gt csa	exon	1269569	1269841	0.96	-	.	Parent=mRNA94
+III	gt csa	exon	1269904	1270519	1	-	.	Parent=mRNA94
+III	gt csa	exon	1271293	1271418	1	-	.	Parent=mRNA94
+###
+III	gt csa	gene	1272534	1273666	.	-	.	ID=gene57
+III	gt csa	mRNA	1272534	1273666	.	-	.	ID=mRNA95;Parent=gene57;Target=WP 1 305 +
+III	gt csa	exon	1272534	1272749	1	-	.	Parent=mRNA95
+III	gt csa	exon	1272798	1273413	1	-	.	Parent=mRNA95
+III	gt csa	exon	1273584	1273666	1	-	.	Parent=mRNA95
+###
+III	gt csa	gene	1274504	1275578	.	-	.	ID=gene58
+III	gt csa	mRNA	1274504	1275578	.	-	.	ID=mRNA96;Parent=gene58;Target=WP 1 306 +
+III	gt csa	exon	1274504	1274719	1	-	.	Parent=mRNA96
+III	gt csa	exon	1274773	1275391	1	-	.	Parent=mRNA96
+III	gt csa	exon	1275496	1275578	1	-	.	Parent=mRNA96
+###
+III	gt csa	gene	1282418	1282768	.	-	.	ID=gene59
+III	gt csa	mRNA	1282418	1282768	.	-	.	ID=mRNA97;Parent=gene59;Target=yk720c2.3 1 300 -
+III	gt csa	exon	1282418	1282633	0.991	-	.	Parent=mRNA97
+III	gt csa	exon	1282685	1282768	1	-	.	Parent=mRNA97
+###
+III	gt csa	gene	1283269	1288513	.	-	.	ID=gene60
+III	gt csa	mRNA	1283269	1284322	.	-	.	ID=mRNA98;Parent=gene60;Target=yk720c2.5 105 341 +,yk729a8.5 114 340 +
+III	gt csa	exon	1283269	1283321	0.981	-	.	Parent=mRNA98
+III	gt csa	exon	1284052	1284148	1	-	.	Parent=mRNA98
+III	gt csa	exon	1284236	1284322	1	-	.	Parent=mRNA98
+III	gt csa	mRNA	1287289	1288513	.	-	.	ID=mRNA99;Parent=gene60;Target=WP 1 312 +
+III	gt csa	exon	1287289	1287501	1	-	.	Parent=mRNA99
+III	gt csa	exon	1287544	1288153	1	-	.	Parent=mRNA99
+III	gt csa	exon	1288401	1288513	1	-	.	Parent=mRNA99
+###
+III	gt csa	gene	1284398	1287041	.	+	.	ID=gene61
+III	gt csa	mRNA	1284398	1284757	.	+	.	ID=mRNA100;Parent=gene61;Target=yk53f10.5 1 360 +
+III	gt csa	exon	1284398	1284757	0.989	+	.	Parent=mRNA100
+III	gt csa	mRNA	1285006	1287041	.	+	.	ID=mRNA101;Parent=gene61;Target=WP 1 303 +
+III	gt csa	exon	1285006	1285088	1	+	.	Parent=mRNA101
+III	gt csa	exon	1286162	1286777	1	+	.	Parent=mRNA101
+III	gt csa	exon	1286832	1287041	1	+	.	Parent=mRNA101
+###
+III	gt csa	gene	1292041	1293205	.	-	.	ID=gene62
+III	gt csa	mRNA	1292041	1293205	.	-	.	ID=mRNA102;Parent=gene62;Target=WP 1 311 +
+III	gt csa	exon	1292041	1292250	1	-	.	Parent=mRNA102
+III	gt csa	exon	1292333	1292972	1	-	.	Parent=mRNA102
+III	gt csa	exon	1293123	1293205	1	-	.	Parent=mRNA102
+###
+III	gt csa	gene	1295674	1297059	.	+	.	ID=gene63
+III	gt csa	mRNA	1295674	1297059	.	+	.	ID=mRNA103;Parent=gene63;Target=WP 1 311 +,yk720c2.3 1 237 -
+III	gt csa	exon	1295674	1295756	1	+	.	Parent=mRNA103
+III	gt csa	exon	1296149	1296785	1	+	.	Parent=mRNA103
+III	gt csa	exon	1296847	1297059	1	+	.	Parent=mRNA103
+###
+III	gt csa	gene	1298564	1299474	.	+	.	ID=gene64
+III	gt csa	mRNA	1298564	1299474	.	+	.	ID=mRNA104;Parent=gene64;Target=WP 1 292 +
+III	gt csa	exon	1298564	1299238	0.952	+	.	Parent=mRNA104
+III	gt csa	exon	1299280	1299474	1	+	.	Parent=mRNA104
+###
+III	gt csa	gene	1303704	1305451	.	+	.	ID=gene65
+III	gt csa	mRNA	1303704	1305451	.	+	.	ID=mRNA105;Parent=gene65;Target=WP 1 322 +
+III	gt csa	exon	1303704	1303792	1	+	.	Parent=mRNA105
+III	gt csa	exon	1303837	1304464	1	+	.	Parent=mRNA105
+III	gt csa	exon	1305203	1305451	1	+	.	Parent=mRNA105
+###
+III	gt csa	gene	1305794	1308239	.	-	.	ID=gene66
+III	gt csa	mRNA	1305794	1308239	.	-	.	ID=mRNA106;Parent=gene66;Target=WP 1 301 +
+III	gt csa	exon	1305794	1305988	1	-	.	Parent=mRNA106
+III	gt csa	exon	1306824	1307478	1	-	.	Parent=mRNA106
+III	gt csa	exon	1308187	1308239	1	-	.	Parent=mRNA106
+###
+III	gt csa	gene	1309177	1311200	.	+	.	ID=gene67
+III	gt csa	mRNA	1309177	1311200	.	+	.	ID=mRNA107;Parent=gene67;Target=WP 1 337 +
+III	gt csa	exon	1309177	1309335	1	+	.	Parent=mRNA107
+III	gt csa	exon	1309577	1309744	1	+	.	Parent=mRNA107
+III	gt csa	exon	1309838	1309936	1	+	.	Parent=mRNA107
+III	gt csa	exon	1310015	1310083	1	+	.	Parent=mRNA107
+III	gt csa	exon	1310130	1310283	1	+	.	Parent=mRNA107
+III	gt csa	exon	1310329	1310399	1	+	.	Parent=mRNA107
+III	gt csa	exon	1310910	1311200	1	+	.	Parent=mRNA107
+###
+III	gt csa	gene	1311218	1312383	.	-	.	ID=gene68
+III	gt csa	mRNA	1311218	1312383	.	-	.	ID=mRNA108;Parent=gene68;Target=WP 1 241 +
+III	gt csa	exon	1311218	1311421	1	-	.	Parent=mRNA108
+III	gt csa	exon	1311716	1312111	1	-	.	Parent=mRNA108
+III	gt csa	exon	1312266	1312383	0.463	-	.	Parent=mRNA108
+###
+III	gt csa	gene	1313348	1315208	.	-	.	ID=gene69
+III	gt csa	mRNA	1313348	1315208	.	-	.	ID=mRNA109;Parent=gene69;Target=yk1237h07.3 1 660 -,WP 1 302 +,yk1237h07.5 1 139 +
+III	gt csa	exon	1313348	1313559	0.995	-	.	Parent=mRNA109
+III	gt csa	exon	1314031	1314655	1	-	.	Parent=mRNA109
+III	gt csa	exon	1315090	1315208	0.992	-	.	Parent=mRNA109
+###
+III	gt csa	gene	1315254	1316655	.	+	.	ID=gene70
+III	gt csa	mRNA	1315254	1316655	.	+	.	ID=mRNA110;Parent=gene70;Target=WP 1 274 +
+III	gt csa	exon	1315254	1315357	1	+	.	Parent=mRNA110
+III	gt csa	exon	1315402	1315494	1	+	.	Parent=mRNA110
+III	gt csa	exon	1316031	1316655	1	+	.	Parent=mRNA110
+###
+III	gt csa	gene	1319006	1321651	.	-	.	ID=gene71
+III	gt csa	mRNA	1319006	1321651	.	-	.	ID=mRNA111;Parent=gene71;Target=WP 1 302 +
+III	gt csa	exon	1319006	1319215	1	-	.	Parent=mRNA111
+III	gt csa	exon	1319264	1319888	1	-	.	Parent=mRNA111
+III	gt csa	exon	1321581	1321651	1	-	.	Parent=mRNA111
+###
+III	gt csa	gene	1322136	1323621	.	-	.	ID=gene72
+III	gt csa	mRNA	1322136	1323621	.	-	.	ID=mRNA112;Parent=gene72;Target=yk546f3.5 1 377 -,WP 1 304 +
+III	gt csa	exon	1322136	1322353	0.995	-	.	Parent=mRNA112
+III	gt csa	exon	1322402	1323026	1	-	.	Parent=mRNA112
+III	gt csa	exon	1323551	1323621	1	-	.	Parent=mRNA112
+###
+III	gt csa	gene	1328634	1333667	.	+	.	ID=gene73
+III	gt csa	mRNA	1328634	1333667	.	+	.	ID=mRNA113;Parent=gene73;Target=WP 1 500 +
+III	gt csa	exon	1328634	1328704	1	+	.	Parent=mRNA113
+III	gt csa	exon	1329933	1330529	1	+	.	Parent=mRNA113
+III	gt csa	exon	1331997	1332615	1	+	.	Parent=mRNA113
+III	gt csa	exon	1333455	1333667	1	+	.	Parent=mRNA113
+###
+III	gt csa	gene	1333841	1334165	.	-	.	ID=gene74
+III	gt csa	mRNA	1333841	1334165	.	-	.	ID=mRNA114;Parent=gene74;Target=WP 1 92 +
+III	gt csa	exon	1333841	1333873	0.825	-	.	Parent=mRNA114
+III	gt csa	exon	1333923	1334165	0.915	-	.	Parent=mRNA114
+###
+III	gt csa	gene	1336697	1342484	.	-	.	ID=gene75
+III	gt csa	mRNA	1336697	1340323	.	-	.	ID=mRNA115;Parent=gene75;Target=yk872h02.3 1 703 -,WP 1 327 +
+III	gt csa	exon	1336697	1337005	0.997	-	.	Parent=mRNA115
+III	gt csa	exon	1338016	1338619	1	-	.	Parent=mRNA115
+III	gt csa	exon	1340092	1340175	1	-	.	Parent=mRNA115
+III	gt csa	exon	1340235	1340323	1	-	.	Parent=mRNA115
+III	gt csa	mRNA	1340606	1342484	.	-	.	ID=mRNA116;Parent=gene75;Target=WP 1 329 +
+III	gt csa	exon	1340606	1340800	1	-	.	Parent=mRNA116
+III	gt csa	exon	1340854	1341023	1	-	.	Parent=mRNA116
+III	gt csa	exon	1341072	1341547	1	-	.	Parent=mRNA116
+III	gt csa	exon	1342339	1342484	1	-	.	Parent=mRNA116
+###
+III	gt csa	gene	1342986	1344682	.	+	.	ID=gene76
+III	gt csa	mRNA	1342986	1344682	.	+	.	ID=mRNA117;Parent=gene76;Target=WP 1 325 +
+III	gt csa	exon	1342986	1343131	1	+	.	Parent=mRNA117
+III	gt csa	exon	1343802	1344423	1	+	.	Parent=mRNA117
+III	gt csa	exon	1344476	1344682	1	+	.	Parent=mRNA117
+###
+III	gt csa	gene	1344968	1345784	.	-	.	ID=gene77
+III	gt csa	mRNA	1344968	1345784	.	-	.	ID=mRNA118;Parent=gene77;Target=WP 1 254 +
+III	gt csa	exon	1344968	1345417	1	-	.	Parent=mRNA118
+III	gt csa	exon	1345473	1345784	1	-	.	Parent=mRNA118
+###
+III	gt csa	gene	1346305	1347118	.	-	.	ID=gene78
+III	gt csa	mRNA	1346305	1347118	.	-	.	ID=mRNA119;Parent=gene78;Target=WP 1 251 +
+III	gt csa	exon	1346305	1346754	1	-	.	Parent=mRNA119
+III	gt csa	exon	1346816	1347118	1	-	.	Parent=mRNA119
+###
+III	gt csa	gene	1347777	1349390	.	-	.	ID=gene79
+III	gt csa	mRNA	1347777	1349390	.	-	.	ID=mRNA120;Parent=gene79;Target=WP 1 268 +
+III	gt csa	exon	1347777	1347980	1	-	.	Parent=mRNA120
+III	gt csa	exon	1348040	1348143	1	-	.	Parent=mRNA120
+III	gt csa	exon	1348299	1348657	1	-	.	Parent=mRNA120
+III	gt csa	exon	1349254	1349390	1	-	.	Parent=mRNA120
+###
+III	gt csa	gene	1349742	1350826	.	-	.	ID=gene80
+III	gt csa	mRNA	1349742	1350826	.	-	.	ID=mRNA121;Parent=gene80;Target=WP 1 253 +
+III	gt csa	exon	1349742	1350188	1	-	.	Parent=mRNA121
+III	gt csa	exon	1350515	1350826	1	-	.	Parent=mRNA121
+###
+III	gt csa	gene	1351206	1353035	.	-	.	ID=gene81
+III	gt csa	mRNA	1351206	1353035	.	-	.	ID=mRNA122;Parent=gene81;Target=WP 18 236 +
+III	gt csa	exon	1351206	1351652	1	-	.	Parent=mRNA122
+III	gt csa	exon	1352826	1353035	1	-	.	Parent=mRNA122
+###
+III	gt csa	gene	1354987	1355410	.	-	.	ID=gene82
+III	gt csa	mRNA	1354987	1355410	.	-	.	ID=mRNA123;Parent=gene82;Target=WP 1 125 +
+III	gt csa	exon	1354987	1355171	1	-	.	Parent=mRNA123
+III	gt csa	exon	1355221	1355410	1	-	.	Parent=mRNA123
+###
+III	gt csa	gene	1357070	1359759	.	-	.	ID=gene83
+III	gt csa	mRNA	1357070	1359125	.	-	.	ID=mRNA124;Parent=gene83;Target=WP 1 391 +
+III	gt csa	exon	1357070	1357311	1	-	.	Parent=mRNA124
+III	gt csa	exon	1357360	1357471	1	-	.	Parent=mRNA124
+III	gt csa	exon	1357509	1357735	0.969	-	.	Parent=mRNA124
+III	gt csa	exon	1357835	1357952	1	-	.	Parent=mRNA124
+III	gt csa	exon	1357998	1358245	1	-	.	Parent=mRNA124
+III	gt csa	exon	1358287	1358398	1	-	.	Parent=mRNA124
+III	gt csa	exon	1359006	1359125	1	-	.	Parent=mRNA124
+III	gt csa	mRNA	1359244	1359759	.	-	.	ID=mRNA125;Parent=gene83;Target=WP 1 140 +
+III	gt csa	exon	1359244	1359488	1	-	.	Parent=mRNA125
+III	gt csa	exon	1359538	1359655	1	-	.	Parent=mRNA125
+III	gt csa	exon	1359703	1359759	1	-	.	Parent=mRNA125
+###
+III	gt csa	gene	1360497	1362666	.	+	.	ID=gene84
+III	gt csa	mRNA	1360497	1362666	.	+	.	ID=mRNA126;Parent=gene84;Target=WP 1 537 +
+III	gt csa	exon	1360497	1360553	1	+	.	Parent=mRNA126
+III	gt csa	exon	1360601	1360718	1	+	.	Parent=mRNA126
+III	gt csa	exon	1360779	1360948	1	+	.	Parent=mRNA126
+III	gt csa	exon	1361034	1361151	1	+	.	Parent=mRNA126
+III	gt csa	exon	1361197	1361420	1	+	.	Parent=mRNA126
+III	gt csa	exon	1361465	1361576	1	+	.	Parent=mRNA126
+III	gt csa	exon	1361749	1361960	1	+	.	Parent=mRNA126
+III	gt csa	exon	1362006	1362123	1	+	.	Parent=mRNA126
+III	gt csa	exon	1362185	1362666	1	+	.	Parent=mRNA126
+###
+III	gt csa	gene	1374142	1374515	.	+	.	ID=gene85
+III	gt csa	mRNA	1374142	1374515	.	+	.	ID=mRNA127;Parent=gene85;Target=yk604h8.5 1 374 +
+III	gt csa	exon	1374142	1374515	1	+	.	Parent=mRNA127
+###
+III	gt csa	gene	1374575	1374874	.	-	.	ID=gene86
+III	gt csa	mRNA	1374575	1374874	.	-	.	ID=mRNA128;Parent=gene86;Target=yk604h8.3 1 300 +
+III	gt csa	exon	1374575	1374874	0.993	-	.	Parent=mRNA128
+###
+III	gt csa	gene	1376935	1377993	.	-	.	ID=gene87
+III	gt csa	mRNA	1376935	1377993	.	-	.	ID=mRNA129;Parent=gene87;Target=WP 1 215 +
+III	gt csa	exon	1376935	1377144	1	-	.	Parent=mRNA129
+III	gt csa	exon	1377379	1377681	1	-	.	Parent=mRNA129
+III	gt csa	exon	1377862	1377993	1	-	.	Parent=mRNA129
+###
+III	gt csa	gene	1379130	1383572	.	-	.	ID=gene88
+III	gt csa	mRNA	1379130	1383572	.	-	.	ID=mRNA130;Parent=gene88;Target=WP 1 439 +
+III	gt csa	exon	1379130	1379360	1	-	.	Parent=mRNA130
+III	gt csa	exon	1379412	1379579	1	-	.	Parent=mRNA130
+III	gt csa	exon	1380424	1380553	1	-	.	Parent=mRNA130
+III	gt csa	exon	1380609	1380685	0.902	-	.	Parent=mRNA130
+III	gt csa	exon	1382653	1382989	1	-	.	Parent=mRNA130
+III	gt csa	exon	1383057	1383140	1	-	.	Parent=mRNA130
+III	gt csa	exon	1383283	1383572	1	-	.	Parent=mRNA130
+###
+III	gt csa	gene	1387471	1388069	.	+	.	ID=gene89
+III	gt csa	mRNA	1387471	1388069	.	+	.	ID=mRNA131;Parent=gene89;Target=yk539a12.5 1 360 +
+III	gt csa	exon	1387471	1387545	0.967	+	.	Parent=mRNA131
+III	gt csa	exon	1387786	1388069	1	+	.	Parent=mRNA131
+###
+III	gt csa	gene	1387828	1388127	.	-	.	ID=gene90
+III	gt csa	mRNA	1387828	1388127	.	-	.	ID=mRNA132;Parent=gene90;Target=yk539a12.3 1 300 +
+III	gt csa	exon	1387828	1388127	0.987	-	.	Parent=mRNA132
+###
+III	gt csa	gene	1390536	1391840	.	-	.	ID=gene91
+III	gt csa	mRNA	1390536	1391840	.	-	.	ID=mRNA133;Parent=gene91;Target=WP 1 252 +,CK579587 1 622 +,CB102366 100 678 +,CB102201 91 657 +,CK579588 1 556 +,CK583482 1 503 +,CB102373 95 478 +,CK583393 1 222 +
+III	gt csa	exon	1390536	1390718	1	-	.	Parent=mRNA133
+III	gt csa	exon	1390764	1391067	1	-	.	Parent=mRNA133
+III	gt csa	exon	1391411	1391499	1	-	.	Parent=mRNA133
+III	gt csa	exon	1391551	1391638	1	-	.	Parent=mRNA133
+III	gt csa	exon	1391688	1391736	1	-	.	Parent=mRNA133
+III	gt csa	exon	1391782	1391840	1	-	.	Parent=mRNA133
+###
+III	gt csa	gene	1399366	1401295	.	+	.	ID=gene92
+III	gt csa	mRNA	1399366	1401295	.	+	.	ID=mRNA134;Parent=gene92;Target=WP 1 357 +
+III	gt csa	exon	1399366	1399462	1	+	.	Parent=mRNA134
+III	gt csa	exon	1399964	1400070	1	+	.	Parent=mRNA134
+III	gt csa	exon	1400121	1400270	1	+	.	Parent=mRNA134
+III	gt csa	exon	1400319	1400648	1	+	.	Parent=mRNA134
+III	gt csa	exon	1400696	1400854	1	+	.	Parent=mRNA134
+III	gt csa	exon	1401068	1401295	1	+	.	Parent=mRNA134
+###
+III	gt csa	gene	1401956	1403309	.	+	.	ID=gene93
+III	gt csa	mRNA	1401956	1403309	.	+	.	ID=mRNA135;Parent=gene93;Target=WP 1 258 +
+III	gt csa	exon	1401956	1402065	1	+	.	Parent=mRNA135
+III	gt csa	exon	1402385	1402463	1	+	.	Parent=mRNA135
+III	gt csa	exon	1402510	1402610	1	+	.	Parent=mRNA135
+III	gt csa	exon	1402777	1403077	1	+	.	Parent=mRNA135
+III	gt csa	exon	1403127	1403309	1	+	.	Parent=mRNA135
+###
+III	gt csa	gene	1404782	1406220	.	+	.	ID=gene94
+III	gt csa	mRNA	1404782	1406220	.	+	.	ID=mRNA136;Parent=gene94;Target=yk1098g06.5 11 546 +,WP 1 257 +,yk1098g06.3 1 708 -
+III	gt csa	exon	1404782	1404928	0.993	+	.	Parent=mRNA136
+III	gt csa	exon	1404984	1405322	1	+	.	Parent=mRNA136
+III	gt csa	exon	1405369	1405527	1	+	.	Parent=mRNA136
+III	gt csa	exon	1405927	1406220	0.997	+	.	Parent=mRNA136
+###
+III	gt csa	gene	1409301	1414108	.	-	.	ID=gene95
+III	gt csa	mRNA	1409301	1412855	.	-	.	ID=mRNA137;Parent=gene95;Target=yk802c04.3 1 671 -,yk1740f01.3 1 653 -,yk1067h09.3 1 728 -,yk482a5.3 1 300 -,WP 1 305 +
+III	gt csa	exon	1409301	1409698	0.997	-	.	Parent=mRNA137
+III	gt csa	exon	1410797	1410956	1	-	.	Parent=mRNA137
+III	gt csa	exon	1412055	1412310	1	-	.	Parent=mRNA137
+III	gt csa	exon	1412537	1412855	1	-	.	Parent=mRNA137
+III	gt csa	mRNA	1409301	1414108	.	-	.	ID=mRNA138;Parent=gene95;Target=yk802c04.3 1 671 -,yk1740f01.3 1 653 -,yk1403f06.3 1 732 -,yk482a5.3 1 300 -,RP 1 229 +,BP 1 231 +,yk1403f06.5 23 637 +,yk1740f01.5 23 593 +,yk802c04.5 23 538 +,yk71h4.5 1 360 +,yk336a10.5 1 377 +,yk647g12.5 1 380 +,yk625f5.5 1 383 +,yk498e8.5 1 360 +,yk236b3.5 1 360 +,yk624b7.5 1 360 +,yk614c9.5 1 360 +,yk376c11.5 1 373 +,yk596b12.5 1 377 +,yk482a5.5 1 342 +,yk424h6.5 1 348 +,yk91b11.5 1 348 +,yk743g6.5 23 194 +
+III	gt csa	exon	1409301	1409698	0.997	-	.	Parent=mRNA138
+III	gt csa	exon	1410797	1410956	1	-	.	Parent=mRNA138
+III	gt csa	exon	1412055	1412238	1	-	.	Parent=mRNA138
+III	gt csa	exon	1413935	1414108	0.986	-	.	Parent=mRNA138
+III	gt csa	mRNA	1412867	1413610	.	-	.	ID=mRNA139;Parent=gene95;Target=yk1067h09.5 1 744 +
+III	gt csa	exon	1412867	1413610	0.995	-	.	Parent=mRNA139
+###
+III	gt csa	gene	1409354	1409706	.	+	.	ID=gene96
+III	gt csa	mRNA	1409354	1409706	.	+	.	ID=mRNA140;Parent=gene96;Target=yk91b11.3 1 335 +,yk71h4.3 1 335 +,yk596b12.3 1 300 +,yk236b3.3 16 300 +,yk743g6.3 1 300 +,yk647g12.3 1 300 +,yk614c9.3 1 300 +,yk376c11.3 1 300 +,yk424h6.3 1 283 +,yk336a10.3 1 283 +,yk498e8.3 1 282 +
+III	gt csa	exon	1409354	1409706	0.983	+	.	Parent=mRNA140
+###
+III	gt csa	gene	1415536	1417177	.	-	.	ID=gene97
+III	gt csa	mRNA	1415536	1417177	.	-	.	ID=mRNA141;Parent=gene97;Target=CK583137 1 508 +,BP 1 124 +
+III	gt csa	exon	1415536	1415865	1	-	.	Parent=mRNA141
+III	gt csa	exon	1417000	1417177	1	-	.	Parent=mRNA141
+###
+III	gt csa	gene	1418971	1420424	.	+	.	ID=gene98
+III	gt csa	mRNA	1418971	1420424	.	+	.	ID=mRNA142;Parent=gene98;Target=yk427c9.5 1 375 +,yk1446h08.3 23 168 -,CEESI82R 12 304 +,yk1423c01.3 23 334 -,yk827b03.5 22 336 +,yk1457b06.5 23 366 +,yk573e8.5 11 360 +,yk289b9.5 11 373 +,yk1446h08.5 23 392 +,yk497f5.5 1 377 +,yk1299h01.3 192 594 -,yk1637f01.5 22 432 +,yk1156a09.5 23 434 +,yk1498f01.5 23 435 +,yk1370f10.5 23 435 +,yk1692c10.5 22 434 +,yk1050c09.3 23 436 -,yk1099h06.5 23 435 +,yk1438b02.5 23 436 +,yk1490c07.5 23 435 +,yk1667g11.5 23 436 +,yk1500g09.5 23 436 +,yk1743g04.5 23 436 +,yk1662h02.5 23 437 +,yk1699g12.5 23 438 +,yk809d12.5 23 437 +,yk891h02.5 23 438 +,yk1324a12.5 23 439 +,yk1581b07.5 23 439 +,yk1597e02.5 22 438 +,yk1005d11.5 23 439 +,yk1015e03.3 23 440 -,yk1258f10.5 24 442 +,yk1134e12.5 23 441 +,yk1329c12.5 24 442 +,yk1348g09.5 23 442 +,yk1281b11.5 23 442 +,yk1347e08.5 23 443 +,yk819c03.5 23 443 +,yk1370f08.5 23 447 +,yk1505b08.3 37 462 -,yk1307b12.3 182 609 -,yk1076e08.5 23 454 +,yk1299h06.3 291 730 -,yk1304f10.3 27 468 -,yk1304f10.5 27 484 +,yk763c11.5 23 480 +,yk776c05.5 23 484 +,yk1167g12.5 22 484 +,yk1340a03.5 22 484 +,yk1261h11.3 195 659 -,yk1033d09.5 18 482 +,yk1041d01.5 23 487 +,yk1307e07.3 224 690 -,yk776b07.5 18 504 +,yk1717f07.5 22 512 +,yk1099h06.3 23 517 -,yk1122e01.3 23 519 -,yk1151e05.3 24 518 -,yk1033d09.3 18 513 -,yk1200b10.3 22 517 -,yk1445a08.3 218 714 -,yk1499d03.3 226 722 -,yk1508b06.3 222 718 -,yk1523g04.3 78 575 -,yk1701c04.3 85 583 -,yk1276a07.3 229 729 -,yk1566c03.3 23 522 -,yk1534b01.3 227 726 -,yk1559d06.3 140 640 -,yk1597e02.3 22 523 -,yk1420g05.3 23 524 -,yk1476g05.3 224 725 -,yk1502f07.3 203 704 -,yk1526c08.3 102 605 -,yk1564e02.3 186 690 -,yk1581b07.3 23 525 -,yk1411e02.3 22 524 -,yk1460g06.3 191 693 -,yk1490c07.3 23 524 -,yk1459c06.3 212 714 -,yk1468c03.3 123 625 -,yk1662h02.3 23 525 -,yk1706f01.3 23 525 -,yk1730a09.3 23 525 -,yk1751g08.3 222 724 -,yk1450f03.3 220 723 -,yk1498f01.3 23 526 -,yk1347e08.3 23 526 -,yk1281f04.3 23 528 -,yk1026f10.3 25 529 -,yk1326f10.3 145 649 -,yk776b07.3 18 522 -,yk819c03.3 23 527 -,yk1363d08.3 23 528 -,yk1141a10.3 23 531 -,yk891h02.3 23 531 -,yk1079e02.3 23 530 -,yk1142c02.3 192 699 -,yk827b03.3 22 529 -,yk1041d01.3 23 532 -,yk1022f05.3 188 696 -,yk1161d09.3 23 531 -,yk1175b05.3 23 531 -,yk1229f01.3 223 731 -,yk776c05.3 23 531 -,yk1258a02.3 23 533 -,yk1258f10.3 24 533 -,yk1213d11.3 257 767 -,yk1021b10.3 23 532 -,yk1212f06.3 183 692 -,yk1338c06.3 23 532 -,yk1041a09.3 233 742 -,yk1076e08.3 23 532 -,yk1134e12.3 23 532 -,yk1156a09.3 23 532 -,yk1167g12.3 22 531 -,yk1217d06.3 183 692 -,yk1238d11.3 23 532 -,yk1239g07.3 223 732 -,yk1261c01.3 218 727 -,yk1266c12.3 23 532 -,yk1266e05.3 23 532 -,yk1281b07.3 23 532 -,yk1289h06.3 101 610 -,yk1309b05.3 224 733 -,yk1382h02.5 23 532 +,yk1329c12.3 24 537 -,yk1063g09.3 154 665 -,yk1089d01.3 23 533 -,yk1667g11.3 23 534 -,yk1500g09.3 23 534 -,yk1653c08.3 23 534 -,yk1370f08.3 23 535 -,yk1370f10.3 23 535 -,yk1629g01.3 23 535 -,yk1743g04.3 23 536 -,yk1239f04.3 23 538 -,yk1717f07.3 22 538 -,yk1274f02.3 23 540 -,yk1223a01.3 150 668 -,yk812e07.5 23 541 +,yk812e07.3 23 540 -,yk1340a03.3 22 541 -,yk1021b10.5 23 543 +,yk1514e03.3 184 709 -,yk1338c06.5 23 553 +,yk1238d11.5 23 553 +,yk1026f10.5 25 554 +,yk1363d08.5 23 552 +,yk1274f02.5 23 552 +,yk1420g05.5 23 552 +,yk1566c03.5 23 552 +,yk1629g01.5 23 552 +,yk1706f01.5 23 552 +,yk1730a09.5 23 552 +,yk1122e01.5 23 552 +,yk1141a10.5 23 552 +,yk1151e05.5 24 553 +,yk1161d09.5 23 552 +,yk1175b05.5 23 552 +,yk1281f04.5 23 552 +,yk1079e02.5 23 551 +,yk1310e07.5 23 555 +,yk1089d01.5 23 572 +,yk1527c07.5 23 589 +,yk1344e01.3 19 587 -,yk761f11.5 17 614 +,yk809d12.3 23 628 -,yk1310e07.3 23 628 -,yk470d10.5 1 376 +,yk1015e03.5 1 388 +,yk110a8.5 1 360 +,yk114f3.5 1 360 +,yk78a9.5 1 383 +,yk60a2.5 1 330 +,yk677a10.5 1 373 +,yk634d3.5 1 374 +,yk389a2.5 1 376 +,yk591g5.5 1 375 +,yk247h2.5 1 244 +,yk92d5.5 1 322 +,yk62e4.5 1 330 +,yk82d9.5 1 352 +,yk484e3.5 1 367 +,yk342c11.5 1 371 +,yk210g1.5 1 371 +,yk199b1.5 1 372 +,yk609a6.5 1 372 +,yk602g4.5 1 374 +,yk472b4.5 1 376 +,yk532b2.5 1 376 +,yk628h8.5 1 384 +,yk470d10.3 1 300 -,yk67e2.5 1 360 +,yk495b4.5 1 360 +,yk515d3.5 1 367 +,yk586d10.5 1 377 +,yk631d3.5 1 383 +,yk77e2.5 1 385 +,yk573e6.5 1 360 +,yk561d9.5 1 376 +,yk487f9.5 1 360 +,yk491d2.5 1 360 +,yk418d7.5 1 373 +,yk391d4.5 1 377 +,yk281f9.5 1 376 +,yk612a2.5 1 360 +,yk667h3.5 1 378 +,yk103f11.5 1 330 +,yk82d4.5 1 330 +,yk502f2.5 1 370 +,yk399b1.5 1 377 +,yk1388g06.3 1 499 -,yk1388g06.5 1 513 +,yk255e5.5 1 360 +,yk1230h08.5 1 172 +,yk1281b07.5 1 174 +,CK576705 1 199 +,BP 1 117 +,RP 1 117 +,yk393a4.5 1 360 +,CK575334 1 379 +,CK579527 1 498 +,yk1411e02.5 1 103 +,yk568f5.5 1 374 +,yk612e4.5 1 360 +,yk1239f04.5 1 492 +,yk1050c09.5 1 505 +,yk591h11.5 1 360 +,yk635a9.5 1 360 +,yk639e2.5 1 360 +,yk654d2.5 1 382 +,yk648e7.5 1 360 +,yk486b11.5 1 360 +,yk650f12.5 1 360 +,yk1012b08.3 1 317 -,yk1123h12.3 1 463 -,yk579f1.5 1 360 +,yk752f11.5 1 326 +,CEESE35F 1 285 +,CEESP60F 1 283 +,yk1032a02.5 53 422 +,yk633a4.5 1 382 +,yk1299c02.5 1 380 +,yk361d12.5 1 375 +,yk594f10.5 1 356 +,yk847c05.5 1 353 +,CEESB14F 1 300 +,CEESY61FB 1 319 +,yk1382d08.3 1 222 +,yk621b1.3 1 300 +,yk739c4.3 1 300 +,yk597g10.3 1 300 +,yk421a11.3 1 292 +,yk447b3.3 1 300 +,yk599b8.3 1 300 +,yk639a10.3 1 300 +,yk555f9.3 1 300 +,yk615c7.3 1 240 +,yk525g4.3 1 240 +,yk556a10.5 1 365 +,yk1475h10.3 1 136 +
+III	gt csa	exon	1418971	1418973	0.667	+	.	Parent=mRNA142
+III	gt csa	exon	1419186	1419251	1	+	.	Parent=mRNA142
+III	gt csa	exon	1419321	1420424	0.99	+	.	Parent=mRNA142
+III	gt csa	mRNA	1419094	1420424	.	+	.	ID=mRNA143;Parent=gene98;Target=yk1587h06.3 135 661 -,yk1212c10.5 1 546 +,yk64h2.5 1 341 +,yk371c5.5 1 370 +,yk596e1.5 1 374 +,yk654c2.5 1 376 +,yk474d11.5 1 377 +,yk1005d11.3 1 502 -,yk1221a01.3 1 512 -,yk1446h08.3 23 168 -,CEESI82R 12 304 +,yk1423c01.3 23 334 -,yk827b03.5 22 336 +,yk1457b06.5 23 366 +,yk573e8.5 11 360 +,yk289b9.5 11 373 +,yk1446h08.5 23 392 +,yk497f5.5 1 377 +,yk1299h01.3 192 594 -,yk1637f01.5 22 432 +,yk1156a09.5 23 434 +,yk1498f01.5 23 435 +,yk1370f10.5 23 435 +,yk1692c10.5 22 434 +,yk1050c09.3 23 436 -,yk1099h06.5 23 435 +,yk1438b02.5 23 436 +,yk1490c07.5 23 435 +,yk1667g11.5 23 436 +,yk1500g09.5 23 436 +,yk1743g04.5 23 436 +,yk1662h02.5 23 437 +,yk1699g12.5 23 438 +,yk809d12.5 23 437 +,yk891h02.5 23 438 +,yk1324a12.5 23 439 +,yk1581b07.5 23 439 +,yk1597e02.5 22 438 +,yk1005d11.5 23 439 +,yk1015e03.3 23 440 -,yk1258f10.5 24 442 +,yk1134e12.5 23 441 +,yk1329c12.5 24 442 +,yk1348g09.5 23 442 +,yk1281b11.5 23 442 +,yk1347e08.5 23 443 +,yk819c03.5 23 443 +,yk1370f08.5 23 447 +,yk1505b08.3 37 462 -,yk1307b12.3 182 609 -,yk1076e08.5 23 454 +,yk1299h06.3 291 730 -,yk1304f10.3 27 468 -,yk1304f10.5 27 484 +,yk763c11.5 23 480 +,yk776c05.5 23 484 +,yk1167g12.5 22 484 +,yk1340a03.5 22 484 +,yk1261h11.3 195 659 -,yk1033d09.5 18 482 +,yk1041d01.5 23 487 +,yk1307e07.3 224 690 -,yk776b07.5 18 504 +,yk1717f07.5 22 512 +,yk1099h06.3 23 517 -,yk1122e01.3 23 519 -,yk1151e05.3 24 518 -,yk1033d09.3 18 513 -,yk1200b10.3 22 517 -,yk1445a08.3 218 714 -,yk1499d03.3 226 722 -,yk1508b06.3 222 718 -,yk1523g04.3 78 575 -,yk1701c04.3 85 583 -,yk1276a07.3 229 729 -,yk1566c03.3 23 522 -,yk1534b01.3 227 726 -,yk1559d06.3 140 640 -,yk1597e02.3 22 523 -,yk1420g05.3 23 524 -,yk1476g05.3 224 725 -,yk1502f07.3 203 704 -,yk1526c08.3 102 605 -,yk1564e02.3 186 690 -,yk1581b07.3 23 525 -,yk1411e02.3 22 524 -,yk1460g06.3 191 693 -,yk1490c07.3 23 524 -,yk1459c06.3 212 714 -,yk1468c03.3 123 625 -,yk1662h02.3 23 525 -,yk1706f01.3 23 525 -,yk1730a09.3 23 525 -,yk1751g08.3 222 724 -,yk1450f03.3 220 723 -,yk1498f01.3 23 526 -,yk1347e08.3 23 526 -,yk1281f04.3 23 528 -,yk1026f10.3 25 529 -,yk1326f10.3 145 649 -,yk776b07.3 18 522 -,yk819c03.3 23 527 -,yk1363d08.3 23 528 -,yk1141a10.3 23 531 -,yk891h02.3 23 531 -,yk1079e02.3 23 530 -,yk1142c02.3 192 699 -,yk827b03.3 22 529 -,yk1041d01.3 23 532 -,yk1022f05.3 188 696 -,yk1161d09.3 23 531 -,yk1175b05.3 23 531 -,yk1229f01.3 223 731 -,yk776c05.3 23 531 -,yk1258a02.3 23 533 -,yk1258f10.3 24 533 -,yk1213d11.3 257 767 -,yk1021b10.3 23 532 -,yk1212f06.3 183 692 -,yk1338c06.3 23 532 -,yk1041a09.3 233 742 -,yk1076e08.3 23 532 -,yk1134e12.3 23 532 -,yk1156a09.3 23 532 -,yk1167g12.3 22 531 -,yk1217d06.3 183 692 -,yk1238d11.3 23 532 -,yk1239g07.3 223 732 -,yk1261c01.3 218 727 -,yk1266c12.3 23 532 -,yk1266e05.3 23 532 -,yk1281b07.3 23 532 -,yk1289h06.3 101 610 -,yk1309b05.3 224 733 -,yk1382h02.5 23 532 +,yk1329c12.3 24 537 -,yk1063g09.3 154 665 -,yk1089d01.3 23 533 -,yk1667g11.3 23 534 -,yk1500g09.3 23 534 -,yk1653c08.3 23 534 -,yk1370f08.3 23 535 -,yk1370f10.3 23 535 -,yk1629g01.3 23 535 -,yk1743g04.3 23 536 -,yk1239f04.3 23 538 -,yk1717f07.3 22 538 -,yk1274f02.3 23 540 -,yk1223a01.3 150 668 -,yk812e07.5 23 541 +,yk812e07.3 23 540 -,yk1340a03.3 22 541 -,yk1021b10.5 23 543 +,yk1514e03.3 184 709 -,yk1338c06.5 23 553 +,yk1238d11.5 23 553 +,yk1026f10.5 25 554 +,yk1363d08.5 23 552 +,yk1274f02.5 23 552 +,yk1420g05.5 23 552 +,yk1566c03.5 23 552 +,yk1629g01.5 23 552 +,yk1706f01.5 23 552 +,yk1730a09.5 23 552 +,yk1122e01.5 23 552 +,yk1141a10.5 23 552 +,yk1151e05.5 24 553 +,yk1161d09.5 23 552 +,yk1175b05.5 23 552 +,yk1281f04.5 23 552 +,yk1079e02.5 23 551 +,yk1310e07.5 23 555 +,yk1089d01.5 23 572 +,yk1527c07.5 23 589 +,yk1344e01.3 19 587 -,yk761f11.5 17 614 +,yk809d12.3 23 628 -,yk1310e07.3 23 628 -,yk470d10.5 1 376 +,yk1015e03.5 1 388 +,yk110a8.5 1 360 +,yk114f3.5 1 360 +,yk78a9.5 1 383 +,yk60a2.5 1 330 +,yk677a10.5 1 373 +,yk634d3.5 1 374 +,yk389a2.5 1 376 +,yk591g5.5 1 375 +,yk247h2.5 1 244 +,yk92d5.5 1 322 +,yk62e4.5 1 330 +,yk82d9.5 1 352 +,yk484e3.5 1 367 +,yk342c11.5 1 371 +,yk210g1.5 1 371 +,yk199b1.5 1 372 +,yk609a6.5 1 372 +,yk602g4.5 1 374 +,yk472b4.5 1 376 +,yk532b2.5 1 376 +,yk628h8.5 1 384 +,yk470d10.3 1 300 -,yk67e2.5 1 360 +,yk495b4.5 1 360 +,yk515d3.5 1 367 +,yk586d10.5 1 377 +,yk631d3.5 1 383 +,yk77e2.5 1 385 +,yk573e6.5 1 360 +,yk561d9.5 1 376 +,yk487f9.5 1 360 +,yk491d2.5 1 360 +,yk418d7.5 1 373 +,yk391d4.5 1 377 +,yk281f9.5 1 376 +,yk612a2.5 1 360 +,yk667h3.5 1 378 +,yk103f11.5 1 330 +,yk82d4.5 1 330 +,yk502f2.5 1 370 +,yk399b1.5 1 377 +,yk1388g06.3 1 499 -,yk1388g06.5 1 513 +,yk255e5.5 1 360 +,yk1230h08.5 1 172 +,yk1281b07.5 1 174 +,CK576705 1 199 +,BP 1 117 +,RP 1 117 +,yk393a4.5 1 360 +,CK575334 1 379 +,CK579527 1 498 +,yk1411e02.5 1 103 +,yk568f5.5 1 374 +,yk612e4.5 1 360 +,yk1239f04.5 1 492 +,yk1050c09.5 1 505 +,yk591h11.5 1 360 +,yk635a9.5 1 360 +,yk639e2.5 1 360 +,yk654d2.5 1 382 +,yk648e7.5 1 360 +,yk486b11.5 1 360 +,yk650f12.5 1 360 +,yk1012b08.3 1 317 -,yk1123h12.3 1 463 -,yk579f1.5 1 360 +,yk752f11.5 1 326 +,CEESE35F 1 285 +,CEESP60F 1 283 +,yk1032a02.5 53 422 +,yk633a4.5 1 382 +,yk1299c02.5 1 380 +,yk361d12.5 1 375 +,yk594f10.5 1 356 +,yk847c05.5 1 353 +,CEESB14F 1 300 +,CEESY61FB 1 319 +,yk1382d08.3 1 222 +,yk621b1.3 1 300 +,yk739c4.3 1 300 +,yk597g10.3 1 300 +,yk421a11.3 1 292 +,yk447b3.3 1 300 +,yk599b8.3 1 300 +,yk639a10.3 1 300 +,yk555f9.3 1 300 +,yk615c7.3 1 240 +,yk525g4.3 1 240 +,yk556a10.5 1 365 +,yk1475h10.3 1 136 +
+III	gt csa	exon	1419094	1419103	1	+	.	Parent=mRNA143
+III	gt csa	exon	1419166	1419251	0.919	+	.	Parent=mRNA143
+III	gt csa	exon	1419321	1420424	0.99	+	.	Parent=mRNA143
+III	gt csa	mRNA	1419138	1420087	.	+	.	ID=mRNA144;Parent=gene98;Target=yk844c03.3 152 710 -,yk1072g09.3 120 674 -,yk1344a02.3 179 720 -,yk1398d04.3 114 643 -,yk1119f04.3 190 729 -,yk1396f08.3 94 712 -,yk865b04.3 146 680 -,yk1339f10.3 103 734 -,yk1212c10.5 1 546 +,yk64h2.5 1 341 +,yk371c5.5 1 370 +,yk596e1.5 1 374 +,yk654c2.5 1 376 +,yk474d11.5 1 377 +,yk1005d11.3 1 502 -,yk1221a01.3 1 512 -,yk1446h08.3 23 168 -,CEESI82R 12 304 +,yk1423c01.3 23 334 -,yk827b03.5 22 336 +,yk1457b06.5 23 366 +,yk573e8.5 11 360 +,yk289b9.5 11 373 +,yk1446h08.5 23 392 +,yk497f5.5 1 377 +,yk1299h01.3 192 594 -,yk1637f01.5 22 432 +,yk1156a09.5 23 434 +,yk1498f01.5 23 435 +,yk1370f10.5 23 435 +,yk1692c10.5 22 434 +,yk1050c09.3 23 436 -,yk1099h06.5 23 435 +,yk1438b02.5 23 436 +,yk1490c07.5 23 435 +,yk1667g11.5 23 436 +,yk1500g09.5 23 436 +,yk1743g04.5 23 436 +,yk1662h02.5 23 437 +,yk1699g12.5 23 438 +,yk809d12.5 23 437 +,yk891h02.5 23 438 +,yk1324a12.5 23 439 +,yk1581b07.5 23 439 +,yk1597e02.5 22 438 +,yk1005d11.5 23 439 +,yk1015e03.3 23 440 -,yk1258f10.5 24 442 +,yk1134e12.5 23 441 +,yk1329c12.5 24 442 +,yk1348g09.5 23 442 +,yk1281b11.5 23 442 +,yk1347e08.5 23 443 +,yk819c03.5 23 443 +,yk1370f08.5 23 447 +,yk1505b08.3 37 462 -,yk1307b12.3 182 609 -,yk1076e08.5 23 454 +,yk1299h06.3 291 730 -,yk1304f10.3 27 468 -,yk1304f10.5 27 484 +,yk763c11.5 23 480 +,yk776c05.5 23 484 +,yk1167g12.5 22 484 +,yk1340a03.5 22 484 +,yk1261h11.3 195 659 -,yk1033d09.5 18 482 +,yk1041d01.5 23 487 +,yk1307e07.3 224 690 -,yk776b07.5 18 504 +,yk1717f07.5 22 512 +,yk1099h06.3 23 517 -,yk1122e01.3 23 519 -,yk1151e05.3 24 518 -,yk1033d09.3 18 513 -,yk1200b10.3 22 517 -,yk1445a08.3 218 714 -,yk1499d03.3 226 722 -,yk1508b06.3 222 718 -,yk1523g04.3 78 575 -,yk1701c04.3 85 583 -,yk1276a07.3 229 729 -,yk1566c03.3 23 522 -,yk1534b01.3 227 726 -,yk1559d06.3 140 640 -,yk1597e02.3 22 523 -,yk1420g05.3 23 524 -,yk1476g05.3 224 725 -,yk1502f07.3 203 704 -,yk1526c08.3 102 605 -,yk1564e02.3 186 690 -,yk1581b07.3 23 525 -,yk1411e02.3 22 524 -,yk1460g06.3 191 693 -,yk1490c07.3 23 524 -,yk1459c06.3 212 714 -,yk1468c03.3 123 625 -,yk1662h02.3 23 525 -,yk1706f01.3 23 525 -,yk1730a09.3 23 525 -,yk1751g08.3 222 724 -,yk1450f03.3 220 723 -,yk1498f01.3 23 526 -,yk1347e08.3 23 526 -,yk1281f04.3 23 528 -,yk1026f10.3 25 529 -,yk1326f10.3 145 649 -,yk776b07.3 18 522 -,yk819c03.3 23 527 -,yk1363d08.3 23 528 -,yk1141a10.3 23 531 -,yk891h02.3 23 531 -,yk1079e02.3 23 530 -,yk1142c02.3 192 699 -,yk827b03.3 22 529 -,yk1041d01.3 23 532 -,yk1022f05.3 188 696 -,yk1161d09.3 23 531 -,yk1175b05.3 23 531 -,yk1229f01.3 223 731 -,yk776c05.3 23 531 -,yk1258a02.3 23 533 -,yk1258f10.3 24 533 -,yk1213d11.3 257 767 -,yk1021b10.3 23 532 -,yk1212f06.3 183 692 -,yk1338c06.3 23 532 -,yk1041a09.3 233 742 -,yk1076e08.3 23 532 -,yk1134e12.3 23 532 -,yk1156a09.3 23 532 -,yk1167g12.3 22 531 -,yk1217d06.3 183 692 -,yk1238d11.3 23 532 -,yk1239g07.3 223 732 -,yk1261c01.3 218 727 -,yk1266c12.3 23 532 -,yk1266e05.3 23 532 -,yk1281b07.3 23 532 -,yk1289h06.3 101 610 -,yk1309b05.3 224 733 -,yk1382h02.5 23 532 +,yk1329c12.3 24 537 -,yk1063g09.3 154 665 -,yk1089d01.3 23 533 -,yk1667g11.3 23 534 -,yk1500g09.3 23 534 -,yk1653c08.3 23 534 -,yk1370f08.3 23 535 -,yk1370f10.3 23 535 -,yk1629g01.3 23 535 -,yk1743g04.3 23 536 -,yk1239f04.3 23 538 -,yk1717f07.3 22 538 -,yk1274f02.3 23 540 -,yk1223a01.3 150 668 -,yk812e07.5 23 541 +,yk812e07.3 23 540 -,yk1340a03.3 22 541 -,yk1021b10.5 23 543 +,yk1514e03.3 184 709 -,yk1338c06.5 23 553 +,yk1238d11.5 23 553 +,yk1026f10.5 25 554 +,yk1363d08.5 23 552 +,yk1274f02.5 23 552 +,yk1420g05.5 23 552 +,yk1566c03.5 23 552 +,yk1629g01.5 23 552 +,yk1706f01.5 23 552 +,yk1730a09.5 23 552 +,yk1122e01.5 23 552 +,yk1141a10.5 23 552 +,yk1151e05.5 24 553 +,yk1161d09.5 23 552 +,yk1175b05.5 23 552 +,yk1281f04.5 23 552 +,yk1079e02.5 23 551 +,yk1310e07.5 23 555 +,yk1089d01.5 23 572 +,yk1527c07.5 23 589 +,yk1344e01.3 19 587 -,yk761f11.5 17 614 +,yk809d12.3 23 628 -,yk1310e07.3 23 628 -,yk757f11.5 17 635 +,yk470d10.5 1 376 +,yk1015e03.5 1 388 +,yk110a8.5 1 360 +,yk114f3.5 1 360 +,yk78a9.5 1 383 +,yk60a2.5 1 330 +,yk677a10.5 1 373 +,yk634d3.5 1 374 +,yk389a2.5 1 376 +,yk591g5.5 1 375 +,yk247h2.5 1 244 +,yk92d5.5 1 322 +,yk62e4.5 1 330 +,yk82d9.5 1 352 +,yk484e3.5 1 367 +,yk342c11.5 1 371 +,yk210g1.5 1 371 +,yk199b1.5 1 372 +,yk609a6.5 1 372 +,yk602g4.5 1 374 +,yk472b4.5 1 376 +,yk532b2.5 1 376 +,yk628h8.5 1 384 +,yk470d10.3 1 300 -,yk67e2.5 1 360 +,yk495b4.5 1 360 +,yk515d3.5 1 367 +,yk586d10.5 1 377 +,yk631d3.5 1 383 +,yk77e2.5 1 385 +,yk573e6.5 1 360 +,yk561d9.5 1 376 +,yk487f9.5 1 360 +,yk491d2.5 1 360 +,yk418d7.5 1 373 +,yk391d4.5 1 377 +,yk281f9.5 1 376 +,yk612a2.5 1 360 +,yk667h3.5 1 378 +,yk103f11.5 1 330 +,yk82d4.5 1 330 +,yk502f2.5 1 370 +,yk399b1.5 1 377 +,yk1388g06.3 1 499 -,yk1388g06.5 1 513 +,yk255e5.5 1 360 +,yk1230h08.5 1 172 +,yk1281b07.5 1 174 +,CK576705 1 199 +,BP 1 117 +,RP 1 117 +,yk393a4.5 1 360 +,CK575334 1 379 +,CK579527 1 498 +,yk1411e02.5 1 103 +,yk568f5.5 1 374 +,yk612e4.5 1 360 +,yk1239f04.5 1 492 +,yk1050c09.5 1 505 +,yk591h11.5 1 360 +,yk635a9.5 1 360 +,yk639e2.5 1 360 +,yk654d2.5 1 382 +,yk648e7.5 1 360 +,yk486b11.5 1 360 +,yk650f12.5 1 360 +,yk1012b08.3 1 317 -,yk1123h12.3 1 463 -,yk579f1.5 1 360 +,yk752f11.5 1 326 +,CEESE35F 1 285 +,CEESP60F 1 283 +,yk1032a02.5 53 422 +,yk633a4.5 1 382 +,yk1299c02.5 1 380 +,yk361d12.5 1 375 +,yk594f10.5 1 356 +,yk847c05.5 1 353 +
+III	gt csa	exon	1419138	1419251	0.842	+	.	Parent=mRNA144
+III	gt csa	exon	1419321	1419863	0.995	+	.	Parent=mRNA144
+III	gt csa	exon	1420079	1420087	0.667	+	.	Parent=mRNA144
+III	gt csa	mRNA	1419138	1420087	.	+	.	ID=mRNA145;Parent=gene98;Target=yk844c03.3 152 710 -,yk1072g09.3 120 674 -,yk1344a02.3 179 720 -,yk1398d04.3 114 643 -,yk1119f04.3 190 729 -,yk865b04.3 146 680 -,yk1212c10.5 1 546 +,yk64h2.5 1 341 +,yk371c5.5 1 370 +,yk596e1.5 1 374 +,yk654c2.5 1 376 +,yk474d11.5 1 377 +,yk1005d11.3 1 502 -,yk1221a01.3 1 512 -,yk1446h08.3 23 168 -,CEESI82R 12 304 +,yk1423c01.3 23 334 -,yk827b03.5 22 336 +,yk1457b06.5 23 366 +,yk573e8.5 11 360 +,yk289b9.5 11 373 +,yk1446h08.5 23 392 +,yk497f5.5 1 377 +,yk1299h01.3 192 594 -,yk1637f01.5 22 432 +,yk1156a09.5 23 434 +,yk1498f01.5 23 435 +,yk1370f10.5 23 435 +,yk1692c10.5 22 434 +,yk1050c09.3 23 436 -,yk1099h06.5 23 435 +,yk1438b02.5 23 436 +,yk1490c07.5 23 435 +,yk1667g11.5 23 436 +,yk1500g09.5 23 436 +,yk1743g04.5 23 436 +,yk1662h02.5 23 437 +,yk1699g12.5 23 438 +,yk809d12.5 23 437 +,yk891h02.5 23 438 +,yk1324a12.5 23 439 +,yk1581b07.5 23 439 +,yk1597e02.5 22 438 +,yk1005d11.5 23 439 +,yk1015e03.3 23 440 -,yk1258f10.5 24 442 +,yk1134e12.5 23 441 +,yk1329c12.5 24 442 +,yk1348g09.5 23 442 +,yk1281b11.5 23 442 +,yk1347e08.5 23 443 +,yk819c03.5 23 443 +,yk1370f08.5 23 447 +,yk1505b08.3 37 462 -,yk1307b12.3 182 609 -,yk1076e08.5 23 454 +,yk1299h06.3 291 730 -,yk1304f10.3 27 468 -,yk1304f10.5 27 484 +,yk763c11.5 23 480 +,yk776c05.5 23 484 +,yk1167g12.5 22 484 +,yk1340a03.5 22 484 +,yk1261h11.3 195 659 -,yk1033d09.5 18 482 +,yk1041d01.5 23 487 +,yk1307e07.3 224 690 -,yk776b07.5 18 504 +,yk1717f07.5 22 512 +,yk1099h06.3 23 517 -,yk1122e01.3 23 519 -,yk1151e05.3 24 518 -,yk1033d09.3 18 513 -,yk1200b10.3 22 517 -,yk1445a08.3 218 714 -,yk1499d03.3 226 722 -,yk1508b06.3 222 718 -,yk1523g04.3 78 575 -,yk1701c04.3 85 583 -,yk1276a07.3 229 729 -,yk1566c03.3 23 522 -,yk1534b01.3 227 726 -,yk1559d06.3 140 640 -,yk1597e02.3 22 523 -,yk1420g05.3 23 524 -,yk1476g05.3 224 725 -,yk1502f07.3 203 704 -,yk1526c08.3 102 605 -,yk1564e02.3 186 690 -,yk1581b07.3 23 525 -,yk1411e02.3 22 524 -,yk1460g06.3 191 693 -,yk1490c07.3 23 524 -,yk1459c06.3 212 714 -,yk1468c03.3 123 625 -,yk1662h02.3 23 525 -,yk1706f01.3 23 525 -,yk1730a09.3 23 525 -,yk1751g08.3 222 724 -,yk1450f03.3 220 723 -,yk1498f01.3 23 526 -,yk1347e08.3 23 526 -,yk1281f04.3 23 528 -,yk1026f10.3 25 529 -,yk1326f10.3 145 649 -,yk776b07.3 18 522 -,yk819c03.3 23 527 -,yk1363d08.3 23 528 -,yk1141a10.3 23 531 -,yk891h02.3 23 531 -,yk1079e02.3 23 530 -,yk1142c02.3 192 699 -,yk827b03.3 22 529 -,yk1041d01.3 23 532 -,yk1022f05.3 188 696 -,yk1161d09.3 23 531 -,yk1175b05.3 23 531 -,yk1229f01.3 223 731 -,yk776c05.3 23 531 -,yk1258a02.3 23 533 -,yk1258f10.3 24 533 -,yk1213d11.3 257 767 -,yk1021b10.3 23 532 -,yk1212f06.3 183 692 -,yk1338c06.3 23 532 -,yk1041a09.3 233 742 -,yk1076e08.3 23 532 -,yk1134e12.3 23 532 -,yk1156a09.3 23 532 -,yk1167g12.3 22 531 -,yk1217d06.3 183 692 -,yk1238d11.3 23 532 -,yk1239g07.3 223 732 -,yk1261c01.3 218 727 -,yk1266c12.3 23 532 -,yk1266e05.3 23 532 -,yk1281b07.3 23 532 -,yk1289h06.3 101 610 -,yk1309b05.3 224 733 -,yk1382h02.5 23 532 +,yk1329c12.3 24 537 -,yk1063g09.3 154 665 -,yk1089d01.3 23 533 -,yk1667g11.3 23 534 -,yk1500g09.3 23 534 -,yk1653c08.3 23 534 -,yk1370f08.3 23 535 -,yk1370f10.3 23 535 -,yk1629g01.3 23 535 -,yk1743g04.3 23 536 -,yk1239f04.3 23 538 -,yk1717f07.3 22 538 -,yk1274f02.3 23 540 -,yk1223a01.3 150 668 -,yk812e07.5 23 541 +,yk812e07.3 23 540 -,yk1340a03.3 22 541 -,yk1021b10.5 23 543 +,yk1514e03.3 184 709 -,yk1338c06.5 23 553 +,yk1238d11.5 23 553 +,yk1026f10.5 25 554 +,yk1363d08.5 23 552 +,yk1274f02.5 23 552 +,yk1420g05.5 23 552 +,yk1566c03.5 23 552 +,yk1629g01.5 23 552 +,yk1706f01.5 23 552 +,yk1730a09.5 23 552 +,yk1122e01.5 23 552 +,yk1141a10.5 23 552 +,yk1151e05.5 24 553 +,yk1161d09.5 23 552 +,yk1175b05.5 23 552 +,yk1281f04.5 23 552 +,yk1079e02.5 23 551 +,yk1258a02.5 23 558 +,yk470d10.5 1 376 +,yk1015e03.5 1 388 +,yk110a8.5 1 360 +,yk114f3.5 1 360 +,yk78a9.5 1 383 +,yk60a2.5 1 330 +,yk677a10.5 1 373 +,yk634d3.5 1 374 +,yk389a2.5 1 376 +,yk591g5.5 1 375 +,yk247h2.5 1 244 +,yk92d5.5 1 322 +,yk62e4.5 1 330 +,yk82d9.5 1 352 +,yk484e3.5 1 367 +,yk342c11.5 1 371 +,yk210g1.5 1 371 +,yk199b1.5 1 372 +,yk609a6.5 1 372 +,yk602g4.5 1 374 +,yk472b4.5 1 376 +,yk532b2.5 1 376 +,yk628h8.5 1 384 +,yk470d10.3 1 300 -,yk67e2.5 1 360 +,yk495b4.5 1 360 +,yk515d3.5 1 367 +,yk586d10.5 1 377 +,yk631d3.5 1 383 +,yk77e2.5 1 385 +,yk573e6.5 1 360 +,yk561d9.5 1 376 +,yk487f9.5 1 360 +,yk491d2.5 1 360 +,yk418d7.5 1 373 +,yk391d4.5 1 377 +,yk281f9.5 1 376 +,yk612a2.5 1 360 +,yk667h3.5 1 378 +,yk103f11.5 1 330 +,yk82d4.5 1 330 +,yk502f2.5 1 370 +,yk399b1.5 1 377 +,yk1388g06.3 1 499 -,yk1388g06.5 1 513 +,yk255e5.5 1 360 +,yk1230h08.5 1 172 +,yk1281b07.5 1 174 +,CK576705 1 199 +,BP 1 117 +,RP 1 117 +,yk393a4.5 1 360 +,CK575334 1 379 +,CK579527 1 498 +,yk1411e02.5 1 103 +,yk568f5.5 1 374 +,yk612e4.5 1 360 +,yk1239f04.5 1 492 +,yk1050c09.5 1 505 +,yk591h11.5 1 360 +,yk635a9.5 1 360 +,yk639e2.5 1 360 +,yk654d2.5 1 382 +,yk648e7.5 1 360 +,yk486b11.5 1 360 +,yk650f12.5 1 360 +,yk1012b08.3 1 317 -,yk1123h12.3 1 463 -,yk579f1.5 1 360 +,yk752f11.5 1 326 +,CEESE35F 1 285 +,CEESP60F 1 283 +,yk1032a02.5 53 422 +,yk633a4.5 1 382 +,yk1195a11.5 1 417 +,yk1299c02.5 1 380 +,yk1133g01.5 1 368 +,yk594f10.5 1 356 +,yk847c05.5 1 353 +
+III	gt csa	exon	1419138	1419251	0.842	+	.	Parent=mRNA145
+III	gt csa	exon	1419321	1419783	1	+	.	Parent=mRNA145
+III	gt csa	exon	1420079	1420087	0.778	+	.	Parent=mRNA145
+III	gt csa	mRNA	1419138	1420424	.	+	.	ID=mRNA146;Parent=gene98;Target=yk844c03.3 152 710 -,yk1072g09.3 120 674 -,yk1344a02.3 179 720 -,yk1398d04.3 114 643 -,yk1119f04.3 190 729 -,yk1396f08.3 94 712 -,yk865b04.3 146 680 -,yk1339f10.3 103 734 -,yk1212c10.5 1 546 +,yk64h2.5 1 341 +,yk371c5.5 1 370 +,yk596e1.5 1 374 +,yk654c2.5 1 376 +,yk474d11.5 1 377 +,yk1005d11.3 1 502 -,yk1221a01.3 1 512 -,yk1446h08.3 23 168 -,CEESI82R 12 304 +,yk1423c01.3 23 334 -,yk827b03.5 22 336 +,yk1457b06.5 23 366 +,yk573e8.5 11 360 +,yk289b9.5 11 373 +,yk1446h08.5 23 392 +,yk497f5.5 1 377 +,yk1299h01.3 192 594 -,yk1637f01.5 22 432 +,yk1156a09.5 23 434 +,yk1498f01.5 23 435 +,yk1370f10.5 23 435 +,yk1692c10.5 22 434 +,yk1050c09.3 23 436 -,yk1099h06.5 23 435 +,yk1438b02.5 23 436 +,yk1490c07.5 23 435 +,yk1667g11.5 23 436 +,yk1500g09.5 23 436 +,yk1743g04.5 23 436 +,yk1662h02.5 23 437 +,yk1699g12.5 23 438 +,yk809d12.5 23 437 +,yk891h02.5 23 438 +,yk1324a12.5 23 439 +,yk1581b07.5 23 439 +,yk1597e02.5 22 438 +,yk1005d11.5 23 439 +,yk1015e03.3 23 440 -,yk1258f10.5 24 442 +,yk1134e12.5 23 441 +,yk1329c12.5 24 442 +,yk1348g09.5 23 442 +,yk1281b11.5 23 442 +,yk1347e08.5 23 443 +,yk819c03.5 23 443 +,yk1370f08.5 23 447 +,yk1505b08.3 37 462 -,yk1307b12.3 182 609 -,yk1076e08.5 23 454 +,yk1299h06.3 291 730 -,yk1304f10.3 27 468 -,yk1304f10.5 27 484 +,yk763c11.5 23 480 +,yk776c05.5 23 484 +,yk1167g12.5 22 484 +,yk1340a03.5 22 484 +,yk1261h11.3 195 659 -,yk1033d09.5 18 482 +,yk1041d01.5 23 487 +,yk1307e07.3 224 690 -,yk776b07.5 18 504 +,yk1717f07.5 22 512 +,yk1099h06.3 23 517 -,yk1122e01.3 23 519 -,yk1151e05.3 24 518 -,yk1033d09.3 18 513 -,yk1200b10.3 22 517 -,yk1445a08.3 218 714 -,yk1499d03.3 226 722 -,yk1508b06.3 222 718 -,yk1523g04.3 78 575 -,yk1701c04.3 85 583 -,yk1276a07.3 229 729 -,yk1566c03.3 23 522 -,yk1534b01.3 227 726 -,yk1559d06.3 140 640 -,yk1597e02.3 22 523 -,yk1420g05.3 23 524 -,yk1476g05.3 224 725 -,yk1502f07.3 203 704 -,yk1526c08.3 102 605 -,yk1564e02.3 186 690 -,yk1581b07.3 23 525 -,yk1411e02.3 22 524 -,yk1460g06.3 191 693 -,yk1490c07.3 23 524 -,yk1459c06.3 212 714 -,yk1468c03.3 123 625 -,yk1662h02.3 23 525 -,yk1706f01.3 23 525 -,yk1730a09.3 23 525 -,yk1751g08.3 222 724 -,yk1450f03.3 220 723 -,yk1498f01.3 23 526 -,yk1347e08.3 23 526 -,yk1281f04.3 23 528 -,yk1026f10.3 25 529 -,yk1326f10.3 145 649 -,yk776b07.3 18 522 -,yk819c03.3 23 527 -,yk1363d08.3 23 528 -,yk1141a10.3 23 531 -,yk891h02.3 23 531 -,yk1079e02.3 23 530 -,yk1142c02.3 192 699 -,yk827b03.3 22 529 -,yk1041d01.3 23 532 -,yk1022f05.3 188 696 -,yk1161d09.3 23 531 -,yk1175b05.3 23 531 -,yk1229f01.3 223 731 -,yk776c05.3 23 531 -,yk1258a02.3 23 533 -,yk1258f10.3 24 533 -,yk1213d11.3 257 767 -,yk1021b10.3 23 532 -,yk1212f06.3 183 692 -,yk1338c06.3 23 532 -,yk1041a09.3 233 742 -,yk1076e08.3 23 532 -,yk1134e12.3 23 532 -,yk1156a09.3 23 532 -,yk1167g12.3 22 531 -,yk1217d06.3 183 692 -,yk1238d11.3 23 532 -,yk1239g07.3 223 732 -,yk1261c01.3 218 727 -,yk1266c12.3 23 532 -,yk1266e05.3 23 532 -,yk1281b07.3 23 532 -,yk1289h06.3 101 610 -,yk1309b05.3 224 733 -,yk1382h02.5 23 532 +,yk1329c12.3 24 537 -,yk1063g09.3 154 665 -,yk1089d01.3 23 533 -,yk1667g11.3 23 534 -,yk1500g09.3 23 534 -,yk1653c08.3 23 534 -,yk1370f08.3 23 535 -,yk1370f10.3 23 535 -,yk1629g01.3 23 535 -,yk1743g04.3 23 536 -,yk1239f04.3 23 538 -,yk1717f07.3 22 538 -,yk1274f02.3 23 540 -,yk1223a01.3 150 668 -,yk812e07.5 23 541 +,yk812e07.3 23 540 -,yk1340a03.3 22 541 -,yk1021b10.5 23 543 +,yk1514e03.3 184 709 -,yk1338c06.5 23 553 +,yk1238d11.5 23 553 +,yk1026f10.5 25 554 +,yk1363d08.5 23 552 +,yk1274f02.5 23 552 +,yk1420g05.5 23 552 +,yk1566c03.5 23 552 +,yk1629g01.5 23 552 +,yk1706f01.5 23 552 +,yk1730a09.5 23 552 +,yk1122e01.5 23 552 +,yk1141a10.5 23 552 +,yk1151e05.5 24 553 +,yk1161d09.5 23 552 +,yk1175b05.5 23 552 +,yk1281f04.5 23 552 +,yk1079e02.5 23 551 +,yk1310e07.5 23 555 +,yk1089d01.5 23 572 +,yk1527c07.5 23 589 +,yk1344e01.3 19 587 -,yk761f11.5 17 614 +,yk809d12.3 23 628 -,yk1310e07.3 23 628 -,yk470d10.5 1 376 +,yk1015e03.5 1 388 +,yk110a8.5 1 360 +,yk114f3.5 1 360 +,yk78a9.5 1 383 +,yk60a2.5 1 330 +,yk677a10.5 1 373 +,yk634d3.5 1 374 +,yk389a2.5 1 376 +,yk591g5.5 1 375 +,yk247h2.5 1 244 +,yk92d5.5 1 322 +,yk62e4.5 1 330 +,yk82d9.5 1 352 +,yk484e3.5 1 367 +,yk342c11.5 1 371 +,yk210g1.5 1 371 +,yk199b1.5 1 372 +,yk609a6.5 1 372 +,yk602g4.5 1 374 +,yk472b4.5 1 376 +,yk532b2.5 1 376 +,yk628h8.5 1 384 +,yk470d10.3 1 300 -,yk67e2.5 1 360 +,yk495b4.5 1 360 +,yk515d3.5 1 367 +,yk586d10.5 1 377 +,yk631d3.5 1 383 +,yk77e2.5 1 385 +,yk573e6.5 1 360 +,yk561d9.5 1 376 +,yk487f9.5 1 360 +,yk491d2.5 1 360 +,yk418d7.5 1 373 +,yk391d4.5 1 377 +,yk281f9.5 1 376 +,yk612a2.5 1 360 +,yk667h3.5 1 378 +,yk103f11.5 1 330 +,yk82d4.5 1 330 +,yk502f2.5 1 370 +,yk399b1.5 1 377 +,yk1388g06.3 1 499 -,yk1388g06.5 1 513 +,yk255e5.5 1 360 +,yk1230h08.5 1 172 +,yk1281b07.5 1 174 +,CK576705 1 199 +,BP 1 117 +,RP 1 117 +,yk393a4.5 1 360 +,CK575334 1 379 +,CK579527 1 498 +,yk1411e02.5 1 103 +,yk568f5.5 1 374 +,yk612e4.5 1 360 +,yk1239f04.5 1 492 +,yk1050c09.5 1 505 +,yk591h11.5 1 360 +,yk635a9.5 1 360 +,yk639e2.5 1 360 +,yk654d2.5 1 382 +,yk648e7.5 1 360 +,yk486b11.5 1 360 +,yk650f12.5 1 360 +,yk1012b08.3 1 317 -,yk1123h12.3 1 463 -,yk579f1.5 1 360 +,yk752f11.5 1 326 +,CEESE35F 1 285 +,CEESP60F 1 283 +,yk1032a02.5 53 422 +,yk633a4.5 1 382 +,yk1299c02.5 1 380 +,yk361d12.5 1 375 +,yk594f10.5 1 356 +,yk847c05.5 1 353 +,CEESB14F 1 300 +,CEESY61FB 1 319 +,yk1382d08.3 1 222 +,yk621b1.3 1 300 +,yk739c4.3 1 300 +,yk597g10.3 1 300 +,yk421a11.3 1 292 +,yk447b3.3 1 300 +,yk599b8.3 1 300 +,yk639a10.3 1 300 +,yk555f9.3 1 300 +,yk615c7.3 1 240 +,yk525g4.3 1 240 +,yk556a10.5 1 365 +,yk1475h10.3 1 136 +
+III	gt csa	exon	1419138	1419251	0.842	+	.	Parent=mRNA146
+III	gt csa	exon	1419321	1420424	0.99	+	.	Parent=mRNA146
+###
+III	gt csa	gene	1419326	1427216	.	-	.	ID=gene99
+III	gt csa	mRNA	1419326	1419839	.	-	.	ID=mRNA147;Parent=gene99;Target=yk1230h08.3 1 312 +,yk1527c07.3 1 508 +,yk1032a02.3 1 376 +,yk602g4.3 1 300 +,yk1195a11.3 1 378 +,yk639e2.3 1 300 +,yk763c11.3 1 356 +,CEESU49F 1 379 +,yk667h3.3 1 300 +,yk1526d06.3 1 360 +,CEESM53F 1 381 +,yk596e1.3 1 300 +,yk654e2.3 1 180 +,yk586d10.3 1 240 +,yk281f9.3 1 300 +,yk255e5.3 1 300 +,yk654e1.3 1 180 +,yk591h11.3 1 240 +,yk634d3.3 1 300 +,yk654c2.3 1 300 +,yk487f9.3 1 300 +,yk515d3.3 1 300 +,yk654d2.3 1 300 +,yk672d12.3 1 300 +,yk631d3.3 1 300 +,yk612a2.3 1 300 +,yk654g12.3 1 180 +,yk281a2.3 1 300 +,yk609a6.3 1 300 +,yk612e4.3 1 300 +,yk371c5.3 1 300 +,yk648e7.3 1 300 +,yk1133g01.3 1 342 +,yk579f1.3 1 300 +,yk289b9.3 1 300 +,yk110a8.3 1 342 +,CEESH76F 1 352 +,yk114f3.3 1 326 +,yk67e2.3 1 332 +,yk64h2.3 1 337 +,yk1382h02.3 1 106 +,CEESV10F 1 307 +,yk92d5.3 1 292 +,CEESN05F 1 295 +,yk677a10.3 1 300 +,yk847c05.3 1 253 +,yk833b04.3 1 252 +,yk78a9.3 1 300 +,CEESX12F 1 238 +,yk62e4.3 1 180 +,yk92c4.3 1 152 +,yk1692c10.3 1 127 +,yk1637f01.3 1 136 +
+III	gt csa	exon	1419326	1419839	0.96	-	.	Parent=mRNA147
+III	gt csa	mRNA	1419858	1427216	.	-	.	ID=mRNA148;Parent=gene99;Target=yk1572a07.3 1 708 -,yk1483e05.3 1 710 -,yk845a11.3 1 671 -,yk1091h10.3 1 703 -,yk777g07.3 1 702 -,yk843d03.3 1 655 -,yk1037c05.3 1 702 -,yk1339b07.3 1 706 -,yk1156e02.3 1 713 -,yk1221d11.3 1 718 -,yk1271e02.3 1 702 -,yk1175h04.3 1 701 -,yk1068f01.3 1 777 -,yk1534a04.3 1 671 -,yk1397e11.3 1 735 -,yk1467c02.3 1 668 -,yk1447g10.3 1 689 -,yk1588c10.3 1 694 -,yk1616c04.3 1 745 -,yk1449e07.3 1 743 -,yk1422c01.3 1 711 -,yk1433e11.3 1 713 -,yk1359d11.3 1 739 -,yk1741b07.3 1 645 -,yk1382d05.3 1 724 -,yk1491e06.3 1 722 -,yk1111g04.3 1 667 -,yk1677f12.3 1 683 -,RP 1 549 +,BP 1 546 +,yk421a11.5 1 360 +,yk384h6.5 1 375 +,yk639a10.5 1 360 +,yk1021a01.5 20 655 +,yk1483e05.5 17 650 +,yk1359d11.5 23 655 +,yk1382d05.5 23 654 +,yk1433e11.5 22 650 +,yk1422c01.5 23 628 +,yk1397e11.5 22 625 +,yk1091h10.5 23 616 +,yk1221d11.5 23 614 +,yk845a11.5 23 613 +,yk1339b07.5 23 612 +,yk1068f01.5 23 611 +,yk1677f12.5 24 611 +,yk1382d08.5 23 610 +,yk1680g05.5 23 610 +,yk1439g04.5 23 609 +,yk1741b07.5 22 608 +,yk1037c05.5 23 606 +,yk1491e06.5 23 606 +,yk1588c10.5 23 604 +,yk1175h04.5 23 603 +,yk777g07.5 20 534 +,yk843d03.5 23 534 +,yk1111g04.5 23 512 +,yk1467c02.5 22 500 +,yk1449c10.5 23 463 +,yk1572a07.5 23 461 +,yk1447g10.5 23 460 +,yk1449e07.5 23 460 +,yk525g4.5 1 375 +,cm20f7.5 11 407 +,yk275h6.5 1 351 +,yk597g10.5 1 354 +,yk447b3.5 1 355 +,yk599b8.5 1 359 +,yk615c7.5 1 370 +,yk1534a04.5 27 403 +,yk739c4.5 23 340 +
+III	gt csa	exon	1419858	1420431	0.998	-	.	Parent=mRNA148
+III	gt csa	exon	1421391	1421771	0.897	-	.	Parent=mRNA148
+III	gt csa	exon	1424258	1424349	0.948	-	.	Parent=mRNA148
+III	gt csa	exon	1425095	1425427	0.96	-	.	Parent=mRNA148
+III	gt csa	exon	1425902	1425994	1	-	.	Parent=mRNA148
+III	gt csa	exon	1426159	1426285	1	-	.	Parent=mRNA148
+III	gt csa	exon	1427060	1427216	1	-	.	Parent=mRNA148
+III	gt csa	mRNA	1420034	1420559	.	-	.	ID=mRNA149;Parent=gene99;Target=yk421a11.5 1 360 +,yk555f9.5 1 360 +
+III	gt csa	exon	1420034	1420559	0.993	-	.	Parent=mRNA149
+III	gt csa	mRNA	1421684	1424322	.	-	.	ID=mRNA150;Parent=gene99;Target=yk621b1.5 1 240 +
+III	gt csa	exon	1421684	1421858	0.943	-	.	Parent=mRNA150
+III	gt csa	exon	1424258	1424322	1	-	.	Parent=mRNA150
+###
+III	gt csa	gene	1439086	1443180	.	+	.	ID=gene100
+III	gt csa	mRNA	1439086	1443180	.	+	.	ID=mRNA151;Parent=gene100;Target=WP 1 531 +
+III	gt csa	exon	1439086	1439148	1	+	.	Parent=mRNA151
+III	gt csa	exon	1439194	1439289	1	+	.	Parent=mRNA151
+III	gt csa	exon	1439346	1439507	1	+	.	Parent=mRNA151
+III	gt csa	exon	1439552	1439628	1	+	.	Parent=mRNA151
+III	gt csa	exon	1439705	1439927	1	+	.	Parent=mRNA151
+III	gt csa	exon	1440041	1440100	1	+	.	Parent=mRNA151
+III	gt csa	exon	1440409	1440543	1	+	.	Parent=mRNA151
+III	gt csa	exon	1440839	1440928	1	+	.	Parent=mRNA151
+III	gt csa	exon	1441573	1441826	1	+	.	Parent=mRNA151
+III	gt csa	exon	1441882	1442030	1	+	.	Parent=mRNA151
+III	gt csa	exon	1442396	1442547	1	+	.	Parent=mRNA151
+III	gt csa	exon	1443049	1443180	1	+	.	Parent=mRNA151
+###
+III	gt csa	gene	1443038	1443263	.	-	.	ID=gene101
+III	gt csa	mRNA	1443038	1443263	.	-	.	ID=mRNA152;Parent=gene101;Target=yk525g8.3 80 300 +,yk656g8.3 80 300 +,yk658b12.3 83 300 +,yk337c2.3 84 300 +,yk675h9.3 85 300 +,yk602e8.3 86 300 +,yk652b11.3 86 300 +,yk659c10.3 86 300 +,yk621h1.3 88 300 +,yk572f4.3 77 288 +,yk592b8.3 75 286 +,yk617a4.3 81 300 +
+III	gt csa	exon	1443038	1443263	0.866	-	.	Parent=mRNA152
+###
+III	gt csa	gene	1447545	1455750	.	-	.	ID=gene102
+III	gt csa	mRNA	1447545	1455750	.	-	.	ID=mRNA153;Parent=gene102;Target=yk674c5.3 1 300 -,yk513e12.3 1 300 -,WP 1 482 +,yk674c5.5 1 360 +
+III	gt csa	exon	1447545	1447665	1	-	.	Parent=mRNA153
+III	gt csa	exon	1449965	1450063	1	-	.	Parent=mRNA153
+III	gt csa	exon	1450108	1450340	1	-	.	Parent=mRNA153
+III	gt csa	exon	1450555	1450692	1	-	.	Parent=mRNA153
+III	gt csa	exon	1450743	1450802	1	-	.	Parent=mRNA153
+III	gt csa	exon	1450847	1450919	1	-	.	Parent=mRNA153
+III	gt csa	exon	1451910	1452038	1	-	.	Parent=mRNA153
+III	gt csa	exon	1452084	1452139	1	-	.	Parent=mRNA153
+III	gt csa	exon	1452429	1452468	1	-	.	Parent=mRNA153
+III	gt csa	exon	1453036	1453163	1	-	.	Parent=mRNA153
+III	gt csa	exon	1454216	1454391	1	-	.	Parent=mRNA153
+III	gt csa	exon	1454479	1454572	1	-	.	Parent=mRNA153
+III	gt csa	exon	1454621	1454698	1	-	.	Parent=mRNA153
+III	gt csa	exon	1455676	1455750	1	-	.	Parent=mRNA153
+III	gt csa	mRNA	1448290	1449007	.	-	.	ID=mRNA154;Parent=gene102;Target=yk1044a02.5 1 718 +
+III	gt csa	exon	1448290	1449007	0.997	-	.	Parent=mRNA154
+III	gt csa	mRNA	1452028	1452748	.	-	.	ID=mRNA155;Parent=gene102;Target=yk513e12.5 1 386 +
+III	gt csa	exon	1452028	1452038	1	-	.	Parent=mRNA155
+III	gt csa	exon	1452084	1452139	0.982	-	.	Parent=mRNA155
+III	gt csa	exon	1452429	1452748	1	-	.	Parent=mRNA155
+###
+III	gt csa	gene	1449026	1449551	.	+	.	ID=gene103
+III	gt csa	mRNA	1449026	1449551	.	+	.	ID=mRNA156;Parent=gene103;Target=yk1044a02.3 208 712 +
+III	gt csa	exon	1449026	1449522	0.991	+	.	Parent=mRNA156
+III	gt csa	exon	1449545	1449551	0.571	+	.	Parent=mRNA156
+###
+III	gt csa	gene	1458223	1466441	.	+	.	ID=gene104
+III	gt csa	mRNA	1458223	1466441	.	+	.	ID=mRNA157;Parent=gene104;Target=WP 1 503 +
+III	gt csa	exon	1458223	1458465	1	+	.	Parent=mRNA157
+III	gt csa	exon	1458508	1458597	1	+	.	Parent=mRNA157
+III	gt csa	exon	1458884	1458935	1	+	.	Parent=mRNA157
+III	gt csa	exon	1459883	1460049	1	+	.	Parent=mRNA157
+III	gt csa	exon	1461819	1461874	1	+	.	Parent=mRNA157
+III	gt csa	exon	1461919	1462047	1	+	.	Parent=mRNA157
+III	gt csa	exon	1463286	1463358	1	+	.	Parent=mRNA157
+III	gt csa	exon	1463515	1463584	1	+	.	Parent=mRNA157
+III	gt csa	exon	1465126	1465193	1	+	.	Parent=mRNA157
+III	gt csa	exon	1465240	1465469	1	+	.	Parent=mRNA157
+III	gt csa	exon	1465516	1465614	1	+	.	Parent=mRNA157
+III	gt csa	exon	1465770	1465832	1	+	.	Parent=mRNA157
+III	gt csa	exon	1465923	1466021	1	+	.	Parent=mRNA157
+III	gt csa	exon	1466372	1466441	1	+	.	Parent=mRNA157
+###
+III	gt csa	gene	1466377	1466722	.	-	.	ID=gene105
+III	gt csa	mRNA	1466377	1466722	.	-	.	ID=mRNA158;Parent=gene105;Target=CEESB41F 1 346 +
+III	gt csa	exon	1466377	1466722	0.965	-	.	Parent=mRNA158
+###
+III	gt csa	gene	1467863	1483497	.	-	.	ID=gene106
+III	gt csa	mRNA	1467863	1483497	.	-	.	ID=mRNA159;Parent=gene106;Target=yk1170a01.3 1 765 -,yk1128d05.3 1 726 -,yk405c3.3 1 300 -,yk500f5.3 1 300 -,yk288a6.3 1 300 -,WP 1 922 +,yk135h2.5 1 373 +,yk288a6.5 1 360 +,yk1170a01.5 22 593 +,yk1128d05.5 23 588 +
+III	gt csa	exon	1467863	1468170	0.981	-	.	Parent=mRNA159
+III	gt csa	exon	1469171	1469260	1	-	.	Parent=mRNA159
+III	gt csa	exon	1470517	1471342	1	-	.	Parent=mRNA159
+III	gt csa	exon	1472209	1472382	1	-	.	Parent=mRNA159
+III	gt csa	exon	1473915	1474201	1	-	.	Parent=mRNA159
+III	gt csa	exon	1474848	1475099	1	-	.	Parent=mRNA159
+III	gt csa	exon	1476256	1476485	1	-	.	Parent=mRNA159
+III	gt csa	exon	1477039	1477574	1	-	.	Parent=mRNA159
+III	gt csa	exon	1478937	1479126	1	-	.	Parent=mRNA159
+III	gt csa	exon	1483404	1483497	1	-	.	Parent=mRNA159
+III	gt csa	mRNA	1474973	1476685	.	-	.	ID=mRNA160;Parent=gene106;Target=yk500f5.5 1 360 +
+III	gt csa	exon	1474973	1475099	1	-	.	Parent=mRNA160
+III	gt csa	exon	1476256	1476485	0.989	-	.	Parent=mRNA160
+III	gt csa	exon	1476684	1476685	1	-	.	Parent=mRNA160
+###
+III	gt csa	gene	1467866	1468169	.	+	.	ID=gene107
+III	gt csa	mRNA	1467866	1468169	.	+	.	ID=mRNA161;Parent=gene107;Target=CEESH11F 1 304 +
+III	gt csa	exon	1467866	1468169	0.984	+	.	Parent=mRNA161
+###
+III	gt csa	gene	1484961	1495320	.	-	.	ID=gene108
+III	gt csa	mRNA	1484961	1495320	.	-	.	ID=mRNA162;Parent=gene108;Target=WP 1 418 +
+III	gt csa	exon	1484961	1485116	1	-	.	Parent=mRNA162
+III	gt csa	exon	1487387	1487633	1	-	.	Parent=mRNA162
+III	gt csa	exon	1487730	1487831	1	-	.	Parent=mRNA162
+III	gt csa	exon	1490092	1490294	1	-	.	Parent=mRNA162
+III	gt csa	exon	1491404	1491494	1	-	.	Parent=mRNA162
+III	gt csa	exon	1491548	1491666	1	-	.	Parent=mRNA162
+III	gt csa	exon	1493719	1493970	1	-	.	Parent=mRNA162
+III	gt csa	exon	1495237	1495320	1	-	.	Parent=mRNA162
+###
+III	gt csa	gene	1509455	1510895	.	+	.	ID=gene109
+III	gt csa	mRNA	1509455	1510895	.	+	.	ID=mRNA163;Parent=gene109;Target=yk1187f01.3 1 381 +
+III	gt csa	exon	1509455	1509613	0.855	+	.	Parent=mRNA163
+III	gt csa	exon	1510265	1510335	0.817	+	.	Parent=mRNA163
+III	gt csa	exon	1510742	1510895	0.916	+	.	Parent=mRNA163
+###
+III	gt csa	gene	1509574	1517983	.	-	.	ID=gene110
+III	gt csa	mRNA	1509574	1512913	.	-	.	ID=mRNA164;Parent=gene110;Target=yk275e6.5 1 360 +,yk1146d12.3 1 312 -
+III	gt csa	exon	1509574	1509618	0.978	-	.	Parent=mRNA164
+III	gt csa	exon	1510270	1510341	0.986	-	.	Parent=mRNA164
+III	gt csa	exon	1510751	1510948	0.987	-	.	Parent=mRNA164
+III	gt csa	exon	1512871	1512913	0.872	-	.	Parent=mRNA164
+III	gt csa	mRNA	1512956	1517983	.	-	.	ID=mRNA165;Parent=gene110;Target=yk1146d12.5 35 612 +,yk774d03.5 23 597 +,yk479a10.5 1 378 +,yk237e8.5 1 360 +,yk714f9.5 23 365 +
+III	gt csa	exon	1512956	1513125	1	-	.	Parent=mRNA165
+III	gt csa	exon	1515550	1515605	1	-	.	Parent=mRNA165
+III	gt csa	exon	1515725	1515894	1	-	.	Parent=mRNA165
+III	gt csa	exon	1517731	1517849	1	-	.	Parent=mRNA165
+III	gt csa	exon	1517921	1517983	1	-	.	Parent=mRNA165
+###
+III	gt csa	gene	1520214	1532758	.	-	.	ID=gene111
+III	gt csa	mRNA	1520214	1532758	.	-	.	ID=mRNA166;Parent=gene111;Target=AY661556 1 2145 +
+III	gt csa	exon	1520214	1520363	1	-	.	Parent=mRNA166
+III	gt csa	exon	1521573	1521926	1	-	.	Parent=mRNA166
+III	gt csa	exon	1523142	1523685	1	-	.	Parent=mRNA166
+III	gt csa	exon	1525164	1525402	1	-	.	Parent=mRNA166
+III	gt csa	exon	1526403	1526535	1	-	.	Parent=mRNA166
+III	gt csa	exon	1528084	1528234	1	-	.	Parent=mRNA166
+III	gt csa	exon	1528291	1528435	1	-	.	Parent=mRNA166
+III	gt csa	exon	1529809	1529984	1	-	.	Parent=mRNA166
+III	gt csa	exon	1531762	1531821	1	-	.	Parent=mRNA166
+III	gt csa	exon	1532182	1532275	1	-	.	Parent=mRNA166
+III	gt csa	exon	1532660	1532758	1	-	.	Parent=mRNA166
+III	gt csa	mRNA	1521343	1529982	.	-	.	ID=mRNA167;Parent=gene111;Target=BP 1 525 +
+III	gt csa	exon	1521343	1521363	0.189	-	.	Parent=mRNA167
+III	gt csa	exon	1521573	1521926	0.879	-	.	Parent=mRNA167
+III	gt csa	exon	1523142	1523685	0.95	-	.	Parent=mRNA167
+III	gt csa	exon	1525164	1525402	0.893	-	.	Parent=mRNA167
+III	gt csa	exon	1526403	1526535	0.988	-	.	Parent=mRNA167
+III	gt csa	exon	1528323	1528435	1	-	.	Parent=mRNA167
+III	gt csa	exon	1529809	1529982	0.921	-	.	Parent=mRNA167
+III	gt csa	mRNA	1521569	1531828	.	-	.	ID=mRNA168;Parent=gene111;Target=RP 1 544 +
+III	gt csa	exon	1521569	1521926	0.88	-	.	Parent=mRNA168
+III	gt csa	exon	1523142	1523685	0.947	-	.	Parent=mRNA168
+III	gt csa	exon	1525164	1525402	0.895	-	.	Parent=mRNA168
+III	gt csa	exon	1526403	1526535	0.969	-	.	Parent=mRNA168
+III	gt csa	exon	1528323	1528435	1	-	.	Parent=mRNA168
+III	gt csa	exon	1529809	1529984	0.923	-	.	Parent=mRNA168
+III	gt csa	exon	1531762	1531828	0.969	-	.	Parent=mRNA168
+###
+III	gt csa	gene	1537499	1538168	.	-	.	ID=gene112
+III	gt csa	mRNA	1537499	1538168	.	-	.	ID=mRNA169;Parent=gene112;Target=yk1272b06.3 1 670 +
+III	gt csa	exon	1537499	1538168	0.997	-	.	Parent=mRNA169
+###
+III	gt csa	gene	1540487	1543445	.	+	.	ID=gene113
+III	gt csa	mRNA	1540487	1543445	.	+	.	ID=mRNA170;Parent=gene113;Target=yk427d4.5 1 361 +,yk630d2.5 1 376 +,RP 1 157 +,yk308b12.5 1 360 +,yk1375b08.3 1 496 -,yk1375b08.5 1 531 +,yk308b12.3 1 300 -,yk427d4.3 1 300 -
+III	gt csa	exon	1540487	1540540	0.954	+	.	Parent=mRNA170
+III	gt csa	exon	1540708	1540869	1	+	.	Parent=mRNA170
+III	gt csa	exon	1541916	1542059	1	+	.	Parent=mRNA170
+III	gt csa	exon	1543175	1543445	0.985	+	.	Parent=mRNA170
+###
+III	gt csa	gene	1544928	1554435	.	-	.	ID=gene114
+III	gt csa	mRNA	1544928	1554435	.	-	.	ID=mRNA171;Parent=gene114;Target=CESAC53F 1 323 -,yk236c12.3 1 300 -,yk670g3.3 1 300 -,RP 1 723 +,BP 1 717 +,yk166a9.5 1 380 +,yk670g3.5 1 360 +,yk341h12.5 1 364 +
+III	gt csa	exon	1544928	1545199	0.982	-	.	Parent=mRNA171
+III	gt csa	exon	1546519	1546675	0.932	-	.	Parent=mRNA171
+III	gt csa	exon	1547363	1547757	0.918	-	.	Parent=mRNA171
+III	gt csa	exon	1548432	1548499	0.924	-	.	Parent=mRNA171
+III	gt csa	exon	1549231	1549616	0.9	-	.	Parent=mRNA171
+III	gt csa	exon	1550539	1550735	0.873	-	.	Parent=mRNA171
+III	gt csa	exon	1551380	1551622	0.988	-	.	Parent=mRNA171
+III	gt csa	exon	1552597	1552760	1	-	.	Parent=mRNA171
+III	gt csa	exon	1552826	1552996	0.95	-	.	Parent=mRNA171
+III	gt csa	exon	1554189	1554435	0.945	-	.	Parent=mRNA171
+###
+III	gt csa	gene	1555385	1560461	.	+	.	ID=gene115
+III	gt csa	mRNA	1555385	1556102	.	+	.	ID=mRNA172;Parent=gene115;Target=yk1111d10.3 1 616 +,yk475g1.3 1 300 +,yk415h12.3 1 300 +,yk491d7.3 1 300 +,yk589g10.3 1 300 +,yk607b8.3 1 300 +,yk157b1.3 1 300 +
+III	gt csa	exon	1555385	1556102	0.978	+	.	Parent=mRNA172
+III	gt csa	mRNA	1558790	1560461	.	+	.	ID=mRNA173;Parent=gene115;Target=yk1371c11.5 23 357 +,yk1030d09.5 23 357 +,yk1508a02.5 23 521 +,yk1540b10.5 23 524 +,yk1532h03.5 23 561 +,yk1371c12.5 23 602 +,yk1364c12.5 23 604 +,yk1395h09.5 22 605 +,yk1377c09.5 23 614 +,yk498e1.5 1 360 +
+III	gt csa	exon	1558790	1558898	1	+	.	Parent=mRNA173
+III	gt csa	exon	1558949	1559033	1	+	.	Parent=mRNA173
+III	gt csa	exon	1559100	1559240	1	+	.	Parent=mRNA173
+III	gt csa	exon	1560205	1560461	1	+	.	Parent=mRNA173
+###
+III	gt csa	gene	1555397	1558519	.	-	.	ID=gene116
+III	gt csa	mRNA	1555397	1558519	.	-	.	ID=mRNA174;Parent=gene116;Target=yk1111d10.5 1 607 +,yk607b8.5 1 377 +,yk1518a06.3 1 610 -,yk475g1.5 1 360 +,yk415h12.5 1 360 +,yk1518a06.5 23 582 +,CK580339 1 480 +,yk491d7.5 1 360 +,yk236h2.5 1 360 +,yk157b1.5 16 384 +,yk589g10.5 1 360 +
+III	gt csa	exon	1555397	1556159	1	-	.	Parent=mRNA174
+III	gt csa	exon	1557562	1557862	1	-	.	Parent=mRNA174
+III	gt csa	exon	1558159	1558268	1	-	.	Parent=mRNA174
+III	gt csa	exon	1558323	1558397	1	-	.	Parent=mRNA174
+III	gt csa	exon	1558446	1558519	1	-	.	Parent=mRNA174
+###
+III	gt csa	gene	1563434	1577849	.	+	.	ID=gene117
+III	gt csa	mRNA	1563434	1570107	.	+	.	ID=mRNA175;Parent=gene117;Target=yk1532h03.3 1 751 -,yk1364c12.3 1 710 -,yk1377c09.3 1 708 -,yk1030d09.3 1 689 -,yk1508a02.3 1 658 -,yk1540b10.3 1 642 -,yk1371c11.3 1 611 -,yk1371c12.3 1 550 -,yk1395h09.3 1 549 -
+III	gt csa	exon	1563434	1563617	0.97	+	.	Parent=mRNA175
+III	gt csa	exon	1564968	1565122	0.994	+	.	Parent=mRNA175
+III	gt csa	exon	1565383	1565545	0.994	+	.	Parent=mRNA175
+III	gt csa	exon	1569746	1570107	0.983	+	.	Parent=mRNA175
+III	gt csa	mRNA	1570296	1573761	.	+	.	ID=mRNA176;Parent=gene117;Target=yk267a5.5 1 376 +,yk832e07.5 23 479 +,yk1755e04.5 22 536 +,yk1344g03.5 24 566 +,yk1736b09.5 24 568 +,yk1654g06.5 25 578 +,yk1672c02.5 24 581 +,yk1648c12.5 24 586 +,yk1743a02.5 23 609 +,yk1365e09.5 23 634 +,yk1618f02.5 15 652 +,yk1612a04.5 1 398 +,yk548h9.5 1 372 +
+III	gt csa	exon	1570296	1570429	1	+	.	Parent=mRNA176
+III	gt csa	exon	1571414	1571483	1	+	.	Parent=mRNA176
+III	gt csa	exon	1571534	1571764	1	+	.	Parent=mRNA176
+III	gt csa	exon	1572543	1572694	1	+	.	Parent=mRNA176
+III	gt csa	exon	1572790	1572997	1	+	.	Parent=mRNA176
+III	gt csa	exon	1573737	1573761	1	+	.	Parent=mRNA176
+III	gt csa	mRNA	1573827	1576628	.	+	.	ID=mRNA177;Parent=gene117;Target=yk1618f02.3 1 742 -,yk1755e04.3 1 743 -,yk1344g03.3 1 711 -,yk1736b09.3 1 649 -,yk1365e09.3 1 704 -,yk1654g06.3 1 694 -,yk1672c02.3 21 686 -,yk1612a04.3 1 663 -,yk1743a02.3 1 617 -,yk1648c12.3 1 629 -,yk832e07.3 1 524 -,yk1235d02.3 1 465 -,yk605e4.3 1 300 -
+III	gt csa	exon	1573827	1573915	0.989	+	.	Parent=mRNA177
+III	gt csa	exon	1574217	1574376	1	+	.	Parent=mRNA177
+III	gt csa	exon	1574938	1575034	1	+	.	Parent=mRNA177
+III	gt csa	exon	1575084	1575161	1	+	.	Parent=mRNA177
+III	gt csa	exon	1576071	1576198	1	+	.	Parent=mRNA177
+III	gt csa	exon	1576416	1576628	0.995	+	.	Parent=mRNA177
+III	gt csa	mRNA	1573884	1576610	.	+	.	ID=mRNA178;Parent=gene117;Target=yk1154b02.3 1 687 -,yk446d1.5 1 234 +,yk1235d02.3 1 465 -,yk605e4.3 1 300 -
+III	gt csa	exon	1573884	1573915	1	+	.	Parent=mRNA178
+III	gt csa	exon	1574217	1574257	1	+	.	Parent=mRNA178
+III	gt csa	exon	1574822	1575034	0.995	+	.	Parent=mRNA178
+III	gt csa	exon	1575084	1575161	1	+	.	Parent=mRNA178
+III	gt csa	exon	1576071	1576198	1	+	.	Parent=mRNA178
+III	gt csa	exon	1576416	1576610	1	+	.	Parent=mRNA178
+III	gt csa	mRNA	1576754	1577849	.	+	.	ID=mRNA179;Parent=gene117;Target=yk423d1.5 1 360 +
+III	gt csa	exon	1576754	1576868	0.974	+	.	Parent=mRNA179
+III	gt csa	exon	1577605	1577849	1	+	.	Parent=mRNA179
+###
+III	gt csa	gene	1569814	1570053	.	-	.	ID=gene118
+III	gt csa	mRNA	1569814	1570053	.	-	.	ID=mRNA180;Parent=gene118;Target=yk252b6.3 1 240 +
+III	gt csa	exon	1569814	1570053	0.938	-	.	Parent=mRNA180
+###
+III	gt csa	gene	1579272	1580784	.	+	.	ID=gene119
+III	gt csa	mRNA	1579272	1580784	.	+	.	ID=mRNA181;Parent=gene119;Target=yk672c6.3 1 300 -,yk423d1.3 1 300 -
+III	gt csa	exon	1579272	1579319	1	+	.	Parent=mRNA181
+III	gt csa	exon	1580527	1580784	1	+	.	Parent=mRNA181
+###
+III	gt csa	gene	1583146	1584881	.	-	.	ID=gene120
+III	gt csa	mRNA	1583146	1584881	.	-	.	ID=mRNA182;Parent=gene120;Target=yk1513e11.5 1 611 +,yk1513e11.3 1 577 -,yk378b9.5 1 376 +,yk102a5.5 1 360 +
+III	gt csa	exon	1583146	1583491	1	-	.	Parent=mRNA182
+III	gt csa	exon	1584617	1584881	0.992	-	.	Parent=mRNA182
+###
+III	gt csa	gene	1583159	1583488	.	+	.	ID=gene121
+III	gt csa	mRNA	1583159	1583488	.	+	.	ID=mRNA183;Parent=gene121;Target=yk102a5.3 1 315 +,yk378b9.3 1 279 +
+III	gt csa	exon	1583159	1583488	0.957	+	.	Parent=mRNA183
+###
+III	gt csa	gene	1605742	1606803	.	+	.	ID=gene122
+III	gt csa	mRNA	1605742	1606803	.	+	.	ID=mRNA184;Parent=gene122;Target=BP 1 152 +
+III	gt csa	exon	1605742	1605953	0.982	+	.	Parent=mRNA184
+III	gt csa	exon	1606445	1606556	0.751	+	.	Parent=mRNA184
+III	gt csa	exon	1606672	1606803	1	+	.	Parent=mRNA184
+III	gt csa	mRNA	1605745	1606803	.	+	.	ID=mRNA185;Parent=gene122;Target=RP 1 142 +
+III	gt csa	exon	1605745	1605953	0.983	+	.	Parent=mRNA185
+III	gt csa	exon	1606472	1606556	0.972	+	.	Parent=mRNA185
+III	gt csa	exon	1606672	1606803	1	+	.	Parent=mRNA185
+###
+III	gt csa	gene	1606834	1610636	.	-	.	ID=gene123
+III	gt csa	mRNA	1606834	1609423	.	-	.	ID=mRNA186;Parent=gene123;Target=yk1416d09.3 1 705 -,yk1362f07.3 1 706 -,yk1547d11.3 1 703 -,yk517d4.3 1 300 -,yk539b10.3 1 300 -,yk579b9.3 1 172 -
+III	gt csa	exon	1606834	1606880	0.979	-	.	Parent=mRNA186
+III	gt csa	exon	1606929	1607019	1	-	.	Parent=mRNA186
+III	gt csa	exon	1607623	1607756	1	-	.	Parent=mRNA186
+III	gt csa	exon	1607809	1608154	1	-	.	Parent=mRNA186
+III	gt csa	exon	1609334	1609423	1	-	.	Parent=mRNA186
+III	gt csa	mRNA	1609706	1610636	.	-	.	ID=mRNA187;Parent=gene123;Target=yk539b10.5 1 360 +
+III	gt csa	exon	1609706	1609870	0.994	-	.	Parent=mRNA187
+III	gt csa	exon	1610442	1610636	1	-	.	Parent=mRNA187
+###
+III	gt csa	gene	1611351	1614022	.	-	.	ID=gene124
+III	gt csa	mRNA	1611351	1614022	.	-	.	ID=mRNA188;Parent=gene124;Target=yk1547d11.5 1 438 +,yk1416d09.5 23 573 +,yk1362f07.5 23 549 +,yk517d4.5 1 360 +
+III	gt csa	exon	1611351	1611537	1	-	.	Parent=mRNA188
+III	gt csa	exon	1612158	1612264	1	-	.	Parent=mRNA188
+III	gt csa	exon	1612870	1613031	1	-	.	Parent=mRNA188
+III	gt csa	exon	1613520	1614022	1	-	.	Parent=mRNA188
+###
+III	gt csa	gene	1617126	1618924	.	-	.	ID=gene125
+III	gt csa	mRNA	1617126	1618924	.	-	.	ID=mRNA189;Parent=gene125;Target=CK589550 1 323 +,BP 1 109 +,RP 1 109 +,yk81b11.5 1 330 +,yk175h6.5 1 222 +
+III	gt csa	exon	1617126	1617142	0.647	-	.	Parent=mRNA189
+III	gt csa	exon	1617362	1617429	0.956	-	.	Parent=mRNA189
+III	gt csa	exon	1618260	1618379	1	-	.	Parent=mRNA189
+III	gt csa	exon	1618719	1618832	0.991	-	.	Parent=mRNA189
+III	gt csa	exon	1618885	1618924	0.975	-	.	Parent=mRNA189
+III	gt csa	mRNA	1617142	1618924	.	-	.	ID=mRNA190;Parent=gene125;Target=yk1213c04.5 23 578 +,yk762h06.5 23 577 +,yk62a4.3 1 298 -,yk1597b03.3 164 675 -,yk1378f10.3 23 532 -,yk1213c04.3 23 531 -,yk341e7.3 1 300 -,yk762h06.3 1 322 -,yk333g8.3 1 300 -,yk289b11.3 1 300 -,yk1491d07.5 9 502 +,yk603g6.3 1 300 -,yk140f8.3 1 300 -,yk383e5.3 1 300 -,yk642a2.3 1 300 -,yk607b2.3 1 300 -,yk1410e10.5 9 492 +,yk1410e10.3 9 482 -,yk1491d07.3 9 481 -,yk342g4.3 1 300 -,yk383e5.5 1 386 +,yk140f8.5 1 381 +,yk599a12.5 1 360 +,yk494f1.5 1 360 +,yk342g4.5 1 377 +,yk333g8.5 1 360 +,yk452a10.5 1 360 +,yk642a2.5 1 376 +,yk603g6.5 1 360 +,yk607b2.5 1 376 +,yk341e7.5 1 372 +,yk289b11.5 13 375 +,BP 1 109 +,RP 1 109 +,yk81b11.5 1 330 +,yk175h6.5 1 222 +
+III	gt csa	exon	1617142	1617429	1	-	.	Parent=mRNA190
+III	gt csa	exon	1618260	1618379	1	-	.	Parent=mRNA190
+III	gt csa	exon	1618719	1618832	1	-	.	Parent=mRNA190
+III	gt csa	exon	1618885	1618924	0.975	-	.	Parent=mRNA190
+III	gt csa	mRNA	1617181	1618918	.	-	.	ID=mRNA191;Parent=gene125;Target=yk1405h09.3 1 391 -,yk1405h09.5 23 302 +
+III	gt csa	exon	1617181	1617429	0.972	-	.	Parent=mRNA191
+III	gt csa	exon	1618260	1618267	1	-	.	Parent=mRNA191
+III	gt csa	exon	1618731	1618832	1	-	.	Parent=mRNA191
+III	gt csa	exon	1618885	1618918	1	-	.	Parent=mRNA191
+###
+III	gt csa	gene	1617159	1617431	.	+	.	ID=gene126
+III	gt csa	mRNA	1617159	1617431	.	+	.	ID=mRNA192;Parent=gene126;Target=yk81b11.3 1 120 +,yk599a12.3 1 229 +
+III	gt csa	exon	1617159	1617431	0.987	+	.	Parent=mRNA192
+###
+III	gt csa	gene	1619718	1625773	.	+	.	ID=gene127
+III	gt csa	mRNA	1619718	1623324	.	+	.	ID=mRNA193;Parent=gene127;Target=yk515d7.5 1 369 +,yk1371g11.5 1 457 +,yk1502h06.5 23 475 +,yk1315f04.5 23 476 +,yk769d02.5 23 487 +,yk1620h12.5 23 600 +,yk566g5.5 1 360 +,yk434a10.5 1 374 +,yk416a11.5 1 240 +,yk413g4.5 1 360 +,yk458a7.5 1 360 +,yk498g8.5 1 360 +,yk344h2.5 1 360 +,yk416f6.5 1 360 +,yk432a10.5 1 360 +,yk638c1.5 1 360 +,yk631h7.5 1 360 +,yk538g9.5 1 360 +,yk499e12.5 1 360 +,yk678h2.5 1 360 +,yk534c9.5 1 360 +,yk591c9.5 1 360 +,yk629b10.5 1 360 +,yk460e6.5 1 360 +,yk668e7.5 1 240 +,yk586g3.5 1 360 +,yk394h5.5 1 360 +,yk542c5.5 1 360 +
+III	gt csa	exon	1619718	1619894	0.972	+	.	Parent=mRNA193
+III	gt csa	exon	1620044	1620352	1	+	.	Parent=mRNA193
+III	gt csa	exon	1623213	1623324	1	+	.	Parent=mRNA193
+III	gt csa	mRNA	1619718	1625773	.	+	.	ID=mRNA194;Parent=gene127;Target=yk515d7.5 1 369 +,L36035 1 1781 +,yk1614a02.5 1 633 +,yk1371g11.5 1 457 +,yk761g06.5 1 588 +,yk1502h06.5 23 475 +,yk1315f04.5 23 476 +,yk769d02.5 23 487 +,yk1545g12.5 23 531 +,yk1421h01.5 23 532 +,yk1399b07.5 23 533 +,yk1651f03.5 23 569 +,yk1664c02.5 22 568 +,yk1696f05.5 23 570 +,yk1528f03.5 23 570 +,yk1741c08.5 23 571 +,yk1444d01.5 23 571 +,yk1500h01.5 23 571 +,yk1645f10.5 23 572 +,yk1695g01.5 23 572 +,yk1592g09.5 23 572 +,yk1526g10.5 22 573 +,yk1522d12.5 21 573 +,yk1387h03.5 22 574 +,yk1526h01.5 23 575 +,yk1493d05.5 23 577 +,yk1363e02.5 23 577 +,yk1657c03.5 23 578 +,yk816g12.5 23 581 +,yk566g5.5 1 360 +,yk434a10.5 1 374 +,yk416a11.5 1 240 +,yk413g4.5 1 360 +,yk458a7.5 1 360 +,yk498g8.5 1 360 +,RP 1 568 +,BP 1 568 +,yk344h2.5 1 360 +,yk416f6.5 1 360 +,yk432a10.5 1 360 +,yk638c1.5 1 360 +,yk631h7.5 1 360 +,yk538g9.5 1 360 +,yk499e12.5 1 360 +,yk678h2.5 1 360 +,yk534c9.5 1 360 +,yk591c9.5 1 360 +,yk629b10.5 1 360 +,yk460e6.5 1 360 +,yk668e7.5 1 240 +,yk586g3.5 1 360 +,yk394h5.5 1 360 +,yk755a01.5 1 538 +,yk542c5.5 1 360 +,yk1004c09.5 1 603 +,AJ270981 1 670 +,yk455e6.5 1 360 +,yk405a9.5 1 360 +,yk343g7.5 1 360 +,CB104502 83 407 +,yk257b9.5 1 375 +,yk545c7.5 1 360 +,yk7b1.5 1 359 +,cm9c7.5 1 402 +,CEMSF82F 1 211 -,yk1315f04.3 1 607 -,yk1645f10.3 1 675 -,yk1528f03.3 1 674 -,yk1500h01.3 1 644 -,yk20e11.5 1 300 +,yk272b10.5 1 360 +,yk221g12.5 1 240 +
+III	gt csa	exon	1619718	1619894	0.972	+	.	Parent=mRNA194
+III	gt csa	exon	1620044	1620352	1	+	.	Parent=mRNA194
+III	gt csa	exon	1621416	1621808	0.997	+	.	Parent=mRNA194
+III	gt csa	exon	1623048	1623425	1	+	.	Parent=mRNA194
+III	gt csa	exon	1624423	1624740	1	+	.	Parent=mRNA194
+III	gt csa	exon	1625234	1625773	0.959	+	.	Parent=mRNA194
+III	gt csa	mRNA	1619718	1625773	.	+	.	ID=mRNA195;Parent=gene127;Target=yk515d7.5 1 369 +,yk1614a02.5 1 633 +,yk1371g11.5 1 457 +,yk761g06.5 1 588 +,yk1502h06.5 23 475 +,yk1315f04.5 23 476 +,yk769d02.5 23 487 +,yk1545g12.5 23 531 +,yk1421h01.5 23 532 +,yk1399b07.5 23 533 +,yk1651f03.5 23 569 +,yk1664c02.5 22 568 +,yk1696f05.5 23 570 +,yk1528f03.5 23 570 +,yk1741c08.5 23 571 +,yk1444d01.5 23 571 +,yk1500h01.5 23 571 +,yk1645f10.5 23 572 +,yk1695g01.5 23 572 +,yk1592g09.5 23 572 +,yk1526g10.5 22 573 +,yk1522d12.5 21 573 +,yk1387h03.5 22 574 +,yk1526h01.5 23 575 +,yk1493d05.5 23 577 +,yk1363e02.5 23 577 +,yk1657c03.5 23 578 +,yk816g12.5 23 581 +,yk566g5.5 1 360 +,yk434a10.5 1 374 +,yk416a11.5 1 240 +,yk413g4.5 1 360 +,yk458a7.5 1 360 +,yk498g8.5 1 360 +,yk344h2.5 1 360 +,yk416f6.5 1 360 +,yk432a10.5 1 360 +,yk638c1.5 1 360 +,yk631h7.5 1 360 +,yk538g9.5 1 360 +,yk499e12.5 1 360 +,yk678h2.5 1 360 +,yk534c9.5 1 360 +,yk591c9.5 1 360 +,yk629b10.5 1 360 +,yk460e6.5 1 360 +,yk668e7.5 1 240 +,yk586g3.5 1 360 +,yk394h5.5 1 360 +,yk755a01.5 1 538 +,yk542c5.5 1 360 +,yk777d06.5 1 646 +,cm9c7.5 1 402 +,CEMSF82F 1 211 -,yk1315f04.3 1 607 -,yk1645f10.3 1 675 -,yk1528f03.3 1 674 -,yk1500h01.3 1 644 -,yk20e11.5 1 300 +,yk272b10.5 1 360 +,yk221g12.5 1 240 +
+III	gt csa	exon	1619718	1619894	0.972	+	.	Parent=mRNA195
+III	gt csa	exon	1620044	1620352	1	+	.	Parent=mRNA195
+III	gt csa	exon	1621416	1621679	1	+	.	Parent=mRNA195
+III	gt csa	exon	1623279	1623425	1	+	.	Parent=mRNA195
+III	gt csa	exon	1624423	1624740	0.958	+	.	Parent=mRNA195
+III	gt csa	exon	1625234	1625773	0.959	+	.	Parent=mRNA195
+###
+III	gt csa	gene	1623119	1625784	.	-	.	ID=gene128
+III	gt csa	mRNA	1623119	1623227	.	-	.	ID=mRNA196;Parent=gene128;Target=yk125c12.5 1 111 +
+III	gt csa	exon	1623119	1623227	0.872	-	.	Parent=mRNA196
+III	gt csa	mRNA	1625267	1625784	.	-	.	ID=mRNA197;Parent=gene128;Target=yk755a01.3 1 509 +,yk1371g11.3 1 500 +,yk1741c08.3 1 502 +,yk1620h12.3 1 499 +,yk1522d12.3 1 505 +,yk1592g09.3 1 484 +,yk1502h06.3 1 491 +,yk1651f03.3 1 490 +,yk1545g12.3 1 481 +,yk1526h01.3 1 487 +,yk1664c02.3 1 489 +,yk1614a02.3 1 489 +,yk1657c03.3 1 488 +,yk1696f05.3 1 489 +,yk1493d05.3 1 490 +,yk777d06.3 1 470 +,yk769d02.3 1 474 +,yk816g12.3 1 487 +,yk1004c09.3 1 455 +,yk1399b07.3 1 434 +,yk1363e02.3 1 430 +,yk1695g01.3 1 430 +,yk1387h03.3 1 430 +
+III	gt csa	exon	1625267	1625784	0.904	-	.	Parent=mRNA197
+###
+III	gt csa	gene	1626655	1629966	.	+	.	ID=gene129
+III	gt csa	mRNA	1626655	1629966	.	+	.	ID=mRNA198;Parent=gene129;Target=yk473d1.5 1 360 +
+III	gt csa	exon	1626655	1626760	0.976	+	.	Parent=mRNA198
+III	gt csa	exon	1629399	1629553	0.994	+	.	Parent=mRNA198
+III	gt csa	exon	1629869	1629966	0.99	+	.	Parent=mRNA198
+###
+III	gt csa	gene	1630786	1634440	.	-	.	ID=gene130
+III	gt csa	mRNA	1630786	1634440	.	-	.	ID=mRNA199;Parent=gene130;Target=yk1400h01.3 1 669 -,yk1673f09.3 1 729 -,WP 1 505 +,yk1400h01.5 1 601 +
+III	gt csa	exon	1630786	1630944	1	-	.	Parent=mRNA199
+III	gt csa	exon	1630996	1631105	1	-	.	Parent=mRNA199
+III	gt csa	exon	1631542	1631671	1	-	.	Parent=mRNA199
+III	gt csa	exon	1632010	1632261	1	-	.	Parent=mRNA199
+III	gt csa	exon	1632410	1632578	1	-	.	Parent=mRNA199
+III	gt csa	exon	1632625	1632755	1	-	.	Parent=mRNA199
+III	gt csa	exon	1632894	1633031	1	-	.	Parent=mRNA199
+III	gt csa	exon	1633206	1633356	1	-	.	Parent=mRNA199
+III	gt csa	exon	1633716	1633864	1	-	.	Parent=mRNA199
+III	gt csa	exon	1634294	1634440	1	-	.	Parent=mRNA199
+###
+III	gt csa	gene	1636110	1637235	.	+	.	ID=gene131
+III	gt csa	mRNA	1636110	1637235	.	+	.	ID=mRNA200;Parent=gene131;Target=yk473d1.3 1 300 -
+III	gt csa	exon	1636110	1636349	0.95	+	.	Parent=mRNA200
+III	gt csa	exon	1637174	1637235	0.984	+	.	Parent=mRNA200
+###
+III	gt csa	gene	1638270	1638592	.	-	.	ID=gene132
+III	gt csa	mRNA	1638270	1638592	.	-	.	ID=mRNA201;Parent=gene132;Target=yk384f7.5 1 324 +
+III	gt csa	exon	1638270	1638592	0.98	-	.	Parent=mRNA201
+###
+III	gt csa	gene	1641900	1642133	.	+	.	ID=gene133
+III	gt csa	mRNA	1641900	1642133	.	+	.	ID=mRNA202;Parent=gene133;Target=yk296c8.3 1 221 +
+III	gt csa	exon	1641900	1641940	0.878	+	.	Parent=mRNA202
+III	gt csa	exon	1641952	1642133	0.846	+	.	Parent=mRNA202
+###
+III	gt csa	gene	1658190	1659850	.	-	.	ID=gene134
+III	gt csa	mRNA	1658190	1659850	.	-	.	ID=mRNA203;Parent=gene134;Target=yk1658h08.5 1 538 +,yk1178b07.5 23 565 +,yk869h10.3 179 673 -,yk1658h08.3 1 488 -,yk1178b07.3 23 514 -,yk1004a04.3 102 584 -,yk1016a02.3 128 579 -
+III	gt csa	exon	1658190	1658447	0.965	-	.	Parent=mRNA203
+III	gt csa	exon	1659566	1659850	1	-	.	Parent=mRNA203
+###
+III	gt csa	gene	1667817	1668608	.	-	.	ID=gene135
+III	gt csa	mRNA	1667817	1668608	.	-	.	ID=mRNA204;Parent=gene135;Target=WP 1 89 +,BP 1 75 +
+III	gt csa	exon	1667817	1667916	1	-	.	Parent=mRNA204
+III	gt csa	exon	1667967	1668062	1	-	.	Parent=mRNA204
+III	gt csa	exon	1668538	1668608	1	-	.	Parent=mRNA204
+###
+III	gt csa	gene	1672506	1672805	.	+	.	ID=gene136
+III	gt csa	mRNA	1672506	1672805	.	+	.	ID=mRNA205;Parent=gene136;Target=yk204f5.3 1 300 +
+III	gt csa	exon	1672506	1672805	0.97	+	.	Parent=mRNA205
+###
+III	gt csa	gene	1672790	1676716	.	-	.	ID=gene137
+III	gt csa	mRNA	1672790	1676716	.	-	.	ID=mRNA206;Parent=gene137;Target=RP 1 300 +,yk204f5.5 1 360 +
+III	gt csa	exon	1672790	1672941	0.778	-	.	Parent=mRNA206
+III	gt csa	exon	1673902	1674102	0.662	-	.	Parent=mRNA206
+III	gt csa	exon	1674163	1674368	0.916	-	.	Parent=mRNA206
+III	gt csa	exon	1675422	1675681	0.939	-	.	Parent=mRNA206
+III	gt csa	exon	1676386	1676474	1	-	.	Parent=mRNA206
+III	gt csa	exon	1676687	1676716	0.8	-	.	Parent=mRNA206
+###
+III	gt csa	gene	1683619	1688088	.	-	.	ID=gene138
+III	gt csa	mRNA	1683619	1688088	.	-	.	ID=mRNA207;Parent=gene138;Target=WP 1 768 +
+III	gt csa	exon	1683619	1683804	1	-	.	Parent=mRNA207
+III	gt csa	exon	1684468	1684619	1	-	.	Parent=mRNA207
+III	gt csa	exon	1684685	1684830	1	-	.	Parent=mRNA207
+III	gt csa	exon	1684885	1685265	1	-	.	Parent=mRNA207
+III	gt csa	exon	1686234	1686438	1	-	.	Parent=mRNA207
+III	gt csa	exon	1686481	1686665	1	-	.	Parent=mRNA207
+III	gt csa	exon	1687040	1688088	1	-	.	Parent=mRNA207
+###
+III	gt csa	gene	1692070	1695095	.	-	.	ID=gene139
+III	gt csa	mRNA	1692070	1695095	.	-	.	ID=mRNA208;Parent=gene139;Target=yk1146g09.3 1 616 -,WP 1 320 +
+III	gt csa	exon	1692070	1692299	0.983	-	.	Parent=mRNA208
+III	gt csa	exon	1692347	1692704	1	-	.	Parent=mRNA208
+III	gt csa	exon	1692749	1692889	1	-	.	Parent=mRNA208
+III	gt csa	exon	1694480	1694576	1	-	.	Parent=mRNA208
+III	gt csa	exon	1694902	1695095	1	-	.	Parent=mRNA208
+###
+III	gt csa	gene	1697210	1697895	.	+	.	ID=gene140
+III	gt csa	mRNA	1697210	1697895	.	+	.	ID=mRNA209;Parent=gene140;Target=yk1108h12.3 1 685 +
+III	gt csa	exon	1697210	1697895	0.997	+	.	Parent=mRNA209
+###
+III	gt csa	gene	1697728	1698972	.	-	.	ID=gene141
+III	gt csa	mRNA	1697728	1698972	.	-	.	ID=mRNA210;Parent=gene141;Target=WP 1 305 +,yk1146g09.5 1 585 +
+III	gt csa	exon	1697728	1697934	1	-	.	Parent=mRNA210
+III	gt csa	exon	1697997	1698621	1	-	.	Parent=mRNA210
+III	gt csa	exon	1698827	1698972	1	-	.	Parent=mRNA210
+###
+III	gt csa	gene	1701749	1702396	.	-	.	ID=gene142
+III	gt csa	mRNA	1701749	1702396	.	-	.	ID=mRNA211;Parent=gene142;Target=yk280d6.5 1 211 +
+III	gt csa	exon	1701749	1701916	1	-	.	Parent=mRNA211
+III	gt csa	exon	1702354	1702396	1	-	.	Parent=mRNA211
+###
+III	gt csa	gene	1703536	1705475	.	-	.	ID=gene143
+III	gt csa	mRNA	1703536	1705475	.	-	.	ID=mRNA212;Parent=gene143;Target=WP 1 286 +
+III	gt csa	exon	1703536	1703760	1	-	.	Parent=mRNA212
+III	gt csa	exon	1704360	1704909	1	-	.	Parent=mRNA212
+III	gt csa	exon	1705393	1705475	1	-	.	Parent=mRNA212
+###
+III	gt csa	gene	1706545	1714620	.	+	.	ID=gene144
+III	gt csa	mRNA	1706545	1713333	.	+	.	ID=mRNA213;Parent=gene144;Target=WP 1 1141 +
+III	gt csa	exon	1706545	1707024	1	+	.	Parent=mRNA213
+III	gt csa	exon	1708672	1708784	1	+	.	Parent=mRNA213
+III	gt csa	exon	1710053	1710138	1	+	.	Parent=mRNA213
+III	gt csa	exon	1710199	1711458	1	+	.	Parent=mRNA213
+III	gt csa	exon	1711552	1712548	1	+	.	Parent=mRNA213
+III	gt csa	exon	1712599	1712789	1	+	.	Parent=mRNA213
+III	gt csa	exon	1712852	1712921	1	+	.	Parent=mRNA213
+III	gt csa	exon	1713108	1713333	1	+	.	Parent=mRNA213
+III	gt csa	mRNA	1713421	1714620	.	+	.	ID=mRNA214;Parent=gene144;Target=WP 1 351 +
+III	gt csa	exon	1713421	1713545	1	+	.	Parent=mRNA214
+III	gt csa	exon	1713600	1713772	1	+	.	Parent=mRNA214
+III	gt csa	exon	1713817	1713953	1	+	.	Parent=mRNA214
+III	gt csa	exon	1714003	1714620	1	+	.	Parent=mRNA214
+###
+III	gt csa	gene	1716518	1721899	.	-	.	ID=gene145
+III	gt csa	mRNA	1716518	1721899	.	-	.	ID=mRNA215;Parent=gene145;Target=WP 1 1138 +
+III	gt csa	exon	1716518	1716778	1	-	.	Parent=mRNA215
+III	gt csa	exon	1717664	1717815	1	-	.	Parent=mRNA215
+III	gt csa	exon	1717868	1718037	1	-	.	Parent=mRNA215
+III	gt csa	exon	1718081	1718509	1	-	.	Parent=mRNA215
+III	gt csa	exon	1718571	1718778	1	-	.	Parent=mRNA215
+III	gt csa	exon	1719192	1719264	0.909	-	.	Parent=mRNA215
+III	gt csa	exon	1719730	1719854	1	-	.	Parent=mRNA215
+III	gt csa	exon	1719904	1721899	1	-	.	Parent=mRNA215
+###
+III	gt csa	gene	1723183	1733090	.	-	.	ID=gene146
+III	gt csa	mRNA	1723183	1724814	.	-	.	ID=mRNA216;Parent=gene146;Target=CEESX92F 1 375 -,yk405f8.3 1 300 -,yk405f8.5 1 375 +
+III	gt csa	exon	1723183	1723463	0.996	-	.	Parent=mRNA216
+III	gt csa	exon	1723517	1723621	1	-	.	Parent=mRNA216
+III	gt csa	exon	1724588	1724814	0.969	-	.	Parent=mRNA216
+III	gt csa	mRNA	1723183	1733090	.	-	.	ID=mRNA217;Parent=gene146;Target=CEESX92F 1 375 -,U15167 13 1528 +,yk793h08.3 1 731 -,yk1219f04.3 1 767 -,yk1236d10.3 1 706 -,yk405f8.3 1 300 -,BP 1 447 +,WP 1 446 +,yk793h08.5 23 628 +,yk1236d10.5 28 615 +
+III	gt csa	exon	1723183	1723463	0.996	-	.	Parent=mRNA217
+III	gt csa	exon	1723517	1723621	1	-	.	Parent=mRNA217
+III	gt csa	exon	1724588	1724810	1	-	.	Parent=mRNA217
+III	gt csa	exon	1725626	1725883	1	-	.	Parent=mRNA217
+III	gt csa	exon	1728036	1728084	1	-	.	Parent=mRNA217
+III	gt csa	exon	1729126	1729418	1	-	.	Parent=mRNA217
+III	gt csa	exon	1732543	1732692	1	-	.	Parent=mRNA217
+III	gt csa	exon	1732928	1733090	1	-	.	Parent=mRNA217
+III	gt csa	mRNA	1723354	1733090	.	-	.	ID=mRNA218;Parent=gene146;Target=RP 1 309 +,yk793h08.5 23 628 +,yk1236d10.5 28 615 +
+III	gt csa	exon	1723354	1723463	1	-	.	Parent=mRNA218
+III	gt csa	exon	1724588	1724810	0.796	-	.	Parent=mRNA218
+III	gt csa	exon	1725626	1725883	0.905	-	.	Parent=mRNA218
+III	gt csa	exon	1728036	1728084	1	-	.	Parent=mRNA218
+III	gt csa	exon	1729126	1729418	1	-	.	Parent=mRNA218
+III	gt csa	exon	1732543	1732692	1	-	.	Parent=mRNA218
+III	gt csa	exon	1732928	1733090	1	-	.	Parent=mRNA218
+###
+III	gt csa	gene	1752185	1754928	.	-	.	ID=gene147
+III	gt csa	mRNA	1752185	1752773	.	-	.	ID=mRNA219;Parent=gene147;Target=yk662d4.3 1 300 -
+III	gt csa	exon	1752185	1752363	1	-	.	Parent=mRNA219
+III	gt csa	exon	1752588	1752653	1	-	.	Parent=mRNA219
+III	gt csa	exon	1752719	1752773	1	-	.	Parent=mRNA219
+III	gt csa	mRNA	1752791	1754928	.	-	.	ID=mRNA220;Parent=gene147;Target=yk662d4.5 1 379 +
+III	gt csa	exon	1752791	1752886	0.865	-	.	Parent=mRNA220
+III	gt csa	exon	1753877	1754092	0.995	-	.	Parent=mRNA220
+III	gt csa	exon	1754866	1754928	1	-	.	Parent=mRNA220
+###
+III	gt csa	gene	1763529	1764816	.	+	.	ID=gene148
+III	gt csa	mRNA	1763529	1764816	.	+	.	ID=mRNA221;Parent=gene148;Target=yk58h5.5 1 239 +,yk411g7.5 1 360 +,yk261e7.5 1 180 +
+III	gt csa	exon	1763529	1763655	0.984	+	.	Parent=mRNA221
+III	gt csa	exon	1764575	1764816	0.996	+	.	Parent=mRNA221
+###
+III	gt csa	gene	1763606	1764825	.	-	.	ID=gene149
+III	gt csa	mRNA	1763606	1764825	.	-	.	ID=mRNA222;Parent=gene149;Target=yk261e7.3 1 300 +,yk411g7.3 1 300 +
+III	gt csa	exon	1763606	1763648	1	-	.	Parent=mRNA222
+III	gt csa	exon	1764567	1764825	0.95	-	.	Parent=mRNA222
+###
+III	gt csa	gene	1771090	1771264	.	-	.	ID=gene150
+III	gt csa	mRNA	1771090	1771264	.	-	.	ID=mRNA223;Parent=gene150;Target=yk581g6.5 186 360 +
+III	gt csa	exon	1771090	1771264	0.954	-	.	Parent=mRNA223
+###
+III	gt csa	gene	1772556	1774226	.	-	.	ID=gene151
+III	gt csa	mRNA	1772556	1774226	.	-	.	ID=mRNA224;Parent=gene151;Target=yk1484e10.3 1 505 -,yk655d4.3 1 300 -,yk541b2.3 1 300 -,yk550e12.3 1 300 -
+III	gt csa	exon	1772556	1772820	0.943	-	.	Parent=mRNA224
+III	gt csa	exon	1773987	1774226	0.946	-	.	Parent=mRNA224
+###
+III	gt csa	gene	1775021	1777597	.	-	.	ID=gene152
+III	gt csa	mRNA	1775021	1777406	.	-	.	ID=mRNA225;Parent=gene152;Target=yk543e1.5 1 360 +,yk541b2.5 7 360 +
+III	gt csa	exon	1775021	1775112	1	-	.	Parent=mRNA225
+III	gt csa	exon	1775494	1775616	0.992	-	.	Parent=mRNA225
+III	gt csa	exon	1775887	1775990	1	-	.	Parent=mRNA225
+III	gt csa	exon	1777076	1777202	1	-	.	Parent=mRNA225
+III	gt csa	exon	1777260	1777406	0.966	-	.	Parent=mRNA225
+III	gt csa	mRNA	1775021	1777597	.	-	.	ID=mRNA226;Parent=gene152;Target=yk543e1.5 1 360 +,yk1484e10.5 1 544 +,yk550e12.5 1 380 +,yk618c5.5 1 360 +,yk276b6.5 1 360 +,yk549f11.5 1 359 +,yk655d4.5 1 359 +,yk444c12.5 1 360 +,yk411g1.5 14 360 +
+III	gt csa	exon	1775021	1775112	1	-	.	Parent=mRNA226
+III	gt csa	exon	1775494	1775616	0.992	-	.	Parent=mRNA226
+III	gt csa	exon	1775887	1775990	1	-	.	Parent=mRNA226
+III	gt csa	exon	1777076	1777214	1	-	.	Parent=mRNA226
+III	gt csa	exon	1777260	1777406	0.993	-	.	Parent=mRNA226
+III	gt csa	exon	1777492	1777597	1	-	.	Parent=mRNA226
+###
+III	gt csa	gene	1777799	1778203	.	+	.	ID=gene153
+III	gt csa	mRNA	1777799	1778203	.	+	.	ID=mRNA227;Parent=gene153;Target=RP 1 41 +,BP 1 41 +
+III	gt csa	exon	1777799	1777904	1	+	.	Parent=mRNA227
+III	gt csa	exon	1778187	1778203	1	+	.	Parent=mRNA227
+###
+III	gt csa	gene	1785208	1785635	.	-	.	ID=gene154
+III	gt csa	mRNA	1785208	1785635	.	-	.	ID=mRNA228;Parent=gene154;Target=yk1303c12.3 24 419 +
+III	gt csa	exon	1785208	1785302	0.989	-	.	Parent=mRNA228
+III	gt csa	exon	1785317	1785531	0.919	-	.	Parent=mRNA228
+III	gt csa	exon	1785550	1785635	0.988	-	.	Parent=mRNA228
+###
+III	gt csa	gene	1807719	1818322	.	-	.	ID=gene155
+III	gt csa	mRNA	1807719	1809245	.	-	.	ID=mRNA229;Parent=gene155;Target=yk750h11.5 1 183 +,yk1048a06.3 1 538 -,yk872f09.3 1 534 -,yk1102f12.3 1 536 -,yk1354g01.3 1 700 -,yk1490a04.3 1 496 -,yk530e1.3 1 300 -,yk264d2.3 1 300 -,yk501h12.3 1 300 -,yk407d6.3 1 300 -
+III	gt csa	exon	1807719	1807889	0.959	-	.	Parent=mRNA229
+III	gt csa	exon	1807944	1808358	1	-	.	Parent=mRNA229
+III	gt csa	exon	1809107	1809245	0.953	-	.	Parent=mRNA229
+III	gt csa	mRNA	1807719	1815816	.	-	.	ID=mRNA230;Parent=gene155;Target=yk750h11.5 1 183 +,yk871f07.3 1 702 -,yk1048a06.3 1 538 -,yk872f09.3 1 534 -,yk1102f12.3 1 536 -,yk1314a11.3 1 729 -,yk1091a04.3 1 689 -,yk1012a09.3 1 682 -,yk1297g02.3 1 682 -,yk1166d10.3 1 717 -,yk1036a09.3 1 696 -,yk1490a04.3 1 496 -,yk530e1.3 1 300 -,yk264d2.3 1 300 -,yk501h12.3 1 300 -,yk407d6.3 1 300 -,yk1755a05.3 1 696 -,WP 1 717 +,yk1048a06.5 1 607 +,yk264d2.5 1 240 +,yk501h12.5 1 375 +,yk407d6.5 1 360 +,yk1091a04.5 1 262 +,yk1755a05.5 1 598 +,yk1036a09.5 11 576 +,yk872f09.5 14 372 +,yk530e1.5 44 360 +
+III	gt csa	exon	1807719	1807889	0.959	-	.	Parent=mRNA230
+III	gt csa	exon	1807944	1808363	1	-	.	Parent=mRNA230
+III	gt csa	exon	1809107	1809381	1	-	.	Parent=mRNA230
+III	gt csa	exon	1809679	1809822	1	-	.	Parent=mRNA230
+III	gt csa	exon	1811041	1811363	1	-	.	Parent=mRNA230
+III	gt csa	exon	1812744	1813091	1	-	.	Parent=mRNA230
+III	gt csa	exon	1814386	1814835	1	-	.	Parent=mRNA230
+III	gt csa	exon	1815432	1815557	1	-	.	Parent=mRNA230
+III	gt csa	exon	1815760	1815816	0.269	-	.	Parent=mRNA230
+III	gt csa	mRNA	1809707	1818322	.	-	.	ID=mRNA231;Parent=gene155;Target=yk1048a06.5 1 607 +,yk264d2.5 1 240 +,yk501h12.5 1 375 +,yk407d6.5 1 360 +,yk1091a04.5 1 262 +,yk1755a05.5 1 598 +,yk1036a09.5 11 576 +,yk1166d10.5 1 559 +,yk1102f12.5 23 595 +,yk1314a11.5 1 585 +,yk1012a09.5 22 578 +,yk1297g02.5 23 533 +,yk1490a04.5 23 510 +,yk872f09.5 14 372 +,yk530e1.5 44 360 +
+III	gt csa	exon	1809707	1809822	0.983	-	.	Parent=mRNA231
+III	gt csa	exon	1811041	1811363	1	-	.	Parent=mRNA231
+III	gt csa	exon	1812744	1813091	1	-	.	Parent=mRNA231
+III	gt csa	exon	1814386	1814835	0.998	-	.	Parent=mRNA231
+III	gt csa	exon	1815432	1815557	1	-	.	Parent=mRNA231
+III	gt csa	exon	1818254	1818322	0.906	-	.	Parent=mRNA231
+###
+III	gt csa	gene	1807745	1807902	.	+	.	ID=gene156
+III	gt csa	mRNA	1807745	1807902	.	+	.	ID=mRNA232;Parent=gene156;Target=yk750h11.3 1 157 +
+III	gt csa	exon	1807745	1807902	0.968	+	.	Parent=mRNA232
+###
+III	gt csa	gene	1821203	1824103	.	-	.	ID=gene157
+III	gt csa	mRNA	1821203	1822732	.	-	.	ID=mRNA233;Parent=gene157;Target=yk305g9.3 1 300 -,yk383c1.3 1 300 -,yk412f9.3 1 300 -,yk665f3.3 1 300 -,yk383c1.5 1 360 +
+III	gt csa	exon	1821203	1821412	1	-	.	Parent=mRNA233
+III	gt csa	exon	1821473	1821557	1	-	.	Parent=mRNA233
+III	gt csa	exon	1821604	1821711	1	-	.	Parent=mRNA233
+III	gt csa	exon	1822654	1822732	1	-	.	Parent=mRNA233
+III	gt csa	mRNA	1822859	1824103	.	-	.	ID=mRNA234;Parent=gene157;Target=yk665f3.5 1 377 +,yk305g9.5 1 376 +
+III	gt csa	exon	1822859	1823006	1	-	.	Parent=mRNA234
+III	gt csa	exon	1823643	1823760	1	-	.	Parent=mRNA234
+III	gt csa	exon	1823964	1824103	1	-	.	Parent=mRNA234
+###
+III	gt csa	gene	1824908	1831849	.	+	.	ID=gene158
+III	gt csa	mRNA	1824908	1831849	.	+	.	ID=mRNA235;Parent=gene158;Target=yk1471g06.5 23 598 +
+III	gt csa	exon	1824908	1824965	1	+	.	Parent=mRNA235
+III	gt csa	exon	1825145	1825214	1	+	.	Parent=mRNA235
+III	gt csa	exon	1827228	1827355	1	+	.	Parent=mRNA235
+III	gt csa	exon	1830455	1830596	1	+	.	Parent=mRNA235
+III	gt csa	exon	1830776	1830907	1	+	.	Parent=mRNA235
+III	gt csa	exon	1831804	1831849	1	+	.	Parent=mRNA235
+III	gt csa	mRNA	1824936	1827299	.	+	.	ID=mRNA236;Parent=gene158;Target=yk428b11.5 1 360 +
+III	gt csa	exon	1824936	1824965	0.85	+	.	Parent=mRNA236
+III	gt csa	exon	1825145	1825400	0.963	+	.	Parent=mRNA236
+III	gt csa	exon	1827228	1827299	0.986	+	.	Parent=mRNA236
+###
+III	gt csa	gene	1833860	1834336	.	-	.	ID=gene159
+III	gt csa	mRNA	1833860	1834336	.	-	.	ID=mRNA237;Parent=gene159;Target=yk1471g06.3 1 477 +,yk428b11.3 1 180 +
+III	gt csa	exon	1833860	1834336	0.918	-	.	Parent=mRNA237
+###
+III	gt csa	gene	1834502	1842946	.	+	.	ID=gene160
+III	gt csa	mRNA	1834502	1842946	.	+	.	ID=mRNA238;Parent=gene160;Target=yk1579g04.5 24 347 +,yk392a4.5 7 371 +,yk1171d07.5 23 574 +,yk1521f03.5 23 574 +,yk1520e11.5 23 587 +,yk1537h08.5 23 589 +,yk614f12.5 1 360 +,yk273b4.5 1 360 +,yk1094h04.5 1 598 +,yk93h5.5 1 292 +,yk1521e10.5 1 446 +,yk460h8.5 1 360 +,yk240e10.5 1 374 +,yk163b1.5 2 360 +,yk14g9.5 1 360 +
+III	gt csa	exon	1834502	1834595	1	+	.	Parent=mRNA238
+III	gt csa	exon	1836122	1836195	1	+	.	Parent=mRNA238
+III	gt csa	exon	1836253	1836355	1	+	.	Parent=mRNA238
+III	gt csa	exon	1837108	1837249	1	+	.	Parent=mRNA238
+III	gt csa	exon	1838335	1838703	1	+	.	Parent=mRNA238
+III	gt csa	exon	1838765	1838877	1	+	.	Parent=mRNA238
+III	gt csa	exon	1840158	1840486	0.988	+	.	Parent=mRNA238
+III	gt csa	exon	1841743	1841899	0.987	+	.	Parent=mRNA238
+III	gt csa	exon	1842859	1842946	0.966	+	.	Parent=mRNA238
+###
+III	gt csa	gene	1844378	1846728	.	+	.	ID=gene161
+III	gt csa	mRNA	1844378	1846728	.	+	.	ID=mRNA239;Parent=gene161;Target=yk1520e11.3 1 527 -,yk1521e10.3 1 432 -,yk1171d07.3 1 410 -
+III	gt csa	exon	1844378	1844512	0.904	+	.	Parent=mRNA239
+III	gt csa	exon	1846336	1846728	0.919	+	.	Parent=mRNA239
+###
+III	gt csa	gene	1846366	1846740	.	-	.	ID=gene162
+III	gt csa	mRNA	1846366	1846740	.	-	.	ID=mRNA240;Parent=gene162;Target=yk1094h04.3 1 361 +,yk14g9.3 1 373 +,yk1537h08.3 1 247 +,yk1521f03.3 1 204 +,yk1579g04.3 1 199 +,yk93h5.3 1 120 +
+III	gt csa	exon	1846366	1846740	0.965	-	.	Parent=mRNA240
+###
+III	gt csa	gene	1849052	1852447	.	+	.	ID=gene163
+III	gt csa	mRNA	1849052	1850827	.	+	.	ID=mRNA241;Parent=gene163;Target=yk532h6.5 1 381 +,yk332d10.5 1 360 +,yk506e3.5 1 383 +,yk174g9.5 1 360 +,yk521e8.5 1 360 +
+III	gt csa	exon	1849052	1849121	0.964	+	.	Parent=mRNA241
+III	gt csa	exon	1849263	1849349	1	+	.	Parent=mRNA241
+III	gt csa	exon	1849404	1849502	1	+	.	Parent=mRNA241
+III	gt csa	exon	1850353	1850445	1	+	.	Parent=mRNA241
+III	gt csa	exon	1850707	1850827	1	+	.	Parent=mRNA241
+III	gt csa	mRNA	1849294	1850837	.	+	.	ID=mRNA242;Parent=gene163;Target=yk487d2.5 1 381 +
+III	gt csa	exon	1849294	1849350	0.939	+	.	Parent=mRNA242
+III	gt csa	exon	1849404	1849502	1	+	.	Parent=mRNA242
+III	gt csa	exon	1850353	1850445	1	+	.	Parent=mRNA242
+III	gt csa	exon	1850707	1850837	0.992	+	.	Parent=mRNA242
+III	gt csa	mRNA	1851033	1852447	.	+	.	ID=mRNA243;Parent=gene163;Target=yk66f12.5 1 360 +
+III	gt csa	exon	1851033	1851113	1	+	.	Parent=mRNA243
+III	gt csa	exon	1852169	1852447	0.993	+	.	Parent=mRNA243
+###
+III	gt csa	gene	1852263	1852877	.	-	.	ID=gene164
+III	gt csa	mRNA	1852263	1852562	.	-	.	ID=mRNA244;Parent=gene164;Target=yk334d11.3 1 300 +
+III	gt csa	exon	1852263	1852562	0.997	-	.	Parent=mRNA244
+III	gt csa	mRNA	1852697	1852877	.	-	.	ID=mRNA245;Parent=gene164;Target=yk66f12.3 1 180 +
+III	gt csa	exon	1852697	1852877	0.925	-	.	Parent=mRNA245
+###
+III	gt csa	gene	1859880	1864478	.	+	.	ID=gene165
+III	gt csa	mRNA	1859880	1860325	.	+	.	ID=mRNA246;Parent=gene165;Target=yk521e3.3 1 281 -,AF150086 1 252 +,RP 1 84 +,BP 1 84 +,yk521e3.5 1 337 +
+III	gt csa	exon	1859880	1860055	0.983	+	.	Parent=mRNA246
+III	gt csa	exon	1860146	1860325	0.961	+	.	Parent=mRNA246
+III	gt csa	mRNA	1860418	1864478	.	+	.	ID=mRNA247;Parent=gene165;Target=yk1220d04.5 23 647 +,yk772h10.5 21 646 +
+III	gt csa	exon	1860418	1860607	1	+	.	Parent=mRNA247
+III	gt csa	exon	1861659	1861816	1	+	.	Parent=mRNA247
+III	gt csa	exon	1864021	1864120	1	+	.	Parent=mRNA247
+III	gt csa	exon	1864301	1864478	1	+	.	Parent=mRNA247
+###
+III	gt csa	gene	1872178	1874286	.	+	.	ID=gene166
+III	gt csa	mRNA	1872178	1874286	.	+	.	ID=mRNA248;Parent=gene166;Target=yk1220d04.3 1 668 -
+III	gt csa	exon	1872178	1872266	1	+	.	Parent=mRNA248
+III	gt csa	exon	1873707	1874286	0.988	+	.	Parent=mRNA248
+###
+III	gt csa	gene	1874643	1877104	.	+	.	ID=gene167
+III	gt csa	mRNA	1874643	1877104	.	+	.	ID=mRNA249;Parent=gene167;Target=yk772h10.3 1 592 -
+III	gt csa	exon	1874643	1874750	1	+	.	Parent=mRNA249
+III	gt csa	exon	1875972	1876159	0.995	+	.	Parent=mRNA249
+III	gt csa	exon	1876806	1877104	0.983	+	.	Parent=mRNA249
+###
+III	gt csa	gene	1878354	1880837	.	+	.	ID=gene168
+III	gt csa	mRNA	1878354	1880828	.	+	.	ID=mRNA250;Parent=gene168;Target=yk1169f09.5 20 395 +,yk1473c02.3 1 783 -,yk1169f09.3 1 705 -
+III	gt csa	exon	1878354	1878595	0.996	+	.	Parent=mRNA250
+III	gt csa	exon	1879233	1879361	1	+	.	Parent=mRNA250
+III	gt csa	exon	1879426	1879560	1	+	.	Parent=mRNA250
+III	gt csa	exon	1880174	1880328	1	+	.	Parent=mRNA250
+III	gt csa	exon	1880625	1880828	1	+	.	Parent=mRNA250
+III	gt csa	mRNA	1878558	1878800	.	+	.	ID=mRNA251;Parent=gene168;Target=yk1251d11.5 1 243 +
+III	gt csa	exon	1878558	1878800	0.988	+	.	Parent=mRNA251
+III	gt csa	mRNA	1879975	1880837	.	+	.	ID=mRNA252;Parent=gene168;Target=yk1512g12.3 1 565 -
+III	gt csa	exon	1879975	1880328	1	+	.	Parent=mRNA252
+III	gt csa	exon	1880625	1880837	0.991	+	.	Parent=mRNA252
+###
+III	gt csa	gene	1880375	1880798	.	-	.	ID=gene169
+III	gt csa	mRNA	1880375	1880798	.	-	.	ID=mRNA253;Parent=gene169;Target=yk1251d11.3 1 424 +
+III	gt csa	exon	1880375	1880798	0.979	-	.	Parent=mRNA253
+###
+III	gt csa	gene	1883596	1886207	.	-	.	ID=gene170
+III	gt csa	mRNA	1883596	1886207	.	-	.	ID=mRNA254;Parent=gene170;Target=WP 1 773 +
+III	gt csa	exon	1883596	1884789	1	-	.	Parent=mRNA254
+III	gt csa	exon	1884882	1885107	1	-	.	Parent=mRNA254
+III	gt csa	exon	1885194	1885938	1	-	.	Parent=mRNA254
+III	gt csa	exon	1885987	1886117	1	-	.	Parent=mRNA254
+III	gt csa	exon	1886185	1886207	1	-	.	Parent=mRNA254
+###
+III	gt csa	gene	1891444	1893894	.	-	.	ID=gene171
+III	gt csa	mRNA	1891444	1893894	.	-	.	ID=mRNA255;Parent=gene171;Target=yk233a7.3 1 300 -,yk233a7.5 1 345 +
+III	gt csa	exon	1891444	1891508	1	-	.	Parent=mRNA255
+III	gt csa	exon	1891927	1892079	0.993	-	.	Parent=mRNA255
+III	gt csa	exon	1893273	1893544	0.969	-	.	Parent=mRNA255
+III	gt csa	exon	1893825	1893894	0.929	-	.	Parent=mRNA255
+###
+III	gt csa	gene	1906128	1906538	.	+	.	ID=gene172
+III	gt csa	mRNA	1906128	1906538	.	+	.	ID=mRNA256;Parent=gene172;Target=yk1723c04.5 1 340 +
+III	gt csa	exon	1906128	1906256	0.953	+	.	Parent=mRNA256
+III	gt csa	exon	1906330	1906538	0.967	+	.	Parent=mRNA256
+###
+III	gt csa	gene	1907887	1910519	.	+	.	ID=gene173
+III	gt csa	mRNA	1907887	1910519	.	+	.	ID=mRNA257;Parent=gene173;Target=yk1723c04.3 1 651 -
+III	gt csa	exon	1907887	1907987	0.901	+	.	Parent=mRNA257
+III	gt csa	exon	1908176	1908310	1	+	.	Parent=mRNA257
+III	gt csa	exon	1909274	1909432	1	+	.	Parent=mRNA257
+III	gt csa	exon	1910268	1910519	1	+	.	Parent=mRNA257
+###
+III	gt csa	gene	1927666	1929298	.	+	.	ID=gene174
+III	gt csa	mRNA	1927666	1929298	.	+	.	ID=mRNA258;Parent=gene174;Target=yk1053g10.5 17 224 +,yk1716g06.5 1 386 +
+III	gt csa	exon	1927666	1927938	1	+	.	Parent=mRNA258
+III	gt csa	exon	1929095	1929298	0.995	+	.	Parent=mRNA258
+###
+III	gt csa	gene	1930845	1931242	.	+	.	ID=gene175
+III	gt csa	mRNA	1930845	1931242	.	+	.	ID=mRNA259;Parent=gene175;Target=yk1564h09.5 1 398 +
+III	gt csa	exon	1930845	1931242	0.985	+	.	Parent=mRNA259
+###
+III	gt csa	gene	1932215	1939546	.	+	.	ID=gene176
+III	gt csa	mRNA	1932215	1939375	.	+	.	ID=mRNA260;Parent=gene176;Target=yk1222g11.5 1 557 +,yk652e1.5 1 383 +,yk205e6.5 1 373 +,yk677h7.5 1 354 +,yk638h1.5 1 360 +,yk205h4.5 1 360 +,yk252c12.3 1 300 +
+III	gt csa	exon	1932215	1932363	1	+	.	Parent=mRNA260
+III	gt csa	exon	1934173	1934512	1	+	.	Parent=mRNA260
+III	gt csa	exon	1936356	1936529	1	+	.	Parent=mRNA260
+III	gt csa	exon	1937670	1938089	1	+	.	Parent=mRNA260
+III	gt csa	exon	1939008	1939375	0.983	+	.	Parent=mRNA260
+III	gt csa	mRNA	1934173	1939534	.	+	.	ID=mRNA261;Parent=gene176;Target=yk1716g06.3 35 413 -
+III	gt csa	exon	1934173	1934226	0.87	+	.	Parent=mRNA261
+III	gt csa	exon	1939167	1939225	0.814	+	.	Parent=mRNA261
+III	gt csa	exon	1939269	1939534	0.94	+	.	Parent=mRNA261
+III	gt csa	mRNA	1938000	1939546	.	+	.	ID=mRNA262;Parent=gene176;Target=yk1596d03.3 1 585 -,yk252c12.3 1 300 +
+III	gt csa	exon	1938000	1938047	0.833	+	.	Parent=mRNA262
+III	gt csa	exon	1939008	1939546	0.954	+	.	Parent=mRNA262
+III	gt csa	mRNA	1938966	1939375	.	+	.	ID=mRNA263;Parent=gene176;Target=yk440d6.5 1 360 +,yk252c12.3 1 300 +
+III	gt csa	exon	1938966	1939375	0.983	+	.	Parent=mRNA263
+###
+III	gt csa	gene	1939092	1943594	.	-	.	ID=gene177
+III	gt csa	mRNA	1939092	1939557	.	-	.	ID=mRNA264;Parent=gene177;Target=yk864f11.3 1 360 +,CEESA81F 1 359 +,yk1618b12.3 1 264 +,yk1222g11.3 1 206 +
+III	gt csa	exon	1939092	1939557	0.969	-	.	Parent=mRNA264
+III	gt csa	mRNA	1939558	1943594	.	-	.	ID=mRNA265;Parent=gene177;Target=yk95d7.3 1 326 -,yk410b4.3 1 300 -,yk410b4.5 1 360 +,yk95d7.5 1 309 +,yk56h1.5 1 292 +
+III	gt csa	exon	1939558	1939643	1	-	.	Parent=mRNA265
+III	gt csa	exon	1940648	1940818	1	-	.	Parent=mRNA265
+III	gt csa	exon	1941527	1941644	1	-	.	Parent=mRNA265
+III	gt csa	exon	1941693	1941742	1	-	.	Parent=mRNA265
+III	gt csa	exon	1943454	1943594	1	-	.	Parent=mRNA265
+###
+III	gt csa	gene	1945109	1961934	.	-	.	ID=gene178
+III	gt csa	mRNA	1945109	1950246	.	-	.	ID=mRNA266;Parent=gene178;Target=AB244413 1 1755 +,yk604a10.3 1 300 -,yk411e9.3 1 300 -,cm12f1.5 1 418 +,yk411e9.5 1 360 +,yk604a10.5 1 360 +
+III	gt csa	exon	1945109	1945261	1	-	.	Parent=mRNA266
+III	gt csa	exon	1946058	1946234	1	-	.	Parent=mRNA266
+III	gt csa	exon	1946292	1946488	1	-	.	Parent=mRNA266
+III	gt csa	exon	1947633	1948044	1	-	.	Parent=mRNA266
+III	gt csa	exon	1948959	1949134	1	-	.	Parent=mRNA266
+III	gt csa	exon	1949218	1949422	1	-	.	Parent=mRNA266
+III	gt csa	exon	1949713	1949872	1	-	.	Parent=mRNA266
+III	gt csa	exon	1949921	1950067	1	-	.	Parent=mRNA266
+III	gt csa	exon	1950119	1950246	1	-	.	Parent=mRNA266
+III	gt csa	mRNA	1951049	1951408	.	-	.	ID=mRNA267;Parent=gene178;Target=yk492f11.3 1 300 +,yk453a11.3 1 300 +,yk199f2.3 1 300 +,yk558h2.3 1 300 +,yk281d11.3 1 300 +,yk278c2.3 1 300 +,yk229f4.3 1 300 +,yk483c3.3 1 300 +,yk615h4.3 1 300 +,yk647d12.3 1 300 +,yk448f2.3 1 283 +,yk551b11.3 1 284 +,yk448c12.3 1 289 +,yk457d7.3 1 293 +,yk446a5.3 1 300 +,yk664b3.3 1 300 +,yk602c4.3 1 285 +,yk253d3.3 1 287 +,yk516c9.3 1 288 +,yk645g1.3 1 288 +,yk646a8.3 1 288 +,yk140h11.3 1 289 +,yk116e3.3 1 338 +,yk60a11.3 1 336 +,yk497d11.3 1 269 +,yk330h9.3 1 270 +,yk800a07.3 1 300 +,yk494c8.3 1 240 +,yk373f11.3 1 240 +,yk222d9.3 1 227 +
+III	gt csa	exon	1951049	1951408	0.991	-	.	Parent=mRNA267
+III	gt csa	mRNA	1952007	1961934	.	-	.	ID=mRNA268;Parent=gene178;Target=yk1042c08.3 1 509 -,yk1611f05.3 1 724 -,yk1039c09.3 1 700 -,yk1339d07.3 1 770 -,yk1391f02.3 1 685 -,yk1444h05.3 1 727 -,yk1720g01.3 1 727 -,yk1372c05.3 1 768 -,yk1372c06.3 1 792 -,yk837g07.3 1 699 -,yk1474e07.3 1 717 -,yk63f12.3 1 325 -,yk1618b03.3 1 688 -,yk1672e09.3 1 756 -,yk1483a12.3 1 757 -,yk1556a02.3 1 756 -,yk1592b08.3 1 737 -,yk1755g08.3 1 759 -,yk376f5.3 1 300 -,yk312g4.3 1 300 -,yk474e3.3 1 300 -,yk603e10.3 1 300 -,yk470a7.3 1 300 -,yk453c10.3 1 300 -,yk645b1.3 1 300 -,yk577a10.3 1 300 -,yk163e8.3 1 300 -,yk142b8.3 1 300 -,yk187h9.3 1 300 -,yk740a4.3 1 300 -,yk520b2.5 1 358 +,yk577a10.5 1 360 +,yk1703a04.5 1 564 +,yk163e8.5 1 360 +,yk474e3.5 1 360 +,yk1672e09.5 15 652 +,yk1556a02.5 17 620 +,yk470a7.5 1 360 +,yk1339d07.5 23 658 +,yk1042c08.5 23 622 +,yk1660c12.5 23 621 +,yk1474e07.5 24 621 +,yk1618b03.5 23 619 +,yk1720g01.5 22 616 +,yk1611f05.5 23 616 +,yk1755g08.5 23 611 +,yk1444h05.5 23 606 +,yk1039c09.5 23 597 +,yk1592b08.5 23 595 +,yk1654a06.5 23 578 +,yk773f01.5 23 532 +,yk1483a12.5 23 518 +,yk645b1.5 1 383 +,yk603e10.5 1 382 +,yk228a2.5 1 360 +,yk312g4.5 1 372 +,yk837g07.5 1 376 +,yk376f5.5 1 360 +,yk453c10.5 1 360 +,yk142b8.5 1 372 +,yk63f12.5 1 320 +,yk740a4.5 23 340 +,yk187h9.5 1 240 +,yk1391f02.5 23 218 +
+III	gt csa	exon	1952007	1952267	0.99	-	.	Parent=mRNA268
+III	gt csa	exon	1953525	1953831	1	-	.	Parent=mRNA268
+III	gt csa	exon	1954624	1954728	1	-	.	Parent=mRNA268
+III	gt csa	exon	1956031	1956288	0.971	-	.	Parent=mRNA268
+III	gt csa	exon	1957574	1957668	1	-	.	Parent=mRNA268
+III	gt csa	exon	1957716	1957848	1	-	.	Parent=mRNA268
+III	gt csa	exon	1959816	1960116	1	-	.	Parent=mRNA268
+III	gt csa	exon	1961827	1961934	1	-	.	Parent=mRNA268
+III	gt csa	mRNA	1952007	1961934	.	-	.	ID=mRNA269;Parent=gene178;Target=yk1042c08.3 1 509 -,yk63f12.3 1 325 -,yk376f5.3 1 300 -,yk312g4.3 1 300 -,yk474e3.3 1 300 -,yk603e10.3 1 300 -,yk470a7.3 1 300 -,yk453c10.3 1 300 -,yk645b1.3 1 300 -,yk577a10.3 1 300 -,yk163e8.3 1 300 -,yk142b8.3 1 300 -,yk187h9.3 1 300 -,yk740a4.3 1 300 -,BP 1 492 +,yk520b2.5 1 358 +,yk577a10.5 1 360 +,yk163e8.5 1 360 +,yk474e3.5 1 360 +,yk1672e09.5 15 652 +,yk1556a02.5 17 620 +,yk470a7.5 1 360 +,yk1339d07.5 23 658 +,yk1042c08.5 23 622 +,yk1660c12.5 23 621 +,yk1474e07.5 24 621 +,yk1618b03.5 23 619 +,yk1720g01.5 22 616 +,yk1611f05.5 23 616 +,yk1755g08.5 23 611 +,yk1444h05.5 23 606 +,yk1039c09.5 23 597 +,yk1592b08.5 23 595 +,yk1654a06.5 23 578 +,yk773f01.5 23 532 +,yk1483a12.5 23 518 +,yk645b1.5 1 383 +,yk603e10.5 1 382 +,yk228a2.5 1 360 +,yk312g4.5 1 372 +,yk837g07.5 1 376 +,yk376f5.5 1 360 +,yk453c10.5 1 360 +,yk142b8.5 1 372 +,yk63f12.5 1 320 +,yk740a4.5 23 340 +,yk187h9.5 1 240 +,yk1391f02.5 23 218 +
+III	gt csa	exon	1952007	1952267	0.99	-	.	Parent=mRNA269
+III	gt csa	exon	1953525	1953878	0.832	-	.	Parent=mRNA269
+III	gt csa	exon	1954624	1954728	0.987	-	.	Parent=mRNA269
+III	gt csa	exon	1956031	1956288	0.913	-	.	Parent=mRNA269
+III	gt csa	exon	1957574	1957668	1	-	.	Parent=mRNA269
+III	gt csa	exon	1957716	1957848	1	-	.	Parent=mRNA269
+III	gt csa	exon	1959816	1960116	1	-	.	Parent=mRNA269
+III	gt csa	exon	1961827	1961934	1	-	.	Parent=mRNA269
+III	gt csa	mRNA	1952017	1961934	.	-	.	ID=mRNA270;Parent=gene178;Target=yk1660c12.3 1 703 -,yk63f12.3 1 325 -,yk376f5.3 1 300 -,yk312g4.3 1 300 -,yk474e3.3 1 300 -,yk603e10.3 1 300 -,yk470a7.3 1 300 -,yk453c10.3 1 300 -,yk645b1.3 1 300 -,yk577a10.3 1 300 -,yk163e8.3 1 300 -,yk142b8.3 1 300 -,yk187h9.3 1 300 -,yk740a4.3 1 300 -,yk520b2.5 1 358 +,yk163e8.5 1 360 +,yk474e3.5 1 360 +,yk1672e09.5 15 652 +,yk1556a02.5 17 620 +,yk470a7.5 1 360 +,yk1339d07.5 23 658 +,yk1042c08.5 23 622 +,yk1660c12.5 23 621 +,yk1474e07.5 24 621 +,yk1618b03.5 23 619 +,yk1720g01.5 22 616 +,yk1611f05.5 23 616 +,yk1755g08.5 23 611 +,yk1444h05.5 23 606 +,yk1039c09.5 23 597 +,yk1592b08.5 23 595 +,yk1654a06.5 23 578 +,yk773f01.5 23 532 +,yk1483a12.5 23 518 +,yk645b1.5 1 383 +,yk603e10.5 1 382 +,yk228a2.5 1 360 +,yk312g4.5 1 372 +,yk837g07.5 1 376 +,yk376f5.5 1 360 +,yk453c10.5 1 360 +,yk142b8.5 1 372 +,yk63f12.5 1 320 +,yk740a4.5 23 340 +,yk187h9.5 1 240 +,yk1391f02.5 23 218 +
+III	gt csa	exon	1952017	1952267	0.996	-	.	Parent=mRNA270
+III	gt csa	exon	1953525	1953758	1	-	.	Parent=mRNA270
+III	gt csa	exon	1954640	1954728	1	-	.	Parent=mRNA270
+III	gt csa	exon	1956031	1956288	0.971	-	.	Parent=mRNA270
+III	gt csa	exon	1957574	1957668	1	-	.	Parent=mRNA270
+III	gt csa	exon	1957716	1957848	1	-	.	Parent=mRNA270
+III	gt csa	exon	1959816	1960116	1	-	.	Parent=mRNA270
+III	gt csa	exon	1961827	1961934	1	-	.	Parent=mRNA270
+III	gt csa	mRNA	1953222	1956293	.	-	.	ID=mRNA271;Parent=gene178;Target=RP 1 244 +,yk1703a04.5 1 564 +
+III	gt csa	exon	1953222	1953278	0.12	-	.	Parent=mRNA271
+III	gt csa	exon	1953525	1953831	0.944	-	.	Parent=mRNA271
+III	gt csa	exon	1954624	1954728	1	-	.	Parent=mRNA271
+III	gt csa	exon	1956031	1956293	0.883	-	.	Parent=mRNA271
+III	gt csa	mRNA	1959320	1959824	.	-	.	ID=mRNA272;Parent=gene178;Target=yk1245c12.5 1 503 +
+III	gt csa	exon	1959320	1959824	0.994	-	.	Parent=mRNA272
+###
+III	gt csa	gene	1950524	1952513	.	+	.	ID=gene179
+III	gt csa	mRNA	1950524	1951426	.	+	.	ID=mRNA273;Parent=gene179;Target=yk1454g11.3 198 646 -,yk1066a07.3 236 686 -,yk1507e02.3 254 710 -,yk1678d01.3 237 693 -,yk1370c12.3 200 660 -,yk1370d03.3 236 711 -,yk1479a03.3 200 674 -,yk1537d05.3 202 677 -,yk1327d02.3 262 742 -,yk457d7.5 1 376 +,yk602c4.5 1 372 +,yk664b3.5 1 376 +,yk647d12.5 1 383 +,yk229f4.5 1 374 +,yk1020a05.3 1 468 -,yk1020a05.5 1 481 +,yk1016a08.3 23 271 -,yk116e3.5 1 360 +,yk1064e06.3 23 443 -,yk1151e09.3 23 447 -,yk1580b09.3 23 449 -,yk1587h09.3 35 461 -,yk1594g06.3 23 449 -,yk1362f01.3 23 459 -,yk1393f05.3 23 459 -,yk1521b10.5 23 466 +,yk1521b10.3 23 467 -,yk892h07.5 23 471 +,yk1176h06.3 24 475 -,yk1155e04.3 23 473 -,yk1291e10.3 23 473 -,yk892h07.3 23 473 -,yk1159h09.3 23 473 -,yk1130b02.3 23 485 -,yk1125f08.3 23 485 -,yk1693h02.5 23 487 +,yk1025d03.5 23 490 +,yk1064e06.5 23 495 +,yk1155e04.5 23 496 +,yk1291e10.5 23 496 +,yk1176h06.5 23 496 +,yk1362f01.5 23 496 +,yk1580b09.5 23 496 +,yk1130b02.5 23 498 +,yk1151e09.5 23 498 +,yk1016a08.5 23 498 +,yk1159h09.5 23 498 +,yk1587h09.5 23 498 +,yk1594g06.5 23 498 +,yk1125f08.5 23 499 +,yk1393f05.5 23 499 +,yk199f2.5 1 377 +,yk497d11.5 1 380 +,yk645g1.5 1 375 +,yk483c3.5 1 378 +,yk253d3.5 1 379 +,yk615h4.5 1 376 +,yk281d11.5 1 360 +,yk330h9.5 1 360 +,yk446a5.5 1 377 +,yk498f9.5 1 360 +,yk453a11.5 1 360 +,yk326h8.5 1 360 +,yk140h11.5 1 360 +,yk627c5.5 1 360 +,FLYBASE 1 131 +,BP 1 131 +,RP 1 131 +,yk448c12.5 1 360 +,yk373f11.5 1 360 +,yk60a11.5 1 360 +,SW 1 130 +,yk476f7.5 1 360 +,yk516c9.5 1 360 +,yk448f2.5 1 360 +,yk558h2.5 1 360 +,yk494c8.5 1 360 +,yk492f11.5 1 360 +,yk551b11.5 1 360 +,yk646a8.5 1 360 +,yk278c2.5 1 374 +,yk471g11.5 1 360 -,yk222d9.5 1 302 +,yk814a07.5 1 104 +
+III	gt csa	exon	1950524	1950539	0.938	+	.	Parent=mRNA273
+III	gt csa	exon	1950634	1950760	0.969	+	.	Parent=mRNA273
+III	gt csa	exon	1951062	1951426	0.975	+	.	Parent=mRNA273
+III	gt csa	mRNA	1950628	1951426	.	+	.	ID=mRNA274;Parent=gene179;Target=yk778a10.5 1 197 +,yk779g10.3 1 447 -,yk1617c03.3 1 461 -,yk1369h11.3 1 472 -,yk1369h11.5 1 479 +,yk1617c03.5 1 493 +,yk890g04.3 1 447 -,yk1010f03.3 1 462 -,yk890g04.5 1 477 +,yk1010f03.5 1 494 +,yk779g10.5 1 495 +,yk1160b11.5 84 440 +,yk1660d01.3 144 579 -,yk1450d10.3 220 663 -,yk1470f08.3 228 671 -,yk1691a10.3 178 621 -,yk1711g11.3 170 613 -,yk1319b02.3 270 730 -,yk1160b11.3 84 545 -,yk457d7.5 1 376 +,yk602c4.5 1 372 +,yk664b3.5 1 376 +,yk647d12.5 1 383 +,yk229f4.5 1 374 +,yk1020a05.3 1 468 -,yk1020a05.5 1 481 +,yk1016a08.3 23 271 -,yk116e3.5 1 360 +,yk1064e06.3 23 443 -,yk1151e09.3 23 447 -,yk1580b09.3 23 449 -,yk1587h09.3 35 461 -,yk1594g06.3 23 449 -,yk1362f01.3 23 459 -,yk1393f05.3 23 459 -,yk1521b10.5 23 466 +,yk1521b10.3 23 467 -,yk892h07.5 23 471 +,yk1176h06.3 24 475 -,yk1155e04.3 23 473 -,yk1291e10.3 23 473 -,yk892h07.3 23 473 -,yk1159h09.3 23 473 -,yk1130b02.3 23 485 -,yk1125f08.3 23 485 -,yk1693h02.5 23 487 +,yk1025d03.5 23 490 +,yk1064e06.5 23 495 +,yk1155e04.5 23 496 +,yk1291e10.5 23 496 +,yk1176h06.5 23 496 +,yk1362f01.5 23 496 +,yk1580b09.5 23 496 +,yk1130b02.5 23 498 +,yk1151e09.5 23 498 +,yk1016a08.5 23 498 +,yk1159h09.5 23 498 +,yk1587h09.5 23 498 +,yk1594g06.5 23 498 +,yk1125f08.5 23 499 +,yk1393f05.5 23 499 +,yk199f2.5 1 377 +,yk497d11.5 1 380 +,yk645g1.5 1 375 +,yk483c3.5 1 378 +,yk253d3.5 1 379 +,yk615h4.5 1 376 +,yk281d11.5 1 360 +,yk330h9.5 1 360 +,yk446a5.5 1 377 +,yk498f9.5 1 360 +,yk453a11.5 1 360 +,yk326h8.5 1 360 +,yk140h11.5 1 360 +,yk627c5.5 1 360 +,FLYBASE 1 131 +,BP 1 131 +,RP 1 131 +,yk448c12.5 1 360 +,yk373f11.5 1 360 +,yk60a11.5 1 360 +,SW 1 130 +,yk476f7.5 1 360 +,yk516c9.5 1 360 +,yk448f2.5 1 360 +,yk558h2.5 1 360 +,yk494c8.5 1 360 +,yk492f11.5 1 360 +,yk551b11.5 1 360 +,yk646a8.5 1 360 +,yk278c2.5 1 374 +,yk471g11.5 1 360 -,yk222d9.5 1 302 +,yk814a07.5 1 104 +
+III	gt csa	exon	1950628	1950760	0.947	+	.	Parent=mRNA274
+III	gt csa	exon	1951062	1951426	0.975	+	.	Parent=mRNA274
+III	gt csa	mRNA	1950628	1951721	.	+	.	ID=mRNA275;Parent=gene179;Target=yk778a10.5 1 197 +,yk779g10.3 1 447 -,yk1617c03.3 1 461 -,yk1369h11.3 1 472 -,yk1369h11.5 1 479 +,yk890g04.3 1 447 -,yk1010f03.3 1 462 -,yk890g04.5 1 477 +,yk1160b11.5 84 440 +,yk1660d01.3 144 579 -,yk1450d10.3 220 663 -,yk1470f08.3 228 671 -,yk1691a10.3 178 621 -,yk1711g11.3 170 613 -,yk1319b02.3 270 730 -,yk1160b11.3 84 545 -,yk457d7.5 1 376 +,yk602c4.5 1 372 +,yk664b3.5 1 376 +,yk647d12.5 1 383 +,yk229f4.5 1 374 +,yk1016a08.3 23 271 -,yk116e3.5 1 360 +,yk1064e06.3 23 443 -,yk1151e09.3 23 447 -,yk1580b09.3 23 449 -,yk1587h09.3 35 461 -,yk1594g06.3 23 449 -,yk1362f01.3 23 459 -,yk1393f05.3 23 459 -,yk1521b10.5 23 466 +,yk1521b10.3 23 467 -,yk892h07.5 23 471 +,yk1176h06.3 24 475 -,yk1155e04.3 23 473 -,yk1291e10.3 23 473 -,yk892h07.3 23 473 -,yk1159h09.3 23 473 -,yk199f2.5 1 377 +,yk497d11.5 1 380 +,yk645g1.5 1 375 +,yk483c3.5 1 378 +,yk253d3.5 1 379 +,yk615h4.5 1 376 +,yk281d11.5 1 360 +,yk330h9.5 1 360 +,yk446a5.5 1 377 +,yk498f9.5 1 360 +,yk453a11.5 1 360 +,yk326h8.5 1 360 +,yk140h11.5 1 360 +,yk627c5.5 1 360 +,FLYBASE 1 131 +,BP 1 131 +,RP 1 131 +,yk448c12.5 1 360 +,yk373f11.5 1 360 +,yk60a11.5 1 360 +,SW 1 130 +,yk476f7.5 1 360 +,yk516c9.5 1 360 +,yk448f2.5 1 360 +,yk558h2.5 1 360 +,yk494c8.5 1 360 +,yk492f11.5 1 360 +,yk551b11.5 1 360 +,yk646a8.5 1 360 +,yk278c2.5 1 374 +,yk471g11.5 1 360 -,CK580762 1 219 +
+III	gt csa	exon	1950628	1950760	0.947	+	.	Parent=mRNA275
+III	gt csa	exon	1951062	1951411	0.995	+	.	Parent=mRNA275
+III	gt csa	exon	1951713	1951721	0.556	+	.	Parent=mRNA275
+III	gt csa	mRNA	1951519	1952513	.	+	.	ID=mRNA276;Parent=gene179;Target=yk372d12.5 1 375 +,yk372d12.3 1 300 -,yk1703a04.3 1 500 +
+III	gt csa	exon	1951519	1951659	0.982	+	.	Parent=mRNA276
+III	gt csa	exon	1951713	1951829	1	+	.	Parent=mRNA276
+III	gt csa	exon	1951902	1952513	0.991	+	.	Parent=mRNA276
+###
+III	gt csa	gene	1963554	1970446	.	-	.	ID=gene180
+III	gt csa	mRNA	1963554	1970446	.	-	.	ID=mRNA277;Parent=gene180;Target=yk23e3.3 1 390 -,WP 1 1309 +,yk23e3.5 1 360 +
+III	gt csa	exon	1963554	1963898	0.975	-	.	Parent=mRNA277
+III	gt csa	exon	1963953	1964107	1	-	.	Parent=mRNA277
+III	gt csa	exon	1964993	1965165	1	-	.	Parent=mRNA277
+III	gt csa	exon	1966002	1966439	1	-	.	Parent=mRNA277
+III	gt csa	exon	1966813	1967020	0.987	-	.	Parent=mRNA277
+III	gt csa	exon	1967077	1967198	0.91	-	.	Parent=mRNA277
+III	gt csa	exon	1967254	1969663	1	-	.	Parent=mRNA277
+III	gt csa	exon	1970232	1970363	1	-	.	Parent=mRNA277
+III	gt csa	exon	1970410	1970446	1	-	.	Parent=mRNA277
+###
+III	gt csa	gene	1971220	1975502	.	-	.	ID=gene181
+III	gt csa	mRNA	1971220	1975502	.	-	.	ID=mRNA278;Parent=gene181;Target=WP 1 1166 +
+III	gt csa	exon	1971220	1971570	1	-	.	Parent=mRNA278
+III	gt csa	exon	1971619	1971773	1	-	.	Parent=mRNA278
+III	gt csa	exon	1971899	1972068	1	-	.	Parent=mRNA278
+III	gt csa	exon	1972118	1972501	1	-	.	Parent=mRNA278
+III	gt csa	exon	1972550	1972766	1	-	.	Parent=mRNA278
+III	gt csa	exon	1973235	1973470	1	-	.	Parent=mRNA278
+III	gt csa	exon	1973518	1975502	1	-	.	Parent=mRNA278
+###
+III	gt csa	gene	1977303	1980450	.	+	.	ID=gene182
+III	gt csa	mRNA	1977303	1980450	.	+	.	ID=mRNA279;Parent=gene182;Target=WP 1 874 +
+III	gt csa	exon	1977303	1977441	1	+	.	Parent=mRNA279
+III	gt csa	exon	1977492	1977554	1	+	.	Parent=mRNA279
+III	gt csa	exon	1977881	1978741	1	+	.	Parent=mRNA279
+III	gt csa	exon	1978792	1979883	1	+	.	Parent=mRNA279
+III	gt csa	exon	1979937	1980162	1	+	.	Parent=mRNA279
+III	gt csa	exon	1980210	1980450	1	+	.	Parent=mRNA279
+###
+III	gt csa	gene	1980811	1982635	.	-	.	ID=gene183
+III	gt csa	mRNA	1980811	1982635	.	-	.	ID=mRNA280;Parent=gene183;Target=WP 1 324 +
+III	gt csa	exon	1980811	1980995	1	-	.	Parent=mRNA280
+III	gt csa	exon	1981163	1981517	1	-	.	Parent=mRNA280
+III	gt csa	exon	1981877	1982017	1	-	.	Parent=mRNA280
+III	gt csa	exon	1982226	1982322	1	-	.	Parent=mRNA280
+III	gt csa	exon	1982442	1982635	1	-	.	Parent=mRNA280
+###

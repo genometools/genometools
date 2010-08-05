@@ -80,6 +80,15 @@ Test do
       "#{$testdata}/gt_cds_nostartcodon_nofinalstopcodon.out"
 end
 
+Name "gt cds test (nGASP)"
+Keywords "gt_cds nGASP"
+Test do
+  run_test "#{$bin}gt cds -startcodon yes -finalstopcodon no -minorflen 64 " +
+           "-seqfile #{$testdata}nGASP/III.fas -usedesc " +
+           "#{$testdata}nGASP/resIII.gff3"
+  run "diff #{$last_stdout} #{$testdata}nGASP/resIIIcds.gff3"
+end
+
 if $gttestdata then
   Name "gt cds bug"
   Keywords "gt_cds"
