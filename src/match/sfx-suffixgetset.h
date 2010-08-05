@@ -18,17 +18,9 @@
 #ifndef SFX_SUFFIXGETSET_H
 #define SFX_SUFFIXGETSET_H
 
-#include "core/assert_api.h"
-#include "core/unused_api.h"
 #include "suffixptr.h"
 
-typedef struct
-{
-  Suffixptr *sortspace;
-  unsigned long sortspaceoffset,
-                bucketleftidx;
-  bool freesortspace;
-} Suffixsortspace;
+typedef struct Suffixsortspace Suffixsortspace;
 
 typedef void (*Dc_processunsortedrange)(void *,
                                         Suffixptr *,
@@ -36,92 +28,53 @@ typedef void (*Dc_processunsortedrange)(void *,
                                         unsigned long,
                                         unsigned long);
 
-/*@unused@*/ static inline Suffixsortspace
-              *suffixsortspace_new(unsigned long numofentries)
-{
-  Suffixsortspace *suffixsortspace;
+Suffixsortspace *suffixsortspace_new(unsigned long numofentries);
 
-  suffixsortspace = gt_malloc(sizeof(*suffixsortspace));
-  if (numofentries == 0)
-  {
-    suffixsortspace->sortspace = NULL;
-    suffixsortspace->freesortspace = false;
-  } else
-  {
-    suffixsortspace->sortspace = gt_malloc(sizeof(*suffixsortspace->sortspace) *
-                                           numofentries);
-    suffixsortspace->freesortspace = true;
-  }
-  suffixsortspace->sortspaceoffset = 0;
-  suffixsortspace->bucketleftidx = 0;
-  return suffixsortspace;
-}
+Suffixsortspace *suffixsortspace_new_fromfile(int filedesc,
+                                              const char *filename,
+                                              unsigned long numofentries);
 
-/*@unused@*/ static inline void
-             suffixsortspace_delete(Suffixsortspace *suffixsortspace)
-{
-  if (suffixsortspace != NULL)
-  {
-    if (suffixsortspace->freesortspace)
-    {
-      gt_free(suffixsortspace->sortspace);
-    }
-    gt_free(suffixsortspace);
-  }
-}
+void suffixsortspace_delete(Suffixsortspace *suffixsortspace);
 
-/*@unused@*/ static inline void suffixptrassert(const Suffixsortspace *sssp,
-                                                unsigned long subbucketleft,
-                                                unsigned long idx)
-{
-  gt_assert(sssp != NULL);
-  gt_assert(sssp->sortspaceoffset <= sssp->bucketleftidx + subbucketleft + idx);
-  /*
-  fprintf(stderr,"idx=%lu,bucketleftidx=%lu,subbucketleft=%lu,"
-                 "sortspaceoffset=%lu\n",
-          idx,sssp->bucketleftidx,subbucketleft,sssp->sortspaceoffset);
-  */
-}
+unsigned long suffixptrget(const Suffixsortspace *sssp,
+                           const Suffixptr *subbucket,
+                           unsigned long subbucketleft,
+                           unsigned long idx);
 
-/*@unused@*/ static inline unsigned long suffixptrget(
-                                         const Suffixsortspace *sssp,
-                                         const Suffixptr *subbucket,
-                                         unsigned long subbucketleft,
-                                         unsigned long idx)
-{
-  suffixptrassert(sssp,subbucketleft,idx);
-  return SUFFIXPTRGET(subbucket,idx);
-}
+void suffixptrset(Suffixsortspace *sssp,
+                  Suffixptr *subbucket,
+                  unsigned long subbucketleft,
+                  unsigned long idx,
+                  unsigned long value);
 
-/*@unused@*/ static inline void suffixptrset(Suffixsortspace *sssp,
-                                             Suffixptr *subbucket,
-                                             unsigned long subbucketleft,
-                                             unsigned long idx,
-                                             unsigned long value)
-{
-  suffixptrassert(sssp,subbucketleft,idx);
-  SUFFIXPTRSET(subbucket,idx,value);
-}
+void suffixptrset2(const Suffixsortspace *sssp,
+                   unsigned long idx,
+                   unsigned long value);
 
-/*@unused@*/ static inline void suffixptrset2(const Suffixsortspace *sssp,
-                                              unsigned long idx,
-                                              unsigned long value)
-{
-  SUFFIXPTRSET(sssp->sortspace,idx - sssp->sortspaceoffset,value);
-}
+unsigned long suffixptrget3(const Suffixsortspace *sssp,
+                            unsigned long idx);
 
-/*@unused@*/ static inline unsigned long suffixptrget3(
-                                         const Suffixsortspace *sssp,
-                                         unsigned long idx)
-{
-  return SUFFIXPTRGET(sssp->sortspace,idx);
-}
+void suffixptrset3(Suffixsortspace *sssp,
+                   unsigned long idx,
+                   unsigned long value);
 
-/*@unused@*/ static inline void suffixptrset3(const Suffixsortspace *sssp,
-                                              unsigned long idx,
-                                              unsigned long value)
-{
-  SUFFIXPTRSET(sssp->sortspace,idx,value);
-}
+unsigned long gt_suffixsortspace_bucketleftidx_get(const Suffixsortspace *sssp);
+
+void gt_suffixsortspace_bucketleftidx_set(Suffixsortspace *sssp,
+                                          unsigned long value);
+
+void gt_suffixsortspace_sortspace_set(Suffixsortspace *sssp,
+                                      Suffixptr *sortspace);
+
+unsigned long gt_suffixsortspace_offset_get(const Suffixsortspace *sssp);
+
+void gt_suffixsortspace_sortspace_delete(Suffixsortspace *sssp);
+
+void gt_suffixsortspace_offset_set(Suffixsortspace *sssp,
+                                   unsigned long offset);
+
+Suffixptr *gt_suffixsortspace_sortspace_get(const Suffixsortspace *sssp);
+
+Suffixptr *gt_suffixsortspace_leftadjust(const Suffixsortspace *sssp);
 
 #endif

@@ -60,7 +60,7 @@ struct Sfxiterator
   unsigned long specialcharacters,
          widthofpart,
          totallength;
-  Suffixsortspace suffixsortspace;
+  Suffixsortspace *suffixsortspace;
   Definedunsignedlong longest;
   unsigned long nextfreeCodeatposition;
   Codeatposition *spaceCodeatposition;
@@ -306,7 +306,7 @@ static void insertwithoutspecial(void *processinfo,
         kmercode->code <= sfi->currentmaxcode)
     {
       unsigned long stidx = --sfi->leftborder[kmercode->code];
-      suffixptrset2(&sfi->suffixsortspace,stidx,position);
+      suffixptrset2(sfi->suffixsortspace,stidx,position);
       /* from right to left */
     }
   }
@@ -348,7 +348,7 @@ static void sfx_derivespecialcodesfromtable(Sfxiterator *sfi,bool deletevalues)
           gt_updatebckspecials(sfi->bcktab,code,sfi->numofchars,prefixindex);
           stidx = --sfi->leftborder[code];
           /* from right to left */
-          suffixptrset2(&sfi->suffixsortspace,stidx,
+          suffixptrset2(sfi->suffixsortspace,stidx,
                         sfi->spaceCodeatposition[j].position - prefixindex);
         }
       }
@@ -403,7 +403,7 @@ static void sfx_derivespecialcodesonthefly(Sfxiterator *sfi)
             gt_assert(code > 0);
             stidx = --sfi->leftborder[code];
             /* from right to left */
-            suffixptrset2(&sfi->suffixsortspace,stidx,
+            suffixptrset2(sfi->suffixsortspace,stidx,
                           specialcontext.position - prefixindex);
           }
         }
@@ -431,7 +431,7 @@ void gt_freeSfxiterator(Sfxiterator **sfiptr)
     gt_specialrangeiterator_delete(sfi->sri);
   }
   FREESPACE(sfi->spaceCodeatposition);
-  FREESPACE(sfi->suffixsortspace.sortspace);
+  suffixsortspace_delete(sfi->suffixsortspace);
   gt_freesuftabparts(sfi->suftabparts);
   if (sfi->bcktab != NULL)
   {
@@ -545,7 +545,7 @@ Sfxiterator *gt_newSfxiterator(const GtEncseq *encseq,
     }
     sfi->bcktab = NULL;
     sfi->nextfreeCodeatposition = 0;
-    sfi->suffixsortspace.sortspace = NULL;
+    sfi->suffixsortspace = NULL;
     sfi->suftabparts = NULL;
     sfi->encseq = encseq;
     sfi->readmode = readmode;
@@ -699,8 +699,8 @@ Sfxiterator *gt_newSfxiterator(const GtEncseq *encseq,
                                          specialcharacters + 1,
                                          logger);
     gt_assert(sfi->suftabparts != NULL);
-    ALLOCASSIGNSPACE(sfi->suffixsortspace.sortspace,NULL,GtUlong,
-                     stpgetlargestwidth(sfi->suftabparts));
+    sfi->suffixsortspace
+      = suffixsortspace_new(stpgetlargestwidth(sfi->suftabparts));
     sfi->longest.defined = false;
     sfi->longest.valueunsignedlong = 0;
     if (gt_encseq_has_specialranges(sfi->encseq))
@@ -712,7 +712,7 @@ Sfxiterator *gt_newSfxiterator(const GtEncseq *encseq,
     {
       sfi->sri = NULL;
     }
-    sfi->fusp.sssp = &sfi->suffixsortspace;
+    sfi->fusp.sssp = sfi->suffixsortspace;
     sfi->fusp.allocatedSuffixptr = stpgetlargestwidth(sfi->suftabparts);
     sfi->overhang.start = sfi->overhang.end = 0;
   }
@@ -750,8 +750,9 @@ static void preparethispart(Sfxiterator *sfi)
   sfi->currentmincode = stpgetcurrentmincode(sfi->part,sfi->suftabparts);
   sfi->currentmaxcode = stpgetcurrentmaxcode(sfi->part,sfi->suftabparts);
   sfi->widthofpart = stpgetcurrentwidthofpart(sfi->part,sfi->suftabparts);
-  sfi->suffixsortspace.sortspaceoffset
-    = stpgetcurrentsuftaboffset(sfi->part,sfi->suftabparts);
+  gt_suffixsortspace_offset_set(sfi->suffixsortspace,
+                                stpgetcurrentsuftaboffset(sfi->part,
+                                                          sfi->suftabparts));
   if (sfi->sfxstrategy.storespecialcodes)
   {
     sfx_derivespecialcodesfromtable(sfi,(numofparts == 1U) ? true : false);
@@ -790,8 +791,7 @@ static void preparethispart(Sfxiterator *sfi)
     if (!sfi->sfxstrategy.streamsuftab)
     {
       /* option -maxdepth with argument */
-      gt_assert(sfi->suffixsortspace.sortspace != NULL);
-      gt_qsufsort(sfi->suffixsortspace.sortspace,
+      gt_qsufsort(sfi->suffixsortspace,
                   partwidth,
                   -1,
                   NULL,
@@ -820,8 +820,9 @@ static void preparethispart(Sfxiterator *sfi)
     if (sfi->sfxstrategy.differencecover > 0)
     {
       Suffixsortspace *suffixsortspace = suffixsortspace_new(0);
-      suffixsortspace->sortspace = sfi->suffixsortspace.sortspace -
-                                   sfi->suffixsortspace.sortspaceoffset;
+      gt_suffixsortspace_sortspace_set(suffixsortspace,
+                                       gt_suffixsortspace_leftadjust(
+                                              sfi->suffixsortspace));
       gt_sortbucketofsuffixes(true,
                               suffixsortspace,
                               partwidth,
@@ -840,7 +841,7 @@ static void preparethispart(Sfxiterator *sfi)
       suffixsortspace_delete(suffixsortspace);
     } else
     {
-      gt_sortallbuckets (&sfi->suffixsortspace,
+      gt_sortallbuckets (sfi->suffixsortspace,
                          &sfi->longest,
                          bucketspec2,
                          sfi->encseq,
@@ -858,8 +859,7 @@ static void preparethispart(Sfxiterator *sfi)
     }
     if (bucketspec2 != NULL)
     {
-      gt_assert(sfi->suffixsortspace.sortspaceoffset == 0);
-      gt_copysort_derivesorting(bucketspec2,&sfi->suffixsortspace,sfi->logger);
+      gt_copysort_derivesorting(bucketspec2,sfi->suffixsortspace,sfi->logger);
       gt_copysort_delete(bucketspec2);
       bucketspec2 = NULL;
     }
@@ -879,7 +879,7 @@ int gt_postsortsuffixesfromstream(Sfxiterator *sfi, const GtStr *indexname,
   {
     return 0;
   }
-  FREESPACE(sfi->suffixsortspace.sortspace);
+  gt_suffixsortspace_sortspace_delete(sfi->suffixsortspace);
   if (sfi->sfxstrategy.streamsuftab)
   {
     gt_assert(sfi->sfxstrategy.ssortmaxdepth.defined &&
@@ -1073,16 +1073,16 @@ static void fillspecialnextpage(Sfxiterator *sfi)
   }
 }
 
-const void *gt_nextSfxiterator(unsigned long *numberofsuffixes, /* XXX */
-                               bool *specialsuffixes,
-                               Sfxiterator *sfi)
+const Suffixsortspace *gt_nextSfxiterator(unsigned long *numberofsuffixes,
+                                          bool *specialsuffixes,
+                                          Sfxiterator *sfi)
 {
   if (sfi->part < stpgetnumofparts(sfi->suftabparts))
   {
     preparethispart(sfi);
     *numberofsuffixes = sfi->widthofpart;
     *specialsuffixes = false;
-    return sfi->suffixsortspace.sortspace;
+    return sfi->suffixsortspace;
   }
   if (sfi->exhausted)
   {
@@ -1097,7 +1097,7 @@ const void *gt_nextSfxiterator(unsigned long *numberofsuffixes, /* XXX */
   gt_assert(sfi->fusp.nextfreeSuffixptr > 0);
   *numberofsuffixes = sfi->fusp.nextfreeSuffixptr;
   *specialsuffixes = true;
-  return (void *) sfi->suffixsortspace.sortspace;
+  return sfi->suffixsortspace;
 }
 
 int gt_sfibcktab2file(FILE *fp,

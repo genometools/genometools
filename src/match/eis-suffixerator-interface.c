@@ -392,29 +392,34 @@ SfxIGenerate(void *iface,
     /* 1. read next region of sequence by calling nextSfxIterator */
     if (elemsLeft)
     {
+      const Suffixsortspace *suffixsortspace;
+
       move2Backlog(backlogState, sfxi->lastGeneratedSufTabSegment,
                    sfxi->lastGeneratedStart, sfxi->lastGeneratedLen);
       sfxi->lastGeneratedStart += sfxi->lastGeneratedLen;
-      if ((sfxi->lastGeneratedSufTabSegment =
-           (Suffixptr *)
-           gt_nextSfxiterator(&sfxi->lastGeneratedLen, &sfxi->specialsuffixes,
-                              sfxi->sfi)))
+      suffixsortspace = gt_nextSfxiterator(&sfxi->lastGeneratedLen,
+                                           &sfxi->specialsuffixes,
+                                           sfxi->sfi);
+      if (suffixsortspace != NULL)
       {
-        size_t pos;
         /* size_t because the current approach cannot generate more
          * than memory will hold anyway */
-        size_t lastGeneratedLen = sfxi->lastGeneratedLen;
-        const Suffixptr *suftab = sfxi->lastGeneratedSufTabSegment;
+        size_t pos, lastGeneratedLen = sfxi->lastGeneratedLen;
+
+        sfxi->lastGeneratedSufTabSegment
+          = gt_suffixsortspace_sortspace_get(suffixsortspace);
         if (!sfxi->rot0Pos.defined)
+        {
           for (pos=0; pos < lastGeneratedLen; pos++)
           {
-            if (SUFFIXPTRGET(suftab,pos) == 0)
+            if (SUFFIXPTRGET(sfxi->lastGeneratedSufTabSegment,pos) == 0)
             {
               sfxi->rot0Pos.defined = true;
               sfxi->rot0Pos.valueunsignedlong = sfxi->lastGeneratedStart + pos;
               break;
             }
           }
+        }
         /* uncomment this to reenable synchronous writing of tables */
 /*if (sfxi->lastGeneratedSufTabSegment == NULL */
 /*    || suftab2file(&sfxi->outfileinfo, sfxi->lastGeneratedSufTabSegment, */

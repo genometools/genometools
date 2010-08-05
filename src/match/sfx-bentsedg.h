@@ -44,7 +44,7 @@ unsigned long getnumoflargelcpvalues(const Outlcpinfo *outlcpinfo);
 
 unsigned long getmaxbranchdepth(const Outlcpinfo *outlcpinfo);
 
-void gt_qsufsort(Suffixptr *sortspace,
+void gt_qsufsort(Suffixsortspace *suffixsortspace,
                  unsigned long partwidth,
                  int mmapfiledesc,
                  GtStr *mmapfilename,

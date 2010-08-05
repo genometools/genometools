@@ -900,8 +900,8 @@ void dc_sortunsortedbucket(void *data,
 #endif
   gt_assert(width >= 2UL);
   gt_assert(dcov->sssp != NULL);
-  gt_assert(subbucketleft >= dcov->sssp->sortspaceoffset);
-  dcov->sortoffset = subbucketleft - dcov->sssp->sortspaceoffset;
+  gt_assert(subbucketleft >= gt_suffixsortspace_offset_get(dcov->sssp));
+  dcov->sortoffset = subbucketleft - gt_suffixsortspace_offset_get(dcov->sssp);
   gt_inlinedarr_qsort_r (NULL,width,data);
 }
 

@@ -24,6 +24,7 @@
 #include "core/logger.h"
 #include "core/encseq_api.h"
 #include "sfx-strategy.h"
+#include "sfx-suffixgetset.h"
 
 typedef struct Sfxiterator Sfxiterator;
 
@@ -40,9 +41,9 @@ Sfxiterator *gt_newSfxiterator(const GtEncseq *encseq,
                                GtLogger *logger,
                                GtError *err);
 
-const void *gt_nextSfxiterator(unsigned long *numberofsuffixes,
-                               bool *specialsuffixes,
-                               Sfxiterator *sfi);
+const Suffixsortspace *gt_nextSfxiterator(unsigned long *numberofsuffixes,
+                                          bool *specialsuffixes,
+                                          Sfxiterator *sfi);
 
 int gt_postsortsuffixesfromstream(Sfxiterator *sfi, const GtStr *indexname,
                                   GtError *err);

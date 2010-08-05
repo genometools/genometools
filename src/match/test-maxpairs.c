@@ -71,7 +71,7 @@ static int constructsarrandrunmaxpairs(
                  GtLogger *logger,
                  GtError *err)
 {
-  const void *suftabptr;
+  const Suffixsortspace *suffixsortspace;
   unsigned long numberofsuffixes;
   bool haserr = false;
   Sfxiterator *sfi;
@@ -99,16 +99,18 @@ static int constructsarrandrunmaxpairs(
                                                  readmode);
     while (true)
     {
-      suftabptr = gt_nextSfxiterator(&numberofsuffixes,&specialsuffixes,sfi);
-      if (suftabptr == NULL || specialsuffixes)
+      suffixsortspace
+        = gt_nextSfxiterator(&numberofsuffixes,&specialsuffixes,sfi);
+      if (suffixsortspace == NULL || specialsuffixes)
       {
         break;
       }
-      gt_updateSequentialsuffixarrayreaderfromRAM(ssar,
-                                                  (const ESASuffixptr *)
-                                                    suftabptr,
-                                                  firstpage,
-                                                  numberofsuffixes);
+      gt_updateSequentialsuffixarrayreaderfromRAM(
+               ssar,
+               (const ESASuffixptr *) gt_suffixsortspace_sortspace_get(
+                                          suffixsortspace),
+               firstpage,
+               numberofsuffixes);
       firstpage = false;
       if (gt_enumeratemaxpairs(ssar,
                                ssi->encseq,

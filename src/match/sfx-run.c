@@ -118,7 +118,7 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
 }
 
 static int suftab2file(FILE *outfpsuftab,
-                       const Suffixptr *suftab,
+                       const Suffixsortspace *suffixsortspace,
                        unsigned long numberofsuffixes,
                        GtError *err)
 {
@@ -129,7 +129,7 @@ static int suftab2file(FILE *outfpsuftab,
 
   for (idx = 0; !haserr && idx < numberofsuffixes; idx++)
   {
-    unsigned long value = SUFFIXPTRGET(suftab,idx);
+    unsigned long value = suffixptrget3(suffixsortspace,idx);
     if (fwrite(&value,
                sizeof (value),
                (size_t) 1,
@@ -137,7 +137,7 @@ static int suftab2file(FILE *outfpsuftab,
                != (size_t) 1)
     {
       gt_error_set(err,"cannot write one  item of size %u: errormsg=\"%s\"",
-                   (unsigned int) sizeof (*suftab),
+                   (unsigned int) sizeof (value),
                    strerror(errno));
       haserr = true;
     }
@@ -160,7 +160,7 @@ static int suftab2file(FILE *outfpsuftab,
 }
 
 static int bwttab2file(Outfileinfo *outfileinfo,
-                       const Suffixptr *suftab,
+                       const Suffixsortspace *suffixsortspace,
                        GtReadmode readmode,
                        unsigned long numberofsuffixes,
                        GtError *err)
@@ -176,7 +176,7 @@ static int bwttab2file(Outfileinfo *outfileinfo,
 
     for (pos=0; pos < numberofsuffixes; pos++)
     {
-      startpos = SUFFIXPTRGET(suftab,pos);
+      startpos = suffixptrget3(suffixsortspace,pos);
       if (startpos == 0)
       {
         cc = (GtUchar) UNDEFBWTCHAR;
@@ -226,32 +226,33 @@ static int suffixeratorwithoutput(const GtStr *indexname,
                                   GtLogger *logger,
                                   GtError *err)
 {
-  const Suffixptr *suftabptr;
   unsigned long numberofsuffixes;
   bool haserr = false, specialsuffixes = false;
   Sfxiterator *sfi = NULL;
 
   sfi = gt_newSfxiterator(encseq,
-                      readmode,
-                      prefixlength,
-                      numofparts,
-                      outfileinfo->outlcpinfo,
-                      sfxstrategy,
-                      sfxprogress,
-                      withprogressbar,
-                      logger,
-                      err);
+                          readmode,
+                          prefixlength,
+                          numofparts,
+                          outfileinfo->outlcpinfo,
+                          sfxstrategy,
+                          sfxprogress,
+                          withprogressbar,
+                          logger,
+                          err);
   if (sfi == NULL)
   {
     haserr = true;
   } else
   {
+    const Suffixsortspace *suffixsortspace;
     while (true)
     {
       unsigned long longest;
 
-      suftabptr = gt_nextSfxiterator(&numberofsuffixes,&specialsuffixes,sfi);
-      if (suftabptr == NULL)
+      suffixsortspace = gt_nextSfxiterator(&numberofsuffixes,&specialsuffixes,
+                                           sfi);
+      if (suffixsortspace == NULL)
       {
         break;
       }
@@ -262,15 +263,16 @@ static int suffixeratorwithoutput(const GtStr *indexname,
       }
       if (outfileinfo->outfpsuftab != NULL)
       {
-        if (suftab2file(outfileinfo->outfpsuftab,suftabptr,numberofsuffixes,
-                        err) != 0)
+        if (suftab2file(outfileinfo->outfpsuftab,suffixsortspace,
+                        numberofsuffixes,err) != 0)
         {
           haserr = true;
           break;
         }
       }
       /* XXX be careful: postpone not output bwtab if streamsuftab is true */
-      if (bwttab2file(outfileinfo,suftabptr,readmode,numberofsuffixes,err) != 0)
+      if (bwttab2file(outfileinfo,suffixsortspace,readmode,numberofsuffixes,
+                      err) != 0)
       {
         haserr = true;
         break;

@@ -622,7 +622,6 @@ static int constructsarrandrunmmsearch(
                  bool withprogressbar,
                  GtError *err)
 {
-  const ESASuffixptr *suftabptr;
   unsigned long numofsuffixes;
   bool haserr = false, specialsuffixes = false;
   Sfxiterator *sfi;
@@ -644,6 +643,7 @@ static int constructsarrandrunmmsearch(
     haserr = true;
   } else
   {
+    const Suffixsortspace *suffixsortspace;
     queryrep.sequence = query;
     queryrep.encseq = NULL;
     queryrep.readmode = GT_READMODE_FORWARD;
@@ -651,15 +651,16 @@ static int constructsarrandrunmmsearch(
     queryrep.length = (unsigned long) querylen;
     while (true)
     {
-      suftabptr = (ESASuffixptr *)
-                  gt_nextSfxiterator(&numofsuffixes,&specialsuffixes,sfi);
-      if (suftabptr == NULL)
+      suffixsortspace = gt_nextSfxiterator(&numofsuffixes,&specialsuffixes,sfi);
+      if (suffixsortspace == NULL)
       {
         break;
       }
       if (runquerysubstringmatch(false,
                                  dbencseq,
-                                 suftabptr,
+                                 (const ESASuffixptr *)
+                                 gt_suffixsortspace_sortspace_get(
+                                          suffixsortspace),
                                  readmode,
                                  numofsuffixes,
                                  0,

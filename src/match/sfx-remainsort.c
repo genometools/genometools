@@ -21,8 +21,8 @@
 #include <unistd.h>
 #include "core/chardef.h"
 #include "core/ma_api.h"
-#include "core/arraydef.h"
 #include "core/fa.h"
+#include "core/arraydef.h"
 #include "core/qsort_r.h"
 #include "core/hashmap-generic.h"
 #include "core/minmax.h"
@@ -1332,21 +1332,14 @@ Compressedtable *gt_rmnsufinfo_delete(unsigned long *longest,
   {
     if (SUFINMEM(&rmnsufinfo->sortblock))
     {
-      gt_assert(rmnsufinfo->sssp != NULL &&
-                rmnsufinfo->sssp->sortspace != NULL);
+      gt_assert(rmnsufinfo->sssp != NULL);
       suffixsortspace = rmnsufinfo->sssp;
     } else
     {
-      suffixsortspace = gt_malloc(sizeof(*suffixsortspace));
-      suffixsortspace->sortspace
-        = gt_fa_mmap_generic_fd(rmnsufinfo->sortblock.mmapfiledesc,
+      suffixsortspace = suffixsortspace_new_fromfile(
+                                rmnsufinfo->sortblock.mmapfiledesc,
                                 gt_str_get(rmnsufinfo->sortblock.mmapfilename),
-                                (size_t) rmnsufinfo->sortblock.mapableentries
-                                  * sizeof (unsigned long),
-                                (size_t) 0,
-                                false,false,NULL);
-      suffixsortspace->sortspaceoffset = 0;
-      suffixsortspace->bucketleftidx = 0;
+                                rmnsufinfo->sortblock.mapableentries);
     }
 #define NOINVERSESUFTAB
 #ifdef NOINVERSESUFTAB
@@ -1371,9 +1364,7 @@ Compressedtable *gt_rmnsufinfo_delete(unsigned long *longest,
   }
   if (!SUFINMEM(&rmnsufinfo->sortblock) && withlcptab)
   {
-    gt_assert(suffixsortspace != NULL);
-    gt_fa_xmunmap(suffixsortspace->sortspace);
-    gt_free(suffixsortspace);
+    suffixsortspace_delete(suffixsortspace);
     suffixsortspace = NULL;
   }
 #ifdef Lowerboundwithrank
