@@ -90,11 +90,17 @@ void suffixsortspace_delete(Suffixsortspace *suffixsortspace)
 }
 
 static void suffixptrassert(const Suffixsortspace *sssp,
+                            const Suffixptr *subbucket,
                             unsigned long subbucketleft,
                             unsigned long idx)
 {
   gt_assert(sssp != NULL);
+  gt_assert(sssp->sortspace != NULL);
   gt_assert(sssp->sortspaceoffset <= sssp->bucketleftidx + subbucketleft + idx);
+  gt_assert(subbucket != NULL);
+  gt_assert(subbucket + idx == sssp->sortspace +
+                               sssp->bucketleftidx + subbucketleft + idx -
+                               sssp->sortspaceoffset);
 }
 
 unsigned long suffixptrget(const Suffixsortspace *sssp,
@@ -102,11 +108,10 @@ unsigned long suffixptrget(const Suffixsortspace *sssp,
                            unsigned long subbucketleft,
                            unsigned long idx)
 {
-  suffixptrassert(sssp,subbucketleft,idx);
-  gt_assert(subbucket + idx == sssp->sortspace +
-                               sssp->bucketleftidx + subbucketleft + idx -
-                               sssp->sortspaceoffset);
-  return SUFFIXPTRGET(subbucket,idx);
+  suffixptrassert(sssp,subbucket,subbucketleft,idx);
+  return SUFFIXPTRGET(sssp->sortspace,sssp->bucketleftidx +
+                                      subbucketleft + idx -
+                                      sssp->sortspaceoffset);
 }
 
 void suffixptrset(Suffixsortspace *sssp,
@@ -115,11 +120,9 @@ void suffixptrset(Suffixsortspace *sssp,
                   unsigned long idx,
                   unsigned long value)
 {
-  suffixptrassert(sssp,subbucketleft,idx);
-  gt_assert(subbucket + idx == sssp->sortspace +
-                               sssp->bucketleftidx + subbucketleft + idx -
-                               sssp->sortspaceoffset);
-  SUFFIXPTRSET(subbucket,idx,value);
+  suffixptrassert(sssp,subbucket,subbucketleft,idx);
+  SUFFIXPTRSET(sssp->sortspace,sssp->bucketleftidx + subbucketleft + idx -
+                               sssp->sortspaceoffset,value);
 }
 
 void suffixptrset2(const Suffixsortspace *sssp,
