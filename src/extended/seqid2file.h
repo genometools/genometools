@@ -23,10 +23,10 @@
 
 /* add the options -seqfile and -regionmapping to the given option parser */
 void             gt_seqid2file_options(GtOptionParser*, GtStr *seqfile,
-                                       bool *usedesc, GtStr *regionmapping);
+                                       bool *usedesc, GtStr *region_mapping);
 
 GtRegionMapping* gt_seqid2file_regionmapping_new(GtStr *seqfile, bool usedesc,
-                                                 GtStr *regionmapping,
+                                                 GtStr *region_mapping,
                                                  GtError*);
 
 #endif

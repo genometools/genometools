@@ -18,10 +18,10 @@
 #include "extended/seqid2file.h"
 
 void gt_seqid2file_options(GtOptionParser *op, GtStr *seqfile, bool *usedesc,
-                           GtStr *regionmapping)
+                           GtStr *region_mapping)
 {
-  GtOption *seqfile_option, *usedesc_option, *regionmapping_option;
-  gt_assert(op && seqfile && usedesc && regionmapping);
+  GtOption *seqfile_option, *usedesc_option, *region_mapping_option;
+  gt_assert(op && seqfile && usedesc && region_mapping);
 
   /* -seqfile */
   seqfile_option = gt_option_new_string("seqfile", "set the sequence file from "
@@ -42,33 +42,33 @@ void gt_seqid2file_options(GtOptionParser *op, GtStr *seqfile, bool *usedesc,
   gt_option_parser_add_option(op, usedesc_option);
 
   /* -regionmapping */
-  regionmapping_option = gt_option_new_string("regionmapping", "set file "
-                                              "containing sequence-region to "
-                                              "sequence file mapping",
-                                              regionmapping, NULL);
-  gt_option_parser_add_option(op, regionmapping_option);
+  region_mapping_option = gt_option_new_string("regionmapping", "set file "
+                                               "containing sequence-region to "
+                                               "sequence file mapping",
+                                               region_mapping, NULL);
+  gt_option_parser_add_option(op, region_mapping_option);
 
   /* either option -seqfile or -regionmapping is mandatory */
-  gt_option_is_mandatory_either(seqfile_option, regionmapping_option);
+  gt_option_is_mandatory_either(seqfile_option, region_mapping_option);
 
   /* the options -seqfile and -regionmapping exclude each other */
-  gt_option_exclude(seqfile_option, regionmapping_option);
+  gt_option_exclude(seqfile_option, region_mapping_option);
 
   /* option -usedesc implies option -seqfile */
   gt_option_imply(usedesc_option, seqfile_option);
 }
 
 GtRegionMapping* gt_seqid2file_regionmapping_new(GtStr *seqfile, bool usedesc,
-                                                 GtStr *regionmapping,
+                                                 GtStr *region_mapping,
                                                  GtError *err)
 {
   gt_error_check(err);
-  gt_assert(seqfile && regionmapping);
-  gt_assert(gt_str_length(seqfile) || gt_str_length(regionmapping));
-  gt_assert(!(gt_str_length(seqfile) && gt_str_length(regionmapping)));
+  gt_assert(seqfile && region_mapping);
+  gt_assert(gt_str_length(seqfile) || gt_str_length(region_mapping));
+  gt_assert(!(gt_str_length(seqfile) && gt_str_length(region_mapping)));
   /* create region mapping */
   if (gt_str_length(seqfile))
     return gt_region_mapping_new_seqfile(seqfile, usedesc);
   else
-    return gt_region_mapping_new_mapping(regionmapping, err);
+    return gt_region_mapping_new_mapping(region_mapping, err);
 }
