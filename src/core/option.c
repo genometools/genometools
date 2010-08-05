@@ -1023,7 +1023,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                 else {
                   if (!option_parsed) {
                     gt_error_set(err, "missing argument to option \"-%s\"",
-                              gt_str_get(option->option_str));
+                                 gt_str_get(option->option_str));
                     had_err = -1;
                   }
                   break;
