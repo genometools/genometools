@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2004-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2004-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -22,17 +22,6 @@
 #include "core/range_api.h"
 #include "gth/gthoutput.h"
 #include "gth/spliced_seq.h"
-
-typedef struct {
-  GtRange splseqrange;   /* genomic positions refering to spliced seq.
-                            (without stopcodon) */
-  unsigned long framenum,
-                startpos,              /* start position refering to frame */
-                lengthwithstopcodon,
-                lengthwithoutstopcodon;
-  char *frame;
-  bool stopcodon;
-} MaximalORF;
 
 void gthshowORFs(char *frame0, char *frame1, char *frame2,
                  unsigned long frame0len, unsigned long frame1len,

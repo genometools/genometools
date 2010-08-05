@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2004-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2004-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -30,6 +30,17 @@
 #define ORFLINEWIDTH            60
 #define ORFBPWIDTH              5
 #define ORFRESIDUESWIDTH        4
+
+typedef struct {
+  GtRange splseqrange;   /* genomic positions refering to spliced seq.
+                            (without stopcodon) */
+  unsigned long framenum,
+                startpos,              /* start position refering to frame */
+                lengthwithstopcodon,
+                lengthwithoutstopcodon;
+  char *frame;
+  bool stopcodon;
+} MaximalORF;
 
 static void findmaximalORFsforframe(GtArray *maximalORFs,
                                     unsigned long minORFlength,
