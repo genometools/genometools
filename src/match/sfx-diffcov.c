@@ -846,19 +846,40 @@ static void dc_addunsortedrange(void *voiddcov,
   ptr->width = width;
 }
 
-typedef Suffixptr Sorttype;
+#ifdef  QSORTNAME
+#undef  QSORTNAME
+#endif
+
+#define QSORTNAME(NAME) dc_##NAME
+
+typedef Suffixptr QSORTNAME(Sorttype);
+
+#ifdef QSORT_ARRAY_DECLARE
+#undef QSORT_ARRAY_DECLARE
+#endif
 
 #define QSORT_ARRAY_DECLARE\
         Differencecover *dcov = (Differencecover *) data
 
+#ifdef QSORT_ARRAY_GET
+#undef QSORT_ARRAY_GET
+#endif
+
 #define QSORT_ARRAY_GET(ARR,RELIDX)\
         suffixptrget3(dcov->sssp,dcov->sortoffset+(RELIDX))
+
+#ifdef QSORT_ARRAY_SET
+#undef QSORT_ARRAY_SET
+#endif
 
 #define QSORT_ARRAY_SET(ARR,RELIDX,VALUE)\
         suffixptrset3(dcov->sssp,dcov->sortoffset+(RELIDX),VALUE)
 
-static int qsortcmparr (GT_UNUSED const Sorttype *subbucket,
-                        unsigned long a, unsigned long b,const void *data)
+static int QSORTNAME(qsortcmparr) (
+                  GT_UNUSED const QSORTNAME(Sorttype) *subbucket,
+                  unsigned long a,
+                  unsigned long b,
+                  const void *data)
 {
   const Differencecover *dcov = (const Differencecover *) data;
   unsigned long suffixpos1, suffixpos2, idx1, idx2;
@@ -902,7 +923,7 @@ void dc_sortunsortedbucket(void *data,
   gt_assert(dcov->sssp != NULL);
   gt_assert(subbucketleft >= gt_suffixsortspace_offset_get(dcov->sssp));
   dcov->sortoffset = subbucketleft - gt_suffixsortspace_offset_get(dcov->sssp);
-  gt_inlinedarr_qsort_r (NULL,width,data);
+  QSORTNAME(gt_inlinedarr_qsort_r) (NULL,width,data);
 }
 
 static void dc_sortremainingsamples(Differencecover *dcov)

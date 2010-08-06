@@ -61,13 +61,15 @@ struct Blindtrie
   GtEncseqReader *esr1, *esr2;
   GtReadmode readmode;
   unsigned long totallength,
-         offset,
-         maxdepth,
-         maxdepthminusoffset;
+                offset,
+                maxdepth,
+                maxdepthminusoffset,
+                allocatedBlindtrienode,
+                nextfreeBlindtrienode,
+                subbucketleft;
+  Suffixptr *subbucket;
   Nodeptr root;
   bool cmpcharbychar;
-  unsigned long allocatedBlindtrienode,
-                nextfreeBlindtrienode;
   Blindtrienode *spaceBlindtrienode;
   GtArrayNodeptr stack;
   Suffixsortspace *sssp;
@@ -632,16 +634,6 @@ static void showblindtrie(const Blindtrie *blindtrie)
 }
 #endif
 
-static int suffixcompare(const void *a, const void *b)
-{
-  gt_assert(*((unsigned long *) a) != *((unsigned long *) b));
-  if (*((unsigned long *) a) < *((unsigned long *) b))
-  {
-    return -1;
-  }
-  return 1;
-}
-
 #ifndef NDEBUG
 
 static void checksorting(const Blindtrie *blindtrie,
@@ -687,6 +679,58 @@ static void inplace_reverseSuffixptr(const Blindtrie *blindtrie,
   }
 }
 
+#ifdef  QSORTNAME
+#undef  QSORTNAME
+#endif
+
+#define QSORTNAME(NAME) bltrie_##NAME
+
+typedef Suffixptr QSORTNAME(Sorttype);
+
+#ifdef QSORT_ARRAY_DECLARE
+#undef QSORT_ARRAY_DECLARE
+#endif
+
+#define QSORT_ARRAY_DECLARE\
+        Blindtrie *blindtrie = (Blindtrie *) data
+
+#ifdef QSORT_ARRAY_GET
+#undef QSORT_ARRAY_GET
+#endif
+
+#define QSORT_ARRAY_GET(ARR,RELIDX)\
+        suffixptrget(blindtrie->sssp,blindtrie->subbucket,\
+                     blindtrie->subbucketleft,RELIDX)
+
+#ifdef QSORT_ARRAY_SET
+#undef QSORT_ARRAY_SET
+#endif
+
+#define QSORT_ARRAY_SET(ARR,RELIDX,VALUE)\
+        suffixptrset(blindtrie->sssp,blindtrie->subbucket,\
+                     blindtrie->subbucketleft,RELIDX,VALUE)
+
+static int QSORTNAME(qsortcmparr) (
+                  GT_UNUSED const QSORTNAME(Sorttype) *subbucket,
+                  unsigned long a,
+                  unsigned long b,
+                  const void *data)
+{
+  const Blindtrie *blindtrie = (const Blindtrie *) data;
+  unsigned long start1, start2;
+
+  start1 = QSORT_ARRAY_GET(NULL,a);
+  start2 = QSORT_ARRAY_GET(NULL,b);
+  gt_assert(start1 != start2);
+  if (start1 < start2)
+  {
+    return -1;
+  }
+  return 1;
+}
+
+#include "qsort-array.gen"
+
 unsigned long gt_blindtrie_suffixsort(
                             Blindtrie *blindtrie,
                             Suffixptr *subbucket,
@@ -706,10 +750,16 @@ unsigned long gt_blindtrie_suffixsort(
 
   if (ordertype == Noorder)
   {
+    blindtrie->subbucket = subbucket;
+    blindtrie->subbucketleft = subbucketleft;
+    QSORTNAME(gt_inlinedarr_qsort_r) (NULL,numberofsuffixes,
+                                      (void *) blindtrie);
+    /*
     qsort(subbucket,
           (size_t) numberofsuffixes,
           sizeof (unsigned long),
           suffixcompare);
+    */
   } else
   {
     if (ordertype == Descending)
@@ -743,8 +793,8 @@ unsigned long gt_blindtrie_suffixsort(
   printf("insert suffixes at offset %lu:\n",offset);
   for (idx=0; idx < numberofsuffixes; idx++)
   {
-    printf("%lu ",suffixptrget(blindtrie->sssp,subbucket,subbucketleft,idx) +
-                   offset);
+    printf("%lu ",
+           suffixptrget(blindtrie->sssp,subbucket,subbucketleft,idx) + offset);
   }
   printf("\nstep 0\n");
   showblindtrie(blindtrie);

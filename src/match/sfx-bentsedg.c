@@ -2219,7 +2219,10 @@ void gt_sortallbuckets(Suffixsortspace *suffixsortspace,
   unsigned long lcpvalue;
   Suffixwithcode firstsuffixofbucket;
   Bentsedgresources bsr;
+  /*
   Suffixptr *suftabptr = gt_suffixsortspace_leftadjust(suffixsortspace);
+  */
+  Suffixptr *suftabptr = gt_suffixsortspace_sortspace_get(suffixsortspace);
 
   initBentsedgresources(&bsr,
                         suffixsortspace,

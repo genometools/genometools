@@ -4,9 +4,10 @@
 #include "core/stack-inlined.h"
 
 /*
- * Qsort routine from Bentley & McIlroy's "Engineering a Sort Function".
+ * Qsort routine from Bentley & McIlroy's ``Engineering a Sort Function''.
  */
 
+#ifndef GT_QSORT_ARR_SWAP
 #define GT_QSORT_ARR_SWAP(ARR,A,B)\
         if ((A) != (B))\
         {\
@@ -14,7 +15,9 @@
           QSORT_ARRAY_SET(ARR,A,QSORT_ARRAY_GET(ARR,B));\
           QSORT_ARRAY_SET(ARR,B,tmp);\
         }
+#endif
 
+#ifndef GT_QSORT_ARR_VECSWAP
 #define GT_QSORT_ARR_VECSWAP(ARR,A,B,N)\
         aidx = A;\
         bidx = B;\
@@ -26,19 +29,20 @@
           aidx++;\
           bidx++;\
         }
+#endif
 
-static inline unsigned long gt_inlined_qsort_arr_r_med3
-                     (const Sorttype *arr,unsigned long a,
+static inline unsigned long QSORTNAME(gt_inlined_qsort_arr_r_med3)
+                     (const QSORTNAME(Sorttype) *arr,unsigned long a,
                       unsigned long b, unsigned long c, void *data)
 {
-  return qsortcmparr (arr, a, b, data) < 0
-           ? (qsortcmparr (arr, b, c, data) < 0
+  return QSORTNAME(qsortcmparr) (arr, a, b, data) < 0
+           ? (QSORTNAME(qsortcmparr) (arr, b, c, data) < 0
                 ? b
-                : (qsortcmparr (arr, a, c, data) < 0
+                : (QSORTNAME(qsortcmparr) (arr, a, c, data) < 0
                      ? c : a))
-           : (qsortcmparr (arr, b, c, data) > 0
+           : (QSORTNAME(qsortcmparr) (arr, b, c, data) > 0
                 ? b
-                : (qsortcmparr (arr, a, c, data) < 0
+                : (QSORTNAME(qsortcmparr) (arr, a, c, data) < 0
                      ? a
                      : c));
 }
@@ -51,7 +55,9 @@ typedef struct
 
 GT_STACK_DECLARESTRUCT(Intervalarrtobesorted,32UL);
 
-static void gt_inlinedarr_qsort_r (Sorttype *arr,unsigned long len,void *data)
+static void QSORTNAME(gt_inlinedarr_qsort_r) (QSORTNAME(Sorttype) *arr,
+                                              unsigned long len,
+                                              void *data)
 {
   unsigned long tmp, pa, pb, pc, pd, pl, pm, pn, aidx, bidx, d, minval;
   int r;
@@ -73,8 +79,10 @@ static void gt_inlinedarr_qsort_r (Sorttype *arr,unsigned long len,void *data)
       for (pm = current.startindex + 1;
            pm < current.startindex + current.len; pm++)
       {
-        for (pl = pm; pl > current.startindex &&
-                      qsortcmparr (arr, pl - 1, pl, data) > 0; pl--)
+        for (pl = pm;
+             pl > current.startindex &&
+             QSORTNAME(qsortcmparr) (arr, pl - 1, pl, data) > 0;
+             pl--)
         {
           GT_QSORT_ARR_SWAP (arr, pl, pl - 1);
         }
@@ -89,15 +97,16 @@ static void gt_inlinedarr_qsort_r (Sorttype *arr,unsigned long len,void *data)
       if (current.len > 40UL)
       {
         d = GT_DIV8 (current.len);
-        pl = gt_inlined_qsort_arr_r_med3 (arr, pl, pl + d,
-                                          pl + GT_MULT2 (d), data);
+        pl = QSORTNAME(gt_inlined_qsort_arr_r_med3) (arr, pl, pl + d,
+                                                     pl + GT_MULT2 (d), data);
         gt_assert(pm >= d);
-        pm = gt_inlined_qsort_arr_r_med3 (arr, pm - d, pm, pm + d, data);
+        pm = QSORTNAME(gt_inlined_qsort_arr_r_med3) (arr, pm - d, pm,
+                                                     pm + d, data);
         gt_assert(pn >= GT_MULT2(d));
-        pn = gt_inlined_qsort_arr_r_med3 (arr, pn - GT_MULT2 (d),
-                                          pn - d, pn, data);
+        pn = QSORTNAME(gt_inlined_qsort_arr_r_med3) (arr, pn - GT_MULT2 (d),
+                                                     pn - d, pn, data);
       }
-      pm = gt_inlined_qsort_arr_r_med3 (arr, pl, pm, pn, data);
+      pm = QSORTNAME(gt_inlined_qsort_arr_r_med3) (arr, pl, pm, pn, data);
     }
     GT_QSORT_ARR_SWAP (arr, current.startindex, pm);
     pa = pb = current.startindex + 1;
@@ -105,7 +114,8 @@ static void gt_inlinedarr_qsort_r (Sorttype *arr,unsigned long len,void *data)
     while (1)
     {
       while (pb <= pc &&
-             (r = qsortcmparr (arr, pb, current.startindex, data)) <= 0)
+             (r = QSORTNAME(qsortcmparr) (arr, pb,
+                                          current.startindex, data)) <= 0)
       {
         if (r == 0)
         {
@@ -116,7 +126,8 @@ static void gt_inlinedarr_qsort_r (Sorttype *arr,unsigned long len,void *data)
         pb++;
       }
       while (pb <= pc &&
-             (r = qsortcmparr (arr, pc, current.startindex, data)) >= 0)
+             (r = QSORTNAME(qsortcmparr) (arr, pc,
+                                          current.startindex, data)) >= 0)
       {
         if (r == 0)
         {
@@ -143,8 +154,10 @@ static void gt_inlinedarr_qsort_r (Sorttype *arr,unsigned long len,void *data)
       for (pm = current.startindex + 1;
            pm < current.startindex + current.len; pm++)
       {
-        for (pl = pm; pl > current.startindex &&
-                      qsortcmparr (arr, pl - 1, pl, data) > 0; pl--)
+        for (pl = pm;
+             pl > current.startindex &&
+             QSORTNAME(qsortcmparr) (arr, pl - 1, pl, data) > 0;
+             pl--)
         {
           GT_QSORT_ARR_SWAP (arr, pl, pl - 1);
         }

@@ -46,6 +46,10 @@ Suffixsortspace *suffixsortspace_new(unsigned long numofentries)
   {
     suffixsortspace->sortspace = gt_malloc(sizeof(*suffixsortspace->sortspace) *
                                            numofentries);
+    /*
+    fprintf(stderr,"sortspace of size %lu at %lu\n",
+            numofentries,(unsigned long) suffixsortspace->sortspace);
+    */
     suffixsortspace->sortspacestart = true;
     suffixsortspace->freesortspace = true;
   }
@@ -98,9 +102,20 @@ static void suffixptrassert(const Suffixsortspace *sssp,
   gt_assert(sssp->sortspace != NULL);
   gt_assert(sssp->sortspaceoffset <= sssp->bucketleftidx + subbucketleft + idx);
   gt_assert(subbucket != NULL);
+  if (subbucket + idx != sssp->sortspace +
+                         sssp->bucketleftidx + subbucketleft + idx)
+  {
+    fprintf(stderr,"idx=%lu,subbucket=%lu,sssp->sortspace=%lu,"
+           "bucketleftidx=%lu,subbucketleft=%lu,sortspaceoffset=%lu\n",idx,
+           (unsigned long) subbucket,
+           (unsigned long) sssp->sortspace,
+           sssp->bucketleftidx,
+           subbucketleft,
+           sssp->sortspaceoffset);
+    exit(EXIT_FAILURE);
+  }
   gt_assert(subbucket + idx == sssp->sortspace +
-                               sssp->bucketleftidx + subbucketleft + idx -
-                               sssp->sortspaceoffset);
+                               sssp->bucketleftidx + subbucketleft + idx);
 }
 
 unsigned long suffixptrget(const Suffixsortspace *sssp,

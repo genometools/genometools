@@ -187,8 +187,36 @@ static int qsortcmp(const Sorttype *a,const Sorttype *b,
   return 0;
 }
 
-static int qsortcmparr(const Sorttype *arr,unsigned long a,unsigned long b,
-                       const GT_UNUSED void *data)
+#ifdef  QSORTNAME
+#undef  QSORTNAME
+#endif
+
+#define QSORTNAME(NAME) qsortbench_##NAME
+
+#ifdef QSORT_ARRAY_DECLARE
+#undef QSORT_ARRAY_DECLARE
+#endif
+
+#define QSORT_ARRAY_DECLARE /* Nothing */
+
+#ifdef QSORT_ARRAY_GET
+#undef QSORT_ARRAY_GET
+#endif
+
+#define QSORT_ARRAY_GET(ARR,RELIDX) ARR[RELIDX]
+
+#ifdef QSORT_ARRAY_SET
+#undef QSORT_ARRAY_SET
+#endif
+
+#define QSORT_ARRAY_SET(ARR,RELIDX,VALUE) ARR[RELIDX] = VALUE
+
+typedef unsigned long QSORTNAME(Sorttype);
+
+static int QSORTNAME(qsortcmparr)(const QSORTNAME(Sorttype) *arr,
+                                  unsigned long a,
+                                  unsigned long b,
+                                  const GT_UNUSED void *data)
 {
   cmpcount++;
   if (arr[a] < arr[b])
@@ -202,18 +230,16 @@ static int qsortcmparr(const Sorttype *arr,unsigned long a,unsigned long b,
   return 0;
 }
 
-static int qsortcmpnodata(const void *a,const void *b)
+#include "match/qsort-array.gen"
+
+static void check_inlinedarr_qsort(unsigned long *a, unsigned long n)
 {
-  cmpcount++;
-  if (*(Sorttype*)a < *((Sorttype*)b))
-  {
-    return -1;
+  unsigned long idx;
+
+  QSORTNAME(gt_inlinedarr_qsort_r) (a, n, NULL);
+  for (idx = 1UL; idx < n; idx++) {
+    gt_assert(a[idx-1] <= a[idx]);
   }
-  if (*(Sorttype*)a > *(Sorttype*)b)
-  {
-    return 1;
-  }
-  return 0;
 }
 
 static int qsortcmpwithdata(const void *a,const void *b, GT_UNUSED void *data)
@@ -232,34 +258,6 @@ static int qsortcmpwithdata(const void *a,const void *b, GT_UNUSED void *data)
 
 #include "match/qsort-inplace.gen"
 
-static void check_inlinedptr_qsort(unsigned long *a, unsigned long n)
-{
-  unsigned long idx;
-  gt_inlined_qsort_r(a, n, NULL);
-  for (idx = 1UL; idx < n; idx++) {
-    gt_assert(a[idx-1] <= a[idx]);
-  }
-}
-
-#define QSORT_ARRAY_DECLARE /* Nothing */
-
-#define QSORT_ARRAY_GET(ARR,RELIDX)\
-        ARR[RELIDX]
-
-#define QSORT_ARRAY_SET(ARR,RELIDX,VALUE)\
-        ARR[RELIDX] = VALUE
-
-#include "match/qsort-array.gen"
-
-static void check_inlinedarr_qsort(unsigned long *a, unsigned long n)
-{
-  unsigned long idx;
-  gt_inlinedarr_qsort_r(a, n, NULL);
-  for (idx = 1UL; idx < n; idx++) {
-    gt_assert(a[idx-1] <= a[idx]);
-  }
-}
-
 static void check_thomas_qsort(unsigned long *a, unsigned long n)
 {
   unsigned long idx;
@@ -269,10 +267,33 @@ static void check_thomas_qsort(unsigned long *a, unsigned long n)
   }
 }
 
+static int qsortcmpnodata(const void *a,const void *b)
+{
+  cmpcount++;
+  if (*(Sorttype*)a < *((Sorttype*)b))
+  {
+    return -1;
+  }
+  if (*(Sorttype*)a > *(Sorttype*)b)
+  {
+    return 1;
+  }
+  return 0;
+}
+
 static void check_gnu_qsort(unsigned long *a, unsigned long n)
 {
   unsigned long idx;
   qsort(a,n, sizeof (Sorttype), qsortcmpnodata);
+  for (idx = 1UL; idx < n; idx++) {
+    gt_assert(a[idx-1] <= a[idx]);
+  }
+}
+
+static void check_inlinedptr_qsort(unsigned long *a, unsigned long n)
+{
+  unsigned long idx;
+  gt_inlined_qsort_r(a, n, NULL);
   for (idx = 1UL; idx < n; idx++) {
     gt_assert(a[idx-1] <= a[idx]);
   }
