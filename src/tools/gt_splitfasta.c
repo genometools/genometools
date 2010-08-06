@@ -125,10 +125,10 @@ static int split_description(const char *filename, GtStr *splitdesc,
       had_err = -1;
       break;
     }
-    gt_fasta_show_entry_generic(gt_bioseq_get_description(bioseq, i),
-                                gt_bioseq_get_sequence(bioseq, i),
-                                gt_bioseq_get_sequence_length(bioseq, i), 0,
-                                outfp);
+    gt_fasta_show_entry(gt_bioseq_get_description(bioseq, i),
+                        gt_bioseq_get_sequence(bioseq, i),
+                        gt_bioseq_get_sequence_length(bioseq, i), 0,
+                        outfp);
     gt_file_delete(outfp);
   }
 

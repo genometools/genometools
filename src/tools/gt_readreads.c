@@ -152,7 +152,7 @@ static int gt_readreads_runner(int argc, const char **argv, int parsed_args,
     if (had_err != 1)
       break;
     if (opts->fasta) {
-      gt_fasta_show_entry((char*)desc, (char*)seq, len, opts->fastawidth);
+      gt_fasta_show_entry((char*)desc, (char*)seq, len, opts->fastawidth, NULL);
     }
     else if (opts->showseq) {
       unsigned long *lens = gt_malloc(sizeof (unsigned long)*len);

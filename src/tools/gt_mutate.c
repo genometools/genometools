@@ -85,7 +85,7 @@ static int gt_mutate_runner(int argc, const char **argv, int parsed_args,
       gt_fasta_show_entry(gt_seq_get_description(mutated_seq),
                           gt_seq_get_orig(mutated_seq),
                           gt_seq_length(mutated_seq),
-                          0);
+                          0, NULL);
       gt_seq_delete(mutated_seq);
     }
     gt_bioseq_delete(bioseq);

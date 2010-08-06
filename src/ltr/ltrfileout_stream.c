@@ -187,18 +187,18 @@ static int write_pdom(GtLTRFileOutStream *ls, GtArray *pdoms,
   }
   if (!had_err)
   {
-    gt_fasta_show_entry_generic(desc,
-                                gt_str_get(pdom_seq),
-                                seq_length,
-                                GT_FSWIDTH,
-                                seqfile);
+    gt_fasta_show_entry(desc,
+                        gt_str_get(pdom_seq),
+                        seq_length,
+                        GT_FSWIDTH,
+                        seqfile);
     if (ls->write_pdom_aaseqs)
     {
-      gt_fasta_show_entry_generic(desc,
-                                  gt_str_get(pdom_aaseq),
-                                  gt_str_length(pdom_aaseq),
-                                  GT_FSWIDTH,
-                                  aafile);
+      gt_fasta_show_entry(desc,
+                          gt_str_get(pdom_aaseq),
+                          gt_str_length(pdom_aaseq),
+                          GT_FSWIDTH,
+                          aafile);
     }
   }
   gt_str_delete(pdom_seq);
@@ -336,8 +336,8 @@ int gt_ltrfileout_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
       ppt_seq = gt_ltrelement_get_sequence(ppt_rng.start-1, ppt_rng.end-1,
                                            ppt_strand, ls->encseq, seqstartpos,
                                            e);
-      gt_fasta_show_entry_generic(desc, ppt_seq, gt_range_length(&ppt_rng),
-                                  GT_FSWIDTH,ls->pptout_file);
+      gt_fasta_show_entry(desc, ppt_seq, gt_range_length(&ppt_rng),
+                          GT_FSWIDTH,ls->pptout_file);
       gt_file_xprintf(ls->tabout_file,
                          "%lu\t%lu\t%s\t%c\t%d\t",
                          ppt_rng.start,
@@ -360,8 +360,8 @@ int gt_ltrfileout_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
       pbs_seq = gt_ltrelement_get_sequence(pbs_rng.start-1, pbs_rng.end-1,
                                            pbs_strand, ls->encseq, seqstartpos,
                                            e);
-      gt_fasta_show_entry_generic(desc, pbs_seq, gt_range_length(&pbs_rng),
-                                  GT_FSWIDTH, ls->pbsout_file);
+      gt_fasta_show_entry(desc, pbs_seq, gt_range_length(&pbs_rng),
+                          GT_FSWIDTH, ls->pbsout_file);
       gt_file_xprintf(ls->tabout_file,
                          "%lu\t%lu\t%c\t%s\t%s\t%s\t%s\t%s\t",
                          pbs_rng.start,
@@ -421,21 +421,21 @@ int gt_ltrfileout_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
                               ltr5_rng.end-1,
                               gt_feature_node_get_strand(ls->element.mainnode),
                               ls->encseq, seqstartpos, e);
-    gt_fasta_show_entry_generic(desc,
-                                outseq,
-                                gt_range_length(&ltr5_rng),
-                                GT_FSWIDTH,
-                                ls->ltr5out_file);
+    gt_fasta_show_entry(desc,
+                        outseq,
+                        gt_range_length(&ltr5_rng),
+                        GT_FSWIDTH,
+                        ls->ltr5out_file);
     gt_free(outseq);
     outseq = gt_ltrelement_get_sequence(rng.start-1,
                               rng.end-1,
                               gt_feature_node_get_strand(ls->element.mainnode),
                               ls->encseq, seqstartpos, e);
-    gt_fasta_show_entry_generic(desc,
-                                outseq,
-                                gt_range_length(&rng),
-                                GT_FSWIDTH,
-                                ls->elemout_file);
+    gt_fasta_show_entry(desc,
+                        outseq,
+                        gt_range_length(&rng),
+                        GT_FSWIDTH,
+                        ls->elemout_file);
     gt_free(outseq);
 
     /* output complete oriented element */
@@ -443,11 +443,11 @@ int gt_ltrfileout_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
                               ltr3_rng.end-1,
                               gt_feature_node_get_strand(ls->element.mainnode),
                               ls->encseq, seqstartpos, e);
-    gt_fasta_show_entry_generic(desc,
-                                outseq,
-                                gt_range_length(&ltr3_rng),
-                                GT_FSWIDTH,
-                                ls->ltr3out_file);
+    gt_fasta_show_entry(desc,
+                        outseq,
+                        gt_range_length(&ltr3_rng),
+                        GT_FSWIDTH,
+                        ls->ltr3out_file);
     gt_free(outseq);
     gt_file_xprintf(ls->tabout_file, "\n");
   }

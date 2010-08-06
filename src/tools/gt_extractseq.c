@@ -154,9 +154,8 @@ static int extractseq_pos(GtFile *outfp, GtBioseq *bs,
     had_err = -1;
   }
   if (!had_err) {
-    gt_fasta_show_entry_generic(NULL,
-                                gt_bioseq_get_raw_sequence(bs) + frompos - 1,
-                                topos - frompos + 1, width, outfp);
+    gt_fasta_show_entry(NULL, gt_bioseq_get_raw_sequence(bs) + frompos - 1,
+                        topos - frompos + 1, width, outfp);
   }
   return had_err;
 }
@@ -178,9 +177,8 @@ static int extractseq_match(GtFile *outfp, GtBioseq *bs,
     gt_assert(desc);
     had_err = gt_grep(&match, pattern, desc, err);
     if (!had_err && match) {
-      gt_fasta_show_entry_generic(desc, gt_bioseq_get_sequence(bs, i),
-                                  gt_bioseq_get_sequence_length(bs, i), width,
-                                  outfp);
+      gt_fasta_show_entry(desc, gt_bioseq_get_sequence(bs, i),
+                          gt_bioseq_get_sequence_length(bs, i), width, outfp);
     }
   }
 

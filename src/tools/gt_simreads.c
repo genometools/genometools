@@ -323,11 +323,11 @@ static int gt_simreads_runner(GT_UNUSED int argc,
       gt_str_reset(description);
       gt_str_append_cstr(description, "read_");
       gt_str_append_ulong(description, output_reads);
-      gt_fasta_show_entry_generic(gt_str_get(description),
-                                  gt_str_get(read),
-                                  gt_str_length(read),
-                                  60,
-                                  arguments->outfp);
+      gt_fasta_show_entry(gt_str_get(description),
+                          gt_str_get(read),
+                          gt_str_length(read),
+                          60,
+                          arguments->outfp);
       output_bases += gt_str_length(read);
       output_reads++;
       if (arguments->verbose && readmode == GT_READMODE_FORWARD)

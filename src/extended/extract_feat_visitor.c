@@ -77,15 +77,15 @@ static void show_entry(GtStr *description, GtStr *sequence, bool translate,
       gt_str_append_char(protein, translated);
       rval = gt_translator_next(tr, &translated, &frame, NULL);
     }
-    gt_fasta_show_entry_generic(gt_str_get(description), gt_str_get(protein),
-                                gt_str_length(protein), 0, outfp);
+    gt_fasta_show_entry(gt_str_get(description), gt_str_get(protein),
+                        gt_str_length(protein), 0, outfp);
     gt_str_delete(protein);
     gt_translator_delete(tr);
     gt_codon_iterator_delete(ci);
   }
   else {
-    gt_fasta_show_entry_generic(gt_str_get(description), gt_str_get(sequence),
-                                gt_str_length(sequence), 0, outfp);
+    gt_fasta_show_entry(gt_str_get(description), gt_str_get(sequence),
+                        gt_str_length(sequence), 0, outfp);
   }
 }
 

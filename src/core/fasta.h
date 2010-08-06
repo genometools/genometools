@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -20,15 +20,10 @@
 
 #include "core/file.h"
 
-/* Show a fasta entry with optional <description> and mandatory <sequence> on
-   stdout. If <width> is != 0 the sequence is formatted accordingly. */
-void gt_fasta_show_entry(const char *description, const char *sequence,
-                         unsigned long sequence_length, unsigned long width);
-
 /* Print a fasta entry with optional <description> and mandatory <sequence> to
    <outfp>. If <width> is != 0 the sequence is formatted accordingly. */
-void gt_fasta_show_entry_generic(const char *description, const char *sequence,
-                                 unsigned long sequence_length,
-                                 unsigned long width, GtFile *outfp);
+void gt_fasta_show_entry(const char *description, const char *sequence,
+                         unsigned long sequence_length, unsigned long width,
+                         GtFile *outfp);
 
 #endif

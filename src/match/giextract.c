@@ -934,9 +934,8 @@ int gt_extractkeysfromfastafile(bool verbose,
                             (int) keylen,(int) keylen,keyspace,
                             desc);
             */
-            gt_fasta_show_entry_generic(desc,
-                                        (const char *) sequence,
-                                        len, width, outfp);
+            gt_fasta_show_entry(desc, (const char *) sequence, len, width,
+                                outfp);
           } else
           {
             (void) snprintf(headerbufferspace,headerbuffersize,
@@ -945,13 +944,13 @@ int gt_extractkeysfromfastafile(bool verbose,
                             fastakeyqueries[keyposition].frompos,
                             fastakeyqueries[keyposition].topos,
                             desc);
-            gt_fasta_show_entry_generic(headerbufferspace,
-                                        (const char *)
-                                        (sequence+fastakeyqueries[keyposition].
-                                                                  frompos - 1),
-                                        fastakeyqueries[keyposition].topos -
-                                        fastakeyqueries[keyposition].frompos+1,
-                                        width, outfp);
+            gt_fasta_show_entry(headerbufferspace,
+                                (const char *)
+                                (sequence+fastakeyqueries[keyposition].
+                                                          frompos - 1),
+                                fastakeyqueries[keyposition].topos -
+                                fastakeyqueries[keyposition].frompos+1,
+                                width, outfp);
           }
           fastakeyqueries[keyposition].markhit = true;
           countmarkhit++;

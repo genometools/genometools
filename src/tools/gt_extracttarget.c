@@ -85,7 +85,8 @@ static bool show_target(GT_UNUSED unsigned long pos, void *data)
   gt_assert(ti);
   gt_fasta_show_entry(gt_bioseq_get_description(ti->bioseq, ti->seqnum),
                       gt_bioseq_get_sequence(ti->bioseq, ti->seqnum),
-                      gt_bioseq_get_sequence_length(ti->bioseq, ti->seqnum), 0);
+                      gt_bioseq_get_sequence_length(ti->bioseq, ti->seqnum), 0,
+                      NULL);
   return true;
 }
 
@@ -191,8 +192,8 @@ static int gt_extracttarget_runner(GT_UNUSED int argc, const char **argv,
 GtTool* gt_extracttarget(void)
 {
   return gt_tool_new(gt_extracttarget_arguments_new,
-                  gt_extracttarget_arguments_delete,
-                  gt_extracttarget_option_parser_new,
-                  NULL,
-                  gt_extracttarget_runner);
+                     gt_extracttarget_arguments_delete,
+                     gt_extracttarget_option_parser_new,
+                     NULL,
+                     gt_extracttarget_runner);
 }

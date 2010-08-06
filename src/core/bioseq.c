@@ -639,10 +639,9 @@ void gt_bioseq_show_as_fasta(GtBioseq *bs, unsigned long width, GtFile *outfp)
   gt_assert(bs);
 
   for (i = 0; i < gt_bioseq_number_of_sequences(bs); i++) {
-    gt_fasta_show_entry_generic(gt_bioseq_get_description(bs, i),
-                                gt_bioseq_get_sequence(bs, i),
-                                gt_bioseq_get_sequence_length(bs, i), width,
-                                outfp);
+    gt_fasta_show_entry(gt_bioseq_get_description(bs, i),
+                        gt_bioseq_get_sequence(bs, i),
+                        gt_bioseq_get_sequence_length(bs, i), width, outfp);
   }
 }
 
@@ -652,10 +651,9 @@ void gt_bioseq_show_sequence_as_fasta(GtBioseq *bs, unsigned long seqnum,
   gt_assert(bs);
   gt_assert(seqnum < gt_bioseq_number_of_sequences(bs));
 
-  gt_fasta_show_entry_generic(gt_bioseq_get_description(bs, seqnum),
-                              gt_bioseq_get_sequence(bs, seqnum),
-                              gt_bioseq_get_sequence_length(bs, seqnum), width,
-                              outfp);
+  gt_fasta_show_entry(gt_bioseq_get_description(bs, seqnum),
+                      gt_bioseq_get_sequence(bs, seqnum),
+                      gt_bioseq_get_sequence_length(bs, seqnum), width, outfp);
 
 }
 
