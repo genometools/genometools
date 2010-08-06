@@ -165,6 +165,12 @@ static const char* bioseq_fingerprints_get(BioseqFingerprints *bsf,
   return gt_str_array_get(bsf->md5_fingerprints, idx);
 }
 
+static GtStrArray* bioseq_fingerprints_get_all(BioseqFingerprints *bsf)
+{
+  gt_assert(bsf);
+  return bsf->md5_fingerprints;
+}
+
 typedef struct {
   FILE *gt_bioseq_index,
        *gt_bioseq_raw;
@@ -573,6 +579,14 @@ const char* gt_bioseq_get_md5_fingerprint(GtBioseq *bs, unsigned long idx)
     bs->fingerprints = bioseq_fingerprints_new(bs);
   gt_assert(bioseq_fingerprints_get(bs->fingerprints, idx));
   return bioseq_fingerprints_get(bs->fingerprints, idx);
+}
+
+GtStrArray* gt_bioseq_get_md5_fingerprints(GtBioseq *bs)
+{
+  gt_assert(bs);
+  if (!bs->fingerprints)
+    bs->fingerprints = bioseq_fingerprints_new(bs);
+  return bioseq_fingerprints_get_all(bs->fingerprints);
 }
 
 const char* gt_bioseq_filename(const GtBioseq *bs)

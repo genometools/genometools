@@ -18,12 +18,14 @@
 #include <ctype.h>
 #include <math.h>
 #include "core/assert_api.h"
+#include "core/bioseq.h"
 #include "core/fileutils_api.h"
 #include "core/ma.h"
 #include "core/safearith.h"
 #include "core/str.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
+#include "extended/md5_seqid.h"
 #include "gth/default.h"
 #include "gth/gthdef.h"
 #include "gth/input.h"
@@ -63,6 +65,9 @@ struct GthInput {
   unsigned long genomicfrompos,   /* analyse genomic seq. from this position */
                 genomicwidth,     /* analyse only this width of genomic seq. */
                 genomictopos;     /* = genomicfrompos + genomicwidth - 1 */
+  bool md5seqids;
+  GtStrArray **genomicMD5s,
+             **referenceMD5s;
 };
 
 GthInput *gth_input_new(GthInputFilePreprocessor file_preprocessor,
@@ -86,6 +91,42 @@ GthInput *gth_input_new(GthInputFilePreprocessor file_preprocessor,
   return input;
 }
 
+static int fillMD5s_for_filenames(GtStrArray **md5s, GtStrArray *filenames,
+                                  GtError *err)
+{
+  unsigned long i;
+  int had_err = 0;
+  gt_error_check(err);
+  gt_assert(md5s && filenames);
+  for (i = 0; !had_err && i < gt_str_array_size(filenames); i++) {
+    GtBioseq *bioseq;
+    if (!(bioseq = gt_bioseq_new(gt_str_array_get(filenames, i), err)))
+      had_err = -1;
+    if (!had_err)
+      md5s[i] = gt_str_array_ref(gt_bioseq_get_md5_fingerprints(bioseq));
+    gt_bioseq_delete(bioseq);
+  }
+  return had_err;
+}
+
+static int fillMD5s(GthInput *input, GtError *err)
+{
+  int had_err;
+  gt_error_check(err);
+  gt_assert(input);
+  input->genomicMD5s = gt_calloc(gt_str_array_size(input->genomicfiles),
+                                 sizeof (GtStrArray*));
+  input->referenceMD5s = gt_calloc(gt_str_array_size(input->referencefiles),
+                                   sizeof (GtStrArray*));
+  had_err = fillMD5s_for_filenames(input->genomicMD5s, input->genomicfiles,
+                                   err);
+  if (!had_err) {
+    had_err = fillMD5s_for_filenames(input->referenceMD5s,
+                                     input->referencefiles, err);
+  }
+  return had_err;
+}
+
 int gth_input_preprocess(GthInput *input,
                          bool gthconsensus,
                          bool noautoindex,
@@ -107,6 +148,10 @@ int gth_input_preprocess(GthInput *input,
                                      err);
   if (!had_err)
     had_err = gth_input_load_scorematrix(input, scorematrixfile, out, err);
+  if (!had_err && out->md5seqids) {
+    input->md5seqids = out->md5seqids;
+    had_err = fillMD5s(input, err);
+  }
   return had_err;
 }
 
@@ -332,21 +377,31 @@ static void save_sequenceid(GtStr *sequenceid, GthSeqCol *seqcol,
 }
 
 void gth_input_save_gen_id(GthInput *input, GtStr *id,
-                           GT_UNUSED unsigned long file_num,
-                           unsigned long seq_num)
+                           unsigned long file_num, unsigned long seq_num)
 {
   gt_assert(input && id);
   gt_assert(input->gen_file_num == file_num);
-  save_sequenceid(id, input->genomic_seq_col, seq_num);
+  if (input->md5seqids) {
+    gt_str_append_cstr(id, GT_MD5_SEQID_PREFIX);
+    gt_str_append_cstr(id, gt_str_array_get(input->genomicMD5s[file_num],
+                                            seq_num));
+  }
+  else
+    save_sequenceid(id, input->genomic_seq_col, seq_num);
 }
 
 void gth_input_save_ref_id(GthInput *input, GtStr *id,
-                            GT_UNUSED unsigned long file_num,
-                           unsigned long seq_num)
+                           unsigned long file_num, unsigned long seq_num)
 {
   gt_assert(input && id);
   gt_assert(input->ref_file_num == file_num);
-  save_sequenceid(id, input->reference_seq_col, seq_num);
+  if (input->md5seqids) {
+    gt_str_append_cstr(id, GT_MD5_SEQID_PREFIX);
+    gt_str_append_cstr(id, gt_str_array_get(input->referenceMD5s[file_num],
+                                            seq_num));
+  }
+  else
+    save_sequenceid(id, input->reference_seq_col, seq_num);
 }
 
 unsigned long gth_input_num_of_gen_files(const GthInput *input)
@@ -880,7 +935,18 @@ void gth_input_delete_current(GthInput *input)
 
 void gth_input_delete_complete(GthInput *input)
 {
+  unsigned long i;
   if (!input) return;
+  if (input->genomicMD5s) {
+    for (i = 0; i < gt_str_array_size(input->genomicfiles); i++)
+      gt_str_array_delete(input->genomicMD5s[i]);
+    gt_free(input->genomicMD5s);
+  }
+  if (input->referenceMD5s) {
+    for (i = 0; i < gt_str_array_size(input->referencefiles); i++)
+      gt_str_array_delete(input->referenceMD5s[i]);
+    gt_free(input->referenceMD5s);
+  }
   gth_input_delete_current(input);
   gt_str_delete(input->bssmfile);
   gt_str_delete(input->proteinsmap);
