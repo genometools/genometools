@@ -32,6 +32,7 @@ typedef struct {
        verbose;
   GtStr *type;
   GtSeqid2FileInfo *s2fi;
+  unsigned long width;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
 } GtExtractFeatArguments;
@@ -92,6 +93,10 @@ static GtOptionParser* gt_extractfeat_option_parser_new(void *tool_arguments)
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
 
+  /* -width */
+  option = gt_option_new_width(&arguments->width);
+  gt_option_parser_add_option(op, option);
+
   /* output file options */
   gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
 
@@ -132,6 +137,7 @@ static int gt_extractfeat_runner(GT_UNUSED int argc, const char **argv,
                                                     gt_str_get(arguments->type),
                                                      arguments->join,
                                                      arguments->translate,
+                                                     arguments->width,
                                                      arguments->outfp);
 
     /* pull the features through the stream and free them afterwards */

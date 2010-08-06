@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -30,7 +30,8 @@ struct GtExtractFeatVisitor {
   const char *type;
   bool join,
        translate;
-  unsigned long fastaseq_counter;
+  unsigned long fastaseq_counter,
+                width;
   GtRegionMapping *region_mapping;
   GtFile *outfp;
 };
@@ -60,7 +61,7 @@ static void construct_description(GtStr *description, const char *type,
 }
 
 static void show_entry(GtStr *description, GtStr *sequence, bool translate,
-                       GtFile *outfp)
+                       unsigned long width, GtFile *outfp)
 {
   if (translate) {
     char translated;
@@ -78,14 +79,14 @@ static void show_entry(GtStr *description, GtStr *sequence, bool translate,
       rval = gt_translator_next(tr, &translated, &frame, NULL);
     }
     gt_fasta_show_entry(gt_str_get(description), gt_str_get(protein),
-                        gt_str_length(protein), 0, outfp);
+                        gt_str_length(protein), width, outfp);
     gt_str_delete(protein);
     gt_translator_delete(tr);
     gt_codon_iterator_delete(ci);
   }
   else {
     gt_fasta_show_entry(gt_str_get(description), gt_str_get(sequence),
-                        gt_str_length(sequence), 0, outfp);
+                        gt_str_length(sequence), width, outfp);
   }
 }
 
@@ -114,7 +115,7 @@ static int extract_feat_visitor_feature_node(GtNodeVisitor *nv,
       efv->fastaseq_counter++;
       construct_description(description, efv->type, efv->fastaseq_counter,
                             efv->join, efv->translate);
-      show_entry(description, sequence, efv->translate, efv->outfp);
+      show_entry(description, sequence, efv->translate, efv->width, efv->outfp);
       gt_str_reset(description);
       gt_str_reset(sequence);
     }
@@ -141,7 +142,8 @@ const GtNodeVisitorClass* gt_extract_feat_visitor_class()
 
 GtNodeVisitor* gt_extract_feat_visitor_new(GtRegionMapping *rm,
                                            const char *type, bool join,
-                                           bool translate, GtFile *outfp)
+                                           bool translate, unsigned long width,
+                                           GtFile *outfp)
 {
   GtNodeVisitor *nv;
   GtExtractFeatVisitor *efv;
@@ -153,6 +155,7 @@ GtNodeVisitor* gt_extract_feat_visitor_new(GtRegionMapping *rm,
   efv->translate = translate;
   efv->fastaseq_counter = 0;
   efv->region_mapping = rm;
+  efv->width = width;
   efv->outfp = outfp;
   return nv;
 }
