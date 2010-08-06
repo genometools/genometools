@@ -122,6 +122,8 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
          *optshowintronmaxlen = NULL,     /* output */
          *optmaxagsnum = NULL,            /* output */
          *optminorflength = NULL,         /* output */
+         *optstartcodon = NULL,           /* output */
+         *optfinalstopcodon = NULL,       /* output */
          *optshowseqnums = NULL,          /* output */
          *optgs2out = NULL,               /* output */
          *optmaskpolyatails = NULL,       /* data preprocessing */
@@ -432,6 +434,23 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
                                             GTH_DEFAULT_MINORFLENGTH, 1);
   gt_option_is_extended_option(optminorflength);
   gt_option_parser_add_option(op, optminorflength);
+
+  /* -startcodon */
+  optstartcodon = gt_option_new_bool("startcodon", "require than an ORF must "
+                                     "begin with a start codon",
+                                     &call_info->out->start_codon, false);
+  gt_option_is_extended_option(optstartcodon);
+  gt_option_is_development_option(optstartcodon);
+  gt_option_parser_add_option(op, optstartcodon);
+
+  /* -finalstopcodon */
+  optfinalstopcodon = gt_option_new_bool("finalstopcodon", "require that the "
+                                         "final ORF must end with a stop codon",
+                                         &call_info->out->final_stop_codon,
+                                         false);
+  gt_option_is_extended_option(optfinalstopcodon);
+  gt_option_is_development_option(optfinalstopcodon);
+  gt_option_parser_add_option(op, optfinalstopcodon);
 
   /* -showseqnums */
   optshowseqnums = gt_option_new_bool("showseqnums", "show sequence numbers in "

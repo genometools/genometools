@@ -397,9 +397,12 @@ void gthshowORFs(char *frame0, char *frame1, char *frame2,
   info.maximalORFs = maximalORFs;
   info.minORFlength = out->minORFlength;
 
-  gt_determine_ORFs(saveORF, &info, 0, frame0, frame0len, false, false, true);
-  gt_determine_ORFs(saveORF, &info, 1, frame1, frame1len, false, false, true);
-  gt_determine_ORFs(saveORF, &info, 2, frame2, frame2len, false, false, true);
+  gt_determine_ORFs(saveORF, &info, 0, frame0, frame0len, out->start_codon,
+                    out->final_stop_codon, true);
+  gt_determine_ORFs(saveORF, &info, 1, frame1, frame1len, out->start_codon,
+                    out->final_stop_codon, true);
+  gt_determine_ORFs(saveORF, &info, 2, frame2, frame2len, out->start_codon,
+                    out->final_stop_codon, true);
 
   if (gt_array_size(maximalORFs)) {
     sortmaximalORFs(maximalORFs);

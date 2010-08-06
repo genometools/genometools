@@ -58,8 +58,7 @@ typedef void (*GthShowVerbose)(const char*);
 typedef void (*GthShowVerboseVM)(char*);
 
 /* This structure bundles all output related variables. */
-typedef struct
-{
+typedef struct {
   char *outputfile;                 /* name of output file */
   bool verboseseqs,                 /* show additional sequence information */
                                     /* (for debugging purposes) */
@@ -72,7 +71,9 @@ typedef struct
        comments,                    /* output (additional) comments */
        showeops,                    /* show edit operations after (protein) DP
                                      */
-       sortags;                     /* sort AGSs */
+       sortags,                     /* sort AGSs */
+       start_codon,                 /* ORF must begin with a start codon */
+       final_stop_codon;            /* final ORF must end with a stop codon */
   double sortagswf;                 /* weight factor for the sorting of AGSs */
   unsigned int maxagsnum;           /* the maximum number of AGSs per PGL */
   unsigned long minORFlength,       /* minimum ORF length shown in assembly */

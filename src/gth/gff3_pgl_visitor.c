@@ -211,6 +211,7 @@ const GthPGLVisitorClass* gth_gff3_pgl_visitor_class()
 
 GthPGLVisitor* gth_gff3_pgl_visitor_new(GthInput *input, bool use_desc_ranges,
                                         unsigned long minORFlength,
+                                        bool start_codon, bool final_stop_codon,
                                         GtFile *outfp)
 {
   GthPGLVisitor *pgl_visitor =
@@ -220,8 +221,8 @@ GthPGLVisitor* gth_gff3_pgl_visitor_new(GthInput *input, bool use_desc_ranges,
   visitor->region_factory = gth_region_factory_new(use_desc_ranges);
   visitor->gthsourcetag = gt_str_new_cstr(GTHSOURCETAG);
   visitor->cds_visitor = gt_cds_visitor_new(NULL, minORFlength,
-                                            visitor->gthsourcetag, false,
-                                            false);
+                                            visitor->gthsourcetag, start_codon,
+                                            final_stop_codon);
   visitor->gff3_visitor = gt_gff3_visitor_new(outfp);
   return pgl_visitor;
 }
