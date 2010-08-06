@@ -29,7 +29,7 @@ typedef void (*GtDiscDistriIterFunc)(unsigned long key,
                                      unsigned long long value,
                                      void *data);
 
-GtDiscDistri*        gt_disc_distri_new(void);
+GtDiscDistri*      gt_disc_distri_new(void);
 void               gt_disc_distri_add(GtDiscDistri*, unsigned long);
 void               gt_disc_distri_add_multi(GtDiscDistri*, unsigned long,
                                         unsigned long long);
@@ -40,10 +40,10 @@ void               gt_disc_distri_foreach(const GtDiscDistri*,
                                           GtDiscDistriIterFunc,
                                           void *data);
 /* same as foreach, but from the longest to the smallest key: */
-void               gt_disc_distri_foreach_in_reverse_order(
-                                             const GtDiscDistri *d,
-                                             GtDiscDistriIterFunc func,
-                                             void *data);
+void               gt_disc_distri_foreach_in_reverse_order(const
+                                                           GtDiscDistri *d,
+                                                           GtDiscDistriIterFunc
+                                                           func, void *data);
 int                gt_disc_distri_unit_test(GtError*);
 void               gt_disc_distri_delete(GtDiscDistri*);
 

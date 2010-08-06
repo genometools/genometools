@@ -46,7 +46,7 @@ DEFINE_HASHMAP(unsigned long, ul, unsigned long long, ull, gt_ht_ul_elem_hash,
                inline)
 
 void gt_disc_distri_add_multi(GtDiscDistri *d, unsigned long key,
-                           unsigned long long occurrences)
+                              unsigned long long occurrences)
 {
   unsigned long long *valueptr;
   gt_assert(d);
@@ -162,7 +162,7 @@ void gt_disc_distri_foreach_generic(const GtDiscDistri *d,
 }
 
 void gt_disc_distri_foreach(const GtDiscDistri *d, GtDiscDistriIterFunc func,
-                        void *data)
+                            void *data)
 {
   gt_disc_distri_foreach_generic(d,func,data,NULL);
 }
@@ -194,7 +194,7 @@ struct ForeachTesterData
 
 /* helper function for unit test of foreach */
 static void foreachtester(unsigned long key,
-                           unsigned long long value, void *data)
+                          unsigned long long value, void *data)
 {
   struct ForeachTesterData *tdata = data;
   GtError *err = tdata->err;
