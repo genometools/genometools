@@ -44,7 +44,7 @@
 
 typedef struct {
   GtStrArray *md5_fingerprints;
-} GtBioseqFingerprints;
+} BioseqFingerprints;
 
 struct GtBioseq {
   bool use_stdin;
@@ -56,7 +56,7 @@ struct GtBioseq {
   size_t raw_sequence_length,
          allocated;
   GtAlphabet *alphabet;
-  GtBioseqFingerprints *fingerprints;
+  BioseqFingerprints *fingerprints;
 };
 
 static bool read_fingerprints(GtStrArray *md5_fingerprints,
@@ -123,9 +123,9 @@ static void write_fingerprints(GtStrArray *md5_fingerprints,
   gt_fa_xfclose(fingerprints_file);
 }
 
-static GtBioseqFingerprints* gt_bioseq_fingerprints_new(GtBioseq *bs)
+static BioseqFingerprints* bioseq_fingerprints_new(GtBioseq *bs)
 {
-  GtBioseqFingerprints *bsf;
+  BioseqFingerprints *bsf;
   bool reading_succeeded = false;
   GtStr *fingerprints_filename;
   gt_assert(bs);
@@ -151,14 +151,14 @@ static GtBioseqFingerprints* gt_bioseq_fingerprints_new(GtBioseq *bs)
   return bsf;
 }
 
-static void gt_bioseq_fingerprints_delete(GtBioseqFingerprints *bsf)
+static void gt_bioseq_fingerprints_delete(BioseqFingerprints *bsf)
 {
   if (!bsf) return;
   gt_str_array_delete(bsf->md5_fingerprints);
   gt_free(bsf);
 }
 
-static const char* gt_bioseq_fingerprints_get(GtBioseqFingerprints *bsf,
+static const char* bioseq_fingerprints_get(BioseqFingerprints *bsf,
                                            unsigned long idx)
 {
   gt_assert(bsf);
@@ -570,9 +570,9 @@ const char* gt_bioseq_get_md5_fingerprint(GtBioseq *bs, unsigned long idx)
 {
   gt_assert(bs && idx < gt_bioseq_number_of_sequences(bs));
   if (!bs->fingerprints)
-    bs->fingerprints = gt_bioseq_fingerprints_new(bs);
-  gt_assert(gt_bioseq_fingerprints_get(bs->fingerprints, idx));
-  return gt_bioseq_fingerprints_get(bs->fingerprints, idx);
+    bs->fingerprints = bioseq_fingerprints_new(bs);
+  gt_assert(bioseq_fingerprints_get(bs->fingerprints, idx));
+  return bioseq_fingerprints_get(bs->fingerprints, idx);
 }
 
 const char* gt_bioseq_filename(const GtBioseq *bs)
