@@ -27,32 +27,21 @@ struct Suffixsortspace
   Suffixptr *sortspace;
   unsigned long sortspaceoffset,
                 bucketleftidx;
-  bool freesortspace,
-       sortspacestart,
-       unmapsortspace;
+  bool unmapsortspace;
 };
 
 Suffixsortspace *suffixsortspace_new(unsigned long numofentries)
 {
   Suffixsortspace *suffixsortspace;
 
+  gt_assert(numofentries > 0);
   suffixsortspace = gt_malloc(sizeof(*suffixsortspace));
-  if (numofentries == 0)
-  {
-    suffixsortspace->sortspace = NULL;
-    suffixsortspace->freesortspace = false;
-    suffixsortspace->sortspacestart = false;
-  } else
-  {
-    suffixsortspace->sortspace = gt_malloc(sizeof(*suffixsortspace->sortspace) *
-                                           numofentries);
-    /*
-    fprintf(stderr,"sortspace of size %lu at %lu\n",
-            numofentries,(unsigned long) suffixsortspace->sortspace);
-    */
-    suffixsortspace->sortspacestart = true;
-    suffixsortspace->freesortspace = true;
-  }
+  suffixsortspace->sortspace = gt_malloc(sizeof(*suffixsortspace->sortspace) *
+                                         numofentries);
+  /*
+  fprintf(stderr,"sortspace of size %lu at %lu\n",
+          numofentries,(unsigned long) suffixsortspace->sortspace);
+  */
   suffixsortspace->sortspaceoffset = 0;
   suffixsortspace->bucketleftidx = 0;
   suffixsortspace->unmapsortspace = false;
@@ -64,14 +53,13 @@ Suffixsortspace *suffixsortspace_new_fromfile(int filedesc,
                                               unsigned long numofentries)
 {
   Suffixsortspace *suffixsortspace;
+
   suffixsortspace = gt_malloc(sizeof(*suffixsortspace));
   suffixsortspace->sortspace
     = gt_fa_mmap_generic_fd(filedesc,filename,
                             (size_t) numofentries * sizeof (Suffixptr),
                             (size_t) 0,false,false,NULL);
   suffixsortspace->sortspaceoffset = 0;
-  suffixsortspace->freesortspace = false;
-  suffixsortspace->sortspacestart = true;
   suffixsortspace->bucketleftidx = 0;
   suffixsortspace->unmapsortspace = true;
   return suffixsortspace;
@@ -81,13 +69,12 @@ void suffixsortspace_delete(Suffixsortspace *suffixsortspace)
 {
   if (suffixsortspace != NULL)
   {
-    if (suffixsortspace->freesortspace)
-    {
-      gt_free(suffixsortspace->sortspace);
-    }
     if (suffixsortspace->unmapsortspace)
     {
       gt_fa_xmunmap(suffixsortspace->sortspace);
+    } else
+    {
+      gt_free(suffixsortspace->sortspace);
     }
     gt_free(suffixsortspace);
   }
@@ -164,15 +151,15 @@ unsigned long gt_suffixsortspace_bucketleftidx_get(const Suffixsortspace *sssp)
   return sssp->bucketleftidx;
 }
 
-unsigned long gt_suffixsortspace_offset_get(const Suffixsortspace *sssp)
-{
-  return sssp->sortspaceoffset;
-}
-
 void gt_suffixsortspace_bucketleftidx_set(Suffixsortspace *sssp,
                                           unsigned long value)
 {
   sssp->bucketleftidx = value;
+}
+
+unsigned long gt_suffixsortspace_offset_get(const Suffixsortspace *sssp)
+{
+  return sssp->sortspaceoffset;
 }
 
 void gt_suffixsortspace_offset_set(Suffixsortspace *sssp,
