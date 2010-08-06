@@ -222,7 +222,6 @@ void gt_fa_lock_exclusive(FILE *stream)
 
 void gt_fa_unlock(FILE *stream)
 {
-  gt_assert(stream);
   if (!stream) return;
   gt_xflock_unlock(fileno(stream));
 }
