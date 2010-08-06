@@ -241,8 +241,9 @@ gt_newSfxInterfaceWithReaders(GtReadmode readmode,
                               GtLogger *verbosity, GtError *err)
 {
   sfxInterface *sfxi = NULL;
-  gt_error_check(err);
+  size_t idx;
 
+  gt_error_check(err);
   sfxi = gt_calloc(1, sizeof (*sfxi));
   {
     RandomSeqAccessor origSeqAccess = { gt_SfxIGetOrigSeq, sfxi };
@@ -264,20 +265,21 @@ gt_newSfxInterfaceWithReaders(GtReadmode readmode,
                                    sfxprogress,
                                    withprogressbar,
                                    verbosity, err)))
+  {
     gt_newSfxInterfaceWithReadersErrRet();
+  }
   sfxi->rot0Pos.defined = false;
   sfxi->specialsuffixes = false;
 
   sfxi->lastGeneratedStart = sfxi->lastGeneratedLen = 0;
   sfxi->lastGeneratedSufTabSegment = NULL;
 
+  for (idx = 0; idx < numReaders; ++idx)
   {
-    size_t i;
-    for (i = 0; i < numReaders; ++i)
+    readers[idx] = gt_SfxIRegisterReader(sfxi, readerRequests[idx]);
+    if (!readers[idx].readData)
     {
-      readers[i] = gt_SfxIRegisterReader(sfxi, readerRequests[i]);
-      if (!readers[i].readData)
-        gt_newSfxInterfaceWithReadersErrRet();
+      gt_newSfxInterfaceWithReadersErrRet();
     }
   }
   return sfxi;
