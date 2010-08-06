@@ -34,11 +34,11 @@ typedef struct {
   GtStr *reader;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
-} GtSeqArguments;
+} SeqArguments;
 
 static void* gt_seq_arguments_new(void)
 {
-  GtSeqArguments *arguments = gt_calloc(1, sizeof *arguments);
+  SeqArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->reader = gt_str_new();
   arguments->ofi = gt_outputfileinfo_new();
   return arguments;
@@ -46,7 +46,7 @@ static void* gt_seq_arguments_new(void)
 
 static void gt_seq_arguments_delete(void *tool_arguments)
 {
-  GtSeqArguments *arguments = tool_arguments;
+  SeqArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_file_delete(arguments->outfp);
   gt_outputfileinfo_delete(arguments->ofi);
@@ -56,7 +56,7 @@ static void gt_seq_arguments_delete(void *tool_arguments)
 
 static GtOptionParser* gt_seq_option_parser_new(void *tool_arguments)
 {
-  GtSeqArguments *arguments = tool_arguments;
+  SeqArguments *arguments = tool_arguments;
   GtOption *option, *option_recreate, *option_showfasta, *option_showseqnum,
            *option_width, *option_stat, *option_reader;
   GtOptionParser *op;
@@ -140,7 +140,7 @@ static GtOptionParser* gt_seq_option_parser_new(void *tool_arguments)
 static int gt_seq_arguments_check(int rest_argc, void *tool_arguments,
                                   GtError *err)
 {
-  GtSeqArguments *arguments = tool_arguments;
+  SeqArguments *arguments = tool_arguments;
   gt_error_check(err);
   gt_assert(arguments);
   /* option -showseqnum makes only sense if we got a single sequence file */
@@ -155,7 +155,7 @@ static int gt_seq_arguments_check(int rest_argc, void *tool_arguments,
 static int gt_seq_runner(int argc, const char **argv, int parsed_args,
                          void *tool_arguments, GtError *err)
 {
-  GtSeqArguments *arguments = tool_arguments;
+  SeqArguments *arguments = tool_arguments;
   GtBioseq *bioseq;
   GtFastaReaderType reader_type = GT_FASTA_READER_REC;
   int arg = parsed_args, had_err = 0;
