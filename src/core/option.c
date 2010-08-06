@@ -1145,6 +1145,12 @@ GtOption* gt_option_new_verbose(bool *value)
   return gt_option_new_bool("v", "be verbose", value, false);
 }
 
+GtOption* gt_option_new_width(unsigned long *value)
+{
+  return gt_option_new_ulong("width", "set output width for FASTA sequence "
+                             "printing\n(0 disables formatting)", value, 0);
+}
+
 GtOption* gt_option_new_debug(bool *value)
 {
   GtOption *o = gt_option_new_bool("debug", "enable debugging output", value,

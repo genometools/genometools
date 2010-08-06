@@ -103,9 +103,7 @@ static GtOptionParser* gt_extractseq_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, fastakeyfile_option);
 
   /* -width */
-  width_option = gt_option_new_ulong("width", "set output width for showing of "
-                                  "sequences (0 disables formatting)",
-                                  &arguments->width, 0);
+  width_option = gt_option_new_width(&arguments->width);
   gt_option_parser_add_option(op, width_option);
 
   /* output file options */

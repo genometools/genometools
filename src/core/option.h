@@ -89,6 +89,7 @@ void            gt_option_parser_delete(GtOptionParser*);
    formating. */
 GtOption*       gt_option_new_outputfile(FILE**);
 GtOption*       gt_option_new_verbose(bool *value);
+GtOption*       gt_option_new_width(unsigned long *value);
 GtOption*       gt_option_new_debug(bool *value);
 GtOption*       gt_option_new_bool(const char *option_str,
                                    const char *description,

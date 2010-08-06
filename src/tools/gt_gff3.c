@@ -156,10 +156,7 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* -width */
-  option = gt_option_new_ulong("width",
-                               "set output width for showing of embedded "
-                               "FASTA sequences\n(0 disables formatting)",
-                               &arguments->width, 0);
+  option = gt_option_new_width(&arguments->width);
   gt_option_parser_add_option(op, option);
 
   /* output file options */
