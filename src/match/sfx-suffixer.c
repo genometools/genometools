@@ -819,14 +819,6 @@ static void preparethispart(Sfxiterator *sfi)
     }
     if (sfi->sfxstrategy.differencecover > 0)
     {
-      /*
-      Suffixsortspace *suffixsortspace = suffixsortspace_new(0);
-      gt_suffixsortspace_sortspace_set(suffixsortspace,
-                                       gt_suffixsortspace_leftadjust(
-                                              sfi->suffixsortspace));
-      printf("offset = %lu\n",
-             gt_suffixsortspace_offset_get(sfi->suffixsortspace));
-      */
       gt_sortbucketofsuffixes(true,
                               sfi->suffixsortspace,
                               partwidth,
@@ -842,7 +834,6 @@ static void preparethispart(Sfxiterator *sfi)
                               (void *) sfi->dcov,
                               dc_sortunsortedbucket,
                               sfi->logger);
-      /*suffixsortspace_delete(suffixsortspace);*/
     } else
     {
       gt_sortallbuckets (sfi->suffixsortspace,
