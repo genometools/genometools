@@ -21,6 +21,7 @@
 #include "core/orf.h"
 #include "core/translator.h"
 #include "core/undef.h"
+#include "core/unused_api.h"
 #include "extended/cds_visitor.h"
 #include "extended/node_visitor_rep.h"
 #include "extended/splicedseq.h"
@@ -92,7 +93,9 @@ static int extract_spliced_seq(GtGenomeNode *gn, GtCDSVisitor *visitor,
                                                  extract_cds_if_necessary, err);
 }
 
-static void save_orf(void *data, GtRange *orf)
+static void save_orf(void *data, GtRange *orf, GT_UNUSED unsigned long framenum,
+                     GT_UNUSED const char *frame,
+                     GT_UNUSED bool ends_with_stop_codon)
 {
   GtArray *ranges = data;
   gt_assert(ranges && orf);
@@ -128,11 +131,11 @@ static GtArray* determine_ORFs_for_all_three_frames(Splicedseq *ss,
     rval = gt_translator_next(tr, &translated, &frame, NULL);
   }
   gt_determine_ORFs(save_orf, orfs, 0, gt_str_get(pr[0]), gt_str_length(pr[0]),
-                    start_codon, final_stop_codon);
+                    start_codon, final_stop_codon, false);
   gt_determine_ORFs(save_orf, orfs, 1, gt_str_get(pr[1]), gt_str_length(pr[1]),
-                    start_codon, final_stop_codon);
+                    start_codon, final_stop_codon, false);
   gt_determine_ORFs(save_orf, orfs, 2, gt_str_get(pr[2]), gt_str_length(pr[2]),
-                    start_codon, final_stop_codon);
+                    start_codon, final_stop_codon, false);
 
   gt_str_delete(pr[2]);
   gt_str_delete(pr[1]);

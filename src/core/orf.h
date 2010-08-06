@@ -20,11 +20,22 @@
 
 #include "core/range_api.h"
 
-typedef void (*GtORFProcessor)(void *data, GtRange *orf);
+typedef void (*GtORFProcessor)(void *data, GtRange *orf, unsigned long framenum,
+                               const char *frame, bool ends_with_stop_codon);
 
+/* Determine all ORFs in the given <frame> of length <framelength> and frame
+   number <framenum> (0, 1, or 2). If <start_codon> is <true> a frame has to
+   start with a start codon, otherwise a frame can start everywhere (i.e., at
+   the first amino acid or after a stop codon). If <final_stop_codon> is <true>
+   the last ORF must end with a stop codon, otherwise it can be ``open''. For
+   each ORF the <orf_processor> function is called and <data>, <framenum> and
+   <frame> is passed along. If <framepos> is true, the ORF range is reported in
+   the coordinate system of the frame (i.e., the amino acids). Otherwise the
+   coordinate system of the original sequence is used (i.e., the nucleotides).
+   The correct <framenum> is needed for the conversion. */
 void gt_determine_ORFs(GtORFProcessor orf_processor, void *data,
                        unsigned int framenum, const char *frame,
                        unsigned long framelen, bool start_codon,
-                       bool final_stop_codon);
+                       bool final_stop_codon, bool framepos);
 
 #endif

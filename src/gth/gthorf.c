@@ -17,6 +17,7 @@
 
 #include "core/assert_api.h"
 #include "core/codon.h"
+#include "core/orf.h"
 #include "gth/gthorf.h"
 #include "gth/gthoutput.h"
 #include "gth/gthstopcodon.h"
@@ -35,62 +36,40 @@ typedef struct {
   GtRange splseqrange;   /* genomic positions refering to spliced seq.
                             (without stopcodon) */
   unsigned long framenum,
-                startpos,              /* start position refering to frame */
                 lengthwithstopcodon,
                 lengthwithoutstopcodon;
-  char *frame;
+  const char *frame;
   bool stopcodon;
 } MaximalORF;
 
-static void findmaximalORFsforframe(GtArray *maximalORFs,
-                                    unsigned long minORFlength,
-                                    unsigned long framenum,
-                                    char *frame, unsigned long framelen)
+typedef struct {
+  GtArray *maximalORFs;
+  unsigned long minORFlength;
+} SaveORFInfo;
+
+static void saveORF(void *data, GtRange *range, unsigned long framenum,
+                    const char *frame, bool ends_with_stop_codon)
 {
-  unsigned long i, j;
   MaximalORF orf;
-
-  /* scan frame */
-  for (i = 0; i < framelen; i++) {
-    /* check if current position is possible start */
-    if ((i == 0 && frame[i]   != LIBKURTZ_STOPCODON) ||
-        (i >  0 && frame[i-1] == LIBKURTZ_STOPCODON
-                && frame[i]   != LIBKURTZ_STOPCODON)) {
-      for (j = i + 1; j < framelen; j++) {
-        /* check if current position is a possible stop */
-        if (j + 1 == framelen || frame[j] == LIBKURTZ_STOPCODON) {
-          /* stop codon found -> save ORF */
-          orf.framenum = framenum;
-          orf.startpos = i;
-          orf.lengthwithstopcodon = j - i + 1;
-          orf.frame    = frame+orf.startpos;
-          if (frame[j] == LIBKURTZ_STOPCODON) {
-            orf.lengthwithoutstopcodon = orf.lengthwithstopcodon - 1;
-            orf.stopcodon              = true;
-          }
-          else {
-            orf.lengthwithoutstopcodon = orf.lengthwithstopcodon;
-            orf.stopcodon              = false;
-          }
-
-          orf.splseqrange.start = orf.startpos * GT_CODON_LENGTH + orf.framenum;
-          orf.splseqrange.end = orf.splseqrange.start
-                                  + orf.lengthwithoutstopcodon * GT_CODON_LENGTH
-                                  - 1;
-                                  /* -1 to shift from the genomic position
-                                     _after_ the last codon to the _last_
-                                     position of the last codon */
-
-          if (orf.lengthwithoutstopcodon >= minORFlength) /* save ORF */
-            gt_array_add(maximalORFs, orf);
-
-          /* jump after current ORF */
-          i = j;
-          break;
-        }
-      }
-    }
-  }
+  SaveORFInfo *info = data;
+  gt_assert(info && range);
+  orf.framenum = framenum;
+  orf.lengthwithstopcodon = gt_range_length(range);
+  orf.frame = frame + range->start;
+  if (ends_with_stop_codon)
+    orf.lengthwithoutstopcodon = orf.lengthwithstopcodon - 1;
+  else
+    orf.lengthwithoutstopcodon = orf.lengthwithstopcodon;
+  orf.stopcodon = ends_with_stop_codon;
+  orf.splseqrange.start = range->start * GT_CODON_LENGTH + orf.framenum;
+  orf.splseqrange.end = orf.splseqrange.start
+                        + orf.lengthwithoutstopcodon * GT_CODON_LENGTH - 1;
+                        /* -1 to shift from the genomic position _after_ the
+                           last codon to the _last_ position of the last codon
+                        */
+  /* save ORF, if necessary */
+  if (orf.lengthwithoutstopcodon >= info->minORFlength)
+    gt_array_add(info->maximalORFs, orf);
 }
 
 static int compareORFs(const void *dataA, const void *dataB)
@@ -410,13 +389,17 @@ void gthshowORFs(char *frame0, char *frame1, char *frame2,
                  unsigned int indentlevel, GthOutput *out)
 {
   GtArray *maximalORFs, *consolidatedORFs;
+  SaveORFInfo info;
 
   maximalORFs = gt_array_new(sizeof (MaximalORF));
   consolidatedORFs = gt_array_new(sizeof (MaximalORF));
 
-  findmaximalORFsforframe(maximalORFs, out->minORFlength, 0, frame0, frame0len);
-  findmaximalORFsforframe(maximalORFs, out->minORFlength, 1, frame1, frame1len);
-  findmaximalORFsforframe(maximalORFs, out->minORFlength, 2, frame2, frame2len);
+  info.maximalORFs = maximalORFs;
+  info.minORFlength = out->minORFlength;
+
+  gt_determine_ORFs(saveORF, &info, 0, frame0, frame0len, false, false, true);
+  gt_determine_ORFs(saveORF, &info, 1, frame1, frame1len, false, false, true);
+  gt_determine_ORFs(saveORF, &info, 2, frame2, frame2len, false, false, true);
 
   if (gt_array_size(maximalORFs)) {
     sortmaximalORFs(maximalORFs);
