@@ -695,6 +695,6 @@ void gt_bioseq_show_seqlengthdistri(GtBioseq *bs, GtFile *outfp)
   for (i = 0; i < gt_bioseq_number_of_sequences(bs); i++)
     gt_disc_distri_add(d, gt_bioseq_get_sequence_length(bs, i));
   gt_file_xprintf(outfp, "sequence length distribution:\n");
-  gt_disc_distri_show_generic(d, outfp);
+  gt_disc_distri_show(d, outfp);
   gt_disc_distri_delete(d);
 }

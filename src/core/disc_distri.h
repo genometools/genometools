@@ -1,7 +1,7 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c)      2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -34,8 +34,7 @@ void               gt_disc_distri_add(GtDiscDistri*, unsigned long);
 void               gt_disc_distri_add_multi(GtDiscDistri*, unsigned long,
                                         unsigned long long);
 unsigned long long gt_disc_distri_get(const GtDiscDistri*, unsigned long);
-void               gt_disc_distri_show(const GtDiscDistri*); /* on stdout */
-void               gt_disc_distri_show_generic(const GtDiscDistri*, GtFile*);
+void               gt_disc_distri_show(const GtDiscDistri*, GtFile*);
 void               gt_disc_distri_foreach(const GtDiscDistri*,
                                           GtDiscDistriIterFunc,
                                           void *data);

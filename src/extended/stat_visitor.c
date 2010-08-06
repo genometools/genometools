@@ -238,26 +238,26 @@ void gt_stat_visitor_show_stats(GtNodeVisitor *nv, GtFile *outfp)
   }
   if (sv->gene_length_distribution) {
     gt_file_xprintf(outfp, "gene length distribution:\n");
-    gt_disc_distri_show_generic(sv->gene_length_distribution, outfp);
+    gt_disc_distri_show(sv->gene_length_distribution, outfp);
   }
   if (sv->gene_score_distribution) {
     gt_file_xprintf(outfp, "gene score distribution:\n");
-    gt_disc_distri_show_generic(sv->gene_score_distribution, outfp);
+    gt_disc_distri_show(sv->gene_score_distribution, outfp);
   }
   if (sv->exon_length_distribution) {
     gt_file_xprintf(outfp, "exon length distribution:\n");
-    gt_disc_distri_show_generic(sv->exon_length_distribution, outfp);
+    gt_disc_distri_show(sv->exon_length_distribution, outfp);
   }
   if (sv->exon_number_distribution) {
     gt_file_xprintf(outfp, "exon number distribution:\n");
-    gt_disc_distri_show_generic(sv->exon_number_distribution, outfp);
+    gt_disc_distri_show(sv->exon_number_distribution, outfp);
   }
   if (sv->intron_length_distribution) {
     gt_file_xprintf(outfp, "intron length distribution:\n");
-    gt_disc_distri_show_generic(sv->intron_length_distribution, outfp);
+    gt_disc_distri_show(sv->intron_length_distribution, outfp);
   }
   if (sv->cds_length_distribution) {
     gt_file_xprintf(outfp, "CDS length distribution:\n");
-    gt_disc_distri_show_generic(sv->cds_length_distribution, outfp);
+    gt_disc_distri_show(sv->cds_length_distribution, outfp);
   }
 }

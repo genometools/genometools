@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c)      2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c)      2008 Thomas Jahns <Thomas.Jahns@gmx.net>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
@@ -73,16 +73,10 @@ unsigned long long gt_disc_distri_get(const GtDiscDistri *d, unsigned long key)
   return *valueptr;
 }
 
-void gt_disc_distri_show(const GtDiscDistri *d)
-{
-  gt_assert(d);
-  gt_disc_distri_show_generic(d, NULL);
-}
-
 typedef struct {
   double cumulative_probability;
   unsigned long long num_of_occurrences;
-  GtFile *genfile;
+  GtFile *outfp;
 } ShowValueInfo;
 
 static enum iterator_op
@@ -98,12 +92,12 @@ showvalue(unsigned long key, unsigned long long occurrences,
 
   probability = (double) occurrences / info->num_of_occurrences;
   info->cumulative_probability += probability;
-  gt_file_xprintf(info->genfile, "%lu: %llu (prob=%.4f,cumulative=%.4f)\n",
+  gt_file_xprintf(info->outfp, "%lu: %llu (prob=%.4f,cumulative=%.4f)\n",
                   key, occurrences, probability, info->cumulative_probability);
   return CONTINUE_ITERATION;
 }
 
-void gt_disc_distri_show_generic(const GtDiscDistri *d, GtFile *genfile)
+void gt_disc_distri_show(const GtDiscDistri *d, GtFile *outfp)
 {
   ShowValueInfo showvalueinfo;
   int rval;
@@ -113,9 +107,9 @@ void gt_disc_distri_show_generic(const GtDiscDistri *d, GtFile *genfile)
   if (d->hashdist) {
     showvalueinfo.cumulative_probability = 0.0;
     showvalueinfo.num_of_occurrences = d->num_of_occurrences;
-    showvalueinfo.genfile = genfile;
+    showvalueinfo.outfp = outfp;
     rval = ul_ull_gt_hashmap_foreach_in_default_order(d->hashdist, showvalue,
-                                                   &showvalueinfo, NULL);
+                                                      &showvalueinfo, NULL);
     gt_assert(!rval); /* showvalue() is sane */
   }
 }

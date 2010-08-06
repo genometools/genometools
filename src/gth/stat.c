@@ -367,7 +367,7 @@ void gth_stat_show(GthStat *stat, bool show_full_stats, bool xmlout,
   if (stat->exondistri) {
     gt_file_xprintf(outfp, "%c length distribution of all exons:\n",
                     COMMENTCHAR);
-    gt_disc_distri_show_generic(stat->exondistribution, outfp);
+    gt_disc_distri_show(stat->exondistribution, outfp);
   }
 
   /* output intron length distribution */
@@ -376,7 +376,7 @@ void gth_stat_show(GthStat *stat, bool show_full_stats, bool xmlout,
       gt_file_xprintf(outfp, "%c\n", COMMENTCHAR);
     gt_file_xprintf(outfp, "%c length distribution of all introns:\n",
                     COMMENTCHAR);
-    gt_disc_distri_show_generic(stat->introndistribution, outfp);
+    gt_disc_distri_show(stat->introndistribution, outfp);
   }
 
   /* output match number distribution */
@@ -385,7 +385,7 @@ void gth_stat_show(GthStat *stat, bool show_full_stats, bool xmlout,
       gt_file_xprintf(outfp, "%c\n", COMMENTCHAR);
     gt_file_xprintf(outfp, "%c distribution of match numbers (per genomic "
                     "file, per reference sequence:\n", COMMENTCHAR);
-    gt_disc_distri_show_generic(stat->matchnumdistribution, outfp);
+    gt_disc_distri_show(stat->matchnumdistribution, outfp);
   }
 
   /* output reference sequence coverage distribution */
@@ -394,7 +394,7 @@ void gth_stat_show(GthStat *stat, bool show_full_stats, bool xmlout,
       gt_file_xprintf(outfp, "%c\n", COMMENTCHAR);
     gt_file_xprintf(outfp, "%c reference sequence coverage distribution (of "
                     "global chains):\n", COMMENTCHAR);
-    gt_disc_distri_show_generic(stat->refseqcoveragedistribution, outfp);
+    gt_disc_distri_show(stat->refseqcoveragedistribution, outfp);
   }
 
   /* output spliced alignment statistics */
@@ -406,12 +406,12 @@ void gth_stat_show(GthStat *stat, bool show_full_stats, bool xmlout,
     INFOCHAR;
     gt_file_xprintf(outfp,
                        "spliced alignment alignment score distribution:\n");
-    gt_disc_distri_show_generic(stat->sa_alignment_score_distribution, outfp);
+    gt_disc_distri_show(stat->sa_alignment_score_distribution, outfp);
     INFOCHAR;
     gt_file_xfputc('\n', outfp);
     INFOCHAR;
     gt_file_xprintf(outfp, "spliced alignment coverage distribution:\n");
-    gt_disc_distri_show_generic(stat->sa_coverage_distribution, outfp);
+    gt_disc_distri_show(stat->sa_coverage_distribution, outfp);
   }
 
   /* output general statistics */
