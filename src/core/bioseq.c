@@ -52,6 +52,7 @@ struct GtBioseq {
   GtSeq **seqs;
   GtArray *descriptions,
           *sequence_ranges;
+  FILE *raw_sequence_file; /* used to lock the memory mapped raw_sequence */
   char *raw_sequence;
   size_t raw_sequence_length,
          allocated;
@@ -67,8 +68,10 @@ static bool read_fingerprints(GtStrArray *md5_fingerprints,
   FILE *fingerprint_file = NULL;
   gt_assert(md5_fingerprints && fingerprints_filename);
   /* open file */
-  if (gt_file_exists(gt_str_get(fingerprints_filename)))
+  if (gt_file_exists(gt_str_get(fingerprints_filename))) {
     fingerprint_file = gt_fa_xfopen(gt_str_get(fingerprints_filename), "r");
+    gt_fa_lock_shared(fingerprint_file);
+  }
   else
     reading_succeeded = false;
   /* reading file (each line contains a single MD5 sum) */
@@ -87,6 +90,7 @@ static bool read_fingerprints(GtStrArray *md5_fingerprints,
     else
       gt_assert(gt_str_array_size(md5_fingerprints) == num_of_seqs);
   }
+  gt_fa_unlock(fingerprint_file);
   gt_fa_xfclose(fingerprint_file);
   return reading_succeeded;
 }
@@ -119,7 +123,9 @@ static void write_fingerprints(GtStrArray *md5_fingerprints,
   FILE *fingerprints_file;
   gt_assert(md5_fingerprints && fingerprints_filename);
   fingerprints_file = gt_fa_xfopen(gt_str_get(fingerprints_filename), "w");
+  gt_fa_lock_exclusive(fingerprints_file);
   strarray_dump_to_file(md5_fingerprints, fingerprints_file);
+  gt_fa_unlock(fingerprints_file);
   gt_fa_xfclose(fingerprints_file);
 }
 
@@ -245,7 +251,9 @@ static const char *gt_bioseq_index_filename,
 static void remove_bioseq_files(int sigraised)
 {
   /* we don't care if fclose() succeeds, xunlink() will take care of it */
+  gt_fa_unlock(gt_bioseq_files_info.bioseq_index);
   (void) fclose(gt_bioseq_files_info.bioseq_index);
+  gt_fa_unlock(gt_bioseq_files_info.bioseq_raw);
   (void) fclose(gt_bioseq_files_info.bioseq_raw);
   gt_xunlink(gt_bioseq_index_filename);
   gt_xunlink(gt_bioseq_raw_filename);
@@ -268,6 +276,7 @@ static int fill_bioseq(GtBioseq *bs, const char *index_filename,
   /* parse the index file and fill the sequence to index mapping */
   index_line = gt_str_new();
   index_file = gt_fa_xfopen(index_filename, "r");
+  gt_fa_lock_shared(index_file);
 
   while (!had_err && gt_str_read_next_line(index_line, index_file) != EOF) {
     switch (line_number % 3) {
@@ -302,16 +311,19 @@ static int fill_bioseq(GtBioseq *bs, const char *index_filename,
     gt_str_reset(index_line);
   }
 
+  gt_fa_unlock(index_file);
+  gt_fa_xfclose(index_file);
+  gt_str_delete(index_line);
+
   if (!had_err) {
     /* the number of descriptions equals the number of sequence ranges */
     gt_assert(gt_array_size(bs->descriptions) ==
-           gt_array_size(bs->sequence_ranges));
+              gt_array_size(bs->sequence_ranges));
     /* map the raw file */
+    bs->raw_sequence_file = gt_fa_xfopen(raw_filename, "r");
+    gt_fa_lock_shared(bs->raw_sequence_file);
     bs->raw_sequence = gt_fa_xmmap_read(raw_filename, &bs->raw_sequence_length);
   }
-
-  gt_fa_xfclose(index_file);
-  gt_str_delete(index_line);
 
   return had_err;
 }
@@ -331,8 +343,10 @@ static int construct_bioseq_files(GtBioseq *bs, GtStr *bioseq_index_file,
   if (!bs->use_stdin) {
     gt_bioseq_files_info.bioseq_index =
       gt_fa_xfopen((const char *) gt_str_get(bioseq_index_file), "w");
+    gt_fa_lock_exclusive(gt_bioseq_files_info.bioseq_index);
     gt_bioseq_files_info.bioseq_raw =
       gt_fa_xfopen(gt_str_get(bioseq_raw_file), "w");
+    gt_fa_lock_exclusive(gt_bioseq_files_info.bioseq_raw);
   }
   gt_bioseq_files_info.offset = 0;
   gt_bioseq_files_info.bs = bs;
@@ -369,7 +383,9 @@ static int construct_bioseq_files(GtBioseq *bs, GtStr *bioseq_index_file,
 
   /* close files */
   if (!bs->use_stdin) {
+    gt_fa_unlock(gt_bioseq_files_info.bioseq_index);
     gt_fa_xfclose(gt_bioseq_files_info.bioseq_index);
+    gt_fa_unlock(gt_bioseq_files_info.bioseq_raw);
     gt_fa_xfclose(gt_bioseq_files_info.bioseq_raw);
     if (had_err) {
       gt_xunlink(gt_bioseq_index_filename);
@@ -432,7 +448,7 @@ static GtBioseq* gt_bioseq_new_with_recreate_and_type(GtStr *sequence_file,
   GtBioseq *bs;
   int had_err = 0;
   gt_error_check(err);
-  bs = gt_calloc(1, sizeof (GtBioseq));
+  bs = gt_calloc(1, sizeof *bs);
   if (!strcmp(gt_str_get(sequence_file), "-"))
     bs->use_stdin = true;
   if (!bs->use_stdin && !gt_file_exists(gt_str_get(sequence_file))) {
@@ -513,8 +529,11 @@ void gt_bioseq_delete(GtBioseq *bs)
   gt_array_delete(bs->sequence_ranges);
   if (bs->use_stdin)
     gt_free(bs->raw_sequence);
-  else
+  else {
     gt_fa_xmunmap(bs->raw_sequence);
+    gt_fa_unlock(bs->raw_sequence_file);
+    gt_fa_xfclose(bs->raw_sequence_file);
+  }
   gt_alphabet_delete(bs->alphabet);
   gt_free(bs);
 }

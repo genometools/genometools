@@ -46,6 +46,9 @@ FILE*   gt_fa_fopen_with_suffix_func(const char *path, const char *suffix,
                                      int src_line, GtError *err);
 void    gt_fa_fclose(FILE *stream);
 void    gt_fa_xfclose(FILE *stream);
+void    gt_fa_lock_shared(FILE *stream);
+void    gt_fa_lock_exclusive(FILE *stream);
+void    gt_fa_unlock(FILE *stream);
 
 /* functions for gzip file pointer */
 #define gt_fa_gzopen(path, mode, err)\

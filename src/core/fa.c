@@ -28,6 +28,7 @@
 #include "core/thread.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
+#include "core/xbsd.h"
 #include "core/xbzlib.h"
 #include "core/xposix.h"
 #include "core/xzlib.h"
@@ -205,6 +206,25 @@ void gt_fa_xfclose(FILE *stream)
   gt_assert(fa);
   if (!stream) return;
   xfclose_generic(stream, GT_FILE_MODE_UNCOMPRESSED, fa);
+}
+
+void gt_fa_lock_shared(FILE *stream)
+{
+  gt_assert(stream);
+  gt_xflock_shared(fileno(stream));
+}
+
+void gt_fa_lock_exclusive(FILE *stream)
+{
+  gt_assert(stream);
+  gt_xflock_exclusive(fileno(stream));
+}
+
+void gt_fa_unlock(FILE *stream)
+{
+  gt_assert(stream);
+  if (!stream) return;
+  gt_xflock_unlock(fileno(stream));
 }
 
 gzFile gt_fa_gzopen_func(const char *path, const char *mode,
