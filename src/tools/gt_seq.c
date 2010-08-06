@@ -31,18 +31,18 @@ typedef struct {
   unsigned long showseqnum,
                 width;
   GtStr *reader;
-} GtBioseqArguments;
+} GtSeqArguments;
 
 static void* gt_seq_arguments_new(void)
 {
-  GtBioseqArguments *arguments = gt_calloc(1, sizeof *arguments);
+  GtSeqArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->reader = gt_str_new();
   return arguments;
 }
 
 static void gt_seq_arguments_delete(void *tool_arguments)
 {
-  GtBioseqArguments *arguments = tool_arguments;
+  GtSeqArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_str_delete(arguments->reader);
   gt_free(arguments);
@@ -50,7 +50,7 @@ static void gt_seq_arguments_delete(void *tool_arguments)
 
 static GtOptionParser* gt_seq_option_parser_new(void *tool_arguments)
 {
-  GtBioseqArguments *arguments = tool_arguments;
+  GtSeqArguments *arguments = tool_arguments;
   GtOption *option, *option_recreate, *option_showfasta, *option_showseqnum,
            *option_width, *option_stat, *option_reader;
   GtOptionParser *op;
@@ -131,7 +131,7 @@ static GtOptionParser* gt_seq_option_parser_new(void *tool_arguments)
 static int gt_seq_arguments_check(int rest_argc, void *tool_arguments,
                                   GtError *err)
 {
-  GtBioseqArguments *arguments = tool_arguments;
+  GtSeqArguments *arguments = tool_arguments;
   gt_error_check(err);
   gt_assert(arguments);
   /* option -showseqnum makes only sense if we got a single sequence file */
@@ -146,7 +146,7 @@ static int gt_seq_arguments_check(int rest_argc, void *tool_arguments,
 static int gt_seq_runner(int argc, const char **argv, int parsed_args,
                          void *tool_arguments, GtError *err)
 {
-  GtBioseqArguments *arguments = tool_arguments;
+  GtSeqArguments *arguments = tool_arguments;
   GtBioseq *bioseq;
   GtFastaReaderType reader_type = GT_FASTA_READER_REC;
   int arg = parsed_args, had_err = 0;
