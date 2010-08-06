@@ -22,6 +22,18 @@
 #include "suffixptr.h"
 #include "sfx-suffixgetset.h"
 
+#define SUFFIXPTRNEWVERSION
+#ifdef  SUFFIXPTRNEWVERSION
+
+#define SUFFIXPTRGET(TAB,IDX)     TAB[IDX].value
+#define SUFFIXPTRSET(TAB,IDX,VAL) TAB[IDX].value = VAL
+
+#else
+
+#define SUFFIXPTRGET(TAB,IDX)     TAB[IDX]
+#define SUFFIXPTRSET(TAB,IDX,VAL) TAB[IDX] = VAL
+#endif
+
 struct Suffixsortspace
 {
   Suffixptr *sortspace;

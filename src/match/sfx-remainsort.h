@@ -23,7 +23,6 @@
 #include "core/readmode.h"
 #include "core/defined-types.h"
 
-#include "suffixptr.h"
 #include "bcktab.h"
 #include "compressedtab.h"
 #include "sfx-suffixgetset.h"

@@ -412,7 +412,7 @@ SfxIGenerate(void *iface,
         {
           for (pos=0; pos < lastGeneratedLen; pos++)
           {
-            if (SUFFIXPTRGET(sfxi->lastGeneratedSufTabSegment,pos) == 0)
+            if (suffixptrget3(suffixsortspace,pos) == 0)
             {
               sfxi->rot0Pos.defined = true;
               sfxi->rot0Pos.valueunsignedlong = sfxi->lastGeneratedStart + pos;

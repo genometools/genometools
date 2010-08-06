@@ -22,7 +22,6 @@
 #include "core/unused_api.h"
 #include "core/readmode.h"
 #include "core/logger.h"
-#include "sfx-suffixgetset.h"
 #include "suffixptr.h"
 
 typedef struct Differencecover Differencecover;

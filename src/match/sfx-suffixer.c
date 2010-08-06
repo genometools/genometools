@@ -44,6 +44,7 @@
 #include "sfx-copysort.h"
 #include "sfx-mappedstr.h"
 #include "sfx-bentsedg.h"
+#include "sfx-suffixgetset.h"
 #include "stamp.h"
 
 typedef struct

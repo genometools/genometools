@@ -43,6 +43,7 @@
 #include "sfx-outprj.pr"
 #include "sfx-apfxlen.h"
 #include "sfx-bentsedg.h"
+#include "sfx-suffixgetset.h"
 #include "giextract.h"
 
 #include "eis-encidxseq.h"

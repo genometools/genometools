@@ -32,9 +32,9 @@
 #include "intcode-def.h"
 #include "bcktab.h"
 #include "initbasepower.h"
-#include "suffixptr.h"
 #include "sfx-strategy.h"
 #include "sfx-diffcov.h"
+#include "sfx-suffixgetset.h"
 #include "sfx-bentsedg.h"
 #include "sfx-apfxlen.h"
 #undef WITHCHECK

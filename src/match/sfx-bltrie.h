@@ -20,7 +20,6 @@
 
 #include "core/encseq.h"
 #include "core/readmode.h"
-#include "suffixptr.h"
 #include "sfx-suffixgetset.h"
 
 typedef struct Blindtrie Blindtrie;

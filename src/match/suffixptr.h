@@ -19,19 +19,16 @@
 
 #define SUFFIXPTRNEWVERSION
 #ifdef  SUFFIXPTRNEWVERSION
+
 typedef struct
 {
   unsigned long value;
 } Suffixptr;
 
-#define SUFFIXPTRGET(TAB,IDX)     TAB[IDX].value
-#define SUFFIXPTRSET(TAB,IDX,VAL) TAB[IDX].value = VAL
-
 #else
+
 typedef unsigned long Suffixptr;
 
-#define SUFFIXPTRGET(TAB,IDX)     TAB[IDX]
-#define SUFFIXPTRSET(TAB,IDX,VAL) TAB[IDX] = VAL
 #endif
 
 #endif
