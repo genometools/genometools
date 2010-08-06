@@ -19,6 +19,7 @@
 #define STAT_STREAM_H
 
 #include <stdio.h>
+#include "core/file.h"
 #include "extended/node_stream_api.h"
 
 /* implements the ``genome_stream'' interface */
@@ -33,6 +34,6 @@ GtNodeStream*            gt_stat_stream_new(GtNodeStream*,
                                             bool exon_number_distri,
                                             bool intron_length_distri,
                                             bool cds_length_distri);
-void                     gt_stat_stream_show_stats(GtNodeStream*);
+void                     gt_stat_stream_show_stats(GtNodeStream*, GtFile*);
 
 #endif

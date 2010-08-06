@@ -208,50 +208,56 @@ GtNodeVisitor* gt_stat_visitor_new(bool gene_length_distri,
   return nv;
 }
 
-void gt_stat_visitor_show_stats(GtNodeVisitor *nv)
+void gt_stat_visitor_show_stats(GtNodeVisitor *nv, GtFile *outfp)
 {
   GtStatVisitor *sv = stat_visitor_cast(nv);
   if (sv->number_of_sequence_regions) {
-    printf("sequence regions: %lu (total length: %llu)\n",
-           sv->number_of_sequence_regions,
-           sv->total_length_of_sequence_regions);
+    gt_file_xprintf(outfp, "sequence regions: %lu (total length: %llu)\n",
+                    sv->number_of_sequence_regions,
+                    sv->total_length_of_sequence_regions);
   }
-  if (sv->number_of_multi_features)
-    printf("multi-features: %lu\n", sv->number_of_multi_features);
+  if (sv->number_of_multi_features) {
+    gt_file_xprintf(outfp, "multi-features: %lu\n",
+                    sv->number_of_multi_features);
+  }
   if (sv->number_of_genes)
-    printf("genes: %lu\n", sv->number_of_genes);
-  if (sv->number_of_protein_coding_genes)
-    printf("protein-coding genes: %lu\n", sv->number_of_protein_coding_genes);
+    gt_file_xprintf(outfp, "genes: %lu\n", sv->number_of_genes);
+  if (sv->number_of_protein_coding_genes) {
+    gt_file_xprintf(outfp, "protein-coding genes: %lu\n",
+                    sv->number_of_protein_coding_genes);
+  }
   if (sv->number_of_mRNAs)
-    printf("mRNAs: %lu\n", sv->number_of_mRNAs);
+    gt_file_xprintf(outfp, "mRNAs: %lu\n", sv->number_of_mRNAs);
   if (sv->number_of_exons)
-    printf("exons: %lu\n", sv->number_of_exons);
+    gt_file_xprintf(outfp, "exons: %lu\n", sv->number_of_exons);
   if (sv->number_of_CDSs)
-    printf("CDSs: %lu\n", sv->number_of_CDSs);
-  if (sv->number_of_LTR_retrotransposons)
-    printf("LTR_retrotransposons: %lu\n", sv->number_of_LTR_retrotransposons);
+    gt_file_xprintf(outfp, "CDSs: %lu\n", sv->number_of_CDSs);
+  if (sv->number_of_LTR_retrotransposons) {
+    gt_file_xprintf(outfp, "LTR_retrotransposons: %lu\n",
+                    sv->number_of_LTR_retrotransposons);
+  }
   if (sv->gene_length_distribution) {
-    printf("gene length distribution:\n");
-    gt_disc_distri_show(sv->gene_length_distribution);
+    gt_file_xprintf(outfp, "gene length distribution:\n");
+    gt_disc_distri_show_generic(sv->gene_length_distribution, outfp);
   }
   if (sv->gene_score_distribution) {
-    printf("gene score distribution:\n");
-    gt_disc_distri_show(sv->gene_score_distribution);
+    gt_file_xprintf(outfp, "gene score distribution:\n");
+    gt_disc_distri_show_generic(sv->gene_score_distribution, outfp);
   }
   if (sv->exon_length_distribution) {
-    printf("exon length distribution:\n");
-    gt_disc_distri_show(sv->exon_length_distribution);
+    gt_file_xprintf(outfp, "exon length distribution:\n");
+    gt_disc_distri_show_generic(sv->exon_length_distribution, outfp);
   }
   if (sv->exon_number_distribution) {
-    printf("exon number distribution:\n");
-    gt_disc_distri_show(sv->exon_number_distribution);
+    gt_file_xprintf(outfp, "exon number distribution:\n");
+    gt_disc_distri_show_generic(sv->exon_number_distribution, outfp);
   }
   if (sv->intron_length_distribution) {
-    printf("intron length distribution:\n");
-    gt_disc_distri_show(sv->intron_length_distribution);
+    gt_file_xprintf(outfp, "intron length distribution:\n");
+    gt_disc_distri_show_generic(sv->intron_length_distribution, outfp);
   }
   if (sv->cds_length_distribution) {
-    printf("CDS length distribution:\n");
-    gt_disc_distri_show(sv->cds_length_distribution);
+    gt_file_xprintf(outfp, "CDS length distribution:\n");
+    gt_disc_distri_show_generic(sv->cds_length_distribution, outfp);
   }
 }

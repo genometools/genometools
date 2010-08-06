@@ -85,9 +85,9 @@ GtNodeStream* gt_stat_stream_new(GtNodeStream *in_stream,
   return gs;
 }
 
-void gt_stat_stream_show_stats(GtNodeStream *gs)
+void gt_stat_stream_show_stats(GtNodeStream *gs, GtFile *outfp)
 {
   GtStatStream *ss = stat_stream_cast(gs);
-  printf("parsed feature trees: %lu\n", ss->number_of_DAGs);
-  gt_stat_visitor_show_stats(ss->stat_visitor);
+  gt_file_xprintf(outfp, "parsed feature trees: %lu\n", ss->number_of_DAGs);
+  gt_stat_visitor_show_stats(ss->stat_visitor, outfp);
 }

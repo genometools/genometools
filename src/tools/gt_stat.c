@@ -15,8 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/ma.h"
 #include "core/option.h"
-#include "core/versionfunc.h"
+#include "core/outputfile.h"
 #include "extended/add_introns_stream.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
@@ -33,15 +34,32 @@ typedef struct {
        cds_length_distribution,
        addintrons,
        verbose;
+  GtOutputFileInfo *ofi;
+  GtFile *outfp;
 } StatArguments;
 
-static GtOPrval parse_options(int *parsed_args, StatArguments *arguments,
-                              int argc, const char **argv, GtError *err)
+static void* gt_stat_argument_new(void)
 {
+  StatArguments *arguments = gt_calloc(1, sizeof *arguments);
+  arguments->ofi = gt_outputfileinfo_new();
+  return arguments;
+}
+
+static void gt_stat_arguments_delete(void *tool_arguments)
+{
+  StatArguments *arguments = tool_arguments;
+  if (!arguments) return;
+  gt_file_delete(arguments->outfp);
+  gt_outputfileinfo_delete(arguments->ofi);
+  gt_free(arguments);
+}
+
+static GtOptionParser* gt_stat_option_parser_new(void *tool_arguments)
+{
+  StatArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *option;
-  GtOPrval oprval;
-  gt_error_check(err);
+
   op = gt_option_parser_new("[option ...] [GFF3_file ...]",
                             "Show statistics about features contained in GFF3 "
                             "files.");
@@ -91,48 +109,41 @@ static GtOPrval parse_options(int *parsed_args, StatArguments *arguments,
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
 
-  /* parse */
-  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
-                                  err);
-  gt_option_parser_delete(op);
-  return oprval;
+  /* output file options */
+  gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
+
+  return op;
 }
 
-int gt_stat(int argc, const char **argv, GtError *err)
+static int gt_stat_runner(int argc, const char **argv, int parsed_args,
+                          void *tool_arguments, GtError *err)
 {
+  StatArguments *arguments = tool_arguments;
   GtNodeStream *gff3_in_stream, *sort_stream, *add_introns_stream, *stat_stream;
-  int parsed_args, had_err;
-  StatArguments arguments;
+  int had_err;
   gt_error_check(err);
-
-  /* option parsing */
-  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
-    case GT_OPTION_PARSER_OK: break;
-    case GT_OPTION_PARSER_ERROR: return -1;
-    case GT_OPTION_PARSER_REQUESTS_EXIT: return 0;
-  }
 
   /* create a gff3 input stream */
   gff3_in_stream = gt_gff3_in_stream_new_unsorted(argc - parsed_args,
                                                   argv + parsed_args);
-  if (arguments.verbose)
+  if (arguments->verbose)
     gt_gff3_in_stream_show_progress_bar((GtGFF3InStream*) gff3_in_stream);
 
   /* create add introns stream if -addintrons was used */
-  if (arguments.addintrons) {
+  if (arguments->addintrons) {
     sort_stream = gt_sort_stream_new(gff3_in_stream);
     add_introns_stream = gt_add_introns_stream_new(sort_stream);
   }
 
   /* create s status stream */
-  stat_stream = gt_stat_stream_new(arguments.addintrons
+  stat_stream = gt_stat_stream_new(arguments->addintrons
                                    ? add_introns_stream : gff3_in_stream,
-                                   arguments.gene_length_distribution,
-                                   arguments.gene_score_distribution,
-                                   arguments.exon_length_distribution,
-                                   arguments.exon_number_distribution,
-                                   arguments.intron_length_distribution,
-                                   arguments.cds_length_distribution);
+                                   arguments->gene_length_distribution,
+                                   arguments->gene_score_distribution,
+                                   arguments->exon_length_distribution,
+                                   arguments->exon_number_distribution,
+                                   arguments->intron_length_distribution,
+                                   arguments->cds_length_distribution);
 
   /* pull the features through the stream , compute the statistics, and free
      them afterwards */
@@ -140,11 +151,20 @@ int gt_stat(int argc, const char **argv, GtError *err)
 
   /* show statistics */
   if (!had_err)
-    gt_stat_stream_show_stats(stat_stream);
+    gt_stat_stream_show_stats(stat_stream, arguments->outfp);
 
   /* free */
   gt_node_stream_delete(stat_stream);
   gt_node_stream_delete(gff3_in_stream);
 
   return had_err;
+}
+
+GtTool *gt_stat(void)
+{
+  return gt_tool_new(gt_stat_argument_new,
+                     gt_stat_arguments_delete,
+                     gt_stat_option_parser_new,
+                     NULL,
+                     gt_stat_runner);
 }

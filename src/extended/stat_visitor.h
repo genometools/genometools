@@ -30,6 +30,6 @@ GtNodeVisitor*            gt_stat_visitor_new(bool gene_length_distri,
                                               bool exon_number_distri,
                                               bool intron_length_distri,
                                               bool cds_length_distri);
-void                      gt_stat_visitor_show_stats(GtNodeVisitor*);
+void                      gt_stat_visitor_show_stats(GtNodeVisitor*, GtFile*);
 
 #endif
