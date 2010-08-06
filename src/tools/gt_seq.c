@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -20,7 +20,7 @@
 #include "core/ma.h"
 #include "core/option.h"
 #include "core/undef.h"
-#include "tools/gt_bioseq.h"
+#include "tools/gt_seq.h"
 
 typedef struct {
   bool recreate,
@@ -33,14 +33,14 @@ typedef struct {
   GtStr *reader;
 } GtBioseqArguments;
 
-static void* gt_bioseq_arguments_new(void)
+static void* gt_seq_arguments_new(void)
 {
   GtBioseqArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->reader = gt_str_new();
   return arguments;
 }
 
-static void gt_bioseq_arguments_delete(void *tool_arguments)
+static void gt_seq_arguments_delete(void *tool_arguments)
 {
   GtBioseqArguments *arguments = tool_arguments;
   if (!arguments) return;
@@ -48,7 +48,7 @@ static void gt_bioseq_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static GtOptionParser* gt_bioseq_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_seq_option_parser_new(void *tool_arguments)
 {
   GtBioseqArguments *arguments = tool_arguments;
   GtOption *option, *option_recreate, *option_showfasta, *option_showseqnum,
@@ -128,8 +128,8 @@ static GtOptionParser* gt_bioseq_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_bioseq_arguments_check(int rest_argc, void *tool_arguments,
-                                     GtError *err)
+static int gt_seq_arguments_check(int rest_argc, void *tool_arguments,
+                                  GtError *err)
 {
   GtBioseqArguments *arguments = tool_arguments;
   gt_error_check(err);
@@ -143,8 +143,8 @@ static int gt_bioseq_arguments_check(int rest_argc, void *tool_arguments,
   return 0;
 }
 
-static int gt_bioseq_runner(int argc, const char **argv, int parsed_args,
-                            void *tool_arguments, GtError *err)
+static int gt_seq_runner(int argc, const char **argv, int parsed_args,
+                         void *tool_arguments, GtError *err)
 {
   GtBioseqArguments *arguments = tool_arguments;
   GtBioseq *bioseq;
@@ -209,11 +209,11 @@ static int gt_bioseq_runner(int argc, const char **argv, int parsed_args,
   return had_err;
 }
 
-GtTool* gt_bioseq(void)
+GtTool* gt_seq(void)
 {
-  return gt_tool_new(gt_bioseq_arguments_new,
-                     gt_bioseq_arguments_delete,
-                     gt_bioseq_option_parser_new,
-                     gt_bioseq_arguments_check,
-                     gt_bioseq_runner);
+  return gt_tool_new(gt_seq_arguments_new,
+                     gt_seq_arguments_delete,
+                     gt_seq_option_parser_new,
+                     gt_seq_arguments_check,
+                     gt_seq_runner);
 }

@@ -1,9 +1,10 @@
-changes in version 1.3.6 (2010-06-12)
+changes in version 1.3.6 (2010-08-06)
 
 - `gt stat` has new options -addintrons and -cdslengthdistri
+- the tool `gt bioseq` has been renamed to `gt seq`
 
 
-changes in version 1.3.5 (2010-06-09)
+changes in version 1.3.5 (2010-07-12)
 
 - `gt gff3 -tidy` cleans up multi-features with different parents
 - `gt stat` shows number of multi-features

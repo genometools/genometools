@@ -61,7 +61,6 @@
 #include "ltr/ppt.h"
 #include "ltr/pbs.h"
 #include "tools/gt_bed_to_gff3.h"
-#include "tools/gt_bioseq.h"
 #include "tools/gt_cds.h"
 #include "tools/gt_chain2dim.h"
 #include "tools/gt_chseqids.h"
@@ -92,6 +91,7 @@
 #include "tools/gt_mutate.h"
 #include "tools/gt_packedindex.h"
 #include "tools/gt_prebwt.h"
+#include "tools/gt_seq.h"
 #include "tools/gt_seqfilter.h"
 #include "tools/gt_sequniq.h"
 #include "tools/gt_seqstat.h"
@@ -126,7 +126,6 @@ GtToolbox* gtt_tools(void)
 
   /* add tools */
   gt_toolbox_add_tool(tools, "bed_to_gff3", gt_bed_to_gff3());
-  gt_toolbox_add_tool(tools, "bioseq", gt_bioseq());
   gt_toolbox_add_tool(tools, "cds", gt_cds());
   gt_toolbox_add(tools, "chseqids", gt_chseqids);
   gt_toolbox_add_tool(tools, "chain2dim", gt_chain2dim());
@@ -158,6 +157,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add(tools, "mkfmindex", gt_mkfmindex);
   gt_toolbox_add_tool(tools, "packedindex", gt_packedindex());
   gt_toolbox_add_tool(tools, "prebwt", gt_prebwt());
+  gt_toolbox_add_tool(tools, "seq", gt_seq());
   gt_toolbox_add_tool(tools, "seqfilter", gt_seqfilter());
   gt_toolbox_add_tool(tools, "sequniq", gt_sequniq());
   gt_toolbox_add(tools, "seqstat", gt_seqstat);

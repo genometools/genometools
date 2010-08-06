@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -15,12 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GT_BIOSEQ_H
-#define GT_BIOSEQ_H
+#ifndef GT_SEQ_H
+#define GT_SEQ_H
 
 #include "core/tool.h"
 
-/* the biosequence tool */
-GtTool* gt_bioseq(void);
+/* the sequence tool */
+GtTool* gt_seq(void);
 
 #endif
