@@ -52,14 +52,14 @@ static GtOptionParser* gt_bioseq_option_parser_new(void *tool_arguments)
 {
   GtBioseqArguments *arguments = tool_arguments;
   GtOption *option, *option_recreate, *option_showfasta, *option_showseqnum,
-         *option_width, *option_stat, *option_reader;
+           *option_width, *option_stat, *option_reader;
   GtOptionParser *op;
   static const char *reader_types[] = { "rec", "fsm", "seqit", NULL };
   gt_assert(arguments);
 
   op = gt_option_parser_new("[option ...] sequence_file [...]",
-                         "Construct the GtBiosequence files for the given "
-                         "sequence_file(s) (if necessary).");
+                            "Construct the GtBiosequence files for the given "
+                            "sequence_file(s) (if necessary).");
 
   /* -recreate */
   option_recreate = gt_option_new_bool("recreate", "recreate GtBiosequence "
@@ -69,8 +69,8 @@ static GtOptionParser* gt_bioseq_option_parser_new(void *tool_arguments)
 
   /* -showfasta */
   option_showfasta = gt_option_new_bool("showfasta", "show sequences on stdout "
-                                     "(in fasta format)", &arguments->showfasta,
-                                     false);
+                                        "(in fasta format)",
+                                        &arguments->showfasta, false);
   gt_option_parser_add_option(op, option_showfasta);
 
   /* -showseqnum */
@@ -95,20 +95,21 @@ static GtOptionParser* gt_bioseq_option_parser_new(void *tool_arguments)
 
   /* -seqlengthdistri */
   option = gt_option_new_bool("seqlengthdistri", "show sequence length "
-                           "distribution", &arguments->seqlengthdistri, false);
+                              "distribution", &arguments->seqlengthdistri,
+                              false);
   gt_option_parser_add_option(op, option);
 
   /* -width */
   option_width = gt_option_new_ulong("width", "set output width for showing of "
-                                  "sequences (0 disables formatting)",
-                                  &arguments->width, 0);
+                                     "sequences (0 disables formatting)",
+                                     &arguments->width, 0);
   gt_option_parser_add_option(op, option_width);
 
   /* -reader */
   option_reader = gt_option_new_choice("reader", "set fasta reader type\n"
-                                    "choose rec|fsm|seqit",
-                                    arguments->reader, reader_types[0],
-                                    reader_types);
+                                       "choose rec|fsm|seqit",
+                                       arguments->reader, reader_types[0],
+                                       reader_types);
   gt_option_is_development_option(option_reader);
   gt_option_parser_add_option(op, option_reader);
 
@@ -136,7 +137,7 @@ static int gt_bioseq_arguments_check(int rest_argc, void *tool_arguments,
   /* option -showseqnum makes only sense if we got a single sequence file */
   if (arguments->showseqnum != GT_UNDEF_ULONG && rest_argc > 1) {
     gt_error_set(err, "option '-showseqnum' makes only sense with a single "
-                   "sequence_file");
+                      "sequence_file");
     return -1;
   }
   return 0;
@@ -180,12 +181,13 @@ static int gt_bioseq_runner(int argc, const char **argv, int parsed_args,
       if (arguments->showseqnum > gt_bioseq_number_of_sequences(bioseq)) {
         gt_error_set(err, "argument '%lu' to option '-showseqnum' is too "
                      "large. The GtBiosequence contains only '%lu' sequences.",
-                  arguments->showseqnum, gt_bioseq_number_of_sequences(bioseq));
+                     arguments->showseqnum,
+                     gt_bioseq_number_of_sequences(bioseq));
         had_err = -1;
       }
       if (!had_err) {
         gt_bioseq_show_sequence_as_fasta(bioseq, arguments->showseqnum - 1,
-                                      arguments->width);
+                                         arguments->width);
       }
     }
 
@@ -210,8 +212,8 @@ static int gt_bioseq_runner(int argc, const char **argv, int parsed_args,
 GtTool* gt_bioseq(void)
 {
   return gt_tool_new(gt_bioseq_arguments_new,
-                  gt_bioseq_arguments_delete,
-                  gt_bioseq_option_parser_new,
-                  gt_bioseq_arguments_check,
-                  gt_bioseq_runner);
+                     gt_bioseq_arguments_delete,
+                     gt_bioseq_option_parser_new,
+                     gt_bioseq_arguments_check,
+                     gt_bioseq_runner);
 }
