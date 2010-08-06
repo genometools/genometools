@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -19,10 +19,11 @@
 #define GC_CONTENT_H
 
 #include "core/alphabet.h"
+#include "core/file.h"
 
-/* Show the GC-content for sequence <seq> with length <len> on stdout.
+/* Show the GC-content for sequence <seq> with length <len> on <outfp>.
    <alpha> has to be compatible with a DNA alphabet. */
 void gt_gc_content_show(const char *seq, unsigned long len,
-                        GtAlphabet *alphabet);
+                        GtAlphabet *alphabet, GtFile *outfp);
 
 #endif

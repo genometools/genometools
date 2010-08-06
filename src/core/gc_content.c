@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -19,7 +19,7 @@
 #include "core/gc_content.h"
 
 void gt_gc_content_show(const char *seq, unsigned long len,
-                        GtAlphabet *alphabet)
+                        GtAlphabet *alphabet, GtFile *outfp)
 {
   unsigned long i,
                 gc = 0, /* number of G/C bases */
@@ -45,7 +45,8 @@ void gt_gc_content_show(const char *seq, unsigned long len,
       gt_assert(0);
     }
   }
-  printf("GC-content: %.2f%% (AT-content: %.2f%%, N-content: %.2f%%)\n",
-         ((double) gc / len) * 100.0, ((double) at / len) * 100.0,
-         ((double) n  / len) * 100.0);
+  gt_file_xprintf(outfp, "GC-content: %.2f%% (AT-content: %.2f%%, "
+                         "N-content: %.2f%%)\n",
+                  ((double) gc / len) * 100.0, ((double) at / len) * 100.0,
+                  ((double) n  / len) * 100.0);
 }

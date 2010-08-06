@@ -19,6 +19,7 @@
 #include "core/bioseq.h"
 #include "core/ma.h"
 #include "core/option.h"
+#include "core/outputfile.h"
 #include "core/undef.h"
 #include "tools/gt_seq.h"
 
@@ -31,12 +32,15 @@ typedef struct {
   unsigned long showseqnum,
                 width;
   GtStr *reader;
+  GtOutputFileInfo *ofi;
+  GtFile *outfp;
 } GtSeqArguments;
 
 static void* gt_seq_arguments_new(void)
 {
   GtSeqArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->reader = gt_str_new();
+  arguments->ofi = gt_outputfileinfo_new();
   return arguments;
 }
 
@@ -44,6 +48,8 @@ static void gt_seq_arguments_delete(void *tool_arguments)
 {
   GtSeqArguments *arguments = tool_arguments;
   if (!arguments) return;
+  gt_file_delete(arguments->outfp);
+  gt_outputfileinfo_delete(arguments->ofi);
   gt_str_delete(arguments->reader);
   gt_free(arguments);
 }
@@ -113,6 +119,9 @@ static GtOptionParser* gt_seq_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(option_reader);
   gt_option_parser_add_option(op, option_reader);
 
+  /* output file options */
+  gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
+
   /* option implications */
   gt_option_imply(option_reader, option_recreate);
   gt_option_imply_either_2(option_width, option_showfasta, option_showseqnum);
@@ -122,7 +131,7 @@ static GtOptionParser* gt_seq_option_parser_new(void *tool_arguments)
   gt_option_exclude(option_showfasta, option_showseqnum);
   gt_option_exclude(option_showseqnum, option_stat);
 
-  /* set minimal arugments */
+  /* set minimal arguments */
   gt_option_parser_set_min_args(op, 1);
 
   return op;
@@ -175,7 +184,7 @@ static int gt_seq_runner(int argc, const char **argv, int parsed_args,
 
     /* output */
     if (!had_err && arguments->showfasta)
-      gt_bioseq_show_as_fasta(bioseq, arguments->width);
+      gt_bioseq_show_as_fasta(bioseq, arguments->width, arguments->outfp);
 
     if (!had_err && arguments->showseqnum != GT_UNDEF_ULONG) {
       if (arguments->showseqnum > gt_bioseq_number_of_sequences(bioseq)) {
@@ -187,18 +196,18 @@ static int gt_seq_runner(int argc, const char **argv, int parsed_args,
       }
       if (!had_err) {
         gt_bioseq_show_sequence_as_fasta(bioseq, arguments->showseqnum - 1,
-                                         arguments->width);
+                                         arguments->width, arguments->outfp);
       }
     }
 
     if (!had_err && arguments->gc_content)
-      gt_bioseq_show_gc_content(bioseq);
+      gt_bioseq_show_gc_content(bioseq, arguments->outfp);
 
     if (!had_err && arguments->stat)
-      gt_bioseq_show_stat(bioseq);
+      gt_bioseq_show_stat(bioseq, arguments->outfp);
 
     if (!had_err && arguments->seqlengthdistri)
-      gt_bioseq_show_seqlengthdistri(bioseq);
+      gt_bioseq_show_seqlengthdistri(bioseq, arguments->outfp);
 
     /* free */
     gt_bioseq_delete(bioseq);

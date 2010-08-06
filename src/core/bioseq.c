@@ -632,59 +632,63 @@ unsigned long gt_bioseq_number_of_sequences(GtBioseq *bs)
   return gt_array_size(bs->descriptions);
 }
 
-void gt_bioseq_show_as_fasta(GtBioseq *bs, unsigned long width)
+void gt_bioseq_show_as_fasta(GtBioseq *bs, unsigned long width, GtFile *outfp)
 {
   unsigned long i;
 
   gt_assert(bs);
 
   for (i = 0; i < gt_bioseq_number_of_sequences(bs); i++) {
-    gt_fasta_show_entry(gt_bioseq_get_description(bs, i),
-                        gt_bioseq_get_sequence(bs, i),
-                        gt_bioseq_get_sequence_length(bs, i), width);
+    gt_fasta_show_entry_generic(gt_bioseq_get_description(bs, i),
+                                gt_bioseq_get_sequence(bs, i),
+                                gt_bioseq_get_sequence_length(bs, i), width,
+                                outfp);
   }
 }
 
 void gt_bioseq_show_sequence_as_fasta(GtBioseq *bs, unsigned long seqnum,
-                                   unsigned long width)
+                                      unsigned long width, GtFile *outfp)
 {
   gt_assert(bs);
   gt_assert(seqnum < gt_bioseq_number_of_sequences(bs));
 
-  gt_fasta_show_entry(gt_bioseq_get_description(bs, seqnum),
-                      gt_bioseq_get_sequence(bs, seqnum),
-                      gt_bioseq_get_sequence_length(bs, seqnum), width);
+  gt_fasta_show_entry_generic(gt_bioseq_get_description(bs, seqnum),
+                              gt_bioseq_get_sequence(bs, seqnum),
+                              gt_bioseq_get_sequence_length(bs, seqnum), width,
+                              outfp);
 
 }
 
-void gt_bioseq_show_gc_content(GtBioseq *bs)
+void gt_bioseq_show_gc_content(GtBioseq *bs, GtFile *outfp)
 {
   gt_assert(bs);
   determine_alphabet_if_necessary(bs);
   if (gt_alphabet_is_dna(bs->alphabet)) {
-    printf("showing GC-content for sequence file \"%s\"\n",
-           gt_str_get(bs->sequence_file));
+    gt_file_xprintf(outfp, "showing GC-content for sequence file \"%s\"\n",
+                    gt_str_get(bs->sequence_file));
     gt_gc_content_show(gt_bioseq_get_raw_sequence(bs),
-                       gt_bioseq_get_raw_sequence_length(bs), bs->alphabet);
+                       gt_bioseq_get_raw_sequence_length(bs), bs->alphabet,
+                       outfp);
   }
 }
 
-void gt_bioseq_show_stat(GtBioseq *bs)
+void gt_bioseq_show_stat(GtBioseq *bs, GtFile *outfp)
 {
   unsigned long i, num_of_seqs;
   gt_assert(bs);
   num_of_seqs = gt_bioseq_number_of_sequences(bs);
-  printf("showing statistics for sequence file \"%s\"\n",
-         gt_str_get(bs->sequence_file));
-  printf("number of sequences: %lu\n", num_of_seqs);
-  printf("total length: %lu\n", gt_bioseq_get_raw_sequence_length(bs));
+  gt_file_xprintf(outfp, "showing statistics for sequence file \"%s\"\n",
+                  gt_str_get(bs->sequence_file));
+  gt_file_xprintf(outfp, "number of sequences: %lu\n", num_of_seqs);
+  gt_file_xprintf(outfp, "total length: %lu\n",
+                  gt_bioseq_get_raw_sequence_length(bs));
   for (i = 0; i < num_of_seqs; i++) {
-    printf("sequence #%lu length: %lu\n", i+1,
-           gt_bioseq_get_sequence_length(bs, i));
+    gt_file_xprintf(outfp, "sequence #%lu length: %lu\n", i+1,
+                    gt_bioseq_get_sequence_length(bs, i));
   }
 }
 
-void gt_bioseq_show_seqlengthdistri(GtBioseq *bs)
+void gt_bioseq_show_seqlengthdistri(GtBioseq *bs, GtFile *outfp)
 {
   GtDiscDistri *d;
   unsigned long i;
@@ -692,7 +696,7 @@ void gt_bioseq_show_seqlengthdistri(GtBioseq *bs)
   d = gt_disc_distri_new();
   for (i = 0; i < gt_bioseq_number_of_sequences(bs); i++)
     gt_disc_distri_add(d, gt_bioseq_get_sequence_length(bs, i));
-  printf("sequence length distribution:\n");
-  gt_disc_distri_show(d);
+  gt_file_xprintf(outfp, "sequence length distribution:\n");
+  gt_disc_distri_show_generic(d, outfp);
   gt_disc_distri_delete(d);
 }

@@ -58,22 +58,23 @@ unsigned long gt_bioseq_get_sequence_length(GtBioseq*, unsigned long index);
 unsigned long gt_bioseq_get_raw_sequence_length(GtBioseq*);
 unsigned long gt_bioseq_number_of_sequences(GtBioseq*);
 
-/* Shows a bioseq on stdout (in fasta format).
-   If width is != 0 the sequences are formatted accordingly. */
-void gt_bioseq_show_as_fasta(GtBioseq*, unsigned long width);
+/* Shows a <bioseq> on <outfp> (in fasta format).
+   If <width> is != 0 the sequences are formatted accordingly. */
+void gt_bioseq_show_as_fasta(GtBioseq *bioseq, unsigned long width,
+                             GtFile *outfp);
 
-/* Shows a sequence with number ``seqnum'' from a bioseq on stdout (in fasta
-   format). If width is != 0 the sequences are formatted accordingly. */
-void gt_bioseq_show_sequence_as_fasta(GtBioseq*, unsigned long seqnum,
-                                      unsigned long width);
+/* Shows a sequence with number <seqnum> from a <bioseq> on <outfp> (in fasta
+   format). If <width> is != 0 the sequences are formatted accordingly. */
+void gt_bioseq_show_sequence_as_fasta(GtBioseq *bioseq, unsigned long seqnum,
+                                      unsigned long width, GtFile *outfp);
 
-/* Shows GC-content on stdout (for DNA files). */
-void gt_bioseq_show_gc_content(GtBioseq*);
+/* Shows GC-content on <outfp> (for DNA files). */
+void gt_bioseq_show_gc_content(GtBioseq*, GtFile *outfp);
 
-/* Shows bioseq statistics (on stdout). */
-void gt_bioseq_show_stat(GtBioseq*);
+/* Shows <bioseq> statistics (on <outfp>). */
+void gt_bioseq_show_stat(GtBioseq *bioseq, GtFile *outfp);
 
-/* Shows bioseq sequence length distribution (on stdout). */
-void gt_bioseq_show_seqlengthdistri(GtBioseq*);
+/* Shows <bioseq> sequence length distribution (on <outfp>). */
+void gt_bioseq_show_seqlengthdistri(GtBioseq *bioseq, GtFile *outfp);
 
 #endif
