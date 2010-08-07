@@ -42,9 +42,9 @@ typedef struct
        docstats,
        showestimsize;
   unsigned int bucketsize;
-} GtSeqstatArguments;
+} SeqstatArguments;
 
-static GtOPrval parse_options(GtSeqstatArguments *arguments,
+static GtOPrval parse_options(SeqstatArguments *arguments,
                               int *parsed_args,int argc,
                               const char **argv, GtError *err)
 {
@@ -276,7 +276,7 @@ int gt_seqstat(int argc, const char **argv, GtError *err)
   unsigned long minlength = 0, maxlength = 0;
   unsigned long long countA = 0;
   bool minlengthdefined = false;
-  GtSeqstatArguments arguments;
+  SeqstatArguments arguments;
 
   gt_error_check(err);
 
