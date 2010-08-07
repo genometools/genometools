@@ -17,8 +17,10 @@
 
 #include "core/assert_api.h"
 #include "core/safearith.h"
+#include "core/trans_table.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
+#include "core/warning_api.h"
 #include "gth/gtherror.h"
 #include "gth/gthoutput.h"
 #include "gth/gthstrandchar.h"
@@ -48,7 +50,8 @@
 typedef struct {
   unsigned long call_number;
   bool significant_match_found,
-       max_call_number_reached;
+       max_call_number_reached,
+       stop_amino_acid_warning;
 } GthMatchInfo;
 
 static void show_matrix_calculation_status(void (*showverbose)(const char*),
@@ -694,6 +697,24 @@ static int calc_spliced_alignments(GthSACollection *sa_collection,
     }
     ref_total_length = range.end - range.start + 1;
 
+    /* check if protein sequences have a stop amino acid */
+    if (!refseqisdna && !match_info->stop_amino_acid_warning &&
+       ref_seq_orig[ref_total_length - 1] != GT_STOP_AMINO) {
+      GtStr *ref_id = gt_str_new();
+      gth_input_save_ref_id(input, ref_id, chain->ref_file_num,
+                            chain->ref_seq_num);
+      gt_warning("protein sequence '%s' (#%lu in file %s) does not end with a "
+                 "stop amino acid ('%c'). If it is not a protein fragment you "
+                 "should add a stop amino acid to improve the prediction. "
+                 "For example with `gt seqtransform -addstopaminos` (see "
+                 "http://genometools.org for details).", gt_str_get(ref_id),
+                 chain->ref_seq_num,
+                 gth_input_get_reference_filename(input, chain->ref_file_num),
+                 GT_STOP_AMINO);
+      match_info->stop_amino_acid_warning = true;
+      gt_str_delete(ref_id);
+    }
+
     /* allocating space for alignment */
     saA = gth_sa_new_and_set(directmatches, true, input, chain->gen_file_num,
                              chain->gen_seq_num, chain->ref_file_num,
@@ -800,6 +821,7 @@ static int compute_sa_collection(GthSACollection *sa_collection,
   match_info.call_number = 0;
   match_info.significant_match_found = false;
   match_info.max_call_number_reached = false;
+  match_info.stop_amino_acid_warning = false;
 
   for (g = 0; g < gth_input_num_of_gen_files(input); g++) {
     for (r = 0; r < gth_input_num_of_ref_files(input); r++) {
