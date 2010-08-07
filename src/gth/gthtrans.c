@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2004-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2004-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -20,6 +20,7 @@
 #include "core/codon_iterator_simple.h"
 #include "core/ma.h"
 #include "core/translator_api.h"
+#include "core/trans_table.h"
 #include "core/unused_api.h"
 #include "gth/gthstopcodon.h"
 #include "gth/indent.h"
@@ -49,7 +50,7 @@
         }
 
 #define REPLACE_STOPCODON(LINE)\
-        if (gs2out && (LINE)[outcounter] == LIBKURTZ_STOPCODON)\
+        if (gs2out && (LINE)[outcounter] == GT_STOP_AMINO)\
         {\
           (LINE)[outcounter] = (unsigned char) GS2_STOPCODON;\
         }

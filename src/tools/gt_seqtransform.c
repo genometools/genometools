@@ -19,10 +19,8 @@
 #include "core/ma.h"
 #include "core/option.h"
 #include "core/outputfile.h"
+#include "core/trans_table.h"
 #include "tools/gt_seqtransform.h"
-
-#define GT_STOP_AMINO       '*'
-#define GT_STOP_AMINO_CSTR  "*"
 
 typedef struct {
   bool addstopaminos;

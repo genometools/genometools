@@ -25,6 +25,7 @@
 #include "core/ma.h"
 #include "core/log.h"
 #include "core/translator.h"
+#include "core/trans_table.h"
 #include "core/unused_api.h"
 
 #define GT_AMINOACIDFAIL            -1
@@ -45,9 +46,6 @@
 #define GT_ILLEGALCHAR(V)\
         gt_error_set(err, "illegal char %s='%c'(%lu)",#V,V,(unsigned long)(V));\
         return GT_AMINOACIDFAIL
-
-#define GT_STARTAMINO 'M'
-#define GT_STOPAMINO  '*'
 
 #define GT_T_BIT  ((unsigned char) 1)
 #define GT_C_BIT (((unsigned char) 1) << 1)
@@ -800,7 +798,7 @@ bool gt_trans_table_is_start_codon(const GtTransTable *tt,
   gt_assert(tt);
   unsigned int code = 0;
   (void) codon2amino(tt->scheme->aminos, true, c1, c2, c3, &code, NULL);
-  if (tt->scheme->startcodon[code] == GT_STARTAMINO) {
+  if (tt->scheme->startcodon[code] == GT_START_AMINO) {
     return true;
   }
   return false;
@@ -812,7 +810,7 @@ bool gt_trans_table_is_stop_codon(const GtTransTable *tt,
   gt_assert(tt);
   char trans;
   trans = codon2amino(tt->scheme->aminos, true, c1, c2, c3, NULL, NULL);
-  if (trans == GT_STOPAMINO) {
+  if (trans == GT_STOP_AMINO) {
     return true;
   }
   return false;

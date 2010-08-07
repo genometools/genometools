@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2009-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -19,6 +19,7 @@
 #include "core/array3dim.h"
 #include "core/chardef.h"
 #include "core/translator_api.h"
+#include "core/trans_table.h"
 #include "gth/gthstopcodon.h"
 #include "gth/align_common.h"
 #include "gth/dp_scores_protein.h"
@@ -46,16 +47,16 @@ static GthFlt get_score(GtScoreMatrix *score_matrix,
            gt_alphabet_valid_input(score_matrix_alphabet,
                                    origreferencechar)) {
     /* XXX: shorten this */
-    if (amino == LIBKURTZ_STOPCODON) {
+    if (amino == GT_STOP_AMINO) {
       /* 2.) (-)2*INDEL_PENALTY for matching/mismatching a stop codon */
-      if (origreferencechar == LIBKURTZ_STOPCODON)
+      if (origreferencechar == GT_STOP_AMINO)
         rval = scalefactor * -2 * indel_penalty;
       else
         rval = scalefactor *  2 * indel_penalty;
     }
     else {
       /* 3.) amino acid substitution score */
-      if (origreferencechar == LIBKURTZ_STOPCODON)
+      if (origreferencechar == GT_STOP_AMINO)
         rval = scalefactor *  2 * indel_penalty;
       else {
         GtUchar code1, code2;

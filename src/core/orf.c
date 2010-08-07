@@ -19,10 +19,8 @@
 #include "core/codon.h"
 #include "core/orf.h"
 #include "core/range.h"
+#include "core/trans_table.h"
 #include "core/undef.h"
-
-#define START_AMINO  'M'
-#define STOP_AMINO   '*'
 
 void gt_determine_ORFs(GtORFProcessor orf_processor, void *data,
                        unsigned int framenum, const char *frame,
@@ -36,22 +34,22 @@ void gt_determine_ORFs(GtORFProcessor orf_processor, void *data,
   for (i = 0; i < framelen; i++) {
     if (orf.start == GT_UNDEF_ULONG) {
       if (start_codon) {
-        if (frame[i] == START_AMINO)
+        if (frame[i] == GT_START_AMINO)
           orf.start = framepos ? i : i * GT_CODON_LENGTH + framenum;
       }
       else {
         if (i) {
-          if (frame[i-1] == STOP_AMINO && frame[i] != STOP_AMINO)
+          if (frame[i-1] == GT_STOP_AMINO && frame[i] != GT_STOP_AMINO)
             orf.start = framepos ? i : i * GT_CODON_LENGTH + framenum;
         }
         else {
-          if (frame[i] != STOP_AMINO)
+          if (frame[i] != GT_STOP_AMINO)
             orf.start = framepos ? 0 : framenum;
         }
       }
     }
     else {
-      if (frame[i] == STOP_AMINO) {
+      if (frame[i] == GT_STOP_AMINO) {
         orf.end = framepos ? i : i * GT_CODON_LENGTH + framenum + 2;
         orf_processor(data, &orf, framenum, frame, true);
         orf.start = GT_UNDEF_ULONG;

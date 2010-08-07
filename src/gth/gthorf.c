@@ -18,6 +18,7 @@
 #include "core/assert_api.h"
 #include "core/codon.h"
 #include "core/orf.h"
+#include "core/trans_table.h"
 #include "gth/gthorf.h"
 #include "gth/gthoutput.h"
 #include "gth/gthstopcodon.h"
@@ -259,7 +260,7 @@ static void showsingleORF(MaximalORF *orf, bool gen_strand_forward,
     }
 
     if (out->gs2out && i + 1 == orf->lengthwithstopcodon &&
-        orf->frame[i] == LIBKURTZ_STOPCODON) {
+        orf->frame[i] == GT_STOP_AMINO) {
       gt_file_xfputc(GS2_STOPCODON, outfp);
     }
     else
