@@ -141,13 +141,13 @@ static GtArray* determine_ORFs_for_all_three_frames(Splicedseq *ss,
   }
   gt_determine_ORFs(save_orf, orfs, 0, gt_str_get(pr[0]), gt_str_length(pr[0]),
                     start_codon, final_stop_codon, false,
-                    gt_str_get(start_codons[0]));
+                    generic_start_codons ? gt_str_get(start_codons[0]) : NULL);
   gt_determine_ORFs(save_orf, orfs, 1, gt_str_get(pr[1]), gt_str_length(pr[1]),
                     start_codon, final_stop_codon, false,
-                    gt_str_get(start_codons[1]));
+                    generic_start_codons ? gt_str_get(start_codons[1]) : NULL);
   gt_determine_ORFs(save_orf, orfs, 2, gt_str_get(pr[2]), gt_str_length(pr[2]),
                     start_codon, final_stop_codon, false,
-                    gt_str_get(start_codons[2]));
+                    generic_start_codons ? gt_str_get(start_codons[2]) : NULL);
 
   gt_str_delete(start_codons[2]);
   gt_str_delete(start_codons[1]);
