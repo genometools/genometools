@@ -23,18 +23,33 @@ void gt_fasta_show_entry(const char *description, const char *sequence,
                          unsigned long sequence_length, unsigned long width,
                          GtFile *outfp)
 {
-  unsigned long i, current_length;
+  gt_fasta_show_entry_with_suffix(description, sequence, sequence_length, NULL,
+                                  width, outfp);
+}
+
+void gt_fasta_show_entry_with_suffix(const char *description,
+                                     const char *sequence,
+                                     unsigned long sequence_length,
+                                     const char *suffix, unsigned long width,
+                                     GtFile *outfp)
+{
+  unsigned long i, current_length, suffix_length;
   gt_assert(sequence);
   gt_file_xfputc(GT_FASTA_SEPARATOR, outfp);
   if (description)
     gt_file_xfputs(description, outfp);
   gt_file_xfputc('\n', outfp);
-  for (i = 0, current_length = 0; i < sequence_length; i++, current_length++) {
+  suffix_length = suffix ? strlen(suffix) : 0;
+  for (i = 0, current_length = 0; i < sequence_length + suffix_length;
+       i++, current_length++) {
     if (width && current_length == width) {
       gt_file_xfputc('\n', outfp);
       current_length = 0;
     }
-    gt_file_xfputc(sequence[i], outfp);
+    if (i < sequence_length)
+      gt_file_xfputc(sequence[i], outfp);
+    else
+      gt_file_xfputc(suffix[i-sequence_length], outfp);
   }
   gt_file_xfputc('\n', outfp);
 }

@@ -26,4 +26,13 @@ void gt_fasta_show_entry(const char *description, const char *sequence,
                          unsigned long sequence_length, unsigned long width,
                          GtFile *outfp);
 
+/* Print a fasta entry with optional <description> and <suffix> plus mandatory
+   <sequence> to <outfp>. If <width> is != 0 the sequence is formatted
+   accordingly. */
+void gt_fasta_show_entry_with_suffix(const char *description,
+                                     const char *sequence,
+                                     unsigned long sequence_length,
+                                     const char *suffix, unsigned long width,
+                                     GtFile *outfp);
+
 #endif
