@@ -64,39 +64,36 @@ static GtOptionParser* gt_seq_option_parser_new(void *tool_arguments)
   gt_assert(arguments);
 
   op = gt_option_parser_new("[option ...] sequence_file [...]",
-                            "Construct the GtBiosequence files for the given "
-                            "sequence_file(s) (if necessary).");
+                            "Parse the given sequence file(s) and construct "
+                            "the corresponding index files.");
 
   /* -recreate */
-  option_recreate = gt_option_new_bool("recreate", "recreate GtBiosequence "
-                                    "files, even if they exist already",
-                                    &arguments->recreate, false);
+  option_recreate = gt_option_new_bool("recreate", "recreate index files, even "
+                                       "if they exist already",
+                                       &arguments->recreate, false);
   gt_option_parser_add_option(op, option_recreate);
 
   /* -showfasta */
-  option_showfasta = gt_option_new_bool("showfasta", "show sequences on stdout "
-                                        "(in fasta format)",
-                                        &arguments->showfasta, false);
+  option_showfasta = gt_option_new_bool("showfasta", "show all sequences (in "
+                                        "FASTA format)", &arguments->showfasta,
+                                        false);
   gt_option_parser_add_option(op, option_showfasta);
 
   /* -showseqnum */
-  option_showseqnum = gt_option_new_ulong_min("showseqnum",
-                                              "show sequence with "
-                                              "given number on stdout "
-                                              "(in fasta format)",
-                                              &arguments->showseqnum,
+  option_showseqnum = gt_option_new_ulong_min("showseqnum", "show sequence "
+                                              "with given number (in FASTA "
+                                              "format)", &arguments->showseqnum,
                                               GT_UNDEF_ULONG, 1);
   gt_option_parser_add_option(op, option_showseqnum);
 
   /* -gc-content */
-  option = gt_option_new_bool("gc-content",
-                              "show GC-content on stdout (for DNA "
-                              "files)", &arguments->gc_content, false);
+  option = gt_option_new_bool("gc-content", "print GC-content (for DNA files)",
+                              &arguments->gc_content, false);
   gt_option_parser_add_option(op, option);
 
   /* -stat */
   option_stat = gt_option_new_bool("stat", "show sequence statistics",
-                                &arguments->stat, false);
+                                   &arguments->stat, false);
   gt_option_parser_add_option(op, option_stat);
 
   /* -seqlengthdistri */
@@ -187,7 +184,7 @@ static int gt_seq_runner(int argc, const char **argv, int parsed_args,
     if (!had_err && arguments->showseqnum != GT_UNDEF_ULONG) {
       if (arguments->showseqnum > gt_bioseq_number_of_sequences(bioseq)) {
         gt_error_set(err, "argument '%lu' to option '-showseqnum' is too "
-                     "large. The GtBiosequence contains only '%lu' sequences.",
+                     "large. The sequence index contains only '%lu' sequences.",
                      arguments->showseqnum,
                      gt_bioseq_number_of_sequences(bioseq));
         had_err = -1;
