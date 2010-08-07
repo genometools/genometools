@@ -222,7 +222,7 @@ GthPGLVisitor* gth_gff3_pgl_visitor_new(GthInput *input, bool use_desc_ranges,
   visitor->gthsourcetag = gt_str_new_cstr(GTHSOURCETAG);
   visitor->cds_visitor = gt_cds_visitor_new(NULL, minORFlength,
                                             visitor->gthsourcetag, start_codon,
-                                            final_stop_codon);
+                                            final_stop_codon, false /* XXX */);
   visitor->gff3_visitor = gt_gff3_visitor_new(outfp);
   return pgl_visitor;
 }

@@ -29,7 +29,8 @@ const GtNodeVisitorClass* gt_cds_visitor_class(void);
 GtNodeVisitor*            gt_cds_visitor_new(GtRegionMapping *region_mapping,
                                              unsigned int minorflen,
                                              GtStr *source, bool start_codon,
-                                             bool final_stop_codon);
+                                             bool final_stop_codon,
+                                             bool generic_start_codons);
 /* Does not take ownership of <region_mapping>. */
 void                      gt_cds_visitor_set_region_mapping(GtCDSVisitor
                                                             *cds_visitor,

@@ -20,6 +20,7 @@
 #include "core/codon_iterator_simple.h"
 #include "core/orf.h"
 #include "core/translator.h"
+#include "core/trans_table.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
 #include "extended/cds_visitor.h"
@@ -35,7 +36,8 @@ struct GtCDSVisitor {
   GtRegionMapping *region_mapping;
   unsigned long offset;
   bool start_codon,
-       final_stop_codon;
+       final_stop_codon,
+       generic_start_codons;
 };
 
 static void cds_visitor_free(GtNodeVisitor *nv)
@@ -104,15 +106,17 @@ static void save_orf(void *data, GtRange *orf, GT_UNUSED unsigned long framenum,
 
 static GtArray* determine_ORFs_for_all_three_frames(Splicedseq *ss,
                                                     bool start_codon,
-                                                    bool final_stop_codon)
+                                                    bool final_stop_codon,
+                                                    bool generic_start_codons)
 {
-  GtStr *pr[3];
+  GtStr *pr[3], *start_codons[3];
   GtArray *orfs;
   GtTranslator *tr;
   char translated;
   int rval;
   unsigned int frame;
   GtCodonIterator *ci;
+  bool start;
   gt_assert(ss);
   ci = gt_codon_iterator_simple_new(gt_splicedseq_get(ss),
                                     gt_splicedseq_length(ss),
@@ -121,22 +125,32 @@ static GtArray* determine_ORFs_for_all_three_frames(Splicedseq *ss,
   pr[0] = gt_str_new();
   pr[1] = gt_str_new();
   pr[2] = gt_str_new();
+  start_codons[0] = generic_start_codons ? gt_str_new() : NULL;
+  start_codons[1] = generic_start_codons ? gt_str_new() : NULL;
+  start_codons[2] = generic_start_codons ? gt_str_new() : NULL;
   orfs = gt_array_new(sizeof (GtRange));
 
   gt_assert(ci);
   tr = gt_translator_new(ci);
-  rval = gt_translator_next(tr, &translated, &frame, NULL);
+  rval = gt_translator_next_with_start(tr, &translated, &frame, &start, NULL);
   while (!rval && translated) {
     gt_str_append_char(pr[frame], translated);
-    rval = gt_translator_next(tr, &translated, &frame, NULL);
+    gt_str_append_char(start_codons[frame], start ? GT_START_AMINO : '-');
+    rval = gt_translator_next_with_start(tr, &translated, &frame, &start, NULL);
   }
   gt_determine_ORFs(save_orf, orfs, 0, gt_str_get(pr[0]), gt_str_length(pr[0]),
-                    start_codon, final_stop_codon, false);
+                    start_codon, final_stop_codon, false,
+                    gt_str_get(start_codons[0]));
   gt_determine_ORFs(save_orf, orfs, 1, gt_str_get(pr[1]), gt_str_length(pr[1]),
-                    start_codon, final_stop_codon, false);
+                    start_codon, final_stop_codon, false,
+                    gt_str_get(start_codons[1]));
   gt_determine_ORFs(save_orf, orfs, 2, gt_str_get(pr[2]), gt_str_length(pr[2]),
-                    start_codon, final_stop_codon, false);
+                    start_codon, final_stop_codon, false,
+                    gt_str_get(start_codons[2]));
 
+  gt_str_delete(start_codons[2]);
+  gt_str_delete(start_codons[1]);
+  gt_str_delete(start_codons[0]);
   gt_str_delete(pr[2]);
   gt_str_delete(pr[1]);
   gt_str_delete(pr[0]);
@@ -236,7 +250,8 @@ static int add_cds_if_necessary(GtGenomeNode *gn, void *data, GtError *err)
     }
 
     orfs = determine_ORFs_for_all_three_frames(v->splicedseq, v->start_codon,
-                                               v->final_stop_codon);
+                                               v->final_stop_codon,
+                                               v->generic_start_codons);
     create_CDS_features_for_longest_ORF(orfs, v, gn);
 
     gt_array_delete(orfs);
@@ -269,7 +284,8 @@ const GtNodeVisitorClass* gt_cds_visitor_class()
 
 GtNodeVisitor* gt_cds_visitor_new(GtRegionMapping *region_mapping,
                                   unsigned int minorflen, GtStr *source,
-                                  bool start_codon, bool final_stop_codon)
+                                  bool start_codon, bool final_stop_codon,
+                                  bool generic_start_codons)
 {
   GtNodeVisitor *nv;
   GtCDSVisitor *cds_visitor;
@@ -281,6 +297,7 @@ GtNodeVisitor* gt_cds_visitor_new(GtRegionMapping *region_mapping,
   cds_visitor->region_mapping = region_mapping;
   cds_visitor->start_codon = start_codon;
   cds_visitor->final_stop_codon = final_stop_codon;
+  cds_visitor->generic_start_codons = generic_start_codons;
   return nv;
 }
 

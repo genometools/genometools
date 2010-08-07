@@ -35,7 +35,8 @@ static int cds_stream_lua_new(lua_State *L)
                                   1, /* XXX */
                                   "gtscript",
                                   true, /* XXX */
-                                  true /* XXX */);
+                                  true, /* XXX */
+                                  false /* XXX */);
   luaL_getmetatable(L, GENOME_STREAM_METATABLE);
   lua_setmetatable(L, -2);
   return 1;

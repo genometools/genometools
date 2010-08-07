@@ -31,9 +31,10 @@
 
 typedef struct {
   unsigned int minorflen;
-  bool verbose,
-       start_codon,
-       final_stop_codon;
+  bool start_codon,
+       final_stop_codon,
+       generic_start_codons,
+       verbose;
   GtSeqid2FileInfo *s2fi;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
@@ -87,6 +88,12 @@ static GtOptionParser* gt_cds_option_parser_new(void *tool_arguments)
                               &arguments->final_stop_codon, true);
   gt_option_parser_add_option(op, option);
 
+  /* -genericstartcodons */
+  option = gt_option_new_bool("genericstartcodons", "use generic start codons",
+                              &arguments->generic_start_codons, false);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
   /* -seqfile, -matchdesc, -usedesc and -regionmapping */
   gt_seqid2file_register_options(op, arguments->s2fi);
 
@@ -129,7 +136,8 @@ static int gt_cds_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
     cds_stream = gt_cds_stream_new(gff3_in_stream, region_mapping,
                                    arguments->minorflen, GT_CDS_SOURCE_TAG,
                                    arguments->start_codon,
-                                   arguments->final_stop_codon);
+                                   arguments->final_stop_codon,
+                                   arguments->generic_start_codons);
 
     /* create gff3 output stream */
     gff3_out_stream = gt_gff3_out_stream_new(cds_stream, arguments->outfp);
