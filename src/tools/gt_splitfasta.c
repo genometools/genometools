@@ -27,7 +27,7 @@
 #include "tools/gt_splitfasta.h"
 
 typedef struct {
-  unsigned long max_filesize_in_MB;
+  unsigned long max_filesize_in_MB, width;
   unsigned int num_files;
   GtStr *splitdesc;
   bool force;
@@ -79,7 +79,8 @@ static GtOptionParser* gt_splitfasta_option_parser_new(void *tool_arguments)
   gt_option_exclude(targetsize_option, splitdesc_option);
   gt_option_exclude(numfiles_option, splitdesc_option);
   gt_option_exclude(numfiles_option, targetsize_option);
-
+  o = gt_option_new_width(&arguments->width);
+  gt_option_parser_add_option(op, o);
   o = gt_option_new_bool(GT_FORCE_OPT_CSTR, "force writing to output file",
                          &arguments->force, false);
   gt_option_parser_add_option(op, o);
@@ -100,7 +101,7 @@ static unsigned long buf_contains_separator(char *buf, int offset,
 }
 
 static int split_description(const char *filename, GtStr *splitdesc,
-                             bool force, GtError *err)
+                             unsigned long width, bool force, GtError *err)
 {
   unsigned long i;
   GtBioseq *bioseq;
@@ -127,7 +128,7 @@ static int split_description(const char *filename, GtStr *splitdesc,
     }
     gt_fasta_show_entry(gt_bioseq_get_description(bioseq, i),
                         gt_bioseq_get_sequence(bioseq, i),
-                        gt_bioseq_get_sequence_length(bioseq, i), 0,
+                        gt_bioseq_get_sequence_length(bioseq, i), width,
                         outfp);
     gt_file_delete(outfp);
   }
@@ -249,7 +250,7 @@ static int gt_splitfasta_runner(GT_UNUSED int argc, const char **argv,
 
   if (gt_str_length(arguments->splitdesc)) {
     had_err = split_description(filename, arguments->splitdesc,
-                                arguments->force, err);
+                                arguments->width, arguments->force, err);
   }
   else {
     unsigned long max_filesize;
