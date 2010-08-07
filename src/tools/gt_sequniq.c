@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008      Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -32,6 +32,7 @@
 typedef struct {
   bool seqit,
        verbose;
+  unsigned long width;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
 } GtSequniqArguments;
@@ -56,16 +57,16 @@ static GtOptionParser* gt_sequniq_option_parser_new(void *tool_arguments)
 {
   GtSequniqArguments *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOption *seqit_option, *verbose_option;
+  GtOption *seqit_option, *verbose_option, *width_option;
   gt_assert(arguments);
 
   op = gt_option_parser_new("[option ...] sequence_file [...] ",
-                         "Filter out repeated sequences in given in given "
-                         "sequence_file(s).");
+                            "Filter out repeated sequences in given in given "
+                            "sequence_file(s).");
 
   /* -seqit */
   seqit_option = gt_option_new_bool("seqit", "use sequence iterator",
-                                 &arguments->seqit, false);
+                                    &arguments->seqit, false);
   gt_option_is_development_option(seqit_option);
   gt_option_parser_add_option(op, seqit_option);
 
@@ -74,10 +75,15 @@ static GtOptionParser* gt_sequniq_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(verbose_option);
   gt_option_parser_add_option(op, verbose_option);
 
+  /* -width */
+  width_option = gt_option_new_width(&arguments->width);
+  gt_option_parser_add_option(op, width_option);
+
+  gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
+
   /* option implications */
   gt_option_imply(verbose_option, seqit_option);
 
-  gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
   gt_option_parser_set_min_args(op, 1);
   return op;
 }
@@ -112,8 +118,8 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
             gt_string_distri_add(sd, gt_bioseq_get_md5_fingerprint(bs, j));
             gt_fasta_show_entry(gt_bioseq_get_description(bs, j),
                                 gt_bioseq_get_sequence(bs, j),
-                                gt_bioseq_get_sequence_length(bs, j), 0,
-                                arguments->outfp);
+                                gt_bioseq_get_sequence_length(bs, j),
+                                arguments->width, arguments->outfp);
           }
           else
             duplicates++;
@@ -146,8 +152,8 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
         md5 = gt_md5_fingerprint((const char*) sequence, (unsigned long) len);
         if (!gt_string_distri_get(sd, md5)) {
           gt_string_distri_add(sd, md5);
-          gt_fasta_show_entry(desc, (const char*) sequence, len, 0,
-                              arguments->outfp);
+          gt_fasta_show_entry(desc, (const char*) sequence, len,
+                              arguments->width, arguments->outfp);
         }
         else
           duplicates++;
@@ -176,8 +182,8 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
 GtTool* gt_sequniq(void)
 {
   return gt_tool_new(gt_sequniq_arguments_new,
-                  gt_sequniq_arguments_delete,
-                  gt_sequniq_option_parser_new,
-                  NULL,
-                  gt_sequniq_runner);
+                     gt_sequniq_arguments_delete,
+                     gt_sequniq_option_parser_new,
+                     NULL,
+                     gt_sequniq_runner);
 }

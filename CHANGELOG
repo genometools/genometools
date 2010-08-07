@@ -6,6 +6,7 @@ changes in version 1.3.6 (2010-08-07)
 - `gt stat` has new options -o, -gzip, -bzip2 and -force
 - `gt extractfeat` has new option -width
 - `gt splitfasta` has new option -width
+- `gt sequniq` has new option -width
 
 
 changes in version 1.3.5 (2010-07-12)
