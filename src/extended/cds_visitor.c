@@ -135,7 +135,8 @@ static GtArray* determine_ORFs_for_all_three_frames(Splicedseq *ss,
   rval = gt_translator_next_with_start(tr, &translated, &frame, &start, NULL);
   while (!rval && translated) {
     gt_str_append_char(pr[frame], translated);
-    gt_str_append_char(start_codons[frame], start ? GT_START_AMINO : '-');
+    if (generic_start_codons)
+      gt_str_append_char(start_codons[frame], start ? GT_START_AMINO : '-');
     rval = gt_translator_next_with_start(tr, &translated, &frame, &start, NULL);
   }
   gt_determine_ORFs(save_orf, orfs, 0, gt_str_get(pr[0]), gt_str_length(pr[0]),
