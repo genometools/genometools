@@ -11,6 +11,7 @@ changes in version 1.3.6 (2010-08-07)
 - `gt mutate` has new options -width, -o, -gzip, -bzip2 and -force
 - `gt shredder` has new options -width, -o, -gzip, -bzip2 and -force
 - `gt seqfilter` has new options -width, -o, -gzip, -bzip2 and -force
+- `gt seqfilter` has new option -maxseqnum
 
 
 changes in version 1.3.5 (2010-07-12)

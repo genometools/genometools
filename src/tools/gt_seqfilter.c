@@ -27,6 +27,7 @@
 typedef struct {
   unsigned long minlength,
                 maxlength,
+                maxseqnum,
                 width;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
@@ -56,20 +57,26 @@ static GtOptionParser* gt_seqfilter_option_parser_new(void *tool_arguments)
   gt_assert(arguments);
 
   op = gt_option_parser_new("[option ...] [sequence_file ...]",
-                         "Filter the given sequence_file(s) and show the "
-                         "results on stdout.");
+                            "Filter the given sequence_file(s) and show the "
+                            "results on stdout.");
 
   /* -minlength */
   option = gt_option_new_ulong("minlength",
-                            "set minimum length a sequence must "
-                            "have to pass the filter", &arguments->minlength,
-                            GT_UNDEF_ULONG);
+                               "set minimum length a sequence must "
+                               "have to pass the filter", &arguments->minlength,
+                               GT_UNDEF_ULONG);
   gt_option_parser_add_option(op, option);
 
   /* -maxlength */
   option = gt_option_new_ulong("maxlength", "set maximum length a sequence can "
-                            "have to pass the filter", &arguments->maxlength,
-                            GT_UNDEF_ULONG);
+                               "have to pass the filter", &arguments->maxlength,
+                               GT_UNDEF_ULONG);
+  gt_option_parser_add_option(op, option);
+
+  /* -maxseqnum */
+  option = gt_option_new_ulong("maxseqnum", "set the maximum number of "
+                               "sequences which can pass the filter",
+                               &arguments->maxseqnum, GT_UNDEF_ULONG);
   gt_option_parser_add_option(op, option);
 
   /* -width */
@@ -88,7 +95,7 @@ static int gt_seqfilter_runner(int argc, const char **argv, int parsed_args,
   GtBioseqIterator *bsi;
   GtBioseq *bioseq;
   unsigned long i;
-  unsigned long long duplicates = 0, num_of_sequences = 0;
+  unsigned long long passed = 0, filtered = 0, num_of_sequences = 0;
   int had_err = 0;
 
   gt_error_check(err);
@@ -101,14 +108,17 @@ static int gt_seqfilter_runner(int argc, const char **argv, int parsed_args,
       if ((arguments->minlength == GT_UNDEF_ULONG ||
            gt_bioseq_get_sequence_length(bioseq, i) >= arguments->minlength) &&
           (arguments->maxlength == GT_UNDEF_ULONG ||
-           gt_bioseq_get_sequence_length(bioseq, i) <= arguments->maxlength)) {
+           gt_bioseq_get_sequence_length(bioseq, i) <= arguments->maxlength) &&
+          (arguments->maxseqnum == GT_UNDEF_ULONG ||
+           passed + 1 <= arguments->maxseqnum)) {
         gt_fasta_show_entry(gt_bioseq_get_description(bioseq, i),
                             gt_bioseq_get_sequence(bioseq, i),
                             gt_bioseq_get_sequence_length(bioseq, i),
                             arguments->width, arguments->outfp);
+        passed++;
       }
       else
-        duplicates++;
+        filtered++;
       num_of_sequences++;
     }
     gt_bioseq_delete(bioseq);
@@ -116,9 +126,10 @@ static int gt_seqfilter_runner(int argc, const char **argv, int parsed_args,
 
   /* show statistics */
   if (!had_err) {
+    gt_assert(passed + filtered == num_of_sequences);
     fprintf(stderr, "# %llu out of %llu sequences have been removed (%.3f%%)\n",
-            duplicates, num_of_sequences,
-            ((double) duplicates / num_of_sequences) * 100.0);
+            filtered, num_of_sequences,
+            ((double) filtered / num_of_sequences) * 100.0);
   }
 
   gt_bioseq_iterator_delete(bsi);
