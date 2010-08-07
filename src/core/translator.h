@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c)      2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2006-2009 Center for Bioinformatics, University of Hamburg
 
@@ -21,6 +21,19 @@
 
 #include "core/translator_api.h"
 #include "core/error_api.h"
+
+/* Returns the translation of the next codon. The currently translated
+   character is put in <translated> while the current reading frame is put in
+   <frame>. <start> is set to <true> if the current codon is a start codon and
+   to <false> otherwise.
+   Returns GT_TRANSLATOR_ERROR if an error occurred, see <err> for details.
+   If the end of the sequence region to translate has been reached,
+   GT_TRANSLATOR_END is returned.
+   Otherwise, GT_TRANSLATOR_OK (equal to 0) is returned. */
+GtTranslatorStatus gt_translator_next_with_start(GtTranslator *translator,
+                                                 char *translated,
+                                                 unsigned int *frame,
+                                                 bool *start, GtError *err);
 
 int gt_translator_unit_test(GtError *err);
 

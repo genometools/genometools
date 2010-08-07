@@ -1,6 +1,7 @@
 /*
   Copyright (c) 2001-2003 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2009-2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c)      2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2009-2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -167,6 +168,15 @@ GtTranslatorStatus gt_translator_next(GtTranslator *tr,
                                       unsigned int *frame,
                                       GtError *err)
 {
+  return gt_translator_next_with_start(tr, translated, frame, NULL, err);
+}
+
+GtTranslatorStatus gt_translator_next_with_start(GtTranslator *tr,
+                                                 char *translated,
+                                                 unsigned int *frame,
+                                                 bool *start,
+                                                 GtError *err)
+{
   char n1, n2, n3;
   int retval;
   gt_assert(tr && translated && frame);
@@ -181,6 +191,8 @@ GtTranslatorStatus gt_translator_next(GtTranslator *tr,
                                           translated, err);
   if (retval)
     return GT_TRANSLATOR_ERROR;
+  if (start)
+    *start = gt_trans_table_is_start_codon(tr->transtable, n1, n2, n3);
   gt_assert(*frame < GT_CODON_LENGTH);
   return GT_TRANSLATOR_OK;
 }
