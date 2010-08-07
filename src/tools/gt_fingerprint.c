@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008      Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -21,6 +21,7 @@
 #include "core/fasta.h"
 #include "core/ma.h"
 #include "core/option.h"
+#include "core/outputfile.h"
 #include "core/string_distri.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
@@ -30,7 +31,10 @@
 typedef struct {
   bool show_duplicates;
   GtStr *checklist,
-      *extract;
+        *extract;
+  unsigned long width;
+  GtOutputFileInfo *ofi;
+  GtFile *outfp;
 } FingerprintArguments;
 
 static void* gt_fingerprint_arguments_new(void)
@@ -38,6 +42,7 @@ static void* gt_fingerprint_arguments_new(void)
   FingerprintArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->checklist = gt_str_new();
   arguments->extract = gt_str_new();
+  arguments->ofi = gt_outputfileinfo_new();
   return arguments;
 }
 
@@ -45,17 +50,19 @@ static void gt_fingerprint_arguments_delete(void *tool_arguments)
 {
   FingerprintArguments *arguments = tool_arguments;
   if (!arguments) return;
+  gt_file_delete(arguments->outfp);
+  gt_outputfileinfo_delete(arguments->ofi);
   gt_str_delete(arguments->extract);
   gt_str_delete(arguments->checklist);
   gt_free(arguments);
 }
 
 static GtOptionParser* gt_fingerprint_option_parser_new(GT_UNUSED
-                                                      void *tool_arguments)
+                                                        void *tool_arguments)
 {
   FingerprintArguments *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOption *check_option, *duplicates_option, *extract_option;
+  GtOption *check_option, *duplicates_option, *extract_option, *width_option;
   gt_assert(arguments);
   op = gt_option_parser_new("[option ...] sequence_file [...] ",
                             "Compute MD5 fingerprints for each sequence given "
@@ -88,10 +95,19 @@ static GtOptionParser* gt_fingerprint_option_parser_new(GT_UNUSED
                                         "stdout.", arguments->extract, NULL);
   gt_option_parser_add_option(op, extract_option);
 
+  /* -width */
+  width_option = gt_option_new_width(&arguments->width);
+  gt_option_parser_add_option(op, width_option);
+
+  gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
+
   /* option exclusions */
   gt_option_exclude(check_option, duplicates_option);
   gt_option_exclude(extract_option, check_option);
   gt_option_exclude(extract_option, duplicates_option);
+
+  /* option implications */
+  gt_option_imply(width_option, extract_option);
 
   gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
   gt_option_parser_set_min_args(op, 1);
@@ -168,8 +184,8 @@ static int show_duplicates(GtStringDistri *sd, GtError *err)
   gt_string_distri_foreach(sd, show_duplicate, &info);
   if (info.duplicates) {
     gt_error_set(err, "duplicates found: %llu out of %llu (%.3f%%)",
-              info.duplicates, info.num_of_sequences,
-              (((double) info.duplicates / info.num_of_sequences) * 100.0));
+                 info.duplicates, info.num_of_sequences,
+                 (((double) info.duplicates / info.num_of_sequences) * 100.0));
     return -1;
   }
   return 0;
@@ -201,7 +217,8 @@ static int gt_fingerprint_runner(int argc, const char **argv, int parsed_args,
                       gt_str_get(arguments->extract))) {
             gt_fasta_show_entry(gt_bioseq_get_description(bs, j),
                                 gt_bioseq_get_sequence(bs, j),
-                                gt_bioseq_get_sequence_length(bs, j), 0, NULL);
+                                gt_bioseq_get_sequence_length(bs, j),
+                                arguments->width, arguments->outfp);
           }
         }
         else
@@ -226,8 +243,8 @@ static int gt_fingerprint_runner(int argc, const char **argv, int parsed_args,
 GtTool* gt_fingerprint(void)
 {
   return gt_tool_new(gt_fingerprint_arguments_new,
-                  gt_fingerprint_arguments_delete,
-                  gt_fingerprint_option_parser_new,
-                  NULL,
-                  gt_fingerprint_runner);
+                     gt_fingerprint_arguments_delete,
+                     gt_fingerprint_option_parser_new,
+                     NULL,
+                     gt_fingerprint_runner);
 }
