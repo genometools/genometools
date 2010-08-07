@@ -54,8 +54,8 @@ static GtOptionParser* gt_mutate_option_parser_new(void *tool_arguments)
   GtOption *o;
   gt_assert(arguments);
   op = gt_option_parser_new("[option ...] [sequence_file ...]",
-                            "Mutate the sequences of the given "
-                            "sequence_file(s) and show them on stdout.");
+                            "Mutate the sequences of the given sequence "
+                            "file(s).");
   /* -rate */
   o = gt_option_new_uint_max("rate", "set the mutation rate", &arguments->rate,
                              1, 100);

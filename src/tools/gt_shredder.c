@@ -59,8 +59,8 @@ static GtOptionParser* gt_shredder_option_parser_new(void *tool_arguments)
   GtOption *o;
   gt_assert(arguments);
   op = gt_option_parser_new("[option ...] [sequence_file ...]",
-                            "Shredder sequence_file into consecutive pieces of "
-                            "random length.");
+                            "Shredder sequence file(s) into consecutive pieces "
+                            "of random length.");
   o = gt_option_new_ulong_min("coverage", "set the number of times the "
                               "sequence_file is shreddered",
                               &arguments->coverage, 1, 1);
