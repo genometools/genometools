@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008      Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,6 +18,7 @@
 #include "core/bioseq_iterator.h"
 #include "core/fasta.h"
 #include "core/option.h"
+#include "core/outputfile.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
 #include "extended/gtdatahelp.h"
@@ -28,25 +29,32 @@ typedef struct {
   unsigned long coverage,
                 minlength,
                 maxlength,
-                overlap;
+                overlap,
+                width;
   double sample_probability;
-} GtShredderArguments;
+  GtOutputFileInfo *ofi;
+  GtFile *outfp;
+} ShredderArguments;
 
 static void* gt_shredder_arguments_new(void)
 {
-  return gt_calloc(1, sizeof (GtShredderArguments));
+  ShredderArguments *arguments = gt_calloc(1, sizeof *arguments);
+  arguments->ofi = gt_outputfileinfo_new();
+  return arguments;
 }
 
 static void gt_shredder_arguments_delete(void *tool_arguments)
 {
-  GtShredderArguments *arguments = tool_arguments;
+  ShredderArguments *arguments = tool_arguments;
   if (!arguments) return;
+  gt_file_delete(arguments->outfp);
+  gt_outputfileinfo_delete(arguments->ofi);
   gt_free(arguments);
 }
 
 static GtOptionParser* gt_shredder_option_parser_new(void *tool_arguments)
 {
-  GtShredderArguments *arguments = tool_arguments;
+  ShredderArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *o;
   gt_assert(arguments);
@@ -72,6 +80,9 @@ static GtOptionParser* gt_shredder_option_parser_new(void *tool_arguments)
                                 "sequences pieces with the given probability",
                                 &arguments->sample_probability, 1.0);
   gt_option_parser_add_option(op, o);
+  o = gt_option_new_width(&arguments->width);
+  gt_option_parser_add_option(op, o);
+  gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
   gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
   return op;
 }
@@ -79,7 +90,7 @@ static GtOptionParser* gt_shredder_option_parser_new(void *tool_arguments)
 static int gt_shredder_arguments_check(GT_UNUSED int rest_argc,
                                        void *tool_arguments, GtError *err)
 {
-  GtShredderArguments *arguments = tool_arguments;
+  ShredderArguments *arguments = tool_arguments;
   gt_error_check(err);
   gt_assert(arguments);
   if (arguments->minlength > arguments->maxlength) {
@@ -93,7 +104,7 @@ static int gt_shredder_runner(GT_UNUSED int argc, const char **argv,
                               int parsed_args, void *tool_arguments,
                               GtError *err)
 {
-  GtShredderArguments *arguments = tool_arguments;
+  ShredderArguments *arguments = tool_arguments;
   GtBioseqIterator *bsi;
   unsigned long i;
   GtBioseq *bioseq;
@@ -120,8 +131,8 @@ static int gt_shredder_runner(GT_UNUSED int argc, const char **argv,
                                          arguments->sample_probability);
       while ((fragment = gt_shredder_shred(shredder, &fragment_length, desc))) {
         gt_str_append_cstr(desc, " [shreddered fragment]");
-        gt_fasta_show_entry(gt_str_get(desc), fragment, fragment_length, 0,
-                            NULL);
+        gt_fasta_show_entry(gt_str_get(desc), fragment, fragment_length,
+                            arguments->width, arguments->outfp);
       }
       gt_shredder_delete(shredder);
     }
