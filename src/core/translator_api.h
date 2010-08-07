@@ -52,10 +52,7 @@ void               gt_translator_set_codon_iterator(GtTranslator *translator,
                                                     GtCodonIterator *ci);
 
 /* Selects the translation scheme in <translator> to the one identified by
-   <transnum>. <transnum> refers to the numbers as reported by
-   <gt_translator_get_translation_table_descriptions()> or the list given
-   at the NCBI web site.
-   Returns a negative value if an error occurred, see <err> for details. */
+   translation table <tt>. */
 void               gt_translator_set_translation_table(GtTranslator *tr,
                                                        GtTransTable *tt);
 
