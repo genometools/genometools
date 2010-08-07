@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -19,23 +19,31 @@
 #include "core/fasta.h"
 #include "core/ma.h"
 #include "core/option.h"
+#include "core/outputfile.h"
 #include "extended/gtdatahelp.h"
 #include "extended/mutate.h"
 #include "tools/gt_mutate.h"
 
 typedef struct {
   unsigned int rate; /* the mutate rate */
+  unsigned long width;
+  GtOutputFileInfo *ofi;
+  GtFile *outfp;
 } MutateArguments;
 
 static void* gt_mutate_arguments_new(void)
 {
-  return gt_calloc(1, sizeof (MutateArguments));
+  MutateArguments *arguments = gt_calloc(1, sizeof *arguments);
+  arguments->ofi = gt_outputfileinfo_new();
+  return arguments;
 }
 
 static void gt_mutate_arguments_delete(void *tool_arguments)
 {
   MutateArguments *arguments = tool_arguments;
   if (!arguments) return;
+  gt_file_delete(arguments->outfp);
+  gt_outputfileinfo_delete(arguments->ofi);
   gt_free(arguments);
 }
 
@@ -46,14 +54,18 @@ static GtOptionParser* gt_mutate_option_parser_new(void *tool_arguments)
   GtOption *o;
   gt_assert(arguments);
   op = gt_option_parser_new("[option ...] [sequence_file ...]",
-                         "Mutate the sequences of the given sequence_file(s) "
-                         "and show them on stdout.");
+                            "Mutate the sequences of the given "
+                            "sequence_file(s) and show them on stdout.");
   /* -rate */
-  o = gt_option_new_uint_max("rate", "set the mutation rate",
-                             &arguments->rate,
-                             1,
-                             100);
+  o = gt_option_new_uint_max("rate", "set the mutation rate", &arguments->rate,
+                             1, 100);
   gt_option_parser_add_option(op, o);
+
+  /* -width */
+  o = gt_option_new_width(&arguments->width);
+  gt_option_parser_add_option(op, o);
+
+  gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
 
   gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
 
@@ -85,7 +97,7 @@ static int gt_mutate_runner(int argc, const char **argv, int parsed_args,
       gt_fasta_show_entry(gt_seq_get_description(mutated_seq),
                           gt_seq_get_orig(mutated_seq),
                           gt_seq_length(mutated_seq),
-                          0, NULL);
+                          arguments->width, arguments->outfp);
       gt_seq_delete(mutated_seq);
     }
     gt_bioseq_delete(bioseq);
@@ -99,8 +111,8 @@ static int gt_mutate_runner(int argc, const char **argv, int parsed_args,
 GtTool* gt_mutate(void)
 {
   return gt_tool_new(gt_mutate_arguments_new,
-                  gt_mutate_arguments_delete,
-                  gt_mutate_option_parser_new,
-                  NULL,
-                  gt_mutate_runner);
+                     gt_mutate_arguments_delete,
+                     gt_mutate_option_parser_new,
+                     NULL,
+                     gt_mutate_runner);
 }
