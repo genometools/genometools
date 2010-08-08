@@ -40,6 +40,9 @@ int              gt_region_mapping_get_raw_sequence(GtRegionMapping*,
                                                     GtStr *seqid,
                                                     const GtRange *range,
                                                     GtError*);
+int              gt_region_mapping_get_description(GtRegionMapping*,
+                                                   GtStr *desc, GtStr *seqid,
+                                                   GtError*);
 const char*      gt_region_mapping_get_md5_fingerprint(GtRegionMapping*,
                                                        GtStr *seqid,
                                                        const GtRange *range,

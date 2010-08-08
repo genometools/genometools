@@ -18,6 +18,8 @@
 #include "core/bioseq_collection.h"
 #include "core/grep_api.h"
 #include "core/ma.h"
+#include "core/md5_seqid.h"
+#include "core/undef.h"
 
 struct GtBioseqCollection {
   GtBioseq **bioseqs;
@@ -116,5 +118,31 @@ int gt_bioseq_collection_grep_desc_md5(GtBioseqCollection *bsc,
   had_err = grep_desc(bsc, &filenum, &seqnum, seqid, err);
   if (!had_err)
     *md5 = gt_bioseq_get_md5_fingerprint(bsc->bioseqs[filenum], seqnum);
+  return had_err;
+}
+
+int gt_bioseq_collection_md5_to_description(GtBioseqCollection *bsc,
+                                            GtStr *desc, GtStr *md5_seqid,
+                                            GtError *err)
+{
+  unsigned long i, seqnum = GT_UNDEF_ULONG;
+  int had_err = 0;
+  GtBioseq *bioseq;
+  gt_error_check(err);
+  gt_assert(bsc && desc && md5_seqid && err);
+  gt_assert(gt_md5_seqid_has_prefix(gt_str_get(md5_seqid)));
+  for (i = 0; i < bsc->num_of_seqfiles; i++) {
+    bioseq = bsc->bioseqs[i];
+    seqnum = gt_bioseq_md5_to_index(bioseq, gt_str_get(md5_seqid) +
+                                    GT_MD5_SEQID_PREFIX_LEN);
+    if (seqnum != GT_UNDEF_ULONG)
+      break;
+  }
+  if (seqnum != GT_UNDEF_ULONG)
+    gt_str_append_cstr(desc, gt_bioseq_get_description(bioseq, seqnum));
+  else  {
+    gt_error_set(err, "sequence %s not found", gt_str_get(md5_seqid));
+    had_err = -1;
+  }
   return had_err;
 }

@@ -31,5 +31,9 @@ int                 gt_bioseq_collection_grep_desc(GtBioseqCollection*,
 int                 gt_bioseq_collection_grep_desc_md5(GtBioseqCollection*,
                                                        const char **md5,
                                                        GtStr *seqid, GtError*);
+int                 gt_bioseq_collection_md5_to_description(GtBioseqCollection*,
+                                                            GtStr *desc,
+                                                            GtStr *md5_seqid,
+                                                            GtError *err);
 
 #endif

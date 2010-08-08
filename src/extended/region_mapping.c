@@ -22,6 +22,7 @@
 #include "core/bioseq.h"
 #include "core/bioseq_collection.h"
 #include "core/ma.h"
+#include "core/md5_seqid.h"
 #include "core/str_array.h"
 #include "extended/mapping.h"
 #include "extended/region_mapping.h"
@@ -186,6 +187,27 @@ int gt_region_mapping_get_raw_sequence(GtRegionMapping *rm, const char **rawseq,
       *length = gt_bioseq_get_raw_sequence_length(rm->bioseq);
       *offset = 1;
     }
+  }
+  return had_err;
+}
+
+int gt_region_mapping_get_description(GtRegionMapping *rm, GtStr *desc,
+                                      GtStr *md5_seqid, GtError *err)
+{
+  int had_err = 0;
+  gt_error_check(err);
+  gt_assert(rm && desc && md5_seqid);
+  /* this method is only implemented for MD5 seqids */
+  gt_assert(gt_md5_seqid_has_prefix(gt_str_get(md5_seqid)));
+  if (!rm->bioseq_collection) {
+    rm->bioseq_collection = gt_bioseq_collection_new(rm->sequence_filenames,
+                                                     err);
+    if (!rm->bioseq_collection)
+      had_err = -1;
+  }
+  if (!had_err) {
+    had_err = gt_bioseq_collection_md5_to_description(rm->bioseq_collection,
+                                                      desc, md5_seqid, err);
   }
   return had_err;
 }

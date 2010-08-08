@@ -1,5 +1,6 @@
 /*
-  Copyright (c) 2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -14,21 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SEQIDS_TO_MD5_STREAM_H
-#define SEQIDS_TO_MD5_STREAM_H
+#ifndef REGULAR_SEQID_H
+#define REGULAR_SEQID_H
 
-#include <stdio.h>
-#include "extended/node_stream_api.h"
-#include "extended/region_mapping.h"
+#include "core/str_api.h"
 
-/* Implements the ``genome_stream'' interface. */
-typedef struct GtSeqidsToMD5Stream GtSeqidsToMD5Stream;
-
-const GtNodeStreamClass* gt_seqids_to_md5_stream_class(void);
-
-/* Create a GtSeqidToMD5Stream, takes ownership of <region_mapping>. */
-GtNodeStream*            gt_seqids_to_md5_stream_new(GtNodeStream *in_stream,
-                                                     GtRegionMapping
-                                                     *region_mapping);
+/* Parse ``regular'' sequence ID from <description> and save it in <seqid>. */
+void gt_regular_seqid_save(GtStr *seqid, GtStr *description);
 
 #endif

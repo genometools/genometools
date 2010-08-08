@@ -632,6 +632,20 @@ unsigned long gt_bioseq_number_of_sequences(GtBioseq *bs)
   return gt_array_size(bs->descriptions);
 }
 
+unsigned long gt_bioseq_md5_to_index(GtBioseq *bs, const char *md5)
+{
+  unsigned long i;
+  gt_assert(bs && md5);
+  if (!bs->fingerprints)
+    bs->fingerprints = bioseq_fingerprints_new(bs);
+  /* XXX: use hash table for faster access */
+  for (i = 0; i < gt_bioseq_number_of_sequences(bs); i++) {
+    if (!strcmp(gt_bioseq_get_md5_fingerprint(bs, i), md5))
+      return i;
+  }
+  return GT_UNDEF_ULONG;
+}
+
 void gt_bioseq_show_as_fasta(GtBioseq *bs, unsigned long width, GtFile *outfp)
 {
   unsigned long i;

@@ -26,6 +26,7 @@
 #include "tools/gt_guessprot.h"
 #include "tools/gt_magicmatch.h"
 #include "tools/gt_mergeesa.h"
+#include "tools/gt_md5_to_seqids.h"
 #include "tools/gt_paircmp.h"
 #include "tools/gt_idxlocali.h"
 #include "tools/gt_patternmatch.h"
@@ -49,6 +50,7 @@ static void* gt_dev_arguments_new(void)
   gt_toolbox_add(dev_toolbox, "gthmkbssmfiles", gt_gthmkbssmfiles);
   gt_toolbox_add(dev_toolbox, "guessprot", gt_guessprot);
   gt_toolbox_add_tool(dev_toolbox, "magicmatch", gt_magicmatch());
+  gt_toolbox_add_tool(dev_toolbox, "md5_to_seqids", gt_md5_to_seqids());
   gt_toolbox_add_tool(dev_toolbox, "idxlocali", gt_idxlocali());
   gt_toolbox_add(dev_toolbox, "mergeesa", gt_mergeesa);
   gt_toolbox_add(dev_toolbox, "paircmp", gt_paircmp);

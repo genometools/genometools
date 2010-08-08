@@ -42,6 +42,9 @@ const char*   gt_str_array_get(const GtStrArray *str_array,
 /* Set the string with number <strnum> in <str_array> to <cstr>. */
 void          gt_str_array_set_cstr(GtStrArray *str_array, unsigned long strnum,
                                     const char *cstr);
+/* Set the string with number <strnum> in <str_array> to <str>. */
+void          gt_str_array_set(GtStrArray *str_array, unsigned long strnum,
+                               const GtStr *str);
 /* Set the size of <str_array> to <size>. <size> must be smaller or equal than
    <gt_str_array_size(str_array)>. */
 void          gt_str_array_set_size(GtStrArray *str_array, unsigned long size);

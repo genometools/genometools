@@ -14,12 +14,18 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <string.h>
-#include "core/assert_api.h"
-#include "extended/md5_seqid.h"
+#ifndef MD5_TO_SEQIDS_VISITOR_H
+#define MD5_TO_SEQIDS_VISITOR_H
 
-bool gt_md5_seqid_has_prefix(const char *seqid)
-{
-  gt_assert(seqid);
-  return !strncmp(seqid, GT_MD5_SEQID_PREFIX, GT_MD5_SEQID_PREFIX_LEN);
-}
+/* implements the ``genome visitor'' interface */
+typedef struct GtMD5ToSeqidsVisitor GtMD5ToSeqidsVisitor;
+
+#include "extended/node_visitor.h"
+#include "extended/region_mapping.h"
+
+const GtNodeVisitorClass* gt_md5_to_seqids_visitor_class(void);
+/* Takes ownership of <region_mapping>. */
+GtNodeVisitor*            gt_md5_to_seqids_visitor_new(GtRegionMapping
+                                                       *region_mapping);
+
+#endif

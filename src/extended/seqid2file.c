@@ -49,11 +49,6 @@ static int seqid2file_check(void *data, GtError *err)
   GtSeqid2FileInfo *info = (GtSeqid2FileInfo*) data;
   gt_error_check(err);
   gt_assert(info);
-  if (!info->matchdesc && gt_str_array_size(info->seqfiles) > 1) {
-    gt_error_set(err, "more than on sequence file supplied to -seqfiles "
-                      "without using -matchdesc makes no sense");
-    return -1;
-  }
   if (gt_str_length(info->seqfile)) {
     gt_assert(!gt_str_array_size(info->seqfiles));
     gt_str_array_add(info->seqfiles, info->seqfile);

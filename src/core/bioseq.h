@@ -57,6 +57,9 @@ const char*   gt_bioseq_filename(const GtBioseq *bioseq);
 unsigned long gt_bioseq_get_sequence_length(GtBioseq*, unsigned long index);
 unsigned long gt_bioseq_get_raw_sequence_length(GtBioseq*);
 unsigned long gt_bioseq_number_of_sequences(GtBioseq*);
+/* Return the index of the (first) sequence with given <MD5> contained in
+   <bioseq>, if it exists. Otherwise <GT_UNDEF_ULONG> is returned. */
+unsigned long gt_bioseq_md5_to_index(GtBioseq *bioseq, const char *MD5);
 
 /* Shows a <bioseq> on <outfp> (in fasta format).
    If <width> is != 0 the sequences are formatted accordingly. */

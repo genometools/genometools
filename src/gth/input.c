@@ -21,11 +21,12 @@
 #include "core/bioseq.h"
 #include "core/fileutils_api.h"
 #include "core/ma.h"
+#include "core/md5_seqid.h"
 #include "core/safearith.h"
 #include "core/str.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
-#include "extended/md5_seqid.h"
+#include "extended/regular_seqid.h"
 #include "gth/default.h"
 #include "gth/gthdef.h"
 #include "gth/input.h"
@@ -332,8 +333,6 @@ void gth_input_get_genomic_description(GthInput *input, GtStr *description,
 static void save_sequenceid(GtStr *sequenceid, GthSeqCol *seqcol,
                             unsigned long seqnum)
 {
-  unsigned long i, len;
-  unsigned char *desc, cc;
   GtStr *description;
 
   /* sequence number is defined */
@@ -341,37 +340,8 @@ static void save_sequenceid(GtStr *sequenceid, GthSeqCol *seqcol,
 
   description = gt_str_new();
   gth_seq_col_get_description(seqcol, seqnum, description);
-  len  = gt_str_length(description);
-  desc = (GtUchar*) gt_str_get(description);
 
-  i = 0;
-
-  if ((len >= 2) && (desc[0] == 'g') && (desc[1] == 'i') && (desc[2] == '|')) {
-    /* skip 'gi|' */
-    i = 3;
-  }
-  else if ((len >= 2) && (desc[0] == 'S') && (desc[1] == 'Q') &&
-           (desc[2] == ';')) {
-    /* skip 'SQ;' */
-    i = 3;
-  }
-  else if ((len >= 3) && (desc[0] == '(') && (desc[1] == 'g') &&
-           (desc[2] == 'i') && (desc[3] == '|')) {
-    /* skip '(gi|' */
-    i = 4;
-  }
-  else if ((len >= 3) && (desc[0] == 'r') && (desc[1] == 'e') &&
-           (desc[2] == 'f') && (desc[3] == '|')) {
-    /* skip 'ref|' */
-    i = 4;
-  }
-
-  for (/* init already done */ ; i < len; i++) {
-    cc = desc[i];
-    if (cc == ':' || cc == '|' || cc == '\t' || cc == ' ')
-      break;
-    gt_str_append_char(sequenceid, desc[i]);
-  }
+  gt_regular_seqid_save(sequenceid, description);
 
   gt_str_delete(description);
 }

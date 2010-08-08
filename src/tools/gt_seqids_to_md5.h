@@ -19,7 +19,7 @@
 
 #include "core/tool.h"
 
-/* the seqids to md5 tool */
+/* the seqids to MD5 tool */
 GtTool* gt_seqids_to_md5(void);
 
 #endif

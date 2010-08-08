@@ -105,6 +105,14 @@ void gt_str_array_set_cstr(GtStrArray *sa, unsigned long strnum,
   gt_str_set(str, cstr);
 }
 
+void gt_str_array_set(GtStrArray *sa, unsigned long strnum, const GtStr *instr)
+{
+  GtStr *str;
+  gt_assert(sa && strnum < gt_array_size(sa->strings) && instr);
+  str = *(GtStr**) gt_array_get(sa->strings, strnum);
+  gt_str_set(str, gt_str_get(instr));
+}
+
 void gt_str_array_set_size(GtStrArray *sa, unsigned long size)
 {
   unsigned long i;
