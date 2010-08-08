@@ -24,6 +24,8 @@
 #include <string.h>
 
 #include "core/error.h"
+#include "stamp.h"
+#include "suffixptr.h"
 
 /* sequential data source api */
 typedef void *SeqDataSrc;
@@ -84,22 +86,51 @@ typedef union translatorState TranslatorState;
  * @return number of chars! written to dest
  */
 typedef size_t (*seqDataTranslateFunc)(void *translator, void *dest,
-                                       const void *src, size_t len);
+                                       const unsigned long *src, size_t len);
+
+typedef size_t (*seqDataTranslateSuffixptrFunc)(void *translator, void *dest,
+                                                const Suffixptr *src,
+                                                size_t len);
 
 struct seqDataTranslator
 {
   TranslatorState state;
   seqDataTranslateFunc translateData;
+  seqDataTranslateSuffixptrFunc translateDataSuffixptr;
 };
 
 typedef struct seqDataTranslator SeqDataTranslator;
 
+extern unsigned long counttranslatememcpy, counttranslateData;
+
 static inline size_t
-SDRTranslate(SeqDataTranslator xltor, void *dest, const void *src, size_t len)
+SDRTranslate(SeqDataTranslator xltor, void *dest, const unsigned long *src,
+             size_t len)
 {
-  if (xltor.translateData)
+  if (xltor.translateData != NULL)
+  {
+    counttranslateData++;
     return xltor.translateData(xltor.state.ref, dest, src, len);
+  }
+  counttranslatememcpy++;
   /* fall back to zero-translation i.e. verbatim copy */
+  gt_assert(xltor.state.elemSize == sizeof (Suffixptr));
+  memcpy(dest, src, len * xltor.state.elemSize);
+  return len * xltor.state.elemSize;
+}
+
+static inline size_t
+SDRTranslateSuffixptr(SeqDataTranslator xltor, void *dest,
+                      const Suffixptr *src, size_t len)
+{
+  if (xltor.translateDataSuffixptr != NULL)
+  {
+    counttranslateData++;
+    return xltor.translateDataSuffixptr(xltor.state.ref, dest, src, len);
+  }
+  counttranslatememcpy++;
+  /* fall back to zero-translation i.e. verbatim copy */
+  gt_assert(xltor.state.elemSize == sizeof (Suffixptr));
   memcpy(dest, src, len * xltor.state.elemSize);
   return len * xltor.state.elemSize;
 }

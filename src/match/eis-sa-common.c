@@ -17,20 +17,44 @@
 #include <stdlib.h>
 
 #include "core/ma_api.h"
-#include "match/eis-sa-common.h"
 #include "core/encseq.h"
+#include "match/eis-sa-common.h"
+#include "match/suffixptr.h"
 
-size_t
-gt_translateSuftab2BWT(struct encSeqTrState *trState,
-                    GtUchar *dest,
-                    unsigned long *src,
-                    size_t len)
+#define SUFFIXPTRGET(TAB,IDX)     TAB[IDX].value /* XXX remove later */
+
+size_t gt_translateSuftab2BWT(void *data,
+                              void *voiddest,
+                              const unsigned long *src,
+                              size_t len)
 {
-  size_t i;
+  struct encSeqTrState *trState = (struct encSeqTrState *) data;
+  GtUchar *dest = (GtUchar *) voiddest;
+  size_t idx;
+
   gt_assert(trState);
-  for (i = 0; i < len; ++i)
+  for (idx = 0; idx < len; ++idx)
   {
-    dest[i] = sfxIdx2BWTSym(src[i], trState->encseq, trState->readmode);
+    dest[idx] = sfxIdx2BWTSym(src[idx], trState->encseq,
+                              trState->readmode);
+  }
+  return len * sizeof (GtUchar);
+}
+
+size_t gt_translateSuftab2BWTSuffixptr(void *data,
+                                       void *voiddest,
+                                       const Suffixptr *src,
+                                       size_t len)
+{
+  struct encSeqTrState *trState = (struct encSeqTrState *) data;
+  GtUchar *dest = (GtUchar *) voiddest;
+  size_t idx;
+
+  gt_assert(trState);
+  for (idx = 0; idx < len; ++idx)
+  {
+    dest[idx] = sfxIdx2BWTSym(SUFFIXPTRGET(src,idx), trState->encseq,
+                              trState->readmode);
   }
   return len * sizeof (GtUchar);
 }
@@ -60,40 +84,6 @@ writeLCPVal(const GtEncseq *encseq, GtReadmode readmode,
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 #endif /* NDEBUG */
-}
-
-size_t
-gt_translateSuftab2LCP(struct encSeqLCPState *lcpState,
-                    unsigned long *dest,
-                    unsigned long *src,
-                    size_t len)
-{
-  size_t elemsLeft = len;
-  unsigned long lastSufIdx;
-  gt_assert(lcpState && dest && src);
-  lastSufIdx = lcpState->lastSufIdx;
-  if (elemsLeft)
-  {
-    unsigned long nextSufIdx = *src;
-    if (lastSufIdx != -1)
-    {
-      writeLCPVal(lcpState->encseq, lcpState->readmode, dest,
-                  lastSufIdx, nextSufIdx);
-    }
-    else
-    {
-      *dest = 0;
-    }
-    while (--elemsLeft)
-    {
-      lastSufIdx = nextSufIdx;
-      nextSufIdx = *(++src);
-      writeLCPVal(lcpState->encseq, lcpState->readmode, ++dest,
-                  lastSufIdx, nextSufIdx);
-    }
-    lcpState->lastSufIdx = nextSufIdx;
-  }
-  return len * sizeof (dest[0]);
 }
 
 struct saTaggedXltorStateLE

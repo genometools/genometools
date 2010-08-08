@@ -130,6 +130,7 @@ gt_BWTSeqNewSASeqSrc(const BWTSeq *bwtSeq, const BWTSeqContextRetriever *ctxMap)
       origSeqAccess.accessFunc = NULL;
       origSeqAccess.state = NULL;
     }
+    STAMP;
     initSASeqSrc(&newBWTSASeqSrc->baseClass,
                  BWTSeqLength(bwtSeq),
                  NULL,
@@ -145,6 +146,7 @@ gt_BWTSeqNewSASeqSrc(const BWTSeq *bwtSeq, const BWTSeqContextRetriever *ctxMap)
                                  * sorted) no generator is necessary
                                  * and all readers just keep their state
                                  */
+    STAMP;
   }
   newBWTSASeqSrc->ctxMap = ctxMap;
   newBWTSASeqSrc->bwtSeq = bwtSeq;
@@ -230,7 +232,6 @@ BWTSASSCreateReader(SASeqSrc *src, enum sfxDataRequest rtype)
     reader = BWTSASSMakeBWTReader(bwtSASeqSrc,
                                   BWTSeqSASSAddReaderState(bwtSASeqSrc));
     break;
-  case SFX_REQUEST_LCPTAB:
   default:
     fprintf(stderr, "error: unimplemented request: %d, %s: %d!\n", rtype,
             __FILE__, __LINE__);

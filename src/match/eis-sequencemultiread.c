@@ -66,6 +66,7 @@ seqReaderSetMove2Backlog(void *backlogState, const void *seqData,
 static size_t
 seqReaderSetRead(void *state, void *dest, size_t len);
 
+/*
 int
 gt_initSeqReaderSet(SeqReaderSet *readerSet, int initialSuperSet,
                  int numConsumers, int *tags, SeqDataTranslator xltors[],
@@ -84,6 +85,7 @@ gt_initSeqReaderSet(SeqReaderSet *readerSet, int initialSuperSet,
   }
   return i;
 }
+*/
 
 void
 gt_initEmptySeqReaderSet(SeqReaderSet *readerSet, int initialSuperSet,
@@ -192,14 +194,24 @@ seqReaderSetRead(void *src, void *dest, size_t len)
       )
     {
       /* pos is in backlog */
-      unsigned long subLen
-        = MIN(elemsLeft, readerSet->backlogStartPos - pos
-              + readerSet->backlogLen),
-        charsWritten =
-        SDRTranslate(state->xltor, dest, (char *)readerSet->seqDataBacklog
-                     + (pos - readerSet->backlogStartPos)
-                     * readerSet->backlogElemSize,
-                     subLen);
+      unsigned long subLen, charsWritten;
+
+      subLen = MIN(elemsLeft, readerSet->backlogStartPos - pos
+                              + readerSet->backlogLen);
+      gt_assert(state->xltor.translateData == NULL);
+      /*
+      charsWritten = SDRTranslate(state->xltor, dest,
+                                  (char *)readerSet->seqDataBacklog
+                                  + (pos - readerSet->backlogStartPos)
+                                  * readerSet->backlogElemSize,
+                                  subLen);
+      */
+      gt_assert(state->xltor.state.elemSize == sizeof (Suffixptr));
+      memcpy(dest, (char *)readerSet->seqDataBacklog
+                   + (pos - readerSet->backlogStartPos)
+                   * readerSet->backlogElemSize,
+             subLen * state->xltor.state.elemSize);
+      charsWritten = subLen * state->xltor.state.elemSize;
       elemsLeft -= subLen;
       seqReaderSetSetConsumerNextPos(state, pos += subLen);
       dest = (char *)dest + charsWritten;

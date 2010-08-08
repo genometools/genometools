@@ -71,19 +71,15 @@ SfxIRequest2XltorFunc(sfxInterface *sfxi,
     stateStore = gt_addSuffixarrayXltor(&sfxi->baseClass.xltorStates,
                                      rtype, readState);
     tr.state.ref = &stateStore->state.encSeqTr;
-    tr.translateData = (seqDataTranslateFunc)gt_translateSuftab2BWT;
+    STAMP;
+    tr.translateData = gt_translateSuftab2BWT;
+    tr.translateDataSuffixptr = gt_translateSuftab2BWTSuffixptr;
+    printf("translateData = gt_translateSuftab2BWT\n");
     break;
   case SFX_REQUEST_SUFTAB:
-    tr.state.elemSize = sizeof (unsigned long);
-    break;
-  case SFX_REQUEST_LCPTAB:
-    readState.lcpState.readmode = sfxi->readmode;
-    readState.lcpState.encseq = sfxi->encseq;
-    readState.lcpState.lastSufIdx = -1;
-    stateStore = gt_addSuffixarrayXltor(&sfxi->baseClass.xltorStates,
-                                     rtype, readState);
-    tr.state.ref = &stateStore->state.lcpState;
-    tr.translateData = (seqDataTranslateFunc)gt_translateSuftab2LCP;
+    tr.state.elemSize = sizeof (Suffixptr);
+    gt_assert(tr.translateData == NULL);
+    printf("translateData = NULL\n");
     break;
   default:
     fprintf(stderr, "error: unimplemented request!\n");
@@ -247,10 +243,12 @@ gt_newSfxInterfaceWithReaders(GtReadmode readmode,
   sfxi = gt_calloc(1, sizeof (*sfxi));
   {
     RandomSeqAccessor origSeqAccess = { gt_SfxIGetOrigSeq, sfxi };
+    STAMP;
     initSASeqSrc(&sfxi->baseClass, length, SfxIBaseRequest2XltorFunc, NULL,
                  SfxIBaseGetRot0Pos, SfxIBaseGetSeqStats,
                  origSeqAccess, gt_deleteSfxInterfaceBase, SfxIBaseNewMRAEnc,
                  SfxIGenerate, sfxi);
+    STAMP;
   }
   sfxi->readmode = readmode;
   sfxi->encseq = encseq;
@@ -363,6 +361,8 @@ gt_SfxIGetOrigSeq(const void *state, Symbol *dest, unsigned long pos,
   return EncSeqGetSubSeq(sfxi->encseq, sfxi->readmode, pos, len, dest);
 }
 
+extern unsigned long counttranslatememcpy, counttranslateData;
+
 /** writes substring of suffix table to output, stores older data into
  * cache if necessary */
 static size_t
@@ -385,8 +385,9 @@ SfxIGenerate(void *iface,
       size_t copyLen = MIN(elemsLeft, sfxi->lastGeneratedStart
                            + sfxi->lastGeneratedLen - generateStart),
         charsWritten =
-        SDRTranslate(xltor, output, sfxi->lastGeneratedSufTabSegment
-                     + generateStart - sfxi->lastGeneratedStart, copyLen);
+        SDRTranslateSuffixptr(xltor, output, sfxi->lastGeneratedSufTabSegment
+                              + generateStart - sfxi->lastGeneratedStart,
+                              copyLen);
       generateStart += copyLen;
       elemsLeft -= copyLen;
       output = (char *)output + charsWritten;

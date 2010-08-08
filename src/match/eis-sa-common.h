@@ -37,10 +37,9 @@
 enum sfxDataRequest {
   SFX_REQUEST_NONE = 0,         /**< empty request, used for special purposes */
   SFX_REQUEST_SUFTAB = 1<<0,    /**< request for suffix array entries */
-  SFX_REQUEST_LCPTAB = 1<<1,    /**< request for lcp table entries */
-  SFX_REQUEST_BWTTAB = 1<<2,    /**< request for bwt table */
-  SFX_REQUEST_ALL = SFX_REQUEST_SUFTAB | SFX_REQUEST_LCPTAB
-                  | SFX_REQUEST_BWTTAB,          /**< used as bitmask  */
+  SFX_REQUEST_BWTTAB = 1<<1,    /**< request for bwt table */
+  SFX_REQUEST_ALL = SFX_REQUEST_SUFTAB |
+                    SFX_REQUEST_BWTTAB, /**< used as bitmask  */
   SFX_REQUEST_ANY = SFX_REQUEST_ALL,             /**< used as bitmask  */
 };
 
@@ -70,29 +69,20 @@ struct encSeqTrState
  * @param src read suffix indices from here
  * @param len length of string to read
  */
-size_t
-gt_translateSuftab2BWT(struct encSeqTrState *trState,
-                    GtUchar *dest,
-                    unsigned long *src,
-                    size_t len);
 
-struct encSeqLCPState
-{
-  unsigned long lastSufIdx;
-  const GtEncseq *encseq;
-  GtReadmode readmode;
-};
+size_t gt_translateSuftab2BWT(void *data,
+                              void *voiddest,
+                              const unsigned long *src,
+                              size_t len);
 
-size_t
-gt_translateSuftab2LCP(struct encSeqLCPState *lcpState,
-                    unsigned long *dest,
-                    unsigned long *src,
-                    size_t len);
+size_t gt_translateSuftab2BWTSuffixptr(void *data,
+                                       void *voiddest,
+                                       const Suffixptr *src,
+                                       size_t len);
 
 union saXltorState
 {
   struct encSeqTrState encSeqTr;
-  struct encSeqLCPState lcpState;
 };
 
 struct saTaggedXltorState

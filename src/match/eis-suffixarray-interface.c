@@ -70,11 +70,13 @@ gt_initSuffixarrayFileInterface(SuffixarrayFileInterface *sai,
 {
   {
     RandomSeqAccessor origSeqAccess = { gt_SAIGetOrigSeq, sai };
+    STAMP;
     initSASeqSrc(&sai->baseClass, seqLen, NULL, SAIBaseMakeReader,
                  SAIBaseGetRot0Pos, NULL,
                  origSeqAccess, gt_deleteSuffixarrayFileInterfaceBase,
                  gt_SAIBaseNewMRAEnc,
                  SAIGenerate, sai);
+    STAMP;
   }
   sai->sa = sa;
   sai->numBWTFileReaders = 0;
@@ -123,7 +125,8 @@ gt_SAIMakeBWTReader(SuffixarrayFileInterface *sai)
                               SFX_REQUEST_BWTTAB, bwtReadState);
       struct seqDataTranslator xltor = {
         { .ref = &stateStore->state.encSeqTr },
-        (seqDataTranslateFunc)gt_translateSuftab2BWT
+        gt_translateSuftab2BWT,
+        gt_translateSuftab2BWTSuffixptr
       };
 
       reader = gt_seqReaderSetRegisterConsumer(&sai->baseClass.readerSet,
@@ -151,39 +154,10 @@ gt_SAIMakeSufTabReader(SuffixarrayFileInterface *sai)
   if (sai->sa->suftabstream.fp)
   {
     struct seqDataTranslator xltor = {
-      { .elemSize = sizeof (unsigned long) }, NULL
+      { .elemSize = sizeof (unsigned long) }, NULL, NULL,
     };
     reader = gt_seqReaderSetRegisterConsumer(&sai->baseClass.readerSet,
                                           SFX_REQUEST_SUFTAB, xltor);
-  }
-  else
-  {
-    fputs("error: suffix array data not available for given project.\n",
-          stderr);
-  }
-  return reader;
-}
-
-struct seqDataReader
-gt_SAIMakeLCPTabReader(SuffixarrayFileInterface *sai)
-{
-  struct seqDataReader reader = { NULL, NULL};
-  if (sai->sa->suftabstream.fp)
-  {
-    union saXltorState lcpReadState = {
-      .lcpState.readmode = sai->sa->readmode,
-      .lcpState.encseq = sai->sa->encseq,
-      .lcpState.lastSufIdx = -1,
-    };
-    struct saTaggedXltorState *stateStore
-      = gt_addSuffixarrayXltor(&sai->xltorStates,
-                            SFX_REQUEST_LCPTAB, lcpReadState);
-    struct seqDataTranslator xltor = {
-      { .ref = &stateStore->state.lcpState },
-      (seqDataTranslateFunc)gt_translateSuftab2BWT
-    };
-    reader = gt_seqReaderSetRegisterConsumer(&sai->baseClass.readerSet,
-                                          SFX_REQUEST_LCPTAB, xltor);
   }
   else
   {
@@ -204,9 +178,6 @@ gt_SAIMakeReader(SuffixarrayFileInterface *sai, enum sfxDataRequest rtype)
     break;
   case SFX_REQUEST_BWTTAB:
     reader = gt_SAIMakeBWTReader(sai);
-    break;
-  case SFX_REQUEST_LCPTAB:
-    reader = gt_SAIMakeLCPTabReader(sai);
     break;
   default:
     fprintf(stderr, "error: unimplemented request: %d, %s: %d!\n", rtype,
@@ -265,16 +236,21 @@ SAIGenerate(void *generatorState, void *backlogState,
             unsigned long generateStart, size_t len,
             SeqDataTranslator xltor)
 {
-  size_t i;
+  size_t idx;
   SuffixarrayFileInterface *sai = generatorState;
   Suffixarray *sa;
   unsigned long buf[len];
+
   gt_assert(sai);
   sa = sai->sa;
-  for (i = 0; i < len; ++i)
-    if (readnextGtUlongfromstream(buf + i, &sa->suftabstream) != 1)
+  for (idx = 0; idx < len; ++idx)
+  {
+    if (readnextGtUlongfromstream(buf + idx, &sa->suftabstream) != 1)
+    {
       break;
-  move2Backlog(backlogState, buf, generateStart, i);
-  SDRTranslate(xltor, output, buf, i);
-  return i;
+    }
+  }
+  move2Backlog(backlogState, buf, generateStart, idx);
+  SDRTranslate(xltor, output, buf, idx);
+  return idx;
 }

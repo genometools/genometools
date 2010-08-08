@@ -119,10 +119,12 @@ initSASeqSrc(SASeqSrc *src, unsigned long seqLen,
   src->deleteSASS = deleteSASS;
   src->newMRAEnc = newMRAEnc;
   src->alphabet = NULL;
+  STAMP;
   gt_initEmptySeqReaderSet(&src->readerSet,
                         SFX_REQUEST_NONE,
                         sizeof (unsigned long),
                         generator, generatorState);
+  STAMP;
   gt_initSATaggedXltorStateList(&src->xltorStates);
 }
 
