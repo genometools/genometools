@@ -39,10 +39,11 @@ static void seqids_to_md5_visitor_free(GtNodeVisitor *nv)
 typedef struct {
   GtStr *new_seqid;
   GtRegionMapping *region_mapping;
-} ChangeSeqidInfo;
+} S2MChangeSeqidInfo;
 
-static void build_new_target(GtStr *target, GtStrArray *target_ids,
-                             GtArray *target_ranges, GtArray *target_strands)
+static void s2m_build_new_target(GtStr *target, GtStrArray *target_ids,
+                                 GtArray *target_ranges,
+                                 GtArray *target_strands)
 {
   unsigned long i;
   gt_assert(target && target_ids && target_ranges && target_strands);
@@ -66,8 +67,9 @@ static void build_new_target(GtStr *target, GtStrArray *target_ids,
   }
 }
 
-static int change_target_seqids(GtGenomeNode *gn, const char *target,
-                                GtRegionMapping *region_mapping, GtError *err)
+static int s2m_change_target_seqids(GtGenomeNode *gn, const char *target,
+                                    GtRegionMapping *region_mapping,
+                                    GtError *err)
 {
   GtStrArray *target_ids;
   GtArray *target_ranges, *target_strands;
@@ -95,7 +97,7 @@ static int change_target_seqids(GtGenomeNode *gn, const char *target,
   }
   if (!had_err) {
     GtStr *new_target = gt_str_new();
-    build_new_target(new_target, target_ids, target_ranges, target_strands);
+    s2m_build_new_target(new_target, target_ids, target_ranges, target_strands);
     gt_feature_node_set_attribute((GtFeatureNode*) gn, TARGET_STRING,
                                   gt_str_get(new_target));
     gt_str_delete(new_target);
@@ -106,16 +108,16 @@ static int change_target_seqids(GtGenomeNode *gn, const char *target,
   return had_err;
 }
 
-static int change_seqid(GtGenomeNode *gn, void *data, GtError *err)
+static int s2m_change_seqid(GtGenomeNode *gn, void *data, GtError *err)
 {
   const char *target;
-  ChangeSeqidInfo *info = (ChangeSeqidInfo*) data;
+  S2MChangeSeqidInfo *info = (S2MChangeSeqidInfo*) data;
   gt_error_check(err);
   gt_assert(gn && info);
   gt_genome_node_change_seqid(gn, info->new_seqid);
   if ((target = gt_feature_node_get_attribute((GtFeatureNode*) gn,
                                               TARGET_STRING))) {
-    return change_target_seqids(gn, target, info->region_mapping, err);
+    return s2m_change_target_seqids(gn, target, info->region_mapping, err);
   }
   return 0;
 }
@@ -140,10 +142,10 @@ static int seqid_to_md5(GtGenomeNode *gn, GtRegionMapping *region_mapping,
       GtStr *new_seqid = gt_str_new_cstr(GT_MD5_SEQID_PREFIX);
       gt_str_append_cstr(new_seqid, md5);
       if (gt_feature_node_try_cast(gn)) {
-        ChangeSeqidInfo info;
+        S2MChangeSeqidInfo info;
         info.new_seqid = new_seqid;
         info.region_mapping = region_mapping;
-        had_err = gt_genome_node_traverse_children(gn, &info, change_seqid,
+        had_err = gt_genome_node_traverse_children(gn, &info, s2m_change_seqid,
                                                    true, err);
       }
       else

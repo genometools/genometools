@@ -40,10 +40,11 @@ static void md5_to_seqids_visitor_free(GtNodeVisitor *nv)
 typedef struct {
   GtStr *new_seqid;
   GtRegionMapping *region_mapping;
-} ChangeSeqidInfo;
+} M2SChangeSeqidInfo;
 
-static void build_new_target(GtStr *target, GtStrArray *target_ids,
-                             GtArray *target_ranges, GtArray *target_strands)
+static void m2s_build_new_target(GtStr *target, GtStrArray *target_ids,
+                                 GtArray *target_ranges,
+                                 GtArray *target_strands)
 {
   unsigned long i;
   gt_assert(target && target_ids && target_ranges && target_strands);
@@ -66,7 +67,7 @@ static void build_new_target(GtStr *target, GtStrArray *target_ids,
   }
 }
 
-static int change_target_seqids(GtGenomeNode *gn, const char *target,
+static int m2s_change_target_seqids(GtGenomeNode *gn, const char *target,
                                 GtRegionMapping *region_mapping, GtError *err)
 {
   GtStrArray *target_ids;
@@ -96,7 +97,7 @@ static int change_target_seqids(GtGenomeNode *gn, const char *target,
   }
   if (!had_err) {
     GtStr *new_target = gt_str_new();
-    build_new_target(new_target, target_ids, target_ranges, target_strands);
+    m2s_build_new_target(new_target, target_ids, target_ranges, target_strands);
     gt_feature_node_set_attribute((GtFeatureNode*) gn, TARGET_STRING,
                                   gt_str_get(new_target));
     gt_str_delete(new_target);
@@ -109,21 +110,21 @@ static int change_target_seqids(GtGenomeNode *gn, const char *target,
   return had_err;
 }
 
-static int change_seqid(GtGenomeNode *gn, void *data, GtError *err)
+static int m2s_change_seqid(GtGenomeNode *gn, void *data, GtError *err)
 {
   const char *target;
-  ChangeSeqidInfo *info = (ChangeSeqidInfo*) data;
+  M2SChangeSeqidInfo *info = (M2SChangeSeqidInfo*) data;
   gt_error_check(err);
   gt_assert(gn && info);
   gt_genome_node_change_seqid(gn, info->new_seqid);
   if ((target = gt_feature_node_get_attribute((GtFeatureNode*) gn,
                                               TARGET_STRING))) {
-    return change_target_seqids(gn, target, info->region_mapping, err);
+    return m2s_change_target_seqids(gn, target, info->region_mapping, err);
   }
   return 0;
 }
 
-static int seqid_to_md5(GtGenomeNode *gn, GtRegionMapping *region_mapping,
+static int md5_to_seqid(GtGenomeNode *gn, GtRegionMapping *region_mapping,
                         GtError *err)
 {
   GtStr *seqid;
@@ -140,10 +141,10 @@ static int seqid_to_md5(GtGenomeNode *gn, GtRegionMapping *region_mapping,
       GtStr *new_seqid = gt_str_new();
       gt_regular_seqid_save(new_seqid, desc);
       if (gt_feature_node_try_cast(gn)) {
-        ChangeSeqidInfo info;
+        M2SChangeSeqidInfo info;
         info.new_seqid = new_seqid;
         info.region_mapping = region_mapping;
-        had_err = gt_genome_node_traverse_children(gn, &info, change_seqid,
+        had_err = gt_genome_node_traverse_children(gn, &info, m2s_change_seqid,
                                                    true, err);
       }
       else
@@ -161,7 +162,7 @@ static int md5_to_seqids_visitor_feature_node(GtNodeVisitor *nv,
 {
   GtMD5ToSeqidsVisitor *v = md5_to_seqids_visitor_cast(nv);
   gt_error_check(err);
-  return seqid_to_md5((GtGenomeNode*) fn, v->region_mapping, err);
+  return md5_to_seqid((GtGenomeNode*) fn, v->region_mapping, err);
 }
 
 static int md5_to_seqids_visitor_region_node(GtNodeVisitor *nv,
@@ -170,7 +171,7 @@ static int md5_to_seqids_visitor_region_node(GtNodeVisitor *nv,
 {
   GtMD5ToSeqidsVisitor *v = md5_to_seqids_visitor_cast(nv);
   gt_error_check(err);
-  return seqid_to_md5((GtGenomeNode*) rn, v->region_mapping, err);
+  return md5_to_seqid((GtGenomeNode*) rn, v->region_mapping, err);
 }
 
 const GtNodeVisitorClass* gt_md5_to_seqids_visitor_class()
