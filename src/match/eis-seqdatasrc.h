@@ -88,7 +88,8 @@ typedef union translatorState TranslatorState;
 typedef size_t (*seqDataTranslateFunc)(void *translator, void *dest,
                                        const unsigned long *src, size_t len);
 
-typedef size_t (*seqDataTranslateSuffixptrFunc)(void *translator, void *dest,
+typedef size_t (*seqDataTranslateSuffixptrFunc)(void *translator,
+                                                void *dest,
                                                 const Suffixptr *src,
                                                 size_t len);
 
@@ -131,7 +132,16 @@ SDRTranslateSuffixptr(SeqDataTranslator xltor, void *dest,
   counttranslatememcpy++;
   /* fall back to zero-translation i.e. verbatim copy */
   gt_assert(xltor.state.elemSize == sizeof (Suffixptr));
-  memcpy(dest, src, len * xltor.state.elemSize);
+  {
+    size_t idx;
+    unsigned long *ulongdest = (unsigned long *) dest;
+    for (idx = 0; idx < len; idx++)
+    {
+#define SUFFIXPTRGET(TAB,IDX)     TAB[IDX].value /* XXX remove later */
+      ulongdest[idx] = SUFFIXPTRGET(src,idx);
+    }
+  }
+  /*memcpy(dest, src, len * xltor.state.elemSize); */
   return len * xltor.state.elemSize;
 }
 

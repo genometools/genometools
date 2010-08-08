@@ -21,8 +21,6 @@
 #include "match/eis-sa-common.h"
 #include "match/suffixptr.h"
 
-#define SUFFIXPTRGET(TAB,IDX)     TAB[IDX].value /* XXX remove later */
-
 size_t gt_translateSuftab2BWT(void *data,
                               void *voiddest,
                               const unsigned long *src,
@@ -41,18 +39,19 @@ size_t gt_translateSuftab2BWT(void *data,
   return len * sizeof (GtUchar);
 }
 
-size_t gt_translateSuftab2BWTSuffixptr(void *data,
+size_t gt_translateSuftab2BWTSuffixptr(void *translator,
                                        void *voiddest,
                                        const Suffixptr *src,
                                        size_t len)
 {
-  struct encSeqTrState *trState = (struct encSeqTrState *) data;
+  struct encSeqTrState *trState = (struct encSeqTrState *) translator;
   GtUchar *dest = (GtUchar *) voiddest;
   size_t idx;
 
   gt_assert(trState);
   for (idx = 0; idx < len; ++idx)
   {
+#define SUFFIXPTRGET(TAB,IDX)     TAB[IDX].value /* XXX remove later */
     dest[idx] = sfxIdx2BWTSym(SUFFIXPTRGET(src,idx), trState->encseq,
                               trState->readmode);
   }
@@ -117,12 +116,12 @@ gt_destructSATaggedXltorStateList(
 struct saTaggedXltorState *
 gt_addSuffixarrayXltor(struct saTaggedXltorStateList *saXltorStateList,
                     enum sfxDataRequest request,
-                    union saXltorState saXltorState)
+                    struct encSeqTrState state)
 {
   struct saTaggedXltorStateLE *newSAXltorState;
   newSAXltorState = gt_malloc(sizeof (*newSAXltorState));
   newSAXltorState->state.typeTag = request;
-  newSAXltorState->state.state = saXltorState;
+  newSAXltorState->state.state = state;
   newSAXltorState->next = saXltorStateList->stateList;
   saXltorStateList->stateList = newSAXltorState;
   ++(saXltorStateList->numXltors);

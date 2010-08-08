@@ -116,15 +116,15 @@ gt_SAIMakeBWTReader(SuffixarrayFileInterface *sai)
   {
     if (sai->sa->encseq)
     {
-      union saXltorState bwtReadState = {
-        .encSeqTr.readmode = sai->sa->readmode,
-        .encSeqTr.encseq = sai->sa->encseq
+      struct encSeqTrState bwtReadState = {
+        .readmode = sai->sa->readmode,
+        .encseq = sai->sa->encseq
       };
       struct saTaggedXltorState *stateStore
         = gt_addSuffixarrayXltor(&sai->xltorStates,
                               SFX_REQUEST_BWTTAB, bwtReadState);
       struct seqDataTranslator xltor = {
-        { .ref = &stateStore->state.encSeqTr },
+        { .ref = &stateStore->state },
         gt_translateSuftab2BWT,
         gt_translateSuftab2BWTSuffixptr
       };
@@ -157,7 +157,7 @@ gt_SAIMakeSufTabReader(SuffixarrayFileInterface *sai)
       { .elemSize = sizeof (unsigned long) }, NULL, NULL,
     };
     reader = gt_seqReaderSetRegisterConsumer(&sai->baseClass.readerSet,
-                                          SFX_REQUEST_SUFTAB, xltor);
+                                             SFX_REQUEST_SUFTAB, xltor);
   }
   else
   {

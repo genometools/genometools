@@ -75,20 +75,15 @@ size_t gt_translateSuftab2BWT(void *data,
                               const unsigned long *src,
                               size_t len);
 
-size_t gt_translateSuftab2BWTSuffixptr(void *data,
+size_t gt_translateSuftab2BWTSuffixptr(void *translator,
                                        void *voiddest,
                                        const Suffixptr *src,
                                        size_t len);
 
-union saXltorState
-{
-  struct encSeqTrState encSeqTr;
-};
-
 struct saTaggedXltorState
 {
   enum sfxDataRequest typeTag;
-  union saXltorState state;
+  struct encSeqTrState state;
 };
 
 struct saTaggedXltorStateList
@@ -107,7 +102,7 @@ gt_destructSATaggedXltorStateList(
 struct saTaggedXltorState *
 gt_addSuffixarrayXltor(struct saTaggedXltorStateList *saXltorStateList,
                     enum sfxDataRequest request,
-                    union saXltorState saXltorState);
+                    struct encSeqTrState state);
 
 typedef struct SASeqSrc SASeqSrc;
 

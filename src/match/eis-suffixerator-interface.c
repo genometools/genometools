@@ -63,14 +63,14 @@ SfxIRequest2XltorFunc(sfxInterface *sfxi,
   SeqDataTranslator tr = { { NULL }, NULL };
   switch (rtype)
   {
-    union saXltorState readState;
+    struct encSeqTrState readState;
     struct saTaggedXltorState *stateStore;
   case SFX_REQUEST_BWTTAB:
-    readState.encSeqTr.readmode = sfxi->readmode;
-    readState.encSeqTr.encseq = sfxi->encseq;
+    readState.readmode = sfxi->readmode;
+    readState.encseq = sfxi->encseq;
     stateStore = gt_addSuffixarrayXltor(&sfxi->baseClass.xltorStates,
-                                     rtype, readState);
-    tr.state.ref = &stateStore->state.encSeqTr;
+                                        rtype, readState);
+    tr.state.ref = &stateStore->state;
     STAMP;
     tr.translateData = gt_translateSuftab2BWT;
     tr.translateDataSuffixptr = gt_translateSuftab2BWTSuffixptr;
