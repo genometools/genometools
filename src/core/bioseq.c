@@ -31,6 +31,7 @@
 #include "core/fileutils_api.h"
 #include "core/gc_content.h"
 #include "core/grep_api.h"
+#include "core/hashmap_api.h"
 #include "core/ma.h"
 #include "core/md5_fingerprint.h"
 #include "core/parseutils.h"
@@ -44,6 +45,7 @@
 
 typedef struct {
   GtStrArray *md5_fingerprints;
+  GtHashmap *md5map; /* maps md5 to index */
 } BioseqFingerprints;
 
 struct GtBioseq {
@@ -134,6 +136,7 @@ static BioseqFingerprints* bioseq_fingerprints_new(GtBioseq *bs)
   BioseqFingerprints *bsf;
   bool reading_succeeded = false;
   GtStr *fingerprints_filename;
+  unsigned long i;
   gt_assert(bs);
   bsf = gt_calloc(1, sizeof *bsf);
   bsf->md5_fingerprints = gt_str_array_new();
@@ -154,12 +157,20 @@ static BioseqFingerprints* bioseq_fingerprints_new(GtBioseq *bs)
       write_fingerprints(bsf->md5_fingerprints, fingerprints_filename);
   }
   gt_str_delete(fingerprints_filename);
+  /* fill md5 map */
+  bsf->md5map = gt_hashmap_new(GT_HASH_STRING, NULL, NULL);
+  for (i = 0; i < gt_str_array_size(bsf->md5_fingerprints); i++) {
+    gt_hashmap_add(bsf->md5map,
+                   (void*) gt_str_array_get(bsf->md5_fingerprints,i),
+                   (void*) (i + 1));
+  }
   return bsf;
 }
 
 static void gt_bioseq_fingerprints_delete(BioseqFingerprints *bsf)
 {
   if (!bsf) return;
+  gt_hashmap_delete(bsf->md5map);
   gt_str_array_delete(bsf->md5_fingerprints);
   gt_free(bsf);
 }
@@ -175,6 +186,17 @@ static GtStrArray* bioseq_fingerprints_get_all(BioseqFingerprints *bsf)
 {
   gt_assert(bsf);
   return bsf->md5_fingerprints;
+}
+
+static unsigned long bioseq_fingerprints_map(BioseqFingerprints *bsf,
+                                             const char *md5)
+{
+  const char *value;
+  gt_assert(bsf && md5);
+  value = gt_hashmap_get(bsf->md5map, md5);
+  if (value)
+    return ((unsigned long) value) - 1;
+  return GT_UNDEF_ULONG;
 }
 
 typedef struct {
@@ -634,16 +656,10 @@ unsigned long gt_bioseq_number_of_sequences(GtBioseq *bs)
 
 unsigned long gt_bioseq_md5_to_index(GtBioseq *bs, const char *md5)
 {
-  unsigned long i;
   gt_assert(bs && md5);
   if (!bs->fingerprints)
     bs->fingerprints = bioseq_fingerprints_new(bs);
-  /* XXX: use hash table for faster access */
-  for (i = 0; i < gt_bioseq_number_of_sequences(bs); i++) {
-    if (!strcmp(gt_bioseq_get_md5_fingerprint(bs, i), md5))
-      return i;
-  }
-  return GT_UNDEF_ULONG;
+  return bioseq_fingerprints_map(bs->fingerprints, md5);
 }
 
 void gt_bioseq_show_as_fasta(GtBioseq *bs, unsigned long width, GtFile *outfp)
