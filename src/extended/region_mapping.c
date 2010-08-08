@@ -240,7 +240,7 @@ const char* gt_region_mapping_get_md5_fingerprint(GtRegionMapping *rm,
   gt_error_check(err);
   gt_assert(rm && seqid);
   gt_assert(!rm->userawseq); /* not implemented */
-  gt_assert(gt_md5_seqid_has_prefix(gt_str_get(seqid))); /* not implemented */
+  gt_assert(!gt_md5_seqid_has_prefix(gt_str_get(seqid))); /* not implemented */
   had_err = update_bioseq_if_necessary(rm, seqid, err);
   if (!had_err) {
     if (rm->usedesc) {
