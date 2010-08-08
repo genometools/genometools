@@ -397,8 +397,10 @@ SfxIGenerate(void *iface,
     {
       const Suffixsortspace *suffixsortspace;
 
+      STAMP;
       move2Backlog(backlogState, sfxi->lastGeneratedSufTabSegment,
                    sfxi->lastGeneratedStart, sfxi->lastGeneratedLen);
+      STAMP;
       sfxi->lastGeneratedStart += sfxi->lastGeneratedLen;
       suffixsortspace = gt_nextSfxiterator(&sfxi->lastGeneratedLen,
                                            &sfxi->specialsuffixes,

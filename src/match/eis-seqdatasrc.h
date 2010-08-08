@@ -62,8 +62,8 @@ typedef size_t (*seqDataWriteFunc)(SeqDataDest dest, const void *src,
 
 struct seqDataWriter
 {
+  seqDataWriteFunc writeData1;
   SeqDataDest dest;
-  seqDataWriteFunc writeData;
 };
 
 typedef struct seqDataWriter SeqDataWriter;
@@ -71,7 +71,7 @@ typedef struct seqDataWriter SeqDataWriter;
 static inline size_t
 SDWWrite(SeqDataWriter sw, const void *src, size_t len)
 {
-  return sw.writeData(sw.dest, src, len);
+  return sw.writeData1(sw.dest, src, len);
 }
 
 /* generic data translator api */

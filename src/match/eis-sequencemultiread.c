@@ -145,6 +145,7 @@ gt_seqReaderSetRegisterAutoConsumer(SeqReaderSet *readerSet, int tag,
                                  SeqDataWriter writer)
 {
   int availId = readerSet->numConsumers++;
+  gt_assert(false);
   gt_assert(readerSet);
   {
     struct seqSinkState *temp;
@@ -276,10 +277,14 @@ seqReaderSetMove2Backlog(void *backlogState, const void *seqData,
   struct seqReaderSet *readerSet = backlogState;
   gt_assert(backlogState && (requestLen?(seqData!=NULL):1));
   requestMinPos = seqReaderSetFindMinOpenRequest(readerSet);
+  STAMP;
+  gt_assert(readerSet->backlogElemSize == sizeof (Suffixptr));
   /* 1. pass all data to be invalidated to automatic sinks */
   {
     int i, numAutoConsumers = readerSet->numAutoConsumers;
     struct seqSinkState *sinks = readerSet->autoConsumerList;
+    /* The following must hold, as writer is not defined */
+    gt_assert(numAutoConsumers == 0);
     for (i = 0; i < numAutoConsumers; ++i)
       SDWWrite(sinks[i].writer, seqData, requestLen);
   }
@@ -308,7 +313,10 @@ seqReaderSetMove2Backlog(void *backlogState, const void *seqData,
     /* 3. extend backlog to also accept all invalidated values still needed */
     if (copyLen)
     {
-      size_t backlogSizeLeft
+      unsigned long *destSptr;
+      Suffixptr *srcSptr;
+
+      size_t idx, backlogSizeLeft
         = readerSet->backlogSize - readerSet->backlogLen;
       if (copyLen > backlogSizeLeft)
       {
@@ -318,11 +326,21 @@ seqReaderSetMove2Backlog(void *backlogState, const void *seqData,
                        * newSize);
         readerSet->backlogSize = newSize;
       }
+      srcSptr = ((Suffixptr *) seqData) + (copyStartPos - requestStart);
+      destSptr = ((unsigned long *) readerSet->seqDataBacklog) +
+                 readerSet->backlogLen;
+      for (idx = 0; idx< copyLen; idx++)
+      {
+#define SUFFIXPTRGET(TAB,IDX)     TAB[IDX].value /* XXX remove later */
+        destSptr[idx] = SUFFIXPTRGET(srcSptr,idx);
+      }
+      /*
       memcpy((char *)readerSet->seqDataBacklog
              + readerSet->backlogLen * readerSet->backlogElemSize,
              (char *)seqData
              + (copyStartPos - requestStart) * readerSet->backlogElemSize,
              readerSet->backlogElemSize * copyLen);
+      */
       readerSet->backlogLen += copyLen;
     }
   }
