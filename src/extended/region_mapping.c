@@ -146,6 +146,24 @@ int gt_region_mapping_get_raw_sequence(GtRegionMapping *rm, const char **rawseq,
   int had_err = 0;
   gt_error_check(err);
   gt_assert(rm && rawseq && length && seqid);
+  /* MD5 sequence id */
+  if (gt_md5_seqid_has_prefix(gt_str_get(seqid))) {
+    if (!rm->bioseq_collection) {
+      rm->bioseq_collection = gt_bioseq_collection_new(rm->sequence_filenames,
+                                                       err);
+      if (!rm->bioseq_collection)
+        had_err = -1;
+    }
+    if (!had_err) {
+      had_err = gt_bioseq_collection_md5_to_seq(rm->bioseq_collection, rawseq,
+                                                length, seqid, err);
+    }
+    if (!had_err) {
+      *offset = 1;
+    }
+    return had_err;
+  }
+  /* ``regular sequence ID */
   if (!rm->matchdesc && !rm->userawseq)
     had_err = update_bioseq_if_necessary(rm, seqid, err);
   if (!had_err) {
@@ -222,6 +240,7 @@ const char* gt_region_mapping_get_md5_fingerprint(GtRegionMapping *rm,
   gt_error_check(err);
   gt_assert(rm && seqid);
   gt_assert(!rm->userawseq); /* not implemented */
+  gt_assert(gt_md5_seqid_has_prefix(gt_str_get(seqid))); /* not implemented */
   had_err = update_bioseq_if_necessary(rm, seqid, err);
   if (!had_err) {
     if (rm->usedesc) {
