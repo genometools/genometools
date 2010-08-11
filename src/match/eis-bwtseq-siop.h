@@ -156,10 +156,11 @@ BWTSeqPosPairRangeOcc(const BWTSeq *bwtSeq, AlphabetRangeID range,
     AlphabetRangeSize rSize = MRAEncGetRangeSize(alphabet, range),
       termIdx = MRAEncMapSymbol(alphabet, bwtTerminatorSym)
       - MRAEncGetRangeBase(alphabet, range),
-      fbIdx = MRAEncMapSymbol(alphabet, bwtSeq->bwtTerminatorFallback)
+      fbIdx = bwtSeq->bwtTerminatorFallback
       - MRAEncGetRangeBase(alphabet, range);
-    memmove(rangeOccs + termIdx, rangeOccs + termIdx + 1,
+    memmove(rangeOccs + termIdx + 1, rangeOccs + termIdx,
             sizeof (rangeOccs[0]) * (rSize - 1));
+    rangeOccs[termIdx] = rangeOccs[termIdx + rSize] = 0;
     if (posB > BWTSeqTerminatorPos(bwtSeq))
     {
       rangeOccs[termIdx + rSize] = 1;
