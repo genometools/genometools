@@ -341,17 +341,13 @@ unsigned long gt_bwtrangesplitallwithspecial(Mbtab *mbtab,
   AlphabetRangeID numofranges = MRAEncGetNumRanges(alphabet);
   AlphabetRangeSize rangesize = 0, totalrange = 0;
 
-  gt_log_log("numofranges=%lu",(unsigned long) numofranges);
-
   for (range_idx = 0; range_idx < (unsigned long) numofranges; range_idx++)
   {
     unsigned long rangeOcc_idx = 0;
     rangesize = MRAEncGetRangeSize(alphabet, range_idx);
     totalrange += rangesize;
-    gt_log_log("rangesize=%lu", (unsigned long) rangesize);
     BWTSeqPosPairRangeOcc(bwtseq, range_idx, lbound, ubound,rangeOccs);
     rangebase = (unsigned long) MRAEncGetRangeBase(alphabet, range_idx);
-    gt_log_log("rangebase=%lu", rangebase);
     for (char_idx = rangebase;
          char_idx < rangebase + rangesize; char_idx++)
     {
@@ -513,15 +509,12 @@ unsigned long gt_pck_getShuStringLength(const FMindex *bwtSubject,
   qend = query + queryLength;
 
   curChar = MRAEncMapSymbol(alphabet, *qptr);
-  /*gt_log_log("query[%lu]=%d",(unsigned long) (qptr-query),(int) *qptr);*/
 
   qptr++;
   start = ((const BWTSeq *) bwtSubject)->count[curChar];
   end = ((const BWTSeq *) bwtSubject)->count[curChar + 1];
-  /*gt_log_log("start=%lu, end=%lu", start, end);*/
   for (/* Nothing */; start < end && qptr < qend; qptr++)
   {
-    /*gt_log_log("query[%lu]=%d",(unsigned long) (qptr-query),(int) *qptr);*/
     GtUlongPair occPair;
     curChar = MRAEncMapSymbol(alphabet, *qptr);
     occPair = BWTSeqTransformedPosPairOcc((const BWTSeq *) bwtSubject,
@@ -530,7 +523,6 @@ unsigned long gt_pck_getShuStringLength(const FMindex *bwtSubject,
                                           end);
     start = ((const BWTSeq *) bwtSubject)->count[curChar] + occPair.a;
     end = ((const BWTSeq *) bwtSubject)->count[curChar] + occPair.b;
-    /*gt_log_log("start=%lu, end=%lu", start, end);*/
   }
   if (qptr == qend && start < end)
     retval = queryLength + 1;

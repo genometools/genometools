@@ -104,6 +104,34 @@ static void process_count_node(GtStackNodecount *stack,
   parent->branching += current->branching;
 }
 
+static inline void add_filenum_count(ShuNode *child,
+                                     ShuNode *parent,
+                                     BwtSeqpositionextractor *positext,
+                                     unsigned long totallength,
+                                     unsigned long numoffiles,
+                                     const GtEncseq *encseq)
+{
+  long unsigned row;
+
+  for (row = child->lower; row < child->upper; row++)
+  {
+    unsigned long filenum, position;
+
+    position = gt_BwtSeqpositionextractor_extract(positext, row);
+    if (child->depth == 1UL)
+      position = totallength - position;
+    else
+      position = totallength - (position + child->depth);
+    if (totallength <= position)
+      filenum = numoffiles - 1;
+    else
+    {
+      filenum = gt_encseq_filenum(encseq, position);
+    }
+    parent->countTermSubtree[0][filenum] += 1;
+  }
+}
+
 static int visit_shu_children(const FMindex *index,
                               ShuNode *parent,
                               GtStackShuNode *stack,
@@ -117,21 +145,22 @@ static int visit_shu_children(const FMindex *index,
                               GT_UNUSED GtLogger *logger,
                               GT_UNUSED GtError *err)
 {
-  unsigned long rangesize, idx, num_of_spezial;
+  unsigned long rangesize, idx, num_of_rows;
   unsigned int offset;
   ShuNode child;
 
   gt_assert(parent->lower < parent->upper);
-  num_of_spezial = parent->upper - parent->lower;
-  rangesize = gt_bwtrangesplitallwithoutspecial(tmpmbtab,
+  num_of_rows = parent->upper - parent->lower;
+  rangesize = gt_bwtrangesplitallwithspecial(tmpmbtab,
                                              rangeOccs,
                                              index,
                                              parent->lower,
                                              parent->upper);
-  gt_assert(rangesize <= numofchars + numoffiles);
+  /* this might be useless... XXX
+   * the 3 comes from the seperator, wildcards and terminator */
+  gt_assert(rangesize <= numofchars + 3);
 
   offset = 0U;
-  /* check the standard symbols that might lead to child branching node */
   for (idx = 0; idx < rangesize; idx++)
   {
     child.process = false;
@@ -140,32 +169,29 @@ static int visit_shu_children(const FMindex *index,
     child.parentOffset = offset + 1U;
     child.depth = parent->depth + 1;
 
-    num_of_spezial = num_of_spezial - (child.upper - child.lower);
+    num_of_rows = num_of_rows - (child.upper - child.lower);
 
-    /* check if child is part of a branch and no actual node */
-    if (child.upper - child.lower == parent->upper - parent->lower)
-    {
-      parent->lower = child.lower;
-      parent->upper = child.upper;
-      parent->depth = child.depth;
-      return 0;
+    if (child.lower + 1 == child.upper || numofchars < idx)
+    { /* we found a leave on parent or the interval consists of
+      * wildcards or terminators */
+      add_filenum_count(&child,
+                        parent,
+                        positext,
+                        totallength,
+                        numoffiles,
+                        encseq);
     } else
     {
-      /* we found a leave on parent*/
-      if (child.lower + 1 == child.upper)
-      {
-        unsigned long filenum, position;
-
-        position = gt_BwtSeqpositionextractor_extract(positext, child.lower);
-        position = totallength - (position + child.depth);
-        filenum = gt_encseq_filenum(encseq, position);
-        parent->countTermSubtree[0][filenum] += 1;
+      if (child.upper - child.lower == parent->upper - parent->lower)
+      { /* child is part of a branch and no actual node */
+        parent->lower = child.lower;
+        parent->upper = child.upper;
+        parent->depth = child.depth;
+        return 0;
       } else
-        /* child is a branch of parent node */
-      {
+      { /* child is a branch of parent node */
         if (child.lower == child.upper)
-        {
-          /* do nothing, this is no node, this is a missing char */
+        { /* do nothing, this is no node, this is a missing char */
         } else
         {
           gt_array2dim_calloc(child.countTermSubtree, 5UL, numoffiles);
@@ -175,25 +201,7 @@ static int visit_shu_children(const FMindex *index,
       }
     }
   }
-  /* all remaining "rows" of the parent interval have a special char and are
-   * leaves, get the positions and save them to parent */
-  for (idx = parent->upper - num_of_spezial; idx < parent->upper; idx++)
-  {
-    unsigned long filenum, position;
-
-    position = gt_BwtSeqpositionextractor_extract(positext, idx);
-    if (child.depth == 1UL)
-      position = totallength - position;
-    else
-      position = totallength - (position + child.depth);
-    if (totallength <= position)
-      filenum = numoffiles - 1;
-    else
-    {
-      filenum = gt_encseq_filenum(encseq, position);
-    }
-    parent->countTermSubtree[0][filenum] += 1;
-  }
+  gt_assert(num_of_rows == 0);
   parent->process = true;
   return 0;
 }
@@ -255,19 +263,6 @@ static int process_shu_node(ShuNode *node,
         node->countTermSubtree[0][i];
     }
   }
-  /*gt_log_log("tiefe: %lu", node->depth);
-  if (gt_log_enabled())
-  {
-    for (i = 0; i < numoffiles; i++)
-      {
-        printf("debug ");
-        for (j = 0; j < numoffiles; j++)
-        {
-          printf("%f\t", shulen[i][j]);
-        }
-        printf("\n");
-      }
-  }*/
   return 0;
 }
 
@@ -288,8 +283,8 @@ int gt_pck_calculate_shulen(const FMindex *index,
   unsigned long numoffiles, numofseq;
   BwtSeqpositionextractor *positext;
 
-  rangeOccs = gt_malloc(sizeof (*rangeOccs) * GT_MULT2(numofchars));
-  tmpmbtab = gt_malloc(sizeof (*tmpmbtab ) * numofchars);
+  rangeOccs = gt_calloc(GT_MULT2(numofchars), sizeof (*rangeOccs));
+  tmpmbtab = gt_calloc(numofchars + 3, sizeof (*tmpmbtab ));
   numoffiles = gt_encseq_num_of_files(encseq);
   numofseq = gt_encseq_num_of_sequences(encseq);
   GT_STACK_INIT(&stack, resize);
