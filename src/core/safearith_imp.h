@@ -37,8 +37,8 @@
 /* safely assign <src> to <dest>, returns 0 on success, 1 otherwise */
 #define assign(dest, src)                                                     \
         ({                                                                    \
-          typeof(src) __x  = (src);                                           \
-          typeof(dest) __y =__x;                                              \
+          __typeof__(src) __x  = (src);                                       \
+          __typeof__(dest) __y =__x;                                          \
           (__x==__y && ((__x < 1) == (__y < 1)) ? (void)((dest)=__y), 0 : 1); \
          })
 
@@ -46,22 +46,26 @@
    returns 0 on success, 1 otherwise */
 #define add_of(c, a, b)                                                       \
         ({                                                                    \
-          typeof(a) __a = a;                                                  \
-          typeof(b) __b = b;                                                  \
+          __typeof__(a) __a = a;                                              \
+          __typeof__(b) __b = b;                                              \
           (__b) < 1                                                           \
-          ? ((__MIN(typeof(c)) - (__b) <= (__a)) ? assign(c, __a + __b) : 1)  \
-          : ((__MAX(typeof(c)) - (__b) >= (__a)) ? assign(c, __a + __b) : 1); \
+          ? ((__MIN(__typeof__(c)) - (__b) <= (__a))                          \
+             ? assign(c, __a + __b) : 1)                                      \
+          : ((__MAX(__typeof__(c)) - (__b) >= (__a))                          \
+            ? assign(c, __a + __b) : 1);                                      \
         })
 
 /* safely subtract <b> from <c> and assign the result to <c>,
    returns 0 on success, 1 otherwise */
 #define sub_of(c, a, b)                                                       \
         ({                                                                    \
-          typeof(a) __a = a;                                                  \
-          typeof(b) __b = b;                                                  \
+          __typeof__(a) __a = a;                                              \
+          __typeof__(b) __b = b;                                              \
           (__b) < 1                                                           \
-          ? ((__MAX(typeof(c)) - (__b) >= (__a)) ? assign(c, __a - __b) : 1)  \
-          : ((__MIN(typeof(c)) + (__b) <= (__a)) ? assign(c, __a - __b) : 1); \
+          ? ((__MAX(__typeof__(c)) - (__b) >= (__a))                          \
+             ? assign(c, __a - __b) : 1)                                      \
+          : ((__MIN(__typeof__(c)) + (__b) <= (__a))                          \
+             ? assign(c, __a - __b) : 1);                                     \
         })
 
 #endif
