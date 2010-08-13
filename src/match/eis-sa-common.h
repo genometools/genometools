@@ -78,6 +78,7 @@ size_t gt_translateSuftab2BWT(void *data,
 size_t gt_translateSuftab2BWTSuffixptr(void *translator,
                                        void *voiddest,
                                        const Suffixptr *src,
+                                       unsigned long offset,
                                        size_t len);
 
 struct saTaggedXltorState

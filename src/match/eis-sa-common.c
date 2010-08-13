@@ -42,6 +42,7 @@ size_t gt_translateSuftab2BWT(void *translator,
 size_t gt_translateSuftab2BWTSuffixptr(void *translator,
                                        void *voiddest,
                                        const Suffixptr *src,
+                                       unsigned long offset,
                                        size_t len)
 {
   struct encSeqTrState *trState = (struct encSeqTrState *) translator;
@@ -52,7 +53,7 @@ size_t gt_translateSuftab2BWTSuffixptr(void *translator,
   for (idx = 0; idx < len; ++idx)
   {
 #define SUFFIXPTRGET(TAB,IDX)     TAB[IDX].value /* XXX remove later */
-    dest[idx] = sfxIdx2BWTSym(SUFFIXPTRGET(src,idx), trState->encseq,
+    dest[idx] = sfxIdx2BWTSym(SUFFIXPTRGET(src,offset+idx), trState->encseq,
                               trState->readmode);
   }
   return len * sizeof (GtUchar);

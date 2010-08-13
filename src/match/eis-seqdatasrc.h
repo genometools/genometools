@@ -91,6 +91,7 @@ typedef size_t (*seqDataTranslateFunc)(void *translator, void *dest,
 typedef size_t (*seqDataTranslateSuffixptrFunc)(void *translator,
                                                 void *dest,
                                                 const Suffixptr *src,
+                                                unsigned long offset,
                                                 size_t len);
 
 struct seqDataTranslator
@@ -118,11 +119,12 @@ SDRTranslate(SeqDataTranslator xltor, void *dest, const unsigned long *src,
 
 static inline size_t
 SDRTranslateSuffixptr(SeqDataTranslator xltor, void *dest,
-                      const Suffixptr *src, size_t len)
+                      const Suffixptr *src, unsigned long offset, size_t len)
 {
   if (xltor.translateDataSuffixptr != NULL)
   {
-    return xltor.translateDataSuffixptr(xltor.state.ref, dest, src, len);
+    return xltor.translateDataSuffixptr(xltor.state.ref, dest, src, offset,
+                                        len);
   }
   /* fall back to zero-translation i.e. verbatim copy */
   gt_assert(xltor.state.elemSize == sizeof (Suffixptr));
@@ -132,7 +134,7 @@ SDRTranslateSuffixptr(SeqDataTranslator xltor, void *dest,
     for (idx = 0; idx < len; idx++)
     {
 #define SUFFIXPTRGET(TAB,IDX)     TAB[IDX].value /* XXX remove later */
-      ulongdest[idx] = SUFFIXPTRGET(src,idx);
+      ulongdest[idx] = SUFFIXPTRGET(src,offset+idx);
     }
   }
   /*memcpy(dest, src, len * xltor.state.elemSize); */

@@ -378,8 +378,8 @@ SfxIGenerate(void *iface,
       size_t copyLen = MIN(elemsLeft, sfxi->lastGeneratedStart
                            + sfxi->lastGeneratedLen - generateStart),
         charsWritten =
-        SDRTranslateSuffixptr(xltor, output, sfxi->lastGeneratedSufTabSegment
-                              + generateStart - sfxi->lastGeneratedStart,
+        SDRTranslateSuffixptr(xltor, output, sfxi->lastGeneratedSufTabSegment,
+                              generateStart - sfxi->lastGeneratedStart,
                               copyLen);
       generateStart += copyLen;
       elemsLeft -= copyLen;
