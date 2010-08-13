@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -49,7 +49,11 @@ unsigned long gt_genome_node_get_start(GtGenomeNode *genome_node);
 
 /* Return the end of <genome_node>.
    Corresponds to column 5 of regular GFF3 lines. */
-unsigned long gt_genome_node_get_end(GtGenomeNode *genome_Node);
+unsigned long gt_genome_node_get_end(GtGenomeNode *genome_node);
+
+/* Return the length of <genome_node>.
+   Computed from column 4 and 5 of regular GFF3 lines. */
+unsigned long gt_genome_node_get_length(GtGenomeNode *genome_node);
 
 /* Return the filename the <genome_node> was read from.
    If the node did not originate from a file, an appropriate string is

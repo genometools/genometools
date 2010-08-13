@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -246,6 +246,14 @@ GtRange gt_genome_node_get_range(GtGenomeNode *gn)
 {
   gt_assert(gn && gn->c_class && gn->c_class->get_range);
   return gn->c_class->get_range(gn);
+}
+
+unsigned long gt_genome_node_get_length(GtGenomeNode *gn)
+{
+  GtRange range;
+  gt_assert(gn && gn->c_class && gn->c_class->get_range);
+  range = gt_genome_node_get_range(gn);
+  return gt_range_length(&range);
 }
 
 void gt_genome_node_set_range(GtGenomeNode *gn, const GtRange *range)
