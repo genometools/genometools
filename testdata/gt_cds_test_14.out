@@ -4,7 +4,7 @@ dna	.	gene	1	15	.	-	.	ID=gene1
 dna	.	exon	1	3	.	-	.	Parent=gene1
 dna	gt cds	CDS	1	3	.	-	0	Parent=gene1
 dna	.	exon	7	9	.	-	.	Parent=gene1
-dna	gt cds	CDS	7	9	.	-	2	Parent=gene1
+dna	gt cds	CDS	7	9	.	-	0	Parent=gene1
 dna	.	exon	13	15	.	-	.	Parent=gene1
-dna	gt cds	CDS	13	15	.	-	2	Parent=gene1
+dna	gt cds	CDS	13	15	.	-	0	Parent=gene1
 ###
