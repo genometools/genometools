@@ -181,7 +181,7 @@ GtNodeStream* gt_chseqids_stream_new(GtNodeStream *in_stream,
   cs = chseqids_stream_cast(gs);
   cs->in_stream = gt_node_stream_ref(in_stream);
   cs->chseqids_mapping = gt_mapping_new(chseqids_file, "chseqids",
-                                     MAPPINGTYPE_STRING, err);
+                                        GT_MAPPINGTYPE_STRING, err);
   if (!cs->chseqids_mapping) {
     gt_node_stream_delete(gs);
     return NULL;

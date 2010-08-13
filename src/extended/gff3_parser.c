@@ -149,7 +149,7 @@ int gt_gff3_parser_set_offsetfile(GtGFF3Parser *parser, GtStr *offsetfile,
   gt_assert(parser);
   gt_assert(parser->offset == GT_UNDEF_LONG);
   parser->offset_mapping = gt_mapping_new(offsetfile, "offsets",
-                                       MAPPINGTYPE_INTEGER, err);
+                                          GT_MAPPINGTYPE_INTEGER, err);
   if (parser->offset_mapping)
     return 0;
   return -1;

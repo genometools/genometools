@@ -52,8 +52,8 @@ GtRegionMapping* gt_region_mapping_new_mapping(GtStr *mapping_filename,
   gt_error_check(err);
   gt_assert(mapping_filename);
   rm = gt_calloc(1, sizeof (GtRegionMapping));
-  rm->mapping = gt_mapping_new(mapping_filename, "mapping", MAPPINGTYPE_STRING,
-                               err);
+  rm->mapping = gt_mapping_new(mapping_filename, "mapping",
+                               GT_MAPPINGTYPE_STRING, err);
   if (!rm->mapping) {
     gt_region_mapping_delete(rm);
     return NULL;

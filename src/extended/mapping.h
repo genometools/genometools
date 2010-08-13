@@ -21,8 +21,8 @@
 #include "core/str.h"
 
 typedef enum {
-  MAPPINGTYPE_STRING,
-  MAPPINGTYPE_INTEGER
+  GT_MAPPINGTYPE_STRING,
+  GT_MAPPINGTYPE_INTEGER
 } GtMappingType;
 
 /* a generic mapping */
