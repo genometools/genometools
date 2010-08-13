@@ -773,11 +773,12 @@ static int check_missing_attributes(GtGenomeNode *this_feature,
     if (!gt_feature_node_get_attribute(other_feature,
                                       gt_str_array_get(this_attributes, i))) {
       gt_error_set(err, "the multi-feature with %s \"%s\" on line %u in file "
-                "\"%s\" does not have a '%s' attribute which is present in its "
-                "counterpart on line %u", ID_STRING, id,
-                gt_genome_node_get_line_number((GtGenomeNode*) other_feature),
-                filename, gt_str_array_get(this_attributes, i),
-                gt_genome_node_get_line_number(this_feature));
+                   "\"%s\" does not have a '%s' attribute which is present in "
+                   "its counterpart on line %u", ID_STRING, id,
+                   gt_genome_node_get_line_number((GtGenomeNode*)
+                                                  other_feature),
+                   filename, gt_str_array_get(this_attributes, i),
+                   gt_genome_node_get_line_number(this_feature));
       had_err = -1;
       break;
     }
