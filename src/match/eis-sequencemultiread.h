@@ -52,6 +52,7 @@ struct seqReaderSet
   struct seqReaderState *consumerList;
   struct seqSinkState *autoConsumerList;
   unsigned long backlogStartPos;
+  bool fromSuffixsortspace;
   size_t backlogSize, backlogLen, backlogElemSize;
   void *seqDataBacklog, *generatorState;
   generatorFunc generator;
@@ -60,16 +61,20 @@ struct seqReaderSet
 /**
  * @return numReaders if all consumers registered otherwise
  */
+/*
 int
 gt_initSeqReaderSet(SeqReaderSet *readerSet, int initialSuperSet,
                  int numConsumers, int *tags, SeqDataTranslator xltors[],
                  SeqDataReader *generatedReaders, size_t seqElemSize,
                  generatorFunc generator, void *generatorState);
+*/
 
 void
 gt_initEmptySeqReaderSet(SeqReaderSet *readerSet, int initialSuperSet,
-                      size_t seqElemSize, generatorFunc generator,
-                      void *generatorState);
+                         bool fromSuffixsortspace,
+                         size_t seqElemSize,
+                         generatorFunc generator,
+                         void *generatorState);
 
 /**
  * @return readData field will be NULL on error -> test with

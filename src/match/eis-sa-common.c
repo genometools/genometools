@@ -21,12 +21,12 @@
 #include "match/eis-sa-common.h"
 #include "match/suffixptr.h"
 
-size_t gt_translateSuftab2BWT(void *data,
+size_t gt_translateSuftab2BWT(void *translator,
                               void *voiddest,
                               const unsigned long *src,
                               size_t len)
 {
-  struct encSeqTrState *trState = (struct encSeqTrState *) data;
+  struct encSeqTrState *trState = (struct encSeqTrState *) translator;
   GtUchar *dest = (GtUchar *) voiddest;
   size_t idx;
 

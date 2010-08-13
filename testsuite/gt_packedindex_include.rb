@@ -64,21 +64,21 @@ def runAndCheckPackedIndex(indexName,dbFiles, extraParams=Hash.new)
            :maxtime => params[:timeOuts][:chksearch])
 end
 
+myfilelist = ["RandomN.fna","Random.fna","Atinsert.fna",
+              "TTT-small.fna","trna_glutamine.fna",
+              "Random-Small.fna","Duplicate.fna"]
+
 Name "gt packedindex check tools for simple sequences"
 Keywords "gt_packedindex"
 Test do
-  allfiles = prependTestdata(["RandomN.fna","Random.fna","Atinsert.fna",
-                              "TTT-small.fna","trna_glutamine.fna",
-                              "Random-Small.fna","Duplicate.fna"])
+  allfiles = prependTestdata(myfilelist)
   runAndCheckPackedIndex('miniindex', allfiles)
 end
 
 Name "gt packedindex check tools for simple sequences w/o locate"
 Keywords "gt_packedindex"
 Test do
-  allfiles = prependTestdata(["RandomN.fna","Random.fna","Atinsert.fna",
-                              "TTT-small.fna","trna_glutamine.fna",
-                              "Random-Small.fna","Duplicate.fna"])
+  allfiles = prependTestdata(myfilelist)
   runAndCheckPackedIndex('miniindex', allfiles,
                          :bdx => { '-locfreq' => 0 },
                          :chksearch => { '-chksfxarray' => 'no' })
@@ -87,9 +87,7 @@ end
 Name "gt packedindex check tools for simple sequences with sprank"
 Keywords "gt_packedindex"
 Test do
-  allfiles = prependTestdata(["RandomN.fna","Random.fna","Atinsert.fna",
-                              "TTT-small.fna","trna_glutamine.fna",
-                              "Random-Small.fna","Duplicate.fna"])
+  allfiles = prependTestdata(myfilelist)
   runAndCheckPackedIndex('miniindex', allfiles,
                          :bdx => { '-sprank' => nil },
                          :chksearch => { '-full-lfmap' => nil },
@@ -112,9 +110,7 @@ end
 Name "gt packedindex check tools for simple sequences with context"
 Keywords "gt_packedindex"
 Test do
-  allfiles = prependTestdata(["RandomN.fna","Random.fna","Atinsert.fna",
-                              "TTT-small.fna","trna_glutamine.fna",
-                              "Random-Small.fna","Duplicate.fna"])
+  allfiles = prependTestdata(myfilelist)
   runAndCheckPackedIndex('miniindex', allfiles,
                          :bdx => { '-sprank' => nil, '-ctxilog' => -1 },
                          :chksearch => { '-chkcontext' => nil },
@@ -133,9 +129,7 @@ end
 Name "gt packedindex check tools for simple sequences, tr-mode"
 Keywords "gt_packedindex"
 Test do
-  allfiles = prependTestdata(["RandomN.fna","Random.fna","Atinsert.fna",
-                              "TTT-small.fna","trna_glutamine.fna",
-                              "Random-Small.fna","Duplicate.fna"])
+  allfiles = prependTestdata(myfilelist)
   runAndCheckPackedIndex('miniindex', allfiles,
                          :useSuftabTranslation => true,
                          :bdx => { '-sprank' => nil },

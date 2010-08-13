@@ -20,6 +20,7 @@
 #include "core/ma_api.h"
 #include "core/unused_api.h"
 #include "match/eis-sequencemultiread.h"
+#include "match/sarr-def.h"
 #include "match/eis-list-do.h"
 
 struct seqReaderState
@@ -89,9 +90,11 @@ gt_initSeqReaderSet(SeqReaderSet *readerSet, int initialSuperSet,
 
 void
 gt_initEmptySeqReaderSet(SeqReaderSet *readerSet, int initialSuperSet,
-                      size_t seqElemSize, generatorFunc generator,
-                      void *generatorState)
+                         bool fromSuffixsortspace,
+                         size_t seqElemSize, generatorFunc generator,
+                         void *generatorState)
 {
+  readerSet->fromSuffixsortspace = fromSuffixsortspace;
   readerSet->tagSuperSet = initialSuperSet;
   readerSet->numAutoConsumers = readerSet->numConsumers = 0;
   readerSet->consumerList = NULL;
@@ -277,7 +280,6 @@ seqReaderSetMove2Backlog(void *backlogState, const void *seqData,
   struct seqReaderSet *readerSet = backlogState;
   gt_assert(backlogState && (requestLen?(seqData!=NULL):1));
   requestMinPos = seqReaderSetFindMinOpenRequest(readerSet);
-  STAMP;
   gt_assert(readerSet->backlogElemSize == sizeof (Suffixptr));
   /* 1. pass all data to be invalidated to automatic sinks */
   {
@@ -286,7 +288,9 @@ seqReaderSetMove2Backlog(void *backlogState, const void *seqData,
     /* The following must hold, as writer is not defined */
     gt_assert(numAutoConsumers == 0);
     for (i = 0; i < numAutoConsumers; ++i)
+    {
       SDWWrite(sinks[i].writer, seqData, requestLen);
+    }
   }
   /* 2. move still unread old values as far as possible to head of copy */
   gt_assert(requestMinPos >= readerSet->backlogStartPos);
@@ -314,7 +318,6 @@ seqReaderSetMove2Backlog(void *backlogState, const void *seqData,
     if (copyLen)
     {
       unsigned long *destSptr;
-      Suffixptr *srcSptr;
 
       size_t idx, backlogSizeLeft
         = readerSet->backlogSize - readerSet->backlogLen;
@@ -326,13 +329,25 @@ seqReaderSetMove2Backlog(void *backlogState, const void *seqData,
                        * newSize);
         readerSet->backlogSize = newSize;
       }
-      srcSptr = ((Suffixptr *) seqData) + (copyStartPos - requestStart);
       destSptr = ((unsigned long *) readerSet->seqDataBacklog) +
                  readerSet->backlogLen;
-      for (idx = 0; idx< copyLen; idx++)
+      if (readerSet->fromSuffixsortspace)
       {
+        Suffixptr *srcSptr
+          = ((Suffixptr *) seqData) + (copyStartPos - requestStart);
+        for (idx = 0; idx< copyLen; idx++)
+        {
 #define SUFFIXPTRGET(TAB,IDX)     TAB[IDX].value /* XXX remove later */
-        destSptr[idx] = SUFFIXPTRGET(srcSptr,idx);
+          destSptr[idx] = SUFFIXPTRGET(srcSptr,idx);
+        }
+      } else
+      {
+        ESASuffixptr *srcSptr
+          = ((ESASuffixptr *) seqData) + (copyStartPos - requestStart);
+        for (idx = 0; idx< copyLen; idx++)
+        {
+          destSptr[idx] = ESASUFFIXPTRGET(srcSptr,idx);
+        }
       }
       /*
       memcpy((char *)readerSet->seqDataBacklog

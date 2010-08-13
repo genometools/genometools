@@ -70,13 +70,11 @@ gt_initSuffixarrayFileInterface(SuffixarrayFileInterface *sai,
 {
   {
     RandomSeqAccessor origSeqAccess = { gt_SAIGetOrigSeq, sai };
-    STAMP;
     initSASeqSrc(&sai->baseClass, seqLen, NULL, SAIBaseMakeReader,
                  SAIBaseGetRot0Pos, NULL,
                  origSeqAccess, gt_deleteSuffixarrayFileInterfaceBase,
                  gt_SAIBaseNewMRAEnc,
                  SAIGenerate, sai);
-    STAMP;
   }
   sai->sa = sa;
   sai->numBWTFileReaders = 0;

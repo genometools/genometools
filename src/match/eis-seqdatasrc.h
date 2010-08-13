@@ -102,18 +102,14 @@ struct seqDataTranslator
 
 typedef struct seqDataTranslator SeqDataTranslator;
 
-extern unsigned long counttranslatememcpy, counttranslateData;
-
 static inline size_t
 SDRTranslate(SeqDataTranslator xltor, void *dest, const unsigned long *src,
              size_t len)
 {
   if (xltor.translateData != NULL)
   {
-    counttranslateData++;
     return xltor.translateData(xltor.state.ref, dest, src, len);
   }
-  counttranslatememcpy++;
   /* fall back to zero-translation i.e. verbatim copy */
   gt_assert(xltor.state.elemSize == sizeof (Suffixptr));
   memcpy(dest, src, len * xltor.state.elemSize);
@@ -126,10 +122,8 @@ SDRTranslateSuffixptr(SeqDataTranslator xltor, void *dest,
 {
   if (xltor.translateDataSuffixptr != NULL)
   {
-    counttranslateData++;
     return xltor.translateDataSuffixptr(xltor.state.ref, dest, src, len);
   }
-  counttranslatememcpy++;
   /* fall back to zero-translation i.e. verbatim copy */
   gt_assert(xltor.state.elemSize == sizeof (Suffixptr));
   {

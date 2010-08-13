@@ -107,24 +107,26 @@ initSASeqSrc(SASeqSrc *src, unsigned long seqLen,
   gt_assert(getRot0Pos);
   src->seqLen = seqLen;
   src->createTranslator = createTranslator;
+  /* createTranslator is not NULL iff read from suffixerator */
+  /* createReader is not NULL iff read from suffixarray */
   if (createTranslator && !createReader)
   {
     src->createReader = gt_SASSGenericCreateReader;
-  }
-  else
+  } else
+  {
     src->createReader = createReader;
+  }
   src->getRot0Pos = getRot0Pos;
   src->getSeqStats = getSeqStats;
   src->origSequenceAccess = origSeqAccess;
   src->deleteSASS = deleteSASS;
   src->newMRAEnc = newMRAEnc;
   src->alphabet = NULL;
-  STAMP;
   gt_initEmptySeqReaderSet(&src->readerSet,
-                        SFX_REQUEST_NONE,
-                        sizeof (unsigned long),
-                        generator, generatorState);
-  STAMP;
+                           SFX_REQUEST_NONE,
+                           (createTranslator != NULL) ? true : false,
+                           sizeof (unsigned long),
+                           generator, generatorState);
   gt_initSATaggedXltorStateList(&src->xltorStates);
 }
 

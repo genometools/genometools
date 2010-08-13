@@ -373,8 +373,6 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
   return haserr ? -1 : 0;
 }
 
-unsigned long counttranslatememcpy = 0, counttranslateData = 0;
-
 static int run_packedindexconstruction(GtLogger *logger,
                                       GtProgressTimer *sfxprogress,
                                       bool withprogressbar,
@@ -433,8 +431,6 @@ static int run_packedindexconstruction(GtLogger *logger,
       gt_deleteSfxInterface(si);
     }
   }
-  fprintf(stderr,"counttranslatememcpy=%lu\n",counttranslatememcpy);
-  fprintf(stderr,"counttranslateData=%lu\n",counttranslateData);
   return haserr ? -1 : 0;
 }
 
