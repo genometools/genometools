@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -27,21 +27,19 @@ typedef struct GtGFF3OutStream GtGFF3OutStream;
 const GtNodeStreamClass* gt_gff3_out_stream_class(void);
 /* Create a <GtGFF3OutStream*> which uses <in_stream> as input.
    It shows the nodes passed through it as GFF3 on <outfp>. */
-GtNodeStream*            gt_gff3_out_stream_new(GtNodeStream *in_stream,
-                                                GtFile *outfp);
+GtNodeStream* gt_gff3_out_stream_new(GtNodeStream *in_stream, GtFile *outfp);
 /* Set the width with which the FASTA sequences of <GtSequenceNode>s passed
    through <gff3_out_stream> are shown to <fasta_width>.
    Per default, each FASTA entry is shown on a single line. */
-void                     gt_gff3_out_stream_set_fasta_width(GtNodeStream
-                                                            *gff3_out_stream,
-                                                            unsigned long
-                                                            fasta_width);
+void          gt_gff3_out_stream_set_fasta_width(GtGFF3OutStream
+                                                 *gff3_out_stream,
+                                                 unsigned long fasta_width);
 /* If this method is called upon <gff3_out_stream>, use the original ID
    attributes provided in the input (instead of creating new ones, which
    is the default). Memory consumption for <gff3_out_stream> is raised from O(1)
    to O(<input_size>), because bookkeeping of used IDs becomes necessary to
    avoid ID collisions. */
-void                     gt_gff3_out_stream_retain_id_attributes(GtNodeStream
-                                                              *gff3_out_stream);
+void          gt_gff3_out_stream_retain_id_attributes(GtGFF3OutStream
+                                                      *gff3_out_stream);
 
 #endif

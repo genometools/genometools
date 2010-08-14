@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -40,7 +40,7 @@ void                     gt_gff3_in_stream_check_id_attributes(GtGFF3InStream
                                                                *gff3_in_stream);
 /* Enable tidy mode for <gff3_in_stream>. That is, the GFF3 parser tries to tidy
    up features which would normally lead to an error. */
-void                     gt_gff3_in_stream_enable_tidy_mode(GtNodeStream
+void                     gt_gff3_in_stream_enable_tidy_mode(GtGFF3InStream
                                                             *gff3_in_stream);
 /* Show progress bar on <stdout> to convey the progress of parsing the GFF3
    files underlying <gff3_in_stream>. */

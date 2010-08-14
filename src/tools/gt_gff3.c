@@ -220,7 +220,7 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
 
   /* enable tidy mode (if necessary) */
   if (!had_err && arguments->tidy)
-    gt_gff3_in_stream_enable_tidy_mode(gff3_in_stream);
+    gt_gff3_in_stream_enable_tidy_mode((GtGFF3InStream*) gff3_in_stream);
 
   /* create sort stream (if necessary) */
   if (!had_err && arguments->sort) {
@@ -245,11 +245,12 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
   /* create gff3 output stream */
   if (!had_err) {
     gff3_out_stream = gt_gff3_out_stream_new(last_stream, arguments->outfp);
-    gt_gff3_out_stream_set_fasta_width(gff3_out_stream, arguments->width);
+    gt_gff3_out_stream_set_fasta_width((GtGFF3OutStream*) gff3_out_stream,
+                                       arguments->width);
   }
 
   if (!had_err && arguments->retainids)
-    gt_gff3_out_stream_retain_id_attributes(gff3_out_stream);
+    gt_gff3_out_stream_retain_id_attributes((GtGFF3OutStream*) gff3_out_stream);
 
   /* pull the features through the stream and free them afterwards */
   if (!had_err)

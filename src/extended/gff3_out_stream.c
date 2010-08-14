@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -70,17 +70,15 @@ GtNodeStream* gt_gff3_out_stream_new(GtNodeStream *in_stream, GtFile *outfp)
   return ns;
 }
 
-void gt_gff3_out_stream_set_fasta_width(GtNodeStream *ns,
-                                     unsigned long fasta_width)
+void gt_gff3_out_stream_set_fasta_width(GtGFF3OutStream *gff3_out_stream,
+                                        unsigned long fasta_width)
 {
-  GtGFF3OutStream *gff3_out_stream = gff3_out_stream_cast(ns);
   gt_assert(gff3_out_stream);
   gt_gff3_visitor_set_fasta_width(gff3_out_stream->gff3_visitor, fasta_width);
 }
 
-void gt_gff3_out_stream_retain_id_attributes(GtNodeStream *ns)
+void gt_gff3_out_stream_retain_id_attributes(GtGFF3OutStream *gff3_out_stream)
 {
-  GtGFF3OutStream *gff3_out_stream = gff3_out_stream_cast(ns);
   gt_assert(gff3_out_stream);
   gt_gff3_visitor_retain_id_attributes(gff3_out_stream->gff3_visitor);
 
