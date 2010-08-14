@@ -1,7 +1,8 @@
 ##gff-version   3
 ##sequence-region   gDNA 1 80
-gDNA	.	gene	10	20	.	-	.	ID=gene
-gDNA	.	mRNA	10	20	.	-	.	ID=mRNA;Parent=gene
-gDNA	.	exon	10	20	.	-	.	Parent=mRNA
-gDNA	.	CDS	10	20	.	-	.	Parent=mRNA
-gDNA	.	exon	10	20	.	-	.	Parent=mRNA
+gDNA	.	gene	10	20	.	-	.	ID=gene1
+gDNA	.	mRNA	10	20	.	-	.	ID=mRNA1;Parent=gene1
+gDNA	.	exon	10	20	.	-	.	Parent=mRNA1
+gDNA	.	CDS	10	20	.	-	0	Parent=mRNA1
+gDNA	.	exon	10	20	.	-	.	Parent=mRNA1
+###

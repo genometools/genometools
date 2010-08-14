@@ -1,0 +1,10 @@
+##gff-version   3
+##sequence-region   dna 1 200
+dna	.	gene	1	109	.	+	.	ID=gene1
+dna	.	exon	1	11	.	+	.	Parent=gene1
+dna	.	CDS	1	11	.	+	0	Parent=gene1
+dna	.	exon	11	21	.	+	.	Parent=gene1
+dna		CDS	11	21	.	+	1	Parent=gene1
+dna	.	exon	101	109	.	+	.	Parent=gene1
+dna	.	CDS	101	109	.	+	0	Parent=gene1
+###

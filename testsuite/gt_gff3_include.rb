@@ -831,6 +831,70 @@ Test do
   run "diff #{$last_stdout} #{$testdata}standard_gene_simple.gff3"
 end
 
+1.upto(12) do |i|
+  Name "gt gff3 (CDS check succ #{i})"
+  Keywords "gt_gff3 cds_check"
+  Test do
+    run_test "#{$bin}gt gff3 #{$testdata}cds_check_succ_#{i}.gff3"
+  end
+end
+
+Name "gt gff3 (CDS check fail 1)"
+Keywords "gt_gff3 cds_check"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}cds_check_fail_1.gff3", :retval => 1
+  grep $last_stderr, /has the wrong phase 1 \(should be 0\)/
+end
+
+Name "gt gff3 (CDS check fail 1, -tidy)"
+Keywords "gt_gff3 cds_check"
+Test do
+  run_test "#{$bin}gt gff3 -tidy #{$testdata}cds_check_fail_1.gff3"
+  run "diff #{$last_stdout} #{$testdata}cds_check_succ_1.gff3"
+end
+
+Name "gt gff3 (CDS check fail 2)"
+Keywords "gt_gff3 cds_check"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}cds_check_fail_2.gff3", :retval => 1
+  grep $last_stderr, /has the wrong phase 2 \(should be 1\)/
+end
+
+Name "gt gff3 (CDS check fail 2, -tidy)"
+Keywords "gt_gff3 cds_check"
+Test do
+  run_test "#{$bin}gt gff3 -tidy #{$testdata}cds_check_fail_2.gff3"
+  run "diff #{$last_stdout} #{$testdata}cds_check_succ_5.gff3"
+end
+
+Name "gt gff3 (CDS check fail 3)"
+Keywords "gt_gff3 cds_check"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}cds_check_fail_3.gff3", :retval => 1
+  grep $last_stderr, /has the wrong phase 0 \(should be 2\)/
+end
+
+Name "gt gff3 (CDS check fail 3, -tidy)"
+Keywords "gt_gff3 cds_check"
+Test do
+  run_test "#{$bin}gt gff3 -tidy #{$testdata}cds_check_fail_3.gff3"
+  run "diff #{$last_stdout} #{$testdata}cds_check_succ_9.gff3"
+end
+
+Name "gt gff3 (CDS check fail 4)"
+Keywords "gt_gff3 cds_check"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}cds_check_fail_4.gff3", :retval => 1
+  grep $last_stderr, /has the wrong phase 0 \(should be 1\)/
+end
+
+Name "gt gff3 (CDS check fail 4, -tidy)"
+Keywords "gt_gff3 cds_check"
+Test do
+  run_test "#{$bin}gt gff3 -tidy #{$testdata}cds_check_fail_4.gff3"
+  run "diff #{$last_stdout} #{$testdata}cds_check_succ_12.gff3"
+end
+
 def large_gff3_test(name, file)
   Name "gt gff3 #{name}"
   Keywords "gt_gff3 large_gff3"
