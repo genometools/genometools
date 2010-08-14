@@ -96,8 +96,8 @@ static int check_cds_phases_if_necessary(GtFeatureNode *fn, bool tidy,
   return had_err;
 }
 
-static int cds_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
-                                    GtError *err)
+static int cds_check_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
+                                          GtError *err)
 {
   GtCDSCheckVisitor *v = cds_check_visitor_cast(nv);
   GtFeatureNodeIterator *fni;
@@ -119,7 +119,7 @@ const GtNodeVisitorClass* gt_cds_check_visitor_class()
     nvc = gt_node_visitor_class_new(sizeof (GtCDSCheckVisitor),
                                     NULL,
                                     NULL,
-                                    cds_visitor_feature_node,
+                                    cds_check_visitor_feature_node,
                                     NULL,
                                     NULL);
   }
