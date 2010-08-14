@@ -210,7 +210,6 @@ seqReaderSetRead(void *src, void *dest, size_t len)
                                   * readerSet->backlogElemSize,
                                   subLen);
       */
-      gt_assert(state->xltor.state.elemSize == sizeof (Suffixptr));
       memcpy(dest, (char *)readerSet->seqDataBacklog
                    + (pos - readerSet->backlogStartPos)
                    * readerSet->backlogElemSize,
@@ -280,7 +279,6 @@ seqReaderSetMove2Backlog(void *backlogState, const void *seqData,
   struct seqReaderSet *readerSet = backlogState;
   gt_assert(backlogState && (requestLen?(seqData!=NULL):1));
   requestMinPos = seqReaderSetFindMinOpenRequest(readerSet);
-  gt_assert(readerSet->backlogElemSize == sizeof (Suffixptr));
   /* 1. pass all data to be invalidated to automatic sinks */
   {
     int i, numAutoConsumers = readerSet->numAutoConsumers;
@@ -333,12 +331,11 @@ seqReaderSetMove2Backlog(void *backlogState, const void *seqData,
                  readerSet->backlogLen;
       if (readerSet->fromSuffixsortspace)
       {
-        Suffixptr *srcSptr
-          = ((Suffixptr *) seqData) + (copyStartPos - requestStart);
+        Suffixsortspace *srcSptr = (Suffixsortspace *) seqData;
         for (idx = 0; idx< copyLen; idx++)
         {
-#define SUFFIXPTRGET(TAB,IDX)     TAB[IDX].value /* XXX remove later */
-          destSptr[idx] = SUFFIXPTRGET(srcSptr,idx);
+          destSptr[idx] = suffixptrget3(srcSptr,
+                                        copyStartPos - requestStart + idx);
         }
       } else
       {

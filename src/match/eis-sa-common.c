@@ -19,7 +19,6 @@
 #include "core/ma_api.h"
 #include "core/encseq.h"
 #include "match/eis-sa-common.h"
-#include "match/suffixptr.h"
 
 size_t gt_translateSuftab2BWT(void *translator,
                               void *voiddest,
@@ -39,9 +38,10 @@ size_t gt_translateSuftab2BWT(void *translator,
   return len * sizeof (GtUchar);
 }
 
-size_t gt_translateSuftab2BWTSuffixptr(void *translator,
+size_t gt_translateSuftab2BWTSuffixsortspace(
+                                       void *translator,
                                        void *voiddest,
-                                       const Suffixptr *src,
+                                       const Suffixsortspace *suffixsortspace,
                                        unsigned long offset,
                                        size_t len)
 {
@@ -52,9 +52,8 @@ size_t gt_translateSuftab2BWTSuffixptr(void *translator,
   gt_assert(trState);
   for (idx = 0; idx < len; ++idx)
   {
-#define SUFFIXPTRGET(TAB,IDX)     TAB[IDX].value /* XXX remove later */
-    dest[idx] = sfxIdx2BWTSym(SUFFIXPTRGET(src,offset+idx), trState->encseq,
-                              trState->readmode);
+    dest[idx] = sfxIdx2BWTSym(suffixptrget3(suffixsortspace,offset+idx),
+                              trState->encseq, trState->readmode);
   }
   return len * sizeof (GtUchar);
 }

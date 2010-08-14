@@ -25,7 +25,7 @@
 
 #include "core/error.h"
 #include "stamp.h"
-#include "suffixptr.h"
+#include "sfx-suffixgetset.h"
 
 /* sequential data source api */
 typedef void *SeqDataSrc;
@@ -88,17 +88,18 @@ typedef union translatorState TranslatorState;
 typedef size_t (*seqDataTranslateFunc)(void *translator, void *dest,
                                        const unsigned long *src, size_t len);
 
-typedef size_t (*seqDataTranslateSuffixptrFunc)(void *translator,
-                                                void *dest,
-                                                const Suffixptr *src,
-                                                unsigned long offset,
-                                                size_t len);
+typedef size_t (*seqDataTranslateSuffixsortspaceFunc)(
+                               void *translator,
+                               void *dest,
+                               const Suffixsortspace *suffixsortspace,
+                               unsigned long offset,
+                               size_t len);
 
 struct seqDataTranslator
 {
   TranslatorState state;
   seqDataTranslateFunc translateData;
-  seqDataTranslateSuffixptrFunc translateDataSuffixptr;
+  seqDataTranslateSuffixsortspaceFunc translateDataSuffixsortspace;
 };
 
 typedef struct seqDataTranslator SeqDataTranslator;
@@ -112,29 +113,28 @@ SDRTranslate(SeqDataTranslator xltor, void *dest, const unsigned long *src,
     return xltor.translateData(xltor.state.ref, dest, src, len);
   }
   /* fall back to zero-translation i.e. verbatim copy */
-  gt_assert(xltor.state.elemSize == sizeof (Suffixptr));
   memcpy(dest, src, len * xltor.state.elemSize);
   return len * xltor.state.elemSize;
 }
 
 static inline size_t
-SDRTranslateSuffixptr(SeqDataTranslator xltor, void *dest,
-                      const Suffixptr *src, unsigned long offset, size_t len)
+SDRTranslateSuffixsortspace(SeqDataTranslator xltor, void *dest,
+                      const Suffixsortspace *suffixsortspace,
+                      unsigned long offset, size_t len)
 {
-  if (xltor.translateDataSuffixptr != NULL)
+  if (xltor.translateDataSuffixsortspace != NULL)
   {
-    return xltor.translateDataSuffixptr(xltor.state.ref, dest, src, offset,
-                                        len);
+    return xltor.translateDataSuffixsortspace(xltor.state.ref, dest,
+                                              suffixsortspace,
+                                              offset, len);
   }
   /* fall back to zero-translation i.e. verbatim copy */
-  gt_assert(xltor.state.elemSize == sizeof (Suffixptr));
   {
     size_t idx;
     unsigned long *ulongdest = (unsigned long *) dest;
     for (idx = 0; idx < len; idx++)
     {
-#define SUFFIXPTRGET(TAB,IDX)     TAB[IDX].value /* XXX remove later */
-      ulongdest[idx] = SUFFIXPTRGET(src,offset+idx);
+      ulongdest[idx] = suffixptrget3(suffixsortspace,offset+idx);
     }
   }
   /*memcpy(dest, src, len * xltor.state.elemSize); */

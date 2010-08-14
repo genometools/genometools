@@ -124,7 +124,7 @@ gt_SAIMakeBWTReader(SuffixarrayFileInterface *sai)
       struct seqDataTranslator xltor = {
         { .ref = &stateStore->state },
         gt_translateSuftab2BWT,
-        gt_translateSuftab2BWTSuffixptr
+        gt_translateSuftab2BWTSuffixsortspace
       };
 
       reader = gt_seqReaderSetRegisterConsumer(&sai->baseClass.readerSet,

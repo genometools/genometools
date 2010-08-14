@@ -30,6 +30,7 @@
 #include "match/eis-mrangealphabet.h"
 #include "match/eis-random-seqaccess.h"
 #include "match/eis-seqdatasrc.h"
+#include "match/sfx-suffixgetset.h"
 
 /**
  * Describes what kind of information will be read by a requestor:
@@ -75,9 +76,10 @@ size_t gt_translateSuftab2BWT(void *data,
                               const unsigned long *src,
                               size_t len);
 
-size_t gt_translateSuftab2BWTSuffixptr(void *translator,
+size_t gt_translateSuftab2BWTSuffixsortspace(
+                                       void *translator,
                                        void *voiddest,
-                                       const Suffixptr *src,
+                                       const Suffixsortspace *suffixsortspace,
                                        unsigned long offset,
                                        size_t len);
 

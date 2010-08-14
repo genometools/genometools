@@ -37,7 +37,6 @@
 #include "match/eis-sa-common.h"
 #include "match/eis-sequencemultiread.h"
 #include "match/eis-suffixerator-interface.h"
-#include "match/suffixptr.h"
 
 struct sfxInterface
 {
@@ -53,7 +52,7 @@ struct sfxInterface
   bool specialsuffixes;
   /* data relevant to holding portions of the suffix array */
   unsigned long lastGeneratedLen, lastGeneratedStart;
-  const Suffixptr *lastGeneratedSufTabSegment;
+  const Suffixsortspace *lastGeneratedSufTabSegment;
 };
 
 static SeqDataTranslator
@@ -72,10 +71,10 @@ SfxIRequest2XltorFunc(sfxInterface *sfxi,
                                         rtype, readState);
     tr.state.ref = &stateStore->state;
     tr.translateData = gt_translateSuftab2BWT;
-    tr.translateDataSuffixptr = gt_translateSuftab2BWTSuffixptr;
+    tr.translateDataSuffixsortspace = gt_translateSuftab2BWTSuffixsortspace;
     break;
   case SFX_REQUEST_SUFTAB:
-    tr.state.elemSize = sizeof (Suffixptr);
+    tr.state.elemSize = sizeof (unsigned long);
     gt_assert(tr.translateData == NULL);
     break;
   default:
@@ -378,9 +377,10 @@ SfxIGenerate(void *iface,
       size_t copyLen = MIN(elemsLeft, sfxi->lastGeneratedStart
                            + sfxi->lastGeneratedLen - generateStart),
         charsWritten =
-        SDRTranslateSuffixptr(xltor, output, sfxi->lastGeneratedSufTabSegment,
-                              generateStart - sfxi->lastGeneratedStart,
-                              copyLen);
+        SDRTranslateSuffixsortspace(xltor, output,
+                                    sfxi->lastGeneratedSufTabSegment,
+                                    generateStart - sfxi->lastGeneratedStart,
+                                    copyLen);
       generateStart += copyLen;
       elemsLeft -= copyLen;
       output = (char *)output + charsWritten;
@@ -388,27 +388,25 @@ SfxIGenerate(void *iface,
     /* 1. read next region of sequence by calling nextSfxIterator */
     if (elemsLeft)
     {
-      const Suffixsortspace *suffixsortspace;
 
       move2Backlog(backlogState, sfxi->lastGeneratedSufTabSegment,
                    sfxi->lastGeneratedStart, sfxi->lastGeneratedLen);
       sfxi->lastGeneratedStart += sfxi->lastGeneratedLen;
-      suffixsortspace = gt_nextSfxiterator(&sfxi->lastGeneratedLen,
-                                           &sfxi->specialsuffixes,
-                                           sfxi->sfi);
-      if (suffixsortspace != NULL)
+      sfxi->lastGeneratedSufTabSegment
+        = gt_nextSfxiterator(&sfxi->lastGeneratedLen,
+                             &sfxi->specialsuffixes,
+                             sfxi->sfi);
+      if (sfxi->lastGeneratedSufTabSegment != NULL)
       {
         /* size_t because the current approach cannot generate more
          * than memory will hold anyway */
         size_t pos, lastGeneratedLen = sfxi->lastGeneratedLen;
 
-        sfxi->lastGeneratedSufTabSegment
-          = gt_suffixsortspace_sortspace_get(suffixsortspace);
         if (!sfxi->rot0Pos.defined)
         {
           for (pos=0; pos < lastGeneratedLen; pos++)
           {
-            if (suffixptrget3(suffixsortspace,pos) == 0)
+            if (suffixptrget3(sfxi->lastGeneratedSufTabSegment,pos) == 0)
             {
               sfxi->rot0Pos.defined = true;
               sfxi->rot0Pos.valueunsignedlong = sfxi->lastGeneratedStart + pos;
