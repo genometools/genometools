@@ -45,7 +45,14 @@ static int check_cds_phases(GtArray *cds_features, bool tidy, GtError *err)
     gt_array_reverse(cds_features);
   for (i = 0; !had_err && i < gt_array_size(cds_features); i++) {
     fn = *(GtFeatureNode**) gt_array_get(cds_features, i);
-    if (gt_feature_node_get_phase(fn) != correct_phase) {
+    /* the first phase can be anything (except being undefined), because the
+       GFF3 spec says:
+
+       NOTE 4 - CDS features MUST have have a defined phase field. Otherwise it
+       is not possible to infer the correct polypeptides corresponding to
+       partially annotated genes. */
+    if ((!i && gt_feature_node_get_phase(fn) == GT_PHASE_UNDEFINED) ||
+        (i && gt_feature_node_get_phase(fn) != correct_phase)) {
       if (!tidy) {
         gt_error_set(err, "%s feature on line %u in file \"%s\" has the wrong "
                      "phase %c (should be %c)", gt_ft_CDS,
