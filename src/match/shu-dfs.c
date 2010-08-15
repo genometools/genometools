@@ -36,7 +36,7 @@ static void visit_count_children(const FMindex *index,
                            unsigned long *rangeOccs,
                            unsigned int numofchars)
 {
-  unsigned long rangesize, idx, num_spezial;
+  unsigned long rangesize, idx, num_special;
   unsigned int offset;
   Nodecount child;
 
@@ -49,7 +49,7 @@ static void visit_count_children(const FMindex *index,
   gt_assert(rangesize <= (unsigned long) numofchars);
 
   offset = 0U;
-  num_spezial = parent->upper - parent->lower;
+  num_special = parent->upper - parent->lower;
   for (idx = 0; idx < rangesize; idx++)
   {
     child.lower = tmpmbtab[idx].lowerbound;
@@ -67,7 +67,7 @@ static void visit_count_children(const FMindex *index,
       child.on_branch = true;
       parent->branching -= 1UL;
       GT_STACK_PUSH(stack, child);
-      num_spezial = 0UL;
+      num_special = 0UL;
       offset += 1U;
     } else
     {
@@ -75,7 +75,7 @@ static void visit_count_children(const FMindex *index,
       if (child.lower + 1 == child.upper)
       {
         parent->leaves += 1;
-        num_spezial -= 1;
+        num_special -= 1;
       } else
         /* child is a branch of parent node */
       {
@@ -86,12 +86,12 @@ static void visit_count_children(const FMindex *index,
         {
           GT_STACK_PUSH(stack, child);
           offset += 1U;
-          num_spezial -= (child.upper - child.lower);
+          num_special -= (child.upper - child.lower);
         }
       }
     }
   }
-  parent->leaves += num_spezial;
+  parent->leaves += num_special;
 }
 
 static void process_count_node(GtStackNodecount *stack,
@@ -118,10 +118,7 @@ static inline void add_filenum_count(ShuNode *child,
     unsigned long filenum, position;
 
     position = gt_BwtSeqpositionextractor_extract(positext, row);
-    if (child->depth == 1UL)
-      position = totallength - position;
-    else
-      position = totallength - (position + child->depth);
+    position = totallength - (position + parent->depth);
     if (totallength <= position)
       filenum = numoffiles - 1;
     else

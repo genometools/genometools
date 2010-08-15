@@ -203,7 +203,8 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
                     end = 0UL,
                     i, j,
                     *filelength;
-      double **shulen, *gc_contents;
+      double **shulen,
+             *gc_contents = NULL;
       const GtAlphabet *alphabet;
       const GtStrArray *filenames;
       const FMindex *subjectindex;
@@ -251,15 +252,30 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
       }
       if (!had_err)
       {
+        gt_log_log("length_i | sum of shulen");
         for (i = 0; i < numoffiles; i++)
         {
           unsigned long length_i;
           length_i = filelength[i];
+          if (gt_log_enabled())
+            printf("debug %lu\t", length_i);
           for (j = 0; j < numoffiles; j++)
+          {
+            if (j == i)
+            {
+              if (gt_log_enabled())
+                printf("0\t\t");
+              continue;
+            }
+            if (gt_log_enabled())
+              printf("%f\t", shulen[i][j]);
             shulen[i][j] = shulen[i][j] / length_i;
+          }
+          if (gt_log_enabled())
+            printf("\n");
         }
       }
-      gt_logger_log(logger, "table of shulens");
+      gt_logger_log(logger, "table of avg shulens");
       if (!had_err && gt_logger_enabled(logger))
       {
         for (i = 0; i < numoffiles; i++)
@@ -272,9 +288,11 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
           printf("\n");
         }
       }
-      if (!had_err && gc_contents != NULL)
+      if (!had_err)
       {
         double *ln_n_fac;
+
+        gt_assert(gc_contents != NULL);
 
         ln_n_fac = gt_get_ln_n_fac(arguments->max_ln_n_fac);
         for (i = 0; i < numoffiles; i++)
@@ -336,15 +354,19 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
           printf("# ");
           for (j = 0; j < numoffiles; j++)
           {
-            /*XXX*/
+            if (i == j)
+            {
+              printf("0\t\t");
+              continue;
+            }
             printf("%f\t", shulen[i][j]);
           }
           printf("\n");
         }
       }
-      printf("Table of Kr\n");
       if (!had_err)
       {
+        printf("# Table of Kr\n");
         for (i = 0; i < numoffiles; i++)
         {
           for (j = 0; j < numoffiles; j++)
@@ -358,6 +380,7 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
         }
       }
       gt_free(filelength);
+      gt_free(gc_contents);
       gt_array2dim_delete(shulen);
     }
   }
