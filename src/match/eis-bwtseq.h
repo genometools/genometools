@@ -225,7 +225,7 @@ static inline void
 BWTSeqRangeOcc(const BWTSeq *bwtSeq, AlphabetRangeID range, unsigned long pos,
                unsigned long *rangeOccs);
 
-/* XXx: range 0 for range = 0 for regular symbols;
+/* XXX: range 0 for range = 0 for regular symbols;
    unsigned long rangeOcc[4]; */
 
 /**
