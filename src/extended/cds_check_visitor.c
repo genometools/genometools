@@ -14,6 +14,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/hashmap_api.h"
+#include "core/unused_api.h"
 #include "core/warning_api.h"
 #include "extended/cds_check_visitor.h"
 #include "extended/feature_node_iterator_api.h"
@@ -72,26 +74,62 @@ static int check_cds_phases(GtArray *cds_features, bool tidy, GtError *err)
   return had_err;
 }
 
+static int check_cds_phases_hm(GT_UNUSED void *key, void *value, void *data,
+                               GtError *err)
+{
+  GtArray *cds_features = value;
+  bool *tidy = data;
+  gt_error_check(err);
+  gt_assert(cds_features && tidy);
+  return check_cds_phases(cds_features, *tidy, err);
+}
+
 static int check_cds_phases_if_necessary(GtFeatureNode *fn, bool tidy,
                                          GtError *err)
 {
   GtFeatureNodeIterator *fni;
   GtFeatureNode *node;
   GtArray *cds_features = NULL;
+  GtHashmap *multi_features = NULL;
   int had_err = 0;
   gt_error_check(err);
   gt_assert(fn);
   fni = gt_feature_node_iterator_new_direct(fn);
   while ((node = gt_feature_node_iterator_next(fni))) {
     if (gt_feature_node_has_type(node, gt_ft_CDS)) {
-      if (!cds_features)
-        cds_features = gt_array_new(sizeof (GtFeatureNode*));
-      gt_array_add(cds_features, node);
+      if (gt_feature_node_is_multi(node)) {
+        GtArray *features;
+        if (!multi_features)
+          multi_features = gt_hashmap_new(GT_HASH_DIRECT, NULL,
+                                          (GtFree) gt_array_delete);
+        if ((features =
+                gt_hashmap_get(multi_features,
+                             gt_feature_node_get_multi_representative(node)))) {
+          gt_array_add(features, node);
+        }
+        else {
+          GtFeatureNode *representative;
+          features = gt_array_new(sizeof (GtFeatureNode*));
+          representative = gt_feature_node_get_multi_representative(node);
+          gt_array_add(features, representative);
+          gt_hashmap_add(multi_features, representative, features);
+        }
+      }
+      else {
+        if (!cds_features)
+          cds_features = gt_array_new(sizeof (GtFeatureNode*));
+        gt_array_add(cds_features, node);
+      }
     }
   }
   if (cds_features)
     had_err = check_cds_phases(cds_features, tidy, err);
+  if (!had_err && multi_features) {
+    had_err = gt_hashmap_foreach(multi_features, check_cds_phases_hm, &tidy,
+                                 err);
+  }
   gt_array_delete(cds_features);
+  gt_hashmap_delete(multi_features);
   gt_feature_node_iterator_delete(fni);
   return had_err;
 }
