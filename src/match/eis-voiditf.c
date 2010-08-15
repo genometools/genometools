@@ -551,3 +551,29 @@ double gt_pck_getGCcontent(const FMindex *bwtSubject,
   gc = c * 2 / (double) (length - 2);
   return gc;
 }
+
+unsigned long gt_pck_get_nonspecial_count(const FMindex *index)
+{
+  const BWTSeq *bwtseq = (const BWTSeq *) index;
+
+  return BWTSeqAggTransformedCount(bwtseq,
+                                   MRAEncGetRangeSize(BWTSeqGetAlphabet(bwtseq),
+                                     0));
+}
+
+unsigned long gt_pck_special_occ_in_nonspecial_intervals(const FMindex *index)
+{
+  const BWTSeq *bwtseq = (const BWTSeq *) index;
+  unsigned long count = 0,
+                *rangeOccs, first_special_row;
+  unsigned short idx, rangesize;
+
+  rangesize = (unsigned short) MRAEncGetRangeSize(BWTSeqGetAlphabet(bwtseq), 1);
+  rangeOccs = gt_calloc(rangesize, sizeof (unsigned long));
+  first_special_row = gt_pck_get_nonspecial_count(index);
+  BWTSeqRangeOcc(bwtseq, 1, first_special_row, rangeOccs);
+  for (idx = 0; idx < rangesize; idx++)
+    count += rangeOccs[idx];
+  gt_free(rangeOccs);
+  return count;
+}

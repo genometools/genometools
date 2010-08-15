@@ -258,21 +258,21 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
           unsigned long length_i;
           length_i = filelength[i];
           if (gt_log_enabled())
-            printf("debug %lu\t", length_i);
+            fprintf(stderr, "debug %lu\t", length_i);
           for (j = 0; j < numoffiles; j++)
           {
             if (j == i)
             {
               if (gt_log_enabled())
-                printf("0\t\t");
+                fprintf(stderr, "0\t\t");
               continue;
             }
             if (gt_log_enabled())
-              printf("%f\t", shulen[i][j]);
+              fprintf(stderr, "%f\t", shulen[i][j]);
             shulen[i][j] = shulen[i][j] / length_i;
           }
           if (gt_log_enabled())
-            printf("\n");
+            fprintf(stderr, "\n");
         }
       }
       gt_logger_log(logger, "table of avg shulens");
@@ -283,7 +283,10 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
           printf("# ");
           for (j = 0; j < numoffiles; j++)
           {
-            printf("%f\t", shulen[i][j]);
+            if (i == j)
+              printf("0\t\t");
+            else
+              printf("%f\t", shulen[i][j]);
           }
           printf("\n");
         }

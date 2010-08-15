@@ -133,6 +133,12 @@ unsigned int gt_bwtseq2maxdepth(const FMindex *fmindex);
 
 const Mbtab **gt_bwtseq2mbtab(const FMindex *fmindex);
 
+/* this does currently not work, only for the root interval. This is due to the
+ * sorting of the special chars, might be changed in future.
+ * Only reliable information:
+ * - Child intervals of standard alphabet
+ * - type of special and the number, but not the interval (child intervals in
+ *   special ranges do not necessarily form continuous intervals!) */
 unsigned long gt_bwtrangesplitallwithspecial(Mbtab *mbtab,
                                              unsigned long *rangeOccs,
                                              const FMindex *voidBwtSeq,
@@ -154,4 +160,11 @@ unsigned long gt_pck_getShuStringLength(const FMindex* bwtSubject,
 double gt_pck_getGCcontent(const FMindex *bwtSubject,
                            const GtAlphabet *alphabet);
 
+/* returns the count of all non special chars in the index, corresponding to the
+ * first row in which a special char prefixes the rotation */
+unsigned long gt_pck_get_nonspecial_count(const FMindex *index);
+
+/* returns occurrences of special chars in the intervals of non special chars,
+ * that is the number of rows that would be extended with a special. */
+unsigned long gt_pck_special_occ_in_nonspecial_intervals(const FMindex *index);
 #endif
