@@ -463,7 +463,7 @@ int gt_hashtable_foreach(GtHashtable *ht, Elemvisitfunc visitor, void *data,
         case CONTINUE_ITERATION:
           break;
         case STOP_ITERATION:
-          return 0;
+          return -1;
         case DELETED_ELEM:
           {
             htsize_t remove_pos = gt_ht_remove(ht, elem);
