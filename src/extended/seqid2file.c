@@ -16,6 +16,7 @@
 */
 
 #include "core/ma.h"
+#include "core/unused_api.h"
 #include "extended/seqid2file.h"
 
 struct GtSeqid2FileInfo {
@@ -44,7 +45,7 @@ void gt_seqid2file_info_delete(GtSeqid2FileInfo *s2fi)
   gt_free(s2fi);
 }
 
-static int seqid2file_check(void *data, GtError *err)
+static int seqid2file_check(void *data, GT_UNUSED GtError *err)
 {
   GtSeqid2FileInfo *info = (GtSeqid2FileInfo*) data;
   gt_error_check(err);
