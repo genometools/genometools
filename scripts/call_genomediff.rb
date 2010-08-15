@@ -31,10 +31,8 @@ def gt_idx(file, revfile, idxname)
              -bsize 8 \
              -sprank \
              -pl \
-             -locfreq 0 \
-             -parts 12 \
              -indexname #{idxname}"
-  #puts call-tis 
+  #puts call-tis
   if system(call)
     return true
   else
@@ -103,9 +101,9 @@ if options.files.empty?
 end
 
 num = options.files.size
-result = Array.new(num){Array.new(num){0}}
-shulen = Array.new(num){Array.new(num){0}}
-divergence = Array.new(num){Array.new(num){0}}
+result = Array.new(num) {Array.new(num) {0}}
+shulen = Array.new(num) {Array.new(num) {0}}
+divergence = Array.new(num) {Array.new(num) {0}}
 
 # prepare data
 options.files.each do |file|
@@ -159,7 +157,7 @@ options.files.each do |file|
   end
 
   querycount = 0
-  if options.verbose 
+  if options.verbose
     shu = true
     div = true
     gt_gdiff(subject, queries, options.debug, options.verbose).each do |line|
@@ -237,4 +235,3 @@ puts num
   end
   puts
 end
-
