@@ -79,7 +79,7 @@ int gt_xbzread(BZFILE *file, void *buf, unsigned len)
 
 void gt_xbzwrite(BZFILE *file, void *buf, unsigned len)
 {
-  gt_assert(buf && len);
+  gt_assert(buf);
   if (BZ2_bzwrite(file, buf, len) != len) {
     fprintf(stderr, "cannot write it compressed file\n");
     exit(EXIT_FAILURE);

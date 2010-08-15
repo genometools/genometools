@@ -73,7 +73,7 @@ int gt_xgzread(gzFile file, void *buf, unsigned len)
 void gt_xgzwrite(gzFile file, void *buf, unsigned len)
 {
   int errnum;
-  gt_assert(buf && len);
+  gt_assert(buf);
   if (gzwrite(file, buf, len) != len) {
     fprintf(stderr, "cannot write to compressed file: %s\n",
             gzerror(file, &errnum));
