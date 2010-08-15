@@ -3,5 +3,5 @@
 dna	.	gene	1	9	.	+	.	ID=gene1
 dna	.	mRNA	1	9	.	+	.	ID=mRNA1;Parent=gene1
 dna	.	exon	1	9	.	+	.	Parent=mRNA1
-dna	gt cds	CDS	1	9	.	+	0	Parent=mRNA1
+dna	gt cds	CDS	1	9	.	+	0	ID=CDS1;Parent=mRNA1
 ###

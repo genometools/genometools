@@ -179,7 +179,7 @@ static void set_phases(GtArray *cds_features)
 static void create_CDS_features_for_ORF(GtRange orf, GtCDSVisitor *v,
                                         GtGenomeNode *gn)
 {
-  GtFeatureNode *cds_feature;
+  GtFeatureNode *representative, *cds_feature;
   GtArray *cds_features;
   unsigned long i;
   GtRange cds;
@@ -199,6 +199,8 @@ static void create_CDS_features_for_ORF(GtRange orf, GtCDSVisitor *v,
                                                                gn));
   gt_feature_node_set_source(cds_feature, v->source);
   gt_feature_node_set_phase(cds_feature, GT_PHASE_ZERO);
+  gt_feature_node_make_multi_representative(cds_feature);
+  representative = cds_feature;
   /* all CDS features in between */
   for (i = strand == GT_STRAND_FORWARD ? orf.start : orf.end;
        strand == GT_STRAND_FORWARD ? i < orf.end : i > orf.start;
@@ -223,6 +225,7 @@ static void create_CDS_features_for_ORF(GtRange orf, GtCDSVisitor *v,
                                         cds.start, cds.end,
                                gt_feature_node_get_strand((GtFeatureNode*) gn));
       gt_feature_node_set_source(cds_feature, v->source);
+      gt_feature_node_set_multi_representative(cds_feature, representative);
     }
   }
   /* set the end of the last CDS feature and store it */

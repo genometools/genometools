@@ -2,5 +2,5 @@
 ##sequence-region   dna 1 11
 dna	.	gene	1	11	.	+	.	ID=gene1
 dna	.	exon	1	11	.	+	.	Parent=gene1
-dna	gt cds	CDS	3	11	.	+	0	Parent=gene1
+dna	gt cds	CDS	3	11	.	+	0	ID=CDS1;Parent=gene1
 ###
