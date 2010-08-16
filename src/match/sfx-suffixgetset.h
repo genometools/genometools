@@ -17,13 +17,11 @@
 
 #ifndef SFX_SUFFIXGETSET_H
 #define SFX_SUFFIXGETSET_H
-
-#include "suffixptr.h"
+#define SUFFIXPTRNEWVERSION
 
 typedef struct Suffixsortspace Suffixsortspace;
 
 typedef void (*Dc_processunsortedrange)(void *,
-                                        Suffixptr *,
                                         unsigned long,
                                         unsigned long,
                                         unsigned long);
@@ -37,12 +35,10 @@ Suffixsortspace *suffixsortspace_new_fromfile(int filedesc,
 void suffixsortspace_delete(Suffixsortspace *suffixsortspace);
 
 unsigned long suffixptrget(const Suffixsortspace *sssp,
-                           const Suffixptr *subbucket,
                            unsigned long subbucketleft,
                            unsigned long idx);
 
 void suffixptrset(Suffixsortspace *sssp,
-                  Suffixptr *subbucket,
                   unsigned long subbucketleft,
                   unsigned long idx,
                   unsigned long value);
@@ -70,6 +66,6 @@ void gt_suffixsortspace_sortspace_delete(Suffixsortspace *sssp);
 void gt_suffixsortspace_offset_set(Suffixsortspace *sssp,
                                    unsigned long offset);
 
-Suffixptr *gt_suffixsortspace_sortspace_get(const Suffixsortspace *sssp);
+unsigned long *gt_suffixsortspace_ulong_get(const Suffixsortspace *sssp);
 
 #endif

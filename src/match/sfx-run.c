@@ -34,7 +34,6 @@
 #include "spacedef.h"
 #include "stamp.h"
 #include "sfx-suffixer.h"
-#include "suffixptr.h"
 #include "sfx-run.h"
 #include "giextract.h"
 #include "stamp.h"

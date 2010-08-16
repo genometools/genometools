@@ -659,7 +659,7 @@ static int constructsarrandrunmmsearch(
       if (runquerysubstringmatch(false,
                                  dbencseq,
                                  (const ESASuffixptr *)
-                                 gt_suffixsortspace_sortspace_get(
+                                 gt_suffixsortspace_ulong_get(
                                           suffixsortspace),
                                  readmode,
                                  numofsuffixes,

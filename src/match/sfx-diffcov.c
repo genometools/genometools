@@ -830,7 +830,6 @@ static void dc_bcktab2firstlevelintervals(Differencecover *dcov)
 }
 
 static void dc_addunsortedrange(void *voiddcov,
-                                GT_UNUSED Suffixptr *subbucket,/*Remove later*/
                                 unsigned long subbucketleft,
                                 unsigned long width,
                                 GT_UNUSED unsigned long depth)
@@ -851,8 +850,6 @@ static void dc_addunsortedrange(void *voiddcov,
 #endif
 
 #define QSORTNAME(NAME) dc_##NAME
-
-typedef Suffixptr QSORTNAME(Sorttype);
 
 #ifdef QSORT_ARRAY_DECLARE
 #undef QSORT_ARRAY_DECLARE
@@ -876,7 +873,7 @@ typedef Suffixptr QSORTNAME(Sorttype);
         suffixptrset3(dcov->sssp,dcov->sortoffset+(RELIDX),VALUE)
 
 static int QSORTNAME(qsortcmparr) (
-                  GT_UNUSED const QSORTNAME(Sorttype) *subbucket,
+                  GT_UNUSED const void *subbucket,
                   unsigned long a,
                   unsigned long b,
                   const void *data)
@@ -905,10 +902,11 @@ static int QSORTNAME(qsortcmparr) (
   return 0;
 }
 
+typedef void * QSORTNAME(Sorttype);
+
 #include "qsort-array.gen"
 
 void dc_sortunsortedbucket(void *data,
-                           GT_UNUSED Suffixptr *subbucket,/*Remove later*/
                            unsigned long subbucketleft,
                            unsigned long width,
                            GT_UNUSED unsigned long depth)

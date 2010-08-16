@@ -19,19 +19,25 @@
 #include "core/fa.h"
 #include "core/assert_api.h"
 #include "core/unused_api.h"
-#include "suffixptr.h"
 #include "sfx-suffixgetset.h"
 
-#define SUFFIXPTRNEWVERSION
 #ifdef  SUFFIXPTRNEWVERSION
 
 #define SUFFIXPTRGET(TAB,IDX)     TAB[IDX].value
 #define SUFFIXPTRSET(TAB,IDX,VAL) TAB[IDX].value = VAL
 
+typedef struct
+{
+  unsigned long value;
+} Suffixptr;
+
 #else
 
 #define SUFFIXPTRGET(TAB,IDX)     TAB[IDX]
 #define SUFFIXPTRSET(TAB,IDX,VAL) TAB[IDX] = VAL
+
+typedef unsigned long Suffixptr;
+
 #endif
 
 struct Suffixsortspace
@@ -92,6 +98,7 @@ void suffixsortspace_delete(Suffixsortspace *suffixsortspace)
   }
 }
 
+/*
 static void suffixptrassert(const Suffixsortspace *sssp,
                             const Suffixptr *subbucket,
                             unsigned long subbucketleft,
@@ -116,25 +123,24 @@ static void suffixptrassert(const Suffixsortspace *sssp,
   gt_assert(subbucket + idx == sssp->sortspace +
                                sssp->bucketleftidx + subbucketleft + idx);
 }
+*/
 
 unsigned long suffixptrget(const Suffixsortspace *sssp,
-                           const Suffixptr *subbucket,
                            unsigned long subbucketleft,
                            unsigned long idx)
 {
-  suffixptrassert(sssp,subbucket,subbucketleft,idx);
+  /*suffixptrassert(sssp,subbucket,subbucketleft,idx);*/
   return SUFFIXPTRGET(sssp->sortspace,sssp->bucketleftidx +
                                       subbucketleft + idx -
                                       sssp->offset);
 }
 
 void suffixptrset(Suffixsortspace *sssp,
-                  Suffixptr *subbucket,
                   unsigned long subbucketleft,
                   unsigned long idx,
                   unsigned long value)
 {
-  suffixptrassert(sssp,subbucket,subbucketleft,idx);
+  /*suffixptrassert(sssp,subbucket,subbucketleft,idx);*/
   SUFFIXPTRSET(sssp->sortspace,sssp->bucketleftidx + subbucketleft + idx -
                                sssp->offset,value);
 }
@@ -186,7 +192,7 @@ void gt_suffixsortspace_sortspace_delete(Suffixsortspace *sssp)
   sssp->sortspace = NULL;
 }
 
-Suffixptr *gt_suffixsortspace_sortspace_get(const Suffixsortspace *sssp)
+unsigned long *gt_suffixsortspace_ulong_get(const Suffixsortspace *sssp)
 {
-  return sssp->sortspace;
+  return (unsigned long *) sssp->sortspace; /* XXX remove type cast */
 }

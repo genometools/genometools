@@ -41,7 +41,6 @@ Blindtrie *gt_blindtrie_new(Suffixsortspace *suffixsortspace,
 
 unsigned long gt_blindtrie_suffixsort(
                             Blindtrie *blindtrie,
-                            Suffixptr *subbucket,
                             unsigned long subbucketleft,
                             unsigned long *lcpsubtab,
                             unsigned long numberofsuffixes,

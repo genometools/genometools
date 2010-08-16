@@ -21,7 +21,6 @@
 #include "core/codetype.h"
 #include "core/encseq.h"
 #include "core/logger.h"
-#include "suffixptr.h"
 #include "bcktab.h"
 #include "sfx-suffixgetset.h"
 

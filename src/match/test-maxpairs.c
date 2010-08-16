@@ -107,7 +107,7 @@ static int constructsarrandrunmaxpairs(
       }
       gt_updateSequentialsuffixarrayreaderfromRAM(
                ssar,
-               (const ESASuffixptr *) gt_suffixsortspace_sortspace_get(
+               (const ESASuffixptr *) gt_suffixsortspace_ulong_get(
                                           suffixsortspace),
                firstpage,
                numberofsuffixes);

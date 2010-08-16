@@ -21,7 +21,6 @@
 #include "core/error_api.h"
 #include "core/encseq.h"
 #include "core/readmode.h"
-#include "suffixptr.h"
 #include "sfx-suffixgetset.h"
 
 void gt_checksortedsuffixes(const char *filename,
@@ -29,7 +28,6 @@ void gt_checksortedsuffixes(const char *filename,
                             const GtEncseq *encseq,
                             GtReadmode readmode,
                             const Suffixsortspace *suffixsortspace,
-                            const Suffixptr *subbucket,
                             unsigned long subbucketleft,
                             unsigned long numberofsuffixes,
                             bool specialsareequal,

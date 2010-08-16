@@ -19,7 +19,6 @@
 #define SFX_LINLCP_H
 
 #include "core/encseq.h"
-#include "suffixptr.h"
 #include "compressedtab.h"
 #include "sfx-suffixgetset.h"
 

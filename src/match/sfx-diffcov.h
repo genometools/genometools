@@ -22,7 +22,6 @@
 #include "core/unused_api.h"
 #include "core/readmode.h"
 #include "core/logger.h"
-#include "suffixptr.h"
 
 typedef struct Differencecover Differencecover;
 
@@ -45,7 +44,6 @@ void gt_differencecover_sortsample(Differencecover *dcov,
 void gt_differencecover_delete(Differencecover *dcov);
 
 void dc_sortunsortedbucket(void *data,
-                           Suffixptr *subbucket,
                            unsigned long subbucketleft,
                            unsigned long width,
                            GT_UNUSED unsigned long depth);

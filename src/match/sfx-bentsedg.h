@@ -24,7 +24,6 @@
 #include "core/codetype.h"
 #include "core/encseq.h"
 #include "bcktab.h"
-#include "suffixptr.h"
 #include "sfx-strategy.h"
 #include "sfx-copysort.h"
 #include "sfx-suffixgetset.h"

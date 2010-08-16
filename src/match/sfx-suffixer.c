@@ -35,7 +35,6 @@
 #include "intcode-def.h"
 #include "spacedef.h"
 #include "esa-fileend.h"
-#include "suffixptr.h"
 #include "sfx-diffcov.h"
 #include "sfx-partssuf.h"
 #include "sfx-suffixer.h"
