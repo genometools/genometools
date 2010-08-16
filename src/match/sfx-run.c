@@ -117,48 +117,6 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
   return haserr  ? -1 : 0;
 }
 
-static int suftab2file(FILE *outfpsuftab,
-                       const Suffixsortspace *suffixsortspace,
-                       unsigned long numberofsuffixes,
-                       GtError *err)
-{
-  bool haserr = false;
-
-#ifdef SUFFIXPTRNEWVERSION /* XXX try to write the entire table at once */
-  unsigned long idx;
-
-  for (idx = 0; !haserr && idx < numberofsuffixes; idx++)
-  {
-    unsigned long value = suffixptrget3(suffixsortspace,idx);
-    if (fwrite(&value,
-               sizeof (value),
-               (size_t) 1,
-               outfpsuftab)
-               != (size_t) 1)
-    {
-      gt_error_set(err,"cannot write one  item of size %u: errormsg=\"%s\"",
-                   (unsigned int) sizeof (value),
-                   strerror(errno));
-      haserr = true;
-    }
-  }
-#else
-  if (fwrite(suftab,
-             sizeof (*suftab),
-             (size_t) numberofsuffixes,
-             outfpsuftab)
-             != (size_t) numberofsuffixes)
-  {
-    gt_error_set(err,"cannot write %lu items of size %u: errormsg=\"%s\"",
-                 numberofsuffixes,
-                 (unsigned int) sizeof (*suftab),
-                 strerror(errno));
-    haserr = true;
-  }
-#endif
-  return haserr ? -1 : 0;
-}
-
 static int bwttab2file(Outfileinfo *outfileinfo,
                        const Suffixsortspace *suffixsortspace,
                        GtReadmode readmode,
@@ -263,8 +221,9 @@ static int suffixeratorwithoutput(const GtStr *indexname,
       }
       if (outfileinfo->outfpsuftab != NULL)
       {
-        if (suftab2file(outfileinfo->outfpsuftab,suffixsortspace,
-                        numberofsuffixes,err) != 0)
+        if (gt_suffixsortspace_to_file (outfileinfo->outfpsuftab,
+                                        suffixsortspace,numberofsuffixes,
+                                        err) != 0)
         {
           haserr = true;
           break;

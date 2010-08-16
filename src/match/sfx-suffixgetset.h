@@ -17,7 +17,9 @@
 
 #ifndef SFX_SUFFIXGETSET_H
 #define SFX_SUFFIXGETSET_H
-#define SUFFIXPTRNEWVERSION
+
+#include <stdio.h>
+#include "core/error_api.h"
 
 typedef struct Suffixsortspace Suffixsortspace;
 
@@ -68,4 +70,8 @@ void gt_suffixsortspace_offset_set(Suffixsortspace *sssp,
 
 unsigned long *gt_suffixsortspace_ulong_get(const Suffixsortspace *sssp);
 
+int gt_suffixsortspace_to_file (FILE *outfpsuftab,
+                                const Suffixsortspace *suffixsortspace,
+                                unsigned long numberofsuffixes,
+                                GtError *err);
 #endif

@@ -15,34 +15,19 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <errno.h>
+#include <string.h>
 #include "core/ma_api.h"
 #include "core/fa.h"
 #include "core/assert_api.h"
-#include "core/unused_api.h"
 #include "sfx-suffixgetset.h"
-
-#ifdef  SUFFIXPTRNEWVERSION
-
-#define SUFFIXPTRGET(TAB,IDX)     TAB[IDX].value
-#define SUFFIXPTRSET(TAB,IDX,VAL) TAB[IDX].value = VAL
-
-typedef struct
-{
-  unsigned long value;
-} Suffixptr;
-
-#else
 
 #define SUFFIXPTRGET(TAB,IDX)     TAB[IDX]
 #define SUFFIXPTRSET(TAB,IDX,VAL) TAB[IDX] = VAL
 
-typedef unsigned long Suffixptr;
-
-#endif
-
 struct Suffixsortspace
 {
-  Suffixptr *sortspace;
+  unsigned long *ulongtab;
   unsigned long offset,
                 bucketleftidx;
   bool unmapsortspace;
@@ -54,12 +39,8 @@ Suffixsortspace *suffixsortspace_new(unsigned long numofentries)
 
   gt_assert(numofentries > 0);
   suffixsortspace = gt_malloc(sizeof(*suffixsortspace));
-  suffixsortspace->sortspace = gt_malloc(sizeof(*suffixsortspace->sortspace) *
-                                         numofentries);
-  /*
-  fprintf(stderr,"sortspace of size %lu at %lu\n",
-          numofentries,(unsigned long) suffixsortspace->sortspace);
-  */
+  suffixsortspace->ulongtab
+    = gt_malloc(sizeof(*suffixsortspace->ulongtab) * numofentries);
   suffixsortspace->offset = 0;
   suffixsortspace->bucketleftidx = 0;
   suffixsortspace->unmapsortspace = false;
@@ -73,9 +54,10 @@ Suffixsortspace *suffixsortspace_new_fromfile(int filedesc,
   Suffixsortspace *suffixsortspace;
 
   suffixsortspace = gt_malloc(sizeof(*suffixsortspace));
-  suffixsortspace->sortspace
+  suffixsortspace->ulongtab
     = gt_fa_mmap_generic_fd(filedesc,filename,
-                            (size_t) numofentries * sizeof (Suffixptr),
+                            (size_t) numofentries *
+                            sizeof (*suffixsortspace->ulongtab),
                             (size_t) 0,false,false,NULL);
   suffixsortspace->offset = 0;
   suffixsortspace->bucketleftidx = 0;
@@ -89,10 +71,10 @@ void suffixsortspace_delete(Suffixsortspace *suffixsortspace)
   {
     if (suffixsortspace->unmapsortspace)
     {
-      gt_fa_xmunmap(suffixsortspace->sortspace);
+      gt_fa_xmunmap(suffixsortspace->ulongtab);
     } else
     {
-      gt_free(suffixsortspace->sortspace);
+      gt_free(suffixsortspace->ulongtab);
     }
     gt_free(suffixsortspace);
   }
@@ -130,9 +112,9 @@ unsigned long suffixptrget(const Suffixsortspace *sssp,
                            unsigned long idx)
 {
   /*suffixptrassert(sssp,subbucket,subbucketleft,idx);*/
-  return SUFFIXPTRGET(sssp->sortspace,sssp->bucketleftidx +
-                                      subbucketleft + idx -
-                                      sssp->offset);
+  return SUFFIXPTRGET(sssp->ulongtab,sssp->bucketleftidx +
+                                     subbucketleft + idx -
+                                     sssp->offset);
 }
 
 void suffixptrset(Suffixsortspace *sssp,
@@ -141,7 +123,7 @@ void suffixptrset(Suffixsortspace *sssp,
                   unsigned long value)
 {
   /*suffixptrassert(sssp,subbucket,subbucketleft,idx);*/
-  SUFFIXPTRSET(sssp->sortspace,sssp->bucketleftidx + subbucketleft + idx -
+  SUFFIXPTRSET(sssp->ulongtab,sssp->bucketleftidx + subbucketleft + idx -
                                sssp->offset,value);
 }
 
@@ -149,19 +131,19 @@ void suffixptrset2(const Suffixsortspace *sssp,
                    unsigned long idx,
                    unsigned long value)
 {
-  SUFFIXPTRSET(sssp->sortspace,idx - sssp->offset,value);
+  SUFFIXPTRSET(sssp->ulongtab,idx - sssp->offset,value);
 }
 
 unsigned long suffixptrget3(const Suffixsortspace *sssp,unsigned long idx)
 {
-  return SUFFIXPTRGET(sssp->sortspace,idx);
+  return SUFFIXPTRGET(sssp->ulongtab,idx);
 }
 
 void suffixptrset3(Suffixsortspace *sssp,
                    unsigned long idx,
                    unsigned long value)
 {
-  SUFFIXPTRSET(sssp->sortspace,idx,value);
+  SUFFIXPTRSET(sssp->ulongtab,idx,value);
 }
 
 unsigned long gt_suffixsortspace_bucketleftidx_get(const Suffixsortspace *sssp)
@@ -188,11 +170,52 @@ void gt_suffixsortspace_offset_set(Suffixsortspace *sssp,
 
 void gt_suffixsortspace_sortspace_delete(Suffixsortspace *sssp)
 {
-  gt_free(sssp->sortspace);
-  sssp->sortspace = NULL;
+  gt_free(sssp->ulongtab);
+  sssp->ulongtab = NULL;
 }
 
 unsigned long *gt_suffixsortspace_ulong_get(const Suffixsortspace *sssp)
 {
-  return (unsigned long *) sssp->sortspace; /* XXX remove type cast */
+  return (unsigned long *) sssp->ulongtab; /* XXX remove type cast */
+}
+
+int gt_suffixsortspace_to_file (FILE *outfpsuftab,
+                                const Suffixsortspace *suffixsortspace,
+                                unsigned long numberofsuffixes,
+                                GtError *err)
+{
+  bool haserr = false;
+
+/*
+  unsigned long idx;
+
+  for (idx = 0; !haserr && idx < numberofsuffixes; idx++)
+  {
+    unsigned long value = suffixptrget3(suffixsortspace,idx);
+    if (fwrite(&value,
+               sizeof (value),
+               (size_t) 1,
+               outfpsuftab)
+               != (size_t) 1)
+    {
+      gt_error_set(err,"cannot write one  item of size %u: errormsg=\"%s\"",
+                   (unsigned int) sizeof (value),
+                   strerror(errno));
+      haserr = true;
+    }
+  }
+*/
+  if (fwrite(suffixsortspace->ulongtab,
+             sizeof (*suffixsortspace->ulongtab),
+             (size_t) numberofsuffixes,
+             outfpsuftab)
+             != (size_t) numberofsuffixes)
+  {
+    gt_error_set(err,"cannot write %lu items of size %u: errormsg=\"%s\"",
+                 numberofsuffixes,
+                 (unsigned int) sizeof (*suffixsortspace->ulongtab),
+                 strerror(errno));
+    haserr = true;
+  }
+  return haserr ? -1 : 0;
 }
