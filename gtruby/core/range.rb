@@ -17,8 +17,12 @@
 
 module GT
   class Range
-    def initialize(start = 0, stop = 0)
-      if start > stop or start < 0 or stop < 0 then
+    def initialize(start, stop)
+      set(start, stop)
+    end
+
+    def set(start, stop)
+      if start.nil? or stop.nil? or start > stop or start < 0 or stop < 0 then
         GT.gterror("range error: start > end!")
       end
       @start = start

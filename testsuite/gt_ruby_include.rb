@@ -134,4 +134,10 @@ if not $arguments["nocairo"] then
     run_ruby "#{$testdata}gtruby/custom_stuff.rb #{$testdata}eden.gff3"
     run "diff #{$last_stdout} #{$testdata}custom_streams_ref.txt"
   end
+
+  Name "gtruby: Range class"
+  Keywords "gt_ruby"
+  Test do
+    run_ruby "#{$testdata}gtruby/range.rb"
+  end
 end
