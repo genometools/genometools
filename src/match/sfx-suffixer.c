@@ -49,7 +49,7 @@
 typedef struct
 {
   unsigned long allocatedSuffixptr, nextfreeSuffixptr;
-  Suffixsortspace *sssp;
+  GtSuffixsortspace *sssp;
 } GtSuffixposbuffer;
 
 struct Sfxiterator
@@ -60,7 +60,7 @@ struct Sfxiterator
   unsigned long specialcharacters,
          widthofpart,
          totallength;
-  Suffixsortspace *suffixsortspace;
+  GtSuffixsortspace *suffixsortspace;
   Definedunsignedlong longest;
   unsigned long nextfreeCodeatposition;
   Codeatposition *spaceCodeatposition;
@@ -431,7 +431,7 @@ void gt_freeSfxiterator(Sfxiterator **sfiptr)
     gt_specialrangeiterator_delete(sfi->sri);
   }
   FREESPACE(sfi->spaceCodeatposition);
-  suffixsortspace_delete(sfi->suffixsortspace);
+  gt_suffixsortspace_delete(sfi->suffixsortspace);
   gt_freesuftabparts(sfi->suftabparts);
   if (sfi->bcktab != NULL)
   {
@@ -700,7 +700,7 @@ Sfxiterator *gt_newSfxiterator(const GtEncseq *encseq,
                                          logger);
     gt_assert(sfi->suftabparts != NULL);
     sfi->suffixsortspace
-      = suffixsortspace_new(stpgetlargestwidth(sfi->suftabparts));
+      = gt_suffixsortspace_new(stpgetlargestwidth(sfi->suftabparts));
     sfi->longest.defined = false;
     sfi->longest.valueunsignedlong = 0;
     if (gt_encseq_has_specialranges(sfi->encseq))
@@ -960,8 +960,8 @@ static void insertfullspecialrange(Sfxiterator *sfi,
   {
     if (GT_ISDIRREVERSE(sfi->readmode))
     {
-      suffixptrset3(sfi->fusp.sssp,sfi->fusp.nextfreeSuffixptr,
-                    GT_REVERSEPOS(sfi->totallength,pos));
+      suffixptrsetdirect(sfi->fusp.sssp,sfi->fusp.nextfreeSuffixptr,
+                         GT_REVERSEPOS(sfi->totallength,pos));
       sfi->fusp.nextfreeSuffixptr++;
       if (pos == leftpos)
       {
@@ -970,7 +970,7 @@ static void insertfullspecialrange(Sfxiterator *sfi,
       pos--;
     } else
     {
-      suffixptrset3(sfi->fusp.sssp,sfi->fusp.nextfreeSuffixptr,pos);
+      suffixptrsetdirect(sfi->fusp.sssp,sfi->fusp.nextfreeSuffixptr,pos);
       sfi->fusp.nextfreeSuffixptr++;
       if (pos == rightpos-1)
       {
@@ -1057,8 +1057,8 @@ static void fillspecialnextpage(Sfxiterator *sfi)
       {
         if (sfi->fusp.nextfreeSuffixptr < sfi->fusp.allocatedSuffixptr)
         {
-          suffixptrset3(sfi->fusp.sssp,sfi->fusp.nextfreeSuffixptr,
-                        sfi->totallength);
+          suffixptrsetdirect(sfi->fusp.sssp,sfi->fusp.nextfreeSuffixptr,
+                             sfi->totallength);
           sfi->fusp.nextfreeSuffixptr++;
           sfi->exhausted = true;
         }
@@ -1068,9 +1068,9 @@ static void fillspecialnextpage(Sfxiterator *sfi)
   }
 }
 
-const Suffixsortspace *gt_nextSfxiterator(unsigned long *numberofsuffixes,
-                                          bool *specialsuffixes,
-                                          Sfxiterator *sfi)
+const GtSuffixsortspace *gt_nextSfxiterator(unsigned long *numberofsuffixes,
+                                            bool *specialsuffixes,
+                                            Sfxiterator *sfi)
 {
   if (sfi->part < stpgetnumofparts(sfi->suftabparts))
   {

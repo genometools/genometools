@@ -79,7 +79,7 @@ size_t gt_translateSuftab2BWT(void *data,
 size_t gt_translateSuftab2BWTSuffixsortspace(
                                        void *translator,
                                        void *voiddest,
-                                       const Suffixsortspace *suffixsortspace,
+                                       const GtSuffixsortspace *suffixsortspace,
                                        unsigned long offset,
                                        size_t len);
 

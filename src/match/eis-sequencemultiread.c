@@ -331,11 +331,11 @@ seqReaderSetMove2Backlog(void *backlogState, const void *seqData,
                  readerSet->backlogLen;
       if (readerSet->fromSuffixsortspace)
       {
-        Suffixsortspace *srcSptr = (Suffixsortspace *) seqData;
+        GtSuffixsortspace *srcSptr = (GtSuffixsortspace *) seqData;
         for (idx = 0; idx< copyLen; idx++)
         {
-          destSptr[idx] = suffixptrget3(srcSptr,
-                                        copyStartPos - requestStart + idx);
+          destSptr[idx] = suffixptrgetdirect(srcSptr,
+                                             copyStartPos - requestStart + idx);
         }
       } else
       {

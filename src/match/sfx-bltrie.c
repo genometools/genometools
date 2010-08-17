@@ -71,7 +71,7 @@ struct Blindtrie
   bool cmpcharbychar;
   Blindtrienode *spaceBlindtrienode;
   GtArrayNodeptr stack;
-  Suffixsortspace *sssp;
+  GtSuffixsortspace *sssp;
 };
 
 static bool isleftofboundary(unsigned long currentstartpos,unsigned long add,
@@ -403,12 +403,15 @@ static unsigned long enumeratetrieleaves (Blindtrie *blindtrie,
 {
   bool readyforpop = false, currentnodeisleaf;
   Nodeptr currentnode, siblval, lcpnode = blindtrie->root;
-  unsigned long nextfree = 0, equalsrangewidth = 0;
+  unsigned long nextfree = 0, equalsrangewidth = 0,
+                bucketleftidxplussubbucketleft;
 
   blindtrie->stack.nextfreeNodeptr = 0;
   GT_STOREINARRAY (&blindtrie->stack, Nodeptr, 128, blindtrie->root);
   SETCURRENT(blindtrie->root->either.firstchild);
   gt_assert(blindtrie->maxdepth == 0 || dc_processunsortedrange != NULL);
+  bucketleftidxplussubbucketleft
+    = gt_suffixsortspace_bucketleftidx_get(blindtrie->sssp) + subbucketleft;
   for (;;)
   {
     if (currentnodeisleaf)
@@ -445,9 +448,8 @@ static unsigned long enumeratetrieleaves (Blindtrie *blindtrie,
             {
               dc_processunsortedrange(
                                voiddcov,
-                               subbucketleft + nextfree - 1 - equalsrangewidth +
-                               gt_suffixsortspace_bucketleftidx_get(
-                                         blindtrie->sssp),
+                               bucketleftidxplussubbucketleft
+                                 + nextfree - 1 - equalsrangewidth,
                                equalsrangewidth + 1,
                                blindtrie->maxdepth);
               equalsrangewidth = 0;
@@ -497,9 +499,8 @@ static unsigned long enumeratetrieleaves (Blindtrie *blindtrie,
   if (nextfree > 0 && equalsrangewidth > 0)
   {
     dc_processunsortedrange(voiddcov,
-                            subbucketleft + nextfree - 1 - equalsrangewidth
-                            + gt_suffixsortspace_bucketleftidx_get(
-                                   blindtrie->sssp),
+                            bucketleftidxplussubbucketleft
+                              + nextfree - 1 - equalsrangewidth,
                             equalsrangewidth + 1,
                             blindtrie->maxdepth);
     equalsrangewidth = 0;
@@ -507,7 +508,7 @@ static unsigned long enumeratetrieleaves (Blindtrie *blindtrie,
   return nextfree;
 }
 
-Blindtrie *gt_blindtrie_new(Suffixsortspace *suffixsortspace,
+Blindtrie *gt_blindtrie_new(GtSuffixsortspace *suffixsortspace,
                             unsigned long numofsuffixes,
                             const GtEncseq *encseq,
                             bool cmpcharbychar,

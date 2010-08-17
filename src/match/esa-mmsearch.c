@@ -643,7 +643,7 @@ static int constructsarrandrunmmsearch(
     haserr = true;
   } else
   {
-    const Suffixsortspace *suffixsortspace;
+    const GtSuffixsortspace *suffixsortspace;
     queryrep.sequence = query;
     queryrep.encseq = NULL;
     queryrep.readmode = GT_READMODE_FORWARD;

@@ -43,7 +43,7 @@ unsigned long getnumoflargelcpvalues(const Outlcpinfo *outlcpinfo);
 
 unsigned long getmaxbranchdepth(const Outlcpinfo *outlcpinfo);
 
-void gt_qsufsort(Suffixsortspace *suffixsortspace,
+void gt_qsufsort(GtSuffixsortspace *suffixsortspace,
                  unsigned long partwidth,
                  int mmapfiledesc,
                  GtStr *mmapfilename,
@@ -59,7 +59,7 @@ void gt_qsufsort(Suffixsortspace *suffixsortspace,
                  bool absoluteinversesuftab,
                  Outlcpinfo *outlcpinfo);
 
-void gt_sortallbuckets(Suffixsortspace *suffixsortspace,
+void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                        Definedunsignedlong *longest,
                        GtBucketspec2 *bucketspec2,
                        const GtEncseq *encseq,
@@ -76,7 +76,7 @@ void gt_sortallbuckets(Suffixsortspace *suffixsortspace,
                        GtLogger *logger);
 
 void gt_sortbucketofsuffixes(bool setdcovsuffixsortspace,
-                             Suffixsortspace *suffixsortspace,
+                             GtSuffixsortspace *suffixsortspace,
                              unsigned long numberofsuffixes,
                              GtBucketspec2 *bucketspec2,
                              const GtEncseq *encseq,

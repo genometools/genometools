@@ -91,7 +91,7 @@ typedef size_t (*seqDataTranslateFunc)(void *translator, void *dest,
 typedef size_t (*seqDataTranslateSuffixsortspaceFunc)(
                                void *translator,
                                void *dest,
-                               const Suffixsortspace *suffixsortspace,
+                               const GtSuffixsortspace *suffixsortspace,
                                unsigned long offset,
                                size_t len);
 
@@ -119,8 +119,8 @@ SDRTranslate(SeqDataTranslator xltor, void *dest, const unsigned long *src,
 
 static inline size_t
 SDRTranslateSuffixsortspace(SeqDataTranslator xltor, void *dest,
-                      const Suffixsortspace *suffixsortspace,
-                      unsigned long offset, size_t len)
+                            const GtSuffixsortspace *suffixsortspace,
+                            unsigned long offset, size_t len)
 {
   if (xltor.translateDataSuffixsortspace != NULL)
   {
@@ -134,7 +134,7 @@ SDRTranslateSuffixsortspace(SeqDataTranslator xltor, void *dest,
     unsigned long *ulongdest = (unsigned long *) dest;
     for (idx = 0; idx < len; idx++)
     {
-      ulongdest[idx] = suffixptrget3(suffixsortspace,offset+idx);
+      ulongdest[idx] = suffixptrgetdirect(suffixsortspace,offset+idx);
     }
   }
   /*memcpy(dest, src, len * xltor.state.elemSize); */

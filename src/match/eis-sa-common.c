@@ -41,7 +41,7 @@ size_t gt_translateSuftab2BWT(void *translator,
 size_t gt_translateSuftab2BWTSuffixsortspace(
                                        void *translator,
                                        void *voiddest,
-                                       const Suffixsortspace *suffixsortspace,
+                                       const GtSuffixsortspace *suffixsortspace,
                                        unsigned long offset,
                                        size_t len)
 {
@@ -52,7 +52,7 @@ size_t gt_translateSuftab2BWTSuffixsortspace(
   gt_assert(trState);
   for (idx = 0; idx < len; ++idx)
   {
-    dest[idx] = sfxIdx2BWTSym(suffixptrget3(suffixsortspace,offset+idx),
+    dest[idx] = sfxIdx2BWTSym(suffixptrgetdirect(suffixsortspace,offset+idx),
                               trState->encseq, trState->readmode);
   }
   return len * sizeof (GtUchar);

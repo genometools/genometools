@@ -230,7 +230,7 @@ typedef struct
   unsigned long leftlcpdist[GT_UNITSIN2BITENC],
                 rightlcpdist[GT_UNITSIN2BITENC];
   Definedunsignedlong *longest;
-  Suffixsortspace *sssp;
+  GtSuffixsortspace *sssp;
   Dc_processunsortedrange dc_processunsortedrange;
   void *voiddcov;
   bool *equalwithprevious;
@@ -639,6 +639,8 @@ static void bs_insertionsortmaxdepth(Bentsedgresources *bsr,
   if (idx > 0)
   {
     unsigned long equalsrangewidth = 0;
+    unsigned long bucketleftidx
+     = gt_suffixsortspace_bucketleftidx_get(bsr->sssp);
 #ifdef SKDEBUG
     printf("ordered suffix %lu\n",suffixptrget(bsr->sssp,subbucketleft,0));
 #endif
@@ -663,8 +665,8 @@ static void bs_insertionsortmaxdepth(Bentsedgresources *bsr,
 #endif
           bsr->dc_processunsortedrange(
                               bsr->voiddcov,
-                              subbucketleft + idx - 1 - equalsrangewidth +
-                              gt_suffixsortspace_bucketleftidx_get(bsr->sssp),
+                              bucketleftidx + subbucketleft + idx - 1
+                                            - equalsrangewidth,
                               equalsrangewidth + 1, maxdepth);
           equalsrangewidth = 0;
         }
@@ -676,11 +678,11 @@ static void bs_insertionsortmaxdepth(Bentsedgresources *bsr,
       printf("process interval of width %lu\n",
              equalsrangewidth + 1);
 #endif
-      bsr->dc_processunsortedrange(bsr->voiddcov,
-                                   subbucketleft + width - 1 - equalsrangewidth+
-                                   gt_suffixsortspace_bucketleftidx_get(
-                                                                 bsr->sssp),
-                                   equalsrangewidth + 1, maxdepth);
+      bsr->dc_processunsortedrange(
+                           bsr->voiddcov,
+                           bucketleftidx + subbucketleft + width - 1
+                                         - equalsrangewidth,
+                           equalsrangewidth + 1, maxdepth);
     }
   }
 }
@@ -1235,7 +1237,7 @@ static void sarrcountingsort(Bentsedgresources *bsr,
   }
 }
 
-static inline void vectorswap(Suffixsortspace *sssp,
+static inline void vectorswap(GtSuffixsortspace *sssp,
                               unsigned long subbucketleft1,
                               unsigned long subbucketleft2,
                               unsigned long width)
@@ -1883,7 +1885,7 @@ unsigned long getmaxbranchdepth(const Outlcpinfo *outlcpinfo)
 }
 
 static void initBentsedgresources(Bentsedgresources *bsr,
-                                  Suffixsortspace *suffixsortspace,
+                                  GtSuffixsortspace *suffixsortspace,
                                   Definedunsignedlong *longest,
                                   const GtEncseq *encseq,
                                   GtReadmode readmode,
@@ -2068,7 +2070,7 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
   gt_logger_log(logger,"countqsort=%lu",bsr->countqsort);
 }
 
-void gt_qsufsort(Suffixsortspace *suffixsortspace,
+void gt_qsufsort(GtSuffixsortspace *suffixsortspace,
                  unsigned long partwidth,
                  int mmapfiledesc,
                  GtStr *mmapfilename,
@@ -2119,11 +2121,11 @@ void gt_qsufsort(Suffixsortspace *suffixsortspace,
 /*
   The following function is called  in sfxsuffixer.c sorts all buckets by
   different suffix comparison methods without the help of other sorting
-  information. Suffixsortspace contains the sortspace which is accessed by some
-  negative offset.
+  information. GtSuffixsortspace contains the sortspace which is accessed
+  by some negative offset.
 */
 
-void gt_sortallbuckets(Suffixsortspace *suffixsortspace,
+void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                        Definedunsignedlong *longest,
                        GtBucketspec2 *bucketspec2,
                        const GtEncseq *encseq,
@@ -2334,7 +2336,12 @@ void gt_sortallbuckets(Suffixsortspace *suffixsortspace,
                         logger);
 }
 
-void dc_setsuffixsortspace(void *voiddcov,Suffixsortspace *sssp);
+/*
+  The following function is from match/sfx-diffcov.c, but we do not want to
+  include match/sfx-diffcov.h here, as this would result into
+  cyclic dependencies. So we directly put the forward declaration here */
+
+void dc_setsuffixsortspace(void *voiddcov,GtSuffixsortspace *sssp);
 
 /*
    The following function is used for sorting the sample making up the
@@ -2342,7 +2349,7 @@ void dc_setsuffixsortspace(void *voiddcov,Suffixsortspace *sssp);
 */
 
 void gt_sortbucketofsuffixes(bool setdcovsuffixsortspace,
-                             Suffixsortspace *suffixsortspace,
+                             GtSuffixsortspace *suffixsortspace,
                              unsigned long numberofsuffixes,
                              GtBucketspec2 *bucketspec2,
                              const GtEncseq *encseq,

@@ -71,7 +71,7 @@ static int constructsarrandrunmaxpairs(
                  GtLogger *logger,
                  GtError *err)
 {
-  const Suffixsortspace *suffixsortspace;
+  const GtSuffixsortspace *suffixsortspace;
   unsigned long numberofsuffixes;
   bool haserr = false;
   Sfxiterator *sfi;

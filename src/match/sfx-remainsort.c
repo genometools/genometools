@@ -145,7 +145,7 @@ struct Rmnsufinfo
   GtReadmode readmode;
   const GtEncseq *encseq;
   const GtCodetype **multimappower;
-  Suffixsortspace *sssp;
+  GtSuffixsortspace *sssp;
 };
 
 #ifdef Lowerboundwithrank
@@ -241,7 +241,7 @@ DEFINE_HASHMAP(unsigned long, seqpos, unsigned long, ul, gt_ht_seqpos_elem_hash,
                gt_ht_seqpos_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR,
                static, inline)
 
-Rmnsufinfo *gt_rmnsufinfo_new(Suffixsortspace *suffixsortspace,
+Rmnsufinfo *gt_rmnsufinfo_new(GtSuffixsortspace *suffixsortspace,
                               int mmapfiledesc,
                               GtStr *mmapfilename,
                               const GtEncseq *encseq,
@@ -694,7 +694,7 @@ static void rms_initinversesuftabnonspecialsadjust(Rmnsufinfo *rmnsufinfo)
                                          rmnsufinfo->numofchars);
     for (/* Nothing */; idx < bucketspec.left; idx++)
     {
-      startpos = suffixptrget3(rmnsufinfo->sssp,idx);
+      startpos = suffixptrgetdirect(rmnsufinfo->sssp,idx);
       rms_inversesuftab_set(rmnsufinfo,startpos,idx);
     }
     updatewidth (rmnsufinfo,bucketspec.nonspecialsinbucket,
@@ -702,13 +702,13 @@ static void rms_initinversesuftabnonspecialsadjust(Rmnsufinfo *rmnsufinfo)
     for (/* Nothing */;
          idx < bucketspec.left+bucketspec.nonspecialsinbucket; idx++)
     {
-      startpos = suffixptrget3(rmnsufinfo->sssp,idx);
+      startpos = suffixptrgetdirect(rmnsufinfo->sssp,idx);
       rms_inversesuftab_set(rmnsufinfo,startpos,bucketspec.left);
     }
   }
   for (/* Nothing */; idx < rmnsufinfo->partwidth; idx++)
   {
-    startpos = suffixptrget3(rmnsufinfo->sssp,idx);
+    startpos = suffixptrgetdirect(rmnsufinfo->sssp,idx);
     rms_inversesuftab_set(rmnsufinfo,startpos,idx);
   }
 }
@@ -781,7 +781,8 @@ static void rms_initinversesuftabnonspecials(Rmnsufinfo *rmnsufinfo)
   gt_assert(rmnsufinfo->sssp != NULL);
   for (idx=0; idx < rmnsufinfo->partwidth; idx++)
   {
-    rms_inversesuftab_set(rmnsufinfo,suffixptrget3(rmnsufinfo->sssp,idx),idx);
+    rms_inversesuftab_set(rmnsufinfo,suffixptrgetdirect(rmnsufinfo->sssp,idx),
+                          idx);
   }
 }
 
@@ -970,7 +971,7 @@ static unsigned long suftabentryfromsection_get(const Rmnsufinfo *rmnsufinfo,
   if (SUFINMEM(&rmnsufinfo->sortblock))
   {
     gt_assert(rmnsufinfo->sssp != NULL);
-    return suffixptrget3(rmnsufinfo->sssp,idx);
+    return suffixptrgetdirect(rmnsufinfo->sssp,idx);
   }
   gt_assert(idx >= rmnsufinfo->sortblock.pageoffset &&
             idx < rmnsufinfo->sortblock.pageoffset +
@@ -986,7 +987,7 @@ static void suftabentryfromsection_update(Rmnsufinfo *rmnsufinfo,
   if (SUFINMEM(&rmnsufinfo->sortblock))
   {
     gt_assert(rmnsufinfo->sssp != NULL);
-    suffixptrset3(rmnsufinfo->sssp,idx,value);
+    suffixptrsetdirect(rmnsufinfo->sssp,idx,value);
   } else
   {
     gt_assert(idx >= rmnsufinfo->sortblock.pageoffset &&
@@ -1305,7 +1306,7 @@ Compressedtable *gt_rmnsufinfo_delete(unsigned long *longest,
 {
   Rmnsufinfo *rmnsufinfo = *rmnsufinfoptr;
   Compressedtable *lcptab;
-  Suffixsortspace *suffixsortspace = NULL;
+  GtSuffixsortspace *suffixsortspace = NULL;
 
   sortremainingsuffixes(rmnsufinfo);
   gt_free(rmnsufinfo->filltable);
@@ -1336,7 +1337,7 @@ Compressedtable *gt_rmnsufinfo_delete(unsigned long *longest,
       suffixsortspace = rmnsufinfo->sssp;
     } else
     {
-      suffixsortspace = suffixsortspace_new_fromfile(
+      suffixsortspace = gt_suffixsortspace_new_fromfile(
                                 rmnsufinfo->sortblock.mmapfiledesc,
                                 gt_str_get(rmnsufinfo->sortblock.mmapfilename),
                                 rmnsufinfo->sortblock.mapableentries);
@@ -1364,7 +1365,7 @@ Compressedtable *gt_rmnsufinfo_delete(unsigned long *longest,
   }
   if (!SUFINMEM(&rmnsufinfo->sortblock) && withlcptab)
   {
-    suffixsortspace_delete(suffixsortspace);
+    gt_suffixsortspace_delete(suffixsortspace);
     suffixsortspace = NULL;
   }
 #ifdef Lowerboundwithrank

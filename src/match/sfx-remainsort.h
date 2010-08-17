@@ -29,7 +29,7 @@
 
 typedef struct Rmnsufinfo Rmnsufinfo;
 
-Rmnsufinfo *gt_rmnsufinfo_new(Suffixsortspace *suffixsortspace,
+Rmnsufinfo *gt_rmnsufinfo_new(GtSuffixsortspace *suffixsortspace,
                               int mmapfiledesc,
                               GtStr *mmapfilename,
                               const GtEncseq *encseq,

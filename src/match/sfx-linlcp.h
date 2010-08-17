@@ -27,6 +27,6 @@ Compressedtable *gt_lcp9_manzini(Compressedtable *spacefortab,
                                  GtReadmode readmode,
                                  unsigned long partwidth,
                                  unsigned long totallength,
-                                 const Suffixsortspace *sortedsuffixes);
+                                 const GtSuffixsortspace *sortedsuffixes);
 
 #endif

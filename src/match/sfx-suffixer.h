@@ -41,9 +41,9 @@ Sfxiterator *gt_newSfxiterator(const GtEncseq *encseq,
                                GtLogger *logger,
                                GtError *err);
 
-const Suffixsortspace *gt_nextSfxiterator(unsigned long *numberofsuffixes,
-                                          bool *specialsuffixes,
-                                          Sfxiterator *sfi);
+const GtSuffixsortspace *gt_nextSfxiterator(unsigned long *numberofsuffixes,
+                                            bool *specialsuffixes,
+                                            Sfxiterator *sfi);
 
 int gt_postsortsuffixesfromstream(Sfxiterator *sfi, const GtStr *indexname,
                                   GtError *err);

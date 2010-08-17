@@ -21,57 +21,58 @@
 #include <stdio.h>
 #include "core/error_api.h"
 
-typedef struct Suffixsortspace Suffixsortspace;
+typedef struct GtSuffixsortspace GtSuffixsortspace;
 
 typedef void (*Dc_processunsortedrange)(void *,
                                         unsigned long,
                                         unsigned long,
                                         unsigned long);
 
-Suffixsortspace *suffixsortspace_new(unsigned long numofentries);
+GtSuffixsortspace *gt_suffixsortspace_new(unsigned long numofentries);
 
-Suffixsortspace *suffixsortspace_new_fromfile(int filedesc,
-                                              const char *filename,
-                                              unsigned long numofentries);
+GtSuffixsortspace *gt_suffixsortspace_new_fromfile(int filedesc,
+                                                   const char *filename,
+                                                   unsigned long numofentries);
 
-void suffixsortspace_delete(Suffixsortspace *suffixsortspace);
+void gt_suffixsortspace_delete(GtSuffixsortspace *suffixsortspace);
 
-unsigned long suffixptrget(const Suffixsortspace *sssp,
+unsigned long suffixptrget(const GtSuffixsortspace *sssp,
                            unsigned long subbucketleft,
                            unsigned long idx);
 
-void suffixptrset(Suffixsortspace *sssp,
+void suffixptrset(GtSuffixsortspace *sssp,
                   unsigned long subbucketleft,
                   unsigned long idx,
                   unsigned long value);
 
-void suffixptrset2(const Suffixsortspace *sssp,
+void suffixptrset2(const GtSuffixsortspace *sssp,
                    unsigned long idx,
                    unsigned long value);
 
-unsigned long suffixptrget3(const Suffixsortspace *sssp,
-                            unsigned long idx);
+unsigned long suffixptrgetdirect(const GtSuffixsortspace *sssp,
+                                 unsigned long idx);
 
-void suffixptrset3(Suffixsortspace *sssp,
-                   unsigned long idx,
-                   unsigned long value);
+void suffixptrsetdirect(GtSuffixsortspace *sssp,
+                        unsigned long idx,
+                        unsigned long value);
 
-unsigned long gt_suffixsortspace_bucketleftidx_get(const Suffixsortspace *sssp);
+unsigned long gt_suffixsortspace_bucketleftidx_get(
+                    const GtSuffixsortspace *sssp);
 
-void gt_suffixsortspace_bucketleftidx_set(Suffixsortspace *sssp,
+void gt_suffixsortspace_bucketleftidx_set(GtSuffixsortspace *sssp,
                                           unsigned long value);
 
-unsigned long gt_suffixsortspace_offset_get(const Suffixsortspace *sssp);
+unsigned long gt_suffixsortspace_offset_get(const GtSuffixsortspace *sssp);
 
-void gt_suffixsortspace_sortspace_delete(Suffixsortspace *sssp);
+void gt_suffixsortspace_sortspace_delete(GtSuffixsortspace *sssp);
 
-void gt_suffixsortspace_offset_set(Suffixsortspace *sssp,
+void gt_suffixsortspace_offset_set(GtSuffixsortspace *sssp,
                                    unsigned long offset);
 
-unsigned long *gt_suffixsortspace_ulong_get(const Suffixsortspace *sssp);
+unsigned long *gt_suffixsortspace_ulong_get(const GtSuffixsortspace *sssp);
 
 int gt_suffixsortspace_to_file (FILE *outfpsuftab,
-                                const Suffixsortspace *suffixsortspace,
+                                const GtSuffixsortspace *suffixsortspace,
                                 unsigned long numberofsuffixes,
                                 GtError *err);
 #endif

@@ -31,7 +31,7 @@ typedef enum
   Noorder
 } Ordertype;
 
-Blindtrie *gt_blindtrie_new(Suffixsortspace *suffixsortspace,
+Blindtrie *gt_blindtrie_new(GtSuffixsortspace *suffixsortspace,
                             unsigned long numofsuffixes,
                             const GtEncseq *encseq,
                             bool cmpcharbychar,

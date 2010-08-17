@@ -118,7 +118,7 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
 }
 
 static int bwttab2file(Outfileinfo *outfileinfo,
-                       const Suffixsortspace *suffixsortspace,
+                       const GtSuffixsortspace *suffixsortspace,
                        GtReadmode readmode,
                        unsigned long numberofsuffixes,
                        GtError *err)
@@ -134,7 +134,7 @@ static int bwttab2file(Outfileinfo *outfileinfo,
 
     for (pos=0; pos < numberofsuffixes; pos++)
     {
-      startpos = suffixptrget3(suffixsortspace,pos);
+      startpos = suffixptrgetdirect(suffixsortspace,pos);
       if (startpos == 0)
       {
         cc = (GtUchar) UNDEFBWTCHAR;
@@ -203,7 +203,7 @@ static int suffixeratorwithoutput(const GtStr *indexname,
     haserr = true;
   } else
   {
-    const Suffixsortspace *suffixsortspace;
+    const GtSuffixsortspace *suffixsortspace;
     while (true)
     {
       unsigned long longest;

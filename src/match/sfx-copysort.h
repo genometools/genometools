@@ -33,7 +33,7 @@ GtBucketspec2 *gt_copysort_new(const Bcktab *bcktab,
                                   unsigned int numofchars);
 
 void gt_copysort_derivesorting(const GtBucketspec2 *bucketspec2,
-                               Suffixsortspace *suffixsortspace,
+                               GtSuffixsortspace *suffixsortspace,
                                GtLogger *logger);
 
 bool gt_copysort_checkhardwork(const GtBucketspec2 *bucketspec2,

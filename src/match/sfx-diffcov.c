@@ -114,8 +114,8 @@ struct Differencecover
   unsigned long firstgenerationtotalwidth,
                 firstgenerationcount;
   GtLogger *logger;
-  Suffixsortspace *sssp,
-                  *sortedsample;
+  GtSuffixsortspace *sssp,
+                    *sortedsample;
   unsigned long sortoffset;
 };
 
@@ -129,13 +129,13 @@ struct Differencecover
 static unsigned long suffixptrgetdcov(const Differencecover *dcov,
                                       unsigned long idx)
 {
-  return suffixptrget3(dcov->sortedsample,idx);
+  return suffixptrgetdirect(dcov->sortedsample,idx);
 }
 
 static void suffixptrsetdcov(const Differencecover *dcov,
                              unsigned long idx,unsigned long value)
 {
-  suffixptrset3(dcov->sortedsample,idx,value);
+  suffixptrsetdirect(dcov->sortedsample,idx,value);
 }
 
 static void fillcoverrank(Differencecover *dcov)
@@ -207,7 +207,11 @@ static unsigned int computehvalue(const Differencecover *dcov,
 }
 #endif
 
-void dc_setsuffixsortspace(void *voiddcov,Suffixsortspace *sssp)
+/* The following function is only used in sfx-bentsedg.c, but we
+   do not include it in sfx-diffcove.c, as this depends on sfx-bentsedg.h.
+*/
+
+void dc_setsuffixsortspace(void *voiddcov,GtSuffixsortspace *sssp)
 {
   Differencecover *dcov = (Differencecover *) voiddcov;
   dcov->sssp = sssp;
@@ -863,14 +867,14 @@ static void dc_addunsortedrange(void *voiddcov,
 #endif
 
 #define QSORT_ARRAY_GET(ARR,RELIDX)\
-        suffixptrget3(dcov->sssp,dcov->sortoffset+(RELIDX))
+        suffixptrgetdirect(dcov->sssp,dcov->sortoffset+(RELIDX))
 
 #ifdef QSORT_ARRAY_SET
 #undef QSORT_ARRAY_SET
 #endif
 
 #define QSORT_ARRAY_SET(ARR,RELIDX,VALUE)\
-        suffixptrset3(dcov->sssp,dcov->sortoffset+(RELIDX),VALUE)
+        suffixptrsetdirect(dcov->sssp,dcov->sortoffset+(RELIDX),VALUE)
 
 static int QSORTNAME(qsortcmparr) (
                   GT_UNUSED const void *subbucket,
@@ -1075,7 +1079,7 @@ void gt_differencecover_sortsample(Differencecover *dcov,
           (size_t) codelist.nextfreeCodeatposition,
           sizeof (*codelist.spaceCodeatposition),compareCodeatpositon);
   }
-  dcov->sortedsample = suffixsortspace_new(dcov->effectivesamplesize);
+  dcov->sortedsample = gt_suffixsortspace_new(dcov->effectivesamplesize);
   posinserted = dcov_derivespecialcodesonthefly(dcov,
                                                 withcheck ? &codelist : NULL);
   GT_FREEARRAY(&codelist,Codeatposition);
@@ -1218,7 +1222,7 @@ void gt_differencecover_sortsample(Differencecover *dcov,
     }
 #endif
   }
-  suffixsortspace_delete(dcov->sortedsample);
+  gt_suffixsortspace_delete(dcov->sortedsample);
   dcov->sortedsample = NULL;
   gt_assert(dcov->diff2pos == NULL);
   filldiff2pos(dcov);
