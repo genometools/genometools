@@ -487,8 +487,7 @@ GtStyleQueryStatus gt_style_get_num(const GtStyle *sty, const char *section,
       GtGenomeNode *gn_lua = gt_genome_node_ref((GtGenomeNode*) gn);
       gt_lua_genome_node_push(sty->L, gn_lua);
     }
-    if (lua_pcall(sty->L, gn ? 1 : 0, 1, 0) != 0)
-    {
+    if (lua_pcall(sty->L, gn ? 1 : 0, 1, 0) != 0) {
       gt_error_set(err, "%s", lua_tostring(sty->L, -1));
       lua_pop(sty->L, 3);
       gt_assert(lua_gettop(sty->L) == stack_size);
