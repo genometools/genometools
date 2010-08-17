@@ -362,7 +362,7 @@ int gt_layout_get_height(const GtLayout *layout, unsigned long *result,
   /* get dynamic heights from tracks */
   lines.style = layout->style;
   lines.height = 0;
-  if (gt_hashmap_foreach(layout->tracks, add_tracklines, &lines, NULL) < 0) {
+  if (gt_hashmap_foreach(layout->tracks, add_tracklines, &lines, err) < 0) {
     return -1;
   }
   height = lines.height;
