@@ -171,7 +171,7 @@ double gt_divergence(double E, /* relative error for shulen length */
   du = 0.0;
   dl = 1.0 - (2 * p * p + 2 * q * q);  /* dl < 0.75 */
   /*this should become user definable*/
-  t = THRESHOLD;
+  t = KR_THRESHOLD;
 
   while (gt_double_smaller_double(t, (dl - du) / 2.0))
   {

@@ -124,14 +124,14 @@ int gt_genomediff_run_simple_search(Genericindex *genericindexSubject,
       gt_logger_log(logger, "# shulen:\n%f", avgShuLength);
       gt_log_log("shu: %f, gc: %f, len: %lu",
           avgShuLength, gc_query, subjectLength);
-      div =  gt_divergence(DEFAULT_E,
-                 DEFAULT_T,
-                 DEFAULT_M,
-                 avgShuLength,
-                 subjectLength,
-                 gc_query,
-                 ln_n_fac,
-                 arguments->max_ln_n_fac);
+      div =  gt_divergence(KR_DEFAULT_E,
+                           KR_DEFAULT_T,
+                           KR_DEFAULT_M,
+                           avgShuLength,
+                           subjectLength,
+                           gc_query,
+                           ln_n_fac,
+                           arguments->max_ln_n_fac);
       gt_logger_log(logger, "# divergence:\n%f", div);
 
       kr = gt_calculateKr(div);

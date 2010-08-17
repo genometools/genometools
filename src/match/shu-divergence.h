@@ -21,10 +21,10 @@
 #include <float.h>
 
 /* threshold used for calculation of divergence */
-#define THRESHOLD pow(10.0, -9.0)
-#define DEFAULT_E 1e-3
-#define DEFAULT_T 1e-5
-#define DEFAULT_M DBL_MIN
+#define KR_THRESHOLD pow(10.0, -9.0)
+#define KR_DEFAULT_E 1e-3
+#define KR_DEFAULT_T 1e-5
+#define KR_DEFAULT_M DBL_MIN
 
 /* calculates the divergence from the shulength */
 double gt_divergence (double E, /* relative error for shulen length */

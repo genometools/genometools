@@ -35,7 +35,7 @@ static void visit_count_children(const FMindex *index,
                            GtStackNodecount *stack,
                            Mbtab *tmpmbtab,
                            unsigned long *rangeOccs,
-                           unsigned int numofchars)
+                           GT_UNUSED unsigned int numofchars)
 {
   unsigned long rangesize, idx, num_special;
   unsigned int offset;
@@ -183,11 +183,13 @@ static int visit_shu_children(const FMindex *index,
 
   gt_assert(parent->lower < parent->upper);
   num_of_rows = parent->upper - parent->lower;
+
   gt_log_log("visit node with depth: %lu and %lu terminal children",
           parent->depth, num_of_rows);
   gt_log_log("interval: %lu:%lu", parent->lower, parent->upper);
   if (parent->depth == 0)
   {
+    gt_assert(num_of_rows == totallength+1);
     rangesize = gt_bwtrangesplitallwithspecial(tmpmbtab,
                                                rangeOccs,
                                                index,

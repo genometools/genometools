@@ -336,9 +336,9 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
             }
 
             shulen[i][j] =
-              gt_divergence(DEFAULT_E,
-                            DEFAULT_T,
-                            DEFAULT_M,
+              gt_divergence(KR_DEFAULT_E,
+                            KR_DEFAULT_T,
+                            KR_DEFAULT_M,
                             query_shulen,
                             subject_len,
                             query_gc,
