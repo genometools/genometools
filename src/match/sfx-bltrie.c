@@ -457,8 +457,9 @@ static unsigned long enumeratetrieleaves (Blindtrie *blindtrie,
           }
         }
       }
-      suffixptrset(blindtrie->sssp,subbucketleft,nextfree,
-                   currentnode->either.nodestartpos - blindtrie->offset);
+      gt_suffixsortspace_set(blindtrie->sssp,subbucketleft,nextfree,
+                             currentnode->either.nodestartpos
+                               - blindtrie->offset);
       nextfree++;
       siblval = currentnode->rightsibling;
       if (siblval == NULL)
@@ -643,8 +644,8 @@ static void checksorting(const Blindtrie *blindtrie,
   gt_assert(numberofsuffixes > 1UL);
   for (idx = 0; idx < numberofsuffixes - 1; idx++)
   {
-    pos1 = suffixptrget(blindtrie->sssp,subbucketleft,idx);
-    pos2 = suffixptrget(blindtrie->sssp,subbucketleft,idx+1);
+    pos1 = gt_suffixsortspace_get(blindtrie->sssp,subbucketleft,idx);
+    pos2 = gt_suffixsortspace_get(blindtrie->sssp,subbucketleft,idx+1);
     if ((ascending && pos1 >= pos2) ||
         (!ascending && pos1 <= pos2))
     {
@@ -667,10 +668,11 @@ static void inplace_reverseSuffixptr(const Blindtrie *blindtrie,
   gt_assert(len > 0);
   for (i = 0, j = len - 1; i < j; i++, j--)
   {
-    tmp = suffixptrget(blindtrie->sssp,subbucketleft,i);
-    suffixptrset(blindtrie->sssp,subbucketleft,i,
-                 suffixptrget(blindtrie->sssp,subbucketleft,j));
-    suffixptrset(blindtrie->sssp,subbucketleft,j,tmp);
+    tmp = gt_suffixsortspace_get(blindtrie->sssp,subbucketleft,i);
+    gt_suffixsortspace_set(blindtrie->sssp,subbucketleft,i,
+                           gt_suffixsortspace_get(blindtrie->sssp,subbucketleft,
+                                                  j));
+    gt_suffixsortspace_set(blindtrie->sssp,subbucketleft,j,tmp);
   }
 }
 
@@ -692,14 +694,15 @@ static void inplace_reverseSuffixptr(const Blindtrie *blindtrie,
 #endif
 
 #define QSORT_ARRAY_GET(ARR,RELIDX)\
-        suffixptrget(blindtrie->sssp,blindtrie->subbucketleft,RELIDX)
+        gt_suffixsortspace_get(blindtrie->sssp,blindtrie->subbucketleft,RELIDX)
 
 #ifdef QSORT_ARRAY_SET
 #undef QSORT_ARRAY_SET
 #endif
 
 #define QSORT_ARRAY_SET(ARR,RELIDX,VALUE)\
-        suffixptrset(blindtrie->sssp,blindtrie->subbucketleft,RELIDX,VALUE)
+        gt_suffixsortspace_set(blindtrie->sssp,blindtrie->subbucketleft,RELIDX,\
+                               VALUE)
 
 static int QSORTNAME(qsortcmparr) (
                   GT_UNUSED const void *subbucket,
@@ -777,21 +780,21 @@ unsigned long gt_blindtrie_suffixsort(
     blindtrie->maxdepthminusoffset = 0;
   }
   blindtrie->nextfreeBlindtrienode = 0;
-  pos = suffixptrget(blindtrie->sssp,subbucketleft,0) + offset;
+  pos = gt_suffixsortspace_get(blindtrie->sssp,subbucketleft,0) + offset;
   blindtrie->root = makeroot(blindtrie,pos);
 #ifdef SKDEBUG
   printf("insert suffixes at offset %lu:\n",offset);
   for (idx=0; idx < numberofsuffixes; idx++)
   {
     printf("%lu ",
-           suffixptrget(blindtrie->sssp,subbucketleft,idx) + offset);
+           gt_suffixsortspace_get(blindtrie->sssp,subbucketleft,idx) + offset);
   }
   printf("\nstep 0\n");
   showblindtrie(blindtrie);
 #endif
   for (idx=1UL; idx < numberofsuffixes; idx++)
   {
-    pos = suffixptrget(blindtrie->sssp,subbucketleft,idx) + offset;
+    pos = gt_suffixsortspace_get(blindtrie->sssp,subbucketleft,idx) + offset;
     if (isleftofboundary(pos,0,blindtrie))
     {
       leafinsubtree = findcompanion(blindtrie,pos);

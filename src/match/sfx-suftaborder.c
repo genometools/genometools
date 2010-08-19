@@ -39,8 +39,8 @@ static void showcomparisonfailure(const char *filename,
 {
   unsigned long pos1, pos2;
 
-  pos1 = suffixptrget(suffixsortspace,subbucketleft,idx1);
-  pos2 = suffixptrget(suffixsortspace,subbucketleft,idx2);
+  pos1 = gt_suffixsortspace_get(suffixsortspace,subbucketleft,idx1);
+  pos2 = gt_suffixsortspace_get(suffixsortspace,subbucketleft,idx2);
   fprintf(stderr,"ERROR: file \"%s\", line %d: ",filename,line);
   fprintf(stderr,"%s(%lu vs %lu"
                  " %lu=\"",
@@ -80,9 +80,9 @@ void gt_checkifprefixesareidentical(const char *filename,
                                        false,
                                        true,
                                        depth,
-                                       suffixptrget(suffixsortspace,
+                                       gt_suffixsortspace_get(suffixsortspace,
                                                     subbucketleft,idx),
-                                       suffixptrget(suffixsortspace,
+                                       gt_suffixsortspace_get(suffixsortspace,
                                                     subbucketleft,idx+1),
                                        esr1,
                                        esr2);
@@ -119,7 +119,7 @@ void gt_showentiresuftab(const GtEncseq *encseq,
 
   for (idx = 0; idx <= totallength; idx++)
   {
-    pos = suffixptrget(suffixsortspace,subbucketleft,idx);
+    pos = gt_suffixsortspace_get(suffixsortspace,subbucketleft,idx);
     printf("suftab[%lu]=%lu ",idx,pos);
     gt_encseq_showatstartposwithdepth(stdout,encseq,readmode,pos,depth);
     printf("\n");
@@ -146,14 +146,14 @@ void gt_checksortedsuffixes(const char *filename,
   esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   gt_assert(numberofsuffixes > 0);
-  pos1 = suffixptrget(suffixsortspace,subbucketleft,0);
+  pos1 = gt_suffixsortspace_get(suffixsortspace,subbucketleft,0);
   gt_assert(pos1 < totallength);
   for (idx = 1UL; idx < numberofsuffixes; idx++)
   {
-    pos2 = suffixptrget(suffixsortspace,subbucketleft,idx);
+    pos2 = gt_suffixsortspace_get(suffixsortspace,subbucketleft,idx);
     if (idx < numberofsuffixes - 1)
     {
-      gt_assert(suffixptrget(suffixsortspace,subbucketleft,idx)
+      gt_assert(gt_suffixsortspace_get(suffixsortspace,subbucketleft,idx)
                 < totallength);
       cmp = gt_encseq_comparetwosuffixes(encseq,
                                          readmode,

@@ -22,9 +22,6 @@
 #include "core/assert_api.h"
 #include "sfx-suffixgetset.h"
 
-#define SUFFIXPTRGET(TAB,IDX)     TAB[IDX]
-#define SUFFIXPTRSET(TAB,IDX,VAL) TAB[IDX] = VAL
-
 struct GtSuffixsortspace
 {
   unsigned long *ulongtab;
@@ -110,41 +107,44 @@ static void suffixptrassert(const GtSuffixsortspace *sssp,
 unsigned long gt_suffixsortspace_getdirect(const GtSuffixsortspace *sssp,
                                            unsigned long idx)
 {
-  return SUFFIXPTRGET(sssp->ulongtab,idx);
+  return sssp->ulongtab[idx];
 }
 
 void gt_suffixsortspace_setdirect(GtSuffixsortspace *sssp,
-                        unsigned long idx,
-                        unsigned long value)
+                                  unsigned long idx,
+                                  unsigned long value)
 {
-  SUFFIXPTRSET(sssp->ulongtab,idx,value);
+  sssp->ulongtab[idx] = value;
 }
 
-unsigned long suffixptrget(const GtSuffixsortspace *sssp,
-                           unsigned long subbucketleft,
-                           unsigned long idx)
-{
-  /*suffixptrassert(sssp,subbucket,subbucketleft,idx);*/
-  return SUFFIXPTRGET(sssp->ulongtab,sssp->bucketleftidx +
-                                     subbucketleft + idx -
-                                     sssp->offset);
-}
-
-void suffixptrset(GtSuffixsortspace *sssp,
-                  unsigned long subbucketleft,
-                  unsigned long idx,
-                  unsigned long value)
+unsigned long gt_suffixsortspace_get(const GtSuffixsortspace *sssp,
+                                     unsigned long subbucketleft,
+                                     unsigned long idx)
 {
   /*suffixptrassert(sssp,subbucket,subbucketleft,idx);*/
-  SUFFIXPTRSET(sssp->ulongtab,sssp->bucketleftidx + subbucketleft + idx -
-                              sssp->offset,value);
+  return gt_suffixsortspace_getdirect(sssp, sssp->bucketleftidx
+                                              + subbucketleft
+                                              + idx
+                                              - sssp->offset);
 }
 
-void gt_suffixsortspace_setdirectwithoffset(const GtSuffixsortspace *sssp,
+void gt_suffixsortspace_set(GtSuffixsortspace *sssp,
+                            unsigned long subbucketleft,
+                            unsigned long idx,
+                            unsigned long value)
+{
+  /*suffixptrassert(sssp,subbucket,subbucketleft,idx);*/
+  gt_suffixsortspace_setdirect(sssp, sssp->bucketleftidx
+                                       + subbucketleft
+                                       + idx
+                                       - sssp->offset,value);
+}
+
+void gt_suffixsortspace_setdirectwithoffset(GtSuffixsortspace *sssp,
                                             unsigned long idx,
                                             unsigned long value)
 {
-  SUFFIXPTRSET(sssp->ulongtab,idx - sssp->offset,value);
+  gt_suffixsortspace_setdirect(sssp,idx - sssp->offset,value);
 }
 
 unsigned long gt_suffixsortspace_bucketleftidx_get(const GtSuffixsortspace
