@@ -40,7 +40,7 @@ unsigned long *gt_lcp13_manzini(const GtEncseq *encseq,
     if (fillpos > 0 && fillpos < partwidth)
     {
       unsigned long previousstart
-        = suffixptrgetdirect(sortedsuffixes,fillpos-1);
+        = gt_suffixsortspace_getdirect(sortedsuffixes,fillpos-1);
       while (pos+lcpvalue < totallength &&
              previousstart+lcpvalue < totallength)
       {
@@ -104,7 +104,7 @@ static void setrelevantfrominversetab(Compressedtable *rightposinverse,
 
     for (idx = 0; idx < partwidth; idx++)
     {
-      pos = suffixptrgetdirect(sortedsuffixes,idx);
+      pos = gt_suffixsortspace_getdirect(sortedsuffixes,idx);
       if (pos > 0)
       {
         GtUchar cc = gt_encseq_get_encoded_char(encseq,pos-1,readmode);
@@ -237,7 +237,7 @@ static unsigned long sa2ranknext(Compressedtable *ranknext,
      ranknext array (which points to ranknext can savely be stored */
   for (idx=0; idx < partwidth; idx++)
   {
-    pos = suffixptrgetdirect(sortedsuffixes,idx);
+    pos = gt_suffixsortspace_getdirect(sortedsuffixes,idx);
     if (pos > 0)
     {
       GtUchar cc = gt_encseq_get_encoded_char(encseq,pos-1, readmode);
@@ -353,7 +353,7 @@ Compressedtable *gt_lcp9_manzini(Compressedtable *spacefortab,
     }
     if (fillpos > 0 && fillpos - 1 < partwidth)
     {
-      previousstart = suffixptrgetdirect(sortedsuffixes,fillpos-1);
+      previousstart = gt_suffixsortspace_getdirect(sortedsuffixes,fillpos-1);
       while (pos+lcpvalue < totallength &&
              previousstart+lcpvalue < totallength)
       {

@@ -107,8 +107,8 @@ static void suffixptrassert(const GtSuffixsortspace *sssp,
 }
 */
 
-unsigned long suffixptrgetdirect(const GtSuffixsortspace *sssp,
-                                 unsigned long idx)
+unsigned long gt_suffixsortspace_getdirect(const GtSuffixsortspace *sssp,
+                                           unsigned long idx)
 {
   return SUFFIXPTRGET(sssp->ulongtab,idx);
 }
@@ -193,7 +193,7 @@ int gt_suffixsortspace_to_file (FILE *outfpsuftab,
 
   for (idx = 0; !haserr && idx < numberofsuffixes; idx++)
   {
-    unsigned long value = suffixptrgetdirect(suffixsortspace,idx);
+    unsigned long value = gt_suffixsortspace_getdirect(suffixsortspace,idx);
     if (fwrite(&value,
                sizeof (value),
                (size_t) 1,

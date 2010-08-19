@@ -129,7 +129,7 @@ struct Differencecover
 static unsigned long suffixptrgetdcov(const Differencecover *dcov,
                                       unsigned long idx)
 {
-  return suffixptrgetdirect(dcov->sortedsample,idx);
+  return gt_suffixsortspace_getdirect(dcov->sortedsample,idx);
 }
 
 static void suffixptrsetdcov(const Differencecover *dcov,
@@ -867,7 +867,7 @@ static void dc_addunsortedrange(void *voiddcov,
 #endif
 
 #define QSORT_ARRAY_GET(ARR,RELIDX)\
-        suffixptrgetdirect(dcov->sssp,dcov->sortoffset+(RELIDX))
+        gt_suffixsortspace_getdirect(dcov->sssp,dcov->sortoffset+(RELIDX))
 
 #ifdef QSORT_ARRAY_SET
 #undef QSORT_ARRAY_SET

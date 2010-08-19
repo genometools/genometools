@@ -134,7 +134,7 @@ SDRTranslateSuffixsortspace(SeqDataTranslator xltor, void *dest,
     unsigned long *ulongdest = (unsigned long *) dest;
     for (idx = 0; idx < len; idx++)
     {
-      ulongdest[idx] = suffixptrgetdirect(suffixsortspace,offset+idx);
+      ulongdest[idx] = gt_suffixsortspace_getdirect(suffixsortspace,offset+idx);
     }
   }
   /*memcpy(dest, src, len * xltor.state.elemSize); */

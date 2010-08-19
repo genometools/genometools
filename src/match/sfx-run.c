@@ -134,7 +134,7 @@ static int bwttab2file(Outfileinfo *outfileinfo,
 
     for (pos=0; pos < numberofsuffixes; pos++)
     {
-      startpos = suffixptrgetdirect(suffixsortspace,pos);
+      startpos = gt_suffixsortspace_getdirect(suffixsortspace,pos);
       if (startpos == 0)
       {
         cc = (GtUchar) UNDEFBWTCHAR;

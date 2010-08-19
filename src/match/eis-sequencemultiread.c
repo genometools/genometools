@@ -334,8 +334,9 @@ seqReaderSetMove2Backlog(void *backlogState, const void *seqData,
         GtSuffixsortspace *srcSptr = (GtSuffixsortspace *) seqData;
         for (idx = 0; idx< copyLen; idx++)
         {
-          destSptr[idx] = suffixptrgetdirect(srcSptr,
-                                             copyStartPos - requestStart + idx);
+          destSptr[idx] 
+            = gt_suffixsortspace_getdirect(srcSptr,
+                                           copyStartPos - requestStart + idx);
         }
       } else
       {

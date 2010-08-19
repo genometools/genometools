@@ -52,8 +52,9 @@ size_t gt_translateSuftab2BWTSuffixsortspace(
   gt_assert(trState);
   for (idx = 0; idx < len; ++idx)
   {
-    dest[idx] = sfxIdx2BWTSym(suffixptrgetdirect(suffixsortspace,offset+idx),
-                              trState->encseq, trState->readmode);
+    dest[idx] 
+      = sfxIdx2BWTSym(gt_suffixsortspace_getdirect(suffixsortspace,offset+idx),
+                      trState->encseq, trState->readmode);
   }
   return len * sizeof (GtUchar);
 }

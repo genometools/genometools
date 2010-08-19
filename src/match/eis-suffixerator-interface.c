@@ -406,7 +406,8 @@ SfxIGenerate(void *iface,
         {
           for (pos=0; pos < lastGeneratedLen; pos++)
           {
-            if (suffixptrgetdirect(sfxi->lastGeneratedSufTabSegment,pos) == 0)
+            if (gt_suffixsortspace_getdirect(sfxi->lastGeneratedSufTabSegment,
+                                             pos) == 0)
             {
               sfxi->rot0Pos.defined = true;
               sfxi->rot0Pos.valueunsignedlong = sfxi->lastGeneratedStart + pos;

@@ -694,7 +694,7 @@ static void rms_initinversesuftabnonspecialsadjust(Rmnsufinfo *rmnsufinfo)
                                          rmnsufinfo->numofchars);
     for (/* Nothing */; idx < bucketspec.left; idx++)
     {
-      startpos = suffixptrgetdirect(rmnsufinfo->sssp,idx);
+      startpos = gt_suffixsortspace_getdirect(rmnsufinfo->sssp,idx);
       rms_inversesuftab_set(rmnsufinfo,startpos,idx);
     }
     updatewidth (rmnsufinfo,bucketspec.nonspecialsinbucket,
@@ -702,13 +702,13 @@ static void rms_initinversesuftabnonspecialsadjust(Rmnsufinfo *rmnsufinfo)
     for (/* Nothing */;
          idx < bucketspec.left+bucketspec.nonspecialsinbucket; idx++)
     {
-      startpos = suffixptrgetdirect(rmnsufinfo->sssp,idx);
+      startpos = gt_suffixsortspace_getdirect(rmnsufinfo->sssp,idx);
       rms_inversesuftab_set(rmnsufinfo,startpos,bucketspec.left);
     }
   }
   for (/* Nothing */; idx < rmnsufinfo->partwidth; idx++)
   {
-    startpos = suffixptrgetdirect(rmnsufinfo->sssp,idx);
+    startpos = gt_suffixsortspace_getdirect(rmnsufinfo->sssp,idx);
     rms_inversesuftab_set(rmnsufinfo,startpos,idx);
   }
 }
@@ -781,7 +781,8 @@ static void rms_initinversesuftabnonspecials(Rmnsufinfo *rmnsufinfo)
   gt_assert(rmnsufinfo->sssp != NULL);
   for (idx=0; idx < rmnsufinfo->partwidth; idx++)
   {
-    rms_inversesuftab_set(rmnsufinfo,suffixptrgetdirect(rmnsufinfo->sssp,idx),
+    rms_inversesuftab_set(rmnsufinfo,
+                          gt_suffixsortspace_getdirect(rmnsufinfo->sssp,idx),
                           idx);
   }
 }
@@ -971,7 +972,7 @@ static unsigned long suftabentryfromsection_get(const Rmnsufinfo *rmnsufinfo,
   if (SUFINMEM(&rmnsufinfo->sortblock))
   {
     gt_assert(rmnsufinfo->sssp != NULL);
-    return suffixptrgetdirect(rmnsufinfo->sssp,idx);
+    return gt_suffixsortspace_getdirect(rmnsufinfo->sssp,idx);
   }
   gt_assert(idx >= rmnsufinfo->sortblock.pageoffset &&
             idx < rmnsufinfo->sortblock.pageoffset +

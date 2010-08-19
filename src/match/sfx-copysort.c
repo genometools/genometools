@@ -464,7 +464,7 @@ static void forwardderive(const GtBucketspec2 *bucketspec2,
   gt_assert (idx < targetoffset[source]);
   for (; idx < targetoffset[source]; idx++)
   {
-    startpos = suffixptrgetdirect(suffixsortspace,idx);
+    startpos = gt_suffixsortspace_getdirect(suffixsortspace,idx);
     if (startpos > 0)
     {
       cc = gt_encseq_get_encoded_char(bucketspec2->encseq,
@@ -491,7 +491,7 @@ static void backwardderive(const GtBucketspec2 *bucketspec2,
   gt_assert (idx > targetoffset[source]);
   for (; idx + 1 > targetoffset[source] + 1; idx--)
   {
-    startpos = suffixptrgetdirect(suffixsortspace,idx);
+    startpos = gt_suffixsortspace_getdirect(suffixsortspace,idx);
     if (startpos > 0)
     {
       cc = gt_encseq_get_encoded_char(bucketspec2->encseq,
@@ -532,11 +532,12 @@ void gt_copysort_derivesorting(const GtBucketspec2 *bucketspec2,
     unsigned long idx;
     for (idx = 0; idx < bucketspec2->partwidth; idx++)
     {
-      gt_encseq_showatstartpos(stdout,
-                               GT_ISDIRREVERSE(readmode) ? false : true,
-                               GT_ISDIRCOMPLEMENT(readmode) ? true : false,
-                               encseq,
-                               suffixptrgetdirect(suffixsortspace,idx));
+      gt_encseq_showatstartpos(
+                            stdout,
+                            GT_ISDIRREVERSE(readmode) ? false : true,
+                            GT_ISDIRCOMPLEMENT(readmode) ? true : false,
+                            encseq,
+                            gt_suffixsortspace_getdirect(suffixsortspace,idx));
     }
   }
 #endif
