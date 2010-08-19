@@ -306,7 +306,8 @@ static void insertwithoutspecial(void *processinfo,
         kmercode->code <= sfi->currentmaxcode)
     {
       unsigned long stidx = --sfi->leftborder[kmercode->code];
-      suffixptrset2(sfi->suffixsortspace,stidx,position);
+      gt_suffixsortspace_setdirectwithoffset(sfi->suffixsortspace,stidx,
+                                             position);
       /* from right to left */
     }
   }
@@ -348,8 +349,8 @@ static void sfx_derivespecialcodesfromtable(Sfxiterator *sfi,bool deletevalues)
           gt_updatebckspecials(sfi->bcktab,code,sfi->numofchars,prefixindex);
           stidx = --sfi->leftborder[code];
           /* from right to left */
-          suffixptrset2(sfi->suffixsortspace,stidx,
-                        sfi->spaceCodeatposition[j].position - prefixindex);
+          gt_suffixsortspace_setdirectwithoffset(sfi->suffixsortspace,stidx,
+                           sfi->spaceCodeatposition[j].position - prefixindex);
         }
       }
       if (deletevalues)
@@ -403,7 +404,7 @@ static void sfx_derivespecialcodesonthefly(Sfxiterator *sfi)
             gt_assert(code > 0);
             stidx = --sfi->leftborder[code];
             /* from right to left */
-            suffixptrset2(sfi->suffixsortspace,stidx,
+            gt_suffixsortspace_setdirectwithoffset(sfi->suffixsortspace,stidx,
                           specialcontext.position - prefixindex);
           }
         }
@@ -960,8 +961,8 @@ static void insertfullspecialrange(Sfxiterator *sfi,
   {
     if (GT_ISDIRREVERSE(sfi->readmode))
     {
-      suffixptrsetdirect(sfi->fusp.sssp,sfi->fusp.nextfreeSuffixptr,
-                         GT_REVERSEPOS(sfi->totallength,pos));
+      gt_suffixsortspace_setdirect(sfi->fusp.sssp,sfi->fusp.nextfreeSuffixptr,
+                                   GT_REVERSEPOS(sfi->totallength,pos));
       sfi->fusp.nextfreeSuffixptr++;
       if (pos == leftpos)
       {
@@ -970,7 +971,8 @@ static void insertfullspecialrange(Sfxiterator *sfi,
       pos--;
     } else
     {
-      suffixptrsetdirect(sfi->fusp.sssp,sfi->fusp.nextfreeSuffixptr,pos);
+      gt_suffixsortspace_setdirect(sfi->fusp.sssp,
+                                   sfi->fusp.nextfreeSuffixptr,pos);
       sfi->fusp.nextfreeSuffixptr++;
       if (pos == rightpos-1)
       {
@@ -1057,8 +1059,9 @@ static void fillspecialnextpage(Sfxiterator *sfi)
       {
         if (sfi->fusp.nextfreeSuffixptr < sfi->fusp.allocatedSuffixptr)
         {
-          suffixptrsetdirect(sfi->fusp.sssp,sfi->fusp.nextfreeSuffixptr,
-                             sfi->totallength);
+          gt_suffixsortspace_setdirect(sfi->fusp.sssp,
+                                       sfi->fusp.nextfreeSuffixptr,
+                                       sfi->totallength);
           sfi->fusp.nextfreeSuffixptr++;
           sfi->exhausted = true;
         }

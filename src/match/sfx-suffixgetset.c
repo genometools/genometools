@@ -113,7 +113,7 @@ unsigned long gt_suffixsortspace_getdirect(const GtSuffixsortspace *sssp,
   return SUFFIXPTRGET(sssp->ulongtab,idx);
 }
 
-void suffixptrsetdirect(GtSuffixsortspace *sssp,
+void gt_suffixsortspace_setdirect(GtSuffixsortspace *sssp,
                         unsigned long idx,
                         unsigned long value)
 {
@@ -140,9 +140,9 @@ void suffixptrset(GtSuffixsortspace *sssp,
                               sssp->offset,value);
 }
 
-void suffixptrset2(const GtSuffixsortspace *sssp,
-                   unsigned long idx,
-                   unsigned long value)
+void gt_suffixsortspace_setdirectwithoffset(const GtSuffixsortspace *sssp,
+                                            unsigned long idx,
+                                            unsigned long value)
 {
   SUFFIXPTRSET(sssp->ulongtab,idx - sssp->offset,value);
 }

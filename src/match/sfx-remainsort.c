@@ -988,7 +988,7 @@ static void suftabentryfromsection_update(Rmnsufinfo *rmnsufinfo,
   if (SUFINMEM(&rmnsufinfo->sortblock))
   {
     gt_assert(rmnsufinfo->sssp != NULL);
-    suffixptrsetdirect(rmnsufinfo->sssp,idx,value);
+    gt_suffixsortspace_setdirect(rmnsufinfo->sssp,idx,value);
   } else
   {
     gt_assert(idx >= rmnsufinfo->sortblock.pageoffset &&

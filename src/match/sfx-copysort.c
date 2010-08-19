@@ -472,7 +472,8 @@ static void forwardderive(const GtBucketspec2 *bucketspec2,
                                       bucketspec2->readmode);
       if (ISNOTSPECIAL(cc) && !bucketspec2->superbuckettab[cc].sorted)
       {
-        suffixptrsetdirect(suffixsortspace,targetoffset[cc],startpos - 1);
+        gt_suffixsortspace_setdirect(suffixsortspace,targetoffset[cc],
+                                     startpos - 1);
         targetoffset[cc]++;
       }
     }
@@ -499,7 +500,8 @@ static void backwardderive(const GtBucketspec2 *bucketspec2,
                                       bucketspec2->readmode);
       if (ISNOTSPECIAL(cc) && !bucketspec2->superbuckettab[cc].sorted)
       {
-        suffixptrsetdirect(suffixsortspace,targetoffset[cc],startpos - 1);
+        gt_suffixsortspace_setdirect(suffixsortspace,targetoffset[cc],
+                                     startpos - 1);
         targetoffset[cc]--;
       }
     }

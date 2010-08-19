@@ -39,9 +39,13 @@ void gt_suffixsortspace_delete(GtSuffixsortspace *suffixsortspace);
 unsigned long gt_suffixsortspace_getdirect(const GtSuffixsortspace *sssp,
                                            unsigned long idx);
 
-void suffixptrsetdirect(GtSuffixsortspace *sssp,
-                        unsigned long idx,
-                        unsigned long value);
+void gt_suffixsortspace_setdirect(GtSuffixsortspace *sssp,
+                                  unsigned long idx,
+                                  unsigned long value);
+
+void gt_suffixsortspace_setdirectwithoffset(const GtSuffixsortspace *sssp,
+                                            unsigned long idx,
+                                            unsigned long value);
 
 unsigned long suffixptrget(const GtSuffixsortspace *sssp,
                            unsigned long subbucketleft,
@@ -51,10 +55,6 @@ void suffixptrset(GtSuffixsortspace *sssp,
                   unsigned long subbucketleft,
                   unsigned long idx,
                   unsigned long value);
-
-void suffixptrset2(const GtSuffixsortspace *sssp,
-                   unsigned long idx,
-                   unsigned long value);
 
 unsigned long gt_suffixsortspace_bucketleftidx_get(
                     const GtSuffixsortspace *sssp);

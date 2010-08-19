@@ -135,7 +135,7 @@ static unsigned long suffixptrgetdcov(const Differencecover *dcov,
 static void suffixptrsetdcov(const Differencecover *dcov,
                              unsigned long idx,unsigned long value)
 {
-  suffixptrsetdirect(dcov->sortedsample,idx,value);
+  gt_suffixsortspace_setdirect(dcov->sortedsample,idx,value);
 }
 
 static void fillcoverrank(Differencecover *dcov)
@@ -874,7 +874,7 @@ static void dc_addunsortedrange(void *voiddcov,
 #endif
 
 #define QSORT_ARRAY_SET(ARR,RELIDX,VALUE)\
-        suffixptrsetdirect(dcov->sssp,dcov->sortoffset+(RELIDX),VALUE)
+        gt_suffixsortspace_setdirect(dcov->sssp,dcov->sortoffset+(RELIDX),VALUE)
 
 static int QSORTNAME(qsortcmparr) (
                   GT_UNUSED const void *subbucket,
