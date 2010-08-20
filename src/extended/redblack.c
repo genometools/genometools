@@ -450,7 +450,7 @@ int gt_rbt_delete(const GtKeytype key,
             *unchained;
   int cmp;
   GtStackGtRBTnodeptrptr nodestack;
-  
+
   GT_STACK_INIT(&nodestack,16UL);
   p = *rootp;
   if (p == NULL)
