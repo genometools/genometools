@@ -47,6 +47,7 @@ static inline unsigned long QSORTNAME(gt_inlined_qsort_arr_r_med3)
                      : c));
 }
 
+#ifndef GT_STACK_INTERVALARRAYTOBESORTED_DEFINED
 typedef struct
 {
   unsigned long startindex,
@@ -54,6 +55,8 @@ typedef struct
 } Intervalarrtobesorted;
 
 GT_STACK_DECLARESTRUCT(Intervalarrtobesorted,32UL);
+#define GT_STACK_INTERVALARRAYTOBESORTED_DEFINED
+#endif
 
 static void QSORTNAME(gt_inlinedarr_qsort_r) (QSORTNAME(Sorttype) *arr,
                                               unsigned long len,
