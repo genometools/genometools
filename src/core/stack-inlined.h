@@ -61,15 +61,8 @@
         (S)->space = &(S)->staticspace[0]
 
 /*
-<<<<<<< HEAD
-<<<<<<< HEAD
   Delete the memory allocated for stack contents
-=======
-  Delete the stack.
->>>>>>> Added inlined implementation of stacks.
-=======
-  Delete the stack.
->>>>>>> Added inlined implementation of stacks.
+
 */
 
 #define GT_STACK_DELETE(S)\
