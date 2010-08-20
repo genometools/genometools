@@ -119,7 +119,7 @@ static int gt_stat_runner(int argc, const char **argv, int parsed_args,
                           void *tool_arguments, GtError *err)
 {
   StatArguments *arguments = tool_arguments;
-  GtNodeStream *gff3_in_stream, *sort_stream, *add_introns_stream = NULL, 
+  GtNodeStream *gff3_in_stream, *sort_stream, *add_introns_stream = NULL,
                *stat_stream;
   int had_err;
   gt_error_check(err);

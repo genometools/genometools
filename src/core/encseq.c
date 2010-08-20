@@ -6562,7 +6562,7 @@ int gt_encseq_builder_unit_test(GtError *err)
   ensure(had_err, gt_encseq_seqlength(encseq, 0UL) == 11UL);
   ensure(had_err, gt_encseq_num_of_files(encseq) == 1UL);
   ensure(had_err, (filenames = gt_encseq_filenames(encseq)));
-  ensure(had_err, gt_str_array_size(filenames) == 1);
+  ensure(had_err, gt_str_array_size(filenames) == 1UL);
   ensure(had_err, strcmp(gt_str_array_get(filenames, 0), "generated") == 0);
   gt_encseq_delete(encseq);
 
@@ -6574,7 +6574,7 @@ int gt_encseq_builder_unit_test(GtError *err)
   ensure(had_err, gt_encseq_num_of_sequences(encseq) == 2UL);
   ensure(had_err, gt_encseq_num_of_files(encseq) == 1UL);
   ensure(had_err, (filenames = gt_encseq_filenames(encseq)));
-  ensure(had_err, gt_str_array_size(filenames) == 1);
+  ensure(had_err, gt_str_array_size(filenames) == 1UL);
   ensure(had_err, strcmp(gt_str_array_get(filenames, 0), "generated") == 0);
   gt_encseq_delete(encseq);
 
@@ -6586,7 +6586,7 @@ int gt_encseq_builder_unit_test(GtError *err)
   ensure(had_err, gt_encseq_num_of_sequences(encseq) == 1UL);
   ensure(had_err, gt_encseq_num_of_files(encseq) == 1UL);
   ensure(had_err, (filenames = gt_encseq_filenames(encseq)));
-  ensure(had_err, gt_str_array_size(filenames) == 1);
+  ensure(had_err, gt_str_array_size(filenames) == 1UL);
   ensure(had_err, strcmp(gt_str_array_get(filenames, 0), "generated") == 0);
   gt_encseq_delete(encseq);
 
@@ -6598,7 +6598,7 @@ int gt_encseq_builder_unit_test(GtError *err)
   ensure(had_err, gt_encseq_num_of_sequences(encseq) == 2UL);
   ensure(had_err, gt_encseq_num_of_files(encseq) == 1UL);
   ensure(had_err, (filenames = gt_encseq_filenames(encseq)));
-  ensure(had_err, gt_str_array_size(filenames) == 1);
+  ensure(had_err, gt_str_array_size(filenames) == 1UL);
   ensure(had_err, strcmp(gt_str_array_get(filenames, 0), "generated") == 0);
   gt_encseq_delete(encseq);
 
@@ -6614,7 +6614,7 @@ int gt_encseq_builder_unit_test(GtError *err)
   ensure(had_err, gt_encseq_seqlength(encseq, 1UL) == 4UL);
   ensure(had_err, gt_encseq_num_of_files(encseq) == 1UL);
   ensure(had_err, (filenames = gt_encseq_filenames(encseq)));
-  ensure(had_err, gt_str_array_size(filenames) == 1);
+  ensure(had_err, gt_str_array_size(filenames) == 1UL);
   ensure(had_err, strcmp(gt_str_array_get(filenames, 0), "generated") == 0);
   gt_encseq_delete(encseq);
 
@@ -6637,7 +6637,7 @@ int gt_encseq_builder_unit_test(GtError *err)
   ensure(had_err, strncmp(desc, "baz", (size_t) desclen * sizeof (char)) == 0);
   ensure(had_err, gt_encseq_num_of_files(encseq) == 1UL);
   ensure(had_err, (filenames = gt_encseq_filenames(encseq)));
-  ensure(had_err, gt_str_array_size(filenames) == 1);
+  ensure(had_err, gt_str_array_size(filenames) == 1UL);
   ensure(had_err, strcmp(gt_str_array_get(filenames, 0), "generated") == 0);
   gt_encseq_delete(encseq);
 
@@ -6666,7 +6666,7 @@ uint64_t gt_encseq_effective_filelength(const GtEncseq *encseq,
 {
   unsigned long num_files;
   if (encseq->numofdbfiles == 1UL)
-    return encseq->totallength;
+    return (uint64_t) encseq->totallength;
   gt_assert(encseq && encseq->filelengthtab);
   num_files = encseq->numofdbfiles;
   gt_assert(filenum < num_files);
