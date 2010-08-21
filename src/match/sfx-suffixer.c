@@ -701,7 +701,8 @@ Sfxiterator *gt_newSfxiterator(const GtEncseq *encseq,
                                          logger);
     gt_assert(sfi->suftabparts != NULL);
     sfi->suffixsortspace
-      = gt_suffixsortspace_new(stpgetlargestwidth(sfi->suftabparts));
+      = gt_suffixsortspace_new(stpgetlargestwidth(sfi->suftabparts),
+                               sfi->totallength);
     sfi->longest.defined = false;
     sfi->longest.valueunsignedlong = 0;
     if (gt_encseq_has_specialranges(sfi->encseq))

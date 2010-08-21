@@ -28,11 +28,13 @@ typedef void (*Dc_processunsortedrange)(void *,
                                         unsigned long,
                                         unsigned long);
 
-GtSuffixsortspace *gt_suffixsortspace_new(unsigned long numofentries);
+GtSuffixsortspace *gt_suffixsortspace_new(unsigned long numofentries,
+                                          unsigned long maxvalue);
 
 GtSuffixsortspace *gt_suffixsortspace_new_fromfile(int filedesc,
                                                    const char *filename,
-                                                   unsigned long numofentries);
+                                                   unsigned long numofentries,
+                                                   unsigned long maxvalue);
 
 void gt_suffixsortspace_delete(GtSuffixsortspace *suffixsortspace);
 

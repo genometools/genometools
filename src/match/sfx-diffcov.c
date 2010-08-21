@@ -1079,7 +1079,8 @@ void gt_differencecover_sortsample(Differencecover *dcov,
           (size_t) codelist.nextfreeCodeatposition,
           sizeof (*codelist.spaceCodeatposition),compareCodeatpositon);
   }
-  dcov->sortedsample = gt_suffixsortspace_new(dcov->effectivesamplesize);
+  dcov->sortedsample = gt_suffixsortspace_new(dcov->effectivesamplesize,
+                                              dcov->totallength);
   posinserted = dcov_derivespecialcodesonthefly(dcov,
                                                 withcheck ? &codelist : NULL);
   GT_FREEARRAY(&codelist,Codeatposition);
