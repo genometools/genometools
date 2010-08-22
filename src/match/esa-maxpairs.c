@@ -376,23 +376,23 @@ int gt_enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
 {
   unsigned int base;
   GtArrayGtUlong *ptr;
-  MaxpairsDfsstate state;
+  MaxpairsDfsstate *state;
   bool haserr = false;
 
-  state.alphabetsize = gt_alphabet_num_of_chars(
-                                           gt_encseq_alphabet(encseq));
-  state.searchlength = searchlength;
-  state.processmaxpairs = processmaxpairs;
-  state.processmaxpairsinfo = processmaxpairsinfo;
-  state.initialized = false;
-  state.encseq = encseq;
-  state.readmode = readmode;
+  state = gt_malloc(sizeof(*state));
+  state->alphabetsize = gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq));
+  state->searchlength = searchlength;
+  state->processmaxpairs = processmaxpairs;
+  state->processmaxpairsinfo = processmaxpairsinfo;
+  state->initialized = false;
+  state->encseq = encseq;
+  state->readmode = readmode;
 
-  GT_INITARRAY(&state.uniquechar,GtUlong);
-  ALLOCASSIGNSPACE(state.poslist,NULL,GtArrayGtUlong,state.alphabetsize);
-  for (base = 0; base < state.alphabetsize; base++)
+  GT_INITARRAY(&state->uniquechar,GtUlong);
+  ALLOCASSIGNSPACE(state->poslist,NULL,GtArrayGtUlong,state->alphabetsize);
+  for (base = 0; base < state->alphabetsize; base++)
   {
-    ptr = &state.poslist[base];
+    ptr = &state->poslist[base];
     GT_INITARRAY(ptr,GtUlong);
   }
   if (gt_depthfirstesa(ssar,
@@ -403,18 +403,19 @@ int gt_enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
                        NULL,
                        NULL,
                        NULL,
-                       (Dfsstate*) &state,
+                       (Dfsstate*) state,
                        logger,
                        err) != 0)
   {
     haserr = true;
   }
-  GT_FREEARRAY(&state.uniquechar,GtUlong);
-  for (base = 0; base < state.alphabetsize; base++)
+  GT_FREEARRAY(&state->uniquechar,GtUlong);
+  for (base = 0; base < state->alphabetsize; base++)
   {
-    ptr = &state.poslist[base];
+    ptr = &state->poslist[base];
     GT_FREEARRAY(ptr,GtUlong);
   }
-  FREESPACE(state.poslist);
+  FREESPACE(state->poslist);
+  gt_free(state);
   return haserr ? -1 : 0;
 }
