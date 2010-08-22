@@ -1080,7 +1080,8 @@ void gt_differencecover_sortsample(Differencecover *dcov,
           sizeof (*codelist.spaceCodeatposition),compareCodeatpositon);
   }
   dcov->sortedsample = gt_suffixsortspace_new(dcov->effectivesamplesize,
-                                              dcov->totallength);
+                                              dcov->totallength,
+                                              false);
   posinserted = dcov_derivespecialcodesonthefly(dcov,
                                                 withcheck ? &codelist : NULL);
   GT_FREEARRAY(&codelist,Codeatposition);
@@ -1157,7 +1158,7 @@ void gt_differencecover_sortsample(Differencecover *dcov,
     } else
     {
       defaultsfxstrategy(&sfxstrategy,
-                gt_encseq_bitwise_cmp_ok(dcov->encseq) ? false : true);
+                         gt_encseq_bitwise_cmp_ok(dcov->encseq) ? false : true);
     }
     sfxstrategy.differencecover = dcov->vparam;
     gt_sortbucketofsuffixes(false,

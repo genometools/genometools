@@ -87,34 +87,37 @@ static void setdirect_ulong(const GtSuffixsortspace *sssp,
 }
 
 GtSuffixsortspace *gt_suffixsortspace_new(unsigned long numofentries,
-                                          unsigned long maxvalue)
+                                          unsigned long maxvalue,
+                                          bool suftabasulongarray)
 {
   GtSuffixsortspace *suffixsortspace;
-  bool usecompact = true;
 
   gt_assert(numofentries > 0);
   suffixsortspace = gt_malloc(sizeof(*suffixsortspace));
   suffixsortspace->maxindex = numofentries-1;
   suffixsortspace->maxvalue = maxvalue;
-  if (usecompact)
+  if (suftabasulongarray)
   {
-    unsigned int bitspervalue
-      = gt_determinebitspervalue((uint64_t) maxvalue);
-    /*
-    printf("maxvalue=%lu,bitspervalue=%u\n",maxvalue,bitspervalue);
-    */
-    suffixsortspace->ulongtab = NULL;
-    suffixsortspace->bitpackarray
-      = bitpackarray_new(bitspervalue,(BitOffset) numofentries,true);
-    suffixsortspace->getdirect = getdirect_bitpackarray;
-    suffixsortspace->setdirect = setdirect_bitpackarray;
-  } else
-  {
+    printf("suftab as array: maxvalue=%lu,numofentries=%lu\n",
+            maxvalue,numofentries);
     suffixsortspace->bitpackarray = NULL;
     suffixsortspace->ulongtab
       = gt_malloc(sizeof(*suffixsortspace->ulongtab) * numofentries);
     suffixsortspace->getdirect = getdirect_ulong;
     suffixsortspace->setdirect = setdirect_ulong;
+  } else
+  {
+    unsigned int bitspervalue
+      = gt_determinebitspervalue((uint64_t) maxvalue);
+
+    printf("suftab as bitpackarray: maxvalue=%lu,numofentries=%lu,"
+           "bitspervalue=%u\n",maxvalue,numofentries,bitspervalue);
+
+    suffixsortspace->ulongtab = NULL;
+    suffixsortspace->bitpackarray
+      = bitpackarray_new(bitspervalue,(BitOffset) numofentries,true);
+    suffixsortspace->getdirect = getdirect_bitpackarray;
+    suffixsortspace->setdirect = setdirect_bitpackarray;
   }
   suffixsortspace->offset = 0;
   suffixsortspace->bucketleftidx = 0;

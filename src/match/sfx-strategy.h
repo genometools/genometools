@@ -40,6 +40,7 @@ typedef struct
        streamsuftab,
        absoluteinversesuftab,
        hashexceptions,
+       suftabasulongarray,
        iteratorbasedkmerscanning;
 } Sfxstrategy;
 
@@ -58,6 +59,7 @@ typedef struct
   sfxstrategy->absoluteinversesuftab = false;
   sfxstrategy->hashexceptions = false;
   sfxstrategy->iteratorbasedkmerscanning = false;
+  sfxstrategy->suftabasulongarray = false;
 }
 
 #endif

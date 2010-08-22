@@ -61,7 +61,8 @@ typedef struct
        outbcktab,
        outkystab,
        outkyssort,
-       iteratorbasedkmerscanning;
+       iteratorbasedkmerscanning,
+       suftabasulongarray;
   GtStr *optionkysargumentstring;
   Sfxstrategy sfxstrategy;
   Filenames2encseqoptions fn2encopt;

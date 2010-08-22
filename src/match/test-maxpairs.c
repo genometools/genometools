@@ -77,16 +77,21 @@ static int constructsarrandrunmaxpairs(
   Sfxiterator *sfi;
   bool specialsuffixes = false;
 
+  Sfxstrategy sfxstrategy;
+
+  defaultsfxstrategy(&sfxstrategy,
+                     gt_encseq_bitwise_cmp_ok(ssi->encseq) ? false : true);
+  sfxstrategy.suftabasulongarray = true;
   sfi = gt_newSfxiterator(ssi->encseq,
-                       readmode,
-                       prefixlength,
-                       numofparts,
-                       NULL, /* oulcpinfo */
-                       NULL, /* sfxstrategy */
-                       sfxprogress,
-                       withprogressbar,
-                       NULL, /* verbosinfo */
-                       err);
+                          readmode,
+                          prefixlength,
+                          numofparts,
+                          NULL, /* oulcpinfo */
+                          &sfxstrategy,
+                          sfxprogress,
+                          withprogressbar,
+                          NULL, /* verbosinfo */
+                          err);
   if (sfi == NULL)
   {
     haserr = true;
@@ -96,7 +101,7 @@ static int constructsarrandrunmaxpairs(
     bool firstpage = true;
 
     ssar = gt_newSequentialsuffixarrayreaderfromRAM(ssi->encseq,
-                                                 readmode);
+                                                    readmode);
     while (true)
     {
       suffixsortspace
@@ -107,8 +112,8 @@ static int constructsarrandrunmaxpairs(
       }
       gt_updateSequentialsuffixarrayreaderfromRAM(
                ssar,
-               (const ESASuffixptr *) gt_suffixsortspace_ulong_get(
-                                          suffixsortspace),
+               (const ESASuffixptr *)
+               gt_suffixsortspace_ulong_get(suffixsortspace),
                firstpage,
                numberofsuffixes);
       firstpage = false;
