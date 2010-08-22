@@ -54,7 +54,7 @@ gt_availBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
  */
 BWTSeq *
 gt_loadBWTSeqForSA(const char *projectName, enum seqBaseEncoding encType,
-                int BWTOptFlags, const Suffixarray *sa,
+                int BWTOptFlags, const GtAlphabet *gtalphabet,
                 unsigned long totalLen, GtError *err);
 
 /**

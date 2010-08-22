@@ -219,11 +219,11 @@ gt_SAIGetRot0Pos(const void *state)
 }
 
 MRAEnc *
-gt_SANewMRAEnc(const Suffixarray *sa)
+gt_SANewMRAEnc(const GtAlphabet *gtalphabet)
 {
   MRAEnc *alphabet;
-  gt_assert(sa);
-  alphabet = gt_MRAEncGTAlphaNew(gt_encseq_alphabet(sa->encseq));
+  gt_assert(gtalphabet != NULL);
+  alphabet = gt_MRAEncGTAlphaNew(gtalphabet);
   gt_MRAEncAddSymbolToRange(alphabet, SEPARATOR, 1);
   return alphabet;
 }

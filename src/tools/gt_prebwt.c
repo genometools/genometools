@@ -82,6 +82,7 @@ static int gt_prebwt_runner(GT_UNUSED int argc,
   bool haserr = false;
   Prebwtoptions *prebwtoptions = (Prebwtoptions *) tool_arguments;
 
+  /* use mapping of GtEncseq instead */
   if (gt_mapsuffixarray(&suffixarray,
                         0,
                         gt_str_get(prebwtoptions->indexname),
@@ -96,7 +97,7 @@ static int gt_prebwt_runner(GT_UNUSED int argc,
   if (!haserr)
   {
     packedindex = gt_loadvoidBWTSeqForSA(gt_str_get(prebwtoptions->indexname),
-                                         &suffixarray,
+                                         gt_encseq_alphabet(suffixarray.encseq),
                                          totallength, false, err);
     if (packedindex == NULL)
     {

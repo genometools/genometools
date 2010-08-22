@@ -185,14 +185,14 @@ gt_createEncIdxSeqGen(unsigned long totalLen, const char *projectName,
 }
 
 struct encIdxSeq *
-gt_loadEncIdxSeqForSA(const Suffixarray *sa, unsigned long totalLen,
+gt_loadEncIdxSeqForSA(const GtAlphabet *gtalphabet, unsigned long totalLen,
                    const char *projectName,
                    enum seqBaseEncoding encType, int features, GtError *err)
 {
   MRAEnc *alphabet;
   EISeq *seqIdx = NULL;
-  gt_assert(sa);
-  alphabet = gt_SANewMRAEnc(sa);
+  gt_assert(gtalphabet!=NULL);
+  alphabet = gt_SANewMRAEnc(gtalphabet);
   switch (encType)
   {
   case BWT_ON_BLOCK_ENC:
@@ -218,11 +218,13 @@ gt_loadEncIdxSeq(const char *projectName,
   unsigned long len;
   do
   {
+    /* The following should be done by directly mapping a GtEncseq */
     if (streamsuffixarray(&suffixArray, 0, projectName, verbosity, err))
       break;
     len = gt_encseq_total_length(suffixArray.encseq) + 1;
-    newSeqIdx = gt_loadEncIdxSeqForSA(&suffixArray, len, projectName,
-                                   encType, features, err);
+    newSeqIdx = gt_loadEncIdxSeqForSA(gt_encseq_alphabet(suffixArray.encseq),
+                                      len, projectName,
+                                      encType, features, err);
     gt_freesuffixarray(&suffixArray);
   } while (0);
   return newSeqIdx;

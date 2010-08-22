@@ -19,8 +19,8 @@
 #define EIS_VOIDITF_H
 
 #include "core/unused_api.h"
+#include "core/encseq_api.h"
 
-#include "sarr-def.h"
 #include "splititv.h"
 #include "procmatch.h"
 
@@ -68,7 +68,7 @@ void gt_bwtrangesplitwithoutspecial(GtArrayBoundswithchar *bwci,
                                  unsigned long ubound);
 
 FMindex *gt_loadvoidBWTSeqForSA(const char *indexname,
-                                const Suffixarray *suffixarray,
+                                const GtAlphabet *gtalphabet,
                                 unsigned long totallength,
                                 bool withpckbt,
                                 GtError *err);

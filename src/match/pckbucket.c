@@ -19,6 +19,7 @@
 #include "core/fa.h"
 #include "core/xansi_api.h"
 #include "core/fileutils_api.h"
+#include "core/chardef.h"
 #include "eis-voiditf.h"
 #include "pckbucket.h"
 #include "initbasepower.h"

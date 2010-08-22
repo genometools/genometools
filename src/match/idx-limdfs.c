@@ -110,8 +110,8 @@ Genericindex *genericindex_new(const char *indexname,
     genericindex->totallength = 0;
   } else
   {
-    genericindex->totallength =
-             gt_encseq_total_length(genericindex->suffixarray->encseq);
+    genericindex->totallength
+      = gt_encseq_total_length(genericindex->suffixarray->encseq);
   }
   if (!haserr)
   {
@@ -136,10 +136,12 @@ Genericindex *genericindex_new(const char *indexname,
   genericindex->maxdepth = 0;
   if (!haserr && !withesa)
   {
-    genericindex->packedindex = gt_loadvoidBWTSeqForSA(indexname,
-                                                    genericindex->suffixarray,
-                                                    genericindex->totallength,
-                                                    true, err);
+    genericindex->packedindex
+      = gt_loadvoidBWTSeqForSA(indexname,
+                               gt_encseq_alphabet(genericindex->suffixarray
+                                                              ->encseq),
+                               genericindex->totallength,
+                               true, err);
     if (genericindex->packedindex == NULL)
     {
       haserr = true;

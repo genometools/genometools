@@ -99,7 +99,7 @@ gt_availBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
   bwtSeq = gt_loadBWTSeqForSA(gt_str_get(params->projectName),
                               params->seqParams.encType,
                               params->seqParams.EISFeatureSet,
-                              sa, totalLen, err);
+                              gt_encseq_alphabet(sa->encseq), totalLen, err);
   /* if loading didn't work try on-demand creation */
   if (!bwtSeq)
   {
@@ -133,27 +133,28 @@ gt_loadBWTSeq(const char *projectName, int BWTOptFlags, GtLogger *verbosity,
   unsigned long len;
   gt_assert(projectName && err);
   gt_error_check(err);
+  /* map the GtEncseq instead */
   if (gt_mapsuffixarray(&suffixArray, 0, projectName, verbosity, err))
     return NULL;
   len = gt_encseq_total_length(suffixArray.encseq) + 1;
   bwtSeq = gt_loadBWTSeqForSA(projectName, BWT_ON_BLOCK_ENC, BWTOptFlags,
-                           &suffixArray, len, err);
+                           gt_encseq_alphabet(suffixArray.encseq), len, err);
   gt_freesuffixarray(&suffixArray);
   return bwtSeq;
 }
 
 BWTSeq *
 gt_loadBWTSeqForSA(const char *projectName, enum seqBaseEncoding encType,
-                int BWTOptFlags, const Suffixarray *sa,
-                unsigned long totalLen, GtError *err)
+                   int BWTOptFlags, const GtAlphabet *gtalphabet,
+                   unsigned long totalLen, GtError *err)
 {
   struct BWTSeq *bwtSeq = NULL;
   EISeq *seqIdx = NULL;
   MRAEnc *alphabet = NULL;
-  gt_assert(projectName && sa && err);
-  alphabet = gt_SANewMRAEnc(sa);
+  gt_assert(projectName && gtalphabet && err);
+  alphabet = gt_SANewMRAEnc(gtalphabet);
   if ((seqIdx = gt_loadEncIdxSeqForSA(
-         sa, totalLen, projectName, encType,
+         gtalphabet, totalLen, projectName, encType,
          gt_convertBWTOptFlags2EISFeatures(BWTOptFlags), err)))
     bwtSeq = gt_newBWTSeq(seqIdx, alphabet,
                        GTAlphabetRangeSort[GT_ALPHABETHANDLING_DEFAULT]);
