@@ -76,28 +76,30 @@ static int gt_prebwt_runner(GT_UNUSED int argc,
                             GT_UNUSED int parsed_args,
                             void *tool_arguments, GtError *err)
 {
-  Suffixarray suffixarray;
+  GtEncseq *encseq;
+  GtEncseqLoader *el;
   unsigned long totallength = 0;
   void *packedindex = NULL;
   bool haserr = false;
   Prebwtoptions *prebwtoptions = (Prebwtoptions *) tool_arguments;
 
-  /* use mapping of GtEncseq instead */
-  if (gt_mapsuffixarray(&suffixarray,
-                        0,
-                        gt_str_get(prebwtoptions->indexname),
-                        NULL,
-                        err) != 0)
+  el = gt_encseq_loader_new();
+  gt_encseq_loader_do_not_require_sds_tab(el);
+  gt_encseq_loader_do_not_require_des_tab(el);
+  gt_encseq_loader_do_not_require_fsp_tab(el);
+  gt_encseq_loader_do_not_require_ssp_tab(el);
+  encseq = gt_encseq_loader_load(el, gt_str_get(prebwtoptions->indexname), err);
+  if (encseq == NULL)
   {
     haserr = true;
   } else
   {
-    totallength = gt_encseq_total_length(suffixarray.encseq);
+    totallength = gt_encseq_total_length(encseq);
   }
   if (!haserr)
   {
     packedindex = gt_loadvoidBWTSeqForSA(gt_str_get(prebwtoptions->indexname),
-                                         gt_encseq_alphabet(suffixarray.encseq),
+                                         gt_encseq_alphabet(encseq),
                                          totallength, false, err);
     if (packedindex == NULL)
     {
@@ -107,7 +109,7 @@ static int gt_prebwt_runner(GT_UNUSED int argc,
   if (!haserr)
   {
     unsigned int numofchars = gt_alphabet_num_of_chars(
-                               gt_encseq_alphabet(suffixarray.encseq));
+                                                    gt_encseq_alphabet(encseq));
     Pckbuckettable *pckbt;
 
     pckbt = gt_pckbuckettable_new((const void *) packedindex,
@@ -120,7 +122,8 @@ static int gt_prebwt_runner(GT_UNUSED int argc,
     }
     gt_pckbuckettable_free(pckbt);
   }
-  gt_freesuffixarray(&suffixarray);
+  gt_encseq_loader_delete(el);
+  gt_encseq_delete(encseq);
   if (packedindex != NULL)
   {
     gt_deletevoidBWTSeq(packedindex);

@@ -14,10 +14,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/encseq_metadata.h"
 #include "core/log.h"
 #include "match/sarr-def.h"
 #include "match/esa-map.h"
-
 #include "match/eis-bitpackseqpos.h"
 #include "match/eis-bwtseq.h"
 #include "match/eis-bwtseq-construct.h"
@@ -44,13 +44,19 @@ gt_availBWTSeq(const struct bwtParam *params, GtLogger *verbosity,
     if (streamsuffixarray(&suffixArray, SARR_SUFTAB | SARR_ESQTAB,
                           gt_str_get(params->projectName), verbosity, err))
     {
+      GtEncseqMetadata *emd = NULL;
       gt_error_unset(err);
-      if (streamsuffixarray(&suffixArray, 0,
-                            gt_str_get(params->projectName), verbosity, err))
+      emd = gt_encseq_metadata_new(gt_str_get(params->projectName), err);
+      if (emd == NULL)
         return NULL;
+      len = gt_encseq_metadata_total_length(emd);
+      gt_encseq_metadata_delete(emd);
+    } else {
+      len = gt_encseq_total_length(suffixArray.encseq) + 1;
     }
+  } else {
+    len = gt_encseq_total_length(suffixArray.encseq) + 1;
   }
-  len = gt_encseq_total_length(suffixArray.encseq) + 1;
   bwtSeq = gt_availBWTSeqFromSA(params, &suffixArray, len, err);
   gt_freesuffixarray(&suffixArray);
   return bwtSeq;
@@ -125,21 +131,30 @@ static const enum rangeSortMode GTAlphabetRangeSort[][2] =
 };
 
 BWTSeq *
-gt_loadBWTSeq(const char *projectName, int BWTOptFlags, GtLogger *verbosity,
-           GtError *err)
+gt_loadBWTSeq(const char *projectName, int BWTOptFlags,
+              GT_UNUSED GtLogger *verbosity, GtError *err)
 {
   struct BWTSeq *bwtSeq = NULL;
-  Suffixarray suffixArray;
+  GtEncseq *encseq;
+  GtEncseqLoader *el;
   unsigned long len;
   gt_assert(projectName && err);
   gt_error_check(err);
-  /* map the GtEncseq instead */
-  if (gt_mapsuffixarray(&suffixArray, 0, projectName, verbosity, err))
+
+  el = gt_encseq_loader_new();
+  gt_encseq_loader_do_not_require_sds_tab(el);
+  gt_encseq_loader_do_not_require_des_tab(el);
+  gt_encseq_loader_do_not_require_fsp_tab(el);
+  gt_encseq_loader_do_not_require_ssp_tab(el);
+  encseq = gt_encseq_loader_load(el, projectName, err);
+  gt_encseq_loader_delete(el);
+
+  if (encseq == NULL)
     return NULL;
-  len = gt_encseq_total_length(suffixArray.encseq) + 1;
+  len = gt_encseq_total_length(encseq) + 1;
   bwtSeq = gt_loadBWTSeqForSA(projectName, BWT_ON_BLOCK_ENC, BWTOptFlags,
-                           gt_encseq_alphabet(suffixArray.encseq), len, err);
-  gt_freesuffixarray(&suffixArray);
+                           gt_encseq_alphabet(encseq), len, err);
+  gt_encseq_delete(encseq);
   return bwtSeq;
 }
 

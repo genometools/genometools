@@ -79,7 +79,6 @@ int gt_test_trieins(bool onlyins,const char *indexname,GtError *err)
   unsigned long totallength = 0;
 
   gt_error_check(err);
-  /* The following should be done by directly mapping a GtEncseq */
   if (streamsuffixarray(&suffixarray,
                         SARR_ESQTAB,
                         indexname,

@@ -14,6 +14,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/encseq_metadata.h"
 #include "match/eis-blockcomp-construct.h"
 #include "match/eis-encidxseq-construct.h"
 #include "match/sarr-def.h"
@@ -210,22 +211,29 @@ gt_loadEncIdxSeqForSA(const GtAlphabet *gtalphabet, unsigned long totalLen,
 
 EISeq *
 gt_loadEncIdxSeq(const char *projectName,
-              enum seqBaseEncoding encType, int features,
-              GtLogger *verbosity, GtError *err)
+                 enum seqBaseEncoding encType, int features,
+                 GT_UNUSED GtLogger *verbosity, GtError *err)
 {
   struct encIdxSeq *newSeqIdx = NULL;
-  Suffixarray suffixArray;
+  GtEncseq *encseq = NULL;
+  GtEncseqLoader *el = NULL;
   unsigned long len;
   do
   {
-    /* The following should be done by directly mapping a GtEncseq */
-    if (streamsuffixarray(&suffixArray, 0, projectName, verbosity, err))
+    el = gt_encseq_loader_new();
+    gt_encseq_loader_do_not_require_sds_tab(el);
+    gt_encseq_loader_do_not_require_des_tab(el);
+    gt_encseq_loader_do_not_require_fsp_tab(el);
+    gt_encseq_loader_do_not_require_ssp_tab(el);
+    encseq = gt_encseq_loader_load(el, projectName, err);
+    gt_encseq_loader_delete(el);
+    if (encseq == NULL)
       break;
-    len = gt_encseq_total_length(suffixArray.encseq) + 1;
-    newSeqIdx = gt_loadEncIdxSeqForSA(gt_encseq_alphabet(suffixArray.encseq),
+    len = gt_encseq_total_length(encseq) + 1;
+    newSeqIdx = gt_loadEncIdxSeqForSA(gt_encseq_alphabet(encseq),
                                       len, projectName,
                                       encType, features, err);
-    gt_freesuffixarray(&suffixArray);
+    gt_encseq_delete(encseq);
   } while (0);
   return newSeqIdx;
 }
