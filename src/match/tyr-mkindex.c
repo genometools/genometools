@@ -573,79 +573,80 @@ static int enumeratelcpintervals(const char *inputindex,
                                  GtLogger *logger,
                                  GtError *err)
 {
-  TyrDfsstate state;
+  TyrDfsstate *state;
   bool haserr = false;
   unsigned int alphasize;
 
   gt_error_check(err);
-  GT_INITARRAY(&state.occdistribution,Countwithpositions);
-  state.esrspace = gt_encseq_create_reader_with_readmode(
+  state = gt_malloc(sizeof(*state));
+  GT_INITARRAY(&state->occdistribution,Countwithpositions);
+  state->esrspace = gt_encseq_create_reader_with_readmode(
                                    gt_encseqSequentialsuffixarrayreader(ssar),
                                    gt_readmodeSequentialsuffixarrayreader(ssar),
                                    0);
-  state.mersize = (unsigned long) mersize;
-  state.encseq = gt_encseqSequentialsuffixarrayreader(ssar);
-  alphasize = gt_alphabet_num_of_chars(gt_encseq_alphabet(state.encseq));
-  state.readmode = gt_readmodeSequentialsuffixarrayreader(ssar);
-  state.storecounts = storecounts;
-  state.minocc = minocc;
-  state.maxocc = maxocc;
-  state.moveforward = GT_ISDIRREVERSE(state.readmode) ? false : true;
-  state.totallength = gt_encseq_total_length(state.encseq);
-  state.performtest = performtest;
-  state.countoutputmers = 0;
-  state.merindexfpout = NULL;
-  state.countsfilefpout = NULL;
-  GT_INITARRAY(&state.largecounts,Largecount);
+  state->mersize = (unsigned long) mersize;
+  state->encseq = gt_encseqSequentialsuffixarrayreader(ssar);
+  alphasize = gt_alphabet_num_of_chars(gt_encseq_alphabet(state->encseq));
+  state->readmode = gt_readmodeSequentialsuffixarrayreader(ssar);
+  state->storecounts = storecounts;
+  state->minocc = minocc;
+  state->maxocc = maxocc;
+  state->moveforward = GT_ISDIRREVERSE(state->readmode) ? false : true;
+  state->totallength = gt_encseq_total_length(state->encseq);
+  state->performtest = performtest;
+  state->countoutputmers = 0;
+  state->merindexfpout = NULL;
+  state->countsfilefpout = NULL;
+  GT_INITARRAY(&state->largecounts,Largecount);
   if (strlen(storeindex) == 0)
   {
-    state.sizeofbuffer = 0;
-    state.bytebuffer = NULL;
+    state->sizeofbuffer = 0;
+    state->bytebuffer = NULL;
   } else
   {
-    state.sizeofbuffer = MERBYTES(mersize);
-    ALLOCASSIGNSPACE(state.bytebuffer,NULL,GtUchar,state.sizeofbuffer);
+    state->sizeofbuffer = MERBYTES(mersize);
+    ALLOCASSIGNSPACE(state->bytebuffer,NULL,GtUchar,state->sizeofbuffer);
   }
   if (performtest)
   {
-    ALLOCASSIGNSPACE(state.currentmer,NULL,GtUchar,state.mersize);
-    state.suftab = gt_suftabSequentialsuffixarrayreader(ssar);
+    ALLOCASSIGNSPACE(state->currentmer,NULL,GtUchar,state->mersize);
+    state->suftab = gt_suftabSequentialsuffixarrayreader(ssar);
   } else
   {
-    state.currentmer = NULL;
-    state.suftab = NULL;
+    state->currentmer = NULL;
+    state->suftab = NULL;
   }
-  if (state.mersize > state.totallength)
+  if (state->mersize > state->totallength)
   {
     gt_error_set(err,"mersize %lu > %lu = totallength not allowed",
-                 state.mersize,
-                 state.totallength);
+                 state->mersize,
+                 state->totallength);
     haserr = true;
   } else
   {
     if (strlen(storeindex) == 0)
     {
-      state.processoccurrencecount = adddistpos2distribution;
+      state->processoccurrencecount = adddistpos2distribution;
     } else
     {
-      state.merindexfpout = gt_fa_fopen_with_suffix(storeindex,MERSUFFIX,
+      state->merindexfpout = gt_fa_fopen_with_suffix(storeindex,MERSUFFIX,
                                                     "wb",err);
-      if (state.merindexfpout == NULL)
+      if (state->merindexfpout == NULL)
       {
         haserr = true;
       } else
       {
-        if (state.storecounts)
+        if (state->storecounts)
         {
-          state.countsfilefpout
+          state->countsfilefpout
             = gt_fa_fopen_with_suffix(storeindex,COUNTSSUFFIX,"wb",err);
-          if (state.countsfilefpout == NULL)
+          if (state->countsfilefpout == NULL)
           {
             haserr = true;
           }
         }
       }
-      state.processoccurrencecount = outputsortedstring2index;
+      state->processoccurrencecount = outputsortedstring2index;
     }
     if (!haserr)
     {
@@ -657,7 +658,7 @@ static int enumeratelcpintervals(const char *inputindex,
                           tyr_processcompletenode,
                           tyr_assignleftmostleaf,
                           tyr_assignrightmostleaf,
-                          (Dfsstate*) &state,
+                          (Dfsstate*) state,
                           logger,
                           err) != 0)
       {
@@ -665,27 +666,27 @@ static int enumeratelcpintervals(const char *inputindex,
       }
       if (strlen(storeindex) == 0)
       {
-        showfinalstatistics(&state,inputindex,logger);
+        showfinalstatistics(state,inputindex,logger);
       }
     }
     if (!haserr)
     {
-      if (state.countsfilefpout != NULL)
+      if (state->countsfilefpout != NULL)
       {
         gt_logger_log(logger,"write %lu mercounts > %lu to file \"%s%s\"",
-                    state.largecounts.nextfreeLargecount,
+                    state->largecounts.nextfreeLargecount,
                     (unsigned long) MAXSMALLMERCOUNT,
                     storeindex,
                     COUNTSSUFFIX);
-        if (fwrite(state.largecounts.spaceLargecount,
+        if (fwrite(state->largecounts.spaceLargecount,
                   sizeof (Largecount),
-                  (size_t) state.largecounts.nextfreeLargecount,
-                  state.countsfilefpout) !=
-                  (size_t) state.largecounts.nextfreeLargecount)
+                  (size_t) state->largecounts.nextfreeLargecount,
+                  state->countsfilefpout) !=
+                  (size_t) state->largecounts.nextfreeLargecount)
         {
           gt_error_set(err,
                        "cannot write %lu items of size %u: errormsg=\"%s\"",
-                       (unsigned long) state.largecounts.nextfreeLargecount,
+                       (unsigned long) state->largecounts.nextfreeLargecount,
                        (unsigned int) sizeof (Largecount),
                        strerror(errno));
           haserr = true;
@@ -696,26 +697,27 @@ static int enumeratelcpintervals(const char *inputindex,
     {
       gt_logger_log(logger,"number of %lu-mers in index: %lu",
                   mersize,
-                  state.countoutputmers);
+                  state->countoutputmers);
       gt_logger_log(logger,"index size: %.2f megabytes\n",
-                  MEGABYTES(state.countoutputmers * state.sizeofbuffer +
+                  MEGABYTES(state->countoutputmers * state->sizeofbuffer +
                             sizeof (unsigned long) * EXTRAINTEGERS));
     }
   }
   /* now out EXTRAINTEGERS integer values */
-  if (!haserr && state.merindexfpout != NULL)
+  if (!haserr && state->merindexfpout != NULL)
   {
-    outputbytewiseUlongvalue(state.merindexfpout,
-                             (unsigned long) state.mersize);
-    outputbytewiseUlongvalue(state.merindexfpout,(unsigned long) alphasize);
+    outputbytewiseUlongvalue(state->merindexfpout,
+                             (unsigned long) state->mersize);
+    outputbytewiseUlongvalue(state->merindexfpout,(unsigned long) alphasize);
   }
-  gt_fa_xfclose(state.merindexfpout);
-  gt_fa_xfclose(state.countsfilefpout);
-  GT_FREEARRAY(&state.occdistribution,Countwithpositions);
-  FREESPACE(state.currentmer);
-  FREESPACE(state.bytebuffer);
-  GT_FREEARRAY(&state.largecounts,Largecount);
-  gt_encseq_reader_delete(state.esrspace);
+  gt_fa_xfclose(state->merindexfpout);
+  gt_fa_xfclose(state->countsfilefpout);
+  GT_FREEARRAY(&state->occdistribution,Countwithpositions);
+  FREESPACE(state->currentmer);
+  FREESPACE(state->bytebuffer);
+  GT_FREEARRAY(&state->largecounts,Largecount);
+  gt_encseq_reader_delete(state->esrspace);
+  gt_free(state);
   return haserr ? -1 : 0;
 }
 

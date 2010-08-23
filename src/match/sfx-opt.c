@@ -24,8 +24,8 @@
 #include "core/str.h"
 #include "core/versionfunc.h"
 #include "core/readmode.h"
-#include "sfx-optdef.h"
 #include "core/logger.h"
+#include "sfx-optdef.h"
 #include "stamp.h"
 #include "eis-bwtseq-param.h"
 
@@ -273,6 +273,13 @@ static GtOPrval parse_options(int *parsed_args,
   option = gt_option_new_bool("iterscan",
                               "use iteratorbased-kmer scanning",
                               &so->iteratorbasedkmerscanning,
+                              false);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
+  option = gt_option_new_bool("suftabasarray",
+                              "use unsigned long array for suftab",
+                              &so->suftabasulongarray,
                               false);
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);

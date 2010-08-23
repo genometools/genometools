@@ -79,6 +79,7 @@ int gt_test_trieins(bool onlyins,const char *indexname,GtError *err)
   unsigned long totallength = 0;
 
   gt_error_check(err);
+  /* The following should be done by directly mapping a GtEncseq */
   if (streamsuffixarray(&suffixarray,
                         SARR_ESQTAB,
                         indexname,
@@ -98,8 +99,8 @@ int gt_test_trieins(bool onlyins,const char *indexname,GtError *err)
     ALLOCASSIGNSPACE(trierep.encseqreadinfo,NULL,Encseqreadinfo,1);
     trierep.encseqreadinfo[0].encseqptr = suffixarray.encseq;
     trierep.encseqreadinfo[0].readmode = suffixarray.readmode;
-    characters = gt_alphabet_characters(
-                               gt_encseq_alphabet(suffixarray.encseq));
+    characters 
+      = gt_alphabet_characters(gt_encseq_alphabet(suffixarray.encseq));
     gt_mergertrie_initnodetable(&trierep,totallength,1U);
     maketrie(&trierep,characters,totallength);
     if (onlyins)

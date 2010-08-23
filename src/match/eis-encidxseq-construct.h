@@ -201,7 +201,7 @@ gt_createEncIdxSeq(const char *projectName,
  * @param err genometools reference for core functions
  */
 EISeq *
-gt_loadEncIdxSeqForSA(const Suffixarray *sa, unsigned long totalLen,
+gt_loadEncIdxSeqForSA(const GtAlphabet *gtalphabet, unsigned long totalLen,
                       const char *projectName,
                       enum seqBaseEncoding encType, int features, GtError *err);
 

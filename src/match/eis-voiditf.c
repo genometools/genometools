@@ -157,7 +157,7 @@ void gt_freeBwtseqcontextiterator(Bwtseqcontextiterator **bsci)
 }
 
 FMindex *gt_loadvoidBWTSeqForSA(const char *indexname,
-                                const Suffixarray *suffixarray,
+                                const GtAlphabet *gtalphabet,
                                 unsigned long totallength,
                                 bool withpckbt,
                                 GtError *err)
@@ -166,10 +166,11 @@ FMindex *gt_loadvoidBWTSeqForSA(const char *indexname,
   bool haserr = false;
 
   bwtseq = gt_loadBWTSeqForSA(indexname,
-                           BWT_ON_BLOCK_ENC,
-                           BWTDEFOPT_MULTI_QUERY,
-                           suffixarray,
-                           totallength+1, err);
+                              BWT_ON_BLOCK_ENC,
+                              BWTDEFOPT_MULTI_QUERY,
+                              gtalphabet,
+                              totallength+1,
+                              err);
   if (bwtseq == NULL)
   {
     haserr = true;
@@ -178,9 +179,7 @@ FMindex *gt_loadvoidBWTSeqForSA(const char *indexname,
   {
     if (withpckbt && gt_pckbuckettableexists(indexname))
     {
-      unsigned int numofchars
-        = gt_alphabet_num_of_chars(
-                           gt_encseq_alphabet(suffixarray->encseq));
+      unsigned int numofchars = gt_alphabet_num_of_chars(gtalphabet);
       bwtseq->pckbuckettable = gt_mappckbuckettable(indexname,numofchars,err);
       if (bwtseq->pckbuckettable == NULL)
       {

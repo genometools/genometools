@@ -509,6 +509,7 @@ static int runsuffixerator(bool doesa,
   sfxstrategy = so->sfxstrategy;
   sfxstrategy.ssortmaxdepth.defined = false;
   sfxstrategy.iteratorbasedkmerscanning = so->iteratorbasedkmerscanning;
+  sfxstrategy.suftabasulongarray = so->suftabasulongarray;
   if (!haserr)
   {
     if (so->outsuftab || so->outbwttab || so->outlcptab || so->outbcktab ||

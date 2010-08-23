@@ -204,18 +204,19 @@ static int computeoccurrenceratio(Sequentialsuffixarrayreader *ssar,
                                   GtLogger *logger,
                                   GtError *err)
 {
-  OccDfsstate state;
+  OccDfsstate *state;
   bool haserr = false;
 
   gt_error_check(err);
-  state.encseq = gt_encseqSequentialsuffixarrayreader(ssar);
-  state.readmode = gt_readmodeSequentialsuffixarrayreader(ssar);
-  state.totallength = gt_encseq_total_length(state.encseq);
-  state.minmersize = minmersize;
-  state.maxmersize = maxmersize;
-  state.uniquedistribution = uniquedistribution;
-  state.nonuniquedistribution = nonuniquedistribution;
-  state.nonuniquemultidistribution = nonuniquemultidistribution;
+  state = gt_malloc(sizeof(*state));
+  state->encseq = gt_encseqSequentialsuffixarrayreader(ssar);
+  state->readmode = gt_readmodeSequentialsuffixarrayreader(ssar);
+  state->totallength = gt_encseq_total_length(state->encseq);
+  state->minmersize = minmersize;
+  state->maxmersize = maxmersize;
+  state->uniquedistribution = uniquedistribution;
+  state->nonuniquedistribution = nonuniquedistribution;
+  state->nonuniquemultidistribution = nonuniquemultidistribution;
   if (gt_depthfirstesa(ssar,
                     occ_allocateDfsinfo,
                     occ_freeDfsinfo,
@@ -224,12 +225,13 @@ static int computeoccurrenceratio(Sequentialsuffixarrayreader *ssar,
                     occ_processcompletenode,
                     occ_assignleftmostleaf,
                     occ_assignrightmostleaf,
-                    (Dfsstate*) &state,
+                    (Dfsstate*) state,
                     logger,
                     err) != 0)
   {
     haserr = true;
   }
+  gt_free(state);
   return haserr ? -1 : 0;
 }
 

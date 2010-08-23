@@ -23,7 +23,7 @@
 static inline MRAEnc *
 SAINewMRAEnc(const SuffixarrayFileInterface *sai)
 {
-  return gt_SANewMRAEnc(sai->sa);
+  return gt_SANewMRAEnc(gt_encseq_alphabet(sai->sa->encseq));
 }
 
 static inline const GtEncseq *

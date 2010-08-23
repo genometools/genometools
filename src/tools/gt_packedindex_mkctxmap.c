@@ -88,7 +88,8 @@ gt_packedindex_mkctxmap(int argc, const char *argv[], GtError *err)
         len = gt_encseq_total_length(sa.encseq) + 1;
         saInitialized = true;
         bwtSeq = gt_loadBWTSeqForSA(projectName, BWT_ON_BLOCK_ENC,
-                                 BWTDEFOPT_MULTI_QUERY, &sa, len, err);
+                                 BWTDEFOPT_MULTI_QUERY,
+                                 gt_encseq_alphabet(sa.encseq), len, err);
         if (!(src = gt_BWTSeqNewSASeqSrc(bwtSeq, NULL)))
         {
           gt_error_set(err, "The project %s does not contain sufficient"

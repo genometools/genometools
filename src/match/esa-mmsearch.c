@@ -627,17 +627,21 @@ static int constructsarrandrunmmsearch(
   Sfxiterator *sfi;
   Queryrep queryrep;
   Querymatch *querymatchspaceptr = gt_querymatch_new();
+  Sfxstrategy sfxstrategy;
 
+  defaultsfxstrategy(&sfxstrategy,
+                     gt_encseq_bitwise_cmp_ok(dbencseq) ? false : true);
+  sfxstrategy.suftabasulongarray = true;
   sfi = gt_newSfxiterator(dbencseq,
-                       readmode,
-                       prefixlength,
-                       numofparts,
-                       NULL, /* outlcpinfo */
-                       NULL, /* sfxstrategy */
-                       sfxprogress,
-                       withprogressbar,
-                       NULL, /* logger */
-                       err);
+                          readmode,
+                          prefixlength,
+                          numofparts,
+                          NULL, /* outlcpinfo */
+                          &sfxstrategy, /* sfxstrategy */
+                          sfxprogress,
+                          withprogressbar,
+                          NULL, /* logger */
+                          err);
   if (sfi == NULL)
   {
     haserr = true;

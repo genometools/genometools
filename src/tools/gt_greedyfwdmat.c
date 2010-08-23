@@ -350,10 +350,10 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
       {
         packedindex =
           gt_loadvoidBWTSeqForSA(gt_str_get(gfmsubcallinfo.indexname),
-                                            &suffixarray,
-                                            totallength,
-                                            false,
-                                            err);
+                                 gt_encseq_alphabet(suffixarray.encseq),
+                                 totallength,
+                                 false,
+                                 err);
         if (packedindex == NULL)
         {
           haserr = true;

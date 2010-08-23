@@ -557,8 +557,7 @@ Sfxiterator *gt_newSfxiterator(const GtEncseq *encseq,
     if (sfxstrategy != NULL)
     {
        sfi->sfxstrategy = *sfxstrategy;
-       if (sfxstrategy->cmpcharbychar
-             || !gt_encseq_bitwise_cmp_ok(encseq))
+       if (sfxstrategy->cmpcharbychar || !gt_encseq_bitwise_cmp_ok(encseq))
        {
          sfi->sfxstrategy.cmpcharbychar = true;
        } else
@@ -568,7 +567,7 @@ Sfxiterator *gt_newSfxiterator(const GtEncseq *encseq,
     } else
     {
       defaultsfxstrategy(&sfi->sfxstrategy,
-      gt_encseq_bitwise_cmp_ok(encseq) ? false : true);
+                         gt_encseq_bitwise_cmp_ok(encseq) ? false : true);
     }
     gt_logger_log(logger,"maxinsertionsort=%lu",
                 sfi->sfxstrategy.maxinsertionsort);
@@ -611,7 +610,7 @@ Sfxiterator *gt_newSfxiterator(const GtEncseq *encseq,
                                           stdout);
       }
       sfi->dcov = gt_differencecover_new(sfi->sfxstrategy.differencecover,
-                                      encseq,readmode,logger);
+                                         encseq,readmode,logger);
       if (sfi->dcov == NULL)
       {
         gt_error_set(err,"no difference cover modulo %u found",
@@ -692,7 +691,7 @@ Sfxiterator *gt_newSfxiterator(const GtEncseq *encseq,
     showleftborder(sfi->leftborder,sfi->numofallcodes);
 #endif
     gt_bcktab_leftborderpartialsums(sfi->bcktab,
-                                 sfi->totallength - specialcharacters);
+                                    sfi->totallength - specialcharacters);
     sfi->suftabparts = gt_newsuftabparts(numofparts,
                                          sfi->leftborder,
                                          sfi->numofallcodes,
@@ -701,14 +700,16 @@ Sfxiterator *gt_newSfxiterator(const GtEncseq *encseq,
                                          logger);
     gt_assert(sfi->suftabparts != NULL);
     sfi->suffixsortspace
-      = gt_suffixsortspace_new(stpgetlargestwidth(sfi->suftabparts));
+      = gt_suffixsortspace_new(stpgetlargestwidth(sfi->suftabparts),
+                               sfi->totallength,
+                               sfi->sfxstrategy.suftabasulongarray);
     sfi->longest.defined = false;
     sfi->longest.valueunsignedlong = 0;
     if (gt_encseq_has_specialranges(sfi->encseq))
     {
       sfi->sri = gt_specialrangeiterator_new(sfi->encseq,
-                                         GT_ISDIRREVERSE(sfi->readmode)
-                                           ? false : true);
+                                             GT_ISDIRREVERSE(sfi->readmode)
+                                               ? false : true);
     } else
     {
       sfi->sri = NULL;

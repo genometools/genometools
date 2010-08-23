@@ -1341,7 +1341,8 @@ Compressedtable *gt_rmnsufinfo_delete(unsigned long *longest,
       suffixsortspace = gt_suffixsortspace_new_fromfile(
                                 rmnsufinfo->sortblock.mmapfiledesc,
                                 gt_str_get(rmnsufinfo->sortblock.mmapfilename),
-                                rmnsufinfo->sortblock.mapableentries);
+                                rmnsufinfo->sortblock.mapableentries,
+                                rmnsufinfo->totallength);
     }
 #define NOINVERSESUFTAB
 #ifdef NOINVERSESUFTAB

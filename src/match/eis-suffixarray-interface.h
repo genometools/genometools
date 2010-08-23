@@ -98,7 +98,7 @@ SAIGetLength(const SuffixarrayFileInterface *sai);
  * @return alphabet
  */
 MRAEnc *
-gt_SANewMRAEnc(const Suffixarray *sa);
+gt_SANewMRAEnc(const GtAlphabet *gtalphabet);
 
 static inline MRAEnc *
 SAINewMRAEnc(const SuffixarrayFileInterface *sai);
