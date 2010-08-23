@@ -99,7 +99,7 @@ int gt_test_trieins(bool onlyins,const char *indexname,GtError *err)
     ALLOCASSIGNSPACE(trierep.encseqreadinfo,NULL,Encseqreadinfo,1);
     trierep.encseqreadinfo[0].encseqptr = suffixarray.encseq;
     trierep.encseqreadinfo[0].readmode = suffixarray.readmode;
-    characters 
+    characters
       = gt_alphabet_characters(gt_encseq_alphabet(suffixarray.encseq));
     gt_mergertrie_initnodetable(&trierep,totallength,1U);
     maketrie(&trierep,characters,totallength);

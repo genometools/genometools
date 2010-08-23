@@ -32,6 +32,7 @@
 #include "core/alphabet.h"
 #include "core/bitpackarray.h"
 #include "core/chardef.h"
+#include "core/encseq_access_type.h"
 #include "core/filelengthvalues.h"
 #include "core/intbits.h"
 #include "core/types_api.h"
@@ -39,24 +40,13 @@
 #include "core/types_api.h"
 #include "core/thread.h"
 
-typedef enum
-{
-  Viadirectaccess,
-  Viabytecompress,
-  Viabitaccess,
-  Viauchartables,
-  Viaushorttables,
-  Viauint32tables,
-  Undefpositionaccesstype
-} GtPositionaccesstype;
-
 typedef uint32_t Uint32;
 
 struct GtEncseq
 {
   /* Common part */
   unsigned long *satcharptr; /* need for writing char */
-  GtPositionaccesstype sat;
+  GtEncseqAccessType sat;
   void *mappedptr; /* NULL or pointer to the mapped space block */
   unsigned long numofspecialstostore;
   unsigned long *totallengthptr,
@@ -103,40 +93,40 @@ struct GtEncseq
                                                       numofdbfiles  -1
                                                       entries */
 
-  /* only for Viabitaccess,
-              Viauchartables,
-              Viaushorttables,
-              Viauint32tables */
+  /* only for GT_ACCESS_TYPE_BITACCESS,
+              GT_ACCESS_TYPE_UCHARTABLES,
+              GT_ACCESS_TYPE_USHORTTABLES,
+              GT_ACCESS_TYPE_UINT32TABLES */
 
   GtTwobitencoding *twobitencoding;
   unsigned long unitsoftwobitencoding;
 
-  /* only for Viauchartables,
-              Viaushorttables,
-              Viauint32tables */
+  /* only for GT_ACCESS_TYPE_UCHARTABLES,
+              GT_ACCESS_TYPE_USHORTTABLES,
+              GT_ACCESS_TYPE_UINT32TABLES */
 
-  /* only for Viadirectaccess */
+  /* only for  GT_ACCESS_TYPE_DIRECTACCESS */
   GtUchar *plainseq;
   bool hasplainseqptr;
 
-  /* only for Viabytecompress */
+  /* only for GT_ACCESS_TYPE_BYTECOMPRESS */
   BitPackArray *bitpackarray;
   unsigned int numofchars; /* used to have faster access in getencodedchar */
 
-  /* only for Viabitaccess */
+  /* only for GT_ACCESS_TYPE_BITACCESS */
   GtBitsequence *specialbits;
 
-  /* only for Viauchartables */
+  /* only for GT_ACCESS_TYPE_UCHARTABLES */
   GtUchar *ucharspecialpositions,
           *ucharspecialrangelength;
   unsigned long *ucharendspecialsubsUint;
 
-  /* only for Viaushorttables */
+  /* only for GT_ACCESS_TYPE_USHORTTABLES */
   GtUshort *ushortspecialpositions,
            *ushortspecialrangelength;
   unsigned long *ushortendspecialsubsUint;
 
-  /* only for Viauint32tables */
+  /* only for GT_ACCESS_TYPE_UINT32TABLES */
   Uint32 *uint32specialpositions,
          *uint32specialrangelength;
   unsigned long *uint32endspecialsubsUint;

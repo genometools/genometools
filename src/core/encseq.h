@@ -299,9 +299,9 @@ int gt_encseq_comparetwostringsgeneric(const GtEncseq *encseq,
 unsigned long gt_encseq_specialcharacters(const GtEncseq *encseq);
 
 /* Return the number of ranges of consecutive runs of special characters
-  where the length of each range is limited by UCHAR_MAX, USHRT_MAX, and
-  UINT32_MAX, depending on whether the Viauchartables, Viaushorttables.
-  Viauint32tables are used */
+  where the length of each range is limited by UCHAR_MAX, USHORT_MAX, and
+  UINT32_MAX, depending on whether the GT_ACCESS_TYPE_UCHARTABLES,
+  GT_ACCESS_TYPE_USHORTTABLES, GT_ACCESS_TYPE_UINT32TABLES are used */
 unsigned long gt_encseq_specialranges(const GtEncseq *encseq);
 
 /* Return the number of ranges of consecutive runs of special characters */

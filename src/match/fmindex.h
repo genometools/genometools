@@ -38,7 +38,7 @@
     Then we do not have to store so many special positions.
 
   - generate special versions of fmqhits for the following cases:
-       - Viadirectaccess
+       -  GT_ACCESS_TYPE_DIRECTACCESS
        - specialcharacters == 0
 
     This means that the macros with the corresponding character

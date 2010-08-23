@@ -33,6 +33,7 @@
 #include "core/cstr_api.h"
 #include "core/divmodmul.h"
 #include "core/encseq.h"
+#include "core/encseq_metadata.h"
 #ifndef GT_INLINEDENCSEQ
 #include "core/encseq_rep.h"
 #endif
@@ -220,8 +221,8 @@ void gt_encseq_sequence2bytecode(GtUchar *dest,
                                           unsigned long startindex,
                                           unsigned long len)
 {
-  gt_assert(encseq->sat != Viabytecompress);
-  if (encseq->sat == Viadirectaccess)
+  gt_assert(encseq->sat != GT_ACCESS_TYPE_BYTECOMPRESS);
+  if (encseq->sat ==  GT_ACCESS_TYPE_DIRECTACCESS)
   {
     gt_encseq_plainseq2bytecode(dest,encseq->plainseq + startindex,len);
   } else
@@ -235,7 +236,7 @@ void gt_encseq_sequence2bytecode(GtUchar *dest,
                                           unsigned long startindex,
                                           unsigned long len)
 {
-  gt_assert(encseq->sat == Viadirectaccess);
+  gt_assert(encseq->sat ==  GT_ACCESS_TYPE_DIRECTACCESS);
   gt_encseq_plainseq2bytecode(dest,encseq->plainseq + startindex,
                                        len);
 }
@@ -510,75 +511,37 @@ void gt_encseq_extract_decoded(const GtEncseq *encseq,
   gt_encseq_reader_delete(esr);
 }
 
-typedef struct
+const char* gt_encseq_accessname(const GtEncseq *encseq)
 {
-  GtPositionaccesstype sat;
-  char *name;
-} WrittenPositionaccesstype;
-
-static WrittenPositionaccesstype wpa[] = {
-  {Viadirectaccess,"direct"},
-  {Viabytecompress,"bytecompress"},
-  {Viabitaccess,"bit"},
-  {Viauchartables,"uchar"},
-  {Viaushorttables,"ushort"},
-  {Viauint32tables,"uint32"}
-};
-
-static char *wpalist = "direct, bytecompress, bit, uchar, ushort, uint32";
-
-/*@null@*/
-static const char *accesstype2name(GtPositionaccesstype sat)
-{
-  gt_assert((int) sat < (int) Undefpositionaccesstype);
-  return wpa[sat].name;
+  return gt_encseq_access_type_str(encseq->sat);
 }
 
-/*@null@*/
-const char *gt_encseq_accessname(const GtEncseq *encseq)
+static int getsatforcevalue(const char *str,GtError *err)
 {
-  return accesstype2name(encseq->sat);
-}
+  GtEncseqAccessType sat = gt_encseq_access_type_get(str);
 
-/*@null@*/
-static GtPositionaccesstype str2positionaccesstype(const char *str)
-{
-  size_t i;
-
-  for (i=0; i<sizeof (wpa)/sizeof (wpa[0]); i++)
-  {
-    if (strcmp(str,wpa[i].name) == 0)
-    {
-      return wpa[i].sat;
-    }
-  }
-  return Undefpositionaccesstype;
-}
-
-int getsatforcevalue(const char *str,GtError *err)
-{
-  GtPositionaccesstype sat = str2positionaccesstype(str);
-
-  if (sat == Undefpositionaccesstype)
+  if (sat == GT_ACCESS_TYPE_UNDEFINED)
   {
     gt_error_set(err,"Illegal argument \"%s\" to option -sat; "
-                     "must be one of the following keywords: %s",str,wpalist);
+                     "must be one of the following keywords: %s",
+                     str,
+                     gt_encseq_access_type_list());
     return -1;
   }
   switch (sat)
   {
-    case Viauchartables: return 0;
-    case Viaushorttables: return 1;
-    case Viauint32tables: return 2;
+    case GT_ACCESS_TYPE_UCHARTABLES: return 0;
+    case GT_ACCESS_TYPE_USHORTTABLES: return 1;
+    case GT_ACCESS_TYPE_UINT32TABLES: return 2;
     default: return 3;
   }
 }
 
-static bool satviautables(GtPositionaccesstype sat)
+static bool satviautables(GtEncseqAccessType sat)
 {
-  return (sat == Viauchartables ||
-          sat == Viaushorttables ||
-          sat == Viauint32tables) ? true : false;
+  return (sat == GT_ACCESS_TYPE_UCHARTABLES ||
+          sat == GT_ACCESS_TYPE_USHORTTABLES ||
+          sat == GT_ACCESS_TYPE_UINT32TABLES) ? true : false;
 }
 
 bool gt_encseq_has_fast_specialrangeenumerator(const GtEncseq *encseq)
@@ -657,11 +620,11 @@ static void assignencseqmapspecification(
   NEWMAPSPEC(encseq->characterdistribution,GtUlong,(unsigned long) numofchars);
   switch (encseq->sat)
   {
-    case Viadirectaccess:
+    case  GT_ACCESS_TYPE_DIRECTACCESS:
       numofunits = encseq->totallength;
       NEWMAPSPEC(encseq->plainseq,GtUchar,numofunits);
       break;
-    case Viabytecompress:
+    case GT_ACCESS_TYPE_BYTECOMPRESS:
       bitspersymbol = gt_alphabet_bits_per_symbol(encseq->alpha);
       numofunits
         = (unsigned long) sizeofbitarray(bitspersymbol,
@@ -676,7 +639,7 @@ static void assignencseqmapspecification(
       gt_assert(encseq->bitpackarray != NULL);
       NEWMAPSPEC(BITPACKARRAYSTOREVAR(encseq->bitpackarray),BitElem,numofunits);
       break;
-    case Viabitaccess:
+    case GT_ACCESS_TYPE_BITACCESS:
       NEWMAPSPEC(encseq->twobitencoding,GtTwobitencoding,
                  encseq->unitsoftwobitencoding);
       if (encseq->numofspecialstostore > 0)
@@ -686,7 +649,7 @@ static void assignencseqmapspecification(
         NEWMAPSPEC(encseq->specialbits,GtBitsequence,numofunits);
       }
       break;
-    case Viauchartables:
+    case GT_ACCESS_TYPE_UCHARTABLES:
       NEWMAPSPEC(encseq->twobitencoding,GtTwobitencoding,
                  encseq->unitsoftwobitencoding);
       if (encseq->numofspecialstostore > 0)
@@ -699,7 +662,7 @@ static void assignencseqmapspecification(
         NEWMAPSPEC(encseq->ucharendspecialsubsUint,GtUlong,numofunits);
       }
       break;
-    case Viaushorttables:
+    case GT_ACCESS_TYPE_USHORTTABLES:
       NEWMAPSPEC(encseq->twobitencoding,GtTwobitencoding,
                  encseq->unitsoftwobitencoding);
       if (encseq->numofspecialstostore > 0)
@@ -712,7 +675,7 @@ static void assignencseqmapspecification(
         NEWMAPSPEC(encseq->ushortendspecialsubsUint,GtUlong,numofunits);
       }
       break;
-    case Viauint32tables:
+    case GT_ACCESS_TYPE_UINT32TABLES:
       NEWMAPSPEC(encseq->twobitencoding,GtTwobitencoding,
                  encseq->unitsoftwobitencoding);
       if (encseq->numofspecialstostore > 0)
@@ -812,7 +775,7 @@ static int fillencseqmapspecstartptr(GtEncseq *encseq,
   return haserr ? -1 : 0;
 }
 
-static uint64_t localdetsizeencseq(GtPositionaccesstype sat,
+static uint64_t localdetsizeencseq(GtEncseqAccessType sat,
                                    unsigned long totallength,
                                    unsigned long numofdbfiles,
                                    unsigned long lengthofdbfilenames,
@@ -827,14 +790,14 @@ static uint64_t localdetsizeencseq(GtPositionaccesstype sat,
 
   switch (sat)
   {
-    case Viadirectaccess:
+    case  GT_ACCESS_TYPE_DIRECTACCESS:
          sum = (uint64_t) totallength * (uint64_t) sizeof (GtUchar);
          break;
-    case Viabytecompress:
+    case GT_ACCESS_TYPE_BYTECOMPRESS:
          gt_assert(bitspersymbol > 0);
          sum = (uint64_t) sizeofbitarray(bitspersymbol,(BitOffset) totallength);
          break;
-    case Viabitaccess:
+    case GT_ACCESS_TYPE_BITACCESS:
          sum = sizeoftwobitencoding;
          if (specialranges > 0)
          {
@@ -842,7 +805,7 @@ static uint64_t localdetsizeencseq(GtPositionaccesstype sat,
                   (uint64_t) GT_NUMOFINTSFORBITS(totallength+GT_INTWORDSIZE);
          }
          break;
-    case Viauchartables:
+    case GT_ACCESS_TYPE_UCHARTABLES:
          sum = sizeoftwobitencoding;
          if (specialranges > 0)
          {
@@ -852,7 +815,7 @@ static uint64_t localdetsizeencseq(GtPositionaccesstype sat,
                                     (totallength/UCHAR_MAX+1);
          }
          break;
-    case Viaushorttables:
+    case GT_ACCESS_TYPE_USHORTTABLES:
          sum = sizeoftwobitencoding;
          if (specialranges > 0)
          {
@@ -862,7 +825,7 @@ static uint64_t localdetsizeencseq(GtPositionaccesstype sat,
                                     (totallength/USHRT_MAX+1);
          }
          break;
-    case Viauint32tables:
+    case GT_ACCESS_TYPE_UINT32TABLES:
          sum = sizeoftwobitencoding;
          if (specialranges > 0)
          {
@@ -895,7 +858,9 @@ static uint64_t detencseqofsatviatables(int kind,
                                         unsigned long specialranges,
                                         unsigned int numofchars)
 {
-  GtPositionaccesstype sat[] = {Viauchartables,Viaushorttables,Viauint32tables};
+  GtEncseqAccessType sat[] = {GT_ACCESS_TYPE_UCHARTABLES,
+                              GT_ACCESS_TYPE_USHORTTABLES,
+                              GT_ACCESS_TYPE_UINT32TABLES};
 
   gt_assert(kind < (int) (sizeof (sat)/sizeof (sat[0])));
   return localdetsizeencseq(sat[kind],totallength,numofdbfiles,
@@ -903,7 +868,7 @@ static uint64_t detencseqofsatviatables(int kind,
 }
 
 #ifndef INLINEDENCSEQ
-static GtPositionaccesstype determinesmallestrep(
+static GtEncseqAccessType determinesmallestrep(
                                   unsigned long *specialranges,
                                   unsigned long totallength,
                                   unsigned long numofdbfiles,
@@ -911,17 +876,17 @@ static GtPositionaccesstype determinesmallestrep(
                                   const unsigned long *specialrangestab,
                                   unsigned int numofchars)
 {
-  GtPositionaccesstype cret;
+  GtEncseqAccessType cret;
   uint64_t tmp, cmin;
 
-  cmin = localdetsizeencseq(Viabitaccess,totallength,numofdbfiles,
+  cmin = localdetsizeencseq(GT_ACCESS_TYPE_BITACCESS,totallength,numofdbfiles,
                             lengthofdbfilenames,
                             specialrangestab[0],numofchars,0);
-  cret = Viabitaccess;
+  cret = GT_ACCESS_TYPE_BITACCESS;
   *specialranges = specialrangestab[0];
-  CHECKANDUPDATE(Viauchartables,0);
-  CHECKANDUPDATE(Viaushorttables,1);
-  CHECKANDUPDATE(Viauint32tables,2);
+  CHECKANDUPDATE(GT_ACCESS_TYPE_UCHARTABLES,0);
+  CHECKANDUPDATE(GT_ACCESS_TYPE_USHORTTABLES,1);
+  CHECKANDUPDATE(GT_ACCESS_TYPE_UINT32TABLES,2);
   return cret;
 }
 
@@ -934,7 +899,7 @@ static int determinesattype(unsigned long *specialranges,
                             const char *str_sat,
                             GtError *err)
 {
-  GtPositionaccesstype sat;
+  GtEncseqAccessType sat;
   bool haserr = false;
 
   *specialranges = specialrangestab[0];
@@ -947,12 +912,12 @@ static int determinesattype(unsigned long *specialranges,
                                  specialrangestab,numofchars);
     } else
     {
-      sat = Viabytecompress;
+      sat = GT_ACCESS_TYPE_BYTECOMPRESS;
     }
   } else
   {
-    sat = str2positionaccesstype(str_sat);
-    if (sat == Undefpositionaccesstype)
+    sat = gt_encseq_access_type_get(str_sat);
+    if (sat == GT_ACCESS_TYPE_UNDEFINED)
     {
       gt_error_set(err,"illegal argument \"%s\" to option -sat",str_sat);
       haserr = true;
@@ -964,14 +929,14 @@ static int determinesattype(unsigned long *specialranges,
         {
           if (specialrangestab[0] == 0)
           {
-            sat = Viabitaccess;
+            sat = GT_ACCESS_TYPE_BITACCESS;
           }
-          if (sat == Viauchartables)
+          if (sat == GT_ACCESS_TYPE_UCHARTABLES)
           {
             *specialranges = specialrangestab[0];
           } else
           {
-            if (sat == Viaushorttables)
+            if (sat == GT_ACCESS_TYPE_USHORTTABLES)
             {
               *specialranges = specialrangestab[1];
             } else
@@ -981,7 +946,7 @@ static int determinesattype(unsigned long *specialranges,
           }
         } else
         {
-          sat = Viabytecompress;
+          sat = GT_ACCESS_TYPE_BYTECOMPRESS;
         }
       }
     }
@@ -999,7 +964,7 @@ static int determinesattype(unsigned long *specialranges,
                             GT_UNUSED GtError *err)
 {
   *specialranges = specialrangestab[0];
-  return (int) Viadirectaccess;
+  return (int)  GT_ACCESS_TYPE_DIRECTACCESS;
 }
 #endif
 
@@ -1034,34 +999,34 @@ void gt_encseq_delete(GtEncseq *encseq)
     gt_free(encseq->characterdistribution);
     switch (encseq->sat)
     {
-      case Viadirectaccess:
+      case  GT_ACCESS_TYPE_DIRECTACCESS:
         if (!encseq->hasplainseqptr)
         {
           gt_free(encseq->plainseq);
         }
         break;
-      case Viabytecompress:
+      case GT_ACCESS_TYPE_BYTECOMPRESS:
         bitpackarray_delete(encseq->bitpackarray);
         encseq->bitpackarray = NULL;
         break;
-      case Viabitaccess:
+      case GT_ACCESS_TYPE_BITACCESS:
         gt_free(encseq->twobitencoding);
         gt_free(encseq->specialbits);
         encseq->specialbits = NULL;
         break;
-      case Viauchartables:
+      case GT_ACCESS_TYPE_UCHARTABLES:
         gt_free(encseq->twobitencoding);
         gt_free(encseq->ucharspecialpositions);
         gt_free(encseq->ucharendspecialsubsUint);
         gt_free(encseq->ucharspecialrangelength);
         break;
-      case Viaushorttables:
+      case GT_ACCESS_TYPE_USHORTTABLES:
         gt_free(encseq->twobitencoding);
         gt_free(encseq->ushortspecialpositions);
         gt_free(encseq->ushortendspecialsubsUint);
         gt_free(encseq->ushortspecialrangelength);
         break;
-      case Viauint32tables:
+      case GT_ACCESS_TYPE_UINT32TABLES:
         gt_free(encseq->twobitencoding);
         gt_free(encseq->uint32specialpositions);
         gt_free(encseq->uint32endspecialsubsUint);
@@ -1172,7 +1137,7 @@ void gt_encseq_delete(GtEncseq *encseq)
 #undef MAXSPECIALTYPE
 #undef POS2PAGENUM
 
-/* Viadirectaccess */
+/*  GT_ACCESS_TYPE_DIRECTACCESS */
 
 static GtUchar delivercharViadirectaccess(const GtEncseq *encseq,
                                         unsigned long pos)
@@ -1301,7 +1266,7 @@ static GtUchar deliverfromtwobitencoding(const GtEncseq *encseq,
   return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
-/* Viabitaccess */
+/* GT_ACCESS_TYPE_BITACCESS */
 
 static GtUchar delivercharViabitaccessSpecial(const GtEncseq *encseq,
                                             unsigned long pos)
@@ -1326,7 +1291,7 @@ static GtUchar FCTNAME(const GtEncseq *encseq,unsigned long pos)\
   return twobits ? (GtUchar) SEPARATOR : (GtUchar) WILDCARD;\
 }
 
-/* Viauchartables */
+/* GT_ACCESS_TYPE_UCHARTABLES */
 
 DECLAREFUNCTIONGENERIC(delivercharViauchartablesSpecialfirst,
                        ucharchecknospecial)
@@ -1334,7 +1299,7 @@ DECLAREFUNCTIONGENERIC(delivercharViauchartablesSpecialfirst,
 DECLAREFUNCTIONGENERIC(delivercharViauchartablesSpecialrange,
                        ucharchecknospecialrange)
 
-/* Viaushorttables */
+/* GT_ACCESS_TYPE_USHORTTABLES */
 
 DECLAREFUNCTIONGENERIC(delivercharViaushorttablesSpecialfirst,
                        ushortchecknospecial)
@@ -1342,7 +1307,7 @@ DECLAREFUNCTIONGENERIC(delivercharViaushorttablesSpecialfirst,
 DECLAREFUNCTIONGENERIC(delivercharViaushorttablesSpecialrange,
                        ushortchecknospecialrange)
 
-/* Viauint32tables */
+/* GT_ACCESS_TYPE_UINT32TABLES */
 
 DECLAREFUNCTIONGENERIC(delivercharViauint32tablesSpecialfirst,
                        uint32checknospecial)
@@ -1469,14 +1434,14 @@ static unsigned long accessspecialpositions(const GtEncseq *encseq,
 {
   switch (encseq->sat)
   {
-    case Viauchartables:
+    case GT_ACCESS_TYPE_UCHARTABLES:
       return (unsigned long) encseq->ucharspecialpositions[idx];
-    case Viaushorttables:
+    case GT_ACCESS_TYPE_USHORTTABLES:
       return (unsigned long) encseq->ushortspecialpositions[idx];
-    case Viauint32tables:
+    case GT_ACCESS_TYPE_UINT32TABLES:
       return (unsigned long) encseq->uint32specialpositions[idx];
     default: fprintf(stderr,"accessspecialpositions(sat = %s is undefined)\n",
-                     accesstype2name(encseq->sat));
+                     gt_encseq_access_type_str(encseq->sat));
              exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
@@ -1486,14 +1451,14 @@ static unsigned long accessspecialrangelength(const GtEncseq *encseq,
 {
   switch (encseq->sat)
   {
-    case Viauchartables:
+    case GT_ACCESS_TYPE_UCHARTABLES:
       return (unsigned long) encseq->ucharspecialrangelength[idx];
-    case Viaushorttables:
+    case GT_ACCESS_TYPE_USHORTTABLES:
       return (unsigned long) encseq->ushortspecialrangelength[idx];
-    case Viauint32tables:
+    case GT_ACCESS_TYPE_UINT32TABLES:
       return (unsigned long) encseq->uint32specialrangelength[idx];
     default: fprintf(stderr,"accessspecialrangelength(sat = %s is undefined)\n",
-                     accesstype2name(encseq->sat));
+                     gt_encseq_access_type_str(encseq->sat));
              exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
@@ -1503,11 +1468,14 @@ static unsigned long accessendspecialsubsUint(const GtEncseq *encseq,
 {
   switch (encseq->sat)
   {
-    case Viauchartables: return encseq->ucharendspecialsubsUint[pgnum];
-    case Viaushorttables: return encseq->ushortendspecialsubsUint[pgnum];
-    case Viauint32tables: return encseq->uint32endspecialsubsUint[pgnum];
+    case GT_ACCESS_TYPE_UCHARTABLES:
+      return encseq->ucharendspecialsubsUint[pgnum];
+    case GT_ACCESS_TYPE_USHORTTABLES:
+      return encseq->ushortendspecialsubsUint[pgnum];
+    case GT_ACCESS_TYPE_UINT32TABLES:
+      return encseq->uint32endspecialsubsUint[pgnum];
     default: fprintf(stderr,"accessendspecialsubsUint(sat = %s is undefined)\n",
-                     accesstype2name(encseq->sat));
+                     gt_encseq_access_type_str(encseq->sat));
              exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
@@ -1719,14 +1687,14 @@ static void advanceEncodedseqstate(const GtEncseq *encseq,
   }
 }
 
-static unsigned long startpos2pagenum(GtPositionaccesstype sat,
+static unsigned long startpos2pagenum(GtEncseqAccessType sat,
                                       unsigned long startpos)
 {
   switch (sat)
   {
-    case Viauchartables:
+    case GT_ACCESS_TYPE_UCHARTABLES:
       return (unsigned long) (startpos >> 8);
-    case Viaushorttables:
+    case GT_ACCESS_TYPE_USHORTTABLES:
       return (unsigned long) (startpos >> 16);
     default:
 #ifndef _LP64
@@ -2114,8 +2082,8 @@ bool gt_encseq_has_specialranges(const GtEncseq *encseq)
 
 bool gt_encseq_bitwise_cmp_ok(const GtEncseq *encseq)
 {
-  return (encseq->sat == Viadirectaccess ||
-          encseq->sat == Viabytecompress) ? false : true;
+  return (encseq->sat ==  GT_ACCESS_TYPE_DIRECTACCESS ||
+          encseq->sat == GT_ACCESS_TYPE_BYTECOMPRESS) ? false : true;
 }
 
 struct GtSpecialrangeiterator
@@ -2138,9 +2106,9 @@ GtSpecialrangeiterator* gt_specialrangeiterator_new(const GtEncseq *encseq,
   sri->encseq = encseq;
   sri->exhausted = (encseq->numofspecialstostore == 0) ? true : false;
   sri->lengthofspecialrange = 0;
-  if (encseq->sat == Viadirectaccess ||
-      encseq->sat == Viabytecompress ||
-      encseq->sat == Viabitaccess)
+  if (encseq->sat ==  GT_ACCESS_TYPE_DIRECTACCESS ||
+      encseq->sat == GT_ACCESS_TYPE_BYTECOMPRESS ||
+      encseq->sat == GT_ACCESS_TYPE_BITACCESS)
   {
     if (moveforward)
     {
@@ -2148,7 +2116,7 @@ GtSpecialrangeiterator* gt_specialrangeiterator_new(const GtEncseq *encseq,
     } else
     {
       sri->pos = encseq->totallength-1;
-      if (encseq->sat == Viabitaccess &&
+      if (encseq->sat == GT_ACCESS_TYPE_BITACCESS &&
           GT_BITNUM2WORD(sri->encseq->specialbits,sri->pos) == 0)
       {
         sri->pos -= (GT_MODWORDSIZE(sri->pos) + 1);
@@ -2331,11 +2299,11 @@ bool gt_specialrangeiterator_next(GtSpecialrangeiterator *sri, GtRange *range)
   }
   switch (sri->encseq->sat)
   {
-    case Viadirectaccess:
+    case  GT_ACCESS_TYPE_DIRECTACCESS:
       return dabcgt_specialrangeiterator_next(true,range,sri);
-    case Viabytecompress:
+    case GT_ACCESS_TYPE_BYTECOMPRESS:
       return dabcgt_specialrangeiterator_next(false,range,sri);
-    case Viabitaccess:
+    case GT_ACCESS_TYPE_BITACCESS:
       return bitaccessgt_specialrangeiterator_next(range,sri);
     default:
       gt_assert(sri->esr->hasprevious);
@@ -2361,22 +2329,22 @@ void gt_specialrangeiterator_delete(GtSpecialrangeiterator *sri)
   gt_free(sri);
 }
 
-static unsigned int sat2maxspecialtype(GtPositionaccesstype sat)
+static unsigned int sat2maxspecialtype(GtEncseqAccessType sat)
 {
-  if (sat == Viauchartables)
+  if (sat == GT_ACCESS_TYPE_UCHARTABLES)
   {
     return (unsigned int) UCHAR_MAX;
   }
-  if (sat == Viaushorttables)
+  if (sat == GT_ACCESS_TYPE_USHORTTABLES)
   {
     return (unsigned int) USHRT_MAX;
   }
-  if (sat == Viauint32tables)
+  if (sat == GT_ACCESS_TYPE_UINT32TABLES)
   {
     return (unsigned int) UINT32_MAX;
   }
   fprintf(stderr,"sat2maxspecialtype(sat = %s is undefined)\n",
-                  accesstype2name(sat));
+                  gt_encseq_access_type_str(sat));
   exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 
@@ -2579,7 +2547,7 @@ GtEncseq* gt_encseq_ref(GtEncseq *encseq)
   return encseq;
 }
 
-static GtEncseq *determineencseqkeyvalues(GtPositionaccesstype sat,
+static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
                                           unsigned long totallength,
                                           unsigned long numofsequences,
                                           unsigned long numofdbfiles,
@@ -2629,11 +2597,11 @@ static GtEncseq *determineencseqkeyvalues(GtPositionaccesstype sat,
                                          lengthofdbfilenames,specialranges,
                                          encseq->numofchars,
                                          gt_alphabet_bits_per_symbol(alpha)));
-  encseq->name = accesstype2name(sat);
+  encseq->name = gt_encseq_access_type_str(sat);
   encseq->deliverchar = NULL;
   encseq->delivercharname = NULL;
   encseq->twobitencoding = NULL;
-  if (sat == Viadirectaccess || sat == Viabytecompress)
+  if (sat ==  GT_ACCESS_TYPE_DIRECTACCESS || sat == GT_ACCESS_TYPE_BYTECOMPRESS)
   {
     encseq->unitsoftwobitencoding = 0;
   } else
@@ -2664,84 +2632,25 @@ static GtEncseq *determineencseqkeyvalues(GtPositionaccesstype sat,
   return encseq;
 }
 
-typedef struct
-{
-  GtPositionaccesstype sat;
-  unsigned long totallength;
-  unsigned long numofdbsequences,
-                numofdbfiles,
-                lengthofdbfilenames;
-  GtSpecialcharinfo specialcharinfo;
-} Firstencseqvalues;
-
-#define NEXTFREAD(VAL)\
-        if (!haserr)\
-        {\
-          size_t ret;\
-          ret = fread(&(VAL),sizeof (VAL), (size_t) 1, fp);\
-          if (ferror(fp))\
-          {\
-            gt_error_set(err,"error when trying to read %s: %s",\
-                              #VAL,strerror(errno));\
-            haserr = true;\
-          }\
-        }
-
-static int readfirstvaluesfromfile(Firstencseqvalues *firstencseqvalues,
-                                   const char *indexname,GtError *err)
-{
-  FILE *fp;
-  bool haserr = false;
-  unsigned long cc;
-
-  gt_error_check(err);
-  fp = gt_fa_fopen_with_suffix(indexname,GT_ENCSEQFILESUFFIX,"rb",err);
-  if (fp == NULL)
-  {
-    haserr = true;
-  }
-  NEXTFREAD(cc);
-  if (!haserr)
-  {
-    if (cc >= (unsigned long) Undefpositionaccesstype)
-    {
-      gt_error_set(err,"illegal type %lu in \"%s%s\"",cc,
-                   indexname,GT_ENCSEQFILESUFFIX);
-      haserr = true;
-    }
-  }
-  firstencseqvalues->sat = (GtPositionaccesstype) cc;
-  NEXTFREAD(firstencseqvalues->totallength);
-  NEXTFREAD(firstencseqvalues->numofdbsequences);
-  NEXTFREAD(firstencseqvalues->numofdbfiles);
-  NEXTFREAD(firstencseqvalues->lengthofdbfilenames);
-  NEXTFREAD(firstencseqvalues->specialcharinfo);
-  gt_fa_xfclose(fp);
-  return haserr ? -1 : 0;
-}
-
 int gt_specialcharinfo_read(GtSpecialcharinfo *specialcharinfo,
                             const char *indexname, GtError *err)
 {
-  Firstencseqvalues firstencseqvalues;
-
-  int retval = readfirstvaluesfromfile(&firstencseqvalues,indexname,err);
-  if (retval != 0)
+  GtEncseqMetadata *emd = gt_encseq_metadata_new(indexname,err);
+  if (emd == NULL)
   {
     return -1;
   }
-  *specialcharinfo = firstencseqvalues.specialcharinfo;
+  *specialcharinfo = gt_encseq_metadata_specialcharinfo(emd);
+  gt_encseq_metadata_delete(emd);
   return 0;
 }
 
-unsigned int gt_encseq_alphabetnumofchars(
-                                                const GtEncseq *encseq)
+unsigned int gt_encseq_alphabetnumofchars(const GtEncseq *encseq)
 {
   return gt_alphabet_num_of_chars(encseq->alpha);
 }
 
-const GtUchar *gt_encseq_alphabetsymbolmap(
-                                                const GtEncseq *encseq)
+const GtUchar *gt_encseq_alphabetsymbolmap(const GtEncseq *encseq)
 {
   return gt_alphabet_symbolmap(encseq->alpha);
 }
@@ -2751,8 +2660,7 @@ GtAlphabet *gt_encseq_alphabet(const GtEncseq *encseq)
   return encseq->alpha;
 }
 
-const GtUchar *gt_encseq_alphabetcharacters(
-                                                const GtEncseq *encseq)
+const GtUchar *gt_encseq_alphabetcharacters(const GtEncseq *encseq)
 {
   return gt_alphabet_characters(encseq->alpha);
 }
@@ -2762,8 +2670,7 @@ GtUchar gt_encseq_alphabetwildcardshow(const GtEncseq *encseq)
   return gt_alphabet_wildcard_show(encseq->alpha);
 }
 
-unsigned long gt_encseq_charcount(const GtEncseq *encseq,
-                                           GtUchar cc)
+unsigned long gt_encseq_charcount(const GtEncseq *encseq, GtUchar cc)
 {
   gt_assert(encseq != NULL &&
             (unsigned int) cc < gt_alphabet_num_of_chars(encseq->alpha));
@@ -2787,7 +2694,7 @@ typedef struct
 
 static GtEncseqfunctions encodedseqfunctab[] =
   {
-    { /* Viadirectaccess */
+    { /*  GT_ACCESS_TYPE_DIRECTACCESS */
       NFCT(fillpos,fillplainseq),
       NFCT(delivercharnospecial,delivercharViadirectaccess),
       NFCT(delivercharspecial,delivercharViadirectaccess),
@@ -2797,7 +2704,7 @@ static GtEncseqfunctions encodedseqfunctab[] =
       NFCT(delivercontainsspecial,containsspecialViadirectaccess)
     },
 
-    { /* Viabytecompress */
+    { /* GT_ACCESS_TYPE_BYTECOMPRESS */
       NFCT(fillpos,fillbitpackarray),
       NFCT(delivercharnospecial,delivercharViabytecompress),
       NFCT(delivercharspecial,delivercharViabytecompress),
@@ -2807,7 +2714,7 @@ static GtEncseqfunctions encodedseqfunctab[] =
       NFCT(delivercontainsspecial,containsspecialViabytecompress)
     },
 
-    { /* Viabitaccess */
+    { /* GT_ACCESS_TYPE_BITACCESS */
       NFCT(fillpos,fillbitaccesstab),
       NFCT(delivercharnospecial,deliverfromtwobitencoding),
       NFCT(delivercharspecial,delivercharViabitaccessSpecial),
@@ -2817,7 +2724,7 @@ static GtEncseqfunctions encodedseqfunctab[] =
       NFCT(delivercontainsspecial,containsspecialViabitaccess)
     },
 
-    { /* Viauchartables */
+    { /* GT_ACCESS_TYPE_UCHARTABLES */
       NFCT(fillpos,ucharfillspecialtables),
       NFCT(delivercharnospecial,deliverfromtwobitencoding),
       NFCT(delivercharspecial,delivercharViauchartablesSpecialfirst),
@@ -2827,7 +2734,7 @@ static GtEncseqfunctions encodedseqfunctab[] =
       NFCT(delivercontainsspecial,containsspecialViatables)
     },
 
-    { /* Viaushorttables */
+    { /* GT_ACCESS_TYPE_USHORTTABLES */
       NFCT(fillpos,ushortfillspecialtables),
       NFCT(delivercharnospecial,deliverfromtwobitencoding),
       NFCT(delivercharspecial,delivercharViaushorttablesSpecialfirst),
@@ -2837,7 +2744,7 @@ static GtEncseqfunctions encodedseqfunctab[] =
       NFCT(delivercontainsspecial,containsspecialViatables)
     },
 
-    { /* Viauint32tables */
+    { /* GT_ACCESS_TYPE_UINT32TABLES */
       NFCT(fillpos,uint32fillspecialtables),
       NFCT(delivercharnospecial,deliverfromtwobitencoding),
       NFCT(delivercharspecial,delivercharViauint32tablesSpecialfirst),
@@ -2913,7 +2820,7 @@ static GtEncseq *files2encodedsequence(
                                 GtError *err)
 {
   GtEncseq *encseq = NULL;
-  GtPositionaccesstype sat = Undefpositionaccesstype;
+  GtEncseqAccessType sat = GT_ACCESS_TYPE_UNDEFINED;
   bool haserr = false;
   int retcode;
   GtSequenceBuffer *fb = NULL;
@@ -2933,7 +2840,7 @@ static GtEncseq *files2encodedsequence(
     haserr = true;
   } else
   {
-    sat = (GtPositionaccesstype) retcode;
+    sat = (GtEncseqAccessType) retcode;
   }
 #ifdef INLINEDENCSEQ
   gt_logger_log(logger,"inlined encodeded sequence");
@@ -3002,8 +2909,7 @@ gt_encseq_new_from_index(bool withrange,
 {
   GtEncseq *encseq = NULL;
   bool haserr = false;
-  int retcode;
-  Firstencseqvalues firstencseqvalues;
+  GtEncseqMetadata *emd = NULL;
   GtAlphabet *alpha;
 
   gt_error_check(err);
@@ -3014,26 +2920,27 @@ gt_encseq_new_from_index(bool withrange,
   }
   if (!haserr)
   {
-    retcode = readfirstvaluesfromfile(&firstencseqvalues,indexname,err);
-    if (retcode < 0)
+    emd = gt_encseq_metadata_new(indexname,err);
+    if (emd == NULL)
     {
       haserr = true;
     }
   }
   if (!haserr)
   {
-    encseq = determineencseqkeyvalues(firstencseqvalues.sat,
-                                      firstencseqvalues.totallength,
-                                      firstencseqvalues.numofdbsequences,
-                                      firstencseqvalues.numofdbfiles,
-                                      firstencseqvalues.lengthofdbfilenames,
-                                      firstencseqvalues.specialcharinfo
-                                                       .specialranges,
-                                      alpha,
-                                      logger);
+    GtSpecialcharinfo si;
+    si = gt_encseq_metadata_specialcharinfo(emd);
+    encseq = determineencseqkeyvalues(gt_encseq_metadata_accesstype(emd),
+                                    gt_encseq_metadata_total_length(emd),
+                                    gt_encseq_metadata_num_of_sequences(emd),
+                                    gt_encseq_metadata_num_of_files(emd),
+                                    gt_encseq_metadata_length_of_filenames(emd),
+                                    si.specialranges,
+                                    alpha,
+                                    logger);
     alpha = NULL;
-    ALLASSIGNAPPENDFUNC(firstencseqvalues.sat);
-    gt_logger_log(logger, "deliverchar=%s",encseq->delivercharname);
+    ALLASSIGNAPPENDFUNC(gt_encseq_metadata_accesstype(emd));
+    gt_logger_log(logger, "deliverchar=%s", encseq->delivercharname);
     if (withtistab)
     {
       if (fillencseqmapspecstartptr(encseq,indexname,logger,err) != 0)
@@ -3117,6 +3024,7 @@ gt_encseq_new_from_index(bool withrange,
       }
     }
   }
+  gt_encseq_metadata_delete(emd);
   if (haserr)
   {
     gt_alphabet_delete((GtAlphabet*) alpha);
@@ -3578,9 +3486,9 @@ static unsigned long fwdgetnextstoppos(const GtEncseq *encseq,
                                 GtEncseqReader *esr,
                                 unsigned long pos)
 {
-  gt_assert(encseq->sat != Viadirectaccess &&
-            encseq->sat != Viabytecompress &&
-            encseq->sat != Viabitaccess);
+  gt_assert(encseq->sat !=  GT_ACCESS_TYPE_DIRECTACCESS &&
+            encseq->sat != GT_ACCESS_TYPE_BYTECOMPRESS &&
+            encseq->sat != GT_ACCESS_TYPE_BITACCESS);
   gt_assert(esr->moveforward);
   while (esr->hasprevious)
   {
@@ -3610,9 +3518,9 @@ static unsigned long revgetnextstoppos(const GtEncseq *encseq,
                                 GtEncseqReader *esr,
                                 unsigned long pos)
 {
-  gt_assert(encseq->sat != Viadirectaccess &&
-            encseq->sat != Viabytecompress &&
-            encseq->sat != Viabitaccess);
+  gt_assert(encseq->sat !=  GT_ACCESS_TYPE_DIRECTACCESS &&
+            encseq->sat != GT_ACCESS_TYPE_BYTECOMPRESS &&
+            encseq->sat != GT_ACCESS_TYPE_BITACCESS);
   gt_assert(!esr->moveforward);
   while (esr->hasprevious)
   {
@@ -3831,7 +3739,7 @@ static void fwdextract2bitenc(GtEndofTwobitencoding *ptbe,
 {
   gt_assert(startpos < encseq->totallength);
   ptbe->position = startpos;
-  if (encseq->sat != Viabitaccess)
+  if (encseq->sat != GT_ACCESS_TYPE_BITACCESS)
   {
     unsigned long stoppos;
 
@@ -3887,7 +3795,7 @@ static void revextract2bitenc(GtEndofTwobitencoding *ptbe,
 {
   gt_assert(startpos < encseq->totallength);
   ptbe->position = startpos;
-  if (encseq->sat != Viabitaccess)
+  if (encseq->sat != GT_ACCESS_TYPE_BITACCESS)
   {
     unsigned long stoppos;
 
@@ -4859,7 +4767,7 @@ static void checkextractspecialbits(const GtEncseq *encseq,bool fwd)
   GtBitsequence spbits1, spbits2;
   unsigned int unitsnotspecial_bruteforce, unitsnotspecial;
 
-  if (encseq->sat != Viabitaccess
+  if (encseq->sat != GT_ACCESS_TYPE_BITACCESS
         || !gt_encseq_has_specialranges(encseq))
   {
     return;
@@ -5983,7 +5891,7 @@ int gt_encseq_encoder_use_representation(GtEncseqEncoder *ee, const char *sat,
 {
   gt_assert(ee && sat);
   if (sat && strlen(sat) > 0
-        && str2positionaccesstype(sat) == Undefpositionaccesstype) {
+        && gt_encseq_access_type_get(sat) == GT_ACCESS_TYPE_UNDEFINED) {
     gt_error_set(err, "undefined access type: '%s'", sat);
     return -1;
   }
@@ -6470,7 +6378,7 @@ GtEncseq* gt_encseq_builder_build(GtEncseqBuilder *eb,
                                            GT_UNUSED GtError *err)
 {
   GtEncseq *encseq = NULL;
-  const GtPositionaccesstype sat = Viadirectaccess;
+  const GtEncseqAccessType sat =  GT_ACCESS_TYPE_DIRECTACCESS;
   GtSpecialcharinfo samplespecialcharinfo;
   bool withrange = eb->withrange;
   gt_assert(eb->plainseq);
