@@ -15,23 +15,20 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <float.h>
+#include <math.h>
 #include <stdio.h>
 
-#include "core/array2dim_api.h"
 #include "core/encseq_api.h"
 #include "core/log_api.h"
 #include "core/logger.h"
-#include "core/mathsupport.h"
 #include "core/str_array_api.h"
 #include "core/unused_api.h"
 
-#include "match/eis-voiditf.h"
 #include "match/genomediff.h"
 #include "match/idx-limdfs.h"
-#include "match/shu-dfs.h"
-#include "match/shu-divergence.h"
+#include "match/shu-genomediff-kr2.h"
 #include "match/shu-genomediff-simple.h"
-#include "match/shu_encseq_gc.h"
 
 #include "tools/gt_genomediff.h"
 
@@ -63,9 +60,9 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
   gt_assert(arguments);
 
   /* init */
-  op = gt_option_parser_new("[option ...] [-esa|-pck] indexname "
-                            "-query sequencefile",
-                            "Reads in a index of type fm or esa.");
+  op = gt_option_parser_new("[option ...] -pck indexname "
+                            "[-query sequencefile(s)]",
+                            "Reads in a packedindex.");
 
   /* -maxdepth */
   option =  gt_option_new_int("maxdepth", "max depth of .pbi-file",
@@ -74,7 +71,7 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* -max_n */
-  option = gt_option_new_ulong("max_n", "Number of precalculated valuesi "
+  option = gt_option_new_ulong("max_n", "Number of precalculated values "
                              "for ln(n!) and pmax(x)",
                              &arguments->max_ln_n_fac, 1000UL);
   gt_option_is_development_option(option);
@@ -116,6 +113,46 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
 
   /* ref query */
   arguments->ref_queryname = gt_option_ref(optionquery);
+
+  /* thresholds */
+  option = gt_option_new_double("thr",
+                                "Threshold for difference (du, dl) in"
+                                "divergence calculation.\n"
+                                "default: 1e-9",
+                                &arguments->divergence_threshold,
+                                pow(10.0, -9.0));
+  gt_option_is_development_option(option);
+  gt_option_hide_default(option);
+  gt_option_parser_add_option(op, option);
+
+  option = gt_option_new_double("abs_err",
+                                "absolut error for epected shulen "
+                                "calculation.\n"
+                                "default: 1e-5",
+                                &arguments->divergence_abs_err,
+                                1e-5);
+  gt_option_is_development_option(option);
+  gt_option_hide_default(option);
+  gt_option_parser_add_option(op, option);
+
+  option = gt_option_new_double("rel_err",
+                                "relative error for epected shulen "
+                                "calculation.\n"
+                                "default: 1e-3",
+                                &arguments->divergence_rel_err,
+                                1e-3);
+  gt_option_is_development_option(option);
+  gt_option_hide_default(option);
+  gt_option_parser_add_option(op, option);
+
+  option = gt_option_new_double("M",
+                                "threshold for minimum logarithm.\n"
+                                "default: DBL_MIN",
+                                &arguments->divergence_m,
+                                DBL_MIN);
+  gt_option_is_development_option(option);
+  gt_option_hide_default(option);
+  gt_option_parser_add_option(op, option);
 
   /* mail */
   gt_option_parser_set_mailaddress(op, "<dwillrodt@zbh.uni-hamburg.de>");
@@ -190,202 +227,16 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
   {
     if (arguments->simplesearch)
       had_err = gt_genomediff_run_simple_search(genericindexSubject,
+                                                encseq,
+                                                logger,
+                                                arguments,
+                                                err);
+    else
+      had_err = gt_genomediff_run_kr2_search(genericindexSubject,
                                              encseq,
                                              logger,
                                              arguments,
                                              err);
-    else
-    {
-      unsigned long numofchars,
-                    numoffiles,
-                    totallength,
-                    start = 0UL,
-                    end = 0UL,
-                    i, j,
-                    *filelength;
-      double **shulen,
-             *gc_contents = NULL;
-      const GtAlphabet *alphabet;
-      const GtStrArray *filenames;
-      const FMindex *subjectindex;
-
-      alphabet = gt_encseq_alphabet(encseq);
-      numofchars = (unsigned long) gt_alphabet_num_of_chars(alphabet);
-      totallength = genericindex_get_totallength(genericindexSubject);
-      gt_logger_log(logger, "totallength=%lu", totallength);
-      filenames = gt_encseq_filenames(encseq);
-      subjectindex = genericindex_get_packedindex(genericindexSubject);
-      numoffiles = gt_encseq_num_of_files(encseq);
-      gt_logger_log(logger, "number of files=%lu", numoffiles);
-      gt_array2dim_calloc(shulen, numoffiles, numoffiles);
-      filelength = gt_calloc((size_t) numoffiles, sizeof (unsigned long));
-
-      for (i = 0UL; i < numoffiles; i++)
-      {
-        start = gt_encseq_filestartpos(encseq, i);
-        filelength[i] =
-          (unsigned long) gt_encseq_effective_filelength(encseq, i) - 1;
-        end = start + filelength[i];
-        gt_logger_log(logger,
-               "File: %s (No: %lu)\tstart: %lu, end: %lu, sep: %lu",
-               gt_str_array_get(filenames, i),
-               i,
-               start,
-               end,
-               end + 1);
-      }
-      had_err = gt_pck_calculate_shulen(subjectindex,
-                                         encseq,
-                                         shulen,
-                                         (unsigned long) numofchars,
-                                         totallength,
-                                         logger,
-                                         err);
-      if (!had_err)
-      {
-        gc_contents = gt_encseq_get_gc(encseq,
-                                      true,
-                                      false,
-                                      err);
-        if (gc_contents == NULL)
-          had_err = -1;
-      }
-      if (!had_err)
-      {
-        gt_log_log("length_i | sum of shulen");
-        for (i = 0; i < numoffiles; i++)
-        {
-          unsigned long length_i;
-          length_i = filelength[i];
-          if (gt_log_enabled())
-            fprintf(stderr, "debug %lu\t", length_i);
-          for (j = 0; j < numoffiles; j++)
-          {
-            if (j == i)
-            {
-              if (gt_log_enabled())
-                fprintf(stderr, "0\t\t");
-              continue;
-            }
-            if (gt_log_enabled())
-              fprintf(stderr, "%f\t", shulen[i][j]);
-            shulen[i][j] = shulen[i][j] / length_i;
-          }
-          if (gt_log_enabled())
-            fprintf(stderr, "\n");
-        }
-      }
-      gt_logger_log(logger, "table of avg shulens");
-      if (!had_err && gt_logger_enabled(logger))
-      {
-        for (i = 0; i < numoffiles; i++)
-        {
-          printf("# ");
-          for (j = 0; j < numoffiles; j++)
-          {
-            if (i == j)
-              printf("0\t\t");
-            else
-              printf("%f\t", shulen[i][j]);
-          }
-          printf("\n");
-        }
-      }
-      if (!had_err)
-      {
-        double *ln_n_fac;
-
-        gt_assert(gc_contents != NULL);
-
-        ln_n_fac = gt_get_ln_n_fac(arguments->max_ln_n_fac);
-        for (i = 0; i < numoffiles; i++)
-        {
-          for (j = i+1; j < numoffiles; j++)
-          {
-            double query_gc, query_shulen;
-            unsigned long subject_len;
-            if (gt_double_smaller_double(shulen[i][j],
-                                         shulen[j][i]))
-            { /* S=j Q=i */
-              query_gc = gc_contents[i];
-              query_shulen = shulen[i][j];
-              subject_len = filelength[j];
-            } else
-            {
-              if (gt_double_smaller_double(shulen[j][i],
-                                           shulen[i][j]))
-              { /* S=i Q=j */
-                query_gc = gc_contents[j];
-                query_shulen = shulen[j][i];
-                subject_len = filelength[i];
-              } else
-              {
-                if (gt_double_smaller_double(fabs(gc_contents[i]-0.5),
-                                             fabs(gc_contents[j]-0.5)))
-                { /* S=i Q=j XXX check this if right*/
-                  query_gc = gc_contents[j];
-                  query_shulen = shulen[j][i];
-                  subject_len = filelength[i];
-                } else
-                  query_gc = gc_contents[i];
-                  query_shulen = shulen[i][j];
-                  subject_len = filelength[j];
-                { /* S=j Q=i */
-                }
-              }
-            }
-
-            shulen[i][j] =
-              gt_divergence(KR_DEFAULT_E,
-                            KR_DEFAULT_T,
-                            KR_DEFAULT_M,
-                            query_shulen,
-                            subject_len,
-                            query_gc,
-                            ln_n_fac,
-                            arguments->max_ln_n_fac);
-            shulen[j][i] = shulen[i][j];
-          }
-        }
-        gt_free(ln_n_fac);
-      }
-      gt_logger_log(logger, "table of divergences");
-      if (!had_err && gt_logger_enabled(logger))
-      {
-        for (i = 0; i < numoffiles; i++)
-        {
-          printf("# ");
-          for (j = 0; j < numoffiles; j++)
-          {
-            if (i == j)
-            {
-              printf("0\t\t");
-              continue;
-            }
-            printf("%f\t", shulen[i][j]);
-          }
-          printf("\n");
-        }
-      }
-      if (!had_err)
-      {
-        printf("# Table of Kr\n");
-        for (i = 0; i < numoffiles; i++)
-        {
-          for (j = 0; j < numoffiles; j++)
-          {
-            if ( i == j )
-              printf("0\t\t");
-            else
-              printf("%f\t", gt_calculateKr(shulen[i][j]));
-          }
-          printf("\n");
-        }
-      }
-      gt_free(filelength);
-      gt_free(gc_contents);
-      gt_array2dim_delete(shulen);
-    }
   }
 
 /*XXX*/

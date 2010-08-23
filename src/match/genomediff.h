@@ -32,6 +32,10 @@ typedef struct {
        simplesearch;
   int user_max_depth;
   unsigned long max_ln_n_fac;
+  double divergence_abs_err, /* kr2 T */
+         divergence_rel_err, /* kr2 E */
+         divergence_m, /* kr2 M */
+         divergence_threshold; /* kr2 THRESHOLD */
   GtStrArray *queryname;
   GtStr *indexname;
 } GtGenomediffArguments;

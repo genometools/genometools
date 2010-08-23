@@ -71,7 +71,7 @@ static double pmax(double M, /* M value should be explored by simulation ??? */
     if (m == 0.0)
     {
       delta = 0.0;
-    } else if (m >= M)
+    } else if (M <= m)
     {
       ln = log(m);
       if (ln == -HUGE_VAL)
@@ -141,7 +141,7 @@ static double expShulen(double T, /* absolute error */
     delta = (prob_i - probOld) * i;  /* delta should always be positive */
     e += delta;    /* expectation of avg shulen length(Q, S) */
     /* check error */
-    if (e >= 1.0 && delta / e <= T)
+    if (1.0 <= e && delta / e <= T)
     {
       break;
     }
@@ -155,6 +155,7 @@ static double expShulen(double T, /* absolute error */
 double gt_divergence(double E, /* relative error for shulen length */
                    double T, /* absolute error */
                    double M,
+                   double threshold,
                    double shulen,
                    unsigned long subjectLength,
                    double gc,
@@ -171,7 +172,7 @@ double gt_divergence(double E, /* relative error for shulen length */
   du = 0.0;
   dl = 1.0 - (2 * p * p + 2 * q * q);  /* dl < 0.75 */
   /*this should become user definable*/
-  t = KR_THRESHOLD;
+  t = threshold;
 
   while (gt_double_smaller_double(t, (dl - du) / 2.0))
   {

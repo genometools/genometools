@@ -124,9 +124,10 @@ int gt_genomediff_run_simple_search(Genericindex *genericindexSubject,
       gt_logger_log(logger, "# shulen:\n%f", avgShuLength);
       gt_log_log("shu: %f, gc: %f, len: %lu",
           avgShuLength, gc_query, subjectLength);
-      div =  gt_divergence(KR_DEFAULT_E,
-                           KR_DEFAULT_T,
-                           KR_DEFAULT_M,
+      div =  gt_divergence(arguments->divergence_rel_err,
+                           arguments->divergence_abs_err,
+                           arguments->divergence_m,
+                           arguments->divergence_threshold,
                            avgShuLength,
                            subjectLength,
                            gc_query,

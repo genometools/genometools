@@ -18,4 +18,12 @@
 #ifndef SHU_GENOMEDIFF_KR2_H
 #define SHU_GENOMEDIFF_KR2_H
 
+#include "match/genomediff.h"
+
+int gt_genomediff_run_kr2_search(Genericindex *genericindexSubject,
+                                 const GtEncseq *encseq,
+                                 GtLogger *logger,
+                                 const GtGenomediffArguments *arguments,
+                                 GtError *err);
+
 #endif

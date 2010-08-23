@@ -23,14 +23,6 @@
 #include "core/stack-inlined.h"
 
 typedef struct {
-  unsigned long leaves, branching, lower, upper;
-  unsigned int parentOffset;
-  bool visited, on_branch;
-} Nodecount;
-
-GT_STACK_DECLARESTRUCT(Nodecount, 256UL);
-
-typedef struct {
   bool process;
   unsigned parentOffset;
   unsigned long **countTermSubtree;
@@ -48,9 +40,5 @@ int gt_pck_calculate_shulen(const FMindex *index,
                             unsigned long totallength,
                             GT_UNUSED GtLogger *logger,
                             GT_UNUSED GtError *err);
-
-void gt_pck_count_nodes_dfs(const FMindex *index,
-                        unsigned long totallength,
-                        unsigned int numofchars);
 
 #endif

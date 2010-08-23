@@ -18,18 +18,11 @@
 #ifndef SHU_DIVERGENCE_H
 #define SHU_DIVERGENCE_H
 
-#include <float.h>
-
-/* threshold used for calculation of divergence */
-#define KR_THRESHOLD pow(10.0, -9.0)
-#define KR_DEFAULT_E 1e-3
-#define KR_DEFAULT_T 1e-5
-#define KR_DEFAULT_M DBL_MIN
-
 /* calculates the divergence from the shulength */
 double gt_divergence (double E, /* relative error for shulen length */
                    double T, /* absolute error */
                    double M,
+                   double threshold, /* break criteria for pmax calculation */
                    double shulen, /*avg shulength*/
                    unsigned long subjectLength, /*subjectlength*/
                    double gc, /*combined gc-content*/

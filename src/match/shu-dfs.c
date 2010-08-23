@@ -30,81 +30,6 @@
 
 #include "match/shu-dfs.h"
 
-static void visit_count_children(const FMindex *index,
-                           Nodecount *parent,
-                           GtStackNodecount *stack,
-                           Mbtab *tmpmbtab,
-                           unsigned long *rangeOccs,
-                           GT_UNUSED unsigned int numofchars)
-{
-  unsigned long rangesize, idx, num_special;
-  unsigned int offset;
-  Nodecount child;
-
-  gt_assert(parent->lower < parent->upper);
-  rangesize = gt_bwtrangesplitallwithoutspecial(tmpmbtab,
-                                             rangeOccs,
-                                             index,
-                                             parent->lower,
-                                             parent->upper);
-  gt_assert(rangesize <= (unsigned long) numofchars);
-
-  offset = 0U;
-  num_special = parent->upper - parent->lower;
-  for (idx = 0; idx < rangesize; idx++)
-  {
-    child.lower = tmpmbtab[idx].lowerbound;
-    child.upper = tmpmbtab[idx].upperbound;
-    child.leaves = 0UL;
-    child.branching = 1UL;
-    child.parentOffset = offset + 1U;
-    child.visited = false;
-    child.on_branch = false;
-
-    /* check if child is part of a branch */
-    if (child.upper - child.lower == parent->upper - parent->lower)
-    {
-      /* XXX do sth with non branching nodes */
-      child.on_branch = true;
-      parent->branching -= 1UL;
-      GT_STACK_PUSH(stack, child);
-      num_special = 0UL;
-      offset += 1U;
-    } else
-    {
-      /* we found a leave on parent*/
-      if (child.lower + 1 == child.upper)
-      {
-        parent->leaves += 1;
-        num_special -= 1;
-      } else
-        /* child is a branch of parent node */
-      {
-        if (child.lower == child.upper)
-        {
-          /* do nothing, this is no node, this is a missing char */
-        } else
-        {
-          GT_STACK_PUSH(stack, child);
-          offset += 1U;
-          num_special -= (child.upper - child.lower);
-        }
-      }
-    }
-  }
-  parent->leaves += num_special;
-}
-
-static void process_count_node(GtStackNodecount *stack,
-                         Nodecount *current)
-{
-  Nodecount *parent;
-
-  parent = &(stack->space[stack->nextfree - current->parentOffset]);
-  parent->leaves += current->leaves;
-  parent->branching += current->branching;
-}
-
 static inline void add_filenum_count(ShuNode *child,
                                      ShuNode *parent,
                                      BwtSeqpositionextractor *positext,
@@ -119,16 +44,13 @@ static inline void add_filenum_count(ShuNode *child,
     unsigned long filenum, position;
 
     position = gt_BwtSeqpositionextractor_extract(positext, row);
-    gt_log_log("row: %lu position in bwt: %lu\n", row, position);
-    position = totallength - (position + 1);
-    gt_log_log("position in S: %lu\n", position);
     if (totallength <= position)
       filenum = numoffiles - 1;
     else
     {
+      position = totallength - (position + 1);
       filenum = gt_encseq_filenum(encseq, position);
     }
-    gt_log_log("filenum: %lu\n", filenum);
     parent->countTermSubtree[0][filenum] += 1;
   }
 }
@@ -157,9 +79,10 @@ static unsigned long **get_special_pos(const FMindex *index,
       special_char_rows_and_pos[0][special_idx] = row_idx;
       special_char_rows_and_pos[1][special_idx] =
         gt_BwtSeqpositionextractor_extract(positext, row_idx);
-      special_idx++;
+      special_idx += 1;
     }
   }
+  gt_assert(num_of_specials == special_idx);
   return special_char_rows_and_pos;
 }
 
@@ -184,9 +107,6 @@ static int visit_shu_children(const FMindex *index,
   gt_assert(parent->lower < parent->upper);
   num_of_rows = parent->upper - parent->lower;
 
-  gt_log_log("visit node with depth: %lu and %lu terminal children",
-          parent->depth, num_of_rows);
-  gt_log_log("interval: %lu:%lu", parent->lower, parent->upper);
   if (parent->depth == 0)
   {
     gt_assert(num_of_rows == totallength+1);
@@ -207,27 +127,26 @@ static int visit_shu_children(const FMindex *index,
     gt_assert(rangesize <= numofchars);
   }
 
-  offset = 0U;
+  offset = 0;
   for (idx = 0; idx < rangesize; idx++)
   {
     child.process = false;
     child.lower = tmpmbtab[idx].lowerbound;
     child.upper = tmpmbtab[idx].upperbound;
-    child.parentOffset = offset + 1U;
+    child.parentOffset = offset + 1;
     child.depth = parent->depth + 1;
 
-    gt_log_log("child_code: %lu\t", idx);
+    gt_assert (child.lower <= child.upper);
+    gt_assert ((child.upper - child.lower) <= num_of_rows);
     num_of_rows = num_of_rows - (child.upper - child.lower);
 
     if (child.lower == child.upper)
     { /* do nothing, this is no node, this is a missing char */
-      gt_log_log("not there\n");
       continue;
     }
     if (child.lower + 1 == child.upper || numofchars <= idx)
     { /* we found a leave on parent or the interval consists of
       * wildcards or terminators (only in root-interval)*/
-      gt_log_log("terminals\n");
       add_filenum_count(&child,
                         parent,
                         positext,
@@ -238,14 +157,12 @@ static int visit_shu_children(const FMindex *index,
     }
     if (child.upper - child.lower == parent->upper - parent->lower)
     { /* child is part of a branch and no actual node */
-      gt_log_log("twigg\n");
       parent->lower = child.lower;
       parent->upper = child.upper;
       parent->depth = child.depth;
       return 0;
     } else
     { /* child is a branch of parent node */
-      gt_log_log("branch\n");
       gt_array2dim_calloc(child.countTermSubtree, 5UL, numoffiles);
       GT_STACK_PUSH(stack, child);
       offset += 1U;
@@ -255,40 +172,44 @@ static int visit_shu_children(const FMindex *index,
       num_of_rows != 0)
   {
     unsigned long start_idx,
-                  max_idx = (unsigned long) (special_pos[1] -
-                                             special_pos[0] - 1);
+                  max_idx = gt_pck_special_occ_in_nonspecial_intervals(index)
+                            - 1;
 
-    gt_log_log("%lu direct terminal children in interval %lu:%lu\n",
-           num_of_rows,
-           parent->lower,
-           parent->upper);
+    gt_assert(num_of_rows <= max_idx + 1);
+    gt_assert(parent->lower <= special_pos[0][max_idx]);
+    gt_assert(special_pos[0][0] <= parent->upper);
     if (parent->lower <= special_pos[0][0])
       start_idx = 0;
     else
     {
-      unsigned long left, mid, right, len;
-      left = 0;
-      right = max_idx;
-      while (left<=right)
+      if (special_pos[0][max_idx - 1] < parent->lower)
+        start_idx = max_idx;
+      else
       {
-        len = (unsigned long) (right-left);
-        mid = left + GT_DIV2(len);
-        if (special_pos[0][mid] < parent->lower)
+        unsigned long left, mid, right, len;
+        left = 0;
+        right = max_idx - 1;
+        while (left<=right)
         {
-          if (parent->lower <= special_pos[0][mid+1])
+          len = (unsigned long) (right - left);
+          mid = left + GT_DIV2(len);
+          if (special_pos[0][mid] < parent->lower)
           {
-            start_idx = mid + 1;
-            break;
-          }
-          left = mid + 1;
-        } else
-        {
-          if (special_pos[0][mid-1] < parent->lower)
+            if (parent->lower <= special_pos[0][mid+1])
+            {
+              start_idx = mid + 1;
+              break;
+            }
+            left = mid + 1;
+          } else
           {
-            start_idx = mid;
-            break;
+            if (special_pos[0][mid - 1] < parent->lower)
+            {
+              start_idx = mid;
+              break;
+            }
+            right = mid - 1;
           }
-          right = mid-1;
         }
       }
     }
@@ -299,20 +220,17 @@ static int visit_shu_children(const FMindex *index,
       unsigned long filenum,
                     position = special_pos[1][idx];
 
-      gt_log_log("at idx %lu: %lu->%lu\n",
-                 idx, special_pos[0][idx], special_pos[1][idx]);
-      gt_log_log("position in bwt: %lu\n", position);
+      gt_assert(1UL <= num_of_rows);
       num_of_rows--;
 
-      position = totallength - (position + 1);
-      gt_log_log("position in S: %lu\n", position);
+      gt_assert((position + 1) <= totallength);
       if (totallength <= position)
         filenum = numoffiles - 1;
       else
       {
+        position = totallength - (position + 1);
         filenum = gt_encseq_filenum(encseq, position);
       }
-      gt_log_log("filenum: %lu\n", filenum);
       parent->countTermSubtree[0][filenum] += 1;
     }
   }
@@ -341,15 +259,15 @@ static int process_shu_node(ShuNode *node,
 
   for (i = 0; i < numoffiles; i++)
   {
-    gt_log_log("total count file/genome %lu: %lu\n",
-           i, node->countTermSubtree[0][i]);
+    if (node->countTermSubtree[0][i] == 0)
+      continue;
+
     termChild_x_i = node->countTermSubtree[0][i] -
                     node->countTermSubtree[1][i] -
                     node->countTermSubtree[2][i] -
                     node->countTermSubtree[3][i] -
                     node->countTermSubtree[4][i];
     /* scan term */
-    gt_log_log("terminal of %lu: %lu\n", i, termChild_x_i);
     if (termChild_x_i != 0)
     {
       for (j = 0; j < numoffiles; j++)
@@ -363,6 +281,9 @@ static int process_shu_node(ShuNode *node,
     /* scan branch */
     for (y = 1U; y < 5U; y++)
     {
+      if (node->countTermSubtree[y][i] == 0)
+        continue;
+
       for (j = 0; j < numoffiles; j++)
       {
         /* j elem seqIds[x] \ seqIds[y] */
@@ -378,15 +299,8 @@ static int process_shu_node(ShuNode *node,
     {
       parent->countTermSubtree[0][i] += node->countTermSubtree[0][i];
       parent->countTermSubtree[node->parentOffset][i] =
-        node->countTermSubtree[0][i];
+                                                   node->countTermSubtree[0][i];
     }
-  }
-  gt_log_log("%lu\n",node->depth);
-  for (i=0;i<numoffiles;i++)
-  {
-    for (j=0;j<numoffiles;j++)
-      gt_log_log("%f\t",shulen[i][j]);
-    gt_log_log("\n");
   }
   return 0;
 }
@@ -460,56 +374,4 @@ int gt_pck_calculate_shulen(const FMindex *index,
   gt_freeBwtSeqpositionextractor(positext);
   gt_array2dim_delete(special_char_rows_and_pos);
   return had_err;
-}
-
-void gt_pck_count_nodes_dfs(const FMindex *index,
-                        unsigned long totallength,
-                        unsigned int numofchars)
-{
-  GtStackNodecount stack;
-  Nodecount root;
-  Nodecount *current;
-  Mbtab *tmpmbtab;
-  unsigned long *rangeOccs;
-  unsigned long resize = 128UL; /* XXX make this user definable, or dependable
-                                 * on input data */
-
-  GT_STACK_INIT(&stack, resize);
-  rangeOccs = gt_malloc(sizeof (*rangeOccs) * GT_MULT2(numofchars));
-  tmpmbtab = gt_malloc(sizeof (*tmpmbtab) * numofchars);
-
-  root.lower = 0UL;
-  root.upper = totallength + 1;
-  root.leaves = 0UL;
-  root.branching = 1UL;
-  root.parentOffset = 0U;
-  root.visited = false;
-  root.on_branch = false;
-
-  GT_STACK_PUSH(&stack, root);
-
-  while (!GT_STACK_ISEMPTY(&stack))
-  {
-    current = &(stack.space[stack.nextfree -1]);
-    if (current->visited)
-    {
-      current = &(GT_STACK_POP(&stack));
-      if GT_STACK_ISEMPTY(&stack)
-        /* XXX change to gt_loger_log */
-        gt_log_log("on root:\n %lu branching nodes\n %lu leaves\n",
-           current->branching, current->leaves);
-      else
-      {
-        process_count_node(&stack, current);
-      }
-    } else
-    {
-      visit_count_children(index, current, &stack,
-                     tmpmbtab, rangeOccs, numofchars);
-      current->visited = true;
-    }
-  }
-  gt_free(rangeOccs);
-  gt_free(tmpmbtab);
-  GT_STACK_DELETE(&stack);
 }
