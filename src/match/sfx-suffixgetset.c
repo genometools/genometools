@@ -97,6 +97,10 @@ GtSuffixsortspace *gt_suffixsortspace_new(unsigned long numofentries,
   suffixsortspace = gt_malloc(sizeof(*suffixsortspace));
   suffixsortspace->maxindex = numofentries-1;
   suffixsortspace->maxvalue = maxvalue;
+#define GT_SUFTABASULONGARRAY
+#ifdef GT_SUFTABASULONGARRAY
+  suftabasulongarray = true;
+#endif
   if (suftabasulongarray)
   {
     gt_log_log("suftab as array: maxvalue=%lu,numofentries=%lu\n",
@@ -200,7 +204,11 @@ unsigned long gt_suffixsortspace_getdirect(const GtSuffixsortspace *sssp,
   /*
   printf("idx=%lu\n",idx);
   */
+#ifdef GT_SUFTABASULONGARRAY
+  return sssp->ulongtab[idx];
+#else
   return sssp->getdirect(sssp,idx);
+#endif
 }
 
 void gt_suffixsortspace_setdirect(GtSuffixsortspace *sssp,
@@ -212,7 +220,11 @@ void gt_suffixsortspace_setdirect(GtSuffixsortspace *sssp,
   /*
   printf("idx=%lu,value=%lu\n",idx,value);
   */
+#ifdef GT_SUFTABASULONGARRAY
+  sssp->ulongtab[idx] = value;
+#else
   sssp->setdirect(sssp,idx,value);
+#endif
 }
 
 unsigned long gt_suffixsortspace_get(const GtSuffixsortspace *sssp,
