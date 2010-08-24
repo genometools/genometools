@@ -162,7 +162,7 @@ static int processbranchedge(bool firstsucc,
   return 0;
 }
 
-int gt_sastream2shulengthdist(Sequentialsuffixarrayreader *ssar,
+int gt_multiesa2shulengthdist(Sequentialsuffixarrayreader *ssar,
                               const GtEncseq *encseq,
                               GtLogger *logger,
                               GtError *err)

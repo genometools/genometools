@@ -22,7 +22,7 @@
 #include "core/logger.h"
 #include "core/encseq_api.h"
 
-int gt_sastream2shulengthdist(Sequentialsuffixarrayreader *ssar,
+int gt_multiesa2shulengthdist(Sequentialsuffixarrayreader *ssar,
                               const GtEncseq *encseq,
                               GtLogger *logger,
                               GtError *err);
