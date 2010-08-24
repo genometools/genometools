@@ -21,10 +21,17 @@
 #include "core/error_api.h"
 #include "core/logger.h"
 #include "core/encseq_api.h"
+#include "match/esa-seqread.h"
+#include "core/str_array.h"
 
 int gt_multiesa2shulengthdist(Sequentialsuffixarrayreader *ssar,
                               const GtEncseq *encseq,
                               GtLogger *logger,
                               GtError *err);
+
+int gt_esa2shulengthqueryfiles(unsigned long *totalgmatchlength,
+                               const Suffixarray *suffixarray,
+                               const GtStrArray *queryfilenames,
+                               GtError *err);
 
 #endif

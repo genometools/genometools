@@ -249,10 +249,10 @@ static unsigned long gt_esa2shulengthatposition(const Suffixarray *suffixarray,
       }
     } else
     {
-      return offset;
+      break;
     }
   }
-  return 0;
+  return offset+1;
 }
 
 static unsigned long gt_esa2shulengthquery(const Suffixarray *suffixarray,
@@ -280,10 +280,10 @@ static unsigned long gt_esa2shulengthquery(const Suffixarray *suffixarray,
   return totalgmatchlength;
 }
 
-int gt_esa2shulengthqueryfile(unsigned long *totalgmatchlength,
-                              const Suffixarray *suffixarray,
-                              const GtStrArray *queryfilenames,
-                              GtError *err)
+int gt_esa2shulengthqueryfiles(unsigned long *totalgmatchlength,
+                               const Suffixarray *suffixarray,
+                               const GtStrArray *queryfilenames,
+                               GtError *err)
 {
   bool haserr = false;
   GtSeqIterator *seqit;

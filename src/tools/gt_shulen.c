@@ -25,18 +25,20 @@
 #include "core/versionfunc.h"
 #include "match/esa-seqread.h"
 #include "match/esa-shulen.h"
+#include "match/esa-map.h"
 #include "tools/gt_shulen.h"
 
 typedef struct
 {
   bool scanfile, beverbose;
   GtStr *indexname;
+  GtStrArray *queryfilenames;
 } Shulengthoptions;
 
-static int callshulendist(const char *indexname,
-                          bool scanfile,
-                          GtLogger *logger,
-                          GtError *err)
+static int callmultishulengthdist(const char *indexname,
+                                  bool scanfile,
+                                  GtLogger *logger,
+                                  GtError *err)
 {
   bool haserr = false;
   Sequentialsuffixarrayreader *ssar;
@@ -70,12 +72,49 @@ static int callshulendist(const char *indexname,
   return haserr ? -1 : 0;
 }
 
+static int callpairswisesshulendistdist(const char *indexname,
+                                        const GtStrArray *queryfilenames,
+                                        GtLogger *logger,
+                                        GtError *err)
+{
+  bool haserr = false;
+  Suffixarray suffixarray;
+
+  if (gt_mapsuffixarray(&suffixarray,
+                        SARR_SUFTAB |
+                        SARR_ESQTAB,
+                        indexname,
+                        logger,
+                        err) != 0)
+  {
+    haserr = true;
+  }
+  if (!haserr)
+  {
+    unsigned long totalgmatchlength = 0;
+
+    if (gt_esa2shulengthqueryfiles(&totalgmatchlength,
+                                   &suffixarray,
+                                   queryfilenames,
+                                   err) != 0)
+    {
+      haserr = true;
+    } else
+    {
+      printf("totalgmatchlength=%lu\n",totalgmatchlength);
+    }
+  }
+  gt_freesuffixarray(&suffixarray);
+  return haserr ? -1 : 0;
+}
+
 static void *gt_shulengthdist_arguments_new(void)
 {
   Shulengthoptions *arguments;
 
   arguments = gt_malloc(sizeof (*arguments));
   arguments->indexname = gt_str_new();
+  arguments->queryfilenames = gt_str_array_new();
   return arguments;
 }
 
@@ -88,13 +127,14 @@ static void gt_shulengthdist_arguments_delete(void *tool_arguments)
     return;
   }
   gt_str_delete(arguments->indexname);
+  gt_str_array_delete(arguments->queryfilenames);
   gt_free(arguments);
 }
 
 static GtOptionParser *gt_shulengthdist_option_parser_new(void *tool_arguments)
 {
   GtOptionParser *op;
-  GtOption *option;
+  GtOption *option, *queryoption, *scanoption;
   Shulengthoptions *arguments = tool_arguments;
 
   op = gt_option_parser_new("[options] -ii indexname",
@@ -102,17 +142,23 @@ static GtOptionParser *gt_shulengthdist_option_parser_new(void *tool_arguments)
                             "shustring lengths.");
   gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
 
-  option = gt_option_new_bool("scan","scan index rather than mapping "
-                                      "it to main memory",
-                              &arguments->scanfile,
-                              false);
-  gt_option_parser_add_option(op, option);
-
   option = gt_option_new_string("ii",
                                 "Specify input index",
                                 arguments->indexname, NULL);
   gt_option_parser_add_option(op, option);
   gt_option_is_mandatory(option);
+
+  scanoption = gt_option_new_bool("scan","scan index rather than mapping "
+                                  "it to main memory",
+                                  &arguments->scanfile,
+                                  false);
+  gt_option_parser_add_option(op, scanoption);
+
+  queryoption = gt_option_new_filenamearray("q",
+                                            "Specify query files",
+                                            arguments->queryfilenames);
+  gt_option_is_development_option(queryoption);
+  gt_option_parser_add_option(op, queryoption);
 
   option = gt_option_new_bool("v",
                               "be verbose ",
@@ -120,6 +166,7 @@ static GtOptionParser *gt_shulengthdist_option_parser_new(void *tool_arguments)
                               false);
   gt_option_parser_add_option(op, option);
 
+  gt_option_exclude(queryoption,scanoption);
   return op;
 }
 
@@ -148,13 +195,25 @@ static int gt_shulengthdist_runner(GT_UNUSED int argc,
   }
   if (!haserr)
   {
-     if (callshulendist(gt_str_get(arguments->indexname),
-                        arguments->scanfile,
-                        logger,
-                        err) != 0)
-     {
-       haserr = true;
-     }
+    if (gt_str_array_size(arguments->queryfilenames) == 0)
+    {
+      if (callmultishulengthdist(gt_str_get(arguments->indexname),
+                                 arguments->scanfile,
+                                 logger,
+                                 err) != 0)
+      {
+        haserr = true;
+      }
+    } else
+    {
+      if (callpairswisesshulendistdist(gt_str_get(arguments->indexname),
+                                       arguments->queryfilenames,
+                                       logger,
+                                       err) != 0)
+      {
+        haserr = true;
+      }
+    }
   }
   gt_logger_delete(logger);
   return haserr ? -1 : 0;
