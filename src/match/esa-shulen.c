@@ -137,12 +137,16 @@ static int processbranchedge(bool firstsucc,
 
       for (idx1=0; idx1 < state->numofdbfiles; idx1++)
       {
-        for (idx2=0; idx2 < state->numofdbfiles; idx2++)
+        if (father->filenumdist[idx1] > 0 && son->filenumdist[idx1] == 0)
         {
-          if (idx1 != idx2)
+          for (idx2=0; idx2 < state->numofdbfiles; idx2++)
           {
-            state->shulengthdist[idx1][idx2]
-              += (fatherdepth + 1) * son->filenumdist[idx2];
+            if (son->filenumdist[idx2] > 0)
+            {
+              gt_assert(idx1 != idx2);
+              state->shulengthdist[idx1][idx2]
+                += (fatherdepth + 1) * son->filenumdist[idx2];
+            }
           }
         }
       }
