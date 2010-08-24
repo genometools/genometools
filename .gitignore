@@ -11,10 +11,12 @@
 *.err
 *.esq
 *.fsp
+*.fsp
 *.gcov
 *.gt_bsf
 *.gt_bsi
 *.gt_bsr
+*.kys
 *.kys
 *.lcp
 *.llv

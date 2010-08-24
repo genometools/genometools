@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2010 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -38,7 +38,7 @@ static Dfsinfo *allocateDfsinfo(Dfsstate *astate)
   Shulengthdiststate *state = (Shulengthdiststate*) astate;
 
   dfsinfo = gt_malloc(sizeof(*dfsinfo));
-  dfsinfo->filenumdist 
+  dfsinfo->filenumdist
     = gt_malloc(sizeof(*dfsinfo->filenumdist) * state->numofdbfiles);
   return (Dfsinfo*) dfsinfo;
 }
