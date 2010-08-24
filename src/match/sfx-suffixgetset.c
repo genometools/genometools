@@ -18,10 +18,11 @@
 #include <errno.h>
 #include <string.h>
 #include <limits.h>
-#include "core/ma_api.h"
-#include "core/fa.h"
 #include "core/assert_api.h"
 #include "core/bitpackarray.h"
+#include "core/fa.h"
+#include "core/log_api.h"
+#include "core/ma_api.h"
 #include "core/mathsupport.h"
 #include "sfx-suffixgetset.h"
 
@@ -98,8 +99,8 @@ GtSuffixsortspace *gt_suffixsortspace_new(unsigned long numofentries,
   suffixsortspace->maxvalue = maxvalue;
   if (suftabasulongarray)
   {
-    printf("suftab as array: maxvalue=%lu,numofentries=%lu\n",
-            maxvalue,numofentries);
+    gt_log_log("suftab as array: maxvalue=%lu,numofentries=%lu\n",
+               maxvalue,numofentries);
     suffixsortspace->bitpackarray = NULL;
     suffixsortspace->ulongtab
       = gt_malloc(sizeof(*suffixsortspace->ulongtab) * numofentries);
@@ -110,8 +111,8 @@ GtSuffixsortspace *gt_suffixsortspace_new(unsigned long numofentries,
     unsigned int bitspervalue
       = gt_determinebitspervalue((uint64_t) maxvalue);
 
-    printf("suftab as bitpackarray: maxvalue=%lu,numofentries=%lu,"
-           "bitspervalue=%u\n",maxvalue,numofentries,bitspervalue);
+    gt_log_log("suftab as bitpackarray: maxvalue=%lu,numofentries=%lu,"
+               "bitspervalue=%u\n",maxvalue,numofentries,bitspervalue);
 
     suffixsortspace->ulongtab = NULL;
     suffixsortspace->bitpackarray
