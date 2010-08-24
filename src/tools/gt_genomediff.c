@@ -154,6 +154,12 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
   gt_option_hide_default(option);
   gt_option_parser_add_option(op, option);
 
+  option = gt_option_new_bool("shulen",
+                              "prints sum of shulen and stops",
+                              &arguments->shulen_only,
+                              false);
+  gt_option_parser_add_option(op, option);
+
   /* mail */
   gt_option_parser_set_mailaddress(op, "<dwillrodt@zbh.uni-hamburg.de>");
   return op;

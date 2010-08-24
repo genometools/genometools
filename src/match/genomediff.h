@@ -29,7 +29,8 @@ typedef struct {
            *ref_queryname;
   bool verbose,
        withesa,
-       simplesearch;
+       simplesearch,
+       shulen_only;
   int user_max_depth;
   unsigned long max_ln_n_fac;
   double divergence_abs_err, /* kr2 T */

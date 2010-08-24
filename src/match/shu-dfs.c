@@ -97,6 +97,7 @@ static int visit_shu_children(const FMindex *index,
                               unsigned long numofchars,
                               unsigned long numoffiles,
                               unsigned long totallength,
+                              unsigned long *stackdepth,
                               GT_UNUSED GtLogger *logger,
                               GT_UNUSED GtError *err)
 {
@@ -165,6 +166,7 @@ static int visit_shu_children(const FMindex *index,
     { /* child is a branch of parent node */
       gt_array2dim_calloc(child.countTermSubtree, 5UL, numoffiles);
       GT_STACK_PUSH(stack, child);
+      *stackdepth += 1;
       offset += 1U;
     }
   }
@@ -319,7 +321,7 @@ int gt_pck_calculate_shulen(const FMindex *index,
   Mbtab *tmpmbtab;
   unsigned long *rangeOccs, **special_char_rows_and_pos;
   unsigned long resize = 128UL; /* XXX make this softcoded */
-  unsigned long numoffiles, numofseq;
+  unsigned long numoffiles, numofseq, stackdepth, maxdepth;
   BwtSeqpositionextractor *positext;
 
   rangeOccs = gt_calloc((size_t) GT_MULT2(numofchars), sizeof (*rangeOccs));
@@ -338,12 +340,16 @@ int gt_pck_calculate_shulen(const FMindex *index,
   root.upper = totallength + 1;
 
   GT_STACK_PUSH(&stack, root);
+  stackdepth = 1UL;
+  maxdepth = 0;
   while (!GT_STACK_ISEMPTY(&stack))
   {
+    maxdepth = maxdepth < stackdepth ? stackdepth : maxdepth;
     current = &(stack.space[stack.nextfree - 1]);
     if (current->process)
     {
       GT_STACK_DECREMENTTOP(&stack);
+      --stackdepth;
       had_err = process_shu_node(current,
                                  &stack,
                                  shulen,
@@ -364,10 +370,12 @@ int gt_pck_calculate_shulen(const FMindex *index,
                                    numofchars,
                                    numoffiles,
                                    totallength,
+                                   &stackdepth,
                                    logger,
                                    err);
     }
   }
+  gt_logger_log(logger, "max stack depth = %lu\n", maxdepth);
   GT_STACK_DELETE(&stack);
   gt_free(rangeOccs);
   gt_free(tmpmbtab);

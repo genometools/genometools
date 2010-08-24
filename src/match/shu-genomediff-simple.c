@@ -100,48 +100,53 @@ int gt_genomediff_run_simple_search(Genericindex *genericindexSubject,
           currentQuery[currentSuffix] == g_sym)
         gc_query += 1;
     }
-    avgShuLength /= (double) queryLength;
-    gc_query /= (double) queryLength;
-
-    gt_logger_log(logger, "Query %d has an average SHUstring length "
-                          "of\n# shulength: %f",
-                          (int) queryNo, avgShuLength);
-    gt_logger_log(logger, "Query description: %s", description);
-    gt_log_log("Query (i): %s", description);
-
-/* XXX Fehlerabfragen einbauen */
-
-    if ( !had_err )
+    if (arguments->shulen_only)
     {
-      double *ln_n_fac;
-      double div, kr;
-
-      /* XXX definitely change this to a user defined variable*/
-      ln_n_fac = gt_get_ln_n_fac(arguments->max_ln_n_fac);
-      gt_log_log("ln(max_ln_n_fac!) = %f\n",
-                 ln_n_fac[arguments->max_ln_n_fac]);
-
-      gt_logger_log(logger, "# shulen:\n%f", avgShuLength);
-      gt_log_log("shu: %f, gc: %f, len: %lu",
-          avgShuLength, gc_query, subjectLength);
-      div =  gt_divergence(arguments->divergence_rel_err,
-                           arguments->divergence_abs_err,
-                           arguments->divergence_m,
-                           arguments->divergence_threshold,
-                           avgShuLength,
-                           subjectLength,
-                           gc_query,
-                           ln_n_fac,
-                           arguments->max_ln_n_fac);
-      gt_logger_log(logger, "# divergence:\n%f", div);
-
-      kr = gt_calculateKr(div);
-
-      printf("# Kr:\n%f\n", kr);
-
-      gt_free(ln_n_fac);
+      printf("# Query %d sum of shulen:\n %.0f\n",
+             (int) queryNo, avgShuLength);
     }
+    {
+      avgShuLength /= (double) queryLength;
+      gc_query /= (double) queryLength;
 
+      gt_logger_log(logger, "Query %d has an average SHUstring length "
+                            "of\n# shulength: %f",
+                            (int) queryNo, avgShuLength);
+      gt_logger_log(logger, "Query description: %s", description);
+      gt_log_log("Query (i): %s", description);
+
+  /* XXX Fehlerabfragen einbauen */
+
+      if ( !had_err )
+      {
+        double *ln_n_fac;
+        double div, kr;
+
+        ln_n_fac = gt_get_ln_n_fac(arguments->max_ln_n_fac);
+        gt_log_log("ln(max_ln_n_fac!) = %f\n",
+                   ln_n_fac[arguments->max_ln_n_fac]);
+
+        gt_logger_log(logger, "# shulen:\n%f", avgShuLength);
+        gt_log_log("shu: %f, gc: %f, len: %lu",
+            avgShuLength, gc_query, subjectLength);
+        div =  gt_divergence(arguments->divergence_rel_err,
+                             arguments->divergence_abs_err,
+                             arguments->divergence_m,
+                             arguments->divergence_threshold,
+                             avgShuLength,
+                             subjectLength,
+                             gc_query,
+                             ln_n_fac,
+                             arguments->max_ln_n_fac);
+        gt_logger_log(logger, "# divergence:\n%f", div);
+
+        kr = gt_calculateKr(div);
+
+        printf("# Kr:\n%f\n", kr);
+
+        gt_free(ln_n_fac);
+      }
+    }
     gt_free(description);
   }
   gt_seqiterator_delete(queries);

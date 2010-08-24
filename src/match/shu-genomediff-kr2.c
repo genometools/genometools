@@ -95,135 +95,141 @@ int gt_genomediff_run_kr2_search(Genericindex *genericindexSubject,
   }
   if (!had_err)
   {
-    gt_log_log("length_i | sum of shulen");
+    if (arguments->shulen_only)
+    {
+      printf("i\t| sum of shulen\n");
+    }
     for (i = 0; i < numoffiles; i++)
     {
       unsigned long length_i;
       length_i = filelength[i];
-      if (gt_log_enabled())
-        fprintf(stderr, "debug %lu\t", length_i);
+      if (arguments->shulen_only)
+        printf("%lu\t|", i);
       for (j = 0; j < numoffiles; j++)
       {
         if (j == i)
         {
-          if (gt_log_enabled())
-            fprintf(stderr, "0\t\t");
+          if (arguments->shulen_only)
+            printf("0\t");
           continue;
         }
-        if (gt_log_enabled())
-          fprintf(stderr, "%f\t", shulen[i][j]);
+        if (arguments->shulen_only)
+          printf("%.0f\t", shulen[i][j]);
         shulen[i][j] = shulen[i][j] / length_i;
       }
-      if (gt_log_enabled())
-        fprintf(stderr, "\n");
+      if (arguments->shulen_only)
+        printf("\n");
     }
   }
-  gt_logger_log(logger, "table of avg shulens");
-  if (!had_err && gt_logger_enabled(logger))
+  if (!arguments->shulen_only)
   {
-    for (i = 0; i < numoffiles; i++)
+    gt_logger_log(logger, "table of avg shulens");
+    if (!had_err && gt_logger_enabled(logger))
     {
-      printf("# ");
-      for (j = 0; j < numoffiles; j++)
+      for (i = 0; i < numoffiles; i++)
       {
-        if (i == j)
-          printf("0\t\t");
-        else
-          printf("%f\t", shulen[i][j]);
-      }
-      printf("\n");
-    }
-  }
-  if (!had_err)
-  {
-    double *ln_n_fac;
-
-    gt_assert(gc_contents != NULL);
-
-    ln_n_fac = gt_get_ln_n_fac(arguments->max_ln_n_fac);
-    for (i = 0; i < numoffiles; i++)
-    {
-      for (j = i+1; j < numoffiles; j++)
-      {
-        double query_gc, query_shulen;
-        unsigned long subject_len;
-        if (gt_double_smaller_double(shulen[i][j],
-                                     shulen[j][i]))
-        { /* S=j Q=i */
-          query_gc = gc_contents[i];
-          query_shulen = shulen[i][j];
-          subject_len = filelength[j];
-        } else
+        printf("# ");
+        for (j = 0; j < numoffiles; j++)
         {
-          if (gt_double_smaller_double(shulen[j][i],
-                                       shulen[i][j]))
-          { /* S=i Q=j */
-            query_gc = gc_contents[j];
-            query_shulen = shulen[j][i];
-            subject_len = filelength[i];
+          if (i == j)
+            printf("0\t\t");
+          else
+            printf("%f\t", shulen[i][j]);
+        }
+        printf("\n");
+      }
+    }
+    if (!had_err)
+    {
+      double *ln_n_fac;
+
+      gt_assert(gc_contents != NULL);
+
+      ln_n_fac = gt_get_ln_n_fac(arguments->max_ln_n_fac);
+      for (i = 0; i < numoffiles; i++)
+      {
+        for (j = i+1; j < numoffiles; j++)
+        {
+          double query_gc, query_shulen;
+          unsigned long subject_len;
+          if (gt_double_smaller_double(shulen[i][j],
+                                       shulen[j][i]))
+          { /* S=j Q=i */
+            query_gc = gc_contents[i];
+            query_shulen = shulen[i][j];
+            subject_len = filelength[j];
           } else
           {
-            if (gt_double_smaller_double(fabs(gc_contents[i]-0.5),
-                                         fabs(gc_contents[j]-0.5)))
-            { /* S=i Q=j XXX check this if right*/
+            if (gt_double_smaller_double(shulen[j][i],
+                                         shulen[i][j]))
+            { /* S=i Q=j */
               query_gc = gc_contents[j];
               query_shulen = shulen[j][i];
               subject_len = filelength[i];
             } else
-              query_gc = gc_contents[i];
-              query_shulen = shulen[i][j];
-              subject_len = filelength[j];
-            { /* S=j Q=i */
+            {
+              if (gt_double_smaller_double(fabs(gc_contents[i]-0.5),
+                                           fabs(gc_contents[j]-0.5)))
+              { /* S=i Q=j XXX check this if right*/
+                query_gc = gc_contents[j];
+                query_shulen = shulen[j][i];
+                subject_len = filelength[i];
+              } else
+                query_gc = gc_contents[i];
+                query_shulen = shulen[i][j];
+                subject_len = filelength[j];
+              { /* S=j Q=i */
+              }
             }
           }
-        }
 
-        shulen[i][j] =
-          gt_divergence(arguments->divergence_rel_err,
-                        arguments->divergence_abs_err,
-                        arguments->divergence_m,
-                        arguments->divergence_threshold,
-                        query_shulen,
-                        subject_len,
-                        query_gc,
-                        ln_n_fac,
-                        arguments->max_ln_n_fac);
-        shulen[j][i] = shulen[i][j];
-      }
-    }
-    gt_free(ln_n_fac);
-  }
-  gt_logger_log(logger, "table of divergences");
-  if (!had_err && gt_logger_enabled(logger))
-  {
-    for (i = 0; i < numoffiles; i++)
-    {
-      printf("# ");
-      for (j = 0; j < numoffiles; j++)
-      {
-        if (i == j)
-        {
-          printf("0\t\t");
-          continue;
+          shulen[i][j] =
+            gt_divergence(arguments->divergence_rel_err,
+                          arguments->divergence_abs_err,
+                          arguments->divergence_m,
+                          arguments->divergence_threshold,
+                          query_shulen,
+                          subject_len,
+                          query_gc,
+                          ln_n_fac,
+                          arguments->max_ln_n_fac);
+          shulen[j][i] = shulen[i][j];
         }
-        printf("%f\t", shulen[i][j]);
       }
-      printf("\n");
+      gt_free(ln_n_fac);
     }
-  }
-  if (!had_err)
-  {
-    printf("# Table of Kr\n");
-    for (i = 0; i < numoffiles; i++)
+    gt_logger_log(logger, "table of divergences");
+    if (!had_err && gt_logger_enabled(logger))
     {
-      for (j = 0; j < numoffiles; j++)
+      for (i = 0; i < numoffiles; i++)
       {
-        if ( i == j )
-          printf("0\t\t");
-        else
-          printf("%f\t", gt_calculateKr(shulen[i][j]));
+        printf("# ");
+        for (j = 0; j < numoffiles; j++)
+        {
+          if (i == j)
+          {
+            printf("0\t\t");
+            continue;
+          }
+          printf("%f\t", shulen[i][j]);
+        }
+        printf("\n");
       }
-      printf("\n");
+    }
+    if (!had_err)
+    {
+      printf("# Table of Kr\n");
+      for (i = 0; i < numoffiles; i++)
+      {
+        for (j = 0; j < numoffiles; j++)
+        {
+          if ( i == j )
+            printf("0\t\t");
+          else
+            printf("%f\t", gt_calculateKr(shulen[i][j]));
+        }
+        printf("\n");
+      }
     }
   }
   gt_free(filelength);
