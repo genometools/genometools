@@ -130,8 +130,8 @@ static Nodeptr makeroot(Blindtrie *blindtrie,unsigned long currentstartpos)
   {
     /* Random access */
     firstchar = gt_encseq_get_encoded_char(blindtrie->encseq,
-                                                  currentstartpos,
-                                                  blindtrie->readmode);
+                                           currentstartpos,
+                                           blindtrie->readmode);
     if (firstchar == (GtUchar) WILDCARD)
     {
       firstchar = (GtUchar) SEPARATOR;
@@ -200,8 +200,8 @@ static Nodeptr findcompanion(Blindtrie *blindtrie,unsigned long currentstartpos)
     {
       /* Random access */
       newchar = gt_encseq_get_encoded_char(blindtrie->encseq,
-                                                  currentstartpos + head->depth,
-                                                  blindtrie->readmode);
+                                           currentstartpos + head->depth,
+                                           blindtrie->readmode);
       if (newchar == (GtUchar) WILDCARD)
       {
         newchar = (GtUchar) SEPARATOR;
@@ -279,10 +279,10 @@ static void insertsuffixintoblindtrie(Blindtrie *blindtrie,
 }
 
 static unsigned long cmpcharbychargetlcp(GtUchar *mm_oldsuffix,
-                                  GtUchar *mm_newsuffix,
-                                  const Blindtrie *blindtrie,
-                                  unsigned long leafpos,
-                                  unsigned long currentstartpos)
+                                         GtUchar *mm_newsuffix,
+                                         const Blindtrie *blindtrie,
+                                         unsigned long leafpos,
+                                         unsigned long currentstartpos)
 {
   unsigned long lcp;
   GtUchar cc1, cc2;
@@ -350,19 +350,17 @@ static unsigned long fastgetlcp(GtUchar *mm_oldsuffix,
   } else
   {
     (void) gt_encseq_compare_maxdepth(blindtrie->encseq,
-                                               &commonunits,
-                                               GT_ISDIRREVERSE(
-                                                            blindtrie->readmode)
-                                               ? false : true,
-                                               GT_ISDIRCOMPLEMENT(
-                                                            blindtrie->readmode)
-                                               ? true : false,
-                                               blindtrie->esr1,
-                                               blindtrie->esr2,
-                                               leafpos,
-                                               currentstartpos,
-                                               0,
-                                               blindtrie->maxdepthminusoffset);
+                                      &commonunits,
+                                      GT_ISDIRREVERSE(blindtrie->readmode)
+                                        ? false : true,
+                                      GT_ISDIRCOMPLEMENT(blindtrie->readmode)
+                                        ? true : false,
+                                      blindtrie->esr1,
+                                      blindtrie->esr2,
+                                      leafpos,
+                                      currentstartpos,
+                                      0,
+                                      blindtrie->maxdepthminusoffset);
   }
   if (isleftofboundary(leafpos,commonunits.finaldepth,blindtrie) &&
       !commonunits.leftspecial)
@@ -560,15 +558,16 @@ static void checkcurrentblindtrie(Blindtrie *blindtrie)
   for (idx=1UL; idx < numofsuffixes; idx++)
   {
     maxcommon = 0;
-    retval = gt_encseq_comparetwostringsgeneric(blindtrie->encseq,
-                                      GT_ISDIRREVERSE(blindtrie->readmode)
-                                        ? false : true,
-                                      GT_ISDIRCOMPLEMENT(blindtrie->readmode)
-                                        ? true : false,
-                                      &maxcommon,
-                                      suffixtable[idx-1],
-                                      suffixtable[idx],
-                                      0);
+    retval = gt_encseq_comparetwostringsgeneric(
+                                        blindtrie->encseq,
+                                        GT_ISDIRREVERSE(blindtrie->readmode)
+                                          ? false : true,
+                                        GT_ISDIRCOMPLEMENT(blindtrie->readmode)
+                                          ? true : false,
+                                        &maxcommon,
+                                        suffixtable[idx-1],
+                                        suffixtable[idx],
+                                        0);
     if (retval >= 0)
     {
       fprintf(stderr,"retval = %d, maxcommon = %u for idx = %lu\n",
@@ -670,8 +669,8 @@ static void inplace_reverseSuffixptr(const Blindtrie *blindtrie,
   {
     tmp = gt_suffixsortspace_get(blindtrie->sssp,subbucketleft,i);
     gt_suffixsortspace_set(blindtrie->sssp,subbucketleft,i,
-                           gt_suffixsortspace_get(blindtrie->sssp,subbucketleft,
-                                                  j));
+                           gt_suffixsortspace_get(blindtrie->sssp,
+                                                  subbucketleft,j));
     gt_suffixsortspace_set(blindtrie->sssp,subbucketleft,j,tmp);
   }
 }
@@ -748,12 +747,6 @@ unsigned long gt_blindtrie_suffixsort(
     blindtrie->subbucketleft = subbucketleft;
     QSORTNAME(gt_inlinedarr_qsort_r) (NULL,numberofsuffixes,
                                       (void *) blindtrie);
-    /*
-    qsort(subbucket,
-          (size_t) numberofsuffixes,
-          sizeof (unsigned long),
-          suffixcompare);
-    */
   } else
   {
     if (ordertype == Descending)
