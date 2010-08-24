@@ -18,7 +18,9 @@
 #include "core/unused_api.h"
 #include "core/array2dim_api.h"
 #include "core/logger.h"
+#include "core/seqiterator_sequence_buffer.h"
 #include "esa-seqread.h"
+#include "esa-splititv.h"
 
 typedef struct /* information stored for each node of the lcp interval tree */
 {
@@ -212,5 +214,116 @@ int gt_multiesa2shulengthdist(Sequentialsuffixarrayreader *ssar,
   }
   gt_array2dim_delete(state->shulengthdist);
   gt_free(state);
+  return haserr ? -1 : 0;
+}
+
+static unsigned long gt_esa2shulengthatposition(const Suffixarray *suffixarray,
+                                                unsigned long totallength,
+                                                unsigned long offset,
+                                                unsigned long left,
+                                                unsigned long right,
+                                                const GtUchar *qstart,
+                                                const GtUchar *qend)
+{
+  Simplelcpinterval itv;
+  const GtUchar *qptr;
+
+  itv.left = left;
+  itv.right = right;
+  for (qptr = qstart; /* Nothing */; qptr++, offset++)
+  {
+    if (itv.left < itv.right)
+    {
+      if (qptr >= qend || ISSPECIAL(*qptr) ||
+          !gt_lcpintervalfindcharchildintv(suffixarray->encseq,
+                                           suffixarray->readmode,
+                                           totallength,
+                                           suffixarray->suftab,
+                                           &itv,
+                                           *qptr,
+                                           offset,
+                                           itv.left,
+                                           itv.right))
+      {
+        break;
+      }
+    } else
+    {
+      return offset;
+    }
+  }
+  return 0;
+}
+
+static unsigned long gt_esa2shulengthquery(const Suffixarray *suffixarray,
+                                           const GtUchar *query,
+                                           unsigned long querylen)
+{
+  const GtUchar *qptr;
+  unsigned long totalgmatchlength = 0, gmatchlength, remaining;
+  unsigned long totallength = gt_encseq_total_length(suffixarray->encseq);
+
+  for (qptr = query, remaining = querylen; remaining > 0; qptr++, remaining--)
+  {
+    gmatchlength = gt_esa2shulengthatposition(suffixarray,
+                                              totallength,
+                                              0,
+                                              0,
+                                              totallength,
+                                              qptr,
+                                              query+querylen);
+    if (gmatchlength > 0)
+    {
+      totalgmatchlength += gmatchlength;
+    }
+  }
+  return totalgmatchlength;
+}
+
+int gt_esa2shulengthqueryfile(unsigned long *totalgmatchlength,
+                              const Suffixarray *suffixarray,
+                              const GtStrArray *queryfilenames,
+                              GtError *err)
+{
+  bool haserr = false;
+  GtSeqIterator *seqit;
+  const GtUchar *query;
+  unsigned long querylen;
+  char *desc = NULL;
+  int retval;
+  GtAlphabet *alphabet;
+
+  gt_error_check(err);
+  alphabet = gt_encseq_alphabet(suffixarray->encseq);
+  gt_assert(gt_str_array_size(queryfilenames) == 1UL);
+  seqit = gt_seqiterator_sequence_buffer_new(queryfilenames, err);
+  if (!seqit)
+  {
+    haserr = true;
+  }
+  if (!haserr)
+  {
+    gt_seqiterator_set_symbolmap(seqit, gt_alphabet_symbolmap(alphabet));
+    for (; /* Nothing */; )
+    {
+      retval = gt_seqiterator_next(seqit,
+                                   &query,
+                                   &querylen,
+                                   &desc,
+                                   err);
+      if (retval < 0)
+      {
+        haserr = true;
+        break;
+      }
+      if (retval == 0)
+      {
+        break;
+      }
+      *totalgmatchlength += gt_esa2shulengthquery(suffixarray,query,querylen);
+      gt_free(desc);
+    }
+    gt_seqiterator_delete(seqit);
+  }
   return haserr ? -1 : 0;
 }
