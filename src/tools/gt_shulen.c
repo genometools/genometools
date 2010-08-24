@@ -53,13 +53,15 @@ static int callshulendist(const char *indexname,
   {
     haserr = true;
   }
-  if (!haserr &&
-      gt_sastream2shulengthdist(ssar,
-                                gt_encseqSequentialsuffixarrayreader(ssar),
-                                logger,
-                                err) != 0)
+  if (!haserr)
   {
-    haserr = true;
+    if (gt_sastream2shulengthdist(ssar,
+                                  gt_encseqSequentialsuffixarrayreader(ssar),
+                                  logger,
+                                  err) != 0)
+    {
+      haserr = true;
+    }
   }
   if (ssar != NULL)
   {
