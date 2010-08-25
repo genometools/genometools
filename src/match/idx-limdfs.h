@@ -24,6 +24,7 @@
 #include "procmatch.h"
 #include "core/logger.h"
 #include "absdfstrans-def.h"
+#include "core/intbits.h"
 
 typedef struct Genericindex Genericindex;
 

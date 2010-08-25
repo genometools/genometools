@@ -18,6 +18,7 @@
 #ifndef STACK_INLINED_H
 #define STACK_INLINED_H
 #include <stdbool.h>
+#include <string.h>
 
 /*
   This file defines macros to conveniently declare and
