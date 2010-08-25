@@ -4074,7 +4074,7 @@ void gt_encseq_showatstartposwithdepth(FILE *fp,
   {
     end = MIN(start + maxshow,MIN(totallength,start+depth));
   }
-  for (i = start; i <= end; i++)
+  for (i = start; i < end; i++)
   {
     if (i == totallength)
     {

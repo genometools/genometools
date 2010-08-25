@@ -21,17 +21,24 @@
 #include "core/seqiterator_sequence_buffer.h"
 #include "esa-seqread.h"
 #include "esa-splititv.h"
+#define SKDEBUG
+#ifdef SKDEBUG
+#include "core/encseq.h"
+#endif
 
 typedef struct /* information stored for each node of the lcp interval tree */
 {
   unsigned long *filenumdist;
+  unsigned long id;
 } ShulengthdistDfsinfo;
 
 typedef struct  /* global information */
 {
-  unsigned long numofdbfiles;
+  unsigned long numofdbfiles,
+                lastleafnumber,
+                **shulengthdist;
   const GtEncseq *encseq;
-  unsigned long **shulengthdist;
+  unsigned long nextid;
 } Shulengthdiststate;
 
 #include "esa-dfs.h"
@@ -41,6 +48,7 @@ static void resetfilenumdist(ShulengthdistDfsinfo *father,
 {
   unsigned long idx;
 
+  printf("reset node %lu\n",father->id);
   for (idx = 0; idx < numofdbfiles; idx++)
   {
     father->filenumdist[idx] = 0;
@@ -53,6 +61,7 @@ static Dfsinfo *allocateDfsinfo(Dfsstate *astate)
   Shulengthdiststate *state = (Shulengthdiststate*) astate;
 
   dfsinfo = gt_malloc(sizeof(*dfsinfo));
+  dfsinfo->id = state->nextid++;
   dfsinfo->filenumdist
     = gt_malloc(sizeof(*dfsinfo->filenumdist) * state->numofdbfiles);
   resetfilenumdist(dfsinfo,state->numofdbfiles);
@@ -66,6 +75,32 @@ static void freeDfsinfo(Dfsinfo *adfsinfo, GT_UNUSED Dfsstate *state)
   gt_free(dfsinfo);
 }
 
+static void contribute(unsigned long **shulengthdist,unsigned long idx1,
+                       unsigned long idx2,unsigned long value)
+{
+#ifdef SKDEBUG
+  printf("add[%lu][%lu]+=%lu\n",idx1,idx2,value);
+#endif
+  shulengthdist[idx1][idx2] += value;
+}
+
+static void shownode(const Shulengthdiststate *state,
+                     const char *kind,
+                     const ShulengthdistDfsinfo *node)
+{
+  unsigned long idx;
+
+  printf("%s(id=%lu):",kind,node->id);
+  for (idx=0; idx < state->numofdbfiles; idx++)
+  {
+    if (node->filenumdist[idx] > 0)
+    {
+      printf(" %lu->%lu",idx,node->filenumdist[idx]);
+    }
+  }
+  printf("\n");
+}
+
 static int processleafedge(bool firstsucc,
                            unsigned long fatherdepth,
                            Dfsinfo *afather,
@@ -75,13 +110,21 @@ static int processleafedge(bool firstsucc,
 {
   Shulengthdiststate *state = (Shulengthdiststate*) astate;
   ShulengthdistDfsinfo *father = (ShulengthdistDfsinfo*) afather;
-#undef SKDEBUG
 #ifdef SKDEBUG
   printf("processleafedge %lu firstsucc=%s, "
-         " depth(father)= %lu\n",
+         " depth(father)= %lu, path=",
          leafnumber,
          firstsucc ? "true" : "false",
          fatherdepth);
+  if (fatherdepth > 0)
+  {
+    gt_encseq_showatstartposwithdepth(stdout,
+                                      state->encseq,
+                                      GT_READMODE_FORWARD,
+                                      leafnumber,
+                                      fatherdepth);
+  }
+  printf("\n");
 #endif
   if (fatherdepth > 0)
   {
@@ -91,15 +134,23 @@ static int processleafedge(bool firstsucc,
     if (firstsucc)
     {
       resetfilenumdist(father,state->numofdbfiles);
+      shownode(state,"father",father);
     } else
     {
       unsigned long idx;
 
+      shownode(state,"father",father);
       for (idx = 0; idx < state->numofdbfiles; idx++)
       {
         if (idx != filenum)
         {
-          state->shulengthdist[idx][filenum] += fatherdepth + 1;
+          contribute(state->shulengthdist,idx,filenum,fatherdepth + 1);
+          if (father->filenumdist[idx] > 0)
+          {
+            contribute(state->shulengthdist,filenum,idx,
+                                            father->filenumdist[idx] *
+                                            (fatherdepth + 1));
+          }
         }
       }
     }
@@ -108,7 +159,32 @@ static int processleafedge(bool firstsucc,
   {
     resetfilenumdist(father,state->numofdbfiles);
   }
+  state->lastleafnumber = leafnumber;
   return 0;
+}
+
+static void cartproduct(Shulengthdiststate *state,
+                        unsigned long depth,
+                        ShulengthdistDfsinfo *node1,
+                        ShulengthdistDfsinfo *node2)
+{
+  unsigned long idx1, idx2;
+
+  for (idx1=0; idx1 < state->numofdbfiles; idx1++)
+  {
+    if (node1->filenumdist[idx1] > 0 && node2->filenumdist[idx1] == 0)
+    {
+      for (idx2=0; idx2 < state->numofdbfiles; idx2++)
+      {
+        if (node2->filenumdist[idx2] > 0)
+        {
+          gt_assert(idx1 != idx2);
+          contribute(state->shulengthdist,idx1,idx2,
+                     (depth + 1) * node2->filenumdist[idx2]);
+        }
+      }
+    }
+  }
 }
 
 static int processbranchedge(bool firstsucc,
@@ -122,8 +198,17 @@ static int processbranchedge(bool firstsucc,
   ShulengthdistDfsinfo *father = (ShulengthdistDfsinfo*) afather;
 
 #ifdef SKDEBUG
-  printf("processbranchedge firstsucc=%s, depth(father)=%lu\n",
+  printf("processbranchedge firstsucc=%s, depth(father)=%lu,path=",
          firstsucc ? "true" : "false",fatherdepth);
+  if (fatherdepth > 0)
+  {
+    gt_encseq_showatstartposwithdepth(stdout,
+                                      state->encseq,
+                                      GT_READMODE_FORWARD,
+                                      state->lastleafnumber,
+                                      fatherdepth);
+  }
+  printf("\n");
 #endif
   if (fatherdepth > 0)
   {
@@ -133,29 +218,19 @@ static int processbranchedge(bool firstsucc,
     if (firstsucc)
     {
       resetfilenumdist(father,state->numofdbfiles);
+      shownode(state,"father",father);
+      shownode(state,"son",son);
     } else
     {
-      unsigned long idx1, idx2;
-
-      for (idx1=0; idx1 < state->numofdbfiles; idx1++)
-      {
-        if (father->filenumdist[idx1] > 0 && son->filenumdist[idx1] == 0)
-        {
-          for (idx2=0; idx2 < state->numofdbfiles; idx2++)
-          {
-            if (son->filenumdist[idx2] > 0)
-            {
-              gt_assert(idx1 != idx2);
-              state->shulengthdist[idx1][idx2]
-                += (fatherdepth + 1) * son->filenumdist[idx2];
-            }
-          }
-        }
-      }
+      shownode(state,"father",father);
+      shownode(state,"son",son);
+      cartproduct(state, fatherdepth, father, son);
+      cartproduct(state, fatherdepth, son, father);
       for (idx = 0; idx < state->numofdbfiles; idx++)
       {
         father->filenumdist[idx] += son->filenumdist[idx];
       }
+      resetfilenumdist(son,state->numofdbfiles);
     }
   } else
   {
@@ -176,6 +251,7 @@ int gt_multiesa2shulengthdist(Sequentialsuffixarrayreader *ssar,
   state = gt_malloc(sizeof(*state));
   state->numofdbfiles = gt_encseq_num_of_files(encseq);
   state->encseq = encseq;
+  state->nextid = 0;
   gt_array2dim_malloc(state->shulengthdist,state->numofdbfiles,
                       state->numofdbfiles);
   for (idx1=0; idx1 < state->numofdbfiles; idx1++)
@@ -228,12 +304,20 @@ static unsigned long gt_esa2shulengthatposition(const Suffixarray *suffixarray,
   Simplelcpinterval itv;
   const GtUchar *qptr;
 
+  gt_assert(left < right);
   itv.left = left;
   itv.right = right;
+  /*printf("\n");*/
   for (qptr = qstart; /* Nothing */; qptr++, offset++)
   {
-    if (itv.left < itv.right)
+    if (itv.left <= itv.right)
     {
+      /*
+      if (qptr < qend)
+      {
+        printf("read %u\n",(unsigned int) *qptr);
+      }
+      */
       if (qptr >= qend || ISSPECIAL(*qptr) ||
           !gt_lcpintervalfindcharchildintv(suffixarray->encseq,
                                            suffixarray->readmode,
@@ -252,6 +336,7 @@ static unsigned long gt_esa2shulengthatposition(const Suffixarray *suffixarray,
       break;
     }
   }
+  /*printf("add %lu\n",offset+1); */
   return offset+1;
 }
 
