@@ -199,9 +199,9 @@ static void transform_refseq_positions(GtArray *matches,
     gt_assert(original.end > original.start);
 
     /* transform match range */
-    transformed.start  = referencelength - 1
-                      - (original.end - referenceoffset)
-                      + referenceoffset;
+    transformed.start = referencelength - 1
+                        - (original.end - referenceoffset)
+                        + referenceoffset;
     transformed.end = referencelength - 1
                       - (original.start - referenceoffset)
                       + referenceoffset;
