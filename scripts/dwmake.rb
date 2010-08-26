@@ -31,6 +31,7 @@ def parseargs(argv)
   options.speed = false
   options.prof = false
   options.ddd = false
+  options.j = 3
   opts = OptionParser.new
   opts.on("--m64","compile 64 bit binary") do |x|
     options.m64 = true
@@ -43,6 +44,9 @@ def parseargs(argv)
   end
   opts.on("--ddd","compile for debugging (no opt)") do |x|
     options.ddd = true
+  end
+  opts.on("-j n", Integer, "number of processes for make") do |x|
+    options.j = x
   end
   rest = opts.parse(argv)
   if not rest.empty?
@@ -87,4 +91,4 @@ if File.exists?('LocalMakefile.previous') and
   exit 1
 end
 
-system("make -f LocalMakefile")
+system("make -j #{options.j} -f LocalMakefile")
