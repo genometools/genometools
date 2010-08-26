@@ -82,7 +82,7 @@ typedef struct GtEncseqReader GtEncseqReader;
   #include "core/encseq_inlined.h"
 #else
 /* Returns the total number of characters in all sequences of <encseq>,
-   not including separators. */
+   including separators and wildcards. */
 unsigned long     gt_encseq_total_length(const GtEncseq *encseq);
 /* Returns the total number of sequences contained in <encseq>. */
 unsigned long     gt_encseq_num_of_sequences(const GtEncseq *encseq);
