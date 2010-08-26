@@ -75,13 +75,15 @@ static void freeDfsinfo(Dfsinfo *adfsinfo, GT_UNUSED Dfsstate *state)
   gt_free(dfsinfo);
 }
 
-static void contribute(unsigned long **shulengthdist,unsigned long idx1,
-                       unsigned long idx2,unsigned long value)
+static void contribute(unsigned long **shulengthdist,
+                       unsigned long referidx,
+                       unsigned long shulenidx,
+                       unsigned long value)
 {
 #ifdef SKDEBUG
-  printf("add[%lu][%lu]+=%lu\n",idx1,idx2,value);
+  printf("add[%lu][%lu]+=%lu\n",referidx,shulenidx,value);
 #endif
-  shulengthdist[idx1][idx2] += value;
+  shulengthdist[referidx][shulenidx] += value;
 }
 
 static void shownode(const Shulengthdiststate *state,
@@ -112,7 +114,7 @@ static int processleafedge(bool firstsucc,
   ShulengthdistDfsinfo *father = (ShulengthdistDfsinfo*) afather;
 #ifdef SKDEBUG
   printf("processleafedge %lu firstsucc=%s, "
-         " depth(father)= %lu, path=",
+         " depth(father)=%lu, path=",
          leafnumber,
          firstsucc ? "true" : "false",
          fatherdepth);
@@ -168,19 +170,19 @@ static void cartproduct(Shulengthdiststate *state,
                         ShulengthdistDfsinfo *node1,
                         ShulengthdistDfsinfo *node2)
 {
-  unsigned long idx1, idx2;
+  unsigned long referidx, shulenidx;
 
-  for (idx1=0; idx1 < state->numofdbfiles; idx1++)
+  for (referidx=0; referidx < state->numofdbfiles; referidx++)
   {
-    if (node1->filenumdist[idx1] > 0 && node2->filenumdist[idx1] == 0)
+    if (node1->filenumdist[referidx] > 0 && node2->filenumdist[referidx] == 0)
     {
-      for (idx2=0; idx2 < state->numofdbfiles; idx2++)
+      for (shulenidx=0; shulenidx < state->numofdbfiles; shulenidx++)
       {
-        if (node2->filenumdist[idx2] > 0)
+        if (node2->filenumdist[shulenidx] > 0)
         {
-          gt_assert(idx1 != idx2);
-          contribute(state->shulengthdist,idx1,idx2,
-                     (depth + 1) * node2->filenumdist[idx2]);
+          gt_assert(referidx != shulenidx);
+          contribute(state->shulengthdist,referidx,shulenidx,
+                     (depth + 1) * node2->filenumdist[shulenidx]);
         }
       }
     }
@@ -246,7 +248,7 @@ int gt_multiesa2shulengthdist(Sequentialsuffixarrayreader *ssar,
 {
   Shulengthdiststate *state;
   bool haserr = false;
-  unsigned long idx1, idx2;
+  unsigned long referidx, shulenidx;
 
   state = gt_malloc(sizeof(*state));
   state->numofdbfiles = gt_encseq_num_of_files(encseq);
@@ -254,11 +256,11 @@ int gt_multiesa2shulengthdist(Sequentialsuffixarrayreader *ssar,
   state->nextid = 0;
   gt_array2dim_malloc(state->shulengthdist,state->numofdbfiles,
                       state->numofdbfiles);
-  for (idx1=0; idx1 < state->numofdbfiles; idx1++)
+  for (referidx=0; referidx < state->numofdbfiles; referidx++)
   {
-    for (idx2=0; idx2 < state->numofdbfiles; idx2++)
+    for (shulenidx=0; shulenidx < state->numofdbfiles; shulenidx++)
     {
-      state->shulengthdist[idx1][idx2] = 0;
+      state->shulengthdist[referidx][shulenidx] = 0;
     }
   }
   if (gt_depthfirstesa(ssar,
@@ -277,13 +279,14 @@ int gt_multiesa2shulengthdist(Sequentialsuffixarrayreader *ssar,
   }
   if (!haserr)
   {
-    for (idx1=0; idx1 < state->numofdbfiles; idx1++)
+    for (referidx=0; referidx < state->numofdbfiles; referidx++)
     {
-      for (idx2=0; idx2 < state->numofdbfiles; idx2++)
+      for (shulenidx=0; shulenidx < state->numofdbfiles; shulenidx++)
       {
-        if (idx1 != idx2)
+        if (referidx != shulenidx)
         {
-          printf("%lu %lu %lu\n",idx1,idx2,state->shulengthdist[idx1][idx2]);
+          printf("%lu %lu %lu\n",referidx,shulenidx,
+                                 state->shulengthdist[referidx][shulenidx]);
         }
       }
     }
