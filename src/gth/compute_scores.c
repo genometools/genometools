@@ -695,8 +695,7 @@ void gth_compute_scores(GthSA *sa,
   else
     score = 0.0;
   gth_sa_set_score(sa, score);
-  gth_sa_set_cumlen_scored_exons(sa,
-                                            data.cumulativelengthofscoredexons);
+  gth_sa_set_cumlen_scored_exons(sa, data.cumulativelengthofscoredexons);
 
   /* fraction of the gen_dp_length which is scored/weighted */
   coverageofgenomicsegment   = (GthFlt) data.cumulativelengthofscoredexons /
