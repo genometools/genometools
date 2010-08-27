@@ -22,6 +22,7 @@
 #include "spacedef.h"
 #include "esa-seqread.h"
 #include "esa-dfs.h"
+#include "stamp.h"
 
 #define ABOVETOP  stackspace[nextfreeItvinfo]
 #define TOP       stackspace[nextfreeItvinfo-1]
@@ -174,6 +175,7 @@ int gt_depthfirstesa(Sequentialsuffixarrayreader *ssar,
       } else
       {
         gt_assert(nextfreeItvinfo < allocatedItvinfo);
+        gt_assert(ABOVETOP.dfsinfo != NULL);
         if (processbranchedge != NULL &&
             processbranchedge(false,
                               TOP.depth,

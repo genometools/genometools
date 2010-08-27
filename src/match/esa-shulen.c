@@ -21,6 +21,7 @@
 #include "core/seqiterator_sequence_buffer.h"
 #include "esa-seqread.h"
 #include "esa-splititv.h"
+#include "stamp.h"
 #undef SKDEBUG
 #ifdef SKDEBUG
 #include "core/encseq.h"
@@ -28,8 +29,8 @@
 
 typedef struct /* information stored for each node of the lcp interval tree */
 {
-  unsigned long *filenumdist;
-  unsigned long id;
+  unsigned long *filenumdist,
+                id;
 } ShulengthdistDfsinfo;
 
 typedef struct  /* global information */
@@ -79,13 +80,14 @@ static void freeDfsinfo(Dfsinfo *adfsinfo, GT_UNUSED Dfsstate *state)
   gt_free(dfsinfo);
 }
 
-static void contribute(unsigned long **shulengthdist,
+static void contribute(GT_UNUSED int line,
+                       unsigned long **shulengthdist,
                        unsigned long referidx,
                        unsigned long shulenidx,
                        unsigned long value)
 {
 #ifdef SKDEBUG
-  printf("add[%lu][%lu]+=%lu\n",referidx,shulenidx,value);
+  printf("line %d: add[%lu][%lu]+=%lu\n",line,referidx,shulenidx,value);
 #endif
   shulengthdist[referidx][shulenidx] += value;
 }
@@ -97,7 +99,7 @@ static void shownode(const Shulengthdiststate *state,
 {
   unsigned long idx;
 
-  printf("%s(id=%lu):",kind,node->id);
+  printf("%s(id=%lu,numofdbfiles=%lu):",kind,node->id,state->numofdbfiles);
   for (idx=0; idx < state->numofdbfiles; idx++)
   {
     if (node->filenumdist[idx] > 0)
@@ -158,11 +160,14 @@ static int processleafedge(bool firstsucc,
     {
       if (idx != filenum)
       {
-        contribute(state->shulengthdist,idx,filenum,fatherdepth + 1);
+        if (father->filenumdist[idx] > 0)
+        {
+          contribute(__LINE__,state->shulengthdist,idx,filenum,fatherdepth + 1);
+        }
         if (father->filenumdist[filenum] == 0 &&
             father->filenumdist[idx] > 0)
         {
-          contribute(state->shulengthdist,filenum,idx,
+          contribute(__LINE__,state->shulengthdist,filenum,idx,
                                           father->filenumdist[idx] *
                                           (fatherdepth + 1));
         }
@@ -191,7 +196,7 @@ static void cartproduct(Shulengthdiststate *state,
         if (node2->filenumdist[shulenidx] > 0)
         {
           gt_assert(referidx != shulenidx);
-          contribute(state->shulengthdist,referidx,shulenidx,
+          contribute(__LINE__,state->shulengthdist,referidx,shulenidx,
                      (depth + 1) * node2->filenumdist[shulenidx]);
         }
       }
@@ -226,15 +231,16 @@ static int processbranchedge(bool firstsucc,
 #endif
   if (firstsucc)
   {
-    resetfilenumdist(father,state->numofdbfiles);
 #ifdef SKDEBUG
+    gt_assert(father != NULL);
     shownode(state,"father",father);
-    shownode(state,"son",son);
 #endif
   } else
   {
 #ifdef SKDEBUG
+    gt_assert(father != NULL);
     shownode(state,"father",father);
+    gt_assert(son != NULL);
     shownode(state,"son",son);
 #endif
     cartproduct(state, fatherdepth, father, son);
