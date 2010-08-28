@@ -24,6 +24,7 @@ int gt_genomediff_run_kr2_search(Genericindex *genericindexSubject,
                                  const GtEncseq *encseq,
                                  GtLogger *logger,
                                  const GtGenomediffArguments *arguments,
+                                 GtProgressTimer *timer,
                                  GtError *err);
 
 #endif

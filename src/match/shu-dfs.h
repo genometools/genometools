@@ -38,6 +38,7 @@ int gt_pck_calculate_shulen(const FMindex *index,
                             double **shulen,
                             unsigned long numofchars,
                             unsigned long totallength,
+                            GtProgressTimer *timer,
                             GT_UNUSED GtLogger *logger,
                             GT_UNUSED GtError *err);
 

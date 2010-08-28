@@ -312,6 +312,7 @@ int gt_pck_calculate_shulen(const FMindex *index,
                             double **shulen,
                             unsigned long numofchars,
                             unsigned long totallength,
+                            GtProgressTimer *timer,
                             GtLogger *logger,
                             GtError *err)
 {
@@ -320,7 +321,7 @@ int gt_pck_calculate_shulen(const FMindex *index,
   ShuNode root, *current;
   Mbtab *tmpmbtab;
   unsigned long *rangeOccs, **special_char_rows_and_pos;
-  unsigned long resize = 128UL; /* XXX make this softcoded */
+  unsigned long resize = 64UL; /* XXX make this softcoded */
   unsigned long numoffiles, numofseq, stackdepth, maxdepth;
   BwtSeqpositionextractor *positext;
 
@@ -330,6 +331,12 @@ int gt_pck_calculate_shulen(const FMindex *index,
   numofseq = gt_encseq_num_of_sequences(encseq);
   GT_STACK_INIT(&stack, resize);
   positext = gt_newBwtSeqpositionextractor(index, totallength + 1);
+  if (timer != NULL)
+  {
+    gt_progress_timer_start_new_state(timer,
+                                      "obtain special pos",
+                                      stdout);
+  }
   special_char_rows_and_pos = get_special_pos(index, positext);
 
   gt_array2dim_calloc(root.countTermSubtree, 5UL, numoffiles);
@@ -339,6 +346,12 @@ int gt_pck_calculate_shulen(const FMindex *index,
   root.lower = 0;
   root.upper = totallength + 1;
 
+  if (timer != NULL)
+  {
+    gt_progress_timer_start_new_state(timer,
+                                      "traverse virtual tree",
+                                      stdout);
+  }
   GT_STACK_PUSH(&stack, root);
   stackdepth = 1UL;
   maxdepth = 0;

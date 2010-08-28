@@ -36,6 +36,7 @@ int gt_genomediff_run_kr2_search(Genericindex *genericindexSubject,
                                  const GtEncseq *encseq,
                                  GtLogger *logger,
                                  const GtGenomediffArguments *arguments,
+                                 GtProgressTimer *timer,
                                  GtError *err)
 {
   int had_err = 0;
@@ -82,10 +83,17 @@ int gt_genomediff_run_kr2_search(Genericindex *genericindexSubject,
                                      shulen,
                                      (unsigned long) numofchars,
                                      totallength,
+                                     timer,
                                      logger,
                                      err);
   if (!had_err)
   {
+    if (timer != NULL)
+    {
+      gt_progress_timer_start_new_state(timer,
+                                        "calculate gc",
+                                        stdout);
+    }
     gc_contents = gt_encseq_get_gc(encseq,
                                   true,
                                   false,
@@ -95,6 +103,12 @@ int gt_genomediff_run_kr2_search(Genericindex *genericindexSubject,
   }
   if (!had_err)
   {
+    if (timer != NULL)
+    {
+      gt_progress_timer_start_new_state(timer,
+                                        "calculate avg",
+                                        stdout);
+    }
     if (arguments->shulen_only)
     {
       printf("i\t| sum of shulen\n");
@@ -145,7 +159,19 @@ int gt_genomediff_run_kr2_search(Genericindex *genericindexSubject,
 
       gt_assert(gc_contents != NULL);
 
+      if (timer != NULL)
+      {
+        gt_progress_timer_start_new_state(timer,
+                                          "precalculate ln_n_fac",
+                                          stdout);
+      }
       ln_n_fac = gt_get_ln_n_fac(arguments->max_ln_n_fac);
+      if (timer != NULL)
+      {
+        gt_progress_timer_start_new_state(timer,
+                                          "calculate divergence",
+                                          stdout);
+      }
       for (i = 0; i < numoffiles; i++)
       {
         for (j = i+1; j < numoffiles; j++)
@@ -218,6 +244,12 @@ int gt_genomediff_run_kr2_search(Genericindex *genericindexSubject,
     }
     if (!had_err)
     {
+      if (timer != NULL)
+      {
+        gt_progress_timer_start_new_state(timer,
+                                          "calculate kr",
+                                          stdout);
+      }
       printf("# Table of Kr\n");
       for (i = 0; i < numoffiles; i++)
       {

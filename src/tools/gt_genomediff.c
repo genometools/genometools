@@ -22,6 +22,8 @@
 #include "core/encseq_api.h"
 #include "core/log_api.h"
 #include "core/logger.h"
+#include "core/progress_timer_api.h"
+#include "core/showtime.h"
 #include "core/str_array_api.h"
 #include "core/unused_api.h"
 
@@ -206,6 +208,13 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
   Genericindex *genericindexSubject;
   GtLogger *logger;
   const GtEncseq *encseq = NULL;
+  GtProgressTimer *timer = NULL;
+
+  if (gt_showtime_enabled())
+  {
+    timer = gt_progress_timer_new("map index");
+    gt_assert(timer);
+  }
 
   gt_error_check(err);
   gt_assert(arguments);
@@ -232,21 +241,42 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
   if (!had_err)
   {
     if (arguments->simplesearch)
+    {
+      if (timer != NULL)
+      {
+        gt_progress_timer_start_new_state(timer,
+                                          "run simple search",
+                                          stdout);
+      }
       had_err = gt_genomediff_run_simple_search(genericindexSubject,
                                                 encseq,
                                                 logger,
                                                 arguments,
                                                 err);
-    else
+    } else
+    {
+      if (timer != NULL)
+      {
+        gt_progress_timer_start_new_state(timer,
+                                          "start shu search",
+                                          stdout);
+      }
       had_err = gt_genomediff_run_kr2_search(genericindexSubject,
                                              encseq,
                                              logger,
                                              arguments,
+                                             timer,
                                              err);
+    }
   }
 
-/*XXX*/
-
+  if (timer != NULL)
+  {
+    gt_progress_timer_start_new_state(timer,
+                                      NULL,
+                                      stdout);
+    gt_progress_timer_delete(timer);
+  }
   genericindex_delete(genericindexSubject);
   gt_logger_delete(logger);
 
