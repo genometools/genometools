@@ -301,8 +301,7 @@ int gt_multiesa2shulengthdist(Sequentialsuffixarrayreader *ssar,
       {
         if (referidx != shulenidx)
         {
-          printf("%lu %lu %lu\n",referidx,shulenidx,
-                                 state->shulengthdist[referidx][shulenidx]);
+          printf("%lu\n",state->shulengthdist[referidx][shulenidx]);
         }
       }
     }
