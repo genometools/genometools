@@ -838,7 +838,6 @@ ALLSPLINT=${addprefix obj/,${notdir ${subst .c,.splint,\
                                 ${SKTOOLS} ${MOVEDENCSEQFILES}}}}\
      obj/redblack.splint
 
-
 spgt:${ALLSPLINT}
 
 scgt:
@@ -872,6 +871,42 @@ obj/%.splint: ${CURDIR}/src/core/%.c
 obj/%.splint: ${CURDIR}/src/extended/%.c
 	@echo "splint $<"
 	@splint -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
+	@touch $@
+
+
+DWHEADER=${shell find ${CURDIR} -name 'core' -prune -o -name '*.h' | \
+				   xargs grep -l Willrodt}
+ALLHEADER=${addprefix obj/,${notdir ${subst .h,.check,\
+					${DWHEADER}}}}
+
+headercheck:${ALLHEADER}
+
+headerclean:
+	find obj -name '*.check' | xargs rm -f
+
+obj/%.check: ${CURDIR}/src/match/%.h
+	@echo "check include $<"
+	@src_check_header.rb $<
+	@touch $@
+
+obj/%.check: ${CURDIR}/src/tools/%.h
+	@echo "check include $<"
+	@src_check_header.rb $<
+	@touch $@
+
+obj/%.check: ${CURDIR}/src/ltr/%.h
+	@echo "check include $<"
+	@src_check_header.rb $<
+	@touch $@
+
+obj/%.check: ${CURDIR}/src/core/%.h
+	@echo "check include $<"
+	@src_check_header.rb $<
+	@touch $@
+
+obj/%.check: ${CURDIR}/src/extended/%.h
+	@echo "check include $<"
+	@src_check_header.rb $<
 	@touch $@
 
 obj/%.prepro: ${CURDIR}/src/match/%.c
