@@ -241,7 +241,8 @@ int gt_depthfirstesa(Sequentialsuffixarrayreader *ssar,
             processbranchedge(firstedge,
                               TOP.depth,
                               TOP.dfsinfo,
-                              firstedge ? NULL : ABOVETOP.dfsinfo,
+                              /*firstedge ? NULL : ABOVETOP.dfsinfo,*/
+                              ABOVETOP.dfsinfo,
                               state,
                               err) != 0)
         {

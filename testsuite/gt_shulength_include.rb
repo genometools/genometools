@@ -4,9 +4,10 @@ allfiles = ["Atinsert.fna",
             "Random.fna",
             "Random159.fna",
             "Random160.fna",
-            "RandomN.fna",
             "TTT-small.fna",
-            "trna_glutamine.fna"]
+            "trna_glutamine.fna",
+            "Atinsert.fna",
+            "U89959_genomic.fas"]
 
 def checkshulengthdist(file1,file2)
   run_test "#{$bin}gt suffixerator -db #{file1} -indexname index1 " + 
@@ -26,11 +27,13 @@ end
 
 allfiles.each do |file1|
   allfiles.each do |file2|
-    Name "gt shulengthdist #{file1} #{file2}"
-    Keywords "gt_shulengthdist small"
-    Test do
-      checkshulengthdist("#{$testdata}/#{file1}",
-                         "#{$testdata}/#{file2}")
+    if file1 != file2
+      Name "gt shulengthdist #{file1} #{file2}"
+      Keywords "gt_shulengthdist small"
+      Test do
+        checkshulengthdist("#{$testdata}/#{file1}",
+                           "#{$testdata}/#{file2}")
+      end
     end
   end
 end

@@ -84,12 +84,14 @@ static void contribute(GT_UNUSED int line,
                        unsigned long **shulengthdist,
                        unsigned long referidx,
                        unsigned long shulenidx,
-                       unsigned long value)
+                       unsigned long count,
+                       unsigned long depth)
 {
 #ifdef SKDEBUG
-  printf("line %d: add[%lu][%lu]+=%lu\n",line,referidx,shulenidx,value);
+  printf("line %d: add[%lu][%lu]+=count=%lu*depth=%lu\n",line,
+          referidx,shulenidx,count,depth);
 #endif
-  shulengthdist[referidx][shulenidx] += value;
+  shulengthdist[referidx][shulenidx] += count * depth;
 }
 
 #ifdef SKDEBUG
@@ -162,14 +164,15 @@ static int processleafedge(bool firstsucc,
       {
         if (father->filenumdist[idx] > 0)
         {
-          contribute(__LINE__,state->shulengthdist,idx,filenum,fatherdepth + 1);
+          contribute(__LINE__,state->shulengthdist,idx,filenum,1UL,
+                     fatherdepth + 1);
         }
         if (father->filenumdist[filenum] == 0 &&
             father->filenumdist[idx] > 0)
         {
           contribute(__LINE__,state->shulengthdist,filenum,idx,
-                                          father->filenumdist[idx] *
-                                          (fatherdepth + 1));
+                     father->filenumdist[idx],
+                     fatherdepth + 1);
         }
       }
     }
@@ -197,7 +200,7 @@ static void cartproduct(Shulengthdiststate *state,
         {
           gt_assert(referidx != shulenidx);
           contribute(__LINE__,state->shulengthdist,referidx,shulenidx,
-                     (depth + 1) * node2->filenumdist[shulenidx]);
+                     node2->filenumdist[shulenidx],depth + 1);
         }
       }
     }
@@ -245,6 +248,9 @@ static int processbranchedge(bool firstsucc,
 #endif
     cartproduct(state, fatherdepth, father, son);
     cartproduct(state, fatherdepth, son, father);
+  }
+  if (son != NULL)
+  {
     for (idx = 0; idx < state->numofdbfiles; idx++)
     {
       father->filenumdist[idx] += son->filenumdist[idx];
@@ -368,17 +374,20 @@ static unsigned long gt_esa2shulengthquery(const Suffixarray *suffixarray,
 
   for (qptr = query, remaining = querylen; remaining > 0; qptr++, remaining--)
   {
-    gmatchlength = gt_esa2shulengthatposition(suffixarray,
+    if (ISSPECIAL(*qptr))
+    {
+      gmatchlength = 0;
+    } else
+    {
+      gmatchlength = gt_esa2shulengthatposition(suffixarray,
                                               totallength,
                                               0,
                                               0,
                                               totallength,
                                               qptr,
                                               query+querylen);
-    if (gmatchlength > 0)
-    {
-      totalgmatchlength += gmatchlength;
     }
+    totalgmatchlength += gmatchlength;
   }
   return totalgmatchlength;
 }
