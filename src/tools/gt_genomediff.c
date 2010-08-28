@@ -58,7 +58,8 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
 {
   GtGenomediffArguments *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOption *option, *optionquery, *optionesaindex, *optionpckindex;
+  GtOption *option, *optionquery, *optionesaindex, *optionpckindex,
+           *optiontraverse;
   gt_assert(arguments);
 
   /* init */
@@ -156,12 +157,23 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
   gt_option_hide_default(option);
   gt_option_parser_add_option(op, option);
 
+  /* shulen */
   option = gt_option_new_bool("shulen",
                               "prints sum of shulen and stops",
                               &arguments->shulen_only,
                               false);
   gt_option_parser_add_option(op, option);
 
+  /* traverse */
+  optiontraverse = gt_option_new_bool("traverse",
+                              "traverses the virtual tree without calculating"
+                              "anything, sets GT_ENV_OPTIONS=-showtime"
+                              "does not work with -esa and -query",
+                              &arguments->traverse_only,
+                              false);
+  gt_option_exclude(optiontraverse, optionesaindex);
+  gt_option_exclude(optiontraverse, optionquery);
+  gt_option_parser_add_option(op, optiontraverse);
   /* mail */
   gt_option_parser_set_mailaddress(op, "<dwillrodt@zbh.uni-hamburg.de>");
   return op;
@@ -194,6 +206,13 @@ static int gt_genomediff_arguments_check(GT_UNUSED int rest_argc,
   {
     printf("not implemented option -esa used, sorry, try -pck instead\n");
     had_err = 1;
+  }
+  if (!had_err && arguments->traverse_only &&
+      !gt_showtime_enabled())
+  {
+    printf ("GT_ENV_OPTIONS should be set to -showtime\n");
+    printf ("setting showtime = true\n");
+    gt_showtime_enable();
   }
   return had_err;
 }

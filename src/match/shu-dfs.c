@@ -98,6 +98,7 @@ static int visit_shu_children(const FMindex *index,
                               unsigned long numoffiles,
                               unsigned long totallength,
                               unsigned long *stackdepth,
+                              bool calculate,
                               GT_UNUSED GtLogger *logger,
                               GT_UNUSED GtError *err)
 {
@@ -148,12 +149,13 @@ static int visit_shu_children(const FMindex *index,
     if (child.lower + 1 == child.upper || numofchars <= idx)
     { /* we found a leave on parent or the interval consists of
       * wildcards or terminators (only in root-interval)*/
-      add_filenum_count(&child,
-                        parent,
-                        positext,
-                        totallength,
-                        numoffiles,
-                        encseq);
+      if (calculate)
+        add_filenum_count(&child,
+                          parent,
+                          positext,
+                          totallength,
+                          numoffiles,
+                          encseq);
       continue;
     }
     if (child.upper - child.lower == parent->upper - parent->lower)
@@ -171,7 +173,7 @@ static int visit_shu_children(const FMindex *index,
     }
   }
   if (parent->depth != 0 &&
-      num_of_rows != 0)
+      num_of_rows != 0 && calculate)
   {
     unsigned long start_idx,
                   max_idx = gt_pck_special_occ_in_nonspecial_intervals(index)
@@ -235,8 +237,8 @@ static int visit_shu_children(const FMindex *index,
       }
       parent->countTermSubtree[0][filenum] += 1;
     }
+    gt_assert(num_of_rows==0);
   }
-  gt_assert(num_of_rows==0);
   parent->process = true;
   return 0;
 }
@@ -312,6 +314,7 @@ int gt_pck_calculate_shulen(const FMindex *index,
                             double **shulen,
                             unsigned long numofchars,
                             unsigned long totallength,
+                            bool calculate,
                             GtProgressTimer *timer,
                             GtLogger *logger,
                             GtError *err)
@@ -363,12 +366,13 @@ int gt_pck_calculate_shulen(const FMindex *index,
     {
       GT_STACK_DECREMENTTOP(&stack);
       --stackdepth;
-      had_err = process_shu_node(current,
-                                 &stack,
-                                 shulen,
-                                 numoffiles,
-                                 logger,
-                                 err);
+      if (calculate)
+        had_err = process_shu_node(current,
+                                   &stack,
+                                   shulen,
+                                   numoffiles,
+                                   logger,
+                                   err);
       gt_array2dim_delete(current->countTermSubtree)
     } else
     {
@@ -384,6 +388,7 @@ int gt_pck_calculate_shulen(const FMindex *index,
                                    numoffiles,
                                    totallength,
                                    &stackdepth,
+                                   calculate,
                                    logger,
                                    err);
     }

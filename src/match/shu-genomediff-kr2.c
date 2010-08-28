@@ -79,15 +79,23 @@ int gt_genomediff_run_kr2_search(Genericindex *genericindexSubject,
            end + 1);
   }
   had_err = gt_pck_calculate_shulen(subjectindex,
-                                     encseq,
-                                     shulen,
-                                     (unsigned long) numofchars,
-                                     totallength,
-                                     timer,
-                                     logger,
-                                     err);
+                                    encseq,
+                                    shulen,
+                                    (unsigned long) numofchars,
+                                    totallength,
+                                    !arguments->traverse_only,
+                                    timer,
+                                    logger,
+                                    err);
   if (!had_err)
   {
+    if (arguments->traverse_only)
+    {
+      gt_free(filelength);
+      gt_array2dim_delete(shulen);
+      gt_assert(timer != NULL);
+      return had_err;
+    }
     if (timer != NULL)
     {
       gt_progress_timer_start_new_state(timer,
