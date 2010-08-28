@@ -45,7 +45,7 @@ int gt_genomediff_run_kr2_search(Genericindex *genericindexSubject,
                 totallength,
                 start = 0UL,
                 end = 0UL,
-                i, j,
+                i_idx, j_idx,
                 *filelength;
   double **shulen,
          *gc_contents = NULL;
@@ -64,16 +64,16 @@ int gt_genomediff_run_kr2_search(Genericindex *genericindexSubject,
   gt_array2dim_calloc(shulen, numoffiles, numoffiles);
   filelength = gt_calloc((size_t) numoffiles, sizeof (unsigned long));
 
-  for (i = 0UL; i < numoffiles; i++)
+  for (i_idx = 0UL; i_idx < numoffiles; i_idx++)
   {
-    start = gt_encseq_filestartpos(encseq, i);
-    filelength[i] =
-      (unsigned long) gt_encseq_effective_filelength(encseq, i) - 1;
-    end = start + filelength[i];
+    start = gt_encseq_filestartpos(encseq, i_idx);
+    filelength[i_idx] =
+      (unsigned long) gt_encseq_effective_filelength(encseq, i_idx) - 1;
+    end = start + filelength[i_idx];
     gt_logger_log(logger,
            "File: %s (No: %lu)\tstart: %lu, end: %lu, sep: %lu",
-           gt_str_array_get(filenames, i),
-           i,
+           gt_str_array_get(filenames, i_idx),
+           i_idx,
            start,
            end,
            end + 1);
@@ -89,6 +89,16 @@ int gt_genomediff_run_kr2_search(Genericindex *genericindexSubject,
                                     err);
   if (!had_err)
   {
+    /*due to the nature of the fm-index calculated shulens are always too long
+     * by 2, this adjusts for this */
+    for (i_idx = 0; i_idx < numoffiles; i_idx++)
+      for (j_idx = i_idx + 1; j_idx < numoffiles; j_idx++)
+      {
+        if (gt_double_smaller_double(2.0, shulen[i_idx][j_idx]))
+          shulen[i_idx][j_idx] -= 2.0;
+        if (gt_double_smaller_double(2.0, shulen[j_idx][i_idx]))
+          shulen[j_idx][i_idx] -= 2.0;
+      }
     if (arguments->traverse_only)
     {
       gt_free(filelength);
@@ -119,25 +129,25 @@ int gt_genomediff_run_kr2_search(Genericindex *genericindexSubject,
     }
     if (arguments->shulen_only)
     {
-      printf("i\t| sum of shulen\n");
+      printf("# sum of shulen\n%lu\n", numoffiles);
     }
-    for (i = 0; i < numoffiles; i++)
+    for (i_idx = 0; i_idx < numoffiles; i_idx++)
     {
       unsigned long length_i;
-      length_i = filelength[i];
+      length_i = filelength[i_idx];
       if (arguments->shulen_only)
-        printf("%lu\t|", i);
-      for (j = 0; j < numoffiles; j++)
+        printf("%s\t", gt_str_array_get(filenames, i_idx));
+      for (j_idx = 0; j_idx < numoffiles; j_idx++)
       {
-        if (j == i)
+        if (j_idx == i_idx)
         {
           if (arguments->shulen_only)
             printf("0\t");
           continue;
         }
         if (arguments->shulen_only)
-          printf("%.0f\t", shulen[i][j]);
-        shulen[i][j] = shulen[i][j] / length_i;
+          printf("%.0f\t", shulen[i_idx][j_idx]);
+        shulen[i_idx][j_idx] = shulen[i_idx][j_idx] / length_i;
       }
       if (arguments->shulen_only)
         printf("\n");
@@ -148,15 +158,15 @@ int gt_genomediff_run_kr2_search(Genericindex *genericindexSubject,
     gt_logger_log(logger, "table of avg shulens");
     if (!had_err && gt_logger_enabled(logger))
     {
-      for (i = 0; i < numoffiles; i++)
+      for (i_idx = 0; i_idx < numoffiles; i_idx++)
       {
-        printf("# ");
-        for (j = 0; j < numoffiles; j++)
+        printf("# %s\t", gt_str_array_get(filenames, i_idx));
+        for (j_idx = 0; j_idx < numoffiles; j_idx++)
         {
-          if (i == j)
+          if (i_idx == j_idx)
             printf("0\t\t");
           else
-            printf("%f\t", shulen[i][j]);
+            printf("%f\t", shulen[i_idx][j_idx]);
         }
         printf("\n");
       }
@@ -180,44 +190,44 @@ int gt_genomediff_run_kr2_search(Genericindex *genericindexSubject,
                                           "calculate divergence",
                                           stdout);
       }
-      for (i = 0; i < numoffiles; i++)
+      for (i_idx = 0; i_idx < numoffiles; i_idx++)
       {
-        for (j = i+1; j < numoffiles; j++)
+        for (j_idx = i_idx+1; j_idx < numoffiles; j_idx++)
         {
           double query_gc, query_shulen;
           unsigned long subject_len;
-          if (gt_double_smaller_double(shulen[i][j],
-                                       shulen[j][i]))
-          { /* S=j Q=i */
-            query_gc = gc_contents[i];
-            query_shulen = shulen[i][j];
-            subject_len = filelength[j];
+          if (gt_double_smaller_double(shulen[i_idx][j_idx],
+                                       shulen[j_idx][i_idx]))
+          { /* S=j_idx Q=i_idx */
+            query_gc = gc_contents[i_idx];
+            query_shulen = shulen[i_idx][j_idx];
+            subject_len = filelength[j_idx];
           } else
           {
-            if (gt_double_smaller_double(shulen[j][i],
-                                         shulen[i][j]))
-            { /* S=i Q=j */
-              query_gc = gc_contents[j];
-              query_shulen = shulen[j][i];
-              subject_len = filelength[i];
+            if (gt_double_smaller_double(shulen[j_idx][i_idx],
+                                         shulen[i_idx][j_idx]))
+            { /* S=i_idx Q=j_idx */
+              query_gc = gc_contents[j_idx];
+              query_shulen = shulen[j_idx][i_idx];
+              subject_len = filelength[i_idx];
             } else
             {
-              if (gt_double_smaller_double(fabs(gc_contents[i]-0.5),
-                                           fabs(gc_contents[j]-0.5)))
-              { /* S=i Q=j XXX check this if right*/
-                query_gc = gc_contents[j];
-                query_shulen = shulen[j][i];
-                subject_len = filelength[i];
+              if (gt_double_smaller_double(fabs(gc_contents[i_idx]-0.5),
+                                           fabs(gc_contents[j_idx]-0.5)))
+              { /* S=i_idx Q=j_idx XXX check this if right*/
+                query_gc = gc_contents[j_idx];
+                query_shulen = shulen[j_idx][i_idx];
+                subject_len = filelength[i_idx];
               } else
-                query_gc = gc_contents[i];
-                query_shulen = shulen[i][j];
-                subject_len = filelength[j];
-              { /* S=j Q=i */
+                query_gc = gc_contents[i_idx];
+                query_shulen = shulen[i_idx][j_idx];
+                subject_len = filelength[j_idx];
+              { /* S=j_idx Q=i_idx */
               }
             }
           }
 
-          shulen[i][j] =
+          shulen[i_idx][j_idx] =
             gt_divergence(arguments->divergence_rel_err,
                           arguments->divergence_abs_err,
                           arguments->divergence_m,
@@ -227,7 +237,7 @@ int gt_genomediff_run_kr2_search(Genericindex *genericindexSubject,
                           query_gc,
                           ln_n_fac,
                           arguments->max_ln_n_fac);
-          shulen[j][i] = shulen[i][j];
+          shulen[j_idx][i_idx] = shulen[i_idx][j_idx];
         }
       }
       gt_free(ln_n_fac);
@@ -235,17 +245,17 @@ int gt_genomediff_run_kr2_search(Genericindex *genericindexSubject,
     gt_logger_log(logger, "table of divergences");
     if (!had_err && gt_logger_enabled(logger))
     {
-      for (i = 0; i < numoffiles; i++)
+      for (i_idx = 0; i_idx < numoffiles; i_idx++)
       {
-        printf("# ");
-        for (j = 0; j < numoffiles; j++)
+        printf("# %s\t", gt_str_array_get(filenames, i_idx));
+        for (j_idx = 0; j_idx < numoffiles; j_idx++)
         {
-          if (i == j)
+          if (i_idx == j_idx)
           {
             printf("0\t\t");
             continue;
           }
-          printf("%f\t", shulen[i][j]);
+          printf("%f\t", shulen[i_idx][j_idx]);
         }
         printf("\n");
       }
@@ -258,15 +268,16 @@ int gt_genomediff_run_kr2_search(Genericindex *genericindexSubject,
                                           "calculate kr",
                                           stdout);
       }
-      printf("# Table of Kr\n");
-      for (i = 0; i < numoffiles; i++)
+      printf("# Table of Kr\n%lu\n", numoffiles);
+      for (i_idx = 0; i_idx < numoffiles; i_idx++)
       {
-        for (j = 0; j < numoffiles; j++)
+        printf("%s\t", gt_str_array_get(filenames, i_idx));
+        for (j_idx = 0; j_idx < numoffiles; j_idx++)
         {
-          if ( i == j )
+          if ( i_idx == j_idx )
             printf("0\t\t");
           else
-            printf("%f\t", gt_calculateKr(shulen[i][j]));
+            printf("%f\t", gt_calculateKr(shulen[i_idx][j_idx]));
         }
         printf("\n");
       }

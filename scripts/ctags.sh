@@ -27,4 +27,6 @@ ctags -w src/*.[ch]                   \
          src/ltr/*.[ch]               \
          src/match/*.[ch]             \
          src/mgth/*.[ch]              \
-         src/tools/*.[ch]
+         src/tools/*.[ch]             \
+         testsuite/*.rb               \
+         scripts/*.rb

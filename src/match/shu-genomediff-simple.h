@@ -18,7 +18,11 @@
 #ifndef SHU_GENOMEDIFF_SIMPLE_H
 #define SHU_GENOMEDIFF_SIMPLE_H
 
+#include "core/logger.h"
+#include "core/encseq_api.h"
+
 #include "match/genomediff.h"
+#include "match/idx-limdfs.h"
 
 int gt_genomediff_run_simple_search(Genericindex *genericindexSubject,
                                     const GtEncseq *encseq,

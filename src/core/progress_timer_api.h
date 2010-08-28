@@ -30,8 +30,8 @@ typedef struct GtProgressTimer GtProgressTimer;
 GtProgressTimer* gt_progress_timer_new(const char *desc);
 /* Announce the end of the current state and the beginning of the new state
    to <pt>. The new state will be described by <newevent>. The time needed for
-   the now completed state is written to <fp>. 
-   To announce the end of timing and print the overall-time use 
+   the now completed state is written to <fp>.
+   To announce the end of timing and print the overall-time use
    <newevent> = NULL */
 void             gt_progress_timer_start_new_state(GtProgressTimer *pt,
                                                    const char *newevent,

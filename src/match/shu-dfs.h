@@ -22,6 +22,8 @@
 
 #include "core/stack-inlined.h"
 
+#include "match/eis-voiditf.h"
+
 typedef struct {
   bool process;
   unsigned parentOffset;

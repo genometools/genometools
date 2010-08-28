@@ -22,6 +22,8 @@
 
 #include "core/stack-inlined.h"
 
+#include "match/eis-voiditf.h"
+
 typedef struct {
   unsigned long leaves, branching, lower, upper;
   unsigned int parentOffset;

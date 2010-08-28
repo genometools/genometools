@@ -258,7 +258,7 @@ static int process_shu_node(ShuNode *node,
 
   if (node->parentOffset != 0)
   {
-    parent = &(stack->space[stack->nextfree - node->parentOffset]);
+    parent = stack->space + stack->nextfree - node->parentOffset;
   }
 
   for (i = 0; i < numoffiles; i++)
@@ -279,7 +279,7 @@ static int process_shu_node(ShuNode *node,
         if (node->countTermSubtree[0][j] == 0 ||
                j == i)
           continue;
-        shulen[i][j] = shulen[i][j] + ((node->depth + 1) * termChild_x_i);
+        shulen[i][j] += ((node->depth + 1) * termChild_x_i);
       }
     }
     /* scan branch */
@@ -393,7 +393,7 @@ int gt_pck_calculate_shulen(const FMindex *index,
                                    err);
     }
   }
-  gt_logger_log(logger, "max stack depth = %lu\n", maxdepth);
+  gt_logger_log(logger, "max stack depth = %lu", maxdepth);
   GT_STACK_DELETE(&stack);
   gt_free(rangeOccs);
   gt_free(tmpmbtab);

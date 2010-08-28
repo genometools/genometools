@@ -19,6 +19,7 @@
 #define SHU_GENOMEDIFF_KR2_H
 
 #include "match/genomediff.h"
+#include "match/idx-limdfs.h"
 
 int gt_genomediff_run_kr2_search(Genericindex *genericindexSubject,
                                  const GtEncseq *encseq,
