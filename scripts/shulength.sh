@@ -20,4 +20,7 @@ env -i bin/gt suffixerator -db ${file1} ${file2} -dna -suf -tis -lcp -indexname 
 echo "# multi comparisons"
 env -i bin/gt shulengthdist -ii both > shit.multi
 cmp -s shit.pairwise shit.multi
-# echo "`tail -1 tmp1`x`tail -1 tmp2`" | ${WOTD} | dot -Tpdf > dot.pdf
+echo "`tail -1 tmp1`x`tail -1 tmp2`y" | ${WOTD} | dot -Tpdf > dot.pdf
+mkvtree -db tmp1 tmp2 -dna -suf -lcp -tis -indexname mkv-tmp
+vstree2tex -suf -lcp -tis -s mkv-tmp > tmp.tex
+latex tmp.tex
