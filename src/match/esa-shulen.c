@@ -49,8 +49,8 @@ typedef struct  /* global information */
 
 #include "esa-dfs.h"
 
-static void resetfilenumdist(ShulengthdistDfsinfo *father,
-                             unsigned long numofdbfiles)
+static void shulen_resetfilenumdist(ShulengthdistDfsinfo *father,
+                                    unsigned long numofdbfiles)
 {
   unsigned long idx;
 
@@ -63,7 +63,7 @@ static void resetfilenumdist(ShulengthdistDfsinfo *father,
   }
 }
 
-static Dfsinfo *allocateDfsinfo(GT_UNUSED Dfsstate *astate)
+static Dfsinfo *shulen_allocateDfsinfo(GT_UNUSED Dfsstate *astate)
 {
   ShulengthdistDfsinfo *dfsinfo;
 
@@ -75,18 +75,18 @@ static Dfsinfo *allocateDfsinfo(GT_UNUSED Dfsstate *astate)
   return (Dfsinfo*) dfsinfo;
 }
 
-static void freeDfsinfo(Dfsinfo *adfsinfo, GT_UNUSED Dfsstate *state)
+static void shulen_freeDfsinfo(Dfsinfo *adfsinfo, GT_UNUSED Dfsstate *state)
 {
   ShulengthdistDfsinfo *dfsinfo = (ShulengthdistDfsinfo*) adfsinfo;;
   gt_free(dfsinfo->filenumdist);
   gt_free(dfsinfo);
 }
 
-static void contribute(unsigned long **shulengthdist,
-                       unsigned long referidx,
-                       unsigned long shulenidx,
-                       unsigned long count,
-                       unsigned long depth)
+static void shulen_contribute(unsigned long **shulengthdist,
+                              unsigned long referidx,
+                              unsigned long shulenidx,
+                              unsigned long count,
+                              unsigned long depth)
 {
 #ifdef SKDEBUG
   printf("line %d: add[%lu][%lu]+=count=%lu*depth=%lu\n",line,
@@ -114,12 +114,12 @@ static void shownode(const Shulengthdiststate *state,
 }
 #endif
 
-static int processleafedge(bool firstsucc,
-                           unsigned long fatherdepth,
-                           Dfsinfo *afather,
-                           unsigned long leafnumber,
-                           Dfsstate *astate,
-                           GT_UNUSED GtError *err)
+static int shulen_processleafedge(bool firstsucc,
+                                  unsigned long fatherdepth,
+                                  Dfsinfo *afather,
+                                  unsigned long leafnumber,
+                                  Dfsstate *astate,
+                                  GT_UNUSED GtError *err)
 {
   Shulengthdiststate *state = (Shulengthdiststate*) astate;
   ShulengthdistDfsinfo *father = (ShulengthdistDfsinfo*) afather;
@@ -153,7 +153,7 @@ static int processleafedge(bool firstsucc,
       father->filenumdist
         = gt_malloc(sizeof(*father->filenumdist) * state->numofdbfiles);
     }
-    resetfilenumdist(father,state->numofdbfiles);
+    shulen_resetfilenumdist(father,state->numofdbfiles);
 #ifdef SKDEBUG
     shownode(state,"father",father);
 #endif
@@ -168,12 +168,12 @@ static int processleafedge(bool firstsucc,
       {
         if (father->filenumdist[idx] > 0)
         {
-          contribute(state->shulengthdist,idx,filenum,1UL,fatherdepth + 1);
+          shulen_contribute(state->shulengthdist,idx,filenum,1UL,fatherdepth+1);
           if (father->filenumdist[filenum] == 0)
           {
-            contribute(state->shulengthdist,filenum,idx,
-                       father->filenumdist[idx],
-                       fatherdepth + 1);
+            shulen_contribute(state->shulengthdist,filenum,idx,
+                              father->filenumdist[idx],
+                              fatherdepth + 1);
           }
         }
       }
@@ -185,10 +185,10 @@ static int processleafedge(bool firstsucc,
   return 0;
 }
 
-static void cartproduct(Shulengthdiststate *state,
-                        unsigned long depth,
-                        const ShulengthdistDfsinfo *node1,
-                        const ShulengthdistDfsinfo *node2)
+static void shulen_cartproduct(Shulengthdiststate *state,
+                               unsigned long depth,
+                               const ShulengthdistDfsinfo *node1,
+                               const ShulengthdistDfsinfo *node2)
 {
   unsigned long referidx, shulenidx;
 
@@ -201,20 +201,20 @@ static void cartproduct(Shulengthdiststate *state,
         if (node2->filenumdist[shulenidx] > 0)
         {
           gt_assert(referidx != shulenidx);
-          contribute(state->shulengthdist,referidx,shulenidx,
-                     node2->filenumdist[shulenidx],depth + 1);
+          shulen_contribute(state->shulengthdist,referidx,shulenidx,
+                            node2->filenumdist[shulenidx],depth + 1);
         }
       }
     }
   }
 }
 
-static int processbranchedge(bool firstsucc,
-                             unsigned long fatherdepth,
-                             Dfsinfo *afather,
-                             Dfsinfo *ason,
-                             Dfsstate *astate,
-                             GT_UNUSED GtError *err)
+static int shulen_processbranchedge(bool firstsucc,
+                                    unsigned long fatherdepth,
+                                    Dfsinfo *afather,
+                                    Dfsinfo *ason,
+                                    Dfsstate *astate,
+                                    GT_UNUSED GtError *err)
 {
   Shulengthdiststate *state = (Shulengthdiststate*) astate;
   ShulengthdistDfsinfo *father = (ShulengthdistDfsinfo*) afather;
@@ -241,7 +241,7 @@ static int processbranchedge(bool firstsucc,
     {
       father->filenumdist
         = gt_malloc(sizeof(*father->filenumdist) * state->numofdbfiles);
-      resetfilenumdist(father,state->numofdbfiles);
+      shulen_resetfilenumdist(father,state->numofdbfiles);
     }
 #ifdef SKDEBUG
     shownode(state,"father",father);
@@ -254,8 +254,8 @@ static int processbranchedge(bool firstsucc,
     gt_assert(son != NULL);
     shownode(state,"son",son);
 #endif
-    cartproduct(state, fatherdepth, father, son);
-    cartproduct(state, fatherdepth, son, father);
+    shulen_cartproduct(state, fatherdepth, father, son);
+    shulen_cartproduct(state, fatherdepth, son, father);
   }
   if (son != NULL)
   {
@@ -296,10 +296,10 @@ int gt_multiesa2shulengthdist(Sequentialsuffixarrayreader *ssar,
     }
   }
   if (gt_depthfirstesa(ssar,
-                       allocateDfsinfo,
-                       freeDfsinfo,
-                       processleafedge,
-                       processbranchedge,
+                       shulen_allocateDfsinfo,
+                       shulen_freeDfsinfo,
+                       shulen_processleafedge,
+                       shulen_processbranchedge,
                        NULL,
                        NULL,
                        NULL,

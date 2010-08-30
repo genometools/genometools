@@ -271,7 +271,7 @@ static void gt_checkentiresuftab(const char *filename,
                                  bool specialsareequal,
                                  bool specialsareequalatdepth0,
                                  unsigned long depth,
-                                 GtError *err)
+                                 GT_UNUSED GtError *err)
 {
   unsigned long idx, maxlcp,
                 currentlcp = 0,
