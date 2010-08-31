@@ -33,7 +33,9 @@
 \newcommand{\Gt}[0]{\emph{GenomeTools}\xspace}
 
 \title{The \Gt Developer's Guide}
-\author{Sascha Steinbiss, Gordon Gremme and Stefan Kurtz\thanks{please send comments to: \texttt{steinbiss@zbh.uni-hamburg.de}}}
+\author{Sascha Steinbiss, Gordon Gremme and Stefan
+        Kurtz\thanks{please send comments to:
+        \texttt{steinbiss@zbh.uni-hamburg.de}}}
 
 
 \begin{document}
@@ -1662,6 +1664,18 @@ tests tagged with the given keywords. OR and AND operators can be used to
 specify the tests in a more detailed way. The \keyword{-select <n>} parameter
 can be used to run only the one test with number \keyword{n}.
 
+\subsection{Header inclusion dependencies}
+Often function prototypes in the \Gt header files use types declared in
+another header files. By mistake, it is possible to forget
+\keyword{#include}'ing the header files where the type is defined in the header
+using it. Note that this problem may never surface if the forgotten header
+is included in every C source file which includes the header file with the
+missing include statement. To address this, the script
+\keyword{scripts/src_check_header.rb} tries to include each header file given
+as a command line argument by itself in a C file and compile it.
+If dependencies are missing, the check will abort and output the compiler error
+message so the problem can be fixed.
+
 \subsection{Debug symbols}
 Compilation with debug symbols is enabled by default.
 To make sure that line numbers are correct when using a debugger, e.g. 
@@ -1713,6 +1727,11 @@ then reside in the \keyword{dist/} subdirectory of the \Gt root,
 \item
 \keyword{srcdist}, which creates a tarball with a source \Gt distribution, which will
 then reside in the working directory,
+\item
+\keyword{spgt}, which checks selected files in the \keyword{core/} and
+\keyword{match/} subdirectories using the splint static
+checker\footnote{\url{http://www.splint.org}}, using the rule set
+\keyword{testdata/SKsplintoptions},
 \item
 \keyword{clean}, which removes all files created during the build and test
 processes, except the \keyword{lib} and \keyword{bin} directories, and
