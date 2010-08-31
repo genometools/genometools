@@ -151,8 +151,8 @@ typedef struct
 } Containsspecialfunc;
 
 void gt_encseq_plainseq2bytecode(GtUchar *bytecode,
-                                          const GtUchar *seq,
-                                          unsigned long len)
+                                 const GtUchar *seq,
+                                 unsigned long len)
 {
   unsigned long j;
   const GtUchar *seqptr;
@@ -166,13 +166,13 @@ void gt_encseq_plainseq2bytecode(GtUchar *bytecode,
   }
   switch (GT_MOD4(len))
   {
-    case (unsigned long) 1:
+    case 1UL:
       bytecode[j] = seqptr[0] << 6;
       break;
-    case (unsigned long) 2:
+    case 2UL:
       bytecode[j] = (seqptr[0] << 6) | (seqptr[1] << 4);
       break;
-    case (unsigned long) 3:
+    case 3UL:
       bytecode[j] = (seqptr[0] << 6) | (seqptr[1] << 4) | (seqptr[2] << 2);
       break;
   }
@@ -186,7 +186,7 @@ static void encseq2bytecode(GtUchar *dest,
 {
   unsigned long i, j;
 
-  if (len >= (unsigned long) 3)
+  if (len >= 3UL)
   {
     for (i=startindex, j=0; i < startindex + len - 3; i+=4, j++)
     {
@@ -202,14 +202,14 @@ static void encseq2bytecode(GtUchar *dest,
   }
   switch (GT_MOD4(len))
   {
-    case (unsigned long) 1:
+    case 1UL:
       dest[j] = (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,i) << 6;
       break;
-    case (unsigned long) 2:
+    case 2UL:
       dest[j] = (GtUchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i) << 6)
               | (GtUchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i+1) << 4);
       break;
-    case (unsigned long) 3:
+    case 3UL:
       dest[j] = (GtUchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i) << 6)
               | (GtUchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i+1) << 4)
               | (GtUchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i+2) << 2);
@@ -444,7 +444,7 @@ bool gt_encseq_contains_special(const GtEncseq *encseq,
                                 unsigned long startpos,
                                 unsigned long len)
 {
-  gt_assert(len >= (unsigned long) 1 && startpos + len <= encseq->totallength);
+  gt_assert(len >= 1UL && startpos + len <= encseq->totallength);
   return encseq->delivercontainsspecial(encseq,moveforward,esrspace,
                                         moveforward
                                           ? startpos
@@ -1430,7 +1430,7 @@ static int fillbitaccesstab(GtEncseq *encseq,
 }
 
 static unsigned long accessspecialpositions(const GtEncseq *encseq,
-                                     unsigned long idx)
+                                            unsigned long idx)
 {
   switch (encseq->sat)
   {
@@ -1512,8 +1512,7 @@ static void showallspecialpositionswithpages(const GtEncseq *encseq)
   unsigned long endpos0, endpos1, endspecialcells, pgnum;
   unsigned long offset = 0;
 
-  endspecialcells
-    = (unsigned long) encseq->totallength/encseq->maxspecialtype + 1;
+  endspecialcells = encseq->totallength/encseq->maxspecialtype + 1;
   for (pgnum=0; pgnum<endspecialcells; pgnum++)
   {
     if (pgnum == 0)
@@ -1600,9 +1599,9 @@ static void determinerange(GtRange *range,
                            unsigned long transpagenum,
                            unsigned long cellnum)
 {
-  range->start = (unsigned long) transpagenum *
-                   (1 + (unsigned long) encseq->maxspecialtype) +
-                   accessspecialpositions(encseq,cellnum);
+  range->start = transpagenum *
+                 (1UL + (unsigned long) encseq->maxspecialtype) +
+                 accessspecialpositions(encseq,cellnum);
   range->end = range->start +
                     accessspecialrangelength(encseq,cellnum) + 1;
 }
@@ -1693,14 +1692,14 @@ static unsigned long startpos2pagenum(GtEncseqAccessType sat,
   switch (sat)
   {
     case GT_ACCESS_TYPE_UCHARTABLES:
-      return (unsigned long) (startpos >> 8);
+      return startpos >> 8;
     case GT_ACCESS_TYPE_USHORTTABLES:
-      return (unsigned long) (startpos >> 16);
+      return startpos >> 16;
     default:
 #ifndef _LP64
       return 0;
 #else
-      return (unsigned long) (startpos >> 32);
+      return startpos >> 32;
 #endif
   }
 }
@@ -2275,7 +2274,7 @@ static bool bitaccessgt_specialrangeiterator_next(GtRange *range,
       if (currentword == 0)
       {
         gt_assert(GT_MODWORDSIZE(sri->pos) == (unsigned long)
-                                                       (GT_INTWORDSIZE-1));
+                                              (GT_INTWORDSIZE-1));
         if (sri->pos < (unsigned long) GT_INTWORDSIZE)
         {
           sri->exhausted = true;
@@ -2398,9 +2397,9 @@ static unsigned long *encseq2markpositions(const GtEncseq *encseq)
 }
 
 unsigned long gt_encseq_sep2seqnum(const unsigned long *recordseps,
-                                            unsigned long numofrecords,
-                                            unsigned long totalwidth,
-                                            unsigned long position)
+                                   unsigned long numofrecords,
+                                   unsigned long totalwidth,
+                                   unsigned long position)
 {
   unsigned long left, mid, right, len;
 
@@ -2422,7 +2421,7 @@ unsigned long gt_encseq_sep2seqnum(const unsigned long *recordseps,
   right = numofrecords - 2;
   while (left<=right)
   {
-    len = (unsigned long) (right-left);
+    len = right-left;
     mid = left + GT_DIV2(len);
     if (recordseps[mid] < position)
     {
@@ -3320,7 +3319,7 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
       {
 #ifndef _LP64
 #define MAXSFXLENFOR32BIT 4294000000UL
-        if (currentpos > (unsigned long) MAXSFXLENFOR32BIT)
+        if (currentpos > MAXSFXLENFOR32BIT)
         {
           gt_error_set(err,"input sequence must not be longer than %lu",
                        MAXSFXLENFOR32BIT);
@@ -3329,71 +3328,74 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
         }
 #endif
         retval = gt_sequence_buffer_next(fb,&charcode,err);
-        if (retval < 0)
+        if (retval > 0)
         {
-          haserr = true;
-          break;
-        }
-        if (retval == 0)
-        {
-          if (lastspeciallength > 0)
+          if (ISSPECIAL(charcode))
           {
-            idx = lastspeciallength;
-            gt_disc_distri_add(distspralen,idx);
-          }
-          break;
-        }
-        if (ISSPECIAL(charcode))
-        {
-          if (desfp != NULL && charcode == (GtUchar) SEPARATOR)
-          {
-            desc = gt_queue_get(descqueue);
-            gt_xfputs(desc,desfp);
-            gt_free(desc);
-            desc = NULL;
-            if (sdsfp != NULL)
+            if (desfp != NULL && charcode == (GtUchar) SEPARATOR)
             {
-              unsigned long desoffset;
+              desc = gt_queue_get(descqueue);
+              gt_xfputs(desc,desfp);
+              gt_free(desc);
+              desc = NULL;
+              if (sdsfp != NULL)
+              {
+                unsigned long desoffset;
 
-              desoffset = (unsigned long) ftello(desfp);
-              gt_xfwrite(&desoffset,sizeof desoffset,(size_t) 1,sdsfp);
+                desoffset = (unsigned long) ftello(desfp);
+                gt_xfwrite(&desoffset,sizeof desoffset,(size_t) 1,sdsfp);
+              }
+              gt_xfputc((int) '\n',desfp);
             }
-            gt_xfputc((int) '\n',desfp);
-          }
-          if (specialprefix)
-          {
-            specialcharinfo->lengthofspecialprefix++;
-          }
-          specialcharinfo->specialcharacters++;
-          if (lastspeciallength == 0)
-          {
-            lastspeciallength = (unsigned long) 1;
-          } else
-          {
-            lastspeciallength++;
-          }
-          if (charcode == (GtUchar) SEPARATOR)
-          {
-            if (outssptab)
+            if (specialprefix)
             {
-              GT_STOREINARRAY(sequenceseppos,GtUlong,128,currentpos);
+              specialcharinfo->lengthofspecialprefix++;
+            }
+            specialcharinfo->specialcharacters++;
+            if (lastspeciallength == 0)
+            {
+              lastspeciallength = 1UL;
             } else
             {
-              sequenceseppos->nextfreeGtUlong++;
+              lastspeciallength++;
+            }
+            if (charcode == (GtUchar) SEPARATOR)
+            {
+              if (outssptab)
+              {
+                GT_STOREINARRAY(sequenceseppos,GtUlong,128,currentpos);
+              } else
+              {
+                sequenceseppos->nextfreeGtUlong++;
+              }
+            }
+          } else
+          {
+            if (specialprefix)
+            {
+              specialprefix = false;
+            }
+            if (lastspeciallength > 0)
+            {
+              idx = lastspeciallength;
+              gt_disc_distri_add(distspralen,idx);
+              lastspeciallength = 0;
             }
           }
         } else
         {
-          if (specialprefix)
+          if (retval == 0)
           {
-            specialprefix = false;
-          }
-          if (lastspeciallength > 0)
+            if (lastspeciallength > 0)
+            {
+              idx = lastspeciallength;
+              gt_disc_distri_add(distspralen,idx);
+            }
+          } else /* retval < 0 */
           {
-            idx = lastspeciallength;
-            gt_disc_distri_add(distspralen,idx);
-            lastspeciallength = 0;
+            haserr = true;
           }
+          break;
         }
       }
     }
@@ -3451,7 +3453,7 @@ static void sequence2specialcharinfo(GtSpecialcharinfo *specialcharinfo,
       specialcharinfo->specialcharacters++;
       if (lastspeciallength == 0)
       {
-        lastspeciallength = (unsigned long) 1;
+        lastspeciallength = 1UL;
       } else
       {
         lastspeciallength++;
@@ -3549,11 +3551,11 @@ static unsigned long revgetnextstoppos(const GtEncseq *encseq,
 static inline GtTwobitencoding calctbeforward(const GtTwobitencoding *tbe,
                                             unsigned long startpos)
 {
-  unsigned long remain = (unsigned long) GT_MODBYUNITSIN2BITENC(startpos);
+  unsigned long remain = GT_MODBYUNITSIN2BITENC(startpos);
 
   if (remain > 0)
   {
-    unsigned long unit = (unsigned long) GT_DIVBYUNITSIN2BITENC(startpos);
+    unsigned long unit = GT_DIVBYUNITSIN2BITENC(startpos);
     return (GtTwobitencoding)
            ((tbe[unit] << GT_MULT2(remain)) |
             (tbe[unit+1] >> GT_MULT2(GT_UNITSIN2BITENC - remain)));
@@ -3571,7 +3573,7 @@ static inline GtTwobitencoding calctbereverse(const GtTwobitencoding *tbe,
     return tbe[GT_DIVBYUNITSIN2BITENC(startpos)];
   } else
   {
-    unsigned long unit = (unsigned long) GT_DIVBYUNITSIN2BITENC(startpos);
+    unsigned long unit = GT_DIVBYUNITSIN2BITENC(startpos);
     GtTwobitencoding tmp = (GtTwobitencoding)
                         (tbe[unit] >> GT_MULT2(GT_UNITSIN2BITENC - 1 - remain));
     if (unit > 0)
@@ -3588,8 +3590,8 @@ static inline GtBitsequence fwdextractspecialbits(
 {
   unsigned long remain, unit;
 
-  remain = (unsigned long) GT_MODWORDSIZE(startpos);
-  unit = (unsigned long) GT_DIVWORDSIZE(startpos);
+  remain = GT_MODWORDSIZE(startpos);
+  unit = GT_DIVWORDSIZE(startpos);
   if (remain <= (unsigned long) GT_DIV2(GT_INTWORDSIZE))
   {
     return (GtBitsequence) ((specialbits[unit] << remain) & GT_FIRSTHALVEBITS);
@@ -3609,7 +3611,7 @@ static inline GtBitsequence revextractspecialbits(
   unsigned long unit;
 
   remain = (int) GT_MODWORDSIZE(startpos);
-  unit = (unsigned long) GT_DIVWORDSIZE(startpos);
+  unit = GT_DIVWORDSIZE(startpos);
   if (remain >= GT_DIV2(GT_INTWORDSIZE))
   {
     return (GtBitsequence) ((specialbits[unit] >> (GT_INTWORDSIZE - 1 - remain))
@@ -4040,8 +4042,8 @@ static unsigned long extractsinglecharacter(const GtEncseq *encseq,
     } else
     {
       cc = (unsigned long) gt_encseq_get_encoded_char(encseq,
-                                                           pos + depth,
-                                                           GT_READMODE_FORWARD);
+                                                      pos + depth,
+                                                      GT_READMODE_FORWARD);
       if (ISSPECIAL((GtUchar) cc))
       {
         cc = pos + depth + GT_COMPAREOFFSET;
@@ -4061,8 +4063,8 @@ static unsigned long extractsinglecharacter(const GtEncseq *encseq,
     } else
     {
       cc = (unsigned long) gt_encseq_get_encoded_char(encseq,
-                                                           pos - depth,
-                                                           GT_READMODE_FORWARD);
+                                                      pos - depth,
+                                                      GT_READMODE_FORWARD);
       if (ISSPECIAL((GtUchar) cc))
       {
         cc = pos - depth + GT_COMPAREOFFSET;
@@ -4842,7 +4844,7 @@ static void multicharactercompare_withtest(const GtEncseq *encseq,
   commonunits2 = (unsigned long) GT_UNITSIN2BITENC;
   ret2 = gt_encseq_comparetwostrings(encseq,fwd,complement,
                                               &commonunits2,pos1,pos2,0);
-  if (ret1 != ret2 || (unsigned long) commonunits1.common != commonunits2)
+  if (ret1 != ret2 || commonunits2 != (unsigned long) commonunits1.common)
   {
     char buf1[GT_INTWORDSIZE+1], buf2[GT_INTWORDSIZE+1];
 
@@ -5397,8 +5399,7 @@ gt_encseq_new_from_files(GtProgressTimer *sfxprogress,
       }
       if (!haserr && outfsptab)
       {
-        unsigned long idx, numoffiles;
-        GtUlong nextsep = 0;
+        unsigned long idx, numoffiles, nextsep = 0;
         FILE *outfp;
 
         numoffiles = gt_str_array_size(filenametab);
@@ -5409,16 +5410,15 @@ gt_encseq_new_from_files(GtProgressTimer *sfxprogress,
           haserr = true;
         } else
         {
-          for (idx = 0UL; idx < numoffiles - 1; idx++)
+          for (idx = 0; idx < numoffiles - 1; idx++)
           {
             gt_assert(filelengthtab != NULL);
-            nextsep = nextsep + filelengthtab[idx].effectivelength;
+            nextsep += filelengthtab[idx].effectivelength;
             if (idx != 0)
-              nextsep += 1;
-            gt_xfwrite(&nextsep,
-                       sizeof (GtUlong),
-                       (size_t) 1,
-                       outfp);
+            {
+              nextsep++;
+            }
+            gt_xfwrite(&nextsep, sizeof (nextsep), (size_t) 1, outfp);
           }
         }
         gt_fa_fclose(outfp);
@@ -6572,12 +6572,12 @@ unsigned long gt_encseq_num_of_files(const GtEncseq *encseq)
 uint64_t gt_encseq_effective_filelength(const GtEncseq *encseq,
                                         unsigned long filenum)
 {
-  unsigned long num_files;
   if (encseq->numofdbfiles == 1UL)
+  {
     return (uint64_t) encseq->totallength;
-  gt_assert(encseq && encseq->filelengthtab);
-  num_files = encseq->numofdbfiles;
-  gt_assert(filenum < num_files);
+  }
+  gt_assert(encseq != NULL && encseq->filelengthtab != NULL);
+  gt_assert(filenum < encseq->numofdbfiles);
   return encseq->filelengthtab[filenum].effectivelength;
 }
 
@@ -6593,9 +6593,9 @@ unsigned long gt_encseq_filenum(const GtEncseq *encseq,
 {
   gt_assert(encseq->numofdbfiles == 1UL || encseq->fsptab != NULL);
   return gt_encseq_sep2seqnum(encseq->fsptab,
-                                      encseq->numofdbfiles,
-                                      encseq->totallength,
-                                      position);
+                              encseq->numofdbfiles,
+                              encseq->totallength,
+                              position);
 }
 
 unsigned long gt_encseq_filestartpos(const GtEncseq *encseq,
@@ -6605,7 +6605,8 @@ unsigned long gt_encseq_filestartpos(const GtEncseq *encseq,
   if (filenum == 0)
   {
     return 0;
-  } else {
+  } else 
+  {
     return encseq->fsptab[filenum-1] + 1;
   }
 }
