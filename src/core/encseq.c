@@ -57,6 +57,7 @@
 #include "core/str.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
+#include "core/defined-types.h"
 
 #define CHECKANDUPDATE(VAL,IDX)\
         tmp = localdetsizeencseq(VAL,totallength,numofdbfiles,\
@@ -2552,6 +2553,8 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
                                           unsigned long numofdbfiles,
                                           unsigned long lengthofdbfilenames,
                                           unsigned long specialranges,
+                                          const Definedunsignedlong 
+                                             *equallength,
                                           GtAlphabet *alpha,
                                           GtLogger *logger)
 {
@@ -2583,6 +2586,14 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
   encseq->ssptab = NULL;
   encseq->fsptab = NULL;
   encseq->hasallocatedssptab = false;
+  if (equallength == NULL)
+  {
+    encseq->equallength.defined = false;
+    encseq->equallength.valueunsignedlong = 0;
+  } else
+  {
+    encseq->equallength = *equallength;
+  }
   encseq->alpha = alpha;
   encseq->numofspecialstostore = specialranges;
   encseq->totallength = totallength;
@@ -2811,6 +2822,7 @@ static GtEncseq *files2encodedsequence(
                                 unsigned long totallength,
                                 unsigned long numofsequences,
                                 const unsigned long *specialrangestab,
+                                const Definedunsignedlong *equallength,
                                 GtAlphabet *alphabet,
                                 const char *str_sat,
                                 unsigned long *characterdistribution,
@@ -2855,6 +2867,7 @@ static GtEncseq *files2encodedsequence(
                                       gt_str_array_size(filenametab),
                                       lengthofdbfilenames,
                                       specialranges,
+                                      equallength,
                                       alphabet,
                                       logger);
     ALLASSIGNAPPENDFUNC(sat);
@@ -2928,15 +2941,39 @@ gt_encseq_new_from_index(bool withrange,
   if (!haserr)
   {
     GtSpecialcharinfo si;
+    Definedunsignedlong equallength;
+    GtEncseqAccessType sat;
+    unsigned long numofdbsequences, totallength;
+
     si = gt_encseq_metadata_specialcharinfo(emd);
-    encseq = determineencseqkeyvalues(gt_encseq_metadata_accesstype(emd),
-                                    gt_encseq_metadata_total_length(emd),
-                                    gt_encseq_metadata_num_of_sequences(emd),
-                                    gt_encseq_metadata_num_of_files(emd),
-                                    gt_encseq_metadata_length_of_filenames(emd),
-                                    si.specialranges,
-                                    alpha,
-                                    logger);
+    sat = gt_encseq_metadata_accesstype(emd);
+    totallength = gt_encseq_metadata_total_length(emd);
+    numofdbsequences = gt_encseq_metadata_num_of_sequences(emd);
+    if (sat == GT_ACCESS_TYPE_EQUALLENGTH)
+    {
+      unsigned long effectivelengthsum;
+
+      equallength.defined = true;
+      gt_assert(numofdbsequences > 0);
+      gt_assert(totallength >= numofdbsequences - 1);
+      effectivelengthsum = totallength - (numofdbsequences - 1);
+      gt_assert(effectivelengthsum % numofdbsequences == 0);
+      equallength.valueunsignedlong = effectivelengthsum / numofdbsequences;
+    } else
+    {
+      equallength.defined = false;
+      equallength.valueunsignedlong = 0;
+    }
+    encseq 
+      = determineencseqkeyvalues(sat,
+                                 totallength,
+                                 numofdbsequences,
+                                 gt_encseq_metadata_num_of_files(emd),
+                                 gt_encseq_metadata_length_of_filenames(emd),
+                                 si.specialranges,
+                                 &equallength,
+                                 alpha,
+                                 logger);
     alpha = NULL;
     ALLASSIGNAPPENDFUNC(gt_encseq_metadata_accesstype(emd));
     gt_logger_log(logger, "deliverchar=%s", encseq->delivercharname);
@@ -3241,6 +3278,7 @@ static void doupdatesumranges(GtSpecialcharinfo *specialcharinfo,
 static int gt_inputfiles2sequencekeyvalues(const char *indexname,
                                            unsigned long *totallength,
                                            GtSpecialcharinfo *specialcharinfo,
+                                           Definedunsignedlong *equallength,
                                            unsigned int forcetable,
                                            unsigned long *specialrangestab,
                                            const GtStrArray *filenametab,
@@ -3257,18 +3295,20 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
 {
   GtSequenceBuffer *fb = NULL;
   GtUchar charcode;
-  unsigned long currentpos = 0;
   int retval;
-  bool specialprefix = true;
-  unsigned long lastspeciallength = 0;
+  unsigned long currentpos = 0,
+                lastspeciallength = 0,
+                lengthofcurrentsequence = 0,
+                idx;
+  bool specialprefix = true, haserr = false;
   GtDiscDistri *distspralen = NULL;
-  unsigned long idx;
-  bool haserr = false;
   GtQueue *descqueue = NULL;
   char *desc;
   FILE *desfp = NULL, *sdsfp = NULL;
 
   gt_error_check(err);
+  equallength->defined = true;
+  equallength->valueunsignedlong = 0;
   specialcharinfo->specialcharacters = 0;
   specialcharinfo->lengthofspecialprefix = 0;
   specialcharinfo->lengthofspecialsuffix = 0;
@@ -3313,7 +3353,6 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
         gt_sequence_buffer_set_desc_queue(fb, descqueue);
       }
       gt_sequence_buffer_set_chardisttab(fb, characterdistribution);
-
       distspralen = gt_disc_distri_new();
       for (currentpos = 0; /* Nothing */; currentpos++)
       {
@@ -3332,20 +3371,48 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
         {
           if (ISSPECIAL(charcode))
           {
-            if (desfp != NULL && charcode == (GtUchar) SEPARATOR)
+            if (charcode == (GtUchar) SEPARATOR)
             {
-              desc = gt_queue_get(descqueue);
-              gt_xfputs(desc,desfp);
-              gt_free(desc);
-              desc = NULL;
-              if (sdsfp != NULL)
+              if (equallength->defined)
               {
-                unsigned long desoffset;
-
-                desoffset = (unsigned long) ftello(desfp);
-                gt_xfwrite(&desoffset,sizeof desoffset,(size_t) 1,sdsfp);
+                if (equallength->valueunsignedlong > 0)
+                {
+                  if (lengthofcurrentsequence != equallength->valueunsignedlong)
+                  {
+                    equallength->defined = false;
+                  }
+                } else
+                {
+                  gt_assert(lengthofcurrentsequence > 0);
+                  equallength->valueunsignedlong = lengthofcurrentsequence;
+                }
+                lengthofcurrentsequence = 0;
               }
-              gt_xfputc((int) '\n',desfp);
+              if (desfp != NULL)
+              {
+                desc = gt_queue_get(descqueue);
+                gt_xfputs(desc,desfp);
+                gt_free(desc);
+                desc = NULL;
+                if (sdsfp != NULL)
+                {
+                  unsigned long desoffset;
+
+                  desoffset = (unsigned long) ftello(desfp);
+                  gt_xfwrite(&desoffset,sizeof desoffset,(size_t) 1,sdsfp);
+                }
+                gt_xfputc((int) '\n',desfp);
+              }
+              if (outssptab)
+              {
+                GT_STOREINARRAY(sequenceseppos,GtUlong,128,currentpos);
+              } else
+              {
+                sequenceseppos->nextfreeGtUlong++;
+              }
+            } else
+            {
+              lengthofcurrentsequence++;
             }
             if (specialprefix)
             {
@@ -3359,18 +3426,9 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
             {
               lastspeciallength++;
             }
-            if (charcode == (GtUchar) SEPARATOR)
-            {
-              if (outssptab)
-              {
-                GT_STOREINARRAY(sequenceseppos,GtUlong,128,currentpos);
-              } else
-              {
-                sequenceseppos->nextfreeGtUlong++;
-              }
-            }
           } else
           {
+            lengthofcurrentsequence++;
             if (specialprefix)
             {
               specialprefix = false;
@@ -3416,12 +3474,40 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
                       gt_str_array_size(filenametab),
                       determinelengthofdbfilenames(filenametab),
                       gt_alphabet_num_of_chars(alpha),distspralen,logger);
+    if (equallength->defined)
+    {
+      if (equallength->valueunsignedlong > 0)
+      {
+        if (lengthofcurrentsequence != equallength->valueunsignedlong)
+        {
+          equallength->defined = false;
+        }
+      } else
+      {
+        gt_assert(lengthofcurrentsequence > 0);
+        equallength->valueunsignedlong = lengthofcurrentsequence;
+      }
+      if (equallength->defined && specialcharinfo->specialcharacters >
+                                  sequenceseppos->nextfreeGtUlong)
+      { /* more special characters than separators */
+        equallength->defined = false;
+      }
+    }
   }
   gt_fa_xfclose(desfp);
   gt_fa_xfclose(sdsfp);
   gt_disc_distri_delete(distspralen);
   gt_sequence_buffer_delete(fb);
   gt_queue_delete_with_contents(descqueue);
+  /*
+  if (equallength->defined)
+  {
+    printf("equallength=%lu\n",equallength->valueunsignedlong);
+  } else
+  {
+    printf("different length\n");
+  }
+  */
   return haserr ? -1 : 0;
 }
 
@@ -5285,6 +5371,8 @@ gt_encseq_new_from_files(GtProgressTimer *sfxprogress,
   unsigned long *characterdistribution = NULL;
   GtEncseq *encseq = NULL;
   GtArrayGtUlong sequenceseppos;
+  Definedunsignedlong equallength; /* is defined of all sequences are of equal
+                             length and no WILDCARD appears in the sequence */
 
   gt_error_check(err);
   filenametab = gt_str_array_ref(filenametab);
@@ -5328,6 +5416,7 @@ gt_encseq_new_from_files(GtProgressTimer *sfxprogress,
     if (gt_inputfiles2sequencekeyvalues(indexname,
                               &totallength,
                               &specialcharinfo,
+                              &equallength,
                               forcetable,
                               specialrangestab,
                               filenametab,
@@ -5360,6 +5449,7 @@ gt_encseq_new_from_files(GtProgressTimer *sfxprogress,
                                    totallength,
                                    sequenceseppos.nextfreeGtUlong+1,
                                    specialrangestab,
+                                   &equallength,
                                    alpha,
                                    gt_str_length(str_sat) > 0
                                      ? gt_str_get(str_sat)
@@ -6375,10 +6465,10 @@ void gt_encseq_builder_reset(GtEncseqBuilder *eb)
 }
 
 GtEncseq* gt_encseq_builder_build(GtEncseqBuilder *eb,
-                                           GT_UNUSED GtError *err)
+                                  GT_UNUSED GtError *err)
 {
   GtEncseq *encseq = NULL;
-  const GtEncseqAccessType sat =  GT_ACCESS_TYPE_DIRECTACCESS;
+  const GtEncseqAccessType sat = GT_ACCESS_TYPE_DIRECTACCESS;
   GtSpecialcharinfo samplespecialcharinfo;
   bool withrange = eb->withrange;
   gt_assert(eb->plainseq);
@@ -6391,6 +6481,7 @@ GtEncseq* gt_encseq_builder_build(GtEncseqBuilder *eb,
                                     0,
                                     0,
                                     samplespecialcharinfo.specialranges,
+                                    NULL,
                                     gt_alphabet_ref(eb->alpha),
                                     eb->logger);
   encseq->specialcharinfo = samplespecialcharinfo;

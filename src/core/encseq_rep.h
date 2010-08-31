@@ -37,6 +37,7 @@
 #include "core/intbits.h"
 #include "core/types_api.h"
 #include "core/str_array_api.h"
+#include "core/defined-types.h"
 #include "core/types_api.h"
 #include "core/thread.h"
 
@@ -74,6 +75,7 @@ struct GtEncseq
   unsigned long *characterdistribution;
   GtSpecialcharinfo *specialcharinfoptr, /* need for writing specialcharinfo */
                   specialcharinfo; /* information about specialcharacters */
+  Definedunsignedlong equallength;
   GtStrArray *filenametab;    /* table of filenames */
   char *firstfilename;
   GtFilelengthvalues *filelengthtab;  /* table of length of files */
