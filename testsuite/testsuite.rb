@@ -163,3 +163,7 @@ require 'scripts_include'
 if $arguments["gcov"] then
   require 'gcov_include' # must be last
 end
+
+# tests by DW
+
+require 'gt_genomediff_include'
