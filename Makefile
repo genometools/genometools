@@ -359,9 +359,6 @@ ifeq ($(threads),yes)
   EXP_CPPFLAGS += -DGT_THREADS_ENABLED
   EXP_LDLIBS += -lpthread
   GTSHAREDLIB_LIBDEP += -lpthread
-  HMMERTHREADS_DEF := #define HMMER_THREADS
-else
-  HMMERTHREADS_DEF := #undef HMMER_THREADS
 endif
 
 # the GenomeTools library
@@ -420,7 +417,8 @@ $(HMMER_OBJ) $(EASEL_OBJ): hmmerlibs
 # HMMER libs must be built with -fPIC to support shared libs on AMD64
 hmmerlibs: hmmer_get
 	@echo "[build HMMER3]"
-	@(cd $(HMMER_BASE) && CFLAGS=$(EXP_CFLAGS)\ -fPIC ./configure -q --enable-threads > /dev/null)
+	@(cd $(HMMER_BASE) && CFLAGS=-O3\ -fomit-frame-pointer\ -fPIC \
+	   ./configure -q --enable-threads > /dev/null)
 	@$(MAKE) -s -C $(HMMER_BASE) > /dev/null
 
 lib/libz.a: $(ZLIB_OBJ)
