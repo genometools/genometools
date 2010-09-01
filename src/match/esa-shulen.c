@@ -311,16 +311,21 @@ int gt_multiesa2shulengthdist(Sequentialsuffixarrayreader *ssar,
   }
   if (!haserr)
   {
-    for (referidx=0; referidx < state->numofdbfiles; referidx++)
+    printf("%lu\n",state->numofdbfiles);
+    for (shulenidx=0; shulenidx < state->numofdbfiles; shulenidx++)
     {
-      for (shulenidx=0; shulenidx < state->numofdbfiles; shulenidx++)
+      printf("%lu\t",shulenidx);
+      for (referidx=0; referidx < state->numofdbfiles; referidx++)
       {
         if (referidx != shulenidx)
         {
-          printf("%lu %lu %lu\n",referidx,shulenidx,
-                                 state->shulengthdist[referidx][shulenidx]);
+          printf("%lu\t", state->shulengthdist[referidx][shulenidx]);
+        } else
+        {
+          printf("0\t");
         }
       }
+      printf("\n");
     }
   }
   gt_array2dim_delete(state->shulengthdist);
