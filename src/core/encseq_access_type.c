@@ -28,6 +28,7 @@ typedef struct
 static GtWrittenAccessType wpa[] = {
   {GT_ACCESS_TYPE_DIRECTACCESS, "direct"},
   {GT_ACCESS_TYPE_BYTECOMPRESS, "bytecompress"},
+  {GT_ACCESS_TYPE_EQUALLENGTH, "eqlen"},
   {GT_ACCESS_TYPE_BITACCESS, "bit"},
   {GT_ACCESS_TYPE_UCHARTABLES, "uchar"},
   {GT_ACCESS_TYPE_USHORTTABLES, "ushort"},
@@ -36,7 +37,7 @@ static GtWrittenAccessType wpa[] = {
 
 const char* gt_encseq_access_type_list(void)
 {
-  return "direct, bytecompress, bit, uchar, ushort, uint32";
+  return "direct, bytecompress, eqlen, bit, uchar, ushort, uint32";
 }
 
 const char* gt_encseq_access_type_str(GtEncseqAccessType at)
@@ -51,6 +52,7 @@ GtEncseqAccessType gt_encseq_access_type_get(const char *str)
 
   for (i=0; i<sizeof (wpa)/sizeof (wpa[0]); i++)
   {
+    gt_assert(i == 0 || wpa[i-1].sat < wpa[i].sat);
     if (strcmp(str,wpa[i].name) == 0)
     {
       return wpa[i].sat;
