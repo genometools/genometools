@@ -259,7 +259,7 @@ if $gttestdata then
     Keywords "gt_ltrdigest"
     Test do
       run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz"
-      run_test "#{$bin}gt ltrdigest -hmms #{$gttestdata}/ltrdigest/hmms/RVT_1_fs.hmm #{$gttestdata}/ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
+      run_test "#{$bin}gt ltrdigest -hmms #{$gttestdata}/ltrdigest/hmms/RVT_1.hmm #{$gttestdata}/ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
       grep($last_stderr, /missing argument/)
     end
   
@@ -277,7 +277,7 @@ if $gttestdata then
     Keywords "gt_ltrdigest"
     Test do
       run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz"
-      run_test "#{$bin}gt ltrdigest -threads 2 -outfileprefix result4 -trnas #{$gttestdata}ltrdigest/Dm-tRNAs-uniq.fa -hmms #{$gttestdata}/ltrdigest/hmms/RVT_1_fs.hmm --  #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 0, :maxtime => 12000
+      run_test "#{$bin}gt ltrdigest -threads 2 -outfileprefix result4 -trnas #{$gttestdata}ltrdigest/Dm-tRNAs-uniq.fa -hmms #{$gttestdata}/ltrdigest/hmms/RVT_1.hmm --  #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 0, :maxtime => 12000
       grep($last_stderr, /option is deprecated. Please use/)
     end
   end
@@ -337,7 +337,7 @@ if $gttestdata then
       Keywords "gt_ltrdigest"
       Test do
         run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/#{chr}_genomic_dmel_RELEASE3-1.FASTA.gz"
-        run_test "#{$bin}gt ltrdigest -outfileprefix result#{chr} -trnas #{$gttestdata}ltrdigest/Dm-tRNAs-uniq.fa -hmms #{$gttestdata}/ltrdigest/hmms/RVT_1_fs.hmm --  #{$gttestdata}ltrdigest/dmel_test_Run9_#{chr}.gff3.sorted #{chr}_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 0, :maxtime => 12000
+        run_test "#{$bin}gt ltrdigest -outfileprefix result#{chr} -trnas #{$gttestdata}ltrdigest/Dm-tRNAs-uniq.fa -hmms #{$gttestdata}/ltrdigest/hmms/RVT_1.hmm --  #{$gttestdata}ltrdigest/dmel_test_Run9_#{chr}.gff3.sorted #{chr}_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 0, :maxtime => 12000
         check_ppt_pbs($last_stdout, chr)       
         #run "diff #{$last_stdout} #{$gttestdata}/ltrdigest/#{chr}_ref.gff3"
       end
@@ -361,7 +361,7 @@ if $gttestdata then
       Test do
         run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/#{chr}_genomic_dmel_RELEASE3-1.FASTA.gz"
         run_test "#{$bin}gt -j 2 ltrdigest -outfileprefix result#{chr} " + \
-                 "-hmms #{$gttestdata}/ltrdigest/hmms/RVT_1_fs.hmm " + \
+                 "-hmms #{$gttestdata}/ltrdigest/hmms/RVT_1.hmm " + \
                  "-aaout yes " + \
                  " #{$gttestdata}ltrdigest/dmel_test_Run9_#{chr}.gff3.sorted " + \
                  " #{chr}_genomic_dmel_RELEASE3-1.FASTA.gz", \
