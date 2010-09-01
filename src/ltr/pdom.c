@@ -194,8 +194,14 @@ void gt_pdom_single_hit_get_aaseq(const GtPdomSingleHit *sh,
   matched = gt_str_get(sh->aa_seq_matched);
   for (i = 0; i < gt_str_length(sh->aa_seq_matched); i++)
   {
-    if (!gt_pdom_isgap(matched[i]))
-      gt_str_append_char(dest, toupper(matched[i]));
+    if (!gt_pdom_isgap(matched[i])) {
+      /* replace stop codons by 'X'es */
+      if (matched[i] == '*') {
+        gt_str_append_char(dest, 'X');
+      } else {
+        gt_str_append_char(dest, toupper(matched[i]));
+      }
+    }
   }
 }
 
