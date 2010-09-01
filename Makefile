@@ -306,11 +306,13 @@ endif
 
 ifeq ($(m32),yes)
   GT_CFLAGS += -m32
+  HMMER_CFLAGS += -m32
   GT_LDFLAGS += -m32
 endif
 
 ifeq ($(m64),yes)
   GT_CFLAGS += -m64
+  HMMER_CFLAGS += -m64
   GT_LDFLAGS += -m64
 endif
 
@@ -417,7 +419,7 @@ $(HMMER_OBJ) $(EASEL_OBJ): hmmerlibs
 # HMMER libs must be built with -fPIC to support shared libs on AMD64
 hmmerlibs: hmmer_get
 	@echo "[build HMMER3]"
-	@(cd $(HMMER_BASE) && CFLAGS=-O3\ -fomit-frame-pointer\ -fPIC \
+	@(cd $(HMMER_BASE) && CFLAGS=-O3\ -fomit-frame-pointer\ -fPIC\ $(HMMER_CFLAGS) \
 	   ./configure -q --enable-threads > /dev/null)
 	@$(MAKE) -s -C $(HMMER_BASE) > /dev/null
 
