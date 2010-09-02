@@ -154,6 +154,7 @@ int gt_encseq_check_consistency(const GtEncseq *encseq,
                                 GtReadmode readmode,
                                 unsigned long scantrials,
                                 unsigned long multicharcmptrials,
+                                bool withseqnumcheck,
                                 GtError *err);
 
 /* Returns true is <encseq> has special ranges, false otherwise. */

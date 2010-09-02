@@ -34,9 +34,9 @@ def checkdc(filelist)
   filelist.each do |filename|
     filearg += "#{$testdata}#{filename} "
   end
-  run_test "#{$bin}gt suffixerator -v -pl -dc 64 -suf -tis " +
+  run_test "#{$bin}gt suffixerator -v -pl -dc 64 -suf -ssp -tis " +
            "-indexname sfx -db " + filearg
-  run_test "#{$bin}gt dev sfxmap #{trials()} -suf -tis -v sfx",
+  run_test "#{$bin}gt dev sfxmap #{trials()} -suf -tis -ssp -v sfx",
            :maxtime => 600
   run_test "#{$bin}gt suffixerator -v -pl -parts 3 -dc 64 -suf -tis " +
            "-indexname sfx3 -db " + filearg
@@ -113,6 +113,24 @@ allfiles += all_fastqfiles
 alldir = ["fwd","cpl","rev","rcl"]
 
 # put the tests with paircmp, maxpair, patternmatch, into a file gt_idxmatch
+
+{"FASTA" => all_fastafiles,
+ "EMBL" => all_emblfiles,
+ "GenBank" => all_genbankfiles,
+ "FastQ" => all_fastqfiles}.each do |k,filelist|
+    Name "gt suffixerator (#{k})"
+    Keywords "gt_suffixerator_tis"
+    Test do
+    run_test "#{$bin}gt suffixerator -tis -ssp -indexname sfx -db " +
+             flattenfilelist(filelist)
+    run_test "#{$bin}gt dev sfxmap -ssp -tis sfx"
+    filelist.each do |filename|
+      run_test "#{$bin}gt suffixerator -tis -ssp -indexname sfx -db " +
+               "#{$testdata}#{filename}"
+      run_test "#{$bin}gt dev sfxmap -ssp -tis sfx"
+    end
+  end
+end
 
 Name "gt qsortbench"
 Keywords "gt_qsortbench"

@@ -454,6 +454,7 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
                                (GtReadmode) readmode,
                                sfxmapoptions.scantrials,
                                sfxmapoptions.multicharcmptrials,
+                               sfxmapoptions.inputssp,
                                err) != 0)
             {
               haserr = true;

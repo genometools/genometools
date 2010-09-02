@@ -1374,21 +1374,25 @@ static int fillViaequallength(GtEncseq *encseq,
   for (pos=0; /* Nothing */; pos++)
   {
     retval = gt_sequence_buffer_next(fb,&cc,err);
-    if (retval < 0)
+    if (retval == 1)
     {
-      return -1;
-    }
-    if (retval == 0)
+      UPDATESEQBUFFER(cc);
+    } else
     {
+      if (retval < 0)
+      {
+        return -1;
+      }
+      gt_assert(retval == 0);
       break;
     }
-    UPDATESEQBUFFER(cc);
   }
   UPDATESEQBUFFERFINAL;
   return 0;
 }
 
-static bool checkspecialViaequallength(const GtEncseq *encseq,unsigned long pos)
+static bool specialsingleposViaequallength(const GtEncseq *encseq,
+                                           unsigned long pos)
 {
   gt_assert(encseq != NULL);
   gt_assert(encseq->equallength.defined);
@@ -1405,7 +1409,7 @@ static bool checkspecialViaequallength(const GtEncseq *encseq,unsigned long pos)
 static GtUchar delivercharViaequallength(const GtEncseq *encseq,
                                          unsigned long pos)
 {
-  if (!checkspecialViaequallength(encseq,pos))
+  if (!specialsingleposViaequallength(encseq,pos))
   {
     return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
   }
@@ -1419,15 +1423,23 @@ static GtUchar seqdelivercharViaequallength(const GtEncseq *encseq,
   return delivercharViaequallength(encseq,pos);
 }
 
-unsigned long gt_encseq_seqnum_Viaequallength(const GtEncseq *encseq,
-                                              unsigned long pos)
+static unsigned long gt_encseq_seqnum_Viaequallength(const GtEncseq *encseq,
+                                                     unsigned long pos)
 {
-  gt_assert(!checkspecialViaequallength(encseq,pos));
+  gt_assert(!specialsingleposViaequallength(encseq,pos));
   if (pos < encseq->equallength.valueunsignedlong)
   {
     return 0;
   }  
-  return (pos + 1)/(encseq->equallength.valueunsignedlong + 1) + 1;
+  return (pos + 1)/(encseq->equallength.valueunsignedlong + 1);
+}
+
+static unsigned long gt_encseq_seqstartpos_Viaequallength(
+                                                  const GtEncseq *encseq,
+                                                  unsigned long seqnum)
+{
+  gt_assert(encseq != NULL && seqnum < encseq->numofdbsequences);
+  return seqnum * (encseq->equallength.valueunsignedlong + 1);
 }
 
 static bool containsspecialViaequallength(const GtEncseq *encseq,
@@ -1438,14 +1450,14 @@ static bool containsspecialViaequallength(const GtEncseq *encseq,
 {
   gt_assert(encseq != NULL);
 
-  if (checkspecialViaequallength(encseq,startpos))
+  if (specialsingleposViaequallength(encseq,startpos))
   {
     return true;
   }
   if (moveforward)
   {
     gt_assert(startpos + len <= encseq->totallength);
-    if (checkspecialViaequallength(encseq,startpos + len - 1) ||
+    if (specialsingleposViaequallength(encseq,startpos + len - 1) ||
         gt_encseq_seqnum_Viaequallength(encseq,startpos) !=
         gt_encseq_seqnum_Viaequallength(encseq,startpos + len - 1))
     {
@@ -1454,7 +1466,7 @@ static bool containsspecialViaequallength(const GtEncseq *encseq,
   } else
   {
     gt_assert (startpos + 1 >= len);
-    if (checkspecialViaequallength(encseq,startpos + 1 - len) ||
+    if (specialsingleposViaequallength(encseq,startpos + 1 - len) ||
         gt_encseq_seqnum_Viaequallength(encseq,startpos) !=
         gt_encseq_seqnum_Viaequallength(encseq,startpos + 1 - len))
     {
@@ -2347,7 +2359,7 @@ static bool gt_equallength_specialrangeiterator_next(GtRange *range,
                                                    GtSpecialrangeiterator *sri)
 {
   gt_assert(!sri->exhausted);
-  gt_assert(!checkspecialViaequallength(sri->encseq,sri->pos));
+  gt_assert(!specialsingleposViaequallength(sri->encseq,sri->pos));
   if (sri->moveforward)
   {
     if (sri->pos + sri->encseq->equallength.valueunsignedlong >=
@@ -2356,7 +2368,7 @@ static bool gt_equallength_specialrangeiterator_next(GtRange *range,
       sri->exhausted = true;
       return false;
     }
-    sri->pos += (sri->encseq->equallength.valueunsignedlong + 1);
+    sri->pos += sri->encseq->equallength.valueunsignedlong + 1;
     range->start = sri->pos - 1;
     range->end = sri->pos;
   } else
@@ -2366,7 +2378,7 @@ static bool gt_equallength_specialrangeiterator_next(GtRange *range,
       sri->exhausted = true;
       return false;
     }
-    sri->pos -= (sri->encseq->equallength.valueunsignedlong + 1);
+    sri->pos -= sri->encseq->equallength.valueunsignedlong + 1;
     range->start = sri->pos + 1;
     range->end = sri->pos + 2;
   }
@@ -2617,61 +2629,63 @@ unsigned long gt_encseq_sep2seqnum(const unsigned long *recordseps,
 unsigned long gt_encseq_seqnum(const GtEncseq *encseq,
                                unsigned long position)
 {
-  gt_assert(encseq->numofdbsequences == 1UL || encseq->ssptab != NULL);
-  return gt_encseq_sep2seqnum(encseq->ssptab,
-                              encseq->numofdbsequences,
-                              encseq->totallength,
-                              position);
+  if (encseq->sat != GT_ACCESS_TYPE_EQUALLENGTH)
+  {
+    gt_assert(encseq->numofdbsequences == 1UL || encseq->ssptab != NULL);
+    return gt_encseq_sep2seqnum(encseq->ssptab,
+                                encseq->numofdbsequences,
+                                encseq->totallength,
+                                position);
+  }
+  return gt_encseq_seqnum_Viaequallength(encseq,position);
 }
 
 unsigned long gt_encseq_seqstartpos(const GtEncseq *encseq,
                                     unsigned long seqnum)
 {
-  gt_assert(encseq->numofdbsequences == 1UL || encseq->ssptab != NULL);
-  if (seqnum > 0)
+  if (encseq->sat != GT_ACCESS_TYPE_EQUALLENGTH)
   {
-    return encseq->ssptab[seqnum-1] + 1;
+    gt_assert(encseq->numofdbsequences == 1UL || encseq->ssptab != NULL);
+    if (seqnum > 0)
+    {
+      return encseq->ssptab[seqnum-1] + 1;
+    }
+    return 0;
   }
-  return 0;
+  return gt_encseq_seqstartpos_Viaequallength(encseq,seqnum);
 }
 
 unsigned long gt_encseq_seqlength(const GtEncseq *encseq, unsigned long seqnum)
 {
-  unsigned long startpos;
-  gt_assert(encseq->numofdbsequences == 1UL || encseq->ssptab != NULL);
-  startpos = (seqnum == 0 ? 0 : encseq->ssptab[seqnum-1] + 1);
-  if (seqnum == 0)
+  if (encseq->sat != GT_ACCESS_TYPE_EQUALLENGTH)
   {
-    if (encseq->numofdbsequences == 1UL)
+    unsigned long startpos;
+    gt_assert(encseq->numofdbsequences == 1UL || encseq->ssptab != NULL);
+    startpos = (seqnum == 0 ? 0 : encseq->ssptab[seqnum-1] + 1);
+    if (seqnum == 0)
     {
-      return encseq->totallength;
-    } else 
+      if (encseq->numofdbsequences == 1UL)
+      {
+        return encseq->totallength;
+      } else 
+      {
+        return encseq->ssptab[0];
+      }
+    } else
     {
-      return encseq->ssptab[0];
+      if (seqnum == encseq->numofdbsequences - 1)
+      {
+        return encseq->totallength - startpos;
+      } else 
+      {
+        return encseq->ssptab[seqnum] - startpos;
+      }
     }
   } else
   {
-    if (seqnum == encseq->numofdbsequences - 1)
-    {
-      return encseq->totallength - startpos;
-    } else 
-    {
-      return encseq->ssptab[seqnum] - startpos;
-    }
+    return encseq->equallength.valueunsignedlong;
   }
 }
-
-/* void gt_encseq_seqinfo(const GtEncseq *encseq,
-                                GtSeqinfo *seqinfo,
-                                unsigned long seqnum)
-{
-  gt_assert(encseq->numofdbsequences == 1UL || encseq->ssptab != NULL);
-  getunitGtSeqinfo(seqinfo,
-                 encseq->ssptab,
-                 encseq->numofdbsequences,
-                 encseq->totallength,
-                 seqnum);
-} */
 
 void gt_encseq_check_markpos(const GtEncseq *encseq)
 {
@@ -3782,14 +3796,36 @@ static unsigned long fwdgetnextstopposViatables(const GtEncseq *encseq,
 static unsigned long fwdgetnextstopposViaequallength(const GtEncseq *encseq,
                                                      unsigned long pos)
 {
-  if (checkspecialViaequallength(encseq,pos))
+  if (specialsingleposViaequallength(encseq,pos))
+  {
+    /*printf("pos=%lu,return %lu\n",pos,pos);*/
+    return pos;
+  } else
+  {
+    unsigned long value, seqnum = gt_encseq_seqnum_Viaequallength(encseq,pos);
+    
+    value = seqnum * (encseq->equallength.valueunsignedlong + 1) + 
+                     encseq->equallength.valueunsignedlong;
+    /*printf("pos=%lu,seqnum=%lu, return %lu\n",pos,seqnum,value);*/
+    return value;
+  }
+}
+
+static unsigned long revgetnextstopposViaequallength(const GtEncseq *encseq,
+                                                     unsigned long pos)
+{
+  if (specialsingleposViaequallength(encseq,pos))
   {
     return pos;
   } else
   {
     unsigned long seqnum = gt_encseq_seqnum_Viaequallength(encseq,pos);
-    return seqnum * (encseq->equallength.valueunsignedlong + 1) + 
-                    encseq->equallength.valueunsignedlong;
+    if (seqnum == 0)
+    {
+      return 0;
+    }
+    return (seqnum - 1) * (encseq->equallength.valueunsignedlong + 1) + 
+                           encseq->equallength.valueunsignedlong;
   }
 }
 
@@ -3824,14 +3860,6 @@ static unsigned long revgetnextstopposViatables(const GtEncseq *encseq,
     }
   }
   return 0; /* virtual stop at -1 */
-}
-
-static unsigned long revgetnextstopposViaequallength(
-                                     GT_UNUSED const GtEncseq *encseq,
-                                     GT_UNUSED unsigned long pos)
-{
-  gt_assert(false);
-  return 0;
 }
 
 static inline GtTwobitencoding calctbeforward(const GtTwobitencoding *tbe,
@@ -4035,9 +4063,11 @@ static void fwdextract2bitenc(GtEndofTwobitencoding *ptbe,
       if (encseq->sat != GT_ACCESS_TYPE_EQUALLENGTH)
       {
         stoppos = fwdgetnextstopposViatables(encseq,esr,startpos);
+        /*printf("startpos=%lu,stoppos=%lu\n",startpos,stoppos);*/
       } else
       {
         stoppos = fwdgetnextstopposViaequallength(encseq,startpos);
+        /*printf("startpos=%lu,stoppos=%lu\n",startpos,stoppos);*/
       }
     } else
     {
@@ -4457,6 +4487,7 @@ int gt_encseq_compare(const GtEncseq *encseq,
   {
     if (fwd)
     {
+      /*printf("pos1=%lu,pos2=%lu,depth=%lu\n",pos1,pos2,depth);*/
       if (pos1 + depth < encseq->totallength &&
           pos2 + depth < encseq->totallength)
       {
@@ -4466,6 +4497,7 @@ int gt_encseq_compare(const GtEncseq *encseq,
                                                    commonunits,
                                                    &ptbe1,&ptbe2);
         depth += commonunits->common;
+        /*printf("depth=%lu\n",depth);*/
       } else
       {
         retval = comparewithonespecial(&commonunits->leftspecial,
@@ -4514,18 +4546,31 @@ int gt_encseq_compare(const GtEncseq *encseq,
                                                  &lcp2,
                                                  pos1,
                                                  pos2,
-                                                 depth);
-    gt_assert(retval == retval2);
+                                                 depth,
+                                                 0);
+    if (retval != retval2)
+    {
+      fprintf(stderr,"line %d: retval = %d != %d = retval2\n",__LINE__,
+              retval,retval2);
+      fprintf(stderr,"pos1 = %lu, pos2 = %lu, depth = %lu, "
+                     "lcp = %lu, lcp2 = %lu\n",
+                      pos1,
+                      pos2,
+                      depth,
+                      commonunits->finaldepth,
+                      lcp2);
+      exit(GT_EXIT_PROGRAMMING_ERROR);
+    }
     if (commonunits->finaldepth != lcp2)
     {
-      fprintf(stderr,"line %d: pos1 = %u, pos2 = %u, depth = %u, "
-                     "lcp = %u != %u = lcp2\n",
+      fprintf(stderr,"line %d: pos1 = %lu, pos2 = %lu, depth = %lu, "
+                     "lcp = %lu != %lu = lcp2\n",
                       __LINE__,
-                      (unsigned int) pos1,
-                      (unsigned int) pos2,
-                      (unsigned int) depth,
-                      (unsigned int) commonunits->finaldepth,
-                      (unsigned int) lcp2);
+                      pos1,
+                      pos2,
+                      depth,
+                      commonunits->finaldepth,
+                      lcp2);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     gt_assert(commonunits->finaldepth == lcp2);
@@ -4583,8 +4628,8 @@ int gt_encseq_compare_maxdepth(const GtEncseq *encseq,
     {
       if (pos1 >= depth && pos2 >= depth)
       {
-        gt_encseq_reader_reinit_with_direction(esr1,encseq,false, pos1 - depth);
-        gt_encseq_reader_reinit_with_direction(esr2,encseq,false, pos2 - depth);
+        gt_encseq_reader_reinit_with_direction(esr1,encseq,false,pos1 - depth);
+        gt_encseq_reader_reinit_with_direction(esr2,encseq,false,pos2 - depth);
       }
     }
   }
@@ -4592,13 +4637,17 @@ int gt_encseq_compare_maxdepth(const GtEncseq *encseq,
   {
     if (fwd)
     {
+      /*
+      printf("depth=%lu, pos1=%lu, pos2=%lu, endpos1=%lu, endpos2=%lu\n",
+              depth,pos1,pos2,endpos1,endpos2);
+      */
       if (pos1 + depth < endpos1 && pos2 + depth < endpos2)
       {
         fwdextract2bitenc(&ptbe1,encseq,esr1,pos1 + depth);
         fwdextract2bitenc(&ptbe2,encseq,esr2,pos2 + depth);
         retval = gt_encseq_compare_twobitencodings(true,complement,
-                                                            commonunits,
-                                                            &ptbe1,&ptbe2);
+                                                   commonunits,
+                                                   &ptbe1,&ptbe2);
         if (depth + commonunits->common < maxdepth)
         {
           depth += commonunits->common;
@@ -4653,31 +4702,40 @@ int gt_encseq_compare_maxdepth(const GtEncseq *encseq,
     }
   } while (retval == 0);
   commonunits->finaldepth = depth;
-#undef FASTCOMPAREDEBUG
 #ifdef FASTCOMPAREDEBUG
   {
     unsigned long lcp2 = 0;
     int retval2;
 
     retval2 = gt_encseq_comparetwostringsgeneric(encseq,
-                                       fwd,
-                                       complement,
-                                       &lcp2,
-                                       pos1,
-                                       pos2,
-                                       depth,
-                                       maxdepth);
-    gt_assert(retval == retval2);
+                                                 fwd,
+                                                 complement,
+                                                 &lcp2,
+                                                 pos1,
+                                                 pos2,
+                                                 depth,
+                                                 maxdepth);
+    if (retval != retval2)
+    {
+      fprintf(stderr,"line %d: retval = %d != %d = retval2\n",__LINE__,
+              retval,retval2);
+      fprintf(stderr,"pos1 = %lu, pos2 = %lu, depth = %lu, maxdepth = %lu\n",
+                      pos1,
+                      pos2,
+                      depth,
+                      maxdepth);
+      exit(GT_EXIT_PROGRAMMING_ERROR);
+    }
     if (commonunits->finaldepth != lcp2)
     {
-      fprintf(stderr,"line %d: pos1 = %u, pos2 = %u, depth = %u, "
-                     "lcp = %u != %u = lcp2\n",
+      fprintf(stderr,"line %d: pos1 = %lu, pos2 = %lu, depth = %lu, "
+                     "lcp = %lu != %lu = lcp2\n",
                       __LINE__,
-                      (unsigned int) pos1,
-                      (unsigned int) pos2,
-                      (unsigned int) depth,
-                      (unsigned int) commonunits->finaldepth,
-                      (unsigned int) lcp2);
+                      pos1,
+                      pos2,
+                      depth,
+                      commonunits->finaldepth,
+                      lcp2);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     gt_assert(commonunits->finaldepth == lcp2);
@@ -5772,13 +5830,46 @@ static void runscanatpostrial(const GtEncseq *encseq,
   }
 }
 
+static void testseqnumextraction(const GtEncseq *encseq)
+{
+  GtUchar cc;
+  bool startofsequence = true;
+  unsigned long pos, startpos, totallength, currentseqnum = 0, seqnum;
+
+  totallength = gt_encseq_total_length(encseq);
+  for (pos=0; pos < totallength; pos++)
+  {
+    /* Random access */
+    cc = gt_encseq_get_encoded_char(encseq,pos,GT_READMODE_FORWARD);
+    if (cc == (GtUchar) SEPARATOR)
+    {
+      currentseqnum++;
+      startofsequence = true;
+    } else
+    {
+      seqnum = gt_encseq_seqnum(encseq,pos);
+      if (currentseqnum != seqnum)
+      {
+        fprintf(stderr,"testseqnumextraction: pos=%lu: currentseqnum = %lu "
+                       "!= %lu = seqnum\n",pos,currentseqnum,seqnum);
+        exit(GT_EXIT_PROGRAMMING_ERROR);
+      }
+      if (startofsequence)
+      {
+        startpos = gt_encseq_seqstartpos(encseq,seqnum);
+        gt_assert(startpos == pos);
+        startofsequence = false;
+      }
+    }
+  }
+}
+
 static void testscanatpos(const GtEncseq *encseq,
                           GtReadmode readmode,
                           unsigned long scantrials)
 {
   GtEncseqReader *esr = NULL;
-  unsigned long startpos, totallength;
-  unsigned long trial;
+  unsigned long startpos, totallength, trial;
 
   totallength = gt_encseq_total_length(encseq);
   esr = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
@@ -5925,6 +6016,7 @@ int gt_encseq_check_consistency(const GtEncseq *encseq,
                                 GtReadmode readmode,
                                 unsigned long scantrials,
                                 unsigned long multicharcmptrials,
+                                bool withseqnumcheck,
                                 GtError *err)
 {
   bool fwd = GT_ISDIRREVERSE(readmode) ? false : true,
@@ -5945,6 +6037,10 @@ int gt_encseq_check_consistency(const GtEncseq *encseq,
   if (scantrials > 0)
   {
     testscanatpos(encseq,readmode,scantrials);
+  }
+  if (withseqnumcheck && readmode == GT_READMODE_FORWARD)
+  {
+    testseqnumextraction(encseq);
   }
   return testfullscan(filenametab,encseq,readmode,err);
 }
@@ -6904,11 +7000,9 @@ unsigned long gt_encseq_filestartpos(const GtEncseq *encseq,
                                      unsigned long filenum)
 {
   gt_assert(encseq->numofdbfiles == 1UL || encseq->fsptab != NULL);
-  if (filenum == 0)
-  {
-    return 0;
-  } else
+  if (filenum > 0)
   {
     return encseq->fsptab[filenum-1] + 1;
   }
+  return 0;
 }
