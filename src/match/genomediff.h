@@ -31,7 +31,8 @@ typedef struct {
        withesa,
        simplesearch,
        shulen_only,
-       traverse_only;
+       traverse_only,
+       scan;
   int user_max_depth;
   unsigned long max_ln_n_fac;
   double divergence_abs_err, /* kr2 T */

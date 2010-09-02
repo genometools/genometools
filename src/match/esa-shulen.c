@@ -455,3 +455,48 @@ int gt_esa2shulengthqueryfiles(unsigned long *totalgmatchlength,
   }
   return haserr ? -1 : 0;
 }
+
+int gt_get_multiesashulengthdist(Sequentialsuffixarrayreader *ssar,
+                                const GtEncseq *encseq,
+                                unsigned long **shulen,
+                                GtLogger *logger,
+                                GtError *err)
+{
+  Shulengthdiststate *state;
+  bool haserr = false;
+  unsigned long referidx, shulenidx;
+
+  state = gt_malloc(sizeof(*state));
+  state->numofdbfiles = gt_encseq_num_of_files(encseq);
+  state->encseq = encseq;
+#ifdef SKDEBUG
+  state->nextid = 0;
+#endif
+  state->firstleafcount2omit = gt_encseq_total_length(encseq) -
+                               gt_encseq_specialcharacters(encseq);
+  state->currentleafcount = 0;
+  state->shulengthdist = shulen;
+  for (referidx=0; referidx < state->numofdbfiles; referidx++)
+  {
+    for (shulenidx=0; shulenidx < state->numofdbfiles; shulenidx++)
+    {
+      state->shulengthdist[referidx][shulenidx] = 0;
+    }
+  }
+  if (gt_depthfirstesa(ssar,
+                       shulen_allocateDfsinfo,
+                       shulen_freeDfsinfo,
+                       shulen_processleafedge,
+                       shulen_processbranchedge,
+                       NULL,
+                       NULL,
+                       NULL,
+                       (Dfsstate*) state,
+                       logger,
+                       err) != 0)
+  {
+    haserr = true;
+  }
+  gt_free(state);
+  return haserr ? -1 : 0;
+}

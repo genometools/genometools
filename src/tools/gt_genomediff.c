@@ -27,10 +27,13 @@
 #include "core/str_array_api.h"
 #include "core/unused_api.h"
 
+#include "match/esa-map.h"
+#include "match/esa-shulen.h"
 #include "match/genomediff.h"
 #include "match/idx-limdfs.h"
-#include "match/shu-genomediff-kr2.h"
-#include "match/shu-genomediff-simple.h"
+#include "match/sarr-def.h"
+#include "match/shu-genomediff-pck-simple.h"
+#include "match/shu-genomediff-pck.h"
 
 #include "tools/gt_genomediff.h"
 
@@ -59,13 +62,13 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
   GtGenomediffArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *option, *optionquery, *optionesaindex, *optionpckindex,
-           *optiontraverse;
+           *optiontraverse, *optionscan;
   gt_assert(arguments);
 
   /* init */
-  op = gt_option_parser_new("[option ...] -pck indexname "
+  op = gt_option_parser_new("[option ...] -pck|-esa indexname "
                             "[-query sequencefile(s)]",
-                            "Reads in a packedindex.");
+                            "Calculates shulens of Genomes and the Kr.");
 
   /* -maxdepth */
   option =  gt_option_new_int("maxdepth", "max depth of .pbi-file",
@@ -88,7 +91,6 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
   optionesaindex = gt_option_new_string("esa",
                                      "Specify index (enhanced suffix array)",
                                      arguments->indexname, NULL);
-  gt_option_is_development_option(optionesaindex);
   gt_option_parser_add_option(op, optionesaindex);
 
   /* -pck */
@@ -112,48 +114,53 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
                                        "if this option is set a simple "
                                        "shustring search will be used." ,
                                        arguments->queryname);
+  gt_option_is_extended_option(optionquery);
   gt_option_parser_add_option(op, optionquery);
 
   /* ref query */
   arguments->ref_queryname = gt_option_ref(optionquery);
 
   /* thresholds */
+  /* divergence error */
   option = gt_option_new_double("thr",
                                 "Threshold for difference (du, dl) in"
                                 "divergence calculation.\n"
                                 "default: 1e-9",
                                 &arguments->divergence_threshold,
                                 pow(10.0, -9.0));
-  gt_option_is_development_option(option);
+  gt_option_is_extended_option(option);
   gt_option_hide_default(option);
   gt_option_parser_add_option(op, option);
 
+  /* expected shulen error */
   option = gt_option_new_double("abs_err",
                                 "absolut error for epected shulen "
                                 "calculation.\n"
                                 "default: 1e-5",
                                 &arguments->divergence_abs_err,
                                 1e-5);
-  gt_option_is_development_option(option);
+  gt_option_is_extended_option(option);
   gt_option_hide_default(option);
   gt_option_parser_add_option(op, option);
 
+  /* relative expected shulen error */
   option = gt_option_new_double("rel_err",
                                 "relative error for epected shulen "
                                 "calculation.\n"
                                 "default: 1e-3",
                                 &arguments->divergence_rel_err,
                                 1e-3);
-  gt_option_is_development_option(option);
+  gt_option_is_extended_option(option);
   gt_option_hide_default(option);
   gt_option_parser_add_option(op, option);
 
+  /* M */
   option = gt_option_new_double("M",
                                 "threshold for minimum logarithm.\n"
                                 "default: DBL_MIN",
                                 &arguments->divergence_m,
                                 DBL_MIN);
-  gt_option_is_development_option(option);
+  gt_option_is_extended_option(option);
   gt_option_hide_default(option);
   gt_option_parser_add_option(op, option);
 
@@ -164,15 +171,25 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
                               false);
   gt_option_parser_add_option(op, option);
 
+  /* scan */
+  optionscan = gt_option_new_bool("scan",
+                                  "do not load esa index but scan"
+                                  " it sequentialy",
+                                  &arguments->scan,
+                                  true);
+  gt_option_exclude(optionscan, optionpckindex);
+  gt_option_parser_add_option(op, optionscan);
+
   /* traverse */
   optiontraverse = gt_option_new_bool("traverse",
                               "traverses the virtual tree without calculating"
-                              "anything, sets GT_ENV_OPTIONS=-showtime"
-                              "does not work with -esa and -query",
+                              " anything, sets GT_ENV_OPTIONS=-showtime"
+                              " does not work with -esa and -query",
                               &arguments->traverse_only,
                               false);
   gt_option_exclude(optiontraverse, optionesaindex);
   gt_option_exclude(optiontraverse, optionquery);
+  gt_option_is_development_option(optiontraverse);
   gt_option_parser_add_option(op, optiontraverse);
   /* mail */
   gt_option_parser_set_mailaddress(op, "<dwillrodt@zbh.uni-hamburg.de>");
@@ -202,11 +219,6 @@ static int gt_genomediff_arguments_check(GT_UNUSED int rest_argc,
     arguments->simplesearch = true;
   else
     arguments->simplesearch = false;
-  if (arguments->withesa)
-  {
-    printf("not implemented option -esa used, sorry, try -pck instead\n");
-    had_err = 1;
-  }
   if (!had_err && arguments->traverse_only &&
       !gt_showtime_enabled())
   {
@@ -217,6 +229,42 @@ static int gt_genomediff_arguments_check(GT_UNUSED int rest_argc,
   return had_err;
 }
 
+static int callpairswisesshulendistdist(const char *indexname,
+                                        const GtStrArray *queryfilenames,
+                                        GtLogger *logger,
+                                        GtError *err)
+{
+  bool haserr = false;
+  Suffixarray suffixarray;
+
+  if (gt_mapsuffixarray(&suffixarray,
+                        SARR_SUFTAB |
+                        SARR_ESQTAB,
+                        indexname,
+                        logger,
+                        err) != 0)
+  {
+    haserr = true;
+  }
+  if (!haserr)
+  {
+    unsigned long totalgmatchlength = 0;
+
+    if (gt_esa2shulengthqueryfiles(&totalgmatchlength,
+                                   &suffixarray,
+                                   queryfilenames,
+                                   err) != 0)
+    {
+      haserr = true;
+    } else
+    {
+      printf("%lu\n",totalgmatchlength);
+    }
+  }
+  gt_freesuffixarray(&suffixarray);
+  return haserr ? -1 : 0;
+}
+
 static int gt_genomediff_runner(GT_UNUSED int argc,
                                 GT_UNUSED const char **argv,
                                 GT_UNUSED int parsed_args,
@@ -224,16 +272,8 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
 {
   GtGenomediffArguments *arguments = tool_arguments;
   int had_err = 0;
-  Genericindex *genericindexSubject;
   GtLogger *logger;
-  const GtEncseq *encseq = NULL;
   GtProgressTimer *timer = NULL;
-
-  if (gt_showtime_enabled())
-  {
-    timer = gt_progress_timer_new("map index");
-    gt_assert(timer);
-  }
 
   gt_error_check(err);
   gt_assert(arguments);
@@ -243,20 +283,11 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
                          stdout);
   gt_assert(logger);
 
-  genericindexSubject = genericindex_new(gt_str_get(
-                                           arguments->indexname),
-                                         arguments->withesa,
-                                         true,
-                                         false,
-                                         true,
-                                         arguments->user_max_depth,
-                                         logger,
-                                         err);
-  if (genericindexSubject == NULL)
-    had_err = 1;
-  else
-    encseq = genericindex_getencseq(genericindexSubject);
-
+  if (gt_showtime_enabled())
+  {
+    timer = gt_progress_timer_new("start");
+    gt_assert(timer);
+  }
   if (!had_err)
   {
     if (arguments->simplesearch)
@@ -267,11 +298,19 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
                                           "run simple search",
                                           stdout);
       }
-      had_err = gt_genomediff_run_simple_search(genericindexSubject,
-                                                encseq,
-                                                logger,
-                                                arguments,
-                                                err);
+      if (arguments->withesa)
+      {
+        had_err = callpairswisesshulendistdist(gt_str_get(
+                                                 arguments->indexname),
+                                               arguments->queryname,
+                                               logger,
+                                               err);
+      } else
+      {
+        had_err = gt_genomediff_pck_shu_simple(logger,
+                                               arguments,
+                                               err);
+      }
     } else
     {
       if (timer != NULL)
@@ -280,12 +319,10 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
                                           "start shu search",
                                           stdout);
       }
-      had_err = gt_genomediff_run_kr2_search(genericindexSubject,
-                                             encseq,
-                                             logger,
-                                             arguments,
-                                             timer,
-                                             err);
+      had_err = gt_genomediff_shu(logger,
+                                  arguments,
+                                  timer,
+                                  err);
     }
   }
 
@@ -296,7 +333,6 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
                                       stdout);
     gt_progress_timer_delete(timer);
   }
-  genericindex_delete(genericindexSubject);
   gt_logger_delete(logger);
 
   return had_err;

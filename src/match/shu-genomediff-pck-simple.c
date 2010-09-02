@@ -31,17 +31,15 @@
 #include "match/shu-dfs.h"
 #include "match/shu-divergence.h"
 
-#include "match/shu-genomediff-simple.h"
+#include "match/shu-genomediff-pck-simple.h"
 
-int gt_genomediff_run_simple_search(Genericindex *genericindexSubject,
-                                    const GtEncseq *encseq,
-                                    GtLogger *logger,
-                                    const GtGenomediffArguments *arguments,
-                                    GtError *err)
+int gt_genomediff_pck_shu_simple(GtLogger *logger,
+                                 const GtGenomediffArguments *arguments,
+                                 GtError *err)
 {
   int had_err = 0;
   int retval;
-  GtSeqIterator *queries;
+  GtSeqIterator *queries = NULL;
   const GtUchar *symbolmap, *currentQuery;
   const GtAlphabet *alphabet;
   GtUchar c_sym, g_sym;
@@ -55,21 +53,48 @@ int gt_genomediff_run_simple_search(Genericindex *genericindexSubject,
          /*gc_subject,*/
          gc_query /*, gc*/;
   const FMindex *subjectindex;
+  Genericindex *genericindexSubject;
+  const GtEncseq *encseq = NULL;
 
-  subjectLength = genericindex_get_totallength(genericindexSubject) - 1;
-  /*subjectLength /= 2;*/
-  /*gt_log_log("subject length: %lu", subjectLength);*/
-  subjectindex = genericindex_get_packedindex(genericindexSubject);
+  genericindexSubject = genericindex_new(gt_str_get(
+                                           arguments->indexname),
+                                         arguments->withesa,
+                                         true,
+                                         false,
+                                         true,
+                                         arguments->user_max_depth,
+                                         logger,
+                                         err);
+  if (genericindexSubject == NULL)
+    had_err = 1;
+  else
+    encseq = genericindex_getencseq(genericindexSubject);
 
-  queries = gt_seqiterator_sequence_buffer_new(
-                                        arguments->queryname,
-                                        err);
-  gt_assert(queries);
-  alphabet = gt_encseq_alphabet(encseq);
-  symbolmap = gt_alphabet_symbolmap(alphabet);
-  gt_seqiterator_set_symbolmap(queries, symbolmap);
-  c_sym = gt_alphabet_encode(alphabet, 'c');
-  g_sym = gt_alphabet_encode(alphabet, 'g');
+  if (!had_err)
+  {
+    subjectLength = genericindex_get_totallength(genericindexSubject) - 1;
+    /*subjectLength /= 2;*/
+    /*gt_log_log("subject length: %lu", subjectLength);*/
+    subjectindex = genericindex_get_packedindex(genericindexSubject);
+
+    queries = gt_seqiterator_sequence_buffer_new(
+                                          arguments->queryname,
+                                          err);
+    gt_assert(queries);
+    alphabet = gt_encseq_alphabet(encseq);
+    /* makes assumption that alphabet is dna, it has to calculate the gc! */
+    if (!gt_alphabet_is_dna(alphabet))
+    {
+      fprintf(stderr, "error: Sequences need to be dna");
+      had_err = 1;
+    } else
+    {
+      symbolmap = gt_alphabet_symbolmap(alphabet);
+      gt_seqiterator_set_symbolmap(queries, symbolmap);
+      c_sym = gt_alphabet_encode(alphabet, 'c');
+      g_sym = gt_alphabet_encode(alphabet, 'g');
+    }
+  }
 
   for (queryNo = 0; !had_err; queryNo++)
   {
@@ -150,5 +175,6 @@ int gt_genomediff_run_simple_search(Genericindex *genericindexSubject,
     gt_free(description);
   }
   gt_seqiterator_delete(queries);
+  genericindex_delete(genericindexSubject);
   return had_err;
 }

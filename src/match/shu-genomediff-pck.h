@@ -15,17 +15,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SHU_GENOMEDIFF_KR2_H
-#define SHU_GENOMEDIFF_KR2_H
+#ifndef SHU_GENOMEDIFF_PCK_H
+#define SHU_GENOMEDIFF_PCK_H
 
 #include "match/genomediff.h"
 #include "match/idx-limdfs.h"
 
-int gt_genomediff_run_kr2_search(Genericindex *genericindexSubject,
-                                 const GtEncseq *encseq,
-                                 GtLogger *logger,
-                                 const GtGenomediffArguments *arguments,
-                                 GtProgressTimer *timer,
-                                 GtError *err);
+int gt_genomediff_shu(GtLogger *logger,
+                      const GtGenomediffArguments *arguments,
+                      GtProgressTimer *timer,
+                      GtError *err);
 
 #endif

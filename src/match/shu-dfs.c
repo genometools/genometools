@@ -109,25 +109,12 @@ static int visit_shu_children(const FMindex *index,
   gt_assert(parent->lower < parent->upper);
   num_of_rows = parent->upper - parent->lower;
 
-  if (parent->depth == 0)
-  {
-    gt_assert(num_of_rows == totallength+1);
-    rangesize = gt_bwtrangesplitallwithspecial(tmpmbtab,
-                                               rangeOccs,
-                                               index,
-                                               parent->lower,
-                                               parent->upper);
-    /* the 3 comes from the seperator, wildcards and terminator */
-    gt_assert(rangesize <= numofchars + 3);
-  } else
-  {
-    rangesize = gt_bwtrangesplitallwithoutspecial(tmpmbtab,
-                                                  rangeOccs,
-                                                  index,
-                                                  parent->lower,
-                                                  parent->upper);
-    gt_assert(rangesize <= numofchars);
-  }
+  rangesize = gt_bwtrangesplitallwithoutspecial(tmpmbtab,
+                                                rangeOccs,
+                                                index,
+                                                parent->lower,
+                                                parent->upper);
+  gt_assert(rangesize <= numofchars);
 
   offset = 0;
   for (idx = 0; idx < rangesize; idx++)
@@ -245,7 +232,7 @@ static int visit_shu_children(const FMindex *index,
 
 static int process_shu_node(ShuNode *node,
                             GtStackShuNode *stack,
-                            double **shulen,
+                            unsigned long **shulen,
                             unsigned long numoffiles,
                             GT_UNUSED GtLogger *logger,
                             GT_UNUSED GtError *err)
@@ -311,7 +298,7 @@ static int process_shu_node(ShuNode *node,
 
 int gt_pck_calculate_shulen(const FMindex *index,
                             const GtEncseq *encseq,
-                            double **shulen,
+                            unsigned long **shulen,
                             unsigned long numofchars,
                             unsigned long totallength,
                             bool calculate,

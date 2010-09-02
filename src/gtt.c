@@ -61,7 +61,7 @@
 #include "ltr/ltrelement.h"
 #include "ltr/pbs.h"
 #include "ltr/ppt.h"
-#include "match/shu_encseq_gc.h"
+#include "match/shu-encseq-gc.h"
 #include "tools/gt_bed_to_gff3.h"
 #include "tools/gt_cds.h"
 #include "tools/gt_chain2dim.h"

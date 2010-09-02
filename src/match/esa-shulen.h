@@ -34,4 +34,9 @@ int gt_esa2shulengthqueryfiles(unsigned long *totalgmatchlength,
                                const GtStrArray *queryfilenames,
                                GtError *err);
 
+int gt_get_multiesashulengthdist(Sequentialsuffixarrayreader *ssar,
+                                const GtEncseq *encseq,
+                                unsigned long **shulen,
+                                GtLogger *logger,
+                                GtError *err);
 #endif

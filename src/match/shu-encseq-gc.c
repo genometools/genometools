@@ -17,13 +17,14 @@
 
 #include <stdbool.h>
 
+#include "core/alphabet_api.h"
 #include "core/encseq_api.h"
 #include "core/ensure.h"
 #include "core/ma_api.h"
 #include "core/mathsupport.h"
 #include "core/unused_api.h"
 
-#include "match/shu_encseq_gc.h"
+#include "match/shu-encseq-gc.h"
 
 static inline unsigned long get_unitsep(const GtEncseq *encseq,
                                         bool per_file,
@@ -48,8 +49,8 @@ static inline void calculate_gc(const GtEncseq *encseq,
                                 bool per_file,
                                 bool with_special,
                                 unsigned long unit_idx,
-                                double gc_count,
-                                double at_count)
+                                unsigned long gc_count,
+                                unsigned long at_count)
 {
   if (with_special)
   {
@@ -57,17 +58,17 @@ static inline void calculate_gc(const GtEncseq *encseq,
     {
       gt_assert(unit_idx < gt_encseq_num_of_files(encseq));
       gc_contens[unit_idx] =
-        gc_count / (double) gt_encseq_effective_filelength(encseq,
-                                                           unit_idx);
+        (double) gc_count / (double) gt_encseq_effective_filelength(encseq,
+                                                                    unit_idx);
     } else
     {
       gt_assert(unit_idx < gt_encseq_num_of_sequences(encseq));
       gc_contens[unit_idx] =
-        gc_count / (double) gt_encseq_seqlength(encseq, unit_idx);
+        (double) gc_count / (double) gt_encseq_seqlength(encseq, unit_idx);
     }
   } else
   {
-    gc_contens[unit_idx] = gc_count / (gc_count + at_count);
+    gc_contens[unit_idx] = (double) gc_count / (double) (gc_count + at_count);
   }
 }
 
@@ -77,17 +78,23 @@ double *gt_encseq_get_gc(const GtEncseq *encseq,
                          GT_UNUSED GtError *err)
 {
   GtEncseqReader *reader;
+  GtAlphabet *alphabet;
   double *gc_contens;
   /* unit = file or sequence depending on per_file */
   unsigned long char_idx, totallength, max_unit,
                 unitsep = 0,
                 unit_idx = 0,
                 nextsep = 0,
-                sep_idx = 0;
-  double        gc_count = 0.0,
-                at_count = 0.0,
-                default_count = 0.0;
+                at_count = 0,
+                sep_idx = 0,
+                gc_count = 0,
+                default_count = 0;
+  GtUchar acgt[8], current_c;
 
+  alphabet = gt_encseq_alphabet(encseq);
+  gt_assert(gt_alphabet_is_dna(alphabet));
+  gt_alphabet_encode_seq(alphabet, acgt,
+                         "aAtTcCgG", 8UL);
   totallength = gt_encseq_total_length(encseq);
   reader = gt_encseq_create_reader_with_readmode(encseq,
                                                  GT_READMODE_FORWARD,
@@ -150,23 +157,21 @@ double *gt_encseq_get_gc(const GtEncseq *encseq,
                                             char_idx + 1UL);
       continue;
     }
-    switch (gt_encseq_reader_next_decoded_char(reader))
+    current_c = gt_encseq_reader_next_encoded_char(reader);
+    if (current_c == acgt[0] ||
+        current_c == acgt[1] ||
+        current_c == acgt[2] ||
+        current_c == acgt[3])
+       at_count++;
+    else
     {
-      case 'a':
-      case 'A':
-      case 't':
-      case 'T':
-        at_count += 1.0;
-        break;
-      case 'c':
-      case 'C':
-      case 'g':
-      case 'G':
-        gc_count += 1.0;
-        break;
-      default:
-        default_count += 1.0;
-        break;
+      if (current_c == acgt[4] ||
+          current_c == acgt[5] ||
+          current_c == acgt[6] ||
+          current_c == acgt[7])
+         gc_count++;
+      else
+        default_count++;
     }
   }
   calculate_gc(encseq,

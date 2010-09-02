@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SHU_GENOMEDIFF_SIMPLE_H
-#define SHU_GENOMEDIFF_SIMPLE_H
+#ifndef SHU_GENOMEDIFF_PCK_SIMPLE_H
+#define SHU_GENOMEDIFF_PCK_SIMPLE_H
 
 #include "core/logger.h"
 #include "core/encseq_api.h"
@@ -24,10 +24,9 @@
 #include "match/genomediff.h"
 #include "match/idx-limdfs.h"
 
-int gt_genomediff_run_simple_search(Genericindex *genericindexSubject,
-                                    const GtEncseq *encseq,
-                                    GtLogger *logger,
-                                    const GtGenomediffArguments *arguments,
-                                    GtError *err);
+/* works only with dna */
+int gt_genomediff_pck_shu_simple(GtLogger *logger,
+                                 const GtGenomediffArguments *arguments,
+                                 GtError *err);
 
 #endif
