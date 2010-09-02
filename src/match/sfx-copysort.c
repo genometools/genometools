@@ -213,8 +213,8 @@ static unsigned long *leftcontextofspecialchardist(unsigned int numofchars,
 */
 
 static unsigned long *leftcontextofspecialchardist(unsigned int numofchars,
-                                            const GtEncseq *encseq,
-                                            GtReadmode readmode)
+                                                   const GtEncseq *encseq,
+                                                   GtReadmode readmode)
 {
   GtUchar cc;
   unsigned int idx;
@@ -236,13 +236,12 @@ static unsigned long *leftcontextofspecialchardist(unsigned int numofchars,
     {
       GtReadmode thismode =
                  (readmode == GT_READMODE_REVERSE) ? GT_READMODE_FORWARD
-                                                    : GT_READMODE_COMPL;
+                                                   : GT_READMODE_COMPL;
       while (gt_specialrangeiterator_next(sri,&range))
       {
         if (range.end < totallength)
         {
-          cc = gt_encseq_get_encoded_char(encseq,range.end,
-                                                 thismode);
+          cc = gt_encseq_get_encoded_char(encseq,range.end,thismode);
           if (ISNOTSPECIAL(cc))
           {
             specialchardist[cc]++;
@@ -256,8 +255,7 @@ static unsigned long *leftcontextofspecialchardist(unsigned int numofchars,
         gt_assert(range.start < totallength);
         if (range.start > 0)
         {
-          cc = gt_encseq_get_encoded_char(encseq,range.start-1,
-                                                 readmode);
+          cc = gt_encseq_get_encoded_char(encseq,range.start-1,readmode);
           if (ISNOTSPECIAL(cc))
           {
             specialchardist[cc]++;
@@ -267,11 +265,22 @@ static unsigned long *leftcontextofspecialchardist(unsigned int numofchars,
     }
     gt_specialrangeiterator_delete(sri);
   }
-  if (gt_encseq_lengthofspecialsuffix(encseq) == 0)
+  if (GT_ISDIRREVERSE(readmode))
   {
-    cc = gt_encseq_get_encoded_char(encseq,totallength-1,readmode);
-    gt_assert(ISNOTSPECIAL(cc));
-    specialchardist[cc]++;
+    if (gt_encseq_lengthofspecialprefix(encseq) == 0)
+    {
+      cc = gt_encseq_get_encoded_char(encseq,totallength-1,readmode);
+      gt_assert(ISNOTSPECIAL(cc));
+      specialchardist[cc]++;
+    }
+  } else
+  {
+    if (gt_encseq_lengthofspecialsuffix(encseq) == 0)
+    {
+      cc = gt_encseq_get_encoded_char(encseq,totallength-1,readmode);
+      gt_assert(ISNOTSPECIAL(cc));
+      specialchardist[cc]++;
+    }
   }
   return specialchardist;
 }

@@ -224,7 +224,7 @@ void gt_encseq_sequence2bytecode(GtUchar *dest,
                                  unsigned long len)
 {
   gt_assert(encseq->sat != GT_ACCESS_TYPE_BYTECOMPRESS);
-  if (encseq->sat ==  GT_ACCESS_TYPE_DIRECTACCESS)
+  if (encseq->sat == GT_ACCESS_TYPE_DIRECTACCESS)
   {
     gt_encseq_plainseq2bytecode(dest,encseq->plainseq + startindex,len);
   } else
@@ -451,7 +451,7 @@ bool gt_encseq_contains_special(const GtEncseq *encseq,
                                         moveforward
                                           ? startpos
                                           : GT_REVERSEPOS(encseq->totallength,
-                                                       startpos),
+                                                          startpos),
                                         len);
 }
 
@@ -945,10 +945,10 @@ static int determinesattype(unsigned long *specialranges,
             sat = GT_ACCESS_TYPE_BITACCESS;
           } else
           {
-            if (equallength != NULL && equallength->defined)
+            /*if (equallength != NULL && equallength->defined)
             {
               sat = GT_ACCESS_TYPE_EQUALLENGTH;
-            }
+            }*/
           }
           if (sat == GT_ACCESS_TYPE_UCHARTABLES)
           {
@@ -1186,7 +1186,7 @@ static GtUchar seqdelivercharnoSpecial(const GtEncseq *encseq,
   return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
-/*  GT_ACCESS_TYPE_DIRECTACCESS */
+/* GT_ACCESS_TYPE_DIRECTACCESS */
 
 static int fillViadirectaccess(GtEncseq *encseq,GtSequenceBuffer *fb,
                                GtError *err)
@@ -1202,17 +1202,20 @@ static int fillViadirectaccess(GtEncseq *encseq,GtSequenceBuffer *fb,
   for (pos=0; /* Nothing */; pos++)
   {
     retval = gt_sequence_buffer_next(fb,&cc,err);
-    if (retval < 0)
+    if (retval == 1)
     {
-      gt_free(encseq->plainseq);
-      encseq->plainseq = NULL;
-      return -1;
-    }
-    if (retval == 0)
+      encseq->plainseq[pos] = cc;
+    } else
     {
+      if (retval < 0)
+      {
+        gt_free(encseq->plainseq);
+        encseq->plainseq = NULL;
+        return -1;
+      }
+      gt_assert(retval == 0);
       break;
     }
-    encseq->plainseq[pos] = cc;
   }
   return 0;
 }
@@ -1274,8 +1277,8 @@ static int fillViabytecompress(GtEncseq *encseq,GtSequenceBuffer *fb,
 {
   unsigned long pos;
   int retval;
-  GtUchar cc;
   unsigned int numofchars;
+  GtUchar cc;
 
   gt_error_check(err);
   numofchars = gt_alphabet_num_of_chars(encseq->alpha);
@@ -1285,32 +1288,30 @@ static int fillViabytecompress(GtEncseq *encseq,GtSequenceBuffer *fb,
   for (pos=0; /* Nothing */; pos++)
   {
     retval = gt_sequence_buffer_next(fb,&cc,err);
-    if (retval < 0)
+    if (retval == 1)
     {
-      bitpackarray_delete(encseq->bitpackarray);
-      encseq->bitpackarray = NULL;
-      return -1;
-    }
-    if (retval == 0)
-    {
-      break;
-    }
-    if (cc == (GtUchar) WILDCARD)
-    {
-      cc = (GtUchar) numofchars;
-    } else
-    {
-      if (cc == (GtUchar) SEPARATOR)
+      if (ISSPECIAL(cc))
       {
-        cc = (GtUchar) (numofchars+1);
+        cc = (cc == (GtUchar) WILDCARD) ? (GtUchar) numofchars
+                                        : (GtUchar) (numofchars+1);
       } else
       {
         gt_assert(cc < (GtUchar) numofchars);
       }
+      gt_assert(pos < encseq->totallength);
+      bitpackarray_store_uint32(encseq->bitpackarray,(BitOffset) pos,
+                                (uint32_t) cc);
+    } else
+    {
+      if (retval < 0)
+      {
+        bitpackarray_delete(encseq->bitpackarray);
+        encseq->bitpackarray = NULL;
+        return -1;
+      }
+      gt_assert(retval == 0);
+      break;
     }
-    gt_assert(pos < encseq->totallength);
-    bitpackarray_store_uint32(encseq->bitpackarray,(BitOffset) pos,
-                              (uint32_t) cc);
   }
   return 0;
 }
@@ -1427,11 +1428,11 @@ static unsigned long gt_encseq_seqnum_Viaequallength(const GtEncseq *encseq,
                                                      unsigned long pos)
 {
   gt_assert(!specialsingleposViaequallength(encseq,pos));
-  if (pos < encseq->equallength.valueunsignedlong)
+  if (pos >= encseq->equallength.valueunsignedlong)
   {
-    return 0;
-  }  
-  return (pos + 1)/(encseq->equallength.valueunsignedlong + 1);
+    return (pos + 1)/(encseq->equallength.valueunsignedlong + 1);
+  }
+  return 0;
 }
 
 static unsigned long gt_encseq_seqstartpos_Viaequallength(
@@ -1440,6 +1441,22 @@ static unsigned long gt_encseq_seqstartpos_Viaequallength(
 {
   gt_assert(encseq != NULL && seqnum < encseq->numofdbsequences);
   return seqnum * (encseq->equallength.valueunsignedlong + 1);
+}
+
+static bool checkspecialbruteforce(const GtEncseq *encseq,
+                                   unsigned long startpos,
+                                   unsigned long len)
+{
+  unsigned long idx;
+
+  for(idx=startpos; idx < startpos + len; idx++)
+  {
+    if (ISSPECIAL(delivercharViaequallength(encseq,idx)))
+    {
+      return true;
+    }
+  }
+  return false;
 }
 
 static bool containsspecialViaequallength(const GtEncseq *encseq,
@@ -1461,6 +1478,7 @@ static bool containsspecialViaequallength(const GtEncseq *encseq,
         gt_encseq_seqnum_Viaequallength(encseq,startpos) !=
         gt_encseq_seqnum_Viaequallength(encseq,startpos + len - 1))
     {
+      gt_assert(checkspecialbruteforce(encseq,startpos,len));
       return true;
     }
   } else
@@ -1473,6 +1491,7 @@ static bool containsspecialViaequallength(const GtEncseq *encseq,
       return true;
     }
   }
+  gt_assert(!checkspecialbruteforce(encseq,startpos,len));
   return false;
 }
 
@@ -1498,19 +1517,22 @@ static int fillViabitaccess(GtEncseq *encseq,
   for (pos=0; /* Nothing */; pos++)
   {
     retval = gt_sequence_buffer_next(fb,&cc,err);
-    if (retval < 0)
+    if (retval == 1)
     {
-      return -1;
-    }
-    if (retval == 0)
+      if (ISSPECIAL(cc))
+      {
+        GT_SETIBIT(encseq->specialbits,pos);
+      }
+      UPDATESEQBUFFER(cc);
+    } else
     {
+      if (retval < 0)
+      {
+        return -1;
+      }
+      gt_assert(retval == 0);
       break;
     }
-    if (ISSPECIAL(cc))
-    {
-      GT_SETIBIT(encseq->specialbits,pos);
-    }
-    UPDATESEQBUFFER(cc);
   }
   UPDATESEQBUFFERFINAL;
   return 0;
@@ -2252,7 +2274,7 @@ GtSpecialrangeiterator* gt_specialrangeiterator_new(const GtEncseq *encseq,
   sri->encseq = encseq;
   sri->exhausted = (encseq->numofspecialstostore == 0) ? true : false;
   sri->lengthofspecialrange = 0;
-  if (encseq->sat ==  GT_ACCESS_TYPE_DIRECTACCESS ||
+  if (encseq->sat == GT_ACCESS_TYPE_DIRECTACCESS ||
       encseq->sat == GT_ACCESS_TYPE_BYTECOMPRESS ||
       encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH ||
       encseq->sat == GT_ACCESS_TYPE_BITACCESS)
@@ -2273,10 +2295,10 @@ GtSpecialrangeiterator* gt_specialrangeiterator_new(const GtEncseq *encseq,
   } else
   {
     sri->pos = 0;
-    sri->esr 
+    sri->esr
       = gt_encseq_create_reader_with_direction(encseq,
                                                moveforward,
-                                               moveforward 
+                                               moveforward
                                                  ? 0
                                                  : (encseq->totallength-1));
   }
@@ -2378,6 +2400,7 @@ static bool gt_equallength_specialrangeiterator_next(GtRange *range,
       sri->exhausted = true;
       return false;
     }
+    gt_assert(sri->pos >= sri->encseq->equallength.valueunsignedlong + 1);
     sri->pos -= sri->encseq->equallength.valueunsignedlong + 1;
     range->start = sri->pos + 1;
     range->end = sri->pos + 2;
@@ -2560,7 +2583,7 @@ static unsigned long *encseq2markpositions(const GtEncseq *encseq)
   gt_assert (encseq->numofdbsequences > 1UL);
   asp.allocatedGtUlong = encseq->numofdbsequences-1;
   asp.nextfreeGtUlong = 0;
-  asp.spaceGtUlong 
+  asp.spaceGtUlong
     = gt_malloc(sizeof (*asp.spaceGtUlong) * asp.allocatedGtUlong);
   sri = gt_specialrangeiterator_new(encseq,true);
   while (gt_specialrangeiterator_next(sri,&range))
@@ -2667,7 +2690,7 @@ unsigned long gt_encseq_seqlength(const GtEncseq *encseq, unsigned long seqnum)
       if (encseq->numofdbsequences == 1UL)
       {
         return encseq->totallength;
-      } else 
+      } else
       {
         return encseq->ssptab[0];
       }
@@ -2676,7 +2699,7 @@ unsigned long gt_encseq_seqlength(const GtEncseq *encseq, unsigned long seqnum)
       if (seqnum == encseq->numofdbsequences - 1)
       {
         return encseq->totallength - startpos;
-      } else 
+      } else
       {
         return encseq->ssptab[seqnum] - startpos;
       }
@@ -2795,7 +2818,7 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
   encseq->deliverchar = NULL;
   encseq->delivercharname = NULL;
   encseq->twobitencoding = NULL;
-  if (sat ==  GT_ACCESS_TYPE_DIRECTACCESS || sat == GT_ACCESS_TYPE_BYTECOMPRESS)
+  if (sat == GT_ACCESS_TYPE_DIRECTACCESS || sat == GT_ACCESS_TYPE_BYTECOMPRESS)
   {
     encseq->unitsoftwobitencoding = 0;
   } else
@@ -3803,8 +3826,8 @@ static unsigned long fwdgetnextstopposViaequallength(const GtEncseq *encseq,
   } else
   {
     unsigned long value, seqnum = gt_encseq_seqnum_Viaequallength(encseq,pos);
-    
-    value = seqnum * (encseq->equallength.valueunsignedlong + 1) + 
+
+    value = seqnum * (encseq->equallength.valueunsignedlong + 1) +
                      encseq->equallength.valueunsignedlong;
     /*printf("pos=%lu,seqnum=%lu, return %lu\n",pos,seqnum,value);*/
     return value;
@@ -3824,7 +3847,7 @@ static unsigned long revgetnextstopposViaequallength(const GtEncseq *encseq,
     {
       return 0;
     }
-    return (seqnum - 1) * (encseq->equallength.valueunsignedlong + 1) + 
+    return (seqnum - 1) * (encseq->equallength.valueunsignedlong + 1) +
                            encseq->equallength.valueunsignedlong;
   }
 }
