@@ -1,10 +1,16 @@
-#!/bin/sh
+#!/bin/bash
 
 # set -e -x
 
 if test $# -ne 1
 then
   echo "Usage: $0 [small|all]"
+  exit 1
+fi
+
+if test "${PROJECT}XXX" = "XXX"
+then
+  echo "$0: environment variable PROJECT not defined"
   exit 1
 fi
 
@@ -23,25 +29,25 @@ code2file()
 {
   case $1 in
     at1MB)
-      echo "testdata/at1MB";;
+      echo "${GTDIR}/testdata/at1MB";;
     mfd)
-      echo "${HOME}/seqcmpprojects/MouthFootDisease/mfdallpart.fna.gz";;
+      echo "${PROJECT}/gi/seqcmpprojects/MouthFootDisease/mfdallpart.fna.gz";;
     yeast)
-      echo "${HOME}/seqcmpprojects/yeast/yeast.fna.gz";;
+      echo "${PROJECT}/gi/seqcmpprojects/yeast.fna.gz";;
     human2)
       echo "${PROJECT}/biodata/genomes/H_sapiens-build36.54-2009/Homo_sapiens.NCBI36.54.dna.chromosome.02.fa.gz";;
     human22)
       echo "${PROJECT}/biodata/genomes/H_sapiens-build36.54-2009/Homo_sapiens.NCBI36.54.dna.chromosome.22.fa.gz";;
     dmel)
-      echo "${HOME}/seqcmpprojects/d_mel/d_mel.fna.gz";;
+      echo "${PROJECT}/gi/seqcmpprojects/d_mel.fna.gz";;
     ecoli1)
-      echo "${PROJECT}/biodata/genomes/Bacteria/Ecoli/ecoli.fna";;
+      echo "${PROJECT}/biodata/genomes/Bacteria/Escherichia_coli_K12/NC_000913.fna";;
     ecoli2)
       echo "${PROJECT}/biodata/genomes/Bacteria/Ecoli_O157_H7/AE005174.fna";;
     swiss1MB)
       echo "${GTTESTDATA}/swissprot/swiss1MB";;
     paradoxus)
-      echo "/local/kurtz/sfx-test/data/S-paradoxus.fna";;
+      echo "${PROJECT}/gi/seqcmpprojects/S-paradoxus.fna.gz";;
     *)
       echo "$0: illegal filecode $1"
       exit 1;;
@@ -51,7 +57,7 @@ code2file()
 checkrepetitive()
 {
   filename=$1
-  for cfc in ${repetitivefiles}
+  for cfc in $repetitivefiles
   do
     if test ${cfc} == ${filename}
     then
@@ -67,7 +73,7 @@ suffixerator()
   filename=`code2file $1`
   shift
   printf "# RUN $fc $*\n"
-  ${RUNNER} gt suffixerator -v -showtime -indexname sfx-id -tis -suf -db ${filename} $* | egrep '# TIME overall|# space peak'
+  GT_ENV_OPTIONS=-showtime ${RUNNER} ${GTDIR}/bin/gt suffixerator -v -indexname sfx-id -tis -suf -db ${filename} $* | egrep '# TIME overall|# space peak'
 }
 
 mkesa()
@@ -92,6 +98,7 @@ done
 # exit 0
 
 echo "# DATE `date +%Y-%m-%d-%H:%M`"
+echo "# HOSTNAME `hostname`"
 for rfc in $allfiles
 do
   checkrepetitive ${rfc}
@@ -103,6 +110,6 @@ do
   do
     suffixerator ${rfc} -dc ${dc}
   done
-  mkesa ${rfc}
-  rm -f sfx-idx.* mkesa-idx.*
+  # mkesa ${rfc}
+  # rm -f sfx-idx.* mkesa-idx.*
 done
