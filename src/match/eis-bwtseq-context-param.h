@@ -40,7 +40,7 @@ ctxMapILogIsValid(unsigned long seqLen, short mapIntervalLog2)
           || mapIntervalLog2 == CTX_MAP_ILOG_AUTOSIZE
           || (mapIntervalLog2 >= 0
               && mapIntervalLog2
-              < MIN(requiredSeqposBits(seqLen),
+              < MIN(requiredUlongBits(seqLen),
                     sizeof (unsigned long) * CHAR_BIT)));
 }
 

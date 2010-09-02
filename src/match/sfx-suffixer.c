@@ -136,10 +136,10 @@ static void compareCodeatpositionlists(const Codeatposition *codelist1,
   {
     if (codelist1[idx].position != codelist2[idx].position)
     {
-      fprintf(stderr,"idx %lu, codelist1.position = " FormatSeqpos " != "
-                      FormatSeqpos " = codelist2.position\n",idx,
-                      PRINTSeqposcast(codelist1[idx].position),
-                      PRINTSeqposcast(codelist2[idx].position));
+      fprintf(stderr,"idx %lu, codelist1.position = %lu != %lu"
+                     " = codelist2.position\n",idx,
+                      codelist1[idx].position,
+                      codelist2[idx].position);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     if (codelist1[idx].maxprefixindex != codelist2[idx].maxprefixindex)
@@ -269,10 +269,8 @@ static void updatekmercount(void *processinfo,
                                    position);
       if (code2 != 0)
       {
-        printf("### position " FormatSeqpos ", code2 = %lu != 0\n",
-                        PRINTSeqposcast(position),code2);
-        printf("previouscode = " FormatGtCodetype "\n",
-                        previouscode);
+        printf("### position %lu, code2 = %lu != 0\n",position,code2);
+        printf("previouscode = " FormatGtCodetype "\n",previouscode);
         if (previouskmercodedefined)
         {
           printf("previouskmercodedefined = true\n");
@@ -453,7 +451,7 @@ static void showleftborder(const unsigned long *leftborder,
 
   for (i=0; i<MIN(numofallcodes,(GtCodetype) 1024); i++)
   {
-    printf("leftborder[" FormatGtCodetype "]=" FormatSeqpos "\n",
+    printf("leftborder[" FormatGtCodetype "]=%lu\n",
             i,leftborder[i]);
   }
 }

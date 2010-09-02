@@ -90,7 +90,7 @@ struct blockCompositionSeq
   /* maxVarBitsPerBucket, cwBits */
   MRAEnc *blockMapAlphabet, *rangeMapAlphabet;
   int *modes;
-  unsigned bucketBlocks, blockSize, callBackDataOffsetBits, bitsPerSeqpos,
+  unsigned bucketBlocks, blockSize, callBackDataOffsetBits, bitsPerUlong,
     bitsPerVarDiskOffset;
   AlphabetRangeSize blockMapAlphabetSize;
   Symbol blockEncFallback, rangeEncFallback;
@@ -349,7 +349,7 @@ gt_newGenBlockEncIdxSeq(unsigned long totalLen, const char *projectName,
 
   newSeqIdx = gt_calloc(sizeof (struct blockCompositionSeq), 1);
   newSeqIdx->bucketBlocks = bucketBlocks;
-  newSeqIdx->bitsPerSeqpos = requiredSeqposBits((newSeqIdx->baseClass.seqLen
+  newSeqIdx->bitsPerUlong = requiredUlongBits((newSeqIdx->baseClass.seqLen
                                                  = totalLen) - 1);
   newSeqIdx->baseClass.alphabet = alphabet;
   {
@@ -419,21 +419,21 @@ gt_newGenBlockEncIdxSeq(unsigned long totalLen, const char *projectName,
 #if EIS_DEBUG > 1
         for (i = 0; i < blockMapAlphabetSize; ++i)
         {
-          gt_log_log("symCount[%"PRIuSymbol"]="FormatSeqpos"\n", (Symbol)i,
+          gt_log_log("symCount[%"PRIuSymbol"]=%lu\n", (Symbol) i,
                   stats->symbolDistributionTable[i]);
         }
 #endif /* EIS_DEBUG > 1 */
         if (blockMapAlphabetSize)
         {
           newSeqIdx->partialSymSumBitsSums[0] = 0;
-          newSeqIdx->partialSymSumBits[0] = requiredSeqposBits(symCounts[0]);
+          newSeqIdx->partialSymSumBits[0] = requiredUlongBits(symCounts[0]);
           for (i = 1; i < blockMapAlphabetSize; ++i)
           {
             newSeqIdx->partialSymSumBitsSums[i]
               = newSeqIdx->partialSymSumBitsSums[i - 1]
               + newSeqIdx->partialSymSumBits[i - 1];
             newSeqIdx->partialSymSumBits[i]
-              = requiredSeqposBits(symCounts[i]);
+              = requiredUlongBits(symCounts[i]);
           }
 #ifdef EIS_DEBUG
           for (i = 0; i < blockMapAlphabetSize; ++i)
@@ -466,8 +466,8 @@ gt_newGenBlockEncIdxSeq(unsigned long totalLen, const char *projectName,
             regionSymCount += stats->symbolDistributionTable[i];
         regionsEstimate = regionSymCount/20;
 #ifdef EIS_DEBUG
-        gt_log_log("Expected "FormatSeqpos" symbols to encode in regions.\n",
-                regionSymCount);
+        gt_log_log("Expected %lu symbols to encode in regions.\n",
+                    regionSymCount);
 #endif
       }
       break;
@@ -774,16 +774,16 @@ symSumBitsDefaultSetup(struct blockCompositionSeq *seqIdx)
   unsigned i;
   AlphabetRangeSize blockMapAlphabetSize = seqIdx->blockMapAlphabetSize;
   seqIdx->partialSymSumBitsSums[0] = 0;
-  seqIdx->partialSymSumBits[0] = seqIdx->bitsPerSeqpos;
+  seqIdx->partialSymSumBits[0] = seqIdx->bitsPerUlong;
   for (i = 1; i < blockMapAlphabetSize; ++i)
     seqIdx->partialSymSumBitsSums[i] = seqIdx->partialSymSumBitsSums[i - 1]
-      + (seqIdx->partialSymSumBits[i] = seqIdx->bitsPerSeqpos);
-  seqIdx->symSumBits = blockMapAlphabetSize * seqIdx->bitsPerSeqpos;
+      + (seqIdx->partialSymSumBits[i] = seqIdx->bitsPerUlong);
+  seqIdx->symSumBits = blockMapAlphabetSize * seqIdx->bitsPerUlong;
 #ifdef EIS_DEBUG
   gt_log_log("symSumBits=%u, blockMapAlphabetSize=%u\n",
           seqIdx->symSumBits, seqIdx->blockMapAlphabetSize);
 #endif
-  gt_assert(seqIdx->partialSymSumBitsSums[i - 1] + seqIdx->bitsPerSeqpos
+  gt_assert(seqIdx->partialSymSumBitsSums[i - 1] + seqIdx->bitsPerUlong
          == seqIdx->symSumBits);
 }
 
@@ -791,7 +791,7 @@ static inline unsigned long
 sBlockGetPartialSymSum(struct superBlock *sBlock, Symbol sym,
                        const struct blockCompositionSeq *seqIdx)
 {
-  return gt_bsGetSeqpos(sBlock->cwData, seqIdx->partialSymSumBitsSums[sym]
+  return gt_bsGetUlong(sBlock->cwData, seqIdx->partialSymSumBitsSums[sym]
                      + sBlock->cwIdxMemBase, seqIdx->partialSymSumBits[sym]);
 }
 
@@ -800,7 +800,7 @@ sBlockGetPartialSymSums(struct superBlock *sBlock,
                         const struct blockCompositionSeq *seqIdx,
                         unsigned long *sums)
 {
-  gt_bsGetNonUniformSeqposArray(
+  gt_bsGetNonUniformUlongArray(
     sBlock->cwData, sBlock->cwIdxMemBase, seqIdx->blockMapAlphabetSize,
     seqIdx->symSumBits, seqIdx->partialSymSumBits,
 #ifdef _LP64
@@ -1867,12 +1867,12 @@ updateIdxOutput(struct blockCompositionSeq *seqIdx,
   blockAlphabetSize = seqIdx->blockMapAlphabetSize;
   /* put bucket data for count up to the beginning of the current
    * block into the cw BitString */
-  gt_assert(sizeof (unsigned long) * CHAR_BIT >= seqIdx->bitsPerSeqpos);
+  gt_assert(sizeof (unsigned long) * CHAR_BIT >= seqIdx->bitsPerUlong);
   {
     Symbol i;
     for (i = 0; i < blockAlphabetSize; ++i)
     {
-      gt_bsStoreSeqpos(aState->compCache,
+      gt_bsStoreUlong(aState->compCache,
                     aState->cwMemOldBits + seqIdx->partialSymSumBitsSums[i],
                     seqIdx->partialSymSumBits[i], buck[i]);
     }
@@ -2042,7 +2042,7 @@ writeIdxHeader(struct blockCompositionSeq *seqIdx,
   *(uint64_t *)(buf + offset + 4) = seqIdx->externalData.rangeEncPos;
   offset += 12;
   *(uint32_t *)(buf + offset) = SPBT_HEADER_FIELD;
-  *(uint32_t *)(buf + offset + 4) = seqIdx->bitsPerSeqpos;
+  *(uint32_t *)(buf + offset + 4) = seqIdx->bitsPerUlong;
   offset += 8;
   *(uint32_t *)(buf + offset) = VDOB_HEADER_FIELD;
   *(uint32_t *)(buf + offset + 4) = seqIdx->bitsPerVarDiskOffset;
@@ -2206,7 +2206,7 @@ gt_loadBlockEncIdxSeqGen(MRAEnc *alphabet, unsigned long totalLen,
         offset += 8;
         break;
       case SPBT_HEADER_FIELD:
-        newSeqIdx->bitsPerSeqpos = *(uint32_t *)(buf + offset + 4);
+        newSeqIdx->bitsPerUlong = *(uint32_t *)(buf + offset + 4);
         offset += 8;
         break;
       case VDOB_HEADER_FIELD:
@@ -2290,11 +2290,11 @@ gt_loadBlockEncIdxSeqGen(MRAEnc *alphabet, unsigned long totalLen,
            && newSeqIdx->numModes
            && offset == headerLen);
     /* compute values not read from header */
-    if (!newSeqIdx->bitsPerSeqpos)
-      newSeqIdx->bitsPerSeqpos =
-        requiredSeqposBits(newSeqIdx->baseClass.seqLen - 1);
-    else if (newSeqIdx->bitsPerSeqpos !=
-            requiredSeqposBits(newSeqIdx->baseClass.seqLen - 1))
+    if (!newSeqIdx->bitsPerUlong)
+      newSeqIdx->bitsPerUlong =
+        requiredUlongBits(newSeqIdx->baseClass.seqLen - 1);
+    else if (newSeqIdx->bitsPerUlong !=
+            requiredUlongBits(newSeqIdx->baseClass.seqLen - 1))
       loadBlockEncIdxSeqErrRet();
   }
   {

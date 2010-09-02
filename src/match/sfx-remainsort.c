@@ -206,8 +206,7 @@ static unsigned long gt_frompos2rank(const Lowerboundwithrank *leftptr,
       }
     }
   }
-  fprintf(stderr,"frompos2rank: cannot find pos " FormatSeqpos
-                 " in ranges",PRINTSeqposcast(specialpos));
+  fprintf(stderr,"frompos2rank: cannot find pos %lu in ranges",specialpos);
   exit(GT_EXIT_PROGRAMMING_ERROR);
   /*@ignore@*/
   return 0;
@@ -522,8 +521,7 @@ static unsigned long gt_frompos2rank(const Lowerboundwithrank *leftptr,
       }
     }
   }
-  fprintf(stderr,"frompos2rank: cannot find pos " FormatSeqpos
-                 " in ranges",PRINTSeqposcast(specialpos));
+  fprintf(stderr,"frompos2rank: cannot find pos %lu in ranges",specialpos);
   exit(GT_EXIT_PROGRAMMING_ERROR);
   /*@ignore@*/
   return 0;

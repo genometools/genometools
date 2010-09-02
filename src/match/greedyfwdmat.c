@@ -354,10 +354,9 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
           fprintf(stderr,"at offset %lu:\n",(unsigned long)
                                               (substring.currentptr -
                                                substring.start));
-          fprintf(stderr,"bucketspec=(" FormatSeqpos "," "%lu" ")\n",
-                          PRINTSeqposcast(bucketspec.left),
-                          PRINTSeqposcast(bucketspec.left+
-                                          bucketspec.nonspecialsinbucket-1));
+          fprintf(stderr,"bucketspec=(%lu,%lu)\n",
+                          bucketspec.left,
+                          bucketspec.left+bucketspec.nonspecialsinbucket-1);
           fprintf(stderr,"gmatchlength2 = %lu != %lu = gmatchlength\n",
                           gmatchlength2,gmatchlength);
           exit(GT_EXIT_PROGRAMMING_ERROR);

@@ -56,10 +56,10 @@ typedef EISeq *(*indexCreateFunc)(
  * alphabet how symbols in this range are sorted
  * @param readOrigSeq makes the original sequence available
  * @param origSeqState opaque sequence object to pass to readOrigSeq
- * @param readNextSeqpos stream reader for the values of the suffix
+ * @param readNextUlong stream reader for the values of the suffix
  * array
  * @param spReadState opaque suffix array source object to pass to
- * readNextSeqpos
+ * readNextUlong
  * @param lrepFunc reports the position of the null-rotation
  * @param lrepState passed to lrepFunc
  * @param err

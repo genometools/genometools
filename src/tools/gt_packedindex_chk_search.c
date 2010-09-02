@@ -194,11 +194,6 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
                                                 false));
           gt_assert(gt_EMINumMatchesTotal(&EMIter)
                       == gt_countmmsearchiterator(mmsi));
-/*        fprintf(stderr, "trial %lu, "FormatSeqpos" matches\n" */
-/*                "pattern: ", trial, numMatches); */
-/*        fprintfsymbolstring(stderr, suffixarray.alpha, pptr, */
-/*                                patternLen); */
-/*        putc('\n', stderr); */
           while (gt_nextmmsearchiterator(&dbstart,mmsi))
           {
             unsigned long matchPos = 0;

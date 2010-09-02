@@ -158,8 +158,8 @@ static void showmergertrie2(const Mergertrierep *trierep,
       }
     } else
     {
-      printf(" d=" FormatSeqpos ",i=" Formatuint64_t "\n",
-            PRINTSeqposcast(current->depth),
+      printf(" d=%lu,i=" Formatuint64_t "\n",
+            current->depth,
             PRINTuint64_tcast(current->suffixinfo.ident));
       showmergertrie2(trierep,characters,level+1,current);
     }
@@ -199,8 +199,7 @@ static void checkmergertrie2(Mergertrierep *trierep,
 #ifndef NDEBUG
     if (ISIBITSET(leafused,start))
     {
-      fprintf(stderr,"leaf " FormatSeqpos " already found\n",
-              PRINTSeqposcast(start));
+      fprintf(stderr,"leaf %lu already found\n",start);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
 #endif
@@ -215,10 +214,9 @@ static void checkmergertrie2(Mergertrierep *trierep,
 #ifndef NDEBUG
       if (father->depth >= node->depth)
       {
-        fprintf(stderr,"father.depth = " FormatSeqpos " >= " FormatSeqpos
-                       " = node.depth\n",
-                       PRINTSeqposcast(father->depth),
-                       PRINTSeqposcast(node->depth));
+        fprintf(stderr,"father.depth = %lu >= %lu = node.depth\n",
+                       father->depth,
+                       node->depth);
         exit(GT_EXIT_PROGRAMMING_ERROR);
       }
 #endif

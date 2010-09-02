@@ -28,7 +28,7 @@ struct BWTSeqContextRetriever
     revMap;                     /**< maps positions in the original
                                  * sequence to positions in the BWT */
   uint16_t mapIntervalLog2;
-  uint16_t bitsPerSeqpos;
+  uint16_t bitsPerUlong;
 };
 
 static inline unsigned long

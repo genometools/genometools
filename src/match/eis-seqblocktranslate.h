@@ -202,7 +202,7 @@ addSymCountsFromComposition(struct compList *compositionTable,
   bitsPerCount = compositionTable->bitsPerCount;
   bitsPerComp = bitsPerCount * alphabetSize;
   gt_assert(compIndex < compositionTable->numCompositions);
-  gt_bsGetUniformSeqposArrayAdd(compositionTable->catCompsPerms,
+  gt_bsGetUniformUlongArrayAdd(compositionTable->catCompsPerms,
                              compIndex * bitsPerComp, bitsPerCount,
                              alphabetSize,
 #ifdef _LP64

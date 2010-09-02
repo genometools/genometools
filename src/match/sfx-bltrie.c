@@ -582,11 +582,10 @@ static void showleaf(const Blindtrie *blindtrie,unsigned int level,
 {
   printf("%*.*s",(int) (6 * level),(int) (6 * level)," ");
   gt_assert(current != NULL);
-  printf("Leaf(add=%lu,firstchar=%u,startpos=" FormatSeqpos
-         ",rightsibling=%lu)\n",
+  printf("Leaf(add=%lu,firstchar=%u,startpos=%lu,rightsibling=%lu)\n",
          NODENUM(current),
          (unsigned int) current->firstchar,
-         PRINTSeqposcast(current->either.startpos),
+         current->either.startpos,
          NODENUM(current->rightsibling));
 }
 
@@ -595,11 +594,11 @@ static void showintern(const Blindtrie *blindtrie,unsigned int level,
 {
   printf("%*.*s",(int) (6 * level),(int) (6 * level)," ");
   gt_assert(current != NULL);
-  printf("Intern(add=%lu,firstchar=%u,depth=" FormatSeqpos
+  printf("Intern(add=%lu,firstchar=%u,depth=%lu"
          ",firstchild=%lu,rightsibling=%lu)\n",
           NODENUM(current),
           (unsigned int) current->firstchar,
-          PRINTSeqposcast(current->depth),
+          current->depth,
           NODENUM(current->either.firstchild),
           NODENUM(current->rightsibling));
 }

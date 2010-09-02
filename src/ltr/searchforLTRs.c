@@ -79,20 +79,13 @@ static void adjustboundariesfromXdropextension(Myxdropbest xdropbest_left,
 
   /*
   printf("Adjusted boundaries from Xdrop-alignment-extension:\n");
-  printf("boundaries->leftLTR_5  = " FormatSeqpos "\n",
-            PRINTSeqposcast( boundaries->leftLTR_5 - offset));
-  printf("boundaries->leftLTR_3  = " FormatSeqpos "\n",
-            PRINTSeqposcast( boundaries->leftLTR_3 - offset));
-  printf("len leftLTR = " FormatSeqpos "\n",
-            PRINTSeqposcast( (boundaries->leftLTR_3 - boundaries->leftLTR_5
-                              + 1)));
-  printf("boundaries->rightLTR_5 = " FormatSeqpos "\n",
-            PRINTSeqposcast( boundaries->rightLTR_5 - offset));
-  printf("boundaries->rightLTR_3 = " FormatSeqpos "\n",
-            PRINTSeqposcast( boundaries->rightLTR_3 - offset));
-  printf("len rightLTR = " FormatSeqpos "\n",
-            PRINTSeqposcast( (boundaries->rightLTR_3 - boundaries->rightLTR_5
-                              + 1)));
+  printf("boundaries->leftLTR_5  = %lu\n",boundaries->leftLTR_5 - offset);
+  printf("boundaries->leftLTR_3  = %lu\n",boundaries->leftLTR_3 - offset);
+  printf("len leftLTR = %lu\n", boundaries->leftLTR_3-boundaries->leftLTR_5+1);
+  printf("boundaries->rightLTR_5 = %lu\n",boundaries->rightLTR_5 - offset);
+  printf("boundaries->rightLTR_3 = %lu\n",boundaries->rightLTR_3 - offset);
+  printf("len rightLTR = %lu\n",
+          boundaries->rightLTR_3-boundaries->rightLTR_5+1)));
  */
 }
 
@@ -226,27 +219,18 @@ int gt_searchforLTRs(LTRharvestoptions *lo,
     /* test
     printf("contig number: %lu\n",
                boundaries->contignumber);
-    printf("offset to contig startpos: " FormatSeqpos "\n",
-               PRINTSeqposcast(offset));
-
+    printf("offset to contig startpos: %lu\n",offset);
     printf("Boundaries from vmatmaxoutdynamic:\n");
-
-    printf("boundaries->leftLTR_5 abs. = " FormatSeqpos "\n",
-              PRINTSeqposcast(repeatptr->pos1));
-    printf("boundaries->rightLTR_5 abs. = " FormatSeqpos "\n",
-              PRINTSeqposcast(repeatptr->pos1 + repeatptr->offset));
-
-    printf("boundaries->leftLTR_5  = " FormatSeqpos "\n",
-              PRINTSeqposcast(repeatptr->pos1 - offset));
-    printf("boundaries->leftLTR_3  = " FormatSeqpos "\n",
-              PRINTSeqposcast(repeatptr->pos1 + repeatptr->len - 1
-                        - offset));
-    printf("boundaries->rightLTR_5 = " FormatSeqpos "\n",
-              PRINTSeqposcast(repeatptr->pos1 + repeatptr->offset
-                        - offset));
-    printf("boundaries->rightLTR_3 = " FormatSeqpos "\n",
-              PRINTSeqposcast(repeatptr->pos1 + repeatptr->offset +
-                        repeatptr->len - 1 - offset));
+    printf("boundaries->leftLTR_5 abs. = %lu\n",repeatptr->pos1);
+    printf("boundaries->rightLTR_5 abs. = %lu\n",
+            repeatptr->pos1+repeatptr->offset);
+    printf("boundaries->leftLTR_5 = %lu\n",repeatptr->pos1 - offset);
+    printf("boundaries->leftLTR_3 = %lu\n",
+            repeatptr->pos1 + repeatptr->len - 1 - offset));
+    printf("boundaries->rightLTR_5 = %lu\n",
+              repeatptr->pos1 + repeatptr->offset - offset);
+    printf("boundaries->rightLTR_3 = %lu\n",
+            repeatptr->pos1 + repeatptr->offset + repeatptr->len - 1 - offset);
     */
 
     /* store new boundaries-positions in boundaries */

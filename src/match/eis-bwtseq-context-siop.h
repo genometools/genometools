@@ -46,9 +46,9 @@ BWTSeqCRNextMark(const BWTSeqContextRetriever *bwtSeqCR, unsigned long pos)
   if (nextMark.textPos < seqLen)
   {
     nextMark.bwtPos
-      = gt_bsGetSeqpos(bwtSeqCR->revMap,
+      = gt_bsGetUlong(bwtSeqCR->revMap,
                     (nextMark.textPos >> bwtSeqCR->mapIntervalLog2)
-                    * bwtSeqCR->bitsPerSeqpos, bwtSeqCR->bitsPerSeqpos);
+                    * bwtSeqCR->bitsPerUlong, bwtSeqCR->bitsPerUlong);
   }
   else
   {

@@ -2620,7 +2620,7 @@ unsigned long gt_encseq_sep2seqnum(const unsigned long *recordseps,
     {
       return numofrecords - 1;
     }
-    fprintf(stderr,"getrecordnumSeqpos: cannot find position %lu", position);
+    fprintf(stderr,"gt_encseq_sep2seqnum: cannot find position %lu\n",position);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   left = 0;
@@ -2645,7 +2645,7 @@ unsigned long gt_encseq_sep2seqnum(const unsigned long *recordseps,
       right = mid-1;
     }
   }
-  fprintf(stderr,"getrecordnumSeqpos: cannot find position %lu", position);
+  fprintf(stderr,"gt_encseq_sep2seqnum: cannot find position %lu\n",position);
   exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 

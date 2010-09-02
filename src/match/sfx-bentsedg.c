@@ -1549,12 +1549,11 @@ static unsigned long bruteforcelcpvalue(const GtEncseq *encseq,
                            esr2);
   if (cmp > 0)
   {
-    fprintf(stderr,"cmp " FormatSeqpos
-            " " FormatSeqpos " = %d, lcpval=" FormatSeqpos "\n",
-            PRINTSeqposcast(previoussuffix->startpos),
-            PRINTSeqposcast(currentsuffix->startpos),
+    fprintf(stderr,"cmp %lu %lu = %d, lcpval=%lu\n",
+            previoussuffix->startpos,
+            currentsuffix->startpos,
             cmp,
-            PRINTSeqposcast(lcpvalue));
+            lcpvalue);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   if (previoussuffix->code == currentsuffix->code)

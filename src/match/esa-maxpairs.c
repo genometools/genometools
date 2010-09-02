@@ -287,10 +287,8 @@ static int processbranchedge(bool firstsucc,
   MaxpairsDfsinfo *father = (MaxpairsDfsinfo*) afather;
 
 #ifdef SKDEBUG
-  printf("processbranchedge firstsucc=%s, "
-         " depth(father)= " FormatSeqpos "\n",
-         firstsucc ? "true" : "false",
-         PRINTSeqposcast(fatherdepth));
+  printf("processbranchedge firstsucc=%s, depth(father)= %lu\n",
+          firstsucc ? "true" : "false",fatherdepth);
 #endif
   if (fatherdepth < (unsigned long) state->searchlength)
   {

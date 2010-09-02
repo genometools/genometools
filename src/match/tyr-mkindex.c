@@ -43,16 +43,16 @@ typedef int (*Processoccurrencecount)(unsigned long,
                                       void *,
                                       GtError *);
 
-typedef struct _listSeqpos
+typedef struct listUlong
 {
   unsigned long position;
-  struct _listSeqpos *nextptr;
-} ListSeqpos;
+  struct listUlong *nextptr;
+} ListUlong;
 
 typedef struct
 {
   unsigned long occcount;
-  ListSeqpos *positionlist;
+  ListUlong *positionlist;
 } Countwithpositions;
 
 GT_DECLAREARRAYSTRUCT(Countwithpositions);
@@ -147,20 +147,20 @@ static void checknumberofoccurrences(const TyrDfsstate *dfsstate,
   gt_freemmsearchiterator(&mmsi);
 }
 
-static /*@null@*/ ListSeqpos *insertListSeqpos(ListSeqpos *liststart,
-                                               unsigned long position)
+static /*@null@*/ ListUlong *insertListUlong(ListUlong *liststart,
+                                             unsigned long position)
 {
-  ListSeqpos *newnode;
+  ListUlong *newnode;
 
-  ALLOCASSIGNSPACE(newnode,NULL,ListSeqpos,1);
+  ALLOCASSIGNSPACE(newnode,NULL,ListUlong,1);
   newnode->position = position;
   newnode->nextptr = liststart;
   return newnode;
 }
 
-static void wrapListSeqpos(ListSeqpos *node)
+static void wrapListUlong(ListUlong *node)
 {
-  ListSeqpos *tmpnext;
+  ListUlong *tmpnext;
 
   if (node != NULL)
   {
@@ -178,11 +178,11 @@ static void wrapListSeqpos(ListSeqpos *node)
   }
 }
 
-static void showListSeqpos(const GtEncseq *encseq,
-                           unsigned long mersize,
-                           const ListSeqpos *node)
+static void showListUlong(const GtEncseq *encseq,
+                          unsigned long mersize,
+                          const ListUlong *node)
 {
-  const ListSeqpos *tmp;
+  const ListUlong *tmp;
 
   for (tmp = node; tmp != NULL; tmp = tmp->nextptr)
   {
@@ -252,12 +252,12 @@ static void showmerdistribution(const TyrDfsstate *state)
                                 spaceCountwithpositions[countocc].occcount);
       if (decideifocc(state,countocc))
       {
-        showListSeqpos(state->encseq,
-                       state->mersize,
-                       state->occdistribution.spaceCountwithpositions[countocc].
-                                              positionlist);
-        wrapListSeqpos(state->occdistribution.spaceCountwithpositions[countocc].
-                                              positionlist);
+        showListUlong(state->encseq,
+                      state->mersize,
+                      state->occdistribution.spaceCountwithpositions[countocc].
+                                             positionlist);
+        wrapListUlong(state->occdistribution.spaceCountwithpositions[countocc].
+                                             positionlist);
       }
     }
   }
@@ -330,8 +330,8 @@ static int adddistpos2distribution(unsigned long countocc,
   if (decideifocc(state,countocc))
   {
     state->occdistribution.spaceCountwithpositions[countocc].positionlist
-      = insertListSeqpos(state->occdistribution.
-                              spaceCountwithpositions[countocc].positionlist,
+      = insertListUlong(state->occdistribution.
+                               spaceCountwithpositions[countocc].positionlist,
                          position);
   }
   if (state->performtest)

@@ -47,7 +47,7 @@ struct seqRangeList
 static inline unsigned long
 seqRangeLen(const struct seqRange *p, unsigned symBits)
 {
-  return gt_bsGetSeqpos(p->symLenStr, symBits, symLenStrBits - symBits);
+  return gt_bsGetUlong(p->symLenStr, symBits, symLenStrBits - symBits);
 }
 
 static inline Symbol
@@ -59,7 +59,7 @@ seqRangeSym(const struct seqRange *p, unsigned symBits)
 static inline void
 seqRangeSetLen(struct seqRange *p, unsigned long len, unsigned symBits)
 {
-  return gt_bsStoreSeqpos(p->symLenStr, symBits, symLenStrBits - symBits, len);
+  return gt_bsStoreUlong(p->symLenStr, symBits, symLenStrBits - symBits, len);
 }
 
 static inline void

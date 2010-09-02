@@ -27,38 +27,38 @@
 
 #ifndef _LP64
 /** retrieve unsigned long from BitString */
-#define gt_bsGetSeqpos gt_bsGetUInt32
+#define gt_bsGetUlong gt_bsGetUInt32
 /** store unsigned long in BitString */
-#define gt_bsStoreSeqpos gt_bsStoreUInt32
+#define gt_bsStoreUlong gt_bsStoreUInt32
 /** read back array of unsigned long values in BitString */
-#define gt_bsGetUniformSeqposArray gt_bsGetUniformUInt32Array
+#define gt_bsGetUniformUlongArray gt_bsGetUniformUInt32Array
 /** read back array of unsigned long values in BitString */
-#define gt_bsGetUniformSeqposArrayAdd gt_bsGetUniformUInt32ArrayAdd
+#define gt_bsGetUniformUlongArrayAdd gt_bsGetUniformUInt32ArrayAdd
 /** read back array of unsigned long values in BitString */
-#define gt_bsGetNonUniformSeqposArray gt_bsGetNonUniformUInt32Array
+#define gt_bsGetNonUniformUlongArray gt_bsGetNonUniformUInt32Array
 /** read back array of unsigned long values in BitString */
-#define gt_bsGetNonUniformSeqposArrayAdd gt_bsGetNonUniformUInt32ArrayAdd
+#define gt_bsGetNonUniformUlongArrayAdd gt_bsGetNonUniformUInt32ArrayAdd
 /** store array of unsigned long values in BitString */
-#define gt_bsStoreUniformSeqposArray gt_bsStoreUniformUInt32Array
+#define gt_bsStoreUniformUlongArray gt_bsStoreUniformUInt32Array
 /** how many bits are required to store given unsigned long value */
-#define requiredSeqposBits gt_requiredUInt32Bits
+#define requiredUlongBits gt_requiredUInt32Bits
 #else
 /** retrieve unsigned long from BitString */
-#define gt_bsGetSeqpos gt_bsGetUInt64
+#define gt_bsGetUlong gt_bsGetUInt64
 /** store unsigned long in BitString */
-#define gt_bsStoreSeqpos gt_bsStoreUInt64
+#define gt_bsStoreUlong gt_bsStoreUInt64
 /** read back array of unsigned long values in BitString */
-#define gt_bsGetUniformSeqposArray gt_bsGetUniformUInt64Array
+#define gt_bsGetUniformUlongArray gt_bsGetUniformUInt64Array
 /** read back array of unsigned long values in BitString */
-#define gt_bsGetUniformSeqposArrayAdd gt_bsGetUniformUInt64ArrayAdd
+#define gt_bsGetUniformUlongArrayAdd gt_bsGetUniformUInt64ArrayAdd
 /** read back array of unsigned long values in BitString */
-#define gt_bsGetNonUniformSeqposArray gt_bsGetNonUniformUInt64Array
+#define gt_bsGetNonUniformUlongArray gt_bsGetNonUniformUInt64Array
 /** read back array of unsigned long values in BitString */
-#define gt_bsGetNonUniformSeqposArrayAdd gt_bsGetNonUniformUInt64ArrayAdd
+#define gt_bsGetNonUniformUlongArrayAdd gt_bsGetNonUniformUInt64ArrayAdd
 /** store array of unsigned long values in BitString  */
-#define gt_bsStoreUniformSeqposArray gt_bsStoreUniformUInt64Array
+#define gt_bsStoreUniformUlongArray gt_bsStoreUniformUInt64Array
 /** how many bits are required to store given unsigned long value */
-#define requiredSeqposBits gt_requiredUInt64Bits
+#define requiredUlongBits gt_requiredUInt64Bits
 #endif
 
 #endif

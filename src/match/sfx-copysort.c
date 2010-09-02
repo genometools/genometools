@@ -295,8 +295,8 @@ static void showbucketspec2(const GtBucketspec2 *bucketspec2)
   {
     for (idx2 = 0; idx2 < bucketspec2->numofchars; idx2++)
     {
-      printf("subbucket[%u][%u]=" FormatSeqpos,idx1,idx2,
-              PRINTSeqposcast(bucketspec2->subbuckettab[idx1][idx2].bucketend));
+      printf("subbucket[%u][%u]=%lu",idx1,idx2,
+              bucketspec2->subbuckettab[idx1][idx2].bucketend);
       if (bucketspec2->subbuckettab[idx1][idx2].sorted)
       {
         printf(" sorted\n");
@@ -305,8 +305,8 @@ static void showbucketspec2(const GtBucketspec2 *bucketspec2)
         printf("\n");
       }
     }
-    printf("superbucket[%u]=" FormatSeqpos "\n",idx1,
-              PRINTSeqposcast(bucketspec2->superbuckettab[idx1].bucketend));
+    printf("superbucket[%u]=%lu\n",idx1,
+           bucketspec2->superbuckettab[idx1].bucketend);
   }
 }
 

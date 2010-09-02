@@ -64,7 +64,7 @@ initBWTSeqContextRetrieverFactory(BWTSeqContextRetrieverFactory *newFactory,
   gt_assert(ctxMapILogIsValid(seqLen, mapIntervalLog2));
   if (mapIntervalLog2 == CTX_MAP_ILOG_AUTOSIZE)
   {
-    mapIntervalLog2 = gt_requiredUIntBits(requiredSeqposBits(seqLen));
+    mapIntervalLog2 = gt_requiredUIntBits(requiredUlongBits(seqLen));
   }
   newFactory->seqLen = seqLen;
   newFactory->currentSfxPos = 0;
@@ -190,7 +190,7 @@ readBS2Map(BWTSeqContextRetrieverFactory *factory,
 
 static inline bool
 BWTSeqCRMapOpen(unsigned short mapIntervalLog2,
-                unsigned short bitsPerSeqpos,
+                unsigned short bitsPerUlong,
                 unsigned long seqLen,
                 const char *projectName,
                 bool createMapFile,
@@ -201,17 +201,17 @@ gt_BWTSCRFGet(BWTSeqContextRetrieverFactory *factory,
               const BWTSeq *bwtSeq,
               const char *projectName)
 {
-  unsigned short bitsPerSeqpos, mapIntervalLog2;
+  unsigned short bitsPerUlong, mapIntervalLog2;
   BWTSeqContextRetriever *gt_newBWTSeqCR;
   gt_assert(factory && projectName);
-  bitsPerSeqpos = requiredSeqposBits(factory->seqLen - 1);
+  bitsPerUlong = requiredUlongBits(factory->seqLen - 1);
   gt_newBWTSeqCR = gt_malloc(sizeof (*gt_newBWTSeqCR));
   gt_newBWTSeqCR->mapIntervalLog2 = mapIntervalLog2 = factory->mapIntervalLog2;
-  gt_newBWTSeqCR->bitsPerSeqpos = bitsPerSeqpos;
+  gt_newBWTSeqCR->bitsPerUlong = bitsPerUlong;
   gt_newBWTSeqCR->bwtSeq = bwtSeq;
   gt_newBWTSeqCR->mapInterval = 1 << factory->mapIntervalLog2;
   gt_newBWTSeqCR->mapMask = gt_newBWTSeqCR->mapInterval - 1;
-  if (!BWTSeqCRMapOpen(mapIntervalLog2, bitsPerSeqpos, factory->seqLen,
+  if (!BWTSeqCRMapOpen(mapIntervalLog2, bitsPerUlong, factory->seqLen,
                        projectName, true, gt_newBWTSeqCR))
   {
     gt_free(gt_newBWTSeqCR);
@@ -227,11 +227,11 @@ readBlock2Buf(FILE *fp,
               size_t len,
               BitString bitstring,
               BitOffset offset,
-              unsigned short bitsPerSeqpos)
+              unsigned short bitsPerUlong)
 {
   if (fread(buf, sizeof (buf[0]), len, fp) != len)
     die("short read when reading backing store");
-  gt_bsStoreUniformSeqposArray(bitstring, offset, bitsPerSeqpos, len,
+  gt_bsStoreUniformUlongArray(bitstring, offset, bitsPerUlong, len,
 #ifdef _LP64
                              (uint64_t*) buf);
 #else
@@ -248,7 +248,7 @@ readBS2Map(BWTSeqContextRetrieverFactory *factory,
   off_t i, numFullBlocks, lastBlockLen;
   BitString revMap =  gt_newBWTSeqCR->revMap;
   BitOffset storePos = 0;
-  unsigned bitsPerSeqpos = gt_newBWTSeqCR->bitsPerSeqpos;
+  unsigned bitsPerUlong = gt_newBWTSeqCR->bitsPerUlong;
   {
     off_t numEntries  = numMapEntries(factory->seqLen,
                                       factory->mapIntervalLog2);
@@ -259,10 +259,10 @@ readBS2Map(BWTSeqContextRetrieverFactory *factory,
     die("failed seek in backing store");
   for (i = 0; i < numFullBlocks; ++i )
   {
-    readBlock2Buf(fp, buf, BLOCK_IO_SIZE, revMap, storePos, bitsPerSeqpos);
-    storePos += bitsPerSeqpos * BLOCK_IO_SIZE;
+    readBlock2Buf(fp, buf, BLOCK_IO_SIZE, revMap, storePos, bitsPerUlong);
+    storePos += bitsPerUlong * BLOCK_IO_SIZE;
   }
-  readBlock2Buf(fp, buf, lastBlockLen, revMap, storePos, bitsPerSeqpos);
+  readBlock2Buf(fp, buf, lastBlockLen, revMap, storePos, bitsPerUlong);
 }
 
 enum {
@@ -271,7 +271,7 @@ enum {
 
 static inline bool
 BWTSeqCRMapOpen(unsigned short mapIntervalLog2,
-                unsigned short bitsPerSeqpos,
+                unsigned short bitsPerUlong,
                 unsigned long seqLen,
                 const char *projectName,
                 bool createMapFile,
@@ -285,7 +285,7 @@ BWTSeqCRMapOpen(unsigned short mapIntervalLog2,
     size_t headerBitElems = bitElemsAllocSize(2 * HEADER_ENTRY_BITS),
       headerSize = headerBitElems * sizeof (BitElem),
       mapSize = headerSize + sizeof (BitElem)
-      * bitElemsAllocSize(bitsPerSeqpos * numMapEntries(
+      * bitElemsAllocSize(bitsPerUlong * numMapEntries(
                             seqLen, mapIntervalLog2));
     mapName = gt_str_new_cstr(projectName);
     {
@@ -301,7 +301,7 @@ BWTSeqCRMapOpen(unsigned short mapIntervalLog2,
           break;
         gt_bsStoreUInt16(headerBuf, 0, HEADER_ENTRY_BITS, mapIntervalLog2);
         gt_bsStoreUInt16(headerBuf, HEADER_ENTRY_BITS, HEADER_ENTRY_BITS,
-                      bitsPerSeqpos);
+                      bitsPerUlong);
         if (fwrite(headerBuf,  sizeof (headerBuf), 1, mapFile) != 1)
           break;
         if (fseeko(mapFile, mapSize - 1, SEEK_SET))
@@ -323,7 +323,7 @@ BWTSeqCRMapOpen(unsigned short mapIntervalLog2,
           break;
         if (gt_bsGetUInt16(headerBuf, 0, HEADER_ENTRY_BITS) != mapIntervalLog2
             || (gt_bsGetUInt16(headerBuf, HEADER_ENTRY_BITS, HEADER_ENTRY_BITS)
-                != bitsPerSeqpos))
+                != bitsPerUlong))
         {
           fprintf(stderr, "error: context map file %s contains corrupted "
                   "data.\n", gt_str_get(mapName));
@@ -346,17 +346,17 @@ gt_BWTSeqCRLoad(const BWTSeq *bwtSeq,
              short mapIntervalLog2)
 {
   unsigned long seqLen;
-  unsigned short bitsPerSeqpos;
+  unsigned short bitsPerUlong;
   BWTSeqContextRetriever *gt_newBWTSeqCR;
   gt_assert(bwtSeq && projectName);
   seqLen = BWTSeqLength(bwtSeq);
-  bitsPerSeqpos = requiredSeqposBits(seqLen - 1);
+  bitsPerUlong = requiredUlongBits(seqLen - 1);
   gt_newBWTSeqCR = gt_malloc(sizeof (*gt_newBWTSeqCR));
-  gt_newBWTSeqCR->bitsPerSeqpos = bitsPerSeqpos;
+  gt_newBWTSeqCR->bitsPerUlong = bitsPerUlong;
   gt_newBWTSeqCR->bwtSeq = bwtSeq;
   if (mapIntervalLog2 != CTX_MAP_ILOG_AUTOSIZE)
   {
-    if (!BWTSeqCRMapOpen(mapIntervalLog2, bitsPerSeqpos, seqLen,
+    if (!BWTSeqCRMapOpen(mapIntervalLog2, bitsPerUlong, seqLen,
                          projectName, false, gt_newBWTSeqCR))
     {
       gt_free(gt_newBWTSeqCR);
@@ -365,9 +365,9 @@ gt_BWTSeqCRLoad(const BWTSeq *bwtSeq,
   }
   else
   {
-    short mapIntervalLog2Max = bitsPerSeqpos;
+    short mapIntervalLog2Max = bitsPerUlong;
     mapIntervalLog2 = 0;
-    while (!BWTSeqCRMapOpen(mapIntervalLog2, bitsPerSeqpos, seqLen,
+    while (!BWTSeqCRMapOpen(mapIntervalLog2, bitsPerUlong, seqLen,
                             projectName, false, gt_newBWTSeqCR)
            && mapIntervalLog2 < mapIntervalLog2Max)
       ++mapIntervalLog2;
