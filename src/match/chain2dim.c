@@ -1602,8 +1602,8 @@ void gt_chain_extractchainelem(GtChain2Dimmatchvalues *value,
           chain->chainedmatches.spaceGtChain2Dimref[idx];
   value->startpos[0] = fiptr->startpos[0];
   value->startpos[1] = fiptr->startpos[1];
-  value->startpos[2] = fiptr->startpos[2];
-  value->startpos[3] = fiptr->startpos[3];
+  value->endpos[0] = fiptr->endpos[0];
+  value->endpos[1] = fiptr->endpos[1];
   value->weight = fiptr->weight;
 }
 
