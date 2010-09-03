@@ -930,55 +930,51 @@ static int determinesattype(unsigned long *specialranges,
   } else
   {
     sat = gt_encseq_access_type_get(str_sat);
-    if (sat == GT_ACCESS_TYPE_UNDEFINED)
+    if (numofchars == GT_DNAALPHASIZE)
     {
-      gt_error_set(err,"illegal argument \"%s\" to option -sat",str_sat);
-      haserr = true;
+      switch(sat)
+      {
+	case GT_ACCESS_TYPE_UCHARTABLES:
+	  *specialranges = specialrangestab[0];
+	  break;
+	case GT_ACCESS_TYPE_USHORTTABLES:
+	  *specialranges = specialrangestab[1];
+	   break;
+	case GT_ACCESS_TYPE_UINT32TABLES:
+	  *specialranges = specialrangestab[2];
+	  break;
+	case GT_ACCESS_TYPE_DIRECTACCESS:
+	case GT_ACCESS_TYPE_BITACCESS:
+	  break;
+	case GT_ACCESS_TYPE_EQUALLENGTH:
+	  if (equallength == NULL || !equallength->defined)
+	  {
+	    gt_error_set(err,"illegal argument \"%s\" to option -sat: "
+			     "%s is only possible for DNA sequences, if "
+			     "all sequences are of equal length and no "
+			     "sequence contains a wildcard",str_sat,str_sat);
+	    haserr = true;
+	  }
+	  break;
+	default:
+          gt_assert(sat == GT_ACCESS_TYPE_UNDEFINED);
+	  gt_error_set(err,"illegal argument \"%s\" to option -sat: "
+			   "must be one of the following keywords: %s",
+			   str_sat,gt_encseq_access_type_list());
+	  haserr = true;
+          break;
+      } 
     } else
     {
-      if (satviautables(sat))
+      if (sat != GT_ACCESS_TYPE_BYTECOMPRESS &&
+          sat != GT_ACCESS_TYPE_DIRECTACCESS)
       {
-        if (numofchars == GT_DNAALPHASIZE)
-        {
-          if (specialrangestab[0] == 0)
-          {
-            sat = GT_ACCESS_TYPE_BITACCESS;
-          } else
-          {
-            /*if (equallength != NULL && equallength->defined)
-            {
-              sat = GT_ACCESS_TYPE_EQUALLENGTH;
-            }*/
-          }
-          if (sat == GT_ACCESS_TYPE_UCHARTABLES)
-          {
-            *specialranges = specialrangestab[0];
-          } else
-          {
-            if (sat == GT_ACCESS_TYPE_USHORTTABLES)
-            {
-              *specialranges = specialrangestab[1];
-            } else
-            {
-              *specialranges = specialrangestab[2];
-            }
-          }
-        } else
-        {
-          sat = GT_ACCESS_TYPE_BYTECOMPRESS;
-        }
-      } else
-      {
-        if (sat == GT_ACCESS_TYPE_EQUALLENGTH &&
-            (numofchars != GT_DNAALPHASIZE ||
-             equallength == NULL || !equallength->defined))
-        {
-          gt_error_set(err,"illegal argument \"%s\" to option -sat: eqlen is "
-                       "only possible for DNA sequences, if all sequences "
-                       "are of equal length and no sequence contains a "
-                       "wildcard",str_sat);
-          haserr = true;
-        }
+        gt_error_set(err,"illegal argument \"%s\" to option -sat: "
+                        "as the sequence is not DNA, you can choose %s or %s",
+                        str_sat,
+                        gt_encseq_access_type_str(GT_ACCESS_TYPE_BYTECOMPRESS),
+                        gt_encseq_access_type_str(GT_ACCESS_TYPE_DIRECTACCESS));
+        haserr = true;
       }
     }
   }
