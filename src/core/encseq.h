@@ -377,5 +377,10 @@ uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
                                   unsigned long specialranges,
                                   unsigned int numofchars,
                                   unsigned int bitspersymbol);
+/*
+  The following function returns the size of the encoded sequence in bytes.
+*/
+
+unsigned long gt_encseq_sizeofrep(const GtEncseq *encseq);
 
 #endif

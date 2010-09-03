@@ -247,7 +247,8 @@ void gt_freesuffixarray(Suffixarray *suffixarray)
   suffixarray->encseq = NULL;
   if (suffixarray->bcktab != NULL)
   {
-    gt_bcktab_delete(&suffixarray->bcktab);
+    gt_bcktab_delete(suffixarray->bcktab);
+    suffixarray->bcktab = NULL;
   }
 }
 

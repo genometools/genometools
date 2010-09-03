@@ -28,11 +28,12 @@
 #include "core/format64.h"
 #include "core/mapspec-gen.h"
 #include "core/unused_api.h"
+#include "core/log_api.h"
 #include "intcode-def.h"
 #include "esa-fileend.h"
-#include "spacedef.h"
 #include "bcktab.h"
 #include "initbasepower.h"
+#include "stamp.h"
 
 #define FROMCODE2SPECIALCODE(CODE,NUMOFCHARS)\
                             (((CODE) - ((NUMOFCHARS)-1)) / (NUMOFCHARS))
@@ -84,7 +85,7 @@ static unsigned long numofdistpfxidxcounters(const GtCodetype *basepower,
 }
 
 uint64_t gt_sizeofbuckettable(unsigned int numofchars,
-                           unsigned int prefixlength)
+                              unsigned int prefixlength)
 {
   uint64_t sizeofrep;
   double numofallcodes, numofspecialcodes;
@@ -103,8 +104,9 @@ uint64_t gt_sizeofbuckettable(unsigned int numofchars,
     = (uint64_t)
       sizeof (unsigned long) * (numofallcodes + 1.0) +
       sizeof (unsigned long) * numofspecialcodes +
-      sizeof (unsigned long) * numofdistpfxidxcounters(basepower,prefixlength);
-  FREESPACE(basepower);
+      sizeof (unsigned long) * numofdistpfxidxcounters(basepower,prefixlength) +
+      sizeof (unsigned long *) * (prefixlength-1);
+  gt_free(basepower);
   return sizeofrep;
 }
 
@@ -134,13 +136,12 @@ static unsigned long **allocdistprefixindexcounts(const GtCodetype *basepower,
     {
       unsigned long *counters, **distpfxidx;
 
-      ALLOCASSIGNSPACE(distpfxidx,NULL,unsigned long *,prefixlength-1);
-      ALLOCASSIGNSPACE(counters,NULL,unsigned long,numofcounters);
-      /*
-      gt_logger_log(logger,"sizeof (distpfxidx)=%lu",
-                  (unsigned long) sizeof (*distpfxidx) * (prefixlength-1) +
-                                  sizeof (*counters) * numofcounters);
-      */
+      distpfxidx = gt_malloc(sizeof(unsigned long *) * (prefixlength-1));
+      gt_log_log("sizeof (distpfxidx)=%lu bytes",
+                  (unsigned long) sizeof (unsigned long *) * (prefixlength-1));
+      counters = gt_malloc(sizeof (*counters) * numofcounters);
+      gt_log_log("sizeof (counter)=%lu bytes",
+                  (unsigned long) sizeof (*counters) * numofcounters);
       memset(counters,0,(size_t) sizeof (*counters) * numofcounters);
       setdistpfxidxptrs(distpfxidx,counters,basepower,prefixlength);
       return distpfxidx;
@@ -154,7 +155,7 @@ static Bcktab *newBcktab(unsigned int numofchars,
 {
   Bcktab *bcktab;
 
-  ALLOCASSIGNSPACE(bcktab,NULL,Bcktab,1);
+  bcktab = gt_malloc(sizeof *bcktab);
   bcktab->leftborder = NULL;
   bcktab->countspecialcodes = NULL;
   bcktab->distpfxidx = NULL;
@@ -166,7 +167,7 @@ static Bcktab *newBcktab(unsigned int numofchars,
   bcktab->numofspecialcodes = bcktab->basepower[prefixlength-1];
   bcktab->multimappower = gt_initmultimappower(numofchars,prefixlength);
   bcktab->allocated = false;
-  ALLOCASSIGNSPACE(bcktab->qgrambuffer,NULL,GtUchar,prefixlength);
+  bcktab->qgrambuffer = gt_malloc(sizeof (*bcktab->qgrambuffer) * prefixlength);
   bcktab->sizeofrep
     = (unsigned long)
       sizeof (*bcktab->leftborder) * (bcktab->numofallcodes + 1) +
@@ -177,10 +178,9 @@ static Bcktab *newBcktab(unsigned int numofchars,
 }
 
 Bcktab *gt_allocBcktab(unsigned int numofchars,
-                    unsigned int prefixlength,
-                    bool storespecialcodes,
-                    GtLogger *logger,
-                    GtError *err)
+                       unsigned int prefixlength,
+                       bool storespecialcodes,
+                       GtError *err)
 {
   Bcktab *bcktab;
   bool haserr = false;
@@ -199,35 +199,30 @@ Bcktab *gt_allocBcktab(unsigned int numofchars,
   }
   if (!haserr)
   {
-    ALLOCASSIGNSPACE(bcktab->leftborder,NULL,unsigned long,
-                     bcktab->numofallcodes+1);
-    /*
-    gt_logger_log(logger,"sizeof (leftborder)=%lu",
-              (unsigned long) sizeof (*bcktab->leftborder) *
-                              (bcktab->numofallcodes+1));
-    */
+    bcktab->leftborder = gt_malloc(sizeof (*bcktab->leftborder) *
+                                   (bcktab->numofallcodes+1));
+    gt_log_log("sizeof (leftborder)=%lu bytes",
+               (unsigned long) sizeof (*bcktab->leftborder) *
+                               (bcktab->numofallcodes+1));
     memset(bcktab->leftborder,0,
            sizeof (*bcktab->leftborder) *
            (size_t) (bcktab->numofallcodes+1));
-    ALLOCASSIGNSPACE(bcktab->countspecialcodes,NULL,unsigned long,
-                     bcktab->numofspecialcodes);
-    /*
-    gt_logger_log(logger,
-                "sizeof (countspecialcodes)=%lu",
-                (unsigned long) sizeof (*bcktab->countspecialcodes) *
-                bcktab->numofspecialcodes);
-    */
+    bcktab->countspecialcodes = gt_malloc(sizeof (*bcktab->countspecialcodes) *
+                                          bcktab->numofspecialcodes);
+    gt_log_log("sizeof (countspecialcodes)=%lu bytes",
+               (unsigned long) sizeof (*bcktab->countspecialcodes) *
+                               bcktab->numofspecialcodes);
     memset(bcktab->countspecialcodes,0,
            sizeof (*bcktab->countspecialcodes) *
                   (size_t) bcktab->numofspecialcodes);
     bcktab->distpfxidx = allocdistprefixindexcounts(bcktab->basepower,
                                                     prefixlength);
-    gt_logger_log(logger,"sizeof (bcktab)=" Formatuint64_t " bytes",
+    gt_log_log("sizeof (bcktab)=" Formatuint64_t " bytes",
               PRINTuint64_tcast(gt_sizeofbuckettable(numofchars,prefixlength)));
   }
   if (haserr)
   {
-    gt_bcktab_delete(&bcktab);
+    gt_bcktab_delete(bcktab);
     return NULL;
   }
   return bcktab;
@@ -246,15 +241,15 @@ static void assignbcktabmapspecification(
              (unsigned long) (bcktab->numofallcodes+1));
   NEWMAPSPEC(bcktab->countspecialcodes,GtUlong,
              (unsigned long) bcktab->numofspecialcodes);
-  numofcounters =
-                 numofdistpfxidxcounters((const GtCodetype *) bcktab->basepower,
-                                         bcktab->prefixlength);
+  numofcounters 
+    = numofdistpfxidxcounters((const GtCodetype *) bcktab->basepower,
+                              bcktab->prefixlength);
   if (numofcounters > 0)
   {
     if (!writemode)
     {
-      ALLOCASSIGNSPACE(bcktab->distpfxidx,NULL,unsigned long *,
-                       bcktab->prefixlength-1);
+      bcktab->distpfxidx = gt_malloc(sizeof (*bcktab->distpfxidx) *
+                                     (bcktab->prefixlength-1));
     }
     NEWMAPSPEC(bcktab->distpfxidx[0],GtUlong,numofcounters);
   }
@@ -306,7 +301,7 @@ Bcktab *gt_mapbcktab(const char *indexname,
                                 indexname,
                                 err) != 0)
   {
-    gt_bcktab_delete(&bcktab);
+    gt_bcktab_delete(bcktab);
     return NULL;
   }
   if (bcktab->distpfxidx != NULL)
@@ -338,42 +333,50 @@ void gt_showbcktab(const Bcktab *bcktab)
   }
 }
 
-void gt_bcktab_delete(Bcktab **bcktab)
+void gt_bcktab_delete(Bcktab *bcktab)
 {
-  Bcktab *bcktabptr = *bcktab;
-
-  /*showbcktab(bcktabptr);*/
-  if (bcktabptr->allocated)
+  if (bcktab == NULL)
   {
-    FREESPACE(bcktabptr->leftborder);
-    FREESPACE(bcktabptr->countspecialcodes);
-    if (bcktabptr->distpfxidx != NULL)
+    return;
+  }
+  /*showbcktab(bcktabptr);*/
+  if (bcktab->allocated)
+  {
+    gt_free(bcktab->leftborder);
+    bcktab->leftborder = NULL;
+    gt_free(bcktab->countspecialcodes);
+    bcktab->countspecialcodes = NULL;
+    if (bcktab->distpfxidx != NULL)
     {
-      FREESPACE(bcktabptr->distpfxidx[0]);
+      gt_free(bcktab->distpfxidx[0]);
     }
   } else
   {
-    if (bcktabptr->mappedptr != NULL)
+    if (bcktab->mappedptr != NULL)
     {
-      gt_fa_xmunmap(bcktabptr->mappedptr);
+      gt_fa_xmunmap(bcktab->mappedptr);
     }
-    bcktabptr->mappedptr = NULL;
-    bcktabptr->leftborder = NULL;
-    bcktabptr->countspecialcodes = NULL;
-    if (bcktabptr->distpfxidx != NULL)
+    bcktab->mappedptr = NULL;
+    bcktab->leftborder = NULL;
+    bcktab->countspecialcodes = NULL;
+    if (bcktab->distpfxidx != NULL)
     {
-      bcktabptr->distpfxidx[0] = NULL;
+      bcktab->distpfxidx[0] = NULL;
     }
   }
-  FREESPACE(bcktabptr->distpfxidx);
-  if (bcktabptr->multimappower != NULL)
+  gt_free(bcktab->distpfxidx);
+  bcktab->distpfxidx = NULL;
+  if (bcktab->multimappower != NULL)
   {
-    gt_multimappowerfree(&bcktabptr->multimappower);
+    gt_multimappowerfree(&bcktab->multimappower);
   }
-  FREESPACE(bcktabptr->filltable);
-  FREESPACE(bcktabptr->basepower);
-  FREESPACE(bcktabptr->qgrambuffer);
-  FREESPACE(*bcktab);
+  gt_free(bcktab->filltable);
+  bcktab->filltable = NULL;
+  gt_free(bcktab->basepower);
+  bcktab->basepower = NULL;
+  gt_free(bcktab->qgrambuffer);
+  bcktab->qgrambuffer = NULL;
+  gt_free(bcktab);
 }
 
 void gt_updatebckspecials(Bcktab *bcktab,
@@ -478,14 +481,14 @@ void checkcountspecialcodes(const Bcktab *bcktab)
 
   if (bcktab->prefixlength >= 2U)
   {
-    ALLOCASSIGNSPACE(count,NULL,unsigned long,bcktab->prefixlength);
+    count = gt_malloc(sizeof (*count) * bcktab->prefixlength);
     for (code=0; code<bcktab->numofallcodes; code++)
     {
       pfxidxpartialsums(count,
                         code,
                         bcktab);
     }
-    FREESPACE(count);
+    gt_free(count);
   }
 }
 #endif

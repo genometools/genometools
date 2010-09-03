@@ -40,12 +40,11 @@ Bcktab *gt_mapbcktab(const char *indexname,
                   unsigned int prefixlength,
                   GtError *err);
 
-void gt_bcktab_delete(Bcktab **bcktab);
+void gt_bcktab_delete(Bcktab *bcktab);
 
 Bcktab *gt_allocBcktab(unsigned int numofchars,
                     unsigned int prefixlength,
                     bool storespecialcodes,
-                    GtLogger *logger,
                     GtError *err);
 
 void gt_updatebckspecials(Bcktab *bcktab,

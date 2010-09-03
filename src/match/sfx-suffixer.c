@@ -32,6 +32,7 @@
 #include "core/progress_timer_api.h"
 #include "core/encseq.h"
 #include "core/safecast-gen.h"
+#include "core/log_api.h"
 #include "intcode-def.h"
 #include "esa-fileend.h"
 #include "sfx-diffcov.h"
@@ -339,9 +340,9 @@ static void sfx_derivespecialcodesfromtable(Sfxiterator *sfi,bool deletevalues)
       if (prefixindex <= sfi->spaceCodeatposition[j].maxprefixindex)
       {
         code = gt_codedownscale(sfi->bcktab,
-                             (GtCodetype) sfi->spaceCodeatposition[j].code,
-                             prefixindex,
-                             sfi->spaceCodeatposition[j].maxprefixindex);
+                                (GtCodetype) sfi->spaceCodeatposition[j].code,
+                                prefixindex,
+                                sfi->spaceCodeatposition[j].maxprefixindex);
         if (code >= sfi->currentmincode && code <= sfi->currentmaxcode)
         {
           gt_updatebckspecials(sfi->bcktab,code,sfi->numofchars,prefixindex);
@@ -383,8 +384,8 @@ static void sfx_derivespecialcodesonthefly(Sfxiterator *sfi)
   for (prefixindex=1U; prefixindex < sfi->prefixlength; prefixindex++)
   {
     ecp = gt_newEnumcodeatposition(sfi->encseq,sfi->readmode,
-                                sfi->prefixlength,
-                                sfi->numofchars);
+                                   sfi->prefixlength,
+                                   sfi->numofchars);
     while (gt_nextEnumcodeatposition(&specialcontext,ecp))
     {
       if (prefixindex <= specialcontext.maxprefixindex)
@@ -437,10 +438,7 @@ void gt_freeSfxiterator(Sfxiterator *sfi)
   sfi->spaceCodeatposition = NULL;
   gt_suffixsortspace_delete(sfi->suffixsortspace);
   gt_freesuftabparts(sfi->suftabparts);
-  if (sfi->bcktab != NULL)
-  {
-    gt_bcktab_delete(&sfi->bcktab);
-  }
+  gt_bcktab_delete(sfi->bcktab);
   if (sfi->dcov != NULL)
   {
     gt_differencecover_delete(sfi->dcov);
@@ -523,6 +521,8 @@ Sfxiterator *gt_newSfxiterator(const GtEncseq *encseq,
 
   gt_error_check(err);
 
+  printf("spacepeak at start of gt_newSfxiterator = %lu\n",
+          gt_ma_get_space_peak()); /* in bytes */
   realspecialranges = gt_encseq_realspecialranges(encseq);
   specialcharacters = gt_encseq_specialcharacters(encseq);
   gt_assert(prefixlength > 0);
@@ -540,9 +540,9 @@ Sfxiterator *gt_newSfxiterator(const GtEncseq *encseq,
     {
       sfi->spaceCodeatposition
         = gt_malloc(sizeof (*sfi->spaceCodeatposition) * (realspecialranges+1));
-      gt_logger_log(logger,"sizeof (spaceCodeatposition)=%lu",
-                              (unsigned long) (sizeof (Codeatposition) *
-                                               (realspecialranges+1)));
+      gt_log_log("sizeof (spaceCodeatposition)=%lu bytes",
+                 (unsigned long) (sizeof (*sfi->spaceCodeatposition) *
+                                          (realspecialranges+1)));
     } else
     {
       sfi->spaceCodeatposition = NULL;
@@ -642,10 +642,9 @@ Sfxiterator *gt_newSfxiterator(const GtEncseq *encseq,
   {
     gt_assert(sfi != NULL);
     sfi->bcktab = gt_allocBcktab(sfi->numofchars,
-                              prefixlength,
-                              sfi->sfxstrategy.storespecialcodes,
-                              logger,
-                              err);
+                                 prefixlength,
+                                 sfi->sfxstrategy.storespecialcodes,
+                                 err);
     if (sfi->bcktab == NULL)
     {
       haserr = true;
@@ -677,7 +676,7 @@ Sfxiterator *gt_newSfxiterator(const GtEncseq *encseq,
     if (sfi->sfxstrategy.storespecialcodes)
     {
       gt_assert(realspecialranges+1
-                  >= (unsigned long) sfi->nextfreeCodeatposition);
+                >= (unsigned long) sfi->nextfreeCodeatposition);
       reversespecialcodes(sfi->spaceCodeatposition,sfi->nextfreeCodeatposition);
     }
 #ifdef SKDEBUG
@@ -702,10 +701,14 @@ Sfxiterator *gt_newSfxiterator(const GtEncseq *encseq,
                                          specialcharacters + 1,
                                          logger);
     gt_assert(sfi->suftabparts != NULL);
+    printf("spacepeak before suffixsortspace alloc = %lu\n",
+            gt_ma_get_space_peak()); /* in bytes */
     sfi->suffixsortspace
       = gt_suffixsortspace_new(stpgetlargestwidth(sfi->suftabparts),
                                sfi->totallength,
                                sfi->sfxstrategy.suftabasulongarray);
+    printf("spacepeak after suffixsortspace alloc = %lu\n",
+            gt_ma_get_space_peak()); /* in bytes */
     sfi->longest.defined = false;
     sfi->longest.valueunsignedlong = 0;
     if (gt_encseq_has_specialranges(sfi->encseq))

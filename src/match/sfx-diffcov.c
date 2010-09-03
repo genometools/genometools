@@ -994,10 +994,7 @@ void gt_differencecover_sortsample(Differencecover *dcov,
   Codeatposition *codeptr;
 
   dcov->samplesize = 0;
-  dcov->bcktab = gt_allocBcktab(dcov->numofchars,
-                                dcov->prefixlength,
-                                true,
-                                NULL,
+  dcov->bcktab = gt_allocBcktab(dcov->numofchars, dcov->prefixlength, true,
                                 NULL);
   dcov->multimappower = gt_bcktab_multimappower(dcov->bcktab);
   dcov->esr = gt_encseq_create_reader_with_readmode(dcov->encseq,
@@ -1194,10 +1191,8 @@ void gt_differencecover_sortsample(Differencecover *dcov,
     }
 #endif
   }
-  if (dcov->bcktab != NULL)
-  {
-    gt_bcktab_delete(&dcov->bcktab);
-  }
+  gt_bcktab_delete(dcov->bcktab);
+  dcov->bcktab = NULL;
   dc_sortremainingsamples(dcov);
   if (withcheck)
   {

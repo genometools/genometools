@@ -103,11 +103,13 @@ GtSuffixsortspace *gt_suffixsortspace_new(unsigned long numofentries,
 #endif
   if (suftabasulongarray)
   {
-    gt_log_log("suftab as array: maxvalue=%lu,numofentries=%lu\n",
+    gt_log_log("suftab as array: maxvalue=%lu,numofentries=%lu",
                maxvalue,numofentries);
     suffixsortspace->bitpackarray = NULL;
     suffixsortspace->ulongtab
-      = gt_malloc(sizeof(*suffixsortspace->ulongtab) * numofentries);
+      = gt_malloc(sizeof (*suffixsortspace->ulongtab) * numofentries);
+    gt_log_log("sizeof (ulongtab)=%lu bytes",
+               sizeof (*suffixsortspace->ulongtab) * numofentries);
     suffixsortspace->getdirect = getdirect_ulong;
     suffixsortspace->setdirect = setdirect_ulong;
   } else

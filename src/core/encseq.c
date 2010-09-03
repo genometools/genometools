@@ -6878,3 +6878,8 @@ unsigned long gt_encseq_filestartpos(const GtEncseq *encseq,
   }
   return 0;
 }
+
+unsigned long gt_encseq_sizeofrep(const GtEncseq *encseq)
+{
+  return encseq->sizeofrep;
+}
