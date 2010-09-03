@@ -373,6 +373,59 @@ if $gttestdata then
               "TransProt11")
 end
 
+SATS = ["direct", "bytecompress", "eqlen", "bit", "uchar", "ushort", "uint32"]
+
+EQLENDNAFILE = {:filename => "#{$testdata}/test1.fasta",
+                :desc => "equal length DNA",
+                :msgs => {
+                  "bytecompress" => "cannot use bytecompress on DNA sequences"}}
+DNAFILE   = {:filename => "#{$testdata}/at1MB",
+             :desc => "non-equal length DNA",
+             :msgs => {
+                "bytecompress" => "cannot use bytecompress on DNA sequences",
+                "eqlen" => "all sequences are of equal length and no " + \
+                "sequence contains"}}
+EQLENAAFILE = {:filename => "#{$testdata}/trembl-eqlen.faa",
+                :desc => "equal length AA",
+                :msgs => {
+                  "eqlen" => "as the sequence is not DNA",
+                  "bit" => "as the sequence is not DNA",
+                  "uchar" => "as the sequence is not DNA",
+                  "ushort" => "as the sequence is not DNA",
+                  "uint32" => "as the sequence is not DNA"}}
+AAFILE    = {:filename => "#{$testdata}/trembl.faa",
+                :desc => "non-equal length AA",
+                :msgs => {
+                  "eqlen" => "as the sequence is not DNA",
+                  "bit" => "as the sequence is not DNA",
+                  "uchar" => "as the sequence is not DNA",
+                  "ushort" => "as the sequence is not DNA",
+                  "uint32" => "as the sequence is not DNA"}}
+
+SATTESTFILES = [EQLENDNAFILE, DNAFILE, EQLENAAFILE, AAFILE]
+
+SATTESTFILES.each do |file|
+  SATS.each do |sat|
+    Name "gt suffixerator sat #{sat} -> #{file[:desc]}"
+    Keywords "gt_suffixerator sats"
+    Test do
+      if !file[:msgs][sat].nil? then
+        retval = 1
+      else
+        retval = 0
+      end
+      run_test "#{$bin}/gt suffixerator -sat #{sat} -v -suf -lcp -des -sds " + \
+               "-ssp -tis -db #{file[:filename]} -indexname myidx", \
+               :retval => retval
+      if !file[:msgs][sat].nil? then
+        grep($last_stderr, /#{file[:msgs][sat]}/)
+      end
+      run_test "#{$bin}/gt dev sfxmap -suf -lcp -des -sds -ssp myidx", \
+               :retval => retval
+    end
+  end
+end  
+
 Name "gt uniquesub"
 Keywords "gt_uniquesub"
 Test do
