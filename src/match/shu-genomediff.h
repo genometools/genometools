@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SHU_GENOMEDIFF_PCK_H
-#define SHU_GENOMEDIFF_PCK_H
+#ifndef SHU_GENOMEDIFF_H
+#define SHU_GENOMEDIFF_H
 
 #include "match/genomediff.h"
 #include "match/idx-limdfs.h"

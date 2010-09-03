@@ -33,7 +33,7 @@
 #include "match/shu-encseq-gc.h"
 #include "match/sarr-def.h"
 
-#include "match/shu-genomediff-pck.h"
+#include "match/shu-genomediff.h"
 
 int gt_genomediff_shu(GtLogger *logger,
                       const GtGenomediffArguments *arguments,
@@ -151,7 +151,7 @@ int gt_genomediff_shu(GtLogger *logger,
     {
       if (arguments->traverse_only)
       {
-        printf("stopping after traversal\n");
+        gt_logger_log(logger, "stopping after traversal");
         genericindex_delete(genericindexSubject);
         if (filelength != NULL)
           gt_free(filelength);
