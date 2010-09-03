@@ -912,7 +912,7 @@ static int determinesattype(unsigned long *specialranges,
                             const char *str_sat,
                             GtError *err)
 {
-  GtEncseqAccessType sat;
+  GtEncseqAccessType sat = GT_ACCESS_TYPE_UNDEFINED;
   bool haserr = false;
 
   *specialranges = specialrangestab[0];
@@ -949,11 +949,17 @@ static int determinesattype(unsigned long *specialranges,
         case GT_ACCESS_TYPE_EQUALLENGTH:
           if (equallength == NULL || !equallength->defined) {
             gt_error_set(err,"illegal argument \"%s\" to option -sat: "
-                 "%s is only possible for DNA sequences, if "
-                 "all sequences are of equal length and no "
-                 "sequence contains a wildcard",str_sat,str_sat);
+                             "%s is only possible for DNA sequences, if "
+                             "all sequences are of equal length and no "
+                             "sequence contains a wildcard",str_sat,str_sat);
             haserr = true;
           }
+          break;
+        case GT_ACCESS_TYPE_BYTECOMPRESS:
+          gt_error_set(err,"illegal argument \"%s\" to option -sat: "
+                           "cannot use bytecompress on DNA sequences",
+                           str_sat);
+          haserr = true;
           break;
         default:
           gt_assert(sat == GT_ACCESS_TYPE_UNDEFINED);
