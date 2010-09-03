@@ -1443,6 +1443,7 @@ static unsigned long gt_encseq_seqstartpos_Viaequallength(
   return seqnum * (encseq->equallength.valueunsignedlong + 1);
 }
 
+/*
 static bool checkspecialbruteforce(const GtEncseq *encseq,
                                    unsigned long startpos,
                                    unsigned long len)
@@ -1458,6 +1459,7 @@ static bool checkspecialbruteforce(const GtEncseq *encseq,
   }
   return false;
 }
+*/
 
 static bool containsspecialViaequallength(const GtEncseq *encseq,
                                           bool moveforward,
@@ -1478,7 +1480,6 @@ static bool containsspecialViaequallength(const GtEncseq *encseq,
         gt_encseq_seqnum_Viaequallength(encseq,startpos) !=
         gt_encseq_seqnum_Viaequallength(encseq,startpos + len - 1))
     {
-      gt_assert(checkspecialbruteforce(encseq,startpos,len));
       return true;
     }
   } else
@@ -1491,7 +1492,6 @@ static bool containsspecialViaequallength(const GtEncseq *encseq,
       return true;
     }
   }
-  gt_assert(!checkspecialbruteforce(encseq,startpos,len));
   return false;
 }
 
