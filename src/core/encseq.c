@@ -932,38 +932,37 @@ static int determinesattype(unsigned long *specialranges,
     sat = gt_encseq_access_type_get(str_sat);
     if (numofchars == GT_DNAALPHASIZE)
     {
-      switch(sat)
+      switch (sat)
       {
-	case GT_ACCESS_TYPE_UCHARTABLES:
-	  *specialranges = specialrangestab[0];
-	  break;
-	case GT_ACCESS_TYPE_USHORTTABLES:
-	  *specialranges = specialrangestab[1];
-	   break;
-	case GT_ACCESS_TYPE_UINT32TABLES:
-	  *specialranges = specialrangestab[2];
-	  break;
-	case GT_ACCESS_TYPE_DIRECTACCESS:
-	case GT_ACCESS_TYPE_BITACCESS:
-	  break;
-	case GT_ACCESS_TYPE_EQUALLENGTH:
-	  if (equallength == NULL || !equallength->defined)
-	  {
-	    gt_error_set(err,"illegal argument \"%s\" to option -sat: "
-			     "%s is only possible for DNA sequences, if "
-			     "all sequences are of equal length and no "
-			     "sequence contains a wildcard",str_sat,str_sat);
-	    haserr = true;
-	  }
-	  break;
-	default:
-          gt_assert(sat == GT_ACCESS_TYPE_UNDEFINED);
-	  gt_error_set(err,"illegal argument \"%s\" to option -sat: "
-			   "must be one of the following keywords: %s",
-			   str_sat,gt_encseq_access_type_list());
-	  haserr = true;
+        case GT_ACCESS_TYPE_UCHARTABLES:
+          *specialranges = specialrangestab[0];
           break;
-      } 
+        case GT_ACCESS_TYPE_USHORTTABLES:
+          *specialranges = specialrangestab[1];
+           break;
+        case GT_ACCESS_TYPE_UINT32TABLES:
+          *specialranges = specialrangestab[2];
+          break;
+        case GT_ACCESS_TYPE_DIRECTACCESS:
+        case GT_ACCESS_TYPE_BITACCESS:
+          break;
+        case GT_ACCESS_TYPE_EQUALLENGTH:
+          if (equallength == NULL || !equallength->defined) {
+            gt_error_set(err,"illegal argument \"%s\" to option -sat: "
+                 "%s is only possible for DNA sequences, if "
+                 "all sequences are of equal length and no "
+                 "sequence contains a wildcard",str_sat,str_sat);
+            haserr = true;
+          }
+          break;
+        default:
+          gt_assert(sat == GT_ACCESS_TYPE_UNDEFINED);
+          gt_error_set(err,"illegal argument \"%s\" to option -sat: "
+                           "must be one of the following keywords: %s",
+                           str_sat,gt_encseq_access_type_list());
+          haserr = true;
+          break;
+      }
     } else
     {
       if (sat != GT_ACCESS_TYPE_BYTECOMPRESS &&
@@ -1446,7 +1445,7 @@ static bool checkspecialbruteforce(const GtEncseq *encseq,
 {
   unsigned long idx;
 
-  for(idx=startpos; idx < startpos + len; idx++)
+  for (idx=startpos; idx < startpos + len; idx++)
   {
     if (ISSPECIAL(delivercharViaequallength(encseq,idx)))
     {
