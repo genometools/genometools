@@ -75,14 +75,13 @@ if $gttestdata then
              + " -overlaps best -xdrop 5 -mat 2 -mis -2 -ins -3 -del -3 -v"\
              + " -gff3 #{k}.gff3 -out #{k}.fas -outinner #{k}_inner.fas", \
              :maxtime => 25000
-      run "diff #{$last_stdout} #{$gttestdata}ltrharvest/s_cer/#{k}.out"
       if k != "chr11" then
-        run "#{$bin}gt gff3 #{k}.gff3"
-        run "diff #{k}.gff3 #{$gttestdata}ltrharvest/s_cer/#{k}.gff3"
-      else # chromosome 11 has no hits, no file expected
-        run "#{$bin}gt gff3 #{k}.gff3", :retval => 1
-        run "diff #{k}.gff3 #{$gttestdata}ltrharvest/s_cer/#{k}.gff3", \
-            :retval => 2
+        run "diff #{$last_stdout} #{$gttestdata}ltrharvest/s_cer/#{k}.out"
+        run "#{$bin}gt gff3 -sort #{$gttestdata}ltrharvest/s_cer/#{k}.gff3 > ref.gff3"
+        run "#{$bin}gt gff3 -sort #{k}.gff3 > out.gff3"
+        run "#{$bin}gt eval -ltr out.gff3 ref.gff3"
+        grep($last_stdout, "LTR_retrotransposon sensitivity: 100.00%")
+        grep($last_stdout, "LTR_retrotransposon specificity: 100.00%")
       end
       run "diff #{k}.fas #{$gttestdata}ltrharvest/s_cer/#{k}.fas"
       run "diff #{k}_inner.fas #{$gttestdata}ltrharvest/s_cer/#{k}_inner.fas"
@@ -100,14 +99,13 @@ if $gttestdata then
              + " -overlaps best -xdrop 5 -mat 2 -mis -2 -ins -3 -del -3 -v"\
              + " -gff3 #{k}.gff3 -out #{k}.fas -outinner #{k}_inner.fas", \
              :maxtime => 7200
-      run "diff #{$last_stdout} #{$gttestdata}ltrharvest/s_cer/#{k}_longoutput.out"
       if k != "chr11" then
-        run "#{$bin}gt gff3 #{k}.gff3"
-        run "diff #{k}.gff3 #{$gttestdata}ltrharvest/s_cer/#{k}.gff3"
-      else # chromosome 11 has no hits, no file expected
-        run "#{$bin}gt gff3 #{k}.gff3", :retval => 1
-        run "diff #{k}.gff3 #{$gttestdata}ltrharvest/s_cer/#{k}.gff3", \
-            :retval => 2
+        run "diff #{$last_stdout} #{$gttestdata}ltrharvest/s_cer/#{k}_longoutput.out"
+        run "#{$bin}gt gff3 -sort #{$gttestdata}ltrharvest/s_cer/#{k}.gff3 > ref.gff3"
+        run "#{$bin}gt gff3 -sort #{k}.gff3 > out.gff3"
+        run "#{$bin}gt eval -ltr out.gff3 ref.gff3"
+        grep($last_stdout, "LTR_retrotransposon sensitivity: 100.00%")
+        grep($last_stdout, "LTR_retrotransposon specificity: 100.00%")
       end
       run "diff #{k}.fas #{$gttestdata}ltrharvest/s_cer/#{k}.fas"
       run "diff #{k}_inner.fas #{$gttestdata}ltrharvest/s_cer/#{k}_inner.fas"
@@ -128,8 +126,11 @@ if $gttestdata then
       run_test "#{$bin}gt suffixerator -db #{$gttestdata}ltrharvest/d_mel/#{v} -dna -suf -sds -lcp -tis -des -ssp", :maxtime => 36000
       run_test "#{$bin}gt ltrharvest -index #{v} -seed 76 -minlenltr 116 -maxlenltr 800 -mindistltr 2280 -maxdistltr 8773 -similar 91 -mintsd 4 -maxtsd 20 -vic 60 -overlaps best -xdrop 7 -mat 2 -mis -2 -ins -3 -del -3 -v -gff3 #{k}.gff3", :maxtime => 3600
       run "diff #{$last_stdout} #{$gttestdata}ltrharvest/d_mel/#{k}.out"
-      run "#{$bin}gt gff3 #{k}.gff3"
-      run "diff #{k}.gff3 #{$gttestdata}ltrharvest/d_mel/#{k}.gff3"
+      run "#{$bin}gt gff3 -sort #{$gttestdata}ltrharvest/d_mel/#{k}.gff3 > ref.gff3"
+      run "#{$bin}gt gff3 -sort #{k}.gff3 > out.gff3"
+      run "#{$bin}gt  eval -ltr out.gff3 ref.gff3"
+      grep($last_stdout, "LTR_retrotransposon sensitivity: 100.00%")
+      grep($last_stdout, "LTR_retrotransposon specificity: 100.00%")
     end
   end
 end
@@ -155,7 +156,7 @@ Test do
            " -motif tgca -motifmis 0"
 end
 
-Name "gt ltrharvest unvalid motif characters"
+Name "gt ltrharvest invalid motif characters"
 Keywords "gt_ltrharvest"
 Test do
   run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -sds -lcp -tis -des -ssp"

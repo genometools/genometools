@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 David Ellinghaus <d.ellinghaus@ikmb.uni-kiel.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,19 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef OUTPUTFASTA_H
-#define OUTPUTFASTA_H
+#ifndef GT_LTRHARVEST_H
+#define GT_LTRHARVEST_H
 
-#include <stdbool.h>
-#include "core/error.h"
-#include "ltrharvest-opt.h"
+#include "core/tool.h"
 
-int gt_showpredictionsmultiplefasta(const LTRharvestoptions *lo,
-                                 const LTRboundaries **bdptrtab,
-                                 unsigned long numofboundaries,
-                                 bool innerregion,
-                                 unsigned int linewidth,
-                                 bool showseqnum,
-                                 GtError *err);
+/* the LTRharvest tool */
+GtTool* gt_ltrharvest(void);
 
 #endif

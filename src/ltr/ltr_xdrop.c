@@ -19,8 +19,7 @@
 #include "core/chardef.h"
 #include "core/divmodmul.h"
 #include "core/minmax.h"
-#include "repeattypes.h"
-#include "myxdrop.h"
+#include "ltr_xdrop.h"
 
 #define MINUSINFINITYINT ((int)integermin)
 #define ACCESSTOFRONT(D,K) ((unsigned long) (D) * (D) + (D) + (K))
@@ -152,7 +151,7 @@ int gt_showmatrix(GtArrayMyfrontvalue * fronts,
  The following function calculates the distance from the given scores.
  */
 void gt_calculatedistancesfromscores(Arbitraryscores *arbitscores,
-    Arbitrarydistances *arbitdistances)
+                                     Arbitrarydistances *arbitdistances)
 {
   unsigned int m, n, r;
   int mat, mis, ins, del;

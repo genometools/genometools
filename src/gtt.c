@@ -57,6 +57,7 @@
 #include "extended/tag_value_map.h"
 #include "extended/redblack.h"
 #include "ltr/gt_ltrdigest.h"
+#include "ltr/gt_ltrharvest.h"
 #include "ltr/ltrelement.h"
 #include "ltr/ppt.h"
 #include "ltr/pbs.h"
@@ -80,7 +81,6 @@
 #include "tools/gt_gff3_to_gtf.h"
 #include "tools/gt_gtf_to_gff3.h"
 #include "tools/gt_interfeat.h"
-#include "tools/gt_ltrharvest.h"
 #include "tools/gt_matchingstatistics.h"
 #include "tools/gt_maxpairs.h"
 #include "tools/gt_merge.h"
@@ -147,7 +147,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "ltrdigest", gt_ltrdigest());
   gt_toolbox_add_tool(tools, "gtf_to_gff3", gt_gtf_to_gff3());
   gt_toolbox_add_tool(tools, "interfeat", gt_interfeat());
-  gt_toolbox_add(tools, "ltrharvest", gt_ltrharvest);
+  gt_toolbox_add_tool(tools, "ltrharvest", gt_ltrharvest());
   gt_toolbox_add(tools, "matstat", gt_matchingstatistics);
   gt_toolbox_add_tool(tools, "repfind", gt_repfind());
   gt_toolbox_add(tools, "merge", gt_merge);

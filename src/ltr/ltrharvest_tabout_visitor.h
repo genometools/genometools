@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 David Ellinghaus <d.ellinghaus@ikmb.uni-kiel.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,10 +15,18 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GT_LTRHARVEST_H
-#define GT_LTRHARVEST_H
+#ifndef LTRHARVEST_TABOUT_VISITOR_H
+#define LTRHARVEST_TABOUT_VISITOR_H
 
-/* the LTRharvest tool */
-int gt_ltrharvest(int argc, const char **argv, GtError*);
+/* implements the ``node visitor'' interface */
+typedef struct GtLTRharvestTaboutVisitor GtLTRharvestTaboutVisitor;
+
+#include "core/encseq_api.h"
+#include "extended/node_visitor.h"
+
+const GtNodeVisitorClass* gt_ltrharvest_tabout_visitor_class(void);
+GtNodeVisitor*            gt_ltrharvest_tabout_visitor_new(void);
+GtNodeVisitor*            gt_ltrharvest_tabout_visitor_new_longoutput(
+                                                        const GtEncseq *encseq);
 
 #endif

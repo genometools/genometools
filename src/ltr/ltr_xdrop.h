@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef MYXDROP_H
-#define MYXDROP_H
+#ifndef LTR_XDROP_H
+#define LTR_XDROP_H
 
 #include "core/arraydef.h"
 #include "core/unused_api.h"
