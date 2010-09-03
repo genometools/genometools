@@ -21,7 +21,6 @@
 #include "core/minmax.h"
 #include "core/encseq.h"
 
-#include "spacedef.h"
 #include "lcpoverflow.h"
 #include "sfx-bltrie.h"
 #include "sfx-suffixgetset.h"
@@ -517,10 +516,11 @@ Blindtrie *gt_blindtrie_new(GtSuffixsortspace *suffixsortspace,
 {
   Blindtrie *blindtrie;
 
-  ALLOCASSIGNSPACE(blindtrie,NULL,Blindtrie,1);
+  blindtrie = gt_malloc(sizeof (*blindtrie));
   blindtrie->allocatedBlindtrienode = GT_MULT2(numofsuffixes + 1) + 1;
-  ALLOCASSIGNSPACE(blindtrie->spaceBlindtrienode,NULL,Blindtrienode,
-                   blindtrie->allocatedBlindtrienode);
+  blindtrie->spaceBlindtrienode
+    = gt_malloc(sizeof (*blindtrie->spaceBlindtrienode) *
+                blindtrie->allocatedBlindtrienode);
   /*
   printf("# sizeof (blindtrie)=%lu\n",
             (unsigned long) (sizeof (Blindtrie) +
@@ -540,11 +540,15 @@ Blindtrie *gt_blindtrie_new(GtSuffixsortspace *suffixsortspace,
   return blindtrie;
 }
 
-void gt_blindtrie_delete(Blindtrie **blindtrie)
+void gt_blindtrie_delete(Blindtrie *blindtrie)
 {
-  FREESPACE((*blindtrie)->spaceBlindtrienode);
-  GT_FREEARRAY(&(*blindtrie)->stack, Nodeptr);
-  FREESPACE(*blindtrie);
+  if (blindtrie == NULL)
+  {
+    return;
+  }
+  gt_free(blindtrie->spaceBlindtrienode);
+  GT_FREEARRAY(&blindtrie->stack, Nodeptr);
+  gt_free(blindtrie);
 }
 
 #ifdef SKDEBUG

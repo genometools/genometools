@@ -37,7 +37,7 @@ Enumcodeatposition *gt_newEnumcodeatposition(const GtEncseq *encseq,
 bool gt_nextEnumcodeatposition(Specialcontext *specialcontext,
                                Enumcodeatposition *ecp);
 
-void gt_freeEnumcodeatposition(Enumcodeatposition **ecp);
+void gt_freeEnumcodeatposition(Enumcodeatposition *ecp);
 
 GtCodetype gt_computefilledqgramcode(const Enumcodeatposition *ecp,
                                      unsigned int prefixindex,

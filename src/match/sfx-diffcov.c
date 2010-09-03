@@ -396,7 +396,8 @@ static unsigned long dcov_derivespecialcodesonthefly(Differencecover *dcov,
         }
       }
     }
-    gt_freeEnumcodeatposition(&ecp);
+    gt_freeEnumcodeatposition(ecp);
+    ecp = NULL;
   }
   if (codelist != NULL)
   {

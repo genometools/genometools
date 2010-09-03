@@ -20,7 +20,6 @@
 #include "core/assert_api.h"
 #include "core/codetype.h"
 #include "core/encseq.h"
-#include "spacedef.h"
 #include "sfx-enumcodes.h"
 #include "stamp.h"
 #include "initbasepower.h"
@@ -45,7 +44,7 @@ Enumcodeatposition *gt_newEnumcodeatposition(const GtEncseq *encseq,
 {
   Enumcodeatposition *ecp;
 
-  ALLOCASSIGNSPACE(ecp,NULL,Enumcodeatposition,1);
+  ecp = gt_malloc(sizeof *ecp);
   ecp->encseq = encseq;
   ecp->readmode = readmode;
   ecp->multimappower = gt_initmultimappower(numofchars,prefixlength);
@@ -157,11 +156,11 @@ bool gt_nextEnumcodeatposition(Specialcontext *specialcontext,
   return done;
 }
 
-void gt_freeEnumcodeatposition(Enumcodeatposition **ecp)
+void gt_freeEnumcodeatposition(Enumcodeatposition *ecp)
 {
-  FREESPACE((*ecp)->filltable);
-  gt_multimappowerfree(&(*ecp)->multimappower);
-  FREESPACE(*ecp);
+  gt_free(ecp->filltable);
+  gt_multimappowerfree(&ecp->multimappower);
+  gt_free(ecp);
 }
 
 GtCodetype gt_computefilledqgramcode(const Enumcodeatposition *ecp,

@@ -27,7 +27,6 @@
 #include "core/unused_api.h"
 #include "core/types_api.h"
 #include "core/encseq.h"
-#include "spacedef.h"
 #include "turnwheels.h"
 #include "esa-fileend.h"
 #include "bcktab.h"
@@ -1667,7 +1666,7 @@ Outlcpinfo *gt_newOutlcpinfo(const char *indexname,
   bool haserr = false;
   Outlcpinfo *outlcpinfo;
 
-  ALLOCASSIGNSPACE(outlcpinfo,NULL,Outlcpinfo,1);
+  outlcpinfo = gt_malloc(sizeof (*outlcpinfo));
   if (indexname == NULL)
   {
     outlcpinfo->outfplcptab = NULL;
@@ -1716,7 +1715,7 @@ Outlcpinfo *gt_newOutlcpinfo(const char *indexname,
   outlcpinfo->previousbucketwasempty = false;
   if (haserr)
   {
-    FREESPACE(outlcpinfo);
+    gt_free(outlcpinfo);
     return NULL;
   }
   return outlcpinfo;
@@ -1860,13 +1859,16 @@ static void multioutlcpvalues(Lcpsubtab *lcpsubtab,
   lcpsubtab->countoutputlcpvalues = bucketsize;
 }
 
-void gt_freeOutlcptab(Outlcpinfo **outlcpinfoptr)
+void gt_freeOutlcptab(Outlcpinfo *outlcpinfo)
 {
-  Outlcpinfo *outlcpinfo = *outlcpinfoptr;
-
+  if (outlcpinfo == NULL)
+  {
+    return;
+  }
   if (outlcpinfo->assideeffect)
   {
-    FREESPACE(outlcpinfo->lcpsubtab.reservoir);
+    gt_free(outlcpinfo->lcpsubtab.reservoir);
+    outlcpinfo->lcpsubtab.reservoir = NULL;
     outlcpinfo->lcpsubtab.sizereservoir = 0;
     if (outlcpinfo->tw != NULL)
     {
@@ -1885,7 +1887,7 @@ void gt_freeOutlcptab(Outlcpinfo **outlcpinfoptr)
   GT_FREEARRAY(&outlcpinfo->lcpsubtab.largelcpvalues,Largelcpvalue);
   gt_fa_fclose(outlcpinfo->outfplcptab);
   gt_fa_fclose(outlcpinfo->outfpllvtab);
-  FREESPACE(*outlcpinfoptr);
+  gt_free(outlcpinfo);
 }
 
 unsigned long getnumoflargelcpvalues(const Outlcpinfo *outlcpinfo)
@@ -1976,12 +1978,12 @@ static void initBentsedgresources(Bentsedgresources *bsr,
     bsr->medianinfospace = NULL;
   } else
   {
-    ALLOCASSIGNSPACE(bsr->countingsortinfo,NULL,Countingsortinfo,
-                     sfxstrategy->maxcountingsort);
+    bsr->countingsortinfo = gt_malloc(sizeof (*bsr->countingsortinfo) *
+                                      sfxstrategy->maxcountingsort);
     if (sfxstrategy->maxwidthrealmedian >= MINMEDIANOF9WIDTH)
     {
-      ALLOCASSIGNSPACE(bsr->medianinfospace,NULL,Medianinfo,
-                       sfxstrategy->maxwidthrealmedian);
+      bsr->medianinfospace = gt_malloc(sizeof (*bsr->medianinfospace) *
+                                       sfxstrategy->maxwidthrealmedian);
     } else
     {
       bsr->medianinfospace = NULL;
@@ -2047,12 +2049,11 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
                                   FILE *outfpllvtab,
                                   GtLogger *logger)
 {
-  FREESPACE(bsr->countingsortinfo);
-  FREESPACE(bsr->medianinfospace);
-  if (bsr->blindtrie != NULL)
-  {
-    gt_blindtrie_delete(&bsr->blindtrie);
-  }
+  gt_free(bsr->countingsortinfo);
+  bsr->countingsortinfo = NULL;
+  gt_free(bsr->medianinfospace);
+  bsr->medianinfospace = NULL;
+  gt_blindtrie_delete(bsr->blindtrie);
   if (bsr->rmnsufinfo != NULL)
   {
     Compressedtable *lcptab;

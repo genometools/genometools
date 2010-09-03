@@ -25,13 +25,12 @@
 #include "core/str_array.h"
 #include "core/str.h"
 #include "core/unused_api.h"
-
 #include "core/defined-types.h"
 #include "core/format64.h"
-#include "spacedef.h"
-#include "esa-fileend.h"
 #include "core/readmode.h"
 #include "core/encseq.h"
+
+#include "esa-fileend.h"
 #include "stamp.h"
 
 #define PRJSPECIALOUT(VAL)\

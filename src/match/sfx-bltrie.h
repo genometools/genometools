@@ -50,6 +50,6 @@ unsigned long gt_blindtrie_suffixsort(
                             void *voiddcov,
                             Dc_processunsortedrange dc_processunsortedrange);
 
-void gt_blindtrie_delete(Blindtrie **blindtrie);
+void gt_blindtrie_delete(Blindtrie *blindtrie);
 
 #endif

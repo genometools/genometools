@@ -33,7 +33,6 @@
 #include "core/encseq.h"
 #include "core/safecast-gen.h"
 #include "intcode-def.h"
-#include "spacedef.h"
 #include "esa-fileend.h"
 #include "sfx-diffcov.h"
 #include "sfx-partssuf.h"
@@ -114,7 +113,8 @@ static unsigned long iterproduceCodeatposition(Codeatposition *codelist,
                                  specialcontext.position -
                                  specialcontext.maxprefixindex);
     }
-    gt_freeEnumcodeatposition(&ecp);
+    gt_freeEnumcodeatposition(ecp);
+    ecp = NULL;
     return insertindex;
   }
   return 0;
@@ -173,8 +173,8 @@ static void verifycodelistcomputation(
   unsigned long nextfreeCodeatposition2;
   Codeatposition *spaceCodeatposition2;
 
-  ALLOCASSIGNSPACE(spaceCodeatposition2,NULL,Codeatposition,
-                   realspecialranges+1);
+  spaceCodeatposition2 = gt_malloc(sizeof (*spaceCodeatposition2) *
+                                   (realspecialranges+1));
   nextfreeCodeatposition2 = iterproduceCodeatposition(spaceCodeatposition2,
                                                       encseq,
                                                       readmode,
@@ -185,7 +185,7 @@ static void verifycodelistcomputation(
                              nextfreeCodeatposition1,
                              spaceCodeatposition2,
                              nextfreeCodeatposition2);
-  FREESPACE(spaceCodeatposition2);
+  gt_free(spaceCodeatposition2);
 }
 #endif
 
@@ -408,13 +408,17 @@ static void sfx_derivespecialcodesonthefly(Sfxiterator *sfi)
         }
       }
     }
-    gt_freeEnumcodeatposition(&ecp);
+    gt_freeEnumcodeatposition(ecp);
+    ecp = NULL;
   }
 }
 
-void gt_freeSfxiterator(Sfxiterator **sfiptr)
+void gt_freeSfxiterator(Sfxiterator *sfi)
 {
-  Sfxiterator *sfi = (Sfxiterator *) *sfiptr;
+  if (sfi == NULL)
+  {
+    return;
+  }
 #ifdef SKDEBUG
   if (sfi->bcktab != NULL)
   {
@@ -429,7 +433,8 @@ void gt_freeSfxiterator(Sfxiterator **sfiptr)
   {
     gt_specialrangeiterator_delete(sfi->sri);
   }
-  FREESPACE(sfi->spaceCodeatposition);
+  gt_free(sfi->spaceCodeatposition);
+  sfi->spaceCodeatposition = NULL;
   gt_suffixsortspace_delete(sfi->suffixsortspace);
   gt_freesuftabparts(sfi->suftabparts);
   if (sfi->bcktab != NULL)
@@ -440,7 +445,7 @@ void gt_freeSfxiterator(Sfxiterator **sfiptr)
   {
     gt_differencecover_delete(sfi->dcov);
   }
-  FREESPACE(*sfiptr);
+  gt_free(sfi);
 }
 
 #ifdef SKDEBUG
@@ -530,11 +535,11 @@ Sfxiterator *gt_newSfxiterator(const GtEncseq *encseq,
   }
   if (!haserr)
   {
-    ALLOCASSIGNSPACE(sfi,NULL,Sfxiterator,1);
+    sfi = gt_malloc(sizeof (*sfi));
     if (sfxstrategy != NULL && sfxstrategy->storespecialcodes)
     {
-      ALLOCASSIGNSPACE(sfi->spaceCodeatposition,NULL,
-                       Codeatposition,realspecialranges+1);
+      sfi->spaceCodeatposition
+        = gt_malloc(sizeof (*sfi->spaceCodeatposition) * (realspecialranges+1));
       gt_logger_log(logger,"sizeof (spaceCodeatposition)=%lu",
                               (unsigned long) (sizeof (Codeatposition) *
                                                (realspecialranges+1)));
@@ -718,10 +723,7 @@ Sfxiterator *gt_newSfxiterator(const GtEncseq *encseq,
   }
   if (haserr)
   {
-    if (sfi != NULL)
-    {
-      gt_freeSfxiterator(&sfi);
-    }
+    gt_freeSfxiterator(sfi);
     return NULL;
   }
   return sfi;

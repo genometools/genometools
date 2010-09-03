@@ -15,10 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/assert_api.h"
+#include "core/ma_api.h"
 #include "core/divmodmul.h"
 #include "core/codetype.h"
-
-#include "spacedef.h"
 #include "sfx-partssuf.h"
 
 typedef struct
@@ -37,8 +37,8 @@ typedef struct
 };
 
 static GtCodetype findfirstlarger(const unsigned long *leftborder,
-                                GtCodetype numofallcodes,
-                                unsigned long suftaboffset)
+                                  GtCodetype numofallcodes,
+                                  unsigned long suftaboffset)
 {
   GtCodetype left = 0, right = numofallcodes, mid, found = numofallcodes;
 
@@ -94,15 +94,15 @@ static void removeemptyparts(Suftabparts *suftabparts,
 }
 
 Suftabparts *gt_newsuftabparts(unsigned int numofparts,
-                            const unsigned long *leftborder,
-                            GtCodetype numofallcodes,
-                            unsigned long numofsuffixestoinsert,
-                            unsigned long fullspecials,
-                            GtLogger *logger)
+                               const unsigned long *leftborder,
+                               GtCodetype numofallcodes,
+                               unsigned long numofsuffixestoinsert,
+                               unsigned long fullspecials,
+                               GtLogger *logger)
 {
   Suftabparts *suftabparts;
 
-  ALLOCASSIGNSPACE(suftabparts,NULL,Suftabparts,(size_t) 1);
+  suftabparts = gt_malloc(sizeof *suftabparts);
   gt_assert(suftabparts != NULL);
   if (numofsuffixestoinsert == 0)
   {
@@ -124,14 +124,13 @@ Suftabparts *gt_newsuftabparts(unsigned int numofparts,
   } else
   {
     unsigned int part, remainder;
-    unsigned long widthofsuftabpart,
-           suftaboffset = 0,
-           sumofwidth = 0;
-    ALLOCASSIGNSPACE(suftabparts->components,NULL,Suftabpartcomponent,
-                     numofparts);
+    unsigned long widthofsuftabpart, suftaboffset = 0, sumofwidth = 0;
+
+    suftabparts->components
+      = gt_malloc(sizeof (*suftabparts->components) * numofparts);
     widthofsuftabpart = numofsuffixestoinsert/numofparts;
-    remainder =
-            (unsigned int) (numofsuffixestoinsert % (unsigned long) numofparts);
+    remainder = (unsigned int) (numofsuffixestoinsert %
+                                (unsigned long) numofparts);
     suftabparts->largestwidth = 0;
     for (part=0; part < numofparts; part++)
     {
@@ -232,7 +231,7 @@ void gt_freesuftabparts(Suftabparts *suftabparts)
 {
   if (suftabparts != NULL)
   {
-    FREESPACE(suftabparts->components);
-    FREESPACE(suftabparts);
+    gt_free(suftabparts->components);
+    gt_free(suftabparts);
   }
 }

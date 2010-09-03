@@ -134,10 +134,7 @@ static int constructsarrandrunmaxpairs(
       gt_freeSequentialsuffixarrayreader(&ssar);
     }
   }
-  if (sfi != NULL)
-  {
-    gt_freeSfxiterator(&sfi);
-  }
+  gt_freeSfxiterator(sfi);
   return haserr ? -1 : 0;
 }
 

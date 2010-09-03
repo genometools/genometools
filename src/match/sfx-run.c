@@ -31,7 +31,6 @@
 #include "core/unused_api.h"
 #include "sfx-optdef.h"
 #include "esa-fileend.h"
-#include "spacedef.h"
 #include "stamp.h"
 #include "sfx-suffixer.h"
 #include "sfx-run.h"
@@ -255,10 +254,7 @@ static int suffixeratorwithoutput(const GtStr *indexname,
       haserr = true;
     }
   }
-  if (sfi != NULL)
-  {
-    gt_freeSfxiterator(&sfi);
-  }
+  gt_freeSfxiterator(sfi);
   return haserr ? -1 : 0;
 }
 
@@ -617,10 +613,7 @@ static int runsuffixerator(bool doesa,
       haserr = true;
     }
   }
-  if (outfileinfo.outlcpinfo != NULL)
-  {
-    gt_freeOutlcptab(&outfileinfo.outlcpinfo);
-  }
+  gt_freeOutlcptab(outfileinfo.outlcpinfo);
   gt_encseq_delete(encseq);
   encseq = NULL;
   if (!haserr && so->outkystab && so->outkyssort)

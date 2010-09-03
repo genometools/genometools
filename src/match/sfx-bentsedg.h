@@ -37,7 +37,7 @@ Outlcpinfo *gt_newOutlcpinfo(const char *indexname,
                              bool assideeffect,
                              GtError *err);
 
-void gt_freeOutlcptab(Outlcpinfo **outlcpinfoptr);
+void gt_freeOutlcptab(Outlcpinfo *outlcpinfo);
 
 unsigned long getnumoflargelcpvalues(const Outlcpinfo *outlcpinfo);
 

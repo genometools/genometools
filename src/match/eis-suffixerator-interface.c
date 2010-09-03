@@ -286,7 +286,8 @@ void
 gt_deleteSfxInterface(sfxInterface *sfxi)
 {
   destructSASeqSrc(&sfxi->baseClass);
-  gt_freeSfxiterator(&sfxi->sfi);
+  gt_freeSfxiterator(sfxi->sfi);
+  sfxi->sfi = NULL;
   deleteSeqStats(sfxi->stats);
   gt_free(sfxi);
 }
