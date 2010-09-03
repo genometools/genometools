@@ -11,5 +11,6 @@ coverage=$2
 inputfile=$3
 
 gt suffixerator -des -tis -ssp -dna -db ${inputfile} -indexname genome-idx
-gt simreads -coverage ${coverage} -len ${readsize} -gzip -force -o genome-idx-reads.fna.gz genome-idx
+gt simreads -coverage ${coverage} -len ${readsize} -gzip -force \
+            -o genome-idx-${readsize}-${coverage}-reads.fna.gz genome-idx
 rm -f genome-idx.*
