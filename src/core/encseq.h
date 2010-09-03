@@ -23,16 +23,16 @@
 #include "core/alphabet.h"
 #include "core/chardef.h"
 #include "core/codetype.h"
-#include "core/str.h"
-#include "core/str_array.h"
-#include "core/types_api.h"
-#include "core/filelengthvalues.h"
 #include "core/disc_distri.h"
 #include "core/encseq_api.h"
+#include "core/encseq_access_type.h"
+#include "core/filelengthvalues.h"
 #include "core/intbits.h"
 #include "core/range.h"
 #include "core/readmode.h"
-#include "core/codetype.h"
+#include "core/str.h"
+#include "core/str_array.h"
+#include "core/types_api.h"
 
 #define GT_REVERSEPOS(TOTALLENGTH,POS) \
           ((TOTALLENGTH) - 1 - (POS))
@@ -367,5 +367,15 @@ void gt_encseq_showatstartposwithdepth(FILE *fp,
                                        GtReadmode readmode,
                                        unsigned long start,
                                        unsigned long depth);
+
+/* Determines the size of the final representation of the encoded sequence
+   with the given characteristics, given the access type <sat>. */
+uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
+                                  unsigned long totallength,
+                                  unsigned long numofdbfiles,
+                                  unsigned long lengthofdbfilenames,
+                                  unsigned long specialranges,
+                                  unsigned int numofchars,
+                                  unsigned int bitspersymbol);
 
 #endif

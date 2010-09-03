@@ -33,6 +33,7 @@
 #include "core/cstr_api.h"
 #include "core/divmodmul.h"
 #include "core/encseq.h"
+#include "core/encseq_access_type.h"
 #include "core/encseq_metadata.h"
 #ifndef GT_INLINEDENCSEQ
 #include "core/encseq_rep.h"
@@ -60,19 +61,6 @@
 #include "core/defined-types.h"
 #include "match/stamp.h"
 
-#define CHECKANDUPDATE(VAL,IDX)\
-        tmp = localdetsizeencseq(VAL,totallength,numofdbfiles,\
-                                 lengthofdbfilenames,\
-                                 specialrangestab[IDX],\
-                                 numofchars,\
-                                 0);\
-        if (tmp < cmin)\
-        {\
-          cmin = tmp;\
-          cret = VAL;\
-          *specialranges = specialrangestab[IDX];\
-        }
-
 /* The following implements the access functions to the bit encoding */
 
 #define EXTRACTENCODEDCHARSCALARFROMLEFT(SCALAR,PREFIX)\
@@ -92,7 +80,7 @@
         unsigned long widthbuffer = 0;\
         GtTwobitencoding *tbeptr;\
         encseq->unitsoftwobitencoding\
-          = detunitsoftwobitencoding(encseq->totallength);\
+          = gt_unitsoftwobitencoding(encseq->totallength);\
         TABLE = gt_malloc(sizeof (*(TABLE)) * encseq->unitsoftwobitencoding);\
         TABLE[encseq->unitsoftwobitencoding-1] = 0;\
         tbeptr = TABLE
@@ -547,19 +535,6 @@ bool gt_encseq_has_fast_specialrangeenumerator(const GtEncseq *encseq)
   return satviautables(encseq->sat);
 }
 
-static unsigned long detunitsoftwobitencoding(unsigned long totallength)
-{
-  uint64_t unitsoftwobitencoding;
-
-  if (totallength < (unsigned long) GT_UNITSIN2BITENC)
-  {
-    return 2UL;
-  }
-  unitsoftwobitencoding = (uint64_t) (2 +
-                          GT_DIVBYUNITSIN2BITENC(totallength - 1));
-  return CALLCASTFUNC(uint64_t,unsigned_long,unitsoftwobitencoding);
-}
-
 static void assignencseqmapspecification(
                                         GtArrayGtMapspecification *mapspectable,
                                         void *voidinfo,
@@ -776,229 +751,6 @@ static int fillencseqmapspecstartptr(GtEncseq *encseq,
   gt_str_delete(tmpfilename);
   return haserr ? -1 : 0;
 }
-
-static uint64_t localdetsizeencseq(GtEncseqAccessType sat,
-                                   unsigned long totallength,
-                                   unsigned long numofdbfiles,
-                                   unsigned long lengthofdbfilenames,
-                                   unsigned long specialranges,
-                                   unsigned int numofchars,
-                                   unsigned int bitspersymbol)
-{
-  uint64_t sum,
-           sizeoftwobitencoding
-             = (uint64_t) detunitsoftwobitencoding(totallength) *
-               (uint64_t) sizeof (GtTwobitencoding);
-
-  switch (sat)
-  {
-    case GT_ACCESS_TYPE_DIRECTACCESS:
-         sum = (uint64_t) totallength * (uint64_t) sizeof (GtUchar);
-         break;
-    case GT_ACCESS_TYPE_BYTECOMPRESS:
-         gt_assert(bitspersymbol > 0);
-         sum = (uint64_t) sizeofbitarray(bitspersymbol,(BitOffset) totallength);
-         break;
-    case GT_ACCESS_TYPE_EQUALLENGTH:
-         sum = sizeoftwobitencoding;
-         break;
-    case GT_ACCESS_TYPE_BITACCESS:
-         sum = sizeoftwobitencoding;
-         if (specialranges > 0)
-         {
-           sum += (uint64_t) sizeof (GtBitsequence) *
-                  (uint64_t) GT_NUMOFINTSFORBITS(totallength+GT_INTWORDSIZE);
-         }
-         break;
-    case GT_ACCESS_TYPE_UCHARTABLES:
-         sum = sizeoftwobitencoding;
-         if (specialranges > 0)
-         {
-           sum += (uint64_t) sizeof (GtUchar) * specialranges +
-                  (uint64_t) sizeof (GtUchar) * specialranges +
-                  (uint64_t) sizeof (unsigned long) *
-                                    (totallength/UCHAR_MAX+1);
-         }
-         break;
-    case GT_ACCESS_TYPE_USHORTTABLES:
-         sum = sizeoftwobitencoding;
-         if (specialranges > 0)
-         {
-           sum += (uint64_t) sizeof (GtUshort) * specialranges +
-                  (uint64_t) sizeof (GtUshort) * specialranges +
-                  (uint64_t) sizeof (unsigned long) *
-                                    (totallength/USHRT_MAX+1);
-         }
-         break;
-    case GT_ACCESS_TYPE_UINT32TABLES:
-         sum = sizeoftwobitencoding;
-         if (specialranges > 0)
-         {
-           sum += (uint64_t) sizeof (uint32_t) * specialranges +
-                  (uint64_t) sizeof (uint32_t) * specialranges +
-                  (uint64_t) sizeof (unsigned long) *
-                                    (totallength/UINT32_MAX+1);
-         }
-         break;
-    default:
-         fprintf(stderr,"localdetsizeencseq(%d) undefined\n",(int) sat);
-         exit(GT_EXIT_PROGRAMMING_ERROR);
-  }
-  sum += sizeof (unsigned long); /* for sat type */
-  sum += sizeof (totallength); /* for totallength */
-  sum += sizeof (unsigned long); /* for numofdbsequences type */
-  sum += sizeof (unsigned long); /* for numofdbfilenames type */
-  sum += sizeof (unsigned long); /* for lengthofdbfilenames type */
-  sum += sizeof (GtSpecialcharinfo); /* for specialcharinfo */
-  sum += sizeof (GtFilelengthvalues) * numofdbfiles; /* for filelengthtab */
-  sum += sizeof (unsigned long) * numofchars; /* for characterdistribution */
-  sum += sizeof (char) * lengthofdbfilenames; /* for firstfilename */
-  return sum;
-}
-
-static uint64_t detencseqofsatviatables(int kind,
-                                        unsigned long totallength,
-                                        unsigned long numofdbfiles,
-                                        unsigned long lengthofdbfilenames,
-                                        unsigned long specialranges,
-                                        unsigned int numofchars)
-{
-  GtEncseqAccessType sat[] = {GT_ACCESS_TYPE_UCHARTABLES,
-                              GT_ACCESS_TYPE_USHORTTABLES,
-                              GT_ACCESS_TYPE_UINT32TABLES};
-
-  gt_assert(kind < (int) (sizeof (sat)/sizeof (sat[0])));
-  return localdetsizeencseq(sat[kind],totallength,numofdbfiles,
-                            lengthofdbfilenames,specialranges,numofchars,0);
-}
-
-#ifndef INLINEDENCSEQ
-static GtEncseqAccessType determinesmallestrep(
-                                  unsigned long *specialranges,
-                                  const Definedunsignedlong *equallength,
-                                  unsigned long totallength,
-                                  unsigned long numofdbfiles,
-                                  unsigned long lengthofdbfilenames,
-                                  const unsigned long *specialrangestab,
-                                  unsigned int numofchars)
-{
-  GtEncseqAccessType cret;
-  uint64_t tmp, cmin;
-
-  cmin = localdetsizeencseq(GT_ACCESS_TYPE_BITACCESS,totallength,numofdbfiles,
-                            lengthofdbfilenames,
-                            specialrangestab[0],numofchars,0);
-  cret = GT_ACCESS_TYPE_BITACCESS;
-  *specialranges = specialrangestab[0];
-  if (equallength != NULL && equallength->defined)
-  {
-    cret = GT_ACCESS_TYPE_EQUALLENGTH;
-  } else
-  {
-    CHECKANDUPDATE(GT_ACCESS_TYPE_UCHARTABLES,0);
-    CHECKANDUPDATE(GT_ACCESS_TYPE_USHORTTABLES,1);
-    CHECKANDUPDATE(GT_ACCESS_TYPE_UINT32TABLES,2);
-  }
-  return cret;
-}
-
-static int determinesattype(unsigned long *specialranges,
-                            unsigned long totallength,
-                            unsigned long numofdbfiles,
-                            unsigned long lengthofdbfilenames,
-                            const unsigned long *specialrangestab,
-                            const Definedunsignedlong *equallength,
-                            unsigned int numofchars,
-                            const char *str_sat,
-                            GtError *err)
-{
-  GtEncseqAccessType sat = GT_ACCESS_TYPE_UNDEFINED;
-  bool haserr = false;
-
-  *specialranges = specialrangestab[0];
-  if (str_sat == NULL)
-  {
-    if (numofchars == GT_DNAALPHASIZE)
-    {
-      sat = determinesmallestrep(specialranges,equallength,totallength,
-                                 numofdbfiles,lengthofdbfilenames,
-                                 specialrangestab,numofchars);
-    } else
-    {
-      sat = GT_ACCESS_TYPE_BYTECOMPRESS;
-    }
-  } else
-  {
-    sat = gt_encseq_access_type_get(str_sat);
-    if (numofchars == GT_DNAALPHASIZE)
-    {
-      switch (sat)
-      {
-        case GT_ACCESS_TYPE_UCHARTABLES:
-          *specialranges = specialrangestab[0];
-          break;
-        case GT_ACCESS_TYPE_USHORTTABLES:
-          *specialranges = specialrangestab[1];
-           break;
-        case GT_ACCESS_TYPE_UINT32TABLES:
-          *specialranges = specialrangestab[2];
-          break;
-        case GT_ACCESS_TYPE_DIRECTACCESS:
-        case GT_ACCESS_TYPE_BITACCESS:
-          break;
-        case GT_ACCESS_TYPE_EQUALLENGTH:
-          if (equallength == NULL || !equallength->defined) {
-            gt_error_set(err,"illegal argument \"%s\" to option -sat: "
-                             "%s is only possible for DNA sequences, if "
-                             "all sequences are of equal length and no "
-                             "sequence contains a wildcard",str_sat,str_sat);
-            haserr = true;
-          }
-          break;
-        case GT_ACCESS_TYPE_BYTECOMPRESS:
-          gt_error_set(err,"illegal argument \"%s\" to option -sat: "
-                           "cannot use bytecompress on DNA sequences",
-                           str_sat);
-          haserr = true;
-          break;
-        default:
-          gt_assert(sat == GT_ACCESS_TYPE_UNDEFINED);
-          gt_error_set(err,"illegal argument \"%s\" to option -sat: "
-                           "must be one of the following keywords: %s",
-                           str_sat,gt_encseq_access_type_list());
-          haserr = true;
-          break;
-      }
-    } else
-    {
-      if (sat != GT_ACCESS_TYPE_BYTECOMPRESS &&
-          sat != GT_ACCESS_TYPE_DIRECTACCESS)
-      {
-        gt_error_set(err,"illegal argument \"%s\" to option -sat: "
-                        "as the sequence is not DNA, you can choose %s or %s",
-                        str_sat,
-                        gt_encseq_access_type_str(GT_ACCESS_TYPE_BYTECOMPRESS),
-                        gt_encseq_access_type_str(GT_ACCESS_TYPE_DIRECTACCESS));
-        haserr = true;
-      }
-    }
-  }
-  return haserr ? -1 : (int) sat;
-}
-
-#else
-static int determinesattype(unsigned long *specialranges,
-                            GT_UNUSED unsigned long totallength,
-                            GT_UNUSED unsigned long lengthofdbfilenames,
-                            const unsigned long *specialrangestab,
-                            GT_UNUSED unsigned int numofchars,
-                            GT_UNUSED const char *str_sat,
-                            GT_UNUSED GtError *err)
-{
-  *specialranges = specialrangestab[0];
-  return (int)  GT_ACCESS_TYPE_DIRECTACCESS;
-}
-#endif
 
 static unsigned long countgt_encseq_compare_maxdepth = 0;
 static unsigned long countgt_encseq_compare = 0;
@@ -2810,7 +2562,7 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
   encseq->lengthofdbfilenames = lengthofdbfilenames;
   encseq->numofchars = gt_alphabet_num_of_chars(alpha);
   encseq->sizeofrep = CALLCASTFUNC(uint64_t, unsigned_long,
-                                   localdetsizeencseq(sat,totallength,
+                                   gt_encseq_determine_size(sat,totallength,
                                          numofdbfiles,
                                          lengthofdbfilenames,specialranges,
                                          encseq->numofchars,
@@ -2824,7 +2576,7 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
     encseq->unitsoftwobitencoding = 0;
   } else
   {
-    encseq->unitsoftwobitencoding = detunitsoftwobitencoding(totallength);
+    encseq->unitsoftwobitencoding = gt_unitsoftwobitencoding(totallength);
   }
   encseq->ucharspecialrangelength = NULL;
   encseq->ushortspecialrangelength = NULL;
@@ -3056,15 +2808,15 @@ static GtEncseq *files2encodedsequence(
   unsigned long specialranges;
 
   gt_error_check(err);
-  retcode = determinesattype(&specialranges,
-                             totallength,
-                             gt_str_array_size(filenametab),
-                             determinelengthofdbfilenames(filenametab),
-                             specialrangestab,
-                             equallength,
-                             gt_alphabet_num_of_chars(alphabet),
-                             str_sat,
-                             err);
+  retcode = gt_encseq_access_type_determine(&specialranges,
+                                     totallength,
+                                     gt_str_array_size(filenametab),
+                                     determinelengthofdbfilenames(filenametab),
+                                     specialrangestab,
+                                     equallength,
+                                     gt_alphabet_num_of_chars(alphabet),
+                                     str_sat,
+                                     err);
   if (retcode < 0)
   {
     haserr = true;
@@ -3453,6 +3205,102 @@ static unsigned long calcspecialranges(unsigned long *specialrangestab,
     specialrangestab[2] = updatesumrangeinfo.specialrangesUint32;
   }
   return updatesumrangeinfo.realspecialranges;
+}
+
+static uint64_t detencseqofsatviatables(int kind,
+                                        unsigned long totallength,
+                                        unsigned long numofdbfiles,
+                                        unsigned long lengthofdbfilenames,
+                                        unsigned long specialranges,
+                                        unsigned int numofchars)
+{
+  GtEncseqAccessType sat[] = {GT_ACCESS_TYPE_UCHARTABLES,
+                              GT_ACCESS_TYPE_USHORTTABLES,
+                              GT_ACCESS_TYPE_UINT32TABLES};
+
+  gt_assert(kind < (int) (sizeof (sat)/sizeof (sat[0])));
+  return gt_encseq_determine_size(sat[kind],totallength,numofdbfiles,
+                                  lengthofdbfilenames,specialranges,
+                                  numofchars,0);
+}
+
+uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
+                                  unsigned long totallength,
+                                  unsigned long numofdbfiles,
+                                  unsigned long lengthofdbfilenames,
+                                  unsigned long specialranges,
+                                  unsigned int numofchars,
+                                  unsigned int bitspersymbol)
+{
+  uint64_t sum,
+           sizeoftwobitencoding
+             = (uint64_t) gt_unitsoftwobitencoding(totallength) *
+               (uint64_t) sizeof (GtTwobitencoding);
+
+  switch (sat)
+  {
+    case GT_ACCESS_TYPE_DIRECTACCESS:
+         sum = (uint64_t) totallength * (uint64_t) sizeof (GtUchar);
+         break;
+    case GT_ACCESS_TYPE_BYTECOMPRESS:
+         gt_assert(bitspersymbol > 0);
+         sum = (uint64_t) sizeofbitarray(bitspersymbol,(BitOffset) totallength);
+         break;
+    case GT_ACCESS_TYPE_EQUALLENGTH:
+         sum = sizeoftwobitencoding;
+         break;
+    case GT_ACCESS_TYPE_BITACCESS:
+         sum = sizeoftwobitencoding;
+         if (specialranges > 0)
+         {
+           sum += (uint64_t) sizeof (GtBitsequence) *
+                  (uint64_t) GT_NUMOFINTSFORBITS(totallength+GT_INTWORDSIZE);
+         }
+         break;
+    case GT_ACCESS_TYPE_UCHARTABLES:
+         sum = sizeoftwobitencoding;
+         if (specialranges > 0)
+         {
+           sum += (uint64_t) sizeof (GtUchar) * specialranges +
+                  (uint64_t) sizeof (GtUchar) * specialranges +
+                  (uint64_t) sizeof (unsigned long) *
+                                    (totallength/UCHAR_MAX+1);
+         }
+         break;
+    case GT_ACCESS_TYPE_USHORTTABLES:
+         sum = sizeoftwobitencoding;
+         if (specialranges > 0)
+         {
+           sum += (uint64_t) sizeof (GtUshort) * specialranges +
+                  (uint64_t) sizeof (GtUshort) * specialranges +
+                  (uint64_t) sizeof (unsigned long) *
+                                    (totallength/USHRT_MAX+1);
+         }
+         break;
+    case GT_ACCESS_TYPE_UINT32TABLES:
+         sum = sizeoftwobitencoding;
+         if (specialranges > 0)
+         {
+           sum += (uint64_t) sizeof (uint32_t) * specialranges +
+                  (uint64_t) sizeof (uint32_t) * specialranges +
+                  (uint64_t) sizeof (unsigned long) *
+                                    (totallength/UINT32_MAX+1);
+         }
+         break;
+    default:
+         fprintf(stderr,"gt_encseq_determine_size(%d) undefined\n",(int) sat);
+         exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
+  sum += sizeof (unsigned long); /* for sat type */
+  sum += sizeof (totallength); /* for totallength */
+  sum += sizeof (unsigned long); /* for numofdbsequences type */
+  sum += sizeof (unsigned long); /* for numofdbfilenames type */
+  sum += sizeof (unsigned long); /* for lengthofdbfilenames type */
+  sum += sizeof (GtSpecialcharinfo); /* for specialcharinfo */
+  sum += sizeof (GtFilelengthvalues) * numofdbfiles; /* for filelengthtab */
+  sum += sizeof (unsigned long) * numofchars; /* for characterdistribution */
+  sum += sizeof (char) * lengthofdbfilenames; /* for firstfilename */
+  return sum;
 }
 
 static void doupdatesumranges(GtSpecialcharinfo *specialcharinfo,

@@ -18,6 +18,9 @@
 #ifndef ENCSEQ_ACCESS_TYPE_H
 #define ENCSEQ_ACCESS_TYPE_H
 
+#include "core/defined-types.h"
+#include "core/error_api.h"
+
 typedef enum
 {
   GT_ACCESS_TYPE_DIRECTACCESS,
@@ -33,5 +36,13 @@ typedef enum
 GtEncseqAccessType gt_encseq_access_type_get(const char *str);
 const char*        gt_encseq_access_type_str(GtEncseqAccessType at);
 const char*        gt_encseq_access_type_list(void);
-
+GtEncseqAccessType gt_encseq_access_type_determine(unsigned long *specialranges,
+                                         unsigned long totallength,
+                                         unsigned long numofdbfiles,
+                                         unsigned long lengthofdbfilenames,
+                                         const unsigned long *specialrangestab,
+                                         const Definedunsignedlong *equallength,
+                                         unsigned int numofchars,
+                                         const char *str_sat,
+                                         GtError *err);
 #endif

@@ -22,6 +22,7 @@
 #include <string.h>
 #include "core/divmodmul.h"
 #include "core/ma_api.h"
+#include "core/safecast-gen.h"
 
 /*
   This file contains some definitions manipulating bitvectors represented
@@ -172,6 +173,19 @@ typedef GtBitsequence GtTwobitencoding;
     buffer[i] = (bs & mask) ? '1' : '0';
   }
   buffer[GT_INTWORDSIZE] = '\0';
+}
+
+static inline unsigned long gt_unitsoftwobitencoding(unsigned long totallength)
+{
+  uint64_t unitsoftwobitencoding;
+
+  if (totallength < (unsigned long) GT_UNITSIN2BITENC)
+  {
+    return 2UL;
+  }
+  unitsoftwobitencoding = (uint64_t) (2 +
+                          GT_DIVBYUNITSIN2BITENC(totallength - 1));
+  return CALLCASTFUNC(uint64_t,unsigned_long,unitsoftwobitencoding);
 }
 
 #endif
