@@ -258,7 +258,7 @@ gt_bitPackStringInt32_unit_test(GtError *err)
     if (numRnd > 1)
     {
       uint32_t v = randSrc[0] & mask;
-      uint32_t r;
+      uint32_t r = 0;
       gt_bsGetUniformUInt32Array(bitStore, offsetStart,
                                  numBits, 1, &r);
       if (r != v)
@@ -411,7 +411,7 @@ gt_bitPackStringInt32_unit_test(GtError *err)
       uint32_t mask = (numBits < 32)?
         ~((~(uint32_t)0) << numBits):~(uint32_t)0;
       uint32_t v = randSrc[0] & mask;
-      uint32_t r;
+      uint32_t r = 0;
       gt_bsGetNonUniformUInt32Array(bitStore, offsetStart, 1, numBits,
                                      numBitsList, &r);
       if (r != v)

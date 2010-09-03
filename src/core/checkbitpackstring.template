@@ -255,7 +255,7 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
     if (numRnd > 1)
     {
       @uOpType@ v = randSrc[0] & mask;
-      @uOpType@ r;
+      @uOpType@ r = 0;
       gt_bsGetUniform@uTypeTag@Array(bitStore, offsetStart,
                                  numBits, 1, &r);
       if (r != v)
@@ -408,7 +408,7 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
       @uOpType@ mask = (numBits < @bitSize@)?
         ~((~(@uOpType@)0) << numBits):~(@uOpType@)0;
       @uOpType@ v = randSrc[0] & mask;
-      @uOpType@ r;
+      @uOpType@ r = 0;
       gt_bsGetNonUniform@uTypeTag@Array(bitStore, offsetStart, 1, numBits,
                                      numBitsList, &r);
       if (r != v)

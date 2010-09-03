@@ -258,7 +258,7 @@ gt_bitPackStringInt_unit_test(GtError *err)
     if (numRnd > 1)
     {
       unsigned v = randSrc[0] & mask;
-      unsigned r;
+      unsigned r = 0;
       gt_bsGetUniformUIntArray(bitStore, offsetStart,
                                  numBits, 1, &r);
       if (r != v)
@@ -411,7 +411,7 @@ gt_bitPackStringInt_unit_test(GtError *err)
       unsigned mask = (numBits < 32)?
         ~((~(unsigned)0) << numBits):~(unsigned)0;
       unsigned v = randSrc[0] & mask;
-      unsigned r;
+      unsigned r = 0;
       gt_bsGetNonUniformUIntArray(bitStore, offsetStart, 1, numBits,
                                      numBitsList, &r);
       if (r != v)
