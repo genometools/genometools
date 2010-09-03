@@ -1,5 +1,6 @@
 /*
   Copyright (c) 2010 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2010 Dirk Willrodt <dwillrodt@zbh.uni-hamburg.de>
   Copyright (c) 2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -73,10 +74,10 @@
         }
 
 /*
-  Push a value.
+  check if array needs expansion and does so if nessesary
 */
 
-#define GT_STACK_PUSH(S,VALUE)\
+#define GT_STACK_CHECK_SPACE(S)\
         if ((S)->nextfree == (S)->allocated)\
         {\
           size_t sizeoftype = sizeof (*((S)->space));\
@@ -91,17 +92,18 @@
             memcpy((S)->space,&(S)->staticspace[0],sizeoftype*(S)->staticsize);\
           }\
           (S)->allocated += (S)->sizeincrement;\
-        }\
+        }
+/*
+  Push a value.
+*/
+
+#define GT_STACK_PUSH(S,VALUE)\
+        GT_STACK_CHECK_SPACE(S)\
         (S)->space[(S)->nextfree++] = VALUE
 
 /*
   check if the stack is empty.
 */
-#define GT_STACK_DELETE(S)\
-        if ((S)->allocated > (S)->staticsize)\
-        {\
-          gt_free((S)->space);\
-        }
 
 #define GT_STACK_ISEMPTY(S)\
         (((S)->nextfree == 0) ? true : false)
@@ -109,8 +111,6 @@
 /*
   reduce the stack size by one
 */
-#define GT_STACK_MAKEALMOSTEMPTY(S)\
-        (S)->nextfree = 1UL
 
 #define GT_STACK_DECREMENTTOP(S)\
         (S)->nextfree--
@@ -136,14 +136,12 @@
 #define GT_STACK_MAKEALMOSTEMPTY(S)\
         (S)->nextfree = 1UL
 
-#define GT_STACK_TOP(S)\
-        ((S)->space[(S)->nextfree - 1])
-
 /*
-  reduce the stack such that it only contains one element.
+  point to next free element, adjust stacksize if nessesary
 */
 
-#define GT_STACK_MAKEALMOSTEMPTY(S)\
-        (S)->nextfree = 1UL
+#define GT_STACK_NEXT_FREE(S,PTR)\
+        GT_STACK_CHECK_SPACE(S);\
+        PTR = (S)->space+(S)->nextfree++
 
 #endif
