@@ -2,14 +2,14 @@
 extern "C" {
 #endif
 int gt_outprjfile(const char *indexname,
-               GtReadmode readmode,
-               const GtEncseq *encseq,
-               unsigned int prefixlength,
-               const Definedunsignedint *maxdepth,
-               unsigned long numoflargelcpvalues,
-               unsigned long maxbranchdepth,
-               const Definedunsignedlong *longest,
-               GtError *err);
+                  GtReadmode readmode,
+                  const GtEncseq *encseq,
+                  unsigned int prefixlength,
+                  const Definedunsignedint *maxdepth,
+                  unsigned long numoflargelcpvalues,
+                  unsigned long maxbranchdepth,
+                  const Definedunsignedlong *longest,
+                  GtError *err);
 
 #ifdef __cplusplus
 }

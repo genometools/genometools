@@ -15,26 +15,35 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ENCSEQ_SPECIALSRANK_H
-#define ENCSEQ_SPECIALSRANK_H
+#ifndef EIS_SPECIALSRANK_PRIV_H
+#define EIS_SPECIALSRANK_PRIV_H
 
-#include "core/encseq.h"
+#include "match/eis-specialsrank.h"
 
-typedef struct specialsRankLookup SpecialsRankLookup;
+typedef unsigned long (*RankReportFunc)(const SpecialsRankLookup *ranker,
+                                 unsigned long pos);
 
-SpecialsRankLookup *
-gt_newSpecialsRankLookup(const GtEncseq *encseq, GtReadmode readmode,
-                     unsigned sampleIntervalLog2);
-
-void
-gt_deleteSpecialsRankLookup(SpecialsRankLookup *table);
+struct specialsRankLookup
+{
+  RankReportFunc rankFunc;
+  const GtEncseq *encseq;
+  union
+  {
+    struct specialsRankTable
+    {
+      GtEncseqReader *scanState;
+      unsigned long *rankSumSamples, numSamples, sampleInterval;
+      GtReadmode readmode;
+      unsigned sampleIntervalLog2;
+    } sampleTable;
+    unsigned long lastSeqPos;
+  } implementationData;
+};
 
 static inline unsigned long
-specialsRank(const SpecialsRankLookup *rankTable, unsigned long pos);
-
-const GtEncseq *
-gt_SPRTGetOrigEncseq(const SpecialsRankLookup *rankTable);
-
-#include "match/encseq-specialsrank-priv.h"
+specialsRank(const SpecialsRankLookup *ranker, unsigned long pos)
+{
+  return ranker->rankFunc(ranker, pos);
+}
 
 #endif

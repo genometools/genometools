@@ -521,8 +521,9 @@ Sfxiterator *gt_newSfxiterator(const GtEncseq *encseq,
 
   gt_error_check(err);
 
+  /*
   printf("spacepeak at start of gt_newSfxiterator = %lu\n",
-          gt_ma_get_space_peak()); /* in bytes */
+          gt_ma_get_space_peak());*/ /* in bytes */
   realspecialranges = gt_encseq_realspecialranges(encseq);
   specialcharacters = gt_encseq_specialcharacters(encseq);
   gt_assert(prefixlength > 0);
@@ -701,14 +702,16 @@ Sfxiterator *gt_newSfxiterator(const GtEncseq *encseq,
                                          specialcharacters + 1,
                                          logger);
     gt_assert(sfi->suftabparts != NULL);
+    /*
     printf("spacepeak before suffixsortspace alloc = %lu\n",
-            gt_ma_get_space_peak()); /* in bytes */
+            gt_ma_get_space_peak());*/ /* in bytes */
     sfi->suffixsortspace
       = gt_suffixsortspace_new(stpgetlargestwidth(sfi->suftabparts),
                                sfi->totallength,
                                sfi->sfxstrategy.suftabasulongarray);
+    /*
     printf("spacepeak after suffixsortspace alloc = %lu\n",
-            gt_ma_get_space_peak()); /* in bytes */
+            gt_ma_get_space_peak());*/ /* in bytes */
     sfi->longest.defined = false;
     sfi->longest.valueunsignedlong = 0;
     if (gt_encseq_has_specialranges(sfi->encseq))

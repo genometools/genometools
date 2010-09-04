@@ -657,6 +657,7 @@ int gt_suffixeratoroptions(Suffixeratoroptions *so,
         retval = -1;
       }
       so->numofparts = (unsigned int) readint;
+      printf("set numofparts to %d\n",readint);
     } else
     {
       gt_assert(false);

@@ -20,7 +20,7 @@
 #include "core/log.h"
 #include "core/minmax.h"
 #include "core/unused_api.h"
-#include "match/encseq-specialsrank.h"
+#include "match/eis-specialsrank.h"
 #include "match/eis-bitpackseqpos.h"
 #include "match/eis-bwtseq.h"
 #include "match/eis-bwtseq-extinfo.h"

@@ -448,13 +448,19 @@ static int runsuffixerator(bool doesa,
     if (so->fn2encopt.isplain)
       gt_encseq_encoder_set_input_preencoded(ee);
     gt_encseq_encoder_set_progresstimer(ee, sfxprogress);
-    haserr = gt_encseq_encoder_use_symbolmap_file(ee,
-                                                 gt_str_get(so->fn2encopt.smap),
-                                                 err);
+    if (gt_encseq_encoder_use_symbolmap_file(ee,
+                                             gt_str_get(so->fn2encopt.smap),
+                                             err) != 0)
+    {
+      haserr = true;
+    }
     if (!haserr) {
-      haserr = gt_encseq_encoder_use_representation(ee,
-                                                  gt_str_get(so->fn2encopt.sat),
-                                                  err);
+      if (gt_encseq_encoder_use_representation(ee,
+                                               gt_str_get(so->fn2encopt.sat),
+                                               err) != 0)
+      {
+        haserr = true;
+      }
     }
     if (!haserr) {
       int rval;
@@ -463,7 +469,7 @@ static int runsuffixerator(bool doesa,
                                       gt_str_get(so->fn2encopt.indexname),
                                       err);
       if (rval != 0)
-        haserr = -1;
+        haserr = true;
       if (!haserr) {
         GtEncseqLoader *el = gt_encseq_loader_new();
         /* -tis is always implied */
@@ -476,7 +482,7 @@ static int runsuffixerator(bool doesa,
         encseq = gt_encseq_loader_load(el, gt_str_get(so->fn2encopt.indexname),
                                        err);
         if (!encseq)
-          haserr = -1;
+          haserr = true;
         gt_encseq_loader_delete(el);
       }
     }

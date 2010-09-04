@@ -24,7 +24,7 @@
  * - generic BWT index creation routine
  */
 
-#include "match/encseq-specialsrank.h"
+#include "match/eis-specialsrank.h"
 #include "match/eis-bwtseq.h"
 #include "match/eis-encidxseq.h"
 #include "match/eis-mrangealphabet.h"

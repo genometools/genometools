@@ -22,8 +22,8 @@
 #include "core/ma_api.h"
 #include "core/minmax.h"
 
-#include "match/encseq-specialsrank.h"
-#include "match/encseq-specialsrank-priv.h"
+#include "match/eis-specialsrank.h"
+#include "match/eis-specialsrank-priv.h"
 
 typedef struct specialsRankTable SpecialsRankTable;
 

@@ -49,8 +49,8 @@ eis-sequencemultiread.c
 eis-suffixarray-interface.c
 eis-suffixerator-interface.c
 eis-voiditf.c
+eis-specialsrank.c
 encodedseq.c
-encseq-specialsrank.c
 enum-patt.c
 esa-dfs.c
 esa-maxpairs.c
@@ -102,6 +102,7 @@ sfx-readmode.c
 sfx-remainsort.c
 sfx-run.c
 sfx-suffixer.c
+sfx-suffixgetset.c
 sfx-suftaborder.c
 spaced-seeds.c
 specialrank.c
