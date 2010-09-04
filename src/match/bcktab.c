@@ -241,7 +241,7 @@ static void assignbcktabmapspecification(
              (unsigned long) (bcktab->numofallcodes+1));
   NEWMAPSPEC(bcktab->countspecialcodes,GtUlong,
              (unsigned long) bcktab->numofspecialcodes);
-  numofcounters 
+  numofcounters
     = numofdistpfxidxcounters((const GtCodetype *) bcktab->basepower,
                               bcktab->prefixlength);
   if (numofcounters > 0)

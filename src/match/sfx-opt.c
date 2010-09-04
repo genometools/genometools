@@ -27,7 +27,6 @@
 #include "core/logger.h"
 #include "sfx-optdef.h"
 #include "stamp.h"
-#include "eis-bwtseq-param.h"
 
 static GtOPrval parse_options(int *parsed_args,
                               bool doesa,
@@ -157,7 +156,7 @@ static GtOPrval parse_options(int *parsed_args,
                                                  "given widthprefixes",
                                                  &so->sfxstrategy.
                                                       maxwidthrealmedian,
-                                                 1U);
+                                                 1UL);
   gt_option_is_development_option(optionmaxwidthrealmedian);
   gt_option_parser_add_option(op, optionmaxwidthrealmedian);
 
@@ -180,17 +179,22 @@ static GtOPrval parse_options(int *parsed_args,
   gt_option_is_development_option(optionstorespecialcodes);
   gt_option_parser_add_option(op, optionstorespecialcodes);
 
-  optionparts = gt_option_new_uint_min("parts",
-                                       "specify number of parts in which the "
-                                       "sequence is processed",
-                                       &so->numofparts,
-                                       1U,
-                                       1U);
+  optionparts
+    = gt_option_new_stringarray("parts",
+                                "specify number of parts in which the suffix "
+                                "array construction is performed;\n"
+                                "alternatively specify the maximimum space "
+                                "allowed for the construction",
+                                so->partsargv);
   gt_option_is_development_option(optionparts);
   gt_option_parser_add_option(op, optionparts);
+  so->optionpartsargvref = gt_option_ref(optionparts);
 
   optionsat = gt_option_new_string("sat",
-                                   "specify kind of sequence representation",
+                                   "specify kind of sequence representation\n"
+                                   "by one of the keyswords direct, "
+                                   "bytecompress, eqlen, bit, uchar, ushort, "
+                                   "uint32",
                                    so->fn2encopt.sat, NULL);
   gt_option_parser_add_option(op, optionsat);
 
@@ -259,8 +263,10 @@ static GtOPrval parse_options(int *parsed_args,
   } else
   {
     optionsuf = optionlcp = optionbwt = NULL;
+#ifndef S_SPLINT_S
     gt_registerPackedIndexOptions(op, &so->bwtIdxParams, BWTDEFOPT_CONSTRUCTION,
                                   so->fn2encopt.indexname);
+#endif
   }
 
   optionshowprogress
@@ -430,7 +436,9 @@ static GtOPrval parse_options(int *parsed_args,
   }
   if (oprval == GT_OPTION_PARSER_OK && !doesa)
   {
+#ifndef S_SPLINT_S
     gt_computePackedIndexDefaults(&so->bwtIdxParams, BWTBaseFeatures);
+#endif
   }
   if (oprval == GT_OPTION_PARSER_OK && gt_option_is_set(optionkys))
   {
@@ -543,7 +551,9 @@ void gt_wrapsfxoptions(Suffixeratoroptions *so)
   gt_str_delete(so->maxdepth);
   gt_str_array_delete(so->fn2encopt.filenametab);
   gt_str_array_delete(so->algbounds);
+  gt_str_array_delete(so->partsargv);
   gt_option_delete(so->optionalgboundsref);
+  gt_option_delete(so->optionpartsargvref);
 }
 
 #define READMAXBOUND(COMP,IDX)\
@@ -579,9 +589,11 @@ int gt_suffixeratoroptions(Suffixeratoroptions *so,
   so->maxdepth = gt_str_new();
   so->outkystab = false;
   so->outkyssort = false;
+  so->numofparts = 1U;
   so->optionkysargumentstring = gt_str_new();
   so->fn2encopt.filenametab = gt_str_array_new();
   so->algbounds = gt_str_array_new();
+  so->partsargv = gt_str_array_new();
   so->prefixlength = PREFIXLENGTH_AUTOMATIC;
   so->sfxstrategy.ssortmaxdepth.defined = false;
   so->sfxstrategy.ssortmaxdepth.valueunsignedint = MAXDEPTH_AUTOMATIC;
@@ -616,19 +628,39 @@ int gt_suffixeratoroptions(Suffixeratoroptions *so,
     const char *arg;
     long readint;
 
-    if (gt_str_array_size(so->algbounds) != 3)
+    if (gt_str_array_size(so->algbounds) != 3UL)
     {
       gt_error_set(err,"option -algbds must have exactly 3 arguments");
       retval = -1;
     }
     READMAXBOUND(maxinsertionsort,0);
-    READMAXBOUND(maxbltriesort,1);
-    READMAXBOUND(maxcountingsort,2);
+    READMAXBOUND(maxbltriesort,1UL);
+    READMAXBOUND(maxcountingsort,2UL);
   } else
   {
     so->sfxstrategy.maxinsertionsort = MAXINSERTIONSORTDEFAULT;
     so->sfxstrategy.maxbltriesort = MAXBLTRIESORTDEFAULT;
     so->sfxstrategy.maxcountingsort = MAXCOUNTINGSORTDEFAULT;
+  }
+  if (retval != 1 && gt_option_is_set(so->optionpartsargvref))
+  {
+    if (gt_str_array_size(so->partsargv) == 1UL)
+    {
+      int readint;
+
+      if (sscanf(gt_str_array_get(so->partsargv,0),"%d",&readint) != 1 ||
+          readint <= 0)
+      {
+        gt_error_set(err,"option -parts must have one positive "
+                         "integer argument optionally followed by one of "
+                         "the keywords MB and GB");
+        retval = -1;
+      }
+      so->numofparts = (unsigned int) readint;
+    } else
+    {
+      gt_assert(false);
+    }
   }
   if (retval != -1)
   {

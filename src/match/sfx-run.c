@@ -44,10 +44,12 @@
 #include "sfx-suffixgetset.h"
 #include "giextract.h"
 
+#ifndef S_SPLINT_S
 #include "eis-encidxseq.h"
 #include "eis-bwtseq-construct.h"
 #include "eis-bwtseq-param.h"
 #include "eis-suffixerator-interface.h"
+#endif
 
 #define INITOUTFILEPTR(PTR,FLAG,SUFFIX)\
         if (!haserr && (FLAG))\
@@ -327,15 +329,16 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
   return haserr ? -1 : 0;
 }
 
+#ifndef S_SPLINT_S
 static int run_packedindexconstruction(GtLogger *logger,
-                                      GtProgressTimer *sfxprogress,
-                                      bool withprogressbar,
-                                      FILE *outfpbcktab,
-                                      const Suffixeratoroptions *so,
-                                      unsigned int prefixlength,
-                                      const GtEncseq *encseq,
-                                      const Sfxstrategy *sfxstrategy,
-                                      GtError *err)
+                                       GtProgressTimer *sfxprogress,
+                                       bool withprogressbar,
+                                       FILE *outfpbcktab,
+                                       const Suffixeratoroptions *so,
+                                       unsigned int prefixlength,
+                                       const GtEncseq *encseq,
+                                       const Sfxstrategy *sfxstrategy,
+                                       GtError *err)
 {
   sfxInterface *si;
   BWTSeq *bwtSeq;
@@ -387,6 +390,9 @@ static int run_packedindexconstruction(GtLogger *logger,
   }
   return haserr ? -1 : 0;
 }
+#else
+
+#endif
 
 static int runsuffixerator(bool doesa,
                           const Suffixeratoroptions *so,
@@ -569,6 +575,7 @@ static int runsuffixerator(bool doesa,
         }
       } else
       {
+#ifndef S_SPLINT_S
         if (run_packedindexconstruction(logger,
                                         sfxprogress,
                                         so->showprogress,
@@ -581,6 +588,7 @@ static int runsuffixerator(bool doesa,
         {
           haserr = true;
         }
+#endif
       }
     }
   }

@@ -801,7 +801,6 @@ splint: obj/gt_config.h
         $(CURDIR)/src/tools/*.c
 
 EISFILES=${shell ls ${CURDIR}/src/match/*.c | grep eis-}\
-         ${CURDIR}/src/match/sfx-opt.c\
          ${CURDIR}/src/match/sfx-run.c\
          ${CURDIR}/src/match/encseq-specialsrank.c
 

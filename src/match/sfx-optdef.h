@@ -22,8 +22,12 @@
 #include "core/str.h"
 #include "core/str_array.h"
 #include "core/readmode.h"
+#include "core/option.h"
 #include "sfx-strategy.h"
+#ifndef S_SPLINT_S /* splint reports too much errors for the following and so
+                      we exclude it */
 #include "eis-bwtseq-param.h"
+#endif
 
 #define PREFIXLENGTH_AUTOMATIC 0
 #define MAXDEPTH_AUTOMATIC     0
@@ -49,8 +53,8 @@ typedef struct
                prefixlength;
   GtStr *inputindex,
         *maxdepth;
-  GtOption *optionalgboundsref;
-  GtStrArray *algbounds;
+  GtOption *optionalgboundsref, *optionpartsargvref;
+  GtStrArray *algbounds, *partsargv;
   GtReadmode readmode;
   bool beverbose,
        showtime,
@@ -66,7 +70,10 @@ typedef struct
   GtStr *optionkysargumentstring;
   Sfxstrategy sfxstrategy;
   Filenames2encseqoptions fn2encopt;
+#ifndef S_SPLINT_S /* splint reports too much errors for the following and so
+                      we exclude it */
   struct bwtOptions bwtIdxParams;
+#endif
 } Suffixeratoroptions;
 
 #endif
