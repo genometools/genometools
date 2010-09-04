@@ -2808,7 +2808,7 @@ static GtEncseq *files2encodedsequence(
   unsigned long specialranges;
 
   gt_error_check(err);
-  retcode = gt_encseq_access_type_determine(&specialranges,
+  retcode = (int) gt_encseq_access_type_determine(&specialranges,
                                      totallength,
                                      gt_str_array_size(filenametab),
                                      determinelengthofdbfilenames(filenametab),

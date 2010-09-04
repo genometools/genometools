@@ -175,7 +175,8 @@ typedef GtBitsequence GtTwobitencoding;
   buffer[GT_INTWORDSIZE] = '\0';
 }
 
-static inline unsigned long gt_unitsoftwobitencoding(unsigned long totallength)
+/*@unused@*/ static inline unsigned long gt_unitsoftwobitencoding(unsigned long
+                                                                    totallength)
 {
   uint64_t unitsoftwobitencoding;
 
