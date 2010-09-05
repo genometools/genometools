@@ -24,6 +24,7 @@
 #include "core/log_api.h"
 #include "core/ma_api.h"
 #include "core/mathsupport.h"
+#include "core/defined-types.h"
 #include "sfx-suffixgetset.h"
 
 struct GtSuffixsortspace
@@ -32,6 +33,7 @@ struct GtSuffixsortspace
   void (*setdirect)(const GtSuffixsortspace *,unsigned long,unsigned long);
   BitPackArray *bitpackarray;
   bool unmapsortspace;
+  Definedunsignedlong longestidx;
   unsigned long maxindex,
                 maxvalue,
                 offset,
@@ -97,6 +99,8 @@ GtSuffixsortspace *gt_suffixsortspace_new(unsigned long numofentries,
   suffixsortspace = gt_malloc(sizeof(*suffixsortspace));
   suffixsortspace->maxindex = numofentries-1;
   suffixsortspace->maxvalue = maxvalue;
+  suffixsortspace->longestidx.defined = false;
+  suffixsortspace->longestidx.valueunsignedlong = 0;
 #define GT_SUFTABASULONGARRAY
 #ifdef GT_SUFTABASULONGARRAY
   suftabasulongarray = true;
@@ -151,15 +155,22 @@ GtSuffixsortspace *gt_suffixsortspace_new_fromfile(int filedesc,
   suffixsortspace->unmapsortspace = true;
   suffixsortspace->maxindex = numofentries - 1;
   suffixsortspace->maxvalue = maxvalue;
+  suffixsortspace->longestidx.defined = false;
+  suffixsortspace->longestidx.valueunsignedlong = 0;
   suffixsortspace->getdirect = getdirect_ulong;
   suffixsortspace->setdirect = setdirect_ulong;
   return suffixsortspace;
 }
 
-void gt_suffixsortspace_delete(GtSuffixsortspace *suffixsortspace)
+void gt_suffixsortspace_delete(GtSuffixsortspace *suffixsortspace,
+                               bool checklongestdefined)
 {
   if (suffixsortspace != NULL)
   {
+    if (checklongestdefined)
+    {
+      gt_assert(suffixsortspace->longestidx.defined);
+    }
     if (suffixsortspace->unmapsortspace)
     {
       gt_fa_xmunmap(suffixsortspace->ulongtab);
@@ -222,6 +233,11 @@ void gt_suffixsortspace_setdirect(GtSuffixsortspace *sssp,
   /*
   printf("idx=%lu,value=%lu\n",idx,value);
   */
+  if (value == 0)
+  {
+    sssp->longestidx.defined = true;
+    sssp->longestidx.valueunsignedlong = idx + sssp->offset;
+  }
 #ifdef GT_SUFTABASULONGARRAY
   sssp->ulongtab[idx] = value;
 #else
@@ -294,6 +310,12 @@ unsigned long *gt_suffixsortspace_ulong_get(const GtSuffixsortspace *sssp)
 {
   gt_assert(sssp->ulongtab != NULL);
   return (unsigned long *) sssp->ulongtab; /* XXX constrain the type cast */
+}
+
+unsigned long gt_suffixsortspace_longest(const GtSuffixsortspace *sssp)
+{
+  gt_assert(sssp->longestidx.defined);
+  return sssp->longestidx.valueunsignedlong;
 }
 
 int gt_suffixsortspace_to_file (FILE *outfpsuftab,

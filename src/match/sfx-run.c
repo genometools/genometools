@@ -29,20 +29,18 @@
 #include "core/readmode.h"
 #include "core/showtime.h"
 #include "core/unused_api.h"
-#include "sfx-optdef.h"
 #include "esa-fileend.h"
-#include "stamp.h"
-#include "sfx-suffixer.h"
-#include "sfx-run.h"
 #include "giextract.h"
 #include "stamp.h"
-
+#include "intcode-def.h"
+#include "sfx-optdef.h"
+#include "sfx-suffixer.h"
+#include "sfx-run.h"
 #include "sfx-opt.pr"
 #include "sfx-outprj.pr"
 #include "sfx-apfxlen.h"
 #include "sfx-bentsedg.h"
 #include "sfx-suffixgetset.h"
-#include "giextract.h"
 
 #ifndef S_SPLINT_S
 #include "eis-encidxseq.h"
@@ -127,8 +125,7 @@ static int bwttab2file(Outfileinfo *outfileinfo,
   bool haserr = false;
 
   gt_error_check(err);
-  if (!haserr &&
-      (!outfileinfo->longest.defined || outfileinfo->outfpbwttab != NULL))
+  if (!outfileinfo->longest.defined || outfileinfo->outfpbwttab != NULL)
   {
     unsigned long startpos, pos;
     GtUchar cc = 0;
@@ -142,8 +139,8 @@ static int bwttab2file(Outfileinfo *outfileinfo,
         if (!outfileinfo->longest.defined)
         {
           outfileinfo->longest.defined = true;
-          outfileinfo->longest.valueunsignedlong =
-                                                  outfileinfo->pageoffset + pos;
+          outfileinfo->longest.valueunsignedlong
+            = outfileinfo->pageoffset + pos;
         }
       } else
       {
@@ -151,8 +148,8 @@ static int bwttab2file(Outfileinfo *outfileinfo,
         {
           /* Random access */
           cc = gt_encseq_get_encoded_char(outfileinfo->encseq,
-                                                startpos - 1,
-                                                readmode);
+                                          startpos - 1,
+                                          readmode);
         }
       }
       if (outfileinfo->outfpbwttab != NULL)
@@ -160,8 +157,7 @@ static int bwttab2file(Outfileinfo *outfileinfo,
         if (fwrite(&cc,sizeof (GtUchar),(size_t) 1,outfileinfo->outfpbwttab)
                     != (size_t) 1)
         {
-          gt_error_set(err,"cannot write 1 item of size %u: "
-                          "errormsg=\"%s\"",
+          gt_error_set(err,"cannot write 1 item of size %u: errormsg=\"%s\"",
                           (unsigned int) sizeof (GtUchar),
                           strerror(errno));
           haserr = true;
@@ -189,16 +185,16 @@ static int suffixeratorwithoutput(const GtStr *indexname,
   bool haserr = false, specialsuffixes = false;
   Sfxiterator *sfi = NULL;
 
-  sfi = gt_newSfxiterator(encseq,
-                          readmode,
-                          prefixlength,
-                          numofparts,
-                          outfileinfo->outlcpinfo,
-                          sfxstrategy,
-                          sfxprogress,
-                          withprogressbar,
-                          logger,
-                          err);
+  sfi = gt_Sfxiterator_new(encseq,
+                           readmode,
+                           prefixlength,
+                           numofparts,
+                           outfileinfo->outlcpinfo,
+                           sfxstrategy,
+                           sfxprogress,
+                           withprogressbar,
+                           logger,
+                           err);
   if (sfi == NULL)
   {
     haserr = true;
@@ -209,13 +205,13 @@ static int suffixeratorwithoutput(const GtStr *indexname,
     {
       unsigned long longest;
 
-      suffixsortspace = gt_nextSfxiterator(&numberofsuffixes,&specialsuffixes,
-                                           sfi);
+      suffixsortspace = gt_Sfxiterator_next(&numberofsuffixes,&specialsuffixes,
+                                            sfi);
       if (suffixsortspace == NULL)
       {
         break;
       }
-      if (numofparts == 1U && gt_sfi2longestsuffixpos(&longest,sfi))
+      if (gt_Sfxiterator_extractlongestsuffixpos(&longest,sfi))
       {
         outfileinfo->longest.defined = true;
         outfileinfo->longest.valueunsignedlong = longest;
@@ -240,23 +236,32 @@ static int suffixeratorwithoutput(const GtStr *indexname,
       outfileinfo->pageoffset += numberofsuffixes;
     }
   }
+  gt_assert(outfileinfo->longest.defined);
+  if (outfileinfo->longest.valueunsignedlong !=
+      gt_Sfxiterator_longest(sfi))
+  {
+    fprintf(stderr,"outfileinfo->longest = %lu != %lu = sfi->longest\n",
+                    outfileinfo->longest.valueunsignedlong,
+                    gt_Sfxiterator_longest(sfi));
+    exit(EXIT_FAILURE);
+  }
   if (!haserr && sfxstrategy->streamsuftab)
   {
     gt_fa_fclose(outfileinfo->outfpsuftab);
     outfileinfo->outfpsuftab = NULL;
-    if (gt_postsortsuffixesfromstream(sfi,indexname,err) != 0)
+    if (gt_Sfxiterator_postsortfromstream(sfi,indexname,err) != 0)
     {
       haserr = true;
     }
   }
   if (!haserr && outfileinfo->outfpbcktab != NULL)
   {
-    if (gt_sfibcktab2file(outfileinfo->outfpbcktab,sfi,err) != 0)
+    if (gt_Sfxiterator_bcktab2file(outfileinfo->outfpbcktab,sfi,err) != 0)
     {
       haserr = true;
     }
   }
-  gt_freeSfxiterator(sfi);
+  gt_Sfxiterator_delete(sfi);
   return haserr ? -1 : 0;
 }
 
@@ -283,10 +288,10 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
     *prefixlength = so->prefixlength;
     maxprefixlen
       = gt_whatisthemaximalprefixlength(numofchars,
-                                    totallength,
-                                    so->sfxstrategy.storespecialcodes
-                                    ? getprefixlenbits()
-                                    : 0);
+                                        totallength,
+                                        so->sfxstrategy.storespecialcodes
+                                        ? (unsigned int) PREFIXLENBITS
+                                        : 0);
     if (gt_checkprefixlength(maxprefixlen,*prefixlength,err) != 0)
     {
       haserr = true;
@@ -351,15 +356,15 @@ static int run_packedindexconstruction(GtLogger *logger,
               so->bwtIdxParams.final.seqParams.encParams.blockEnc.bucketBlocks,
               so->bwtIdxParams.final.locateInterval);
   si = gt_newSfxInterface(so->readmode,
-                      prefixlength,
-                      so->numofparts,
-                      sfxstrategy,
-                      encseq,
-                      sfxprogress,
-                      withprogressbar,
-                      gt_encseq_total_length(encseq) + 1,
-                      logger,
-                      err);
+                          prefixlength,
+                          so->numofparts,
+                          sfxstrategy,
+                          encseq,
+                          sfxprogress,
+                          withprogressbar,
+                          gt_encseq_total_length(encseq) + 1,
+                          logger,
+                          err);
   if (si == NULL)
   {
     haserr = true;
@@ -380,7 +385,7 @@ static int run_packedindexconstruction(GtLogger *logger,
       gt_assert(sfi != NULL);
       if (outfpbcktab != NULL)
       {
-        if (gt_sfibcktab2file(outfpbcktab,sfi,err) != 0)
+        if (gt_Sfxiterator_bcktab2file(outfpbcktab,sfi,err) != 0)
         {
           haserr = true;
         }
@@ -395,9 +400,9 @@ static int run_packedindexconstruction(GtLogger *logger,
 #endif
 
 static int runsuffixerator(bool doesa,
-                          const Suffixeratoroptions *so,
-                          GtLogger *logger,
-                          GtError *err)
+                           const Suffixeratoroptions *so,
+                           GtLogger *logger,
+                           GtError *err)
 {
   GtProgressTimer *sfxprogress = NULL;
   Outfileinfo outfileinfo;
@@ -659,7 +664,7 @@ int gt_parseargsandcallsuffixerator(bool doesa,int argc,
   if (retval == 0)
   {
     GtLogger *logger = gt_logger_new(so.beverbose,
-                                    GT_LOGGER_DEFLT_PREFIX, stdout);
+                                     GT_LOGGER_DEFLT_PREFIX, stdout);
 
     gt_logger_log(logger,"sizeof (unsigned long)=%lu",
                   (unsigned long) (sizeof (unsigned long) * CHAR_BIT));

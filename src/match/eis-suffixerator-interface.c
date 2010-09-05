@@ -248,15 +248,16 @@ gt_newSfxInterfaceWithReaders(GtReadmode readmode,
   sfxi->encseq = encseq;
   sfxi->alpha = gt_encseq_alphabet(encseq);
   sfxi->stats = newSeqStatsFromCharDist(encseq,sfxi->alpha, length);
-  if (!(sfxi->sfi = gt_newSfxiterator(encseq,
-                                   readmode,
-                                   prefixlength,
-                                   numofparts,
-                                   NULL,
-                                   sfxstrategy,
-                                   sfxprogress,
-                                   withprogressbar,
-                                   verbosity, err)))
+  if (!(sfxi->sfi = gt_Sfxiterator_new(encseq,
+                                       readmode,
+                                       prefixlength,
+                                       numofparts,
+                                       NULL,
+                                       sfxstrategy,
+                                       sfxprogress,
+                                       withprogressbar,
+                                       verbosity,
+                                       err)))
   {
     gt_newSfxInterfaceWithReadersErrRet();
   }
@@ -286,7 +287,7 @@ void
 gt_deleteSfxInterface(sfxInterface *sfxi)
 {
   destructSASeqSrc(&sfxi->baseClass);
-  gt_freeSfxiterator(sfxi->sfi);
+  gt_Sfxiterator_delete(sfxi->sfi);
   sfxi->sfi = NULL;
   deleteSeqStats(sfxi->stats);
   gt_free(sfxi);
@@ -394,9 +395,9 @@ SfxIGenerate(void *iface,
                    sfxi->lastGeneratedStart, sfxi->lastGeneratedLen);
       sfxi->lastGeneratedStart += sfxi->lastGeneratedLen;
       sfxi->lastGeneratedSufTabSegment
-        = gt_nextSfxiterator(&sfxi->lastGeneratedLen,
-                             &sfxi->specialsuffixes,
-                             sfxi->sfi);
+        = gt_Sfxiterator_next(&sfxi->lastGeneratedLen,
+                              &sfxi->specialsuffixes,
+                              sfxi->sfi);
       if (sfxi->lastGeneratedSufTabSegment != NULL)
       {
         /* size_t because the current approach cannot generate more

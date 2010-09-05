@@ -510,7 +510,6 @@ static void showoptions(const Suffixeratoroptions *so)
   }
   gt_logger_log_force(logger, "storespecialcodes=%s",
                         so->sfxstrategy.storespecialcodes ? "true" : "false");
-  gt_logger_log_force(logger, "parts=%u",so->numofparts);
   for (i=0; i<gt_str_array_size(so->fn2encopt.filenametab); i++)
   {
     gt_logger_log_force(logger, "inputfile[%lu]=%s",i,
@@ -590,6 +589,7 @@ int gt_suffixeratoroptions(Suffixeratoroptions *so,
   so->outkystab = false;
   so->outkyssort = false;
   so->numofparts = 1U;
+  so->maximumspace = 0; /* in megabytes */
   so->optionkysargumentstring = gt_str_new();
   so->fn2encopt.filenametab = gt_str_array_new();
   so->algbounds = gt_str_array_new();
@@ -657,16 +657,55 @@ int gt_suffixeratoroptions(Suffixeratoroptions *so,
         retval = -1;
       }
       so->numofparts = (unsigned int) readint;
-      printf("set numofparts to %d\n",readint);
     } else
     {
-      gt_assert(false);
+      if (gt_str_array_size(so->partsargv) == 2UL)
+      {
+        int readint;
+        const int maxpartsarg = (1 << 22) - 1;
+
+        if (sscanf(gt_str_array_get(so->partsargv,0),"%d",&readint) != 1 ||
+            readint <= 0 || readint >= maxpartsarg)
+        {
+          gt_error_set(err,"option -parts must have one positive "
+                           "integer argument optionally followed by one of "
+                           "the keywords MB and GB; the integer must be "
+                           "smaller than %d",maxpartsarg);
+          retval = -1;
+        }
+        if (retval != -1)
+        {
+          so->maximumspace = (unsigned long) readint;
+          if (strcmp(gt_str_array_get(so->partsargv,1UL),"GB") == 0)
+          {
+            so->maximumspace *= 1024UL;
+          } else
+          {
+            if (strcmp(gt_str_array_get(so->partsargv,1UL),"MB") != 0)
+            {
+              gt_error_set(err,"option -parts must have one positive "
+                               "integer argument optionally followed by one of "
+                               "the keywords MB and GB; the integer must be "
+                               "smaller than %d",maxpartsarg);
+              retval = -1;
+            }
+          }
+        }
+      }
     }
   }
   if (retval != -1)
   {
     if (so->beverbose)
     {
+      if (so->maximumspace > 0)
+      {
+        gt_assert(so->numofparts == 1U);
+        gt_logger_log_force(logger, "maximumspace=%lu MB",so->maximumspace);
+      } else
+      {
+        gt_logger_log_force(logger, "parts=%u",so->numofparts);
+      }
       gt_logger_log_force(logger, "maxinsertionsort=%lu",
                             so->sfxstrategy.maxinsertionsort);
       gt_logger_log_force(logger, "maxbltriesort=%lu",

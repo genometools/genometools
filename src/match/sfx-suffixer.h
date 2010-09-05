@@ -28,30 +28,32 @@
 
 typedef struct Sfxiterator Sfxiterator;
 
-void gt_freeSfxiterator(Sfxiterator *sfi);
+void gt_Sfxiterator_delete(Sfxiterator *sfi);
 
-Sfxiterator *gt_newSfxiterator(const GtEncseq *encseq,
-                               GtReadmode readmode,
-                               unsigned int prefixlength,
-                               unsigned int numofparts,
-                               void *voidoutlcpinfo,
-                               const Sfxstrategy *sfxstrategy,
-                               GtProgressTimer *sfxprogress,
-                               bool withprogressbar,
-                               GtLogger *logger,
-                               GtError *err);
+Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
+                                GtReadmode readmode,
+                                unsigned int prefixlength,
+                                unsigned int numofparts,
+                                void *voidoutlcpinfo,
+                                const Sfxstrategy *sfxstrategy,
+                                GtProgressTimer *sfxprogress,
+                                bool withprogressbar,
+                                GtLogger *logger,
+                                GtError *err);
 
-const GtSuffixsortspace *gt_nextSfxiterator(unsigned long *numberofsuffixes,
-                                            bool *specialsuffixes,
-                                            Sfxiterator *sfi);
+const GtSuffixsortspace *gt_Sfxiterator_next(unsigned long *numberofsuffixes,
+                                             bool *specialsuffixes,
+                                             Sfxiterator *sfi);
 
-int gt_postsortsuffixesfromstream(Sfxiterator *sfi, const GtStr *indexname,
-                                  GtError *err);
+int gt_Sfxiterator_postsortfromstream(Sfxiterator *sfi,
+                                      const GtStr *indexname,
+                                      GtError *err);
 
-bool gt_sfi2longestsuffixpos(unsigned long *longest,const Sfxiterator *sfi);
+bool gt_Sfxiterator_extractlongestsuffixpos(unsigned long *longest,
+                                            const Sfxiterator *sfi);
 
-int gt_sfibcktab2file(FILE *fp,const Sfxiterator *sfi,GtError *err);
+int gt_Sfxiterator_bcktab2file(FILE *fp,const Sfxiterator *sfi,GtError *err);
 
-unsigned int getprefixlenbits(void);
+unsigned long gt_Sfxiterator_longest(const Sfxiterator *sfi);
 
 #endif

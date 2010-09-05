@@ -208,7 +208,7 @@ static unsigned int computehvalue(const Differencecover *dcov,
 #endif
 
 /* The following function is only used in sfx-bentsedg.c, but we
-   do not include it in sfx-diffcove.c, as this depends on sfx-bentsedg.h.
+   do not include it in sfx-diffcove.h, as this depends on sfx-bentsedg.h.
 */
 
 void dc_setsuffixsortspace(void *voiddcov,GtSuffixsortspace *sssp)
@@ -1220,7 +1220,7 @@ void gt_differencecover_sortsample(Differencecover *dcov,
     }
 #endif
   }
-  gt_suffixsortspace_delete(dcov->sortedsample);
+  gt_suffixsortspace_delete(dcov->sortedsample,false);
   dcov->sortedsample = NULL;
   gt_assert(dcov->diff2pos == NULL);
   filldiff2pos(dcov);

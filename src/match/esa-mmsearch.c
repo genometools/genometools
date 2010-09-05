@@ -632,16 +632,16 @@ static int constructsarrandrunmmsearch(
   defaultsfxstrategy(&sfxstrategy,
                      gt_encseq_bitwise_cmp_ok(dbencseq) ? false : true);
   sfxstrategy.suftabasulongarray = true;
-  sfi = gt_newSfxiterator(dbencseq,
-                          readmode,
-                          prefixlength,
-                          numofparts,
-                          NULL, /* outlcpinfo */
-                          &sfxstrategy, /* sfxstrategy */
-                          sfxprogress,
-                          withprogressbar,
-                          NULL, /* logger */
-                          err);
+  sfi = gt_Sfxiterator_new(dbencseq,
+                           readmode,
+                           prefixlength,
+                           numofparts,
+                           NULL, /* outlcpinfo */
+                           &sfxstrategy, /* sfxstrategy */
+                           sfxprogress,
+                           withprogressbar,
+                           NULL, /* logger */
+                           err);
   if (sfi == NULL)
   {
     haserr = true;
@@ -655,7 +655,8 @@ static int constructsarrandrunmmsearch(
     queryrep.length = (unsigned long) querylen;
     while (true)
     {
-      suffixsortspace = gt_nextSfxiterator(&numofsuffixes,&specialsuffixes,sfi);
+      suffixsortspace = gt_Sfxiterator_next(&numofsuffixes,&specialsuffixes,
+                                            sfi);
       if (suffixsortspace == NULL)
       {
         break;
@@ -681,7 +682,7 @@ static int constructsarrandrunmmsearch(
     }
   }
   gt_querymatch_delete(querymatchspaceptr);
-  gt_freeSfxiterator(sfi);
+  gt_Sfxiterator_delete(sfi);
   return haserr ? -1 : 0;
 }
 

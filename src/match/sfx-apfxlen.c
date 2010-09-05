@@ -100,8 +100,8 @@ unsigned int gt_recommendedprefixlength(unsigned int numofchars,
 }
 
 unsigned int gt_whatisthemaximalprefixlength(unsigned int numofchars,
-                                          unsigned long totallength,
-                                          unsigned int prefixlenbits)
+                                             unsigned long totallength,
+                                             unsigned int prefixlenbits)
 {
   unsigned int maxprefixlen, mbp;
 

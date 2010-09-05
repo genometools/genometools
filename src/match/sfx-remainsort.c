@@ -1365,7 +1365,7 @@ Compressedtable *gt_rmnsufinfo_delete(unsigned long *longest,
   }
   if (!SUFINMEM(&rmnsufinfo->sortblock) && withlcptab)
   {
-    gt_suffixsortspace_delete(suffixsortspace);
+    gt_suffixsortspace_delete(suffixsortspace,true);
     suffixsortspace = NULL;
   }
 #ifdef Lowerboundwithrank

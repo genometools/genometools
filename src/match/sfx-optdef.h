@@ -51,6 +51,7 @@ typedef struct
 {
   unsigned int numofparts,
                prefixlength;
+  unsigned long maximumspace;
   GtStr *inputindex,
         *maxdepth;
   GtOption *optionalgboundsref, *optionpartsargvref;

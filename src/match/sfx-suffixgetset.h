@@ -37,7 +37,8 @@ GtSuffixsortspace *gt_suffixsortspace_new_fromfile(int filedesc,
                                                    unsigned long numofentries,
                                                    unsigned long maxvalue);
 
-void gt_suffixsortspace_delete(GtSuffixsortspace *suffixsortspace);
+void gt_suffixsortspace_delete(GtSuffixsortspace *suffixsortspace,
+                               bool checklongestdefined);
 
 unsigned long gt_suffixsortspace_getdirect(const GtSuffixsortspace *sssp,
                                            unsigned long idx);
@@ -73,6 +74,8 @@ void gt_suffixsortspace_offset_set(GtSuffixsortspace *sssp,
                                    unsigned long offset);
 
 unsigned long *gt_suffixsortspace_ulong_get(const GtSuffixsortspace *sssp);
+
+unsigned long gt_suffixsortspace_longest(const GtSuffixsortspace *sssp);
 
 int gt_suffixsortspace_to_file (FILE *outfpsuftab,
                                 const GtSuffixsortspace *suffixsortspace,

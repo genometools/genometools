@@ -18,9 +18,6 @@
 #ifndef INTCODE_DEF_H
 #define INTCODE_DEF_H
 
-#include <stdbool.h>
-#include "core/codetype.h"
-
 #define PREFIXLENBITS   4
 #define CODEBITS        (32-PREFIXLENBITS)
 #define MAXPREFIXLENGTH ((1U << PREFIXLENBITS) - 1)
