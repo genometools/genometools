@@ -42,7 +42,7 @@ struct sfxInterface
 {
   struct SASeqSrc baseClass;
   GtReadmode readmode;
-  unsigned int prefixlength, numofparts;
+  unsigned int prefixlength, numofparts, maximumspace;
   const Sfxstrategy *sfxstrategy;
   const GtAlphabet *alpha;
   const GtEncseq *encseq;
@@ -149,6 +149,7 @@ sfxInterface *
 gt_newSfxInterface(GtReadmode readmode,
                 unsigned int prefixlength,
                 unsigned int numofparts,
+                unsigned long maximumspace,
                 const Sfxstrategy *sfxstrategy,
                 const GtEncseq *encseq,
                 GtProgressTimer *sfxprogress,
@@ -158,18 +159,19 @@ gt_newSfxInterface(GtReadmode readmode,
                 GtError *err)
 {
   return gt_newSfxInterfaceWithReaders(readmode,
-                                    prefixlength,
-                                    numofparts,
-                                    sfxstrategy,
-                                    0,
-                                    NULL,
-                                    NULL,
-                                    encseq,
-                                    sfxprogress,
-                                    withprogressbar,
-                                    length,
-                                    verbosity,
-                                    err);
+                                       prefixlength,
+                                       numofparts,
+                                       maximumspace,
+                                       sfxstrategy,
+                                       0,
+                                       NULL,
+                                       NULL,
+                                       encseq,
+                                       sfxprogress,
+                                       withprogressbar,
+                                       length,
+                                       verbosity,
+                                       err);
 }
 
 static struct seqStats *
@@ -222,6 +224,7 @@ sfxInterface *
 gt_newSfxInterfaceWithReaders(GtReadmode readmode,
                               unsigned int prefixlength,
                               unsigned int numofparts,
+                              unsigned long maximumspace,
                               const Sfxstrategy *sfxstrategy,
                               size_t numReaders,
                               enum sfxDataRequest readerRequests[],
@@ -252,6 +255,7 @@ gt_newSfxInterfaceWithReaders(GtReadmode readmode,
                                        readmode,
                                        prefixlength,
                                        numofparts,
+                                       maximumspace,
                                        NULL,
                                        sfxstrategy,
                                        sfxprogress,

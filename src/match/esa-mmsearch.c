@@ -613,6 +613,7 @@ static int constructsarrandrunmmsearch(
                  GtReadmode readmode,
                  unsigned int prefixlength,
                  unsigned int numofparts,
+                 unsigned long maximumspace,
                  const GtUchar *query,
                  unsigned long querylen,
                  unsigned int minlength,
@@ -636,6 +637,7 @@ static int constructsarrandrunmmsearch(
                            readmode,
                            prefixlength,
                            numofparts,
+                           maximumspace,
                            NULL, /* outlcpinfo */
                            &sfxstrategy, /* sfxstrategy */
                            sfxprogress,
@@ -715,6 +717,7 @@ int gt_sarrquerysubstringmatch(const GtUchar *dbseq,
                                   GT_READMODE_FORWARD,
                                   gt_recommendedprefixlength(numofchars,dblen),
                                   1U, /* parts */
+                                  0, /* maximumspace */
                                   query,
                                   querylen,
                                   minlength,

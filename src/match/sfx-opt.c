@@ -404,7 +404,7 @@ static GtOPrval parse_options(int *parsed_args,
       if (oprval != GT_OPTION_PARSER_ERROR && so->numofparts > 1U)
       {
         if (so->sfxstrategy.ssortmaxdepth.valueunsignedint
-            == MAXDEPTH_AUTOMATIC)
+            == MAXDEPTH_AUTOMATIC) /* undefined value */
         {
           so->sfxstrategy.streamsuftab = true;
         } else

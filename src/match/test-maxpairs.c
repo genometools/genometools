@@ -66,6 +66,7 @@ static int constructsarrandrunmaxpairs(
                  GtReadmode readmode,
                  unsigned int prefixlength,
                  unsigned int numofparts,
+                 unsigned long maximumspace,
                  GtProgressTimer *sfxprogress,
                  bool withprogressbar,
                  GtLogger *logger,
@@ -86,6 +87,7 @@ static int constructsarrandrunmaxpairs(
                            readmode,
                            prefixlength,
                            numofparts,
+                           maximumspace,
                            NULL, /* oulcpinfo */
                            &sfxstrategy,
                            sfxprogress,
@@ -172,6 +174,7 @@ static int sarrselfsubstringmatch(const GtUchar *dbseq,
                                   gt_recommendedprefixlength(numofchars,
                                                           dblen+querylen+1),
                                   1U, /* parts */
+                                  0, /* maximumspace */
                                   NULL,
                                   false,
                                   logger,
