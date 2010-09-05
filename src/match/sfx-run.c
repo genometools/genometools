@@ -125,7 +125,7 @@ static int bwttab2file(Outfileinfo *outfileinfo,
   bool haserr = false;
 
   gt_error_check(err);
-  if (!outfileinfo->longest.defined || outfileinfo->outfpbwttab != NULL)
+  if (outfileinfo->outfpbwttab != NULL)
   {
     unsigned long startpos, pos;
     GtUchar cc = 0;
@@ -136,12 +136,6 @@ static int bwttab2file(Outfileinfo *outfileinfo,
       if (startpos == 0)
       {
         cc = (GtUchar) UNDEFBWTCHAR;
-        if (!outfileinfo->longest.defined)
-        {
-          outfileinfo->longest.defined = true;
-          outfileinfo->longest.valueunsignedlong
-            = outfileinfo->pageoffset + pos;
-        }
       } else
       {
         if (outfileinfo->outfpbwttab != NULL)
@@ -203,18 +197,11 @@ static int suffixeratorwithoutput(const GtStr *indexname,
     const GtSuffixsortspace *suffixsortspace;
     while (true)
     {
-      unsigned long longest;
-
       suffixsortspace = gt_Sfxiterator_next(&numberofsuffixes,&specialsuffixes,
                                             sfi);
       if (suffixsortspace == NULL)
       {
         break;
-      }
-      if (gt_Sfxiterator_extractlongestsuffixpos(&longest,sfi))
-      {
-        outfileinfo->longest.defined = true;
-        outfileinfo->longest.valueunsignedlong = longest;
       }
       if (outfileinfo->outfpsuftab != NULL)
       {
@@ -236,15 +223,8 @@ static int suffixeratorwithoutput(const GtStr *indexname,
       outfileinfo->pageoffset += numberofsuffixes;
     }
   }
-  gt_assert(outfileinfo->longest.defined);
-  if (outfileinfo->longest.valueunsignedlong !=
-      gt_Sfxiterator_longest(sfi))
-  {
-    fprintf(stderr,"outfileinfo->longest = %lu != %lu = sfi->longest\n",
-                    outfileinfo->longest.valueunsignedlong,
-                    gt_Sfxiterator_longest(sfi));
-    exit(EXIT_FAILURE);
-  }
+  outfileinfo->longest.defined = true;
+  outfileinfo->longest.valueunsignedlong = gt_Sfxiterator_longest(sfi);
   if (!haserr && sfxstrategy->streamsuftab)
   {
     gt_fa_fclose(outfileinfo->outfpsuftab);

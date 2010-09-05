@@ -61,7 +61,6 @@ struct Sfxiterator
                 widthofpart,
                 totallength;
   GtSuffixsortspace *suffixsortspace;
-  Definedunsignedlong longest;
   unsigned long nextfreeCodeatposition;
   Codeatposition *spaceCodeatposition;
   Suftabparts *suftabparts;
@@ -706,8 +705,6 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
       = gt_suffixsortspace_new(stpgetlargestwidth(sfi->suftabparts),
                                sfi->totallength,
                                sfi->sfxstrategy.suftabasulongarray);
-    sfi->longest.defined = false;
-    sfi->longest.valueunsignedlong = 0;
     if (gt_encseq_has_specialranges(sfi->encseq))
     {
       sfi->sri = gt_specialrangeiterator_new(sfi->encseq,
@@ -727,17 +724,6 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
     return NULL;
   }
   return sfi;
-}
-
-bool gt_Sfxiterator_extractlongestsuffixpos(unsigned long *longest,
-                                            const Sfxiterator *sfi)
-{
-  if (sfi->longest.defined)
-  {
-    *longest = sfi->longest.valueunsignedlong;
-    return true;
-  }
-  return false;
 }
 
 static void preparethispart(Sfxiterator *sfi)
@@ -798,7 +784,6 @@ static void preparethispart(Sfxiterator *sfi)
                   partwidth,
                   -1,
                   NULL,
-                  &sfi->longest.valueunsignedlong,
                   sfi->encseq,
                   sfi->readmode,
                   sfi->currentmincode,
@@ -809,7 +794,6 @@ static void preparethispart(Sfxiterator *sfi)
                   false,
                   true,
                   sfi->outlcpinfo);
-      sfi->longest.defined = true;
     }
   } else
   {
@@ -840,7 +824,6 @@ static void preparethispart(Sfxiterator *sfi)
     } else
     {
       gt_sortallbuckets (sfi->suffixsortspace,
-                         &sfi->longest,
                          bucketspec2,
                          sfi->encseq,
                          sfi->readmode,
@@ -922,7 +905,6 @@ int gt_Sfxiterator_postsortfromstream(Sfxiterator *sfi, const GtStr *indexname,
                 sfi->totallength - sfi->specialcharacters,
                 mmapfiledesc,
                 tmpfilename,
-                &sfi->longest.valueunsignedlong,
                 sfi->encseq,
                 sfi->readmode,
                 0,
@@ -933,7 +915,6 @@ int gt_Sfxiterator_postsortfromstream(Sfxiterator *sfi, const GtStr *indexname,
                 sfi->sfxstrategy.hashexceptions,
                 sfi->sfxstrategy.absoluteinversesuftab,
                 sfi->outlcpinfo);
-    sfi->longest.defined = true;
   }
   gt_str_delete(tmpfilename);
   if (close(mmapfiledesc) == -1)

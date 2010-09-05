@@ -49,8 +49,7 @@ void gt_rmnsufinfo_addunsortedrange(Rmnsufinfo *rmnsufinfo,
 
 void gt_rmnsufinfo_bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo );
 
-Compressedtable *gt_rmnsufinfo_delete(unsigned long *longest,
-                                      Rmnsufinfo **rmnsufinfoptr,
+Compressedtable *gt_rmnsufinfo_delete(Rmnsufinfo **rmnsufinfoptr,
                                       bool withlcptab);
 
 #endif

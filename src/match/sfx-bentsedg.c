@@ -230,7 +230,6 @@ typedef struct
   Rmnsufinfo *rmnsufinfo;
   unsigned long leftlcpdist[GT_UNITSIN2BITENC],
                 rightlcpdist[GT_UNITSIN2BITENC];
-  Definedunsignedlong *longest;
   GtSuffixsortspace *sssp;
   Dc_processunsortedrange dc_processunsortedrange;
   void *voiddcov;
@@ -1902,7 +1901,6 @@ unsigned long getmaxbranchdepth(const Outlcpinfo *outlcpinfo)
 
 static void initBentsedgresources(Bentsedgresources *bsr,
                                   GtSuffixsortspace *suffixsortspace,
-                                  Definedunsignedlong *longest,
                                   const GtEncseq *encseq,
                                   GtReadmode readmode,
                                   Bcktab *bcktab,
@@ -1922,7 +1920,6 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   bsr->sssp = suffixsortspace;
   gt_suffixsortspace_bucketleftidx_set(bsr->sssp,0);
   bsr->encseq = encseq;
-  bsr->longest = longest;
   bsr->fwd = GT_ISDIRREVERSE(bsr->readmode) ? false : true;
   bsr->complement = GT_ISDIRCOMPLEMENT(bsr->readmode) ? true : false;
   for (idx = 0; idx < (unsigned long) GT_UNITSIN2BITENC; idx++)
@@ -2058,10 +2055,8 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
   {
     Compressedtable *lcptab;
 
-    lcptab = gt_rmnsufinfo_delete(&bsr->longest->valueunsignedlong,
-                                  &bsr->rmnsufinfo,
+    lcptab = gt_rmnsufinfo_delete(&bsr->rmnsufinfo,
                                   bsr->lcpsubtab == NULL ? false : true);
-    bsr->longest->defined = true;
     if (lcptab != NULL)
     {
       multioutlcpvalues(lcpsubtab,bsr->totallength,lcptab,partwidth,
@@ -2089,7 +2084,6 @@ void gt_qsufsort(GtSuffixsortspace *suffixsortspace,
                  unsigned long partwidth,
                  int mmapfiledesc,
                  GtStr *mmapfilename,
-                 unsigned long *longest,
                  const GtEncseq *encseq,
                  GtReadmode readmode,
                  GT_UNUSED GtCodetype mincode,
@@ -2118,7 +2112,7 @@ void gt_qsufsort(GtSuffixsortspace *suffixsortspace,
                                  hashexceptions,
                                  absoluteinversesuftab);
   gt_rmnsufinfo_bcktab2firstlevelintervals(rmnsufinfo);
-  lcptab = gt_rmnsufinfo_delete(longest,&rmnsufinfo,
+  lcptab = gt_rmnsufinfo_delete(&rmnsufinfo,
                                 outlcpinfo == NULL ? false : true);
   if (lcptab != NULL)
   {
@@ -2141,7 +2135,6 @@ void gt_qsufsort(GtSuffixsortspace *suffixsortspace,
 */
 
 void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
-                       Definedunsignedlong *longest,
                        GtBucketspec2 *bucketspec2,
                        const GtEncseq *encseq,
                        GtReadmode readmode,
@@ -2166,7 +2159,6 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
 
   initBentsedgresources(&bsr,
                         suffixsortspace,
-                        longest,
                         encseq,
                         readmode,
                         bcktab,
@@ -2394,7 +2386,6 @@ void gt_sortbucketofsuffixes(bool setdcovsuffixsortspace,
   }
   initBentsedgresources(&bsr,
                         suffixsortspace,
-                        NULL,
                         encseq,
                         readmode,
                         NULL, /* bcktab unused */

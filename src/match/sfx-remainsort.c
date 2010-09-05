@@ -129,7 +129,6 @@ struct Rmnsufinfo
                 firstgenerationcount;
   RmsFirstwithnewdepth firstwithnewdepth;
   GtEncseqReader *esr;
-  unsigned long longestrel;
   unsigned int prefixlength,
                numofchars;
   /* XXX the following is only used for parts > 0 && maxdepth */
@@ -491,10 +490,6 @@ static void inversesuftabrel_set(Rmnsufinfo *rmnsufinfo,unsigned long idx,
 #ifdef ITVDEBUG
   SETIBIT(rmnsufinfo->itvrel.is_rms_inversesuftab_set,idx);
 #endif
-  if (idx == 0)
-  {
-    rmnsufinfo->longestrel = value;
-  }
 }
 
 #ifdef Lowerboundwithrank
@@ -1299,8 +1294,7 @@ void gt_rmnsufinfo_bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo)
   }
 }
 
-Compressedtable *gt_rmnsufinfo_delete(unsigned long *longest,
-                                      Rmnsufinfo **rmnsufinfoptr,
+Compressedtable *gt_rmnsufinfo_delete(Rmnsufinfo **rmnsufinfoptr,
                                       bool withlcptab)
 {
   Rmnsufinfo *rmnsufinfo = *rmnsufinfoptr;
@@ -1310,12 +1304,8 @@ Compressedtable *gt_rmnsufinfo_delete(unsigned long *longest,
   sortremainingsuffixes(rmnsufinfo);
   gt_free(rmnsufinfo->filltable);
   rmnsufinfo->filltable = NULL;
-  if (rmnsufinfo->absoluteinversesuftab)
+  if (!rmnsufinfo->absoluteinversesuftab)
   {
-    *longest = compressedtable_get(rmnsufinfo->inversesuftab,0);
-  } else
-  {
-    *longest = rmnsufinfo->longestrel;
 #ifdef ITVDEBUG
     gt_free(rmnsufinfo->itvrel.is_rms_inversesuftab_set);
     rmnsufinfo->itvrel.is_rms_inversesuftab_set = NULL;

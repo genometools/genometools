@@ -49,9 +49,6 @@ int gt_Sfxiterator_postsortfromstream(Sfxiterator *sfi,
                                       const GtStr *indexname,
                                       GtError *err);
 
-bool gt_Sfxiterator_extractlongestsuffixpos(unsigned long *longest,
-                                            const Sfxiterator *sfi);
-
 int gt_Sfxiterator_bcktab2file(FILE *fp,const Sfxiterator *sfi,GtError *err);
 
 unsigned long gt_Sfxiterator_longest(const Sfxiterator *sfi);
