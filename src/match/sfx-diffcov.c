@@ -92,6 +92,7 @@ struct Differencecover
                prefixlength;
   Diffrank *coverrank;
   Diffvalue *diffvalues, *diff2pos;
+  size_t requiredspace;
   unsigned long totallength,
                 *leftborder; /* points to bcktab->leftborder */
   Bcktab *bcktab;
@@ -144,6 +145,7 @@ static void fillcoverrank(Differencecover *dcov)
   Diffrank j;
 
   dcov->coverrank = gt_malloc(sizeof (*dcov->coverrank) * dcov->vparam);
+  dcov->requiredspace += sizeof (*dcov->coverrank) * dcov->vparam;
   gt_assert(dcov->size <= Diffrankmax);
   for (i=0; i<dcov->vparam; i++)
   {
@@ -166,6 +168,7 @@ static void filldiff2pos(Differencecover *dcov)
   Diffvalue *iptr, *jptr;
 
   dcov->diff2pos = gt_malloc(sizeof (*dcov->diff2pos) * dcov->vparam);
+  dcov->requiredspace += sizeof (*dcov->diff2pos) * dcov->vparam;
   for (iptr=dcov->diffvalues + dcov->size - 1; iptr>=dcov->diffvalues; iptr--)
   {
     for (jptr=dcov->diffvalues; jptr<dcov->diffvalues + dcov->size; jptr++)
@@ -238,13 +241,14 @@ Differencecover *gt_differencecover_new(unsigned int vparam,
   bool found = false;
 
   dcov = gt_malloc(sizeof (*dcov));
+  dcov->requiredspace = sizeof (*dcov);
   dcov->numofchars = gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq));
   dcov->totallength = gt_encseq_total_length(encseq);
   dcov->logger = logger;
   dcov->sssp = NULL;
   for (dcov->logmod = 0;
        dcov->logmod < (unsigned int) (sizeof (differencecoversizes)/
-                                     sizeof (differencecoversizes[0]));
+                                      sizeof (differencecoversizes[0]));
        dcov->logmod++)
   {
     if (v == vparam)
@@ -299,6 +303,11 @@ Differencecover *gt_differencecover_new(unsigned int vparam,
   return dcov;
 }
 
+size_t gt_differencecover_requiredspace(const Differencecover *dcov)
+{
+  return dcov->requiredspace;
+}
+
 static unsigned int differencecover_offset(const Differencecover *dcov,
                                            unsigned long pos1,
                                            unsigned long pos2)
@@ -343,16 +352,15 @@ static unsigned long dcov_derivespecialcodesonthefly(Differencecover *dcov,
   unsigned int prefixindex, unitsnotspecial;
   Enumcodeatposition *ecp;
   Specialcontext specialcontext;
-  unsigned long countderived = 0;
-  unsigned long pos, sampleindex;
+  unsigned long countderived = 0, pos, sampleindex;
   GtCodetype code;
 
   for (prefixindex=1U; prefixindex < dcov->prefixlength; prefixindex++)
   {
     /* XXX use one structure and reinit it */
     ecp = gt_newEnumcodeatposition(dcov->encseq,dcov->readmode,
-                                dcov->prefixlength,
-                                dcov->numofchars);
+                                   dcov->prefixlength,
+                                   dcov->numofchars);
     while (gt_nextEnumcodeatposition(&specialcontext,ecp))
     {
       if (prefixindex <= specialcontext.maxprefixindex)
@@ -370,13 +378,13 @@ static unsigned long dcov_derivespecialcodesonthefly(Differencecover *dcov,
                       == pos);
           }
           code = gt_encseq_extractprefixcode(&unitsnotspecial,
-                                   dcov->encseq,
-                                   dcov->filltable,
-                                   dcov->readmode,
-                                   dcov->esr,
-                                   dcov->multimappower,
-                                   pos,
-                                   dcov->prefixlength);
+                                             dcov->encseq,
+                                             dcov->filltable,
+                                             dcov->readmode,
+                                             dcov->esr,
+                                             dcov->multimappower,
+                                             pos,
+                                             dcov->prefixlength);
           if (codelist != NULL)
           {
             gt_assert((GtCodetype) codelist->spaceCodeatposition[
@@ -547,6 +555,7 @@ static void dc_initinversesuftabspecials(Differencecover *dcov)
 {
   dcov->inversesuftab = gt_malloc(sizeof (*dcov->inversesuftab) *
                                   dcov->maxsamplesize);
+  dcov->requiredspace += sizeof (*dcov->inversesuftab) * dcov->maxsamplesize;
   if (gt_encseq_has_specialranges(dcov->encseq))
   {
     GtSpecialrangeiterator *sri;
@@ -554,8 +563,8 @@ static void dc_initinversesuftabspecials(Differencecover *dcov)
     unsigned long specialidx;
 
     sri = gt_specialrangeiterator_new(dcov->encseq,
-                                  GT_ISDIRREVERSE(dcov->readmode)
-                                  ? false : true);
+                                      GT_ISDIRREVERSE(dcov->readmode)
+                                      ? false : true);
     specialidx = dcov->effectivesamplesize;
     while (gt_specialrangeiterator_next(sri,&range))
     {
@@ -1090,13 +1099,13 @@ void gt_differencecover_sortsample(Differencecover *dcov,
     if (diffptr < afterend && (Diffvalue) modvalue == *diffptr)
     {
       code = gt_encseq_extractprefixcode(&unitsnotspecial,
-                               dcov->encseq,
-                               dcov->filltable,
-                               dcov->readmode,
-                               dcov->esr,
-                               dcov->multimappower,
-                               pos,
-                               dcov->prefixlength);
+                                         dcov->encseq,
+                                         dcov->filltable,
+                                         dcov->readmode,
+                                         dcov->esr,
+                                         dcov->multimappower,
+                                         pos,
+                                         dcov->prefixlength);
       if (unitsnotspecial == dcov->prefixlength)
       {
         sampleindex = --dcov->leftborder[code];

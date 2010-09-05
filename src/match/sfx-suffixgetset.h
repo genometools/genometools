@@ -77,8 +77,10 @@ unsigned long *gt_suffixsortspace_ulong_get(const GtSuffixsortspace *sssp);
 
 unsigned long gt_suffixsortspace_longest(const GtSuffixsortspace *sssp);
 
+size_t gt_suffixsortspace_requiredspace(const GtSuffixsortspace *sssp);
+
 int gt_suffixsortspace_to_file (FILE *outfpsuftab,
-                                const GtSuffixsortspace *suffixsortspace,
+                                const GtSuffixsortspace *sssp,
                                 unsigned long numberofsuffixes,
                                 GtError *err);
 #endif

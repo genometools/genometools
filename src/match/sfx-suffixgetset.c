@@ -29,6 +29,7 @@
 
 struct GtSuffixsortspace
 {
+  size_t requiredspace;
   unsigned long(*getdirect)(const GtSuffixsortspace *,unsigned long);
   void (*setdirect)(const GtSuffixsortspace *,unsigned long,unsigned long);
   BitPackArray *bitpackarray;
@@ -97,6 +98,7 @@ GtSuffixsortspace *gt_suffixsortspace_new(unsigned long numofentries,
 
   gt_assert(numofentries > 0);
   suffixsortspace = gt_malloc(sizeof(*suffixsortspace));
+  suffixsortspace->requiredspace = sizeof (*suffixsortspace);
   suffixsortspace->maxindex = numofentries-1;
   suffixsortspace->maxvalue = maxvalue;
   suffixsortspace->longestidx.defined = false;
@@ -112,6 +114,8 @@ GtSuffixsortspace *gt_suffixsortspace_new(unsigned long numofentries,
     suffixsortspace->bitpackarray = NULL;
     suffixsortspace->ulongtab
       = gt_malloc(sizeof (*suffixsortspace->ulongtab) * numofentries);
+    suffixsortspace->requiredspace += sizeof (*suffixsortspace->ulongtab) *
+                                      numofentries;
     gt_log_log("sizeof (ulongtab)=%lu bytes",
                sizeof (*suffixsortspace->ulongtab) * numofentries);
     suffixsortspace->getdirect = getdirect_ulong;
@@ -127,6 +131,8 @@ GtSuffixsortspace *gt_suffixsortspace_new(unsigned long numofentries,
     suffixsortspace->ulongtab = NULL;
     suffixsortspace->bitpackarray
       = bitpackarray_new(bitspervalue,(BitOffset) numofentries,true);
+    suffixsortspace->requiredspace += sizeofbitarray(bitspervalue,
+                                                     (BitOffset) numofentries);
     suffixsortspace->getdirect = getdirect_bitpackarray;
     suffixsortspace->setdirect = setdirect_bitpackarray;
   }
@@ -144,12 +150,15 @@ GtSuffixsortspace *gt_suffixsortspace_new_fromfile(int filedesc,
   GtSuffixsortspace *suffixsortspace;
 
   suffixsortspace = gt_malloc(sizeof(*suffixsortspace));
+  suffixsortspace->requiredspace += sizeof (*suffixsortspace);
   suffixsortspace->bitpackarray = NULL;
   suffixsortspace->ulongtab
     = gt_fa_mmap_generic_fd(filedesc,filename,
                             (size_t) numofentries *
                             sizeof (*suffixsortspace->ulongtab),
                             (size_t) 0,false,false,NULL);
+  suffixsortspace->requiredspace += sizeof (*suffixsortspace->ulongtab) *
+                                    numofentries;
   suffixsortspace->offset = 0;
   suffixsortspace->bucketleftidx = 0;
   suffixsortspace->unmapsortspace = true;
@@ -318,24 +327,29 @@ unsigned long gt_suffixsortspace_longest(const GtSuffixsortspace *sssp)
   return sssp->longestidx.valueunsignedlong;
 }
 
+size_t gt_suffixsortspace_requiredspace(const GtSuffixsortspace *sssp)
+{
+  return sssp->requiredspace;
+}
+
 int gt_suffixsortspace_to_file (FILE *outfpsuftab,
-                                const GtSuffixsortspace *suffixsortspace,
+                                const GtSuffixsortspace *sssp,
                                 unsigned long numberofsuffixes,
                                 GtError *err)
 {
   bool haserr = false;
 
-  if (suffixsortspace->ulongtab != NULL)
+  if (sssp->ulongtab != NULL)
   {
-    if (fwrite(suffixsortspace->ulongtab,
-               sizeof (*suffixsortspace->ulongtab),
+    if (fwrite(sssp->ulongtab,
+               sizeof (*sssp->ulongtab),
                (size_t) numberofsuffixes,
                outfpsuftab)
                != (size_t) numberofsuffixes)
     {
       gt_error_set(err,"cannot write %lu items of size %u: errormsg=\"%s\"",
                    numberofsuffixes,
-                   (unsigned int) sizeof (*suffixsortspace->ulongtab),
+                   (unsigned int) sizeof (*sssp->ulongtab),
                    strerror(errno));
       haserr = true;
     }
@@ -343,10 +357,10 @@ int gt_suffixsortspace_to_file (FILE *outfpsuftab,
   {
     unsigned long idx;
 
-    gt_assert(suffixsortspace->ulongtab == NULL);
+    gt_assert(sssp->ulongtab == NULL);
     for (idx = 0; !haserr && idx < numberofsuffixes; idx++)
     {
-      unsigned long value = getdirect_bitpackarray(suffixsortspace,idx);
+      unsigned long value = getdirect_bitpackarray(sssp,idx);
       if (fwrite(&value,
                  sizeof (value),
                  (size_t) 1,
