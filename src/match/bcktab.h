@@ -95,8 +95,6 @@ void gt_bcktab_showlog2info(const Bcktab *bcktab, GtLogger *logger);
 
 unsigned int gt_singletonmaxprefixindex(const Bcktab *bcktab,GtCodetype code);
 
-unsigned long gt_bcktab_specialsmaxbucketsize(const Bcktab *bcktab);
-
 unsigned long gt_bcktab_nonspecialsmaxbucketsize(const Bcktab *bcktab);
 
 unsigned int gt_bcktab_optimalnumofbits(unsigned short *logofremaining,

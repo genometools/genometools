@@ -788,11 +788,6 @@ void gt_bcktab_showlog2info(const Bcktab *bcktab,GtLogger *logger)
                 logger);
 }
 
-unsigned long gt_bcktab_specialsmaxbucketsize(const Bcktab *bcktab)
-{
-  return bcktab->maxbucketinfo.specialsmaxbucketsize;
-}
-
 unsigned long gt_bcktab_nonspecialsmaxbucketsize(const Bcktab *bcktab)
 {
   return bcktab->maxbucketinfo.nonspecialsmaxbucketsize;
@@ -957,7 +952,8 @@ size_t gt_bcktab_sizeforlcpvalues(const Bcktab *bcktab)
 {
   size_t sizespeciallcps, sizelcps;
 
-  sizespeciallcps = sizeof (uint8_t) * gt_bcktab_specialsmaxbucketsize(bcktab);
+  sizespeciallcps = sizeof (uint8_t) * 
+                    bcktab->maxbucketinfo.specialsmaxbucketsize;
   sizelcps
     = sizeof (unsigned long) * gt_bcktab_nonspecialsmaxbucketsize(bcktab);
   return MAX(sizelcps,sizespeciallcps);
