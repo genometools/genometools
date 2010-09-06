@@ -509,6 +509,19 @@ GtCodetype gt_codedownscale(const Bcktab *bcktab,
   return code;
 }
 
+#ifdef SKDEBUG
+static void gt_bcktab_showleftborder(const Bcktab *bcktab)
+{
+  GtCodetype code;
+
+  for (code = 0; code < bcktab->numofallcodes; code++)
+  {
+    printf("leftborder[%lu]=%lu\n",(unsigned long) code,
+                                   bcktab->leftborder[code]);
+  }
+}
+#endif
+
 unsigned int gt_calcbucketboundsparts(Bucketspecification *bucketspec,
                                    const Bcktab *bcktab,
                                    GtCodetype code,
@@ -680,6 +693,12 @@ void gt_determinemaxbucketsize(Bcktab *bcktab,
   Bucketspecification bucketspec;
   GtCodetype code;
 
+#ifdef SKDEBUG
+  printf("mincode=%lu,maxcode=%lu,partwidth=%lu,totallength=%lu\n",
+          (unsigned long) mincode,(unsigned long) maxcode,
+          partwidth,totallength);
+  gt_bcktab_showleftborder(bcktab);
+#endif
   bcktab->maxbucketinfo.specialsmaxbucketsize = 1UL;
   bcktab->maxbucketinfo.nonspecialsmaxbucketsize = 1UL;
   bcktab->maxbucketinfo.maxbucketsize = 1UL;
@@ -935,24 +954,31 @@ GtCodetype gt_bcktab_numofallcodes(const Bcktab *bcktab)
   return bcktab->numofallcodes;
 }
 
-void gt_bcktab_leftborderpartialsums(Bcktab *bcktab,
-                                  unsigned long numofsuffixestosort)
+unsigned long gt_bcktab_leftborderpartialsums(Bcktab *bcktab,
+                                              unsigned long numofsuffixestosort)
 {
-  unsigned long *optr;
+  unsigned long *optr, largestbucketsize;
 
+  gt_assert(bcktab->leftborder != NULL);
+  largestbucketsize = bcktab->leftborder[0];
   for (optr = bcktab->leftborder + 1;
        optr < bcktab->leftborder + bcktab->numofallcodes; optr++)
   {
+    if (largestbucketsize < *optr)
+    {
+      largestbucketsize = *optr;
+    }
     *optr += *(optr-1);
   }
   bcktab->leftborder[bcktab->numofallcodes] = numofsuffixestosort;
+  return largestbucketsize;
 }
 
 size_t gt_bcktab_sizeforlcpvalues(const Bcktab *bcktab)
 {
   size_t sizespeciallcps, sizelcps;
 
-  sizespeciallcps = sizeof (uint8_t) * 
+  sizespeciallcps = sizeof (uint8_t) *
                     bcktab->maxbucketinfo.specialsmaxbucketsize;
   sizelcps
     = sizeof (unsigned long) * gt_bcktab_nonspecialsmaxbucketsize(bcktab);

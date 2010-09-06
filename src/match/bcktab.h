@@ -119,8 +119,8 @@ uint64_t gt_sizeofbuckettable(unsigned int numofchars,
 
 unsigned int gt_bcktab_prefixlength(const Bcktab *bcktab);
 
-void gt_bcktab_leftborderpartialsums(Bcktab *bcktab,
-                                     unsigned long numofsuffixestosort);
+unsigned long gt_bcktab_leftborderpartialsums(Bcktab *bcktab,
+                                             unsigned long numofsuffixestosort);
 
 size_t gt_bcktab_sizeforlcpvalues(const Bcktab *bcktab);
 
