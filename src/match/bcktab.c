@@ -28,6 +28,7 @@
 #include "core/format64.h"
 #include "core/mapspec-gen.h"
 #include "core/unused_api.h"
+#include "core/minmax.h"
 #include "core/log_api.h"
 #include "intcode-def.h"
 #include "esa-fileend.h"
@@ -667,13 +668,13 @@ static unsigned int calc_optimalnumofbits(unsigned short *logofremaining,
 }
 
 void gt_determinemaxbucketsize(Bcktab *bcktab,
-                            const GtCodetype mincode,
-                            const GtCodetype maxcode,
-                            unsigned long partwidth,
-                            unsigned int numofchars,
-                            bool hashexceptions,
-                            /* relevant for hashexception */
-                            unsigned long totallength)
+                               const GtCodetype mincode,
+                               const GtCodetype maxcode,
+                               unsigned long partwidth,
+                               unsigned int numofchars,
+                               bool hashexceptions,
+                               /* relevant for hashexception */
+                               unsigned long totallength)
 {
   unsigned int rightchar = (unsigned int) (mincode % numofchars);
   Bucketspecification bucketspec;
@@ -694,12 +695,12 @@ void gt_determinemaxbucketsize(Bcktab *bcktab,
   for (code = mincode; code <= maxcode; code++)
   {
     rightchar = gt_calcbucketboundsparts(&bucketspec,
-                                      bcktab,
-                                      code,
-                                      maxcode,
-                                      partwidth,
-                                      rightchar,
-                                      numofchars);
+                                         bcktab,
+                                         code,
+                                         maxcode,
+                                         partwidth,
+                                         rightchar,
+                                         numofchars);
     if (bucketspec.nonspecialsinbucket >
         bcktab->maxbucketinfo.nonspecialsmaxbucketsize)
     {
@@ -950,6 +951,16 @@ void gt_bcktab_leftborderpartialsums(Bcktab *bcktab,
     *optr += *(optr-1);
   }
   bcktab->leftborder[bcktab->numofallcodes] = numofsuffixestosort;
+}
+
+size_t gt_bcktab_sizeforlcpvalues(const Bcktab *bcktab)
+{
+  size_t sizespeciallcps, sizelcps;
+
+  sizespeciallcps = sizeof (uint8_t) * gt_bcktab_specialsmaxbucketsize(bcktab);
+  sizelcps
+    = sizeof (unsigned long) * gt_bcktab_nonspecialsmaxbucketsize(bcktab);
+  return MAX(sizelcps,sizespeciallcps);
 }
 
 #ifdef SKDEBUG

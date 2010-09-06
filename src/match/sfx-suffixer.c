@@ -33,6 +33,7 @@
 #include "core/encseq.h"
 #include "core/safecast-gen.h"
 #include "core/log_api.h"
+#include "core/mathsupport.h"
 #include "intcode-def.h"
 #include "esa-fileend.h"
 #include "sfx-diffcov.h"
@@ -505,11 +506,80 @@ void getencseqkmersinsertwithoutspecial(const GtEncseq *encseq,
 
 #define MEGABYTES(V) ((double) (V)/((1UL << 20) - 1))
 
+static int computepartsfittingmaximumspace(size_t usedspace,
+                                           unsigned long maximumspace,
+                                           const unsigned long *leftborder,
+                                           unsigned long numofallcodes,
+                                           unsigned long totallength,
+                                           unsigned long specialcharacters,
+                                           bool suftabasulongarray,
+                                           GtError *err)
+{
+  unsigned int parts;
+  Suftabparts *suftabparts;
+
+  if (usedspace >= (size_t) maximumspace)
+  {
+    gt_error_set(err,"already used %.2f MB of memory cannot compute "
+                     "enhanced suffix array in at most %lu MB",
+                     MEGABYTES(usedspace),maximumspace);
+    return -1;
+  }
+  for (parts = 1U; parts <= 100U; parts++)
+  {
+    size_t suftabsize;
+
+    suftabparts = gt_newsuftabparts(parts,
+                                    leftborder,
+                                    numofallcodes,
+                                    totallength - specialcharacters,
+                                    specialcharacters + 1,
+                                    NULL);
+    gt_assert(suftabparts != NULL);
+    suftabsize = gt_suffixsortspace_requiredspace(
+                                              stpgetlargestwidth(suftabparts),
+                                              totallength,
+                                              suftabasulongarray);
+    if ((unsigned long) (suftabsize + usedspace) <= maximumspace)
+    {
+      gt_freesuftabparts(suftabparts);
+      return (int) parts;
+    }
+    gt_freesuftabparts(suftabparts);
+  }
+  gt_error_set(err,"cannot compute enhanced suffix array in at most %lu MB",
+                   maximumspace);
+  return -1;
+}
+
+static void verifyusedspace(size_t usedspace)
+{
+  unsigned long usedspace_ma_fa = gt_ma_get_space_current() +
+                                  gt_fa_get_space_current();
+  if (usedspace_ma_fa > 0)
+  {
+    double relativedifference;
+
+    gt_assert(usedspace_ma_fa >= (unsigned long) usedspace);
+    relativedifference
+      = (double) (usedspace_ma_fa - usedspace)/usedspace_ma_fa;
+    if (usedspace_ma_fa > 100000UL &&
+        gt_double_larger_double(relativedifference,0.1))
+    {
+      fprintf(stderr,"relativedifference %.2f too large: usedspace=%.2f, "
+              "usedspace_ma_fa=%.2f\n",relativedifference,
+                                       MEGABYTES(usedspace),
+                                       MEGABYTES(usedspace_ma_fa));
+      exit(GT_EXIT_PROGRAMMING_ERROR);
+    }
+  }
+}
+
 Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                 GtReadmode readmode,
                                 unsigned int prefixlength,
                                 unsigned int numofparts,
-                                GT_UNUSED unsigned long maximumspace,
+                                unsigned long maximumspace,
                                 void *voidoutlcpinfo,
                                 const Sfxstrategy *sfxstrategy,
                                 GtProgressTimer *sfxprogress,
@@ -519,14 +589,15 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
 {
   Sfxiterator *sfi = NULL;
   unsigned long realspecialranges, specialcharacters;
-  size_t usedspace = 0;
+  size_t usedspace;
   bool haserr = false;
 
   gt_error_check(err);
-
   /*
   printf("spacepeak at start of gt_Sfxiterator_new = %lu\n",
           gt_ma_get_space_peak());*/ /* in bytes */
+  gt_assert(encseq != NULL);
+  usedspace = (size_t) gt_encseq_sizeofrep(encseq);
   realspecialranges = gt_encseq_realspecialranges(encseq);
   specialcharacters = gt_encseq_specialcharacters(encseq);
   gt_assert(prefixlength > 0);
@@ -700,11 +771,35 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
 #endif
     gt_bcktab_leftborderpartialsums(sfi->bcktab,
                                     sfi->totallength - specialcharacters);
+    verifyusedspace(usedspace);
     if (maximumspace > 0)
     {
+      int retval;
+
       gt_assert(numofparts == 1U);
-      /*printf("used space %.2f\n",MEGABYTES(usedspace));*/
+      retval
+        = computepartsfittingmaximumspace(usedspace,
+                                          maximumspace,
+                                          sfi->leftborder,
+                                          sfi->numofallcodes,
+                                          sfi->totallength,
+                                          specialcharacters,
+                                          sfi->sfxstrategy.suftabasulongarray,
+                                          err);
+      if (retval < 0)
+      {
+        haserr = true;
+      } else
+      {
+        gt_assert(retval > 0);
+        numofparts = (unsigned int) retval;
+        gt_logger_log(logger, "derived parts=%u",numofparts);
+      }
     }
+  }
+  if (!haserr)
+  {
+    gt_assert(sfi != NULL);
     sfi->suftabparts = gt_newsuftabparts(numofparts,
                                          sfi->leftborder,
                                          sfi->numofallcodes,

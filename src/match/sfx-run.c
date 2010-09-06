@@ -460,13 +460,15 @@ static int runsuffixerator(bool doesa,
         haserr = true;
       if (!haserr) {
         GtEncseqLoader *el = gt_encseq_loader_new();
-        /* -tis is always implied */
-        if (!so->fn2encopt.outdestab)
-          gt_encseq_loader_do_not_require_des_tab(el);
-        if (!so->fn2encopt.outsdstab)
-          gt_encseq_loader_do_not_require_sds_tab(el);
-        if (!so->fn2encopt.outssptab)
-          gt_encseq_loader_do_not_require_ssp_tab(el);
+        /* as we only construct the des, sds, and ssptable, but do not
+           need it later during the construction of the enhanced suffix
+           array, we do not load it again: we just load the information
+           stored in the .esq file. It would be better to use the
+           in memory constructed encseq rather than the one mapped into
+           memory. This would require to free the des, sds, and ssptable. */
+        gt_encseq_loader_do_not_require_des_tab(el);
+        gt_encseq_loader_do_not_require_sds_tab(el);
+        gt_encseq_loader_do_not_require_ssp_tab(el);
         encseq = gt_encseq_loader_load(el, gt_str_get(so->fn2encopt.indexname),
                                        err);
         if (!encseq)

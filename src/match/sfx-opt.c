@@ -568,6 +568,8 @@ void gt_wrapsfxoptions(Suffixeratoroptions *so)
           so->sfxstrategy.COMP = (unsigned long) readint;\
         }
 
+#define MEGABYTES(V) ((double) (V)/((1UL << 20) - 1))
+
 int gt_suffixeratoroptions(Suffixeratoroptions *so,
                         bool doesa,
                         int argc,
@@ -589,7 +591,7 @@ int gt_suffixeratoroptions(Suffixeratoroptions *so,
   so->outkystab = false;
   so->outkyssort = false;
   so->numofparts = 1U;
-  so->maximumspace = 0; /* in megabytes */
+  so->maximumspace = 0; /* in bytes */
   so->optionkysargumentstring = gt_str_new();
   so->fn2encopt.filenametab = gt_str_array_new();
   so->algbounds = gt_str_array_new();
@@ -678,7 +680,16 @@ int gt_suffixeratoroptions(Suffixeratoroptions *so,
           so->maximumspace = (unsigned long) readint;
           if (strcmp(gt_str_array_get(so->partsargv,1UL),"GB") == 0)
           {
-            so->maximumspace *= 1024UL;
+            if (sizeof(unsigned long) == (size_t) 4 && so->maximumspace > 3UL)
+            {
+              gt_error_set(err,"for 32bit binaries one cannot specify more "
+                               "than 3 GB as maximum space");
+              retval = -1;
+            }
+            if (retval != 1)
+            {
+              so->maximumspace <<= 30;
+            }
           } else
           {
             if (strcmp(gt_str_array_get(so->partsargv,1UL),"MB") != 0)
@@ -688,6 +699,17 @@ int gt_suffixeratoroptions(Suffixeratoroptions *so,
                                "the keywords MB and GB; the integer must be "
                                "smaller than %d",maxpartsarg);
               retval = -1;
+            }
+            if (sizeof(unsigned long) == (size_t) 4 &&
+                so->maximumspace > 4095UL)
+            {
+              gt_error_set(err,"for 32bit binaries one cannot specify more "
+                               "than 4095 MB as maximum space");
+              retval = -1;
+            }
+            if (retval != -1)
+            {
+              so->maximumspace <<= 20;
             }
           }
         }
@@ -701,7 +723,8 @@ int gt_suffixeratoroptions(Suffixeratoroptions *so,
       if (so->maximumspace > 0)
       {
         gt_assert(so->numofparts == 1U);
-        gt_logger_log_force(logger, "maximumspace=%lu MB",so->maximumspace);
+        gt_logger_log_force(logger, "maximumspace=%.0f MB",
+                                     MEGABYTES(so->maximumspace));
       } else
       {
         gt_logger_log_force(logger, "parts=%u",so->numofparts);

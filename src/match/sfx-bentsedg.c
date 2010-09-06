@@ -39,21 +39,6 @@
 #include "sfx-suffixgetset.h"
 #include "stamp.h"
 
-/*
-  Work on modules which are part of the suffix array construction:
-  sfx-bentsedg.c DONE
-  sfx-bltrie.c DONE
-  sfx-diffcov.c DONE
-  sfx-remainsort.c DONE
-  sfx-linlcp.c DONE
-  sfx-copysort.c DONE
-  sfx-suffixer.c: DONE
-  The following needs to be done.
-
-  eis-suffixerator-interface.c
-  sfx-run.c: contains functions to write suftab/bwttab.
-*/
-
 #define UNIQUEINT(P)           ((unsigned long) ((P) + GT_COMPAREOFFSET))
 #define ACCESSCHAR(POS)        gt_encseq_get_encoded_char(bsr->encseq,\
                                                           POS,bsr->readmode)
@@ -99,10 +84,10 @@ typedef struct
   void *reservoir;
   size_t sizereservoir;
   unsigned long *bucketoflcpvalues, /* pointer into reservoir */
-         maxbranchdepth,
-         numoflargelcpvalues,
-         totalnumoflargelcpvalues,
-         countoutputlcpvalues;
+                maxbranchdepth,
+                numoflargelcpvalues,
+                totalnumoflargelcpvalues,
+                countoutputlcpvalues;
   uint8_t *smalllcpvalues; /* pointer into reservoir */
   const Compressedtable *completelcpvalues;
   GtArrayLargelcpvalue largelcpvalues;
@@ -1948,16 +1933,16 @@ static void initBentsedgresources(Bentsedgresources *bsr,
     /* gt_bcktab_showlog2info(bcktab,logger); */
     if (outlcpinfo != NULL && outlcpinfo->assideeffect)
     {
-      size_t sizespeciallcps, sizelcps;
+      size_t sizeforlcpvalues; /* in bytes */
 
       gt_assert(bsr->lcpsubtab != NULL);
-      sizespeciallcps = sizeof (*bsr->lcpsubtab->smalllcpvalues) *
-                        gt_bcktab_specialsmaxbucketsize(bcktab);
-      sizelcps = sizeof (*bsr->lcpsubtab->bucketoflcpvalues) *
-                 gt_bcktab_nonspecialsmaxbucketsize(bcktab);
-      if (bsr->lcpsubtab->sizereservoir < MAX(sizelcps,sizespeciallcps))
+      gt_assert(sizeof (*bsr->lcpsubtab->smalllcpvalues) == sizeof (uint8_t));
+      gt_assert(sizeof (*bsr->lcpsubtab->bucketoflcpvalues) ==
+                sizeof (unsigned long));
+      sizeforlcpvalues = gt_bcktab_sizeforlcpvalues(bcktab);
+      if (bsr->lcpsubtab->sizereservoir < sizeforlcpvalues)
       {
-        bsr->lcpsubtab->sizereservoir = MAX(sizelcps,sizespeciallcps);
+        bsr->lcpsubtab->sizereservoir = sizeforlcpvalues;
         bsr->lcpsubtab->reservoir = gt_realloc(bsr->lcpsubtab->reservoir,
                                                bsr->lcpsubtab->sizereservoir);
         /* point to the same area, since this is not used simultaneously */

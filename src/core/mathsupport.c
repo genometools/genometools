@@ -71,6 +71,11 @@ bool gt_double_smaller_double(double d1, double d2)
   return gt_double_compare(d1, d2) < 0;
 }
 
+bool gt_double_larger_double(double d1, double d2)
+{
+  return gt_double_compare(d1, d2) > 0;
+}
+
 unsigned long gt_rand_max(unsigned long maximal_value)
 {
   unsigned long r;

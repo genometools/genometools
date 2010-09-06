@@ -246,6 +246,12 @@ unsigned long gt_ma_get_space_peak(void)
   return ma->max_size;
 }
 
+unsigned long gt_ma_get_space_current(void)
+{
+  gt_assert(ma);
+  return ma->current_size;
+}
+
 void gt_ma_show_space_peak(FILE *fp)
 {
   gt_assert(ma);

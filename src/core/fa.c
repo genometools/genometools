@@ -580,6 +580,18 @@ int gt_fa_check_mmap_leak(void)
   return 0;
 }
 
+unsigned long gt_fa_get_space_peak(void)
+{
+  gt_assert(fa != NULL);
+  return fa->max_size;
+}
+
+unsigned long gt_fa_get_space_current(void)
+{
+  gt_assert(fa != NULL);
+  return fa->current_size;
+}
+
 void gt_fa_show_space_peak(FILE *fp)
 {
   gt_assert(fa);

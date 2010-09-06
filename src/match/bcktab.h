@@ -100,13 +100,13 @@ unsigned long gt_bcktab_specialsmaxbucketsize(const Bcktab *bcktab);
 unsigned long gt_bcktab_nonspecialsmaxbucketsize(const Bcktab *bcktab);
 
 unsigned int gt_bcktab_optimalnumofbits(unsigned short *logofremaining,
-                                     const Bcktab *bcktab);
+                                        const Bcktab *bcktab);
 
 unsigned int gt_pfxidx2lcpvalues(unsigned int *minprefixindex,
-                              uint8_t *lcpsubtab,
-                              unsigned long specialsinbucket,
-                              const Bcktab *bcktab,
-                              GtCodetype code);
+                                 uint8_t *lcpsubtab,
+                                 unsigned long specialsinbucket,
+                                 const Bcktab *bcktab,
+                                 GtCodetype code);
 
 const GtCodetype **gt_bcktab_multimappower(const Bcktab *bcktab);
 
@@ -117,12 +117,14 @@ unsigned long *gt_bcktab_leftborder(Bcktab *bcktab);
 GtCodetype gt_bcktab_numofallcodes(const Bcktab *bcktab);
 
 uint64_t gt_sizeofbuckettable(unsigned int numofchars,
-                           unsigned int prefixlength);
+                              unsigned int prefixlength);
 
 unsigned int gt_bcktab_prefixlength(const Bcktab *bcktab);
 
 void gt_bcktab_leftborderpartialsums(Bcktab *bcktab,
-                                  unsigned long numofsuffixestosort);
+                                     unsigned long numofsuffixestosort);
+
+size_t gt_bcktab_sizeforlcpvalues(const Bcktab *bcktab);
 
 #ifdef SKDEBUG
 void checkcountspecialcodes(const Bcktab *bcktab);
