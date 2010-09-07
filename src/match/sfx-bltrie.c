@@ -326,26 +326,28 @@ static unsigned long cmpcharbychargetlcp(GtUchar *mm_oldsuffix,
 }
 
 static unsigned long fastgetlcp(GtUchar *mm_oldsuffix,
-                         GtUchar *mm_newsuffix,
-                         const Blindtrie *blindtrie,
-                         unsigned long leafpos,
-                         unsigned long currentstartpos)
+                                GtUchar *mm_newsuffix,
+                                const Blindtrie *blindtrie,
+                                unsigned long leafpos,
+                                unsigned long currentstartpos)
 {
   GtCommonunits commonunits;
 
   if (blindtrie->maxdepth == 0)
   {
+    gt_assert(leafpos < blindtrie->totallength);
+    gt_assert(currentstartpos < blindtrie->totallength);
     (void) gt_encseq_compare(blindtrie->encseq,
-                                      &commonunits,
-                                      GT_ISDIRREVERSE(blindtrie->readmode)
-                                      ? false : true,
-                                      GT_ISDIRCOMPLEMENT(blindtrie->readmode)
-                                      ? true : false,
-                                      blindtrie->esr1,
-                                      blindtrie->esr2,
-                                      leafpos,
-                                      currentstartpos,
-                                      0);
+                             &commonunits,
+                             GT_ISDIRREVERSE(blindtrie->readmode)
+                             ? false : true,
+                             GT_ISDIRCOMPLEMENT(blindtrie->readmode)
+                             ? true : false,
+                             blindtrie->esr1,
+                             blindtrie->esr2,
+                             leafpos,
+                             currentstartpos,
+                             0);
   } else
   {
     (void) gt_encseq_compare_maxdepth(blindtrie->encseq,
@@ -799,7 +801,8 @@ unsigned long gt_blindtrie_suffixsort(
                                (&mm_oldsuffix,
                                 &mm_newsuffix,
                                 blindtrie,
-                                leafinsubtree->either.nodestartpos,pos);
+                                leafinsubtree->either.nodestartpos,
+                                pos);
       currentnode = blindtrie->root;
       for (stackidx=0;stackidx<blindtrie->stack.nextfreeNodeptr;stackidx++)
       {

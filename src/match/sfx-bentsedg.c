@@ -137,6 +137,7 @@ typedef GtEndofTwobitencoding Sfxcmp;
               pos += depth;\
               gt_encseq_reader_reinit_with_direction(bsr->esr1,bsr->encseq,\
                                                      true,pos);\
+              gt_assert(pos < bsr->totallength);\
               gt_encseq_extract2bitenc(true,&(VAR),bsr->encseq,\
                                        bsr->esr1,pos);\
             } else\
@@ -147,12 +148,14 @@ typedef GtEndofTwobitencoding Sfxcmp;
             }\
           } else\
           {\
+            gt_assert(pos < bsr->totallength);\
             pos = GT_REVERSEPOS(bsr->totallength,pos);\
             if (pos >= depth)\
             {\
               pos -= depth;\
               gt_encseq_reader_reinit_with_direction(bsr->esr1,bsr->encseq,\
                                                     false,pos);\
+              gt_assert(pos < bsr->totallength);\
               gt_encseq_extract2bitenc(false,&(VAR),bsr->encseq,\
                                        bsr->esr1,pos);\
             } else\
@@ -478,13 +481,15 @@ static void bs_insertionsort(Bentsedgresources *bsr,
                                  gt_suffixsortspace_get(bsr->sssp,subbucketleft,
                                                         pj));
 #endif
+        startpos1 = gt_suffixsortspace_get(bsr->sssp,subbucketleft,pj-1);
+        gt_assert(startpos1 < bsr->totallength);
+        startpos2 = gt_suffixsortspace_get(bsr->sssp,subbucketleft,pj);
+        gt_assert(startpos2 < bsr->totallength);
         retval = gt_encseq_compare(bsr->encseq,&commonunits,bsr->fwd,
                                    bsr->complement,
                                    bsr->esr1,bsr->esr2,
-                                   gt_suffixsortspace_get(bsr->sssp,
-                                                          subbucketleft,pj-1),
-                                   gt_suffixsortspace_get(bsr->sssp,
-                                                          subbucketleft,pj),
+                                   startpos1,
+                                   startpos2,
                                    offset);
         lcplen = commonunits.finaldepth;
       }

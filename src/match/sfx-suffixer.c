@@ -1061,6 +1061,7 @@ static void insertfullspecialrange(Sfxiterator *sfi,
   {
     if (GT_ISDIRREVERSE(sfi->readmode))
     {
+      gt_assert(pos < sfi->totallength);
       gt_suffixsortspace_setdirect(sfi->fusp.sssp,sfi->fusp.nextfreeSuffixptr,
                                    GT_REVERSEPOS(sfi->totallength,pos));
       sfi->fusp.nextfreeSuffixptr++;

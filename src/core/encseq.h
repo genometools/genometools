@@ -160,10 +160,6 @@ int gt_encseq_check_consistency(const GtEncseq *encseq,
 /* Returns true is <encseq> has special ranges, false otherwise. */
 bool gt_encseq_has_specialranges(const GtEncseq *encseq);
 
-/* Returns true if the representation of the <encseq> allows for fast
-  enumeration of special ranges. */
-bool gt_encseq_has_fast_specialrangeenumerator(const GtEncseq *encseq);
-
 /* Return true if the representation of the <encseq> is based on two
   bit encoding */
 bool gt_encseq_bitwise_cmp_ok(const GtEncseq *encseq);
@@ -218,12 +214,12 @@ int gt_encseq_compare_maxdepth(const GtEncseq *encseq,
 
 /* Return true if and only if the substring of length <len> starting
   at position <startpos> in <encseq> contains a special character.
-  <esrspace> refer to a memory areas for storeing a
+  <esr> refer to a memory areas for storeing a
   GtEncseqReader. <moveforward> is true if and only if the
   scanning is done in forward direction. */
 bool gt_encseq_contains_special(const GtEncseq *encseq,
                                 bool moveforward,
-                                GtEncseqReader *esrspace,
+                                GtEncseqReader *esr,
                                 unsigned long startpos,
                                 unsigned long len);
 
