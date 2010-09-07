@@ -572,10 +572,10 @@ static void verifyestimatedspace(size_t estimatedspace)
     if (usedspace_ma_fa > 100000UL &&
         gt_double_larger_double(relativedifference,0.1))
     {
-      fprintf(stderr,"relativedifference %.2f too large: estimatedspace=%.2f, "
-              "usedspace_ma_fa=%.2f\n",relativedifference,
-                                       MEGABYTES(estimatedspace),
-                                       MEGABYTES(usedspace_ma_fa));
+      gt_log_log("relativedifference %.2f too large: estimatedspace=%.2f, "
+                 "usedspace_ma_fa=%.2f\n",relativedifference,
+                                          MEGABYTES(estimatedspace),
+                                          MEGABYTES(usedspace_ma_fa));
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   }
