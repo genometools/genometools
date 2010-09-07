@@ -1508,130 +1508,25 @@ static void showallspecialpositions(const GtEncseq *encseq)
 
 #endif
 
-/*
-   find next not empty page and set firstcell to the first index in the
-   page and lastcell to the last plus 1 index of the page.
-*/
-
-static bool nextnonemptypage(const GtEncseq *encseq,
-                             GtEncseqReader *esr,
-                             bool moveforward)
+static void advanceGtEncseqReader(const GtEncseq *encseq,
+                                  GtEncseqReader *esr,
+                                  bool moveforward)
 {
   switch (encseq->sat)
   {
     case GT_ACCESS_TYPE_UCHARTABLES:
-      return ucharnextnonemptypage(encseq,esr,moveforward);
-    case GT_ACCESS_TYPE_USHORTTABLES:
-      return ushortnextnonemptypage(encseq,esr,moveforward);
-    case GT_ACCESS_TYPE_UINT32TABLES:
-      return uint32nextnonemptypage(encseq,esr,moveforward);
-    default: 
-      fprintf(stderr,"nextnonemptypage(sat = %s is undefined)\n",
-              gt_encseq_access_type_str(encseq->sat));
-      exit(GT_EXIT_PROGRAMMING_ERROR);
-  }
-}
-    
-static void determinerange(GtRange *range,
-                           const GtEncseq *encseq,
-                           unsigned long transpagenum,
-                           unsigned long cellnum)
-{
-  switch (encseq->sat)
-  {
-    case GT_ACCESS_TYPE_UCHARTABLES:
-      uchardeterminerange(range,encseq,transpagenum,cellnum);
+      ucharadvanceGtEncseqReader(encseq,esr,moveforward);
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
-      ushortdeterminerange(range,encseq,transpagenum,cellnum);
+      ushortadvanceGtEncseqReader(encseq,esr,moveforward);
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
-      uint32determinerange(range,encseq,transpagenum,cellnum);
+      uint32advanceGtEncseqReader(encseq,esr,moveforward);
       break;
-    default: fprintf(stderr,"determinerange(sat = %s is undefined)\n",
+    default: fprintf(stderr,"advanceGtEncseqReader(sat = %s is undefined)\n",
                      gt_encseq_access_type_str(encseq->sat));
              exit(GT_EXIT_PROGRAMMING_ERROR);
-  }
-}
-
-static void advanceEncodedseqstate(const GtEncseq *encseq,
-                                   GtEncseqReader *esr,
-                                   bool moveforward)
-{
-  unsigned long cellnum;
-
-  while (true)
-  {
-    if (esr->hascurrent)
-    {
-      esr->previousrange = esr->currentrange;
-      esr->hascurrent = false;
-    }
-    if (moveforward)
-    {
-      esr->firstcell++;
-    } else
-    {
-      esr->lastcell--;
-    }
-#ifdef RANGEDEBUG
-    printf("advance with firstcell=%lu, lastcell=%lu\n",
-            esr->firstcell,esr->lastcell);
-#endif
-    /* do not let comparison values become negative, hence compare with + 1 */
-    if (esr->firstcell + 1 < esr->lastcell + 1 ||
-        nextnonemptypage(encseq,esr,moveforward))
-    {
-      if (moveforward)
-      {
-        cellnum = esr->firstcell;
-      } else
-      {
-        cellnum = esr->lastcell - 1;
-      }
-      determinerange(&esr->currentrange,encseq,
-                     esr->morepagesleft ? (moveforward ? (esr->nextpage-1)
-                                                       : (esr->nextpage+1))
-                                        : esr->nextpage,
-                     cellnum);
-      esr->hasrange = true;
-    } else
-    {
-      esr->hasrange = false;
-      break;
-    }
-    if (esr->hasprevious)
-    {
-      if (moveforward)
-      {
-        if (esr->previousrange.end == esr->currentrange.start)
-        {
-          esr->previousrange.end = esr->currentrange.end;
-          esr->hascurrent = false;
-        } else
-        {
-          esr->hascurrent = true;
-          break;
-        }
-      } else
-      {
-        if (esr->currentrange.end == esr->previousrange.start)
-        {
-          esr->previousrange.start = esr->currentrange.start;
-          esr->hascurrent = false;
-        } else
-        {
-          esr->hascurrent = true;
-          break;
-        }
-      }
-    } else
-    {
-      esr->previousrange = esr->currentrange;
-      esr->hasprevious = true;
-      esr->hascurrent = false;
-    }
-  }
+   }
 }
 
 static void binpreparenextrange(const GtEncseq *encseq,
@@ -1681,7 +1576,7 @@ void gt_encseq_reader_reinit_with_direction(GtEncseqReader *esr,
       printf("start advance at (%lu,%lu) in page %lu\n",
                        esr->firstcell,esr->lastcell,esr->nextpage);
 #endif
-    advanceEncodedseqstate(encseq,esr,moveforward);
+    advanceGtEncseqReader(encseq,esr,moveforward);
   }
   esr->currentpos = startpos;
 }
@@ -1762,7 +1657,7 @@ static GtUchar seqdelivercharSpecial(const GtEncseq *encseq,
         }
         if (esr->hasrange)
         {
-          advanceEncodedseqstate(encseq,esr,true);
+          advanceGtEncseqReader(encseq,esr,true);
         }
       }
     } else
@@ -1777,7 +1672,7 @@ static GtUchar seqdelivercharSpecial(const GtEncseq *encseq,
         }
         if (esr->hasrange)
         {
-          advanceEncodedseqstate(encseq,esr,false);
+          advanceGtEncseqReader(encseq,esr,false);
         }
       }
     }
@@ -2089,7 +1984,7 @@ bool gt_specialrangeiterator_next(GtSpecialrangeiterator *sri, GtRange *range)
       *range = sri->esr->previousrange;
       if (sri->esr->hasrange)
       {
-        advanceEncodedseqstate(sri->encseq,sri->esr,sri->moveforward);
+        advanceGtEncseqReader(sri->encseq,sri->esr,sri->moveforward);
       } else
       {
         sri->exhausted = true;
@@ -3472,7 +3367,7 @@ static unsigned long fwdgetnextstopposViatables(const GtEncseq *encseq,
       /* follows current special range */
       if (esr->hasrange)
       {
-        advanceEncodedseqstate(encseq,esr,true);
+        advanceGtEncseqReader(encseq,esr,true);
       } else
       {
         break;
@@ -3541,7 +3436,7 @@ static unsigned long revgetnextstopposViatables(const GtEncseq *encseq,
       /* follows current special range */
       if (esr->hasrange)
       {
-        advanceEncodedseqstate(encseq,esr,false);
+        advanceGtEncseqReader(encseq,esr,false);
       } else
       {
         break;

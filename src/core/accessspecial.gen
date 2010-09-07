@@ -419,6 +419,87 @@ static bool ADDTYPE(nextnonemptypage)(const GtEncseq *encseq,
   return false;
 }
 
+static void ADDTYPE(advanceGtEncseqReader)(const GtEncseq *encseq,
+                                           GtEncseqReader *esr,
+                                           bool moveforward)
+{
+  unsigned long cellnum;
+
+  while (true)
+  {
+    if (esr->hascurrent)
+    {
+      esr->previousrange = esr->currentrange;
+      esr->hascurrent = false;
+    }
+    if (moveforward)
+    {
+      esr->firstcell++;
+    } else
+    {
+      esr->lastcell--;
+    }
+#ifdef RANGEDEBUG
+    printf("advance with firstcell=%lu, lastcell=%lu\n",
+            esr->firstcell,esr->lastcell);
+#endif
+    /* do not let comparison values become negative, hence compare with + 1 */
+    if (esr->firstcell + 1 < esr->lastcell + 1 ||
+        ADDTYPE(nextnonemptypage)(encseq,esr,moveforward))
+    {
+      if (moveforward)
+      {
+        cellnum = esr->firstcell;
+      } else
+      {
+        cellnum = esr->lastcell - 1;
+      }
+      ADDTYPE(determinerange)(&esr->currentrange,encseq,
+                              esr->morepagesleft 
+                                 ? (moveforward ? (esr->nextpage-1)
+                                                : (esr->nextpage+1))
+                                 : esr->nextpage,
+                     cellnum);
+      esr->hasrange = true;
+    } else
+    {
+      esr->hasrange = false;
+      break;
+    }
+    if (esr->hasprevious)
+    {
+      if (moveforward)
+      {
+        if (esr->previousrange.end == esr->currentrange.start)
+        {
+          esr->previousrange.end = esr->currentrange.end;
+          esr->hascurrent = false;
+        } else
+        {
+          esr->hascurrent = true;
+          break;
+        }
+      } else
+      {
+        if (esr->currentrange.end == esr->previousrange.start)
+        {
+          esr->previousrange.start = esr->currentrange.start;
+          esr->hascurrent = false;
+        } else
+        {
+          esr->hascurrent = true;
+          break;
+        }
+      }
+    } else
+    {
+      esr->previousrange = esr->currentrange;
+      esr->hasprevious = true;
+      esr->hascurrent = false;
+    }
+  }
+}
+
 #ifdef POS2PAGENUM
 
 static bool ADDTYPE(checknospecial)(const GtEncseq *encseq,
