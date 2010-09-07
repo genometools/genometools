@@ -1397,6 +1397,8 @@ DECLAREFUNCTIONGENERIC(delivercharViauint32tablesSpecialfirst,
 DECLAREFUNCTIONGENERIC(delivercharViauint32tablesSpecialrange,
                        uint32checknospecialrange)
 
+#ifdef RANGEDEBUG
+
 static unsigned long accessendspecialsubsUint(const GtEncseq *encseq,
                                               unsigned long pgnum)
 {
@@ -1413,8 +1415,6 @@ static unsigned long accessendspecialsubsUint(const GtEncseq *encseq,
              exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
-
-#ifdef RANGEDEBUG
 
 static unsigned long accessspecialrangelength(const GtEncseq *encseq,
                                               unsigned long idx)
@@ -1517,48 +1517,21 @@ static bool nextnonemptypage(const GtEncseq *encseq,
                              GtEncseqReader *esr,
                              bool moveforward)
 {
-  unsigned long endpos0, endpos1, pagenum;
-
-  while (esr->morepagesleft)
+  switch (encseq->sat)
   {
-    pagenum = esr->nextpage;
-    if (moveforward)
-    {
-      if (esr->nextpage == esr->numofspecialcells-1)
-      {
-        esr->morepagesleft = false;
-      } else
-      {
-        esr->nextpage++;
-      }
-    } else
-    {
-      if (esr->nextpage == 0)
-      {
-        esr->morepagesleft = false;
-      } else
-      {
-        esr->nextpage--;
-      }
-    }
-    if (pagenum == 0)
-    {
-      endpos0 = 0;
-    } else
-    {
-      endpos0 = accessendspecialsubsUint(encseq,pagenum-1);
-    }
-    endpos1 = accessendspecialsubsUint(encseq,pagenum);
-    if (endpos0 < endpos1)
-    {
-      esr->firstcell = endpos0;
-      esr->lastcell = endpos1;
-      return true;
-    }
+    case GT_ACCESS_TYPE_UCHARTABLES:
+      return ucharnextnonemptypage(encseq,esr,moveforward);
+    case GT_ACCESS_TYPE_USHORTTABLES:
+      return ushortnextnonemptypage(encseq,esr,moveforward);
+    case GT_ACCESS_TYPE_UINT32TABLES:
+      return uint32nextnonemptypage(encseq,esr,moveforward);
+    default: 
+      fprintf(stderr,"nextnonemptypage(sat = %s is undefined)\n",
+              gt_encseq_access_type_str(encseq->sat));
+      exit(GT_EXIT_PROGRAMMING_ERROR);
   }
-  return false;
 }
-
+    
 static void determinerange(GtRange *range,
                            const GtEncseq *encseq,
                            unsigned long transpagenum,

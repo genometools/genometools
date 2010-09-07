@@ -368,6 +368,57 @@ static void ADDTYPE(binpreparenextrange)(const GtEncseq *encseq,
   }
 }
 
+/*
+   find next not empty page and set firstcell to the first index in the
+   page and lastcell to the last plus 1 index of the page.
+*/
+
+static bool ADDTYPE(nextnonemptypage)(const GtEncseq *encseq,
+                                      GtEncseqReader *esr,
+                                      bool moveforward)
+{
+  unsigned long endpos0, endpos1, pagenum;
+
+  while (esr->morepagesleft)
+  {
+    pagenum = esr->nextpage;
+    if (moveforward)
+    {
+      if (esr->nextpage == esr->numofspecialcells-1)
+      {
+        esr->morepagesleft = false;
+      } else
+      {
+        esr->nextpage++;
+      }
+    } else
+    {
+      if (esr->nextpage == 0)
+      {
+        esr->morepagesleft = false;
+      } else
+      {
+        esr->nextpage--;
+      }
+    }
+    if (pagenum == 0)
+    {
+      endpos0 = 0;
+    } else
+    {
+      endpos0 = ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenum-1];
+    }
+    endpos1 = ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenum];
+    if (endpos0 < endpos1)
+    {
+      esr->firstcell = endpos0;
+      esr->lastcell = endpos1;
+      return true;
+    }
+  }
+  return false;
+}
+
 #ifdef POS2PAGENUM
 
 static bool ADDTYPE(checknospecial)(const GtEncseq *encseq,
