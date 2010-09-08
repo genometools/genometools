@@ -523,7 +523,10 @@ static unsigned long insertfullspecialrangesample(Differencecover *dcov,
   {
     if (GT_ISDIRREVERSE(dcov->readmode))
     {
-      unsigned long revpos = GT_REVERSEPOS(dcov->totallength,pos);
+      unsigned long revpos;
+
+      gt_assert(pos < dcov->totallength);
+      revpos = GT_REVERSEPOS(dcov->totallength,pos);
       if (checkifindifferencecover(dcov,MODV(revpos)))
       {
         inversesuftab_set(dcov,revpos,specialidx);
@@ -1072,7 +1075,8 @@ void gt_differencecover_sortsample(Differencecover *dcov,
     }
   }
   dcov->effectivesamplesize = dcov->samplesize - fullspecials;
-  gt_bcktab_leftborderpartialsums(dcov->bcktab,dcov->effectivesamplesize);
+  (void) gt_bcktab_leftborderpartialsums(dcov->bcktab,
+                                         dcov->effectivesamplesize);
   gt_logger_log(dcov->logger,
               "%lu positions are sampled (%.2f) pl=%u",
               dcov->samplesize,
