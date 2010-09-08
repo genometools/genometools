@@ -3423,30 +3423,26 @@ static unsigned long fwdgetnextstopposViatables(const GtEncseq *encseq,
 static unsigned long fwdgetnextstopposViaequallength(const GtEncseq *encseq,
                                                      unsigned long pos)
 {
-  if (specialsingleposViaequallength(encseq,pos))
-  {
-    return pos;
-  } else
+  if (!specialsingleposViaequallength(encseq,pos))
   {
     unsigned long seqnum = gt_encseq_seqnum_Viaequallength(encseq,pos);
 
     return seqnum * (encseq->equallength.valueunsignedlong + 1) +
                      encseq->equallength.valueunsignedlong;
   }
+  return pos;
 }
 
 static unsigned long revgetnextstopposViaequallength(const GtEncseq *encseq,
                                                      unsigned long pos)
 {
-  if (specialsingleposViaequallength(encseq,pos))
-  {
-    return pos+1;
-  } else
+  if (!specialsingleposViaequallength(encseq,pos))
   {
     unsigned long seqnum = gt_encseq_seqnum_Viaequallength(encseq,pos);
 
     return seqnum * (encseq->equallength.valueunsignedlong + 1);
   }
+  return pos+1;
 }
 
 static unsigned long revgetnextstopposViatables(const GtEncseq *encseq,
