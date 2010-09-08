@@ -1,3 +1,28 @@
+require 'fileutils'
+require 'tempfile'
+
+def reverse_and_concat(file)
+  tf = Tempfile.new("gt_rev")
+  tmpfile = tf.path
+  tf.close
+  dirname = File.dirname(file)
+  `$GTDIR/bin/gt            \
+   convertseq -o #{tmpfile} \
+   -force -r #{file}`
+  basename = File.basename(file, ".*")
+  newfile = File.join(dirname, basename + "_plus_rev.fas")
+  FileUtils.cp(file, newfile)
+  file = newfile
+  File.open(file, 'a') {|fp|
+    File.open(tmpfile, 'r') {|tf|
+      while line = tf.gets
+        fp.puts line
+      end
+    }
+  }
+  failtest unless File.exist?(newfile)
+  return newfile
+end
 
 kr_testable_files = []
 smallfilecodes = []
@@ -21,7 +46,7 @@ smallfilecodes = fp.readlines
 fp.close
 
 smallfilecodes.collect! do |filecode|
-  "#{$testdata}/genomediff/#{filecode}"
+  "#{$testdata}/genomediff/#{filecode}".chomp
 end
 
 if $gttestdata
@@ -30,7 +55,7 @@ if $gttestdata
   fp.close
 
   bigfilecodes.collect! do |filecode|
-    "#{$gttestdata}/genomediff/#{filecode}"
+    "#{$gttestdata}/genomediff/#{filecode}".chomp
   end
 end
 
@@ -52,6 +77,7 @@ def test_pck(files, param)
            "-bsize 8            " +
            "-sprank             " +
            "-pl                 " +
+           "-sat uchar          " +
            "-indexname pck")
   run_test(
     "#{$bin}gt genomediff #{param} -pck pck",
@@ -59,7 +85,7 @@ def test_pck(files, param)
 end
 
 def test_esa(files, param)
-    run_test "#{$bin}gt suffixerator -db #{files} -indexname esa " + 
+    run_test "#{$bin}gt suffixerator -db #{files} -indexname esa " +
              "-dna -suf -tis -lcp -ssp"
     run_test "#{$bin}gt genomediff #{param} -esa esa"
 end
@@ -67,7 +93,7 @@ end
 def compare_2d_result(matrix1, matrix2)
   0.upto(matrix1.length - 1) do |i_idx|
     1.upto(matrix2.length) do |j_idx|
-      if i_idx!=j_idx - 1 and 
+      if i_idx!=j_idx - 1 and
          matrix1[i_idx][j_idx] != matrix2[i_idx][j_idx]
         return matrix1[i_idx][j_idx], matrix2[i_idx][j_idx]
       end
@@ -77,44 +103,46 @@ def compare_2d_result(matrix1, matrix2)
 end
 
 allfilecodes.each do |code|
-  code.chomp!
   Name "gt genomediff pck traverse #{code}"
   Keywords "gt_genomediff pck traverse"
   Test do
-    test_pck("#{code}*plus*.fas", "-traverse")
+    test_pck("#{code}*.fas", "-traverse")
   end
   Name "gt genomediff pck shulen #{code}"
   Keywords "gt_genomediff pck shulen"
   Test do
-    test_pck("#{code}*plus*.fas", "-shulen")
+    test_pck("#{code}*.fas", "-shulen")
   end
   Name "gt genomediff pck fullrun #{code}"
   Keywords "gt_genomediff pck fullrun"
   Test do
-    test_pck("#{code}*plus*.fas", "")
+    test_pck("#{code}*.fas", "")
   end
   Name "gt genomediff esa shulen #{code}"
   Keywords "gt_genomediff esa shulen"
   Test do
-    test_esa("#{code}*plus*.fas", "-shulen")
+    test_esa("#{code}*.fas", "-shulen")
   end
   Name "gt genomediff esa fullrun #{code}"
   Keywords "gt_genomediff esa fullrun"
   Test do
-    test_esa("#{code}*plus*.fas", "")
+    test_esa("#{code}*.fas", "")
   end
 end
 
 kr_testable_files.each do |code|
   Name "gt genomediff compare shulen #{code}"
-  Keywords "gt_genomediff esa pck check_shulen"
+  Keywords "gt_genomediff esa pck check_shulen simulated_data"
   Test do
     pck_out = []
     esa_out =[]
     kr_out = []
     numoffiles = 0
-
-    test_pck("#{code}*plus*.fas", "-shulen")
+    files = " "
+    Dir.glob("#{code}*.fas").sort.each do |file|
+      files += reverse_and_concat(file) + ' '
+    end
+    test_pck("#{files}", "-shulen")
 
     File.open($last_stdout, 'r') do |outfile|
       while line = outfile.gets do
@@ -128,11 +156,11 @@ kr_testable_files.each do |code|
       end
       if numoffiles == nil or
         numoffiles != pck_out.length
-        failtest("can't parse output") 
+        failtest("can't parse output")
       end
     end
 
-    test_esa("#{code}*plus*.fas", "-shulen")
+    test_esa("#{files}", "-shulen")
 
     File.open($last_stdout, 'r') do |outfile|
       while line = outfile.gets do
@@ -142,9 +170,9 @@ kr_testable_files.each do |code|
           esa_out << line.split
         end
       end
-      if numoffiles == nil or
-        numoffiles != pck_out.length
-        failtest("can't parse output or wrong line numbers") 
+      if numoffiles != esa_out.length
+        failtest("can't parse output or wrong" +
+                 " line numbers (#{esa_out.length})")
       end
     end
 
@@ -152,7 +180,7 @@ kr_testable_files.each do |code|
       line = krfile.gets
       line.chomp!
       if numoffiles != line.to_i
-        failtest("different num of files")
+        failtest("different num of files #{line.to_i}")
       end
       while line = krfile.gets do
         line.chomp!
@@ -171,19 +199,24 @@ kr_testable_files.each do |code|
     if result = compare_2d_result(esa_out,kr_out)
       failtest("different results esa-kr #{result[0]},#{result[1]}")
     end
+    FileUtils.rm(Dir.glob("#{code}*plus*fas"))
   end
 end
 
 kr_testable_files.each do |code|
   Name "gt genomediff compare kr #{code}"
-  Keywords "gt_genomediff esa pck check_kr"
+  Keywords "gt_genomediff esa pck check_kr simulated_data"
   Test do
     pck_out = []
     esa_out = []
     kr_out = []
     numoffiles = 0
+    files = " "
+    Dir.glob("#{code}*.fas").sort.each do |file|
+      files += reverse_and_concat(file) + ' '
+    end
 
-    test_pck("#{code}*plus*.fas", "")
+    test_pck("#{files}", "")
 
     File.open($last_stdout, 'r') do |outfile|
       while line = outfile.gets do
@@ -197,11 +230,11 @@ kr_testable_files.each do |code|
       end
       if numoffiles == nil or
         numoffiles != pck_out.length
-        failtest("can't parse output") 
+        failtest("can't parse output")
       end
     end
 
-    test_esa("#{code}*plus*.fas", "")
+    test_esa("#{files}", "")
 
     File.open($last_stdout, 'r') do |outfile|
       while line = outfile.gets do
@@ -213,7 +246,7 @@ kr_testable_files.each do |code|
       end
       if numoffiles == nil or
         numoffiles != pck_out.length
-        failtest("can't parse output or wrong line numbers") 
+        failtest("can't parse output or wrong line numbers")
       end
     end
 
@@ -251,6 +284,7 @@ kr_testable_files.each do |code|
         end
       end
     end
+    FileUtils.rm(Dir.glob("#{code}*plus*fas"))
   end
 end
 
@@ -279,7 +313,7 @@ def check_shulen_for_list_pairwise(list)
             end
             if numoffiles == nil or
               numoffiles != pck_out.length
-              failtest("can't parse output pck #{file1} #{file2}") 
+              failtest("can't parse output pck #{file1} #{file2}")
             end
           end
           test_esa("#{$testdata}/#{file1} #{$testdata}/#{file2}",
@@ -295,7 +329,7 @@ def check_shulen_for_list_pairwise(list)
             end
             if numoffiles == NIL or
               numoffiles != pck_out.length
-              failtest("can't parse output esa #{file1} #{file2}") 
+              failtest("can't parse output esa #{file1} #{file2}")
             end
           end
           if result = compare_2d_result(pck_out,esa_out)
@@ -336,7 +370,7 @@ Test do
     end
     if numoffiles == nil or
       numoffiles != pck_out.length
-      failtest("can't parse output") 
+      failtest("can't parse output")
     end
   end
   test_esa(realfiles, "-shulen")
@@ -351,7 +385,7 @@ Test do
     end
     if numoffiles == NIL or
       numoffiles != pck_out.length
-      failtest("can't parse output or wrong line numbers") 
+      failtest("can't parse output or wrong line numbers")
     end
   end
   if result = compare_2d_result(pck_out,esa_out)
