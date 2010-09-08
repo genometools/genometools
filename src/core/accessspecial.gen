@@ -216,8 +216,8 @@ static void ADDTYPE(binpreparenextrange)(const GtEncseq *encseq,
   {
     endpos0 = 0;
   }
-  esr->firstcell = endpos0;
-  esr->lastcell = endpos1 = ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenum];
+  esr->idx->firstcell = endpos0;
+  esr->idx->lastcell = endpos1 = ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenum];
   if (startpos > 0)
   {
     while (endpos0  < endpos1)
@@ -234,14 +234,14 @@ static void ADDTYPE(binpreparenextrange)(const GtEncseq *encseq,
         if (startpos > range.end)
         {
           found = true;
-          esr->firstcell = cellnum;
+          esr->idx->firstcell = cellnum;
           endpos0 = cellnum+1;
         } else
         {
           if (startpos >= range.start)
           {
             found = true;
-            esr->firstcell = cellnum;
+            esr->idx->firstcell = cellnum;
             break;
           }
           endpos1 = cellnum;
@@ -251,14 +251,14 @@ static void ADDTYPE(binpreparenextrange)(const GtEncseq *encseq,
         if (startpos < range.start)
         {
           found = true;
-          esr->lastcell = cellnum+1;
+          esr->idx->lastcell = cellnum+1;
           endpos1 = cellnum;
         } else
         {
           if (startpos < range.end)
           {
             found = true;
-            esr->lastcell = cellnum+1;
+            esr->idx->lastcell = cellnum+1;
             break;
           }
           endpos0 = cellnum+1;
@@ -275,12 +275,12 @@ static void ADDTYPE(binpreparenextrange)(const GtEncseq *encseq,
         if (range.start == 0)
         {
           found = true;
-          esr->firstcell = 0;
+          esr->idx->firstcell = 0;
         }
       } else
       {
         found = true;
-        esr->lastcell = 1UL;
+        esr->idx->lastcell = 1UL;
       }
     }
   }
@@ -296,8 +296,8 @@ static void ADDTYPE(binpreparenextrange)(const GtEncseq *encseq,
     endpos1 = ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenum-1];
     if (endpos0 < endpos1)
     {
-      esr->firstcell = endpos1-1;
-      esr->lastcell = endpos1;
+      esr->idx->firstcell = endpos1-1;
+      esr->idx->lastcell = endpos1;
       pagenum--;
       found = true;
     }
@@ -306,11 +306,11 @@ static void ADDTYPE(binpreparenextrange)(const GtEncseq *encseq,
   if (found)
   {
     ADDTYPE(determinerange)(&range,encseq,pagenum,
-                   moveforward ? esr->firstcell : (esr->lastcell-1));
+                   moveforward ? esr->idx->firstcell : (esr->idx->lastcell-1));
     printf("binary found pos %lu in ", startpos);
     showsequencerange(&range);
     printf(" at cell %lu in page %lu\n",
-           moveforward ? esr->firstcell : (esr->lastcell-1),
+           moveforward ? esr->idx->firstcell : (esr->idx->lastcell-1),
            pagenum);
   } else
   {
@@ -319,52 +319,52 @@ static void ADDTYPE(binpreparenextrange)(const GtEncseq *encseq,
 #endif
   if (found)
   {
-    ADDTYPE(determinerange)(&esr->previousrange,encseq,pagenum,
-                   moveforward ? esr->firstcell: (esr->lastcell-1));
+    ADDTYPE(determinerange)(&esr->idx->previousrange,encseq,pagenum,
+                   moveforward ? esr->idx->firstcell: (esr->idx->lastcell-1));
 #ifdef RANGEDEBUG
     printf("previousrange=");
-    showsequencerange(&esr->previousrange);
+    showsequencerange(&esr->idx->previousrange);
     printf("\n");
 #endif
-    if (esr->previousrange.start <= startpos &&
-        startpos < esr->previousrange.end)
+    if (esr->idx->previousrange.start <= startpos &&
+        startpos < esr->idx->previousrange.end)
     {
-      esr->hasprevious = true;
+      esr->idx->hasprevious = true;
     }
     if (moveforward)
     {
-      if (pagenum+1 < esr->numofspecialcells)
+      if (pagenum+1 < esr->idx->numofspecialcells)
       {
-        esr->morepagesleft = true;
-        esr->nextpage = pagenum+1;
+        esr->idx->morepagesleft = true;
+        esr->idx->nextpage = pagenum+1;
       } else
       {
-        esr->morepagesleft = false;
-        esr->nextpage = pagenum;
+        esr->idx->morepagesleft = false;
+        esr->idx->nextpage = pagenum;
       }
     } else
     {
       if (pagenum > 0)
       {
-        esr->morepagesleft = true;
-        esr->nextpage = pagenum-1;
+        esr->idx->morepagesleft = true;
+        esr->idx->nextpage = pagenum-1;
       } else
       {
-        esr->morepagesleft = false;
-        esr->nextpage = 0;
+        esr->idx->morepagesleft = false;
+        esr->idx->nextpage = 0;
       }
     }
   } else
   {
-    esr->firstcell = esr->lastcell = 0;
-    if (pagenum < esr->numofspecialcells)
+    esr->idx->firstcell = esr->idx->lastcell = 0;
+    if (pagenum < esr->idx->numofspecialcells)
     {
-      esr->morepagesleft = true;
+      esr->idx->morepagesleft = true;
     } else
     {
-      esr->morepagesleft = false;
+      esr->idx->morepagesleft = false;
     }
-    esr->nextpage = pagenum;
+    esr->idx->nextpage = pagenum;
   }
 }
 
@@ -379,26 +379,26 @@ static bool ADDTYPE(nextnonemptypage)(const GtEncseq *encseq,
 {
   unsigned long endpos0, endpos1, pagenum;
 
-  while (esr->morepagesleft)
+  while (esr->idx->morepagesleft)
   {
-    pagenum = esr->nextpage;
+    pagenum = esr->idx->nextpage;
     if (moveforward)
     {
-      if (esr->nextpage == esr->numofspecialcells-1)
+      if (esr->idx->nextpage == esr->idx->numofspecialcells-1)
       {
-        esr->morepagesleft = false;
+        esr->idx->morepagesleft = false;
       } else
       {
-        esr->nextpage++;
+        esr->idx->nextpage++;
       }
     } else
     {
-      if (esr->nextpage == 0)
+      if (esr->idx->nextpage == 0)
       {
-        esr->morepagesleft = false;
+        esr->idx->morepagesleft = false;
       } else
       {
-        esr->nextpage--;
+        esr->idx->nextpage--;
       }
     }
     if (pagenum == 0)
@@ -411,8 +411,8 @@ static bool ADDTYPE(nextnonemptypage)(const GtEncseq *encseq,
     endpos1 = ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenum];
     if (endpos0 < endpos1)
     {
-      esr->firstcell = endpos0;
-      esr->lastcell = endpos1;
+      esr->idx->firstcell = endpos0;
+      esr->idx->lastcell = endpos1;
       return true;
     }
   }
@@ -427,75 +427,75 @@ static void ADDTYPE(advanceGtEncseqReader)(const GtEncseq *encseq,
 
   while (true)
   {
-    if (esr->hascurrent)
+    if (esr->idx->hascurrent)
     {
-      esr->previousrange = esr->currentrange;
-      esr->hascurrent = false;
+      esr->idx->previousrange = esr->idx->currentrange;
+      esr->idx->hascurrent = false;
     }
     if (moveforward)
     {
-      esr->firstcell++;
+      esr->idx->firstcell++;
     } else
     {
-      esr->lastcell--;
+      esr->idx->lastcell--;
     }
 #ifdef RANGEDEBUG
     printf("advance with firstcell=%lu, lastcell=%lu\n",
-            esr->firstcell,esr->lastcell);
+            esr->idx->firstcell,esr->idx->lastcell);
 #endif
     /* do not let comparison values become negative, hence compare with + 1 */
-    if (esr->firstcell + 1 < esr->lastcell + 1 ||
+    if (esr->idx->firstcell + 1 < esr->idx->lastcell + 1 ||
         ADDTYPE(nextnonemptypage)(encseq,esr,moveforward))
     {
       if (moveforward)
       {
-        cellnum = esr->firstcell;
+        cellnum = esr->idx->firstcell;
       } else
       {
-        cellnum = esr->lastcell - 1;
+        cellnum = esr->idx->lastcell - 1;
       }
-      ADDTYPE(determinerange)(&esr->currentrange,encseq,
-                              esr->morepagesleft 
-                                 ? (moveforward ? (esr->nextpage-1)
-                                                : (esr->nextpage+1))
-                                 : esr->nextpage,
+      ADDTYPE(determinerange)(&esr->idx->currentrange,encseq,
+                              esr->idx->morepagesleft 
+                                 ? (moveforward ? (esr->idx->nextpage-1)
+                                                : (esr->idx->nextpage+1))
+                                 : esr->idx->nextpage,
                      cellnum);
-      esr->hasrange = true;
+      esr->idx->hasrange = true;
     } else
     {
-      esr->hasrange = false;
+      esr->idx->hasrange = false;
       break;
     }
-    if (esr->hasprevious)
+    if (esr->idx->hasprevious)
     {
       if (moveforward)
       {
-        if (esr->previousrange.end == esr->currentrange.start)
+        if (esr->idx->previousrange.end == esr->idx->currentrange.start)
         {
-          esr->previousrange.end = esr->currentrange.end;
-          esr->hascurrent = false;
+          esr->idx->previousrange.end = esr->idx->currentrange.end;
+          esr->idx->hascurrent = false;
         } else
         {
-          esr->hascurrent = true;
+          esr->idx->hascurrent = true;
           break;
         }
       } else
       {
-        if (esr->currentrange.end == esr->previousrange.start)
+        if (esr->idx->currentrange.end == esr->idx->previousrange.start)
         {
-          esr->previousrange.start = esr->currentrange.start;
-          esr->hascurrent = false;
+          esr->idx->previousrange.start = esr->idx->currentrange.start;
+          esr->idx->hascurrent = false;
         } else
         {
-          esr->hascurrent = true;
+          esr->idx->hascurrent = true;
           break;
         }
       }
     } else
     {
-      esr->previousrange = esr->currentrange;
-      esr->hasprevious = true;
-      esr->hascurrent = false;
+      esr->idx->previousrange = esr->idx->currentrange;
+      esr->idx->hasprevious = true;
+      esr->idx->hascurrent = false;
     }
   }
 }

@@ -355,16 +355,13 @@ GtUchar gt_encseq_get_encoded_char_nospecial(const GtEncseq *encseq,
 }
 #endif
 
-struct GtEncseqReader
-{
-  GtEncseq *encseq;
-  GtReadmode readmode;
-  /* the following components are only used when sat is in Viatables. */
+/* The following components are only accessed when the encseq access type is one
+   of the GT_ACCESS_TYPE_*TABLES ones. */
+typedef struct {
   unsigned long firstcell, /* first index of tables with startpos and length */
                 lastcell,  /* last index of tables with startpos and length */
                 nextpage,  /* next page to be used */
-                numofspecialcells,  /* number of pages */
-                currentpos;
+                numofspecialcells;  /* number of pages */
   GtRange previousrange,  /* previous range of wildcards */
           currentrange;   /* current range of wildcards */
   bool moveforward,
@@ -372,6 +369,14 @@ struct GtEncseqReader
        hasrange,        /* there is some range */
        hasprevious,     /* there is some previous range */
        hascurrent;      /* there is some current range */
+} GtEncseqReaderIndexes;
+
+struct GtEncseqReader
+{
+  GtEncseq *encseq;
+  GtReadmode readmode;
+  unsigned long currentpos;
+  GtEncseqReaderIndexes *idx;
 };
 
 #ifndef INLINEDENCSEQ
@@ -1586,27 +1591,34 @@ void gt_encseq_reader_reinit_with_direction(GtEncseqReader *esr,
                                             bool moveforward,
                                             unsigned long startpos)
 {
-  gt_assert(esr != NULL);
+  gt_assert(esr != NULL && encseq != NULL);
   if (encseq != esr->encseq) {
     if (esr->encseq != NULL)
       gt_encseq_delete(esr->encseq);
     esr->encseq = gt_encseq_ref((GtEncseq*) encseq);
   }
   gt_assert(esr->encseq);
-  esr->moveforward = moveforward;
   if (satviautables(encseq->sat))
   {
     gt_assert(startpos < encseq->totallength);
-    gt_assert(esr != NULL);
-    esr->hasprevious = esr->hascurrent = false;
-    esr->numofspecialcells
+    if (esr->idx == NULL)
+      esr->idx = gt_calloc((size_t) 1, sizeof (GtEncseqReaderIndexes));
+    esr->idx->moveforward = moveforward;
+    esr->idx->hasprevious = esr->idx->hascurrent = false;
+    esr->idx->numofspecialcells
       = (unsigned long) encseq->totallength/encseq->maxspecialtype + 1;
     binpreparenextrange(encseq,esr,moveforward,startpos);
 #ifdef RANGEDEBUG
       printf("start advance at (%lu,%lu) in page %lu\n",
-                       esr->firstcell,esr->lastcell,esr->nextpage);
+                       esr->idx->firstcell,esr->idx->lastcell,
+                       esr->idx->nextpage);
 #endif
     advanceGtEncseqReader(encseq,esr,moveforward);
+  } else {
+    if (esr->idx != NULL) {
+      gt_free(esr->idx);
+      esr->idx = NULL;
+    }
   }
   esr->currentpos = startpos;
 }
@@ -1661,6 +1673,9 @@ void gt_encseq_reader_delete(GtEncseqReader *esr)
   if (esr->encseq != NULL) {
     gt_encseq_delete(esr->encseq);
   }
+  if (esr->idx != NULL) {
+    gt_free(esr->idx);
+  }
   gt_free(esr);
 }
 
@@ -1671,37 +1686,37 @@ static GtUchar seqdelivercharSpecialViatables(const GtEncseq *encseq,
   gt_assert(encseq == esr->encseq);
 #ifdef RANGEDEBUG
   printf("pos=%lu,previous=(%lu,%lu)\n",pos,
-          esr->previousrange.start,
-          esr->previousrange.end);
+          esr->idx->previousrange.start,
+          esr->idx->previousrange.end);
 #endif
-  if (esr->hasprevious)
+  if (esr->idx->hasprevious)
   {
-    if (esr->moveforward)
+    if (esr->idx->moveforward)
     {
-      if (pos >= esr->previousrange.start)
+      if (pos >= esr->idx->previousrange.start)
       {
-        if (pos < esr->previousrange.end)
+        if (pos < esr->idx->previousrange.end)
         {
           return EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,pos)
                     ? (GtUchar) SEPARATOR
                     : (GtUchar) WILDCARD;
         }
-        if (esr->hasrange)
+        if (esr->idx->hasrange)
         {
           advanceGtEncseqReader(encseq,esr,true);
         }
       }
     } else
     {
-      if (pos < esr->previousrange.end)
+      if (pos < esr->idx->previousrange.end)
       {
-        if (pos >= esr->previousrange.start)
+        if (pos >= esr->idx->previousrange.start)
         {
           return EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,pos)
                      ? (GtUchar) SEPARATOR
                      : (GtUchar) WILDCARD;
         }
-        if (esr->hasrange)
+        if (esr->idx->hasrange)
         {
           advanceGtEncseqReader(encseq,esr,false);
         }
@@ -1718,21 +1733,21 @@ static bool containsspecialViatables(const GtEncseq *encseq,
                                      unsigned long len)
 {
   gt_encseq_reader_reinit_with_direction(esr,encseq,moveforward,startpos);
-  if (esr->hasprevious)
+  if (esr->idx->hasprevious)
   {
-    if (esr->moveforward)
+    if (esr->idx->moveforward)
     {
       gt_assert(startpos + len > 0);
-      if (startpos + len - 1 >= esr->previousrange.start &&
-          startpos < esr->previousrange.end)
+      if (startpos + len - 1 >= esr->idx->previousrange.start &&
+          startpos < esr->idx->previousrange.end)
       {
         return true;
       }
     } else
     {
       gt_assert(startpos + 1 >= len);
-      if (startpos + 1 - len < esr->previousrange.end &&
-          startpos >= esr->previousrange.start)
+      if (startpos + 1 - len < esr->idx->previousrange.end &&
+          startpos >= esr->idx->previousrange.start)
       {
         return true;
       }
@@ -2013,9 +2028,9 @@ bool gt_specialrangeiterator_next(GtSpecialrangeiterator *sri, GtRange *range)
       return gt_bitaccess_specialrangeiterator_next(range,sri);
     default:
       gt_assert(satviautables(sri->encseq->sat));
-      gt_assert(sri->esr->hasprevious);
-      *range = sri->esr->previousrange;
-      if (sri->esr->hasrange)
+      gt_assert(sri->esr->idx->hasprevious);
+      *range = sri->esr->idx->previousrange;
+      if (sri->esr->idx->hasrange)
       {
         advanceGtEncseqReader(sri->encseq,sri->esr,sri->moveforward);
       } else
@@ -3396,17 +3411,17 @@ static unsigned long fwdgetnextstopposViatables(const GtEncseq *encseq,
 {
   gt_assert(encseq == esr->encseq);
   gt_assert(satviautables(esr->encseq->sat));
-  gt_assert(esr->moveforward);
-  while (esr->hasprevious)
+  gt_assert(esr->idx->moveforward);
+  while (esr->idx->hasprevious)
   {
-    if (pos >= esr->previousrange.start)
+    if (pos >= esr->idx->previousrange.start)
     {
-      if (pos < esr->previousrange.end)
+      if (pos < esr->idx->previousrange.end)
       {
         return pos; /* is in current special range */
       }
       /* follows current special range */
-      if (esr->hasrange)
+      if (esr->idx->hasrange)
       {
         advanceGtEncseqReader(encseq,esr,true);
       } else
@@ -3415,7 +3430,7 @@ static unsigned long fwdgetnextstopposViatables(const GtEncseq *encseq,
       }
     } else
     {
-      return esr->previousrange.start;
+      return esr->idx->previousrange.start;
     }
   }
   return esr->encseq->totallength;
@@ -3452,17 +3467,17 @@ static unsigned long revgetnextstopposViatables(const GtEncseq *encseq,
 {
   gt_assert(encseq == esr->encseq);
   gt_assert(satviautables(encseq->sat));
-  gt_assert(!esr->moveforward);
-  while (esr->hasprevious)
+  gt_assert(!esr->idx->moveforward);
+  while (esr->idx->hasprevious)
   {
-    if (pos < esr->previousrange.end)
+    if (pos < esr->idx->previousrange.end)
     {
-      if (pos >= esr->previousrange.start)
+      if (pos >= esr->idx->previousrange.start)
       {
         return pos+1; /* is in current special range */
       }
       /* follows current special range */
-      if (esr->hasrange)
+      if (esr->idx->hasrange)
       {
         advanceGtEncseqReader(encseq,esr,false);
       } else
@@ -3471,7 +3486,7 @@ static unsigned long revgetnextstopposViatables(const GtEncseq *encseq,
       }
     } else
     {
-      return esr->previousrange.end;
+      return esr->idx->previousrange.end;
     }
   }
   return 0; /* virtual stop at -1 */
