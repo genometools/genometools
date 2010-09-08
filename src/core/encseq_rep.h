@@ -40,6 +40,7 @@
 #include "core/defined-types.h"
 #include "core/types_api.h"
 #include "core/thread.h"
+#include "core/encseq_api.h"
 
 typedef uint32_t Uint32;
 
