@@ -144,7 +144,6 @@ gt_loadBWTSeq(const char *projectName, int BWTOptFlags,
   el = gt_encseq_loader_new();
   gt_encseq_loader_do_not_require_sds_tab(el);
   gt_encseq_loader_do_not_require_des_tab(el);
-  gt_encseq_loader_do_not_require_fsp_tab(el);
   gt_encseq_loader_do_not_require_ssp_tab(el);
   encseq = gt_encseq_loader_load(el, projectName, err);
   gt_encseq_loader_delete(el);

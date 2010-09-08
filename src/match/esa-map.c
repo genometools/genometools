@@ -266,8 +266,6 @@ static int inputsuffixarray(bool map,
   gt_error_check(err);
   initsuffixarray(suffixarray);
   el = gt_encseq_loader_new();
-  if (!(demand & SARR_ESQTAB))
-    gt_encseq_loader_do_not_require_esq_tab(el);
   if (!(demand & SARR_DESTAB))
     gt_encseq_loader_do_not_require_des_tab(el);
   if (!(demand & SARR_SDSTAB))

@@ -86,7 +86,6 @@ static int gt_prebwt_runner(GT_UNUSED int argc,
   el = gt_encseq_loader_new();
   gt_encseq_loader_do_not_require_sds_tab(el);
   gt_encseq_loader_do_not_require_des_tab(el);
-  gt_encseq_loader_do_not_require_fsp_tab(el);
   gt_encseq_loader_do_not_require_ssp_tab(el);
   encseq = gt_encseq_loader_load(el, gt_str_get(prebwtoptions->indexname), err);
   if (encseq == NULL)
