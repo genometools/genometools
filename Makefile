@@ -870,7 +870,7 @@ obj/%.splint: ${CURDIR}/src/extended/%.c
 	@touch $@
 
 
-DWHEADER=${shell find ${CURDIR} -name 'core' -prune -o -name '*.h' | \
+DWHEADER=${shell find ${CURDIR} -name '*.h' | \
 				   xargs grep -l Willrodt}
 ALLHEADER=${addprefix obj/,${notdir ${subst .h,.check,\
 					${DWHEADER}}}}
