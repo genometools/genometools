@@ -567,15 +567,16 @@ static int check_mandatory_either_options(GtOptionParser *op, GtError *err)
       else {
         /* XXX: this code needs to be generalized fo more than 2 mandatory
            options (if the corresponding methods are added) */
-        if (gt_array_size(o->mandatory_either_options) == 2);
-        meo_a = *(GtOption**) gt_array_get(o->mandatory_either_options, 0);
-        meo_b = *(GtOption**) gt_array_get(o->mandatory_either_options, 1);
-        if (!o->is_set && !meo_a->is_set && !meo_b->is_set) {
-          gt_error_set(err, "either option \"-%s\", option \"-%s\" or option "
-                       "\"-%s\" is mandatory", gt_str_get(o->option_str),
-                       gt_str_get(meo_a->option_str),
-                       gt_str_get(meo_b->option_str));
-          return -1;
+        if (gt_array_size(o->mandatory_either_options) == 2) {
+          meo_a = *(GtOption**) gt_array_get(o->mandatory_either_options, 0);
+          meo_b = *(GtOption**) gt_array_get(o->mandatory_either_options, 1);
+          if (!o->is_set && !meo_a->is_set && !meo_b->is_set) {
+            gt_error_set(err, "either option \"-%s\", option \"-%s\" or option "
+                         "\"-%s\" is mandatory", gt_str_get(o->option_str),
+                         gt_str_get(meo_a->option_str),
+                         gt_str_get(meo_b->option_str));
+            return -1;
+          }
         }
       }
     }
