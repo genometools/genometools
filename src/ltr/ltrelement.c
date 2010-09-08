@@ -20,6 +20,7 @@
 #include "core/cstr_api.h"
 #include "core/ensure.h"
 #include "core/ma.h"
+#include "core/minmax.h"
 #include "core/range.h"
 #include "core/unused_api.h"
 #include "extended/reverse.h"
@@ -91,7 +92,7 @@ int gt_ltrelement_format_description(GtLTRElement *e, unsigned int seqnamelen,
   char tmpstr[BUFSIZ];
   gt_assert(buf && e);
 
-  (void) snprintf(tmpstr, seqnamelen+1, "%s", e->seqid);
+  (void) snprintf(tmpstr, MIN(BUFSIZ, seqnamelen+1), "%s", e->seqid);
   tmpstr[seqnamelen+1] = '\0';
   gt_cstr_rep(tmpstr, ' ', '_');
   ret = snprintf(buf, buflen, "%s_%lu_%lu", tmpstr, e->leftLTR_5+1,
