@@ -19,6 +19,7 @@
 #include "core/array_api.h"
 #include "core/hashmap.h"
 #include "core/ma.h"
+#include "core/spacecalc.h"
 #include "core/thread.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
@@ -256,7 +257,7 @@ void gt_ma_show_space_peak(FILE *fp)
 {
   gt_assert(ma);
   fprintf(fp, "# space peak in megabytes: %.2f (in %llu events)\n",
-          (double) ma->max_size / (1 << 20),
+          GT_MEGABYTES(ma->max_size),
           ma->mallocevents);
 }
 

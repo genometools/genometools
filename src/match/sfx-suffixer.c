@@ -34,6 +34,7 @@
 #include "core/safecast-gen.h"
 #include "core/log_api.h"
 #include "core/mathsupport.h"
+#include "core/spacecalc.h"
 #include "intcode-def.h"
 #include "esa-fileend.h"
 #include "sfx-diffcov.h"
@@ -504,10 +505,6 @@ void getencseqkmersinsertwithoutspecial(const GtEncseq *encseq,
   }
 }
 
-#ifndef MEGABYTES
-#define MEGABYTES(V) ((double) (V)/((1UL << 20) - 1))
-#endif
-
 static int computepartsfittingmaximumspace(size_t estimatedspace,
                                            unsigned long maximumspace,
                                            const unsigned long *leftborder,
@@ -524,7 +521,7 @@ static int computepartsfittingmaximumspace(size_t estimatedspace,
   {
     gt_error_set(err,"already used %.2f MB of memory cannot compute "
                      "enhanced suffix array in at most %lu MB",
-                     MEGABYTES(estimatedspace),maximumspace);
+                     GT_MEGABYTES(estimatedspace),maximumspace);
     return -1;
   }
   for (parts = 1U; parts <= 100U; parts++)
@@ -575,10 +572,10 @@ static void verifyestimatedspace(size_t estimatedspace)
     if (usedspace_ma_fa > 100000UL &&
         gt_double_larger_double(relativedifference,0.1))
     {
-      gt_log_log("relativedifference %.2f too large: estimatedspace=%.2f, "
-                 "usedspace_ma_fa=%.2f\n",relativedifference,
-                                          MEGABYTES(estimatedspace),
-                                          MEGABYTES(usedspace_ma_fa));
+      fprintf(stderr, "relativedifference %.2f too large: estimatedspace=%.2f, "
+                      "usedspace_ma_fa=%.2f\n",relativedifference,
+                                               GT_MEGABYTES(estimatedspace),
+                                               GT_MEGABYTES(usedspace_ma_fa));
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   }

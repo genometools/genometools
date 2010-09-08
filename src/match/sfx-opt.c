@@ -21,6 +21,7 @@
 #include "core/basename_api.h"
 #include "core/ma_api.h"
 #include "core/option.h"
+#include "core/spacecalc.h"
 #include "core/str.h"
 #include "core/versionfunc.h"
 #include "core/readmode.h"
@@ -568,8 +569,6 @@ void gt_wrapsfxoptions(Suffixeratoroptions *so)
           so->sfxstrategy.COMP = (unsigned long) readint;\
         }
 
-#define MEGABYTES(V) ((double) (V)/((1UL << 20) - 1))
-
 int gt_suffixeratoroptions(Suffixeratoroptions *so,
                         bool doesa,
                         int argc,
@@ -724,7 +723,7 @@ int gt_suffixeratoroptions(Suffixeratoroptions *so,
       {
         gt_assert(so->numofparts == 1U);
         gt_logger_log_force(logger, "maximumspace=%.0f MB",
-                                     MEGABYTES(so->maximumspace));
+                                     GT_MEGABYTES(so->maximumspace));
       } else
       {
         gt_logger_log_force(logger, "parts=%u",so->numofparts);

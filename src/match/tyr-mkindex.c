@@ -23,6 +23,7 @@
 #include "core/fa.h"
 #include "esa-seqread.h"
 #include "core/logger.h"
+#include "core/spacecalc.h"
 #include "spacedef.h"
 #include "core/format64.h"
 #include "esa-mmsearch.h"
@@ -549,10 +550,6 @@ static void tyr_assignrightmostleaf(Dfsinfo *adfsinfo,
   dfsinfo->lcptabrightmostleafplus1 = currentlcp;
 }
 
-#ifndef MEGABYTES
-#define MEGABYTES(V)  ((double) (V)/((((unsigned long) 1) << 20) - 1))
-#endif
-
 static void outputbytewiseUlongvalue(FILE *fpout,unsigned long value)
 {
   size_t i;
@@ -701,8 +698,8 @@ static int enumeratelcpintervals(const char *inputindex,
                   mersize,
                   state->countoutputmers);
       gt_logger_log(logger,"index size: %.2f megabytes\n",
-                  MEGABYTES(state->countoutputmers * state->sizeofbuffer +
-                            sizeof (unsigned long) * EXTRAINTEGERS));
+                  GT_MEGABYTES(state->countoutputmers * state->sizeofbuffer +
+                               sizeof (unsigned long) * EXTRAINTEGERS));
     }
   }
   /* now out EXTRAINTEGERS integer values */
