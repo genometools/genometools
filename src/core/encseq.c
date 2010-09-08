@@ -931,7 +931,7 @@ static GtUchar deliverfromtwobitencoding(const GtEncseq *encseq,
 
 /* XXX use esr->encseq to extract encoding */
 
-static GtUchar seqdelivercharnospecial(const GtEncseq *encseq,
+static GtUchar seqdelivercharnospecial(GT_UNUSED const GtEncseq *encseq,
                                        GtEncseqReader *esr,
                                        unsigned long pos)
 {
@@ -979,7 +979,7 @@ static GtUchar delivercharViadirectaccess(const GtEncseq *encseq,
   return encseq->plainseq[pos];
 }
 
-static GtUchar seqdelivercharViadirectaccess(const GtEncseq *encseq,
+static GtUchar seqdelivercharViadirectaccess(GT_UNUSED const GtEncseq *encseq,
                                              GtEncseqReader *esr,
                                              unsigned long pos)
 {
@@ -1092,7 +1092,7 @@ static GtUchar delivercharViabytecompress(const GtEncseq *encseq,
   exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 
-static GtUchar seqdelivercharViabytecompress(const GtEncseq *encseq,
+static GtUchar seqdelivercharViabytecompress(GT_UNUSED const GtEncseq *encseq,
                                              GtEncseqReader *esr,
                                              unsigned long pos)
 {
@@ -1198,7 +1198,7 @@ static GtUchar delivercharViaequallength(const GtEncseq *encseq,
   return (GtUchar) SEPARATOR;
 }
 
-static GtUchar seqdelivercharViaequallength(const GtEncseq *encseq,
+static GtUchar seqdelivercharViaequallength(GT_UNUSED const GtEncseq *encseq,
                                             GtEncseqReader *esr,
                                             unsigned long pos)
 {
@@ -1332,7 +1332,8 @@ static GtUchar delivercharViabitaccessSpecial(const GtEncseq *encseq,
                : (GtUchar) WILDCARD;
 }
 
-static GtUchar seqdelivercharViabitaccessSpecial(const GtEncseq *encseq,
+static GtUchar seqdelivercharViabitaccessSpecial(GT_UNUSED
+                                                         const GtEncseq *encseq,
                                                  GT_UNUSED GtEncseqReader *esr,
                                                  unsigned long pos)
 {
@@ -1993,7 +1994,7 @@ static bool gt_bitaccess_specialrangeiterator_next(GtRange *range,
 }
 
 /* XXX Also put the iterators into the function bundle so that */
-   
+
 bool gt_specialrangeiterator_next(GtSpecialrangeiterator *sri, GtRange *range)
 {
   if (sri->exhausted)
@@ -4753,45 +4754,45 @@ static void checkextractspecialbits(const GtEncseq *encseq,bool fwd)
     {
       if (fwd)
       {
-	spbits1 = fwdextractspecialbits(encseq->specialbits,startpos);
-	unitsnotspecial = fwdbitaccessunitsnotspecial(spbits1,encseq,startpos);
-	spbits2 = fwdextractspecialbits_bruteforce
-		  (&unitsnotspecial_bruteforce,encseq->specialbits,startpos);
+  spbits1 = fwdextractspecialbits(encseq->specialbits,startpos);
+  unitsnotspecial = fwdbitaccessunitsnotspecial(spbits1,encseq,startpos);
+  spbits2 = fwdextractspecialbits_bruteforce
+      (&unitsnotspecial_bruteforce,encseq->specialbits,startpos);
       } else
       {
-	spbits1 = revextractspecialbits(encseq->specialbits,startpos);
-	unitsnotspecial = revbitaccessunitsnotspecial(spbits1,startpos);
-	spbits2 = revextractspecialbits_bruteforce
-		  (&unitsnotspecial_bruteforce,encseq->specialbits,startpos);
+  spbits1 = revextractspecialbits(encseq->specialbits,startpos);
+  unitsnotspecial = revbitaccessunitsnotspecial(spbits1,startpos);
+  spbits2 = revextractspecialbits_bruteforce
+      (&unitsnotspecial_bruteforce,encseq->specialbits,startpos);
       }
       gt_assert(unitsnotspecial_bruteforce == unitsnotspecial);
       if (spbits1 != spbits2)
       {
-	char buffer[GT_INTWORDSIZE+1];
+  char buffer[GT_INTWORDSIZE+1];
 
-	gt_bitsequence_tostring(buffer,spbits2);
-	fprintf(stderr,"%sextractspecialbits at startpos %lu"
-		       " (unitsnotspecial=%u)\n correct=%s!=\n",
-		       fwd ? "fwd" : "rev",
-		       startpos,unitsnotspecial,buffer);
-	gt_bitsequence_tostring(buffer,spbits1);
-	fprintf(stderr,"     %s=fast\n",buffer);
-	exit(GT_EXIT_PROGRAMMING_ERROR);
+  gt_bitsequence_tostring(buffer,spbits2);
+  fprintf(stderr,"%sextractspecialbits at startpos %lu"
+           " (unitsnotspecial=%u)\n correct=%s!=\n",
+           fwd ? "fwd" : "rev",
+           startpos,unitsnotspecial,buffer);
+  gt_bitsequence_tostring(buffer,spbits1);
+  fprintf(stderr,"     %s=fast\n",buffer);
+  exit(GT_EXIT_PROGRAMMING_ERROR);
       }
       if (fwd)
       {
-	if (startpos == encseq->totallength - 1)
-	{
-	  break;
-	}
-	startpos++;
+  if (startpos == encseq->totallength - 1)
+  {
+    break;
+  }
+  startpos++;
       } else
       {
-	if (startpos == 0)
-	{
-	  break;
-	}
-	startpos--;
+  if (startpos == 0)
+  {
+    break;
+  }
+  startpos--;
       }
     }
   }
@@ -5642,7 +5643,7 @@ int gt_encseq_check_consistency(const GtEncseq *encseq,
   bool fwd = GT_ISDIRREVERSE(readmode) ? false : true,
        complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
 
-  if (encseq->sat != GT_ACCESS_TYPE_DIRECTACCESS && 
+  if (encseq->sat != GT_ACCESS_TYPE_DIRECTACCESS &&
       encseq->sat != GT_ACCESS_TYPE_BYTECOMPRESS)
   /*satviautables(encseq->sat)*/
   {

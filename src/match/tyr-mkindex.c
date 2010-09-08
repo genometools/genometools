@@ -549,7 +549,9 @@ static void tyr_assignrightmostleaf(Dfsinfo *adfsinfo,
   dfsinfo->lcptabrightmostleafplus1 = currentlcp;
 }
 
+#ifndef MEGABYTES
 #define MEGABYTES(V)  ((double) (V)/((((unsigned long) 1) << 20) - 1))
+#endif
 
 static void outputbytewiseUlongvalue(FILE *fpout,unsigned long value)
 {

@@ -504,7 +504,9 @@ void getencseqkmersinsertwithoutspecial(const GtEncseq *encseq,
   }
 }
 
+#ifndef MEGABYTES
 #define MEGABYTES(V) ((double) (V)/((1UL << 20) - 1))
+#endif
 
 static int computepartsfittingmaximumspace(size_t estimatedspace,
                                            unsigned long maximumspace,
