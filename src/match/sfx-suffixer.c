@@ -554,6 +554,7 @@ static int computepartsfittingmaximumspace(size_t estimatedspace,
   return -1;
 }
 
+#ifdef DEBUGSIZEESTIMATION
 static void verifyestimatedspace(size_t estimatedspace)
 {
   unsigned long usedspace_ma_fa = gt_ma_get_space_current() +
@@ -582,6 +583,7 @@ static void verifyestimatedspace(size_t estimatedspace)
     }
   }
 }
+#endif
 
 Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                 GtReadmode readmode,
@@ -783,8 +785,10 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
     largestbucketsize
       = gt_bcktab_leftborderpartialsums(sfi->bcktab,
                                         sfi->totallength - specialcharacters);
-    estimatedspace += sizeof (unsigned long) * largestbucketsize;
+    estimatedspace += sizeof (uint8_t) * largestbucketsize;
+#ifdef DEBUGSIZEESTIMATION
     verifyestimatedspace(estimatedspace);
+#endif
     if (maximumspace > 0)
     {
       int retval;
