@@ -99,6 +99,7 @@ static int visit_shu_children(const FMindex *index,
                               GT_UNUSED unsigned long numofchars,
                               unsigned long numoffiles,
                               unsigned long totallength,
+                              unsigned long max_idx,
                               unsigned long *stackdepth,
                               bool calculate,
                               GT_UNUSED GtLogger *logger,
@@ -124,8 +125,7 @@ static int visit_shu_children(const FMindex *index,
     gt_assert (tmpmbtab[idx].lowerbound <= tmpmbtab[idx].upperbound);
     gt_assert ((tmpmbtab[idx].upperbound - tmpmbtab[idx].lowerbound) <=
               num_of_rows);
-    num_of_rows = num_of_rows -
-                  (tmpmbtab[idx].upperbound - tmpmbtab[idx].lowerbound);
+    num_of_rows -= (tmpmbtab[idx].upperbound - tmpmbtab[idx].lowerbound);
 
     if (tmpmbtab[idx].lowerbound != tmpmbtab[idx].upperbound)
     {
@@ -171,8 +171,8 @@ static int visit_shu_children(const FMindex *index,
           child->upper = tmpmbtab[idx].upperbound;
           child->parentOffset = offset + 1;
           child->depth = parent->depth + 1;
-          *stackdepth += 1;
-          offset += 1U;
+          (*stackdepth)++;
+          offset++;
         }
       }
     }
@@ -181,9 +181,8 @@ static int visit_shu_children(const FMindex *index,
       num_of_rows > 0 &&
       calculate)
   {
-    unsigned long start_idx,
-                  max_idx = gt_pck_special_occ_in_nonspecial_intervals(index)
-                            - 1;
+    /* XXX eine funktion nackh oben verschieben */
+    unsigned long start_idx;
 
     gt_assert(num_of_rows <= max_idx + 1);
     gt_assert(parent->lower <= special_pos[0][max_idx]);
@@ -252,7 +251,7 @@ static int visit_shu_children(const FMindex *index,
 
 static int process_shu_node(ShuNode *node,
                             GtStackShuNode *stack,
-                            unsigned long **shulen,
+                            uint64_t **shulen,
                             unsigned long numoffiles,
                             GT_UNUSED GtLogger *logger,
                             GT_UNUSED GtError *err)
@@ -294,7 +293,7 @@ static int process_shu_node(ShuNode *node,
       {
         if (node->countTermSubtree[child_y][idx_i] > 0)
         {
-        for (idx_j = 0; idx_j < numoffiles; idx_j++)
+          for (idx_j = 0; idx_j < numoffiles; idx_j++)
           {
             /* idx_j elem seqIds[x] \ seqIds[child_y] */
             if (node->countTermSubtree[0][idx_j] > 0 &&
@@ -319,7 +318,7 @@ static int process_shu_node(ShuNode *node,
 
 int gt_pck_calculate_shulen(const FMindex *index,
                             const GtEncseq *encseq,
-                            unsigned long **shulen,
+                            uint64_t **shulen,
                             unsigned long numofchars,
                             unsigned long totallength,
                             bool calculate,
@@ -333,7 +332,9 @@ int gt_pck_calculate_shulen(const FMindex *index,
   Mbtab *tmpmbtab;
   unsigned long *rangeOccs, **special_char_rows_and_pos;
   unsigned long resize = 64UL; /* XXX make this softcoded */
-  unsigned long numoffiles, numofseq, stackdepth, maxdepth, depth_idx;
+  unsigned long numoffiles, numofseq, stackdepth, maxdepth, depth_idx,
+                max_idx = gt_pck_special_occ_in_nonspecial_intervals(index)
+                          - 1;
   BwtSeqpositionextractor *positext;
 
   rangeOccs = gt_calloc((size_t) GT_MULT2(numofchars), sizeof (*rangeOccs));
@@ -367,8 +368,9 @@ int gt_pck_calculate_shulen(const FMindex *index,
   maxdepth = 0;
   while (!GT_STACK_ISEMPTY(&stack))
   {
-    maxdepth = maxdepth < stackdepth ? stackdepth : maxdepth;
-    current = &(stack.space[stack.nextfree - 1]);
+    if (maxdepth < stackdepth)
+      maxdepth = stackdepth;
+    current = stack.space + stack.nextfree - 1;
     if (current->process)
     {
       GT_STACK_DECREMENTTOP(&stack);
@@ -393,6 +395,7 @@ int gt_pck_calculate_shulen(const FMindex *index,
                                    numofchars,
                                    numoffiles,
                                    totallength,
+                                   max_idx,
                                    &stackdepth,
                                    calculate,
                                    logger,

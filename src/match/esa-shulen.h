@@ -1,5 +1,6 @@
 /*
   Copyright (c) 2010 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2010 Dirk Willrodt <dwillrodt@zbh.uni-hamburg.de>
   Copyright (c) 2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -36,7 +37,7 @@ int gt_esa2shulengthqueryfiles(unsigned long *totalgmatchlength,
 
 int gt_get_multiesashulengthdist(Sequentialsuffixarrayreader *ssar,
                                 const GtEncseq *encseq,
-                                unsigned long **shulen,
+                                uint64_t **shulen,
                                 GtLogger *logger,
                                 GtError *err);
 #endif

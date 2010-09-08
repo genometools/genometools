@@ -19,6 +19,7 @@
 
 #include "core/array2dim_api.h"
 #include "core/encseq_api.h"
+#include "core/format64.h"
 #include "core/log_api.h"
 #include "core/logger.h"
 #include "core/ma.h"
@@ -44,9 +45,9 @@ int gt_genomediff_shu(GtLogger *logger,
   double **div = NULL,
          *gc_contents = NULL;
   unsigned long numoffiles = 0,
-                **shulen = NULL,
                 *filelength = NULL,
                 i_idx, j_idx;
+  uint64_t **shulen = NULL;
   const GtStrArray *filenames = NULL;
   const GtEncseq *encseq = NULL;
   Genericindex *genericindexSubject = NULL;
@@ -203,8 +204,9 @@ int gt_genomediff_shu(GtLogger *logger,
         } else
         {
           if (arguments->shulen_only)
-            printf("%lu\t", arguments->withesa ?
-                              shulen[j_idx][i_idx] : shulen[i_idx][j_idx]);
+            printf(Formatuint64_t"\t", arguments->withesa ?
+                              PRINTuint64_tcast(shulen[j_idx][i_idx]) :
+                              PRINTuint64_tcast(shulen[i_idx][j_idx]));
           else
             div[i_idx][j_idx] = arguments->withesa ?
                                   ((double) shulen[j_idx][i_idx]) / length_i :

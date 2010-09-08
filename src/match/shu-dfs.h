@@ -37,7 +37,7 @@ GT_STACK_DECLARESTRUCT(ShuNode, 256UL);
 
 int gt_pck_calculate_shulen(const FMindex *index,
                             const GtEncseq *encseq,
-                            unsigned long **shulen,
+                            uint64_t **shulen,
                             unsigned long numofchars,
                             unsigned long totallength,
                             bool calculate,

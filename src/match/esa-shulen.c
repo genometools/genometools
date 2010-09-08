@@ -19,6 +19,7 @@
 #include "core/array2dim_api.h"
 #include "core/logger.h"
 #include "core/seqiterator_sequence_buffer.h"
+#include "core/format64.h"
 #include "esa-seqread.h"
 #include "esa-splititv.h"
 #undef SKDEBUG
@@ -39,8 +40,8 @@ typedef struct  /* global information */
   unsigned long numofdbfiles,
                 lastleafnumber,
                 firstleafcount2omit,
-                currentleafcount,
-                **shulengthdist;
+                currentleafcount;
+  uint64_t **shulengthdist;
   const GtEncseq *encseq;
 #ifdef SKDEBUG
   unsigned long nextid;
@@ -82,7 +83,7 @@ static void shulen_freeDfsinfo(Dfsinfo *adfsinfo, GT_UNUSED Dfsstate *state)
   gt_free(dfsinfo);
 }
 
-static void shulen_contribute(unsigned long **shulengthdist,
+static void shulen_contribute(uint64_t **shulengthdist,
                               unsigned long referidx,
                               unsigned long shulenidx,
                               unsigned long count,
@@ -319,7 +320,8 @@ int gt_multiesa2shulengthdist(Sequentialsuffixarrayreader *ssar,
       {
         if (referidx != shulenidx)
         {
-          printf("%lu\t", state->shulengthdist[referidx][shulenidx]);
+          printf(Formatuint64_t"\t",
+                 PRINTuint64_tcast(state->shulengthdist[referidx][shulenidx]));
         } else
         {
           printf("0\t");
@@ -458,13 +460,12 @@ int gt_esa2shulengthqueryfiles(unsigned long *totalgmatchlength,
 
 int gt_get_multiesashulengthdist(Sequentialsuffixarrayreader *ssar,
                                 const GtEncseq *encseq,
-                                unsigned long **shulen,
+                                uint64_t **shulen,
                                 GtLogger *logger,
                                 GtError *err)
 {
   Shulengthdiststate *state;
   bool haserr = false;
-  unsigned long referidx, shulenidx;
 
   state = gt_malloc(sizeof(*state));
   state->numofdbfiles = gt_encseq_num_of_files(encseq);
@@ -476,13 +477,6 @@ int gt_get_multiesashulengthdist(Sequentialsuffixarrayreader *ssar,
                                gt_encseq_specialcharacters(encseq);
   state->currentleafcount = 0;
   state->shulengthdist = shulen;
-  for (referidx=0; referidx < state->numofdbfiles; referidx++)
-  {
-    for (shulenidx=0; shulenidx < state->numofdbfiles; shulenidx++)
-    {
-      state->shulengthdist[referidx][shulenidx] = 0;
-    }
-  }
   if (gt_depthfirstesa(ssar,
                        shulen_allocateDfsinfo,
                        shulen_freeDfsinfo,
