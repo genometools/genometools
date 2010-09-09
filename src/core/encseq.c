@@ -4081,7 +4081,7 @@ static int comparewithonespecial(bool *leftspecial,
   return cc1 < cc2 ? -1 : 1;
 }
 
-#define FASTCOMPAREDEBUG
+#undef FASTCOMPAREDEBUG
 #ifdef FASTCOMPAREDEBUG
 static void verifycomparestringresults(const GtEncseq *encseq,
                                        GtCommonunits *commonunits,
