@@ -54,10 +54,12 @@ static int encode_sequence_file(const char *seqfile, GtError *err)
 
 static off_t index_size(const char *prefix, const char *suffix)
 {
- off_t size;
+ off_t size = 0;
  GtStr *index_name = gt_str_new_cstr(prefix);
  gt_str_append_cstr(index_name, suffix);
- size = gt_file_size(gt_str_get(index_name));
+ if (gt_file_exists(gt_str_get(index_name))) {
+   size = gt_file_size(gt_str_get(index_name));
+ }
  gt_str_delete(index_name);
  return size;
 }
