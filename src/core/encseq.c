@@ -355,8 +355,11 @@ GtUchar gt_encseq_get_encoded_char_nospecial(const GtEncseq *encseq,
 }
 #endif
 
-/* The following components are only accessed when the encseq access type is one
-   of the GT_ACCESS_TYPE_*TABLES ones. */
+/* The following components are only accessed when the encseq access is one of
+   GT_ACCESS_TYPE_UCHARTABLES,
+   GT_ACCESS_TYPE_USHORTTABLES,
+   GT_ACCESS_TYPE_UINT32TABLES */
+
 typedef struct {
   unsigned long firstcell, /* first index of tables with startpos and length */
                 lastcell,  /* last index of tables with startpos and length */
@@ -369,14 +372,14 @@ typedef struct {
        hasrange,        /* there is some range */
        hasprevious,     /* there is some previous range */
        hascurrent;      /* there is some current range */
-} GtEncseqReaderIndexes;
+} GtEncseqReaderViatablesinfo;
 
 struct GtEncseqReader
 {
   GtEncseq *encseq;
   GtReadmode readmode;
   unsigned long currentpos;
-  GtEncseqReaderIndexes *idx;
+  GtEncseqReaderViatablesinfo *idx;
 };
 
 #ifndef INLINEDENCSEQ
@@ -1598,11 +1601,14 @@ void gt_encseq_reader_reinit_with_direction(GtEncseqReader *esr,
     esr->encseq = gt_encseq_ref((GtEncseq*) encseq);
   }
   gt_assert(esr->encseq);
+  esr->readmode = moveforward ? GT_READMODE_FORWARD : GT_READMODE_REVERSE;
   if (satviautables(encseq->sat))
   {
     gt_assert(startpos < encseq->totallength);
     if (esr->idx == NULL)
-      esr->idx = gt_calloc((size_t) 1, sizeof (GtEncseqReaderIndexes));
+    {
+      esr->idx = gt_calloc((size_t) 1, sizeof (*esr->idx));
+    }
     esr->idx->moveforward = moveforward;
     esr->idx->hasprevious = esr->idx->hascurrent = false;
     esr->idx->numofspecialcells
