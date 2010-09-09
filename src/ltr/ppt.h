@@ -48,7 +48,7 @@ typedef struct {
 typedef struct GtPPTHit GtPPTHit;
 typedef struct GtPPTResults GtPPTResults;
 
-GtHMM* gt_ppt_hmm_new(const GtAlphabet *alphabet, GtPPTOptions *opts);
+GtHMM* gt_ppt_hmm_new(const GtAlphabet *alpha, GtPPTOptions *opts);
 
 GtPPTResults*   gt_ppt_find(const char *seq,
                             const char *rev_seq,

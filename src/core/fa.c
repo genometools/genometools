@@ -295,7 +295,7 @@ void gt_fa_xbzclose(BZFILE *stream)
 
 static const char genometools_tmptemplate[] = "/genometools.XXXXXXXXXX";
 
-FILE* gt_xtmpfp_generic_func(GtStr *template_arg, int flags,
+FILE* gt_xtmpfp_generic_func(GtStr *template_arg, enum tmpfp_flags flags,
                              const char *src_file, int src_line)
 {
   FILE *fp;

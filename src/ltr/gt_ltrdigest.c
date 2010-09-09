@@ -50,7 +50,7 @@ typedef struct GtLTRdigestOptions {
 
 static void* gt_ltrdigest_arguments_new(void)
 {
-  GtLTRdigestOptions *arguments = gt_calloc(1, sizeof *arguments);
+  GtLTRdigestOptions *arguments = gt_calloc((size_t) 1, sizeof *arguments);
   memset(arguments, 0, sizeof *arguments);
 #ifdef HAVE_HMMER
   arguments->pdom_opts.hmm_files = gt_str_array_new();
@@ -86,11 +86,11 @@ static GtOptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
   GtOption *oh, *oc, *oeval;
   static const char *cutoffs[] = {"NONE", "GA", "TC", NULL};
 #endif
-  static GtRange pptlen_defaults           = { 8, 30},
-                 uboxlen_defaults          = { 3, 30},
-                 pbsalilen_defaults        = {11, 30},
-                 pbsoffsetlen_defaults     = { 0,  5},
-                 pbstrnaoffsetlen_defaults = { 0,  5};
+  static GtRange pptlen_defaults           = { 8UL, 30UL},
+                 uboxlen_defaults          = { 3UL, 30UL},
+                 pbsalilen_defaults        = {11UL, 30UL},
+                 pbsoffsetlen_defaults     = { 0UL,  5UL},
+                 pbstrnaoffsetlen_defaults = { 0UL,  5UL};
   gt_assert(arguments);
 
   /* init */
@@ -113,7 +113,7 @@ static GtOptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
                          "set maximal length of sequence names in FASTA headers"
                          " (e.g. for clustalw or similar tools)",
                          &arguments->seqnamelen,
-                         20);
+                         20U);
   gt_option_parser_add_option(op, o);
 
   /* PPT search options */
@@ -134,7 +134,7 @@ static GtOptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
                          "radius around beginning of 3' LTR "
                          "to search for PPT",
                          &arguments->ppt_opts.radius,
-                         30);
+                         30U);
   gt_option_parser_add_option(op, o);
 
   o = gt_option_new_probability("pptrprob",
@@ -221,7 +221,7 @@ static GtOptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
                          "maximal allowed PBS/tRNA alignment unit "
                          "edit distance",
                          &arguments->pbs_opts.max_edist,
-                         1);
+                         1U);
   gt_option_parser_add_option(op, o);
   gt_option_imply(o, ot);
 
@@ -229,7 +229,7 @@ static GtOptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
                          "radius around end of 5' LTR "
                          "to search for PBS",
                          &arguments->pbs_opts.radius,
-                         30);
+                         30U);
   gt_option_parser_add_option(op, o);
   gt_option_imply(o, ot);
 
@@ -341,7 +341,7 @@ static GtOptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
 
   gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
 
-  gt_option_parser_set_min_max_args(op, 2, 2);
+  gt_option_parser_set_min_max_args(op, 2U, 2U);
 
   return op;
 }
@@ -505,7 +505,7 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
 
   gt_node_stream_delete(gff3_out_stream);
   gt_node_stream_delete(ltrdigest_stream);
-  if (tab_out_stream)
+  if (tab_out_stream != NULL)
     gt_node_stream_delete(tab_out_stream);
   gt_node_stream_delete(gff3_in_stream);
 

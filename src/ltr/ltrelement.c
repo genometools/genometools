@@ -53,8 +53,8 @@ char* gt_ltrelement_get_sequence(unsigned long start, unsigned long end,
   alpha = gt_encseq_alphabet(seq);
   len = end - start + 1;
 
-  out          = gt_malloc((len + 1) * sizeof (char));
-  symbolstring = gt_malloc((len + 1) * sizeof (GtUchar));
+  out          = gt_malloc((size_t) (len + 1) * sizeof (char));
+  symbolstring = gt_malloc((size_t) (len + 1) * sizeof (GtUchar));
 
   esr = gt_encseq_create_reader_with_readmode(seq, GT_READMODE_FORWARD,
                                               seqstartpos + start);
@@ -90,7 +90,7 @@ int gt_ltrelement_format_description(GtLTRElement *e, unsigned int seqnamelen,
   char tmpstr[BUFSIZ];
   gt_assert(buf && e);
 
-  (void) snprintf(tmpstr, MIN(BUFSIZ, seqnamelen+1), "%s", e->seqid);
+  (void) snprintf(tmpstr, MIN(BUFSIZ, (size_t) seqnamelen+1), "%s", e->seqid);
   tmpstr[seqnamelen+1] = '\0';
   gt_cstr_rep(tmpstr, ' ', '_');
   ret = snprintf(buf, buflen, "%s_%lu_%lu", tmpstr, e->leftLTR_5+1,
@@ -121,23 +121,23 @@ int gt_ltrelement_unit_test(GtError *err)
   gt_error_check(err);
 
   /* check left LTR */
-  element.leftLTR_5 = 20;
-  element.leftLTR_3 = 119;
-  ensure(had_err, gt_ltrelement_leftltrlen(&element) == 100);
+  element.leftLTR_5 = 20UL;
+  element.leftLTR_3 = 119UL;
+  ensure(had_err, gt_ltrelement_leftltrlen(&element) == 100UL);
   memset(tmp, 0, BUFSIZ);
   memcpy(tmp, fullseq + (element.leftLTR_5 * sizeof (char)),
-         (element.leftLTR_3 - element.leftLTR_5+ 1) * sizeof (char));
+         (size_t) (element.leftLTR_3 - element.leftLTR_5+ 1) * sizeof (char));
   ensure(had_err, strcmp(tmp, "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcg"
                               "aatatagcactgcatttcgaatatagtttcgaatatagcactgcattt"
                               "cgaa" ) == 0);
 
   /* check right LTR */
-  element.rightLTR_5 = 520;
-  element.rightLTR_3 = 619;
-  ensure(had_err, gt_ltrelement_rightltrlen(&element) == 100);
+  element.rightLTR_5 = 520UL;
+  element.rightLTR_3 = 619UL;
+  ensure(had_err, gt_ltrelement_rightltrlen(&element) == 100UL);
   memset(tmp, 0, BUFSIZ);
   memcpy(tmp, fullseq + (element.rightLTR_5 * sizeof (char)),
-         (element.rightLTR_3 - element.rightLTR_5+ 1) * sizeof (char));
+         (size_t) (element.rightLTR_3 - element.rightLTR_5+ 1) * sizeof (char));
   ensure(had_err, strcmp(tmp, "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcg"
                               "aatatagcactgcatttcgaatatagtttcgaatatagcactgcattt"
                               "cgaa" ) == 0);

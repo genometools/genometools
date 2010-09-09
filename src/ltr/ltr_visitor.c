@@ -103,7 +103,7 @@ static int gt_ltr_visitor_feature_node(GtNodeVisitor *gv, GtFeatureNode *gf,
       char *pfamcpy = gt_cstr_dup(pfamname);
       pdomarr = gt_array_new(sizeof (GtFeatureNode*));
       gt_hashmap_add(lv->element->pdoms, pfamcpy, pdomarr);
-      if (lv->element->pdomorder)
+      if (lv->element->pdomorder != NULL)
         gt_array_add(lv->element->pdomorder, pfamcpy);
     }
     gt_array_add(pdomarr, gf);

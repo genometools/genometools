@@ -71,7 +71,7 @@ static GtPBSHit* gt_pbs_hit_new(unsigned long alilen, GtStrand strand,
 static GtPBSResults* gt_pbs_results_new(GtLTRElement *elem,
                                         GtPBSOptions *opts)
 {
-  GtPBSResults *res = gt_calloc(1, sizeof (GtPBSResults));
+  GtPBSResults *res = gt_calloc((size_t) 1, sizeof (GtPBSResults));
   res->elem = elem;
   res->opts = opts;
   res->hits = gt_array_new(sizeof (GtPBSHit*));
@@ -171,8 +171,9 @@ static GtScoreFunction* gt_dna_scorefunc_new(GtAlphabet *a, int match,
     }
   }
   /* make N-N a mismatch! */
-  gt_score_matrix_set_score(sm, gt_alphabet_encode(a, 'n'),
-                            gt_alphabet_encode(a, 'n'), mismatch);
+  gt_score_matrix_set_score(sm, (unsigned int) gt_alphabet_encode(a, 'n'),
+                            (unsigned int) gt_alphabet_encode(a, 'n'),
+                            mismatch);
   return sf;
 }
 
@@ -190,13 +191,23 @@ static double gt_pbs_score_func(unsigned long edist, unsigned long offset,
           /penalties;
 }
 
+static inline unsigned long gt_ulongabs(unsigned long nr1, unsigned long nr2)
+{
+  if (nr1 == nr2) return 0UL;
+  if (nr1 > nr2) {
+    return nr1 - nr2;
+  } else {
+    return nr2 - nr1;
+  }
+}
+
 static void gt_pbs_add_hit(GtArray *hitlist, GtAlignment *ali, GtPBSOptions *o,
                            unsigned long trna_seqlen, const char *desc,
                            GtStrand strand, GtPBSResults *r)
 {
   unsigned long dist;
   GtPBSHit *hit;
-  unsigned long offset;
+  unsigned long offset, alilen;
   GtRange urange, vrange;
   gt_assert(hitlist && desc);
 
@@ -206,17 +217,18 @@ static void gt_pbs_add_hit(GtArray *hitlist, GtAlignment *ali, GtPBSOptions *o,
   dist = gt_alignment_eval(ali);
   urange = gt_alignment_get_urange(ali);
   vrange = gt_alignment_get_vrange(ali);
-  offset = abs(o->radius - urange.start);
+  offset = gt_ulongabs((unsigned long) o->radius, urange.start);
+  alilen = gt_ulongabs(urange.end, urange.start)+1;
 
-  if (dist <= o->max_edist
-        && abs(o->radius-urange.start) <= o->offsetlen.end
-        && abs(o->radius-urange.start) >= o->offsetlen.start
-        && abs(urange.end-urange.start+1) <= o->alilen.end
-        && abs(urange.end-urange.start+1) >= o->alilen.start
+  if (dist <= (unsigned long) o->max_edist
+        && offset <= o->offsetlen.end
+        && offset >= o->offsetlen.start
+        && alilen <= o->alilen.end
+        && alilen >= o->alilen.start
         && vrange.start <= o->trnaoffsetlen.end
         && vrange.start >= o->trnaoffsetlen.start)
   {
-    hit = gt_pbs_hit_new(abs(urange.end-urange.start+1),
+    hit = gt_pbs_hit_new(alilen,
                          strand,
                          desc,
                          vrange.start,
@@ -265,12 +277,12 @@ GtPBSResults* gt_pbs_find(const char *seq,
 
   seq_forward = gt_seq_new(seq + (gt_ltrelement_leftltrlen(element))
                                - (o->radius),
-                           2*o->radius + 1,
+                           (unsigned long) (2*o->radius + 1),
                            a);
 
   seq_rev     = gt_seq_new(rev_seq + (gt_ltrelement_rightltrlen(element))
                                    - (o->radius),
-                           2*o->radius + 1,
+                           (unsigned long) (2*o->radius + 1),
                            a);
 
     for (j=0;j<gt_bioseq_number_of_sequences(o->trna_lib);j++)
@@ -282,7 +294,7 @@ GtPBSResults* gt_pbs_find(const char *seq,
     trna_seq = gt_bioseq_get_seq(o->trna_lib, j);
     trna_seqlen = gt_seq_length(trna_seq);
 
-    trna_from3_full = gt_calloc(trna_seqlen, sizeof (char));
+    trna_from3_full = gt_calloc((size_t) trna_seqlen, sizeof (char));
     memcpy(trna_from3_full, gt_seq_get_orig(trna_seq),
            sizeof (char)*trna_seqlen);
     (void) gt_reverse_complement(trna_from3_full, trna_seqlen, err);
@@ -314,7 +326,7 @@ void gt_pbs_results_delete(GtPBSResults *results)
 {
     unsigned long i;
     if (!results) return;
-    if (results->hits)
+    if (results->hits != NULL)
     {
       for (i=0;i<gt_array_size(results->hits);i++)
       {
@@ -369,72 +381,72 @@ int gt_pbs_unit_test(GtError *err)
   ensure(had_err, gt_file_exists(gt_str_get(tmpfilename)));
 
   /* setup testing parameters */
-  o.radius = 30;
-  o.max_edist = 1;
-  o.alilen.start = 11;
-  o.alilen.end = 30;
-  o.offsetlen.start = 0;
-  o.offsetlen.end = 5;
-  o.trnaoffsetlen.start = 0;
-  o.trnaoffsetlen.end =  40;
+  o.radius = 30U;
+  o.max_edist = 1U;
+  o.alilen.start = 11UL;
+  o.alilen.end = 30UL;
+  o.offsetlen.start = 0UL;
+  o.offsetlen.end = 5UL;
+  o.trnaoffsetlen.start = 0UL;
+  o.trnaoffsetlen.end =  40UL;
   o.ali_score_match = 5;
   o.ali_score_mismatch = -10;
   o.ali_score_insertion = o.ali_score_deletion = -20;
   o.trna_lib = gt_bioseq_new(gt_str_get(tmpfilename), err);
-  ensure(had_err, gt_bioseq_number_of_sequences(o.trna_lib) == 2);
+  ensure(had_err, gt_bioseq_number_of_sequences(o.trna_lib) == 2UL);
 
-  element.leftLTR_5 = 20;
-  element.leftLTR_3 = 119;
-  element.rightLTR_5 = 520;
-  element.rightLTR_3 = 619;
+  element.leftLTR_5 = 20UL;
+  element.leftLTR_3 = 119UL;
+  element.rightLTR_5 = 520UL;
+  element.rightLTR_3 = 619UL;
 
   /* setup sequences */
-  seq     = gt_malloc(600 * sizeof (char));
-  rev_seq = gt_malloc(600 * sizeof (char));
-  memcpy(seq,     fullseq + 20, 600);
-  memcpy(rev_seq, fullseq + 20, 600);
-  gt_reverse_complement(rev_seq, 600, err);
+  seq     = gt_malloc((size_t) 600 * sizeof (char));
+  rev_seq = gt_malloc((size_t) 600 * sizeof (char));
+  memcpy(seq,     fullseq + 20, (size_t) 600);
+  memcpy(rev_seq, fullseq + 20, (size_t) 600);
+  ensure(had_err, !gt_reverse_complement(rev_seq, (unsigned long) 600, NULL));
 
   /* try to find PBS in sequences */
   res = gt_pbs_find(seq, rev_seq, &element, &o, err);
   ensure(had_err, res != NULL);
-  ensure(had_err, gt_pbs_results_get_number_of_hits(res) == 2);
+  ensure(had_err, gt_pbs_results_get_number_of_hits(res) == 2UL);
 
   /* check first hit on forward strand */
-  hit = gt_pbs_results_get_ranked_hit(res, 0);
+  hit = gt_pbs_results_get_ranked_hit(res, 0UL);
   ensure(had_err, hit != NULL);
-  ensure(had_err, gt_pbs_hit_get_alignment_length(hit) == 17);
-  ensure(had_err, gt_pbs_hit_get_edist(hit) == 0);
-  ensure(had_err, gt_pbs_hit_get_offset(hit) == 0);
-  ensure(had_err, gt_pbs_hit_get_tstart(hit) == 3);
+  ensure(had_err, gt_pbs_hit_get_alignment_length(hit) == 17UL);
+  ensure(had_err, gt_pbs_hit_get_edist(hit) == 0UL);
+  ensure(had_err, gt_pbs_hit_get_offset(hit) == 0UL);
+  ensure(had_err, gt_pbs_hit_get_tstart(hit) == 3UL);
   ensure(had_err, strcmp(gt_pbs_hit_get_trna(hit), "test1") == 0);
   rng = gt_pbs_hit_get_coords(hit);
-  ensure(had_err, rng.start == 120);
-  ensure(had_err, rng.end == 136);
+  ensure(had_err, rng.start == 120UL);
+  ensure(had_err, rng.end == 136UL);
   score1 = gt_pbs_hit_get_score(hit);
   ensure(had_err, gt_pbs_hit_get_strand(hit) == GT_STRAND_FORWARD);
   memset(tmp, 0, BUFSIZ-1);
   memcpy(tmp, fullseq + (rng.start * sizeof (char)),
-         (rng.end - rng.start + 1) * sizeof (char));
+         (size_t) ((rng.end - rng.start + 1) * sizeof (char)));
   ensure(had_err, strcmp(tmp, "acatactaggatgctag" ) == 0);
 
   /* check second hit on reverse strand */
-  hit = gt_pbs_results_get_ranked_hit(res, 1);
+  hit = gt_pbs_results_get_ranked_hit(res, 1UL);
   ensure(had_err, hit != NULL);
-  ensure(had_err, gt_pbs_hit_get_alignment_length(hit) == 14);
-  ensure(had_err, gt_pbs_hit_get_edist(hit) == 1);
-  ensure(had_err, gt_pbs_hit_get_offset(hit) == 0);
-  ensure(had_err, gt_pbs_hit_get_tstart(hit) == 6);
+  ensure(had_err, gt_pbs_hit_get_alignment_length(hit) == 14UL);
+  ensure(had_err, gt_pbs_hit_get_edist(hit) == 1UL);
+  ensure(had_err, gt_pbs_hit_get_offset(hit) == 0UL);
+  ensure(had_err, gt_pbs_hit_get_tstart(hit) == 6UL);
   ensure(had_err, strcmp(gt_pbs_hit_get_trna(hit), "test2") == 0);
   rng = gt_pbs_hit_get_coords(hit);
-  ensure(had_err, rng.start == 506);
-  ensure(had_err, rng.end == 519);
+  ensure(had_err, rng.start == 506UL);
+  ensure(had_err, rng.end == 519UL);
   score2 = gt_pbs_hit_get_score(hit);
   ensure(had_err, gt_double_compare(score1, score2) > 0);
   ensure(had_err, gt_pbs_hit_get_strand(hit) == GT_STRAND_REVERSE);
   memset(tmp, 0, BUFSIZ-1);
   memcpy(tmp, fullseq + (rng.start * sizeof (char)),
-         (rng.end - rng.start + 1) * sizeof (char));
+         (size_t) ((rng.end - rng.start + 1) * sizeof (char)));
   ensure(had_err, strcmp(tmp, "gatcctaaggctac" ) == 0);
 
   /* clean up */

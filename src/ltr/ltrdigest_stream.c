@@ -150,8 +150,9 @@ static void pbs_attach_results_to_gff3(GtPBSResults *results,
                            pbs_range.end,
                            gt_pbs_hit_get_strand(hit));
   gt_feature_node_set_source((GtFeatureNode*) gf, tag);
-  gt_feature_node_set_score((GtFeatureNode*) gf, gt_pbs_hit_get_score(hit));
-  if (gt_pbs_hit_get_trna(hit)) {
+  gt_feature_node_set_score((GtFeatureNode*) gf,
+                            (float) gt_pbs_hit_get_score(hit));
+  if (gt_pbs_hit_get_trna(hit) != NULL) {
     gt_feature_node_add_attribute((GtFeatureNode*) gf, "trna",
                                    gt_pbs_hit_get_trna(hit));
   }
@@ -217,7 +218,7 @@ static int run_ltrdigest(GtLTRElement *element, char *seq,
   GtStrand canonical_strand = GT_STRAND_UNKNOWN;
 
   /* create reverse strand sequence */
-  rev_seq = gt_calloc(seqlen+1, sizeof (char));
+  rev_seq = gt_calloc((size_t) seqlen+1, sizeof (char));
   memcpy(rev_seq, seq, sizeof (char) * seqlen);
   had_err = gt_reverse_complement(rev_seq, seqlen, err);
 
@@ -324,14 +325,14 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
 
     /* fill LTRElement structure from GFF3 subgraph */
     gni = gt_feature_node_iterator_new(fn);
-    for (mygn = fn; mygn; mygn = gt_feature_node_iterator_next(gni))
+    for (mygn = fn; mygn != NULL; mygn = gt_feature_node_iterator_next(gni))
       (void) gt_genome_node_accept((GtGenomeNode*) mygn,
                                    (GtNodeVisitor*) ls->lv,
                                    e);
     gt_feature_node_iterator_delete(gni);
   }
 
-  if (ls->element.mainnode)
+  if (ls->element.mainnode != NULL)
   {
     unsigned long seqid;
     const char *sreg;
@@ -375,8 +376,8 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
       {
         alpha        = gt_encseq_alphabet(ls->encseq);
         length       = gt_ltrelement_length(&ls->element);
-        seq          = gt_malloc((length+1) * sizeof (char));
-        symbolstring = gt_malloc((length+1) * sizeof (GtUchar));
+        seq          = gt_malloc((size_t) (length+1) * sizeof (char));
+        symbolstring = gt_malloc((size_t) (length+1) * sizeof (GtUchar));
         gt_encseq_extract_substring(ls->encseq,
                                   symbolstring,
                                   seqstartpos + (ls->element.leftLTR_5),
