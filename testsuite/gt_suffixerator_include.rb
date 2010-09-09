@@ -222,11 +222,16 @@ allmultifiles.each do |filename|
     run_test "#{$bin}gt suffixerator -suf -lcp -pl -dir rev -ii localidx"
     run_test "#{$bin}gt dev sfxmap -tis -des localidx",
              :retval => 1
-    run_test "#{$bin}gt dev sfxmap -tis -ssp localidx",
-             :retval => 1
+    # In short read files with equal read lengths, ssptabs need not
+    # be built explicitly.
+    # Thus these tests only fail for non-equal length files.
+    if !all_fastqfiles.include?(filename) then
+      run_test "#{$bin}gt dev sfxmap -tis -ssp localidx",
+               :retval => 1
+      run_test "#{$bin}gt dev sfxmap -ssp localidx",
+               :retval => 1
+    end
     run_test "#{$bin}gt dev sfxmap -des localidx",
-             :retval => 1
-    run_test "#{$bin}gt dev sfxmap -ssp localidx",
              :retval => 1
     run_test "#{$bin}gt dev sfxmap -tis -bck localidx",
              :retval => 1

@@ -193,8 +193,9 @@ class EncseqLoader:
             raise IOError, ("file not found: %s" % indexname+".esq")
         if self.destab and not os.path.exists(indexname+".des"):
             raise IOError, ("file not found: %s" % indexname+".des")
-        if self.ssptab and not os.path.exists(indexname+".ssp"):
-            raise IOError, ("file not found: %s" % indexname+".ssp")
+        # not required in every case (equallength seqs)
+        #if self.ssptab and not os.path.exists(indexname+".ssp"):
+        #    raise IOError, ("file not found: %s" % indexname+".ssp")
         if self.sdstab and not os.path.exists(indexname+".sds"):
             raise IOError, ("file not found: %s" % indexname+".sds")
         err = Error()

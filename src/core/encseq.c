@@ -2765,7 +2765,9 @@ gt_encseq_new_from_index(bool withrange,
       encseq->sdstab = NULL;
     }
   }
-  if (!haserr && withssptab)
+  if (!haserr && (withssptab
+                    && encseq != NULL
+                    && encseq->sat != GT_ACCESS_TYPE_EQUALLENGTH))
   {
     gt_assert(encseq != NULL);
     if (encseq->numofdbsequences > 1UL)
@@ -5367,7 +5369,7 @@ gt_encseq_new_from_files(GtProgressTimer *sfxprogress,
       {
         haserr = true;
       }
-      if (!haserr && outssptab)
+      if (!haserr && (outssptab && encseq->sat != GT_ACCESS_TYPE_EQUALLENGTH))
       {
         FILE *outfp;
         outfp = gt_fa_fopen_with_suffix(indexname,GT_SSPTABFILESUFFIX,"wb",err);

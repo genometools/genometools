@@ -301,9 +301,10 @@ module GT
       if @destab and !File.exists?("#{indexname}.des") then
         GT.gterror("file not found: #{indexname}.des")
       end
-      if @ssptab and !File.exists?("#{indexname}.ssp") then
-        GT.gterror("file not found: #{indexname}.ssp")
-      end
+      # not required in every case (equallength seqs)
+      #if @ssptab and !File.exists?("#{indexname}.ssp") then
+      #  GT.gterror("file not found: #{indexname}.ssp")
+      #end
       if @sdstab and !File.exists?("#{indexname}.sds") then
         GT.gterror("file not found: #{indexname}.sds")
       end
