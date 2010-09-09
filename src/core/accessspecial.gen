@@ -333,7 +333,7 @@ static void ADDTYPE(binpreparenextrange)(const GtEncseq *encseq,
     }
     if (moveforward)
     {
-      if (pagenum+1 < esr->idx->numofspecialcells)
+      if (pagenum+1 < esr->encseq->numofspecialcells)
       {
         esr->idx->morepagesleft = true;
         esr->idx->nextpage = pagenum+1;
@@ -357,7 +357,7 @@ static void ADDTYPE(binpreparenextrange)(const GtEncseq *encseq,
   } else
   {
     esr->idx->firstcell = esr->idx->lastcell = 0;
-    if (pagenum < esr->idx->numofspecialcells)
+    if (pagenum < esr->encseq->numofspecialcells)
     {
       esr->idx->morepagesleft = true;
     } else
@@ -384,7 +384,7 @@ static bool ADDTYPE(nextnonemptypage)(const GtEncseq *encseq,
     pagenum = esr->idx->nextpage;
     if (moveforward)
     {
-      if (esr->idx->nextpage == esr->idx->numofspecialcells-1)
+      if (esr->idx->nextpage == esr->encseq->numofspecialcells-1)
       {
         esr->idx->morepagesleft = false;
       } else

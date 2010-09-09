@@ -362,8 +362,7 @@ GtUchar gt_encseq_get_encoded_char_nospecial(const GtEncseq *encseq,
 typedef struct {
   unsigned long firstcell, /* first index of tables with startpos and length */
                 lastcell,  /* last index of tables with startpos and length */
-                nextpage,  /* next page to be used */
-                numofspecialcells;  /* number of pages */
+                nextpage;  /* next page to be used */
   GtRange previousrange,  /* previous range of wildcards */
           currentrange;   /* current range of wildcards */
   bool moveforward,
@@ -1513,11 +1512,9 @@ static void showspecialpositionswithpages(const GtEncseq *encseq,
 
 static void showallspecialpositionswithpages(const GtEncseq *encseq)
 {
-  unsigned long endpos0, endpos1, endspecialcells, pgnum;
-  unsigned long offset = 0;
+  unsigned long endpos0, endpos1, pgnum, offset = 0;
 
-  endspecialcells = encseq->totallength/encseq->maxspecialtype + 1;
-  for (pgnum=0; pgnum<endspecialcells; pgnum++)
+  for (pgnum=0; pgnum<encseq->numofspecialcells; pgnum++)
   {
     if (pgnum == 0)
     {
@@ -1612,8 +1609,6 @@ static void gt_encseq_reader_reinit_with_direction(GtEncseqReader *esr,
     }
     esr->idx->moveforward = moveforward;
     esr->idx->hasprevious = esr->idx->hascurrent = false;
-    esr->idx->numofspecialcells
-      = (unsigned long) encseq->totallength/encseq->maxspecialtype + 1;
     binpreparenextrange(encseq,esr,moveforward,startpos);
 #ifdef RANGEDEBUG
       printf("start advance at (%lu,%lu) in page %lu\n",
@@ -2285,6 +2280,7 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
   if (satviautables(sat))
   {
     encseq->maxspecialtype = sat2maxspecialtype(sat);
+    encseq->numofspecialcells = totallength/encseq->maxspecialtype + 1;
   }
   encseq->filelengthtab = NULL;
   encseq->filenametab = NULL;
@@ -2909,10 +2905,6 @@ static unsigned long currentspecialrangevalue(unsigned long len,
                                               unsigned long occcount,
                                               unsigned long maxspecialtype)
 {
-/*
-  printf("len=%lu,occcount=%lu,maxspecialtype=%lu\n",
-           len,occcount,maxspecialtype);
-*/
   if (maxspecialtype == UINT32_MAX)
   {
     gt_assert(len - 1 <= UINT32_MAX);
@@ -4089,6 +4081,59 @@ static int comparewithonespecial(bool *leftspecial,
   return cc1 < cc2 ? -1 : 1;
 }
 
+#define FASTCOMPAREDEBUG
+#ifdef FASTCOMPAREDEBUG
+static void verifycomparestringresults(const GtEncseq *encseq,
+                                       GtCommonunits *commonunits,
+                                       bool fwd,
+                                       bool complement,
+                                       unsigned long pos1,
+                                       unsigned long pos2,
+                                       unsigned long depth,
+                                       unsigned long maxdepth,
+                                       int retval)
+{
+  unsigned long lcp2 = 0;
+  int retval2;
+
+  retval2 = gt_encseq_comparetwostringsgeneric(encseq,
+					       fwd,
+					       complement,
+					       &lcp2,
+					       pos1,
+					       pos2,
+					       depth,
+					       maxdepth);
+  if (retval != retval2)
+  {
+    fprintf(stderr,"line %d: retval = %d != %d = retval2\n",__LINE__,
+	    retval,retval2);
+    fprintf(stderr,"pos1 = %lu, pos2 = %lu, depth = %lu, maxdepth = %lu "
+		   "lcp = %lu, lcp2 = %lu\n",
+		    pos1,
+		    pos2,
+		    depth,
+                    maxdepth,
+		    commonunits->finaldepth,
+		    lcp2);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
+  if (commonunits->finaldepth != lcp2)
+  {
+    fprintf(stderr,"line %d: pos1 = %lu, pos2 = %lu, depth = %lu, maxdepth=%lu "
+		   "lcp = %lu != %lu = lcp2\n",
+		    __LINE__,
+		    pos1,
+		    pos2,
+		    depth,
+                    maxdepth,
+		    commonunits->finaldepth,
+		    lcp2);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
+}
+#endif
+
 int gt_encseq_compare(const GtEncseq *encseq,
                       GtCommonunits *commonunits,
                       bool fwd,
@@ -4181,47 +4226,16 @@ int gt_encseq_compare(const GtEncseq *encseq,
     }
   } while (retval == 0);
   commonunits->finaldepth = depth;
-#undef FASTCOMPAREDEBUG
 #ifdef FASTCOMPAREDEBUG
-  {
-    unsigned long lcp2 = 0;
-    int retval2;
-
-    retval2 = gt_encseq_comparetwostringsgeneric(encseq,
-                                                 fwd,
-                                                 complement,
-                                                 &lcp2,
-                                                 pos1,
-                                                 pos2,
-                                                 depth,
-                                                 0);
-    if (retval != retval2)
-    {
-      fprintf(stderr,"line %d: retval = %d != %d = retval2\n",__LINE__,
-              retval,retval2);
-      fprintf(stderr,"pos1 = %lu, pos2 = %lu, depth = %lu, "
-                     "lcp = %lu, lcp2 = %lu\n",
-                      pos1,
-                      pos2,
-                      depth,
-                      commonunits->finaldepth,
-                      lcp2);
-      exit(GT_EXIT_PROGRAMMING_ERROR);
-    }
-    if (commonunits->finaldepth != lcp2)
-    {
-      fprintf(stderr,"line %d: pos1 = %lu, pos2 = %lu, depth = %lu, "
-                     "lcp = %lu != %lu = lcp2\n",
-                      __LINE__,
-                      pos1,
-                      pos2,
-                      depth,
-                      commonunits->finaldepth,
-                      lcp2);
-      exit(GT_EXIT_PROGRAMMING_ERROR);
-    }
-    gt_assert(commonunits->finaldepth == lcp2);
-  }
+  verifycomparestringresults(encseq,
+                             commonunits,
+                             fwd,
+                             complement,
+                             pos1,
+                             pos2,
+                             depth,
+                             0,
+                             retval);
 #endif
   return retval;
 }
@@ -4346,43 +4360,15 @@ int gt_encseq_compare_maxdepth(const GtEncseq *encseq,
   } while (retval == 0);
   commonunits->finaldepth = depth;
 #ifdef FASTCOMPAREDEBUG
-  {
-    unsigned long lcp2 = 0;
-    int retval2;
-
-    retval2 = gt_encseq_comparetwostringsgeneric(encseq,
-                                                 fwd,
-                                                 complement,
-                                                 &lcp2,
-                                                 pos1,
-                                                 pos2,
-                                                 depth,
-                                                 maxdepth);
-    if (retval != retval2)
-    {
-      fprintf(stderr,"line %d: retval = %d != %d = retval2\n",__LINE__,
-              retval,retval2);
-      fprintf(stderr,"pos1 = %lu, pos2 = %lu, depth = %lu, maxdepth = %lu\n",
-                      pos1,
-                      pos2,
-                      depth,
-                      maxdepth);
-      exit(GT_EXIT_PROGRAMMING_ERROR);
-    }
-    if (commonunits->finaldepth != lcp2)
-    {
-      fprintf(stderr,"line %d: pos1 = %lu, pos2 = %lu, depth = %lu, "
-                     "lcp = %lu != %lu = lcp2\n",
-                      __LINE__,
-                      pos1,
-                      pos2,
-                      depth,
-                      commonunits->finaldepth,
-                      lcp2);
-      exit(GT_EXIT_PROGRAMMING_ERROR);
-    }
-    gt_assert(commonunits->finaldepth == lcp2);
-  }
+  verifycomparestringresults(encseq,
+                             commonunits,
+                             fwd,
+                             complement,
+                             pos1,
+                             pos2,
+                             depth,
+                             maxdepth,
+                             retval);
 #endif
   return retval;
 }
